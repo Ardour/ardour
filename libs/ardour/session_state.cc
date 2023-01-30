@@ -1690,8 +1690,8 @@ Session::set_state (const XMLNode& node, int version)
 
 	if (node.get_property (X_("sample-rate"), _base_sample_rate)) {
 
-		_nominal_sample_rate = _base_sample_rate;
-	 Temporal::set_sample_rate (_nominal_sample_rate);
+		/* required to convert positions during session load */
+		Temporal::set_sample_rate (_base_sample_rate);
 
 		while (!AudioEngine::instance()->running () || _base_sample_rate != AudioEngine::instance()->sample_rate ()) {
 			boost::optional<int> r = AskAboutSampleRateMismatch (_base_sample_rate, _current_sample_rate);
@@ -1702,7 +1702,6 @@ Session::set_state (const XMLNode& node, int version)
 			} else if (rv == -1 && AudioEngine::instance()->running ()) {
 				/* retry */
 				set_block_size (_engine.samples_per_cycle());
-				/* retry */
 				continue;
 			} else {
 				if (AudioEngine::instance()->running ()) {
@@ -1716,7 +1715,7 @@ Session::set_state (const XMLNode& node, int version)
 		}
 
 		if (_base_sample_rate != _engine.sample_rate ()) {
-			set_sample_rate (_engine.sample_rate());
+			set_sample_rate (_base_sample_rate);
 		}
 	}
 

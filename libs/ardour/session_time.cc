@@ -62,7 +62,7 @@ Session::timecode_drop_frames() const
 void
 Session::sync_time_vars ()
 {
-	_current_sample_rate = (samplecnt_t) round (_nominal_sample_rate * (1.0 + (config.get_video_pullup()/100.0)));
+	_current_sample_rate = (samplecnt_t) round (_base_sample_rate * (1.0 + (config.get_video_pullup()/100.0)));
 	_samples_per_timecode_frame = (double) _current_sample_rate / (double) timecode_frames_per_second();
 	if (timecode_drop_frames()) {
 	  _frames_per_hour = (int32_t)(107892 * _samples_per_timecode_frame);
