@@ -43,7 +43,7 @@ public:
 	void cycle_split ();
 
 	/* reset SRC, clear out any state */
-	void reinit ();
+	void reinit (bool with_ratio);
 
 	Buffer& get_buffer (pframes_t nframes) {
 		return get_audio_buffer (nframes);
