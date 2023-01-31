@@ -1716,6 +1716,11 @@ Session::set_state (const XMLNode& node, int version)
 
 		if (_base_sample_rate != _engine.sample_rate ()) {
 			set_sample_rate (_base_sample_rate);
+			/* post_engine_init() calls initialize_latencies()
+			 * which sets up resampling. However by that time all session
+			 * ports will exist and would be need to be reinitialized.
+			 */
+			setup_engine_resampling ();
 		}
 	}
 

@@ -565,6 +565,7 @@ Session::immediately_post_engine ()
 	 * know that the engine is running, but before we either create a
 	 * session or set state for an existing one.
 	 */
+	Port::setup_resampler (Config->get_port_resampler_quality ());
 
 	_process_graph.reset (new Graph (*this));
 	_rt_tasklist.reset (new RTTaskList (_process_graph));
@@ -6728,10 +6729,21 @@ Session::missing_filesources (DataType dt) const
 }
 
 void
+Session::setup_engine_resampling ()
+{
+	if (_base_sample_rate != AudioEngine::instance()->sample_rate ()) {
+		Port::setup_resampler (std::max<uint32_t>(65, Config->get_port_resampler_quality ()));
+	} else {
+		Port::setup_resampler (Config->get_port_resampler_quality ());
+	}
+	Port::set_engine_ratio (_base_sample_rate,  AudioEngine::instance()->sample_rate ());
+}
+
+void
 Session::initialize_latencies ()
 {
 	block_processing ();
-	Port::set_engine_ratio (_base_sample_rate,  AudioEngine::instance()->sample_rate ());
+	setup_engine_resampling ();
 	update_latency (false);
 	update_latency (true);
 	unblock_processing ();

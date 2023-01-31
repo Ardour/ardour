@@ -1486,6 +1486,8 @@ private:
 	void send_latency_compensation_change ();
 	void update_send_delaylines ();
 
+	void setup_engine_resampling ();
+
 	void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
 
 	void process_scrub          (pframes_t);
