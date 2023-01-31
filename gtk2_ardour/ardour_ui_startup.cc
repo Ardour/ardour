@@ -184,10 +184,11 @@ ARDOUR_UI::sr_mismatch_dialog (samplecnt_t desired, samplecnt_t actual)
 	HBox* hbox = new HBox();
 	Image* image = new Image (Stock::DIALOG_WARNING, ICON_SIZE_DIALOG);
 	ArdourDialog dialog (_("Sample Rate Mismatch"), true);
-	Label  message (string_compose (_("\
-This session was created with a sample rate of %1 Hz, but\n\
-%2 is currently running at %3 Hz.  If you load this session,\n\
-audio may be played at the wrong sample rate.\n"), desired, PROGRAM_NAME, actual));
+	Label message (string_compose (_("\
+This session was created with a sample rate of %1 Hz, but \
+%2 is currently running at %3 Hz. If you load this session, \
+audio will be resampled, which reduces quality.\n"), desired, PROGRAM_NAME, actual));
+	message.set_line_wrap ();
 
 	image->set_alignment(ALIGN_CENTER, ALIGN_START);
 	hbox->pack_start (*image, PACK_EXPAND_WIDGET, 12);
@@ -224,10 +225,10 @@ void
 ARDOUR_UI::sr_mismatch_message (samplecnt_t desired, samplecnt_t actual)
 {
 	ArdourMessageDialog msg (string_compose (_("\
-This session was created with a sample rate of %1 Hz, but\n\
+This session was created with a sample rate of %1 Hz, but \
 %2 is currently running at %3 Hz.\n\
-Audio will be recorded and played at the wrong sample rate.\n\
-Re-Configure the Audio Engine in\n\
+Audio is resampled for both playback and recording to match the sampling \
+rate, which reduces quality. Reconfigure the Audio Engine in \
 Menu > Window > Audio/Midi Setup"),
 				desired, PROGRAM_NAME, actual),
 			true,
