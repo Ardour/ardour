@@ -22,6 +22,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+//#define CANVAS_PROFILE
+
 /** @file  canvas/canvas.cc
  *  @brief Implementation of the main canvas classes.
  */
@@ -133,6 +135,9 @@ Canvas::zoomed ()
 void
 Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context) const
 {
+#ifdef CANVAS_PROFILE
+	const int64_t start = g_get_monotonic_time ();
+#endif
 	if (ArdourCanvas::nodraw & 0x40) {
 		std::cout << "GtkCanvas::render " << area << "\n";
 	}
@@ -180,6 +185,12 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 		}
 #endif
 	}
+
+#ifdef CANVAS_PROFILE
+	const int64_t end = g_get_monotonic_time ();
+	const int64_t elapsed = end - start;
+	std::cout << "GtkCanvas::render " << area << " " << (elapsed / 1000.f) << " ms\n";
+#endif
 
 }
 
