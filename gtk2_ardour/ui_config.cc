@@ -241,8 +241,7 @@ UIConfiguration::pre_gui_init ()
 #ifdef __APPLE__
 	switch (get_use_opengl_view()) {
 		case NSGLAuto:
-			if (query_darwin_version () >= 19) {
-				/* on Catalina, do not use NSGLView */
+			if (query_darwin_version () >= 23) {
 				g_setenv ("ARDOUR_NSGL", "0", 0);
 			} else {
 				g_setenv ("ARDOUR_NSGL", "1", 0);
