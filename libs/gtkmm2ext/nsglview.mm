@@ -164,9 +164,14 @@ __attribute__ ((visibility ("hidden")))
 		return;
 	}
 
+	float scale = 1.0;
+	if ([self window]) {
+		scale = [[self window] backingScaleFactor];
+	}
+
 	[[self openGLContext] makeCurrentContext];
 
-	glViewport (0, 0, width, height);
+	glViewport (0, 0, width * scale, height * scale);
 	glMatrixMode (GL_PROJECTION);
 	glLoadIdentity ();
 	glOrtho (-1.0f, 1.0f, -1.0f, 1.0f, -1.0f, 1.0f);
@@ -177,7 +182,7 @@ __attribute__ ((visibility ("hidden")))
 	glGenTextures (1, &_texture_id);
 	glBindTexture (GL_TEXTURE_RECTANGLE_ARB, _texture_id);
 	glTexImage2D (GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA8,
-			width, height, 0,
+			width * scale, height * scale, 0,
 			GL_BGRA, GL_UNSIGNED_BYTE, NULL);
 	glTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_DECAL);
 
@@ -236,6 +241,12 @@ __attribute__ ((visibility ("hidden")))
 #ifdef NSVIEW_PROFILE
 	const int64_t start = g_get_monotonic_time ();
 #endif
+
+	float scale = 1.0;
+	if ([self window]) {
+		scale = [[self window] backingScaleFactor];
+	}
+
 	[[self openGLContext] makeCurrentContext];
 
 	glMatrixMode(GL_MODELVIEW);
@@ -258,8 +269,8 @@ __attribute__ ((visibility ("hidden")))
 #endif
 	_expose_area.x = _expose_area.y  = _expose_area.width = _expose_area.height = 0;
 
-	if (!surf || surf->get_width () != _width || surf->get_height() != _height) {
-		surf = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _width, _height);
+	if (!surf || surf->get_width () != _width  * scale || surf->get_height() != _height * scale) {
+		surf = Cairo::ImageSurface::create (Cairo::FORMAT_ARGB32, _width * scale, _height * scale);
 
 		cairo_rect.x = 0;
 		cairo_rect.y = 0;
@@ -268,9 +279,7 @@ __attribute__ ((visibility ("hidden")))
 	}
 
 	Cairo::RefPtr<Cairo::Context> ctx = Cairo::Context::create (surf);
-
-	// TODO: check retina screen, scaling factor.
-	// cairo_surface_get_device_scale () or explicit scale
+	ctx->scale (scale, scale);
 
 	ctx->rectangle (cairo_rect.x, cairo_rect.y, cairo_rect.width, cairo_rect.height);
 	ctx->clip_preserve ();
@@ -304,17 +313,17 @@ __attribute__ ((visibility ("hidden")))
 	glEnable(GL_TEXTURE_2D);
 	glBindTexture(GL_TEXTURE_RECTANGLE_ARB, _texture_id);
 	glTexImage2D(GL_TEXTURE_RECTANGLE_ARB, 0, GL_RGBA8,
-			_width, _height, /*border*/ 0,
+			_width * scale, _height * scale, /*border*/ 0,
 			GL_BGRA, GL_UNSIGNED_BYTE, imgdata);
 
 	glBegin(GL_QUADS);
-	glTexCoord2f(           0.0f, (GLfloat) _height);
+	glTexCoord2f(           0.0f, (GLfloat) _height * scale);
 	glVertex2f(-1.0f, -1.0f);
 
-	glTexCoord2f((GLfloat) _width, (GLfloat) _height);
+	glTexCoord2f((GLfloat) _width * scale, (GLfloat) _height * scale);
 	glVertex2f( 1.0f, -1.0f);
 
-	glTexCoord2f((GLfloat) _width, 0.0f);
+	glTexCoord2f((GLfloat) _width * scale, 0.0f);
 	glVertex2f( 1.0f,  1.0f);
 
 	glTexCoord2f(            0.0f, 0.0f);
@@ -324,8 +333,6 @@ __attribute__ ((visibility ("hidden")))
 	glDisable(GL_TEXTURE_2D);
 	glPopMatrix();
 
-	///
-
 	glFlush();
 	glSwapAPPLE();
 	[NSOpenGLContext clearCurrentContext];
@@ -334,7 +341,7 @@ __attribute__ ((visibility ("hidden")))
 #ifdef NSVIEW_PROFILE
 	const int64_t end = g_get_monotonic_time ();
 	const int64_t elapsed = end - start;
-	printf ("NSGL::drawRect %f ms\n", elapsed / 1000.f);
+	printf ("NSGL::drawRect (%d x %d) * %.1f in %f ms\n", _width, _height, scale, elapsed / 1000.f);
 #endif
 
 }
