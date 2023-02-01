@@ -4438,7 +4438,13 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		 */
 
 		if (nframes == 0 && _currently_playing->state() == Trigger::Stopped) {
-			(void) handle_stopped_trigger (bufs, dest_offset);
+			if (!_stop_all && !_currently_playing->explicitly_stopped()) {
+				std::cerr << "stopped, do handle thing\n";
+				(void) handle_stopped_trigger (bufs, dest_offset);
+			} else {
+				_currently_playing = 0;
+				PropertyChanged (Properties::currently_playing);
+			}
 		}
 	}
 
