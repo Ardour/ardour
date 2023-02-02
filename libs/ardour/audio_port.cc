@@ -127,8 +127,15 @@ AudioPort::cycle_split ()
 }
 
 void
-AudioPort::reinit ()
+AudioPort::reinit (bool with_ratio)
 {
+	/* must not be called concurrently with processing */
+	if (with_ratio) {
+		/* Note: latency changes with quality, caller
+		 * must take care of updating port latencies */
+		_src.setup (resampler_quality ());
+		_src.set_rrfilt (10);
+	}
 	_src.reset ();
 }
 

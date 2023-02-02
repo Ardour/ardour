@@ -3026,7 +3026,7 @@ These settings will only take effect after %1 is restarted.\n\
 		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_opengl_view),
 		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_opengl_view)
 		);
-	glmode->add (NSGLAuto, _("until (including) macOS 10.14"));
+	glmode->add (NSGLAuto, _("Automatic"));
 	glmode->add (NSGLDisable, _("No"));
 	glmode->add (NSGLEnable, _("Yes"));
 
@@ -3038,7 +3038,7 @@ These settings will only take effect after %1 is restarted.\n\
 #ifndef USE_CAIRO_IMAGE_SURFACE
 	_cairo_image_surface = new BoolOption (
 		"cairo-image-surface",
-		_("Disable Graphics Hardware Acceleration (requires restart)"),
+		_("Use intermediate image-surface to render canvas (requires restart)"),
 		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_cairo_image_surface),
 		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_cairo_image_surface)
 		);
@@ -4884,7 +4884,7 @@ RCOptionEditor::parameter_changed (string const & p)
 	} else if (p == "use-opengl-view" && _cairo_image_surface) {
 #ifdef __APPLE__
 		AppleNSGLViewMode m =  UIConfiguration::instance().get_use_opengl_view ();
-		if (m == NSGLEnable || (m == NSGLAuto && query_darwin_version () < 19)) {
+		if (m == NSGLEnable || (m == NSGLAuto && query_darwin_version () < 23)) {
 			_cairo_image_surface->set_sensitive (false);
 		} else {
 			_cairo_image_surface->set_sensitive (true);

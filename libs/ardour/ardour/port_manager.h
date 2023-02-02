@@ -189,6 +189,9 @@ public:
 
 	void remove_all_ports ();
 
+	/** reset port-buffers. e.g. after freewheeling */
+	void reinit (bool with_ratio = false);
+
 	void clear_pending_port_deletions ();
 
 	virtual void add_pending_port_deletion (Port*) = 0;
@@ -302,8 +305,6 @@ protected:
 	 * Realtime safe.
 	 */
 	void cycle_end (pframes_t nframes, Session* s = 0);
-
-	void reinit ();
 
 	void cycle_end_fade_out (gain_t, gain_t, pframes_t, Session* s = 0);
 

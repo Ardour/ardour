@@ -4057,7 +4057,7 @@ TriggerBox::handle_stopped_trigger (BufferSet& bufs, pframes_t dest_offset)
 	} else {
 		_currently_playing = 0;
 		PropertyChanged (Properties::currently_playing);
-		DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, but stop_all was set, leaving nf loop\n");
+		DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, but stop_all was set #1, leaving nf loop\n");
 		/* leave nframes loop */
 		return 1;
 	}
@@ -4391,7 +4391,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 				_currently_playing = 0;
 				PropertyChanged (Properties::currently_playing);
-				DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, but stop_all was set, leaving nf loop\n");
+				DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, but stop_all was set #2, leaving nf loop\n");
 				/* leave nframes loop */
 				break;
 			}
@@ -4438,7 +4438,13 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		 */
 
 		if (nframes == 0 && _currently_playing->state() == Trigger::Stopped) {
-			(void) handle_stopped_trigger (bufs, dest_offset);
+			if (!_stop_all && !_currently_playing->explicitly_stopped()) {
+				std::cerr << "stopped, do handle thing\n";
+				(void) handle_stopped_trigger (bufs, dest_offset);
+			} else {
+				_currently_playing = 0;
+				PropertyChanged (Properties::currently_playing);
+			}
 		}
 	}
 

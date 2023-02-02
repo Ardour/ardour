@@ -191,7 +191,6 @@ Session::Session (AudioEngine &eng,
 	, _bounce_processing_active (false)
 	, waiting_for_sync_offset (false)
 	, _base_sample_rate (0)
-	, _nominal_sample_rate (0)
 	, _current_sample_rate (0)
 	, _transport_sample (0)
 	, _session_range_location (0)
@@ -566,6 +565,7 @@ Session::immediately_post_engine ()
 	 * know that the engine is running, but before we either create a
 	 * session or set state for an existing one.
 	 */
+	Port::setup_resampler (Config->get_port_resampler_quality ());
 
 	_process_graph.reset (new Graph (*this));
 	_rt_tasklist.reset (new RTTaskList (_process_graph));
@@ -2111,21 +2111,28 @@ Session::preroll_samples (samplepos_t pos) const
 void
 Session::set_sample_rate (samplecnt_t frames_per_second)
 {
-	/** \fn void Session::set_sample_size(samplecnt_t)
-		the AudioEngine object that calls this guarantees
-		that it will not be called while we are also in
-		::process(). Its fine to do things that block
-		here.
-	*/
+	/* this is called from the engine when SR changes,
+	 * and after creating or loading a session
+	 * via post_engine_init().
+	 *
+	 * In the latter case this call can happen
+	 * concurrently with processing.
+	 */
 
 	if (_base_sample_rate == 0) {
 		_base_sample_rate = frames_per_second;
 	}
-	else if (_base_sample_rate != frames_per_second && frames_per_second != _nominal_sample_rate && _engine.running ()) {
+	else if (_base_sample_rate != frames_per_second && _engine.running ()) {
 		NotifyAboutSampleRateMismatch (_base_sample_rate, frames_per_second);
 	}
-	_nominal_sample_rate = _base_sample_rate;
-	 Temporal::set_sample_rate (_nominal_sample_rate);
+
+	/* The session's actual SR does not change.
+	 * _engine.Running calls Session::initialize_latencies ()
+	 * which sets up resampling, so the following really needs
+	 * to be called only once.
+	 */
+
+	Temporal::set_sample_rate (_base_sample_rate);
 
 	sync_time_vars();
 
@@ -2136,12 +2143,7 @@ Session::set_sample_rate (samplecnt_t frames_per_second)
 	Location* loc = _locations->auto_loop_location ();
 	DiskReader::reset_loop_declick (loc, nominal_sample_rate());
 
-	// XXX we need some equivalent to this, somehow
-	// SndFileSource::setup_standard_crossfades (frames_per_second);
-
 	set_dirty();
-
-	/* XXX need to reset/reinstantiate all LADSPA plugins */
 }
 
 void
@@ -4387,7 +4389,7 @@ Session::maybe_update_session_range (timepos_t const & a, timepos_t const & b)
 		return;
 	}
 
-	samplepos_t session_end_marker_shift_samples = session_end_shift * _nominal_sample_rate;
+	samplepos_t session_end_marker_shift_samples = session_end_shift * nominal_sample_rate ();
 
 	if (_session_range_location == 0) {
 
@@ -6727,10 +6729,21 @@ Session::missing_filesources (DataType dt) const
 }
 
 void
+Session::setup_engine_resampling ()
+{
+	if (_base_sample_rate != AudioEngine::instance()->sample_rate ()) {
+		Port::setup_resampler (std::max<uint32_t>(65, Config->get_port_resampler_quality ()));
+	} else {
+		Port::setup_resampler (Config->get_port_resampler_quality ());
+	}
+	Port::set_engine_ratio (_base_sample_rate,  AudioEngine::instance()->sample_rate ());
+}
+
+void
 Session::initialize_latencies ()
 {
 	block_processing ();
-	Port::set_engine_ratio (_base_sample_rate,  AudioEngine::instance()->sample_rate ());
+	setup_engine_resampling ();
 	update_latency (false);
 	update_latency (true);
 	unblock_processing ();

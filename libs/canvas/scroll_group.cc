@@ -83,6 +83,7 @@ ScrollGroup::scroll_to (Duple const& d)
 	if (_scroll_sensitivity & ScrollsVertically) {
 		_scroll_offset.y = d.y;
 	}
+	_canvas->item_visual_property_changed (this);
 }
 
 bool

@@ -8789,7 +8789,7 @@ Editor::fit_tracks (TrackViewList & tracks)
 	   request signal handler will cause the vertical adjustment setting to fail
 	*/
 
-	controls_layout.property_height () = _full_canvas_height;
+	reset_controls_layout_height (_full_canvas_height);
 	vertical_adjustment.set_value (first_y_pos);
 
 	redo_visual_stack.push_back (current_visual_state (true));

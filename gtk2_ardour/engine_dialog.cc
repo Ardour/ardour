@@ -1526,7 +1526,9 @@ EngineControl::device_changed ()
 	 * the device_name and  'change_device' will never be true.
 	 * so work around this by setting...
 	 */
-	if (backend->use_separate_input_and_output_devices ()) {
+	if (!_have_control) {
+		queue_device_changed = false;
+	} else if (backend->use_separate_input_and_output_devices ()) {
 		if (device_name_in != backend->input_device_name () || device_name_out != backend->output_device_name ()) {
 			queue_device_changed = true;
 		}

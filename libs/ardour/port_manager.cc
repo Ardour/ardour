@@ -1316,11 +1316,12 @@ PortManager::silence (pframes_t nframes, Session* s)
 		}
 	}
 }
+
 void
-PortManager::reinit ()
+PortManager::reinit (bool with_ratio)
 {
 	for (auto const& p : *_ports.reader ()) {
-		p.second->reinit ();
+		p.second->reinit (with_ratio);
 	}
 }
 
