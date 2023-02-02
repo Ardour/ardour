@@ -89,6 +89,8 @@ compiler_flags_dictionaries= {
         'attasm': '-masm=att',
         # Flags to make AVX instructions/intrinsics available
         'avx': '-mavx',
+        # Flags to make AVX512F instructions/intrinsics available
+        'avx512f': '-mavx512f',
         # Flags to make FMA instructions/intrinsics available
         'fma': '-mfma',
         # Flags to make ARM/NEON instructions/intrinsics available
@@ -519,6 +521,16 @@ int main() { return 0; }''',
             if re.search ('x86_64-w64', str(conf.env['CC'])) is not None:
                 conf.define ('FPU_AVX_FMA_SUPPORT', 1)
         elif conf.env['build_target'] == 'i386' or conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
+            conf.check_cxx(fragment = "#include <immintrin.h>\nint main(void) { __m128 a; _mm_fmadd_ss(a, a, a); return 0; }\n",
+                           features  = ['cxx'],
+                           cxxflags  = [ conf.env['compiler_flags_dict']['avx512f'], conf.env['compiler_flags_dict']['fma'], conf.env['compiler_flags_dict']['avx'] ],
+                           mandatory = False,
+                           execute   = False,
+                           msg       = 'Checking compiler for AVX512F intrinsics',
+                           okmsg     = 'Found',
+                           errmsg    = 'Not supported',
+                           define_name = 'FPU_AVX512F_SUPPORT')
+
             conf.check_cxx(fragment = "#include <immintrin.h>\nint main(void) { __m128 a; _mm_fmadd_ss(a, a, a); return 0; }\n",
                            features  = ['cxx'],
                            cxxflags  = [ conf.env['compiler_flags_dict']['fma'], conf.env['compiler_flags_dict']['avx'] ],
@@ -1528,6 +1540,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Dr. Mingw',             conf.is_defined('HAVE_DRMINGW'))
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
     write_config_text('FPU optimization',      opts.fpu_optimization)
+    write_config_text('FPU AVX512F support',   conf.is_defined('FPU_AVX512F_SUPPORT'))
     write_config_text('FPU AVX/FMA support',   conf.is_defined('FPU_AVX_FMA_SUPPORT'))
     write_config_text('Futex Semaphore',       conf.is_defined('USE_FUTEX_SEMAPHORE'))
     write_config_text('Freedesktop files',     opts.freedesktop)

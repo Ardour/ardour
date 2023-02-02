@@ -191,7 +191,24 @@ setup_hardware_optimization (bool try_optimization)
 		FPU* fpu = FPU::instance ();
 
 #if defined(ARCH_X86) && defined(BUILD_SSE_OPTIMIZATIONS)
-		/* We have AVX-optimized code for Windows and Linux */
+		/* Utilize different optimization routines for various x86 extensions */
+
+#ifdef FPU_AVX512F_SUPPORT
+		if (fpu->has_avx512f ()) {
+			info << "Using AVX512F optimized routines" << endmsg;
+
+			// AVX512F SET
+			compute_peak          = x86_avx512f_compute_peak;
+			find_peaks            = x86_avx512f_find_peaks;
+			apply_gain_to_buffer  = x86_avx512f_apply_gain_to_buffer;
+			mix_buffers_with_gain = x86_avx512f_mix_buffers_with_gain;
+			mix_buffers_no_gain   = x86_avx512f_mix_buffers_no_gain;
+			copy_vector           = x86_avx512f_copy_vector;
+
+			generic_mix_functions = false;
+
+		} else
+#endif
 
 #ifdef FPU_AVX_FMA_SUPPORT
 		if (fpu->has_fma ()) {
