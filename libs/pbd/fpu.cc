@@ -210,13 +210,18 @@ FPU::FPU ()
 		if ((cpu_info[2] & (1<<27)) /* OSXSAVE */ &&
 		    (cpu_info[2] & (1<<28) /* AVX */) &&
 		    ((_xgetbv (_XCR_XFEATURE_ENABLED_MASK) & 0x6) == 0x6)) { /* OS really supports XSAVE */
-			info << _("AVX-capable processor") << endmsg;
+			info << _("AVX capable processor") << endmsg;
 			_flags = Flags (_flags | (HasAVX));
 		}
 
 		if (cpu_info[2] & (1<<12) /* FMA */) {
 			info << _("AVX with FMA capable processor") << endmsg;
 			_flags = Flags (_flags | (HasFMA));
+		}
+
+		if (cpu_info[2] & (1<<16) /* AVX512F */) {
+			info << _("AVX512F capable processor") << endmsg;
+			_flags = Flags (_flags | (HasAVX512F));
 		}
 
 		if (cpu_info[3] & (1<<25)) {
