@@ -28,31 +28,48 @@
 [autoscroll-editor]
 [blink-alert-indicators]
 [blink-rec-arm]
+  appearance blink record rec enable rec-enable record-enable
 [boxy-buttons]
+  appearance style boxy buttons theme
 [buggy-gradients]
+  appearance bugs tweaks kwirks
 [cairo-image-surface]
 [check-announcements]
+  check announcements phone home
 [clock-display-limit]
+  clock display limit length maximum duration
 [color-file]
+ theme colors appearance style themeing
 [color-regions-using-track-color]
+ theme colors appearance style themeing
 [default-bindings]
+ shortcuts keys keybindings bindings
 [default-lower-midi-note]
+ MIDI low lowest lower
 [default-narrow_ms]
+ appearance width mixer
 [default-upper-midi-note]
+ MIDI upper high highest
 [draggable-playhead]
+ playhead drag dragging
 [draggable-playhead-speed]
+ playhead drag dragging
 [editor-stereo-only-meters]
+ editor stereo meters
 [extra-ui-extents-time]
 [flat-buttons]
+  appearance style flat buttons theme ableton
 [floating-monitor-section]
+  appearance monitor floating separate window
 [follow-edits]
 [font-scale]
   fonts font size scaling
   readable readability
-
 [freesound-dir]
+  freesound folder folders directory directories download
 [grid-follows-internal]
 [hide-splash-screen]
+  appearance hide splash screen 
 [highlight-auditioned-clips]
 [icon-set]
 [input-meter-layout]
@@ -212,6 +229,7 @@
 [SECTION:Global]
 
 [afl-position]
+  monitoring monitor afl pfl pre post position
 [all-safe]
 [allow-special-bus-removal]
 [ask-replace-instrument]
@@ -219,6 +237,7 @@
 [auditioner-output-left]
 [auditioner-output-right]
 [auto-analyse-audio]
+  automatic automated audio analysis transients
 [auto-connect-standard-busses]
 [auto-input-does-talkback]
 [auto-return-after-rewind-ffwd]
@@ -232,13 +251,17 @@
 [click-gain]
 [click-record-only]
 [click-sound]
+ metronome click beat sound sample 
 [clicking]
 [clip-library-dir]
+  folder folders directory directories download clips library
 [conceal-lv1-if-lv2-exists]
 [conceal-vst2-if-vst3-exists]
 [copy-demo-sessions]
 [cpu-dma-latency]
+  cpu dma latency performance xrun
 [create-xrun-marker]
+  xrun xmarker
 [default-automation-time-domain]
 [default-fade-shape]
 [default-session-parent-dir]

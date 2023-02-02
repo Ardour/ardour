@@ -875,4 +875,4 @@ UIConfiguration::color_to_hex_string_no_alpha (Gtkmm2ext::Color c)
 	return buf;
 }
 
-#include "configuration_metadata.cc"
+#include "configuration_metadata.h"
