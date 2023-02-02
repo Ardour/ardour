@@ -55,6 +55,16 @@ LIBARDOUR_API void x86_sse_avx_find_peaks               (float const* buf, uint3
 LIBARDOUR_API void  x86_fma_mix_buffers_with_gain       (float* dst, float const* src, uint32_t nframes, float gain);
 #endif
 
+/* FMA functions */
+#ifdef FPU_AVX512F_SUPPORT
+LIBARDOUR_API float x86_avx512f_compute_peak            (float const* buf, uint32_t nsamples, float current);
+LIBARDOUR_API void  x86_avx512f_apply_gain_to_buffer    (float* buf, uint32_t nframes, float gain);
+LIBARDOUR_API void  x86_avx512f_mix_buffers_with_gain   (float* dst, float const* src, uint32_t nframes, float gain);
+LIBARDOUR_API void  x86_avx512f_mix_buffers_no_gain     (float* dst, float const* src, uint32_t nframes);
+LIBARDOUR_API void  x86_avx512f_copy_vector             (float* dst, float const* src, uint32_t nframes);
+LIBARDOUR_API void  x86_avx512f_find_peaks              (float const* buf, uint32_t nsamples, float* min, float* max);
+#endif
+
 /* debug wrappers for SSE functions */
 
 LIBARDOUR_API float debug_compute_peak               (ARDOUR::Sample const* buf, ARDOUR::pframes_t nsamples, float current);
