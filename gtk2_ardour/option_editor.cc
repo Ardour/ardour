@@ -897,6 +897,7 @@ OptionEditor::search ()
 		typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 		tokenizer t (search_for, sep);
 
+		search_targets.clear ();
 		for (tokenizer::iterator ti = t.begin (); ti != t.end (); ++ti) {
 			string word = *ti;
 			transform (word.begin (), word.end (), word.begin (), ::toupper);
