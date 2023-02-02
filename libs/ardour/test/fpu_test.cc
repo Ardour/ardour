@@ -154,6 +154,33 @@ FPUTest::avxTest ()
 }
 
 void
+FPUTest::avx512fTest ()
+{
+	PBD::FPU* fpu = PBD::FPU::instance ();
+	if (!fpu->has_avx512f ()) {
+		printf ("AVX512F is not available at run-time\n");
+		return;
+	}
+
+#if ( defined(__x86_64__) || defined(_M_X64) )
+	size_t align_max = 64;
+#else
+	size_t align_max = 16;
+#endif
+	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test1) % align_max) == 0);
+	CPPUNIT_ASSERT_MESSAGE ("Aligned Malloc", (((intptr_t)_test2) % align_max) == 0);
+
+	compute_peak          = x86_avx512f_compute_peak;
+	find_peaks            = x86_avx512f_find_peaks;
+	apply_gain_to_buffer  = x86_avx512f_apply_gain_to_buffer;
+	mix_buffers_with_gain = x86_avx512f_mix_buffers_with_gain;
+	mix_buffers_no_gain   = x86_avx512f_mix_buffers_no_gain;
+	copy_vector           = x86_avx512f_copy_vector;
+
+	run (align_max, FLT_EPSILON);
+}
+
+void
 FPUTest::sseTest ()
 {
 	PBD::FPU* fpu = PBD::FPU::instance ();
