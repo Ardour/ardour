@@ -349,11 +349,9 @@ Ebu_r128_proc::detect_process (int nfram)
 			z3 += y;
 			sj += y * y;
 		}
-		if (_nchan == 1) {
-			si = 2 * sj;
-		} else {
-			si += _chan_gain[i] * sj;
-		}
+
+		si += _chan_gain[i] * sj;
+
 		S->_z1 = !isfinite_local (z1) ? 0 : z1;
 		S->_z2 = !isfinite_local (z2) ? 0 : z2;
 		S->_z3 = !isfinite_local (z3) ? 0 : z3;
