@@ -2068,7 +2068,8 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 		break;
 
 	case Replicate:
-		assert (get_count () > 1);
+		/* NB. When resolving impossible matches, "replicate 1 time" is valid.
+		 * e.g. add a MIDI filter (1 MIDI in, 1 MIDI out) after some audio plugin */
 		assert (!_plugins.front()->get_info()->reconfigurable_io ());
 		break;
 
@@ -2367,6 +2368,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 		// prefer floor() so the count won't overly increase IFF (nin < nout)
 		f = max (f, (uint32_t) floor (inx.get(*t) / (float)nout));
 	}
+	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: resolving by output, replicate %2\n", name(), f));
 	if (f > 0 && outputs * f >= _configured_out) {
 		out = outputs * f + midi_bypass;
 		return Match (Replicate, f, _strict_io);
@@ -2379,6 +2381,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 		if (nin == 0 || inx.get(*t) == 0) { continue; }
 		f = max (f, (uint32_t) ceil (inx.get(*t) / (float)nin));
 	}
+	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: resolving by input, replicate %2\n", name(), f));
 	if (f > 0) {
 		out = outputs * f + midi_bypass;
 		return Match (Replicate, f, _strict_io);
@@ -2391,6 +2394,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 		if (nin == 0 || inx.get(*t) == 0) { continue; }
 		f = max (f, (uint32_t) ceil (inx.get(*t) / (float)nin));
 	}
+	DEBUG_TRACE (DEBUG::ChanMapping, string_compose ("%1: resolving by input w/sc, replicate %2\n", name(), f));
 	out = outputs * f + midi_bypass;
 	return Match (Replicate, f, _strict_io);
 }
