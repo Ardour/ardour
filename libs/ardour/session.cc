@@ -239,7 +239,6 @@ Session::Session (AudioEngine &eng,
 	, _session_dir (new SessionDirectory (fullpath))
 	, _current_snapshot_name (snapshot_name)
 	, state_tree (0)
-	, state_was_pending (false)
 	, _state_of_the_state (StateOfTheState (CannotSave | InitialConnecting | Loading))
 	, _save_queued (false)
 	, _save_queued_pending (false)
@@ -613,9 +612,9 @@ Session::destroy ()
 {
 	vector<void*> debug_pointers;
 
-	/* if we got to here, leaving pending capture state around
-	   is a mistake.
-	*/
+	/* if we got to here, leaving pending state around
+	 * is a mistake.
+	 */
 
 	remove_pending_capture_state ();
 

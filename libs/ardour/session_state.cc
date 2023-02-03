@@ -423,9 +423,6 @@ Session::session_loaded ()
 
 	if (_is_new) {
 		save_state ("");
-	} else if (state_was_pending) {
-		save_state ("");
-		state_was_pending = false;
 	}
 
 	/* Now, finally, we can fill the playback buffers */
@@ -968,7 +965,7 @@ Session::load_state (string snapshot_name, bool from_template)
 	delete state_tree;
 	state_tree = 0;
 
-	state_was_pending = false;
+	bool state_was_pending = false;
 
 	/* check for leftover pending state from a crashed capture attempt */
 
@@ -982,6 +979,8 @@ Session::load_state (string snapshot_name, bool from_template)
 		boost::optional<int> r = AskAboutPendingState();
 		if (r.value_or (1)) {
 			state_was_pending = true;
+		} else {
+			remove_pending_capture_state ();
 		}
 	}
 

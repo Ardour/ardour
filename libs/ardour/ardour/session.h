@@ -1600,7 +1600,6 @@ private:
 	std::string _current_snapshot_name;
 
 	XMLTree*         state_tree;
-	bool             state_was_pending;
 	StateOfTheState _state_of_the_state;
 
 	friend class    StateProtector;
