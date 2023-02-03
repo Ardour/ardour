@@ -1324,7 +1324,7 @@ void
 ARDOUR_UI::save_session_at_its_request (std::string snapshot_name)
 {
 	if (_session) {
-		_session->save_state (snapshot_name);
+		_session->save_state (snapshot_name, true);
 	}
 }
 
