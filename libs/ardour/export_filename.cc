@@ -260,10 +260,27 @@ ExportFilename::get_path (ExportFormatSpecPtr format) const
 
 	if (format) {
 		path += ".";
-		path += format->extension ();
+		if (channel_config && channel_config->get_channels().size () == 1 && channel_config->get_channels().front()->midi ()) {
+			path += "mid";
+		} else {
+			path += format->extension ();
+		}
 	}
 
 	path = legalize_for_universal_path (path);
+
+#if 0
+	std::cout << "ExportFilename::get_path"
+		<< " SN: " << include_session
+		<< " LB: " << include_label
+		<< " RV: " << include_revision
+		<< " TS: " << include_timespan
+		<< " CC: " << include_channel_config
+		<< " FN: " << include_format_name
+		<< " CN: " << include_channel
+		<< " DT: " << include_date
+		<< " '" << path << "'\n";
+#endif
 
 	return Glib::build_filename (folder, path);
 }

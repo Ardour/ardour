@@ -276,7 +276,7 @@ public:
 private:
 	void check_config (boost::shared_ptr<Warnings> warnings,
 	                   TimespanStatePtr            timespan_state,
-	                   ChannelConfigStatePtr       channel_config_state,
+	                   ExportChannelConfigPtr      channel_config,
 	                   FormatStatePtr              format_state,
 	                   FilenameStatePtr            filename_state);
 

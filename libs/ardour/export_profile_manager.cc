@@ -876,32 +876,29 @@ ExportProfileManager::get_warnings ()
 {
 	boost::shared_ptr<Warnings> warnings (new Warnings ());
 
-	ChannelConfigStatePtr channel_config_state;
-	if (!channel_configs.empty ()) {
-		channel_config_state = channel_configs.front ();
-	}
-
 	TimespanStatePtr timespan_state = timespans.front ();
 
 	/* Check "global" config ***/
 	TimespanListPtr timespans = timespan_state->timespans;
-
-	ExportChannelConfigPtr channel_config;
-	if (channel_config_state) {
-		channel_config = channel_config_state->config;
-	}
 
 	/* Check Timespans are not empty */
 	if (timespans->empty ()) {
 		warnings->errors.push_back (_("No timespan has been selected!"));
 	}
 
-	if (channel_config_state == 0) {
+	if (channel_configs.empty ()) {
 		warnings->errors.push_back (_("No channels have been selected!"));
 	} else {
-		/* Check channel config ports */
-		if (!channel_config->all_channels_have_ports ()) {
-			warnings->warnings.push_back (_("Some channels are empty"));
+		for (auto const& cc : channel_configs) {
+			ExportChannelConfigPtr channel_config = cc->config;
+			if (!cc) {
+				warnings->errors.push_back (_("Invalid export channel config!"));
+				continue;
+			}
+			/* Check channel config ports */
+			if (!channel_config->all_channels_have_ports ()) {
+				warnings->warnings.push_back (_("Some channels are empty"));
+			}
 		}
 	}
 
@@ -915,7 +912,7 @@ ExportProfileManager::get_warnings ()
 	/*** Check files ***/
 
 	/* handle_duplicate_format_extensions */
-	for (TimespanList::iterator t1 = timespans->begin (); t1 != timespans->end (); ++t1) {
+	{
 		typedef std::map<std::string, int> ExtCountMap;
 		ExtCountMap                        counts;
 
@@ -944,23 +941,24 @@ ExportProfileManager::get_warnings ()
 			}
 		}
 
-		for (format_it = formats.begin (), filename_it = filenames.begin ();
-		     format_it != formats.end () && filename_it != filenames.end ();
-		     ++format_it, ++filename_it) {
-			ExportFilenamePtr filename    = (*filename_it)->filename;
+		for (auto const& i : filenames) {
+			ExportFilenamePtr filename    = i->filename;
 			filename->include_format_name = duplicates_found;
 		}
 	}
 
 	bool folder_ok = true;
 
-	if (channel_config_state) {
+	if (!channel_configs.empty ()) {
 		FormatStateList::const_iterator   format_it;
 		FilenameStateList::const_iterator filename_it;
 		for (format_it = formats.begin (), filename_it = filenames.begin ();
 		     format_it != formats.end () && filename_it != filenames.end ();
 		     ++format_it, ++filename_it) {
-			check_config (warnings, timespan_state, channel_config_state, *format_it, *filename_it);
+
+			for (auto const& cc : channel_configs) {
+				check_config (warnings, timespan_state, cc->config, *format_it, *filename_it);
+			}
 
 			if (!Glib::file_test ((*filename_it)->filename->get_folder (), Glib::FileTest (G_FILE_TEST_EXISTS | G_FILE_TEST_IS_DIR))) {
 				folder_ok = false;
@@ -978,11 +976,10 @@ ExportProfileManager::get_warnings ()
 void
 ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
                                     TimespanStatePtr            timespan_state,
-                                    ChannelConfigStatePtr       channel_config_state,
+                                    ExportChannelConfigPtr      channel_config,
                                     FormatStatePtr format_state, FilenameStatePtr filename_state)
 {
 	TimespanListPtr        timespans      = timespan_state->timespans;
-	ExportChannelConfigPtr channel_config = channel_config_state->config;
 	ExportFormatSpecPtr    format         = format_state->format;
 	ExportFilenamePtr      filename       = filename_state->filename;
 
@@ -1064,6 +1061,7 @@ ExportProfileManager::build_filenames (std::list<std::string>& result, ExportFil
 	for (std::list<ExportTimespanPtr>::iterator timespan_it = timespans->begin ();
 	     timespan_it != timespans->end (); ++timespan_it) {
 		filename->set_timespan (*timespan_it);
+		filename->set_channel_config (channel_config);
 
 		if (channel_config->get_split ()) {
 			filename->include_channel = true;
