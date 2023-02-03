@@ -647,9 +647,8 @@ TrackExportChannelSelector::~TrackExportChannelSelector ()
 void
 TrackExportChannelSelector::sync_with_manager ()
 {
-	if (sync_with_manager_state ()) {
-		update_config();
-	}
+	sync_with_manager_state ();
+	update_config();
 }
 
 bool
