@@ -291,8 +291,8 @@ ExportFileNotebook::FilePage::FilePage (Session * s, ManagerPtr profile_manager,
 	tab_widget.pack_start (tab_label, false, false, 3);
 	tab_widget.pack_end (tab_close_alignment, false, false, 0);
 	tab_widget.show_all_children ();
+
 	update_tab_label ();
-	update_example_filename();
 
 	/* Done */
 
@@ -380,7 +380,11 @@ void
 ExportFileNotebook::FilePage::critical_selection_changed ()
 {
 	update_tab_label();
-	update_example_filename();
+
+	/* Note: `update_example_filename()` is called from
+	 * `ExportDialog::update_warnings_and_example_filename()`
+	 * in response to CriticalSelectionChanged
+	 */
 
 	soundcloud_button_connection.block ();
 	analysis_button_connection.block ();

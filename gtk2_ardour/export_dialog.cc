@@ -122,11 +122,7 @@ ExportDialog::set_session (ARDOUR::Session* s)
 	preset_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
 	timespan_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
 	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
-	channel_selector->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
 	file_notebook->CriticalSelectionChanged.connect (sigc::mem_fun (*this, &ExportDialog::maybe_set_session_dirty));
-
-	update_warnings_and_example_filename ();
-	update_realtime_selection ();
 
 	_initialized = true;
 
