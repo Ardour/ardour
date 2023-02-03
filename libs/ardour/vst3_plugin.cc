@@ -1518,7 +1518,7 @@ VST3PI::performEdit (Vst::ParamID id, Vst::ParamValue v)
 		_update_ctrl[idx->second] = true;
 		/* set_parameter_internal() is called via OnParameterChange */
 		value = _controller->normalizedParamToPlain (id, value);
-		OnParameterChange (ValueChange, idx->second, v); /* EMIT SIGNAL */
+		OnParameterChange (ValueChange, idx->second, value); /* EMIT SIGNAL */
 	}
 	return kResultOk;
 }
