@@ -1850,6 +1850,8 @@ VST3PI::set_parameter (uint32_t p, float value, int32 sample_off, bool to_list)
 {
 	if (to_list) {
 		set_parameter_internal (index_to_id (p), value, sample_off, false);
+	} else {
+		value = _controller->plainParamToNormalized (index_to_id (p), value);
 	}
 	_shadow_data[p] = value;
 	_update_ctrl[p] = true;
