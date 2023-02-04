@@ -92,8 +92,6 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace ArdourWidgets;
 
-extern int query_darwin_version (); // cocoacarbon.mm
-
 class ClickOptions : public OptionEditorMiniPage
 {
 public:
@@ -3021,17 +3019,17 @@ These settings will only take effect after %1 is restarted.\n\
 
 #ifdef __APPLE__
 	ComboOption<AppleNSGLViewMode>* glmode = new ComboOption<AppleNSGLViewMode> (
-		"use-opengl-view",
+		"nsgl-view-mode",
 		_("Render Canvas on openGL texture (requires restart)"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_opengl_view),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_opengl_view)
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_nsgl_view_mode),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_nsgl_view_mode)
 		);
-	glmode->add (NSGLAuto, _("Automatic"));
+	glmode->add (NSGLHiRes, _("Yes, with Retina scaling"));
+	glmode->add (NSGLLoRes, _("Yes, low resolution"));
 	glmode->add (NSGLDisable, _("No"));
-	glmode->add (NSGLEnable, _("Yes"));
 
 	Gtkmm2ext::UI::instance()->set_tip (glmode->tip_widget(), string_compose (
-				_("Render editor canvas, on a openGL texture, bypassing color-correction and retina scaling.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
+				_("Render editor canvas, on a openGL texture which may improve graphics performance.\nThis requires restarting %1 before having an effect"), PROGRAM_NAME));
 	add_option (_("Appearance"), glmode);
 #endif
 
@@ -4901,15 +4899,6 @@ RCOptionEditor::parameter_changed (string const & p)
 		plugin_scan_refresh ();
 	} else if (p == "conceal-vst2-if-vst3-exists") {
 		plugin_scan_refresh ();
-	} else if (p == "use-opengl-view" && _cairo_image_surface) {
-#ifdef __APPLE__
-		AppleNSGLViewMode m =  UIConfiguration::instance().get_use_opengl_view ();
-		if (m == NSGLEnable || (m == NSGLAuto && query_darwin_version () < 23)) {
-			_cairo_image_surface->set_sensitive (false);
-		} else {
-			_cairo_image_surface->set_sensitive (true);
-		}
-#endif
 	}
 }
 

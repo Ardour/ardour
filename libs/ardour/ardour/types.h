@@ -686,9 +686,9 @@ enum PluginGUIBehavior {
 };
 
 enum AppleNSGLViewMode {
-	NSGLAuto, // disable on Catalina and above
+	NSGLHiRes,
+	NSGLLoRes,
 	NSGLDisable,
-	NSGLEnable
 };
 
 /** A struct used to describe changes to processors in a route.

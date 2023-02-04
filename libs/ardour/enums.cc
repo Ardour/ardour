@@ -762,9 +762,9 @@ setup_enum_writer ()
 	REGISTER_ENUM(PluginGUIDestroyVST);
 	REGISTER(_PluginGUIBehavior);
 
-	REGISTER_ENUM(NSGLAuto);
+	REGISTER_ENUM(NSGLHiRes);
+	REGISTER_ENUM(NSGLLoRes);
 	REGISTER_ENUM(NSGLDisable);
-	REGISTER_ENUM(NSGLEnable);
 	REGISTER(_AppleNSGLViewMode);
 
 	REGISTER_ENUM (Small);

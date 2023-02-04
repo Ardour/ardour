@@ -107,7 +107,7 @@ UI_CONFIG_VARIABLE (double, waveform_clip_level, "waveform-clip-level", -0.09339
 UI_CONFIG_VARIABLE (bool, no_new_session_dialog, "no-new-session-dialog", false)
 UI_CONFIG_VARIABLE (bool, buggy_gradients, "buggy-gradients", false)
 UI_CONFIG_VARIABLE (bool, cairo_image_surface, "cairo-image-surface", false)
-UI_CONFIG_VARIABLE (ARDOUR::AppleNSGLViewMode, use_opengl_view, "use-opengl-view", NSGLAuto)
+UI_CONFIG_VARIABLE (ARDOUR::AppleNSGLViewMode, nsgl_view_mode, "nsgl-view-mode", NSGLHiRes)
 UI_CONFIG_VARIABLE (uint64_t, waveform_cache_size, "waveform-cache-size", 100) /* units of megagbytes */
 UI_CONFIG_VARIABLE (int32_t, recent_session_sort, "recent-session-sort", 0)
 UI_CONFIG_VARIABLE (bool, save_export_analysis_image, "save-export-analysis-image", false)

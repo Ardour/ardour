@@ -2582,9 +2582,9 @@ LuaBindings::common (lua_State* L)
 		.endNamespace ()
 
 		.beginNamespace ("AppleNSGLViewMode")
-		.addConst ("NSGLAuto", ARDOUR::AppleNSGLViewMode(NSGLAuto))
+		.addConst ("NSGLHiRes", ARDOUR::AppleNSGLViewMode(NSGLHiRes))
+		.addConst ("NSGLLoRes", ARDOUR::AppleNSGLViewMode(NSGLLoRes))
 		.addConst ("NSGLDisable", ARDOUR::AppleNSGLViewMode(NSGLDisable))
-		.addConst ("NSGLEnable", ARDOUR::AppleNSGLViewMode(NSGLEnable))
 		.endNamespace ()
 
 		.beginNamespace ("PluginGUIBehavior")

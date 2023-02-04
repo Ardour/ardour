@@ -239,20 +239,8 @@ UIConfiguration::pre_gui_init ()
 	}
 #endif
 #ifdef __APPLE__
-	switch (get_use_opengl_view()) {
-		case NSGLAuto:
-			if (query_darwin_version () >= 23) {
-				g_setenv ("ARDOUR_NSGL", "0", 0);
-			} else {
-				g_setenv ("ARDOUR_NSGL", "1", 0);
-			}
-			break;
-		case NSGLDisable:
-			g_setenv ("ARDOUR_NSGL", "0", 0);
-			break;
-		case NSGLEnable:
-			g_setenv ("ARDOUR_NSGL", "1", 0);
-			break;
+	if (NSGLDisable == get_nsgl_view_mode()) {
+		g_setenv ("ARDOUR_NSGL", "0", 0);
 	}
 #endif
 	return 0;
