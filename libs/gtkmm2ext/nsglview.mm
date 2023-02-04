@@ -375,12 +375,6 @@ __attribute__ ((visibility ("hidden")))
 @end
 
 void*
-Gtkmm2ext::nsglview_create (Gtkmm2ext::CairoCanvas* canvas)
-{
-	return nsglview_create (canvas, true);
-}
-
-void*
 Gtkmm2ext::nsglview_create (Gtkmm2ext::CairoCanvas* canvas, bool use_backing_scale)
 {
 	if (g_getenv ("ARDOUR_NSGL") && (0 == atoi (g_getenv ("ARDOUR_NSGL")))) {

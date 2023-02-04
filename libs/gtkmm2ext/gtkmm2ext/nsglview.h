@@ -25,7 +25,6 @@ namespace Gtkmm2ext
 {
 	class CairoCanvas;
 
-	void* nsglview_create (CairoCanvas*);
 	void* nsglview_create (CairoCanvas*, bool use_backing_scale);
 	void  nsglview_overlay (void*, GdkWindow*);
 	void  nsglview_resize (void*, int x, int y, int w, int h);

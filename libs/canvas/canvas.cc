@@ -555,12 +555,12 @@ GtkCanvas::GtkCanvas ()
 }
 
 void
-GtkCanvas::use_nsglview ()
+GtkCanvas::use_nsglview (bool retina)
 {
 	assert (!_nsglview);
 	assert (!get_realized());
 #ifdef ARDOUR_CANVAS_NSVIEW_TAG // patched gdkquartz.h
-	_nsglview = Gtkmm2ext::nsglview_create (this);
+	_nsglview = Gtkmm2ext::nsglview_create (this, retina);
 #endif
 }
 

@@ -217,7 +217,7 @@ public:
 	GtkCanvas ();
 	~GtkCanvas () { _in_dtor = true ; }
 
-	void use_nsglview ();
+	void use_nsglview (bool retina = true);
 
 	void request_redraw (Rect const &);
 	void request_size (Duple);

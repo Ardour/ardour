@@ -41,7 +41,7 @@ public:
 	virtual ~CairoWidget ();
 
 	void set_canvas_widget ();
-	void use_nsglview ();
+	void use_nsglview (bool retina = true);
 	void use_image_surface (bool yn = true);
 
 	/* swizzle Gtk::Widget methods for Canvas::Widget */
