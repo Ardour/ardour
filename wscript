@@ -946,7 +946,7 @@ def options(opt):
     opt.add_option('--thread-sanitizer', action='store_true', default=False, dest='tsan',
                     help='Turn on ThreadSanitizer (requires GCC >= 4.8 or clang, and 64bit CPU)')
     opt.add_option('--ptformat', action='store_true', default=False, dest='ptformat',
-                    help='Turn on PT session import option')
+                    help='Enable support to import PTS/PTF/PTX sessions')
     opt.add_option('--no-threaded-waveviews', action='store_true', default=False, dest='no_threaded_waveviews',
                     help='Disable threaded waveview rendering')
     opt.add_option('--no-futex-semaphore', action='store_true', default=False, dest='no_futex_semaphore',
