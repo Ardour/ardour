@@ -1095,6 +1095,10 @@ def configure(conf):
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'AudioToolbox', '-framework', 'AudioUnit'])
         conf.env.append_value('LINKFLAGS_AUDIOUNITS', ['-framework', 'Cocoa'])
 
+        # use image surface for rendering
+        conf.env.append_value('CFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
+        conf.env.append_value('CXXFLAGS', '-DUSE_CAIRO_IMAGE_SURFACE')
+
         if (
                 # osx up to and including 10.6 (uname 10.X.X)
                 (re.search ("^[1-9][0-9]\.", os.uname()[2]) is None or not re.search ("^10\.", os.uname()[2]) is None)
