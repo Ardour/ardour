@@ -120,6 +120,7 @@ protected:
 	cairo_pattern_t*                       shine_pattern;
 	PBD::microseconds_t                    last_shuttle_request;
 	PBD::ScopedConnection                  parameter_connection;
+	PBD::ScopedConnection                  port_connection;
 	ShuttleInfoButton                      _info_button;
 	Gtk::Menu*                             shuttle_context_menu;
 	ArdourWidgets::BindingProxy            binding_proxy;

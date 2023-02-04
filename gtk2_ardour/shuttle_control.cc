@@ -186,6 +186,8 @@ ShuttleControl::ShuttleControl ()
 	}
 
 	Config->ParameterChanged.connect (parameter_connection, MISSING_INVALIDATOR, boost::bind (&ShuttleControl::parameter_changed, this, _1), gui_context ());
+	Port::ResamplerQualityChanged.connect (port_connection, MISSING_INVALIDATOR, boost::bind (&ShuttleControl::parameter_changed, this, "external-sync"), gui_context ());
+
 	UIConfiguration::instance ().ColorsChanged.connect (sigc::mem_fun (*this, &ShuttleControl::set_colors));
 	Timers::blink_connect (sigc::mem_fun (*this, &ShuttleControl::do_blink));
 
@@ -768,7 +770,7 @@ ShuttleControl::parameter_changed (std::string p)
 		delete shuttle_context_menu;
 		shuttle_context_menu = 0;
 	} else if (p == "external-sync") {
-		if (_session->config.get_external_sync() || !Port::can_varispeed ()) {
+		if (!_session || _session->config.get_external_sync() || !Port::can_varispeed ()) {
 			_vari_dialog.hide ();
 			_vari_button.set_sensitive (false);
 			if (shuttle_grabbed) {
