@@ -41,6 +41,7 @@ using namespace PBD;
 
 PBD::Signal0<void> Port::PortDrop;
 PBD::Signal0<void> Port::PortSignalDrop;
+PBD::Signal0<void> Port::ResamplerQualityChanged;
 
 bool         Port::_connecting_blocked = false;
 pframes_t    Port::_global_port_buffer_offset = 0;
@@ -729,10 +730,13 @@ Port::setup_resampler (uint32_t q)
 		_resampler_latency = q - 1;
 	}
 
-	if (port_manager && cur_quality != _resampler_quality) {
-		Glib::Threads::Mutex::Lock lm (port_manager->process_lock ());
-		port_manager->reinit (true);
-		return false;
+	if (cur_quality != _resampler_quality) {
+		ResamplerQualityChanged (); /* EMIT SIGNAL */
+		if (port_manager) {
+			Glib::Threads::Mutex::Lock lm (port_manager->process_lock ());
+			port_manager->reinit (true);
+			return false;
+		}
 	}
 	return true;
 }

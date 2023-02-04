@@ -139,6 +139,7 @@ public:
 
 	static PBD::Signal0<void> PortDrop;
 	static PBD::Signal0<void> PortSignalDrop;
+	static PBD::Signal0<void> ResamplerQualityChanged;
 
 	static void set_varispeed_ratio (double s); //< varispeed playback
 	static bool set_engine_ratio (double session, double engine); //< SR mismatch
