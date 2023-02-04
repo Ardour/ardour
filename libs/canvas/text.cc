@@ -206,10 +206,6 @@ Text::_redraw () const
 void
 Text::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	if (ArdourCanvas::nodraw & 0x4) {
-		return;
-	}
-
 	if (_text.empty()) {
 		return;
 	}

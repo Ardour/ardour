@@ -51,9 +51,6 @@ public:
 	virtual void set_outline_width (Distance);
 
 	bool outline () const {
-		if (ArdourCanvas::nodraw & 0x2) {
-			return false;
-		}
 		return _outline;
 	}
 

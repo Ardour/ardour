@@ -25,12 +25,8 @@
 
 #include <gdk/gdkquartz.h>
 
-#define NSVIEW_PROFILE
+//#define NSVIEW_PROFILE
 //#define DEBUG_NSVIEW_EXPOSURE
-
-namespace ArdourCanvas {
-extern uint64_t nodraw;
-}
 
 #include <OpenGL/gl.h>
 #import  <Cocoa/Cocoa.h>
@@ -121,12 +117,12 @@ __attribute__ ((visibility ("hidden")))
 		glEnable (GL_TEXTURE_RECTANGLE_ARB);
 		[NSOpenGLContext clearCurrentContext];
 
-		if (ArdourCanvas::nodraw & 0x200) {
-			[self setWantsBestResolutionOpenGLSurface:NO];
-		} else {
-			[self setWantsBestResolutionOpenGLSurface:YES];
-			[self setWantsLayer:YES];
-		}
+#if 1
+		[self setWantsBestResolutionOpenGLSurface:YES];
+		[self setWantsLayer:YES];
+#else
+		[self setWantsBestResolutionOpenGLSurface:NO];
+#endif
 
 		[self reshape];
 	}
@@ -169,7 +165,7 @@ __attribute__ ((visibility ("hidden")))
 	}
 
 	float scale = 1.0;
-	if ([self window] && 0 == (ArdourCanvas::nodraw & 0x200)) {
+	if ([self window]) {
 		scale = [[self window] backingScaleFactor];
 	}
 
@@ -247,7 +243,7 @@ __attribute__ ((visibility ("hidden")))
 #endif
 
 	float scale = 1.0;
-	if ([self window] && 0 == (ArdourCanvas::nodraw & 0x200)) {
+	if ([self window]) {
 		scale = [[self window] backingScaleFactor];
 	}
 
@@ -343,11 +339,9 @@ __attribute__ ((visibility ("hidden")))
 	[super setNeedsDisplay:NO];
 
 #ifdef NSVIEW_PROFILE
-	if (ArdourCanvas::nodraw & 0x100) {
-		const int64_t end = g_get_monotonic_time ();
-		const int64_t elapsed = end - start;
-		printf ("NSGL::drawRect (%d x %d) * %.1f in %f ms\n", _width, _height, scale, elapsed / 1000.f);
-	}
+	const int64_t end = g_get_monotonic_time ();
+	const int64_t elapsed = end - start;
+	printf ("NSGL::drawRect (%d x %d) * %.1f in %f ms\n", _width, _height, scale, elapsed / 1000.f);
 #endif
 
 }

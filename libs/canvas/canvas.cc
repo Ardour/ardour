@@ -22,7 +22,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#define CANVAS_PROFILE
+//#define CANVAS_PROFILE
 
 /** @file  canvas/canvas.cc
  *  @brief Implementation of the main canvas classes.
@@ -30,7 +30,6 @@
 
 #include <list>
 #include <cassert>
-#include <cstdlib>
 #include <gtkmm/adjustment.h>
 #include <gtkmm/label.h>
 #include <gtkmm/window.h>
@@ -54,7 +53,6 @@ using namespace std;
 using namespace ArdourCanvas;
 
 uint32_t Canvas::tooltip_timeout_msecs = 750;
-uint64_t ArdourCanvas::nodraw = 0;
 
 /** Construct a new Canvas */
 Canvas::Canvas ()
@@ -71,13 +69,6 @@ Canvas::Canvas ()
 	_use_intermediate_surface = NULL != g_getenv("ARDOUR_INTERMEDIATE_SURFACE");
 #endif
 	set_epoch ();
-
-	const char * dbg = g_getenv ("ARDOUR_CANVAS_NODRAW");
-
-	if (dbg) {
-		nodraw = strtoull (dbg, NULL, 0);
-		std::cerr << "\n\n **** SET NODRAW FROM " << dbg << " to " << std::hex << nodraw << std::dec << std::endl;
-	}
 }
 
 void
@@ -138,9 +129,6 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 #ifdef CANVAS_PROFILE
 	const int64_t start = g_get_monotonic_time ();
 #endif
-	if (ArdourCanvas::nodraw & 0x40) {
-		std::cout << "GtkCanvas::render " << area << "\n";
-	}
 
 	PreRender (); // emit signal
 
@@ -187,11 +175,9 @@ Canvas::render (Rect const & area, Cairo::RefPtr<Cairo::Context> const & context
 	}
 
 #ifdef CANVAS_PROFILE
-	if (ArdourCanvas::nodraw & 0x100) {
-		const int64_t end = g_get_monotonic_time ();
-		const int64_t elapsed = end - start;
-		std::cout << "GtkCanvas::render " << area << " " << (elapsed / 1000.f) << " ms\n";
-	}
+	const int64_t end = g_get_monotonic_time ();
+	const int64_t elapsed = end - start;
+	std::cout << "GtkCanvas::render " << area << " " << (elapsed / 1000.f) << " ms\n";
 #endif
 
 }
@@ -1082,11 +1068,9 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 
 
 #ifdef CANVAS_PROFILE
-	if (ArdourCanvas::nodraw & 0x100) {
-		const int64_t end = g_get_monotonic_time ();
-		const int64_t elapsed = end - start;
-		printf ("GtkCanvas::on_expose_event %f ms\n", elapsed / 1000.f);
-	}
+	const int64_t end = g_get_monotonic_time ();
+	const int64_t elapsed = end - start;
+	printf ("GtkCanvas::on_expose_event %f ms\n", elapsed / 1000.f);
 #endif
 
 	return true;
@@ -1318,9 +1302,6 @@ GtkCanvas::on_unmap ()
 void
 GtkCanvas::queue_draw()
 {
-	if (ArdourCanvas::nodraw & 0x20) {
-		std::cout << "GtkCanvas::queue_draw " << get_width () << " x " <<  get_height () << "\n";
-	}
 #ifdef __APPLE__
 	if (_nsglview) {
 		Gtkmm2ext::nsglview_queue_draw (_nsglview, 0, 0, get_width (), get_height ());
@@ -1333,9 +1314,6 @@ GtkCanvas::queue_draw()
 void
 GtkCanvas::queue_draw_area (int x, int y, int width, int height)
 {
-	if (ArdourCanvas::nodraw & 0x20) {
-		std::cout << "GtkCanvas::queue_draw_area " << width << " x " << height << " @ " << x << " + " << y << "\n";
-	}
 #ifdef __APPLE__
 	if (_nsglview) {
 		Gtkmm2ext::nsglview_queue_draw (_nsglview, x, y, width, height);

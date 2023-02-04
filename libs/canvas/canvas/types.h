@@ -257,8 +257,6 @@ struct FourDimensions {
 	}
 };
 
-extern LIBCANVAS_API uint64_t nodraw;
-
 extern LIBCANVAS_API std::ostream & operator<< (std::ostream &, Rect const &);
 
 typedef std::vector<Duple> Points;
