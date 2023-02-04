@@ -20,13 +20,17 @@
 
 [action-table-columns]
 [all-floating-windows-are-dialogs]
+  KDE quirks dialogs window hidden behind
 [allow-non-quarter-pulse]
 [ask-before-closing-last-window]
 [automation-edit-cancels-auto-hide]
+  automation spill touch
 [autoplay-clips]
 [autoplay-files]
 [autoscroll-editor]
+  scroll editor
 [blink-alert-indicators]
+  blink altert indicators
 [blink-rec-arm]
   appearance blink record rec enable rec-enable record-enable
 [boxy-buttons]
@@ -51,9 +55,9 @@
 [default-upper-midi-note]
  MIDI upper high highest
 [draggable-playhead]
- playhead drag dragging
+ playhead dragging
 [draggable-playhead-speed]
- playhead drag dragging
+ playhead dragging
 [editor-stereo-only-meters]
  editor stereo meters
 [extra-ui-extents-time]
@@ -68,105 +72,182 @@
 [freesound-dir]
   freesound folder folders directory directories download
 [grid-follows-internal]
+  grid switch automatic tools mode selection internal edit
 [hide-splash-screen]
-  appearance hide splash screen 
+  appearance hide splash screen
 [highlight-auditioned-clips]
 [icon-set]
 [input-meter-layout]
+  meter recorder layout
 [input-meter-scopes]
+  scopes recorder layout
 [insert-at-position]
 [keyboard-layout]
 [keyboard-layout-name]
 [link-region-and-track-selection]
 [lock-gui-after-seconds]
+  lock
 [max-inline-controls]
+  plugins mixer-strip controls inline
 [max-plugin-chart]
+  plugins top favorite sidebar
 [max-plugin-recent]
+  plugins recent favorite sidebar
 [meter-hold]
+  metering standard hold falloff level dbfs
 [meter-line-up-din]
+  metering standard din line-up level dbfs
 [meter-line-up-level]
+  metering standard line-up level dbfs
 [meter-peak]
+  metering peak line-up level dbfs
 [meter-style-led]
+  metering style led
 [meter-vu-standard]
+  metering standard vu line-up level dbfs
 [mixer-element-visibility]
+  mixer visibility comment solo mute phase polarity invert rec solo locked vca trigger
 [name-new-markers]
+  markers name dialog naming
 [never-display-periodic-midi]
+  sysex mtc midi regions messages events
 [new-automation-points-on-lane]
+  automation y-axis click draw lane points
 [no-new-session-dialog]
 [one-plugin-window-only]
+  plugins window single close
 [only-copy-imported-files]
+  drag drop import copy link files
 [open-gui-after-adding-plugin]
+  plugins gui open window
 [plugin-gui-behavior]
+  plugins gui resources vst destroy window
 [prefer-inline-over-gui]
+  plugins inline mixer strip
 [preview-video-frame-on-drag]
 [primary-clock-delta-mode]
 [recent-session-sort]
 [rubberbanding-snaps-to-grid]
+  rubberband snap grid time stretch
 [ruler-granularity]
+  ruler spacing grid snap distance
 [rulers-follow-grid]
+  ruler grid auto show visibility
 [save-export-analysis-image]
+  export analysis save image
 [save-export-mixer-screenshot]
+  export save image mixer screenshot
 [screen-saver-mode]
+  screensaver screen-saver prevent lock
 [secondary-clock-delta-mode]
 [show-editor-meter]
+  toolbar editor meter master
 [show-grids-ruler]
 [show-inline-display-by-default]
+  plugins inline controls mixer
 [show-manager-if-plugins-are-missing]
+  plugins manager missing
 [show-mini-timeline]
+  minitimeline mini timeline toolbar
 [show-name-highlight]
+  editor region name bar highlight layout
 [show-on-cue-page]
 [show-plugin-scan-window]
+  plugins popup progress scan indexing
 [show-region-cue-markers]
+  cue markers regions editor
 [show-region-gain]
+  regions gain envelope volume modes
 [show-region-name]
+  regions name appearance editor
 [show-region-xrun-markers]
+  regions xruns markers dropouts
 [show-secondary-clock]
+  clock toolbar visibility secondary
 [show-snapped-cursor]
+  cursor snap edit point line
 [show-toolbar-cuectrl]
+  toolbar cue
 [show-toolbar-latency]
+  toolbar latency information
 [show-toolbar-monitor-info]
+  toolbar monitoring information section
 [show-toolbar-monitoring]
+  toolbar monitoring information section
 [show-toolbar-recpunch]
+  toolbar punch recording layered sound transparent
 [show-toolbar-selclock]
+  toolbar clock selection time display
 [show-track-meters]
+  editor meter small track header
 [show-triggers-inline]
 [show-waveform-clipping]
+  waveform clipping red peak
 [show-waveforms]
+  waveform display box empty
 [show-waveforms-while-recording]
+  waveform display recording
 [show-zoom-tools]
 [snap-threshold]
+  snap threshold distance mouse
 [snap-to-grid]
+  snap grid editor mouse
 [snap-to-marks]
+  snap grid editor mouse markers marks
 [snap-to-region-end]
+  snap grid editor mouse regions boundaries boundary
 [snap-to-region-start]
+  snap grid editor mouse regions boundaries boundary
 [snap-to-region-sync]
+  snap grid editor mouse regions sync
 [sound-midi-notes]
+  play notes selection midi sound hear
 [stripable-color-palette]
 [super-rapid-clock-update]
+  clocks fast update display timecode video slow updates
 [time-axis-name-ellipsize-mode]
+  editor width name track header ellipsize size
 [timeline-item-gradient-depth]
+  editor gradient blur contrast style
 [transients-follow-front]
+  KDE quirks dialogs window hidden behind transient
 [ui-font-family]
 [ui-rc-file]
 [update-editor-during-summary-drag]
+  editor summary scroll drag pan follow
 [use-double-click-to-zoom-to-selection]
+  editor zoom selection mouse click
 [use-mouse-position-as-zoom-focus-on-scroll]
+  editor zoom selection mouse wheel focus scroll
 [use-note-bars-for-velocity]
+  midi velocity bars box
 [use-note-color-for-velocity]
+  midi velocity color
 [use-opengl-view]
 [use-route-color-widely]
+  mixer colors faders
 [use-time-rulers-to-zoom-with-vertical-drag]
+  zoom drag mouse
 [use-tooltips]
+  tooltips help popup information
 [use-wm-visibility]
+  quirks visibility switch windows
 [vertical-region-gap]
+  visual gap tracks spacing
 [vkeybd-layout]
+  virtual keyboard layout qwerty midi
 [waveform-cache-size]
+  memory cache performance optimization image
 [waveform-clip-level]
+  clip level dbfs waveform peaking
 [waveform-gradient-depth]
+  editor gradient blur contrast style waveform
 [waveform-scale]
+  waveform logarithmic logscale linear
 [waveform-shape]
+  waveform rectified half shape display
 [widget-prelight]
-
+  highlight mouse prelight hover indicate
 
 [SECTION:Session]
 
@@ -251,7 +332,7 @@
 [click-gain]
 [click-record-only]
 [click-sound]
- metronome click beat sound sample 
+ metronome click beat sound sample
 [clicking]
 [clip-library-dir]
   folder folders directory directories download clips library
@@ -385,9 +466,12 @@
 [tutorial-manual-url]
 [updates-url]
 [use-audio-units]
+  plugins audiounits audio-unit enable disable
 [use-click-emphasis]
 [use-lxvst]
+  plugins vst2 enable disable
 [use-macvst]
+  plugins vst2 enable disable
 [use-master-volume]
 [use-monitor-bus]
 [use-osc]
