@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2020 Ayan Shafqat <ayan.x.shafqat@gmail.com>
+ * Copyright (C) 2023 Ayan Shafqat <ayan.x.shafqat@gmail.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,58 +17,19 @@
  */
 #ifdef FPU_AVX512F_SUPPORT
 
-/**
- * ================= THIS IS WoRK IN PROGRESS ========================
- *
- * The functions below are not optimized to AVX512F, yet. This is here
- * to integrate with Ardour's build system and integration tests.
- *
- */
-
 #include "ardour/mix.h"
 
 #include <immintrin.h>
-#include <xmmintrin.h>
+
+#define IS_ALIGNED_TO(ptr, bytes) \
+	(reinterpret_cast<uintptr_t>(ptr) % (bytes) == 0)
 
 #ifndef __AVX512F__
 #error "__AVX512F__ must be enabled for this module to work"
 #endif
 
-#define IS_ALIGNED_TO(ptr, bytes) (reinterpret_cast<uintptr_t>(ptr) % (bytes) == 0)
-
-#if defined(__GNUC__)
-#define IS_NOT_ALIGNED_TO(ptr, bytes) \
-	__builtin_expect(!!(reinterpret_cast<intptr_t>(ptr) % (bytes)), 0)
-#else
-#define IS_NOT_ALIGNED_TO(ptr, bytes) \
-	(!!(reinterpret_cast<intptr_t>(ptr) % (bytes)))
-#endif
-
 /**
- * Local functions
- */
-
-static inline __m256 avx_getmax_ps(__m256 vmax);
-static inline __m256 avx_getmin_ps(__m256 vmin);
-
-static void
-x86_avx512f_mix_buffers_with_gain_unaligned(float *dst, const float *src, uint32_t nframes, float gain);
-
-static void
-x86_avx512f_mix_buffers_with_gain_aligned(float *dst, const float *src, uint32_t nframes, float gain);
-
-static void
-x86_avx512f_mix_buffers_no_gain_unaligned(float *dst, const float *src, uint32_t nframes);
-
-static void
-x86_avx512f_mix_buffers_no_gain_aligned(float *dst, const float *src, uint32_t nframes);
-
-/**
- * Module implementation
- */
-
-/**
- * @brief x86-64 AVX optimized routine for compute peak procedure
+ * @brief x86-64 AVX-512F optimized routine for compute peak procedure
  * @param src Pointer to source buffer
  * @param nframes Number of frames to process
  * @param current Current peak value
@@ -77,99 +38,223 @@ x86_avx512f_mix_buffers_no_gain_aligned(float *dst, const float *src, uint32_t n
 float
 x86_avx512f_compute_peak(const float *src, uint32_t nframes, float current)
 {
-	// If src is null then skip processing
-	if ((src == nullptr) || (nframes == 0))
-	{
-		return current;
-	}
+	// Convert to signed integer to prevent any arithmetic overflow errors
+	int32_t frames = static_cast<int32_t>(nframes);
 
-	// Broadcast mask to compute absolute value
-	const uint32_t f32_nan = UINT32_C(0x7FFFFFFF);
-	const __m256 ABS_MASK =
-		_mm256_broadcast_ss(reinterpret_cast<const float *>(&f32_nan));
+	// Broadcast the current max values to all elements of the ZMM register
+	__m512 zmax = _mm512_set1_ps(current);
 
-	// Broadcast the current max value to all elements of the YMM register
-	__m256 vmax = _mm256_set1_ps(current);
+	// Compute single/4/8 min/max of unaligned portion until alignment is reached
+	while (frames > 0) {
+		if (IS_ALIGNED_TO(src, sizeof(__m512))) {
+			break;
+		}
 
-	// Compute single min/max of unaligned portion until alignment is reached
-	while (IS_NOT_ALIGNED_TO(src, sizeof(__m256)) && (nframes > 0))
-	{
-		__m256 vsrc;
+		if (IS_ALIGNED_TO(src, sizeof(__m256))) {
+			__m512 x = _mm512_castps256_ps512(_mm256_load_ps(src));
 
-		vsrc = _mm256_broadcast_ss(src);
-		vsrc = _mm256_and_ps(ABS_MASK, vsrc);
-		vmax = _mm256_max_ps(vmax, vsrc);
+			x = _mm512_abs_ps(x);
+			zmax = _mm512_max_ps(zmax, x);
+
+			src += 8;
+			frames -= 8;
+			continue;
+		}
+
+		if (IS_ALIGNED_TO(src, sizeof(__m128))) {
+			__m512 x = _mm512_castps128_ps512(_mm_load_ps(src));
+
+			x = _mm512_abs_ps(x);
+			zmax = _mm512_max_ps(zmax, x);
+
+			src += 4;
+			frames -= 4;
+			continue;
+		}
+
+		// Pointers are aligned to float boundaries (4 bytes)
+		__m512 x = _mm512_castps128_ps512(_mm_load_ss(src));
+
+		x = _mm512_abs_ps(x);
+		zmax = _mm512_max_ps(zmax, x);
 
 		++src;
-		--nframes;
+		--frames;
 	}
 
-	// Process the aligned portion 32 samples at a time
-	while (nframes >= 32)
-	{
-#ifdef _WIN32
-		_mm_prefetch(reinterpret_cast<char const *>(src + 32), _mm_hint(0));
-#else
-		__builtin_prefetch(reinterpret_cast<void const *>(src + 32), 0, 0);
-#endif
-		__m256 t0 = _mm256_load_ps(src + 0);
-		__m256 t1 = _mm256_load_ps(src + 8);
-		__m256 t2 = _mm256_load_ps(src + 16);
-		__m256 t3 = _mm256_load_ps(src + 24);
+	while (frames >= 256) {
+		_mm_prefetch(reinterpret_cast<void const *>(src + 256), _mm_hint(0));
 
-		t0 = _mm256_and_ps(ABS_MASK, t0);
-		t1 = _mm256_and_ps(ABS_MASK, t1);
-		t2 = _mm256_and_ps(ABS_MASK, t2);
-		t3 = _mm256_and_ps(ABS_MASK, t3);
+		__m512 x0 = _mm512_load_ps(src + 0);
+		__m512 x1 = _mm512_load_ps(src + 16);
+		__m512 x2 = _mm512_load_ps(src + 32);
+		__m512 x3 = _mm512_load_ps(src + 48);
+		__m512 x4 = _mm512_load_ps(src + 64);
+		__m512 x5 = _mm512_load_ps(src + 80);
+		__m512 x6 = _mm512_load_ps(src + 96);
+		__m512 x7 = _mm512_load_ps(src + 112);
 
-		vmax = _mm256_max_ps(vmax, t0);
-		vmax = _mm256_max_ps(vmax, t1);
-		vmax = _mm256_max_ps(vmax, t2);
-		vmax = _mm256_max_ps(vmax, t3);
+		__m512 x8 = _mm512_load_ps(src +  128);
+		__m512 x9 = _mm512_load_ps(src +  144);
+		__m512 x10 = _mm512_load_ps(src + 160);
+		__m512 x11 = _mm512_load_ps(src + 176);
+		__m512 x12 = _mm512_load_ps(src + 192);
+		__m512 x13 = _mm512_load_ps(src + 208);
+		__m512 x14 = _mm512_load_ps(src + 224);
+		__m512 x15 = _mm512_load_ps(src + 240);
 
-		src += 32;
-		nframes -= 32;
+		x0  = _mm512_abs_ps(x0);
+		x1  = _mm512_abs_ps(x1);
+		x2  = _mm512_abs_ps(x2);
+		x3  = _mm512_abs_ps(x3);
+		x4  = _mm512_abs_ps(x4);
+		x5  = _mm512_abs_ps(x5);
+		x6  = _mm512_abs_ps(x6);
+		x7  = _mm512_abs_ps(x7);
+		x8  = _mm512_abs_ps(x8);
+		x9  = _mm512_abs_ps(x9);
+		x10 = _mm512_abs_ps(x10);
+		x11 = _mm512_abs_ps(x11);
+		x12 = _mm512_abs_ps(x12);
+		x13 = _mm512_abs_ps(x13);
+		x14 = _mm512_abs_ps(x14);
+		x15 = _mm512_abs_ps(x15);
+
+		zmax = _mm512_max_ps(zmax, x0);
+		zmax = _mm512_max_ps(zmax, x1);
+		zmax = _mm512_max_ps(zmax, x2);
+		zmax = _mm512_max_ps(zmax, x3);
+		zmax = _mm512_max_ps(zmax, x4);
+		zmax = _mm512_max_ps(zmax, x5);
+		zmax = _mm512_max_ps(zmax, x6);
+		zmax = _mm512_max_ps(zmax, x7);
+		zmax = _mm512_max_ps(zmax, x8);
+		zmax = _mm512_max_ps(zmax, x9);
+		zmax = _mm512_max_ps(zmax, x10);
+		zmax = _mm512_max_ps(zmax, x11);
+		zmax = _mm512_max_ps(zmax, x12);
+		zmax = _mm512_max_ps(zmax, x13);
+		zmax = _mm512_max_ps(zmax, x14);
+		zmax = _mm512_max_ps(zmax, x15);
+
+		src += 256;
+		frames -= 256;
+	}
+
+	while (frames >= 128) {
+		_mm_prefetch(reinterpret_cast<void const *>(src + 128), _mm_hint(0));
+
+		__m512 x0 = _mm512_load_ps(src + 0);
+		__m512 x1 = _mm512_load_ps(src + 16);
+		__m512 x2 = _mm512_load_ps(src + 32);
+		__m512 x3 = _mm512_load_ps(src + 48);
+		__m512 x4 = _mm512_load_ps(src + 64);
+		__m512 x5 = _mm512_load_ps(src + 80);
+		__m512 x6 = _mm512_load_ps(src + 96);
+		__m512 x7 = _mm512_load_ps(src + 112);
+
+		x0  = _mm512_abs_ps(x0);
+		x1  = _mm512_abs_ps(x1);
+		x2  = _mm512_abs_ps(x2);
+		x3  = _mm512_abs_ps(x3);
+		x4  = _mm512_abs_ps(x4);
+		x5  = _mm512_abs_ps(x5);
+		x6  = _mm512_abs_ps(x6);
+		x7  = _mm512_abs_ps(x7);
+
+		zmax = _mm512_max_ps(zmax, x0);
+		zmax = _mm512_max_ps(zmax, x1);
+		zmax = _mm512_max_ps(zmax, x2);
+		zmax = _mm512_max_ps(zmax, x3);
+		zmax = _mm512_max_ps(zmax, x4);
+		zmax = _mm512_max_ps(zmax, x5);
+		zmax = _mm512_max_ps(zmax, x6);
+		zmax = _mm512_max_ps(zmax, x7);
+
+		src += 128;
+		frames -= 128;
+	}
+
+	while (frames >= 64) {
+		_mm_prefetch(reinterpret_cast<void const *>(src + 64), _mm_hint(0));
+
+		__m512 x0 = _mm512_load_ps(src + 0);
+		__m512 x1 = _mm512_load_ps(src + 16);
+		__m512 x2 = _mm512_load_ps(src + 32);
+		__m512 x3 = _mm512_load_ps(src + 48);
+
+		x0  = _mm512_abs_ps(x0);
+		x1  = _mm512_abs_ps(x1);
+		x2  = _mm512_abs_ps(x2);
+		x3  = _mm512_abs_ps(x3);
+
+		zmax = _mm512_max_ps(zmax, x0);
+		zmax = _mm512_max_ps(zmax, x1);
+		zmax = _mm512_max_ps(zmax, x2);
+		zmax = _mm512_max_ps(zmax, x3);
+
+		src += 64;
+		frames -= 64;
+	}
+
+	// Process the remaining samples 16 at a time
+	while (frames >= 16) {
+		__m512 x = _mm512_load_ps(src);
+
+		x = _mm512_abs_ps(x);
+		zmax = _mm512_max_ps(zmax, x);
+
+		src += 16;
+		frames -= 16;
 	}
 
 	// Process the remaining samples 8 at a time
-	while (nframes >= 8)
-	{
-		__m256 vsrc;
+	while (frames >= 8) {
+		__m512 x = _mm512_castps256_ps512(_mm256_load_ps(src));
 
-		vsrc = _mm256_load_ps(src);
-		vsrc = _mm256_and_ps(ABS_MASK, vsrc);
-		vmax = _mm256_max_ps(vmax, vsrc);
+		x = _mm512_abs_ps(x);
+		zmax = _mm512_max_ps(zmax, x);
 
 		src += 8;
-		nframes -= 8;
+		frames -= 8;
 	}
 
-	// If there are still some left 4 to 8 samples, process them below
-	while (nframes > 0)
-	{
-		__m256 vsrc;
+	// Process the remaining samples 4 at a time
+	while (frames >= 4) {
+		__m512 x = _mm512_castps128_ps512(_mm_load_ps(src));
 
-		vsrc = _mm256_broadcast_ss(src);
-		vsrc = _mm256_and_ps(ABS_MASK, vsrc);
-		vmax = _mm256_max_ps(vmax, vsrc);
+		x = _mm512_abs_ps(x);
+		zmax = _mm512_max_ps(zmax, x);
+
+		src += 4;
+		frames -= 4;
+	}
+
+	// If there are still some left 2-4 samples, process them one at a time.
+	while (frames > 0) {
+		__m512 x = _mm512_castps128_ps512(_mm_load_ss(src));
+
+		x = _mm512_abs_ps(x);
+		zmax = _mm512_max_ps(zmax, x);
 
 		++src;
-		--nframes;
+		--frames;
 	}
 
-	vmax = avx_getmax_ps(vmax);
+	// Get the max of the ZMM registers
+	current = _mm512_reduce_max_ps(zmax);
 
-#if defined(__GNUC__) && (__GNUC__ < 5)
-	return *((float *)&vmax);
-#elif defined(__GNUC__) && (__GNUC__ < 8)
-	return vmax[0];
-#else
-	return _mm256_cvtss_f32(vmax);
-#endif
+	// There's a penalty going from AVX mode to SSE mode. This can
+	// be avoided by ensuring the CPU that rest of the routine is no
+	// longer interested in the upper portion of the YMM register.
+
+	_mm256_zeroupper(); // zeros the upper portion of YMM register
+
+	return current;
 }
 
 /**
- * @brief x86-64 AVX optimized routine for find peak procedure
+ * @brief x86-64 AVX-512F optimized routine for find peak procedure
  * @param src Pointer to source buffer
  * @param nframes Number of frames to process
  * @param[in,out] minf Current minimum value, updated
@@ -178,83 +263,226 @@ x86_avx512f_compute_peak(const float *src, uint32_t nframes, float current)
 void
 x86_avx512f_find_peaks(const float *src, uint32_t nframes, float *minf, float *maxf)
 {
-	// Broadcast the current min and max values to all elements of the YMM register
-	__m256 vmin = _mm256_broadcast_ss(minf);
-	__m256 vmax = _mm256_broadcast_ss(maxf);
+        // Convert to signed integer to prevent any arithmetic overflow errors
+	int32_t frames = static_cast<int32_t>(nframes);
 
-	// Compute single min/max of unaligned portion until alignment is reached
-	while (IS_NOT_ALIGNED_TO(src, sizeof(__m256)) && nframes > 0) {
-		__m256 vsrc;
+	// Broadcast the current min and max values to all elements of the ZMM register
+	__m512 zmin = _mm512_set1_ps(*minf);
+	__m512 zmax = _mm512_set1_ps(*maxf);
 
-		vsrc = _mm256_broadcast_ss(src);
-		vmax = _mm256_max_ps(vmax, vsrc);
-		vmin = _mm256_min_ps(vmin, vsrc);
+
+	// Compute single/4/8 min/max of unaligned portion until alignment is reached
+	while (frames > 0) {
+		if (IS_ALIGNED_TO(src, sizeof(__m512))) {
+			break;
+		}
+
+		if (IS_ALIGNED_TO(src, sizeof(__m256))) {
+			__m512 x = _mm512_castps256_ps512(_mm256_load_ps(src));
+
+			zmin = _mm512_min_ps(zmin, x);
+			zmax = _mm512_max_ps(zmax, x);
+
+			src += 8;
+			frames -= 8;
+			continue;
+		}
+
+		if (IS_ALIGNED_TO(src, sizeof(__m128))) {
+			__m512 x = _mm512_castps128_ps512(_mm_load_ps(src));
+
+			zmin = _mm512_min_ps(zmin, x);
+			zmax = _mm512_max_ps(zmax, x);
+
+			src += 4;
+			frames -= 4;
+			continue;
+		}
+
+		// Pointers are aligned to float boundaries (4 bytes)
+		__m512 x = _mm512_castps128_ps512(_mm_load_ss(src));
+
+		zmin = _mm512_min_ps(zmin, x);
+		zmax = _mm512_max_ps(zmax, x);
 
 		++src;
-		--nframes;
+		--frames;
 	}
 
-	// Process the aligned portion 32 samples at a time
-	while (nframes >= 32)
-	{
-#ifdef _WIN32
-		_mm_prefetch(reinterpret_cast<char const *>(src + 32), _mm_hint(0));
-#else
-		__builtin_prefetch(reinterpret_cast<void const *>(src + 32), 0, 0);
-#endif
-		__m256 t0 = _mm256_load_ps(src + 0);
-		__m256 t1 = _mm256_load_ps(src + 8);
-		__m256 t2 = _mm256_load_ps(src + 16);
-		__m256 t3 = _mm256_load_ps(src + 24);
+	while (frames >= 256) {
+		_mm_prefetch(reinterpret_cast<void const *>(src + 256), _mm_hint(0));
 
-		vmax = _mm256_max_ps(vmax, t0);
-		vmax = _mm256_max_ps(vmax, t1);
-		vmax = _mm256_max_ps(vmax, t2);
-		vmax = _mm256_max_ps(vmax, t3);
+		__m512 x0 = _mm512_load_ps(src + 0);
+		__m512 x1 = _mm512_load_ps(src + 16);
+		__m512 x2 = _mm512_load_ps(src + 32);
+		__m512 x3 = _mm512_load_ps(src + 48);
+		__m512 x4 = _mm512_load_ps(src + 64);
+		__m512 x5 = _mm512_load_ps(src + 80);
+		__m512 x6 = _mm512_load_ps(src + 96);
+		__m512 x7 = _mm512_load_ps(src + 112);
 
-		vmin = _mm256_min_ps(vmin, t0);
-		vmin = _mm256_min_ps(vmin, t1);
-		vmin = _mm256_min_ps(vmin, t2);
-		vmin = _mm256_min_ps(vmin, t3);
+		__m512 x8 = _mm512_load_ps(src +  128);
+		__m512 x9 = _mm512_load_ps(src +  144);
+		__m512 x10 = _mm512_load_ps(src + 160);
+		__m512 x11 = _mm512_load_ps(src + 176);
+		__m512 x12 = _mm512_load_ps(src + 192);
+		__m512 x13 = _mm512_load_ps(src + 208);
+		__m512 x14 = _mm512_load_ps(src + 224);
+		__m512 x15 = _mm512_load_ps(src + 240);
 
-		src += 32;
-		nframes -= 32;
+		zmin = _mm512_min_ps(zmin, x0);
+		zmin = _mm512_min_ps(zmin, x1);
+		zmin = _mm512_min_ps(zmin, x2);
+		zmin = _mm512_min_ps(zmin, x3);
+		zmin = _mm512_min_ps(zmin, x4);
+		zmin = _mm512_min_ps(zmin, x5);
+		zmin = _mm512_min_ps(zmin, x6);
+		zmin = _mm512_min_ps(zmin, x7);
+
+		zmin = _mm512_min_ps(zmin, x8);
+		zmin = _mm512_min_ps(zmin, x9);
+		zmin = _mm512_min_ps(zmin, x10);
+		zmin = _mm512_min_ps(zmin, x11);
+		zmin = _mm512_min_ps(zmin, x12);
+		zmin = _mm512_min_ps(zmin, x13);
+		zmin = _mm512_min_ps(zmin, x14);
+		zmin = _mm512_min_ps(zmin, x15);
+
+		zmax = _mm512_max_ps(zmax, x0);
+		zmax = _mm512_max_ps(zmax, x1);
+		zmax = _mm512_max_ps(zmax, x2);
+		zmax = _mm512_max_ps(zmax, x3);
+		zmax = _mm512_max_ps(zmax, x4);
+		zmax = _mm512_max_ps(zmax, x5);
+		zmax = _mm512_max_ps(zmax, x6);
+		zmax = _mm512_max_ps(zmax, x7);
+
+		zmax = _mm512_max_ps(zmax, x8);
+		zmax = _mm512_max_ps(zmax, x9);
+		zmax = _mm512_max_ps(zmax, x10);
+		zmax = _mm512_max_ps(zmax, x11);
+		zmax = _mm512_max_ps(zmax, x12);
+		zmax = _mm512_max_ps(zmax, x13);
+		zmax = _mm512_max_ps(zmax, x14);
+		zmax = _mm512_max_ps(zmax, x15);
+
+		src += 256;
+		frames -= 256;
+	}
+
+	while (frames >= 128) {
+		_mm_prefetch(reinterpret_cast<void const *>(src + 128), _mm_hint(0));
+
+		__m512 x0 = _mm512_load_ps(src + 0);
+		__m512 x1 = _mm512_load_ps(src + 16);
+		__m512 x2 = _mm512_load_ps(src + 32);
+		__m512 x3 = _mm512_load_ps(src + 48);
+		__m512 x4 = _mm512_load_ps(src + 64);
+		__m512 x5 = _mm512_load_ps(src + 80);
+		__m512 x6 = _mm512_load_ps(src + 96);
+		__m512 x7 = _mm512_load_ps(src + 112);
+
+		zmin = _mm512_min_ps(zmin, x0);
+		zmin = _mm512_min_ps(zmin, x1);
+		zmin = _mm512_min_ps(zmin, x2);
+		zmin = _mm512_min_ps(zmin, x3);
+		zmin = _mm512_min_ps(zmin, x4);
+		zmin = _mm512_min_ps(zmin, x5);
+		zmin = _mm512_min_ps(zmin, x6);
+		zmin = _mm512_min_ps(zmin, x7);
+
+		zmax = _mm512_max_ps(zmax, x0);
+		zmax = _mm512_max_ps(zmax, x1);
+		zmax = _mm512_max_ps(zmax, x2);
+		zmax = _mm512_max_ps(zmax, x3);
+		zmax = _mm512_max_ps(zmax, x4);
+		zmax = _mm512_max_ps(zmax, x5);
+		zmax = _mm512_max_ps(zmax, x6);
+		zmax = _mm512_max_ps(zmax, x7);
+
+		src += 128;
+		frames -= 128;
+	}
+
+	while (frames >= 64) {
+		_mm_prefetch(reinterpret_cast<void const *>(src + 64), _mm_hint(0));
+
+		__m512 x0 = _mm512_load_ps(src + 0);
+		__m512 x1 = _mm512_load_ps(src + 16);
+		__m512 x2 = _mm512_load_ps(src + 32);
+		__m512 x3 = _mm512_load_ps(src + 48);
+
+		zmin = _mm512_min_ps(zmin, x0);
+		zmin = _mm512_min_ps(zmin, x1);
+		zmin = _mm512_min_ps(zmin, x2);
+		zmin = _mm512_min_ps(zmin, x3);
+
+		zmax = _mm512_max_ps(zmax, x0);
+		zmax = _mm512_max_ps(zmax, x1);
+		zmax = _mm512_max_ps(zmax, x2);
+		zmax = _mm512_max_ps(zmax, x3);
+
+		src += 64;
+		frames -= 64;
+	}
+
+	// Process the remaining samples 16 at a time
+	while (frames >= 16) {
+		__m512 x = _mm512_load_ps(src);
+
+		zmin = _mm512_min_ps(zmin, x);
+		zmax = _mm512_max_ps(zmax, x);
+
+		src += 16;
+		frames -= 16;
 	}
 
 	// Process the remaining samples 8 at a time
-	while (nframes >= 8) {
-		__m256 vsrc;
+	while (frames >= 8) {
+		__m512 x = _mm512_castps256_ps512(_mm256_load_ps(src));
 
-		vsrc = _mm256_load_ps(src);
-		vmax = _mm256_max_ps(vmax, vsrc);
-		vmin = _mm256_min_ps(vmin, vsrc);
+		zmin = _mm512_min_ps(zmin, x);
+		zmax = _mm512_max_ps(zmax, x);
 
 		src += 8;
-		nframes -= 8;
+		frames -= 8;
 	}
 
-	// If there are still some left 4 to 8 samples, process them one at a time.
-	while (nframes > 0) {
-		__m256 vsrc;
+	// Process the remaining samples 4 at a time
+	while (frames >= 4) {
+		__m512 x = _mm512_castps128_ps512(_mm_load_ps(src));
 
-		vsrc = _mm256_broadcast_ss(src);
-		vmax = _mm256_max_ps(vmax, vsrc);
-		vmin = _mm256_min_ps(vmin, vsrc);
+		zmin = _mm512_min_ps(zmin, x);
+		zmax = _mm512_max_ps(zmax, x);
+
+		src += 4;
+		frames -= 4;
+	}
+
+	// If there are still some left 2-4 samples, process them one at a time.
+	while (frames > 0) {
+		__m512 x = _mm512_castps128_ps512(_mm_load_ss(src));
+
+		zmin = _mm512_min_ps(zmin, x);
+		zmax = _mm512_max_ps(zmax, x);
 
 		++src;
-		--nframes;
+		--frames;
 	}
 
-	// Get min and max of the YMM registers
-	vmin = avx_getmin_ps(vmin);
-	vmax = avx_getmax_ps(vmax);
+	// Get min and max of the ZMM registers
+	*minf = _mm512_reduce_min_ps(zmin);
+	*maxf = _mm512_reduce_max_ps(zmax);
 
-	_mm_store_ss(minf, _mm256_castps256_ps128(vmin));
-	_mm_store_ss(maxf, _mm256_castps256_ps128(vmax));
+	// There's a penalty going from AVX mode to SSE mode. This can
+	// be avoided by ensuring the CPU that rest of the routine is no
+	// longer interested in the upper portion of the YMM register.
+
+	_mm256_zeroupper(); // zeros the upper portion of YMM register
 }
 
 /**
- * @brief x86-64 AVX optimized routine for apply gain routine
+ * @brief x86-64 AVX-512F optimized routine for apply gain routine
  * @param[in,out] dst Pointer to the destination buffer, which gets updated
  * @param nframes Number of frames (or samples) to process
  * @param gain Gain to apply
@@ -263,66 +491,128 @@ void
 x86_avx512f_apply_gain_to_buffer(float *dst, uint32_t nframes, float gain)
 {
 	// Convert to signed integer to prevent any arithmetic overflow errors
-	int32_t frames = (int32_t)nframes;
-	// Load gain vector to all elements of YMM register
-	__m256 vgain = _mm256_set1_ps(gain);
+	int32_t frames = static_cast<int32_t>(nframes);
 
-	do {
-		__m128 g0 = _mm256_castps256_ps128(vgain);
-		while (!IS_ALIGNED_TO(dst, sizeof(__m256)) && (frames > 0)) {
-			_mm_store_ss(dst, _mm_mul_ps(g0, _mm_load_ss(dst)));
-			++dst;
-			--frames;
+	// Load gain vector to all elements of XMM, YMM, and ZMM register
+	// It's the same register, but used for SSE, AVX, and AVX512 calculation
+	__m512 zgain = _mm512_set1_ps(gain);
+	__m256 ygain = _mm512_castps512_ps256(zgain);
+	__m128 xgain = _mm512_castps512_ps128(zgain);
+
+	while (frames > 0) {
+		if (IS_ALIGNED_TO(dst, sizeof(__m512))) {
+			break;
 		}
-	} while (0);
+
+		if (IS_ALIGNED_TO(dst, sizeof(__m256))) {
+			__m256 x = _mm256_load_ps(dst);
+			__m256 y = _mm256_mul_ps(ygain, x);
+			_mm256_store_ps(dst, y);
+			dst += 8;
+			frames -= 8;
+			continue;
+		}
+
+		if (IS_ALIGNED_TO(dst, sizeof(__m128))) {
+			__m128 x = _mm_load_ps(dst);
+			__m128 y = _mm_mul_ps(xgain, x);
+			_mm_store_ps(dst, y);
+			dst += 4;
+			frames -= 4;
+			continue;
+		}
+
+		// Pointers are aligned to float boundaries (4 bytes)
+		__m128 x = _mm_load_ss(dst);
+		__m128 y = _mm_mul_ss(xgain, x);
+		_mm_store_ss(dst, y);
+		++dst;
+		--frames;
+	}
+
+	// Process the remaining samples 128 at a time
+	while (frames >= 128) {
+		_mm_prefetch(reinterpret_cast<void const *>(dst + 128), _mm_hint(0));
+
+		__m512 x0 = _mm512_load_ps(dst + 0);
+		__m512 x1 = _mm512_load_ps(dst + 16);
+		__m512 x2 = _mm512_load_ps(dst + 32);
+		__m512 x3 = _mm512_load_ps(dst + 48);
+		__m512 x4 = _mm512_load_ps(dst + 64);
+		__m512 x5 = _mm512_load_ps(dst + 80);
+		__m512 x6 = _mm512_load_ps(dst + 96);
+		__m512 x7 = _mm512_load_ps(dst + 112);
+
+		__m512 y0 = _mm512_mul_ps(zgain, x0);
+		__m512 y1 = _mm512_mul_ps(zgain, x1);
+		__m512 y2 = _mm512_mul_ps(zgain, x2);
+		__m512 y3 = _mm512_mul_ps(zgain, x3);
+		__m512 y4 = _mm512_mul_ps(zgain, x4);
+		__m512 y5 = _mm512_mul_ps(zgain, x5);
+		__m512 y6 = _mm512_mul_ps(zgain, x6);
+		__m512 y7 = _mm512_mul_ps(zgain, x7);
+
+		_mm512_store_ps(dst + 0, y0);
+		_mm512_store_ps(dst + 16, y1);
+		_mm512_store_ps(dst + 32, y2);
+		_mm512_store_ps(dst + 48, y3);
+		_mm512_store_ps(dst + 64, y4);
+		_mm512_store_ps(dst + 80, y5);
+		_mm512_store_ps(dst + 96, y6);
+		_mm512_store_ps(dst + 112, y7);
+
+		dst += 128;
+		frames -= 128;
+	}
 
 	// Process the remaining samples 16 at a time
-	while (frames >= 16)
-	{
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)dst + (16 * sizeof(float))), _mm_hint(0));
-#else
-		__builtin_prefetch(reinterpret_cast<void const *>(dst + 16), 0, 0);
-#endif
-		__m256 d0, d1;
-		d0 = _mm256_load_ps(dst + 0);
-		d1 = _mm256_load_ps(dst + 8);
-
-		d0 = _mm256_mul_ps(vgain, d0);
-		d1 = _mm256_mul_ps(vgain, d1);
-
-		_mm256_store_ps(dst + 0, d0);
-		_mm256_store_ps(dst + 8, d1);
+	while (frames >= 16) {
+		__m512 x = _mm512_load_ps(dst);
+		__m512 y = _mm512_mul_ps(zgain, x);
+		_mm512_store_ps(dst, y);
 
 		dst += 16;
 		frames -= 16;
 	}
 
-	// Process the remaining samples 8 at a time
+	// Process remaining samples x8
 	while (frames >= 8) {
-		_mm256_store_ps(dst, _mm256_mul_ps(vgain, _mm256_load_ps(dst)));
+		__m256 x = _mm256_load_ps(dst);
+		__m256 y = _mm256_mul_ps(ygain, x);
+		_mm256_store_ps(dst, y);
+
 		dst += 8;
 		frames -= 8;
 	}
 
-	// Process the remaining samples
-	do {
-		__m128 g0 = _mm256_castps256_ps128(vgain);
-		while (frames > 0) {
-			_mm_store_ss(dst, _mm_mul_ps(g0, _mm_load_ss(dst)));
-			++dst;
-			--frames;
-		}
-	} while (0);
+	// Process remaining samples x4
+	while (frames >= 4) {
+		__m128 x = _mm_load_ps(dst);
+		__m128 y = _mm_mul_ps(xgain, x);
+		_mm_store_ps(dst, y);
+
+		dst += 4;
+		frames -= 4;
+	}
+
+	// Process remaining samples
+	while (frames > 0) {
+		__m128 x = _mm_load_ss(dst);
+		__m128 y = _mm_mul_ss(xgain, x);
+		_mm_store_ss(dst, y);
+		++dst;
+		--frames;
+	}
+
+	// There's a penalty going from AVX mode to SSE mode. This can
+	// be avoided by ensuring the CPU that rest of the routine is no
+	// longer interested in the upper portion of the YMM register.
+	//
+	_mm256_zeroupper(); // zeros the upper portion of YMM register
 }
 
 /**
- * @brief x86-64 AVX optimized routine for mixing buffer with gain.
- *
- * This function may choose SSE over AVX if the pointers are aligned
- * to 16 byte boundary instead of 32 byte boundary to reduce time to
- * process.
- *
+ * @brief x86-64 AVX-512F optimized routine for mixing buffer with gain.
  * @param[in,out] dst Pointer to destination buffer, which gets updated
  * @param[in] src Pointer to source buffer (not updated)
  * @param nframes Number of samples to process
@@ -331,25 +621,168 @@ x86_avx512f_apply_gain_to_buffer(float *dst, uint32_t nframes, float gain)
 void
 x86_avx512f_mix_buffers_with_gain(float *dst, const float *src, uint32_t nframes, float gain)
 {
-	if (IS_ALIGNED_TO(dst, 32) && IS_ALIGNED_TO(src, 32)) {
-		// Pointers are both aligned to 32 bit boundaries, this can be processed with AVX
-		x86_avx512f_mix_buffers_with_gain_aligned(dst, src, nframes, gain);
-	} else if (IS_ALIGNED_TO(dst, 16) && IS_ALIGNED_TO(src, 16)) {
-		// This can still be processed with SSE
-		x86_sse_mix_buffers_with_gain(dst, src, nframes, gain);
-	} else {
-		// Pointers are unaligned, so process them with unaligned load/store AVX
-		x86_avx512f_mix_buffers_with_gain_unaligned(dst, src, nframes, gain);
+	// Convert to signed integer to prevent any arithmetic overflow errors
+	int32_t frames = static_cast<int32_t>(nframes);
+
+	// Load gain vector to all elements of XMM, YMM, and ZMM register
+	// It's the same register, but used for SSE, AVX, and AVX512 calculation
+	__m512 zgain = _mm512_set1_ps(gain);
+	__m256 ygain = _mm512_castps512_ps256(zgain);
+	__m128 xgain = _mm512_castps512_ps128(zgain);
+
+	while (frames > 0)
+	{
+		if (IS_ALIGNED_TO(src, sizeof(__m512)) &&
+		    IS_ALIGNED_TO(dst, sizeof(__m512))) {
+			break;
+		}
+
+		if (IS_ALIGNED_TO(src, sizeof(__m256)) &&
+		    IS_ALIGNED_TO(dst, sizeof(__m256))) {
+			__m256 x = _mm256_load_ps(src);
+			__m256 y = _mm256_load_ps(dst);
+
+			y = _mm256_fmadd_ps(ygain, x, y);
+			_mm256_store_ps(dst, y);
+
+			src += 8;
+			dst += 8;
+			frames -= 8;
+			continue;
+		}
+
+		if (IS_ALIGNED_TO(src, sizeof(__m128)) &&
+		    IS_ALIGNED_TO(dst, sizeof(__m128))) {
+			__m128 x = _mm_load_ps(src);
+			__m128 y = _mm_load_ps(dst);
+
+			y = _mm_fmadd_ps(xgain, x, y);
+			_mm_store_ps(dst, y);
+
+			src += 4;
+			dst += 4;
+			frames -= 4;
+			continue;
+		}
+
+		// Pointers are aligned to float boundaries (4 bytes)
+		__m128 x = _mm_load_ss(src);
+		__m128 y = _mm_load_ss(dst);
+
+		y = _mm_fmadd_ss(xgain, x, y);
+		_mm_store_ss(dst, y);
+
+		++src;
+		++dst;
+		--frames;
 	}
+
+	// Process the remaining samples 128 at a time
+	while (frames >= 128) {
+		_mm_prefetch(reinterpret_cast<void const *>(src + 128), _mm_hint(0));
+		_mm_prefetch(reinterpret_cast<void const *>(dst + 128), _mm_hint(0));
+
+		__m512 x0 = _mm512_load_ps(src + 0);
+		__m512 x1 = _mm512_load_ps(src + 16);
+		__m512 x2 = _mm512_load_ps(src + 32);
+		__m512 x3 = _mm512_load_ps(src + 48);
+		__m512 x4 = _mm512_load_ps(src + 64);
+		__m512 x5 = _mm512_load_ps(src + 80);
+		__m512 x6 = _mm512_load_ps(src + 96);
+		__m512 x7 = _mm512_load_ps(src + 112);
+
+		__m512 y0 = _mm512_load_ps(dst + 0);
+		__m512 y1 = _mm512_load_ps(dst + 16);
+		__m512 y2 = _mm512_load_ps(dst + 32);
+		__m512 y3 = _mm512_load_ps(dst + 48);
+		__m512 y4 = _mm512_load_ps(dst + 64);
+		__m512 y5 = _mm512_load_ps(dst + 80);
+		__m512 y6 = _mm512_load_ps(dst + 96);
+		__m512 y7 = _mm512_load_ps(dst + 112);
+
+		y0 = _mm512_fmadd_ps(zgain, x0, y0);
+		y1 = _mm512_fmadd_ps(zgain, x1, y1);
+		y2 = _mm512_fmadd_ps(zgain, x2, y2);
+		y3 = _mm512_fmadd_ps(zgain, x3, y3);
+		y4 = _mm512_fmadd_ps(zgain, x4, y4);
+		y5 = _mm512_fmadd_ps(zgain, x5, y5);
+		y6 = _mm512_fmadd_ps(zgain, x6, y6);
+		y7 = _mm512_fmadd_ps(zgain, x7, y7);
+
+		_mm512_store_ps(dst + 0, y0);
+		_mm512_store_ps(dst + 16, y1);
+		_mm512_store_ps(dst + 32, y2);
+		_mm512_store_ps(dst + 48, y3);
+		_mm512_store_ps(dst + 64, y4);
+		_mm512_store_ps(dst + 80, y5);
+		_mm512_store_ps(dst + 96, y6);
+		_mm512_store_ps(dst + 112, y7);
+
+		src += 128;
+		dst += 128;
+		frames -= 128;
+	}
+
+	// Process the remaining samples 16 at a time
+	while (frames >= 16) {
+		__m512 x = _mm512_load_ps(src);
+		__m512 y = _mm512_load_ps(dst);
+		y = _mm512_fmadd_ps(zgain, x, y);
+		_mm512_store_ps(dst, y);
+
+		src += 16;
+		dst += 16;
+		frames -= 16;
+	}
+
+	// Process remaining samples x8
+	while (frames >= 8) {
+		__m256 x = _mm256_load_ps(src);
+		__m256 y = _mm256_load_ps(dst);
+
+		y = _mm256_fmadd_ps(ygain, x, y);
+		_mm256_store_ps(dst, y);
+
+		src += 8;
+		dst += 8;
+		frames -= 8;
+	}
+
+	// Process remaining samples x4
+	while (frames >= 4) {
+		__m128 x = _mm_load_ps(src);
+		__m128 y = _mm_load_ps(dst);
+
+		y = _mm_fmadd_ps(xgain, x, y);
+		_mm_store_ps(dst, y);
+
+		src += 4;
+		dst += 4;
+		frames -= 4;
+	}
+
+	// Process remaining samples
+	while (frames > 0) {
+		__m128 x = _mm_load_ss(src);
+		__m128 y = _mm_load_ss(dst);
+
+		y = _mm_fmadd_ss(xgain, x, y);
+		_mm_store_ss(dst, y);
+
+		++src;
+		++dst;
+		--frames;
+	}
+
+	// There's a penalty going from AVX mode to SSE mode. This can
+	// be avoided by ensuring the CPU that rest of the routine is no
+	// longer interested in the upper portion of the YMM register.
+	//
+	_mm256_zeroupper(); // zeros the upper portion of YMM register
 }
 
 /**
- * @brief x86-64 AVX optimized routine for mixing buffer with no gain.
- *
- * This function may choose SSE over AVX if the pointers are aligned
- * to 16 byte boundary instead of 32 byte boundary to reduce time to
- * process.
- *
+ * @brief x86-64 AVX-512F optimized routine for mixing buffer with no gain.
  * @param[in,out] dst Pointer to destination buffer, which gets updated
  * @param[in] src Pointer to source buffer (not updated)
  * @param nframes Number of samples to process
@@ -357,25 +790,157 @@ x86_avx512f_mix_buffers_with_gain(float *dst, const float *src, uint32_t nframes
 void
 x86_avx512f_mix_buffers_no_gain(float *dst, const float *src, uint32_t nframes)
 {
-	if (IS_ALIGNED_TO(dst, 32) && IS_ALIGNED_TO(src, 32)) {
-		// Pointers are both aligned to 32 bit boundaries, this can be processed with AVX
-		x86_avx512f_mix_buffers_no_gain_aligned(dst, src, nframes);
-	} else if (IS_ALIGNED_TO(dst, 16) && IS_ALIGNED_TO(src, 16)) {
-		// This can still be processed with SSE
-		x86_sse_mix_buffers_no_gain(dst, src, nframes);
-	} else {
-		// Pointers are unaligned, so process them with unaligned load/store AVX
-		x86_avx512f_mix_buffers_no_gain_unaligned(dst, src, nframes);
+	// Convert to signed integer to prevent any arithmetic overflow errors
+	int32_t frames = static_cast<int32_t>(nframes);
+
+	while (frames > 0)
+	{
+		if (IS_ALIGNED_TO(src, sizeof(__m512)) &&
+		    IS_ALIGNED_TO(dst, sizeof(__m512))) {
+			break;
+		}
+
+		if (IS_ALIGNED_TO(src, sizeof(__m256)) &&
+		    IS_ALIGNED_TO(dst, sizeof(__m256))) {
+			__m256 x = _mm256_load_ps(src);
+			__m256 y = _mm256_load_ps(dst);
+			y = _mm256_add_ps(x, y);
+			_mm256_store_ps(dst, y);
+			src += 8;
+			dst += 8;
+			frames -= 8;
+			continue;
+		}
+
+		if (IS_ALIGNED_TO(src, sizeof(__m128)) &&
+		    IS_ALIGNED_TO(dst, sizeof(__m128))) {
+			__m128 x = _mm_load_ps(src);
+			__m128 y = _mm_load_ps(dst);
+			y = _mm_add_ps(x, y);
+			_mm_store_ps(dst, y);
+			src += 4;
+			dst += 4;
+			frames -= 4;
+			continue;
+		}
+
+		// Pointers are aligned to float boundaries (4 bytes)
+		__m128 x = _mm_load_ss(src);
+		__m128 y = _mm_load_ss(dst);
+		y = _mm_add_ss(x, y);
+		_mm_store_ss(dst, y);
+		++src;
+		++dst;
+		--frames;
 	}
+
+	// Process the remaining samples 128 at a time
+	while (frames >= 128) {
+		_mm_prefetch(reinterpret_cast<void const *>(src + 128), _mm_hint(0));
+		_mm_prefetch(reinterpret_cast<void const *>(dst + 128), _mm_hint(0));
+
+		__m512 x0 = _mm512_load_ps(src + 0);
+		__m512 x1 = _mm512_load_ps(src + 16);
+		__m512 x2 = _mm512_load_ps(src + 32);
+		__m512 x3 = _mm512_load_ps(src + 48);
+		__m512 x4 = _mm512_load_ps(src + 64);
+		__m512 x5 = _mm512_load_ps(src + 80);
+		__m512 x6 = _mm512_load_ps(src + 96);
+		__m512 x7 = _mm512_load_ps(src + 112);
+
+		__m512 y0 = _mm512_load_ps(dst + 0);
+		__m512 y1 = _mm512_load_ps(dst + 16);
+		__m512 y2 = _mm512_load_ps(dst + 32);
+		__m512 y3 = _mm512_load_ps(dst + 48);
+		__m512 y4 = _mm512_load_ps(dst + 64);
+		__m512 y5 = _mm512_load_ps(dst + 80);
+		__m512 y6 = _mm512_load_ps(dst + 96);
+		__m512 y7 = _mm512_load_ps(dst + 112);
+
+		y0 = _mm512_add_ps(x0, y0);
+		y1 = _mm512_add_ps(x1, y1);
+		y2 = _mm512_add_ps(x2, y2);
+		y3 = _mm512_add_ps(x3, y3);
+		y4 = _mm512_add_ps(x4, y4);
+		y5 = _mm512_add_ps(x5, y5);
+		y6 = _mm512_add_ps(x6, y6);
+		y7 = _mm512_add_ps(x7, y7);
+
+		_mm512_store_ps(dst + 0, y0);
+		_mm512_store_ps(dst + 16, y1);
+		_mm512_store_ps(dst + 32, y2);
+		_mm512_store_ps(dst + 48, y3);
+		_mm512_store_ps(dst + 64, y4);
+		_mm512_store_ps(dst + 80, y5);
+		_mm512_store_ps(dst + 96, y6);
+		_mm512_store_ps(dst + 112, y7);
+
+		src += 128;
+		dst += 128;
+		frames -= 128;
+	}
+
+	// Process the remaining samples 16 at a time
+	while (frames >= 16) {
+		__m512 x = _mm512_load_ps(src);
+		__m512 y = _mm512_load_ps(dst);
+
+		y = _mm512_add_ps(x, y);
+		_mm512_store_ps(dst, y);
+
+		src += 16;
+		dst += 16;
+		frames -= 16;
+	}
+
+	// Process remaining samples x8
+	while (frames >= 8) {
+		__m256 x = _mm256_load_ps(src);
+		__m256 y = _mm256_load_ps(dst);
+
+		y = _mm256_add_ps(x, y);
+		_mm256_store_ps(dst, y);
+
+		src += 8;
+		dst += 8;
+		frames -= 8;
+	}
+
+	// Process remaining samples x4
+	while (frames >= 4) {
+		__m128 x = _mm_load_ps(src);
+		__m128 y = _mm_load_ps(dst);
+
+		y = _mm_add_ps(x, y);
+		_mm_store_ps(dst, y);
+
+		src += 4;
+		dst += 4;
+		frames -= 4;
+	}
+
+	// Process remaining samples
+	while (frames > 0) {
+		__m128 x = _mm_load_ss(src);
+		__m128 y = _mm_load_ss(dst);
+
+		y = _mm_add_ss(x, y);
+		_mm_store_ss(dst, y);
+
+		++src;
+		++dst;
+		--frames;
+	}
+
+	// There's a penalty going from AVX mode to SSE mode. This can
+	// be avoided by ensuring the CPU that rest of the routine is no
+	// longer interested in the upper portion of the YMM register.
+	//
+	_mm256_zeroupper(); // zeros the upper portion of YMM register
 }
 
 /**
  * @brief Copy vector from one location to another
- *
- * This has not been hand optimized for AVX with the rationale that standard
- * C library implementation will provide faster memory copy operation. It will
- * be redundant to implement memcpy for floats.
- *
  * @param[out] dst Pointer to destination buffer
  * @param[in] src Pointer to source buffer
  * @param nframes Number of samples to copy
@@ -383,429 +948,154 @@ x86_avx512f_mix_buffers_no_gain(float *dst, const float *src, uint32_t nframes)
 void
 x86_avx512f_copy_vector(float *dst, const float *src, uint32_t nframes)
 {
-	(void) memcpy(dst, src, nframes * sizeof(float));
-}
+    // Convert to signed integer to prevent any arithmetic overflow errors
+	int32_t frames = static_cast<int32_t>(nframes);
 
-/**
- * Local helper functions
- */
-
-/**
- * @brief Helper routine for mixing buffers with gain for unaligned buffers
- *
- * @details This routine executes the following expression below per element:
- *
- * dst = dst + (gain * src)
- *
- * @param[in,out] dst Pointer to destination buffer, which gets updated
- * @param[in] src Pointer to source buffer (not updated)
- * @param nframes Number of samples to process
- * @param gain Gain to apply
- */
-static void
-x86_avx512f_mix_buffers_with_gain_unaligned(float *dst, const float *src, uint32_t nframes, float gain)
-{
-	// Load gain vector to all elements of YMM register
-	__m256 vgain = _mm256_set1_ps(gain);
-
-	// Process the remaining samples 16 at a time
-	while (nframes >= 16)
-	{
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)dst + (16 * sizeof(float))), _mm_hint(0));
-		_mm_prefetch(((char *)src + (16 * sizeof(float))), _mm_hint(0));
-#else
-		__builtin_prefetch(reinterpret_cast<void const *>(src + 16), 0, 0);
-		__builtin_prefetch(reinterpret_cast<void const *>(dst + 16), 0, 0);
-#endif
-		__m256 s0, s1;
-		__m256 d0, d1;
-
-		// Load sources
-		s0 = _mm256_loadu_ps(src + 0);
-		s1 = _mm256_loadu_ps(src + 8);
-
-		// Load destinations
-		d0 = _mm256_loadu_ps(dst + 0);
-		d1 = _mm256_loadu_ps(dst + 8);
-
-		// src = src * gain
-		s0 = _mm256_mul_ps(vgain, s0);
-		s1 = _mm256_mul_ps(vgain, s1);
-
-		// dst = dst + src
-		d0 = _mm256_add_ps(d0, s0);
-		d1 = _mm256_add_ps(d1, s1);
-
-		// Store result
-		_mm256_storeu_ps(dst + 0, d0);
-		_mm256_storeu_ps(dst + 8, d1);
-
-		// Update pointers and counters
-		src += 16;
-		dst += 16;
-		nframes -= 16;
-	}
-
-	// Process the remaining samples 8 at a time
-	while (nframes >= 8) {
-		__m256 s0, d0;
-		// Load sources
-		s0 = _mm256_loadu_ps(src);
-		// Load destinations
-		d0 = _mm256_loadu_ps(dst);
-		// src = src * gain
-		s0 = _mm256_mul_ps(vgain, s0);
-		// dst = dst + src
-		d0 = _mm256_add_ps(d0, s0);
-		// Store result
-		_mm256_storeu_ps(dst, d0);
-		// Update pointers and counters
-		src+= 8;
-		dst += 8;
-		nframes -= 8;
-	}
-
-	// Process the remaining samples
-	do {
-		__m128 g0 = _mm_set_ss(gain);
-		while (nframes > 0) {
-			__m128 s0, d0;
-			s0 = _mm_load_ss(src);
-			d0 = _mm_load_ss(dst);
-			s0 = _mm_mul_ss(g0, s0);
-			d0 = _mm_add_ss(d0, s0);
-			_mm_store_ss(dst, d0);
-			++src;
-			++dst;
-			--nframes;
+	while (frames > 0) {
+		if (IS_ALIGNED_TO(src, sizeof(__m512)) &&
+		    IS_ALIGNED_TO(dst, sizeof(__m512))) {
+			break;
 		}
-	} while (0);
-}
 
-/**
- * @brief Helper routine for mixing buffers with gain for aligned buffers
- *
- * @details This routine executes the following expression below per element:
- *
- * dst = dst + (gain * src)
- *
- * @param[in,out] dst Pointer to destination buffer, which gets updated
- * @param[in] src Pointer to source buffer (not updated)
- * @param nframes Number of samples to process
- * @param gain Gain to apply
- */
-static void
-x86_avx512f_mix_buffers_with_gain_aligned(float *dst, const float *src, uint32_t nframes, float gain)
-{
-	// Load gain vector to all elements of YMM register
-	__m256 vgain = _mm256_set1_ps(gain);
+		if (IS_ALIGNED_TO(src, sizeof(__m256)) &&
+		    IS_ALIGNED_TO(dst, sizeof(__m256))) {
+			__m256 x = _mm256_load_ps(src);
+			_mm256_store_ps(dst, x);
+			src += 8;
+			dst += 8;
+			frames -= 8;
+			continue;
+		}
 
-	// Process the remaining samples 16 at a time
-	while (nframes >= 16)
-	{
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)dst + (16 * sizeof(float))), _mm_hint(0));
-		_mm_prefetch(((char *)src + (16 * sizeof(float))), _mm_hint(0));
-#else
-		__builtin_prefetch(reinterpret_cast<void const *>(src + 16), 0, 0);
-		__builtin_prefetch(reinterpret_cast<void const *>(dst + 16), 0, 0);
-#endif
-		__m256 s0, s1;
-		__m256 d0, d1;
+		if (IS_ALIGNED_TO(src, sizeof(__m128)) &&
+		    IS_ALIGNED_TO(dst, sizeof(__m128))) {
+			__m128 x = _mm_load_ps(src);
+			_mm_store_ps(dst, x);
+			src += 4;
+			dst += 4;
+			frames -= 4;
+			continue;
+		}
 
-		// Load sources
-		s0 = _mm256_load_ps(src + 0);
-		s1 = _mm256_load_ps(src + 8);
-
-		// Load destinations
-		d0 = _mm256_load_ps(dst + 0);
-		d1 = _mm256_load_ps(dst + 8);
-
-		// src = src * gain
-		s0 = _mm256_mul_ps(vgain, s0);
-		s1 = _mm256_mul_ps(vgain, s1);
-
-		// dst = dst + src
-		d0 = _mm256_add_ps(d0, s0);
-		d1 = _mm256_add_ps(d1, s1);
-
-		// Store result
-		_mm256_store_ps(dst + 0, d0);
-		_mm256_store_ps(dst + 8, d1);
-
-		// Update pointers and counters
-		src += 16;
-		dst += 16;
-		nframes -= 16;
+		// Pointers are aligned to float boundaries (4 bytes)
+		__m128 x = _mm_load_ss(src);
+		_mm_store_ss(dst, x);
+		++src;
+		++dst;
+		--frames;
 	}
 
-	// Process the remaining samples 8 at a time
-	while (nframes >= 8) {
-		__m256 s0, d0;
-		// Load sources
-		s0 = _mm256_load_ps(src + 0 );
-		// Load destinations
-		d0 = _mm256_load_ps(dst + 0 );
-		// src = src * gain
-		s0 = _mm256_mul_ps(vgain, s0);
-		// dst = dst + src
-		d0 = _mm256_add_ps(d0, s0);
-		// Store result
-		_mm256_store_ps(dst, d0);
-		// Update pointers and counters
+	// Process 256 samples at a time
+	while (frames >= 256) {
+		_mm_prefetch(reinterpret_cast<void const *>(src + 256), _mm_hint(0));
+		_mm_prefetch(reinterpret_cast<void const *>(dst + 256), _mm_hint(0));
+
+		__m512 x0 = _mm512_load_ps(src + 0);
+		__m512 x1 = _mm512_load_ps(src + 16);
+		__m512 x2 = _mm512_load_ps(src + 32);
+		__m512 x3 = _mm512_load_ps(src + 48);
+		__m512 x4 = _mm512_load_ps(src + 64);
+		__m512 x5 = _mm512_load_ps(src + 80);
+		__m512 x6 = _mm512_load_ps(src + 96);
+		__m512 x7 = _mm512_load_ps(src + 112);
+
+		__m512 x8 = _mm512_load_ps(src +  128);
+		__m512 x9 = _mm512_load_ps(src +  144);
+		__m512 x10 = _mm512_load_ps(src + 160);
+		__m512 x11 = _mm512_load_ps(src + 176);
+		__m512 x12 = _mm512_load_ps(src + 192);
+		__m512 x13 = _mm512_load_ps(src + 208);
+		__m512 x14 = _mm512_load_ps(src + 224);
+		__m512 x15 = _mm512_load_ps(src + 240);
+
+		_mm512_store_ps(dst + 0, x0);
+		_mm512_store_ps(dst + 16, x1);
+		_mm512_store_ps(dst + 32, x2);
+		_mm512_store_ps(dst + 48, x3);
+		_mm512_store_ps(dst + 64, x4);
+		_mm512_store_ps(dst + 80, x5);
+		_mm512_store_ps(dst + 96, x6);
+		_mm512_store_ps(dst + 112, x7);
+
+		_mm512_store_ps(dst + 128, x8);
+		_mm512_store_ps(dst + 144, x9);
+		_mm512_store_ps(dst + 160, x10);
+		_mm512_store_ps(dst + 176, x11);
+		_mm512_store_ps(dst + 192, x12);
+		_mm512_store_ps(dst + 208, x13);
+		_mm512_store_ps(dst + 224, x14);
+		_mm512_store_ps(dst + 240, x15);
+
+		src += 256;
+		dst += 256;
+		frames -= 256;
+	}
+
+	// Process remaining samples 64 at a time
+	while (frames >= 64) {
+		_mm_prefetch(reinterpret_cast<void const *>(src + 64), _mm_hint(0));
+		_mm_prefetch(reinterpret_cast<void const *>(dst + 64), _mm_hint(0));
+
+		__m512 x0 = _mm512_load_ps(src + 0);
+		__m512 x1 = _mm512_load_ps(src + 16);
+		__m512 x2 = _mm512_load_ps(src + 32);
+		__m512 x3 = _mm512_load_ps(src + 48);
+
+		_mm512_store_ps(dst + 0, x0);
+		_mm512_store_ps(dst + 16, x1);
+		_mm512_store_ps(dst + 32, x2);
+		_mm512_store_ps(dst + 48, x3);
+
+		src += 64;
+		dst += 64;
+		frames -= 64;
+	}
+
+	// Process remaining samples 16 at a time
+	while (frames >= 16) {
+		__m512 x = _mm512_load_ps(src);
+		_mm512_store_ps(dst, x);
+
+		src += 16;
+		dst += 16;
+		frames -= 16;
+	}
+
+	// Process remaining samples x8
+	while (frames >= 8) {
+		__m256 x = _mm256_load_ps(src);
+		_mm256_store_ps(dst, x);
+
 		src += 8;
 		dst += 8;
-		nframes -= 8;
+		frames -= 8;
 	}
 
-	// Process the remaining samples, one sample at a time.
-	do {
-		__m128 g0 = _mm256_castps256_ps128(vgain); // use the same register
-		while (nframes > 0) {
-			__m128 s0, d0;
-			s0 = _mm_load_ss(src);
-			d0 = _mm_load_ss(dst);
-			s0 = _mm_mul_ss(g0, s0);
-			d0 = _mm_add_ss(d0, s0);
-			_mm_store_ss(dst, d0);
-			++src;
-			++dst;
-			--nframes;
-		}
-	} while (0);
+	// Process remaining samples x4
+	while (frames >= 4) {
+		__m128 x = _mm_load_ps(src);
+		_mm_store_ps(dst, x);
+
+		src += 4;
+		dst += 4;
+		frames -= 4;
+	}
+
+	// Process remaining samples
+	while (frames > 0) {
+		__m128 x = _mm_load_ss(src);
+		_mm_store_ss(dst, x);
+
+		++src;
+		++dst;
+		--frames;
+	}
+
+	// There's a penalty going from AVX mode to SSE mode. This can
+	// be avoided by ensuring the CPU that rest of the routine is no
+	// longer interested in the upper portion of the YMM register.
+
+	_mm256_zeroupper(); // zeros the upper portion of YMM register
 }
 
-/**
- * @brief Helper routine for mixing buffers with no gain for aligned buffers
- *
- * @details This routine executes the following expression below per element:
- *
- * dst = dst + src
- *
- * @param[in,out] dst Pointer to destination buffer, which gets updated
- * @param[in] src Pointer to source buffer (not updated)
- * @param nframes Number of samples to process
- */
-static void
-x86_avx512f_mix_buffers_no_gain_unaligned(float *dst, const float *src, uint32_t nframes)
-{
-	// Process the remaining samples 16 at a time
-	while (nframes >= 16)
-	{
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)dst + (16 * sizeof(float))), _mm_hint(0));
-		_mm_prefetch(((char *)src + (16 * sizeof(float))), _mm_hint(0));
-#else
-		__builtin_prefetch(reinterpret_cast<void const *>(src + 16), 0, 0);
-		__builtin_prefetch(reinterpret_cast<void const *>(dst + 16), 0, 0);
-#endif
-		__m256 s0, s1;
-		__m256 d0, d1;
-
-		// Load sources
-		s0 = _mm256_loadu_ps(src + 0);
-		s1 = _mm256_loadu_ps(src + 8);
-
-		// Load destinations
-		d0 = _mm256_loadu_ps(dst + 0);
-		d1 = _mm256_loadu_ps(dst + 8);
-
-		// dst = dst + src
-		d0 = _mm256_add_ps(d0, s0);
-		d1 = _mm256_add_ps(d1, s1);
-
-		// Store result
-		_mm256_storeu_ps(dst + 0, d0);
-		_mm256_storeu_ps(dst + 8, d1);
-
-		// Update pointers and counters
-		src += 16;
-		dst += 16;
-		nframes -= 16;
-	}
-
-	// Process the remaining samples 8 at a time
-	while (nframes >= 8) {
-		__m256 s0, d0;
-		// Load sources
-		s0 = _mm256_loadu_ps(src);
-		// Load destinations
-		d0 = _mm256_loadu_ps(dst);
-		// dst = dst + src
-		d0 = _mm256_add_ps(d0, s0);
-		// Store result
-		_mm256_storeu_ps(dst, d0);
-		// Update pointers and counters
-		src+= 8;
-		dst += 8;
-		nframes -= 8;
-	}
-
-	// Process the remaining samples
-	do {
-		while (nframes > 0) {
-			__m128 s0, d0;
-			s0 = _mm_load_ss(src);
-			d0 = _mm_load_ss(dst);
-			d0 = _mm_add_ss(d0, s0);
-			_mm_store_ss(dst, d0);
-			++src;
-			++dst;
-			--nframes;
-		}
-	} while (0);
-
-}
-
-/**
- * @brief Helper routine for mixing buffers with no gain for unaligned buffers
- *
- * @details This routine executes the following expression below per element:
- *
- * dst = dst + src
- *
- * @param[in,out] dst Pointer to destination buffer, which gets updated
- * @param[in] src Pointer to source buffer (not updated)
- * @param nframes Number of samples to process
- */
-static void
-x86_avx512f_mix_buffers_no_gain_aligned(float *dst, const float *src, uint32_t nframes)
-{
-	// Process the aligned portion 32 samples at a time
-	while (nframes >= 32)
-	{
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)dst + (32 * sizeof(float))), _mm_hint(0));
-		_mm_prefetch(((char *)src + (32 * sizeof(float))), _mm_hint(0));
-#else
-		__builtin_prefetch(reinterpret_cast<void const *>(src + 32), 0, 0);
-		__builtin_prefetch(reinterpret_cast<void const *>(dst + 32), 0, 0);
-#endif
-		__m256 s0, s1, s2, s3;
-		__m256 d0, d1, d2, d3;
-
-		// Load sources
-		s0 = _mm256_load_ps(src + 0 );
-		s1 = _mm256_load_ps(src + 8 );
-		s2 = _mm256_load_ps(src + 16);
-		s3 = _mm256_load_ps(src + 24);
-
-		// Load destinations
-		d0 = _mm256_load_ps(dst + 0 );
-		d1 = _mm256_load_ps(dst + 8 );
-		d2 = _mm256_load_ps(dst + 16);
-		d3 = _mm256_load_ps(dst + 24);
-
-		// dst = dst + src
-		d0 = _mm256_add_ps(d0, s0);
-		d1 = _mm256_add_ps(d1, s1);
-		d2 = _mm256_add_ps(d2, s2);
-		d3 = _mm256_add_ps(d3, s3);
-
-		// Store result
-		_mm256_store_ps(dst + 0 , d0);
-		_mm256_store_ps(dst + 8 , d1);
-		_mm256_store_ps(dst + 16, d2);
-		_mm256_store_ps(dst + 24, d3);
-
-		// Update pointers and counters
-		src += 32;
-		dst += 32;
-		nframes -= 32;
-	}
-
-	// Process the remaining samples 16 at a time
-	while (nframes >= 16)
-	{
-#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
-		_mm_prefetch(((char *)dst + (16 * sizeof(float))), _mm_hint(0));
-		_mm_prefetch(((char *)src + (16 * sizeof(float))), _mm_hint(0));
-#else
-		__builtin_prefetch(reinterpret_cast<void const *>(src + 16), 0, 0);
-		__builtin_prefetch(reinterpret_cast<void const *>(dst + 16), 0, 0);
-#endif
-		__m256 s0, s1;
-		__m256 d0, d1;
-
-		// Load sources
-		s0 = _mm256_load_ps(src + 0);
-		s1 = _mm256_load_ps(src + 8);
-
-		// Load destinations
-		d0 = _mm256_load_ps(dst + 0);
-		d1 = _mm256_load_ps(dst + 8);
-
-		// dst = dst + src
-		d0 = _mm256_add_ps(d0, s0);
-		d1 = _mm256_add_ps(d1, s1);
-
-		// Store result
-		_mm256_store_ps(dst + 0, d0);
-		_mm256_store_ps(dst + 8, d1);
-
-		// Update pointers and counters
-		src += 16;
-		dst += 16;
-		nframes -= 16;
-	}
-
-	// Process the remaining samples 8 at a time
-	while (nframes >= 8) {
-		__m256 s0, d0;
-		// Load sources
-		s0 = _mm256_load_ps(src + 0 );
-		// Load destinations
-		d0 = _mm256_load_ps(dst + 0 );
-		// dst = dst + src
-		d0 = _mm256_add_ps(d0, s0);
-		// Store result
-		_mm256_store_ps(dst, d0);
-		// Update pointers and counters
-		src += 8;
-		dst += 8;
-		nframes -= 8;
-	}
-
-	// Process the remaining samples
-	do {
-		while (nframes > 0) {
-			__m128 s0, d0;
-			s0 = _mm_load_ss(src);
-			d0 = _mm_load_ss(dst);
-			d0 = _mm_add_ss(d0, s0);
-			_mm_store_ss(dst, d0);
-			++src;
-			++dst;
-			--nframes;
-		}
-	} while (0);
-}
-
-/**
- * @brief Get the maximum value of packed float register
- * @param vmax Packed float 8x register
- * @return __m256 Maximum value in p[0]
- */
-static inline __m256 avx_getmax_ps(__m256 vmax)
-{
-	vmax = _mm256_max_ps(vmax, _mm256_permute2f128_ps(vmax, vmax, 1));
-	vmax = _mm256_max_ps(vmax, _mm256_permute_ps(vmax, _MM_SHUFFLE(0, 0, 3, 2)));
-	vmax = _mm256_max_ps(vmax, _mm256_permute_ps(vmax, _MM_SHUFFLE(0, 0, 0, 1)));
-	return vmax;
-}
-
-/**
- * @brief Get the minimum value of packed float register
- * @param vmax Packed float 8x register
- * @return __m256 Minimum value in p[0]
- */
-static inline __m256 avx_getmin_ps(__m256 vmin)
-{
-	vmin = _mm256_min_ps(vmin, _mm256_permute2f128_ps(vmin, vmin, 1));
-	vmin = _mm256_min_ps(vmin, _mm256_permute_ps(vmin, _MM_SHUFFLE(0, 0, 3, 2)));
-	vmin = _mm256_min_ps(vmin, _mm256_permute_ps(vmin, _MM_SHUFFLE(0, 0, 0, 1)));
-	return vmin;
-}
-
-#endif // FPU_AVX512_SUPPORT
+#endif // FPU_AVX512F_SUPPORT
