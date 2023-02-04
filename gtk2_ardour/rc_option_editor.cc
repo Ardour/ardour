@@ -4277,6 +4277,26 @@ These settings will only take effect after %1 is restarted.\n\
 				sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_master_volume)
 				));
 
+	ComboOption<int32_t>* zitaq = new ComboOption<int32_t> (
+			"port-resampler-quality",
+			_("I/O Resampler (vari-speed) quality"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_port_resampler_quality),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_port_resampler_quality)
+			);
+
+		zitaq->add (0, _("Off (no vari-speed)"));
+		zitaq->add (9, _("Low (16 samples latency)"));
+		zitaq->add (17, _("Moderate (32 samples latency), default"));
+		zitaq->add (33, _("Medium (64 samples latency)"));
+		zitaq->add (49, _("High (96 samples latency)"));
+		zitaq->add (65, _("Very High (128 samples latency)"));
+		zitaq->add (93, _("Extreme (184 samples latency)"));
+
+		zitaq->set_note (_("This setting will only take effect when the Audio Engine is restarted."));
+		set_tooltip (zitaq->tip_widget(), _("To facilitate vari-speed playback/recording, audio is resampled to change pitch and speed. This introduces latency depending on the quality. For consistency this latency is also present when not vari-speeding (even if no resampling happens).\n\nIt is possible to disable this feature, which will also disable vari-speed. - Except if the audio-engine runs at a different sample-rate than the session, the quality is set to be at least 'Very High' (128 samples round-trip latency)"));
+
+	add_option (_("Signal Flow"), zitaq);
+
 	add_option (_("Signal Flow"), new OptionEditorHeading (_("Default Track / Bus Muting Options")));
 
 	add_option (_("Signal Flow"),
