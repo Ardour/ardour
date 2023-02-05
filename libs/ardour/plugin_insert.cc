@@ -2459,7 +2459,7 @@ PluginInsert::automatic_can_support_io_configuration (ChanCount const& inx, Chan
 	}
 
 	/* Plugin inputs match requested inputs + side-chain-ports exactly */
-	if (inputs == insc) {
+	if (inputs == insc && has_sidechain ()) {
 		out = outputs + midi_bypass;
 		return Match (ExactMatch, 1);
 	}
