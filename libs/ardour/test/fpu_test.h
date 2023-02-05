@@ -26,6 +26,7 @@ public:
 #if defined(ARCH_X86) && defined(BUILD_SSE_OPTIMIZATIONS)
 	void avxFmaTest ();
 	void avxTest ();
+	void avx512fTest ();
 	void sseTest ();
 #elif defined ARM_NEON_SUPPORT
 	void neonTest ();
