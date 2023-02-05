@@ -87,6 +87,8 @@
 [link-region-and-track-selection]
 [lock-gui-after-seconds]
   lock
+[max-note-height]
+  maximum note height theme appearance size visible range
 [max-inline-controls]
   plugins mixer-strip controls inline
 [max-plugin-chart]

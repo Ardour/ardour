@@ -116,6 +116,8 @@ public:
 	ArdourCanvas::Container* midi_underlay () const { return _midi_underlay; }
 	ArdourCanvas::Container* region_canvas () const { return _region_group; }
 
+	void parameter_changed (std::string const &);
+
 protected:
 	void setup_rec_box ();
 	void update_rec_box ();

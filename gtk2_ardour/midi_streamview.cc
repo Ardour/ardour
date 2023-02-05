@@ -99,6 +99,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 	color_handler ();
 
 	UIConfiguration::instance().ColorsChanged.connect(sigc::mem_fun(*this, &MidiStreamView::color_handler));
+	UIConfiguration::instance().ParameterChanged.connect(sigc::mem_fun(*this, &MidiStreamView::parameter_changed));
 
 	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
 	note_range_adjustment.set_value(_lowest_note);
@@ -109,6 +110,16 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 
 MidiStreamView::~MidiStreamView ()
 {
+}
+
+void
+MidiStreamView::parameter_changed (string const & param)
+{
+	if (param == X_("max-note-height")) {
+		apply_note_range_to_regions ();
+	} else {
+		StreamView::parameter_changed (param);
+	}
 }
 
 RegionView*
@@ -402,7 +413,8 @@ MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest, bool to_region
 	float uiscale = UIConfiguration::instance().get_ui_scale();
 	uiscale = expf (uiscale) / expf (1.f);
 
-	int const max_note_height = std::max<int> (20, 20 * uiscale);
+	const int mnh = UIConfiguration::instance().get_max_note_height();
+	int const max_note_height = std::max<int> (mnh, mnh * uiscale);
 	int const range = _highest_note - _lowest_note;
 	int const pixels_per_note = floor (child_height () / range);
 
