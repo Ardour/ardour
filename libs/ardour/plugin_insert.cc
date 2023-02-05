@@ -100,7 +100,7 @@ PluginInsert::PluginInsert (Session& s, Temporal::TimeDomain td, boost::shared_p
 		add_plugin (plug);
 		create_automatable_parameters ();
 		const ChanCount& sc (sidechain_input_pins ());
-		if (sc.n_audio () > 0 || sc.n_midi () > 0) {
+		if ((sc.n_audio () > 0 || sc.n_midi () > 0) && Config->get_setup_sidechain ()) {
 			add_sidechain (sc.n_audio (), sc.n_midi ());
 		}
 	}
