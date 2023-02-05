@@ -275,25 +275,45 @@
 [realtime-export]
 [record-mode]
 [session-monitoring]
+  monitoring hearing listening signal monitors
 [show-busses-on-meterbridge]
+  busses bus meterbridge meters
 [show-fader-on-meterbridge]
+  faders meterbridge
 [show-group-tabs]
+  group 
 [show-master-on-meterbridge]
+  master meterbridge
 [show-midi-on-meterbridge]
+  midi meterbridge
 [show-monitor-on-meterbridge]
+  monitor meterbridge
 [show-mute-on-meterbridge]
+  mute meterbridge
 [show-name-on-meterbridge]
+  solo meterbridge
 [show-rec-on-meterbridge]
+  record recenable meterbridge
 [show-region-fades]
+  region gain fades show hide fadein fadeout
 [show-solo-on-meterbridge]
+  solo meterbridge
 [show-summary]
+  summary show
 [slave-timecode-offset]
+  timecode sync offset
 [subframes-per-frame]
+  timecode subframes sync
 [take-name]
+  take names
 [timecode-format]
+  timecode sync format tc 
 [timecode-generator-offset]
+  timecode sync offset generate send
 [timecode-offset]
+  timecode sync offset receive
 [timecode-offset-negative]
+  timecode sync offset negative
 [track-name-number]
 [track-name-take]
 [triggerbox-overrides-disk-monitoring]
