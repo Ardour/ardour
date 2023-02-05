@@ -521,7 +521,7 @@ int main() { return 0; }''',
             if re.search ('x86_64-w64', str(conf.env['CC'])) is not None:
                 conf.define ('FPU_AVX_FMA_SUPPORT', 1)
         elif conf.env['build_target'] == 'i386' or conf.env['build_target'] == 'i686' or conf.env['build_target'] == 'x86_64':
-            conf.check_cxx(fragment = "#include <immintrin.h>\nint main(void) { __m512 a; _mm512_fmadd_ps(a, a, a); return 0; }\n",
+            conf.check_cxx(fragment = "#include <immintrin.h>\nint main(void) { __m512 a; _mm512_abs_ps(a); _mm512_fmadd_ps(a, a, a); (void) _mm512_reduce_min_ps(a); (void)_mm512_reduce_max_ps(a); return 0; }\n",
                            features  = ['cxx'],
                            cxxflags  = [ conf.env['compiler_flags_dict']['avx512f'], conf.env['compiler_flags_dict']['fma'], conf.env['compiler_flags_dict']['avx'] ],
                            mandatory = False,
