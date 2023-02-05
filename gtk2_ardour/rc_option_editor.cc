@@ -4275,7 +4275,7 @@ These settings will only take effect after %1 is restarted.\n\
 				sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_master_volume)
 				));
 
-	ComboOption<int32_t>* zitaq = new ComboOption<int32_t> (
+	ComboOption<uint32_t>* zitaq = new ComboOption<uint32_t> (
 			"port-resampler-quality",
 			_("I/O Resampler (vari-speed) quality"),
 			sigc::mem_fun (*_rc_config, &RCConfiguration::get_port_resampler_quality),
@@ -4289,6 +4289,19 @@ These settings will only take effect after %1 is restarted.\n\
 		zitaq->add (49, _("High (96 samples latency)"));
 		zitaq->add (65, _("Very High (128 samples latency)"));
 		zitaq->add (93, _("Extreme (184 samples latency)"));
+
+		uint32_t prq_val = _rc_config->get_port_resampler_quality ();
+		if (!(prq_val == 0 || prq_val == 9 || prq_val == 17 || prq_val == 33 || prq_val == 65 || prq_val == 93)) {
+			if (prq_val < 8) {
+				_rc_config->set_port_resampler_quality (8);
+				prq_val = 8;
+			}
+			if (prq_val > 96) {
+				_rc_config->set_port_resampler_quality (96);
+				prq_val = 96;
+			}
+			zitaq->add (prq_val, string_compose (_("Custom (%1 samples latency)"), prq_val - 1));
+		}
 
 		zitaq->set_note (_("This setting will only take effect when the Audio Engine is restarted."));
 		set_tooltip (zitaq->tip_widget(), _("To facilitate vari-speed playback/recording, audio is resampled to change pitch and speed. This introduces latency depending on the quality. For consistency this latency is also present when not vari-speeding (even if no resampling happens).\n\nIt is possible to disable this feature, which will also disable vari-speed. - Except if the audio-engine runs at a different sample-rate than the session, the quality is set to be at least 'Very High' (128 samples round-trip latency)"));
