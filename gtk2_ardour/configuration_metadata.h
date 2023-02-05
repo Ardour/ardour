@@ -33,6 +33,7 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("input-meter-layout"), _("meter"), _("recorder"), _("layout"),  NULL);
 	VAR_META (X_("input-meter-scopes"), _("scopes"), _("recorder"), _("layout"),  NULL);
 	VAR_META (X_("lock-gui-after-seconds"), _("lock"),  NULL);
+	VAR_META (X_("max-note-height"), _("maximum"), _("note"), _("height"), _("theme"), _("appearance"), _("size"), _("visible"), _("range"),  NULL);
 	VAR_META (X_("max-inline-controls"), _("plugins"), _("mixer-strip"), _("controls"), _("inline"),  NULL);
 	VAR_META (X_("max-plugin-chart"), _("plugins"), _("top"), _("favorite"), _("sidebar"),  NULL);
 	VAR_META (X_("max-plugin-recent"), _("plugins"), _("recent"), _("favorite"), _("sidebar"),  NULL);
