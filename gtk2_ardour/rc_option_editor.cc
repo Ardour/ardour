@@ -3472,8 +3472,13 @@ These settings will only take effect after %1 is restarted.\n\
 	                                           sigc::mem_fun (*this, &RCOptionEditor::set_default_upper_midi_note));
 	mru_option->set_valid_chars (legal_midi_name_chars);
 
+	SpinOption<int>* mnh_option = new SpinOption<int> ("max-note-height", _("Maximum note height"),
+	                                                   sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_max_note_height),
+	                                                   sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_max_note_height),
+	                                                   10, 40, 1, 5);
 	add_option (_("MIDI"), mrl_option);
 	add_option (_("MIDI"), mru_option);
+	add_option (_("MIDI"), mnh_option);
 
 	/* MIDI PORTs */
 	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Port Options")));
