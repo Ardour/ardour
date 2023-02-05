@@ -10,7 +10,7 @@
 # [never-do-that-thing]
 #   thing that action prevent never stop otherthing
 #
-# The file is processed via tools/process-metadata to create build/gtk2_ardour/configuration_metadata.cc which is then incorporated via an #include directive
+# The file is processed via tools/process-metadata to create build/gtk2_ardour/configuration_metadata.h which is then incorporated via an #include directive
 # within gtk2_ardour/ui_config.cc
 #
 # Whenever a new preference variable is added to the source code, its name should also be added here.
@@ -372,12 +372,17 @@
 [limit-n-automatables]
 [link-send-and-route-panner]
 [listen-position]
+   afl pfl listen monitoring position 
 [locate-while-waiting-for-sync]
 [loop-fade-choice]
 [loop-is-mode]
+  looping mode behavior
 [ltc-output-port]
+  timecode output port routing
 [ltc-output-volume]
+  timecode output level gain volume ltc
 [ltc-send-continuously]
+  timecode transmit send continuously always ltc
 [max-gain]
 [max-recent-sessions]
 [max-recent-templates]
@@ -434,6 +439,7 @@
 [resource-index-url]
 [rewind-ffwd-like-tape-decks]
 [ripple-mode]
+  ripple all interview selected
 [run-all-transport-masters-always]
 [sample-lib-path]
 [save-history]
@@ -453,8 +459,11 @@
 [solo-control-is-listen-control]
 [solo-mute-gain]
 [solo-mute-override]
+  solo mute override overrule priority
 [stop-at-session-end]
+  transport stop end session
 [stop-recording-on-xrun]
+  transport recording xrun stop 
 [strict-io]
 [timecode-sync-frame-rate]
 [trace-midi-input]
@@ -463,18 +472,22 @@
 [transient-sensitivity]
 [transport-masters-just-roll-when-sync-lost]
 [try-autostart-engine]
+   audioengine startup 
 [tutorial-manual-url]
 [updates-url]
 [use-audio-units]
   plugins audiounits audio-unit enable disable
 [use-click-emphasis]
+   metronome beat click sound emphasis
 [use-lxvst]
   plugins vst2 enable disable
 [use-macvst]
   plugins vst2 enable disable
 [use-master-volume]
 [use-monitor-bus]
+   monitoring bus optional
 [use-osc]
+   osc open sound control
 [use-plugin-own-gui]
 [use-tranzport]
 [use-vst3]
