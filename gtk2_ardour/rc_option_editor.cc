@@ -3789,6 +3789,7 @@ These settings will only take effect after %1 is restarted.\n\
 			    ));
 
 	add_option (_("Transport"), new OptionEditorHeading (_("Plugins")));
+
 	bo = new BoolOption (
 		"plugins-stop-with-transport",
 		_("Silence plugins when the transport is stopped"),
@@ -3863,7 +3864,7 @@ These settings will only take effect after %1 is restarted.\n\
 			);
 	add_option (_("Plugins"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses. When disabled plugins will be left inactive when they are added to tracks/busses"));
+					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses.\n<b>When disabled</b> plugins will be left inactive when they are added to tracks/busses"));
 
 	bo = new BoolOption (
 		"setup-sidechain",
