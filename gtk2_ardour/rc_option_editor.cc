@@ -3798,7 +3798,7 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Transport"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> plugins will be reset at transport stop. When disabled plugins will be left unchanged at transport stop.\n\nThis mostly affects plugins with a \"tail\" like Reverbs."));
-	bo->highlight ();
+
 	/* PLUGINS ******************************************************************/
 
 #if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined VST3_SUPPORT)
