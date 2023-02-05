@@ -135,6 +135,7 @@ public:
 	void set_output_map (uint32_t, ChanMapping);
 	void set_thru_map (ChanMapping);
 	bool reset_map (bool emit = true);
+	bool reset_sidechain_map ();
 	bool configured () const { return _configured; }
 
 	// these are ports visible on the outside

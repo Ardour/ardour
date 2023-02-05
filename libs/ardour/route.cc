@@ -2353,7 +2353,11 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 		PBD::Unwinder<bool> uw (_in_sidechain_setup, true);
 
 		if (add) {
-			if (!pi->add_sidechain ()) {
+			ChanCount sc (pi->sidechain_input_pins ());
+			if (sc.n_audio () == 0 && sc.n_midi () == 0) {
+				sc.set (DataType::AUDIO, 1);
+			}
+			if (!pi->add_sidechain (sc.n_audio (), sc.n_midi ())) {
 				return false;
 			}
 		} else {
@@ -2384,6 +2388,7 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 	}
 
 	if (pi->has_sidechain ()) {
+		pi->reset_sidechain_map ();
 		pi->sidechain_input ()->changed.connect_same_thread (*pi, boost::bind (&Route::sidechain_change_handler, this, _1, _2));
 	}
 

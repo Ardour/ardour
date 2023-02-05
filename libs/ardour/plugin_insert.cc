@@ -1969,6 +1969,53 @@ PluginInsert::reset_map (bool emit)
 }
 
 bool
+PluginInsert::reset_sidechain_map ()
+{
+	/* intended to be called from Route::add_remove_sidechain after
+	 * adding a SC. This connects the SC ports like reset_map() above.
+	 */
+
+	if (!has_sidechain () || sidechain_input_pins ().n_total () == 0) {
+		return false;
+	}
+	if (_custom_cfg) {
+		return false;
+	}
+
+	const PinMappings old_in (_in_map);
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		uint32_t sc = 0; // side-chain round-robin (all instances)
+		uint32_t pc = 0;
+		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i, ++pc) {
+			const uint32_t nis = natural_input_streams ().get(*t);
+
+			/* SC inputs are last in the plugin-insert.. */
+			const uint32_t sc_start = _configured_in.get (*t);
+			const uint32_t sc_len = _configured_internal.get (*t) - sc_start;
+
+			for (uint32_t in = 0; in < nis; ++in) {
+				const Plugin::IOPortDescription& iod (_plugins[pc]->describe_io_port (*t, true, in));
+				if (iod.is_sidechain) {
+					/* connect sidechain sinks to sidechain inputs in round-robin fashion */
+					if (sc_len > 0) {// side-chain may be hidden
+						_in_map[pc].set (*t, in, sc_start + sc);
+						sc = (sc + 1) % sc_len;
+					}
+				}
+			}
+		}
+	}
+
+	sanitize_maps ();
+	if (old_in == _in_map) {
+		return false;
+	}
+
+	mapping_changed ();
+	return true;
+}
+
+bool
 PluginInsert::configure_io (ChanCount in, ChanCount out)
 {
 	Match old_match = _match;
