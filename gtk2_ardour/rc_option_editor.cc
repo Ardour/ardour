@@ -3865,6 +3865,16 @@ These settings will only take effect after %1 is restarted.\n\
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses. When disabled plugins will be left inactive when they are added to tracks/busses"));
 
+	bo = new BoolOption (
+		"setup-sidechain",
+			_("Setup Sidechain ports when loading plugin with aux inputs"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_setup_sidechain),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_setup_sidechain)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> sidechain ports are created for plugins at instantiation time if a plugin has sidechain inputs. Note that the ports themselves will have to be manually connected, so while the plugin pins are connected they are initially fed with silence.\n<b>When disabled</b> sidechain input pins will remain unconnected."));
+
 	add_option (_("Plugins/GUI"), new OptionEditorHeading (_("Plugin GUI")));
 	add_option (_("Plugins/GUI"),
 	     new BoolOption (
