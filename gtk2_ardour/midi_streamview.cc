@@ -116,7 +116,7 @@ void
 MidiStreamView::parameter_changed (string const & param)
 {
 	if (param == X_("max-note-height")) {
-		apply_note_range_to_regions ();
+		apply_note_range (_lowest_note, _highest_note, true);
 	} else {
 		StreamView::parameter_changed (param);
 	}
@@ -416,29 +416,24 @@ MidiStreamView::apply_note_range(uint8_t lowest, uint8_t highest, bool to_region
 	const int mnh = UIConfiguration::instance().get_max_note_height();
 	int const max_note_height = std::max<int> (mnh, mnh * uiscale);
 	int const range = _highest_note - _lowest_note;
-	int const pixels_per_note = floor (child_height () / range);
 
-	/* do not grow note height beyond 10 pixels */
-	if (pixels_per_note > max_note_height) {
+	int const available_note_range = floor (child_height() / max_note_height);
+	int additional_notes = available_note_range - range;
 
-		int const available_note_range = floor (child_height() / max_note_height);
-		int additional_notes = available_note_range - range;
+	/* distribute additional notes to higher and lower ranges, clamp at 0 and 127 */
+	for (int i = 0; i < additional_notes; i++){
 
-		/* distribute additional notes to higher and lower ranges, clamp at 0 and 127 */
-		for (int i = 0; i < additional_notes; i++){
-
-			if (i % 2 && _highest_note < 127){
-				_highest_note++;
-			}
-			else if (i % 2) {
-				_lowest_note--;
-			}
-			else if (_lowest_note > 0){
-				_lowest_note--;
-			}
-			else {
-				_highest_note++;
-			}
+		if (i % 2 && _highest_note < 127){
+			_highest_note++;
+		}
+		else if (i % 2) {
+			_lowest_note--;
+		}
+		else if (_lowest_note > 0){
+			_lowest_note--;
+		}
+		else {
+			_highest_note++;
 		}
 	}
 
