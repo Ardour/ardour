@@ -58,7 +58,8 @@ Container::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) con
 	Item::render_children (area, context);
 
 	if (_render_with_alpha >= 1.0) {
-		context->pop_group ();
+		context->pop_group_to_source ();
+		context->paint ();
 	} else if (_render_with_alpha > 0) {
 		context->pop_group_to_source ();
 		context->paint_with_alpha (_render_with_alpha);
@@ -76,7 +77,7 @@ Container::compute_bounding_box () const
 void
 Container::set_render_with_alpha (double alpha)
 {
-	if (alpha == 1.0 && NULL != g_getenv("ARDOUR_NO_OPAQUE_RENDER_GROUP")) {
+	if (alpha >= 1.0 && NULL == g_getenv("ARDOUR_OPAQUE_RENDER_GROUP")) {
 		alpha = -1; // disable render group when fully opaque
 	}
 	if (_render_with_alpha == alpha) {
