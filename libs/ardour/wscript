@@ -547,6 +547,10 @@ def build(bld):
             avx512f_cxxflags.append (bld.env['compiler_flags_dict']['avx'])
             avx512f_cxxflags.append (bld.env['compiler_flags_dict']['pic'])
             avx512f_cxxflags.append (bld.env['compiler_flags_dict']['fma'])
+            # work around issue with mingc/gcc-8
+            # https://stackoverflow.com/questions/43152633/invalid-register-for-seh-savexmm-in-cygwin
+            if bld.env['build_target'] == 'mingw':
+                avx512f_cxxflags.append ('-fno-asynchronous-unwind-tables')
 
             bld(features = 'cxx cxxstlib asm',
                 source   = avx512f_sources,
