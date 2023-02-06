@@ -193,7 +193,8 @@ ColorThemeManager::setup_modifiers ()
 	for (UIConfiguration::Modifiers::const_iterator m = modifiers.begin(); m != modifiers.end(); ++m) {
 		mod_hbox = manage (new HBox);
 
-		mod_scale = manage (new HScale (0.0, 1.0, 0.01));
+		Adjustment* adj = manage (new Adjustment (0.0, 0.0, 1.0, 0.01, 0.1, 0));
+		mod_scale = manage (new HScale (*adj));
 		mod_scale->set_draw_value (false);
 		mod_scale->set_value (m->second.a());
 		mod_scale->set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
