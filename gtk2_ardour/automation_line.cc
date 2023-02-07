@@ -343,8 +343,8 @@ AutomationLine::sync_model_with_view_points (list<ControlPoint*> cp)
 	update_pending = true;
 
 	bool moved = false;
-	for (list<ControlPoint*>::iterator i = cp.begin(); i != cp.end(); ++i) {
-		moved = sync_model_with_view_point (**i) || moved;
+	for (auto const & vp : cp) {
+		moved = sync_model_with_view_point (*vp) || moved;
 	}
 
 	return moved;
@@ -622,8 +622,8 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 			contiguous_points.pop_back ();
 		}
 
-		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
-			(*ccp)->compute_x_bounds (trackview.editor());
+		for (auto const & ccp : contiguous_points) {
+			ccp->compute_x_bounds (trackview.editor());
 		}
 		_drag_had_movement = true;
 	}
