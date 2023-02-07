@@ -772,31 +772,38 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 	 * is the RegionView's top-left corner.
 	 */
 	double view_x = cp.get_x();
-	double view_y = 1.0 - cp.get_y() / (double)_height;
 
 	/* model time is relative to the Region (regardless of region->start offset) */
 	timepos_t model_time = (*cp.model())->when;
 
-	/* convert to absolute time on timeline */
-	const timepos_t absolute_time = model_time + get_origin();
+	const timepos_t origin (get_origin());
 
-	/* now convert it back to match the view_x (RegionView pixel pos) */
-	const double model_x = trackview.editor().time_to_pixel_unrounded (absolute_time.earlier (_offset).earlier (get_origin ()));
+	/* convert to absolute time on timeline */
+	const timepos_t absolute_time = model_time + origin;
+
+	/* now convert to pixels relative to start of region, which matches view_x */
+	const double model_x = trackview.editor().time_to_pixel_unrounded (absolute_time) - trackview.editor().time_to_pixel_unrounded (origin);
 
 	if (view_x != model_x) {
 
-		/* convert the current position in the view (units: pixels)
-		 * into samples, then use that to create a timecnt_t that
-		 * measures the distance from the origin for this line.
+		/* convert the current position in the view (units:
+		 * region-relative pixels) into samples, then use that to
+		 * create a timecnt_t that measures the distance from the
+		 * origin for this line.
 		 *
 		 * Note that the offset and origin is irrelevant here,
 		 * pixel_to_sample() islinear only depending on zoom level.
 		 */
 
-		const timecnt_t view_samples (trackview.editor().pixel_to_sample (view_x));
+		const timepos_t view_samples (trackview.editor().pixel_to_sample (view_x));
 
 		/* measure distance from RegionView origin (this preserves time domain) */
-		model_time = timepos_t (the_list()->time_domain()).distance (timepos_t (view_samples));
+
+		if (model_time.time_domain() == Temporal::AudioTime) {
+			model_time = timepos_t (timecnt_t (view_samples, origin).samples());
+		} else {
+			model_time = timepos_t (timecnt_t (view_samples, origin).beats());
+		}
 
 		/* convert RegionView to Region position (account for region->start() _offset) */
 		model_time += _offset;
@@ -804,6 +811,7 @@ AutomationLine::sync_model_with_view_point (ControlPoint& cp)
 
 	update_pending = true;
 
+	double view_y = 1.0 - cp.get_y() / (double)_height;
 	view_to_model_coord_y (view_y);
 
 	alist->modify (cp.model(), model_time, view_y);
