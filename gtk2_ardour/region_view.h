@@ -250,7 +250,7 @@ private:
 	virtual void _redisplay (bool) = 0;
 
   private:
-	friend class DisplaySuspender;
+	friend struct DisplaySuspender;
 	void enable_display (bool view_only);
 	void disable_display();
 
