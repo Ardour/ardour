@@ -1107,6 +1107,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 				/* click on a normal region view */
 
+				if (_drags->active ()) {
+					return true;
+				}
+
 				if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::slip_contents_modifier ())) {
 					if (!clicked_regionview->region()->locked() && (Config->get_edit_mode() != Lock)) {
 						_drags->add (new RegionSlipContentsDrag (this, item, clicked_regionview, selection->regions.by_layer(), drag_time_domain (clicked_regionview->region())));
@@ -1377,6 +1381,9 @@ Editor::button_press_handler_2 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	Editing::MouseMode const eff = effective_mouse_mode ();
 	switch (eff) {
 	case MouseObject:
+		if (_drags->active ()) {
+			return true;
+		}
 		switch (item_type) {
 		case RegionItem:
 			if (ArdourKeyboard::indicates_copy (event->button.state)) {
@@ -2655,6 +2662,8 @@ Editor::add_region_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* region
 		return;
 	}
 
+	assert (!_drags->active ());
+
 	_drags->add (new RegionMoveDrag (this, item, region_view, selection->regions.by_layer(), copy, drag_time_domain (region_view->region())));
 }
 
@@ -2666,6 +2675,8 @@ Editor::add_region_brush_drag (ArdourCanvas::Item* item, GdkEvent*, RegionView* 
 	if (!region_view->region()->playlist()) {
 		return;
 	}
+
+	assert (!_drags->active ());
 
 	if (should_ripple()) {
 		return;
