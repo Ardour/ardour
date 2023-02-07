@@ -157,7 +157,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	PortColumns port_columns;
 
-	friend class Row;
+	friend struct Row;
 	Glib::RefPtr<Gtk::ListStore> midi_port_store;
 	Glib::RefPtr<Gtk::ListStore> audio_port_store;
 
