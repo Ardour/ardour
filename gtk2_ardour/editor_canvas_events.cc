@@ -1138,6 +1138,10 @@ Editor::canvas_drop_zone_event (GdkEvent* event)
 	case GDK_LEAVE_NOTIFY:
 		return typed_event (_canvas_drop_zone, event, DropZoneItem);
 
+	case GDK_MOTION_NOTIFY:
+		return motion_handler (_canvas_drop_zone, event);
+		break;
+
 	default:
 		break;
 	}
