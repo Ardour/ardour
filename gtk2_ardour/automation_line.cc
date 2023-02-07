@@ -518,7 +518,7 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 }
 
 double
-AutomationLine::ContiguousControlPoints::clamp_dx (double dx)
+AutomationLine::ContiguousControlPoints::clamp_dx (double dx, double region_limit)
 {
 	if (empty()) {
 		return dx;
