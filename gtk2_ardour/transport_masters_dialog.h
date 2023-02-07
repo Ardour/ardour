@@ -23,16 +23,23 @@
 #include <string>
 
 #include <gtkmm/button.h>
+#include <gtkmm/comboboxtext.h>
 #include <gtkmm/eventbox.h>
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/label.h>
 #include <gtkmm/table.h>
 #include <gtkmm/entry.h>
+#include <gtkmm/box.h>
+#include <gtkmm/liststore.h>
 #include <gtkmm/treestore.h>
+
+#include "ardour/types.h"
+#include "pbd/property_basics.h"
 
 #include "widgets/ardour_button.h"
 
 #include "ardour_window.h"
+#include "ardour_dialog.h"
 
 namespace Gtk {
 	class Menu;
