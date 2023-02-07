@@ -160,7 +160,7 @@ public:
 	}
 
 	Temporal::TimeDomain time_domain() const { return _time_domain; }
-
+	void set_time_domain (Temporal::TimeDomain);
 
 	void swap_grab (ArdourCanvas::Item *, Gdk::Cursor *, uint32_t);
 	bool motion_handler (GdkEvent*, bool);

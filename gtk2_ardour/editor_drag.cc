@@ -279,6 +279,13 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, Temporal::TimeDomain td, bool trac
 {
 }
 
+void
+Drag::set_time_domain (Temporal::TimeDomain td)
+{
+	/* must be called early in life of a Drag */
+	_time_domain = td;
+}
+
 timepos_t
 Drag::pixel_to_time (double x) const
 {
