@@ -2197,8 +2197,8 @@ ControlList::dump (ostream& o)
 {
 	/* NOT LOCKED ... for debugging only */
 
-	for (EventList::iterator x = _events.begin (); x != _events.end (); ++x) {
-		o << (*x)->value << " @ " << (*x)->when << endl;
+	for (auto const & e : _events) {
+		o << e->value << " @ " << e->when << endl;
 	}
 }
 
