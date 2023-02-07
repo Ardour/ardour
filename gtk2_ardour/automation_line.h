@@ -165,6 +165,7 @@ public:
 	void set_width (Temporal::timecnt_t const &);
 
 	Temporal::timepos_t session_position (Temporal::timepos_t const &) const;
+	void dump (std::ostream&) const;
 
 protected:
 

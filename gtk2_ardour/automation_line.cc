@@ -1399,6 +1399,18 @@ AutomationLine::add_visible_control_point (uint32_t view_index, uint32_t pi, dou
 }
 
 void
+AutomationLine::dump (std::ostream& ostr) const
+{
+	for (auto const & cp : control_points) {
+		if (cp->model() != alist->end()) {
+			ostr << '#' << cp->view_index() << " @ " << cp->get_x() << ", " << cp->get_y() << " for " << (*cp->model())->value << " @ " << (*(cp->model()))->when << std::endl;
+		} else {
+			ostr << "dead point\n";
+		}
+	}
+}
+
+void
 AutomationLine::connect_to_list ()
 {
 	_list_connections.drop_connections ();
