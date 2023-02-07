@@ -4775,6 +4775,7 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 		cy = zero_gain_y;
 	}
 
+	/* cx_pos is in absolute timeline units */
 	timepos_t cx_pos (timepos_t (pixel_to_time (cx)) + snap_delta (event->button.state));
 
 	if (need_snap) {
@@ -4782,7 +4783,9 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 	}
 
 	cx_pos.shift_earlier (snap_delta (event->button.state));
-	cx_pos = min (cx_pos, _point->line().maximum_time() + _point->line().offset());
+
+	/* total number of pixels (canvas window units) to move */
+	double px = _editor->time_to_pixel_unrounded (cx_pos);
 
 	float const fraction = 1.0 - (cy / _point->line().height());
 
@@ -4791,8 +4794,9 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 		_editor->begin_reversible_command (_("automation event move"));
 		_point->line().start_drag_single (_point, _fixed_grab_x, initial_fraction);
 	}
+
 	pair<float, float> result;
-	result = _point->line().drag_motion (_editor->time_to_pixel_unrounded (cx_pos), fraction, false, _pushing, _final_index);
+	result = _point->line().drag_motion (px, fraction, false, _pushing, _final_index);
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_relative_string (result.first, result.second));
 }
 

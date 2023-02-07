@@ -539,8 +539,13 @@ AutomationLine::ContiguousControlPoints::clamp_dx (double dx)
 	}
 
 	tx = cp->get_x() + dx; // new possible position if we just add the motion
+
+	tx = max (tx, 0.);
+	tx = min (tx, region_limit);
+
 	tx = max (tx, before_x); // can't move later than following point
 	tx = min (tx, after_x);  // can't move earlier than preceding point
+
 	return  tx - cp->get_x ();
 }
 
@@ -637,8 +642,10 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 	 */
 
 	if (dx < 0 || ((dx > 0) && !with_push)) {
-		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
-			dx = (*ccp)->clamp_dx (dx);
+		const timepos_t rl (maximum_time() + _offset);
+		double region_limit = trackview.editor().duration_to_pixels_unrounded (timecnt_t (rl, get_origin()));
+		for (auto const & ccp : contiguous_points){
+			dx = ccp->clamp_dx (dx, region_limit);
 		}
 	}
 

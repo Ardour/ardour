@@ -194,7 +194,7 @@ protected:
 	class ContiguousControlPoints : public std::list<ControlPoint*> {
 public:
 		ContiguousControlPoints (AutomationLine& al);
-		double clamp_dx (double dx);
+		double clamp_dx (double dx, double region_limit);
 		void move (double dx, double dvalue);
 		void compute_x_bounds (PublicEditor& e);
 private:
