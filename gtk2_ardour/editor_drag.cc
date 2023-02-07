@@ -4714,6 +4714,8 @@ ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
 
 	_point = reinterpret_cast<ControlPoint*> (_item->get_data ("control_point"));
 	assert (_point);
+
+	set_time_domain (_point->line().the_list()->time_domain());
 }
 
 
