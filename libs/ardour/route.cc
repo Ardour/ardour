@@ -957,14 +957,11 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 						processor.reset (new UnknownProcessor (_session, node, this));
 					} else {
 						processor.reset (new PluginInsert (_session, time_domain()));
-						processor->set_owner (this);
 					}
 
 				} else {
-
 					processor.reset (new PortInsert (_session, _pannable, _mute_master));
 				}
-
 			}
 
 		} else if (node.name() == "Send") {
@@ -977,6 +974,8 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 			error << string_compose(_("unknown Processor type \"%1\"; ignored"), node.name()) << endmsg;
 			return false;
 		}
+
+		processor->set_owner (this);
 
 		if (processor->set_state (node, version)) {
 			return false;
