@@ -37,6 +37,8 @@
 #include <intrin.h>
 #elif defined(__GNUC__) || defined(__clang__)
 #include <cpuid.h>
+#else
+#error "Unsupported compiler: need __cpuid and __cpuidex for CPU detection"
 #endif
 
 #include "pbd/compose.h"
