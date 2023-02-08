@@ -33,6 +33,12 @@
 #include <asm/hwcap.h>
 #endif
 
+#ifdef PLATFORM_WINDOWS
+#include <intrin.h>
+#elif defined(__GNUC__) || defined(__clang__)
+#include <cpuid.h>
+#endif
+
 #include "pbd/compose.h"
 #include "pbd/fpu.h"
 #include "pbd/error.h"
@@ -48,7 +54,6 @@ FPU* FPU::_instance (0);
 
 #ifdef PLATFORM_WINDOWS
 /* Use MSVC/mingw intrinsic to get CPUID */
-#include <intrin.h>
 static void cpuid(int reg[4], int cpuid_leaf)
 {
 	__cpuid(reg, cpuid_leaf);
@@ -59,7 +64,6 @@ static void cpuidex(int reg[4], int cpuid_leaf, int cpuid_level)
 	__cpuidex(reg, cpuid_leaf, cpuid_level);
 }
 #else
-#include <cpuid.h>
 /* use __cpuid() with the same API to match the MSVC/mingw intrinsic */
 static void cpuid(int reg[4], int cpuid_leaf)
 {
@@ -196,9 +200,13 @@ FPU::FPU ()
 
 	if (num_ids > 0) {
 
-		/* Now get CPU/FPU flags */
+		int cpu_info_ex[4];
 
+		/* Now get CPU/FPU flags */
 		cpuid(cpu_info, 1);
+
+		/* Get CPU extended features: Like AVX512F */
+		cpuidex(cpu_info_ex, 7, 0);
 
 		if ((cpu_info[2] & (1<<27)) /* OSXSAVE */ &&
 		    (cpu_info[2] & (1<<28) /* AVX */) &&
@@ -210,6 +218,11 @@ FPU::FPU ()
 		if (cpu_info[2] & (1<<12) /* FMA */) {
 			info << _("AVX with FMA capable processor") << endmsg;
 			_flags = Flags (_flags | (HasFMA));
+		}
+
+		if (cpu_info_ex[1] & (1<<16) /* AVX512F */) {
+			info << _("AVX512F capable processor") << endmsg;
+			_flags = Flags (_flags | (HasAVX512F));
 		}
 
 		if (cpu_info[3] & (1<<25)) {
@@ -304,20 +317,7 @@ FPU::FPU ()
 #endif
 		}
 
-		/* Get CPU extended features: Like AVX512F */
-		if (num_ids > 0) {
-			int cpu_info_ex[4];
-
-			cpuidex(cpu_info_ex, 7, 0);
-
-			if (cpu_info_ex[1] & (1<<16) /* AVX512F */) {
-				info << _("AVX512F capable processor") << endmsg;
-				_flags = Flags (_flags | (HasAVX512F));
-			}
-		}
-
 		/* finally get the CPU brand */
-
 		cpuid(cpu_info, 0x80000000);
 
 		const int parameter_end = 0x80000004;
