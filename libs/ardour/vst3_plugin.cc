@@ -2075,7 +2075,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 	assert (_n_bus_in == _component->getBusCount (Vst::kAudio, Vst::kInput));
 	assert (_n_bus_out == _component->getBusCount (Vst::kAudio, Vst::kOutput));
 
-	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: n_bus_in = %1 n_bus_in = %2\n", _n_bus_in, _n_bus_out));
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: n_bus_in = %1 n_bus_out = %2\n", _n_bus_in, _n_bus_out));
 
 	typedef std::vector<Vst::SpeakerArrangement> VSTSpeakerArrangements;
 	VSTSpeakerArrangements sa_in;
@@ -2092,7 +2092,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 				enable = true;
 			}
 		}
-		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kInput, %1, %2)\n", sa_in.size (), enable));
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kInput, %1, %2, %3%4)\n", sa_in.size (), enable, std::hex, sa));
 		_component->activateBus (Vst::kAudio, Vst::kInput, sa_in.size (), enable);
 		sa_in.push_back (sa);
 	}
@@ -2107,7 +2107,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 				enable = true;
 			}
 		}
-		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kOutput, %1, %2)\n", sa_out.size (), enable));
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kOutput, %1, %2, %3%4)\n", sa_out.size (), enable, std::hex, sa));
 		_component->activateBus (Vst::kAudio, Vst::kOutput, sa_out.size (), enable);
 		sa_out.push_back (sa);
 	}
@@ -2116,19 +2116,21 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 	_processor->setBusArrangements (sa_in.size () > 0 ? &sa_in[0] : NULL, sa_in.size (),
 	                                sa_out.size () > 0 ? &sa_out[0] : NULL, sa_out.size ());
 
-#if 0
-	for (int32 i = 0; i < _n_bus_in; ++i) {
-		Vst::SpeakerArrangement arr;
-		if (_processor->getBusArrangement (Vst::kInput, i, arr) == kResultOk) {
-			int cc = Vst::SpeakerArr::getChannelCount (arr);
-			std::cerr << "VST3: Input BusArrangements: " << i << " chan: " << cc << " bits: " << arr << "\n";
+#ifndef NDEBUG
+	if (DEBUG_ENABLED (DEBUG::VST3Config)) {
+		for (int32 i = 0; i < _n_bus_in; ++i) {
+			Vst::SpeakerArrangement arr;
+			if (_processor->getBusArrangement (Vst::kInput, i, arr) == kResultOk) {
+				int cc = Vst::SpeakerArr::getChannelCount (arr);
+				DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3: Input BusArrangements: %1 chan: %2 bits: %3%4\n", i, cc, std::hex, arr));
+			}
 		}
-	}
-	for (int32 i = 0; i < _n_bus_out; ++i) {
-		Vst::SpeakerArrangement arr;
-		if (_processor->getBusArrangement (Vst::kOutput, i, arr) == kResultOk) {
-			int cc = Vst::SpeakerArr::getChannelCount (arr);
-			std::cerr << "VST3: Output BusArrangements: " << i << " chan: " << cc << " bits: " << arr << "\n";
+		for (int32 i = 0; i < _n_bus_out; ++i) {
+			Vst::SpeakerArrangement arr;
+			if (_processor->getBusArrangement (Vst::kOutput, i, arr) == kResultOk) {
+				int cc = Vst::SpeakerArr::getChannelCount (arr);
+				DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3: Output BusArrangements: %1 chan: %2 bits: %3%4\n", i, cc, std::hex, arr));
+			}
 		}
 	}
 #endif
