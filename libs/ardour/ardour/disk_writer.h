@@ -86,8 +86,8 @@ public:
 
 	std::list<boost::shared_ptr<Source> >& last_capture_sources () { return _last_capture_sources; }
 
-	bool record_enabled () const { return g_atomic_int_get (&_record_enabled); }
-	bool record_safe () const { return g_atomic_int_get (&_record_safe); }
+	bool record_enabled () const { return g_atomic_int_get (const_cast<GATOMIC_QUAL gint*>(&_record_enabled)); }
+	bool record_safe () const { return g_atomic_int_get (const_cast<GATOMIC_QUAL gint*>(&_record_safe)); }
 
 	void set_record_enabled (bool yn);
 	void set_record_safe (bool yn);
