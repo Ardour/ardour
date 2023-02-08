@@ -27,10 +27,6 @@
 #include <stdint.h>
 #include <assert.h>
 
-#ifdef PLATFORM_WINDOWS
-#include <intrin.h>
-#endif
-
 #ifdef ARM_NEON_SUPPORT
 /* Needed for ARM NEON detection */
 #include <sys/auxv.h>
@@ -49,35 +45,32 @@ using namespace std;
 FPU* FPU::_instance (0);
 
 #if ( (defined __x86_64__) || (defined __i386__) || (defined _M_X64) || (defined _M_IX86) ) // ARCH_X86
-#ifndef PLATFORM_WINDOWS
 
-/* use __cpuid() as the name to match the MSVC/mingw intrinsic */
-
-static void
-__cpuid(int regs[4], int cpuid_leaf)
+#ifdef PLATFORM_WINDOWS
+/* Use MSVC/mingw intrinsic to get CPUID */
+#include <intrin.h>
+static void cpuid(int reg[4], int cpuid_leaf)
 {
-	asm volatile (
-#if defined(__i386__)
-			"pushl %%ebx;\n\t"
-#endif
-			"cpuid;\n\t"
-			"movl %%eax, (%1);\n\t"
-			"movl %%ebx, 4(%1);\n\t"
-			"movl %%ecx, 8(%1);\n\t"
-			"movl %%edx, 12(%1);\n\t"
-#if defined(__i386__)
-			"popl %%ebx;\n\t"
-#endif
-			:"=a" (cpuid_leaf) /* %eax clobbered by CPUID */
-			:"S" (regs), "a" (cpuid_leaf)
-			:
-#if !defined(__i386__)
-			"%ebx",
-#endif
-			"%ecx", "%edx", "memory");
+	__cpuid(reg, cpuid_leaf);
 }
-
-#endif /* !PLATFORM_WINDOWS */
+/* Get extended features of CPUID */
+static void cpuidex(int reg[4], int cpuid_leaf, int cpuid_level)
+{
+	__cpuidex(reg, cpuid_leaf, cpuid_level);
+}
+#else
+#include <cpuid.h>
+/* use __cpuid() with the same API to match the MSVC/mingw intrinsic */
+static void cpuid(int reg[4], int cpuid_leaf)
+{
+	__cpuid_count(cpuid_leaf, 0, reg[0], reg[1], reg[2], reg[3]);
+}
+/* Get extended features of CPUID */
+static void cpuidex(int reg[4], int cpuid_leaf, int cpuid_level)
+{
+	__cpuid_count(cpuid_leaf, cpuid_level, reg[0], reg[1], reg[2], reg[3]);
+}
+#endif // PLATFORM_WINDOWS
 
 #ifndef HAVE_XGETBV // Allow definition by build system
 	#if defined(__MINGW32__) && defined(__MINGW64_VERSION_MAJOR) && __MINGW64_VERSION_MAJOR >= 5
@@ -192,7 +185,7 @@ FPU::FPU ()
 	char cpu_string[48];
 	string cpu_vendor;
 
-	__cpuid (cpu_info, 0);
+	cpuid(cpu_info, 0);
 
 	int num_ids = cpu_info[0];
 	std::swap(cpu_info[2], cpu_info[3]);
@@ -205,7 +198,7 @@ FPU::FPU ()
 
 		/* Now get CPU/FPU flags */
 
-		__cpuid (cpu_info, 1);
+		cpuid(cpu_info, 1);
 
 		if ((cpu_info[2] & (1<<27)) /* OSXSAVE */ &&
 		    (cpu_info[2] & (1<<28) /* AVX */) &&
@@ -217,11 +210,6 @@ FPU::FPU ()
 		if (cpu_info[2] & (1<<12) /* FMA */) {
 			info << _("AVX with FMA capable processor") << endmsg;
 			_flags = Flags (_flags | (HasFMA));
-		}
-
-		if (cpu_info[2] & (1<<16) /* AVX512F */) {
-			info << _("AVX512F capable processor") << endmsg;
-			_flags = Flags (_flags | (HasAVX512F));
 		}
 
 		if (cpu_info[3] & (1<<25)) {
@@ -316,9 +304,21 @@ FPU::FPU ()
 #endif
 		}
 
+		/* Get CPU extended features: Like AVX512F */
+		if (num_ids > 0) {
+			int cpu_info_ex[4];
+
+			cpuidex(cpu_info_ex, 7, 0);
+
+			if (cpu_info_ex[1] & (1<<16) /* AVX512F */) {
+				info << _("AVX512F capable processor") << endmsg;
+				_flags = Flags (_flags | (HasAVX512F));
+			}
+		}
+
 		/* finally get the CPU brand */
 
-		__cpuid (cpu_info, 0x80000000);
+		cpuid(cpu_info, 0x80000000);
 
 		const int parameter_end = 0x80000004;
 		string cpu_brand;
@@ -328,7 +328,7 @@ FPU::FPU ()
 
 			for (int parameter = 0x80000002; parameter <= parameter_end &&
 				     cpu_string_ptr < &cpu_string[sizeof(cpu_string)]; parameter++) {
-				__cpuid(cpu_info, parameter);
+				cpuid(cpu_info, parameter);
 				memcpy(cpu_string_ptr, cpu_info, sizeof(cpu_info));
 				cpu_string_ptr += sizeof(cpu_info);
 			}
