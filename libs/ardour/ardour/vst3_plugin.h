@@ -449,5 +449,11 @@ public:
 	boost::shared_ptr<VST3PluginModule> m;
 };
 
+#if defined(__clang__)
+#    pragma clang diagnostic pop
+#elif __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
+#    pragma GCC diagnostic pop
+#endif
+
 } // namespace ARDOUR
 #endif
