@@ -149,7 +149,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 		duration_clock = manage (new AudioClock (X_("stretch"), true, X_("stretch"), true, false, true, false, true));
 		duration_clock->set_session (e.session());
 		duration_clock->set_mode (AudioClock::BBT);
-		duration_clock->set_duration (timecnt_t (new_length, position));
+		duration_clock->set_duration (timecnt_t (new_length, position), true);
 
 		Gtk::Alignment* clock_align = manage (new Gtk::Alignment);
 		clock_align->add (*duration_clock);
