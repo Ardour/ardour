@@ -2064,10 +2064,12 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		return;
 	}
 
-	bool was_active = false;
-	if (_is_processing) {
-		was_active = true;
-		deactivate ();
+	/* some plugins, notably JUCE based ones, require the plugin to be
+	 * inactive to change bus arrangements.
+	 */
+	bool was_active = _is_processing;
+	if (!deactivate ()) {
+		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI::enable_io failed to deactivate plugin\n");
 	}
 
 	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: ins = %1 == %3 outs = %2 == %4\n", ins.size (), outs.size (), n_audio_inputs (), n_audio_outputs ()));
@@ -2098,6 +2100,10 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 				enable = true;
 			}
 		}
+		/* special case for Left only == Mono */
+		if (sa == 1 /*Vst::SpeakerArr::kSpeakerL */) {
+			sa = Vst::SpeakerArr::kMono; /* 1 << 19 */
+		}
 
 		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kInput, %1, %2, %3%4)\n", sa_in.size (), enable, std::hex, sa));
 		_component->activateBus (Vst::kAudio, Vst::kInput, sa_in.size (), enable);
@@ -2114,16 +2120,21 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 				enable = true;
 			}
 		}
+		/* special case for Left only == Mono */
+		if (sa == 1 /*Vst::SpeakerArr::kSpeakerL */) {
+			sa = Vst::SpeakerArr::kMono; /* 1 << 19 */
+		}
 		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kOutput, %1, %2, %3%4)\n", sa_out.size (), enable, std::hex, sa));
 		_component->activateBus (Vst::kAudio, Vst::kOutput, sa_out.size (), enable);
 		sa_out.push_back (sa);
 	}
 
+	Vst::SpeakerArrangement null_arrangement = {};
 #ifndef NDEBUG
 	tresult rv =
 #endif
-	_processor->setBusArrangements (sa_in.size () > 0 ? &sa_in[0] : NULL, sa_in.size (),
-	                                sa_out.size () > 0 ? &sa_out[0] : NULL, sa_out.size ());
+	_processor->setBusArrangements (sa_in.size () > 0 ? &sa_in[0] : &null_arrangement, sa_in.size (),
+	                                sa_out.size () > 0 ? &sa_out[0] : &null_arrangement, sa_out.size ());
 
 #ifndef NDEBUG
 	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: setBusArrangements ins = %1 outs = %2 | rv = %3\n", sa_in.size (), sa_out.size (), rv));
