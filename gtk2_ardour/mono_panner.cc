@@ -420,7 +420,7 @@ MonoPanner::on_motion_notify_event (GdkEventMotion* ev)
 	double delta = (ev->x - last_drag_x) / (double) w;
 
 	/* create a detent close to the center, at approx 1/180 deg */
-	if (!detented && fabsf (position_control->get_value() - .5f) < 0.006f) {
+	if (!detented && fabs (position_control->get_value() - .5) < 0.006) {
 		detented = true;
 		/* snap to center */
 		position_control->set_value (0.5, Controllable::NoGroup);
