@@ -6422,12 +6422,12 @@ Route::set_loop (Location* l)
 
 static inline MonitorState
 operator| (const MonitorState& a, const MonitorState& b) {
-  return static_cast<MonitorState> (static_cast <int>(a) | static_cast<int> (b));
+	return static_cast<MonitorState> (static_cast <int>(a) | static_cast<int> (b));
 }
 
 static inline MonitorState
 operator& (const MonitorState& a, const MonitorState& b) {
-  return static_cast<MonitorState> (static_cast <int>(a) & static_cast<int> (b));
+	return static_cast<MonitorState> (static_cast <int>(a) & static_cast<int> (b));
 }
 
 MonitorState
