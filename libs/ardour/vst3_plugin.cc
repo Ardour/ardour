@@ -2064,6 +2064,12 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		return;
 	}
 
+	bool was_active = false;
+	if (_is_processing) {
+		was_active = true;
+		deactivate ();
+	}
+
 	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: ins = %1 == %3 outs = %2 == %4\n", ins.size (), outs.size (), n_audio_inputs (), n_audio_outputs ()));
 
 	_enabled_audio_in  = ins;
@@ -2139,6 +2145,9 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		}
 	}
 #endif
+	if (was_active) {
+		activate ();
+	}
 }
 
 void
