@@ -41,9 +41,12 @@ class AutomationList;
 #if defined(__clang__)
 # pragma clang diagnostic push
 # pragma clang diagnostic ignored "-Wnon-virtual-dtor"
-#elif __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 6)
+# pragma clang diagnostic ignored "-Wdelete-non-virtual-dtor"
+# pragma clang diagnostic ignored "-Wdelete-non-abstract-non-virtual-dtor"
+#elif __GNUC__ > 4 || (__GNUC__ == 4 && __GNUC_MINOR__ >= 7)
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wnon-virtual-dtor"
+# pragma GCC diagnostic ignored "-Wdelete-non-virtual-dtor"
 #endif
 
 namespace Steinberg {
