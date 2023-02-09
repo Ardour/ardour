@@ -169,7 +169,7 @@ class VST3LinuxModule : public VST3PluginModule
 public:
 	VST3LinuxModule (std::string const& path)
 	{
-		if ((_dll = dlopen (path.c_str (), RTLD_LOCAL | RTLD_LAZY)) == 0) {
+		if ((_dll = dlopen (path.c_str (), RTLD_LOCAL | RTLD_LAZY | RTLD_DEEPBIND)) == 0) {
 			PBD::error << string_compose (_("Could not load VST3 plugin '%1': %2"), path, dlerror ()) << endmsg;
 			throw failed_constructor ();
 		}
