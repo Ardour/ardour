@@ -103,7 +103,7 @@ static void* vstfx_load_vst_library(const char* path)
 	you get some occasional failures to load - dlerror reports
 	invalid arguments*/
 
-	if ((dll = dlopen (path, RTLD_LOCAL | RTLD_LAZY | RTLD_DEEPBIND)) != 0) {
+	if ((dll = dlopen (path, RTLD_LOCAL | RTLD_LAZY)) != 0) {
 		return dll;
 	}
 
@@ -151,7 +151,7 @@ static void* vstfx_load_vst_library(const char* path)
 
 		/*Try and load the library*/
 
-		if ((dll = dlopen (full_path, RTLD_LOCAL | RTLD_LAZY | RTLD_DEEPBIND)) != 0) {
+		if ((dll = dlopen(full_path, RTLD_LOCAL | RTLD_LAZY)) != 0) {
 			/*Succeeded */
 			break;
 		}
