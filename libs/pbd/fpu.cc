@@ -33,12 +33,15 @@
 #include <asm/hwcap.h>
 #endif
 
-#ifdef PLATFORM_WINDOWS
-#include <intrin.h>
-#elif defined(__GNUC__) || defined(__clang__)
-#include <cpuid.h>
-#else
-#error "Unsupported compiler: need __cpuid and __cpuidex for CPU detection"
+/* x86 CPU  - need __cpuid to query flags */
+#if (defined __x86_64__) || (defined __i386__) || (defined _M_X64) || (defined _M_IX86)
+# ifdef PLATFORM_WINDOWS
+#  include <intrin.h>
+# elif defined(__GNUC__) || defined(__clang__)
+#  include <cpuid.h>
+# else
+#  error "Unsupported compiler: need __cpuid and __cpuidex for CPU detection"
+# endif
 #endif
 
 #include "pbd/compose.h"
@@ -52,8 +55,7 @@ using namespace std;
 
 FPU* FPU::_instance (0);
 
-#if ( (defined __x86_64__) || (defined __i386__) || (defined _M_X64) || (defined _M_IX86) ) // ARCH_X86
-
+#if (defined __x86_64__) || (defined __i386__) || (defined _M_X64) || (defined _M_IX86)
 #ifdef PLATFORM_WINDOWS
 /* Use MSVC/mingw intrinsic to get CPUID */
 static void cpuid(int reg[4], int cpuid_leaf)
