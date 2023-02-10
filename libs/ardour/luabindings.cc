@@ -788,11 +788,11 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_continuing", &Temporal::TempoMap::set_continuing)
 
 		.addFunction ("tempo_at", (Temporal::TempoPoint const& (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::tempo_at)
-		.addFunction ("tempo_at_bbt", (Temporal::TempoPoint const& (Temporal::TempoMap::*)(Temporal::BBT_Time const &) const) &Temporal::TempoMap::tempo_at)
+		.addFunction ("tempo_at_bbt", (Temporal::TempoPoint const& (Temporal::TempoMap::*)(Temporal::BBT_Argument const &) const) &Temporal::TempoMap::tempo_at)
 		.addFunction ("tempo_at_beats", (Temporal::TempoPoint const& (Temporal::TempoMap::*)(Temporal::Beats const &) const) &Temporal::TempoMap::tempo_at)
 
 		.addFunction ("meter_at", (Temporal::MeterPoint const& (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::meter_at)
-		.addFunction ("meter_at_bbt", (Temporal::MeterPoint const& (Temporal::TempoMap::*)(Temporal::BBT_Time const &) const) &Temporal::TempoMap::meter_at)
+		.addFunction ("meter_at_bbt", (Temporal::MeterPoint const& (Temporal::TempoMap::*)(Temporal::BBT_Argument const &) const) &Temporal::TempoMap::meter_at)
 		.addFunction ("meter_at_beats", (Temporal::MeterPoint const& (Temporal::TempoMap::*)(Temporal::Beats const &) const) &Temporal::TempoMap::meter_at)
 
 		.addFunction ("bbt_at", (Temporal::BBT_Time (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::bbt_at)
@@ -802,12 +802,12 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("tempo_at_sc", (Temporal::TempoPoint const& (Temporal::TempoMap::*)(superclock_t) const) &Temporal::TempoMap::tempo_at)
 		.addFunction ("meter_at_sc", (Temporal::MeterPoint const& (Temporal::TempoMap::*)(superclock_t) const) &Temporal::TempoMap::meter_at)
 		.addFunction ("superclock_at", (superclock_t (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::superclock_at)
-		.addFunction ("superclock_at_bbt", (superclock_t (Temporal::TempoMap::*)(Temporal::BBT_Time const &) const) &Temporal::TempoMap::superclock_at)
+		.addFunction ("superclock_at_bbt", (superclock_t (Temporal::TempoMap::*)(Temporal::BBT_Argument const &) const) &Temporal::TempoMap::superclock_at)
 		.addFunction ("superclock_at_beats", (superclock_t (Temporal::TempoMap::*)(Temporal::Beats const &) const) &Temporal::TempoMap::superclock_at)
 #endif
 
 		.addFunction ("quarters_at", (Temporal::Beats (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::quarters_at)
-		.addFunction ("quarters_at_bbt", (Temporal::Beats (Temporal::TempoMap::*)(Temporal::BBT_Time const &) const) &Temporal::TempoMap::quarters_at)
+		.addFunction ("quarters_at_bbt", (Temporal::Beats (Temporal::TempoMap::*)(Temporal::BBT_Argument const &) const) &Temporal::TempoMap::quarters_at)
 		.addFunction ("quarters_at_sample", &Temporal::TempoMap::quarters_at_sample)
 
 		.addFunction ("sample_at", (samplepos_t (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::sample_at)
@@ -816,7 +816,7 @@ LuaBindings::common (lua_State* L)
 
 		.addFunction ("bbt_duration_at", &Temporal::TempoMap::bbt_duration_at)
 		.addFunction ("bbtwalk_to_quarters", (Temporal::Beats (Temporal::TempoMap::*)(Temporal::Beats const &, Temporal::BBT_Offset const &) const) &Temporal::TempoMap::bbtwalk_to_quarters)
-		.addFunction ("bbtwalk_to_quarters_bbt", (Temporal::Beats (Temporal::TempoMap::*)(Temporal::BBT_Time const &, Temporal::BBT_Offset const &) const) &Temporal::TempoMap::bbtwalk_to_quarters)
+		.addFunction ("bbtwalk_to_quarters_bbt", (Temporal::Beats (Temporal::TempoMap::*)(Temporal::BBT_Argument const &, Temporal::BBT_Offset const &) const) &Temporal::TempoMap::bbtwalk_to_quarters)
 
 		.addFunction ("convert_duration", &Temporal::TempoMap::convert_duration)
 		.addFunction ("bbt_walk", &Temporal::TempoMap::bbt_walk)

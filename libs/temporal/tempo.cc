@@ -824,7 +824,7 @@ TempoMap::replace_tempo (TempoPoint const & old, Tempo const & t, timepos_t cons
 }
 
 TempoPoint &
-TempoMap::set_tempo (Tempo const & t, BBT_Time const & bbt)
+TempoMap::set_tempo (Tempo const & t, BBT_Argument const & bbt)
 {
 	return set_tempo (t, timepos_t (quarters_at (bbt)));
 }
@@ -1615,7 +1615,7 @@ TempoMap::set_meter (Meter const & m, timepos_t const & time)
 }
 
 MeterPoint &
-TempoMap::set_meter (Meter const & t, BBT_Time const & bbt)
+TempoMap::set_meter (Meter const & t, BBT_Argument const & bbt)
 {
 	return set_meter (t, timepos_t (quarters_at (bbt)));
 }
@@ -1718,7 +1718,7 @@ TempoMap::superclock_at (Temporal::Beats const & qn) const
 }
 
 superclock_t
-TempoMap::superclock_at (Temporal::BBT_Time const & bbt) const
+TempoMap::superclock_at (Temporal::BBT_Argument const & bbt) const
 {
 	return metric_at (bbt).superclock_at (bbt);
 }
@@ -1768,7 +1768,7 @@ TempoMap::bbtwalk_to_quarters (Beats const & pos, BBT_Offset const & distance) c
 }
 
 Temporal::Beats
-TempoMap::bbtwalk_to_quarters (BBT_Time const & pos, BBT_Offset const & distance) const
+TempoMap::bbtwalk_to_quarters (BBT_Argument const & pos, BBT_Offset const & distance) const
 {
 	return quarters_at (bbt_walk (pos, distance)) - quarters_at (pos);
 }
@@ -2335,7 +2335,7 @@ std::operator<<(std::ostream& str, TempoMapPoint const & tmp)
 }
 
 BBT_Time
-TempoMap::bbt_walk (BBT_Time const & bbt, BBT_Offset const & o) const
+TempoMap::bbt_walk (BBT_Argument const & bbt, BBT_Offset const & o) const
 {
 	BBT_Offset offset (o);
 	BBT_Time start (bbt);
@@ -2469,7 +2469,7 @@ TempoMap::quarters_at (timepos_t const & pos) const
 }
 
 Temporal::Beats
-TempoMap::quarters_at (Temporal::BBT_Time const & bbt) const
+TempoMap::quarters_at (Temporal::BBT_Argument const & bbt) const
 {
 	return metric_at (bbt).quarters_at (bbt);
 }
@@ -3053,7 +3053,7 @@ TempoMap::metric_at (Beats const & b, bool can_match) const
 }
 
 TempoMetric
-TempoMap::metric_at (BBT_Time const & bbt, bool can_match) const
+TempoMap::metric_at (BBT_Argument const & bbt, bool can_match) const
 {
 	TempoPoint const * tp = 0;
 	MeterPoint const * mp = 0;
