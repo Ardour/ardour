@@ -15,7 +15,11 @@
 #
 # Whenever a new preference variable is added to the source code, its name should also be added here.
 #
-
+# GUIDANCE:
+#   when adding new metadata/keywords, use a longer form of the word wherever possible, so that we will match on a substring of that word. For example
+#   use "synchronization" rather than sync, because that will match both "sync" and "synchronization". For languages that create plurals with a suffix,
+#   prefer plural forms for the same reason.
+#
 [SECTION:UI]
 
 [action-table-columns]
@@ -303,19 +307,19 @@
 [show-summary]
   summary show
 [slave-timecode-offset]
-  timecode sync offset
+  timecode synchronization offset
 [subframes-per-frame]
   timecode subframes sync
 [take-name]
   take names
 [timecode-format]
-  timecode sync format tc 
+  timecode synchronization format tc 
 [timecode-generator-offset]
-  timecode sync offset generate send
+  timecode synchronization offset generate send
 [timecode-offset]
-  timecode sync offset receive
+  timecode synchronization offset receive
 [timecode-offset-negative]
-  timecode sync offset negative
+  timecode synchronization offset negative
 [track-name-number]
 [track-name-take]
 [triggerbox-overrides-disk-monitoring]
@@ -410,13 +414,20 @@
 [max-recent-templates]
 [max-transport-speed]
 [meter-falloff]
+  meter falloff fall off
 [meter-type-bus]
+  meter type bus
 [meter-type-master]
+  meter type master
 [meter-type-track]
+  meter type track
 [midi-audition-synth-uri]
+  midi audition synthesizer plugin name id uri location
 [midi-clock-sets-tempo]
+  midi clock mclk set tempo
 [midi-feedback]
 [midi-input-follows-selection]
+  midi inputs port device follow selection tracks
 [midi-track-buffer-seconds]
 [minimum-disk-read-bytes]
 [minimum-disk-write-bytes]
@@ -453,24 +464,38 @@
 [recording-resets-xrun-count]
 [reference-manual-url]
 [region-boundaries-from-onscreen_tracks]
+  grid region boundaries from visible onscreen tracks lanes
 [region-boundaries-from-selected-tracks]
+  grid region boundaries from selected tracks lanes
 [region-equivalency]
+  options equivalent equivalence regions comparison selection
 [region-selection-after-split]
+  selection regions after split left right side
 [replicate-missing-region-channels]
+   channels replicate missing region
 [reset-default-speed-on-stop]
+   transport reset default speed stop
 [resource-index-url]
 [rewind-ffwd-like-tape-decks]
 [ripple-mode]
   ripple all interview selected
 [run-all-transport-masters-always]
+  synchronization always run masters transport
 [sample-lib-path]
 [save-history]
+   history save disk serialize store
 [save-history-depth]
+   history depth size length
 [send-ltc]
+  synchronization send transmit deliver linear timecode ltc
 [send-midi-clock]
+  synchronization send transmit deliver midi clock mclk
 [send-mmc]
+  synchronization send transmit deliver midi machine code mmc
 [send-mtc]
+  synchronization send transmit deliver midi time code timecode mtc
 [show-solo-mutes]
+  appearance solo mute
 [show-video-server-dialog]
 [show-vst3-micro-edit-inline]
 [shuttle-max-speed]
@@ -488,9 +513,11 @@
   transport recording xrun stop 
 [strict-io]
 [timecode-sync-frame-rate]
+  timecode synchronization frame rate
 [trace-midi-input]
 [trace-midi-output]
 [tracks-auto-naming]
+   automatically name tracks
 [transient-sensitivity]
 [transport-masters-just-roll-when-sync-lost]
 [try-autostart-engine]
@@ -515,7 +542,9 @@
 [use-vst3]
 [use-windows-vst]
 [verbose-plugin-scan]
+  plugins scanning verbose
 [verify-remove-last-capture]
+  verify remove removal last most recent capture recording take
 [video-advanced-setup]
 [video-server-docroot]
 [video-server-url]
