@@ -4718,6 +4718,30 @@ ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
 	set_time_domain (_point->line().the_list()->time_domain());
 }
 
+Temporal::timecnt_t
+ControlPointDrag::total_dt (GdkEvent* event) const
+{
+	if (_x_constrained) {
+		return timecnt_t::zero (Temporal::BeatTime);
+	}
+
+	/* x-axis delta in absolute samples, because we can't do any better */
+	timecnt_t const dx = timecnt_t (pixel_to_time (_drags->current_pointer_x() - grab_x()), _point->line().get_origin());
+
+	/* control point time in absolute time, using natural time domain */
+	timepos_t const point_absolute = (*_point->model())->when + _point->line().get_origin().shift_earlier (_point->line().offset());
+
+	/* Now adjust the absolute time by dx, and snap
+	 */
+	timepos_t snap = point_absolute + dx + snap_delta (event->button.state);
+	_editor->snap_to_with_modifier (snap, event);
+
+	/* Now measure the distance between the actual point position and
+	 * dragged one (possibly snapped), then subtract the snap delta again.
+	 */
+
+	return timecnt_t (point_absolute.distance (snap) - snap_delta (event->button.state));
+}
 
 void
 ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
@@ -4726,6 +4750,13 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	// start the grab at the center of the control point so
 	// the point doesn't 'jump' to the mouse after the first drag
+
+	/* The point coordinates are in canvas-item-relative space, so x==9
+	 * represents the start of the line. That start could be absolute zero
+	 * (for a track-level automation line) or the position of a region on
+	 * the timline (e.g. for MIDI CC data exposed as automation)
+	 */
+
 	_fixed_grab_x = _point->get_x() + _editor->time_to_pixel_unrounded (timepos_t (_point->line().offset()));
 	_fixed_grab_y = _point->get_y();
 
@@ -4746,57 +4777,41 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 void
 ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 {
-	double dx = _drags->current_pointer_x() - last_pointer_x();
+	/* First y */
+
 	double dy = current_pointer_y() - last_pointer_y();
-	bool need_snap = true;
 
 	if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::fine_adjust_modifier ())) {
-		dx *= 0.1;
 		dy *= 0.1;
-		need_snap = false;
 	}
 
-	/* coordinate in pixels relative to the start of the region (for region-based automation)
-	   or track (for track-based automation) */
-	double cx = _fixed_grab_x + _cumulative_x_drag + dx;
 	double cy = _fixed_grab_y + _cumulative_y_drag + dy;
-
-	// calculate zero crossing point. back off by .01 to stay on the
-	// positive side of zero
 	double const zero_gain_y = (1.0 - _zero_gain_fraction) * _point->line().height() - .01;
 
-	if (!_point->can_slide ()) {
-		cx = _fixed_grab_x;
-	}
 	if (_y_constrained) {
 		cy = _fixed_grab_y;
 	}
 
-	_cumulative_x_drag = cx - _fixed_grab_x;
 	_cumulative_y_drag = cy - _fixed_grab_y;
 
-	cx = max (0.0, cx);
 	cy = max (0.0, cy);
 	cy = min ((double) _point->line().height(), cy);
 
 	// make sure we hit zero when passing through
+
 	if ((cy < zero_gain_y && (cy - dy) > zero_gain_y) || (cy > zero_gain_y && (cy - dy) < zero_gain_y)) {
 		cy = zero_gain_y;
 	}
 
-	/* cx_pos is in absolute timeline units */
-	timepos_t cx_pos (timepos_t (pixel_to_time (cx)) + snap_delta (event->button.state));
-
-	if (need_snap) {
-		_editor->snap_to_with_modifier (cx_pos, event);
-	}
-
-	cx_pos.shift_earlier (snap_delta (event->button.state));
-
-	/* total number of pixels (canvas window units) to move */
-	double px = _editor->time_to_pixel_unrounded (cx_pos);
-
 	float const fraction = 1.0 - (cy / _point->line().height());
+
+	/* Now x axis */
+
+	timecnt_t dt;
+
+	if (_point->can_slide ()) {
+		dt = total_dt (event);
+	}
 
 	if (first_motion) {
 		float const initial_fraction = 1.0 - (_fixed_grab_y / _point->line().height());
@@ -4805,7 +4820,7 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 	}
 
 	pair<float, float> result;
-	result = _point->line().drag_motion (px, fraction, false, _pushing, _final_index);
+	result = _point->line().drag_motion (dt, fraction, false, _pushing, _final_index);
 	show_verbose_cursor_text (_point->line().get_verbose_cursor_relative_string (result.first, result.second));
 }
 
@@ -4941,7 +4956,7 @@ LineDrag::motion (GdkEvent* event, bool first_move)
 	/* we are ignoring x position for this drag, so we can just pass in anything */
 	pair<float, float> result;
 
-	result = _line->drag_motion (0, fraction, true, false, ignored);
+	result = _line->drag_motion (timecnt_t (time_domain()), fraction, true, false, ignored);
 	show_verbose_cursor_text (_line->get_verbose_cursor_relative_string (result.first, result.second));
 }
 
@@ -6514,7 +6529,7 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 		/* we are ignoring x position for this drag, so we can just pass in anything */
 		pair<float, float> result;
 		uint32_t ignored;
-		result = l->line->drag_motion (0, f, true, false, ignored);
+		result = l->line->drag_motion (timecnt_t (time_domain()), f, true, false, ignored);
 		show_verbose_cursor_text (l->line->get_verbose_cursor_relative_string (result.first, result.second));
 	}
 }

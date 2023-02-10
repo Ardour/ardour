@@ -485,7 +485,7 @@ struct ControlPointSorter
 };
 
 AutomationLine::ContiguousControlPoints::ContiguousControlPoints (AutomationLine& al)
-	: line (al), before_x (0), after_x (DBL_MAX)
+	: line (al), before_x (timepos_t (line.the_list()->time_domain())), after_x (timepos_t::max (line.the_list()->time_domain()))
 {
 }
 
@@ -502,8 +502,8 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 		*/
 
 		if (front()->view_index() > 0) {
-			before_x = line.nth (front()->view_index() - 1)->get_x();
-			before_x += e.sample_to_pixel_unrounded (64);
+			before_x = (*line.nth (front()->view_index() - 1)->model())->when;
+			before_x += timepos_t (64);
 		}
 
 		/* if our last point has a point after it in the line,
@@ -511,57 +511,65 @@ AutomationLine::ContiguousControlPoints::compute_x_bounds (PublicEditor& e)
 		*/
 
 		if (back()->view_index() < (line.npoints() - 1)) {
-			after_x = line.nth (back()->view_index() + 1)->get_x();
-			after_x -= e.sample_to_pixel_unrounded (64);
+			after_x = (*line.nth (back()->view_index() + 1)->model())->when;
+			after_x.shift_earlier (timepos_t (64));
 		}
 	}
 }
 
-double
-AutomationLine::ContiguousControlPoints::clamp_dx (double dx, double region_limit)
+Temporal::timecnt_t
+AutomationLine::ContiguousControlPoints::clamp_dt (timecnt_t const & dt, timepos_t const & line_limit)
 {
 	if (empty()) {
-		return dx;
+		return dt;
 	}
 
 	/* get the maximum distance we can move any of these points along the x-axis
 	 */
 
-	double tx; /* possible position a point would move to, given dx */
-	ControlPoint* cp;
+	ControlPoint* reference_point;
 
-	if (dx > 0) {
+	if (dt.magnitude() > 0) {
 		/* check the last point, since we're moving later in time */
-		cp = back();
+		reference_point = back();
 	} else {
 		/* check the first point, since we're moving earlier in time */
-		cp = front();
+		reference_point = front();
 	}
 
-	tx = cp->get_x() + dx; // new possible position if we just add the motion
+	/* possible position the "reference" point would move to, given dx */
+	Temporal::timepos_t possible_pos = (*reference_point->model())->when + dt; // new possible position if we just add the motion
 
-	tx = max (tx, 0.);
-	tx = min (tx, region_limit);
+	/* Now clamp that position so that:
+	 *
+	 * - it is not before the origin (zero)
+	 * - it is not beyond the line's own limit (e.g. for region automation)
+	 * - it is not before the preceding point
+	 * - it is not after the folloing point
+	 */
 
-	tx = max (tx, before_x); // can't move later than following point
-	tx = min (tx, after_x);  // can't move earlier than preceding point
+	possible_pos = max (possible_pos, Temporal::timepos_t (possible_pos.time_domain()));
+	possible_pos = min (possible_pos, line_limit);
 
-	return  tx - cp->get_x ();
+	possible_pos = max (possible_pos, before_x); // can't move later than following point
+	possible_pos = min (possible_pos, after_x);  // can't move earlier than preceding point
+
+	return (*reference_point->model())->when.distance (possible_pos);
 }
 
 void
-AutomationLine::ContiguousControlPoints::move (double dx, double dvalue)
+AutomationLine::ContiguousControlPoints::move (timecnt_t const & dt, double dvalue)
 {
-	for (std::list<ControlPoint*>::iterator i = begin(); i != end(); ++i) {
+	for (auto & cp : *this) {
 		// compute y-axis delta
-		double view_y = 1.0 - (*i)->get_y() / line.height();
+		double view_y = 1.0 - cp->get_y() / line.height();
 		line.view_to_model_coord_y (view_y);
 		line.apply_delta (view_y, dvalue);
 		view_y = line.model_to_view_coord_y (view_y);
 		view_y = (1.0 - view_y) * line.height();
 
-		(*i)->move_to ((*i)->get_x() + dx, view_y, ControlPoint::Full);
-		line.reset_line_coords (**i);
+		cp->move_to (line.dt_to_dx ((*cp->model())->when, dt), view_y, ControlPoint::Full);
+		line.reset_line_coords (*cp);
 	}
 }
 
@@ -572,8 +580,6 @@ AutomationLine::ContiguousControlPoints::move (double dx, double dvalue)
 void
 AutomationLine::start_drag_common (double x, float fraction)
 {
-	_drag_x = x;
-	_drag_distance = 0;
 	_last_drag_fraction = fraction;
 	_drag_had_movement = false;
 	did_push = false;
@@ -583,20 +589,39 @@ AutomationLine::start_drag_common (double x, float fraction)
 	_drag_points.sort (ControlPointSorter());
 }
 
+/** Takes a relative-to-origin position, moves it by dt, and returns a
+ *  relative-to-origin pixel count.
+ */
+double
+AutomationLine::dt_to_dx (timepos_t const & pos, timecnt_t const & dt)
+{
+	/* convert a shift of pos by dt into an absolute timepos */
+	timepos_t const new_pos ((pos + dt + get_origin()).shift_earlier (offset()));
+	/* convert to pixels */
+	double px = trackview.editor().time_to_pixel_unrounded (new_pos);
+	/* convert back to pixels-relative-to-origin */
+	px -= trackview.editor().time_to_pixel_unrounded (get_origin());
+	return px;
+}
 
 /** Should be called to indicate motion during a drag.
- *  @param x New x position of the drag in canvas units, or undefined if ignore_x == true.
+ *  @param x New x position of the drag in canvas units relative to origin, or undefined if ignore_x == true.
  *  @param fraction New y fraction.
  *  @return x position and y fraction that were actually used (once clamped).
  */
 pair<float, float>
-AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool with_push, uint32_t& final_index)
+AutomationLine::drag_motion (timecnt_t const & pdt, float fraction, bool ignore_x, bool with_push, uint32_t& final_index)
 {
 	if (_drag_points.empty()) {
 		return pair<double,float> (fraction, _desc.is_linear () ? 0 : 1);
 	}
 
-	double dx = ignore_x ? 0 : (x - _drag_x);
+	timecnt_t dt (pdt);
+
+	if (ignore_x) {
+		dt = timecnt_t (pdt.time_domain());
+	}
+
 	double dy = fraction - _last_drag_fraction;
 
 	if (!_drag_had_movement) {
@@ -641,11 +666,10 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 	 * since all later points will move too.
 	 */
 
-	if (dx < 0 || ((dx > 0) && !with_push)) {
-		const timepos_t rl (maximum_time() + _offset);
-		double region_limit = trackview.editor().duration_to_pixels_unrounded (timecnt_t (rl, get_origin()));
+	if (dt.is_negative() || (dt.is_positive() && !with_push)) {
+		const timepos_t line_limit = get_origin() + maximum_time() + _offset;
 		for (auto const & ccp : contiguous_points){
-			dx = ccp->clamp_dx (dx, region_limit);
+			dt = ccp->clamp_dt (dt, line_limit);
 		}
 	}
 
@@ -679,18 +703,22 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 		}
 	}
 
-	if (dx || dy) {
+	if (!dt.is_zero() || dy) {
 		/* and now move each section */
+
+
 		for (vector<CCP>::iterator ccp = contiguous_points.begin(); ccp != contiguous_points.end(); ++ccp) {
-			(*ccp)->move (dx, delta_value);
+			(*ccp)->move (dt, delta_value);
 		}
 
 		if (with_push) {
 			final_index = contiguous_points.back()->back()->view_index () + 1;
 			ControlPoint* p;
 			uint32_t i = final_index;
+
 			while ((p = nth (i)) != 0 && p->can_slide()) {
-				p->move_to (p->get_x() + dx, p->get_y(), ControlPoint::Full);
+
+				p->move_to (dt_to_dx ((*p->model())->when, dt), p->get_y(), ControlPoint::Full);
 				reset_line_coords (*p);
 				++i;
 			}
@@ -716,8 +744,6 @@ AutomationLine::drag_motion (double const x, float fraction, bool ignore_x, bool
 	}
 
 	double const result_frac = _last_drag_fraction + dy;
-	_drag_distance += dx;
-	_drag_x += dx;
 	_last_drag_fraction = result_frac;
 	did_push = with_push;
 

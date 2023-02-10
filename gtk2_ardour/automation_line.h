@@ -92,7 +92,7 @@ public:
 	virtual void start_drag_single (ControlPoint*, double, float);
 	virtual void start_drag_line (uint32_t, uint32_t, float);
 	virtual void start_drag_multiple (std::list<ControlPoint*>, float, XMLNode *);
-	virtual std::pair<float, float> drag_motion (double, float, bool, bool with_push, uint32_t& final_index);
+	virtual std::pair<float, float> drag_motion (Temporal::timecnt_t const &, float, bool, bool with_push, uint32_t& final_index);
 	virtual void end_drag (bool with_push, uint32_t final_index);
 
 	ControlPoint* nth (uint32_t);
@@ -167,6 +167,8 @@ public:
 	Temporal::timepos_t session_position (Temporal::timepos_t const &) const;
 	void dump (std::ostream&) const;
 
+	double dt_to_dx (Temporal::timepos_t const &, Temporal::timecnt_t const &);
+
 protected:
 
 	std::string    _name;
@@ -194,13 +196,13 @@ protected:
 	class ContiguousControlPoints : public std::list<ControlPoint*> {
 public:
 		ContiguousControlPoints (AutomationLine& al);
-		double clamp_dx (double dx, double region_limit);
-		void move (double dx, double dvalue);
+		Temporal::timecnt_t clamp_dt (Temporal::timecnt_t const & dx, Temporal::timepos_t const & region_limit);
+		void move (Temporal::timecnt_t const &, double dvalue);
 		void compute_x_bounds (PublicEditor& e);
 private:
 		AutomationLine& line;
-		double before_x;
-		double after_x;
+		Temporal::timepos_t before_x;
+		Temporal::timepos_t after_x;
 	};
 
 	friend class ContiguousControlPoints;
@@ -221,8 +223,6 @@ private:
 	std::list<ControlPoint*> _drag_points; ///< points we are dragging
 	std::list<ControlPoint*> _push_points; ///< additional points we are dragging if "push" is enabled
 	bool _drag_had_movement; ///< true if the drag has seen movement, otherwise false
-	double _drag_x; ///< last x position of the drag, in units
-	double _drag_distance; ///< total x movement of the drag, in canvas units
 	double _last_drag_fraction; ///< last y position of the drag, as a fraction
 	/** offset from the start of the automation list to the start of the line, so that
 	 *  a +ve offset means that the 0 on the line is at _offset in the list
