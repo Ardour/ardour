@@ -1154,7 +1154,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 
 	char buf[64];
 	Temporal::BBT_Time next_beat;
-	uint32_t beats = 0;
 	double bbt_position_of_helper;
 	bool helper_active = false;
 	ArdourCanvas::Ruler::Mark mark;
@@ -1339,8 +1338,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 
 	case bbt_show_quarters:
 
-		beats = distance (grid.begin(), grid.end());
-
 		mark.label = "";
 		mark.position = lower;
 		mark.style = ArdourCanvas::Ruler::Mark::Micro;
@@ -1377,8 +1374,6 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	case bbt_show_thirtyseconds:
 	case bbt_show_sixtyfourths:
 	case bbt_show_onetwentyeighths:
-
-		beats = distance (grid.begin(), grid.end());
 
 		bbt_position_of_helper = lower + (3 * Editor::get_current_zoom ());
 
