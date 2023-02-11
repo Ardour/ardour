@@ -166,7 +166,8 @@ VST3Plugin::default_value (uint32_t port)
 void
 VST3Plugin::set_parameter (uint32_t port, float val, sampleoffset_t when)
 {
-	if (AudioEngine::instance()->in_process_thread()) {
+	if (!_plug->active () || AudioEngine::instance()->in_process_thread()) {
+		/* directly use VST3PI::_input_param_changes */
 		_plug->set_parameter (port, val, when);
 	} else {
 		assert (when == 0);
@@ -610,9 +611,18 @@ VST3Plugin::set_state (const XMLNode& node, int version)
 			continue;
 		}
 
+		/* This is not required, PluginInsert::set_state calls
+		 * set_control_ids() which already calls VST3Plugin::set_parameter.
+		 *
+		 * However there /may/ not be controllables for all parameters. Doing
+		 * this here also prevents an additional pass to synchronize the controller
+		 * via VST3PI::load_state -> VST3PI::update_shadow_data -> addParameterData
+		 */
+#if 1
 		if (!_plug->try_set_parameter_by_id (param_id, value)) {
 			warning << string_compose (_("VST3<%1>: Invalid Vst::ParamID in VST3Plugin::set_state"), name ()) << endmsg;
 		}
+#endif
 	}
 
 	XMLNode* chunk;
@@ -1253,6 +1263,8 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 	}
 
 	int32 n_params = _controller->getParameterCount ();
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3 parameter count: %1\n", n_params));
+
 	for (int32 i = 0; i < n_params; ++i) {
 		Vst::ParameterInfo pi;
 		if (_controller->getParameterInfo (i, pi) != kResultTrue) {
