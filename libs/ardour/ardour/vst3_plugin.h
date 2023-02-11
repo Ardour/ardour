@@ -173,7 +173,9 @@ public:
 	                       EndGesture,
 	                       ValueChange,
 	                       InternalChange,
-	                       PresetChange };
+	                       PresetChange,
+	                       ParamValueChanged
+	                     };
 
 	PBD::Signal3<void, ParameterChange, uint32_t, float> OnParameterChange;
 
