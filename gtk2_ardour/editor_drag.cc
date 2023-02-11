@@ -6836,25 +6836,6 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	Drag::start_grab (event, cursor);
 
 	_y = _region_view->note_to_y (_region_view->y_to_note (y_to_region (event->button.y)));
-
-	const timepos_t pos = _drags->current_pointer_time ();
-	const Beats beats = pos.beats ();
-
-	/* XXX Fix this some day to use next-earliest region and extend to new
-	   position if necessary.
-	*/
-
-	boost::shared_ptr<MidiRegion> mr = _region_view->midi_region();
-
-	if (beats >= mr->nt_last().beats()) {
-		return;
-	}
-
-	const Temporal::Beats start = beats - _region_view->region()->position().beats ();
-
-	_region_view->clear_note_selection();
-
-	_last_pos = timepos_t (start);
 }
 
 void
@@ -6865,17 +6846,12 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 	}
 
 	boost::shared_ptr<MidiRegion> mr = _region_view->midi_region();
-	const timepos_t pos (_drags->current_pointer_time());
-	const Beats beats = pos.beats();
 
-	if (beats > mr->nt_last().beats()) {
-		/* past end of region */
-		return;
-	}
+	timepos_t pos (_drags->current_pointer_time());
+	_editor->snap_to (pos, RoundNearest, SnapToGrid_Scaled);
+	Temporal::Beats aligned_beats (pos.beats ());
 
-	timepos_t snapped (beats);
-	_editor->snap_to (snapped, RoundNearest, SnapToGrid_Scaled);
-	const timepos_t region_offset (snapped.beats() - _region_view->region()->position ().beats());
+	Beats const start = _region_view->region()->absolute_time_to_region_beats (timepos_t (aligned_beats));
 
 	/* This code is like MidiRegionView::get_draw_length_beats() but
 	 * defaults to 1/64th note rather than a 1/4 note, since we're in
@@ -6890,7 +6866,7 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 	}
 
 	/* create_note_at() implements UNDO for us */
-	_region_view->create_note_at (region_offset, _y, length, event->button.state, false);
+	_region_view->create_note_at (timepos_t (start), _y, length, event->button.state, false);
 }
 
 double
