@@ -608,7 +608,7 @@ TempoDialog::tap_tempo_focus_out (GdkEventFocus* )
 MeterDialog::MeterDialog (TempoMap::SharedPtr const & map, timepos_t const & pos, const string&)
 	: ArdourDialog (_("New Time Signature"))
 {
-	Temporal::BBT_Time when (map->round_to_bar (map->bbt_at (pos)));
+	Temporal::BBT_Argument when (map->round_to_bar (map->bbt_at (pos)));
 	Meter const & meter (map->meter_at (when));
 
 	init (when, meter.divisions_per_bar(), meter.note_value(), false, pos.time_domain());

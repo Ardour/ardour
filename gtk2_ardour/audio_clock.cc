@@ -2123,7 +2123,7 @@ AudioClock::samples_from_bbt_string (timepos_t const & pos, const string& str) c
 		return 0;
 	}
 
-	BBT_Time bbt;
+	BBT_Argument bbt;
 
 	if (sscanf (str.c_str(), BBT_SCANF_FORMAT, &bbt.bars, &bbt.beats, &bbt.ticks) != 3) {
 		return 0;

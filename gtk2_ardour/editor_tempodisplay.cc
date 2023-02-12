@@ -519,9 +519,9 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 
 	double note_type = meter_dialog.get_note_type ();
 
-	Temporal::BBT_Time requested;
-	meter_dialog.get_bbt_time (requested);
-
+	Temporal::BBT_Time r;
+	meter_dialog.get_bbt_time (r);
+	Temporal::BBT_Argument requested (timepos_t::zero (Temporal::BeatTime), r);
 
 	TempoMapChange tmc (*this, _("add time signature"));
 	pos = timepos_t (tmc.map().quarters_at (requested));
@@ -631,8 +631,9 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 	double const note_type = meter_dialog.get_note_type ();
 	const Meter meter (bpb, note_type);
 
-	Temporal::BBT_Time when;
-	meter_dialog.get_bbt_time (when);
+	Temporal::BBT_Time w;
+	meter_dialog.get_bbt_time (w);
+	Temporal::BBT_Argument when (timepos_t::zero (Temporal::BeatTime), w);
 
 	TempoMapChange tmc (*this, _("edit time signature"));
 	tmc.map().set_meter (meter, when);
@@ -682,8 +683,9 @@ Editor::edit_tempo_section (TempoPoint& section)
 
 	const Tempo tempo (bpm, end_bpm, nt);
 
-	Temporal::BBT_Time when;
-	tempo_dialog.get_bbt_time (when);
+	Temporal::BBT_Time w;
+	tempo_dialog.get_bbt_time (w);
+	Temporal::BBT_Argument when (timepos_t::zero (Temporal::BeatTime), w);
 
 	TempoMapChange tmc (*this, _("edit tempo"));
 	tmc.map().replace_tempo (section, tempo, timepos_t (tmc.map().quarters_at (when)));

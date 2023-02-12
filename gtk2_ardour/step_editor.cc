@@ -420,7 +420,7 @@ StepEditor::step_edit_bar_sync ()
 
 	/* have to go to BBT to round up to bar, unfortunately */
 	TempoMap::SharedPtr tmap (TempoMap::use());
-	BBT_Time bbt (tmap->bbt_at (pos).round_up_to_bar ());
+	BBT_Argument bbt (tmap->bbt_at (pos).round_up_to_bar ());
 
 	/* now back to beats */
 	pos = timepos_t (tmap->quarters_at (bbt));

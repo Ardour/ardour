@@ -310,7 +310,7 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 		cerr << "new meter from SMF : " << meter << endl;
 
 
-		Temporal::BBT_Time bbt; /* 1|1|0 which is correct for the no-meter case */
+		Temporal::BBT_Argument bbt; /* 1|1|0 which is correct for the no-meter case */
 
 		if (have_initial_meter) {
 

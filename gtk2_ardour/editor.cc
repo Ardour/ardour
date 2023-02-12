@@ -2957,16 +2957,16 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 
 	if (_grid_type == GridTypeBar) {
 		TempoMetric m (tmap->metric_at (presnap));
-		BBT_Time bbt (m.bbt_at (presnap));
+		BBT_Argument bbt (m.bbt_at (presnap));
 		switch (direction) {
 		case RoundDownAlways:
-			bbt = bbt.round_down_to_bar ();
+			bbt = BBT_Argument (bbt.reference(), bbt.round_down_to_bar ());
 			break;
 		case RoundUpAlways:
-			bbt = bbt.round_up_to_bar ();
+			bbt = BBT_Argument (bbt.reference(), bbt.round_up_to_bar ());
 			break;
 		case RoundNearest:
-			bbt = m.round_to_bar (bbt);
+			bbt = BBT_Argument (bbt.reference(), m.round_to_bar (bbt));
 			break;
 		default:
 			break;
