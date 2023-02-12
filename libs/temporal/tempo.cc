@@ -636,7 +636,7 @@ MeterPoint::get_state () const
 	return base;
 }
 
-Temporal::BBT_Time
+Temporal::BBT_Argument
 TempoMetric::bbt_at (timepos_t const & pos) const
 {
 	if (pos.is_beats()) {
@@ -675,7 +675,9 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 
 	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("BBT offset from %3 @ %1: %2\n", (_tempo->beats() < _meter->beats() ?  _meter->bbt() : _tempo->bbt()), bbt_offset,
 	                                                 (_tempo->beats() < _meter->beats() ? "meter" : "tempo")));
-	return _meter->bbt_add (reference_point->bbt(), bbt_offset);
+	timepos_t ref (std::min (_meter->sclock(), _tempo->sclock()));
+
+	return BBT_Argument (ref, _meter->bbt_add (reference_point->bbt(), bbt_offset));
 }
 
 superclock_t
@@ -1664,7 +1666,7 @@ TempoMap::remove_meter (MeterPoint const & mp, bool with_reset)
 	}
 }
 
-Temporal::BBT_Time
+Temporal::BBT_Argument
 TempoMap::bbt_at (timepos_t const & pos) const
 {
 	if (pos.is_beats()) {
@@ -1673,16 +1675,20 @@ TempoMap::bbt_at (timepos_t const & pos) const
 	return bbt_at (pos.superclocks());
 }
 
-Temporal::BBT_Time
+Temporal::BBT_Argument
 TempoMap::bbt_at (superclock_t s) const
 {
-	return metric_at (s).bbt_at (timepos_t::from_superclock (s));
+	TempoMetric metric (metric_at (s));
+	timepos_t ref (std::min (metric.tempo().sclock(), metric.meter().sclock()));
+	return BBT_Argument (ref, metric.bbt_at (timepos_t::from_superclock (s)));
 }
 
-Temporal::BBT_Time
+Temporal::BBT_Argument
 TempoMap::bbt_at (Temporal::Beats const & qn) const
 {
-	return metric_at (qn).bbt_at (qn);
+	TempoMetric metric (metric_at (qn));
+	timepos_t ref (std::min (metric.tempo().sclock(), metric.meter().sclock()));
+	return BBT_Argument (ref, metric.bbt_at (qn));
 }
 
 #if 0
@@ -1940,7 +1946,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	TempoPoint const * tp = 0;
 	MeterPoint const * mp = 0;
 	Points::const_iterator p = _points.begin();
-	BBT_Time bbt;
+	BBT_Argument bbt;
 	Beats beats;
 
 	/* Find relevant meter for nominal start point */
@@ -1980,7 +1986,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 		 * in effect at that time.
 		 */
 
-		const BBT_Time new_bbt = metric.meter().round_up_to_beat (bbt);
+		const BBT_Argument new_bbt (metric.reftime(), metric.meter().round_up_to_beat (bbt));
 
 		if (new_bbt != bbt) {
 
@@ -2032,8 +2038,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 		if (bar != bbt) {
 
-			bbt = bar;
-
+			bbt = BBT_Argument (bbt.reference(), bar);
 
 			/* rebuild metric */
 
@@ -2334,7 +2339,7 @@ std::operator<<(std::ostream& str, TempoMapPoint const & tmp)
 	return str;
 }
 
-BBT_Time
+BBT_Argument
 TempoMap::bbt_walk (BBT_Argument const & bbt, BBT_Offset const & o) const
 {
 	BBT_Offset offset (o);
@@ -2348,7 +2353,7 @@ TempoMap::bbt_walk (BBT_Argument const & bbt, BBT_Offset const & o) const
 	/* trivial (and common) case: single tempo, single meter */
 
 	if (_tempos.size() == 1 && _meters.size() == 1) {
-		return _meters.front().bbt_add (bbt, o);
+		return BBT_Argument (_meters.front().bbt_add (bbt, o));
 	}
 
 	/* Find tempo,meter pair for bbt, and also for the next tempo and meter
@@ -2454,8 +2459,7 @@ TempoMap::bbt_walk (BBT_Argument const & bbt, BBT_Offset const & o) const
 		start.ticks %= ticks_per_beat;
 	}
 
-
-	return start;
+	return BBT_Argument (metric.reftime(), start);
 }
 
 Temporal::Beats

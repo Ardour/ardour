@@ -234,7 +234,7 @@ Session::convert_to_samples (AnyTime const & position)
 
 	switch (position.type) {
 	case AnyTime::BBT:
-		return Temporal::superclock_to_samples (TempoMap::use()->superclock_at (position.bbt), _current_sample_rate);
+		return Temporal::superclock_to_samples (TempoMap::use()->superclock_at (BBT_Argument (timepos_t::zero (Temporal::BeatTime), position.bbt)), _current_sample_rate);
 		break;
 
 	case AnyTime::Timecode:

@@ -795,8 +795,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("meter_at_bbt", (Temporal::MeterPoint const& (Temporal::TempoMap::*)(Temporal::BBT_Argument const &) const) &Temporal::TempoMap::meter_at)
 		.addFunction ("meter_at_beats", (Temporal::MeterPoint const& (Temporal::TempoMap::*)(Temporal::Beats const &) const) &Temporal::TempoMap::meter_at)
 
-		.addFunction ("bbt_at", (Temporal::BBT_Time (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::bbt_at)
-		.addFunction ("bbt_at_beats", (Temporal::BBT_Time (Temporal::TempoMap::*)(Temporal::Beats const &) const) &Temporal::TempoMap::bbt_at)
+		.addFunction ("bbt_at", (Temporal::BBT_Argument (Temporal::TempoMap::*)(Temporal::timepos_t const &) const) &Temporal::TempoMap::bbt_at)
+		.addFunction ("bbt_at_beats", (Temporal::BBT_Argument (Temporal::TempoMap::*)(Temporal::Beats const &) const) &Temporal::TempoMap::bbt_at)
 
 #ifdef WITH_SUPERCLOCK_BINDINGS
 		.addFunction ("tempo_at_sc", (Temporal::TempoPoint const& (Temporal::TempoMap::*)(superclock_t) const) &Temporal::TempoMap::tempo_at)

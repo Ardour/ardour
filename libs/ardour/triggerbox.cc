@@ -929,18 +929,18 @@ Trigger::process_state_requests (BufferSet& bufs, pframes_t dest_offset)
 	}
 }
 
-Temporal::BBT_Time
+Temporal::BBT_Argument
 Trigger::compute_start (Temporal::TempoMap::SharedPtr const & tmap, samplepos_t start, samplepos_t end, Temporal::BBT_Offset const & q, samplepos_t& start_samples, bool& will_start)
 {
 	Temporal::Beats start_beats (tmap->quarters_at (timepos_t (start)));
 	Temporal::Beats end_beats (tmap->quarters_at (timepos_t (end)));
 
-	Temporal::BBT_Time t_bbt;
+	Temporal::BBT_Argument t_bbt;
 	Temporal::Beats t_beats;
 
 	if (!compute_quantized_transition (start, start_beats, end_beats, t_bbt, t_beats, start_samples, tmap, q)) {
 		will_start = false;
-		return Temporal::BBT_Time ();
+		return Temporal::BBT_Argument ();
 	}
 
 	will_start = true;
@@ -949,7 +949,7 @@ Trigger::compute_start (Temporal::TempoMap::SharedPtr const & tmap, samplepos_t 
 
 bool
 Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
-                                       Temporal::BBT_Time& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
+                                       Temporal::BBT_Argument& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
                                        Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Offset const & q)
 {
 	/* XXX need to use global grid here is quantization == zero */
@@ -958,7 +958,7 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 	 * quantization, the next time for a transition.
 	 */
 
-	Temporal::BBT_Time possible_bbt;
+	Temporal::BBT_Argument possible_bbt;
 	Temporal::Beats possible_beats;
 	samplepos_t possible_samples;
 
@@ -978,7 +978,7 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 	} else {
 
 		possible_bbt = tmap->bbt_at (timepos_t (start_beats));
-		possible_bbt = possible_bbt.round_up_to_bar ();
+		possible_bbt = Temporal::BBT_Argument (possible_bbt.reference(), possible_bbt.round_up_to_bar ());
 		/* bars are 1-based; 'every 4 bars' means 'on bar 1, 5, 9, ...' */
 		possible_bbt.bars = 1 + ((possible_bbt.bars-1) / q.bars * q.bars);
 		possible_beats = tmap->quarters_at (possible_bbt);
@@ -1004,7 +1004,7 @@ Trigger::compute_quantized_transition (samplepos_t start_sample, Temporal::Beats
 
 pframes_t
 Trigger::compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes,
-                                  Temporal::BBT_Time& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
+                                  Temporal::BBT_Argument& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
                                   Temporal::TempoMap::SharedPtr const & tmap)
 {
 	using namespace Temporal;
@@ -1072,7 +1072,7 @@ Trigger::maybe_compute_next_transition (samplepos_t start_sample, Temporal::Beat
 		return;
 	}
 
-	Temporal::BBT_Time transition_bbt;
+	Temporal::BBT_Argument transition_bbt;
 	TempoMap::SharedPtr tmap (TempoMap::use());
 
 	if (!compute_next_transition (start_sample, start, end, nframes, transition_bbt, transition_beats, transition_samples, tmap)) {
@@ -1449,13 +1449,15 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
            _beatcnt : the expected duration of the trigger, based on analysis of its tempo .. can be overridden by the user later
 	*/
 
-	samplepos_t end_by_follow_length = tmap->sample_at (tmap->bbt_walk(transition_bbt, _follow_length));
+	const Temporal::BBT_Argument transition_bba (timepos_t::zero (Temporal::BeatTime), transition_bbt);
+
+	samplepos_t end_by_follow_length = tmap->sample_at (tmap->bbt_walk (transition_bba, _follow_length));
 	samplepos_t end_by_data_length = transition_sample + (data.length - _start_offset);
 	/* this could still blow up if the data is less than 1 tick long, but
 	   we should handle that elsewhere.
 	*/
 	const Temporal::Beats bc (Temporal::Beats::from_double (_beatcnt));
-	samplepos_t end_by_beatcnt = tmap->sample_at (tmap->bbt_walk(transition_bbt, Temporal::BBT_Offset (0, bc.get_beats(), bc.get_ticks())));
+	samplepos_t end_by_beatcnt = tmap->sample_at (tmap->bbt_walk (transition_bba, Temporal::BBT_Offset (0, bc.get_beats(), bc.get_ticks())));
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 SO %9 @ %2 / %3 / %4 ends: FL %5 (from %6) BC %7 DL %8\n",
 	                                              index(), transition_sample, transition_beats, transition_bbt,
@@ -2315,8 +2317,10 @@ MIDITrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position,
 timepos_t
 MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t, Temporal::Beats & effective_length)
 {
-	Temporal::Beats end_by_follow_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, _follow_length));
-	Temporal::Beats end_by_data_length = tmap->quarters_at (tmap->bbt_walk (transition_bbt, Temporal::BBT_Offset (0, data_length.get_beats(), data_length.get_ticks())));
+	const Temporal::BBT_Argument transition_bba (timepos_t::zero(Temporal::BeatTime), transition_bbt);
+
+	Temporal::Beats end_by_follow_length = tmap->quarters_at (tmap->bbt_walk (transition_bba, _follow_length));
+	Temporal::Beats end_by_data_length = tmap->quarters_at (tmap->bbt_walk (transition_bba, Temporal::BBT_Offset (0, data_length.get_beats(), data_length.get_ticks())));
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 ends: TB %2 FL %3 EBFL %4 DL %5 EBDL %6 tbbt %7 fl %8\n",
 	                                              index(), transition_beats, _follow_length, end_by_follow_length, data_length, end_by_data_length, transition_bbt, _follow_length));
@@ -2326,10 +2330,10 @@ MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::
 
 		if (internal_use_follow_length()) {
 			final_beat = end_by_follow_length;
-			effective_length = tmap->bbtwalk_to_quarters (transition_bbt, _follow_length);
+			effective_length = tmap->bbtwalk_to_quarters (transition_bba, _follow_length);
 		} else {
 			final_beat = end_by_data_length;
-			effective_length = tmap->bbtwalk_to_quarters (transition_bbt, Temporal::BBT_Offset (0, data_length.get_beats(), data_length.get_ticks()));
+			effective_length = tmap->bbtwalk_to_quarters (transition_bba, Temporal::BBT_Offset (0, data_length.get_beats(), data_length.get_ticks()));
 		}
 
 	} else {
@@ -3192,7 +3196,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	CueEvents::const_reverse_iterator c = cues.rbegin ();
 	samplepos_t pos = c->time;
 	TriggerPtr trig;
-	Temporal::BBT_Time start_bbt;
+	Temporal::BBT_Argument start_bbt;
 	samplepos_t start_samples;
 	Temporal::Beats effective_length;
 	bool will_start;
@@ -3344,7 +3348,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 	if (start_samples < transport_position) {
 		samplepos_t s = start_samples;
-		BBT_Time ns = start_bbt;
+		BBT_Argument ns = start_bbt;
 		const BBT_Offset step (0, effective_length.get_beats(), effective_length.get_ticks());
 
 		do {

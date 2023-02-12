@@ -292,7 +292,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	timepos_t current_pos() const;
 	double position_as_fraction() const;
 
-	Temporal::BBT_Time compute_start (Temporal::TempoMap::SharedPtr const &, samplepos_t start, samplepos_t end, Temporal::BBT_Offset const & q, samplepos_t& start_samples, bool& will_start);
+	Temporal::BBT_Argument compute_start (Temporal::TempoMap::SharedPtr const &, samplepos_t start, samplepos_t end, Temporal::BBT_Offset const & q, samplepos_t& start_samples, bool& will_start);
 	virtual timepos_t compute_end (Temporal::TempoMap::SharedPtr const &, Temporal::BBT_Time const &, samplepos_t, Temporal::Beats &) = 0;
 	virtual void start_and_roll_to (samplepos_t start, samplepos_t position, uint32_t cnt) = 0;
 
@@ -337,11 +337,11 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 
 
 	bool compute_quantized_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end,
-	                                   Temporal::BBT_Time& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
+	                                   Temporal::BBT_Argument& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
 	                                   Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Offset const & q);
 
 	pframes_t compute_next_transition (samplepos_t start_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes,
-	                                   Temporal::BBT_Time& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
+	                                   Temporal::BBT_Argument& t_bbt, Temporal::Beats& t_beats, samplepos_t& t_samples,
 	                                   Temporal::TempoMap::SharedPtr const & tmap);
 
 

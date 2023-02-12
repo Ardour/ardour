@@ -2120,8 +2120,8 @@ Session::flush_cue_recording ()
 	_locations->clear_cue_markers (_last_roll_location, _transport_sample);
 
 	while (TriggerBox::cue_records.read (&cr, 1) == 1) {
-		BBT_Time bbt = tmap->bbt_at (timepos_t (cr.when));
-		bbt = bbt.round_up_to_bar ();
+		BBT_Argument bbt = tmap->bbt_at (timepos_t (cr.when));
+		bbt = BBT_Argument (bbt.reference(), bbt.round_up_to_bar ());
 
 		const timepos_t when (tmap->quarters_at (bbt));
 

@@ -200,14 +200,14 @@ intptr_t Session::vst_callback (
 				newflags |= (kVstTimeSigValid);
 			}
 			if ((value & (kVstPpqPosValid)) || (value & (kVstBarsValid))) {
-				Temporal::BBT_Time bbt;
+				Temporal::BBT_Argument bbt;
 
 				try {
 					bbt = tmap->bbt_at (timepos_t (now));
 					bbt.beats = 1;
 					bbt.ticks = 0;
 					/* exact quarter note */
-					double ppqBar = DoubleableBeats (tmap->quarters_at (bbt)).to_double ();
+					double ppqBar = DoubleableBeats (tmap->quarters_at (BBT_Argument (bbt))).to_double ();
 					/* quarter note at sample position (not rounded to note subdivision) */
 					double ppqPos = DoubleableBeats (tmap->quarters_at_sample (now)).to_double();
 					if (value & (kVstPpqPosValid)) {
