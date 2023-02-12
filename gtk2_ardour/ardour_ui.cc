@@ -596,7 +596,7 @@ ARDOUR_UI::engine_stopped ()
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::engine_stopped)
 	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, true);
-	update_sample_rate (0);
+	update_sample_rate ();
 	update_cpu_load ();
 }
 
@@ -609,7 +609,7 @@ ARDOUR_UI::engine_running (uint32_t cnt)
 
 	update_disk_space ();
 	update_cpu_load ();
-	update_sample_rate (AudioEngine::instance()->sample_rate());
+	update_sample_rate ();
 	update_timecode_format ();
 	update_peak_thread_work ();
 	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, true);
@@ -632,7 +632,7 @@ ARDOUR_UI::engine_halted (const char* reason, bool free_reason)
 	ActionManager::set_sensitive (ActionManager::engine_sensitive_actions, false);
 	ActionManager::set_sensitive (ActionManager::engine_opposite_sensitive_actions, true);
 
-	update_sample_rate (0);
+	update_sample_rate ();
 
 	string msgstr;
 
@@ -674,8 +674,8 @@ ARDOUR_UI::post_engine ()
 	/* connect to important signals */
 
 	AudioEngine::instance()->Stopped.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::engine_stopped, this), gui_context());
-	AudioEngine::instance()->SampleRateChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
-	AudioEngine::instance()->BufferSizeChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this, _1), gui_context());
+	AudioEngine::instance()->SampleRateChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this), gui_context());
+	AudioEngine::instance()->BufferSizeChanged.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::update_sample_rate, this), gui_context());
 	AudioEngine::instance()->Halted.connect_same_thread (halt_connection, boost::bind (&ARDOUR_UI::engine_halted, this, _1, false));
 	AudioEngine::instance()->BecameSilent.connect (forever_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::audioengine_became_silent, this), gui_context());
 
@@ -1237,9 +1237,9 @@ ARDOUR_UI::set_fps_timeout_connection ()
 }
 
 void
-ARDOUR_UI::update_sample_rate (samplecnt_t)
+ARDOUR_UI::update_sample_rate ()
 {
-	std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>: "), _("Audio"));
+	std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>:"), _("Audio"));
 
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::update_sample_rate, ignored)
 
@@ -1257,18 +1257,12 @@ ARDOUR_UI::update_sample_rate (samplecnt_t)
 			sample_rate_label.set_markup (label + _("none"));
 
 		} else {
-			char buf[64];
 
-			if (fmod (rate, 1000.0) != 0.0) {
-				snprintf (buf, sizeof (buf), "%.1f %s / %4.1f %s",
-					  (float) rate / 1000.0f, _("kHz"),
-					  (AudioEngine::instance()->usecs_per_cycle() / 1000.0f), _("ms"));
-			} else {
-				snprintf (buf, sizeof (buf), "%" PRId64 " %s / %4.1f %s",
-					  rate / 1000, _("kHz"),
-					  (AudioEngine::instance()->usecs_per_cycle() / 1000.0f), _("ms"));
-			}
-			sample_rate_label.set_markup (label + buf);
+			char buf[64];
+			snprintf (buf, sizeof (buf), "%4.1f", (AudioEngine::instance()->usecs_per_cycle() / 1000.0f));
+			const char* const bg = (_session && _session->nominal_sample_rate () != rate) ? " background=\"red\" foreground=\"white\"" : "";
+			sample_rate_label.set_markup (string_compose ("%1 <span%2>%3</span> %4 %5", label, bg, ARDOUR_UI_UTILS::rate_as_string (rate), buf, _("ms")));
+
 		}
 	}
 }

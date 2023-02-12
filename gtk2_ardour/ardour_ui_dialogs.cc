@@ -126,6 +126,7 @@ ARDOUR_UI::set_session (Session *s)
 	transport_ctrl.set_session (s);
 
 	update_path_label ();
+	update_sample_rate ();
 
 	if (!_session) {
 		WM::Manager::instance().set_session (s);

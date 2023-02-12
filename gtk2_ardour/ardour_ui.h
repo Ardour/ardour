@@ -647,7 +647,7 @@ private:
 	void update_peak_thread_work ();
 
 	Gtk::Label   sample_rate_label;
-	void update_sample_rate (ARDOUR::samplecnt_t);
+	void update_sample_rate ();
 
 	Gtk::Label    format_label;
 	void update_format ();
