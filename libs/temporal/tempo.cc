@@ -636,6 +636,36 @@ MeterPoint::get_state () const
 	return base;
 }
 
+timepos_t
+TempoMetric::reftime() const
+{
+	TempoMap::SharedPtr tmap (TempoMap::use ());
+	return tmap->reftime (*this);
+}
+
+timepos_t
+TempoMap::reftime (TempoMetric const &tm) const
+{
+	Points::const_iterator pi;
+
+	if (tm.meter().sclock() < tm.tempo().sclock()) {
+		pi = _points.s_iterator_to (*(static_cast<const Point*> (&tm.meter())));
+	} else {
+		pi = _points.s_iterator_to (*(static_cast<const Point*> (&tm.tempo())));
+	}
+
+	/* Walk backwards through points to find a BBT markers, or the start */
+
+	while (pi != _points.begin()) {
+		if (dynamic_cast<const MusicTimePoint*> (&*pi)) {
+			break;
+		}
+		--pi;
+	}
+
+	return timepos_t (pi->sclock());
+}
+
 Temporal::BBT_Argument
 TempoMetric::bbt_at (timepos_t const & pos) const
 {

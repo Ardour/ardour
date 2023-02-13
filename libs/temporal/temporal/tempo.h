@@ -470,7 +470,7 @@ class LIBTEMPORAL_API TempoMetric
 	TempoMetric (TempoPoint const & t, MeterPoint const & m) : _tempo (&t), _meter (&m) {}
 	virtual ~TempoMetric () {}
 
-	timepos_t reftime() const { return timepos_t (std::min (_tempo->sclock(), _meter->sclock())); }
+	timepos_t reftime() const;
 
 	TempoPoint const & tempo() const { return *_tempo; }
 	MeterPoint const & meter() const { return *_meter; }
@@ -710,6 +710,9 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	/* API to be reviewed */
 
 	LIBTEMPORAL_API static WritableSharedPtr fetch_writable() { _tempo_map_p = write_copy(); return _tempo_map_p; }
+
+	/* not part of public API */
+	timepos_t reftime(TempoMetric const &) const;
 
 	/* and now on with the rest of the show ... */
 
