@@ -1470,7 +1470,12 @@ VST3PI::restartComponent (int32 flags)
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::restartComponent %1%2\n", std::hex, flags));
 
 	if (flags & Vst::kReloadComponent) {
-		Glib::Threads::Mutex::Lock pl (_process_lock);
+		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
+		if (!AudioEngine::instance()->in_process_thread()) {
+			pl.acquire ();
+		} else {
+			assert (0); // a plugin should not call this while processing
+		}
 		/* according to the spec, "The host has to unload completely
 		 * the plug-in (controller/processor) and reload it."
 		 *
@@ -1483,14 +1488,30 @@ VST3PI::restartComponent (int32 flags)
 		activate ();
 	}
 	if (flags & Vst::kParamValuesChanged) {
-		Glib::Threads::Mutex::Lock pl (_process_lock);
+		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
+		if (!AudioEngine::instance()->in_process_thread()) {
+			pl.acquire ();
+		}
 		update_shadow_data ();
 	}
 	if (flags & Vst::kLatencyChanged) {
-		Glib::Threads::Mutex::Lock pl (_process_lock);
-		/* need to re-activate the plugin as per spec */
-		deactivate ();
-		activate ();
+		/* https://forums.steinberg.net/t/reporting-latency-change/201601
+		 * mentions that the host plugin should be deactivated before querying
+		 * latency. However the official spec does not require this.
+		 *
+		 * However other implementations do not call setActive(false/true) when 
+		 * the latency changes, and Ardour does not require it either, latency
+		 * changes are automatically picked up.
+		 */
+		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
+		if (!AudioEngine::instance()->in_process_thread()) {
+			/* Some plugins (e.g BlendEQ) call this from the process,
+			 * IPlugProcessor::ProcessBuffers. In that case taking the
+			 * _process_lock would deadlock.
+			 */
+			pl.acquire ();
+		}
+		_plugin_latency.reset ();
 	}
 	if (flags & Vst::kIoChanged) {
 		warning << "VST3: Vst::kIoChanged (not implemented)" << endmsg;
