@@ -1287,13 +1287,14 @@ AudioClock::set_bbt (timecnt_t const & w)
 
 	/* handle a common case */
 
+	TempoMap::SharedPtr tmap (TempoMap::use());
+
 	if (is_duration) {
 		if (pos.is_zero ()) {
 			BBT.bars = 0;
 			BBT.beats = 0;
 			BBT.ticks = 0;
 		} else {
-			TempoMap::SharedPtr tmap (TempoMap::use());
 
 			const int divisions = tmap->meter_at (w.position()).divisions_per_bar();
 			Temporal::BBT_Time sub_bbt;
@@ -1328,7 +1329,7 @@ AudioClock::set_bbt (timecnt_t const & w)
 			}
 		}
 	} else {
-		BBT = TempoMap::use()->bbt_at (pos);
+		BBT = tmap->bbt_at (pos);
 	}
 
 	if (negative) {
@@ -1343,7 +1344,7 @@ AudioClock::set_bbt (timecnt_t const & w)
 
 	if (_with_info) {
 
-		TempoMetric m (TempoMap::use()->metric_at (pos));
+		TempoMetric m (tmap->metric_at (pos));
 
 		if (m.tempo().note_type() == 4) {
 			snprintf (buf, sizeof(buf), u8"\u2669 = %.3f", m.tempo().note_types_per_minute_at_DOUBLE (pos));
