@@ -6432,7 +6432,7 @@ Editor::toggle_region_polarity ()
 			arv->audio_region()->set_scale_amplitude (-1 * scale_amplitude);
 
 			if (!in_command) {
-				begin_reversible_command (_("region polarity invery"));
+				begin_reversible_command (_("region polarity invert"));
 				in_command = true;
 			}
 			_session->add_command (new StatefulDiffCommand (arv->region()));
