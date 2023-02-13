@@ -23,6 +23,24 @@
 
 using namespace Temporal;
 
+int64_t
+BBT_Time::as_integer () const
+{
+	/* up to 256 beats in a bar, 4095 ticks in a beat,
+	   and whatever is left for bars (a lot!)
+	*/
+	return (((int64_t) bars)<<20)|(beats<<12)|ticks;
+}
+
+BBT_Time
+BBT_Time::from_integer (int64_t v)
+{
+	int32_t B = v>>20;
+	int32_t b = (v>>12) & 0xff;
+	int32_t t= v & 0xfff;
+	return BBT_Time (B, b, t);
+}
+
 BBT_Time
 BBT_Time::round_up_to_bar() const
 {

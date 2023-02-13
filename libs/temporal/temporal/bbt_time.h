@@ -54,6 +54,9 @@ struct LIBTEMPORAL_API BBT_Time
 	int32_t beats;
 	int32_t ticks;
 
+	int64_t as_integer() const;
+	static BBT_Time from_integer (int64_t);
+
 	bool is_bar() const { return beats == 1 && ticks == 0; }
 	bool is_beat() const { return ticks == 0; }
 
