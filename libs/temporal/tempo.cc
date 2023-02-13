@@ -787,6 +787,10 @@ TempoMap::copy_points (TempoMap const & other)
 			_points.push_back (*tpp);
 		}
 	}
+
+	for (auto & p : _points) {
+		p.set_map (*this);
+	}
 }
 
 MeterPoint*
