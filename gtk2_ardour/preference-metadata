@@ -30,11 +30,13 @@
 [automation-edit-cancels-auto-hide]
   automation spill touch
 [autoplay-clips]
+  audition clips slots triggers autoplay automatically play
 [autoplay-files]
+  files audition autoplay automatically play
 [autoscroll-editor]
   scroll editor
 [blink-alert-indicators]
-  blink altert indicators
+  blink alert indicators
 [blink-rec-arm]
   appearance blink record rec enable rec-enable record-enable
 [boxy-buttons]
@@ -71,8 +73,7 @@
   appearance monitor floating separate window
 [follow-edits]
 [font-scale]
-  fonts font size scaling
-  readable readability
+  fonts font size scaling readable readability
 [freesound-dir]
   freesound folder folders directory directories download
 [grid-follows-internal]
@@ -86,11 +87,12 @@
 [input-meter-scopes]
   scopes recorder layout
 [insert-at-position]
+  import embed position insert
 [keyboard-layout]
 [keyboard-layout-name]
 [link-region-and-track-selection]
 [lock-gui-after-seconds]
-  lock
+  lock gui time seconds
 [max-note-height]
   maximum note height theme appearance size visible range
 [max-inline-controls]
@@ -132,6 +134,7 @@
   plugins inline mixer strip
 [preview-video-frame-on-drag]
 [primary-clock-delta-mode]
+  clocks mode primary delta difference edit cursor playhead
 [recent-session-sort]
 [rubberbanding-snaps-to-grid]
   rubberband snap grid time stretch
@@ -146,6 +149,7 @@
 [screen-saver-mode]
   screensaver screen-saver prevent lock
 [secondary-clock-delta-mode]
+  clocks mode secondary delta difference edit cursor playhead
 [show-editor-meter]
   toolbar editor meter master
 [show-grids-ruler]
@@ -190,7 +194,7 @@
 [show-waveform-clipping]
   waveform clipping red peak
 [show-waveforms]
-  waveform display box empty
+  waveform display box empty invisible hide show
 [show-waveforms-while-recording]
   waveform display recording
 [show-zoom-tools]
@@ -260,26 +264,39 @@
 [audio-search-path]
 [auto-input]
 [auto-play]
+  transport autoplay automatically play
 [auto-return]
+  transport autoreturn automatically return go back
 [count-in]
+  transport count in count-in 
 [cue-behavior]
 [draw-opaque-midi_regions]
 [external-sync]
+  transport use external synchronization master 
 [glue-new-markers-to-bars-and-beats]
+  position time domain glue use markers bars beats musical
 [glue-new-regions-to-bars-and-beats]
+  position time domain glue use regions bars beats musical
 [insert-merge-policy]
 [jack-time-master]
+  transport synchronization jack time master 
 [meterbridge-label-height]
+  meter meterbridge bridge label height
 [midi-copy-is-fork]
+  midi copy clone duplicate fork linked
 [midi-search-path]
 [minitimeline-span]
 [native-file-data-format]
+  audio files audiofiles native data format
 [native-file-header-format]
+  audio files audiofiles native header format container envelope
 [punch-in]
 [punch-out]
 [raid-path]
 [realtime-export]
+  exporting realtime real time nonrealtime nonreal
 [record-mode]
+  recording capture layers layering sound on soundonsound nonlayered layered
 [session-monitoring]
   monitoring hearing listening signal monitors
 [show-busses-on-meterbridge]
@@ -287,7 +304,7 @@
 [show-fader-on-meterbridge]
   faders meterbridge
 [show-group-tabs]
-  group 
+  group tabs show hide visible visibility
 [show-master-on-meterbridge]
   master meterbridge
 [show-midi-on-meterbridge]
@@ -321,12 +338,18 @@
 [timecode-offset-negative]
   timecode synchronization offset negative
 [track-name-number]
+  name naming numbered tracks
 [track-name-take]
+  name naming tracks takes 
 [triggerbox-overrides-disk-monitoring]
 [use-monitor-fades]
+  monitoring fades fadein fadeout enable disable use 
 [use-region-fades]
+  region fades fadein fadeout enable disable use 
 [use-transport-fades]
+  transport fades fadein fadeout enable disable use 
 [use-video-file-fps]
+  video use frames per second fps 
 [use-video-sync]
 [video-pullup]
 [videotimeline-pullup]
@@ -355,7 +378,9 @@
 [buffering-preset]
 [capture-buffer-seconds]
 [click-emphasis-sound]
+ metronome click beat downbeat emphasis sample sound
 [click-gain]
+ metronome click beat volume gain level
 [click-record-only]
 [click-sound]
  metronome click beat sound sample
@@ -370,14 +395,20 @@
 [create-xrun-marker]
   xrun xmarker
 [default-automation-time-domain]
+  automation time domain default
 [default-fade-shape]
+  fades fadein fadeout shape type style default
 [default-session-parent-dir]
+  folders directory directories session path default
 [default-trigger-input-port]
 [denormal-model]
+  denormal model handling cpu performance speed xruns dsp load
 [denormal-protection]
+  denormal model handling cpu performance speed xruns dsp load
 [deprecated-hiding-groups-deactivates-groups]
 [disable-disarm-during-roll]
 [discover-plugins-on-start]
+  plugins scan discover rescan reload startup
 [disk-choice-space-threshold]
 [display-first-midi-bank-as-zero]
 [donate-url]
@@ -389,18 +420,22 @@
 [group-override-inverts]
 [hide-dummy-backend]
 [history-depth]
+  history undo redo depth length size 
 [initial-program-change]
 [input-auto-connect]
 [inter-scene-gap-samples]
 [interview-editing]
 [latched-record-enable]
 [layer-model]
+  editing layering model style type
 [limit-n-automatables]
 [link-send-and-route-panner]
+  mixing panning send panner link connect tie
 [listen-position]
    afl pfl listen monitoring position 
 [locate-while-waiting-for-sync]
 [loop-fade-choice]
+  looping fades fadein fadeout choice type style model
 [loop-is-mode]
   looping mode behavior
 [ltc-output-port]
@@ -410,9 +445,13 @@
 [ltc-send-continuously]
   timecode transmit send continuously always ltc
 [max-gain]
+  volume gain fader maximum peak
 [max-recent-sessions]
+  number maximum recent sessions
 [max-recent-templates]
+  number maximum recent templates
 [max-transport-speed]
+  maximum top fastest highest transport speed
 [meter-falloff]
   meter falloff fall off
 [meter-type-bus]
@@ -426,42 +465,70 @@
 [midi-clock-sets-tempo]
   midi clock mclk set tempo
 [midi-feedback]
+  midi generic control surface feedback
 [midi-input-follows-selection]
   midi inputs port device follow selection tracks
 [midi-track-buffer-seconds]
 [minimum-disk-read-bytes]
+  disk disc i/o io chunk read size bytes buffering
 [minimum-disk-write-bytes]
+  disk disc i/o io chunk write size bytes buffering
 [mmc-control]
 [mmc-receive-device-id]
+  midi machine control mmc receive receiving device id
 [mmc-send-device-id]
+  midi machine control mmc send sending device id
 [monitor-bus-preferred-bundle]
 [monitoring-model]
+  monitoring model style type
 [mtc-qf-speed-tolerance]
+  transport synchronization MIDI timecode time code threshold tolerance sensitivity quarter frame
 [mute-affects-control-outs]
+  mute muting monitor outs control outputs
 [mute-affects-main-outs]
+  mute muting main outs outputs master
 [mute-affects-post-fader]
+  mute muting postfader post fader
 [mute-affects-pre-fader]
+  mute muting prefader pre fader
 [new-plugins-active]
+  plugins newly added active 
 [osc-port]
+  OSC port number
 [output-auto-connect]
+  outputs automatically connect
 [periodic-safety-backup-interval]
+  backups autosave
 [periodic-safety-backups]
+  backups autosave
 [pfl-position]
+  solo listen prefader position
 [pingback-url]
 [playback-buffer-seconds]
+  performance disk disc buffering playback keep up size seconds 
 [plugin-cache-version]
 [plugin-path-lxvst]
+  plugins paths folders directory directories linux vst lxvst search
 [plugin-path-vst]
+  plugins paths folders directory directories vst search
 [plugin-path-vst3]
+  plugins paths folders directory directories vst3 search
 [plugin-scan-timeout]
+  plugins scan timeout fail wait
 [plugins-stop-with-transport]
+  plugins stop transport tail reverb ringing reset
 [port-resampler-quality]
+  resampling audioengine global quality level
 [preroll-seconds]
 [processor-usage]
+  cpu threads usage distribute parallel
 [quieten-at-speed]
+  volume gain level reduce quieten cut speed fast foward rewind ffwd
 [range-location-minimum]
 [range-selection-after-split]
+  editing split selection range after split 
 [recording-resets-xrun-count]
+  recording resets xruns 
 [reference-manual-url]
 [region-boundaries-from-onscreen_tracks]
   grid region boundaries from visible onscreen tracks lanes
@@ -482,6 +549,7 @@
 [run-all-transport-masters-always]
   synchronization always run masters transport
 [sample-lib-path]
+  files folders samples library path
 [save-history]
    history save disk serialize store
 [save-history-depth]
@@ -499,9 +567,13 @@
 [show-video-server-dialog]
 [show-vst3-micro-edit-inline]
 [shuttle-max-speed]
+  transport shuttle varispeed control speed maximum
 [shuttle-speed-factor]
+  transport shuttle varispeed control speed
 [shuttle-speed-threshold]
+  transport shuttle varispeed control threshold 
 [shuttle-units]
+  transport shuttle varispeed units semitones percentage
 [skip-playback]
 [solo-control-is-listen-control]
 [solo-mute-gain]
@@ -512,6 +584,7 @@
 [stop-recording-on-xrun]
   transport recording xrun stop 
 [strict-io]
+  plugins outputs number flexible variable fixed
 [timecode-sync-frame-rate]
   timecode synchronization frame rate
 [trace-midi-input]
@@ -519,6 +592,7 @@
 [tracks-auto-naming]
    automatically name tracks
 [transient-sensitivity]
+   analysis transients sensitive sensitivity vamp
 [transport-masters-just-roll-when-sync-lost]
 [try-autostart-engine]
    audioengine startup 
@@ -538,15 +612,20 @@
 [use-osc]
    osc open sound control
 [use-plugin-own-gui]
+   plugins GUI editor prefer use own
 [use-tranzport]
 [use-vst3]
+   plugins vst3
 [use-windows-vst]
 [verbose-plugin-scan]
   plugins scanning verbose
 [verify-remove-last-capture]
   verify remove removal last most recent capture recording take
 [video-advanced-setup]
+   video setup
 [video-server-docroot]
 [video-server-url]
+  video server location url file
 [work-around-jack-no-copy-optimization]
 [xjadeo-binary]
+  xjadeo video monitor location file
