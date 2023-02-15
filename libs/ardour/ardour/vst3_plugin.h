@@ -185,6 +185,7 @@ public:
 	bool     activate ();
 	bool     deactivate ();
 	bool     active () const { return _is_processing; }
+	bool     is_loading_state () const { return _is_loading_state; }
 
 	/* State */
 	bool save_state (RAMStream& stream);
@@ -271,6 +272,7 @@ private:
 	Vst3EventList _output_events;
 
 	/* state */
+	bool    _is_loading_state;
 	bool    _is_processing;
 	int32_t _block_size;
 

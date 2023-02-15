@@ -27,6 +27,7 @@
 #include "pbd/failed_constructor.h"
 #include "pbd/file_utils.h"
 #include "pbd/tokenizer.h"
+#include "pbd/unwind.h"
 
 #ifdef PLATFORM_WINDOWS
 #include "pbd/windows_special_dirs.h"
@@ -168,7 +169,7 @@ VST3Plugin::default_value (uint32_t port)
 void
 VST3Plugin::set_parameter (uint32_t port, float val, sampleoffset_t when)
 {
-	if (!_plug->active () || AudioEngine::instance()->in_process_thread()) {
+	if (!_plug->active () || _plug->is_loading_state () || AudioEngine::instance()->in_process_thread() ) {
 		/* directly use VST3PI::_input_param_changes */
 		_plug->set_parameter (port, val, when);
 	} else {
@@ -1144,6 +1145,7 @@ VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string uniqu
 #if SMTG_OS_LINUX
 	, _run_loop (0)
 #endif
+	, _is_loading_state (false)
 	, _is_processing (false)
 	, _block_size (0)
 	, _port_id_bypass (UINT32_MAX)
@@ -1471,7 +1473,7 @@ VST3PI::restartComponent (int32 flags)
 
 	if (flags & Vst::kReloadComponent) {
 		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
-		if (!AudioEngine::instance()->in_process_thread()) {
+		if (!AudioEngine::instance()->in_process_thread() && !_is_loading_state) {
 			pl.acquire ();
 		} else {
 			assert (0); // a plugin should not call this while processing
@@ -1489,7 +1491,7 @@ VST3PI::restartComponent (int32 flags)
 	}
 	if (flags & Vst::kParamValuesChanged) {
 		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
-		if (!AudioEngine::instance()->in_process_thread()) {
+		if (!AudioEngine::instance()->in_process_thread() && !_is_loading_state) {
 			pl.acquire ();
 		}
 		update_shadow_data ();
@@ -1504,7 +1506,7 @@ VST3PI::restartComponent (int32 flags)
 		 * changes are automatically picked up.
 		 */
 		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
-		if (!AudioEngine::instance()->in_process_thread()) {
+		if (!AudioEngine::instance()->in_process_thread() && !_is_loading_state) {
 			/* Some plugins (e.g BlendEQ) call this from the process,
 			 * IPlugProcessor::ProcessBuffers. In that case taking the
 			 * _process_lock would deadlock.
@@ -2392,6 +2394,9 @@ VST3PI::load_state (RAMStream& stream)
 	if (!read_equal_ID (stream, Vst::getChunkID (Vst::kChunkList))) {
 		return false;
 	}
+
+	PBD::Unwinder<bool> uw (_is_loading_state, true);
+
 	int32 count;
 	stream.read_int32 (count);
 	for (int32 i = 0; i < count; ++i) {
