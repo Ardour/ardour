@@ -24,11 +24,9 @@
 #ifndef __ardour_plugin_insert_h__
 #define __ardour_plugin_insert_h__
 
-#include <vector>
+#include <memory>
 #include <string>
-
-#include <boost/weak_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+#include <vector>
 
 #include "pbd/stack_allocator.h"
 #include "pbd/timing.h"

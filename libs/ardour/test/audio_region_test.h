@@ -16,7 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include "test_needing_session.h"
 
 namespace ARDOUR {

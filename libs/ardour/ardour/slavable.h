@@ -20,11 +20,11 @@
 #ifndef __ardour_slavable_h__
 #define __ardour_slavable_h__
 
+#include <memory>
 #include <set>
 #include <string>
 #include <stdint.h>
 
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/signals.h"
 

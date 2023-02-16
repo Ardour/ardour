@@ -19,7 +19,7 @@
 #ifndef __ardour_muteable_h__
 #define __ardour_muteable_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "pbd/signals.h"
 

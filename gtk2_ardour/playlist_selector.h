@@ -21,7 +21,7 @@
 #ifndef __ardour_playlist_selector_h__
 #define __ardour_playlist_selector_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>

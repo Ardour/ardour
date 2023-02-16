@@ -32,13 +32,14 @@
 #define __ardour_types_h__
 
 #include <bitset>
+#include <cstdint>
 #include <istream>
-#include <vector>
 #include <map>
+#include <memory>
 #include <set>
-#include <boost/shared_ptr.hpp>
+#include <vector>
+
 #include <sys/types.h>
-#include <stdint.h>
 #include <pthread.h>
 
 #include <inttypes.h>

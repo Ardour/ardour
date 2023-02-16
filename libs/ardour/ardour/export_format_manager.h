@@ -24,9 +24,8 @@
 #define __ardour_export_format_manager_h__
 
 #include <list>
+#include <memory>
 #include <string>
-
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/signals.h"
 

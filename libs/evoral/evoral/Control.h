@@ -23,7 +23,8 @@
 
 #include <set>
 #include <map>
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include "pbd/signals.h"
 
 #include "temporal/timeline.h"

@@ -19,7 +19,7 @@
 #ifndef __ardour_plugin_dspload_window_h__
 #define __ardour_plugin_dspload_window_h__
 
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 #include <gtkmm/box.h>
 #include <gtkmm/scrolledwindow.h>

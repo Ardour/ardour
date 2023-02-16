@@ -20,7 +20,7 @@
 #ifndef __gtk2_ardour_midi_export_dialog_h__
 #define __gtk2_ardour_midi_export_dialog_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <gtkmm/filechooserwidget.h>
 

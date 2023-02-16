@@ -19,7 +19,8 @@
 #ifndef __ardour_delayline_h__
 #define __ardour_delayline_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <boost/shared_array.hpp>
 
 #include "ardour/types.h"

@@ -24,9 +24,9 @@
 #ifndef __ardour_region_h__
 #define __ardour_region_h__
 
+#include <memory>
 #include <vector>
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+
 #include <boost/utility.hpp>
 
 #include "temporal/timeline.h"

@@ -22,13 +22,14 @@
 #define __gtk_ardour_port_matrix_h__
 
 #include <list>
+#include <memory>
+
 #include <gtkmm/box.h>
 #include <gtkmm/scrollbar.h>
 #include <gtkmm/table.h>
 #include <gtkmm/label.h>
 #include <gtkmm/checkbutton.h>
 #include <gtkmm/notebook.h>
-#include <boost/shared_ptr.hpp>
 
 #include "ardour/bundle.h"
 #include "ardour/types.h"

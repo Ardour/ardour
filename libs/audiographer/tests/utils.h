@@ -3,8 +3,9 @@
 
 // Includes we want almost always
 
+#include <memory>
+
 #include <cppunit/extensions/HelperMacros.h>
-#include <boost/shared_ptr.hpp>
 
 // includes used in this file
 

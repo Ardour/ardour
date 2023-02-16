@@ -17,9 +17,10 @@
  */
 #ifndef _ardour_luascripting_h_
 #define _ardour_luascripting_h_
+
+#include <memory>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
 #include <glibmm/threads.h>
 
 #include "pbd/signals.h"

@@ -22,9 +22,9 @@
 #define __ardour_analysis_graph_h__
 
 #include <map>
+#include <memory>
 #include <set>
 #include <cstring>
-#include <boost/shared_ptr.hpp>
 
 #include "ardour/audioregion.h"
 #include "ardour/audioplaylist.h"

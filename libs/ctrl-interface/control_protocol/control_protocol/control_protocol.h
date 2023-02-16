@@ -23,10 +23,10 @@
 #define ardour_control_protocols_h
 
 #include <list>
+#include <memory>
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/signals.h"
 #include "pbd/stateful.h"

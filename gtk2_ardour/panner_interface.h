@@ -20,7 +20,8 @@
 #ifndef __gtk_ardour_panner_interface_h__
 #define __gtk_ardour_panner_interface_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <gtkmm/drawingarea.h>
 #include <gtkmm/label.h>
 #include "gtkmm2ext/persistent_tooltip.h"

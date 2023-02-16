@@ -19,12 +19,11 @@
 #ifndef __libbackend_portaudio_pcmio_h__
 #define __libbackend_portaudio_pcmio_h__
 
+#include <cstdint>
 #include <map>
+#include <memory>
 #include <vector>
 #include <string>
-#include <boost/shared_ptr.hpp>
-
-#include <stdint.h>
 
 #include <portaudio.h>
 

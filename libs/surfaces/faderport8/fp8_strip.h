@@ -19,8 +19,8 @@
 #ifndef _ardour_surfaces_fp8strip_h_
 #define _ardour_surfaces_fp8strip_h_
 
-#include <stdint.h>
-#include <boost/shared_ptr.hpp>
+#include <cstdint>
+#include <memory>
 
 #include "pbd/signals.h"
 #include "pbd/controllable.h"

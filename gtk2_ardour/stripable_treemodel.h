@@ -19,11 +19,9 @@
 #ifndef __gtk2_ardour_stripable_treemodel_h__
 #define __gtk2_ardour_stripable_treemodel_h__
 
+#include <cstdint>
+#include <memory>
 #include <set>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
-#include <stdint.h>
 
 #include <gtkmm/treemodel.h>
 

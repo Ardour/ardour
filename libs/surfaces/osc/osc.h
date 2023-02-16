@@ -25,14 +25,14 @@
 #ifndef ardour_osc_h
 #define ardour_osc_h
 
+#include <bitset>
+#include <memory>
 #include <string>
 #include <vector>
-#include <bitset>
 
 #include <sys/time.h>
 #include <pthread.h>
 
-#include <boost/shared_ptr.hpp>
 
 #include <lo/lo.h>
 

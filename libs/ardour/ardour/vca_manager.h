@@ -23,7 +23,7 @@
 #include <string>
 #include <list>
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <glibmm/threads.h>
 

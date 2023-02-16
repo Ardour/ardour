@@ -23,13 +23,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <string>
-#include <cmath>
-#include <cerrno>
 #include <cassert>
-#include <unistd.h>
-
-#include <boost/shared_ptr.hpp>
+#include <cerrno>
+#include <cmath>
+#include <cunistd>
+#include <memory>
+#include <string>
 
 #include <glibmm/main.h>
 

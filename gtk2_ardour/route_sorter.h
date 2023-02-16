@@ -20,7 +20,8 @@
 #ifndef __gtk2_ardour_route_sorter_h__
 #define __gtk2_ardour_route_sorter_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <stdint.h>
 #include <vector>
 

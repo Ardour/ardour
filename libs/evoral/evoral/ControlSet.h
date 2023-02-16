@@ -24,7 +24,8 @@
 
 #include <set>
 #include <map>
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <boost/utility.hpp>
 #include <glibmm/threads.h>
 #include "pbd/signals.h"

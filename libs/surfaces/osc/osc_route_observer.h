@@ -20,9 +20,10 @@
 #ifndef __osc_oscrouteobserver_h__
 #define __osc_oscrouteobserver_h__
 
-#include <string>
 #include <bitset>
-#include <boost/shared_ptr.hpp>
+#include <memory>
+#include <string>
+
 #include <sigc++/sigc++.h>
 #include <lo/lo.h>
 

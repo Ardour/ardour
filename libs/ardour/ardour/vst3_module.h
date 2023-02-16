@@ -19,7 +19,7 @@
 #ifndef _ardour_vst3_module_h_
 #define _ardour_vst3_module_h_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "ardour/libardour_visibility.h"
 

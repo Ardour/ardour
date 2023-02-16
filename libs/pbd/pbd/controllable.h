@@ -23,6 +23,7 @@
 #ifndef __pbd_controllable_h__
 #define __pbd_controllable_h__
 
+#include <memory>
 #include <string>
 #include <set>
 
@@ -30,7 +31,6 @@
 #include "pbd/signals.h"
 #include <glibmm/threads.h>
 
-#include <boost/enable_shared_from_this.hpp>
 
 #include "pbd/statefuldestructible.h"
 

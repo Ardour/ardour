@@ -21,10 +21,11 @@
 #ifndef  __gtk_ardour_port_group_h__
 #define  __gtk_ardour_port_group_h__
 
-#include <vector>
-#include <string>
+#include <memory>
 #include <set>
-#include <boost/shared_ptr.hpp>
+#include <string>
+#include <vector>
+
 #include "pbd/signals.h"
 
 #include <gtkmm/widget.h>

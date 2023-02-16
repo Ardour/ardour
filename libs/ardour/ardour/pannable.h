@@ -20,9 +20,8 @@
 #ifndef __libardour_pannable_h__
 #define __libardour_pannable_h__
 
+#include <memory>
 #include <string>
-
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/stateful.h"
 #include "evoral/Parameter.h"

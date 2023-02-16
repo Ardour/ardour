@@ -19,9 +19,9 @@
 #ifndef __ardour_record_enable_control_h__
 #define __ardour_record_enable_control_h__
 
+#include <memory>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
 #include <boost/dynamic_bitset.hpp>
 
 #include "ardour/slavable_automation_control.h"

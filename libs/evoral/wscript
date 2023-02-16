@@ -40,8 +40,6 @@ def configure(conf):
         autowaf.check_pkg(conf, 'libpbd-4', uselib_store='LIBPBD', atleast_version='4.0.0', mandatory=True)
 
     # Boost headers
-    autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
-    autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
 
     conf.env['BUILD_TESTS'] = Options.options.build_tests
     conf.env['TEST_COVERAGE'] = Options.options.test_coverage

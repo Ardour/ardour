@@ -23,13 +23,12 @@
 #ifndef __ardour_source_h__
 #define __ardour_source_h__
 
+#include <memory>
 #include <string>
 #include <set>
 
 #include <glibmm/threads.h>
 
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 #include <boost/utility.hpp>
 
 #include "pbd/statefuldestructible.h"

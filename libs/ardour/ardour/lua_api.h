@@ -19,9 +19,10 @@
 #ifndef _ardour_lua_api_h_
 #define _ardour_lua_api_h_
 
+#include <memory>
 #include <string>
+
 #include <lo/lo.h>
-#include <boost/shared_ptr.hpp>
 #include <boost/enable_shared_from_this.hpp>
 #include <rubberband/RubberBandStretcher.h>
 #include <vamp-hostsdk/Plugin.h>

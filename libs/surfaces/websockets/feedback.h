@@ -19,7 +19,8 @@
 #ifndef _ardour_surface_websockets_feedback_h_
 #define _ardour_surface_websockets_feedback_h_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <boost/unordered_map.hpp>
 #include <glibmm/threads.h>
 

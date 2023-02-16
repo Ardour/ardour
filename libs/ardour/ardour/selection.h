@@ -20,11 +20,9 @@
 #ifndef __ardour_selection_h__
 #define __ardour_selection_h__
 
+#include <memory>
 #include <set>
 #include <vector>
-
-#include <boost/weak_ptr.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/stateful.h"
 

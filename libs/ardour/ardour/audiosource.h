@@ -23,9 +23,9 @@
 #ifndef __ardour_audio_source_h__
 #define __ardour_audio_source_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <boost/shared_array.hpp>
-#include <boost/enable_shared_from_this.hpp>
 
 #include <time.h>
 

@@ -22,8 +22,8 @@
 #ifndef __ardour_export_formats_h__
 #define __ardour_export_formats_h__
 
-#include <boost/weak_ptr.hpp>
 #include <list>
+#include <memory>
 
 #include "pbd/failed_constructor.h"
 #include "pbd/signals.h"

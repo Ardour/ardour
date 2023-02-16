@@ -20,7 +20,7 @@
 #ifndef __ardour_tempo_map_importer_h__
 #define __ardour_tempo_map_importer_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "pbd/xml++.h"
 

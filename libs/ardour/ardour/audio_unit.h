@@ -22,14 +22,13 @@
 #ifndef __ardour_audio_unit_h__
 #define __ardour_audio_unit_h__
 
-#include <stdint.h>
-#include <boost/shared_ptr.hpp>
-
+#include <cstdint>
 #include <list>
+#include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
-#include <map>
 
 #include "pbd/g_atomic_compat.h"
 #include "ardour/plugin.h"
@@ -38,7 +37,6 @@
 #include <AudioUnit/AudioUnitProperties.h>
 #include "AUParamInfo.h"
 
-#include <boost/shared_ptr.hpp>
 
 class CAComponent;
 class CAAudioUnit;

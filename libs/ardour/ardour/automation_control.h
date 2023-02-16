@@ -24,10 +24,9 @@
 #define __ardour_automation_control_h__
 
 #include <map>
+#include <memory>
 
 #include <glibmm/threads.h>
-
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/controllable.h"
 

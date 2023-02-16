@@ -47,10 +47,6 @@ def configure(conf):
     autowaf.check_pkg(conf, 'libxml-2.0', uselib_store='XML')
     autowaf.check_pkg(conf, 'sigc++-2.0', uselib_store='SIGCPP', atleast_version='2.0')
 
-    # Boost headers
-    autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
-    autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
-
 def build(bld):
     # Library
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):

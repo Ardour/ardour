@@ -21,9 +21,10 @@
 #ifndef __export_format_selector_h__
 #define __export_format_selector_h__
 
+#include <memory>
 #include <string>
+
 #include <sigc++/signal.h>
-#include <boost/shared_ptr.hpp>
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>

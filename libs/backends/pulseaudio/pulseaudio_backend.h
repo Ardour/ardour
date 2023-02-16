@@ -19,17 +19,16 @@
 #ifndef __libbackend_pulse_audiobackend_h__
 #define __libbackend_pulse_audiobackend_h__
 
+#include <cstdint>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
 #include <pthread.h>
-#include <stdint.h>
 
 #include <pulse/pulseaudio.h>
-
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/natsort.h"
 

@@ -23,12 +23,13 @@
 #ifndef EVORAL_SEQUENCE_HPP
 #define EVORAL_SEQUENCE_HPP
 
-#include <vector>
+#include <list>
+#include <memory>
 #include <queue>
 #include <set>
-#include <list>
 #include <utility>
-#include <boost/shared_ptr.hpp>
+#include <vector>
+
 #include <glibmm/threads.h>
 
 #include "evoral/visibility.h"

@@ -23,8 +23,7 @@
 #ifndef __ardour_plugin_h__
 #define __ardour_plugin_h__
 
-#include <boost/shared_ptr.hpp>
-
+#include <memory>
 #include <set>
 #include <string>
 

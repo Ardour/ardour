@@ -21,14 +21,13 @@
 #ifndef __libbackend_portaudio_backend_h__
 #define __libbackend_portaudio_backend_h__
 
+#include <cstdint>
+#include <memory>
 #include <string>
 #include <vector>
 #include <set>
 
-#include <stdint.h>
 #include <pthread.h>
-
-#include <boost/shared_ptr.hpp>
 
 #include "ardour/audio_backend.h"
 #include "ardour/dsp_load_calculator.h"

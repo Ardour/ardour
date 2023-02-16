@@ -19,7 +19,8 @@
 #ifndef _ardour_maschine2_knob_h_
 #define _ardour_maschine2_knob_h_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <sigc++/trackable.h>
 
 #include <cairomm/refptr.h>

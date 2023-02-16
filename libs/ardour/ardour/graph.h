@@ -24,11 +24,11 @@
 #define __ardour_graph_h__
 
 #include <list>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/g_atomic_compat.h"
 #include "pbd/mpmc_queue.h"

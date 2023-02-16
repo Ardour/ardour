@@ -24,9 +24,9 @@
 
 #include <string>
 #include <list>
+#include <memory>
 #include <utility>
 
-#include <boost/shared_ptr.hpp>
 
 #include <gtkmm/box.h>
 #include <gtkmm/button.h>

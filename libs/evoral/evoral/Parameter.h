@@ -20,10 +20,10 @@
 #ifndef EVORAL_PARAMETER_HPP
 #define EVORAL_PARAMETER_HPP
 
-#include <string>
+#include <cstdint>
 #include <map>
-#include <stdint.h>
-#include <boost/shared_ptr.hpp>
+#include <memory>
+#include <string>
 
 #include "evoral/visibility.h"
 #include "evoral/types.h"

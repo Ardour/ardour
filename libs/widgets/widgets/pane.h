@@ -20,11 +20,11 @@
 #ifndef _WIDGETS_PANE_H_
 #define _WIDGETS_PANE_H_
 
+#include <cstdint>
+#include <memory>
 #include <vector>
 #include <algorithm>
-#include <boost/shared_ptr.hpp>
 
-#include <stdint.h>
 
 #include <gdkmm/cursor.h>
 #include <gtkmm/container.h>

@@ -19,14 +19,14 @@
 #ifndef _ardour_vst3_host_h_
 #define _ardour_vst3_host_h_
 
+#include <cstdint>
 #include <map>
-#include <stdint.h>
+#include <memory>
 #include <string>
 #include <vector>
 
 #include <glib.h>
 
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/g_atomic_compat.h"
 #include "ardour/libardour_visibility.h"

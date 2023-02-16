@@ -19,8 +19,9 @@
 #ifndef __osc_osccontrollable_h__
 #define __osc_osccontrollable_h__
 
+#include <memory>
 #include <string>
-#include <boost/shared_ptr.hpp>
+
 #include <sigc++/sigc++.h>
 #include <lo/lo.h>
 

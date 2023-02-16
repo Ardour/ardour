@@ -20,8 +20,8 @@
 #ifndef _WIDGETS_BINDING_PROXY_
 #define _WIDGETS_BINDING_PROXY_
 
+#include <memory>
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/signals.h"
 

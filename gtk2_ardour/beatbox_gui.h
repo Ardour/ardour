@@ -20,8 +20,8 @@
 #ifndef __gtk2_ardour_beatbox_gui_h__
 #define __gtk2_ardour_beatbox_gui_h__
 
+#include <memory>
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 #include <gtkmm/radiobutton.h>
 #include <gtkmm/togglebutton.h>

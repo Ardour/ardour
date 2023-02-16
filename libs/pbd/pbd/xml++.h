@@ -32,14 +32,14 @@
  * Modified for Ardour and released under the same terms.
  */
 
+#include <cstdarg>
+#include <cstdio>
+#include <memory>
 #include <string>
 #include <vector>
-#include <cstdio>
-#include <cstdarg>
 
 #include <libxml/parser.h>
 #include <libxml/tree.h>
-#include <boost/shared_ptr.hpp>
 
 #include <glibmm/ustring.h>
 

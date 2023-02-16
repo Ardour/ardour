@@ -20,9 +20,8 @@
 #ifndef __gtk2_ardour_control_slave_ui_h__
 #define __gtk2_ardour_control_slave_ui_h__
 
-#include <stdint.h>
-
-#include <boost/shared_ptr.hpp>
+#include <cstdint>
+#include <memory>
 
 #include <gtkmm/box.h>
 #include <gtkmm/checkmenuitem.h>

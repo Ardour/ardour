@@ -19,7 +19,8 @@
 #ifndef __ardour_gtk_cursor_context_h__
 #define __ardour_gtk_cursor_context_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <gdkmm/cursor.h>
 
 class Editor;

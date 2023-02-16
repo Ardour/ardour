@@ -22,12 +22,12 @@
 #ifndef __libardour_stripable_h__
 #define __libardour_stripable_h__
 
-#include <stdint.h>
-
+#include <cstdint>
+#include <memory>
 #include <string>
+
 #include <boost/utility.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
+
 
 #include "pbd/signals.h"
 

@@ -19,7 +19,8 @@
 #ifndef __gtkardour_stripable_colorpicker_h__
 #define __gtkardour_stripable_colorpicker_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <gtkmm/colorbutton.h>
 #include <gtkmm/colorselection.h>
 

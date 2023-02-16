@@ -19,7 +19,7 @@
 #ifndef __ardour_readonly_control_h__
 #define __ardour_readonly_control_h__
 
-#include <boost/weak_ptr.hpp>
+#include <memory>
 
 #include "pbd/destructible.h"
 

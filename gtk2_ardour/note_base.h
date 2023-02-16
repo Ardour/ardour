@@ -21,7 +21,7 @@
 #ifndef __gtk_ardour_note_base_h__
 #define __gtk_ardour_note_base_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "temporal/beats.h"
 #include "canvas/types.h"

@@ -19,9 +19,10 @@
 #ifndef __gtk_ardour_port_matrix_component_h__
 #define __gtk_ardour_port_matrix_component_h__
 
-#include <stdint.h>
+#include <cstdint>
+#include <memory>
+
 #include <gtkmm/eventbox.h>
-#include <boost/shared_ptr.hpp>
 
 class PortMatrix;
 class PortMatrixBody;

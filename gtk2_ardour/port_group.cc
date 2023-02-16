@@ -20,8 +20,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <memory>
 #include <cstring>
-#include <boost/shared_ptr.hpp>
+
 #include <boost/algorithm/string.hpp>
 
 #include "midi++/mmc.h"

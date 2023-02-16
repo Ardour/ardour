@@ -1,7 +1,7 @@
 #ifndef AUDIOGRAPHER_SINK_H
 #define AUDIOGRAPHER_SINK_H
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "process_context.h"
 

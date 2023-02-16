@@ -19,9 +19,10 @@
 #ifndef  __gtk_ardour_port_matrix_grid_h__
 #define  __gtk_ardour_port_matrix_grid_h__
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+
 #include "ardour/types.h"
 #include "port_matrix_component.h"
 #include "port_matrix_types.h"

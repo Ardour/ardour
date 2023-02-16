@@ -24,10 +24,10 @@
 #define __ardour_export_channel_h__
 
 #include <list>
+#include <memory>
 #include <set>
 
 #include <boost/scoped_array.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/ringbuffer.h"
 #include "pbd/signals.h"

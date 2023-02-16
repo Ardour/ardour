@@ -20,10 +20,8 @@
 #define __libardour_control_group_h__
 
 #include <map>
+#include <memory>
 #include <vector>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/enable_shared_from_this.hpp>
 
 #include <glibmm/threads.h>
 

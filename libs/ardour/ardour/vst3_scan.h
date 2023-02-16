@@ -19,9 +19,9 @@
 #ifndef _ardour_vst3_scan_h_
 #define _ardour_vst3_scan_h_
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/xml++.h"
 

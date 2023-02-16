@@ -23,9 +23,9 @@
 #define __ardour_session_event_h__
 
 #include <list>
+#include <memory>
+
 #include <boost/function.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 
 #include "pbd/pool.h"
 #include "pbd/ringbuffer.h"

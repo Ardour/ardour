@@ -21,12 +21,12 @@
 #define WINMME_MIDI_IO_H
 
 #include <map>
+#include <memory>
 #include <vector>
 #include <string>
 #include <stdint.h>
 #include <pthread.h>
 
-#include <boost/shared_ptr.hpp>
 #include "pbd/ringbuffer.h"
 
 #include "winmmemidi_input_device.h"

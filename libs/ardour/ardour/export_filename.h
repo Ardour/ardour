@@ -21,8 +21,7 @@
 #ifndef __ardour_export_filename_h__
 #define __ardour_export_filename_h__
 
-#include <boost/shared_ptr.hpp>
-
+#include <memory>
 #include <string>
 
 #include <ardour/export_pointers.h>

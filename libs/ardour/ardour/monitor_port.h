@@ -19,7 +19,7 @@
 #ifndef _ardour_monitor_port_h_
 #define _ardour_monitor_port_h_
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <set>
 
 #include "zita-resampler/vmresampler.h"

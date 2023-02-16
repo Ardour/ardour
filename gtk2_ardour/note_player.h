@@ -20,8 +20,9 @@
 #ifndef __gtk2_ardour_note_player_h__
 #define __gtk2_ardour_note_player_h__
 
+#include <memory>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+
 #include <sigc++/trackable.h>
 
 #include "evoral/Note.h"

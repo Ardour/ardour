@@ -27,10 +27,9 @@
 #define __ardour_gtk_automation_time_axis_h__
 
 #include <list>
+#include <memory>
 #include <string>
 #include <utility>
-
-#include <boost/shared_ptr.hpp>
 
 #include "ardour/types.h"
 #include "ardour/automatable.h"

@@ -22,8 +22,8 @@
 #ifndef __ardour_redirect_h__
 #define __ardour_redirect_h__
 
+#include <memory>
 #include <string>
-#include <boost/shared_ptr.hpp>
 
 #include <glibmm/threads.h>
 

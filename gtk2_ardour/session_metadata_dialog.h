@@ -23,6 +23,8 @@
 #ifndef __session_metadata_dialog_h__
 #define __session_metadata_dialog_h__
 
+#include <memory>
+
 #include "ardour_dialog.h"
 
 #ifdef interface
@@ -40,8 +42,6 @@
 #include <gtkmm/textview.h>
 #include <gtkmm/treemodel.h>
 #include <gtkmm/treeview.h>
-
-#include <boost/shared_ptr.hpp>
 
 #include <string>
 #include <list>

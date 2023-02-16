@@ -21,8 +21,7 @@
 #ifndef _WAVEVIEW_WAVE_VIEW_H_
 #define _WAVEVIEW_WAVE_VIEW_H_
 
-#include <boost/shared_ptr.hpp>
-#include <boost/scoped_ptr.hpp>
+#include <memory>
 
 #include <glibmm/refptr.h>
 

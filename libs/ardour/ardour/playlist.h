@@ -27,9 +27,9 @@
 #ifndef __ardour_playlist_h__
 #define __ardour_playlist_h__
 
-#include <boost/enable_shared_from_this.hpp>
+#include <memory>
+
 #include <boost/optional.hpp>
-#include <boost/shared_ptr.hpp>
 #include <boost/utility.hpp>
 #include <list>
 #include <map>

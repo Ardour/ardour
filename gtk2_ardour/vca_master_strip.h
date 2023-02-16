@@ -21,7 +21,7 @@
 #ifndef __ardour_vca_master_strip__
 #define __ardour_vca_master_strip__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <gtkmm/box.h>
 #include <gtkmm/colorselection.h>

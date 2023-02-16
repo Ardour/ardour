@@ -21,8 +21,8 @@
 #define _gtkardour_io_button_h_
 
 #include <list>
+#include <memory>
 
-#include <boost/shared_ptr.hpp>
 #include <gtkmm/menu.h>
 
 #include "ardour/data_type.h"

@@ -21,14 +21,13 @@
 #ifndef __libardour_jack_audiobackend_h__
 #define __libardour_jack_audiobackend_h__
 
+#include <cstdint>
 #include <string>
 #include <vector>
 #include <map>
+#include <memory>
 #include <set>
 
-#include <stdint.h>
-
-#include <boost/shared_ptr.hpp>
 
 #include "weak_libjack.h"
 

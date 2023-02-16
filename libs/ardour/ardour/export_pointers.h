@@ -20,9 +20,9 @@
 #ifndef __ardour_export_pointers_h__
 #define __ardour_export_pointers_h__
 
+#include <memory>
+
 #include <boost/operators.hpp>
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/comparable_shared_ptr.h"

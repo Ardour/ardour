@@ -28,11 +28,9 @@
 #include <cstring>
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
-
-#include <boost/shared_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 
 #include <glibmm/threads.h>
 #include "pbd/fastlog.h"

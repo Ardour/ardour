@@ -21,7 +21,7 @@
 #define __ardour_gtk_playlist_selection_h__
 
 #include <list>
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace ARDOUR {
 	class Playlist;

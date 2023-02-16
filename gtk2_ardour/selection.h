@@ -25,8 +25,9 @@
 #ifndef __ardour_gtk_selection_h__
 #define __ardour_gtk_selection_h__
 
+#include <memory>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+
 #include <boost/noncopyable.hpp>
 
 #include <sigc++/signal.h>

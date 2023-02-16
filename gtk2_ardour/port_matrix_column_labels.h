@@ -19,7 +19,8 @@
 #ifndef __port_matrix_column_labels_h__
 #define __port_matrix_column_labels_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include "port_matrix_labels.h"
 
 namespace ARDOUR {

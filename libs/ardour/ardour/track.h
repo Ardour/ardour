@@ -22,7 +22,7 @@
 #ifndef __ardour_track_h__
 #define __ardour_track_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "pbd/enum_convert.h"
 

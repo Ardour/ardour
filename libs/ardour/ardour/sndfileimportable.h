@@ -21,7 +21,8 @@
 #ifndef __ardour_sndfile_importable_source_h__
 #define __ardour_sndfile_importable_source_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <sndfile.h>
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"

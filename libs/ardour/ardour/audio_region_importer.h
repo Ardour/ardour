@@ -22,9 +22,9 @@
 
 #include <list>
 #include <map>
+#include <memory>
 #include <utility>
 
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/xml++.h"
 #include "pbd/id.h"

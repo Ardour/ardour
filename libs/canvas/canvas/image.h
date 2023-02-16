@@ -20,8 +20,9 @@
 #ifndef __CANVAS_IMAGE__
 #define __CANVAS_IMAGE__
 
-#include <stdint.h>
-#include <boost/shared_ptr.hpp>
+#include <cstdint>
+#include <memory>
+
 #include <boost/shared_array.hpp>
 
 #include "canvas/visibility.h"

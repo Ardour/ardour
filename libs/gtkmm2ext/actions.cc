@@ -18,14 +18,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cstdint>
 #include <cstring>
 #include <vector>
 #include <string>
 #include <list>
+#include <memory>
 #include <stack>
-#include <stdint.h>
 
-#include <boost/shared_ptr.hpp>
 
 #include <gtk/gtkaccelmap.h>
 #include <gtk/gtkuimanager.h>

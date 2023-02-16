@@ -19,10 +19,9 @@
 #ifndef __ardour_instrument_info_h__
 #define __ardour_instrument_info_h__
 
+#include <memory>
 #include <stdint.h>
 #include <string>
-
-#include <boost/weak_ptr.hpp>
 
 #include "pbd/signals.h"
 

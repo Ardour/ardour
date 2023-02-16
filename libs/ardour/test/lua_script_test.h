@@ -1,4 +1,5 @@
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include "test_needing_session.h"
 
 class LuaScriptTest : public TestNeedingSession

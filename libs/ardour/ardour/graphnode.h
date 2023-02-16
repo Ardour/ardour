@@ -23,9 +23,8 @@
 
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
-
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/g_atomic_compat.h"
 #include "pbd/rcu.h"

@@ -25,9 +25,9 @@
 #define __ardour_export_handler_h__
 
 #include <map>
+#include <memory>
 
 #include <boost/operators.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/gstdio_compat.h"
 

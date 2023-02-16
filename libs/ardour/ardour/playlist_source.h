@@ -19,9 +19,8 @@
 #ifndef __ardour_playlist_source_h__
 #define __ardour_playlist_source_h__
 
+#include <memory>
 #include <string>
-
-#include <boost/shared_ptr.hpp>
 
 #include "ardour/ardour.h"
 #include "ardour/source.h"

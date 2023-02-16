@@ -22,15 +22,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <cmath>
-#include <climits>
-#include <cfloat>
 #include <algorithm>
-
+#include <cfloat>
+#include <climits>
+#include <cmath>
+#include <memory>
 #include <set>
 
 #include <boost/scoped_array.hpp>
-#include <boost/shared_ptr.hpp>
 
 #include <glibmm/fileutils.h>
 #include <glibmm/threads.h>

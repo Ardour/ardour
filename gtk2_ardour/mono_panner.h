@@ -21,9 +21,9 @@
 #ifndef __gtk_ardour_mono_panner_h__
 #define __gtk_ardour_mono_panner_h__
 
-#include "pbd/signals.h"
+#include <memory>
 
-#include <boost/shared_ptr.hpp>
+#include "pbd/signals.h"
 
 #include "widgets/binding_proxy.h"
 

@@ -20,7 +20,7 @@
 #ifndef __ardour_source_factory_h__
 #define __ardour_source_factory_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 #include <stdint.h>
 #include <string>
 

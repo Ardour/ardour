@@ -24,7 +24,7 @@
 #undef interface
 #endif
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <gtkmm/adjustment.h>
 #include <gtkmm/spinbutton.h>

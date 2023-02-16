@@ -20,11 +20,15 @@
  */
 
 #include <iostream>
-#include <boost/weak_ptr.hpp>
+#include <memory>
+
 #include <cairo.h>
 
 #include "gtkmm2ext/keyboard.h"
+
 #include "ardour/bundle.h"
+
+#include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/colors.h"
 
 #include "port_matrix_row_labels.h"

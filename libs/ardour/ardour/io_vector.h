@@ -19,8 +19,9 @@
 #ifndef __ardour_io_vector_h__
 #define __ardour_io_vector_h__
 
+#include <memory>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+
 #include "ardour/io.h"
 
 namespace ARDOUR {

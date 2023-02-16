@@ -20,7 +20,7 @@
 #ifndef __ardour_analyser_h__
 #define __ardour_analyser_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include "ardour/libardour_visibility.h"
 #include "pbd/pthread_utils.h"

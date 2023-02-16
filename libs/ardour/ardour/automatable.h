@@ -23,10 +23,10 @@
 #define __ardour_automatable_h__
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/rcu.h"
 #include "pbd/signals.h"

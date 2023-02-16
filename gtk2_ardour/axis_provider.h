@@ -20,7 +20,7 @@
 #ifndef __gtk2_ardour_axis_provider_h__
 #define __gtk2_ardour_axis_provider_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 namespace ARDOUR {
 	class Stripable;

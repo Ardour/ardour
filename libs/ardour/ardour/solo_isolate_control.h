@@ -19,9 +19,8 @@
 #ifndef __ardour_solo_isolate_control_h__
 #define __ardour_solo_isolate_control_h__
 
+#include <memory>
 #include <string>
-
-#include <boost/shared_ptr.hpp>
 
 #include "ardour/slavable_automation_control.h"
 #include "ardour/libardour_visibility.h"

@@ -26,11 +26,10 @@
 
 #include <list>
 #include <map>
+#include <memory>
 #include <stdexcept>
 #include <string>
 #include <vector>
-
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/file_utils.h"
 #include "pbd/uuid.h"

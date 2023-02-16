@@ -129,8 +129,6 @@ def configure(conf):
             define_name='HAVE_LOCALTIME_R', execute = False, mandatory=False)
 
     # Boost headers
-    autowaf.check_header(conf, 'cxx', 'boost/shared_ptr.hpp')
-    autowaf.check_header(conf, 'cxx', 'boost/weak_ptr.hpp')
     if Options.options.dist_target == 'mingw':
         conf.check(compiler='cxx',
                    lib='ole32',

@@ -22,10 +22,9 @@
 #ifndef __ardour_export_format_base_h__
 #define __ardour_export_format_base_h__
 
+#include <memory>
 #include <set>
 #include <string>
-
-#include <boost/shared_ptr.hpp>
 
 #include <sndfile.h>
 #include <samplerate.h>

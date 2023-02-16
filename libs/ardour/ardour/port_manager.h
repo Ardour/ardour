@@ -20,14 +20,12 @@
 #ifndef __libardour_port_manager_h__
 #define __libardour_port_manager_h__
 
+#include <cstdint>
 #include <exception>
 #include <map>
+#include <memory>
 #include <string>
 #include <vector>
-
-#include <stdint.h>
-
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/natsort.h"
 #include "pbd/rcu.h"

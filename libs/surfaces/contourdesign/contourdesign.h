@@ -20,9 +20,10 @@
 #ifndef ardour_contourdesign_control_protocol_h
 #define ardour_contourdesign_control_protocol_h
 
+#include <memory>
 #include <string>
 #include <vector>
-#include <boost/shared_ptr.hpp>
+
 #include <glibmm/main.h>
 
 #define ABSTRACT_UI_EXPORTS

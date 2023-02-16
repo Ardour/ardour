@@ -24,6 +24,7 @@
 #define __export_channel_selector_h__
 
 #include <list>
+#include <memory>
 
 #include "ardour/export_profile_manager.h"
 
@@ -32,7 +33,7 @@
 #endif
 
 #include <sigc++/signal.h>
-#include <boost/shared_ptr.hpp>
+
 
 #include <gtkmm/alignment.h>
 #include <gtkmm/box.h>

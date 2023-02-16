@@ -20,9 +20,8 @@
 #ifndef __ardour_mute_control_h__
 #define __ardour_mute_control_h__
 
+#include <memory>
 #include <string>
-
-#include <boost/shared_ptr.hpp>
 
 #include "ardour/slavable_automation_control.h"
 

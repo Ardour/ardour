@@ -20,9 +20,8 @@
 #ifndef __libardour_pan_controllable_h__
 #define __libardour_pan_controllable_h__
 
+#include <memory>
 #include <string>
-
-#include <boost/shared_ptr.hpp>
 
 #include "evoral/Parameter.h"
 

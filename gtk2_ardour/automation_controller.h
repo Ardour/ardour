@@ -29,7 +29,7 @@
 #undef NO
 #endif
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
 
 #include <gtkmm/alignment.h>
 

@@ -20,8 +20,9 @@
 #ifndef __ardour_automation_watch_h__
 #define __ardour_automation_watch_h__
 
+#include <memory>
 #include <set>
-#include <boost/shared_ptr.hpp>
+
 #include <sigc++/signal.h>
 
 #include "pbd/pthread_utils.h"

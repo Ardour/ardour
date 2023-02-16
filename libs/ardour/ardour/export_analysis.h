@@ -21,10 +21,10 @@
 
 #include <cstring>
 #include <map>
+#include <memory>
 #include <set>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
 
 #include "ardour/types.h"
 

@@ -24,16 +24,16 @@
 #ifndef __export_timespan_selector_h__
 #define __export_timespan_selector_h__
 
-#include "audio_clock.h"
-
 #include <ctime>
 #include <list>
+#include <memory>
+
+#include "audio_clock.h"
 
 #ifdef interface
 #undef interface
 #endif
 
-#include <boost/shared_ptr.hpp>
 
 #include <gtkmm/box.h>
 #include <gtkmm/checkbutton.h>

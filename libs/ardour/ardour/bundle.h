@@ -22,10 +22,11 @@
 #ifndef __ardour_bundle_h__
 #define __ardour_bundle_h__
 
+#include <memory>
 #include <string>
 #include <vector>
+
 #include <glibmm/threads.h>
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/signals.h"
 

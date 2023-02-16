@@ -22,9 +22,8 @@
 #define __ardour_audio_playlist_importer_h__
 
 #include <list>
-
-#include <boost/shared_ptr.hpp>
-
+#include <memory>
+x
 #include "pbd/xml++.h"
 #include "pbd/id.h"
 

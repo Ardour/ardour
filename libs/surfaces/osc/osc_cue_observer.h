@@ -20,7 +20,8 @@
 #define __osc_osccueobserver_h__
 
 #include <string>
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <sigc++/sigc++.h>
 #include <lo/lo.h>
 

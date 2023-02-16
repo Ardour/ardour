@@ -21,11 +21,11 @@
 #define _libardour_port_engine_shared_h_
 
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/natsort.h"
 #include "pbd/rcu.h"

@@ -39,6 +39,7 @@
 #include <exception>
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
@@ -47,7 +48,6 @@
 
 #include <boost/dynamic_bitset.hpp>
 #include <boost/scoped_ptr.hpp>
-#include <boost/weak_ptr.hpp>
 #include <boost/utility.hpp>
 
 #include <glibmm/threads.h>

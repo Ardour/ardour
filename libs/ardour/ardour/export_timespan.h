@@ -23,9 +23,8 @@
 #ifndef __ardour_export_timespan_h__
 #define __ardour_export_timespan_h__
 
+#include <memory>
 #include <string>
-
-#include <boost/shared_ptr.hpp>
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"

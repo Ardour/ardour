@@ -27,10 +27,10 @@
 #include <AudioToolbox/AudioToolbox.h>
 
 #include <map>
+#include <memory>
 #include <vector>
 #include <string>
 
-#include <boost/shared_ptr.hpp>
 #include "pbd/ringbuffer.h"
 
 namespace ARDOUR {

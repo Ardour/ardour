@@ -22,11 +22,11 @@
 #ifndef __ardour_audio_streamview_h__
 #define __ardour_audio_streamview_h__
 
-#include <list>
-#include <map>
 #include <cmath>
+#include <list>
+#include <memory>
+#include <map>
 
-#include <boost/weak_ptr.hpp>
 
 #include "ardour/location.h"
 #include "point_selection.h"

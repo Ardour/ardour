@@ -21,11 +21,13 @@
 #ifndef __ardour_session_playlists_h__
 #define __ardour_session_playlists_h__
 
+#include <memory>
 #include <set>
 #include <vector>
 #include <string>
+
 #include <glibmm/threads.h>
-#include <boost/shared_ptr.hpp>
+
 #include <boost/function.hpp>
 
 #include "pbd/signals.h"

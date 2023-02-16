@@ -19,7 +19,8 @@
 #ifndef __ardour_push2_knob_h__
 #define __ardour_push2_knob_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <sigc++/trackable.h>
 
 #include <cairomm/refptr.h>

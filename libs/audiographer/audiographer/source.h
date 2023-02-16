@@ -1,10 +1,10 @@
 #ifndef AUDIOGRAPHER_SOURCE_H
 #define AUDIOGRAPHER_SOURCE_H
 
+#include <memory>
+
 #include "types.h"
 #include "sink.h"
-
-#include <boost/shared_ptr.hpp>
 
 #include "audiographer/visibility.h"
 

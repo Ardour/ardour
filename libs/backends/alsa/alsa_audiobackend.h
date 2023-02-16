@@ -20,15 +20,15 @@
 #ifndef __libbackend_alsa_audiobackend_h__
 #define __libbackend_alsa_audiobackend_h__
 
+#include <cstdint>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 #include <vector>
 
 #include <pthread.h>
-#include <stdint.h>
 
-#include <boost/shared_ptr.hpp>
 
 #include "pbd/natsort.h"
 #include "pbd/rcu.h"

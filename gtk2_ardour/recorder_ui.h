@@ -19,8 +19,8 @@
 #ifndef __gtk_ardour_recorder_ui_h__
 #define __gtk_ardour_recorder_ui_h__
 
-#include <boost/shared_ptr.hpp>
 #include <list>
+#include <memory>
 #include <vector>
 
 #include <gtkmm/alignment.h>

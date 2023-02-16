@@ -20,9 +20,8 @@
 #ifndef __ardour_audio_playlist_source_h__
 #define __ardour_audio_playlist_source_h__
 
+#include <memory>
 #include <string>
-
-#include <boost/shared_ptr.hpp>
 
 #include "ardour/ardour.h"
 #include "ardour/audiosource.h"

@@ -19,7 +19,8 @@
 #ifndef __port_matrix_row_labels_h__
 #define __port_matrix_row_labels_h__
 
-#include <boost/shared_ptr.hpp>
+#include <memory>
+
 #include <gdkmm/color.h>
 #include "port_matrix_labels.h"
 
