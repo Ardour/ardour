@@ -660,8 +660,7 @@ MeterPoint::get_state () const
 timepos_t
 TempoMetric::reftime() const
 {
-	TempoMap::SharedPtr tmap (TempoMap::use ());
-	return tmap->reftime (*this);
+	return _tempo->map().reftime (*this);
 }
 
 timepos_t
