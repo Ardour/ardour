@@ -4358,7 +4358,7 @@ MidiRegionView::data_recorded (boost::weak_ptr<MidiSource> w)
 				// - then calculate the distance from that relative to src->natural_position ()
 				// - and then take the samples() value of that and convert it to pixels
 				//
-				// Much simpler to just use ev.time() which is alredy the absolute position (in sample-time)
+				// Much simpler to just use ev.time() which is already the absolute position (in sample-time)
 				_active_notes[note]->set_x1 (trackview.editor().sample_to_pixel ((src->time_since_capture_start (timepos_t (ev.time ()))).samples()));
 				_active_notes[note]->set_outline_all ();
 				_active_notes[note] = 0;

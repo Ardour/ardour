@@ -523,7 +523,7 @@
 [processor-usage]
   cpu threads usage distribute parallel
 [quieten-at-speed]
-  volume gain level reduce quieten cut speed fast foward rewind ffwd
+  volume gain level reduce quieten cut speed fast forward rewind ffwd
 [range-location-minimum]
 [range-selection-after-split]
   editing split selection range after split 

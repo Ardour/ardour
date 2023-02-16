@@ -1928,7 +1928,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	options.attach (smf_tempo_btn, 4, 5, 2, 3, FILL, SHRINK, 2, 0);
 	options.attach (smf_marker_btn, 4, 5, 3, 4, FILL, SHRINK, 2, 0);
 
-	/* 3nd col (Audio-only) */
+	/* 3rd col (Audio-only) */
 	vspace = manage (new Alignment ());
 	vspace->set_size_request (16, 2);
 	options.attach (*vspace, 5, 6, 6, 7, SHRINK, SHRINK, 0, 0);
