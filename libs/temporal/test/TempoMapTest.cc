@@ -18,8 +18,8 @@ void
 TempoMapTest::addTest()
 {
 	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
-	TempoPoint& tp = tmap->set_tempo (Tempo (180, 4), BBT_Time (6, 1, 0));
-	tmap->set_meter (Meter (6, 8), BBT_Time (3, 1, 0));
+	TempoPoint& tp = tmap->set_tempo (Tempo (180, 4), BBT_Argument (6, 1, 0));
+	tmap->set_meter (Meter (6, 8), BBT_Argument (3, 1, 0));
 
 	/* tp is at 6|1|0 which is 3|0|0 after the 6/8 meter at ((3-1) * 4 =) 8
 	 * quarter notes), so 3 bars of 6
