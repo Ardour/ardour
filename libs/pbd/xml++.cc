@@ -5,6 +5,7 @@
  * Modified for Ardour and released under the same terms.
  */
 
+#include <cassert>
 #include <string.h>
 #include <iostream>
 
