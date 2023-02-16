@@ -545,7 +545,7 @@ AutomationLine::ContiguousControlPoints::clamp_dt (timecnt_t const & dt, timepos
 	 * - it is not before the origin (zero)
 	 * - it is not beyond the line's own limit (e.g. for region automation)
 	 * - it is not before the preceding point
-	 * - it is not after the folloing point
+	 * - it is not after the following point
 	 */
 
 	possible_pos = max (possible_pos, Temporal::timepos_t (possible_pos.time_domain()));
