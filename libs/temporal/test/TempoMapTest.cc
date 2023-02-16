@@ -27,7 +27,7 @@ TempoMapTest::addTest()
 	 * be 8 + 9 = 17
 	 */
 
-	std::cout << "\n\n\n\***************** tp = " << tp.beats() << std::endl;
+	std::cout << "\n\n\n ***************** tp = " << tp.beats() << std::endl;
 
 	CPPUNIT_ASSERT (tp.beats() == Beats (17,0));
 
