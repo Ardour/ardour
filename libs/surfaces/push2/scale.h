@@ -67,7 +67,7 @@ class ScaleLayout : public Push2Layout
 	Push2Menu* _scale_menu;
 	int _last_vpot;
 	int _vpot_delta_cnt;
-	boost::shared_ptr<Push2::Button> _root_button;
+	std::shared_ptr<Push2::Button> _root_button;
 
 	void build_scale_menu ();
 	PBD::ScopedConnectionList _menu_connections;

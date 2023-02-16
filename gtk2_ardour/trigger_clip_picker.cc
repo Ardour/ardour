@@ -497,9 +497,9 @@ TriggerClipPicker::row_selected ()
 		std::string path = (*i)[_columns.path];
 		if (SMFSource::valid_midi_file (path)) {
 			/* TODO: if it's a really big file, we could skip this check */
-			boost::shared_ptr<SMFSource> ms;
+			std::shared_ptr<SMFSource> ms;
 			try {
-				ms = boost::dynamic_pointer_cast<SMFSource> (
+				ms = std::dynamic_pointer_cast<SMFSource> (
 					SourceFactory::createExternal (DataType::MIDI, *_session,
 												   path, 0, Source::Flag (0), false));
 			} catch (const std::exception& e) {
@@ -619,7 +619,7 @@ TriggerClipPicker::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& con
 {
 	if (data.get_target () == "x-ardour/region.pbdid") {
 		PBD::ID rid (data.get_data_as_string ());
-		boost::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
+		std::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
 		if (export_to_clip_library (region, this)) {
 			context->drag_finish (true, false, time);
 		} else {
@@ -978,10 +978,10 @@ TriggerClipPicker::audition (std::string const& path)
 		return;
 	}
 
-	boost::shared_ptr<Region> r;
+	std::shared_ptr<Region> r;
 
 	if (SMFSource::valid_midi_file (path)) {
-		boost::shared_ptr<SMFSource> ms = boost::dynamic_pointer_cast<SMFSource> (SourceFactory::createExternal (DataType::MIDI, *_session, path, 0, Source::Flag (0), false));
+		std::shared_ptr<SMFSource> ms = std::dynamic_pointer_cast<SMFSource> (SourceFactory::createExternal (DataType::MIDI, *_session, path, 0, Source::Flag (0), false));
 
 		std::string rname = region_name_from_path (ms->path (), false);
 
@@ -991,12 +991,12 @@ TriggerClipPicker::audition (std::string const& path)
 		plist.add (ARDOUR::Properties::name, rname);
 		plist.add (ARDOUR::Properties::layer, 0);
 
-		r = boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (boost::dynamic_pointer_cast<Source> (ms), plist, false));
+		r = std::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (std::dynamic_pointer_cast<Source> (ms), plist, false));
 		assert (r);
 
 	} else {
 		SourceList                         srclist;
-		boost::shared_ptr<AudioFileSource> afs;
+		std::shared_ptr<AudioFileSource> afs;
 		bool                               old_sbp = AudioSource::get_build_peakfiles ();
 
 		/* don't even think of building peakfiles for these files */
@@ -1012,9 +1012,9 @@ TriggerClipPicker::audition (std::string const& path)
 
 		for (uint16_t n = 0; n < info.channels; ++n) {
 			try {
-				afs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createExternal (DataType::AUDIO, *_session, path, n, Source::Flag (ARDOUR::AudioFileSource::NoPeakFile), false));
+				afs = std::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createExternal (DataType::AUDIO, *_session, path, n, Source::Flag (ARDOUR::AudioFileSource::NoPeakFile), false));
 				if (afs->sample_rate () != _session->nominal_sample_rate ()) {
-					boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource (*_session, afs, ARDOUR::SrcGood));
+					std::shared_ptr<SrcFileSource> sfs (new SrcFileSource (*_session, afs, ARDOUR::SrcGood));
 					srclist.push_back (sfs);
 				} else {
 					srclist.push_back (afs);
@@ -1032,7 +1032,7 @@ TriggerClipPicker::audition (std::string const& path)
 			return;
 		}
 
-		afs               = boost::dynamic_pointer_cast<AudioFileSource> (srclist[0]);
+		afs               = std::dynamic_pointer_cast<AudioFileSource> (srclist[0]);
 		std::string rname = region_name_from_path (afs->path (), false);
 
 		PropertyList plist;
@@ -1041,7 +1041,7 @@ TriggerClipPicker::audition (std::string const& path)
 		plist.add (ARDOUR::Properties::name, rname);
 		plist.add (ARDOUR::Properties::layer, 0);
 
-		r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
+		r = std::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
 	}
 
 	r->set_position (timepos_t ());
@@ -1076,7 +1076,7 @@ void
 TriggerClipPicker::audition_show_plugin_ui ()
 {
 	if (!_audition_plugnui) {
-		boost::shared_ptr<PluginInsert> plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (_session->the_auditioner ()->the_instrument ());
+		std::shared_ptr<PluginInsert> plugin_insert = std::dynamic_pointer_cast<PluginInsert> (_session->the_auditioner ()->the_instrument ());
 		if (plugin_insert) {
 			_audition_plugnui = new PluginUIWindow (plugin_insert);
 			_audition_plugnui->set_session (_session);
@@ -1113,7 +1113,7 @@ TriggerClipPicker::audition_processors_changed ()
 	}
 
 	if (_session && _session->the_auditioner ()->get_audition_synth_info()) {
-		boost::shared_ptr<PluginInsert> plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (_session->the_auditioner ()->the_instrument ());
+		std::shared_ptr<PluginInsert> plugin_insert = std::dynamic_pointer_cast<PluginInsert> (_session->the_auditioner ()->the_instrument ());
 		if (plugin_insert) {
 			set_tooltip (_show_plugin_btn, "Show the selected audition-instrument's GUI");
 			_show_plugin_btn.set_sensitive (true);

@@ -30,7 +30,7 @@
 class PluginSetupDialog : public ArdourDialog
 {
 public:
-	PluginSetupDialog (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::PluginInsert>, ARDOUR::Route::PluginSetupOptions);
+	PluginSetupDialog (std::shared_ptr<ARDOUR::Route>, std::shared_ptr<ARDOUR::PluginInsert>, ARDOUR::Route::PluginSetupOptions);
 
 	bool fan_out () const { return _fan_out.get_active () && _fan_out.get_sensitive (); }
 
@@ -45,8 +45,8 @@ private:
 	void apply_mapping ();
 	void toggle_fan_out ();
 
-	boost::shared_ptr<ARDOUR::Route> _route;
-	boost::shared_ptr<ARDOUR::PluginInsert> _pi;
+	std::shared_ptr<ARDOUR::Route> _route;
+	std::shared_ptr<ARDOUR::PluginInsert> _pi;
 
 	ArdourWidgets::ArdourDropdown _out_presets;
 	ArdourWidgets::ArdourButton _keep_mapping;

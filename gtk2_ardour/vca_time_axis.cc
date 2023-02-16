@@ -165,14 +165,14 @@ VCATimeAxisView::mute_release (GdkEventButton*)
 }
 
 void
-VCATimeAxisView::set_vca (boost::shared_ptr<VCA> v)
+VCATimeAxisView::set_vca (std::shared_ptr<VCA> v)
 {
 	StripableTimeAxisView::set_stripable (v);
 	_vca = v;
 
-	gain_meter.set_controls (boost::shared_ptr<Route>(),
-	                         boost::shared_ptr<PeakMeter>(),
-	                         boost::shared_ptr<Amp>(),
+	gain_meter.set_controls (std::shared_ptr<Route>(),
+	                         std::shared_ptr<PeakMeter>(),
+	                         std::shared_ptr<Amp>(),
 	                         _vca->gain_control());
 
 	// Mixer_UI::instance()->show_vca_change.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill_change));
@@ -341,7 +341,7 @@ VCATimeAxisView::presentation_info () const
 	return _vca->presentation_info();
 }
 
-boost::shared_ptr<Stripable>
+std::shared_ptr<Stripable>
 VCATimeAxisView::stripable () const
 {
 	return _vca;
@@ -391,14 +391,14 @@ VCATimeAxisView::set_marked_for_display (bool yn)
 void
 VCATimeAxisView::create_gain_automation_child (const Evoral::Parameter& param, bool show)
 {
-	boost::shared_ptr<AutomationControl> c = _vca->gain_control();
+	std::shared_ptr<AutomationControl> c = _vca->gain_control();
 	if (!c) {
 		error << "VCA has no gain automation, unable to add automation track view." << endmsg;
 		return;
 	}
 
 	gain_track.reset (new AutomationTimeAxisView (_session,
-						      _vca, boost::shared_ptr<Automatable> (), c, param,
+						      _vca, std::shared_ptr<Automatable> (), c, param,
 						      _editor,
 						      *this,
 						      false,
@@ -411,14 +411,14 @@ VCATimeAxisView::create_gain_automation_child (const Evoral::Parameter& param, b
 void
 VCATimeAxisView::create_mute_automation_child (const Evoral::Parameter& param, bool show)
 {
-	boost::shared_ptr<AutomationControl> c = _vca->mute_control();
+	std::shared_ptr<AutomationControl> c = _vca->mute_control();
 	if (!c) {
 		error << "VCA has no mute automation, unable to add automation track view." << endmsg;
 		return;
 	}
 
 	mute_track.reset (new AutomationTimeAxisView (_session,
-						      _vca, boost::shared_ptr<Automatable> (), c, param,
+						      _vca, std::shared_ptr<Automatable> (), c, param,
 						      _editor,
 						      *this,
 						      false,
@@ -555,7 +555,7 @@ VCATimeAxisView::drop_all_slaves ()
 	_vca->Drop (); /* EMIT SIGNAL */
 
 	if (Mixer_UI::instance()->showing_spill_for (_vca)) {
-		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
+		Mixer_UI::instance()->show_spill (std::shared_ptr<Stripable>());
 	}
 }
 

@@ -39,7 +39,7 @@ public:
 	bool add_impdata (
 	    uint32_t                    c_in,
 	    uint32_t                    c_out,
-	    boost::shared_ptr<AudioReadable> r,
+	    std::shared_ptr<AudioReadable> r,
 	    float                       gain      = 1.0,
 	    uint32_t                    pre_delay = 0,
 	    sampleoffset_t              offset    = 0,
@@ -71,7 +71,7 @@ private:
 	class ImpData : public AudioReadable
 	{
 	public:
-		ImpData (uint32_t ci, uint32_t co, boost::shared_ptr<AudioReadable> r, float g, float d, sampleoffset_t s = 0, samplecnt_t l = 0, uint32_t c = 0)
+		ImpData (uint32_t ci, uint32_t co, std::shared_ptr<AudioReadable> r, float g, float d, sampleoffset_t s = 0, samplecnt_t l = 0, uint32_t c = 0)
 		    : c_in (ci)
 		    , c_out (co)
 		    , gain (g)
@@ -107,7 +107,7 @@ private:
 		}
 
 	private:
-		boost::shared_ptr<AudioReadable> _readable;
+		std::shared_ptr<AudioReadable> _readable;
 
 		sampleoffset_t _offset;
 		samplecnt_t    _length;
@@ -176,7 +176,7 @@ public:
 	void run_stereo_no_latency (float* L, float* R, uint32_t);
 
 private:
-	std::vector<boost::shared_ptr<AudioReadable> > _readables;
+	std::vector<std::shared_ptr<AudioReadable> > _readables;
 
 	IRChannelConfig _irc;
 	IRSettings      _ir_settings;

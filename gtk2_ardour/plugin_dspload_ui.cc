@@ -28,7 +28,7 @@
 using namespace Gtkmm2ext;
 using namespace Gtk;
 
-PluginLoadStatsGui::PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PlugInsertBase> pib)
+PluginLoadStatsGui::PluginLoadStatsGui (std::shared_ptr<ARDOUR::PlugInsertBase> pib)
 	: _pib (pib)
 	, _lbl_min ("", ALIGN_END, ALIGN_CENTER)
 	, _lbl_max ("", ALIGN_END, ALIGN_CENTER)

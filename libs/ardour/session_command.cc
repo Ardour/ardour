@@ -92,7 +92,7 @@ Session::memento_command_factory(XMLNode *n)
     n->get_property ("type-name", type_name);
 
     if (type_name == "ARDOUR::AudioRegion" || type_name == "ARDOUR::MidiRegion" || type_name == "ARDOUR::Region") {
-	    boost::shared_ptr<Region> r = RegionFactory::region_by_id (id);
+	    std::shared_ptr<Region> r = RegionFactory::region_by_id (id);
 	    if (r) {
 		    return new MementoCommand<Region>(*r, before, after);
 	    }
@@ -112,12 +112,12 @@ Session::memento_command_factory(XMLNode *n)
 
     } else if (type_name == "ARDOUR::Playlist" || type_name == "ARDOUR::AudioPlaylist" || type_name == "ARDOUR::MidiPlaylist") {
 
-	    if (boost::shared_ptr<Playlist> pl = _playlists->by_name(child->property("name")->value())) {
+	    if (std::shared_ptr<Playlist> pl = _playlists->by_name(child->property("name")->value())) {
 		    return new MementoCommand<Playlist>(*(pl.get()), before, after);
 	    }
 
     } else if (type_name == "ARDOUR::Route" || type_name == "ARDOUR::AudioTrack" || type_name == "ARDOUR::MidiTrack") {
-		if (boost::shared_ptr<Route> r = route_by_id(id)) {
+		if (std::shared_ptr<Route> r = route_by_id(id)) {
 			return new MementoCommand<Route>(*r, before, after);
 		} else {
 			error << string_compose (X_("Route %1 not found in session"), id) << endmsg;
@@ -163,13 +163,13 @@ Session::stateful_diff_command_factory (XMLNode* n)
 	}
 
 	if ((type_name == "ARDOUR::AudioRegion" || type_name == "ARDOUR::MidiRegion")) {
-		boost::shared_ptr<Region> r = RegionFactory::region_by_id (id);
+		std::shared_ptr<Region> r = RegionFactory::region_by_id (id);
 		if (r) {
 			return new StatefulDiffCommand (r, *n);
 		}
 
 	} else if (type_name == "ARDOUR::AudioPlaylist" ||  type_name == "ARDOUR::MidiPlaylist") {
-		boost::shared_ptr<Playlist> p = _playlists->by_id (id);
+		std::shared_ptr<Playlist> p = _playlists->by_id (id);
 		if (p) {
 			return new StatefulDiffCommand (p, *n);
 		} else {

@@ -64,7 +64,7 @@ fill_note_length_map ()
 	note_length_map.insert (make_pair<int32_t,string> (Temporal::ticks_per_beat/64, _("Sixty-fourth")));
 }
 
-MidiListEditor::MidiListEditor (Session* s, boost::shared_ptr<MidiRegion> r, boost::shared_ptr<MidiTrack> tr)
+MidiListEditor::MidiListEditor (Session* s, std::shared_ptr<MidiRegion> r, std::shared_ptr<MidiTrack> tr)
 	: ArdourWindow (r->name())
 	, buttons (1, 1)
 	, region (r)
@@ -270,7 +270,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 
 	if (apply) {
 
-		boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
+		std::shared_ptr<MidiModel> m (region->midi_source(0)->model());
 		MidiModel::NoteDiffCommand* cmd = m->new_note_diff_command (opname);
 		vector<TreeModel::Path> previous_selection;
 
@@ -280,7 +280,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 
 			TreeView::Selection::ListHandle_Path rows = view.get_selection()->get_selected_rows ();
 			TreeModel::iterator iter;
-			boost::shared_ptr<NoteType> note;
+			std::shared_ptr<NoteType> note;
 
 			for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 
@@ -330,7 +330,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 			previous_selection.push_back (path);
 
 			if (iter) {
-				boost::shared_ptr<NoteType> note = (*iter)[columns._note];
+				std::shared_ptr<NoteType> note = (*iter)[columns._note];
 
 				switch (prop) {
 				case MidiModel::NoteDiffCommand::StartTime:
@@ -450,9 +450,9 @@ MidiListEditor::key_release (GdkEventKey* ev)
 	TreeViewColumn* col;
 	TreeModel::iterator iter;
 	MidiModel::NoteDiffCommand* cmd;
-	boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
-	boost::shared_ptr<NoteType> note;
-	boost::shared_ptr<NoteType> copy;
+	std::shared_ptr<MidiModel> m (region->midi_source(0)->model());
+	std::shared_ptr<NoteType> note;
+	std::shared_ptr<NoteType> copy;
 
 	switch (ev->keyval) {
 	case GDK_Insert:
@@ -512,19 +512,19 @@ MidiListEditor::delete_selected_note ()
 		return;
 	}
 
-	typedef vector<boost::shared_ptr<NoteType> > Notes;
+	typedef vector<std::shared_ptr<NoteType> > Notes;
 	Notes to_delete;
 
 	for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin(); i != rows.end(); ++i) {
 		TreeIter iter;
 
 		if ((iter = model->get_iter (*i))) {
-			boost::shared_ptr<NoteType> note = (*iter)[columns._note];
+			std::shared_ptr<NoteType> note = (*iter)[columns._note];
 			to_delete.push_back (note);
 		}
 	}
 
-	boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
+	std::shared_ptr<MidiModel> m (region->midi_source(0)->model());
 	MidiModel::NoteDiffCommand* cmd = m->new_note_diff_command (_("delete notes (from list)"));
 
 	for (Notes::iterator i = to_delete.begin(); i != to_delete.end(); ++i) {
@@ -583,7 +583,7 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 		return;
 	}
 
-	boost::shared_ptr<NoteType> note = (*iter)[columns._note];
+	std::shared_ptr<NoteType> note = (*iter)[columns._note];
 	MidiModel::NoteDiffCommand::Property prop (MidiModel::NoteDiffCommand::NoteNumber);
 
 	Temporal::Beats  bval;
@@ -700,7 +700,7 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 
 	if (apply) {
 
-		boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
+		std::shared_ptr<MidiModel> m (region->midi_source(0)->model());
 		MidiModel::NoteDiffCommand* cmd = m->new_note_diff_command (opname);
 
 		TreeView::Selection::ListHandle_Path rows = view.get_selection()->get_selected_rows ();
@@ -754,7 +754,7 @@ MidiListEditor::redisplay_model ()
 
 	if (_session) {
 
-		boost::shared_ptr<MidiModel> m (region->midi_source(0)->model());
+		std::shared_ptr<MidiModel> m (region->midi_source(0)->model());
 		TreeModel::Row row;
 		stringstream ss;
 
@@ -806,7 +806,7 @@ MidiListEditor::selection_changed ()
 
 	TreeModel::Path path;
 	TreeModel::iterator iter;
-	boost::shared_ptr<NoteType> note;
+	std::shared_ptr<NoteType> note;
 	TreeView::Selection::ListHandle_Path rows = view.get_selection()->get_selected_rows ();
 
 	NotePlayer* player = new NotePlayer (track);

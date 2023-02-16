@@ -38,7 +38,7 @@ class Pannable;
 class VBAPanner : public Panner
 {
 public:
-	VBAPanner (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
+	VBAPanner (std::shared_ptr<Pannable>, std::shared_ptr<Speakers>);
 	~VBAPanner ();
 
 	void      configure_io (ChanCount in, ChanCount /* ignored - we use Speakers */);
@@ -49,18 +49,18 @@ public:
 	void set_width (double);
 	void set_elevation (double);
 
-	static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
+	static Panner* factory (std::shared_ptr<Pannable>, std::shared_ptr<Speakers>);
 
 	void distribute (BufferSet& ibufs, BufferSet& obufs, gain_t gain_coeff, pframes_t nframes);
 
 	void set_azimuth_elevation (double azimuth, double elevation);
 
-	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
+	std::string value_as_string (std::shared_ptr<const AutomationControl>) const;
 
 	XMLNode& get_state () const;
 
 	PBD::AngularVector          signal_position (uint32_t n) const;
-	boost::shared_ptr<Speakers> get_speakers () const;
+	std::shared_ptr<Speakers> get_speakers () const;
 
 	void reset ();
 
@@ -78,7 +78,7 @@ private:
 	};
 
 	std::vector<Signal*>            _signals;
-	boost::shared_ptr<VBAPSpeakers> _speakers;
+	std::shared_ptr<VBAPSpeakers> _speakers;
 
 	void compute_gains (double g[3], int ls[3], int azi, int ele);
 	void update ();

@@ -304,54 +304,54 @@ CLASSKEYS(std::vector<samplepos_t>);
 CLASSKEYS(std::list<Evoral::ControlEvent*>);
 
 CLASSKEYS(std::vector<ARDOUR::Plugin::PresetRecord>);
-CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Processor> >);
-CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::Source> >);
-CLASSKEYS(std::vector<boost::shared_ptr<ARDOUR::AudioReadable> >);
+CLASSKEYS(std::vector<std::shared_ptr<ARDOUR::Processor> >);
+CLASSKEYS(std::vector<std::shared_ptr<ARDOUR::Source> >);
+CLASSKEYS(std::vector<std::shared_ptr<ARDOUR::AudioReadable> >);
 CLASSKEYS(std::vector<Evoral::Parameter>);
-CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::PluginInfo> >); // PluginInfoList
+CLASSKEYS(std::list<std::shared_ptr<ARDOUR::PluginInfo> >); // PluginInfoList
 
 CLASSKEYS(std::list<ArdourMarker*>);
 CLASSKEYS(std::list<TimeAxisView*>);
 CLASSKEYS(std::list<ARDOUR::TimelineRange>);
 
-CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Port> >);
-CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Region> >);
-CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Route> >);
-CLASSKEYS(std::list<boost::shared_ptr<ARDOUR::Stripable> >);
-CLASSKEYS(boost::shared_ptr<std::list<boost::shared_ptr<ARDOUR::Route> > >);
-CLASSKEYS(boost::shared_ptr<std::vector<boost::shared_ptr<ARDOUR::Bundle> > >);
+CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Port> >);
+CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Region> >);
+CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Route> >);
+CLASSKEYS(std::list<std::shared_ptr<ARDOUR::Stripable> >);
+CLASSKEYS(std::shared_ptr<std::list<std::shared_ptr<ARDOUR::Route> > >);
+CLASSKEYS(std::shared_ptr<std::vector<std::shared_ptr<ARDOUR::Bundle> > >);
 
-CLASSKEYS(boost::shared_ptr<ARDOUR::AudioRegion>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::AudioRom>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::AudioSource>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::Automatable>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::AutomatableSequence<Temporal::Beats> >);
-CLASSKEYS(boost::shared_ptr<ARDOUR::AutomationList>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::FileSource>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::MidiModel>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::MidiPlaylist>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::MidiRegion>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::MidiSource>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::PluginInfo>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::Processor>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::AudioReadable>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::Region>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::SessionPlaylists>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::Track>);
-CLASSKEYS(boost::shared_ptr<Evoral::ControlList>);
-CLASSKEYS(boost::shared_ptr<Evoral::Note<Temporal::Beats> >);
-CLASSKEYS(boost::shared_ptr<Evoral::Sequence<Temporal::Beats> >);
+CLASSKEYS(std::shared_ptr<ARDOUR::AudioRegion>);
+CLASSKEYS(std::shared_ptr<ARDOUR::AudioRom>);
+CLASSKEYS(std::shared_ptr<ARDOUR::AudioSource>);
+CLASSKEYS(std::shared_ptr<ARDOUR::Automatable>);
+CLASSKEYS(std::shared_ptr<ARDOUR::AutomatableSequence<Temporal::Beats> >);
+CLASSKEYS(std::shared_ptr<ARDOUR::AutomationList>);
+CLASSKEYS(std::shared_ptr<ARDOUR::FileSource>);
+CLASSKEYS(std::shared_ptr<ARDOUR::MidiModel>);
+CLASSKEYS(std::shared_ptr<ARDOUR::MidiPlaylist>);
+CLASSKEYS(std::shared_ptr<ARDOUR::MidiRegion>);
+CLASSKEYS(std::shared_ptr<ARDOUR::MidiSource>);
+CLASSKEYS(std::shared_ptr<ARDOUR::PluginInfo>);
+CLASSKEYS(std::shared_ptr<ARDOUR::Processor>);
+CLASSKEYS(std::shared_ptr<ARDOUR::AudioReadable>);
+CLASSKEYS(std::shared_ptr<ARDOUR::Region>);
+CLASSKEYS(std::shared_ptr<ARDOUR::SessionPlaylists>);
+CLASSKEYS(std::shared_ptr<ARDOUR::Track>);
+CLASSKEYS(std::shared_ptr<Evoral::ControlList>);
+CLASSKEYS(std::shared_ptr<Evoral::Note<Temporal::Beats> >);
+CLASSKEYS(std::shared_ptr<Evoral::Sequence<Temporal::Beats> >);
 
-CLASSKEYS(boost::shared_ptr<ARDOUR::Playlist>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::Bundle>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::Route>);
-CLASSKEYS(boost::shared_ptr<ARDOUR::VCA>);
-CLASSKEYS(boost::weak_ptr<ARDOUR::Bundle>);
-CLASSKEYS(boost::weak_ptr<ARDOUR::Route>);
-CLASSKEYS(boost::weak_ptr<ARDOUR::Track>);
-CLASSKEYS(boost::weak_ptr<ARDOUR::VCA>);
+CLASSKEYS(std::shared_ptr<ARDOUR::Playlist>);
+CLASSKEYS(std::shared_ptr<ARDOUR::Bundle>);
+CLASSKEYS(std::shared_ptr<ARDOUR::Route>);
+CLASSKEYS(std::shared_ptr<ARDOUR::VCA>);
+CLASSKEYS(std::weak_ptr<ARDOUR::Bundle>);
+CLASSKEYS(std::weak_ptr<ARDOUR::Route>);
+CLASSKEYS(std::weak_ptr<ARDOUR::Track>);
+CLASSKEYS(std::weak_ptr<ARDOUR::VCA>);
 
-CLASSKEYS(boost::shared_ptr<ARDOUR::RegionList>);
+CLASSKEYS(std::shared_ptr<ARDOUR::RegionList>);
 
 CLASSKEYS(Vamp::RealTime);
 CLASSKEYS(Vamp::PluginBase);
@@ -399,7 +399,7 @@ CLASSKEYS(LuaDialog::ProgressWindow);
  * - Do not dereference Shared or Weak Pointers. Pass the pointer to Lua.
  * - Define Objects as boost:shared_ptr Object whenever possible.
  *
- *   Storing a boost::shared_ptr in a Lua-variable keeps the reference
+ *   Storing a std::shared_ptr in a Lua-variable keeps the reference
  *   until that variable is set to 'nil'.
  *   (if the script were to keep a direct pointer to the object instance, the
  *   behaviour is undefined if the actual object goes away)
@@ -889,7 +889,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginWSPtrClass <Evoral::Control> ("Control")
-		.addFunction ("list", (boost::shared_ptr<Evoral::ControlList>(Evoral::Control::*)())&Evoral::Control::list)
+		.addFunction ("list", (std::shared_ptr<Evoral::ControlList>(Evoral::Control::*)())&Evoral::Control::list)
 		.endClass ()
 
 		.beginClass <Evoral::ParameterDescriptor> ("ParameterDescriptor")
@@ -1251,7 +1251,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("num_ports", (size_t (PortSet::*)(DataType)const)&PortSet::num_ports)
 		.addFunction ("add", &PortSet::add)
 		.addFunction ("remove", &PortSet::remove)
-		.addFunction ("port", (boost::shared_ptr<Port> (PortSet::*)(DataType, size_t)const)&PortSet::port)
+		.addFunction ("port", (std::shared_ptr<Port> (PortSet::*)(DataType, size_t)const)&PortSet::port)
 		.addFunction ("contains", &PortSet::contains)
 		.addFunction ("clear", &PortSet::clear)
 		.addFunction ("empty", &PortSet::empty)
@@ -1262,7 +1262,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("add_port", &IO::add_port)
 		.addFunction ("remove_port", &IO::remove_port)
 		.addFunction ("connect", &IO::connect)
-		.addFunction ("disconnect", (int (IO::*)(boost::shared_ptr<Port>, std::string, void *))&IO::disconnect)
+		.addFunction ("disconnect", (int (IO::*)(std::shared_ptr<Port>, std::string, void *))&IO::disconnect)
 		.addFunction ("disconnect_all", (int (IO::*)(void *))&IO::disconnect)
 		.addFunction ("physically_connected", &IO::physically_connected)
 		.addFunction ("has_port", &IO::has_port)
@@ -1433,7 +1433,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("soloed", &Route::soloed)
 		.addFunction ("amp", &Route::amp)
 		.addFunction ("trim", &Route::trim)
-		.addFunction ("peak_meter", (boost::shared_ptr<PeakMeter> (Route::*)())&Route::peak_meter)
+		.addFunction ("peak_meter", (std::shared_ptr<PeakMeter> (Route::*)())&Route::peak_meter)
 		.addFunction ("set_meter_point", &Route::set_meter_point)
 		.addFunction ("signal_latency", &Route::signal_latency)
 		.addFunction ("playback_latency", &Route::playback_latency)
@@ -1466,7 +1466,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("lower_region", &Playlist::lower_region)
 		.addFunction ("raise_region_to_top", &Playlist::raise_region_to_top)
 		.addFunction ("lower_region_to_bottom", &Playlist::lower_region_to_bottom)
-		.addFunction ("duplicate", (void (Playlist::*)(boost::shared_ptr<Region>, Temporal::timepos_t &, timecnt_t const &, float))&Playlist::duplicate)
+		.addFunction ("duplicate", (void (Playlist::*)(std::shared_ptr<Region>, Temporal::timepos_t &, timecnt_t const &, float))&Playlist::duplicate)
 		.addFunction ("duplicate_until", &Playlist::duplicate_until)
 		.addFunction ("duplicate_range", &Playlist::duplicate_range)
 		.addFunction ("combine", &Playlist::combine)
@@ -1478,7 +1478,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("split_region", &Playlist::split_region)
 		.addFunction ("get_orig_track_id", &Playlist::get_orig_track_id)
 		//.addFunction ("split", &Playlist::split) // XXX needs MusicSample
-		.addFunction ("cut", (boost::shared_ptr<Playlist> (Playlist::*)(std::list<TimelineRange>&, bool))&Playlist::cut)
+		.addFunction ("cut", (std::shared_ptr<Playlist> (Playlist::*)(std::list<TimelineRange>&, bool))&Playlist::cut)
 #if 0
 		.addFunction ("copy", &Playlist::copy)
 		.addFunction ("paste", &Playlist::paste)
@@ -1626,13 +1626,13 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_video_locked", &Region::set_video_locked)
 		.addFunction ("set_position_locked", &Region::set_position_locked)
 		.addFunction ("source", &Region::source)
-		.addFunction ("control", static_cast<boost::shared_ptr<Evoral::Control>(Region::*)(const Evoral::Parameter&, bool)>(&Region::control))
+		.addFunction ("control", static_cast<std::shared_ptr<Evoral::Control>(Region::*)(const Evoral::Parameter&, bool)>(&Region::control))
 		.endClass ()
 
 		.deriveWSPtrClass <MidiRegion, Region> ("MidiRegion")
 		.addFunction ("do_export", &MidiRegion::do_export)
 		.addFunction ("midi_source", &MidiRegion::midi_source)
-		.addFunction ("model", (boost::shared_ptr<MidiModel> (MidiRegion::*)())&MidiRegion::model)
+		.addFunction ("model", (std::shared_ptr<MidiModel> (MidiRegion::*)())&MidiRegion::model)
 		.endClass ()
 
 		.deriveWSPtrClass <AudioRegion, Region> ("AudioRegion")
@@ -1725,7 +1725,7 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <Automatable, Evoral::ControlSet> ("Automatable")
 		.addCast<Slavable> ("to_slavable")
-		.addFunction ("automation_control", (boost::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
+		.addFunction ("automation_control", (std::shared_ptr<AutomationControl>(Automatable::*)(const Evoral::Parameter&, bool))&Automatable::automation_control)
 		.addFunction ("all_automatable_params", &Automatable::all_automatable_params)
 		.endClass ()
 
@@ -1759,7 +1759,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginStdVector <Plugin::PresetRecord> ("PresetVector").endClass ()
-		.beginStdList <boost::shared_ptr<ARDOUR::PluginInfo> > ("PluginInfoList").endClass ()
+		.beginStdList <std::shared_ptr<ARDOUR::PluginInfo> > ("PluginInfoList").endClass ()
 
 		.deriveClass <ParameterDescriptor, Evoral::ParameterDescriptor> ("ParameterDescriptor")
 		.addVoidConstructor ()
@@ -1776,7 +1776,7 @@ LuaBindings::common (lua_State* L)
 		.addStaticFunction ("midi_note_name", &ParameterDescriptor::midi_note_name)
 		.endClass ()
 
-		.beginStdVector <boost::shared_ptr<ARDOUR::Processor> > ("ProcessorVector").endClass ()
+		.beginStdVector <std::shared_ptr<ARDOUR::Processor> > ("ProcessorVector").endClass ()
 
 		.deriveWSPtrClass <Processor, SessionObject> ("Processor")
 		.addCast<Automatable> ("to_automatable")
@@ -1826,8 +1826,8 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <IOProcessor, Processor> ("IOProcessor")
 		.addFunction ("natural_input_streams", &IOProcessor::natural_input_streams)
 		.addFunction ("natural_output_streams", &IOProcessor::natural_output_streams)
-		.addFunction ("input", (boost::shared_ptr<IO>(IOProcessor::*)())&IOProcessor::input)
-		.addFunction ("output", (boost::shared_ptr<IO>(IOProcessor::*)())&IOProcessor::output)
+		.addFunction ("input", (std::shared_ptr<IO>(IOProcessor::*)())&IOProcessor::input)
+		.addFunction ("output", (std::shared_ptr<IO>(IOProcessor::*)())&IOProcessor::output)
 		.endClass ()
 
 		.deriveWSPtrClass <SideChain, IOProcessor> ("SideChain")
@@ -2033,7 +2033,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <Amp, Processor> ("Amp")
-		.addFunction ("gain_control", (boost::shared_ptr<GainControl>(Amp::*)())&Amp::gain_control)
+		.addFunction ("gain_control", (std::shared_ptr<GainControl>(Amp::*)())&Amp::gain_control)
 		.addStaticFunction ("apply_gain", static_cast<gain_t (*)(AudioBuffer&, samplecnt_t, samplecnt_t, gain_t, gain_t, sampleoffset_t)>(&Amp::apply_gain))
 		.endClass ()
 
@@ -2099,73 +2099,73 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("n_channels", &AudioSource::n_channels)
 		.endClass ()
 
-		// <std::list<boost::shared_ptr <AudioTrack> >
-		.beginStdList <boost::shared_ptr<AudioTrack> > ("AudioTrackList")
+		// <std::list<std::shared_ptr <AudioTrack> >
+		.beginStdList <std::shared_ptr<AudioTrack> > ("AudioTrackList")
 		.endClass ()
 
 		.beginStdList <TimelineRange> ("TimelineRangeList")
 		.endClass ()
 
-		// std::list<boost::shared_ptr <MidiTrack> >
-		.beginStdList <boost::shared_ptr<MidiTrack> > ("MidiTrackList")
+		// std::list<std::shared_ptr <MidiTrack> >
+		.beginStdList <std::shared_ptr<MidiTrack> > ("MidiTrackList")
 		.endClass ()
 
-		// RouteList == std::list<boost::shared_ptr<Route> >
-		.beginConstStdList <boost::shared_ptr<Route> > ("RouteList")
+		// RouteList == std::list<std::shared_ptr<Route> >
+		.beginConstStdList <std::shared_ptr<Route> > ("RouteList")
 		.endClass ()
 
-		// StripableList == std::list<boost::shared_ptr<Stripable> >
-		.beginConstStdList <boost::shared_ptr<Stripable> > ("StripableList")
+		// StripableList == std::list<std::shared_ptr<Stripable> >
+		.beginConstStdList <std::shared_ptr<Stripable> > ("StripableList")
 		.endClass ()
 
-		// VCAList == std::list<boost::shared_ptr<VCA> >
-		.beginConstStdList <boost::shared_ptr<VCA> > ("VCAList")
+		// VCAList == std::list<std::shared_ptr<VCA> >
+		.beginConstStdList <std::shared_ptr<VCA> > ("VCAList")
 		.endClass ()
 
-		// VCAVector == std::vector<boost::shared_ptr<VCA> >
-		.beginConstStdVector <boost::shared_ptr<VCA> > ("VCAVector")
+		// VCAVector == std::vector<std::shared_ptr<VCA> >
+		.beginConstStdVector <std::shared_ptr<VCA> > ("VCAVector")
 		.endClass ()
 
-		// boost::shared_ptr<RouteList>
-		.beginPtrStdList <boost::shared_ptr<Route> > ("RouteListPtr")
-		.addVoidPtrConstructor<std::list<boost::shared_ptr <Route> > > ()
+		// std::shared_ptr<RouteList>
+		.beginPtrStdList <std::shared_ptr<Route> > ("RouteListPtr")
+		.addVoidPtrConstructor<std::list<std::shared_ptr <Route> > > ()
 		.endClass ()
 
-		// boost::shared_ptr<BundleList>
-		.beginPtrStdVector <boost::shared_ptr<Bundle> > ("BundleListPtr")
-		.addVoidPtrConstructor<std::vector<boost::shared_ptr <Bundle> > > ()
+		// std::shared_ptr<BundleList>
+		.beginPtrStdVector <std::shared_ptr<Bundle> > ("BundleListPtr")
+		.addVoidPtrConstructor<std::vector<std::shared_ptr <Bundle> > > ()
 		.endClass ()
 
-		// typedef std::list<boost::weak_ptr <Route> > WeakRouteList
-		.beginConstStdList <boost::weak_ptr<Route> > ("WeakRouteList")
+		// typedef std::list<std::weak_ptr <Route> > WeakRouteList
+		.beginConstStdList <std::weak_ptr<Route> > ("WeakRouteList")
 		.endClass ()
 
 		// RouteGroupList == std::list<RouteGroup*>
 		.beginConstStdCPtrList <RouteGroup> ("RouteGroupList")
 		.endClass ()
 
-		// typedef std::vector<boost::shared_ptr<Source> > Region::SourceList
-		.beginStdVector <boost::shared_ptr<Source> > ("SourceList")
+		// typedef std::vector<std::shared_ptr<Source> > Region::SourceList
+		.beginStdVector <std::shared_ptr<Source> > ("SourceList")
 		.endClass ()
 
-		// typedef std::vector<boost::shared_ptr<AudioReadable> >
-		.beginStdVector <boost::shared_ptr<AudioReadable> > ("ReadableList")
+		// typedef std::vector<std::shared_ptr<AudioReadable> >
+		.beginStdVector <std::shared_ptr<AudioReadable> > ("ReadableList")
 		.endClass ()
 
-		// from SessionPlaylists: std::vector<boost::shared_ptr<Playlist > >
-		.beginStdVector <boost::shared_ptr<Playlist> > ("PlaylistList")
+		// from SessionPlaylists: std::vector<std::shared_ptr<Playlist > >
+		.beginStdVector <std::shared_ptr<Playlist> > ("PlaylistList")
 		.endClass ()
 
-		// std::list< boost::weak_ptr <AudioSource> >
-		.beginConstStdList <boost::weak_ptr<AudioSource> > ("WeakAudioSourceList")
+		// std::list< std::weak_ptr <AudioSource> >
+		.beginConstStdList <std::weak_ptr<AudioSource> > ("WeakAudioSourceList")
 		.endClass ()
 
-		// typedef std::vector<boost::shared_ptr<Region> > RegionVector
-		.beginStdVector <boost::shared_ptr<Region> > ("RegionVector")
+		// typedef std::vector<std::shared_ptr<Region> > RegionVector
+		.beginStdVector <std::shared_ptr<Region> > ("RegionVector")
 		.endClass ()
 
-		// typedef std::set <boost::shared_ptr<PBD::Controllable> > PBD::ControllableSet;
-		.beginStdSet <boost::shared_ptr<PBD::Controllable>> ("ControllableSet")
+		// typedef std::set <std::shared_ptr<PBD::Controllable> > PBD::ControllableSet;
+		.beginStdSet <std::shared_ptr<PBD::Controllable>> ("ControllableSet")
 		.endClass ()
 
 		// typedef std::set <enum AutomationType> AutomationTypeSet;
@@ -2176,17 +2176,17 @@ LuaBindings::common (lua_State* L)
 		.beginStdVector <samplepos_t> ("XrunPositions")
 		.endClass ()
 
-		// typedef std::list<boost::shared_ptr<Region> > RegionList
-		.beginConstStdList <boost::shared_ptr<Region> > ("RegionList")
+		// typedef std::list<std::shared_ptr<Region> > RegionList
+		.beginConstStdList <std::shared_ptr<Region> > ("RegionList")
 		.endClass ()
 
-		// boost::shared_ptr <std::list<boost::shared_ptr<Region> > >
-		.beginPtrStdList <boost::shared_ptr<Region> > ("RegionListPtr")
-		.addVoidPtrConstructor<std::list<boost::shared_ptr <Region> > > ()
+		// std::shared_ptr <std::list<std::shared_ptr<Region> > >
+		.beginPtrStdList <std::shared_ptr<Region> > ("RegionListPtr")
+		.addVoidPtrConstructor<std::list<std::shared_ptr <Region> > > ()
 		.endClass ()
 
 		// RegionFactory::RegionMap
-		.beginStdMap <PBD::ID,boost::shared_ptr<Region> > ("RegionMap")
+		.beginStdMap <PBD::ID,std::shared_ptr<Region> > ("RegionMap")
 		.endClass ()
 
 		// typedef std::map<std::string, DPM> PortManager::AudioPortMeters;
@@ -2197,12 +2197,12 @@ LuaBindings::common (lua_State* L)
 		.beginStdMap <std::string, PortManager::MPM> ("MIDIPortMeters")
 		.endClass ()
 
-		// typedef std::list<boost::shared_ptr<Processor> > ProcessorList
-		.beginStdList <boost::shared_ptr<Processor> > ("ProcessorList")
+		// typedef std::list<std::shared_ptr<Processor> > ProcessorList
+		.beginStdList <std::shared_ptr<Processor> > ("ProcessorList")
 		.endClass ()
 
-		//std::list<boost::shared_ptr<Port> > PortList
-		.beginConstStdList <boost::shared_ptr<Port> > ("PortList")
+		//std::list<std::shared_ptr<Port> > PortList
+		.beginConstStdList <std::shared_ptr<Port> > ("PortList")
 		.endClass ()
 
 		.beginConstStdCPtrList <Location> ("LocationList")
@@ -2211,14 +2211,14 @@ LuaBindings::common (lua_State* L)
 		.beginConstStdVector <Evoral::Parameter> ("ParameterList")
 		.endClass ()
 
-		.beginStdList <boost::shared_ptr<AutomationControl> > ("ControlList")
+		.beginStdList <std::shared_ptr<AutomationControl> > ("ControlList")
 		.endClass ()
 
-		.beginPtrStdList <boost::shared_ptr<AutomationControl> > ("ControlListPtr")
-		.addVoidPtrConstructor<std::list<boost::shared_ptr <AutomationControl> > > ()
+		.beginPtrStdList <std::shared_ptr<AutomationControl> > ("ControlListPtr")
+		.addVoidPtrConstructor<std::list<std::shared_ptr <AutomationControl> > > ()
 		.endClass ()
 
-		.beginStdList <boost::shared_ptr<Evoral::Note<Temporal::Beats> > > ("NotePtrList")
+		.beginStdList <std::shared_ptr<Evoral::Note<Temporal::Beats> > > ("NotePtrList")
 		.endClass ()
 
 		.beginConstStdCPtrList <Evoral::ControlEvent> ("EventList")
@@ -2226,13 +2226,13 @@ LuaBindings::common (lua_State* L)
 
 #if 0  // depends on Evoal:: Note, Beats see note_fixer.h
 	// typedef Evoral::Note<Temporal::Beats> Note
-	// std::set< boost::weak_ptr<Note> >
-		.beginStdSet <boost::weak_ptr<Note> > ("WeakNoteSet")
+	// std::set< std::weak_ptr<Note> >
+		.beginStdSet <std::weak_ptr<Note> > ("WeakNoteSet")
 		.endClass ()
 #endif
 
-	// std::list<boost::weak_ptr<Source> >
-		.beginConstStdList <boost::weak_ptr<Source> > ("WeakSourceList")
+	// std::list<std::weak_ptr<Source> >
+		.beginConstStdList <std::weak_ptr<Source> > ("WeakSourceList")
 		.endClass ()
 
 		.beginClass <ChanCount> ("ChanCount")
@@ -2716,7 +2716,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("connect", &PortManager::connect)
 		.addFunction ("physically_connected", &PortManager::physically_connected)
 		.addFunction ("disconnect", (int (PortManager::*)(const std::string&, const std::string&))&PortManager::disconnect)
-		.addFunction ("disconnect_port", (int (PortManager::*)(boost::shared_ptr<Port>))&PortManager::disconnect)
+		.addFunction ("disconnect_port", (int (PortManager::*)(std::shared_ptr<Port>))&PortManager::disconnect)
 		.addFunction ("get_port_by_name", &PortManager::get_port_by_name)
 		.addFunction ("get_pretty_name_by_name", &PortManager::get_pretty_name_by_name)
 		.addFunction ("port_is_physical", &PortManager::port_is_physical)
@@ -2873,7 +2873,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("snap_name", &Session::snap_name)
 		.addFunction ("monitor_out", &Session::monitor_out)
 		.addFunction ("master_out", &Session::master_out)
-		.addFunction ("add_internal_send", (void (Session::*)(boost::shared_ptr<Route>, boost::shared_ptr<Processor>, boost::shared_ptr<Route>))&Session::add_internal_send)
+		.addFunction ("add_internal_send", (void (Session::*)(std::shared_ptr<Route>, std::shared_ptr<Processor>, std::shared_ptr<Route>))&Session::add_internal_send)
 		.addFunction ("add_internal_sends", &Session::add_internal_sends)
 		.addFunction ("locations", &Session::locations)
 		.addFunction ("soloing", &Session::soloing)
@@ -2916,7 +2916,7 @@ LuaBindings::common (lua_State* L)
 		.beginClass <RegionFactory> ("RegionFactory")
 		.addStaticFunction ("region_by_id", &RegionFactory::region_by_id)
 		.addStaticFunction ("regions", &RegionFactory::regions)
-		.addStaticFunction ("clone_region", static_cast<boost::shared_ptr<Region> (*)(boost::shared_ptr<Region>, bool, bool)>(&RegionFactory::create))
+		.addStaticFunction ("clone_region", static_cast<std::shared_ptr<Region> (*)(std::shared_ptr<Region>, bool, bool)>(&RegionFactory::create))
 		.endClass ()
 
 		/* session enums (rt-safe, common) */
@@ -2997,7 +2997,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.beginClass <ARDOUR::LuaAPI::Rubberband> ("Rubberband")
-		.addConstructor <void (*) (boost::shared_ptr<AudioRegion>, bool)> ()
+		.addConstructor <void (*) (std::shared_ptr<AudioRegion>, bool)> ()
 		.addFunction ("set_strech_and_pitch", &ARDOUR::LuaAPI::Rubberband::set_strech_and_pitch)
 		.addFunction ("set_mapping", &ARDOUR::LuaAPI::Rubberband::set_mapping)
 		.addFunction ("process", &ARDOUR::LuaAPI::Rubberband::process)

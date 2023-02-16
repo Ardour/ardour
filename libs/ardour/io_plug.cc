@@ -40,7 +40,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-IOPlug::IOPlug (Session& s, boost::shared_ptr<Plugin> p, bool pre)
+IOPlug::IOPlug (Session& s, std::shared_ptr<Plugin> p, bool pre)
 	: SessionObject (s, "")
 	, GraphNode (s._process_graph)
 	, _plugin (p)
@@ -62,7 +62,7 @@ IOPlug::IOPlug (Session& s, boost::shared_ptr<Plugin> p, bool pre)
 IOPlug::~IOPlug ()
 {
 	for (CtrlOutMap::const_iterator i = _control_outputs.begin(); i != _control_outputs.end(); ++i) {
-		boost::dynamic_pointer_cast<ReadOnlyControl>(i->second)->drop_references ();
+		std::dynamic_pointer_cast<ReadOnlyControl>(i->second)->drop_references ();
 	}
 }
 
@@ -102,7 +102,7 @@ IOPlug::get_state() const
 	node->add_child_nocopy (_plugin->get_state());
 
 	for (auto const& c : controls()) {
-		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (c.second);
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (c.second);
 		if (ac) {
 			node->add_child_nocopy (ac->get_state());
 		}
@@ -316,13 +316,13 @@ IOPlug::create_parameters ()
 		_plugin->get_parameter_descriptor (i, desc);
 
 		if (!_plugin->parameter_is_input (i)) {
-			_control_outputs[i] = boost::shared_ptr<ReadOnlyControl> (new ReadOnlyControl (_plugin, desc, i));
+			_control_outputs[i] = std::shared_ptr<ReadOnlyControl> (new ReadOnlyControl (_plugin, desc, i));
 			continue;
 		}
 
 		Evoral::Parameter param (PluginAutomation, 0, i);
 
-		boost::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc));
+		std::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc));
 		c->set_flag (Controllable::NotAutomatable);
 		add_control (c);
 
@@ -337,7 +337,7 @@ IOPlug::create_parameters ()
 		if (desc.datatype == Variant::NOTHING) {
 			continue;
 		}
-		boost::shared_ptr<AutomationControl> c (new PluginPropertyControl (this, param, desc));
+		std::shared_ptr<AutomationControl> c (new PluginPropertyControl (this, param, desc));
 		c->set_flag (Controllable::NotAutomatable);
 		add_control (c);
 	}
@@ -348,8 +348,8 @@ IOPlug::create_parameters ()
 void
 IOPlug::parameter_changed_externally (uint32_t which, float val)
 {
-	boost::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, which));
-	boost::shared_ptr<PluginControl> pc = boost::dynamic_pointer_cast<PluginControl> (c);
+	std::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, which));
+	std::shared_ptr<PluginControl> pc = std::dynamic_pointer_cast<PluginControl> (c);
 	if (pc) {
 		pc->catch_up_with_external_value (val);
 	}
@@ -518,12 +518,12 @@ IOPlug::clear_stats ()
 	g_atomic_int_set (&_stat_reset, 1);
 }
 
-boost::shared_ptr<ReadOnlyControl>
+std::shared_ptr<ReadOnlyControl>
 IOPlug::control_output (uint32_t num) const
 {
 	CtrlOutMap::const_iterator i = _control_outputs.find (num);
 	if (i == _control_outputs.end ()) {
-		return boost::shared_ptr<ReadOnlyControl> ();
+		return std::shared_ptr<ReadOnlyControl> ();
 	} else {
 		return (*i).second;
 	}
@@ -541,12 +541,12 @@ IOPlug::write_immediate_event (Evoral::EventType event_type, size_t size, const 
 	return _plugin->write_immediate_event (event_type, size, buf);
 }
 
-boost::shared_ptr<Evoral::Control>
+std::shared_ptr<Evoral::Control>
 IOPlug::control_factory(const Evoral::Parameter& param)
 {
 	Evoral::Control*                  control   = NULL;
 	ParameterDescriptor               desc(param);
-	boost::shared_ptr<AutomationList> list;
+	std::shared_ptr<AutomationList> list;
 
 #if 0
 	if (param.type() == PluginAutomation) {
@@ -561,11 +561,11 @@ IOPlug::control_factory(const Evoral::Parameter& param)
 #endif
 
 	if (!control) {
-		boost::shared_ptr<AutomationList> list;
+		std::shared_ptr<AutomationList> list;
 		control = new AutomationControl (_session, param, desc, list);
 	}
 
-	return boost::shared_ptr<Evoral::Control>(control);
+	return std::shared_ptr<Evoral::Control>(control);
 }
 
 std::string
@@ -580,9 +580,9 @@ IOPlug::describe_parameter (Evoral::Parameter param)
 }
 
 bool
-IOPlug::direct_feeds_according_to_reality (boost::shared_ptr<GraphNode> node, bool* via_send_only)
+IOPlug::direct_feeds_according_to_reality (std::shared_ptr<GraphNode> node, bool* via_send_only)
 {
-	boost::shared_ptr<IOPlug> other (boost::dynamic_pointer_cast<IOPlug> (node));
+	std::shared_ptr<IOPlug> other (std::dynamic_pointer_cast<IOPlug> (node));
 	assert (other && other->_pre == _pre);
 	if (via_send_only) {
 		*via_send_only = false;
@@ -595,7 +595,7 @@ IOPlug::direct_feeds_according_to_reality (boost::shared_ptr<GraphNode> node, bo
 IOPlug::PluginControl::PluginControl (IOPlug*                     p,
                                       Evoral::Parameter const&    param,
                                       ParameterDescriptor const&  desc)
-	: AutomationControl (p->session (), param, desc, boost::shared_ptr<AutomationList> (), p->describe_parameter (param))
+	: AutomationControl (p->session (), param, desc, std::shared_ptr<AutomationList> (), p->describe_parameter (param))
 	, _iop (p)
 {
 }
@@ -620,7 +620,7 @@ IOPlug::PluginControl::get_state () const
 	XMLNode& node (AutomationControl::get_state());
 	node.set_property ("parameter", parameter().id());
 
-	boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (_iop->plugin ());
+	std::shared_ptr<LV2Plugin> lv2plugin = std::dynamic_pointer_cast<LV2Plugin> (_iop->plugin ());
 	if (lv2plugin) {
 		node.set_property ("symbol", lv2plugin->port_symbol (parameter().id()));
 	}
@@ -631,7 +631,7 @@ IOPlug::PluginControl::get_state () const
 double
 IOPlug::PluginControl::get_value () const
 {
-	boost::shared_ptr<Plugin> plugin = _iop->plugin ();
+	std::shared_ptr<Plugin> plugin = _iop->plugin ();
 
 	if (!plugin) {
 		return 0.0;
@@ -643,7 +643,7 @@ IOPlug::PluginControl::get_value () const
 std::string
 IOPlug::PluginControl::get_user_string () const
 {
-	boost::shared_ptr<Plugin> plugin = _iop->plugin (0);
+	std::shared_ptr<Plugin> plugin = _iop->plugin (0);
 	if (plugin) {
 		std::string pp;
 		if (plugin->print_parameter (parameter().id(), pp) && pp.size () > 0) {

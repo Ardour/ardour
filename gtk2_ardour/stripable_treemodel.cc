@@ -27,7 +27,7 @@
 
 using namespace ARDOUR;
 
-StripableTreeModel::Glue::Glue (boost::shared_ptr<Stripable> s)
+StripableTreeModel::Glue::Glue (std::shared_ptr<Stripable> s)
 	: stripable (s)
 {
 }
@@ -89,7 +89,7 @@ StripableTreeModel::get_value_vfunc (const TreeModel::iterator& iter, int column
 	}
 
 	const Glue* glue = (const Glue*)iter.gobj()->user_data;
-	boost::shared_ptr<Stripable> iter_stripable = glue->stripable.lock();
+	std::shared_ptr<Stripable> iter_stripable = glue->stripable.lock();
 
 	if (!iter_stripable) {
 		return;
@@ -102,7 +102,7 @@ StripableTreeModel::get_value_vfunc (const TreeModel::iterator& iter, int column
 }
 
 void
-StripableTreeModel::text_value (boost::shared_ptr<Stripable> stripable, Glib::ValueBase& value) const
+StripableTreeModel::text_value (std::shared_ptr<Stripable> stripable, Glib::ValueBase& value) const
 {
 	StringColumn::ValueType val;
 	val.set (stripable->name());
@@ -117,7 +117,7 @@ StripableTreeModel::iter_next_vfunc (const iterator& iter, iterator& iter_next) 
 	}
 
 	const Glue* glue = (const Glue*)iter.gobj()->user_data;
-	boost::shared_ptr<Stripable> iter_stripable = glue->stripable.lock();
+	std::shared_ptr<Stripable> iter_stripable = glue->stripable.lock();
 
 	if (!iter_stripable) {
 		return false;

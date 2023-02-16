@@ -83,11 +83,11 @@ MTC_TransportMaster::init ()
 }
 
 void
-MTC_TransportMaster::connection_handler (boost::weak_ptr<ARDOUR::Port> w0, std::string n0, boost::weak_ptr<ARDOUR::Port> w1, std::string n1, bool con) 
+MTC_TransportMaster::connection_handler (std::weak_ptr<ARDOUR::Port> w0, std::string n0, std::weak_ptr<ARDOUR::Port> w1, std::string n1, bool con) 
 {
 	TransportMaster::connection_handler(w0, n0, w1, n1, con);
 
-	boost::shared_ptr<Port> p = w1.lock ();
+	std::shared_ptr<Port> p = w1.lock ();
 	if (p == _port) {
 		resync_latency (false);
 	}
@@ -404,7 +404,7 @@ MTC_TransportMaster::update_mtc_time (const MIDI::byte *msg, bool was_full, samp
 
 	if (was_full || outside_window (mtc_frame)) {
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("update_mtc_time: full TC %1 or outside window %2 MTC %3\n", was_full, outside_window (mtc_frame), mtc_frame));
-		boost::shared_ptr<TransportMaster> c = TransportMasterManager::instance().current();
+		std::shared_ptr<TransportMaster> c = TransportMasterManager::instance().current();
 		if (c && c.get() == this && _session->config.get_external_sync()) {
 			_session->set_requested_return_sample (-1);
 			_session->request_locate (mtc_frame, false, MustStop, TRS_MTC);

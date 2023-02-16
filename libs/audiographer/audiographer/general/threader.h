@@ -128,7 +128,7 @@ class /*LIBAUDIOGRAPHER_API*/ Threader : public Source<T>, public Sink<T>
 	long         wait_timeout;
 
 	Glib::Threads::Mutex exception_mutex;
-	boost::shared_ptr<ThreaderException> exception;
+	std::shared_ptr<ThreaderException> exception;
 
 };
 

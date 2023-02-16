@@ -455,13 +455,13 @@ Editor::drop_paths_part_two (const vector<string>& paths, timepos_t const & p, d
 
 		if (tv->track()) {
 			do_import (midi_paths, Editing::ImportSerializeFiles, ImportToTrack,
-				   SrcBest, SMFTrackNumber, SMFTempoIgnore, pos, boost::shared_ptr<ARDOUR::PluginInfo>(), tv->track ());
+				   SrcBest, SMFTrackNumber, SMFTempoIgnore, pos, std::shared_ptr<ARDOUR::PluginInfo>(), tv->track ());
 
 			if (UIConfiguration::instance().get_only_copy_imported_files() || copy) {
 				do_import (audio_paths, Editing::ImportSerializeFiles, Editing::ImportToTrack,
-					   SrcBest, SMFTrackName, SMFTempoIgnore, pos, boost::shared_ptr<PluginInfo>(), tv->track ());
+					   SrcBest, SMFTrackName, SMFTempoIgnore, pos, std::shared_ptr<PluginInfo>(), tv->track ());
 			} else {
-				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, pos, boost::shared_ptr<ARDOUR::PluginInfo>(), tv->track ());
+				do_embed (audio_paths, Editing::ImportSerializeFiles, ImportToTrack, pos, std::shared_ptr<ARDOUR::PluginInfo>(), tv->track ());
 			}
 		}
 	}
@@ -629,9 +629,9 @@ Editor::session_gui_extents (bool use_extra) const
 	 * NOTE: we should listen to playlists, and cache these values so we don't calculate them every time.
 	 */
 	{
-		boost::shared_ptr<RouteList> rl = _session->get_routes();
+		std::shared_ptr<RouteList> rl = _session->get_routes();
 		for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*r);
+			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*r);
 
 			if (!tr) {
 				continue;

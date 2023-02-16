@@ -51,8 +51,8 @@ namespace ARDOUR {
 class LV2PluginUI : public PlugUIBase, public Gtk::VBox
 {
 public:
-	LV2PluginUI (boost::shared_ptr<ARDOUR::PlugInsertBase>,
-			boost::shared_ptr<ARDOUR::LV2Plugin>);
+	LV2PluginUI (std::shared_ptr<ARDOUR::PlugInsertBase>,
+			std::shared_ptr<ARDOUR::LV2Plugin>);
 	~LV2PluginUI ();
 
 	gint get_preferred_height ();
@@ -69,10 +69,10 @@ private:
 
 	void control_changed (uint32_t);
 
-	typedef boost::shared_ptr<ARDOUR::AutomationControl> ControllableRef;
+	typedef std::shared_ptr<ARDOUR::AutomationControl> ControllableRef;
 
-	boost::shared_ptr<ARDOUR::PlugInsertBase> _pib;
-	boost::shared_ptr<ARDOUR::LV2Plugin>      _lv2;
+	std::shared_ptr<ARDOUR::PlugInsertBase> _pib;
+	std::shared_ptr<ARDOUR::LV2Plugin>      _lv2;
 	std::vector<int>                          _output_ports;
 	sigc::connection                          _screen_update_connection;
 	sigc::connection                          _message_update_connection;

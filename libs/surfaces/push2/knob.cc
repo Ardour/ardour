@@ -256,7 +256,7 @@ Push2Knob::compute_bounding_box () const
 }
 
 void
-Push2Knob::set_controllable (boost::shared_ptr<AutomationControl> c)
+Push2Knob::set_controllable (std::shared_ptr<AutomationControl> c)
 {
 	watch_connection.disconnect ();  //stop watching the old controllable
 

@@ -88,7 +88,7 @@ void
 AudioPlaylistImportHandler::playlists_by_diskstream (PBD::ID const & id, PlaylistList & list) const
 {
 	for (ElementList::const_iterator it = elements.begin(); it != elements.end(); ++it) {
-		boost::shared_ptr<AudioPlaylistImporter> pl = boost::dynamic_pointer_cast<AudioPlaylistImporter> (*it);
+		std::shared_ptr<AudioPlaylistImporter> pl = std::dynamic_pointer_cast<AudioPlaylistImporter> (*it);
 		if (pl && pl->orig_diskstream() == id) {
 			list.push_back (PlaylistPtr (new AudioPlaylistImporter (*pl)));
 		}
@@ -201,7 +201,7 @@ AudioPlaylistImporter::_cancel_move ()
 void
 AudioPlaylistImporter::_move ()
 {
-	boost::shared_ptr<Playlist> playlist;
+	std::shared_ptr<Playlist> playlist;
 
 	// Update diskstream id
 	xml_playlist.property ("orig-diskstream-id")->set_value (diskstream_id.to_s());
@@ -259,7 +259,7 @@ AudioPlaylistImporter::populate_region_list ()
 	ElementImportHandler::ElementList elements;
 	handler.get_regions (orig_node, elements);
 	for (ElementImportHandler::ElementList::iterator it = elements.begin(); it != elements.end(); ++it) {
-		regions.push_back (boost::dynamic_pointer_cast<AudioRegionImporter> (*it));
+		regions.push_back (std::dynamic_pointer_cast<AudioRegionImporter> (*it));
 	}
 }
 

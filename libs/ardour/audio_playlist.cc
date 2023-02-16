@@ -66,12 +66,12 @@ AudioPlaylist::AudioPlaylist (Session& session, string name, bool hidden)
 {
 }
 
-AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, string name, bool hidden)
+AudioPlaylist::AudioPlaylist (std::shared_ptr<const AudioPlaylist> other, string name, bool hidden)
 	: Playlist (other, name, hidden)
 {
 }
 
-AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, timepos_t const & start, timepos_t const & cnt, string name, bool hidden)
+AudioPlaylist::AudioPlaylist (std::shared_ptr<const AudioPlaylist> other, timepos_t const & start, timepos_t const & cnt, string name, bool hidden)
 	: Playlist (other, start, cnt, name, hidden)
 {
 	RegionReadLock rlock2 (const_cast<AudioPlaylist*> (other.get()));
@@ -88,7 +88,7 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, time
 	RegionList::iterator ours = regions.begin ();
 
 	for (auto const & r : other->regions) {
-		boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
+		std::shared_ptr<AudioRegion> region = std::dynamic_pointer_cast<AudioRegion> (r);
 		assert (region);
 
 		samplecnt_t fade_in = 64;
@@ -137,7 +137,7 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, time
 			break;
 		}
 
-		boost::shared_ptr<AudioRegion> our_region = boost::dynamic_pointer_cast<AudioRegion> (*ours);
+		std::shared_ptr<AudioRegion> our_region = std::dynamic_pointer_cast<AudioRegion> (*ours);
 		assert (our_region);
 
 		our_region->set_fade_in_length (fade_in);
@@ -152,7 +152,7 @@ AudioPlaylist::AudioPlaylist (boost::shared_ptr<const AudioPlaylist> other, time
 
 /** Sort by descending layer and then by ascending position */
 struct ReadSorter {
-    bool operator() (boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
+    bool operator() (std::shared_ptr<Region> a, std::shared_ptr<Region> b) {
 	    if (a->layer() != b->layer()) {
 		    return a->layer() > b->layer();
 	    }
@@ -163,9 +163,9 @@ struct ReadSorter {
 
 /** A segment of region that needs to be read */
 struct Segment {
-	Segment (boost::shared_ptr<AudioRegion> r, Temporal::Range a) : region (r), range (a) {}
+	Segment (std::shared_ptr<AudioRegion> r, Temporal::Range a) : region (r), range (a) {}
 
-	boost::shared_ptr<AudioRegion> region; ///< the region
+	std::shared_ptr<AudioRegion> region; ///< the region
 	Temporal::Range range;       ///< range of the region to read, in session samples
 };
 
@@ -204,7 +204,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ti
 	/* Find all the regions that are involved in the bit we are reading,
 	   and sort them by descending layer and ascending position.
 	*/
-	boost::shared_ptr<RegionList> all = regions_touched_locked (start, start + cnt);
+	std::shared_ptr<RegionList> all = regions_touched_locked (start, start + cnt);
 	all->sort (ReadSorter ());
 
 	/* This will be a list of the bits of our read range that we have
@@ -218,7 +218,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ti
 
 	/* Now go through the `all' list filling in `to_do' and `done' */
 	for (RegionList::iterator i = all->begin(); i != all->end(); ++i) {
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*i);
+		std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (*i);
 
 		/* muted regions don't figure into it at all */
 		if (ar->muted()) {
@@ -297,7 +297,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ti
 void
 AudioPlaylist::dump () const
 {
-	boost::shared_ptr<Region>r;
+	std::shared_ptr<Region>r;
 
 	cerr << "Playlist \"" << _name << "\" " << endl
 	     << regions.size() << " regions "
@@ -316,9 +316,9 @@ AudioPlaylist::dump () const
 }
 
 bool
-AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
+AudioPlaylist::destroy_region (std::shared_ptr<Region> region)
 {
-	boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion> (region);
+	std::shared_ptr<AudioRegion> r = std::dynamic_pointer_cast<AudioRegion> (region);
 
         if (!r) {
                 return false;
@@ -342,9 +342,9 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 			i = tmp;
 		}
 
-		for (set<boost::shared_ptr<Region> >::iterator x = all_regions.begin(); x != all_regions.end(); ) {
+		for (set<std::shared_ptr<Region> >::iterator x = all_regions.begin(); x != all_regions.end(); ) {
 
-			set<boost::shared_ptr<Region> >::iterator xtmp = x;
+			set<std::shared_ptr<Region> >::iterator xtmp = x;
 			++xtmp;
 
 			if ((*x) == region) {
@@ -355,7 +355,7 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 			x = xtmp;
 		}
 
-		region->set_playlist (boost::shared_ptr<Playlist>());
+		region->set_playlist (std::shared_ptr<Playlist>());
 	}
 
 	if (changed) {
@@ -367,7 +367,7 @@ AudioPlaylist::destroy_region (boost::shared_ptr<Region> region)
 }
 
 bool
-AudioPlaylist::region_changed (const PropertyChange& what_changed, boost::shared_ptr<Region> region)
+AudioPlaylist::region_changed (const PropertyChange& what_changed, std::shared_ptr<Region> region)
 {
 	if (in_flush || in_set_state) {
 		return false;
@@ -399,14 +399,14 @@ AudioPlaylist::region_changed (const PropertyChange& what_changed, boost::shared
 }
 
 void
-AudioPlaylist::pre_combine (vector<boost::shared_ptr<Region> >& copies)
+AudioPlaylist::pre_combine (vector<std::shared_ptr<Region> >& copies)
 {
 	RegionSortByPosition cmp;
-	boost::shared_ptr<AudioRegion> ar;
+	std::shared_ptr<AudioRegion> ar;
 
 	sort (copies.begin(), copies.end(), cmp);
 
-	ar = boost::dynamic_pointer_cast<AudioRegion> (copies.front());
+	ar = std::dynamic_pointer_cast<AudioRegion> (copies.front());
 
 	/* disable fade in of the first region */
 
@@ -414,7 +414,7 @@ AudioPlaylist::pre_combine (vector<boost::shared_ptr<Region> >& copies)
 		ar->set_fade_in_active (false);
 	}
 
-	ar = boost::dynamic_pointer_cast<AudioRegion> (copies.back());
+	ar = std::dynamic_pointer_cast<AudioRegion> (copies.back());
 
 	/* disable fade out of the last region */
 
@@ -424,19 +424,19 @@ AudioPlaylist::pre_combine (vector<boost::shared_ptr<Region> >& copies)
 }
 
 void
-AudioPlaylist::post_combine (vector<boost::shared_ptr<Region> >& originals, boost::shared_ptr<Region> compound_region)
+AudioPlaylist::post_combine (vector<std::shared_ptr<Region> >& originals, std::shared_ptr<Region> compound_region)
 {
 	RegionSortByPosition cmp;
-	boost::shared_ptr<AudioRegion> ar;
-	boost::shared_ptr<AudioRegion> cr;
+	std::shared_ptr<AudioRegion> ar;
+	std::shared_ptr<AudioRegion> cr;
 
-	if ((cr = boost::dynamic_pointer_cast<AudioRegion> (compound_region)) == 0) {
+	if ((cr = std::dynamic_pointer_cast<AudioRegion> (compound_region)) == 0) {
 		return;
 	}
 
 	sort (originals.begin(), originals.end(), cmp);
 
-	ar = boost::dynamic_pointer_cast<AudioRegion> (originals.front());
+	ar = std::dynamic_pointer_cast<AudioRegion> (originals.front());
 
 	/* copy the fade in of the first into the compound region */
 
@@ -444,7 +444,7 @@ AudioPlaylist::post_combine (vector<boost::shared_ptr<Region> >& originals, boos
 		cr->set_fade_in (ar->fade_in());
 	}
 
-	ar = boost::dynamic_pointer_cast<AudioRegion> (originals.back());
+	ar = std::dynamic_pointer_cast<AudioRegion> (originals.back());
 
 	if (ar) {
 		/* copy the fade out of the last into the compound region */
@@ -453,11 +453,11 @@ AudioPlaylist::post_combine (vector<boost::shared_ptr<Region> >& originals, boos
 }
 
 void
-AudioPlaylist::pre_uncombine (vector<boost::shared_ptr<Region> >& originals, boost::shared_ptr<Region> compound_region)
+AudioPlaylist::pre_uncombine (vector<std::shared_ptr<Region> >& originals, std::shared_ptr<Region> compound_region)
 {
 	RegionSortByPosition cmp;
-	boost::shared_ptr<AudioRegion> ar;
-	boost::shared_ptr<AudioRegion> cr = boost::dynamic_pointer_cast<AudioRegion>(compound_region);
+	std::shared_ptr<AudioRegion> ar;
+	std::shared_ptr<AudioRegion> cr = std::dynamic_pointer_cast<AudioRegion>(compound_region);
 
 	if (!cr) {
 		return;
@@ -469,9 +469,9 @@ AudioPlaylist::pre_uncombine (vector<boost::shared_ptr<Region> >& originals, boo
 	 * done within Playlist::uncombine ()
 	 */
 
-	for (vector<boost::shared_ptr<Region> >::iterator i = originals.begin(); i != originals.end(); ++i) {
+	for (vector<std::shared_ptr<Region> >::iterator i = originals.begin(); i != originals.end(); ++i) {
 
-		if ((ar = boost::dynamic_pointer_cast<AudioRegion> (*i)) == 0) {
+		if ((ar = std::dynamic_pointer_cast<AudioRegion> (*i)) == 0) {
 			continue;
 		}
 
@@ -540,7 +540,7 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 				continue;
 			}
 
-			boost::shared_ptr<Region> in = region_by_id (PBD::ID (p->value ()));
+			std::shared_ptr<Region> in = region_by_id (PBD::ID (p->value ()));
 
 			if (!in) {
 				warning << string_compose (_("Legacy crossfade involved an incoming region not present in playlist \"%1\" - crossfade discarded"),
@@ -549,14 +549,14 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 				continue;
 			}
 
-			boost::shared_ptr<AudioRegion> in_a = boost::dynamic_pointer_cast<AudioRegion> (in);
+			std::shared_ptr<AudioRegion> in_a = std::dynamic_pointer_cast<AudioRegion> (in);
 			assert (in_a);
 
 			if ((p = (*i)->property (X_("out"))) == 0) {
 				continue;
 			}
 
-			boost::shared_ptr<Region> out = region_by_id (PBD::ID (p->value ()));
+			std::shared_ptr<Region> out = region_by_id (PBD::ID (p->value ()));
 
 			if (!out) {
 				warning << string_compose (_("Legacy crossfade involved an outgoing region not present in playlist \"%1\" - crossfade discarded"),
@@ -565,7 +565,7 @@ AudioPlaylist::load_legacy_crossfades (const XMLNode& node, int version)
 				continue;
 			}
 
-			boost::shared_ptr<AudioRegion> out_a = boost::dynamic_pointer_cast<AudioRegion> (out);
+			std::shared_ptr<AudioRegion> out_a = std::dynamic_pointer_cast<AudioRegion> (out);
 			assert (out_a);
 
 			/* now decide whether to add a fade in or fade out

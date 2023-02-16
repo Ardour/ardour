@@ -94,7 +94,7 @@ public:
 		int32_t          scene;
 	};
 
-	boost::weak_ptr<Track> track;
+	std::weak_ptr<Track> track;
 
 	union {
 		bool second_yes_or_no;
@@ -110,8 +110,8 @@ public:
 
 	typedef boost::function<void (SessionEvent*)> RTeventCallback;
 
-	boost::shared_ptr<ControlList> controls; /* apply to */
-	boost::shared_ptr<RouteList> routes;     /* apply to */
+	std::shared_ptr<ControlList> controls; /* apply to */
+	std::shared_ptr<RouteList> routes;     /* apply to */
 	boost::function<void (void)> rt_slot;    /* what to call in RT context */
 	RTeventCallback              rt_return;  /* called after rt_slot, with this event as an argument */
 	PBD::EventLoop*              event_loop;
@@ -119,12 +119,12 @@ public:
 	std::list<TimelineRange> audio_range;
 	std::list<TimelineRange> music_range;
 
-	boost::shared_ptr<Region> region;
-	boost::shared_ptr<TransportMaster> transport_master;
+	std::shared_ptr<Region> region;
+	std::shared_ptr<TransportMaster> transport_master;
 
 	SessionEvent (Type t, Action a, samplepos_t when, samplepos_t where, double spd, bool yn = false, bool yn2 = false, bool yn3 = false);
 
-	void set_track (boost::shared_ptr<Track> t) {
+	void set_track (std::shared_ptr<Track> t) {
 		track = t;
 	}
 

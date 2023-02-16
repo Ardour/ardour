@@ -51,7 +51,7 @@ using namespace ArdourWidgets;
 using PBD::Controllable;
 
 AutomationBarController::AutomationBarController (
-		boost::shared_ptr<AutomationControl> ac,
+		std::shared_ptr<AutomationControl> ac,
 		Adjustment*                          adj)
 	: ArdourWidgets::BarController (*adj, ac)
 	, _controllable (ac)
@@ -69,7 +69,7 @@ AutomationBarController::~AutomationBarController()
 {
 }
 
-AutomationController::AutomationController(boost::shared_ptr<AutomationControl> ac,
+AutomationController::AutomationController(std::shared_ptr<AutomationControl> ac,
                                            Adjustment*                          adj,
                                            bool                                 use_knob)
 	: _widget(NULL)
@@ -140,10 +140,10 @@ AutomationController::~AutomationController()
 {
 }
 
-boost::shared_ptr<AutomationController>
+std::shared_ptr<AutomationController>
 AutomationController::create(const Evoral::Parameter&             param,
                              const ParameterDescriptor&           desc,
-                             boost::shared_ptr<AutomationControl> ac,
+                             std::shared_ptr<AutomationControl> ac,
                              bool use_knob)
 {
 	const double lo        = ac->internal_to_interface(desc.lower, true);
@@ -160,7 +160,7 @@ AutomationController::create(const Evoral::Parameter&             param,
 
 	assert (ac);
 	assert(ac->parameter() == param);
-	return boost::shared_ptr<AutomationController>(new AutomationController(ac, adjustment, use_knob));
+	return std::shared_ptr<AutomationController>(new AutomationController(ac, adjustment, use_knob));
 }
 
 void

@@ -65,7 +65,7 @@ OSCCueObserver::clear_observer ()
 	tick_enable = false;
 
 	strip_connections.drop_connections ();
-	_strip = boost::shared_ptr<ARDOUR::Stripable> ();
+	_strip = std::shared_ptr<ARDOUR::Stripable> ();
 	send_end (0);
 	// all strip buttons should be off and faders 0 and etc.
 	_osc.text_message_with_id (X_("/cue/name"), 0, " ", true, addr);
@@ -76,7 +76,7 @@ OSCCueObserver::clear_observer ()
 }
 
 void
-OSCCueObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, Sorted new_sends, bool force)
+OSCCueObserver::refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, Sorted new_sends, bool force)
 {
 	tick_enable = false;
 
@@ -146,8 +146,8 @@ void
 OSCCueObserver::send_init()
 {
 	for (uint32_t i = 0; i < sends.size(); i++) {
-		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (sends[i]);
-		boost::shared_ptr<Send> send = r->internal_send_for (boost::dynamic_pointer_cast<Route> (_strip));
+		std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (sends[i]);
+		std::shared_ptr<Send> send = r->internal_send_for (std::dynamic_pointer_cast<Route> (_strip));
 		if (r) {
 			r->processors_changed.connect  (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_restart, this), OSC::instance());
 		}
@@ -167,7 +167,7 @@ OSCCueObserver::send_init()
 				send_gain_message (i + 1, send->gain_control(), true);
 			}
 
-			boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (send);
+			std::shared_ptr<Processor> proc = std::dynamic_pointer_cast<Processor> (send);
 				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCCueObserver::send_enabled_message, this, X_("/cue/send/enable"), i + 1, proc), OSC::instance());
 				send_enabled_message (X_("/cue/send/enable"), i + 1, proc);
 		}
@@ -218,7 +218,7 @@ OSCCueObserver::name_changed (const PBD::PropertyChange& what_changed, uint32_t 
 }
 
 void
-OSCCueObserver::send_change_message (string path, uint32_t id, boost::shared_ptr<Controllable> controllable)
+OSCCueObserver::send_change_message (string path, uint32_t id, std::shared_ptr<Controllable> controllable)
 {
 	if (id) {
 		path = string_compose("%1/%2", path, id);
@@ -228,7 +228,7 @@ OSCCueObserver::send_change_message (string path, uint32_t id, boost::shared_ptr
 }
 
 void
-OSCCueObserver::send_gain_message (uint32_t id,  boost::shared_ptr<Controllable> controllable, bool force)
+OSCCueObserver::send_gain_message (uint32_t id,  std::shared_ptr<Controllable> controllable, bool force)
 {
 	if (_last_gain[id] != controllable->get_value()) {
 		_last_gain[id] = controllable->get_value();
@@ -247,7 +247,7 @@ OSCCueObserver::send_gain_message (uint32_t id,  boost::shared_ptr<Controllable>
 }
 
 void
-OSCCueObserver::send_enabled_message (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc)
+OSCCueObserver::send_enabled_message (std::string path, uint32_t id, std::shared_ptr<ARDOUR::Processor> proc)
 {
 	if (id) {
 		_osc.float_message_with_id (path, id, (float) proc->enabled(), true, addr);

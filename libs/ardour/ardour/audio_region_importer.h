@@ -49,8 +49,8 @@ class LIBARDOUR_API AudioRegionImportHandler : public ElementImportHandler
 
 	// Source management
 	bool check_source (std::string const & filename) const;
-	void add_source (std::string const & filename, boost::shared_ptr<Source> const & source);
-	boost::shared_ptr<Source> const & get_source (std::string const & filename) const;
+	void add_source (std::string const & filename, std::shared_ptr<Source> const & source);
+	std::shared_ptr<Source> const & get_source (std::string const & filename) const;
 
 	// Id management
 	void register_id (PBD::ID & old_id, PBD::ID & new_id);
@@ -58,8 +58,8 @@ class LIBARDOUR_API AudioRegionImportHandler : public ElementImportHandler
 
   private:
 	// Source management
-	typedef std::map<std::string, boost::shared_ptr<Source> > SourceMap;
-	typedef std::pair<std::string, boost::shared_ptr<Source> > SourcePair;
+	typedef std::map<std::string, std::shared_ptr<Source> > SourceMap;
+	typedef std::pair<std::string, std::shared_ptr<Source> > SourcePair;
 	SourceMap sources;
 
 	// Id management
@@ -102,7 +102,7 @@ class LIBARDOUR_API AudioRegionImporter : public ElementImporter
 
 	void prepare_region ();
 	void prepare_sources ();
-	std::vector<boost::shared_ptr<Region> > region;
+	std::vector<std::shared_ptr<Region> > region;
 	bool region_prepared;
 	bool sources_prepared;
 };

@@ -47,7 +47,7 @@ AudioEngineTest::test_start ()
 
 	CPPUNIT_ASSERT (AudioEngine::instance ());
 
-	boost::shared_ptr<AudioBackend> backend = engine->set_backend ("None (Dummy)", "Unit-Test", "");
+	std::shared_ptr<AudioBackend> backend = engine->set_backend ("None (Dummy)", "Unit-Test", "");
 
 	CPPUNIT_ASSERT (backend);
 

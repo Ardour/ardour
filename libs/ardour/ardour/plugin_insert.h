@@ -56,15 +56,15 @@ class Plugin;
 
 /** Plugin inserts: send data through a plugin
  */
-class LIBARDOUR_API PluginInsert : public Processor, public PlugInsertBase, public boost::enable_shared_from_this <PluginInsert>
+class LIBARDOUR_API PluginInsert : public Processor, public PlugInsertBase, public std::enable_shared_from_this <PluginInsert>
 {
 public:
-	PluginInsert (Session&, Temporal::TimeDomain td, boost::shared_ptr<Plugin> = boost::shared_ptr<Plugin>());
+	PluginInsert (Session&, Temporal::TimeDomain td, std::shared_ptr<Plugin> = std::shared_ptr<Plugin>());
 	~PluginInsert ();
 
 	void drop_references ();
 
-	boost::weak_ptr<PluginInsert> weak_ptr () {
+	std::weak_ptr<PluginInsert> weak_ptr () {
 		return shared_from_this();
 	}
 
@@ -178,7 +178,7 @@ public:
 	bool add_sidechain  (uint32_t n_audio = 1, uint32_t n_midi = 0);
 	bool del_sidechain ();
 	void update_sidechain_name ();
-	boost::shared_ptr<SideChain> sidechain () const { return _sidechain; }
+	std::shared_ptr<SideChain> sidechain () const { return _sidechain; }
 	// end C++ class slavery!
 
 	uint32_t get_count  () const { return _plugins.size(); }
@@ -214,7 +214,7 @@ public:
 		PluginControl (PluginInsert*                     p,
 		               const Evoral::Parameter&          param,
 		               const ParameterDescriptor&        desc,
-		               boost::shared_ptr<AutomationList> list=boost::shared_ptr<AutomationList>());
+		               std::shared_ptr<AutomationList> list=std::shared_ptr<AutomationList>());
 
 		double get_value (void) const;
 		void catch_up_with_external_value (double val);
@@ -232,7 +232,7 @@ public:
 		PluginPropertyControl (PluginInsert*                     p,
 		                       const Evoral::Parameter&          param,
 		                       const ParameterDescriptor&        desc,
-		                       boost::shared_ptr<AutomationList> list=boost::shared_ptr<AutomationList>());
+		                       std::shared_ptr<AutomationList> list=std::shared_ptr<AutomationList>());
 
 		double get_value (void) const;
 		XMLNode& get_state() const;
@@ -244,7 +244,7 @@ public:
 		Variant       _value;
 	};
 
-	boost::shared_ptr<Plugin> plugin(uint32_t num=0) const {
+	std::shared_ptr<Plugin> plugin(uint32_t num=0) const {
 		if (num < _plugins.size()) {
 			return _plugins[num];
 		} else {
@@ -258,22 +258,22 @@ public:
 		return _sidechain ? true : false;
 	}
 
-	boost::shared_ptr<IO> sidechain_input () const {
+	std::shared_ptr<IO> sidechain_input () const {
 		if (_sidechain) {
 			return _sidechain->input ();
 		}
-		return boost::shared_ptr<IO> ();
+		return std::shared_ptr<IO> ();
 	}
 
 	PluginType type () const;
 
-	boost::shared_ptr<ReadOnlyControl> control_output (uint32_t) const;
+	std::shared_ptr<ReadOnlyControl> control_output (uint32_t) const;
 
 	std::string describe_parameter (Evoral::Parameter param);
 
 	samplecnt_t signal_latency () const;
 
-	boost::shared_ptr<Plugin> get_impulse_analysis_plugin();
+	std::shared_ptr<Plugin> get_impulse_analysis_plugin();
 
 	void collect_signal_for_analysis (samplecnt_t nframes);
 
@@ -335,15 +335,15 @@ private:
 
 	float default_parameter_value (const Evoral::Parameter& param);
 
-	typedef std::vector<boost::shared_ptr<Plugin> > Plugins;
+	typedef std::vector<std::shared_ptr<Plugin> > Plugins;
 	Plugins _plugins;
 
-	boost::shared_ptr<SideChain> _sidechain;
+	std::shared_ptr<SideChain> _sidechain;
 	uint32_t _sc_playback_latency;
 	uint32_t _sc_capture_latency;
 	uint32_t _plugin_signal_latency;
 
-	boost::weak_ptr<Plugin> _impulseAnalysisPlugin;
+	std::weak_ptr<Plugin> _impulseAnalysisPlugin;
 
 	samplecnt_t _signal_analysis_collect_nsamples;
 	samplecnt_t _signal_analysis_collect_nsamples_max;
@@ -428,9 +428,9 @@ private:
 	bool check_inplace ();
 	void mapping_changed ();
 
-	boost::shared_ptr<Plugin> plugin_factory (boost::shared_ptr<Plugin>);
-	void add_plugin (boost::shared_ptr<Plugin>);
-	void plugin_removed (boost::weak_ptr<Plugin>);
+	std::shared_ptr<Plugin> plugin_factory (std::shared_ptr<Plugin>);
+	void add_plugin (std::shared_ptr<Plugin>);
+	void plugin_removed (std::weak_ptr<Plugin>);
 
 	void add_sidechain_from_xml (const XMLNode& node, int version);
 
@@ -442,7 +442,7 @@ private:
 	uint32_t _bypass_port;
 	bool     _inverted_bypass_enable;
 
-	typedef std::map<uint32_t, boost::shared_ptr<ReadOnlyControl> >CtrlOutMap;
+	typedef std::map<uint32_t, std::shared_ptr<ReadOnlyControl> >CtrlOutMap;
 	CtrlOutMap _control_outputs;
 
 	PBD::TimingStats  _timing_stats;

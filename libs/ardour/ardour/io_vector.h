@@ -26,13 +26,13 @@
 
 namespace ARDOUR {
 
-class IOVector : public std::vector<boost::weak_ptr<ARDOUR::IO> >
+class IOVector : public std::vector<std::weak_ptr<ARDOUR::IO> >
 {
 public:
 #if 0 // unused -- for future reference
 	bool connected_to (const IOVector& other) const {
 		for (IOVector::const_iterator i = other.begin(); i != other.end(); ++i) {
-			boost::shared_ptr<const IO> io = i->lock();
+			std::shared_ptr<const IO> io = i->lock();
 			if (!io) continue;
 			if (connected_to (io)) {
 				return true;
@@ -41,9 +41,9 @@ public:
 		return false;
 	}
 
-	bool connected_to (boost::shared_ptr<const IO> other) const {
+	bool connected_to (std::shared_ptr<const IO> other) const {
 		for (IOVector::const_iterator i = begin(); i != end(); ++i) {
-			boost::shared_ptr<const IO> io = i->lock();
+			std::shared_ptr<const IO> io = i->lock();
 			if (!io) continue;
 			if (io->connected_to (other)) {
 				return true;
@@ -53,9 +53,9 @@ public:
 	}
 #endif
 
-	bool fed_by (boost::shared_ptr<const IO> other) const {
+	bool fed_by (std::shared_ptr<const IO> other) const {
 		for (IOVector::const_iterator i = begin(); i != end(); ++i) {
-			boost::shared_ptr<const IO> io = i->lock();
+			std::shared_ptr<const IO> io = i->lock();
 			if (!io) continue;
 			if (other->connected_to (io)) {
 				return true;

@@ -45,7 +45,7 @@ public:
 	MidiRegionPropertiesBox ();
 	~MidiRegionPropertiesBox ();
 
-	void set_region (boost::shared_ptr<ARDOUR::Region>);
+	void set_region (std::shared_ptr<ARDOUR::Region>);
 
 private:
 	void region_changed (const PBD::PropertyChange& what_changed);

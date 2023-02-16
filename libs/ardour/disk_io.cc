@@ -66,7 +66,7 @@ DiskIOProcessor::~DiskIOProcessor ()
 {
 	{
 		RCUWriter<ChannelList> writer (channels);
-		boost::shared_ptr<ChannelList> c = writer.get_copy();
+		std::shared_ptr<ChannelList> c = writer.get_copy();
 
 		for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 			delete *chan;
@@ -170,7 +170,7 @@ DiskIOProcessor::configure_io (ChanCount in, ChanCount out)
 
 	{
 		RCUWriter<ChannelList> writer (channels);
-		boost::shared_ptr<ChannelList> c = writer.get_copy();
+		std::shared_ptr<ChannelList> c = writer.get_copy();
 
 		uint32_t n_audio = in.n_audio();
 
@@ -230,13 +230,13 @@ int
 DiskIOProcessor::add_channel (uint32_t how_many)
 {
 	RCUWriter<ChannelList> writer (channels);
-	boost::shared_ptr<ChannelList> c = writer.get_copy();
+	std::shared_ptr<ChannelList> c = writer.get_copy();
 
 	return add_channel_to (c, how_many);
 }
 
 int
-DiskIOProcessor::remove_channel_from (boost::shared_ptr<ChannelList> c, uint32_t how_many)
+DiskIOProcessor::remove_channel_from (std::shared_ptr<ChannelList> c, uint32_t how_many)
 {
 	while (how_many-- && !c->empty()) {
 		delete c->back();
@@ -250,15 +250,15 @@ int
 DiskIOProcessor::remove_channel (uint32_t how_many)
 {
 	RCUWriter<ChannelList> writer (channels);
-	boost::shared_ptr<ChannelList> c = writer.get_copy();
+	std::shared_ptr<ChannelList> c = writer.get_copy();
 
 	return remove_channel_from (c, how_many);
 }
 
 void
-DiskIOProcessor::playlist_deleted (boost::weak_ptr<Playlist> wpl)
+DiskIOProcessor::playlist_deleted (std::weak_ptr<Playlist> wpl)
 {
-	boost::shared_ptr<Playlist> pl (wpl.lock());
+	std::shared_ptr<Playlist> pl (wpl.lock());
 
 	if (!pl) {
 		return;
@@ -277,20 +277,20 @@ DiskIOProcessor::playlist_deleted (boost::weak_ptr<Playlist> wpl)
 	}
 }
 
-boost::shared_ptr<AudioPlaylist>
+std::shared_ptr<AudioPlaylist>
 DiskIOProcessor::audio_playlist () const
 {
-	return boost::dynamic_pointer_cast<AudioPlaylist> (_playlists[DataType::AUDIO]);
+	return std::dynamic_pointer_cast<AudioPlaylist> (_playlists[DataType::AUDIO]);
 }
 
-boost::shared_ptr<MidiPlaylist>
+std::shared_ptr<MidiPlaylist>
 DiskIOProcessor::midi_playlist () const
 {
-	return boost::dynamic_pointer_cast<MidiPlaylist> (_playlists[DataType::MIDI]);
+	return std::dynamic_pointer_cast<MidiPlaylist> (_playlists[DataType::MIDI]);
 }
 
 int
-DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
+DiskIOProcessor::use_playlist (DataType dt, std::shared_ptr<Playlist> playlist)
 {
 	if (!playlist) {
 		return 0;
@@ -314,7 +314,7 @@ DiskIOProcessor::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist
 
 	playlist->ContentsChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
 	playlist->LayeringChanged.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_modified, this));
-	playlist->DropReferences.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_deleted, this, boost::weak_ptr<Playlist>(playlist)));
+	playlist->DropReferences.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_deleted, this, std::weak_ptr<Playlist>(playlist)));
 	playlist->RangesMoved.connect_same_thread (playlist_connections, boost::bind (&DiskIOProcessor::playlist_ranges_moved, this, _1, _2));
 
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 now using playlist %1 (%2)\n", name(), playlist->name(), playlist->id()));

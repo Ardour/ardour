@@ -245,7 +245,7 @@ FaderPort::handle_midi_polypressure_message (MIDI::Parser &, MIDI::EventTwoBytes
 	case FaderTouch:
 		fader_is_touched = tb->value;
 		if (_current_stripable) {
-			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+			std::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
 				timepos_t now = timepos_t (session->engine().sample_time());
 				if (tb->value) {
@@ -329,7 +329,7 @@ FaderPort::handle_midi_pitchbend_message (MIDI::Parser &, MIDI::pitchbend_t pb)
 		}
 
 		if ((button_state & trim_modifier) == trim_modifier ) {    // mod+encoder = input trim
-			boost::shared_ptr<AutomationControl> trim = _current_stripable->trim_control ();
+			std::shared_ptr<AutomationControl> trim = _current_stripable->trim_control ();
 			if (trim) {
 				float val = accurate_coefficient_to_dB (trim->get_value());
 				val += delta * .5f; // use 1/2 dB Steps -20..+20
@@ -359,7 +359,7 @@ FaderPort::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* 
 
 	if (was_fader) {
 		if (_current_stripable) {
-			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+			std::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
 				int ival = (fader_msb << 7) | fader_lsb;
 				float val = gain->interface_to_internal (ival/16383.0);
@@ -894,13 +894,13 @@ FaderPort::drop_current_stripable ()
 		if (_current_stripable == session->monitor_out()) {
 			set_current_stripable (session->master_out());
 		} else {
-			set_current_stripable (boost::shared_ptr<Stripable>());
+			set_current_stripable (std::shared_ptr<Stripable>());
 		}
 	}
 }
 
 void
-FaderPort::set_current_stripable (boost::shared_ptr<Stripable> r)
+FaderPort::set_current_stripable (std::shared_ptr<Stripable> r)
 {
 	stripable_connections.drop_connections ();
 
@@ -917,18 +917,18 @@ FaderPort::set_current_stripable (boost::shared_ptr<Stripable> r)
 		_current_stripable->mute_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_mute, this), this);
 		_current_stripable->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_solo, this), this);
 
-		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_stripable);
+		std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track> (_current_stripable);
 		if (t) {
 			t->rec_enable_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_recenable, this), this);
 		}
 
-		boost::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
 		if (control) {
 			control->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_gain, this), this);
 			control->alist()->automation_state_changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_auto, this), this);
 		}
 
-		boost::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
+		std::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
 		if (mp) {
 			mp->cut_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort::map_cut, this), this);
 		}
@@ -946,7 +946,7 @@ FaderPort::map_auto ()
 	 * the Off button, because this will disable the fader.
 	 */
 
-	boost::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
 	const AutoState as = control->automation_state ();
 
 	switch (as) {
@@ -979,7 +979,7 @@ FaderPort::map_auto ()
 void
 FaderPort::map_cut ()
 {
-	boost::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
+	std::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
 
 	if (mp) {
 		bool yn = mp->cut_all ();
@@ -1023,7 +1023,7 @@ FaderPort::map_solo ()
 void
 FaderPort::map_recenable ()
 {
-	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_stripable);
+	std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track> (_current_stripable);
 	if (t) {
 		get_button (Rec).set_led_state (t->rec_enable_control()->get_value());
 	} else {
@@ -1043,7 +1043,7 @@ FaderPort::map_gain ()
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
 	double val;
 
 	if (!control) {

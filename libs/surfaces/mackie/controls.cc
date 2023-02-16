@@ -74,7 +74,7 @@ Control::set_in_use (bool in_use)
 }
 
 void
-Control::set_control (boost::shared_ptr<AutomationControl> ac)
+Control::set_control (std::shared_ptr<AutomationControl> ac)
 {
 	normal_ac = ac;
 }

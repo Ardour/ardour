@@ -448,7 +448,7 @@ BasicUI::trigger_cue_row (int cue_idx)
 void
 BasicUI::trigger_stop_col (int col, bool immediately)
 {
-	boost::shared_ptr<TriggerBox> tb = session->triggerbox_at (col);
+	std::shared_ptr<TriggerBox> tb = session->triggerbox_at (col);
 	if (tb) {
 		if (immediately) {
 			tb->stop_all_immediately ();
@@ -615,7 +615,7 @@ void
 BasicUI::toggle_monitor_mute ()
 {
 	if (session->monitor_out()) {
-		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+		std::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
 		if (mon->cut_all ()) {
 			mon->set_cut_all (false);
 		} else {
@@ -628,7 +628,7 @@ void
 BasicUI::toggle_monitor_dim ()
 {
 	if (session->monitor_out()) {
-		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+		std::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
 		if (mon->dim_all ()) {
 			mon->set_dim_all (false);
 		} else {
@@ -641,7 +641,7 @@ void
 BasicUI::toggle_monitor_mono ()
 {
 	if (session->monitor_out()) {
-		boost::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
+		std::shared_ptr<MonitorProcessor> mon = session->monitor_out()->monitor_control();
 		if (mon->mono()) {
 			mon->set_mono (false);
 		} else {
@@ -845,11 +845,11 @@ BasicUI::goto_nth_marker (int n)
 ARDOUR::TriggerPtr
 BasicUI::find_trigger (int x, int y)
 {
-	boost::shared_ptr<Route> r = session->get_remote_nth_route (x);
+	std::shared_ptr<Route> r = session->get_remote_nth_route (x);
 	if (!r) {
 		return TriggerPtr();
 	}
-	boost::shared_ptr<TriggerBox> tb = r->triggerbox();
+	std::shared_ptr<TriggerBox> tb = r->triggerbox();
 
 	if (!tb || !tb->active()) {
 		return TriggerPtr();
@@ -867,7 +867,7 @@ BasicUI::find_trigger (int x, int y)
 float
 BasicUI::trigger_progress_at (int x)
 {
-	boost::shared_ptr<TriggerBox> tb = session->triggerbox_at (_tbank_start_route + x);
+	std::shared_ptr<TriggerBox> tb = session->triggerbox_at (_tbank_start_route + x);
 	if (tb) {
 		ARDOUR::TriggerPtr trigger = tb->currently_playing ();
 		if (trigger) {
@@ -882,7 +882,7 @@ BasicUI::trigger_display_at (int x, int y)
 {
 	TriggerDisplay disp;
 
-	boost::shared_ptr<TriggerBox> tb = session->triggerbox_at (_tbank_start_route + x);
+	std::shared_ptr<TriggerBox> tb = session->triggerbox_at (_tbank_start_route + x);
 	if (tb) {
 		ARDOUR::TriggerPtr current = tb->currently_playing ();
 		TriggerPtr tp = tb->trigger (_tbank_start_row + y);
@@ -916,12 +916,12 @@ BasicUI::unbang_trigger_at (int x, int y)
 this stuff is waiting to go in so that all UIs can offer complex solo/mute functionality
 
 void
-BasicUI::solo_release (boost::shared_ptr<Route> r)
+BasicUI::solo_release (std::shared_ptr<Route> r)
 {
 }
 
 void
-BasicUI::solo_press (boost::shared_ptr<Route> r, bool momentary, bool global, bool exclusive, bool isolate, bool solo_group)
+BasicUI::solo_press (std::shared_ptr<Route> r, bool momentary, bool global, bool exclusive, bool isolate, bool solo_group)
 {
 	if (momentary) {
 		_solo_release = new SoloMuteRelease (_route->soloed());
@@ -944,7 +944,7 @@ BasicUI::solo_press (boost::shared_ptr<Route> r, bool momentary, bool global, bo
 		if (_solo_release) {
 			_solo_release->exclusive = true;
 
-			boost::shared_ptr<RouteList> routes = _session->get_routes();
+			std::shared_ptr<RouteList> routes = _session->get_routes();
 
 			for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 				if ((*i)->soloed ()) {
@@ -992,7 +992,7 @@ BasicUI::solo_press (boost::shared_ptr<Route> r, bool momentary, bool global, bo
 
 		/* click: solo this route */
 
-		boost::shared_ptr<RouteList> rl (new RouteList);
+		std::shared_ptr<RouteList> rl (new RouteList);
 		rl->push_back (route());
 
 		if (_solo_release) {

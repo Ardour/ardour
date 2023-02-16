@@ -61,7 +61,7 @@ bool MonoPanner::have_colors = false;
 Pango::AttrList MonoPanner::panner_font_attributes;
 bool            MonoPanner::have_font = false;
 
-MonoPanner::MonoPanner (boost::shared_ptr<ARDOUR::PannerShell> p)
+MonoPanner::MonoPanner (std::shared_ptr<ARDOUR::PannerShell> p)
 	: PannerInterface (p->panner())
 	, _panner_shell (p)
 	, position_control (_panner->pannable()->pan_azimuth_control)

@@ -107,7 +107,7 @@ Session::ltc_tx_resync_latency (bool playback)
 	if (deletion_in_progress() || !playback) {
 		return;
 	}
-	boost::shared_ptr<Port> ltcport = ltc_output_port();
+	std::shared_ptr<Port> ltcport = ltc_output_port();
 	if (ltcport) {
 		ltcport->get_connected_latency_range(ltc_out_latency, true);
 		DEBUG_TRACE (DEBUG::TXLTC, string_compose ("resync latency: %1\n", ltc_out_latency.max));
@@ -167,7 +167,7 @@ Session::send_ltc_for_cycle (samplepos_t start_sample, samplepos_t end_sample, p
 	assert (n_samples > 0);
 
 	pframes_t txf = 0;
-	boost::shared_ptr<Port> ltcport = ltc_output_port();
+	std::shared_ptr<Port> ltcport = ltc_output_port();
 
 	if (!ltcport) {
 		assert (deletion_in_progress ());

@@ -114,16 +114,16 @@ EditorSources::selection_changed ()
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin (); i != rows.end (); ++i) {
 			if ((iter = _model->get_iter (*i))) {
 				/* highlight any regions in the editor that use this region's source */
-				boost::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
+				std::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
 				if (!region)
 					continue;
 
-				boost::shared_ptr<ARDOUR::Source> source = region->source ();
+				std::shared_ptr<ARDOUR::Source> source = region->source ();
 				if (source) {
-					set<boost::shared_ptr<Region>> regions;
+					set<std::shared_ptr<Region>> regions;
 					RegionFactory::get_regions_using_source (source, regions);
 
-					for (set<boost::shared_ptr<Region>>::iterator region = regions.begin (); region != regions.end (); region++) {
+					for (set<std::shared_ptr<Region>>::iterator region = regions.begin (); region != regions.end (); region++) {
 						_change_connection.block (true);
 						_editor->set_selected_regionview_from_region_list (*region, Selection::Add);
 						_change_connection.block (false);
@@ -161,7 +161,7 @@ EditorSources::recover_selected_sources ()
 		TreeView::Selection::ListHandle_Path rows = _display.get_selection ()->get_selected_rows ();
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin (); i != rows.end (); ++i) {
 			if ((iter = _model->get_iter (*i))) {
-				boost::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
+				std::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
 				if (region) {
 					to_be_recovered.push_back (region);
 				}
@@ -192,7 +192,7 @@ EditorSources::remove_selected_sources ()
 	int opt = prompter.run ();
 
 	if (opt >= 1) {
-		std::list<boost::weak_ptr<ARDOUR::Source>> to_be_removed;
+		std::list<std::weak_ptr<ARDOUR::Source>> to_be_removed;
 
 		if (_display.get_selection ()->count_selected_rows () > 0) {
 			TreeIter                             iter;
@@ -202,17 +202,17 @@ EditorSources::remove_selected_sources ()
 
 			for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin (); i != rows.end (); ++i) {
 				if ((iter = _model->get_iter (*i))) {
-					boost::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
+					std::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
 
 					if (!region)
 						continue;
 
-					boost::shared_ptr<ARDOUR::Source> source = region->source ();
+					std::shared_ptr<ARDOUR::Source> source = region->source ();
 					if (source) {
-						set<boost::shared_ptr<Region>> regions;
+						set<std::shared_ptr<Region>> regions;
 						RegionFactory::get_regions_using_source (source, regions);
 
-						for (set<boost::shared_ptr<Region>>::iterator region = regions.begin (); region != regions.end (); region++) {
+						for (set<std::shared_ptr<Region>>::iterator region = regions.begin (); region != regions.end (); region++) {
 							_change_connection.block (true);
 							_editor->set_selected_regionview_from_region_list (*region, Selection::Add);
 							_change_connection.block (false);
@@ -226,7 +226,7 @@ EditorSources::remove_selected_sources ()
 			_editor->remove_regions (_editor->get_regions_from_selection_and_entered (), false /*can_ripple*/, false /*as_part_of_other_command*/); // this operation is undo-able
 
 			if (opt == 2) {
-				for (std::list<boost::weak_ptr<ARDOUR::Source>>::iterator i = to_be_removed.begin (); i != to_be_removed.end (); ++i) {
+				for (std::list<std::weak_ptr<ARDOUR::Source>>::iterator i = to_be_removed.begin (); i != to_be_removed.end (); ++i) {
 					_session->remove_source (*i); // this operation is (currently) not undo-able
 				}
 			}
@@ -288,13 +288,13 @@ EditorSources::drag_data_received (const RefPtr<Gdk::DragContext>& context,
 	}
 }
 
-boost::shared_ptr<ARDOUR::Region>
+std::shared_ptr<ARDOUR::Region>
 EditorSources::get_single_selection ()
 {
 	Glib::RefPtr<TreeSelection> selected = _display.get_selection ();
 
 	if (selected->count_selected_rows () != 1) {
-		return boost::shared_ptr<ARDOUR::Region> ();
+		return std::shared_ptr<ARDOUR::Region> ();
 	}
 
 	TreeView::Selection::ListHandle_Path rows = selected->get_selected_rows ();
@@ -304,7 +304,7 @@ EditorSources::get_single_selection ()
 	TreeIter iter = _model->get_iter (*rows.begin ());
 
 	if (!iter) {
-		return boost::shared_ptr<ARDOUR::Region> ();
+		return std::shared_ptr<ARDOUR::Region> ();
 	}
 
 	return (*iter)[_columns.region];

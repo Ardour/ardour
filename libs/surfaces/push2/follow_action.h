@@ -41,11 +41,11 @@ class FollowActionIcon : public ArdourCanvas::Rectangle
 	void set_font_description (Pango::FontDescription const &);
 	void set_size (double size);
 	void set_scale (double scale);
-	void set_trigger (boost::shared_ptr<ARDOUR::Trigger> t);
+	void set_trigger (std::shared_ptr<ARDOUR::Trigger> t);
 	void reset_trigger ();
 
   private:
-	boost::shared_ptr<ARDOUR::Trigger> trigger;;
+	std::shared_ptr<ARDOUR::Trigger> trigger;;
 	Pango::FontDescription font_description;
 	double size;
 	double scale;

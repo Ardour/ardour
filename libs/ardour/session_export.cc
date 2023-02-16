@@ -45,7 +45,7 @@ using namespace PBD;
 #define TFSM_ROLL() { _transport_fsm->enqueue (new TransportFSM::Event (TransportFSM::StartTransport)); }
 #define TFSM_SPEED(speed) { _transport_fsm->enqueue (new TransportFSM::Event (speed)); }
 
-boost::shared_ptr<ExportHandler>
+std::shared_ptr<ExportHandler>
 Session::get_export_handler ()
 {
 	if (!export_handler) {
@@ -55,7 +55,7 @@ Session::get_export_handler ()
 	return export_handler;
 }
 
-boost::shared_ptr<ExportStatus>
+std::shared_ptr<ExportStatus>
 Session::get_export_status ()
 {
 	if (!export_status) {
@@ -74,7 +74,7 @@ Session::pre_export ()
 	/* take everyone out of awrite to avoid disasters */
 
 	{
-		boost::shared_ptr<RouteList> r = routes.reader ();
+		std::shared_ptr<RouteList> r = routes.reader ();
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->protect_automation ();
@@ -172,10 +172,10 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 
 		/* get everyone to the right position */
 
-		boost::shared_ptr<RouteList> rl = routes.reader();
+		std::shared_ptr<RouteList> rl = routes.reader();
 
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
 			if (tr && tr->seek (position, true)) {
 				error << string_compose (_("%1: cannot seek to %2 for export"),
 						  (*i)->name(), position)

@@ -125,7 +125,7 @@ IOPluginWindow::refill ()
 	if (!_session) {
 		return;
 	}
-	boost::shared_ptr<IOPlugList> iop (_session->io_plugs ());
+	std::shared_ptr<IOPlugList> iop (_session->io_plugs ());
 	for (auto& i : *iop) {
 		IOPlugUI* iopup = manage (new IOPlugUI (i));
 		if (i->is_pre ()) {
@@ -178,7 +178,7 @@ bool
 IOPluginWindow::PluginBox::use_plugins (SelectedPlugins const& plugins)
 {
 	for (SelectedPlugins::const_iterator p = plugins.begin (); p != plugins.end (); ++p) {
-		_session->load_io_plugin (boost::shared_ptr<IOPlug> (new IOPlug (*_session, *p, _is_pre)));
+		_session->load_io_plugin (std::shared_ptr<IOPlug> (new IOPlug (*_session, *p, _is_pre)));
 	}
 	return false;
 }
@@ -194,7 +194,7 @@ IOPluginWindow::PluginBox::load_plugin (PluginPresetPtr const& ppp)
 	if (ppp->_preset.valid) {
 		p->load_preset (ppp->_preset);
 	}
-	_session->load_io_plugin (boost::shared_ptr<IOPlug> (new IOPlug (*_session, p, _is_pre)));
+	_session->load_io_plugin (std::shared_ptr<IOPlug> (new IOPlug (*_session, p, _is_pre)));
 }
 
 bool
@@ -235,7 +235,7 @@ IOPluginWindow::PluginBox::drag_data_received (Glib::RefPtr<Gdk::DragContext> co
 		for (auto const& i : nfos) {
 			PluginPtr p = i->load (*_session);
 			if (p) {
-				_session->load_io_plugin (boost::shared_ptr<IOPlug> (new IOPlug (*_session, p, _is_pre)));
+				_session->load_io_plugin (std::shared_ptr<IOPlug> (new IOPlug (*_session, p, _is_pre)));
 			}
 		}
 
@@ -260,7 +260,7 @@ IOPluginWindow::PluginBox::drag_data_received (Glib::RefPtr<Gdk::DragContext> co
 
 /* ****************************************************************************/
 
-IOPluginWindow::IOPlugUI::IOPlugUI (boost::shared_ptr<ARDOUR::IOPlug> iop)
+IOPluginWindow::IOPlugUI::IOPlugUI (std::shared_ptr<ARDOUR::IOPlug> iop)
 	: Alignment (0, 0.5, 0, 0)
 	, _btn_input (iop->input (), iop->is_pre ())
 	, _btn_output (iop->output (), iop->is_pre ())
@@ -373,13 +373,13 @@ IOPluginWindow::IOPlugUI::button_resized (Gtk::Allocation& alloc)
 
 /* ****************************************************************************/
 
-IOPluginWindow::PluginWindowProxy::PluginWindowProxy (std::string const& name, boost::weak_ptr<PlugInsertBase> plugin)
+IOPluginWindow::PluginWindowProxy::PluginWindowProxy (std::string const& name, std::weak_ptr<PlugInsertBase> plugin)
 	: WM::ProxyBase (name, std::string ())
 	, _pib (plugin)
 	, _is_custom (true)
 	, _want_custom (true)
 {
-	boost::shared_ptr<PlugInsertBase> p = _pib.lock ();
+	std::shared_ptr<PlugInsertBase> p = _pib.lock ();
 	if (!p) {
 		return;
 	}
@@ -394,7 +394,7 @@ IOPluginWindow::PluginWindowProxy::~PluginWindowProxy ()
 Gtk::Window*
 IOPluginWindow::PluginWindowProxy::get (bool create)
 {
-	boost::shared_ptr<PlugInsertBase> p = _pib.lock ();
+	std::shared_ptr<PlugInsertBase> p = _pib.lock ();
 	if (!p) {
 		return 0;
 	}
@@ -413,7 +413,7 @@ IOPluginWindow::PluginWindowProxy::get (bool create)
 		_window    = new PluginUIWindow (p, false, _is_custom);
 
 		if (_window) {
-			boost::shared_ptr<ARDOUR::IOPlug> iop = boost::dynamic_pointer_cast<ARDOUR::IOPlug> (p);
+			std::shared_ptr<ARDOUR::IOPlug> iop = std::dynamic_pointer_cast<ARDOUR::IOPlug> (p);
 			assert (iop);
 			_window->set_title (iop->name ());
 			setup ();
@@ -478,7 +478,7 @@ IOPluginWindow::PluginWindowProxy::plugin_going_away ()
 
 /* ****************************************************************************/
 
-IOPluginWindow::IOButton::IOButton (boost::shared_ptr<ARDOUR::IO> io, bool pre)
+IOPluginWindow::IOButton::IOButton (std::shared_ptr<ARDOUR::IO> io, bool pre)
 	: _io (io)
 	, _pre (pre)
 	, _io_selector (0)
@@ -525,10 +525,10 @@ IOPluginWindow::IOButton::port_pretty_name_changed (std::string pn)
 }
 
 void
-IOPluginWindow::IOButton::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost::weak_ptr<Port> wb)
+IOPluginWindow::IOButton::port_connected_or_disconnected (std::weak_ptr<Port> wa, std::weak_ptr<Port> wb)
 {
-	boost::shared_ptr<Port> a = wa.lock ();
-	boost::shared_ptr<Port> b = wb.lock ();
+	std::shared_ptr<Port> a = wa.lock ();
+	std::shared_ptr<Port> b = wb.lock ();
 
 	if ((a && _io->has_port (a)) || (b && _io->has_port (b))) {
 		update ();
@@ -544,7 +544,7 @@ IOPluginWindow::IOButton::disconnect ()
 void
 IOPluginWindow::IOButton::update ()
 {
-	boost::shared_ptr<ARDOUR::Bundle> bundle;
+	std::shared_ptr<ARDOUR::Bundle> bundle;
 	_bundle_connections.drop_connections ();
 
 	set_label (*this, _io->session (), bundle, _io);
@@ -555,7 +555,7 @@ IOPluginWindow::IOButton::update ()
 }
 
 struct RouteCompareByName {
-	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b)
+	bool operator() (std::shared_ptr<Route> a, std::shared_ptr<Route> b)
 	{
 		return a->name ().compare (b->name ()) < 0;
 	}
@@ -586,8 +586,8 @@ IOPluginWindow::IOButton::button_press (GdkEventButton* ev)
 
 	uint32_t const n_with_separator = citems.size ();
 
-	boost::shared_ptr<ARDOUR::BundleList> b      = _io->session ().bundles ();
-	boost::shared_ptr<ARDOUR::RouteList>  routes = _io->session ().get_routes ();
+	std::shared_ptr<ARDOUR::BundleList> b      = _io->session ().bundles ();
+	std::shared_ptr<ARDOUR::RouteList>  routes = _io->session ().get_routes ();
 	RouteList                             copy   = *routes;
 	copy.sort (RouteCompareByName ());
 
@@ -597,12 +597,12 @@ IOPluginWindow::IOButton::button_press (GdkEventButton* ev)
 			 * user-bundles first.
 			 */
 			for (auto const& i : *b) {
-				if (boost::dynamic_pointer_cast<UserBundle> (i)) {
+				if (std::dynamic_pointer_cast<UserBundle> (i)) {
 					maybe_add_bundle_to_menu (i);
 				}
 			}
 			for (auto const& i : *b) {
-				if (boost::dynamic_pointer_cast<UserBundle> (i) == 0) {
+				if (std::dynamic_pointer_cast<UserBundle> (i) == 0) {
 					maybe_add_bundle_to_menu (i);
 				}
 			}
@@ -627,12 +627,12 @@ IOPluginWindow::IOButton::button_press (GdkEventButton* ev)
 		} else {
 			/* output of post-process plugins go to physical sinks */
 			for (auto const& i : *b) {
-				if (boost::dynamic_pointer_cast<UserBundle> (i)) {
+				if (std::dynamic_pointer_cast<UserBundle> (i)) {
 					maybe_add_bundle_to_menu (i);
 				}
 			}
 			for (auto const& i : *b) {
-				if (boost::dynamic_pointer_cast<UserBundle> (i) == 0) {
+				if (std::dynamic_pointer_cast<UserBundle> (i) == 0) {
 					maybe_add_bundle_to_menu (i);
 				}
 			}
@@ -650,13 +650,13 @@ IOPluginWindow::IOButton::button_press (GdkEventButton* ev)
 }
 
 void
-IOPluginWindow::IOButton::bundle_chosen (boost::shared_ptr<Bundle> c)
+IOPluginWindow::IOButton::bundle_chosen (std::shared_ptr<Bundle> c)
 {
 	_io->connect_ports_to_bundle (c, true, this);
 }
 
 void
-IOPluginWindow::IOButton::maybe_add_bundle_to_menu (boost::shared_ptr<Bundle> b)
+IOPluginWindow::IOButton::maybe_add_bundle_to_menu (std::shared_ptr<Bundle> b)
 {
 	using namespace Menu_Helpers;
 

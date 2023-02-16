@@ -647,7 +647,7 @@ Editor::canvas_fade_out_handle_event (GdkEvent *event, ArdourCanvas::Item* item,
 }
 
 struct DescendingRegionLayerSorter {
-	bool operator()(boost::shared_ptr<Region> a, boost::shared_ptr<Region> b) {
+	bool operator()(std::shared_ptr<Region> a, std::shared_ptr<Region> b) {
 		return a->layer() > b->layer();
 	}
 };
@@ -1152,8 +1152,8 @@ Editor::canvas_drop_zone_event (GdkEvent* event)
 bool
 Editor::track_canvas_drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int x, int y, guint time)
 {
-	boost::shared_ptr<Region> region;
-	boost::shared_ptr<Region> region_copy;
+	std::shared_ptr<Region> region;
+	std::shared_ptr<Region> region_copy;
 	RouteTimeAxisView* rtav;
 	GdkEvent event;
 	double px;
@@ -1250,7 +1250,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	samplepos_t const pos = window_event_sample (&event, &px, &py);
 
 	PBD::ID rid (data.get_data_as_string ());
-	boost::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
+	std::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
 
 	if (!region) { return; }
 
@@ -1261,20 +1261,20 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 		rtav = dynamic_cast<RouteTimeAxisView*> (tv.first);
 	} else {
 		try {
-			if (boost::dynamic_pointer_cast<AudioRegion> (region)) {
+			if (std::dynamic_pointer_cast<AudioRegion> (region)) {
 				uint32_t output_chan = region->sources().size();
 				if ((Config->get_output_auto_connect() & AutoConnectMaster) && session()->master_out()) {
 					output_chan =  session()->master_out()->n_inputs().n_audio();
 				}
-				list<boost::shared_ptr<AudioTrack> > audio_tracks;
+				list<std::shared_ptr<AudioTrack> > audio_tracks;
 				audio_tracks = session()->new_audio_track (region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order);
 				rtav = dynamic_cast<RouteTimeAxisView*> (time_axis_view_from_stripable (audio_tracks.front()));
-			} else if (boost::dynamic_pointer_cast<MidiRegion> (region)) {
+			} else if (std::dynamic_pointer_cast<MidiRegion> (region)) {
 				ChanCount one_midi_port (DataType::MIDI, 1);
-				list<boost::shared_ptr<MidiTrack> > midi_tracks;
+				list<std::shared_ptr<MidiTrack> > midi_tracks;
 				midi_tracks = session()->new_midi_track (one_midi_port, one_midi_port,
 				                                         Config->get_strict_io () || Profile->get_mixbus (),
-				                                         boost::shared_ptr<ARDOUR::PluginInfo>(),
+				                                         std::shared_ptr<ARDOUR::PluginInfo>(),
 				                                         (ARDOUR::Plugin::PresetRecord*) 0,
 				                                         (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order, Normal, true);
 				rtav = dynamic_cast<RouteTimeAxisView*> (time_axis_view_from_stripable (midi_tracks.front()));
@@ -1288,10 +1288,10 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 	}
 
 	if (rtav != 0 && rtav->is_track ()) {
-		boost::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
+		std::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
 
-		if ((boost::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 && dynamic_cast<AudioTimeAxisView*> (rtav) != 0) ||
-		    (boost::dynamic_pointer_cast<MidiRegion> (region_copy) != 0 && dynamic_cast<MidiTimeAxisView*> (rtav) != 0)) {
+		if ((std::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 && dynamic_cast<AudioTimeAxisView*> (rtav) != 0) ||
+		    (std::dynamic_pointer_cast<MidiRegion> (region_copy) != 0 && dynamic_cast<MidiTimeAxisView*> (rtav) != 0)) {
 			_drags->set (new RegionInsertDrag (this, region_copy, rtav, timepos_t (pos), drag_time_domain (region_copy.get())), &event);
 			_drags->end_grab (&event);
 		}

@@ -123,9 +123,9 @@ MidiStreamView::parameter_changed (string const & param)
 }
 
 RegionView*
-MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool /*wfd*/, bool recording)
+MidiStreamView::create_region_view (std::shared_ptr<Region> r, bool /*wfd*/, bool recording)
 {
-	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (r);
+	std::shared_ptr<MidiRegion> region = std::dynamic_pointer_cast<MidiRegion> (r);
 
 	if (region == 0) {
 		return 0;
@@ -148,9 +148,9 @@ MidiStreamView::create_region_view (boost::shared_ptr<Region> r, bool /*wfd*/, b
 }
 
 RegionView*
-MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait_for_data, bool recording)
+MidiStreamView::add_region_view_internal (std::shared_ptr<Region> r, bool wait_for_data, bool recording)
 {
-	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (r);
+	std::shared_ptr<MidiRegion> region = std::dynamic_pointer_cast<MidiRegion> (r);
 
 	if (!region) {
 		return 0;
@@ -189,7 +189,7 @@ MidiStreamView::add_region_view_internal (boost::shared_ptr<Region> r, bool wait
 	}
 
 	/* catch regionview going away */
-	boost::weak_ptr<Region> wr (region); // make this explicit
+	std::weak_ptr<Region> wr (region); // make this explicit
 	region->DropReferences.connect (*this, invalidator (*this), boost::bind (&MidiStreamView::remove_region_view, this, wr), gui_context());
 
 	RegionViewAdded (region_view);
@@ -208,7 +208,7 @@ MidiStreamView::display_region (MidiRegionView* region_view, bool)
 
 	region_view->set_height (child_height());
 
-	boost::shared_ptr<MidiSource> source (region_view->midi_region()->midi_source(0));
+	std::shared_ptr<MidiSource> source (region_view->midi_region()->midi_source(0));
 
 	if (!source) {
 		error << _("attempt to display MIDI region with no source") << endmsg;
@@ -228,7 +228,7 @@ MidiStreamView::display_region (MidiRegionView* region_view, bool)
 
 
 void
-MidiStreamView::display_track (boost::shared_ptr<Track> tr)
+MidiStreamView::display_track (std::shared_ptr<Track> tr)
 {
 	StreamView::display_track (tr);
 
@@ -238,9 +238,9 @@ MidiStreamView::display_track (boost::shared_ptr<Track> tr)
 }
 
 void
-MidiStreamView::update_contents_metrics(boost::shared_ptr<Region> r)
+MidiStreamView::update_contents_metrics(std::shared_ptr<Region> r)
 {
-	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(r);
+	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(r);
 
 	if (mr) {
 		Source::ReaderLock lm (mr->midi_source(0)->mutex());
@@ -514,7 +514,7 @@ MidiStreamView::setup_rec_box ()
 				plist.add (ARDOUR::Properties::name, string());
 				plist.add (ARDOUR::Properties::layer, 0);
 
-				boost::shared_ptr<MidiRegion> region (boost::dynamic_pointer_cast<MidiRegion>
+				std::shared_ptr<MidiRegion> region (std::dynamic_pointer_cast<MidiRegion>
 				                                      (RegionFactory::create (sources, plist, false)));
 				if (region) {
 
@@ -565,8 +565,8 @@ MidiStreamView::setup_rec_box ()
 
 			/* remove temp regions */
 
-			for (list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin(); iter != rec_regions.end();) {
-				list<pair<boost::shared_ptr<Region>,RegionView*> >::iterator tmp;
+			for (list<pair<std::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin(); iter != rec_regions.end();) {
+				list<pair<std::shared_ptr<Region>,RegionView*> >::iterator tmp;
 
 				tmp = iter;
 				++tmp;
@@ -643,7 +643,7 @@ MidiStreamView::update_rec_box ()
 	}
 
 	/* Update the region being recorded to reflect where we currently are */
-	boost::shared_ptr<ARDOUR::Region> region = rec_regions.back().first;
+	std::shared_ptr<ARDOUR::Region> region = rec_regions.back().first;
 	region->set_length (timecnt_t (_trackview.track()->current_capture_end () - _trackview.track()->current_capture_start()));
 
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (rec_regions.back().second);
@@ -716,7 +716,7 @@ MidiStreamView::paste (timepos_t const & pos, const Selection& selection, PasteC
 		prev = i;
 	}
 
-	boost::shared_ptr<Region> r = (*prev)->region ();
+	std::shared_ptr<Region> r = (*prev)->region ();
 
 	/* If *prev doesn't cover pos, it's no good */
 	if (r->position() > pos || ((r->position() + r->length()) < pos)) {

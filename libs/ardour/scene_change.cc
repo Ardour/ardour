@@ -26,16 +26,16 @@ using namespace ARDOUR;
 std::string SceneChange::xml_node_name = X_("SceneChange");
 const uint32_t SceneChange::out_of_bound_color = 0x00000000; /* note: zero alpha means invisible, which acts as out-of-bound signal */
 
-boost::shared_ptr<SceneChange>
+std::shared_ptr<SceneChange>
 SceneChange::factory (const XMLNode& node, int version)
 {
 	XMLProperty const * prop = node.property (X_("type"));
 
 	if (prop->value() == X_("MIDI")) {
-		return boost::shared_ptr<SceneChange> (new MIDISceneChange (node, version));
+		return std::shared_ptr<SceneChange> (new MIDISceneChange (node, version));
 	}
 
-	return boost::shared_ptr<SceneChange>();
+	return std::shared_ptr<SceneChange>();
 }
 
 SceneChange::SceneChange ()

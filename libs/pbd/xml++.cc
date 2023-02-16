@@ -464,7 +464,7 @@ XMLNode::add_child_copy(const XMLNode& n)
 	return copy;
 }
 
-boost::shared_ptr<XMLSharedNodeList>
+std::shared_ptr<XMLSharedNodeList>
 XMLTree::find(const string xpath, XMLNode* node) const
 {
 	xmlXPathContext* ctxt;
@@ -478,8 +478,8 @@ XMLTree::find(const string xpath, XMLNode* node) const
 		ctxt = xmlXPathNewContext(_doc);
 	}
 
-	boost::shared_ptr<XMLSharedNodeList> result =
-		boost::shared_ptr<XMLSharedNodeList>(find_impl(ctxt, xpath));
+	std::shared_ptr<XMLSharedNodeList> result =
+		std::shared_ptr<XMLSharedNodeList>(find_impl(ctxt, xpath));
 
 	xmlXPathFreeContext(ctxt);
 	if (doc) {
@@ -812,7 +812,7 @@ static XMLSharedNodeList* find_impl(xmlXPathContext* ctxt, const string& xpath)
 	if (nodeset) {
 		for (int i = 0; i < nodeset->nodeNr; ++i) {
 			XMLNode* node = readnode(nodeset->nodeTab[i]);
-			nodes->push_back(boost::shared_ptr<XMLNode>(node));
+			nodes->push_back(std::shared_ptr<XMLNode>(node));
 		}
 	} else {
 		// return empty set

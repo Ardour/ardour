@@ -62,8 +62,8 @@ public:
 
 	sigc::signal<void> Hiding;
 
-	virtual boost::shared_ptr<ARDOUR::Stripable> stripable() const = 0;
-	virtual boost::shared_ptr<ARDOUR::AutomationControl> control() const { return boost::shared_ptr<ARDOUR::AutomationControl>(); }
+	virtual std::shared_ptr<ARDOUR::Stripable> stripable() const = 0;
+	virtual std::shared_ptr<ARDOUR::AutomationControl> control() const { return std::shared_ptr<ARDOUR::AutomationControl>(); }
 
 	virtual std::string state_id() const = 0;
 	/* for now, we always return properties in string form.

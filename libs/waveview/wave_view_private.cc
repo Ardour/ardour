@@ -31,7 +31,7 @@
 
 namespace ArdourWaveView {
 
-WaveViewProperties::WaveViewProperties (boost::shared_ptr<ARDOUR::AudioRegion> region)
+WaveViewProperties::WaveViewProperties (std::shared_ptr<ARDOUR::AudioRegion> region)
     : region_start (region->start_sample ())
     , region_end (region->start_sample () + region->length_samples ())
     , channel (0)
@@ -56,7 +56,7 @@ WaveViewProperties::WaveViewProperties (boost::shared_ptr<ARDOUR::AudioRegion> r
 
 /*-------------------------------------------------*/
 
-WaveViewImage::WaveViewImage (boost::shared_ptr<const ARDOUR::AudioRegion> const& region_ptr,
+WaveViewImage::WaveViewImage (std::shared_ptr<const ARDOUR::AudioRegion> const& region_ptr,
                               WaveViewProperties const& properties)
 	: region (region_ptr)
 	, props (properties)
@@ -84,7 +84,7 @@ WaveViewCacheGroup::~WaveViewCacheGroup ()
 }
 
 void
-WaveViewCacheGroup::add_image (boost::shared_ptr<WaveViewImage> image)
+WaveViewCacheGroup::add_image (std::shared_ptr<WaveViewImage> image)
 {
 	if (!image) {
 		// Not adding invalid image to cache
@@ -141,7 +141,7 @@ WaveViewCacheGroup::add_image (boost::shared_ptr<WaveViewImage> image)
 	_parent_cache.increase_size (image->size_in_bytes ());
 }
 
-boost::shared_ptr<WaveViewImage>
+std::shared_ptr<WaveViewImage>
 WaveViewCacheGroup::lookup_image (WaveViewProperties const& props)
 {
 	for (ImageCache::iterator i = _cached_images.begin (); i != _cached_images.end (); ++i) {
@@ -149,7 +149,7 @@ WaveViewCacheGroup::lookup_image (WaveViewProperties const& props)
 			return (*i);
 		}
 	}
-	return boost::shared_ptr<WaveViewImage>();
+	return std::shared_ptr<WaveViewImage>();
 }
 
 void
@@ -196,8 +196,8 @@ WaveViewCache::decrease_size (uint64_t bytes)
 	image_cache_size -= bytes;
 }
 
-boost::shared_ptr<WaveViewCacheGroup>
-WaveViewCache::get_cache_group (boost::shared_ptr<ARDOUR::AudioSource> source)
+std::shared_ptr<WaveViewCacheGroup>
+WaveViewCache::get_cache_group (std::shared_ptr<ARDOUR::AudioSource> source)
 {
 	CacheGroups::iterator it = cache_group_map.find (source);
 
@@ -206,7 +206,7 @@ WaveViewCache::get_cache_group (boost::shared_ptr<ARDOUR::AudioSource> source)
 		return it->second;
 	}
 
-	boost::shared_ptr<WaveViewCacheGroup> new_group (new WaveViewCacheGroup (*this));
+	std::shared_ptr<WaveViewCacheGroup> new_group (new WaveViewCacheGroup (*this));
 
 	bool inserted = cache_group_map.insert (std::make_pair (source, new_group)).second;
 	x_assert (inserted, inserted);
@@ -215,7 +215,7 @@ WaveViewCache::get_cache_group (boost::shared_ptr<ARDOUR::AudioSource> source)
 }
 
 void
-WaveViewCache::reset_cache_group (boost::shared_ptr<WaveViewCacheGroup>& group)
+WaveViewCache::reset_cache_group (std::shared_ptr<WaveViewCacheGroup>& group)
 {
 	if (!group) {
 		return;
@@ -290,14 +290,14 @@ WaveViewThreads::deinitialize ()
 }
 
 void
-WaveViewThreads::enqueue_draw_request (boost::shared_ptr<WaveViewDrawRequest>& request)
+WaveViewThreads::enqueue_draw_request (std::shared_ptr<WaveViewDrawRequest>& request)
 {
 	assert (instance);
 	instance->_enqueue_draw_request (request);
 }
 
 void
-WaveViewThreads::_enqueue_draw_request (boost::shared_ptr<WaveViewDrawRequest>& request)
+WaveViewThreads::_enqueue_draw_request (std::shared_ptr<WaveViewDrawRequest>& request)
 {
 	Glib::Threads::Mutex::Lock lm (_queue_mutex);
 	_queue.push_back (request);
@@ -305,14 +305,14 @@ WaveViewThreads::_enqueue_draw_request (boost::shared_ptr<WaveViewDrawRequest>& 
 	_cond.signal ();
 }
 
-boost::shared_ptr<WaveViewDrawRequest>
+std::shared_ptr<WaveViewDrawRequest>
 WaveViewThreads::dequeue_draw_request ()
 {
 	assert (instance);
 	return instance->_dequeue_draw_request ();
 }
 
-boost::shared_ptr<WaveViewDrawRequest>
+std::shared_ptr<WaveViewDrawRequest>
 WaveViewThreads::_dequeue_draw_request ()
 {
 	/* _queue_mutex must be held at this point */
@@ -323,7 +323,7 @@ WaveViewThreads::_dequeue_draw_request ()
 		_cond.wait (_queue_mutex);
 	}
 
-	boost::shared_ptr<WaveViewDrawRequest> req;
+	std::shared_ptr<WaveViewDrawRequest> req;
 
 	/* queue could be empty at this point because an already running thread
 	 * pulled the request before we were fully awake and reacquired the mutex.
@@ -352,7 +352,7 @@ WaveViewThreads::start_threads ()
 	uint32_t num_threads = std::min (8, std::max (1, num_cpus - 1));
 
 	for (uint32_t i = 0; i != num_threads; ++i) {
-		boost::shared_ptr<WaveViewDrawingThread> new_thread (new WaveViewDrawingThread ());
+		std::shared_ptr<WaveViewDrawingThread> new_thread (new WaveViewDrawingThread ());
 		_threads.push_back(new_thread);
 	}
 }
@@ -498,7 +498,7 @@ WaveViewThreads::_thread_proc ()
 		 * supposed to loop around and check _quit.
 		 */
 
-		boost::shared_ptr<WaveViewDrawRequest> req = WaveViewThreads::dequeue_draw_request ();
+		std::shared_ptr<WaveViewDrawRequest> req = WaveViewThreads::dequeue_draw_request ();
 
 		_queue_mutex.unlock ();
 

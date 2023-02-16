@@ -50,7 +50,7 @@ class LIBARDOUR_API STStretch : public Filter {
 	STStretch (ARDOUR::Session&, TimeFXRequest&);
 	~STStretch ();
 
-	int run (boost::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
+	int run (std::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
 
   private:
 	TimeFXRequest& tsr;

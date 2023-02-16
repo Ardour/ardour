@@ -177,7 +177,7 @@ TrackMixLayout::show ()
 	                                    Push2::Lower5, Push2::Lower6, Push2::Lower7, Push2::Lower8 };
 
 	for (size_t n = 0; n < sizeof (lower_buttons) / sizeof (lower_buttons[0]); ++n) {
-		boost::shared_ptr<Push2::Button> b = _p2.button_by_id (lower_buttons[n]);
+		std::shared_ptr<Push2::Button> b = _p2.button_by_id (lower_buttons[n]);
 		b->set_color (Push2::LED::DarkGray);
 		b->set_state (Push2::LED::OneShot24th);
 		_p2.write (b->state_msg());
@@ -283,13 +283,13 @@ TrackMixLayout::button_right ()
 }
 
 void
-TrackMixLayout::simple_control_change (boost::shared_ptr<AutomationControl> ac, Push2::ButtonID bid)
+TrackMixLayout::simple_control_change (std::shared_ptr<AutomationControl> ac, Push2::ButtonID bid)
 {
 	if (!ac || !parent()) {
 		return;
 	}
 
-	boost::shared_ptr<Push2::Button> b = _p2.button_by_id (bid);
+	std::shared_ptr<Push2::Button> b = _p2.button_by_id (bid);
 
 	if (!b) {
 		return;
@@ -312,10 +312,10 @@ TrackMixLayout::solo_mute_change ()
 		return;
 	}
 
-	boost::shared_ptr<Push2::Button> b = _p2.button_by_id (Push2::Lower2);
+	std::shared_ptr<Push2::Button> b = _p2.button_by_id (Push2::Lower2);
 
 	if (b) {
-		boost::shared_ptr<SoloControl> sc = _stripable->solo_control();
+		std::shared_ptr<SoloControl> sc = _stripable->solo_control();
 
 		if (sc) {
 			if (sc->soloed_by_self_or_masters()) {
@@ -339,7 +339,7 @@ TrackMixLayout::solo_mute_change ()
 	b = _p2.button_by_id (Push2::Lower1);
 
 	if (b) {
-		boost::shared_ptr<MuteControl> mc = _stripable->mute_control();
+		std::shared_ptr<MuteControl> mc = _stripable->mute_control();
 
 		if (mc) {
 			if (mc->muted_by_self_or_masters()) {
@@ -403,8 +403,8 @@ TrackMixLayout::monitoring_change ()
 		return;
 	}
 
-	boost::shared_ptr<Push2::Button> b1 = _p2.button_by_id (Push2::Lower4);
-	boost::shared_ptr<Push2::Button> b2 = _p2.button_by_id (Push2::Lower5);
+	std::shared_ptr<Push2::Button> b1 = _p2.button_by_id (Push2::Lower4);
+	std::shared_ptr<Push2::Button> b2 = _p2.button_by_id (Push2::Lower5);
 	uint8_t b1_color;
 	uint8_t b2_color;
 
@@ -459,7 +459,7 @@ TrackMixLayout::show_state ()
 }
 
 void
-TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
+TrackMixLayout::set_stripable (std::shared_ptr<Stripable> s)
 {
 	_stripable_connections.drop_connections ();
 
@@ -491,10 +491,10 @@ TrackMixLayout::set_stripable (boost::shared_ptr<Stripable> s)
 		_knobs[2]->set_controllable (_stripable->pan_width_control());
 		_knobs[3]->set_controllable (_stripable->trim_control());
 		_knobs[3]->add_flag (Push2Knob::ArcToZero);
-		_knobs[4]->set_controllable (boost::shared_ptr<AutomationControl>());
-		_knobs[5]->set_controllable (boost::shared_ptr<AutomationControl>());
-		_knobs[6]->set_controllable (boost::shared_ptr<AutomationControl>());
-		_knobs[7]->set_controllable (boost::shared_ptr<AutomationControl>());
+		_knobs[4]->set_controllable (std::shared_ptr<AutomationControl>());
+		_knobs[5]->set_controllable (std::shared_ptr<AutomationControl>());
+		_knobs[6]->set_controllable (std::shared_ptr<AutomationControl>());
+		_knobs[7]->set_controllable (std::shared_ptr<AutomationControl>());
 	}
 
 	show_state ();
@@ -557,7 +557,7 @@ TrackMixLayout::stripable_property_change (PropertyChange const& what_changed)
 void
 TrackMixLayout::strip_vpot (int n, int delta)
 {
-	boost::shared_ptr<Controllable> ac = _knobs[n]->controllable();
+	std::shared_ptr<Controllable> ac = _knobs[n]->controllable();
 
 	if (ac) {
 		ac->set_value (ac->get_value() + ((2.0/64.0) * delta), PBD::Controllable::UseGroup);
@@ -567,7 +567,7 @@ TrackMixLayout::strip_vpot (int n, int delta)
 void
 TrackMixLayout::strip_vpot_touch (int n, bool touching)
 {
-	boost::shared_ptr<AutomationControl> ac = _knobs[n]->controllable();
+	std::shared_ptr<AutomationControl> ac = _knobs[n]->controllable();
 	if (ac) {
 		const timepos_t now (_session.audible_sample());
 		if (touching) {

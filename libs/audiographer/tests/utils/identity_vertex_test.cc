@@ -87,9 +87,9 @@ class IdentityVertexTest : public CppUnit::TestFixture
 	}
 
   private:
-	boost::shared_ptr<IdentityVertex<float> > vertex;
-	boost::shared_ptr<VectorSink<float> > sink_a;
-	boost::shared_ptr<VectorSink<float> > sink_b;
+	std::shared_ptr<IdentityVertex<float> > vertex;
+	std::shared_ptr<VectorSink<float> > sink_a;
+	std::shared_ptr<VectorSink<float> > sink_b;
 
 	float * random_data;
 	float * zero_data;

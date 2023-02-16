@@ -86,14 +86,14 @@ CC121::CC121 (Session& s)
 {
 	last_encoder_time = 0;
 
-	boost::shared_ptr<ARDOUR::Port> inp;
-	boost::shared_ptr<ARDOUR::Port> outp;
+	std::shared_ptr<ARDOUR::Port> inp;
+	std::shared_ptr<ARDOUR::Port> outp;
 
 	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, "CC121 Recv", true);
 	outp = AudioEngine::instance()->register_output_port (DataType::MIDI, "CC121 Send", true);
 
-	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(inp);
-	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(outp);
+	_input_port = std::dynamic_pointer_cast<AsyncMIDIPort>(inp);
+	_output_port = std::dynamic_pointer_cast<AsyncMIDIPort>(outp);
 
 	if (_input_port == 0 || _output_port == 0) {
 		throw failed_constructor();
@@ -183,14 +183,14 @@ CC121::~CC121 ()
 	all_lights_out ();
 
 	if (_input_port) {
-		DEBUG_TRACE (DEBUG::CC121, string_compose ("unregistering input port %1\n", boost::shared_ptr<ARDOUR::Port>(_input_port)->name()));
+		DEBUG_TRACE (DEBUG::CC121, string_compose ("unregistering input port %1\n", std::shared_ptr<ARDOUR::Port>(_input_port)->name()));
 		AudioEngine::instance()->unregister_port (_input_port);
 		_input_port.reset ();
 	}
 
 	if (_output_port) {
 		_output_port->drain (10000,  250000); /* check every 10 msecs, wait up to 1/4 second for the port to drain */
-		DEBUG_TRACE (DEBUG::CC121, string_compose ("unregistering output port %1\n", boost::shared_ptr<ARDOUR::Port>(_output_port)->name()));
+		DEBUG_TRACE (DEBUG::CC121, string_compose ("unregistering output port %1\n", std::shared_ptr<ARDOUR::Port>(_output_port)->name()));
 		AudioEngine::instance()->unregister_port (_output_port);
 		_output_port.reset ();
 	}
@@ -307,7 +307,7 @@ CC121::button_press_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	case FaderTouch:
 	  fader_is_touched = true;
 		if (_current_stripable) {
-			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+			std::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
 				timepos_t now (session->engine().sample_time());
 			  gain->start_touch (now);
@@ -354,7 +354,7 @@ CC121::button_release_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	case FaderTouch:
 		fader_is_touched = false;
 		if (_current_stripable) {
-			boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+			std::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 			if (gain) {
 				timepos_t now (session->engine().sample_time());
 				gain->stop_touch (now);
@@ -389,7 +389,7 @@ CC121::encoder_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 {
         DEBUG_TRACE (DEBUG::CC121, "encoder handler");
 
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_current_stripable);
+	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (_current_stripable);
 	/* Extract absolute value*/
 	float adj = static_cast<float>(tb->value & ~0x40);
 	/* Get direction (negative values start at 0x40)*/
@@ -487,7 +487,7 @@ CC121::fader_handler (MIDI::Parser &, MIDI::pitchbend_t pb)
         DEBUG_TRACE (DEBUG::CC121, "fader handler");
 
 	if (_current_stripable) {
-	  boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+	  std::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 	  if (gain) {
 	    float val = gain->interface_to_internal (pb/16384.0);
 	    /* even though the cc121 only controls a
@@ -696,9 +696,9 @@ CC121::connect_session_signals()
 }
 
 bool
-CC121::midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::AsyncMIDIPort> port)
+CC121::midi_input_handler (Glib::IOCondition ioc, std::shared_ptr<ARDOUR::AsyncMIDIPort> port)
 {
-	DEBUG_TRACE (DEBUG::CC121, string_compose ("something happened on  %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
+	DEBUG_TRACE (DEBUG::CC121, string_compose ("something happened on  %1\n", std::shared_ptr<MIDI::Port>(port)->name()));
 
 	if (ioc & ~IO_IN) {
 		return false;
@@ -707,7 +707,7 @@ CC121::midi_input_handler (Glib::IOCondition ioc, boost::shared_ptr<ARDOUR::Asyn
 	if (ioc & IO_IN) {
 
 		port->clear ();
-		DEBUG_TRACE (DEBUG::CC121, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
+		DEBUG_TRACE (DEBUG::CC121, string_compose ("data available on %1\n", std::shared_ptr<MIDI::Port>(port)->name()));
 		samplepos_t now = session->engine().sample_time();
 		port->parse (now);
 	}
@@ -724,12 +724,12 @@ CC121::get_state () const
 	XMLNode* child;
 
 	child = new XMLNode (X_("Input"));
-	child->add_child_nocopy (boost::shared_ptr<ARDOUR::Port>(_input_port)->get_state());
+	child->add_child_nocopy (std::shared_ptr<ARDOUR::Port>(_input_port)->get_state());
 	node.add_child_nocopy (*child);
 
 
 	child = new XMLNode (X_("Output"));
-	child->add_child_nocopy (boost::shared_ptr<ARDOUR::Port>(_output_port)->get_state());
+	child->add_child_nocopy (std::shared_ptr<ARDOUR::Port>(_output_port)->get_state());
 	node.add_child_nocopy (*child);
 
 	/* Save action state for Function1..4, Lock, Value, EQnEnable, EQType,
@@ -770,7 +770,7 @@ CC121::set_state (const XMLNode& node, int version)
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
 			portnode->remove_property ("name");
-			boost::shared_ptr<ARDOUR::Port>(_input_port)->set_state (*portnode, version);
+			std::shared_ptr<ARDOUR::Port>(_input_port)->set_state (*portnode, version);
 		}
 	}
 
@@ -778,7 +778,7 @@ CC121::set_state (const XMLNode& node, int version)
 		XMLNode* portnode = child->child (Port::state_node_name.c_str());
 		if (portnode) {
 			portnode->remove_property ("name");
-			boost::shared_ptr<ARDOUR::Port>(_output_port)->set_state (*portnode, version);
+			std::shared_ptr<ARDOUR::Port>(_output_port)->set_state (*portnode, version);
 		}
 	}
 
@@ -800,15 +800,15 @@ CC121::set_state (const XMLNode& node, int version)
 }
 
 bool
-CC121::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
+CC121::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
 {
 	DEBUG_TRACE (DEBUG::CC121, "CC121::connection_handler  start\n");
 	if (!_input_port || !_output_port) {
 		return false;
 	}
 
-	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_input_port)->name());
-	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_output_port)->name());
+	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (std::shared_ptr<ARDOUR::Port>(_input_port)->name());
+	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (std::shared_ptr<ARDOUR::Port>(_output_port)->name());
 
 	if (ni == name1 || ni == name2) {
 		if (yn) {
@@ -971,7 +971,7 @@ CC121::Button::set_action (boost::function<void()> f, bool when_pressed, CC121::
 }
 
 void
-CC121::Button::set_led_state (boost::shared_ptr<MIDI::Port> port, bool onoff)
+CC121::Button::set_led_state (std::shared_ptr<MIDI::Port> port, bool onoff)
 {
 	MIDI::byte buf[3];
 	DEBUG_TRACE(DEBUG::CC121, "Set Led State\n");
@@ -1058,13 +1058,13 @@ CC121::drop_current_stripable ()
 		if (_current_stripable == session->monitor_out()) {
 			set_current_stripable (session->master_out());
 		} else {
-			set_current_stripable (boost::shared_ptr<Stripable>());
+			set_current_stripable (std::shared_ptr<Stripable>());
 		}
 	}
 }
 
 void
-CC121::set_current_stripable (boost::shared_ptr<Stripable> r)
+CC121::set_current_stripable (std::shared_ptr<Stripable> r)
 {
 	stripable_connections.drop_connections ();
 
@@ -1076,19 +1076,19 @@ CC121::set_current_stripable (boost::shared_ptr<Stripable> r)
 		_current_stripable->mute_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_mute, this), this);
 		_current_stripable->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_solo, this), this);
 
-		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_stripable);
+		std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track> (_current_stripable);
 		if (t) {
 			t->rec_enable_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_recenable, this), this);
 			t->monitoring_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_monitoring, this), this);
 		}
 
-		boost::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
 		if (control) {
 			control->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_gain, this), this);
 			control->alist()->automation_state_changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_auto, this), this);
 		}
 
-		boost::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
+		std::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
 		if (mp) {
 			mp->cut_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&CC121::map_cut, this), this);
 		}
@@ -1102,7 +1102,7 @@ CC121::set_current_stripable (boost::shared_ptr<Stripable> r)
 void
 CC121::map_auto ()
 {
-	boost::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
 	const AutoState as = control->automation_state ();
 
 	switch (as) {
@@ -1137,7 +1137,7 @@ CC121::map_auto ()
 void
 CC121::map_cut ()
 {
-	boost::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
+	std::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
 
 	if (mp) {
 		bool yn = mp->cut_all ();
@@ -1181,7 +1181,7 @@ CC121::map_solo ()
 void
 CC121::map_recenable ()
 {
-	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_stripable);
+	std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track> (_current_stripable);
 	if (t) {
 		get_button (Rec).set_led_state (_output_port, t->rec_enable_control()->get_value());
 	} else {
@@ -1193,7 +1193,7 @@ CC121::map_recenable ()
 void
 CC121::map_monitoring ()
 {
-	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (_current_stripable);
+	std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track> (_current_stripable);
 	if (t) {
 	  MonitorState state = t->monitoring_control()->monitoring_state ();
 		if (state == MonitoringInput || state == MonitoringCue) {
@@ -1218,7 +1218,7 @@ CC121::map_gain ()
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->gain_control ();
 	double val;
 
 	if (!control) {
@@ -1266,10 +1266,10 @@ CC121::map_stripable_state ()
 	}
 }
 
-list<boost::shared_ptr<ARDOUR::Bundle> >
+list<std::shared_ptr<ARDOUR::Bundle> >
 CC121::bundles ()
 {
-	list<boost::shared_ptr<ARDOUR::Bundle> > b;
+	list<std::shared_ptr<ARDOUR::Bundle> > b;
 
 	if (_input_bundle) {
 		b.push_back (_input_bundle);
@@ -1279,13 +1279,13 @@ CC121::bundles ()
 	return b;
 }
 
-boost::shared_ptr<Port>
+std::shared_ptr<Port>
 CC121::output_port()
 {
 	return _output_port;
 }
 
-boost::shared_ptr<Port>
+std::shared_ptr<Port>
 CC121::input_port()
 {
 	return _input_port;

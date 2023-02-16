@@ -107,9 +107,9 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal3<int,boost::shared_ptr<Route>, boost::shared_ptr<PluginInsert>, Route::PluginSetupOptions > Route::PluginSetup;
+PBD::Signal3<int,std::shared_ptr<Route>, std::shared_ptr<PluginInsert>, Route::PluginSetupOptions > Route::PluginSetup;
 
-PBD::Signal1<void, boost::weak_ptr<Route> > Route::FanOut;
+PBD::Signal1<void, std::weak_ptr<Route> > Route::FanOut;
 
 /** Base class for all routable/mixable objects (tracks and busses) */
 Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType default_type)
@@ -146,9 +146,9 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 	g_atomic_int_set (&_pending_signals, 0);
 }
 
-boost::weak_ptr<Route>
+std::weak_ptr<Route>
 Route::weakroute () {
-	return boost::weak_ptr<Route> (boost::dynamic_pointer_cast<Route> (shared_from_this ()));
+	return std::weak_ptr<Route> (std::dynamic_pointer_cast<Route> (shared_from_this ()));
 }
 
 int
@@ -559,7 +559,7 @@ Route::process_output_buffers (BufferSet& bufs,
 
 void
 Route::bounce_process (BufferSet& buffers, samplepos_t start, samplecnt_t nframes,
-		boost::shared_ptr<Processor> endpoint,
+		std::shared_ptr<Processor> endpoint,
 		bool include_endpoint, bool for_export, bool for_freeze)
 {
 	/* If no processing is required, there's no need to go any further. */
@@ -584,7 +584,7 @@ Route::bounce_process (BufferSet& buffers, samplepos_t start, samplecnt_t nframe
 		}
 
 		if (!for_export && !seen_disk_io) {
-			if (boost::dynamic_pointer_cast<DiskReader> (*i)) {
+			if (std::dynamic_pointer_cast<DiskReader> (*i)) {
 				seen_disk_io = true;
 				buffers.set_count ((*i)->output_streams());
 			}
@@ -611,7 +611,7 @@ Route::bounce_process (BufferSet& buffers, samplepos_t start, samplecnt_t nframe
 		/* don't run any processors that do routing.
 		 * Also don't bother with metering.
 		 */
-		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
+		if (!(*i)->does_routing() && !std::dynamic_pointer_cast<PeakMeter>(*i)) {
 			(*i)->run (buffers, start - latency, start - latency + nframes, 1.0, nframes, true);
 			buffers.set_count ((*i)->output_streams());
 			latency += (*i)->effective_latency ();
@@ -624,7 +624,7 @@ Route::bounce_process (BufferSet& buffers, samplepos_t start, samplecnt_t nframe
 }
 
 samplecnt_t
-Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint,
+Route::bounce_get_latency (std::shared_ptr<Processor> endpoint,
 		bool include_endpoint, bool for_export, bool for_freeze) const
 {
 	samplecnt_t latency = 0;
@@ -638,7 +638,7 @@ Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint,
 			break;
 		}
 		if (!for_export && !seen_disk_io) {
-			if (boost::dynamic_pointer_cast<DiskReader> (*i)) {
+			if (std::dynamic_pointer_cast<DiskReader> (*i)) {
 				seen_disk_io = true;
 			}
 			continue;
@@ -646,7 +646,7 @@ Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint,
 		if (!for_export && !can_freeze_processor (*i, !for_freeze)) {
 			break;
 		}
-		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
+		if (!(*i)->does_routing() && !std::dynamic_pointer_cast<PeakMeter>(*i)) {
 			latency += (*i)->effective_latency ();
 		}
 		if ((*i) == endpoint) {
@@ -657,7 +657,7 @@ Route::bounce_get_latency (boost::shared_ptr<Processor> endpoint,
 }
 
 ChanCount
-Route::bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint,
+Route::bounce_get_output_streams (ChanCount &cc, std::shared_ptr<Processor> endpoint,
 		bool include_endpoint, bool for_export, bool for_freeze) const
 {
 	if (!endpoint && !include_endpoint) {
@@ -673,7 +673,7 @@ Route::bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> en
 		if (!for_export && !can_freeze_processor (*i, !for_freeze)) {
 			break;
 		}
-		if (!(*i)->does_routing() && !boost::dynamic_pointer_cast<PeakMeter>(*i)) {
+		if (!(*i)->does_routing() && !std::dynamic_pointer_cast<PeakMeter>(*i)) {
 			cc = (*i)->output_streams();
 		} else if (*i == _main_outs) {
 			cc = (*i)->output_streams();
@@ -771,7 +771,7 @@ Route::push_solo_isolate_upstream (int32_t delta)
 {
 	/* forward propagate solo-isolate status to everything fed by this route, but not those via sends only */
 
-	boost::shared_ptr<RouteList> routes = _session.get_routes ();
+	std::shared_ptr<RouteList> routes = _session.get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 
 		if ((*i).get() == this || !(*i)->can_solo()) {
@@ -788,8 +788,8 @@ void
 Route::push_solo_upstream (int delta)
 {
 	DEBUG_TRACE (DEBUG::Solo, string_compose("\t ... INVERT push from %1\n", _name));
-	for (auto const& i : _session._current_route_graph.to (boost::dynamic_pointer_cast<Route> (shared_from_this ()))) {
-		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (i);
+	for (auto const& i : _session._current_route_graph.to (std::dynamic_pointer_cast<Route> (shared_from_this ()))) {
+		std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (i);
 		if (r) {
 			r->solo_control()->mod_solo_by_others_downstream (-delta);
 		}
@@ -798,10 +798,10 @@ Route::push_solo_upstream (int delta)
 
 #if 0
 static void
-dump_processors(const string& name, const list<boost::shared_ptr<Processor> >& procs)
+dump_processors(const string& name, const list<std::shared_ptr<Processor> >& procs)
 {
 	cerr << name << " {" << endl;
-	for (list<boost::shared_ptr<Processor> >::const_iterator p = procs.begin();
+	for (list<std::shared_ptr<Processor> >::const_iterator p = procs.begin();
 			p != procs.end(); ++p) {
 		cerr << "\t" << (*p)->name() << " ID = " << (*p)->id() << " @ " << (*p) << endl;
 	}
@@ -812,7 +812,7 @@ dump_processors(const string& name, const list<boost::shared_ptr<Processor> >& p
 /** Supposing that we want to insert a Processor at a given Placement, return
  *  the processor to add the new one before (or 0 to add at the end).
  */
-boost::shared_ptr<Processor>
+std::shared_ptr<Processor>
 Route::before_processor_for_placement (Placement p)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
@@ -827,17 +827,17 @@ Route::before_processor_for_placement (Placement p)
 		loc = find (_processors.begin(), _processors.end(), _main_outs);
 	}
 
-	return loc != _processors.end() ? *loc : boost::shared_ptr<Processor> ();
+	return loc != _processors.end() ? *loc : std::shared_ptr<Processor> ();
 }
 
 /** Supposing that we want to insert a Processor at a given index, return
  *  the processor to add the new one before (or -1 to add at the end).
  */
-boost::shared_ptr<Processor>
+std::shared_ptr<Processor>
 Route::before_processor_for_index (int index)
 {
 	if (index == -1) {
-		return boost::shared_ptr<Processor> ();
+		return std::shared_ptr<Processor> ();
 	}
 
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
@@ -852,14 +852,14 @@ Route::before_processor_for_index (int index)
 		++i;
 	}
 
-	return (i != _processors.end() ? *i : boost::shared_ptr<Processor> ());
+	return (i != _processors.end() ? *i : std::shared_ptr<Processor> ());
 }
 
 /** Add a processor either pre- or post-fader
  *  @return 0 on success, non-0 on failure.
  */
 int
-Route::add_processor (boost::shared_ptr<Processor> processor, Placement placement, ProcessorStreams* err, bool activation_allowed)
+Route::add_processor (std::shared_ptr<Processor> processor, Placement placement, ProcessorStreams* err, bool activation_allowed)
 {
 	return add_processor (processor, before_processor_for_placement (placement), err, activation_allowed);
 }
@@ -870,7 +870,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, Placement placemen
  *  @return 0 on success, non-0 on failure.
  */
 int
-Route::add_processor_by_index (boost::shared_ptr<Processor> processor, int index, ProcessorStreams* err, bool activation_allowed)
+Route::add_processor_by_index (std::shared_ptr<Processor> processor, int index, ProcessorStreams* err, bool activation_allowed)
 {
 	return add_processor (processor, before_processor_for_index (index), err, activation_allowed);
 }
@@ -880,7 +880,7 @@ Route::add_processor_by_index (boost::shared_ptr<Processor> processor, int index
  *  @return 0 on success, non-0 on failure.
  */
 int
-Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<Processor> before, ProcessorStreams* err, bool activation_allowed)
+Route::add_processor (std::shared_ptr<Processor> processor, std::shared_ptr<Processor> before, ProcessorStreams* err, bool activation_allowed)
 {
 	assert (processor != _meter);
 	assert (processor != _main_outs);
@@ -905,7 +905,7 @@ Route::add_processor (boost::shared_ptr<Processor> processor, boost::shared_ptr<
 }
 
 void
-Route::processor_selfdestruct (boost::weak_ptr<Processor> wp)
+Route::processor_selfdestruct (std::weak_ptr<Processor> wp)
 {
 	/* We cannot destruct the processor here (usually RT-thread
 	 * with various locks held - in case of sends also io_locks).
@@ -921,7 +921,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 	XMLProperty const * prop;
 
 	try {
-		boost::shared_ptr<Processor> processor;
+		std::shared_ptr<Processor> processor;
 
 		/* bit of a hack: get the `placement' property from the <Redirect> tag here
 		   so that we can add the processor in the right place (pre/post-fader)
@@ -966,7 +966,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 
 		} else if (node.name() == "Send") {
 
-			boost::shared_ptr<Pannable> sendpan (new Pannable (_session, Config->get_default_automation_time_domain()));
+			std::shared_ptr<Pannable> sendpan (new Pannable (_session, Config->get_default_automation_time_domain()));
 			processor.reset (new Send (_session, sendpan, _mute_master));
 
 		} else {
@@ -1010,10 +1010,10 @@ inline Route::PluginSetupOptions operator&= (Route::PluginSetupOptions& a, const
 }
 
 int
-Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor> before, ProcessorStreams* err)
+Route::add_processors (const ProcessorList& others, std::shared_ptr<Processor> before, ProcessorStreams* err)
 {
 	ProcessorList::iterator loc;
-	boost::shared_ptr <PluginInsert> fanout;
+	std::shared_ptr <PluginInsert> fanout;
 
 	if (g_atomic_int_get (&_pending_process_reorder) || g_atomic_int_get (&_pending_listen_change)) {
 		/* we need to flush any pending re-order changes */
@@ -1040,20 +1040,20 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 	// check if there's an instrument to replace or configure
 	for (ProcessorList::const_iterator i = others.begin(); i != others.end(); ++i) {
 
-		boost::shared_ptr<PluginInsert> pi;
-		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) == 0) {
+		std::shared_ptr<PluginInsert> pi;
+		if ((pi = std::dynamic_pointer_cast<PluginInsert>(*i)) == 0) {
 			continue;
 		}
 		if (!pi->plugin ()->get_info ()->is_instrument ()) {
 			continue;
 		}
-		if (boost::dynamic_pointer_cast<TriggerBox>(*i)) {
+		if (std::dynamic_pointer_cast<TriggerBox>(*i)) {
 			/* triggerbox looks a lot like an instrument, but it
 			   isn't a replacement for an instrument
 			*/
 			continue;
 		}
-		boost::shared_ptr<Processor> instrument = the_instrument ();
+		std::shared_ptr<Processor> instrument = the_instrument ();
 		ChanCount in (DataType::MIDI, 1);
 		ChanCount out (DataType::AUDIO, 2); // XXX route's out?!
 
@@ -1084,7 +1084,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 		flags &= mask;
 
 		if (flags != None) {
-			boost::optional<int> rv = PluginSetup (boost::dynamic_pointer_cast<Route>(shared_from_this ()), pi, flags);  /* EMIT SIGNAL */
+			boost::optional<int> rv = PluginSetup (std::dynamic_pointer_cast<Route>(shared_from_this ()), pi, flags);  /* EMIT SIGNAL */
 			int mode = rv.value_or (0);
 			switch (mode & 3) {
 				case 1:
@@ -1112,7 +1112,7 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 
 		for (ProcessorList::const_iterator i = others.begin(); i != others.end(); ++i) {
 
-			boost::shared_ptr<TriggerBox> tb = boost::dynamic_pointer_cast<TriggerBox> (*i);
+			std::shared_ptr<TriggerBox> tb = std::dynamic_pointer_cast<TriggerBox> (*i);
 			if (tb) {
 				_triggerbox = tb;
 			}
@@ -1125,9 +1125,9 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 				continue;
 			}
 
-			boost::shared_ptr<PluginInsert> pi;
+			std::shared_ptr<PluginInsert> pi;
 
-			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
+			if ((pi = std::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				PluginManager::instance().stats_use_plugin (pi->plugin()->get_info());
 				pi->set_strict_io (_strict_io);
 			}
@@ -1170,24 +1170,24 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 
 			(*i)->ActiveChanged.connect_same_thread (*this, boost::bind (&Session::queue_latency_recompute, &_session));
 
-			boost::shared_ptr<Send> send;
-			if ((send = boost::dynamic_pointer_cast<Send> (*i))) {
+			std::shared_ptr<Send> send;
+			if ((send = std::dynamic_pointer_cast<Send> (*i))) {
 				send->SelfDestruct.connect_same_thread (**i,
-						boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (*i)));
+						boost::bind (&Route::processor_selfdestruct, this, std::weak_ptr<Processor> (*i)));
 				if (send->output()) {
 					send->output()->changed.connect_same_thread (**i, boost::bind (&Route::output_change_handler, this, _1, _2));
 				}
 			}
 
-			if (boost::dynamic_pointer_cast<InternalSend>(*i)) {
+			if (std::dynamic_pointer_cast<InternalSend>(*i)) {
 				routing_processor_added = true;
 			}
 		}
 
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			boost::shared_ptr<PluginInsert> pi;
+			std::shared_ptr<PluginInsert> pi;
 
-			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
+			if ((pi = std::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				if (pi->has_no_inputs ()) {
 					_have_internal_generator = true;
 					break;
@@ -1202,11 +1202,11 @@ Route::add_processors (const ProcessorList& others, boost::shared_ptr<Processor>
 
 	if (fanout && fanout->configured ()
 			&& fanout->output_streams().n_audio() > 2
-			&& boost::dynamic_pointer_cast<PluginInsert> (the_instrument ()) == fanout) {
+			&& std::dynamic_pointer_cast<PluginInsert> (the_instrument ()) == fanout) {
 		/* This adds new tracks or busses, and changes connections.
 		 * This cannot be done here, and needs to be delegated to the GUI thread. */
 		_instrument_fanned_out = true;
-		FanOut (boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this())); /* EMIT SIGNAL */
+		FanOut (std::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this())); /* EMIT SIGNAL */
 	}
 	return 0;
 }
@@ -1268,7 +1268,7 @@ Route::disable_plugins (Placement p)
 	placement_range(p, start, end);
 
 	for (ProcessorList::iterator i = start; i != end; ++i) {
-		if (boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+		if (std::dynamic_pointer_cast<PluginInsert> (*i)) {
 			(*i)->enable (false);
 		}
 	}
@@ -1284,7 +1284,7 @@ Route::disable_plugins ()
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if (boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+		if (std::dynamic_pointer_cast<PluginInsert> (*i)) {
 			(*i)->enable (false);
 		}
 	}
@@ -1305,13 +1305,14 @@ Route::ab_plugins (bool forward)
 		*/
 
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+			if (!std::dynamic_pointer_cast<PluginInsert> (*i)) {
 				continue;
 			}
 			if (!(*i)->display_to_user () || is_internal_processor (*i)) {
 				continue;
 			}
-			if (boost::dynamic_pointer_cast<PluginInsert> (*i)->is_channelstrip()) {
+			if (std::dynamic_pointer_cast<PluginInsert> (*i)->is_channelstrip()) {
+
 				continue;
 			}
 
@@ -1328,13 +1329,13 @@ Route::ab_plugins (bool forward)
 		/* backward = if the redirect was marked to go active on the next ab, do so */
 
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			if (!boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+			if (!std::dynamic_pointer_cast<PluginInsert> (*i)) {
 				continue;
 			}
 			if (!(*i)->display_to_user () || is_internal_processor (*i)) {
 				continue;
 			}
-			if (boost::dynamic_pointer_cast<PluginInsert> (*i)->is_channelstrip()) {
+			if (std::dynamic_pointer_cast<PluginInsert> (*i)->is_channelstrip()) {
 				continue;
 			}
 
@@ -1426,7 +1427,7 @@ Route::clear_processors (Placement p)
 }
 
 bool
-Route::is_internal_processor (boost::shared_ptr<Processor> p) const
+Route::is_internal_processor (std::shared_ptr<Processor> p) const
 {
 	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim || p == _polarity || (_volume && p == _volume) || (_triggerbox && p == _triggerbox)) {
 		return true;
@@ -1435,7 +1436,7 @@ Route::is_internal_processor (boost::shared_ptr<Processor> p) const
 }
 
 int
-Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStreams* err, bool need_process_lock)
+Route::remove_processor (std::shared_ptr<Processor> processor, ProcessorStreams* err, bool need_process_lock)
 {
 	// TODO once the export point can be configured properly, do something smarter here
 	if (processor == _capturing_processor) {
@@ -1487,8 +1488,8 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 		/* stop redirects that send signals to JACK ports
 		 * from causing noise as a result of no longer being run
 		 */
-		boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor> (*i);
-		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(*i);
+		std::shared_ptr<IOProcessor> iop = std::dynamic_pointer_cast<IOProcessor> (*i);
+		std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert>(*i);
 
 		if (pi != 0) {
 			assert (iop == 0);
@@ -1506,7 +1507,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 			lm.acquire ();
 		}
 
-		if (boost::dynamic_pointer_cast<InternalSend>(*i)) {
+		if (std::dynamic_pointer_cast<InternalSend>(*i)) {
 			routing_processor_removed = true;
 		}
 
@@ -1522,9 +1523,9 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 		_have_internal_generator = false;
 
 		for (i = _processors.begin(); i != _processors.end(); ++i) {
-			boost::shared_ptr<PluginInsert> pi;
+			std::shared_ptr<PluginInsert> pi;
 
-			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
+			if ((pi = std::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				if (pi->has_no_inputs ()) {
 					_have_internal_generator = true;
 					break;
@@ -1545,7 +1546,7 @@ Route::remove_processor (boost::shared_ptr<Processor> processor, ProcessorStream
 }
 
 int
-Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Processor> sub, ProcessorStreams* err)
+Route::replace_processor (std::shared_ptr<Processor> old, std::shared_ptr<Processor> sub, ProcessorStreams* err)
 {
 	/* these can never be removed */
 	if (is_internal_processor (old)) {
@@ -1557,7 +1558,7 @@ Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Pr
 	}
 
 	/* I/Os are out, too */
-	if (boost::dynamic_pointer_cast<IOProcessor> (old) || boost::dynamic_pointer_cast<IOProcessor> (sub)) {
+	if (std::dynamic_pointer_cast<IOProcessor> (old) || std::dynamic_pointer_cast<IOProcessor> (sub)) {
 		return 1;
 	}
 
@@ -1603,8 +1604,8 @@ Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Pr
 		}
 
 		if (_strict_io) {
-			boost::shared_ptr<PluginInsert> pi;
-			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(sub)) != 0) {
+			std::shared_ptr<PluginInsert> pi;
+			if ((pi = std::dynamic_pointer_cast<PluginInsert>(sub)) != 0) {
 				pi->set_strict_io (true);
 			}
 		}
@@ -1618,8 +1619,8 @@ Route::replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Pr
 		_have_internal_generator = false;
 
 		for (i = _processors.begin(); i != _processors.end(); ++i) {
-			boost::shared_ptr<PluginInsert> pi;
-			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
+			std::shared_ptr<PluginInsert> pi;
+			if ((pi = std::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				if (pi->has_no_inputs ()) {
 					_have_internal_generator = true;
 					break;
@@ -1660,7 +1661,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 		ProcessorState pstate (this);
 
 		ProcessorList::iterator i;
-		boost::shared_ptr<Processor> processor;
+		std::shared_ptr<Processor> processor;
 
 		for (i = _processors.begin(); i != _processors.end(); ) {
 
@@ -1685,8 +1686,8 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 			   run.
 			*/
 
-			boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor>(processor);
-			boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(processor);
+			std::shared_ptr<IOProcessor> iop = std::dynamic_pointer_cast<IOProcessor>(processor);
+			std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert>(processor);
 			if (pi != 0) {
 				assert (iop == 0);
 				iop = pi->sidechain();
@@ -1696,7 +1697,7 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 				iop->disconnect ();
 			}
 
-			if (boost::dynamic_pointer_cast<InternalSend>(processor)) {
+			if (std::dynamic_pointer_cast<InternalSend>(processor)) {
 				routing_processor_removed = true;
 			}
 
@@ -1720,9 +1721,9 @@ Route::remove_processors (const ProcessorList& to_be_deleted, ProcessorStreams* 
 		_have_internal_generator = false;
 
 		for (i = _processors.begin(); i != _processors.end(); ++i) {
-			boost::shared_ptr<PluginInsert> pi;
+			std::shared_ptr<PluginInsert> pi;
 
-			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
+			if ((pi = std::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				if (pi->has_no_inputs ()) {
 					_have_internal_generator = true;
 					break;
@@ -1759,7 +1760,7 @@ Route::stop_triggers (bool now)
 void
 Route::reset_instrument_info ()
 {
-	boost::shared_ptr<Processor> instr = the_instrument();
+	std::shared_ptr<Processor> instr = the_instrument();
 	if (!instr) {
 		_instrument_fanned_out = false;
 	}
@@ -1811,15 +1812,15 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 
 	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p, ++index) {
 
-		if (boost::dynamic_pointer_cast<DiskReader> (*p)) {
+		if (std::dynamic_pointer_cast<DiskReader> (*p)) {
 			/* disk-reader has the same i/o as disk-writer */
 			in = max (in, disk_io);
 		}
 
 		if ((*p)->can_support_io_configuration(in, out)) {
 
-			if (boost::dynamic_pointer_cast<Delivery> (*p)
-					&& boost::dynamic_pointer_cast<Delivery> (*p)->role() == Delivery::Main
+			if (std::dynamic_pointer_cast<Delivery> (*p)
+					&& std::dynamic_pointer_cast<Delivery> (*p)->role() == Delivery::Main
 					&& !is_auditioner()
 					&& (is_monitor() || _strict_io || Profile->get_mixbus ())) {
 				/* with strict I/O the panner + output are forced to
@@ -1869,12 +1870,12 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 					 */
 					DEBUG_TRACE (DEBUG::Processors, "Monitor: Channel configuration change.\n");
 				}
-				if (boost::dynamic_pointer_cast<InternalSend> (*p)) {
+				if (std::dynamic_pointer_cast<InternalSend> (*p)) {
 					// internal sends make no sense, only feedback
 					DEBUG_TRACE (DEBUG::Processors, "Monitor: No Sends allowed.\n");
 					return list<pair<ChanCount, ChanCount> > ();
 				}
-				if (boost::dynamic_pointer_cast<PortInsert> (*p)) {
+				if (std::dynamic_pointer_cast<PortInsert> (*p)) {
 					/* External Sends can be problematic. one can add/remove ports
 					 * there signal leaves the DAW to external monitors anyway, so there's
 					 * no real use for allowing them here anyway.
@@ -1882,14 +1883,14 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 					DEBUG_TRACE (DEBUG::Processors, "Monitor: No External Sends allowed.\n");
 					return list<pair<ChanCount, ChanCount> > ();
 				}
-				if (boost::dynamic_pointer_cast<Send> (*p)) {
+				if (std::dynamic_pointer_cast<Send> (*p)) {
 					// ditto
 					DEBUG_TRACE (DEBUG::Processors, "Monitor: No Sends allowed.\n");
 					return list<pair<ChanCount, ChanCount> > ();
 				}
 			}
 
-			if (boost::dynamic_pointer_cast<DiskWriter> (*p)) {
+			if (std::dynamic_pointer_cast<DiskWriter> (*p)) {
 				assert (in == out);
 				disk_io = out;
 			}
@@ -1983,28 +1984,28 @@ Route::configure_processors_unlocked (ProcessorStreams* err, Glib::Threads::RWLo
 		processor_max_streams = ChanCount::max(processor_max_streams, c->first);
 		processor_max_streams = ChanCount::max(processor_max_streams, c->second);
 
-		boost::shared_ptr<IOProcessor> iop;
-		boost::shared_ptr<PluginInsert> pi;
-		if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*p)) != 0) {
+		std::shared_ptr<IOProcessor> iop;
+		std::shared_ptr<PluginInsert> pi;
+		if ((pi = std::dynamic_pointer_cast<PluginInsert>(*p)) != 0) {
 			/* plugins connected via Split or Hide Match may have more channels.
 			 * route/scratch buffers are needed for all of them
 			 * The configuration may only be a subset (both input and output)
 			 */
 			processor_max_streams = ChanCount::max(processor_max_streams, pi->required_buffers());
 		}
-		else if ((iop = boost::dynamic_pointer_cast<IOProcessor>(*p)) != 0) {
+		else if ((iop = std::dynamic_pointer_cast<IOProcessor>(*p)) != 0) {
 			processor_max_streams = ChanCount::max(processor_max_streams, iop->natural_input_streams());
 			processor_max_streams = ChanCount::max(processor_max_streams, iop->natural_output_streams());
 		}
-		else if (boost::dynamic_pointer_cast<TriggerBox>(*p) != 0) {
+		else if (std::dynamic_pointer_cast<TriggerBox>(*p) != 0) {
 			/* TB sidechain control input */
 			processor_max_streams = ChanCount::max(processor_max_streams, c->first + ChanCount (DataType::MIDI, 1));
 		}
 
 		out = c->second;
 
-		if (boost::dynamic_pointer_cast<Delivery> (*p)
-				&& boost::dynamic_pointer_cast<Delivery> (*p)->role() == Delivery::Main) {
+		if (std::dynamic_pointer_cast<Delivery> (*p)
+				&& std::dynamic_pointer_cast<Delivery> (*p)->role() == Delivery::Main) {
 			/* main delivery will increase port count to match input.
 			 * the Delivery::Main is usually the last processor - followed only by
 			 * 'MeterOutput'.
@@ -2050,7 +2051,8 @@ Route::all_visible_processors_active (bool state)
 		if (!(*i)->display_to_user () || is_internal_processor (*i)) {
 			continue;
 		}
-		boost::shared_ptr<PluginInsert> pi;
+
+		std::shared_ptr<PluginInsert> pi;
 		if (0 != (pi = boost::dynamic_pointer_cast<PluginInsert>(*i))) {
 			if (pi->is_channelstrip ()) {
 				continue;
@@ -2191,13 +2193,13 @@ Route::apply_processor_order (const ProcessorList& new_order)
 	 */
 	bool need_latency_recompute = false;
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if (boost::dynamic_pointer_cast<PortInsert> (*i)) {
+		if (std::dynamic_pointer_cast<PortInsert> (*i)) {
 			need_latency_recompute = true;
 			break;
-		} else if (boost::dynamic_pointer_cast<LatentSend> (*i)) {
+		} else if (std::dynamic_pointer_cast<LatentSend> (*i)) {
 			need_latency_recompute = true;
 			break;
-		} else if (boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+		} else if (std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (*i)) {
 			if (pi->sidechain_input ()) {
 				need_latency_recompute = true;
 				break;
@@ -2222,9 +2224,9 @@ Route::move_instrument_down (bool postfader)
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	ProcessorList new_order;
-	boost::shared_ptr<Processor> instrument;
+	std::shared_ptr<Processor> instrument;
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(*i);
+		std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert>(*i);
 		if (pi && pi->plugin ()->get_info ()->is_instrument ()) {
 			instrument = *i;
 		} else if (instrument && *i == _amp) {
@@ -2314,14 +2316,14 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 }
 
 bool
-Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
+Route::add_remove_sidechain (std::shared_ptr<Processor> proc, bool add)
 {
 	if (_session.actively_recording () || _in_sidechain_setup) {
 		return false;
 	}
 
-	boost::shared_ptr<PluginInsert> pi;
-	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
+	std::shared_ptr<PluginInsert> pi;
+	if ((pi = std::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
 		return false;
 	}
 
@@ -2386,14 +2388,14 @@ Route::add_remove_sidechain (boost::shared_ptr<Processor> proc, bool add)
 }
 
 bool
-Route::plugin_preset_output (boost::shared_ptr<Processor> proc, ChanCount outs)
+Route::plugin_preset_output (std::shared_ptr<Processor> proc, ChanCount outs)
 {
 	if (_session.actively_recording ()) {
 		return false;
 	}
 
-	boost::shared_ptr<PluginInsert> pi;
-	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
+	std::shared_ptr<PluginInsert> pi;
+	if ((pi = std::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
 		return false;
 	}
 
@@ -2429,20 +2431,20 @@ Route::plugin_preset_output (boost::shared_ptr<Processor> proc, ChanCount outs)
 }
 
 bool
-Route::reset_plugin_insert (boost::shared_ptr<Processor> proc)
+Route::reset_plugin_insert (std::shared_ptr<Processor> proc)
 {
 	ChanCount unused;
 	return customize_plugin_insert (proc, 0, unused, unused);
 }
 
 bool
-Route::customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t count, ChanCount outs, ChanCount sinks)
+Route::customize_plugin_insert (std::shared_ptr<Processor> proc, uint32_t count, ChanCount outs, ChanCount sinks)
 {
 	if (_session.actively_recording ()) {
 		return false;
 	}
-	boost::shared_ptr<PluginInsert> pi;
-	if ((pi = boost::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
+	std::shared_ptr<PluginInsert> pi;
+	if ((pi = std::dynamic_pointer_cast<PluginInsert>(proc)) == 0) {
 		return false;
 	}
 
@@ -2500,8 +2502,8 @@ Route::set_strict_io (const bool enable)
 		_strict_io = enable;
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
-			boost::shared_ptr<PluginInsert> pi;
-			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*p)) != 0) {
+			std::shared_ptr<PluginInsert> pi;
+			if ((pi = std::dynamic_pointer_cast<PluginInsert>(*p)) != 0) {
 				pi->set_strict_io (_strict_io);
 			}
 		}
@@ -2512,8 +2514,8 @@ Route::set_strict_io (const bool enable)
 			// not possible
 			_strict_io = !enable; // restore old value
 			for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
-				boost::shared_ptr<PluginInsert> pi;
-				if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*p)) != 0) {
+				std::shared_ptr<PluginInsert> pi;
+				if ((pi = std::dynamic_pointer_cast<PluginInsert>(*p)) != 0) {
 					pi->set_strict_io (_strict_io);
 				}
 			}
@@ -2632,9 +2634,9 @@ Route::state (bool save_template) const
 					 the monitor section, because these will always be
 					 added if necessary.
 					 */
-				boost::shared_ptr<InternalSend> is;
+				std::shared_ptr<InternalSend> is;
 
-				if ((is = boost::dynamic_pointer_cast<InternalSend> (p)) != 0) {
+				if ((is = std::dynamic_pointer_cast<InternalSend> (p)) != 0) {
 					if (is->role() == Delivery::Listen) {
 						continue;
 					}
@@ -2649,7 +2651,7 @@ Route::state (bool save_template) const
 	}
 
 	if (_custom_meter_position_noted) {
-		boost::shared_ptr<Processor> after = _processor_after_last_custom_meter.lock ();
+		std::shared_ptr<Processor> after = _processor_after_last_custom_meter.lock ();
 		if (after) {
 			node->set_property (X_("processor-after-last-custom-meter"), after->id());
 		}
@@ -2785,7 +2787,7 @@ Route::set_state (const XMLNode& node, int version)
 		} else {
 			_volume->set_display_to_user (true);
 			_volume->activate ();
-			main_outs()->set_gain_control (boost::shared_ptr<GainControl> ());
+			main_outs()->set_gain_control (std::shared_ptr<GainControl> ());
 		}
 	}
 
@@ -2864,7 +2866,7 @@ Route::set_state (const XMLNode& node, int version)
 			} else {
 				Evoral::Parameter p = EventTypeMap::instance().from_symbol (control_name);
 				if (p.type () >= MidiCCAutomation && p.type () < MidiSystemExclusiveAutomation) {
-					boost::shared_ptr<AutomationControl> ac = automation_control (p, true);
+					std::shared_ptr<AutomationControl> ac = automation_control (p, true);
 					if (ac) {
 						ac->set_state (*child, version);
 					}
@@ -3228,9 +3230,9 @@ Route::set_processor_state (const XMLNode& node, int version)
 			(*i)->set_owner (this);
 			(*i)->ActiveChanged.connect_same_thread (**i, boost::bind (&Session::queue_latency_recompute, &_session));
 
-			boost::shared_ptr<PluginInsert> pi;
+			std::shared_ptr<PluginInsert> pi;
 
-			if ((pi = boost::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
+			if ((pi = std::dynamic_pointer_cast<PluginInsert>(*i)) != 0) {
 				if (pi->has_no_inputs ()) {
 					_have_internal_generator = true;
 					break;
@@ -3264,11 +3266,11 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 
 	if (o == _processors.end()) {
 
-		boost::shared_ptr<Processor> processor;
+		std::shared_ptr<Processor> processor;
 
 		if (prop->value() == "intsend") {
 
-			processor.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), boost::shared_ptr<Route>(), Delivery::Aux, true));
+			processor.reset (new InternalSend (_session, _pannable, _mute_master, std::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), std::shared_ptr<Route>(), Delivery::Aux, true));
 
 		} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 		           prop->value() == "lv2" ||
@@ -3293,8 +3295,8 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 		} else if (prop->value() == "send") {
 
 			processor.reset (new Send (_session, _pannable, _mute_master, Delivery::Send, true));
-			boost::shared_ptr<Send> send = boost::dynamic_pointer_cast<Send> (processor);
-			send->SelfDestruct.connect_same_thread (*send, boost::bind (&Route::processor_selfdestruct, this, boost::weak_ptr<Processor> (processor)));
+			std::shared_ptr<Send> send = std::dynamic_pointer_cast<Send> (processor);
+			send->SelfDestruct.connect_same_thread (*send, boost::bind (&Route::processor_selfdestruct, this, std::weak_ptr<Processor> (processor)));
 			if (send->output()) {
 				send->output()->changed.connect_same_thread (*send, boost::bind (&Route::output_change_handler, this, _1, _2));
 			}
@@ -3311,7 +3313,7 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 
 		/* set strict I/O only after loading plugin state, because
 		 * individual plugins may override this */
-		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (processor);
+		std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (processor);
 		if (pi && _strict_io) {
 			pi->set_strict_io (true);
 		}
@@ -3324,7 +3326,7 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 		/* we have to note the monitor send here, otherwise a new one will be created
 		   and the state of this one will be lost.
 		*/
-		boost::shared_ptr<InternalSend> isend = boost::dynamic_pointer_cast<InternalSend> (processor);
+		std::shared_ptr<InternalSend> isend = std::dynamic_pointer_cast<InternalSend> (processor);
 		if (isend && isend->role() == Delivery::Listen) {
 			_monitor_send = isend;
 		}
@@ -3367,9 +3369,9 @@ Route::silence_unlocked (pframes_t nframes)
 	}
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<PluginInsert> pi;
+		std::shared_ptr<PluginInsert> pi;
 
-		if (!_active && (pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
+		if (!_active && (pi = std::dynamic_pointer_cast<PluginInsert> (*i)) != 0) {
 			/* evaluate automated automation controls */
 			pi->automation_run (now, nframes);
 			/* skip plugins, they don't need anything when we're not active */
@@ -3395,7 +3397,7 @@ Route::add_send_to_internal_return (InternalSend* send)
 	Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
 
 	for (ProcessorList::const_iterator x = _processors.begin(); x != _processors.end(); ++x) {
-		boost::shared_ptr<InternalReturn> d = boost::dynamic_pointer_cast<InternalReturn>(*x);
+		std::shared_ptr<InternalReturn> d = std::dynamic_pointer_cast<InternalReturn>(*x);
 
 		if (d) {
 			return d->add_send (send);
@@ -3409,7 +3411,7 @@ Route::remove_send_from_internal_return (InternalSend* send)
 	Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
 
 	for (ProcessorList::const_iterator x = _processors.begin(); x != _processors.end(); ++x) {
-		boost::shared_ptr<InternalReturn> d = boost::dynamic_pointer_cast<InternalReturn>(*x);
+		std::shared_ptr<InternalReturn> d = std::dynamic_pointer_cast<InternalReturn>(*x);
 
 		if (d) {
 			return d->remove_send (send);
@@ -3429,7 +3431,7 @@ Route::enable_monitor_send ()
 
 	/* make sure we have one */
 	if (!_monitor_send) {
-		_monitor_send.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), _session.monitor_out(), Delivery::Listen));
+		_monitor_send.reset (new InternalSend (_session, _pannable, _mute_master, std::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), _session.monitor_out(), Delivery::Listen));
 		_monitor_send->set_display_to_user (false);
 	}
 
@@ -3442,7 +3444,7 @@ Route::enable_monitor_send ()
  *  @param before Processor to insert before, or 0 to insert at the end.
  */
 int
-Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor> before)
+Route::add_aux_send (std::shared_ptr<Route> route, std::shared_ptr<Processor> before)
 {
 	assert (route != _session.monitor_out ());
 
@@ -3451,7 +3453,7 @@ Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor
 
 		for (ProcessorList::iterator x = _processors.begin(); x != _processors.end(); ++x) {
 
-			boost::shared_ptr<InternalSend> d = boost::dynamic_pointer_cast<InternalSend> (*x);
+			std::shared_ptr<InternalSend> d = std::dynamic_pointer_cast<InternalSend> (*x);
 
 			if (d && d->target_route() == route) {
 				/* already listening via the specified IO: do nothing */
@@ -3462,11 +3464,11 @@ Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor
 
 	try {
 
-		boost::shared_ptr<InternalSend> listener;
+		std::shared_ptr<InternalSend> listener;
 
 		{
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			listener.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Aux));
+			listener.reset (new InternalSend (_session, _pannable, _mute_master, std::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Aux));
 		}
 
 		add_processor (listener, before);
@@ -3479,10 +3481,10 @@ Route::add_aux_send (boost::shared_ptr<Route> route, boost::shared_ptr<Processor
 }
 
 int
-Route::add_foldback_send (boost::shared_ptr<Route> route, bool post_fader)
+Route::add_foldback_send (std::shared_ptr<Route> route, bool post_fader)
 {
 	assert (route != _session.monitor_out ());
-	boost::shared_ptr<Processor> before;
+	std::shared_ptr<Processor> before;
 	if (post_fader) {
 		before = before_processor_for_placement (PostFader);
 	} else {
@@ -3494,7 +3496,7 @@ Route::add_foldback_send (boost::shared_ptr<Route> route, bool post_fader)
 
 		for (ProcessorList::iterator x = _processors.begin(); x != _processors.end(); ++x) {
 
-			boost::shared_ptr<InternalSend> d = boost::dynamic_pointer_cast<InternalSend> (*x);
+			std::shared_ptr<InternalSend> d = std::dynamic_pointer_cast<InternalSend> (*x);
 
 			if (d && d->target_route() == route) {
 				/* already listening via the specified IO: do nothing */
@@ -3505,11 +3507,11 @@ Route::add_foldback_send (boost::shared_ptr<Route> route, bool post_fader)
 
 	try {
 
-		boost::shared_ptr<InternalSend> listener;
+		std::shared_ptr<InternalSend> listener;
 
 		{
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
-			listener.reset (new InternalSend (_session, _pannable, _mute_master, boost::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Foldback));
+			listener.reset (new InternalSend (_session, _pannable, _mute_master, std::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), route, Delivery::Foldback));
 		}
 
 		listener->panner_shell()->set_linked_to_route (false);
@@ -3557,8 +3559,8 @@ Route::all_inputs () const
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	for (ProcessorList::const_iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
-		boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor>(*r);
-		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(*r);
+		std::shared_ptr<IOProcessor> iop = std::dynamic_pointer_cast<IOProcessor>(*r);
+		std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert>(*r);
 		if (pi != 0) {
 			assert (iop == 0);
 			iop = pi->sidechain();
@@ -3578,7 +3580,7 @@ Route::all_outputs () const
 	// _output is included via Delivery
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	for (ProcessorList::const_iterator r = _processors.begin(); r != _processors.end(); ++r) {
-		boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor>(*r);
+		std::shared_ptr<IOProcessor> iop = std::dynamic_pointer_cast<IOProcessor>(*r);
 		if (iop != 0 && iop->output()) {
 			ios.push_back (iop->output());
 		}
@@ -3587,9 +3589,9 @@ Route::all_outputs () const
 }
 
 bool
-Route::direct_feeds_according_to_reality (boost::shared_ptr<GraphNode> node, bool* via_send_only)
+Route::direct_feeds_according_to_reality (std::shared_ptr<GraphNode> node, bool* via_send_only)
 {
-	boost::shared_ptr<Route> other (boost::dynamic_pointer_cast<Route> (node));
+	std::shared_ptr<Route> other (std::dynamic_pointer_cast<Route> (node));
 	assert (other);
 
 	IOVector const& other_inputs (other->all_inputs());
@@ -3608,15 +3610,15 @@ Route::direct_feeds_according_to_reality (boost::shared_ptr<GraphNode> node, boo
 
 	for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
-		boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor>(*r);
-		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(*r);
+		std::shared_ptr<IOProcessor> iop = std::dynamic_pointer_cast<IOProcessor>(*r);
+		std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert>(*r);
 		if (pi != 0) {
 			assert (iop == 0);
 			iop = pi->sidechain();
 		}
 
 		if (iop != 0) {
-			boost::shared_ptr<const IO> iop_out = iop->output();
+			std::shared_ptr<const IO> iop_out = iop->output();
 			if (other.get() == this && iop_out && iop->input() && iop_out->connected_to (iop->input())) {
 				// TODO this needs a delaylines in the Insert to align connections (!)
 				DEBUG_TRACE (DEBUG::Graph,  string_compose ("\tIOP %1 does feed its own return (%2)\n", iop->name(), other->name()));
@@ -3639,23 +3641,23 @@ Route::direct_feeds_according_to_reality (boost::shared_ptr<GraphNode> node, boo
 }
 
 bool
-Route::direct_feeds_according_to_graph (boost::shared_ptr<Route> other, bool* via_send_only)
+Route::direct_feeds_according_to_graph (std::shared_ptr<Route> other, bool* via_send_only)
 {
-	return _session._current_route_graph.has (boost::dynamic_pointer_cast<Route> (shared_from_this ()), other, via_send_only);
+	return _session._current_route_graph.has (std::dynamic_pointer_cast<Route> (shared_from_this ()), other, via_send_only);
 }
 
 bool
-Route::feeds (boost::shared_ptr<Route> other)
+Route::feeds (std::shared_ptr<Route> other)
 {
-	return _session._current_route_graph.feeds (boost::dynamic_pointer_cast<Route> (shared_from_this ()), other);
+	return _session._current_route_graph.feeds (std::dynamic_pointer_cast<Route> (shared_from_this ()), other);
 }
 
-std::set<boost::shared_ptr<Route>>
+std::set<std::shared_ptr<Route>>
 Route::signal_sources (bool via_sends_only)
 {
-	std::set<boost::shared_ptr<Route>> rv;
-	for (auto const& i : _session._current_route_graph.to (boost::dynamic_pointer_cast<Route> (shared_from_this ()), via_sends_only)) {
-		boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (i);
+	std::set<std::shared_ptr<Route>> rv;
+	for (auto const& i : _session._current_route_graph.to (std::dynamic_pointer_cast<Route> (shared_from_this ()), via_sends_only)) {
+		std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (i);
 		if (r) {
 			rv.insert (r);
 		}
@@ -3686,7 +3688,7 @@ Route::output_effectively_connected_real () const
 	}
 
 	/* now follow connections downstream */
-	boost::shared_ptr<RouteList> routes = _session.get_routes ();
+	std::shared_ptr<RouteList> routes = _session.get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		Route* rp = (*i).get();
 		if (rp == this) {
@@ -3765,13 +3767,13 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 	if (_solo_control->soloed_by_others_upstream() || _solo_isolate_control->solo_isolated_by_upstream()) {
 		int sbou = 0;
 		int ibou = 0;
-		boost::shared_ptr<RouteList> routes = _session.get_routes ();
+		std::shared_ptr<RouteList> routes = _session.get_routes ();
 		if (_input->connected()) {
 			for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 				if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
 					continue;
 				}
-				if ((*i)->direct_feeds_according_to_reality (boost::dynamic_pointer_cast<Route> (shared_from_this()))) {
+				if ((*i)->direct_feeds_according_to_reality (std::dynamic_pointer_cast<Route> (shared_from_this()))) {
 					if ((*i)->soloed()) {
 						++sbou;
 					}
@@ -3864,7 +3866,7 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 			 * ideally the input_change_handler() of the other route
 			 * would propagate the change to us.
 			 */
-			boost::shared_ptr<RouteList> routes = _session.get_routes ();
+			std::shared_ptr<RouteList> routes = _session.get_routes ();
 			if (_output->connected()) {
 				for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 					if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
@@ -3885,7 +3887,7 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 				_solo_control->mod_solo_by_others_downstream (delta);
 				// Session::route_solo_changed() does not propagate indirect solo-changes
 				// propagate upstream to tracks
-				boost::shared_ptr<Route> shared_this = boost::dynamic_pointer_cast<Route> (shared_from_this());
+				std::shared_ptr<Route> shared_this = std::dynamic_pointer_cast<Route> (shared_from_this());
 				for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 					if ((*i).get() == this || !can_solo()) {
 						continue;
@@ -3924,11 +3926,11 @@ void
 Route::flush_processor_buffers_locked (samplecnt_t nframes)
 {
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
+		std::shared_ptr<Delivery> d = std::dynamic_pointer_cast<Delivery> (*i);
 		if (d) {
 			d->flush_buffers (nframes);
 		} else {
-			boost::shared_ptr<PortInsert> p = boost::dynamic_pointer_cast<PortInsert> (*i);
+			std::shared_ptr<PortInsert> p = std::dynamic_pointer_cast<PortInsert> (*i);
 			if (p) {
 				p->flush_buffers (nframes);
 			}
@@ -4071,7 +4073,7 @@ Route::update_send_delaylines ()
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if (boost::shared_ptr<LatentSend> snd = boost::dynamic_pointer_cast<LatentSend> (*i)) {
+		if (std::shared_ptr<LatentSend> snd = std::dynamic_pointer_cast<LatentSend> (*i)) {
 			snd->update_delaylines (true);
 		}
 	}
@@ -4164,7 +4166,7 @@ Route::emit_pending_signals ()
 	while (!selfdestruct_sequence.empty ()) {
 		Glib::Threads::Mutex::Lock lx (selfdestruct_lock);
 		if (selfdestruct_sequence.empty ()) { break; } // re-check with lock
-		boost::shared_ptr<Processor> proc = selfdestruct_sequence.back ().lock ();
+		std::shared_ptr<Processor> proc = selfdestruct_sequence.back ().lock ();
 		selfdestruct_sequence.pop_back ();
 		lx.release ();
 		if (proc) {
@@ -4230,7 +4232,7 @@ Route::set_meter_point_unlocked ()
 		_meter->set_display_to_user (true);
 
 		/* If we have a previous position for the custom meter, try to put it there */
-		boost::shared_ptr<Processor> after = _processor_after_last_custom_meter.lock ();
+		std::shared_ptr<Processor> after = _processor_after_last_custom_meter.lock ();
 		if (after) {
 			ProcessorList::iterator i = find (_processors.begin(), _processors.end(), after);
 			if (i != _processors.end ()) {
@@ -4328,7 +4330,7 @@ Route::listen_position_changed ()
 	_session.set_dirty ();
 }
 
-boost::shared_ptr<CapturingProcessor>
+std::shared_ptr<CapturingProcessor>
 Route::add_export_point()
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
@@ -4357,10 +4359,10 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 		/* mark all send are inactive, set internal-return "delay-out" to zero. */
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			if (boost::shared_ptr<LatentSend> snd = boost::dynamic_pointer_cast<LatentSend> (*i)) {
+			if (std::shared_ptr<LatentSend> snd = std::dynamic_pointer_cast<LatentSend> (*i)) {
 				snd->set_delay_in (0);
 			}
-			if (boost::shared_ptr<InternalReturn> rtn = boost::dynamic_pointer_cast<InternalReturn> (*i)) {
+			if (std::shared_ptr<InternalReturn> rtn = std::dynamic_pointer_cast<InternalReturn> (*i)) {
 				rtn->set_playback_offset (0);
 			}
 			// TODO sidechain inputs?!
@@ -4395,12 +4397,12 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 	samplecnt_t l_in  = 0;
 	samplecnt_t l_out = 0;
 	for (ProcessorList::reverse_iterator i = _processors.rbegin(); i != _processors.rend(); ++i) {
-		if (boost::shared_ptr<LatentSend> snd = boost::dynamic_pointer_cast<LatentSend> (*i)) {
+		if (std::shared_ptr<LatentSend> snd = std::dynamic_pointer_cast<LatentSend> (*i)) {
 			snd->set_delay_in (l_out + _output_latency);
 		}
 
-		if (boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (*i)) {
-			if (boost::shared_ptr<IO> pio = pi->sidechain_input ()) {
+		if (std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (*i)) {
+			if (std::shared_ptr<IO> pio = pi->sidechain_input ()) {
 				samplecnt_t lat = l_out + _output_latency;
 				pio->set_private_port_latencies (lat, true);
 				pio->set_public_port_latencies (lat, true);
@@ -4419,7 +4421,7 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 
 		/* set sidechain, send and insert port latencies */
-		if (boost::shared_ptr<PortInsert> pi = boost::dynamic_pointer_cast<PortInsert> (*i)) {
+		if (std::shared_ptr<PortInsert> pi = std::dynamic_pointer_cast<PortInsert> (*i)) {
 			if (pi->input ()) {
 				/* propagate playback latency from output to input */
 				pi->input ()->set_private_port_latencies (play_lat_out + l_in, true);
@@ -4429,7 +4431,7 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 				pi->output ()->set_private_port_latencies (capt_lat_in + l_in, false);
 			}
 
-		} else if (boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (*i)) {
+		} else if (std::shared_ptr<Send> snd = std::dynamic_pointer_cast<Send> (*i)) {
 			if (snd->output ()) {
 				/* set capture latency */
 				snd->output ()->set_private_port_latencies (capt_lat_in + l_in, false);
@@ -4442,7 +4444,7 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 					*delayline_update_needed = true;
 				}
 			}
-		} else if (!apply_to_delayline && boost::dynamic_pointer_cast<InternalReturn> (*i)) {
+		} else if (!apply_to_delayline && std::dynamic_pointer_cast<InternalReturn> (*i)) {
 			/* InternalReturn::set_playback_offset() calls set_delay_out(), requires process lock */
 			const samplecnt_t poff = _signal_latency + _output_latency;
 			if (delayline_update_needed && (*i)->playback_offset () != poff) {
@@ -4535,11 +4537,11 @@ Route::shift (timepos_t const & pos, timecnt_t const & distance)
 	ControllableSet acs;
 	automatables (acs);
 	for (auto& ec : acs) {
-		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (ec);
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (ec);
 		if (!ac) {
 			continue;
 		}
-		boost::shared_ptr<AutomationList> al = ac->alist();
+		std::shared_ptr<AutomationList> al = ac->alist();
 		if (!al || al->empty ()) {
 			continue;
 		}
@@ -4557,17 +4559,17 @@ Route::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t
 	ControllableSet acs;
 	automatables (acs);
 	for (auto& ec : acs) {
-		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (ec);
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (ec);
 		if (!ac) {
 			continue;
 		}
-		boost::shared_ptr<AutomationList> al = ac->alist();
+		std::shared_ptr<AutomationList> al = ac->alist();
 		if (!al || al->empty ()) {
 			continue;
 		}
 
 		XMLNode &before = al->get_state ();
-		boost::shared_ptr<Evoral::ControlList> cl = copy ? al->copy (start, end) : al->cut (start, end);
+		std::shared_ptr<Evoral::ControlList> cl = copy ? al->copy (start, end) : al->cut (start, end);
 		if (!copy) {
 			/* remove time (negative distance), ripple */
 			al->shift (start, end.distance (start));
@@ -4582,10 +4584,10 @@ Route::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t
 }
 
 void
-Route::set_plugin_state_dir (boost::weak_ptr<Processor> p, const std::string& d)
+Route::set_plugin_state_dir (std::weak_ptr<Processor> p, const std::string& d)
 {
-	boost::shared_ptr<Processor> processor (p.lock ());
-	boost::shared_ptr<PluginInsert> pi  = boost::dynamic_pointer_cast<PluginInsert> (processor);
+	std::shared_ptr<Processor> processor (p.lock ());
+	std::shared_ptr<PluginInsert> pi  = std::dynamic_pointer_cast<PluginInsert> (processor);
 	if (!pi) {
 		return;
 	}
@@ -4641,7 +4643,7 @@ Route::set_name (const string& str)
 	SessionObject::set_name (newname);
 
 	for (uint32_t n = 0 ; ; ++n) {
-		boost::shared_ptr<PluginInsert> pi = boost::static_pointer_cast<PluginInsert> (nth_plugin (n));
+		std::shared_ptr<PluginInsert> pi = std::static_pointer_cast<PluginInsert> (nth_plugin (n));
 		if (!pi) {
 			break;
 		}
@@ -4696,22 +4698,22 @@ Route::set_name_in_state (XMLNode& node, string const & name)
 	}
 }
 
-boost::shared_ptr<Send>
-Route::internal_send_for (boost::shared_ptr<const Route> target) const
+std::shared_ptr<Send>
+Route::internal_send_for (std::shared_ptr<const Route> target) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<InternalSend> send;
+		std::shared_ptr<InternalSend> send;
 
-		if ((send = boost::dynamic_pointer_cast<InternalSend>(*i)) != 0) {
+		if ((send = std::dynamic_pointer_cast<InternalSend>(*i)) != 0) {
 			if (send->target_route() == target) {
 				return send;
 			}
 		}
 	}
 
-	return boost::shared_ptr<Send>();
+	return std::shared_ptr<Send>();
 }
 
 void
@@ -4754,44 +4756,44 @@ Route::set_active (bool yn, void* src)
 	}
 }
 
-boost::shared_ptr<Pannable>
+std::shared_ptr<Pannable>
 Route::pannable() const
 {
 	return _pannable;
 }
 
-boost::shared_ptr<Panner>
+std::shared_ptr<Panner>
 Route::panner() const
 {
 	/* may be null ! */
 	return _main_outs->panner_shell()->panner();
 }
 
-boost::shared_ptr<PannerShell>
+std::shared_ptr<PannerShell>
 Route::panner_shell() const
 {
 	return _main_outs->panner_shell();
 }
 
-boost::shared_ptr<GainControl>
+std::shared_ptr<GainControl>
 Route::gain_control() const
 {
 	return _gain_control;
 }
 
-boost::shared_ptr<GainControl>
+std::shared_ptr<GainControl>
 Route::trim_control() const
 {
 	return _trim_control;
 }
 
-boost::shared_ptr<GainControl>
+std::shared_ptr<GainControl>
 Route::volume_control() const
 {
 	return _volume_control;
 }
 
-boost::shared_ptr<PhaseControl>
+std::shared_ptr<PhaseControl>
 Route::phase_control() const
 {
 	return _phase_control;
@@ -4817,18 +4819,18 @@ Route::set_volume_applies_to_output (bool en)
 		_volume->set_display_to_user (true);
 		add_processor (_volume, PostFader, NULL, true);
 		_volume->activate ();
-		main_outs()->set_gain_control (boost::shared_ptr<GainControl> ());
+		main_outs()->set_gain_control (std::shared_ptr<GainControl> ());
 	}
 	_volume_applies_to_output = en;
 	_session.set_dirty ();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::get_control (const Evoral::Parameter& param)
 {
 	/* either we own the control or .... */
 
-	boost::shared_ptr<AutomationControl> c = boost::dynamic_pointer_cast<AutomationControl>(control (param));
+	std::shared_ptr<AutomationControl> c = std::dynamic_pointer_cast<AutomationControl>(control (param));
 
 	if (!c) {
 
@@ -4836,7 +4838,7 @@ Route::get_control (const Evoral::Parameter& param)
 
 		Glib::Threads::RWLock::ReaderLock rm (_processor_lock);
 		for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			if ((c = boost::dynamic_pointer_cast<AutomationControl>((*i)->control (param))) != 0) {
+			if ((c = std::dynamic_pointer_cast<AutomationControl>((*i)->control (param))) != 0) {
 				break;
 			}
 		}
@@ -4846,38 +4848,38 @@ Route::get_control (const Evoral::Parameter& param)
 
 		/* nobody does so we'll make a new one */
 
-		c = boost::dynamic_pointer_cast<AutomationControl>(control_factory(param));
+		c = std::dynamic_pointer_cast<AutomationControl>(control_factory(param));
 		add_control(c);
 	}
 
 	return c;
 }
 
-boost::shared_ptr<Processor>
+std::shared_ptr<Processor>
 Route::nth_plugin (uint32_t n) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	ProcessorList::const_iterator i;
 
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
-		if (boost::dynamic_pointer_cast<PluginInsert> (*i)) {
+		if (std::dynamic_pointer_cast<PluginInsert> (*i)) {
 			if (n-- == 0) {
 				return *i;
 			}
 		}
 	}
 
-	return boost::shared_ptr<Processor> ();
+	return std::shared_ptr<Processor> ();
 }
 
-boost::shared_ptr<Processor>
+std::shared_ptr<Processor>
 Route::nth_send (uint32_t n) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	ProcessorList::const_iterator i;
 
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
-		if (boost::dynamic_pointer_cast<Send> (*i)) {
+		if (std::dynamic_pointer_cast<Send> (*i)) {
 
 			if ((*i) == _monitor_send) {
 				/* send to monitor section is not considered
@@ -4892,7 +4894,7 @@ Route::nth_send (uint32_t n) const
 		}
 	}
 
-	return boost::shared_ptr<Processor> ();
+	return std::shared_ptr<Processor> ();
 }
 
 bool
@@ -4902,7 +4904,7 @@ Route::has_io_processor_named (const string& name)
 	ProcessorList::iterator i;
 
 	for (i = _processors.begin(); i != _processors.end(); ++i) {
-		if (boost::dynamic_pointer_cast<IOProcessor> (*i)) {
+		if (std::dynamic_pointer_cast<IOProcessor> (*i)) {
 			if (0 == PBD::natcmp ((*i)->name().c_str(), name.c_str())) {
 				return true;
 			}
@@ -4970,7 +4972,7 @@ Route::unknown_processors () const
 
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if (boost::dynamic_pointer_cast<UnknownProcessor const> (*i)) {
+		if (std::dynamic_pointer_cast<UnknownProcessor const> (*i)) {
 			p.push_back ((*i)->name ());
 		}
 	}
@@ -5093,7 +5095,7 @@ Route::set_public_port_latencies (samplecnt_t value, bool playback, bool with_la
 	/* publish private latencies */
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<IOProcessor> iop = boost::dynamic_pointer_cast<IOProcessor>(*i);
+		std::shared_ptr<IOProcessor> iop = std::dynamic_pointer_cast<IOProcessor>(*i);
 		if (!iop) {
 			continue;
 		}
@@ -5155,11 +5157,11 @@ Route::setup_invisible_processors ()
 	/* find visible processors */
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<Send> auxsnd = boost::dynamic_pointer_cast<Send> ((*i));
+		std::shared_ptr<Send> auxsnd = std::dynamic_pointer_cast<Send> ((*i));
 
 #ifdef HAVE_BEATBOX
 		/* XXX temporary hack while we decide on visibility */
-		if (boost::dynamic_pointer_cast<BeatBox> (*i)) {
+		if (std::dynamic_pointer_cast<BeatBox> (*i)) {
 			continue;
 		}
 #endif
@@ -5442,7 +5444,7 @@ Route::unpan ()
 	_pannable.reset ();
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery>(*i);
+		std::shared_ptr<Delivery> d = std::dynamic_pointer_cast<Delivery>(*i);
 		if (d) {
 			d->unpan ();
 		}
@@ -5477,7 +5479,7 @@ Route::maybe_note_meter_position ()
 			_processor_after_last_custom_meter = *i;
 			break;
 		}
-		if (boost::dynamic_pointer_cast<PeakMeter> (*i)) {
+		if (std::dynamic_pointer_cast<PeakMeter> (*i)) {
 			if (!seen_trim) {
 				_processor_after_last_custom_meter = _trim;
 			} else {
@@ -5492,7 +5494,7 @@ Route::maybe_note_meter_position ()
 	assert(_processor_after_last_custom_meter.lock());
 }
 
-boost::shared_ptr<Processor>
+std::shared_ptr<Processor>
 Route::processor_by_id (PBD::ID id) const
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
@@ -5502,11 +5504,11 @@ Route::processor_by_id (PBD::ID id) const
 		}
 	}
 
-	return boost::shared_ptr<Processor> ();
+	return std::shared_ptr<Processor> ();
 }
 
 bool
-Route::can_freeze_processor (boost::shared_ptr<Processor> p, bool allow_routing) const
+Route::can_freeze_processor (std::shared_ptr<Processor> p, bool allow_routing) const
 {
 	/* ignore inactive processors and obviously ignore the main
 	 * outs since everything has them and we don't care.
@@ -5519,11 +5521,11 @@ Route::can_freeze_processor (boost::shared_ptr<Processor> p, bool allow_routing)
 		return allow_routing;
 	}
 
-	if (boost::dynamic_pointer_cast<PortInsert>(p)) {
+	if (std::dynamic_pointer_cast<PortInsert>(p)) {
 		return false;
 	}
 
-	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(p);
+	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert>(p);
 	if (pi && pi->has_sidechain () && pi->sidechain_input () && pi->sidechain_input ()->connected()) {
 		return false;
 	}
@@ -5543,23 +5545,23 @@ Route::has_external_redirects () const
 	return false;
 }
 
-boost::shared_ptr<Processor>
+std::shared_ptr<Processor>
 Route::the_instrument () const
 {
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	return the_instrument_unlocked ();
 }
 
-boost::shared_ptr<Processor>
+std::shared_ptr<Processor>
 Route::the_instrument_unlocked () const
 {
 	for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert>(*i);
+		std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert>(*i);
 		if (pi && pi->plugin ()->get_info ()->is_instrument ()) {
 			return (*i);
 		}
 	}
-	return boost::shared_ptr<Processor>();
+	return std::shared_ptr<Processor>();
 }
 
 bool
@@ -5594,7 +5596,7 @@ Route::non_realtime_locate (samplepos_t pos)
 }
 
 void
-Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes)
+Route::fill_buffers_with_input (BufferSet& bufs, std::shared_ptr<IO> io, pframes_t nframes)
 {
 	size_t n_buffers;
 	size_t i;
@@ -5609,7 +5611,7 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 
 	for (i = 0; i < n_buffers; ++i) {
 
-		boost::shared_ptr<MidiPort> source_port = io->midi (i);
+		std::shared_ptr<MidiPort> source_port = io->midi (i);
 		MidiBuffer& buf (bufs.get_midi (i));
 
 		if (source_port) {
@@ -5636,7 +5638,7 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 		 * in a round-robin fashion
 		 */
 
-		boost::shared_ptr<AudioPort> source_port = io->audio (i);
+		std::shared_ptr<AudioPort> source_port = io->audio (i);
 		AudioBuffer& buf (bufs.get_audio (i%n_buffers));
 
 		if (i < n_buffers) {
@@ -5682,20 +5684,20 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 	}
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::pan_azimuth_control() const
 {
 	if (!_pannable || !panner()) {
-		return boost::shared_ptr<AutomationControl>();
+		return std::shared_ptr<AutomationControl>();
 	}
 	return _pannable->pan_azimuth_control;
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::pan_elevation_control() const
 {
 	if (Profile->get_mixbus() || !_pannable || !panner()) {
-		return boost::shared_ptr<AutomationControl>();
+		return std::shared_ptr<AutomationControl>();
 	}
 
 	set<Evoral::Parameter> c = pannable()->what_can_be_automated ();
@@ -5703,14 +5705,14 @@ Route::pan_elevation_control() const
 	if (c.find (PanElevationAutomation) != c.end()) {
 		return _pannable->pan_elevation_control;
 	} else {
-		return boost::shared_ptr<AutomationControl>();
+		return std::shared_ptr<AutomationControl>();
 	}
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::pan_width_control() const
 {
 	if (Profile->get_mixbus() || !_pannable || !panner()) {
-		return boost::shared_ptr<AutomationControl>();
+		return std::shared_ptr<AutomationControl>();
 	}
 
 	set<Evoral::Parameter> c = pannable()->what_can_be_automated ();
@@ -5718,14 +5720,14 @@ Route::pan_width_control() const
 	if (c.find (PanWidthAutomation) != c.end()) {
 		return _pannable->pan_width_control;
 	} else {
-		return boost::shared_ptr<AutomationControl>();
+		return std::shared_ptr<AutomationControl>();
 	}
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::pan_frontback_control() const
 {
 	if (Profile->get_mixbus() || !_pannable || !panner()) {
-		return boost::shared_ptr<AutomationControl>();
+		return std::shared_ptr<AutomationControl>();
 	}
 
 	set<Evoral::Parameter> c = pannable()->what_can_be_automated ();
@@ -5733,14 +5735,14 @@ Route::pan_frontback_control() const
 	if (c.find (PanFrontBackAutomation) != c.end()) {
 		return _pannable->pan_frontback_control;
 	} else {
-		return boost::shared_ptr<AutomationControl>();
+		return std::shared_ptr<AutomationControl>();
 	}
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::pan_lfe_control() const
 {
 	if (Profile->get_mixbus() || !_pannable || !panner()) {
-		return boost::shared_ptr<AutomationControl>();
+		return std::shared_ptr<AutomationControl>();
 	}
 
 	set<Evoral::Parameter> c = pannable()->what_can_be_automated ();
@@ -5748,7 +5750,7 @@ Route::pan_lfe_control() const
 	if (c.find (PanLFEAutomation) != c.end()) {
 		return _pannable->pan_lfe_control;
 	} else {
-		return boost::shared_ptr<AutomationControl>();
+		return std::shared_ptr<AutomationControl>();
 	}
 }
 
@@ -5759,51 +5761,45 @@ Route::eq_band_cnt () const
 	return 0;
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::eq_gain_controllable (uint32_t band) const
 {
 	return boost::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::eq_freq_controllable (uint32_t band) const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::eq_q_controllable (uint32_t band) const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::eq_shape_controllable (uint32_t band) const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
-boost::shared_ptr<AutomationControl>
-Route::eq_enable_controllable () const
-{
-	return boost::shared_ptr<AutomationControl>();
-}
-
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::filter_freq_controllable (bool hpf) const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::filter_slope_controllable (bool) const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::filter_enable_controllable (bool) const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
 std::string
@@ -5821,37 +5817,43 @@ Route::tape_drive_controllable () const
 boost::shared_ptr<AutomationControl>
 Route::tape_drive_mode_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
-boost::shared_ptr<ReadOnlyControl>
+std::shared_ptr<AutomationControl>
+Route::tape_drive_controllable () const
+{
+	return std::shared_ptr<AutomationControl>();
+}
+
+std::shared_ptr<ReadOnlyControl>
 Route::tape_drive_mtr_controllable () const
 {
-	return boost::shared_ptr<ReadOnlyControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
-boost::shared_ptr<ReadOnlyControl>
+std::shared_ptr<ReadOnlyControl>
 Route::master_correlation_mtr_controllable (bool mm) const
 {
-	return boost::shared_ptr<ReadOnlyControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::master_limiter_enable_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
-boost::shared_ptr<ReadOnlyControl>
+std::shared_ptr<ReadOnlyControl>
 Route::master_limiter_mtr_controllable () const
 {
-	return boost::shared_ptr<ReadOnlyControl>();
+	return std::shared_ptr<ReadOnlyControl>();
 }
 
-boost::shared_ptr<ReadOnlyControl>
+std::shared_ptr<ReadOnlyControl>
 Route::master_k_mtr_controllable () const
 {
-	return boost::shared_ptr<ReadOnlyControl>();
+	return std::shared_ptr<ReadOnlyControl>();
 }
 
 string
@@ -5860,67 +5862,68 @@ Route::eq_band_name (uint32_t band) const
 	return string ();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::comp_enable_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
-}
-boost::shared_ptr<AutomationControl>
-Route::comp_threshold_controllable () const
-{
-	return boost::shared_ptr<AutomationControl>();
-}
-boost::shared_ptr<AutomationControl>
-Route::comp_speed_controllable () const
-{
-	return boost::shared_ptr<AutomationControl>();
-}
-boost::shared_ptr<AutomationControl>
-Route::comp_mode_controllable () const
-{
-	return boost::shared_ptr<AutomationControl>();
-}
-boost::shared_ptr<AutomationControl>
-Route::comp_makeup_controllable () const
-{
-	return boost::shared_ptr<AutomationControl>();
-}
-boost::shared_ptr<AutomationControl>
-Route::comp_ratio_controllable () const
-{
-	return boost::shared_ptr<AutomationControl>();
-}
-boost::shared_ptr<AutomationControl>
-Route::comp_attack_controllable () const
-{
-	return boost::shared_ptr<AutomationControl>();
-}
-boost::shared_ptr<AutomationControl>
-Route::comp_release_controllable () const
-{
-	return boost::shared_ptr<AutomationControl>();
-}
-boost::shared_ptr<AutomationControl>
-Route::comp_key_filter_freq_controllable () const
-{
-	return boost::shared_ptr<AutomationControl>();
-}
-boost::shared_ptr<AutomationControl>
-Route::comp_lookahead_controllable () const
-{
-	return boost::shared_ptr<AutomationControl>();
-}
-boost::shared_ptr<ReadOnlyControl>
-Route::comp_meter_controllable () const
-{
-	return boost::shared_ptr<ReadOnlyControl>();
-}
-boost::shared_ptr<ReadOnlyControl>
-Route::comp_redux_controllable () const
-{
-	return boost::shared_ptr<ReadOnlyControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
+std::shared_ptr<AutomationControl>
+Route::comp_threshold_controllable () const
+{
+	return std::shared_ptr<AutomationControl>();
+}
+
+std::shared_ptr<AutomationControl>
+Route::comp_speed_controllable () const
+{
+	return std::shared_ptr<AutomationControl>();
+}
+std::shared_ptr<AutomationControl>
+Route::comp_mode_controllable () const
+{
+	return std::shared_ptr<AutomationControl>();
+}
+std::shared_ptr<AutomationControl>
+Route::comp_makeup_controllable () const
+{
+	return std::shared_ptr<AutomationControl>();
+}
+std::shared_ptr<AutomationControl>
+Route::comp_ratio_controllable () const
+{
+	return std::shared_ptr<AutomationControl>();
+}
+std::shared_ptr<AutomationControl>
+Route::comp_attack_controllable () const
+{
+	return std::shared_ptr<AutomationControl>();
+}
+std::shared_ptr<AutomationControl>
+Route::comp_release_controllable () const
+{
+	return std::shared_ptr<AutomationControl>();
+}
+std::shared_ptr<AutomationControl>
+Route::comp_key_filter_freq_controllable () const
+{
+	return std::shared_ptr<AutomationControl>();
+}
+std::shared_ptr<AutomationControl>
+Route::comp_lookahead_controllable () const
+{
+	return std::shared_ptr<AutomationControl>();
+}
+std::shared_ptr<ReadOnlyControl>
+Route::comp_meter_controllable () const
+{
+	return std::shared_ptr<ReadOnlyControl>();
+}
+std::shared_ptr<ReadOnlyControl>
+Route::comp_redux_controllable () const
+{
+	return std::shared_ptr<ReadOnlyControl>();
+}
 string
 Route::comp_mode_name (uint32_t mode) const
 {
@@ -5939,104 +5942,104 @@ Route::gate_mode_name (uint32_t mode) const
 	return _("???");
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_enable_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_mode_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_ratio_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_knee_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_threshold_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_depth_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_hysteresis_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_hold_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_attack_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_release_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_key_listen_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_key_filter_enable_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_key_filter_freq_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::gate_lookahead_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
-boost::shared_ptr<ReadOnlyControl>
+std::shared_ptr<ReadOnlyControl>
 Route::gate_meter_controllable () const
 {
-	return boost::shared_ptr<ReadOnlyControl>();
+	return std::shared_ptr<ReadOnlyControl>();
 }
-boost::shared_ptr<ReadOnlyControl>
+std::shared_ptr<ReadOnlyControl>
 Route::gate_redux_controllable () const
 {
-	return boost::shared_ptr<ReadOnlyControl>();
+	return std::shared_ptr<ReadOnlyControl>();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::send_pan_azimuth_controllable (uint32_t n) const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::send_level_controllable (uint32_t n) const
 {
-	boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(nth_send (n));
+	std::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(nth_send (n));
 	if (s) {
 		return s->gain_control ();
 	}
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::send_enable_controllable (uint32_t n) const
 {
 	/* although Ardour sends have enable/disable as part of the Processor
@@ -6044,29 +6047,29 @@ Route::send_enable_controllable (uint32_t n) const
 	 *
 	 * XXX: we should fix this (make it click-free, automatable enable-control)
 	 */
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::send_pan_azimuth_enable_controllable (uint32_t n) const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
 string
 Route::send_name (uint32_t n) const
 {
-	boost::shared_ptr<Processor> p = nth_send (n);
+	std::shared_ptr<Processor> p = nth_send (n);
 	if (p) {
 		return p->name();
 	}
 	return string();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::master_send_enable_controllable () const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
 bool
@@ -6080,7 +6083,7 @@ Route::slaved () const
 }
 
 bool
-Route::slaved_to (boost::shared_ptr<VCA> vca) const
+Route::slaved_to (std::shared_ptr<VCA> vca) const
 {
 	if (!vca || !_gain_control) {
 		return false;
@@ -6107,10 +6110,10 @@ Route::clear_all_solo_state ()
 	_solo_control->clear_all_solo_state ();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::automation_control_recurse (PBD::ID const & id) const
 {
-	boost::shared_ptr<AutomationControl> ac = Automatable::automation_control (id);
+	std::shared_ptr<AutomationControl> ac = Automatable::automation_control (id);
 
 	if (ac) {
 		return ac;
@@ -6130,7 +6133,7 @@ Route::automation_control_recurse (PBD::ID const & id) const
 		}
 	}
 
-	return boost::shared_ptr<AutomationControl> ();
+	return std::shared_ptr<AutomationControl> ();
 }
 
 void

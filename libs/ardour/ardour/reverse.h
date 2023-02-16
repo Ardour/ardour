@@ -29,7 +29,7 @@ class LIBARDOUR_API Reverse : public Filter {
 	Reverse (ARDOUR::Session&);
 	~Reverse ();
 
-	int run (boost::shared_ptr<ARDOUR::Region>, Progress *);
+	int run (std::shared_ptr<ARDOUR::Region>, Progress *);
 };
 
 } /* namespace */

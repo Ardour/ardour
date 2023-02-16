@@ -40,7 +40,7 @@ Reverse::~Reverse ()
 }
 
 int
-Reverse::run (boost::shared_ptr<Region> r, Progress*)
+Reverse::run (std::shared_ptr<Region> r, Progress*)
 {
 	SourceList nsrcs;
 	SourceList::iterator si;
@@ -51,7 +51,7 @@ Reverse::run (boost::shared_ptr<Region> r, Progress*)
 	samplecnt_t to_read;
 	int ret = -1;
 
-	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion>(r);
+	std::shared_ptr<AudioRegion> region = std::dynamic_pointer_cast<AudioRegion>(r);
 
 	if (!region) {
 		return ret;
@@ -96,7 +96,7 @@ Reverse::run (boost::shared_ptr<Region> r, Progress*)
 
 			/* write it out */
 
-			boost::shared_ptr<AudioSource> asrc(boost::dynamic_pointer_cast<AudioSource>(*si));
+			std::shared_ptr<AudioSource> asrc(std::dynamic_pointer_cast<AudioSource>(*si));
 
 			if (asrc && asrc->write (buf, to_read) != to_read) {
 				goto out;
@@ -120,7 +120,7 @@ Reverse::run (boost::shared_ptr<Region> r, Progress*)
 
 	if (ret) {
 		for (si = nsrcs.begin(); si != nsrcs.end(); ++si) {
-			boost::shared_ptr<AudioSource> asrc(boost::dynamic_pointer_cast<AudioSource>(*si));
+			std::shared_ptr<AudioSource> asrc(std::dynamic_pointer_cast<AudioSource>(*si));
 			asrc->mark_for_remove ();
 		}
 	}

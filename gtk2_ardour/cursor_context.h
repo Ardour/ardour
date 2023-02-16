@@ -44,7 +44,7 @@ class CursorContext
 {
 public:
 	/** A smart handle for a cursor change context. */
-	typedef boost::shared_ptr<CursorContext> Handle;
+	typedef std::shared_ptr<CursorContext> Handle;
 
 	~CursorContext();
 

@@ -40,7 +40,7 @@ namespace ArdourWidgets {
 class LIBWIDGETS_API BindingProxy : public sigc::trackable
 {
 public:
-	BindingProxy (boost::shared_ptr<PBD::Controllable>);
+	BindingProxy (std::shared_ptr<PBD::Controllable>);
 	BindingProxy ();
 	virtual ~BindingProxy();
 
@@ -49,12 +49,12 @@ public:
 	static bool is_bind_action (GdkEventButton *);
 	bool button_press_handler (GdkEventButton *);
 
-	boost::shared_ptr<PBD::Controllable> get_controllable() const { return controllable; }
-	void set_controllable (boost::shared_ptr<PBD::Controllable>);
+	std::shared_ptr<PBD::Controllable> get_controllable() const { return controllable; }
+	void set_controllable (std::shared_ptr<PBD::Controllable>);
 
 protected:
 	ArdourWidgets::PopUp* prompter;
-	boost::shared_ptr<PBD::Controllable> controllable;
+	std::shared_ptr<PBD::Controllable> controllable;
 
 	static guint bind_button;
 	static guint bind_statemask;

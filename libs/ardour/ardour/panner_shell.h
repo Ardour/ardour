@@ -51,7 +51,7 @@ class Pannable;
 class LIBARDOUR_API PannerShell : public SessionObject
 {
 public:
-	PannerShell (std::string name, Session&, boost::shared_ptr<Pannable>, Temporal::TimeDomain, bool is_send = false);
+	PannerShell (std::string name, Session&, std::shared_ptr<Pannable>, Temporal::TimeDomain, bool is_send = false);
 	virtual ~PannerShell ();
 
 	std::string describe_parameter (Evoral::Parameter param);
@@ -68,9 +68,9 @@ public:
 	PBD::Signal0<void> PannableChanged; /* Pannable changed -- l*/
 	PBD::Signal0<void> Changed; /* panner and/or outputs count and/or bypass state changed */
 
-	boost::shared_ptr<Panner> panner() const { return _panner; }
-	boost::shared_ptr<Pannable> pannable() const { return _panlinked ? _pannable_route : _pannable_internal; }
-	boost::shared_ptr<Pannable> unlinked_pannable () const { return _pannable_internal; }
+	std::shared_ptr<Panner> panner() const { return _panner; }
+	std::shared_ptr<Pannable> pannable() const { return _panlinked ? _pannable_route : _pannable_internal; }
+	std::shared_ptr<Pannable> unlinked_pannable () const { return _pannable_internal; }
 
 	bool bypassed () const;
 	void set_bypassed (bool);
@@ -91,10 +91,10 @@ public:
 	void distribute_no_automation (BufferSet& src, BufferSet& dest, pframes_t nframes, gain_t gain_coeff);
 	bool set_user_selected_panner_uri (std::string const uri);
 
-	boost::shared_ptr<Panner> _panner;
+	std::shared_ptr<Panner> _panner;
 
-	boost::shared_ptr<Pannable> _pannable_internal;
-	boost::shared_ptr<Pannable> _pannable_route;
+	std::shared_ptr<Pannable> _pannable_internal;
+	std::shared_ptr<Pannable> _pannable_route;
 	bool _is_send;
 	bool _panlinked;
 	bool _bypassed;

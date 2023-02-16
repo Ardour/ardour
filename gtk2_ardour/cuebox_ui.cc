@@ -304,10 +304,10 @@ CueBoxUI::context_menu (uint64_t idx)
 void
 CueBoxUI::get_slots (TriggerList &triggerlist, uint64_t idx)
 {
-	boost::shared_ptr<RouteList> rl = _session->get_routes();
+	std::shared_ptr<RouteList> rl = _session->get_routes();
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
-		boost::shared_ptr<Route> route = *r;
-		boost::shared_ptr<TriggerBox> box = route->triggerbox();
+		std::shared_ptr<Route> route = *r;
+		std::shared_ptr<TriggerBox> box = route->triggerbox();
 #warning @Ben disambiguate processor *active* vs *visibility*
 		if (box /*&& box.active*/) {
 			TriggerPtr trigger = box->trigger(idx);
@@ -322,7 +322,7 @@ CueBoxUI::clear_all_triggers (uint64_t idx)
 	TriggerList tl;
 	get_slots(tl, idx);
 	for (TriggerList::iterator t = tl.begin(); t != tl.end(); ++t) {
-		(*t)->set_region(boost::shared_ptr<Region>());
+		(*t)->set_region(std::shared_ptr<Region>());
 	}
 }
 

@@ -45,7 +45,7 @@ namespace GTKArdour {
 class PluginEqGui : public Gtk::Table
 {
 public:
-	PluginEqGui (boost::shared_ptr<ARDOUR::PluginInsert>);
+	PluginEqGui (std::shared_ptr<ARDOUR::PluginInsert>);
 	~PluginEqGui ();
 
 private:
@@ -118,8 +118,8 @@ private:
 	GTKArdour::FFT *_impulse_fft;
 	GTKArdour::FFT *_signal_input_fft;
 	GTKArdour::FFT *_signal_output_fft;
-	boost::shared_ptr<ARDOUR::Plugin> _plugin;
-	boost::shared_ptr<ARDOUR::PluginInsert> _plugin_insert;
+	std::shared_ptr<ARDOUR::Plugin> _plugin;
+	std::shared_ptr<ARDOUR::PluginInsert> _plugin_insert;
 
 	// gui objects
 	Gtk::DrawingArea *_analysis_area;

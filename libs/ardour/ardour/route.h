@@ -104,7 +104,7 @@ class LIBARDOUR_API Route : public Stripable,
 {
 public:
 
-	typedef std::list<boost::shared_ptr<Processor> > ProcessorList;
+	typedef std::list<std::shared_ptr<Processor> > ProcessorList;
 
 	Route (Session&, std::string name, PresentationInfo::Flag flags = PresentationInfo::Flag(0), DataType default_type = DataType::AUDIO);
 	virtual ~Route();
@@ -118,8 +118,8 @@ public:
 		return _default_type;
 	}
 
-	boost::shared_ptr<IO> input() const { return _input; }
-	boost::shared_ptr<IO> output() const { return _output; }
+	std::shared_ptr<IO> input() const { return _input; }
+	std::shared_ptr<IO> output() const { return _output; }
 	IOVector all_inputs () const;
 	IOVector all_outputs () const;
 
@@ -137,7 +137,7 @@ public:
 	bool set_name (const std::string& str);
 	static void set_name_in_state (XMLNode &, const std::string &);
 
-	boost::shared_ptr<MonitorControl> monitoring_control() const { return _monitoring_control; }
+	std::shared_ptr<MonitorControl> monitoring_control() const { return _monitoring_control; }
 
 	MonitorState monitoring_state () const;
 	virtual MonitorState get_input_monitoring_state (bool recording, bool talkback) const { return MonitoringSilence; }
@@ -211,38 +211,38 @@ public:
 
 	/* Processors */
 
-	boost::shared_ptr<Amp> amp() const  { return _amp; }
-	boost::shared_ptr<Amp> trim() const { return _trim; }
-	boost::shared_ptr<PolarityProcessor> polarity() const { return _polarity; }
-	boost::shared_ptr<PeakMeter>       peak_meter()       { return _meter; }
-	boost::shared_ptr<const PeakMeter> peak_meter() const { return _meter; }
-	boost::shared_ptr<PeakMeter> shared_peak_meter() const { return _meter; }
-	boost::shared_ptr<TriggerBox> triggerbox() const { return _triggerbox; }
+	std::shared_ptr<Amp> amp() const  { return _amp; }
+	std::shared_ptr<Amp> trim() const { return _trim; }
+	std::shared_ptr<PolarityProcessor> polarity() const { return _polarity; }
+	std::shared_ptr<PeakMeter>       peak_meter()       { return _meter; }
+	std::shared_ptr<const PeakMeter> peak_meter() const { return _meter; }
+	std::shared_ptr<PeakMeter> shared_peak_meter() const { return _meter; }
+	std::shared_ptr<TriggerBox> triggerbox() const { return _triggerbox; }
 
 	void flush_processors ();
 
-	void foreach_processor (boost::function<void(boost::weak_ptr<Processor>)> method) const {
+	void foreach_processor (boost::function<void(std::weak_ptr<Processor>)> method) const {
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		for (ProcessorList::const_iterator i = _processors.begin(); i != _processors.end(); ++i) {
-			method (boost::weak_ptr<Processor> (*i));
+			method (std::weak_ptr<Processor> (*i));
 		}
 	}
 
-	boost::shared_ptr<Processor> nth_processor (uint32_t n) {
+	std::shared_ptr<Processor> nth_processor (uint32_t n) {
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 		ProcessorList::iterator i;
 		for (i = _processors.begin(); i != _processors.end() && n; ++i, --n) {}
 		if (i == _processors.end()) {
-			return boost::shared_ptr<Processor> ();
+			return std::shared_ptr<Processor> ();
 		} else {
 			return *i;
 		}
 	}
 
-	boost::shared_ptr<Processor> processor_by_id (PBD::ID) const;
+	std::shared_ptr<Processor> processor_by_id (PBD::ID) const;
 
-	boost::shared_ptr<Processor> nth_plugin (uint32_t n) const;
-	boost::shared_ptr<Processor> nth_send (uint32_t n) const;
+	std::shared_ptr<Processor> nth_plugin (uint32_t n) const;
+	std::shared_ptr<Processor> nth_send (uint32_t n) const;
 
 	bool has_io_processor_named (const std::string&);
 	ChanCount max_processor_streams () const { return processor_max_streams; }
@@ -255,23 +255,23 @@ public:
 	PatchChangeGridDialog* patch_selector_dialog () const { return _patch_selector_dialog; }
 	void set_patch_selector_dialog  (PatchChangeGridDialog* d) { _patch_selector_dialog = d; }
 
-	boost::shared_ptr<AutomationControl> automation_control_recurse (PBD::ID const & id) const;
+	std::shared_ptr<AutomationControl> automation_control_recurse (PBD::ID const & id) const;
 
 	 void automatables (PBD::ControllableSet&) const;
 
 	/* special processors */
 
-	boost::shared_ptr<InternalSend>     monitor_send() const { return _monitor_send; }
+	std::shared_ptr<InternalSend>     monitor_send() const { return _monitor_send; }
 	/** the signal processorat at end of the processing chain which produces output */
-	boost::shared_ptr<Delivery>         main_outs() const { return _main_outs; }
-	boost::shared_ptr<InternalReturn>   internal_return() const { return _intreturn; }
-	boost::shared_ptr<MonitorProcessor> monitor_control() const { return _monitor_control; }
-	boost::shared_ptr<Send>             internal_send_for (boost::shared_ptr<const Route> target) const;
+	std::shared_ptr<Delivery>         main_outs() const { return _main_outs; }
+	std::shared_ptr<InternalReturn>   internal_return() const { return _intreturn; }
+	std::shared_ptr<MonitorProcessor> monitor_control() const { return _monitor_control; }
+	std::shared_ptr<Send>             internal_send_for (std::shared_ptr<const Route> target) const;
 	void add_internal_return ();
 	void add_send_to_internal_return (InternalSend *);
 	void remove_send_from_internal_return (InternalSend *);
 	void listen_position_changed ();
-	boost::shared_ptr<CapturingProcessor> add_export_point(/* Add some argument for placement later */);
+	std::shared_ptr<CapturingProcessor> add_export_point(/* Add some argument for placement later */);
 
 	/** A record of the stream configuration at some point in the processor list.
 	 * Used to return where and why an processor list configuration request failed.
@@ -283,12 +283,12 @@ public:
 		ChanCount count; ///< Input requested of processor
 	};
 
-	int add_processor (boost::shared_ptr<Processor>, Placement placement, ProcessorStreams* err = 0, bool activation_allowed = true);
-	int add_processor_by_index (boost::shared_ptr<Processor>, int, ProcessorStreams* err = 0, bool activation_allowed = true);
-	int add_processor (boost::shared_ptr<Processor>, boost::shared_ptr<Processor>, ProcessorStreams* err = 0, bool activation_allowed = true);
-	int add_processors (const ProcessorList&, boost::shared_ptr<Processor>, ProcessorStreams* err = 0);
-	boost::shared_ptr<Processor> before_processor_for_placement (Placement);
-	boost::shared_ptr<Processor> before_processor_for_index (int);
+	int add_processor (std::shared_ptr<Processor>, Placement placement, ProcessorStreams* err = 0, bool activation_allowed = true);
+	int add_processor_by_index (std::shared_ptr<Processor>, int, ProcessorStreams* err = 0, bool activation_allowed = true);
+	int add_processor (std::shared_ptr<Processor>, std::shared_ptr<Processor>, ProcessorStreams* err = 0, bool activation_allowed = true);
+	int add_processors (const ProcessorList&, std::shared_ptr<Processor>, ProcessorStreams* err = 0);
+	std::shared_ptr<Processor> before_processor_for_placement (Placement);
+	std::shared_ptr<Processor> before_processor_for_index (int);
 	bool processors_reorder_needs_configure (const ProcessorList& new_order);
 	/** remove plugin/processor
 	 *
@@ -297,7 +297,7 @@ public:
 	 * @param need_process_lock if locking is required (set to true, unless called from RT context with lock)
 	 * @returns 0 on success
 	 */
-	int remove_processor (boost::shared_ptr<Processor> proc, ProcessorStreams* err = 0, bool need_process_lock = true);
+	int remove_processor (std::shared_ptr<Processor> proc, ProcessorStreams* err = 0, bool need_process_lock = true);
 	/** replace plugin/processor with another
 	 *
 	 * @param old processor to remove
@@ -305,7 +305,7 @@ public:
 	 * @param err error report (index where removal vailed, channel-count why it failed) may be nil
 	 * @returns 0 on success
 	 */
-	int replace_processor (boost::shared_ptr<Processor> old, boost::shared_ptr<Processor> sub, ProcessorStreams* err = 0);
+	int replace_processor (std::shared_ptr<Processor> old, std::shared_ptr<Processor> sub, ProcessorStreams* err = 0);
 	int remove_processors (const ProcessorList&, ProcessorStreams* err = 0);
 	int reorder_processors (const ProcessorList& new_order, ProcessorStreams* err = 0);
 	void disable_processors (Placement);
@@ -329,7 +329,7 @@ public:
 	 * @param proc Processor to reset
 	 * @returns true if successful
 	 */
-	bool reset_plugin_insert (boost::shared_ptr<Processor> proc);
+	bool reset_plugin_insert (std::shared_ptr<Processor> proc);
 	/** enable custom plugin-insert configuration
 	 * @param proc Processor to customize
 	 * @param count number of plugin instances to use (if zero, reset to default)
@@ -337,9 +337,9 @@ public:
 	 * @param sinks input pins for variable-I/O plugins
 	 * @returns true if successful
 	 */
-	bool customize_plugin_insert (boost::shared_ptr<Processor> proc, uint32_t count, ChanCount outs, ChanCount sinks);
-	bool add_remove_sidechain (boost::shared_ptr<Processor> proc, bool);
-	bool plugin_preset_output (boost::shared_ptr<Processor> proc, ChanCount outs);
+	bool customize_plugin_insert (std::shared_ptr<Processor> proc, uint32_t count, ChanCount outs, ChanCount sinks);
+	bool add_remove_sidechain (std::shared_ptr<Processor> proc, bool);
+	bool plugin_preset_output (std::shared_ptr<Processor> proc, ChanCount outs);
 
 	/* enable sidechain input for a given processor
 	 *
@@ -350,12 +350,12 @@ public:
 	 * @param proc the processor to add sidechain inputs to
 	 * @returns true on success
 	 */
-	bool add_sidechain (boost::shared_ptr<Processor> proc) { return add_remove_sidechain (proc, true); }
+	bool add_sidechain (std::shared_ptr<Processor> proc) { return add_remove_sidechain (proc, true); }
 	/* remove sidechain input from given processor
 	 * @param proc the processor to remove the sidechain input from
 	 * @returns true on success
 	 */
-	bool remove_sidechain (boost::shared_ptr<Processor> proc) { return add_remove_sidechain (proc, false); }
+	bool remove_sidechain (std::shared_ptr<Processor> proc) { return add_remove_sidechain (proc, false); }
 
 	samplecnt_t  update_signal_latency (bool apply_to_delayline = false, bool* delayline_update_needed = NULL);
 	void apply_latency_compensation ();
@@ -394,10 +394,10 @@ public:
 	};
 
 	/** ask GUI about port-count, fan-out when adding instrument */
-	static PBD::Signal3<int, boost::shared_ptr<Route>, boost::shared_ptr<PluginInsert>, PluginSetupOptions > PluginSetup;
+	static PBD::Signal3<int, std::shared_ptr<Route>, std::shared_ptr<PluginInsert>, PluginSetupOptions > PluginSetup;
 
 	/** used to signal the GUI to fan-out (track-creation) */
-	static PBD::Signal1<void, boost::weak_ptr<Route> > FanOut;
+	static PBD::Signal1<void, std::weak_ptr<Route> > FanOut;
 
 	/** the processors have changed; the parameter indicates what changed */
 	PBD::Signal1<void,RouteProcessorChange> processors_changed;
@@ -421,14 +421,14 @@ public:
 	void set_processor_state (const XMLNode&, int version);
 	virtual bool set_processor_state (XMLNode const & node, int version, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
 
-	boost::weak_ptr<Route> weakroute ();
+	std::weak_ptr<Route> weakroute ();
 
 	int save_as_template (const std::string& path, const std::string& name, const std::string& description );
 
 	PBD::Signal1<void,void*> SelectedChanged;
 
-	int add_aux_send (boost::shared_ptr<Route>, boost::shared_ptr<Processor>);
-	int add_foldback_send (boost::shared_ptr<Route>, bool post_fader);
+	int add_aux_send (std::shared_ptr<Route>, std::shared_ptr<Processor>);
+	int add_foldback_send (std::shared_ptr<Route>, bool post_fader);
 	void remove_monitor_send ();
 
 	/**
@@ -436,7 +436,7 @@ public:
 	 * either its main outs or a send.  This is checked by the actual
 	 * connections, rather than by what the graph is currently doing.
 	 */
-	bool direct_feeds_according_to_reality (boost::shared_ptr<GraphNode>, bool* via_send_only = 0);
+	bool direct_feeds_according_to_reality (std::shared_ptr<GraphNode>, bool* via_send_only = 0);
 
 	std::string graph_node_name () const {
 		return name ();
@@ -447,19 +447,19 @@ public:
 	 * either its main outs or a send, according to the graph that
 	 * is currently being processed.
 	 */
-	bool direct_feeds_according_to_graph (boost::shared_ptr<Route>, bool* via_send_only = 0);
+	bool direct_feeds_according_to_graph (std::shared_ptr<Route>, bool* via_send_only = 0);
 
 	/**
 	 * @return true if this node feeds the first argument via at least one
 	 * (arbitrarily long) signal pathway.
 	 */
-	bool feeds (boost::shared_ptr<Route>);
+	bool feeds (std::shared_ptr<Route>);
 
 	/**
 	 * @return a list of all routes that eventually may feed a signal
 	 * into this route.
 	 */
-	std::set<boost::shared_ptr<Route>> signal_sources (bool via_sends_only = false);
+	std::set<std::shared_ptr<Route>> signal_sources (bool via_sends_only = false);
 
 	/** Follow output port connections and check if the output *port*
 	 * of any downstream routes is connected.
@@ -468,13 +468,13 @@ public:
 
 	/* Controls (not all directly owned by the Route) */
 
-	boost::shared_ptr<AutomationControl> get_control (const Evoral::Parameter& param);
+	std::shared_ptr<AutomationControl> get_control (const Evoral::Parameter& param);
 
-	boost::shared_ptr<SoloControl> solo_control() const {
+	std::shared_ptr<SoloControl> solo_control() const {
 		return _solo_control;
 	}
 
-	boost::shared_ptr<MuteControl> mute_control() const {
+	std::shared_ptr<MuteControl> mute_control() const {
 		return _mute_control;
 	}
 
@@ -484,11 +484,11 @@ public:
 	bool muted_by_self () const { return _mute_control->muted_by_self(); }
 	bool muted_by_others_soloing () const;
 
-	boost::shared_ptr<SoloIsolateControl> solo_isolate_control() const {
+	std::shared_ptr<SoloIsolateControl> solo_isolate_control() const {
 		return _solo_isolate_control;
 	}
 
-	boost::shared_ptr<SoloSafeControl> solo_safe_control() const {
+	std::shared_ptr<SoloSafeControl> solo_safe_control() const {
 		return _solo_safe_control;
 	}
 
@@ -497,14 +497,14 @@ public:
 	   here.
 	*/
 
-	boost::shared_ptr<Panner> panner() const;  /* may return null */
-	boost::shared_ptr<PannerShell> panner_shell() const;
-	boost::shared_ptr<Pannable> pannable() const;
+	std::shared_ptr<Panner> panner() const;  /* may return null */
+	std::shared_ptr<PannerShell> panner_shell() const;
+	std::shared_ptr<Pannable> pannable() const;
 
-	boost::shared_ptr<GainControl> gain_control() const;
-	boost::shared_ptr<GainControl> trim_control() const;
-	boost::shared_ptr<GainControl> volume_control() const;
-	boost::shared_ptr<PhaseControl> phase_control() const;
+	std::shared_ptr<GainControl> gain_control() const;
+	std::shared_ptr<GainControl> trim_control() const;
+	std::shared_ptr<GainControl> volume_control() const;
+	std::shared_ptr<PhaseControl> phase_control() const;
 
 	void set_volume_applies_to_output (bool);
 
@@ -519,7 +519,7 @@ public:
 	   processors later in the processing chain, but that would be a
 	   special case not covered by this utility function.
 	*/
-	boost::shared_ptr<Processor> the_instrument() const;
+	std::shared_ptr<Processor> the_instrument() const;
 	InstrumentInfo& instrument_info() { return _instrument_info; }
 	bool instrument_fanned_out () const { return _instrument_fanned_out;}
 
@@ -528,77 +528,78 @@ public:
 	 * Any or all of these may return NULL.
 	 */
 
-	boost::shared_ptr<AutomationControl> pan_azimuth_control() const;
-	boost::shared_ptr<AutomationControl> pan_elevation_control() const;
-	boost::shared_ptr<AutomationControl> pan_width_control() const;
-	boost::shared_ptr<AutomationControl> pan_frontback_control() const;
-	boost::shared_ptr<AutomationControl> pan_lfe_control() const;
+	std::shared_ptr<AutomationControl> pan_azimuth_control() const;
+	std::shared_ptr<AutomationControl> pan_elevation_control() const;
+	std::shared_ptr<AutomationControl> pan_width_control() const;
+	std::shared_ptr<AutomationControl> pan_frontback_control() const;
+	std::shared_ptr<AutomationControl> pan_lfe_control() const;
 
 	uint32_t eq_band_cnt () const;
 	std::string eq_band_name (uint32_t) const;
-	boost::shared_ptr<AutomationControl> eq_enable_controllable () const;
-	boost::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const;
-	boost::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const;
-	boost::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const;
-	boost::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t band) const;
 
-	boost::shared_ptr<AutomationControl> filter_freq_controllable (bool hpf) const;
-	boost::shared_ptr<AutomationControl> filter_slope_controllable (bool) const;
-	boost::shared_ptr<AutomationControl> filter_enable_controllable (bool) const;
+	std::shared_ptr<AutomationControl> eq_enable_controllable () const;
+	std::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const;
+	std::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const;
+	std::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const;
+	std::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t band) const;
+
+	std::shared_ptr<AutomationControl> filter_freq_controllable (bool hpf) const;
+	std::shared_ptr<AutomationControl> filter_slope_controllable (bool) const;
+	std::shared_ptr<AutomationControl> filter_enable_controllable (bool) const;
 
 	std::string tape_mode_name (uint32_t) const;
-	boost::shared_ptr<AutomationControl> tape_drive_controllable () const;
-	boost::shared_ptr<AutomationControl> tape_drive_mode_controllable () const;
-	boost::shared_ptr<ReadOnlyControl>   tape_drive_mtr_controllable () const;
+	std::shared_ptr<AutomationControl> tape_drive_controllable () const;
+	std::shared_ptr<AutomationControl> tape_drive_mode_controllable () const;
+	std::shared_ptr<ReadOnlyControl>   tape_drive_mtr_controllable () const;
 
-	boost::shared_ptr<AutomationControl> comp_enable_controllable () const;
-	boost::shared_ptr<AutomationControl> comp_threshold_controllable () const;
-	boost::shared_ptr<AutomationControl> comp_speed_controllable () const;
-	boost::shared_ptr<AutomationControl> comp_mode_controllable () const;
-	boost::shared_ptr<AutomationControl> comp_makeup_controllable () const;
-	boost::shared_ptr<AutomationControl> comp_ratio_controllable () const;
-	boost::shared_ptr<AutomationControl> comp_attack_controllable () const;
-	boost::shared_ptr<AutomationControl> comp_release_controllable () const;
-	boost::shared_ptr<AutomationControl> comp_key_filter_freq_controllable () const;
-	boost::shared_ptr<AutomationControl> comp_lookahead_controllable () const;
-	boost::shared_ptr<ReadOnlyControl>   comp_meter_controllable () const;
-	boost::shared_ptr<ReadOnlyControl>   comp_redux_controllable () const;
+	std::shared_ptr<AutomationControl> comp_enable_controllable () const;
+	std::shared_ptr<AutomationControl> comp_threshold_controllable () const;
+	std::shared_ptr<AutomationControl> comp_speed_controllable () const;
+	std::shared_ptr<AutomationControl> comp_mode_controllable () const;
+	std::shared_ptr<AutomationControl> comp_makeup_controllable () const;
+	std::shared_ptr<AutomationControl> comp_ratio_controllable () const;
+	std::shared_ptr<AutomationControl> comp_attack_controllable () const;
+	std::shared_ptr<AutomationControl> comp_release_controllable () const;
+	std::shared_ptr<AutomationControl> comp_key_filter_freq_controllable () const;
+	std::shared_ptr<AutomationControl> comp_lookahead_controllable () const;
+	std::shared_ptr<ReadOnlyControl>   comp_meter_controllable () const;
+	std::shared_ptr<ReadOnlyControl>   comp_redux_controllable () const;
 
 	std::string gate_mode_name (uint32_t) const;
-	boost::shared_ptr<AutomationControl> gate_enable_controllable () const;
-	boost::shared_ptr<AutomationControl> gate_mode_controllable () const;
-	boost::shared_ptr<AutomationControl> gate_ratio_controllable () const;
-	boost::shared_ptr<AutomationControl> gate_knee_controllable () const;
-	boost::shared_ptr<AutomationControl> gate_threshold_controllable () const;
-	boost::shared_ptr<AutomationControl> gate_depth_controllable () const;
-	boost::shared_ptr<AutomationControl> gate_hysteresis_controllable () const;
-	boost::shared_ptr<AutomationControl> gate_hold_controllable () const;
-	boost::shared_ptr<AutomationControl> gate_attack_controllable () const;
-	boost::shared_ptr<AutomationControl> gate_release_controllable () const;
-	boost::shared_ptr<AutomationControl> gate_key_listen_controllable () const;
-	boost::shared_ptr<AutomationControl> gate_key_filter_enable_controllable () const;
-	boost::shared_ptr<AutomationControl> gate_key_filter_freq_controllable () const;
-	boost::shared_ptr<AutomationControl> gate_lookahead_controllable () const;
-	boost::shared_ptr<ReadOnlyControl>   gate_meter_controllable () const;
-	boost::shared_ptr<ReadOnlyControl>   gate_redux_controllable () const;
+	std::shared_ptr<AutomationControl> gate_enable_controllable () const;
+	std::shared_ptr<AutomationControl> gate_mode_controllable () const;
+	std::shared_ptr<AutomationControl> gate_ratio_controllable () const;
+	std::shared_ptr<AutomationControl> gate_knee_controllable () const;
+	std::shared_ptr<AutomationControl> gate_threshold_controllable () const;
+	std::shared_ptr<AutomationControl> gate_depth_controllable () const;
+	std::shared_ptr<AutomationControl> gate_hysteresis_controllable () const;
+	std::shared_ptr<AutomationControl> gate_hold_controllable () const;
+	std::shared_ptr<AutomationControl> gate_attack_controllable () const;
+	std::shared_ptr<AutomationControl> gate_release_controllable () const;
+	std::shared_ptr<AutomationControl> gate_key_listen_controllable () const;
+	std::shared_ptr<AutomationControl> gate_key_filter_enable_controllable () const;
+	std::shared_ptr<AutomationControl> gate_key_filter_freq_controllable () const;
+	std::shared_ptr<AutomationControl> gate_lookahead_controllable () const;
+	std::shared_ptr<ReadOnlyControl>   gate_meter_controllable () const;
+	std::shared_ptr<ReadOnlyControl>   gate_redux_controllable () const;
 
 	std::string comp_mode_name (uint32_t mode) const;
 	std::string comp_speed_name (uint32_t mode) const;
 
-	boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const;
-	boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const;
-	boost::shared_ptr<AutomationControl> send_pan_azimuth_controllable (uint32_t n) const;
-	boost::shared_ptr<AutomationControl> send_pan_azimuth_enable_controllable (uint32_t n) const;
+	std::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const;
+	std::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const;
+	std::shared_ptr<AutomationControl> send_pan_azimuth_controllable (uint32_t n) const;
+	std::shared_ptr<AutomationControl> send_pan_azimuth_enable_controllable (uint32_t n) const;
 
 	std::string send_name (uint32_t n) const;
 
-	boost::shared_ptr<AutomationControl> master_send_enable_controllable () const;
+	std::shared_ptr<AutomationControl> master_send_enable_controllable () const;
 
-	boost::shared_ptr<ReadOnlyControl> master_correlation_mtr_controllable (bool) const;
+	std::shared_ptr<ReadOnlyControl> master_correlation_mtr_controllable (bool) const;
 
-	boost::shared_ptr<AutomationControl> master_limiter_enable_controllable () const;
-	boost::shared_ptr<ReadOnlyControl> master_limiter_mtr_controllable () const;
-	boost::shared_ptr<ReadOnlyControl> master_k_mtr_controllable () const;
+	std::shared_ptr<AutomationControl> master_limiter_enable_controllable () const;
+	std::shared_ptr<ReadOnlyControl> master_limiter_mtr_controllable () const;
+	std::shared_ptr<ReadOnlyControl> master_k_mtr_controllable () const;
 
 	void protect_automation ();
 
@@ -609,7 +610,7 @@ public:
 	 */
 	void monitor_run (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes);
 
-	bool slaved_to (boost::shared_ptr<VCA>) const;
+	bool slaved_to (std::shared_ptr<VCA>) const;
 	bool slaved () const;
 
 	virtual void use_captured_sources (SourceList& srcs, CaptureInfos const &) {}
@@ -640,13 +641,13 @@ protected:
 
 	virtual void bounce_process (BufferSet& bufs,
 	                             samplepos_t start_sample, samplecnt_t nframes,
-															 boost::shared_ptr<Processor> endpoint, bool include_endpoint,
+															 std::shared_ptr<Processor> endpoint, bool include_endpoint,
 	                             bool for_export, bool for_freeze);
 
-	samplecnt_t  bounce_get_latency (boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
-	ChanCount    bounce_get_output_streams (ChanCount &cc, boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
+	samplecnt_t  bounce_get_latency (std::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
+	ChanCount    bounce_get_output_streams (ChanCount &cc, std::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze) const;
 
-	bool can_freeze_processor (boost::shared_ptr<Processor>, bool allow_routing = false) const;
+	bool can_freeze_processor (std::shared_ptr<Processor>, bool allow_routing = false) const;
 
 	bool           _active;
 	samplecnt_t    _signal_latency;
@@ -655,20 +656,20 @@ protected:
 	ProcessorList  _processors;
 	mutable Glib::Threads::RWLock _processor_lock;
 
-	boost::shared_ptr<IO>               _input;
-	boost::shared_ptr<IO>               _output;
+	std::shared_ptr<IO>               _input;
+	std::shared_ptr<IO>               _output;
 
-	boost::shared_ptr<Delivery>         _main_outs;
-	boost::shared_ptr<InternalSend>     _monitor_send;
-	boost::shared_ptr<InternalReturn>   _intreturn;
-	boost::shared_ptr<MonitorProcessor> _monitor_control;
-	boost::shared_ptr<Pannable>         _pannable;
-	boost::shared_ptr<DiskReader>       _disk_reader;
-	boost::shared_ptr<DiskWriter>       _disk_writer;
+	std::shared_ptr<Delivery>         _main_outs;
+	std::shared_ptr<InternalSend>     _monitor_send;
+	std::shared_ptr<InternalReturn>   _intreturn;
+	std::shared_ptr<MonitorProcessor> _monitor_control;
+	std::shared_ptr<Pannable>         _pannable;
+	std::shared_ptr<DiskReader>       _disk_reader;
+	std::shared_ptr<DiskWriter>       _disk_writer;
 #ifdef HAVE_BEATBOX
-	boost::shared_ptr<BeatBox>       _beatbox;
+	std::shared_ptr<BeatBox>       _beatbox;
 #endif
-	boost::shared_ptr<MonitorControl>   _monitoring_control;
+	std::shared_ptr<MonitorControl>   _monitoring_control;
 
 	DiskIOPoint _disk_io_point;
 
@@ -691,10 +692,10 @@ protected:
 
 	bool _recordable : 1;
 
-	boost::shared_ptr<SoloControl> _solo_control;
-	boost::shared_ptr<MuteControl> _mute_control;
-	boost::shared_ptr<SoloIsolateControl> _solo_isolate_control;
-	boost::shared_ptr<SoloSafeControl> _solo_safe_control;
+	std::shared_ptr<SoloControl> _solo_control;
+	std::shared_ptr<MuteControl> _mute_control;
+	std::shared_ptr<SoloIsolateControl> _solo_isolate_control;
+	std::shared_ptr<SoloSafeControl> _solo_safe_control;
 
 	std::string    _comment;
 	bool           _have_internal_generator;
@@ -718,24 +719,24 @@ protected:
 	uint32_t pans_required() const;
 	ChanCount n_process_buffers ();
 
-	boost::shared_ptr<GainControl>  _gain_control;
-	boost::shared_ptr<GainControl>  _trim_control;
-	boost::shared_ptr<GainControl>  _volume_control;
-	boost::shared_ptr<PhaseControl> _phase_control;
-	boost::shared_ptr<Amp>               _amp;
-	boost::shared_ptr<Amp>               _trim;
-	boost::shared_ptr<Amp>               _volume;
-	boost::shared_ptr<PeakMeter>         _meter;
-	boost::shared_ptr<PolarityProcessor> _polarity;
-	boost::shared_ptr<TriggerBox>        _triggerbox;
+	std::shared_ptr<GainControl>  _gain_control;
+	std::shared_ptr<GainControl>  _trim_control;
+	std::shared_ptr<GainControl>  _volume_control;
+	std::shared_ptr<PhaseControl> _phase_control;
+	std::shared_ptr<Amp>               _amp;
+	std::shared_ptr<Amp>               _trim;
+	std::shared_ptr<Amp>               _volume;
+	std::shared_ptr<PeakMeter>         _meter;
+	std::shared_ptr<PolarityProcessor> _polarity;
+	std::shared_ptr<TriggerBox>        _triggerbox;
 
 	bool _volume_applies_to_output;
 
-	boost::shared_ptr<DelayLine> _delayline;
+	std::shared_ptr<DelayLine> _delayline;
 
-	bool is_internal_processor (boost::shared_ptr<Processor>) const;
+	bool is_internal_processor (std::shared_ptr<Processor>) const;
 
-	boost::shared_ptr<Processor> the_instrument_unlocked() const;
+	std::shared_ptr<Processor> the_instrument_unlocked() const;
 
 	SlavableControlList slavables () const;
 
@@ -750,8 +751,8 @@ private:
 	void output_change_handler (IOChange, void *src);
 	void sidechain_change_handler (IOChange, void *src);
 
-	void processor_selfdestruct (boost::weak_ptr<Processor>);
-	std::vector<boost::weak_ptr<Processor> > selfdestruct_sequence;
+	void processor_selfdestruct (std::weak_ptr<Processor>);
+	std::vector<std::weak_ptr<Processor> > selfdestruct_sequence;
 	Glib::Threads::Mutex  selfdestruct_lock;
 
 	bool input_port_count_changing (ChanCount);
@@ -782,13 +783,13 @@ private:
 	pframes_t latency_preroll (pframes_t nframes, samplepos_t& start_sample, samplepos_t& end_sample);
 
 	void run_route (samplepos_t start_sample, samplepos_t end_sample, pframes_t nframes, bool gain_automation_ok, bool run_disk_reader);
-	void fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pframes_t nframes);
+	void fill_buffers_with_input (BufferSet& bufs, std::shared_ptr<IO> io, pframes_t nframes);
 
 	void reset_instrument_info ();
 	void solo_control_changed (bool self, PBD::Controllable::GroupControlDisposition);
 	void maybe_note_meter_position ();
 
-	void set_plugin_state_dir (boost::weak_ptr<Processor>, const std::string&);
+	void set_plugin_state_dir (std::weak_ptr<Processor>, const std::string&);
 
 	/** A handy class to keep processor state while we attempt a reconfiguration
 	 *  that may fail.
@@ -817,7 +818,7 @@ private:
 
 	friend class ProcessorState;
 
-	boost::shared_ptr<CapturingProcessor> _capturing_processor;
+	std::shared_ptr<CapturingProcessor> _capturing_processor;
 
 	int64_t _track_number;
 	bool    _strict_io;
@@ -831,7 +832,7 @@ private:
 	/** the processor that came after the meter when it was last set to a custom position,
 	    or 0.
 	*/
-	boost::weak_ptr<Processor> _processor_after_last_custom_meter;
+	std::weak_ptr<Processor> _processor_after_last_custom_meter;
 
 	RoutePinWindowProxy*   _pinmgr_proxy;
 	PatchChangeGridDialog* _patch_selector_dialog;

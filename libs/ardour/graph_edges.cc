@@ -231,10 +231,10 @@ struct RouteRecEnabledComparator
 {
 	bool operator () (GraphVertex n1, GraphVertex n2) const
 	{
-		boost::shared_ptr<Track> t1 (boost::dynamic_pointer_cast<Track>(n1));
-		boost::shared_ptr<Track> t2 (boost::dynamic_pointer_cast<Track>(n2));
-		boost::shared_ptr<Route> r1 (boost::dynamic_pointer_cast<Route>(n1));
-		boost::shared_ptr<Route> r2 (boost::dynamic_pointer_cast<Route>(n2));
+		std::shared_ptr<Track> t1 (std::dynamic_pointer_cast<Track>(n1));
+		std::shared_ptr<Track> t2 (std::dynamic_pointer_cast<Track>(n2));
+		std::shared_ptr<Route> r1 (std::dynamic_pointer_cast<Route>(n1));
+		std::shared_ptr<Route> r2 (std::dynamic_pointer_cast<Route>(n2));
 
 		PresentationInfo::order_t r1o = r1 ? r1->presentation_info().order() : 0;
 		PresentationInfo::order_t r2o = r2 ? r2->presentation_info().order() : 0;

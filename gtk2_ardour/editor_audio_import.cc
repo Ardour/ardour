@@ -153,7 +153,7 @@ Editor::session_import_dialog ()
 	dialog.run ();
 }
 
-typedef std::map<PBD::ID,boost::shared_ptr<ARDOUR::Source> > SourceMap;
+typedef std::map<PBD::ID,std::shared_ptr<ARDOUR::Source> > SourceMap;
 
 /**
  * Updating is still disabled, see note in libs/ardour/import.cc Session::import_files()
@@ -212,7 +212,7 @@ Editor::check_whether_and_how_to_import(string path, bool all_or_nothing)
 	return function;
 }
 
-boost::shared_ptr<AudioTrack>
+std::shared_ptr<AudioTrack>
 Editor::get_nth_selected_audio_track (int nth) const
 {
 	AudioTimeAxisView* atv;
@@ -236,13 +236,13 @@ Editor::get_nth_selected_audio_track (int nth) const
 	}
 
 	if (!atv || !atv->is_audio_track()) {
-		return boost::shared_ptr<AudioTrack>();
+		return std::shared_ptr<AudioTrack>();
 	}
 
 	return atv->audio_track();
 }
 
-boost::shared_ptr<MidiTrack>
+std::shared_ptr<MidiTrack>
 Editor::get_nth_selected_midi_track (int nth) const
 {
 	MidiTimeAxisView* mtv;
@@ -266,7 +266,7 @@ Editor::get_nth_selected_midi_track (int nth) const
 	}
 
 	if (!mtv || !mtv->is_midi_track()) {
-		return boost::shared_ptr<MidiTrack>();
+		return std::shared_ptr<MidiTrack>();
 	}
 
 	return mtv->midi_track();
@@ -342,7 +342,7 @@ Editor::do_import (vector<string>           paths,
                    MidiTempoMapDisposition  smf_tempo_disposition,
                    timepos_t&               pos,
                    ARDOUR::PluginInfoPtr    instrument,
-                   boost::shared_ptr<Track> track,
+                   std::shared_ptr<Track> track,
                    bool                     with_markers)
 {
 	vector<string> to_import;
@@ -495,7 +495,7 @@ Editor::do_embed (vector<string>           paths,
                   ImportMode               mode,
                   timepos_t&               pos,
                   ARDOUR::PluginInfoPtr    instrument,
-                  boost::shared_ptr<Track> track)
+                  std::shared_ptr<Track> track)
 {
 	bool check_sample_rate = true;
 	vector<string> to_embed;
@@ -580,7 +580,7 @@ Editor::import_sndfiles (vector<string>            paths,
                          timepos_t&                pos,
                          int                       target_regions,
                          int                       target_tracks,
-                         boost::shared_ptr<Track>& track,
+                         std::shared_ptr<Track>& track,
                          std::string const&        pgroup_id,
                          bool                      replace,
                          bool                      with_markers,
@@ -655,11 +655,11 @@ Editor::embed_sndfiles (vector<string>            paths,
                         timepos_t&              pos,
                         int                       target_regions,
                         int                       target_tracks,
-                        boost::shared_ptr<Track>& track,
+                        std::shared_ptr<Track>& track,
                         std::string const&        pgroup_id,
                         ARDOUR::PluginInfoPtr     instrument)
 {
-	boost::shared_ptr<AudioFileSource> source;
+	std::shared_ptr<AudioFileSource> source;
 	SourceList sources;
 	string linked_path;
 	SoundFileInfo finfo;
@@ -747,17 +747,17 @@ Editor::embed_sndfiles (vector<string>            paths,
 
 				/* check if we have this thing embedded already */
 
-				boost::shared_ptr<Source> s;
+				std::shared_ptr<Source> s;
 
 				if ((s = _session->audio_source_by_path_and_channel (path, n)) == 0) {
 
-					source = boost::dynamic_pointer_cast<AudioFileSource> (
+					source = std::dynamic_pointer_cast<AudioFileSource> (
 						SourceFactory::createExternal (DataType::AUDIO, *_session,
 									       path, n,
 						                               Source::Flag (0),
 									true, true));
 				} else {
-					source = boost::dynamic_pointer_cast<AudioFileSource> (s);
+					source = std::dynamic_pointer_cast<AudioFileSource> (s);
 				}
 
 				sources.push_back(source);
@@ -787,12 +787,12 @@ Editor::add_sources (vector<string>            paths,
                      ImportMode                mode,
                      int                       target_regions,
                      int                       target_tracks,
-                     boost::shared_ptr<Track>& track,
+                     std::shared_ptr<Track>& track,
                      std::string const&        pgroup_id,
                      bool                      /*add_channel_suffix*/,
                      ARDOUR::PluginInfoPtr     instrument)
 {
-	vector<boost::shared_ptr<Region> > regions;
+	vector<std::shared_ptr<Region> > regions;
 	string region_name;
 	uint32_t input_chan = 0;
 	uint32_t output_chan = 0;
@@ -828,10 +828,10 @@ Editor::add_sources (vector<string>            paths,
 		plist.add (ARDOUR::Properties::external, true);
 		plist.add (ARDOUR::Properties::opaque, true);
 
-		boost::shared_ptr<Region> r = RegionFactory::create (sources, plist);
+		std::shared_ptr<Region> r = RegionFactory::create (sources, plist);
 
-		if (boost::dynamic_pointer_cast<AudioRegion>(r)) {
-			boost::dynamic_pointer_cast<AudioRegion>(r)->special_set_position(sources[0]->natural_position());
+		if (std::dynamic_pointer_cast<AudioRegion>(r)) {
+			std::dynamic_pointer_cast<AudioRegion>(r)->special_set_position(sources[0]->natural_position());
 		}
 
 		regions.push_back (r);
@@ -855,7 +855,7 @@ Editor::add_sources (vector<string>            paths,
 			just_one.clear ();
 			just_one.push_back (*x);
 
-			boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (*x);
+			std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (*x);
 
 			if (sources.size() > 1 && disposition == ImportDistinctChannels) {
 
@@ -922,10 +922,10 @@ Editor::add_sources (vector<string>            paths,
 			plist.add (ARDOUR::Properties::external, true);
 			plist.add (ARDOUR::Properties::opaque, true);
 
-			boost::shared_ptr<Region> r = RegionFactory::create (just_one, plist);
+			std::shared_ptr<Region> r = RegionFactory::create (just_one, plist);
 
-			if (boost::dynamic_pointer_cast<AudioRegion>(r)) {
-				boost::dynamic_pointer_cast<AudioRegion>(r)->special_set_position((*x)->natural_position());
+			if (std::dynamic_pointer_cast<AudioRegion>(r)) {
+				std::dynamic_pointer_cast<AudioRegion>(r)->special_set_position((*x)->natural_position());
 			}
 
 			regions.push_back (r);
@@ -966,16 +966,16 @@ Editor::add_sources (vector<string>            paths,
 	 */
 	assert (regions.size() == track_names.size());
 
-	for (vector<boost::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (*r);
+	for (vector<std::shared_ptr<Region> >::iterator r = regions.begin(); r != regions.end(); ++r, ++n) {
+		std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (*r);
 
 		if (use_timestamp) {
 			if (ar) {
 
 				/* get timestamp for this region */
 
-				const boost::shared_ptr<Source> s (ar->sources().front());
-				const boost::shared_ptr<AudioSource> as = boost::dynamic_pointer_cast<AudioSource> (s);
+				const std::shared_ptr<Source> s (ar->sources().front());
+				const std::shared_ptr<AudioSource> as = std::dynamic_pointer_cast<AudioSource> (s);
 
 				assert (as);
 
@@ -1024,18 +1024,18 @@ Editor::add_sources (vector<string>            paths,
 }
 
 int
-Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
+Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
                                      uint32_t                  in_chans,
                                      uint32_t                  out_chans,
                                      timepos_t&                pos,
                                      ImportMode                mode,
-                                     boost::shared_ptr<Track>& existing_track,
+                                     std::shared_ptr<Track>& existing_track,
                                      string const&             new_track_name,
                                      string const&             pgroup_id,
                                      ARDOUR::PluginInfoPtr     instrument)
 {
-	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(region);
-	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion>(region);
+	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion>(region);
+	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion>(region);
 
 	switch (mode) {
 	case ImportAsRegion:
@@ -1057,8 +1057,8 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 			}
 		}
 
-		boost::shared_ptr<Playlist> playlist = existing_track->playlist();
-		boost::shared_ptr<Region> copy (RegionFactory::create (region, region->properties()));
+		std::shared_ptr<Playlist> playlist = existing_track->playlist();
+		std::shared_ptr<Region> copy (RegionFactory::create (region, region->properties()));
 		playlist->clear_changes ();
 		playlist->clear_owned_changes ();
 		playlist->add_region (copy, pos);
@@ -1078,7 +1078,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 	{
 		if (!existing_track) {
 			if (ar) {
-				list<boost::shared_ptr<AudioTrack> > at (
+				list<std::shared_ptr<AudioTrack> > at (
 					_session->new_audio_track (in_chans, out_chans,
 					                           0, 1, string(),
 					                           PresentationInfo::max_order,
@@ -1089,7 +1089,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 				if (at.empty()) {
 					return -1;
 				}
-				for (list<boost::shared_ptr<AudioTrack> >::iterator i = at.begin(); i != at.end(); ++i) {
+				for (list<std::shared_ptr<AudioTrack> >::iterator i = at.begin(); i != at.end(); ++i) {
 					if (Config->get_strict_io ()) {
 						(*i)->set_strict_io (true);
 					}
@@ -1098,7 +1098,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 
 				existing_track = at.front();
 			} else if (mr) {
-				list<boost::shared_ptr<MidiTrack> > mt (
+				list<std::shared_ptr<MidiTrack> > mt (
 					_session->new_midi_track (ChanCount (DataType::MIDI, 1),
 					                          ChanCount (DataType::MIDI, 1),
 					                          Config->get_strict_io () || Profile->get_mixbus (),
@@ -1116,7 +1116,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 					return -1;
 				}
 
-				for (list<boost::shared_ptr<MidiTrack> >::iterator i = mt.begin(); i != mt.end(); ++i) {
+				for (list<std::shared_ptr<MidiTrack> >::iterator i = mt.begin(); i != mt.end(); ++i) {
 					if (Config->get_strict_io ()) {
 						(*i)->set_strict_io (true);
 					}
@@ -1134,7 +1134,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 		}
 
 		if (mode == ImportAsTrigger) {
-			boost::shared_ptr<Region> copy (RegionFactory::create (region, true));
+			std::shared_ptr<Region> copy (RegionFactory::create (region, true));
 			for (int s = 0; s < TriggerBox::default_triggers_per_box; ++s) {
 				if (!existing_track->triggerbox ()->trigger (s)->region ()) {
 					existing_track->triggerbox ()->set_from_selection (s, copy);
@@ -1145,7 +1145,7 @@ Editor::finish_bringing_in_material (boost::shared_ptr<Region> region,
 				}
 			}
 		} else {
-			boost::shared_ptr<Playlist> playlist = existing_track->playlist();
+			std::shared_ptr<Playlist> playlist = existing_track->playlist();
 			playlist->clear_changes ();
 			playlist->add_region (region, pos);
 			_session->add_command (new StatefulDiffCommand (playlist));

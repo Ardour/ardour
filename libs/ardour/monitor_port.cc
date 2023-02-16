@@ -84,7 +84,7 @@ MonitorPort::monitor (PortEngine& e, pframes_t n_samples)
 		memset (_input, 0, sizeof (Sample) * _insize);
 		_silent = true;
 	}
-	boost::shared_ptr<MonitorPorts> cycle_ports = _monitor_ports.reader ();
+	std::shared_ptr<MonitorPorts> cycle_ports = _monitor_ports.reader ();
 
 	for (MonitorPorts::iterator i = cycle_ports->begin (); i != cycle_ports->end(); ++i) {
 		if (i->second->remove && i->second->gain == 0) {
@@ -105,7 +105,7 @@ MonitorPort::monitor (PortEngine& e, pframes_t n_samples)
 }
 
 void
-MonitorPort::collect (boost::shared_ptr<MonitorInfo> mi, Sample* buf, pframes_t n_samples, std::string const& pn)
+MonitorPort::collect (std::shared_ptr<MonitorInfo> mi, Sample* buf, pframes_t n_samples, std::string const& pn)
 {
 	gain_t target_gain = mi->remove ? 0.0 : 1.0;
 	gain_t current_gain = mi->gain;
@@ -183,7 +183,7 @@ MonitorPort::get_audio_buffer (pframes_t n_samples)
 bool
 MonitorPort::monitoring (std::string const& pn) const
 {
-	boost::shared_ptr<MonitorPorts> mp = _monitor_ports.reader ();
+	std::shared_ptr<MonitorPorts> mp = _monitor_ports.reader ();
 	if (pn.empty ()) {
 		for (MonitorPorts::iterator i = mp->begin (); i != mp->end(); ++i) {
 			if (!i->second->remove) {
@@ -202,7 +202,7 @@ MonitorPort::monitoring (std::string const& pn) const
 void
 MonitorPort::active_monitors (std::list<std::string>& portlist) const
 {
-	boost::shared_ptr<MonitorPorts> mp = _monitor_ports.reader ();
+	std::shared_ptr<MonitorPorts> mp = _monitor_ports.reader ();
 	for (MonitorPorts::iterator i = mp->begin (); i != mp->end(); ++i) {
 		if (i->second->remove) {
 			continue;
@@ -223,7 +223,7 @@ MonitorPort::set_active_monitors (std::list<std::string> const& pl)
 
 	{
 		RCUWriter<MonitorPorts> mp_rcu (_monitor_ports);
-		boost::shared_ptr<MonitorPorts> mp = mp_rcu.get_copy ();
+		std::shared_ptr<MonitorPorts> mp = mp_rcu.get_copy ();
 		/* clear ports not present in portlist */
 		for (MonitorPorts::iterator i = mp->begin (); i != mp->end (); ++i) {
 			if (std::find (pl.begin (), pl.end (), i->first) != pl.end ()) {
@@ -237,7 +237,7 @@ MonitorPort::set_active_monitors (std::list<std::string> const& pl)
 		}
 		/* add ports */
 		for (std::list<std::string>::const_iterator i = pl.begin (); i != pl.end (); ++i) {
-			std::pair<MonitorPorts::iterator, bool> it = mp->insert (make_pair (*i, boost::shared_ptr<MonitorInfo> (new MonitorInfo ())));
+			std::pair<MonitorPorts::iterator, bool> it = mp->insert (make_pair (*i, std::shared_ptr<MonitorInfo> (new MonitorInfo ())));
 			if (!it.second && !it.first->second->remove) {
 				/* already present */
 				continue;
@@ -270,8 +270,8 @@ MonitorPort::add_port (std::string const& pn)
 
 	{
 		RCUWriter<MonitorPorts> mp_rcu (_monitor_ports);
-		boost::shared_ptr<MonitorPorts> mp = mp_rcu.get_copy ();
-		std::pair<MonitorPorts::iterator, bool> it = mp->insert (make_pair (pn, boost::shared_ptr<MonitorInfo> (new MonitorInfo ())));
+		std::shared_ptr<MonitorPorts> mp = mp_rcu.get_copy ();
+		std::pair<MonitorPorts::iterator, bool> it = mp->insert (make_pair (pn, std::shared_ptr<MonitorInfo> (new MonitorInfo ())));
 		if (!it.second) {
 			if (!it.first->second->remove) {
 				/* already present */
@@ -296,7 +296,7 @@ MonitorPort::remove_port (std::string const& pn, bool instantly)
 
 	{
 		RCUWriter<MonitorPorts> mp_rcu (_monitor_ports);
-		boost::shared_ptr<MonitorPorts> mp = mp_rcu.get_copy ();
+		std::shared_ptr<MonitorPorts> mp = mp_rcu.get_copy ();
 		MonitorPorts::iterator i = mp->find (pn);
 		if (i == mp->end ()) {
 			return;
@@ -323,11 +323,11 @@ MonitorPort::clear_ports (bool instantly)
 
 	if (instantly) {
 		RCUWriter<MonitorPorts> mp_rcu (_monitor_ports);
-		boost::shared_ptr<MonitorPorts> mp = mp_rcu.get_copy ();
+		std::shared_ptr<MonitorPorts> mp = mp_rcu.get_copy ();
 		mp->swap (copy);
 		assert (mp->empty ());
 	} else {
-		boost::shared_ptr<MonitorPorts> mp = _monitor_ports.reader ();
+		std::shared_ptr<MonitorPorts> mp = _monitor_ports.reader ();
 		copy = *mp;
 		for (MonitorPorts::iterator i = copy.begin (); i != copy.end(); ++i) {
 			i->second->remove = true;

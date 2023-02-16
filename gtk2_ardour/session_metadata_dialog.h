@@ -49,7 +49,7 @@
 #include "ardour/session_metadata.h"
 
 class MetadataField;
-typedef boost::shared_ptr<MetadataField> MetadataPtr;
+typedef std::shared_ptr<MetadataField> MetadataPtr;
 
 /// Wraps a metadata field to be used in a GUI
 class MetadataField
@@ -291,7 +291,7 @@ protected:
 	void warn_user (std::string const & string);
 
 	typedef std::list<Gtk::Widget *> WidgetList;
-	typedef boost::shared_ptr<WidgetList> WidgetListPtr;
+	typedef std::shared_ptr<WidgetList> WidgetListPtr;
 	typedef Gtk::Widget & (DataSet::*WidgetFunc) ();
 
 	/// Returns list of widgets gathered by calling f for each data set
@@ -310,7 +310,7 @@ private:
 	void init_people_data ();
 	void init_school_data ();
 
-	typedef boost::shared_ptr<SessionMetadataSet> DataSetPtr;
+	typedef std::shared_ptr<SessionMetadataSet> DataSetPtr;
 	typedef std::list<DataSetPtr> DataSetList;
 	DataSetList data_list;
 

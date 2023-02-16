@@ -1049,17 +1049,17 @@ struct null_deleter { void operator()(void const *) const {} };
 bool
 TimeAxisView::is_child (TimeAxisView* tav)
 {
-	return find (children.begin(), children.end(), boost::shared_ptr<TimeAxisView>(tav, null_deleter())) != children.end();
+	return find (children.begin(), children.end(), std::shared_ptr<TimeAxisView>(tav, null_deleter())) != children.end();
 }
 
 void
-TimeAxisView::add_child (boost::shared_ptr<TimeAxisView> child)
+TimeAxisView::add_child (std::shared_ptr<TimeAxisView> child)
 {
 	children.push_back (child);
 }
 
 void
-TimeAxisView::remove_child (boost::shared_ptr<TimeAxisView> child)
+TimeAxisView::remove_child (std::shared_ptr<TimeAxisView> child)
 {
 	Children::iterator i;
 
@@ -1395,7 +1395,7 @@ TimeAxisView::reset_visual_state ()
 TrackViewList
 TrackViewList::filter_to_unique_playlists ()
 {
-	std::set<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+	std::set<std::shared_ptr<ARDOUR::Playlist> > playlists;
 	TrackViewList ts;
 
 	for (iterator i = begin(); i != end(); ++i) {
@@ -1404,7 +1404,7 @@ TrackViewList::filter_to_unique_playlists ()
 			/* not a route: include it anyway */
 			ts.push_back (*i);
 		} else {
-			boost::shared_ptr<ARDOUR::Track> t = rtav->track();
+			std::shared_ptr<ARDOUR::Track> t = rtav->track();
 			if (t) {
 				if (playlists.insert (t->playlist()).second) {
 					/* playlist not seen yet */

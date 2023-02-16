@@ -56,7 +56,7 @@ bool
 Convolution::add_impdata (
     uint32_t                    c_in,
     uint32_t                    c_out,
-    boost::shared_ptr<AudioReadable> readable,
+    std::shared_ptr<AudioReadable> readable,
     float                       gain,
     uint32_t                    pre_delay,
     sampleoffset_t              offset,
@@ -246,7 +246,7 @@ Convolver::Convolver (
 {
 	_threaded = true;
 
-	std::vector<boost::shared_ptr<AudioReadable> > readables = AudioReadable::load (_session, path);
+	std::vector<std::shared_ptr<AudioReadable> > readables = AudioReadable::load (_session, path);
 
 	if (readables.empty ()) {
 		PBD::error << string_compose (_("Convolver: IR \"%1\" no usable audio-channels sound."), path) << endmsg;
@@ -308,7 +308,7 @@ Convolver::Convolver (
 			io_i = (c / n_outputs ()) % n_inputs ();
 		}
 
-		boost::shared_ptr<AudioReadable> r = readables[ir_c];
+		std::shared_ptr<AudioReadable> r = readables[ir_c];
 		assert (r->n_channels () == 1);
 
 		const float    chan_gain  = _ir_settings.gain * _ir_settings.channel_gain[c];

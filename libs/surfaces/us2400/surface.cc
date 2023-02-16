@@ -163,7 +163,7 @@ Surface::~Surface ()
 }
 
 bool
-Surface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
+Surface::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
 {
 	if (!_port) {
 		return false;
@@ -369,7 +369,7 @@ Surface::master_monitor_may_have_changed ()
 void
 Surface::setup_master ()
 {
-	boost::shared_ptr<Stripable> m;
+	std::shared_ptr<Stripable> m;
 
 	if ((m = _mcp.get_session().monitor_out()) == 0) {
 		m = _mcp.get_session().master_out();
@@ -426,7 +426,7 @@ Surface::master_gain_changed ()
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac = _master_fader->control();
+	std::shared_ptr<AutomationControl> ac = _master_fader->control();
 	if (!ac) {
 		return;
 	}
@@ -624,9 +624,9 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 			float value = (float)ev->value / 127.0;
 			float db_value = 20.0 * value;
 			float inv_db = 20.0 - db_value; 
-			boost::shared_ptr<Stripable> r = mcp().subview_stripable();
+			std::shared_ptr<Stripable> r = mcp().subview_stripable();
 			if (r && r->is_input_strip()) {
-				boost::shared_ptr<AutomationControl> pc = r->send_level_controllable (10);
+				std::shared_ptr<AutomationControl> pc = r->send_level_controllable (10);
 				if (pc) {
 					pc->set_value (dB_to_coefficient(-db_value) , PBD::Controllable::NoGroup);
 				}
@@ -638,9 +638,9 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 		}
 		if (ev->controller_number == 0x02) {
 			float value = (float)ev->value / 127.0;
-			boost::shared_ptr<Stripable> r = mcp().subview_stripable();
+			std::shared_ptr<Stripable> r = mcp().subview_stripable();
 			if (r && r->is_input_strip()) {
-				boost::shared_ptr<AutomationControl> pc = r->send_pan_azimuth_controllable (10);
+				std::shared_ptr<AutomationControl> pc = r->send_pan_azimuth_controllable (10);
 				if (pc) {
 					pc->set_interface (value, true);
 				}
@@ -948,9 +948,9 @@ Surface::update_strip_selection ()
 }
 
 void
-Surface::map_stripables (const vector<boost::shared_ptr<Stripable> >& stripables)
+Surface::map_stripables (const vector<std::shared_ptr<Stripable> >& stripables)
 {
-	vector<boost::shared_ptr<Stripable> >::const_iterator r;
+	vector<std::shared_ptr<Stripable> >::const_iterator r;
 	Strips::iterator s = strips.begin();
 
 	DEBUG_TRACE (DEBUG::US2400, string_compose ("Mapping %1 stripables to %2 strips\n", stripables.size(), strips.size()));
@@ -1013,7 +1013,7 @@ Surface::set_jog_mode (JogWheel::Mode)
 }
 
 bool
-Surface::stripable_is_locked_to_strip (boost::shared_ptr<Stripable> stripable) const
+Surface::stripable_is_locked_to_strip (std::shared_ptr<Stripable> stripable) const
 {
 	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
 		if ((*s)->stripable() == stripable && (*s)->locked()) {
@@ -1024,7 +1024,7 @@ Surface::stripable_is_locked_to_strip (boost::shared_ptr<Stripable> stripable) c
 }
 
 bool
-Surface::stripable_is_mapped (boost::shared_ptr<Stripable> stripable) const
+Surface::stripable_is_mapped (std::shared_ptr<Stripable> stripable) const
 {
 	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
 		if ((*s)->stripable() == stripable) {

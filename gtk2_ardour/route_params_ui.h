@@ -105,11 +105,11 @@ private:
 
 	ProcessorSelection  _p_selection;
 
-	boost::shared_ptr<ARDOUR::Route> _route;
+	std::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnection _route_processors_connection;
 	PBD::ScopedConnectionList route_connections;
 
-	boost::shared_ptr<ARDOUR::Processor> _processor;
+	std::shared_ptr<ARDOUR::Processor> _processor;
 	PBD::ScopedConnection _processor_going_away_connection;
 
 
@@ -132,7 +132,7 @@ private:
 			add(route);
 		}
 		Gtk::TreeModelColumn<std::string> text;
-		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> > route;
+		Gtk::TreeModelColumn<std::shared_ptr<ARDOUR::Route> > route;
 	};
 
 	RouteDisplayModelColumns route_display_columns ;
@@ -142,8 +142,8 @@ private:
 
 	void add_routes (ARDOUR::RouteList&);
 
-	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Route> route);
-	void route_removed (boost::weak_ptr<ARDOUR::Route> route);
+	void route_property_changed (const PBD::PropertyChange&, std::weak_ptr<ARDOUR::Route> route);
+	void route_removed (std::weak_ptr<ARDOUR::Route> route);
 	void map_frozen ();
 
 
@@ -159,10 +159,10 @@ private:
 	void setup_processor_boxes();
 	void cleanup_processor_boxes();
 
-	void redirect_selected (boost::shared_ptr<ARDOUR::Processor>);
+	void redirect_selected (std::shared_ptr<ARDOUR::Processor>);
 
 	void plugin_going_away (ARDOUR::Placement);
-	void processor_going_away (boost::weak_ptr<ARDOUR::Processor>);
+	void processor_going_away (std::weak_ptr<ARDOUR::Processor>);
 
 	gint edit_input_configuration (GdkEventButton *ev);
 	gint edit_output_configuration (GdkEventButton *ev);

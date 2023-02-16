@@ -36,17 +36,17 @@ class OSCCueObserver
 	OSCCueObserver (ArdourSurface::OSC& o, ArdourSurface::OSC::OSCSurface* sur);
 	~OSCCueObserver ();
 
-	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
+	std::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
 	lo_address address() const { return addr; };
 	void tick (void);
-	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> > Sorted;
+	typedef std::vector<std::shared_ptr<ARDOUR::Stripable> > Sorted;
 	Sorted sends;
 	void clear_observer (void);
-	void refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, Sorted new_sends, bool force);
+	void refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, Sorted new_sends, bool force);
 
   private:
 
-	boost::shared_ptr<ARDOUR::Stripable> _strip;
+	std::shared_ptr<ARDOUR::Stripable> _strip;
 	ArdourSurface::OSC& _osc;
 
 	PBD::ScopedConnectionList strip_connections;
@@ -62,9 +62,9 @@ class OSCCueObserver
 	std::vector<float> _last_gain;
 
 	void name_changed (const PBD::PropertyChange& what_changed, uint32_t id);
-	void send_change_message (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_gain_message (uint32_t id, boost::shared_ptr<PBD::Controllable> controllable, bool force);
-	void send_enabled_message (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc);
+	void send_change_message (std::string path, uint32_t id, std::shared_ptr<PBD::Controllable> controllable);
+	void send_gain_message (uint32_t id, std::shared_ptr<PBD::Controllable> controllable, bool force);
+	void send_enabled_message (std::string path, uint32_t id, std::shared_ptr<ARDOUR::Processor> proc);
 	void send_init (void);
 	void send_end (uint32_t new_sends_size);
 	void send_restart (void);

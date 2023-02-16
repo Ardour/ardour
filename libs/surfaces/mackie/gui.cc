@@ -274,7 +274,7 @@ MackieControlProtocolGUI::connection_handler ()
 
 	for (ic = input_combos.begin(), oc = output_combos.begin(); ic != input_combos.end() && oc != output_combos.end(); ++ic, ++oc) {
 
-		boost::shared_ptr<Surface> surface = _cp.get_surface_by_raw_pointer ((*ic)->get_data ("surface"));
+		std::shared_ptr<Surface> surface = _cp.get_surface_by_raw_pointer ((*ic)->get_data ("surface"));
 
 		if (surface) {
 			update_port_combos (midi_inputs, midi_outputs, *ic, *oc, surface);
@@ -286,7 +286,7 @@ void
 MackieControlProtocolGUI::update_port_combos (vector<string> const& midi_inputs, vector<string> const& midi_outputs,
                                               Gtk::ComboBox* input_combo,
                                               Gtk::ComboBox* output_combo,
-                                              boost::shared_ptr<Surface> surface)
+                                              std::shared_ptr<Surface> surface)
 {
 	Glib::RefPtr<Gtk::ListStore> input = build_midi_port_list (midi_inputs, true);
 	Glib::RefPtr<Gtk::ListStore> output = build_midi_port_list (midi_outputs, false);
@@ -370,7 +370,7 @@ MackieControlProtocolGUI::device_dependent_widget ()
 
 		for (uint32_t n = 0; n < n_surfaces; ++n) {
 
-			boost::shared_ptr<Surface> surface = _cp.nth_surface (n);
+			std::shared_ptr<Surface> surface = _cp.nth_surface (n);
 
 			if (!surface) {
 				PBD::fatal << string_compose (_("programming error: %1\n"), string_compose ("n=%1 surface not found!", n)) << endmsg;
@@ -389,7 +389,7 @@ MackieControlProtocolGUI::device_dependent_widget ()
 			output_combo->set_data ("surface", surface.get());
 			output_combos.push_back (output_combo);
 
-			boost::weak_ptr<Surface> ws (surface);
+			std::weak_ptr<Surface> ws (surface);
 			input_combo->signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &MackieControlProtocolGUI::active_port_changed), input_combo, ws, true));
 			output_combo->signal_changed().connect (sigc::bind (sigc::mem_fun (*this, &MackieControlProtocolGUI::active_port_changed), output_combo, ws, false));
 
@@ -806,13 +806,13 @@ MackieControlProtocolGUI::build_midi_port_list (vector<string> const & ports, bo
 }
 
 void
-MackieControlProtocolGUI::active_port_changed (Gtk::ComboBox* combo, boost::weak_ptr<Surface> ws, bool for_input)
+MackieControlProtocolGUI::active_port_changed (Gtk::ComboBox* combo, std::weak_ptr<Surface> ws, bool for_input)
 {
 	if (ignore_active_change) {
 		return;
 	}
 
-	boost::shared_ptr<Surface> surface = ws.lock();
+	std::shared_ptr<Surface> surface = ws.lock();
 
 	if (!surface) {
 		return;

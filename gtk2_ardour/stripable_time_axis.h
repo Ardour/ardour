@@ -28,17 +28,17 @@ public:
 	StripableTimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
 	virtual ~StripableTimeAxisView ();
 
-	void set_stripable (boost::shared_ptr<ARDOUR::Stripable>);
-	boost::shared_ptr<ARDOUR::Stripable> stripable() const { return _stripable; }
+	void set_stripable (std::shared_ptr<ARDOUR::Stripable>);
+	std::shared_ptr<ARDOUR::Stripable> stripable() const { return _stripable; }
 
-	typedef std::map<Evoral::Parameter, boost::shared_ptr<AutomationTimeAxisView> > AutomationTracks;
+	typedef std::map<Evoral::Parameter, std::shared_ptr<AutomationTimeAxisView> > AutomationTracks;
 	const AutomationTracks& automation_tracks() const { return _automation_tracks; }
 	virtual Gtk::CheckMenuItem* automation_child_menu_item (Evoral::Parameter);
 
 	virtual void create_automation_child (const Evoral::Parameter& param, bool show) = 0;
-	virtual boost::shared_ptr<AutomationTimeAxisView> automation_child (Evoral::Parameter param, PBD::ID ctrl_id = PBD::ID(0));
+	virtual std::shared_ptr<AutomationTimeAxisView> automation_child (Evoral::Parameter param, PBD::ID ctrl_id = PBD::ID(0));
 
-	virtual boost::shared_ptr<AutomationLine> automation_child_by_alist_id (PBD::ID);
+	virtual std::shared_ptr<AutomationLine> automation_child_by_alist_id (PBD::ID);
 
 	void request_redraw ();
 
@@ -49,7 +49,7 @@ public:
 protected:
 	void reset_samples_per_pixel ();
 	virtual void set_samples_per_pixel (double);
-	void add_automation_child(Evoral::Parameter param, boost::shared_ptr<AutomationTimeAxisView> track, bool show=true);
+	void add_automation_child(Evoral::Parameter param, std::shared_ptr<AutomationTimeAxisView> track, bool show=true);
 
 	virtual void create_gain_automation_child (const Evoral::Parameter &, bool) = 0;
 	virtual void create_trim_automation_child (const Evoral::Parameter &, bool) = 0;
@@ -61,11 +61,11 @@ protected:
 	void update_trim_track_visibility ();
 	void update_mute_track_visibility ();
 
-	boost::shared_ptr<ARDOUR::Stripable> _stripable;
+	std::shared_ptr<ARDOUR::Stripable> _stripable;
 
-	boost::shared_ptr<AutomationTimeAxisView> gain_track;
-	boost::shared_ptr<AutomationTimeAxisView> trim_track;
-	boost::shared_ptr<AutomationTimeAxisView> mute_track;
+	std::shared_ptr<AutomationTimeAxisView> gain_track;
+	std::shared_ptr<AutomationTimeAxisView> trim_track;
+	std::shared_ptr<AutomationTimeAxisView> mute_track;
 
 	typedef std::map<Evoral::Parameter, Gtk::CheckMenuItem*> ParameterMenuMap;
 	/** parameter -> menu item map for the main automation menu */

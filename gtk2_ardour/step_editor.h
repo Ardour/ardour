@@ -53,7 +53,7 @@ class StepEntry;
 class StepEditor : public PBD::ScopedConnectionList, public sigc::trackable
 {
 public:
-	StepEditor (PublicEditor&, boost::shared_ptr<ARDOUR::MidiTrack>, MidiTimeAxisView&);
+	StepEditor (PublicEditor&, std::shared_ptr<ARDOUR::MidiTrack>, MidiTimeAxisView&);
 	virtual ~StepEditor ();
 
 	void step_entry_done ();
@@ -84,14 +84,14 @@ public:
 private:
 	Temporal::timepos_t                    step_edit_insert_position;
 	Temporal::Beats                        step_edit_beat_pos;
-	boost::shared_ptr<ARDOUR::MidiRegion>  step_edit_region;
+	std::shared_ptr<ARDOUR::MidiRegion>  step_edit_region;
 	MidiRegionView*                        step_edit_region_view;
 	uint8_t                               _step_edit_triplet_countdown;
 	bool                                  _step_edit_within_chord;
 	Temporal::Beats                       _step_edit_chord_duration;
 	PBD::ScopedConnection                  step_edit_region_connection;
 	PublicEditor&                         _editor;
-	boost::shared_ptr<ARDOUR::MidiTrack>  _track;
+	std::shared_ptr<ARDOUR::MidiTrack>  _track;
 	MidiTimeAxisView&                     _mtv;
 	int8_t                                 last_added_pitch;
 	Temporal::Beats                        last_added_end;
@@ -99,7 +99,7 @@ private:
 	sigc::connection delete_connection;
 	sigc::connection hide_connection;
 
-	void region_removed (boost::weak_ptr<ARDOUR::Region>);
+	void region_removed (std::weak_ptr<ARDOUR::Region>);
 	void playlist_changed ();
 	bool step_entry_hidden (GdkEventAny*);
 	void resync_step_edit_position ();

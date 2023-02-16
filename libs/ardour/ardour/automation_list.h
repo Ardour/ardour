@@ -50,11 +50,11 @@ class BeatsSamplesConverter;
 class LIBARDOUR_API AutomationListProperty : public PBD::SharedStatefulProperty<AutomationList>
 {
 public:
-	AutomationListProperty (PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > d, Ptr p)
+	AutomationListProperty (PBD::PropertyDescriptor<std::shared_ptr<AutomationList> > d, Ptr p)
 		: PBD::SharedStatefulProperty<AutomationList> (d.property_id, p)
 	{}
 
-	AutomationListProperty (PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > d, Ptr o, Ptr c)
+	AutomationListProperty (PBD::PropertyDescriptor<std::shared_ptr<AutomationList> > d, Ptr o, Ptr c)
 		: PBD::SharedStatefulProperty<AutomationList> (d.property_id, o, c)
 	{}
 
@@ -80,7 +80,7 @@ public:
 	AutomationList (const AutomationList&, timepos_t const & start, timepos_t const & end);
 	~AutomationList();
 
-	virtual boost::shared_ptr<ControlList> create(const Evoral::Parameter&           id,
+	virtual std::shared_ptr<ControlList> create(const Evoral::Parameter&           id,
 	                                              const Evoral::ParameterDescriptor& desc,
 	                                              Temporal::TimeDomain);
 

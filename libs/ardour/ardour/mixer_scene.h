@@ -56,7 +56,7 @@ public:
 private:
 	typedef std::map<PBD::ID, double> ControllableValueMap;
 
-	bool recurse_to_master (boost::shared_ptr<PBD::Controllable>, std::set <PBD::ID>&, AutomationTypeSet const&) const;
+	bool recurse_to_master (std::shared_ptr<PBD::Controllable>, std::set <PBD::ID>&, AutomationTypeSet const&) const;
 
 	ControllableValueMap       _ctrl_map;
 	std::string                _name;

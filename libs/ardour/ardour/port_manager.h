@@ -88,13 +88,13 @@ public:
 		}
 	};
 
-	typedef std::map<std::string, boost::shared_ptr<Port>, SortByPortName> Ports;
-	typedef std::list<boost::shared_ptr<Port> >                            PortList;
+	typedef std::map<std::string, std::shared_ptr<Port>, SortByPortName> Ports;
+	typedef std::list<std::shared_ptr<Port> >                            PortList;
 
-	typedef boost::shared_ptr<CircularSampleBuffer> AudioPortScope;
-	typedef boost::shared_ptr<CircularEventBuffer>  MIDIPortMonitor;
-	typedef boost::shared_ptr<DPM>                  AudioPortMeter;
-	typedef boost::shared_ptr<MPM>                  MIDIPortMeter;
+	typedef std::shared_ptr<CircularSampleBuffer> AudioPortScope;
+	typedef std::shared_ptr<CircularEventBuffer>  MIDIPortMonitor;
+	typedef std::shared_ptr<DPM>                  AudioPortMeter;
+	typedef std::shared_ptr<MPM>                  MIDIPortMeter;
 
 	struct AudioInputPort {
 		AudioInputPort (samplecnt_t);
@@ -136,15 +136,15 @@ public:
 
 	/* Port registration */
 
-	boost::shared_ptr<Port> register_input_port (DataType, const std::string& portname, bool async = false, PortFlags extra_flags = PortFlags (0));
-	boost::shared_ptr<Port> register_output_port (DataType, const std::string& portname, bool async = false, PortFlags extra_flags = PortFlags (0));
-	int                     unregister_port (boost::shared_ptr<Port>);
+	std::shared_ptr<Port> register_input_port (DataType, const std::string& portname, bool async = false, PortFlags extra_flags = PortFlags (0));
+	std::shared_ptr<Port> register_output_port (DataType, const std::string& portname, bool async = false, PortFlags extra_flags = PortFlags (0));
+	int                     unregister_port (std::shared_ptr<Port>);
 
 	/* Port connectivity */
 
 	int connect (const std::string& source, const std::string& destination);
 	int disconnect (const std::string& source, const std::string& destination);
-	int disconnect (boost::shared_ptr<Port>);
+	int disconnect (std::shared_ptr<Port>);
 	int disconnect (std::string const&);
 	int reestablish_ports ();
 	int reconnect_ports ();
@@ -155,7 +155,7 @@ public:
 
 	/* Naming */
 
-	boost::shared_ptr<Port> get_port_by_name (const std::string&);
+	std::shared_ptr<Port> get_port_by_name (const std::string&);
 	void                    port_renamed (const std::string&, const std::string&);
 	std::string             make_port_name_relative (const std::string& name) const;
 	std::string             make_port_name_non_relative (const std::string& name) const;
@@ -260,7 +260,7 @@ public:
 	 *  The std::string parameters are the (long) port names.
 	 *  The bool parameter is true if ports were connected, or false for disconnected.
 	 */
-	PBD::Signal5<void, boost::weak_ptr<Port>, std::string, boost::weak_ptr<Port>, std::string, bool> PortConnectedOrDisconnected;
+	PBD::Signal5<void, std::weak_ptr<Port>, std::string, std::weak_ptr<Port>, std::string, bool> PortConnectedOrDisconnected;
 
 	PBD::Signal3<void, DataType, std::vector<std::string>, bool> PhysInputChanged;
 
@@ -275,18 +275,18 @@ public:
 	}
 
 protected:
-	boost::shared_ptr<AudioBackend> _backend;
+	std::shared_ptr<AudioBackend> _backend;
 
 	SerializedRCUManager<Ports> _ports;
 
 	bool                   _port_remove_in_progress;
 	PBD::RingBuffer<Port*> _port_deletions_pending;
 
-	boost::shared_ptr<Port> register_port (DataType type, const std::string& portname, bool input, bool async = false, PortFlags extra_flags = PortFlags (0));
+	std::shared_ptr<Port> register_port (DataType type, const std::string& portname, bool input, bool async = false, PortFlags extra_flags = PortFlags (0));
 	void                    port_registration_failure (const std::string& portname);
 
 	/** List of ports to be used between \ref cycle_start() and \ref cycle_end() */
-	boost::shared_ptr<Ports> _cycle_ports;
+	std::shared_ptr<Ports> _cycle_ports;
 
 	void silence (pframes_t nframes, Session* s = 0);
 	void silence_outputs (pframes_t nframes);
@@ -324,7 +324,7 @@ private:
 	MonitorPort _monitor_port;
 
 	struct PortID {
-		PortID (boost::shared_ptr<AudioBackend>, DataType, bool, std::string const&);
+		PortID (std::shared_ptr<AudioBackend>, DataType, bool, std::string const&);
 		PortID (XMLNode const&, bool old_midi_format = false);
 
 		std::string backend;

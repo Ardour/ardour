@@ -65,7 +65,7 @@ ControlGroup::clear ()
 	 * don't deadlock.
 	 */
 
-	std::vector<boost::shared_ptr<AutomationControl> > controls;
+	std::vector<std::shared_ptr<AutomationControl> > controls;
 	{
 		Glib::Threads::RWLock::WriterLock lm (controls_lock);
 		for (ControlMap::const_iterator i = _controls.begin(); i != _controls.end(); ++i) {
@@ -75,8 +75,8 @@ ControlGroup::clear ()
 
 	_controls.clear ();
 
-	for (std::vector<boost::shared_ptr<AutomationControl> >::iterator c = controls.begin(); c != controls.end(); ++c) {
-		(*c)->set_group (boost::shared_ptr<ControlGroup>());
+	for (std::vector<std::shared_ptr<AutomationControl> >::iterator c = controls.begin(); c != controls.end(); ++c) {
+		(*c)->set_group (std::shared_ptr<ControlGroup>());
 	}
 }
 
@@ -96,9 +96,9 @@ ControlGroup::controls () const
 }
 
 void
-ControlGroup::control_going_away (boost::weak_ptr<AutomationControl> wac)
+ControlGroup::control_going_away (std::weak_ptr<AutomationControl> wac)
 {
-	boost::shared_ptr<AutomationControl> ac (wac.lock());
+	std::shared_ptr<AutomationControl> ac (wac.lock());
 	if (!ac) {
 		return;
 	}
@@ -107,7 +107,7 @@ ControlGroup::control_going_away (boost::weak_ptr<AutomationControl> wac)
 }
 
 int
-ControlGroup::remove_control (boost::shared_ptr<AutomationControl> ac)
+ControlGroup::remove_control (std::shared_ptr<AutomationControl> ac)
 {
 	int erased;
 
@@ -117,7 +117,7 @@ ControlGroup::remove_control (boost::shared_ptr<AutomationControl> ac)
 	}
 
 	if (erased) {
-		ac->set_group (boost::shared_ptr<ControlGroup>());
+		ac->set_group (std::shared_ptr<ControlGroup>());
 	}
 
 	/* return zero if erased, non-zero otherwise */
@@ -125,7 +125,7 @@ ControlGroup::remove_control (boost::shared_ptr<AutomationControl> ac)
 }
 
 int
-ControlGroup::add_control (boost::shared_ptr<AutomationControl> ac)
+ControlGroup::add_control (std::shared_ptr<AutomationControl> ac)
 {
 	if (ac->parameter() != _parameter) {
 		if (_parameter.type () != PluginAutomation) {
@@ -154,7 +154,7 @@ ControlGroup::add_control (boost::shared_ptr<AutomationControl> ac)
 
 	ac->set_group (shared_from_this());
 
-	ac->DropReferences.connect_same_thread (member_connections, boost::bind (&ControlGroup::control_going_away, this, boost::weak_ptr<AutomationControl>(ac)));
+	ac->DropReferences.connect_same_thread (member_connections, boost::bind (&ControlGroup::control_going_away, this, std::weak_ptr<AutomationControl>(ac)));
 
 	return 0;
 }
@@ -170,7 +170,7 @@ ControlGroup::pre_realtime_queue_stuff (double val)
 }
 
 void
-ControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control, double val)
+ControlGroup::set_group_value (std::shared_ptr<AutomationControl> control, double val)
 {
 	double old = control->get_value ();
 
@@ -257,7 +257,7 @@ GainControlGroup::get_max_factor (gain_t factor)
 }
 
 void
-GainControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control, double val)
+GainControlGroup::set_group_value (std::shared_ptr<AutomationControl> control, double val)
 {
 	Glib::Threads::RWLock::ReaderLock lm (controls_lock);
 
@@ -307,7 +307,7 @@ GainControlGroup::set_group_value (boost::shared_ptr<AutomationControl> control,
 				continue;
 			}
 
-			boost::shared_ptr<GainControl> gc = boost::dynamic_pointer_cast<GainControl> (c->second);
+			std::shared_ptr<GainControl> gc = std::dynamic_pointer_cast<GainControl> (c->second);
 
 			if (gc) {
 				gc->inc_gain (factor);

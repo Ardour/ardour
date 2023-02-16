@@ -212,7 +212,7 @@ SelectionPropertiesBox::selection_changed ()
 		_audio_ops_box->show();
 	}
 
-	boost::shared_ptr<ARDOUR::Region> selected_region = boost::shared_ptr<ARDOUR::Region>();
+	std::shared_ptr<ARDOUR::Region> selected_region = std::shared_ptr<ARDOUR::Region>();
 
 	if (!selection.triggers.empty()) {
 		TriggerSelection ts = selection.triggers;

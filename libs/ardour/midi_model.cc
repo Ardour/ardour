@@ -129,7 +129,7 @@ MidiModel::apply_diff_command_only(Session& session, Command* cmd)
 #define REMOVED_PATCH_CHANGES_ELEMENT "RemovedPatchChanges"
 #define DIFF_PATCH_CHANGES_ELEMENT "ChangedPatchChanges"
 
-MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const std::string& name)
+MidiModel::DiffCommand::DiffCommand(std::shared_ptr<MidiModel> m, const std::string& name)
 	: Command (name)
 	, _model (m)
 	, _name (name)
@@ -137,7 +137,7 @@ MidiModel::DiffCommand::DiffCommand(boost::shared_ptr<MidiModel> m, const std::s
 	assert(_model);
 }
 
-MidiModel::NoteDiffCommand::NoteDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node)
+MidiModel::NoteDiffCommand::NoteDiffCommand (std::shared_ptr<MidiModel> m, const XMLNode& node)
 	: DiffCommand (m, "")
 {
 	assert (_model);
@@ -679,7 +679,7 @@ MidiModel::NoteDiffCommand::get_state () const
 	return *diff_command;
 }
 
-MidiModel::SysExDiffCommand::SysExDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node)
+MidiModel::SysExDiffCommand::SysExDiffCommand (std::shared_ptr<MidiModel> m, const XMLNode& node)
 	: DiffCommand (m, "")
 {
 	assert (_model);
@@ -687,7 +687,7 @@ MidiModel::SysExDiffCommand::SysExDiffCommand (boost::shared_ptr<MidiModel> m, c
 }
 
 void
-MidiModel::SysExDiffCommand::change (boost::shared_ptr<Evoral::Event<TimeType> > s, TimeType new_time)
+MidiModel::SysExDiffCommand::change (std::shared_ptr<Evoral::Event<TimeType> > s, TimeType new_time)
 {
 	Change change;
 
@@ -856,13 +856,13 @@ MidiModel::SysExDiffCommand::get_state () const
 	return *diff_command;
 }
 
-MidiModel::PatchChangeDiffCommand::PatchChangeDiffCommand (boost::shared_ptr<MidiModel> m, const string& name)
+MidiModel::PatchChangeDiffCommand::PatchChangeDiffCommand (std::shared_ptr<MidiModel> m, const string& name)
 	: DiffCommand (m, name)
 {
 	assert (_model);
 }
 
-MidiModel::PatchChangeDiffCommand::PatchChangeDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode & node)
+MidiModel::PatchChangeDiffCommand::PatchChangeDiffCommand (std::shared_ptr<MidiModel> m, const XMLNode & node)
 	: DiffCommand (m, "")
 {
 	assert (_model);
@@ -1230,7 +1230,7 @@ MidiModel::PatchChangeDiffCommand::get_state () const
  * `Discrete' mode).
  */
 bool
-MidiModel::write_to (boost::shared_ptr<MidiSource>     source,
+MidiModel::write_to (std::shared_ptr<MidiSource>     source,
                      const Source::WriterLock& source_lock)
 {
 	ReadLock lock (read_lock()); /* Sequence read-lock */
@@ -1288,7 +1288,7 @@ MidiModel::sync_to_source (const Source::WriterLock& source_lock)
  * destroying the original note durations.
  */
 bool
-MidiModel::write_section_to (boost::shared_ptr<MidiSource>     source,
+MidiModel::write_section_to (std::shared_ptr<MidiSource>     source,
                              const Source::WriterLock&         source_lock,
                              TimeType                          begin_time,
                              TimeType                          end_time,
@@ -1400,7 +1400,7 @@ MidiModel::find_patch_change (Evoral::event_id_t id)
 	return PatchChangePtr ();
 }
 
-boost::shared_ptr<Evoral::Event<MidiModel::TimeType> >
+std::shared_ptr<Evoral::Event<MidiModel::TimeType> >
 MidiModel::find_sysex (Evoral::event_id_t sysex_id)
 {
 	/* used only for looking up notes when reloading history from disk,
@@ -1413,7 +1413,7 @@ MidiModel::find_sysex (Evoral::event_id_t sysex_id)
 		}
 	}
 
-	return boost::shared_ptr<Evoral::Event<TimeType> > ();
+	return std::shared_ptr<Evoral::Event<TimeType> > ();
 }
 
 /** Lock and invalidate the source.
@@ -1664,7 +1664,7 @@ MidiModel::source_automation_state_changed (Evoral::Parameter const& p, AutoStat
 {
 	{
 		Glib::Threads::Mutex::Lock lm (_control_lock);
-		boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (control(p)->list ());
+		std::shared_ptr<AutomationList> al = std::dynamic_pointer_cast<AutomationList> (control(p)->list ());
 		al->set_automation_state (s);
 	}
 	/* re-read MIDI */
@@ -1677,10 +1677,10 @@ MidiModel::automation_list_automation_state_changed (Evoral::Parameter const& p,
 	_midi_source.set_automation_state_of (p, s);
 }
 
-boost::shared_ptr<Evoral::Control>
+std::shared_ptr<Evoral::Control>
 MidiModel::control_factory (Evoral::Parameter const & p)
 {
-	boost::shared_ptr<Evoral::Control> c = Automatable::control_factory (p);
+	std::shared_ptr<Evoral::Control> c = Automatable::control_factory (p);
 
 	/* Set up newly created control's lists to the appropriate interpolation and
 	   automation state from our source.
@@ -1688,7 +1688,7 @@ MidiModel::control_factory (Evoral::Parameter const & p)
 
 	c->list()->set_interpolation (_midi_source.interpolation_of (p));
 
-	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (c->list ());
+	std::shared_ptr<AutomationList> al = std::dynamic_pointer_cast<AutomationList> (c->list ());
 	assert (al);
 
 	al->set_automation_state (_midi_source.automation_state_of (p));
@@ -1729,7 +1729,7 @@ MidiModel::insert_silence_at_start (TimeType t)
 	/* Controllers */
 
 	for (Controls::iterator i = controls().begin(); i != controls().end(); ++i) {
-		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (i->second);
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i->second);
 		XMLNode& before = ac->alist()->get_state ();
 		i->second->list()->shift (timepos_t::zero (i->second->list()->time_domain()), timecnt_t (t));
 		XMLNode& after = ac->alist()->get_state ();

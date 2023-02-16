@@ -80,10 +80,10 @@ public:
 	GainMeterBase (ARDOUR::Session*, bool horizontal, int, int);
 	virtual ~GainMeterBase ();
 
-	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
-	                           boost::shared_ptr<ARDOUR::PeakMeter> meter,
-	                           boost::shared_ptr<ARDOUR::Amp> amp,
-	                           boost::shared_ptr<ARDOUR::GainControl> control);
+	virtual void set_controls (std::shared_ptr<ARDOUR::Route> route,
+	                           std::shared_ptr<ARDOUR::PeakMeter> meter,
+	                           std::shared_ptr<ARDOUR::Amp> amp,
+	                           std::shared_ptr<ARDOUR::GainControl> control);
 
 	void update_gain_sensitive ();
 	void update_meters ();
@@ -101,7 +101,7 @@ public:
 
 	virtual void setup_meters (int len=0);
 
-	boost::shared_ptr<PBD::Controllable> get_controllable();
+	std::shared_ptr<PBD::Controllable> get_controllable();
 
 	LevelMeterHBox& get_level_meter() const { return *level_meter; }
 	ArdourWidgets::SliderController& get_gain_slider() const { return *gain_slider; }
@@ -122,10 +122,10 @@ protected:
 	friend class MeterStrip;
 	friend class RouteTimeAxisView;
 	friend class VCAMasterStrip;
-	boost::shared_ptr<ARDOUR::Route> _route;
-	boost::shared_ptr<ARDOUR::PeakMeter> _meter;
-	boost::shared_ptr<ARDOUR::Amp> _amp;
-	boost::shared_ptr<ARDOUR::GainControl> _control;
+	std::shared_ptr<ARDOUR::Route> _route;
+	std::shared_ptr<ARDOUR::PeakMeter> _meter;
+	std::shared_ptr<ARDOUR::Amp> _amp;
+	std::shared_ptr<ARDOUR::GainControl> _control;
 	std::vector<sigc::connection> connections;
 	PBD::ScopedConnectionList model_connections;
 
@@ -223,10 +223,10 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
          GainMeter (ARDOUR::Session*, int);
 	virtual ~GainMeter ();
 
-	virtual void set_controls (boost::shared_ptr<ARDOUR::Route> route,
-	                           boost::shared_ptr<ARDOUR::PeakMeter> meter,
-	                           boost::shared_ptr<ARDOUR::Amp> amp,
-	                           boost::shared_ptr<ARDOUR::GainControl> control);
+	virtual void set_controls (std::shared_ptr<ARDOUR::Route> route,
+	                           std::shared_ptr<ARDOUR::PeakMeter> meter,
+	                           std::shared_ptr<ARDOUR::Amp> amp,
+	                           std::shared_ptr<ARDOUR::GainControl> control);
 
 	int get_gm_width ();
 	void setup_meters (int len=0);

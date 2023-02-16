@@ -89,7 +89,7 @@ public:
 	bool is_color () const { return _color.val(); }
 	bool is_monitoring() const { return _monitoring.val(); }
 	int32_t group_master_number() const { return _group_master_number.val(); }
-	boost::weak_ptr<Route> subgroup_bus() const { return _subgroup_bus; }
+	std::weak_ptr<Route> subgroup_bus() const { return _subgroup_bus; }
 
 	bool empty() const {return routes->empty();}
 	size_t size() const { return routes->size();}
@@ -112,8 +112,8 @@ public:
 
 	bool enabled_property (PBD::PropertyID);
 
-	int add (boost::shared_ptr<Route>);
-	int remove (boost::shared_ptr<Route>);
+	int add (std::shared_ptr<Route>);
+	int remove (std::shared_ptr<Route>);
 
 	template<typename Function>
 	void foreach_route (Function f) {
@@ -128,7 +128,7 @@ public:
 
 	/* fills at_set with all members of the group that are AudioTracks */
 
-	void audio_track_group (std::set<boost::shared_ptr<AudioTrack> >& at_set);
+	void audio_track_group (std::set<std::shared_ptr<AudioTrack> >& at_set);
 
 	void clear () {
 		routes->clear ();
@@ -139,19 +139,19 @@ public:
 	void make_subgroup (bool, Placement);
 	void destroy_subgroup ();
 
-	boost::shared_ptr<RouteList> route_list() { return routes; }
+	std::shared_ptr<RouteList> route_list() { return routes; }
 
 	/** Emitted when a route has been added to this group */
-	PBD::Signal2<void, RouteGroup *, boost::weak_ptr<ARDOUR::Route> > RouteAdded;
+	PBD::Signal2<void, RouteGroup *, std::weak_ptr<ARDOUR::Route> > RouteAdded;
 	/** Emitted when a route has been removed from this group */
-	PBD::Signal2<void, RouteGroup *, boost::weak_ptr<ARDOUR::Route> > RouteRemoved;
+	PBD::Signal2<void, RouteGroup *, std::weak_ptr<ARDOUR::Route> > RouteRemoved;
 
 	XMLNode& get_state () const;
 
 	int set_state (const XMLNode&, int version);
 
-	void assign_master (boost::shared_ptr<VCA>);
-	void unassign_master (boost::shared_ptr<VCA>);
+	void assign_master (std::shared_ptr<VCA>);
+	void unassign_master (std::shared_ptr<VCA>);
 	bool has_control_master() const;
 	bool slaved () const;
 
@@ -165,9 +165,9 @@ public:
 	void migrate_rgba (uint32_t color) { _rgba = color; }
 
 private:
-	boost::shared_ptr<RouteList> routes;
-	boost::shared_ptr<Route> _subgroup_bus;
-	boost::weak_ptr<VCA> group_master;
+	std::shared_ptr<RouteList> routes;
+	std::shared_ptr<Route> _subgroup_bus;
+	std::weak_ptr<VCA> group_master;
 
 	PBD::Property<bool> _relative;
 	PBD::Property<bool> _active;
@@ -182,13 +182,13 @@ private:
 	PBD::Property<bool> _monitoring;
 	PBD::Property<int32_t> _group_master_number;
 
-	boost::shared_ptr<ControlGroup> _solo_group;
-	boost::shared_ptr<ControlGroup> _mute_group;
-	boost::shared_ptr<ControlGroup> _rec_enable_group;
-	boost::shared_ptr<ControlGroup> _gain_group;
-	boost::shared_ptr<ControlGroup> _monitoring_group;
+	std::shared_ptr<ControlGroup> _solo_group;
+	std::shared_ptr<ControlGroup> _mute_group;
+	std::shared_ptr<ControlGroup> _rec_enable_group;
+	std::shared_ptr<ControlGroup> _gain_group;
+	std::shared_ptr<ControlGroup> _monitoring_group;
 
-	void remove_when_going_away (boost::weak_ptr<Route>);
+	void remove_when_going_away (std::weak_ptr<Route>);
 	void unset_subgroup_bus ();
 	int set_state_2X (const XMLNode&, int);
 

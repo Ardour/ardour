@@ -79,7 +79,7 @@ ButtonConfigWidget::find_action_in_model (const TreeModel::iterator& iter, strin
 }
 
 void
-ButtonConfigWidget::set_current_config (boost::shared_ptr<ButtonBase> btn_cnf)
+ButtonConfigWidget::set_current_config (std::shared_ptr<ButtonBase> btn_cnf)
 {
 	const ButtonAction* ba = dynamic_cast<const ButtonAction*> (btn_cnf.get());
 	if (ba) {
@@ -94,17 +94,17 @@ ButtonConfigWidget::set_current_config (boost::shared_ptr<ButtonBase> btn_cnf)
 	}
 }
 
-boost::shared_ptr<ButtonBase>
+std::shared_ptr<ButtonBase>
 ButtonConfigWidget::get_current_config (ContourDesignControlProtocol& ccp) const
 {
 	if (_choice_jump.get_active ()) {
-		return boost::shared_ptr<ButtonBase> (new ButtonJump (JumpDistance (_jump_distance.get_distance ()), ccp));
+		return std::shared_ptr<ButtonBase> (new ButtonJump (JumpDistance (_jump_distance.get_distance ()), ccp));
 	}
 
 	TreeModel::const_iterator row = _action_cb.get_active ();
 	string action_path = (*row)[_action_model.path ()];
 
-	return boost::shared_ptr<ButtonBase> (new ButtonAction (action_path, ccp));
+	return std::shared_ptr<ButtonBase> (new ButtonAction (action_path, ccp));
 }
 
 

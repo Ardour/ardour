@@ -31,7 +31,7 @@ namespace ARDOUR {
 class VST3PluginUI : public PlugUIBase, public Gtk::VBox
 {
 public:
-	VST3PluginUI (boost::shared_ptr<ARDOUR::PlugInsertBase>, boost::shared_ptr<ARDOUR::VST3Plugin>);
+	VST3PluginUI (std::shared_ptr<ARDOUR::PlugInsertBase>, std::shared_ptr<ARDOUR::VST3Plugin>);
 	virtual ~VST3PluginUI ();
 
 	gint get_preferred_height ();
@@ -49,7 +49,7 @@ protected:
 
   bool forward_scroll_event (GdkEventScroll*);
 
-	boost::shared_ptr<ARDOUR::VST3Plugin>   _vst3;
+	std::shared_ptr<ARDOUR::VST3Plugin>   _vst3;
 
 	Gtk::HBox _ardour_buttons_box;
 

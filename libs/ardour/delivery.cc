@@ -55,9 +55,9 @@ bool                          Delivery::panners_legal = false;
 
 /* deliver to an existing IO object */
 
-Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pannable> pannable,
-                    boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
-	: IOProcessor(s, boost::shared_ptr<IO>(), (role_requires_output_ports (r) ? io : boost::shared_ptr<IO>()), name, Temporal::AudioTime, (r == Send || r == Aux || r == Foldback))
+Delivery::Delivery (Session& s, std::shared_ptr<IO> io, std::shared_ptr<Pannable> pannable,
+                    std::shared_ptr<MuteMaster> mm, const string& name, Role r)
+	: IOProcessor(s, std::shared_ptr<IO>(), (role_requires_output_ports (r) ? io : std::shared_ptr<IO>()), name, Temporal::AudioTime, (r == Send || r == Aux || r == Foldback))
 	, _role (r)
 	, _output_buffers (new BufferSet())
 	, _current_gain (GAIN_COEFF_ZERO)
@@ -68,7 +68,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 	if (pannable) {
 		bool is_send = false;
 		if (r & (Delivery::Send|Delivery::Aux|Delivery::Foldback)) is_send = true;
-		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, time_domain(), is_send));
+		_panshell = std::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, time_domain(), is_send));
 	}
 
 	_display_to_user = false;
@@ -80,7 +80,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<IO> io, boost::shared_ptr<Pann
 
 /* deliver to a new IO object */
 
-Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster> mm, const string& name, Role r)
+Delivery::Delivery (Session& s, std::shared_ptr<Pannable> pannable, std::shared_ptr<MuteMaster> mm, const string& name, Role r)
 	: IOProcessor(s, false, (role_requires_output_ports (r) ? true : false), name, "", DataType::AUDIO, (r == Send || r == Aux || r == Foldback))
 	, _role (r)
 	, _output_buffers (new BufferSet())
@@ -92,7 +92,7 @@ Delivery::Delivery (Session& s, boost::shared_ptr<Pannable> pannable, boost::sha
 	if (pannable) {
 		bool is_send = false;
 		if (r & (Delivery::Send|Delivery::Aux|Delivery::Foldback)) is_send = true;
-		_panshell = boost::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, time_domain(), is_send));
+		_panshell = std::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, time_domain(), is_send));
 	}
 
 	_display_to_user = false;
@@ -188,7 +188,7 @@ Delivery::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 }
 
 void
-Delivery::set_gain_control (boost::shared_ptr<GainControl> gc) {
+Delivery::set_gain_control (std::shared_ptr<GainControl> gc) {
 	if (gc) {
 		_gain_control = gc;
 		_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));
@@ -680,13 +680,13 @@ Delivery::output_changed (IOChange change, void* /*src*/)
 	}
 }
 
-boost::shared_ptr<Panner>
+std::shared_ptr<Panner>
 Delivery::panner () const
 {
 	if (_panshell) {
 		return _panshell->panner();
 	} else {
-		return boost::shared_ptr<Panner>();
+		return std::shared_ptr<Panner>();
 	}
 }
 

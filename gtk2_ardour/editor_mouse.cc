@@ -211,9 +211,9 @@ Editor::canvas_event_sample (GdkEvent const * event, double* pcx, double* pcy) c
 }
 
 void
-Editor::set_current_trimmable (boost::shared_ptr<Trimmable> t)
+Editor::set_current_trimmable (std::shared_ptr<Trimmable> t)
 {
-	boost::shared_ptr<Trimmable> st = _trimmable.lock();
+	std::shared_ptr<Trimmable> st = _trimmable.lock();
 
 	if (!st || st == t) {
 		_trimmable = t;
@@ -221,9 +221,9 @@ Editor::set_current_trimmable (boost::shared_ptr<Trimmable> t)
 }
 
 void
-Editor::set_current_movable (boost::shared_ptr<Movable> m)
+Editor::set_current_movable (std::shared_ptr<Movable> m)
 {
-	boost::shared_ptr<Movable> sm = _movable.lock();
+	std::shared_ptr<Movable> sm = _movable.lock();
 
 	if (!sm || sm != m) {
 		_movable = m;
@@ -1178,14 +1178,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 					RouteTimeAxisView* p = dynamic_cast<RouteTimeAxisView*> (parent);
 					assert (p);
-					boost::shared_ptr<Playlist> pl = p->track()->playlist ();
+					std::shared_ptr<Playlist> pl = p->track()->playlist ();
 					if (pl->n_regions() == 0) {
 						/* Parent has no regions; create one so that we have somewhere to put automation */
 						_drags->set (new RegionCreateDrag (this, item, parent), event);
 					} else {
 						/* See if there's a region before the click that we can extend, and extend it if so */
 						timepos_t const t (canvas_event_sample (event));
-						boost::shared_ptr<Region> prev = pl->find_next_region (t, End, -1);
+						std::shared_ptr<Region> prev = pl->find_next_region (t, End, -1);
 						if (!prev) {
 							_drags->set (new RegionCreateDrag (this, item, parent), event);
 						} else {
@@ -1277,18 +1277,18 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				TrackViewList ts = selection->tracks.filter_to_unique_playlists ();
 				for (TrackViewList::iterator i = ts.begin(); i != ts.end(); ++i) {
 					RouteTimeAxisView* tatv;
-					boost::shared_ptr<Playlist> playlist;
+					std::shared_ptr<Playlist> playlist;
 					if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) == 0) {
 						continue;
 					}
 					if ((playlist = (*i)->playlist()) == 0) {
 						continue;
 					}
-					if (boost::dynamic_pointer_cast<AudioPlaylist> (playlist) == 0) {
+					if (std::dynamic_pointer_cast<AudioPlaylist> (playlist) == 0) {
 						continue;
 					}
 					for (list<TimelineRange>::const_iterator j = selection->time.begin(); j != selection->time.end(); ++j) {
-						boost::shared_ptr<RegionList> rl = playlist->regions_touched (j->start(), j->end());
+						std::shared_ptr<RegionList> rl = playlist->regions_touched (j->start(), j->end());
 						for (RegionList::iterator ir = rl->begin(); ir != rl->end(); ++ir) {
 							RegionView* rv;
 							if ((rv = tatv->view()->find_view (*ir)) != 0) {
@@ -2631,10 +2631,10 @@ Editor::mouse_brush_insert_region (RegionView* rv, timepos_t const & pos)
 		return;
 	}
 
-	boost::shared_ptr<Playlist> playlist = rtv->playlist();
+	std::shared_ptr<Playlist> playlist = rtv->playlist();
 
 	playlist->clear_changes ();
-	boost::shared_ptr<Region> new_region (RegionFactory::create (rv->region(), true));
+	std::shared_ptr<Region> new_region (RegionFactory::create (rv->region(), true));
 	playlist->add_region (new_region, pos);
 	_session->add_command (new StatefulDiffCommand (playlist));
 
@@ -2699,7 +2699,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 
 	/* lets try to create new Region for the selection */
 
-	vector<boost::shared_ptr<Region> > new_regions;
+	vector<std::shared_ptr<Region> > new_regions;
 	create_region_from_selection (new_regions);
 
 	if (new_regions.empty()) {
@@ -2708,7 +2708,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 
 	/* XXX fix me one day to use all new regions */
 
-	boost::shared_ptr<Region> region (new_regions.front());
+	std::shared_ptr<Region> region (new_regions.front());
 
 	/* add it to the current stream/playlist.
 	 *
@@ -2725,7 +2725,7 @@ Editor::start_selection_grab (ArdourCanvas::Item* /*item*/, GdkEvent* event)
 	 */
 	begin_reversible_command (Operations::selection_grab);
 
-	boost::shared_ptr<Playlist> playlist = clicked_axisview->playlist();
+	std::shared_ptr<Playlist> playlist = clicked_axisview->playlist();
 
 	playlist->clear_changes ();
 	clicked_routeview->playlist()->add_region (region, selection->time[clicked_selection].start());

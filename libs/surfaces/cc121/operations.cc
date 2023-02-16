@@ -83,7 +83,7 @@ void
 CC121::read ()
 {
 	if (_current_stripable) {
-		boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+		std::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 		if (gain) {
 			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Play );
 		}
@@ -94,7 +94,7 @@ void
 CC121::write ()
 {
 	if (_current_stripable) {
-		boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+		std::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 		if (gain) {
 			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Write );
 		}
@@ -105,7 +105,7 @@ void
 CC121::touch ()
 {
 	if (_current_stripable) {
-		boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+		std::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 		if (gain) {
 			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Touch );
 		}
@@ -116,7 +116,7 @@ void
 CC121::off ()
 {
 	if (_current_stripable) {
-		boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+		std::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 		if (gain) {
 			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Off );
 		}
@@ -158,7 +158,7 @@ CC121::mute ()
 	}
 
 	if (_current_stripable == session->monitor_out()) {
-		boost::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
+		std::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
 		mp->set_cut_all (!mp->cut_all());
 		return;
 	}
@@ -182,7 +182,7 @@ CC121::rec_enable ()
 		return;
 	}
 
-	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_current_stripable);
+	std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track>(_current_stripable);
 
 	if (!t) {
 		return;
@@ -194,7 +194,7 @@ CC121::rec_enable ()
 void
 CC121::use_master ()
 {
-	boost::shared_ptr<Stripable> r = session->master_out();
+	std::shared_ptr<Stripable> r = session->master_out();
 	if (r) {
 		if (_current_stripable == r) {
 			r = pre_master_stripable.lock();
@@ -203,7 +203,7 @@ CC121::use_master ()
 			blinkers.remove (Output);
 		} else {
 			if (_current_stripable != session->master_out() && _current_stripable != session->monitor_out()) {
-				pre_master_stripable = boost::weak_ptr<Stripable> (_current_stripable);
+				pre_master_stripable = std::weak_ptr<Stripable> (_current_stripable);
 			}
 			set_current_stripable (r);
 			get_button(Output).set_led_state (_output_port, true);
@@ -215,7 +215,7 @@ CC121::use_master ()
 void
 CC121::use_monitor ()
 {
-	boost::shared_ptr<Stripable> r = session->monitor_out();
+	std::shared_ptr<Stripable> r = session->monitor_out();
 
 	if (r) {
 		if (_current_stripable == r) {
@@ -225,7 +225,7 @@ CC121::use_monitor ()
 			blinkers.remove (Output);
 		} else {
 			if (_current_stripable != session->master_out() && _current_stripable != session->monitor_out()) {
-				pre_monitor_stripable = boost::weak_ptr<Stripable> (_current_stripable);
+				pre_monitor_stripable = std::weak_ptr<Stripable> (_current_stripable);
 			}
 			set_current_stripable (r);
 			get_button(Output).set_led_state (_output_port, true);
@@ -235,7 +235,7 @@ CC121::use_monitor ()
 }
 
 void
-CC121::set_controllable (boost::shared_ptr<AutomationControl> ac, float delta)
+CC121::set_controllable (std::shared_ptr<AutomationControl> ac, float delta)
 {
 	if (!ac || delta == 0) {
 		return;

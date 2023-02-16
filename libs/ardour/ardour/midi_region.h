@@ -59,10 +59,10 @@ class LIBARDOUR_API MidiRegion : public Region
   public:
 	~MidiRegion();
 
-	boost::shared_ptr<MidiRegion> clone (std::string path = std::string()) const;
-	boost::shared_ptr<MidiRegion> clone (boost::shared_ptr<MidiSource>, ThawList* tl = 0) const;
+	std::shared_ptr<MidiRegion> clone (std::string path = std::string()) const;
+	std::shared_ptr<MidiRegion> clone (std::shared_ptr<MidiSource>, ThawList* tl = 0) const;
 
-	boost::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
+	std::shared_ptr<MidiSource> midi_source (uint32_t n=0) const;
 
 	timecnt_t read_at (Evoral::EventSink<samplepos_t>& dst,
 	                   timepos_t const & position,
@@ -82,29 +82,29 @@ class LIBARDOUR_API MidiRegion : public Region
 	                          uint32_t  chan_n = 0,
 	                          NoteMode  mode = Sustained) const;
 
-	void merge (boost::shared_ptr<MidiRegion const>);
+	void merge (std::shared_ptr<MidiRegion const>);
 
 	XMLNode& state () const;
 	int      set_state (const XMLNode&, int version);
 
-	int separate_by_channel (std::vector< boost::shared_ptr<Region> >&) const;
+	int separate_by_channel (std::vector< std::shared_ptr<Region> >&) const;
 
 	/* automation */
 
-	boost::shared_ptr<Evoral::Control> control(const Evoral::Parameter& id, bool create=false);
+	std::shared_ptr<Evoral::Control> control(const Evoral::Parameter& id, bool create=false);
 
-	virtual boost::shared_ptr<const Evoral::Control> control(const Evoral::Parameter& id) const;
+	virtual std::shared_ptr<const Evoral::Control> control(const Evoral::Parameter& id) const;
 
 	/* export */
 
 	bool do_export (std::string const& path) const;
 
-	boost::shared_ptr<MidiModel> model();
-	boost::shared_ptr<const MidiModel> model() const;
+	std::shared_ptr<MidiModel> model();
+	std::shared_ptr<const MidiModel> model() const;
 
 	void fix_negative_start ();
 
-	void clobber_sources (boost::shared_ptr<MidiSource> source);
+	void clobber_sources (std::shared_ptr<MidiSource> source);
 
 	int render (Evoral::EventSink<samplepos_t>& dst,
 	            uint32_t                        chan_n,
@@ -128,8 +128,8 @@ class LIBARDOUR_API MidiRegion : public Region
 	friend class RegionFactory;
 
 	MidiRegion (const SourceList&);
-	MidiRegion (boost::shared_ptr<const MidiRegion>);
-	MidiRegion (boost::shared_ptr<const MidiRegion>, timecnt_t const & offset);
+	MidiRegion (std::shared_ptr<const MidiRegion>);
+	MidiRegion (std::shared_ptr<const MidiRegion>, timecnt_t const & offset);
 
 	timecnt_t _read_at (const SourceList&, Evoral::EventSink<samplepos_t>& dst,
 	                    timepos_t const & position,

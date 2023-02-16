@@ -235,7 +235,7 @@ private:
 		}
 	};
 
-	typedef boost::shared_ptr<MidiDeviceSetting> MidiDeviceSettings;
+	typedef std::shared_ptr<MidiDeviceSetting> MidiDeviceSettings;
 	bool                                         _can_set_midi_latencies;
 	std::vector<MidiDeviceSettings>              _midi_devices;
 
@@ -280,7 +280,7 @@ private:
 		}
 	};
 
-	typedef boost::shared_ptr<StateStruct> State;
+	typedef std::shared_ptr<StateStruct> State;
 	typedef std::list<State>               StateList;
 	static bool                            state_sort_cmp (const State& a, const State& b);
 

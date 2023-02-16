@@ -458,7 +458,7 @@ Source::dec_use_count ()
 #endif
 
 	try {
-		boost::shared_ptr<Source> sptr = shared_from_this();
+		std::shared_ptr<Source> sptr = shared_from_this();
 	} catch (...) {
 		/* no shared_ptr available, relax; */
 	}

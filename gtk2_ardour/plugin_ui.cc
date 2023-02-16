@@ -71,7 +71,7 @@
 #  include "vst3_hwnd_plugin_ui.h"
 # elif defined (__APPLE__)
 #  include "vst3_plugin_ui.h"
-extern VST3PluginUI* create_mac_vst3_gui (boost::shared_ptr<ARDOUR::PlugInsertBase>, Gtk::VBox**);
+extern VST3PluginUI* create_mac_vst3_gui (std::shared_ptr<ARDOUR::PlugInsertBase>, Gtk::VBox**);
 # else
 #  include "vst3_x11_plugin_ui.h"
 # endif
@@ -106,7 +106,7 @@ using namespace Gtk;
 PluginUIWindow* PluginUIWindow::the_plugin_window = 0;
 
 PluginUIWindow::PluginUIWindow (
-	boost::shared_ptr<PlugInsertBase> pib,
+	std::shared_ptr<PlugInsertBase> pib,
 	bool                              scrollable,
 	bool                              editor)
 	: ArdourWindow (string())
@@ -260,18 +260,18 @@ PluginUIWindow::set_title(const std::string& title)
 
 bool
 #ifdef WINDOWS_VST_SUPPORT
-PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PlugInsertBase> pib)
+PluginUIWindow::create_windows_vst_editor(std::shared_ptr<PlugInsertBase> pib)
 #else
-PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PlugInsertBase>)
+PluginUIWindow::create_windows_vst_editor(std::shared_ptr<PlugInsertBase>)
 #endif
 {
 #ifndef WINDOWS_VST_SUPPORT
 	return false;
 #else
 
-	boost::shared_ptr<WindowsVSTPlugin> vp;
+	std::shared_ptr<WindowsVSTPlugin> vp;
 
-	if ((vp = boost::dynamic_pointer_cast<WindowsVSTPlugin> (pib->plugin())) == 0) {
+	if ((vp = std::dynamic_pointer_cast<WindowsVSTPlugin> (pib->plugin())) == 0) {
 		error << string_compose (_("unknown type of editor-supplying plugin (note: no VST support in this version of %1)"), PROGRAM_NAME)
 		      << endmsg;
 		throw failed_constructor ();
@@ -290,18 +290,18 @@ PluginUIWindow::create_windows_vst_editor(boost::shared_ptr<PlugInsertBase>)
 
 bool
 #ifdef LXVST_SUPPORT
-PluginUIWindow::create_lxvst_editor(boost::shared_ptr<PlugInsertBase> pib)
+PluginUIWindow::create_lxvst_editor(std::shared_ptr<PlugInsertBase> pib)
 #else
-PluginUIWindow::create_lxvst_editor(boost::shared_ptr<PlugInsertBase>)
+PluginUIWindow::create_lxvst_editor(std::shared_ptr<PlugInsertBase>)
 #endif
 {
 #ifndef LXVST_SUPPORT
 	return false;
 #else
 
-	boost::shared_ptr<LXVSTPlugin> lxvp;
+	std::shared_ptr<LXVSTPlugin> lxvp;
 
-	if ((lxvp = boost::dynamic_pointer_cast<LXVSTPlugin> (pib->plugin())) == 0) {
+	if ((lxvp = std::dynamic_pointer_cast<LXVSTPlugin> (pib->plugin())) == 0) {
 		error << string_compose (_("unknown type of editor-supplying plugin (note: no linuxVST support in this version of %1)"), PROGRAM_NAME)
 		      << endmsg;
 		throw failed_constructor ();
@@ -320,16 +320,16 @@ PluginUIWindow::create_lxvst_editor(boost::shared_ptr<PlugInsertBase>)
 
 bool
 #ifdef MACVST_SUPPORT
-PluginUIWindow::create_mac_vst_editor (boost::shared_ptr<PlugInsertBase> pib)
+PluginUIWindow::create_mac_vst_editor (std::shared_ptr<PlugInsertBase> pib)
 #else
-PluginUIWindow::create_mac_vst_editor (boost::shared_ptr<PlugInsertBase>)
+PluginUIWindow::create_mac_vst_editor (std::shared_ptr<PlugInsertBase>)
 #endif
 {
 #ifndef MACVST_SUPPORT
 	return false;
 #else
-	boost::shared_ptr<MacVSTPlugin> mvst;
-	if ((mvst = boost::dynamic_pointer_cast<MacVSTPlugin> (pib->plugin())) == 0) {
+	std::shared_ptr<MacVSTPlugin> mvst;
+	if ((mvst = std::dynamic_pointer_cast<MacVSTPlugin> (pib->plugin())) == 0) {
 		error << string_compose (_("unknown type of editor-supplying plugin (note: no MacVST support in this version of %1)"), PROGRAM_NAME)
 		      << endmsg;
 		throw failed_constructor ();
@@ -348,16 +348,16 @@ PluginUIWindow::create_mac_vst_editor (boost::shared_ptr<PlugInsertBase>)
 
 bool
 #ifdef VST3_SUPPORT
-PluginUIWindow::create_vst3_editor (boost::shared_ptr<PlugInsertBase> pib)
+PluginUIWindow::create_vst3_editor (std::shared_ptr<PlugInsertBase> pib)
 #else
-PluginUIWindow::create_vst3_editor (boost::shared_ptr<PlugInsertBase>)
+PluginUIWindow::create_vst3_editor (std::shared_ptr<PlugInsertBase>)
 #endif
 {
 #ifndef VST3_SUPPORT
 	return false;
 #else
-	boost::shared_ptr<VST3Plugin> vst3;
-	if ((vst3 = boost::dynamic_pointer_cast<VST3Plugin> (pib->plugin())) == 0) {
+	std::shared_ptr<VST3Plugin> vst3;
+	if ((vst3 = std::dynamic_pointer_cast<VST3Plugin> (pib->plugin())) == 0) {
 		error << _("create_vst3_editor called on non-VST3 plugin") << endmsg;
 		throw failed_constructor ();
 	} else {
@@ -384,9 +384,9 @@ PluginUIWindow::create_vst3_editor (boost::shared_ptr<PlugInsertBase>)
 
 bool
 #ifdef AUDIOUNIT_SUPPORT
-PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PlugInsertBase> pib)
+PluginUIWindow::create_audiounit_editor (std::shared_ptr<PlugInsertBase> pib)
 #else
-PluginUIWindow::create_audiounit_editor (boost::shared_ptr<PlugInsertBase>)
+PluginUIWindow::create_audiounit_editor (std::shared_ptr<PlugInsertBase>)
 #endif
 {
 #ifndef AUDIOUNIT_SUPPORT
@@ -432,12 +432,12 @@ PluginUIWindow::app_activated (bool)
 }
 
 bool
-PluginUIWindow::create_lv2_editor(boost::shared_ptr<PlugInsertBase> pib)
+PluginUIWindow::create_lv2_editor(std::shared_ptr<PlugInsertBase> pib)
 {
 #ifdef HAVE_SUIL
-	boost::shared_ptr<LV2Plugin> vp;
+	std::shared_ptr<LV2Plugin> vp;
 
-	if ((vp = boost::dynamic_pointer_cast<LV2Plugin> (pib->plugin())) == 0) {
+	if ((vp = std::dynamic_pointer_cast<LV2Plugin> (pib->plugin())) == 0) {
 		error << _("create_lv2_editor called on non-LV2 plugin") << endmsg;
 		throw failed_constructor ();
 	} else {
@@ -523,7 +523,7 @@ PluginUIWindow::plugin_going_away ()
 	death_connection.disconnect ();
 }
 
-PlugUIBase::PlugUIBase (boost::shared_ptr<PlugInsertBase> pib)
+PlugUIBase::PlugUIBase (std::shared_ptr<PlugInsertBase> pib)
 	: _pib (pib)
 	, plugin (pib->plugin())
 	, _add_button (_("Add"))
@@ -543,7 +543,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PlugInsertBase> pib)
 	, preset_gui (0)
 	, preset_dialog (0)
 {
-	_pi = boost::dynamic_pointer_cast<ARDOUR::PluginInsert> (_pib); /* may be NULL */
+	_pi = std::dynamic_pointer_cast<ARDOUR::PluginInsert> (_pib); /* may be NULL */
 
 	_preset_modified.set_size_request (16, -1);
 	_preset_combo.set_text("(default)");
@@ -596,7 +596,7 @@ PlugUIBase::PlugUIBase (boost::shared_ptr<PlugInsertBase> pib)
 	_bypass_button.signal_button_release_event().connect (sigc::mem_fun(*this, &PlugUIBase::bypass_button_release), false);
 
 	if (_pi) {
-		_pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  boost::weak_ptr<Processor>(_pi)), gui_context());
+		_pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&PlugUIBase::processor_active_changed, this,  std::weak_ptr<Processor>(_pi)), gui_context());
 		_bypass_button.set_active (!_pi->enabled ());
 	} else {
 		_bypass_button.set_sensitive (false);
@@ -734,10 +734,10 @@ PlugUIBase::latency_button_clicked ()
 }
 
 void
-PlugUIBase::processor_active_changed (boost::weak_ptr<Processor> weak_p)
+PlugUIBase::processor_active_changed (std::weak_ptr<Processor> weak_p)
 {
 	ENSURE_GUI_THREAD (*this, &PlugUIBase::processor_active_changed, weak_p);
-	boost::shared_ptr<Processor> p (weak_p.lock());
+	std::shared_ptr<Processor> p (weak_p.lock());
 
 	if (p) {
 		_bypass_button.set_active (!p->enabled ());

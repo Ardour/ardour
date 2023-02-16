@@ -26,15 +26,15 @@ main (int argc, char* argv[])
 	{
 
 	/* Find the track */
-	boost::shared_ptr<MidiTrack> track = boost::dynamic_pointer_cast<MidiTrack> (session->get_routes()->back());
+	std::shared_ptr<MidiTrack> track = std::dynamic_pointer_cast<MidiTrack> (session->get_routes()->back());
 	assert (track);
 
 	/* And the playlist */
-	boost::shared_ptr<Playlist> playlist = track->playlist ();
+	std::shared_ptr<Playlist> playlist = track->playlist ();
 	assert (playlist);
 
 	/* And the region */
-	boost::shared_ptr<MidiRegion> region = boost::dynamic_pointer_cast<MidiRegion> (playlist->region_list_property().rlist().front());
+	std::shared_ptr<MidiRegion> region = std::dynamic_pointer_cast<MidiRegion> (playlist->region_list_property().rlist().front());
 	assert (region);
 
 	/* Duplicate it a lot */

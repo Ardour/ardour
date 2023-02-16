@@ -128,8 +128,8 @@ FaderPort8::FaderPort8 (Session& s)
 	, _two_line_text (false)
 	, _auto_pluginui (true)
 {
-	boost::shared_ptr<ARDOUR::Port> inp;
-	boost::shared_ptr<ARDOUR::Port> outp;
+	std::shared_ptr<ARDOUR::Port> inp;
+	std::shared_ptr<ARDOUR::Port> outp;
 
 #ifdef FADERPORT16
 	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, "FaderPort16 Recv", true);
@@ -141,8 +141,8 @@ FaderPort8::FaderPort8 (Session& s)
 	inp  = AudioEngine::instance()->register_input_port (DataType::MIDI, "FaderPort8 Recv", true);
 	outp = AudioEngine::instance()->register_output_port (DataType::MIDI, "FaderPort8 Send", true);
 #endif
-	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(inp);
-	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(outp);
+	_input_port = std::dynamic_pointer_cast<AsyncMIDIPort>(inp);
+	_output_port = std::dynamic_pointer_cast<AsyncMIDIPort>(outp);
 
 	if (_input_port == 0 || _output_port == 0) {
 		throw failed_constructor();
@@ -192,7 +192,7 @@ FaderPort8::~FaderPort8 ()
 	stop ();
 
 	if (_input_port) {
-		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("unregistering input port %1\n", boost::shared_ptr<ARDOUR::Port>(_input_port)->name()));
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("unregistering input port %1\n", std::shared_ptr<ARDOUR::Port>(_input_port)->name()));
 		Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
 		AudioEngine::instance()->unregister_port (_input_port);
 		_input_port.reset ();
@@ -202,7 +202,7 @@ FaderPort8::~FaderPort8 ()
 
 	if (_output_port) {
 		_output_port->drain (10000,  250000); /* check every 10 msecs, wait up to 1/4 second for the port to drain */
-		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("unregistering output port %1\n", boost::shared_ptr<ARDOUR::Port>(_output_port)->name()));
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("unregistering output port %1\n", std::shared_ptr<ARDOUR::Port>(_output_port)->name()));
 		Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
 		AudioEngine::instance()->unregister_port (_output_port);
 		_output_port.reset ();
@@ -428,8 +428,8 @@ FaderPort8::connection_handler (std::string name1, std::string name2)
 		return false;
 	}
 
-	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_input_port)->name());
-	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_output_port)->name());
+	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (std::shared_ptr<ARDOUR::Port>(_input_port)->name());
+	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (std::shared_ptr<ARDOUR::Port>(_output_port)->name());
 
 	if (ni == name1 || ni == name2) {
 		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("Connection notify %1 and %2\n", name1, name2));
@@ -487,10 +487,10 @@ FaderPort8::connection_handler (std::string name1, std::string name2)
 	return true; /* connection status changed */
 }
 
-list<boost::shared_ptr<ARDOUR::Bundle> >
+list<std::shared_ptr<ARDOUR::Bundle> >
 FaderPort8::bundles ()
 {
-	list<boost::shared_ptr<ARDOUR::Bundle> > b;
+	list<std::shared_ptr<ARDOUR::Bundle> > b;
 
 	if (_input_bundle) {
 		b.push_back (_input_bundle);
@@ -504,16 +504,16 @@ FaderPort8::bundles ()
  * MIDI I/O
  */
 bool
-FaderPort8::midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::AsyncMIDIPort> wport)
+FaderPort8::midi_input_handler (Glib::IOCondition ioc, std::weak_ptr<ARDOUR::AsyncMIDIPort> wport)
 {
-	boost::shared_ptr<AsyncMIDIPort> port (wport.lock());
+	std::shared_ptr<AsyncMIDIPort> port (wport.lock());
 
 	if (!port || !_input_port) {
 		return false;
 	}
 
 #ifdef VERBOSE_DEBUG
-	DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("something happened on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
+	DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("something happened on %1\n", std::shared_ptr<MIDI::Port>(port)->name()));
 #endif
 
 	if (ioc & ~IO_IN) {
@@ -524,7 +524,7 @@ FaderPort8::midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::A
 
 		port->clear ();
 #ifdef VERBOSE_DEBUG
-		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("data available on %1\n", boost::shared_ptr<MIDI::Port>(port)->name()));
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("data available on %1\n", std::shared_ptr<MIDI::Port>(port)->name()));
 #endif
 		samplepos_t now = session->engine().sample_time();
 		port->parse (now);
@@ -549,7 +549,7 @@ FaderPort8::start_midi_handling ()
 	 * port, the relevant thread will invoke our ::midi_input_handler()
 	 * method, which will read the data, and invoke the parser.
 	 */
-	_input_port->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &FaderPort8::midi_input_handler), boost::weak_ptr<AsyncMIDIPort> (_input_port)));
+	_input_port->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &FaderPort8::midi_input_handler), std::weak_ptr<AsyncMIDIPort> (_input_port)));
 	_input_port->xthread().attach (main_loop()->get_context());
 }
 
@@ -768,11 +768,11 @@ FaderPort8::get_state () const
 	XMLNode* child;
 
 	child = new XMLNode (X_("Input"));
-	child->add_child_nocopy (boost::shared_ptr<ARDOUR::Port>(_input_port)->get_state());
+	child->add_child_nocopy (std::shared_ptr<ARDOUR::Port>(_input_port)->get_state());
 	node.add_child_nocopy (*child);
 
 	child = new XMLNode (X_("Output"));
-	child->add_child_nocopy (boost::shared_ptr<ARDOUR::Port>(_output_port)->get_state());
+	child->add_child_nocopy (std::shared_ptr<ARDOUR::Port>(_output_port)->get_state());
 	node.add_child_nocopy (*child);
 
 #ifndef FADERPORT2
@@ -819,7 +819,7 @@ FaderPort8::set_state (const XMLNode& node, int version)
 		if (portnode) {
 			portnode->remove_property ("name");
 			DEBUG_TRACE (DEBUG::FaderPort8, "FaderPort8::set_state Input\n");
-			boost::shared_ptr<ARDOUR::Port>(_input_port)->set_state (*portnode, version);
+			std::shared_ptr<ARDOUR::Port>(_input_port)->set_state (*portnode, version);
 		}
 	}
 
@@ -828,7 +828,7 @@ FaderPort8::set_state (const XMLNode& node, int version)
 		if (portnode) {
 			portnode->remove_property ("name");
 			DEBUG_TRACE (DEBUG::FaderPort8, "FaderPort8::set_state Output\n");
-			boost::shared_ptr<ARDOUR::Port>(_output_port)->set_state (*portnode, version);
+			std::shared_ptr<ARDOUR::Port>(_output_port)->set_state (*portnode, version);
 		}
 	}
 
@@ -871,16 +871,16 @@ FaderPort8::set_state (const XMLNode& node, int version)
  * Stripable Assignment
  */
 
-static bool flt_audio_track (boost::shared_ptr<Stripable> s) {
-	return boost::dynamic_pointer_cast<AudioTrack>(s) != 0;
+static bool flt_audio_track (std::shared_ptr<Stripable> s) {
+	return std::dynamic_pointer_cast<AudioTrack>(s) != 0;
 }
 
-static bool flt_midi_track (boost::shared_ptr<Stripable> s) {
-	return boost::dynamic_pointer_cast<MidiTrack>(s) != 0;
+static bool flt_midi_track (std::shared_ptr<Stripable> s) {
+	return std::dynamic_pointer_cast<MidiTrack>(s) != 0;
 }
 
-static bool flt_bus (boost::shared_ptr<Stripable> s) {
-	if (boost::dynamic_pointer_cast<Route>(s) == 0) {
+static bool flt_bus (std::shared_ptr<Stripable> s) {
+	if (std::dynamic_pointer_cast<Route>(s) == 0) {
 		return false;
 	}
 #ifdef MIXBUS
@@ -888,11 +888,11 @@ static bool flt_bus (boost::shared_ptr<Stripable> s) {
 		return false;
 	}
 #endif
-	return boost::dynamic_pointer_cast<Track>(s) == 0;
+	return std::dynamic_pointer_cast<Track>(s) == 0;
 }
 
-static bool flt_auxbus (boost::shared_ptr<Stripable> s) {
-	if (boost::dynamic_pointer_cast<Route>(s) == 0) {
+static bool flt_auxbus (std::shared_ptr<Stripable> s) {
+	if (std::dynamic_pointer_cast<Route>(s) == 0) {
 		return false;
 	}
 #ifdef MIXBUS
@@ -900,35 +900,35 @@ static bool flt_auxbus (boost::shared_ptr<Stripable> s) {
 		return false;
 	}
 #endif
-	return boost::dynamic_pointer_cast<Track>(s) == 0;
+	return std::dynamic_pointer_cast<Track>(s) == 0;
 }
 
-static bool flt_vca (boost::shared_ptr<Stripable> s) {
-	return boost::dynamic_pointer_cast<VCA>(s) != 0;
+static bool flt_vca (std::shared_ptr<Stripable> s) {
+	return std::dynamic_pointer_cast<VCA>(s) != 0;
 }
 
-static bool flt_selected (boost::shared_ptr<Stripable> s) {
+static bool flt_selected (std::shared_ptr<Stripable> s) {
 	return s->is_selected ();
 }
 
-static bool flt_mains (boost::shared_ptr<Stripable> s) {
+static bool flt_mains (std::shared_ptr<Stripable> s) {
 	return (s->is_master() || s->is_monitor());
 }
 
-static bool flt_all (boost::shared_ptr<Stripable> s) {
+static bool flt_all (std::shared_ptr<Stripable> s) {
 	return true;
 }
 
-static bool flt_rec_armed (boost::shared_ptr<Stripable> s) {
-	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(s);
+static bool flt_rec_armed (std::shared_ptr<Stripable> s) {
+	std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track>(s);
 	if (!t) {
 		return false;
 	}
 	return t->rec_enable_control ()->get_value () > 0.;
 }
 
-static bool flt_instrument (boost::shared_ptr<Stripable> s) {
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(s);
+static bool flt_instrument (std::shared_ptr<Stripable> s) {
+	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route>(s);
 	if (!r) {
 		return false;
 	}
@@ -938,7 +938,7 @@ static bool flt_instrument (boost::shared_ptr<Stripable> s) {
 void
 FaderPort8::filter_stripables (StripableList& strips) const
 {
-	typedef bool (*FilterFunction)(boost::shared_ptr<Stripable>);
+	typedef bool (*FilterFunction)(std::shared_ptr<Stripable>);
 	FilterFunction flt;
 
 	bool allow_master = false;
@@ -1013,7 +1013,7 @@ FaderPort8::assign_stripables (bool select_only)
 	}
 
 #ifdef FADERPORT2
-	boost::shared_ptr<Stripable> s = first_selected_stripable();
+	std::shared_ptr<Stripable> s = first_selected_stripable();
 	if (s) {
 		_ctrls.strip(0).set_stripable (s, _ctrls.fader_mode() == ModePan);
 	} else {
@@ -1041,14 +1041,14 @@ FaderPort8::assign_stripables (bool select_only)
 				boost::bind (&FaderPort8::notify_stripable_added_or_removed, this), this);
 
 		(*s)->PropertyChanged.connect (assigned_stripable_connections, MISSING_INVALIDATOR,
-				boost::bind (&FaderPort8::notify_stripable_property_changed, this, boost::weak_ptr<Stripable> (*s), _1), this);
+				boost::bind (&FaderPort8::notify_stripable_property_changed, this, std::weak_ptr<Stripable> (*s), _1), this);
 		(*s)->presentation_info ().PropertyChanged.connect (assigned_stripable_connections, MISSING_INVALIDATOR,
-				boost::bind (&FaderPort8::notify_stripable_property_changed, this, boost::weak_ptr<Stripable> (*s), _1), this);
+				boost::bind (&FaderPort8::notify_stripable_property_changed, this, std::weak_ptr<Stripable> (*s), _1), this);
 
-		if (boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(*s)) {
+		if (std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route>(*s)) {
 			if (r->panner_shell()) {
 				r->panner_shell()->Changed.connect (assigned_stripable_connections, MISSING_INVALIDATOR,
-				boost::bind (&FaderPort8::notify_stripable_property_changed, this, boost::weak_ptr<Stripable> (*s), PropertyChange()), this);
+				boost::bind (&FaderPort8::notify_stripable_property_changed, this, std::weak_ptr<Stripable> (*s), PropertyChange()), this);
 			}
 		}
 
@@ -1063,7 +1063,7 @@ FaderPort8::assign_stripables (bool select_only)
 			_ctrls.strip(id).set_stripable (*s, _ctrls.fader_mode() == ModePan);
 		}
 
-		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_strip, this, boost::weak_ptr<Stripable> (*s)));
+		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_strip, this, std::weak_ptr<Stripable> (*s)));
 		 _ctrls.strip(id).set_select_cb (cb);
 
 		if (++id == N_STRIPS) {
@@ -1107,7 +1107,7 @@ FaderPort8::unlock_link (bool drop)
 void
 FaderPort8::lock_link ()
 {
-	boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (_link_control.lock ());
+	std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (_link_control.lock ());
 	if (!ac) {
 		return;
 	}
@@ -1236,12 +1236,12 @@ FaderPort8::assign_processor_ctrls ()
 }
 
 bool
-FaderPort8::assign_plugin_presets (boost::shared_ptr<PluginInsert> pi)
+FaderPort8::assign_plugin_presets (std::shared_ptr<PluginInsert> pi)
 {
 	if (!pi) {
 		return false;
 	}
-	boost::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin ();
+	std::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin ();
 
 	std::vector<ARDOUR::Plugin::PresetRecord> presets = plugin->get_presets ();
 	if (presets.size () == 0) {
@@ -1295,7 +1295,7 @@ FaderPort8::assign_plugin_presets (boost::shared_ptr<PluginInsert> pi)
 }
 
 void
-FaderPort8::build_well_known_processor_ctrls (boost::shared_ptr<Stripable> s, bool eq)
+FaderPort8::build_well_known_processor_ctrls (std::shared_ptr<Stripable> s, bool eq)
 {
 #define PUSH_BACK_NON_NULL(N, C) do {if (C) { _proc_params.push_back (ProcessorCtrl (N, C)); }} while (0)
 
@@ -1335,7 +1335,7 @@ FaderPort8::select_plugin (int num)
 	// make sure drop_ctrl_connections() was called
 	assert (_proc_params.size() == 0 && _showing_well_known == 0 && _plugin_insert.expired());
 
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (first_selected_stripable());
+	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (first_selected_stripable());
 	if (!r) {
 		_ctrls.set_fader_mode (ModeTrack);
 		return;
@@ -1344,7 +1344,7 @@ FaderPort8::select_plugin (int num)
 	// Toggle Bypass
 	if (shift_mod ()) {
 		if (num >= 0) {
-			boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (r->nth_plugin (num));
+			std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (r->nth_plugin (num));
 #ifdef MIXBUS
 			if (pi && !pi->is_channelstrip () && pi->display_to_user ())
 #else
@@ -1365,7 +1365,7 @@ FaderPort8::select_plugin (int num)
 	}
 	_showing_well_known = 0;
 
-	boost::shared_ptr<Processor> proc = r->nth_plugin (num);
+	std::shared_ptr<Processor> proc = r->nth_plugin (num);
 	if (!proc) {
 		_ctrls.set_fader_mode (ModeTrack);
 		return;
@@ -1375,7 +1375,7 @@ FaderPort8::select_plugin (int num)
 	processor_connections.drop_connections ();
 	r->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
 
-	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
+	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (proc);
 	assert (pi); // nth_plugin() always returns a PI.
 	/* _plugin_insert is used for Bypass/Enable & presets */
 #ifdef MIXBUS
@@ -1384,9 +1384,9 @@ FaderPort8::select_plugin (int num)
 	if (pi->display_to_user ())
 #endif
 	{
-		_plugin_insert = boost::weak_ptr<ARDOUR::PluginInsert> (pi);
+		_plugin_insert = std::weak_ptr<ARDOUR::PluginInsert> (pi);
 		pi->ActiveChanged.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_plugin_active_changed, this), this);
-		boost::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin ();
+		std::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin ();
 
 		plugin->PresetAdded.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
 		plugin->PresetRemoved.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
@@ -1428,7 +1428,7 @@ void
 FaderPort8::select_plugin_preset (size_t num)
 {
 	assert (_proc_params.size() > 0);
-	boost::shared_ptr<PluginInsert> pi = _plugin_insert.lock();
+	std::shared_ptr<PluginInsert> pi = _plugin_insert.lock();
 	if (!pi) {
 		_ctrls.set_fader_mode (ModeTrack);
 		return;
@@ -1448,7 +1448,7 @@ FaderPort8::select_plugin_preset (size_t num)
 void
 FaderPort8::spill_plugins ()
 {
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (first_selected_stripable());
+	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (first_selected_stripable());
 	if (!r) {
 		_ctrls.set_fader_mode (ModeTrack);
 		return;
@@ -1464,7 +1464,7 @@ FaderPort8::spill_plugins ()
 	r->processors_changed.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::spill_plugins, this), this);
 
 	// count available
-	boost::shared_ptr<Processor> proc;
+	std::shared_ptr<Processor> proc;
 
 	std::vector<uint32_t> procs;
 
@@ -1474,7 +1474,7 @@ FaderPort8::spill_plugins ()
 		}
 #ifdef MIXBUS
 		/* don't show channelstrip plugins, use "well known" */
-		if (boost::dynamic_pointer_cast<PluginInsert> (proc)->is_channelstrip ()) {
+		if (std::dynamic_pointer_cast<PluginInsert> (proc)->is_channelstrip ()) {
 			continue;
 		}
 #endif
@@ -1522,11 +1522,11 @@ FaderPort8::spill_plugins ()
 		if (i >= procs.size()) {
 			break;
 		}
-		boost::shared_ptr<Processor> proc = r->nth_plugin (procs[i]);
+		std::shared_ptr<Processor> proc = r->nth_plugin (procs[i]);
 		if (!proc) {
 			break;
 		}
-		boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (proc);
+		std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (proc);
 		boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, procs[i]));
 
 		_ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
@@ -1588,7 +1588,7 @@ FaderPort8::spill_plugins ()
 void
 FaderPort8::assign_sends ()
 {
-	boost::shared_ptr<Stripable> s = first_selected_stripable();
+	std::shared_ptr<Stripable> s = first_selected_stripable();
 	if (!s) {
 		_ctrls.set_fader_mode (ModeTrack);
 		return;
@@ -1618,7 +1618,7 @@ FaderPort8::assign_sends ()
 			--skip;
 			continue;
 		}
-		boost::shared_ptr<AutomationControl> send = s->send_level_controllable (i);
+		std::shared_ptr<AutomationControl> send = s->send_level_controllable (i);
 		if (!send) {
 			break;
 		}
@@ -1692,7 +1692,7 @@ FaderPort8::drop_ctrl_connections ()
 {
 	_proc_params.clear();
 	if (_auto_pluginui) {
-		boost::shared_ptr<PluginInsert> pi = _plugin_insert.lock ();
+		std::shared_ptr<PluginInsert> pi = _plugin_insert.lock ();
 		if (pi) {
 			pi->HideUI (); /* EMIT SIGNAL */
 		}
@@ -1706,9 +1706,9 @@ FaderPort8::drop_ctrl_connections ()
 
 /* functor for FP8Strip's select button */
 void
-FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
+FaderPort8::select_strip (std::weak_ptr<Stripable> ws)
 {
-	boost::shared_ptr<Stripable> s = ws.lock();
+	std::shared_ptr<Stripable> s = ws.lock();
 	if (!s) {
 		return;
 	}
@@ -1717,7 +1717,7 @@ FaderPort8::select_strip (boost::weak_ptr<Stripable> ws)
 # if 0 /* selecting a selected strip -> move fader to unity */
 	if (s == first_selected_stripable () && !shift_mod ()) {
 		if (_ctrls.fader_mode () == ModeTrack) {
-			boost::shared_ptr<AutomationControl> ac = s->gain_control ();
+			std::shared_ptr<AutomationControl> ac = s->gain_control ();
 			ac->start_touch (timepos_t (ac->session().transport_sample()));
 			ac->set_value (ac->normal (), PBD::Controllable::UseGroup);
 		}
@@ -1761,7 +1761,7 @@ FaderPort8::notify_fader_mode_changed ()
 {
 	FaderMode fadermode = _ctrls.fader_mode ();
 
-	boost::shared_ptr<Stripable> s = first_selected_stripable();
+	std::shared_ptr<Stripable> s = first_selected_stripable();
 	if (!s && (fadermode == ModePlugins || fadermode == ModeSend)) {
 		_ctrls.set_fader_mode (ModeTrack);
 		return;
@@ -1814,9 +1814,9 @@ FaderPort8::notify_pi_property_changed (const PropertyChange& what_changed)
 }
 
 void
-FaderPort8::notify_stripable_property_changed (boost::weak_ptr<Stripable> ws, const PropertyChange& what_changed)
+FaderPort8::notify_stripable_property_changed (std::weak_ptr<Stripable> ws, const PropertyChange& what_changed)
 {
-	boost::shared_ptr<Stripable> s = ws.lock();
+	std::shared_ptr<Stripable> s = ws.lock();
 	if (!s) {
 		assert (0); // this should not happen
 		return;
@@ -1908,7 +1908,7 @@ FaderPort8::stripable_selection_changed ()
 
 	/* update selection lights */
 	for (StripAssignmentMap::const_iterator i = _assigned_strips.begin(); i != _assigned_strips.end(); ++i) {
-		boost::shared_ptr<ARDOUR::Stripable> s = i->first;
+		std::shared_ptr<ARDOUR::Stripable> s = i->first;
 		uint8_t id = i->second;
 		bool sel = s->is_selected ();
 		_ctrls.strip(id).select_button ().set_active (sel);
@@ -1923,9 +1923,9 @@ void
 FaderPort8::subscribe_to_strip_signals ()
 {
 	/* keep track of automation-mode of primary selection, shared buttons */
-	boost::shared_ptr<Stripable> s = first_selected_stripable();
+	std::shared_ptr<Stripable> s = first_selected_stripable();
 	if (s) {
-		boost::shared_ptr<AutomationControl> ac;
+		std::shared_ptr<AutomationControl> ac;
 		ac = s->gain_control();
 		if (ac && ac->alist()) {
 			ac->alist()->automation_state_changed.connect (route_state_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::notify_route_state_changed, this), this);
@@ -1953,7 +1953,7 @@ FaderPort8::subscribe_to_strip_signals ()
 void
 FaderPort8::move_selected_into_view ()
 {
-	boost::shared_ptr<Stripable> selected = first_selected_stripable ();
+	std::shared_ptr<Stripable> selected = first_selected_stripable ();
 	if (!selected) {
 		return;
 	}
@@ -1987,7 +1987,7 @@ FaderPort8::select_prev_next (bool next)
 	StripableList strips;
 	filter_stripables (strips);
 
-	boost::shared_ptr<Stripable> selected = first_selected_stripable ();
+	std::shared_ptr<Stripable> selected = first_selected_stripable ();
 	if (!selected) {
 		if (strips.size() > 0) {
 			if (next) {
@@ -2000,7 +2000,7 @@ FaderPort8::select_prev_next (bool next)
 	}
 
 	bool found = false;
-	boost::shared_ptr<Stripable> toselect;
+	std::shared_ptr<Stripable> toselect;
 	for (StripableList::const_iterator s = strips.begin(); s != strips.end(); ++s) {
 		if (*s == selected) {
 			if (!next) {

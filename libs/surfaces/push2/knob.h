@@ -71,8 +71,8 @@ public:
 	void add_flag (Flags);
 	void remove_flag (Flags);
 
-	void set_controllable (boost::shared_ptr<ARDOUR::AutomationControl> c);
-	boost::shared_ptr<ARDOUR::AutomationControl> controllable() const { return _controllable; }
+	void set_controllable (std::shared_ptr<ARDOUR::AutomationControl> c);
+	std::shared_ptr<ARDOUR::AutomationControl> controllable() const { return _controllable; }
 
 	void set_text_color (Gtkmm2ext::Color);
 	void set_arc_start_color (Gtkmm2ext::Color);
@@ -85,7 +85,7 @@ public:
   protected:
 	void controllable_changed ();
 	PBD::ScopedConnection watch_connection;
-	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
+	std::shared_ptr<ARDOUR::AutomationControl> _controllable;
 
   private:
 	Push2&  _p2;

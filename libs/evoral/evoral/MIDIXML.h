@@ -44,7 +44,7 @@ xml_to_midi(const XMLNode& node, Evoral::Event<Time>& ev)
 }
 
 template<typename Time>
-boost::shared_ptr<XMLNode>
+std::shared_ptr<XMLNode>
 midi_to_xml(const Evoral::Event<Time>& ev)
 {
 	XMLNode* result = 0;
@@ -84,10 +84,10 @@ midi_to_xml(const Evoral::Event<Time>& ev)
 		break;
 
 	default:
-		return boost::shared_ptr<XMLNode>();
+		return std::shared_ptr<XMLNode>();
 	}
 
-	return boost::shared_ptr<XMLNode>(result);
+	return std::shared_ptr<XMLNode>(result);
 }
 
 } // namespace MIDIXML

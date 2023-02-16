@@ -75,7 +75,7 @@ private:
 
 	void test_conformity ();
 
-	void plot_graph (boost::shared_ptr<ARDOUR::ExportAnalysis>);
+	void plot_graph (std::shared_ptr<ARDOUR::ExportAnalysis>);
 	void graph_size_request (Gtk::Requisition*);
 	bool graph_expose_event (GdkEventExpose*);
 
@@ -87,7 +87,7 @@ private:
 
 	ARDOUR::Session*                        _session;
 	ARDOUR::TimelineRange const&               _range;
-	boost::shared_ptr<ARDOUR::ExportStatus> _status;
+	std::shared_ptr<ARDOUR::ExportStatus> _status;
 	bool                                    _autostart;
 
 	Gtk::VBox        _setup_box;

@@ -37,14 +37,14 @@ using namespace ArdourWidgets;
 guint BindingProxy::bind_button = 2;
 guint BindingProxy::bind_statemask = Gdk::CONTROL_MASK;
 
-BindingProxy::BindingProxy (boost::shared_ptr<Controllable> c)
+BindingProxy::BindingProxy (std::shared_ptr<Controllable> c)
 	: prompter (0),
 	  controllable (c)
 {
 	if (c) {
 		c->DropReferences.connect (
 				_controllable_going_away_connection, invalidator (*this),
-				boost::bind (&BindingProxy::set_controllable, this, boost::shared_ptr<Controllable> ()),
+				boost::bind (&BindingProxy::set_controllable, this, std::shared_ptr<Controllable> ()),
 				gui_context());
 	}
 }
@@ -62,7 +62,7 @@ BindingProxy::~BindingProxy ()
 }
 
 void
-BindingProxy::set_controllable (boost::shared_ptr<Controllable> c)
+BindingProxy::set_controllable (std::shared_ptr<Controllable> c)
 {
 	learning_finished ();
 	controllable = c;
@@ -71,7 +71,7 @@ BindingProxy::set_controllable (boost::shared_ptr<Controllable> c)
 	if (c) {
 		c->DropReferences.connect (
 				_controllable_going_away_connection, invalidator (*this),
-				boost::bind (&BindingProxy::set_controllable, this, boost::shared_ptr<Controllable> ()),
+				boost::bind (&BindingProxy::set_controllable, this, std::shared_ptr<Controllable> ()),
 				gui_context());
 	}
 }

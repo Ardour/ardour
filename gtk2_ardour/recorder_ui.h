@@ -82,15 +82,15 @@ private:
 	void parameter_changed (std::string const&);
 	void presentation_info_changed (PBD::PropertyChange const&);
 	void gui_extents_changed ();
-	void regions_changed (boost::shared_ptr<ARDOUR::RegionList>, PBD::PropertyChange const&);
+	void regions_changed (std::shared_ptr<ARDOUR::RegionList>, PBD::PropertyChange const&);
 
 	void start_updating ();
 	void stop_updating ();
 	bool update_meters ();
 	void add_or_remove_io (ARDOUR::DataType, std::vector<std::string>, bool);
 	void io_plugins_changed ();
-	void io_plugin_add (boost::shared_ptr<ARDOUR::IOPlug>);
-	void io_plugin_going_away (boost::weak_ptr<ARDOUR::IOPlug>);
+	void io_plugin_add (std::shared_ptr<ARDOUR::IOPlug>);
+	void io_plugin_going_away (std::weak_ptr<ARDOUR::IOPlug>);
 	void post_add_remove (bool);
 	void update_io_widget_labels ();
 
@@ -250,14 +250,14 @@ private:
 	};
 
 	struct InputPortPtrSort {
-		bool operator() (boost::shared_ptr<InputPort> const& a, boost::shared_ptr<InputPort> const& b) const {
+		bool operator() (std::shared_ptr<InputPort> const& a, std::shared_ptr<InputPort> const& b) const {
 			return *a < *b;
 		}
 	};
 
-	typedef std::map<std::string, boost::shared_ptr<InputPort> >     InputPortMap;
-	typedef std::set<boost::shared_ptr<InputPort>, InputPortPtrSort> InputPortSet;
-	typedef std::set<boost::shared_ptr<ARDOUR::IOPlug>>              IOPlugSet;
+	typedef std::map<std::string, std::shared_ptr<InputPort> >     InputPortMap;
+	typedef std::set<std::shared_ptr<InputPort>, InputPortPtrSort> InputPortSet;
+	typedef std::set<std::shared_ptr<ARDOUR::IOPlug>>              IOPlugSet;
 
 	RecRuler                     _ruler;
 	Gtk::EventBox                _space;

@@ -78,8 +78,8 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 
 		for (ArdourMixerStrip::PluginMap::iterator it = strip.plugins ().begin (); it != strip.plugins ().end (); ++it) {
 			uint32_t plugin_id                     = it->first;
-			boost::shared_ptr<PluginInsert> insert = it->second->insert ();
-			boost::shared_ptr<Plugin> plugin       = insert->plugin ();
+			std::shared_ptr<PluginInsert> insert = it->second->insert ();
+			std::shared_ptr<Plugin> plugin       = insert->plugin ();
 
 			update (client, Node::strip_plugin_description, strip_id, plugin_id,
 			        static_cast<std::string> (plugin->name ()));
@@ -88,7 +88,7 @@ WebsocketsDispatcher::update_all_nodes (Client client)
 			        strip.plugin (plugin_id).enabled ());
 
 			for (uint32_t param_id = 0; param_id < plugin->parameter_count (); ++param_id) {
-				boost::shared_ptr<AutomationControl> a_ctrl;
+				std::shared_ptr<AutomationControl> a_ctrl;
 
 				try {
 				    a_ctrl = strip.plugin (plugin_id).param_control (param_id);

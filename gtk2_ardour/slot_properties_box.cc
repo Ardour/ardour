@@ -105,12 +105,12 @@ SlotPropertyTable::SlotPropertyTable ()
 	: _color_button (ArdourButton::Element (ArdourButton::just_led_default_elements | ArdourButton::ColorBox))
 	, _color_label (_("Color:"))
 	, _velocity_adjustment(1.,0.,1.0,0.01,0.1)
-	, _velocity_slider (&_velocity_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
+	, _velocity_slider (&_velocity_adjustment, std::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _gain_adjustment( 0.0, -20.0, +20.0, 1.0, 3.0, 0)
 	, _gain_spinner (_gain_adjustment)
 	, _allow_button (ArdourButton::Element (ArdourButton::led_default_elements))
 	, _follow_probability_adjustment(0,0,100,2,5)
-	, _follow_probability_slider (&_follow_probability_adjustment, boost::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
+	, _follow_probability_slider (&_follow_probability_adjustment, std::shared_ptr<PBD::Controllable>(), 24/*length*/, 12/*girth*/ )
 	, _follow_count_adjustment (1, 1, 128, 1, 4)
 	, _follow_count_spinner (_follow_count_adjustment)
 	, _use_follow_length_button (ArdourButton::default_elements)
@@ -410,11 +410,11 @@ SlotPropertyTable::set_quantize (BBT_Offset bbo)
 void
 SlotPropertyTable::patch_button_event ()
 {
-	boost::shared_ptr<Trigger> trigr = trigger();
-	if (boost::dynamic_pointer_cast<MIDITrigger> (trigr)) {
+	std::shared_ptr<Trigger> trigr = trigger();
+	if (std::dynamic_pointer_cast<MIDITrigger> (trigr)) {
 		SessionObject* obj = trigr->box ().owner ();
-		boost::shared_ptr<Stripable> stripable = obj->session().stripable_by_id (obj->id ());
-		_patch_change_window.reset (boost::dynamic_pointer_cast<Route> (stripable), boost::dynamic_pointer_cast<MIDITrigger> (trigr));
+		std::shared_ptr<Stripable> stripable = obj->session().stripable_by_id (obj->id ());
+		_patch_change_window.reset (std::dynamic_pointer_cast<Route> (stripable), std::dynamic_pointer_cast<MIDITrigger> (trigr));
 		_patch_change_window.present ();
 	}
 }
@@ -584,11 +584,11 @@ SlotPropertyTable::set_follow_action (FollowAction const & fa, uint64_t idx)
 void
 SlotPropertyTable::on_trigger_set ()
 {
-	boost::shared_ptr<Trigger> trigr = trigger();
-	if (boost::dynamic_pointer_cast<MIDITrigger> (trigr)) {
+	std::shared_ptr<Trigger> trigr = trigger();
+	if (std::dynamic_pointer_cast<MIDITrigger> (trigr)) {
 		SessionObject* obj = triggerbox ().owner ();
-		boost::shared_ptr<Stripable> stripable = obj->session().stripable_by_id (obj->id ());
-		_patch_change_window.reset (boost::dynamic_pointer_cast<Route> (stripable), boost::dynamic_pointer_cast<MIDITrigger> (trigr));
+		std::shared_ptr<Stripable> stripable = obj->session().stripable_by_id (obj->id ());
+		_patch_change_window.reset (std::dynamic_pointer_cast<Route> (stripable), std::dynamic_pointer_cast<MIDITrigger> (trigr));
 		_patch_button.show();
 		_allow_button.show();
 	} else {

@@ -970,9 +970,9 @@ ARDOUR_UI_UTILS::convert_drop_to_paths (vector<string>& paths, const SelectionDa
 }
 
 void
-ARDOUR_UI_UTILS::copy_patch_changes (boost::shared_ptr<ARDOUR::Auditioner> a, boost::shared_ptr<ARDOUR::Trigger> t)
+ARDOUR_UI_UTILS::copy_patch_changes (std::shared_ptr<ARDOUR::Auditioner> a, std::shared_ptr<ARDOUR::Trigger> t)
 {
-	boost::shared_ptr<ARDOUR::MIDITrigger> mt = boost::dynamic_pointer_cast <ARDOUR::MIDITrigger> (t);
+	std::shared_ptr<ARDOUR::MIDITrigger> mt = std::dynamic_pointer_cast <ARDOUR::MIDITrigger> (t);
 
 	if (!mt || !a) {
 		return;

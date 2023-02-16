@@ -65,9 +65,9 @@ RBEffect::~RBEffect ()
 }
 
 int
-RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
+RBEffect::run (std::shared_ptr<Region> r, Progress* progress)
 {
-	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (r);
+	std::shared_ptr<AudioRegion> region = std::dynamic_pointer_cast<AudioRegion> (r);
 
 	if (!region) {
 		error << "RBEffect::run() passed a non-audio region! WTF?" << endmsg;
@@ -289,7 +289,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 				this_read = stretcher.retrieve (buffers, this_read);
 
 				for (uint32_t i = 0; i < nsrcs.size (); ++i) {
-					boost::shared_ptr<AudioSource> asrc = boost::dynamic_pointer_cast<AudioSource> (nsrcs[i]);
+					std::shared_ptr<AudioSource> asrc = std::dynamic_pointer_cast<AudioSource> (nsrcs[i]);
 					if (!asrc) {
 						continue;
 					}
@@ -317,7 +317,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 			this_read = stretcher.retrieve (buffers, this_read);
 
 			for (uint32_t i = 0; i < nsrcs.size (); ++i) {
-				boost::shared_ptr<AudioSource> asrc = boost::dynamic_pointer_cast<AudioSource> (nsrcs[i]);
+				std::shared_ptr<AudioSource> asrc = std::dynamic_pointer_cast<AudioSource> (nsrcs[i]);
 				if (!asrc) {
 					continue;
 				}
@@ -353,7 +353,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 
 	/* now reset ancestral data for each new region */
 
-	for (vector<boost::shared_ptr<Region> >::iterator x = results.begin (); x != results.end (); ++x) {
+	for (vector<std::shared_ptr<Region> >::iterator x = results.begin (); x != results.end (); ++x) {
 		(*x)->set_ancestral_data (timepos_t (read_start),
 		                          timecnt_t (read_duration, timepos_t (read_start)),
 		                          stretch,
@@ -370,7 +370,7 @@ RBEffect::run (boost::shared_ptr<Region> r, Progress* progress)
 	/* XXX: assuming we've only processed one input region into one result here */
 
 	if (ret == 0 && !tsr.time_fraction.is_unity()) {
-		boost::shared_ptr<AudioRegion> result = boost::dynamic_pointer_cast<AudioRegion> (results.front ());
+		std::shared_ptr<AudioRegion> result = std::dynamic_pointer_cast<AudioRegion> (results.front ());
 		assert (result);
 		result->envelope ()->x_scale (tsr.time_fraction);
 	}

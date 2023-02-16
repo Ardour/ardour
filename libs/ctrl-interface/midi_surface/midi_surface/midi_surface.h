@@ -50,13 +50,13 @@ class MIDISurface : public ARDOUR::ControlProtocol
 
 	static void* request_factory (uint32_t num_requests);
 
-	boost::shared_ptr<ARDOUR::Port> input_port();
-	boost::shared_ptr<ARDOUR::Port> output_port();
+	std::shared_ptr<ARDOUR::Port> input_port();
+	std::shared_ptr<ARDOUR::Port> output_port();
 
 	// Bundle to represent our input ports
-	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
+	std::shared_ptr<ARDOUR::Bundle> _input_bundle;
 	// Bundle to represent our output ports
-	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
+	std::shared_ptr<ARDOUR::Bundle> _output_bundle;
 
 	ARDOUR::Session & get_session() { return *session; }
 
@@ -69,7 +69,7 @@ class MIDISurface : public ARDOUR::ControlProtocol
 	XMLNode& get_state() const;
 	int set_state (const XMLNode & node, int version);
 
-	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
+	std::list<std::shared_ptr<ARDOUR::Bundle> > bundles ();
 
 	PBD::Signal0<void> ConnectionChange;
 
@@ -82,8 +82,8 @@ class MIDISurface : public ARDOUR::ControlProtocol
 	MIDI::Port* _input_port;
 	MIDI::Port* _output_port;
 
-	boost::shared_ptr<ARDOUR::Port> _async_in;
-	boost::shared_ptr<ARDOUR::Port> _async_out;
+	std::shared_ptr<ARDOUR::Port> _async_in;
+	std::shared_ptr<ARDOUR::Port> _async_out;
 
 	void do_request (MidiSurfaceRequest*);
 
@@ -118,7 +118,7 @@ class MIDISurface : public ARDOUR::ControlProtocol
 
 	int _connection_state;
 
-	virtual bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
+	virtual bool connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
 	PBD::ScopedConnectionList port_connections;
 
 	virtual int ports_acquire ();

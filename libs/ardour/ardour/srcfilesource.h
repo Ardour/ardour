@@ -31,7 +31,7 @@ namespace ARDOUR {
 
 class LIBARDOUR_API SrcFileSource : public AudioFileSource {
 public:
-	SrcFileSource (Session&, boost::shared_ptr<AudioFileSource>, SrcQuality srcq = SrcQuality(SrcQuick));
+	SrcFileSource (Session&, std::shared_ptr<AudioFileSource>, SrcQuality srcq = SrcQuality(SrcQuick));
 	~SrcFileSource ();
 
 	int  update_header (samplepos_t /*when*/, struct tm&, time_t) { return 0; }
@@ -62,7 +62,7 @@ protected:
 
 private:
 	static const uint32_t max_blocksize;
-	boost::shared_ptr<AudioFileSource> _source;
+	std::shared_ptr<AudioFileSource> _source;
 
 	mutable SRC_STATE* _src_state;
 	mutable SRC_DATA   _src_data;

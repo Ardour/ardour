@@ -169,7 +169,7 @@ CueLayout::show ()
 	};
 
 	for (auto & lb : lower_buttons) {
-		boost::shared_ptr<Push2::Button> b = _p2.button_by_id (lb);
+		std::shared_ptr<Push2::Button> b = _p2.button_by_id (lb);
 		b->set_color (Push2::LED::DarkGray);
 		b->set_state (Push2::LED::OneShot24th);
 		_p2.write (b->state_msg());
@@ -181,7 +181,7 @@ CueLayout::show ()
 	};
 
 	for (auto & sb : scene_buttons) {
-		boost::shared_ptr<Push2::Button> b = _p2.button_by_id (sb);
+		std::shared_ptr<Push2::Button> b = _p2.button_by_id (sb);
 		b->set_color (Push2::LED::Green);
 		b->set_state (Push2::LED::NoTransition);
 		_p2.write (b->state_msg());
@@ -202,7 +202,7 @@ CueLayout::hide ()
 	};
 
 	for (auto & sb : scene_buttons) {
-		boost::shared_ptr<Push2::Button> b = _p2.button_by_id (sb);
+		std::shared_ptr<Push2::Button> b = _p2.button_by_id (sb);
 		b->set_color (Push2::LED::Black);
 		b->set_state (Push2::LED::NoTransition);
 		_p2.write (b->state_msg());
@@ -278,7 +278,7 @@ CueLayout::button_lower (uint32_t n)
 		return;
 	}
 
-	boost::shared_ptr<TriggerBox> tb = _route[n]->triggerbox();
+	std::shared_ptr<TriggerBox> tb = _route[n]->triggerbox();
 
 	if (!tb) {
 		/* unpossible! */
@@ -289,7 +289,7 @@ CueLayout::button_lower (uint32_t n)
 		tb->stop_all_quantized ();
 	} else {
 		/* select track */
-		_session.selection().set (_route[n], boost::shared_ptr<AutomationControl>());
+		_session.selection().set (_route[n], std::shared_ptr<AutomationControl>());
 	}
 }
 
@@ -370,9 +370,9 @@ CueLayout::viewport_changed ()
 		_route[n] = _session.get_remote_nth_route (track_base+n);
 		follow_action_icon[n]->reset_trigger ();
 
-		boost::shared_ptr<Route> r = _route[n];
+		std::shared_ptr<Route> r = _route[n];
 
-		boost::shared_ptr<Push2::Button> lower_button = _p2.lower_button_by_column (n);
+		std::shared_ptr<Push2::Button> lower_button = _p2.lower_button_by_column (n);
 
 		if (r) {
 			_route[n]->DropReferences.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::viewport_changed, this), &_p2);
@@ -381,7 +381,7 @@ CueLayout::viewport_changed ()
 			std::string shortname = short_version (r->name(), 10);
 			_lower_text[n]->set (shortname);
 
-			boost::shared_ptr<Processor> s;
+			std::shared_ptr<Processor> s;
 
 			switch (_knob_function) {
 			case KnobGain:
@@ -393,27 +393,27 @@ CueLayout::viewport_changed ()
 			case KnobSendA:
 				s = r->nth_send (0);
 				if (s) {
-					boost::shared_ptr<Send> ss = boost::dynamic_pointer_cast<Send> (s);
+					std::shared_ptr<Send> ss = std::dynamic_pointer_cast<Send> (s);
 					if (ss) {
 						_controllables[n] = ss->gain_control();
 					} else {
-						_controllables[n] = boost::shared_ptr<AutomationControl> ();
+						_controllables[n] = std::shared_ptr<AutomationControl> ();
 					}
 				}
 				break;
 			case KnobSendB:
 				s = r->nth_send (1);
 				if (s) {
-					boost::shared_ptr<Send> ss = boost::dynamic_pointer_cast<Send> (s);
+					std::shared_ptr<Send> ss = std::dynamic_pointer_cast<Send> (s);
 					if (ss) {
 						_controllables[n] = ss->gain_control();
 					} else {
-						_controllables[n] = boost::shared_ptr<AutomationControl> ();
+						_controllables[n] = std::shared_ptr<AutomationControl> ();
 					}
 				}
 				break;
 			default:
-				_controllables[n] = boost::shared_ptr<AutomationControl> ();
+				_controllables[n] = std::shared_ptr<AutomationControl> ();
 			}
 
 			uint8_t color = _p2.get_color_index (r->presentation_info().color());
@@ -422,14 +422,14 @@ CueLayout::viewport_changed ()
 			lower_button->set_state (Push2::LED::OneShot24th);
 			_p2.write (lower_button->state_msg());
 
-			boost::shared_ptr<TriggerBox> tb = r->triggerbox ();
+			std::shared_ptr<TriggerBox> tb = r->triggerbox ();
 
 			if (tb) {
 				tb->PropertyChanged.connect (_route_connections, invalidator (*this), boost::bind (&CueLayout::triggerbox_property_change, this, _1, n), &_p2);
 			}
 
 			for (int y = 0; y < 8; ++y) {
-				boost::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (n, y);
+				std::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (n, y);
 				if (tb && tb->active()) {
 					TriggerPtr tp = tb->trigger (y);
 					if (tp && tp->region()) {
@@ -454,12 +454,12 @@ CueLayout::viewport_changed ()
 
 			_lower_text[n]->set (std::string());
 			lower_button->set_color (Push2::LED::Black);
-			_controllables[n] = boost::shared_ptr<AutomationControl> ();
+			_controllables[n] = std::shared_ptr<AutomationControl> ();
 
 			/* turn this column off */
 
 			for (int y = 0; y < 8; ++y) {
-				boost::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (n, y);
+				std::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (n, y);
 				pad->set_color (Push2::LED::Black);
 				pad->set_state (Push2::LED::OneShot24th);
 				_p2.write (pad->state_msg());
@@ -471,7 +471,7 @@ CueLayout::viewport_changed ()
 void
 CueLayout::strip_vpot (int n, int delta)
 {
-	boost::shared_ptr<Controllable> ac = _controllables[n];
+	std::shared_ptr<Controllable> ac = _controllables[n];
 
 	if (ac) {
 		ac->set_value (ac->get_value() + ((2.0/64.0) * delta), PBD::Controllable::UseGroup);
@@ -524,13 +524,13 @@ CueLayout::show_running_boxen (bool yn)
 	};
 
 	for (int n = 0; n < 8; ++n) {
-		boost::shared_ptr<Push2::Button> lower_button = _p2.button_by_id (lower_buttons[n]);
+		std::shared_ptr<Push2::Button> lower_button = _p2.button_by_id (lower_buttons[n]);
 
 		if (!_route[n]) {
 			continue;
 		}
 
-		boost::shared_ptr<TriggerBox> tb = _route[n]->triggerbox();
+		std::shared_ptr<TriggerBox> tb = _route[n]->triggerbox();
 		if (!tb) {
 			continue;
 		}
@@ -555,7 +555,7 @@ CueLayout::show_running_boxen (bool yn)
 		_p2.write (lower_button->state_msg());
 	}
 
-	boost::shared_ptr<Push2::Button> stop = _p2.button_by_id (Push2::Stop);
+	std::shared_ptr<Push2::Button> stop = _p2.button_by_id (Push2::Stop);
 	assert (stop);
 
 	if (yn) {
@@ -575,7 +575,7 @@ CueLayout::pad_press (int y, int x) /* fix coordinate order one day */
 		return;
 	}
 
-	boost::shared_ptr<TriggerBox> tb = _route[x]->triggerbox();
+	std::shared_ptr<TriggerBox> tb = _route[x]->triggerbox();
 
 	if (!tb) {
 		/* unpossible! */
@@ -592,7 +592,7 @@ CueLayout::pad_release (int y, int x) /* fix coordinate order one day */
 		return;
 	}
 
-	boost::shared_ptr<TriggerBox> tb = _route[x]->triggerbox();
+	std::shared_ptr<TriggerBox> tb = _route[x]->triggerbox();
 
 	if (!tb) {
 		/* unpossible! */
@@ -613,12 +613,12 @@ CueLayout::update_meters ()
 void
 CueLayout::update_clip_progress (int n)
 {
-	boost::shared_ptr<Route> r = _p2.get_session().get_remote_nth_route (n + track_base);
+	std::shared_ptr<Route> r = _p2.get_session().get_remote_nth_route (n + track_base);
 	if (!r) {
 		_progress[n]->set_arc (0.0 - 90.0);
 		return;
 	}
-	boost::shared_ptr<TriggerBox> tb = r->triggerbox();
+	std::shared_ptr<TriggerBox> tb = r->triggerbox();
 
 	if (!tb || !tb->active()) {
 		_progress[n]->set_arc (0.0 - 90.0);
@@ -688,13 +688,13 @@ CueLayout::trigger_property_change (PropertyChange const& what_changed, uint32_t
 	TriggerPtr trig;
 
 	if (what_changed.contains (Properties::running)) {
-		boost::shared_ptr<TriggerBox> tb = _route[col]->triggerbox ();
+		std::shared_ptr<TriggerBox> tb = _route[col]->triggerbox ();
 		assert (tb);
 
 		trig = tb->trigger (row);
 		assert (trig);
 
-		boost::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (col, row);
+		std::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (col, row);
 		assert (pad);
 
 		set_pad_color_from_trigger_state (col, pad, trig);
@@ -724,7 +724,7 @@ CueLayout::triggerbox_property_change (PropertyChange const& what_changed, uint3
 
 	if (what_changed.contains (Properties::currently_playing) || what_changed.contains (Properties::queued)) {
 
-		boost::shared_ptr<TriggerBox> tb = _route[col]->triggerbox ();
+		std::shared_ptr<TriggerBox> tb = _route[col]->triggerbox ();
 		assert (tb);
 
 
@@ -733,7 +733,7 @@ CueLayout::triggerbox_property_change (PropertyChange const& what_changed, uint3
 		 */
 
 		for (uint32_t y = 0; y < 8; ++y) {
-			boost::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (col, y);
+			std::shared_ptr<Push2::Pad> pad = _p2.pad_by_xy (col, y);
 			assert (pad);
 
 			TriggerPtr trig = tb->trigger (y);
@@ -764,7 +764,7 @@ CueLayout::triggerbox_property_change (PropertyChange const& what_changed, uint3
 			 */
 
 			if (!playing) {
-				boost::shared_ptr<Push2::Button> lower_button = _p2.lower_button_by_column (col);
+				std::shared_ptr<Push2::Button> lower_button = _p2.lower_button_by_column (col);
 				lower_button->set_color (_p2.get_color_index (_route[col]->presentation_info().color()));
 				lower_button->set_state (Push2::LED::NoTransition);
 				_p2.write (lower_button->state_msg());
@@ -774,7 +774,7 @@ CueLayout::triggerbox_property_change (PropertyChange const& what_changed, uint3
 }
 
 void
-CueLayout::set_pad_color_from_trigger_state (int col, boost::shared_ptr<Push2::Pad> pad, TriggerPtr trig)
+CueLayout::set_pad_color_from_trigger_state (int col, std::shared_ptr<Push2::Pad> pad, TriggerPtr trig)
 {
 	if (!visible()) {
 		return;
@@ -838,7 +838,7 @@ FollowActionIcon::FollowActionIcon (Item* i)
 }
 
 void
-FollowActionIcon::set_trigger (boost::shared_ptr<Trigger> t)
+FollowActionIcon::set_trigger (std::shared_ptr<Trigger> t)
 {
 	begin_change ();
 	trigger = t;

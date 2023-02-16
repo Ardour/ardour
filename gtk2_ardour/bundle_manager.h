@@ -38,18 +38,18 @@ namespace ARDOUR {
 class BundleEditorMatrix : public PortMatrix
 {
 public:
-	BundleEditorMatrix (Gtk::Window *, ARDOUR::Session *, boost::shared_ptr<ARDOUR::Bundle>);
+	BundleEditorMatrix (Gtk::Window *, ARDOUR::Session *, std::shared_ptr<ARDOUR::Bundle>);
 
 	void set_state (ARDOUR::BundleChannel c[2], bool s);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
 
-	bool can_add_channels (boost::shared_ptr<ARDOUR::Bundle>) const;
-	bool can_add_port (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::DataType t) const;
+	bool can_add_channels (std::shared_ptr<ARDOUR::Bundle>) const;
+	bool can_add_port (std::shared_ptr<ARDOUR::Bundle>, ARDOUR::DataType t) const;
 
-	void add_channel (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::DataType);
-	bool can_remove_channels (boost::shared_ptr<ARDOUR::Bundle>) const;
+	void add_channel (std::shared_ptr<ARDOUR::Bundle>, ARDOUR::DataType);
+	bool can_remove_channels (std::shared_ptr<ARDOUR::Bundle>) const;
 	void remove_channel (ARDOUR::BundleChannel);
-	bool can_rename_channels (boost::shared_ptr<ARDOUR::Bundle>) const;
+	bool can_rename_channels (std::shared_ptr<ARDOUR::Bundle>) const;
 	void rename_channel (ARDOUR::BundleChannel);
 	void setup_ports (int);
 	bool list_is_global (int) const;
@@ -62,14 +62,14 @@ private:
 		OURS = 1
 	};
 
-	boost::shared_ptr<PortGroup> _port_group;
-	boost::shared_ptr<ARDOUR::Bundle> _bundle;
+	std::shared_ptr<PortGroup> _port_group;
+	std::shared_ptr<ARDOUR::Bundle> _bundle;
 };
 
 class BundleEditor : public ArdourDialog
 {
 public:
-	BundleEditor (ARDOUR::Session *, boost::shared_ptr<ARDOUR::UserBundle>);
+	BundleEditor (ARDOUR::Session *, std::shared_ptr<ARDOUR::UserBundle>);
 
 protected:
 	void on_map ();
@@ -80,7 +80,7 @@ private:
 	void on_show ();
 
 	BundleEditorMatrix _matrix;
-	boost::shared_ptr<ARDOUR::UserBundle> _bundle;
+	std::shared_ptr<ARDOUR::UserBundle> _bundle;
 	Gtk::Entry _name;
 	Gtk::ComboBoxText _input_or_output;
 };
@@ -95,8 +95,8 @@ private:
 	void new_clicked ();
 	void edit_clicked ();
 	void delete_clicked ();
-	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>);
-	void bundle_changed (ARDOUR::Bundle::Change, boost::weak_ptr<ARDOUR::UserBundle>);
+	void add_bundle (std::shared_ptr<ARDOUR::Bundle>);
+	void bundle_changed (ARDOUR::Bundle::Change, std::weak_ptr<ARDOUR::UserBundle>);
 	void set_button_sensitivity ();
 	void row_activated (Gtk::TreeModel::Path const & p, Gtk::TreeViewColumn* c);
 
@@ -109,7 +109,7 @@ private:
 		}
 
 		Gtk::TreeModelColumn<std::string> name;
-		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::UserBundle> > bundle;
+		Gtk::TreeModelColumn<std::shared_ptr<ARDOUR::UserBundle> > bundle;
 	};
 
 	Gtk::TreeView _tree_view;
@@ -124,7 +124,7 @@ class NameChannelDialog : public ArdourDialog
 {
 public:
 	NameChannelDialog ();
-	NameChannelDialog (boost::shared_ptr<ARDOUR::Bundle>, uint32_t);
+	NameChannelDialog (std::shared_ptr<ARDOUR::Bundle>, uint32_t);
 
 	std::string get_name () const;
 
@@ -132,7 +132,7 @@ private:
 
 	void setup ();
 
-	boost::shared_ptr<ARDOUR::Bundle> _bundle;
+	std::shared_ptr<ARDOUR::Bundle> _bundle;
 	Gtk::Entry _name;
 	bool _adding;
 };

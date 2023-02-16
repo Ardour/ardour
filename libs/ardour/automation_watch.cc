@@ -70,7 +70,7 @@ AutomationWatch::~AutomationWatch ()
 }
 
 void
-AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
+AutomationWatch::add_automation_watch (std::shared_ptr<AutomationControl> ac)
 {
 	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 	DEBUG_TRACE (DEBUG::Automation, string_compose ("now watching control %1 for automation, astate = %2\n", ac->name(), enum_2_string (ac->automation_state())));
@@ -105,14 +105,14 @@ AutomationWatch::add_automation_watch (boost::shared_ptr<AutomationControl> ac)
 	 * explicit here, but it helps to remind us what is going on.
 	 */
 
-	boost::weak_ptr<AutomationControl> wac (ac);
+	std::weak_ptr<AutomationControl> wac (ac);
 	ac->DropReferences.connect_same_thread (automation_connections[ac], boost::bind (&AutomationWatch::remove_weak_automation_watch, this, wac));
 }
 
 void
-AutomationWatch::remove_weak_automation_watch (boost::weak_ptr<AutomationControl> wac)
+AutomationWatch::remove_weak_automation_watch (std::weak_ptr<AutomationControl> wac)
 {
-	boost::shared_ptr<AutomationControl> ac = wac.lock();
+	std::shared_ptr<AutomationControl> ac = wac.lock();
 
 	if (!ac) {
 		return;
@@ -122,7 +122,7 @@ AutomationWatch::remove_weak_automation_watch (boost::weak_ptr<AutomationControl
 }
 
 void
-AutomationWatch::remove_automation_watch (boost::shared_ptr<AutomationControl> ac)
+AutomationWatch::remove_automation_watch (std::shared_ptr<AutomationControl> ac)
 {
 	Glib::Threads::Mutex::Lock lm (automation_watch_lock);
 	DEBUG_TRACE (DEBUG::Automation, string_compose ("remove control %1 from automation watch\n", ac->name()));
@@ -173,7 +173,7 @@ AutomationWatch::timer ()
 			for (AutomationWatches::iterator aw = automation_watches.begin(); aw != automation_watches.end(); ++aw) {
 				if ((*aw)->alist()->automation_write()) {
 					double val = (*aw)->get_double();
-					boost::shared_ptr<SlavableAutomationControl> sc = boost::dynamic_pointer_cast<SlavableAutomationControl> (*aw);
+					std::shared_ptr<SlavableAutomationControl> sc = std::dynamic_pointer_cast<SlavableAutomationControl> (*aw);
 					if (sc) {
 						val = sc->reduce_by_masters (val, true);
 					}

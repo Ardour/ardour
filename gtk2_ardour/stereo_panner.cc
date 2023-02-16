@@ -67,7 +67,7 @@ bool            StereoPanner::have_font = false;
 
 using namespace ARDOUR;
 
-StereoPanner::StereoPanner (boost::shared_ptr<PannerShell> p)
+StereoPanner::StereoPanner (std::shared_ptr<PannerShell> p)
 	: PannerInterface (p->panner())
 	, _panner_shell (p)
 	, position_control (_panner->pannable()->pan_azimuth_control)

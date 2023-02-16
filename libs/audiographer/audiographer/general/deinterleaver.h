@@ -20,7 +20,7 @@ class /*LIBAUDIOGRAPHER_API*/ DeInterleaver
   , public Throwing<>
 {
   private:
-	typedef boost::shared_ptr<IdentityVertex<T> > OutputPtr;
+	typedef std::shared_ptr<IdentityVertex<T> > OutputPtr;
 
   public:
 	/// Constructor. \n RT safe
@@ -32,7 +32,7 @@ class /*LIBAUDIOGRAPHER_API*/ DeInterleaver
 
 	~DeInterleaver() { reset(); }
 
-	typedef boost::shared_ptr<Source<T> > SourcePtr;
+	typedef std::shared_ptr<Source<T> > SourcePtr;
 
 	/// Inits the deinterleaver. Must be called before using. \n Not RT safe
 	void init (unsigned int num_channels, samplecnt_t max_samples_per_channel)

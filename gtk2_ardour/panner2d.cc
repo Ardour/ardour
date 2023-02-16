@@ -80,7 +80,7 @@ Panner2d::Target::set_text (const char* txt)
 	text = txt;
 }
 
-Panner2d::Panner2d (boost::shared_ptr<PannerShell> p, int32_t h)
+Panner2d::Panner2d (std::shared_ptr<PannerShell> p, int32_t h)
 : panner_shell (p)
 	, position (AngularVector (0.0, 0.0), "")
 	, width (0)
@@ -903,7 +903,7 @@ Panner2d::toggle_bypass ()
 	panner_shell->set_bypassed (!panner_shell->bypassed());
 }
 
-Panner2dWindow::Panner2dWindow (boost::shared_ptr<PannerShell> p, int32_t h, uint32_t inputs)
+Panner2dWindow::Panner2dWindow (std::shared_ptr<PannerShell> p, int32_t h, uint32_t inputs)
 	: ArdourWindow (_("Panner (2D)"))
 	, widget (p, h)
 	, bypass_button (_("Bypass"))

@@ -29,14 +29,14 @@ class PhaseControl;
 class LIBARDOUR_API PolarityProcessor : public Processor
 {
 public:
-	PolarityProcessor (Session&, boost::shared_ptr<PhaseControl>);
+	PolarityProcessor (Session&, std::shared_ptr<PhaseControl>);
 
 	bool display_to_user() const { return false; }
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required);
 	bool configure_io (ChanCount in, ChanCount out);
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 
-	boost::shared_ptr<PhaseControl> phase_control() {
+	std::shared_ptr<PhaseControl> phase_control() {
 		return _control;
 	}
 
@@ -44,7 +44,7 @@ protected:
 	XMLNode& state () const;
 
 private:
-	boost::shared_ptr<PhaseControl> _control;
+	std::shared_ptr<PhaseControl> _control;
 	std::vector<gain_t> _current_gain;
 };
 

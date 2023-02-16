@@ -130,7 +130,7 @@ LedState
 US2400Protocol::right_press (Button &)
 {
 	if (_subview_mode != None) {
-		boost::shared_ptr<Stripable> s = first_selected_stripable();
+		std::shared_ptr<Stripable> s = first_selected_stripable();
 
 		if (s) {
 			bool hasNextSend = true;
@@ -869,7 +869,7 @@ US2400Protocol::master_fader_touch_press (US2400::Button &)
 
 	Fader* master_fader = _master_surface->master_fader();
 
-	boost::shared_ptr<AutomationControl> ac = master_fader->control ();
+	std::shared_ptr<AutomationControl> ac = master_fader->control ();
 
 	master_fader->set_in_use (true);
 	master_fader->start_touch (timepos_t (transport_sample()));

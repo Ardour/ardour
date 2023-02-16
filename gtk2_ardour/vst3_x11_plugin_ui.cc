@@ -178,7 +178,7 @@ private:
 
 VST3X11Runloop static_runloop;
 
-VST3X11PluginUI::VST3X11PluginUI (boost::shared_ptr<PlugInsertBase> pib, boost::shared_ptr<VST3Plugin> vst3)
+VST3X11PluginUI::VST3X11PluginUI (std::shared_ptr<PlugInsertBase> pib, std::shared_ptr<VST3Plugin> vst3)
 	: VST3PluginUI (pib, vst3)
 	//, _runloop (new VST3X11Runloop)
 {

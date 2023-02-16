@@ -59,7 +59,7 @@ private:
 	uint8_t   _data[MaxPulseMidiEventSize];
 };
 
-typedef std::vector<boost::shared_ptr<PulseMidiEvent> > PulseMidiBuffer;
+typedef std::vector<std::shared_ptr<PulseMidiEvent> > PulseMidiBuffer;
 
 
 class PulseAudioPort : public BackendPort

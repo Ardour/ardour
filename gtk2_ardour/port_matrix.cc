@@ -193,7 +193,7 @@ PortMatrix::reconnect_to_routes ()
 {
 	_route_connections.drop_connections ();
 
-	boost::shared_ptr<RouteList> routes = _session->get_routes ();
+	std::shared_ptr<RouteList> routes = _session->get_routes ();
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 		(*i)->processors_changed.connect (_route_connections, invalidator (*this), boost::bind (&PortMatrix::route_processors_changed, this, _1), gui_context());
 		(*i)->DropReferences.connect (_route_connections, invalidator (*this), boost::bind (&PortMatrix::routes_changed, this), gui_context());
@@ -407,7 +407,7 @@ PortMatrix::columns () const
 	return &_ports[_column_index];
 }
 
-boost::shared_ptr<const PortGroup>
+std::shared_ptr<const PortGroup>
 PortMatrix::visible_columns () const
 {
 	return visible_ports (_column_index);
@@ -420,7 +420,7 @@ PortMatrix::rows () const
 	return &_ports[_row_index];
 }
 
-boost::shared_ptr<const PortGroup>
+std::shared_ptr<const PortGroup>
 PortMatrix::visible_rows () const
 {
 	return visible_ports (_row_index);
@@ -455,7 +455,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 			Menu* m = manage (new Menu);
 			MenuList& sub = m->items ();
 
-			boost::weak_ptr<Bundle> w (bc[dim].bundle);
+			std::weak_ptr<Bundle> w (bc[dim].bundle);
 
 			if (can_add_channels (bc[dim].bundle)) {
 				/* Start off with options for the `natural' port type */
@@ -563,9 +563,9 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 }
 
 void
-PortMatrix::remove_channel_proxy (boost::weak_ptr<Bundle> b, uint32_t c)
+PortMatrix::remove_channel_proxy (std::weak_ptr<Bundle> b, uint32_t c)
 {
-	boost::shared_ptr<Bundle> sb = b.lock ();
+	std::shared_ptr<Bundle> sb = b.lock ();
 	if (!sb) {
 		return;
 	}
@@ -575,9 +575,9 @@ PortMatrix::remove_channel_proxy (boost::weak_ptr<Bundle> b, uint32_t c)
 }
 
 void
-PortMatrix::rename_channel_proxy (boost::weak_ptr<Bundle> b, uint32_t c)
+PortMatrix::rename_channel_proxy (std::weak_ptr<Bundle> b, uint32_t c)
 {
-	boost::shared_ptr<Bundle> sb = b.lock ();
+	std::shared_ptr<Bundle> sb = b.lock ();
 	if (!sb) {
 		return;
 	}
@@ -586,9 +586,9 @@ PortMatrix::rename_channel_proxy (boost::weak_ptr<Bundle> b, uint32_t c)
 }
 
 void
-PortMatrix::disassociate_all_on_bundle (boost::weak_ptr<Bundle> bundle, int dim)
+PortMatrix::disassociate_all_on_bundle (std::weak_ptr<Bundle> bundle, int dim)
 {
-	boost::shared_ptr<Bundle> sb = bundle.lock ();
+	std::shared_ptr<Bundle> sb = bundle.lock ();
 	if (!sb) {
 		return;
 	}
@@ -601,9 +601,9 @@ PortMatrix::disassociate_all_on_bundle (boost::weak_ptr<Bundle> bundle, int dim)
 }
 
 void
-PortMatrix::disassociate_all_on_channel (boost::weak_ptr<Bundle> bundle, uint32_t channel, int dim)
+PortMatrix::disassociate_all_on_channel (std::weak_ptr<Bundle> bundle, uint32_t channel, int dim)
 {
-	boost::shared_ptr<Bundle> sb = bundle.lock ();
+	std::shared_ptr<Bundle> sb = bundle.lock ();
 	if (!sb) {
 		return;
 	}
@@ -718,10 +718,10 @@ PortMatrix::on_scroll_event (GdkEventScroll* ev)
 	return true;
 }
 
-boost::shared_ptr<IO>
-PortMatrix::io_from_bundle (boost::shared_ptr<Bundle> b) const
+std::shared_ptr<IO>
+PortMatrix::io_from_bundle (std::shared_ptr<Bundle> b) const
 {
-	boost::shared_ptr<IO> io = _ports[0].io_from_bundle (b);
+	std::shared_ptr<IO> io = _ports[0].io_from_bundle (b);
 	if (!io) {
 		io = _ports[1].io_from_bundle (b);
 	}
@@ -730,22 +730,22 @@ PortMatrix::io_from_bundle (boost::shared_ptr<Bundle> b) const
 }
 
 bool
-PortMatrix::can_add_channels (boost::shared_ptr<Bundle> b) const
+PortMatrix::can_add_channels (std::shared_ptr<Bundle> b) const
 {
 	return io_from_bundle (b) != 0;
 }
 
 bool
-PortMatrix::can_add_port (boost::shared_ptr<Bundle> b, DataType t) const
+PortMatrix::can_add_port (std::shared_ptr<Bundle> b, DataType t) const
 {
-	boost::shared_ptr<IO> io = io_from_bundle (b);
+	std::shared_ptr<IO> io = io_from_bundle (b);
 	return io && io->can_add_port (t);
 }
 
 void
-PortMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
+PortMatrix::add_channel (std::shared_ptr<Bundle> b, DataType t)
 {
-	boost::shared_ptr<IO> io = io_from_bundle (b);
+	std::shared_ptr<IO> io = io_from_bundle (b);
 
 	if (io) {
 		int const r = io->add_port ("", this, t);
@@ -758,7 +758,7 @@ PortMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 }
 
 bool
-PortMatrix::can_remove_channels (boost::shared_ptr<Bundle> b) const
+PortMatrix::can_remove_channels (std::shared_ptr<Bundle> b) const
 {
 	return io_from_bundle (b) != 0;
 }
@@ -767,8 +767,8 @@ void
 PortMatrix::remove_channel (ARDOUR::BundleChannel b)
 {
 	std::string errmsg;
-	boost::shared_ptr<IO> io = io_from_bundle (b.bundle);
-	boost::shared_ptr<Port> p = io->nth (b.channel);
+	std::shared_ptr<IO> io = io_from_bundle (b.bundle);
+	std::shared_ptr<Port> p = io->nth (b.channel);
 
 	if (!io || !p) {
 		return;
@@ -789,9 +789,9 @@ PortMatrix::remove_channel (ARDOUR::BundleChannel b)
 }
 
 void
-PortMatrix::remove_all_channels (boost::weak_ptr<Bundle> w)
+PortMatrix::remove_all_channels (std::weak_ptr<Bundle> w)
 {
-	boost::shared_ptr<Bundle> b = w.lock ();
+	std::shared_ptr<Bundle> b = w.lock ();
 	if (!b) {
 		return;
 	}
@@ -807,9 +807,9 @@ PortMatrix::remove_all_channels (boost::weak_ptr<Bundle> w)
 }
 
 bool
-PortMatrix::can_add_port_proxy (boost::weak_ptr<Bundle> w, DataType t) const
+PortMatrix::can_add_port_proxy (std::weak_ptr<Bundle> w, DataType t) const
 {
-	boost::shared_ptr<Bundle> b = w.lock ();
+	std::shared_ptr<Bundle> b = w.lock ();
 	if (!b) {
 		return false;
 	}
@@ -817,9 +817,9 @@ PortMatrix::can_add_port_proxy (boost::weak_ptr<Bundle> w, DataType t) const
 }
 
 void
-PortMatrix::add_channel_proxy (boost::weak_ptr<Bundle> w, DataType t)
+PortMatrix::add_channel_proxy (std::weak_ptr<Bundle> w, DataType t)
 {
-	boost::shared_ptr<Bundle> b = w.lock ();
+	std::shared_ptr<Bundle> b = w.lock ();
 	if (!b) {
 		return;
 	}
@@ -958,7 +958,7 @@ PortMatrix::body_dimensions_changed ()
 /** @return The PortGroup that is currently visible (ie selected by
  *  the notebook) along a given axis.
  */
-boost::shared_ptr<const PortGroup>
+std::shared_ptr<const PortGroup>
 PortMatrix::visible_ports (int d) const
 {
 	PortGroupList const & p = _ports[d];
@@ -987,18 +987,18 @@ PortMatrix::visible_ports (int d) const
 	}
 
 	if (j == p.end()) {
-		return boost::shared_ptr<const PortGroup> ();
+		return std::shared_ptr<const PortGroup> ();
 	}
 
 	return *j;
 }
 
 void
-PortMatrix::add_remove_option (Menu_Helpers::MenuList& m, boost::weak_ptr<Bundle> w, int c)
+PortMatrix::add_remove_option (Menu_Helpers::MenuList& m, std::weak_ptr<Bundle> w, int c)
 {
 	using namespace Menu_Helpers;
 
-	boost::shared_ptr<Bundle> b = w.lock ();
+	std::shared_ptr<Bundle> b = w.lock ();
 	if (!b) {
 		return;
 	}
@@ -1009,11 +1009,11 @@ PortMatrix::add_remove_option (Menu_Helpers::MenuList& m, boost::weak_ptr<Bundle
 }
 
 void
-PortMatrix::add_disassociate_option (Menu_Helpers::MenuList& m, boost::weak_ptr<Bundle> w, int d, int c)
+PortMatrix::add_disassociate_option (Menu_Helpers::MenuList& m, std::weak_ptr<Bundle> w, int d, int c)
 {
 	using namespace Menu_Helpers;
 
-	boost::shared_ptr<Bundle> b = w.lock ();
+	std::shared_ptr<Bundle> b = w.lock ();
 	if (!b) {
 		return;
 	}
@@ -1186,7 +1186,7 @@ PortMatrix::get_association (PortMatrixNode node) const
 
 /** @return true if b is a non-zero pointer and the bundle it points to has some channels */
 bool
-PortMatrix::bundle_with_channels (boost::shared_ptr<ARDOUR::Bundle> b)
+PortMatrix::bundle_with_channels (std::shared_ptr<ARDOUR::Bundle> b)
 {
 	return b && b->nchannels() != ARDOUR::ChanCount::ZERO;
 }
@@ -1201,7 +1201,7 @@ PortMatrix::check_flip () const
 	/* Look for the row's port group name in the columns */
 
 	int new_column = 0;
-	boost::shared_ptr<const PortGroup> r = visible_ports (_row_index);
+	std::shared_ptr<const PortGroup> r = visible_ports (_row_index);
 	PortGroupList::List::const_iterator i = _ports[_column_index].begin();
 	while (i != _ports[_column_index].end() && (*i)->name != r->name) {
 		++i;
@@ -1215,7 +1215,7 @@ PortMatrix::check_flip () const
 	/* Look for the column's port group name in the rows */
 
 	int new_row = 0;
-	boost::shared_ptr<const PortGroup> c = visible_ports (_column_index);
+	std::shared_ptr<const PortGroup> c = visible_ports (_column_index);
 	i = _ports[_row_index].begin();
 	while (i != _ports[_row_index].end() && (*i)->name != c->name) {
 		++i;

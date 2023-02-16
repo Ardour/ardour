@@ -62,7 +62,7 @@ void
 FaderPort::read ()
 {
 	if (_current_stripable) {
-		boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+		std::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 		if (gain) {
 			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Play );
 		}
@@ -73,7 +73,7 @@ void
 FaderPort::write ()
 {
 	if (_current_stripable) {
-		boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+		std::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 		if (gain) {
 			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Write );
 		}
@@ -84,7 +84,7 @@ void
 FaderPort::touch ()
 {
 	if (_current_stripable) {
-		boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+		std::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 		if (gain) {
 			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Touch );
 		}
@@ -95,7 +95,7 @@ void
 FaderPort::off ()
 {
 	if (_current_stripable) {
-		boost::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
+		std::shared_ptr<AutomationControl> gain = _current_stripable->gain_control ();
 		if (gain) {
 			gain->set_automation_state( (ARDOUR::AutoState) ARDOUR::Off );
 		}
@@ -125,7 +125,7 @@ FaderPort::mute ()
 	}
 
 	if (_current_stripable == session->monitor_out()) {
-		boost::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
+		std::shared_ptr<MonitorProcessor> mp = _current_stripable->monitor_control();
 		mp->set_cut_all (!mp->cut_all());
 		return;
 	}
@@ -150,7 +150,7 @@ FaderPort::rec_enable ()
 		return;
 	}
 
-	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(_current_stripable);
+	std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track>(_current_stripable);
 
 	if (!t) {
 		return;
@@ -162,7 +162,7 @@ FaderPort::rec_enable ()
 void
 FaderPort::use_master ()
 {
-	boost::shared_ptr<Stripable> r = session->master_out();
+	std::shared_ptr<Stripable> r = session->master_out();
 	if (r) {
 		if (_current_stripable == r) {
 			r = pre_master_stripable.lock();
@@ -171,7 +171,7 @@ FaderPort::use_master ()
 			blinkers.remove (Output);
 		} else {
 			if (_current_stripable != session->master_out() && _current_stripable != session->monitor_out()) {
-				pre_master_stripable = boost::weak_ptr<Stripable> (_current_stripable);
+				pre_master_stripable = std::weak_ptr<Stripable> (_current_stripable);
 			}
 			set_current_stripable (r);
 			get_button(Output).set_led_state (true);
@@ -183,7 +183,7 @@ FaderPort::use_master ()
 void
 FaderPort::use_monitor ()
 {
-	boost::shared_ptr<Stripable> r = session->monitor_out();
+	std::shared_ptr<Stripable> r = session->monitor_out();
 
 	if (r) {
 		if (_current_stripable == r) {
@@ -193,7 +193,7 @@ FaderPort::use_monitor ()
 			blinkers.remove (Output);
 		} else {
 			if (_current_stripable != session->master_out() && _current_stripable != session->monitor_out()) {
-				pre_monitor_stripable = boost::weak_ptr<Stripable> (_current_stripable);
+				pre_monitor_stripable = std::weak_ptr<Stripable> (_current_stripable);
 			}
 			set_current_stripable (r);
 			get_button(Output).set_led_state (true);
@@ -210,13 +210,13 @@ FaderPort::pan_azimuth (int delta)
 		return;
 	}
 
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_current_stripable);
+	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (_current_stripable);
 
 	if (!r) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> azimuth = r->pan_azimuth_control ();
+	std::shared_ptr<AutomationControl> azimuth = r->pan_azimuth_control ();
 
 	if (!azimuth) {
 		return;
@@ -233,13 +233,13 @@ FaderPort::pan_width(int delta)
 		return;
 	}
 
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_current_stripable);
+	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (_current_stripable);
 
 	if (!r) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> width = r->pan_width_control ();
+	std::shared_ptr<AutomationControl> width = r->pan_width_control ();
 
 	if (!width) {
 		return;

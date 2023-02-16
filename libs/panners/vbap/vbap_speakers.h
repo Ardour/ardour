@@ -36,7 +36,7 @@ class Speakers;
 class VBAPSpeakers : public boost::noncopyable
 {
 public:
-	VBAPSpeakers (boost::shared_ptr<Speakers>);
+	VBAPSpeakers (std::shared_ptr<Speakers>);
 
 	typedef std::vector<double> dvector;
 
@@ -65,7 +65,7 @@ public:
 		return _speakers.size ();
 	}
 
-	boost::shared_ptr<Speakers> parent () const
+	std::shared_ptr<Speakers> parent () const
 	{
 		return _parent;
 	}
@@ -75,7 +75,7 @@ public:
 private:
 	static const double         MIN_VOL_P_SIDE_LGTH;
 	int                         _dimension;
-	boost::shared_ptr<Speakers> _parent;
+	std::shared_ptr<Speakers> _parent;
 	std::vector<Speaker>        _speakers;
 	PBD::ScopedConnection       speaker_connection;
 

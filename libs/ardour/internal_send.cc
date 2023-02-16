@@ -50,10 +50,10 @@ using namespace std;
 PBD::Signal1<void, pframes_t> InternalSend::CycleStart;
 
 InternalSend::InternalSend (Session&                      s,
-                            boost::shared_ptr<Pannable>   p,
-                            boost::shared_ptr<MuteMaster> mm,
-                            boost::shared_ptr<Route>      sendfrom,
-                            boost::shared_ptr<Route>      sendto,
+                            std::shared_ptr<Pannable>   p,
+                            std::shared_ptr<MuteMaster> mm,
+                            std::shared_ptr<Route>      sendfrom,
+                            std::shared_ptr<Route>      sendto,
                             Delivery::Role                role,
                             bool                          ignore_bitslot)
 	: Send (s, p, mm, role, ignore_bitslot)
@@ -105,7 +105,7 @@ InternalSend::propagate_solo ()
 			_send_to->solo_isolate_control()->mod_solo_isolated_by_upstream (-1);
 		}
 		/* propagate further downstream alike Route::input_change_handler() */
-		boost::shared_ptr<RouteList> routes = _session.get_routes ();
+		std::shared_ptr<RouteList> routes = _session.get_routes ();
 		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 			if ((*i) == _send_to || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
 				continue;
@@ -123,7 +123,7 @@ InternalSend::propagate_solo ()
 		_send_from->solo_control()->mod_solo_by_others_downstream (-1);
 
 		/* propagate further upstream alike Route::output_change_handler() */
-		boost::shared_ptr<RouteList> routes = _session.get_routes ();
+		std::shared_ptr<RouteList> routes = _session.get_routes ();
 		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 			if (*i == _send_from || !(*i)->can_solo()) {
 				continue;
@@ -148,7 +148,7 @@ InternalSend::init_gain ()
 }
 
 int
-InternalSend::use_target (boost::shared_ptr<Route> sendto, bool update_name)
+InternalSend::use_target (std::shared_ptr<Route> sendto, bool update_name)
 {
 	if (_send_to) {
 		propagate_solo ();
@@ -373,7 +373,7 @@ InternalSend::set_allow_feedback (bool yn)
 }
 
 bool
-InternalSend::feeds (boost::shared_ptr<Route> other) const
+InternalSend::feeds (std::shared_ptr<Route> other) const
 {
 	if (_role == Listen || !_allow_feedback) {
 		return _send_to == other;
@@ -448,7 +448,7 @@ InternalSend::after_connect ()
 		return 0;
 	}
 
-	boost::shared_ptr<Route> sendto;
+	std::shared_ptr<Route> sendto;
 
 	if ((sendto = _session.route_by_id (_send_to_id)) == 0) {
 		error << string_compose (_("%1 - cannot find any track/bus with the ID %2 to connect to"), display_name (), _send_to_id) << endmsg;

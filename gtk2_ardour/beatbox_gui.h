@@ -252,7 +252,7 @@ class SequencerStepIndicator : public ArdourCanvas::Rectangle, public sigc::trac
 
 class BBGUI : public ArdourDialog {
   public:
-	BBGUI (boost::shared_ptr<ARDOUR::BeatBox> bb);
+	BBGUI (std::shared_ptr<ARDOUR::BeatBox> bb);
 	~BBGUI ();
 
 	double width() const { return _width; }
@@ -263,7 +263,7 @@ class BBGUI : public ArdourDialog {
 	void on_unmap ();
 
   private:
-	boost::shared_ptr<ARDOUR::BeatBox> bbox;
+	std::shared_ptr<ARDOUR::BeatBox> bbox;
 	double _width;
 	double _height;
 

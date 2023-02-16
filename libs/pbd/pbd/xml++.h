@@ -64,7 +64,7 @@ private:
 };
 
 typedef std::vector<XMLNode *>                   XMLNodeList;
-typedef std::vector<boost::shared_ptr<XMLNode> > XMLSharedNodeList;
+typedef std::vector<std::shared_ptr<XMLNode> > XMLSharedNodeList;
 typedef XMLNodeList::iterator                    XMLNodeIterator;
 typedef XMLNodeList::const_iterator              XMLNodeConstIterator;
 typedef std::vector<XMLProperty*>                XMLPropertyList;
@@ -100,7 +100,7 @@ public:
 
 	const std::string& write_buffer() const;
 
-	boost::shared_ptr<XMLSharedNodeList> find(const std::string xpath, XMLNode* = 0) const;
+	std::shared_ptr<XMLSharedNodeList> find(const std::string xpath, XMLNode* = 0) const;
 
 private:
 	bool read_internal(bool validate);

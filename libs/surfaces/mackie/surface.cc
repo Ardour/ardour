@@ -206,7 +206,7 @@ Surface::~Surface ()
 }
 
 bool
-Surface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
+Surface::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
 {
 	if (!_port) {
 		return false;
@@ -448,7 +448,7 @@ Surface::setup_master ()
 
 	if (!_master_stripable) {
 		if (_master_fader) {
-			_master_fader->set_control (boost::shared_ptr<AutomationControl>());
+			_master_fader->set_control (std::shared_ptr<AutomationControl>());
 		}
 		master_connection.disconnect ();
 		return;
@@ -500,7 +500,7 @@ Surface::master_gain_changed ()
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac = _master_fader->control();
+	std::shared_ptr<AutomationControl> ac = _master_fader->control();
 	if (!ac) {
 		return;
 	}
@@ -1183,9 +1183,9 @@ Surface::update_strip_selection ()
 }
 
 void
-Surface::map_stripables (const vector<boost::shared_ptr<Stripable> >& stripables)
+Surface::map_stripables (const vector<std::shared_ptr<Stripable> >& stripables)
 {
-	vector<boost::shared_ptr<Stripable> >::const_iterator r;
+	vector<std::shared_ptr<Stripable> >::const_iterator r;
 	Strips::iterator s = strips.begin();
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Mapping %1 stripables to %2 strips\n", stripables.size(), strips.size()));
@@ -1213,7 +1213,7 @@ Surface::map_stripables (const vector<boost::shared_ptr<Stripable> >& stripables
 	}
 	for (; s != strips.end(); ++s) {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 being set to null stripable\n", (*s)->index()));
-		(*s)->set_stripable (boost::shared_ptr<Stripable>());
+		(*s)->set_stripable (std::shared_ptr<Stripable>());
 	}
 	if(xtouch){
 		_port->write (display_colors_on_xtouch(colors)); //write colors to strips for xtouch
@@ -1449,7 +1449,7 @@ Surface::set_jog_mode (JogWheel::Mode m)
 }
 
 bool
-Surface::stripable_is_locked_to_strip (boost::shared_ptr<Stripable> stripable) const
+Surface::stripable_is_locked_to_strip (std::shared_ptr<Stripable> stripable) const
 {
 	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
 		if ((*s)->stripable() == stripable && (*s)->locked()) {
@@ -1460,7 +1460,7 @@ Surface::stripable_is_locked_to_strip (boost::shared_ptr<Stripable> stripable) c
 }
 
 bool
-Surface::stripable_is_mapped (boost::shared_ptr<Stripable> stripable) const
+Surface::stripable_is_mapped (std::shared_ptr<Stripable> stripable) const
 {
 	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
 		if ((*s)->stripable() == stripable) {

@@ -45,7 +45,7 @@ class PeakReaderTest : public CppUnit::TestFixture
 	}
 
   private:
-	boost::shared_ptr<PeakReader> reader;
+	std::shared_ptr<PeakReader> reader;
 
 	float * random_data;
 	samplecnt_t samples;

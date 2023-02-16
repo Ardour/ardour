@@ -35,8 +35,8 @@ MidiAutomationLine::MidiAutomationLine (
 	const std::string&                                      name,
 	TimeAxisView&                                           tav,
 	ArdourCanvas::Item&                                     parent,
-	boost::shared_ptr<ARDOUR::AutomationList>               list,
-	boost::shared_ptr<ARDOUR::MidiRegion>                   region,
+	std::shared_ptr<ARDOUR::AutomationList>               list,
+	std::shared_ptr<ARDOUR::MidiRegion>                   region,
 	Evoral::Parameter                                       parameter)
 	: AutomationLine (name, tav, parent, list, parameter)
 	, _region (region)
@@ -81,7 +81,7 @@ MidiAutomationLine::get_verbose_cursor_string (double fraction) const
 	}
 
 	const uint8_t channel = mtv->get_preferred_midi_channel();
-	boost::shared_ptr<const ValueNameList> value_names = mtv->route()->instrument_info().value_name_list_by_control (channel, _parameter.id());
+	std::shared_ptr<const ValueNameList> value_names = mtv->route()->instrument_info().value_name_list_by_control (channel, _parameter.id());
 
 	if (!value_names) {
 		return AutomationLine::get_verbose_cursor_string(fraction);
@@ -89,7 +89,7 @@ MidiAutomationLine::get_verbose_cursor_string (double fraction) const
 
 	const uint16_t cc_value = floor(std::max(std::min(fraction * 127.0, 127.0), 0.0));
 
-	boost::shared_ptr<const Value> value = value_names->max_value_below(cc_value);
+	std::shared_ptr<const Value> value = value_names->max_value_below(cc_value);
 	if (!value) {
 		return AutomationLine::get_verbose_cursor_string(fraction);
 	}

@@ -30,7 +30,7 @@ class LIBARDOUR_API MidiStretch : public Filter {
 	MidiStretch (ARDOUR::Session&, const TimeFXRequest&);
 	~MidiStretch ();
 
-	int run (boost::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
+	int run (std::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
 
   private:
 	const TimeFXRequest& _request;

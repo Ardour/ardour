@@ -41,7 +41,7 @@ class CrossfadeView : public TimeAxisViewItem
 public:
 	CrossfadeView (ArdourCanvas::Container*,
 	               RouteTimeAxisView&,
-	               boost::shared_ptr<ARDOUR::Crossfade>,
+	               std::shared_ptr<ARDOUR::Crossfade>,
 	               double initial_samples_per_pixel,
 	               Gdk::Color& basic_color,
 	               AudioRegionView& leftview,
@@ -49,7 +49,7 @@ public:
 
 	~CrossfadeView ();
 
-	boost::shared_ptr<ARDOUR::Crossfade> crossfade;  // ok, let 'em have it
+	std::shared_ptr<ARDOUR::Crossfade> crossfade;  // ok, let 'em have it
 
 	AudioRegionView& left_view;    // and these too
 	AudioRegionView& right_view;

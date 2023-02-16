@@ -61,7 +61,7 @@ InstrumentInfo::set_external_instrument (const string& model, const string& mode
 }
 
 void
-InstrumentInfo::set_internal_instrument (boost::shared_ptr<Processor> p)
+InstrumentInfo::set_internal_instrument (std::shared_ptr<Processor> p)
 {
 	invalidate_cached_plugin_model ();
 	if (p == internal_instrument.lock ()) {
@@ -75,7 +75,7 @@ InstrumentInfo::set_internal_instrument (boost::shared_ptr<Processor> p)
 		Changed (); /* EMIT SIGNAL */
 	}
 
-	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
+	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (p);
 	if (pi && pi->plugin ()->has_midnam ()) {
 		pi->plugin()->UpdatedMidnam.connect_same_thread (_midnam_changed, boost::bind (&InstrumentInfo::emit_changed, this));
 	}
@@ -91,9 +91,9 @@ InstrumentInfo::emit_changed () {
 bool
 InstrumentInfo::have_custom_plugin_info () const
 {
-	boost::shared_ptr<Processor> p = internal_instrument.lock ();
+	std::shared_ptr<Processor> p = internal_instrument.lock ();
 
-	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
+	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (p);
 	if (pi && pi->plugin ()->has_midnam ()) {
 		std::string                  model        = pi->plugin ()->midnam_model ();
 		const std::list<std::string> device_modes = MidiPatchManager::instance ().custom_device_mode_names_by_model (model);
@@ -113,8 +113,8 @@ InstrumentInfo::model () const
 	if (!_plugin_model.empty ()) {
 		return _plugin_model;
 	}
-	boost::shared_ptr<Processor>    p  = internal_instrument.lock ();
-	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
+	std::shared_ptr<Processor>    p  = internal_instrument.lock ();
+	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (p);
 	if (pi && pi->plugin ()->has_midnam ()) {
 		_plugin_model = pi->plugin ()->midnam_model ();
 		return _plugin_model;
@@ -131,8 +131,8 @@ InstrumentInfo::mode () const
 	if (!_plugin_mode.empty ()) {
 		return _plugin_mode;
 	}
-	boost::shared_ptr<Processor>    p  = internal_instrument.lock ();
-	boost::shared_ptr<PluginInsert> pi = boost::dynamic_pointer_cast<PluginInsert> (p);
+	std::shared_ptr<Processor>    p  = internal_instrument.lock ();
+	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (p);
 	if (pi && pi->plugin ()->has_midnam ()) {
 		const std::list<std::string> device_modes = MidiPatchManager::instance ().custom_device_mode_names_by_model (model ());
 		if (device_modes.size () > 0) {
@@ -146,33 +146,33 @@ InstrumentInfo::mode () const
 string
 InstrumentInfo::get_note_name (uint16_t bank, uint8_t program, uint8_t channel, uint8_t note) const
 {
-	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
+	std::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
 	if (dev_names) {
 		return dev_names->note_name (mode (), channel, bank, program, note);
 	}
 	return "";
 }
 
-boost::shared_ptr<const ValueNameList>
+std::shared_ptr<const ValueNameList>
 InstrumentInfo::value_name_list_by_control (uint8_t channel, uint8_t number) const
 {
-	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
+	std::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
 	if (dev_names) {
 		return dev_names->value_name_list_by_control (mode (), channel, number);
 	}
-	return boost::shared_ptr<const ValueNameList> ();
+	return std::shared_ptr<const ValueNameList> ();
 }
 
-boost::shared_ptr<MasterDeviceNames>
+std::shared_ptr<MasterDeviceNames>
 InstrumentInfo::master_device_names () const
 {
 #if 1
 	/* this safe if model does not exist */
-	boost::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance ().document_by_model (model ());
+	std::shared_ptr<MIDINameDocument> midnam = MidiPatchManager::instance ().document_by_model (model ());
 	if (midnam) {
 		return midnam->master_device_names (model ());
 	}
-	return boost::shared_ptr<MasterDeviceNames> ();
+	return std::shared_ptr<MasterDeviceNames> ();
 #else
 	return MidiPatchManager::instance ().master_device_by_model (model ());
 #endif
@@ -184,10 +184,10 @@ InstrumentInfo::master_device_names () const
 uint16_t
 InstrumentInfo::channels_for_control_list (std::string const& ctrl_name_list) const
 {
-	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
+	std::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
 	uint16_t channels = 0;
 	for (int c = 0; c < 16; ++c) {
-		boost::shared_ptr<ChannelNameSet> const& chan_names (dev_names->channel_name_set_by_channel (mode (), c));
+		std::shared_ptr<ChannelNameSet> const& chan_names (dev_names->channel_name_set_by_channel (mode (), c));
 		if (!chan_names || !chan_names->available_for_channel (c + 1)) {
 			continue;
 		}
@@ -201,13 +201,13 @@ InstrumentInfo::channels_for_control_list (std::string const& ctrl_name_list) co
 	return channels;
 }
 
-boost::shared_ptr<ControlNameList>
+std::shared_ptr<ControlNameList>
 InstrumentInfo::control_name_list (uint8_t channel)
 {
-	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
-	boost::shared_ptr<ChannelNameSet> const&    chan_names (dev_names->channel_name_set_by_channel (mode (), channel));
+	std::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
+	std::shared_ptr<ChannelNameSet> const&    chan_names (dev_names->channel_name_set_by_channel (mode (), channel));
 	if (!chan_names) {
-		return boost::shared_ptr<ControlNameList> ();
+		return std::shared_ptr<ControlNameList> ();
 	}
 	return dev_names->control_name_list (chan_names->control_list_name ());
 }
@@ -215,7 +215,7 @@ InstrumentInfo::control_name_list (uint8_t channel)
 size_t
 InstrumentInfo::master_controller_count () const
 {
-	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
+	std::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
 	if (!dev_names) {
 		return 0;
 	}
@@ -223,7 +223,7 @@ InstrumentInfo::master_controller_count () const
 
 	size_t total_ctrls = 0;
 	for (MasterDeviceNames::ControlNameLists::const_iterator l = ctllist.begin(); l != ctllist.end(); ++l) {
-		boost::shared_ptr<ControlNameList> const& name_list = l->second;
+		std::shared_ptr<ControlNameList> const& name_list = l->second;
 		total_ctrls += name_list->controls().size();
 	}
 	return total_ctrls;
@@ -235,7 +235,7 @@ InstrumentInfo::master_control_names () const
 {
 	static MasterDeviceNames::ControlNameLists empty_list;
 
-	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
+	std::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
 	if (dev_names) {
 		return dev_names->controls();
 	}
@@ -260,7 +260,7 @@ InstrumentInfo::get_patch_name (uint16_t bank, uint8_t program, uint8_t channel,
 {
 	PatchPrimaryKey patch_key (program, bank);
 
-	boost::shared_ptr<MIDI::Name::Patch> const& patch (MidiPatchManager::instance ().find_patch (model (), mode (), channel, patch_key));
+	std::shared_ptr<MIDI::Name::Patch> const& patch (MidiPatchManager::instance ().find_patch (model (), mode (), channel, patch_key));
 
 	if (patch) {
 		return patch->name ();
@@ -284,21 +284,21 @@ InstrumentInfo::get_controller_name (Evoral::Parameter param) const
 		return "";
 	}
 
-	boost::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
+	std::shared_ptr<MasterDeviceNames> const& dev_names (MidiPatchManager::instance ().master_device_by_model (model ()));
 	if (!dev_names) {
 		return "";
 	}
 
-	boost::shared_ptr<ChannelNameSet> const& chan_names (dev_names->channel_name_set_by_channel (mode (), param.channel ()));
+	std::shared_ptr<ChannelNameSet> const& chan_names (dev_names->channel_name_set_by_channel (mode (), param.channel ()));
 	if (!chan_names) {
 		return "";
 	}
 
-	boost::shared_ptr<ControlNameList> const& control_names (dev_names->control_name_list (chan_names->control_list_name ()));
+	std::shared_ptr<ControlNameList> const& control_names (dev_names->control_name_list (chan_names->control_list_name ()));
 	if (!control_names) {
 		return "";
 	}
-	boost::shared_ptr<const Control> const& c = control_names->control (param.id ());
+	std::shared_ptr<const Control> const& c = control_names->control (param.id ());
 
 	if (c) {
 		return string_compose (c->name () + " [%1]", int(param.channel ()) + 1);
@@ -307,7 +307,7 @@ InstrumentInfo::get_controller_name (Evoral::Parameter param) const
 	return "";
 }
 
-boost::shared_ptr<ChannelNameSet>
+std::shared_ptr<ChannelNameSet>
 InstrumentInfo::get_patches (uint8_t channel)
 {
 	return MidiPatchManager::instance ().find_channel_name_set (model (), mode (), channel);

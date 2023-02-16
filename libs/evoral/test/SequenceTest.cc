@@ -30,7 +30,7 @@ SequenceTest::copyTest ()
 void
 SequenceTest::preserveEventOrderingTest ()
 {
-	vector< boost::shared_ptr< Event<Time> > > inserted_events;
+	vector< std::shared_ptr< Event<Time> > > inserted_events;
 
 	seq->start_write();
 
@@ -44,11 +44,11 @@ SequenceTest::preserveEventOrderingTest ()
 		event->buffer()[1] = 0; //event->time().to_double() / 1000;
 		event->buffer()[2] = 0; //event->time().to_double() / 1000;
 
-		boost::shared_ptr<Event<Time> > event_ptr(event);
+		std::shared_ptr<Event<Time> > event_ptr(event);
 
 		seq->append((*i)->on_event(), next_event_id ());
 		inserted_events.push_back(
-				boost::shared_ptr<Event<Time> >(
+				std::shared_ptr<Event<Time> >(
 						new Event<Time>((*i)->on_event(), true)
 		));
 
@@ -57,7 +57,7 @@ SequenceTest::preserveEventOrderingTest ()
 
 		seq->append((*i)->off_event(), next_event_id ());
 		inserted_events.push_back(
-				boost::shared_ptr<Event<Time> >(
+				std::shared_ptr<Event<Time> >(
 						new Event<Time>((*i)->off_event(), true)
 		));
 	}
@@ -104,7 +104,7 @@ SequenceTest::iteratorSeekTest ()
 
 	// Test invalidation
 	Sequence<Time>::const_iterator i = seq->begin(Time::from_double(600));
-	std::set< boost::weak_ptr< Note<Time> > > active_notes;
+	Sequence<Time>::WeakActiveNotes active_notes;
 	i.get_active_notes(active_notes);
 	CPPUNIT_ASSERT_EQUAL((size_t)1, active_notes.size());
 
@@ -143,7 +143,7 @@ SequenceTest::controlInterpolationTest ()
 	static const uint64_t delay   = 1000;
 	static const uint32_t cc_type = 1;
 
-	boost::shared_ptr<Control> c = seq->control(Parameter(cc_type, 1, 1), true);
+	std::shared_ptr<Control> c = seq->control(Parameter(cc_type, 1, 1), true);
 	CPPUNIT_ASSERT(c);
 
 	double min = 0.0;

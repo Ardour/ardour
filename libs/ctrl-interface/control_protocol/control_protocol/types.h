@@ -26,13 +26,13 @@ namespace ARDOUR {
 	class Route;
 	class Stripable;
 
-	typedef std::vector<boost::weak_ptr<ARDOUR::Route> >    RouteNotificationList;
-	typedef boost::shared_ptr<RouteNotificationList>        RouteNotificationListPtr;
-	typedef std::vector<boost::shared_ptr<ARDOUR::Route> >  StrongRouteNotificationList;
+	typedef std::vector<std::weak_ptr<ARDOUR::Route> >    RouteNotificationList;
+	typedef std::shared_ptr<RouteNotificationList>        RouteNotificationListPtr;
+	typedef std::vector<std::shared_ptr<ARDOUR::Route> >  StrongRouteNotificationList;
 
-	typedef std::vector<boost::weak_ptr<ARDOUR::Stripable> >    StripableNotificationList;
-	typedef boost::shared_ptr<StripableNotificationList>        StripableNotificationListPtr;
-	typedef std::vector<boost::shared_ptr<ARDOUR::Stripable> >  StrongStripableNotificationList;
+	typedef std::vector<std::weak_ptr<ARDOUR::Stripable> >    StripableNotificationList;
+	typedef std::shared_ptr<StripableNotificationList>        StripableNotificationListPtr;
+	typedef std::vector<std::shared_ptr<ARDOUR::Stripable> >  StrongStripableNotificationList;
 }
 
 #endif /* __ardour_control_protocol_types_h__ */

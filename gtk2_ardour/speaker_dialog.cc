@@ -92,12 +92,12 @@ SpeakerDialog::SpeakerDialog ()
 }
 
 void
-SpeakerDialog::set_speakers (boost::shared_ptr<Speakers> s)
+SpeakerDialog::set_speakers (std::shared_ptr<Speakers> s)
 {
 	_speakers = s;
 }
 
-boost::shared_ptr<Speakers>
+std::shared_ptr<Speakers>
 SpeakerDialog::get_speakers () const
 {
 	return _speakers.lock ();
@@ -106,7 +106,7 @@ SpeakerDialog::get_speakers () const
 bool
 SpeakerDialog::darea_expose_event (GdkEventExpose* event)
 {
-	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	std::shared_ptr<Speakers> speakers = _speakers.lock ();
 	if (!speakers) {
 		return false;
 	}
@@ -269,7 +269,7 @@ SpeakerDialog::darea_size_allocate (Gtk::Allocation& alloc)
 bool
 SpeakerDialog::darea_button_press_event (GdkEventButton *ev)
 {
-	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	std::shared_ptr<Speakers> speakers = _speakers.lock ();
 	if (!speakers) {
 		return false;
 	}
@@ -316,7 +316,7 @@ SpeakerDialog::darea_button_press_event (GdkEventButton *ev)
 bool
 SpeakerDialog::darea_button_release_event (GdkEventButton *ev)
 {
-	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	std::shared_ptr<Speakers> speakers = _speakers.lock ();
 	if (!speakers) {
 		return false;
 	}
@@ -367,7 +367,7 @@ SpeakerDialog::darea_button_release_event (GdkEventButton *ev)
 int
 SpeakerDialog::find_closest_object (gdouble x, gdouble y)
 {
-	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	std::shared_ptr<Speakers> speakers = _speakers.lock ();
 	if (!speakers) {
 		return -1;
 	}
@@ -422,7 +422,7 @@ SpeakerDialog::darea_motion_notify_event (GdkEventMotion *ev)
 bool
 SpeakerDialog::handle_motion (gint evx, gint evy, GdkModifierType state)
 {
-	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	std::shared_ptr<Speakers> speakers = _speakers.lock ();
 	if (!speakers) {
 		return false;
 	}
@@ -488,7 +488,7 @@ SpeakerDialog::handle_motion (gint evx, gint evy, GdkModifierType state)
 void
 SpeakerDialog::add_speaker ()
 {
-	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	std::shared_ptr<Speakers> speakers = _speakers.lock ();
 	if (!speakers) {
 		return;
 	}
@@ -500,7 +500,7 @@ SpeakerDialog::add_speaker ()
 void
 SpeakerDialog::set_selected (int i)
 {
-	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	std::shared_ptr<Speakers> speakers = _speakers.lock ();
 	if (!speakers) {
 		return;
 	}
@@ -530,7 +530,7 @@ SpeakerDialog::set_selected (int i)
 void
 SpeakerDialog::azimuth_changed ()
 {
-	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	std::shared_ptr<Speakers> speakers = _speakers.lock ();
 	if (!speakers) {
 		return;
 	}
@@ -551,7 +551,7 @@ SpeakerDialog::azimuth_changed ()
 void
 SpeakerDialog::speaker_position_changed ()
 {
-	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	std::shared_ptr<Speakers> speakers = _speakers.lock ();
 	if (!speakers) {
 		return;
 	}
@@ -572,7 +572,7 @@ SpeakerDialog::speaker_position_changed ()
 void
 SpeakerDialog::remove_speaker ()
 {
-	boost::shared_ptr<Speakers> speakers = _speakers.lock ();
+	std::shared_ptr<Speakers> speakers = _speakers.lock ();
 	if (!speakers) {
 		return;
 	}

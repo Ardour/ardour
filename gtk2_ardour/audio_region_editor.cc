@@ -52,7 +52,7 @@ _peak_amplitude_thread (void* arg)
 	return 0;
 }
 
-AudioRegionEditor::AudioRegionEditor (Session* s, boost::shared_ptr<AudioRegion> r)
+AudioRegionEditor::AudioRegionEditor (Session* s, std::shared_ptr<AudioRegion> r)
 	: RegionEditor (s, r)
 	, _audio_region (r)
 	, gain_adjustment(accurate_coefficient_to_dB(fabsf (_audio_region->scale_amplitude())), -40.0, +40.0, 0.1, 1.0, 0)

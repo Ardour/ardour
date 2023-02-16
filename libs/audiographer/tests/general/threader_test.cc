@@ -137,15 +137,15 @@ class ThreaderTest : public CppUnit::TestFixture
   private:
 	Glib::ThreadPool * thread_pool;
 
-	boost::shared_ptr<Threader<float> > threader;
-	boost::shared_ptr<VectorSink<float> > sink_a;
-	boost::shared_ptr<VectorSink<float> > sink_b;
-	boost::shared_ptr<VectorSink<float> > sink_c;
-	boost::shared_ptr<VectorSink<float> > sink_d;
-	boost::shared_ptr<VectorSink<float> > sink_e;
-	boost::shared_ptr<VectorSink<float> > sink_f;
+	std::shared_ptr<Threader<float> > threader;
+	std::shared_ptr<VectorSink<float> > sink_a;
+	std::shared_ptr<VectorSink<float> > sink_b;
+	std::shared_ptr<VectorSink<float> > sink_c;
+	std::shared_ptr<VectorSink<float> > sink_d;
+	std::shared_ptr<VectorSink<float> > sink_e;
+	std::shared_ptr<VectorSink<float> > sink_f;
 
-	boost::shared_ptr<ThrowingSink<float> > throwing_sink;
+	std::shared_ptr<ThrowingSink<float> > throwing_sink;
 
 	float * random_data;
 	float * zero_data;

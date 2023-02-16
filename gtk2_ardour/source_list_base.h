@@ -29,11 +29,11 @@ public:
 protected:
 	void name_edit (const std::string&, const std::string&);
 	void tag_edit (const std::string&, const std::string&);
-	bool list_region (boost::shared_ptr<ARDOUR::Region>) const;
+	bool list_region (std::shared_ptr<ARDOUR::Region>) const;
 
 private:
-	void remove_source (boost::shared_ptr<ARDOUR::Source>);
-	void remove_weak_source (boost::weak_ptr<ARDOUR::Source>);
+	void remove_source (std::shared_ptr<ARDOUR::Source>);
+	void remove_weak_source (std::weak_ptr<ARDOUR::Source>);
 };
 
 #endif /* _gtk_ardour_source_list_base_h_ */

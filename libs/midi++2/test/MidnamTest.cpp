@@ -37,7 +37,7 @@ MidnamTest::protools_patchfile_test()
 
     CPPUNIT_ASSERT(find_file (test_search_path (), "Roland_SC_88_Pro.midnam", test_file_path));
     XMLTree xmldoc(test_file_path);
-    boost::shared_ptr<XMLSharedNodeList> result = xmldoc.find(
+    std::shared_ptr<XMLSharedNodeList> result = xmldoc.find(
             "//MIDINameDocument");
     CPPUNIT_ASSERT(result->size() == 1);
 
@@ -50,14 +50,14 @@ MidnamTest::protools_patchfile_test()
 
     const string model = *doc.all_models().begin();
     CPPUNIT_ASSERT_EQUAL(string("SC-88 Pro"), model);
-    boost::shared_ptr<MasterDeviceNames> masterDeviceNames =
+    std::shared_ptr<MasterDeviceNames> masterDeviceNames =
             doc.master_device_names_by_model().find(model)->second;
     CPPUNIT_ASSERT_EQUAL(string("Roland"), masterDeviceNames->manufacturer());
 
     string modename = masterDeviceNames->custom_device_mode_names().front();
     CPPUNIT_ASSERT_EQUAL(string("Default"), modename);
 
-    boost::shared_ptr<CustomDeviceMode> mode =
+    std::shared_ptr<CustomDeviceMode> mode =
             masterDeviceNames->custom_device_mode_by_name(modename);
 
     CPPUNIT_ASSERT_EQUAL(modename, mode->name());
@@ -74,9 +74,9 @@ MidnamTest::protools_patchfile_test()
                     mode->channel_name_set_name_by_channel(i));
     }
 
-    boost::shared_ptr<ChannelNameSet> nameSet1 =
+    std::shared_ptr<ChannelNameSet> nameSet1 =
             masterDeviceNames->channel_name_set_by_channel(modename, 0);
-    boost::shared_ptr<ChannelNameSet> nameSet2 =
+    std::shared_ptr<ChannelNameSet> nameSet2 =
             masterDeviceNames->channel_name_set_by_channel(modename, 9);
 
     CPPUNIT_ASSERT_EQUAL(ns1, nameSet1->name());
@@ -87,7 +87,7 @@ MidnamTest::protools_patchfile_test()
     CPPUNIT_ASSERT(banks1.size() == 16);
     CPPUNIT_ASSERT(banks2.size() == 1);
 
-    boost::shared_ptr<PatchBank> bank = banks1.front();
+    std::shared_ptr<PatchBank> bank = banks1.front();
     CPPUNIT_ASSERT_EQUAL(string("Piano"), bank->name());
     const PatchNameList& plist1 = bank->patch_name_list();
     CPPUNIT_ASSERT(plist1.size() == 110);
@@ -105,7 +105,7 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
 
     CPPUNIT_ASSERT(find_file (test_search_path (), "Yamaha_PSR_S900.midnam", test_file_path));
     XMLTree xmldoc(test_file_path);
-    boost::shared_ptr<XMLSharedNodeList> result = xmldoc.find(
+    std::shared_ptr<XMLSharedNodeList> result = xmldoc.find(
             "//MIDINameDocument");
     CPPUNIT_ASSERT(result->size() == 1);
 
@@ -118,7 +118,7 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
 
     const string model = *doc.all_models().begin();
     CPPUNIT_ASSERT_EQUAL(string("PSR-S900"), model);
-    boost::shared_ptr<MasterDeviceNames> masterDeviceNames =
+    std::shared_ptr<MasterDeviceNames> masterDeviceNames =
             doc.master_device_names_by_model().find(model)->second;
     CPPUNIT_ASSERT_EQUAL(string("Yamaha"), masterDeviceNames->manufacturer());
 
@@ -135,7 +135,7 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
     CPPUNIT_ASSERT_EQUAL(string("GM2"), modename);
 
     for (list<string>::const_iterator modename = modes.begin(); modename != modes.end(); ++modename) {
-        boost::shared_ptr<CustomDeviceMode> mode =
+        std::shared_ptr<CustomDeviceMode> mode =
                 masterDeviceNames->custom_device_mode_by_name(*modename);
 
         CPPUNIT_ASSERT_EQUAL(*modename, mode->name());
@@ -146,7 +146,7 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
         for (uint8_t i = 0; i <= 15; i++) {
                 CPPUNIT_ASSERT_EQUAL(ns,
                         mode->channel_name_set_name_by_channel(i));
-                boost::shared_ptr<ChannelNameSet> nameSet =
+                std::shared_ptr<ChannelNameSet> nameSet =
                         masterDeviceNames->channel_name_set_by_channel(ns, 1);
 
                 CPPUNIT_ASSERT_EQUAL(ns, nameSet->name());
@@ -154,7 +154,7 @@ MidnamTest::yamaha_PSRS900_patchfile_test()
                 const ChannelNameSet::PatchBanks& banks1 = nameSet->patch_banks();
                 CPPUNIT_ASSERT(banks1.size() > 1);
 
-                boost::shared_ptr<PatchBank> bank = banks1.front();
+                std::shared_ptr<PatchBank> bank = banks1.front();
                 const PatchNameList& list = bank->patch_name_list();
 
                 for(PatchNameList::const_iterator p = list.begin(); p != list.end(); ++p) {
@@ -185,10 +185,10 @@ MidnamTest::load_all_midnams_test ()
 
     for (vector<std::string>::iterator i = result.begin(); i != result.end(); ++i) {
         cout << "Processing file " << Glib::path_get_basename(*i) << endl;
-        boost::shared_ptr<MIDINameDocument> document(new MIDINameDocument(*i));
+        std::shared_ptr<MIDINameDocument> document(new MIDINameDocument(*i));
 
         XMLTree xmldoc(*i);
-        boost::shared_ptr<XMLSharedNodeList> result = xmldoc.find("//MIDINameDocument");
+        std::shared_ptr<XMLSharedNodeList> result = xmldoc.find("//MIDINameDocument");
         CPPUNIT_ASSERT(result->size() == 1);
 
         result = xmldoc.find("//ExtendingDeviceNames");
@@ -211,10 +211,10 @@ MidnamTest::load_all_midnams_test ()
                     document->master_device_names_by_model().begin();
 
         string modename = device->second->custom_device_mode_names().front();
-        boost::shared_ptr<CustomDeviceMode> mode = device->second->custom_device_mode_by_name(modename);
+        std::shared_ptr<CustomDeviceMode> mode = device->second->custom_device_mode_by_name(modename);
         CPPUNIT_ASSERT_EQUAL(deviceModeName, mode->name());
 
-        boost::shared_ptr<ChannelNameSet> nameSet = device->second->channel_name_set_by_channel(modename, 0);
+        std::shared_ptr<ChannelNameSet> nameSet = device->second->channel_name_set_by_channel(modename, 0);
     }
 }
 

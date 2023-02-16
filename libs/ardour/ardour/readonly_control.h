@@ -33,14 +33,14 @@ class Plugin;
 class LIBARDOUR_API ReadOnlyControl : public PBD::Destructible
 {
 public:
-	ReadOnlyControl (boost::shared_ptr<Plugin>, const ParameterDescriptor&, uint32_t pnum);
+	ReadOnlyControl (std::shared_ptr<Plugin>, const ParameterDescriptor&, uint32_t pnum);
 
 	double get_parameter () const;
 	std::string describe_parameter ();
 	const ParameterDescriptor& desc() const { return _desc; }
 
 private:
-	boost::weak_ptr<Plugin> _plugin;
+	std::weak_ptr<Plugin> _plugin;
 	const ParameterDescriptor _desc;
 	uint32_t _parameter_num;
 };

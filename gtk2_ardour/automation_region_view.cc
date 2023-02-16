@@ -48,9 +48,9 @@ using namespace Temporal;
 
 AutomationRegionView::AutomationRegionView (ArdourCanvas::Container*                  parent,
                                             AutomationTimeAxisView&                   time_axis,
-                                            boost::shared_ptr<ARDOUR::Region>         region,
+                                            std::shared_ptr<ARDOUR::Region>         region,
                                             const Evoral::Parameter&                  param,
-                                            boost::shared_ptr<ARDOUR::AutomationList> list,
+                                            std::shared_ptr<ARDOUR::AutomationList> list,
                                             double                                    spu,
                                             uint32_t                                  basic_color)
 	: RegionView(parent, time_axis, region, spu, basic_color, true)
@@ -91,12 +91,12 @@ AutomationRegionView::init (bool /*wfd*/)
 }
 
 void
-AutomationRegionView::create_line (boost::shared_ptr<ARDOUR::AutomationList> list)
+AutomationRegionView::create_line (std::shared_ptr<ARDOUR::AutomationList> list)
 {
-	_line = boost::shared_ptr<AutomationLine> (new MidiAutomationLine(
+	_line = std::shared_ptr<AutomationLine> (new MidiAutomationLine(
 				ARDOUR::EventTypeMap::instance().to_symbol(list->parameter()),
 				trackview, *get_canvas_group(), list,
-				boost::dynamic_pointer_cast<ARDOUR::MidiRegion> (_region),
+				std::dynamic_pointer_cast<ARDOUR::MidiRegion> (_region),
 				_parameter));
 	_line->set_colors();
 	_line->set_height ((uint32_t)rint(trackview.current_height() - 2.5 - NAME_HIGHLIGHT_SIZE));
@@ -171,8 +171,8 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 void
 AutomationRegionView::add_automation_event (GdkEvent *, timepos_t const & w, double y, bool with_guard_points)
 {
-	boost::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
-	boost::shared_ptr<ARDOUR::AutomationControl> ac = boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(c);
+	std::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
+	std::shared_ptr<ARDOUR::AutomationControl> ac = std::dynamic_pointer_cast<ARDOUR::AutomationControl>(c);
 	timepos_t when (w); /* the non-const copy */
 
 	if (!_line) {
@@ -196,9 +196,9 @@ AutomationRegionView::add_automation_event (GdkEvent *, timepos_t const & w, dou
 
 	if (c->list()->size () == 0) {
 		/* we need the MidiTrack::MidiControl, not the region's (midi model source) control */
-		boost::shared_ptr<ARDOUR::MidiTrack> mt = boost::dynamic_pointer_cast<ARDOUR::MidiTrack> (view->parent_stripable ());
+		std::shared_ptr<ARDOUR::MidiTrack> mt = std::dynamic_pointer_cast<ARDOUR::MidiTrack> (view->parent_stripable ());
 		assert (mt);
-		boost::shared_ptr<Evoral::Control> mc = mt->control(_parameter);
+		std::shared_ptr<Evoral::Control> mc = mt->control(_parameter);
 		assert (mc);
 		y = mc->get_double ();
 	} else if (UIConfiguration::instance().get_new_automation_points_on_lane()) {
@@ -231,12 +231,12 @@ bool
 AutomationRegionView::paste (timepos_t const &                               pos,
                              unsigned                                        paste_count,
                              float                                           times,
-                             boost::shared_ptr<const ARDOUR::AutomationList> slist)
+                             std::shared_ptr<const ARDOUR::AutomationList> slist)
 {
 	using namespace ARDOUR;
 
 	AutomationTimeAxisView* const             view    = automation_view();
-	boost::shared_ptr<ARDOUR::AutomationList> my_list = _line->the_list();
+	std::shared_ptr<ARDOUR::AutomationList> my_list = _line->the_list();
 
 	if (view->session()->transport_rolling() && my_list->automation_write()) {
 		/* do not paste if this control is in write mode and we're rolling */

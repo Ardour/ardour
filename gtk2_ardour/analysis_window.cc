@@ -243,8 +243,8 @@ AnalysisWindow::analyze_data (Gtk::Button * /*button*/)
 			TimeSelection ts = s.time;
 
 			for (TrackSelection::iterator i = s.tracks.begin(); i != s.tracks.end(); ++i) {
-				boost::shared_ptr<AudioPlaylist> pl
-					= boost::dynamic_pointer_cast<AudioPlaylist>((*i)->playlist());
+				std::shared_ptr<AudioPlaylist> pl
+					= std::dynamic_pointer_cast<AudioPlaylist>((*i)->playlist());
 
 				if (!pl)
 					continue;

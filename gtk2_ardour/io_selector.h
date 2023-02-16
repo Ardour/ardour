@@ -29,7 +29,7 @@
 class IOSelector : public PortMatrix
 {
 public:
-	IOSelector (Gtk::Window*, ARDOUR::Session *, boost::shared_ptr<ARDOUR::IO>);
+	IOSelector (Gtk::Window*, ARDOUR::Session *, std::shared_ptr<ARDOUR::IO>);
 
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
@@ -40,7 +40,7 @@ public:
 	ARDOUR::Session* session() const { return _session; }
 
 	uint32_t n_io_ports () const;
-	boost::shared_ptr<ARDOUR::IO> const io () { return _io; }
+	std::shared_ptr<ARDOUR::IO> const io () { return _io; }
 	void setup_ports (int);
 	bool list_is_global (int) const;
 
@@ -64,8 +64,8 @@ private:
 
 	int _other;
 	int _ours;
-	boost::shared_ptr<ARDOUR::IO> _io;
-	boost::shared_ptr<PortGroup> _port_group;
+	std::shared_ptr<ARDOUR::IO> _io;
+	std::shared_ptr<PortGroup> _port_group;
 	bool _find_inputs_for_io_outputs;
 	PBD::ScopedConnection _io_connection;
 };
@@ -73,7 +73,7 @@ private:
 class IOSelectorWindow : public ArdourWindow
 {
   public:
-	IOSelectorWindow (ARDOUR::Session *, boost::shared_ptr<ARDOUR::IO>, bool can_cancel = false);
+	IOSelectorWindow (ARDOUR::Session *, std::shared_ptr<ARDOUR::IO>, bool can_cancel = false);
 
 	IOSelector& selector() { return _selector; }
 

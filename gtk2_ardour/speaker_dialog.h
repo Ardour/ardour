@@ -36,11 +36,11 @@ class SpeakerDialog  : public ArdourWindow
 public:
 	SpeakerDialog ();
 
-	boost::shared_ptr<ARDOUR::Speakers> get_speakers() const;
-	void set_speakers (boost::shared_ptr<ARDOUR::Speakers>);
+	std::shared_ptr<ARDOUR::Speakers> get_speakers() const;
+	void set_speakers (std::shared_ptr<ARDOUR::Speakers>);
 
 private:
-	boost::weak_ptr<ARDOUR::Speakers> _speakers;
+	std::weak_ptr<ARDOUR::Speakers> _speakers;
 	Gtk::HBox        hbox;
 	Gtk::VBox        side_vbox;
 	Gtk::AspectFrame aspect_frame;

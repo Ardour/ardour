@@ -1771,9 +1771,9 @@ LV2Plugin::has_editor() const
 }
 
 void
-LV2Plugin::add_slave (boost::shared_ptr<Plugin> p, bool)
+LV2Plugin::add_slave (std::shared_ptr<Plugin> p, bool)
 {
-	boost::shared_ptr<LV2Plugin> lv2 = boost::dynamic_pointer_cast<LV2Plugin> (p);
+	std::shared_ptr<LV2Plugin> lv2 = std::dynamic_pointer_cast<LV2Plugin> (p);
 	if (lv2) {
 		Glib::Threads::Mutex::Lock lm (_slave_lock);
 		_slaves.insert (lv2);
@@ -1781,9 +1781,9 @@ LV2Plugin::add_slave (boost::shared_ptr<Plugin> p, bool)
 }
 
 void
-LV2Plugin::remove_slave (boost::shared_ptr<Plugin> p)
+LV2Plugin::remove_slave (std::shared_ptr<Plugin> p)
 {
-	boost::shared_ptr<LV2Plugin> lv2 = boost::dynamic_pointer_cast<LV2Plugin> (p);
+	std::shared_ptr<LV2Plugin> lv2 = std::dynamic_pointer_cast<LV2Plugin> (p);
 	if (lv2) {
 		Glib::Threads::Mutex::Lock lm (_slave_lock);
 		_slaves.erase (lv2);
@@ -2562,7 +2562,7 @@ LV2Plugin::automatable() const
 }
 
 void
-LV2Plugin::set_automation_control (uint32_t i, boost::shared_ptr<AutomationControl> c)
+LV2Plugin::set_automation_control (uint32_t i, std::shared_ptr<AutomationControl> c)
 {
 	if ((_port_flags[i] & (PORT_CTRLED | PORT_CTRLER))) {
 		DEBUG_TRACE(DEBUG::LV2Automate, string_compose ("Ctrl Port %1\n", i));
@@ -3294,18 +3294,18 @@ LV2Plugin::designated_bypass_port ()
 	return UINT32_MAX;
 }
 
-boost::shared_ptr<ScalePoints>
+std::shared_ptr<ScalePoints>
 LV2Plugin::get_scale_points(uint32_t port_index) const
 {
 	const LilvPort*  port   = lilv_plugin_get_port_by_index(_impl->plugin, port_index);
 	LilvScalePoints* points = lilv_port_get_scale_points(_impl->plugin, port);
 
-	boost::shared_ptr<ScalePoints> ret;
+	std::shared_ptr<ScalePoints> ret;
 	if (!points) {
 		return ret;
 	}
 
-	ret = boost::shared_ptr<ScalePoints>(new ScalePoints());
+	ret = std::shared_ptr<ScalePoints>(new ScalePoints());
 
 	LILV_FOREACH(scale_points, i, points) {
 		const LilvScalePoint* p     = lilv_scale_points_get(points, i);

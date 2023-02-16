@@ -38,11 +38,11 @@ using namespace std;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
-BundleEditorMatrix::BundleEditorMatrix (Gtk::Window* parent, Session* session, boost::shared_ptr<Bundle> bundle)
+BundleEditorMatrix::BundleEditorMatrix (Gtk::Window* parent, Session* session, std::shared_ptr<Bundle> bundle)
 	: PortMatrix (parent, session, DataType::NIL)
 	, _bundle (bundle)
 {
-	_port_group = boost::shared_ptr<PortGroup> (new PortGroup (""));
+	_port_group = std::shared_ptr<PortGroup> (new PortGroup (""));
 	_port_group->add_bundle (_bundle);
 
 	setup_all_ports ();
@@ -103,7 +103,7 @@ BundleEditorMatrix::get_state (BundleChannel c[2]) const
 }
 
 bool
-BundleEditorMatrix::can_add_channels (boost::shared_ptr<Bundle> b) const
+BundleEditorMatrix::can_add_channels (std::shared_ptr<Bundle> b) const
 {
 	if (b == _bundle) {
 		return true;
@@ -113,7 +113,7 @@ BundleEditorMatrix::can_add_channels (boost::shared_ptr<Bundle> b) const
 }
 
 bool
-BundleEditorMatrix::can_add_port (boost::shared_ptr<Bundle> b, DataType t) const
+BundleEditorMatrix::can_add_port (std::shared_ptr<Bundle> b, DataType t) const
 {
 #if 1
 	return true; // anything goes
@@ -124,7 +124,7 @@ BundleEditorMatrix::can_add_port (boost::shared_ptr<Bundle> b, DataType t) const
 }
 
 void
-BundleEditorMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
+BundleEditorMatrix::add_channel (std::shared_ptr<Bundle> b, DataType t)
 {
 	if (b == _bundle) {
 
@@ -145,7 +145,7 @@ BundleEditorMatrix::add_channel (boost::shared_ptr<Bundle> b, DataType t)
 }
 
 bool
-BundleEditorMatrix::can_remove_channels (boost::shared_ptr<Bundle> b) const
+BundleEditorMatrix::can_remove_channels (std::shared_ptr<Bundle> b) const
 {
 	if (b != _bundle) {
 		return false;
@@ -161,7 +161,7 @@ BundleEditorMatrix::remove_channel (BundleChannel bc)
 }
 
 bool
-BundleEditorMatrix::can_rename_channels (boost::shared_ptr<Bundle> b) const
+BundleEditorMatrix::can_rename_channels (std::shared_ptr<Bundle> b) const
 {
 	if (b == _bundle) {
 		return true;
@@ -194,7 +194,7 @@ BundleEditorMatrix::disassociation_verb () const
 	return _("Disassociate");
 }
 
-BundleEditor::BundleEditor (Session* session, boost::shared_ptr<UserBundle> bundle)
+BundleEditor::BundleEditor (Session* session, std::shared_ptr<UserBundle> bundle)
 	: ArdourDialog (_("Edit Bundle")), _matrix (this, session, bundle), _bundle (bundle)
 {
 	Gtk::Table* t = new Gtk::Table (3, 2);
@@ -283,7 +283,7 @@ BundleManager::BundleManager (Session* session)
 	_tree_view.append_column (_("Name"), _list_model_columns.name);
 	_tree_view.set_headers_visible (false);
 
-	boost::shared_ptr<BundleList> bundles = _session->bundles ();
+	std::shared_ptr<BundleList> bundles = _session->bundles ();
 	for (BundleList::iterator i = bundles->begin(); i != bundles->end(); ++i) {
 		add_bundle (*i);
 	}
@@ -338,7 +338,7 @@ BundleManager::set_button_sensitivity ()
 void
 BundleManager::new_clicked ()
 {
-	boost::shared_ptr<UserBundle> b (new UserBundle (_("Bundle")));
+	std::shared_ptr<UserBundle> b (new UserBundle (_("Bundle")));
 
 	/* Start off with a single channel */
 	/* XXX: allow user to specify type */
@@ -356,7 +356,7 @@ BundleManager::edit_clicked ()
 {
 	Gtk::TreeModel::iterator i = _tree_view.get_selection()->get_selected();
 	if (i) {
-		boost::shared_ptr<UserBundle> b = (*i)[_list_model_columns.bundle];
+		std::shared_ptr<UserBundle> b = (*i)[_list_model_columns.bundle];
 		BundleEditor e (_session, b);
 		e.run ();
 	}
@@ -367,16 +367,16 @@ BundleManager::delete_clicked ()
 {
 	Gtk::TreeModel::iterator i = _tree_view.get_selection()->get_selected();
 	if (i) {
-		boost::shared_ptr<UserBundle> b = (*i)[_list_model_columns.bundle];
+		std::shared_ptr<UserBundle> b = (*i)[_list_model_columns.bundle];
 		_session->remove_bundle (b);
 		_list_model->erase (i);
 	}
 }
 
 void
-BundleManager::add_bundle (boost::shared_ptr<Bundle> b)
+BundleManager::add_bundle (std::shared_ptr<Bundle> b)
 {
-	boost::shared_ptr<UserBundle> u = boost::dynamic_pointer_cast<UserBundle> (b);
+	std::shared_ptr<UserBundle> u = std::dynamic_pointer_cast<UserBundle> (b);
 	if (u == 0) {
 		return;
 	}
@@ -385,20 +385,20 @@ BundleManager::add_bundle (boost::shared_ptr<Bundle> b)
 	(*i)[_list_model_columns.name] = u->name ();
 	(*i)[_list_model_columns.bundle] = u;
 
-	u->Changed.connect (bundle_connections, invalidator (*this), boost::bind (&BundleManager::bundle_changed, this, _1, boost::weak_ptr<UserBundle> (u)), gui_context());
+	u->Changed.connect (bundle_connections, invalidator (*this), boost::bind (&BundleManager::bundle_changed, this, _1, std::weak_ptr<UserBundle> (u)), gui_context());
 }
 
 void
-BundleManager::bundle_changed (Bundle::Change c, boost::weak_ptr<UserBundle> wb)
+BundleManager::bundle_changed (Bundle::Change c, std::weak_ptr<UserBundle> wb)
 {
-	boost::shared_ptr<UserBundle> b = wb.lock ();
+	std::shared_ptr<UserBundle> b = wb.lock ();
 	if (!b || 0 == (c & Bundle::NameChanged)) {
 		return;
 	}
 
 	Gtk::TreeModel::iterator i = _list_model->children().begin ();
 	while (i != _list_model->children().end()) {
-		boost::shared_ptr<UserBundle> t = (*i)[_list_model_columns.bundle];
+		std::shared_ptr<UserBundle> t = (*i)[_list_model_columns.bundle];
 		if (t == b) {
 			break;
 		}
@@ -418,7 +418,7 @@ BundleManager::row_activated (Gtk::TreeModel::Path const & p, Gtk::TreeViewColum
 		return;
 	}
 
-	boost::shared_ptr<UserBundle> b = (*i)[_list_model_columns.bundle];
+	std::shared_ptr<UserBundle> b = (*i)[_list_model_columns.bundle];
 	BundleEditor e (_session, b);
 	e.run ();
 }
@@ -430,7 +430,7 @@ NameChannelDialog::NameChannelDialog ()
 	setup ();
 }
 
-NameChannelDialog::NameChannelDialog (boost::shared_ptr<Bundle> b, uint32_t c)
+NameChannelDialog::NameChannelDialog (std::shared_ptr<Bundle> b, uint32_t c)
 	: ArdourDialog (_("Rename Channel")),
 	  _bundle (b),
 	  _adding (false)

@@ -101,7 +101,7 @@ public:
 	Temporal::TimeDomain time_domain() const { return _time_domain; }
 	void set_time_domain (Temporal::TimeDomain td);
 
-	virtual boost::shared_ptr<ControlList> create(const Parameter& id, const ParameterDescriptor& desc, Temporal::TimeDomain);
+	virtual std::shared_ptr<ControlList> create(const Parameter& id, const ParameterDescriptor& desc, Temporal::TimeDomain);
 
 	void dump (std::ostream&);
 
@@ -201,8 +201,8 @@ public:
 	 */
 	void thin (double thinning_factor);
 
-	boost::shared_ptr<ControlList> cut (Temporal::timepos_t const &, Temporal::timepos_t const &);
-	boost::shared_ptr<ControlList> copy (Temporal::timepos_t const &, Temporal::timepos_t const &);
+	std::shared_ptr<ControlList> cut (Temporal::timepos_t const &, Temporal::timepos_t const &);
+	std::shared_ptr<ControlList> copy (Temporal::timepos_t const &, Temporal::timepos_t const &);
 
 	/** Remove all events in the given time range from this list.
 	 *
@@ -371,7 +371,7 @@ public:
 
 	void build_search_cache_if_necessary (Temporal::timepos_t const & start) const;
 
-	boost::shared_ptr<ControlList> cut_copy_clear (Temporal::timepos_t const &, Temporal::timepos_t const &, int op);
+	std::shared_ptr<ControlList> cut_copy_clear (Temporal::timepos_t const &, Temporal::timepos_t const &, int op);
 	bool erase_range_internal (Temporal::timepos_t const & start, Temporal::timepos_t const & end, EventList &);
 
 	void     maybe_add_insert_guard (Temporal::timepos_t const & when);

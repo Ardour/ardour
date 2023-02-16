@@ -410,7 +410,7 @@ MidiPort::add_shadow_port (string const & name, MidiFilter mf)
 
 	_shadow_midi_filter = mf;
 
-	if (!(_shadow_port = boost::dynamic_pointer_cast<MidiPort> (AudioEngine::instance()->register_output_port (DataType::MIDI, name, false, PortFlags (Shadow|IsTerminal))))) {
+	if (!(_shadow_port = std::dynamic_pointer_cast<MidiPort> (AudioEngine::instance()->register_output_port (DataType::MIDI, name, false, PortFlags (Shadow|IsTerminal))))) {
 		return -3;
 	}
 

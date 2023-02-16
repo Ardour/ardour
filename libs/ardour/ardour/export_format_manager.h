@@ -62,8 +62,8 @@ class LIBARDOUR_API ExportFormatManager : public PBD::ScopedConnectionList
 			quality (quality) { set_name (name); }
 		ExportFormatBase::Quality  quality;
 	};
-	typedef boost::shared_ptr<QualityState> QualityPtr;
-	typedef boost::weak_ptr<QualityState> WeakQualityPtr;
+	typedef std::shared_ptr<QualityState> QualityPtr;
+	typedef std::weak_ptr<QualityState> WeakQualityPtr;
 	typedef std::list<QualityPtr> QualityList;
 
 	/* Sample rate states */
@@ -74,8 +74,8 @@ class LIBARDOUR_API ExportFormatManager : public PBD::ScopedConnectionList
 			: rate (rate) { set_name (name); }
 		ExportFormatBase::SampleRate  rate;
 	};
-	typedef boost::shared_ptr<SampleRateState> SampleRatePtr;
-	typedef boost::weak_ptr<SampleRateState> WeakSampleRatePtr;
+	typedef std::shared_ptr<SampleRateState> SampleRatePtr;
+	typedef std::weak_ptr<SampleRateState> WeakSampleRatePtr;
 	typedef std::list<SampleRatePtr> SampleRateList;
 
   public:

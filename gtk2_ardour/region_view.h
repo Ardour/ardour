@@ -56,13 +56,13 @@ class RegionView : public TimeAxisViewItem
 public:
 	RegionView (ArdourCanvas::Container*          parent,
 	            TimeAxisView&                     time_view,
-	            const boost::shared_ptr<ARDOUR::Region>& region,
+	            const std::shared_ptr<ARDOUR::Region>& region,
 	            double                            samples_per_pixel,
 	            uint32_t                          base_color,
 	            bool                              automation = false);
 
 	RegionView (const RegionView& other);
-	RegionView (const RegionView& other, const boost::shared_ptr<ARDOUR::Region>& other_region);
+	RegionView (const RegionView& other, const std::shared_ptr<ARDOUR::Region>& other_region);
 
 	~RegionView ();
 
@@ -70,7 +70,7 @@ public:
 
 	virtual void init (bool what_changed);
 
-	boost::shared_ptr<ARDOUR::Region> region() const { return _region; }
+	std::shared_ptr<ARDOUR::Region> region() const { return _region; }
 
 	bool is_valid() const    { return valid; }
 
@@ -164,7 +164,7 @@ protected:
 	 */
 	RegionView (ArdourCanvas::Container *,
 	            TimeAxisView&,
-	            const boost::shared_ptr<ARDOUR::Region>&,
+	            const std::shared_ptr<ARDOUR::Region>&,
 	            double samples_per_pixel,
 	            uint32_t basic_color,
 	            bool recording,
@@ -195,7 +195,7 @@ protected:
 
 	Temporal::timecnt_t region_relative_distance (Temporal::timecnt_t const &, Temporal::TimeDomain desired_time_domain);
 
-	boost::shared_ptr<ARDOUR::Region> _region;
+	std::shared_ptr<ARDOUR::Region> _region;
 
 	ArdourCanvas::Polygon* sync_mark; ///< polygon for sync position
 	ArdourCanvas::Line* sync_line; ///< polygon for sync position

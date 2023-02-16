@@ -119,7 +119,7 @@ private:
 	std::string     _note_list_name;
 };
 
-typedef std::list<boost::shared_ptr<Patch> > PatchNameList;
+typedef std::list<std::shared_ptr<Patch> > PatchNameList;
 
 class LIBMIDIPP_API PatchBank
 {
@@ -151,8 +151,8 @@ class LIBMIDIPP_API ChannelNameSet
 {
 public:
 	typedef std::set<uint8_t>                                    AvailableForChannels;
-	typedef std::list<boost::shared_ptr<PatchBank> >             PatchBanks;
-	typedef std::map<PatchPrimaryKey, boost::shared_ptr<Patch> > PatchMap;
+	typedef std::list<std::shared_ptr<PatchBank> >             PatchBanks;
+	typedef std::map<PatchPrimaryKey, std::shared_ptr<Patch> > PatchMap;
 	typedef std::list<PatchPrimaryKey>                           PatchList;
 
 	ChannelNameSet() {};
@@ -168,11 +168,11 @@ public:
 		return _available_for_channels.find(channel) != _available_for_channels.end();
 	}
 
-	boost::shared_ptr<Patch> find_patch(const PatchPrimaryKey& key) {
+	std::shared_ptr<Patch> find_patch(const PatchPrimaryKey& key) {
 		return _patch_map[key];
 	}
 
-	boost::shared_ptr<Patch> previous_patch(const PatchPrimaryKey& key) {
+	std::shared_ptr<Patch> previous_patch(const PatchPrimaryKey& key) {
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
 			 ++i) {
@@ -184,10 +184,10 @@ public:
 			}
 		}
 
-		return boost::shared_ptr<Patch>();
+		return std::shared_ptr<Patch>();
 	}
 
-	boost::shared_ptr<Patch> next_patch(const PatchPrimaryKey& key) {
+	std::shared_ptr<Patch> next_patch(const PatchPrimaryKey& key) {
 		for (PatchList::const_iterator i = _patch_list.begin();
 			 i != _patch_list.end();
 			 ++i) {
@@ -200,7 +200,7 @@ public:
 			}
 		}
 
-		return boost::shared_ptr<Patch>();
+		return std::shared_ptr<Patch>();
 	}
 
 	const std::string& note_list_name()    const { return _note_list_name; }
@@ -250,7 +250,7 @@ private:
 class LIBMIDIPP_API NoteNameList
 {
 public:
-	typedef std::vector< boost::shared_ptr<Note> > Notes;
+	typedef std::vector< std::shared_ptr<Note> > Notes;
 
 	NoteNameList() { _notes.resize(128); }
 	NoteNameList (const std::string& name) : _name(name) { _notes.resize(128); }
@@ -295,7 +295,7 @@ private:
 class LIBMIDIPP_API ValueNameList
 {
 public:
-	typedef std::map<uint16_t, boost::shared_ptr<Value> > Values;
+	typedef std::map<uint16_t, std::shared_ptr<Value> > Values;
 
 	ValueNameList() {}
 	ValueNameList(const std::string& name) : _name(name) {}
@@ -304,8 +304,8 @@ public:
 
 	void set_name(const std::string& name) { _name = name; }
 
-	boost::shared_ptr<const Value> value(uint16_t num) const;
-	boost::shared_ptr<const Value> max_value_below(uint16_t num) const;
+	std::shared_ptr<const Value> value(uint16_t num) const;
+	std::shared_ptr<const Value> max_value_below(uint16_t num) const;
 
 	const Values& values() const { return _values; }
 
@@ -334,7 +334,7 @@ public:
 	const std::string& name()   const { return _name; }
 
 	const std::string&                     value_name_list_name() const { return _value_name_list_name; }
-	boost::shared_ptr<const ValueNameList> value_name_list()      const { return _value_name_list; }
+	std::shared_ptr<const ValueNameList> value_name_list()      const { return _value_name_list; }
 
 	void set_type(const std::string& type) { _type = type; }
 	void set_number(uint16_t number)       { _number = number; }
@@ -349,13 +349,13 @@ private:
 	std::string _name;
 
 	std::string                      _value_name_list_name;  ///< Global, UsesValueNameList
-	boost::shared_ptr<ValueNameList> _value_name_list;       ///< Local, ValueNameList
+	std::shared_ptr<ValueNameList> _value_name_list;       ///< Local, ValueNameList
 };
 
 class LIBMIDIPP_API ControlNameList
 {
 public:
-	typedef std::map<uint16_t, boost::shared_ptr<Control> > Controls;
+	typedef std::map<uint16_t, std::shared_ptr<Control> > Controls;
 
 	ControlNameList() {}
 	ControlNameList(const std::string& name) : _name(name) {}
@@ -364,7 +364,7 @@ public:
 
 	void set_name(const std::string& name) { _name = name; }
 
-	boost::shared_ptr<const Control> control(uint16_t num) const;
+	std::shared_ptr<const Control> control(uint16_t num) const;
 
 	const Controls& controls() const { return _controls; }
 
@@ -407,13 +407,13 @@ class LIBMIDIPP_API MasterDeviceNames
 public:
 	typedef std::set<std::string>                                       Models;
 	/// maps name to CustomDeviceMode
-	typedef std::map<std::string, boost::shared_ptr<CustomDeviceMode> > CustomDeviceModes;
+	typedef std::map<std::string, std::shared_ptr<CustomDeviceMode> > CustomDeviceModes;
 	typedef std::list<std::string>                                      CustomDeviceModeNames;
 	/// maps name to ChannelNameSet
-	typedef std::map<std::string, boost::shared_ptr<ChannelNameSet> >   ChannelNameSets;
-	typedef std::map<std::string, boost::shared_ptr<NoteNameList> >     NoteNameLists;
-	typedef std::map<std::string, boost::shared_ptr<ControlNameList> >  ControlNameLists;
-	typedef std::map<std::string, boost::shared_ptr<ValueNameList> >    ValueNameLists;
+	typedef std::map<std::string, std::shared_ptr<ChannelNameSet> >   ChannelNameSets;
+	typedef std::map<std::string, std::shared_ptr<NoteNameList> >     NoteNameLists;
+	typedef std::map<std::string, std::shared_ptr<ControlNameList> >  ControlNameLists;
+	typedef std::map<std::string, std::shared_ptr<ValueNameList> >    ValueNameLists;
 	typedef std::map<std::string, PatchNameList>                        PatchNameLists;
 
 	MasterDeviceNames() {};
@@ -428,21 +428,21 @@ public:
 	const ControlNameLists& controls() const { return _control_name_lists; }
 	const ValueNameLists&   values()   const { return _value_name_lists; }
 
-	boost::shared_ptr<const ValueNameList> value_name_list_by_control(
+	std::shared_ptr<const ValueNameList> value_name_list_by_control(
 		const std::string& mode,
 		uint8_t            channel,
 		uint8_t            number);
 
 	const CustomDeviceModeNames& custom_device_mode_names() const { return _custom_device_mode_names; }
 
-	boost::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(const std::string& mode_name);
-	boost::shared_ptr<ChannelNameSet> channel_name_set_by_channel(const std::string& mode, uint8_t channel);
-	boost::shared_ptr<Patch> find_patch(const std::string& mode, uint8_t channel, const PatchPrimaryKey& key);
+	std::shared_ptr<CustomDeviceMode> custom_device_mode_by_name(const std::string& mode_name);
+	std::shared_ptr<ChannelNameSet> channel_name_set_by_channel(const std::string& mode, uint8_t channel);
+	std::shared_ptr<Patch> find_patch(const std::string& mode, uint8_t channel, const PatchPrimaryKey& key);
 
-	boost::shared_ptr<ControlNameList> control_name_list(const std::string& name);
-	boost::shared_ptr<ValueNameList>   value_name_list(const std::string& name);
-	boost::shared_ptr<NoteNameList>    note_name_list(const std::string& name);
-	boost::shared_ptr<ChannelNameSet>  channel_name_set(const std::string& name);
+	std::shared_ptr<ControlNameList> control_name_list(const std::string& name);
+	std::shared_ptr<ValueNameList>   value_name_list(const std::string& name);
+	std::shared_ptr<NoteNameList>    note_name_list(const std::string& name);
+	std::shared_ptr<ChannelNameSet>  channel_name_set(const std::string& name);
 
 	std::string note_name(const std::string& mode_name,
 	                      uint8_t            channel,
@@ -469,7 +469,7 @@ class LIBMIDIPP_API MIDINameDocument
 {
 public:
 	// Maps Model names to MasterDeviceNames
-	typedef std::map<std::string, boost::shared_ptr<MasterDeviceNames> > MasterDeviceNamesList;
+	typedef std::map<std::string, std::shared_ptr<MasterDeviceNames> > MasterDeviceNamesList;
 
 	MIDINameDocument() {}
 	MIDINameDocument(const std::string& file_path);
@@ -481,7 +481,7 @@ public:
 	void set_author(const std::string& author) { _author = author; }
 	void set_file_path(const std::string& file_path) { _file_path = file_path; }
 
-	boost::shared_ptr<MasterDeviceNames> master_device_names(const std::string& model);
+	std::shared_ptr<MasterDeviceNames> master_device_names(const std::string& model);
 
 	const MasterDeviceNamesList& master_device_names_by_model() const { return _master_device_names_list; }
 

@@ -79,8 +79,8 @@ CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
 	/* fetch the current selection so that we can get the most recently selected */
 	StripableAutomationControls selected;
 	get_stripables (selected);
-	boost::shared_ptr<Stripable> last_selected =
-	  selected.empty () ? boost::shared_ptr<Stripable> ()
+	std::shared_ptr<Stripable> last_selected =
+	  selected.empty () ? std::shared_ptr<Stripable> ()
 	                    : selected.back ().stripable;
 
 	/* Get all stripables and sort into the appropriate ordering */
@@ -92,7 +92,7 @@ CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
 	/* Check for a possible selection-affecting route group */
 
 	RouteGroup* group = 0;
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (last_selected);
+	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (last_selected);
 
 	if (r && r->route_group() && r->route_group()->is_select() && r->route_group()->is_active()) {
 		group = r->route_group();
@@ -122,7 +122,7 @@ CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
 
 	for (IterTypeCore s = (stripables.*begin_method)(); s != (stripables.*end_method)(); ++s) {
 
-		r = boost::dynamic_pointer_cast<Route> (*s);
+		r = std::dynamic_pointer_cast<Route> (*s);
 
 		/* monitor is never selectable anywhere. for now, anyway */
 
@@ -148,9 +148,9 @@ CoreSelection::select_prev_stripable (bool mixer_order, bool routes_only)
 
 
 bool
-CoreSelection::select_stripable_and_maybe_group (boost::shared_ptr<Stripable> s, bool with_group, bool routes_only, RouteGroup* not_allowed_in_group)
+CoreSelection::select_stripable_and_maybe_group (std::shared_ptr<Stripable> s, bool with_group, bool routes_only, RouteGroup* not_allowed_in_group)
 {
-	boost::shared_ptr<Route> r;
+	std::shared_ptr<Route> r;
 	StripableList sl;
 
 	/* no selection of hidden stripables (though they can be selected and
@@ -167,7 +167,7 @@ CoreSelection::select_stripable_and_maybe_group (boost::shared_ptr<Stripable> s,
 		return false;
 	}
 
-	if ((r = boost::dynamic_pointer_cast<Route> (s))) {
+	if ((r = std::dynamic_pointer_cast<Route> (s))) {
 
 		/* no selection of inactive routes, though they can be selected
 		 * and made inactive.
@@ -182,7 +182,7 @@ CoreSelection::select_stripable_and_maybe_group (boost::shared_ptr<Stripable> s,
 			if (!not_allowed_in_group || !r->route_group() || r->route_group() != not_allowed_in_group) {
 
 				if (r->route_group() && r->route_group()->is_select() && r->route_group()->is_active()) {
-					boost::shared_ptr<RouteList> rl = r->route_group()->route_list ();
+					std::shared_ptr<RouteList> rl = r->route_group()->route_list ();
 					for (RouteList::iterator ri = rl->begin(); ri != rl->end(); ++ri) {
 						if (*ri != r) {
 							sl.push_back (*ri);
@@ -200,12 +200,12 @@ CoreSelection::select_stripable_and_maybe_group (boost::shared_ptr<Stripable> s,
 			}
 
 		} else {
-			set (s, boost::shared_ptr<AutomationControl>());
+			set (s, std::shared_ptr<AutomationControl>());
 			return true;
 		}
 
 	} else if (!routes_only) {
-		set (s, boost::shared_ptr<AutomationControl>());
+		set (s, std::shared_ptr<AutomationControl>());
 		return true;
 	}
 
@@ -213,7 +213,7 @@ CoreSelection::select_stripable_and_maybe_group (boost::shared_ptr<Stripable> s,
 }
 
 void
-CoreSelection::toggle (boost::shared_ptr<Stripable> s, boost::shared_ptr<AutomationControl> c)
+CoreSelection::toggle (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c)
 {
 	DEBUG_TRACE (DEBUG::Selection, string_compose ("toggle: s %1 selected %2 c %3 selected %4\n",
 	                                               s, selected (s), c, selected (c)));
@@ -228,9 +228,9 @@ void
 CoreSelection::set (StripableList& sl)
 {
 	bool send = false;
-	boost::shared_ptr<AutomationControl> no_control;
+	std::shared_ptr<AutomationControl> no_control;
 
-	std::vector<boost::shared_ptr<Stripable> > removed;
+	std::vector<std::shared_ptr<Stripable> > removed;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -238,7 +238,7 @@ CoreSelection::set (StripableList& sl)
 		removed.reserve (_stripables.size());
 
 		for (SelectedStripables::const_iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
-			boost::shared_ptr<Stripable> sp = session.stripable_by_id ((*x).stripable);
+			std::shared_ptr<Stripable> sp = session.stripable_by_id ((*x).stripable);
 			if (sp) {
 				removed.push_back (sp);
 			}
@@ -275,7 +275,7 @@ CoreSelection::set (StripableList& sl)
 
 		PropertyChange pc (Properties::selected);
 
-		for (std::vector<boost::shared_ptr<Stripable> >::iterator s = removed.begin(); s != removed.end(); ++s) {
+		for (std::vector<std::shared_ptr<Stripable> >::iterator s = removed.begin(); s != removed.end(); ++s) {
 			(*s)->presentation_info().PropertyChanged (pc);
 		}
 
@@ -288,7 +288,7 @@ CoreSelection::set (StripableList& sl)
 }
 
 void
-CoreSelection::add (boost::shared_ptr<Stripable> s, boost::shared_ptr<AutomationControl> c)
+CoreSelection::add (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c)
 {
 	bool send = false;
 
@@ -319,7 +319,7 @@ CoreSelection::add (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automation
 }
 
 void
-CoreSelection::remove (boost::shared_ptr<Stripable> s, boost::shared_ptr<AutomationControl> c)
+CoreSelection::remove (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c)
 {
 	bool send = false;
 	{
@@ -352,7 +352,7 @@ CoreSelection::remove (boost::shared_ptr<Stripable> s, boost::shared_ptr<Automat
 }
 
 void
-CoreSelection::set (boost::shared_ptr<Stripable> s, boost::shared_ptr<AutomationControl> c)
+CoreSelection::set (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -384,7 +384,7 @@ void
 CoreSelection::clear_stripables ()
 {
 	bool send = false;
-	std::vector<boost::shared_ptr<Stripable> > s;
+	std::vector<std::shared_ptr<Stripable> > s;
 
 	DEBUG_TRACE (DEBUG::Selection, "clearing s/c selection\n");
 	{
@@ -395,7 +395,7 @@ CoreSelection::clear_stripables ()
 			s.reserve (_stripables.size());
 
 			for (SelectedStripables::const_iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
-				boost::shared_ptr<Stripable> sp = session.stripable_by_id ((*x).stripable);
+				std::shared_ptr<Stripable> sp = session.stripable_by_id ((*x).stripable);
 				if (sp) {
 					s.push_back (sp);
 				}
@@ -415,14 +415,14 @@ CoreSelection::clear_stripables ()
 
 		PropertyChange pc (Properties::selected);
 
-		for (std::vector<boost::shared_ptr<Stripable> >::iterator ss = s.begin(); ss != s.end(); ++ss) {
+		for (std::vector<std::shared_ptr<Stripable> >::iterator ss = s.begin(); ss != s.end(); ++ss) {
 			(*ss)->presentation_info().PropertyChanged (pc);
 		}
 
 	}
 }
 
-boost::shared_ptr<Stripable>
+std::shared_ptr<Stripable>
 CoreSelection::first_selected_stripable () const
 {
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
@@ -430,7 +430,7 @@ CoreSelection::first_selected_stripable () const
 }
 
 bool
-CoreSelection::selected (boost::shared_ptr<const Stripable> s) const
+CoreSelection::selected (std::shared_ptr<const Stripable> s) const
 {
 	if (!s) {
 		return false;
@@ -458,7 +458,7 @@ CoreSelection::selected (boost::shared_ptr<const Stripable> s) const
 }
 
 bool
-CoreSelection::selected (boost::shared_ptr<const AutomationControl> c) const
+CoreSelection::selected (std::shared_ptr<const AutomationControl> c) const
 {
 	if (!c) {
 		return false;
@@ -475,7 +475,7 @@ CoreSelection::selected (boost::shared_ptr<const AutomationControl> c) const
 	return false;
 }
 
-CoreSelection::SelectedStripable::SelectedStripable (boost::shared_ptr<Stripable> s, boost::shared_ptr<AutomationControl> c, int o)
+CoreSelection::SelectedStripable::SelectedStripable (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c, int o)
 	: stripable (s ? s->id() : PBD::ID (0))
 	, controllable (c ? c->id() : PBD::ID (0))
 	, order (o)
@@ -495,8 +495,8 @@ CoreSelection::get_stripables (StripableAutomationControls& sc) const
 
 	for (SelectedStripables::const_iterator x = _stripables.begin(); x != _stripables.end(); ++x) {
 
-		boost::shared_ptr<Stripable> s = session.stripable_by_id ((*x).stripable);
-		boost::shared_ptr<AutomationControl> c;
+		std::shared_ptr<Stripable> s = session.stripable_by_id ((*x).stripable);
+		std::shared_ptr<AutomationControl> c;
 
 		if (!s) {
 			/* some global automation control, not owned by a Stripable */

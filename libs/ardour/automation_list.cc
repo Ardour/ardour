@@ -144,12 +144,12 @@ AutomationList::~AutomationList()
 	delete _before;
 }
 
-boost::shared_ptr<Evoral::ControlList>
+std::shared_ptr<Evoral::ControlList>
 AutomationList::create(const Evoral::Parameter&           id,
                        const Evoral::ParameterDescriptor& desc,
                        Temporal::TimeDomain time_domain)
 {
-	return boost::shared_ptr<Evoral::ControlList>(new AutomationList(id, desc, time_domain));
+	return std::shared_ptr<Evoral::ControlList>(new AutomationList(id, desc, time_domain));
 }
 
 void
@@ -560,7 +560,7 @@ AutomationListProperty::clone () const
 {
 	return new AutomationListProperty (
 		this->property_id(),
-		boost::shared_ptr<AutomationList> (new AutomationList (*this->_old.get())),
-		boost::shared_ptr<AutomationList> (new AutomationList (*this->_current.get()))
+		std::shared_ptr<AutomationList> (new AutomationList (*this->_old.get())),
+		std::shared_ptr<AutomationList> (new AutomationList (*this->_current.get()))
 		);
 }

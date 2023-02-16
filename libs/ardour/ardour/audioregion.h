@@ -49,11 +49,11 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> fade_in_active;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> fade_out_active;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float> scale_amplitude;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_in;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_in;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > fade_out;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > inverse_fade_out;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<boost::shared_ptr<AutomationList> > envelope;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<std::shared_ptr<AutomationList> > fade_in;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<std::shared_ptr<AutomationList> > inverse_fade_in;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<std::shared_ptr<AutomationList> > fade_out;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<std::shared_ptr<AutomationList> > inverse_fade_out;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<std::shared_ptr<AutomationList> > envelope;
 }
 
 class Playlist;
@@ -69,13 +69,13 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 
 	~AudioRegion();
 
-	void copy_settings (boost::shared_ptr<const AudioRegion>);
+	void copy_settings (std::shared_ptr<const AudioRegion>);
 
-	bool source_equivalent (boost::shared_ptr<const Region>) const;
+	bool source_equivalent (std::shared_ptr<const Region>) const;
 
 	bool speed_mismatch (float) const;
 
-	boost::shared_ptr<AudioSource> audio_source (uint32_t n=0) const;
+	std::shared_ptr<AudioSource> audio_source (uint32_t n=0) const;
 
 	void   set_scale_amplitude (gain_t);
 	gain_t scale_amplitude() const { return _scale_amplitude; }
@@ -98,11 +98,11 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	bool fade_in_active ()  const { return _fade_in_active; }
 	bool fade_out_active () const { return _fade_out_active; }
 
-	boost::shared_ptr<AutomationList> fade_in()  { return _fade_in.val (); }
-	boost::shared_ptr<AutomationList> inverse_fade_in()  { return _inverse_fade_in.val (); }
-	boost::shared_ptr<AutomationList> fade_out() { return _fade_out.val (); }
-	boost::shared_ptr<AutomationList> inverse_fade_out()  { return _inverse_fade_out.val (); }
-	boost::shared_ptr<AutomationList> envelope() { return _envelope.val (); }
+	std::shared_ptr<AutomationList> fade_in()  { return _fade_in.val (); }
+	std::shared_ptr<AutomationList> inverse_fade_in()  { return _inverse_fade_in.val (); }
+	std::shared_ptr<AutomationList> fade_out() { return _fade_out.val (); }
+	std::shared_ptr<AutomationList> inverse_fade_out()  { return _inverse_fade_out.val (); }
+	std::shared_ptr<AutomationList> envelope() { return _envelope.val (); }
 
 	Temporal::Range body_range () const;
 
@@ -140,13 +140,13 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	void set_fade_in_shape (FadeShape);
 	void set_fade_in_length (samplecnt_t);
 	void set_fade_in (FadeShape, samplecnt_t);
-	void set_fade_in (boost::shared_ptr<AutomationList>);
+	void set_fade_in (std::shared_ptr<AutomationList>);
 
 	void set_fade_out_active (bool yn);
 	void set_fade_out_shape (FadeShape);
 	void set_fade_out_length (samplecnt_t);
 	void set_fade_out (FadeShape, samplecnt_t);
-	void set_fade_out (boost::shared_ptr<AutomationList>);
+	void set_fade_out (std::shared_ptr<AutomationList>);
 
 	void set_default_fade_in ();
 	void set_default_fade_out ();
@@ -156,16 +156,16 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	void set_envelope_active (bool yn);
 	void set_default_envelope ();
 
-	int separate_by_channel (std::vector<boost::shared_ptr<Region> >&) const;
+	int separate_by_channel (std::vector<std::shared_ptr<Region> >&) const;
 
 	/* automation */
 
-	boost::shared_ptr<Evoral::Control>
+	std::shared_ptr<Evoral::Control>
 	control(const Evoral::Parameter& id, bool create=false) {
 		return _automatable.control(id, create);
 	}
 
-	virtual boost::shared_ptr<const Evoral::Control>
+	virtual std::shared_ptr<const Evoral::Control>
 	control(const Evoral::Parameter& id) const {
 		return _automatable.control(id);
 	}
@@ -193,11 +193,11 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
   private:
 	friend class RegionFactory;
 
-	AudioRegion (boost::shared_ptr<AudioSource>);
+	AudioRegion (std::shared_ptr<AudioSource>);
 	AudioRegion (const SourceList &);
-	AudioRegion (boost::shared_ptr<const AudioRegion>);
-	AudioRegion (boost::shared_ptr<const AudioRegion>, timecnt_t const & offset);
-	AudioRegion (boost::shared_ptr<const AudioRegion>, const SourceList&);
+	AudioRegion (std::shared_ptr<const AudioRegion>);
+	AudioRegion (std::shared_ptr<const AudioRegion>, timecnt_t const & offset);
+	AudioRegion (std::shared_ptr<const AudioRegion>, const SourceList&);
 	AudioRegion (SourceList &);
 
   private:
@@ -246,7 +246,7 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	uint32_t               _fade_in_suspended;
 	uint32_t               _fade_out_suspended;
 
-	boost::shared_ptr<ARDOUR::Region> get_single_other_xfade_region (bool start) const;
+	std::shared_ptr<ARDOUR::Region> get_single_other_xfade_region (bool start) const;
 
   protected:
 	/* default constructor for derived (compound) types */

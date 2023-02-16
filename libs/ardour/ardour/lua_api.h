@@ -61,13 +61,13 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param r Route to add Send to
 	 * @param p add send before given processor (or \ref nil_processor to add at the end)
 	 */
-	boost::shared_ptr<Processor> new_send (Session* s, boost::shared_ptr<ARDOUR::Route> r, boost::shared_ptr<ARDOUR::Processor> p);
+	std::shared_ptr<Processor> new_send (Session* s, std::shared_ptr<ARDOUR::Route> r, std::shared_ptr<ARDOUR::Processor> p);
 
 	/** Create a null processor shared pointer
 	 *
 	 * This is useful for Track:bounce() to indicate no processing.
 	 */
-	boost::shared_ptr<ARDOUR::Processor> nil_processor ();
+	std::shared_ptr<ARDOUR::Processor> nil_processor ();
 
 	/** create a new Lua Processor (Plugin)
 	 *
@@ -76,13 +76,13 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param td Time domain (audio or beats) for any automation data
 	 * @returns Processor object (may be nil)
 	 */
-	boost::shared_ptr<ARDOUR::Processor> new_luaproc_with_time_domain (ARDOUR::Session *s, const std::string& p, Temporal::TimeDomain td);
+	std::shared_ptr<ARDOUR::Processor> new_luaproc_with_time_domain (ARDOUR::Session *s, const std::string& p, Temporal::TimeDomain td);
 
 	/* As above but uses default time domain for the session/application */
-	boost::shared_ptr<ARDOUR::Processor> new_luaproc (ARDOUR::Session *s, const std::string& p);
+	std::shared_ptr<ARDOUR::Processor> new_luaproc (ARDOUR::Session *s, const std::string& p);
 
 	/** List all installed plugins */
-	std::list<boost::shared_ptr<ARDOUR::PluginInfo> > list_plugins ();
+	std::list<std::shared_ptr<ARDOUR::PluginInfo> > list_plugins ();
 
 	/** Write a list of untagged plugins to a file, so we can bulk-tag them 
 	 * @returns path to XML file or empty string on error
@@ -95,7 +95,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param type Plugin Type
 	 * @returns PluginInfo or nil if not found
 	 */
-	boost::shared_ptr<ARDOUR::PluginInfo> new_plugin_info (const std::string& id, ARDOUR::PluginType type);
+	std::shared_ptr<ARDOUR::PluginInfo> new_plugin_info (const std::string& id, ARDOUR::PluginType type);
 
 	/** create a new Plugin Instance
 	 *
@@ -106,10 +106,10 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param td     Time domain for any automation data
 	 * @returns Processor or nil
 	 */
-	boost::shared_ptr<ARDOUR::Processor> new_plugin_with_time_domain (ARDOUR::Session *s, const std::string& id, ARDOUR::PluginType type, Temporal::TimeDomain td, const std::string& preset = "");
+	std::shared_ptr<ARDOUR::Processor> new_plugin_with_time_domain (ARDOUR::Session *s, const std::string& id, ARDOUR::PluginType type, Temporal::TimeDomain td, const std::string& preset = "");
 
 	/* As above but uses default time domain for the session/application */
-	boost::shared_ptr<ARDOUR::Processor> new_plugin (ARDOUR::Session *s, const std::string& id, ARDOUR::PluginType type, const std::string& preset = "");
+	std::shared_ptr<ARDOUR::Processor> new_plugin (ARDOUR::Session *s, const std::string& id, ARDOUR::PluginType type, const std::string& preset = "");
 
 	/** set a plugin control-input parameter value
 	 *
@@ -118,7 +118,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param value value to set
 	 * @returns true on success, false on error or out-of-bounds value
 	 */
-	bool set_processor_param (boost::shared_ptr<ARDOUR::Processor> proc, uint32_t which, float value);
+	bool set_processor_param (std::shared_ptr<ARDOUR::Processor> proc, uint32_t which, float value);
 
 	/** get a plugin control parameter value
 	 *
@@ -127,7 +127,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param ok boolean variable contains true or false after call returned. to be checked by caller before using value.
 	 * @returns value
 	 */
-	float get_processor_param (boost::shared_ptr<Processor> proc, uint32_t which, bool &ok);
+	float get_processor_param (std::shared_ptr<Processor> proc, uint32_t which, bool &ok);
 
 	/** reset a processor to its default values (only works for plugins )
 	 *
@@ -136,7 +136,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param proc Plugin-Insert
 	 * @returns true on success, false when the processor is not a plugin
 	 */
-	bool reset_processor_to_default (boost::shared_ptr<Processor> proc);
+	bool reset_processor_to_default (std::shared_ptr<Processor> proc);
 
 	/** set a plugin control-input parameter value
 	 *
@@ -147,7 +147,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param value value to set
 	 * @returns true on success, false on error or out-of-bounds value
 	 */
-	bool set_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, float value);
+	bool set_plugin_insert_param (std::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, float value);
 
 	/** get a plugin control parameter value
 	 *
@@ -156,7 +156,7 @@ namespace ARDOUR { namespace LuaAPI {
 	 * @param ok boolean variable contains true or false after call returned. to be checked by caller before using value.
 	 * @returns value
 	 */
-	float get_plugin_insert_param (boost::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, bool &ok);
+	float get_plugin_insert_param (std::shared_ptr<ARDOUR::PluginInsert> pi, uint32_t which, bool &ok);
 
 	/**
 	 * A convenience function to get a Automation Lists and ParameterDescriptor
@@ -311,7 +311,7 @@ namespace ARDOUR { namespace LuaAPI {
 			 * @param fn lua callback function or nil
 			 * @return 0 on success
 			 */
-			int analyze (boost::shared_ptr<ARDOUR::AudioReadable> r, uint32_t channel, luabridge::LuaRef fn);
+			int analyze (std::shared_ptr<ARDOUR::AudioReadable> r, uint32_t channel, luabridge::LuaRef fn);
 
 			/** call plugin():reset() and clear initialization flag */
 			void reset ();
@@ -358,15 +358,15 @@ namespace ARDOUR { namespace LuaAPI {
 
 	};
 
-	class Rubberband : public AudioReadable , public boost::enable_shared_from_this<Rubberband>
+	class Rubberband : public AudioReadable , public std::enable_shared_from_this<Rubberband>
 	{
 		public:
-			Rubberband (boost::shared_ptr<AudioRegion>, bool percussive);
+			Rubberband (std::shared_ptr<AudioRegion>, bool percussive);
 			~Rubberband ();
 			bool set_strech_and_pitch (double stretch_ratio, double pitch_ratio);
 			bool set_mapping (luabridge::LuaRef tbl);
-			boost::shared_ptr<AudioRegion> process (luabridge::LuaRef cb);
-			boost::shared_ptr<AudioReadable> readable ();
+			std::shared_ptr<AudioRegion> process (luabridge::LuaRef cb);
+			std::shared_ptr<AudioReadable> readable ();
 
 			/* audioreadable API */
 			samplecnt_t readable_length_samples () const { return _read_len; }
@@ -378,16 +378,16 @@ namespace ARDOUR { namespace LuaAPI {
 			bool read_region (bool study);
 			bool retrieve (float**);
 			void cleanup (bool abort);
-			boost::shared_ptr<AudioRegion> finalize ();
+			std::shared_ptr<AudioRegion> finalize ();
 
-			boost::shared_ptr<AudioRegion> _region;
+			std::shared_ptr<AudioRegion> _region;
 
 			uint32_t    _n_channels;
 			samplecnt_t _read_len;
 			samplecnt_t _read_start;
 			samplecnt_t _read_offset;
 
-			std::vector<boost::shared_ptr<AudioSource> > _asrc;
+			std::vector<std::shared_ptr<AudioSource> > _asrc;
 
 			RubberBand::RubberBandStretcher _rbs;
 			std::map<size_t, size_t>        _mapping;
@@ -396,15 +396,15 @@ namespace ARDOUR { namespace LuaAPI {
 			double _pitch_ratio;
 
 			luabridge::LuaRef*            _cb;
-			boost::shared_ptr<Rubberband> _self;
+			std::shared_ptr<Rubberband> _self;
 			static const samplecnt_t      _bufsize;
 	};
 
-	boost::shared_ptr<Evoral::Note<Temporal::Beats> >
+	std::shared_ptr<Evoral::Note<Temporal::Beats> >
 		new_noteptr (uint8_t, Temporal::Beats, Temporal::Beats, uint8_t, uint8_t);
 
-	std::list<boost::shared_ptr< Evoral::Note<Temporal::Beats> > >
-		note_list (boost::shared_ptr<ARDOUR::MidiModel>);
+	std::list<std::shared_ptr< Evoral::Note<Temporal::Beats> > >
+		note_list (std::shared_ptr<ARDOUR::MidiModel>);
 
 } } /* namespace */
 

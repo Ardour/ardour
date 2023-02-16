@@ -1706,8 +1706,8 @@ Editor::build_track_region_context_menu ()
 	RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (clicked_axisview);
 
 	if (rtv) {
-		boost::shared_ptr<Track> tr;
-		boost::shared_ptr<Playlist> pl;
+		std::shared_ptr<Track> tr;
+		std::shared_ptr<Playlist> pl;
 
 		if ((tr = rtv->track())) {
 			add_region_context_items (edit_items, tr);
@@ -1735,7 +1735,7 @@ Editor::loudness_analyze_region_selection ()
 		if (!arv) {
 			continue;
 		}
-		if (!boost::dynamic_pointer_cast<AudioRegion> (arv->region ())) {
+		if (!std::dynamic_pointer_cast<AudioRegion> (arv->region ())) {
 			continue;
 		}
 		assert (dynamic_cast<RouteTimeAxisView *> (&arv->get_time_axis_view ()));
@@ -1753,7 +1753,7 @@ Editor::loudness_analyze_region_selection ()
 		if (!arv) {
 			continue;
 		}
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (arv->region ());
+		std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (arv->region ());
 		if (!ar) {
 			continue;
 		}
@@ -1778,7 +1778,7 @@ Editor::loudness_analyze_range_selection ()
 	samplecnt_t total_work = 0;
 
 	for (TrackSelection::iterator i = s.tracks.begin (); i != s.tracks.end (); ++i) {
-		boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist> ((*i)->playlist ());
+		std::shared_ptr<AudioPlaylist> pl = std::dynamic_pointer_cast<AudioPlaylist> ((*i)->playlist ());
 		if (!pl) {
 			continue;
 		}
@@ -1798,7 +1798,7 @@ Editor::loudness_analyze_range_selection ()
 	spd.show();
 
 	for (TrackSelection::iterator i = s.tracks.begin (); i != s.tracks.end (); ++i) {
-		boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist> ((*i)->playlist ());
+		std::shared_ptr<AudioPlaylist> pl = std::dynamic_pointer_cast<AudioPlaylist> ((*i)->playlist ());
 		if (!pl) {
 			continue;
 		}
@@ -1866,7 +1866,7 @@ Editor::build_track_selection_context_menu ()
 }
 
 void
-Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, boost::shared_ptr<Track> track)
+Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, std::shared_ptr<Track> track)
 {
 	using namespace Menu_Helpers;
 
@@ -4469,7 +4469,7 @@ Editor::get_nudge_distance (timepos_t const & pos, timecnt_t& next)
 }
 
 int
-Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
+Editor::playlist_deletion_dialog (std::shared_ptr<Playlist> pl)
 {
 	ArdourDialog dialog (_("Playlist Deletion"));
 	Label  label (string_compose (_("Playlist %1 is currently unused.\n"
@@ -4520,7 +4520,7 @@ Editor::playlist_deletion_dialog (boost::shared_ptr<Playlist> pl)
 }
 
 int
-Editor::plugin_setup (boost::shared_ptr<Route> r, boost::shared_ptr<PluginInsert> pi, ARDOUR::Route::PluginSetupOptions flags)
+Editor::plugin_setup (std::shared_ptr<Route> r, std::shared_ptr<PluginInsert> pi, ARDOUR::Route::PluginSetupOptions flags)
 {
 	PluginSetupDialog psd (r, pi, flags);
 	int rv = psd.run ();
@@ -4687,20 +4687,20 @@ void
 Editor::clear_grouped_playlists (RouteUI* rui)
 {
 	begin_reversible_command (_("clear playlists"));
-	vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+	vector<std::shared_ptr<ARDOUR::Playlist> > playlists;
 	_session->playlists()->get (playlists);
 	mapover_grouped_routes (sigc::mem_fun (*this, &Editor::mapped_clear_playlist), rui, ARDOUR::Properties::group_select.property_id);
 	commit_reversible_command ();
 }
 
 void
-Editor::mapped_select_playlist_matching (RouteUI& rui, boost::weak_ptr<ARDOUR::Playlist> pl)
+Editor::mapped_select_playlist_matching (RouteUI& rui, std::weak_ptr<ARDOUR::Playlist> pl)
 {
 	rui.select_playlist_matching (pl);
 }
 
 void
-Editor::mapped_use_new_playlist (RouteUI& rui, std::string name, string gid, bool copy, vector<boost::shared_ptr<ARDOUR::Playlist> > const & playlists)
+Editor::mapped_use_new_playlist (RouteUI& rui, std::string name, string gid, bool copy, vector<std::shared_ptr<ARDOUR::Playlist> > const & playlists)
 {
 	rui.use_new_playlist (name, gid, playlists, copy);
 }
@@ -4710,7 +4710,7 @@ Editor::new_playlists_for_all_tracks (bool copy)
 {
 	string name, gid;
 	if (stamp_new_playlist(  copy ?  _("Copy Playlist for ALL Tracks") : _("New Playlist for ALL Tracks"), name,gid,copy)) {
-		vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+		vector<std::shared_ptr<ARDOUR::Playlist> > playlists;
 		_session->playlists()->get (playlists);
 		mapover_all_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
 	}
@@ -4721,7 +4721,7 @@ Editor::new_playlists_for_grouped_tracks (RouteUI* rui, bool copy)
 {
 	string name, gid;
 	if (stamp_new_playlist(  copy ?  _("Copy Playlist for this track/group") : _("New Playlist for this track/group"), name,gid,copy)) {
-		vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+		vector<std::shared_ptr<ARDOUR::Playlist> > playlists;
 		_session->playlists()->get (playlists);
 		mapover_grouped_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists), rui, ARDOUR::Properties::group_select.property_id);
 	}
@@ -4732,7 +4732,7 @@ Editor::new_playlists_for_selected_tracks (bool copy)
 {
 	string name, gid;
 	if (stamp_new_playlist(  copy ?  _("Copy Playlist for Selected Tracks") : _("New Playlist for Selected Tracks"), name,gid,copy)) {
-		vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+		vector<std::shared_ptr<ARDOUR::Playlist> > playlists;
 		_session->playlists()->get (playlists);
 		mapover_selected_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
 	}
@@ -4743,7 +4743,7 @@ Editor::new_playlists_for_armed_tracks (bool copy)
 {
 	string name, gid;
 	if (stamp_new_playlist( copy ?  _("Copy Playlist for Armed Tracks") : _("New Playlist for Armed Tracks"), name,gid,copy)) {
-		vector<boost::shared_ptr<ARDOUR::Playlist> > playlists;
+		vector<std::shared_ptr<ARDOUR::Playlist> > playlists;
 		_session->playlists()->get (playlists);
 		mapover_armed_routes (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_use_new_playlist), name, gid, copy, playlists));
 	}
@@ -5247,12 +5247,12 @@ Editor::get_regions_at (RegionSelection& rs, timepos_t const & where, const Trac
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*t);
 
 		if (rtv) {
-			boost::shared_ptr<Track> tr;
-			boost::shared_ptr<Playlist> pl;
+			std::shared_ptr<Track> tr;
+			std::shared_ptr<Playlist> pl;
 
 			if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
 
-				boost::shared_ptr<RegionList> regions = pl->regions_at (where);
+				std::shared_ptr<RegionList> regions = pl->regions_at (where);
 
 				for (RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 					RegionView* rv = rtv->view()->find_view (*i);
@@ -5279,12 +5279,12 @@ Editor::get_regions_after (RegionSelection& rs, timepos_t const & where, const T
 	for (TrackViewList::const_iterator t = tracks->begin(); t != tracks->end(); ++t) {
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(*t);
 		if (rtv) {
-			boost::shared_ptr<Track> tr;
-			boost::shared_ptr<Playlist> pl;
+			std::shared_ptr<Track> tr;
+			std::shared_ptr<Playlist> pl;
 
 			if ((tr = rtv->track()) && ((pl = tr->playlist()))) {
 
-				boost::shared_ptr<RegionList> regions = pl->regions_touched (where, timepos_t::max (where.time_domain()));
+				std::shared_ptr<RegionList> regions = pl->regions_touched (where, timepos_t::max (where.time_domain()));
 
 				for (RegionList::iterator i = regions->begin(); i != regions->end(); ++i) {
 
@@ -5400,9 +5400,9 @@ Editor::get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) cons
 		RouteTimeAxisView* rtav;
 
 		if ((rtav = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
-			boost::shared_ptr<Playlist> pl;
-			std::vector<boost::shared_ptr<Region> > results;
-			boost::shared_ptr<Track> tr;
+			std::shared_ptr<Playlist> pl;
+			std::vector<std::shared_ptr<Region> > results;
+			std::shared_ptr<Track> tr;
 
 			if ((tr = rtav->track()) == 0) {
 				/* bus */
@@ -5410,7 +5410,7 @@ Editor::get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) cons
 			}
 
 			if ((pl = (tr->playlist())) != 0) {
-				boost::shared_ptr<Region> r = pl->region_by_id (id);
+				std::shared_ptr<Region> r = pl->region_by_id (id);
 				if (r) {
 					RegionView* rv = rtav->view()->find_view (r);
 					if (rv) {
@@ -5423,7 +5423,7 @@ Editor::get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) cons
 }
 
 void
-Editor::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > > &selection) const
+Editor::get_per_region_note_selection (list<pair<PBD::ID, set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > > &selection) const
 {
 
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
@@ -5438,7 +5438,7 @@ Editor::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<
 }
 
 void
-Editor::get_regionview_corresponding_to (boost::shared_ptr<Region> region, vector<RegionView*>& regions)
+Editor::get_regionview_corresponding_to (std::shared_ptr<Region> region, vector<RegionView*>& regions)
 {
 	for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 
@@ -5446,9 +5446,9 @@ Editor::get_regionview_corresponding_to (boost::shared_ptr<Region> region, vecto
 
 		if ((tatv = dynamic_cast<RouteTimeAxisView*> (*i)) != 0) {
 
-			boost::shared_ptr<Playlist> pl;
+			std::shared_ptr<Playlist> pl;
 			RegionView* marv;
-			boost::shared_ptr<Track> tr;
+			std::shared_ptr<Track> tr;
 
 			if ((tr = tatv->track()) == 0) {
 				/* bus */
@@ -5463,7 +5463,7 @@ Editor::get_regionview_corresponding_to (boost::shared_ptr<Region> region, vecto
 }
 
 RegionView*
-Editor::regionview_from_region (boost::shared_ptr<Region> region) const
+Editor::regionview_from_region (std::shared_ptr<Region> region) const
 {
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		RouteTimeAxisView* tatv;
@@ -5481,7 +5481,7 @@ Editor::regionview_from_region (boost::shared_ptr<Region> region) const
 }
 
 RouteTimeAxisView*
-Editor::rtav_from_route (boost::shared_ptr<Route> route) const
+Editor::rtav_from_route (std::shared_ptr<Route> route) const
 {
 	for (TrackViewList::const_iterator i = track_views.begin(); i != track_views.end(); ++i) {
 		RouteTimeAxisView* rtav;
@@ -5665,7 +5665,7 @@ Editor::region_view_removed ()
 }
 
 AxisView*
-Editor::axis_view_by_stripable (boost::shared_ptr<Stripable> s) const
+Editor::axis_view_by_stripable (std::shared_ptr<Stripable> s) const
 {
 	for (TrackViewList::const_iterator j = track_views.begin (); j != track_views.end(); ++j) {
 		if ((*j)->stripable() == s) {
@@ -5677,7 +5677,7 @@ Editor::axis_view_by_stripable (boost::shared_ptr<Stripable> s) const
 }
 
 AxisView*
-Editor::axis_view_by_control (boost::shared_ptr<AutomationControl> c) const
+Editor::axis_view_by_control (std::shared_ptr<AutomationControl> c) const
 {
 	for (TrackViewList::const_iterator j = track_views.begin (); j != track_views.end(); ++j) {
 		if ((*j)->control() == c) {
@@ -5697,7 +5697,7 @@ Editor::axis_view_by_control (boost::shared_ptr<AutomationControl> c) const
 }
 
 TrackViewList
-Editor::axis_views_from_routes (boost::shared_ptr<RouteList> r) const
+Editor::axis_views_from_routes (std::shared_ptr<RouteList> r) const
 {
 	TrackViewList t;
 
@@ -5760,7 +5760,7 @@ Editor::add_vcas (VCAList& vlist)
 	StripableList sl;
 
 	for (VCAList::iterator v = vlist.begin(); v != vlist.end(); ++v) {
-		sl.push_back (boost::dynamic_pointer_cast<Stripable> (*v));
+		sl.push_back (std::dynamic_pointer_cast<Stripable> (*v));
 	}
 
 	add_stripables (sl);
@@ -5781,8 +5781,8 @@ Editor::add_routes (RouteList& rlist)
 void
 Editor::add_stripables (StripableList& sl)
 {
-	boost::shared_ptr<VCA> v;
-	boost::shared_ptr<Route> r;
+	std::shared_ptr<VCA> v;
+	std::shared_ptr<Route> r;
 	TrackViewList new_selection;
 	bool changed = false;
 	bool from_scratch = (track_views.size() == 0);
@@ -5797,7 +5797,7 @@ Editor::add_stripables (StripableList& sl)
 			continue;
 		}
 
-		if ((v = boost::dynamic_pointer_cast<VCA> (*s)) != 0) {
+		if ((v = std::dynamic_pointer_cast<VCA> (*s)) != 0) {
 
 			VCATimeAxisView* vtv = new VCATimeAxisView (*this, _session, *_track_canvas);
 			vtv->set_vca (v);
@@ -5806,7 +5806,7 @@ Editor::add_stripables (StripableList& sl)
 			(*s)->gui_changed.connect (*this, invalidator (*this), boost::bind (&Editor::handle_gui_changes, this, _1, _2), gui_context());
 			changed = true;
 
-		} else if ((r = boost::dynamic_pointer_cast<Route> (*s)) != 0) {
+		} else if ((r = std::dynamic_pointer_cast<Route> (*s)) != 0) {
 
 			if (r->is_auditioner() || r->is_monitor()) {
 				continue;
@@ -5900,7 +5900,7 @@ Editor::timeaxisview_deleted (TimeAxisView *tv)
 		return;
 	}
 
-	boost::shared_ptr<Route> route = rtav->route ();
+	std::shared_ptr<Route> route = rtav->route ();
 	if (current_mixer_strip && current_mixer_strip->route() == route) {
 
 		TimeAxisView* next_tv;
@@ -5986,7 +5986,7 @@ Editor::show_track_in_display (TimeAxisView* tv, bool move_into_view)
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (tv);
 		RouteGroup* rg = rtv->route ()->route_group ();
 		if (rg && rg->is_active () && rg->is_hidden () && !rg->is_select ()) {
-			boost::shared_ptr<RouteList> rl (rg->route_list ());
+			std::shared_ptr<RouteList> rl (rg->route_list ());
 			for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
 				(*i)->presentation_info().set_hidden (false);
 			}
@@ -6006,8 +6006,8 @@ struct TrackViewStripableSorter
     StripableTimeAxisView const* stav_b = dynamic_cast<StripableTimeAxisView const*>(tav_b);
     assert (stav_a && stav_b);
 
-    boost::shared_ptr<ARDOUR::Stripable> const& a = stav_a->stripable ();
-    boost::shared_ptr<ARDOUR::Stripable> const& b = stav_b->stripable ();
+    std::shared_ptr<ARDOUR::Stripable> const& a = stav_a->stripable ();
+    std::shared_ptr<ARDOUR::Stripable> const& b = stav_b->stripable ();
     return ARDOUR::Stripable::Sorter () (a, b);
   }
 };
@@ -6105,9 +6105,9 @@ Editor::fit_route_group (RouteGroup *g)
 }
 
 void
-Editor::consider_auditioning (boost::shared_ptr<Region> region)
+Editor::consider_auditioning (std::shared_ptr<Region> region)
 {
-	boost::shared_ptr<AudioRegion> r = boost::dynamic_pointer_cast<AudioRegion> (region);
+	std::shared_ptr<AudioRegion> r = std::dynamic_pointer_cast<AudioRegion> (region);
 
 	if (r == 0) {
 		_session->cancel_audition ();
@@ -6126,13 +6126,13 @@ Editor::consider_auditioning (boost::shared_ptr<Region> region)
 }
 
 void
-Editor::hide_a_region (boost::shared_ptr<Region> r)
+Editor::hide_a_region (std::shared_ptr<Region> r)
 {
 	r->set_hidden (true);
 }
 
 void
-Editor::show_a_region (boost::shared_ptr<Region> r)
+Editor::show_a_region (std::shared_ptr<Region> r)
 {
 	r->set_hidden (false);
 }
@@ -6531,13 +6531,13 @@ Editor::change_region_layering_order (bool from_context_menu)
 		return;
 	}
 
-	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (clicked_routeview->route());
+	std::shared_ptr<Track> track = std::dynamic_pointer_cast<Track> (clicked_routeview->route());
 
 	if (!track) {
 		return;
 	}
 
-	boost::shared_ptr<Playlist> pl = track->playlist();
+	std::shared_ptr<Playlist> pl = track->playlist();
 
 	if (!pl) {
 		return;

@@ -85,7 +85,7 @@ public:
 		ShuttleControl& sc;
 	};
 
-	boost::shared_ptr<ShuttleControllable> controllable () const
+	std::shared_ptr<ShuttleControllable> controllable () const
 	{
 		return _controllable;
 	}
@@ -115,7 +115,7 @@ protected:
 	double                                 shuttle_speed_on_grab;
 	double                                 requested_speed;
 	float                                  shuttle_fract;
-	boost::shared_ptr<ShuttleControllable> _controllable;
+	std::shared_ptr<ShuttleControllable> _controllable;
 	cairo_pattern_t*                       pattern;
 	cairo_pattern_t*                       shine_pattern;
 	PBD::microseconds_t                    last_shuttle_request;

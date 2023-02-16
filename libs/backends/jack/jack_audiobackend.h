@@ -51,7 +51,7 @@ class JackPort : public ProtoPort
 
 class JACKAudioBackend : public AudioBackend {
   public:
-    JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, boost::shared_ptr<JackConnection>);
+    JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, std::shared_ptr<JackConnection>);
     ~JACKAudioBackend ();
 
     /* AUDIOBACKEND API */
@@ -226,7 +226,7 @@ class JACKAudioBackend : public AudioBackend {
     bool speed_and_position (double& sp, samplepos_t& pos);
 
   private:
-    boost::shared_ptr<JackConnection>  _jack_connection;
+    std::shared_ptr<JackConnection>  _jack_connection;
     bool            _running;
     bool            _freewheeling;
     std::map<DataType,size_t> _raw_buffer_sizes;
@@ -307,7 +307,7 @@ class JACKAudioBackend : public AudioBackend {
     */
     void jack_registration_callback (jack_port_id_t, int);
 
-    typedef std::map<std::string,boost::shared_ptr<JackPort> > JackPorts;
+    typedef std::map<std::string,std::shared_ptr<JackPort> > JackPorts;
     mutable SerializedRCUManager<JackPorts> _jack_ports; /* can be modified in ::get_port_by_name () */
 
     void connect_callback (jack_port_id_t, jack_port_id_t, int);

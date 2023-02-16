@@ -482,7 +482,7 @@ VSTPlugin::load_user_preset (PresetRecord r)
 	   non-direct-dispatch thing.
 	*/
 
-	boost::shared_ptr<XMLTree> t (presets_tree ());
+	std::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
 		return false;
 	}
@@ -555,7 +555,7 @@ VSTPlugin::load_user_preset (PresetRecord r)
 string
 VSTPlugin::do_save_preset (string name)
 {
-	boost::shared_ptr<XMLTree> t (presets_tree ());
+	std::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
 		return "";
 	}
@@ -619,7 +619,7 @@ VSTPlugin::do_save_preset (string name)
 void
 VSTPlugin::do_remove_preset (string name)
 {
-	boost::shared_ptr<XMLTree> t (presets_tree ());
+	std::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
 		return;
 	}
@@ -888,7 +888,7 @@ VSTPlugin::find_presets ()
 
 	/* User presets from our XML file */
 
-	boost::shared_ptr<XMLTree> t (presets_tree ());
+	std::shared_ptr<XMLTree> t (presets_tree ());
 
 	if (t) {
 		XMLNode* root = t->root ();

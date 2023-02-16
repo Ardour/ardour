@@ -73,19 +73,19 @@ public:
 
 	void stripable_selection_changed () {}
 
-	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles ();
+	std::list<std::shared_ptr<ARDOUR::Bundle> > bundles ();
 
-	boost::shared_ptr<ARDOUR::Port> input_port () const;
-	boost::shared_ptr<ARDOUR::Port> output_port () const;
+	std::shared_ptr<ARDOUR::Port> input_port () const;
+	std::shared_ptr<ARDOUR::Port> output_port () const;
 
 	void set_feedback_interval (PBD::microseconds_t);
 
 	int set_feedback (bool yn);
 	bool get_feedback () const;
 
-	boost::shared_ptr<PBD::Controllable> lookup_controllable (std::string const &) const;
+	std::shared_ptr<PBD::Controllable> lookup_controllable (std::string const &) const;
 
-	void maybe_start_touch (boost::shared_ptr<PBD::Controllable>);
+	void maybe_start_touch (std::shared_ptr<PBD::Controllable>);
 
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
@@ -136,10 +136,10 @@ public:
 	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
 
 private:
-	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
-	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
-	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
-	boost::shared_ptr<ARDOUR::AsyncMIDIPort> _output_port;
+	std::shared_ptr<ARDOUR::Bundle> _input_bundle;
+	std::shared_ptr<ARDOUR::Bundle> _output_bundle;
+	std::shared_ptr<ARDOUR::AsyncMIDIPort> _input_port;
+	std::shared_ptr<ARDOUR::AsyncMIDIPort> _output_port;
 
 	PBD::microseconds_t _feedback_interval;
 	PBD::microseconds_t last_feedback_time;
@@ -172,8 +172,8 @@ private:
 	mutable Glib::Threads::Mutex controllables_lock;
 	Glib::Threads::Mutex pending_lock;
 
-	bool start_learning (boost::weak_ptr<PBD::Controllable>);
-	void stop_learning (boost::weak_ptr<PBD::Controllable>);
+	bool start_learning (std::weak_ptr<PBD::Controllable>);
+	void stop_learning (std::weak_ptr<PBD::Controllable>);
 
 	void learning_stopped (MIDIControllable*);
 
@@ -189,7 +189,7 @@ private:
 	};
 
 	int connection_state;
-	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
+	bool connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
 	PBD::ScopedConnection _port_connection;
 
 	std::string _current_binding;
@@ -208,7 +208,7 @@ private:
 
 	PBD::ScopedConnectionList midi_connections;
 
-	bool midi_input_handler (Glib::IOCondition ioc, boost::weak_ptr<ARDOUR::AsyncMIDIPort> port);
+	bool midi_input_handler (Glib::IOCondition ioc, std::weak_ptr<ARDOUR::AsyncMIDIPort> port);
 	void start_midi_handling ();
 	void stop_midi_handling ();
 };

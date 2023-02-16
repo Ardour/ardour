@@ -54,7 +54,7 @@ class /*LIBAUDIOGRAPHER_API*/ Interleaver
 			throw Exception (*this, "Channel out of range");
 		}
 
-		return boost::static_pointer_cast<Sink<T> > (inputs[channel]);
+		return std::static_pointer_cast<Sink<T> > (inputs[channel]);
 	}
 
   private:
@@ -140,7 +140,7 @@ class /*LIBAUDIOGRAPHER_API*/ Interleaver
 		return ready_samples * channels;
 	}
 
-	typedef boost::shared_ptr<Input> InputPtr;
+	typedef std::shared_ptr<Input> InputPtr;
 	std::vector<InputPtr> inputs;
 
 	unsigned int channels;

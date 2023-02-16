@@ -35,7 +35,7 @@
 class PluginPresetsUI : public Gtk::Table
 {
 public:
-	PluginPresetsUI (boost::shared_ptr<ARDOUR::PluginInsert>);
+	PluginPresetsUI (std::shared_ptr<ARDOUR::PluginInsert>);
 
 private:
 	void update_preset_list ();
@@ -44,7 +44,7 @@ private:
 	void preset_row_activated (Gtk::TreeModel::Path, Gtk::TreeViewColumn*);
 	void load_preset ();
 
-	boost::shared_ptr<ARDOUR::PluginInsert> _insert;
+	std::shared_ptr<ARDOUR::PluginInsert> _insert;
 	PBD::ScopedConnectionList _preset_connections;
 
 	struct PluginPreset {

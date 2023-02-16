@@ -120,7 +120,7 @@ Transform::Operation::eval(Context& ctx) const
 }
 
 Command*
-Transform::operator()(boost::shared_ptr<MidiModel> model,
+Transform::operator()(std::shared_ptr<MidiModel> model,
                       Temporal::Beats              position,
                       std::vector<Notes>&          seqs)
 {

@@ -51,7 +51,7 @@ class RTTaskList;
 class Session;
 class GraphEdges;
 
-typedef boost::shared_ptr<GraphNode> node_ptr_t;
+typedef std::shared_ptr<GraphNode> node_ptr_t;
 
 typedef std::list<node_ptr_t> node_list_t;
 typedef std::set<node_ptr_t>  node_set_t;
@@ -75,10 +75,10 @@ public:
 	Graph (Session& session);
 
 	/* public API for use by session-process */
-	int process_routes (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
-	int routes_no_roll (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool non_rt_pending);
-	int silence_routes (boost::shared_ptr<GraphChain> chain, pframes_t nframes);
-	int process_io_plugs (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample);
+	int process_routes (std::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler);
+	int routes_no_roll (std::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool non_rt_pending);
+	int silence_routes (std::shared_ptr<GraphChain> chain, pframes_t nframes);
+	int process_io_plugs (std::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample);
 
 	bool     in_process_thread () const;
 	uint32_t n_threads () const;

@@ -45,16 +45,16 @@ class FloatingTextEntry;
 class VCAMasterStrip : public AxisView, public Gtk::EventBox
 {
 public:
-	VCAMasterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::VCA>);
+	VCAMasterStrip (ARDOUR::Session*, std::shared_ptr<ARDOUR::VCA>);
 	~VCAMasterStrip ();
 
-	boost::shared_ptr<ARDOUR::Stripable> stripable() const;
+	std::shared_ptr<ARDOUR::Stripable> stripable() const;
 	ARDOUR::PresentationInfo const & presentation_info () const;
 
 	std::string name() const;
 	Gdk::Color color () const;
 	std::string state_id() const;
-	boost::shared_ptr<ARDOUR::VCA> vca() const { return _vca; }
+	std::shared_ptr<ARDOUR::VCA> vca() const { return _vca; }
 
 	static PBD::Signal1<void,VCAMasterStrip*> CatchDeletion;
 
@@ -62,7 +62,7 @@ public:
 	bool set_marked_for_display (bool);
 
 private:
-	boost::shared_ptr<ARDOUR::VCA> _vca;
+	std::shared_ptr<ARDOUR::VCA> _vca;
 	GainMeter    gain_meter;
 
 	Gtk::Frame                  global_frame;
@@ -82,7 +82,7 @@ private:
 	PBD::ScopedConnectionList   vca_connections;
 
 	void spill ();
-	void spill_change (boost::shared_ptr<ARDOUR::Stripable>);
+	void spill_change (std::shared_ptr<ARDOUR::Stripable>);
 	void hide_clicked();
 	bool width_button_pressed (GdkEventButton *);
 	void set_selected (bool);

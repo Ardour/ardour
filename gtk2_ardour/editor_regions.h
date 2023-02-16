@@ -32,10 +32,10 @@ public:
 	EditorRegions (Editor*);
 
 	void set_selected (RegionSelection&);
-	void selection_mapover (sigc::slot<void, boost::shared_ptr<ARDOUR::Region>>);
+	void selection_mapover (sigc::slot<void, std::shared_ptr<ARDOUR::Region>>);
 	void remove_unused_regions ();
 
-	boost::shared_ptr<ARDOUR::Region> get_single_selection ();
+	std::shared_ptr<ARDOUR::Region> get_single_selection ();
 
 	void unselect_all ()
 	{
@@ -43,7 +43,7 @@ public:
 	}
 
 protected:
-	void regions_changed (boost::shared_ptr<ARDOUR::RegionList>, PBD::PropertyChange const&);
+	void regions_changed (std::shared_ptr<ARDOUR::RegionList>, PBD::PropertyChange const&);
 
 private:
 	void init ();

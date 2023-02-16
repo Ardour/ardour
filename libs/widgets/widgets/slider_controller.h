@@ -42,12 +42,12 @@ namespace ArdourWidgets {
 class LIBWIDGETS_API SliderController : public ArdourWidgets::ArdourFader
 {
 public:
-	SliderController (Gtk::Adjustment* adj, boost::shared_ptr<PBD::Controllable> mc, int orientation, int, int);
+	SliderController (Gtk::Adjustment* adj, std::shared_ptr<PBD::Controllable> mc, int orientation, int, int);
 
 	virtual ~SliderController () {}
 
 	Gtk::SpinButton& get_spin_button () { assert(_ctrl); return _spin; }
-	void set_controllable (boost::shared_ptr<PBD::Controllable> c) { _binding_proxy.set_controllable (c); }
+	void set_controllable (std::shared_ptr<PBD::Controllable> c) { _binding_proxy.set_controllable (c); }
 
 protected:
 	bool on_button_press_event (GdkEventButton *ev);
@@ -57,7 +57,7 @@ protected:
 	void spin_adjusted();
 
 	BindingProxy _binding_proxy;
-	boost::shared_ptr<PBD::Controllable> _ctrl;
+	std::shared_ptr<PBD::Controllable> _ctrl;
 	Gtk::Adjustment *_ctrl_adj;
 	Gtk::Adjustment _spin_adj;
 	Gtk::SpinButton _spin;
@@ -68,13 +68,13 @@ protected:
 class LIBWIDGETS_API VSliderController : public SliderController
 {
 public:
-	VSliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD::Controllable> mc, int, int);
+	VSliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::Controllable> mc, int, int);
 };
 
 class LIBWIDGETS_API HSliderController : public SliderController
 {
 public:
-	HSliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD::Controllable> mc, int, int);
+	HSliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::Controllable> mc, int, int);
 };
 
 }; /* namespace */

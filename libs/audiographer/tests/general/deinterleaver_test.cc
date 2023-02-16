@@ -113,11 +113,11 @@ class DeInterleaverTest : public CppUnit::TestFixture
 
 
   private:
-	boost::shared_ptr<DeInterleaver<float> > deinterleaver;
+	std::shared_ptr<DeInterleaver<float> > deinterleaver;
 
-	boost::shared_ptr<VectorSink<float> > sink_a;
-	boost::shared_ptr<VectorSink<float> > sink_b;
-	boost::shared_ptr<VectorSink<float> > sink_c;
+	std::shared_ptr<VectorSink<float> > sink_a;
+	std::shared_ptr<VectorSink<float> > sink_b;
+	std::shared_ptr<VectorSink<float> > sink_c;
 
 	float * random_data;
 	samplecnt_t samples_per_channel;

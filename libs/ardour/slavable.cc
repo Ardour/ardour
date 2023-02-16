@@ -60,10 +60,10 @@ Slavable::get_state () const
 	return *node;
 }
 
-std::vector<boost::shared_ptr<VCA> >
+std::vector<std::shared_ptr<VCA> >
 Slavable::masters (VCAManager* manager) const
 {
-	std::vector<boost::shared_ptr<VCA> > rv;
+	std::vector<std::shared_ptr<VCA> > rv;
 	Glib::Threads::RWLock::ReaderLock lm (master_lock);
 	for (std::set<uint32_t>::const_iterator i = _masters.begin(); i != _masters.end(); ++i) {
 		rv.push_back (manager->vca_by_number (*i));
@@ -72,13 +72,13 @@ Slavable::masters (VCAManager* manager) const
 }
 
 bool
-Slavable::assigned_to (VCAManager* manager, boost::shared_ptr<VCA> mst) const
+Slavable::assigned_to (VCAManager* manager, std::shared_ptr<VCA> mst) const
 {
 	if (mst.get () == this) {
 		return true;
 	}
-	std::vector<boost::shared_ptr<VCA> > ml = mst->masters (manager);
-	for (std::vector<boost::shared_ptr<VCA> >::const_iterator i = ml.begin (); i != ml.end(); ++i) {
+	std::vector<std::shared_ptr<VCA> > ml = mst->masters (manager);
+	for (std::vector<std::shared_ptr<VCA> >::const_iterator i = ml.begin (); i != ml.end(); ++i) {
 		if (assigned_to (manager, *i)) {
 			return true;
 		}
@@ -111,13 +111,13 @@ Slavable::set_state (XMLNode const& node, int version)
 int
 Slavable::do_assign (VCAManager* manager)
 {
-	std::vector<boost::shared_ptr<VCA> > vcas;
+	std::vector<std::shared_ptr<VCA> > vcas;
 
 	{
 		Glib::Threads::RWLock::ReaderLock lm (master_lock);
 
 		for (std::set<uint32_t>::const_iterator i = _masters.begin(); i != _masters.end(); ++i) {
-			boost::shared_ptr<VCA> v = manager->vca_by_number (*i);
+			std::shared_ptr<VCA> v = manager->vca_by_number (*i);
 			if (v) {
 				vcas.push_back (v);
 			} else {
@@ -130,7 +130,7 @@ Slavable::do_assign (VCAManager* manager)
 
 	if (!vcas.empty()) {
 
-		for (std::vector<boost::shared_ptr<VCA> >::iterator v = vcas.begin(); v != vcas.end(); ++v) {
+		for (std::vector<std::shared_ptr<VCA> >::iterator v = vcas.begin(); v != vcas.end(); ++v) {
 			assign (*v);
 		}
 
@@ -146,7 +146,7 @@ Slavable::do_assign (VCAManager* manager)
 }
 
 void
-Slavable::assign (boost::shared_ptr<VCA> v)
+Slavable::assign (std::shared_ptr<VCA> v)
 {
 	assert (v);
 	{
@@ -156,29 +156,29 @@ Slavable::assign (boost::shared_ptr<VCA> v)
 		}
 
 		/* Do NOT use ::unassign() because it will store a
-		 * boost::shared_ptr<VCA> in the functor, leaving a dangling ref to the
+		 * std::shared_ptr<VCA> in the functor, leaving a dangling ref to the
 		 * VCA.
 		 */
 
 
-		v->Drop.connect_same_thread (unassign_connections, boost::bind (&Slavable::weak_unassign, this, boost::weak_ptr<VCA>(v)));
-		v->DropReferences.connect_same_thread (unassign_connections, boost::bind (&Slavable::weak_unassign, this, boost::weak_ptr<VCA>(v)));
+		v->Drop.connect_same_thread (unassign_connections, boost::bind (&Slavable::weak_unassign, this, std::weak_ptr<VCA>(v)));
+		v->DropReferences.connect_same_thread (unassign_connections, boost::bind (&Slavable::weak_unassign, this, std::weak_ptr<VCA>(v)));
 	}
 
 	AssignmentChange (v, true);
 }
 
 void
-Slavable::weak_unassign (boost::weak_ptr<VCA> v)
+Slavable::weak_unassign (std::weak_ptr<VCA> v)
 {
-	boost::shared_ptr<VCA> sv (v.lock());
+	std::shared_ptr<VCA> sv (v.lock());
 	if (sv) {
 		unassign (sv);
 	}
 }
 
 void
-Slavable::unassign (boost::shared_ptr<VCA> v)
+Slavable::unassign (std::shared_ptr<VCA> v)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (master_lock);
@@ -194,7 +194,7 @@ Slavable::unassign (boost::shared_ptr<VCA> v)
 }
 
 bool
-Slavable::assign_controls (boost::shared_ptr<VCA> vca)
+Slavable::assign_controls (std::shared_ptr<VCA> vca)
 {
 	bool rv = false;
 	SlavableControlList scl = slavables ();
@@ -205,7 +205,7 @@ Slavable::assign_controls (boost::shared_ptr<VCA> vca)
 }
 
 void
-Slavable::unassign_controls (boost::shared_ptr<VCA> vca)
+Slavable::unassign_controls (std::shared_ptr<VCA> vca)
 {
 	SlavableControlList scl = slavables ();
 	for (SlavableControlList::iterator i = scl.begin(); i != scl.end(); ++i) {
@@ -214,9 +214,9 @@ Slavable::unassign_controls (boost::shared_ptr<VCA> vca)
 }
 
 bool
-Slavable::assign_control (boost::shared_ptr<VCA> vca, boost::shared_ptr<SlavableAutomationControl> slave)
+Slavable::assign_control (std::shared_ptr<VCA> vca, std::shared_ptr<SlavableAutomationControl> slave)
 {
-	boost::shared_ptr<AutomationControl> master;
+	std::shared_ptr<AutomationControl> master;
 	master = vca->automation_control (slave->parameter());
 	if (!master) {
 		return false;
@@ -226,13 +226,13 @@ Slavable::assign_control (boost::shared_ptr<VCA> vca, boost::shared_ptr<Slavable
 }
 
 void
-Slavable::unassign_control (boost::shared_ptr<VCA> vca, boost::shared_ptr<SlavableAutomationControl> slave)
+Slavable::unassign_control (std::shared_ptr<VCA> vca, std::shared_ptr<SlavableAutomationControl> slave)
 {
 	if (!vca) {
 		/* unassign from all */
 		slave->clear_masters ();
 	} else {
-		boost::shared_ptr<AutomationControl> master;
+		std::shared_ptr<AutomationControl> master;
 		master = vca->automation_control (slave->parameter());
 		if (master) {
 			slave->remove_master (master);

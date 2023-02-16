@@ -65,7 +65,7 @@ class DummyMidiEvent : public BackendMIDIEvent {
 		uint8_t *_data;
 };
 
-typedef std::vector<boost::shared_ptr<DummyMidiEvent> > DummyMidiBuffer;
+typedef std::vector<std::shared_ptr<DummyMidiEvent> > DummyMidiBuffer;
 
 class DummyPort : public BackendPort {
 	protected:

@@ -63,15 +63,15 @@ public:
 
 	std::string write_source_name () const;
 
-	boost::shared_ptr<AudioFileSource> audio_write_source (uint32_t n = 0) {
-		boost::shared_ptr<ChannelList> c = channels.reader ();
+	std::shared_ptr<AudioFileSource> audio_write_source (uint32_t n = 0) {
+		std::shared_ptr<ChannelList> c = channels.reader ();
 		if (n < c->size ()) {
 			return (*c)[n]->write_source;
 		}
-		return boost::shared_ptr<AudioFileSource> ();
+		return std::shared_ptr<AudioFileSource> ();
 	}
 
-	boost::shared_ptr<SMFSource> midi_write_source () const { return _midi_write_source; }
+	std::shared_ptr<SMFSource> midi_write_source () const { return _midi_write_source; }
 
 	std::string steal_write_source_name ();
 	int use_new_write_source (DataType, uint32_t n = 0);
@@ -84,7 +84,7 @@ public:
 
 	bool configure_io (ChanCount in, ChanCount out);
 
-	std::list<boost::shared_ptr<Source> >& last_capture_sources () { return _last_capture_sources; }
+	std::list<std::shared_ptr<Source> >& last_capture_sources () { return _last_capture_sources; }
 
 	bool record_enabled () const { return g_atomic_int_get (const_cast<GATOMIC_QUAL gint*>(&_record_enabled)); }
 	bool record_safe () const { return g_atomic_int_get (const_cast<GATOMIC_QUAL gint*>(&_record_safe)); }
@@ -112,7 +112,7 @@ public:
 	 *  Parameter is the source that it is destined for.
 	 *  A caller can get a copy of the data with get_gui_feed_buffer ()
 	 */
-	PBD::Signal1<void, boost::weak_ptr<MidiSource> > DataRecorded;
+	PBD::Signal1<void, std::weak_ptr<MidiSource> > DataRecorded;
 
 	PBD::Signal0<void> RecordEnableChanged;
 	PBD::Signal0<void> RecordSafeChanged;
@@ -122,7 +122,7 @@ public:
 
 	void adjust_buffering ();
 
-	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
+	std::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
 protected:
 	friend class Track;
@@ -138,7 +138,7 @@ protected:
 
 	virtual XMLNode& state () const;
 
-	int use_playlist (DataType, boost::shared_ptr<Playlist>);
+	int use_playlist (DataType, std::shared_ptr<Playlist>);
 
 	int do_flush (RunContext context, bool force = false);
 
@@ -147,7 +147,7 @@ protected:
 private:
 	static samplecnt_t _chunk_samples;
 
-	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
+	int add_channel_to (std::shared_ptr<ChannelList>, uint32_t how_many);
 
 	void engage_record_enable ();
 	void disengage_record_enable ();
@@ -162,7 +162,7 @@ private:
 	                             samplecnt_t& rec_offset);
 
 	void check_record_status (samplepos_t transport_sample, double speed, bool can_record);
-	void finish_capture (boost::shared_ptr<ChannelList> c);
+	void finish_capture (std::shared_ptr<ChannelList> c);
 	void reset_capture ();
 
 	void loop (samplepos_t);
@@ -192,10 +192,10 @@ private:
 	GATOMIC_QUAL gint _samples_pending_write;
 	GATOMIC_QUAL gint _num_captured_loops;
 
-	boost::shared_ptr<SMFSource> _midi_write_source;
+	std::shared_ptr<SMFSource> _midi_write_source;
 
-	std::list<boost::shared_ptr<Source> >            _last_capture_sources;
-	std::vector<boost::shared_ptr<AudioFileSource> > capturing_sources;
+	std::list<std::shared_ptr<Source> >            _last_capture_sources;
+	std::vector<std::shared_ptr<AudioFileSource> > capturing_sources;
 
 	/** A buffer that we use to put newly-arrived MIDI data in for
 	 * the GUI to read (so that it can update itself).

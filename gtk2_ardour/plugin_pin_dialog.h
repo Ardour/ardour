@@ -46,7 +46,7 @@
 class PluginPinWidget : public ARDOUR::SessionHandlePtr, public Gtk::VBox
 {
 public:
-	PluginPinWidget (boost::shared_ptr<ARDOUR::PluginInsert>);
+	PluginPinWidget (std::shared_ptr<ARDOUR::PluginInsert>);
 	~PluginPinWidget ();
 	void set_session (ARDOUR::Session *);
 private:
@@ -75,7 +75,7 @@ private:
 		bool sc; // sidechain
 	};
 
-	typedef boost::shared_ptr<_CtrlElem> CtrlElem;
+	typedef std::shared_ptr<_CtrlElem> CtrlElem;
 
 	struct CtrlWidget {
 		CtrlWidget (const std::string& n, CtrlType ct, ARDOUR::DataType dt, uint32_t id, uint32_t ip = 0, uint32_t bn = 0, bool sc = false)
@@ -175,21 +175,21 @@ private:
 	bool handle_disconnect (const CtrlElem &, bool no_signal = false);
 	void disconnect_other_outputs (uint32_t skip_pc, ARDOUR::DataType dt, uint32_t id);
 	void disconnect_other_thru (ARDOUR::DataType dt, uint32_t id);
-	void remove_port (boost::weak_ptr<ARDOUR::Port>);
-	void disconnect_port (boost::weak_ptr<ARDOUR::Port>);
-	void connect_port (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
-	void add_send_from (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Route>);
-	uint32_t add_port_to_table (boost::shared_ptr<ARDOUR::Port>, uint32_t, bool);
-	uint32_t maybe_add_route_to_input_menu (boost::shared_ptr<ARDOUR::Route>, ARDOUR::DataType, boost::weak_ptr<ARDOUR::Port>);
-	void port_connected_or_disconnected (boost::weak_ptr<ARDOUR::Port>, boost::weak_ptr<ARDOUR::Port>);
+	void remove_port (std::weak_ptr<ARDOUR::Port>);
+	void disconnect_port (std::weak_ptr<ARDOUR::Port>);
+	void connect_port (std::weak_ptr<ARDOUR::Port>, std::weak_ptr<ARDOUR::Port>);
+	void add_send_from (std::weak_ptr<ARDOUR::Port>, std::weak_ptr<ARDOUR::Route>);
+	uint32_t add_port_to_table (std::shared_ptr<ARDOUR::Port>, uint32_t, bool);
+	uint32_t maybe_add_route_to_input_menu (std::shared_ptr<ARDOUR::Route>, ARDOUR::DataType, std::weak_ptr<ARDOUR::Port>);
+	void port_connected_or_disconnected (std::weak_ptr<ARDOUR::Port>, std::weak_ptr<ARDOUR::Port>);
 	void port_pretty_name_changed (std::string);
 
-	bool sc_input_press (GdkEventButton *, boost::weak_ptr<ARDOUR::Port>);
+	bool sc_input_press (GdkEventButton *, std::weak_ptr<ARDOUR::Port>);
 	bool sc_input_release (GdkEventButton *);
 
 	PBD::ScopedConnectionList _plugin_connections;
 	PBD::ScopedConnectionList _io_connection;
-	boost::shared_ptr<ARDOUR::PluginInsert> _pi;
+	std::shared_ptr<ARDOUR::PluginInsert> _pi;
 
 	void queue_idle_update ();
 	bool idle_update ();
@@ -218,7 +218,7 @@ private:
 
 	class Control: public sigc::trackable {
 	public:
-		Control (boost::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
+		Control (std::shared_ptr<ARDOUR::AutomationControl>, std::string const &);
 		~Control ();
 		Gtk::Alignment box;
 	private:
@@ -226,7 +226,7 @@ private:
 		void control_changed ();
 		void set_tooltip ();
 
-		boost::weak_ptr<ARDOUR::AutomationControl> _control;
+		std::weak_ptr<ARDOUR::AutomationControl> _control;
 		Gtk::Adjustment _adjustment;
 		ArdourWidgets::HSliderController _slider;
 		Gtkmm2ext::PersistentTooltip _slider_persistant_tooltip;
@@ -242,22 +242,22 @@ private:
 class PluginPinDialog : public ArdourWindow
 {
 public:
-	PluginPinDialog (boost::shared_ptr<ARDOUR::PluginInsert>);
-	PluginPinDialog (boost::shared_ptr<ARDOUR::Route>);
+	PluginPinDialog (std::shared_ptr<ARDOUR::PluginInsert>);
+	PluginPinDialog (std::shared_ptr<ARDOUR::Route>);
 
 	void set_session (ARDOUR::Session *);
 private:
 	Gtk::ScrolledWindow* scroller;
 	Gtk::VBox *vbox;
-	typedef boost::shared_ptr<PluginPinWidget> PluginPinWidgetPtr;
+	typedef std::shared_ptr<PluginPinWidget> PluginPinWidgetPtr;
 	typedef std::vector<PluginPinWidgetPtr> PluginPinWidgetList;
 
 	void route_going_away ();
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
-	void add_processor (boost::weak_ptr<ARDOUR::Processor>);
+	void add_processor (std::weak_ptr<ARDOUR::Processor>);
 	void map_height (Gtk::Allocation&);
 
-	boost::shared_ptr<ARDOUR::Route> _route;
+	std::shared_ptr<ARDOUR::Route> _route;
 	PluginPinWidgetList ppw;
 	PBD::ScopedConnectionList _route_connections;
 	bool _height_mapped;

@@ -30,7 +30,7 @@ ThawList::~ThawList ()
 }
 
 void
-ThawList::add (boost::shared_ptr<Region> r)
+ThawList::add (std::shared_ptr<Region> r)
 {
 	if (std::find (begin (), end (), r) != end ()) {
 		return;
@@ -49,7 +49,7 @@ ThawList::release ()
 		(*i)->set_changemap (0);
 	}
 	for (Region::ChangeMap::const_iterator i = cm.begin (); i != cm.end (); ++i) {
-		boost::shared_ptr<RegionList> rl (new RegionList (i->second));
+		std::shared_ptr<RegionList> rl (new RegionList (i->second));
 		assert (rl->size () > 0);
 		Region::RegionsPropertyChanged (rl, i->first);
 	}

@@ -115,10 +115,10 @@ private:
 	void disconnect ();
 	PBD::ScopedConnection _parser_connection;
 	PBD::ScopedConnection _manager_connection;
-	boost::shared_ptr<MIDI::Parser> _midi_parser;
+	std::shared_ptr<MIDI::Parser> _midi_parser;
 
-	boost::shared_ptr<ARDOUR::MidiPort> tracer_port;
-	boost::shared_ptr<ARDOUR::MidiPort> traced_port;
+	std::shared_ptr<ARDOUR::MidiPort> tracer_port;
+	std::shared_ptr<ARDOUR::MidiPort> traced_port;
 
 	static unsigned int window_count;
 };

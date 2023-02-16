@@ -38,10 +38,10 @@ public:
 
 	void set_exclusive (bool exclusive = true);
 
-	void set (boost::shared_ptr<Route>);
-	void set (boost::shared_ptr<RouteList>);
-	void set (boost::shared_ptr<RouteList>, boost::shared_ptr<RouteList>);
-	void set (boost::shared_ptr<std::list<std::string> >);
+	void set (std::shared_ptr<Route>);
+	void set (std::shared_ptr<RouteList>);
+	void set (std::shared_ptr<RouteList>, std::shared_ptr<RouteList>);
+	void set (std::shared_ptr<std::list<std::string> >);
 
 	void release (Session*, bool mute) const;
 
@@ -49,10 +49,10 @@ private:
 	bool active;
 	bool exclusive;
 
-	boost::shared_ptr<RouteList> routes_on;
-	boost::shared_ptr<RouteList> routes_off;
+	std::shared_ptr<RouteList> routes_on;
+	std::shared_ptr<RouteList> routes_off;
 
-	boost::shared_ptr<std::list<std::string> > port_monitors;
+	std::shared_ptr<std::list<std::string> > port_monitors;
 };
 
 } // namespace ARDOUR

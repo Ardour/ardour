@@ -93,7 +93,7 @@ PannerUI::PannerUI (Session* s)
 }
 
 void
-PannerUI::set_panner (boost::shared_ptr<PannerShell> ps, boost::shared_ptr<Panner> p)
+PannerUI::set_panner (std::shared_ptr<PannerShell> ps, std::shared_ptr<Panner> p)
 {
 	/* note that the panshell might not change here (i.e. ps == _panshell)
 	 */
@@ -150,7 +150,7 @@ PannerUI::build_astate_menu ()
 		pan_astate_menu->items().clear ();
 	}
 
-	boost::shared_ptr<Pannable> pannable = _panshell->pannable();
+	std::shared_ptr<Pannable> pannable = _panshell->pannable();
 
 	pan_astate_menu->items().push_back (MenuElem (GainMeterBase::astate_string (ARDOUR::Off),
 			sigc::bind ( sigc::mem_fun (pannable.get(), &Pannable::set_automation_state), (AutoState) ARDOUR::Off)));
@@ -253,26 +253,26 @@ PannerUI::setup_pan ()
 		delete big_window;
 		big_window = 0;
 
-		boost::shared_ptr<Pannable> pannable = _panner->pannable();
+		std::shared_ptr<Pannable> pannable = _panner->pannable();
 
 		_stereo_panner = new StereoPanner (_panshell);
 		_stereo_panner->set_size_request (-1, 5 * ceilf(7.f * scale));
 		_stereo_panner->set_send_drawing_mode (_send_mode);
 		pan_vbox.pack_start (*_stereo_panner, false, false);
 
-		boost::shared_ptr<AutomationControl> ac;
+		std::shared_ptr<AutomationControl> ac;
 
 		ac = pannable->pan_azimuth_control;
 		_stereo_panner->StartPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
-					boost::weak_ptr<AutomationControl> (ac)));
+					std::weak_ptr<AutomationControl> (ac)));
 		_stereo_panner->StopPositionGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
-					boost::weak_ptr<AutomationControl>(ac)));
+					std::weak_ptr<AutomationControl>(ac)));
 
 		ac = pannable->pan_width_control;
 		_stereo_panner->StartWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
-					boost::weak_ptr<AutomationControl> (ac)));
+					std::weak_ptr<AutomationControl> (ac)));
 		_stereo_panner->StopWidthGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
-					boost::weak_ptr<AutomationControl>(ac)));
+					std::weak_ptr<AutomationControl>(ac)));
 		_stereo_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
 	}
 	else if (_current_uri == "http://ardour.org/plugin/panner_1in2out#ui"
@@ -280,15 +280,15 @@ PannerUI::setup_pan ()
 	{
 		delete big_window;
 		big_window = 0;
-		boost::shared_ptr<Pannable> pannable = _panner->pannable();
-		boost::shared_ptr<AutomationControl> ac = pannable->pan_azimuth_control;
+		std::shared_ptr<Pannable> pannable = _panner->pannable();
+		std::shared_ptr<AutomationControl> ac = pannable->pan_azimuth_control;
 
 		_mono_panner = new MonoPanner (_panshell);
 
 		_mono_panner->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
-					boost::weak_ptr<AutomationControl> (ac)));
+					std::weak_ptr<AutomationControl> (ac)));
 		_mono_panner->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
-					boost::weak_ptr<AutomationControl>(ac)));
+					std::weak_ptr<AutomationControl>(ac)));
 
 		_mono_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
 
@@ -346,9 +346,9 @@ PannerUI::set_send_drawing_mode (bool onoff)
 }
 
 void
-PannerUI::start_touch (boost::weak_ptr<AutomationControl> wac)
+PannerUI::start_touch (std::weak_ptr<AutomationControl> wac)
 {
-	boost::shared_ptr<AutomationControl> ac = wac.lock();
+	std::shared_ptr<AutomationControl> ac = wac.lock();
 	if (!ac) {
 		return;
 	}
@@ -356,9 +356,9 @@ PannerUI::start_touch (boost::weak_ptr<AutomationControl> wac)
 }
 
 void
-PannerUI::stop_touch (boost::weak_ptr<AutomationControl> wac)
+PannerUI::stop_touch (std::weak_ptr<AutomationControl> wac)
 {
-	boost::shared_ptr<AutomationControl> ac = wac.lock();
+	std::shared_ptr<AutomationControl> ac = wac.lock();
 	if (!ac) {
 		return;
 	}
@@ -540,7 +540,7 @@ PannerUI::pan_automation_state_button_event (GdkEventButton *ev)
 void
 PannerUI::pan_automation_state_changed ()
 {
-	boost::shared_ptr<Pannable> pannable (_panner->pannable());
+	std::shared_ptr<Pannable> pannable (_panner->pannable());
 	pan_automation_state_button.set_label (GainMeterBase::short_astate_string(pannable->automation_state()));
 
 	bool x = (pannable->automation_state() != ARDOUR::Off);

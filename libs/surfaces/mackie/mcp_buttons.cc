@@ -817,7 +817,7 @@ LedState
 MackieControlProtocol::pan_press (Button &)
 {
 	/* XXX eventually pan may have its own subview mode */
-	set_subview_mode (Mackie::Subview::None, boost::shared_ptr<Stripable>());
+	set_subview_mode (Mackie::Subview::None, std::shared_ptr<Stripable>());
 	return none;
 }
 LedState
@@ -1259,7 +1259,7 @@ MackieControlProtocol::prog2_clear_solo_press (Button &)
 		session->get_stripables (sl);
 		for (StripableList::const_iterator i = sl.begin(); i != sl.end(); ++i)
 		{
-			boost::shared_ptr<MuteControl> mc = (*i)->mute_control();
+			std::shared_ptr<MuteControl> mc = (*i)->mute_control();
 			if (!mc->muted() && (!(*i)->is_master()) && (!(*i)->is_monitor()))
 			{
 				mc->set_value(1.0, Controllable::UseGroup);

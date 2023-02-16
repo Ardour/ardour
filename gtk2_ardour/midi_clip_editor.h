@@ -69,7 +69,7 @@ public:
 
 	void set_session (ARDOUR::Session*);
 
-	void set_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::TriggerReference);
+	void set_region (std::shared_ptr<ARDOUR::Region>, ARDOUR::TriggerReference);
 	void region_changed (const PBD::PropertyChange& what_changed);
 
 private:
@@ -80,7 +80,7 @@ private:
 
 	PBD::ScopedConnection state_connection;
 
-	boost::shared_ptr<ARDOUR::Region> _region;
+	std::shared_ptr<ARDOUR::Region> _region;
 };
 
 #endif /* __midi_region_trimmer_box_h__ */

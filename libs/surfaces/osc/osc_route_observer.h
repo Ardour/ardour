@@ -41,21 +41,21 @@ class OSCRouteObserver
 	OSCRouteObserver (ArdourSurface::OSC& o, uint32_t sid, ArdourSurface::OSC::OSCSurface* sur);
 	~OSCRouteObserver ();
 
-	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
+	std::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
 	uint32_t strip_id () const { return ssid; }
 	lo_address address () const { return addr; };
 	void tick (void);
 	void send_select_status (const PBD::PropertyChange&);
-	void refresh_strip (boost::shared_ptr<ARDOUR::Stripable> strip, bool force);
-	void refresh_send (boost::shared_ptr<ARDOUR::Send> send, bool force);
+	void refresh_strip (std::shared_ptr<ARDOUR::Stripable> strip, bool force);
+	void refresh_send (std::shared_ptr<ARDOUR::Send> send, bool force);
 	void set_expand (uint32_t expand);
 	void set_link_ready (uint32_t not_ready);
 	void clear_strip ();
 
   private:
-	boost::shared_ptr<ARDOUR::Stripable> _strip;
-	boost::shared_ptr<ARDOUR::Send> _send;
-	boost::shared_ptr<ARDOUR::GainControl> _gain_control;
+	std::shared_ptr<ARDOUR::Stripable> _strip;
+	std::shared_ptr<ARDOUR::Send> _send;
+	std::shared_ptr<ARDOUR::GainControl> _gain_control;
 
 	PBD::ScopedConnectionList strip_connections;
 	PBD::ScopedConnectionList pan_connections;
@@ -76,18 +76,18 @@ class OSCRouteObserver
 	bool in_line;
 	ARDOUR::AutoState as;
 	bool _tick_busy;
-	boost::shared_ptr<ARDOUR::PannerShell> current_pan_shell;
+	std::shared_ptr<ARDOUR::PannerShell> current_pan_shell;
 
 	void send_clear ();
 	void name_changed (const PBD::PropertyChange& what_changed);
-	void panner_changed (boost::shared_ptr<ARDOUR::PannerShell>);
+	void panner_changed (std::shared_ptr<ARDOUR::PannerShell>);
 	void group_name ();
 	void pi_changed (PBD::PropertyChange const&);
-	void send_change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_monitor_status (boost::shared_ptr<PBD::Controllable> controllable);
+	void send_change_message (std::string path, std::shared_ptr<PBD::Controllable> controllable);
+	void send_monitor_status (std::shared_ptr<PBD::Controllable> controllable);
 	void send_gain_message ();
 	void gain_automation ();
-	void send_automation (std::string path, boost::shared_ptr<PBD::Controllable> control);
+	void send_automation (std::string path, std::shared_ptr<PBD::Controllable> control);
 	void send_trim_message ();
 	void no_strip ();
 };

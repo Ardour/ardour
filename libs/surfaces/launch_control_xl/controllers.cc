@@ -47,7 +47,7 @@ LaunchControlXL::build_maps ()
 	id_controller_button_map.clear();
 
 	/* Knobs */
-	boost::shared_ptr<Knob> knob;
+	std::shared_ptr<Knob> knob;
 
 	#define MAKE_KNOB(i,cc,index,c_on,c_off,a) \
 		knob.reset (new Knob ((i), (cc), (index), (c_on), (c_off), (a), (*this))); \
@@ -201,7 +201,7 @@ LaunchControlXL::build_maps ()
 
 
 	/* Faders */
-	boost::shared_ptr<Fader> fader;
+	std::shared_ptr<Fader> fader;
 
 	#define MAKE_FADER(i,cc,a) \
 		fader.reset (new Fader ((i), (cc), (a))); \
@@ -224,8 +224,8 @@ LaunchControlXL::build_maps ()
 	}
 
 	/* Buttons */
-	boost::shared_ptr<ControllerButton> controller_button;
-	boost::shared_ptr<NoteButton> note_button;
+	std::shared_ptr<ControllerButton> controller_button;
+	std::shared_ptr<NoteButton> note_button;
 
 
 	#define MAKE_TRACK_BUTTON_PRESS(i,nn,index,c_on,c_off,p,check) \
@@ -518,7 +518,7 @@ LaunchControlXL::fader_name_by_id (FaderID id)
 	return "???";
 }
 
-boost::shared_ptr<LaunchControlXL::TrackButton>
+std::shared_ptr<LaunchControlXL::TrackButton>
 LaunchControlXL::track_button_by_range(uint8_t n, uint8_t first, uint8_t middle)
 {
 	NNNoteButtonMap::iterator b;
@@ -529,16 +529,16 @@ LaunchControlXL::track_button_by_range(uint8_t n, uint8_t first, uint8_t middle)
 	}
 
 	if (b != nn_note_button_map.end()) {
-		return boost::dynamic_pointer_cast<TrackButton> (b->second);
+		return std::dynamic_pointer_cast<TrackButton> (b->second);
 	}
 
-	return boost::shared_ptr<TrackButton>();
+	return std::shared_ptr<TrackButton>();
 }
 
 void
 LaunchControlXL::update_track_focus_led(uint8_t n)
 {
-	boost::shared_ptr<TrackButton> b = focus_button_by_column(n);
+	std::shared_ptr<TrackButton> b = focus_button_by_column(n);
 
 	if (!b) {
 		return;
@@ -557,9 +557,9 @@ LaunchControlXL::update_track_focus_led(uint8_t n)
 	write (b->state_msg());
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 LaunchControlXL::get_ac_by_state(uint8_t n) {
-		boost::shared_ptr<AutomationControl> ac;
+		std::shared_ptr<AutomationControl> ac;
 
 		switch(track_mode()) {
 			case TrackMute:
@@ -580,16 +580,16 @@ LaunchControlXL::get_ac_by_state(uint8_t n) {
 		return ac;
 }
 
-boost::shared_ptr<LaunchControlXL::Knob>
+std::shared_ptr<LaunchControlXL::Knob>
 LaunchControlXL::knob_by_id(KnobID id)
 {
 	IDKnobMap::iterator k = id_knob_map.find(id);
-	return boost::dynamic_pointer_cast<Knob> (k->second);
+	return std::dynamic_pointer_cast<Knob> (k->second);
 
 }
 
-boost::shared_ptr<LaunchControlXL::Knob>*
-LaunchControlXL::knobs_by_column(uint8_t col, boost::shared_ptr<Knob>* knob_col)
+std::shared_ptr<LaunchControlXL::Knob>*
+LaunchControlXL::knobs_by_column(uint8_t col, std::shared_ptr<Knob>* knob_col)
 {
 	for (uint8_t n = 0; n < 3; ++n) {
 		if (id_knob_map.find(static_cast<KnobID>(col+n*8)) != id_knob_map.end()) {
@@ -604,7 +604,7 @@ void
 LaunchControlXL::update_knob_led_by_id (uint8_t id, LEDColor color)
 {
 
-	boost::shared_ptr<Knob> knob;
+	std::shared_ptr<Knob> knob;
 	IDKnobMap::iterator k = id_knob_map.find(static_cast<KnobID>(id));
 
 	if (k != id_knob_map.end()) {
@@ -620,7 +620,7 @@ LaunchControlXL::update_knob_led_by_strip(uint8_t n)
 {
 	LEDColor color;
 
-	boost::shared_ptr<Knob> knobs_col[3];
+	std::shared_ptr<Knob> knobs_col[3];
 	knobs_by_column(n, knobs_col);
 
 	for  (uint8_t s = 0; s < 3; ++s) {
@@ -643,7 +643,7 @@ LaunchControlXL::update_knob_led_by_strip(uint8_t n)
 void
 LaunchControlXL::update_track_control_led(uint8_t n)
 {
-	boost::shared_ptr<TrackButton> b = control_button_by_column(n);
+	std::shared_ptr<TrackButton> b = control_button_by_column(n);
 
 	if (!b) {
 		return;
@@ -655,7 +655,7 @@ LaunchControlXL::update_track_control_led(uint8_t n)
 	}
 
 	if (stripable[n]) {
-			boost::shared_ptr<AutomationControl> ac = get_ac_by_state(n);
+			std::shared_ptr<AutomationControl> ac = get_ac_by_state(n);
 			if (ac) {
 				if (ac->get_value()) {
 					b->set_color(b->color_enabled());
@@ -703,7 +703,7 @@ LaunchControlXL::solo_iso_led_bank ()
 		return;
 	} else {
 		for (int n = 0; n < stripable_counter; ++n) {
-			boost::shared_ptr<TrackButton> b = focus_button_by_column(n);
+			std::shared_ptr<TrackButton> b = focus_button_by_column(n);
 			if (stripable[n] && stripable[n]->solo_isolate_control()) {
 				if (stripable[n]->solo_isolate_control()->get_value()) {
 					b->set_color(RedFull);
@@ -741,7 +741,7 @@ LaunchControlXL::master_send_led_bank ()
 		int stripable_counter = LaunchControlXL::get_amount_of_tracks();
 
 		for (int n = 0; n < stripable_counter; ++n) {
-			boost::shared_ptr<TrackButton> b = control_button_by_column(n);
+			std::shared_ptr<TrackButton> b = control_button_by_column(n);
 			if (stripable[n] && stripable[n]->master_send_enable_controllable()) {
 				if (stripable[n]->master_send_enable_controllable()->get_value()) {
 					b->set_color(GreenFull);
@@ -765,7 +765,7 @@ LaunchControlXL::fader(uint8_t n)
 		return;
 	}
 
-	boost::shared_ptr<Fader> fader;
+	std::shared_ptr<Fader> fader;
 	IDFaderMap::iterator f = id_fader_map.find(static_cast<FaderID>(n));
 
 	if (f != id_fader_map.end()) {
@@ -776,7 +776,7 @@ LaunchControlXL::fader(uint8_t n)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac = stripable[fader->id()]->gain_control();
+	std::shared_ptr<AutomationControl> ac = stripable[fader->id()]->gain_control();
 	if (ac && check_pick_up(fader, ac)) {
 		ac->set_value ( ac->interface_to_internal( fader->value() / 127.0), PBD::Controllable::UseGroup );
 	}
@@ -789,7 +789,7 @@ LaunchControlXL::knob_sendA(uint8_t n)
 		return;
 	}
 
-	boost::shared_ptr<Knob> knob;
+	std::shared_ptr<Knob> knob;
 	IDKnobMap::iterator k = id_knob_map.find(static_cast<KnobID>(n));
 
 	if (k != id_knob_map.end()) {
@@ -800,7 +800,7 @@ LaunchControlXL::knob_sendA(uint8_t n)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<AutomationControl> ac;
 
 	if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
 		ac = stripable[n]->trim_control();
@@ -820,7 +820,7 @@ LaunchControlXL::knob_sendB(uint8_t n)
 		return;
 	}
 
-	boost::shared_ptr<Knob> knob;
+	std::shared_ptr<Knob> knob;
 	IDKnobMap::iterator k = id_knob_map.find(static_cast<KnobID>(n + 8));
 
 	if (k != id_knob_map.end()) {
@@ -831,7 +831,7 @@ LaunchControlXL::knob_sendB(uint8_t n)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<AutomationControl> ac;
 
 	if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
 	#ifdef MIXBUS
@@ -855,7 +855,7 @@ LaunchControlXL::knob_pan(uint8_t n)
 		return;
 	}
 
-	boost::shared_ptr<Knob> knob;
+	std::shared_ptr<Knob> knob;
 	IDKnobMap::iterator k = id_knob_map.find(static_cast<KnobID>(n + 16));
 
 	if (k != id_knob_map.end()) {
@@ -866,7 +866,7 @@ LaunchControlXL::knob_pan(uint8_t n)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<AutomationControl> ac;
 
 	if (buttons_down.find(Device) != buttons_down.end()) { // Device button hold
 #ifdef MIXBUS
@@ -929,7 +929,7 @@ LaunchControlXL::button_press_track_control(uint8_t n) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac = get_ac_by_state(n);
+	std::shared_ptr<AutomationControl> ac = get_ac_by_state(n);
 
 	if (ac) {
 		session->set_control (ac, !ac->get_value(), PBD::Controllable::UseGroup);
@@ -944,9 +944,9 @@ LaunchControlXL::button_track_mode(TrackMode state)
 			update_track_control_led(n);
 		}
 
-		boost::shared_ptr<TrackStateButton> mute = boost::dynamic_pointer_cast<TrackStateButton> (id_note_button_map[Mute]);
-		boost::shared_ptr<TrackStateButton> solo = boost::dynamic_pointer_cast<TrackStateButton> (id_note_button_map[Solo]);
-		boost::shared_ptr<TrackStateButton> record = boost::dynamic_pointer_cast<TrackStateButton> (id_note_button_map[Record]);
+		std::shared_ptr<TrackStateButton> mute = std::dynamic_pointer_cast<TrackStateButton> (id_note_button_map[Mute]);
+		std::shared_ptr<TrackStateButton> solo = std::dynamic_pointer_cast<TrackStateButton> (id_note_button_map[Solo]);
+		std::shared_ptr<TrackStateButton> record = std::dynamic_pointer_cast<TrackStateButton> (id_note_button_map[Record]);
 
 		if (mute && solo && record) {
 			write(mute->state_msg((state == TrackMute)));
@@ -1046,7 +1046,7 @@ LaunchControlXL::button_record()
 }
 
 bool
-LaunchControlXL::button_long_press_timeout (ButtonID id, boost::shared_ptr<Button> button)
+LaunchControlXL::button_long_press_timeout (ButtonID id, std::shared_ptr<Button> button)
 {
 	if (buttons_down.find (id) != buttons_down.end()) {
 		DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose ("long press timeout for %1, invoking method\n", id));
@@ -1066,7 +1066,7 @@ LaunchControlXL::button_long_press_timeout (ButtonID id, boost::shared_ptr<Butto
 
 
 void
-LaunchControlXL::start_press_timeout (boost::shared_ptr<Button> button, ButtonID id)
+LaunchControlXL::start_press_timeout (std::shared_ptr<Button> button, ButtonID id)
 {
 	ButtonID no_timeout_buttons[] = { SelectUp, SelectDown, SelectLeft, SelectRight };
 
@@ -1110,8 +1110,8 @@ LaunchControlXL::dm_fader (FaderID id) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac;
-	boost::shared_ptr<Fader> fader;
+	std::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<Fader> fader;
 
 	IDFaderMap::iterator f = id_fader_map.find(id);
 
@@ -1147,8 +1147,8 @@ LaunchControlXL::dm_pan_azi (KnobID k)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac;
-	boost::shared_ptr<Knob> knob = knob_by_id (k);
+	std::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<Knob> knob = knob_by_id (k);
 
 	ac = first_selected_stripable()->pan_azimuth_control();
 
@@ -1181,8 +1181,8 @@ LaunchControlXL::dm_pan_width (KnobID k)
 	}
 
 	DEBUG_TRACE (DEBUG::LaunchControlXL, "dm_pan_width()\n");
-	boost::shared_ptr<AutomationControl> ac;
-	boost::shared_ptr<Knob> knob = knob_by_id (k);
+	std::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<Knob> knob = knob_by_id (k);
 
 	ac = first_selected_stripable()->pan_width_control();
 
@@ -1213,8 +1213,8 @@ LaunchControlXL::dm_trim (KnobID k)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac;
-	boost::shared_ptr<Knob> knob = knob_by_id (k);
+	std::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<Knob> knob = knob_by_id (k);
 
 	ac = first_selected_stripable()->trim_control();
 
@@ -1372,8 +1372,8 @@ LaunchControlXL::dm_mb_eq (KnobID k, bool gain, uint8_t band)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac;
-	boost::shared_ptr<Knob> knob = knob_by_id (k);
+	std::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<Knob> knob = knob_by_id (k);
 	if (gain) {
 		ac = first_selected_stripable()->eq_gain_controllable(band);
 	} else {
@@ -1479,8 +1479,8 @@ LaunchControlXL::dm_mb_flt_frq (KnobID k, bool hpf)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac;
-	boost::shared_ptr<Knob> knob = knob_by_id (k);
+	std::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<Knob> knob = knob_by_id (k);
 	if (hpf) {
 		ac = first_selected_stripable()->filter_freq_controllable(true);
 	} else {
@@ -1544,8 +1544,8 @@ LaunchControlXL::dm_mb_sends (KnobID k)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac;
-	boost::shared_ptr<Knob> knob = knob_by_id (k);
+	std::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<Knob> knob = knob_by_id (k);
 
 	uint8_t send = static_cast<uint8_t> (k) - 16 + 4 * send_bank_base();
 	DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose("dm_mb_send: knobid '%1'\n", k));
@@ -1606,8 +1606,8 @@ LaunchControlXL::dm_mb_comp (KnobID k, CompParam c)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac;
-	boost::shared_ptr<Knob> knob = knob_by_id (k);
+	std::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<Knob> knob = knob_by_id (k);
 
 	switch (c) {
 		case (CompMakeup):
@@ -1633,8 +1633,8 @@ LaunchControlXL::dm_mb_comp_thresh (FaderID id) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac;
-	boost::shared_ptr<Fader> fader;
+	std::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<Fader> fader;
 
 	IDFaderMap::iterator f = id_fader_map.find(id);
 
@@ -1671,8 +1671,8 @@ LaunchControlXL::dm_mb_tapedrive (KnobID k)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac;
-	boost::shared_ptr<Knob> knob = knob_by_id (k);
+	std::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<Knob> knob = knob_by_id (k);
 
 	ac = first_selected_stripable()->tape_drive_controllable();
 
@@ -1721,7 +1721,7 @@ LaunchControlXL::dm_mb_send_switch(ButtonID id)
 		return;
 	}
 
-	boost::shared_ptr<Button> button = id_note_button_map[id];;
+	std::shared_ptr<Button> button = id_note_button_map[id];;
 
 	uint8_t send = static_cast<uint8_t> (id) + 4 * send_bank_base();
 	DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose("dm_mb_send: buttonid '%1'\n", (int)id));

@@ -58,7 +58,7 @@ using namespace std;
 
 PBD::Signal1<void, TriggerStrip*> TriggerStrip::CatchDeletion;
 
-TriggerStrip::TriggerStrip (Session* s, boost::shared_ptr<ARDOUR::Route> rt)
+TriggerStrip::TriggerStrip (Session* s, std::shared_ptr<ARDOUR::Route> rt)
 	: SessionHandlePtr (s)
 	, RouteUI (s)
 	, _clear_meters (true)
@@ -189,7 +189,7 @@ TriggerStrip::init ()
 }
 
 void
-TriggerStrip::set_route (boost::shared_ptr<Route> rt)
+TriggerStrip::set_route (std::shared_ptr<Route> rt)
 {
 	RouteUI::set_route (rt);
 
@@ -198,7 +198,7 @@ TriggerStrip::set_route (boost::shared_ptr<Route> rt)
 	_processor_box.set_route (rt);
 
 	/* Fader/Gain */
-	boost::shared_ptr<AutomationControl> ac = _route->gain_control ();
+	std::shared_ptr<AutomationControl> ac = _route->gain_control ();
 	_gain_control                           = AutomationController::create (ac->parameter (), ParameterDescriptor (ac->parameter ()), ac, false);
 	_gain_control->set_name (X_("ProcessorControlSlider"));
 	_gain_control->set_size_request (PX_SCALE (19), -1);
@@ -291,7 +291,7 @@ TriggerStrip::build_route_ops_menu ()
 		items.push_back (MenuElem (_("Pin Connections..."), sigc::mem_fun (*this, &RouteUI::manage_pins)));
 	}
 
-	if (active && (boost::dynamic_pointer_cast<MidiTrack>(_route) || _route->the_instrument ())) {
+	if (active && (std::dynamic_pointer_cast<MidiTrack>(_route) || _route->the_instrument ())) {
 		items.push_back (MenuElem (_("Patch Selector..."),
 					sigc::mem_fun(*this, &RouteUI::select_midi_patch)));
 	}
@@ -366,7 +366,7 @@ TriggerStrip::connect_to_pan ()
 		return;
 	}
 
-	boost::shared_ptr<Pannable> p = _route->pannable ();
+	std::shared_ptr<Pannable> p = _route->pannable ();
 
 	p->automation_state_changed.connect (_panstate_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_state_changed, &_panners), gui_context ());
 
@@ -459,12 +459,12 @@ TriggerStrip::plugin_selector ()
 }
 
 void
-TriggerStrip::hide_processor_editor (boost::weak_ptr<Processor> p)
+TriggerStrip::hide_processor_editor (std::weak_ptr<Processor> p)
 {
 	/* TODO consolidate w/ TriggerStrip::hide_processor_editor
 	 * -> RouteUI ?
 	 */
-	boost::shared_ptr<Processor> processor (p.lock ());
+	std::shared_ptr<Processor> processor (p.lock ());
 	if (!processor) {
 		return;
 	}
@@ -481,7 +481,7 @@ TriggerStrip::map_frozen ()
 {
 	ENSURE_GUI_THREAD (*this, &TriggerStrip::map_frozen)
 
-	boost::shared_ptr<AudioTrack> at = audio_track ();
+	std::shared_ptr<AudioTrack> at = audio_track ();
 
 	bool en = _route->active () || ARDOUR::Profile->get_mixbus ();
 

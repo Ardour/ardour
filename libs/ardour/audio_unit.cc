@@ -355,7 +355,7 @@ Boolean ComponentAndDescriptionMatch_Loosely(ArdourComponent inComponent, const 
 }
 
 
-AUPlugin::AUPlugin (AudioEngine& engine, Session& session, boost::shared_ptr<CAComponent> _comp)
+AUPlugin::AUPlugin (AudioEngine& engine, Session& session, std::shared_ptr<CAComponent> _comp)
 	: Plugin (engine, session)
 	, comp (_comp)
 	, unit (new CAAudioUnit)
@@ -1124,7 +1124,7 @@ AUPlugin::match_variable_io (ChanCount& in, ChanCount& aux_in, ChanCount& out)
 	/* preferred setting (provided by plugin_insert) */
 	const int32_t preferred_out = out.n_audio ();
 
-	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
+	AUPluginInfoPtr pinfo = std::dynamic_pointer_cast<AUPluginInfo>(get_info());
 	vector<pair<int,int> > io_configs = pinfo->io_configs;
 
 #ifndef NDEBUG
@@ -2294,7 +2294,7 @@ AUPlugin::find_presets ()
 
 	PluginInfoPtr nfo = get_info();
 	find_files_matching_filter (preset_files, preset_search_path, au_preset_filter,
-			boost::dynamic_pointer_cast<AUPluginInfo> (nfo).get(),
+			std::dynamic_pointer_cast<AUPluginInfo> (nfo).get(),
 			true, true, true);
 
 	if (preset_files.empty()) {
@@ -2351,7 +2351,7 @@ AUPlugin::has_editor () const
 
 /* ****************************************************************************/
 
-AUPluginInfo::AUPluginInfo (boost::shared_ptr<CAComponentDescription> d)
+AUPluginInfo::AUPluginInfo (std::shared_ptr<CAComponentDescription> d)
 	: version (0)
 	, max_outputs (0)
 	, descriptor (d)
@@ -2366,7 +2366,7 @@ AUPluginInfo::load (Session& session)
 		PluginPtr plugin;
 
 		DEBUG_TRACE (DEBUG::AudioUnitConfig, "load AU as a component\n");
-		boost::shared_ptr<CAComponent> comp (new CAComponent(*descriptor));
+		std::shared_ptr<CAComponent> comp (new CAComponent(*descriptor));
 
 		if (!comp->IsValid()) {
 			error << ("AudioUnit: not a valid Component") << endmsg;
@@ -2378,7 +2378,7 @@ AUPluginInfo::load (Session& session)
 		AUPluginInfo *aup = new AUPluginInfo (*this);
 		DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose ("plugin info for %1 = %2\n", this, aup));
 		plugin->set_info (PluginInfoPtr (aup));
-		boost::dynamic_pointer_cast<AUPlugin> (plugin)->set_fixed_size_buffers (aup->creator == "Universal Audio");
+		std::dynamic_pointer_cast<AUPlugin> (plugin)->set_fixed_size_buffers (aup->creator == "Universal Audio");
 		return plugin;
 	}
 
@@ -2392,10 +2392,10 @@ std::vector<Plugin::PresetRecord>
 AUPluginInfo::get_presets (bool user_only) const
 {
 	std::vector<Plugin::PresetRecord> p;
-	boost::shared_ptr<CAComponent> comp;
+	std::shared_ptr<CAComponent> comp;
 
 	try {
-		comp = boost::shared_ptr<CAComponent>(new CAComponent(*descriptor));
+		comp = std::shared_ptr<CAComponent>(new CAComponent(*descriptor));
 		if (!comp->IsValid()) {
 			throw failed_constructor();
 		}
@@ -2438,7 +2438,7 @@ AUPluginInfo::get_presets (bool user_only) const
 	UInt32 dataSize;
 	Boolean isWritable;
 
-	boost::shared_ptr<CAAudioUnit> unit (new CAAudioUnit);
+	std::shared_ptr<CAAudioUnit> unit (new CAAudioUnit);
 	if (noErr != CAAudioUnit::Open (*(comp.get()), *unit)) {
 		return p;
 	}
@@ -2526,7 +2526,7 @@ AUPlugin::set_info (PluginInfoPtr info)
 {
 	Plugin::set_info (info);
 
-	AUPluginInfoPtr pinfo = boost::dynamic_pointer_cast<AUPluginInfo>(get_info());
+	AUPluginInfoPtr pinfo = std::dynamic_pointer_cast<AUPluginInfo>(get_info());
 	_has_midi_input = pinfo->needs_midi_input ();
 	_has_midi_output = false;
 }

@@ -49,7 +49,7 @@ private:
 	static MidiPatchManager* _manager;
 
 public:
-	typedef std::map<std::string, boost::shared_ptr<MIDINameDocument> >    MidiNameDocuments;
+	typedef std::map<std::string, std::shared_ptr<MIDINameDocument> >    MidiNameDocuments;
 	typedef std::map<std::string, MIDINameDocument::MasterDeviceNamesList> DeviceNamesByMaker;
 
         ~MidiPatchManager();
@@ -72,66 +72,66 @@ public:
 
 	void remove_search_path (const PBD::Searchpath& search_path);
 
-	boost::shared_ptr<MIDINameDocument> document_by_model(std::string model_name) const;
+	std::shared_ptr<MIDINameDocument> document_by_model(std::string model_name) const;
 
-	boost::shared_ptr<MasterDeviceNames> master_device_by_model(std::string model_name)
+	std::shared_ptr<MasterDeviceNames> master_device_by_model(std::string model_name)
 		{ return _master_devices_by_model[model_name]; }
 
-	boost::shared_ptr<ChannelNameSet> find_channel_name_set(
+	std::shared_ptr<ChannelNameSet> find_channel_name_set(
 			std::string model,
 			std::string custom_device_mode,
 			uint8_t channel) {
-		boost::shared_ptr<MIDI::Name::MasterDeviceNames> master_device = master_device_by_model(model);
+		std::shared_ptr<MIDI::Name::MasterDeviceNames> master_device = master_device_by_model(model);
 
 		if (master_device != 0 && custom_device_mode != "") {
 			return master_device->channel_name_set_by_channel(custom_device_mode, channel);
 		} else {
-			return boost::shared_ptr<ChannelNameSet>();
+			return std::shared_ptr<ChannelNameSet>();
 		}
 	}
 
-	boost::shared_ptr<Patch> find_patch(
+	std::shared_ptr<Patch> find_patch(
 			std::string model,
 			std::string custom_device_mode,
 			uint8_t channel,
 			PatchPrimaryKey patch_key) {
 
-		boost::shared_ptr<ChannelNameSet> channel_name_set = find_channel_name_set(model, custom_device_mode, channel);
+		std::shared_ptr<ChannelNameSet> channel_name_set = find_channel_name_set(model, custom_device_mode, channel);
 
 		if (channel_name_set) {
 			return  channel_name_set->find_patch(patch_key);
 		} else {
-			return boost::shared_ptr<Patch>();
+			return std::shared_ptr<Patch>();
 		}
 	}
 
-	boost::shared_ptr<Patch> previous_patch(
+	std::shared_ptr<Patch> previous_patch(
 			std::string model,
 			std::string custom_device_mode,
 			uint8_t channel,
 			PatchPrimaryKey patch_key) {
 
-		boost::shared_ptr<ChannelNameSet> channel_name_set = find_channel_name_set(model, custom_device_mode, channel);
+		std::shared_ptr<ChannelNameSet> channel_name_set = find_channel_name_set(model, custom_device_mode, channel);
 
 		if (channel_name_set) {
 			return  channel_name_set->previous_patch(patch_key);
 		} else {
-			return boost::shared_ptr<Patch>();
+			return std::shared_ptr<Patch>();
 		}
 	}
 
-	boost::shared_ptr<Patch> next_patch(
+	std::shared_ptr<Patch> next_patch(
 			std::string model,
 			std::string custom_device_mode,
 			uint8_t channel,
 			PatchPrimaryKey patch_key) {
 
-		boost::shared_ptr<ChannelNameSet> channel_name_set = find_channel_name_set(model, custom_device_mode, channel);
+		std::shared_ptr<ChannelNameSet> channel_name_set = find_channel_name_set(model, custom_device_mode, channel);
 
 		if (channel_name_set) {
 			return  channel_name_set->next_patch(patch_key);
 		} else {
-			return boost::shared_ptr<Patch>();
+			return std::shared_ptr<Patch>();
 		}
 	}
 
@@ -155,7 +155,7 @@ public:
 	                PBD::EventLoop* event_loop);
 private:
 	bool load_midi_name_document(const std::string& file_path);
-	bool add_midi_name_document(boost::shared_ptr<MIDINameDocument>);
+	bool add_midi_name_document(std::shared_ptr<MIDINameDocument>);
 	bool remove_midi_name_document(const std::string& file_path, bool emit_signal = true);
 
 	void add_midnam_files_from_directory(const std::string& directory_path);

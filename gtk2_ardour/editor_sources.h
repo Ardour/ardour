@@ -26,7 +26,7 @@ class EditorSources : public EditorComponent, public SourceListBase
 public:
 	EditorSources (Editor*);
 
-	boost::shared_ptr<ARDOUR::Region> get_single_selection ();
+	std::shared_ptr<ARDOUR::Region> get_single_selection ();
 
 	/* user actions */
 	void remove_selected_sources ();

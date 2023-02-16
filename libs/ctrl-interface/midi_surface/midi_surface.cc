@@ -93,8 +93,8 @@ MIDISurface::ports_acquire ()
 	 * really insist on that (and use JACK)
 	 */
 
-	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
-	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
+	_input_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
+	_output_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
 
 	/* Create a shadow port where, depending on the state of the surface,
 	 * we will make pad note on/off events appear. The surface code will
@@ -102,8 +102,8 @@ MIDISurface::ports_acquire ()
 	 */
 
 	if (with_pad_filter) {
-		boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->add_shadow_port (string_compose (_("%1 Pads"), port_name_prefix), boost::bind (&MIDISurface::pad_filter, this, _1, _2));
-		boost::shared_ptr<MidiPort> shadow_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
+		std::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->add_shadow_port (string_compose (_("%1 Pads"), port_name_prefix), boost::bind (&MIDISurface::pad_filter, this, _1, _2));
+		std::shared_ptr<MidiPort> shadow_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
 
 		if (shadow_port) {
 
@@ -184,15 +184,15 @@ MIDISurface::port_registration_handler ()
 }
 
 bool
-MIDISurface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
+MIDISurface::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
 {
 	DEBUG_TRACE (DEBUG::MIDISurface, "FaderPort::connection_handler start\n");
 	if (!_input_port || !_output_port) {
 		return false;
 	}
 
-	std::string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_in)->name());
-	std::string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_out)->name());
+	std::string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (std::shared_ptr<ARDOUR::Port>(_async_in)->name());
+	std::string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (std::shared_ptr<ARDOUR::Port>(_async_out)->name());
 
 	if (ni == name1 || ni == name2) {
 		if (yn) {
@@ -245,13 +245,13 @@ MIDISurface::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name
 	return true; /* connection status changed */
 }
 
-boost::shared_ptr<Port>
+std::shared_ptr<Port>
 MIDISurface::output_port()
 {
 	return _async_out;
 }
 
-boost::shared_ptr<Port>
+std::shared_ptr<Port>
 MIDISurface::input_port()
 {
 	return _async_in;
@@ -424,10 +424,10 @@ MIDISurface::stop_using_device ()
 	return 0;
 }
 
-std::list<boost::shared_ptr<ARDOUR::Bundle> >
+std::list<std::shared_ptr<ARDOUR::Bundle> >
 MIDISurface::bundles ()
 {
-	std::list<boost::shared_ptr<ARDOUR::Bundle> > b;
+	std::list<std::shared_ptr<ARDOUR::Bundle> > b;
 
 	if (_output_bundle) {
 		b.push_back (_output_bundle);

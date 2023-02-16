@@ -404,7 +404,7 @@ std::ostream& operator<<(std::ostream& o, ARDOUR::SessionEvent const& ev) {
 			o << " region: '" << ev.region->name () << "'";
 			break;
 		case SessionEvent::Overwrite:
-			if (boost::shared_ptr<Track> track = ev.track.lock ()) {
+			if (std::shared_ptr<Track> track = ev.track.lock ()) {
 				o << " track: '" << track->name () << "'";
 			}
 			o << " reason: " << ev.overwrite;

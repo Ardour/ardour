@@ -259,7 +259,7 @@ CoreMidiIo::recv_event (uint32_t port, double cycle_time_us, uint64_t &time, uin
 		assert(rv == sizeof(uint32_t));
 		rv = _rb[port]->read((uint8_t*)&packet, s);
 		assert(rv == s);
-		_input_queue[port].push_back(boost::shared_ptr<CoreMIDIPacket>(new _CoreMIDIPacket (&packet)));
+		_input_queue[port].push_back(std::shared_ptr<CoreMIDIPacket>(new _CoreMIDIPacket (&packet)));
 	}
 
 	UInt64 start = _time_at_cycle_start;

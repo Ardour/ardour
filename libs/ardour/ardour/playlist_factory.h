@@ -32,12 +32,12 @@ class Session;
 class LIBARDOUR_API PlaylistFactory {
 
   public:
-	static PBD::Signal2<void,boost::shared_ptr<Playlist>, bool> PlaylistCreated;
+	static PBD::Signal2<void,std::shared_ptr<Playlist>, bool> PlaylistCreated;
 
-	static boost::shared_ptr<Playlist> create (Session&, const XMLNode&, bool hidden = false, bool unused = false);
-	static boost::shared_ptr<Playlist> create (DataType type, Session&, std::string name, bool hidden = false);
-	static boost::shared_ptr<Playlist> create (boost::shared_ptr<const Playlist>, std::string name, bool hidden = false);
-	static boost::shared_ptr<Playlist> create (boost::shared_ptr<const Playlist>, timepos_t const & start, timepos_t const & cnt, std::string name, bool hidden = false);
+	static std::shared_ptr<Playlist> create (Session&, const XMLNode&, bool hidden = false, bool unused = false);
+	static std::shared_ptr<Playlist> create (DataType type, Session&, std::string name, bool hidden = false);
+	static std::shared_ptr<Playlist> create (std::shared_ptr<const Playlist>, std::string name, bool hidden = false);
+	static std::shared_ptr<Playlist> create (std::shared_ptr<const Playlist>, timepos_t const & start, timepos_t const & cnt, std::string name, bool hidden = false);
 };
 
 }

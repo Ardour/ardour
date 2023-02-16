@@ -54,45 +54,45 @@ public:
      * callback.
      */
 
-	boost::shared_ptr<ARDOUR::Port> mmc_input_port () const
+	std::shared_ptr<ARDOUR::Port> mmc_input_port () const
 	{
-		return boost::dynamic_pointer_cast<MidiPort> (_mmc_in);
+		return std::dynamic_pointer_cast<MidiPort> (_mmc_in);
 	}
-	boost::shared_ptr<ARDOUR::Port> mmc_output_port () const
+	std::shared_ptr<ARDOUR::Port> mmc_output_port () const
 	{
-		return boost::dynamic_pointer_cast<MidiPort> (_mmc_out);
+		return std::dynamic_pointer_cast<MidiPort> (_mmc_out);
 	}
 
-	boost::shared_ptr<ARDOUR::Port> scene_input_port () const
+	std::shared_ptr<ARDOUR::Port> scene_input_port () const
 	{
-		return boost::dynamic_pointer_cast<MidiPort> (_scene_in);
+		return std::dynamic_pointer_cast<MidiPort> (_scene_in);
 	}
-	boost::shared_ptr<ARDOUR::Port> scene_output_port () const
+	std::shared_ptr<ARDOUR::Port> scene_output_port () const
 	{
-		return boost::dynamic_pointer_cast<MidiPort> (_scene_out);
+		return std::dynamic_pointer_cast<MidiPort> (_scene_out);
 	}
 
 	/* Ports used to send synchronization. These have their output handled inside the
 	 * process callback.
 	 */
 
-	boost::shared_ptr<MidiPort> mtc_output_port () const
+	std::shared_ptr<MidiPort> mtc_output_port () const
 	{
 		return _mtc_output_port;
 	}
-	boost::shared_ptr<MidiPort> midi_clock_output_port () const
+	std::shared_ptr<MidiPort> midi_clock_output_port () const
 	{
 		return _midi_clock_output_port;
 	}
 
 	/* Port for arbitrary incoming MIDI that will control triggers */
-	boost::shared_ptr<MidiPort> trigger_input_port () const
+	std::shared_ptr<MidiPort> trigger_input_port () const
 	{
 		return _trigger_input_port;
 	}
 
 	/* Virtual MIDI keyboard output */
-	boost::shared_ptr<AsyncMIDIPort> vkbd_output_port () const;
+	std::shared_ptr<AsyncMIDIPort> vkbd_output_port () const;
 
 	void                set_midi_port_states (const XMLNodeList&);
 	std::list<XMLNode*> get_midi_port_states () const;
@@ -101,16 +101,16 @@ public:
 
 protected:
 	/* asynchronously handled ports: ARDOUR::AsyncMIDIPort */
-	boost::shared_ptr<Port> _mmc_in;
-	boost::shared_ptr<Port> _mmc_out;
-	boost::shared_ptr<Port> _scene_in;
-	boost::shared_ptr<Port> _scene_out;
-	boost::shared_ptr<Port> _vkbd_out;
+	std::shared_ptr<Port> _mmc_in;
+	std::shared_ptr<Port> _mmc_out;
+	std::shared_ptr<Port> _scene_in;
+	std::shared_ptr<Port> _scene_out;
+	std::shared_ptr<Port> _vkbd_out;
 
 	/* synchronously handled ports: ARDOUR::MidiPort */
-	boost::shared_ptr<MidiPort> _mtc_output_port;
-	boost::shared_ptr<MidiPort> _midi_clock_output_port;
-	boost::shared_ptr<MidiPort> _trigger_input_port;
+	std::shared_ptr<MidiPort> _mtc_output_port;
+	std::shared_ptr<MidiPort> _midi_clock_output_port;
+	std::shared_ptr<MidiPort> _trigger_input_port;
 
 	void create_ports ();
 };

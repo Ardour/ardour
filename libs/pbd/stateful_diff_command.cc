@@ -32,7 +32,7 @@ using namespace PBD;
  *  @param s Stateful object.
  */
 
-StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<StatefulDestructible> s)
+StatefulDiffCommand::StatefulDiffCommand (std::shared_ptr<StatefulDestructible> s)
 	: _object (s)
 	, _changes (0)
 {
@@ -45,7 +45,7 @@ StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<StatefulDestructible
 	s->DropReferences.connect_same_thread (*this, boost::bind (&Destructible::drop_references, this));
 }
 
-StatefulDiffCommand::StatefulDiffCommand (boost::shared_ptr<StatefulDestructible> s, XMLNode const& n)
+StatefulDiffCommand::StatefulDiffCommand (std::shared_ptr<StatefulDestructible> s, XMLNode const& n)
 	: _object (s)
 	, _changes (0)
 {
@@ -74,7 +74,7 @@ StatefulDiffCommand::~StatefulDiffCommand ()
 void
 StatefulDiffCommand::operator() ()
 {
-	boost::shared_ptr<Stateful> s (_object.lock ());
+	std::shared_ptr<Stateful> s (_object.lock ());
 
 	if (s) {
 		s->apply_changes (*_changes);
@@ -84,7 +84,7 @@ StatefulDiffCommand::operator() ()
 void
 StatefulDiffCommand::undo ()
 {
-	boost::shared_ptr<Stateful> s (_object.lock ());
+	std::shared_ptr<Stateful> s (_object.lock ());
 
 	if (s) {
 		PropertyList p = *_changes;
@@ -96,7 +96,7 @@ StatefulDiffCommand::undo ()
 XMLNode&
 StatefulDiffCommand::get_state () const
 {
-	boost::shared_ptr<Stateful> s (_object.lock ());
+	std::shared_ptr<Stateful> s (_object.lock ());
 
 	if (!s) {
 		/* XXX should we throw? */

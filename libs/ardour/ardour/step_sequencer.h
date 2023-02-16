@@ -262,7 +262,7 @@ class StepSequencer : public PBD::Stateful
 
 	void queue_note_off (Temporal::Beats const &, uint8_t note, uint8_t velocity, uint8_t channel);
 
-	boost::shared_ptr<Source> write_to_source (Session& s, std::string p = std::string()) const;
+	std::shared_ptr<Source> write_to_source (Session& s, std::string p = std::string()) const;
 
   private:
 	mutable Glib::Threads::Mutex       _sequence_lock;
@@ -346,7 +346,7 @@ class StepSequencer : public PBD::Stateful
 	void check_note_offs (ARDOUR::MidiBuffer&, samplepos_t start_sample, samplepos_t last_sample);
 	void clear_note_offs ();
 
-	bool fill_midi_source (boost::shared_ptr<SMFSource> src) const;
+	bool fill_midi_source (std::shared_ptr<SMFSource> src) const;
 
 };
 

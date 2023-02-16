@@ -1014,7 +1014,7 @@ AudioClock::set_slave_info ()
 		return;
 	}
 
-	boost::shared_ptr<TransportMaster> tm = TransportMasterManager::instance().current();
+	std::shared_ptr<TransportMaster> tm = TransportMasterManager::instance().current();
 
 	if (_session->transport_master_is_external()) {
 
@@ -1035,8 +1035,8 @@ AudioClock::set_slave_info ()
 		case LTC:
 		case MTC:
 			if (tm) {
-				boost::shared_ptr<TimecodeTransportMaster> tcmaster;
-				if ((tcmaster = boost::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0) {
+				std::shared_ptr<TimecodeTransportMaster> tcmaster;
+				if ((tcmaster = std::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0) {
 					//TODO: _left_btn.set_name () //  tcmaster->apparent_timecode_format() != _session->config.get_timecode_format();
 					_left_btn.set_text (string_compose ("%1%2", tm->display_name()[0], tcmaster->position_string ()), false);
 					_right_btn.set_text (tm->delta_string (), false);

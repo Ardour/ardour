@@ -32,20 +32,20 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal2<void,boost::shared_ptr<Playlist>, bool> PlaylistFactory::PlaylistCreated;
+PBD::Signal2<void,std::shared_ptr<Playlist>, bool> PlaylistFactory::PlaylistCreated;
 
-boost::shared_ptr<Playlist>
+std::shared_ptr<Playlist>
 PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden, bool unused)
 {
 	XMLProperty const * type = node.property("type");
 
-	boost::shared_ptr<Playlist> pl;
+	std::shared_ptr<Playlist> pl;
 
 	try {
 		if (!type || type->value() == "audio") {
-			pl = boost::shared_ptr<Playlist> (new AudioPlaylist (s, node, hidden));
+			pl = std::shared_ptr<Playlist> (new AudioPlaylist (s, node, hidden));
 		} else if (type->value() == "midi") {
-			pl = boost::shared_ptr<Playlist> (new MidiPlaylist (s, node, hidden));
+			pl = std::shared_ptr<Playlist> (new MidiPlaylist (s, node, hidden));
 		}
 
 		pl->set_region_ownership ();
@@ -56,20 +56,20 @@ PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden, bool unus
 		return pl;
 
 	} catch (...) {
-		return boost::shared_ptr<Playlist> ();
+		return std::shared_ptr<Playlist> ();
 	}
 }
 
-boost::shared_ptr<Playlist>
+std::shared_ptr<Playlist>
 PlaylistFactory::create (DataType type, Session& s, string name, bool hidden)
 {
-	boost::shared_ptr<Playlist> pl;
+	std::shared_ptr<Playlist> pl;
 
 	try {
 		if (type == DataType::AUDIO)
-			pl = boost::shared_ptr<Playlist> (new AudioPlaylist (s, name, hidden));
+			pl = std::shared_ptr<Playlist> (new AudioPlaylist (s, name, hidden));
 		else if (type == DataType::MIDI)
-			pl = boost::shared_ptr<Playlist> (new MidiPlaylist (s, name, hidden));
+			pl = std::shared_ptr<Playlist> (new MidiPlaylist (s, name, hidden));
 
 		if (pl && !hidden) {
 			PlaylistCreated (pl, false);
@@ -77,24 +77,24 @@ PlaylistFactory::create (DataType type, Session& s, string name, bool hidden)
 
 		return pl;
 	} catch (...) {
-		return boost::shared_ptr<Playlist> ();
+		return std::shared_ptr<Playlist> ();
 	}
 }
 
-boost::shared_ptr<Playlist>
-PlaylistFactory::create (boost::shared_ptr<const Playlist> old, string name, bool hidden)
+std::shared_ptr<Playlist>
+PlaylistFactory::create (std::shared_ptr<const Playlist> old, string name, bool hidden)
 {
-	boost::shared_ptr<Playlist> pl;
-	boost::shared_ptr<const AudioPlaylist> apl;
-	boost::shared_ptr<const MidiPlaylist> mpl;
+	std::shared_ptr<Playlist> pl;
+	std::shared_ptr<const AudioPlaylist> apl;
+	std::shared_ptr<const MidiPlaylist> mpl;
 
 	try {
 
-		if ((apl = boost::dynamic_pointer_cast<const AudioPlaylist> (old)) != 0) {
-			pl = boost::shared_ptr<Playlist> (new AudioPlaylist (apl, name, hidden));
+		if ((apl = std::dynamic_pointer_cast<const AudioPlaylist> (old)) != 0) {
+			pl = std::shared_ptr<Playlist> (new AudioPlaylist (apl, name, hidden));
 			pl->set_region_ownership ();
-		} else if ((mpl = boost::dynamic_pointer_cast<const MidiPlaylist> (old)) != 0) {
-			pl = boost::shared_ptr<Playlist> (new MidiPlaylist (mpl, name, hidden));
+		} else if ((mpl = std::dynamic_pointer_cast<const MidiPlaylist> (old)) != 0) {
+			pl = std::shared_ptr<Playlist> (new MidiPlaylist (mpl, name, hidden));
 			pl->set_region_ownership ();
 		}
 
@@ -104,24 +104,24 @@ PlaylistFactory::create (boost::shared_ptr<const Playlist> old, string name, boo
 
 		return pl;
 	} catch (...) {
-		return boost::shared_ptr<Playlist> ();
+		return std::shared_ptr<Playlist> ();
 	}
 
 }
 
-boost::shared_ptr<Playlist>
-PlaylistFactory::create (boost::shared_ptr<const Playlist> old, timepos_t const & start, timepos_t const & cnt, string name, bool hidden)
+std::shared_ptr<Playlist>
+PlaylistFactory::create (std::shared_ptr<const Playlist> old, timepos_t const & start, timepos_t const & cnt, string name, bool hidden)
 {
-	boost::shared_ptr<Playlist> pl;
-	boost::shared_ptr<const AudioPlaylist> apl;
-	boost::shared_ptr<const MidiPlaylist> mpl;
+	std::shared_ptr<Playlist> pl;
+	std::shared_ptr<const AudioPlaylist> apl;
+	std::shared_ptr<const MidiPlaylist> mpl;
 
 	try {
-		if ((apl = boost::dynamic_pointer_cast<const AudioPlaylist> (old)) != 0) {
-			pl = boost::shared_ptr<Playlist> (new AudioPlaylist (apl, start, cnt, name, hidden));
+		if ((apl = std::dynamic_pointer_cast<const AudioPlaylist> (old)) != 0) {
+			pl = std::shared_ptr<Playlist> (new AudioPlaylist (apl, start, cnt, name, hidden));
 			pl->set_region_ownership ();
-		} else if ((mpl = boost::dynamic_pointer_cast<const MidiPlaylist> (old)) != 0) {
-			pl = boost::shared_ptr<Playlist> (new MidiPlaylist (mpl, start, cnt, name, hidden));
+		} else if ((mpl = std::dynamic_pointer_cast<const MidiPlaylist> (old)) != 0) {
+			pl = std::shared_ptr<Playlist> (new MidiPlaylist (mpl, start, cnt, name, hidden));
 			pl->set_region_ownership ();
 		}
 
@@ -129,6 +129,6 @@ PlaylistFactory::create (boost::shared_ptr<const Playlist> old, timepos_t const 
 
 		return pl;
 	} catch (...) {
-		return boost::shared_ptr<Playlist> ();
+		return std::shared_ptr<Playlist> ();
 	}
 }

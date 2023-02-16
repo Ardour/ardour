@@ -683,8 +683,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	 *
 	 */
   public:
-	typedef boost::shared_ptr<TempoMap const> SharedPtr;
-	typedef boost::shared_ptr<TempoMap> WritableSharedPtr;
+	typedef std::shared_ptr<TempoMap const> SharedPtr;
+	typedef std::shared_ptr<TempoMap> WritableSharedPtr;
   private:
 	static thread_local WritableSharedPtr _tempo_map_p;
 	static SerializedRCUManager<TempoMap> _map_mgr;

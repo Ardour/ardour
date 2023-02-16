@@ -157,7 +157,7 @@ protected:
 		Gtk::TreeModelColumn<uint32_t>                             solo_isolate_state;
 		Gtk::TreeModelColumn<uint32_t>                             solo_safe_state;
 		Gtk::TreeModelColumn<bool>                                 is_track;
-		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Stripable>> stripable;
+		Gtk::TreeModelColumn<std::shared_ptr<ARDOUR::Stripable>> stripable;
 		Gtk::TreeModelColumn<bool>                                 name_editable;
 		Gtk::TreeModelColumn<bool>                                 is_input_active;
 		Gtk::TreeModelColumn<bool>                                 is_midi;
@@ -179,7 +179,7 @@ private:
 	void add_routes (ARDOUR::RouteList&);
 	void add_masters (ARDOUR::VCAList&);
 	void add_stripables (ARDOUR::StripableList&);
-	void remove_strip (boost::weak_ptr<ARDOUR::Stripable>);
+	void remove_strip (std::weak_ptr<ARDOUR::Stripable>);
 
 	void selection_changed ();
 	void row_deleted (Gtk::TreeModel::Path const&);
@@ -195,7 +195,7 @@ private:
 	bool idle_update_mute_rec_solo_etc ();
 	void update_input_active_display ();
 
-	void route_property_changed (const PBD::PropertyChange&, boost::weak_ptr<ARDOUR::Stripable>);
+	void route_property_changed (const PBD::PropertyChange&, std::weak_ptr<ARDOUR::Stripable>);
 	void presentation_info_changed (PBD::PropertyChange const&);
 
 	void name_edit (std::string const&, std::string const&);
@@ -209,7 +209,7 @@ private:
 	bool leave_notify (GdkEventCrossing*);
 	void name_edit_started (Gtk::CellEditable*, const Glib::ustring&);
 
-	bool get_relevant_routes (boost::shared_ptr<ARDOUR::RouteList> rl);
+	bool get_relevant_routes (std::shared_ptr<ARDOUR::RouteList> rl);
 
 	Gtk::ScrolledWindow          _scroller;
 	Glib::RefPtr<Gtk::ListStore> _model;

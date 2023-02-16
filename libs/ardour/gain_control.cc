@@ -57,7 +57,7 @@ static std::string gain_control_name (Evoral::Parameter const& param)
 	return "";
 }
 
-static boost::shared_ptr<AutomationList> automation_list_new (Evoral::Parameter const& param)
+static std::shared_ptr<AutomationList> automation_list_new (Evoral::Parameter const& param)
 {
 	switch (param.type()) {
 		case GainAutomation:
@@ -67,7 +67,7 @@ static boost::shared_ptr<AutomationList> automation_list_new (Evoral::Parameter 
 		case InsertReturnLevel:
 			/* fallthrough */
 		case TrimAutomation:
-			return boost::shared_ptr<AutomationList> (new AutomationList (param, Temporal::AudioTime));
+			return std::shared_ptr<AutomationList> (new AutomationList (param, Temporal::AudioTime));
 		case MainOutVolume:
 			/* not automatable */
 			break;
@@ -75,10 +75,10 @@ static boost::shared_ptr<AutomationList> automation_list_new (Evoral::Parameter 
 			assert (0);
 			break;
 	}
-	return boost::shared_ptr<AutomationList> ();
+	return std::shared_ptr<AutomationList> ();
 }
 
-GainControl::GainControl (Session& session, const Evoral::Parameter &param, boost::shared_ptr<AutomationList> al)
+GainControl::GainControl (Session& session, const Evoral::Parameter &param, std::shared_ptr<AutomationList> al)
 	: SlavableAutomationControl (session, param, ParameterDescriptor(param),
 	                             al ? al : automation_list_new (param),
 	                             gain_control_name (param),
@@ -104,7 +104,7 @@ GainControl::inc_gain (gain_t factor)
 }
 
 void
-GainControl::post_add_master (boost::shared_ptr<AutomationControl> m)
+GainControl::post_add_master (std::shared_ptr<AutomationControl> m)
 {
 	if (m->get_value() == 0) {
 		/* master is at -inf, which forces this ctrl to -inf on assignment */

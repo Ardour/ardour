@@ -31,7 +31,7 @@ class LIBARDOUR_API AudioReadable {
 public:
 	virtual ~AudioReadable() {}
 
-	static std::vector<boost::shared_ptr<AudioReadable> >
+	static std::vector<std::shared_ptr<AudioReadable> >
 		load (Session&, std::string const&);
 
 	virtual samplecnt_t read (Sample*, samplepos_t pos, samplecnt_t cnt, int channel) const = 0;

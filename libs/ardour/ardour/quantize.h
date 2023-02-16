@@ -33,7 +33,7 @@ public:
 	          float strength, float swing, Temporal::Beats const & threshold);
 	~Quantize ();
 
-	Command* operator() (boost::shared_ptr<ARDOUR::MidiModel>,
+	Command* operator() (std::shared_ptr<ARDOUR::MidiModel>,
 	                     Temporal::Beats position,
 	                     std::vector<Evoral::Sequence<Temporal::Beats>::Notes>&);
 	std::string name() const { return std::string ("quantize"); }

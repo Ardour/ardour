@@ -27,7 +27,7 @@
 using namespace ARDOUR;
 using namespace std;
 
-NotePlayer::NotePlayer (boost::shared_ptr<MidiTrack> mt)
+NotePlayer::NotePlayer (std::shared_ptr<MidiTrack> mt)
 	: track (mt)
 {
 }
@@ -38,7 +38,7 @@ NotePlayer::~NotePlayer ()
 }
 
 void
-NotePlayer::add (boost::shared_ptr<NoteType> note)
+NotePlayer::add (std::shared_ptr<NoteType> note)
 {
 	notes.push_back (note);
 }

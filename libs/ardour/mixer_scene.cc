@@ -64,7 +64,7 @@ MixerScene::snapshot ()
 {
 	_ctrl_map.clear ();
 	for (auto const& c : Controllable::registered_controllables ()) {
-		if (!boost::dynamic_pointer_cast<AutomationControl> (c)) {
+		if (!std::dynamic_pointer_cast<AutomationControl> (c)) {
 			continue;
 		}
 		if (c->flags () & Controllable::HiddenControl) {
@@ -77,13 +77,13 @@ MixerScene::snapshot ()
 }
 
 bool
-MixerScene::recurse_to_master (boost::shared_ptr<PBD::Controllable> c, std::set <PBD::ID>& done, AutomationTypeSet const& ts) const
+MixerScene::recurse_to_master (std::shared_ptr<PBD::Controllable> c, std::set <PBD::ID>& done, AutomationTypeSet const& ts) const
 {
 	if (done.find (c->id()) != done.end ()) {
 		return false;
 	}
 
-	auto ac = boost::dynamic_pointer_cast<AutomationControl> (c);
+	auto ac = std::dynamic_pointer_cast<AutomationControl> (c);
 #if 1 /* ignore controls in Write, or Touch + touching() state */
 	if (ac && ac->automation_write ()) {
 		done.insert (c->id ());
@@ -101,7 +101,7 @@ MixerScene::recurse_to_master (boost::shared_ptr<PBD::Controllable> c, std::set 
 		}
 	}
 
-	auto sc = boost::dynamic_pointer_cast<SlavableAutomationControl> (c);
+	auto sc = std::dynamic_pointer_cast<SlavableAutomationControl> (c);
 	if (sc && sc->slaved ()) {
 		/* first set masters, then set own value */
 		for (auto const& m : sc->masters ()) {

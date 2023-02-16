@@ -64,7 +64,7 @@ class LIBARDOUR_API MidiPort : public Port {
 	typedef boost::function<bool(MidiBuffer&,MidiBuffer&)> MidiFilter;
 	void set_inbound_filter (MidiFilter);
 	int add_shadow_port (std::string const &, MidiFilter);
-	boost::shared_ptr<MidiPort> shadow_port() const { return _shadow_port; }
+	std::shared_ptr<MidiPort> shadow_port() const { return _shadow_port; }
 
 	void read_and_parse_entire_midi_buffer_with_no_speed_adjustment (pframes_t nframes, MIDI::Parser& parser, samplepos_t now);
 
@@ -78,7 +78,7 @@ private:
 	bool                        _resolve_required;
 	bool                        _input_active;
 	MidiFilter                  _inbound_midi_filter;
-	boost::shared_ptr<MidiPort> _shadow_port;
+	std::shared_ptr<MidiPort> _shadow_port;
 	MidiFilter                  _shadow_midi_filter;
 	MIDI::Parser*               _trace_parser;
 	bool                        _data_fetched_for_cycle;

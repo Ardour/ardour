@@ -125,7 +125,7 @@ ControlList::ControlList (const ControlList& other, timepos_t const& start, time
 
 	/* now grab the relevant points, and shift them back if necessary */
 
-	boost::shared_ptr<ControlList> section = const_cast<ControlList*> (&other)->copy (start, end);
+	std::shared_ptr<ControlList> section = const_cast<ControlList*> (&other)->copy (start, end);
 
 	if (!section->empty ()) {
 		// XXX copy_events() emits Dirty, but this is just assignment copy/construction
@@ -151,10 +151,10 @@ ControlList::~ControlList ()
 	delete _curve;
 }
 
-boost::shared_ptr<ControlList>
+std::shared_ptr<ControlList>
 ControlList::create (const Parameter& id, const ParameterDescriptor& desc, TimeDomain time_style)
 {
-	return boost::shared_ptr<ControlList> (new ControlList (id, desc, time_style));
+	return std::shared_ptr<ControlList> (new ControlList (id, desc, time_style));
 }
 
 bool
@@ -1831,10 +1831,10 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const& 
  *  @param end End position in model coordinates.
  *  @param op 0 = cut, 1 = copy, 2 = clear.
  */
-boost::shared_ptr<ControlList>
+std::shared_ptr<ControlList>
 ControlList::cut_copy_clear (timepos_t const& start_time, timepos_t const& end_time, int op)
 {
-	boost::shared_ptr<ControlList> nal = create (_parameter, _desc, _time_domain);
+	std::shared_ptr<ControlList> nal = create (_parameter, _desc, _time_domain);
 
 	iterator     s, e;
 	timepos_t    start = start_time;
@@ -1917,13 +1917,13 @@ ControlList::cut_copy_clear (timepos_t const& start_time, timepos_t const& end_t
 	return nal;
 }
 
-boost::shared_ptr<ControlList>
+std::shared_ptr<ControlList>
 ControlList::cut (timepos_t const& start, timepos_t const& end)
 {
 	return cut_copy_clear (start, end, 0);
 }
 
-boost::shared_ptr<ControlList>
+std::shared_ptr<ControlList>
 ControlList::copy (timepos_t const& start, timepos_t const& end)
 {
 	return cut_copy_clear (start, end, 1);

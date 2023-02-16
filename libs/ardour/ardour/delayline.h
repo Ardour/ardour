@@ -72,7 +72,7 @@ private:
 	typedef std::vector<boost::shared_array<MidiBuffer> > MidiDlyBuf;
 
 	AudioDlyBuf _buf;
-	boost::shared_ptr<MidiBuffer> _midi_buf;
+	std::shared_ptr<MidiBuffer> _midi_buf;
 
 #ifndef NDEBUG
 	Glib::Threads::Mutex _set_delay_mutex;

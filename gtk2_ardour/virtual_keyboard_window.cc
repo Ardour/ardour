@@ -100,11 +100,11 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_piano_octave_range.set_active ("7");
 	_transpose_output.set_active ("0");
 
-	_pitchbend            = boost::shared_ptr<VKBDControl> (new VKBDControl ("PB", 8192, 16383));
+	_pitchbend            = std::shared_ptr<VKBDControl> (new VKBDControl ("PB", 8192, 16383));
 	_pitch_slider         = manage (new VSliderController (&_pitch_adjustment, _pitchbend, 0, PX_SCALE (15)));
 	_pitch_slider_tooltip = new Gtkmm2ext::PersistentTooltip (_pitch_slider);
 
-	_modwheel         = boost::shared_ptr<VKBDControl> (new VKBDControl ("MW", 0, 127));
+	_modwheel         = std::shared_ptr<VKBDControl> (new VKBDControl ("MW", 0, 127));
 	_modwheel_slider  = manage (new VSliderController (&_modwheel_adjustment, _modwheel, 0, PX_SCALE (15)));
 	_modwheel_tooltip = new Gtkmm2ext::PersistentTooltip (_modwheel_slider);
 
@@ -137,7 +137,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 
 	int col = 4;
 	for (size_t i = 0; i < VKBD_NCTRLS; ++i, ++col) {
-		_cc[i]      = boost::shared_ptr<VKBDControl> (new VKBDControl ("CC"));
+		_cc[i]      = std::shared_ptr<VKBDControl> (new VKBDControl ("CC"));
 		_cc_knob[i] = manage (new ArdourKnob (ArdourKnob::default_elements, ArdourKnob::Flags (0)));
 		_cc_knob[i]->set_controllable (_cc[i]);
 		_cc_knob[i]->set_size_request (PX_SCALE (21), PX_SCALE (21));

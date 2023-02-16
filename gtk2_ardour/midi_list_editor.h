@@ -46,8 +46,8 @@ class MidiListEditor : public ArdourWindow
 public:
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 
-	MidiListEditor(ARDOUR::Session*, boost::shared_ptr<ARDOUR::MidiRegion>,
-	               boost::shared_ptr<ARDOUR::MidiTrack>);
+	MidiListEditor(ARDOUR::Session*, std::shared_ptr<ARDOUR::MidiRegion>,
+	               std::shared_ptr<ARDOUR::MidiTrack>);
 	~MidiListEditor();
 
 private:
@@ -68,7 +68,7 @@ private:
 		Gtk::TreeModelColumn<uint8_t>     velocity;
 		Gtk::TreeModelColumn<std::string> start;
 		Gtk::TreeModelColumn<std::string> length;
-		Gtk::TreeModelColumn<boost::shared_ptr<NoteType> > _note;
+		Gtk::TreeModelColumn<std::shared_ptr<NoteType> > _note;
 	};
 
 	struct NoteLengthColumns : public Gtk::TreeModel::ColumnRecord
@@ -95,8 +95,8 @@ private:
 	Gtk::VBox                    vbox;
 	Gtk::ToggleButton            sound_notes_button;
 
-	boost::shared_ptr<ARDOUR::MidiRegion> region;
-	boost::shared_ptr<ARDOUR::MidiTrack>  track;
+	std::shared_ptr<ARDOUR::MidiRegion> region;
+	std::shared_ptr<ARDOUR::MidiTrack>  track;
 
 	/** connection used to connect to model's ContentChanged signal */
 	PBD::ScopedConnectionList content_connections;

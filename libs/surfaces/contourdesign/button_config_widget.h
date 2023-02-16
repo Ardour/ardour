@@ -40,8 +40,8 @@ public:
 	ButtonConfigWidget ();
 	~ButtonConfigWidget () {};
 
-	void set_current_config (boost::shared_ptr<ButtonBase> btn_cnf);
-	boost::shared_ptr<ButtonBase> get_current_config (ContourDesignControlProtocol& ccp) const;
+	void set_current_config (std::shared_ptr<ButtonBase> btn_cnf);
+	std::shared_ptr<ButtonBase> get_current_config (ContourDesignControlProtocol& ccp) const;
 
 	sigc::signal<void> Changed;
 

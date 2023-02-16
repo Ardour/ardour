@@ -51,17 +51,17 @@ class LIBEVORAL_API Control
 public:
 	Control (const Parameter&               parameter,
 	         const ParameterDescriptor&     desc,
-	         boost::shared_ptr<ControlList> list);
+	         std::shared_ptr<ControlList> list);
 
 	virtual ~Control() {}
 
 	virtual void   set_double (double val, Temporal::timepos_t const & when = Temporal::timepos_t (), bool to_list = false);
 	virtual double get_double () const { return _user_value; }
 
-	void set_list(boost::shared_ptr<ControlList>);
+	void set_list(std::shared_ptr<ControlList>);
 
-	boost::shared_ptr<ControlList>       list()       { return _list; }
-	boost::shared_ptr<const ControlList> list() const { return _list; }
+	std::shared_ptr<ControlList>       list()       { return _list; }
+	std::shared_ptr<const ControlList> list() const { return _list; }
 
 	inline const Parameter& parameter() const { return _parameter; }
 
@@ -70,7 +70,7 @@ public:
 
 protected:
 	Parameter                      _parameter;
-	boost::shared_ptr<ControlList> _list;
+	std::shared_ptr<ControlList> _list;
 	double                         _user_value;
 	PBD::ScopedConnection          _list_marked_dirty_connection;
 

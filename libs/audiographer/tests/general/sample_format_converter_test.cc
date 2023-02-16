@@ -32,7 +32,7 @@ class SampleFormatConverterTest : public CppUnit::TestFixture
 	void testInit()
 	{
 		// Float never uses dithering and should always use full 32 bits of data
-		boost::shared_ptr<SampleFormatConverter<float> > f_converter (new SampleFormatConverter<float>(1));
+		std::shared_ptr<SampleFormatConverter<float> > f_converter (new SampleFormatConverter<float>(1));
 		f_converter->init (samples, D_Tri, 32); // Doesn't throw
 		CPPUNIT_ASSERT_THROW (f_converter->init (samples, D_Tri, 24), Exception);
 		CPPUNIT_ASSERT_THROW (f_converter->init (samples, D_Tri, 48), Exception);
@@ -40,20 +40,20 @@ class SampleFormatConverterTest : public CppUnit::TestFixture
 		/* Test that too large data widths throw.
 		   We are fine with unnecessarily narrow data widths */
 
-		boost::shared_ptr<SampleFormatConverter<int32_t> > i_converter (new SampleFormatConverter<int32_t>(1));
+		std::shared_ptr<SampleFormatConverter<int32_t> > i_converter (new SampleFormatConverter<int32_t>(1));
 		i_converter->init (samples, D_Tri, 32); // Doesn't throw
 		i_converter->init (samples, D_Tri, 24); // Doesn't throw
 		i_converter->init (samples, D_Tri, 8); // Doesn't throw
 		i_converter->init (samples, D_Tri, 16); // Doesn't throw
 		CPPUNIT_ASSERT_THROW (i_converter->init (samples, D_Tri, 48), Exception);
 
-		boost::shared_ptr<SampleFormatConverter<int16_t> > i16_converter (new SampleFormatConverter<int16_t>(1));
+		std::shared_ptr<SampleFormatConverter<int16_t> > i16_converter (new SampleFormatConverter<int16_t>(1));
 		i16_converter->init (samples, D_Tri, 16); // Doesn't throw
 		i16_converter->init (samples, D_Tri, 8); // Doesn't throw
 		CPPUNIT_ASSERT_THROW (i16_converter->init (samples, D_Tri, 32), Exception);
 		CPPUNIT_ASSERT_THROW (i16_converter->init (samples, D_Tri, 48), Exception);
 
-		boost::shared_ptr<SampleFormatConverter<uint8_t> > ui_converter (new SampleFormatConverter<uint8_t>(1));
+		std::shared_ptr<SampleFormatConverter<uint8_t> > ui_converter (new SampleFormatConverter<uint8_t>(1));
 		ui_converter->init (samples, D_Tri, 8); // Doesn't throw
 		ui_converter->init (samples, D_Tri, 4); // Doesn't throw
 		CPPUNIT_ASSERT_THROW (ui_converter->init (samples, D_Tri, 16), Exception);
@@ -61,8 +61,8 @@ class SampleFormatConverterTest : public CppUnit::TestFixture
 
 	void testFrameCount()
 	{
-		boost::shared_ptr<SampleFormatConverter<int32_t> > converter (new SampleFormatConverter<int32_t>(1));
-		boost::shared_ptr<VectorSink<int32_t> > sink (new VectorSink<int32_t>());
+		std::shared_ptr<SampleFormatConverter<int32_t> > converter (new SampleFormatConverter<int32_t>(1));
+		std::shared_ptr<VectorSink<int32_t> > sink (new VectorSink<int32_t>());
 
 		converter->init (samples, D_Tri, 32);
 		converter->add_output (sink);
@@ -90,8 +90,8 @@ class SampleFormatConverterTest : public CppUnit::TestFixture
 
 	void testFloat()
 	{
-		boost::shared_ptr<SampleFormatConverter<float> > converter (new SampleFormatConverter<float>(1));
-		boost::shared_ptr<VectorSink<float> > sink (new VectorSink<float>());
+		std::shared_ptr<SampleFormatConverter<float> > converter (new SampleFormatConverter<float>(1));
+		std::shared_ptr<VectorSink<float> > sink (new VectorSink<float>());
 		samplecnt_t samples_output = 0;
 
 		converter->init(samples, D_Tri, 32);
@@ -123,8 +123,8 @@ class SampleFormatConverterTest : public CppUnit::TestFixture
 
 	void testInt32()
 	{
-		boost::shared_ptr<SampleFormatConverter<int32_t> > converter (new SampleFormatConverter<int32_t>(1));
-		boost::shared_ptr<VectorSink<int32_t> > sink (new VectorSink<int32_t>());
+		std::shared_ptr<SampleFormatConverter<int32_t> > converter (new SampleFormatConverter<int32_t>(1));
+		std::shared_ptr<VectorSink<int32_t> > sink (new VectorSink<int32_t>());
 		samplecnt_t samples_output = 0;
 
 		converter->init(samples, D_Tri, 32);
@@ -139,8 +139,8 @@ class SampleFormatConverterTest : public CppUnit::TestFixture
 
 	void testInt24()
 	{
-		boost::shared_ptr<SampleFormatConverter<int32_t> > converter (new SampleFormatConverter<int32_t>(1));
-		boost::shared_ptr<VectorSink<int32_t> > sink (new VectorSink<int32_t>());
+		std::shared_ptr<SampleFormatConverter<int32_t> > converter (new SampleFormatConverter<int32_t>(1));
+		std::shared_ptr<VectorSink<int32_t> > sink (new VectorSink<int32_t>());
 		samplecnt_t samples_output = 0;
 
 		converter->init(samples, D_Tri, 24);
@@ -155,8 +155,8 @@ class SampleFormatConverterTest : public CppUnit::TestFixture
 
 	void testInt16()
 	{
-		boost::shared_ptr<SampleFormatConverter<int16_t> > converter (new SampleFormatConverter<int16_t>(1));
-		boost::shared_ptr<VectorSink<int16_t> > sink (new VectorSink<int16_t>());
+		std::shared_ptr<SampleFormatConverter<int16_t> > converter (new SampleFormatConverter<int16_t>(1));
+		std::shared_ptr<VectorSink<int16_t> > sink (new VectorSink<int16_t>());
 		samplecnt_t samples_output = 0;
 
 		converter->init(samples, D_Tri, 16);
@@ -171,8 +171,8 @@ class SampleFormatConverterTest : public CppUnit::TestFixture
 
 	void testUint8()
 	{
-		boost::shared_ptr<SampleFormatConverter<uint8_t> > converter (new SampleFormatConverter<uint8_t>(1));
-		boost::shared_ptr<VectorSink<uint8_t> > sink (new VectorSink<uint8_t>());
+		std::shared_ptr<SampleFormatConverter<uint8_t> > converter (new SampleFormatConverter<uint8_t>(1));
+		std::shared_ptr<VectorSink<uint8_t> > sink (new VectorSink<uint8_t>());
 		samplecnt_t samples_output = 0;
 
 		converter->init(samples, D_Tri, 8);
@@ -187,8 +187,8 @@ class SampleFormatConverterTest : public CppUnit::TestFixture
 
 	void testChannelCount()
 	{
-		boost::shared_ptr<SampleFormatConverter<int32_t> > converter (new SampleFormatConverter<int32_t>(3));
-		boost::shared_ptr<VectorSink<int32_t> > sink (new VectorSink<int32_t>());
+		std::shared_ptr<SampleFormatConverter<int32_t> > converter (new SampleFormatConverter<int32_t>(3));
+		std::shared_ptr<VectorSink<int32_t> > sink (new VectorSink<int32_t>());
 		samplecnt_t samples_output = 0;
 
 		converter->init(samples, D_Tri, 32);

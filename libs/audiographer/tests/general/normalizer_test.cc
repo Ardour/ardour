@@ -48,9 +48,9 @@ class NormalizerTest : public CppUnit::TestFixture
 	}
 
   private:
-	boost::shared_ptr<Normalizer> normalizer;
-	boost::shared_ptr<PeakReader> peak_reader;
-	boost::shared_ptr<VectorSink<float> > sink;
+	std::shared_ptr<Normalizer> normalizer;
+	std::shared_ptr<PeakReader> peak_reader;
+	std::shared_ptr<VectorSink<float> > sink;
 
 	float * random_data;
 	samplecnt_t samples;

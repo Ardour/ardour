@@ -203,7 +203,7 @@ public:
 	 *
 	 * @param r Region to consider auditioning
 	 */
-	virtual void consider_auditioning (boost::shared_ptr<ARDOUR::Region> r) = 0;
+	virtual void consider_auditioning (std::shared_ptr<ARDOUR::Region> r) = 0;
 
 	/* import dialogs -> ardour-ui ?! */
 	virtual void external_audio_dialog () = 0;
@@ -283,12 +283,12 @@ public:
 	/** Import existing media */
 	virtual void do_import (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, ARDOUR::SrcQuality,
 	                        ARDOUR::MidiTrackNameSource, ARDOUR::MidiTempoMapDisposition, Temporal::timepos_t&,
-	                        boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>(),
-	                        boost::shared_ptr<ARDOUR::Track> track = boost::shared_ptr<ARDOUR::Track>(),
+	                        std::shared_ptr<ARDOUR::PluginInfo> instrument = std::shared_ptr<ARDOUR::PluginInfo>(),
+	                        std::shared_ptr<ARDOUR::Track> track = std::shared_ptr<ARDOUR::Track>(),
 	                        bool with_markers = false) = 0;
 	virtual void do_embed (std::vector<std::string> paths, Editing::ImportDisposition, Editing::ImportMode mode, Temporal::timepos_t&,
-	                       boost::shared_ptr<ARDOUR::PluginInfo> instrument = boost::shared_ptr<ARDOUR::PluginInfo>(),
-	                       boost::shared_ptr<ARDOUR::Track> track = boost::shared_ptr<ARDOUR::Track>()) = 0;
+	                       std::shared_ptr<ARDOUR::PluginInfo> instrument = std::shared_ptr<ARDOUR::PluginInfo>(),
+	                       std::shared_ptr<ARDOUR::Track> track = std::shared_ptr<ARDOUR::Track>()) = 0;
 
 	/** Open main export dialog */
 	virtual void export_audio () = 0;
@@ -312,10 +312,10 @@ public:
 	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
 	virtual samplecnt_t get_current_zoom () const = 0;
 	virtual void reset_zoom (samplecnt_t) = 0;
-	virtual void clear_playlist (boost::shared_ptr<ARDOUR::Playlist>) = 0;
+	virtual void clear_playlist (std::shared_ptr<ARDOUR::Playlist>) = 0;
 	virtual void clear_grouped_playlists (RouteUI*) = 0;
 
-	virtual void mapped_select_playlist_matching (RouteUI&, boost::weak_ptr<ARDOUR::Playlist> pl) = 0;
+	virtual void mapped_select_playlist_matching (RouteUI&, std::weak_ptr<ARDOUR::Playlist> pl) = 0;
 
 	virtual void mapover_grouped_routes (sigc::slot<void, RouteUI&> sl, RouteUI*, PBD::PropertyID) const = 0;
 	virtual void mapover_armed_routes (sigc::slot<void, RouteUI&> sl) const = 0;
@@ -381,7 +381,7 @@ public:
 	virtual Temporal::timepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE, bool from_context_menu = false, bool from_outside_canvas = false) = 0;
 	virtual void toggle_meter_updating() = 0;
 	virtual void split_regions_at (Temporal::timepos_t const &, RegionSelection&) = 0;
-	virtual void split_region_at_points (boost::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
+	virtual void split_region_at_points (std::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
 	virtual void mouse_add_new_marker (Temporal::timepos_t where, ARDOUR::Location::Flags extra_flags = ARDOUR::Location::Flags (0), int32_t cue_id = 0) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
@@ -416,11 +416,11 @@ public:
 
 	virtual StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const = 0;
 
-	virtual TimeAxisView* time_axis_view_from_stripable (boost::shared_ptr<ARDOUR::Stripable> s) const = 0;
+	virtual TimeAxisView* time_axis_view_from_stripable (std::shared_ptr<ARDOUR::Stripable> s) const = 0;
 
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
-	virtual RegionView* regionview_from_region (boost::shared_ptr<ARDOUR::Region>) const = 0;
-	virtual RouteTimeAxisView* rtav_from_route (boost::shared_ptr<ARDOUR::Route>) const = 0;
+	virtual RegionView* regionview_from_region (std::shared_ptr<ARDOUR::Region>) const = 0;
+	virtual RouteTimeAxisView* rtav_from_route (std::shared_ptr<ARDOUR::Route>) const = 0;
 
 	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Realized;
@@ -490,12 +490,12 @@ public:
 
 	virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
 
-	virtual void set_current_trimmable (boost::shared_ptr<ARDOUR::Trimmable>) = 0;
-	virtual void set_current_movable (boost::shared_ptr<ARDOUR::Movable>) = 0;
+	virtual void set_current_trimmable (std::shared_ptr<ARDOUR::Trimmable>) = 0;
+	virtual void set_current_movable (std::shared_ptr<ARDOUR::Movable>) = 0;
 
 	virtual void center_screen (samplepos_t) = 0;
 
-	virtual TrackViewList axis_views_from_routes (boost::shared_ptr<ARDOUR::RouteList>) const = 0;
+	virtual TrackViewList axis_views_from_routes (std::shared_ptr<ARDOUR::RouteList>) const = 0;
 	virtual TrackViewList const & get_track_views () const = 0;
 
 	virtual MixerStrip* get_current_mixer_strip () const = 0;
@@ -550,7 +550,7 @@ public:
 	virtual void get_regions_after (RegionSelection&, Temporal::timepos_t const & where, const TrackViewList& ts) const = 0;
 	virtual RegionSelection get_regions_from_selection_and_mouse (Temporal::timepos_t const &) = 0;
 	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
-	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const = 0;
+	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const = 0;
 
 	virtual void build_region_boundary_cache () = 0;
 	virtual void mark_region_boundary_cache_dirty () = 0;

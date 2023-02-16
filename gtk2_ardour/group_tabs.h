@@ -81,7 +81,7 @@ protected:
 	};
 
 private:
-	static void emit_gui_changed_for_members (boost::shared_ptr<ARDOUR::RouteList>);
+	static void emit_gui_changed_for_members (std::shared_ptr<ARDOUR::RouteList>);
 
 	/** Compute all the tabs for this widget.
 	 *  @return Tabs.
@@ -136,8 +136,8 @@ private:
 	Tab * click_to_tab (double, std::list<Tab>::iterator *, std::list<Tab>::iterator *);
 
 	void route_group_property_changed (ARDOUR::RouteGroup *);
-	void route_added_to_route_group (ARDOUR::RouteGroup *, boost::weak_ptr<ARDOUR::Route>);
-	void route_removed_from_route_group (ARDOUR::RouteGroup *, boost::weak_ptr<ARDOUR::Route>);
+	void route_added_to_route_group (ARDOUR::RouteGroup *, std::weak_ptr<ARDOUR::Route>);
+	void route_removed_from_route_group (ARDOUR::RouteGroup *, std::weak_ptr<ARDOUR::Route>);
 
 	void assign_group_to_master (uint32_t which, ARDOUR::RouteGroup*, bool rename_master) const;
 	void unassign_group_to_master (uint32_t which, ARDOUR::RouteGroup*) const;

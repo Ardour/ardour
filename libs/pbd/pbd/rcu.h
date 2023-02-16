@@ -55,7 +55,7 @@ public:
 	RCUManager (T* new_rcu_value)
 	{
 		g_atomic_int_set (&_active_reads, 0);
-		x.rcu_value = new boost::shared_ptr<T> (new_rcu_value);
+		x.rcu_value = new std::shared_ptr<T> (new_rcu_value);
 	}
 
 	virtual ~RCUManager ()
@@ -63,9 +63,9 @@ public:
 		delete x.rcu_value;
 	}
 
-	boost::shared_ptr<T> reader () const
+	std::shared_ptr<T> reader () const
 	{
-		boost::shared_ptr<T> rv;
+		std::shared_ptr<T> rv;
 
 		/* Keep count of any readers in this section of code, so writers can
 		 * wait until rcu_value is no longer in use after an atomic exchange
@@ -76,7 +76,7 @@ public:
 		 * consider reverting f87de76b9fc8b3a5a.
 		 */
 		g_atomic_int_inc (&_active_reads);
-		rv = *((boost::shared_ptr<T>*)g_atomic_pointer_get (&x.gptr));
+		rv = *((std::shared_ptr<T>*)g_atomic_pointer_get (&x.gptr));
 		g_atomic_int_add (&_active_reads, -1);
 
 		return rv;
@@ -87,8 +87,8 @@ public:
 	 * for one implementation.
 	 */
 
-	virtual boost::shared_ptr<T> write_copy ()                           = 0;
-	virtual bool                 update (boost::shared_ptr<T> new_value) = 0;
+	virtual std::shared_ptr<T> write_copy ()                           = 0;
+	virtual bool                 update (std::shared_ptr<T> new_value) = 0;
 
 protected:
 	/* ordinarily this would simply be a declaration of a ptr to a shared_ptr<T>. However, the atomic
@@ -100,7 +100,7 @@ protected:
 	 * evaluate to the same address.
 	 */
 	union {
-		boost::shared_ptr<T>*         rcu_value;
+		std::shared_ptr<T>*         rcu_value;
 		mutable GATOMIC_QUAL gpointer gptr;
 	} x;
 
@@ -150,20 +150,20 @@ public:
 	{
 	}
 
-	void init (boost::shared_ptr<T> new_rcu_value) {
-		assert  (*RCUManager<T>::x.rcu_value == boost::shared_ptr<T> ());
+	void init (std::shared_ptr<T> new_rcu_value) {
+		assert  (*RCUManager<T>::x.rcu_value == std::shared_ptr<T> ());
 
-		boost::shared_ptr<T>* new_spp = new boost::shared_ptr<T> (new_rcu_value);
+		std::shared_ptr<T>* new_spp = new std::shared_ptr<T> (new_rcu_value);
 		g_atomic_pointer_set (&RCUManager<T>::x.gptr, new_spp);
 	}
 
-	boost::shared_ptr<T> write_copy ()
+	std::shared_ptr<T> write_copy ()
 	{
 		_lock.lock ();
 
 		// clean out any dead wood
 
-		typename std::list<boost::shared_ptr<T> >::iterator i;
+		typename std::list<std::shared_ptr<T> >::iterator i;
 
 		for (i = _dead_wood.begin (); i != _dead_wood.end ();) {
 			if ((*i).unique ()) {
@@ -180,7 +180,7 @@ public:
 
 		_current_write_old = RCUManager<T>::x.rcu_value;
 
-		boost::shared_ptr<T> new_copy (new T (**_current_write_old));
+		std::shared_ptr<T> new_copy (new T (**_current_write_old));
 
 		return new_copy;
 
@@ -193,11 +193,11 @@ public:
 		_lock.unlock();
 	}
 
-	bool update (boost::shared_ptr<T> new_value)
+	bool update (std::shared_ptr<T> new_value)
 	{
 		/* we still hold the write lock - other writers are locked out */
 
-		boost::shared_ptr<T>* new_spp = new boost::shared_ptr<T> (new_value);
+		std::shared_ptr<T>* new_spp = new std::shared_ptr<T> (new_value);
 
 		/* update, by atomic compare&swap. Only succeeds if the old
 		 * value has not been changed.
@@ -262,8 +262,8 @@ public:
 
 private:
 	Glib::Threads::Mutex             _lock;
-	boost::shared_ptr<T>*            _current_write_old;
-	std::list<boost::shared_ptr<T> > _dead_wood;
+	std::shared_ptr<T>*            _current_write_old;
+	std::list<std::shared_ptr<T> > _dead_wood;
 };
 
 /** RCUWriter is a convenience object that implements write_copy/update via
@@ -274,7 +274,7 @@ private:
  * @code
  * {
  *      RCUWriter writer (object_manager);
- *      boost::shared_ptr<T> copy = writer.get_copy();
+ *      std::shared_ptr<T> copy = writer.get_copy();
  *      ... modify copy ...
  *
  * } <= writer goes out of scope, update invoked
@@ -315,14 +315,14 @@ public:
 		}
 	}
 
-	boost::shared_ptr<T> get_copy () const
+	std::shared_ptr<T> get_copy () const
 	{
 		return _copy;
 	}
 
 private:
 	RCUManager<T>&       _manager;
-	boost::shared_ptr<T> _copy;
+	std::shared_ptr<T> _copy;
 };
 
 #endif /* __pbd_rcu_h__ */

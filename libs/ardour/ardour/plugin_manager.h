@@ -105,7 +105,7 @@ public:
 	static uint32_t cache_version ();
 	bool cache_valid () const;
 
-	void scan_log (std::vector<boost::shared_ptr<PluginScanLogEntry> >&) const;
+	void scan_log (std::vector<std::shared_ptr<PluginScanLogEntry> >&) const;
 	void clear_stale_log ();
 
 	bool whitelist (ARDOUR::PluginType, std::string const&, bool force);
@@ -185,7 +185,7 @@ public:
 	PBD::Signal3<void, ARDOUR::PluginType, std::string, std::string> PluginTagChanged; //PluginType t, string id, string tag
 
 private:
-	typedef boost::shared_ptr<PluginScanLogEntry> PSLEPtr;
+	typedef std::shared_ptr<PluginScanLogEntry> PSLEPtr;
 
 	struct PSLEPtrSort {
 		bool operator() (PSLEPtr const& a, PSLEPtr const& b) const {

@@ -41,7 +41,7 @@ ControlSet::ControlSet (ControlSet const & other)
 }
 
 void
-ControlSet::add_control(boost::shared_ptr<Control> ac)
+ControlSet::add_control(std::shared_ptr<Control> ac)
 {
 	_controls[ac->parameter()] = ac;
 
@@ -71,7 +71,7 @@ ControlSet::what_has_data (set<Parameter>& s) const
  * a control will be created, added to this set, and returned.
  * If \a create_if_missing is false this function may return null.
  */
-boost::shared_ptr<Control>
+std::shared_ptr<Control>
 ControlSet::control (const Parameter& parameter, bool create_if_missing)
 {
 	Controls::iterator i = _controls.find(parameter);
@@ -80,12 +80,12 @@ ControlSet::control (const Parameter& parameter, bool create_if_missing)
 		return i->second;
 
 	} else if (create_if_missing) {
-		boost::shared_ptr<Control> ac(control_factory(parameter));
+		std::shared_ptr<Control> ac(control_factory(parameter));
 		add_control(ac);
 		return ac;
 
 	} else {
-		return boost::shared_ptr<Control>();
+		return std::shared_ptr<Control>();
 	}
 }
 

@@ -53,14 +53,14 @@ public:
 	PortGroup (std::string const & n);
 	~PortGroup ();
 
-	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>, bool allow_dups = false);
-	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO> io);
-	void add_bundle (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO>, Gdk::Color);
-	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);
-	boost::shared_ptr<ARDOUR::Bundle> only_bundle ();
+	void add_bundle (std::shared_ptr<ARDOUR::Bundle>, bool allow_dups = false);
+	void add_bundle (std::shared_ptr<ARDOUR::Bundle>, std::shared_ptr<ARDOUR::IO> io);
+	void add_bundle (std::shared_ptr<ARDOUR::Bundle>, std::shared_ptr<ARDOUR::IO>, Gdk::Color);
+	void remove_bundle (std::shared_ptr<ARDOUR::Bundle>);
+	std::shared_ptr<ARDOUR::Bundle> only_bundle ();
 	void clear ();
 	ARDOUR::ChanCount total_channels () const;
-	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
+	std::shared_ptr<ARDOUR::IO> io_from_bundle (std::shared_ptr<ARDOUR::Bundle>) const;
 	void remove_duplicates ();
 
 	std::string name; ///< name for the group
@@ -74,15 +74,15 @@ public:
 	PBD::Signal1<void,ARDOUR::Bundle::Change> BundleChanged;
 
 	struct BundleRecord {
-	    boost::shared_ptr<ARDOUR::Bundle> bundle;
+	    std::shared_ptr<ARDOUR::Bundle> bundle;
 	    /** IO whose ports are in the bundle, or 0.  This is so that we can do things like adding
 		ports to the IO from matrix editor menus. */
-	    boost::weak_ptr<ARDOUR::IO> io;
+	    std::weak_ptr<ARDOUR::IO> io;
 	    Gdk::Color colour;
 	    bool has_colour;
 	    PBD::ScopedConnection changed_connection;
 
-	    BundleRecord (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO>, Gdk::Color, bool has_colour);
+	    BundleRecord (std::shared_ptr<ARDOUR::Bundle>, std::shared_ptr<ARDOUR::IO>, Gdk::Color, bool has_colour);
 	};
 
 	typedef std::list<BundleRecord*> BundleList;
@@ -93,7 +93,7 @@ public:
 
 private:
 	void bundle_changed (ARDOUR::Bundle::Change);
-	void add_bundle_internal (boost::shared_ptr<ARDOUR::Bundle>, boost::shared_ptr<ARDOUR::IO>, bool, Gdk::Color, bool);
+	void add_bundle_internal (std::shared_ptr<ARDOUR::Bundle>, std::shared_ptr<ARDOUR::IO>, bool, Gdk::Color, bool);
 
 	BundleList _bundles;
 };
@@ -105,19 +105,19 @@ public:
 	PortGroupList ();
 	~PortGroupList();
 
-	typedef std::vector<boost::shared_ptr<PortGroup> > List;
+	typedef std::vector<std::shared_ptr<PortGroup> > List;
 
-	void add_group (boost::shared_ptr<PortGroup>);
-	void add_group_if_not_empty (boost::shared_ptr<PortGroup>);
+	void add_group (std::shared_ptr<PortGroup>);
+	void add_group_if_not_empty (std::shared_ptr<PortGroup>);
 	void gather (ARDOUR::Session *, ARDOUR::DataType, bool, bool, bool);
 	PortGroup::BundleList const & bundles () const;
 	void clear ();
-	void remove_bundle (boost::shared_ptr<ARDOUR::Bundle>);
+	void remove_bundle (std::shared_ptr<ARDOUR::Bundle>);
 	ARDOUR::ChanCount total_channels () const;
 	uint32_t size () const {
 		return _groups.size();
 	}
-	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
+	std::shared_ptr<ARDOUR::IO> io_from_bundle (std::shared_ptr<ARDOUR::Bundle>) const;
 
 	void suspend_signals ();
 	void resume_signals ();
@@ -144,9 +144,9 @@ private:
 	std::string common_prefix_before (std::vector<std::string> const &, std::string const &) const;
 	void emit_changed ();
 	void emit_bundle_changed (ARDOUR::Bundle::Change);
-	boost::shared_ptr<ARDOUR::Bundle> make_bundle_from_ports (std::vector<std::string> const &, ARDOUR::DataType, bool, std::string const& bundle_name = std::string()) const;
-	void add_bundles_for_ports (std::vector<std::string> const &, ARDOUR::DataType, bool, bool, boost::shared_ptr<PortGroup>) const;
-	void maybe_add_processor_to_list (boost::weak_ptr<ARDOUR::Processor>, std::list<boost::shared_ptr<ARDOUR::IO> > *, bool, std::set<boost::shared_ptr<ARDOUR::IO> > &);
+	std::shared_ptr<ARDOUR::Bundle> make_bundle_from_ports (std::vector<std::string> const &, ARDOUR::DataType, bool, std::string const& bundle_name = std::string()) const;
+	void add_bundles_for_ports (std::vector<std::string> const &, ARDOUR::DataType, bool, bool, std::shared_ptr<PortGroup>) const;
+	void maybe_add_processor_to_list (std::weak_ptr<ARDOUR::Processor>, std::list<std::shared_ptr<ARDOUR::IO> > *, bool, std::set<std::shared_ptr<ARDOUR::IO> > &);
 
 	mutable PortGroup::BundleList _bundles;
 	List _groups;

@@ -18,6 +18,8 @@
  * with this program; if not, write to the Free Software Foundation, Inc.,
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
+
+#include <cassert>
 #include <cmath>
 
 #include "pbd/basename.h"
@@ -117,7 +119,7 @@ swing_position (Temporal::Beats pos, Temporal::Beats grid, double swing_strength
 }
 
 Command*
-Quantize::operator () (boost::shared_ptr<MidiModel> model,
+Quantize::operator () (std::shared_ptr<MidiModel> model,
                        Temporal::Beats position,
                        std::vector<Evoral::Sequence<Temporal::Beats>::Notes>& seqs)
 {

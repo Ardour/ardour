@@ -1238,7 +1238,7 @@ PluginManager::auv2_plugin (CAComponentDescription const& desc, AUv2Info const& 
 {
 	PSLEPtr psle (scan_log_entry (AudioUnit, auv2_stringify_descriptor (desc)));
 
-	AUPluginInfoPtr info (new AUPluginInfo (boost::shared_ptr<CAComponentDescription> (new CAComponentDescription (desc))));
+	AUPluginInfoPtr info (new AUPluginInfo (std::shared_ptr<CAComponentDescription> (new CAComponentDescription (desc))));
 	psle->msg (PluginScanLogEntry::OK);
 
 	info->unique_id   = nfo.id;
@@ -3319,7 +3319,7 @@ PluginManager::rescan_faulty ()
 
 /* ****************************************************************************/
 void
-PluginManager::scan_log (std::vector<boost::shared_ptr<PluginScanLogEntry> >& l) const
+PluginManager::scan_log (std::vector<std::shared_ptr<PluginScanLogEntry> >& l) const
 {
 	for (PluginScanLog::const_iterator i = _plugin_scan_log.begin(); i != _plugin_scan_log.end(); ++i) {
 		l.push_back (*i);

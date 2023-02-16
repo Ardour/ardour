@@ -245,14 +245,14 @@ VST3PluginModule::release_factory ()
 	}
 }
 
-boost::shared_ptr<VST3PluginModule>
+std::shared_ptr<VST3PluginModule>
 VST3PluginModule::load (std::string const& path)
 {
 #ifdef __APPLE__
-	return boost::shared_ptr<VST3PluginModule> (new VST3MacModule (path));
+	return std::shared_ptr<VST3PluginModule> (new VST3MacModule (path));
 #elif defined PLATFORM_WINDOWS
-	return boost::shared_ptr<VST3PluginModule> (new VST3WindowsModule (path));
+	return std::shared_ptr<VST3PluginModule> (new VST3WindowsModule (path));
 #else
-	return boost::shared_ptr<VST3PluginModule> (new VST3LinuxModule (path));
+	return std::shared_ptr<VST3PluginModule> (new VST3LinuxModule (path));
 #endif
 }

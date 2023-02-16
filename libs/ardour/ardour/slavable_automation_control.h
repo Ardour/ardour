@@ -31,7 +31,7 @@ public:
 	SlavableAutomationControl(ARDOUR::Session&,
 	                          const Evoral::Parameter&                  parameter,
 	                          const ParameterDescriptor&                desc,
-	                          boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
+	                          std::shared_ptr<ARDOUR::AutomationList> l=std::shared_ptr<ARDOUR::AutomationList>(),
 	                          const std::string&                        name="",
 	                          PBD::Controllable::Flag                   flags=PBD::Controllable::Flag (0)
 		);
@@ -40,13 +40,13 @@ public:
 
 	double get_value () const;
 
-	void add_master (boost::shared_ptr<AutomationControl>);
-	void remove_master (boost::shared_ptr<AutomationControl>);
+	void add_master (std::shared_ptr<AutomationControl>);
+	void remove_master (std::shared_ptr<AutomationControl>);
 	void clear_masters ();
-	bool slaved_to (boost::shared_ptr<AutomationControl>) const;
+	bool slaved_to (std::shared_ptr<AutomationControl>) const;
 	bool slaved () const;
 
-	std::set<boost::shared_ptr<AutomationControl>> masters () const;
+	std::set<std::shared_ptr<AutomationControl>> masters () const;
 
 	virtual void automation_run (samplepos_t start, pframes_t nframes);
 
@@ -90,14 +90,14 @@ protected:
 
 	class MasterRecord {
 	public:
-		MasterRecord (boost::weak_ptr<AutomationControl> gc, double vc, double vm)
+		MasterRecord (std::weak_ptr<AutomationControl> gc, double vc, double vm)
 			: _master (gc)
 			, _yn (false)
 			, _val_ctrl (vc)
 			, _val_master (vm)
 		{}
 
-		boost::shared_ptr<AutomationControl> master() const { assert(_master.lock()); return _master.lock(); }
+		std::shared_ptr<AutomationControl> master() const { assert(_master.lock()); return _master.lock(); }
 
 		double val_ctrl () const { return _val_ctrl; }
 		double val_master () const { return _val_master; }
@@ -119,7 +119,7 @@ protected:
 		PBD::ScopedConnection dropped_connection;
 
   private:
-		boost::weak_ptr<AutomationControl> _master;
+		std::weak_ptr<AutomationControl> _master;
 		/* holds most recently seen master value for boolean/toggle controls */
 		bool   _yn;
 
@@ -132,10 +132,10 @@ protected:
 	typedef std::map<PBD::ID,MasterRecord> Masters;
 	Masters _masters;
 
-	void   master_going_away (boost::weak_ptr<AutomationControl>);
+	void   master_going_away (std::weak_ptr<AutomationControl>);
 	double get_value_locked() const;
 	void   actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
-	void   update_boolean_masters_records (boost::shared_ptr<AutomationControl>);
+	void   update_boolean_masters_records (std::shared_ptr<AutomationControl>);
 
 	virtual bool get_masters_curve_locked (samplepos_t, samplepos_t, float*, samplecnt_t) const;
 	bool masters_curve_multiply (timepos_t const &, timepos_t const &, float*, samplecnt_t) const;
@@ -143,14 +143,14 @@ protected:
 	virtual double reduce_by_masters_locked (double val, bool) const;
 	virtual double scale_automation_callback (double val, double ratio) const;
 
-	virtual bool handle_master_change (boost::shared_ptr<AutomationControl>);
+	virtual bool handle_master_change (std::shared_ptr<AutomationControl>);
 	virtual bool boolean_automation_run_locked (samplepos_t start, pframes_t len);
 	bool boolean_automation_run (samplepos_t start, pframes_t len);
 
-	virtual void   master_changed (bool from_self, GroupControlDisposition gcd, boost::weak_ptr<AutomationControl>);
+	virtual void   master_changed (bool from_self, GroupControlDisposition gcd, std::weak_ptr<AutomationControl>);
 	virtual double get_masters_value_locked () const;
-	virtual void   pre_remove_master (boost::shared_ptr<AutomationControl>) {}
-	virtual void   post_add_master (boost::shared_ptr<AutomationControl>) {}
+	virtual void   pre_remove_master (std::shared_ptr<AutomationControl>) {}
+	virtual void   post_add_master (std::shared_ptr<AutomationControl>) {}
 
 	XMLNode* _masters_node; /* used to store master ratios in ::set_state() for later use */
 };

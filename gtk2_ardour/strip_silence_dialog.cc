@@ -175,7 +175,7 @@ void
 StripSilenceDialog::silences (AudioIntervalMap& m)
 {
 	for (list<ViewInterval>::iterator v = views.begin(); v != views.end(); ++v) {
-		pair<boost::shared_ptr<Region>,AudioIntervalResult> newpair (v->view->region(), v->intervals);
+		pair<std::shared_ptr<Region>,AudioIntervalResult> newpair (v->view->region(), v->intervals);
 		m.insert (newpair);
 	}
 }
@@ -268,7 +268,7 @@ StripSilenceDialog::detection_thread_work ()
 		analysis_progress_cur = 0;
 		analysis_progress_max = views.size();
 		for (list<ViewInterval>::iterator i = views.begin(); i != views.end(); ++i) {
-			boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> ((*i).view->region());
+			std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> ((*i).view->region());
 
 			if (ar) {
 				i->intervals = ar->find_silence (dB_to_coefficient (threshold ()), minimum_length (), fade_length(), _interthread_info);

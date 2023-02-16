@@ -46,7 +46,7 @@ class ReadOnlyControl;
 class LIBARDOUR_API IOPlug : public SessionObject, public PlugInsertBase, public Latent, public GraphNode
 {
 public:
-	IOPlug (Session&, boost::shared_ptr<Plugin> = boost::shared_ptr<Plugin>(), bool pre = true);
+	IOPlug (Session&, std::shared_ptr<Plugin> = std::shared_ptr<Plugin>(), bool pre = true);
 	virtual ~IOPlug ();
 
 	bool set_name (std::string const&);
@@ -63,8 +63,8 @@ public:
 
 	bool is_pre () const { return _pre; }
 
-	boost::shared_ptr<IO> input () const { return _input; }
-	boost::shared_ptr<IO> output () const { return _output; }
+	std::shared_ptr<IO> input () const { return _input; }
+	std::shared_ptr<IO> output () const { return _output; }
 
 	Gtkmm2ext::WindowProxy* window_proxy () const { return _window_proxy; }
 	void set_window_proxy (Gtkmm2ext::WindowProxy* wp) { _window_proxy = wp; }
@@ -79,7 +79,7 @@ public:
 
 	/* PlugInsertBase */
 	uint32_t get_count () const { return 1; }
-	boost::shared_ptr<Plugin> plugin (uint32_t num = 0) const { return _plugin; }
+	std::shared_ptr<Plugin> plugin (uint32_t num = 0) const { return _plugin; }
 	PluginType type () const { return _plugin->get_info()->type; }
 
 	UIElements ui_elements () const;
@@ -87,7 +87,7 @@ public:
 	bool write_immediate_event (Evoral::EventType event_type, size_t size, const uint8_t* buf);
 	bool load_preset (Plugin::PresetRecord);
 
-	boost::shared_ptr<ReadOnlyControl> control_output (uint32_t) const;
+	std::shared_ptr<ReadOnlyControl> control_output (uint32_t) const;
 
 	bool reset_parameters_to_default () { return false;}
 	bool can_reset_all_parameters () { return false; }
@@ -97,13 +97,13 @@ public:
 	virtual void clear_stats ();
 
 	/* ControlSet */
-	boost::shared_ptr<Evoral::Control> control_factory (const Evoral::Parameter& id);
+	std::shared_ptr<Evoral::Control> control_factory (const Evoral::Parameter& id);
 
 	/* GraphNode */
 	std::string graph_node_name () const {
 		return name ();
 	}
-	bool direct_feeds_according_to_reality (boost::shared_ptr<GraphNode>, bool* via_send_only = 0);
+	bool direct_feeds_according_to_reality (std::shared_ptr<GraphNode>, bool* via_send_only = 0);
 	void process ();
 
 protected:
@@ -156,12 +156,12 @@ private:
 	bool      _pre;
 	uint32_t  _plugin_signal_latency;
 
-	typedef std::map<uint32_t, boost::shared_ptr<ReadOnlyControl> >CtrlOutMap;
+	typedef std::map<uint32_t, std::shared_ptr<ReadOnlyControl> >CtrlOutMap;
 	CtrlOutMap _control_outputs;
 
 	BufferSet             _bufs;
-	boost::shared_ptr<IO> _input;
-	boost::shared_ptr<IO> _output;
+	std::shared_ptr<IO> _input;
+	std::shared_ptr<IO> _output;
 
 	PortManager::AudioInputPorts _audio_input_ports;
 	PortManager::MIDIInputPorts  _midi_input_ports;

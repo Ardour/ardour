@@ -37,14 +37,14 @@ class ExportPresetSelector : public Gtk::HBox
 public:
 	ExportPresetSelector (bool readonly = false);
 
-	void set_manager (boost::shared_ptr<ARDOUR::ExportProfileManager> manager);
+	void set_manager (std::shared_ptr<ARDOUR::ExportProfileManager> manager);
 
 	sigc::signal<void> CriticalSelectionChanged;
 
 	Gtk::ComboBox& the_combo () { return combo; }
 
 private:
-	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
+	typedef std::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
 	typedef ARDOUR::ExportPresetPtr                         PresetPtr;
 	typedef ARDOUR::ExportProfileManager::PresetList        PresetList;
 

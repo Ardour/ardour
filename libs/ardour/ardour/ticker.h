@@ -46,7 +46,7 @@ public:
 	void tick (samplepos_t, samplepos_t, pframes_t, samplecnt_t);
 
 private:
-	boost::shared_ptr<MidiPort> _midi_port;
+	std::shared_ptr<MidiPort> _midi_port;
 
 	void   reset ();
 	void   resync_latency (bool);

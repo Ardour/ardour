@@ -58,7 +58,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 	~TransportMastersWidget ();
 
 	void update (Temporal::timepos_t);
-	void set_transport_master (boost::shared_ptr<ARDOUR::TransportMaster>);
+	void set_transport_master (std::shared_ptr<ARDOUR::TransportMaster>);
 
 	void set_session (ARDOUR::Session*);
 
@@ -104,7 +104,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 		void mod_request_type (ARDOUR::TransportRequestType);
 
-		boost::shared_ptr<ARDOUR::TransportMaster> tm;
+		std::shared_ptr<ARDOUR::TransportMaster> tm;
 
 		void update (ARDOUR::Session*, ARDOUR::samplepos_t);
 
@@ -168,7 +168,7 @@ class TransportMastersWidget : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 
 	void rebuild ();
 	void clear ();
-	void current_changed (boost::shared_ptr<ARDOUR::TransportMaster> old_master, boost::shared_ptr<ARDOUR::TransportMaster> new_master);
+	void current_changed (std::shared_ptr<ARDOUR::TransportMaster> old_master, std::shared_ptr<ARDOUR::TransportMaster> new_master);
 	void add_master ();
 	void update_usability ();
 	void allow_master_select (bool);

@@ -422,7 +422,7 @@ class Push2 : public MIDISurface
 
 	ModifierState modifier_state() const { return _modifier_state; }
 
-	boost::shared_ptr<Button> button_by_id (ButtonID);
+	std::shared_ptr<Button> button_by_id (ButtonID);
 	static std::string button_name_by_id (ButtonID);
 
 	void strip_buttons_off ();
@@ -438,11 +438,11 @@ class Push2 : public MIDISurface
 
 	bool stop_down () const { return _stop_down; }
 
-	typedef std::map<int,boost::shared_ptr<Pad> > PadMap;
+	typedef std::map<int,std::shared_ptr<Pad> > PadMap;
 	PadMap const & nn_pad_map() const { return _nn_pad_map; }
 
-	boost::shared_ptr<Pad> pad_by_xy (int x, int y);
-	boost::shared_ptr<Button> lower_button_by_column (uint32_t col);
+	std::shared_ptr<Pad> pad_by_xy (int x, int y);
+	std::shared_ptr<Button> lower_button_by_column (uint32_t col);
 
   private:
 	libusb_device_handle* _handle;
@@ -458,16 +458,16 @@ class Push2 : public MIDISurface
 	void relax () {}
 
 	/* map of Buttons by CC */
-	typedef std::map<int,boost::shared_ptr<Button> > CCButtonMap;
+	typedef std::map<int,std::shared_ptr<Button> > CCButtonMap;
 	CCButtonMap _cc_button_map;
 	/* map of Buttons by ButtonID */
-	typedef std::map<ButtonID,boost::shared_ptr<Button> > IDButtonMap;
+	typedef std::map<ButtonID,std::shared_ptr<Button> > IDButtonMap;
 	IDButtonMap _id_button_map;
 	std::set<ButtonID> _buttons_down;
 	std::set<ButtonID> _consumed;
 
 	bool button_long_press_timeout (ButtonID id);
-	void start_press_timeout (boost::shared_ptr<Button>, ButtonID);
+	void start_press_timeout (std::shared_ptr<Button>, ButtonID);
 
 	void init_buttons (bool startup);
 	void init_touch_strip ();
@@ -479,11 +479,11 @@ class Push2 : public MIDISurface
 
 	/* array of Pads by x,y duple (indexed as (x*8) + y */
 
-	std::vector<boost::shared_ptr<Pad> > _xy_pad_map;
+	std::vector<std::shared_ptr<Pad> > _xy_pad_map;
 
 	/* map of Pads by note number they generate (their "filtered" value)
 	 */
-	typedef std::multimap<int,boost::shared_ptr<Pad> > FNPadMap;
+	typedef std::multimap<int,std::shared_ptr<Pad> > FNPadMap;
 	FNPadMap _fn_pad_map;
 
 	void set_button_color (ButtonID, uint8_t color_index);
@@ -582,7 +582,7 @@ class Push2 : public MIDISurface
 
 	/* special Stripable */
 
-	boost::shared_ptr<ARDOUR::Stripable> _master;
+	std::shared_ptr<ARDOUR::Stripable> _master;
 
 	sigc::connection _vblank_connection;
 	bool vblank ();
@@ -608,7 +608,7 @@ class Push2 : public MIDISurface
 
 	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;
 
-	boost::weak_ptr<ARDOUR::MidiTrack> _current_pad_target;
+	std::weak_ptr<ARDOUR::MidiTrack> _current_pad_target;
 
 	/* GUI */
 

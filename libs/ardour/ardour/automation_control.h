@@ -58,18 +58,18 @@ public:
 	AutomationControl(ARDOUR::Session&,
 	                  const Evoral::Parameter&                  parameter,
 	                  const ParameterDescriptor&                desc,
-	                  boost::shared_ptr<ARDOUR::AutomationList> l=boost::shared_ptr<ARDOUR::AutomationList>(),
+	                  std::shared_ptr<ARDOUR::AutomationList> l=std::shared_ptr<ARDOUR::AutomationList>(),
 	                  const std::string&                        name="",
 	                  PBD::Controllable::Flag                   flags=PBD::Controllable::Flag (0)
 		);
 
 	virtual ~AutomationControl ();
 
-	boost::shared_ptr<AutomationList> alist() const {
-		return boost::dynamic_pointer_cast<AutomationList>(_list);
+	std::shared_ptr<AutomationList> alist() const {
+		return std::dynamic_pointer_cast<AutomationList>(_list);
 	}
 
-	void set_list (boost::shared_ptr<Evoral::ControlList>);
+	void set_list (std::shared_ptr<Evoral::ControlList>);
 
 	inline bool automation_playback() const {
 		return alist() ? alist()->automation_playback() : false;
@@ -125,7 +125,7 @@ public:
 	ControlList grouped_controls () const;
 
 protected:
-	boost::shared_ptr<ControlGroup> _group;
+	std::shared_ptr<ControlGroup> _group;
 
 	const ParameterDescriptor _desc;
 
@@ -155,7 +155,7 @@ private:
 	   declared to be a friend in ControlGroupMember. Oh well.
 	*/
 	friend class ControlGroup;
-	void set_group (boost::shared_ptr<ControlGroup>);
+	void set_group (std::shared_ptr<ControlGroup>);
 	PBD::ScopedConnection _state_changed_connection;
 	bool _no_session;
 };

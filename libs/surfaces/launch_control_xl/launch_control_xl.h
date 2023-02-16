@@ -360,7 +360,7 @@ public:
 	static bool probe();
 	static void *request_factory(uint32_t);
 
-	std::list<boost::shared_ptr<ARDOUR::Bundle> > bundles();
+	std::list<std::shared_ptr<ARDOUR::Bundle> > bundles();
 
 	bool has_editor() const { return true; }
 	void *get_gui() const;
@@ -374,8 +374,8 @@ public:
 
 	PBD::Signal0<void> ConnectionChange;
 
-	boost::shared_ptr<ARDOUR::Port> input_port();
-	boost::shared_ptr<ARDOUR::Port> output_port();
+	std::shared_ptr<ARDOUR::Port> input_port();
+	std::shared_ptr<ARDOUR::Port> output_port();
 
 	Button *button_by_id(ButtonID);
 
@@ -440,38 +440,38 @@ private:
 	void relax() {}
 
 	/* map of NoteButtons by NoteNumber */
-	typedef std::map<int, boost::shared_ptr<NoteButton> > NNNoteButtonMap;
+	typedef std::map<int, std::shared_ptr<NoteButton> > NNNoteButtonMap;
 	NNNoteButtonMap nn_note_button_map;
 	/* map of NoteButtons by ButtonID */
-	typedef std::map<ButtonID, boost::shared_ptr<NoteButton> > IDNoteButtonMap;
+	typedef std::map<ButtonID, std::shared_ptr<NoteButton> > IDNoteButtonMap;
 	IDNoteButtonMap id_note_button_map;
 	/* map of ControllerNoteButtons by CC */
-	typedef std::map<int, boost::shared_ptr<ControllerButton> > CCControllerButtonMap;
+	typedef std::map<int, std::shared_ptr<ControllerButton> > CCControllerButtonMap;
 	CCControllerButtonMap cc_controller_button_map;
 	/* map of ControllerButtons by ButtonID */
-	typedef std::map<ButtonID, boost::shared_ptr<ControllerButton> > IDControllerButtonMap;
+	typedef std::map<ButtonID, std::shared_ptr<ControllerButton> > IDControllerButtonMap;
 	IDControllerButtonMap id_controller_button_map;
 
 
 	/* map of Fader by CC */
-	typedef std::map<int, boost::shared_ptr<Fader> > CCFaderMap;
+	typedef std::map<int, std::shared_ptr<Fader> > CCFaderMap;
 	CCFaderMap cc_fader_map;
 	/* map of Fader by FaderID */
-	typedef std::map<FaderID, boost::shared_ptr<Fader> > IDFaderMap;
+	typedef std::map<FaderID, std::shared_ptr<Fader> > IDFaderMap;
 	IDFaderMap id_fader_map;
 
 	/* map of Knob by CC */
-	typedef std::map<int, boost::shared_ptr<Knob> > CCKnobMap;
+	typedef std::map<int, std::shared_ptr<Knob> > CCKnobMap;
 	CCKnobMap cc_knob_map;
 	/* map of Knob by KnobID */
-	typedef std::map<KnobID, boost::shared_ptr<Knob> > IDKnobMap;
+	typedef std::map<KnobID, std::shared_ptr<Knob> > IDKnobMap;
 	IDKnobMap id_knob_map;
 
 	std::set<ButtonID> buttons_down;
 	std::set<ButtonID> consumed;
 
-	bool button_long_press_timeout(ButtonID id, boost::shared_ptr<Button> button);
-	void start_press_timeout(boost::shared_ptr<Button> , ButtonID);
+	bool button_long_press_timeout(ButtonID id, std::shared_ptr<Button> button);
+	void start_press_timeout(std::shared_ptr<Button> , ButtonID);
 
 	void init_buttons();
 	void init_buttons(bool startup);
@@ -489,19 +489,19 @@ private:
 	void build_maps();
 
 	// Bundle to represent our input ports
-	boost::shared_ptr<ARDOUR::Bundle> _input_bundle;
+	std::shared_ptr<ARDOUR::Bundle> _input_bundle;
 	// Bundle to represent our output ports
-	boost::shared_ptr<ARDOUR::Bundle> _output_bundle;
+	std::shared_ptr<ARDOUR::Bundle> _output_bundle;
 
 	MIDI::Port *_input_port;
 	MIDI::Port *_output_port;
-	boost::shared_ptr<ARDOUR::Port> _async_in;
-	boost::shared_ptr<ARDOUR::Port> _async_out;
+	std::shared_ptr<ARDOUR::Port> _async_in;
+	std::shared_ptr<ARDOUR::Port> _async_out;
 
 	void connect_to_parser();
-	void handle_button_message(boost::shared_ptr<Button> button, MIDI::EventTwoBytes *);
+	void handle_button_message(std::shared_ptr<Button> button, MIDI::EventTwoBytes *);
 
-	bool check_pick_up(boost::shared_ptr<Controller> controller, boost::shared_ptr<ARDOUR::AutomationControl> ac, bool rotary = false);
+	bool check_pick_up(std::shared_ptr<Controller> controller, std::shared_ptr<ARDOUR::AutomationControl> ac, bool rotary = false);
 
 	void handle_midi_controller_message(MIDI::Parser &, MIDI::EventTwoBytes *, MIDI::channel_t chan);
 	void handle_midi_note_on_message(MIDI::Parser &, MIDI::EventTwoBytes *, MIDI::channel_t chan);
@@ -519,8 +519,8 @@ private:
 	void notify_parameter_changed(std::string);
 
 	/* Knob methods */
-	boost::shared_ptr<Knob> knob_by_id(KnobID id);
-	boost::shared_ptr<Knob>* knobs_by_column(uint8_t col, boost::shared_ptr<Knob>* knob_col);
+	std::shared_ptr<Knob> knob_by_id(KnobID id);
+	std::shared_ptr<Knob>* knobs_by_column(uint8_t col, std::shared_ptr<Knob>* knob_col);
 	void update_knob_led_by_strip(uint8_t n);
 	void update_knob_led_by_id(uint8_t id, LEDColor color);
 
@@ -576,9 +576,9 @@ private:
 
 
 	/* Button methods */
-	boost::shared_ptr<TrackButton> track_button_by_range(uint8_t n, uint8_t first, uint8_t middle);
-	boost::shared_ptr<TrackButton> focus_button_by_column(uint8_t col) { return track_button_by_range(col, 41, 57) ; }
-	boost::shared_ptr<TrackButton> control_button_by_column(uint8_t col) { return track_button_by_range(col, 73, 89) ; }
+	std::shared_ptr<TrackButton> track_button_by_range(uint8_t n, uint8_t first, uint8_t middle);
+	std::shared_ptr<TrackButton> focus_button_by_column(uint8_t col) { return track_button_by_range(col, 41, 57) ; }
+	std::shared_ptr<TrackButton> control_button_by_column(uint8_t col) { return track_button_by_range(col, 73, 89) ; }
 
 
 	void button_device();
@@ -598,7 +598,7 @@ private:
 	void button_press_track_control(uint8_t n);
 	void button_release_track_control(uint8_t n);
 
-	boost::shared_ptr<ARDOUR::AutomationControl> get_ac_by_state(uint8_t n);
+	std::shared_ptr<ARDOUR::AutomationControl> get_ac_by_state(uint8_t n);
 	void update_track_focus_led(uint8_t n);
 	void update_track_control_led(uint8_t n);
 
@@ -609,7 +609,7 @@ private:
 
 	int32_t bank_start;
 	PBD::ScopedConnectionList stripable_connections;
-	boost::shared_ptr<ARDOUR::Stripable> stripable[8];
+	std::shared_ptr<ARDOUR::Stripable> stripable[8];
 
 	void stripables_added ();
 
@@ -631,15 +631,15 @@ private:
 
 	/* special Stripable */
 
-	boost::shared_ptr<ARDOUR::Stripable> master;
+	std::shared_ptr<ARDOUR::Stripable> master;
 
 	void port_registration_handler();
 
 	enum ConnectionState { InputConnected = 0x1, OutputConnected = 0x2 };
 
 	int connection_state;
-	bool connection_handler(boost::weak_ptr<ARDOUR::Port>, std::string name1,
-			boost::weak_ptr<ARDOUR::Port>, std::string name2,
+	bool connection_handler(std::weak_ptr<ARDOUR::Port>, std::string name1,
+			std::weak_ptr<ARDOUR::Port>, std::string name2,
 			bool yn);
 	PBD::ScopedConnection port_connection;
 	void connected();

@@ -846,31 +846,31 @@ StepSequencer::clear_note_offs ()
 	}
 }
 
-boost::shared_ptr<Source>
+std::shared_ptr<Source>
 StepSequencer::write_to_source (Session& session, string path) const
 {
-	boost::shared_ptr<SMFSource> src;
+	std::shared_ptr<SMFSource> src;
 
 	/* caller must check for pre-existing file */
 
 	assert (!path.empty());
 	assert (!Glib::file_test (path, Glib::FILE_TEST_EXISTS));
 
-	src = boost::dynamic_pointer_cast<SMFSource>(SourceFactory::createWritable (DataType::MIDI, session, path, false, session.sample_rate()));
+	src = std::dynamic_pointer_cast<SMFSource>(SourceFactory::createWritable (DataType::MIDI, session, path, false, session.sample_rate()));
 
 	try {
 		if (src->create (path)) {
-			return boost::shared_ptr<Source>();
+			return std::shared_ptr<Source>();
 		}
 	} catch (...) {
-		return boost::shared_ptr<Source>();
+		return std::shared_ptr<Source>();
 	}
 
 	if (!fill_midi_source (src)) {
 		/* src will go out of scope, and its destructor will remove the
 		   file, if any
 		*/
-		return boost::shared_ptr<Source>();
+		return std::shared_ptr<Source>();
 	}
 
 	return src;
@@ -883,7 +883,7 @@ struct ETC {
 };
 
 bool
-StepSequencer::fill_midi_source (boost::shared_ptr<SMFSource> src) const
+StepSequencer::fill_midi_source (std::shared_ptr<SMFSource> src) const
 {
 	Temporal::Beats smf_beats;
 

@@ -215,7 +215,7 @@ public:
 
 protected:
 	char*                                _messageId;
-	boost::shared_ptr<HostAttributeList> _attribute_list;
+	std::shared_ptr<HostAttributeList> _attribute_list;
 };
 
 class LIBARDOUR_API ConnectionProxy : public Vst::IConnectionPoint, public RefObject
@@ -299,7 +299,7 @@ public:
 	tresult PLUGIN_API createInstance (TUID cid, TUID _iid, void** obj) SMTG_OVERRIDE;
 
 protected:
-	boost::shared_ptr<PlugInterfaceSupport> _plug_interface_support;
+	std::shared_ptr<PlugInterfaceSupport> _plug_interface_support;
 };
 
 class LIBARDOUR_LOCAL Vst3ParamValueQueue : public Vst::IParamValueQueue

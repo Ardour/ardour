@@ -83,8 +83,8 @@ MidiPatchManager::add_search_path (const Searchpath& search_path)
 bool
 MidiPatchManager::add_custom_midnam (const std::string& id, char const* midnam)
 {
-	boost::shared_ptr<MIDINameDocument> document;
-	document = boost::shared_ptr<MIDINameDocument>(new MIDINameDocument());
+	std::shared_ptr<MIDINameDocument> document;
+	document = std::shared_ptr<MIDINameDocument>(new MIDINameDocument());
 	XMLTree mxml;
 	if (mxml.read_buffer (midnam, true)) {
 		if (0 == document->set_state (mxml, *mxml.root())) {
@@ -113,7 +113,7 @@ MidiPatchManager::update_custom_midnam (const std::string& id, char const* midna
 bool
 MidiPatchManager::is_custom_model (const std::string& model) const
 {
-	boost::shared_ptr<MIDINameDocument> midnam = document_by_model (model);
+	std::shared_ptr<MIDINameDocument> midnam = document_by_model (model);
 	return (midnam && midnam->file_path().substr(0, 7) == "custom:");
 }
 
@@ -167,9 +167,9 @@ MidiPatchManager::remove_midnam_files_from_directory(const std::string& director
 bool
 MidiPatchManager::load_midi_name_document (const std::string& file_path)
 {
-	boost::shared_ptr<MIDINameDocument> document;
+	std::shared_ptr<MIDINameDocument> document;
 	try {
-		document = boost::shared_ptr<MIDINameDocument>(new MIDINameDocument(file_path));
+		document = std::shared_ptr<MIDINameDocument>(new MIDINameDocument(file_path));
 	}
 	catch (...) {
 		error << string_compose(_("Error parsing MIDI patch file %1"), file_path)
@@ -179,18 +179,18 @@ MidiPatchManager::load_midi_name_document (const std::string& file_path)
 	return add_midi_name_document (document);
 }
 
-boost::shared_ptr<MIDINameDocument>
+std::shared_ptr<MIDINameDocument>
 MidiPatchManager::document_by_model(std::string model_name) const
 {
 	MidiNameDocuments::const_iterator i = _documents.find (model_name);
 	if (i != _documents.end ()) {
 		return i->second;
 	}
-	return boost::shared_ptr<MIDINameDocument> ();
+	return std::shared_ptr<MIDINameDocument> ();
 }
 
 bool
-MidiPatchManager::add_midi_name_document (boost::shared_ptr<MIDINameDocument> document)
+MidiPatchManager::add_midi_name_document (std::shared_ptr<MIDINameDocument> document)
 {
 	bool added = false;
 	for (MIDINameDocument::MasterDeviceNamesList::const_iterator device =
@@ -237,7 +237,7 @@ MidiPatchManager::remove_midi_name_document (const std::string& file_path, bool 
 	for (MidiNameDocuments::iterator i = _documents.begin(); i != _documents.end();) {
 		if (i->second->file_path() == file_path) {
 
-			boost::shared_ptr<MIDINameDocument> document = i->second;
+			std::shared_ptr<MIDINameDocument> document = i->second;
 
 			info << string_compose(_("Removing MIDI patch file %1"), file_path) << endmsg;
 

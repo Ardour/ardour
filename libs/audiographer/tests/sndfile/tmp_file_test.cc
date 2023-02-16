@@ -37,7 +37,7 @@ class TmpFileTest : public CppUnit::TestFixture
 	}
 
   private:
-	boost::shared_ptr<TmpFileSync<float> > file;
+	std::shared_ptr<TmpFileSync<float> > file;
 
 	float * random_data;
 	samplecnt_t samples;

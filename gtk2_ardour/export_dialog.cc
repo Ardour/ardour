@@ -265,7 +265,7 @@ ExportDialog::update_warnings_and_example_filename ()
 
 	/* Add new warnings */
 
-	boost::shared_ptr<ExportProfileManager::Warnings> warnings = profile_manager->get_warnings();
+	std::shared_ptr<ExportProfileManager::Warnings> warnings = profile_manager->get_warnings();
 
 	for (std::list<string>::iterator it = warnings->errors.begin(); it != warnings->errors.end(); ++it) {
 		add_error (*it);
@@ -352,7 +352,7 @@ ExportDialog::do_export (bool analysis_only)
 	_analysis_only = analysis_only;
 	if (analysis_only) {
 		for (auto const& fmt : profile_manager->get_formats ()) {
-			boost::shared_ptr<ExportFormatSpecification> fmp = fmt->format;
+			std::shared_ptr<ExportFormatSpecification> fmp = fmt->format;
 			fmp->set_format_id (ExportFormatBase::F_None);
 			fmp->set_type (ExportFormatBase::T_None);
 			fmp->set_analyse (true);

@@ -189,11 +189,11 @@ LuaProc::drop_references ()
 	Plugin::drop_references ();
 }
 
-boost::weak_ptr<Route>
+std::weak_ptr<Route>
 LuaProc::route () const
 {
 	if (!_owner) {
-		return boost::weak_ptr<Route>();
+		return std::weak_ptr<Route>();
 	}
 	return static_cast<Route*>(_owner)->weakroute ();
 }
@@ -341,7 +341,7 @@ LuaProc::load_script ()
 				}
 				assert (pn == (int) _ctrl_params.size ());
 
-				//_param_desc[pn] = boost::shared_ptr<ParameterDescriptor> (new ParameterDescriptor());
+				//_param_desc[pn] = std::shared_ptr<ParameterDescriptor> (new ParameterDescriptor());
 				luabridge::LuaRef lr = i.value ();
 
 				if (type == "input") {
@@ -1033,15 +1033,15 @@ LuaProc::describe_parameter (Evoral::Parameter param)
 	return "??";
 }
 
-boost::shared_ptr<ScalePoints>
+std::shared_ptr<ScalePoints>
 LuaProc::parse_scale_points (luabridge::LuaRef* lr)
 {
 	if (!(*lr)["scalepoints"].isTable()) {
-		return boost::shared_ptr<ScalePoints> ();
+		return std::shared_ptr<ScalePoints> ();
 	}
 
 	int cnt = 0;
-	boost::shared_ptr<ScalePoints> rv = boost::shared_ptr<ScalePoints>(new ScalePoints());
+	std::shared_ptr<ScalePoints> rv = std::shared_ptr<ScalePoints>(new ScalePoints());
 	luabridge::LuaRef scalepoints ((*lr)["scalepoints"]);
 
 	for (luabridge::Iterator i (scalepoints); !i.isNil (); ++i) {
@@ -1055,10 +1055,10 @@ LuaProc::parse_scale_points (luabridge::LuaRef* lr)
 	if (rv->size() > 0) {
 		return rv;
 	}
-	return boost::shared_ptr<ScalePoints> ();
+	return std::shared_ptr<ScalePoints> ();
 }
 
-boost::shared_ptr<ScalePoints>
+std::shared_ptr<ScalePoints>
 LuaProc::get_scale_points (uint32_t port) const
 {
 	int lp = _ctrl_params[port].second;
@@ -1148,7 +1148,7 @@ LuaProc::presets_tree () const
 bool
 LuaProc::load_preset (PresetRecord r)
 {
-	boost::shared_ptr<XMLTree> t (presets_tree ());
+	std::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
 		return false;
 	}
@@ -1184,7 +1184,7 @@ LuaProc::load_preset (PresetRecord r)
 std::string
 LuaProc::do_save_preset (std::string name) {
 
-	boost::shared_ptr<XMLTree> t (presets_tree ());
+	std::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
 		return "";
 	}
@@ -1218,7 +1218,7 @@ LuaProc::do_save_preset (std::string name) {
 void
 LuaProc::do_remove_preset (std::string name)
 {
-	boost::shared_ptr<XMLTree> t (presets_tree ());
+	std::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
 		return;
 	}
@@ -1231,7 +1231,7 @@ LuaProc::do_remove_preset (std::string name)
 void
 LuaProc::find_presets ()
 {
-	boost::shared_ptr<XMLTree> t (presets_tree ());
+	std::shared_ptr<XMLTree> t (presets_tree ());
 	if (t) {
 		XMLNode* root = t->root ();
 		for (XMLNodeList::const_iterator i = root->children().begin(); i != root->children().end(); ++i) {

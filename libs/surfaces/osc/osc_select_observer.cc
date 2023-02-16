@@ -103,7 +103,7 @@ OSCSelectObserver::no_strip ()
 	send_connections.drop_connections ();
 	plugin_connections.drop_connections ();
 	eq_connections.drop_connections ();
-	_strip = boost::shared_ptr<Stripable> ();
+	_strip = std::shared_ptr<Stripable> ();
 	/*
 	 * The strip will sit idle at this point doing nothing until
 	 * the surface has recalculated it's strip list and then calls
@@ -113,7 +113,7 @@ OSCSelectObserver::no_strip ()
  }
 
 void
-OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, uint32_t s_nsends, uint32_t gm, bool force)
+OSCSelectObserver::refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, uint32_t s_nsends, uint32_t gm, bool force)
 {
 	_init = true;
 	if (_tick_busy) {
@@ -143,7 +143,7 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 	_strip->PropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::name_changed, this, boost::lambda::_1), OSC::instance());
 	name_changed (ARDOUR::Properties::name);
 
-	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+	std::shared_ptr<Route> rt = std::dynamic_pointer_cast<Route> (_strip);
 	if (rt) {
 		rt->route_group_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::group_name, this), OSC::instance());
 		group_name ();
@@ -154,7 +154,7 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 		session->RouteGroupPropertyChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::group_sharing, this, _1), OSC::instance());
 		group_sharing (rt->route_group ());
 
-		boost::shared_ptr<PannerShell> pan_sh =  rt->panner_shell();
+		std::shared_ptr<PannerShell> pan_sh =  rt->panner_shell();
 		if (pan_sh) {
 			pan_sh->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::panner_changed, this), OSC::instance());
 		}
@@ -185,25 +185,25 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 		change_message (X_("/select/solo_safe"), _strip->solo_safe_control());
 	}
 
-	boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (_strip);
+	std::shared_ptr<Track> track = std::dynamic_pointer_cast<Track> (_strip);
 	if (track) {
 		track->monitoring_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::monitor_status, this, track->monitoring_control()), OSC::instance());
 		monitor_status (track->monitoring_control());
 	}
 
-	boost::shared_ptr<AutomationControl> rec_controllable = _strip->rec_enable_control ();
+	std::shared_ptr<AutomationControl> rec_controllable = _strip->rec_enable_control ();
 	if (rec_controllable) {
 		rec_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/recenable"), _strip->rec_enable_control()), OSC::instance());
 		change_message (X_("/select/recenable"), _strip->rec_enable_control());
 	}
 
-	boost::shared_ptr<AutomationControl> recsafe_controllable = _strip->rec_safe_control ();
+	std::shared_ptr<AutomationControl> recsafe_controllable = _strip->rec_safe_control ();
 	if (recsafe_controllable) {
 		recsafe_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/record_safe"), _strip->rec_safe_control()), OSC::instance());
 		change_message (X_("/select/record_safe"), _strip->rec_safe_control());
 	}
 
-	boost::shared_ptr<AutomationControl> phase_controllable = _strip->phase_control ();
+	std::shared_ptr<AutomationControl> phase_controllable = _strip->phase_control ();
 	if (phase_controllable) {
 		phase_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/polarity"), _strip->phase_control()), OSC::instance());
 		change_message (X_("/select/polarity"), _strip->phase_control());
@@ -213,11 +213,11 @@ OSCSelectObserver::refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip
 	_strip->gain_control()->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::gain_message, this), OSC::instance());
 	gain_automation ();
 
-	boost::shared_ptr<Slavable> slv = boost::dynamic_pointer_cast<Slavable> (_strip);
+	std::shared_ptr<Slavable> slv = std::dynamic_pointer_cast<Slavable> (_strip);
 	slv->AssignmentChange.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::slaved_changed, this, _1, _2), OSC::instance());
-	slaved_changed (boost::shared_ptr<VCA>(), false);
+	slaved_changed (std::shared_ptr<VCA>(), false);
 
-	boost::shared_ptr<Controllable> trim_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->trim_control());
+	std::shared_ptr<Controllable> trim_controllable = std::dynamic_pointer_cast<Controllable>(_strip->trim_control());
 	if (trim_controllable) {
 		trim_controllable->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::trim_message, this, X_("/select/trimdB"), _strip->trim_control()), OSC::instance());
 		_strip->trim_control()->alist()->automation_state_changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_automation, this, X_("/select/trimdB"), _strip->trim_control()), OSC::instance());
@@ -400,14 +400,14 @@ OSCSelectObserver::send_init()
 			_strip->send_enable_controllable(s)->Changed.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::enable_message_with_id, this, X_("/select/send_enable"), c, _strip->send_enable_controllable(s)), OSC::instance());
 			enable_message_with_id (X_("/select/send_enable"), c, _strip->send_enable_controllable(s));
 		} else if (send_valid) {
-			boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route> (_strip);
+			std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (_strip);
 			if (!r) {
 				// should never get here
 				_osc.float_message_with_id (X_("/select/send_enable"), c, 0, in_line, addr);
 			}
-			boost::shared_ptr<Send> snd = boost::dynamic_pointer_cast<Send> (r->nth_send(s));
+			std::shared_ptr<Send> snd = std::dynamic_pointer_cast<Send> (r->nth_send(s));
 			if (snd) {
-				boost::shared_ptr<Processor> proc = boost::dynamic_pointer_cast<Processor> (snd);
+				std::shared_ptr<Processor> proc = std::dynamic_pointer_cast<Processor> (snd);
 				proc->ActiveChanged.connect (send_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_enable, this, X_("/select/send_enable"), c, proc), OSC::instance());
 				_osc.float_message_with_id (X_("/select/send_enable"), c, proc->enabled(), in_line, addr);
 			}
@@ -473,20 +473,20 @@ OSCSelectObserver::plugin_init()
 		plugin_end ();
 		return;
 	}
-	boost::shared_ptr<Route> r = boost::dynamic_pointer_cast<Route>(_strip);
+	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route>(_strip);
 	if (!r) {
 		plugin_end ();
 		return;
 	}
 
 	// we have a plugin number now get the processor
-	boost::shared_ptr<Processor> proc = r->nth_plugin (plug_id);
-	boost::shared_ptr<PluginInsert> pi;
-	if (!(pi = boost::dynamic_pointer_cast<PluginInsert>(proc))) {
+	std::shared_ptr<Processor> proc = r->nth_plugin (plug_id);
+	std::shared_ptr<PluginInsert> pi;
+	if (!(pi = std::dynamic_pointer_cast<PluginInsert>(proc))) {
 		plugin_end ();
 		return;
 	}
-	boost::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
+	std::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
 	// we have a plugin we can ask if it is activated
 	proc->ActiveChanged.connect (plugin_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::plug_enable, this, X_("/select/plugin/activate"), proc), OSC::instance());
 	_osc.float_message (X_("/select/plugin/activate"), proc->enabled(), addr);
@@ -531,7 +531,7 @@ OSCSelectObserver::plugin_init()
 		pip->get_parameter_descriptor(controlid, pd);
 		_osc.text_message_with_id (X_("/select/plugin/parameter/name"), pid, pd.label, in_line, addr);
 		if ( pip->parameter_is_input(controlid)) {
-			boost::shared_ptr<AutomationControl> c = pi->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
+			std::shared_ptr<AutomationControl> c = pi->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
 			if (c) {
 				bool swtch = false;
 				if (pd.integer_step && pd.upper == 1) {
@@ -545,7 +545,7 @@ OSCSelectObserver::plugin_init()
 }
 
 void
-OSCSelectObserver::plugin_parameter_changed (int pid, bool swtch, boost::shared_ptr<PBD::Controllable> controllable)
+OSCSelectObserver::plugin_parameter_changed (int pid, bool swtch, std::shared_ptr<PBD::Controllable> controllable)
 {
 	if (swtch) {
 		enable_message_with_id (X_("/select/plugin/parameter"), pid, controllable);
@@ -655,7 +655,7 @@ OSCSelectObserver::name_changed (const PBD::PropertyChange& what_changed)
 	}
 
 	_osc.text_message (X_("/select/name"), _strip->name(), addr);
-	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route> (_strip);
+	std::shared_ptr<Route> route = std::dynamic_pointer_cast<Route> (_strip);
 	if (route) {
 		// lets tell the surface how many inputs this strip has
 		_osc.float_message (X_("/select/n_inputs"), (float) route->n_inputs().n_total(), addr);
@@ -671,11 +671,11 @@ OSCSelectObserver::panner_changed ()
 
 	if (feedback[1]) {
 
-		boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+		std::shared_ptr<Route> rt = std::dynamic_pointer_cast<Route> (_strip);
 		if (!rt) {
 			return;
 		}
-		boost::shared_ptr<PannerShell> pan_sh =  rt->panner_shell();
+		std::shared_ptr<PannerShell> pan_sh =  rt->panner_shell();
 		if (pan_sh) {
 			string pt = pan_sh->current_panner_uri();
 			if (pt.size()){
@@ -687,18 +687,18 @@ OSCSelectObserver::panner_changed ()
 				_osc.float_message (X_("/strip/pan_stereo_width"), 1.0, addr);
 				return;
 			}
-			boost::shared_ptr<Controllable> pan_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
+			std::shared_ptr<Controllable> pan_controllable = std::dynamic_pointer_cast<Controllable>(_strip->pan_azimuth_control());
 			if (pan_controllable) {
-				boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (pan_controllable);
+				std::shared_ptr<AutomationControl>at = std::dynamic_pointer_cast<AutomationControl> (pan_controllable);
 				pan_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
 				at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_automation, this, X_("/select/pan_stereo_position"), _strip->pan_azimuth_control()), OSC::instance());
 				change_message (X_("/select/pan_stereo_position"), _strip->pan_azimuth_control());
 				send_automation (X_("/select/pan_stereo_position"), _strip->pan_azimuth_control());
 			}
 
-			boost::shared_ptr<Controllable> width_controllable = boost::dynamic_pointer_cast<Controllable>(_strip->pan_width_control());
+			std::shared_ptr<Controllable> width_controllable = std::dynamic_pointer_cast<Controllable>(_strip->pan_width_control());
 			if (width_controllable) {
-				boost::shared_ptr<AutomationControl>at = boost::dynamic_pointer_cast<AutomationControl> (width_controllable);
+				std::shared_ptr<AutomationControl>at = std::dynamic_pointer_cast<AutomationControl> (width_controllable);
 				width_controllable->Changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), OSC::instance());
 				at->alist()->automation_state_changed.connect (pan_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::send_automation, this, X_("/select/pan_stereo_width"), _strip->pan_width_control()), OSC::instance());
 				change_message (X_("/select/pan_stereo_width"), _strip->pan_width_control());
@@ -729,7 +729,7 @@ OSCSelectObserver::panner_changed ()
 void
 OSCSelectObserver::group_name ()
 {
-	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+	std::shared_ptr<Route> rt = std::dynamic_pointer_cast<Route> (_strip);
 	RouteGroup *rg = rt->route_group();
 	group_sharing (rg);
 }
@@ -738,7 +738,7 @@ void
 OSCSelectObserver::group_sharing (RouteGroup *rgc)
 {
 	_group_sharing[15] = 1;
-	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+	std::shared_ptr<Route> rt = std::dynamic_pointer_cast<Route> (_strip);
 	string new_name = "none";
 	RouteGroup* rg = NULL;
 	if (rt) {
@@ -807,7 +807,7 @@ OSCSelectObserver::group_sharing (RouteGroup *rgc)
 void
 OSCSelectObserver::comment_changed ()
 {
-	boost::shared_ptr<Route> rt = boost::dynamic_pointer_cast<Route> (_strip);
+	std::shared_ptr<Route> rt = std::dynamic_pointer_cast<Route> (_strip);
 	if (rt) {
 		_osc.text_message (X_("/select/comment"), rt->comment(), addr);
 	}
@@ -823,7 +823,7 @@ OSCSelectObserver::pi_changed (PBD::PropertyChange const& what_changed)
 }
 
 void
-OSCSelectObserver::change_message (string path, boost::shared_ptr<Controllable> controllable)
+OSCSelectObserver::change_message (string path, std::shared_ptr<Controllable> controllable)
 {
 	float val = controllable->get_value();
 
@@ -831,9 +831,9 @@ OSCSelectObserver::change_message (string path, boost::shared_ptr<Controllable> 
 }
 
 void
-OSCSelectObserver::send_automation (string path, boost::shared_ptr<PBD::Controllable> control)
+OSCSelectObserver::send_automation (string path, std::shared_ptr<PBD::Controllable> control)
 {
-	boost::shared_ptr<AutomationControl>automate = boost::dynamic_pointer_cast<AutomationControl> (control);
+	std::shared_ptr<AutomationControl>automate = std::dynamic_pointer_cast<AutomationControl> (control);
 
 	AutoState as = automate->alist()->automation_state();
 	string auto_name;
@@ -867,7 +867,7 @@ OSCSelectObserver::send_automation (string path, boost::shared_ptr<PBD::Controll
 }
 
 void
-OSCSelectObserver::enable_message (string path, boost::shared_ptr<Controllable> controllable)
+OSCSelectObserver::enable_message (string path, std::shared_ptr<Controllable> controllable)
 {
 	float val = controllable->get_value();
 	if (val) {
@@ -879,7 +879,7 @@ OSCSelectObserver::enable_message (string path, boost::shared_ptr<Controllable> 
 }
 
 void
-OSCSelectObserver::plug_enable (string path, boost::shared_ptr<Processor> proc)
+OSCSelectObserver::plug_enable (string path, std::shared_ptr<Processor> proc)
 {
 	// with no delay value is wrong
 	Glib::usleep(10);
@@ -888,7 +888,7 @@ OSCSelectObserver::plug_enable (string path, boost::shared_ptr<Processor> proc)
 }
 
 void
-OSCSelectObserver::change_message_with_id (string path, uint32_t id, boost::shared_ptr<Controllable> controllable)
+OSCSelectObserver::change_message_with_id (string path, uint32_t id, std::shared_ptr<Controllable> controllable)
 {
 	float val = controllable->get_value();
 
@@ -896,7 +896,7 @@ OSCSelectObserver::change_message_with_id (string path, uint32_t id, boost::shar
 }
 
 void
-OSCSelectObserver::enable_message_with_id (string path, uint32_t id, boost::shared_ptr<Controllable> controllable)
+OSCSelectObserver::enable_message_with_id (string path, uint32_t id, std::shared_ptr<Controllable> controllable)
 {
 	float val = controllable->get_value();
 	if (val) {
@@ -907,7 +907,7 @@ OSCSelectObserver::enable_message_with_id (string path, uint32_t id, boost::shar
 }
 
 void
-OSCSelectObserver::monitor_status (boost::shared_ptr<Controllable> controllable)
+OSCSelectObserver::monitor_status (std::shared_ptr<Controllable> controllable)
 {
 	int disk, input;
 	float val = controllable->get_value();
@@ -930,7 +930,7 @@ OSCSelectObserver::monitor_status (boost::shared_ptr<Controllable> controllable)
 }
 
 void
-OSCSelectObserver::trim_message (string path, boost::shared_ptr<Controllable> controllable)
+OSCSelectObserver::trim_message (string path, std::shared_ptr<Controllable> controllable)
 {
 	if (_last_trim != controllable->get_value()) {
 		_last_trim = controllable->get_value();
@@ -1010,7 +1010,7 @@ OSCSelectObserver::gain_automation ()
 }
 
 void
-OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> controllable)
+OSCSelectObserver::send_gain (uint32_t id, std::shared_ptr<PBD::Controllable> controllable)
 {
 	float raw_value = 0.0;
 	if (controllable) {
@@ -1049,7 +1049,7 @@ OSCSelectObserver::send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> 
 }
 
 void
-OSCSelectObserver::send_enable (string path, uint32_t id, boost::shared_ptr<Processor> proc)
+OSCSelectObserver::send_enable (string path, uint32_t id, std::shared_ptr<Processor> proc)
 {
 	// with no delay value is wrong
 	Glib::usleep(10);
@@ -1162,17 +1162,17 @@ OSCSelectObserver::eq_restart(int x)
 }
 
 void
-OSCSelectObserver::slaved_changed (boost::shared_ptr<VCA> vca, bool state)
+OSCSelectObserver::slaved_changed (std::shared_ptr<VCA> vca, bool state)
 {
 	lo_message reply;
 	reply = lo_message_new ();
 	StripableList stripables;
 	session->get_stripables (stripables);
 	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
-		boost::shared_ptr<Stripable> s = *it;
+		std::shared_ptr<Stripable> s = *it;
 
 		// we only want VCAs
-		boost::shared_ptr<VCA> v = boost::dynamic_pointer_cast<VCA> (s);
+		std::shared_ptr<VCA> v = std::dynamic_pointer_cast<VCA> (s);
 		if (v) {
 			string name;
 			if (_strip->slaved_to (v)) {

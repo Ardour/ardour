@@ -35,7 +35,7 @@ const uint32_t ResampledImportableSource::blocksize = 524288U;
 const uint32_t ResampledImportableSource::blocksize = 16384U;
 #endif
 
-ResampledImportableSource::ResampledImportableSource (boost::shared_ptr<ImportableSource> src, samplecnt_t rate, SrcQuality srcq)
+ResampledImportableSource::ResampledImportableSource (std::shared_ptr<ImportableSource> src, samplecnt_t rate, SrcQuality srcq)
 	: source (src)
 	, _src_state (0)
 {

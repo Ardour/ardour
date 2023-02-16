@@ -128,13 +128,13 @@ public:
 	void clear_mixer_scene (size_t, bool interactive = true);
 	void rename_mixer_scene (size_t n);
 
-	void do_vca_assign (boost::shared_ptr<ARDOUR::VCA>);
-	void do_vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
-	void show_spill (boost::shared_ptr<ARDOUR::Stripable>);
-	bool showing_spill_for (boost::shared_ptr<ARDOUR::Stripable>) const;
-	void fan_out (boost::weak_ptr<ARDOUR::Route>, bool to_busses, bool group);
+	void do_vca_assign (std::shared_ptr<ARDOUR::VCA>);
+	void do_vca_unassign (std::shared_ptr<ARDOUR::VCA>);
+	void show_spill (std::shared_ptr<ARDOUR::Stripable>);
+	bool showing_spill_for (std::shared_ptr<ARDOUR::Stripable>) const;
+	void fan_out (std::weak_ptr<ARDOUR::Route>, bool to_busses, bool group);
 
-	sigc::signal1<void,boost::shared_ptr<ARDOUR::Stripable> > show_spill_change;
+	sigc::signal1<void,std::shared_ptr<ARDOUR::Stripable> > show_spill_change;
 
 	RouteProcessorSelection& selection() { return _selection; }
 
@@ -238,8 +238,8 @@ private:
 	void vca_scroll_right ();
 	void toggle_midi_input_active (bool flip_others);
 
-	void move_vca_into_view (boost::shared_ptr<ARDOUR::Stripable>);
-	void move_stripable_into_view (boost::shared_ptr<ARDOUR::Stripable>);
+	void move_vca_into_view (std::shared_ptr<ARDOUR::Stripable>);
+	void move_stripable_into_view (std::shared_ptr<ARDOUR::Stripable>);
 
 	void add_stripables (ARDOUR::StripableList&);
 
@@ -252,11 +252,11 @@ private:
 	void remove_master (VCAMasterStrip*);
 	void new_masters_created ();
 
-	MixerStrip* strip_by_route (boost::shared_ptr<ARDOUR::Route>) const;
-	MixerStrip* strip_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
+	MixerStrip* strip_by_route (std::shared_ptr<ARDOUR::Route>) const;
+	MixerStrip* strip_by_stripable (std::shared_ptr<ARDOUR::Stripable>) const;
 
-	AxisView* axis_view_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
-	AxisView* axis_view_by_control (boost::shared_ptr<ARDOUR::AutomationControl>) const;
+	AxisView* axis_view_by_stripable (std::shared_ptr<ARDOUR::Stripable>) const;
+	AxisView* axis_view_by_control (std::shared_ptr<ARDOUR::AutomationControl>) const;
 
 	gint start_updating ();
 	gint stop_updating ();
@@ -269,7 +269,7 @@ private:
 	void track_name_changed (MixerStrip *);
 
 	void redisplay_track_list ();
-	void spill_redisplay (boost::shared_ptr<ARDOUR::Stripable>);
+	void spill_redisplay (std::shared_ptr<ARDOUR::Stripable>);
 	bool no_track_list_redisplay;
 	bool track_display_button_press (GdkEventButton*);
 	void strip_width_changed ();
@@ -336,7 +336,7 @@ private:
 	FoldbackStrip * foldback_strip;
 	bool _show_foldback_strip;
 
-	void stripable_property_changed (const PBD::PropertyChange& what_changed, boost::weak_ptr<ARDOUR::Stripable> ws);
+	void stripable_property_changed (const PBD::PropertyChange& what_changed, std::weak_ptr<ARDOUR::Stripable> ws);
 	void route_group_property_changed (ARDOUR::RouteGroup *, const PBD::PropertyChange &);
 
 	/* various treeviews */
@@ -350,7 +350,7 @@ private:
 		}
 		Gtk::TreeModelColumn<bool>         visible;
 		Gtk::TreeModelColumn<std::string>  text;
-		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Stripable> > stripable;
+		Gtk::TreeModelColumn<std::shared_ptr<ARDOUR::Stripable> > stripable;
 		Gtk::TreeModelColumn<AxisView*>    strip;
 	};
 
@@ -456,7 +456,7 @@ private:
 
 	bool _strip_selection_change_without_scroll;
 
-	mutable boost::weak_ptr<ARDOUR::Stripable> spilled_strip;
+	mutable std::weak_ptr<ARDOUR::Stripable> spilled_strip;
 
 	void escape ();
 
@@ -466,10 +466,10 @@ private:
 	void spill_nothing ();
 	PBD::ScopedConnection _spill_gone_connection;
 
-	void vca_assign (boost::shared_ptr<ARDOUR::VCA>);
-	void vca_unassign (boost::shared_ptr<ARDOUR::VCA>);
+	void vca_assign (std::shared_ptr<ARDOUR::VCA>);
+	void vca_unassign (std::shared_ptr<ARDOUR::VCA>);
 
-	template<class T> void control_action (boost::shared_ptr<T> (ARDOUR::Stripable::*get_control)() const);
+	template<class T> void control_action (std::shared_ptr<T> (ARDOUR::Stripable::*get_control)() const);
 	void solo_action ();
 	void mute_action ();
 	void rec_enable_action ();

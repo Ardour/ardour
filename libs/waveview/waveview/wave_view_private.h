@@ -33,7 +33,7 @@ namespace ArdourWaveView {
 struct WaveViewProperties
 {
 public: // ctors
-	WaveViewProperties (boost::shared_ptr<ARDOUR::AudioRegion> region);
+	WaveViewProperties (std::shared_ptr<ARDOUR::AudioRegion> region);
 
 	// WaveViewProperties (WaveViewProperties const& other) = default;
 
@@ -166,13 +166,13 @@ public: // methods
 
 struct WaveViewImage {
 public: // ctors
-	WaveViewImage (boost::shared_ptr<const ARDOUR::AudioRegion> const& region_ptr,
+	WaveViewImage (std::shared_ptr<const ARDOUR::AudioRegion> const& region_ptr,
 	               WaveViewProperties const& properties);
 
 	~WaveViewImage ();
 
 public: // member variables
-	boost::weak_ptr<const ARDOUR::AudioRegion> region;
+	std::weak_ptr<const ARDOUR::AudioRegion> region;
 	WaveViewProperties props;
 	Cairo::RefPtr<Cairo::ImageSurface> cairo_image;
 	uint64_t timestamp;
@@ -207,7 +207,7 @@ public:
 	void cancel() { g_atomic_int_set (&_stop, 1); }
 	bool finished() { return image->finished(); }
 
-	boost::shared_ptr<WaveViewImage> image;
+	std::shared_ptr<WaveViewImage> image;
 
 	bool is_valid () {
 		return (image && image->is_valid());
@@ -229,9 +229,9 @@ public:
 public:
 
 	// @return image with matching properties or null
-	boost::shared_ptr<WaveViewImage> lookup_image (WaveViewProperties const&);
+	std::shared_ptr<WaveViewImage> lookup_image (WaveViewProperties const&);
 
-	void add_image (boost::shared_ptr<WaveViewImage>);
+	void add_image (std::shared_ptr<WaveViewImage>);
 
 	bool full () const { return _cached_images.size() > max_size(); }
 
@@ -248,7 +248,7 @@ private:
 	 */
 	WaveViewCache& _parent_cache;
 
-	typedef std::list<boost::shared_ptr<WaveViewImage> > ImageCache;
+	typedef std::list<std::shared_ptr<WaveViewImage> > ImageCache;
 	ImageCache _cached_images;
 };
 
@@ -262,16 +262,16 @@ public:
 
 	void clear_cache ();
 
-	boost::shared_ptr<WaveViewCacheGroup> get_cache_group (boost::shared_ptr<ARDOUR::AudioSource>);
+	std::shared_ptr<WaveViewCacheGroup> get_cache_group (std::shared_ptr<ARDOUR::AudioSource>);
 
-	void reset_cache_group (boost::shared_ptr<WaveViewCacheGroup>&);
+	void reset_cache_group (std::shared_ptr<WaveViewCacheGroup>&);
 
 private:
 	WaveViewCache();
 	~WaveViewCache();
 
 private:
-	typedef std::map<boost::shared_ptr<ARDOUR::AudioSource>, boost::shared_ptr<WaveViewCacheGroup> >
+	typedef std::map<std::shared_ptr<ARDOUR::AudioSource>, std::shared_ptr<WaveViewCacheGroup> >
 	    CacheGroups;
 
 	CacheGroups cache_group_map;
@@ -313,17 +313,17 @@ public:
 
 	static bool enabled () { return (instance); }
 
-	static void enqueue_draw_request (boost::shared_ptr<WaveViewDrawRequest>&);
+	static void enqueue_draw_request (std::shared_ptr<WaveViewDrawRequest>&);
 
 private:
 	friend class WaveViewDrawingThread;
 
 	// will block until a request is available
-	static boost::shared_ptr<WaveViewDrawRequest> dequeue_draw_request ();
+	static std::shared_ptr<WaveViewDrawRequest> dequeue_draw_request ();
 	static void thread_proc ();
 
-	boost::shared_ptr<WaveViewDrawRequest> _dequeue_draw_request ();
-	void _enqueue_draw_request (boost::shared_ptr<WaveViewDrawRequest>&);
+	std::shared_ptr<WaveViewDrawRequest> _dequeue_draw_request ();
+	void _enqueue_draw_request (std::shared_ptr<WaveViewDrawRequest>&);
 	void _thread_proc ();
 
 	void start_threads ();
@@ -334,7 +334,7 @@ private:
 	static WaveViewThreads* instance;
 
 	// TODO use std::unique_ptr when possible
-	typedef std::vector<boost::shared_ptr<WaveViewDrawingThread> > WaveViewThreadList;
+	typedef std::vector<std::shared_ptr<WaveViewDrawingThread> > WaveViewThreadList;
 
 	bool _quit;
 	WaveViewThreadList _threads;
@@ -343,7 +343,7 @@ private:
 	mutable Glib::Threads::Mutex _queue_mutex;
 	Glib::Threads::Cond _cond;
 
-	typedef std::deque<boost::shared_ptr<WaveViewDrawRequest> > DrawRequestQueueType;
+	typedef std::deque<std::shared_ptr<WaveViewDrawRequest> > DrawRequestQueueType;
 	DrawRequestQueueType _queue;
 };
 

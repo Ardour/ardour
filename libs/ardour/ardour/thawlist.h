@@ -28,7 +28,7 @@ class LIBARDOUR_API ThawList : public RegionList
 {
 	public:
 		~ThawList ();
-		void add (boost::shared_ptr<Region> r);
+		void add (std::shared_ptr<Region> r);
 		void release ();
 };
 

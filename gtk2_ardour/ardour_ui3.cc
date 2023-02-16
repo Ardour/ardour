@@ -121,11 +121,11 @@ ARDOUR_UI::reset_focus (Gtk::Widget* w)
 void
 ARDOUR_UI::monitor_dim_all ()
 {
-	boost::shared_ptr<Route> mon = _session->monitor_out ();
+	std::shared_ptr<Route> mon = _session->monitor_out ();
 	if (!mon) {
 		return;
 	}
-	boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor = mon->monitor_control ();
+	std::shared_ptr<ARDOUR::MonitorProcessor> _monitor = mon->monitor_control ();
 
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-dim-all");
 	_monitor->set_dim_all (tact->get_active());
@@ -134,11 +134,11 @@ ARDOUR_UI::monitor_dim_all ()
 void
 ARDOUR_UI::monitor_cut_all ()
 {
-	boost::shared_ptr<Route> mon = _session->monitor_out ();
+	std::shared_ptr<Route> mon = _session->monitor_out ();
 	if (!mon) {
 		return;
 	}
-	boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor = mon->monitor_control ();
+	std::shared_ptr<ARDOUR::MonitorProcessor> _monitor = mon->monitor_control ();
 
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-cut-all");
 	_monitor->set_cut_all (tact->get_active());
@@ -147,11 +147,11 @@ ARDOUR_UI::monitor_cut_all ()
 void
 ARDOUR_UI::monitor_mono ()
 {
-	boost::shared_ptr<Route> mon = _session->monitor_out ();
+	std::shared_ptr<Route> mon = _session->monitor_out ();
 	if (!mon) {
 		return;
 	}
-	boost::shared_ptr<ARDOUR::MonitorProcessor> _monitor = mon->monitor_control ();
+	std::shared_ptr<ARDOUR::MonitorProcessor> _monitor = mon->monitor_control ();
 
 	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Monitor"), "monitor-mono");
 	_monitor->set_mono (tact->get_active());

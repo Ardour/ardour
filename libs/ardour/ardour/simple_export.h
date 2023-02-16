@@ -53,9 +53,9 @@ public:
 	bool        check_outputs () const;
 
 protected:
-	boost::shared_ptr<ARDOUR::ExportHandler>        _handler;
-	boost::shared_ptr<ARDOUR::ExportStatus>         _status;
-	boost::shared_ptr<ARDOUR::ExportProfileManager> _manager;
+	std::shared_ptr<ARDOUR::ExportHandler>        _handler;
+	std::shared_ptr<ARDOUR::ExportStatus>         _status;
+	std::shared_ptr<ARDOUR::ExportProfileManager> _manager;
 
 private:
 	std::string _name;

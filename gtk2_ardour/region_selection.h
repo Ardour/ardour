@@ -52,7 +52,7 @@ public:
 	void sort_by_position_and_track ();
 
 	bool contains (RegionView*) const;
-	bool contains (boost::shared_ptr<ARDOUR::Region>) const;
+	bool contains (std::shared_ptr<ARDOUR::Region>) const;
 	bool involves (const TimeAxisView&) const;
 
 	void clear_all();
@@ -66,7 +66,7 @@ public:
 
 	size_t n_midi_regions() const;
 
-	std::set<boost::shared_ptr<ARDOUR::Playlist> > playlists () const;
+	std::set<std::shared_ptr<ARDOUR::Playlist> > playlists () const;
 	std::list<PBD::ID> pending;
 
 	ARDOUR::RegionList regionlist () const;

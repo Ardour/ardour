@@ -84,7 +84,7 @@ RCUTest::read_thread ()
 #endif
 
 	for (int i = 0; i < 15000; ++i) {
-		boost::shared_ptr<Values> reader  = _values.reader ();
+		std::shared_ptr<Values> reader  = _values.reader ();
 		for (Values::const_iterator i = reader->begin (); i != reader->end(); ++i) {
 			CPPUNIT_ASSERT (i->first == i->second->val);
 		}
@@ -109,7 +109,7 @@ RCUTest::write_thread ()
 
 	for (int i = 0; i < 10000; ++i) {
 		RCUWriter<Values> writer (_values);
-		boost::shared_ptr<Values> w = writer.get_copy ();
+		std::shared_ptr<Values> w = writer.get_copy ();
 		char tmp [64];
 		sprintf (tmp, "foo %d", i);
 		w->insert (make_pair (tmp, new Value (tmp)));
@@ -118,7 +118,7 @@ RCUTest::write_thread ()
 	/* replace */
 	for (int i = 0; i < 2500; ++i) {
 		RCUWriter<Values> writer (_values);
-		boost::shared_ptr<Values> w = writer.get_copy ();
+		std::shared_ptr<Values> w = writer.get_copy ();
 
 		char tmp [64];
 		sprintf (tmp, "foo %d", i);
@@ -134,7 +134,7 @@ RCUTest::write_thread ()
 	/* clear */
 	{
 		RCUWriter<Values> writer (_values);
-		boost::shared_ptr<Values> w = writer.get_copy ();
+		std::shared_ptr<Values> w = writer.get_copy ();
 		w->clear ();
 	}
 	_values.flush ();

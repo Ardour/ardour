@@ -39,7 +39,7 @@ class ElementImporter;
 class LIBARDOUR_API ElementImportHandler
 {
   public:
-	typedef boost::shared_ptr<ElementImporter> ElementPtr;
+	typedef std::shared_ptr<ElementImporter> ElementPtr;
 	typedef std::list<ElementPtr> ElementList;
 
 	/** ElementImportHandler constructor

@@ -67,7 +67,7 @@ class VideoImageFrame : public sigc::trackable
 	PublicEditor& editor;
 	ArdourCanvas::Container *_parent;
 	ArdourCanvas::Image *image;
-	boost::shared_ptr<ArdourCanvas::Image::Data> img;
+	std::shared_ptr<ArdourCanvas::Image::Data> img;
 
 	int clip_width;
 	int clip_height;

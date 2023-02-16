@@ -31,7 +31,7 @@ using namespace PBD;
 
 const uint32_t SrcFileSource::max_blocksize = 2097152U; /* see AudioDiskstream::do_refill_with_alloc, max */
 
-SrcFileSource::SrcFileSource (Session& s, boost::shared_ptr<AudioFileSource> src, SrcQuality srcq)
+SrcFileSource::SrcFileSource (Session& s, std::shared_ptr<AudioFileSource> src, SrcQuality srcq)
 	: Source(s, DataType::AUDIO, src->name(), Flag (src->flags() & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 	, AudioFileSource (s, src->path(), Flag (src->flags() & ~(Writable|Removable|RemovableIfEmpty|RemoveAtDestroy)))
 	, _source (src)
@@ -86,7 +86,7 @@ SrcFileSource::~SrcFileSource ()
 void
 SrcFileSource::close ()
 {
-	boost::shared_ptr<FileSource> fs = boost::dynamic_pointer_cast<FileSource> (_source);
+	std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (_source);
 	if (fs) {
 		fs->close ();
 	}

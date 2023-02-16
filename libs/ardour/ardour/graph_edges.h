@@ -30,7 +30,7 @@
 namespace ARDOUR {
 class GraphNode;
 
-typedef boost::shared_ptr<GraphNode> GraphVertex;
+typedef std::shared_ptr<GraphNode> GraphVertex;
 
 /** A list of edges for a directed graph for routes.
  *

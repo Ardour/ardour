@@ -95,7 +95,7 @@ Editor::embed_audio_from_video (std::string path, samplepos_t n, bool lock_posit
 	ImportProgressWindow ipw (&import_status, _("Import"), _("Cancel Import"));
 	ipw.show ();
 
-	boost::shared_ptr<ARDOUR::Track> track;
+	std::shared_ptr<ARDOUR::Track> track;
 	std::string const& gid = ARDOUR::Playlist::generate_pgroup_id ();
 	Temporal::timepos_t pos (n);
 
@@ -104,7 +104,7 @@ Editor::embed_audio_from_video (std::string path, samplepos_t n, bool lock_posit
 
 	if (ok && track) {
 		if (lock_position_to_video) {
-			boost::shared_ptr<ARDOUR::Playlist> pl = track->playlist();
+			std::shared_ptr<ARDOUR::Playlist> pl = track->playlist();
 			pl->find_next_region (pos, ARDOUR::End, 0)->set_video_locked (true);
 		}
 		_session->save_state ("", true);

@@ -23,7 +23,7 @@
 
 #include <list>
 #include <memory>
-x
+
 #include "pbd/xml++.h"
 #include "pbd/id.h"
 
@@ -40,7 +40,7 @@ class Session;
 class LIBARDOUR_API AudioPlaylistImportHandler : public ElementImportHandler
 {
   public:
-	typedef boost::shared_ptr<AudioPlaylistImporter> PlaylistPtr;
+	typedef std::shared_ptr<AudioPlaylistImporter> PlaylistPtr;
 	typedef std::list<PlaylistPtr> PlaylistList;
 
 	AudioPlaylistImportHandler (XMLTree const & source, Session & session, AudioRegionImportHandler & region_handler, const char * nodename = "Playlists");
@@ -82,7 +82,7 @@ class LIBARDOUR_API AudioPlaylistImporter : public ElementImporter
 	void _move ();
 
   private:
-	typedef std::list<boost::shared_ptr<AudioRegionImporter> > RegionList;
+	typedef std::list<std::shared_ptr<AudioRegionImporter> > RegionList;
 
 	void populate_region_list ();
 

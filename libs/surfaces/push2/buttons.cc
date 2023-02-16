@@ -36,9 +36,9 @@ Push2::build_maps ()
 {
 	/* Pads */
 
-	boost::shared_ptr<Pad> pad;
+	std::shared_ptr<Pad> pad;
 
-	_xy_pad_map.assign (64, boost::shared_ptr<Pad>());
+	_xy_pad_map.assign (64, std::shared_ptr<Pad>());
 
 #define MAKE_PAD(x,y,nn) \
 	pad.reset (new Pad ((x), (y), (nn))); \
@@ -112,7 +112,7 @@ Push2::build_maps ()
 
 	/* Now color buttons */
 
-	boost::shared_ptr<Button> button;
+	std::shared_ptr<Button> button;
 
 #define MAKE_COLOR_BUTTON(i,cc) \
 	button.reset (new ColorButton ((i), (cc))); \
@@ -682,7 +682,7 @@ void
 Push2::button_select_press ()
 {
 	_modifier_state = ModifierState (_modifier_state | ModSelect);
-	boost::shared_ptr<Button> b = _id_button_map[Select];
+	std::shared_ptr<Button> b = _id_button_map[Select];
 	b->set_color (Push2::LED::White);
 	b->set_state (Push2::LED::Blinking16th);
 	write (b->state_msg());
@@ -695,7 +695,7 @@ Push2::button_select_release ()
 {
 	if (_modifier_state & ModSelect) {
 		_modifier_state = ModifierState (_modifier_state & ~(ModSelect));
-		boost::shared_ptr<Button> b = _id_button_map[Select];
+		std::shared_ptr<Button> b = _id_button_map[Select];
 		b->timeout_connection.disconnect ();
 		b->set_color (Push2::LED::White);
 		b->set_state (Push2::LED::OneShot24th);
@@ -716,7 +716,7 @@ Push2::button_long_press_timeout (ButtonID id)
 {
 	if (_buttons_down.find (id) != _buttons_down.end()) {
 		DEBUG_TRACE (DEBUG::Push2, string_compose ("long press timeout for %1, invoking method\n", id));
-		boost::shared_ptr<Button> button = _id_button_map[id];
+		std::shared_ptr<Button> button = _id_button_map[id];
 		(this->*button->long_press_method) ();
 	} else {
 		DEBUG_TRACE (DEBUG::Push2, string_compose ("long press timeout for %1, expired/cancelled\n", id));
@@ -732,7 +732,7 @@ Push2::button_long_press_timeout (ButtonID id)
 }
 
 void
-Push2::start_press_timeout (boost::shared_ptr<Button> button, ButtonID id)
+Push2::start_press_timeout (std::shared_ptr<Button> button, ButtonID id)
 {
 	assert (button);
 	Glib::RefPtr<Glib::TimeoutSource> timeout = Glib::TimeoutSource::create (500); // milliseconds
@@ -817,7 +817,7 @@ Push2::button_mix_press ()
 void
 Push2::button_master ()
 {
-	boost::shared_ptr<Stripable> main_out = session->master_out ();
+	std::shared_ptr<Stripable> main_out = session->master_out ();
 
 	if (!main_out) {
 		return;

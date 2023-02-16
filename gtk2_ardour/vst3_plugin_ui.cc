@@ -35,7 +35,7 @@ using namespace Steinberg;
 DEF_CLASS_IID (Presonus::IPlugInViewScaling)
 #endif
 
-VST3PluginUI::VST3PluginUI (boost::shared_ptr<PlugInsertBase> pib, boost::shared_ptr<VST3Plugin> vst3)
+VST3PluginUI::VST3PluginUI (std::shared_ptr<PlugInsertBase> pib, std::shared_ptr<VST3Plugin> vst3)
 	: PlugUIBase (pib)
 	, _vst3 (vst3)
 	, _req_width (0)

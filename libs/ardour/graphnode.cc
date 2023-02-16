@@ -33,20 +33,20 @@ GraphActivision::GraphActivision ()
 node_set_t const&
 GraphActivision::activation_set (GraphChain const* const g) const
 {
-	boost::shared_ptr<ActivationMap> m (_activation_set.reader ());
+	std::shared_ptr<ActivationMap> m (_activation_set.reader ());
 	return m->at (g);
 }
 
 int
 GraphActivision::init_refcount (GraphChain const* const g) const
 {
-	boost::shared_ptr<RefCntMap> m (_init_refcount.reader ());
+	std::shared_ptr<RefCntMap> m (_init_refcount.reader ());
 	return m->at (g);
 }
 
 /* ****************************************************************************/
 
-GraphNode::GraphNode (boost::shared_ptr<Graph> graph)
+GraphNode::GraphNode (std::shared_ptr<Graph> graph)
 	: _graph (graph)
 {
 	g_atomic_int_set (&_refcount, 0);

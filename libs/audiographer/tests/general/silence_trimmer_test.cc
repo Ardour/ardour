@@ -168,8 +168,8 @@ class SilenceTrimmerTest : public CppUnit::TestFixture
 	}
 
   private:
-	boost::shared_ptr<SilenceTrimmer<float> > trimmer;
-	boost::shared_ptr<AppendingVectorSink<float> > sink;
+	std::shared_ptr<SilenceTrimmer<float> > trimmer;
+	std::shared_ptr<AppendingVectorSink<float> > sink;
 
 	float * random_data;
 	float * zero_data;

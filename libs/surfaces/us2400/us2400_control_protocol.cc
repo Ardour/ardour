@@ -207,7 +207,7 @@ US2400Protocol::next_track()
 }
 
 bool
-US2400Protocol::stripable_is_locked_to_strip (boost::shared_ptr<Stripable> r) const
+US2400Protocol::stripable_is_locked_to_strip (std::shared_ptr<Stripable> r) const
 {
 	for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
 		if ((*si)->stripable_is_locked_to_strip (r)) {
@@ -220,7 +220,7 @@ US2400Protocol::stripable_is_locked_to_strip (boost::shared_ptr<Stripable> r) co
 #ifdef MIXBUS
 struct StripableByMixbusOrder
 {
-	bool operator () (const boost::shared_ptr<Stripable> & a, const boost::shared_ptr<Stripable> & b) const
+	bool operator () (const std::shared_ptr<Stripable> & a, const std::shared_ptr<Stripable> & b) const
 	{
 		return a->mixbus() < b->mixbus();
 	}
@@ -240,7 +240,7 @@ struct StripableByMixbusOrder
 // predicate for sort call in get_sorted_stripables
 struct StripableByPresentationOrder
 {
-	bool operator () (const boost::shared_ptr<Stripable> & a, const boost::shared_ptr<Stripable> & b) const
+	bool operator () (const std::shared_ptr<Stripable> & a, const std::shared_ptr<Stripable> & b) const
 	{
 		return a->presentation_info().order() < b->presentation_info().order();
 	}
@@ -271,7 +271,7 @@ US2400Protocol::get_sorted_stripables()
 
 	for (StripableList::iterator it = stripables.begin(); it != stripables.end(); ++it) {
 
-		boost::shared_ptr<Stripable> s = *it;
+		std::shared_ptr<Stripable> s = *it;
 
 		if (s->presentation_info().special()) {
 			continue;
@@ -383,7 +383,7 @@ US2400Protocol::switch_banks (uint32_t initial, bool force)
 		Sorted::iterator r = sorted.begin() + _current_initial_bank;
 
 		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-			vector<boost::shared_ptr<Stripable> > stripables;
+			vector<std::shared_ptr<Stripable> > stripables;
 			uint32_t added = 0;
 
 			DEBUG_TRACE (DEBUG::US2400, string_compose ("surface has %1 unlocked strips\n", (*si)->n_strips (false)));
@@ -402,7 +402,7 @@ US2400Protocol::switch_banks (uint32_t initial, bool force)
 		DEBUG_TRACE (DEBUG::US2400, string_compose ("clear all strips, bank target %1  is outside route range %2\n",
 		                                                   _current_initial_bank, sorted.size()));
 		for (Surfaces::iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-			vector<boost::shared_ptr<Stripable> > stripables;
+			vector<std::shared_ptr<Stripable> > stripables;
 			/* pass in an empty stripables list, so that all strips will be reset */
 			(*si)->map_stripables (stripables);
 		}
@@ -513,7 +513,7 @@ US2400Protocol::update_timecode_beats_led()
 void
 US2400Protocol::update_global_button (int id, LedState ls)
 {
-	boost::shared_ptr<Surface> surface;
+	std::shared_ptr<Surface> surface;
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -550,7 +550,7 @@ US2400Protocol::update_global_led (int id, LedState ls)
 	if (!_device_info.has_global_controls()) {
 		return;
 	}
-	boost::shared_ptr<Surface> surface = _master_surface;
+	std::shared_ptr<Surface> surface = _master_surface;
 
 	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (id);
 
@@ -743,7 +743,7 @@ US2400Protocol::create_surfaces ()
 
 		DEBUG_TRACE (DEBUG::US2400, string_compose ("Port Name for surface %1 is %2\n", n, device_name));
 
-		boost::shared_ptr<Surface> surface;
+		std::shared_ptr<Surface> surface;
 
 		if (n ==0) {
 			stype = st_mcu;
@@ -1030,7 +1030,7 @@ US2400Protocol::notify_routes_added (ARDOUR::RouteList & rl)
 void
 US2400Protocol::notify_solo_active_changed (bool active)
 {
-	boost::shared_ptr<Surface> surface;
+	std::shared_ptr<Surface> surface;
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -1119,7 +1119,7 @@ US2400Protocol::notify_record_state_changed ()
 		return;
 	}
 
-	boost::shared_ptr<Surface> surface;
+	std::shared_ptr<Surface> surface;
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -1157,10 +1157,10 @@ US2400Protocol::notify_record_state_changed ()
 	}
 }
 
-list<boost::shared_ptr<ARDOUR::Bundle> >
+list<std::shared_ptr<ARDOUR::Bundle> >
 US2400Protocol::bundles ()
 {
-	list<boost::shared_ptr<ARDOUR::Bundle> > b;
+	list<std::shared_ptr<ARDOUR::Bundle> > b;
 
 	if (_input_bundle) {
 		b.push_back (_input_bundle);
@@ -1376,7 +1376,7 @@ US2400Protocol::notify_subview_stripable_deleted ()
 }
 
 bool
-US2400Protocol::subview_mode_would_be_ok (SubViewMode mode, boost::shared_ptr<Stripable> r)
+US2400Protocol::subview_mode_would_be_ok (SubViewMode mode, std::shared_ptr<Stripable> r)
 {
 	switch (mode) {
 	case None:
@@ -1411,7 +1411,7 @@ US2400Protocol::redisplay_subview_mode ()
 }
 
 int
-US2400Protocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Stripable> r)
+US2400Protocol::set_subview_mode (SubViewMode sm, std::shared_ptr<Stripable> r)
 {
 	if (!subview_mode_would_be_ok (sm, r)) {
 
@@ -1437,7 +1437,7 @@ US2400Protocol::set_subview_mode (SubViewMode sm, boost::shared_ptr<Stripable> r
 		return -1;
 	}
 
-	boost::shared_ptr<Stripable> old_stripable = _subview_stripable;
+	std::shared_ptr<Stripable> old_stripable = _subview_stripable;
 
 	_subview_mode = sm;
 	_subview_stripable = r;
@@ -1485,7 +1485,7 @@ US2400Protocol::set_view_mode (ViewMode m)
 	}
 
 	/* leave subview mode, whatever it was */
-	set_subview_mode (None, boost::shared_ptr<Stripable>());
+	set_subview_mode (None, std::shared_ptr<Stripable>());
 }
 
 void
@@ -1507,7 +1507,7 @@ US2400Protocol::set_monitor_on_surface_strip (uint32_t surface, uint32_t strip_n
 }
 
 void
-US2400Protocol::force_special_stripable_to_strip (boost::shared_ptr<Stripable> r, uint32_t surface, uint32_t strip_number)
+US2400Protocol::force_special_stripable_to_strip (std::shared_ptr<Stripable> r, uint32_t surface, uint32_t strip_number)
 {
 	if (!r) {
 		return;
@@ -1663,7 +1663,7 @@ US2400Protocol::down_controls (AutomationType p, uint32_t pressed)
 		break;
 	case RecEnableAutomation:
 		for (StripableList::iterator s = stripables.begin(); s != stripables.end(); ++s) {
-			boost::shared_ptr<AutomationControl> ac = (*s)->rec_enable_control();
+			std::shared_ptr<AutomationControl> ac = (*s)->rec_enable_control();
 			if (ac) {
 				controls.push_back (ac);
 			}
@@ -1737,7 +1737,7 @@ US2400Protocol::pull_stripable_range (DownButtonList& down, StripableList& selec
 
 			for (uint32_t n = fs; n < ls; ++n) {
 				Strip* strip = (*s)->nth_strip (n);
-				boost::shared_ptr<Stripable> r = strip->stripable();
+				std::shared_ptr<Stripable> r = strip->stripable();
 				if (r) {
 					if (global_index_locked (*strip) == pressed) {
 						selected.push_front (r);
@@ -1796,7 +1796,7 @@ US2400Protocol::toggle_backlight ()
 	}
 }
 
-boost::shared_ptr<Surface>
+std::shared_ptr<Surface>
 US2400Protocol::get_surface_by_raw_pointer (void* ptr) const
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -1807,10 +1807,10 @@ US2400Protocol::get_surface_by_raw_pointer (void* ptr) const
 		}
 	}
 
-	return boost::shared_ptr<Surface> ();
+	return std::shared_ptr<Surface> ();
 }
 
-boost::shared_ptr<Surface>
+std::shared_ptr<Surface>
 US2400Protocol::nth_surface (uint32_t n) const
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -1821,11 +1821,11 @@ US2400Protocol::nth_surface (uint32_t n) const
 		}
 	}
 
-	return boost::shared_ptr<Surface> ();
+	return std::shared_ptr<Surface> ();
 }
 
 void
-US2400Protocol::connection_handler (boost::weak_ptr<ARDOUR::Port> wp1, std::string name1, boost::weak_ptr<ARDOUR::Port> wp2, std::string name2, bool yn)
+US2400Protocol::connection_handler (std::weak_ptr<ARDOUR::Port> wp1, std::string name1, std::weak_ptr<ARDOUR::Port> wp2, std::string name2, bool yn)
 {
 	Surfaces scopy;
 	{
@@ -1842,25 +1842,25 @@ US2400Protocol::connection_handler (boost::weak_ptr<ARDOUR::Port> wp1, std::stri
 }
 
 bool
-US2400Protocol::is_track (boost::shared_ptr<Stripable> r) const
+US2400Protocol::is_track (std::shared_ptr<Stripable> r) const
 {
-	return boost::dynamic_pointer_cast<Track>(r) != 0;
+	return std::dynamic_pointer_cast<Track>(r) != 0;
 }
 
 bool
-US2400Protocol::is_audio_track (boost::shared_ptr<Stripable> r) const
+US2400Protocol::is_audio_track (std::shared_ptr<Stripable> r) const
 {
-	return boost::dynamic_pointer_cast<AudioTrack>(r) != 0;
+	return std::dynamic_pointer_cast<AudioTrack>(r) != 0;
 }
 
 bool
-US2400Protocol::is_midi_track (boost::shared_ptr<Stripable> r) const
+US2400Protocol::is_midi_track (std::shared_ptr<Stripable> r) const
 {
-	return boost::dynamic_pointer_cast<MidiTrack>(r) != 0;
+	return std::dynamic_pointer_cast<MidiTrack>(r) != 0;
 }
 
 bool
-US2400Protocol::is_mapped (boost::shared_ptr<Stripable> r) const
+US2400Protocol::is_mapped (std::shared_ptr<Stripable> r) const
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
@@ -1883,7 +1883,7 @@ US2400Protocol::stripable_selection_changed ()
 	}
 
 	//first check for the dedicated Master strip
-	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
+	std::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
 	if (s && s->is_master()) {
 		update_global_button(Button::MstrSelect, on);  //NOTE:  surface does not respond to this
 	} else {
@@ -1904,17 +1904,17 @@ US2400Protocol::stripable_selection_changed ()
 		 */
 
 		if (set_subview_mode (TrackView, s)) {
-			set_subview_mode (None, boost::shared_ptr<Stripable>());
+			set_subview_mode (None, std::shared_ptr<Stripable>());
 		}
 
 	} else
-		set_subview_mode (None, boost::shared_ptr<Stripable>());
+		set_subview_mode (None, std::shared_ptr<Stripable>());
 }
 
-boost::shared_ptr<Stripable>
+std::shared_ptr<Stripable>
 US2400Protocol::first_selected_stripable () const
 {
-	boost::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
+	std::shared_ptr<Stripable> s = ControlProtocol::first_selected_stripable();
 
 	if (s) {
 		/* check it is on one of our surfaces */
@@ -1934,7 +1934,7 @@ US2400Protocol::first_selected_stripable () const
 	return s; /* may be null */
 }
 
-boost::shared_ptr<Stripable>
+std::shared_ptr<Stripable>
 US2400Protocol::subview_stripable () const
 {
 	return _subview_stripable;
@@ -1976,13 +1976,13 @@ US2400Protocol::request_factory (uint32_t num_requests)
 void
 US2400Protocol::set_automation_state (AutoState as)
 {
-	boost::shared_ptr<Stripable> r = first_selected_stripable ();
+	std::shared_ptr<Stripable> r = first_selected_stripable ();
 
 	if (!r) {
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac = r->gain_control();
+	std::shared_ptr<AutomationControl> ac = r->gain_control();
 
 	if (!ac) {
 		return;

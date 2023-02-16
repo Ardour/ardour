@@ -72,7 +72,7 @@ VCA::VCA (Session& s, int32_t num, const string& name)
 	: Stripable (s, name, PresentationInfo (num, PresentationInfo::VCA))
 	, Muteable (s, name)
 	, _number (num)
-	, _gain_control (new GainControl (s, Evoral::Parameter (GainAutomation), boost::shared_ptr<AutomationList> ()))
+	, _gain_control (new GainControl (s, Evoral::Parameter (GainAutomation), std::shared_ptr<AutomationList> ()))
 {
 }
 
@@ -95,7 +95,7 @@ VCA::~VCA ()
 	{
 		Glib::Threads::Mutex::Lock lm (_control_lock);
 		for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
-			boost::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
+			std::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
 		}
 	}
 	{
@@ -198,7 +198,7 @@ VCA::slaved () const
 }
 
 bool
-VCA::slaved_to (boost::shared_ptr<VCA> vca) const
+VCA::slaved_to (std::shared_ptr<VCA> vca) const
 {
 	if (!vca || !_gain_control) {
 		return false;
@@ -210,7 +210,7 @@ VCA::slaved_to (boost::shared_ptr<VCA> vca) const
 }
 
 void
-VCA::assign (boost::shared_ptr<VCA> v)
+VCA::assign (std::shared_ptr<VCA> v)
 {
 	/* prevent recursive assignments */
 	if (assigned_to (_session.vca_manager_ptr (), v)) {

@@ -65,11 +65,11 @@ AutomationListPropertyTest::basicTest ()
 	list<string> ignore_properties;
 	ignore_properties.push_back ("id");
 
-	PropertyDescriptor<boost::shared_ptr<AutomationList> > descriptor;
+	PropertyDescriptor<std::shared_ptr<AutomationList> > descriptor;
 	descriptor.property_id = g_quark_from_static_string ("FadeIn");
 	AutomationListProperty property (
 		descriptor,
-		boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), Temporal::AudioTime))
+		std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), Temporal::AudioTime))
 		);
 
 	property.clear_changes ();
@@ -115,7 +115,7 @@ class Fred : public StatefulDestructible
 {
 public:
 	Fred ()
-		: _jim (_descriptor, boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), Temporal::AudioTime)))
+		: _jim (_descriptor, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), Temporal::AudioTime)))
 
 	{
 		add_property (_jim);
@@ -137,10 +137,10 @@ public:
 	}
 
 	AutomationListProperty _jim;
-	static PropertyDescriptor<boost::shared_ptr<AutomationList> > _descriptor;
+	static PropertyDescriptor<std::shared_ptr<AutomationList> > _descriptor;
 };
 
-PropertyDescriptor<boost::shared_ptr<AutomationList> > Fred::_descriptor;
+PropertyDescriptor<std::shared_ptr<AutomationList> > Fred::_descriptor;
 
 void
 AutomationListPropertyTest::undoTest ()
@@ -150,7 +150,7 @@ AutomationListPropertyTest::undoTest ()
 
 	Fred::make_property_quarks ();
 
-	boost::shared_ptr<Fred> sheila (new Fred);
+	std::shared_ptr<Fred> sheila (new Fred);
 
 	/* Add some data */
 	sheila->_jim->add (timepos_t(0), 1, false, false);

@@ -51,8 +51,8 @@ Return::Return (Session& s, bool internal)
 {
 	/* never muted */
 
-	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation), time_domain()));
-	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter (GainAutomation), gl));
+	std::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation), time_domain()));
+	_gain_control = std::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter (GainAutomation), gl));
 	add_control (_gain_control);
 
 	_amp.reset (new Amp (_session, X_("Fader"), _gain_control, true));

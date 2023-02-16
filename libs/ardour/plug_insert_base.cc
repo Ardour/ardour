@@ -85,11 +85,11 @@ PlugInsertBase::parse_plugin_type (XMLNode const& node, PluginType& type, std::s
 	return true;
 }
 
-boost::shared_ptr<Plugin>
+std::shared_ptr<Plugin>
 PlugInsertBase::find_and_load_plugin (Session& s, XMLNode const& node, PluginType& type, std::string const& unique_id, bool& any_vst)
 {
 	/* Find and load plugin module */
-	boost::shared_ptr<Plugin> plugin = find_plugin (s, unique_id, type);
+	std::shared_ptr<Plugin> plugin = find_plugin (s, unique_id, type);
 
 	/* treat VST plugins equivalent if they have the same uniqueID
 	 * allow to move sessions windows <> linux */
@@ -124,7 +124,7 @@ PlugInsertBase::find_and_load_plugin (Session& s, XMLNode const& node, PluginTyp
 		 * load the plugin from the serialized version in the
 		 * session-file instead.
 		 */
-		boost::shared_ptr<LuaProc> lp (new LuaProc (s.engine(), s, ""));
+		std::shared_ptr<LuaProc> lp (new LuaProc (s.engine(), s, ""));
 		XMLNode *ls = node.child (lp->state_node_name().c_str());
 		if (ls && lp) {
 			if (0 == lp->set_script_from_state (*ls)) {
@@ -139,7 +139,7 @@ PlugInsertBase::find_and_load_plugin (Session& s, XMLNode const& node, PluginTyp
 					"Perhaps it was removed or moved since it was last used."),
 				unique_id)
 			<< endmsg;
-		return boost::shared_ptr<Plugin> ();
+		return std::shared_ptr<Plugin> ();
 	}
 	return plugin;
 }
@@ -156,7 +156,7 @@ PlugInsertBase::set_control_ids (const XMLNode& node, int version)
 		uint32_t p = (uint32_t)-1;
 		std::string str;
 		if ((*iter)->get_property (X_("symbol"), str)) {
-			boost::shared_ptr<LV2Plugin> lv2plugin = boost::dynamic_pointer_cast<LV2Plugin> (plugin ());
+			std::shared_ptr<LV2Plugin> lv2plugin = std::dynamic_pointer_cast<LV2Plugin> (plugin ());
 			if (lv2plugin) {
 				p = lv2plugin->port_index(str.c_str());
 			}
@@ -170,12 +170,12 @@ PlugInsertBase::set_control_ids (const XMLNode& node, int version)
 		}
 
 		/* this may create the new controllable */
-		boost::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, p));
+		std::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, p));
 
 		if (!c) {
 			continue;
 		}
-		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (c);
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (c);
 		if (ac) {
 			ac->set_state (**iter, version);
 		}
@@ -185,7 +185,7 @@ PlugInsertBase::set_control_ids (const XMLNode& node, int version)
 void
 PlugInsertBase::preset_load_set_value (uint32_t p, float v)
 {
-	boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (Evoral::ControlSet::control (Evoral::Parameter(PluginAutomation, 0, p), false));
+	std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (Evoral::ControlSet::control (Evoral::Parameter(PluginAutomation, 0, p), false));
 	if (!ac) {
 		return;
 	}

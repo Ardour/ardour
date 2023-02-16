@@ -79,7 +79,7 @@ public:
 class LIBARDOUR_API PortExportChannel : public ExportChannel
 {
 public:
-	typedef std::set<boost::weak_ptr<AudioPort>> PortSet;
+	typedef std::set<std::weak_ptr<AudioPort>, std::owner_less<std::weak_ptr<AudioPort> > > PortSet;
 
 	PortExportChannel ();
 	~PortExportChannel ();
@@ -98,7 +98,7 @@ public:
 
 	bool operator< (ExportChannel const& other) const;
 
-	void add_port (boost::weak_ptr<AudioPort> port) { ports.insert (port); }
+	void add_port (std::weak_ptr<AudioPort> port) { ports.insert (port); }
 	PortSet const& get_ports () const { return ports; }
 
 private:
@@ -106,7 +106,7 @@ private:
 	samplecnt_t                                           _buffer_size;
 	boost::scoped_array<Sample>                           _buffer;
 	mutable AudioBuffer                                   _buf;
-	std::list<boost::shared_ptr<PBD::RingBuffer<Sample>>> _delaylines;
+	std::list<std::shared_ptr<PBD::RingBuffer<Sample>>> _delaylines;
 };
 
 /// Basic export channel that reads from MIDIPorts
@@ -134,15 +134,15 @@ public:
 
 	bool operator< (ExportChannel const& other) const;
 
-	boost::shared_ptr<MidiPort> port () const { return _port.lock (); }
+	std::shared_ptr<MidiPort> port () const { return _port.lock (); }
 
-	void set_port (boost::weak_ptr<MidiPort> port)
+	void set_port (std::weak_ptr<MidiPort> port)
 	{
 		_port = port;
 	}
 
 private:
-	boost::weak_ptr<MidiPort> _port;
+	std::weak_ptr<MidiPort> _port;
 	mutable FixedDelay        _delayline;
 	mutable MidiBuffer        _buf;
 };
@@ -230,14 +230,14 @@ class LIBARDOUR_API RouteExportChannel : public ExportChannel
 	class ProcessorRemover; // fwd declaration
 
 public:
-	RouteExportChannel (boost::shared_ptr<CapturingProcessor> processor,
+	RouteExportChannel (std::shared_ptr<CapturingProcessor> processor,
 	                    DataType                              type,
 	                    size_t                                channel,
-	                    boost::shared_ptr<ProcessorRemover>   remover);
+	                    std::shared_ptr<ProcessorRemover>   remover);
 
 	~RouteExportChannel ();
 
-	static void create_from_route (std::list<ExportChannelPtr>& result, boost::shared_ptr<Route> route);
+	static void create_from_route (std::list<ExportChannelPtr>& result, std::shared_ptr<Route> route);
 	static void create_from_state (std::list<ExportChannelPtr>& result, Session&, XMLNode*);
 
 public: // ExportChannel interface
@@ -250,7 +250,7 @@ public: // ExportChannel interface
 	bool audio () const;
 	bool midi () const;
 
-	boost::shared_ptr<Route> route () const { return _remover->route (); }
+	std::shared_ptr<Route> route () const { return _remover->route (); }
 
 	std::string state_node_name () const { return "RouteExportChannel"; }
 
@@ -264,28 +264,28 @@ private:
 	class ProcessorRemover
 	{
 	public:
-		ProcessorRemover (boost::shared_ptr<Route> route, boost::shared_ptr<CapturingProcessor> processor)
+		ProcessorRemover (std::shared_ptr<Route> route, std::shared_ptr<CapturingProcessor> processor)
 			: _route (route)
 			, _processor (processor)
 		{
 		}
 		~ProcessorRemover ();
 
-		boost::shared_ptr<Route> route () const { return _route; }
+		std::shared_ptr<Route> route () const { return _route; }
 
 	private:
-		boost::shared_ptr<Route>              _route;
-		boost::shared_ptr<CapturingProcessor> _processor;
+		std::shared_ptr<Route>              _route;
+		std::shared_ptr<CapturingProcessor> _processor;
 	};
 
-	boost::shared_ptr<CapturingProcessor> _processor;
+	std::shared_ptr<CapturingProcessor> _processor;
 
 	DataType _type;
 	size_t   _channel;
 
 	// Each channel keeps a ref to the remover. Last one alive
 	// will cause the processor to be removed on deletion.
-	boost::shared_ptr<ProcessorRemover> _remover;
+	std::shared_ptr<ProcessorRemover> _remover;
 };
 
 } // namespace ARDOUR

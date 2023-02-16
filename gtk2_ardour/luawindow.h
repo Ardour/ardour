@@ -107,7 +107,7 @@ private:
 
 	ArdourWidgets::ArdourDropdown script_select;
 
-	typedef boost::shared_ptr<ScriptBuffer> ScriptBufferPtr;
+	typedef std::shared_ptr<ScriptBuffer> ScriptBufferPtr;
 	typedef std::vector<ScriptBufferPtr> ScriptBufferList;
 
 	ScriptBufferList script_buffers;

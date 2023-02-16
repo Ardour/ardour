@@ -59,12 +59,12 @@ public:
 
 	virtual bool find_next_event(double start, double end, ControlEvent& ev, bool only_active) const { return false; }
 
-	boost::shared_ptr<Control> control_factory(const Parameter& param) {
+	std::shared_ptr<Control> control_factory(const Parameter& param) {
 		Evoral::ParameterDescriptor desc;
 		desc.upper = 127;
 		desc.rangesteps = 128;
-		boost::shared_ptr<ControlList> list(new ControlList(param, desc, Temporal::BeatTime));
-		return boost::shared_ptr<Control>(new Control(param, desc, list));
+		std::shared_ptr<ControlList> list(new ControlList(param, desc, Temporal::BeatTime));
+		return std::shared_ptr<Control>(new Control(param, desc, list));
 	}
 };
 
@@ -125,7 +125,7 @@ class SequenceTest : public CppUnit::TestFixture
 
 public:
 	typedef Temporal::Beats Time;
-	typedef std::vector< boost::shared_ptr< Note<Time> > > Notes;
+	typedef std::vector< std::shared_ptr< Note<Time> > > Notes;
 
 	void setUp () {
 		type_map = new DummyTypeMap();
@@ -135,7 +135,7 @@ public:
 
 		for (int i = 0; i < 12; i++) {
 			test_notes.push_back(
-				boost::shared_ptr<Note<Time> >(
+				std::shared_ptr<Note<Time> >(
 					new Note<Time>(0, Time::from_double(i * 100), Time::from_double(100), 64 + i, 64)));
 		}
 	}

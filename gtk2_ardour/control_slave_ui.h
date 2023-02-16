@@ -44,10 +44,10 @@ class ControlSlaveUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 public:
 	ControlSlaveUI (ARDOUR::Session*);
 	~ControlSlaveUI ();
-	void set_stripable (boost::shared_ptr<ARDOUR::Stripable>);
+	void set_stripable (std::shared_ptr<ARDOUR::Stripable>);
 
 private:
-	boost::shared_ptr<ARDOUR::Stripable> stripable;
+	std::shared_ptr<ARDOUR::Stripable> stripable;
 	PBD::ScopedConnectionList   connections;
 	PBD::ScopedConnectionList   master_connections;
 	ArdourWidgets::ArdourButton initial_button;
@@ -58,7 +58,7 @@ private:
 	bool specific_vca_button_release (GdkEventButton* ev, uint32_t n);
 	bool vca_event_box_release (GdkEventButton* ev);
 	bool vca_button_release (GdkEventButton* ev, uint32_t n);
-	void add_vca_button (boost::shared_ptr<ARDOUR::VCA>);
+	void add_vca_button (std::shared_ptr<ARDOUR::VCA>);
 	void unassign_all ();
 
 	Gtk::Menu* context_menu;

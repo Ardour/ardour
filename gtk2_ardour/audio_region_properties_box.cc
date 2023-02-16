@@ -117,7 +117,7 @@ RegionPropertiesBox::set_session (Session* s)
 }
 
 void
-RegionPropertiesBox::set_region (boost::shared_ptr<Region> r)
+RegionPropertiesBox::set_region (std::shared_ptr<Region> r)
 {
 	set_session (&r->session ());
 
@@ -191,7 +191,7 @@ AudioRegionPropertiesBox::~AudioRegionPropertiesBox ()
 }
 
 void
-AudioRegionPropertiesBox::set_region (boost::shared_ptr<Region> r)
+AudioRegionPropertiesBox::set_region (std::shared_ptr<Region> r)
 {
 	RegionPropertiesBox::set_region (r);
 }

@@ -43,7 +43,7 @@ Pitch::Pitch (Session& s, TimeFXRequest& req)
 }
 
 int
-Pitch::run (boost::shared_ptr<Region> region)
+Pitch::run (std::shared_ptr<Region> region)
 {
 	tsr.done = true;
 

@@ -211,8 +211,8 @@ LaunchControlXL::ports_acquire ()
 	 * really insist on that (and use JACK)
 	 */
 
-	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
-	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
+	_input_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
+	_output_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
 
 	session->BundleAddedOrRemoved ();
 
@@ -251,10 +251,10 @@ LaunchControlXL::ports_release ()
 	_output_port = 0;
 }
 
-list<boost::shared_ptr<ARDOUR::Bundle> >
+list<std::shared_ptr<ARDOUR::Bundle> >
 LaunchControlXL::bundles ()
 {
-	list<boost::shared_ptr<ARDOUR::Bundle> > b;
+	list<std::shared_ptr<ARDOUR::Bundle> > b;
 
 	if (_output_bundle) {
 		b.push_back (_output_bundle);
@@ -281,7 +281,7 @@ LaunchControlXL::init_buttons (ButtonID buttons[], uint8_t i)
 {
 	DEBUG_TRACE (DEBUG::LaunchControlXL, "init_buttons buttons[]\n");
 	for (uint8_t n = 0; n < i; ++n) {
-		boost::shared_ptr<TrackButton> button = boost::dynamic_pointer_cast<TrackButton> (id_note_button_map[buttons[n]]);
+		std::shared_ptr<TrackButton> button = std::dynamic_pointer_cast<TrackButton> (id_note_button_map[buttons[n]]);
 		if (button) {
 			switch ((button->check_method)()) {
 				case (dev_nonexistant):
@@ -300,14 +300,14 @@ LaunchControlXL::init_buttons (ButtonID buttons[], uint8_t i)
 		}
 	}
 	/* set "Track Select" LEDs always on - we cycle through stripables */
-	boost::shared_ptr<SelectButton> sl = boost::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectLeft]);
-	boost::shared_ptr<SelectButton> sr = boost::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectRight]);
+	std::shared_ptr<SelectButton> sl = std::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectLeft]);
+	std::shared_ptr<SelectButton> sr = std::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectRight]);
 	if (sl && sr) {
 		write(sl->state_msg(true));
 		write(sr->state_msg(true));
 	}
 
-	boost::shared_ptr<TrackStateButton> db =  boost::dynamic_pointer_cast<TrackStateButton>(id_note_button_map[Device]);
+	std::shared_ptr<TrackStateButton> db =  std::dynamic_pointer_cast<TrackStateButton>(id_note_button_map[Device]);
 	if (db) {
 		write(db->state_msg(device_mode()));
 	}
@@ -327,7 +327,7 @@ LaunchControlXL::init_buttons (bool startup)
 			Control1, Control2, Control3, Control4, Control5, Control6, Control7, Control8 };
 
 		for (size_t n = 0; n < sizeof (buttons) / sizeof (buttons[0]); ++n) {
-			boost::shared_ptr<TrackButton> button = boost::dynamic_pointer_cast<TrackButton> (id_note_button_map[buttons[n]]);
+			std::shared_ptr<TrackButton> button = std::dynamic_pointer_cast<TrackButton> (id_note_button_map[buttons[n]]);
 			if (button) {
 				switch ((button->check_method)()) {
 					case (dev_nonexistant):
@@ -348,14 +348,14 @@ LaunchControlXL::init_buttons (bool startup)
 	}
 
 	/* set "Track Select" LEDs always on - we cycle through stripables */
-	boost::shared_ptr<SelectButton> sl = boost::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectLeft]);
-	boost::shared_ptr<SelectButton> sr = boost::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectRight]);
+	std::shared_ptr<SelectButton> sl = std::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectLeft]);
+	std::shared_ptr<SelectButton> sr = std::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectRight]);
 	if (sl && sr) {
 		write(sl->state_msg(true));
 		write(sr->state_msg(true));
 	}
 #ifdef MIXBUS // for now we only offer a device mode for Mixbus
-	boost::shared_ptr<TrackStateButton> db =  boost::dynamic_pointer_cast<TrackStateButton>(id_note_button_map[Device]);
+	std::shared_ptr<TrackStateButton> db =  std::dynamic_pointer_cast<TrackStateButton>(id_note_button_map[Device]);
 	if (db) {
 		write(db->state_msg(device_mode()));
 	}
@@ -367,7 +367,7 @@ LaunchControlXL::init_knobs (KnobID knobs[], uint8_t i)
 {
 	for (uint8_t n = 0; n < i ; ++n) {
 		DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose ("init_knobs from array - n:%1\n", n));
-		boost::shared_ptr<Knob> knob = id_knob_map[knobs[n]];
+		std::shared_ptr<Knob> knob = id_knob_map[knobs[n]];
 		if (knob) {
 			switch ((knob->check_method)()) {
 				case (dev_nonexistant):
@@ -400,7 +400,7 @@ LaunchControlXL::init_knobs ()
 							Pan1, Pan2, Pan3, Pan4, Pan5, Pan6, Pan7, Pan8 };
 
 		for (size_t n = 0; n < sizeof (knobs) / sizeof (knobs[0]); ++n) {
-			boost::shared_ptr<Knob> knob = id_knob_map[knobs[n]];
+			std::shared_ptr<Knob> knob = id_knob_map[knobs[n]];
 			if (knob) {
 				switch ((knob->check_method)()) {
 					case (dev_nonexistant):
@@ -577,13 +577,13 @@ LaunchControlXL::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t
 
 
 void
-LaunchControlXL::handle_button_message(boost::shared_ptr<Button> button, MIDI::EventTwoBytes* ev)
+LaunchControlXL::handle_button_message(std::shared_ptr<Button> button, MIDI::EventTwoBytes* ev)
 {
 	if (ev->value) {
 		/* any press cancels any pending long press timeouts */
 		for (set<ButtonID>::iterator x = buttons_down.begin(); x != buttons_down.end(); ++x) {
-			boost::shared_ptr<ControllerButton> cb = id_controller_button_map[*x];
-			boost::shared_ptr<NoteButton>	nb = id_note_button_map[*x];
+			std::shared_ptr<ControllerButton> cb = id_controller_button_map[*x];
+			std::shared_ptr<NoteButton>	nb = id_note_button_map[*x];
 			if (cb != 0) {
 				cb->timeout_connection.disconnect();
 			} else if (nb != 0) {
@@ -619,7 +619,7 @@ LaunchControlXL::handle_button_message(boost::shared_ptr<Button> button, MIDI::E
 
 
 bool
-LaunchControlXL::check_pick_up(boost::shared_ptr<Controller> controller, boost::shared_ptr<AutomationControl> ac, bool rotary)
+LaunchControlXL::check_pick_up(std::shared_ptr<Controller> controller, std::shared_ptr<AutomationControl> ac, bool rotary)
 {
 	/* returns false until the controller value matches with the current setting of the stripable's ac */
 	return (abs (controller->value() / 127.0 - ac->internal_to_interface(ac->get_value(), rotary)) < 0.007875);
@@ -640,14 +640,14 @@ LaunchControlXL::handle_midi_controller_message (MIDI::Parser& parser, MIDI::Eve
 	CCKnobMap::iterator k = cc_knob_map.find (ev->controller_number);
 
 	if (b != cc_controller_button_map.end()) {
-		boost::shared_ptr<Button> button = b->second;
+		std::shared_ptr<Button> button = b->second;
 		handle_button_message(button, ev);
 	} else if (f != cc_fader_map.end()) {
-		boost::shared_ptr<Fader> fader = f->second;
+		std::shared_ptr<Fader> fader = f->second;
 		fader->set_value(ev->value);
 		(fader->action_method)();
 	} else if (k != cc_knob_map.end()) {
-		boost::shared_ptr<Knob> knob = k->second;
+		std::shared_ptr<Knob> knob = k->second;
 		knob->set_value(ev->value);
 		(knob->action_method)();
 	}
@@ -667,7 +667,7 @@ LaunchControlXL::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventT
 	 NNNoteButtonMap::iterator b = nn_note_button_map.find (ev->controller_number);
 
 	 if (b != nn_note_button_map.end()) {
-		 boost::shared_ptr<Button> button = b->second;
+		 std::shared_ptr<Button> button = b->second;
 		handle_button_message(button, ev);
 	}
 }
@@ -824,15 +824,15 @@ LaunchControlXL::set_state (const XMLNode & node, int version)
 }
 
 bool
-LaunchControlXL::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
+LaunchControlXL::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
 {
 	DEBUG_TRACE (DEBUG::LaunchControlXL, "LaunchControlXL::connection_handler start\n");
 	if (!_async_in || !_async_out) {
 		return false;
 	}
 
-	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_in)->name());
-	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (boost::shared_ptr<ARDOUR::Port>(_async_out)->name());
+	string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (std::shared_ptr<ARDOUR::Port>(_async_in)->name());
+	string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (std::shared_ptr<ARDOUR::Port>(_async_out)->name());
 
 	if (ni == name1 || ni == name2) {
 		if (yn) {
@@ -880,13 +880,13 @@ LaunchControlXL::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string 
 }
 
 
-boost::shared_ptr<Port>
+std::shared_ptr<Port>
 LaunchControlXL::output_port()
 {
 	return _async_out;
 }
 
-boost::shared_ptr<Port>
+std::shared_ptr<Port>
 LaunchControlXL::input_port()
 {
 	return _async_in;
@@ -949,23 +949,23 @@ LaunchControlXL::stripable_property_change (PropertyChange const& what_changed, 
 }
 /* strip filter definitions */
 
-static bool flt_default (boost::shared_ptr<Stripable> s) {
+static bool flt_default (std::shared_ptr<Stripable> s) {
 	if (s->is_master() || s->is_monitor()) {
 		return false;
 	}
-	return (boost::dynamic_pointer_cast<Route>(s) != 0 ||
-			boost::dynamic_pointer_cast<VCA>(s) != 0);
+	return (std::dynamic_pointer_cast<Route>(s) != 0 ||
+			std::dynamic_pointer_cast<VCA>(s) != 0);
 }
 
-static bool flt_track (boost::shared_ptr<Stripable> s) {
-	return boost::dynamic_pointer_cast<Track>(s) != 0;
+static bool flt_track (std::shared_ptr<Stripable> s) {
+	return std::dynamic_pointer_cast<Track>(s) != 0;
 }
 
-static bool flt_auxbus (boost::shared_ptr<Stripable> s) {
+static bool flt_auxbus (std::shared_ptr<Stripable> s) {
 	if (s->is_master() || s->is_monitor()) {
 		return false;
 	}
-	if (boost::dynamic_pointer_cast<Route>(s) == 0) {
+	if (std::dynamic_pointer_cast<Route>(s) == 0) {
 		return false;
 	}
 #ifdef MIXBUS
@@ -973,30 +973,30 @@ static bool flt_auxbus (boost::shared_ptr<Stripable> s) {
 		return false;
 	}
 #endif
-	return boost::dynamic_pointer_cast<Track>(s) == 0;
+	return std::dynamic_pointer_cast<Track>(s) == 0;
 }
 
 #ifdef MIXBUS
-static bool flt_mixbus (boost::shared_ptr<Stripable> s) {
+static bool flt_mixbus (std::shared_ptr<Stripable> s) {
 	if (s->mixbus () == 0) {
 		return false;
 	}
-	return boost::dynamic_pointer_cast<Track>(s) == 0;
+	return std::dynamic_pointer_cast<Track>(s) == 0;
 }
 #endif
 
-static bool flt_vca (boost::shared_ptr<Stripable> s) {
-	return boost::dynamic_pointer_cast<VCA>(s) != 0;
+static bool flt_vca (std::shared_ptr<Stripable> s) {
+	return std::dynamic_pointer_cast<VCA>(s) != 0;
 }
 
-static bool flt_selected (boost::shared_ptr<Stripable> s) {
+static bool flt_selected (std::shared_ptr<Stripable> s) {
 	return s->is_selected ();
 }
 
 #ifdef MIXBUS
 #else
-static bool flt_rec_armed (boost::shared_ptr<Stripable> s) {
-	boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track>(s);
+static bool flt_rec_armed (std::shared_ptr<Stripable> s) {
+	std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track>(s);
 	if (!t) {
 		return false;
 	}
@@ -1004,14 +1004,14 @@ static bool flt_rec_armed (boost::shared_ptr<Stripable> s) {
 }
 #endif
 
-static bool flt_mains (boost::shared_ptr<Stripable> s) {
+static bool flt_mains (std::shared_ptr<Stripable> s) {
 	return (s->is_master() || s->is_monitor());
 }
 
 void
 LaunchControlXL::filter_stripables(StripableList& strips) const
 {
-	typedef bool (*FilterFunction)(boost::shared_ptr<Stripable>);
+	typedef bool (*FilterFunction)(std::shared_ptr<Stripable>);
 	FilterFunction flt;
 
 	switch ((int)template_number()) {
@@ -1087,11 +1087,11 @@ LaunchControlXL::switch_bank (uint32_t base)
 	
 	set_send_bank(0);
 
-	boost::shared_ptr<SelectButton> sl = boost::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectLeft]);
-	boost::shared_ptr<SelectButton> sr = boost::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectRight]);
+	std::shared_ptr<SelectButton> sl = std::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectLeft]);
+	std::shared_ptr<SelectButton> sr = std::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectRight]);
 
-	boost::shared_ptr<Stripable> s[8];
-	boost::shared_ptr<Stripable> next_base;
+	std::shared_ptr<Stripable> s[8];
+	std::shared_ptr<Stripable> next_base;
 	uint32_t stripable_counter = get_amount_of_tracks();
 	uint32_t skip = base;
 	uint32_t n = 0;
@@ -1301,7 +1301,7 @@ void LaunchControlXL::set_track_mode (TrackMode mode) {
 	}
 
 	for ( size_t n = 0 ; n < sizeof (trk_cntrl_btns) / sizeof (trk_cntrl_btns[0]); ++n) {
-		boost::shared_ptr<TrackButton> b = boost::dynamic_pointer_cast<TrackButton> (id_note_button_map[trk_cntrl_btns[n]]);
+		std::shared_ptr<TrackButton> b = std::dynamic_pointer_cast<TrackButton> (id_note_button_map[trk_cntrl_btns[n]]);
 		if (b) {
 			b->set_color_enabled(color_on);
 			b->set_color_disabled(color_off);
@@ -1314,7 +1314,7 @@ LaunchControlXL::set_device_mode (bool yn)
 {
 	_device_mode = yn;
 	reset(template_number());
-	boost::shared_ptr<TrackStateButton> db =  boost::dynamic_pointer_cast<TrackStateButton>(id_note_button_map[Device]);
+	std::shared_ptr<TrackStateButton> db =  std::dynamic_pointer_cast<TrackStateButton>(id_note_button_map[Device]);
 	write(db->state_msg(_device_mode));
 	set_send_bank(0);
 	build_maps();
@@ -1384,8 +1384,8 @@ LaunchControlXL::set_send_bank (int offset)
 	DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose ("set_send_bank - _send_bank_base: %1 \n", send_bank_base()));
 	DEBUG_TRACE (DEBUG::LaunchControlXL, string_compose ("set_send_bank - applying offset %1 \n", offset));
 
-	boost::shared_ptr<SelectButton> sbu = boost::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectUp]);
-	boost::shared_ptr<SelectButton> sbd = boost::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectDown]);
+	std::shared_ptr<SelectButton> sbu = std::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectUp]);
+	std::shared_ptr<SelectButton> sbd = std::dynamic_pointer_cast<SelectButton>(id_controller_button_map[SelectDown]);
 
 	if (!sbu || !sbd ) {
 		return;

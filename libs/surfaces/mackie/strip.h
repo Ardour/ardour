@@ -72,13 +72,13 @@ public:
 	Strip (Surface&, const std::string & name, int index, const std::map<Button::ID,StripButtonInfo>&);
 	~Strip();
 
-	boost::shared_ptr<ARDOUR::Stripable> stripable() const { return _stripable; }
+	std::shared_ptr<ARDOUR::Stripable> stripable() const { return _stripable; }
 
 	void add (Control & control);
 	int index() const { return _index; } // zero based
 	Surface* surface() const { return _surface; }
 
-	void set_stripable (boost::shared_ptr<ARDOUR::Stripable>, bool with_messages = true);
+	void set_stripable (std::shared_ptr<ARDOUR::Stripable>, bool with_messages = true);
 
 	// call all signal handlers manually
 	void notify_all ();
@@ -97,7 +97,7 @@ public:
 	static std::string format_parameter_for_display(
 		ARDOUR::ParameterDescriptor const& desc, 
 		float val, 
-		boost::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation, 
+		std::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation, 
 		bool& overwrite_screen_hold);
 
 	void zero ();
@@ -144,7 +144,7 @@ private:
 	std::string lcd2_current_display[2];
 	PBD::microseconds_t _block_screen_redisplay_until;
 	PBD::microseconds_t return_to_vpot_mode_display_at;
-	boost::shared_ptr<ARDOUR::Stripable> _stripable;
+	std::shared_ptr<ARDOUR::Stripable> _stripable;
 	PBD::ScopedConnectionList stripable_connections;
 
 	ARDOUR::AutomationType  _pan_mode;
@@ -167,7 +167,7 @@ private:
 	void update_meter ();
 	std::string vpot_mode_string ();
 
-	boost::shared_ptr<ARDOUR::AutomationControl> mb_pan_controllable;
+	std::shared_ptr<ARDOUR::AutomationControl> mb_pan_controllable;
 
 	void return_to_vpot_mode_display ();
 	void next_pot_mode ();

@@ -60,7 +60,7 @@ public:
 	PannerUI (ARDOUR::Session*);
 	~PannerUI ();
 
-	virtual void set_panner (boost::shared_ptr<ARDOUR::PannerShell>, boost::shared_ptr<ARDOUR::Panner>);
+	virtual void set_panner (std::shared_ptr<ARDOUR::PannerShell>, std::shared_ptr<ARDOUR::Panner>);
 
 	void panshell_changed ();
 
@@ -85,8 +85,8 @@ private:
 	friend class TriggerStrip;
 	friend class SendUI;
 
-	boost::shared_ptr<ARDOUR::PannerShell> _panshell;
-	boost::shared_ptr<ARDOUR::Panner> _panner;
+	std::shared_ptr<ARDOUR::PannerShell> _panshell;
+	std::shared_ptr<ARDOUR::Panner> _panner;
 	PBD::ScopedConnectionList connections;
 	PBD::ScopedConnectionList _pan_control_connections;
 
@@ -146,8 +146,8 @@ private:
 	void pan_automation_state_changed();
 	gint pan_automation_state_button_event (GdkEventButton *);
 
-	void start_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
-	void stop_touch (boost::weak_ptr<ARDOUR::AutomationControl>);
+	void start_touch (std::weak_ptr<ARDOUR::AutomationControl>);
+	void stop_touch (std::weak_ptr<ARDOUR::AutomationControl>);
 
 	std::map<std::string,std::string> _panner_list;
 	bool _suspend_menu_callbacks;

@@ -151,9 +151,9 @@ Auditioner::load_synth ()
 
 	unload_synth (true);
 
-	boost::shared_ptr<Plugin> p = audition_synth_info->load (_session);
+	std::shared_ptr<Plugin> p = audition_synth_info->load (_session);
 	if (p) {
-		asynth = boost::shared_ptr<Processor> (new PluginInsert (_session, time_domain(), p));
+		asynth = std::shared_ptr<Processor> (new PluginInsert (_session, time_domain(), p));
 	}
 
 	if (asynth) {
@@ -245,8 +245,8 @@ Auditioner::connect ()
 
 			/* reconnect existing ports */
 
-			boost::shared_ptr<Port> oleft (_output->nth (0));
-			boost::shared_ptr<Port> oright (_output->nth (1));
+			std::shared_ptr<Port> oleft (_output->nth (0));
+			std::shared_ptr<Port> oright (_output->nth (1));
 			if (oleft) {
 				oleft->connect (left);
 			}
@@ -313,7 +313,7 @@ Auditioner::roll (pframes_t nframes, samplepos_t start_sample, samplepos_t end_s
 	}
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		boost::shared_ptr<Delivery> d = boost::dynamic_pointer_cast<Delivery> (*i);
+		std::shared_ptr<Delivery> d = std::dynamic_pointer_cast<Delivery> (*i);
 		if (d) {
 			d->flush_buffers (nframes);
 		}
@@ -363,7 +363,7 @@ Auditioner::update_controls (BufferSet const& bufs)
 }
 
 void
-Auditioner::audition_region (boost::shared_ptr<Region> region, bool loop)
+Auditioner::audition_region (std::shared_ptr<Region> region, bool loop)
 {
 	if (g_atomic_int_get (&_auditioning)) {
 		/* don't go via session for this, because we are going
@@ -376,7 +376,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region, bool loop)
 
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	if (boost::dynamic_pointer_cast<AudioRegion>(region) != 0) {
+	if (std::dynamic_pointer_cast<AudioRegion>(region) != 0) {
 
 		_midi_audition = false;
 
@@ -387,7 +387,7 @@ Auditioner::audition_region (boost::shared_ptr<Region> region, bool loop)
 
 		/* copy it */
 
-		the_region = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region, false));
+		the_region = std::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (region, false));
 		the_region->set_position (timepos_t (Temporal::AudioTime));
 
 		_disk_reader->midi_playlist()->drop_regions ();
@@ -406,14 +406,14 @@ Auditioner::audition_region (boost::shared_ptr<Region> region, bool loop)
 			}
 		}
 
-	} else if (boost::dynamic_pointer_cast<MidiRegion>(region)) {
+	} else if (std::dynamic_pointer_cast<MidiRegion>(region)) {
 		_midi_audition = true;
 
 		the_region.reset();
 		_import_position = region->position();
 
 		/* copy it */
-		midi_region = (boost::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (region, false)));
+		midi_region = (std::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (region, false)));
 		midi_region->set_position (_import_position);
 
 		/* avoid truncated notes: round up the length of midi regions to seconds, at least 2 seconds long */
@@ -619,7 +619,7 @@ Auditioner::idle_synth_update ()
 	if (auditioning() || !asynth) {
 		return;
 	}
-	auto pi = boost::dynamic_pointer_cast<PluginInsert> (asynth);
+	auto pi = std::dynamic_pointer_cast<PluginInsert> (asynth);
 
 	/* Note: calling thread must have process buffers */
 	BufferSet   bufs;

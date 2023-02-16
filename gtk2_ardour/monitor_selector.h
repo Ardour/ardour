@@ -27,7 +27,7 @@
 class MonitorSelector : public PortMatrix
 {
 public:
-	MonitorSelector (Gtk::Window*, ARDOUR::Session *, boost::shared_ptr<ARDOUR::IO>);
+	MonitorSelector (Gtk::Window*, ARDOUR::Session *, std::shared_ptr<ARDOUR::IO>);
 
 	void set_state (ARDOUR::BundleChannel c[2], bool);
 	PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const;
@@ -36,7 +36,7 @@ public:
 	std::string channel_noun () const;
 
 	uint32_t n_io_ports () const;
-	boost::shared_ptr<ARDOUR::IO> const io () { return _io; }
+	std::shared_ptr<ARDOUR::IO> const io () { return _io; }
 	void setup_ports (int);
 	bool list_is_global (int) const;
 
@@ -52,9 +52,9 @@ public:
 		return _other;
 	}
 
-	bool can_add_channels (boost::shared_ptr<ARDOUR::Bundle>) const { return false; }
-	bool can_remove_channels (boost::shared_ptr<ARDOUR::Bundle>) const { return false; }
-	bool can_rename_channels (boost::shared_ptr<ARDOUR::Bundle>) const { return false; }
+	bool can_add_channels (std::shared_ptr<ARDOUR::Bundle>) const { return false; }
+	bool can_remove_channels (std::shared_ptr<ARDOUR::Bundle>) const { return false; }
+	bool can_rename_channels (std::shared_ptr<ARDOUR::Bundle>) const { return false; }
 
 private:
 	void io_changed ();
@@ -62,8 +62,8 @@ private:
 
 	int _other;
 	int _ours;
-	boost::shared_ptr<ARDOUR::IO> _io;
-	boost::shared_ptr<PortGroup> _port_group;
+	std::shared_ptr<ARDOUR::IO> _io;
+	std::shared_ptr<PortGroup> _port_group;
 	bool _find_inputs_for_io_outputs;
 	PBD::ScopedConnection _io_connection;
 };
@@ -71,7 +71,7 @@ private:
 class MonitorSelectorWindow : public ArdourWindow
 {
 public:
-	MonitorSelectorWindow (ARDOUR::Session *, boost::shared_ptr<ARDOUR::IO>, bool can_cancel = false);
+	MonitorSelectorWindow (ARDOUR::Session *, std::shared_ptr<ARDOUR::IO>, bool can_cancel = false);
 
 	MonitorSelector& selector() { return _selector; }
 

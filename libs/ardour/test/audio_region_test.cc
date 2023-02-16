@@ -41,12 +41,12 @@ AudioRegionTest::setUp ()
 
 	std::string const test_wav_path = Glib::build_filename (new_test_output_dir(), "test.wav");
 	_playlist = PlaylistFactory::create (DataType::AUDIO, *_session, "test");
-	_audio_playlist = boost::dynamic_pointer_cast<AudioPlaylist> (_playlist);
+	_audio_playlist = std::dynamic_pointer_cast<AudioPlaylist> (_playlist);
 	_source = SourceFactory::createWritable (DataType::AUDIO, *_session, test_wav_path, get_test_sample_rate ());
 
 	/* Write a staircase to the source */
 
-	boost::shared_ptr<SndFileSource> s = boost::dynamic_pointer_cast<SndFileSource> (_source);
+	std::shared_ptr<SndFileSource> s = std::dynamic_pointer_cast<SndFileSource> (_source);
 	assert (s);
 
 	int const signal_length = 4096;
@@ -63,7 +63,7 @@ AudioRegionTest::setUp ()
 	plist.add (Properties::length, 100);
 	for (int i = 0; i < 16; ++i) {
 		_r[i] = RegionFactory::create (_source, plist);
-		_ar[i] = boost::dynamic_pointer_cast<AudioRegion> (_r[i]);
+		_ar[i] = std::dynamic_pointer_cast<AudioRegion> (_r[i]);
 		_ar[i]->set_name (string_compose ("ar%1", i));
 	}
 }

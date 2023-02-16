@@ -64,7 +64,7 @@ class NoteBase : public sigc::trackable
   public:
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 
-	NoteBase (MidiRegionView& region, bool, const boost::shared_ptr<NoteType> note = boost::shared_ptr<NoteType>());
+	NoteBase (MidiRegionView& region, bool, const std::shared_ptr<NoteType> note = std::shared_ptr<NoteType>());
 	virtual ~NoteBase ();
 
 	void set_item (ArdourCanvas::Item *);
@@ -107,7 +107,7 @@ class NoteBase : public sigc::trackable
 	float mouse_x_fraction() const { return _mouse_x_fraction; }
 	float mouse_y_fraction() const { return _mouse_y_fraction; }
 
-	const boost::shared_ptr<NoteType> note() const { return _note; }
+	const std::shared_ptr<NoteType> note() const { return _note; }
 	MidiRegionView& region_view() const { return _region; }
 
 	static void set_colors ();
@@ -136,7 +136,7 @@ protected:
 	ArdourCanvas::Item*               _item;
 	ArdourCanvas::Text*               _text;
 	State                             _state;
-	const boost::shared_ptr<NoteType> _note;
+	const std::shared_ptr<NoteType> _note;
 	bool                              _with_events;
 	bool                              _own_note;
 	Flags                             _flags;

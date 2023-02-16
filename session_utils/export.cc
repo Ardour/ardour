@@ -85,9 +85,9 @@ static int export_session (Session *session,
 		ExportSettings const& settings)
 {
 	ExportTimespanPtr tsp = session->get_export_handler()->add_timespan();
-	boost::shared_ptr<ExportChannelConfiguration> ccp = session->get_export_handler()->add_channel_config();
-	boost::shared_ptr<ARDOUR::ExportFilename> fnp = session->get_export_handler()->add_filename();
-	boost::shared_ptr<ARDOUR::BroadcastInfo> b;
+	std::shared_ptr<ExportChannelConfiguration> ccp = session->get_export_handler()->add_channel_config();
+	std::shared_ptr<ARDOUR::ExportFilename> fnp = session->get_export_handler()->add_filename();
+	std::shared_ptr<ARDOUR::BroadcastInfo> b;
 
 	XMLTree tree;
 
@@ -124,7 +124,7 @@ static int export_session (Session *session,
 "</ExportFormatSpecification>"
 	).c_str());
 
-	boost::shared_ptr<ExportFormatSpecification> fmp = session->get_export_handler()->add_format(*tree.root());
+	std::shared_ptr<ExportFormatSpecification> fmp = session->get_export_handler()->add_format(*tree.root());
 
 	/* set up range */
 	samplepos_t start, end;
@@ -183,7 +183,7 @@ static int export_session (Session *session,
 		return -1;
 	}
 
-	boost::shared_ptr<ARDOUR::ExportStatus> status = session->get_export_status ();
+	std::shared_ptr<ARDOUR::ExportStatus> status = session->get_export_status ();
 
 	// TODO trap SIGINT -> status->abort();
 

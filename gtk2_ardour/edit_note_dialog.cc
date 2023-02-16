@@ -98,7 +98,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 	_time_clock.set_mode (AudioClock::BBT);
 
 	/* Calculate absolute position of the event on time timeline */
-	boost::shared_ptr<ARDOUR::Region> region (_region_view->region ());
+	std::shared_ptr<ARDOUR::Region> region (_region_view->region ());
 	timepos_t const pos = region->source_position() + timecnt_t ((*_events.begin())->note()->time ());
 
 	_time_clock.set (pos, true);
@@ -201,7 +201,7 @@ EditNoteDialog::done (int r)
 		}
 	}
 
-	boost::shared_ptr<ARDOUR::Region> region (_region_view->region ());
+	std::shared_ptr<ARDOUR::Region> region (_region_view->region ());
 
 	/* convert current clock time into an offset from the start of the source */
 	timecnt_t const time_clock_source_relative = region->source_position ().distance (_time_clock.last_when ());

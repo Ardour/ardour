@@ -358,7 +358,7 @@ TriggerPage::add_sidebar_page (string const & name, Gtk::Widget& widget)
 void
 TriggerPage::initial_track_display ()
 {
-	boost::shared_ptr<RouteList> r = _session->get_tracks ();
+	std::shared_ptr<RouteList> r = _session->get_tracks ();
 	RouteList                    rl (*r);
 	_strips.clear ();
 	add_routes (rl);
@@ -373,7 +373,7 @@ TriggerPage::clear_selected_slot ()
 		return;
 	}
 	TriggerPtr trigger = ts.front ()->trigger ();
-	trigger->set_region (boost::shared_ptr<Region>());
+	trigger->set_region (std::shared_ptr<Region>());
 }
 
 void
@@ -416,7 +416,7 @@ TriggerPage::add_routes (RouteList& rl)
 	rl.sort (Stripable::Sorter ());
 	for (RouteList::iterator r = rl.begin (); r != rl.end (); ++r) {
 		/* we're only interested in Tracks */
-		if (!boost::dynamic_pointer_cast<Track> (*r)) {
+		if (!std::dynamic_pointer_cast<Track> (*r)) {
 			continue;
 		}
 #if 0
@@ -436,8 +436,8 @@ TriggerPage::add_routes (RouteList& rl)
 		TriggerStrip* ts = new TriggerStrip (_session, *r);
 		_strips.push_back (ts);
 
-		(*r)->presentation_info ().PropertyChanged.connect (*this, invalidator (*this), boost::bind (&TriggerPage::stripable_property_changed, this, _1, boost::weak_ptr<Stripable> (*r)), gui_context ());
-		(*r)->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&TriggerPage::stripable_property_changed, this, _1, boost::weak_ptr<Stripable> (*r)), gui_context ());
+		(*r)->presentation_info ().PropertyChanged.connect (*this, invalidator (*this), boost::bind (&TriggerPage::stripable_property_changed, this, _1, std::weak_ptr<Stripable> (*r)), gui_context ());
+		(*r)->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&TriggerPage::stripable_property_changed, this, _1, std::weak_ptr<Stripable> (*r)), gui_context ());
 		ts->signal_button_release_event().connect (sigc::bind (sigc::mem_fun(*this, &TriggerPage::strip_button_release_event), ts));
 	}
 	redisplay_track_list ();
@@ -461,8 +461,8 @@ TriggerPage::remove_route (TriggerStrip* ra)
 struct TriggerStripSorter {
 	bool operator() (const TriggerStrip* ts_a, const TriggerStrip* ts_b)
 	{
-		boost::shared_ptr<ARDOUR::Stripable> const& a = ts_a->stripable ();
-		boost::shared_ptr<ARDOUR::Stripable> const& b = ts_b->stripable ();
+		std::shared_ptr<ARDOUR::Stripable> const& a = ts_a->stripable ();
+		std::shared_ptr<ARDOUR::Stripable> const& b = ts_b->stripable ();
 		return ARDOUR::Stripable::Sorter () (a, b);
 	}
 };
@@ -475,8 +475,8 @@ TriggerPage::redisplay_track_list ()
 
 	for (list<TriggerStrip*>::iterator i = _strips.begin (); i != _strips.end (); ++i) {
 		TriggerStrip*                strip = *i;
-		boost::shared_ptr<Stripable> s     = strip->stripable ();
-		boost::shared_ptr<Route>     route = boost::dynamic_pointer_cast<Route> (s);
+		std::shared_ptr<Stripable> s     = strip->stripable ();
+		std::shared_ptr<Route>     route = std::dynamic_pointer_cast<Route> (s);
 
 		bool hidden = s->presentation_info ().hidden ();
 
@@ -507,7 +507,7 @@ TriggerPage::redisplay_track_list ()
 }
 
 AxisView*
-TriggerPage::axis_view_by_stripable (boost::shared_ptr<Stripable> s) const
+TriggerPage::axis_view_by_stripable (std::shared_ptr<Stripable> s) const
 {
 	for (list<TriggerStrip*>::const_iterator i = _strips.begin (); i != _strips.end (); ++i) {
 		TriggerStrip* strip = *i;
@@ -519,7 +519,7 @@ TriggerPage::axis_view_by_stripable (boost::shared_ptr<Stripable> s) const
 }
 
 AxisView*
-TriggerPage::axis_view_by_control (boost::shared_ptr<AutomationControl> c) const
+TriggerPage::axis_view_by_control (std::shared_ptr<AutomationControl> c) const
 {
 	return 0;
 }
@@ -541,11 +541,11 @@ TriggerPage::pi_property_changed (PBD::PropertyChange const& what_changed)
 }
 
 void
-TriggerPage::stripable_property_changed (PBD::PropertyChange const& what_changed, boost::weak_ptr<Stripable> ws)
+TriggerPage::stripable_property_changed (PBD::PropertyChange const& what_changed, std::weak_ptr<Stripable> ws)
 {
 	if (what_changed.contains (ARDOUR::Properties::trigger_track)) {
 #if 0
-		boost::shared_ptr<Stripable> s = ws.lock ();
+		std::shared_ptr<Stripable> s = ws.lock ();
 		/* TODO: find trigger-strip for given stripable, delete *it; */
 #else
 		/* For now we just hide it */
@@ -661,25 +661,25 @@ TriggerPage::no_strip_drag_data_received (Glib::RefPtr<Gdk::DragContext> const& 
 {
 	if (data.get_target () == "x-ardour/region.pbdid") {
 		PBD::ID rid (data.get_data_as_string ());
-		boost::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
-		boost::shared_ptr<TriggerBox> triggerbox;
+		std::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
+		std::shared_ptr<TriggerBox> triggerbox;
 
-		if (boost::dynamic_pointer_cast<AudioRegion> (region)) {
+		if (std::dynamic_pointer_cast<AudioRegion> (region)) {
 			uint32_t output_chan = region->sources().size();
 			if ((Config->get_output_auto_connect() & AutoConnectMaster) && session()->master_out()) {
 				output_chan =  session()->master_out()->n_inputs().n_audio();
 			}
-			std::list<boost::shared_ptr<AudioTrack> > audio_tracks;
+			std::list<std::shared_ptr<AudioTrack> > audio_tracks;
 			audio_tracks = session()->new_audio_track (region->sources().size(), output_chan, 0, 1, region->name(), PresentationInfo::max_order, Normal, true, true);
 			if (!audio_tracks.empty()) {
 				triggerbox = audio_tracks.front()->triggerbox ();
 			}
-		} else if (boost::dynamic_pointer_cast<MidiRegion> (region)) {
+		} else if (std::dynamic_pointer_cast<MidiRegion> (region)) {
 			ChanCount one_midi_port (DataType::MIDI, 1);
-			list<boost::shared_ptr<MidiTrack> > midi_tracks;
+			list<std::shared_ptr<MidiTrack> > midi_tracks;
 			midi_tracks = session()->new_midi_track (one_midi_port, one_midi_port,
 			                                         Config->get_strict_io () || Profile->get_mixbus (),
-			                                         boost::shared_ptr<ARDOUR::PluginInfo>(),
+			                                         std::shared_ptr<ARDOUR::PluginInfo>(),
 			                                         (ARDOUR::Plugin::PresetRecord*) 0,
 			                                         (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order, Normal, true, true);
 			if (!midi_tracks.empty()) {
@@ -693,7 +693,7 @@ TriggerPage::no_strip_drag_data_received (Glib::RefPtr<Gdk::DragContext> const& 
 		}
 
 		// XXX: check does the region need to be copied?
-		boost::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
+		std::shared_ptr<Region> region_copy = RegionFactory::create (region, true);
 		triggerbox->set_from_selection (0, region_copy);
 
 		context->drag_finish (true, false, time);

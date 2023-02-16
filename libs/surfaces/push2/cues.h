@@ -102,7 +102,7 @@ class CueLayout : public Push2Layout
 	int                              _long_stop;
 
 	PBD::ScopedConnectionList        _route_connections;
-	boost::shared_ptr<ARDOUR::Route> _route[8];
+	std::shared_ptr<ARDOUR::Route> _route[8];
 	PBD::ScopedConnectionList        _session_connections;
 	PBD::ScopedConnection            _trig_connections[64];
 
@@ -114,13 +114,13 @@ class CueLayout : public Push2Layout
 	ArdourCanvas::Arc* _progress[8];
 	ArdourCanvas::FollowActionIcon* follow_action_icon[8];
 
-	boost::shared_ptr<ARDOUR::AutomationControl> _controllables[8];
+	std::shared_ptr<ARDOUR::AutomationControl> _controllables[8];
 
 	void viewport_changed ();
 
 	void update_clip_progress (int);
 	void show_knob_function ();
-	void set_pad_color_from_trigger_state (int col, boost::shared_ptr<Push2::Pad>, ARDOUR::TriggerPtr);
+	void set_pad_color_from_trigger_state (int col, std::shared_ptr<Push2::Pad>, ARDOUR::TriggerPtr);
 	void show_running_boxen (bool);
 	void draw_follow_icon (ARDOUR::TriggerPtr, Cairo::RefPtr<Cairo::Context> context, ARDOUR::FollowAction const & icon, float size) const;
 };

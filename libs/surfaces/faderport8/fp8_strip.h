@@ -95,7 +95,7 @@ public:
 	void set_periodic_display_mode (DisplayMode m);
 
 	// convenience function to call all set_XXX_controllable
-	void set_stripable (boost::shared_ptr<ARDOUR::Stripable>, bool panmode);
+	void set_stripable (std::shared_ptr<ARDOUR::Stripable>, bool panmode);
 	void set_text_line (uint8_t, std::string const&, bool inv = false);
 
 	enum CtrlMask {
@@ -117,12 +117,12 @@ public:
 
 	void unset_controllables (int which = CTRL_ALL);
 
-	void set_fader_controllable  (boost::shared_ptr<ARDOUR::AutomationControl>);
-	void set_mute_controllable   (boost::shared_ptr<ARDOUR::AutomationControl>);
-	void set_solo_controllable   (boost::shared_ptr<ARDOUR::AutomationControl>);
-	void set_rec_controllable    (boost::shared_ptr<ARDOUR::AutomationControl>);
-	void set_pan_controllable    (boost::shared_ptr<ARDOUR::AutomationControl>);
-	void set_select_controllable (boost::shared_ptr<ARDOUR::AutomationControl>);
+	void set_fader_controllable  (std::shared_ptr<ARDOUR::AutomationControl>);
+	void set_mute_controllable   (std::shared_ptr<ARDOUR::AutomationControl>);
+	void set_solo_controllable   (std::shared_ptr<ARDOUR::AutomationControl>);
+	void set_rec_controllable    (std::shared_ptr<ARDOUR::AutomationControl>);
+	void set_pan_controllable    (std::shared_ptr<ARDOUR::AutomationControl>);
+	void set_select_controllable (std::shared_ptr<ARDOUR::AutomationControl>);
 
 private:
 	FP8Base&  _base;
@@ -138,12 +138,12 @@ private:
 
 	std::string _stripable_name;
 
-	boost::shared_ptr<ARDOUR::AutomationControl> _fader_ctrl;
-	boost::shared_ptr<ARDOUR::AutomationControl> _mute_ctrl;
-	boost::shared_ptr<ARDOUR::AutomationControl> _solo_ctrl;
-	boost::shared_ptr<ARDOUR::AutomationControl> _rec_ctrl;
-	boost::shared_ptr<ARDOUR::AutomationControl> _pan_ctrl;
-	boost::shared_ptr<ARDOUR::AutomationControl> _x_select_ctrl;
+	std::shared_ptr<ARDOUR::AutomationControl> _fader_ctrl;
+	std::shared_ptr<ARDOUR::AutomationControl> _mute_ctrl;
+	std::shared_ptr<ARDOUR::AutomationControl> _solo_ctrl;
+	std::shared_ptr<ARDOUR::AutomationControl> _rec_ctrl;
+	std::shared_ptr<ARDOUR::AutomationControl> _pan_ctrl;
+	std::shared_ptr<ARDOUR::AutomationControl> _x_select_ctrl;
 
 	PBD::ScopedConnection _fader_connection;
 	PBD::ScopedConnection _mute_connection;
@@ -152,10 +152,10 @@ private:
 	PBD::ScopedConnection _pan_connection;
 	PBD::ScopedConnection _x_select_connection;
 
-	boost::shared_ptr<ARDOUR::PeakMeter> _peak_meter;
-	boost::shared_ptr<ARDOUR::ReadOnlyControl> _redux_ctrl;
+	std::shared_ptr<ARDOUR::PeakMeter> _peak_meter;
+	std::shared_ptr<ARDOUR::ReadOnlyControl> _redux_ctrl;
 
-	void set_x_select_controllable (boost::shared_ptr<ARDOUR::AutomationControl>);
+	void set_x_select_controllable (std::shared_ptr<ARDOUR::AutomationControl>);
 	boost::function<void ()> _select_plugin_functor;
 
 	void drop_automation_controls ();

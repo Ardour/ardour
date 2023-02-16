@@ -50,12 +50,12 @@ public:
 	}
 
 private:
-	void render_bundle_name (cairo_t *, Gdk::Color, Gdk::Color, double, double, boost::shared_ptr<ARDOUR::Bundle>);
+	void render_bundle_name (cairo_t *, Gdk::Color, Gdk::Color, double, double, std::shared_ptr<ARDOUR::Bundle>);
 	void render_channel_name (cairo_t *, Gdk::Color, Gdk::Color, double, double, ARDOUR::BundleChannel const &);
 	double channel_x (ARDOUR::BundleChannel const &) const;
 	double channel_y (ARDOUR::BundleChannel const &) const;
 	void queue_draw_for (ARDOUR::BundleChannel const &);
-	ARDOUR::BundleChannel position_to_channel (double, double, boost::shared_ptr<const PortGroup>) const;
+	ARDOUR::BundleChannel position_to_channel (double, double, std::shared_ptr<const PortGroup>) const;
 
 	void render (cairo_t *);
 	void compute_dimensions ();

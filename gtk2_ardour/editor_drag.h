@@ -296,7 +296,7 @@ protected:
 	/* sets snap delta from unsnapped pos */
 	void setup_snap_delta (Temporal::timepos_t const & pos);
 
-	boost::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*, bool commit);
+	std::shared_ptr<ARDOUR::Region> add_midi_region (MidiTimeAxisView*, bool commit);
 
 	void show_verbose_cursor_time (Temporal::timepos_t const &);
 	void show_verbose_cursor_duration (Temporal::timepos_t const & , Temporal::timepos_t const & , double xoffset = 0);
@@ -363,7 +363,7 @@ public:
 	Temporal::timepos_t initial_position; ///< initial position of the region
 	Temporal::timepos_t initial_end; ///< initial end position of the region
 	samplepos_t anchored_fade_length; ///< fade_length when anchored during drag
-	boost::shared_ptr<ARDOUR::Playlist> initial_playlist;
+	std::shared_ptr<ARDOUR::Playlist> initial_playlist;
 	TimeAxisView* initial_time_axis_view;
 };
 
@@ -393,7 +393,7 @@ protected:
 	friend class DraggingView;
 
 protected:
-	typedef std::set<boost::shared_ptr<ARDOUR::Playlist> > PlaylistSet;
+	typedef std::set<std::shared_ptr<ARDOUR::Playlist> > PlaylistSet;
 	void add_stateful_diff_commands_for_playlists (PlaylistSet const &);
 
 private:
@@ -511,7 +511,7 @@ private:
 		);
 
 	RegionView* insert_region_into_playlist (
-		boost::shared_ptr<ARDOUR::Region>,
+		std::shared_ptr<ARDOUR::Region>,
 		RouteTimeAxisView*,
 		ARDOUR::layer_t,
 		Temporal::timepos_t const &,
@@ -519,14 +519,14 @@ private:
 		);
 
 	void remove_region_from_playlist (
-		boost::shared_ptr<ARDOUR::Region>,
-		boost::shared_ptr<ARDOUR::Playlist>,
+		std::shared_ptr<ARDOUR::Region>,
+		std::shared_ptr<ARDOUR::Playlist>,
 		PlaylistSet& modified_playlists
 		);
 
 
 	void collect_new_region_view (RegionView *);
-	RouteTimeAxisView* create_destination_time_axis (boost::shared_ptr<ARDOUR::Region>, TimeAxisView* original);
+	RouteTimeAxisView* create_destination_time_axis (std::shared_ptr<ARDOUR::Region>, TimeAxisView* original);
 
 	bool _copy;
 	RegionView* _new_region_view;
@@ -536,7 +536,7 @@ private:
 class RegionInsertDrag : public RegionMotionDrag
 {
 public:
-	RegionInsertDrag (Editor *, boost::shared_ptr<ARDOUR::Region>, RouteTimeAxisView*, Temporal::timepos_t const &, Temporal::TimeDomain);
+	RegionInsertDrag (Editor *, std::shared_ptr<ARDOUR::Region>, RouteTimeAxisView*, Temporal::timepos_t const &, Temporal::TimeDomain);
 
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
@@ -573,7 +573,7 @@ public:
 
 private:
 	MidiTimeAxisView* _view;
-	boost::shared_ptr<ARDOUR::Region> _region;
+	std::shared_ptr<ARDOUR::Region> _region;
 };
 
 /** Drags to resize MIDI notes */
@@ -1401,15 +1401,15 @@ public:
 	}
 
 private:
-	void setup (std::list<boost::shared_ptr<AutomationLine> > const &);
+	void setup (std::list<std::shared_ptr<AutomationLine> > const &);
 	double y_fraction (double global_y_position) const;
-	double value (boost::shared_ptr<ARDOUR::AutomationList> list, Temporal::timepos_t const & x) const;
+	double value (std::shared_ptr<ARDOUR::AutomationList> list, Temporal::timepos_t const & x) const;
 
 	std::list<ARDOUR::TimelineRange> _ranges;
 
 	/** A line that is part of the drag */
 	struct Line {
-		boost::shared_ptr<AutomationLine> line; ///< the line
+		std::shared_ptr<AutomationLine> line; ///< the line
 		std::list<ControlPoint*> points; ///< points to drag on the line
 		std::pair<Temporal::timepos_t, Temporal::timepos_t> range; ///< the range of all points on the line, in session time
 		XMLNode* state; ///< the XML state node before the drag

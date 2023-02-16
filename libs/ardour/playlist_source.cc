@@ -42,7 +42,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PlaylistSource::PlaylistSource (Session& s, const ID& orig, const std::string& name, boost::shared_ptr<Playlist> p, DataType type,
+PlaylistSource::PlaylistSource (Session& s, const ID& orig, const std::string& name, std::shared_ptr<Playlist> p, DataType type,
                                 timepos_t const & begin, timepos_t const & len, Source::Flag /*flags*/)
 	: Source (s, type, name)
 	, _playlist (p)

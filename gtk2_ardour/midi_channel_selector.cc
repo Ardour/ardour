@@ -327,7 +327,7 @@ MidiMultipleChannelSelector::invert_selection(void)
 
 /*-----------------------------------------*/
 
-MidiChannelSelectorWindow::MidiChannelSelectorWindow (boost::shared_ptr<MidiTrack> mt)
+MidiChannelSelectorWindow::MidiChannelSelectorWindow (std::shared_ptr<MidiTrack> mt)
 	: ArdourWindow (_("MIDI Channel Control"))
 	, track (mt)
 	, playback_all_button (playback_button_group, _("Playback all channels"))

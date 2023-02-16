@@ -38,14 +38,14 @@ public:
 	virtual void tearDown ();
 
 protected:
-	boost::shared_ptr<ARDOUR::Playlist> _playlist;
+	std::shared_ptr<ARDOUR::Playlist> _playlist;
 	/** AudioPlaylist downcast of _playlist */
-	boost::shared_ptr<ARDOUR::AudioPlaylist> _audio_playlist;
-	boost::shared_ptr<ARDOUR::Source> _source;
+	std::shared_ptr<ARDOUR::AudioPlaylist> _audio_playlist;
+	std::shared_ptr<ARDOUR::Source> _source;
 	/** 16 regions, of length 100, each referencing a source which is 4096
 	 *  samples of a staircase waveform.
 	 */
-	boost::shared_ptr<ARDOUR::Region> _r[16];
+	std::shared_ptr<ARDOUR::Region> _r[16];
 	/** AudioRegion downcasts of _r[] */
-	boost::shared_ptr<ARDOUR::AudioRegion> _ar[16];
+	std::shared_ptr<ARDOUR::AudioRegion> _ar[16];
 };

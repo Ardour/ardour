@@ -324,7 +324,7 @@ Maschine2::notify_master_change ()
 	}
 }
 
-static void apply_ac_delta (boost::shared_ptr<AutomationControl> ac, double d) {
+static void apply_ac_delta (std::shared_ptr<AutomationControl> ac, double d) {
 	if (!ac) {
 		return;
 	}
@@ -362,7 +362,7 @@ Maschine2::encoder_master (int delta)
 			break;
 		case MST_VOLUME:
 			{
-				boost::shared_ptr<Route> master = session->master_out ();
+				std::shared_ptr<Route> master = session->master_out ();
 				if (master) {
 					// TODO consider _ctrl->button (M2Contols::EncoderWheel)->is_pressed() for fine grained
 					const double factor = _ctrl->button (M2Contols::BtnShift, M2Contols::ModNone)->active () ? 256. : 32.;

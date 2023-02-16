@@ -44,7 +44,7 @@ class ExportFormatSelector : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
 private:
 
-	typedef boost::shared_ptr<ARDOUR::ExportFormatSpecification> FormatPtr;
+	typedef std::shared_ptr<ARDOUR::ExportFormatSpecification> FormatPtr;
 	typedef std::list<FormatPtr> FormatList;
 
 public:

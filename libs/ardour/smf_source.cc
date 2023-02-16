@@ -96,7 +96,7 @@ SMFSource::SMFSource (Session& s, const string& path, Source::Flag flags)
 
 	/* there's no data to load into the model but create it anyway */
 
-	_model = boost::shared_ptr<MidiModel> (new MidiModel (*this));
+	_model = std::shared_ptr<MidiModel> (new MidiModel (*this));
 }
 
 /** Constructor used for external-to-session files.  File must exist. */
@@ -653,7 +653,7 @@ SMFSource::load_model_unlocked (bool force_reload)
 	assert (!_writing);
 
 	if (!_model) {
-		_model = boost::shared_ptr<MidiModel> (new MidiModel (*this));
+		_model = std::shared_ptr<MidiModel> (new MidiModel (*this));
 	} else {
 		_model->clear();
 	}
@@ -823,7 +823,7 @@ SMFSource::ensure_disk_file (const WriterLock& lock)
 		/* We have a model, so write it to disk; see MidiSource::session_saved
 		   for an explanation of what we are doing here.
 		*/
-		boost::shared_ptr<MidiModel> mm = _model;
+		std::shared_ptr<MidiModel> mm = _model;
 		_model.reset ();
 		mm->sync_to_source (lock);
 		_model = mm;

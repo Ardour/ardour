@@ -121,8 +121,8 @@ public:
 
 	Flags flags () const { return _flags; }
 
-	boost::shared_ptr<SceneChange> scene_change() const { return _scene_change; }
-	void set_scene_change (boost::shared_ptr<SceneChange>);
+	std::shared_ptr<SceneChange> scene_change() const { return _scene_change; }
+	void set_scene_change (std::shared_ptr<SceneChange>);
 
 	int32_t cue_id() const { assert (is_cue_marker()); return _cue; }
 	void set_cue_id (int32_t);
@@ -220,7 +220,7 @@ private:
 	uint32_t         _signals_suspended;
 	std::set<Signal> _postponed_signals;
 
-	boost::shared_ptr<SceneChange> _scene_change;
+	std::shared_ptr<SceneChange> _scene_change;
 };
 
 /** A collection of session locations including unique dedicated locations (loop, punch, etc) */

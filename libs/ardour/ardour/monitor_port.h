@@ -66,10 +66,10 @@ private:
 		bool  remove;
 	};
 
-	void collect (boost::shared_ptr<MonitorInfo>, Sample*, pframes_t, std::string const&);
+	void collect (std::shared_ptr<MonitorInfo>, Sample*, pframes_t, std::string const&);
 	void finalize (pframes_t);
 
-	typedef std::map<std::string, boost::shared_ptr<MonitorInfo> > MonitorPorts;
+	typedef std::map<std::string, std::shared_ptr<MonitorInfo> > MonitorPorts;
 	SerializedRCUManager<MonitorPorts> _monitor_ports;
 
 	AudioBuffer*            _buffer;

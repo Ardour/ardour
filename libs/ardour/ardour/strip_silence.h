@@ -28,7 +28,7 @@ class LIBARDOUR_API StripSilence : public Filter
   public:
 	StripSilence (Session &, const AudioIntervalMap&, samplecnt_t fade_length);
 
-	int run (boost::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
+	int run (std::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
 
 private:
 	const AudioIntervalMap& _smap;

@@ -63,11 +63,11 @@ class ExportTimespanSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
 protected:
 	typedef std::list<ARDOUR::Location*>                    LocationList;
-	typedef boost::shared_ptr<ARDOUR::ExportHandler>        HandlerPtr;
-	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ProfileManagerPtr;
+	typedef std::shared_ptr<ARDOUR::ExportHandler>        HandlerPtr;
+	typedef std::shared_ptr<ARDOUR::ExportProfileManager> ProfileManagerPtr;
 
 	typedef std::list<ARDOUR::ExportTimespanPtr>           TimespanList;
-	typedef boost::shared_ptr<TimespanList>                TimespanListPtr;
+	typedef std::shared_ptr<TimespanList>                TimespanListPtr;
 	typedef ARDOUR::ExportProfileManager::TimespanStatePtr TimespanStatePtr;
 
 public:

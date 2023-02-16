@@ -84,14 +84,14 @@ MidiControlUI::do_request (MidiUIRequest* req)
 }
 
 bool
-MidiControlUI::midi_input_handler (IOCondition ioc, boost::weak_ptr<AsyncMIDIPort> wport)
+MidiControlUI::midi_input_handler (IOCondition ioc, std::weak_ptr<AsyncMIDIPort> wport)
 {
-	boost::shared_ptr<AsyncMIDIPort> port = wport.lock ();
+	std::shared_ptr<AsyncMIDIPort> port = wport.lock ();
 	if (!port) {
 		return false;
 	}
 
-	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("something happened on  %1\n", boost::shared_ptr<ARDOUR::Port> (port)->name()));
+	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("something happened on  %1\n", std::shared_ptr<ARDOUR::Port> (port)->name()));
 
 	if (ioc & ~IO_IN) {
 		return false;
@@ -100,7 +100,7 @@ MidiControlUI::midi_input_handler (IOCondition ioc, boost::weak_ptr<AsyncMIDIPor
 	if (ioc & IO_IN) {
 
 		port->clear ();
-		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", boost::shared_ptr<ARDOUR::Port>(port)->name()));
+		DEBUG_TRACE (DEBUG::MidiIO, string_compose ("data available on %1\n", std::shared_ptr<ARDOUR::Port>(port)->name()));
 		samplepos_t now = _session.engine().sample_time();
 		port->parse (now);
 	}
@@ -116,14 +116,14 @@ MidiControlUI::clear_ports ()
 void
 MidiControlUI::reset_ports ()
 {
-	vector<boost::shared_ptr<AsyncMIDIPort> > ports;
-	boost::shared_ptr<AsyncMIDIPort> p;
+	vector<std::shared_ptr<AsyncMIDIPort> > ports;
+	std::shared_ptr<AsyncMIDIPort> p;
 
-	if ((p = boost::dynamic_pointer_cast<AsyncMIDIPort> (_session.mmc_input_port()))) {
+	if ((p = std::dynamic_pointer_cast<AsyncMIDIPort> (_session.mmc_input_port()))) {
 		ports.push_back (p);
 	}
 
-	if ((p = boost::dynamic_pointer_cast<AsyncMIDIPort> (_session.scene_input_port()))) {
+	if ((p = std::dynamic_pointer_cast<AsyncMIDIPort> (_session.scene_input_port()))) {
 		ports.push_back (p);
 	}
 
@@ -131,9 +131,9 @@ MidiControlUI::reset_ports ()
 		return;
 	}
 
-	for (vector<boost::shared_ptr<AsyncMIDIPort> >::const_iterator pi = ports.begin(); pi != ports.end(); ++pi) {
+	for (vector<std::shared_ptr<AsyncMIDIPort> >::const_iterator pi = ports.begin(); pi != ports.end(); ++pi) {
 		(*pi)->xthread().set_receive_handler (sigc::bind (
-					sigc::mem_fun (this, &MidiControlUI::midi_input_handler), boost::weak_ptr<AsyncMIDIPort>(*pi)));
+					sigc::mem_fun (this, &MidiControlUI::midi_input_handler), std::weak_ptr<AsyncMIDIPort>(*pi)));
 		(*pi)->xthread().attach (_main_loop->get_context());
 	}
 }

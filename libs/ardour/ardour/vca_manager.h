@@ -45,10 +45,10 @@ public:
 	~VCAManager ();
 
 	VCAList create_vca (uint32_t how_many, std::string const & name = std::string());
-	void remove_vca (boost::shared_ptr<VCA>);
+	void remove_vca (std::shared_ptr<VCA>);
 
-	boost::shared_ptr<VCA> vca_by_number(int32_t) const;
-	boost::shared_ptr<VCA> vca_by_name (std::string const&) const;
+	std::shared_ptr<VCA> vca_by_number(int32_t) const;
+	std::shared_ptr<VCA> vca_by_name (std::string const&) const;
 
 	VCAList vcas() const;
 	VCAList::size_type n_vcas() const { return _vcas.size(); }

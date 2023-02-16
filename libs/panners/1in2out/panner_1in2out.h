@@ -40,7 +40,7 @@ namespace ARDOUR
 class Panner1in2out : public Panner
 {
 public:
-	Panner1in2out (boost::shared_ptr<Pannable>);
+	Panner1in2out (std::shared_ptr<Pannable>);
 	~Panner1in2out ();
 
 	void                      set_position (double);
@@ -59,9 +59,9 @@ public:
 		return ChanCount (DataType::AUDIO, 2);
 	}
 
-	static Panner* factory (boost::shared_ptr<Pannable>, boost::shared_ptr<Speakers>);
+	static Panner* factory (std::shared_ptr<Pannable>, std::shared_ptr<Speakers>);
 
-	std::string value_as_string (boost::shared_ptr<const AutomationControl>) const;
+	std::string value_as_string (std::shared_ptr<const AutomationControl>) const;
 
 	XMLNode& get_state () const;
 

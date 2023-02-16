@@ -218,7 +218,7 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 			if (_dragging_new_tab) {
 				run_new_group_dialog (&routes, false);
 			} else {
-				boost::shared_ptr<RouteList> r = _session->get_routes ();
+				std::shared_ptr<RouteList> r = _session->get_routes ();
 				/* First add new ones, then remove old ones.
 				 * We cannot allow the group to become temporarily empty, because
 				 * Session::route_removed_from_route_group() will delete empty groups.
@@ -394,7 +394,7 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 		items.push_back (SeparatorElem());
 
 		bool can_subgroup = true;
-		boost::shared_ptr<RouteList> rl = g->route_list();
+		std::shared_ptr<RouteList> rl = g->route_list();
 		for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
 #ifdef MIXBUS
 			if ((*i)->mixbus ()) {
@@ -482,7 +482,7 @@ GroupTabs::assign_group_to_master (uint32_t which, RouteGroup* group, bool renam
 		return;
 	}
 
-	boost::shared_ptr<VCA> master;
+	std::shared_ptr<VCA> master;
 
 	if (which == 0) {
 		if (_session->vca_manager().create_vca (1).empty ()) {
@@ -518,7 +518,7 @@ GroupTabs::unassign_group_to_master (uint32_t which, RouteGroup* group) const
 		return;
 	}
 
-	boost::shared_ptr<VCA> master = _session->vca_manager().vca_by_number (which);
+	std::shared_ptr<VCA> master = _session->vca_manager().vca_by_number (which);
 
 	if (!master) {
 		/* should never happen; if it does, basically something deeply
@@ -538,7 +538,7 @@ GroupTabs::assign_some_to_master (uint32_t which, RouteList rl, std::string vcan
 		return;
 	}
 
-	boost::shared_ptr<VCA> master;
+	std::shared_ptr<VCA> master;
 	bool set_name = false;
 
 	if (which == 0) {
@@ -584,10 +584,10 @@ GroupTabs::get_rec_enabled ()
 		return rec_enabled;
 	}
 
-	boost::shared_ptr<RouteList> rl = _session->get_routes ();
+	std::shared_ptr<RouteList> rl = _session->get_routes ();
 
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		boost::shared_ptr<Track> trk (boost::dynamic_pointer_cast<Track> (*i));
+		std::shared_ptr<Track> trk (std::dynamic_pointer_cast<Track> (*i));
 		if (trk && trk->rec_enable_control()->get_value()) {
 			rec_enabled.push_back (*i);
 		}
@@ -725,7 +725,7 @@ GroupTabs::un_subgroup (RouteGroup* g)
 void
 GroupTabs::collect (RouteGroup* g)
 {
-	boost::shared_ptr<RouteList> group_routes = g->route_list ();
+	std::shared_ptr<RouteList> group_routes = g->route_list ();
 	group_routes->sort (Stripable::Sorter());
 	int const N = group_routes->size ();
 
@@ -792,7 +792,7 @@ GroupTabs::set_activation (RouteGroup* g, bool a)
 void
 GroupTabs::remove_group (RouteGroup* g)
 {
-	boost::shared_ptr<RouteList> rl (g->route_list ());
+	std::shared_ptr<RouteList> rl (g->route_list ());
 	_session->remove_route_group (*g);
 
 	emit_gui_changed_for_members (rl);
@@ -875,11 +875,11 @@ GroupTabs::route_group_property_changed (RouteGroup* rg)
 }
 
 void
-GroupTabs::route_added_to_route_group (RouteGroup*, boost::weak_ptr<Route> w)
+GroupTabs::route_added_to_route_group (RouteGroup*, std::weak_ptr<Route> w)
 {
 	/* Similarly-spirited hack as in route_group_property_changed */
 
-	boost::shared_ptr<Route> r = w.lock ();
+	std::shared_ptr<Route> r = w.lock ();
 	if (!r) {
 		return;
 	}
@@ -890,11 +890,11 @@ GroupTabs::route_added_to_route_group (RouteGroup*, boost::weak_ptr<Route> w)
 }
 
 void
-GroupTabs::route_removed_from_route_group (RouteGroup*, boost::weak_ptr<Route> w)
+GroupTabs::route_removed_from_route_group (RouteGroup*, std::weak_ptr<Route> w)
 {
 	/* Similarly-spirited hack as in route_group_property_changed */
 
-	boost::shared_ptr<Route> r = w.lock ();
+	std::shared_ptr<Route> r = w.lock ();
 	if (!r) {
 		return;
 	}
@@ -905,7 +905,7 @@ GroupTabs::route_removed_from_route_group (RouteGroup*, boost::weak_ptr<Route> w
 }
 
 void
-GroupTabs::emit_gui_changed_for_members (boost::shared_ptr<RouteList> rl)
+GroupTabs::emit_gui_changed_for_members (std::shared_ptr<RouteList> rl)
 {
 	PresentationInfo::ChangeSuspender cs;
 

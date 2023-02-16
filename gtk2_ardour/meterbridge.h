@@ -96,8 +96,8 @@ private:
 	struct MeterOrderRouteSorter
 	{
 		bool operator() (struct MeterBridgeStrip ma, struct MeterBridgeStrip mb) {
-			boost::shared_ptr<ARDOUR::Route> a = ma.s->route();
-			boost::shared_ptr<ARDOUR::Route> b = mb.s->route();
+			std::shared_ptr<ARDOUR::Route> a = ma.s->route();
+			std::shared_ptr<ARDOUR::Route> b = mb.s->route();
 			if (a->is_master() || a->is_monitor()) {
 				/* "a" is a special route (master, monitor, etc), and comes
 				 * last in the mixer ordering

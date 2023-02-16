@@ -33,7 +33,7 @@
 
 using namespace ARDOUR;
 
-MidiExportDialog::MidiExportDialog (PublicEditor&, boost::shared_ptr<MidiRegion> region)
+MidiExportDialog::MidiExportDialog (PublicEditor&, std::shared_ptr<MidiRegion> region)
 	: ArdourDialog (string_compose (_("Export MIDI: %1"), region->name()))
 	, file_chooser (Gtk::FILE_CHOOSER_ACTION_SAVE)
 {

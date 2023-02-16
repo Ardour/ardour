@@ -73,7 +73,7 @@ public:
 
 	float buffer_load () const;
 
-	void move_processor_automation (boost::weak_ptr<Processor>, std::list<Temporal::RangeMove> const&);
+	void move_processor_automation (std::weak_ptr<Processor>, std::list<Temporal::RangeMove> const&);
 
 	/* called by the Butler in a non-realtime context as part of its normal
 	 * buffer refill loop (not due to transport-mechanism requests like
@@ -150,10 +150,10 @@ protected:
 
 	void resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
 
-	int  use_playlist (DataType, boost::shared_ptr<Playlist>);
+	int  use_playlist (DataType, std::shared_ptr<Playlist>);
 	void playlist_ranges_moved (std::list<Temporal::RangeMove> const&, bool);
 
-	int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many);
+	int add_channel_to (std::shared_ptr<ChannelList>, uint32_t how_many);
 
 	class DeclickAmp
 	{

@@ -112,11 +112,11 @@ LIBARDOUR_API uint32_t how_many_dsp_threads ();
 
 LIBARDOUR_API std::string compute_sha1_of_file (std::string path);
 
-template<typename T> boost::shared_ptr<ControlList> route_list_to_control_list (boost::shared_ptr<RouteList> rl, boost::shared_ptr<T> (Stripable::*get_control)() const) {
-	boost::shared_ptr<ControlList> cl (new ControlList);
+template<typename T> std::shared_ptr<ControlList> route_list_to_control_list (std::shared_ptr<RouteList> rl, std::shared_ptr<T> (Stripable::*get_control)() const) {
+	std::shared_ptr<ControlList> cl (new ControlList);
 	if (!rl) { return cl; }
 	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
-		boost::shared_ptr<AutomationControl> ac = ((*r).get()->*get_control)();
+		std::shared_ptr<AutomationControl> ac = ((*r).get()->*get_control)();
 		if (ac) {
 			cl->push_back (ac);
 		}
@@ -124,10 +124,10 @@ template<typename T> boost::shared_ptr<ControlList> route_list_to_control_list (
 	return cl;
 }
 
-template<typename T> boost::shared_ptr<ControlList> stripable_list_to_control_list (StripableList& sl, boost::shared_ptr<T> (Stripable::*get_control)() const) {
-	boost::shared_ptr<ControlList> cl (new ControlList);
+template<typename T> std::shared_ptr<ControlList> stripable_list_to_control_list (StripableList& sl, std::shared_ptr<T> (Stripable::*get_control)() const) {
+	std::shared_ptr<ControlList> cl (new ControlList);
 	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
-		boost::shared_ptr<AutomationControl> ac = ((*s).get()->*get_control)();
+		std::shared_ptr<AutomationControl> ac = ((*s).get()->*get_control)();
 		if (ac) {
 			cl->push_back (ac);
 		}

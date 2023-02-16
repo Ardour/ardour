@@ -89,7 +89,7 @@ int
 Track::init ()
 {
 	if (!is_auditioner()) {
-		_triggerbox = boost::shared_ptr<TriggerBox> (new TriggerBox (_session, data_type ()));
+		_triggerbox = std::shared_ptr<TriggerBox> (new TriggerBox (_session, data_type ()));
 		_triggerbox->set_owner (this);
 	}
 
@@ -113,8 +113,8 @@ Track::init ()
 
 	set_align_choice_from_io ();
 
-	boost::shared_ptr<Route> rp (boost::dynamic_pointer_cast<Route> (shared_from_this()));
-	boost::shared_ptr<Track> rt = boost::dynamic_pointer_cast<Track> (rp);
+	std::shared_ptr<Route> rp (std::dynamic_pointer_cast<Route> (shared_from_this()));
+	std::shared_ptr<Track> rt = std::dynamic_pointer_cast<Track> (rp);
 
 	_record_enable_control.reset (new RecordEnableControl (_session, EventTypeMap::instance().to_symbol (RecEnableAutomation), *this, time_domain()));
 	add_control (_record_enable_control);
@@ -207,11 +207,11 @@ Track::set_state (const XMLNode& node, int version)
 					set_align_choice (ac, true);
 				}
 
-				if (boost::shared_ptr<AudioPlaylist> pl = boost::dynamic_pointer_cast<AudioPlaylist> (_session.playlists()->by_name (name))) {
+				if (std::shared_ptr<AudioPlaylist> pl = std::dynamic_pointer_cast<AudioPlaylist> (_session.playlists()->by_name (name))) {
 					use_playlist (DataType::AUDIO, pl);
 				}
 
-				if (boost::shared_ptr<MidiPlaylist> pl = boost::dynamic_pointer_cast<MidiPlaylist> (_session.playlists()->by_name (name))) {
+				if (std::shared_ptr<MidiPlaylist> pl = std::dynamic_pointer_cast<MidiPlaylist> (_session.playlists()->by_name (name))) {
 					use_playlist (DataType::MIDI, pl);
 				}
 			}
@@ -425,7 +425,7 @@ Track::set_name (const string& str)
 			break;
 	}
 
-	boost::shared_ptr<Track> me = boost::dynamic_pointer_cast<Track> (shared_from_this ());
+	std::shared_ptr<Track> me = std::dynamic_pointer_cast<Track> (shared_from_this ());
 
 	_disk_reader->set_name (str);
 	_disk_writer->set_name (str);
@@ -465,7 +465,7 @@ Track::set_name (const string& str)
 	return Route::set_name (str);
 }
 
-boost::shared_ptr<Playlist>
+std::shared_ptr<Playlist>
 Track::playlist ()
 {
 	return _playlists[data_type()];
@@ -487,7 +487,7 @@ Track::ensure_input_monitoring (bool m)
 	}
 }
 
-list<boost::shared_ptr<Source> > &
+list<std::shared_ptr<Source> > &
 Track::last_capture_sources ()
 {
 	return _disk_writer->last_capture_sources ();
@@ -657,7 +657,7 @@ Track::playlist_modified ()
 int
 Track::find_and_use_playlist (DataType dt, PBD::ID const & id)
 {
-	boost::shared_ptr<Playlist> playlist;
+	std::shared_ptr<Playlist> playlist;
 
 	if ((playlist = _session.playlists()->by_id (id)) == 0) {
 		return -1;
@@ -672,7 +672,7 @@ Track::find_and_use_playlist (DataType dt, PBD::ID const & id)
 }
 
 int
-Track::use_playlist (DataType dt, boost::shared_ptr<Playlist> p, bool set_orig)
+Track::use_playlist (DataType dt, std::shared_ptr<Playlist> p, bool set_orig)
 {
 	int ret;
 
@@ -684,20 +684,20 @@ Track::use_playlist (DataType dt, boost::shared_ptr<Playlist> p, bool set_orig)
 		}
 	}
 
-	boost::shared_ptr<Playlist> old = _playlists[dt];
+	std::shared_ptr<Playlist> old = _playlists[dt];
 
 	if (ret == 0) {
 		_playlists[dt] = p;
 	}
 
 	if (old) {
-		boost::shared_ptr<RegionList> rl (new RegionList (old->region_list_property ().rlist ()));
+		std::shared_ptr<RegionList> rl (new RegionList (old->region_list_property ().rlist ()));
 		if (rl->size () > 0) {
 			Region::RegionsPropertyChanged (rl, Properties::hidden);
 		}
 	}
 	if (p) {
-		boost::shared_ptr<RegionList> rl (new RegionList (p->region_list_property ().rlist ()));
+		std::shared_ptr<RegionList> rl (new RegionList (p->region_list_property ().rlist ()));
 		if (rl->size () > 0) {
 			Region::RegionsPropertyChanged (rl, Properties::hidden);
 		}
@@ -720,7 +720,7 @@ Track::use_copy_playlist ()
 	}
 
 	string newname;
-	boost::shared_ptr<Playlist> playlist;
+	std::shared_ptr<Playlist> playlist;
 
 	newname = Playlist::bump_name (_playlists[data_type()]->name(), _session);
 
@@ -739,7 +739,7 @@ int
 Track::use_new_playlist (DataType dt)
 {
 	string newname;
-	boost::shared_ptr<Playlist> playlist = _playlists[dt];
+	std::shared_ptr<Playlist> playlist = _playlists[dt];
 
 	if (playlist) {
 		newname = Playlist::bump_name (playlist->name(), _session);
@@ -788,7 +788,7 @@ Track::set_align_choice_from_io ()
 
 	if (_input) {
 		uint32_t n = 0;
-		boost::shared_ptr<Port> p;
+		std::shared_ptr<Port> p;
 
 		while (0 != (p = _input->nth (n++))) {
 			/* In case of JACK all ports not owned by Ardour may be re-sampled,
@@ -895,8 +895,8 @@ Track::use_captured_sources (SourceList& srcs, CaptureInfos const & capture_info
 		return;
 	}
 
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (srcs.front());
-	boost::shared_ptr<SMFSource> mfs = boost::dynamic_pointer_cast<SMFSource> (srcs.front());
+	std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource> (srcs.front());
+	std::shared_ptr<SMFSource> mfs = std::dynamic_pointer_cast<SMFSource> (srcs.front());
 
 	if (afs) {
 		use_captured_audio_sources (srcs, capture_info);
@@ -916,9 +916,9 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 
 	/* There is an assumption here that we have only a single MIDI file */
 
-	boost::shared_ptr<SMFSource> mfs = boost::dynamic_pointer_cast<SMFSource> (srcs.front());
-	boost::shared_ptr<Playlist> pl = _playlists[DataType::MIDI];
-	boost::shared_ptr<MidiRegion> midi_region;
+	std::shared_ptr<SMFSource> mfs = std::dynamic_pointer_cast<SMFSource> (srcs.front());
+	std::shared_ptr<Playlist> pl = _playlists[DataType::MIDI];
+	std::shared_ptr<MidiRegion> midi_region;
 	CaptureInfos::const_iterator ci;
 
 	if (!mfs || !pl) {
@@ -961,9 +961,9 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 		plist.add (Properties::length, mfs->length());
 		plist.add (Properties::layer, 0);
 
-		boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+		std::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 
-		midi_region = boost::dynamic_pointer_cast<MidiRegion> (rx);
+		midi_region = std::dynamic_pointer_cast<MidiRegion> (rx);
 		midi_region->special_set_position (timepos_t (capture_info.front()->start));
 	}
 
@@ -1023,8 +1023,8 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 			plist.add (Properties::opaque, rmode != RecSoundOnSound);
 			plist.add (Properties::name, region_name);
 
-			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
-			midi_region = boost::dynamic_pointer_cast<MidiRegion> (rx);
+			std::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+			midi_region = std::dynamic_pointer_cast<MidiRegion> (rx);
 			if (preroll_off > 0) {
 				midi_region->trim_front (timepos_t ((*ci)->start - initial_capture + preroll_off));
 			}
@@ -1054,9 +1054,9 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 		return;
 	}
 
-	boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (srcs.front());
-	boost::shared_ptr<Playlist> pl = _playlists[DataType::AUDIO];
-	boost::shared_ptr<AudioRegion> region;
+	std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource> (srcs.front());
+	std::shared_ptr<Playlist> pl = _playlists[DataType::AUDIO];
+	std::shared_ptr<AudioRegion> region;
 
 	if (!afs || !pl) {
 		return;
@@ -1080,11 +1080,11 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 		plist.add (Properties::length, afs->length());
 		plist.add (Properties::name, whole_file_region_name);
 		plist.add (Properties::opaque, rmode != RecSoundOnSound);
-		boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+		std::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 		rx->set_automatic (true);
 		rx->set_whole_file (true);
 
-		region = boost::dynamic_pointer_cast<AudioRegion> (rx);
+		region = std::dynamic_pointer_cast<AudioRegion> (rx);
 		region->special_set_position (timepos_t (afs->natural_position()));
 	}
 
@@ -1127,8 +1127,8 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 			plist.add (Properties::name, region_name);
 			plist.add (Properties::opaque, rmode != RecSoundOnSound);
 
-			boost::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
-			region = boost::dynamic_pointer_cast<AudioRegion> (rx);
+			std::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
+			region = std::dynamic_pointer_cast<AudioRegion> (rx);
 			if (preroll_off > 0) {
 				region->trim_front (timepos_t (buffer_position + preroll_off));
 			}

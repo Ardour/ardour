@@ -171,7 +171,7 @@ public:
 	virtual void step_height (bool);
 
 	virtual ARDOUR::RouteGroup* route_group() const { return 0; }
-	virtual boost::shared_ptr<ARDOUR::Playlist> playlist() const { return boost::shared_ptr<ARDOUR::Playlist> (); }
+	virtual std::shared_ptr<ARDOUR::Playlist> playlist() const { return std::shared_ptr<ARDOUR::Playlist> (); }
 
 	virtual void set_samples_per_pixel (double);
 	virtual void show_selection (TimeSelection&);
@@ -203,8 +203,8 @@ public:
 
 	virtual void fade_range (TimeSelection&) {}
 
-	virtual boost::shared_ptr<ARDOUR::Region> find_next_region (ARDOUR::timepos_t const & /*pos*/, ARDOUR::RegionPoint, int32_t /*dir*/) {
-		return boost::shared_ptr<ARDOUR::Region> ();
+	virtual std::shared_ptr<ARDOUR::Region> find_next_region (ARDOUR::timepos_t const & /*pos*/, ARDOUR::RegionPoint, int32_t /*dir*/) {
+		return std::shared_ptr<ARDOUR::Region> ();
 	}
 
 	void order_selection_trims (ArdourCanvas::Item *item, bool put_start_on_top);
@@ -227,7 +227,7 @@ public:
 	virtual LayerDisplay layer_display () const { return Overlaid; }
 	virtual StreamView* view () const { return 0; }
 
-	typedef std::vector<boost::shared_ptr<TimeAxisView> > Children;
+	typedef std::vector<std::shared_ptr<TimeAxisView> > Children;
 	Children get_child_list () const;
 
 	static uint32_t preset_height (Height);
@@ -304,8 +304,8 @@ protected:
 	bool is_child (TimeAxisView*);
 	virtual bool propagate_time_selection () const { return false; }
 
-	virtual void remove_child (boost::shared_ptr<TimeAxisView>);
-	void add_child (boost::shared_ptr<TimeAxisView>);
+	virtual void remove_child (std::shared_ptr<TimeAxisView>);
+	void add_child (std::shared_ptr<TimeAxisView>);
 
 	/* selection display */
 

@@ -70,8 +70,8 @@ public:
 
 	void set_tooltip_prefix (std::string pfx) { _tooltip_prefix = pfx; controllable_changed (true); }
 
-	boost::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
-	void set_controllable (boost::shared_ptr<PBD::Controllable> c);
+	std::shared_ptr<PBD::Controllable> get_controllable() { return binding_proxy.get_controllable(); }
+	void set_controllable (std::shared_ptr<PBD::Controllable> c);
 
 	bool on_button_press_event (GdkEventButton*);
 	bool on_button_release_event (GdkEventButton*);

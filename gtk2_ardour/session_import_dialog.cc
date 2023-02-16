@@ -120,11 +120,11 @@ SessionImportDialog::load_session (const string& filename)
 			error << string_compose (_("Cannot load XML for session from %1"), filename) << endmsg;
 			return;
 		}
-		boost::shared_ptr<AudioRegionImportHandler> region_handler (new AudioRegionImportHandler (tree, *_session));
-		boost::shared_ptr<AudioPlaylistImportHandler> pl_handler (new AudioPlaylistImportHandler (tree, *_session, *region_handler));
+		std::shared_ptr<AudioRegionImportHandler> region_handler (new AudioRegionImportHandler (tree, *_session));
+		std::shared_ptr<AudioPlaylistImportHandler> pl_handler (new AudioPlaylistImportHandler (tree, *_session, *region_handler));
 
-		handlers.push_back (boost::static_pointer_cast<ElementImportHandler> (region_handler));
-		handlers.push_back (boost::static_pointer_cast<ElementImportHandler> (pl_handler));
+		handlers.push_back (std::static_pointer_cast<ElementImportHandler> (region_handler));
+		handlers.push_back (std::static_pointer_cast<ElementImportHandler> (pl_handler));
 		handlers.push_back (HandlerPtr(new UnusedAudioPlaylistImportHandler (tree, *_session, *region_handler)));
 		handlers.push_back (HandlerPtr(new AudioTrackImportHandler (tree, *_session, *pl_handler)));
 		handlers.push_back (HandlerPtr(new LocationImportHandler (tree, *_session)));

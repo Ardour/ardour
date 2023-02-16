@@ -122,13 +122,13 @@ TransportMastersWidget::~TransportMastersWidget ()
 }
 
 void
-TransportMastersWidget::set_transport_master (boost::shared_ptr<TransportMaster> tm)
+TransportMastersWidget::set_transport_master (std::shared_ptr<TransportMaster> tm)
 {
 	_session->request_sync_source (tm);
 }
 
 void
-TransportMastersWidget::current_changed (boost::shared_ptr<TransportMaster> old_master, boost::shared_ptr<TransportMaster> new_master)
+TransportMastersWidget::current_changed (std::shared_ptr<TransportMaster> old_master, std::shared_ptr<TransportMaster> new_master)
 {
 	for (vector<Row*>::iterator r = rows.begin(); r != rows.end(); ++r) {
 		if ((*r)->tm == new_master) {
@@ -229,7 +229,7 @@ TransportMastersWidget::rebuild ()
 		table.attach (r->current_box,     col, col+1, n, n+1, FILL, SHRINK); ++col;
 		table.attach (r->last_box,        col, col+1, n, n+1, FILL, SHRINK); ++col;
 
-		boost::shared_ptr<TimecodeTransportMaster> ttm (boost::dynamic_pointer_cast<TimecodeTransportMaster> (r->tm));
+		std::shared_ptr<TimecodeTransportMaster> ttm (std::dynamic_pointer_cast<TimecodeTransportMaster> (r->tm));
 
 		if (ttm) {
 			table.attach (r->sclock_synced_button, col, col+1, n, n+1, FILL, SHRINK); ++col;
@@ -431,11 +431,11 @@ TransportMastersWidget::Row::prop_change (PropertyChange what_changed)
 	}
 
 	if (what_changed.contains (Properties::fr2997)) {
-		fr2997_button.set_active (boost::dynamic_pointer_cast<TimecodeTransportMaster> (tm)->fr2997());
+		fr2997_button.set_active (std::dynamic_pointer_cast<TimecodeTransportMaster> (tm)->fr2997());
 	}
 
 	if (what_changed.contains (Properties::sclock_synced)) {
-		sclock_synced_button.set_active (boost::dynamic_pointer_cast<TimecodeTransportMaster> (tm)->sample_clock_synced());
+		sclock_synced_button.set_active (std::dynamic_pointer_cast<TimecodeTransportMaster> (tm)->sample_clock_synced());
 	}
 
 	if (what_changed.contains (Properties::collect)) {
@@ -461,7 +461,7 @@ TransportMastersWidget::Row::use_button_toggled ()
 void
 TransportMastersWidget::Row::fr2997_button_toggled ()
 {
-	boost::dynamic_pointer_cast<TimecodeTransportMaster>(tm)->set_fr2997 (fr2997_button.get_active());
+	std::dynamic_pointer_cast<TimecodeTransportMaster>(tm)->set_fr2997 (fr2997_button.get_active());
 }
 
 void
@@ -558,8 +558,8 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 	samplepos_t when;
 	stringstream ss;
 	Time t;
-	boost::shared_ptr<TimecodeTransportMaster> ttm;
-	boost::shared_ptr<MIDIClock_TransportMaster> mtm;
+	std::shared_ptr<TimecodeTransportMaster> ttm;
+	std::shared_ptr<MIDIClock_TransportMaster> mtm;
 
 	if (!AudioEngine::instance()->running() || !s) {
 		return;
@@ -571,7 +571,7 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 
 	if (tm->speed_and_position (speed, pos, most_recent, when, now)) {
 
-		if ((ttm = boost::dynamic_pointer_cast<TimecodeTransportMaster> (tm))) {
+		if ((ttm = std::dynamic_pointer_cast<TimecodeTransportMaster> (tm))) {
 			Timecode::TimecodeFormat fmt = ttm->apparent_timecode_format();
 			format.set_text (timecode_format_name (fmt));
 
@@ -580,7 +580,7 @@ TransportMastersWidget::Row::update (Session* s, samplepos_t now)
 					Timecode::timecode_has_drop_frames (fmt),
 					TEMPORAL_SAMPLE_RATE, 0, false, 0);
 
-		} else if ((mtm = boost::dynamic_pointer_cast<MIDIClock_TransportMaster> (tm))) {
+		} else if ((mtm = std::dynamic_pointer_cast<MIDIClock_TransportMaster> (tm))) {
 			char buf[16];
 			snprintf (buf, sizeof (buf), "%.1f BPM", mtm->bpm());
 			buf[15] = '\0';

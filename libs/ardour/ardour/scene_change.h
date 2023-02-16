@@ -32,7 +32,7 @@ class SceneChange : public PBD::Stateful
 	SceneChange ();
 	virtual ~SceneChange () {};
 
-	static boost::shared_ptr<SceneChange> factory (const XMLNode&, int version);
+	static std::shared_ptr<SceneChange> factory (const XMLNode&, int version);
 	static std::string xml_node_name;
 
         uint32_t color() const;

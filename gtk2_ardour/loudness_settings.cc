@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cassert>
+
 #include <glibmm.h>
 #include "pbd/gstdio_compat.h"
 

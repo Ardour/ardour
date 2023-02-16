@@ -105,7 +105,7 @@ public:
 	 *
 	 * We use this to declare return values and members of structures.
 	 */
-	typedef boost::shared_ptr<ProtoPort> PortPtr;
+	typedef std::shared_ptr<ProtoPort> PortPtr;
 
 	/* We use this to declare arguments to methods/functions, in order to
 	 * avoid copying shared_ptr<ProtoPort> every time (a practice we use in

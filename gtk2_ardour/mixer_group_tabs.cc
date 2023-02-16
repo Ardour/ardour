@@ -198,7 +198,7 @@ MixerGroupTabs::selected_routes () const
 {
 	RouteList rl;
 	BOOST_FOREACH (AxisView* r, _mixer->selection().axes) {
-		boost::shared_ptr<Route> rp = boost::dynamic_pointer_cast<Route> (r->stripable());
+		std::shared_ptr<Route> rp = std::dynamic_pointer_cast<Route> (r->stripable());
 		if (rp) {
 			rl.push_back (rp);
 		}

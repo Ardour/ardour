@@ -29,7 +29,7 @@
 
 
 
-PluginDisplay::PluginDisplay (boost::shared_ptr<ARDOUR::Plugin> p, uint32_t max_height)
+PluginDisplay::PluginDisplay (std::shared_ptr<ARDOUR::Plugin> p, uint32_t max_height)
 	: _plug (p)
 	, _surf (0)
 	, _max_height (max_height)

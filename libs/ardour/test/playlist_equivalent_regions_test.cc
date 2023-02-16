@@ -55,7 +55,7 @@ PlaylistEquivalentRegionsTest::basicsTest ()
 	_playlist_b->add_region (_r[1], timepos_t(42));
 
 	/* Look for the equivalents to _r[0] on _playlist_b */
-	vector<boost::shared_ptr<Region> > e;
+	vector<std::shared_ptr<Region> > e;
 	_playlist_b->get_equivalent_regions (_r[0], e);
 
 	/* That should be _r[1] */
@@ -93,7 +93,7 @@ PlaylistEquivalentRegionsTest::multiLayerTest ()
 	 * using different equivalence modes */
 
 	Config->set_region_equivalence (Exact);
-	vector<boost::shared_ptr<Region> > e;
+	vector<std::shared_ptr<Region> > e;
 	_playlist_b->get_equivalent_regions (_r[0], e);
 	/* That should be _r[2] and _r[3] */
 	CPPUNIT_ASSERT_EQUAL (size_t (2), e.size ());

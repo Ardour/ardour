@@ -135,7 +135,7 @@ RegionLayeringOrderEditor::row_selected ()
 	/* XXX this should be reversible, really */
 
 	for (vector<RegionView*>::iterator i = eq.begin(); i != eq.end(); ++i) {
-		boost::shared_ptr<Playlist> pl = (*i)->region()->playlist();
+		std::shared_ptr<Playlist> pl = (*i)->region()->playlist();
 		if (pl) {
 			pl->raise_region_to_top ((*i)->region());
 		}
@@ -188,7 +188,7 @@ RegionLayeringOrderEditor::refill ()
 }
 
 void
-RegionLayeringOrderEditor::set_context (const string& a_name, Session* s, TimeAxisView* tav, boost::shared_ptr<Playlist> pl, timepos_t const & pos)
+RegionLayeringOrderEditor::set_context (const string& a_name, Session* s, TimeAxisView* tav, std::shared_ptr<Playlist> pl, timepos_t const & pos)
 {
 	track_name_label.set_text (a_name);
 

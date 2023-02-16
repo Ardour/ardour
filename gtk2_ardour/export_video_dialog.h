@@ -75,7 +75,7 @@ private:
 	bool _aborted;
 	bool _normalize;
 
-	boost::shared_ptr<ARDOUR::ExportStatus> status;
+	std::shared_ptr<ARDOUR::ExportStatus> status;
 
 	TimeSelection    _export_range;
 	sigc::connection _audio_progress_connection;

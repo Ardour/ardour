@@ -440,7 +440,7 @@ StartupFSM::start_audio_midi_setup ()
 	BootMessage (_("Starting Audio/MIDI Engine"));
 	bool setup_required = false;
 
-	boost::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
+	std::shared_ptr<AudioBackend> backend = AudioEngine::instance()->current_backend();
 	if (!backend) {
 		/* backend is unknown ... */
 		setup_required = true;

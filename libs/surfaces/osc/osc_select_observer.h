@@ -40,14 +40,14 @@ class OSCSelectObserver
 	OSCSelectObserver (ArdourSurface::OSC& o, ARDOUR::Session& s, ArdourSurface::OSC::OSCSurface* sur);
 	~OSCSelectObserver ();
 
-	boost::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
+	std::shared_ptr<ARDOUR::Stripable> strip () const { return _strip; }
 	lo_address address() const { return addr; };
 	void tick (void);
 	void renew_sends (void);
 	void renew_plugin (void);
 	void eq_restart (int);
 	void clear_observer (void);
-	void refresh_strip (boost::shared_ptr<ARDOUR::Stripable> new_strip, uint32_t nsends, uint32_t g_mode, bool force);
+	void refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, uint32_t nsends, uint32_t g_mode, bool force);
 	void set_expand (uint32_t expand);
 	void set_send_page (uint32_t page);
 	void set_send_size (uint32_t size);
@@ -56,7 +56,7 @@ class OSCSelectObserver
 	void set_plugin_size (uint32_t size);
 
   private:
-	boost::shared_ptr<ARDOUR::Stripable> _strip;
+	std::shared_ptr<ARDOUR::Stripable> _strip;
 	ArdourSurface::OSC& _osc;
 
 	PBD::ScopedConnectionList strip_connections;
@@ -104,29 +104,29 @@ class OSCSelectObserver
 	void group_sharing (ARDOUR::RouteGroup *rg_c);
 	void comment_changed ();
 	void pi_changed (PBD::PropertyChange const&);
-	void change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
-	void enable_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
+	void change_message (std::string path, std::shared_ptr<PBD::Controllable> controllable);
+	void enable_message (std::string path, std::shared_ptr<PBD::Controllable> controllable);
 	void comp_mode (void);
-	void change_message_with_id (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
-	void enable_message_with_id (std::string path, uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
-	void monitor_status (boost::shared_ptr<PBD::Controllable> controllable);
+	void change_message_with_id (std::string path, uint32_t id, std::shared_ptr<PBD::Controllable> controllable);
+	void enable_message_with_id (std::string path, uint32_t id, std::shared_ptr<PBD::Controllable> controllable);
+	void monitor_status (std::shared_ptr<PBD::Controllable> controllable);
 	void gain_message ();
 	void gain_automation ();
-	void send_automation (std::string path, boost::shared_ptr<PBD::Controllable> control);
-	void trim_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
+	void send_automation (std::string path, std::shared_ptr<PBD::Controllable> control);
+	void trim_message (std::string path, std::shared_ptr<PBD::Controllable> controllable);
 	// sends stuff
 	void send_init (void);
 	void send_end (void);
 	void plugin_init (void);
 	void plugin_end (void);
-	void plugin_parameter_changed (int pid, bool swtch, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_gain (uint32_t id, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_enable (std::string path, uint32_t id, boost::shared_ptr<ARDOUR::Processor> proc);
-	void plug_enable (std::string path, boost::shared_ptr<ARDOUR::Processor> proc);
+	void plugin_parameter_changed (int pid, bool swtch, std::shared_ptr<PBD::Controllable> controllable);
+	void send_gain (uint32_t id, std::shared_ptr<PBD::Controllable> controllable);
+	void send_enable (std::string path, uint32_t id, std::shared_ptr<ARDOUR::Processor> proc);
+	void plug_enable (std::string path, std::shared_ptr<ARDOUR::Processor> proc);
 	void eq_init (void);
 	void eq_end (void);
 	void no_strip ();
-	void slaved_changed (boost::shared_ptr<ARDOUR::VCA> vca, bool state);
+	void slaved_changed (std::shared_ptr<ARDOUR::VCA> vca, bool state);
 };
 
 #endif /* __osc_oscselectobserver_h__ */

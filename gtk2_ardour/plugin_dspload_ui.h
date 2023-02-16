@@ -32,7 +32,7 @@
 class PluginLoadStatsGui : public Gtk::Table
 {
 public:
-	PluginLoadStatsGui (boost::shared_ptr<ARDOUR::PlugInsertBase>);
+	PluginLoadStatsGui (std::shared_ptr<ARDOUR::PlugInsertBase>);
 
 	void start_updating ();
 	void stop_updating ();
@@ -47,7 +47,7 @@ private:
 		_pib->clear_stats ();
 	}
 
-	boost::shared_ptr<ARDOUR::PlugInsertBase> _pib;
+	std::shared_ptr<ARDOUR::PlugInsertBase> _pib;
 	sigc::connection update_cpu_label_connection;
 
 	Gtk::Label _lbl_min;

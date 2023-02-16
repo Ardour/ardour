@@ -124,7 +124,7 @@ StripableColorDialog::popup (const std::string& name, uint32_t color)
 }
 
 void
-StripableColorDialog::popup (boost::shared_ptr<ARDOUR::Stripable> s)
+StripableColorDialog::popup (std::shared_ptr<ARDOUR::Stripable> s)
 {
 	if (s && s->active_color_picker()) {
 		s->active_color_picker()->present ();

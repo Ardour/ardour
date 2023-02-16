@@ -184,7 +184,7 @@ Strip::add (Control & control)
  }
 
 void
-Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
+Strip::set_stripable (std::shared_ptr<Stripable> r, bool /*with_messages*/)
 {
 	if (_controls_locked) {
 		return;
@@ -194,20 +194,20 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 
 	stripable_connections.drop_connections ();
 
-	_fader->set_control (boost::shared_ptr<AutomationControl>());
-	_vpot->set_control (boost::shared_ptr<AutomationControl>());
+	_fader->set_control (std::shared_ptr<AutomationControl>());
+	_vpot->set_control (std::shared_ptr<AutomationControl>());
 
 	if (_select) {
-		_select->set_control (boost::shared_ptr<AutomationControl>());
+		_select->set_control (std::shared_ptr<AutomationControl>());
 	}
 	if (_solo) {
-		_solo->set_control (boost::shared_ptr<AutomationControl>());
+		_solo->set_control (std::shared_ptr<AutomationControl>());
 	}
 	if (_mute) {
-		_mute->set_control (boost::shared_ptr<AutomationControl>());
+		_mute->set_control (std::shared_ptr<AutomationControl>());
 	}
 	if (_recenable) {
-		_recenable->set_control (boost::shared_ptr<AutomationControl>());
+		_recenable->set_control (std::shared_ptr<AutomationControl>());
 	}
 
 	_stripable = r;
@@ -233,7 +233,7 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 	_stripable->solo_control()->Changed.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_solo_changed, this), ui_context());
 	_stripable->mute_control()->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_mute_changed, this), ui_context());
 
-	boost::shared_ptr<AutomationControl> pan_control = _stripable->pan_azimuth_control();
+	std::shared_ptr<AutomationControl> pan_control = _stripable->pan_azimuth_control();
 	if (pan_control) {
 		pan_control->Changed.connect(stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_panner_azi_changed, this, false), ui_context());
 	}
@@ -247,7 +247,7 @@ Strip::set_stripable (boost::shared_ptr<Stripable> r, bool /*with_messages*/)
 	_stripable->PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_property_changed, this, _1), ui_context());
 	_stripable->presentation_info().PropertyChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Strip::notify_property_changed, this, _1), ui_context());
 
-	boost::shared_ptr<AutomationControl> rec_enable_control = _stripable->rec_enable_control ();
+	std::shared_ptr<AutomationControl> rec_enable_control = _stripable->rec_enable_control ();
 
 	if (_recenable && rec_enable_control) {
 		_recenable->set_control (rec_enable_control);
@@ -339,7 +339,7 @@ void
 Strip::notify_record_enable_changed ()
 {
 	if (_stripable && _recenable)  {
-		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (_stripable);
+		std::shared_ptr<Track> trk = std::dynamic_pointer_cast<Track> (_stripable);
 		if (trk) {
 			_surface->write (_recenable->set_state (trk->rec_enable_control()->get_value() ? on : off));
 		}
@@ -359,7 +359,7 @@ Strip::notify_gain_changed (bool force_update)
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> ac = _stripable->gain_control();
+	std::shared_ptr<AutomationControl> ac = _stripable->gain_control();
 	Control* control;
 
 	if (!ac) {
@@ -467,7 +467,7 @@ Strip::notify_panner_azi_changed (bool force_update)
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("pan change for strip %1\n", _index));
 
-	boost::shared_ptr<AutomationControl> pan_control = _stripable->pan_azimuth_control ();
+	std::shared_ptr<AutomationControl> pan_control = _stripable->pan_azimuth_control ();
 
 	if (!pan_control) {
 		/* basically impossible, since we're here because that control
@@ -502,7 +502,7 @@ Strip::notify_panner_width_changed (bool force_update)
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("pan width change for strip %1\n", _index));
 
-	boost::shared_ptr<AutomationControl> pan_control = _stripable->pan_width_control ();
+	std::shared_ptr<AutomationControl> pan_control = _stripable->pan_width_control ();
 
 	if (!pan_control) {
 		/* basically impossible, since we're here because that control
@@ -571,7 +571,7 @@ Strip::vselect_event (Button&, ButtonState bs)
 
 		if (ms & MackieControlProtocol::MODIFIER_SHIFT) {
 
-			boost::shared_ptr<AutomationControl> ac = _vpot->control ();
+			std::shared_ptr<AutomationControl> ac = _vpot->control ();
 
 			if (ac) {
 
@@ -583,7 +583,7 @@ Strip::vselect_event (Button&, ButtonState bs)
 
 #ifdef MIXBUS
 			if (_stripable) {
-				boost::shared_ptr<AutomationControl> ac = _stripable->master_send_enable_controllable ();
+				std::shared_ptr<AutomationControl> ac = _stripable->master_send_enable_controllable ();
 				if (ac) {
 					Controllable::GroupControlDisposition gcd;
 
@@ -614,7 +614,7 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 
 	if (bs == press) {
 
-		boost::shared_ptr<AutomationControl> ac = _fader->control ();
+		std::shared_ptr<AutomationControl> ac = _fader->control ();
 
 		_fader->set_in_use (true);
 		_fader->start_touch (timepos_t (_surface->mcp().transport_sample()));
@@ -635,7 +635,7 @@ Strip::fader_touch_event (Button&, ButtonState bs)
 void
 Strip::handle_button (Button& button, ButtonState bs)
 {
-	boost::shared_ptr<AutomationControl> control;
+	std::shared_ptr<AutomationControl> control;
 
 	if (bs == press) {
 		button.set_in_use (true);
@@ -705,7 +705,7 @@ std::string
 Strip::format_parameter_for_display(
 		ARDOUR::ParameterDescriptor const& desc,
 		float val,
-		boost::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation,
+		std::shared_ptr<ARDOUR::Stripable> stripable_for_non_mixbus_azimuth_automation,
 		bool& overwrite_screen_hold)
 {
 	std::string formatted_parameter_display;
@@ -735,7 +735,7 @@ Strip::format_parameter_for_display(
 			overwrite_screen_hold = true;
 		} else {
 			if (stripable_for_non_mixbus_azimuth_automation) {
-				boost::shared_ptr<AutomationControl> pa = stripable_for_non_mixbus_azimuth_automation->pan_azimuth_control();
+				std::shared_ptr<AutomationControl> pa = stripable_for_non_mixbus_azimuth_automation->pan_azimuth_control();
 				if (pa) {
 					formatted_parameter_display = pa->get_user_string ();
 					overwrite_screen_hold = true;
@@ -783,7 +783,7 @@ void
 Strip::handle_fader (Fader& fader, float position)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("fader to %1\n", position));
-	boost::shared_ptr<AutomationControl> ac = fader.control();
+	std::shared_ptr<AutomationControl> ac = fader.control();
 	if (!ac) {
 		return;
 	}
@@ -816,7 +816,7 @@ Strip::handle_pot (Pot& pot, float delta)
 	   stop moving. So to get a stop event, we need to use a timeout.
 	*/
 
-	boost::shared_ptr<AutomationControl> ac = pot.control();
+	std::shared_ptr<AutomationControl> ac = pot.control();
 	if (!ac) {
 		return;
 	}
@@ -932,7 +932,7 @@ Strip::update_automation ()
 		notify_gain_changed (false);
 	}
 
-	boost::shared_ptr<AutomationControl> pan_control = _stripable->pan_azimuth_control ();
+	std::shared_ptr<AutomationControl> pan_control = _stripable->pan_azimuth_control ();
 	if (pan_control) {
 		state = pan_control->automation_state ();
 		if (state == Touch || state == Play) {
@@ -1098,7 +1098,7 @@ Strip::vpot_mode_string ()
 		return string();
 	}
 
-	boost::shared_ptr<AutomationControl> ac = _vpot->control();
+	std::shared_ptr<AutomationControl> ac = _vpot->control();
 
 	if (!ac) {
 		return string();
@@ -1133,8 +1133,8 @@ Strip::flip_mode_changed ()
 {
 	if (_surface->mcp().subview()->permit_flipping_faders_and_pots()) {
 
-		boost::shared_ptr<AutomationControl> pot_control = _vpot->control();
-		boost::shared_ptr<AutomationControl> fader_control = _fader->control();
+		std::shared_ptr<AutomationControl> pot_control = _vpot->control();
+		std::shared_ptr<AutomationControl> fader_control = _fader->control();
 
 		if (pot_control && fader_control) {
 
@@ -1206,7 +1206,7 @@ Strip::next_pot_mode ()
 	}
 
 
-	boost::shared_ptr<AutomationControl> ac = _vpot->control();
+	std::shared_ptr<AutomationControl> ac = _vpot->control();
 
 	if (!ac) {
 		return;
@@ -1271,12 +1271,12 @@ void
 Strip::set_vpot_parameter (AutomationType p)
 {
 	if (!_stripable || (p == NullAutomation)) {
-		_vpot->set_control (boost::shared_ptr<AutomationControl>());
+		_vpot->set_control (std::shared_ptr<AutomationControl>());
 		pending_display[1] = string();
 		return;
 	}
 
-	boost::shared_ptr<AutomationControl> pan_control;
+	std::shared_ptr<AutomationControl> pan_control;
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("switch to vpot mode %1\n", p));
 
@@ -1310,7 +1310,7 @@ Strip::set_vpot_parameter (AutomationType p)
 bool
 Strip::is_midi_track () const
 {
-	return boost::dynamic_pointer_cast<MidiTrack>(_stripable) != 0;
+	return std::dynamic_pointer_cast<MidiTrack>(_stripable) != 0;
 }
 
 void

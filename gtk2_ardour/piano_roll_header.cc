@@ -682,7 +682,7 @@ PianoRollHeader::on_size_allocate (Gtk::Allocation& a)
 void
 PianoRollHeader::send_note_on (uint8_t note)
 {
-	boost::shared_ptr<ARDOUR::MidiTrack> track = _view.trackview ().midi_track ();
+	std::shared_ptr<ARDOUR::MidiTrack> track = _view.trackview ().midi_track ();
 	MidiTimeAxisView*                    mtv   = dynamic_cast<MidiTimeAxisView*> (&_view.trackview ());
 
 	//cerr << "note on: " << (int) note << endl;
@@ -699,7 +699,7 @@ PianoRollHeader::send_note_on (uint8_t note)
 void
 PianoRollHeader::send_note_off (uint8_t note)
 {
-	boost::shared_ptr<ARDOUR::MidiTrack> track = _view.trackview ().midi_track ();
+	std::shared_ptr<ARDOUR::MidiTrack> track = _view.trackview ().midi_track ();
 	MidiTimeAxisView*                    mtv   = dynamic_cast<MidiTimeAxisView*> (&_view.trackview ());
 
 	if (track) {

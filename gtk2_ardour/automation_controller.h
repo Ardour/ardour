@@ -51,26 +51,26 @@ namespace Gtk {
 
 class AutomationBarController : public ArdourWidgets::BarController {
 public:
-	AutomationBarController(boost::shared_ptr<ARDOUR::AutomationControl> ac,
+	AutomationBarController(std::shared_ptr<ARDOUR::AutomationControl> ac,
 	                        Gtk::Adjustment*                             adj);
 	~AutomationBarController();
 private:
 	std::string get_label (double&);
-	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
+	std::shared_ptr<ARDOUR::AutomationControl> _controllable;
 };
 
 /** A BarController which displays the value and allows control of an AutomationControl */
 class AutomationController : public Gtk::Alignment {
 public:
-	static boost::shared_ptr<AutomationController> create (
+	static std::shared_ptr<AutomationController> create (
 		const Evoral::Parameter&                     param,
 		const ARDOUR::ParameterDescriptor&           desc,
-		boost::shared_ptr<ARDOUR::AutomationControl> ac,
+		std::shared_ptr<ARDOUR::AutomationControl> ac,
 		bool                                         use_knob = false);
 
 	~AutomationController();
 
-	boost::shared_ptr<ARDOUR::AutomationControl> controllable() { return _controllable; }
+	std::shared_ptr<ARDOUR::AutomationControl> controllable() { return _controllable; }
 
 	void disable_vertical_scroll();
 
@@ -84,7 +84,7 @@ public:
 	void stop_updating ();
 
 private:
-	AutomationController (boost::shared_ptr<ARDOUR::AutomationControl> ac,
+	AutomationController (std::shared_ptr<ARDOUR::AutomationControl> ac,
 	                      Gtk::Adjustment*                             adj,
 	                      bool                                         use_knob);
 
@@ -99,7 +99,7 @@ private:
 	bool on_button_release(GdkEventButton* ev);
 
 	Gtk::Widget*                                 _widget;
-	boost::shared_ptr<ARDOUR::AutomationControl> _controllable;
+	std::shared_ptr<ARDOUR::AutomationControl> _controllable;
 	Gtk::Adjustment*                             _adjustment;
 	sigc::connection                             _screen_update_connection;
 	PBD::ScopedConnectionList                    _changed_connections;

@@ -629,10 +629,10 @@ LadspaPlugin::parameter_is_input (uint32_t param) const
 	return LADSPA_IS_PORT_INPUT(port_descriptor (param));
 }
 
-boost::shared_ptr<ScalePoints>
+std::shared_ptr<ScalePoints>
 LadspaPlugin::get_scale_points(uint32_t port_index) const
 {
-	boost::shared_ptr<ScalePoints> ret;
+	std::shared_ptr<ScalePoints> ret;
 #ifdef HAVE_LRDF
 	const uint32_t id     = atol(unique_id().c_str());
 	lrdf_defaults* points = lrdf_get_scale_values(id, port_index);
@@ -641,7 +641,7 @@ LadspaPlugin::get_scale_points(uint32_t port_index) const
 		return ret;
 	}
 
-	ret = boost::shared_ptr<ScalePoints>(new ScalePoints());
+	ret = std::shared_ptr<ScalePoints>(new ScalePoints());
 
 	for (uint32_t i = 0; i < points->count; ++i) {
 		ret->insert(make_pair(points->items[i].label,

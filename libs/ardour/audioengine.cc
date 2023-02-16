@@ -148,7 +148,7 @@ AudioEngine::split_cycle (pframes_t nframes)
 {
 	/* caller must hold process lock */
 
-	boost::shared_ptr<Ports> p = _ports.reader();
+	std::shared_ptr<Ports> p = _ports.reader();
 
 	/* This is mainly for the benefit of rt-control ports (MTC, MClk)
 	 *
@@ -997,13 +997,13 @@ AudioEngine::drop_backend ()
 	}
 }
 
-boost::shared_ptr<AudioBackend>
+std::shared_ptr<AudioBackend>
 AudioEngine::set_backend (const std::string& name, const std::string& arg1, const std::string& arg2)
 {
 	BackendMap::iterator b = _backends.find (name);
 
 	if (b == _backends.end()) {
-		return boost::shared_ptr<AudioBackend>();
+		return std::shared_ptr<AudioBackend>();
 	}
 
 	drop_backend ();
@@ -1017,7 +1017,7 @@ AudioEngine::set_backend (const std::string& name, const std::string& arg1, cons
 
 	} catch (exception& e) {
 		error << string_compose (_("Could not create backend for %1: %2"), name, e.what()) << endmsg;
-		return boost::shared_ptr<AudioBackend>();
+		return std::shared_ptr<AudioBackend>();
 	}
 
 	return _backend;

@@ -89,7 +89,7 @@ namespace ARDOUR {
 	}
 }
 
-PBD::Signal2<void,boost::shared_ptr<ARDOUR::RegionList>,const PropertyChange&> Region::RegionsPropertyChanged;
+PBD::Signal2<void,std::shared_ptr<ARDOUR::RegionList>,const PropertyChange&> Region::RegionsPropertyChanged;
 
 void
 Region::make_property_quarks ()
@@ -280,7 +280,7 @@ Region::Region (const SourceList& srcs)
 }
 
 /** Create a new Region from an existing one */
-Region::Region (boost::shared_ptr<const Region> other)
+Region::Region (std::shared_ptr<const Region> other)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
 	, REGION_COPY_STATE (other)
@@ -338,7 +338,7 @@ Region::Region (boost::shared_ptr<const Region> other)
  * the start within \a other is given by \a offset
  * (i.e. relative to the start of \a other's sources, the start is \a offset + \a other.start()
  */
-Region::Region (boost::shared_ptr<const Region> other, timecnt_t const & offset)
+Region::Region (std::shared_ptr<const Region> other, timecnt_t const & offset)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
 	, REGION_COPY_STATE (other)
@@ -383,7 +383,7 @@ Region::Region (boost::shared_ptr<const Region> other, timecnt_t const & offset)
 }
 
 /** Create a copy of @p other but with different sources. Used by filters */
-Region::Region (boost::shared_ptr<const Region> other, const SourceList& srcs)
+Region::Region (std::shared_ptr<const Region> other, const SourceList& srcs)
 	: SessionObject (other->session(), other->name())
 	, _type (srcs.front()->type())
 	, REGION_COPY_STATE (other)
@@ -416,7 +416,7 @@ Region::~Region ()
 }
 
 void
-Region::set_playlist (boost::weak_ptr<Playlist> wpl)
+Region::set_playlist (std::weak_ptr<Playlist> wpl)
 {
 	_playlist = wpl.lock();
 }
@@ -439,7 +439,7 @@ Region::set_selected_for_solo(bool yn)
 {
 	if (_soloSelected != yn) {
 
-		boost::shared_ptr<Playlist> pl (playlist());
+		std::shared_ptr<Playlist> pl (playlist());
 		if (pl){
 			if (yn) {
 				pl->AddToSoloSelectedList(this);
@@ -521,7 +521,7 @@ Region::maybe_uncopy ()
 void
 Region::first_edit ()
 {
-	boost::shared_ptr<Playlist> pl (playlist());
+	std::shared_ptr<Playlist> pl (playlist());
 
 	if (_first_edit != EditChangesNothing && pl) {
 
@@ -537,13 +537,13 @@ Region::first_edit ()
 bool
 Region::at_natural_position () const
 {
-	boost::shared_ptr<Playlist> pl (playlist());
+	std::shared_ptr<Playlist> pl (playlist());
 
 	if (!pl) {
 		return false;
 	}
 
-	boost::shared_ptr<Region> whole_file_region = get_parent();
+	std::shared_ptr<Region> whole_file_region = get_parent();
 
 	if (whole_file_region) {
 		if (position() == whole_file_region->position() + _start) {
@@ -557,13 +557,13 @@ Region::at_natural_position () const
 void
 Region::move_to_natural_position ()
 {
-	boost::shared_ptr<Playlist> pl (playlist());
+	std::shared_ptr<Playlist> pl (playlist());
 
 	if (!pl) {
 		return;
 	}
 
-	boost::shared_ptr<Region> whole_file_region = get_parent();
+	std::shared_ptr<Region> whole_file_region = get_parent();
 
 	if (whole_file_region) {
 		set_position (whole_file_region->position() + _start);
@@ -626,7 +626,7 @@ Region::recompute_position_from_time_domain ()
 void
 Region::update_after_tempo_map_change (bool send)
 {
-	boost::shared_ptr<Playlist> pl (playlist());
+	std::shared_ptr<Playlist> pl (playlist());
 
 	if (!pl) {
 		return;
@@ -1220,7 +1220,7 @@ Region::sync_position() const
 void
 Region::raise ()
 {
-	boost::shared_ptr<Playlist> pl (playlist());
+	std::shared_ptr<Playlist> pl (playlist());
 	if (pl) {
 		pl->raise_region (shared_from_this ());
 	}
@@ -1229,7 +1229,7 @@ Region::raise ()
 void
 Region::lower ()
 {
-	boost::shared_ptr<Playlist> pl (playlist());
+	std::shared_ptr<Playlist> pl (playlist());
 	if (pl) {
 		pl->lower_region (shared_from_this ());
 	}
@@ -1239,7 +1239,7 @@ Region::lower ()
 void
 Region::raise_to_top ()
 {
-	boost::shared_ptr<Playlist> pl (playlist());
+	std::shared_ptr<Playlist> pl (playlist());
 	if (pl) {
 		pl->raise_region_to_top (shared_from_this());
 	}
@@ -1248,7 +1248,7 @@ Region::raise_to_top ()
 void
 Region::lower_to_bottom ()
 {
-	boost::shared_ptr<Playlist> pl (playlist());
+	std::shared_ptr<Playlist> pl (playlist());
 	if (pl) {
 		pl->lower_region_to_bottom (shared_from_this());
 	}
@@ -1500,11 +1500,11 @@ Region::send_change (const PropertyChange& what_changed)
 		 */
 
 		try {
-			boost::shared_ptr<Region> rptr = shared_from_this();
+			std::shared_ptr<Region> rptr = shared_from_this();
 			if (_changemap) {
 				(*_changemap)[what_changed].push_back (rptr);
 			} else {
-				boost::shared_ptr<RegionList> rl (new RegionList);
+				std::shared_ptr<RegionList> rl (new RegionList);
 				rl->push_back (rptr);
 				RegionsPropertyChanged (rl, what_changed);
 			}
@@ -1515,20 +1515,20 @@ Region::send_change (const PropertyChange& what_changed)
 }
 
 bool
-Region::overlap_equivalent (boost::shared_ptr<const Region> other) const
+Region::overlap_equivalent (std::shared_ptr<const Region> other) const
 {
 	return coverage (other->position(), other->nt_last()) != Temporal::OverlapNone;
 }
 
 bool
-Region::enclosed_equivalent (boost::shared_ptr<const Region> other) const
+Region::enclosed_equivalent (std::shared_ptr<const Region> other) const
 {
 	return ((position() >= other->position() && end() <= other->end()) ||
 	        (position() <= other->position() && end() >= other->end()));
 }
 
 bool
-Region::layer_and_time_equivalent (boost::shared_ptr<const Region> other) const
+Region::layer_and_time_equivalent (std::shared_ptr<const Region> other) const
 {
 	return _layer == other->_layer &&
 		position() == other->position() &&
@@ -1536,7 +1536,7 @@ Region::layer_and_time_equivalent (boost::shared_ptr<const Region> other) const
 }
 
 bool
-Region::exact_equivalent (boost::shared_ptr<const Region> other) const
+Region::exact_equivalent (std::shared_ptr<const Region> other) const
 {
 	return _start == other->_start &&
 		position() == other->position() &&
@@ -1544,14 +1544,14 @@ Region::exact_equivalent (boost::shared_ptr<const Region> other) const
 }
 
 bool
-Region::size_equivalent (boost::shared_ptr<const Region> other) const
+Region::size_equivalent (std::shared_ptr<const Region> other) const
 {
 	return _start == other->_start &&
 		_length == other->_length;
 }
 
 void
-Region::source_deleted (boost::weak_ptr<Source>)
+Region::source_deleted (std::weak_ptr<Source>)
 {
 	drop_sources ();
 
@@ -1597,7 +1597,7 @@ Region::set_master_sources (const SourceList& srcs)
 }
 
 bool
-Region::source_equivalent (boost::shared_ptr<const Region> other) const
+Region::source_equivalent (std::shared_ptr<const Region> other) const
 {
 	if (!other)
 		return false;
@@ -1626,7 +1626,7 @@ Region::source_equivalent (boost::shared_ptr<const Region> other) const
 }
 
 bool
-Region::any_source_equivalent (boost::shared_ptr<const Region> other) const
+Region::any_source_equivalent (std::shared_ptr<const Region> other) const
 {
 	if (!other) {
 		return false;
@@ -1666,11 +1666,11 @@ Region::source_string () const
 }
 
 void
-Region::deep_sources (std::set<boost::shared_ptr<Source> > & sources) const
+Region::deep_sources (std::set<std::shared_ptr<Source> > & sources) const
 {
 	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
 
-		boost::shared_ptr<PlaylistSource> ps = boost::dynamic_pointer_cast<PlaylistSource> (*i);
+		std::shared_ptr<PlaylistSource> ps = std::dynamic_pointer_cast<PlaylistSource> (*i);
 
 		if (ps) {
 			if (sources.find (ps) == sources.end()) {
@@ -1687,7 +1687,7 @@ Region::deep_sources (std::set<boost::shared_ptr<Source> > & sources) const
 
 	for (SourceList::const_iterator i = _master_sources.begin(); i != _master_sources.end(); ++i) {
 
-		boost::shared_ptr<PlaylistSource> ps = boost::dynamic_pointer_cast<PlaylistSource> (*i);
+		std::shared_ptr<PlaylistSource> ps = std::dynamic_pointer_cast<PlaylistSource> (*i);
 
 		if (ps) {
 			if (sources.find (ps) == sources.end()) {
@@ -1704,7 +1704,7 @@ Region::deep_sources (std::set<boost::shared_ptr<Source> > & sources) const
 }
 
 bool
-Region::uses_source (boost::shared_ptr<const Source> source, bool shallow) const
+Region::uses_source (std::shared_ptr<const Source> source, bool shallow) const
 {
 	for (SourceList::const_iterator i = _sources.begin(); i != _sources.end(); ++i) {
 		if (*i == source) {
@@ -1712,7 +1712,7 @@ Region::uses_source (boost::shared_ptr<const Source> source, bool shallow) const
 		}
 
 		if (!shallow) {
-			boost::shared_ptr<PlaylistSource> ps = boost::dynamic_pointer_cast<PlaylistSource> (*i);
+			std::shared_ptr<PlaylistSource> ps = std::dynamic_pointer_cast<PlaylistSource> (*i);
 
 			if (ps) {
 				if (ps->playlist()->uses_source (source)) {
@@ -1728,7 +1728,7 @@ Region::uses_source (boost::shared_ptr<const Source> source, bool shallow) const
 		}
 
 		if (!shallow) {
-			boost::shared_ptr<PlaylistSource> ps = boost::dynamic_pointer_cast<PlaylistSource> (*i);
+			std::shared_ptr<PlaylistSource> ps = std::dynamic_pointer_cast<PlaylistSource> (*i);
 
 			if (ps) {
 				if (ps->playlist()->uses_source (source)) {
@@ -1803,21 +1803,21 @@ Region::verify_start (timepos_t const & pos)
 	return true;
 }
 
-boost::shared_ptr<Region>
+std::shared_ptr<Region>
 Region::get_parent() const
 {
-	boost::shared_ptr<Playlist> pl (playlist());
+	std::shared_ptr<Playlist> pl (playlist());
 
 	if (pl) {
-		boost::shared_ptr<Region> r;
-		boost::shared_ptr<Region const> grrr2 = boost::dynamic_pointer_cast<Region const> (shared_from_this());
+		std::shared_ptr<Region> r;
+		std::shared_ptr<Region const> grrr2 = std::dynamic_pointer_cast<Region const> (shared_from_this());
 
 		if (grrr2 && (r = _session.find_whole_file_parent (grrr2))) {
-			return boost::static_pointer_cast<Region> (r);
+			return std::static_pointer_cast<Region> (r);
 		}
 	}
 
-	return boost::shared_ptr<Region>();
+	return std::shared_ptr<Region>();
 }
 
 int
@@ -1958,7 +1958,7 @@ Region::drop_sources ()
 void
 Region::use_sources (SourceList const & s)
 {
-	set<boost::shared_ptr<Source> > unique_srcs;
+	set<std::shared_ptr<Source> > unique_srcs;
 
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
 
@@ -1972,7 +1972,7 @@ Region::use_sources (SourceList const & s)
 
 		if (unique_srcs.find (*i) == unique_srcs.end ()) {
 			unique_srcs.insert (*i);
-			(*i)->DropReferences.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, boost::weak_ptr<Source>(*i)));
+			(*i)->DropReferences.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, std::weak_ptr<Source>(*i)));
 		}
 	}
 }
@@ -2156,7 +2156,7 @@ Region::region_relative_position (timepos_t const & p) const
 Temporal::TimeDomain
 Region::time_domain() const
 {
-	boost::shared_ptr<Playlist> pl (_playlist.lock());
+	std::shared_ptr<Playlist> pl (_playlist.lock());
 
 	if (pl) {
 		return pl->time_domain ();

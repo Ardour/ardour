@@ -36,7 +36,7 @@ using namespace Gtk;
 using namespace std;
 using namespace Temporal;
 
-StepEditor::StepEditor (PublicEditor& e, boost::shared_ptr<MidiTrack> t, MidiTimeAxisView& mtv)
+StepEditor::StepEditor (PublicEditor& e, std::shared_ptr<MidiTrack> t, MidiTimeAxisView& mtv)
 	: _editor (e)
 	, _track (t)
 	, _mtv (mtv)
@@ -104,10 +104,10 @@ StepEditor::resync_step_edit_to_edit_point ()
 void
 StepEditor::prepare_step_edit_region ()
 {
-	boost::shared_ptr<Region> r = _track->playlist()->top_region_at (step_edit_insert_position);
+	std::shared_ptr<Region> r = _track->playlist()->top_region_at (step_edit_insert_position);
 
 	if (r) {
-		step_edit_region = boost::dynamic_pointer_cast<MidiRegion>(r);
+		step_edit_region = std::dynamic_pointer_cast<MidiRegion>(r);
 	}
 
 	if (step_edit_region) {
@@ -438,9 +438,9 @@ StepEditor::playlist_changed ()
 }
 
 void
-StepEditor::region_removed (boost::weak_ptr<Region> wr)
+StepEditor::region_removed (std::weak_ptr<Region> wr)
 {
-	boost::shared_ptr<Region> r (wr.lock());
+	std::shared_ptr<Region> r (wr.lock());
 
 	if (!r) {
 		return;

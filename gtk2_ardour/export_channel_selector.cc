@@ -243,21 +243,24 @@ PortExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 		for (Gtk::ListStore::Children::iterator r_it = route_list->children().begin(); r_it != route_list->children().end(); ++r_it) {
 
 			Glib::RefPtr<Gtk::ListStore> port_list = r_it->get_value (route_cols.port_list_col);
-			std::set<boost::weak_ptr<AudioPort> > route_ports;
-			std::set<boost::weak_ptr<AudioPort> > intersection;
-			std::map<boost::weak_ptr<AudioPort>, string> port_labels;
+			PortExportChannel::PortSet route_ports;
+			PortExportChannel::PortSet intersection;
+			std::map<std::weak_ptr<AudioPort>, string, std::owner_less<std::weak_ptr<AudioPort> > > port_labels;
 
 			for (Gtk::ListStore::Children::const_iterator p_it = port_list->children().begin(); p_it != port_list->children().end(); ++p_it) {
 				route_ports.insert ((*p_it)->get_value (route_cols.port_cols.port));
 				port_labels.insert (make_pair ((*p_it)->get_value (route_cols.port_cols.port),
-			                                       (*p_it)->get_value (route_cols.port_cols.label)));
+				                               (*p_it)->get_value (route_cols.port_cols.label)));
 			}
+
+			std::owner_less<std::weak_ptr<AudioPort> > cmp;
 
 			std::set_intersection (pec->get_ports().begin(), pec->get_ports().end(),
 			                       route_ports.begin(), route_ports.end(),
-			                       std::insert_iterator<std::set<boost::weak_ptr<AudioPort> > > (intersection, intersection.begin()));
+			                       std::insert_iterator<PortExportChannel::PortSet> (intersection, intersection.begin()),
+			                       cmp);
 
-			intersection.erase (boost::weak_ptr<AudioPort> ()); // Remove "none" selection
+			intersection.erase (std::weak_ptr<AudioPort> ()); // Remove "none" selection
 
 			if (intersection.empty()) {
 				continue;
@@ -269,13 +272,13 @@ PortExportChannelSelector::ChannelTreeView::set_config (ChannelConfigPtr c)
 				/* Set previous channels (if any) to none */
 
 				for (uint32_t chn = 1; chn < i; ++chn) {
-					r_it->set_value (route_cols.get_channel (chn).port, boost::weak_ptr<AudioPort> ());
+					r_it->set_value (route_cols.get_channel (chn).port, std::weak_ptr<AudioPort> ());
 					r_it->set_value (route_cols.get_channel (chn).label, string ("(none)"));
 				}
 			}
 
-			boost::weak_ptr<AudioPort> port = *intersection.begin();
-			std::map<boost::weak_ptr<AudioPort>, string>::iterator label_it = port_labels.find (port);
+			std::weak_ptr<AudioPort> port = *intersection.begin();
+			std::map<std::weak_ptr<AudioPort>, string>::iterator label_it = port_labels.find (port);
 			string label = label_it != port_labels.end() ? label_it->second : "error";
 
 			r_it->set_value (route_cols.get_channel (i).port, port);
@@ -321,7 +324,7 @@ PortExportChannelSelector::ChannelTreeView::add_route (ARDOUR::IO * io)
 	row = *iter;
 
 	row[route_cols.port_cols.selected] = false;
-	row[route_cols.port_cols.port] = boost::weak_ptr<AudioPort> ();
+	row[route_cols.port_cols.port] = std::weak_ptr<AudioPort> ();
 	row[route_cols.port_cols.label] = "(none)";
 
 }
@@ -359,7 +362,7 @@ PortExportChannelSelector::ChannelTreeView::set_channel_count (uint32_t channels
 		for (Gtk::ListStore::Children::iterator it = route_list->children().begin(); it != route_list->children().end(); ++it) {
 			std::string label = it->get_value(route_cols.selected) ? "(none)" : "";
 			it->set_value (route_cols.get_channel (n_channels).label, label);
-			it->set_value (route_cols.get_channel (n_channels).port, boost::weak_ptr<AudioPort> ());
+			it->set_value (route_cols.get_channel (n_channels).port, std::weak_ptr<AudioPort> ());
 		}
 
 		/* set column width */
@@ -399,8 +402,8 @@ PortExportChannelSelector::ChannelTreeView::update_config ()
 				continue;
 			}
 
-			boost::weak_ptr<AudioPort> weak_port = row[route_cols.get_channel (i).port];
-			boost::shared_ptr<AudioPort> port = weak_port.lock ();
+			std::weak_ptr<AudioPort> weak_port = row[route_cols.get_channel (i).port];
+			std::shared_ptr<AudioPort> port = weak_port.lock ();
 			if (port) {
 				pec->add_port (port);
 			}
@@ -426,7 +429,7 @@ PortExportChannelSelector::ChannelTreeView::update_toggle_selection (std::string
 		}
 
 		iter->set_value (route_cols.get_channel (i).label, std::string("(none)"));
-		iter->set_value (route_cols.get_channel (i).port, boost::weak_ptr<AudioPort> ());
+		iter->set_value (route_cols.get_channel (i).port, std::weak_ptr<AudioPort> ());
 
 		Glib::RefPtr<Gtk::ListStore> port_list = iter->get_value (route_cols.port_list_col);
 		Gtk::ListStore::Children::iterator port_it;
@@ -457,7 +460,7 @@ PortExportChannelSelector::ChannelTreeView::update_selection_text (std::string c
 	for (port_it = port_list->children().begin(); port_it != port_list->children().end(); ++port_it) {
 		std::string label = port_it->get_value (route_cols.port_cols.label);
 		if (label == new_text) {
-			boost::weak_ptr<AudioPort> w = (*port_it)[route_cols.port_cols.port];
+			std::weak_ptr<AudioPort> w = (*port_it)[route_cols.port_cols.port];
 			iter->set_value (route_cols.get_channel (channel).port, w);
 		}
 	}
@@ -671,7 +674,7 @@ TrackExportChannelSelector::sync_with_manager_state ()
 
 	auto channel_list = statelist.front()->config->get_channels();
 	if (!channel_list.empty ()) {
-		if (boost::dynamic_pointer_cast <RouteExportChannel> (channel_list.front ())) {
+		if (std::dynamic_pointer_cast <RouteExportChannel> (channel_list.front ())) {
 			track_output_button.set_active (false);
 		} else {
 			track_output_button.set_active (true);
@@ -687,31 +690,31 @@ TrackExportChannelSelector::sync_with_manager_state ()
 		ExportChannelConfiguration::ChannelList const& chan_list = state->config->get_channels ();
 
 		for (auto const& c : chan_list) {
-			boost::shared_ptr<PortExportMIDI>     pem;
-			boost::shared_ptr<PortExportChannel>  pec;
-			boost::shared_ptr<RouteExportChannel> rec;
+			std::shared_ptr<PortExportMIDI>     pem;
+			std::shared_ptr<PortExportChannel>  pec;
+			std::shared_ptr<RouteExportChannel> rec;
 
-			if ((rec = boost::dynamic_pointer_cast <RouteExportChannel> (c))) {
+			if ((rec = std::dynamic_pointer_cast <RouteExportChannel> (c))) {
 				for (auto const& i : track_list->children ()) {
 					Gtk::TreeModel::Row      row = *i;
-					boost::shared_ptr<Route> route = row[track_cols.route];
+					std::shared_ptr<Route> route = row[track_cols.route];
 					if (route == rec->route ()) {
 						row[track_cols.selected] = true;
 						break;
 					}
 				}
-			} else if ((pem = boost::dynamic_pointer_cast<PortExportMIDI> (c))) {
+			} else if ((pem = std::dynamic_pointer_cast<PortExportMIDI> (c))) {
 				bool breakout = false;
 				for (auto const& i : track_list->children ()) {
 					Gtk::TreeModel::Row      row = *i;
-					boost::shared_ptr<Route> route = row[track_cols.route];
+					std::shared_ptr<Route> route = row[track_cols.route];
 					uint32_t n_audio = route->n_outputs().n_audio();
 					uint32_t n_midi = route->n_outputs().n_midi();
 					if (n_audio > 0 || n_midi == 0) {
 						continue;
 					}
 					for (uint32_t i = 0; i < n_midi; ++i) {
-						boost::shared_ptr<MidiPort> port = route->output()->midi (i);
+						std::shared_ptr<MidiPort> port = route->output()->midi (i);
 						assert (pem->port ());
 						if (port && port == pem->port ()) {
 							row[track_cols.selected] = true;
@@ -722,20 +725,25 @@ TrackExportChannelSelector::sync_with_manager_state ()
 						continue;
 					}
 				}
-			} else if ((pec = boost::dynamic_pointer_cast<PortExportChannel> (c))) {
+			} else if ((pec = std::dynamic_pointer_cast<PortExportChannel> (c))) {
 				for (auto const& i : track_list->children ()) {
 					Gtk::TreeModel::Row row = *i;
-					boost::shared_ptr<Route> route = row[track_cols.route];
-					std::set<boost::weak_ptr<AudioPort>> route_ports;
-					std::set<boost::weak_ptr<AudioPort>> intersection;
+					std::shared_ptr<Route> route = row[track_cols.route];
+
+					PortExportChannel::PortSet route_ports;
+					PortExportChannel::PortSet intersection;
+
 					PortSet& ps (route->output()->ports ());
 					for (PortSet::audio_iterator p = ps.audio_begin (); p != ps.audio_end (); ++p) {
 						route_ports.insert (*p);
 					}
 
+					std::owner_less<std::weak_ptr<AudioPort> > cmp;
+
 					std::set_intersection (pec->get_ports().begin(), pec->get_ports().end(),
-							route_ports.begin(), route_ports.end(),
-							std::insert_iterator<std::set<boost::weak_ptr<AudioPort>>> (intersection, intersection.begin ()));
+					                       route_ports.begin(), route_ports.end(),
+					                       std::insert_iterator<PortExportChannel::PortSet> (intersection, intersection.begin ()),
+					                       cmp);
 
 					if (!intersection.empty()) {
 						row[track_cols.selected] = true;
@@ -758,14 +766,14 @@ TrackExportChannelSelector::select_tracks (int what)
 
 	for (Gtk::ListStore::Children::iterator it = track_list->children().begin(); it != track_list->children().end(); ++it) {
 		Gtk::TreeModel::Row row = *it;
-		boost::shared_ptr<Route> route = row[track_cols.route];
-		if (!boost::dynamic_pointer_cast<Track> (route)) {
+		std::shared_ptr<Route> route = row[track_cols.route];
+		if (!std::dynamic_pointer_cast<Track> (route)) {
 			continue;
 		}
-		if (0 == (what & 1) && boost::dynamic_pointer_cast<AudioTrack> (route)) {
+		if (0 == (what & 1) && std::dynamic_pointer_cast<AudioTrack> (route)) {
 			continue;
 		}
-		if (0 == (what & 2) && boost::dynamic_pointer_cast<MidiTrack> (route)) {
+		if (0 == (what & 2) && std::dynamic_pointer_cast<MidiTrack> (route)) {
 			continue;
 		}
 		if (excl_muted && route->muted ()) {
@@ -787,8 +795,8 @@ TrackExportChannelSelector::select_busses ()
 
 	for (Gtk::ListStore::Children::iterator it = track_list->children().begin(); it != track_list->children().end(); ++it) {
 		Gtk::TreeModel::Row row = *it;
-		boost::shared_ptr<Route> route = row[track_cols.route];
-		if (!boost::dynamic_pointer_cast<Track> (route)) {
+		std::shared_ptr<Route> route = row[track_cols.route];
+		if (!std::dynamic_pointer_cast<Track> (route)) {
 			if (excl_muted && route->muted ()) {
 				continue;
 			}
@@ -828,7 +836,7 @@ TrackExportChannelSelector::fill_list()
 	CoreSelection const& cs (_session->selection());
 
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
-		if (!boost::dynamic_pointer_cast<Track>(*it)) {
+		if (!std::dynamic_pointer_cast<Track>(*it)) {
 			// not a track, must be a bus
 			if ((*it)->is_master () || (*it)->is_monitor ()) {
 				continue;
@@ -843,7 +851,7 @@ TrackExportChannelSelector::fill_list()
 		}
 	}
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
-		if (boost::dynamic_pointer_cast<AudioTrack>(*it) || boost::dynamic_pointer_cast<MidiTrack>(*it)) {
+		if (std::dynamic_pointer_cast<AudioTrack>(*it) || std::dynamic_pointer_cast<MidiTrack>(*it)) {
 			if (!(*it)->active ()) {
 				// don't include inactive tracks
 				continue;
@@ -854,7 +862,7 @@ TrackExportChannelSelector::fill_list()
 }
 
 void
-TrackExportChannelSelector::add_track (boost::shared_ptr<Route> route, bool selected)
+TrackExportChannelSelector::add_track (std::shared_ptr<Route> route, bool selected)
 {
 	Gtk::TreeModel::iterator iter = track_list->append();
 	Gtk::TreeModel::Row row = *iter;
@@ -879,13 +887,13 @@ TrackExportChannelSelector::update_config()
 
 		ExportProfileManager::ChannelConfigStatePtr state;
 
-		boost::shared_ptr<Route> route = row[track_cols.route];
+		std::shared_ptr<Route> route = row[track_cols.route];
 
 		if (track_output_button.get_active()) {
 			uint32_t n_audio = route->n_outputs().n_audio();
 			uint32_t n_midi = route->n_outputs().n_midi();
 			for (uint32_t i = 0; i < n_audio; ++i) {
-				boost::shared_ptr<AudioPort> port = route->output()->audio (i);
+				std::shared_ptr<AudioPort> port = route->output()->audio (i);
 				if (port) {
 					ExportChannelPtr channel (new PortExportChannel ());
 					PortExportChannel * pec = static_cast<PortExportChannel *> (channel.get());
@@ -901,7 +909,7 @@ TrackExportChannelSelector::update_config()
 				n_midi = 0;
 			}
 			for (uint32_t i = 0; i < n_midi; ++i) {
-				boost::shared_ptr<MidiPort> port = route->output()->midi (i);
+				std::shared_ptr<MidiPort> port = route->output()->midi (i);
 				if (port) {
 					ExportChannelPtr channel (new PortExportMIDI ());
 					PortExportMIDI* pem = static_cast<PortExportMIDI*> (channel.get());

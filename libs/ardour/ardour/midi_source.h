@@ -68,7 +68,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	 * @return zero on success, non-zero if the write failed for any reason.
 	 */
 	int write_to (const ReaderLock&             lock,
-	              boost::shared_ptr<MidiSource> newsrc,
+	              std::shared_ptr<MidiSource> newsrc,
 	              Temporal::Beats               begin = Temporal::Beats(),
 	              Temporal::Beats               end   = std::numeric_limits<Temporal::Beats>::max());
 
@@ -82,7 +82,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	 * @return zero on success, non-zero if the write failed for any reason.
 	 */
 	int export_write_to (const ReaderLock&             lock,
-	                     boost::shared_ptr<MidiSource> newsrc,
+	                     std::shared_ptr<MidiSource> newsrc,
 	                     Temporal::Beats               begin,
 	                     Temporal::Beats               end);
 
@@ -182,18 +182,18 @@ class LIBARDOUR_API MidiSource : virtual public Source
 
 	void set_note_mode(const WriterLock& lock, NoteMode mode);
 
-	boost::shared_ptr<MidiModel> model() { return _model; }
-	void set_model(const WriterLock& lock, boost::shared_ptr<MidiModel>);
+	std::shared_ptr<MidiModel> model() { return _model; }
+	void set_model(const WriterLock& lock, std::shared_ptr<MidiModel>);
 	void drop_model(const WriterLock& lock);
 
 	AutomationList::InterpolationStyle interpolation_of (Evoral::Parameter const&) const;
 	void set_interpolation_of (Evoral::Parameter const&, AutomationList::InterpolationStyle);
-	void copy_interpolation_from (boost::shared_ptr<MidiSource>);
+	void copy_interpolation_from (std::shared_ptr<MidiSource>);
 	void copy_interpolation_from (MidiSource *);
 
 	AutoState automation_state_of (Evoral::Parameter const&) const;
 	void set_automation_state_of (Evoral::Parameter const&, AutoState);
-	void copy_automation_state_from (boost::shared_ptr<MidiSource>);
+	void copy_automation_state_from (std::shared_ptr<MidiSource>);
 	void copy_automation_state_from (MidiSource *);
 
 	/** Emitted when a different MidiModel is set */
@@ -226,7 +226,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	                                  timepos_t const &            position,
 	                                  timecnt_t const &            cnt) = 0;
 
-	boost::shared_ptr<MidiModel> _model;
+	std::shared_ptr<MidiModel> _model;
 	bool                         _writing;
 
 	/** The total duration of the current capture. */

@@ -71,7 +71,7 @@ PBD::Signal1<void,RegionView*> RegionView::RegionViewGoingAway;
 
 RegionView::RegionView (ArdourCanvas::Container*                 parent,
                         TimeAxisView&                            tv,
-                        const boost::shared_ptr<ARDOUR::Region>& r,
+                        const std::shared_ptr<ARDOUR::Region>& r,
                         double                                   spu,
                         uint32_t                                 basic_color,
                         bool                                     automation)
@@ -123,7 +123,7 @@ RegionView::RegionView (const RegionView& other)
 	}
 }
 
-RegionView::RegionView (const RegionView& other, const boost::shared_ptr<Region>& other_region)
+RegionView::RegionView (const RegionView& other, const std::shared_ptr<Region>& other_region)
 	: sigc::trackable(other)
 	, TimeAxisViewItem (other)
 	, sync_mark (nullptr)
@@ -153,7 +153,7 @@ RegionView::RegionView (const RegionView& other, const boost::shared_ptr<Region>
 
 RegionView::RegionView (ArdourCanvas::Container*                 parent,
                         TimeAxisView&                            tv,
-                        const boost::shared_ptr<ARDOUR::Region>& r,
+                        const std::shared_ptr<ARDOUR::Region>& r,
                         double                                   spu,
                         uint32_t                                 basic_color,
                         bool                                     recording,
@@ -553,7 +553,7 @@ RegionView::update_cue_markers ()
 	 * be appropriate as the origin of cue markers. We use the first one.
 	 */
 
-	boost::shared_ptr<Source> source = region()->source (0);
+	std::shared_ptr<Source> source = region()->source (0);
 	CueMarkers const & model_markers (source->cue_markers());
 
 	/* Remove any view markers that are no longer present in the model cue
@@ -976,7 +976,7 @@ RegionView::update_coverage_frame (LayerDisplay d)
 		return;
 	}
 
-	boost::shared_ptr<Playlist> pl (_region->playlist ());
+	std::shared_ptr<Playlist> pl (_region->playlist ());
 	if (!pl) {
 		return;
 	}
@@ -1061,8 +1061,8 @@ RegionView::trim_front (timepos_t const & new_bound, bool no_overlap)
 
 	if (no_overlap) {
 		/* Get the next region on the left of this region and shrink/expand it. */
-		boost::shared_ptr<Playlist> playlist (_region->playlist());
-		boost::shared_ptr<Region> region_left = playlist->find_next_region (pos, End, 0);
+		std::shared_ptr<Playlist> playlist (_region->playlist());
+		std::shared_ptr<Region> region_left = playlist->find_next_region (pos, End, 0);
 
 		bool regions_touching = false;
 
@@ -1094,8 +1094,8 @@ RegionView::trim_end (timepos_t const & new_bound, bool no_overlap)
 
 	if (no_overlap) {
 		/* Get the next region on the right of this region and shrink/expand it. */
-		boost::shared_ptr<Playlist> playlist (_region->playlist());
-		boost::shared_ptr<Region> region_right = playlist->find_next_region (last, Start, 1);
+		std::shared_ptr<Playlist> playlist (_region->playlist());
+		std::shared_ptr<Region> region_right = playlist->find_next_region (last, Start, 1);
 
 		bool regions_touching = false;
 

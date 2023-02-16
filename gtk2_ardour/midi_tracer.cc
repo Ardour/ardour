@@ -67,8 +67,8 @@ MidiTracer::MidiTracer ()
 	g_atomic_int_set (&_update_queued, 0);
 
 	std::string portname (string_compose(X_("x-MIDI-tracer-%1"), ++window_count));
-	boost::shared_ptr<ARDOUR::Port> port = AudioEngine::instance()->register_input_port (DataType::MIDI, portname, false,  PortFlags (IsInput | Hidden | IsTerminal));
-	tracer_port                          = boost::dynamic_pointer_cast<MidiPort> (port);
+	std::shared_ptr<ARDOUR::Port> port = AudioEngine::instance()->register_input_port (DataType::MIDI, portname, false,  PortFlags (IsInput | Hidden | IsTerminal));
+	tracer_port                          = std::dynamic_pointer_cast<MidiPort> (port);
 
 	_midi_port_list = ListStore::create (_midi_port_cols);
 	_midi_port_combo.set_model (_midi_port_list);
@@ -233,12 +233,12 @@ MidiTracer::port_changed ()
 
 	std::string const pn = (*r)[_midi_port_cols.port_name];
 
-	boost::shared_ptr<ARDOUR::Port> p = AudioEngine::instance()->get_port_by_name (pn);
+	std::shared_ptr<ARDOUR::Port> p = AudioEngine::instance()->get_port_by_name (pn);
 
 	if (!p) {
 		/* connect to external port */
 		if (0 == tracer_port->connect (pn)) {
-			_midi_parser = boost::shared_ptr<MIDI::Parser> (new MIDI::Parser);
+			_midi_parser = std::shared_ptr<MIDI::Parser> (new MIDI::Parser);
 			_midi_parser->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
 			tracer_port->set_trace (_midi_parser.get ());
 		} else {
@@ -247,7 +247,7 @@ MidiTracer::port_changed ()
 		return;
 	}
 
-	boost::shared_ptr<MidiPort> mp = boost::dynamic_pointer_cast<MidiPort> (p);
+	std::shared_ptr<MidiPort> mp = std::dynamic_pointer_cast<MidiPort> (p);
 
 	/* The inheritance hierarchy makes this messy. AsyncMIDIPort has two
 	 * available MIDI::Parsers what we could connect to, ::self_parser()
@@ -260,20 +260,20 @@ MidiTracer::port_changed ()
 	 * If not use our local parser and tell the port that we need it to be called.
 	 */
 
-	boost::shared_ptr<AsyncMIDIPort> async = boost::dynamic_pointer_cast<AsyncMIDIPort> (p);
+	std::shared_ptr<AsyncMIDIPort> async = std::dynamic_pointer_cast<AsyncMIDIPort> (p);
 
 	if (!async) {
 
-		boost::shared_ptr<MidiPort> mp = boost::dynamic_pointer_cast<MidiPort> (p);
+		std::shared_ptr<MidiPort> mp = std::dynamic_pointer_cast<MidiPort> (p);
 		if (mp) {
 			if (mp->flags() & TransportMasterPort) {
-				boost::shared_ptr<TransportMaster> tm = TransportMasterManager::instance().master_by_port(boost::dynamic_pointer_cast<ARDOUR::Port> (p));
-				boost::shared_ptr<TransportMasterViaMIDI> tm_midi = boost::dynamic_pointer_cast<TransportMasterViaMIDI> (tm);
+				std::shared_ptr<TransportMaster> tm = TransportMasterManager::instance().master_by_port(std::dynamic_pointer_cast<ARDOUR::Port> (p));
+				std::shared_ptr<TransportMasterViaMIDI> tm_midi = std::dynamic_pointer_cast<TransportMasterViaMIDI> (tm);
 				if (tm_midi) {
 					tm_midi->transport_parser().any.connect_same_thread(_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
 				}
 			} else {
-				_midi_parser = boost::shared_ptr<MIDI::Parser> (new MIDI::Parser);
+				_midi_parser = std::shared_ptr<MIDI::Parser> (new MIDI::Parser);
 				_midi_parser->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
 				mp->set_trace (_midi_parser.get ());
 				traced_port = mp;

@@ -146,7 +146,7 @@ MidiTimeAxisView::set_note_highlight (uint8_t note) {
 }
 
 void
-MidiTimeAxisView::set_route (boost::shared_ptr<Route> rt)
+MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 {
 	_route = rt;
 
@@ -827,7 +827,7 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 					               sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
 					                           fully_qualified_param)));
 
-				boost::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
+				std::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
 				bool visible = false;
 
 				if (track) {
@@ -859,7 +859,7 @@ MidiTimeAxisView::add_channel_command_menu_item (Menu_Helpers::MenuList& items,
 					               sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
 					                           fully_qualified_param)));
 
-				boost::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
+				std::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
 				bool visible = false;
 
 				if (track) {
@@ -900,7 +900,7 @@ MidiTimeAxisView::add_single_channel_controller_item(Menu_Helpers::MenuList& ctl
 						fully_qualified_param)));
 			dynamic_cast<Label*> (ctl_items.back().get_child())->set_use_markup (true);
 
-			boost::shared_ptr<AutomationTimeAxisView> track = automation_child (
+			std::shared_ptr<AutomationTimeAxisView> track = automation_child (
 				fully_qualified_param);
 
 			bool visible = false;
@@ -955,7 +955,7 @@ MidiTimeAxisView::add_multi_channel_controller_item(Menu_Helpers::MenuList& ctl_
 				               sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::toggle_automation_track),
 				                           fully_qualified_param)));
 
-			boost::shared_ptr<AutomationTimeAxisView> track = automation_child (
+			std::shared_ptr<AutomationTimeAxisView> track = automation_child (
 				fully_qualified_param);
 			bool visible = false;
 
@@ -1021,7 +1021,7 @@ MidiTimeAxisView::build_controller_menu ()
 			uint16_t channels  = _route->instrument_info().channels_for_control_list (l->first);
 			bool multi_channel = 0 != (channels & (channels - 1));
 
-			boost::shared_ptr<ControlNameList> name_list = l->second;
+			std::shared_ptr<ControlNameList> name_list = l->second;
 			Menu*                              ctl_menu  = NULL;
 
 			for (ControlNameList::Controls::const_iterator c = name_list->controls().begin();
@@ -1279,7 +1279,7 @@ MidiTimeAxisView::show_all_automation (bool apply_to_selection)
 						continue;
 					}
 
-					boost::shared_ptr<ControlNameList> control_names = _route->instrument_info().control_name_list (chn);
+					std::shared_ptr<ControlNameList> control_names = _route->instrument_info().control_name_list (chn);
 					if (!control_names) {
 						continue;
 					}
@@ -1346,8 +1346,8 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		return;
 	}
 
-	boost::shared_ptr<AutomationTimeAxisView> track;
-	boost::shared_ptr<AutomationControl> control;
+	std::shared_ptr<AutomationTimeAxisView> track;
+	std::shared_ptr<AutomationControl> control;
 
 	switch (param.type()) {
 
@@ -1382,7 +1382,7 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		track.reset (new AutomationTimeAxisView (
 			             _session,
 			             _route,
-			             control ? _route : boost::shared_ptr<Automatable> (),
+			             control ? _route : std::shared_ptr<Automatable> (),
 			             control,
 			             param,
 			             _editor,
@@ -1552,7 +1552,7 @@ MidiTimeAxisView::toggle_note_selection (uint8_t note)
 }
 
 void
-MidiTimeAxisView::get_per_region_note_selection (list<pair<PBD::ID, set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >& selection)
+MidiTimeAxisView::get_per_region_note_selection (list<pair<PBD::ID, set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >& selection)
 {
 	_view->foreach_regionview (
 		sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::get_per_region_note_selection_region_view), sigc::ref(selection)));
@@ -1583,12 +1583,12 @@ MidiTimeAxisView::toggle_note_selection_region_view (RegionView* rv, uint8_t not
 }
 
 void
-MidiTimeAxisView::get_per_region_note_selection_region_view (RegionView* rv, list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > > &selection)
+MidiTimeAxisView::get_per_region_note_selection_region_view (RegionView* rv, list<pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > > &selection)
 {
 	Evoral::Sequence<Temporal::Beats>::Notes selected;
 	dynamic_cast<MidiRegionView*>(rv)->selection_as_notelist (selected, false);
 
-	std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > notes;
+	std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > notes;
 
 	Evoral::Sequence<Temporal::Beats>::Notes::iterator sel_it;
 	for (sel_it = selected.begin(); sel_it != selected.end(); ++sel_it) {
@@ -1615,7 +1615,7 @@ MidiTimeAxisView::set_channel_mode (ChannelMode, uint16_t)
 
 		for (uint32_t chn = 0; chn < 16; ++chn) {
 			Evoral::Parameter fully_qualified_param (MidiCCAutomation, chn, ctl);
-			boost::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
+			std::shared_ptr<AutomationTimeAxisView> track = automation_child (fully_qualified_param);
 
 			if (!track) {
 				continue;
@@ -1667,7 +1667,7 @@ MidiTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
 	return 0;
 }
 
-boost::shared_ptr<MidiRegion>
+std::shared_ptr<MidiRegion>
 MidiTimeAxisView::add_region (timepos_t const & f, timecnt_t const & length, bool commit)
 {
 	Editor* real_editor = dynamic_cast<Editor*> (&_editor);
@@ -1680,11 +1680,11 @@ MidiTimeAxisView::add_region (timepos_t const & f, timecnt_t const & length, boo
 
 	real_editor->snap_to (pos, Temporal::RoundNearest);
 
-	boost::shared_ptr<Source> src = _session->create_midi_source_by_stealing_name (view()->trackview().track());
+	std::shared_ptr<Source> src = _session->create_midi_source_by_stealing_name (view()->trackview().track());
 
 	const Temporal::timecnt_t start (Temporal::BeatTime); /* zero beats */
 
-	boost::shared_ptr<Region> region;
+	std::shared_ptr<Region> region;
 
 	/* Create the (empty) whole-file region that will show up in the source
 	 * list. This is NOT used in any playlists.
@@ -1719,7 +1719,7 @@ MidiTimeAxisView::add_region (timepos_t const & f, timecnt_t const & length, boo
 		real_editor->commit_reversible_command ();
 	}
 
-	return boost::dynamic_pointer_cast<MidiRegion>(region);
+	return std::dynamic_pointer_cast<MidiRegion>(region);
 }
 
 void

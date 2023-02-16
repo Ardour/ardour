@@ -26,7 +26,7 @@ using namespace PBD;
 
 RecordSafeControl::RecordSafeControl (Session& session, std::string const & name, Recordable& r, Temporal::TimeDomain td)
 	: SlavableAutomationControl (session, RecSafeAutomation, ParameterDescriptor (RecSafeAutomation),
-	                             boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(RecSafeAutomation), td)),
+	                             std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(RecSafeAutomation), td)),
 	                             name)
 	, _recordable (r)
 {

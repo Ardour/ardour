@@ -42,7 +42,7 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 
-PBD::Signal1<void, boost::shared_ptr<Region> > RegionFactory::CheckNewRegion;
+PBD::Signal1<void, std::shared_ptr<Region> > RegionFactory::CheckNewRegion;
 Glib::Threads::Mutex                           RegionFactory::region_map_lock;
 RegionFactory::RegionMap                       RegionFactory::region_map;
 PBD::ScopedConnectionList*                     RegionFactory::region_list_connections = 0;
@@ -51,17 +51,17 @@ std::map<std::string, uint32_t>                RegionFactory::region_name_number
 std::map<std::string, PBD::ID>                 RegionFactory::region_name_map;
 RegionFactory::CompoundAssociations            RegionFactory::_compound_associations;
 
-boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bool fork, ThawList* tl)
+std::shared_ptr<Region>
+RegionFactory::create (std::shared_ptr<const Region> region, bool announce, bool fork, ThawList* tl)
 {
-	boost::shared_ptr<Region>            ret;
-	boost::shared_ptr<const AudioRegion> ar;
-	boost::shared_ptr<const MidiRegion>  mr;
+	std::shared_ptr<Region>            ret;
+	std::shared_ptr<const AudioRegion> ar;
+	std::shared_ptr<const MidiRegion>  mr;
 
-	if ((ar = boost::dynamic_pointer_cast<const AudioRegion> (region)) != 0) {
-		ret = boost::shared_ptr<Region> (new AudioRegion (ar, timecnt_t::from_superclock (0)));
+	if ((ar = std::dynamic_pointer_cast<const AudioRegion> (region)) != 0) {
+		ret = std::shared_ptr<Region> (new AudioRegion (ar, timecnt_t::from_superclock (0)));
 
-	} else if ((mr = boost::dynamic_pointer_cast<const MidiRegion> (region)) != 0) {
+	} else if ((mr = std::dynamic_pointer_cast<const MidiRegion> (region)) != 0) {
 		if (mr->session ().config.get_midi_copy_is_fork () || fork) {
 			/* What we really want to do here is what Editor::fork_region()
 			   does via Session::create_midi_source_by_stealing_name(), but we
@@ -71,11 +71,11 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 			const std::string ancestor_name = mr->sources ().front ()->ancestor_name ();
 			const std::string base          = PBD::basename_nosuffix (ancestor_name);
 
-			boost::shared_ptr<MidiSource> source = mr->session ().create_midi_source_for_session (base);
+			std::shared_ptr<MidiSource> source = mr->session ().create_midi_source_for_session (base);
 			source->set_ancestor_name (mr->sources ().front ()->name ());
 			ret = mr->clone (source, tl);
 		} else {
-			ret = boost::shared_ptr<Region> (new MidiRegion (mr, timecnt_t (Temporal::Beats (), timepos_t (Temporal::Beats()))));
+			ret = std::shared_ptr<Region> (new MidiRegion (mr, timecnt_t (Temporal::Beats (), timepos_t (Temporal::Beats()))));
 		}
 
 	} else {
@@ -106,24 +106,24 @@ RegionFactory::create (boost::shared_ptr<const Region> region, bool announce, bo
 	return ret;
 }
 
-boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& plist, bool announce, ThawList* tl)
+std::shared_ptr<Region>
+RegionFactory::create (std::shared_ptr<Region> region, const PropertyList& plist, bool announce, ThawList* tl)
 {
-	boost::shared_ptr<Region>            ret;
-	boost::shared_ptr<const AudioRegion> other_a;
-	boost::shared_ptr<const MidiRegion>  other_m;
+	std::shared_ptr<Region>            ret;
+	std::shared_ptr<const AudioRegion> other_a;
+	std::shared_ptr<const MidiRegion>  other_m;
 
-	if ((other_a = boost::dynamic_pointer_cast<AudioRegion> (region)) != 0) {
-		ret = boost::shared_ptr<Region> (new AudioRegion (other_a));
+	if ((other_a = std::dynamic_pointer_cast<AudioRegion> (region)) != 0) {
+		ret = std::shared_ptr<Region> (new AudioRegion (other_a));
 
-	} else if ((other_m = boost::dynamic_pointer_cast<MidiRegion> (region)) != 0) {
-		ret = boost::shared_ptr<Region> (new MidiRegion (other_m));
+	} else if ((other_m = std::dynamic_pointer_cast<MidiRegion> (region)) != 0) {
+		ret = std::shared_ptr<Region> (new MidiRegion (other_m));
 
 	} else {
 		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
 		      << endmsg;
 		abort (); /*NOTREACHED*/
-		return boost::shared_ptr<Region> ();
+		return std::shared_ptr<Region> ();
 	}
 
 	if (ret) {
@@ -147,24 +147,24 @@ RegionFactory::create (boost::shared_ptr<Region> region, const PropertyList& pli
 	return ret;
 }
 
-boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region, timecnt_t const & offset, const PropertyList& plist, bool announce, ThawList* tl)
+std::shared_ptr<Region>
+RegionFactory::create (std::shared_ptr<Region> region, timecnt_t const & offset, const PropertyList& plist, bool announce, ThawList* tl)
 {
-	boost::shared_ptr<Region>            ret;
-	boost::shared_ptr<const AudioRegion> other_a;
-	boost::shared_ptr<const MidiRegion>  other_m;
+	std::shared_ptr<Region>            ret;
+	std::shared_ptr<const AudioRegion> other_a;
+	std::shared_ptr<const MidiRegion>  other_m;
 
-	if ((other_a = boost::dynamic_pointer_cast<AudioRegion> (region)) != 0) {
-		ret = boost::shared_ptr<Region> (new AudioRegion (other_a, offset));
+	if ((other_a = std::dynamic_pointer_cast<AudioRegion> (region)) != 0) {
+		ret = std::shared_ptr<Region> (new AudioRegion (other_a, offset));
 
-	} else if ((other_m = boost::dynamic_pointer_cast<MidiRegion> (region)) != 0) {
-		ret = boost::shared_ptr<Region> (new MidiRegion (other_m, offset));
+	} else if ((other_m = std::dynamic_pointer_cast<MidiRegion> (region)) != 0) {
+		ret = std::shared_ptr<Region> (new MidiRegion (other_m, offset));
 
 	} else {
 		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
 		      << endmsg;
 		abort (); /*NOTREACHED*/
-		return boost::shared_ptr<Region> ();
+		return std::shared_ptr<Region> ();
 	}
 
 	if (ret) {
@@ -187,20 +187,20 @@ RegionFactory::create (boost::shared_ptr<Region> region, timecnt_t const & offse
 	return ret;
 }
 
-boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs, const PropertyList& plist, bool announce, ThawList* tl)
+std::shared_ptr<Region>
+RegionFactory::create (std::shared_ptr<Region> region, const SourceList& srcs, const PropertyList& plist, bool announce, ThawList* tl)
 {
-	boost::shared_ptr<Region>            ret;
-	boost::shared_ptr<const AudioRegion> other;
+	std::shared_ptr<Region>            ret;
+	std::shared_ptr<const AudioRegion> other;
 
 	/* used by AudioFilter when constructing a new region that is intended to have nearly
 	   identical settings to an original, but using different sources.
 	*/
 
-	if ((other = boost::dynamic_pointer_cast<AudioRegion> (region)) != 0) {
+	if ((other = std::dynamic_pointer_cast<AudioRegion> (region)) != 0) {
 		// XXX use me in caller where plist is setup, this is start i think srcs.front()->length (srcs.front()->natural_position())
 
-		ret = boost::shared_ptr<Region> (new AudioRegion (other, srcs));
+		ret = std::shared_ptr<Region> (new AudioRegion (other, srcs));
 
 	} else {
 		fatal << _("programming error: RegionFactory::create() called with unknown Region type")
@@ -229,26 +229,26 @@ RegionFactory::create (boost::shared_ptr<Region> region, const SourceList& srcs,
 	return ret;
 }
 
-boost::shared_ptr<Region>
-RegionFactory::create (boost::shared_ptr<Source> src, const PropertyList& plist, bool announce, ThawList* tl)
+std::shared_ptr<Region>
+RegionFactory::create (std::shared_ptr<Source> src, const PropertyList& plist, bool announce, ThawList* tl)
 {
 	SourceList srcs;
 	srcs.push_back (src);
 	return create (srcs, plist, announce, tl);
 }
 
-boost::shared_ptr<Region>
+std::shared_ptr<Region>
 RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool announce, ThawList* tl)
 {
-	boost::shared_ptr<Region>      ret;
-	boost::shared_ptr<AudioSource> as;
-	boost::shared_ptr<MidiSource>  ms;
+	std::shared_ptr<Region>      ret;
+	std::shared_ptr<AudioSource> as;
+	std::shared_ptr<MidiSource>  ms;
 
-	if ((as = boost::dynamic_pointer_cast<AudioSource> (srcs[0])) != 0) {
-		ret = boost::shared_ptr<Region> (new AudioRegion (srcs));
+	if ((as = std::dynamic_pointer_cast<AudioSource> (srcs[0])) != 0) {
+		ret = std::shared_ptr<Region> (new AudioRegion (srcs));
 
-	} else if ((ms = boost::dynamic_pointer_cast<MidiSource> (srcs[0])) != 0) {
-		ret = boost::shared_ptr<Region> (new MidiRegion (srcs));
+	} else if ((ms = std::dynamic_pointer_cast<MidiSource> (srcs[0])) != 0) {
+		ret = std::shared_ptr<Region> (new MidiRegion (srcs));
 	}
 
 	if (ret) {
@@ -272,26 +272,26 @@ RegionFactory::create (const SourceList& srcs, const PropertyList& plist, bool a
 	return ret;
 }
 
-boost::shared_ptr<Region>
+std::shared_ptr<Region>
 RegionFactory::create (Session& session, XMLNode& node, bool yn)
 {
 	return session.XMLRegionFactory (node, yn);
 }
 
-boost::shared_ptr<Region>
+std::shared_ptr<Region>
 RegionFactory::create (SourceList& srcs, const XMLNode& node)
 {
-	boost::shared_ptr<Region> ret;
+	std::shared_ptr<Region> ret;
 
 	if (srcs.empty ()) {
 		return ret;
 	}
 
 	if (srcs[0]->type () == DataType::AUDIO) {
-		ret = boost::shared_ptr<Region> (new AudioRegion (srcs));
+		ret = std::shared_ptr<Region> (new AudioRegion (srcs));
 
 	} else if (srcs[0]->type () == DataType::MIDI) {
-		ret = boost::shared_ptr<Region> (new MidiRegion (srcs));
+		ret = std::shared_ptr<Region> (new MidiRegion (srcs));
 	}
 
 	if (ret) {
@@ -313,9 +313,9 @@ RegionFactory::create (SourceList& srcs, const XMLNode& node)
 }
 
 void
-RegionFactory::map_add (boost::shared_ptr<Region> r)
+RegionFactory::map_add (std::shared_ptr<Region> r)
 {
-	pair<ID, boost::shared_ptr<Region> > p;
+	pair<ID, std::shared_ptr<Region> > p;
 	p.first  = r->id ();
 	p.second = r;
 
@@ -328,16 +328,16 @@ RegionFactory::map_add (boost::shared_ptr<Region> r)
 		region_list_connections = new ScopedConnectionList;
 	}
 
-	r->DropReferences.connect_same_thread (*region_list_connections, boost::bind (&RegionFactory::map_remove, boost::weak_ptr<Region> (r)));
-	r->PropertyChanged.connect_same_thread (*region_list_connections, boost::bind (&RegionFactory::region_changed, _1, boost::weak_ptr<Region> (r)));
+	r->DropReferences.connect_same_thread (*region_list_connections, boost::bind (&RegionFactory::map_remove, std::weak_ptr<Region> (r)));
+	r->PropertyChanged.connect_same_thread (*region_list_connections, boost::bind (&RegionFactory::region_changed, _1, std::weak_ptr<Region> (r)));
 
 	add_to_region_name_maps (r);
 }
 
 void
-RegionFactory::map_remove (boost::weak_ptr<Region> w)
+RegionFactory::map_remove (std::weak_ptr<Region> w)
 {
-	boost::shared_ptr<Region> r = w.lock ();
+	std::shared_ptr<Region> r = w.lock ();
 	if (!r) {
 		return;
 	}
@@ -351,19 +351,19 @@ RegionFactory::map_remove (boost::weak_ptr<Region> w)
 	}
 }
 
-boost::shared_ptr<Region>
+std::shared_ptr<Region>
 RegionFactory::region_by_id (const PBD::ID& id)
 {
 	RegionMap::iterator i = region_map.find (id);
 
 	if (i == region_map.end ()) {
-		return boost::shared_ptr<Region> ();
+		return std::shared_ptr<Region> ();
 	}
 
 	return i->second;
 }
 
-boost::shared_ptr<Region>
+std::shared_ptr<Region>
 RegionFactory::wholefile_region_by_name (const std::string& name)
 {
 	for (RegionMap::iterator i = region_map.begin (); i != region_map.end (); ++i) {
@@ -371,10 +371,10 @@ RegionFactory::wholefile_region_by_name (const std::string& name)
 			return i->second;
 		}
 	}
-	return boost::shared_ptr<Region> ();
+	return std::shared_ptr<Region> ();
 }
 
-boost::shared_ptr<Region>
+std::shared_ptr<Region>
 RegionFactory::region_by_name (const std::string& name)
 {
 	for (RegionMap::iterator i = region_map.begin (); i != region_map.end (); ++i) {
@@ -382,7 +382,7 @@ RegionFactory::region_by_name (const std::string& name)
 			return i->second;
 		}
 	}
-	return boost::shared_ptr<Region> ();
+	return std::shared_ptr<Region> ();
 }
 
 void
@@ -433,7 +433,7 @@ RegionFactory::nregions ()
 
 /** Add a region to the two region name maps */
 void
-RegionFactory::add_to_region_name_maps (boost::shared_ptr<Region> region)
+RegionFactory::add_to_region_name_maps (std::shared_ptr<Region> region)
 {
 	update_region_name_number_map (region);
 
@@ -443,7 +443,7 @@ RegionFactory::add_to_region_name_maps (boost::shared_ptr<Region> region)
 
 /** Account for a region rename in the two region name maps */
 void
-RegionFactory::rename_in_region_name_maps (boost::shared_ptr<Region> region)
+RegionFactory::rename_in_region_name_maps (std::shared_ptr<Region> region)
 {
 	update_region_name_number_map (region);
 
@@ -473,7 +473,7 @@ RegionFactory::remove_from_region_name_map (string n)
 
 /** Update a region's entry in the region_name_number_map */
 void
-RegionFactory::update_region_name_number_map (boost::shared_ptr<Region> region)
+RegionFactory::update_region_name_number_map (std::shared_ptr<Region> region)
 {
 	string::size_type const last_period = region->name ().find_last_of ('.');
 
@@ -491,9 +491,9 @@ RegionFactory::update_region_name_number_map (boost::shared_ptr<Region> region)
 }
 
 void
-RegionFactory::region_changed (PropertyChange const& what_changed, boost::weak_ptr<Region> w)
+RegionFactory::region_changed (PropertyChange const& what_changed, std::weak_ptr<Region> w)
 {
-	boost::shared_ptr<Region> r = w.lock ();
+	std::shared_ptr<Region> r = w.lock ();
 	if (!r) {
 		return;
 	}
@@ -621,8 +621,8 @@ RegionFactory::new_region_name (string old)
 	return old;
 }
 
-boost::shared_ptr<Region>
-RegionFactory::get_whole_region_for_source (boost::shared_ptr<Source> s)
+std::shared_ptr<Region>
+RegionFactory::get_whole_region_for_source (std::shared_ptr<Source> s)
 {
 	Glib::Threads::Mutex::Lock lm (region_map_lock);
 
@@ -632,11 +632,11 @@ RegionFactory::get_whole_region_for_source (boost::shared_ptr<Source> s)
 		}
 	}
 
-	return boost::shared_ptr<Region> ();
+	return std::shared_ptr<Region> ();
 }
 
 void
-RegionFactory::get_regions_using_source (boost::shared_ptr<Source> s, std::set<boost::shared_ptr<Region> >& r)
+RegionFactory::get_regions_using_source (std::shared_ptr<Source> s, std::set<std::shared_ptr<Region> >& r)
 {
 	Glib::Threads::Mutex::Lock lm (region_map_lock);
 
@@ -648,7 +648,7 @@ RegionFactory::get_regions_using_source (boost::shared_ptr<Source> s, std::set<b
 }
 
 void
-RegionFactory::remove_regions_using_source (boost::shared_ptr<Source> src)
+RegionFactory::remove_regions_using_source (std::shared_ptr<Source> src)
 {
 	Glib::Threads::Mutex::Lock lm (region_map_lock);
 	RegionList                 remove_regions;
@@ -666,7 +666,7 @@ RegionFactory::remove_regions_using_source (boost::shared_ptr<Source> src)
 }
 
 void
-RegionFactory::add_compound_association (boost::shared_ptr<Region> orig, boost::shared_ptr<Region> copy)
+RegionFactory::add_compound_association (std::shared_ptr<Region> orig, std::shared_ptr<Region> copy)
 {
 	Glib::Threads::Mutex::Lock lm (region_map_lock);
 	_compound_associations[copy] = orig;

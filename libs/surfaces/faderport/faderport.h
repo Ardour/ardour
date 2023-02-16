@@ -144,9 +144,9 @@ class FaderPort : public MIDISurface {
 	std::string get_action (ButtonID, bool on_press, FaderPort::ButtonState = ButtonState (0));
 
   private:
-	boost::shared_ptr<ARDOUR::Stripable> _current_stripable;
-	boost::weak_ptr<ARDOUR::Stripable> pre_master_stripable;
-	boost::weak_ptr<ARDOUR::Stripable> pre_monitor_stripable;
+	std::shared_ptr<ARDOUR::Stripable> _current_stripable;
+	std::weak_ptr<ARDOUR::Stripable> pre_master_stripable;
+	std::weak_ptr<ARDOUR::Stripable> pre_monitor_stripable;
 
 	mutable void *gui;
 	void build_gui ();
@@ -253,7 +253,7 @@ class FaderPort : public MIDISurface {
 	void start_blinking (ButtonID);
 	void stop_blinking (ButtonID);
 
-	void set_current_stripable (boost::shared_ptr<ARDOUR::Stripable>);
+	void set_current_stripable (std::shared_ptr<ARDOUR::Stripable>);
 	void drop_current_stripable ();
 	void use_master ();
 	void use_monitor ();

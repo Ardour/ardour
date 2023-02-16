@@ -30,7 +30,7 @@ using namespace PBD;
 
 SoloIsolateControl::SoloIsolateControl (Session& session, std::string const & name, Soloable& s, Temporal::TimeDomain td)
 	: SlavableAutomationControl (session, SoloIsolateAutomation, ParameterDescriptor (SoloIsolateAutomation),
-	                             boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(SoloIsolateAutomation), td)),
+	                             std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(SoloIsolateAutomation), td)),
 	                             name)
 	, _soloable (s)
 	, _solo_isolated (false)
@@ -42,7 +42,7 @@ SoloIsolateControl::SoloIsolateControl (Session& session, std::string const & na
 }
 
 void
-SoloIsolateControl::master_changed (bool from_self, PBD::Controllable::GroupControlDisposition gcd, boost::weak_ptr<AutomationControl>)
+SoloIsolateControl::master_changed (bool from_self, PBD::Controllable::GroupControlDisposition gcd, std::weak_ptr<AutomationControl>)
 {
 	if (!_soloable.can_solo()) {
 		return;
@@ -144,7 +144,7 @@ SoloIsolateControl::get_value () const
 		return solo_isolated() || get_masters_value ();
 	}
 
-	if (_list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback()) {
+	if (_list && std::dynamic_pointer_cast<AutomationList>(_list)->automation_playback()) {
 		// Playing back automation, get the value from the list
 		return AutomationControl::get_value();
 	}

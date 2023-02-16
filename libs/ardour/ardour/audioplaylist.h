@@ -40,24 +40,24 @@ class LIBARDOUR_API AudioPlaylist : public ARDOUR::Playlist
 public:
 	AudioPlaylist (Session&, const XMLNode&, bool hidden = false);
 	AudioPlaylist (Session&, std::string name, bool hidden = false);
-	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, std::string name, bool hidden = false);
-	AudioPlaylist (boost::shared_ptr<const AudioPlaylist>, timepos_t const & start, timepos_t const & cnt, std::string name, bool hidden = false);
+	AudioPlaylist (std::shared_ptr<const AudioPlaylist>, std::string name, bool hidden = false);
+	AudioPlaylist (std::shared_ptr<const AudioPlaylist>, timepos_t const & start, timepos_t const & cnt, std::string name, bool hidden = false);
 
 	timecnt_t read (Sample *dst, Sample *mixdown, float *gain_buffer, timepos_t const & start, timecnt_t const & cnt, uint32_t chan_n=0);
 
-	bool destroy_region (boost::shared_ptr<Region>);
+	bool destroy_region (std::shared_ptr<Region>);
 
 protected:
 
-	void pre_combine (std::vector<boost::shared_ptr<Region> >&);
-	void post_combine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>);
-	void pre_uncombine (std::vector<boost::shared_ptr<Region> >&, boost::shared_ptr<Region>);
+	void pre_combine (std::vector<std::shared_ptr<Region> >&);
+	void post_combine (std::vector<std::shared_ptr<Region> >&, std::shared_ptr<Region>);
+	void pre_uncombine (std::vector<std::shared_ptr<Region> >&, std::shared_ptr<Region>);
 
 private:
 	int set_state (const XMLNode&, int version);
 	void dump () const;
-	bool region_changed (const PBD::PropertyChange&, boost::shared_ptr<Region>);
-	void source_offset_changed (boost::shared_ptr<AudioRegion>);
+	bool region_changed (const PBD::PropertyChange&, std::shared_ptr<Region>);
+	void source_offset_changed (std::shared_ptr<AudioRegion>);
         void load_legacy_crossfades (const XMLNode&, int version);
 };
 

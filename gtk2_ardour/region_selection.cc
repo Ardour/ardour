@@ -92,7 +92,7 @@ bool RegionSelection::contains (RegionView* rv) const
 	return find (begin(), end(), rv) != end();
 }
 
-bool RegionSelection::contains (boost::shared_ptr<ARDOUR::Region> region) const
+bool RegionSelection::contains (std::shared_ptr<ARDOUR::Region> region) const
 {
 	for (const_iterator r = begin (); r != end (); ++r) {
 		if ((*r)->region () == region) {
@@ -323,10 +323,10 @@ RegionSelection::end_time () const
 }
 
 /** @return the playlists that the regions in the selection are on */
-set<boost::shared_ptr<Playlist> >
+set<std::shared_ptr<Playlist> >
 RegionSelection::playlists () const
 {
-	set<boost::shared_ptr<Playlist> > pl;
+	set<std::shared_ptr<Playlist> > pl;
 	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
 		pl.insert ((*i)->region()->playlist ());
 	}

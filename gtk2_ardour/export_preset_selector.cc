@@ -67,7 +67,7 @@ ExportPresetSelector::ExportPresetSelector (bool readonly)
 }
 
 void
-ExportPresetSelector::set_manager (boost::shared_ptr<ARDOUR::ExportProfileManager> manager)
+ExportPresetSelector::set_manager (std::shared_ptr<ARDOUR::ExportProfileManager> manager)
 {
 	profile_manager = manager;
 	current = profile_manager->preset ();

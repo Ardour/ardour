@@ -166,7 +166,7 @@ void
 AudioTriggerPropertiesBox::MultiplyTempo(float mult)
 {
 	TriggerPtr trigger (tref.trigger());
-	boost::shared_ptr<AudioTrigger> at = boost::dynamic_pointer_cast<AudioTrigger> (trigger);
+	std::shared_ptr<AudioTrigger> at = std::dynamic_pointer_cast<AudioTrigger> (trigger);
 	if (at) {
 		at->set_segment_tempo (at->segment_tempo () * mult);
 	}
@@ -176,7 +176,7 @@ void
 AudioTriggerPropertiesBox::toggle_stretch ()
 {
 	TriggerPtr trigger (tref.trigger());
-	boost::shared_ptr<AudioTrigger> at = boost::dynamic_pointer_cast<AudioTrigger> (trigger);
+	std::shared_ptr<AudioTrigger> at = std::dynamic_pointer_cast<AudioTrigger> (trigger);
 	if (at) {
 		at->set_stretchable (!at->stretchable ());
 	}
@@ -186,7 +186,7 @@ void
 AudioTriggerPropertiesBox::set_stretch_mode (Trigger::StretchMode sm)
 {
 	TriggerPtr trigger (tref.trigger());
-	boost::shared_ptr<AudioTrigger> at = boost::dynamic_pointer_cast<AudioTrigger> (trigger);
+	std::shared_ptr<AudioTrigger> at = std::dynamic_pointer_cast<AudioTrigger> (trigger);
 	if (at) {
 		at->set_stretch_mode (sm);
 	}
@@ -205,7 +205,7 @@ void
 AudioTriggerPropertiesBox::on_trigger_changed (const PBD::PropertyChange& pc)
 {
 	TriggerPtr trigger (tref.trigger());
-	boost::shared_ptr<AudioTrigger> at = boost::dynamic_pointer_cast<AudioTrigger> (trigger);
+	std::shared_ptr<AudioTrigger> at = std::dynamic_pointer_cast<AudioTrigger> (trigger);
 	if (!at) {
 		return;
 	}
@@ -290,7 +290,7 @@ AudioTriggerPropertiesBox::beats_changed ()
 	}
 
 	TriggerPtr trigger (tref.trigger());
-	boost::shared_ptr<AudioTrigger> at = boost::dynamic_pointer_cast<AudioTrigger> (trigger);
+	std::shared_ptr<AudioTrigger> at = std::dynamic_pointer_cast<AudioTrigger> (trigger);
 	if (at) {
 		at->set_segment_beatcnt (_beat_adjustment.get_value());
 	}

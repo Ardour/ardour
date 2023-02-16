@@ -961,7 +961,7 @@ EditorSummary::routes_added (list<RouteTimeAxisView*> const & r)
 	for (list<RouteTimeAxisView*>::const_iterator i = r.begin(); i != r.end(); ++i) {
 		/* Connect to the relevant signal for the route so that we know when its colour has changed */
 		(*i)->route()->presentation_info().PropertyChanged.connect (*this, invalidator (*this), boost::bind (&EditorSummary::route_gui_changed, this, _1), gui_context ());
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> ((*i)->route ());
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> ((*i)->route ());
 		if (tr) {
 			tr->PlaylistChanged.connect (*this, invalidator (*this), boost::bind (&EditorSummary::set_background_dirty, this), gui_context ());
 		}

@@ -51,7 +51,7 @@ using std::string;
 
 PBD::Signal1<void,VCAMasterStrip*> VCAMasterStrip::CatchDeletion;
 
-VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
+VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	: SessionHandlePtr (s)
 	, _vca (v)
 	, gain_meter (s, 254) /* magic number, don't adjust blindly */
@@ -65,11 +65,11 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 		_vca->presentation_info().set_color (Gtkmm2ext::gdk_color_to_rgba (unique_random_color()));
 	}
 
-	control_slave_ui.set_stripable (boost::dynamic_pointer_cast<Stripable> (v));
+	control_slave_ui.set_stripable (std::dynamic_pointer_cast<Stripable> (v));
 
-	gain_meter.set_controls (boost::shared_ptr<Route>(),
-	                         boost::shared_ptr<PeakMeter>(),
-	                         boost::shared_ptr<Amp>(),
+	gain_meter.set_controls (std::shared_ptr<Route>(),
+	                         std::shared_ptr<PeakMeter>(),
+	                         std::shared_ptr<Amp>(),
 	                         _vca->gain_control());
 
 	solo_button.set_name ("solo button");
@@ -151,7 +151,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, boost::shared_ptr<VCA> v)
 	update_vca_name ();
 	solo_changed ();
 	mute_changed ();
-	spill_change (boost::shared_ptr<VCA>());
+	spill_change (std::shared_ptr<VCA>());
 
 	Mixer_UI::instance()->show_spill_change.connect (sigc::mem_fun (*this, &VCAMasterStrip::spill_change));
 
@@ -173,7 +173,7 @@ VCAMasterStrip::~VCAMasterStrip ()
 {
 	if ((_session && !_session->deletion_in_progress()) && Mixer_UI::instance()->showing_spill_for (_vca)) {
 		/* cancel spill for this VCA */
-		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
+		Mixer_UI::instance()->show_spill (std::shared_ptr<Stripable>());
 	}
 
 	delete delete_dialog;
@@ -187,14 +187,14 @@ VCAMasterStrip::self_delete ()
 {
 	if ((_session && !_session->deletion_in_progress()) && Mixer_UI::instance()->showing_spill_for (_vca)) {
 		/* cancel spill for this VCA */
-		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
+		Mixer_UI::instance()->show_spill (std::shared_ptr<Stripable>());
 	}
 	/* Drop reference immediately, delete self when idle */
 	_vca.reset ();
-	gain_meter.set_controls (boost::shared_ptr<Route>(),
-	                         boost::shared_ptr<PeakMeter>(),
-	                         boost::shared_ptr<Amp>(),
-	                         boost::shared_ptr<GainControl>());
+	gain_meter.set_controls (std::shared_ptr<Route>(),
+	                         std::shared_ptr<PeakMeter>(),
+	                         std::shared_ptr<Amp>(),
+	                         std::shared_ptr<GainControl>());
 	delete_when_idle (this);
 }
 
@@ -475,14 +475,14 @@ void
 VCAMasterStrip::spill ()
 {
 	if (Mixer_UI::instance()->showing_spill_for (_vca)) {
-		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
+		Mixer_UI::instance()->show_spill (std::shared_ptr<Stripable>());
 	} else {
 		Mixer_UI::instance()->show_spill (_vca);
 	}
 }
 
 void
-VCAMasterStrip::spill_change (boost::shared_ptr<Stripable> vca)
+VCAMasterStrip::spill_change (std::shared_ptr<Stripable> vca)
 {
 	if (vca != _vca) {
 		vertical_button.set_active_state (Gtkmm2ext::Off);
@@ -547,7 +547,7 @@ VCAMasterStrip::drop_all_slaves ()
 	_vca->Drop (); /* EMIT SIGNAL */
 
 	if (Mixer_UI::instance()->showing_spill_for (_vca)) {
-		Mixer_UI::instance()->show_spill (boost::shared_ptr<Stripable>());
+		Mixer_UI::instance()->show_spill (std::shared_ptr<Stripable>());
 	}
 }
 
@@ -591,7 +591,7 @@ VCAMasterStrip::presentation_info () const
 	return _vca->presentation_info();
 }
 
-boost::shared_ptr<Stripable>
+std::shared_ptr<Stripable>
 VCAMasterStrip::stripable () const
 {
 	return _vca;

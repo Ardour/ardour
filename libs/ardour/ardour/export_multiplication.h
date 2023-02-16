@@ -75,12 +75,12 @@
 	template <typename T>
 	class DataNode : public GraphNode {
 	  private:
-		typedef boost::shared_ptr<T> DataPtr;
-		typedef boost::shared_ptr<DataNode<T> > SelfPtr;
-		typedef boost::weak_ptr<DataNode<T> > WeakSelfPtr;
+		typedef std::shared_ptr<T> DataPtr;
+		typedef std::shared_ptr<DataNode<T> > SelfPtr;
+		typedef std::weak_ptr<DataNode<T> > WeakSelfPtr;
 
 		DataNode (DataPtr data) : _data (data) {}
-		void set_self_ptr (boost::shared_ptr<DataNode<T> > ptr) { _self_ptr = ptr; }
+		void set_self_ptr (std::shared_ptr<DataNode<T> > ptr) { _self_ptr = ptr; }
 
 	  public:
 		static SelfPtr create (T * data)
@@ -101,7 +101,7 @@
 		SelfPtr self_ptr () { return _self_ptr.lock(); }
 
 		template<typename P> // Parent's data type
-		void sort_parents (list<boost::shared_ptr<DataNode<P> > > const & sort_list)
+		void sort_parents (list<std::shared_ptr<DataNode<P> > > const & sort_list)
 		{
 			parents.sort (NodeSorter<P> (sort_list));
 		}
@@ -117,7 +117,7 @@
 	template<typename T>
 	class NodeSorter {
 	  public:
-		typedef list<boost::shared_ptr<DataNode<T> > > ListType;
+		typedef list<std::shared_ptr<DataNode<T> > > ListType;
 
 		NodeSorter (ListType const & list) : list (list) {}
 
@@ -146,16 +146,16 @@
   public:
 
 	typedef DataNode<TimespanState> TimespanNode;
-	typedef boost::shared_ptr<TimespanNode> TimespanNodePtr;
+	typedef std::shared_ptr<TimespanNode> TimespanNodePtr;
 
 	typedef DataNode<ChannelConfigState> ChannelConfigNode;
-	typedef boost::shared_ptr<ChannelConfigNode> ChannelConfigNodePtr;
+	typedef std::shared_ptr<ChannelConfigNode> ChannelConfigNodePtr;
 
 	typedef DataNode<FormatState> FormatNode;
-	typedef boost::shared_ptr<FormatNode> FormatNodePtr;
+	typedef std::shared_ptr<FormatNode> FormatNodePtr;
 
 	typedef DataNode<FilenameState> FilenameNode;
-	typedef boost::shared_ptr<FilenameNode> FilenameNodePtr;
+	typedef std::shared_ptr<FilenameNode> FilenameNodePtr;
 
 	struct MultiplicationGraph {
 		list<TimespanNodePtr>      timespans;

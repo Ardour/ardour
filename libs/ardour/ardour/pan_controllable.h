@@ -40,7 +40,7 @@ class LIBARDOUR_API PanControllable : public AutomationControl
 		: AutomationControl (s,
 		                     param,
 		                     ParameterDescriptor(param),
-		                     boost::shared_ptr<AutomationList>(new AutomationList(param, td)),
+		                     std::shared_ptr<AutomationList>(new AutomationList(param, td)),
 		                     name)
 		, owner (o)
 	{}

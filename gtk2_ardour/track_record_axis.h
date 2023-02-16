@@ -57,14 +57,14 @@ class RouteGroupMenu;
 class TrackRecordAxis : public Gtk::VBox, public AxisView, public RouteUI
 {
 public:
-	TrackRecordAxis (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
+	TrackRecordAxis (ARDOUR::Session*, std::shared_ptr<ARDOUR::Route>);
 	~TrackRecordAxis ();
 
 	/* AxisView */
 	std::string name () const;
 	Gdk::Color  color () const;
 
-	boost::shared_ptr<ARDOUR::Stripable> stripable() const {
+	std::shared_ptr<ARDOUR::Stripable> stripable() const {
 		return RouteUI::stripable();
 	}
 
@@ -167,7 +167,7 @@ private:
 	class TrackSummary : public CairoWidget
 	{
 		public:
-			TrackSummary (boost::shared_ptr<ARDOUR::Route>);
+			TrackSummary (std::shared_ptr<ARDOUR::Route>);
 			~TrackSummary ();
 
 			void playhead_position_changed (samplepos_t p);
@@ -181,7 +181,7 @@ private:
 			bool on_button_press_event (GdkEventButton*);
 
 		private:
-			void render_region (boost::shared_ptr<ARDOUR::Region>, Cairo::RefPtr<Cairo::Context> const&, double);
+			void render_region (std::shared_ptr<ARDOUR::Region>, Cairo::RefPtr<Cairo::Context> const&, double);
 			void playlist_changed ();
 			void playlist_contents_changed ();
 			void property_changed (PBD::PropertyChange const&);
@@ -193,7 +193,7 @@ private:
 				return (p - _start) * _xscale;
 			}
 
-			boost::shared_ptr<ARDOUR::Track> _track;
+			std::shared_ptr<ARDOUR::Track> _track;
 			samplepos_t _start;
 			samplepos_t _end;
 			double      _xscale;

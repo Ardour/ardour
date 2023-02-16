@@ -143,7 +143,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	}
 }
 
-MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, boost::shared_ptr<Route> rt, bool in_mixer)
+MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, std::shared_ptr<Route> rt, bool in_mixer)
 	: SessionHandlePtr (sess)
 	, RouteUI (sess)
 	, _mixer(mx)
@@ -434,17 +434,17 @@ MixerStrip::~MixerStrip ()
 }
 
 void
-MixerStrip::vca_assign (boost::shared_ptr<ARDOUR::VCA> vca)
+MixerStrip::vca_assign (std::shared_ptr<ARDOUR::VCA> vca)
 {
-	boost::shared_ptr<Slavable> sl = boost::dynamic_pointer_cast<Slavable> ( route() );
+	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> ( route() );
 	if (sl)
 		sl->assign(vca);
 }
 
 void
-MixerStrip::vca_unassign (boost::shared_ptr<ARDOUR::VCA> vca)
+MixerStrip::vca_unassign (std::shared_ptr<ARDOUR::VCA> vca)
 {
-	boost::shared_ptr<Slavable> sl = boost::dynamic_pointer_cast<Slavable> ( route() );
+	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> ( route() );
 	if (sl)
 		sl->unassign(vca);
 }
@@ -498,7 +498,7 @@ MixerStrip::update_trim_control ()
 		trim_control.set_controllable (route()->trim()->gain_control());
 	} else {
 		trim_control.hide ();
-		boost::shared_ptr<Controllable> none;
+		std::shared_ptr<Controllable> none;
 		trim_control.set_controllable (none);
 	}
 }
@@ -522,7 +522,7 @@ MixerStrip::trim_end_touch ()
 }
 
 void
-MixerStrip::set_route (boost::shared_ptr<Route> rt)
+MixerStrip::set_route (std::shared_ptr<Route> rt)
 {
 	//the rec/monitor stuff only shows up for tracks.
 	//the show_sends only shows up for buses.
@@ -547,7 +547,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 
 	set_trigger_display (rt->triggerbox());
 
-	control_slave_ui.set_stripable (boost::dynamic_pointer_cast<Stripable> (rt));
+	control_slave_ui.set_stripable (std::dynamic_pointer_cast<Stripable> (rt));
 
 	/* ProcessorBox needs access to _route so that it can read
 	   GUI object state.
@@ -610,7 +610,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	if (route()->is_master() && _volume_controller == 0) {
 		assert (_loudess_analysis_button == 0);
 		assert (route()->volume_control());
-		boost::shared_ptr<AutomationControl> ac = route()->volume_control ();
+		std::shared_ptr<AutomationControl> ac = route()->volume_control ();
 
 		_volume_controller = AutomationController::create (ac->parameter (), ParameterDescriptor (ac->parameter ()), ac, false);
 		_volume_controller->set_name (X_("ProcessorControlSlider"));
@@ -672,7 +672,7 @@ MixerStrip::set_route (boost::shared_ptr<Route> rt)
 	}
 
 	if (is_audio_track()) {
-		boost::shared_ptr<AudioTrack> at = audio_track();
+		std::shared_ptr<AudioTrack> at = audio_track();
 		at->FreezeChange.connect (route_connections, invalidator (*this), boost::bind (&MixerStrip::map_frozen, this), gui_context());
 	}
 
@@ -807,7 +807,7 @@ MixerStrip::set_width_enum (Width w, void* owner)
 	gpm.set_width (w);
 	panners.set_width (w);
 
-	boost::shared_ptr<AutomationList> gain_automation = _route->gain_control()->alist();
+	std::shared_ptr<AutomationList> gain_automation = _route->gain_control()->alist();
 
 	_width_owner = owner;
 
@@ -887,7 +887,7 @@ MixerStrip::connect_to_pan ()
 		return;
 	}
 
-	boost::shared_ptr<Pannable> p = _route->pannable ();
+	std::shared_ptr<Pannable> p = _route->pannable ();
 
 	p->automation_state_changed.connect (panstate_connection, invalidator (*this), boost::bind (&PannerUI::pan_automation_state_changed, &panners), gui_context());
 
@@ -1138,7 +1138,7 @@ MixerStrip::build_route_ops_menu ()
 		items.push_back (MenuElem (_("Pin Connections..."), sigc::mem_fun (*this, &RouteUI::manage_pins)));
 	}
 
-	if (active && (boost::dynamic_pointer_cast<MidiTrack>(_route) || _route->the_instrument ())) {
+	if (active && (std::dynamic_pointer_cast<MidiTrack>(_route) || _route->the_instrument ())) {
 		items.push_back (MenuElem (_("Patch Selector..."),
 					sigc::mem_fun(*this, &RouteUI::select_midi_patch)));
 	}
@@ -1376,7 +1376,7 @@ MixerStrip::map_frozen ()
 {
 	ENSURE_GUI_THREAD (*this, &MixerStrip::map_frozen)
 
-	boost::shared_ptr<AudioTrack> at = audio_track();
+	std::shared_ptr<AudioTrack> at = audio_track();
 
 	bool en   = _route->active () || ARDOUR::Profile->get_mixbus();
 
@@ -1403,9 +1403,9 @@ MixerStrip::hide_redirect_editors ()
 }
 
 void
-MixerStrip::hide_processor_editor (boost::weak_ptr<Processor> p)
+MixerStrip::hide_processor_editor (std::weak_ptr<Processor> p)
 {
-	boost::shared_ptr<Processor> processor (p.lock ());
+	std::shared_ptr<Processor> processor (p.lock ());
 	if (!processor) {
 		return;
 	}
@@ -1420,7 +1420,7 @@ MixerStrip::hide_processor_editor (boost::weak_ptr<Processor> p)
 void
 MixerStrip::reset_strip_style ()
 {
-	if (_current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery)) {
+	if (_current_delivery && std::dynamic_pointer_cast<Send>(_current_delivery)) {
 
 		gpm.unset_fader_fg ();
 		gpm.set_fader_name ("SendStripBase");
@@ -1576,12 +1576,12 @@ MixerStrip::meter_changed ()
  *  @param send_to New bus that we are displaying sends to, or 0.
  */
 void
-MixerStrip::bus_send_display_changed (boost::shared_ptr<Route> send_to)
+MixerStrip::bus_send_display_changed (std::shared_ptr<Route> send_to)
 {
 	RouteUI::bus_send_display_changed (send_to);
 
 	if (send_to) {
-		boost::shared_ptr<Send> send = _route->internal_send_for (send_to);
+		std::shared_ptr<Send> send = _route->internal_send_for (send_to);
 
 		if (send) {
 			show_send (send);
@@ -1596,9 +1596,9 @@ MixerStrip::bus_send_display_changed (boost::shared_ptr<Route> send_to)
 void
 MixerStrip::drop_send ()
 {
-	boost::shared_ptr<Send> current_send;
+	std::shared_ptr<Send> current_send;
 
-	if (_current_delivery && ((current_send = boost::dynamic_pointer_cast<Send>(_current_delivery)) != 0)) {
+	if (_current_delivery && ((current_send = std::dynamic_pointer_cast<Send>(_current_delivery)) != 0)) {
 		current_send->set_metering (false);
 	}
 
@@ -1607,7 +1607,7 @@ MixerStrip::drop_send ()
 }
 
 void
-MixerStrip::set_current_delivery (boost::shared_ptr<Delivery> d)
+MixerStrip::set_current_delivery (std::shared_ptr<Delivery> d)
 {
 	_current_delivery = d;
 	setup_invert_buttons ();
@@ -1616,7 +1616,7 @@ MixerStrip::set_current_delivery (boost::shared_ptr<Delivery> d)
 }
 
 void
-MixerStrip::show_send (boost::shared_ptr<Send> send)
+MixerStrip::show_send (std::shared_ptr<Send> send)
 {
 	assert (send != 0);
 
@@ -1767,13 +1767,13 @@ MixerStrip::input_active_button_press (GdkEventButton*)
 bool
 MixerStrip::input_active_button_release (GdkEventButton* ev)
 {
-	boost::shared_ptr<MidiTrack> mt = midi_track ();
+	std::shared_ptr<MidiTrack> mt = midi_track ();
 
 	if (!mt) {
 		return true;
 	}
 
-	boost::shared_ptr<RouteList> rl (new RouteList);
+	std::shared_ptr<RouteList> rl (new RouteList);
 
 	rl->push_back (route());
 
@@ -1786,7 +1786,7 @@ MixerStrip::input_active_button_release (GdkEventButton* ev)
 void
 MixerStrip::midi_input_status_changed ()
 {
-	boost::shared_ptr<MidiTrack> mt = midi_track ();
+	std::shared_ptr<MidiTrack> mt = midi_track ();
 	assert (mt);
 	midi_input_enable_button.set_active (mt->input_active ());
 }
@@ -1873,8 +1873,8 @@ void
 MixerStrip::update_sensitivity ()
 {
 	bool en   = _route->active () || ARDOUR::Profile->get_mixbus();
-	bool send = _current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery) != 0;
-	bool aux  = _current_delivery && boost::dynamic_pointer_cast<InternalSend>(_current_delivery) != 0;
+	bool send = _current_delivery && std::dynamic_pointer_cast<Send>(_current_delivery) != 0;
+	bool aux  = _current_delivery && std::dynamic_pointer_cast<InternalSend>(_current_delivery) != 0;
 
 	if (route()->is_master()) {
 		solo_iso_table.set_sensitive (false);
@@ -1956,7 +1956,7 @@ MixerStrip::ab_plugins ()
 bool
 MixerStrip::level_meter_button_press (GdkEventButton* ev)
 {
-	if (_current_delivery && boost::dynamic_pointer_cast<Send>(_current_delivery)) {
+	if (_current_delivery && std::dynamic_pointer_cast<Send>(_current_delivery)) {
 		return false;
 	}
 	if (ev->button == 3) {
@@ -2008,12 +2008,12 @@ MixerStrip::popup_level_meter_menu (GdkEventButton* ev)
 	if (_route->is_master()) {
 		_strip_type = 4;
 	}
-	else if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
-			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0) {
+	else if (std::dynamic_pointer_cast<AudioTrack>(_route) == 0
+			&& std::dynamic_pointer_cast<MidiTrack>(_route) == 0) {
 		/* non-master bus */
 		_strip_type = 3;
 	}
-	else if (boost::dynamic_pointer_cast<MidiTrack>(_route)) {
+	else if (std::dynamic_pointer_cast<MidiTrack>(_route)) {
 		_strip_type = 2;
 	}
 	else {
@@ -2123,7 +2123,7 @@ MixerStrip::hide_master_spacer (bool yn)
 }
 
 void
-MixerStrip::set_trigger_display (boost::shared_ptr<TriggerBox> tb)
+MixerStrip::set_trigger_display (std::shared_ptr<TriggerBox> tb)
 {
 	_tmaster->set_triggerbox (tb);
 	trigger_display.set_triggerbox (tb.get());

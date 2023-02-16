@@ -202,7 +202,7 @@ Editor::export_range ()
 }
 
 bool
-Editor::process_midi_export_dialog (MidiExportDialog& dialog, boost::shared_ptr<MidiRegion> midi_region)
+Editor::process_midi_export_dialog (MidiExportDialog& dialog, std::shared_ptr<MidiRegion> midi_region)
 {
 	string path = dialog.get_path ();
 
@@ -233,9 +233,9 @@ Editor::export_region ()
 		return;
 	}
 
-	boost::shared_ptr<Region> r = selection->regions.front()->region();
-	boost::shared_ptr<AudioRegion> audio_region = boost::dynamic_pointer_cast<AudioRegion>(r);
-	boost::shared_ptr<MidiRegion> midi_region = boost::dynamic_pointer_cast<MidiRegion>(r);
+	std::shared_ptr<Region> r = selection->regions.front()->region();
+	std::shared_ptr<AudioRegion> audio_region = std::dynamic_pointer_cast<AudioRegion>(r);
+	std::shared_ptr<MidiRegion> midi_region = std::dynamic_pointer_cast<MidiRegion>(r);
 
 	if (audio_region) {
 
@@ -295,7 +295,7 @@ Editor::bounce_region_selection (bool with_processing)
 	bool multiple_per_track = false;
 
 	if (multiple_selected) {
-		std::set<boost::shared_ptr<Route>> route_set;
+		std::set<std::shared_ptr<Route>> route_set;
 		for (auto const& i: selection->regions) {
 			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&i->get_time_axis_view());
 			auto rv = route_set.insert (rtv->route ());
@@ -325,7 +325,7 @@ Editor::bounce_region_selection (bool with_processing)
 			dialog.set_initial_text ("");
 			dialog.set_allow_empty ();
 		} else {
-			boost::shared_ptr<Region> region (selection->regions.front()->region ());
+			std::shared_ptr<Region> region (selection->regions.front()->region ());
 			dialog.set_prompt (_("Name for Bounced Region:"));
 			dialog.set_initial_text (region->name());
 		}
@@ -399,9 +399,9 @@ Editor::bounce_region_selection (bool with_processing)
 	if (copy_to_trigger) {
 		for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 
-			boost::shared_ptr<Region> region ((*i)->region());
+			std::shared_ptr<Region> region ((*i)->region());
 			RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_time_axis_view());
-			boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (rtv->route());
+			std::shared_ptr<Track> track = std::dynamic_pointer_cast<Track> (rtv->route());
 			if (!track) {
 				continue;
 			}
@@ -421,9 +421,9 @@ Editor::bounce_region_selection (bool with_processing)
 
 	for (RegionSelection::iterator i = selection->regions.begin(); i != selection->regions.end(); ++i) {
 
-		boost::shared_ptr<Region> region ((*i)->region());
+		std::shared_ptr<Region> region ((*i)->region());
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*>(&(*i)->get_time_axis_view());
-		boost::shared_ptr<Track> track = boost::dynamic_pointer_cast<Track> (rtv->route());
+		std::shared_ptr<Track> track = std::dynamic_pointer_cast<Track> (rtv->route());
 
 		InterThreadInfo itt;
 
@@ -434,12 +434,12 @@ Editor::bounce_region_selection (bool with_processing)
 			name = bounce_name;
 		}
 
-		boost::shared_ptr<Region> r;
+		std::shared_ptr<Region> r;
 
 		if (with_processing) {
 			r = track->bounce_range (region->position_sample(), region->position_sample() + region->length_samples(), itt, track->main_outs(), false, name);
 		} else {
-			r = track->bounce_range (region->position_sample(), region->position_sample() + region->length_samples(), itt, boost::shared_ptr<Processor>(), false, name);
+			r = track->bounce_range (region->position_sample(), region->position_sample() + region->length_samples(), itt, std::shared_ptr<Processor>(), false, name);
 		}
 
 		if (copy_to_clip_library) {
@@ -447,7 +447,7 @@ Editor::bounce_region_selection (bool with_processing)
 		}
 
 		if (copy_to_trigger) {
-			boost::shared_ptr<Trigger::UIState> state (new Trigger::UIState());
+			std::shared_ptr<Trigger::UIState> state (new Trigger::UIState());
 			if (multiple_selected) {
 				state->name = string_compose ("%1%2", bounce_name, r->name ());
 			} else {
@@ -463,9 +463,9 @@ Editor::bounce_region_selection (bool with_processing)
 }
 
 bool
-Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
+Editor::write_region (string path, std::shared_ptr<AudioRegion> region)
 {
-	boost::shared_ptr<AudioFileSource> fs;
+	std::shared_ptr<AudioFileSource> fs;
 	const samplepos_t chunk_size = 4096;
 	samplepos_t to_read;
 	Sample buf[chunk_size];
@@ -473,7 +473,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	samplepos_t pos;
 	char s[PATH_MAX+1];
 	uint32_t cnt;
-	vector<boost::shared_ptr<AudioFileSource> > sources;
+	vector<std::shared_ptr<AudioFileSource> > sources;
 	uint32_t nchans;
 
 	const string sound_directory = _session->session_directory().sound_path();
@@ -516,7 +516,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 
 
 			try {
-				fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *_session, path, _session->sample_rate()));
+				fs = std::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *_session, path, _session->sample_rate()));
 			}
 
 			catch (failed_constructor& err) {
@@ -540,7 +540,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 		this_time = min (to_read, chunk_size);
 
 		uint32_t chn = 0;
-		for (vector<boost::shared_ptr<AudioFileSource> >::iterator src=sources.begin(); src != sources.end(); ++src, ++chn) {
+		for (vector<std::shared_ptr<AudioFileSource> >::iterator src=sources.begin(); src != sources.end(); ++src, ++chn) {
 
 			fs = (*src);
 
@@ -563,7 +563,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 	time (&tnow);
 	now = localtime (&tnow);
 
-	for (vector<boost::shared_ptr<AudioFileSource> >::iterator src = sources.begin(); src != sources.end(); ++src) {
+	for (vector<std::shared_ptr<AudioFileSource> >::iterator src = sources.begin(); src != sources.end(); ++src) {
 		(*src)->update_header (0, *now, tnow);
 		(*src)->mark_immutable ();
 	}
@@ -572,7 +572,7 @@ Editor::write_region (string path, boost::shared_ptr<AudioRegion> region)
 
 error_out:
 
-	for (vector<boost::shared_ptr<AudioFileSource> >::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (vector<std::shared_ptr<AudioFileSource> >::iterator i = sources.begin(); i != sources.end(); ++i) {
 		(*i)->mark_for_remove ();
 	}
 
@@ -598,7 +598,7 @@ Editor::write_audio_selection (TimeSelection& ts)
 
 		if (atv->is_audio_track()) {
 
-			boost::shared_ptr<AudioPlaylist> playlist = boost::dynamic_pointer_cast<AudioPlaylist>(atv->track()->playlist());
+			std::shared_ptr<AudioPlaylist> playlist = std::dynamic_pointer_cast<AudioPlaylist>(atv->track()->playlist());
 
 			if (playlist && write_audio_range (*playlist, atv->track()->n_channels(), ts) == 0) {
 				ret = -1;
@@ -613,7 +613,7 @@ Editor::write_audio_selection (TimeSelection& ts)
 bool
 Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list<TimelineRange>& range)
 {
-	boost::shared_ptr<AudioFileSource> fs;
+	std::shared_ptr<AudioFileSource> fs;
 	const samplepos_t chunk_size = 4096;
 	samplecnt_t nframes;
 	Sample buf[chunk_size];
@@ -622,7 +622,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 	char s[PATH_MAX+1];
 	uint32_t cnt;
 	string path;
-	vector<boost::shared_ptr<AudioFileSource> > sources;
+	vector<std::shared_ptr<AudioFileSource> > sources;
 
 	const string sound_directory = _session->session_directory().sound_path();
 
@@ -653,7 +653,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 		path = s;
 
 		try {
-			fs = boost::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *_session, path, _session->sample_rate()));
+			fs = std::dynamic_pointer_cast<AudioFileSource> (SourceFactory::createWritable (DataType::AUDIO, *_session, path, _session->sample_rate()));
 		}
 
 		catch (failed_constructor& err) {
@@ -725,7 +725,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 	time (&tnow);
 	now = localtime (&tnow);
 
-	for (vector<boost::shared_ptr<AudioFileSource> >::iterator s = sources.begin(); s != sources.end(); ++s) {
+	for (vector<std::shared_ptr<AudioFileSource> >::iterator s = sources.begin(); s != sources.end(); ++s) {
 		(*s)->update_header (0, *now, tnow);
 		(*s)->mark_immutable ();
 		// do we need to ref it again?
@@ -736,7 +736,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 error_out:
 	/* unref created files */
 
-	for (vector<boost::shared_ptr<AudioFileSource> >::iterator i = sources.begin(); i != sources.end(); ++i) {
+	for (vector<std::shared_ptr<AudioFileSource> >::iterator i = sources.begin(); i != sources.end(); ++i) {
 		(*i)->mark_for_remove ();
 	}
 

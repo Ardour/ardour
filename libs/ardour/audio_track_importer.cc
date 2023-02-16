@@ -283,7 +283,7 @@ AudioTrackImporter::_move ()
 #if 0
 	/* Add diskstream */
 
-	boost::shared_ptr<XMLSharedNodeList> ds_node_list;
+	std::shared_ptr<XMLSharedNodeList> ds_node_list;
 	string xpath = "/Session/DiskStreams/AudioDiskstream[@id='" + old_ds_id.to_s() + "']";
 	ds_node_list = source.find (xpath);
 
@@ -292,12 +292,12 @@ AudioTrackImporter::_move ()
 		return;
 	}
 
-	boost::shared_ptr<XMLNode> ds_node = ds_node_list->front();
+	std::shared_ptr<XMLNode> ds_node = ds_node_list->front();
 	XMLProperty * p = ds_node->property (X_("id"));
 	assert (p);
 	p->set_value (new_ds_id.to_s());
 
-	boost::shared_ptr<DiskReader> new_ds (new DiskReader (session, *ds_node));
+	std::shared_ptr<DiskReader> new_ds (new DiskReader (session, *ds_node));
 	new_ds->set_name (name);
 	new_ds->do_refill_with_alloc (true, false);
 	new_ds->set_block_size (session.get_block_size ());

@@ -32,7 +32,7 @@ class LIBARDOUR_API RBEffect : public Filter {
 	RBEffect (ARDOUR::Session&, TimeFXRequest&);
 	~RBEffect ();
 
-	int run (boost::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
+	int run (std::shared_ptr<ARDOUR::Region>, Progress* progress = 0);
 
   private:
 	TimeFXRequest& tsr;

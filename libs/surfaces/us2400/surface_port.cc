@@ -62,8 +62,8 @@ SurfacePort::SurfacePort (Surface& s)
 		throw failed_constructor();
 	}
 
-	_input_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
-	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
+	_input_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_async_in).get();
+	_output_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
 }
 
 SurfacePort::~SurfacePort()

@@ -30,7 +30,7 @@ class Session;
 class LIBARDOUR_API AudioRom : public AudioReadable
 {
 public:
-	static boost::shared_ptr<AudioRom> new_rom (Sample*, size_t);
+	static std::shared_ptr<AudioRom> new_rom (Sample*, size_t);
 	~AudioRom();
 
 	samplecnt_t read (Sample*, samplepos_t pos, samplecnt_t cnt, int channel) const;

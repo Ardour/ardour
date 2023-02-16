@@ -32,7 +32,7 @@ public:
 	StripableColorDialog ();
 	~StripableColorDialog ();
 	void reset ();
-	void popup (boost::shared_ptr<ARDOUR::Stripable> s);
+	void popup (std::shared_ptr<ARDOUR::Stripable> s);
 	void popup (const std::string&, uint32_t);
 	sigc::signal<void, uint32_t> ColorChanged;
 
@@ -41,7 +41,7 @@ private:
 	void finish_color_edit (int response);
 	void color_changed ();
 
-	boost::shared_ptr<ARDOUR::Stripable> _stripable;
+	std::shared_ptr<ARDOUR::Stripable> _stripable;
 	ARDOUR::PresentationInfo::color_t _initial_color;
 
 	sigc::connection _color_changed_connection;

@@ -71,11 +71,11 @@ public:
 	void automation_run (samplepos_t start, pframes_t nframes);
 
 protected:
-	bool handle_master_change (boost::shared_ptr<AutomationControl>);
+	bool handle_master_change (std::shared_ptr<AutomationControl>);
 	void actually_set_value (double, PBD::Controllable::GroupControlDisposition group_override);
 
-	void pre_remove_master (boost::shared_ptr<AutomationControl>);
-	void post_add_master (boost::shared_ptr<AutomationControl>);
+	void pre_remove_master (std::shared_ptr<AutomationControl>);
+	void post_add_master (std::shared_ptr<AutomationControl>);
 
 private:
 	Muteable& _muteable;

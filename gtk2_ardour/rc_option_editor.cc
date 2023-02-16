@@ -1452,7 +1452,7 @@ public:
 		if (!_shp->session()) {
 			return;
 		}
-		boost::shared_ptr<Port> ltc_port = _shp->session()->ltc_output_port ();
+		std::shared_ptr<Port> ltc_port = _shp->session()->ltc_output_port ();
 		if (!ltc_port) {
 			return;
 		}
@@ -1474,7 +1474,7 @@ public:
 		++i; /* skip "Disconnected" */
 
 		std::string const& pn = _rc_config->get_ltc_output_port ();
-		boost::shared_ptr<Port> ltc_port;
+		std::shared_ptr<Port> ltc_port;
 		if (_shp->session()) {
 			ltc_port = _shp->session()->ltc_output_port ();
 		}
@@ -1551,7 +1551,7 @@ public:
 		++i; /* skip "Disconnected" */
 
 		std::string const& pn = _rc_config->get_default_trigger_input_port ();
-		boost::shared_ptr<Port> port;
+		std::shared_ptr<Port> port;
 
 		PBD::Unwinder<bool> uw (_ignore_change, true);
 
@@ -4928,8 +4928,8 @@ RCOptionEditor::parameter_changed (string const & p)
 		_solo_control_is_listen_control->set_sensitive (s);
 		_listen_position->set_sensitive (s);
 	} else if (p == "sync-source") {
-		boost::shared_ptr<TransportMaster> tm (TransportMasterManager::instance().current());
-		if (boost::dynamic_pointer_cast<TimecodeTransportMaster> (tm)) {
+		std::shared_ptr<TransportMaster> tm (TransportMasterManager::instance().current());
+		if (std::dynamic_pointer_cast<TimecodeTransportMaster> (tm)) {
 			_sync_framerate->set_sensitive (true);
 		} else {
 			_sync_framerate->set_sensitive (false);

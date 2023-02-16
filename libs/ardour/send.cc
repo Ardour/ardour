@@ -90,15 +90,15 @@ Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_b
 
 }
 
-Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMaster> mm, Role r, bool ignore_bitslot)
+Send::Send (Session& s, std::shared_ptr<Pannable> p, std::shared_ptr<MuteMaster> mm, Role r, bool ignore_bitslot)
 	: Delivery (s, p, mm, name_and_id_new_send (s, r, _bitslot, ignore_bitslot), r)
 	, _metering (false)
 	, _remove_on_disconnect (false)
 {
 	//boost_debug_shared_ptr_mark_interesting (this, "send");
 
-	boost::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (BusSendLevel), time_domain()));
-	set_gain_control (boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(BusSendLevel), gl)));
+	std::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (BusSendLevel), time_domain()));
+	set_gain_control (std::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(BusSendLevel), gl)));
 
 	gain_control ()->set_flag (Controllable::InlineControl);
 	add_control (gain_control ());
@@ -110,7 +110,7 @@ Send::Send (Session& s, boost::shared_ptr<Pannable> p, boost::shared_ptr<MuteMas
 
 
 	if (_role == Delivery::Aux || _role == Delivery::Send) {
-		set_polarity_control (boost::shared_ptr<AutomationControl> (new AutomationControl (_session, PhaseAutomation, ParameterDescriptor (PhaseAutomation), boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation), time_domain())), "polarity-invert")));
+		set_polarity_control (std::shared_ptr<AutomationControl> (new AutomationControl (_session, PhaseAutomation, ParameterDescriptor (PhaseAutomation), std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation), time_domain())), "polarity-invert")));
 		add_control (polarity_control ());
 	}
 

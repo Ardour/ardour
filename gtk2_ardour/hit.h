@@ -35,7 +35,7 @@ public:
 	Hit (MidiRegionView&                   region,
 	     ArdourCanvas::Item*               parent,
 	     double                            size,
-	     const boost::shared_ptr<NoteType> note        = boost::shared_ptr<NoteType>(),
+	     const std::shared_ptr<NoteType> note        = std::shared_ptr<NoteType>(),
 	     bool                              with_events = true);
 
 	~Hit();

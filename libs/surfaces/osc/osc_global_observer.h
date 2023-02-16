@@ -89,9 +89,9 @@ class OSCGlobalObserver
 	};
 
 	void update_mixer_scene_state();
-	void send_change_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_gain_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
-	void send_trim_message (std::string path, boost::shared_ptr<PBD::Controllable> controllable);
+	void send_change_message (std::string path, std::shared_ptr<PBD::Controllable> controllable);
+	void send_gain_message (std::string path, std::shared_ptr<PBD::Controllable> controllable);
+	void send_trim_message (std::string path, std::shared_ptr<PBD::Controllable> controllable);
 	void send_transport_state_changed (void);
 	void send_record_state_changed (void);
 	void solo_active (bool active);

@@ -115,9 +115,9 @@ class InterleaverTest : public CppUnit::TestFixture
 
 
   private:
-	boost::shared_ptr<Interleaver<float> > interleaver;
+	std::shared_ptr<Interleaver<float> > interleaver;
 
-	boost::shared_ptr<VectorSink<float> > sink;
+	std::shared_ptr<VectorSink<float> > sink;
 
 	samplecnt_t channels;
 	float * random_data;

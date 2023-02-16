@@ -97,8 +97,8 @@ public:
 	uint32_t n_strips (bool with_locked_strips = true) const;
 	Strip* nth_strip (uint32_t n) const;
 
-	bool stripable_is_locked_to_strip (boost::shared_ptr<ARDOUR::Stripable>) const;
-	bool stripable_is_mapped (boost::shared_ptr<ARDOUR::Stripable>) const;
+	bool stripable_is_locked_to_strip (std::shared_ptr<ARDOUR::Stripable>) const;
+	bool stripable_is_mapped (std::shared_ptr<ARDOUR::Stripable>) const;
 
 	/// This collection owns the groups
 	typedef std::map<std::string,Group*> Groups;
@@ -106,7 +106,7 @@ public:
 
 	SurfacePort& port() const { return *_port; }
 
-	void map_stripables (const std::vector<boost::shared_ptr<ARDOUR::Stripable> >&);
+	void map_stripables (const std::vector<std::shared_ptr<ARDOUR::Stripable> >&);
 
 	void update_strip_selection ();
 
@@ -174,7 +174,7 @@ public:
         void notify_metering_state_changed();
 	void turn_it_on ();
 
-	bool connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool);
+	bool connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::weak_ptr<ARDOUR::Port>, std::string name2, bool);
 
 	void master_monitor_may_have_changed ();
 

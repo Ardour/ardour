@@ -83,7 +83,7 @@ RegionPeakCursor::hide ()
 void
 RegionPeakCursor::set (AudioRegionView* arv, samplepos_t when, samplecnt_t samples_per_pixel)
 {
-	boost::shared_ptr<ARDOUR::AudioRegion> ar = boost::dynamic_pointer_cast<ARDOUR::AudioRegion> (arv->region ());
+	std::shared_ptr<ARDOUR::AudioRegion> ar = std::dynamic_pointer_cast<ARDOUR::AudioRegion> (arv->region ());
 	assert (ar);
 	assert (ar->n_channels () > 0);
 

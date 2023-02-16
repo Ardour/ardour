@@ -32,7 +32,7 @@ namespace ARDOUR {
 class LIBARDOUR_API VST3PluginModule
 {
 public:
-	static boost::shared_ptr<VST3PluginModule> load (std::string const& path);
+	static std::shared_ptr<VST3PluginModule> load (std::string const& path);
 
 	VST3PluginModule () : _factory (0) {}
 	virtual ~VST3PluginModule () {}

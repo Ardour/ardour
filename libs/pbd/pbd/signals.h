@@ -68,7 +68,7 @@ public:
 #endif
 	{}
 	virtual ~SignalBase () { }
-	virtual void disconnect (boost::shared_ptr<Connection>) = 0;
+	virtual void disconnect (std::shared_ptr<Connection>) = 0;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
 	void set_debug_connection (bool yn) { _debug_connection = yn; }
 #endif
@@ -81,7 +81,7 @@ protected:
 #endif
 };
 
-class LIBPBD_API Connection : public boost::enable_shared_from_this<Connection>
+class LIBPBD_API Connection : public std::enable_shared_from_this<Connection>
 {
 public:
 	Connection (SignalBase* b, PBD::EventLoop::InvalidationRecord* ir)
@@ -158,7 +158,7 @@ public:
 	}
 };
 
-typedef boost::shared_ptr<Connection> UnscopedConnection;
+typedef std::shared_ptr<Connection> UnscopedConnection;
 
 class LIBPBD_API ScopedConnection
 {

@@ -79,7 +79,7 @@ AudioTimeAxisView::AudioTimeAxisView (PublicEditor& ed, Session* sess, ArdourCan
 }
 
 void
-AudioTimeAxisView::set_route (boost::shared_ptr<Route> rt)
+AudioTimeAxisView::set_route (std::shared_ptr<Route> rt)
 {
 	_route = rt;
 

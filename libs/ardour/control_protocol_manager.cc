@@ -113,7 +113,7 @@ ControlProtocolManager::set_session (Session* s)
 		StripableNotificationListPtr v (new StripableNotificationList);
 		for (CoreSelection::StripableAutomationControls::iterator i = sac.begin(); i != sac.end(); ++i) {
 			if ((*i).stripable) {
-				v->push_back (boost::weak_ptr<Stripable> ((*i).stripable));
+				v->push_back (std::weak_ptr<Stripable> ((*i).stripable));
 			}
 		}
 		if (!v->empty()) {

@@ -124,7 +124,7 @@ MeterStrip::MeterStrip (int metricmode, MeterType mt)
 	UIConfiguration::instance().DPIReset.connect (sigc::mem_fun (*this, &MeterStrip::on_theme_changed));
 }
 
-MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
+MeterStrip::MeterStrip (Session* sess, std::shared_ptr<ARDOUR::Route> rt)
 	: SessionHandlePtr (sess)
 	, RouteUI ((Session*) 0)
 	, _route (rt)
@@ -290,7 +290,7 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	nfo_vbox.show();
 	namenumberbx.show();
 
-	if (boost::dynamic_pointer_cast<Track>(_route)) {
+	if (std::dynamic_pointer_cast<Track>(_route)) {
 		monitor_input_button->show();
 		monitor_disk_button->show();
 	} else {
@@ -329,12 +329,12 @@ MeterStrip::MeterStrip (Session* sess, boost::shared_ptr<ARDOUR::Route> rt)
 	if (_route->is_master()) {
 		_strip_type = 4;
 	}
-	else if (boost::dynamic_pointer_cast<AudioTrack>(_route) == 0
-			&& boost::dynamic_pointer_cast<MidiTrack>(_route) == 0) {
+	else if (std::dynamic_pointer_cast<AudioTrack>(_route) == 0
+			&& std::dynamic_pointer_cast<MidiTrack>(_route) == 0) {
 		/* non-master bus */
 		_strip_type = 3;
 	}
-	else if (boost::dynamic_pointer_cast<MidiTrack>(_route)) {
+	else if (std::dynamic_pointer_cast<MidiTrack>(_route)) {
 		_strip_type = 2;
 	}
 	else {
@@ -475,8 +475,8 @@ MeterStrip::meter_configuration_changed (ChanCount c)
 		}
 	}
 
-	bool is_audio_track = _route && boost::dynamic_pointer_cast<AudioTrack>(_route) != 0;
-	bool is_midi_track = _route && boost::dynamic_pointer_cast<MidiTrack>(_route) != 0;
+	bool is_audio_track = _route && std::dynamic_pointer_cast<AudioTrack>(_route) != 0;
+	bool is_midi_track = _route && std::dynamic_pointer_cast<MidiTrack>(_route) != 0;
 
 	if (!is_audio_track && (is_midi_track || /* MIDI Bus */ (type == (1 << DataType::MIDI)))) {
 		meter_ticks1_area.set_name ("MidiTrackMetricsLeft");

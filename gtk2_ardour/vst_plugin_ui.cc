@@ -35,7 +35,7 @@
 #include <gdk/gdkx.h>
 #endif
 
-VSTPluginUI::VSTPluginUI (boost::shared_ptr<ARDOUR::PlugInsertBase> pib, boost::shared_ptr<ARDOUR::VSTPlugin> plugin)
+VSTPluginUI::VSTPluginUI (std::shared_ptr<ARDOUR::PlugInsertBase> pib, std::shared_ptr<ARDOUR::VSTPlugin> plugin)
 	: PlugUIBase (pib)
 	, _vst (plugin)
 {

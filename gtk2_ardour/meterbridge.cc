@@ -529,7 +529,7 @@ Meterbridge::add_strips (RouteList& routes)
 {
 	MeterStrip* strip;
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
-		boost::shared_ptr<Route> route = (*x);
+		std::shared_ptr<Route> route = (*x);
 		if (route->is_auditioner()) {
 			continue;
 		}
@@ -599,8 +599,8 @@ Meterbridge::sync_order_keys ()
 				(*i).visible = false;
 			}
 		}
-		else if (boost::dynamic_pointer_cast<AudioTrack>((*i).s->route()) == 0
-				&& boost::dynamic_pointer_cast<MidiTrack>((*i).s->route()) == 0
+		else if (std::dynamic_pointer_cast<AudioTrack>((*i).s->route()) == 0
+				&& std::dynamic_pointer_cast<MidiTrack>((*i).s->route()) == 0
 				) {
 			/* non-master bus */
 			if (_show_busses) {
@@ -612,7 +612,7 @@ Meterbridge::sync_order_keys ()
 				(*i).visible = false;
 			}
 		}
-		else if (boost::dynamic_pointer_cast<MidiTrack>((*i).s->route())) {
+		else if (std::dynamic_pointer_cast<MidiTrack>((*i).s->route())) {
 			if (_show_midi) {
 				(*i).s->show();
 				(*i).visible = true;

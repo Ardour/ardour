@@ -65,7 +65,7 @@ public:
 	class LIBARDOUR_API DiffCommand : public Command {
 	public:
 
-		DiffCommand (boost::shared_ptr<MidiModel> m, const std::string& name);
+		DiffCommand (std::shared_ptr<MidiModel> m, const std::string& name);
 
 		const std::string& name () const { return _name; }
 
@@ -75,10 +75,10 @@ public:
 		virtual int set_state (const XMLNode&, int version) = 0;
 		virtual XMLNode & get_state () const = 0;
 
-		boost::shared_ptr<MidiModel> model() const { return _model; }
+		std::shared_ptr<MidiModel> model() const { return _model; }
 
 	protected:
-		boost::shared_ptr<MidiModel> _model;
+		std::shared_ptr<MidiModel> _model;
 		const std::string            _name;
 
 	};
@@ -86,8 +86,8 @@ public:
 	class LIBARDOUR_API NoteDiffCommand : public DiffCommand {
 	public:
 
-		NoteDiffCommand (boost::shared_ptr<MidiModel> m, const std::string& name) : DiffCommand (m, name) {}
-		NoteDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
+		NoteDiffCommand (std::shared_ptr<MidiModel> m, const std::string& name) : DiffCommand (m, name) {}
+		NoteDiffCommand (std::shared_ptr<MidiModel> m, const XMLNode& node);
 
 		enum Property {
 			NoteNumber,
@@ -136,7 +136,7 @@ public:
 		};
 
 		typedef std::list<NoteChange>                                    ChangeList;
-		typedef std::list< boost::shared_ptr< Evoral::Note<TimeType> > > NoteList;
+		typedef std::list< std::shared_ptr< Evoral::Note<TimeType> > > NoteList;
 
 		const ChangeList& changes()       const { return _changes; }
 		const NoteList&   added_notes()   const { return _added_notes; }
@@ -159,7 +159,7 @@ public:
 	/* Currently this class only supports changes of sys-ex time, but could be expanded */
 	class LIBARDOUR_API SysExDiffCommand : public DiffCommand {
 	public:
-		SysExDiffCommand (boost::shared_ptr<MidiModel> m, const XMLNode& node);
+		SysExDiffCommand (std::shared_ptr<MidiModel> m, const XMLNode& node);
 
 		enum Property {
 			Time,
@@ -172,12 +172,12 @@ public:
 		void operator() ();
 		void undo ();
 
-		void change (boost::shared_ptr<Evoral::Event<TimeType> >, TimeType);
+		void change (std::shared_ptr<Evoral::Event<TimeType> >, TimeType);
 
 	private:
 		struct Change {
 			Change () : sysex_id (0) {}
-			boost::shared_ptr<Evoral::Event<TimeType> > sysex;
+			std::shared_ptr<Evoral::Event<TimeType> > sysex;
 			gint sysex_id;
 			SysExDiffCommand::Property property;
 			TimeType old_time;
@@ -195,8 +195,8 @@ public:
 
 	class LIBARDOUR_API PatchChangeDiffCommand : public DiffCommand {
 	public:
-		PatchChangeDiffCommand (boost::shared_ptr<MidiModel>, const std::string &);
-		PatchChangeDiffCommand (boost::shared_ptr<MidiModel>, const XMLNode &);
+		PatchChangeDiffCommand (std::shared_ptr<MidiModel>, const std::string &);
+		PatchChangeDiffCommand (std::shared_ptr<MidiModel>, const XMLNode &);
 
 		int set_state (const XMLNode &, int version);
 		XMLNode & get_state () const;
@@ -290,10 +290,10 @@ public:
 
 	bool sync_to_source (const Source::WriterLock& source_lock);
 
-	bool write_to(boost::shared_ptr<MidiSource>     source,
+	bool write_to(std::shared_ptr<MidiSource>     source,
 	              const Source::WriterLock& source_lock);
 
-	bool write_section_to(boost::shared_ptr<MidiSource>     source,
+	bool write_section_to(std::shared_ptr<MidiSource>     source,
 	                      const Source::WriterLock& source_lock,
 	                      Temporal::Beats                   begin = Temporal::Beats(),
 	                      Temporal::Beats                   end   = std::numeric_limits<Temporal::Beats>::max(),
@@ -307,15 +307,15 @@ public:
 	PBD::Signal0<void> ContentsChanged;
 	PBD::Signal1<void, Temporal::timecnt_t> ContentsShifted;
 
-	boost::shared_ptr<Evoral::Note<TimeType> > find_note (NotePtr);
+	std::shared_ptr<Evoral::Note<TimeType> > find_note (NotePtr);
 	PatchChangePtr find_patch_change (Evoral::event_id_t);
-	boost::shared_ptr<Evoral::Note<TimeType> > find_note (Evoral::event_id_t);
-	boost::shared_ptr<Evoral::Event<TimeType> > find_sysex (Evoral::event_id_t);
+	std::shared_ptr<Evoral::Note<TimeType> > find_note (Evoral::event_id_t);
+	std::shared_ptr<Evoral::Event<TimeType> > find_sysex (Evoral::event_id_t);
 
 	InsertMergePolicy insert_merge_policy () const;
 	void set_insert_merge_policy (InsertMergePolicy);
 
-	boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
+	std::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
 
 	void insert_silence_at_start (TimeType);
 	void transpose (NoteDiffCommand *, const NotePtr, int);

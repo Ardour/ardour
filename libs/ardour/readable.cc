@@ -30,10 +30,10 @@
 
 using namespace ARDOUR;
 
-std::vector<boost::shared_ptr<AudioReadable> >
+std::vector<std::shared_ptr<AudioReadable> >
 AudioReadable::load (Session& session, std::string const& path)
 {
-	std::vector<boost::shared_ptr<AudioReadable> > readables;
+	std::vector<std::shared_ptr<AudioReadable> > readables;
 
 	ARDOUR::SoundFileInfo sf_info;
 	std::string error_msg;
@@ -45,14 +45,14 @@ AudioReadable::load (Session& session, std::string const& path)
 
 	for (unsigned int n = 0; n < sf_info.channels; ++n) {
 		try {
-			boost::shared_ptr<AudioFileSource> afs;
-			afs = boost::dynamic_pointer_cast<AudioFileSource> (
+			std::shared_ptr<AudioFileSource> afs;
+			afs = std::dynamic_pointer_cast<AudioFileSource> (
 					SourceFactory::createExternal (DataType::AUDIO, session,
 						path, n,
 						Source::Flag (ARDOUR::AudioFileSource::NoPeakFile), false));
 
 			if (afs->sample_rate() != session.nominal_sample_rate()) {
-				boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(session, afs, ARDOUR::SrcBest));
+				std::shared_ptr<SrcFileSource> sfs (new SrcFileSource(session, afs, ARDOUR::SrcBest));
 				readables.push_back(sfs);
 			} else {
 				readables.push_back (afs);

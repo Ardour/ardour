@@ -47,19 +47,19 @@ class ExportPreset;
 typedef ComparableSharedPtr<ExportChannel> ExportChannelPtr;
 typedef ComparableSharedPtr<ExportTimespan> ExportTimespanPtr;
 
-typedef boost::shared_ptr<ExportChannelConfiguration> ExportChannelConfigPtr;
-typedef boost::shared_ptr<ExportFormatBase> ExportFormatBasePtr;
-typedef boost::shared_ptr<ExportFormat> ExportFormatPtr;
-typedef boost::shared_ptr<ExportFormatSpecification> ExportFormatSpecPtr;
-typedef boost::shared_ptr<ExportFormatCompatibility> ExportFormatCompatibilityPtr;
-typedef boost::shared_ptr<ExportFilename> ExportFilenamePtr;
-typedef boost::shared_ptr<ExportStatus> ExportStatusPtr;
-typedef boost::shared_ptr<ExportPreset> ExportPresetPtr;
+typedef std::shared_ptr<ExportChannelConfiguration> ExportChannelConfigPtr;
+typedef std::shared_ptr<ExportFormatBase> ExportFormatBasePtr;
+typedef std::shared_ptr<ExportFormat> ExportFormatPtr;
+typedef std::shared_ptr<ExportFormatSpecification> ExportFormatSpecPtr;
+typedef std::shared_ptr<ExportFormatCompatibility> ExportFormatCompatibilityPtr;
+typedef std::shared_ptr<ExportFilename> ExportFilenamePtr;
+typedef std::shared_ptr<ExportStatus> ExportStatusPtr;
+typedef std::shared_ptr<ExportPreset> ExportPresetPtr;
 
-typedef boost::weak_ptr<ExportFormatCompatibility> WeakExportFormatCompatibilityPtr;
-typedef boost::weak_ptr<ExportFormat> WeakExportFormatPtr;
+typedef std::weak_ptr<ExportFormatCompatibility> WeakExportFormatCompatibilityPtr;
+typedef std::weak_ptr<ExportFormat> WeakExportFormatPtr;
 
-typedef boost::shared_ptr<AudioGrapher::BroadcastInfo> BroadcastInfoPtr;
+typedef std::shared_ptr<AudioGrapher::BroadcastInfo> BroadcastInfoPtr;
 
 } // namespace ARDOUR
 

@@ -70,7 +70,7 @@ public:
 	ClipEditorBox () {}
 	~ClipEditorBox () {}
 
-	virtual void set_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::TriggerReference) = 0;
+	virtual void set_region (std::shared_ptr<ARDOUR::Region>, ARDOUR::TriggerReference) = 0;
 
 	static void                           init ();
 	static void                           register_clip_editor_actions (Gtkmm2ext::Bindings*);
@@ -92,7 +92,7 @@ public:
 	AudioClipEditor ();
 	~AudioClipEditor ();
 
-	void set_region (boost::shared_ptr<ARDOUR::AudioRegion>, ARDOUR::TriggerReference);
+	void set_region (std::shared_ptr<ARDOUR::AudioRegion>, ARDOUR::TriggerReference);
 	void on_size_allocate (Gtk::Allocation&);
 
 	double      sample_to_pixel (ARDOUR::samplepos_t);
@@ -138,7 +138,7 @@ private:
 	samplepos_t                            left_origin;
 	double                                 _spp;
 	double                                 scroll_fraction;
-	boost::shared_ptr<ARDOUR::AudioRegion> audio_region;
+	std::shared_ptr<ARDOUR::AudioRegion> audio_region;
 
 	void scroll_left ();
 	void scrol_right ();
@@ -201,7 +201,7 @@ public:
 	AudioClipEditorBox ();
 	~AudioClipEditorBox ();
 
-	void set_region (boost::shared_ptr<ARDOUR::Region>, ARDOUR::TriggerReference);
+	void set_region (std::shared_ptr<ARDOUR::Region>, ARDOUR::TriggerReference);
 	void region_changed (const PBD::PropertyChange& what_changed);
 
 private:
@@ -215,7 +215,7 @@ private:
 
 	PBD::ScopedConnection state_connection;
 
-	boost::shared_ptr<ARDOUR::Region> _region;
+	std::shared_ptr<ARDOUR::Region> _region;
 
 	void zoom_in_click ();
 	void zoom_out_click ();

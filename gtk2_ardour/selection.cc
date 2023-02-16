@@ -241,7 +241,7 @@ Selection::trigger_regionview_proxy () const
 }
 
 void
-Selection::toggle (boost::shared_ptr<Playlist> pl)
+Selection::toggle (std::shared_ptr<Playlist> pl)
 {
 	clear_time(); // enforce object/range exclusivity
 	clear_tracks(); // enforce object/track exclusivity
@@ -345,7 +345,7 @@ Selection::toggle (timepos_t const & start, timepos_t const & end)
 }
 
 void
-Selection::add (boost::shared_ptr<Playlist> pl)
+Selection::add (std::shared_ptr<Playlist> pl)
 {
 
 	if (find (playlists.begin(), playlists.end(), pl) == playlists.end()) {
@@ -359,11 +359,11 @@ Selection::add (boost::shared_ptr<Playlist> pl)
 }
 
 void
-Selection::add (const list<boost::shared_ptr<Playlist> >& pllist)
+Selection::add (const list<std::shared_ptr<Playlist> >& pllist)
 {
 	bool changed = false;
 
-	for (list<boost::shared_ptr<Playlist> >::const_iterator i = pllist.begin(); i != pllist.end(); ++i) {
+	for (list<std::shared_ptr<Playlist> >::const_iterator i = pllist.begin(); i != pllist.end(); ++i) {
 		if (find (playlists.begin(), playlists.end(), (*i)) == playlists.end()) {
 			(*i)->use ();
 			playlists.push_back (*i);
@@ -519,9 +519,9 @@ Selection::replace (uint32_t sid, timepos_t const & start, timepos_t const & end
 }
 
 void
-Selection::add (boost::shared_ptr<Evoral::ControlList> cl)
+Selection::add (std::shared_ptr<Evoral::ControlList> cl)
 {
-	boost::shared_ptr<ARDOUR::AutomationList> al = boost::dynamic_pointer_cast<ARDOUR::AutomationList>(cl);
+	std::shared_ptr<ARDOUR::AutomationList> al = std::dynamic_pointer_cast<ARDOUR::AutomationList>(cl);
 
 	if (!al) {
 		warning << "Programming error: Selected list is not an ARDOUR::AutomationList" << endmsg;
@@ -539,7 +539,7 @@ Selection::add (boost::shared_ptr<Evoral::ControlList> cl)
 	 * the downside is that we can't perform duplicate checks.
 	 * This code was changed in response to #6842
 	 */
-	lines.push_back (boost::shared_ptr<ARDOUR::AutomationList> (new ARDOUR::AutomationList(*al)));
+	lines.push_back (std::shared_ptr<ARDOUR::AutomationList> (new ARDOUR::AutomationList(*al)));
 	LinesChanged();
 }
 
@@ -586,9 +586,9 @@ Selection::remove (MidiCutBuffer* midi)
 }
 
 void
-Selection::remove (boost::shared_ptr<Playlist> track)
+Selection::remove (std::shared_ptr<Playlist> track)
 {
-	list<boost::shared_ptr<Playlist> >::iterator i;
+	list<std::shared_ptr<Playlist> >::iterator i;
 	if ((i = find (playlists.begin(), playlists.end(), track)) != playlists.end()) {
 		playlists.erase (i);
 		PlaylistsChanged();
@@ -596,13 +596,13 @@ Selection::remove (boost::shared_ptr<Playlist> track)
 }
 
 void
-Selection::remove (const list<boost::shared_ptr<Playlist> >& pllist)
+Selection::remove (const list<std::shared_ptr<Playlist> >& pllist)
 {
 	bool changed = false;
 
-	for (list<boost::shared_ptr<Playlist> >::const_iterator i = pllist.begin(); i != pllist.end(); ++i) {
+	for (list<std::shared_ptr<Playlist> >::const_iterator i = pllist.begin(); i != pllist.end(); ++i) {
 
-		list<boost::shared_ptr<Playlist> >::iterator x;
+		list<std::shared_ptr<Playlist> >::iterator x;
 
 		if ((x = find (playlists.begin(), playlists.end(), (*i))) != playlists.end()) {
 			playlists.erase (x);
@@ -654,7 +654,7 @@ Selection::remove (samplepos_t /*start*/, samplepos_t /*end*/)
 }
 
 void
-Selection::remove (boost::shared_ptr<ARDOUR::AutomationList> ac)
+Selection::remove (std::shared_ptr<ARDOUR::AutomationList> ac)
 {
 	AutomationSelection::iterator i;
 	if ((i = find (lines.begin(), lines.end(), ac)) != lines.end()) {
@@ -676,7 +676,7 @@ Selection::set (const MidiNoteSelection& midi_list)
 }
 
 void
-Selection::set (boost::shared_ptr<Playlist> playlist)
+Selection::set (std::shared_ptr<Playlist> playlist)
 {
 	if (playlist) {
 		clear_time (); // enforce region/object exclusivity
@@ -688,7 +688,7 @@ Selection::set (boost::shared_ptr<Playlist> playlist)
 }
 
 void
-Selection::set (const list<boost::shared_ptr<Playlist> >& pllist)
+Selection::set (const list<std::shared_ptr<Playlist> >& pllist)
 {
 	if (!pllist.empty()) {
 		clear_time(); // enforce region/object exclusivity
@@ -796,7 +796,7 @@ Selection::set_preserving_all_ranges (timepos_t const & start, timepos_t const &
 }
 
 void
-Selection::set (boost::shared_ptr<Evoral::ControlList> ac)
+Selection::set (std::shared_ptr<Evoral::ControlList> ac)
 {
 	clear_time(); // enforce region/object exclusivity
 	clear_tracks(); // enforce object/track exclusivity
@@ -1144,15 +1144,15 @@ Selection::get_state () const
 	}
 
 	/* midi region views have thir own internal selection. */
-	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > > rid_notes;
+	list<pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > > rid_notes;
 	editor->get_per_region_note_selection (rid_notes);
 
-	list<pair<PBD::ID, std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > > > >::iterator rn_it;
+	list<pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >::iterator rn_it;
 	for (rn_it = rid_notes.begin(); rn_it != rid_notes.end(); ++rn_it) {
 		XMLNode* n = node->add_child (X_("MIDINotes"));
 		n->set_property (X_("region-id"), (*rn_it).first);
 
-		for (std::set<boost::shared_ptr<Evoral::Note<Temporal::Beats> > >::iterator i = (*rn_it).second.begin(); i != (*rn_it).second.end(); ++i) {
+		for (std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > >::iterator i = (*rn_it).second.begin(); i != (*rn_it).second.end(); ++i) {
 			XMLNode* nc = n->add_child(X_("note"));
 			nc->set_property(X_("note-id"), (*i)->id());
 		}
@@ -1307,7 +1307,7 @@ Selection::set_state (XMLNode const & node, int)
 				vector <ControlPoint *> cps;
 
 				if (stv) {
-					boost::shared_ptr<AutomationLine> li = stv->automation_child_by_alist_id (alist_id);
+					std::shared_ptr<AutomationLine> li = stv->automation_child_by_alist_id (alist_id);
 					if (li) {
 						ControlPoint* cp = li->nth(view_index);
 						if (cp) {
@@ -1336,7 +1336,7 @@ Selection::set_state (XMLNode const & node, int)
 					for (RegionSelection::iterator rsi = rs.begin(); rsi != rs.end(); ++rsi) {
 						AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*rsi);
 						if (arv) {
-							boost::shared_ptr<AudioRegionGainLine> gl = arv->get_gain_line ();
+							std::shared_ptr<AudioRegionGainLine> gl = arv->get_gain_line ();
 							ControlPoint* cp = gl->nth(view_index);
 							if (cp) {
 								cps.push_back (cp);
@@ -1373,7 +1373,7 @@ Selection::set_state (XMLNode const & node, int)
 			StripableTimeAxisView* stv = editor->get_stripable_time_axis_by_id (id);
 
 			if (stv && (*i)->get_property (X_("control_id"), ctrl_id)) {
-				boost::shared_ptr<AutomationTimeAxisView> atv = stv->automation_child (EventTypeMap::instance().from_symbol (param), ctrl_id);
+				std::shared_ptr<AutomationTimeAxisView> atv = stv->automation_child (EventTypeMap::instance().from_symbol (param), ctrl_id);
 
 				/* the automation could be for an entity that was never saved
 				 * in the session file. Don't freak out if we can't find
@@ -1436,8 +1436,8 @@ Selection::toggle (const TrackViewList& track_list)
 	PresentationInfo::ChangeSuspender cs;
 
 	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
-		boost::shared_ptr<Stripable> s = (*i)->stripable ();
-		boost::shared_ptr<AutomationControl> c = (*i)->control ();
+		std::shared_ptr<Stripable> s = (*i)->stripable ();
+		std::shared_ptr<AutomationControl> c = (*i)->control ();
 		selection.toggle (s, c);
 	}
 }
@@ -1459,8 +1459,8 @@ Selection::add (TrackViewList const & track_list)
 	PresentationInfo::ChangeSuspender cs;
 
 	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
-		boost::shared_ptr<Stripable> s = (*i)->stripable ();
-		boost::shared_ptr<AutomationControl> c = (*i)->control ();
+		std::shared_ptr<Stripable> s = (*i)->stripable ();
+		std::shared_ptr<AutomationControl> c = (*i)->control ();
 		selection.add (s, c);
 	}
 }
@@ -1488,8 +1488,8 @@ Selection::remove (const TrackViewList& t)
 	PresentationInfo::ChangeSuspender cs;
 
 	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
-		boost::shared_ptr<Stripable> s = (*i)->stripable ();
-		boost::shared_ptr<AutomationControl> c = (*i)->control ();
+		std::shared_ptr<Stripable> s = (*i)->stripable ();
+		std::shared_ptr<AutomationControl> c = (*i)->control ();
 		selection.remove (s, c);
 	}
 }
@@ -1525,8 +1525,8 @@ Selection::set (const TrackViewList& track_list)
 	CoreSelection::StripableAutomationControls sac;
 	selection.get_stripables (sac);
 	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
-		boost::shared_ptr<Stripable> s = (*i)->stripable ();
-		boost::shared_ptr<AutomationControl> c = (*i)->control ();
+		std::shared_ptr<Stripable> s = (*i)->stripable ();
+		std::shared_ptr<AutomationControl> c = (*i)->control ();
 		bool found = false;
 		for (CoreSelection::StripableAutomationControls::iterator j = sac.begin (); j != sac.end (); ++j) {
 			if (j->stripable == s && j->controllable == c) {
@@ -1550,8 +1550,8 @@ Selection::set (const TrackViewList& track_list)
 	selection.clear_stripables ();
 
 	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
-		boost::shared_ptr<Stripable> s = (*i)->stripable ();
-		boost::shared_ptr<AutomationControl> c = (*i)->control ();
+		std::shared_ptr<Stripable> s = (*i)->stripable ();
+		std::shared_ptr<AutomationControl> c = (*i)->control ();
 		selection.add (s, c);
 	}
 }
@@ -1580,8 +1580,8 @@ Selection::selected (TimeAxisView* tv) const
 	}
 
 	CoreSelection& selection (session->selection());
-	boost::shared_ptr<Stripable> s = tv->stripable ();
-	boost::shared_ptr<AutomationControl> c = tv->control ();
+	std::shared_ptr<Stripable> s = tv->stripable ();
+	std::shared_ptr<AutomationControl> c = tv->control ();
 
 	if (c) {
 		return selection.selected (c);

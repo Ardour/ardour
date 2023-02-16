@@ -472,9 +472,9 @@ ExportVideoDialog::launch_export ()
 
 	/* export audio track */
 	ExportTimespanPtr                              tsp = _session->get_export_handler ()->add_timespan ();
-	boost::shared_ptr<ExportChannelConfiguration>  ccp = _session->get_export_handler ()->add_channel_config ();
-	boost::shared_ptr<ARDOUR::ExportFilename>      fnp = _session->get_export_handler ()->add_filename ();
-	boost::shared_ptr<AudioGrapher::BroadcastInfo> b;
+	std::shared_ptr<ExportChannelConfiguration>  ccp = _session->get_export_handler ()->add_channel_config ();
+	std::shared_ptr<ARDOUR::ExportFilename>      fnp = _session->get_export_handler ()->add_filename ();
+	std::shared_ptr<AudioGrapher::BroadcastInfo> b;
 
 	XMLTree tree;
 	string  vtl_normalize = _normalize ? "true" : "false";
@@ -527,7 +527,7 @@ ExportVideoDialog::launch_export ()
 	                  .c_str ());
 	/* clang-format on */
 
-	boost::shared_ptr<ExportFormatSpecification> fmp = _session->get_export_handler ()->add_format (*tree.root ());
+	std::shared_ptr<ExportFormatSpecification> fmp = _session->get_export_handler ()->add_format (*tree.root ());
 
 	/* set up range */
 	samplepos_t start, end;

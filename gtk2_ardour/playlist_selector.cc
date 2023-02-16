@@ -155,7 +155,7 @@ PlaylistSelector::prepare (RouteUI* ruix, plMode mode)
 		_rui = ruix;
 		_track_connections.drop_connections ();
 
-		boost::shared_ptr<Track> this_track = _rui->track ();
+		std::shared_ptr<Track> this_track = _rui->track ();
 
 		if (this_track) {
 			this_track->PlaylistChanged.connect (
@@ -234,13 +234,13 @@ PlaylistSelector::redisplay ()
 
 	_session->playlists ()->foreach (this, &PlaylistSelector::add_playlist_to_map);
 
-	boost::shared_ptr<Track> this_track = _rui->track ();
+	std::shared_ptr<Track> this_track = _rui->track ();
 
 	TreeModel::Row selected_row;
 	bool           have_selected = false;
 
 	for (TrackPlaylistMap::iterator x = _trpl_map.begin (); x != _trpl_map.end (); ++x) {
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (_session->route_by_id (x->first));
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (_session->route_by_id (x->first));
 
 		/* add a node for the track */
 
@@ -261,13 +261,13 @@ PlaylistSelector::redisplay ()
 		}
 
 		/* Now insert all the playlists for this diskstream/track in a subtree */
-		vector<boost::shared_ptr<Playlist> > pls = *(x->second);
+		vector<std::shared_ptr<Playlist> > pls = *(x->second);
 
 		/* sort the playlists to match the order they appear in the track menu */
 		PlaylistSorterByID cmp;
 		sort (pls.begin (), pls.end (), cmp);
 
-		for (vector<boost::shared_ptr<Playlist> >::iterator p = pls.begin (); p != pls.end (); ++p) {
+		for (vector<std::shared_ptr<Playlist> >::iterator p = pls.begin (); p != pls.end (); ++p) {
 			(*p)->PropertyChanged.connect (_playlist_connections, invalidator (*this), boost::bind (&PlaylistSelector::pl_property_changed, this, _1), gui_context ());
 
 			TreeModel::Row child_row;
@@ -294,14 +294,14 @@ PlaylistSelector::redisplay ()
 
 	if (_mode != plSelect) {
 		// Add unassigned (imported) playlists to the list
-		list<boost::shared_ptr<Playlist> > unassigned;
+		list<std::shared_ptr<Playlist> > unassigned;
 		_session->playlists ()->unassigned (unassigned);
 
 		if (unassigned.begin () != unassigned.end ()) {
 			TreeModel::Row row = *(model->append ());
 			row[columns.text]  = _("Imported");
 
-			for (list<boost::shared_ptr<Playlist> >::iterator p = unassigned.begin (); p != unassigned.end (); ++p) {
+			for (list<std::shared_ptr<Playlist> >::iterator p = unassigned.begin (); p != unassigned.end (); ++p) {
 				TreeModel::Row child_row;
 
 				child_row = *(model->append (row.children ()));
@@ -337,7 +337,7 @@ PlaylistSelector::pl_property_changed (PBD::PropertyChange const& what_changed)
 }
 
 void
-PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
+PlaylistSelector::add_playlist_to_map (std::shared_ptr<Playlist> pl)
 {
 	if (pl->frozen ()) {
 		return;
@@ -348,12 +348,12 @@ PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 	}
 
 	if (_rui->is_midi_track ()) {
-		if (boost::dynamic_pointer_cast<MidiPlaylist> (pl) == 0) {
+		if (std::dynamic_pointer_cast<MidiPlaylist> (pl) == 0) {
 			return;
 		}
 	} else {
 		assert (_rui->is_audio_track ());
-		if (boost::dynamic_pointer_cast<AudioPlaylist> (pl) == 0) {
+		if (std::dynamic_pointer_cast<AudioPlaylist> (pl) == 0) {
 			return;
 		}
 	}
@@ -361,7 +361,7 @@ PlaylistSelector::add_playlist_to_map (boost::shared_ptr<Playlist> pl)
 	TrackPlaylistMap::iterator x;
 
 	if ((x = _trpl_map.find (pl->get_orig_track_id ())) == _trpl_map.end ()) {
-		x = _trpl_map.insert (_trpl_map.end (), make_pair (pl->get_orig_track_id (), new vector<boost::shared_ptr<Playlist> >));
+		x = _trpl_map.insert (_trpl_map.end (), make_pair (pl->get_orig_track_id (), new vector<std::shared_ptr<Playlist> >));
 	}
 
 	x->second->push_back (pl);
@@ -388,12 +388,12 @@ PlaylistSelector::selection_changed ()
 		return;
 	}
 
-	boost::shared_ptr<Playlist> pl;
+	std::shared_ptr<Playlist> pl;
 	if ((pl = ((*iter)[columns.playlist])) != 0) {
-		if (_rui->is_audio_track () && boost::dynamic_pointer_cast<AudioPlaylist> (pl) == 0) {
+		if (_rui->is_audio_track () && std::dynamic_pointer_cast<AudioPlaylist> (pl) == 0) {
 			return;
 		}
-		if (_rui->is_midi_track () && boost::dynamic_pointer_cast<MidiPlaylist> (pl) == 0) {
+		if (_rui->is_midi_track () && std::dynamic_pointer_cast<MidiPlaylist> (pl) == 0) {
 			return;
 		}
 
@@ -403,7 +403,7 @@ PlaylistSelector::selection_changed ()
 			 */
 			case plCopy:
 				{
-					boost::shared_ptr<Playlist> playlist = PlaylistFactory::create (pl, string_compose ("%1.1", pl->name ()));
+					std::shared_ptr<Playlist> playlist = PlaylistFactory::create (pl, string_compose ("%1.1", pl->name ()));
 					/* playlist->reset_shares ();  @Robin is this needed? */
 					_rui->track ()->use_playlist (_rui->is_audio_track () ? DataType::AUDIO : DataType::MIDI, playlist);
 				}

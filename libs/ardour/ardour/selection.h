@@ -43,30 +43,30 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 	CoreSelection (Session& s);
 	~CoreSelection ();
 
-	void toggle (boost::shared_ptr<Stripable>, boost::shared_ptr<AutomationControl>);
-	void add (boost::shared_ptr<Stripable>, boost::shared_ptr<AutomationControl>);
-	void remove (boost::shared_ptr<Stripable>, boost::shared_ptr<AutomationControl>);
-	void set (boost::shared_ptr<Stripable>, boost::shared_ptr<AutomationControl>);
+	void toggle (std::shared_ptr<Stripable>, std::shared_ptr<AutomationControl>);
+	void add (std::shared_ptr<Stripable>, std::shared_ptr<AutomationControl>);
+	void remove (std::shared_ptr<Stripable>, std::shared_ptr<AutomationControl>);
+	void set (std::shared_ptr<Stripable>, std::shared_ptr<AutomationControl>);
 	void set (StripableList&);
 
 	void select_next_stripable (bool mixer_order, bool routes_only);
 	void select_prev_stripable (bool mixer_order, bool routes_only);
-	bool select_stripable_and_maybe_group (boost::shared_ptr<Stripable> s, bool with_group, bool routes_only, RouteGroup*);
+	bool select_stripable_and_maybe_group (std::shared_ptr<Stripable> s, bool with_group, bool routes_only, RouteGroup*);
 
 	void clear_stripables();
 
-	boost::shared_ptr<Stripable> first_selected_stripable () const;
+	std::shared_ptr<Stripable> first_selected_stripable () const;
 
-	bool selected (boost::shared_ptr<const Stripable>) const;
-	bool selected (boost::shared_ptr<const AutomationControl>) const;
+	bool selected (std::shared_ptr<const Stripable>) const;
+	bool selected (std::shared_ptr<const AutomationControl>) const;
 	uint32_t selected() const;
 
 	struct StripableAutomationControl {
-		boost::shared_ptr<Stripable> stripable;
-		boost::shared_ptr<AutomationControl> controllable;
+		std::shared_ptr<Stripable> stripable;
+		std::shared_ptr<AutomationControl> controllable;
 		int order;
 
-		StripableAutomationControl (boost::shared_ptr<Stripable> s, boost::shared_ptr<AutomationControl> c, int o)
+		StripableAutomationControl (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c, int o)
 			: stripable (s), controllable (c), order (o) {}
 	};
 
@@ -94,7 +94,7 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 	Session& session;
 
 	struct SelectedStripable {
-		SelectedStripable (boost::shared_ptr<Stripable>, boost::shared_ptr<AutomationControl>, int);
+		SelectedStripable (std::shared_ptr<Stripable>, std::shared_ptr<AutomationControl>, int);
 		SelectedStripable (PBD::ID const & s, PBD::ID const & c, int o)
 			: stripable (s), controllable (c), order (o) {}
 
@@ -112,7 +112,7 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 
 	typedef std::set<SelectedStripable> SelectedStripables;
 
-	boost::weak_ptr<ARDOUR::Stripable> _first_selected_stripable;
+	std::weak_ptr<ARDOUR::Stripable> _first_selected_stripable;
 
 	SelectedStripables _stripables;
 

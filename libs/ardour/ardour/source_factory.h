@@ -41,14 +41,14 @@ public:
 	static void init ();
 	static void terminate ();
 
-	static PBD::Signal1<void, boost::shared_ptr<Source>> SourceCreated;
+	static PBD::Signal1<void, std::shared_ptr<Source>> SourceCreated;
 
-	static boost::shared_ptr<Source> create (Session&, const XMLNode& node, bool async = false);
-	static boost::shared_ptr<Source> createSilent (Session&, const XMLNode& node, samplecnt_t, float sample_rate);
-	static boost::shared_ptr<Source> createExternal (DataType, Session&, const std::string& path, int chn, Source::Flag, bool announce = true, bool async = false);
-	static boost::shared_ptr<Source> createWritable (DataType, Session&, const std::string& path, samplecnt_t rate, bool announce = true, bool async = false);
-	static boost::shared_ptr<Source> createForRecovery (DataType, Session&, const std::string& path, int chn);
-	static boost::shared_ptr<Source> createFromPlaylist (DataType, Session&, boost::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name, uint32_t chn, timepos_t start, timepos_t const& len, bool copy, bool defer_peaks);
+	static std::shared_ptr<Source> create (Session&, const XMLNode& node, bool async = false);
+	static std::shared_ptr<Source> createSilent (Session&, const XMLNode& node, samplecnt_t, float sample_rate);
+	static std::shared_ptr<Source> createExternal (DataType, Session&, const std::string& path, int chn, Source::Flag, bool announce = true, bool async = false);
+	static std::shared_ptr<Source> createWritable (DataType, Session&, const std::string& path, samplecnt_t rate, bool announce = true, bool async = false);
+	static std::shared_ptr<Source> createForRecovery (DataType, Session&, const std::string& path, int chn);
+	static std::shared_ptr<Source> createFromPlaylist (DataType, Session&, std::shared_ptr<Playlist> p, const PBD::ID& orig, const std::string& name, uint32_t chn, timepos_t start, timepos_t const& len, bool copy, bool defer_peaks);
 
 	static Glib::Threads::Cond  PeaksToBuild;
 	static Glib::Threads::Mutex peak_building_lock;
@@ -56,10 +56,10 @@ public:
 	static bool                      peak_thread_run;
 	static std::vector<PBD::Thread*> peak_thread_pool;
 
-	static std::list<boost::weak_ptr<AudioSource>> files_with_peaks;
+	static std::list<std::weak_ptr<AudioSource>> files_with_peaks;
 
 	static int peak_work_queue_length ();
-	static int setup_peakfile (boost::shared_ptr<Source>, bool async);
+	static int setup_peakfile (std::shared_ptr<Source>, bool async);
 };
 
 } // namespace ARDOUR

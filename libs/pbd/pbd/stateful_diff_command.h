@@ -36,8 +36,8 @@ class PropertyList;
 class LIBPBD_API StatefulDiffCommand : public Command
 {
 public:
-	StatefulDiffCommand (boost::shared_ptr<StatefulDestructible>);
-	StatefulDiffCommand (boost::shared_ptr<StatefulDestructible>, XMLNode const&);
+	StatefulDiffCommand (std::shared_ptr<StatefulDestructible>);
+	StatefulDiffCommand (std::shared_ptr<StatefulDestructible>, XMLNode const&);
 	~StatefulDiffCommand ();
 
 	void operator() ();
@@ -48,7 +48,7 @@ public:
 	bool empty () const;
 
 private:
-	boost::weak_ptr<Stateful> _object;  ///< the object in question
+	std::weak_ptr<Stateful> _object;  ///< the object in question
 	PBD::PropertyList*        _changes; ///< property changes to execute this command
 };
 

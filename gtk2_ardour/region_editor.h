@@ -54,7 +54,7 @@ class ClockGroup;
 class RegionEditor : public ArdourDialog
 {
 public:
-	RegionEditor (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Region>);
+	RegionEditor (ARDOUR::Session*, std::shared_ptr<ARDOUR::Region>);
 	virtual ~RegionEditor ();
 
 protected:
@@ -64,7 +64,7 @@ protected:
 	int _table_row;
 
 private:
-	boost::shared_ptr<ARDOUR::Region> _region;
+	std::shared_ptr<ARDOUR::Region> _region;
 
 	void connect_editor_events ();
 

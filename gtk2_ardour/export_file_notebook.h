@@ -46,19 +46,19 @@ public:
 
 	ExportFileNotebook ();
 
-	void set_session_and_manager (ARDOUR::Session * s, boost::shared_ptr<ARDOUR::ExportProfileManager> manager);
+	void set_session_and_manager (ARDOUR::Session * s, std::shared_ptr<ARDOUR::ExportProfileManager> manager);
 	void sync_with_manager ();
 	void update_example_filenames();
 
-	boost::shared_ptr<SoundcloudExportSelector> soundcloud_export_selector;
+	std::shared_ptr<SoundcloudExportSelector> soundcloud_export_selector;
 
 	sigc::signal<void> CriticalSelectionChanged;
 
 private:
 
-	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
-	typedef boost::shared_ptr<ARDOUR::ExportFormatSpecification> FormatPtr;
-	typedef boost::shared_ptr<ARDOUR::ExportFilename> FilenamePtr;
+	typedef std::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
+	typedef std::shared_ptr<ARDOUR::ExportFormatSpecification> FormatPtr;
+	typedef std::shared_ptr<ARDOUR::ExportFilename> FilenamePtr;
 	class FilePage;
 
 	ManagerPtr        profile_manager;

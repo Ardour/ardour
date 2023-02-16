@@ -784,7 +784,7 @@ TriggerEntry::drag_begin (Glib::RefPtr<Gdk::DragContext> const& context)
 		/* ctx leaves scope, cr is destroyed, and pixmap surface is flush()ed */
 	}
 
-	boost::shared_ptr<Region> region = trigger ()->region ();
+	std::shared_ptr<Region> region = trigger ()->region ();
 	if (region) {
 		PublicEditor::instance ().pbdid_dragged_dt = region->data_type ();
 	} else {
@@ -812,7 +812,7 @@ TriggerEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::Selecti
 		return;
 	}
 	if (data.get_target () == "x-ardour/region.pbdid") {
-		boost::shared_ptr<Region> region = trigger ()->region ();
+		std::shared_ptr<Region> region = trigger ()->region ();
 		if (region) {
 			data.set (data.get_target (), region->id ().to_s ());
 		}
@@ -989,7 +989,7 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 
 	if (data.get_target () == "x-ardour/region.pbdid") {
 		PBD::ID                   rid (data.get_data_as_string ());
-		boost::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
+		std::shared_ptr<Region> region = RegionFactory::region_by_id (rid);
 		if (region) {
 			_triggerbox.set_from_selection (n, region);
 			context->drag_finish (true, false, time);
@@ -1001,11 +1001,11 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 
 	if (data.get_target () == "x-ardour/trigger.pbdid") {
 		PBD::ID tid (data.get_data_as_string ());
-		boost::shared_ptr<Trigger> source = _triggerbox.session().trigger_by_id (tid);
+		std::shared_ptr<Trigger> source = _triggerbox.session().trigger_by_id (tid);
 		if (source) {
 			Trigger::UIState *state = new Trigger::UIState();
 			source->get_ui_state(*state);
-			boost::shared_ptr<Trigger::UIState> state_p (state);
+			std::shared_ptr<Trigger::UIState> state_p (state);
 			_triggerbox.enqueue_trigger_state_for_region(source->region(), state_p);
 			_triggerbox.set_from_selection (n, source->region());
 			context->drag_finish (true, false, time);

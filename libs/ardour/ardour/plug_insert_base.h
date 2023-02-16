@@ -40,7 +40,7 @@ public:
 	virtual ~PlugInsertBase () {}
 
 	virtual uint32_t get_count () const = 0;
-	virtual boost::shared_ptr<Plugin> plugin (uint32_t num = 0) const = 0;
+	virtual std::shared_ptr<Plugin> plugin (uint32_t num = 0) const = 0;
 	virtual PluginType type () const = 0;
 
 	enum UIElements : std::uint8_t {
@@ -56,7 +56,7 @@ public:
 	virtual bool write_immediate_event (Evoral::EventType event_type, size_t size, const uint8_t* buf) = 0;
 	virtual bool load_preset (Plugin::PresetRecord) = 0;
 
-	virtual boost::shared_ptr<ReadOnlyControl> control_output (uint32_t) const = 0;
+	virtual std::shared_ptr<ReadOnlyControl> control_output (uint32_t) const = 0;
 
 	virtual bool can_reset_all_parameters () = 0;
 	virtual bool reset_parameters_to_default () = 0;
@@ -67,7 +67,7 @@ public:
 
 protected:
 	bool parse_plugin_type (XMLNode const&, PluginType&, std::string&) const;
-	boost::shared_ptr<Plugin> find_and_load_plugin (Session&, XMLNode const&, PluginType&, std::string const&, bool& any_vst);
+	std::shared_ptr<Plugin> find_and_load_plugin (Session&, XMLNode const&, PluginType&, std::string const&, bool& any_vst);
 
 	void set_control_ids (const XMLNode&, int version);
 	void preset_load_set_value (uint32_t, float);

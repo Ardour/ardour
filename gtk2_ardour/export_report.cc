@@ -920,9 +920,9 @@ ExportReport::audition (std::string path, unsigned n_chn, int page)
 	}
 	if (SMFSource::valid_midi_file (path)) { return; }
 
-	boost::shared_ptr<Region> r;
+	std::shared_ptr<Region> r;
 	SourceList srclist;
-	boost::shared_ptr<AudioFileSource> afs;
+	std::shared_ptr<AudioFileSource> afs;
 	bool old_sbp = AudioSource::get_build_peakfiles ();
 
 	/* don't even think of building peakfiles for these files */
@@ -930,12 +930,12 @@ ExportReport::audition (std::string path, unsigned n_chn, int page)
 
 	for (unsigned int n = 0; n < n_chn; ++n) {
 		try {
-			afs = boost::dynamic_pointer_cast<AudioFileSource> (
+			afs = std::dynamic_pointer_cast<AudioFileSource> (
 				SourceFactory::createExternal (DataType::AUDIO, *_session,
 										 path, n,
 										 Source::Flag (ARDOUR::AudioFileSource::NoPeakFile), false));
 			if (afs->sample_rate() != _session->nominal_sample_rate()) {
-				boost::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs, ARDOUR::SrcGood));
+				std::shared_ptr<SrcFileSource> sfs (new SrcFileSource(*_session, afs, ARDOUR::SrcGood));
 				srclist.push_back(sfs);
 			} else {
 				srclist.push_back(afs);
@@ -953,7 +953,7 @@ ExportReport::audition (std::string path, unsigned n_chn, int page)
 		return;
 	}
 
-	afs = boost::dynamic_pointer_cast<AudioFileSource> (srclist[0]);
+	afs = std::dynamic_pointer_cast<AudioFileSource> (srclist[0]);
 	std::string rname = region_name_from_path (afs->path(), false);
 
 	PBD::PropertyList plist;
@@ -963,7 +963,7 @@ ExportReport::audition (std::string path, unsigned n_chn, int page)
 	plist.add (ARDOUR::Properties::name, rname);
 	plist.add (ARDOUR::Properties::layer, 0);
 
-	r = boost::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
+	r = std::dynamic_pointer_cast<AudioRegion> (RegionFactory::create (srclist, plist, false));
 
 	r->set_position (timepos_t ());
 	_session->audition_region(r);

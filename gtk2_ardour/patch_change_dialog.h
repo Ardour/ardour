@@ -48,7 +48,7 @@ public:
 		const Gtk::BuiltinStockID&,
 		bool allow_delete = false,
 		bool modal = true,
-		boost::shared_ptr<ARDOUR::Region> region = boost::shared_ptr<ARDOUR::Region>()
+		std::shared_ptr<ARDOUR::Region> region = std::shared_ptr<ARDOUR::Region>()
 		);
 
 	Evoral::PatchChange<Temporal::Beats> patch () const;
@@ -69,7 +69,7 @@ private:
 
 	int get_14bit_bank () const;
 
-	const boost::shared_ptr<ARDOUR::Region> _region;
+	const std::shared_ptr<ARDOUR::Region> _region;
 	ARDOUR::InstrumentInfo& _info;
 	AudioClock _time;
 	Gtk::SpinButton   _channel;
@@ -79,7 +79,7 @@ private:
 	Gtk::ComboBoxText _bank_combo;
 	Gtk::ComboBoxText _patch_combo;
 
-	boost::shared_ptr<MIDI::Name::PatchBank> _current_patch_bank;
+	std::shared_ptr<MIDI::Name::PatchBank> _current_patch_bank;
 
 	bool _ignore_signals;
 	bool _keep_open;

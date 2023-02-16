@@ -37,7 +37,7 @@ public:
 
 	static void init ();
 	static void terminate ();
-	static void queue_source_for_analysis (boost::shared_ptr<Source>, bool force);
+	static void queue_source_for_analysis (std::shared_ptr<Source>, bool force);
 	static void work ();
 	static void flush ();
 
@@ -45,11 +45,11 @@ private:
 	static Glib::Threads::Mutex               analysis_active_lock;
 	static Glib::Threads::Mutex               analysis_queue_lock;
 	static Glib::Threads::Cond                SourcesToAnalyse;
-	static std::list<boost::weak_ptr<Source>> analysis_queue;
+	static std::list<std::weak_ptr<Source>> analysis_queue;
 	static bool                               analysis_thread_run;
 	static PBD::Thread*                       analysis_thread;
 
-	static void analyse_audio_file_source (boost::shared_ptr<AudioFileSource>);
+	static void analyse_audio_file_source (std::shared_ptr<AudioFileSource>);
 };
 
 } // namespace ARDOUR

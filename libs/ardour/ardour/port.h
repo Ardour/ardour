@@ -142,7 +142,7 @@ public:
 
 
 	PBD::Signal1<void,bool> MonitorInputChanged;
-	PBD::Signal3<void,boost::shared_ptr<Port>,boost::shared_ptr<Port>, bool > ConnectedOrDisconnected;
+	PBD::Signal3<void,std::shared_ptr<Port>,std::shared_ptr<Port>, bool > ConnectedOrDisconnected;
 
 	static PBD::Signal0<void> PortDrop;
 	static PBD::Signal0<void> PortSignalDrop;
@@ -209,7 +209,7 @@ private:
 	static uint32_t _resampler_quality; // 8 <= q <= 96
 	static uint32_t _resampler_latency; // = _resampler_quality - 1
 
-	void port_connected_or_disconnected (boost::weak_ptr<Port>, boost::weak_ptr<Port>, bool);
+	void port_connected_or_disconnected (std::weak_ptr<Port>, std::weak_ptr<Port>, bool);
 	void signal_drop ();
 	void session_global_drop ();
 	void drop ();

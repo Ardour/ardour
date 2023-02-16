@@ -48,7 +48,7 @@ public:
 	             const std::string& proc_name, const std::string io_name="",
 	             ARDOUR::DataType default_type = DataType::AUDIO, bool sendish=false);
 
-	IOProcessor (Session&, boost::shared_ptr<IO> input, boost::shared_ptr<IO> output,
+	IOProcessor (Session&, std::shared_ptr<IO> input, std::shared_ptr<IO> output,
 	             const std::string& proc_name, Temporal::TimeDomain, bool sendish=false);
 
 	virtual ~IOProcessor ();
@@ -60,18 +60,18 @@ public:
 	virtual ChanCount natural_output_streams() const;
 	virtual ChanCount natural_input_streams () const;
 
-	boost::shared_ptr<IO>       input()        { return _input; }
-	boost::shared_ptr<const IO> input() const  { return _input; }
-	boost::shared_ptr<IO>       output()       { return _output; }
-	boost::shared_ptr<const IO> output() const { return _output; }
+	std::shared_ptr<IO>       input()        { return _input; }
+	std::shared_ptr<const IO> input() const  { return _input; }
+	std::shared_ptr<IO>       output()       { return _output; }
+	std::shared_ptr<const IO> output() const { return _output; }
 
-	void set_input (boost::shared_ptr<IO>);
-	void set_output (boost::shared_ptr<IO>);
+	void set_input (std::shared_ptr<IO>);
+	void set_output (std::shared_ptr<IO>);
 
 	void silence (samplecnt_t nframes, samplepos_t start_sample);
 	void disconnect ();
 
-	virtual bool feeds (boost::shared_ptr<Route> other) const;
+	virtual bool feeds (std::shared_ptr<Route> other) const;
 
 	PBD::Signal2<void,IOProcessor*,bool>     AutomationPlaybackChanged;
 	PBD::Signal2<void,IOProcessor*,uint32_t> AutomationChanged;
@@ -84,8 +84,8 @@ public:
 	uint32_t bit_slot() const { return _bitslot; }
 
 protected:
-	boost::shared_ptr<IO> _input;
-	boost::shared_ptr<IO> _output;
+	std::shared_ptr<IO> _input;
+	std::shared_ptr<IO> _output;
 
 	/* used by PortInsert, Send & Return*/
 	std::string validate_name (std::string const& new_name, std::string const& canonical_name) const;

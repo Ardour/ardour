@@ -60,9 +60,9 @@ public:
 
 	static bool skip_saving_automation; // to be used only by session-state
 
-	boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
+	std::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id);
 
-	boost::shared_ptr<AutomationControl> automation_control (PBD::ID const & id) const;
+	std::shared_ptr<AutomationControl> automation_control (PBD::ID const & id) const;
 	/* derived classes need to provide some way to search their own child
 	   automatable's for a control. normally, we'd just make the method
 	   above virtual, and let them override it. But that wouldn't
@@ -77,17 +77,17 @@ public:
 
 	   So, skip around all that with a different name.
 	*/
-	virtual boost::shared_ptr<AutomationControl> automation_control_recurse (PBD::ID const & id) const {
+	virtual std::shared_ptr<AutomationControl> automation_control_recurse (PBD::ID const & id) const {
 		return automation_control (id);
 	}
 
-	boost::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id) {
+	std::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id) {
 		return automation_control (id, false);
 	}
-	boost::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id, bool create_if_missing);
-	boost::shared_ptr<const AutomationControl> automation_control (const Evoral::Parameter& id) const;
+	std::shared_ptr<AutomationControl> automation_control (const Evoral::Parameter& id, bool create_if_missing);
+	std::shared_ptr<const AutomationControl> automation_control (const Evoral::Parameter& id) const;
 
-	virtual void add_control(boost::shared_ptr<Evoral::Control>);
+	virtual void add_control(std::shared_ptr<Evoral::Control>);
 	virtual bool find_next_event (Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev, bool only_active = true) const;
 	void clear_controls ();
 
@@ -136,8 +136,8 @@ protected:
 
 	SlavableControlList slavables () const { return SlavableControlList(); }
 
-	void find_next_ac_event (boost::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev) const;
-	void find_prev_ac_event (boost::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev) const;
+	void find_next_ac_event (std::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev) const;
+	void find_prev_ac_event (std::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev) const;
 
 private:
 	PBD::ScopedConnectionList _control_connections; ///< connections to our controls' signals

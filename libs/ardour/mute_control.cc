@@ -31,7 +31,7 @@ using namespace std;
 
 MuteControl::MuteControl (Session& session, std::string const & name, Muteable& m, Temporal::TimeDomain td)
 	: SlavableAutomationControl (session, MuteAutomation, ParameterDescriptor (MuteAutomation),
-	                             boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (MuteAutomation), td)),
+	                             std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (MuteAutomation), td)),
 	                             name)
 	, _muteable (m)
 {
@@ -41,7 +41,7 @@ MuteControl::MuteControl (Session& session, std::string const & name, Muteable& 
 }
 
 void
-MuteControl::post_add_master (boost::shared_ptr<AutomationControl> m)
+MuteControl::post_add_master (std::shared_ptr<AutomationControl> m)
 {
 	if (m->get_value()) {
 
@@ -59,7 +59,7 @@ MuteControl::post_add_master (boost::shared_ptr<AutomationControl> m)
 }
 
 void
-MuteControl::pre_remove_master (boost::shared_ptr<AutomationControl> m)
+MuteControl::pre_remove_master (std::shared_ptr<AutomationControl> m)
 {
 	if (!m) {
 		/* null control ptr means we're removing all masters */
@@ -92,10 +92,10 @@ MuteControl::actually_set_value (double val, Controllable::GroupControlDispositi
 }
 
 bool
-MuteControl::handle_master_change (boost::shared_ptr<AutomationControl> m)
+MuteControl::handle_master_change (std::shared_ptr<AutomationControl> m)
 {
 	bool send_signal = false;
-	boost::shared_ptr<MuteControl> mc = boost::dynamic_pointer_cast<MuteControl> (m);
+	std::shared_ptr<MuteControl> mc = std::dynamic_pointer_cast<MuteControl> (m);
 	if (!mc) {
 		return false;
 	}
@@ -127,7 +127,7 @@ MuteControl::get_value () const
 		return muted_by_self() || muted_by_masters ();
 	}
 
-	if (_list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback()) {
+	if (_list && std::dynamic_pointer_cast<AutomationList>(_list)->automation_playback()) {
 		// Playing back automation, get the value from the list
 		return AutomationControl::get_value();
 	}

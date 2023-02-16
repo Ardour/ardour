@@ -136,7 +136,7 @@ ExportChannelConfiguration::all_channels_have_ports () const
 }
 
 void
-ExportChannelConfiguration::configurations_for_files (std::list<boost::shared_ptr<ExportChannelConfiguration>>& configs)
+ExportChannelConfiguration::configurations_for_files (std::list<std::shared_ptr<ExportChannelConfiguration>>& configs)
 {
 	configs.clear ();
 
@@ -146,7 +146,7 @@ ExportChannelConfiguration::configurations_for_files (std::list<boost::shared_pt
 	}
 
 	for (auto const& c : channels) {
-		boost::shared_ptr<ExportChannelConfiguration> config (new ExportChannelConfiguration (session));
+		std::shared_ptr<ExportChannelConfiguration> config (new ExportChannelConfiguration (session));
 		config->set_name (_name);
 		config->register_channel (c);
 		configs.push_back (config);

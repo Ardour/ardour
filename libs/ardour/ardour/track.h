@@ -89,14 +89,14 @@ public:
 	 * @param include_endpoint include the given processor in the bounced audio.
 	 * @return true if the track can be bounced, or false otherwise.
 	 */
-	virtual bool bounceable (boost::shared_ptr<Processor> endpoint, bool include_endpoint) const = 0;
+	virtual bool bounceable (std::shared_ptr<Processor> endpoint, bool include_endpoint) const = 0;
 
 	/** bounce track from session start to session end to new region
 	 *
 	 * @param itt asynchronous progress report and cancel
 	 * @return a new audio region (or nil in case of error)
 	 */
-	virtual boost::shared_ptr<Region> bounce (InterThreadInfo& itt, std::string const& name) = 0;
+	virtual std::shared_ptr<Region> bounce (InterThreadInfo& itt, std::string const& name) = 0;
 
 	/** Bounce the given range to a new audio region.
 	 * @param start start time (in samples)
@@ -106,19 +106,19 @@ public:
 	 * @param include_endpoint include the given processor in the bounced audio.
 	 * @return a new audio region (or nil in case of error)
 	 */
-	virtual boost::shared_ptr<Region> bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo& itt,
-	                                                boost::shared_ptr<Processor> endpoint, bool include_endpoint,
+	virtual std::shared_ptr<Region> bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo& itt,
+	                                                std::shared_ptr<Processor> endpoint, bool include_endpoint,
 	                                                std::string const& name) = 0;
 
 	virtual int export_stuff (BufferSet& bufs, samplepos_t start_sample, samplecnt_t nframes,
-	                          boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,
+	                          std::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,
 	                          MidiNoteTracker&) = 0;
 
 	virtual int set_state (const XMLNode&, int version);
 	static void zero_diskstream_id_in_xml (XMLNode&);
 
-	boost::shared_ptr<AutomationControl> rec_enable_control() const { return _record_enable_control; }
-	boost::shared_ptr<AutomationControl> rec_safe_control() const { return _record_safe_control; }
+	std::shared_ptr<AutomationControl> rec_enable_control() const { return _record_enable_control; }
+	std::shared_ptr<AutomationControl> rec_safe_control() const { return _record_safe_control; }
 
 	int prep_record_enabled (bool);
 	bool can_be_record_enabled ();
@@ -131,14 +131,14 @@ public:
 	/* used by DiskReader request_overwrite_buffer(), to create
 	 * a SessionEvent with weak_ptr<> reference
 	 */
-	boost::shared_ptr<Track> shared_ptr () {
-		return boost::dynamic_pointer_cast<Track> (shared_from_this());
+	std::shared_ptr<Track> shared_ptr () {
+		return std::dynamic_pointer_cast<Track> (shared_from_this());
 	}
 
-	boost::shared_ptr<Playlist> playlist ();
+	std::shared_ptr<Playlist> playlist ();
 	void request_input_monitoring (bool);
 	void ensure_input_monitoring (bool);
-	std::list<boost::shared_ptr<Source> > & last_capture_sources ();
+	std::list<std::shared_ptr<Source> > & last_capture_sources ();
 	std::string steal_write_source_name ();
 	void reset_write_sources (bool, bool force = false);
 	float playback_buffer_load () const;
@@ -166,7 +166,7 @@ public:
 	void set_align_style (AlignStyle, bool force=false);
 	void set_align_choice (AlignChoice, bool force=false);
 	void playlist_modified ();
-	int use_playlist (DataType, boost::shared_ptr<Playlist>, bool set_orig = true);
+	int use_playlist (DataType, std::shared_ptr<Playlist>, bool set_orig = true);
 	int find_and_use_playlist (DataType, PBD::ID const &);
 	int use_copy_playlist ();
 	int use_new_playlist (DataType);
@@ -186,18 +186,18 @@ public:
 protected:
 	XMLNode& state (bool save_template) const;
 
-	boost::shared_ptr<Playlist>   _playlists[DataType::num_types];
+	std::shared_ptr<Playlist>   _playlists[DataType::num_types];
 
 	MeterPoint    _saved_meter_point;
 	TrackMode     _mode;
 
 	//private: (FIXME)
 	struct FreezeRecordProcessorInfo {
-		FreezeRecordProcessorInfo(XMLNode& st, boost::shared_ptr<Processor> proc)
+		FreezeRecordProcessorInfo(XMLNode& st, std::shared_ptr<Processor> proc)
 			: state (st), processor (proc) {}
 
 		XMLNode                      state;
-		boost::shared_ptr<Processor> processor;
+		std::shared_ptr<Processor> processor;
 		PBD::ID                      id;
 	};
 
@@ -208,7 +208,7 @@ protected:
 
 		~FreezeRecord();
 
-		boost::shared_ptr<Playlist>        playlist;
+		std::shared_ptr<Playlist>        playlist;
 		std::vector<FreezeRecordProcessorInfo*> processor_info;
 		bool                               have_mementos;
 		FreezeState                        state;
@@ -219,8 +219,8 @@ protected:
 	FreezeRecord _freeze_record;
 	XMLNode*      pending_state;
 
-	boost::shared_ptr<AutomationControl> _record_enable_control;
-	boost::shared_ptr<AutomationControl> _record_safe_control;
+	std::shared_ptr<AutomationControl> _record_enable_control;
+	std::shared_ptr<AutomationControl> _record_safe_control;
 
 	virtual void record_enable_changed (bool, PBD::Controllable::GroupControlDisposition);
 	virtual void record_safe_changed (bool, PBD::Controllable::GroupControlDisposition);

@@ -49,7 +49,7 @@ using std::vector;
 #define GET_PRIVATE_JACK_POINTER(localvar)  jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(localvar,r) jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return r; }
 
-JACKAudioBackend::JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, boost::shared_ptr<JackConnection> jc)
+JACKAudioBackend::JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, std::shared_ptr<JackConnection> jc)
 	: AudioBackend (e, info)
 	, _jack_connection (jc)
 	, _running (false)
@@ -75,7 +75,7 @@ JACKAudioBackend::~JACKAudioBackend()
 {
 	{
 		RCUWriter<JackPorts> writer (_jack_ports);
-		boost::shared_ptr<JackPorts> jp = writer.get_copy ();
+		std::shared_ptr<JackPorts> jp = writer.get_copy ();
 		jp->clear ();
 	}
 
@@ -1099,7 +1099,7 @@ JACKAudioBackend::n_physical (unsigned long flags) const
 	if (ports) {
 		for (uint32_t i = 0; ports[i]; ++i) {
 			if (!strstr (ports[i], "Midi-Through")) {
-				boost::shared_ptr<JackPort> jp (new JackPort (jack_port_by_name (_priv_jack, ports[i])));
+				std::shared_ptr<JackPort> jp (new JackPort (jack_port_by_name (_priv_jack, ports[i])));
 				DataType t = port_data_type (jp);
 				if (t != DataType::NIL) {
 					c.set (t, c.get (t) + 1);

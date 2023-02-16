@@ -70,7 +70,7 @@ ArdourDisplay::on_scroll_event (GdkEventScroll* ev)
 		}
 	}
 
-	boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
+	std::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
 	if (c) {
 		float val = c->get_interface();
 
@@ -100,7 +100,7 @@ static inline float dB_to_coefficient (float dB) {
 void
 ArdourDisplay::handle_controllable_preset (float p)
 {
-	boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
+	std::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
 
 	if (!c) return;
 
@@ -115,7 +115,7 @@ ArdourDisplay::handle_controllable_preset (float p)
 
 
 void
-ArdourDisplay::set_controllable (boost::shared_ptr<Controllable> c)
+ArdourDisplay::set_controllable (std::shared_ptr<Controllable> c)
 {
     watch_connection.disconnect ();  //stop watching the old controllable
 
@@ -131,7 +131,7 @@ ArdourDisplay::set_controllable (boost::shared_ptr<Controllable> c)
 void
 ArdourDisplay::controllable_changed ()
 {
-	boost::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
+	std::shared_ptr<PBD::Controllable> c = binding_proxy.get_controllable();
 
 	if (!c) return;
 

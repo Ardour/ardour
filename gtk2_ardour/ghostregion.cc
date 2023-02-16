@@ -454,7 +454,7 @@ MidiGhostRegion::model_changed ()
 	/* we rely on the parent MRV having removed notes not in the model */
 	for (EventList::iterator i = events.begin(); i != events.end(); ) {
 
-		boost::shared_ptr<NoteType> note = i->first;
+		std::shared_ptr<NoteType> note = i->first;
 		GhostEvent* cne = i->second;
 		const bool visible = (note->note() >= parent_mrv._current_range_min) &&
 			(note->note() <= parent_mrv._current_range_max);
@@ -479,7 +479,7 @@ MidiGhostRegion::model_changed ()
  *  @return Our Event, or 0 if not found.
  */
 MidiGhostRegion::GhostEvent *
-MidiGhostRegion::find_event (boost::shared_ptr<NoteType> parent)
+MidiGhostRegion::find_event (std::shared_ptr<NoteType> parent)
 {
 	/* we are using _optimization_iterator to speed up the common case where a caller
 	   is going through our notes in order.

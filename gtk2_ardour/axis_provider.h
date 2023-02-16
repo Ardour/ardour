@@ -33,8 +33,8 @@ class AxisViewProvider
 {
 public:
 	virtual ~AxisViewProvider () {}
-	virtual AxisView* axis_view_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const = 0;
-	virtual AxisView* axis_view_by_control (boost::shared_ptr<ARDOUR::AutomationControl>) const = 0;
+	virtual AxisView* axis_view_by_stripable (std::shared_ptr<ARDOUR::Stripable>) const = 0;
+	virtual AxisView* axis_view_by_control (std::shared_ptr<ARDOUR::AutomationControl>) const = 0;
 };
 
 #endif /* __gtk2_ardour_axis_provider_h__ */

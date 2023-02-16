@@ -67,7 +67,7 @@ namespace Evoral {
 template<typename Time>
 Sequence<Time>::const_iterator::const_iterator()
 	: _seq(NULL)
-	, _event(boost::shared_ptr< Event<Time> >(new Event<Time>()))
+	, _event(std::shared_ptr< Event<Time> >(new Event<Time>()))
 	, _active_patch_change_message (NO_EVENT)
 	, _type(NIL)
 	, _is_end(true)
@@ -82,7 +82,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
                                                Time                                t,
                                                bool                                force_discrete,
                                                const std::set<Evoral::Parameter>&  filtered,
-                                               std::set<WeakNotePtr> const *       active_notes)
+                                               WeakActiveNotes const *             active_notes)
 	: _seq(&seq)
 	, _active_patch_change_message (0)
 	, _type(NIL)
@@ -194,7 +194,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 	choose_next(t);
 
 	// Allocate a new event for storing the current event in MIDI format
-	_event = boost::shared_ptr< Event<Time> >(
+	_event = std::shared_ptr< Event<Time> >(
 		new Event<Time>(NO_EVENT, Time(), 4, NULL, true));
 
 	// Set event from chosen sub-iterator
@@ -214,7 +214,7 @@ Sequence<Time>::const_iterator::const_iterator(const Sequence<Time>&            
 
 template<typename Time>
 void
-Sequence<Time>::const_iterator::get_active_notes (std::set<WeakNotePtr>& active_notes) const
+Sequence<Time>::const_iterator::get_active_notes (WeakActiveNotes& active_notes) const
 {
 	/* can't iterate over a std::priority_queue<> such as ActiveNotes */
 	ActiveNotes copy (_active_notes);
@@ -510,7 +510,7 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
 	}
 
 	for (typename SysExes::const_iterator i = other._sysexes.begin(); i != other._sysexes.end(); ++i) {
-		boost::shared_ptr<Event<Time> > n (new Event<Time> (**i, true));
+		std::shared_ptr<Event<Time> > n (new Event<Time> (**i, true));
 		_sysexes.insert (n);
 	}
 
@@ -535,14 +535,14 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
 template<typename Time>
 bool
 Sequence<Time>::control_to_midi_event(
-	boost::shared_ptr< Event<Time> >& ev,
+	std::shared_ptr< Event<Time> >& ev,
 	const ControlIterator&            iter) const
 {
 	assert(iter.list.get());
 
 	// initialize the event pointer with a new event, if necessary
 	if (!ev) {
-		ev = boost::shared_ptr< Event<Time> >(new Event<Time>(NO_EVENT, Time(), 3, NULL, true));
+		ev = std::shared_ptr< Event<Time> >(new Event<Time>(NO_EVENT, Time(), 3, NULL, true));
 	}
 
 	const uint8_t midi_type = _type_map.parameter_midi_type(iter.list->parameter());
@@ -1080,7 +1080,7 @@ Sequence<Time>::append_control_unlocked(const Parameter& param, Time time, doubl
 {
 	DEBUG_TRACE (DEBUG::Sequence, string_compose ("%1 %2 @ %3 = %4 # controls: %5\n",
 	                                              this, _type_map.to_symbol(param), time, value, _controls.size()));
-	boost::shared_ptr<Control> c = control(param, true);
+	std::shared_ptr<Control> c = control(param, true);
 	c->list()->add (Temporal::timepos_t (time), value, true, false);
 	/* XXX control events should use IDs */
 }
@@ -1096,7 +1096,7 @@ Sequence<Time>::append_sysex_unlocked(const Event<Time>& ev, event_id_t /* evid 
 	} cerr << "]" << endl;
 #endif
 
-	boost::shared_ptr< Event<Time> > event(new Event<Time>(ev, true));
+	std::shared_ptr< Event<Time> > event(new Event<Time>(ev, true));
 	/* XXX sysex events should use IDs */
 	_sysexes.insert(event);
 }

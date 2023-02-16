@@ -48,26 +48,26 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 	 */
 	static bool exists() { return _instance != 0; }
 
-	typedef std::list<boost::shared_ptr<TransportMaster> > TransportMasters;
+	typedef std::list<std::shared_ptr<TransportMaster> > TransportMasters;
 
 	int add (SyncSource type, std::string const & name, bool removeable = true);
 	int remove (std::string const & name);
 	void clear ();
 
-	PBD::Signal1<void,boost::shared_ptr<TransportMaster> > Added;
-	PBD::Signal1<void,boost::shared_ptr<TransportMaster> > Removed; // null argument means "clear"
+	PBD::Signal1<void,std::shared_ptr<TransportMaster> > Added;
+	PBD::Signal1<void,std::shared_ptr<TransportMaster> > Removed; // null argument means "clear"
 
 	double pre_process_transport_masters (pframes_t, samplepos_t session_transport_position);
 
 	double get_current_speed_in_process_context() const { return _master_speed; }
 	samplepos_t get_current_position_in_process_context() const { return _master_position; }
 
-	boost::shared_ptr<TransportMaster> current() const { return _current_master; }
-	int set_current (boost::shared_ptr<TransportMaster>);
+	std::shared_ptr<TransportMaster> current() const { return _current_master; }
+	int set_current (std::shared_ptr<TransportMaster>);
 	int set_current (SyncSource);
 	int set_current (std::string const &);
 
-	PBD::Signal2<void,boost::shared_ptr<TransportMaster>, boost::shared_ptr<TransportMaster> > CurrentChanged;
+	PBD::Signal2<void,std::shared_ptr<TransportMaster>, std::shared_ptr<TransportMaster> > CurrentChanged;
 
 	int set_state (XMLNode const &, int);
 	XMLNode& get_state() const;
@@ -77,9 +77,9 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 
 	bool master_invalid_this_cycle() const { return _master_invalid_this_cycle; }
 
-	boost::shared_ptr<TransportMaster> master_by_type (SyncSource src) const;
-	boost::shared_ptr<TransportMaster> master_by_name (std::string const &) const;
-	boost::shared_ptr<TransportMaster> master_by_port (boost::shared_ptr<Port> const &p) const;
+	std::shared_ptr<TransportMaster> master_by_type (SyncSource src) const;
+	std::shared_ptr<TransportMaster> master_by_name (std::string const &) const;
+	std::shared_ptr<TransportMaster> master_by_port (std::shared_ptr<Port> const &p) const;
 
 	TransportMasters const & transport_masters() const { return _transport_masters; }
 
@@ -97,7 +97,7 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 	double                _master_speed;
 	samplepos_t           _master_position;
 
-	boost::shared_ptr<TransportMaster> _current_master;
+	std::shared_ptr<TransportMaster> _current_master;
 	Session* _session;
 
 	bool _master_invalid_this_cycle;
@@ -122,9 +122,9 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 	void maybe_restore_tc_format ();
 	void maybe_set_tc_format ();
 
-	int add_locked (boost::shared_ptr<TransportMaster>);
+	int add_locked (std::shared_ptr<TransportMaster>);
 	double compute_matching_master_speed (pframes_t nframes, samplepos_t, bool& locate_required);
-	int set_current_locked (boost::shared_ptr<TransportMaster>);
+	int set_current_locked (std::shared_ptr<TransportMaster>);
 
 	PBD::ScopedConnection config_connection;
 	void parameter_changed (std::string const & what);

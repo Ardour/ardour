@@ -55,7 +55,7 @@ class AudioRegionView;
 class AudioRegionEditor : public RegionEditor
 {
 public:
-	AudioRegionEditor (ARDOUR::Session*, boost::shared_ptr<ARDOUR::AudioRegion>);
+	AudioRegionEditor (ARDOUR::Session*, std::shared_ptr<ARDOUR::AudioRegion>);
 	~AudioRegionEditor ();
 
 	void peak_amplitude_thread ();
@@ -67,7 +67,7 @@ private:
 	void gain_changed ();
 	void gain_adjustment_changed ();
 
-	boost::shared_ptr<ARDOUR::AudioRegion> _audio_region;
+	std::shared_ptr<ARDOUR::AudioRegion> _audio_region;
 
 	Gtk::Label      gain_label;
 	Gtk::Adjustment gain_adjustment;

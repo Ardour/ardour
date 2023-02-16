@@ -108,7 +108,7 @@ count_channels (Vst::IComponent* c, Vst::MediaType media, Vst::BusDirection dir,
 }
 
 static bool
-discover_vst3 (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::vector<ARDOUR::VST3Info>& rv, bool verbose)
+discover_vst3 (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::vector<ARDOUR::VST3Info>& rv, bool verbose)
 {
 	using namespace std;
 	using namespace ARDOUR;
@@ -473,7 +473,7 @@ ARDOUR::vst3_scan_and_cache (std::string const& module_path, std::string const& 
 	root->set_property ("module", module_path);
 
 	try {
-		boost::shared_ptr<VST3PluginModule> m = VST3PluginModule::load (module_path);
+		std::shared_ptr<VST3PluginModule> m = VST3PluginModule::load (module_path);
 		std::vector<VST3Info> nfo;
 		if (!discover_vst3 (m, nfo, verbose)) {
 			delete root;

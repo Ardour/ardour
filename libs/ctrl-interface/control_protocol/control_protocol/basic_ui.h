@@ -194,7 +194,7 @@ class LIBCONTROLCP_API BasicUI {
 	void unbang_trigger_at (int x, int y);
 
 	/* it would be nice to use TriggerPtr here but that implies including ardour/triggerbox.h */
-	boost::shared_ptr<ARDOUR::Trigger> find_trigger (int x, int y);
+	std::shared_ptr<ARDOUR::Trigger> find_trigger (int x, int y);
 
   protected:
 	BasicUI ();

@@ -1476,10 +1476,10 @@ ARDOUR_UI::update_timecode_format ()
 
 	if (_session) {
 		bool matching;
-		boost::shared_ptr<TimecodeTransportMaster> tcmaster;
-		boost::shared_ptr<TransportMaster> tm = TransportMasterManager::instance().current();
+		std::shared_ptr<TimecodeTransportMaster> tcmaster;
+		std::shared_ptr<TransportMaster> tm = TransportMasterManager::instance().current();
 
-		if ((tm->type() == LTC || tm->type() == MTC) && (tcmaster = boost::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0 && tm->locked()) {
+		if ((tm->type() == LTC || tm->type() == MTC) && (tcmaster = std::dynamic_pointer_cast<TimecodeTransportMaster>(tm)) != 0 && tm->locked()) {
 			matching = (tcmaster->apparent_timecode_format() == _session->config.get_timecode_format());
 		} else {
 			matching = true;
@@ -1542,7 +1542,7 @@ ARDOUR_UI::session_add_midi_route (
 			ChanCount one_midi_channel;
 			one_midi_channel.set (DataType::MIDI, 1);
 
-			list<boost::shared_ptr<MidiTrack> > tracks;
+			list<std::shared_ptr<MidiTrack> > tracks;
 			tracks = _session->new_midi_track (one_midi_channel, one_midi_channel, strict_io, instrument, pset, route_group, how_many, name_template, order, ARDOUR::Normal, true, trigger_visibility);
 
 			if (tracks.size() != how_many) {
@@ -1579,7 +1579,7 @@ ARDOUR_UI::session_add_audio_route (
 	ARDOUR::PresentationInfo::order_t order,
 	bool trigger_visibility)
 {
-	list<boost::shared_ptr<AudioTrack> > tracks;
+	list<std::shared_ptr<AudioTrack> > tracks;
 	RouteList routes;
 
 	assert (_session);
@@ -1610,7 +1610,7 @@ ARDOUR_UI::session_add_audio_route (
 	}
 
 	if (strict_io) {
-		for (list<boost::shared_ptr<AudioTrack> >::iterator i = tracks.begin(); i != tracks.end(); ++i) {
+		for (list<std::shared_ptr<AudioTrack> >::iterator i = tracks.begin(); i != tracks.end(); ++i) {
 			(*i)->set_strict_io (true);
 		}
 		for (RouteList::iterator i = routes.begin(); i != routes.end(); ++i) {
@@ -1761,11 +1761,11 @@ ARDOUR_UI::trx_record_enable_all_tracks ()
 		return false;
 	}
 
-	boost::shared_ptr<RouteList> rl = _session->get_tracks ();
+	std::shared_ptr<RouteList> rl = _session->get_tracks ();
 	bool none_record_enabled = true;
 
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
-		boost::shared_ptr<Track> t = boost::dynamic_pointer_cast<Track> (*r);
+		std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track> (*r);
 		assert (t);
 
 		if (t->rec_enable_control()->get_value()) {
@@ -2130,13 +2130,13 @@ ARDOUR_UI::toggle_record_enable (uint16_t rid)
 		return;
 	}
 
-	boost::shared_ptr<Route> r;
+	std::shared_ptr<Route> r;
 
 	if ((r = _session->get_remote_nth_route (rid)) != 0) {
 
-		boost::shared_ptr<Track> t;
+		std::shared_ptr<Track> t;
 
-		if ((t = boost::dynamic_pointer_cast<Track>(r)) != 0) {
+		if ((t = std::dynamic_pointer_cast<Track>(r)) != 0) {
 			t->rec_enable_control()->set_value (!t->rec_enable_control()->get_value(), Controllable::UseGroup);
 		}
 	}

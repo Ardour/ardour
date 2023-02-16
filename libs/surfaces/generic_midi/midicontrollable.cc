@@ -67,7 +67,7 @@ MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser&
 	control_additional = (MIDI::byte) -1;
 }
 
-MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser& p, boost::shared_ptr<PBD::Controllable> c, bool m)
+MIDIControllable::MIDIControllable (GenericMidiControlProtocol* s, MIDI::Parser& p, std::shared_ptr<PBD::Controllable> c, bool m)
 	: _surface (s)
 	, _parser (p)
 	, _momentary (m)
@@ -121,14 +121,14 @@ MIDIControllable::drop_external_control ()
 	control_additional = (MIDI::byte) -1;
 }
 
-boost::shared_ptr<PBD::Controllable>
+std::shared_ptr<PBD::Controllable>
 MIDIControllable::get_controllable () const
 {
 	return _controllable;
 }
 
 void
-MIDIControllable::set_controllable (boost::shared_ptr<PBD::Controllable> c)
+MIDIControllable::set_controllable (std::shared_ptr<PBD::Controllable> c)
 {
 	Glib::Threads::Mutex::Lock lm (controllable_lock);
 	if (c && c == _controllable) {
@@ -197,7 +197,7 @@ MIDIControllable::control_to_midi (float val)
 			return 0;
 		}
 	} else {
-		boost::shared_ptr<AutomationControl> actl = boost::dynamic_pointer_cast<AutomationControl> (_controllable);
+		std::shared_ptr<AutomationControl> actl = std::dynamic_pointer_cast<AutomationControl> (_controllable);
 		if (actl) {
 			control_min = actl->internal_to_interface(control_min);
 			control_max = actl->internal_to_interface(control_max);
@@ -233,7 +233,7 @@ MIDIControllable::midi_to_control (int val)
 	float control_range = control_max - control_min;
 	DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("Min %1 Max %2 Range %3\n", control_min, control_max, control_range));
 
-	boost::shared_ptr<AutomationControl> actl = boost::dynamic_pointer_cast<AutomationControl> (_controllable);
+	std::shared_ptr<AutomationControl> actl = std::dynamic_pointer_cast<AutomationControl> (_controllable);
 	if (actl) {
 		if (fv == 0.f) return control_min;
 		if (fv == 1.f) return control_max;
@@ -264,10 +264,10 @@ MIDIControllable::lookup_controllable()
 		return -1;
 	}
 
-	boost::shared_ptr<Controllable> c = _surface->lookup_controllable (_current_uri);
+	std::shared_ptr<Controllable> c = _surface->lookup_controllable (_current_uri);
 
 	if (!c) {
-		set_controllable (boost::shared_ptr<PBD::Controllable>());
+		set_controllable (std::shared_ptr<PBD::Controllable>());
 		return -1;
 	}
 
@@ -279,7 +279,7 @@ MIDIControllable::lookup_controllable()
 void
 MIDIControllable::drop_controllable ()
 {
-	set_controllable (boost::shared_ptr<PBD::Controllable>());
+	set_controllable (std::shared_ptr<PBD::Controllable>());
 }
 
 void

@@ -73,8 +73,8 @@ FaderPort8::send_session_state ()
 void
 FaderPort8::notify_route_state_changed ()
 {
-	boost::shared_ptr<Stripable> s = first_selected_stripable();
-	boost::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<Stripable> s = first_selected_stripable();
+	std::shared_ptr<AutomationControl> ac;
 	if (s) {
 		switch (_ctrls.fader_mode ()) {
 			case ModeTrack:
@@ -220,7 +220,7 @@ FaderPort8::notify_mute_changed ()
 void
 FaderPort8::notify_plugin_active_changed ()
 {
-	boost::shared_ptr<PluginInsert> pi = _plugin_insert.lock();
+	std::shared_ptr<PluginInsert> pi = _plugin_insert.lock();
 	if (pi) {
 		_ctrls.button (FP8Controls::BtnBypass).set_active (true);
 		_ctrls.button (FP8Controls::BtnBypass).set_color (pi->enabled () ? 0x00ff00ff : 0xff0000ff);
@@ -231,13 +231,13 @@ FaderPort8::notify_plugin_active_changed ()
 }
 
 void
-FaderPort8::nofity_focus_control (boost::weak_ptr<PBD::Controllable> c)
+FaderPort8::nofity_focus_control (std::weak_ptr<PBD::Controllable> c)
 {
 	assert (_link_enabled && !_link_locked);
 	// TODO consider subscribing to c's DropReferences
 	// (in case the control goes away while it has focus, update the BtnColor)
 	_link_control = c;
-	if (c.expired () || 0 == boost::dynamic_pointer_cast<AutomationControl> (_link_control.lock ())) {
+	if (c.expired () || 0 == std::dynamic_pointer_cast<AutomationControl> (_link_control.lock ())) {
 		_ctrls.button (FP8Controls::BtnLink).set_color (0xff8800ff);
 		_ctrls.button (FP8Controls::BtnLock).set_color (0xff0000ff);
 	} else {

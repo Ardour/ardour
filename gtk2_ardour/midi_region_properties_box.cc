@@ -76,7 +76,7 @@ MidiRegionPropertiesBox::~MidiRegionPropertiesBox ()
 }
 
 void
-MidiRegionPropertiesBox::set_region (boost::shared_ptr<Region> r)
+MidiRegionPropertiesBox::set_region (std::shared_ptr<Region> r)
 {
 	RegionPropertiesBox::set_region (r);
 

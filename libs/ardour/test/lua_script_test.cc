@@ -63,11 +63,11 @@ void
 LuaScriptTest::dsp_script_test ()
 {
 	PluginManager& pm = PluginManager::instance ();
-	std::list<boost::shared_ptr<AudioTrack> > tracks;
+	std::list<std::shared_ptr<AudioTrack> > tracks;
 
 	tracks = _session->new_audio_track (2, 2, NULL, 1, "", PresentationInfo::max_order);
 	CPPUNIT_ASSERT (tracks.size() == 1);
-	boost::shared_ptr<Route> r = tracks.front ();
+	std::shared_ptr<Route> r = tracks.front ();
 
 	std::cout << "\n";
 	const PluginInfoList& plugs = pm.lua_plugin_info();
@@ -91,10 +91,10 @@ LuaScriptTest::dsp_script_test ()
 		PluginPtr p = (*i)->load (*_session);
 		CPPUNIT_ASSERT_MESSAGE ((*i)->name, p);
 
-		boost::shared_ptr<Processor> processor (new PluginInsert (*_session, r->time_domain(), p));
+		std::shared_ptr<Processor> processor (new PluginInsert (*_session, r->time_domain(), p));
 		processor->enable (true);
 
-		int rv = r->add_processor (processor, boost::shared_ptr<Processor>(), 0);
+		int rv = r->add_processor (processor, std::shared_ptr<Processor>(), 0);
 		CPPUNIT_ASSERT_MESSAGE ((*i)->name, rv == 0);
 		processor->enable (true);
 		Glib::usleep(200000); // run process, failing plugins will be deactivated.

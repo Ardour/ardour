@@ -34,7 +34,7 @@ PanControllable::actually_set_value (double v, Controllable::GroupControlDisposi
 		return;
 	}
 
-	boost::shared_ptr<Panner> p = owner->panner();
+	std::shared_ptr<Panner> p = owner->panner();
 
 	bool can_set = false;
 
@@ -67,5 +67,5 @@ PanControllable::get_user_string () const
 		snprintf(buf, sizeof(buf), "%.0f%%", 100.f * v);
 		return buf;
 	}
-	return owner->panner()->value_as_string (boost::dynamic_pointer_cast<const AutomationControl>(shared_from_this()));
+	return owner->panner()->value_as_string (std::dynamic_pointer_cast<const AutomationControl>(shared_from_this()));
 }

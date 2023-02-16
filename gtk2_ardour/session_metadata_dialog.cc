@@ -662,7 +662,7 @@ SessionMetadataDialog<DataSet>::warn_user (string const & string)
 }
 
 template <typename DataSet>
-boost::shared_ptr<std::list<Gtk::Widget *> >
+std::shared_ptr<std::list<Gtk::Widget *> >
 SessionMetadataDialog<DataSet>::get_custom_widgets (WidgetFunc f)
 {
 	WidgetListPtr list (new WidgetList);

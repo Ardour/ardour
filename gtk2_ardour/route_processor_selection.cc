@@ -73,12 +73,12 @@ RouteProcessorSelection::add_grouped_tracks (AxisView* r) const
 {
 	std::list<AxisView*> rv;
 
-	boost::shared_ptr<Route> route = boost::dynamic_pointer_cast<Route>(r->stripable());
+	std::shared_ptr<Route> route = std::dynamic_pointer_cast<Route>(r->stripable());
 	if (route) {
 		ARDOUR::RouteGroup* rg = route->route_group ();
 		if (rg && rg->is_active() && rg->is_select ()) {
 
-			boost::shared_ptr<RouteList> rl = rg->route_list ();
+			std::shared_ptr<RouteList> rl = rg->route_list ();
 			for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
 				AxisView* av = avp.axis_view_by_stripable (*i);
 				rv.push_back (av);
@@ -137,7 +137,7 @@ RouteProcessorSelection::add (AxisView* r, bool with_groups)
 	PresentationInfo::ChangeSuspender cs;
 	for (std::list<AxisView*>::const_iterator i = avl.begin (); i != avl.end (); ++i) {
 		if (axes.insert (*i).second) {
-			shp.session()->selection().add ((*i)->stripable(), boost::shared_ptr<AutomationControl>());
+			shp.session()->selection().add ((*i)->stripable(), std::shared_ptr<AutomationControl>());
 			MixerStrip* ms = dynamic_cast<MixerStrip*> (*i);
 			if (ms) {
 				ms->CatchDeletion.connect (*this, invalidator (*this), boost::bind (&RouteProcessorSelection::remove, this, _1, false), gui_context());
@@ -162,7 +162,7 @@ RouteProcessorSelection::remove (AxisView* r, bool with_groups)
 
 	PresentationInfo::ChangeSuspender cs;
 	for (std::list<AxisView*>::const_iterator i = avl.begin (); i != avl.end (); ++i) {
-		shp.session()->selection().remove ((*i)->stripable(), boost::shared_ptr<AutomationControl>());
+		shp.session()->selection().remove ((*i)->stripable(), std::shared_ptr<AutomationControl>());
 	}
 }
 

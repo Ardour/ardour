@@ -58,14 +58,14 @@ class BeatBox : public ARDOUR::Processor {
 	XMLNode& state() const;
 	XMLNode& get_state () const;
 
-	bool fill_source (boost::shared_ptr<Source>);
+	bool fill_source (std::shared_ptr<Source>);
 
   private:
 	StepSequencer* _sequencer;
 
 	ARDOUR::MidiNoteTracker inbound_tracker;
 
-	bool fill_midi_source (boost::shared_ptr<SMFSource>);
+	bool fill_midi_source (std::shared_ptr<SMFSource>);
 
 };
 

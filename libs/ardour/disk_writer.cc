@@ -74,7 +74,7 @@ DiskWriter::~DiskWriter ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("DiskWriter %1 @ %2 deleted\n", _name, this));
 
-	boost::shared_ptr<ChannelList> c = channels.reader();
+	std::shared_ptr<ChannelList> c = channels.reader();
 
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 		(*chan)->write_source.reset ();
@@ -106,7 +106,7 @@ DiskWriter::WriterChannelInfo::resize (samplecnt_t bufsize)
 }
 
 int
-DiskWriter::add_channel_to (boost::shared_ptr<ChannelList> c, uint32_t how_many)
+DiskWriter::add_channel_to (std::shared_ptr<ChannelList> c, uint32_t how_many)
 {
 	while (how_many--) {
 		c->push_back (new WriterChannelInfo (_session.butler()->audio_capture_buffer_size()));
@@ -429,7 +429,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	}
 
 	uint32_t n;
-	boost::shared_ptr<ChannelList> c = channels.reader();
+	std::shared_ptr<ChannelList> c = channels.reader();
 	ChannelList::iterator chan;
 
 	samplecnt_t rec_offset = 0;
@@ -740,7 +740,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 }
 
 void
-DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
+DiskWriter::finish_capture (std::shared_ptr<ChannelList> c)
 {
 	_was_recording = false;
 	_xrun_flag = false;
@@ -787,10 +787,10 @@ DiskWriter::finish_capture (boost::shared_ptr<ChannelList> c)
 	_first_recordable_sample = max_samplepos;
 }
 
-boost::shared_ptr<MidiBuffer>
+std::shared_ptr<MidiBuffer>
 DiskWriter::get_gui_feed_buffer () const
 {
-	boost::shared_ptr<MidiBuffer> b (new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI)));
+	std::shared_ptr<MidiBuffer> b (new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI)));
 
 	Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex);
 	b->copy (_gui_feed_buffer);
@@ -854,7 +854,7 @@ DiskWriter::prep_record_enable ()
 		return false;
 	}
 
-	boost::shared_ptr<ChannelList> c = channels.reader();
+	std::shared_ptr<ChannelList> c = channels.reader();
 
 	capturing_sources.clear ();
 
@@ -877,7 +877,7 @@ DiskWriter::prep_record_disable ()
 float
 DiskWriter::buffer_load () const
 {
-	boost::shared_ptr<ChannelList> c = channels.reader();
+	std::shared_ptr<ChannelList> c = channels.reader();
 
 	if (c->empty ()) {
 		return 1.0;
@@ -892,7 +892,7 @@ DiskWriter::set_note_mode (NoteMode m)
 {
 	_note_mode = m;
 
-	boost::shared_ptr<MidiPlaylist> mp = boost::dynamic_pointer_cast<MidiPlaylist> (_playlists[DataType::MIDI]);
+	std::shared_ptr<MidiPlaylist> mp = std::dynamic_pointer_cast<MidiPlaylist> (_playlists[DataType::MIDI]);
 
 	if (mp) {
 		mp->set_note_mode (m);
@@ -917,7 +917,7 @@ DiskWriter::reset_capture ()
 {
 	uint32_t n;
 	ChannelList::iterator chan;
-	boost::shared_ptr<ChannelList> c = channels.reader();
+	std::shared_ptr<ChannelList> c = channels.reader();
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 		(*chan)->wbuf->reset ();
@@ -942,7 +942,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 	vector.buf[0] = 0;
 	vector.buf[1] = 0;
 
-	boost::shared_ptr<ChannelList> c = channels.reader();
+	std::shared_ptr<ChannelList> c = channels.reader();
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 
 		(*chan)->wbuf->get_read_vector (&vector);
@@ -1052,7 +1052,7 @@ void
 DiskWriter::reset_write_sources (bool mark_write_complete, bool /*force*/)
 {
 	ChannelList::iterator chan;
-	boost::shared_ptr<ChannelList> c = channels.reader();
+	std::shared_ptr<ChannelList> c = channels.reader();
 	uint32_t n;
 
 	if (!_session.writable() || !recordable()) {
@@ -1111,7 +1111,7 @@ DiskWriter::use_new_write_source (DataType dt, uint32_t n)
 		_midi_write_source.reset();
 
 		try {
-			_midi_write_source = boost::dynamic_pointer_cast<SMFSource>(
+			_midi_write_source = std::dynamic_pointer_cast<SMFSource>(
 				_session.create_midi_source_for_session (write_source_name ()));
 
 			if (!_midi_write_source) {
@@ -1125,7 +1125,7 @@ DiskWriter::use_new_write_source (DataType dt, uint32_t n)
 			return -1;
 		}
 	} else {
-		boost::shared_ptr<ChannelList> c = channels.reader();
+		std::shared_ptr<ChannelList> c = channels.reader();
 
 		if (n >= c->size()) {
 			error << string_compose (_("AudioDiskstream: channel %1 out of range"), n) << endmsg;
@@ -1161,7 +1161,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	SourceList audio_srcs;
 	SourceList midi_srcs;
 	ChannelList::iterator chan;
-	boost::shared_ptr<ChannelList> c = channels.reader();
+	std::shared_ptr<ChannelList> c = channels.reader();
 	uint32_t n = 0;
 	bool mark_write_completed = false;
 
@@ -1219,7 +1219,7 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 
 	for (n = 0, chan = c->begin(); chan != c->end(); ++chan, ++n) {
 
-		boost::shared_ptr<AudioFileSource> as = (*chan)->write_source;
+		std::shared_ptr<AudioFileSource> as = (*chan)->write_source;
 
 		if (as) {
 			audio_srcs.push_back (as);
@@ -1326,7 +1326,7 @@ DiskWriter::loop (samplepos_t transport_sample)
 	_transport_looped = false;
 	if (_was_recording) {
 		// all we need to do is finish this capture, with modified capture length
-		boost::shared_ptr<ChannelList> c = channels.reader();
+		std::shared_ptr<ChannelList> c = channels.reader();
 
 		finish_capture (c);
 
@@ -1354,7 +1354,7 @@ DiskWriter::loop (samplepos_t transport_sample)
 void
 DiskWriter::adjust_buffering ()
 {
-	boost::shared_ptr<ChannelList> c = channels.reader();
+	std::shared_ptr<ChannelList> c = channels.reader();
 
 	for (ChannelList::iterator chan = c->begin(); chan != c->end(); ++chan) {
 		(*chan)->resize (_session.butler()->audio_capture_buffer_size());
@@ -1413,7 +1413,7 @@ DiskWriter::configure_io (ChanCount in, ChanCount out)
 {
 	bool changed = false;
 	{
-		boost::shared_ptr<ChannelList> c = channels.reader();
+		std::shared_ptr<ChannelList> c = channels.reader();
 		if (in.n_audio() != c->size()) {
 			changed = true;
 		}
@@ -1435,7 +1435,7 @@ DiskWriter::configure_io (ChanCount in, ChanCount out)
 }
 
 int
-DiskWriter::use_playlist (DataType dt, boost::shared_ptr<Playlist> playlist)
+DiskWriter::use_playlist (DataType dt, std::shared_ptr<Playlist> playlist)
 {
 	bool reset_ws = _playlists[dt] != playlist;
 

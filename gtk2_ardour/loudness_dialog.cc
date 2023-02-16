@@ -442,9 +442,9 @@ LoudnessDialog::analyze ()
 
 	ExportTimespanPtr tsp = _session->get_export_handler ()->add_timespan ();
 
-	boost::shared_ptr<ExportChannelConfiguration> ccp = _session->get_export_handler ()->add_channel_config ();
-	boost::shared_ptr<ARDOUR::ExportFilename>     fnp = _session->get_export_handler ()->add_filename ();
-	boost::shared_ptr<ExportFormatSpecification>  fmp = _session->get_export_handler ()->add_format ();
+	std::shared_ptr<ExportChannelConfiguration> ccp = _session->get_export_handler ()->add_channel_config ();
+	std::shared_ptr<ARDOUR::ExportFilename>     fnp = _session->get_export_handler ()->add_filename ();
+	std::shared_ptr<ExportFormatSpecification>  fmp = _session->get_export_handler ()->add_format ();
 
 	/* setup format */
 	fmp->set_sample_format (ExportFormatBase::SF_Float);
@@ -470,7 +470,7 @@ LoudnessDialog::analyze ()
 	}
 
 	/* do audio export */
-	boost::shared_ptr<AudioGrapher::BroadcastInfo> b;
+	std::shared_ptr<AudioGrapher::BroadcastInfo> b;
 	_session->get_export_handler ()->reset ();
 	_session->get_export_handler ()->add_export_config (tsp, ccp, fmp, fnp, b);
 	_session->get_export_handler ()->do_export ();

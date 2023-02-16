@@ -95,7 +95,7 @@ public:
 			pframes_t nframes, samplecnt_t offset);
 
 	std::string describe_parameter (Evoral::Parameter);
-	boost::shared_ptr<ScalePoints> get_scale_points(uint32_t port_index) const;
+	std::shared_ptr<ScalePoints> get_scale_points(uint32_t port_index) const;
 
 	bool parameter_is_audio (uint32_t) const { return false; }
 	bool parameter_is_control (uint32_t) const { return true; }
@@ -163,7 +163,7 @@ private:
 
 	LuaTableRef lref;
 
-	boost::weak_ptr<Route> route () const;
+	std::weak_ptr<Route> route () const;
 
 	void init ();
 	bool load_script ();
@@ -173,7 +173,7 @@ private:
 	std::string presets_file () const;
 	XMLTree* presets_tree () const;
 
-	boost::shared_ptr<ScalePoints> parse_scale_points (luabridge::LuaRef*);
+	std::shared_ptr<ScalePoints> parse_scale_points (luabridge::LuaRef*);
 
 	std::vector<std::pair<bool, int> > _ctrl_params;
 	std::map<int, ARDOUR::ParameterDescriptor> _param_desc;
@@ -224,7 +224,7 @@ class LIBARDOUR_API LuaPluginInfo : public PluginInfo
 	uint32_t _max_outputs;
 };
 
-typedef boost::shared_ptr<LuaPluginInfo> LuaPluginInfoPtr;
+typedef std::shared_ptr<LuaPluginInfo> LuaPluginInfoPtr;
 
 } // namespace ARDOUR
 

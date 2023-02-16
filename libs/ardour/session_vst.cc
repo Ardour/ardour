@@ -521,7 +521,7 @@ intptr_t Session::vst_callback (
 		SHOW_CALLBACK ("audioMasterBeginEdit");
 		// begin of automation session (when mouse down), parameter index in <index>
 		if (plug && plug->plugin_insert ()) {
-			boost::shared_ptr<AutomationControl> ac = plug->plugin_insert ()->automation_control (Evoral::Parameter (PluginAutomation, 0, index));
+			std::shared_ptr<AutomationControl> ac = plug->plugin_insert ()->automation_control (Evoral::Parameter (PluginAutomation, 0, index));
 			if (ac) {
 				ac->start_touch (timepos_t (ac->session().transport_sample()));
 			}
@@ -532,7 +532,7 @@ intptr_t Session::vst_callback (
 		SHOW_CALLBACK ("audioMasterEndEdit");
 		// end of automation session (when mouse up),     parameter index in <index>
 		if (plug && plug->plugin_insert ()) {
-			boost::shared_ptr<AutomationControl> ac = plug->plugin_insert ()->automation_control (Evoral::Parameter (PluginAutomation, 0, index));
+			std::shared_ptr<AutomationControl> ac = plug->plugin_insert ()->automation_control (Evoral::Parameter (PluginAutomation, 0, index));
 			if (ac) {
 				ac->stop_touch (timepos_t (ac->session().transport_sample()));
 			}

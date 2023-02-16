@@ -52,19 +52,19 @@ public:
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
 
-	bool bounceable (boost::shared_ptr<Processor>, bool) const { return false; }
-	boost::shared_ptr<Region> bounce (InterThreadInfo&, std::string const&);
-	boost::shared_ptr<Region> bounce_range (samplepos_t                  start,
+	bool bounceable (std::shared_ptr<Processor>, bool) const { return false; }
+	std::shared_ptr<Region> bounce (InterThreadInfo&, std::string const&);
+	std::shared_ptr<Region> bounce_range (samplepos_t                  start,
 	                                        samplepos_t                  end,
 	                                        InterThreadInfo&             iti,
-	                                        boost::shared_ptr<Processor> endpoint,
+	                                        std::shared_ptr<Processor> endpoint,
 	                                        bool                         include_endpoint,
 	                                        std::string const&           name);
 
 	int export_stuff (BufferSet&                   bufs,
 	                  samplepos_t                  start_sample,
 	                  samplecnt_t                  end_sample,
-	                  boost::shared_ptr<Processor> endpoint,
+	                  std::shared_ptr<Processor> endpoint,
 	                  bool                         include_endpoint,
 	                  bool                         for_export,
 	                  bool                         for_freeze,
@@ -78,7 +78,7 @@ public:
 	/** A control that will send "immediate" events to a MIDI track when twiddled */
 	struct MidiControl : public AutomationControl {
 		MidiControl(MidiTrack* route, const Evoral::Parameter& param,
-			    boost::shared_ptr<AutomationList> al = boost::shared_ptr<AutomationList>())
+			    std::shared_ptr<AutomationList> al = std::shared_ptr<AutomationList>())
 			: AutomationControl (route->session(), param, ParameterDescriptor(param), al)
 			, _route (route)
 		{}
@@ -105,7 +105,7 @@ public:
 
 	PBD::Signal1<void,bool> StepEditStatusChange;
 
-	boost::shared_ptr<SMFSource> write_source (uint32_t n = 0);
+	std::shared_ptr<SMFSource> write_source (uint32_t n = 0);
 
 	/* Configure capture/playback channels (see MidiChannelFilter). */
 	void set_capture_channel_mode (ChannelMode mode, uint16_t mask);
@@ -123,10 +123,10 @@ public:
 
 	virtual void filter_input (BufferSet& bufs);
 
-	boost::shared_ptr<MidiPlaylist> midi_playlist ();
+	std::shared_ptr<MidiPlaylist> midi_playlist ();
 
-	PBD::Signal1<void, boost::weak_ptr<MidiSource> > DataRecorded;
-	boost::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
+	PBD::Signal1<void, std::weak_ptr<MidiSource> > DataRecorded;
+	std::shared_ptr<MidiBuffer> get_gui_feed_buffer () const;
 
 	MonitorState monitoring_state () const;
 	MonitorState get_input_monitoring_state (bool recording, bool talkback) const;
@@ -142,7 +142,7 @@ public:
 	bool restore_pgm_on_load () const;
 
 	void realtime_handle_transport_stopped ();
-	void region_edited (boost::shared_ptr<Region>);
+	void region_edited (std::shared_ptr<Region>);
 
 protected:
 
@@ -175,7 +175,7 @@ private:
 	void track_input_active (IOChange, void*);
 	void map_input_active (bool);
 
-	void data_recorded (boost::weak_ptr<MidiSource> src);
+	void data_recorded (std::weak_ptr<MidiSource> src);
 
 	/** Update automation controls to reflect any changes in buffers. */
 	void update_controls (BufferSet const& bufs);

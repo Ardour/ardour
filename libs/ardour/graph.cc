@@ -432,7 +432,7 @@ again:
 }
 
 int
-Graph::process_routes (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler)
+Graph::process_routes (std::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool& need_butler)
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("graph execution from %1 to %2 = %3\n", start_sample, end_sample, nframes));
 
@@ -460,7 +460,7 @@ Graph::process_routes (boost::shared_ptr<GraphChain> chain, pframes_t nframes, s
 }
 
 int
-Graph::routes_no_roll (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool non_rt_pending)
+Graph::routes_no_roll (std::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample, samplepos_t end_sample, bool non_rt_pending)
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("no-roll graph execution from %1 to %2 = %3\n", start_sample, end_sample, nframes));
 
@@ -487,7 +487,7 @@ Graph::routes_no_roll (boost::shared_ptr<GraphChain> chain, pframes_t nframes, s
 }
 
 int
-Graph::silence_routes (boost::shared_ptr<GraphChain> chain, pframes_t nframes)
+Graph::silence_routes (std::shared_ptr<GraphChain> chain, pframes_t nframes)
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("silence graph execution from %1 for = %2\n", nframes));
 
@@ -510,7 +510,7 @@ Graph::silence_routes (boost::shared_ptr<GraphChain> chain, pframes_t nframes)
 }
 
 int
-Graph::process_io_plugs (boost::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample)
+Graph::process_io_plugs (std::shared_ptr<GraphChain> chain, pframes_t nframes, samplepos_t start_sample)
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("IOPlug graph execution at %1 for %2\n", start_sample, nframes));
 
@@ -615,8 +615,8 @@ GraphChain::GraphChain (GraphNodeList const& nodelist, GraphEdges const& edges)
 	for (auto const& ni : nodelist) {
 		RCUWriter<GraphActivision::ActivationMap>         wa (ni->_activation_set);
 		RCUWriter<GraphActivision::RefCntMap>             wr (ni->_init_refcount);
-		boost::shared_ptr<GraphActivision::ActivationMap> ma (wa.get_copy ());
-		boost::shared_ptr<GraphActivision::RefCntMap>     mr (wr.get_copy ());
+		std::shared_ptr<GraphActivision::ActivationMap> ma (wa.get_copy ());
+		std::shared_ptr<GraphActivision::RefCntMap>     mr (wr.get_copy ());
 		(*mr)[this] = 0;
 		(*ma)[this].clear ();
 		_nodes_rt.push_back (ni);
@@ -632,13 +632,13 @@ GraphChain::GraphChain (GraphNodeList const& nodelist, GraphEdges const& edges)
 
 		/* Set up ni's activation set */
 		if (has_output) {
-			boost::shared_ptr<GraphActivision::ActivationMap> m (ni->_activation_set.reader ());
+			std::shared_ptr<GraphActivision::ActivationMap> m (ni->_activation_set.reader ());
 			for (auto const& i : fed_from_r) {
 				auto it = (*m)[this].insert (i);
 				assert (it.second);
 
 				/* Increment the refcount of any node that we directly feed */
-				boost::shared_ptr<GraphActivision::RefCntMap> a ((*it.first)->_init_refcount.reader ());
+				std::shared_ptr<GraphActivision::RefCntMap> a ((*it.first)->_init_refcount.reader ());
 				(*a)[this] += 1;
 			}
 		}
@@ -668,8 +668,8 @@ GraphChain::~GraphChain ()
 	for (auto const& ni : _nodes_rt) {
 		RCUWriter<GraphActivision::ActivationMap>         wa (ni->_activation_set);
 		RCUWriter<GraphActivision::RefCntMap>             wr (ni->_init_refcount);
-		boost::shared_ptr<GraphActivision::ActivationMap> ma (wa.get_copy ());
-		boost::shared_ptr<GraphActivision::RefCntMap>     mr (wr.get_copy ());
+		std::shared_ptr<GraphActivision::ActivationMap> ma (wa.get_copy ());
+		std::shared_ptr<GraphActivision::RefCntMap>     mr (wr.get_copy ());
 		mr->erase (this);
 		ma->erase (this);
 	}

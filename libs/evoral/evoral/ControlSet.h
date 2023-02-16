@@ -47,22 +47,22 @@ public:
 	ControlSet (const ControlSet&);
         virtual ~ControlSet() {}
 
-	virtual boost::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id) = 0;
+	virtual std::shared_ptr<Evoral::Control> control_factory(const Evoral::Parameter& id) = 0;
 
-	boost::shared_ptr<Control>
+	std::shared_ptr<Control>
 	control (const Parameter& id, bool create_if_missing=false);
 
-	inline boost::shared_ptr<const Control>
+	inline std::shared_ptr<const Control>
 	control (const Parameter& id) const {
 		const Controls::const_iterator i = _controls.find(id);
-		return (i != _controls.end() ? i->second : boost::shared_ptr<Control>());
+		return (i != _controls.end() ? i->second : std::shared_ptr<Control>());
 	}
 
-	typedef std::map< Parameter, boost::shared_ptr<Control> > Controls;
+	typedef std::map< Parameter, std::shared_ptr<Control> > Controls;
 	inline Controls&       controls()       { return _controls; }
 	inline const Controls& controls() const { return _controls; }
 
-	virtual void add_control(boost::shared_ptr<Control>);
+	virtual void add_control(std::shared_ptr<Control>);
 
 	virtual bool controls_empty() const { return _controls.size() == 0; }
 	virtual void clear_controls();

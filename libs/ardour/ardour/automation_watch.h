@@ -40,16 +40,16 @@ class LIBARDOUR_API AutomationWatch : public sigc::trackable, public ARDOUR::Ses
 public:
 	static AutomationWatch& instance();
 
-	void add_automation_watch (boost::shared_ptr<ARDOUR::AutomationControl>);
-	void remove_automation_watch (boost::shared_ptr<ARDOUR::AutomationControl>);
+	void add_automation_watch (std::shared_ptr<ARDOUR::AutomationControl>);
+	void remove_automation_watch (std::shared_ptr<ARDOUR::AutomationControl>);
 	void transport_stop_automation_watches (ARDOUR::samplepos_t);
 	void set_session (ARDOUR::Session*);
 
 	gint timer ();
 
 private:
-	typedef std::set<boost::shared_ptr<ARDOUR::AutomationControl> > AutomationWatches;
-	typedef std::map<boost::shared_ptr<ARDOUR::AutomationControl>, PBD::ScopedConnection> AutomationConnection;
+	typedef std::set<std::shared_ptr<ARDOUR::AutomationControl> > AutomationWatches;
+	typedef std::map<std::shared_ptr<ARDOUR::AutomationControl>, PBD::ScopedConnection> AutomationConnection;
 
 	AutomationWatch ();
 	~AutomationWatch();
@@ -64,7 +64,7 @@ private:
 	PBD::ScopedConnection    transport_connection;
 
 	void transport_state_change ();
-	void remove_weak_automation_watch (boost::weak_ptr<ARDOUR::AutomationControl>);
+	void remove_weak_automation_watch (std::weak_ptr<ARDOUR::AutomationControl>);
 	void thread ();
 };
 

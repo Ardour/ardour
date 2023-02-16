@@ -139,7 +139,7 @@ class ChunkerTest : public CppUnit::TestFixture
 
 	void testEndOfInputFlagHandling()
 	{
-		boost::shared_ptr<ProcessContextGrabber<float> > grabber(new ProcessContextGrabber<float>());
+		std::shared_ptr<ProcessContextGrabber<float> > grabber(new ProcessContextGrabber<float>());
 
 		assert (samples % 2 == 0);
 		chunker.reset (new Chunker<float>(samples));
@@ -168,8 +168,8 @@ class ChunkerTest : public CppUnit::TestFixture
 	}
 
   private:
-	boost::shared_ptr<Chunker<float> > chunker;
-	boost::shared_ptr<VectorSink<float> > sink;
+	std::shared_ptr<Chunker<float> > chunker;
+	std::shared_ptr<VectorSink<float> > sink;
 
 	float * random_data;
 	samplecnt_t samples;

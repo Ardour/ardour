@@ -217,8 +217,8 @@ Maschine2::start ()
 		return -1;
 	}
 
-	boost::dynamic_pointer_cast<AsyncMIDIPort>(_midi_out)->set_flush_at_cycle_start (true);
-	_output_port = boost::dynamic_pointer_cast<AsyncMIDIPort>(_midi_out).get();
+	std::dynamic_pointer_cast<AsyncMIDIPort>(_midi_out)->set_flush_at_cycle_start (true);
+	_output_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_midi_out).get();
 
 	switch (_maschine_type) {
 		case Mikro:

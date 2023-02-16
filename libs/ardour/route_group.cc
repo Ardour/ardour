@@ -139,7 +139,7 @@ RouteGroup::~RouteGroup ()
 	_rec_enable_group->clear ();
 	_monitoring_group->clear ();
 
-	boost::shared_ptr<VCA> vca (group_master.lock());
+	std::shared_ptr<VCA> vca (group_master.lock());
 
 	for (RouteList::iterator i = routes->begin(); i != routes->end();) {
 		RouteList::iterator tmp = i;
@@ -159,7 +159,7 @@ RouteGroup::~RouteGroup ()
  *  @param r Route to add.
  */
 int
-RouteGroup::add (boost::shared_ptr<Route> r)
+RouteGroup::add (std::shared_ptr<Route> r)
 {
 	if (r->is_master()) {
 		return 0;
@@ -178,30 +178,30 @@ RouteGroup::add (boost::shared_ptr<Route> r)
 	_solo_group->add_control (r->solo_control());
 	_mute_group->add_control (r->mute_control());
 	_gain_group->add_control (r->gain_control());
-	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (r);
+	std::shared_ptr<Track> trk = std::dynamic_pointer_cast<Track> (r);
 	if (trk) {
 		_rec_enable_group->add_control (trk->rec_enable_control());
 		_monitoring_group->add_control (trk->monitoring_control());
 	}
 
 	r->set_route_group (this);
-	r->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::remove_when_going_away, this, boost::weak_ptr<Route> (r)));
+	r->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::remove_when_going_away, this, std::weak_ptr<Route> (r)));
 
-	boost::shared_ptr<VCA> vca (group_master.lock());
+	std::shared_ptr<VCA> vca (group_master.lock());
 
 	if (vca) {
 		r->assign (vca);
 	}
 
 	_session.set_dirty ();
-	RouteAdded (this, boost::weak_ptr<Route> (r)); /* EMIT SIGNAL */
+	RouteAdded (this, std::weak_ptr<Route> (r)); /* EMIT SIGNAL */
 	return 0;
 }
 
 void
-RouteGroup::remove_when_going_away (boost::weak_ptr<Route> wr)
+RouteGroup::remove_when_going_away (std::weak_ptr<Route> wr)
 {
-	boost::shared_ptr<Route> r (wr.lock());
+	std::shared_ptr<Route> r (wr.lock());
 
 	if (r) {
 		remove (r);
@@ -218,14 +218,14 @@ RouteGroup::unset_subgroup_bus ()
 }
 
 int
-RouteGroup::remove (boost::shared_ptr<Route> r)
+RouteGroup::remove (std::shared_ptr<Route> r)
 {
 	RouteList::iterator i;
 
 	if ((i = find (routes->begin(), routes->end(), r)) != routes->end()) {
 		r->set_route_group (0);
 
-		boost::shared_ptr<VCA> vca = group_master.lock();
+		std::shared_ptr<VCA> vca = group_master.lock();
 
 		if (vca) {
 			r->unassign (vca);
@@ -234,14 +234,14 @@ RouteGroup::remove (boost::shared_ptr<Route> r)
 		_solo_group->remove_control (r->solo_control());
 		_mute_group->remove_control (r->mute_control());
 		_gain_group->remove_control (r->gain_control());
-		boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track> (r);
+		std::shared_ptr<Track> trk = std::dynamic_pointer_cast<Track> (r);
 		if (trk) {
 			_rec_enable_group->remove_control (trk->rec_enable_control());
 			_monitoring_group->remove_control (trk->monitoring_control());
 		}
 		routes->erase (i);
 		_session.set_dirty ();
-		RouteRemoved (this, boost::weak_ptr<Route> (r)); /* EMIT SIGNAL */
+		RouteRemoved (this, std::weak_ptr<Route> (r)); /* EMIT SIGNAL */
 		return 0;
 	}
 
@@ -312,7 +312,7 @@ RouteGroup::set_state (const XMLNode& node, int version)
 
 		for (vector<string>::iterator i = ids.begin(); i != ids.end(); ++i) {
 			PBD::ID id (*i);
-			boost::shared_ptr<Route> r = _session.route_by_id (id);
+			std::shared_ptr<Route> r = _session.route_by_id (id);
 
 			if (r) {
 				add (r);
@@ -322,7 +322,7 @@ RouteGroup::set_state (const XMLNode& node, int version)
 
 	PBD::ID subgroup_id (0);
 	if (node.get_property ("subgroup-bus", subgroup_id)) {
-		boost::shared_ptr<Route> r = _session.route_by_id (subgroup_id);
+		std::shared_ptr<Route> r = _session.route_by_id (subgroup_id);
 		if (r) {
 			_subgroup_bus = r;
 			_subgroup_bus->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::unset_subgroup_bus, this));
@@ -330,7 +330,7 @@ RouteGroup::set_state (const XMLNode& node, int version)
 	}
 
 	if (_group_master_number.val() > 0) {
-		boost::shared_ptr<VCA> vca = _session.vca_manager().vca_by_number (_group_master_number.val());
+		std::shared_ptr<VCA> vca = _session.vca_manager().vca_by_number (_group_master_number.val());
 		if (vca) {
 			/* no need to do the assignment because slaves will
 			   handle that themselves. But we can set group_master
@@ -529,10 +529,10 @@ RouteGroup::set_hidden (bool yn, void* /*src*/)
 }
 
 void
-RouteGroup::audio_track_group (set<boost::shared_ptr<AudioTrack> >& ats)
+RouteGroup::audio_track_group (set<std::shared_ptr<AudioTrack> >& ats)
 {
 	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(*i);
+		std::shared_ptr<AudioTrack> at = std::dynamic_pointer_cast<AudioTrack>(*i);
 		if (at) {
 			ats.insert (at);
 		}
@@ -583,7 +583,7 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 
 	} else {
 
-		boost::shared_ptr<Bundle> bundle = _subgroup_bus->input()->bundle ();
+		std::shared_ptr<Bundle> bundle = _subgroup_bus->input()->bundle ();
 
 		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 			(*i)->output()->disconnect (this);
@@ -657,13 +657,13 @@ RouteGroup::push_to_groups ()
 }
 
 void
-RouteGroup::assign_master (boost::shared_ptr<VCA> master)
+RouteGroup::assign_master (std::shared_ptr<VCA> master)
 {
 	if (!routes || routes->empty()) {
 		return;
 	}
 
-	boost::shared_ptr<Route> front = routes->front ();
+	std::shared_ptr<Route> front = routes->front ();
 
 	if (front->slaved_to (master)) {
 		return;
@@ -681,13 +681,13 @@ RouteGroup::assign_master (boost::shared_ptr<VCA> master)
 }
 
 void
-RouteGroup::unassign_master (boost::shared_ptr<VCA> master)
+RouteGroup::unassign_master (std::shared_ptr<VCA> master)
 {
 	if (!routes || routes->empty()) {
 		return;
 	}
 
-	boost::shared_ptr<Route> front = routes->front ();
+	std::shared_ptr<Route> front = routes->front ();
 
 	if (!front->slaved_to (master)) {
 		return;

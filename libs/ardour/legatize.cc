@@ -30,7 +30,7 @@ Legatize::~Legatize ()
 {}
 
 Command*
-Legatize::operator()(boost::shared_ptr<ARDOUR::MidiModel> model,
+Legatize::operator()(std::shared_ptr<ARDOUR::MidiModel> model,
                      Temporal::Beats                      position,
                      std::vector<Legatize::Notes>&        seqs)
 {

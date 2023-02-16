@@ -110,7 +110,7 @@ Session::process (pframes_t nframes)
 
 	_engine.main_thread()->get_buffers ();
 
-	boost::shared_ptr<GraphChain> io_graph_chain = _io_graph_chain[0];
+	std::shared_ptr<GraphChain> io_graph_chain = _io_graph_chain[0];
 	if (io_graph_chain) {
 		PortManager::falloff_cache_calc (nframes, nominal_sample_rate ());
 		_process_graph->process_io_plugs (io_graph_chain, nframes, 0);
@@ -134,7 +134,7 @@ Session::process (pframes_t nframes)
 	bool one_or_more_routes_declicking = false;
 	{
 		ProcessorChangeBlocker pcb (this);
-		boost::shared_ptr<RouteList> r = routes.reader ();
+		std::shared_ptr<RouteList> r = routes.reader ();
 		for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 			if ((*i)->apply_processor_changes_rt()) {
 				_rt_emit_pending = true;
@@ -146,7 +146,7 @@ Session::process (pframes_t nframes)
 	}
 
 	if (_update_send_delaylines) {
-		boost::shared_ptr<RouteList> r = routes.reader ();
+		std::shared_ptr<RouteList> r = routes.reader ();
 		for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 			(*i)->update_send_delaylines ();
 		}
@@ -205,7 +205,7 @@ Session::no_roll (pframes_t nframes)
 
 	samplepos_t end_sample = _transport_sample + floor (nframes * _transport_fsm->transport_speed());
 	int ret = 0;
-	boost::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList> r = routes.reader ();
 
 	if (_click_io) {
 		_click_io->silence (nframes);
@@ -218,7 +218,7 @@ Session::no_roll (pframes_t nframes)
 
 	_global_locate_pending = locate_pending ();
 
-	boost::shared_ptr<GraphChain> graph_chain = _graph_chain;
+	std::shared_ptr<GraphChain> graph_chain = _graph_chain;
 	if (graph_chain) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/no-roll\n");
 		_process_graph->routes_no_roll(graph_chain, nframes, _transport_sample, end_sample, non_realtime_work_pending());
@@ -250,7 +250,7 @@ int
 Session::process_routes (pframes_t nframes, bool& need_butler)
 {
 	TimerRAII tr (dsp_stats[Roll]);
-	boost::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList> r = routes.reader ();
 
 	const samplepos_t start_sample = _transport_sample;
 	const samplepos_t end_sample = _transport_sample + floor (nframes * _transport_fsm->transport_speed());
@@ -266,7 +266,7 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 
 	_global_locate_pending = locate_pending();
 
-	boost::shared_ptr<GraphChain> graph_chain = _graph_chain;
+	std::shared_ptr<GraphChain> graph_chain = _graph_chain;
 	if (graph_chain) {
 		DEBUG_TRACE(DEBUG::ProcessThreads,"calling graph/process-routes\n");
 		if (_process_graph->process_routes (graph_chain, nframes, start_sample, end_sample, need_butler) < 0) {
@@ -307,10 +307,10 @@ Session::get_track_statistics ()
 	float pworst = 1.0f;
 	float cworst = 1.0f;
 
-	boost::shared_ptr<RouteList> rl = routes.reader();
+	std::shared_ptr<RouteList> rl = routes.reader();
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
 
 		if (!tr || tr->is_private_route()) {
 			continue;
@@ -348,7 +348,7 @@ Session::compute_audible_delta (samplepos_t& pos_and_delta) const
 samplecnt_t
 Session::calc_preroll_subcycle (samplecnt_t ns) const
 {
-	boost::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList> r = routes.reader ();
 	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
 		samplecnt_t route_offset = (*i)->playback_latency ();
 		if (_remaining_latency_preroll > route_offset + ns) {
@@ -759,9 +759,9 @@ void
 Session::process_audition (pframes_t nframes)
 {
 	SessionEvent* ev;
-	boost::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList> r = routes.reader ();
 
-	boost::shared_ptr<GraphChain> graph_chain = _graph_chain;
+	std::shared_ptr<GraphChain> graph_chain = _graph_chain;
 	if (graph_chain) {
 		/* Ideally we'd use Session::rt_tasklist, since dependency is irrelevant. */
 		_process_graph->silence_routes (graph_chain, nframes);
@@ -1033,13 +1033,13 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::Overwrite:
-		if (boost::shared_ptr<Track> track = ev->track.lock()) {
+		if (std::shared_ptr<Track> track = ev->track.lock()) {
 			overwrite_some_buffers (track, ev->overwrite);
 		}
 		break;
 
 	case SessionEvent::OverwriteAll:
-			overwrite_some_buffers (boost::shared_ptr<Track>(), ev->overwrite);
+			overwrite_some_buffers (std::shared_ptr<Track>(), ev->overwrite);
 		break;
 
 	case SessionEvent::TransportStateChange:
@@ -1097,9 +1097,9 @@ Session::process_event (SessionEvent* ev)
 }
 
 void
-Session::handle_slots_empty_status (boost::weak_ptr<Route> const & wr)
+Session::handle_slots_empty_status (std::weak_ptr<Route> const & wr)
 {
-	boost::shared_ptr<Route> r = wr.lock();
+	std::shared_ptr<Route> r = wr.lock();
 
 	if (!r) {
 		return;
@@ -1176,7 +1176,7 @@ Session::emit_route_signals ()
 	// TODO use RAII to allow using these signals in other places
 	BatchUpdateStart(); /* EMIT SIGNAL */
 	ProcessorChangeBlocker pcb (this);
-	boost::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList> r = routes.reader ();
 	for (RouteList::const_iterator ci = r->begin(); ci != r->end(); ++ci) {
 		(*ci)->emit_pending_signals ();
 	}
@@ -1738,7 +1738,7 @@ Session::bang_trigger_at (int32_t route_index, int32_t row_index)
 	get_stripables (sl);
 	sl.sort (Stripable::Sorter ());
 	for (StripableList::iterator s = sl.begin (); s != sl.end (); ++s) {
-		boost::shared_ptr<Route>     r = boost::dynamic_pointer_cast<Route> (*s);
+		std::shared_ptr<Route>     r = std::dynamic_pointer_cast<Route> (*s);
 		if (!r || !r->triggerbox ()) {
 			continue;
 		}
@@ -1765,7 +1765,7 @@ Session::unbang_trigger_at (int32_t route_index, int32_t row_index)
 	get_stripables (sl);
 	sl.sort (Stripable::Sorter ());
 	for (StripableList::iterator s = sl.begin (); s != sl.end (); ++s) {
-		boost::shared_ptr<Route>     r = boost::dynamic_pointer_cast<Route> (*s);
+		std::shared_ptr<Route>     r = std::dynamic_pointer_cast<Route> (*s);
 		if (!r || !r->triggerbox ()) {
 			continue;
 		}
@@ -1782,7 +1782,7 @@ Session::unbang_trigger_at (int32_t route_index, int32_t row_index)
 	return false;
 }
 
-boost::shared_ptr<TriggerBox>
+std::shared_ptr<TriggerBox>
 Session::triggerbox_at (int32_t route_index) const
 {
 	int index = 0;
@@ -1790,7 +1790,7 @@ Session::triggerbox_at (int32_t route_index) const
 	get_stripables (sl);
 	sl.sort (Stripable::Sorter ());
 	for (StripableList::iterator s = sl.begin (); s != sl.end (); ++s) {
-		boost::shared_ptr<Route>     r = boost::dynamic_pointer_cast<Route> (*s);
+		std::shared_ptr<Route>     r = std::dynamic_pointer_cast<Route> (*s);
 		if (!r || !r->triggerbox ()) {
 			continue;
 		}
@@ -1803,7 +1803,7 @@ Session::triggerbox_at (int32_t route_index) const
 		}
 		index++;
 	}
-	return boost::shared_ptr<TriggerBox>();
+	return std::shared_ptr<TriggerBox>();
 }
 
 int
@@ -1813,7 +1813,7 @@ Session::num_triggerboxes () const
 	StripableList sl;
 	get_stripables (sl);
 	for (StripableList::iterator s = sl.begin (); s != sl.end (); ++s) {
-		boost::shared_ptr<Route>     r = boost::dynamic_pointer_cast<Route> (*s);
+		std::shared_ptr<Route>     r = std::dynamic_pointer_cast<Route> (*s);
 		if (!r || !r->triggerbox ()) {
 			continue;
 		}
@@ -1829,7 +1829,7 @@ Session::num_triggerboxes () const
 TriggerPtr
 Session::trigger_at (int32_t route_index, int32_t trigger_index) const
 {
-	boost::shared_ptr<TriggerBox> tb = triggerbox_at(route_index);
+	std::shared_ptr<TriggerBox> tb = triggerbox_at(route_index);
 	if (tb) {
 		return tb->trigger(trigger_index);
 	}

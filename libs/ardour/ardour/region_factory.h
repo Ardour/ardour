@@ -47,11 +47,11 @@ class ThawList;
 class LIBARDOUR_API RegionFactory
 {
 public:
-	typedef std::map<PBD::ID, boost::shared_ptr<Region> > RegionMap;
+	typedef std::map<PBD::ID, std::shared_ptr<Region> > RegionMap;
 
-	static boost::shared_ptr<Region> wholefile_region_by_name (const std::string& name);
-	static boost::shared_ptr<Region> region_by_id (const PBD::ID&);
-	static boost::shared_ptr<Region> region_by_name (const std::string& name);
+	static std::shared_ptr<Region> wholefile_region_by_name (const std::string& name);
+	static std::shared_ptr<Region> region_by_id (const PBD::ID&);
+	static std::shared_ptr<Region> region_by_name (const std::string& name);
 	static void                      clear_map ();
 	static const RegionMap           all_regions ()
 	{
@@ -65,39 +65,39 @@ public:
 	 * itself, to permit dynamic_cast<> to be used to
 	 * infer the type of Region.
 	 */
-	static PBD::Signal1<void, boost::shared_ptr<Region> > CheckNewRegion;
+	static PBD::Signal1<void, std::shared_ptr<Region> > CheckNewRegion;
 
 	/** create a "pure copy" of Region \p other */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<const Region> other, bool announce, bool fork = false, ThawList* tl = 0);
+	static std::shared_ptr<Region> create (std::shared_ptr<const Region> other, bool announce, bool fork = false, ThawList* tl = 0);
 
 	/** Lua binding to create a "pure copy" of Region \p other */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, bool announce, bool fork)
+	static std::shared_ptr<Region> create (std::shared_ptr<Region> other, bool announce, bool fork)
 	{
-		return create (boost::shared_ptr<const Region> (other), announce, fork, 0);
+		return create (std::shared_ptr<const Region> (other), announce, fork, 0);
 	}
 
 	/** create a region from a single Source */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Source>, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
+	static std::shared_ptr<Region> create (std::shared_ptr<Source>, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 	/** create a region from a multiple sources */
-	static boost::shared_ptr<Region> create (const SourceList&, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
+	static std::shared_ptr<Region> create (const SourceList&, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 	/** create a copy of \p other starting at zero within \p other's sources */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
+	static std::shared_ptr<Region> create (std::shared_ptr<Region> other, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 	/** create a copy of \p other starting at \p offset within \p other */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, timecnt_t const & offset, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
+	static std::shared_ptr<Region> create (std::shared_ptr<Region> other, timecnt_t const & offset, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 	/** create a "copy" of \p other but using a different set of sources \p srcs */
-	static boost::shared_ptr<Region> create (boost::shared_ptr<Region> other, const SourceList& srcs, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
+	static std::shared_ptr<Region> create (std::shared_ptr<Region> other, const SourceList& srcs, const PBD::PropertyList&, bool announce = true, ThawList* tl = 0);
 
 	/** create a region with no sources, using XML state */
-	static boost::shared_ptr<Region> create (Session&, XMLNode&, bool);
+	static std::shared_ptr<Region> create (Session&, XMLNode&, bool);
 	/** create a region with specified sources \p srcs and XML state */
-	static boost::shared_ptr<Region> create (SourceList& srcs, const XMLNode&);
+	static std::shared_ptr<Region> create (SourceList& srcs, const XMLNode&);
 
-	static boost::shared_ptr<Region> get_whole_region_for_source (boost::shared_ptr<ARDOUR::Source>);
+	static std::shared_ptr<Region> get_whole_region_for_source (std::shared_ptr<ARDOUR::Source>);
 
-	static void get_regions_using_source (boost::shared_ptr<Source>, std::set<boost::shared_ptr<Region> >&);
-	static void remove_regions_using_source (boost::shared_ptr<Source>);
+	static void get_regions_using_source (std::shared_ptr<Source>, std::set<std::shared_ptr<Region> >&);
+	static void remove_regions_using_source (std::shared_ptr<Source>);
 
-	static void map_remove (boost::weak_ptr<Region>);
+	static void map_remove (std::weak_ptr<Region>);
 	static void delete_all_regions ();
 
 	static const RegionMap& regions ()
@@ -107,7 +107,7 @@ public:
 
 	static uint32_t nregions ();
 
-	static void foreach_region (boost::function<void (boost::shared_ptr<Region>)> f)
+	static void foreach_region (boost::function<void (std::shared_ptr<Region>)> f)
 	{
 		Glib::Threads::Mutex::Lock ls (region_map_lock);
 		for (RegionMap::const_iterator i = region_map.begin (); i != region_map.end (); ++i) {
@@ -132,29 +132,29 @@ public:
 	 * or split sufficiently.
 	 */
 
-	typedef std::map<boost::shared_ptr<Region>, boost::shared_ptr<Region> > CompoundAssociations;
+	typedef std::map<std::shared_ptr<Region>, std::shared_ptr<Region> > CompoundAssociations;
 
 	static CompoundAssociations& compound_associations ()
 	{
 		return _compound_associations;
 	}
 
-	static void add_compound_association (boost::shared_ptr<Region>, boost::shared_ptr<Region>);
+	static void add_compound_association (std::shared_ptr<Region>, std::shared_ptr<Region>);
 
 	/* exposed because there may be cases where regions are created with
 	 * announce=false but they still need to be in the map soon after
 	 * creation.
 	 */
 
-	static void map_add (boost::shared_ptr<Region>);
+	static void map_add (std::shared_ptr<Region>);
 
 private:
 	friend class ::RegionNamingTest;
 
-	static void region_changed (PBD::PropertyChange const&, boost::weak_ptr<Region>);
-	static void add_to_region_name_maps (boost::shared_ptr<Region>);
-	static void rename_in_region_name_maps (boost::shared_ptr<Region>);
-	static void update_region_name_number_map (boost::shared_ptr<Region>);
+	static void region_changed (PBD::PropertyChange const&, std::weak_ptr<Region>);
+	static void add_to_region_name_maps (std::shared_ptr<Region>);
+	static void rename_in_region_name_maps (std::shared_ptr<Region>);
+	static void update_region_name_number_map (std::shared_ptr<Region>);
 	static void remove_from_region_name_map (std::string);
 
 	static Glib::Threads::Mutex region_map_lock;

@@ -47,12 +47,12 @@ public:
 	RegionPropertiesBox ();
 	~RegionPropertiesBox ();
 
-	virtual void set_region (boost::shared_ptr<ARDOUR::Region>);
+	virtual void set_region (std::shared_ptr<ARDOUR::Region>);
 
 	void set_session (ARDOUR::Session* s);
 
 protected:
-	boost::shared_ptr<ARDOUR::Region> _region;
+	std::shared_ptr<ARDOUR::Region> _region;
 
 	Gtk::Label _header_label;
 
@@ -78,7 +78,7 @@ public:
 	AudioRegionPropertiesBox ();
 	~AudioRegionPropertiesBox ();
 
-	virtual void set_region (boost::shared_ptr<ARDOUR::Region>);
+	virtual void set_region (std::shared_ptr<ARDOUR::Region>);
 
 private:
 	ArdourWidgets::ArdourButton fade_in_enable_button;

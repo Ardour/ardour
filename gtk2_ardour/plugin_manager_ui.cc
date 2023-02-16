@@ -405,7 +405,7 @@ plugin_type (const PluginType t)
 }
 
 bool
-PluginManagerUI::show_this_plugin (boost::shared_ptr<PluginScanLogEntry> psle, PluginInfoPtr pip, const std::string& searchstr)
+PluginManagerUI::show_this_plugin (std::shared_ptr<PluginScanLogEntry> psle, PluginInfoPtr pip, const std::string& searchstr)
 {
 	using PBD::match_search_strings;
 
@@ -476,7 +476,7 @@ PluginManagerUI::refill ()
 {
 	/* save selection and sort-column, clear model to speed-up refill */
 	TreeIter                              iter = plugin_display.get_selection ()->get_selected ();
-	boost::shared_ptr<PluginScanLogEntry> sel;
+	std::shared_ptr<PluginScanLogEntry> sel;
 	if (iter) {
 		sel = (*iter)[plugin_columns.psle];
 	}
@@ -494,14 +494,14 @@ PluginManagerUI::refill ()
 
 	std::map<PluginType, PluginCount> plugin_count;
 
-	std::vector<boost::shared_ptr<PluginScanLogEntry> > psl;
+	std::vector<std::shared_ptr<PluginScanLogEntry> > psl;
 	PluginManager& manager (PluginManager::instance ());
 	manager.scan_log (psl);
 
 	std::string searchstr = _entry_search.get_text ();
 	setup_search_string (searchstr);
 
-	for (std::vector<boost::shared_ptr<PluginScanLogEntry> >::const_iterator i = psl.begin (); i != psl.end (); ++i) {
+	for (std::vector<std::shared_ptr<PluginScanLogEntry> >::const_iterator i = psl.begin (); i != psl.end (); ++i) {
 		PluginInfoList const& plugs = (*i)->nfo ();
 
 		if (!(*i)->recent ()) {
@@ -577,7 +577,7 @@ PluginManagerUI::refill ()
 	if (sel) {
 		TreeModel::Children rows = plugin_model->children ();
 		for (TreeModel::Children::iterator i = rows.begin (); i != rows.end (); ++i) {
-			boost::shared_ptr<PluginScanLogEntry> const& srow ((*i)[plugin_columns.psle]);
+			std::shared_ptr<PluginScanLogEntry> const& srow ((*i)[plugin_columns.psle]);
 			if (*sel == *srow) {
 				plugin_display.get_selection ()->select (*i);
 				TreeIter iter = plugin_display.get_selection ()->get_selected ();
@@ -659,7 +659,7 @@ PluginManagerUI::selection_changed ()
 	}
 
 	TreeIter                                     iter = plugin_display.get_selection ()->get_selected ();
-	boost::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
+	std::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
 
 	_log.get_buffer ()->set_text (psle->log ());
 
@@ -679,7 +679,7 @@ PluginManagerUI::row_activated (TreeModel::Path const& p, TreeViewColumn*)
 	if (!iter) {
 		return;
 	}
-	boost::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
+	std::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
 
 	switch (psle->type ()) {
 		case Windows_VST:
@@ -705,7 +705,7 @@ PluginManagerUI::blacklist_changed (std::string const& path)
 {
 	TreeIter iter;
 	if ((iter = plugin_model->get_iter (path))) {
-		boost::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
+		std::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
 		if ((*iter)[plugin_columns.blacklisted]) {
 			PluginScanDialog psd (false, true, this);
 			PluginManager::instance ().rescan_plugin (psle->type (), psle->path ());
@@ -836,7 +836,7 @@ PluginManagerUI::rescan_selected ()
 	}
 
 	TreeIter                                     iter = plugin_display.get_selection ()->get_selected ();
-	boost::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
+	std::shared_ptr<PluginScanLogEntry> const& psle ((*iter)[plugin_columns.psle]);
 
 	PluginScanDialog psd (false, true, this);
 	PluginManager::instance ().rescan_plugin (psle->type (), psle->path ());

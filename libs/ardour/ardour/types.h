@@ -98,9 +98,9 @@ static const layer_t    max_layer    = UINT32_MAX;
 // a set of (time) intervals: first of pair is the offset of the start within the region, second is the offset of the end
 typedef std::list<std::pair<sampleoffset_t, sampleoffset_t> > AudioIntervalResult;
 // associate a set of intervals with regions (e.g. for silence detection)
-typedef std::map<boost::shared_ptr<ARDOUR::Region>,AudioIntervalResult> AudioIntervalMap;
+typedef std::map<std::shared_ptr<ARDOUR::Region>,AudioIntervalResult> AudioIntervalMap;
 
-typedef std::list<boost::shared_ptr<Region> > RegionList;
+typedef std::list<std::shared_ptr<Region> > RegionList;
 
 struct IOChange {
 
@@ -620,7 +620,7 @@ enum ShuttleUnits {
 	Semitones
 };
 
-typedef std::vector<boost::shared_ptr<Source> > SourceList;
+typedef std::vector<std::shared_ptr<Source> > SourceList;
 
 enum SrcQuality {
 	SrcBest,
@@ -633,23 +633,23 @@ enum SrcQuality {
 typedef std::list<samplepos_t> AnalysisFeatureList;
 typedef std::vector<samplepos_t> XrunPositions;
 
-typedef std::list<boost::shared_ptr<Route> > RouteList;
-typedef std::list<boost::shared_ptr<GraphNode> > GraphNodeList;
-typedef std::list<boost::shared_ptr<Stripable> > StripableList;
-typedef std::list<boost::weak_ptr  <Route> > WeakRouteList;
-typedef std::list<boost::weak_ptr  <Stripable> > WeakStripableList;
-typedef std::list<boost::shared_ptr<AutomationControl> > ControlList;
-typedef std::list<boost::weak_ptr  <AutomationControl> > WeakControlList;
-typedef std::list<boost::shared_ptr<SlavableAutomationControl> > SlavableControlList;
+typedef std::list<std::shared_ptr<Route> > RouteList;
+typedef std::list<std::shared_ptr<GraphNode> > GraphNodeList;
+typedef std::list<std::shared_ptr<Stripable> > StripableList;
+typedef std::list<std::weak_ptr  <Route> > WeakRouteList;
+typedef std::list<std::weak_ptr  <Stripable> > WeakStripableList;
+typedef std::list<std::shared_ptr<AutomationControl> > ControlList;
+typedef std::list<std::weak_ptr  <AutomationControl> > WeakControlList;
+typedef std::list<std::shared_ptr<SlavableAutomationControl> > SlavableControlList;
 typedef std::set <AutomationType> AutomationTypeSet;
 
-typedef std::list<boost::shared_ptr<VCA> > VCAList;
+typedef std::list<std::shared_ptr<VCA> > VCAList;
 
 class Bundle;
-typedef std::vector<boost::shared_ptr<Bundle> > BundleList;
+typedef std::vector<std::shared_ptr<Bundle> > BundleList;
 
 class IOPlug;
-typedef std::vector<boost::shared_ptr<IOPlug> > IOPlugList;
+typedef std::vector<std::shared_ptr<IOPlug> > IOPlugList;
 
 enum RegionEquivalence {
 	Exact,

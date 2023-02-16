@@ -30,7 +30,7 @@
 using namespace PBD;
 using namespace ArdourWidgets;
 
-SliderController::SliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD::Controllable> mc, int orientation, int fader_length, int fader_girth)
+SliderController::SliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::Controllable> mc, int orientation, int fader_length, int fader_girth)
 	: ArdourFader (*adj, orientation, fader_length, fader_girth)
 	, _ctrl (mc)
 	, _ctrl_adj (adj)
@@ -81,9 +81,9 @@ SliderController::on_button_press_event (GdkEventButton *ev)
 bool
 SliderController::on_enter_notify_event (GdkEventCrossing* ev)
 {
-	boost::shared_ptr<PBD::Controllable> c (_binding_proxy.get_controllable ());
+	std::shared_ptr<PBD::Controllable> c (_binding_proxy.get_controllable ());
 	if (c) {
-		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> (c));
+		PBD::Controllable::GUIFocusChanged (std::weak_ptr<PBD::Controllable> (c));
 	}
 	return ArdourFader::on_enter_notify_event (ev);
 }
@@ -92,7 +92,7 @@ bool
 SliderController::on_leave_notify_event (GdkEventCrossing* ev)
 {
 	if (_binding_proxy.get_controllable()) {
-		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> ());
+		PBD::Controllable::GUIFocusChanged (std::weak_ptr<PBD::Controllable> ());
 	}
 	return ArdourFader::on_leave_notify_event (ev);
 }
@@ -132,12 +132,12 @@ SliderController::spin_adjusted ()
 
 
 
-VSliderController::VSliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD::Controllable> mc, int fader_length, int fader_girth)
+VSliderController::VSliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::Controllable> mc, int fader_length, int fader_girth)
 	: SliderController (adj, mc, VERT, fader_length, fader_girth)
 {
 }
 
-HSliderController::HSliderController (Gtk::Adjustment *adj, boost::shared_ptr<PBD::Controllable> mc, int fader_length, int fader_girth)
+HSliderController::HSliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::Controllable> mc, int fader_length, int fader_girth)
 	: SliderController (adj, mc, HORIZ, fader_length, fader_girth)
 {
 }

@@ -151,8 +151,8 @@ public:
 	TransportMaster (SyncSource t, std::string const& name);
 	virtual ~TransportMaster ();
 
-	static boost::shared_ptr<TransportMaster> factory (SyncSource, std::string const&, bool removeable);
-	static boost::shared_ptr<TransportMaster> factory (XMLNode const&);
+	static std::shared_ptr<TransportMaster> factory (SyncSource, std::string const&, bool removeable);
+	static std::shared_ptr<TransportMaster> factory (XMLNode const&);
 
 	virtual void pre_process (pframes_t nframes, samplepos_t now, boost::optional<samplepos_t>) = 0;
 
@@ -362,7 +362,7 @@ public:
 
 	virtual void set_session (Session*);
 
-	boost::shared_ptr<Port> port () const
+	std::shared_ptr<Port> port () const
 	{
 		return _port;
 	}
@@ -433,11 +433,11 @@ protected:
 	double e2;
 	double b, c;
 
-	boost::shared_ptr<Port> _port;
+	std::shared_ptr<Port> _port;
 
 	mutable XMLNode port_node;
 
-	virtual void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string name1, boost::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
+	virtual void connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
 
 	PBD::ScopedConnection port_connection;
 	PBD::ScopedConnection backend_connection;
@@ -456,11 +456,11 @@ public:
 	virtual ~TransportMasterViaMIDI ();
 
 	MIDI::Parser& transport_parser () { return parser; }
-	boost::shared_ptr<MidiPort> midi_port () const
+	std::shared_ptr<MidiPort> midi_port () const
 	{
 		return _midi_port;
 	}
-	boost::shared_ptr<Port> create_midi_port (std::string const& port_name);
+	std::shared_ptr<Port> create_midi_port (std::string const& port_name);
 
 	virtual void set_session (Session*);
 
@@ -469,7 +469,7 @@ protected:
 
 	void resync_latency (bool);
 	MIDI::Parser                parser;
-	boost::shared_ptr<MidiPort> _midi_port;
+	std::shared_ptr<MidiPort> _midi_port;
 
 	virtual void parameter_changed (std::string const& p) {}
 
@@ -576,7 +576,7 @@ private:
 	void parse_timecode_offset ();
 	void parameter_changed (std::string const& p);
 
-	void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string, boost::weak_ptr<ARDOUR::Port>, std::string, bool);
+	void connection_handler (std::weak_ptr<ARDOUR::Port>, std::string, std::weak_ptr<ARDOUR::Port>, std::string, bool);
 };
 
 class LIBARDOUR_API LTC_TransportMaster : public TimecodeTransportMaster
@@ -623,7 +623,7 @@ private:
 	void resync_latency (bool);
 	void parse_timecode_offset ();
 	void parameter_changed (std::string const& p);
-	void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string, boost::weak_ptr<ARDOUR::Port>, std::string, bool);
+	void connection_handler (std::weak_ptr<ARDOUR::Port>, std::string, std::weak_ptr<ARDOUR::Port>, std::string, bool);
 
 	LTCDecoder*    decoder;
 	double         samples_per_ltc_frame;
@@ -719,7 +719,7 @@ protected:
 	void        calculate_filter_coefficients (double qpm);
 	void        update_midi_clock (MIDI::Parser& parser, samplepos_t timestamp);
 
-	void connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string, boost::weak_ptr<ARDOUR::Port>, std::string, bool);
+	void connection_handler (std::weak_ptr<ARDOUR::Port>, std::string, std::weak_ptr<ARDOUR::Port>, std::string, bool);
 };
 
 class LIBARDOUR_API Engine_TransportMaster : public TransportMaster

@@ -66,7 +66,7 @@ VST3Plugin::VST3Plugin (const VST3Plugin& other)
 	: Plugin (other)
 	, _parameter_queue (128 + other.parameter_count ())
 {
-	boost::shared_ptr<VST3PluginInfo> nfo = boost::dynamic_pointer_cast<VST3PluginInfo> (other.get_info ());
+	std::shared_ptr<VST3PluginInfo> nfo = std::dynamic_pointer_cast<VST3PluginInfo> (other.get_info ());
 	_plug = new VST3PI (nfo->m, nfo->unique_id);
 	init ();
 
@@ -231,12 +231,12 @@ VST3Plugin::designated_bypass_port ()
 }
 
 void
-VST3Plugin::set_automation_control (uint32_t port, boost::shared_ptr<ARDOUR::AutomationControl> ac)
+VST3Plugin::set_automation_control (uint32_t port, std::shared_ptr<ARDOUR::AutomationControl> ac)
 {
 	if (!ac->alist () || !_plug->subscribe_to_automation_changes ()) {
 		return;
 	}
-	ac->alist ()->automation_state_changed.connect_same_thread (_connections, boost::bind (&VST3PI::automation_state_changed, _plug, port, _1, boost::weak_ptr<AutomationList> (ac->alist ())));
+	ac->alist ()->automation_state_changed.connect_same_thread (_connections, boost::bind (&VST3PI::automation_state_changed, _plug, port, _1, std::weak_ptr<AutomationList> (ac->alist ())));
 }
 
 std::set<Evoral::Parameter>
@@ -673,18 +673,18 @@ VST3Plugin::plugin_latency () const
 }
 
 void
-VST3Plugin::add_slave (boost::shared_ptr<Plugin> p, bool rt)
+VST3Plugin::add_slave (std::shared_ptr<Plugin> p, bool rt)
 {
-	boost::shared_ptr<VST3Plugin> vst = boost::dynamic_pointer_cast<VST3Plugin> (p);
+	std::shared_ptr<VST3Plugin> vst = std::dynamic_pointer_cast<VST3Plugin> (p);
 	if (vst) {
 		_plug->add_slave (vst->_plug->controller (), rt);
 	}
 }
 
 void
-VST3Plugin::remove_slave (boost::shared_ptr<Plugin> p)
+VST3Plugin::remove_slave (std::shared_ptr<Plugin> p)
 {
-	boost::shared_ptr<VST3Plugin> vst = boost::dynamic_pointer_cast<VST3Plugin> (p);
+	std::shared_ptr<VST3Plugin> vst = std::dynamic_pointer_cast<VST3Plugin> (p);
 	if (vst) {
 		_plug->remove_slave (vst->_plug->controller ());
 	}
@@ -896,8 +896,10 @@ VST3Plugin::load_preset (PresetRecord r)
 std::string
 VST3Plugin::do_save_preset (std::string name)
 {
-	boost::shared_ptr<VST3PluginInfo> nfo = boost::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
+
+	std::shared_ptr<VST3PluginInfo> nfo = std::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
 	PBD::Searchpath                   psp = nfo->preset_search_path ();
+
 	assert (!psp.empty ());
 
 	std::string dir = psp.front ();
@@ -928,8 +930,9 @@ VST3Plugin::do_save_preset (std::string name)
 void
 VST3Plugin::do_remove_preset (std::string name)
 {
-	boost::shared_ptr<VST3PluginInfo> nfo = boost::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
+	std::shared_ptr<VST3PluginInfo> nfo = std::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
 	PBD::Searchpath                   psp = nfo->preset_search_path ();
+
 	assert (!psp.empty ());
 
 	std::string dir = psp.front ();
@@ -1018,7 +1021,8 @@ VST3Plugin::find_presets ()
 	// TODO check _plug->unit_data()
 	// IUnitData: programDataSupported -> setUnitProgramData (IBStream)
 
-	boost::shared_ptr<VST3PluginInfo> info = boost::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
+
+	std::shared_ptr<VST3PluginInfo> info = std::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
 	PBD::Searchpath                   psp  = info->preset_search_path ();
 
 	std::vector<std::string> preset_files;
@@ -1142,7 +1146,7 @@ VST3PluginInfo::preset_search_path () const
 
 /* ****************************************************************************/
 
-VST3PI::VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_id)
+VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_id)
 	: _module (m)
 	, _component (0)
 	, _controller (0)
@@ -1406,8 +1410,8 @@ VST3PI::connect_components ()
 		return true;
 	}
 
-	_component_cproxy  = boost::shared_ptr<ConnectionProxy> (new ConnectionProxy (componentCP));
-	_controller_cproxy = boost::shared_ptr<ConnectionProxy> (new ConnectionProxy (controllerCP));
+	_component_cproxy  = std::shared_ptr<ConnectionProxy> (new ConnectionProxy (componentCP));
+	_controller_cproxy = std::shared_ptr<ConnectionProxy> (new ConnectionProxy (controllerCP));
 
 	tresult res = _component_cproxy->connect (controllerCP);
 	if (!(res == kResultOk || res == kNotImplemented)) {
@@ -2638,10 +2642,10 @@ VST3PI::subscribe_to_automation_changes () const
 }
 
 void
-VST3PI::automation_state_changed (uint32_t port, AutoState s, boost::weak_ptr<AutomationList> wal)
+VST3PI::automation_state_changed (uint32_t port, AutoState s, std::weak_ptr<AutomationList> wal)
 {
 	Vst::ParamID                      id (index_to_id (port));
-	boost::shared_ptr<AutomationList> al = wal.lock ();
+	std::shared_ptr<AutomationList> al = wal.lock ();
 	FUnknownPtr<IEditControllerExtra> extra_ctrl (_controller);
 	assert (extra_ctrl);
 
@@ -2674,12 +2678,12 @@ VST3PI::automation_state_changed (uint32_t port, AutoState s, boost::weak_ptr<Au
 
 /* ****************************************************************************/
 
-static boost::shared_ptr<AutomationControl>
+static std::shared_ptr<AutomationControl>
 lookup_ac (SessionObject* o, FIDString id)
 {
 	Stripable* s = dynamic_cast<Stripable*> (o);
 	if (!s) {
-		return boost::shared_ptr<AutomationControl> ();
+		return std::shared_ptr<AutomationControl> ();
 	}
 
 	if (0 == strcmp (id, ContextInfo::kMute)) {
@@ -2713,7 +2717,7 @@ lookup_ac (SessionObject* o, FIDString id)
 		}
 #endif
 	}
-	return boost::shared_ptr<AutomationControl> ();
+	return std::shared_ptr<AutomationControl> ();
 }
 
 tresult
@@ -2750,7 +2754,7 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 	} else if (0 == strcmp (id, ContextInfo::kSelected)) {
 		value = s->is_selected () ? 1 : 0;
 	} else if (0 == strcmp (id, ContextInfo::kFocused)) {
-		boost::shared_ptr<Stripable> stripable = s->session ().selection ().first_selected_stripable ();
+		std::shared_ptr<Stripable> stripable = s->session ().selection ().first_selected_stripable ();
 		value                                  = stripable && stripable.get () == s ? 1 : 0;
 	} else if (0 == strcmp (id, ContextInfo::kSendCount)) {
 		value = 0;
@@ -2758,7 +2762,7 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 			++value;
 		}
 	} else if (0 == strcmp (id, ContextInfo::kMute)) {
-		boost::shared_ptr<MuteControl> ac = s->mute_control ();
+		std::shared_ptr<MuteControl> ac = s->mute_control ();
 		if (ac) {
 			psl_subscribe_to (ac, id);
 			value = ac->muted_by_self ();
@@ -2766,7 +2770,7 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 			value = 0;
 		}
 	} else if (0 == strcmp (id, ContextInfo::kSolo)) {
-		boost::shared_ptr<SoloControl> ac = s->solo_control ();
+		std::shared_ptr<SoloControl> ac = s->solo_control ();
 		if (ac) {
 			psl_subscribe_to (ac, id);
 			value = ac->self_soloed ();
@@ -2808,7 +2812,7 @@ VST3PI::getContextInfoString (Vst::TChar* string, int32 max_len, FIDString id)
 		DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::setContextInfoString: NOT IMPLEMENTED (%1)\n", id));
 		return kNotImplemented; // XXX TODO
 	} else {
-		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		if (!ac) {
 			DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::getContextInfoString unsupported ID %1\n", id));
 			return kInvalidArgument;
@@ -2837,11 +2841,11 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 #endif
 		value = 2.0; // Config->get_max_gain();
 	} else if (0 == strcmp (id, ContextInfo::kVolume)) {
-		boost::shared_ptr<AutomationControl> ac = s->gain_control ();
+		std::shared_ptr<AutomationControl> ac = s->gain_control ();
 		value                                   = ac->get_value (); // gain coefficient  0..2 (1.0 = 0dB)
 		psl_subscribe_to (ac, id);
 	} else if (0 == strcmp (id, ContextInfo::kPan)) {
-		boost::shared_ptr<AutomationControl> ac = s->pan_azimuth_control ();
+		std::shared_ptr<AutomationControl> ac = s->pan_azimuth_control ();
 		if (ac) {
 			value = ac->internal_to_interface (ac->get_value (), true);
 			psl_subscribe_to (ac, id);
@@ -2849,7 +2853,7 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 			value = 0.5; // center
 		}
 	} else if (0 == strncmp (id, ContextInfo::kSendLevel, strlen (ContextInfo::kSendLevel))) {
-		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		if (ac) {
 			value = ac->get_value (); // gain cofficient
 			psl_subscribe_to (ac, id);
@@ -2874,15 +2878,15 @@ VST3PI::setContextInfoValue (FIDString id, double value)
 	}
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::setContextInfoValue<double> %1 to %2\n", id, value));
 	if (0 == strcmp (id, ContextInfo::kVolume)) {
-		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		ac->set_value (value, Controllable::NoGroup);
 	} else if (0 == strcmp (id, ContextInfo::kPan)) {
-		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		if (ac) {
 			ac->set_value (ac->interface_to_internal (value, true), PBD::Controllable::NoGroup);
 		}
 	} else if (0 == strncmp (id, ContextInfo::kSendLevel, strlen (ContextInfo::kSendLevel))) {
-		boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		if (ac) {
 			ac->set_value (value, Controllable::NoGroup);
 		} else {
@@ -2910,14 +2914,14 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 #endif
 		s->presentation_info ().set_color (value);
 	} else if (0 == strcmp (id, ContextInfo::kSelected)) {
-		boost::shared_ptr<Stripable> stripable = s->session ().stripable_by_id (s->id ());
+		std::shared_ptr<Stripable> stripable = s->session ().stripable_by_id (s->id ());
 		assert (stripable);
 		if (value == 0) {
-			s->session ().selection ().remove (stripable, boost::shared_ptr<AutomationControl> ());
+			s->session ().selection ().remove (stripable, std::shared_ptr<AutomationControl> ());
 		} else if (_add_to_selection) {
-			s->session ().selection ().add (stripable, boost::shared_ptr<AutomationControl> ());
+			s->session ().selection ().add (stripable, std::shared_ptr<AutomationControl> ());
 		} else {
-			s->session ().selection ().set (stripable, boost::shared_ptr<AutomationControl> ());
+			s->session ().selection ().set (stripable, std::shared_ptr<AutomationControl> ());
 		}
 	} else if (0 == strcmp (id, ContextInfo::kMultiSelect)) {
 		_add_to_selection = value != 0;
@@ -2954,7 +2958,7 @@ VST3PI::beginEditContextInfoValue (FIDString id)
 		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::beginEditContextInfoValue: not initialized");
 		return kNotInitialized;
 	}
-	boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+	std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 	if (!ac) {
 		return kInvalidArgument;
 	}
@@ -2970,7 +2974,7 @@ VST3PI::endEditContextInfoValue (FIDString id)
 		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::endEditContextInfoValue: not initialized");
 		return kNotInitialized;
 	}
-	boost::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+	std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 	if (!ac) {
 		return kInvalidArgument;
 	}
@@ -2980,7 +2984,7 @@ VST3PI::endEditContextInfoValue (FIDString id)
 }
 
 void
-VST3PI::psl_subscribe_to (boost::shared_ptr<ARDOUR::AutomationControl> ac, FIDString id)
+VST3PI::psl_subscribe_to (std::shared_ptr<ARDOUR::AutomationControl> ac, FIDString id)
 {
 	FUnknownPtr<IContextInfoHandler2> nfo2 (_controller);
 	if (!nfo2) {

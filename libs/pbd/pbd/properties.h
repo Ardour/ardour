@@ -368,7 +368,7 @@ template <class T>
 class /*LIBPBD_API*/ SharedStatefulProperty : public PropertyBase
 {
 public:
-	typedef boost::shared_ptr<T> Ptr;
+	typedef std::shared_ptr<T> Ptr;
 
 	SharedStatefulProperty (PropertyID d, Ptr p)
 		: PropertyBase (d)

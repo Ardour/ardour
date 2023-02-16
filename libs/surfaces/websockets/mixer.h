@@ -45,10 +45,10 @@ private:
 class ArdourMixerPlugin : public PBD::ScopedConnectionList
 {
 public:
-	ArdourMixerPlugin (boost::shared_ptr<ARDOUR::PluginInsert>);
+	ArdourMixerPlugin (std::shared_ptr<ARDOUR::PluginInsert>);
 	~ArdourMixerPlugin ();
 
-	boost::shared_ptr<ARDOUR::PluginInsert> insert () const;
+	std::shared_ptr<ARDOUR::PluginInsert> insert () const;
 	
 	bool enabled () const;
 	void set_enabled (bool);
@@ -57,23 +57,23 @@ public:
 	TypedValue param_value (uint32_t);
 	void       set_param_value (uint32_t, TypedValue);
 
-	boost::shared_ptr<ARDOUR::AutomationControl> param_control (uint32_t) const;
+	std::shared_ptr<ARDOUR::AutomationControl> param_control (uint32_t) const;
 
-	static TypedValue param_value (boost::shared_ptr<ARDOUR::AutomationControl>);
+	static TypedValue param_value (std::shared_ptr<ARDOUR::AutomationControl>);
 
 private:
-	boost::shared_ptr<ARDOUR::PluginInsert> _insert;
+	std::shared_ptr<ARDOUR::PluginInsert> _insert;
 };
 
 class ArdourMixerStrip : public PBD::ScopedConnectionList
 {
 public:
-	ArdourMixerStrip (boost::shared_ptr<ARDOUR::Stripable>, PBD::EventLoop*);
+	ArdourMixerStrip (std::shared_ptr<ARDOUR::Stripable>, PBD::EventLoop*);
 	~ArdourMixerStrip ();
 	
-	boost::shared_ptr<ARDOUR::Stripable> stripable () const;
+	std::shared_ptr<ARDOUR::Stripable> stripable () const;
 
-	typedef std::map<uint32_t, boost::shared_ptr<ArdourMixerPlugin> > PluginMap;
+	typedef std::map<uint32_t, std::shared_ptr<ArdourMixerPlugin> > PluginMap;
 
 	PluginMap&         plugins ();
 	ArdourMixerPlugin& plugin (uint32_t);
@@ -99,7 +99,7 @@ public:
 	static double from_velocity (int);
 
 private:
-	boost::shared_ptr<ARDOUR::Stripable> _stripable;
+	std::shared_ptr<ARDOUR::Stripable> _stripable;
 
 	PluginMap _plugins;
 
@@ -119,7 +119,7 @@ public:
 	int start ();
 	int stop ();
 
-	typedef std::map<uint32_t, boost::shared_ptr<ArdourMixerStrip> > StripMap;
+	typedef std::map<uint32_t, std::shared_ptr<ArdourMixerStrip> > StripMap;
 
 	StripMap&         strips ();
 	ArdourMixerStrip& strip (uint32_t);

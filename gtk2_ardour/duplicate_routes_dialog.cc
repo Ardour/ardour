@@ -95,9 +95,9 @@ DuplicateRouteDialog::restart (Session* s)
 			continue;
 		}
 
-		boost::shared_ptr<Route> r (rui->route());
+		std::shared_ptr<Route> r (rui->route());
 
-		if (boost::dynamic_pointer_cast<Track> (r)) {
+		if (std::dynamic_pointer_cast<Track> (r)) {
 			ntracks++;
 		} else {
 			if (!r->is_master() && !r->is_monitor()) {
@@ -178,9 +178,9 @@ DuplicateRouteDialog::on_response (int response)
 
 	for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
 
-		boost::shared_ptr<Route> r;
+		std::shared_ptr<Route> r;
 
-		if ((r = boost::dynamic_pointer_cast<Route> (*s)) == 0) {
+		if ((r = std::dynamic_pointer_cast<Route> (*s)) == 0) {
 			/* some other type of Stripable, not a route */
 			continue;
 		}

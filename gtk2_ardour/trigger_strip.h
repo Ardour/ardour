@@ -46,14 +46,14 @@ class TriggerMaster;
 class TriggerStrip : public AxisView, public RouteUI, public Gtk::EventBox
 {
 public:
-	TriggerStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
+	TriggerStrip (ARDOUR::Session*, std::shared_ptr<ARDOUR::Route>);
 	~TriggerStrip ();
 
 	/* AxisView */
 	std::string name () const;
 	Gdk::Color  color () const;
 
-	boost::shared_ptr<ARDOUR::Stripable> stripable () const
+	std::shared_ptr<ARDOUR::Stripable> stripable () const
 	{
 		return RouteUI::stripable ();
 	}
@@ -85,7 +85,7 @@ private:
 	void init ();
 
 	/* RouteUI */
-	void set_route (boost::shared_ptr<ARDOUR::Route>);
+	void set_route (std::shared_ptr<ARDOUR::Route>);
 	void route_property_changed (const PBD::PropertyChange&);
 	void route_color_changed ();
 	void update_sensitivity ();
@@ -105,7 +105,7 @@ private:
 
 	/* Plugin related */
 	PluginSelector* plugin_selector ();
-	void            hide_processor_editor (boost::weak_ptr<ARDOUR::Processor>);
+	void            hide_processor_editor (std::weak_ptr<ARDOUR::Processor>);
 
 	/* Panner */
 	void connect_to_pan ();
@@ -130,7 +130,7 @@ private:
 	TriggerBoxWidget                        _trigger_display;
 	PannerUI                                _panners;
 	LevelMeterVBox                          _level_meter;
-	boost::shared_ptr<AutomationController> _gain_control;
+	std::shared_ptr<AutomationController> _gain_control;
 
 	Gtk::Menu* _route_ops_menu;
 };

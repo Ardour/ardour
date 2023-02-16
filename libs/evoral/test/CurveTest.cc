@@ -44,7 +44,7 @@ CurveTest::trivial ()
 {
 	float vec[1024];
 
-	boost::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
+	std::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
 
 	cl->create_curve ();
 
@@ -74,7 +74,7 @@ CurveTest::rtGet ()
 	timepos_t t2047 (2047.0);
 
 	// Create simple control list
-	boost::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
+	std::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
 	cl->create_curve ();
 	cl->fast_simple_add(timepos_t(0), 42.0);
 
@@ -98,7 +98,7 @@ CurveTest::twoPointLinear ()
 {
 	float vec[1024];
 
-	boost::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
+	std::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
 
 	cl->create_curve ();
 	cl->set_interpolation (ControlList::Linear);
@@ -185,7 +185,7 @@ CurveTest::threePointLinear ()
 {
 	float vec[4];
 
-	boost::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
+	std::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
 
 	cl->create_curve ();
 	cl->set_interpolation (ControlList::Linear);
@@ -228,7 +228,7 @@ CurveTest::threePointLinear ()
 void
 CurveTest::threePointDiscete ()
 {
-	boost::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
+	std::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
 	cl->set_interpolation (ControlList::Discrete);
 
 	timepos_t t0 (0);
@@ -257,7 +257,7 @@ CurveTest::threePointDiscete ()
 void
 CurveTest::ctrlListEval ()
 {
-	boost::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
+	std::shared_ptr<Evoral::ControlList> cl = TestCtrlList();
 
 	timepos_t t0 (0);
 	timepos_t t80 (80);

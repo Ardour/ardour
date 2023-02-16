@@ -90,7 +90,7 @@ Engine_TransportMaster::pre_process (pframes_t, samplepos_t, boost::optional<sam
 bool
 Engine_TransportMaster::speed_and_position (double& sp, samplepos_t& position, samplepos_t& lp, samplepos_t & when, samplepos_t now)
 {
-	boost::shared_ptr<AudioBackend> backend = engine.current_backend();
+	std::shared_ptr<AudioBackend> backend = engine.current_backend();
 
 	/* 3rd argument (now) doesn't matter here because we're always being
 	 * called synchronously with the engine.

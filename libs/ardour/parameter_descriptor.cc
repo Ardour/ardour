@@ -125,7 +125,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		break;
 	case PhaseAutomation:
 		toggled = true;
-		scale_points = boost::shared_ptr<ScalePoints>(new ScalePoints());
+		scale_points = std::shared_ptr<ScalePoints>(new ScalePoints());
 		scale_points->insert (std::make_pair (_("Normal"), 0));
 		scale_points->insert (std::make_pair (_("Invert"), 1));
 		break;
@@ -134,7 +134,7 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		integer_step = true;
 		lower = MonitorAuto;
 		upper = MonitorCue;
-		scale_points = boost::shared_ptr<ScalePoints>(new ScalePoints());
+		scale_points = std::shared_ptr<ScalePoints>(new ScalePoints());
 		scale_points->insert (std::make_pair (_("Auto"), MonitorAuto));
 		scale_points->insert (std::make_pair (_("Input"), MonitorInput));
 		scale_points->insert (std::make_pair (_("Disk"), MonitorDisk));

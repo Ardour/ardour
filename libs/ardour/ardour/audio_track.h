@@ -43,18 +43,18 @@ class LIBARDOUR_API AudioTrack : public Track
 	void freeze_me (InterThreadInfo&);
 	void unfreeze ();
 
-	bool bounceable (boost::shared_ptr<Processor>, bool include_endpoint) const;
-	boost::shared_ptr<Region> bounce (InterThreadInfo&, std::string const& name);
-	boost::shared_ptr<Region> bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo&,
-	                                        boost::shared_ptr<Processor> endpoint, bool include_endpoint,
+	bool bounceable (std::shared_ptr<Processor>, bool include_endpoint) const;
+	std::shared_ptr<Region> bounce (InterThreadInfo&, std::string const& name);
+	std::shared_ptr<Region> bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo&,
+	                                        std::shared_ptr<Processor> endpoint, bool include_endpoint,
 	                                        std::string const& name);
 	int export_stuff (BufferSet& bufs, samplepos_t start_sample, samplecnt_t nframes,
-	                  boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,
+	                  std::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,
 	                  MidiNoteTracker&);
 
 	int set_state (const XMLNode&, int version);
 
-	boost::shared_ptr<AudioFileSource> write_source (uint32_t n = 0);
+	std::shared_ptr<AudioFileSource> write_source (uint32_t n = 0);
 
   protected:
 	XMLNode& state (bool save_template) const;

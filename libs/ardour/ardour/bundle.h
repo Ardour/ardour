@@ -73,7 +73,7 @@ class LIBARDOUR_API Bundle : public PBD::ScopedConnectionList
 
 	Bundle (bool i = true);
 	Bundle (std::string const &, bool i = true);
-	Bundle (boost::shared_ptr<Bundle>);
+	Bundle (std::shared_ptr<Bundle>);
 
 	virtual ~Bundle() {}
 
@@ -102,15 +102,15 @@ class LIBARDOUR_API Bundle : public PBD::ScopedConnectionList
 	bool offers_port_alone (std::string) const;
 	void remove_channel (uint32_t);
 	void remove_channels ();
-	void add_channels_from_bundle (boost::shared_ptr<Bundle>);
-	void connect (boost::shared_ptr<Bundle>, AudioEngine &,
+	void add_channels_from_bundle (std::shared_ptr<Bundle>);
+	void connect (std::shared_ptr<Bundle>, AudioEngine &,
 	              bool allow_partial = false);
-	void disconnect (boost::shared_ptr<Bundle>, AudioEngine &);
-	bool connected_to (boost::shared_ptr<Bundle>, AudioEngine &,
+	void disconnect (std::shared_ptr<Bundle>, AudioEngine &);
+	bool connected_to (std::shared_ptr<Bundle>, AudioEngine &,
 	                   DataType type = DataType::NIL,
 	                   bool exclusive = false);
 	bool connected_to_anything (AudioEngine &);
-	bool has_same_ports (boost::shared_ptr<Bundle>) const;
+	bool has_same_ports (std::shared_ptr<Bundle>) const;
 	uint32_t type_channel_to_overall (DataType, uint32_t) const;
 	uint32_t overall_channel_to_type (DataType, uint32_t) const;
 
@@ -164,7 +164,7 @@ class LIBARDOUR_API BundleChannel
 public:
 	BundleChannel () : channel (-1) {}
 
-	BundleChannel (boost::shared_ptr<Bundle> b, int c)
+	BundleChannel (std::shared_ptr<Bundle> b, int c)
 		: bundle (b), channel (c) {}
 
 	bool operator== (BundleChannel const& other) const {
@@ -175,7 +175,7 @@ public:
 		return bundle != other.bundle || channel != other.channel;
 	}
 
-	boost::shared_ptr<Bundle> bundle;
+	std::shared_ptr<Bundle> bundle;
 	int channel; ///< channel index, or -1 for "all"
 };
 

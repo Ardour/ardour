@@ -103,7 +103,7 @@ ARDOUR::clip_library_dir (bool create_if_missing)
 }
 
 bool
-ARDOUR::export_to_clip_library (boost::shared_ptr<Region> r, void* src)
+ARDOUR::export_to_clip_library (std::shared_ptr<Region> r, void* src)
 {
 	std::string const lib = clip_library_dir (true);
 	if (lib.empty () || !r) {

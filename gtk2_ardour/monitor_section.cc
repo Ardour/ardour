@@ -1194,7 +1194,7 @@ bool
 MonitorSection::cancel_isolate (GdkEventButton*)
 {
 	if (_session) {
-		boost::shared_ptr<RouteList> rl (_session->get_routes ());
+		std::shared_ptr<RouteList> rl (_session->get_routes ());
 		_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_isolate_control), 0.0, Controllable::NoGroup);
 	}
 
@@ -1227,7 +1227,7 @@ MonitorSection::parameter_changed (std::string name)
 void
 MonitorSection::unassign_controllables ()
 {
-	boost::shared_ptr<Controllable> none;
+	std::shared_ptr<Controllable> none;
 
 	solo_cut_control->set_controllable (none);
 	solo_cut_display->set_controllable (none);
@@ -1273,7 +1273,7 @@ MonitorSection::state_id() const
 }
 
 void
-MonitorSection::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, ARDOUR::BundleList const& /*current*/)
+MonitorSection::maybe_add_bundle_to_output_menu (std::shared_ptr<Bundle> b, ARDOUR::BundleList const& /*current*/)
 {
 	using namespace Menu_Helpers;
 
@@ -1281,7 +1281,7 @@ MonitorSection::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, AR
 		return;
 	}
 
-	list<boost::shared_ptr<Bundle> >::iterator i = output_menu_bundles.begin ();
+	list<std::shared_ptr<Bundle> >::iterator i = output_menu_bundles.begin ();
 	while (i != output_menu_bundles.end() && b->has_same_ports (*i) == false) {
 		++i;
 	}
@@ -1301,7 +1301,7 @@ MonitorSection::maybe_add_bundle_to_output_menu (boost::shared_ptr<Bundle> b, AR
 }
 
 void
-MonitorSection::bundle_output_chosen (boost::shared_ptr<ARDOUR::Bundle> c)
+MonitorSection::bundle_output_chosen (std::shared_ptr<ARDOUR::Bundle> c)
 {
 
 	ARDOUR::BundleList current = _route->output()->bundles_connected ();
@@ -1326,7 +1326,7 @@ MonitorSection::output_release (GdkEventButton *ev)
 }
 
 struct RouteCompareByName {
-	bool operator() (boost::shared_ptr<Route> a, boost::shared_ptr<Route> b) {
+	bool operator() (std::shared_ptr<Route> a, std::shared_ptr<Route> b) {
 		return a->name().compare (b->name()) < 0;
 	}
 };
@@ -1360,23 +1360,23 @@ MonitorSection::output_press (GdkEventButton *ev)
 
 		ARDOUR::BundleList current = _route->output()->bundles_connected ();
 
-		boost::shared_ptr<ARDOUR::BundleList> b = _session->bundles ();
+		std::shared_ptr<ARDOUR::BundleList> b = _session->bundles ();
 
 		/* give user bundles first chance at being in the menu */
 
 		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-			if (boost::dynamic_pointer_cast<UserBundle> (*i)) {
+			if (std::dynamic_pointer_cast<UserBundle> (*i)) {
 				maybe_add_bundle_to_output_menu (*i, current);
 			}
 		}
 
 		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-			if (boost::dynamic_pointer_cast<UserBundle> (*i) == 0) {
+			if (std::dynamic_pointer_cast<UserBundle> (*i) == 0) {
 				maybe_add_bundle_to_output_menu (*i, current);
 			}
 		}
 
-		boost::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
+		std::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
 		RouteList copy = *routes;
 		copy.sort (RouteCompareByName ());
 		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
@@ -1410,7 +1410,7 @@ MonitorSection::update_output_display ()
 
 	uint32_t io_count;
 	uint32_t io_index;
-	boost::shared_ptr<Port> port;
+	std::shared_ptr<Port> port;
 	vector<string> port_connections;
 
 	uint32_t total_connection_count = 0;
@@ -1581,13 +1581,13 @@ MonitorSection::edit_output_configuration ()
 }
 
 void
-MonitorSection::port_connected_or_disconnected (boost::weak_ptr<Port> wa, boost::weak_ptr<Port> wb)
+MonitorSection::port_connected_or_disconnected (std::weak_ptr<Port> wa, std::weak_ptr<Port> wb)
 {
 	if (!_route) {
 		return;
 	}
-	boost::shared_ptr<Port> a = wa.lock ();
-	boost::shared_ptr<Port> b = wb.lock ();
+	std::shared_ptr<Port> a = wa.lock ();
+	std::shared_ptr<Port> b = wb.lock ();
 	if ((a && _route->output()->has_port (a)) || (b && _route->output()->has_port (b))) {
 		update_output_display ();
 	}
@@ -1612,13 +1612,13 @@ MonitorSection::load_bindings ()
 }
 
 void
-MonitorSection::help_count_processors (boost::weak_ptr<Processor> p, uint32_t* cnt) const
+MonitorSection::help_count_processors (std::weak_ptr<Processor> p, uint32_t* cnt) const
 {
-	boost::shared_ptr<Processor> processor (p.lock ());
+	std::shared_ptr<Processor> processor (p.lock ());
 	if (!processor || !processor->display_to_user()) {
 		return;
 	}
-	if (boost::dynamic_pointer_cast<Amp>(processor)) {
+	if (std::dynamic_pointer_cast<Amp>(processor)) {
 		return;
 	}
 	++(*cnt);

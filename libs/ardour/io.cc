@@ -110,7 +110,7 @@ IO::~IO ()
 }
 
 void
-IO::connection_change (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
+IO::connection_change (std::shared_ptr<Port> a, std::shared_ptr<Port> b)
 {
 	if (_session.deletion_in_progress ()) {
 		return;
@@ -151,7 +151,7 @@ IO::silence (samplecnt_t nframes)
 }
 
 int
-IO::disconnect (boost::shared_ptr<Port> our_port, string other_port, void* src)
+IO::disconnect (std::shared_ptr<Port> our_port, string other_port, void* src)
 {
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
@@ -185,7 +185,7 @@ IO::disconnect (boost::shared_ptr<Port> our_port, string other_port, void* src)
 }
 
 int
-IO::connect (boost::shared_ptr<Port> our_port, string other_port, void* src)
+IO::connect (std::shared_ptr<Port> our_port, string other_port, void* src)
 {
 	if (other_port.length() == 0 || our_port == 0) {
 		return 0;
@@ -230,7 +230,7 @@ IO::can_add_port (DataType type) const
 }
 
 int
-IO::remove_port (boost::shared_ptr<Port> port, void* src)
+IO::remove_port (std::shared_ptr<Port> port, void* src)
 {
 	ChanCount before = _ports.count ();
 	ChanCount after = before;
@@ -292,7 +292,7 @@ IO::remove_port (boost::shared_ptr<Port> port, void* src)
 int
 IO::add_port (string destination, void* src, DataType type)
 {
-	boost::shared_ptr<Port> our_port;
+	std::shared_ptr<Port> our_port;
 
 	if (type == DataType::NIL) {
 		type = _default_type;
@@ -384,8 +384,8 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 	assert (!AudioEngine::instance()->process_lock().trylock());
 #endif
 
-	boost::shared_ptr<Port> port;
-	vector<boost::shared_ptr<Port> > deleted_ports;
+	std::shared_ptr<Port> port;
+	vector<std::shared_ptr<Port> > deleted_ports;
 
 	changed    = false;
 
@@ -659,7 +659,7 @@ IO::set_state (const XMLNode& node, int version)
 				continue;
 			}
 
-			boost::shared_ptr<Port> p = port_by_name (prop->value());
+			std::shared_ptr<Port> p = port_by_name (prop->value());
 
 			if (p) {
 				p->set_state (**i, version);
@@ -709,14 +709,14 @@ IO::set_state_2X (const XMLNode& node, int version, bool in)
 	return 0;
 }
 
-boost::shared_ptr<Bundle>
+std::shared_ptr<Bundle>
 IO::find_possible_bundle (const string &desired_name)
 {
 	static const string digits = "0123456789";
 	const string &default_name = (_direction == Input ? _("in") : _("out"));
 	const string &bundle_type_name = (_direction == Input ? _("input") : _("output"));
 
-	boost::shared_ptr<Bundle> c = _session.bundle_by_name (desired_name);
+	std::shared_ptr<Bundle> c = _session.bundle_by_name (desired_name);
 
 	if (!c) {
 		int bundle_number, mask;
@@ -800,7 +800,7 @@ IO::find_possible_bundle (const string &desired_name)
 }
 
 int
-IO::get_port_counts_2X (XMLNode const & node, int /*version*/, ChanCount& n, boost::shared_ptr<Bundle>& /*c*/)
+IO::get_port_counts_2X (XMLNode const & node, int /*version*/, ChanCount& n, std::shared_ptr<Bundle>& /*c*/)
 {
 	XMLProperty const * prop;
 	XMLNodeList children = node.children ();
@@ -828,7 +828,7 @@ IO::get_port_counts_2X (XMLNode const & node, int /*version*/, ChanCount& n, boo
 }
 
 int
-IO::get_port_counts (const XMLNode& node, int version, ChanCount& n, boost::shared_ptr<Bundle>& c)
+IO::get_port_counts (const XMLNode& node, int version, ChanCount& n, std::shared_ptr<Bundle>& c)
 {
 	if (version < 3000) {
 		return get_port_counts_2X (node, version, n, c);
@@ -885,7 +885,7 @@ int
 IO::create_ports (const XMLNode& node, int version)
 {
 	ChanCount n;
-	boost::shared_ptr<Bundle> c;
+	std::shared_ptr<Bundle> c;
 
 	get_port_counts (node, version, n, c);
 
@@ -1323,12 +1323,12 @@ IO::connected_latency (bool for_playback) const
 }
 
 int
-IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive, void* src) {
+IO::connect_ports_to_bundle (std::shared_ptr<Bundle> c, bool exclusive, void* src) {
 	return connect_ports_to_bundle(c, exclusive, false, src);
 }
 
 int
-IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive,
+IO::connect_ports_to_bundle (std::shared_ptr<Bundle> c, bool exclusive,
                              bool allow_partial, void* src)
 {
 	BLOCK_PROCESS_CALLBACK ();
@@ -1351,7 +1351,7 @@ IO::connect_ports_to_bundle (boost::shared_ptr<Bundle> c, bool exclusive,
 }
 
 int
-IO::disconnect_ports_from_bundle (boost::shared_ptr<Bundle> c, void* src)
+IO::disconnect_ports_from_bundle (std::shared_ptr<Bundle> c, void* src)
 {
 	BLOCK_PROCESS_CALLBACK ();
 
@@ -1462,14 +1462,14 @@ IO::find_port_hole (const char* base)
 }
 
 
-boost::shared_ptr<AudioPort>
+std::shared_ptr<AudioPort>
 IO::audio(uint32_t n) const
 {
 	return _ports.nth_audio_port (n);
 
 }
 
-boost::shared_ptr<MidiPort>
+std::shared_ptr<MidiPort>
 IO::midi(uint32_t n) const
 {
 	return _ports.nth_midi_port (n);
@@ -1515,7 +1515,7 @@ IO::bundles_connected ()
 	BundleList bundles;
 
 	/* Session bundles */
-	boost::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
+	std::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
 	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
 		if ((*i)->connected_to (_bundle, _session.engine())) {
 			bundles.push_back (*i);
@@ -1524,7 +1524,7 @@ IO::bundles_connected ()
 
 	/* Route bundles */
 
-	boost::shared_ptr<ARDOUR::RouteList> r = _session.get_routes ();
+	std::shared_ptr<ARDOUR::RouteList> r = _session.get_routes ();
 
 	if (_direction == Input) {
 		for (ARDOUR::RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -1544,7 +1544,7 @@ IO::bundles_connected ()
 }
 
 
-IO::UserBundleInfo::UserBundleInfo (IO* io, boost::shared_ptr<UserBundle> b)
+IO::UserBundleInfo::UserBundleInfo (IO* io, std::shared_ptr<UserBundle> b)
 {
 	bundle = b;
 	b->Changed.connect_same_thread (changed, boost::bind (&IO::bundle_changed, io, _1));
@@ -1618,7 +1618,7 @@ IO::connected () const
 }
 
 bool
-IO::connected_to (boost::shared_ptr<const IO> other) const
+IO::connected_to (std::shared_ptr<const IO> other) const
 {
 	if (!other) {
 		return connected ();
@@ -1632,8 +1632,8 @@ IO::connected_to (boost::shared_ptr<const IO> other) const
 
 	for (i = 0; i < no; ++i) {
 		for (j = 0; j < ni; ++j) {
-			boost::shared_ptr<Port> pa (nth(i));
-			boost::shared_ptr<Port> pb (other->nth(j));
+			std::shared_ptr<Port> pa (nth(i));
+			std::shared_ptr<Port> pb (other->nth(j));
 			if (pa && pb && pa->connected_to (pb->name())) {
 				return true;
 			}
@@ -1717,7 +1717,7 @@ IO::copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, samplecn
 	}
 }
 
-boost::shared_ptr<Port>
+std::shared_ptr<Port>
 IO::port_by_name (const std::string& str) const
 {
 	/* to be called only from ::set_state() - no locking */
@@ -1725,11 +1725,11 @@ IO::port_by_name (const std::string& str) const
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
 
 		if (i->name() == str) {
-			return boost::const_pointer_cast<Port> (*i);
+			return std::const_pointer_cast<Port> (*i);
 		}
 	}
 
-	return boost::shared_ptr<Port> ();
+	return std::shared_ptr<Port> ();
 }
 
 bool
@@ -1745,7 +1745,7 @@ IO::physically_connected () const
 }
 
 bool
-IO::has_port (boost::shared_ptr<Port> p) const
+IO::has_port (std::shared_ptr<Port> p) const
 {
 	Glib::Threads::RWLock::ReaderLock rl (_io_lock);
 	return _ports.contains (p);

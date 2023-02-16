@@ -36,7 +36,7 @@ PortSet::PortSet()
 		_ports.push_back( PortVec() );
 }
 
-static bool sort_ports_by_name (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
+static bool sort_ports_by_name (std::shared_ptr<Port> a, std::shared_ptr<Port> b)
 {
 	string aname (a->name());
 	string bname (b->name());
@@ -76,7 +76,7 @@ static bool sort_ports_by_name (boost::shared_ptr<Port> a, boost::shared_ptr<Por
 }
 
 
-static bool sort_ports_by_type_and_name (boost::shared_ptr<Port> a, boost::shared_ptr<Port> b)
+static bool sort_ports_by_type_and_name (std::shared_ptr<Port> a, std::shared_ptr<Port> b)
 {
 	if (a->type() != b->type()) {
 		return a->type() < b->type();
@@ -86,7 +86,7 @@ static bool sort_ports_by_type_and_name (boost::shared_ptr<Port> a, boost::share
 }
 
 void
-PortSet::add (boost::shared_ptr<Port> port)
+PortSet::add (std::shared_ptr<Port> port)
 {
 	PortVec& v = _ports[port->type()];
 
@@ -101,7 +101,7 @@ PortSet::add (boost::shared_ptr<Port> port)
 }
 
 bool
-PortSet::remove (boost::shared_ptr<Port> port)
+PortSet::remove (std::shared_ptr<Port> port)
 {
 	PortVec::iterator i = find(_all_ports.begin(), _all_ports.end(), port);
 	if (i != _all_ports.end()) {
@@ -129,19 +129,19 @@ PortSet::num_ports() const
 }
 
 bool
-PortSet::contains (boost::shared_ptr<const Port> port) const
+PortSet::contains (std::shared_ptr<const Port> port) const
 {
 	return find(_all_ports.begin(), _all_ports.end(), port) != _all_ports.end();
 }
 
-boost::shared_ptr<Port>
+std::shared_ptr<Port>
 PortSet::port(size_t n) const
 {
 	assert(n < _all_ports.size());
 	return _all_ports[n];
 }
 
-boost::shared_ptr<Port>
+std::shared_ptr<Port>
 PortSet::port(DataType type, size_t n) const
 {
 	if (type == DataType::NIL) {
@@ -152,19 +152,19 @@ PortSet::port(DataType type, size_t n) const
 			return v[n];
 		}
 	}
-	return boost::shared_ptr<Port>();
+	return std::shared_ptr<Port>();
 }
 
-boost::shared_ptr<AudioPort>
+std::shared_ptr<AudioPort>
 PortSet::nth_audio_port(size_t n) const
 {
-	return boost::dynamic_pointer_cast<AudioPort> (port (DataType::AUDIO, n));
+	return std::dynamic_pointer_cast<AudioPort> (port (DataType::AUDIO, n));
 }
 
-boost::shared_ptr<MidiPort>
+std::shared_ptr<MidiPort>
 PortSet::nth_midi_port(size_t n) const
 {
-	return boost::dynamic_pointer_cast<MidiPort> (port (DataType::MIDI, n));
+	return std::dynamic_pointer_cast<MidiPort> (port (DataType::MIDI, n));
 }
 
 void

@@ -72,8 +72,8 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	int discover_backends();
 	std::vector<const AudioBackendInfo*> available_backends() const;
 	std::string current_backend_name () const;
-	boost::shared_ptr<AudioBackend> set_backend (const std::string&, const std::string& arg1, const std::string& arg2);
-	boost::shared_ptr<AudioBackend> current_backend() const { return _backend; }
+	std::shared_ptr<AudioBackend> set_backend (const std::string&, const std::string& arg1, const std::string& arg2);
+	std::shared_ptr<AudioBackend> current_backend() const { return _backend; }
 	bool setup_required () const;
 
 	ProcessThread* main_thread() const { return _main_thread; }

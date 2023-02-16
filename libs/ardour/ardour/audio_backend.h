@@ -60,7 +60,7 @@ struct LIBARDOUR_API AudioBackendInfo {
 	 * Returns a valid shared_ptr to the object if successfull,
 	 * or a "null" shared_ptr otherwise.
 	 */
-	boost::shared_ptr<AudioBackend> (*factory) (AudioEngine&);
+	std::shared_ptr<AudioBackend> (*factory) (AudioEngine&);
 
 	/** Return true if the underlying mechanism/API has been
 	 * configured and does not need (re)configuration in order

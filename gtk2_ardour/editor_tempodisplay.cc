@@ -842,7 +842,7 @@ Editor::mid_tempo_per_track_update (TimeAxisView& tav)
 
 		for (TimeAxisView::Children::iterator ct = kids.begin(); ct != kids.end(); ++ct) {
 
-			boost::shared_ptr<AutomationTimeAxisView> atav = boost::dynamic_pointer_cast<AutomationTimeAxisView> (*ct);
+			std::shared_ptr<AutomationTimeAxisView> atav = std::dynamic_pointer_cast<AutomationTimeAxisView> (*ct);
 
 			if (atav) {
 				AutomationStreamView* asv = atav->automation_view ();

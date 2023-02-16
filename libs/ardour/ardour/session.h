@@ -322,11 +322,11 @@ public:
 	void refresh_disk_space ();
 
 	int load_routes (const XMLNode&, int);
-	boost::shared_ptr<RouteList> get_routes() const {
+	std::shared_ptr<RouteList> get_routes() const {
 		return routes.reader ();
 	}
 
-	boost::shared_ptr<RTTaskList> rt_tasklist () { return _rt_tasklist; }
+	std::shared_ptr<RTTaskList> rt_tasklist () { return _rt_tasklist; }
 
 	RouteList get_routelist (bool mixer_order = false, PresentationInfo::Flag fl = PresentationInfo::MixerRoutes) const;
 
@@ -341,11 +341,11 @@ public:
 
 	void get_stripables (StripableList&, PresentationInfo::Flag fl = PresentationInfo::MixerStripables) const;
 	StripableList get_stripables () const;
-	boost::shared_ptr<RouteList> get_tracks() const;
-	boost::shared_ptr<RouteList> get_routes_with_internal_returns() const;
-	boost::shared_ptr<RouteList> get_routes_with_regions_at (timepos_t const &) const;
+	std::shared_ptr<RouteList> get_tracks() const;
+	std::shared_ptr<RouteList> get_routes_with_internal_returns() const;
+	std::shared_ptr<RouteList> get_routes_with_regions_at (timepos_t const &) const;
 
-	boost::shared_ptr<AudioTrack> get_nth_audio_track (uint32_t) const;
+	std::shared_ptr<AudioTrack> get_nth_audio_track (uint32_t) const;
 
 	uint32_t nstripables (bool with_monitor = false) const;
 	uint32_t nroutes() const { return routes.reader()->size(); }
@@ -355,14 +355,14 @@ public:
 
 	bool plot_process_graph (std::string const& file_name) const;
 
-	boost::shared_ptr<BundleList> bundles () {
+	std::shared_ptr<BundleList> bundles () {
 		return _bundles.reader ();
 	}
 
 	void notify_presentation_info_change (PBD::PropertyChange const&);
 
 	template<class T> void foreach_route (T *obj, void (T::*func)(Route&), bool sort = true);
-	template<class T> void foreach_route (T *obj, void (T::*func)(boost::shared_ptr<Route>), bool sort = true);
+	template<class T> void foreach_route (T *obj, void (T::*func)(std::shared_ptr<Route>), bool sort = true);
 	template<class T, class A> void foreach_route (T *obj, void (T::*func)(Route&, A), A arg, bool sort = true);
 
 	template<class A>            void foreach_track (void (Track::*method)(A), A arg);
@@ -375,12 +375,12 @@ public:
 	static const std::string session_name_is_legal (const std::string&);
 
 	bool io_name_is_legal (const std::string&) const;
-	boost::shared_ptr<Route> route_by_name (std::string) const;
-	boost::shared_ptr<Route> route_by_id (PBD::ID) const;
-	boost::shared_ptr<Stripable> stripable_by_id (PBD::ID) const;
-	boost::shared_ptr<Stripable> get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo::Flag) const;
-	boost::shared_ptr<Route> get_remote_nth_route (PresentationInfo::order_t n) const;
-	boost::shared_ptr<Route> route_by_selected_count (uint32_t cnt) const;
+	std::shared_ptr<Route> route_by_name (std::string) const;
+	std::shared_ptr<Route> route_by_id (PBD::ID) const;
+	std::shared_ptr<Stripable> stripable_by_id (PBD::ID) const;
+	std::shared_ptr<Stripable> get_remote_nth_stripable (PresentationInfo::order_t n, PresentationInfo::Flag) const;
+	std::shared_ptr<Route> get_remote_nth_route (PresentationInfo::order_t n) const;
+	std::shared_ptr<Route> route_by_selected_count (uint32_t cnt) const;
 	void routes_using_input_from (const std::string& str, RouteList& rl);
 
 	bool route_name_unique (std::string) const;
@@ -454,11 +454,11 @@ public:
 	/** Emitted when a route is added to one of our route groups.
 	 *  First parameter is the RouteGroup, second is the route.
 	 */
-	PBD::Signal2<void, RouteGroup *, boost::weak_ptr<Route> > RouteAddedToRouteGroup;
+	PBD::Signal2<void, RouteGroup *, std::weak_ptr<Route> > RouteAddedToRouteGroup;
 	/** Emitted when a route is removed from one of our route groups.
 	 *  First parameter is the RouteGroup, second is the route.
 	 */
-	PBD::Signal2<void, RouteGroup *, boost::weak_ptr<Route> > RouteRemovedFromRouteGroup;
+	PBD::Signal2<void, RouteGroup *, std::weak_ptr<Route> > RouteRemovedFromRouteGroup;
 
 	/** Emitted when a foldback send is created or deleted
 	 */
@@ -495,7 +495,7 @@ public:
 	void request_transport_speed (double speed, TransportRequestSource origin = TRS_UI);
 	void request_default_play_speed (double speed, TransportRequestSource origin = TRS_UI);
 	void request_transport_speed_nonzero (double, TransportRequestSource origin = TRS_UI);
-	void request_overwrite_buffer (boost::shared_ptr<Track>, OverwriteReason);
+	void request_overwrite_buffer (std::shared_ptr<Track>, OverwriteReason);
 	void adjust_playback_buffering();
 	void adjust_capture_buffering();
 
@@ -645,7 +645,7 @@ public:
 	std::vector<std::string> possible_states() const;
 	static std::vector<std::string> possible_states (std::string path);
 
-	bool export_track_state (boost::shared_ptr<RouteList> rl, const std::string& path);
+	bool export_track_state (std::shared_ptr<RouteList> rl, const std::string& path);
 
 	/// The instant xml file is written to the session directory
 	void add_instant_xml (XMLNode&, bool write_to_config = true);
@@ -718,7 +718,7 @@ public:
 
 	/* fundamental operations. duh. */
 
-	std::list<boost::shared_ptr<AudioTrack> > new_audio_track (
+	std::list<std::shared_ptr<AudioTrack> > new_audio_track (
 		int input_channels,
 		int output_channels,
 		RouteGroup* route_group,
@@ -730,9 +730,9 @@ public:
 		bool trigger_visibility = false
 		);
 
-	std::list<boost::shared_ptr<MidiTrack> > new_midi_track (
+	std::list<std::shared_ptr<MidiTrack> > new_midi_track (
 		const ChanCount& input, const ChanCount& output, bool strict_io,
-		boost::shared_ptr<PluginInfo> instrument,
+		std::shared_ptr<PluginInfo> instrument,
 		Plugin::PresetRecord* pset,
 		RouteGroup* route_group, uint32_t how_many, std::string name_template,
 		PresentationInfo::order_t,
@@ -742,10 +742,10 @@ public:
 		);
 
 	RouteList new_audio_route (int input_channels, int output_channels, RouteGroup* route_group, uint32_t how_many, std::string name_template, PresentationInfo::Flag, PresentationInfo::order_t);
-	RouteList new_midi_route (RouteGroup* route_group, uint32_t how_many, std::string name_template, bool strict_io, boost::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord*, PresentationInfo::Flag, PresentationInfo::order_t);
+	RouteList new_midi_route (RouteGroup* route_group, uint32_t how_many, std::string name_template, bool strict_io, std::shared_ptr<PluginInfo> instrument, Plugin::PresetRecord*, PresentationInfo::Flag, PresentationInfo::order_t);
 
-	void remove_routes (boost::shared_ptr<RouteList>);
-	void remove_route (boost::shared_ptr<Route>);
+	void remove_routes (std::shared_ptr<RouteList>);
+	void remove_route (std::shared_ptr<Route>);
 
 	void resort_routes ();
 
@@ -795,7 +795,7 @@ public:
 	static PBD::Signal1<void, samplepos_t> StartTimeChanged;
 	static PBD::Signal1<void, samplepos_t> EndTimeChanged;
 
-	void   request_sync_source (boost::shared_ptr<TransportMaster>);
+	void   request_sync_source (std::shared_ptr<TransportMaster>);
 	bool   synced_to_engine() const;
 
 	double engine_speed() const { return _engine_speed; }
@@ -830,13 +830,13 @@ public:
 
 	/* region info  */
 
-	boost::shared_ptr<Region> find_whole_file_parent (boost::shared_ptr<Region const>) const;
+	std::shared_ptr<Region> find_whole_file_parent (std::shared_ptr<Region const>) const;
 
-	boost::shared_ptr<Region>      XMLRegionFactory (const XMLNode&, bool full);
-	boost::shared_ptr<AudioRegion> XMLAudioRegionFactory (const XMLNode&, bool full);
-	boost::shared_ptr<MidiRegion>  XMLMidiRegionFactory (const XMLNode&, bool full);
+	std::shared_ptr<Region>      XMLRegionFactory (const XMLNode&, bool full);
+	std::shared_ptr<AudioRegion> XMLAudioRegionFactory (const XMLNode&, bool full);
+	std::shared_ptr<MidiRegion>  XMLMidiRegionFactory (const XMLNode&, bool full);
 
-	void deinterlace_midi_region ( boost::shared_ptr<MidiRegion> mr );
+	void deinterlace_midi_region ( std::shared_ptr<MidiRegion> mr );
 
 	/* source management */
 
@@ -844,16 +844,16 @@ public:
 	bool sample_rate_convert (ImportStatus&, std::string infile, std::string& outfile);
 	std::string build_tmp_convert_name (std::string file);
 
-	boost::shared_ptr<ExportHandler> get_export_handler ();
-	boost::shared_ptr<ExportStatus> get_export_status ();
+	std::shared_ptr<ExportHandler> get_export_handler ();
+	std::shared_ptr<ExportStatus> get_export_status ();
 
 	int start_audio_export (samplepos_t position, bool realtime = false, bool region_export = false);
 
 	PBD::Signal1<int, samplecnt_t> ProcessExport;
 	static PBD::Signal4<void, std::string, std::string, bool, samplepos_t> Exported;
 
-	void add_source (boost::shared_ptr<Source>);
-	void remove_source (boost::weak_ptr<Source>);
+	void add_source (std::shared_ptr<Source>);
+	void remove_source (std::weak_ptr<Source>);
 
 	void cleanup_regions();
 	bool can_cleanup_peakfiles () const;
@@ -861,16 +861,16 @@ public:
 	int  cleanup_sources (CleanupReport&);
 	int  cleanup_trash_sources (CleanupReport&);
 
-	int destroy_sources (std::list<boost::shared_ptr<Source> > const&);
+	int destroy_sources (std::list<std::shared_ptr<Source> > const&);
 
 	int remove_last_capture ();
-	void get_last_capture_sources (std::list<boost::shared_ptr<Source> >&);
+	void get_last_capture_sources (std::list<std::shared_ptr<Source> >&);
 
 	/** handlers should return -1 for "stop cleanup",
 	    0 for "yes, delete this playlist",
 	    1 for "no, don't delete this playlist".
 	*/
-	static PBD::Signal1<int,boost::shared_ptr<Playlist> >  AskAboutPlaylistDeletion;
+	static PBD::Signal1<int,std::shared_ptr<Playlist> >  AskAboutPlaylistDeletion;
 
 	/** handlers should return 0 for "ignore the rate mismatch",
 	    !0 for "do not use this session"
@@ -891,27 +891,27 @@ public:
 
 	static PBD::Signal0<void> AfterConnect;
 
-	boost::shared_ptr<AudioFileSource> create_audio_source_for_session (
+	std::shared_ptr<AudioFileSource> create_audio_source_for_session (
 		size_t, std::string const &, uint32_t);
 
-	boost::shared_ptr<MidiSource> create_midi_source_for_session (std::string const &);
-	boost::shared_ptr<MidiSource> create_midi_source_by_stealing_name (boost::shared_ptr<Track>);
+	std::shared_ptr<MidiSource> create_midi_source_for_session (std::string const &);
+	std::shared_ptr<MidiSource> create_midi_source_by_stealing_name (std::shared_ptr<Track>);
 
-	boost::shared_ptr<Source> source_by_id (const PBD::ID&);
-	boost::shared_ptr<AudioFileSource> audio_source_by_path_and_channel (const std::string&, uint16_t) const;
-	boost::shared_ptr<MidiSource> midi_source_by_path (const std::string&, bool need_source_lock) const;
+	std::shared_ptr<Source> source_by_id (const PBD::ID&);
+	std::shared_ptr<AudioFileSource> audio_source_by_path_and_channel (const std::string&, uint16_t) const;
+	std::shared_ptr<MidiSource> midi_source_by_path (const std::string&, bool need_source_lock) const;
 	uint32_t count_sources_by_origin (const std::string&);
 
-	void add_playlist (boost::shared_ptr<Playlist>, bool unused = false);
+	void add_playlist (std::shared_ptr<Playlist>, bool unused = false);
 
 	/* Curves and AutomationLists (TODO when they go away) */
 	void add_automation_list(AutomationList*);
 
 	/* auditioning */
 
-	boost::shared_ptr<Auditioner> the_auditioner() { return auditioner; }
+	std::shared_ptr<Auditioner> the_auditioner() { return auditioner; }
 	void audition_playlist ();
-	void audition_region (boost::shared_ptr<Region>);
+	void audition_region (std::shared_ptr<Region>);
 	void cancel_audition ();
 	bool is_auditioning () const;
 
@@ -929,33 +929,33 @@ public:
 	/* I/O Plugin */
 	PBD::Signal0<void> IOPluginsChanged;
 
-	void load_io_plugin (boost::shared_ptr<IOPlug>);
-	bool unload_io_plugin (boost::shared_ptr<IOPlug>);
+	void load_io_plugin (std::shared_ptr<IOPlug>);
+	bool unload_io_plugin (std::shared_ptr<IOPlug>);
 
-	boost::shared_ptr<IOPlug> nth_io_plug (uint32_t n) {
-		boost::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
+	std::shared_ptr<IOPlug> nth_io_plug (uint32_t n) {
+		std::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
 		if (n < iop->size ()) {
 			return (*iop)[n];
 		}
-		return boost::shared_ptr<IOPlug> ();
+		return std::shared_ptr<IOPlug> ();
 	}
 
-	boost::shared_ptr<IOPlugList> io_plugs () const {
+	std::shared_ptr<IOPlugList> io_plugs () const {
 		return _io_plugins.reader ();
 	}
 
 	/* flattening stuff */
 
-	boost::shared_ptr<Region> write_one_track (Track&, samplepos_t start, samplepos_t end,
-	                                           bool overwrite, std::vector<boost::shared_ptr<Source> >&, InterThreadInfo& wot,
-	                                           boost::shared_ptr<Processor> endpoint,
+	std::shared_ptr<Region> write_one_track (Track&, samplepos_t start, samplepos_t end,
+	                                           bool overwrite, std::vector<std::shared_ptr<Source> >&, InterThreadInfo& wot,
+	                                           std::shared_ptr<Processor> endpoint,
 	                                           bool include_endpoint, bool for_export, bool for_freeze, std::string const& name);
 	int freeze_all (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */
 
 	bool muted () const;
-	std::vector<boost::weak_ptr<AutomationControl> > cancel_all_mute ();
+	std::vector<std::weak_ptr<AutomationControl> > cancel_all_mute ();
 
 	bool soloing () const { return _non_soloed_outs_muted; }
 	bool listening () const;
@@ -965,17 +965,17 @@ public:
 	bool solo_selection_active ();
 	void solo_selection (StripableList&, bool);
 
-	void clear_all_solo_state (boost::shared_ptr<RouteList>);
-	void prepare_momentary_solo (SoloMuteRelease* smr = NULL, bool exclusive = false, boost::shared_ptr<Route> route = boost::shared_ptr<Route> ());
+	void clear_all_solo_state (std::shared_ptr<RouteList>);
+	void prepare_momentary_solo (SoloMuteRelease* smr = NULL, bool exclusive = false, std::shared_ptr<Route> route = std::shared_ptr<Route> ());
 
 	static const SessionEvent::RTeventCallback rt_cleanup;
 
 	/* Control-based methods */
 
-	void set_controls (boost::shared_ptr<ControlList>, double val, PBD::Controllable::GroupControlDisposition);
-	void set_control (boost::shared_ptr<AutomationControl>, double val, PBD::Controllable::GroupControlDisposition);
+	void set_controls (std::shared_ptr<ControlList>, double val, PBD::Controllable::GroupControlDisposition);
+	void set_control (std::shared_ptr<AutomationControl>, double val, PBD::Controllable::GroupControlDisposition);
 
-	void set_exclusive_input_active (boost::shared_ptr<RouteList> rt, bool onoff, bool flip_others = false);
+	void set_exclusive_input_active (std::shared_ptr<RouteList> rt, bool onoff, bool flip_others = false);
 
 	PBD::Signal1<void,bool> SoloActive;
 	PBD::Signal0<void> SoloChanged;
@@ -992,20 +992,20 @@ public:
 	void reset_monitor_section ();
 	bool monitor_active() const { return (_monitor_out && _monitor_out->monitor_control () && _monitor_out->monitor_control ()->monitor_active()); }
 
-	boost::shared_ptr<Route> monitor_out() const { return _monitor_out; }
-	boost::shared_ptr<Route> master_out() const { return _master_out; }
-	boost::shared_ptr<GainControl>  master_volume () const;
+	std::shared_ptr<Route> monitor_out() const { return _monitor_out; }
+	std::shared_ptr<Route> master_out() const { return _master_out; }
+	std::shared_ptr<GainControl>  master_volume () const;
 
 	PresentationInfo::order_t master_order_key () const { return _master_out ? _master_out->presentation_info ().order () : -1; }
 	bool ensure_stripable_sort_order ();
 
-	void globally_add_internal_sends (boost::shared_ptr<Route> dest, Placement p, bool);
-	void globally_set_send_gains_from_track (boost::shared_ptr<Route> dest);
-	void globally_set_send_gains_to_zero (boost::shared_ptr<Route> dest);
-	void globally_set_send_gains_to_unity (boost::shared_ptr<Route> dest);
-	void add_internal_sends (boost::shared_ptr<Route> dest, Placement p, boost::shared_ptr<RouteList> senders);
-	void add_internal_send (boost::shared_ptr<Route>, int, boost::shared_ptr<Route>);
-	void add_internal_send (boost::shared_ptr<Route>, boost::shared_ptr<Processor>, boost::shared_ptr<Route>);
+	void globally_add_internal_sends (std::shared_ptr<Route> dest, Placement p, bool);
+	void globally_set_send_gains_from_track (std::shared_ptr<Route> dest);
+	void globally_set_send_gains_to_zero (std::shared_ptr<Route> dest);
+	void globally_set_send_gains_to_unity (std::shared_ptr<Route> dest);
+	void add_internal_sends (std::shared_ptr<Route> dest, Placement p, std::shared_ptr<RouteList> senders);
+	void add_internal_send (std::shared_ptr<Route>, int, std::shared_ptr<Route>);
+	void add_internal_send (std::shared_ptr<Route>, std::shared_ptr<Processor>, std::shared_ptr<Route>);
 
 	static void set_disable_all_loaded_plugins (bool yn) {
 		_disable_all_loaded_plugins = yn;
@@ -1039,9 +1039,9 @@ public:
 
 	/* I/O bundles */
 
-	void add_bundle (boost::shared_ptr<Bundle>, bool emit_signal = true);
-	void remove_bundle (boost::shared_ptr<Bundle>);
-	boost::shared_ptr<Bundle> bundle_by_name (std::string) const;
+	void add_bundle (std::shared_ptr<Bundle>, bool emit_signal = true);
+	void remove_bundle (std::shared_ptr<Bundle>);
+	std::shared_ptr<Bundle> bundle_by_name (std::string) const;
 
 	PBD::Signal0<void> BundleAddedOrRemoved;
 
@@ -1095,7 +1095,7 @@ public:
 	 * @param sfd the object to diff
 	 * @returns the allocated StatefulDiffCommand (already added via add_command)
 	 */
-	PBD::StatefulDiffCommand* add_stateful_diff_command (boost::shared_ptr<PBD::StatefulDestructible> sfd);
+	PBD::StatefulDiffCommand* add_stateful_diff_command (std::shared_ptr<PBD::StatefulDestructible> sfd);
 
 	/** @return The list of operations that are currently in progress */
 	std::list<GQuark> const & current_operations () {
@@ -1137,8 +1137,8 @@ public:
 
 	/* clicking */
 
-	boost::shared_ptr<IO> click_io() { return _click_io; }
-	boost::shared_ptr<Amp> click_gain() { return _click_gain; }
+	std::shared_ptr<IO> click_io() { return _click_io; }
+	std::shared_ptr<Amp> click_gain() { return _click_gain; }
 
 	/* disk, buffer loads */
 
@@ -1200,21 +1200,21 @@ public:
 
 	/* Speakers */
 
-	boost::shared_ptr<Speakers> get_speakers ();
+	std::shared_ptr<Speakers> get_speakers ();
 
 	/* Controllables */
 
-	boost::shared_ptr<ARDOUR::Trigger> trigger_by_id (PBD::ID) const;
+	std::shared_ptr<ARDOUR::Trigger> trigger_by_id (PBD::ID) const;
 
-	boost::shared_ptr<Processor> processor_by_id (PBD::ID) const;
+	std::shared_ptr<Processor> processor_by_id (PBD::ID) const;
 
-	boost::shared_ptr<PBD::Controllable> controllable_by_id (const PBD::ID&);
-	boost::shared_ptr<AutomationControl> automation_control_by_id (const PBD::ID&);
+	std::shared_ptr<PBD::Controllable> controllable_by_id (const PBD::ID&);
+	std::shared_ptr<AutomationControl> automation_control_by_id (const PBD::ID&);
 
-	void add_controllable (boost::shared_ptr<PBD::Controllable>);
+	void add_controllable (std::shared_ptr<PBD::Controllable>);
 
-	boost::shared_ptr<PBD::Controllable> solo_cut_control() const;
-	boost::shared_ptr<PBD::Controllable> recently_touched_controllable () const;
+	std::shared_ptr<PBD::Controllable> solo_cut_control() const;
+	std::shared_ptr<PBD::Controllable> recently_touched_controllable () const;
 
 	bool apply_nth_mixer_scene (size_t);
 	bool apply_nth_mixer_scene (size_t, RouteList const&);
@@ -1222,8 +1222,8 @@ public:
 	bool nth_mixer_scene_valid (size_t) const;
 	size_t last_touched_mixer_scene_idx () {return _last_touched_mixer_scene_idx;}
 
-	boost::shared_ptr<MixerScene>              nth_mixer_scene (size_t, bool create_if_missing = false);
-	std::vector<boost::shared_ptr<MixerScene>> mixer_scenes () const;
+	std::shared_ptr<MixerScene>              nth_mixer_scene (size_t, bool create_if_missing = false);
+	std::vector<std::shared_ptr<MixerScene>> mixer_scenes () const;
 
 	SessionConfiguration config;
 
@@ -1259,7 +1259,7 @@ public:
 		PostTransportLoopChanged        = 0x400
 	};
 
-	boost::shared_ptr<SessionPlaylists> playlists () const { return _playlists; }
+	std::shared_ptr<SessionPlaylists> playlists () const { return _playlists; }
 
 	void send_mmc_locate (samplepos_t);
 	void queue_full_time_code () { _send_timecode_update = true; }
@@ -1317,19 +1317,19 @@ public:
 
 	/* asynchronous MIDI control ports */
 
-	boost::shared_ptr<Port> mmc_output_port () const;
-	boost::shared_ptr<Port> mmc_input_port () const;
-	boost::shared_ptr<Port> trigger_input_port () const;
-	boost::shared_ptr<Port> scene_input_port () const;
-	boost::shared_ptr<Port> scene_output_port () const;
+	std::shared_ptr<Port> mmc_output_port () const;
+	std::shared_ptr<Port> mmc_input_port () const;
+	std::shared_ptr<Port> trigger_input_port () const;
+	std::shared_ptr<Port> scene_input_port () const;
+	std::shared_ptr<Port> scene_output_port () const;
 
-	boost::shared_ptr<AsyncMIDIPort> vkbd_output_port () const;
+	std::shared_ptr<AsyncMIDIPort> vkbd_output_port () const;
 
 	/* synchronous MIDI ports used for synchronization */
 
-	boost::shared_ptr<MidiPort> midi_clock_output_port () const;
-	boost::shared_ptr<MidiPort> mtc_output_port () const;
-	boost::shared_ptr<Port> ltc_output_port() const { return _ltc_output_port; }
+	std::shared_ptr<MidiPort> midi_clock_output_port () const;
+	std::shared_ptr<MidiPort> mtc_output_port () const;
+	std::shared_ptr<Port> ltc_output_port() const { return _ltc_output_port; }
 
 	MIDI::MachineControl& mmc() { return *_mmc; }
 
@@ -1346,7 +1346,7 @@ public:
 	double compute_speed_from_master (pframes_t nframes);
 	bool   transport_master_is_external() const;
 	bool   transport_master_no_external_or_using_engine() const;
-	boost::shared_ptr<TransportMaster> transport_master() const;
+	std::shared_ptr<TransportMaster> transport_master() const;
 
 	void import_pt_sources (PTFFormat& ptf, ImportStatus& status);
 	void import_pt_rest (PTFFormat& ptf);
@@ -1380,7 +1380,7 @@ public:
 	CueEvents const & cue_events() const { return _cue_events; }
 
 	int num_triggerboxes () const;
-	boost::shared_ptr<TriggerBox> triggerbox_at (int32_t route_index) const;
+	std::shared_ptr<TriggerBox> triggerbox_at (int32_t route_index) const;
 	TriggerPtr trigger_at (int32_t route_index, int32_t row_index) const;
 	bool bang_trigger_at(int32_t route_index, int32_t row_index);
 	bool unbang_trigger_at(int32_t route_index, int32_t row_index);
@@ -1418,7 +1418,7 @@ private:
 	static void init_name_id_counter (guint n);
 	static unsigned int name_id_counter ();
 
-	boost::shared_ptr<SessionPlaylists> _playlists;
+	std::shared_ptr<SessionPlaylists> _playlists;
 
 	/* stuff used in process() should be close together to
 	   maximise cache hits
@@ -1555,8 +1555,8 @@ private:
 	bool _region_export;
 	samplepos_t _export_preroll;
 
-	boost::shared_ptr<ExportHandler> export_handler;
-	boost::shared_ptr<ExportStatus>  export_status;
+	std::shared_ptr<ExportHandler> export_handler;
+	std::shared_ptr<ExportStatus>  export_status;
 
 	int  pre_export ();
 	int  stop_audio_export ();
@@ -1640,7 +1640,7 @@ private:
 
 	SerializedRCUManager<IOPlugList> _io_plugins;
 
-	std::vector<boost::shared_ptr<MixerScene>> _mixer_scenes;
+	std::vector<std::shared_ptr<MixerScene>> _mixer_scenes;
 	mutable Glib::Threads::RWLock              _mixer_scenes_lock;
 
 	Butler* _butler;
@@ -1740,13 +1740,13 @@ private:
 
 	struct AutoConnectRequest {
 		public:
-		AutoConnectRequest (boost::shared_ptr <Route> r,
+		AutoConnectRequest (std::shared_ptr <Route> r,
 				bool ci, bool co,
 				const ChanCount& is,
 				const ChanCount& os,
 				const ChanCount& io,
 				const ChanCount& oo)
-			: route (boost::weak_ptr<Route> (r))
+			: route (std::weak_ptr<Route> (r))
 			, connect_inputs (ci)
 			, connect_outputs (co)
 			, input_start (is)
@@ -1755,7 +1755,7 @@ private:
 			, output_offset (oo)
 		{}
 
-		boost::weak_ptr <Route> route;
+		std::weak_ptr <Route> route;
 		bool connect_inputs;
 		bool connect_outputs;
 		ChanCount input_start;
@@ -1880,7 +1880,7 @@ private:
 
 	void set_play_loop (bool yn, bool change_transport_state);
 	void unset_play_loop (bool change_transport_state = false);
-	void overwrite_some_buffers (boost::shared_ptr<Route>, OverwriteReason);
+	void overwrite_some_buffers (std::shared_ptr<Route>, OverwriteReason);
 	void flush_all_inserts ();
 	int  micro_locate (samplecnt_t distance);
 
@@ -1943,21 +1943,21 @@ private:
 
 	void load_and_connect_instruments (RouteList&,
 			bool strict_io,
-			boost::shared_ptr<PluginInfo> instrument,
+			std::shared_ptr<PluginInfo> instrument,
 			Plugin::PresetRecord* pset,
 			ChanCount& existing_outputs
 			);
 
-	boost::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);
-	boost::shared_ptr<Route> XMLRouteFactory_2X (const XMLNode&, int);
-	boost::shared_ptr<Route> XMLRouteFactory_3X (const XMLNode&, int);
+	std::shared_ptr<Route> XMLRouteFactory (const XMLNode&, int);
+	std::shared_ptr<Route> XMLRouteFactory_2X (const XMLNode&, int);
+	std::shared_ptr<Route> XMLRouteFactory_3X (const XMLNode&, int);
 
 	void route_processors_changed (RouteProcessorChange);
 
 	bool find_route_name (std::string const &, uint32_t& id, std::string& name, bool);
 	void count_existing_track_channels (ChanCount& in, ChanCount& out);
-	void auto_connect_route (boost::shared_ptr<Route>, bool, bool, const ChanCount&, const ChanCount&, const ChanCount& io = ChanCount(), const ChanCount& oo = ChanCount());
-	void midi_output_change_handler (IOChange change, void* /*src*/, boost::weak_ptr<Route> midi_track);
+	void auto_connect_route (std::shared_ptr<Route>, bool, bool, const ChanCount&, const ChanCount&, const ChanCount& io = ChanCount(), const ChanCount& oo = ChanCount());
+	void midi_output_change_handler (IOChange change, void* /*src*/, std::weak_ptr<Route> midi_track);
 
 	/* track numbering */
 
@@ -1966,12 +1966,12 @@ private:
 
 	/* solo/mute/notifications */
 
-	void route_listen_changed (PBD::Controllable::GroupControlDisposition, boost::weak_ptr<Route>);
+	void route_listen_changed (PBD::Controllable::GroupControlDisposition, std::weak_ptr<Route>);
 	void route_mute_changed ();
-	void route_solo_changed (bool self_solo_change, PBD::Controllable::GroupControlDisposition group_override, boost::weak_ptr<Route>);
-	void route_solo_isolated_changed (boost::weak_ptr<Route>);
+	void route_solo_changed (bool self_solo_change, PBD::Controllable::GroupControlDisposition group_override, std::weak_ptr<Route>);
+	void route_solo_isolated_changed (std::weak_ptr<Route>);
 
-	void update_route_solo_state (boost::shared_ptr<RouteList> r = boost::shared_ptr<RouteList>());
+	void update_route_solo_state (std::shared_ptr<RouteList> r = std::shared_ptr<RouteList>());
 
 	void listen_position_changed ();
 	void solo_control_mode_changed ();
@@ -1983,8 +1983,8 @@ private:
 	int load_regions (const XMLNode& node);
 	int load_compounds (const XMLNode& node);
 
-	void route_added_to_route_group (RouteGroup *, boost::weak_ptr<Route>);
-	void route_removed_from_route_group (RouteGroup *, boost::weak_ptr<Route>);
+	void route_added_to_route_group (RouteGroup *, std::weak_ptr<Route>);
+	void route_removed_from_route_group (RouteGroup *, std::weak_ptr<Route>);
 	void route_group_property_changed (RouteGroup *);
 
 	/* SOURCES */
@@ -1994,19 +1994,19 @@ private:
 public:
 
 	/* Emited when a new source is added to the session */
-	PBD::Signal1< void, boost::weak_ptr<Source> > SourceAdded;
-	PBD::Signal1< void, boost::weak_ptr<Source> > SourceRemoved;
+	PBD::Signal1< void, std::weak_ptr<Source> > SourceAdded;
+	PBD::Signal1< void, std::weak_ptr<Source> > SourceRemoved;
 
-	typedef std::map<PBD::ID,boost::shared_ptr<Source> > SourceMap;
+	typedef std::map<PBD::ID,std::shared_ptr<Source> > SourceMap;
 
-	void foreach_source (boost::function<void( boost::shared_ptr<Source> )> f) {
+	void foreach_source (boost::function<void( std::shared_ptr<Source> )> f) {
 		Glib::Threads::Mutex::Lock ls (source_lock);
 		for (SourceMap::iterator i = sources.begin(); i != sources.end(); ++i) {
 			f ( (*i).second );
 		}
 	}
 
-	bool playlist_is_active( boost::shared_ptr<Playlist>);
+	bool playlist_is_active( std::shared_ptr<Playlist>);
 	ARDOUR::CueMarkers pending_source_markers; // source markers created while recording
 
 private:
@@ -2016,13 +2016,13 @@ private:
 	int load_sources (const XMLNode& node);
 	XMLNode& get_sources_as_xml ();
 
-	boost::shared_ptr<Source> XMLSourceFactory (const XMLNode&);
+	std::shared_ptr<Source> XMLSourceFactory (const XMLNode&);
 
 	/* PLAYLISTS */
 
-	void remove_playlist (boost::weak_ptr<Playlist>);
-	void track_playlist_changed (boost::weak_ptr<Track>);
-	void playlist_region_added (boost::weak_ptr<Region>);
+	void remove_playlist (std::weak_ptr<Playlist>);
+	void track_playlist_changed (std::weak_ptr<Track>);
+	void playlist_region_added (std::weak_ptr<Region>);
 	void playlist_ranges_moved (std::list<Temporal::RangeMove> const &);
 	void playlist_regions_extended (std::list<Temporal::Range> const &);
 
@@ -2039,10 +2039,10 @@ private:
 
 	/* AUDITIONING */
 
-	boost::shared_ptr<Auditioner> auditioner;
-	void set_audition (boost::shared_ptr<Region>);
+	std::shared_ptr<Auditioner> auditioner;
+	void set_audition (std::shared_ptr<Region>);
 	void non_realtime_set_audition ();
-	boost::shared_ptr<Region> pending_audition_region;
+	std::shared_ptr<Region> pending_audition_region;
 
 	/* EXPORT */
 
@@ -2132,17 +2132,17 @@ private:
 	int      set_state (const XMLNode& node, int version); // not idempotent
 	XMLNode& get_template ();
 
-	bool maybe_copy_midifile (snapshot_t, boost::shared_ptr<Source> src, XMLNode*);
+	bool maybe_copy_midifile (snapshot_t, std::shared_ptr<Source> src, XMLNode*);
 
-	void collect_sources_of_this_snapshot (std::set<boost::shared_ptr<Source>>&, bool incl_unused = true) const;
+	void collect_sources_of_this_snapshot (std::set<std::shared_ptr<Source>>&, bool incl_unused = true) const;
 
 	/* click track */
 	typedef std::list<Click*>     Clicks;
 	Clicks                        clicks;
 	bool                         _clicking;
 	bool                         _click_rec_only;
-	boost::shared_ptr<IO>        _click_io;
-	boost::shared_ptr<Amp>       _click_gain;
+	std::shared_ptr<IO>        _click_io;
+	std::shared_ptr<Amp>       _click_gain;
 	Sample*                       click_data;
 	Sample*                       click_emphasis_data;
 	samplecnt_t                   click_length;
@@ -2188,8 +2188,8 @@ private:
 	/* main outs */
 	uint32_t main_outs;
 
-	boost::shared_ptr<Route> _master_out;
-	boost::shared_ptr<Route> _monitor_out;
+	std::shared_ptr<Route> _master_out;
+	std::shared_ptr<Route> _monitor_out;
 
 	void auto_connect_master_bus ();
 
@@ -2198,14 +2198,14 @@ private:
 	int find_all_sources (std::string path, std::set<std::string>& result);
 	int find_all_sources_across_snapshots (std::set<std::string>& result, bool exclude_this_snapshot);
 
-	typedef std::set<boost::shared_ptr<PBD::Controllable> > Controllables;
+	typedef std::set<std::shared_ptr<PBD::Controllable> > Controllables;
 	Glib::Threads::Mutex controllables_lock;
 	Controllables controllables;
 
-	boost::shared_ptr<PBD::Controllable> _solo_cut_control;
+	std::shared_ptr<PBD::Controllable> _solo_cut_control;
 
-	void controllable_touched (boost::weak_ptr<PBD::Controllable>);
-	boost::weak_ptr<PBD::Controllable> _recently_touched_controllable;
+	void controllable_touched (std::weak_ptr<PBD::Controllable>);
+	std::weak_ptr<PBD::Controllable> _recently_touched_controllable;
 
 	void reset_native_file_format();
 	bool first_file_data_format_reset;
@@ -2226,12 +2226,12 @@ private:
 	GATOMIC_QUAL gint _have_rec_enabled_track;
 	GATOMIC_QUAL gint _have_rec_disabled_track;
 
-	static int ask_about_playlist_deletion (boost::shared_ptr<Playlist>);
+	static int ask_about_playlist_deletion (std::shared_ptr<Playlist>);
 
 	/* realtime "apply to set of routes" operations */
 	template<typename T> SessionEvent*
-		get_rt_event (boost::shared_ptr<RouteList> rl, T targ, SessionEvent::RTeventCallback after, PBD::Controllable::GroupControlDisposition group_override,
-		              void (Session::*method) (boost::shared_ptr<RouteList>, T, PBD::Controllable::GroupControlDisposition)) {
+		get_rt_event (std::shared_ptr<RouteList> rl, T targ, SessionEvent::RTeventCallback after, PBD::Controllable::GroupControlDisposition group_override,
+		              void (Session::*method) (std::shared_ptr<RouteList>, T, PBD::Controllable::GroupControlDisposition)) {
 		SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 		ev->rt_slot = boost::bind (method, this, rl, targ, group_override);
 		ev->rt_return = after;
@@ -2242,8 +2242,8 @@ private:
 
 	/* specialized version realtime "apply to set of routes" operations */
 	template<typename T1, typename T2> SessionEvent*
-		get_rt_event (boost::shared_ptr<RouteList> rl, T1 t1arg, T2 t2arg, SessionEvent::RTeventCallback after, PBD::Controllable::GroupControlDisposition group_override,
-		              void (Session::*method) (boost::shared_ptr<RouteList>, T1, T2, PBD::Controllable::GroupControlDisposition)) {
+		get_rt_event (std::shared_ptr<RouteList> rl, T1 t1arg, T2 t2arg, SessionEvent::RTeventCallback after, PBD::Controllable::GroupControlDisposition group_override,
+		              void (Session::*method) (std::shared_ptr<RouteList>, T1, T2, PBD::Controllable::GroupControlDisposition)) {
 		SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 		ev->rt_slot = boost::bind (method, this, rl, t1arg, t2arg, group_override);
 		ev->rt_return = after;
@@ -2253,7 +2253,7 @@ private:
 	}
 
 	/* specialized version realtime "apply to set of controls" operations */
-	SessionEvent* get_rt_event (boost::shared_ptr<WeakControlList> cl, double arg, PBD::Controllable::GroupControlDisposition group_override) {
+	SessionEvent* get_rt_event (std::shared_ptr<WeakControlList> cl, double arg, PBD::Controllable::GroupControlDisposition group_override) {
 		SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 		ev->rt_slot = boost::bind (&Session::rt_set_controls, this, cl, arg, group_override);
 		ev->rt_return = Session::rt_cleanup;
@@ -2262,8 +2262,8 @@ private:
 		return ev;
 	}
 
-	void rt_set_controls (boost::shared_ptr<WeakControlList>, double val, PBD::Controllable::GroupControlDisposition group_override);
-	void rt_clear_all_solo_state (boost::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
+	void rt_set_controls (std::shared_ptr<WeakControlList>, double val, PBD::Controllable::GroupControlDisposition group_override);
+	void rt_clear_all_solo_state (std::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
 
 	void setup_midi_machine_control ();
 
@@ -2279,7 +2279,7 @@ private:
 	void set_track_monitor_input_status (bool);
 	samplepos_t compute_stop_limit () const;
 
-	boost::shared_ptr<Speakers> _speakers;
+	std::shared_ptr<Speakers> _speakers;
 	void load_nested_sources (const XMLNode& node);
 
 	/** The directed graph of routes that is currently being used for audio processing
@@ -2288,11 +2288,11 @@ private:
 	GraphEdges _current_route_graph;
 
 	friend class IOPlug;
-	boost::shared_ptr<Graph>      _process_graph;
-	boost::shared_ptr<GraphChain> _graph_chain;
-	boost::shared_ptr<GraphChain> _io_graph_chain[2];
+	std::shared_ptr<Graph>      _process_graph;
+	std::shared_ptr<GraphChain> _graph_chain;
+	std::shared_ptr<GraphChain> _io_graph_chain[2];
 
-	void resort_routes_using (boost::shared_ptr<RouteList>);
+	void resort_routes_using (std::shared_ptr<RouteList>);
 	void resort_io_plugs ();
 
 	bool rechain_process_graph (GraphNodeList&);
@@ -2306,9 +2306,9 @@ private:
 
 	MidiClockTicker* midi_clock;
 
-	boost::shared_ptr<Port>  _ltc_output_port;
+	std::shared_ptr<Port>  _ltc_output_port;
 
-	boost::shared_ptr<RTTaskList> _rt_tasklist;
+	std::shared_ptr<RTTaskList> _rt_tasklist;
 
 	/* Scene Changing */
 	SceneChanger* _scene_changer;
@@ -2330,15 +2330,15 @@ private:
 
 	VCAManager* _vca_manager;
 
-	boost::shared_ptr<Route> get_midi_nth_route_by_id (PresentationInfo::order_t n) const;
+	std::shared_ptr<Route> get_midi_nth_route_by_id (PresentationInfo::order_t n) const;
 
 	std::string created_with;
 
-	void midi_track_presentation_info_changed (PBD::PropertyChange const &, boost::weak_ptr<MidiTrack>);
-	void rewire_selected_midi (boost::shared_ptr<MidiTrack>);
+	void midi_track_presentation_info_changed (PBD::PropertyChange const &, std::weak_ptr<MidiTrack>);
+	void rewire_selected_midi (std::shared_ptr<MidiTrack>);
 	void rewire_midi_selection_ports ();
 	void disconnect_port_for_rewire (std::string const& port) const;
-	boost::weak_ptr<MidiTrack> current_midi_target;
+	std::weak_ptr<MidiTrack> current_midi_target;
 
 	StripableList _soloSelection;  //the items that are soloe'd during a solo-selection operation; need to unsolo after the roll
 
@@ -2372,7 +2372,7 @@ private:
 	void clear_active_cue ();
 
 	int tb_with_filled_slots;
-	void handle_slots_empty_status (boost::weak_ptr<Route> const &);
+	void handle_slots_empty_status (std::weak_ptr<Route> const &);
 };
 
 

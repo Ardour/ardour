@@ -248,7 +248,7 @@ public:
 		: LuaDialogWidget (key, title)
 		, _db_adjustment (ARDOUR::gain_to_slider_position_with_max (1.0, ARDOUR::Config->get_max_gain ()), 0, 1, 0.01, 0.1)
 	{
-		_db_slider = Gtk::manage (new ArdourWidgets::HSliderController (&_db_adjustment, boost::shared_ptr<PBD::Controllable> (), 220, 18));
+		_db_slider = Gtk::manage (new ArdourWidgets::HSliderController (&_db_adjustment, std::shared_ptr<PBD::Controllable> (), 220, 18));
 
 		_fader_centering_box.pack_start (*_db_slider, true, false);
 

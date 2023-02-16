@@ -23,8 +23,6 @@
 #include <memory>
 #include <sstream>
 
-#include <boost/make_shared.hpp>
-
 #include <glibmm.h>
 
 #include <rubberband/RubberBandStretcher.h>
@@ -613,7 +611,7 @@ Trigger::set_state (const XMLNode& node, int version)
 
 	node.get_property (X_("region"), rid);
 
-	boost::shared_ptr<Region> r = RegionFactory::region_by_id (rid);
+	std::shared_ptr<Region> r = RegionFactory::region_by_id (rid);
 
 	if (r) {
 		set_region (r, false);  //this results in a call to estimate_tempo()
@@ -638,7 +636,7 @@ Trigger::internal_use_follow_length () const
 }
 
 void
-Trigger::set_region (boost::shared_ptr<Region> r, bool use_thread)
+Trigger::set_region (std::shared_ptr<Region> r, bool use_thread)
 {
 	/* Called from (G)UI thread */
 
@@ -665,7 +663,7 @@ Trigger::clear_region ()
 }
 
 void
-Trigger::set_region_internal (boost::shared_ptr<Region> r)
+Trigger::set_region_internal (std::shared_ptr<Region> r)
 {
 	/* No whole file regions in the triggerbox, just like we do not allow
 	 * them in playlists either.
@@ -1549,11 +1547,11 @@ AudioTrigger::natural_length() const
 }
 
 int
-AudioTrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
+AudioTrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 {
 	assert (!active());
 
-	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
+	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (r);
 
 	if (r && !ar) {
 		return -1;
@@ -1774,7 +1772,7 @@ AudioTrigger::setup_stretcher ()
 		return;
 	}
 
-	boost::shared_ptr<AudioRegion> ar (boost::dynamic_pointer_cast<AudioRegion> (_region));
+	std::shared_ptr<AudioRegion> ar (std::dynamic_pointer_cast<AudioRegion> (_region));
 	const uint32_t nchans = std::min (_box.input_streams().n_audio(), ar->n_channels());
 
 	//map our internal enum to a rubberband option
@@ -1803,7 +1801,7 @@ AudioTrigger::drop_data ()
 }
 
 int
-AudioTrigger::load_data (boost::shared_ptr<AudioRegion> ar)
+AudioTrigger::load_data (std::shared_ptr<AudioRegion> ar)
 {
 	const uint32_t nchans = ar->n_channels();
 
@@ -1847,7 +1845,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
                          Temporal::Beats const & start, Temporal::Beats const & end,
                          pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset)
 {
-	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion>(_region);
+	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion>(_region);
 	/* We do not modify the I/O of our parent route, so we process only min (bufs.n_audio(),region.channels()) */
 	const uint32_t nchans = (in_process_context ? std::min (bufs.count().n_audio(), ar->n_channels()) : ar->n_channels());
 	int avail = 0;
@@ -2355,7 +2353,7 @@ SegmentDescriptor
 MIDITrigger::get_segment_descriptor () const
 {
 	SegmentDescriptor sd;
-	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion> (_region);
+	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (_region);
 	assert (mr);
 
 	sd.set_extent (Temporal::Beats(), mr->length().beats());
@@ -2605,13 +2603,13 @@ MIDITrigger::estimate_midi_patches ()
 		_patch_change[chan].set_program( 0 );
 	}
 
-	boost::shared_ptr<SMFSource> smfs = boost::dynamic_pointer_cast<SMFSource> (_region->source(0));
+	std::shared_ptr<SMFSource> smfs = std::dynamic_pointer_cast<SMFSource> (_region->source(0));
 	if (smfs) {
 		/* second, apply any patches that the Auditioner has in its memory
 		 * ...this handles the case where the user chose patches for a file that itself lacked patch-settings
 		 * (it's possible that the user didn't audition the actual file they dragged in, but this is still the best starting-point we have)
 		 * */
-		boost::shared_ptr<ARDOUR::Auditioner> aud = _box.session().the_auditioner();
+		std::shared_ptr<ARDOUR::Auditioner> aud = _box.session().the_auditioner();
 		if (aud) {
 			for (uint8_t chan = 0; chan < 16; ++chan) {
 				if (aud->patch_change (chan).is_set()) {
@@ -2621,7 +2619,7 @@ MIDITrigger::estimate_midi_patches ()
 		}
 
 		/* thirdly, apply the patches from the file itself (if it has any) */
-		boost::shared_ptr<MidiModel> model = smfs->model();
+		std::shared_ptr<MidiModel> model = smfs->model();
 		for (MidiModel::PatchChanges::const_iterator i = model->patch_changes().begin(); i != model->patch_changes().end(); ++i) {
 			if ((*i)->is_set()) {
 				int chan = (*i)->channel();  /* behavior is undefined for SMF's with multiple patch changes. I'm not sure that we care */
@@ -2641,9 +2639,9 @@ MIDITrigger::estimate_midi_patches ()
 }
 
 int
-MIDITrigger::set_region_in_worker_thread (boost::shared_ptr<Region> r)
+MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 {
-	boost::shared_ptr<MidiRegion> mr = boost::dynamic_pointer_cast<MidiRegion> (r);
+	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (r);
 
 	if (!mr) {
 		return -1;
@@ -3054,9 +3052,9 @@ PBD::Signal0<void> TriggerBox::TriggerMIDILearned;
 MIDI::Parser* TriggerBox::input_parser (new MIDI::Parser); /* leak */
 PBD::ScopedConnectionList TriggerBox::static_connections;
 PBD::ScopedConnection TriggerBox::midi_input_connection;
-boost::shared_ptr<MidiPort> TriggerBox::current_input;
+std::shared_ptr<MidiPort> TriggerBox::current_input;
 
-typedef std::map <boost::shared_ptr<Region>, boost::shared_ptr<Trigger::UIState>> RegionStateMap;
+typedef std::map <std::shared_ptr<Region>, std::shared_ptr<Trigger::UIState>> RegionStateMap;
 RegionStateMap enqueued_state_map;
 
 void
@@ -3072,7 +3070,7 @@ TriggerBox::static_init (Session & s)
 {
 	Config->ParameterChanged.connect_same_thread (static_connections, boost::bind (&TriggerBox::static_parameter_changed, _1));
 	input_parser->any.connect_same_thread (midi_input_connection, boost::bind (&TriggerBox::midi_input_handler, _1, _2, _3, _4));
-	boost::dynamic_pointer_cast<MidiPort> (s.trigger_input_port())->set_trace (input_parser);
+	std::dynamic_pointer_cast<MidiPort> (s.trigger_input_port())->set_trace (input_parser);
 	std::string const& dtip (Config->get_default_trigger_input_port());
 	if (!dtip.empty () && s.engine().get_port_by_name (dtip)) {
 		s.trigger_input_port()->connect (dtip);
@@ -3101,11 +3099,11 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 
 	if (_data_type == DataType::AUDIO) {
 		for (uint32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
-			all_triggers.push_back (boost::make_shared<AudioTrigger> (n, *this));
+			all_triggers.push_back (std::make_shared<AudioTrigger> (n, *this));
 		}
 	} else {
 		for (uint32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
-			all_triggers.push_back (boost::make_shared<MIDITrigger> (n, *this));
+			all_triggers.push_back (std::make_shared<MIDITrigger> (n, *this));
 		}
 	}
 
@@ -3359,8 +3357,8 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1: roll trigger %2 from %3 to %4 with cnt = %5\n", order(), trig->index(), start_samples, transport_position, cnt));
 
-		if (boost::dynamic_pointer_cast<MIDITrigger> (trig)) {
-			boost::dynamic_pointer_cast<MIDITrigger> (trig)->_transition_bbt = ns;
+		if (std::dynamic_pointer_cast<MIDITrigger> (trig)) {
+			std::dynamic_pointer_cast<MIDITrigger> (trig)->_transition_bbt = ns;
 		}
 
 		trig->start_and_roll_to (start_samples, transport_position, cnt);
@@ -3389,7 +3387,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 }
 
 void
-TriggerBox::set_region (uint32_t slot, boost::shared_ptr<Region> region)
+TriggerBox::set_region (uint32_t slot, std::shared_ptr<Region> region)
 {
 	/* This is called from our worker thread */
 
@@ -3555,12 +3553,12 @@ TriggerBox::trigger_by_id (PBD::ID check)
 }
 
 void
-TriggerBox::deep_sources (std::set<boost::shared_ptr<Source> >& sources)
+TriggerBox::deep_sources (std::set<std::shared_ptr<Source> >& sources)
 {
 	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
 
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
-		boost::shared_ptr<Region> r (trigger(n)->region ());
+		std::shared_ptr<Region> r (trigger(n)->region ());
 		if (r) {
 			r->deep_sources (sources);
 		}
@@ -3568,12 +3566,12 @@ TriggerBox::deep_sources (std::set<boost::shared_ptr<Source> >& sources)
 }
 
 void
-TriggerBox::used_regions (std::set<boost::shared_ptr<Region> >& regions)
+TriggerBox::used_regions (std::set<std::shared_ptr<Region> >& regions)
 {
 	Glib::Threads::RWLock::ReaderLock lm (trigger_lock);
 
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
-		boost::shared_ptr<Region> r (trigger(n)->region ());
+		std::shared_ptr<Region> r (trigger(n)->region ());
 		if (r) {
 			regions.insert (r);
 		}
@@ -3582,13 +3580,13 @@ TriggerBox::used_regions (std::set<boost::shared_ptr<Region> >& regions)
 
 
 void
-TriggerBox::enqueue_trigger_state_for_region (boost::shared_ptr<Region> region, boost::shared_ptr<Trigger::UIState> state)
+TriggerBox::enqueue_trigger_state_for_region (std::shared_ptr<Region> region, std::shared_ptr<Trigger::UIState> state)
 {
 	enqueued_state_map.insert (std::make_pair(region, state));
 }
 
 void
-TriggerBox::set_from_selection (uint32_t slot, boost::shared_ptr<Region> region)
+TriggerBox::set_from_selection (uint32_t slot, std::shared_ptr<Region> region)
 {
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("load %1 into %2\n", region->name(), slot));
 
@@ -3653,7 +3651,7 @@ TriggerBox::set_from_path (uint32_t slot, std::string const & path)
 		plist.add (Properties::layer, 0);
 		plist.add (Properties::layering_index, 0);
 
-		boost::shared_ptr<Region> the_region (RegionFactory::create (src_list, plist, true));
+		std::shared_ptr<Region> the_region (RegionFactory::create (src_list, plist, true));
 
 		all_triggers[slot]->set_region (the_region);
 
@@ -3677,7 +3675,7 @@ void
 TriggerBox::clear_all_triggers ()
 {
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
-		all_triggers[n]->set_region (boost::shared_ptr<Region>());
+		all_triggers[n]->set_region (std::shared_ptr<Region>());
 	}
 }
 
@@ -4404,7 +4402,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		pframes_t frames_covered;
 
 
-		boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (_currently_playing->region());
+		std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (_currently_playing->region());
 		if (ar) {
 			max_chans = std::max (ar->n_channels(), max_chans);
 		}
@@ -4919,7 +4917,7 @@ TriggerBoxThread::Request::init_pool ()
 }
 
 void
-TriggerBoxThread::set_region (TriggerBox& box, uint32_t slot, boost::shared_ptr<Region> r)
+TriggerBoxThread::set_region (TriggerBox& box, uint32_t slot, std::shared_ptr<Region> r)
 {
 	TriggerBoxThread::Request* req = new TriggerBoxThread::Request (TriggerBoxThread::SetRegion);
 

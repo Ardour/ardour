@@ -54,13 +54,13 @@ public:
 		ToggleType type;
 	};
 
-	boost::shared_ptr<TransportControllable> roll_controllable;
-	boost::shared_ptr<TransportControllable> stop_controllable;
-	boost::shared_ptr<TransportControllable> goto_start_controllable;
-	boost::shared_ptr<TransportControllable> goto_end_controllable;
-	boost::shared_ptr<TransportControllable> auto_loop_controllable;
-	boost::shared_ptr<TransportControllable> play_selection_controllable;
-	boost::shared_ptr<TransportControllable> rec_controllable;
+	std::shared_ptr<TransportControllable> roll_controllable;
+	std::shared_ptr<TransportControllable> stop_controllable;
+	std::shared_ptr<TransportControllable> goto_start_controllable;
+	std::shared_ptr<TransportControllable> goto_end_controllable;
+	std::shared_ptr<TransportControllable> auto_loop_controllable;
+	std::shared_ptr<TransportControllable> play_selection_controllable;
+	std::shared_ptr<TransportControllable> rec_controllable;
 };
 
 #endif

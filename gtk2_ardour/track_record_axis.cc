@@ -78,7 +78,7 @@ PBD::Signal2<void, TrackRecordAxis*, bool> TrackRecordAxis::EditNextName;
 bool TrackRecordAxis::_size_group_initialized = false;
 Glib::RefPtr<Gtk::SizeGroup> TrackRecordAxis::_track_number_size_group;
 
-TrackRecordAxis::TrackRecordAxis (Session* s, boost::shared_ptr<ARDOUR::Route> rt)
+TrackRecordAxis::TrackRecordAxis (Session* s, std::shared_ptr<ARDOUR::Route> rt)
 	: SessionHandlePtr (s)
 	, RouteUI (s)
 	, _clear_meters (true)
@@ -660,7 +660,7 @@ TrackRecordAxis::disconnect_entry_signals ()
 
 /* ****************************************************************************/
 
-TrackRecordAxis::TrackSummary::TrackSummary (boost::shared_ptr<ARDOUR::Route> r)
+TrackRecordAxis::TrackSummary::TrackSummary (std::shared_ptr<ARDOUR::Route> r)
 	: _start (0)
 	, _end (480000)
 	, _xscale (1)
@@ -668,7 +668,7 @@ TrackRecordAxis::TrackSummary::TrackSummary (boost::shared_ptr<ARDOUR::Route> r)
 	, _rec_updating (false)
 	, _rec_active (false)
 {
-	_track = boost::dynamic_pointer_cast<Track> (r);
+	_track = std::dynamic_pointer_cast<Track> (r);
 	assert (_track);
 
 	_track->PlaylistChanged.connect (_connections, invalidator (*this), boost::bind (&TrackSummary::playlist_changed, this), gui_context ());
@@ -747,7 +747,7 @@ TrackRecordAxis::TrackSummary::render (Cairo::RefPtr<Cairo::Context> const& cr, 
 }
 
 void
-TrackRecordAxis::TrackSummary::render_region (boost::shared_ptr<ARDOUR::Region> r, Cairo::RefPtr<Cairo::Context> const& cr, double y)
+TrackRecordAxis::TrackSummary::render_region (std::shared_ptr<ARDOUR::Region> r, Cairo::RefPtr<Cairo::Context> const& cr, double y)
 {
 	const samplepos_t rp = r->position_sample ();
 	const samplecnt_t rl = r->length_samples ();

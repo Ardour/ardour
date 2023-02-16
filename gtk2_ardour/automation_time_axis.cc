@@ -91,9 +91,9 @@ bool AutomationTimeAxisView::have_name_font = false;
  */
 AutomationTimeAxisView::AutomationTimeAxisView (
 	Session* s,
-	boost::shared_ptr<Stripable> strip,
-	boost::shared_ptr<Automatable> a,
-	boost::shared_ptr<AutomationControl> c,
+	std::shared_ptr<Stripable> strip,
+	std::shared_ptr<Automatable> a,
+	std::shared_ptr<AutomationControl> c,
 	Evoral::Parameter p,
 	PublicEditor& e,
 	TimeAxisView& parent,
@@ -299,7 +299,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 
 		assert (_control);
 
-		boost::shared_ptr<AutomationLine> line (
+		std::shared_ptr<AutomationLine> line (
 			new AutomationLine (
 				ARDOUR::EventTypeMap::instance().to_symbol(_parameter),
 				*this,
@@ -579,7 +579,7 @@ AutomationTimeAxisView::update_name_from_param ()
 	 * -> instrument_info().get_controller_name()
 	 * It does not work with  parent/plug_name for plugins.
 	 */
-	boost::shared_ptr<ARDOUR::Route> r = boost::dynamic_pointer_cast<ARDOUR::Route> (_stripable);
+	std::shared_ptr<ARDOUR::Route> r = std::dynamic_pointer_cast<ARDOUR::Route> (_stripable);
 	if (!r) {
 		return;
 	}
@@ -758,7 +758,7 @@ AutomationTimeAxisView::add_automation_event (GdkEvent* event, timepos_t const &
 		return;
 	}
 
-	boost::shared_ptr<AutomationList> list = _line->the_list ();
+	std::shared_ptr<AutomationList> list = _line->the_list ();
 
 	if (list->in_write_pass()) {
 		/* do not allow the GUI to add automation events during an
@@ -834,7 +834,7 @@ AutomationTimeAxisView::paste (timepos_t const & pos, const Selection& selection
 bool
 AutomationTimeAxisView::paste_one (timepos_t const & pos, unsigned paste_count, float times, const Selection& selection, ItemCounts& counts, bool greedy)
 {
-	boost::shared_ptr<AutomationList> alist(_line->the_list());
+	std::shared_ptr<AutomationList> alist(_line->the_list());
 
 	if (_session->transport_rolling() && alist->automation_write()) {
 		/* do not paste if this control is in write mode and we're rolling */
@@ -948,7 +948,7 @@ AutomationTimeAxisView::clear_lines ()
 }
 
 void
-AutomationTimeAxisView::add_line (boost::shared_ptr<AutomationLine> line)
+AutomationTimeAxisView::add_line (std::shared_ptr<AutomationLine> line)
 {
 	if (_control && line) {
 		assert(line->the_list() == _control->list());
@@ -1038,10 +1038,10 @@ AutomationTimeAxisView::has_automation () const
 	return ( (_line && _line->npoints() > 0) || (_view && _view->has_automation()) );
 }
 
-list<boost::shared_ptr<AutomationLine> >
+list<std::shared_ptr<AutomationLine> >
 AutomationTimeAxisView::lines () const
 {
-	list<boost::shared_ptr<AutomationLine> > lines;
+	list<std::shared_ptr<AutomationLine> > lines;
 
 	if (_line) {
 		lines.push_back (_line);
@@ -1121,14 +1121,14 @@ AutomationTimeAxisView::parse_state_id (
 void
 AutomationTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 {
-	list<boost::shared_ptr<AutomationLine> > lines;
+	list<std::shared_ptr<AutomationLine> > lines;
 	if (_line) {
 		lines.push_back (_line);
 	} else if (_view) {
 		lines = _view->get_lines ();
 	}
 
-	for (list<boost::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
+	for (list<std::shared_ptr<AutomationLine> >::iterator i = lines.begin(); i != lines.end(); ++i) {
 		cut_copy_clear_one (**i, selection, op);
 	}
 }
@@ -1136,8 +1136,8 @@ AutomationTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 void
 AutomationTimeAxisView::cut_copy_clear_one (AutomationLine& line, Selection& selection, CutCopyOp op)
 {
-	boost::shared_ptr<Evoral::ControlList> what_we_got;
-	boost::shared_ptr<AutomationList> alist (line.the_list());
+	std::shared_ptr<Evoral::ControlList> what_we_got;
+	std::shared_ptr<AutomationList> alist (line.the_list());
 
 	XMLNode &before = alist->get_state();
 
@@ -1189,7 +1189,7 @@ AutomationTimeAxisView::presentation_info () const
 	return _stripable->presentation_info();
 }
 
-boost::shared_ptr<Stripable>
+std::shared_ptr<Stripable>
 AutomationTimeAxisView::stripable () const
 {
 	return _stripable;

@@ -24,7 +24,7 @@
 #include "ardour/automation_list.h"
 #include "evoral/Parameter.h"
 
-class AutomationSelection : public std::list<boost::shared_ptr<ARDOUR::AutomationList> > {
+class AutomationSelection : public std::list<std::shared_ptr<ARDOUR::AutomationList> > {
 public:
 	const_iterator
 	get_nth(const Evoral::Parameter& param, size_t nth) const {

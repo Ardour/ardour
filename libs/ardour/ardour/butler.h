@@ -100,7 +100,7 @@ private:
 	void empty_pool_trash ();
 	void process_delegated_work ();
 	void config_changed (std::string);
-	bool flush_tracks_to_disk_normal (boost::shared_ptr<RouteList>, uint32_t& errors);
+	bool flush_tracks_to_disk_normal (std::shared_ptr<RouteList>, uint32_t& errors);
 	void queue_request (Request::Type r);
 
 	pthread_t thread;

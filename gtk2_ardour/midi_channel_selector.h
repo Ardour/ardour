@@ -123,14 +123,14 @@ protected:
 class MidiChannelSelectorWindow : public ArdourWindow, public PBD::ScopedConnectionList
 {
 public:
-	MidiChannelSelectorWindow (boost::shared_ptr<ARDOUR::MidiTrack>);
+	MidiChannelSelectorWindow (std::shared_ptr<ARDOUR::MidiTrack>);
 	~MidiChannelSelectorWindow ();
 
 	void set_channel_colors (const uint32_t new_channel_colors[16]);
 	void set_default_channel_color();
 
 private:
-	boost::shared_ptr<ARDOUR::MidiTrack> track;
+	std::shared_ptr<ARDOUR::MidiTrack> track;
 	std::vector<Gtk::ToggleButton*> playback_buttons;
 	std::vector<Gtk::ToggleButton*> capture_buttons;
 

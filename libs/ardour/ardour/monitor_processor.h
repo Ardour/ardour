@@ -158,22 +158,22 @@ public:
 
 	PBD::Signal0<void> Changed;
 
-	boost::shared_ptr<PBD::Controllable> channel_cut_control (uint32_t) const;
-	boost::shared_ptr<PBD::Controllable> channel_dim_control (uint32_t) const;
-	boost::shared_ptr<PBD::Controllable> channel_polarity_control (uint32_t) const;
-	boost::shared_ptr<PBD::Controllable> channel_solo_control (uint32_t) const;
+	std::shared_ptr<PBD::Controllable> channel_cut_control (uint32_t) const;
+	std::shared_ptr<PBD::Controllable> channel_dim_control (uint32_t) const;
+	std::shared_ptr<PBD::Controllable> channel_polarity_control (uint32_t) const;
+	std::shared_ptr<PBD::Controllable> channel_solo_control (uint32_t) const;
 
-	boost::shared_ptr<PBD::Controllable> dim_control () const { return _dim_all_control; }
-	boost::shared_ptr<PBD::Controllable> cut_control () const { return _cut_all_control; }
-	boost::shared_ptr<PBD::Controllable> mono_control () const { return _mono_control; }
-	boost::shared_ptr<PBD::Controllable> dim_level_control () const { return _dim_level_control; }
-	boost::shared_ptr<PBD::Controllable> solo_boost_control () const { return _solo_boost_level_control; }
+	std::shared_ptr<PBD::Controllable> dim_control () const { return _dim_all_control; }
+	std::shared_ptr<PBD::Controllable> cut_control () const { return _cut_all_control; }
+	std::shared_ptr<PBD::Controllable> mono_control () const { return _mono_control; }
+	std::shared_ptr<PBD::Controllable> dim_level_control () const { return _dim_level_control; }
+	std::shared_ptr<PBD::Controllable> solo_boost_control () const { return _solo_boost_level_control; }
 
 private:
 	struct ChannelRecord {
 		gain_t current_gain;
 
-		/* pointers - created first, but managed by boost::shared_ptr<> */
+		/* pointers - created first, but managed by std::shared_ptr<> */
 
 		MPControl<gain_t>* cut_ptr;
 		MPControl<bool>*   dim_ptr;
@@ -182,10 +182,10 @@ private:
 
 		/* shared ptr access and lifetime management, for external users */
 
-		boost::shared_ptr<PBD::Controllable> cut_control;
-		boost::shared_ptr<PBD::Controllable> dim_control;
-		boost::shared_ptr<PBD::Controllable> polarity_control;
-		boost::shared_ptr<PBD::Controllable> soloed_control;
+		std::shared_ptr<PBD::Controllable> cut_control;
+		std::shared_ptr<PBD::Controllable> dim_control;
+		std::shared_ptr<PBD::Controllable> polarity_control;
+		std::shared_ptr<PBD::Controllable> soloed_control;
 
 		/* typed controllables for internal use */
 
@@ -204,7 +204,7 @@ private:
 	bool                 _monitor_active;
 
 
-	/* pointers - created first, but managed by boost::shared_ptr<> */
+	/* pointers - created first, but managed by std::shared_ptr<> */
 
 	MPControl<bool>*            _dim_all_ptr;
 	MPControl<bool>*            _cut_all_ptr;
@@ -214,11 +214,11 @@ private:
 
 	/* shared ptr access and lifetime management, for external users */
 
-	boost::shared_ptr<PBD::Controllable> _dim_all_control;
-	boost::shared_ptr<PBD::Controllable> _cut_all_control;
-	boost::shared_ptr<PBD::Controllable> _mono_control;
-	boost::shared_ptr<PBD::Controllable> _dim_level_control;
-	boost::shared_ptr<PBD::Controllable> _solo_boost_level_control;
+	std::shared_ptr<PBD::Controllable> _dim_all_control;
+	std::shared_ptr<PBD::Controllable> _cut_all_control;
+	std::shared_ptr<PBD::Controllable> _mono_control;
+	std::shared_ptr<PBD::Controllable> _dim_level_control;
+	std::shared_ptr<PBD::Controllable> _solo_boost_level_control;
 
 	/* typed controllables for internal use */
 

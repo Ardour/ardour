@@ -113,7 +113,7 @@ MidiClipEditorBox::set_session (Session* s)
 }
 
 void
-MidiClipEditorBox::set_region (boost::shared_ptr<Region> r, TriggerReference /*notused*/)
+MidiClipEditorBox::set_region (std::shared_ptr<Region> r, TriggerReference /*notused*/)
 {
 	set_session (&r->session ());
 

@@ -428,7 +428,7 @@ ExportFormatDialog::load_state (FormatPtr spec)
 	}
 
 	for (Gtk::ListStore::Children::iterator it = format_list->children ().begin (); it != format_list->children ().end (); ++it) {
-		boost::shared_ptr<ARDOUR::ExportFormat> format_in_list = it->get_value (format_cols.ptr);
+		std::shared_ptr<ARDOUR::ExportFormat> format_in_list = it->get_value (format_cols.ptr);
 		if (spec->is_format (format_in_list)) {
 			format_in_list->set_selected (true);
 			break;
@@ -559,9 +559,9 @@ ExportFormatDialog::init_format_table ()
 
 		/* Encoding options */
 
-		boost::shared_ptr<HasSampleFormat> hsf;
+		std::shared_ptr<HasSampleFormat> hsf;
 
-		if ((hsf = boost::dynamic_pointer_cast<HasSampleFormat> (*it))) {
+		if ((hsf = std::dynamic_pointer_cast<HasSampleFormat> (*it))) {
 			hsf->SampleFormatSelectChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_format_selection, this, _1, _2), gui_context ());
 			hsf->SampleFormatCompatibleChanged.connect (*this, invalidator (*this), boost::bind (&ExportFormatDialog::change_sample_format_compatibility, this, _1, _2), gui_context ());
 
@@ -825,11 +825,11 @@ ExportFormatDialog::change_dither_type_selection (bool select, WeakDitherTypePtr
 
 template <typename T, typename ColsT>
 void
-ExportFormatDialog::change_selection (bool select, boost::weak_ptr<T> w_ptr, Glib::RefPtr<Gtk::ListStore>& list, Gtk::TreeView& view, ColsT& cols)
+ExportFormatDialog::change_selection (bool select, std::weak_ptr<T> w_ptr, Glib::RefPtr<Gtk::ListStore>& list, Gtk::TreeView& view, ColsT& cols)
 {
 	++applying_changes_from_engine;
 
-	boost::shared_ptr<T> ptr = w_ptr.lock ();
+	std::shared_ptr<T> ptr = w_ptr.lock ();
 
 	Gtk::ListStore::Children::iterator it;
 	Glib::RefPtr<Gtk::TreeSelection>   selection;
@@ -886,10 +886,10 @@ ExportFormatDialog::change_dither_type_compatibility (bool compatibility, WeakDi
 
 template <typename T, typename ColsT>
 void
-ExportFormatDialog::change_compatibility (bool compatibility, boost::weak_ptr<T> w_ptr, Glib::RefPtr<Gtk::ListStore>& list, ColsT& cols,
+ExportFormatDialog::change_compatibility (bool compatibility, std::weak_ptr<T> w_ptr, Glib::RefPtr<Gtk::ListStore>& list, ColsT& cols,
                                           std::string const& c_incompatible, std::string const& c_compatible)
 {
-	boost::shared_ptr<T> ptr = w_ptr.lock ();
+	std::shared_ptr<T> ptr = w_ptr.lock ();
 
 	Gtk::ListStore::Children::iterator it;
 	for (it = list->children ().begin (); it != list->children ().end (); ++it) {
@@ -1107,27 +1107,27 @@ ExportFormatDialog::change_encoding_options (ExportFormatPtr ptr)
 	fill_sample_rate_lists (ptr);
 	empty_encoding_option_table ();
 
-	boost::shared_ptr<ARDOUR::ExportFormatLinear>    linear_ptr;
-	boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> ogg_ptr;
-	boost::shared_ptr<ARDOUR::ExportFormatFLAC>      flac_ptr;
-	boost::shared_ptr<ARDOUR::ExportFormatOggOpus>   opus_ptr;
-	boost::shared_ptr<ARDOUR::ExportFormatBWF>       bwf_ptr;
-	boost::shared_ptr<ARDOUR::ExportFormatMPEG>      mpeg_ptr;
-	boost::shared_ptr<ARDOUR::ExportFormatFFMPEG>    ffmpeg_ptr;
+	std::shared_ptr<ARDOUR::ExportFormatLinear>    linear_ptr;
+	std::shared_ptr<ARDOUR::ExportFormatOggVorbis> ogg_ptr;
+	std::shared_ptr<ARDOUR::ExportFormatFLAC>      flac_ptr;
+	std::shared_ptr<ARDOUR::ExportFormatOggOpus>   opus_ptr;
+	std::shared_ptr<ARDOUR::ExportFormatBWF>       bwf_ptr;
+	std::shared_ptr<ARDOUR::ExportFormatMPEG>      mpeg_ptr;
+	std::shared_ptr<ARDOUR::ExportFormatFFMPEG>    ffmpeg_ptr;
 
-	if ((linear_ptr = boost::dynamic_pointer_cast<ExportFormatLinear> (ptr))) {
+	if ((linear_ptr = std::dynamic_pointer_cast<ExportFormatLinear> (ptr))) {
 		show_linear_enconding_options (linear_ptr);
-	} else if ((ogg_ptr = boost::dynamic_pointer_cast<ExportFormatOggVorbis> (ptr))) {
+	} else if ((ogg_ptr = std::dynamic_pointer_cast<ExportFormatOggVorbis> (ptr))) {
 		show_ogg_enconding_options (ogg_ptr);
-	} else if ((opus_ptr = boost::dynamic_pointer_cast<ExportFormatOggOpus> (ptr))) {
+	} else if ((opus_ptr = std::dynamic_pointer_cast<ExportFormatOggOpus> (ptr))) {
 		show_opus_enconding_options (opus_ptr);
-	} else if ((flac_ptr = boost::dynamic_pointer_cast<ExportFormatFLAC> (ptr))) {
+	} else if ((flac_ptr = std::dynamic_pointer_cast<ExportFormatFLAC> (ptr))) {
 		show_flac_enconding_options (flac_ptr);
-	} else if ((bwf_ptr = boost::dynamic_pointer_cast<ExportFormatBWF> (ptr))) {
+	} else if ((bwf_ptr = std::dynamic_pointer_cast<ExportFormatBWF> (ptr))) {
 		show_bwf_enconding_options (bwf_ptr);
-	} else if ((mpeg_ptr = boost::dynamic_pointer_cast<ExportFormatMPEG> (ptr))) {
+	} else if ((mpeg_ptr = std::dynamic_pointer_cast<ExportFormatMPEG> (ptr))) {
 		show_mpeg_enconding_options (mpeg_ptr);
-	} else if ((ffmpeg_ptr = boost::dynamic_pointer_cast<ExportFormatFFMPEG> (ptr))) {
+	} else if ((ffmpeg_ptr = std::dynamic_pointer_cast<ExportFormatFFMPEG> (ptr))) {
 		show_ffmpeg_enconding_options (ffmpeg_ptr);
 	} else {
 		std::cout << "Unrecognized format!" << std::endl;
@@ -1149,7 +1149,7 @@ ExportFormatDialog::remove_widget (Gtk::Widget& to_remove, Gtk::Container* remov
 }
 
 void
-ExportFormatDialog::show_linear_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatLinear> ptr)
+ExportFormatDialog::show_linear_enconding_options (std::shared_ptr<ARDOUR::ExportFormatLinear> ptr)
 {
 	/* Set label and pack table */
 
@@ -1161,13 +1161,13 @@ ExportFormatDialog::show_linear_enconding_options (boost::shared_ptr<ARDOUR::Exp
 	encoding_options_table.attach (sample_format_view, 0, 1, 1, 2);
 	encoding_options_table.attach (dither_type_view, 1, 2, 1, 2);
 
-	fill_sample_format_lists (boost::dynamic_pointer_cast<HasSampleFormat> (ptr));
+	fill_sample_format_lists (std::dynamic_pointer_cast<HasSampleFormat> (ptr));
 
 	show_all_children ();
 }
 
 void
-ExportFormatDialog::show_ogg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatOggVorbis> ptr)
+ExportFormatDialog::show_ogg_enconding_options (std::shared_ptr<ARDOUR::ExportFormatOggVorbis> ptr)
 {
 	encoding_options_label.set_label (_("Ogg Vorbis options"));
 
@@ -1178,7 +1178,7 @@ ExportFormatDialog::show_ogg_enconding_options (boost::shared_ptr<ARDOUR::Export
 }
 
 void
-ExportFormatDialog::show_opus_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatOggOpus> ptr)
+ExportFormatDialog::show_opus_enconding_options (std::shared_ptr<ARDOUR::ExportFormatOggOpus> ptr)
 {
 	encoding_options_label.set_label (_("OPUS options"));
 	encoding_options_table.resize (1, 1);
@@ -1188,7 +1188,7 @@ ExportFormatDialog::show_opus_enconding_options (boost::shared_ptr<ARDOUR::Expor
 }
 
 void
-ExportFormatDialog::show_flac_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatFLAC> ptr)
+ExportFormatDialog::show_flac_enconding_options (std::shared_ptr<ARDOUR::ExportFormatFLAC> ptr)
 {
 	encoding_options_label.set_label (_("FLAC options"));
 
@@ -1198,13 +1198,13 @@ ExportFormatDialog::show_flac_enconding_options (boost::shared_ptr<ARDOUR::Expor
 	encoding_options_table.attach (sample_format_view, 0, 1, 1, 2);
 	encoding_options_table.attach (dither_type_view, 1, 2, 1, 2);
 
-	fill_sample_format_lists (boost::dynamic_pointer_cast<HasSampleFormat> (ptr));
+	fill_sample_format_lists (std::dynamic_pointer_cast<HasSampleFormat> (ptr));
 
 	show_all_children ();
 }
 
 void
-ExportFormatDialog::show_bwf_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatBWF> ptr)
+ExportFormatDialog::show_bwf_enconding_options (std::shared_ptr<ARDOUR::ExportFormatBWF> ptr)
 {
 	encoding_options_label.set_label (_("Broadcast Wave options"));
 
@@ -1214,13 +1214,13 @@ ExportFormatDialog::show_bwf_enconding_options (boost::shared_ptr<ARDOUR::Export
 	encoding_options_table.attach (sample_format_view, 0, 1, 1, 2);
 	encoding_options_table.attach (dither_type_view, 1, 2, 1, 2);
 
-	fill_sample_format_lists (boost::dynamic_pointer_cast<HasSampleFormat> (ptr));
+	fill_sample_format_lists (std::dynamic_pointer_cast<HasSampleFormat> (ptr));
 
 	show_all_children ();
 }
 
 void
-ExportFormatDialog::show_mpeg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatMPEG> ptr)
+ExportFormatDialog::show_mpeg_enconding_options (std::shared_ptr<ARDOUR::ExportFormatMPEG> ptr)
 {
 	encoding_options_label.set_label (_("Variable bit rate quality"));
 	encoding_options_table.resize (1, 1);
@@ -1231,7 +1231,7 @@ ExportFormatDialog::show_mpeg_enconding_options (boost::shared_ptr<ARDOUR::Expor
 }
 
 void
-ExportFormatDialog::show_ffmpeg_enconding_options (boost::shared_ptr<ARDOUR::ExportFormatFFMPEG> ptr)
+ExportFormatDialog::show_ffmpeg_enconding_options (std::shared_ptr<ARDOUR::ExportFormatFFMPEG> ptr)
 {
 	encoding_options_label.set_label (_("FFMPEG/MP3 options"));
 	encoding_options_table.resize (1, 1);
@@ -1241,7 +1241,7 @@ ExportFormatDialog::show_ffmpeg_enconding_options (boost::shared_ptr<ARDOUR::Exp
 }
 
 void
-ExportFormatDialog::fill_sample_rate_lists (boost::shared_ptr<ARDOUR::ExportFormat> ptr)
+ExportFormatDialog::fill_sample_rate_lists (std::shared_ptr<ARDOUR::ExportFormat> ptr)
 {
 	Gtk::TreeModel::iterator iter;
 	Gtk::TreeModel::Row      row;
@@ -1268,7 +1268,7 @@ ExportFormatDialog::fill_sample_rate_lists (boost::shared_ptr<ARDOUR::ExportForm
 
 }
 void
-ExportFormatDialog::fill_sample_format_lists (boost::shared_ptr<ARDOUR::HasSampleFormat> ptr)
+ExportFormatDialog::fill_sample_format_lists (std::shared_ptr<ARDOUR::HasSampleFormat> ptr)
 {
 	/* Fill lists */
 
@@ -1311,7 +1311,7 @@ ExportFormatDialog::fill_sample_format_lists (boost::shared_ptr<ARDOUR::HasSampl
 }
 
 void
-ExportFormatDialog::fill_codec_quality_lists (boost::shared_ptr<ARDOUR::HasCodecQuality> ptr)
+ExportFormatDialog::fill_codec_quality_lists (std::shared_ptr<ARDOUR::HasCodecQuality> ptr)
 {
 	HasCodecQuality::CodecQualityList const& codecs = ptr->get_codec_qualities ();
 

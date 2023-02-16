@@ -71,13 +71,13 @@ public:
 	Strip (Surface&, const std::string & name, int index, const std::map<Button::ID,StripButtonInfo>&);
 	~Strip();
 
-	boost::shared_ptr<ARDOUR::Stripable> stripable() const { return _stripable; }
+	std::shared_ptr<ARDOUR::Stripable> stripable() const { return _stripable; }
 
 	void add (Control & control);
 	int index() const { return _index; } // zero based
 	Surface* surface() const { return _surface; }
 
-	void set_stripable (boost::shared_ptr<ARDOUR::Stripable>, bool with_messages = true);
+	void set_stripable (std::shared_ptr<ARDOUR::Stripable>, bool with_messages = true);
 	void reset_stripable ();
 
 	// call all signal handlers manually
@@ -125,7 +125,7 @@ private:
 	bool     _controls_locked;
 	bool     _transport_is_rolling;
 	bool     _metering_active;
-	boost::shared_ptr<ARDOUR::Stripable> _stripable;
+	std::shared_ptr<ARDOUR::Stripable> _stripable;
 	PBD::ScopedConnectionList stripable_connections;
 	PBD::ScopedConnectionList subview_connections;
 	PBD::ScopedConnectionList send_connections;
@@ -164,11 +164,11 @@ private:
 
 	void notify_vpot_change ();
 
-	void setup_eq_vpot (boost::shared_ptr<ARDOUR::Stripable>);//
-	void setup_dyn_vpot (boost::shared_ptr<ARDOUR::Stripable>);//
-	void setup_sends_vpot (boost::shared_ptr<ARDOUR::Stripable>);//
+	void setup_eq_vpot (std::shared_ptr<ARDOUR::Stripable>);//
+	void setup_dyn_vpot (std::shared_ptr<ARDOUR::Stripable>);//
+	void setup_sends_vpot (std::shared_ptr<ARDOUR::Stripable>);//
 
-	void setup_trackview_vpot (boost::shared_ptr<ARDOUR::Stripable>);
+	void setup_trackview_vpot (std::shared_ptr<ARDOUR::Stripable>);
 };
 
 }

@@ -76,7 +76,7 @@ Automatable::Automatable (const Automatable& other)
 	Glib::Threads::Mutex::Lock lm (other._control_lock);
 
 	for (Controls::const_iterator i = other._controls.begin(); i != other._controls.end(); ++i) {
-		boost::shared_ptr<Evoral::Control> ac (control_factory (i->first));
+		std::shared_ptr<Evoral::Control> ac (control_factory (i->first));
 		add_control (ac);
 	}
 }
@@ -85,14 +85,14 @@ Automatable::~Automatable ()
 {
 	{
 		RCUWriter<ControlList> writer (_automated_controls);
-		boost::shared_ptr<ControlList> cl = writer.get_copy ();
+		std::shared_ptr<ControlList> cl = writer.get_copy ();
 		cl->clear ();
 	}
 	_automated_controls.flush ();
 
 	Glib::Threads::Mutex::Lock lm (_control_lock);
 	for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
-		boost::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
+		std::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
 	}
 }
 
@@ -145,7 +145,7 @@ Automatable::load_automation (const string& path)
 
 		Evoral::Parameter param(PluginAutomation, 0, port);
 		/* FIXME: this is legacy and only used for plugin inserts?  I think? */
-		boost::shared_ptr<Evoral::Control> c = control (param, true);
+		std::shared_ptr<Evoral::Control> c = control (param, true);
 		c->list()->add (when, value);
 		tosave.insert (param);
 	}
@@ -159,13 +159,13 @@ bad:
 }
 
 void
-Automatable::add_control(boost::shared_ptr<Evoral::Control> ac)
+Automatable::add_control(std::shared_ptr<Evoral::Control> ac)
 {
 	Evoral::Parameter param = ac->parameter();
 
-	boost::shared_ptr<AutomationList> al = boost::dynamic_pointer_cast<AutomationList> (ac->list ());
+	std::shared_ptr<AutomationList> al = std::dynamic_pointer_cast<AutomationList> (ac->list ());
 
-	boost::shared_ptr<AutomationControl> actl (boost::dynamic_pointer_cast<AutomationControl> (ac));
+	std::shared_ptr<AutomationControl> actl (std::dynamic_pointer_cast<AutomationControl> (ac));
 
 	if ((!actl || !(actl->flags() & Controllable::NotAutomatable)) && al) {
 		al->automation_state_changed.connect_same_thread (
@@ -278,7 +278,7 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 			}
 
 			if (_can_automate_list.find (param) == _can_automate_list.end ()) {
-				boost::shared_ptr<AutomationControl> actl = automation_control (param);
+				std::shared_ptr<AutomationControl> actl = automation_control (param);
 				if (actl && (*niter)->children().size() > 0 && Config->get_limit_n_automatables () > 0) {
 					actl->clear_flag (Controllable::NotAutomatable);
 					if (!(actl->flags() & Controllable::HiddenControl) && actl->name() != X_("hidden")) {
@@ -292,14 +292,14 @@ Automatable::set_automation_xml_state (const XMLNode& node, Evoral::Parameter le
 			}
 
 
-			boost::shared_ptr<AutomationControl> existing = automation_control (param);
+			std::shared_ptr<AutomationControl> existing = automation_control (param);
 
 			if (existing) {
 				existing->alist()->set_state (**niter, Stateful::loading_state_version);
 			} else {
-				boost::shared_ptr<Evoral::Control> newcontrol = control_factory(param);
+				std::shared_ptr<Evoral::Control> newcontrol = control_factory(param);
 				add_control (newcontrol);
-				boost::shared_ptr<AutomationList> al (new AutomationList(**niter, param));
+				std::shared_ptr<AutomationList> al (new AutomationList(**niter, param));
 				newcontrol->set_list(al);
 			}
 
@@ -322,7 +322,7 @@ Automatable::get_automation_xml_state () const
 	}
 
 	for (Controls::const_iterator li = controls().begin(); li != controls().end(); ++li) {
-		boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(li->second->list());
+		std::shared_ptr<AutomationList> l = std::dynamic_pointer_cast<AutomationList>(li->second->list());
 		if (l) {
 			node->add_child_nocopy (l->get_state ());
 		}
@@ -336,7 +336,7 @@ Automatable::set_parameter_automation_state (Evoral::Parameter param, AutoState 
 {
 	Glib::Threads::Mutex::Lock lm (control_lock());
 
-	boost::shared_ptr<AutomationControl> c = automation_control (param, true);
+	std::shared_ptr<AutomationControl> c = automation_control (param, true);
 
 	if (c && (s != c->automation_state())) {
 		c->set_automation_state (s);
@@ -350,7 +350,7 @@ Automatable::get_parameter_automation_state (Evoral::Parameter param)
 {
 	AutoState result = Off;
 
-	boost::shared_ptr<AutomationControl> c = automation_control(param);
+	std::shared_ptr<AutomationControl> c = automation_control(param);
 
 	if (c) {
 		result = c->automation_state();
@@ -367,8 +367,8 @@ Automatable::protect_automation ()
 
 	for (ParameterSet::const_iterator i = automated_params.begin(); i != automated_params.end(); ++i) {
 
-		boost::shared_ptr<Evoral::Control> c = control(*i);
-		boost::shared_ptr<AutomationList> l = boost::dynamic_pointer_cast<AutomationList>(c->list());
+		std::shared_ptr<Evoral::Control> c = control(*i);
+		std::shared_ptr<AutomationList> l = std::dynamic_pointer_cast<AutomationList>(c->list());
 
 		switch (l->automation_state()) {
 		case Write:
@@ -392,11 +392,11 @@ Automatable::non_realtime_locate (samplepos_t now)
 
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
 
-		boost::shared_ptr<AutomationControl> c
-				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
+		std::shared_ptr<AutomationControl> c
+				= std::dynamic_pointer_cast<AutomationControl>(li->second);
 		if (c) {
-			boost::shared_ptr<AutomationList> l
-				= boost::dynamic_pointer_cast<AutomationList>(c->list());
+			std::shared_ptr<AutomationList> l
+				= std::dynamic_pointer_cast<AutomationList>(c->list());
 
 			if (!l) {
 				continue;
@@ -435,14 +435,14 @@ void
 Automatable::non_realtime_transport_stop (samplepos_t now, bool /*flush_processors*/)
 {
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
-		boost::shared_ptr<AutomationControl> c =
-			boost::dynamic_pointer_cast<AutomationControl>(li->second);
+		std::shared_ptr<AutomationControl> c =
+			std::dynamic_pointer_cast<AutomationControl>(li->second);
 		if (!c) {
 			continue;
 		}
 
-		boost::shared_ptr<AutomationList> l =
-			boost::dynamic_pointer_cast<AutomationList>(c->list());
+		std::shared_ptr<AutomationList> l =
+			std::dynamic_pointer_cast<AutomationList>(c->list());
 		if (!l) {
 			continue;
 		}
@@ -476,7 +476,7 @@ void
 Automatable::automation_run (samplepos_t start, pframes_t nframes, bool only_active)
 {
 	if (only_active) {
-		boost::shared_ptr<ControlList> cl = _automated_controls.reader ();
+		std::shared_ptr<ControlList> cl = _automated_controls.reader ();
 		for (ControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 			(*ci)->automation_run (start, nframes);
 		}
@@ -484,8 +484,8 @@ Automatable::automation_run (samplepos_t start, pframes_t nframes, bool only_act
 	}
 
 	for (Controls::iterator li = controls().begin(); li != controls().end(); ++li) {
-		boost::shared_ptr<AutomationControl> c =
-			boost::dynamic_pointer_cast<AutomationControl>(li->second);
+		std::shared_ptr<AutomationControl> c =
+			std::dynamic_pointer_cast<AutomationControl>(li->second);
 		if (!c) {
 			continue;
 		}
@@ -497,11 +497,11 @@ void
 Automatable::automation_list_automation_state_changed (Evoral::Parameter const& param, AutoState as)
 {
 	{
-		boost::shared_ptr<AutomationControl> c (automation_control(param));
+		std::shared_ptr<AutomationControl> c (automation_control(param));
 		assert (c && c->list());
 
 		RCUWriter<ControlList> writer (_automated_controls);
-		boost::shared_ptr<ControlList> cl = writer.get_copy ();
+		std::shared_ptr<ControlList> cl = writer.get_copy ();
 
 		ControlList::iterator fi = std::find (cl->begin(), cl->end(), c);
 		if (fi != cl->end()) {
@@ -522,13 +522,13 @@ Automatable::automation_list_automation_state_changed (Evoral::Parameter const& 
 	_automated_controls.flush();
 }
 
-boost::shared_ptr<Evoral::Control>
+std::shared_ptr<Evoral::Control>
 Automatable::control_factory(const Evoral::Parameter& param)
 {
 	Evoral::Control*                  control   = NULL;
 	bool                              make_list = true;
 	ParameterDescriptor               desc(param);
-	boost::shared_ptr<AutomationList> list;
+	std::shared_ptr<AutomationList> list;
 
 	if (parameter_is_midi (param.type())) {
 		MidiTrack* mt = dynamic_cast<MidiTrack*>(this);
@@ -552,7 +552,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 				if (!Variant::type_is_numeric(desc.datatype)) {
 					make_list = false;  // Can't automate non-numeric data yet
 				} else {
-					list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc, Temporal::AudioTime));
+					list = std::shared_ptr<AutomationList>(new AutomationList(param, desc, Temporal::AudioTime));
 				}
 				control = new PluginInsert::PluginPropertyControl(pi, param, desc, list);
 			}
@@ -600,52 +600,52 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	}
 
 	if (make_list && !list) {
-		list = boost::shared_ptr<AutomationList>(new AutomationList(param, desc, time_domain()));
+		list = std::shared_ptr<AutomationList>(new AutomationList(param, desc, time_domain()));
 	}
 
 	if (!control) {
 		control = new AutomationControl(_a_session, param, desc, list);
 	}
 
-	return boost::shared_ptr<Evoral::Control>(control);
+	return std::shared_ptr<Evoral::Control>(control);
 }
 
 void
 Automatable::automatables (ControllableSet& s) const
 {
 	for (auto const& i : _controls) {
-		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (i.second);
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i.second);
 		if (ac) {
 			s.insert (ac);
 		}
 	}
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Automatable::automation_control (PBD::ID const & id) const
 {
 	Controls::const_iterator li;
 
 	for (li = _controls.begin(); li != _controls.end(); ++li) {
-		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl> (li->second);
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (li->second);
 		if (ac && (ac->id() == id)) {
 			return ac;
 		}
 	}
 
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Automatable::automation_control (const Evoral::Parameter& id, bool create)
 {
-	return boost::dynamic_pointer_cast<AutomationControl>(Evoral::ControlSet::control(id, create));
+	return std::dynamic_pointer_cast<AutomationControl>(Evoral::ControlSet::control(id, create));
 }
 
-boost::shared_ptr<const AutomationControl>
+std::shared_ptr<const AutomationControl>
 Automatable::automation_control (const Evoral::Parameter& id) const
 {
-	return boost::dynamic_pointer_cast<const AutomationControl>(Evoral::ControlSet::control(id));
+	return std::dynamic_pointer_cast<const AutomationControl>(Evoral::ControlSet::control(id));
 }
 
 void
@@ -661,7 +661,7 @@ Automatable::find_next_event (timepos_t const & start, timepos_t const & end, Ev
 	next_event.when = start <= end ? timepos_t::max (start.time_domain()) : timepos_t (start.time_domain());
 
 	if (only_active) {
-		boost::shared_ptr<ControlList> cl = _automated_controls.reader ();
+		std::shared_ptr<ControlList> cl = _automated_controls.reader ();
 		for (ControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 			if ((*ci)->automation_playback()) {
 				if (start <= end) {
@@ -673,8 +673,8 @@ Automatable::find_next_event (timepos_t const & start, timepos_t const & end, Ev
 		}
 	} else {
 		for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
-			boost::shared_ptr<AutomationControl> c
-				= boost::dynamic_pointer_cast<AutomationControl>(li->second);
+			std::shared_ptr<AutomationControl> c
+				= std::dynamic_pointer_cast<AutomationControl>(li->second);
 			if (c) {
 				if (start <= end) {
 					find_next_ac_event (c, start, end, next_event);
@@ -688,18 +688,18 @@ Automatable::find_next_event (timepos_t const & start, timepos_t const & end, Ev
 }
 
 void
-Automatable::find_next_ac_event (boost::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event) const
+Automatable::find_next_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event) const
 {
 	assert (start <= end);
 
-	boost::shared_ptr<SlavableAutomationControl> sc
-		= boost::dynamic_pointer_cast<SlavableAutomationControl>(c);
+	std::shared_ptr<SlavableAutomationControl> sc
+		= std::dynamic_pointer_cast<SlavableAutomationControl>(c);
 
 	if (sc) {
 		sc->find_next_event (start, end, next_event);
 	}
 
-	boost::shared_ptr<const Evoral::ControlList> alist (c->list());
+	std::shared_ptr<const Evoral::ControlList> alist (c->list());
 	Evoral::ControlEvent cp (start, 0.0f);
 	if (!alist) {
 		return;
@@ -715,17 +715,17 @@ Automatable::find_next_ac_event (boost::shared_ptr<AutomationControl> c, timepos
 }
 
 void
-Automatable::find_prev_ac_event (boost::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event) const
+Automatable::find_prev_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event) const
 {
 	assert (start > end);
-	boost::shared_ptr<SlavableAutomationControl> sc
-		= boost::dynamic_pointer_cast<SlavableAutomationControl>(c);
+	std::shared_ptr<SlavableAutomationControl> sc
+		= std::dynamic_pointer_cast<SlavableAutomationControl>(c);
 
 	if (sc) {
 		sc->find_next_event (start, end, next_event);
 	}
 
-	boost::shared_ptr<const Evoral::ControlList> alist (c->list());
+	std::shared_ptr<const Evoral::ControlList> alist (c->list());
 	if (!alist) {
 		return;
 	}

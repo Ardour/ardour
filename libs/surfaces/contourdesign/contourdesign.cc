@@ -195,7 +195,7 @@ ContourDesignControlProtocol::set_state (const XMLNode& node, int version)
 		if (type == X_("action")) {
 			string path ("");
 			child->get_property (X_("path"), path);
-			boost::shared_ptr<ButtonBase> b (new ButtonAction (path, *this));
+			std::shared_ptr<ButtonBase> b (new ButtonAction (path, *this));
 			_button_actions[i] = b;
 		} else {
 			double value;
@@ -217,7 +217,7 @@ ContourDesignControlProtocol::set_state (const XMLNode& node, int version)
 				unit = BEATS;
 			}
 
-			boost::shared_ptr<ButtonBase> b (new ButtonJump (JumpDistance (value, unit), *this));
+			std::shared_ptr<ButtonBase> b (new ButtonJump (JumpDistance (value, unit), *this));
 		}
 	}
 
@@ -474,10 +474,10 @@ ContourDesignControlProtocol::handle_event () {
 }
 
 
-boost::shared_ptr<ButtonBase>
+std::shared_ptr<ButtonBase>
 ContourDesignControlProtocol::make_button_action (string action_string)
 {
-	return boost::shared_ptr<ButtonBase> (new ButtonAction (action_string, *this));
+	return std::shared_ptr<ButtonBase> (new ButtonAction (action_string, *this));
 }
 
 /* The buttons have the following layout
@@ -503,25 +503,25 @@ ContourDesignControlProtocol::setup_default_button_actions ()
 	_button_actions.push_back (make_button_action ("Transport/Stop"));
 	_button_actions.push_back (make_button_action ("Transport/Roll"));
 	_button_actions.push_back (make_button_action ("Common/jump-forward-to-mark"));
-	_button_actions.push_back (boost::shared_ptr<ButtonBase> (new ButtonJump (JumpDistance (-4.0, BARS), *this)));
-	_button_actions.push_back (boost::shared_ptr<ButtonBase> (new ButtonJump (JumpDistance (+4.0, BARS), *this)));
+	_button_actions.push_back (std::shared_ptr<ButtonBase> (new ButtonJump (JumpDistance (-4.0, BARS), *this)));
+	_button_actions.push_back (std::shared_ptr<ButtonBase> (new ButtonJump (JumpDistance (+4.0, BARS), *this)));
 	_button_actions.push_back (make_button_action (""));
 	_button_actions.push_back (make_button_action ("Common/add-location-from-playhead"));
 	_button_actions.push_back (make_button_action ("Transport/GotoStart"));
 	_button_actions.push_back (make_button_action ("Transport/GotoEnd"));
 }
 
-const boost::shared_ptr<ButtonBase>
+const std::shared_ptr<ButtonBase>
 ContourDesignControlProtocol::get_button_action (unsigned int index) const
 {
 	if (index >= _button_actions.size()) {
-		return boost::shared_ptr<ButtonBase>();
+		return std::shared_ptr<ButtonBase>();
 	}
 	return _button_actions[index];
 }
 
 void
-ContourDesignControlProtocol::set_button_action (unsigned int index, const boost::shared_ptr<ButtonBase> btn_act)
+ContourDesignControlProtocol::set_button_action (unsigned int index, const std::shared_ptr<ButtonBase> btn_act)
 {
 	if (index >= _button_actions.size()) {
 		return;

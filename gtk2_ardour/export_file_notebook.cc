@@ -53,7 +53,7 @@ ExportFileNotebook::ExportFileNotebook () :
 }
 
 void
-ExportFileNotebook::set_session_and_manager (ARDOUR::Session * s, boost::shared_ptr<ARDOUR::ExportProfileManager> manager)
+ExportFileNotebook::set_session_and_manager (ARDOUR::Session * s, std::shared_ptr<ARDOUR::ExportProfileManager> manager)
 {
 	SessionHandlePtr::set_session (s);
 	profile_manager = manager;

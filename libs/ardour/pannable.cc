@@ -103,7 +103,7 @@ Pannable::control_auto_state_changed (AutoState new_state)
 }
 
 void
-Pannable::set_panner (boost::shared_ptr<Panner> p)
+Pannable::set_panner (std::shared_ptr<Panner> p)
 {
 	_panner = p;
 }
@@ -111,7 +111,7 @@ Pannable::set_panner (boost::shared_ptr<Panner> p)
 const std::set<Evoral::Parameter>&
 Pannable::what_can_be_automated() const
 {
-	boost::shared_ptr<Panner> const panner = _panner.lock();
+	std::shared_ptr<Panner> const panner = _panner.lock();
 	if (panner) {
 		return panner->what_can_be_automated ();
 	}
@@ -139,7 +139,7 @@ Pannable::set_automation_state (AutoState state)
 		const Controls& c (controls());
 
 		for (Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {
-			boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl>(ci->second);
+			std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl>(ci->second);
 			if (ac) {
 				ac->alist()->set_automation_state (state);
 			}
@@ -156,7 +156,7 @@ Pannable::start_touch (timepos_t const & when)
 	const Controls& c (controls());
 
 	for (Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {
-		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl>(ci->second);
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl>(ci->second);
 		if (ac) {
 			ac->alist()->start_touch (when);
 		}
@@ -170,7 +170,7 @@ Pannable::stop_touch (timepos_t const & when)
 	const Controls& c (controls());
 
 	for (Controls::const_iterator ci = c.begin(); ci != c.end(); ++ci) {
-		boost::shared_ptr<AutomationControl> ac = boost::dynamic_pointer_cast<AutomationControl>(ci->second);
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl>(ci->second);
 		if (ac) {
 			ac->alist()->stop_touch (when);
 		}

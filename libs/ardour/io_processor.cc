@@ -70,7 +70,7 @@ IOProcessor::IOProcessor (Session& s, bool with_input, bool with_output,
 
 /* create an IOProcessor that proxies to an existing IO object */
 
-IOProcessor::IOProcessor (Session& s, boost::shared_ptr<IO> in, boost::shared_ptr<IO> out,
+IOProcessor::IOProcessor (Session& s, std::shared_ptr<IO> in, std::shared_ptr<IO> out,
                           const string& proc_name, Temporal::TimeDomain td, bool sendish)
 	: Processor(s, proc_name, td)
 	, _input (in)
@@ -98,7 +98,7 @@ IOProcessor::~IOProcessor ()
 }
 
 void
-IOProcessor::set_input (boost::shared_ptr<IO> io)
+IOProcessor::set_input (std::shared_ptr<IO> io)
 {
 	/* CALLER MUST HOLD PROCESS LOCK */
 
@@ -107,7 +107,7 @@ IOProcessor::set_input (boost::shared_ptr<IO> io)
 }
 
 void
-IOProcessor::set_output (boost::shared_ptr<IO> io)
+IOProcessor::set_output (std::shared_ptr<IO> io)
 {
 	/* CALLER MUST HOLD PROCESS LOCK */
 
@@ -335,7 +335,7 @@ IOProcessor::set_name (const std::string& new_name)
 }
 
 bool
-IOProcessor::feeds (boost::shared_ptr<Route> other) const
+IOProcessor::feeds (std::shared_ptr<Route> other) const
 {
 	return _output && _output->connected_to (other->input());
 }

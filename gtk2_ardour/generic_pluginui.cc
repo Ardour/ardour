@@ -84,7 +84,7 @@ using namespace ArdourWidgets;
 using namespace Gtk;
 using namespace ARDOUR_UI_UTILS;
 
-GenericPluginUI::GenericPluginUI (boost::shared_ptr<PlugInsertBase> pib, bool scrollable)
+GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scrollable)
 	: PlugUIBase (pib)
 	, automation_menu (0)
 	, is_scrollable(scrollable)
@@ -172,7 +172,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PlugInsertBase> pib, bool sc
 			continue;
 		}
 		const Evoral::Parameter param(PluginAutomation, 0, i);
-		boost::shared_ptr<ARDOUR::AutomationControl> c (boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(_pib->control (param)));
+		std::shared_ptr<ARDOUR::AutomationControl> c (std::dynamic_pointer_cast<ARDOUR::AutomationControl>(_pib->control (param)));
 		if (!c) {
 			continue;
 		}
@@ -202,7 +202,7 @@ GenericPluginUI::GenericPluginUI (boost::shared_ptr<PlugInsertBase> pib, bool sc
 	main_contents.pack_start (settings_box, false, false);
 
 	if (_pi) {
-		_pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&GenericPluginUI::processor_active_changed, this, boost::weak_ptr<Processor>(_pi)), gui_context());
+		_pi->ActiveChanged.connect (active_connection, invalidator (*this), boost::bind (&GenericPluginUI::processor_active_changed, this, std::weak_ptr<Processor>(_pi)), gui_context());
 		_bypass_button.set_active (!_pi->enabled());
 	} else {
 		_bypass_button.set_sensitive (false);
@@ -356,7 +356,7 @@ GenericPluginUI::build ()
 
 			ControlUI* cui;
 
-			boost::shared_ptr<ARDOUR::AutomationControl> c (boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(_pib->control (param)));
+			std::shared_ptr<ARDOUR::AutomationControl> c (std::dynamic_pointer_cast<ARDOUR::AutomationControl>(_pib->control (param)));
 
 			if (c && c->flags () & Controllable::HiddenControl) {
 				continue;
@@ -384,7 +384,7 @@ GenericPluginUI::build ()
 		const ParameterDescriptor& desc = d->second;
 		const Evoral::Parameter    param(PluginPropertyAutomation, 0, desc.key);
 
-		boost::shared_ptr<ARDOUR::AutomationControl> c (boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(_pib->control (param)));
+		std::shared_ptr<ARDOUR::AutomationControl> c (std::dynamic_pointer_cast<ARDOUR::AutomationControl>(_pib->control (param)));
 
 		if (!c) {
 			error << string_compose(_("Plugin Editor: no control for property %1"), desc.key) << endmsg;
@@ -711,7 +711,7 @@ GenericPluginUI::midi_refill_patches ()
 
 	for (uint8_t chn = 0; chn < 16; ++chn) {
 		midi_pgmsel[chn]->clear_items ();
-		boost::shared_ptr<MIDI::Name::ChannelNameSet> cns =
+		std::shared_ptr<MIDI::Name::ChannelNameSet> cns =
 			MIDI::Name::MidiPatchManager::instance().find_channel_name_set (model, mode, chn);
 
 		if (cns) {
@@ -761,9 +761,9 @@ GenericPluginUI::midi_bank_patch_select (uint8_t chn, uint32_t bankpgm)
 	MidiTrack* mt = _pi ? dynamic_cast<MidiTrack*> (_pi->owner()) : NULL;
 	if (mt) {
 		/* send to track */
-		boost::shared_ptr<AutomationControl> bank_msb = mt->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
-		boost::shared_ptr<AutomationControl> bank_lsb = mt->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_LSB_BANK), true);
-		boost::shared_ptr<AutomationControl> program = mt->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
+		std::shared_ptr<AutomationControl> bank_msb = mt->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
+		std::shared_ptr<AutomationControl> bank_lsb = mt->automation_control(Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_LSB_BANK), true);
+		std::shared_ptr<AutomationControl> program = mt->automation_control(Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
 
 		bank_msb->set_value (bank >> 7, PBD::Controllable::NoGroup);
 		bank_lsb->set_value (bank & 127, PBD::Controllable::NoGroup);
@@ -860,7 +860,7 @@ GenericPluginUI::automation_state_changed (ControlUI* cui)
 GenericPluginUI::ControlUI*
 GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
                                    const ParameterDescriptor&           desc,
-                                   boost::shared_ptr<AutomationControl> mcontrol,
+                                   std::shared_ptr<AutomationControl> mcontrol,
                                    float                                value,
                                    bool                                 is_input,
                                    bool                                 use_knob)
@@ -1292,7 +1292,7 @@ GenericPluginUI::output_update ()
 	for (vector<ControlUI*>::iterator i = output_controls.begin(); i != output_controls.end(); ++i) {
 		float val = plugin->get_parameter ((*i)->parameter().id());
 		char buf[32];
-		boost::shared_ptr<ReadOnlyControl> c = _pib->control_output ((*i)->parameter().id());
+		std::shared_ptr<ReadOnlyControl> c = _pib->control_output ((*i)->parameter().id());
 		const std::string& str = ARDOUR::value_as_string(c->desc(), Variant(val));
 		size_t len = str.copy(buf, 31);
 		buf[len] = '\0';

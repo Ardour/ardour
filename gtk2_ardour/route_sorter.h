@@ -33,9 +33,9 @@
 
 struct TreeOrderKey {
     uint32_t old_display_order;
-		boost::shared_ptr<ARDOUR::Stripable> stripable;
+		std::shared_ptr<ARDOUR::Stripable> stripable;
 
-	TreeOrderKey (uint32_t ok, boost::shared_ptr<ARDOUR::Stripable> s)
+	TreeOrderKey (uint32_t ok, std::shared_ptr<ARDOUR::Stripable> s)
 		: old_display_order (ok)
 		, stripable (s)
 	{}
@@ -47,8 +47,8 @@ struct TreeOrderKeySorter
 {
 	bool operator() (const TreeOrderKey& ok_a, const TreeOrderKey& ok_b)
 	{
-		boost::shared_ptr<ARDOUR::Stripable> const& a = ok_a.stripable;
-		boost::shared_ptr<ARDOUR::Stripable> const& b = ok_b.stripable;
+		std::shared_ptr<ARDOUR::Stripable> const& a = ok_a.stripable;
+		std::shared_ptr<ARDOUR::Stripable> const& b = ok_b.stripable;
 		return ARDOUR::Stripable::Sorter () (a, b);
 	}
 };

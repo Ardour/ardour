@@ -73,7 +73,7 @@ panner_descriptor ()
 	return &_descriptor;
 }
 
-Pannerbalance::Pannerbalance (boost::shared_ptr<Pannable> p)
+Pannerbalance::Pannerbalance (std::shared_ptr<Pannable> p)
 	: Panner (p)
 {
 	if (!_pannable->has_state ()) {
@@ -257,7 +257,7 @@ Pannerbalance::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
 }
 
 Panner*
-Pannerbalance::factory (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speakers> /* ignored */)
+Pannerbalance::factory (std::shared_ptr<Pannable> p, std::shared_ptr<Speakers> /* ignored */)
 {
 	return new Pannerbalance (p);
 }
@@ -273,7 +273,7 @@ Pannerbalance::get_state () const
 }
 
 string
-Pannerbalance::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
+Pannerbalance::value_as_string (std::shared_ptr<const AutomationControl> ac) const
 {
 	double val = ac->get_value ();
 

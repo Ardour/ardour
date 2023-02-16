@@ -117,8 +117,8 @@ private:
 	int get_note_onset_function ();
 
 	void run_analysis ();
-	int run_percussion_onset_analysis (boost::shared_ptr<ARDOUR::AudioReadable> region, ARDOUR::sampleoffset_t offset, ARDOUR::AnalysisFeatureList& results);
-	int run_note_onset_analysis (boost::shared_ptr<ARDOUR::AudioReadable> region, ARDOUR::sampleoffset_t offset, ARDOUR::AnalysisFeatureList& results);
+	int run_percussion_onset_analysis (std::shared_ptr<ARDOUR::AudioReadable> region, ARDOUR::sampleoffset_t offset, ARDOUR::AnalysisFeatureList& results);
+	int run_note_onset_analysis (std::shared_ptr<ARDOUR::AudioReadable> region, ARDOUR::sampleoffset_t offset, ARDOUR::AnalysisFeatureList& results);
 
 	void do_action ();
 	void do_split_action ();

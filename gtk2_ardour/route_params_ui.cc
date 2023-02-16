@@ -150,7 +150,7 @@ RouteParams_UI::add_routes (RouteList& routes)
 	ENSURE_GUI_THREAD (*this, &RouteParams_UI::add_routes, routes)
 
 	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
-		boost::shared_ptr<Route> route = (*x);
+		std::shared_ptr<Route> route = (*x);
 
 		if (route->is_auditioner()) {
 			return;
@@ -162,20 +162,20 @@ RouteParams_UI::add_routes (RouteList& routes)
 
 		//route_select_list.rows().back().select ();
 
-		route->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&RouteParams_UI::route_property_changed, this, _1, boost::weak_ptr<Route>(route)), gui_context());
-		route->DropReferences.connect (*this, invalidator (*this), boost::bind (&RouteParams_UI::route_removed, this, boost::weak_ptr<Route>(route)), gui_context());
+		route->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&RouteParams_UI::route_property_changed, this, _1, std::weak_ptr<Route>(route)), gui_context());
+		route->DropReferences.connect (*this, invalidator (*this), boost::bind (&RouteParams_UI::route_removed, this, std::weak_ptr<Route>(route)), gui_context());
 	}
 }
 
 
 void
-RouteParams_UI::route_property_changed (const PropertyChange& what_changed, boost::weak_ptr<Route> wr)
+RouteParams_UI::route_property_changed (const PropertyChange& what_changed, std::weak_ptr<Route> wr)
 {
 	if (!what_changed.contains (ARDOUR::Properties::name)) {
 		return;
 	}
 
-	boost::shared_ptr<Route> route (wr.lock());
+	std::shared_ptr<Route> route (wr.lock());
 
 	if (!route) {
 		return;
@@ -186,7 +186,7 @@ RouteParams_UI::route_property_changed (const PropertyChange& what_changed, boos
 	bool found = false ;
 	TreeModel::Children rows = route_display_model->children();
 	for(TreeModel::Children::iterator iter = rows.begin(); iter != rows.end(); ++iter) {
-		boost::shared_ptr<Route> r =(*iter)[route_display_columns.route];
+		std::shared_ptr<Route> r =(*iter)[route_display_columns.route];
 		if (r == route) {
 			(*iter)[route_display_columns.text] = route->name() ;
 			found = true ;
@@ -208,7 +208,7 @@ void
 RouteParams_UI::map_frozen()
 {
 	ENSURE_GUI_THREAD (*this, &RouteParams_UI::map_frozen)
-	boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(_route);
+	std::shared_ptr<AudioTrack> at = std::dynamic_pointer_cast<AudioTrack>(_route);
 	if (at && insert_box) {
 		switch (at->freeze_state()) {
 			case AudioTrack::Frozen:
@@ -240,7 +240,7 @@ RouteParams_UI::setup_processor_boxes()
 		insert_box = new ProcessorBox (_session, boost::bind (&RouteParams_UI::plugin_selector, this), _p_selection, 0);
 		insert_box->set_route (_route);
 
-		boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(_route);
+		std::shared_ptr<AudioTrack> at = std::dynamic_pointer_cast<AudioTrack>(_route);
 		if (at) {
 			at->FreezeChange.connect (route_connections, invalidator (*this), boost::bind (&RouteParams_UI::map_frozen, this), gui_context());
 		}
@@ -318,9 +318,9 @@ RouteParams_UI::cleanup_view (bool stopupdate)
 }
 
 void
-RouteParams_UI::route_removed (boost::weak_ptr<Route> wr)
+RouteParams_UI::route_removed (std::weak_ptr<Route> wr)
 {
-	boost::shared_ptr<Route> route (wr.lock());
+	std::shared_ptr<Route> route (wr.lock());
 
 	if (!route) {
 		return;
@@ -332,7 +332,7 @@ RouteParams_UI::route_removed (boost::weak_ptr<Route> wr)
 	TreeModel::Children::iterator ri;
 
 	for(TreeModel::Children::iterator iter = rows.begin(); iter != rows.end(); ++iter) {
-		boost::shared_ptr<Route> r =(*iter)[route_display_columns.route];
+		std::shared_ptr<Route> r =(*iter)[route_display_columns.route];
 
 		if (r == route) {
 			route_display_model->erase(iter);
@@ -359,7 +359,7 @@ RouteParams_UI::set_session (Session *sess)
 	route_display_model->clear();
 
 	if (_session) {
-		boost::shared_ptr<RouteList> r = _session->get_routes();
+		std::shared_ptr<RouteList> r = _session->get_routes();
 		add_routes (*r);
 		_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&RouteParams_UI::add_routes, this, _1), gui_context());
 	}
@@ -391,7 +391,7 @@ RouteParams_UI::route_selected()
 
 	if(iter) {
 		//If anything is selected
-		boost::shared_ptr<Route> route = (*iter)[route_display_columns.route] ;
+		std::shared_ptr<Route> route = (*iter)[route_display_columns.route] ;
 
 		if (_route == route) {
 			// do nothing
@@ -461,41 +461,41 @@ RouteParams_UI::show_track_menu()
 }
 
 void
-RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
+RouteParams_UI::redirect_selected (std::shared_ptr<ARDOUR::Processor> proc)
 {
-	boost::shared_ptr<Send> send;
-	boost::shared_ptr<Return> retrn;
-	boost::shared_ptr<PluginInsert> plugin_insert;
-	boost::shared_ptr<PortInsert> port_insert;
+	std::shared_ptr<Send> send;
+	std::shared_ptr<Return> retrn;
+	std::shared_ptr<PluginInsert> plugin_insert;
+	std::shared_ptr<PortInsert> port_insert;
 
-	if ((boost::dynamic_pointer_cast<InternalSend> (proc)) != 0) {
+	if ((std::dynamic_pointer_cast<InternalSend> (proc)) != 0) {
 		cleanup_view();
 		_processor.reset ((Processor*) 0);
 		update_title();
 		return;
-	} else if ((send = boost::dynamic_pointer_cast<Send> (proc)) != 0) {
+	} else if ((send = std::dynamic_pointer_cast<Send> (proc)) != 0) {
 
 		SendUI *send_ui = new SendUI (this, _session, send);
 
 		cleanup_view();
-		send->DropReferences.connect (_processor_going_away_connection, invalidator (*this), boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor>(proc)), gui_context());
+		send->DropReferences.connect (_processor_going_away_connection, invalidator (*this), boost::bind (&RouteParams_UI::processor_going_away, this, std::weak_ptr<Processor>(proc)), gui_context());
 		_active_view = send_ui;
 
 		redir_hpane.add (*_active_view);
 		redir_hpane.show_all();
 
-	} else if ((retrn = boost::dynamic_pointer_cast<Return> (proc)) != 0) {
+	} else if ((retrn = std::dynamic_pointer_cast<Return> (proc)) != 0) {
 
 		ReturnUI *return_ui = new ReturnUI (this, retrn, _session);
 
 		cleanup_view();
-		retrn->DropReferences.connect (_processor_going_away_connection, invalidator (*this), boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor>(proc)), gui_context());
+		retrn->DropReferences.connect (_processor_going_away_connection, invalidator (*this), boost::bind (&RouteParams_UI::processor_going_away, this, std::weak_ptr<Processor>(proc)), gui_context());
 		_active_view = return_ui;
 
 		redir_hpane.add (*_active_view);
 		redir_hpane.show_all();
 
-	} else if ((plugin_insert = boost::dynamic_pointer_cast<PluginInsert> (proc)) != 0) {
+	} else if ((plugin_insert = std::dynamic_pointer_cast<PluginInsert> (proc)) != 0) {
 
 		GenericPluginUI *plugin_ui = new GenericPluginUI (plugin_insert, true);
 
@@ -507,12 +507,12 @@ RouteParams_UI::redirect_selected (boost::shared_ptr<ARDOUR::Processor> proc)
 		redir_hpane.add (*_active_view);
 		redir_hpane.show_all();
 
-	} else if ((port_insert = boost::dynamic_pointer_cast<PortInsert> (proc)) != 0) {
+	} else if ((port_insert = std::dynamic_pointer_cast<PortInsert> (proc)) != 0) {
 
 		PortInsertUI *portinsert_ui = new PortInsertUI (this, _session, port_insert);
 
 		cleanup_view();
-		port_insert->DropReferences.connect (_processor_going_away_connection, invalidator (*this), boost::bind (&RouteParams_UI::processor_going_away, this, boost::weak_ptr<Processor> (proc)), gui_context());
+		port_insert->DropReferences.connect (_processor_going_away_connection, invalidator (*this), boost::bind (&RouteParams_UI::processor_going_away, this, std::weak_ptr<Processor> (proc)), gui_context());
 		_active_view = portinsert_ui;
 
 		redir_hpane.add (*_active_view);
@@ -538,9 +538,9 @@ RouteParams_UI::plugin_going_away (Placement place)
 }
 
 void
-RouteParams_UI::processor_going_away (boost::weak_ptr<ARDOUR::Processor> wproc)
+RouteParams_UI::processor_going_away (std::weak_ptr<ARDOUR::Processor> wproc)
 {
-	boost::shared_ptr<Processor> proc = (wproc.lock());
+	std::shared_ptr<Processor> proc = (wproc.lock());
 
 	if (!proc) {
 		return;

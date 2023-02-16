@@ -44,7 +44,7 @@ namespace ARDOUR {
 class Session;
 
 class LIBARDOUR_API Source : public SessionObject,
-		public boost::enable_shared_from_this<ARDOUR::Source>
+		public std::enable_shared_from_this<ARDOUR::Source>
 {
 public:
 	enum Flag {

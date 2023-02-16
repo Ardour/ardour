@@ -237,14 +237,14 @@ Butler::thread_work ()
 
 		sampleoffset_t audition_seek;
 		if (should_run && _session.is_auditioning () && (audition_seek = _session.the_auditioner ()->seek_sample ()) >= 0) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (_session.the_auditioner ());
+			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (_session.the_auditioner ());
 			DEBUG_TRACE (DEBUG::Butler, "seek the auditioner\n");
 			tr->seek (audition_seek);
 			tr->do_refill ();
 			_session.the_auditioner ()->seek_response (audition_seek);
 		}
 
-		boost::shared_ptr<RouteList> rl = _session.get_routes ();
+		std::shared_ptr<RouteList> rl = _session.get_routes ();
 
 		RouteList rl_with_auditioner = *rl;
 		rl_with_auditioner.push_back (_session.the_auditioner ());
@@ -252,13 +252,13 @@ Butler::thread_work ()
 		DEBUG_TRACE (DEBUG::Butler, string_compose ("butler starts refill loop, twr = %1\n", transport_work_requested ()));
 
 		for (i = rl_with_auditioner.begin (); !transport_work_requested () && should_run && i != rl_with_auditioner.end (); ++i) {
-			boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
 
 			if (!tr) {
 				continue;
 			}
 
-			boost::shared_ptr<IO> io = tr->input ();
+			std::shared_ptr<IO> io = tr->input ();
 
 			if (io && !io->active ()) {
 				/* don't read inactive tracks */
@@ -334,14 +334,14 @@ Butler::thread_work ()
 }
 
 bool
-Butler::flush_tracks_to_disk_normal (boost::shared_ptr<RouteList> rl, uint32_t& errors)
+Butler::flush_tracks_to_disk_normal (std::shared_ptr<RouteList> rl, uint32_t& errors)
 {
 	bool disk_work_outstanding = false;
 
 	for (RouteList::iterator i = rl->begin (); !transport_work_requested () && should_run && i != rl->end (); ++i) {
 		// cerr << "write behind for " << (*i)->name () << endl;
 
-		boost::shared_ptr<Track> tr = boost::dynamic_pointer_cast<Track> (*i);
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
 
 		if (!tr) {
 			continue;

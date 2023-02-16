@@ -118,7 +118,7 @@ bool
 Stripable::is_selected() const
 {
 	try {
-		boost::shared_ptr<const Stripable> s (shared_from_this());
+		std::shared_ptr<const Stripable> s (shared_from_this());
 	} catch (...) {
 		std::cerr << "cannot shared-from-this for " << this << std::endl;
 		abort ();
@@ -127,7 +127,7 @@ Stripable::is_selected() const
 }
 
 bool
-Stripable::Sorter::operator() (boost::shared_ptr<ARDOUR::Stripable> a, boost::shared_ptr<ARDOUR::Stripable> b)
+Stripable::Sorter::operator() (std::shared_ptr<ARDOUR::Stripable> a, std::shared_ptr<ARDOUR::Stripable> b)
 {
 	const PresentationInfo::Flag a_flag = a->presentation_info().flags ();
 	const PresentationInfo::Flag b_flag = b->presentation_info().flags ();

@@ -40,7 +40,7 @@
 class ExportFilenameSelector : public Gtk::VBox, public ARDOUR::SessionHandlePtr
 {
 public:
-	typedef boost::shared_ptr<ARDOUR::ExportFilename> FilenamePtr;
+	typedef std::shared_ptr<ARDOUR::ExportFilename> FilenamePtr;
 
 	ExportFilenameSelector ();
 	~ExportFilenameSelector ();
@@ -71,7 +71,7 @@ private:
 	void open_browse_dialog ();
 	void open_folder ();
 
-	boost::shared_ptr<ARDOUR::ExportFilename> filename;
+	std::shared_ptr<ARDOUR::ExportFilename> filename;
 
 	Glib::RefPtr<Gtk::SizeGroup> label_sizegroup;
 

@@ -46,9 +46,9 @@ class LIBARDOUR_API AnalysisGraph {
 		~AnalysisGraph ();
 
 		void analyze_region (ARDOUR::AudioRegion const*, bool raw = false, ARDOUR::Progress* = 0);
-		void analyze_region (boost::shared_ptr<ARDOUR::AudioRegion>, bool raw = false);
+		void analyze_region (std::shared_ptr<ARDOUR::AudioRegion>, bool raw = false);
 
-		void analyze_range (boost::shared_ptr<ARDOUR::Route>, boost::shared_ptr<ARDOUR::AudioPlaylist>, const std::list<TimelineRange>&);
+		void analyze_range (std::shared_ptr<ARDOUR::Route>, std::shared_ptr<ARDOUR::AudioPlaylist>, const std::list<TimelineRange>&);
 
 		const AnalysisResults& results () const { return _results; }
 
@@ -70,9 +70,9 @@ class LIBARDOUR_API AnalysisGraph {
 		samplecnt_t       _samples_end;
 		bool             _canceled;
 
-		typedef boost::shared_ptr<AudioGrapher::Analyser> AnalysisPtr;
-		typedef boost::shared_ptr<AudioGrapher::Chunker<float> > ChunkerPtr;
-		typedef boost::shared_ptr<AudioGrapher::Interleaver<Sample> > InterleaverPtr;
+		typedef std::shared_ptr<AudioGrapher::Analyser> AnalysisPtr;
+		typedef std::shared_ptr<AudioGrapher::Chunker<float> > ChunkerPtr;
+		typedef std::shared_ptr<AudioGrapher::Interleaver<Sample> > InterleaverPtr;
 
 		InterleaverPtr  interleaver;
 		ChunkerPtr      chunker;

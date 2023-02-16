@@ -102,7 +102,7 @@ def signal(f, n, v):
 
     print("""
 \t/** The slots that this signal will call on emission */
-\ttypedef std::map<boost::shared_ptr<Connection>, slot_function_type> Slots;
+\ttypedef std::map<std::shared_ptr<Connection>, slot_function_type> Slots;
 \tSlots _slots;
 """, file=f)
 
@@ -291,9 +291,9 @@ def signal(f, n, v):
     print("\tfriend class Connection;", file=f)
 
     print("""
-\tboost::shared_ptr<Connection> _connect (PBD::EventLoop::InvalidationRecord* ir, slot_function_type f)
+\tstd::shared_ptr<Connection> _connect (PBD::EventLoop::InvalidationRecord* ir, slot_function_type f)
 \t{
-\t\tboost::shared_ptr<Connection> c (new Connection (this, ir));
+\t\tstd::shared_ptr<Connection> c (new Connection (this, ir));
 \t\tGlib::Threads::Mutex::Lock lm (_mutex);
 \t\t_slots[c] = f;
 #ifdef DEBUG_PBD_SIGNAL_CONNECTIONS
@@ -306,7 +306,7 @@ def signal(f, n, v):
 \t}""", file=f)
 
     print("""
-\tvoid disconnect (boost::shared_ptr<Connection> c)
+\tvoid disconnect (std::shared_ptr<Connection> c)
 \t{
 \t\t/* ~ScopedConnection can call this concurrently with our d'tor */
 \t\tGlib::Threads::Mutex::Lock lm (_mutex, Glib::Threads::TRY_LOCK);

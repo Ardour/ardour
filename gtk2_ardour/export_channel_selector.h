@@ -64,9 +64,9 @@ class XMLNode;
 class ExportChannelSelector : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
 protected:
-	typedef boost::shared_ptr<ARDOUR::ExportChannelConfiguration> ChannelConfigPtr;
+	typedef std::shared_ptr<ARDOUR::ExportChannelConfiguration> ChannelConfigPtr;
 	typedef std::list<ChannelConfigPtr> ChannelConfigList;
-	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ProfileManagerPtr;
+	typedef std::shared_ptr<ARDOUR::ExportProfileManager> ProfileManagerPtr;
 
 	ProfileManagerPtr manager;
 
@@ -148,7 +148,7 @@ private:
 		public:
 			Channel (RouteCols & cols) { cols.add (port); cols.add (label); }
 
-			Gtk::TreeModelColumn<boost::weak_ptr<ARDOUR::AudioPort> > port;
+			Gtk::TreeModelColumn<std::weak_ptr<ARDOUR::AudioPort> > port;
 			Gtk::TreeModelColumn<std::string> label;
 		};
 		std::list<Channel> channels;
@@ -166,7 +166,7 @@ private:
 			PortCols () { add(selected); add(port); add(label); }
 
 			Gtk::TreeModelColumn<bool> selected;  // not used ATM
-			Gtk::TreeModelColumn<boost::weak_ptr<ARDOUR::AudioPort> > port;
+			Gtk::TreeModelColumn<std::weak_ptr<ARDOUR::AudioPort> > port;
 			Gtk::TreeModelColumn<std::string> label;
 		};
 		PortCols port_cols;
@@ -232,7 +232,7 @@ private:
 	void handle_selection ();
 
 	ARDOUR::ExportProfileManager::ChannelConfigStatePtr state;
-	boost::shared_ptr<ARDOUR::RegionExportChannelFactory> factory;
+	std::shared_ptr<ARDOUR::RegionExportChannelFactory> factory;
 	ARDOUR::AudioRegion const & region;
 	ARDOUR::AudioTrack & track;
 
@@ -262,7 +262,7 @@ class TrackExportChannelSelector : public ExportChannelSelector
 
 	void fill_list();
 	bool sync_with_manager_state ();
-	void add_track (boost::shared_ptr<ARDOUR::Route> route, bool selected);
+	void add_track (std::shared_ptr<ARDOUR::Route> route, bool selected);
 	void update_config();
 	ChannelConfigList configs;
 
@@ -271,7 +271,7 @@ class TrackExportChannelSelector : public ExportChannelSelector
 	struct TrackCols : public Gtk::TreeModelColumnRecord
 	{
 	  public:
-		Gtk::TreeModelColumn<boost::shared_ptr<ARDOUR::Route> > route;
+		Gtk::TreeModelColumn<std::shared_ptr<ARDOUR::Route> > route;
 		Gtk::TreeModelColumn<std::string>     label;
 		Gtk::TreeModelColumn<bool>            selected;
 		Gtk::TreeModelColumn<uint32_t>        order_key;

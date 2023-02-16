@@ -41,11 +41,11 @@ namespace ARDOUR {
 class StereoPanner : public PannerInterface
 {
 public:
-	StereoPanner (boost::shared_ptr<ARDOUR::PannerShell>);
+	StereoPanner (std::shared_ptr<ARDOUR::PannerShell>);
 	~StereoPanner ();
 
-	boost::shared_ptr<PBD::Controllable> get_position_controllable() const { return position_control; }
-	boost::shared_ptr<PBD::Controllable> get_width_controllable() const { return width_control; }
+	std::shared_ptr<PBD::Controllable> get_position_controllable() const { return position_control; }
+	std::shared_ptr<PBD::Controllable> get_width_controllable() const { return width_control; }
 
 	sigc::signal<void> StartPositionGesture;
 	sigc::signal<void> StopPositionGesture;
@@ -60,17 +60,17 @@ protected:
 	bool on_scroll_event (GdkEventScroll*);
 	bool on_key_press_event (GdkEventKey*);
 
-	boost::weak_ptr<PBD::Controllable> proxy_controllable () const
+	std::weak_ptr<PBD::Controllable> proxy_controllable () const
 	{
-		return boost::weak_ptr<PBD::Controllable> (position_binder.get_controllable());
+		return std::weak_ptr<PBD::Controllable> (position_binder.get_controllable());
 	}
 
 private:
 	PannerEditor* editor ();
-	boost::shared_ptr<ARDOUR::PannerShell> _panner_shell;
+	std::shared_ptr<ARDOUR::PannerShell> _panner_shell;
 
-	boost::shared_ptr<PBD::Controllable> position_control;
-	boost::shared_ptr<PBD::Controllable> width_control;
+	std::shared_ptr<PBD::Controllable> position_control;
+	std::shared_ptr<PBD::Controllable> width_control;
 	PBD::ScopedConnectionList panvalue_connections;
 	PBD::ScopedConnectionList panshell_connections;
 	bool dragging_position;

@@ -99,12 +99,12 @@ public:
 
 	bool need_butler() const { return _need_butler; }
 
-	boost::shared_ptr<Playlist>      get_playlist (DataType dt) const { return _playlists[dt]; }
-	boost::shared_ptr<MidiPlaylist>  midi_playlist() const;
-	boost::shared_ptr<AudioPlaylist> audio_playlist() const;
+	std::shared_ptr<Playlist>      get_playlist (DataType dt) const { return _playlists[dt]; }
+	std::shared_ptr<MidiPlaylist>  midi_playlist() const;
+	std::shared_ptr<AudioPlaylist> audio_playlist() const;
 
 	virtual void playlist_modified () {}
-	virtual int use_playlist (DataType, boost::shared_ptr<Playlist>);
+	virtual int use_playlist (DataType, std::shared_ptr<Playlist>);
 
 	virtual void adjust_buffering() = 0;
 
@@ -162,7 +162,7 @@ protected:
 		PBD::RingBufferNPT<Sample>::rw_vector rw_vector;
 
 		/* used only by capture */
-		boost::shared_ptr<AudioFileSource> write_source;
+		std::shared_ptr<AudioFileSource> write_source;
 		PBD::RingBufferNPT<CaptureTransition>* capture_transition_buf;
 
 		/* used in the butler thread only */
@@ -174,14 +174,14 @@ protected:
 	typedef std::vector<ChannelInfo*> ChannelList;
 	SerializedRCUManager<ChannelList> channels;
 
-	virtual int add_channel_to (boost::shared_ptr<ChannelList>, uint32_t how_many) = 0;
-	int remove_channel_from (boost::shared_ptr<ChannelList>, uint32_t how_many);
+	virtual int add_channel_to (std::shared_ptr<ChannelList>, uint32_t how_many) = 0;
+	int remove_channel_from (std::shared_ptr<ChannelList>, uint32_t how_many);
 
-	boost::shared_ptr<Playlist> _playlists[DataType::num_types];
+	std::shared_ptr<Playlist> _playlists[DataType::num_types];
 	PBD::ScopedConnectionList playlist_connections;
 
 	virtual void playlist_changed (const PBD::PropertyChange&) {}
-	virtual void playlist_deleted (boost::weak_ptr<Playlist>);
+	virtual void playlist_deleted (std::weak_ptr<Playlist>);
 	virtual void playlist_ranges_moved (std::list<Temporal::RangeMove> const &, bool) {}
 
 	/* The MIDI stuff */

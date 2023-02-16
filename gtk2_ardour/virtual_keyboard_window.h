@@ -137,18 +137,18 @@ private:
 	ArdourWidgets::ArdourDropdown  _transpose_output;
 	ArdourWidgets::ArdourButton    _send_panic;
 
-	boost::shared_ptr<VKBDControl>    _pitchbend;
+	std::shared_ptr<VKBDControl>    _pitchbend;
 	Gtk::Adjustment                   _pitch_adjustment;
 	ArdourWidgets::VSliderController* _pitch_slider;
 	Gtkmm2ext::PersistentTooltip*     _pitch_slider_tooltip;
 
-	boost::shared_ptr<VKBDControl>    _modwheel;
+	std::shared_ptr<VKBDControl>    _modwheel;
 	Gtk::Adjustment                   _modwheel_adjustment;
 	ArdourWidgets::VSliderController* _modwheel_slider;
 	Gtkmm2ext::PersistentTooltip*     _modwheel_tooltip;
 #define VKBD_NCTRLS 4
 
-	boost::shared_ptr<VKBDControl> _cc[VKBD_NCTRLS];
+	std::shared_ptr<VKBDControl> _cc[VKBD_NCTRLS];
 	ArdourWidgets::ArdourKnob*     _cc_knob[VKBD_NCTRLS];
 	ArdourWidgets::ArdourDropdown  _cc_key[VKBD_NCTRLS];
 

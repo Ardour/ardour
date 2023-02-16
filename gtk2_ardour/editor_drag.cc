@@ -587,7 +587,7 @@ Drag::show_view_preview (timepos_t const & pos)
 	}
 }
 
-boost::shared_ptr<Region>
+std::shared_ptr<Region>
 Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
 {
 	if (_editor->session()) {
@@ -596,13 +596,13 @@ Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
 		return view->add_region (pos, len, commit);
 	}
 
-	return boost::shared_ptr<Region>();
+	return std::shared_ptr<Region>();
 }
 
 struct TimeAxisViewStripableSorter {
 	bool operator() (TimeAxisView* tav_a, TimeAxisView* tav_b) {
-		boost::shared_ptr<ARDOUR::Stripable> const& a = tav_a->stripable ();
-		boost::shared_ptr<ARDOUR::Stripable> const& b = tav_b->stripable ();
+		std::shared_ptr<ARDOUR::Stripable> const& a = tav_a->stripable ();
+		std::shared_ptr<ARDOUR::Stripable> const& b = tav_b->stripable ();
 		return ARDOUR::Stripable::Sorter () (a, b);
 	}
 };
@@ -1251,7 +1251,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		return;
 	}
 
-	typedef map<boost::shared_ptr<Playlist>, double> PlaylistDropzoneMap;
+	typedef map<std::shared_ptr<Playlist>, double> PlaylistDropzoneMap;
 	PlaylistDropzoneMap playlist_dropzone_map;
 	_ndropzone = 0; // number of elements currently in the dropzone
 
@@ -1548,8 +1548,8 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 			AudioRegionView* arv = dynamic_cast<AudioRegionView*>(rv);
 			MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(rv);
 
-			const boost::shared_ptr<const Region> original = rv->region();
-			boost::shared_ptr<Region> region_copy;
+			const std::shared_ptr<const Region> original = rv->region();
+			std::shared_ptr<Region> region_copy;
 
 			region_copy = RegionFactory::create (original, true);
 
@@ -1561,13 +1561,13 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 
 			RegionView* nrv;
 			if (arv) {
-				boost::shared_ptr<AudioRegion> audioregion_copy
-				= boost::dynamic_pointer_cast<AudioRegion>(region_copy);
+				std::shared_ptr<AudioRegion> audioregion_copy
+				= std::dynamic_pointer_cast<AudioRegion>(region_copy);
 
 				nrv = new AudioRegionView (*arv, audioregion_copy);
 			} else if (mrv) {
-				boost::shared_ptr<MidiRegion> midiregion_copy
-					= boost::dynamic_pointer_cast<MidiRegion>(region_copy);
+				std::shared_ptr<MidiRegion> midiregion_copy
+					= std::dynamic_pointer_cast<MidiRegion>(region_copy);
 				nrv = new MidiRegionView (*mrv, midiregion_copy);
 			} else {
 				continue;
@@ -1692,7 +1692,7 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 }
 
 RouteTimeAxisView*
-RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, TimeAxisView* original)
+RegionMoveDrag::create_destination_time_axis (std::shared_ptr<Region> region, TimeAxisView* original)
 {
 	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return NULL;
@@ -1703,8 +1703,8 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 	 */
 	TimeAxisView* tav = 0;
 	try {
-		if (boost::dynamic_pointer_cast<AudioRegion> (region)) {
-			list<boost::shared_ptr<AudioTrack> > audio_tracks;
+		if (std::dynamic_pointer_cast<AudioRegion> (region)) {
+			list<std::shared_ptr<AudioTrack> > audio_tracks;
 			uint32_t output_chan = region->sources().size();
 			if ((Config->get_output_auto_connect() & AutoConnectMaster) && _editor->session()->master_out()) {
 				output_chan =  _editor->session()->master_out()->n_inputs().n_audio();
@@ -1713,10 +1713,10 @@ RegionMoveDrag::create_destination_time_axis (boost::shared_ptr<Region> region, 
 			tav =_editor->time_axis_view_from_stripable (audio_tracks.front());
 		} else {
 			ChanCount one_midi_port (DataType::MIDI, 1);
-			list<boost::shared_ptr<MidiTrack> > midi_tracks;
+			list<std::shared_ptr<MidiTrack> > midi_tracks;
 			midi_tracks = _editor->session()->new_midi_track (one_midi_port, one_midi_port,
 			                                                  Config->get_strict_io () || Profile->get_mixbus (),
-			                                                  boost::shared_ptr<ARDOUR::PluginInfo>(),
+			                                                  std::shared_ptr<ARDOUR::PluginInfo>(),
 			                                                  (ARDOUR::Plugin::PresetRecord*) 0,
 			                                                  (ARDOUR::RouteGroup*) 0, 1, region->name(), PresentationInfo::max_order, Normal, true);
 			tav = _editor->time_axis_view_from_stripable (midi_tracks.front());
@@ -1761,7 +1761,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 		return;
 	}
 
-	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
+	typedef map<std::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
 	PlaylistMapping playlist_mapping;
 
 	/* determine boundaries of dragged regions, across all playlists */
@@ -1880,13 +1880,13 @@ RegionMoveDrag::finished_no_copy (
 	timecnt_t const drag_delta = last_position.distance (_primary->region()->position());
 	RegionList ripple_exclude;
 
-	typedef map<boost::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
+	typedef map<std::shared_ptr<Playlist>, RouteTimeAxisView*> PlaylistMapping;
 	PlaylistMapping playlist_mapping;
 
 	/* determine earliest position affected by the drag, across all playlists */
 	timepos_t extent_min = timepos_t::max (Temporal::AudioTime); /* NUTEMPO fix domain */
 
-	std::set<boost::shared_ptr<const Region> > uniq;
+	std::set<std::shared_ptr<const Region> > uniq;
 	for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ) {
 
 		RegionView* rv = i->view;
@@ -1981,7 +1981,7 @@ RegionMoveDrag::finished_no_copy (
 
 		} else {
 
-			boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
+			std::shared_ptr<Playlist> playlist = dest_rtv->playlist();
 
 			/* this movement may result in a crossfade being modified, or a layering change,
 			   so we need to get undo data from the playlist as well as the region.
@@ -2055,7 +2055,7 @@ RegionMoveDrag::finished_no_copy (
 		}
 	}
 
-	for (set<boost::shared_ptr<Playlist> >::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
+	for (set<std::shared_ptr<Playlist> >::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
 		(*p)->thaw();
 	}
 
@@ -2096,12 +2096,12 @@ RegionMoveDrag::finished_no_copy (
  */
 void
 RegionMoveDrag::remove_region_from_playlist (
-	boost::shared_ptr<Region> region,
-	boost::shared_ptr<Playlist> playlist,
+	std::shared_ptr<Region> region,
+	std::shared_ptr<Playlist> playlist,
 	PlaylistSet& modified_playlists
 	)
 {
-	pair<set<boost::shared_ptr<Playlist> >::iterator, bool> r = modified_playlists.insert (playlist);
+	pair<set<std::shared_ptr<Playlist> >::iterator, bool> r = modified_playlists.insert (playlist);
 
 	if (r.second) {
 		playlist->clear_changes ();
@@ -2125,14 +2125,14 @@ RegionMoveDrag::remove_region_from_playlist (
  */
 RegionView *
 RegionMoveDrag::insert_region_into_playlist (
-	boost::shared_ptr<Region> region,
+	std::shared_ptr<Region> region,
 	RouteTimeAxisView*        dest_rtv,
 	layer_t                   dest_layer,
 	timepos_t const &         where,
 	PlaylistSet&              modified_playlists
 	)
 {
-	boost::shared_ptr<Playlist> dest_playlist = dest_rtv->playlist ();
+	std::shared_ptr<Playlist> dest_playlist = dest_rtv->playlist ();
 	if (!dest_playlist) {
 		return 0;
 	}
@@ -2229,13 +2229,13 @@ RegionMoveDrag::setup_pointer_offset ()
 	_pointer_offset = timecnt_t (_last_position.distance (raw_grab_time()), _last_position);
 }
 
-RegionInsertDrag::RegionInsertDrag (Editor* e, boost::shared_ptr<Region> r, RouteTimeAxisView* v, timepos_t const & pos, Temporal::TimeDomain td)
+RegionInsertDrag::RegionInsertDrag (Editor* e, std::shared_ptr<Region> r, RouteTimeAxisView* v, timepos_t const & pos, Temporal::TimeDomain td)
 	: RegionMotionDrag (e, 0, 0, list<RegionView*> (), td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionInsertDrag\n");
 
-	assert ((boost::dynamic_pointer_cast<AudioRegion> (r) && dynamic_cast<AudioTimeAxisView*> (v)) ||
-		(boost::dynamic_pointer_cast<MidiRegion> (r) && dynamic_cast<MidiTimeAxisView*> (v)));
+	assert ((std::dynamic_pointer_cast<AudioRegion> (r) && dynamic_cast<AudioTimeAxisView*> (v)) ||
+		(std::dynamic_pointer_cast<MidiRegion> (r) && dynamic_cast<MidiTimeAxisView*> (v)));
 
 	_primary = v->view()->create_region_view (r, false, false);
 
@@ -2259,7 +2259,7 @@ RegionInsertDrag::finished (GdkEvent * event, bool)
 	_primary->get_canvas_group()->reparent (dest_rtv->view()->region_canvas());
 	_primary->get_canvas_group()->set_y_position (0);
 
-	boost::shared_ptr<Playlist> playlist = dest_rtv->playlist();
+	std::shared_ptr<Playlist> playlist = dest_rtv->playlist();
 
 	_editor->begin_reversible_command (Operations::insert_region);
 	playlist->clear_changes ();
@@ -2771,7 +2771,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 {
 	RegionView* rv = _primary;
 
-	pair<set<boost::shared_ptr<Playlist> >::iterator,bool> insert_result;
+	pair<set<std::shared_ptr<Playlist> >::iterator,bool> insert_result;
 	timecnt_t delta;
 	timepos_t adj_time = adjusted_time (_drags->current_pointer_time () + snap_delta (event->button.state), event, true);
 	timecnt_t dt = raw_grab_time().distance (adj_time) + _pointer_offset - snap_delta (event->button.state);
@@ -2809,7 +2809,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 				arv->drag_start ();
 			}
 
-			boost::shared_ptr<Playlist> pl = rv->region()->playlist();
+			std::shared_ptr<Playlist> pl = rv->region()->playlist();
 			insert_result = _editor->motion_frozen_playlists.insert (pl);
 
 			if (insert_result.second) {
@@ -2819,9 +2819,9 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (rv);
 			/* a MRV start trim may change the source length. ensure we cover all playlists here */
 			if (mrv && _operation == StartTrim) {
-				vector<boost::shared_ptr<Playlist> > all_playlists;
+				vector<std::shared_ptr<Playlist> > all_playlists;
 				_editor->session()->playlists()->get (all_playlists);
-				for (vector<boost::shared_ptr<Playlist> >::iterator x = all_playlists.begin(); x != all_playlists.end(); ++x) {
+				for (vector<std::shared_ptr<Playlist> >::iterator x = all_playlists.begin(); x != all_playlists.end(); ++x) {
 
 					if ((*x)->uses_source (rv->region()->source(0))) {
 						insert_result = _editor->motion_frozen_playlists.insert (*x);
@@ -2854,7 +2854,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 				for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
 					if (!arv) continue;
-					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+					std::shared_ptr<AudioRegion> ar (arv->audio_region());
 					if (ar->locked()) continue;
 					samplecnt_t len = ar->fade_in()->back()->when.samples();
 					if (len < dts) dts = min(dts, len);
@@ -2864,7 +2864,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 				for (list<DraggingView>::const_iterator i = _views.begin(); i != _views.end(); ++i) {
 					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
 					if (!arv) continue;
-					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+					std::shared_ptr<AudioRegion> ar (arv->audio_region());
 					if (ar->locked()) continue;
 					samplecnt_t len = ar->fade_out()->back()->when.samples();
 					if (len < -dts) dts = max(dts, -len);
@@ -2882,7 +2882,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			if (changed && _preserve_fade_anchor) {
 				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
 				if (arv) {
-					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+					std::shared_ptr<AudioRegion> ar (arv->audio_region());
 					samplecnt_t len = ar->fade_in()->back()->when.samples();
 					samplecnt_t diff = ar->first_sample() - i->initial_position.samples();
 					samplepos_t new_length = len - diff;
@@ -2901,7 +2901,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			if (changed && _preserve_fade_anchor) {
 				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
 				if (arv) {
-					boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+					std::shared_ptr<AudioRegion> ar (arv->audio_region());
 					samplecnt_t len = ar->fade_out()->back()->when.samples();
 					samplecnt_t diff = 1 + ar->last_sample() - i->initial_end.samples();
 					samplepos_t new_length = len + diff;
@@ -2944,7 +2944,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 				if (_preserve_fade_anchor && i->anchored_fade_length) {
 					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
 					if (arv) {
-						boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+						std::shared_ptr<AudioRegion> ar (arv->audio_region());
 						arv->reset_fade_in_shape_width (ar, i->anchored_fade_length);
 						ar->set_fade_in_length(i->anchored_fade_length);
 						ar->set_fade_in_active(true);
@@ -2959,7 +2959,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 				if (_preserve_fade_anchor && i->anchored_fade_length) {
 					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
 					if (arv) {
-						boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+						std::shared_ptr<AudioRegion> ar (arv->audio_region());
 						arv->reset_fade_out_shape_width (ar, i->anchored_fade_length);
 						ar->set_fade_out_length(i->anchored_fade_length);
 						ar->set_fade_out_active(true);
@@ -2979,7 +2979,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 		}
 
-		for (set<boost::shared_ptr<Playlist> >::iterator p = _editor->motion_frozen_playlists.begin(); p != _editor->motion_frozen_playlists.end(); ++p) {
+		for (set<std::shared_ptr<Playlist> >::iterator p = _editor->motion_frozen_playlists.begin(); p != _editor->motion_frozen_playlists.end(); ++p) {
 			/* Trimming one region may affect others on the playlist, so we need
 			   to get undo Commands from the whole playlist rather than just the
 			   region.  Use motion_frozen_playlists (a set) to make sure we don't
@@ -4030,7 +4030,7 @@ FadeInDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	Drag::start_grab (event, cursor);
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
-	boost::shared_ptr<AudioRegion> const r = arv->audio_region ();
+	std::shared_ptr<AudioRegion> const r = arv->audio_region ();
 	setup_snap_delta (r->position());
 
 	show_verbose_cursor_duration (r->position(), r->position() + r->fade_in()->back()->when, 32);
@@ -4041,7 +4041,7 @@ void
 FadeInDrag::setup_pointer_offset ()
 {
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
-	boost::shared_ptr<AudioRegion> const r = arv->audio_region ();
+	std::shared_ptr<AudioRegion> const r = arv->audio_region ();
 	_pointer_offset = (r->fade_in()->back()->when + r->position()).distance (raw_grab_time());
 }
 
@@ -4055,7 +4055,7 @@ FadeInDrag::motion (GdkEvent* event, bool first_motion)
 
 	samplepos_t pos = tpos.samples ();
 
-	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
+	std::shared_ptr<AudioRegion> region = std::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	samplecnt_t fade_length;
 
@@ -4100,7 +4100,7 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 	samplepos_t pos = tpos.samples ();
 	samplecnt_t fade_length;
 
-	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
+	std::shared_ptr<AudioRegion> region = std::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	if (pos < (region->position_sample() + 64)) {
 		fade_length = 64; // this should be a minimum defined somewhere
@@ -4122,7 +4122,7 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		tmp->drag_end ();
 
-		boost::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_in();
+		std::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_in();
 		XMLNode &before = alist->get_state();
 
 		tmp->audio_region()->set_fade_in_length (fade_length);
@@ -4169,7 +4169,7 @@ FadeOutDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	Drag::start_grab (event, cursor);
 
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
-	boost::shared_ptr<AudioRegion> r = arv->audio_region ();
+	std::shared_ptr<AudioRegion> r = arv->audio_region ();
 	setup_snap_delta (r->nt_last());
 
 	show_verbose_cursor_duration (r->nt_last().earlier (r->fade_out()->back()->when), r->nt_last());
@@ -4180,7 +4180,7 @@ void
 FadeOutDrag::setup_pointer_offset ()
 {
 	AudioRegionView* arv = dynamic_cast<AudioRegionView*> (_primary);
-	boost::shared_ptr<AudioRegion> r = arv->audio_region ();
+	std::shared_ptr<AudioRegion> r = arv->audio_region ();
 	_pointer_offset = (r->position() + (r->length() - r->fade_out()->back()->when)).distance (raw_grab_time());
 }
 
@@ -4195,7 +4195,7 @@ FadeOutDrag::motion (GdkEvent* event, bool first_motion)
 
 	samplepos_t pos (tpos.samples());
 
-	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
+	std::shared_ptr<AudioRegion> region = std::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	if (pos > (region->last_sample() - 64)) {
 		fade_length = 64; // this should really be a minimum fade defined somewhere
@@ -4239,7 +4239,7 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	samplecnt_t fade_length;
 
-	boost::shared_ptr<AudioRegion> region = boost::dynamic_pointer_cast<AudioRegion> (_primary->region ());
+	std::shared_ptr<AudioRegion> region = std::dynamic_pointer_cast<AudioRegion> (_primary->region ());
 
 	if (pos > (region->last_sample() - 64)) {
 		fade_length = 64; // this should really be a minimum fade defined somewhere
@@ -4261,7 +4261,7 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		tmp->drag_end ();
 
-		boost::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_out();
+		std::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_out();
 		XMLNode &before = alist->get_state();
 
 		tmp->audio_region()->set_fade_out_length (fade_length);
@@ -6298,7 +6298,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, list<RegionView*> cons
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationRangeDrag\n");
 
-	list<boost::shared_ptr<AutomationLine> > lines;
+	list<std::shared_ptr<AutomationLine> > lines;
 
 	for (list<RegionView*>::const_iterator i = v.begin(); i != v.end(); ++i) {
 		if (AudioRegionView* audio_view = dynamic_cast<AudioRegionView*>(*i)) {
@@ -6317,12 +6317,12 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, list<RegionView*> cons
  *  @param offset Offset from the session start to the points in the AutomationLines.
  */
 void
-AutomationRangeDrag::setup (list<boost::shared_ptr<AutomationLine> > const & lines)
+AutomationRangeDrag::setup (list<std::shared_ptr<AutomationLine> > const & lines)
 {
 	/* find the lines that overlap the ranges being dragged */
-	list<boost::shared_ptr<AutomationLine> >::const_iterator i = lines.begin ();
+	list<std::shared_ptr<AutomationLine> >::const_iterator i = lines.begin ();
 	while (i != lines.end ()) {
-		list<boost::shared_ptr<AutomationLine> >::const_iterator j = i;
+		list<std::shared_ptr<AutomationLine> >::const_iterator j = i;
 		++j;
 
 		pair<timepos_t, timepos_t> r = (*i)->get_point_x_range ();
@@ -6367,7 +6367,7 @@ AutomationRangeDrag::y_fraction (double global_y) const
 }
 
 double
-AutomationRangeDrag::value (boost::shared_ptr<AutomationList> list, timepos_t const & x) const
+AutomationRangeDrag::value (std::shared_ptr<AutomationList> list, timepos_t const & x) const
 {
 	if (list->size () == 0) {
 		return _initial_value;
@@ -6426,7 +6426,7 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 						continue;
 					}
 
-					boost::shared_ptr<AutomationList> the_list = j->line->the_list ();
+					std::shared_ptr<AutomationList> the_list = j->line->the_list ();
 
 					/* j is the line that this audio range starts in; fade into it;
 					 * 64 samples length plucked out of thin air.
@@ -6471,7 +6471,7 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 						continue;
 					}
 
-					boost::shared_ptr<AutomationList> the_list = j->line->the_list ();
+					std::shared_ptr<AutomationList> the_list = j->line->the_list ();
 
 					/* j is the line that this audio range starts in; fade out of it;
 					 * 64 samples length plucked out of thin air.
@@ -6606,7 +6606,7 @@ void
 PatchChangeDrag::motion (GdkEvent* ev, bool)
 {
 	timepos_t f = adjusted_current_time (ev);
-	boost::shared_ptr<Region> r = _region_view->region ();
+	std::shared_ptr<Region> r = _region_view->region ();
 	f = max (f, r->position ());
 	f = min (f, r->nt_last ());
 
@@ -6626,7 +6626,7 @@ PatchChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 		return;
 	}
 
-	boost::shared_ptr<Region> r (_region_view->region ());
+	std::shared_ptr<Region> r (_region_view->region ());
 	timepos_t f = adjusted_current_time (ev);
 	f = max (f, r->position ());
 	f = min (f, r->nt_last ());
@@ -6643,7 +6643,7 @@ PatchChangeDrag::aborted (bool)
 void
 PatchChangeDrag::setup_pointer_offset ()
 {
-	boost::shared_ptr<Region> region = _region_view->region ();
+	std::shared_ptr<Region> region = _region_view->region ();
 	_pointer_offset = region->source_beats_to_absolute_time (_patch_change->patch()->time()).distance (raw_grab_time());
 }
 
@@ -6861,7 +6861,7 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 		return;
 	}
 
-	boost::shared_ptr<MidiRegion> mr = _region_view->midi_region();
+	std::shared_ptr<MidiRegion> mr = _region_view->midi_region();
 
 	timepos_t pos (_drags->current_pointer_time());
 	_editor->snap_to (pos, RoundNearest, SnapToGrid_Scaled);
@@ -6914,7 +6914,7 @@ CrossfadeEdgeDrag::motion (GdkEvent*, bool)
 	timecnt_t new_length;
 	timecnt_t len;
 
-	boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+	std::shared_ptr<AudioRegion> ar (arv->audio_region());
 
 	if (start) {
 		distance = _drags->current_pointer_x() - grab_x();
@@ -6946,7 +6946,7 @@ CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 	timecnt_t new_length;
 	timecnt_t len;
 
-	boost::shared_ptr<AudioRegion> ar (arv->audio_region());
+	std::shared_ptr<AudioRegion> ar (arv->audio_region());
 
 	if (start) {
 		distance = _drags->current_pointer_x() - grab_x();

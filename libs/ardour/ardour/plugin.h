@@ -58,8 +58,8 @@ class PluginInfo;
 class AutomationControl;
 class SessionObject;
 
-typedef boost::shared_ptr<Plugin>     PluginPtr;
-typedef boost::shared_ptr<PluginInfo> PluginInfoPtr;
+typedef std::shared_ptr<Plugin>     PluginPtr;
+typedef std::shared_ptr<PluginInfo> PluginInfoPtr;
 typedef std::list<PluginInfoPtr>      PluginInfoList;
 typedef std::set<uint32_t>            PluginOutputConfiguration;
 
@@ -157,11 +157,11 @@ public:
 	virtual IOPortDescription         describe_io_port (DataType dt, bool input, uint32_t id) const;
 	virtual PluginOutputConfiguration possible_output () const;
 
-	virtual void set_automation_control (uint32_t /*port_index*/, boost::shared_ptr<ARDOUR::AutomationControl>) {}
+	virtual void set_automation_control (uint32_t /*port_index*/, std::shared_ptr<ARDOUR::AutomationControl>) {}
 
-	virtual boost::shared_ptr<ScalePoints> get_scale_points (uint32_t /*port_index*/) const
+	virtual std::shared_ptr<ScalePoints> get_scale_points (uint32_t /*port_index*/) const
 	{
-		return boost::shared_ptr<ScalePoints> ();
+		return std::shared_ptr<ScalePoints> ();
 	}
 
 	samplecnt_t signal_latency () const
@@ -189,8 +189,8 @@ public:
 	void realtime_locate (bool);
 	void monitoring_changed ();
 
-	virtual void add_slave (boost::shared_ptr<Plugin>, bool realtime) {}
-	virtual void remove_slave (boost::shared_ptr<Plugin>) {}
+	virtual void add_slave (std::shared_ptr<Plugin>, bool realtime) {}
+	virtual void remove_slave (std::shared_ptr<Plugin>) {}
 
 	typedef struct {
 		unsigned char* data;
@@ -453,7 +453,7 @@ struct PluginPreset {
 	}
 };
 
-typedef boost::shared_ptr<PluginPreset> PluginPresetPtr;
+typedef std::shared_ptr<PluginPreset> PluginPresetPtr;
 typedef std::list<PluginPresetPtr>      PluginPresetList;
 
 PluginPtr

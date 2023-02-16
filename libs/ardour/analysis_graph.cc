@@ -55,7 +55,7 @@ AnalysisGraph::~AnalysisGraph ()
 }
 
 void
-AnalysisGraph::analyze_region (boost::shared_ptr<AudioRegion> region, bool raw)
+AnalysisGraph::analyze_region (std::shared_ptr<AudioRegion> region, bool raw)
 {
 	analyze_region (region.get(), raw, (ARDOUR::Progress*)0);
 }
@@ -122,7 +122,7 @@ AnalysisGraph::analyze_region (AudioRegion const* region, bool raw, ARDOUR::Prog
 }
 
 void
-AnalysisGraph::analyze_range (boost::shared_ptr<Route> route, boost::shared_ptr<AudioPlaylist> pl, const std::list<TimelineRange>& range)
+AnalysisGraph::analyze_range (std::shared_ptr<Route> route, std::shared_ptr<AudioPlaylist> pl, const std::list<TimelineRange>& range)
 {
 	const uint32_t n_audio = route->n_inputs().n_audio();
 	if (n_audio == 0 || n_audio > _max_chunksize) {

@@ -39,7 +39,7 @@ class IOSelector;
 class SendUI : public Gtk::HBox
 {
 public:
-	SendUI (Gtk::Window*, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Send>);
+	SendUI (Gtk::Window*, ARDOUR::Session*, std::shared_ptr<ARDOUR::Send>);
 	~SendUI ();
 
 private:
@@ -49,7 +49,7 @@ private:
 	bool invert_press (GdkEventButton* ev);
 	bool invert_release (GdkEventButton* ev);
 
-	boost::shared_ptr<ARDOUR::Send> _send;
+	std::shared_ptr<ARDOUR::Send> _send;
 
 	ArdourWidgets::ArdourButton _invert_button;
 	GainMeter                   _gpm;
@@ -64,7 +64,7 @@ private:
 class SendUIWindow : public ArdourWindow
 {
 public:
-	SendUIWindow (Gtk::Window&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::Send>);
+	SendUIWindow (Gtk::Window&, ARDOUR::Session*, std::shared_ptr<ARDOUR::Send>);
 
 private:
 	SendUI _ui;

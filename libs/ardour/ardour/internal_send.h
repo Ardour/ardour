@@ -31,7 +31,7 @@ namespace ARDOUR {
 class LIBARDOUR_API InternalSend : public Send
 {
 public:
-	InternalSend (Session&, boost::shared_ptr<Pannable>, boost::shared_ptr<MuteMaster>, boost::shared_ptr<Route> send_from, boost::shared_ptr<Route> send_to, Delivery::Role role = Delivery::Aux, bool ignore_bitslot = false);
+	InternalSend (Session&, std::shared_ptr<Pannable>, std::shared_ptr<MuteMaster>, std::shared_ptr<Route> send_from, std::shared_ptr<Route> send_to, Delivery::Role role = Delivery::Aux, bool ignore_bitslot = false);
 	virtual ~InternalSend ();
 
 	std::string display_name() const;
@@ -42,13 +42,13 @@ public:
 
 	void cycle_start (pframes_t);
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
-	bool feeds (boost::shared_ptr<Route> other) const;
+	bool feeds (std::shared_ptr<Route> other) const;
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
 	bool configure_io (ChanCount in, ChanCount out);
 	int  set_block_size (pframes_t);
 
-	boost::shared_ptr<Route> source_route() const { return _send_from; }
-	boost::shared_ptr<Route> target_route() const { return _send_to; }
+	std::shared_ptr<Route> source_route() const { return _send_from; }
+	std::shared_ptr<Route> target_route() const { return _send_to; }
 	const PBD::ID& target_id() const { return _send_to_id; }
 
 	BufferSet const & get_buffers () const {
@@ -68,8 +68,8 @@ protected:
 
 private:
 	BufferSet mixbufs;
-	boost::shared_ptr<Route> _send_from;
-	boost::shared_ptr<Route> _send_to;
+	std::shared_ptr<Route> _send_from;
+	std::shared_ptr<Route> _send_to;
 	bool _allow_feedback;
 	PBD::ID _send_to_id;
 	PBD::ScopedConnection connect_c;
@@ -81,7 +81,7 @@ private:
 	void send_to_property_changed (const PBD::PropertyChange&);
 	int  after_connect ();
 	void init_gain ();
-	int  use_target (boost::shared_ptr<Route>, bool update_name = true);
+	int  use_target (std::shared_ptr<Route>, bool update_name = true);
 	void target_io_changed ();
 	void ensure_mixbufs ();
 

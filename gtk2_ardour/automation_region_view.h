@@ -40,9 +40,9 @@ class AutomationRegionView : public RegionView
 public:
 	AutomationRegionView(ArdourCanvas::Container*,
 	                     AutomationTimeAxisView&,
-	                     boost::shared_ptr<ARDOUR::Region>,
+	                     std::shared_ptr<ARDOUR::Region>,
 	                     const Evoral::Parameter& parameter,
-	                     boost::shared_ptr<ARDOUR::AutomationList>,
+	                     std::shared_ptr<ARDOUR::AutomationList>,
 	                     double initial_samples_per_pixel,
 	                     uint32_t basic_color);
 
@@ -53,12 +53,12 @@ public:
 	bool paste (Temporal::timepos_t const &                     pos,
 	            unsigned                                        paste_count,
 	            float                                           times,
-	            boost::shared_ptr<const ARDOUR::AutomationList> slist);
+	            std::shared_ptr<const ARDOUR::AutomationList> slist);
 
 	inline AutomationTimeAxisView* automation_view() const
 		{ return dynamic_cast<AutomationTimeAxisView*>(&trackview); }
 
-	boost::shared_ptr<AutomationLine> line() { return _line; }
+	std::shared_ptr<AutomationLine> line() { return _line; }
 
 	// We are a ghost.  Meta ghosts?  Crazy talk.
 	virtual GhostRegion* add_ghost(TimeAxisView&) { return 0; }
@@ -71,7 +71,7 @@ public:
 	void tempo_map_changed ();
 
 protected:
-	void create_line(boost::shared_ptr<ARDOUR::AutomationList> list);
+	void create_line(std::shared_ptr<ARDOUR::AutomationList> list);
 	bool set_position(Temporal::timepos_t const & pos, void* src, double* ignored);
 	void region_resized (const PBD::PropertyChange&);
 	bool canvas_group_event(GdkEvent* ev);
@@ -83,7 +83,7 @@ protected:
 
 private:
 	Evoral::Parameter                   _parameter;
-	boost::shared_ptr<AutomationLine>   _line;
+	std::shared_ptr<AutomationLine>   _line;
 	PBD::ScopedConnection               _mouse_mode_connection;
 };
 

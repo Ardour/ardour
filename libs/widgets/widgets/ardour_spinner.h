@@ -35,7 +35,7 @@ namespace ArdourWidgets {
 class LIBWIDGETS_API ArdourSpinner : public Gtk::Alignment
 {
 	public:
-		ArdourSpinner (boost::shared_ptr<PBD::Controllable>, Gtk::Adjustment* adj);
+		ArdourSpinner (std::shared_ptr<PBD::Controllable>, Gtk::Adjustment* adj);
 
 		virtual ~ArdourSpinner ();
 
@@ -66,7 +66,7 @@ class LIBWIDGETS_API ArdourSpinner : public Gtk::Alignment
 		bool             _ctrl_ignore;
 		bool             _spin_ignore;
 
-		boost::shared_ptr<PBD::Controllable> _controllable;
+		std::shared_ptr<PBD::Controllable> _controllable;
 
 };
 

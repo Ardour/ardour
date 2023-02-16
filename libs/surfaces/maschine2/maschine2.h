@@ -128,7 +128,7 @@ class Maschine2: public ARDOUR::ControlProtocol, public AbstractUI<Maschine2Requ
 		void notify_master_change ();
 
 		/* PAD Port */
-		boost::shared_ptr<ARDOUR::Port> _midi_out;
+		std::shared_ptr<ARDOUR::Port> _midi_out;
 		MIDI::Port* _output_port;
 
 		/* callbacks */

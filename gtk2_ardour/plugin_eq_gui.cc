@@ -59,7 +59,7 @@
 
 using namespace ARDOUR;
 
-PluginEqGui::PluginEqGui (boost::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
+PluginEqGui::PluginEqGui (std::shared_ptr<ARDOUR::PluginInsert> pluginInsert)
 	: _min_dB (-12.0)
 	, _max_dB (+12.0)
 	, _step_dB (3.0)

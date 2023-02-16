@@ -34,10 +34,10 @@ AudioRom::AudioRom (Sample* rom, size_t size)
 	memcpy (_rom, rom, sizeof (Sample) * _size);
 }
 
-boost::shared_ptr<AudioRom>
+std::shared_ptr<AudioRom>
 AudioRom::new_rom (Sample* rom, size_t size)
 {
-	return boost::shared_ptr<AudioRom> (new AudioRom (rom, size));
+	return std::shared_ptr<AudioRom> (new AudioRom (rom, size));
 }
 
 AudioRom::~AudioRom ()

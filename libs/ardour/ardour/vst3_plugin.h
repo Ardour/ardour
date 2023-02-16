@@ -63,7 +63,7 @@ class LIBARDOUR_API VST3PI
 	, public Presonus::IContextInfoProvider3
 {
 public:
-	VST3PI (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_id);
+	VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_id);
 	virtual ~VST3PI ();
 
 	/* IComponentHandler */
@@ -132,7 +132,7 @@ public:
 	bool        set_program (int p, int32 sample_off);
 
 	bool subscribe_to_automation_changes () const;
-	void automation_state_changed (uint32_t, ARDOUR::AutoState, boost::weak_ptr<ARDOUR::AutomationList>);
+	void automation_state_changed (uint32_t, ARDOUR::AutoState, std::weak_ptr<ARDOUR::AutomationList>);
 
 	ARDOUR::Plugin::IOPortDescription describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const;
 
@@ -243,15 +243,15 @@ private:
 	void stripable_property_changed (PBD::PropertyChange const&);
 
 	bool setup_psl_info_handler ();
-	void psl_subscribe_to (boost::shared_ptr<ARDOUR::AutomationControl>, FIDString);
+	void psl_subscribe_to (std::shared_ptr<ARDOUR::AutomationControl>, FIDString);
 	void psl_stripable_property_changed (PBD::PropertyChange const&);
 
 	void forward_signal (Presonus::IContextInfoHandler2*, FIDString) const;
 
-	boost::shared_ptr<ARDOUR::VST3PluginModule> _module;
+	std::shared_ptr<ARDOUR::VST3PluginModule> _module;
 
-	boost::shared_ptr<ConnectionProxy> _component_cproxy;
-	boost::shared_ptr<ConnectionProxy> _controller_cproxy;
+	std::shared_ptr<ConnectionProxy> _component_cproxy;
+	std::shared_ptr<ConnectionProxy> _controller_cproxy;
 
 	FUID                  _fuid;
 	Vst::IComponent*      _component;
@@ -371,7 +371,7 @@ public:
 	IOPortDescription           describe_io_port (DataType dt, bool input, uint32_t id) const;
 	PluginOutputConfiguration   possible_output () const;
 
-	void set_automation_control (uint32_t, boost::shared_ptr<ARDOUR::AutomationControl>);
+	void set_automation_control (uint32_t, std::shared_ptr<ARDOUR::AutomationControl>);
 
 	std::string state_node_name () const
 	{
@@ -399,8 +399,8 @@ public:
 
 	void set_owner (ARDOUR::SessionObject* o);
 
-	void add_slave (boost::shared_ptr<Plugin>, bool);
-	void remove_slave (boost::shared_ptr<Plugin>);
+	void add_slave (std::shared_ptr<Plugin>, bool);
+	void remove_slave (std::shared_ptr<Plugin>);
 
 	int connect_and_run (BufferSet&  bufs,
 	                     samplepos_t start, samplepos_t end, double speed,
@@ -456,7 +456,7 @@ public:
 	bool                              is_instrument () const;
 	PBD::Searchpath                   preset_search_path () const;
 
-	boost::shared_ptr<VST3PluginModule> m;
+	std::shared_ptr<VST3PluginModule> m;
 };
 
 #if defined(__clang__)

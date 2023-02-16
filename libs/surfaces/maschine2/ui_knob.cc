@@ -162,7 +162,7 @@ Maschine2Knob::compute_bounding_box () const
 }
 
 void
-Maschine2Knob::set_controllable (boost::shared_ptr<AutomationControl> c)
+Maschine2Knob::set_controllable (std::shared_ptr<AutomationControl> c)
 {
 	watch_connection.disconnect ();
 
@@ -196,7 +196,7 @@ Maschine2Knob::encoder_changed (int delta)
 		return;
 	}
 	const double d = delta * 0.5 / _ctrl->range ();
-	boost::shared_ptr<AutomationControl> ac = _controllable;
+	std::shared_ptr<AutomationControl> ac = _controllable;
 	ac->set_value (ac->interface_to_internal (std::min (ac->upper(), std::max (ac->lower(), ac->internal_to_interface (ac->get_value()) + d))), PBD::Controllable::UseGroup);
 }
 

@@ -37,7 +37,7 @@ class MTDM;
 class PortInsertUI : public Gtk::VBox
 {
 public:
-	PortInsertUI (Gtk::Window*, ARDOUR::Session*, boost::shared_ptr<ARDOUR::PortInsert>);
+	PortInsertUI (Gtk::Window*, ARDOUR::Session*, std::shared_ptr<ARDOUR::PortInsert>);
 	~PortInsertUI ();
 
 	void redisplay ();
@@ -59,7 +59,7 @@ private:
 	void edit_latency_button_clicked ();
 	void latency_button_toggled ();
 
-	boost::shared_ptr<ARDOUR::PortInsert> _pi;
+	std::shared_ptr<ARDOUR::PortInsert> _pi;
 
 	Gtk::Notebook                       _notebook;
 	ArdourWidgets::StatefulToggleButton _measure_latency_button;
@@ -90,7 +90,7 @@ private:
 class PortInsertWindow : public ArdourWindow
 {
 public:
-	PortInsertWindow (Gtk::Window&, ARDOUR::Session*, boost::shared_ptr<ARDOUR::PortInsert>);
+	PortInsertWindow (Gtk::Window&, ARDOUR::Session*, std::shared_ptr<ARDOUR::PortInsert>);
 
 private:
 	PortInsertUI _portinsertui;

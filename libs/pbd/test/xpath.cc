@@ -22,7 +22,7 @@ XPathTest::testMisc ()
 
 	XMLTree  doc(testdata_path);
 	// "//bank" gives as last element an empty element libxml bug????
-	boost::shared_ptr<XMLSharedNodeList> result = doc.find("//bank[@name]");
+	std::shared_ptr<XMLSharedNodeList> result = doc.find("//bank[@name]");
 
 //	cout << "Found " << result->size() << " banks" << endl;
 	assert(result->size() == 8);
@@ -86,7 +86,7 @@ XPathTest::testMisc ()
 
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
 //		cout << "\t found Patchbank " << (*i)->property("Name")->value() << endl;
-		boost::shared_ptr<XMLSharedNodeList> patches = doc3.find ("//Patch[@Name]", i->get());
+		std::shared_ptr<XMLSharedNodeList> patches = doc3.find ("//Patch[@Name]", i->get());
 		for(XMLSharedNodeList::const_iterator p = patches->begin(); p != patches->end(); ++p) {
 //			cout << "\t\t found patch number " << (*p)->property("Number")->value()
 //			     << " with name: " << (*p)->property("Name")->value()  << endl;
@@ -97,7 +97,7 @@ XPathTest::testMisc ()
 	result = doc3.find("//@Value");
 
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
-		boost::shared_ptr<XMLNode> node = (*i);
+		std::shared_ptr<XMLNode> node = (*i);
 //		cout << "\t found attribute node: " << node->name()
 //		     << " value: " << node->attribute_value() << endl;
 	}
@@ -108,7 +108,7 @@ XPathTest::testMisc ()
 
 	assert(result->size() == 15);
 	for(XMLSharedNodeList::const_iterator i = result->begin(); i != result->end(); ++i) {
-		boost::shared_ptr<XMLNode> node = (*i);
+		std::shared_ptr<XMLNode> node = (*i);
 //		cout << "\t found available Channel: " << node->name()
 //		     << " value: " << node->attribute_value() << endl;
 	}

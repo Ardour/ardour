@@ -159,7 +159,7 @@ Pane::handle_child_visibility ()
 void
 Pane::on_add (Widget* w)
 {
-	children.push_back (boost::shared_ptr<Child> (new Child (this, w, 0)));
+	children.push_back (std::shared_ptr<Child> (new Child (this, w, 0)));
 	Child* kid = children.back ().get();
 
 	w->set_parent (*this);

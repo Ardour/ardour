@@ -40,7 +40,7 @@ SoloMuteRelease::set_exclusive (bool e)
 }
 
 void
-SoloMuteRelease::set (boost::shared_ptr<Route> r)
+SoloMuteRelease::set (std::shared_ptr<Route> r)
 {
 	if (active) {
 		routes_on.reset (new RouteList);
@@ -52,7 +52,7 @@ SoloMuteRelease::set (boost::shared_ptr<Route> r)
 }
 
 void
-SoloMuteRelease::set (boost::shared_ptr<RouteList> rl)
+SoloMuteRelease::set (std::shared_ptr<RouteList> rl)
 {
 	if (active) {
 		routes_on = rl;
@@ -62,14 +62,14 @@ SoloMuteRelease::set (boost::shared_ptr<RouteList> rl)
 }
 
 void
-SoloMuteRelease::set (boost::shared_ptr<RouteList> on, boost::shared_ptr<RouteList> off)
+SoloMuteRelease::set (std::shared_ptr<RouteList> on, std::shared_ptr<RouteList> off)
 {
 	routes_on = on;
 	routes_off = off;
 }
 
 void
-SoloMuteRelease::set (boost::shared_ptr<std::list<std::string> > pml)
+SoloMuteRelease::set (std::shared_ptr<std::list<std::string> > pml)
 {
 	port_monitors = pml;
 }

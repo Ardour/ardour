@@ -76,8 +76,8 @@ protected:
 		Gtk::Dialog::on_response (response_id);
 	}
 
-	typedef boost::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
-	typedef boost::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
+	typedef std::shared_ptr<ARDOUR::ExportHandler> HandlerPtr;
+	typedef std::shared_ptr<ARDOUR::ExportProfileManager> ManagerPtr;
 
 	ARDOUR::ExportProfileManager::ExportType type;
 	HandlerPtr      handler;
@@ -94,7 +94,7 @@ protected:
 	boost::scoped_ptr<ExportChannelSelector>  channel_selector;
 	boost::scoped_ptr<ExportFileNotebook>     file_notebook;
 
-	boost::shared_ptr<SoundcloudExportSelector> soundcloud_selector;
+	std::shared_ptr<SoundcloudExportSelector> soundcloud_selector;
 
 	Gtk::VBox                                 warning_widget;
 	Gtk::VBox                                 progress_widget;
@@ -123,7 +123,7 @@ private:
 	void show_progress ();
 	gint progress_timeout ();
 
-	typedef boost::shared_ptr<ARDOUR::ExportStatus> StatusPtr;
+	typedef std::shared_ptr<ARDOUR::ExportStatus> StatusPtr;
 
 	PublicEditor &  editor;
 	StatusPtr       status;

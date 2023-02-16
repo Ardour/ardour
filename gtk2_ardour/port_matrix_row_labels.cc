@@ -237,7 +237,7 @@ PortMatrixRowLabels::port_name_x () const
 
 void
 PortMatrixRowLabels::render_bundle_name (
-	cairo_t* cr, Gdk::Color fg_colour, Gdk::Color bg_colour, double xoff, double yoff, boost::shared_ptr<ARDOUR::Bundle> b
+	cairo_t* cr, Gdk::Color fg_colour, Gdk::Color bg_colour, double xoff, double yoff, std::shared_ptr<ARDOUR::Bundle> b
 	)
 {
 	double const x = bundle_name_x ();

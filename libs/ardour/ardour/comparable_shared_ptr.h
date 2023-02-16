@@ -26,32 +26,32 @@
 namespace ARDOUR {
 
 template<typename T>
-class /*LIBARDOUR_API*/ ComparableSharedPtr : public boost::shared_ptr<T>
+class /*LIBARDOUR_API*/ ComparableSharedPtr : public std::shared_ptr<T>
                           , public boost::less_than_comparable<ComparableSharedPtr<T> >
 {
   public:
 	ComparableSharedPtr () {}
 	template<class Y>
-	explicit ComparableSharedPtr (Y * p) : boost::shared_ptr<T> (p) {}
+	explicit ComparableSharedPtr (Y * p) : std::shared_ptr<T> (p) {}
 
 	template<class Y, class D>
-	ComparableSharedPtr (Y * p, D d) : boost::shared_ptr<T> (p, d) {}
+	ComparableSharedPtr (Y * p, D d) : std::shared_ptr<T> (p, d) {}
 
 	template<class Y, class D, class A>
-	ComparableSharedPtr (Y * p, D d, A a) : boost::shared_ptr<T> (p, d, a) {}
+	ComparableSharedPtr (Y * p, D d, A a) : std::shared_ptr<T> (p, d, a) {}
 
-	ComparableSharedPtr (ComparableSharedPtr const & r) : boost::shared_ptr<T> (r) {}
+	ComparableSharedPtr (ComparableSharedPtr const & r) : std::shared_ptr<T> (r) {}
 
 	ComparableSharedPtr& operator=(ComparableSharedPtr const& r) {
-		boost::shared_ptr<T>(r).swap(*this);
+		std::shared_ptr<T>(r).swap(*this);
 		return *this;
 	}
 
 	template<class Y>
-	ComparableSharedPtr(ComparableSharedPtr<Y> const & r) : boost::shared_ptr<T> (r) {}
+	ComparableSharedPtr(ComparableSharedPtr<Y> const & r) : std::shared_ptr<T> (r) {}
 
 	template<class Y>
-	ComparableSharedPtr(ComparableSharedPtr<Y> const & r, T * p) : boost::shared_ptr<T> (r, p) {}
+	ComparableSharedPtr(ComparableSharedPtr<Y> const & r, T * p) : std::shared_ptr<T> (r, p) {}
 
 	template<class Y>
 	bool operator< (ComparableSharedPtr<Y> const & other) const { return **this < *other; }

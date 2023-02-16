@@ -24,7 +24,7 @@
 using namespace std;
 using namespace Gtk;
 
-NewPluginPresetDialog::NewPluginPresetDialog (boost::shared_ptr<ARDOUR::Plugin> p, std::string title, bool favorite_btn)
+NewPluginPresetDialog::NewPluginPresetDialog (std::shared_ptr<ARDOUR::Plugin> p, std::string title, bool favorite_btn)
 	: ArdourDialog (title)
 	, _replace (_("Replace existing preset with this name"))
 {

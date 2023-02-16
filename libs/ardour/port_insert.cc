@@ -46,7 +46,7 @@ PortInsert::name_and_id_new_insert (Session& s, uint32_t& bitslot)
 	return string_compose (_("insert %1"), bitslot);
 }
 
-PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost::shared_ptr<MuteMaster> mm)
+PortInsert::PortInsert (Session& s, std::shared_ptr<Pannable> pannable, std::shared_ptr<MuteMaster> mm)
 	: IOProcessor (s, true, true, name_and_id_new_insert (s, _bitslot), "", DataType::AUDIO, true)
 	, _out (new Delivery (s, _output, pannable, mm, _name, Delivery::Insert))
 	, _metering (false)
@@ -57,13 +57,13 @@ PortInsert::PortInsert (Session& s, boost::shared_ptr<Pannable> pannable, boost:
 	, _measured_latency (0)
 {
 	/* Send */
-	_out->set_gain_control (boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(BusSendLevel), boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (BusSendLevel), time_domain())))));
+	_out->set_gain_control (std::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(BusSendLevel), std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (BusSendLevel), time_domain())))));
 
-	_out->set_polarity_control (boost::shared_ptr<AutomationControl> (new AutomationControl (_session, PhaseAutomation, ParameterDescriptor (PhaseAutomation), boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation), time_domain())), "polarity-invert")));
+	_out->set_polarity_control (std::shared_ptr<AutomationControl> (new AutomationControl (_session, PhaseAutomation, ParameterDescriptor (PhaseAutomation), std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation), time_domain())), "polarity-invert")));
 	_send_meter.reset (new PeakMeter (_session, name()));
 
 	/* Return */
-	_gain_control = boost::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(InsertReturnLevel), boost::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (InsertReturnLevel), time_domain()))));
+	_gain_control = std::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(InsertReturnLevel), std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (InsertReturnLevel), time_domain()))));
 	_amp.reset (new Amp (_session, _("Return"), _gain_control, true));
 	_return_meter.reset (new PeakMeter (_session, name()));
 

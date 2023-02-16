@@ -37,7 +37,7 @@ using namespace PBD;
 Glib::Threads::Mutex          Analyser::analysis_active_lock;
 Glib::Threads::Mutex          Analyser::analysis_queue_lock;
 Glib::Threads::Cond           Analyser::SourcesToAnalyse;
-list<boost::weak_ptr<Source>> Analyser::analysis_queue;
+list<std::weak_ptr<Source>> Analyser::analysis_queue;
 bool                          Analyser::analysis_thread_run = false;
 PBD::Thread*                  Analyser::analysis_thread     = 0;
 
@@ -67,7 +67,7 @@ Analyser::terminate ()
 }
 
 void
-Analyser::queue_source_for_analysis (boost::shared_ptr<Source> src, bool force)
+Analyser::queue_source_for_analysis (std::shared_ptr<Source> src, bool force)
 {
 	if (!src->can_be_analysed ()) {
 		return;
@@ -78,7 +78,7 @@ Analyser::queue_source_for_analysis (boost::shared_ptr<Source> src, bool force)
 	}
 
 	Glib::Threads::Mutex::Lock lm (analysis_queue_lock);
-	analysis_queue.push_back (boost::weak_ptr<Source> (src));
+	analysis_queue.push_back (std::weak_ptr<Source> (src));
 	SourcesToAnalyse.broadcast ();
 }
 
@@ -104,11 +104,11 @@ Analyser::work ()
 			goto wait;
 		}
 
-		boost::shared_ptr<Source> src (analysis_queue.front ().lock ());
+		std::shared_ptr<Source> src (analysis_queue.front ().lock ());
 		analysis_queue.pop_front ();
 		analysis_queue_lock.unlock ();
 
-		boost::shared_ptr<AudioFileSource> afs = boost::dynamic_pointer_cast<AudioFileSource> (src);
+		std::shared_ptr<AudioFileSource> afs = std::dynamic_pointer_cast<AudioFileSource> (src);
 
 		if (afs && !afs->empty ()) {
 			Glib::Threads::Mutex::Lock lm (analysis_active_lock);
@@ -118,7 +118,7 @@ Analyser::work ()
 }
 
 void
-Analyser::analyse_audio_file_source (boost::shared_ptr<AudioFileSource> src)
+Analyser::analyse_audio_file_source (std::shared_ptr<AudioFileSource> src)
 {
 	AnalysisFeatureList results;
 

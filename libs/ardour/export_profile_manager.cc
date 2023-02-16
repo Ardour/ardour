@@ -160,7 +160,7 @@ ExportProfileManager::prepare_for_export ()
 		     ++format_it, ++filename_it) {
 			ExportFilenamePtr filename = (*filename_it)->filename;
 
-			boost::shared_ptr<BroadcastInfo> b;
+			std::shared_ptr<BroadcastInfo> b;
 			if ((*format_it)->format->has_broadcast_info ()) {
 				b.reset (new BroadcastInfo);
 				b->set_from_session (session, (*ts_it)->get_start ());
@@ -871,10 +871,10 @@ ExportProfileManager::init_filenames (XMLNodeList nodes)
 	return true;
 }
 
-boost::shared_ptr<ExportProfileManager::Warnings>
+std::shared_ptr<ExportProfileManager::Warnings>
 ExportProfileManager::get_warnings ()
 {
-	boost::shared_ptr<Warnings> warnings (new Warnings ());
+	std::shared_ptr<Warnings> warnings (new Warnings ());
 
 	TimespanStatePtr timespan_state = timespans.front ();
 
@@ -974,7 +974,7 @@ ExportProfileManager::get_warnings ()
 }
 
 void
-ExportProfileManager::check_config (boost::shared_ptr<Warnings> warnings,
+ExportProfileManager::check_config (std::shared_ptr<Warnings> warnings,
                                     TimespanStatePtr            timespan_state,
                                     ExportChannelConfigPtr      channel_config,
                                     FormatStatePtr format_state, FilenameStatePtr filename_state)

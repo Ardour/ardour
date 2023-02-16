@@ -69,7 +69,7 @@ class LatencyBarController : public ArdourWidgets::BarController
 {
 public:
 	LatencyBarController (Gtk::Adjustment& adj, LatencyGUI* g)
-		: BarController (adj, boost::shared_ptr<PBD::Controllable> (new LatencyGUIControllable (g)))
+		: BarController (adj, std::shared_ptr<PBD::Controllable> (new LatencyGUIControllable (g)))
 		, _latency_gui (g)
 	{
 		set_digits (0);

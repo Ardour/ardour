@@ -120,7 +120,7 @@ EditorRegions::selection_changed ()
 
 		for (TreeView::Selection::ListHandle_Path::iterator i = rows.begin (); i != rows.end (); ++i) {
 			if ((iter = _model->get_iter (*i))) {
-				boost::shared_ptr<Region> region = (*iter)[_columns.region];
+				std::shared_ptr<Region> region = (*iter)[_columns.region];
 
 				// they could have clicked on a row that is just a placeholder, like "Hidden"
 				// although that is not allowed by our selection filter. check it anyway
@@ -144,7 +144,7 @@ void
 EditorRegions::set_selected (RegionSelection& regions)
 {
 	for (RegionSelection::iterator i = regions.begin (); i != regions.end (); ++i) {
-		boost::shared_ptr<Region> r ((*i)->region ());
+		std::shared_ptr<Region> r ((*i)->region ());
 
 		RegionRowMap::iterator it;
 
@@ -168,7 +168,7 @@ EditorRegions::show_context_menu (int button, int time)
 bool
 EditorRegions::button_press (GdkEventButton* ev)
 {
-	boost::shared_ptr<Region> region;
+	std::shared_ptr<Region> region;
 	TreeIter                  iter;
 	TreeModel::Path           path;
 	TreeViewColumn*           column;
@@ -198,7 +198,7 @@ EditorRegions::button_press (GdkEventButton* ev)
 }
 
 void
-EditorRegions::selection_mapover (sigc::slot<void, boost::shared_ptr<Region>> sl)
+EditorRegions::selection_mapover (sigc::slot<void, std::shared_ptr<Region>> sl)
 {
 	Glib::RefPtr<TreeSelection>                    selection = _display.get_selection ();
 	TreeView::Selection::ListHandle_Path           rows      = selection->get_selected_rows ();
@@ -216,7 +216,7 @@ EditorRegions::selection_mapover (sigc::slot<void, boost::shared_ptr<Region>> sl
 			   selected (XXX maybe prevent them from being selected)
 			*/
 
-			boost::shared_ptr<Region> r = (*iter)[_columns.region];
+			std::shared_ptr<Region> r = (*iter)[_columns.region];
 
 			if (r) {
 				sl (r);
@@ -226,7 +226,7 @@ EditorRegions::selection_mapover (sigc::slot<void, boost::shared_ptr<Region>> sl
 }
 
 void
-EditorRegions::regions_changed (boost::shared_ptr<RegionList> rl, const PropertyChange& what_changed)
+EditorRegions::regions_changed (std::shared_ptr<RegionList> rl, const PropertyChange& what_changed)
 {
 	/* the grid is most interested in the regions that are *visible* in the editor.
 	 * this is a convenient place to flag changes to the grid cache, on a visible region */
@@ -241,13 +241,13 @@ EditorRegions::regions_changed (boost::shared_ptr<RegionList> rl, const Property
 	RegionListBase::regions_changed (rl, what_changed);
 }
 
-boost::shared_ptr<Region>
+std::shared_ptr<Region>
 EditorRegions::get_single_selection ()
 {
 	Glib::RefPtr<TreeSelection> selected = _display.get_selection ();
 
 	if (selected->count_selected_rows () != 1) {
-		return boost::shared_ptr<Region> ();
+		return std::shared_ptr<Region> ();
 	}
 
 	TreeView::Selection::ListHandle_Path rows = selected->get_selected_rows ();
@@ -257,7 +257,7 @@ EditorRegions::get_single_selection ()
 	TreeIter iter = _model->get_iter (*rows.begin ());
 
 	if (!iter) {
-		return boost::shared_ptr<Region> ();
+		return std::shared_ptr<Region> ();
 	}
 
 	return (*iter)[_columns.region];

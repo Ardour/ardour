@@ -61,7 +61,7 @@ NoteBase::set_colors ()
 	color_modifier = UIConfiguration::instance().modifier ("midi note");
 }
 
-NoteBase::NoteBase(MidiRegionView& region, bool with_events, const boost::shared_ptr<NoteType> note)
+NoteBase::NoteBase(MidiRegionView& region, bool with_events, const std::shared_ptr<NoteType> note)
 	: _region(region)
 	, _item (0)
 	, _text(0)

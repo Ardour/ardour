@@ -82,7 +82,7 @@ Editor::editor_list_button_toggled ()
 void
 Editor::show_editor_mixer (bool yn)
 {
-	boost::shared_ptr<ARDOUR::Route> r;
+	std::shared_ptr<ARDOUR::Route> r;
 
 	show_editor_mixer_when_tracks_arrive = false;
 
@@ -209,7 +209,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 	// if this is an automation track, then the mixer strip should
 	// show the parent
 
-	boost::shared_ptr<ARDOUR::Stripable> stripable;
+	std::shared_ptr<ARDOUR::Stripable> stripable;
 	AutomationTimeAxisView* atv;
 
 	if ((atv = dynamic_cast<AutomationTimeAxisView*>(&view)) != 0) {
@@ -238,7 +238,7 @@ Editor::set_selected_mixer_strip (TimeAxisView& view)
 		create_editor_mixer ();
 	}
 
-	boost::shared_ptr<ARDOUR::Route> route = boost::dynamic_pointer_cast<ARDOUR::Route> (stripable);
+	std::shared_ptr<ARDOUR::Route> route = std::dynamic_pointer_cast<ARDOUR::Route> (stripable);
 	if (current_mixer_strip->route() == route) {
 		return;
 	}

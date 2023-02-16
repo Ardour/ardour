@@ -32,7 +32,7 @@ namespace ArdourWidgets {
 class LIBWIDGETS_API BarController : public Gtk::Alignment
 {
 public:
-	BarController (Gtk::Adjustment& adj, boost::shared_ptr<PBD::Controllable>);
+	BarController (Gtk::Adjustment& adj, std::shared_ptr<PBD::Controllable>);
 
 	virtual ~BarController ();
 

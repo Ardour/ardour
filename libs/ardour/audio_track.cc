@@ -152,14 +152,14 @@ AudioTrack::set_state_part_two ()
 		}
 		_freeze_record.processor_info.clear ();
 
-		boost::shared_ptr<Playlist> freeze_pl;
+		std::shared_ptr<Playlist> freeze_pl;
 		if ((prop = fnode->property (X_("playlist-id"))) != 0) {
 			freeze_pl = _session.playlists()->by_id (prop->value());
 		} else if ((prop = fnode->property (X_("playlist"))) != 0) {
 			freeze_pl = _session.playlists()->by_name (prop->value());
 		}
 		if (freeze_pl) {
-			_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist> (freeze_pl);
+			_freeze_record.playlist = std::dynamic_pointer_cast<AudioPlaylist> (freeze_pl);
 			_freeze_record.playlist->use();
 		} else {
 			_freeze_record.playlist.reset ();
@@ -182,7 +182,7 @@ AudioTrack::set_state_part_two ()
 			}
 
 			FreezeRecordProcessorInfo* frii = new FreezeRecordProcessorInfo (*((*citer)->children().front()),
-										   boost::shared_ptr<Processor>());
+										   std::shared_ptr<Processor>());
 			frii->id = prop->value ();
 			_freeze_record.processor_info.push_back (frii);
 		}
@@ -206,7 +206,7 @@ AudioTrack::get_input_monitoring_state (bool recording, bool talkback) const
 
 int
 AudioTrack::export_stuff (BufferSet& buffers, samplepos_t start, samplecnt_t nframes,
-                          boost::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,
+                          std::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,
                           MidiNoteTracker& /* ignored, this is audio */)
 {
 	boost::scoped_array<gain_t> gain_buffer (new gain_t[nframes]);
@@ -214,7 +214,7 @@ AudioTrack::export_stuff (BufferSet& buffers, samplepos_t start, samplecnt_t nfr
 
 	Glib::Threads::RWLock::ReaderLock rlock (_processor_lock);
 
-	boost::shared_ptr<AudioPlaylist> apl = boost::dynamic_pointer_cast<AudioPlaylist>(playlist());
+	std::shared_ptr<AudioPlaylist> apl = std::dynamic_pointer_cast<AudioPlaylist>(playlist());
 
 	assert(apl);
 	assert(buffers.count().n_audio() >= 1);
@@ -246,7 +246,7 @@ AudioTrack::export_stuff (BufferSet& buffers, samplepos_t start, samplecnt_t nfr
 }
 
 bool
-AudioTrack::bounceable (boost::shared_ptr<Processor> endpoint, bool include_endpoint) const
+AudioTrack::bounceable (std::shared_ptr<Processor> endpoint, bool include_endpoint) const
 {
 	if (!endpoint && !include_endpoint) {
 		/* no processing - just read from the playlist and create new
@@ -276,7 +276,7 @@ AudioTrack::bounceable (boost::shared_ptr<Processor> endpoint, bool include_endp
 			continue;
 		}
 
-		if (boost::dynamic_pointer_cast<PeakMeter>(*r)) {
+		if (std::dynamic_pointer_cast<PeakMeter>(*r)) {
 			continue;
 		}
 
@@ -306,34 +306,34 @@ AudioTrack::bounceable (boost::shared_ptr<Processor> endpoint, bool include_endp
 	return true;
 }
 
-boost::shared_ptr<Region>
+std::shared_ptr<Region>
 AudioTrack::bounce (InterThreadInfo& itt, std::string const& name)
 {
 	return bounce_range (_session.current_start_sample(), _session.current_end_sample(), itt, main_outs(), false, name);
 }
 
-boost::shared_ptr<Region>
+std::shared_ptr<Region>
 AudioTrack::bounce_range (samplepos_t start,
                           samplepos_t end,
                           InterThreadInfo& itt,
-                          boost::shared_ptr<Processor> endpoint,
+                          std::shared_ptr<Processor> endpoint,
                           bool include_endpoint,
                           std::string const& name)
 {
-	vector<boost::shared_ptr<Source> > srcs;
+	vector<std::shared_ptr<Source> > srcs;
 	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false, false, name);
 }
 
 void
 AudioTrack::freeze_me (InterThreadInfo& itt)
 {
-	vector<boost::shared_ptr<Source> > srcs;
+	vector<std::shared_ptr<Source> > srcs;
 	string new_playlist_name;
-	boost::shared_ptr<Playlist> new_playlist;
+	std::shared_ptr<Playlist> new_playlist;
 	string dir;
 	string region_name;
 
-	if ((_freeze_record.playlist = boost::dynamic_pointer_cast<AudioPlaylist>(playlist())) == 0) {
+	if ((_freeze_record.playlist = std::dynamic_pointer_cast<AudioPlaylist>(playlist())) == 0) {
 		return;
 	}
 
@@ -361,7 +361,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 		return;
 	}
 
-	boost::shared_ptr<Region> res;
+	std::shared_ptr<Region> res;
 
 	if ((res = _session.write_one_track (*this, _session.current_start_sample(), _session.current_end_sample(),
 					true, srcs, itt, main_outs(), false, false, true, "")) == 0) {
@@ -375,7 +375,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 
 		for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
-			if (boost::dynamic_pointer_cast<PeakMeter>(*r)) {
+			if (std::dynamic_pointer_cast<PeakMeter>(*r)) {
 				continue;
 			}
 
@@ -390,7 +390,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 			_freeze_record.processor_info.push_back (frii);
 
 			/* now deactivate the processor, */
-			if (!boost::dynamic_pointer_cast<Amp>(*r) && *r != _disk_reader && *r != main_outs()) {
+			if (!std::dynamic_pointer_cast<Amp>(*r) && *r != _disk_reader && *r != main_outs()) {
 				(*r)->deactivate ();
 			}
 
@@ -413,7 +413,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 	plist.add (Properties::name, region_name);
 	plist.add (Properties::whole_file, true);
 
-	boost::shared_ptr<Region> region (RegionFactory::create (srcs, plist, false));
+	std::shared_ptr<Region> region (RegionFactory::create (srcs, plist, false));
 
 	new_playlist->set_orig_track_id (id());
 
@@ -429,7 +429,7 @@ AudioTrack::freeze_me (InterThreadInfo& itt)
 	new_playlist->set_frozen (true);
 	region->set_locked (true);
 
-	use_playlist (DataType::AUDIO, boost::dynamic_pointer_cast<AudioPlaylist>(new_playlist));
+	use_playlist (DataType::AUDIO, std::dynamic_pointer_cast<AudioPlaylist>(new_playlist));
 	_disk_writer->set_record_enabled (false);
 
 	_freeze_record.playlist->use(); // prevent deletion
@@ -477,7 +477,7 @@ AudioTrack::unfreeze ()
 	FreezeChange (); /* EMIT SIGNAL */
 }
 
-boost::shared_ptr<AudioFileSource>
+std::shared_ptr<AudioFileSource>
 AudioTrack::write_source (uint32_t n)
 {
 	assert (_disk_writer);

@@ -62,7 +62,7 @@ private:
 	ChanCount* saved_output;
 
 	void add_sidechain_from_xml (const XMLNode& node, int version);
-	boost::shared_ptr<SideChain> _sidechain;
+	std::shared_ptr<SideChain> _sidechain;
 };
 
 }

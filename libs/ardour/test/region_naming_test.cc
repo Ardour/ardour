@@ -30,7 +30,7 @@ void
 RegionNamingTest::basicsTest ()
 {
 	for (int i = 0; i < 64; ++i) {
-		boost::shared_ptr<Region> r = RegionFactory::create (_r[0], true);
+		std::shared_ptr<Region> r = RegionFactory::create (_r[0], true);
 		stringstream s;
 		s << "ar0." << (i + 1);
 		CPPUNIT_ASSERT_EQUAL (s.str(), r->name());
@@ -39,15 +39,15 @@ RegionNamingTest::basicsTest ()
 	_r[0]->set_name ("foo");
 
 	for (int i = 0; i < 64; ++i) {
-		boost::shared_ptr<Region> r = RegionFactory::create (_r[0], true);
+		std::shared_ptr<Region> r = RegionFactory::create (_r[0], true);
 		stringstream s;
 		s << "foo." << (i + 1);
 		CPPUNIT_ASSERT_EQUAL (s.str(), r->name());
 	}
 
 	for (int i = 0; i < 64; ++i) {
-		boost::shared_ptr<Region> rA = RegionFactory::create (_r[0], true);
-		boost::shared_ptr<Region> rB = RegionFactory::create (rA, true);
+		std::shared_ptr<Region> rA = RegionFactory::create (_r[0], true);
+		std::shared_ptr<Region> rB = RegionFactory::create (rA, true);
 		stringstream s;
 		s << "foo." << (i * 2 + 64 + 1);
 		CPPUNIT_ASSERT_EQUAL (s.str(), rA->name());

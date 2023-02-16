@@ -119,12 +119,12 @@ void
 ControlProtocol::set_route_table_size (uint32_t size)
 {
 	while (route_table.size() < size) {
-		route_table.push_back (boost::shared_ptr<Route> ((Route*) 0));
+		route_table.push_back (std::shared_ptr<Route> ((Route*) 0));
 	}
 }
 
 void
-ControlProtocol::set_route_table (uint32_t table_index, boost::shared_ptr<ARDOUR::Route> r)
+ControlProtocol::set_route_table (uint32_t table_index, std::shared_ptr<ARDOUR::Route> r)
 {
 	if (table_index >= route_table.size()) {
 		return;
@@ -139,7 +139,7 @@ bool
 ControlProtocol::set_route_table (uint32_t table_index, uint32_t remote_control_id)
 {
 #if 0 // STRIPABLE
-	boost::shared_ptr<Route> r = session->route_by_remote_id (remote_control_id);
+	std::shared_ptr<Route> r = session->route_by_remote_id (remote_control_id);
 
 	if (!r) {
 		return false;
@@ -157,9 +157,9 @@ ControlProtocol::route_set_rec_enable (uint32_t table_index, bool yn)
 		return;
 	}
 
-	boost::shared_ptr<Route> r = route_table[table_index];
+	std::shared_ptr<Route> r = route_table[table_index];
 
-	boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(r);
+	std::shared_ptr<AudioTrack> at = std::dynamic_pointer_cast<AudioTrack>(r);
 
 	if (at) {
 		at->rec_enable_control()->set_value (1.0, Controllable::UseGroup);
@@ -173,9 +173,9 @@ ControlProtocol::route_get_rec_enable (uint32_t table_index)
 		return false;
 	}
 
-	boost::shared_ptr<Route> r = route_table[table_index];
+	std::shared_ptr<Route> r = route_table[table_index];
 
-	boost::shared_ptr<AudioTrack> at = boost::dynamic_pointer_cast<AudioTrack>(r);
+	std::shared_ptr<AudioTrack> at = std::dynamic_pointer_cast<AudioTrack>(r);
 
 	if (at) {
 		return at->rec_enable_control()->get_value();
@@ -192,7 +192,7 @@ ControlProtocol::route_get_gain (uint32_t table_index)
 		return 0.0f;
 	}
 
-	boost::shared_ptr<Route> r = route_table[table_index];
+	std::shared_ptr<Route> r = route_table[table_index];
 
 	if (r == 0) {
 		return 0.0f;
@@ -208,7 +208,7 @@ ControlProtocol::route_set_gain (uint32_t table_index, float gain)
 		return;
 	}
 
-	boost::shared_ptr<Route> r = route_table[table_index];
+	std::shared_ptr<Route> r = route_table[table_index];
 
 	if (r != 0) {
 		r->gain_control()->set_value (gain, Controllable::UseGroup);
@@ -222,7 +222,7 @@ ControlProtocol::route_get_effective_gain (uint32_t table_index)
 		return 0.0f;
 	}
 
-	boost::shared_ptr<Route> r = route_table[table_index];
+	std::shared_ptr<Route> r = route_table[table_index];
 
 	if (r == 0) {
 		return 0.0f;
@@ -239,7 +239,7 @@ ControlProtocol::route_get_peak_input_power (uint32_t table_index, uint32_t whic
 		return 0.0f;
 	}
 
-	boost::shared_ptr<Route> r = route_table[table_index];
+	std::shared_ptr<Route> r = route_table[table_index];
 
 	if (r == 0) {
 		return 0.0f;
@@ -255,7 +255,7 @@ ControlProtocol::route_get_muted (uint32_t table_index)
 		return false;
 	}
 
-	boost::shared_ptr<Route> r = route_table[table_index];
+	std::shared_ptr<Route> r = route_table[table_index];
 
 	if (r == 0) {
 		return false;
@@ -271,7 +271,7 @@ ControlProtocol::route_set_muted (uint32_t table_index, bool yn)
 		return;
 	}
 
-	boost::shared_ptr<Route> r = route_table[table_index];
+	std::shared_ptr<Route> r = route_table[table_index];
 
 	if (r != 0) {
 		r->mute_control()->set_value (yn ? 1.0 : 0.0, Controllable::UseGroup);
@@ -286,7 +286,7 @@ ControlProtocol::route_get_soloed (uint32_t table_index)
 		return false;
 	}
 
-	boost::shared_ptr<Route> r = route_table[table_index];
+	std::shared_ptr<Route> r = route_table[table_index];
 
 	if (r == 0) {
 		return false;
@@ -302,7 +302,7 @@ ControlProtocol::route_set_soloed (uint32_t table_index, bool yn)
 		return;
 	}
 
-	boost::shared_ptr<Route> r = route_table[table_index];
+	std::shared_ptr<Route> r = route_table[table_index];
 
 	if (r != 0) {
 		session->set_control (r->solo_control(), yn ? 1.0 : 0.0, Controllable::UseGroup);
@@ -316,7 +316,7 @@ ControlProtocol:: route_get_name (uint32_t table_index)
 		return "";
 	}
 
-	boost::shared_ptr<Route> r = route_table[table_index];
+	std::shared_ptr<Route> r = route_table[table_index];
 
 	if (r == 0) {
 		return "";
@@ -325,10 +325,10 @@ ControlProtocol:: route_get_name (uint32_t table_index)
 	return r->name();
 }
 
-list<boost::shared_ptr<Bundle> >
+list<std::shared_ptr<Bundle> >
 ControlProtocol::bundles ()
 {
-	return list<boost::shared_ptr<Bundle> > ();
+	return list<std::shared_ptr<Bundle> > ();
 }
 
 XMLNode&
@@ -353,49 +353,49 @@ ControlProtocol::set_state (XMLNode const & node, int /* version */)
 	return 0;
 }
 
-boost::shared_ptr<Stripable>
+std::shared_ptr<Stripable>
 ControlProtocol::first_selected_stripable () const
 {
 	return session->selection().first_selected_stripable ();
 }
 
 void
-ControlProtocol::add_stripable_to_selection (boost::shared_ptr<ARDOUR::Stripable> s)
+ControlProtocol::add_stripable_to_selection (std::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().add (s, boost::shared_ptr<AutomationControl>());
+	session->selection().add (s, std::shared_ptr<AutomationControl>());
 }
 
 void
-ControlProtocol::set_stripable_selection (boost::shared_ptr<ARDOUR::Stripable> s)
+ControlProtocol::set_stripable_selection (std::shared_ptr<ARDOUR::Stripable> s)
 {
 	session->selection().select_stripable_and_maybe_group (s, true, true, 0);
 }
 
 void
-ControlProtocol::toggle_stripable_selection (boost::shared_ptr<ARDOUR::Stripable> s)
+ControlProtocol::toggle_stripable_selection (std::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().toggle (s, boost::shared_ptr<AutomationControl>());
+	session->selection().toggle (s, std::shared_ptr<AutomationControl>());
 }
 
 void
-ControlProtocol::remove_stripable_from_selection (boost::shared_ptr<ARDOUR::Stripable> s)
+ControlProtocol::remove_stripable_from_selection (std::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().remove (s, boost::shared_ptr<AutomationControl>());
+	session->selection().remove (s, std::shared_ptr<AutomationControl>());
 }
 
 void
 ControlProtocol::add_rid_to_selection (int rid)
 {
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
+	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
-		session->selection().add (s, boost::shared_ptr<AutomationControl>());
+		session->selection().add (s, std::shared_ptr<AutomationControl>());
 	}
 }
 
 void
 ControlProtocol::set_rid_selection (int rid)
 {
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
+	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
 		session->selection().select_stripable_and_maybe_group (s, true, true, 0);
 	}
@@ -404,18 +404,18 @@ ControlProtocol::set_rid_selection (int rid)
 void
 ControlProtocol::toggle_rid_selection (int rid)
 {
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
+	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
-		session->selection().toggle (s, boost::shared_ptr<AutomationControl>());
+		session->selection().toggle (s, std::shared_ptr<AutomationControl>());
 	}
 }
 
 void
 ControlProtocol::remove_rid_from_selection (int rid)
 {
-	boost::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
+	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
-		session->selection().remove (s, boost::shared_ptr<AutomationControl>());
+		session->selection().remove (s, std::shared_ptr<AutomationControl>());
 	}
 }
 

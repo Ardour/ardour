@@ -49,7 +49,7 @@ using namespace PBD;
 using namespace std;
 using namespace Gtkmm2ext;
 
-RegionEditor::RegionEditor (Session* s, boost::shared_ptr<Region> r)
+RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 	: ArdourDialog (_("Region"))
 	, _table (9, 2)
 	, _table_row (0)
@@ -284,7 +284,7 @@ void
 RegionEditor::position_clock_changed ()
 {
 	bool in_command = false;
-	boost::shared_ptr<Playlist> pl = _region->playlist();
+	std::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
 		PublicEditor::instance().begin_reversible_command (_("change region start position"));
@@ -304,7 +304,7 @@ void
 RegionEditor::end_clock_changed ()
 {
 	bool in_command = false;
-	boost::shared_ptr<Playlist> pl = _region->playlist();
+	std::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
 		PublicEditor::instance().begin_reversible_command (_("change region end position"));
@@ -327,7 +327,7 @@ RegionEditor::length_clock_changed ()
 {
 	timecnt_t len = length_clock.current_duration();
 	bool in_command = false;
-	boost::shared_ptr<Playlist> pl = _region->playlist();
+	std::shared_ptr<Playlist> pl = _region->playlist();
 
 	if (pl) {
 		PublicEditor::instance().begin_reversible_command (_("change region length"));

@@ -92,7 +92,7 @@ AudioClipEditor::ClipBBTMetric::get_marks (std::vector<ArdourCanvas::Ruler::Mark
 		return;
 	}
 
-	boost::shared_ptr<AudioTrigger> at = boost::dynamic_pointer_cast<AudioTrigger> (trigger);
+	std::shared_ptr<AudioTrigger> at = std::dynamic_pointer_cast<AudioTrigger> (trigger);
 	if (!at) {
 		return;
 	}
@@ -402,7 +402,7 @@ AudioClipEditor::drop_waves ()
 }
 
 void
-AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r, TriggerReference tr)
+AudioClipEditor::set_region (std::shared_ptr<AudioRegion> r, TriggerReference tr)
 {
 	drop_waves ();
 
@@ -425,12 +425,12 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r, TriggerReference 
 	len = r->source (0)->length ().samples ();
 
 	for (uint32_t n = 0; n < n_chans; ++n) {
-		boost::shared_ptr<Region> wr = RegionFactory::get_whole_region_for_source (r->source (n));
+		std::shared_ptr<Region> wr = RegionFactory::get_whole_region_for_source (r->source (n));
 		if (!wr) {
 			continue;
 		}
 
-		boost::shared_ptr<AudioRegion> war = boost::dynamic_pointer_cast<AudioRegion> (wr);
+		std::shared_ptr<AudioRegion> war = std::dynamic_pointer_cast<AudioRegion> (wr);
 		if (!war) {
 			continue;
 		}
@@ -445,7 +445,7 @@ AudioClipEditor::set_region (boost::shared_ptr<AudioRegion> r, TriggerReference 
 	}
 
 	TriggerPtr trigger (tr.trigger());
-	boost::shared_ptr<AudioTrigger> at = boost::dynamic_pointer_cast<AudioTrigger> (trigger);
+	std::shared_ptr<AudioTrigger> at = std::dynamic_pointer_cast<AudioTrigger> (trigger);
 	if (at) {
 		if (at->segment_tempo() == 0.) {
 			/* tempo unknown, hide ruler */
@@ -607,9 +607,9 @@ AudioClipEditorBox::zoom_out_click ()
 }
 
 void
-AudioClipEditorBox::set_region (boost::shared_ptr<Region> r, TriggerReference tref)
+AudioClipEditorBox::set_region (std::shared_ptr<Region> r, TriggerReference tref)
 {
-	boost::shared_ptr<AudioRegion> ar = boost::dynamic_pointer_cast<AudioRegion> (r);
+	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (r);
 
 	if (!ar) {
 		return;

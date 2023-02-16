@@ -37,7 +37,7 @@ class Graph;
 class GraphNode;
 struct GraphChain;
 
-typedef boost::shared_ptr<GraphNode> node_ptr_t;
+typedef std::shared_ptr<GraphNode> node_ptr_t;
 typedef std::set<node_ptr_t>         node_set_t;
 typedef std::list<node_ptr_t>        node_list_t;
 
@@ -74,7 +74,7 @@ protected:
 class LIBARDOUR_API GraphNode : public ProcessNode, public GraphActivision
 {
 public:
-	GraphNode (boost::shared_ptr<Graph> Graph);
+	GraphNode (std::shared_ptr<Graph> Graph);
 
 	/* API used by Graph */
 	void prep (GraphChain const*);
@@ -83,13 +83,13 @@ public:
 	/* API used to sort Nodes and create GraphChain */
 	virtual std::string graph_node_name () const = 0;
 
-	virtual bool direct_feeds_according_to_reality (boost::shared_ptr<GraphNode>, bool* via_send_only = 0) = 0;
+	virtual bool direct_feeds_according_to_reality (std::shared_ptr<GraphNode>, bool* via_send_only = 0) = 0;
 
 protected:
 	void trigger ();
 	virtual void process () = 0;
 
-	boost::shared_ptr<Graph> _graph;
+	std::shared_ptr<Graph> _graph;
 
 private:
 	void finish (GraphChain const*);

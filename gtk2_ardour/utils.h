@@ -113,7 +113,7 @@ bool running_from_source_tree ();
 
 void inhibit_screensaver (bool);
 
-void copy_patch_changes (boost::shared_ptr<ARDOUR::Auditioner>, boost::shared_ptr<ARDOUR::Trigger>);
+void copy_patch_changes (std::shared_ptr<ARDOUR::Auditioner>, std::shared_ptr<ARDOUR::Trigger>);
 
 bool convert_drop_to_paths (std::vector<std::string>&, const Gtk::SelectionData&);
 

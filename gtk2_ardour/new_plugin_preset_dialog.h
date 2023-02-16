@@ -26,7 +26,7 @@
 class NewPluginPresetDialog : public ArdourDialog
 {
 public:
-	NewPluginPresetDialog (boost::shared_ptr<ARDOUR::Plugin>, std::string, bool fav = false);
+	NewPluginPresetDialog (std::shared_ptr<ARDOUR::Plugin>, std::string, bool fav = false);
 
 	std::string name () const;
 	bool replace () const;

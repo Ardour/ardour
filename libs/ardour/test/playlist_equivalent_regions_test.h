@@ -32,5 +32,5 @@ public:
 	void multiLayerTest ();
 
 private:
-	boost::shared_ptr<ARDOUR::Playlist> _playlist_b;
+	std::shared_ptr<ARDOUR::Playlist> _playlist_b;
 };

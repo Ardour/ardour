@@ -41,7 +41,7 @@ using namespace ARDOUR;
 using namespace Glib;
 
 void
-Session::set_controls (boost::shared_ptr<ControlList> cl, double val, Controllable::GroupControlDisposition gcd)
+Session::set_controls (std::shared_ptr<ControlList> cl, double val, Controllable::GroupControlDisposition gcd)
 {
 	if (cl->empty()) {
 		return;
@@ -71,7 +71,7 @@ Session::set_controls (boost::shared_ptr<ControlList> cl, double val, Controllab
 	}
 #endif
 
-	boost::shared_ptr<WeakControlList> wcl (new WeakControlList);
+	std::shared_ptr<WeakControlList> wcl (new WeakControlList);
 	for (ControlList::iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 		/* as of july 2017 this is a no-op for everything except record enable */
 		(*ci)->pre_realtime_queue_stuff (val, gcd);
@@ -83,19 +83,19 @@ Session::set_controls (boost::shared_ptr<ControlList> cl, double val, Controllab
 }
 
 void
-Session::set_control (boost::shared_ptr<AutomationControl> ac, double val, Controllable::GroupControlDisposition gcd)
+Session::set_control (std::shared_ptr<AutomationControl> ac, double val, Controllable::GroupControlDisposition gcd)
 {
 	if (!ac) {
 		return;
 	}
 
-	boost::shared_ptr<ControlList> cl (new ControlList);
+	std::shared_ptr<ControlList> cl (new ControlList);
 	cl->push_back (ac);
 	set_controls (cl, val, gcd);
 }
 
 void
-Session::rt_set_controls (boost::shared_ptr<WeakControlList> cl, double val, Controllable::GroupControlDisposition gcd)
+Session::rt_set_controls (std::shared_ptr<WeakControlList> cl, double val, Controllable::GroupControlDisposition gcd)
 {
 	/* Note that we require that all controls in the ControlList are of the
 	   same type.
@@ -107,7 +107,7 @@ Session::rt_set_controls (boost::shared_ptr<WeakControlList> cl, double val, Con
 	AutomationType type = NullAutomation;
 
 	for (auto const& c : *cl) {
-		boost::shared_ptr<AutomationControl> ac = c.lock ();
+		std::shared_ptr<AutomationControl> ac = c.lock ();
 		if (ac) {
 			ac->set_value (val, gcd);
 			type = ac->desc().type;
@@ -128,11 +128,11 @@ Session::rt_set_controls (boost::shared_ptr<WeakControlList> cl, double val, Con
 }
 
 void
-Session::prepare_momentary_solo (SoloMuteRelease* smr, bool exclusive, boost::shared_ptr<Route> route)
+Session::prepare_momentary_solo (SoloMuteRelease* smr, bool exclusive, std::shared_ptr<Route> route)
 {
-	boost::shared_ptr<RouteList> routes_on (new RouteList);
-	boost::shared_ptr<RouteList> routes_off (new RouteList);
-	boost::shared_ptr<RouteList> routes = get_routes();
+	std::shared_ptr<RouteList> routes_on (new RouteList);
+	std::shared_ptr<RouteList> routes_off (new RouteList);
+	std::shared_ptr<RouteList> routes = get_routes();
 
 	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
 #ifdef MIXBUS
@@ -157,7 +157,7 @@ Session::prepare_momentary_solo (SoloMuteRelease* smr, bool exclusive, boost::sh
 
 	if (_monitor_out) {
 		if (smr) {
-			boost::shared_ptr<std::list<std::string> > pml (new std::list<std::string>);
+			std::shared_ptr<std::list<std::string> > pml (new std::list<std::string>);
 			_engine.monitor_port().active_monitors (*pml);
 			smr->set (pml);
 		}
@@ -169,13 +169,13 @@ Session::prepare_momentary_solo (SoloMuteRelease* smr, bool exclusive, boost::sh
 }
 
 void
-Session::clear_all_solo_state (boost::shared_ptr<RouteList> rl)
+Session::clear_all_solo_state (std::shared_ptr<RouteList> rl)
 {
 	queue_event (get_rt_event (rl, false, rt_cleanup, Controllable::NoGroup, &Session::rt_clear_all_solo_state));
 }
 
 void
-Session::rt_clear_all_solo_state (boost::shared_ptr<RouteList> rl, bool /* yn */, Controllable::GroupControlDisposition /* group_override */)
+Session::rt_clear_all_solo_state (std::shared_ptr<RouteList> rl, bool /* yn */, Controllable::GroupControlDisposition /* group_override */)
 {
 	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
 		if ((*i)->is_auditioner()) {

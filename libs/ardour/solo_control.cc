@@ -30,7 +30,7 @@ using namespace PBD;
 
 SoloControl::SoloControl (Session& session, std::string const & name, Soloable& s, Muteable& m, Temporal::TimeDomain td)
 	: SlavableAutomationControl (session, SoloAutomation, ParameterDescriptor (SoloAutomation),
-	                             boost::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(SoloAutomation), td)),
+	                             std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(SoloAutomation), td)),
 	                             name)
 	, _soloable (s)
 	, _muteable (m)
@@ -181,7 +181,7 @@ SoloControl::get_value () const
 		return self_soloed() || get_masters_value ();
 	}
 
-	if (_list && boost::dynamic_pointer_cast<AutomationList>(_list)->automation_playback()) {
+	if (_list && std::dynamic_pointer_cast<AutomationList>(_list)->automation_playback()) {
 		// Playing back automation, get the value from the list
 		return AutomationControl::get_value();
 	}
@@ -260,9 +260,9 @@ SoloControl::get_state () const
 }
 
 void
-SoloControl::master_changed (bool /*from self*/, GroupControlDisposition, boost::weak_ptr<AutomationControl> wm)
+SoloControl::master_changed (bool /*from self*/, GroupControlDisposition, std::weak_ptr<AutomationControl> wm)
 {
-	boost::shared_ptr<AutomationControl> m = wm.lock ();
+	std::shared_ptr<AutomationControl> m = wm.lock ();
 	assert (m);
 	bool send_signal = false;
 
@@ -299,7 +299,7 @@ SoloControl::master_changed (bool /*from self*/, GroupControlDisposition, boost:
 }
 
 void
-SoloControl::post_add_master (boost::shared_ptr<AutomationControl> m)
+SoloControl::post_add_master (std::shared_ptr<AutomationControl> m)
 {
 	if (m->get_value()) {
 
@@ -317,7 +317,7 @@ SoloControl::post_add_master (boost::shared_ptr<AutomationControl> m)
 }
 
 void
-SoloControl::pre_remove_master (boost::shared_ptr<AutomationControl> m)
+SoloControl::pre_remove_master (std::shared_ptr<AutomationControl> m)
 {
 	if (!m) {
 		/* null control ptr means we're removing all masters. Nothing

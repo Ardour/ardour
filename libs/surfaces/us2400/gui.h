@@ -121,7 +121,7 @@ class US2400ProtocolGUI : public Gtk::Notebook
 	void update_port_combos (std::vector<std::string> const&, std::vector<std::string> const&,
 	                         Gtk::ComboBox* input_combo,
 	                         Gtk::ComboBox* output_combo,
-	                         boost::shared_ptr<US2400::Surface> surface);
+	                         std::shared_ptr<US2400::Surface> surface);
 
 	PBD::ScopedConnectionList _port_connections;
 	void connection_handler ();
@@ -129,7 +129,7 @@ class US2400ProtocolGUI : public Gtk::Notebook
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
 	bool _ignore_profile_changed;
 	bool ignore_active_change;
-	void active_port_changed (Gtk::ComboBox* combo, boost::weak_ptr<US2400::Surface> ws, bool for_input);
+	void active_port_changed (Gtk::ComboBox* combo, std::weak_ptr<US2400::Surface> ws, bool for_input);
 };
 
 }

@@ -72,23 +72,23 @@ Image::compute_bounding_box () const
 	set_bbox_clean ();
 }
 
-boost::shared_ptr<Image::Data>
+std::shared_ptr<Image::Data>
 Image::get_image (bool allocate_data)
 {
 	/* can be called by any thread */
 
 	int stride = Cairo::ImageSurface::format_stride_for_width (_format, _width);
 	if (allocate_data)  {
-		boost::shared_ptr<Data> d (new Data (new uint8_t[stride*_height], _width, _height, stride, _format));
+		std::shared_ptr<Data> d (new Data (new uint8_t[stride*_height], _width, _height, stride, _format));
 		return d;
 	} else {
-		boost::shared_ptr<Data> d (new Data (NULL, _width, _height, stride, _format));
+		std::shared_ptr<Data> d (new Data (NULL, _width, _height, stride, _format));
 		return d;
 	}
 }
 
 void
-Image::put_image (boost::shared_ptr<Data> d)
+Image::put_image (std::shared_ptr<Data> d)
 {
 	/* can be called by any thread */
 

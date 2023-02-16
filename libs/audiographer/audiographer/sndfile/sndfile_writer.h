@@ -27,7 +27,7 @@ class SndfileWriter
   , public FlagDebuggable<>
 {
   public:
-	SndfileWriter (std::string const & path, int format, ChannelCount channels, samplecnt_t samplerate, boost::shared_ptr<BroadcastInfo> broadcast_info)
+	SndfileWriter (std::string const & path, int format, ChannelCount channels, samplecnt_t samplerate, std::shared_ptr<BroadcastInfo> broadcast_info)
 	  : SndfileHandle (path, Write, format, channels, samplerate)
 	  , path (path)
 	{

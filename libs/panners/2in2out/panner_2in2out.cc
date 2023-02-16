@@ -74,7 +74,7 @@ panner_descriptor ()
 	return &_descriptor;
 }
 
-Panner2in2out::Panner2in2out (boost::shared_ptr<Pannable> p)
+Panner2in2out::Panner2in2out (std::shared_ptr<Pannable> p)
 	: Panner (p)
 {
 	if (!_pannable->has_state ()) {
@@ -469,7 +469,7 @@ Panner2in2out::distribute_one_automated (AudioBuffer& srcbuf, BufferSet& obufs,
 }
 
 Panner*
-Panner2in2out::factory (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speakers> /* ignored */)
+Panner2in2out::factory (std::shared_ptr<Pannable> p, std::shared_ptr<Speakers> /* ignored */)
 {
 	return new Panner2in2out (p);
 }
@@ -485,7 +485,7 @@ Panner2in2out::get_state () const
 }
 
 string
-Panner2in2out::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
+Panner2in2out::value_as_string (std::shared_ptr<const AutomationControl> ac) const
 {
 	double val = ac->get_value ();
 

@@ -160,12 +160,12 @@ Port::drop ()
 }
 
 void
-Port::port_connected_or_disconnected (boost::weak_ptr<Port> w0, boost::weak_ptr<Port> w1, bool con)
+Port::port_connected_or_disconnected (std::weak_ptr<Port> w0, std::weak_ptr<Port> w1, bool con)
 {
-	boost::shared_ptr<Port> p0 = w0.lock ();
-	boost::shared_ptr<Port> p1 = w1.lock ();
+	std::shared_ptr<Port> p0 = w0.lock ();
+	std::shared_ptr<Port> p1 = w1.lock ();
 	/* a cheaper, less hacky way to do boost::shared_from_this() ...  */
-	boost::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
+	std::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
 
 	if (p0 == pself) {
 		ConnectedOrDisconnected (p0, p1, con); // emit signal
@@ -198,9 +198,9 @@ Port::disconnect_all ()
 
 		/* a cheaper, less hacky way to do boost::shared_from_this() ...
 		 */
-		boost::shared_ptr<Port> pself = port_manager->get_port_by_name (name());
+		std::shared_ptr<Port> pself = port_manager->get_port_by_name (name());
 		for (vector<string>::const_iterator c = connections.begin(); c != connections.end() && pself; ++c) {
-			boost::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (*c);
+			std::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (*c);
 			if (pother) {
 				pother->_connections.erase (_name);
 				ConnectedOrDisconnected (pself, pother, false); // emit signal
@@ -276,7 +276,7 @@ Port::connect (std::string const & other)
 		 */
 		_connections.insert (other);
 
-		boost::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (other);
+		std::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (other);
 		if (pother) {
 			pother->_connections.insert (_name);
 		}
@@ -304,8 +304,8 @@ Port::disconnect (std::string const & other)
 	}
 
 	/* a cheaper, less hacky way to do boost::shared_from_this() ...  */
-	boost::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
-	boost::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (other);
+	std::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
+	std::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (other);
 
 	if (r == 0 && pother) {
 		pother->_connections.erase (_name);
@@ -564,7 +564,7 @@ Port::get_connected_latency_range (LatencyRange& range, bool playback) const
 				 * latency compensation.
 				 */
 
-				boost::shared_ptr<Port> remote_port = AudioEngine::instance()->get_port_by_name (*c);
+				std::shared_ptr<Port> remote_port = AudioEngine::instance()->get_port_by_name (*c);
 				if (remote_port) {
 					lr = remote_port->private_latency_range (playback);
 					DEBUG_TRACE (DEBUG::LatencyIO, string_compose (

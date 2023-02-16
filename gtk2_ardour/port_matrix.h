@@ -98,7 +98,7 @@ public:
 	}
 
 	PortGroupList const * columns () const;
-	boost::shared_ptr<const PortGroup> visible_columns () const;
+	std::shared_ptr<const PortGroup> visible_columns () const;
 
 	/** @return index into the _ports array for the list which is displayed as columns */
 	int column_index () const {
@@ -106,7 +106,7 @@ public:
 	}
 
 	PortGroupList const * rows () const;
-	boost::shared_ptr<const PortGroup> visible_rows () const;
+	std::shared_ptr<const PortGroup> visible_rows () const;
 
 	/** @return index into the _ports array for the list which is displayed as rows */
 	int row_index () const {
@@ -117,7 +117,7 @@ public:
 		return &_ports[d];
 	}
 
-	boost::shared_ptr<const PortGroup> visible_ports (int d) const;
+	std::shared_ptr<const PortGroup> visible_ports (int d) const;
 
 	void init ();
 	void setup ();
@@ -146,15 +146,15 @@ public:
 	virtual PortMatrixNode::State get_state (ARDOUR::BundleChannel c[2]) const = 0;
 	virtual bool list_is_global (int) const = 0;
 
-	virtual bool can_add_channels (boost::shared_ptr<ARDOUR::Bundle>) const;
-	virtual void add_channel (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::DataType);
-	virtual bool can_remove_channels (boost::shared_ptr<ARDOUR::Bundle>) const;
+	virtual bool can_add_channels (std::shared_ptr<ARDOUR::Bundle>) const;
+	virtual void add_channel (std::shared_ptr<ARDOUR::Bundle>, ARDOUR::DataType);
+	virtual bool can_remove_channels (std::shared_ptr<ARDOUR::Bundle>) const;
 	virtual void remove_channel (ARDOUR::BundleChannel);
-	virtual void remove_all_channels (boost::weak_ptr<ARDOUR::Bundle>);
-	virtual bool can_rename_channels (boost::shared_ptr<ARDOUR::Bundle>) const {
+	virtual void remove_all_channels (std::weak_ptr<ARDOUR::Bundle>);
+	virtual bool can_rename_channels (std::shared_ptr<ARDOUR::Bundle>) const {
 		return false;
 	}
-	virtual bool can_add_port (boost::shared_ptr<ARDOUR::Bundle>, ARDOUR::DataType t) const;
+	virtual bool can_add_port (std::shared_ptr<ARDOUR::Bundle>, ARDOUR::DataType t) const;
 	virtual void rename_channel (ARDOUR::BundleChannel) {}
 	virtual std::string disassociation_verb () const = 0;
 	virtual std::string channel_noun () const;
@@ -166,7 +166,7 @@ public:
 
 	sigc::signal<void, Result> Finished;
 
-	static bool bundle_with_channels (boost::shared_ptr<ARDOUR::Bundle>);
+	static bool bundle_with_channels (std::shared_ptr<ARDOUR::Bundle>);
 
 protected:
 
@@ -185,25 +185,25 @@ private:
 	void routes_changed ();
 	void reconnect_to_routes ();
 	void select_arrangement ();
-	bool can_add_port_proxy (boost::weak_ptr<ARDOUR::Bundle>, ARDOUR::DataType) const;
-	void add_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, ARDOUR::DataType);
-	void remove_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
-	void rename_channel_proxy (boost::weak_ptr<ARDOUR::Bundle>, uint32_t);
-	void disassociate_all_on_channel (boost::weak_ptr<ARDOUR::Bundle>, uint32_t, int);
-	void disassociate_all_on_bundle (boost::weak_ptr<ARDOUR::Bundle>, int);
+	bool can_add_port_proxy (std::weak_ptr<ARDOUR::Bundle>, ARDOUR::DataType) const;
+	void add_channel_proxy (std::weak_ptr<ARDOUR::Bundle>, ARDOUR::DataType);
+	void remove_channel_proxy (std::weak_ptr<ARDOUR::Bundle>, uint32_t);
+	void rename_channel_proxy (std::weak_ptr<ARDOUR::Bundle>, uint32_t);
+	void disassociate_all_on_channel (std::weak_ptr<ARDOUR::Bundle>, uint32_t, int);
+	void disassociate_all_on_bundle (std::weak_ptr<ARDOUR::Bundle>, int);
 	void setup_global_ports ();
         void setup_global_ports_proxy ();
 	void toggle_show_only_bundles ();
 	bool on_scroll_event (GdkEventScroll *);
-	boost::shared_ptr<ARDOUR::IO> io_from_bundle (boost::shared_ptr<ARDOUR::Bundle>) const;
+	std::shared_ptr<ARDOUR::IO> io_from_bundle (std::shared_ptr<ARDOUR::Bundle>) const;
 	void setup_notebooks ();
 	void remove_notebook_pages (Gtk::Notebook &);
 	void notebook_page_selected (GtkNotebookPage *, guint);
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
 	void body_dimensions_changed ();
 	void session_going_away ();
-	void add_remove_option (Gtk::Menu_Helpers::MenuList &, boost::weak_ptr<ARDOUR::Bundle>, int);
-	void add_disassociate_option (Gtk::Menu_Helpers::MenuList &, boost::weak_ptr<ARDOUR::Bundle>, int, int);
+	void add_remove_option (Gtk::Menu_Helpers::MenuList &, std::weak_ptr<ARDOUR::Bundle>, int);
+	void add_disassociate_option (Gtk::Menu_Helpers::MenuList &, std::weak_ptr<ARDOUR::Bundle>, int, int);
 	void port_connected_or_disconnected ();
 	void update_tab_highlighting ();
 	std::pair<int, int> check_flip () const;

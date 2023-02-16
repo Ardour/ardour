@@ -45,7 +45,7 @@ using namespace std;
 
 const double VBAPSpeakers::MIN_VOL_P_SIDE_LGTH = 0.01;
 
-VBAPSpeakers::VBAPSpeakers (boost::shared_ptr<Speakers> s)
+VBAPSpeakers::VBAPSpeakers (std::shared_ptr<Speakers> s)
 	: _dimension (2)
 	, _parent (s)
 {

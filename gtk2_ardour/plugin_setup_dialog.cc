@@ -28,7 +28,7 @@ using namespace ARDOUR;
 using namespace ArdourWidgets;
 using namespace Gtk;
 
-PluginSetupDialog::PluginSetupDialog (boost::shared_ptr<ARDOUR::Route> r, boost::shared_ptr<ARDOUR::PluginInsert> pi, ARDOUR::Route::PluginSetupOptions flags)
+PluginSetupDialog::PluginSetupDialog (std::shared_ptr<ARDOUR::Route> r, std::shared_ptr<ARDOUR::PluginInsert> pi, ARDOUR::Route::PluginSetupOptions flags)
 	: ArdourDialog (_("Plugin Setup"), true, false)
 	, _route (r)
 	, _pi (pi)
@@ -43,8 +43,8 @@ PluginSetupDialog::PluginSetupDialog (boost::shared_ptr<ARDOUR::Route> r, boost:
 	int row = 0;
 
 	if (flags & Route::CanReplace) {
-		boost::shared_ptr<Processor> old = _route->the_instrument ();
-		boost::shared_ptr<PluginInsert> opi = boost::dynamic_pointer_cast<PluginInsert> (old);
+		std::shared_ptr<Processor> old = _route->the_instrument ();
+		std::shared_ptr<PluginInsert> opi = std::dynamic_pointer_cast<PluginInsert> (old);
 		assert (opi);
 
 		opi->configured_io (_cur_inputs, _cur_outputs);
@@ -205,8 +205,8 @@ PluginSetupDialog::apply_mapping ()
 	// toggle button
 	_keep_mapping.set_active (!_keep_mapping.get_active ());
 
-	boost::shared_ptr<Processor> old = _route->the_instrument ();
-	boost::shared_ptr<PluginInsert> opi = boost::dynamic_pointer_cast<PluginInsert> (old);
+	std::shared_ptr<Processor> old = _route->the_instrument ();
+	std::shared_ptr<PluginInsert> opi = std::dynamic_pointer_cast<PluginInsert> (old);
 
 	if (_keep_mapping.get_active () && opi && io_match ()) {
 		_pi->pre_seed (_cur_inputs, _cur_outputs, opi->input_map (0), opi->output_map (0), opi->thru_map ());

@@ -41,8 +41,8 @@ class PortManager;
 
 class BackendPort;
 
-typedef boost::shared_ptr<BackendPort> BackendPortPtr;
-typedef boost::shared_ptr<BackendPort> const & BackendPortHandle;
+typedef std::shared_ptr<BackendPort> BackendPortPtr;
+typedef std::shared_ptr<BackendPort> const & BackendPortHandle;
 
 class LIBARDOUR_API BackendPort : public ProtoPort
 {
@@ -228,12 +228,12 @@ protected:
 	SerializedRCUManager<PortRegistry> _portregistry;
 
 	bool valid_port (BackendPortHandle port) const {
-		boost::shared_ptr<PortRegistry> p = _portregistry.reader ();
+		std::shared_ptr<PortRegistry> p = _portregistry.reader ();
 		return p->find (port) != p->end ();
 	}
 
 	BackendPortPtr find_port (const std::string& port_name) const {
-		boost::shared_ptr<PortMap> p  = _portmap.reader ();
+		std::shared_ptr<PortMap> p  = _portmap.reader ();
 		PortMap::const_iterator    it = p->find (port_name);
 		if (it == p->end ()) {
 			return BackendPortPtr();

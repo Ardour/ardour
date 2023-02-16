@@ -497,40 +497,40 @@ MonitorProcessor::update_monitor_state ()
 	}
 }
 
-boost::shared_ptr<Controllable>
+std::shared_ptr<Controllable>
 MonitorProcessor::channel_cut_control (uint32_t chn) const
 {
 	if (chn < _channels.size()) {
 		return _channels[chn]->cut_control;
 	}
-	return boost::shared_ptr<Controllable>();
+	return std::shared_ptr<Controllable>();
 }
 
-boost::shared_ptr<Controllable>
+std::shared_ptr<Controllable>
 MonitorProcessor::channel_dim_control (uint32_t chn) const
 {
 	if (chn < _channels.size()) {
 		return _channels[chn]->dim_control;
 	}
-	return boost::shared_ptr<Controllable>();
+	return std::shared_ptr<Controllable>();
 }
 
-boost::shared_ptr<Controllable>
+std::shared_ptr<Controllable>
 MonitorProcessor::channel_polarity_control (uint32_t chn) const
 {
 	if (chn < _channels.size()) {
 		return _channels[chn]->polarity_control;
 	}
-	return boost::shared_ptr<Controllable>();
+	return std::shared_ptr<Controllable>();
 }
 
-boost::shared_ptr<Controllable>
+std::shared_ptr<Controllable>
 MonitorProcessor::channel_solo_control (uint32_t chn) const
 {
 	if (chn < _channels.size()) {
 		return _channels[chn]->soloed_control;
 	}
-	return boost::shared_ptr<Controllable>();
+	return std::shared_ptr<Controllable>();
 }
 
 MonitorProcessor::ChannelRecord::ChannelRecord (uint32_t chn)

@@ -78,7 +78,7 @@ private:
 
 	void redisplay_track_list ();
 	void pi_property_changed (PBD::PropertyChange const&);
-	void stripable_property_changed (PBD::PropertyChange const&, boost::weak_ptr<ARDOUR::Stripable>);
+	void stripable_property_changed (PBD::PropertyChange const&, std::weak_ptr<ARDOUR::Stripable>);
 
 	void rec_state_changed ();
 	void rec_state_clicked ();
@@ -93,8 +93,8 @@ private:
 	bool idle_drop_paths (std::vector<std::string>);
 	void drop_paths_part_two (std::vector<std::string>);
 
-	AxisView* axis_view_by_stripable (boost::shared_ptr<ARDOUR::Stripable>) const;
-	AxisView* axis_view_by_control (boost::shared_ptr<ARDOUR::AutomationControl>) const;
+	AxisView* axis_view_by_stripable (std::shared_ptr<ARDOUR::Stripable>) const;
+	AxisView* axis_view_by_control (std::shared_ptr<ARDOUR::AutomationControl>) const;
 
 	void                      selection_changed ();
 	PBD::ScopedConnectionList editor_connections;

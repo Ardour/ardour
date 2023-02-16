@@ -534,7 +534,7 @@ Editor::LocationMarkers::~LocationMarkers ()
 }
 
 void
-Editor::get_markers_to_ripple (boost::shared_ptr<Playlist> target_playlist, timepos_t const & pos, std::vector<ArdourMarker*>& markers)
+Editor::get_markers_to_ripple (std::shared_ptr<Playlist> target_playlist, timepos_t const & pos, std::vector<ArdourMarker*>& markers)
 {
 	const timepos_t ripple_start = effective_ripple_mark_start (target_playlist, pos);
 

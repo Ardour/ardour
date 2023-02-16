@@ -40,7 +40,7 @@ using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 using namespace Gtk;
 
-MonitorSelector::MonitorSelector (Gtk::Window* p, ARDOUR::Session* session, boost::shared_ptr<ARDOUR::IO> io)
+MonitorSelector::MonitorSelector (Gtk::Window* p, ARDOUR::Session* session, std::shared_ptr<ARDOUR::IO> io)
 	: PortMatrix (p, session, DataType::AUDIO)
 	, _io (io)
 {
@@ -115,7 +115,7 @@ MonitorSelector::set_state (ARDOUR::BundleChannel c[2], bool s)
 	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
 
-			boost::shared_ptr<Port> f = _session->engine().get_port_by_name (*i);
+			std::shared_ptr<Port> f = _session->engine().get_port_by_name (*i);
 			if (!f) {
 				return;
 			}
@@ -152,7 +152,7 @@ MonitorSelector::get_state (ARDOUR::BundleChannel c[2]) const
 	for (ARDOUR::Bundle::PortList::const_iterator i = our_ports.begin(); i != our_ports.end(); ++i) {
 		for (ARDOUR::Bundle::PortList::const_iterator j = other_ports.begin(); j != other_ports.end(); ++j) {
 
-			boost::shared_ptr<Port> f = _session->engine().get_port_by_name (*i);
+			std::shared_ptr<Port> f = _session->engine().get_port_by_name (*i);
 
 			/* since we are talking about an IO, our ports should all have an associated Port *,
 			   so the above call should never fail */
@@ -196,7 +196,7 @@ MonitorSelector::channel_noun () const
 	return _("port");
 }
 
-MonitorSelectorWindow::MonitorSelectorWindow (ARDOUR::Session* session, boost::shared_ptr<ARDOUR::IO> io, bool /*can_cancel*/)
+MonitorSelectorWindow::MonitorSelectorWindow (ARDOUR::Session* session, std::shared_ptr<ARDOUR::IO> io, bool /*can_cancel*/)
 	: ArdourWindow (_("Monitor output selector"))
 	, _selector (this, session, io)
 {

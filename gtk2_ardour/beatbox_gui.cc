@@ -67,7 +67,7 @@ using std::endl;
 
 const double _step_dimen = 32;
 
-BBGUI::BBGUI (boost::shared_ptr<BeatBox> bb)
+BBGUI::BBGUI (std::shared_ptr<BeatBox> bb)
 	: ArdourDialog (_("BeatBox"))
 	, bbox (bb)
 	, horizontal_adjustment (0.0, 0.0, 800.0)
@@ -178,7 +178,7 @@ void
 BBGUI::export_as_region ()
 {
 	std::string path = bbox->session().new_midi_source_path (bbox->owner()->name());
-	boost::shared_ptr<Source> src = bbox->sequencer().write_to_source (bbox->session(), path);
+	std::shared_ptr<Source> src = bbox->sequencer().write_to_source (bbox->session(), path);
 
 	if (!src) {
 		return;
@@ -195,7 +195,7 @@ BBGUI::export_as_region ()
 	plist.add (ARDOUR::Properties::whole_file, true);
 	plist.add (ARDOUR::Properties::external, false);
 
-	boost::shared_ptr<Region> region = RegionFactory::create (src, plist, true);
+	std::shared_ptr<Region> region = RegionFactory::create (src, plist, true);
 }
 
 void

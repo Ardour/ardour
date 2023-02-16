@@ -26,9 +26,10 @@
 #include <cassert>
 #include <cerrno>
 #include <cmath>
-#include <cunistd>
 #include <memory>
 #include <string>
+
+#include <unistd.h>
 
 #include <glibmm/main.h>
 
@@ -65,7 +66,7 @@ void
 Session::midi_panic()
 {
 	{
-		boost::shared_ptr<RouteList> r = routes.reader ();
+		std::shared_ptr<RouteList> r = routes.reader ();
 
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			MidiTrack *track = dynamic_cast<MidiTrack*>((*i).get());
@@ -298,7 +299,7 @@ Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 	   of an MTC slave to become out of date. Catch this.
 	*/
 
-	boost::shared_ptr<MTC_TransportMaster> mtcs = boost::dynamic_pointer_cast<MTC_TransportMaster> (transport_master());
+	std::shared_ptr<MTC_TransportMaster> mtcs = std::dynamic_pointer_cast<MTC_TransportMaster> (transport_master());
 
 	if (mtcs) {
 		// cerr << "Locate *with* MTC slave\n";
@@ -327,7 +328,7 @@ Session::mmc_shuttle (MIDI::MachineControl &/*mmc*/, float speed, bool forw)
 	}
 }
 
-boost::shared_ptr<Route>
+std::shared_ptr<Route>
 Session::get_midi_nth_route_by_id (PresentationInfo::order_t n) const
 {
 	PresentationInfo::Flag f;
@@ -343,7 +344,7 @@ Session::get_midi_nth_route_by_id (PresentationInfo::order_t n) const
 		f = PresentationInfo::Route;
 	}
 
-	boost::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList> r = routes.reader ();
 	PresentationInfo::order_t match_cnt = 0;
 
 	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
@@ -354,7 +355,7 @@ Session::get_midi_nth_route_by_id (PresentationInfo::order_t n) const
 		}
 	}
 
-	return boost::shared_ptr<Route>();
+	return std::shared_ptr<Route>();
 }
 
 void
@@ -364,12 +365,12 @@ Session::mmc_record_enable (MIDI::MachineControl &mmc, size_t trk, bool enabled)
 		return;
 	}
 
-	boost::shared_ptr<Route> r = get_midi_nth_route_by_id (trk);
+	std::shared_ptr<Route> r = get_midi_nth_route_by_id (trk);
 
 	if (r) {
-		boost::shared_ptr<AudioTrack> at;
+		std::shared_ptr<AudioTrack> at;
 
-		if ((at = boost::dynamic_pointer_cast<AudioTrack> (r))) {
+		if ((at = std::dynamic_pointer_cast<AudioTrack> (r))) {
 			at->rec_enable_control()->set_value (enabled, Controllable::UseGroup);
 		}
 	}
@@ -381,7 +382,7 @@ Session::mtc_tx_resync_latency (bool playback)
 	if (deletion_in_progress() || !playback) {
 		return;
 	}
-	boost::shared_ptr<Port> mtxport = _midi_ports->mtc_output_port ();
+	std::shared_ptr<Port> mtxport = _midi_ports->mtc_output_port ();
 	if (mtxport) {
 		mtxport->get_connected_latency_range(mtc_out_latency, true);
 		DEBUG_TRACE (DEBUG::MTC, string_compose ("resync latency: %1\n", mtc_out_latency.max));
@@ -661,56 +662,56 @@ Session::start_midi_thread ()
 	return 0;
 }
 
-boost::shared_ptr<ARDOUR::Port>
+std::shared_ptr<ARDOUR::Port>
 Session::mmc_output_port () const
 {
 	return _midi_ports->mmc_output_port ();
 }
 
-boost::shared_ptr<ARDOUR::Port>
+std::shared_ptr<ARDOUR::Port>
 Session::mmc_input_port () const
 {
 	return _midi_ports->mmc_input_port ();
 }
 
-boost::shared_ptr<ARDOUR::Port>
+std::shared_ptr<ARDOUR::Port>
 Session::scene_output_port () const
 {
 	return _midi_ports->scene_output_port ();
 }
 
-boost::shared_ptr<ARDOUR::Port>
+std::shared_ptr<ARDOUR::Port>
 Session::scene_input_port () const
 {
 	return _midi_ports->scene_input_port ();
 }
 
-boost::shared_ptr<ARDOUR::Port>
+std::shared_ptr<ARDOUR::Port>
 Session::trigger_input_port () const
 {
 	return _midi_ports->trigger_input_port ();
 }
 
-boost::shared_ptr<AsyncMIDIPort>
+std::shared_ptr<AsyncMIDIPort>
 Session::vkbd_output_port () const
 {
 	return _midi_ports->vkbd_output_port ();
 }
 
-boost::shared_ptr<MidiPort>
+std::shared_ptr<MidiPort>
 Session::midi_clock_output_port () const
 {
 	return _midi_ports->midi_clock_output_port ();
 }
 
-boost::shared_ptr<MidiPort>
+std::shared_ptr<MidiPort>
 Session::mtc_output_port () const
 {
 	return _midi_ports->mtc_output_port ();
 }
 
 void
-Session::midi_track_presentation_info_changed (PropertyChange const& what_changed, boost::weak_ptr<MidiTrack> mt)
+Session::midi_track_presentation_info_changed (PropertyChange const& what_changed, std::weak_ptr<MidiTrack> mt)
 {
 	if (!Config->get_midi_input_follows_selection()) {
 		return;
@@ -720,7 +721,7 @@ Session::midi_track_presentation_info_changed (PropertyChange const& what_change
 		return;
 	}
 
-	boost::shared_ptr<MidiTrack> new_midi_target (mt.lock ());
+	std::shared_ptr<MidiTrack> new_midi_target (mt.lock ());
 
 	if (new_midi_target->is_selected()) {
 		rewire_selected_midi (new_midi_target);
@@ -758,13 +759,13 @@ Session::disconnect_port_for_rewire (std::string const& port) const
 }
 
 void
-Session::rewire_selected_midi (boost::shared_ptr<MidiTrack> new_midi_target)
+Session::rewire_selected_midi (std::shared_ptr<MidiTrack> new_midi_target)
 {
 	if (!new_midi_target) {
 		return;
 	}
 
-	boost::shared_ptr<MidiTrack> old_midi_target = current_midi_target.lock ();
+	std::shared_ptr<MidiTrack> old_midi_target = current_midi_target.lock ();
 
 	if (new_midi_target == old_midi_target) {
 		return;
@@ -792,7 +793,7 @@ Session::rewire_midi_selection_ports ()
 		return;
 	}
 
-	boost::shared_ptr<MidiTrack> target = current_midi_target.lock();
+	std::shared_ptr<MidiTrack> target = current_midi_target.lock();
 
 	if (!target) {
 		return;

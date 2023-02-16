@@ -32,7 +32,7 @@ public:
 
 	Transpose (int semitones);
 
-	Command* operator() (boost::shared_ptr<ARDOUR::MidiModel> model,
+	Command* operator() (std::shared_ptr<ARDOUR::MidiModel> model,
 	                     Temporal::Beats                      position,
 	                     std::vector<Notes>&                  seqs);
 

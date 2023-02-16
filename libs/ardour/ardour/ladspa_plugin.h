@@ -98,7 +98,7 @@ class LIBARDOUR_API LadspaPlugin : public ARDOUR::Plugin
 	bool parameter_is_output(uint32_t) const;
 	bool parameter_is_toggled(uint32_t) const;
 
-	boost::shared_ptr<ScalePoints>
+	std::shared_ptr<ScalePoints>
 	get_scale_points(uint32_t port_index) const;
 
 	int set_state (const XMLNode&, int version);
@@ -163,7 +163,7 @@ class LIBARDOUR_API LadspaPluginInfo : public PluginInfo {
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 };
 
-typedef boost::shared_ptr<LadspaPluginInfo> LadspaPluginInfoPtr;
+typedef std::shared_ptr<LadspaPluginInfo> LadspaPluginInfoPtr;
 
 } // namespace ARDOUR
 

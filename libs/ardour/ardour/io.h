@@ -99,22 +99,22 @@ public:
 
 	int ensure_io (ChanCount cnt, bool clear, void *src);
 
-	int connect_ports_to_bundle (boost::shared_ptr<Bundle>, bool exclusive, void *);
-	int connect_ports_to_bundle (boost::shared_ptr<Bundle>, bool, bool, void *);
-	int disconnect_ports_from_bundle (boost::shared_ptr<Bundle>, void *);
+	int connect_ports_to_bundle (std::shared_ptr<Bundle>, bool exclusive, void *);
+	int connect_ports_to_bundle (std::shared_ptr<Bundle>, bool, bool, void *);
+	int disconnect_ports_from_bundle (std::shared_ptr<Bundle>, void *);
 
 	BundleList bundles_connected ();
 
-	boost::shared_ptr<Bundle> bundle () { return _bundle; }
+	std::shared_ptr<Bundle> bundle () { return _bundle; }
 
 	bool can_add_port (DataType) const;
 
 	int add_port (std::string connection, void *src, DataType type = DataType::NIL);
-	int remove_port (boost::shared_ptr<Port>, void *src);
-	int connect (boost::shared_ptr<Port> our_port, std::string other_port, void *src);
-	int disconnect (boost::shared_ptr<Port> our_port, std::string other_port, void *src);
+	int remove_port (std::shared_ptr<Port>, void *src);
+	int connect (std::shared_ptr<Port> our_port, std::string other_port, void *src);
+	int disconnect (std::shared_ptr<Port> our_port, std::string other_port, void *src);
 	int disconnect (void *src);
-	bool connected_to (boost::shared_ptr<const IO>) const;
+	bool connected_to (std::shared_ptr<const IO>) const;
 	bool connected_to (const std::string&) const;
 	bool connected () const;
 	bool physically_connected () const;
@@ -129,20 +129,20 @@ public:
 	PortSet& ports() { return _ports; }
 	const PortSet& ports() const { return _ports; }
 
-	bool has_port (boost::shared_ptr<Port>) const;
+	bool has_port (std::shared_ptr<Port>) const;
 
-	boost::shared_ptr<Port> nth (uint32_t n) const {
+	std::shared_ptr<Port> nth (uint32_t n) const {
 		if (n < _ports.num_ports()) {
 			return _ports.port(n);
 		} else {
-			return boost::shared_ptr<Port> ();
+			return std::shared_ptr<Port> ();
 		}
 	}
 
-	boost::shared_ptr<Port> port_by_name (const std::string& str) const;
+	std::shared_ptr<Port> port_by_name (const std::string& str) const;
 
-	boost::shared_ptr<AudioPort> audio(uint32_t n) const;
-	boost::shared_ptr<MidiPort>  midi(uint32_t n) const;
+	std::shared_ptr<AudioPort> audio(uint32_t n) const;
+	std::shared_ptr<MidiPort>  midi(uint32_t n) const;
 
 	const ChanCount& n_ports ()  const { return _ports.count(); }
 
@@ -212,11 +212,11 @@ private:
 	void reestablish_port_subscriptions ();
 	PBD::ScopedConnectionList _port_connections;
 
-	boost::shared_ptr<Bundle> _bundle; ///< a bundle representing our ports
+	std::shared_ptr<Bundle> _bundle; ///< a bundle representing our ports
 
 	struct UserBundleInfo {
-		UserBundleInfo (IO*, boost::shared_ptr<UserBundle> b);
-		boost::shared_ptr<UserBundle> bundle;
+		UserBundleInfo (IO*, std::shared_ptr<UserBundle> b);
+		std::shared_ptr<UserBundle> bundle;
 		PBD::ScopedConnection changed;
 	};
 
@@ -228,11 +228,11 @@ private:
 	void bundle_changed (Bundle::Change);
 	int set_port_state_2X (const XMLNode& node, int version, bool in);
 
-	int get_port_counts (const XMLNode& node, int version, ChanCount& n, boost::shared_ptr<Bundle>& c);
-	int get_port_counts_2X (const XMLNode& node, int version, ChanCount& n, boost::shared_ptr<Bundle>& c);
+	int get_port_counts (const XMLNode& node, int version, ChanCount& n, std::shared_ptr<Bundle>& c);
+	int get_port_counts_2X (const XMLNode& node, int version, ChanCount& n, std::shared_ptr<Bundle>& c);
 	int create_ports (const XMLNode&, int version);
 
-	boost::shared_ptr<Bundle> find_possible_bundle (const std::string &desired_name);
+	std::shared_ptr<Bundle> find_possible_bundle (const std::string &desired_name);
 
 	int ensure_ports_locked (ChanCount, bool clear, bool& changed);
 
@@ -245,7 +245,7 @@ private:
 	void apply_pretty_name ();
 	std::string _pretty_name_prefix;
 	BufferSet _buffers;
-	void connection_change (boost::shared_ptr<ARDOUR::Port>, boost::shared_ptr<ARDOUR::Port>);
+	void connection_change (std::shared_ptr<ARDOUR::Port>, std::shared_ptr<ARDOUR::Port>);
 };
 
 } // namespace ARDOUR

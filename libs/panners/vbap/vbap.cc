@@ -80,7 +80,7 @@ VBAPanner::Signal::resize_gains (uint32_t n)
 	gains.assign (n, 0.0);
 }
 
-VBAPanner::VBAPanner (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speakers> s)
+VBAPanner::VBAPanner (std::shared_ptr<Pannable> p, std::shared_ptr<Speakers> s)
 	: Panner (p)
 	, _speakers (new VBAPSpeakers (s))
 {
@@ -375,7 +375,7 @@ VBAPanner::get_state () const
 }
 
 Panner*
-VBAPanner::factory (boost::shared_ptr<Pannable> p, boost::shared_ptr<Speakers> s)
+VBAPanner::factory (std::shared_ptr<Pannable> p, std::shared_ptr<Speakers> s)
 {
 	return new VBAPanner (p, s);
 }
@@ -393,7 +393,7 @@ VBAPanner::out () const
 }
 
 string
-VBAPanner::value_as_string (boost::shared_ptr<const AutomationControl> ac) const
+VBAPanner::value_as_string (std::shared_ptr<const AutomationControl> ac) const
 {
 	double val = ac->get_value ();
 
@@ -422,7 +422,7 @@ VBAPanner::signal_position (uint32_t n) const
 	return AngularVector ();
 }
 
-boost::shared_ptr<Speakers>
+std::shared_ptr<Speakers>
 VBAPanner::get_speakers () const
 {
 	return _speakers->parent ();

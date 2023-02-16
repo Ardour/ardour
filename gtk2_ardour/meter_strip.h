@@ -49,18 +49,18 @@ namespace ARDOUR {
 class MeterStrip : public Gtk::VBox, public AxisView, public RouteUI
 {
 public:
-	MeterStrip (ARDOUR::Session*, boost::shared_ptr<ARDOUR::Route>);
+	MeterStrip (ARDOUR::Session*, std::shared_ptr<ARDOUR::Route>);
 	MeterStrip (int, ARDOUR::MeterType);
 	~MeterStrip ();
 
 	std::string name() const;
 	Gdk::Color color () const;
 
-	boost::shared_ptr<ARDOUR::Stripable> stripable() const { return RouteUI::stripable(); }
+	std::shared_ptr<ARDOUR::Stripable> stripable() const { return RouteUI::stripable(); }
 
 	void set_session (ARDOUR::Session* s);
 	void fast_update ();
-	boost::shared_ptr<ARDOUR::Route> route() { return _route; }
+	std::shared_ptr<ARDOUR::Route> route() { return _route; }
 
 	static PBD::Signal1<void,MeterStrip*> CatchDeletion;
 	static PBD::Signal0<void> MetricChanged;
@@ -83,7 +83,7 @@ public:
 	bool selected() const { return false; }
 
 protected:
-	boost::shared_ptr<ARDOUR::Route> _route;
+	std::shared_ptr<ARDOUR::Route> _route;
 	PBD::ScopedConnectionList meter_route_connections;
 	PBD::ScopedConnectionList level_meter_connection;
 	void self_delete ();

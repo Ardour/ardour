@@ -78,7 +78,7 @@ public:
      * ... to avoid collisions with Image deletion, some synchronization method
      * may be required or the use of shared_ptr<Image> or similar.
      */
-    boost::shared_ptr<Data> get_image (bool allocate_data = true);
+    std::shared_ptr<Data> get_image (bool allocate_data = true);
 
 
     /**
@@ -90,7 +90,7 @@ public:
      * ... to avoid collisions with Image deletion, some synchronization method
      * may be required or the use of shared_ptr<Image> or similar.
      */
-    void put_image (boost::shared_ptr<Data>);
+    void put_image (std::shared_ptr<Data>);
 
     void render (Rect const &, Cairo::RefPtr<Cairo::Context>) const;
     void compute_bounding_box () const;
@@ -99,8 +99,8 @@ private:
     Cairo::Format            _format;
     int                      _width;
     int                      _height;
-    mutable boost::shared_ptr<Data>  _current;
-    boost::shared_ptr<Data>  _pending;
+    mutable std::shared_ptr<Data>  _current;
+    std::shared_ptr<Data>  _pending;
     mutable bool             _need_render;
     mutable Cairo::RefPtr<Cairo::Surface> _surface;
 

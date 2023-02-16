@@ -54,7 +54,7 @@ struct WinMMEMIDIPacket {
 	uint8_t data[MaxWinMidiEventSize];
 };
 
-typedef std::vector<boost::shared_ptr<WinMMEMIDIPacket> > WinMMEMIDIQueue;
+typedef std::vector<std::shared_ptr<WinMMEMIDIPacket> > WinMMEMIDIQueue;
 
 class WinMMEMidiIO {
 public:

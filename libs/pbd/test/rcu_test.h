@@ -28,7 +28,7 @@ private:
 		std::string val;
 	};
 
-	typedef std::map<std::string, boost::shared_ptr<Value> > Values;
+	typedef std::map<std::string, std::shared_ptr<Value> > Values;
 
 	SerializedRCUManager<Values> _values;
 

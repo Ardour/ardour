@@ -153,7 +153,7 @@ TriggerMaster::~TriggerMaster ()
 }
 
 void
-TriggerMaster::set_triggerbox (boost::shared_ptr<ARDOUR::TriggerBox> t)
+TriggerMaster::set_triggerbox (std::shared_ptr<ARDOUR::TriggerBox> t)
 {
 	_triggerbox = t;
 }
@@ -727,10 +727,10 @@ CueMaster::context_menu ()
 void
 CueMaster::get_boxen (TriggerBoxList &boxlist)
 {
-	boost::shared_ptr<RouteList> rl = _session->get_routes();
+	std::shared_ptr<RouteList> rl = _session->get_routes();
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
-		boost::shared_ptr<Route> route = *r;
-		boost::shared_ptr<TriggerBox> box = route->triggerbox();
+		std::shared_ptr<Route> route = *r;
+		std::shared_ptr<TriggerBox> box = route->triggerbox();
 #warning @Ben disambiguate processor *active* vs *visibility*
 		if (box /*&& box.active*/) {
 			boxlist.push_back(box);

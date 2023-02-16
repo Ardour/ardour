@@ -1029,7 +1029,7 @@ ArdourButton::on_size_allocate (Allocation& alloc)
 }
 
 void
-ArdourButton::set_controllable (boost::shared_ptr<Controllable> c)
+ArdourButton::set_controllable (std::shared_ptr<Controllable> c)
 {
 	watch_connection.disconnect ();
 	binding_proxy.set_controllable (c);
@@ -1038,7 +1038,7 @@ ArdourButton::set_controllable (boost::shared_ptr<Controllable> c)
 void
 ArdourButton::watch ()
 {
-	boost::shared_ptr<Controllable> c (binding_proxy.get_controllable ());
+	std::shared_ptr<Controllable> c (binding_proxy.get_controllable ());
 
 	if (!c) {
 		warning << _("button cannot watch state of non-existing Controllable\n") << endmsg;
@@ -1247,9 +1247,9 @@ ArdourButton::on_enter_notify_event (GdkEventCrossing* ev)
 		CairoWidget::set_dirty ();
 	}
 
-	boost::shared_ptr<PBD::Controllable> c (binding_proxy.get_controllable ());
+	std::shared_ptr<PBD::Controllable> c (binding_proxy.get_controllable ());
 	if (c) {
-		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> (c));
+		PBD::Controllable::GUIFocusChanged (std::weak_ptr<PBD::Controllable> (c));
 	}
 
 	return CairoWidget::on_enter_notify_event (ev);
@@ -1265,7 +1265,7 @@ ArdourButton::on_leave_notify_event (GdkEventCrossing* ev)
 	}
 
 	if (binding_proxy.get_controllable()) {
-		PBD::Controllable::GUIFocusChanged (boost::weak_ptr<PBD::Controllable> ());
+		PBD::Controllable::GUIFocusChanged (std::weak_ptr<PBD::Controllable> ());
 	}
 
 	return CairoWidget::on_leave_notify_event (ev);

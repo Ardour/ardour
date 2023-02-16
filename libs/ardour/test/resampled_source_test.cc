@@ -20,7 +20,7 @@ ResampledSourceTest::seekTest ()
 
 	CPPUNIT_ASSERT (find_file (test_search_path (), test_filename, test_file_path));
 
-	boost::shared_ptr<SndFileImportableSource> s (new SndFileImportableSource (test_file_path));
+	std::shared_ptr<SndFileImportableSource> s (new SndFileImportableSource (test_file_path));
 	ResampledImportableSource r (s, 48000, SrcBest);
 
 	/* Make sure that seek (0) has the desired effect, ie that

@@ -42,7 +42,7 @@ using namespace PBD;
 
 #define GAIN_COEFF_DELTA (1e-5)
 
-Amp::Amp (Session& s, const std::string& name, boost::shared_ptr<GainControl> gc, bool control_midi_also)
+Amp::Amp (Session& s, const std::string& name, std::shared_ptr<GainControl> gc, bool control_midi_also)
 	: Processor(s, "Amp", Temporal::AudioTime)
 	, _apply_gain_automation(false)
 	, _current_gain(GAIN_COEFF_ZERO)

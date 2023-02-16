@@ -32,7 +32,7 @@ class Graph;
 class LIBARDOUR_API RTTaskList
 {
 public:
-	RTTaskList (boost::shared_ptr<Graph>);
+	RTTaskList (std::shared_ptr<Graph>);
 
 	/** process tasks in list in parallel, wait for them to complete */
 	void process ();
@@ -42,7 +42,7 @@ public:
 
 private:
 	std::vector<RTTask>      _tasks;
-	boost::shared_ptr<Graph> _graph;
+	std::shared_ptr<Graph> _graph;
 };
 
 } // namespace ARDOUR

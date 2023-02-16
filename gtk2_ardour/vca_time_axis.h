@@ -41,11 +41,11 @@ public:
 	VCATimeAxisView (PublicEditor&, ARDOUR::Session*, ArdourCanvas::Canvas& canvas);
 	virtual ~VCATimeAxisView ();
 
-	boost::shared_ptr<ARDOUR::Stripable> stripable() const;
+	std::shared_ptr<ARDOUR::Stripable> stripable() const;
 	ARDOUR::PresentationInfo const & presentation_info () const;
 
-	void set_vca (boost::shared_ptr<ARDOUR::VCA>);
-	boost::shared_ptr<ARDOUR::VCA> vca() const { return _vca; }
+	void set_vca (std::shared_ptr<ARDOUR::VCA>);
+	std::shared_ptr<ARDOUR::VCA> vca() const { return _vca; }
 
 	std::string name() const;
 	Gdk::Color color () const;
@@ -61,7 +61,7 @@ public:
 	void hide_all_automation (bool apply_to_selection = false);
 
 protected:
-	boost::shared_ptr<ARDOUR::VCA> _vca;
+	std::shared_ptr<ARDOUR::VCA> _vca;
 	ArdourWidgets::ArdourButton    solo_button;
 	ArdourWidgets::ArdourButton    mute_button;
 	ArdourWidgets::ArdourButton    automation_button;

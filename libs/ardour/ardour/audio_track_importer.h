@@ -61,7 +61,7 @@ class LIBARDOUR_API AudioTrackImporter : public ElementImporter
 
   private:
 
-	typedef boost::shared_ptr<AudioPlaylistImporter> PlaylistPtr;
+	typedef std::shared_ptr<AudioPlaylistImporter> PlaylistPtr;
 	typedef std::list<PlaylistPtr> PlaylistList;
 
 	bool parse_route_xml ();

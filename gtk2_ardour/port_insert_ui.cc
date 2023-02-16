@@ -44,7 +44,7 @@
 
 using namespace ARDOUR;
 
-PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, boost::shared_ptr<ARDOUR::PortInsert> pi)
+PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, std::shared_ptr<ARDOUR::PortInsert> pi)
 	: _pi (pi)
 	, _measure_latency_button (_("Measure Latency"))
 	, _invert_button (X_("Ø"))
@@ -104,11 +104,11 @@ PortInsertUI::PortInsertUI (Gtk::Window* parent, ARDOUR::Session* sess, boost::s
 
 	_input_gpm.setup_meters ();
 	_input_gpm.set_fader_name (X_("SendUIFader"));
-	_input_gpm.set_controls (boost::shared_ptr<Route> (), _pi->return_meter (), _pi->return_amp (), _pi->return_gain_control ());
+	_input_gpm.set_controls (std::shared_ptr<Route> (), _pi->return_meter (), _pi->return_amp (), _pi->return_gain_control ());
 
 	_output_gpm.setup_meters ();
 	_output_gpm.set_fader_name (X_("SendUIFader"));
-	_output_gpm.set_controls (boost::shared_ptr<Route> (), _pi->send_meter (), _pi->send_amp (), _pi->send_gain_control ());
+	_output_gpm.set_controls (std::shared_ptr<Route> (), _pi->send_meter (), _pi->send_amp (), _pi->send_gain_control ());
 
 	Gtkmm2ext::UI::instance ()->set_tip (_invert_button, _("Click to invert polarity of all send channels"));
 	Gtkmm2ext::UI::instance ()->set_tip (_edit_latency_button, _("Edit Latency, manually override measured or I/O reported latency"));
@@ -176,7 +176,7 @@ PortInsertUI::invert_press (GdkEventButton* ev)
 		return true;
 	}
 
-	boost::shared_ptr<AutomationControl> ac = _pi->send_polarity_control ();
+	std::shared_ptr<AutomationControl> ac = _pi->send_polarity_control ();
 	ac->start_touch (timepos_t (ac->session ().audible_sample ()));
 	return true;
 }
@@ -188,7 +188,7 @@ PortInsertUI::invert_release (GdkEventButton* ev)
 		return true;
 	}
 
-	boost::shared_ptr<AutomationControl> ac = _pi->send_polarity_control ();
+	std::shared_ptr<AutomationControl> ac = _pi->send_polarity_control ();
 	ac->set_value (_invert_button.get_active () ? 0 : 1, PBD::Controllable::NoGroup);
 	ac->stop_touch (timepos_t (ac->session ().audible_sample ()));
 	return true;
@@ -331,7 +331,7 @@ PortInsertUI::finished (IOSelector::Result r)
 	_output_selector.Finished (r);
 }
 
-PortInsertWindow::PortInsertWindow (Gtk::Window& parent, ARDOUR::Session* s, boost::shared_ptr<ARDOUR::PortInsert> pi)
+PortInsertWindow::PortInsertWindow (Gtk::Window& parent, ARDOUR::Session* s, std::shared_ptr<ARDOUR::PortInsert> pi)
 	: ArdourWindow (parent, string_compose (_("Port Insert: %1"), pi->name ()))
 	, _portinsertui (this, s, pi)
 {

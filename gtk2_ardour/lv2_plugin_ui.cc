@@ -64,7 +64,7 @@ LV2PluginUI::write_from_ui(void*       controller,
 			return;
 		}
 
-		boost::shared_ptr<AutomationControl> ac = me->_controllables[port_index];
+		std::shared_ptr<AutomationControl> ac = me->_controllables[port_index];
 
 		me->_updates.insert (port_index);
 
@@ -75,7 +75,7 @@ LV2PluginUI::write_from_ui(void*       controller,
 
 		const int cnt = me->_pib->get_count();
 		for (int i=0; i < cnt; i++ ) {
-			boost::shared_ptr<LV2Plugin> lv2i = boost::dynamic_pointer_cast<LV2Plugin> (me->_pib->plugin(i));
+			std::shared_ptr<LV2Plugin> lv2i = std::dynamic_pointer_cast<LV2Plugin> (me->_pib->plugin(i));
 			lv2i->write_from_ui(port_index, format, buffer_size, (const uint8_t*)buffer);
 		}
 	}
@@ -296,8 +296,8 @@ LV2PluginUI::output_update()
 	_updates.clear ();
 }
 
-LV2PluginUI::LV2PluginUI(boost::shared_ptr<PlugInsertBase> pib,
-                         boost::shared_ptr<LV2Plugin>    lv2p)
+LV2PluginUI::LV2PluginUI(std::shared_ptr<PlugInsertBase> pib,
+                         std::shared_ptr<LV2Plugin>    lv2p)
 	: PlugUIBase(pib)
 	, _pib(pib)
 	, _lv2(lv2p)
@@ -472,7 +472,7 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 			*/
 
 			_values_last_sent_to_ui[port]        = _lv2->get_parameter(port);
-			_controllables[port] = boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (
+			_controllables[port] = std::dynamic_pointer_cast<ARDOUR::AutomationControl> (
 				_pib->control(Evoral::Parameter(PluginAutomation, 0, port)));
 
 			if (_lv2->parameter_is_control(port) && _lv2->parameter_is_input(port)) {
