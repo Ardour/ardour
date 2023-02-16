@@ -96,13 +96,19 @@ VST3Plugin::init ()
 	_plug->OnResizeView.connect_same_thread (_connections, boost::bind (&VST3Plugin::forward_resize_view, this, _1, _2));
 	_plug->OnParameterChange.connect_same_thread (_connections, boost::bind (&VST3Plugin::parameter_change_handler, this, _1, _2, _3));
 
-	/* assume all I/O is connected by default */
-	for (int32_t i = 0; i < (int32_t)_plug->n_audio_inputs (); ++i) {
-		_connected_inputs.push_back (true);
+	/* assume only default active busses are connected */
+	for (auto const& abi : _plug->bus_info_in ()) {
+		for (int32_t i = 0; i < abi.second.n_chn; ++i) {
+		_connected_inputs.push_back (abi.second.dflt);
+		}
 	}
-	for (int32_t i = 0; i < (int32_t)_plug->n_audio_outputs (); ++i) {
-		_connected_outputs.push_back (true);
+
+	for (auto const& abi : _plug->bus_info_out ()) {
+		for (int32_t i = 0; i < abi.second.n_chn; ++i) {
+		_connected_outputs.push_back (abi.second.dflt);
+		}
 	}
+
 	/* pre-configure from GUI thread */
 	_plug->enable_io (_connected_inputs, _connected_outputs);
 }
@@ -1747,9 +1753,9 @@ VST3PI::count_channels (Vst::MediaType media, Vst::BusDirection dir, Vst::BusTyp
 				n_channels += bus.channelCount;
 
 				if (dir == Vst::kInput) {
-					_bus_info_in.insert (std::make_pair(i, AudioBusInfo (type, bus.channelCount)));
+					_bus_info_in.insert (std::make_pair(i, AudioBusInfo (type, bus.channelCount, bus.flags & Vst::BusInfo::kDefaultActive)));
 				} else {
-					_bus_info_out.insert (std::make_pair(i, AudioBusInfo (type, bus.channelCount)));
+					_bus_info_out.insert (std::make_pair(i, AudioBusInfo (type, bus.channelCount, bus.flags & Vst::BusInfo::kDefaultActive)));
 				}
 			}
 		}
