@@ -3013,7 +3013,7 @@ These settings will only take effect after %1 is restarted.\n\
 	}
 
 	add_option (_("Appearance/Quirks"), new OptionEditorBlank ());
-#if (!defined USE_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE)
+#if (!defined USE_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE || defined __APPLE__)
 	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
 #endif
 
