@@ -1638,7 +1638,7 @@ AUPlugin::get_musical_time_location_callback (UInt32*   outDeltaSampleOffsetToNe
 	DEBUG_TRACE (DEBUG::AudioUnitProcess, "AU calls ardour music time location callback\n");
 
 	TempoMetric metric = tmap->metric_at (timepos_t (transport_sample + input_offset));
-	BBT_Time bbt = tmap->bbt_at (timepos_t (transport_sample));
+	BBT_Argument bbt = tmap->bbt_at (timepos_t (transport_sample));
 
 	if (outDeltaSampleOffsetToNextBeat) {
 		if (bbt.ticks == 0) {
