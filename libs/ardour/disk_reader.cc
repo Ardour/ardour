@@ -687,10 +687,10 @@ DiskReader::overwrite_existing_audio ()
 	const bool reversed = !_session.transport_will_roll_forwards ();
 
 	sampleoffset_t chunk1_offset;
-	samplecnt_t    chunk1_cnt;
-	samplecnt_t    chunk2_cnt;
+	size_t    chunk1_cnt;
+	size_t    chunk2_cnt;
 
-	const samplecnt_t to_overwrite = c->front()->rbuf->overwritable_at (overwrite_offset);
+	const size_t to_overwrite = c->front()->rbuf->overwritable_at (overwrite_offset);
 
 	chunk1_offset = overwrite_offset;
 	chunk1_cnt    = min (c->front()->rbuf->bufsize() - overwrite_offset, to_overwrite);
@@ -728,7 +728,7 @@ DiskReader::overwrite_existing_audio ()
 		start = overwrite_sample;
 
 		if (chunk1_cnt) {
-			if (audio_read (buf + chunk1_offset, mixdown_buffer.get (), gain_buffer.get (), start, chunk1_cnt, rci, n, reversed) != chunk1_cnt) {
+			if (audio_read (buf + chunk1_offset, mixdown_buffer.get (), gain_buffer.get (), start, chunk1_cnt, rci, n, reversed) != (samplecnt_t) chunk1_cnt) {
 				error << string_compose (_("DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"), id (), chunk1_cnt, overwrite_sample) << endmsg;
 				ret = false;
 				continue;
@@ -737,7 +737,7 @@ DiskReader::overwrite_existing_audio ()
 		}
 
 		if (chunk2_cnt) {
-			if (audio_read (buf, mixdown_buffer.get (), gain_buffer.get (), start, chunk2_cnt, rci, n, reversed) != chunk2_cnt) {
+			if (audio_read (buf, mixdown_buffer.get (), gain_buffer.get (), start, chunk2_cnt, rci, n, reversed) != (samplecnt_t) chunk2_cnt) {
 				error << string_compose (_("DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"), id (), chunk2_cnt, overwrite_sample) << endmsg;
 				ret = false;
 			}
@@ -837,7 +837,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 			return 0;
 		}
 
-		if (abs (sample - playback_sample) < (c->front ()->rbuf->reserved_size () / 6)) {
+		if ((size_t) abs (sample - playback_sample) < (c->front ()->rbuf->reserved_size () / 6)) {
 			/* we're close enough. Note: this is a heuristic */
 			return 0;
 		}
@@ -865,7 +865,8 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 	 * samples.
 	 */
 
-	samplecnt_t shift = sample > c->front ()->rbuf->reservation_size () ? c->front ()->rbuf->reservation_size () : sample;
+	const samplecnt_t rsize = (samplecnt_t) c->front()->rbuf->reservation_size();
+	samplecnt_t shift = (sample > rsize ? rsize : sample);
 
 	if (read_reversed) {
 		/* reading in reverse, so start at a later sample, and read

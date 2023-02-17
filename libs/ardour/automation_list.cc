@@ -95,7 +95,7 @@ AutomationList::AutomationList (const AutomationList& other)
 	, _before (0)
 {
 	_state = other._state;
-	g_atomic_int_set (&_touching, other.touching());
+	_touching.store (other.touching());
 
 	create_curve_if_necessary();
 
@@ -108,7 +108,7 @@ AutomationList::AutomationList (const AutomationList& other, timepos_t const & s
 	, _before (0)
 {
 	_state = other._state;
-	g_atomic_int_set (&_touching, other.touching());
+	_touching.store (other.touching());
 
 	create_curve_if_necessary();
 

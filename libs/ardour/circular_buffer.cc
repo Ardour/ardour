@@ -21,15 +21,15 @@
 
 using namespace ARDOUR;
 
-CircularSampleBuffer::CircularSampleBuffer (samplecnt_t size)
+CircularSampleBuffer::CircularSampleBuffer (size_t size)
 	: _rb (size)
 {
 }
 
 void
-CircularSampleBuffer::write (Sample const* buf, samplecnt_t n_samples)
+CircularSampleBuffer::write (Sample const* buf, size_t n_samples)
 {
-	ssize_t ws = (ssize_t) _rb.write_space ();
+	size_t ws = _rb.write_space ();
 	if (ws < n_samples) {
 		/* overwrite old data (consider a spinlock wrt ::read) */
 		_rb.increment_read_idx (n_samples - ws);
@@ -38,16 +38,16 @@ CircularSampleBuffer::write (Sample const* buf, samplecnt_t n_samples)
 }
 
 void
-CircularSampleBuffer::silence (samplecnt_t n_samples)
+CircularSampleBuffer::silence (size_t n_samples)
 {
-	ssize_t ws = (ssize_t) _rb.write_space ();
+	size_t ws = _rb.write_space ();
 	if (ws < n_samples) {
 		/* overwrite old data (consider a spinlock wrt ::read) */
 		_rb.increment_read_idx (n_samples - ws);
 	}
 	PBD::RingBuffer<Sample>::rw_vector vec;
 	_rb.get_write_vector (&vec);
-	if (vec.len[0] >= n_samples) {
+	if (vec.len[0] >= (size_t) n_samples) {
 		memset (vec.buf[0], 0, sizeof (Sample) * n_samples);
 	} else {
 		assert (vec.len[0] > 0 && vec.len[0] + vec.len[1] >= n_samples);
@@ -58,7 +58,7 @@ CircularSampleBuffer::silence (samplecnt_t n_samples)
 }
 
 bool
-CircularSampleBuffer::read (Sample& s_min, Sample& s_max, samplecnt_t spp)
+CircularSampleBuffer::read (Sample& s_min, Sample& s_max, size_t spp)
 {
 	s_min = s_max = 0;
 
@@ -72,10 +72,10 @@ CircularSampleBuffer::read (Sample& s_min, Sample& s_max, samplecnt_t spp)
 	/* immediately mark as read, allow writer to overwrite data if needed */
 	_rb.increment_read_idx (spp);
 
-	samplecnt_t to_proc = std::min (spp, (samplecnt_t)vec.len[0]);
+	size_t to_proc = std::min (spp, vec.len[0]);
 	ARDOUR::find_peaks (vec.buf[0], to_proc, &s_min, &s_max);
 
-	to_proc = std::min (spp - to_proc, (samplecnt_t)vec.len[1]);
+	to_proc = std::min (spp - to_proc, vec.len[1]);
 	if (to_proc > 0) { // XXX is this check needed?
 		ARDOUR::find_peaks (vec.buf[1], to_proc, &s_min, &s_max);
 	}
@@ -111,7 +111,7 @@ CircularEventBuffer::Event::Event (uint8_t const* buf, size_t size)
 	pad = 0;
 }
 
-CircularEventBuffer::CircularEventBuffer (samplecnt_t size)
+CircularEventBuffer::CircularEventBuffer (size_t size)
 {
 	guint power_of_two;
 	for (power_of_two = 1; 1U << power_of_two < size; ++power_of_two) {}
@@ -142,7 +142,7 @@ CircularEventBuffer::write (uint8_t const* buf, size_t size)
 	guint write_idx = _idx.load ();
 	memcpy (&_buf[write_idx], &e, sizeof (Event));
 	write_idx = (write_idx + 1) & _size_mask;
-	g_atomic_int_set (&_idx, write_idx);
+	_idx.store (write_idx);
 	_ack.store (1);
 }
 
@@ -150,7 +150,7 @@ bool
 CircularEventBuffer::read (EventList& l)
 {
 	guint to_read = _size_mask;
-	int canderef (1);
+	size_t canderef (1);
 	if (!_ack.compare_exchange_strong (canderef, 0)) {
 		return false;
 	}

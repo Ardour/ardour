@@ -38,7 +38,7 @@ public:
 
 	atomic_counter (gint value = 0)
 	{
-		g_atomic_int_set (&m_value, value);
+		m_value.store (value);
 	}
 
 	gint get() const
@@ -48,7 +48,7 @@ public:
 
 	void set (gint new_value)
 	{
-		g_atomic_int_set (&m_value, new_value);
+		m_value.store (new_value);
 	}
 
 	void increment ()
@@ -73,12 +73,7 @@ public:
 
 	bool compare_and_exchange (gint old_value, gint new_value)
 	{
-		return g_atomic_int_compare_and_exchange
-			(
-			 &m_value,
-			 old_value,
-			 new_value
-			);
+		return m_value.compare_exchange_strong (old_value, new_value);
 	}
 
 	/**

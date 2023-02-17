@@ -58,7 +58,7 @@ void
 GraphNode::prep (GraphChain const* chain)
 {
 	/* This is the number of nodes that directly feed us */
-	g_atomic_int_set (&_refcount, init_refcount (chain));
+	_refcount.store (init_refcount (chain));
 }
 
 void
@@ -76,7 +76,7 @@ GraphNode::trigger ()
 	if (PBD::atomic_dec_and_test (_refcount)) {
 #if 0 // TODO optimize: remove prep()
 		/* reset reference count for next cycle */
-		g_atomic_int_set (&_refcount, _init_refcount[chain]);
+		_refcount.store (_init_refcount[chain]);
 #endif
 		/* All nodes that feed this node have completed, so this node be processed now. */
 		_graph->trigger (this);

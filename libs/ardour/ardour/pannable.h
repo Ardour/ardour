@@ -66,7 +66,7 @@ public:
 	void start_touch (timepos_t const & when);
 	void stop_touch (timepos_t const & when);
 
-	bool touching() const { return g_atomic_int_get (const_cast<std::atomic<int>*> (&_touching)); }
+	bool touching() const { return _touching.load(); }
 
 	bool writing() const { return _auto_state == Write; }
 	bool touch_enabled() const { return _auto_state & (Touch | Latch); }

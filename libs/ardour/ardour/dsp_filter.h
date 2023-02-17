@@ -18,8 +18,9 @@
 #ifndef _dsp_filter_h_
 #define _dsp_filter_h_
 
-#include <stdint.h>
-#include <string.h>
+#include <atomic>
+#include <cstdint>
+#include <cstring>
 #include <assert.h>
 #include <glib.h>
 #include <glibmm.h>
@@ -112,7 +113,8 @@ namespace ARDOUR { namespace DSP {
 			 * @param val value to set
 			 */
 			void atomic_set_int (size_t off, int32_t val) {
-				g_atomic_int_set (&(((int32_t*)_data)[off]), val);
+				((int32_t*)_data)[off] = val;
+				std::atomic_thread_fence (std::memory_order_release);
 			}
 
 			/** atomically read integer at offset
@@ -125,7 +127,8 @@ namespace ARDOUR { namespace DSP {
 			 * @returns value at offset
 			 */
 			int32_t atomic_get_int (size_t off) {
-				return g_atomic_int_get (&(((int32_t*)_data)[off]));
+				std::atomic_thread_fence (std::memory_order_acquire);
+				return (((int32_t*)_data)[off]);
 			}
 
 		private:

@@ -107,25 +107,25 @@ private:
 	void helper_thread ();
 
 	PBD::MPMCQueue<ProcessNode*> _trigger_queue;      ///< nodes that can be processed
-	std::atomic<unsigned int>           _trigger_queue_size; ///< number of entries in trigger-queue
+	std::atomic<uint32_t>        _trigger_queue_size; ///< number of entries in trigger-queue
 
 	/** Start worker threads */
 	PBD::Semaphore _execution_sem;
 
 	/** The number of processing threads that are asleep */
-	std::atomic<unsigned int> _idle_thread_cnt;
+	std::atomic<uint32_t> _idle_thread_cnt;
 
 	/** Signalled to start a run of the graph for a process callback */
 	PBD::Semaphore _callback_start_sem;
 	PBD::Semaphore _callback_done_sem;
 
 	/** The number of unprocessed nodes that do not feed any other node; updated during processing */
-	std::atomic<unsigned int> _terminal_refcnt;
+	std::atomic<uint32_t> _terminal_refcnt;
 
 	bool _graph_empty;
 
 	/* number of background worker threads >= 0 */
-	std::atomic<unsigned int> _n_workers;
+	std::atomic<uint32_t> _n_workers;
 
 	/* flag to terminate background threads */
 	std::atomic<int> _terminate;

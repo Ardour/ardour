@@ -85,8 +85,8 @@ public:
 
 	std::list<std::shared_ptr<Source> >& last_capture_sources () { return _last_capture_sources; }
 
-	bool record_enabled () const { return g_atomic_int_get (const_cast<std::atomic<int>*>(&_record_enabled)); }
-	bool record_safe () const { return g_atomic_int_get (const_cast<std::atomic<int>*>(&_record_safe)); }
+	bool record_enabled () const { return _record_enabled.load(); }
+	bool record_safe () const { return _record_safe.load(); }
 
 	void set_record_enabled (bool yn);
 	void set_record_safe (bool yn);

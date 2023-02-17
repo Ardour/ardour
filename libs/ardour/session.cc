@@ -1499,7 +1499,7 @@ Session::reset_punch_loop_constraint ()
 	if (_punch_or_loop.load () == NoConstraint) {
 		return;
 	}
-	g_atomic_int_set (&_punch_or_loop, NoConstraint);
+	_punch_or_loop.store (NoConstraint);
 	PunchLoopConstraintChange (); /* EMIT SIGNAL */
 }
 
@@ -1972,11 +1972,11 @@ Session::disable_record (bool rt_context, bool force)
 	if ((rs = (RecordState) _record_status.load ()) != Disabled) {
 
 		if (!Config->get_latched_record_enable () || force) {
-			g_atomic_int_set (&_record_status, Disabled);
+			_record_status.store (Disabled);
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordExit));
 		} else {
 			if (rs == Recording) {
-				g_atomic_int_set (&_record_status, Enabled);
+				_record_status.store (Enabled);
 			}
 		}
 
@@ -2010,7 +2010,7 @@ Session::maybe_enable_record (bool rt_context)
 		return;
 	}
 
-	g_atomic_int_set (&_record_status, Enabled);
+	_record_status.store (Enabled);
 
 	// TODO make configurable, perhaps capture-buffer-seconds dependnet?
 	bool quick_start = true;
@@ -6322,7 +6322,7 @@ Session::update_route_record_state ()
 
 	int const old = _have_rec_enabled_track.load ();
 
-	g_atomic_int_set (&_have_rec_enabled_track, i != rl->end () ? 1 : 0);
+	_have_rec_enabled_track.store (i != rl->end () ? 1 : 0);
 
 	if (_have_rec_enabled_track.load () != old) {
 		RecordStateChanged (); /* EMIT SIGNAL */
@@ -6335,7 +6335,7 @@ Session::update_route_record_state ()
 		}
 	}
 
-	g_atomic_int_set (&_have_rec_disabled_track, i != rl->end () ? 1 : 0);
+	_have_rec_disabled_track.store (i != rl->end () ? 1 : 0);
 
 	bool record_arm_state_changed = (old != _have_rec_enabled_track.load () );
 

@@ -495,7 +495,7 @@ AUPlugin::discover_factory_presets ()
 void
 AUPlugin::init ()
 {
-	g_atomic_int_set (&_current_latency, UINT_MAX);
+	_current_latency.store (UINT_MAX);
 
 	OSErr err;
 
@@ -763,7 +763,7 @@ AUPlugin::plugin_latency () const
 	guint lat = _current_latency.load ();;
 	if (lat == UINT_MAX) {
 		lat = unit->Latency() * _session.sample_rate();
-		g_atomic_int_set (&_current_latency, lat);
+		_current_latency.store (lat);
 	}
 	return lat;
 }
@@ -2660,7 +2660,7 @@ AUPlugin::parameter_change_listener (void* /*arg*/, void* src, const AudioUnitEv
 		if (event->mArgument.mProperty.mPropertyID == kAudioUnitProperty_Latency) {
 			DEBUG_TRACE (DEBUG::AudioUnitConfig, string_compose("AU Latency Change Event %1 <> %2\n", new_value, unit->Latency()));
 			guint lat = unit->Latency() * _session.sample_rate();
-			g_atomic_int_set (&_current_latency, lat);
+			_current_latency.store (lat);
 		}
 		return;
 	}

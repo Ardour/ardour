@@ -4133,7 +4133,7 @@ Route::apply_processor_changes_rt ()
 		update_signal_latency (true);
 	}
 	if (emissions != 0) {
-		g_atomic_int_set (&_pending_signals, emissions);
+		_pending_signals.store (emissions);
 		return true;
 	}
 	return (!selfdestruct_sequence.empty ());

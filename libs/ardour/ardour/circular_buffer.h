@@ -20,6 +20,7 @@
 #define _ardour_circular_buffer_h_
 
 #include <atomic>
+#include <cstdint>
 
 #include "pbd/ringbuffer.h"
 
@@ -36,11 +37,11 @@ namespace ARDOUR {
 class LIBARDOUR_API CircularSampleBuffer
 {
 public:
-	CircularSampleBuffer (samplecnt_t size);
+	CircularSampleBuffer (size_t size);
 
-	void silence (samplecnt_t);
-	void write (Sample const*, samplecnt_t);
-	bool read (Sample& s_min, Sample& s_max, samplecnt_t n_samples);
+	void silence (size_t);
+	void write (Sample const*, size_t);
+	bool read (Sample& s_min, Sample& s_max, size_t n_samples);
 
 private:
 	PBD::RingBuffer<Sample> _rb;
@@ -59,7 +60,7 @@ public:
 
 	typedef std::vector<Event> EventList;
 
-	CircularEventBuffer (samplecnt_t size);
+	CircularEventBuffer (size_t size);
 	~CircularEventBuffer ();
 
 	void reset ();
@@ -70,11 +71,11 @@ private:
 	CircularEventBuffer (CircularEventBuffer const&);
 
 	Event* _buf;
-	guint  _size;
-	guint  _size_mask;
+	size_t  _size;
+	size_t  _size_mask;
 
-	std::atomic<int> _idx;
-	std::atomic<int> _ack;
+	std::atomic<size_t> _idx;
+	std::atomic<size_t> _ack;
 };
 
 }

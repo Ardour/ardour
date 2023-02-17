@@ -154,8 +154,8 @@ Session::realtime_stop (bool abort, bool clear_state)
 
 	reset_punch_loop_constraint ();
 
-	g_atomic_int_set (&_playback_load, 100);
-	g_atomic_int_set (&_capture_load, 100);
+	_playback_load.store (100);
+	_capture_load.store (100);
 
 	if (config.get_use_video_sync()) {
 		waiting_for_sync_offset = true;
@@ -1118,7 +1118,7 @@ Session::butler_transport_work (bool have_process_lock)
 
   restart:
 	std::shared_ptr<RouteList> r = routes.reader ();
-	int on_entry = g_atomic_int_get (&_butler->should_do_transport_work);
+	int on_entry = _butler->should_do_transport_work.load();
 	bool finished = true;
 	PostTransportWork ptw = post_transport_work();
 #ifndef NDEBUG
@@ -1212,7 +1212,7 @@ Session::non_realtime_overwrite (int on_entry, bool& finished, bool update_loop_
 		if (tr && tr->pending_overwrite ()) {
 			tr->overwrite_existing_buffers ();
 		}
-		if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
+		if (on_entry != _butler->should_do_transport_work.load()) {
 			finished = false;
 			return;
 		}
@@ -1279,14 +1279,14 @@ Session::non_realtime_locate ()
 		std::cerr << "locate to " << tf << " took " << (end - start) << " usecs for " << nt << " tracks = " << usecs_per_track << " per track\n";
 #endif
 		if (usecs_per_track > _current_usecs_per_track.load ()) {
-			g_atomic_int_set (&_current_usecs_per_track, usecs_per_track);
+			_current_usecs_per_track.store (usecs_per_track);
 		}
 	}
 
 	/* we've caught up with whatever the _seek_counter was when we did the
 	   non-realtime locates.
 	*/
-	g_atomic_int_set (&_butler_seek_counter, sc);
+	_butler_seek_counter.store (sc);
 
 	{
 		/* VCAs are quick to locate because they have no data (except
@@ -1510,7 +1510,7 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished, bool will_
 			DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler PTW: locate on %1\n", (*i)->name()));
 			(*i)->non_realtime_locate (_transport_sample);
 
-			if (on_entry != g_atomic_int_get (&_butler->should_do_transport_work)) {
+			if (on_entry != _butler->should_do_transport_work.load()) {
 				finished = false;
 				/* we will be back */
 				return;
@@ -1998,7 +1998,8 @@ Session::sync_source_changed (SyncSource type, samplepos_t pos, pframes_t cycle_
 		mtc_master->ActiveChanged.connect_same_thread (mtc_status_connection, boost::bind (&Session::mtc_status_changed, this, _1));
 		MTCSyncStateChanged(mtc_master->locked() );
 	} else {
-		if (g_atomic_int_compare_and_exchange (&_mtc_active, 1, 0)) {
+		int canderef (1);
+		if (_mtc_active.compare_exchange_strong (canderef, 0)) {
 			MTCSyncStateChanged( false );
 		}
 		mtc_status_connection.disconnect ();
@@ -2010,7 +2011,8 @@ Session::sync_source_changed (SyncSource type, samplepos_t pos, pframes_t cycle_
 		ltc_master->ActiveChanged.connect_same_thread (ltc_status_connection, boost::bind (&Session::ltc_status_changed, this, _1));
 		LTCSyncStateChanged (ltc_master->locked() );
 	} else {
-		if (g_atomic_int_compare_and_exchange (&_ltc_active, 1, 0)) {
+		int canderef (1);
+		if (_ltc_active.compare_exchange_strong (canderef, 0)) {
 			LTCSyncStateChanged( false );
 		}
 		ltc_status_connection.disconnect ();

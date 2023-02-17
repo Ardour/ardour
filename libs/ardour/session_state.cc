@@ -182,9 +182,9 @@ Session::pre_engine_init (string fullpath)
 
 	timerclear (&last_mmc_step);
 	_processing_prohibited.store (0);
-	g_atomic_int_set (&_record_status, Disabled);
-	g_atomic_int_set (&_playback_load, 100);
-	g_atomic_int_set (&_capture_load, 100);
+	_record_status.store (Disabled);
+	_playback_load.store (100);
+	_capture_load.store (100);
 	set_next_event ();
 	_all_route_group->set_active (true, this);
 

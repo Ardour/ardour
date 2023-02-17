@@ -320,8 +320,8 @@ Session::get_track_statistics ()
 		cworst = min (cworst, tr->capture_buffer_load());
 	}
 
-	g_atomic_int_set (&_playback_load, (uint32_t) floor (pworst * 100.0f));
-	g_atomic_int_set (&_capture_load, (uint32_t) floor (cworst * 100.0f));
+	_playback_load.store ((uint32_t) floor (pworst * 100.0f));
+	_capture_load.store ((uint32_t) floor (cworst * 100.0f));
 
 	if (actively_recording()) {
 		set_dirty();
@@ -1074,7 +1074,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::SetTimecodeTransmission:
-		g_atomic_int_set (&_suspend_timecode_transmission, ev->yes_or_no ? 0 : 1);
+		_suspend_timecode_transmission.store (ev->yes_or_no ? 0 : 1);
 		break;
 
 	case SessionEvent::SyncCues:

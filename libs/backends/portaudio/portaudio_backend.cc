@@ -1733,7 +1733,8 @@ PortAudioBackend::process_port_connection_changes ()
 	bool connections_changed = false;
 	bool ports_changed = false;
 	if (!pthread_mutex_trylock (&_port_callback_mutex)) {
-		if (g_atomic_int_compare_and_exchange (&_port_change_flag, 1, 0)) {
+		int canderef (1);
+		if (_port_change_flag.compare_exchange_strong (canderef, 0)) {
 			ports_changed = true;
 		}
 		if (!_port_connection_queue.empty ()) {

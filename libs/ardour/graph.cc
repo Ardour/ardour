@@ -60,8 +60,6 @@ alloc_allowed ()
 }
 #endif
 
-#define g_atomic_uint_get(x) static_cast<guint> (g_atomic_int_get (x))
-
 Graph::Graph (Session& session)
 	: SessionHandleRef (session)
 	, _execution_sem ("graph_execution", 0)
@@ -107,7 +105,7 @@ void
 Graph::reset_thread_list ()
 {
 	uint32_t num_threads = how_many_dsp_threads ();
-	guint    n_workers   = g_atomic_uint_get (&_n_workers);
+	uint32_t n_workers   = _n_workers.load();
 
 	/* don't bother doing anything here if we already have the right
 	 * number of threads.
@@ -136,7 +134,7 @@ Graph::reset_thread_list ()
 		}
 	}
 
-	while (g_atomic_uint_get (&_n_workers) + 1 != num_threads) {
+	while (_n_workers.load() + 1 != num_threads) {
 		sched_yield ();
 	}
 }
@@ -144,7 +142,7 @@ Graph::reset_thread_list ()
 uint32_t
 Graph::n_threads () const
 {
-	return 1 + g_atomic_uint_get (&_n_workers);
+	return 1 + _n_workers.load();
 }
 
 void
@@ -165,8 +163,8 @@ Graph::drop_threads ()
 	_terminate.store (1);
 
 	/* Wake-up sleeping threads */
-	guint tc = g_atomic_uint_get (&_idle_thread_cnt);
-	assert (tc == g_atomic_uint_get (&_n_workers));
+	uint32_t tc = _idle_thread_cnt.load();
+	assert (tc == _n_workers.load());
 	for (guint i = 0; i < tc; ++i) {
 		_execution_sem.signal ();
 	}
@@ -213,14 +211,14 @@ Graph::prep ()
 		_graph_empty = false;
 	}
 
-	assert (g_atomic_uint_get (&_trigger_queue_size) == 0);
+	assert (_trigger_queue_size.load() == 0);
 	assert (_graph_empty != (_graph_chain->_n_terminal_nodes > 0));
 
 	if (_trigger_queue.capacity () < _graph_chain->_nodes_rt.size ()) {
 		_trigger_queue.reserve (_graph_chain->_nodes_rt.size ());
 	}
 
-	g_atomic_int_set (&_terminal_refcnt, _graph_chain->_n_terminal_nodes);
+	_terminal_refcnt.store (_graph_chain->_n_terminal_nodes);
 
 	/* Trigger the initial nodes for processing, which are the ones at the `input' end */
 	for (auto const& i : _graph_chain->_init_trigger_list) {
@@ -248,7 +246,7 @@ Graph::reached_terminal_node ()
 		/* We have run all the nodes that are at the `output' end of
 		 * the graph, so there is nothing more to do this time around.
 		 */
-		assert (g_atomic_uint_get (&_trigger_queue_size) == 0);
+		assert (_trigger_queue_size.load() == 0);
 
 		/* Notify caller */
 		DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 cycle done.\n", pthread_name ()));
@@ -260,8 +258,8 @@ Graph::reached_terminal_node ()
 		 * If there are more threads than CPU cores, some worker-
 		 * threads may only be "on the way" to become idle.
 		 */
-		guint n_workers = g_atomic_uint_get (&_n_workers);
-		while (g_atomic_uint_get (&_idle_thread_cnt) != n_workers) {
+		uint32_t n_workers = _n_workers.load();
+		while (_idle_thread_cnt.load() != n_workers) {
 			sched_yield ();
 		}
 
@@ -303,9 +301,9 @@ Graph::run_one ()
 		 * other threads.
 		 * This thread as not yet decreased _trigger_queue_size.
 		 */
-		guint idle_cnt   = g_atomic_uint_get (&_idle_thread_cnt);
-		guint work_avail = g_atomic_uint_get (&_trigger_queue_size);
-		guint wakeup     = std::min (idle_cnt + 1, work_avail);
+		uint32_t idle_cnt   = _idle_thread_cnt.load();
+		uint32_t work_avail = _trigger_queue_size.load();
+		uint32_t wakeup     = std::min (idle_cnt + 1, work_avail);
 
 		DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 signals %2 threads\n", pthread_name (), wakeup));
 		for (guint i = 1; i < wakeup; ++i) {
@@ -316,7 +314,7 @@ Graph::run_one ()
 	while (!to_run) {
 		/* Wait for work, fall asleep */
 		_idle_thread_cnt.fetch_add (1);
-		assert (g_atomic_uint_get (&_idle_thread_cnt) <= g_atomic_uint_get (&_n_workers));
+		assert (_idle_thread_cnt.load() <= _n_workers.load());
 
 		DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 goes to sleep\n", pthread_name ()));
 		_execution_sem.wait ();
@@ -352,7 +350,7 @@ void
 Graph::helper_thread ()
 {
 	_n_workers.fetch_add (1);
-	guint id = g_atomic_uint_get (&_n_workers);
+	uint32_t id = _n_workers.load();
 
 	/* This is needed for ARDOUR::Session requests called from rt-processors
 	 * in particular Lua scripts may do cross-thread calls */
@@ -579,15 +577,15 @@ Graph::in_process_thread () const
 void
 Graph::process_tasklist (RTTaskList const& rt)
 {
-	assert (g_atomic_uint_get (&_trigger_queue_size) == 0);
+	assert (_trigger_queue_size.load() == 0);
 
 	std::vector<RTTask> const& tasks = rt.tasks ();
 	if (tasks.empty ()) {
 		return;
 	}
 
-	g_atomic_int_set (&_trigger_queue_size, tasks.size ());
-	g_atomic_int_set (&_terminal_refcnt, tasks.size ());
+	_trigger_queue_size.store (tasks.size ());
+	_terminal_refcnt.store (tasks.size ());
 	_graph_empty = false;
 
 	for (auto const& t : tasks) {

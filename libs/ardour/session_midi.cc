@@ -151,7 +151,7 @@ Session::mmc_record_strobe (MIDI::MachineControl &/*mmc*/)
 		*/
 
 		save_state ("", true);
-		g_atomic_int_set (&_record_status, Enabled);
+		_record_status.store (Enabled);
 		RecordStateChanged (); /* EMIT SIGNAL */
 
 		request_roll (TRS_MMC);

@@ -385,7 +385,7 @@ DiskWriter::set_state (const XMLNode& node, int version)
 
 	int rec_safe = 0;
 	node.get_property (X_("record-safe"), rec_safe);
-	g_atomic_int_set (&_record_safe, rec_safe);
+	_record_safe.store (rec_safe);
 
 	reset_write_sources (false, true);
 

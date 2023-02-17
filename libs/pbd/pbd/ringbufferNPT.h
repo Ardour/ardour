@@ -72,15 +72,15 @@ class /*LIBPBD_API*/ RingBufferNPT
 	void get_write_vector (rw_vector *);
 
 	void decrement_read_ptr (size_t cnt) {
-		g_atomic_int_set (&read_ptr, (read_ptr.load () - cnt) % size);
+		read_ptr.store ((read_ptr.load () - cnt) % size);
 	}
 
 	void increment_read_ptr (size_t cnt) {
-		g_atomic_int_set (&read_ptr, (read_ptr.load () + cnt) % size);
+		read_ptr.store ((read_ptr.load () + cnt) % size);
 	}
 
 	void increment_write_ptr (size_t cnt) {
-		g_atomic_int_set (&write_ptr,  (write_ptr.load () + cnt) % size);
+		write_ptr.store ((write_ptr.load () + cnt) % size);
 	}
 
 	size_t write_space () {
@@ -161,7 +161,7 @@ RingBufferNPT<T>::read (T *dest, size_t cnt)
                 priv_read_ptr = n2;
         }
 
-        g_atomic_int_set (&read_ptr, priv_read_ptr);
+        read_ptr.store (priv_read_ptr);
         return to_read;
 }
 
@@ -200,7 +200,7 @@ RingBufferNPT<T>::write (const T *src, size_t cnt)
                 priv_write_ptr = n2;
         }
 
-        g_atomic_int_set (&write_ptr, priv_write_ptr);
+        write_ptr.store (priv_write_ptr);
         return to_write;
 }
 

@@ -140,7 +140,7 @@ public:
 
 	virtual void inc_use_count ();
 	virtual void dec_use_count ();
-	int  use_count() const { return g_atomic_int_get (const_cast<std::atomic<int>*> (&_use_count)); }
+	int  use_count() const { return _use_count.load(); }
 	bool used() const { return use_count() > 0; }
 
 	uint32_t level() const { return _level; }
