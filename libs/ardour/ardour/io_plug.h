@@ -19,10 +19,9 @@
 #ifndef _libardour_io_plug_h_
 #define _libardour_io_plug_h_
 
-#include <boost/shared_ptr.hpp>
+#include <atomic>
 
 #include "pbd/timing.h"
-#include "pbd/g_atomic_compat.h"
 
 #include "ardour/ardour.h"
 #include "ardour/automation_control.h"
@@ -169,8 +168,8 @@ private:
 	Gtkmm2ext::WindowProxy* _window_proxy;
 
 	PBD::TimingStats  _timing_stats;
-	GATOMIC_QUAL gint _stat_reset;
-	GATOMIC_QUAL gint _reset_meters;
+	std::atomic<int> _stat_reset;
+	std::atomic<int> _reset_meters;
 };
 
 }

@@ -67,7 +67,7 @@ Source::Source (Session& s, DataType type, const string& name, Flag flags)
 	, _have_natural_position (false)
 	, _level (0)
 {
-	g_atomic_int_set (&_use_count, 0);
+	_use_count.store (0);
 	_analysed = false;
 	_timestamp = 0;
 
@@ -82,7 +82,7 @@ Source::Source (Session& s, const XMLNode& node)
 	, _have_natural_position (false)
 	, _level (0)
 {
-	g_atomic_int_set (&_use_count, 0);
+	_use_count.store (0);
 	_analysed = false;
 	_timestamp = 0;
 
@@ -440,21 +440,21 @@ Source::set_allow_remove_if_empty (bool yn)
 void
 Source::inc_use_count ()
 {
-    g_atomic_int_inc (&_use_count);
+    _use_count.fetch_add (1);
 }
 
 void
 Source::dec_use_count ()
 {
 #ifndef NDEBUG
-        gint oldval = g_atomic_int_add (&_use_count, -1);
+	int oldval = _use_count.fetch_sub (1);
         if (oldval <= 0) {
                 cerr << "Bad use dec for " << name() << endl;
                 abort ();
         }
         assert (oldval > 0);
 #else
-        g_atomic_int_add (&_use_count, -1);
+        _use_count.fetch_sub (1);
 #endif
 
 	try {

@@ -53,7 +53,7 @@ Pannable::Pannable (Session& s, Temporal::TimeDomain td)
 {
 	//boost_debug_shared_ptr_mark_interesting (this, "pannable");
 
-	g_atomic_int_set (&_touching, 0);
+	_touching.store (0);
 
 	add_control (pan_azimuth_control);
 	add_control (pan_elevation_control);
@@ -161,7 +161,7 @@ Pannable::start_touch (timepos_t const & when)
 			ac->alist()->start_touch (when);
 		}
 	}
-	g_atomic_int_set (&_touching, 1);
+	_touching.store (1);
 }
 
 void
@@ -175,7 +175,7 @@ Pannable::stop_touch (timepos_t const & when)
 			ac->alist()->stop_touch (when);
 		}
 	}
-	g_atomic_int_set (&_touching, 0);
+	_touching.store (0);
 }
 
 XMLNode&

@@ -33,8 +33,7 @@
 # define MPMC_QUEUE_TYPE std::atomic<size_t>
 #else
 # include <glib.h>
-# include "pbd/g_atomic_compat.h"
-# define MPMC_QUEUE_TYPE GATOMIC_QUAL guint
+# define MPMC_QUEUE_TYPE std::atomic<unsigned int>
 #endif
 
 namespace PBD {
@@ -99,8 +98,8 @@ public:
 		for (size_t i = 0; i <= _buffer_mask; ++i) {
 			g_atomic_int_set (&_buffer[i]._sequence, i);
 		}
-		g_atomic_int_set (&_enqueue_pos, 0);
-		g_atomic_int_set (&_dequeue_pos, 0);
+		_enqueue_pos.store (0);
+		_dequeue_pos.store (0);
 #endif
 	}
 
@@ -111,7 +110,7 @@ public:
 #ifdef MPMC_USE_STD_ATOMIC
 		size_t pos = _enqueue_pos.load (std::memory_order_relaxed);
 #else
-		guint pos = g_atomic_int_get (&_enqueue_pos);
+		guint pos = _enqueue_pos.load ();
 #endif
 		for (;;) {
 			cell = &_buffer[pos & _buffer_mask];
@@ -136,7 +135,7 @@ public:
 #ifdef MPMC_USE_STD_ATOMIC
 				pos = _enqueue_pos.load (std::memory_order_relaxed);
 #else
-				pos = g_atomic_int_get (&_enqueue_pos);
+				pos = _enqueue_pos.load ();
 #endif
 			}
 		}
@@ -158,7 +157,7 @@ public:
 #ifdef MPMC_USE_STD_ATOMIC
 		size_t pos = _dequeue_pos.load (std::memory_order_relaxed);
 #else
-		guint pos = g_atomic_int_get (&_dequeue_pos);
+		guint pos = _dequeue_pos.load ();
 #endif
 		for (;;) {
 			cell = &_buffer[pos & _buffer_mask];
@@ -183,7 +182,7 @@ public:
 #ifdef MPMC_USE_STD_ATOMIC
 				pos = _dequeue_pos.load (std::memory_order_relaxed);
 #else
-				pos = g_atomic_int_get (&_dequeue_pos);
+				pos = _dequeue_pos.load ();
 #endif
 			}
 		}

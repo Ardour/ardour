@@ -379,7 +379,7 @@ WaveViewThreads::stop_threads ()
 /*-------------------------------------------------*/
 WaveViewDrawRequest::WaveViewDrawRequest ()
 {
-	g_atomic_int_set (&_stop, 0);
+	_stop.store (0);
 }
 
 WaveViewDrawRequest::~WaveViewDrawRequest ()

@@ -89,7 +89,7 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 
   private:
 	mutable Glib::Threads::RWLock _lock;
-	GATOMIC_QUAL gint             _selection_order;
+	std::atomic<int>             _selection_order;
 
 	Session& session;
 

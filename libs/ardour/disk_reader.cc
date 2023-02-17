@@ -52,7 +52,7 @@ PBD::Signal0<void>    DiskReader::Underrun;
 Sample*               DiskReader::_sum_buffer     = 0;
 Sample*               DiskReader::_mixdown_buffer = 0;
 gain_t*               DiskReader::_gain_buffer    = 0;
-GATOMIC_QUAL gint     DiskReader::_no_disk_output (0);
+std::atomic<int>     DiskReader::_no_disk_output (0);
 DiskReader::Declicker DiskReader::loop_declick_in;
 DiskReader::Declicker DiskReader::loop_declick_out;
 samplecnt_t           DiskReader::loop_fade_length (0);
@@ -68,7 +68,7 @@ DiskReader::DiskReader (Session& s, Track& t, string const& str,  Temporal::Time
 {
 	file_sample[DataType::AUDIO] = 0;
 	file_sample[DataType::MIDI]  = 0;
-	g_atomic_int_set (&_pending_overwrite, 0);
+	_pending_overwrite.store (OverwriteReason (0));
 }
 
 DiskReader::~DiskReader ()
@@ -263,7 +263,7 @@ DiskReader::use_playlist (DataType dt, std::shared_ptr<Playlist> playlist)
 	 * the diskstream for the very first time - the input changed handling will
 	 * take care of the buffer refill. */
 
-	if (!(g_atomic_int_get (&_pending_overwrite) & PlaylistChanged) || prior_playlist) {
+	if (!(_pending_overwrite.load () & PlaylistChanged) || prior_playlist) {
 		_session.request_overwrite_buffer (_track.shared_ptr (), PlaylistChanged);
 	}
 
@@ -279,7 +279,7 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	sampleoffset_t                 disk_samples_to_consume;
 	MonitorState                   ms = _track.monitoring_state ();
 	const bool                     midi_only = (c->empty() || !_playlists[DataType::AUDIO]);
-	bool                           no_disk_output = g_atomic_int_get (&_no_disk_output) != 0;
+	bool                           no_disk_output = _no_disk_output.load () != 0;
 
 	if (!check_active()) {
 		return;
@@ -547,7 +547,7 @@ DiskReader::configuration_changed ()
 bool
 DiskReader::pending_overwrite () const
 {
-	return g_atomic_int_get (&_pending_overwrite) != 0;
+	return _pending_overwrite.load () != 0;
 }
 
 void
@@ -613,9 +613,9 @@ DiskReader::set_pending_overwrite (OverwriteReason why)
 	}
 
 	while (true) {
-		OverwriteReason current = OverwriteReason (g_atomic_int_get (&_pending_overwrite));
+		OverwriteReason current = OverwriteReason (_pending_overwrite.load ());
 		OverwriteReason next    = OverwriteReason (current | why);
-		if (g_atomic_int_compare_and_exchange (&_pending_overwrite, current, next)) {
+		if (_pending_overwrite.compare_exchange_strong (current, next)) {
 			break;
 		}
 	}
@@ -787,23 +787,23 @@ DiskReader::overwrite_existing_buffers ()
 {
 	/* called from butler thread */
 
-	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 overwriting existing buffers at %2 (because %3%4%5\n", owner ()->name (), overwrite_sample, std::hex, g_atomic_int_get (&_pending_overwrite), std::dec));
+	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("%1 overwriting existing buffers at %2 (because %3%4%5\n", owner ()->name (), overwrite_sample, std::hex, _pending_overwrite.load (), std::dec));
 
 	bool ret = true;
 
-	if (g_atomic_int_get (&_pending_overwrite) & (PlaylistModified | LoopDisabled | LoopChanged | PlaylistChanged)) {
+	if (_pending_overwrite.load () & (PlaylistModified | LoopDisabled | LoopChanged | PlaylistChanged)) {
 		if (_playlists[DataType::AUDIO] && !overwrite_existing_audio ()) {
 			ret = false;
 		}
 	}
 
-	if (g_atomic_int_get (&_pending_overwrite) & (PlaylistModified | PlaylistChanged)) {
+	if (_pending_overwrite.load () & (PlaylistModified | PlaylistChanged)) {
 		if (_playlists[DataType::MIDI] && !overwrite_existing_midi ()) {
 			ret = false;
 		}
 	}
 
-	g_atomic_int_set (&_pending_overwrite, 0);
+	_pending_overwrite.store (OverwriteReason (0));
 
 	return ret;
 }
@@ -843,7 +843,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		}
 	}
 
-	g_atomic_int_set (&_pending_overwrite, 0);
+	_pending_overwrite.store (OverwriteReason (0));
 
 	DEBUG_TRACE (DEBUG::DiskIO, string_compose ("DiskReader::seek %1 %2 -> %3 refill=%4\n", owner ()->name ().c_str (), playback_sample, sample, complete_refill));
 
@@ -1456,7 +1456,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 		target = &dst;
 	}
 
-	if (g_atomic_int_get (&_no_disk_output)) {
+	if (_no_disk_output.load ()) {
 		return;
 	}
 
@@ -1547,7 +1547,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 void
 DiskReader::inc_no_disk_output ()
 {
-	g_atomic_int_inc (&_no_disk_output);
+	_no_disk_output.fetch_add (1);
 }
 
 void
@@ -1560,9 +1560,9 @@ DiskReader::dec_no_disk_output ()
 	 */
 
 	do {
-		gint v = g_atomic_int_get (&_no_disk_output);
+		gint v = _no_disk_output.load ();
 		if (v > 0) {
-			if (g_atomic_int_compare_and_exchange (&_no_disk_output, v, v - 1)) {
+			if (_no_disk_output.compare_exchange_strong (v, v - 1)) {
 				break;
 			}
 		} else {

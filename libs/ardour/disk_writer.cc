@@ -37,6 +37,7 @@
 #include "ardour/session.h"
 #include "ardour/smf_source.h"
 
+#include "pbd/atomic.h"
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
@@ -64,10 +65,10 @@ DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcesso
 	DiskIOProcessor::init ();
 	_xruns.reserve (128);
 
-	g_atomic_int_set (&_record_enabled, 0);
-	g_atomic_int_set (&_record_safe, 0);
-	g_atomic_int_set (&_samples_pending_write, 0);
-	g_atomic_int_set (&_num_captured_loops, 0);
+	_record_enabled.store (0);
+	_record_safe.store (0);
+	_samples_pending_write.store (0);
+	_num_captured_loops.store (0);
 }
 
 DiskWriter::~DiskWriter ()
@@ -285,25 +286,25 @@ DiskWriter::calculate_record_range (Temporal::OverlapType ot, samplepos_t transp
 void
 DiskWriter::engage_record_enable ()
 {
-	g_atomic_int_set (&_record_enabled, 1);
+	_record_enabled.store (1);
 }
 
 void
 DiskWriter::disengage_record_enable ()
 {
-	g_atomic_int_set (&_record_enabled, 0);
+	_record_enabled.store (0);
 }
 
 void
 DiskWriter::engage_record_safe ()
 {
-	g_atomic_int_set (&_record_safe, 1);
+	_record_safe.store (1);
 }
 
 void
 DiskWriter::disengage_record_safe ()
 {
-	g_atomic_int_set (&_record_safe, 0);
+	_record_safe.store (0);
 }
 
 /** Get the start position (in session samples) of the nth capture in the current pass */
@@ -541,8 +542,8 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				_midi_write_source->mark_write_starting_now (start, _capture_captured);
 			}
 
-			g_atomic_int_set (&_samples_pending_write, 0);
-			g_atomic_int_set (&_num_captured_loops, 0);
+			_samples_pending_write.store (0);
+			_num_captured_loops.store (0);
 
 			_was_recording = true;
 
@@ -646,7 +647,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				   reconstruct their actual time; future clever MIDI looping should
 				   probably be implemented in the source instead of here.
 				*/
-				const samplecnt_t loop_offset = g_atomic_int_get (&_num_captured_loops) * loop_length.samples();
+				const samplecnt_t loop_offset = _num_captured_loops.load () * loop_length.samples();
 				const samplepos_t event_time = start_sample + loop_offset - _accumulated_capture_offset + ev.time();
 				if (event_time < 0 || event_time < _first_recordable_sample) {
 					/* Event out of range, skip */
@@ -672,7 +673,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				}
 			}
 
-			g_atomic_int_add (&_samples_pending_write, nframes);
+			_samples_pending_write.fetch_add ((int) nframes);
 
 			if (buf.size() != 0) {
 				Glib::Threads::Mutex::Lock lm (_gui_feed_buffer_mutex, Glib::Threads::TRY_LOCK);
@@ -764,7 +765,7 @@ DiskWriter::finish_capture (std::shared_ptr<ChannelList> c)
 		timepos_t loop_end;
 		timecnt_t loop_length;
 		get_location_times (_loop_location, &loop_start, &loop_end, &loop_length);
-	        ci->loop_offset = g_atomic_int_get (&_num_captured_loops) * loop_length.samples();
+	        ci->loop_offset = _num_captured_loops.load () * loop_length.samples();
 	} else {
 		ci->loop_offset = 0;
 	}
@@ -1003,7 +1004,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 
 	if (_midi_write_source && _midi_buf) {
 
-		const samplecnt_t total = g_atomic_int_get(&_samples_pending_write);
+		const samplecnt_t total = _samples_pending_write.load ();
 
 		if (total == 0 ||
 		    _midi_buf->read_space() == 0 ||
@@ -1039,7 +1040,7 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 				error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
 				return -1;
 			}
-			g_atomic_int_add(&_samples_pending_write, -to_write);
+			_samples_pending_write.fetch_sub (to_write);
 		}
 	}
 
@@ -1347,7 +1348,7 @@ DiskWriter::loop (samplepos_t transport_sample)
 	   the Source and/or entirely after the capture is finished.
 	*/
 	if (_was_recording) {
-		g_atomic_int_add (&_num_captured_loops, 1);
+		_num_captured_loops.fetch_add (1);
 	}
 }
 

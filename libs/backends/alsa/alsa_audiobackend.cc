@@ -1020,7 +1020,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	}
 
 	_run = true;
-	g_atomic_int_set (&_port_change_flag, 0);
+	_port_change_flag.store (0);
 
 	if (pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC,
 	                                 &_main_thread, pthread_process, this)) {
@@ -2084,7 +2084,8 @@ AlsaAudioBackend::main_process_thread ()
 		bool connections_changed = false;
 		bool ports_changed       = false;
 		if (!pthread_mutex_trylock (&_port_callback_mutex)) {
-			if (g_atomic_int_compare_and_exchange (&_port_change_flag, 1, 0)) {
+			int canderef (1);
+			if (_port_change_flag.compare_exchange_strong (canderef, 0)) {
 				ports_changed = true;
 			}
 			if (!_port_connection_queue.empty ()) {

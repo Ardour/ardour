@@ -321,8 +321,8 @@ Playlist::init (bool hide)
 	add_property (regions);
 	_xml_node_name = X_("Playlist");
 
-	g_atomic_int_set (&block_notifications, 0);
-	g_atomic_int_set (&ignore_state_changes, 0);
+	block_notifications.store (0);
+	ignore_state_changes.store (0);
 	pending_contents_change     = false;
 	pending_layering            = false;
 	first_set_state             = true;
@@ -430,28 +430,28 @@ void
 Playlist::freeze_locked ()
 {
 	delay_notifications ();
-	g_atomic_int_inc (&ignore_state_changes);
+	ignore_state_changes.fetch_add (1);
 }
 
 /** @param from_undo true if this thaw is triggered by the end of an undo on this playlist */
 void
 Playlist::thaw (bool from_undo)
 {
-	g_atomic_int_dec_and_test (&ignore_state_changes);
+	PBD::atomic_dec_and_test (ignore_state_changes);
 	release_notifications (from_undo);
 }
 
 void
 Playlist::delay_notifications ()
 {
-	g_atomic_int_inc (&block_notifications);
+	block_notifications.fetch_add (1);
 }
 
 /** @param from_undo true if this release is triggered by the end of an undo on this playlist */
 void
 Playlist::release_notifications (bool from_undo)
 {
-	if (g_atomic_int_dec_and_test (&block_notifications)) {
+	if (PBD::atomic_dec_and_test (block_notifications)) {
 		flush_notifications (from_undo);
 	}
 }

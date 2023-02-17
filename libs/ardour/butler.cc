@@ -60,7 +60,7 @@ Butler::Butler (Session& s)
 	, pool_trash (16)
 	, _xthread (true)
 {
-	g_atomic_int_set (&should_do_transport_work, 0);
+	should_do_transport_work.store (0);
 	SessionEvent::pool->set_trash (&pool_trash);
 
 	/* catch future changes to parameters */
@@ -381,7 +381,7 @@ void
 Butler::schedule_transport_work ()
 {
 	DEBUG_TRACE (DEBUG::Butler, "requesting more transport work\n");
-	g_atomic_int_inc (&should_do_transport_work);
+	should_do_transport_work.fetch_add (1);
 	summon ();
 }
 
@@ -432,7 +432,7 @@ Butler::wait_until_finished ()
 bool
 Butler::transport_work_requested () const
 {
-	return g_atomic_int_get (&should_do_transport_work);
+	return should_do_transport_work.load ();
 }
 
 void

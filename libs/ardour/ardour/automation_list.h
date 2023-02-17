@@ -23,7 +23,8 @@
 #ifndef __ardour_automation_event_h__
 #define __ardour_automation_event_h__
 
-#include <stdint.h>
+#include <atomic>
+#include <cstdint>
 #include <cstdlib>
 #include <list>
 #include <cmath>
@@ -37,7 +38,6 @@
 #include "pbd/xml++.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/properties.h"
-#include "pbd/g_atomic_compat.h"
 
 #include "ardour/ardour.h"
 
@@ -109,7 +109,7 @@ public:
 	void start_touch (timepos_t const & when);
 	void stop_touch (timepos_t const &  when);
 
-	bool touching () const { return g_atomic_int_get (const_cast<GATOMIC_QUAL gint*>(&_touching)) != 0; }
+	bool touching () const { return g_atomic_int_get (const_cast<std::atomic<int>*>(&_touching)) != 0; }
 	bool writing () const { return _state == Write; }
 	bool touch_enabled () const { return _state & (Touch | Latch); }
 
@@ -136,7 +136,7 @@ private:
 	void maybe_signal_changed ();
 
 	AutoState         _state;
-	GATOMIC_QUAL gint _touching;
+	std::atomic<int> _touching;
 
 	PBD::ScopedConnection _writepass_connection;
 

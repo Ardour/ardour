@@ -19,26 +19,27 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <atomic>
+
 #include <glib.h>
 
-#include "pbd/g_atomic_compat.h"
 #include "temporal/beats.h"
 #include "evoral/Event.h"
 
 namespace Evoral {
 
-static GATOMIC_QUAL event_id_t _event_id_counter = 0;
+static std::atomic<event_id_t> _event_id_counter (0);
 
 event_id_t
 event_id_counter()
 {
-	return g_atomic_int_get (&_event_id_counter);
+	return _event_id_counter.load ();
 }
 
 void
 init_event_id_counter(event_id_t n)
 {
-	g_atomic_int_set (&_event_id_counter, n);
+	_event_id_counter.store (n);
 }
 
 event_id_t
@@ -53,7 +54,7 @@ next_event_id ()
 	 *
 	 * current user-record: is event-counter="276390506" (just abov 2^28)
 	 */
-	return g_atomic_int_add (&_event_id_counter, 1);
+	return _event_id_counter.fetch_add (1);
 }
 
 #ifdef EVORAL_EVENT_ALLOC

@@ -23,12 +23,13 @@
 #ifndef __ardour_butler_h__
 #define __ardour_butler_h__
 
+#include <atomic>
+
 #include <pthread.h>
 
 #include <glibmm/threads.h>
 
 #include "pbd/crossthread.h"
-#include "pbd/g_atomic_compat.h"
 #include "pbd/pool.h"
 #include "pbd/ringbuffer.h"
 #include "pbd/mpmc_queue.h"
@@ -81,7 +82,7 @@ public:
 		return _midi_buffer_size;
 	}
 
-	mutable GATOMIC_QUAL gint should_do_transport_work;
+	mutable std::atomic<int> should_do_transport_work;
 
 private:
 	struct Request {

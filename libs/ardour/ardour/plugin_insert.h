@@ -24,13 +24,13 @@
 #ifndef __ardour_plugin_insert_h__
 #define __ardour_plugin_insert_h__
 
+#include <atomic>
 #include <memory>
 #include <string>
 #include <vector>
 
 #include "pbd/stack_allocator.h"
 #include "pbd/timing.h"
-#include "pbd/g_atomic_compat.h"
 
 #include "ardour/ardour.h"
 #include "ardour/libardour_visibility.h"
@@ -446,8 +446,8 @@ private:
 	CtrlOutMap _control_outputs;
 
 	PBD::TimingStats  _timing_stats;
-	GATOMIC_QUAL gint _stat_reset;
-	GATOMIC_QUAL gint _flush;
+	std::atomic<int> _stat_reset;
+	std::atomic<int> _flush;
 };
 
 } // namespace ARDOUR

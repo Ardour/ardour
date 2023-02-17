@@ -23,6 +23,7 @@
 #ifndef __pbd_stateful_h__
 #define __pbd_stateful_h__
 
+#include <atomic>
 #include <string>
 #include <list>
 #include <cassert>
@@ -32,7 +33,6 @@
 #include "pbd/xml++.h"
 #include "pbd/property_basics.h"
 #include "pbd/signals.h"
-#include "pbd/g_atomic_compat.h"
 
 class XMLNode;
 
@@ -105,7 +105,7 @@ class LIBPBD_API Stateful {
 	virtual void suspend_property_changes ();
 	virtual void resume_property_changes ();
 
-	bool property_changes_suspended() const { return g_atomic_int_get (const_cast<GATOMIC_QUAL gint*> (&_stateful_frozen)) > 0; }
+	bool property_changes_suspended() const { return g_atomic_int_get (const_cast<std::atomic<int>*> (&_stateful_frozen)) > 0; }
 
   protected:
 
@@ -142,7 +142,7 @@ class LIBPBD_API Stateful {
 	static Glib::Threads::Private<bool> _regenerate_xml_or_string_ids;
 
 	PBD::ID           _id;
-	GATOMIC_QUAL gint _stateful_frozen;
+	std::atomic<int> _stateful_frozen;
 
 	static void set_regenerate_xml_and_string_ids_in_this_thread (bool yn);
 };

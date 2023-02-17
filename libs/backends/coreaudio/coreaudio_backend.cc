@@ -639,7 +639,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 
 	_preinit = true;
 	_run = true;
-	g_atomic_int_set (&_port_change_flag, 0);
+	_port_change_flag.store (0);
 
 	if (_midi_driver_option == _("CoreMidi")) {
 		_midiio->set_enabled(true);
@@ -697,7 +697,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	engine.reconnect_ports ();
 
 	// force  an initial registration_callback() & latency re-compute
-	g_atomic_int_set (&_port_change_flag, 1);
+	_port_change_flag.store (1);
 	pre_process ();
 
 	_dsp_load_calc.reset ();
@@ -1026,7 +1026,7 @@ CoreAudioBackend::coremidi_rediscover()
 #ifndef NDEBUG
 			printf("unregister MIDI Output: %s\n", (*it)->name().c_str());
 #endif
-			g_atomic_int_set (&_port_change_flag, 1);
+			_port_change_flag.store (1);
 			unregister_port((*it));
 			it = _system_midi_out.erase(it);
 		}
@@ -1046,7 +1046,7 @@ CoreAudioBackend::coremidi_rediscover()
 #ifndef NDEBUG
 			printf("unregister MIDI Input: %s\n", (*it)->name().c_str());
 #endif
-			g_atomic_int_set (&_port_change_flag, 1);
+			_port_change_flag.store (1);
 			unregister_port((*it));
 			it = _system_midi_in.erase(it);
 		}
@@ -1072,7 +1072,7 @@ CoreAudioBackend::coremidi_rediscover()
 		BackendPortPtr pp = std::dynamic_pointer_cast<BackendPort>(p);
 		pp->set_hw_port_name(_midiio->port_name(i, true));
 		_system_midi_in.push_back(pp);
-		g_atomic_int_set (&_port_change_flag, 1);
+		_port_change_flag.store (1);
 	}
 
 	for (size_t i = 0; i < _midiio->n_midi_outputs(); ++i) {
@@ -1095,7 +1095,7 @@ CoreAudioBackend::coremidi_rediscover()
 		BackendPortPtr pp = std::dynamic_pointer_cast<BackendPort>(p);
 		pp->set_hw_port_name(_midiio->port_name(i, false));
 		_system_midi_out.push_back(pp);
-		g_atomic_int_set (&_port_change_flag, 1);
+		_port_change_flag.store (1);
 	}
 
 

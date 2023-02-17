@@ -203,8 +203,8 @@ public:
 	WaveViewDrawRequest ();
 	~WaveViewDrawRequest ();
 
-	bool stopped() const { return (bool) g_atomic_int_get (&_stop); }
-	void cancel() { g_atomic_int_set (&_stop, 1); }
+	bool stopped() const { return (bool) _stop.load (); }
+	void cancel() { _stop.store (1); }
 	bool finished() { return image->finished(); }
 
 	std::shared_ptr<WaveViewImage> image;
@@ -214,7 +214,7 @@ public:
 	}
 
 private:
-	GATOMIC_QUAL gint _stop; /* intended for atomic access */
+	std::atomic<int> _stop; /* intended for atomic access */
 };
 
 class WaveViewCache;

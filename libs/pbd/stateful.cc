@@ -24,6 +24,7 @@
 #include <glibmm/fileutils.h>
 #include <glibmm/miscutils.h>
 
+#include "pbd/atomic.h"
 #include "pbd/debug.h"
 #include "pbd/stateful.h"
 #include "pbd/types_convert.h"
@@ -48,7 +49,7 @@ Stateful::Stateful ()
 	, _instant_xml (nullptr)
 	, _properties (new OwnedPropertyList)
 {
-	g_atomic_int_set (&_stateful_frozen, 0);
+	_stateful_frozen.store (0);
 }
 
 Stateful::~Stateful ()
@@ -298,7 +299,7 @@ Stateful::send_change (const PropertyChange& what_changed)
 void
 Stateful::suspend_property_changes ()
 {
-	g_atomic_int_add (&_stateful_frozen, 1);
+	_stateful_frozen.fetch_add (1);
 }
 
 void
@@ -309,7 +310,7 @@ Stateful::resume_property_changes ()
 	{
 		Glib::Threads::Mutex::Lock lm (_lock);
 
-		if (property_changes_suspended() && g_atomic_int_dec_and_test (&_stateful_frozen) == FALSE) {
+		if (property_changes_suspended() && PBD::atomic_dec_and_test (_stateful_frozen) == FALSE) {
 			return;
 		}
 

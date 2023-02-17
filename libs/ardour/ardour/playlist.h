@@ -27,16 +27,17 @@
 #ifndef __ardour_playlist_h__
 #define __ardour_playlist_h__
 
-#include <memory>
-
-#include <boost/optional.hpp>
-#include <boost/utility.hpp>
+#include <atomic>
 #include <list>
 #include <map>
+#include <memory>
 #include <set>
 #include <string>
 
 #include <sys/stat.h>
+
+#include <boost/optional.hpp>
+#include <boost/utility.hpp>
 
 #include <glib.h>
 
@@ -44,7 +45,6 @@
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/undo.h"
-#include "pbd/g_atomic_compat.h"
 
 #include "temporal/range.h"
 
@@ -349,8 +349,8 @@ protected:
 	PBD::ScopedConnectionList            region_drop_references_connections;
 	DataType                             _type;
 	uint32_t                             _sort_id;
-	mutable GATOMIC_QUAL gint            block_notifications;
-	mutable GATOMIC_QUAL gint            ignore_state_changes;
+	mutable std::atomic<int>            block_notifications;
+	mutable std::atomic<int>            ignore_state_changes;
 	std::set<std::shared_ptr<Region> > pending_adds;
 	std::set<std::shared_ptr<Region> > pending_removes;
 	RegionList                           pending_bounds;
@@ -391,8 +391,8 @@ protected:
 
 	bool holding_state () const
 	{
-		return g_atomic_int_get (&block_notifications) != 0 ||
-		       g_atomic_int_get (&ignore_state_changes) != 0;
+		return block_notifications.load () != 0 ||
+		       ignore_state_changes.load () != 0;
 	}
 
 	void         delay_notifications ();

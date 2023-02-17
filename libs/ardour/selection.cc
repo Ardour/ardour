@@ -46,7 +46,7 @@ CoreSelection::send_selection_change ()
 CoreSelection::CoreSelection (Session& s)
 	: session (s)
 {
-	g_atomic_int_set (&_selection_order, 0);
+	_selection_order.store (0);
 }
 
 CoreSelection::~CoreSelection ()
@@ -248,7 +248,7 @@ CoreSelection::set (StripableList& sl)
 
 		for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
 
-			SelectedStripable ss (*s, no_control, g_atomic_int_add (&_selection_order, 1));
+			SelectedStripable ss (*s, no_control, _selection_order.fetch_add (1));
 
 			if (_stripables.insert (ss).second) {
 				DEBUG_TRACE (DEBUG::Selection, string_compose ("set:added %1 to s/c selection\n", (*s)->name()));
@@ -295,7 +295,7 @@ CoreSelection::add (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationCont
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
 
-		SelectedStripable ss (s, c, g_atomic_int_add (&_selection_order, 1));
+		SelectedStripable ss (s, c, _selection_order.fetch_add (1));
 
 		if (_stripables.insert (ss).second) {
 			DEBUG_TRACE (DEBUG::Selection, string_compose ("added %1/%2 to s/c selection\n", s->name(), c));
@@ -357,7 +357,7 @@ CoreSelection::set (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationCont
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
 
-		SelectedStripable ss (s, c, g_atomic_int_add (&_selection_order, 1));
+		SelectedStripable ss (s, c, _selection_order.fetch_add (1));
 
 		if (_stripables.size() == 1 && _stripables.find (ss) != _stripables.end()) {
 			return;

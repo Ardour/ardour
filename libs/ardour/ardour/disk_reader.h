@@ -20,9 +20,9 @@
 #ifndef _ardour_disk_reader_h_
 #define _ardour_disk_reader_h_
 
-#include <boost/optional.hpp>
+#include <atomic>
 
-#include "pbd/g_atomic_compat.h"
+#include <boost/optional.hpp>
 
 #include "evoral/Curve.h"
 
@@ -114,7 +114,7 @@ public:
 	static void dec_no_disk_output ();
 	static bool no_disk_output ()
 	{
-		return g_atomic_int_get (&_no_disk_output);
+		return _no_disk_output.load ();
 	}
 	static void reset_loop_declick (Location*, samplecnt_t sample_rate);
 	static void alloc_loop_declick (samplecnt_t sample_rate);
@@ -202,7 +202,7 @@ private:
 	IOChange       input_change_pending;
 	samplepos_t    file_sample[DataType::num_types];
 
-	mutable GATOMIC_QUAL gint _pending_overwrite;
+	mutable std::atomic<OverwriteReason> _pending_overwrite;
 
 	DeclickAmp            _declick_amp;
 	sampleoffset_t        _declick_offs;
@@ -213,7 +213,7 @@ private:
 
 	static samplecnt_t _chunk_samples;
 
-	static GATOMIC_QUAL gint _no_disk_output;
+	static std::atomic<int> _no_disk_output;
 
 	static Declicker   loop_declick_in;
 	static Declicker   loop_declick_out;

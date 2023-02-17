@@ -181,7 +181,7 @@ Session::pre_engine_init (string fullpath)
 	*/
 
 	timerclear (&last_mmc_step);
-	g_atomic_int_set (&_processing_prohibited, 0);
+	_processing_prohibited.store (0);
 	g_atomic_int_set (&_record_status, Disabled);
 	g_atomic_int_set (&_playback_load, 100);
 	g_atomic_int_set (&_capture_load, 100);
@@ -786,7 +786,7 @@ Session::save_state (string snapshot_name, bool pending, bool switch_to_snapshot
 		return 1;
 	}
 
-	if (g_atomic_int_get(&_suspend_save)) {
+	if (_suspend_save.load ()) {
 		/* StateProtector cannot be used for templates or save-as */
 		assert (!template_only && !switch_to_snapshot && !for_archive && (snapshot_name.empty () || snapshot_name == _current_snapshot_name));
 		if (pending) {

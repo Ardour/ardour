@@ -52,7 +52,7 @@ AlsaAudioSlave::AlsaAudioSlave (
 	, _play_buff (0)
 	, _src_buff (0)
 {
-	g_atomic_int_set (&_draining, 1);
+	_draining.store (1);
 
 	if (0 != _pcmi.state()) {
 		return;
@@ -213,7 +213,7 @@ AlsaAudioSlave::process_thread ()
 		}
 
 		const size_t spp = _pcmi.fsize ();
-		const bool drain = g_atomic_int_get (&_draining);
+		const bool drain = _draining.load ();
 		last_n_periods = 0;
 
 		while (nr >= (long)spp) {
@@ -267,7 +267,7 @@ AlsaAudioSlave::process_thread ()
 				_rb_capture.increment_write_idx (spp * nchn);
 #endif
 			} else {
-				g_atomic_int_set (&_draining, 1);
+				_draining.store (1);
 			}
 			_pcmi.capt_done (spp);
 
@@ -342,7 +342,7 @@ AlsaAudioSlave::process_thread ()
 		if (xrun && (_pcmi.capt_xrun() > 0 || _pcmi.play_xrun() > 0)) {
 			reset_dll = true;
 			_samples_since_dll_reset = 0;
-			g_atomic_int_set (&_draining, 1);
+			_draining.store (1);
 		}
 	}
 
@@ -373,11 +373,11 @@ AlsaAudioSlave::cycle_start (double tme, double mst_speed, bool drain)
 	}
 
 	if (drain) {
-		g_atomic_int_set (&_draining, 1);
+		_draining.store (1);
 		return;
 	}
 
-	if (g_atomic_int_get (&_draining)) {
+	if (_draining.load ()) {
 		_rb_capture.increment_read_idx (_rb_capture.read_space());
 		return;
 	}
@@ -425,7 +425,7 @@ AlsaAudioSlave::cycle_start (double tme, double mst_speed, bool drain)
 #ifndef NDEBUG
 		std::cerr << "ALSA Slave: Capture Ringbuffer Underflow\n"; // XXX DEBUG
 #endif
-		g_atomic_int_set(&_draining, 1);
+		_draining.store (1);
 	}
 
 	if ((!_active || underflow) && _capt_buff) {
@@ -443,7 +443,7 @@ AlsaAudioSlave::cycle_end ()
 	bool drain_done = false;
 	bool overflow = false;
 
-	if (g_atomic_int_get (&_draining)) {
+	if (_draining.load ()) {
 		if (_rb_capture.read_space() == 0 && _rb_playback.read_space() == 0 && _samples_since_dll_reset > _pcmi.fsamp ()) {
 			reset_resampler (_src_capt);
 			reset_resampler (_src_play);
@@ -502,11 +502,11 @@ AlsaAudioSlave::cycle_end ()
 #ifndef NDEBUG
 		std::cerr << "ALSA Slave: Playback Ringbuffer Overflow\n"; // XXX DEBUG
 #endif
-		g_atomic_int_set (&_draining, 1);
+		_draining.store (1);
 		return;
 	}
 	if (drain_done) {
-		g_atomic_int_set (&_draining, 0);
+		_draining.store (0);
 	}
 }
 
@@ -514,7 +514,7 @@ void
 AlsaAudioSlave::freewheel (bool onoff)
 {
 	if (onoff) {
-		g_atomic_int_set (&_draining, 1);
+		_draining.store (1);
 	}
 }
 

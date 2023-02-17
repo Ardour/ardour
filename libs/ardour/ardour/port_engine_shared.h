@@ -20,6 +20,7 @@
 #ifndef _libardour_port_engine_shared_h_
 #define _libardour_port_engine_shared_h_
 
+#include <atomic>
 #include <map>
 #include <memory>
 #include <set>
@@ -29,7 +30,6 @@
 
 #include "pbd/natsort.h"
 #include "pbd/rcu.h"
-#include "pbd/g_atomic_compat.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/port_engine.h"
@@ -195,7 +195,7 @@ protected:
 	std::vector<PortConnectData *> _port_connection_queue;
 	pthread_mutex_t _port_callback_mutex;
 
-	GATOMIC_QUAL gint _port_change_flag; /* atomic */
+	std::atomic<int> _port_change_flag; /* atomic */
 
 	void port_connect_callback (const std::string& a, const std::string& b, bool conn) {
 		pthread_mutex_lock (&_port_callback_mutex);
@@ -204,7 +204,7 @@ protected:
 	}
 
 	void port_connect_add_remove_callback () {
-		g_atomic_int_set (&_port_change_flag, 1);
+		_port_change_flag.store (1);
 	}
 
 	virtual void update_system_port_latencies ();

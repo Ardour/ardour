@@ -20,11 +20,10 @@
 #ifndef __ardour_disk_writer_h__
 #define __ardour_disk_writer_h__
 
+#include <atomic>
 #include <list>
 #include <vector>
 #include <boost/optional.hpp>
-
-#include "pbd/g_atomic_compat.h"
 
 #include "ardour/disk_io.h"
 #include "ardour/midi_buffer.h"
@@ -86,8 +85,8 @@ public:
 
 	std::list<std::shared_ptr<Source> >& last_capture_sources () { return _last_capture_sources; }
 
-	bool record_enabled () const { return g_atomic_int_get (const_cast<GATOMIC_QUAL gint*>(&_record_enabled)); }
-	bool record_safe () const { return g_atomic_int_get (const_cast<GATOMIC_QUAL gint*>(&_record_safe)); }
+	bool record_enabled () const { return g_atomic_int_get (const_cast<std::atomic<int>*>(&_record_enabled)); }
+	bool record_safe () const { return g_atomic_int_get (const_cast<std::atomic<int>*>(&_record_safe)); }
 
 	void set_record_enabled (bool yn);
 	void set_record_safe (bool yn);
@@ -187,10 +186,10 @@ private:
 	bool          _transport_looped;
 	samplepos_t   _transport_loop_sample;
 
-	GATOMIC_QUAL gint _record_enabled;
-	GATOMIC_QUAL gint _record_safe;
-	GATOMIC_QUAL gint _samples_pending_write;
-	GATOMIC_QUAL gint _num_captured_loops;
+	std::atomic<int> _record_enabled;
+	std::atomic<int> _record_safe;
+	std::atomic<int> _samples_pending_write;
+	std::atomic<int> _num_captured_loops;
 
 	std::shared_ptr<SMFSource> _midi_write_source;
 

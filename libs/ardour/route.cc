@@ -141,9 +141,9 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 {
 	processor_max_streams.reset();
 
-	g_atomic_int_set (&_pending_process_reorder, 0);
-	g_atomic_int_set (&_pending_listen_change, 0);
-	g_atomic_int_set (&_pending_signals, 0);
+	_pending_process_reorder.store (0);
+	_pending_listen_change.store (0);
+	_pending_signals.store (0);
 }
 
 std::weak_ptr<Route>
@@ -1015,7 +1015,7 @@ Route::add_processors (const ProcessorList& others, std::shared_ptr<Processor> b
 	ProcessorList::iterator loc;
 	std::shared_ptr <PluginInsert> fanout;
 
-	if (g_atomic_int_get (&_pending_process_reorder) || g_atomic_int_get (&_pending_listen_change)) {
+	if (_pending_process_reorder.load () || _pending_listen_change.load ()) {
 		/* we need to flush any pending re-order changes */
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 		apply_processor_changes_rt ();
@@ -2254,13 +2254,13 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 	/* If a change is already queued, wait for it
 	 * (unless engine is stopped. apply immediately and proceed
 	 */
-	while (g_atomic_int_get (&_pending_process_reorder)) {
+	while (_pending_process_reorder.load ()) {
 		if (!AudioEngine::instance()->running()) {
 			DEBUG_TRACE (DEBUG::Processors, "offline apply queued processor re-order.\n");
 			Glib::Threads::RWLock::WriterLock lm (_processor_lock);
 
-			g_atomic_int_set (&_pending_process_reorder, 0);
-			g_atomic_int_set (&_pending_listen_change, 0);
+			_pending_process_reorder.store (0);
+			_pending_listen_change.store (0);
 
 			apply_processor_order(_pending_processor_order);
 			_pending_processor_order.clear ();
@@ -2309,7 +2309,7 @@ Route::reorder_processors (const ProcessorList& new_order, ProcessorStreams* err
 
 		// _pending_processor_order is protected by _processor_lock
 		_pending_processor_order = new_order;
-		g_atomic_int_set (&_pending_process_reorder, 1);
+		_pending_process_reorder.store (1);
 	}
 
 	return 0;
@@ -4102,11 +4102,11 @@ Route::apply_processor_changes_rt ()
 
 	bool changed = false;
 
-	if (g_atomic_int_get (&_pending_process_reorder)) {
+	if (_pending_process_reorder.load ()) {
 		Glib::Threads::RWLock::WriterLock pwl (_processor_lock, Glib::Threads::TRY_LOCK);
 		if (pwl.locked()) {
-			g_atomic_int_set (&_pending_process_reorder, 0);
-			g_atomic_int_set (&_pending_listen_change, 0);
+			_pending_process_reorder.store (0);
+			_pending_listen_change.store (0);
 			apply_processor_order (_pending_processor_order);
 			_pending_processor_order.clear ();
 			setup_invisible_processors ();
@@ -4115,10 +4115,10 @@ Route::apply_processor_changes_rt ()
 		}
 	}
 
-	if (g_atomic_int_get (&_pending_listen_change)) {
+	if (_pending_listen_change.load ()) {
 		Glib::Threads::RWLock::WriterLock pwl (_processor_lock, Glib::Threads::TRY_LOCK);
 		if (pwl.locked()) {
-			g_atomic_int_set (&_pending_listen_change, 0);
+			_pending_listen_change.store (0);
 			setup_invisible_processors ();
 			changed = true;
 			emissions |= EmitRtProcessorChange;
@@ -4142,7 +4142,7 @@ Route::apply_processor_changes_rt ()
 void
 Route::emit_pending_signals ()
 {
-	int sig = g_atomic_int_and (&_pending_signals, 0);
+	int sig = _pending_signals.fetch_and (0);
 	if (sig & EmitMeterChanged) {
 		_meter->emit_configuration_changed();
 		meter_change (); /* EMIT SIGNAL */
@@ -4309,7 +4309,7 @@ Route::listen_position_changed ()
 
 	if (c == _monitor_send->input_streams () && AudioEngine::instance()->running()) {
 		Glib::Threads::RWLock::ReaderLock lm (_processor_lock); // XXX is this needed?
-		g_atomic_int_set (&_pending_listen_change, 1);
+		_pending_listen_change.store (1);
 		return;
 	}
 

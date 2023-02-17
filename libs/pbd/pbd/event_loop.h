@@ -20,6 +20,7 @@
 #ifndef __pbd_event_loop_h__
 #define __pbd_event_loop_h__
 
+#include <atomic>
 #include <string>
 #include <vector>
 #include <map>
@@ -58,19 +59,19 @@ public:
 	struct InvalidationRecord {
 		std::list<BaseRequestObject*> requests;
 		PBD::EventLoop* event_loop;
-		gint _valid;
-		gint _ref;
+		std::atomic<int> _valid;
+		std::atomic<int> _ref;
 		const char* file;
 		int line;
 
 		InvalidationRecord() : event_loop (0), _valid (1), _ref (0) {}
-		void invalidate () { g_atomic_int_set (&_valid, 0); }
-		bool valid () { return g_atomic_int_get (&_valid) == 1; }
+		void invalidate () { _valid.store (0); }
+		bool valid () { return _valid.load () == 1; }
 
-		void ref ()    { g_atomic_int_inc (&_ref); }
-		void unref ()  { (void) g_atomic_int_dec_and_test (&_ref); }
-		bool in_use () { return g_atomic_int_get (&_ref) > 0; }
-		int  use_count () { return g_atomic_int_get (&_ref); }
+		void ref ()    { _ref.fetch_add (1); }
+		void unref ()  { (void) _ref.fetch_sub (1); }
+		bool in_use () { return _ref.load () > 0; }
+		int  use_count () { return _ref.load (); }
 	};
 
 	static void* invalidate_request (void* data);

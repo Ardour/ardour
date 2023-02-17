@@ -24,12 +24,12 @@
 #include <iostream>
 #include <string>
 
-#include <stdint.h>
+#include <atomic>
+#include <cstdint>
 
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
 #include "pbd/properties.h"
-#include "pbd/g_atomic_compat.h"
 
 #include "ardour/libardour_visibility.h"
 
@@ -287,7 +287,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 
 	static PBD::PropertyChange _pending_static_changes;
 	static Glib::Threads::Mutex static_signal_lock;
-	static GATOMIC_QUAL gint   _change_signal_suspended;
+	static std::atomic<int>   _change_signal_suspended;
 
 	static int selection_counter;
 };

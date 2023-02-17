@@ -62,7 +62,7 @@ Auditioner::Auditioner (Session& s)
 	, _queue_panic (false)
 	, _import_position (0)
 {
-	g_atomic_int_set (&_auditioning, 0);
+	_auditioning.store (0);
 }
 
 int
@@ -365,7 +365,7 @@ Auditioner::update_controls (BufferSet const& bufs)
 void
 Auditioner::audition_region (std::shared_ptr<Region> region, bool loop)
 {
-	if (g_atomic_int_get (&_auditioning)) {
+	if (_auditioning.load ()) {
 		/* don't go via session for this, because we are going
 		   to remain active.
 		*/
@@ -483,7 +483,7 @@ Auditioner::audition_region (std::shared_ptr<Region> region, bool loop)
 
 	current_sample = offset.samples();
 
-	g_atomic_int_set (&_auditioning, 1);
+	_auditioning.store (1);
 }
 
 void
@@ -503,7 +503,7 @@ Auditioner::play_audition (samplecnt_t nframes)
 	samplecnt_t this_nframes;
 	int ret;
 
-	if (g_atomic_int_get (&_auditioning) == 0) {
+	if (_auditioning.load () == 0) {
 		silence (nframes);
 		if (_reload_synth) {
 			unload_synth (false);
@@ -581,12 +581,12 @@ Auditioner::play_audition (samplecnt_t nframes)
 
 void
 Auditioner::cancel_audition () {
-	g_atomic_int_set (&_auditioning, 0);
+	_auditioning.store (0);
 }
 
 bool
 Auditioner::auditioning() const {
-	return g_atomic_int_get (&_auditioning);
+	return _auditioning.load ();
 }
 
 void

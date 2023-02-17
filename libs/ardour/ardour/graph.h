@@ -23,6 +23,7 @@
 #ifndef __ardour_graph_h__
 #define __ardour_graph_h__
 
+#include <atomic>
 #include <list>
 #include <memory>
 #include <set>
@@ -30,7 +31,6 @@
 #include <vector>
 
 
-#include "pbd/g_atomic_compat.h"
 #include "pbd/mpmc_queue.h"
 #include "pbd/semutils.h"
 
@@ -107,28 +107,28 @@ private:
 	void helper_thread ();
 
 	PBD::MPMCQueue<ProcessNode*> _trigger_queue;      ///< nodes that can be processed
-	GATOMIC_QUAL guint           _trigger_queue_size; ///< number of entries in trigger-queue
+	std::atomic<unsigned int>           _trigger_queue_size; ///< number of entries in trigger-queue
 
 	/** Start worker threads */
 	PBD::Semaphore _execution_sem;
 
 	/** The number of processing threads that are asleep */
-	GATOMIC_QUAL guint _idle_thread_cnt;
+	std::atomic<unsigned int> _idle_thread_cnt;
 
 	/** Signalled to start a run of the graph for a process callback */
 	PBD::Semaphore _callback_start_sem;
 	PBD::Semaphore _callback_done_sem;
 
 	/** The number of unprocessed nodes that do not feed any other node; updated during processing */
-	GATOMIC_QUAL guint _terminal_refcnt;
+	std::atomic<unsigned int> _terminal_refcnt;
 
 	bool _graph_empty;
 
 	/* number of background worker threads >= 0 */
-	GATOMIC_QUAL guint _n_workers;
+	std::atomic<unsigned int> _n_workers;
 
 	/* flag to terminate background threads */
-	GATOMIC_QUAL gint _terminate;
+	std::atomic<int> _terminate;
 
 	/* graph chain */
 	GraphChain const* _graph_chain;

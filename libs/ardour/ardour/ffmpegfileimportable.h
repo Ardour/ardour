@@ -19,7 +19,8 @@
 #ifndef _ardour_ffmpegfile_importable_source_h_
 #define _ardour_ffmpegfile_importable_source_h_
 
-#include "pbd/g_atomic_compat.h"
+#include <atomic>
+
 #include "pbd/ringbuffer.h"
 
 #include "ardour/importable_source.h"
@@ -68,7 +69,7 @@ private:
 
 	PBD::RingBuffer<Sample> _buffer;
 	/* Set to 1 to indicate that ffmpeg should be terminating. */
-	GATOMIC_QUAL gint _ffmpeg_should_terminate;
+	std::atomic<int> _ffmpeg_should_terminate;
 
 	/* To make sure we don't try to parse partial floats, we might have a couple of bytes
 	 * of leftover unparsable data after any `did_read_data` call. Those couple of bytes are

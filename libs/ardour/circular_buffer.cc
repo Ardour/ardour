@@ -29,7 +29,7 @@ CircularSampleBuffer::CircularSampleBuffer (samplecnt_t size)
 void
 CircularSampleBuffer::write (Sample const* buf, samplecnt_t n_samples)
 {
-	guint ws = _rb.write_space ();
+	ssize_t ws = (ssize_t) _rb.write_space ();
 	if (ws < n_samples) {
 		/* overwrite old data (consider a spinlock wrt ::read) */
 		_rb.increment_read_idx (n_samples - ws);
@@ -40,7 +40,7 @@ CircularSampleBuffer::write (Sample const* buf, samplecnt_t n_samples)
 void
 CircularSampleBuffer::silence (samplecnt_t n_samples)
 {
-	guint ws = _rb.write_space ();
+	ssize_t ws = (ssize_t) _rb.write_space ();
 	if (ws < n_samples) {
 		/* overwrite old data (consider a spinlock wrt ::read) */
 		_rb.increment_read_idx (n_samples - ws);
@@ -129,8 +129,8 @@ CircularEventBuffer::~CircularEventBuffer ()
 
 void
 CircularEventBuffer::reset () {
-	g_atomic_int_set (&_idx, 0);
-	g_atomic_int_set (&_ack, 0);
+	_idx.store (0);
+	_ack.store (0);
 	memset ((void*)_buf, 0, _size * sizeof (Event));
 }
 
@@ -139,23 +139,24 @@ CircularEventBuffer::write (uint8_t const* buf, size_t size)
 {
 	Event e (buf, size);
 
-	guint write_idx = g_atomic_int_get (&_idx);
+	guint write_idx = _idx.load ();
 	memcpy (&_buf[write_idx], &e, sizeof (Event));
 	write_idx = (write_idx + 1) & _size_mask;
 	g_atomic_int_set (&_idx, write_idx);
-	g_atomic_int_set (&_ack, 1);
+	_ack.store (1);
 }
 
 bool
 CircularEventBuffer::read (EventList& l)
 {
 	guint to_read = _size_mask;
-	if (!g_atomic_int_compare_and_exchange (&_ack, 1, 0)) {
+	int canderef (1);
+	if (!_ack.compare_exchange_strong (canderef, 0)) {
 		return false;
 	}
 
 	l.clear ();
-	guint priv_idx = g_atomic_int_get (&_idx);
+	guint priv_idx = _idx.load ();
 	while (priv_idx > 0) {
 		--priv_idx;
 		--to_read;

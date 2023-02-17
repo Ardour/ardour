@@ -34,6 +34,7 @@
 
 #include <boost/algorithm/string/erase.hpp>
 
+#include "pbd/atomic.h"
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 #include "pbd/i18n.h"
@@ -200,7 +201,7 @@ Session::locate (samplepos_t target_sample, bool for_loop_end, bool force, bool 
 	_nominal_jack_transport_sample = boost::none;
 	// Bump seek counter so that any in-process locate in the butler
 	// thread(s?) can restart.
-	g_atomic_int_inc (&_seek_counter);
+	_seek_counter.fetch_add (1);
 	_last_roll_or_reversal_location = target_sample;
 	if (!for_loop_end) {
 		_remaining_latency_preroll = worst_latency_preroll_buffer_size_ceil ();
@@ -761,9 +762,9 @@ Session::add_post_transport_work (PostTransportWork ptw)
 	int tries = 0;
 
 	while (tries < 8) {
-		oldval = (PostTransportWork) g_atomic_int_get (&_post_transport_work);
+		oldval = _post_transport_work.load ();
 		newval = PostTransportWork (oldval | ptw);
-		if (g_atomic_int_compare_and_exchange (&_post_transport_work, oldval, newval)) {
+		if (_post_transport_work.compare_exchange_strong (oldval, newval)) {
 			/* success */
 			return;
 		}
@@ -1162,15 +1163,15 @@ Session::butler_transport_work (bool have_process_lock)
 		}
 	}
 
-	const int butler = g_atomic_int_get (&_butler_seek_counter);
-	const int rtlocates = g_atomic_int_get (&_seek_counter);
+	const int butler = _butler_seek_counter.load ();
+	const int rtlocates = _seek_counter.load ();
 	const bool will_locate = (butler != rtlocates);
 
 	if (ptw & PostTransportStop) {
 		non_realtime_stop (ptw & PostTransportAbort, on_entry, finished, will_locate);
 
 		if (!finished) {
-			g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
+			(void) PBD::atomic_dec_and_test (_butler->should_do_transport_work);
 			goto restart;
 		}
 	}
@@ -1184,7 +1185,7 @@ Session::butler_transport_work (bool have_process_lock)
 	if (ptw & PostTransportOverWrite) {
 		non_realtime_overwrite (on_entry, finished, (ptw & PostTransportLoopChanged));
 		if (!finished) {
-			g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
+			(void) PBD::atomic_dec_and_test (_butler->should_do_transport_work);
 			goto restart;
 		}
 	}
@@ -1193,7 +1194,7 @@ Session::butler_transport_work (bool have_process_lock)
 		non_realtime_set_audition ();
 	}
 
-	g_atomic_int_dec_and_test (&_butler->should_do_transport_work);
+	(void) PBD::atomic_dec_and_test (_butler->should_do_transport_work);
 
 	DEBUG_TRACE (DEBUG::Transport, string_compose (X_("Butler transport work all done after %1 usecs @ %2 ptw %3 trw = %4\n"), g_get_monotonic_time() - before, _transport_sample, enum_2_string (post_transport_work()), _butler->transport_work_requested()));
 }
@@ -1261,13 +1262,13 @@ Session::non_realtime_locate ()
 		std::shared_ptr<RouteList> rl = routes.reader();
 
 	  restart:
-		sc = g_atomic_int_get (&_seek_counter);
+		sc = _seek_counter.load ();
 		tf = _transport_sample;
 		start = get_microseconds ();
 
 		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i, ++nt) {
 			(*i)->non_realtime_locate (tf);
-			if (sc != g_atomic_int_get (&_seek_counter)) {
+			if (sc != _seek_counter.load ()) {
 				goto restart;
 			}
 		}
@@ -1277,7 +1278,7 @@ Session::non_realtime_locate ()
 #ifndef NDEBUG
 		std::cerr << "locate to " << tf << " took " << (end - start) << " usecs for " << nt << " tracks = " << usecs_per_track << " per track\n";
 #endif
-		if (usecs_per_track > g_atomic_int_get (&_current_usecs_per_track)) {
+		if (usecs_per_track > _current_usecs_per_track.load ()) {
 			g_atomic_int_set (&_current_usecs_per_track, usecs_per_track);
 		}
 	}
@@ -1878,8 +1879,8 @@ Session::reset_xrun_count ()
 void
 Session::route_processors_changed (RouteProcessorChange c)
 {
-	if (g_atomic_int_get (&_ignore_route_processor_changes) > 0) {
-		g_atomic_int_or (&_ignored_a_processor_change, (int)c.type);
+	if (_ignore_route_processor_changes.load () > 0) {
+		(void) _ignored_a_processor_change.fetch_or (c.type);
 		return;
 	}
 
@@ -1948,7 +1949,7 @@ Session::request_resume_timecode_transmission ()
 bool
 Session::timecode_transmission_suspended () const
 {
-	return g_atomic_int_get (&_suspend_timecode_transmission) == 1;
+	return _suspend_timecode_transmission.load () == 1;
 }
 
 std::shared_ptr<TransportMaster>

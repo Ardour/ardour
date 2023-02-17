@@ -24,6 +24,7 @@
 #ifndef __ardour_route_h__
 #define __ardour_route_h__
 
+#include <atomic>
 #include <cmath>
 #include <cstring>
 #include <list>
@@ -39,7 +40,6 @@
 #include "pbd/stateful.h"
 #include "pbd/controllable.h"
 #include "pbd/destructible.h"
-#include "pbd/g_atomic_compat.h"
 
 #include "ardour/ardour.h"
 #include "ardour/gain_control.h"
@@ -681,9 +681,9 @@ protected:
 	};
 
 	ProcessorList     _pending_processor_order;
-	GATOMIC_QUAL gint _pending_process_reorder; // atomic
-	GATOMIC_QUAL gint _pending_listen_change; // atomic
-	GATOMIC_QUAL gint _pending_signals; // atomic
+	std::atomic<int> _pending_process_reorder; // atomic
+	std::atomic<int> _pending_listen_change; // atomic
+	std::atomic<int> _pending_signals; // atomic
 
 	MeterPoint     _meter_point;
 	MeterPoint     _pending_meter_point;

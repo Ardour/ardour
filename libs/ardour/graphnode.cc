@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/atomic.h"
+
 #include "ardour/graphnode.h"
 #include "ardour/graph.h"
 #include "ardour/route.h"
@@ -49,7 +51,7 @@ GraphActivision::init_refcount (GraphChain const* const g) const
 GraphNode::GraphNode (std::shared_ptr<Graph> graph)
 	: _graph (graph)
 {
-	g_atomic_int_set (&_refcount, 0);
+	_refcount.store (0);
 }
 
 void
@@ -71,7 +73,7 @@ void
 GraphNode::trigger ()
 {
 	/* check if we can run */
-	if (g_atomic_int_dec_and_test (&_refcount)) {
+	if (PBD::atomic_dec_and_test (_refcount)) {
 #if 0 // TODO optimize: remove prep()
 		/* reset reference count for next cycle */
 		g_atomic_int_set (&_refcount, _init_refcount[chain]);

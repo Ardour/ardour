@@ -48,8 +48,8 @@ IOPlug::IOPlug (Session& s, std::shared_ptr<Plugin> p, bool pre)
 	, _plugin_signal_latency (0)
 	, _window_proxy (0)
 {
-	g_atomic_int_set (&_stat_reset, 0);
-	g_atomic_int_set (&_reset_meters, 0);
+	_stat_reset.store (0);
+	_reset_meters.store (0);
 
 	if (_plugin) {
 		setup ();
@@ -430,7 +430,8 @@ IOPlug::connect_and_run (samplepos_t start, pframes_t n_samples)
 	Temporal::TempoMap::update_thread_tempo_map ();
 	assert (n_samples > 0);
 
-	if (g_atomic_int_compare_and_exchange (&_stat_reset, 1, 0)) {
+	int canderef (1);
+	if (_stat_reset.compare_exchange_strong (canderef, 0)) {
 		_timing_stats.reset ();
 	}
 
@@ -466,7 +467,8 @@ IOPlug::connect_and_run (samplepos_t start, pframes_t n_samples)
 
 	PortSet& ports (_output->ports());
 	if (_pre) {
-		const bool reset       = g_atomic_int_compare_and_exchange (&_reset_meters, 1, 0);
+		canderef = 1;
+		const bool reset       = _reset_meters.compare_exchange_strong (canderef, 0);
 		samplecnt_t const rate = _session.nominal_sample_rate ();
 
 		auto a = _audio_input_ports.begin ();
@@ -503,7 +505,7 @@ IOPlug::connect_and_run (samplepos_t start, pframes_t n_samples)
 void
 IOPlug::reset_input_meters ()
 {
-	g_atomic_int_set (&_reset_meters, 1);
+	_reset_meters.store (1);
 }
 
 bool
@@ -515,7 +517,7 @@ IOPlug::get_stats (PBD::microseconds_t& min, PBD::microseconds_t& max, double& a
 void
 IOPlug::clear_stats ()
 {
-	g_atomic_int_set (&_stat_reset, 1);
+	_stat_reset.store (1);
 }
 
 std::shared_ptr<ReadOnlyControl>

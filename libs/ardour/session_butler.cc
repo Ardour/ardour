@@ -122,11 +122,11 @@ Session::overwrite_some_buffers (std::shared_ptr<Route> r, OverwriteReason why)
 uint32_t
 Session::playback_load ()
 {
-	return (uint32_t) g_atomic_int_get (&_playback_load);
+	return (uint32_t) _playback_load.load ();
 }
 
 uint32_t
 Session::capture_load ()
 {
-	return (uint32_t) g_atomic_int_get (&_capture_load);
+	return (uint32_t) _capture_load.load ();
 }

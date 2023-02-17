@@ -131,7 +131,7 @@ Session::setup_bundles ()
 		   auto-connect thread, which does this sort of thing anyway.
 		*/
 
-		g_atomic_int_set (&_update_pretty_names, 1);
+		_update_pretty_names.store (1);
 		auto_connect_thread_wakeup ();
 	}
 

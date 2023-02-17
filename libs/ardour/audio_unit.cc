@@ -760,7 +760,7 @@ AUPlugin::default_value (uint32_t port)
 samplecnt_t
 AUPlugin::plugin_latency () const
 {
-	guint lat = g_atomic_int_get (&_current_latency);;
+	guint lat = _current_latency.load ();;
 	if (lat == UINT_MAX) {
 		lat = unit->Latency() * _session.sample_rate();
 		g_atomic_int_set (&_current_latency, lat);

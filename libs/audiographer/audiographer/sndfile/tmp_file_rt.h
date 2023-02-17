@@ -68,7 +68,7 @@ class TmpFileRt
 				% c.channels() % SndfileHandle::channels()));
 		}
 
-		if (SndfileWriter<T>::throw_level (ThrowProcess) && _rb.write_space() < c.samples()) {
+		if (SndfileWriter<T>::throw_level (ThrowProcess) && _rb.write_space() < (size_t) c.samples()) {
 			throw Exception (*this, boost::str (boost::format
 				("Could not write data to ringbuffer/output file (%1%)")
 				% SndfileHandle::strError()));

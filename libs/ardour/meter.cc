@@ -53,8 +53,8 @@ PeakMeter::PeakMeter (Session& s, const std::string& name)
 	_meter_type     = MeterPeak;
 	_bufcnt         = 0;
 
-	g_atomic_int_set (&_reset_dpm, 1);
-	g_atomic_int_set (&_reset_max, 1);
+	_reset_dpm.store (1);
+	_reset_max.store (1);
 }
 
 PeakMeter::~PeakMeter ()
@@ -96,9 +96,10 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 		return;
 	}
 
-	const bool reset_max = g_atomic_int_compare_and_exchange (&_reset_max, 1, 0);
+	int canderef (1);
+	const bool reset_max = _reset_max.compare_exchange_strong (canderef, 0);
 	/* max-peak is set from DPM's peak-buffer, so DPM also needs to be reset in sync */
-	const bool reset_dpm = g_atomic_int_compare_and_exchange (&_reset_dpm, 1, 0) || reset_max;
+	const bool reset_dpm = _reset_dpm.compare_exchange_strong (canderef, 0) || reset_max;
 
 	const uint32_t n_audio = min (current_meters.n_audio (), bufs.count ().n_audio ());
 	const uint32_t n_midi  = min (current_meters.n_midi (), bufs.count ().n_midi ());
@@ -202,7 +203,7 @@ void
 PeakMeter::reset ()
 {
 	if (_active || _pending_active) {
-		g_atomic_int_set (&_reset_dpm, 1);
+		_reset_dpm.store (1);
 	} else {
 		for (size_t i = 0; i < _peak_power.size (); ++i) {
 			_peak_power[i]  = -std::numeric_limits<float>::infinity ();
@@ -227,7 +228,7 @@ void
 PeakMeter::reset_max ()
 {
 	if (_active || _pending_active) {
-		g_atomic_int_set (&_reset_max, 1);
+		_reset_max.store (1);
 		return;
 	}
 	for (size_t i = 0; i < _max_peak_signal.size (); ++i) {
@@ -361,7 +362,7 @@ PeakMeter::set_max_channels (const ChanCount& chn)
 float
 PeakMeter::meter_level (uint32_t n, MeterType type)
 {
-	if (g_atomic_int_get (&_reset_max)) {
+	if (_reset_max.load ()) {
 		if (n < current_meters.n_midi () && type != MeterMaxPeak) {
 			return 0;
 		} else {

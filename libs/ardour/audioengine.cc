@@ -75,7 +75,7 @@ using namespace PBD;
 
 AudioEngine* AudioEngine::_instance = 0;
 
-static GATOMIC_QUAL gint audioengine_thread_cnt = 1;
+static std::atomic<int> audioengine_thread_cnt (1);
 
 #ifdef SILENCE_AFTER
 #define SILENCE_AFTER_SECONDS 600
@@ -112,12 +112,12 @@ AudioEngine::AudioEngine ()
 	start_hw_event_processing();
 	discover_backends ();
 
-	g_atomic_int_set (&_hw_reset_request_count, 0);
-	g_atomic_int_set (&_pending_playback_latency_callback, 0);
-	g_atomic_int_set (&_pending_capture_latency_callback, 0);
-	g_atomic_int_set (&_hw_devicelist_update_count, 0);
-	g_atomic_int_set (&_stop_hw_reset_processing, 0);
-	g_atomic_int_set (&_stop_hw_devicelist_processing, 0);
+	_hw_reset_request_count.store (0);
+	_pending_playback_latency_callback.store (0);
+	_pending_capture_latency_callback.store (0);
+	_hw_devicelist_update_count.store (0);
+	_stop_hw_reset_processing.store (0);
+	_stop_hw_devicelist_processing.store (0);
 }
 
 AudioEngine::~AudioEngine ()
@@ -305,10 +305,12 @@ AudioEngine::process_callback (pframes_t nframes)
 	if (_session && !_session->processing_blocked ()) {
 		bool lp = false;
 		bool lc = false;
-		if (g_atomic_int_compare_and_exchange (&_pending_playback_latency_callback, 1, 0)) {
+		int canderef (1);
+		if (_pending_playback_latency_callback.compare_exchange_strong (canderef, 0)) {
 			lp = true;
 		}
-		if (g_atomic_int_compare_and_exchange (&_pending_capture_latency_callback, 1, 0)) {
+		canderef = 1;
+		if (_pending_capture_latency_callback.compare_exchange_strong (canderef, 0)) {
 			lc = true;
 		}
 		if (lp || lc) {
@@ -653,14 +655,14 @@ void
 AudioEngine::request_backend_reset()
 {
 	Glib::Threads::Mutex::Lock guard (_reset_request_lock);
-	g_atomic_int_inc (&_hw_reset_request_count);
+	_hw_reset_request_count.fetch_add (1);
 	_hw_reset_condition.signal ();
 }
 
 int
 AudioEngine::backend_reset_requested()
 {
-	return g_atomic_int_get (&_hw_reset_request_count);
+	return _hw_reset_request_count.load ();
 }
 
 void
@@ -671,14 +673,14 @@ AudioEngine::do_reset_backend()
 
 	Glib::Threads::Mutex::Lock guard (_reset_request_lock);
 
-	while (!g_atomic_int_get (&_stop_hw_reset_processing)) {
+	while (!_stop_hw_reset_processing.load ()) {
 
-		if (g_atomic_int_get (&_hw_reset_request_count) != 0 && _backend) {
+		if (_hw_reset_request_count.load () != 0 && _backend) {
 
 			_reset_request_lock.unlock();
 
 			Glib::Threads::RecMutex::Lock pl (_state_lock);
-			g_atomic_int_dec_and_test (&_hw_reset_request_count);
+			PBD::atomic_dec_and_test (_hw_reset_request_count);
 
 			std::cout << "AudioEngine::RESET::Reset request processing. Requests left: " << _hw_reset_request_count << std::endl;
 			DeviceResetStarted(); // notify about device reset to be started
@@ -720,7 +722,7 @@ void
 AudioEngine::request_device_list_update()
 {
 	Glib::Threads::Mutex::Lock guard (_devicelist_update_lock);
-	g_atomic_int_inc (&_hw_devicelist_update_count);
+	_hw_devicelist_update_count.fetch_add (1);
 	_hw_devicelist_update_condition.signal ();
 }
 
@@ -734,13 +736,13 @@ AudioEngine::do_devicelist_update()
 
 	while (!_stop_hw_devicelist_processing) {
 
-		if (g_atomic_int_get (&_hw_devicelist_update_count)) {
+		if (_hw_devicelist_update_count.load ()) {
 
 			_devicelist_update_lock.unlock();
 
 			Glib::Threads::RecMutex::Lock pl (_state_lock);
 
-			g_atomic_int_dec_and_test (&_hw_devicelist_update_count);
+			PBD::atomic_dec_and_test (_hw_devicelist_update_count);
 			DeviceListChanged (); /* EMIT SIGNAL */
 
 			_devicelist_update_lock.lock();
@@ -756,14 +758,14 @@ void
 AudioEngine::start_hw_event_processing()
 {
 	if (_hw_reset_event_thread == 0) {
-		g_atomic_int_set (&_hw_reset_request_count, 0);
-		g_atomic_int_set (&_stop_hw_reset_processing, 0);
+		_hw_reset_request_count.store (0);
+		_stop_hw_reset_processing.store (0);
 		_hw_reset_event_thread = PBD::Thread::create (boost::bind (&AudioEngine::do_reset_backend, this));
 	}
 
 	if (_hw_devicelist_update_thread == 0) {
-		g_atomic_int_set (&_hw_devicelist_update_count, 0);
-		g_atomic_int_set (&_stop_hw_devicelist_processing, 0);
+		_hw_devicelist_update_count.store (0);
+		_stop_hw_devicelist_processing.store (0);
 		_hw_devicelist_update_thread = PBD::Thread::create (boost::bind (&AudioEngine::do_devicelist_update, this));
 	}
 }
@@ -773,16 +775,16 @@ void
 AudioEngine::stop_hw_event_processing()
 {
 	if (_hw_reset_event_thread) {
-		g_atomic_int_set (&_stop_hw_reset_processing, 1);
-		g_atomic_int_set (&_hw_reset_request_count, 0);
+		_stop_hw_reset_processing.store (1);
+		_hw_reset_request_count.store (0);
 		_hw_reset_condition.signal ();
 		_hw_reset_event_thread->join ();
 		_hw_reset_event_thread = 0;
 	}
 
 	if (_hw_devicelist_update_thread) {
-		g_atomic_int_set (&_stop_hw_devicelist_processing, 1);
-		g_atomic_int_set (&_hw_devicelist_update_count, 0);
+		_stop_hw_devicelist_processing.store (1);
+		_hw_devicelist_update_count.store (0);
 		_hw_devicelist_update_condition.signal ();
 		_hw_devicelist_update_thread->join ();
 		_hw_devicelist_update_thread = 0;
@@ -798,8 +800,8 @@ AudioEngine::set_session (Session *s)
 
 	if (_session) {
 		_init_countdown = std::max (4, (int)(_backend->sample_rate () / _backend->buffer_size ()) / 8);
-		g_atomic_int_set (&_pending_playback_latency_callback, 0);
-		g_atomic_int_set (&_pending_capture_latency_callback, 0);
+		_pending_playback_latency_callback.store (0);
+		_pending_capture_latency_callback.store (0);
 	}
 }
 
@@ -1451,7 +1453,7 @@ AudioEngine::thread_init_callback (void* arg)
 
 	pthread_set_name (X_("audioengine"));
 
-	const int thread_num = g_atomic_int_add (&audioengine_thread_cnt, 1);
+	const int thread_num = audioengine_thread_cnt.fetch_add (1);
 	const string thread_name = string_compose (X_("AudioEngine %1"), thread_num);
 
 	SessionEvent::create_per_thread_pool (thread_name, 512);
@@ -1525,9 +1527,9 @@ void
 AudioEngine::queue_latency_update (bool for_playback)
 {
 	if (for_playback) {
-		g_atomic_int_set (&_pending_playback_latency_callback, 1);
+		_pending_playback_latency_callback.store (1);
 	} else {
-		g_atomic_int_set (&_pending_capture_latency_callback, 1);
+		_pending_capture_latency_callback.store (1);
 	}
 }
 

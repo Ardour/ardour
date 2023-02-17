@@ -70,11 +70,11 @@ Graph::Graph (Session& session)
 	, _graph_empty (true)
 	, _graph_chain (0)
 {
-	g_atomic_int_set (&_terminal_refcnt, 0);
-	g_atomic_int_set (&_terminate, 0);
-	g_atomic_int_set (&_n_workers, 0);
-	g_atomic_int_set (&_idle_thread_cnt, 0);
-	g_atomic_int_set (&_trigger_queue_size, 0);
+	_terminal_refcnt.store (0);
+	_terminate.store (0);
+	_n_workers.store (0);
+	_idle_thread_cnt.store (0);
+	_trigger_queue_size.store (0);
 
 	/* pre-allocate memory */
 	_trigger_queue.reserve (1024);
@@ -124,7 +124,7 @@ Graph::reset_thread_list ()
 	}
 
 	/* Allow threads to run */
-	g_atomic_int_set (&_terminate, 0);
+	_terminate.store (0);
 
 	if (AudioEngine::instance ()->create_process_thread (boost::bind (&Graph::main_thread, this)) != 0) {
 		throw failed_constructor ();
@@ -153,7 +153,7 @@ Graph::session_going_away ()
 	drop_threads ();
 
 	/* now drop all references on the nodes. */
-	g_atomic_int_set (&_trigger_queue_size, 0);
+	_trigger_queue_size.store (0);
 	_trigger_queue.clear ();
 	_graph_chain = 0;
 }
@@ -162,7 +162,7 @@ void
 Graph::drop_threads ()
 {
 	/* Flag threads to terminate */
-	g_atomic_int_set (&_terminate, 1);
+	_terminate.store (1);
 
 	/* Wake-up sleeping threads */
 	guint tc = g_atomic_uint_get (&_idle_thread_cnt);
@@ -177,8 +177,8 @@ Graph::drop_threads ()
 	/* join process threads */
 	AudioEngine::instance ()->join_process_threads ();
 
-	g_atomic_int_set (&_n_workers, 0);
-	g_atomic_int_set (&_idle_thread_cnt, 0);
+	_n_workers.store (0);
+	_idle_thread_cnt.store (0);
 
 	/* signal main process thread if it's waiting for an already terminated thread */
 	_callback_done_sem.signal ();
@@ -224,7 +224,7 @@ Graph::prep ()
 
 	/* Trigger the initial nodes for processing, which are the ones at the `input' end */
 	for (auto const& i : _graph_chain->_init_trigger_list) {
-		g_atomic_int_inc (&_trigger_queue_size);
+		_trigger_queue_size.fetch_add (1);
 		_trigger_queue.push_back (i.get ());
 	}
 }
@@ -232,7 +232,7 @@ Graph::prep ()
 void
 Graph::trigger (ProcessNode* n)
 {
-	g_atomic_int_inc (&_trigger_queue_size);
+	_trigger_queue_size.fetch_add (1);
 	_trigger_queue.push_back (n);
 }
 
@@ -242,7 +242,7 @@ Graph::trigger (ProcessNode* n)
 void
 Graph::reached_terminal_node ()
 {
-	if (g_atomic_int_dec_and_test (&_terminal_refcnt)) {
+	if (PBD::atomic_dec_and_test (_terminal_refcnt)) {
 	again:
 
 		/* We have run all the nodes that are at the `output' end of
@@ -268,7 +268,7 @@ Graph::reached_terminal_node ()
 		/* Block until the a process callback */
 		_callback_start_sem.wait ();
 
-		if (g_atomic_int_get (&_terminate)) {
+		if (_terminate.load ()) {
 			return;
 		}
 
@@ -280,7 +280,7 @@ Graph::reached_terminal_node ()
 		 */
 		prep ();
 
-		if (_graph_empty && !g_atomic_int_get (&_terminate)) {
+		if (_graph_empty && !_terminate.load ()) {
 			goto again;
 		}
 		/* .. continue in worker-thread */
@@ -293,7 +293,7 @@ Graph::run_one ()
 {
 	ProcessNode* to_run = NULL;
 
-	if (g_atomic_int_get (&_terminate)) {
+	if (_terminate.load ()) {
 		return;
 	}
 
@@ -315,19 +315,19 @@ Graph::run_one ()
 
 	while (!to_run) {
 		/* Wait for work, fall asleep */
-		g_atomic_int_inc (&_idle_thread_cnt);
+		_idle_thread_cnt.fetch_add (1);
 		assert (g_atomic_uint_get (&_idle_thread_cnt) <= g_atomic_uint_get (&_n_workers));
 
 		DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 goes to sleep\n", pthread_name ()));
 		_execution_sem.wait ();
 
-		if (g_atomic_int_get (&_terminate)) {
+		if (_terminate.load ()) {
 			return;
 		}
 
 		DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 is awake\n", pthread_name ()));
 
-		g_atomic_int_dec_and_test (&_idle_thread_cnt);
+		PBD::atomic_dec_and_test (_idle_thread_cnt);
 
 		/* Try to find some work to do */
 		_trigger_queue.pop_front (to_run);
@@ -342,7 +342,7 @@ Graph::run_one ()
 	Temporal::TempoMap::fetch ();
 
 	/* Process the graph-node */
-	g_atomic_int_dec_and_test (&_trigger_queue_size);
+	PBD::atomic_dec_and_test (_trigger_queue_size);
 	to_run->run (_graph_chain);
 
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("%1 has finished run_one()\n", pthread_name ()));
@@ -351,7 +351,7 @@ Graph::run_one ()
 void
 Graph::helper_thread ()
 {
-	g_atomic_int_inc (&_n_workers);
+	_n_workers.fetch_add (1);
 	guint id = g_atomic_uint_get (&_n_workers);
 
 	/* This is needed for ARDOUR::Session requests called from rt-processors
@@ -370,7 +370,7 @@ Graph::helper_thread ()
 
 	pt->get_buffers ();
 
-	while (!g_atomic_int_get (&_terminate)) {
+	while (!_terminate.load ()) {
 		run_one ();
 	}
 
@@ -406,7 +406,7 @@ again:
 
 	DEBUG_TRACE (DEBUG::ProcessThreads, "main thread is awake\n");
 
-	if (g_atomic_int_get (&_terminate)) {
+	if (_terminate.load ()) {
 		pt->drop_buffers ();
 		delete (pt);
 		return;
@@ -416,14 +416,14 @@ again:
 	 * (later this is done by Graph_reached_terminal_node) */
 	prep ();
 
-	if (_graph_empty && !g_atomic_int_get (&_terminate)) {
+	if (_graph_empty && !_terminate.load ()) {
 		_callback_done_sem.signal ();
 		DEBUG_TRACE (DEBUG::ProcessThreads, "main thread sees graph done, goes back to sleep\n");
 		goto again;
 	}
 
 	/* After setup, the main-thread just becomes a normal worker */
-	while (!g_atomic_int_get (&_terminate)) {
+	while (!_terminate.load ()) {
 		run_one ();
 	}
 
@@ -436,7 +436,7 @@ Graph::process_routes (std::shared_ptr<GraphChain> chain, pframes_t nframes, sam
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("graph execution from %1 to %2 = %3\n", start_sample, end_sample, nframes));
 
-	if (g_atomic_int_get (&_terminate)) {
+	if (_terminate.load ()) {
 		return 0;
 	}
 
@@ -464,7 +464,7 @@ Graph::routes_no_roll (std::shared_ptr<GraphChain> chain, pframes_t nframes, sam
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("no-roll graph execution from %1 to %2 = %3\n", start_sample, end_sample, nframes));
 
-	if (g_atomic_int_get (&_terminate)) {
+	if (_terminate.load ()) {
 		return 0;
 	}
 
@@ -491,7 +491,7 @@ Graph::silence_routes (std::shared_ptr<GraphChain> chain, pframes_t nframes)
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("silence graph execution from %1 for = %2\n", nframes));
 
-	if (g_atomic_int_get (&_terminate)) {
+	if (_terminate.load ()) {
 		return 0;
 	}
 
@@ -514,7 +514,7 @@ Graph::process_io_plugs (std::shared_ptr<GraphChain> chain, pframes_t nframes, s
 {
 	DEBUG_TRACE (DEBUG::ProcessThreads, string_compose ("IOPlug graph execution at %1 for %2\n", start_sample, nframes));
 
-	if (g_atomic_int_get (&_terminate)) {
+	if (_terminate.load ()) {
 		return 0;
 	}
 

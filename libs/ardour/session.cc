@@ -46,6 +46,7 @@
 
 #include <boost/algorithm/string/erase.hpp>
 
+#include "pbd/atomic.h"
 #include "pbd/basename.h"
 #include "pbd/convert.h"
 #include "pbd/error.h"
@@ -154,7 +155,7 @@ using namespace Temporal;
 
 bool Session::_disable_all_loaded_plugins = false;
 bool Session::_bypass_all_loaded_plugins = false;
-guint Session::_name_id_counter = 0;
+std::atomic<unsigned int> Session::_name_id_counter (0);
 
 PBD::Signal1<void,std::string> Session::Dialog;
 PBD::Signal0<int> Session::AskAboutPendingState;
@@ -329,21 +330,21 @@ Session::Session (AudioEngine &eng,
 	, _active_cue (-1)
 	, tb_with_filled_slots (0)
 {
-	g_atomic_int_set (&_suspend_save, 0);
-	g_atomic_int_set (&_playback_load, 0);
-	g_atomic_int_set (&_capture_load, 0);
-	g_atomic_int_set (&_post_transport_work, 0);
-	g_atomic_int_set (&_processing_prohibited, Disabled);
-	g_atomic_int_set (&_record_status, Disabled);
-	g_atomic_int_set (&_punch_or_loop, NoConstraint);
-	g_atomic_int_set (&_current_usecs_per_track, 1000);
-	g_atomic_int_set (&_have_rec_enabled_track, 0);
-	g_atomic_int_set (&_have_rec_disabled_track, 1);
-	g_atomic_int_set (&_latency_recompute_pending, 0);
-	g_atomic_int_set (&_suspend_timecode_transmission, 0);
-	g_atomic_int_set (&_update_pretty_names, 0);
-	g_atomic_int_set (&_seek_counter, 0);
-	g_atomic_int_set (&_butler_seek_counter, 0);
+	_suspend_save.store (0);
+	_playback_load.store (0);
+	_capture_load.store (0);
+	_post_transport_work.store (PostTransportWork (0));
+	_processing_prohibited.store (Disabled);
+	_record_status.store (Disabled);
+	_punch_or_loop.store (NoConstraint);
+	_current_usecs_per_track.store (1000);
+	_have_rec_enabled_track.store (0);
+	_have_rec_disabled_track.store (1);
+	_latency_recompute_pending.store (0);
+	_suspend_timecode_transmission.store (0);
+	_update_pretty_names.store (0);
+	_seek_counter.store (0);
+	_butler_seek_counter.store (0);
 
 	created_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 
@@ -542,19 +543,19 @@ Session::~Session ()
 unsigned int
 Session::next_name_id ()
 {
-	return g_atomic_int_add (&_name_id_counter, 1);
+	return _name_id_counter.fetch_add (1);
 }
 
 unsigned int
 Session::name_id_counter ()
 {
-	return g_atomic_int_get (&_name_id_counter);
+	return _name_id_counter.load ();
 }
 
 void
 Session::init_name_id_counter (guint n)
 {
-	g_atomic_int_set (&_name_id_counter, n);
+	_name_id_counter.store (n);
 }
 
 int
@@ -874,7 +875,7 @@ Session::destroy ()
 void
 Session::block_processing()
 {
-	g_atomic_int_set (&_processing_prohibited, 1);
+	_processing_prohibited.store (1);
 
 	/* processing_blocked() is only checked at the beginning
 	 * of the next cycle. So wait until any ongoing
@@ -1477,7 +1478,7 @@ Session::punch_active () const
 bool
 Session::punch_is_possible () const
 {
-	return g_atomic_int_get (&_punch_or_loop) != OnlyLoop;
+	return _punch_or_loop.load () != OnlyLoop;
 }
 
 bool
@@ -1489,13 +1490,13 @@ Session::loop_is_possible () const
 		}
 	}
 #endif
-	return g_atomic_int_get(&_punch_or_loop) != OnlyPunch;
+	return _punch_or_loop.load () != OnlyPunch;
 }
 
 void
 Session::reset_punch_loop_constraint ()
 {
-	if (g_atomic_int_get (&_punch_or_loop) == NoConstraint) {
+	if (_punch_or_loop.load () == NoConstraint) {
 		return;
 	}
 	g_atomic_int_set (&_punch_or_loop, NoConstraint);
@@ -1507,7 +1508,8 @@ Session::maybe_allow_only_loop (bool play_loop) {
 	if (!(get_play_loop () || play_loop)) {
 		return false;
 	}
-	bool rv = g_atomic_int_compare_and_exchange (&_punch_or_loop, NoConstraint, OnlyLoop);
+	PunchLoopLock nocon (NoConstraint);
+	bool rv = _punch_or_loop.compare_exchange_strong (nocon, OnlyLoop);
 	if (rv) {
 		PunchLoopConstraintChange (); /* EMIT SIGNAL */
 	}
@@ -1523,7 +1525,8 @@ Session::maybe_allow_only_punch () {
 	if (!punch_active ()) {
 		return false;
 	}
-	bool rv = g_atomic_int_compare_and_exchange (&_punch_or_loop, NoConstraint, OnlyPunch);
+	PunchLoopLock nocon (NoConstraint);
+	bool rv = _punch_or_loop.compare_exchange_strong (nocon, OnlyPunch);
 	if (rv) {
 		PunchLoopConstraintChange (); /* EMIT SIGNAL */
 	}
@@ -1927,13 +1930,13 @@ Session::enable_record ()
 	}
 
 	while (1) {
-		RecordState rs = (RecordState) g_atomic_int_get (&_record_status);
+		RecordState rs = (RecordState) _record_status.load ();
 
 		if (rs == Recording) {
 			break;
 		}
 
-		if (g_atomic_int_compare_and_exchange (&_record_status, rs, Recording)) {
+		if (_record_status.compare_exchange_strong (rs, Recording)) {
 
 			_last_record_location = _transport_sample;
 			send_immediate_mmc (MIDI::MachineControlCommand (MIDI::MachineControl::cmdRecordStrobe));
@@ -1966,7 +1969,7 @@ Session::disable_record (bool rt_context, bool force)
 {
 	RecordState rs;
 
-	if ((rs = (RecordState) g_atomic_int_get (&_record_status)) != Disabled) {
+	if ((rs = (RecordState) _record_status.load ()) != Disabled) {
 
 		if (!Config->get_latched_record_enable () || force) {
 			g_atomic_int_set (&_record_status, Disabled);
@@ -1988,7 +1991,9 @@ Session::disable_record (bool rt_context, bool force)
 void
 Session::step_back_from_record ()
 {
-	if (g_atomic_int_compare_and_exchange (&_record_status, Recording, Enabled)) {
+	RecordState rs (Recording);
+
+	if (_record_status.compare_exchange_strong (rs, Enabled)) {
 
 		if (Config->get_monitoring_model() == HardwareMonitoring && config.get_auto_input()) {
 			set_track_monitor_input_status (false);
@@ -6290,13 +6295,13 @@ Session::add_automation_list(AutomationList *al)
 bool
 Session::have_rec_enabled_track () const
 {
-	return g_atomic_int_get (&_have_rec_enabled_track) == 1;
+	return _have_rec_enabled_track.load () == 1;
 }
 
 bool
 Session::have_rec_disabled_track () const
 {
-	return g_atomic_int_get (&_have_rec_disabled_track) == 1;
+	return _have_rec_disabled_track.load () == 1;
 }
 
 /** Update the state of our rec-enabled tracks flag */
@@ -6315,11 +6320,11 @@ Session::update_route_record_state ()
 		++i;
 	}
 
-	int const old = g_atomic_int_get (&_have_rec_enabled_track);
+	int const old = _have_rec_enabled_track.load ();
 
 	g_atomic_int_set (&_have_rec_enabled_track, i != rl->end () ? 1 : 0);
 
-	if (g_atomic_int_get (&_have_rec_enabled_track) != old) {
+	if (_have_rec_enabled_track.load () != old) {
 		RecordStateChanged (); /* EMIT SIGNAL */
 	}
 
@@ -6332,7 +6337,7 @@ Session::update_route_record_state ()
 
 	g_atomic_int_set (&_have_rec_disabled_track, i != rl->end () ? 1 : 0);
 
-	bool record_arm_state_changed = (old != g_atomic_int_get (&_have_rec_enabled_track) );
+	bool record_arm_state_changed = (old != _have_rec_enabled_track.load () );
 
 	if (record_status() == Recording && record_arm_state_changed ) {
 		RecordArmStateChanged ();
@@ -7291,7 +7296,7 @@ Session::auto_connect_thread_wakeup ()
 void
 Session::queue_latency_recompute ()
 {
-	g_atomic_int_inc (&_latency_recompute_pending);
+	_latency_recompute_pending.fetch_add (1);
 	auto_connect_thread_wakeup ();
 }
 
@@ -7394,7 +7399,7 @@ Session::auto_connect (const AutoConnectRequest& ar)
 void
 Session::auto_connect_thread_start ()
 {
-	if (g_atomic_int_get (&_ac_thread_active)) {
+	if (_ac_thread_active.load ()) {
 		return;
 	}
 
@@ -7404,16 +7409,16 @@ Session::auto_connect_thread_start ()
 	}
 	lx.release ();
 
-	g_atomic_int_set (&_ac_thread_active, 1);
+	_ac_thread_active.store (1);
 	if (pthread_create (&_auto_connect_thread, NULL, auto_connect_thread, this)) {
-		g_atomic_int_set (&_ac_thread_active, 0);
+		_ac_thread_active.store (0);
 	}
 }
 
 void
 Session::auto_connect_thread_terminate ()
 {
-	if (!g_atomic_int_get (&_ac_thread_active)) {
+	if (!_ac_thread_active.load ()) {
 		return;
 	}
 
@@ -7429,7 +7434,7 @@ Session::auto_connect_thread_terminate ()
 	 */
 
 	pthread_mutex_lock (&_auto_connect_mutex);
-	g_atomic_int_set (&_ac_thread_active, 0);
+	_ac_thread_active.store (0);
 	pthread_cond_signal (&_auto_connect_cond);
 	pthread_mutex_unlock (&_auto_connect_mutex);
 
@@ -7455,7 +7460,7 @@ Session::auto_connect_thread_run ()
 	pthread_mutex_lock (&_auto_connect_mutex);
 
 	Glib::Threads::Mutex::Lock lx (_auto_connect_queue_lock);
-	while (g_atomic_int_get (&_ac_thread_active)) {
+	while (_ac_thread_active.load ()) {
 
 		if (!_auto_connect_queue.empty ()) {
 			/* Why would we need the process lock?
@@ -7485,20 +7490,20 @@ Session::auto_connect_thread_run ()
 			 * calls DiskWriter::set_capture_offset () which
 			 * modifies the capture-offset, which can be a problem.
 			 */
-			while (g_atomic_int_and (&_latency_recompute_pending, 0)) {
+			while (_latency_recompute_pending.fetch_and (0)) {
 				update_latency_compensation (false, false);
-				if (g_atomic_int_get (&_latency_recompute_pending)) {
+				if (_latency_recompute_pending.load ()) {
 					Glib::usleep (1000);
 				}
 			}
 		}
 
-		if (_midi_ports && g_atomic_int_get (&_update_pretty_names)) {
+		if (_midi_ports && _update_pretty_names.load ()) {
 			std::shared_ptr<Port> ap = std::dynamic_pointer_cast<Port> (vkbd_output_port ());
 			if (ap->pretty_name () != _("Virtual Keyboard")) {
 				ap->set_pretty_name (_("Virtual Keyboard"));
 			}
-			g_atomic_int_set (&_update_pretty_names, 0);
+			_update_pretty_names.store (0);
 		}
 
 		if (_engine.port_deletions_pending ().read_space () > 0) {
@@ -7688,13 +7693,13 @@ Session::ProcessorChangeBlocker::ProcessorChangeBlocker (Session* s, bool rc)
 	: _session (s)
 	, _reconfigure_on_delete (rc)
 {
-	g_atomic_int_inc (&s->_ignore_route_processor_changes);
+	PBD::atomic_inc (s->_ignore_route_processor_changes);
 }
 
 Session::ProcessorChangeBlocker::~ProcessorChangeBlocker ()
 {
-	if (g_atomic_int_dec_and_test (&_session->_ignore_route_processor_changes)) {
-		gint type = g_atomic_int_and (&_session->_ignored_a_processor_change, 0);
+	if (PBD::atomic_dec_and_test (_session->_ignore_route_processor_changes)) {
+		RouteProcessorChange::Type type = (RouteProcessorChange::Type) _session->_ignored_a_processor_change.fetch_and (0);
 		if (_reconfigure_on_delete) {
 			if (type & RouteProcessorChange::GeneralChange) {
 				_session->route_processors_changed (RouteProcessorChange ());

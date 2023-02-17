@@ -19,6 +19,7 @@
 #ifndef _ardour_vst3_host_h_
 #define _ardour_vst3_host_h_
 
+#include <atomic>
 #include <cstdint>
 #include <map>
 #include <memory>
@@ -27,8 +28,6 @@
 
 #include <glib.h>
 
-
-#include "pbd/g_atomic_compat.h"
 #include "ardour/libardour_visibility.h"
 #include "vst3/vst3.h"
 
@@ -155,7 +154,7 @@ public:
 	uint32 PLUGIN_API release () SMTG_OVERRIDE;
 
 private:
-	GATOMIC_QUAL gint _cnt; // atomic
+	std::atomic<int> _cnt; // atomic
 };
 
 class LIBARDOUR_API HostAttributeList : public Vst::IAttributeList, public RefObject

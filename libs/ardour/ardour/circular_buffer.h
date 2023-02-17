@@ -19,8 +19,9 @@
 #ifndef _ardour_circular_buffer_h_
 #define _ardour_circular_buffer_h_
 
+#include <atomic>
+
 #include "pbd/ringbuffer.h"
-#include "pbd/g_atomic_compat.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
@@ -72,8 +73,8 @@ private:
 	guint  _size;
 	guint  _size_mask;
 
-	GATOMIC_QUAL gint _idx;
-	GATOMIC_QUAL gint _ack;
+	std::atomic<int> _idx;
+	std::atomic<int> _ack;
 };
 
 }

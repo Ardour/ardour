@@ -257,7 +257,7 @@ PortManager::PortManager ()
 	, _audio_input_ports (new AudioInputPorts)
 	, _midi_input_ports (new MIDIInputPorts)
 {
-	g_atomic_int_set (&_reset_meters, 1);
+	_reset_meters.store (1);
 	load_port_info ();
 }
 
@@ -1910,7 +1910,7 @@ PortManager::check_for_ambiguous_latency (bool log) const
 void
 PortManager::reset_input_meters ()
 {
-	g_atomic_int_set (&_reset_meters, 1);
+	_reset_meters.store (1);
 }
 
 PortManager::AudioInputPorts
@@ -1934,7 +1934,8 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 		return;
 	}
 
-	const bool reset = g_atomic_int_compare_and_exchange (&_reset_meters, 1, 0);
+	int canderef (1);
+	const bool reset = _reset_meters.compare_exchange_strong (canderef, 0);
 
 	_monitor_port.monitor (port_engine (), n_samples);
 

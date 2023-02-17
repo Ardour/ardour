@@ -92,8 +92,8 @@ PluginInsert::PluginInsert (Session& s, Temporal::TimeDomain td, std::shared_ptr
 	, _bypass_port (UINT32_MAX)
 	, _inverted_bypass_enable (false)
 {
-	g_atomic_int_set (&_stat_reset, 0);
-	g_atomic_int_set (&_flush, 0);
+	_stat_reset.store (0);
+	_flush.store (0);
 
 	/* the first is the master */
 	if (plug) {
@@ -748,7 +748,7 @@ PluginInsert::deactivate ()
 void
 PluginInsert::flush ()
 {
-	g_atomic_int_set (&_flush, 1);
+	_flush.store (1);
 }
 
 void
@@ -1272,7 +1272,8 @@ PluginInsert::silence (samplecnt_t nframes, samplepos_t start_sample)
 	ChanCount maxbuf = ChanCount::max (natural_input_streams (), natural_output_streams());
 	_session.get_scratch_buffers (maxbuf, true).silence (nframes, 0);
 
-	if (g_atomic_int_compare_and_exchange (&_stat_reset, 1, 0)) {
+	int canderef;
+	if (_stat_reset.compare_exchange_strong (canderef, 0)) {
 		_timing_stats.reset ();
 	}
 
@@ -1300,7 +1301,8 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		_sidechain->run (bufs, start_sample, end_sample, speed, nframes, true);
 	}
 
-	if (g_atomic_int_compare_and_exchange (&_stat_reset, 1, 0)) {
+	int canderef (1);
+	if (_stat_reset.compare_exchange_strong (canderef, 0)) {
 		_timing_stats.reset ();
 	}
 
@@ -1311,7 +1313,8 @@ PluginInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 	}
 
-	if (check_active () && g_atomic_int_compare_and_exchange (&_flush, 1, 0)) {
+	canderef = 1;
+	if (check_active () && _flush.compare_exchange_strong (canderef,  0)) {
 		for (Plugins::iterator i = _plugins.begin(); i != _plugins.end(); ++i) {
 			(*i)->flush ();
 		}
@@ -3371,7 +3374,7 @@ PluginInsert::get_stats (PBD::microseconds_t& min, PBD::microseconds_t& max, dou
 void
 PluginInsert::clear_stats ()
 {
-	g_atomic_int_set (&_stat_reset, 1);
+	_stat_reset.store (1);
 }
 
 std::ostream& operator<<(std::ostream& o, const ARDOUR::PluginInsert::Match& m)

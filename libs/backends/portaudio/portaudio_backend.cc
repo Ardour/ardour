@@ -673,7 +673,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 	_run = true;
 
 	engine.reconnect_ports ();
-	g_atomic_int_set (&_port_change_flag, 0);
+	_port_change_flag.store (0);
 
 	_dsp_calc.reset ();
 

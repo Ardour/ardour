@@ -23,10 +23,10 @@
 #ifndef ringbuffer_h
 #define ringbuffer_h
 
+#include <atomic>
 #include <cstring>
 
 #include "pbd/libpbd_visibility.h"
-#include "pbd/g_atomic_compat.h"
 
 namespace PBD {
 
@@ -34,11 +34,11 @@ template<class T>
 class /*LIBPBD_API*/ RingBuffer
 {
 public:
-	RingBuffer (guint sz) {
+	RingBuffer (size_t sz) {
 #if 0
 		size = ffs(sz); /* find first [bit] set is a single inlined assembly instruction. But it looks like the API rounds up so... */
 #endif
-		guint power_of_two;
+		size_t power_of_two;
 		for (power_of_two = 1; 1U<<power_of_two < sz; power_of_two++) {}
 		size = 1<<power_of_two;
 		size_mask = size;
@@ -53,44 +53,44 @@ public:
 
 	void reset () {
 		/* !!! NOT THREAD SAFE !!! */
-		g_atomic_int_set (&write_idx, 0);
-		g_atomic_int_set (&read_idx, 0);
+		write_idx.store (0);
+		read_idx.store (0);
 	}
 
-	void set (guint r, guint w) {
+	void set (size_t r, size_t w) {
 		/* !!! NOT THREAD SAFE !!! */
-		g_atomic_int_set (&write_idx, w);
-		g_atomic_int_set (&read_idx, r);
+		write_idx.store (w);
+		read_idx.store (r);
 	}
 
-	guint read  (T *dest, guint cnt);
-	guint write (T const * src,  guint cnt);
+	size_t read  (T *dest, size_t cnt);
+	size_t write (T const * src,  size_t cnt);
 
 	struct rw_vector {
 		T *buf[2];
-		guint len[2];
+		size_t len[2];
 	};
 
 	void get_read_vector (rw_vector *);
 	void get_write_vector (rw_vector *);
 
-	void decrement_read_idx (guint cnt) {
-		g_atomic_int_set (&read_idx, (g_atomic_int_get(&read_idx) - cnt) & size_mask);
+	void decrement_read_idx (size_t cnt) {
+		read_idx.store ((read_idx.load() - cnt) & size_mask);
 	}
 
-	void increment_read_idx (guint cnt) {
-		g_atomic_int_set (&read_idx, (g_atomic_int_get(&read_idx) + cnt) & size_mask);
+	void increment_read_idx (size_t cnt) {
+		read_idx.store ((read_idx.load () + cnt) & size_mask);
 	}
 
-	void increment_write_idx (guint cnt) {
-		g_atomic_int_set (&write_idx,  (g_atomic_int_get(&write_idx) + cnt) & size_mask);
+	void increment_write_idx (size_t cnt) {
+		write_idx.store ((write_idx.load () + cnt) & size_mask);
 	}
 
-	guint write_space () const {
-		guint w, r;
+	size_t write_space () const {
+		size_t w, r;
 
-		w = g_atomic_int_get (&write_idx);
-		r = g_atomic_int_get (&read_idx);
+		w = write_idx.load ();
+		r = read_idx.load ();
 
 		if (w > r) {
 			return ((r - w + size) & size_mask) - 1;
@@ -101,11 +101,11 @@ public:
 		}
 	}
 
-	guint read_space () const {
-		guint w, r;
+	size_t read_space () const {
+		size_t w, r;
 
-		w = g_atomic_int_get (&write_idx);
-		r = g_atomic_int_get (&read_idx);
+		w = write_idx.load ();
+		r = read_idx.load ();
 
 		if (w > r) {
 			return w - r;
@@ -115,31 +115,31 @@ public:
 	}
 
 	T *buffer () { return buf; }
-	guint get_write_idx () const { return g_atomic_int_get (&write_idx); }
-	guint get_read_idx () const { return g_atomic_int_get (&read_idx); }
-	guint bufsize () const { return size; }
+	size_t get_write_idx () const { return write_idx.load (); }
+	size_t get_read_idx () const { return read_idx.load (); }
+	size_t bufsize () const { return size; }
 
 protected:
 	T *buf;
-	guint size;
-	guint size_mask;
-	mutable GATOMIC_QUAL gint write_idx;
-	mutable GATOMIC_QUAL gint read_idx;
+	size_t size;
+	size_t size_mask;
+	mutable std::atomic<int> write_idx;
+	mutable std::atomic<int> read_idx;
 
 private:
 	RingBuffer (RingBuffer const&);
 };
 
-template<class T> /*LIBPBD_API*/ guint
-RingBuffer<T>::read (T *dest, guint cnt)
+template<class T> /*LIBPBD_API*/ size_t
+RingBuffer<T>::read (T *dest, size_t cnt)
 {
-	guint free_cnt;
-	guint cnt2;
-	guint to_read;
-	guint n1, n2;
-	guint priv_read_idx;
+	size_t free_cnt;
+	size_t cnt2;
+	size_t to_read;
+	size_t n1, n2;
+	size_t priv_read_idx;
 
-	priv_read_idx = g_atomic_int_get (&read_idx);
+	priv_read_idx = read_idx.load ();
 
 	if ((free_cnt = read_space ()) == 0) {
 		return 0;
@@ -165,21 +165,21 @@ RingBuffer<T>::read (T *dest, guint cnt)
 		priv_read_idx = n2;
 	}
 
-	g_atomic_int_set (&read_idx, priv_read_idx);
+	read_idx.store (priv_read_idx);
 	return to_read;
 }
 
-template<class T> /*LIBPBD_API*/ guint
-RingBuffer<T>::write (T const *src, guint cnt)
+template<class T> /*LIBPBD_API*/ size_t
+RingBuffer<T>::write (T const *src, size_t cnt)
 
 {
-	guint free_cnt;
-	guint cnt2;
-	guint to_write;
-	guint n1, n2;
-	guint priv_write_idx;
+	size_t free_cnt;
+	size_t cnt2;
+	size_t to_write;
+	size_t n1, n2;
+	size_t priv_write_idx;
 
-	priv_write_idx = g_atomic_int_get (&write_idx);
+	priv_write_idx = write_idx.load ();
 
 	if ((free_cnt = write_space ()) == 0) {
 		return 0;
@@ -205,7 +205,7 @@ RingBuffer<T>::write (T const *src, guint cnt)
 		priv_write_idx = n2;
 	}
 
-	g_atomic_int_set (&write_idx, priv_write_idx);
+	write_idx.store (priv_write_idx);
 	return to_write;
 }
 
@@ -213,12 +213,12 @@ template<class T> /*LIBPBD_API*/ void
 RingBuffer<T>::get_read_vector (typename RingBuffer<T>::rw_vector *vec)
 
 {
-	guint free_cnt;
-	guint cnt2;
-	guint w, r;
+	size_t free_cnt;
+	size_t cnt2;
+	size_t w, r;
 
-	w = g_atomic_int_get (&write_idx);
-	r = g_atomic_int_get (&read_idx);
+	w = write_idx.load ();
+	r = read_idx.load ();
 
 	if (w > r) {
 		free_cnt = w - r;
@@ -254,12 +254,12 @@ template<class T> /*LIBPBD_API*/ void
 RingBuffer<T>::get_write_vector (typename RingBuffer<T>::rw_vector *vec)
 
 {
-	guint free_cnt;
-	guint cnt2;
-	guint w, r;
+	size_t free_cnt;
+	size_t cnt2;
+	size_t w, r;
 
-	w = g_atomic_int_get (&write_idx);
-	r = g_atomic_int_get (&read_idx);
+	w = write_idx.load ();
+	r = read_idx.load ();
 
 	if (w > r) {
 		free_cnt = ((r - w + size) & size_mask) - 1;

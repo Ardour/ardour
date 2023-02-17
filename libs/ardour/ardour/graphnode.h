@@ -21,12 +21,12 @@
 #ifndef __ardour_graphnode_h__
 #define __ardour_graphnode_h__
 
+#include <atomic>
 #include <list>
 #include <map>
 #include <memory>
 #include <set>
 
-#include "pbd/g_atomic_compat.h"
 #include "pbd/rcu.h"
 
 #include "ardour/libardour_visibility.h"
@@ -94,7 +94,7 @@ protected:
 private:
 	void finish (GraphChain const*);
 
-	GATOMIC_QUAL gint _refcount;
+	std::atomic<int> _refcount;
 };
 
 } // namespace ARDOUR
