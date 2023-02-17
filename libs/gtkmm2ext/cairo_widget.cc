@@ -63,7 +63,9 @@ CairoWidget::CairoWidget ()
 	, _current_parent (0)
 	, _canvas_widget (false)
 	, _nsglview (0)
-#ifdef USE_CAIRO_IMAGE_SURFACE
+#ifdef __APPLE__
+	, _use_image_surface (false)
+#elif defined USE_CAIRO_IMAGE_SURFACE
 	, _use_image_surface (true)
 #else
 	, _use_image_surface (NULL != getenv("ARDOUR_IMAGE_SURFACE"))
