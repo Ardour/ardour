@@ -32,6 +32,7 @@
 #include "gtk2ardour-config.h"
 #endif
 
+#include <atomic>
 #include <map>
 
 #include <string>
@@ -44,7 +45,6 @@
 #include <sigc++/signal.h>
 
 #include "pbd/statefuldestructible.h"
-#include "pbd/g_atomic_compat.h"
 
 #include "temporal/beats.h"
 
@@ -585,18 +585,18 @@ protected:
 	virtual void resume_route_redisplay () = 0;
 	virtual void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update) = 0;
 
-	GATOMIC_QUAL gint _suspend_route_redisplay_counter;
+	std::atomic<int> _suspend_route_redisplay_counter;
 };
 
 class DisplaySuspender {
 	public:
 		DisplaySuspender() {
-			if (g_atomic_int_add (&PublicEditor::instance()._suspend_route_redisplay_counter, 1) == 0) {
+			if (PublicEditor::instance()._suspend_route_redisplay_counter.fetch_add (1) == 0) {
 				PublicEditor::instance().suspend_route_redisplay ();
 			}
 		}
 		~DisplaySuspender () {
-			if (g_atomic_int_dec_and_test (&PublicEditor::instance()._suspend_route_redisplay_counter)) {
+			if (PBD::atomic_dec_and_test (PublicEditor::instance()._suspend_route_redisplay_counter)) {
 				PublicEditor::instance().resume_route_redisplay ();
 			}
 		}

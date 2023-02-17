@@ -64,7 +64,7 @@ MidiTracer::MidiTracer ()
 	, collect_button (_("Enabled"))
 	, delta_time_button (_("Delta times"))
 {
-	g_atomic_int_set (&_update_queued, 0);
+	_update_queued.store (0);
 
 	std::string portname (string_compose(X_("x-MIDI-tracer-%1"), ++window_count));
 	std::shared_ptr<ARDOUR::Port> port = AudioEngine::instance()->register_input_port (DataType::MIDI, portname, false,  PortFlags (IsInput | Hidden | IsTerminal));
@@ -511,7 +511,8 @@ MidiTracer::tracer (Parser&, MIDI::byte* msg, size_t len, samplecnt_t now)
 
 	fifo.write (&buf, 1);
 
-	if (g_atomic_int_compare_and_exchange (&_update_queued, 0, 1)) {
+	int canderef (0);
+	if (_update_queued.compare_exchange_strong (canderef, 1)) {
 		gui_context()->call_slot (invalidator (*this), boost::bind (&MidiTracer::update, this));
 	}
 }
@@ -520,7 +521,7 @@ void
 MidiTracer::update ()
 {
 	bool updated = false;
-	g_atomic_int_set (&_update_queued, 0);
+	_update_queued.store (0);
 
 	RefPtr<TextBuffer> buf (text.get_buffer());
 

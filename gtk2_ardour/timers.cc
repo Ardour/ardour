@@ -17,12 +17,14 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <atomic>
+
 #include "timers.h"
 
+#include "pbd/atomic.h"
 #include "pbd/timer.h"
 #include "pbd/debug.h"
 #include "pbd/compose.h"
-#include "pbd/g_atomic_compat.h"
 
 #include "debug.h"
 
@@ -89,7 +91,7 @@ public:
 		, super_rapid(40)
 		, fps(40)
 	{
-	g_atomic_int_set (&_suspend_counter, 0);
+	_suspend_counter.store (0);
 #ifndef NDEBUG
 		second.connect (sigc::mem_fun (*this, &UITimers::on_second_timer));
 #endif
@@ -101,7 +103,7 @@ public:
 	StandardTimer   super_rapid;
 	StandardTimer   fps;
 
-	GATOMIC_QUAL gint _suspend_counter;
+	std::atomic<int> _suspend_counter;
 
 #ifndef NDEBUG
 	std::vector<int64_t> rapid_eps_count;
@@ -213,7 +215,7 @@ fps_connect(const sigc::slot<void>& slot)
 
 TimerSuspender::TimerSuspender ()
 {
-	if (g_atomic_int_add (&get_timers()._suspend_counter, 1) == 0) {
+	if (get_timers()._suspend_counter.fetch_add (1) == 0) {
 		get_timers().rapid.suspend();
 		get_timers().super_rapid.suspend();
 		get_timers().fps.suspend();
@@ -222,7 +224,7 @@ TimerSuspender::TimerSuspender ()
 
 TimerSuspender::~TimerSuspender ()
 {
-	if (g_atomic_int_dec_and_test (&get_timers()._suspend_counter)) {
+	if (PBD::atomic_dec_and_test (get_timers()._suspend_counter)) {
 		get_timers().rapid.resume();
 		get_timers().super_rapid.resume();
 		get_timers().fps.resume();
