@@ -4908,9 +4908,9 @@ Session::format_audio_source_name (const string& legalized_base, uint32_t nchan,
 			sstr << "%R";
 		}
 	} else if (nchan > 2) {
-		if (nchan < 26) {
+		if (nchan <= 26) {
 			sstr << '%';
-			sstr << 'a' + chan;
+			sstr << static_cast<char>('a' + chan);
 		} else {
 			/* XXX what? more than 26 channels! */
 			sstr << '%';
