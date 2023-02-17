@@ -20,14 +20,15 @@
 #ifndef __pbd_rcu_h__
 #define __pbd_rcu_h__
 
-#include "boost/shared_ptr.hpp"
+#include <atomic>
+#include <mutex>
+#include <memory>
+
 #include "boost/smart_ptr/detail/yield_k.hpp"
-#include "glibmm/threads.h"
 
 #include <list>
 
 #include "pbd/libpbd_visibility.h"
-#include "pbd/g_atomic_compat.h"
 
 /** @file rcu.h
  * Define a set of classes to implement Read-Copy-Update.  We do not attempt to define RCU here - use google.
@@ -52,15 +53,18 @@ template <class T>
 class /*LIBPBD_API*/ RCUManager
 {
 public:
-	RCUManager (T* new_rcu_value)
+	RCUManager (T* object_to_be_managed)
 	{
-		g_atomic_int_set (&_active_reads, 0);
-		x.rcu_value = new std::shared_ptr<T> (new_rcu_value);
+		_active_reads = 0;
+		managed_object = new std::shared_ptr<T> (object_to_be_managed);
 	}
 
 	virtual ~RCUManager ()
 	{
-		delete x.rcu_value;
+		/* This just deletes the shared ptr, but of course this may
+		   also be the last reference to the managed object.
+		*/
+		delete managed_object;
 	}
 
 	std::shared_ptr<T> reader () const
@@ -68,16 +72,16 @@ public:
 		std::shared_ptr<T> rv;
 
 		/* Keep count of any readers in this section of code, so writers can
-		 * wait until rcu_value is no longer in use after an atomic exchange
+		 * wait until managed_object is no longer in use after an atomic exchange
 		 * before dropping it.
 		 *
 		 * rg: this is not great, 3 consecutive full compiler and hardware
 		 * memory barterers. For an edge-case lock that is not usually contended.
 		 * consider reverting f87de76b9fc8b3a5a.
 		 */
-		g_atomic_int_inc (&_active_reads);
-		rv = *((std::shared_ptr<T>*)g_atomic_pointer_get (&x.gptr));
-		g_atomic_int_add (&_active_reads, -1);
+		_active_reads++;
+		rv = *managed_object;
+		_active_reads--;
 
 		return rv;
 	}
@@ -87,29 +91,19 @@ public:
 	 * for one implementation.
 	 */
 
-	virtual std::shared_ptr<T> write_copy ()                           = 0;
-	virtual bool                 update (std::shared_ptr<T> new_value) = 0;
+	virtual std::shared_ptr<T> write_copy ()                         = 0;
+	virtual bool               update (std::shared_ptr<T> new_value) = 0;
 
 protected:
-	/* ordinarily this would simply be a declaration of a ptr to a shared_ptr<T>. However, the atomic
-	 * operations that we are using (from glib) have sufficiently strict typing that it proved hard
-	 * to get them to accept even a cast value of the ptr-to-shared-ptr() as the argument to get()
-	 * and comp_and_exchange(). Consequently, we play a litle trick here that relies on the fact
-	 * that sizeof(A*) == sizeof(B*) no matter what the types of A and B are. for most purposes
-	 * we will use x.rcu_value, but when we need to use an atomic op, we use x.gptr. Both expressions
-	 * evaluate to the same address.
-	 */
-	union {
-		std::shared_ptr<T>*         rcu_value;
-		mutable GATOMIC_QUAL gpointer gptr;
-	} x;
+	typedef std::shared_ptr<T>* PtrToSharedPtr;
+	std::atomic<PtrToSharedPtr> managed_object;
 
 	inline bool active_read () const {
-		return g_atomic_int_get (&_active_reads) != 0;
+		return _active_reads.load() != 0;
 	}
 
 private:
-	mutable GATOMIC_QUAL gint _active_reads;
+	mutable std::atomic<int> _active_reads;
 };
 
 /** Serialized RCUManager implements the RCUManager interface. It is based on the
@@ -126,7 +120,7 @@ private:
  * undefined.
  *
  * The class maintains a lock-protected "dead wood" list of old value of
- * *rcu_value (i.e. shared_ptr<T>). The list is cleaned up every time we call
+ * *managed_object (i.e. shared_ptr<T>). The list is cleaned up every time we call
  * write_copy(). If the list is the last instance of a shared_ptr<T> that
  * references the object (determined by shared_ptr::unique()) then we
  * erase it from the list, thus deleting the object it points to.  This is lazy
@@ -144,17 +138,15 @@ template <class T>
 class /*LIBPBD_API*/ SerializedRCUManager : public RCUManager<T>
 {
 public:
-	SerializedRCUManager(T* new_rcu_value)
-		: RCUManager<T>(new_rcu_value)
+	SerializedRCUManager(T* new_managed_object)
+		: RCUManager<T>(new_managed_object)
 		, _current_write_old (0)
 	{
 	}
 
-	void init (std::shared_ptr<T> new_rcu_value) {
-		assert  (*RCUManager<T>::x.rcu_value == std::shared_ptr<T> ());
-
-		std::shared_ptr<T>* new_spp = new std::shared_ptr<T> (new_rcu_value);
-		g_atomic_pointer_set (&RCUManager<T>::x.gptr, new_spp);
+	void init (std::shared_ptr<T> object_to_be_managed) {
+		assert  (*RCUManager<T>::managed_object == std::shared_ptr<T> ());
+		RCUManager<T>::managed_object = new std::shared_ptr<T> (object_to_be_managed);
 	}
 
 	std::shared_ptr<T> write_copy ()
@@ -175,10 +167,14 @@ public:
 
 		/* store the current so that we can do compare and exchange
 		 * when someone calls update(). Notice that we hold
-		 * a lock, so this store of rcu_value is atomic.
+		 * a lock, so this store of managed_object is atomic.
 		 */
 
-		_current_write_old = RCUManager<T>::x.rcu_value;
+		_current_write_old = RCUManager<T>::managed_object;
+
+		/* now do the (potentially arbitrarily expensive data copy of
+		 * the RCU-managed object
+		 */
 
 		std::shared_ptr<T> new_copy (new T (**_current_write_old));
 
@@ -197,7 +193,7 @@ public:
 	{
 		/* we still hold the write lock - other writers are locked out */
 
-		std::shared_ptr<T>* new_spp = new std::shared_ptr<T> (new_value);
+		typename RCUManager<T>::PtrToSharedPtr new_spp = new std::shared_ptr<T> (new_value);
 
 		/* update, by atomic compare&swap. Only succeeds if the old
 		 * value has not been changed.
@@ -205,9 +201,7 @@ public:
 		 * XXX but how could it? we hold the freakin' lock!
 		 */
 
-		bool ret = g_atomic_pointer_compare_and_exchange (&RCUManager<T>::x.gptr,
-		                                                  (gpointer)_current_write_old,
-		                                                  (gpointer)new_spp);
+		bool ret = RCUManager<T>::managed_object.compare_exchange_strong (_current_write_old, new_spp);
 
 		if (ret) {
 			/* successful update
@@ -227,7 +221,7 @@ public:
 			 */
 
 			if (!_current_write_old->unique ()) {
-				_dead_wood.push_back (*_current_write_old);
+				_dead_wood.push_back (*_current_write_old); 
 			}
 
 			/* now delete it - if we are the only user, this deletes the
@@ -256,14 +250,14 @@ public:
 
 	void flush ()
 	{
-		Glib::Threads::Mutex::Lock lm (_lock);
+		std::lock_guard<std::mutex> lm (_lock);
 		_dead_wood.clear ();
 	}
 
 private:
-	Glib::Threads::Mutex             _lock;
-	std::shared_ptr<T>*            _current_write_old;
-	std::list<std::shared_ptr<T> > _dead_wood;
+	std::mutex                             _lock;
+	typename RCUManager<T>::PtrToSharedPtr _current_write_old;
+	std::list<std::shared_ptr<T> >         _dead_wood;
 };
 
 /** RCUWriter is a convenience object that implements write_copy/update via
@@ -321,7 +315,7 @@ public:
 	}
 
 private:
-	RCUManager<T>&       _manager;
+	RCUManager<T>&     _manager;
 	std::shared_ptr<T> _copy;
 };
 
