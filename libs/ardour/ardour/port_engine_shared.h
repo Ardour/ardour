@@ -29,6 +29,7 @@
 
 #include "pbd/natsort.h"
 #include "pbd/rcu.h"
+#include "pbd/g_atomic_compat.h"
 
 #include "ardour/libardour_visibility.h"
 #include "ardour/port_engine.h"
