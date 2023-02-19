@@ -68,8 +68,7 @@ MIDIClock_TransportMaster::~MIDIClock_TransportMaster()
 void
 MIDIClock_TransportMaster::init ()
 {
-	midi_clock_count = 0;
-	current.reset ();
+	reset (false);
 	resync_latency (false);
 }
 
@@ -210,7 +209,7 @@ MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t ti
 		/* second 0xf8 message after start/reset has arrived */
 
 		first_timestamp = timestamp;
-		current.update (0, timestamp, 0);
+		current.update (current.position, timestamp, 0);
 
 		DEBUG_TRACE (DEBUG::MidiClock, string_compose ("first clock message after start received @ %1\n", timestamp));
 
@@ -228,7 +227,7 @@ MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t ti
 		double bpm = (ENGINE->sample_rate() * 60.0) / samples_per_quarter;
 
 		if (bpm < 1 || bpm > 999) {
-			current.update (0, timestamp, 0);
+			current.update (current.position, timestamp, 0);
 			midi_clock_count = 1; /* start over */
 			DEBUG_TRACE (DEBUG::MidiClock, string_compose ("BPM is out of bounds (%1)\n", timestamp, current.timestamp));
 		} else {
@@ -242,7 +241,7 @@ MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t ti
 			t1 = t0 + e2; /* timestamp we predict for the next 0xf8 clock message */
 
 			midi_clock_count++;
-			current.update (one_ppqn_in_samples + midi_port_latency.max, timestamp, 0);
+			current.update (current.position + one_ppqn_in_samples + midi_port_latency.max, timestamp, 0);
 		}
 
 	} else {
@@ -281,15 +280,14 @@ MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t ti
 
 		calculate_filter_coefficients (_bpm);
 
-		// need at least two clock events to compute speed
-
-		if (!_running) {
-			DEBUG_TRACE (DEBUG::MidiClock, string_compose ("start mclock running with speed = %1\n", (t1 - t0) / one_ppqn_in_samples));
-			_running = true;
-		}
-
 		midi_clock_count++;
-		current.update (current.position + one_ppqn_in_samples, timestamp, speed);
+		if (_running) {
+			DEBUG_TRACE (DEBUG::MidiClock, string_compose ("mclock running with speed = %1 bpm = %2\n", (t1 - t0) / one_ppqn_in_samples, _bpm));
+			current.update (current.position + one_ppqn_in_samples, timestamp, speed);
+		} else {
+			DEBUG_TRACE (DEBUG::MidiClock, string_compose ("mclock stopped speed = %1 bpm = %2\n", (t1 - t0) / one_ppqn_in_samples, _bpm));
+			current.update (current.position, timestamp, 0);
+		}
 
 		if (TransportMasterManager::instance().current().get() == this) {
 			_session->maybe_update_tempo_from_midiclock_tempo (_bpm);
@@ -321,11 +319,12 @@ MIDIClock_TransportMaster::start (Parser& /*parser*/, samplepos_t timestamp)
 {
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("MIDIClock_TransportMaster got start message at time %1 engine time %2 transport_sample %3\n", timestamp, ENGINE->sample_time(), _session->transport_sample()));
 
-	if (!_running) {
-		reset(true);
-		_running = true;
-		current.update (_session->transport_sample(), timestamp, 0);
+	if (_running) {
+		return;
 	}
+
+	_running = true;
+	current.update (0, timestamp, 0);
 }
 
 void
@@ -341,6 +340,7 @@ MIDIClock_TransportMaster::reset (bool with_position)
 
 	_running = false;
 	_current_delta = 0;
+	midi_clock_count = 0;
 }
 
 void
@@ -369,7 +369,7 @@ MIDIClock_TransportMaster::stop (Parser& /*parser*/, samplepos_t timestamp)
 		//
 		// find out the last MIDI beat: go back #midi_clocks mod 6
 		// and lets hope the tempo didnt change in those last 6 beats :)
-		current.update (current.position - (midi_clock_count % 6) * one_ppqn_in_samples, 0, 0);
+		current.update (current.position - (midi_clock_count % 6) * one_ppqn_in_samples, current.timestamp, 0);
 	}
 }
 
@@ -387,12 +387,19 @@ MIDIClock_TransportMaster::position (Parser& /*parser*/, MIDI::byte* message, si
 	MIDI::byte msb = message[2];
 	assert((lsb <= 0x7f) && (msb <= 0x7f));
 
+	/* Each MIDI Beat spans 6 MIDI Clocks.
+	 * In other words, each MIDI Beat is a 16th note (since there are 24 MIDI
+	 * Clocks in a quarter note, therefore 4 MIDI Beats also fit in a quarter).
+	 * So, a master can sync playback to a resolution of any particular 16th note.
+	 */
+
 	uint16_t position_in_sixteenth_notes = (uint16_t(msb) << 7) | uint16_t(lsb);
+
 	samplepos_t position_in_samples = calculate_song_position(position_in_sixteenth_notes);
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Song Position: %1 samples: %2\n", position_in_sixteenth_notes, position_in_samples));
 
-	current.update (position_in_samples + midi_port_latency.max, timestamp, current.speed);
+	current.update (position_in_samples + midi_port_latency.max, timestamp, 0);
 }
 
 bool
