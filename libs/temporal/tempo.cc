@@ -3559,7 +3559,13 @@ TempoMap::midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_p
 	 * (compare to 14da117bc88)
 	 */
 	clk_pos = PBD::muldiv_round (superclock_at (b), TEMPORAL_SAMPLE_RATE, superclock_ticks_per_second ());
-	clk_beat = b.get_beats () * 24;
+
+	/* Each MIDI Beat spans 6 MIDI Clocks.
+	 * In other words, each MIDI Beat is a 16th note (since there are 24 MIDI
+	 * Clocks in a quarter note, therefore 4 MIDI Beats also fit in a quarter).
+	 * So, a master can sync playback to a resolution of any particular 16th note.
+	 */
+	clk_beat = b.get_beats () * 4 ; // 4 = 24 / 6;
 
 	assert (clk_pos >= pos);
 }
