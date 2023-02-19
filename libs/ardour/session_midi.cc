@@ -99,7 +99,7 @@ void
 Session::spp_start ()
 {
 	if (Config->get_mmc_control ()) {
-		request_roll (TRS_MIDIClock);
+		request_roll (TRS_MMC);
 	}
 }
 
