@@ -324,7 +324,7 @@ MIDIClock_TransportMaster::start (Parser& /*parser*/, samplepos_t timestamp)
 	}
 
 	_running = true;
-	current.update (0, timestamp, 0);
+	current.update (0, current.timestamp, 0);
 }
 
 void
@@ -399,7 +399,7 @@ MIDIClock_TransportMaster::position (Parser& /*parser*/, MIDI::byte* message, si
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Song Position: %1 samples: %2\n", position_in_sixteenth_notes, position_in_samples));
 
-	current.update (position_in_samples + midi_port_latency.max, timestamp, 0);
+	current.update (position_in_samples + midi_port_latency.max, current.timestamp, 0);
 }
 
 bool
