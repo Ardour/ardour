@@ -113,8 +113,11 @@ namespace ARDOUR { namespace DSP {
 			 * @param val value to set
 			 */
 			void atomic_set_int (size_t off, int32_t val) {
-				((int32_t*)_data)[off] = val;
+				/* no read or write that precedes the write we are
+				   about to do can be reordered past this fence.
+				*/
 				std::atomic_thread_fence (std::memory_order_release);
+				((int32_t*)_data)[off] = val;
 			}
 
 			/** atomically read integer at offset
@@ -127,6 +130,9 @@ namespace ARDOUR { namespace DSP {
 			 * @returns value at offset
 			 */
 			int32_t atomic_get_int (size_t off) {
+				/* no read that precedes the read we are
+				   about to do can be reordered past this fence.
+				*/
 				std::atomic_thread_fence (std::memory_order_acquire);
 				return (((int32_t*)_data)[off]);
 			}
