@@ -295,8 +295,8 @@ MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t ti
 	}
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose (
-	             "clock #%1 @ %2 should-be %3 transport %4 appspeed %6 "
-	             "read-delta %7 should-be-delta %8 t1-t0 %9 t0 %10 t1 %11 sample-rate %12 engine %13 running %14\n",
+	             "clock #%1 @ %2 should-be %3 transport %4 appspeed %5 "
+	             "read-delta %6 should-be-delta %7 t1-t0 %8 t0 %9 t1 %10 sample-rate %11 engine %12 running %13\n",
 	             midi_clock_count,                 // #
 	             elapsed_since_start,              // @
 	             current.position,                 // should-be
