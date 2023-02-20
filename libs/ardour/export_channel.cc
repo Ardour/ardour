@@ -135,7 +135,7 @@ PortExportChannel::read (Buffer const*& buf, samplecnt_t samples) const
 
 		PBD::RingBuffer<Sample>::rw_vector vec;
 		(*di)->get_read_vector (&vec);
-		assert (vec.len[0] + vec.len[1] >= samples);
+		assert ((samplecnt_t) (vec.len[0] + vec.len[1]) >= samples);
 
 		samplecnt_t to_write = std::min (samples, (samplecnt_t)vec.len[0]);
 		mix_buffers_no_gain (&_buffer[0], vec.buf[0], to_write);
