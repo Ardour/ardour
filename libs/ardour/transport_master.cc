@@ -164,14 +164,17 @@ TransportMaster::set_name (std::string const & str)
 }
 
 void
-TransportMaster::connection_handler (boost::weak_ptr<ARDOUR::Port>, std::string, boost::weak_ptr<ARDOUR::Port> w1, std::string, bool yn)
+TransportMaster::connection_handler (boost::weak_ptr<ARDOUR::Port> w0, std::string, boost::weak_ptr<ARDOUR::Port> w1, std::string, bool yn)
 {
 	if (!_port) {
 		return;
 	}
 
-	boost::shared_ptr<Port> p = w1.lock ();
-	if (p == _port) {
+	boost::shared_ptr<Port> p0 (w0.lock());
+	boost::shared_ptr<Port> p1 (w1.lock());
+
+	if ((p0 && _port == p0) || (p1 && _port == p1)) {
+
 		/* it's about us */
 
 		/* XXX technically .. if the user makes an N->1 connection to
