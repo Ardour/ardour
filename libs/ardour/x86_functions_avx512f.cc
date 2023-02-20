@@ -83,8 +83,11 @@ x86_avx512f_compute_peak(const float *src, uint32_t nframes, float current)
 	}
 
 	while (frames >= 256) {
+#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(reinterpret_cast<void const *>(src + 256), _mm_hint(0));
-
+#else
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 256), 0, 0);
+#endif
 		__m512 x0 = _mm512_load_ps(src + 0);
 		__m512 x1 = _mm512_load_ps(src + 16);
 		__m512 x2 = _mm512_load_ps(src + 32);
@@ -142,8 +145,11 @@ x86_avx512f_compute_peak(const float *src, uint32_t nframes, float current)
 	}
 
 	while (frames >= 128) {
+#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(reinterpret_cast<void const *>(src + 128), _mm_hint(0));
-
+#else
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 128), 0, 0);
+#endif
 		__m512 x0 = _mm512_load_ps(src + 0);
 		__m512 x1 = _mm512_load_ps(src + 16);
 		__m512 x2 = _mm512_load_ps(src + 32);
@@ -176,8 +182,11 @@ x86_avx512f_compute_peak(const float *src, uint32_t nframes, float current)
 	}
 
 	while (frames >= 64) {
+#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(reinterpret_cast<void const *>(src + 64), _mm_hint(0));
-
+#else
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 64), 0, 0);
+#endif
 		__m512 x0 = _mm512_load_ps(src + 0);
 		__m512 x1 = _mm512_load_ps(src + 16);
 		__m512 x2 = _mm512_load_ps(src + 32);
@@ -310,8 +319,11 @@ x86_avx512f_find_peaks(const float *src, uint32_t nframes, float *minf, float *m
 	}
 
 	while (frames >= 256) {
+#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(reinterpret_cast<void const *>(src + 256), _mm_hint(0));
-
+#else
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 256), 0, 0);
+#endif
 		__m512 x0 = _mm512_load_ps(src + 0);
 		__m512 x1 = _mm512_load_ps(src + 16);
 		__m512 x2 = _mm512_load_ps(src + 32);
@@ -371,8 +383,11 @@ x86_avx512f_find_peaks(const float *src, uint32_t nframes, float *minf, float *m
 	}
 
 	while (frames >= 128) {
+#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(reinterpret_cast<void const *>(src + 128), _mm_hint(0));
-
+#else
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 128), 0, 0);
+#endif
 		__m512 x0 = _mm512_load_ps(src + 0);
 		__m512 x1 = _mm512_load_ps(src + 16);
 		__m512 x2 = _mm512_load_ps(src + 32);
@@ -405,8 +420,11 @@ x86_avx512f_find_peaks(const float *src, uint32_t nframes, float *minf, float *m
 	}
 
 	while (frames >= 64) {
+#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(reinterpret_cast<void const *>(src + 64), _mm_hint(0));
-
+#else
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 64), 0, 0);
+#endif
 		__m512 x0 = _mm512_load_ps(src + 0);
 		__m512 x1 = _mm512_load_ps(src + 16);
 		__m512 x2 = _mm512_load_ps(src + 32);
@@ -532,8 +550,11 @@ x86_avx512f_apply_gain_to_buffer(float *dst, uint32_t nframes, float gain)
 
 	// Process the remaining samples 128 at a time
 	while (frames >= 128) {
+#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(reinterpret_cast<void const *>(dst + 128), _mm_hint(0));
-
+#else
+		__builtin_prefetch(reinterpret_cast<void const *>(dst + 128), 0, 0);
+#endif
 		__m512 x0 = _mm512_load_ps(dst + 0);
 		__m512 x1 = _mm512_load_ps(dst + 16);
 		__m512 x2 = _mm512_load_ps(dst + 32);
@@ -679,8 +700,13 @@ x86_avx512f_mix_buffers_with_gain(float *dst, const float *src, uint32_t nframes
 
 	// Process the remaining samples 128 at a time
 	while (frames >= 128) {
+#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(reinterpret_cast<void const *>(src + 128), _mm_hint(0));
 		_mm_prefetch(reinterpret_cast<void const *>(dst + 128), _mm_hint(0));
+#else
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 128), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(dst + 128), 0, 0);
+#endif
 
 		__m512 x0 = _mm512_load_ps(src + 0);
 		__m512 x1 = _mm512_load_ps(src + 16);
@@ -836,8 +862,14 @@ x86_avx512f_mix_buffers_no_gain(float *dst, const float *src, uint32_t nframes)
 
 	// Process the remaining samples 128 at a time
 	while (frames >= 128) {
+#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(reinterpret_cast<void const *>(src + 128), _mm_hint(0));
 		_mm_prefetch(reinterpret_cast<void const *>(dst + 128), _mm_hint(0));
+#else
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 128), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(dst + 128), 0, 0);
+#endif
+
 
 		__m512 x0 = _mm512_load_ps(src + 0);
 		__m512 x1 = _mm512_load_ps(src + 16);
@@ -987,9 +1019,13 @@ x86_avx512f_copy_vector(float *dst, const float *src, uint32_t nframes)
 
 	// Process 256 samples at a time
 	while (frames >= 256) {
+#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(reinterpret_cast<void const *>(src + 256), _mm_hint(0));
 		_mm_prefetch(reinterpret_cast<void const *>(dst + 256), _mm_hint(0));
-
+#else
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 256), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(dst + 256), 0, 0);
+#endif
 		__m512 x0 = _mm512_load_ps(src + 0);
 		__m512 x1 = _mm512_load_ps(src + 16);
 		__m512 x2 = _mm512_load_ps(src + 32);
@@ -1033,8 +1069,13 @@ x86_avx512f_copy_vector(float *dst, const float *src, uint32_t nframes)
 
 	// Process remaining samples 64 at a time
 	while (frames >= 64) {
+#if defined(COMPILER_MSVC) || defined(COMPILER_MINGW)
 		_mm_prefetch(reinterpret_cast<void const *>(src + 64), _mm_hint(0));
 		_mm_prefetch(reinterpret_cast<void const *>(dst + 64), _mm_hint(0));
+#else
+		__builtin_prefetch(reinterpret_cast<void const *>(src + 64), 0, 0);
+		__builtin_prefetch(reinterpret_cast<void const *>(dst + 64), 0, 0);
+#endif
 
 		__m512 x0 = _mm512_load_ps(src + 0);
 		__m512 x1 = _mm512_load_ps(src + 16);
