@@ -74,14 +74,18 @@ public:
 		/* Keep count of any readers in this section of code, so writers can
 		 * wait until managed_object is no longer in use after an atomic exchange
 		 * before dropping it.
-		 *
-		 * rg: this is not great, 3 consecutive full compiler and hardware
-		 * memory barterers. For an edge-case lock that is not usually contended.
-		 * consider reverting f87de76b9fc8b3a5a.
 		 */
-		_active_reads++;
+		/* no reads or writes below this atomic store (e.g. the copying
+		 * of *managed_object) can move before this "barrier".
+		 */
+		_active_reads.fetch_add (1, std::memory_order_release);
 		rv = *managed_object;
-		_active_reads--;
+		/* no reads or writes below this atomic store (e.g. the copying
+		 * of *managed_object) can move before this "barrier", and this
+		 * also synchronizes with a memory_order_acquire load when
+		 * testing for active readers (see below).
+		 */
+		_active_reads.fetch_sub (1, std::memory_order_release);
 
 		return rv;
 	}
@@ -99,7 +103,7 @@ protected:
 	std::atomic<PtrToSharedPtr> managed_object;
 
 	inline bool active_read () const {
-		return _active_reads.load() != 0;
+		return _active_reads.load (std::memory_order_acquire) != 0;
 	}
 
 private:
