@@ -513,7 +513,7 @@ VSTPlugin::load_user_preset (PresetRecord r)
 					_state->wanted_chunk = raw_data;
 					_state->wanted_chunk_size = size;
 					_state->want_chunk = 1;
-					if (!has_editor () || 0 == plugin_insert ()->window_proxy ()) {
+					if (!has_editor () || (plugin_insert () && 0 == plugin_insert ()->window_proxy ())) {
 						vststate_maybe_set_program (_state);
 						_state->want_chunk = 0;
 						_state->want_program = -1;
