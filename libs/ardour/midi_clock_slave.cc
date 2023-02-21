@@ -258,7 +258,7 @@ MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t ti
 		const double samples_per_quarter = (timestamp - current.timestamp) * 24.0;
 		const double instantaneous_bpm = (ENGINE->sample_rate() * 60.0) / samples_per_quarter;
 
-		const double predicted_clock_interval_in_samples = (t1 - t0);
+		const double predicted_clock_interval_in_samples = (t1 - t0) * 24;
 
 		/* _speed is relative to session tempo map */
 
