@@ -129,8 +129,6 @@ MIDIClock_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("preprocess with lt = %1 @ %2, running ? %3\n", current.timestamp, now, _running));
 
-	_midi_port->read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, parser, now);
-
 	/* no clock messages ever, or no clock messages for 1/4 second ? conclude that its stopped */
 
 	if (!current.timestamp || one_ppqn_in_samples == 0 || (now > current.timestamp && ((now - current.timestamp) > (ENGINE->sample_rate() / 4)))) {
@@ -140,8 +138,9 @@ MIDIClock_TransportMaster::pre_process (MIDI::pframes_t nframes, samplepos_t now
 		midi_clock_count = 0;
 
 		DEBUG_TRACE (DEBUG::MidiClock, string_compose ("No MIDI Clock messages received for some time, stopping! ts = %1 @ %2 ppqn = %3\n", current.timestamp, now, one_ppqn_in_samples));
-		return;
 	}
+
+	_midi_port->read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, parser, now);
 
 	if (session_pos) {
 		const samplepos_t current_pos = current.position + ((now - current.timestamp) * current.speed);
@@ -223,7 +222,7 @@ MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t ti
 
 		e2 = timestamp - current.timestamp;
 
-		const samplecnt_t samples_per_quarter = e2 * 24;
+		const samplecnt_t samples_per_quarter = e2 * ppqn;
 		double bpm = (ENGINE->sample_rate() * 60.0) / samples_per_quarter;
 
 		if (bpm < 1 || bpm > 999) {
@@ -255,43 +254,30 @@ MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t ti
 		t1 += b * e + e2;
 		e2 += c * e;
 
-		const double samples_per_quarter = (timestamp - current.timestamp) * 24.0;
-		const double instantaneous_bpm = (ENGINE->sample_rate() * 60.0) / samples_per_quarter;
+		const double samples_per_quarter = (t1 - t0) * ppqn;
 
-		const double predicted_clock_interval_in_samples = (t1 - t0) * 24;
+		_bpm = (ENGINE->sample_rate() * 60.0) / samples_per_quarter;
+		calculate_filter_coefficients (_bpm);
 
-		/* _speed is relative to session tempo map */
-
-		double speed = predicted_clock_interval_in_samples / one_ppqn_in_samples;
-
-		/* _bpm (really, _qpm) is absolute */
-
-		/* detect substantial changes in apparent tempo (defined as a
-		 * change of more than 20% of the current tempo.
+		/* when rolling speed is always 1.0. The transport moves at wall-clock
+		 * speed. What changes is the music-time (BPM), not the speed.
 		 */
-
-		const double lpf_coeff = 0.063;
-
-		if (fabs (instantaneous_bpm - _bpm) > (0.20 * _bpm)) {
-			_bpm = instantaneous_bpm;
-		} else {
-			_bpm += lpf_coeff * (instantaneous_bpm - _bpm);
+		if (TransportMasterManager::instance().current().get() == this) {
+			/* TODO always set tempo, even when there is a map */
+			_session->maybe_update_tempo_from_midiclock_tempo (_bpm);
 		}
 
-		calculate_filter_coefficients (_bpm);
+		calculate_one_ppqn_in_samples_at (current.position);
 
 		midi_clock_count++;
 		if (_running) {
 			DEBUG_TRACE (DEBUG::MidiClock, string_compose ("mclock running with speed = %1 bpm = %2\n", (t1 - t0) / one_ppqn_in_samples, _bpm));
-			current.update (current.position + one_ppqn_in_samples, timestamp, speed);
+			current.update (current.position + one_ppqn_in_samples, timestamp, 1.0);
 		} else {
 			DEBUG_TRACE (DEBUG::MidiClock, string_compose ("mclock stopped speed = %1 bpm = %2\n", (t1 - t0) / one_ppqn_in_samples, _bpm));
 			current.update (current.position, timestamp, 0);
 		}
 
-		if (TransportMasterManager::instance().current().get() == this) {
-			_session->maybe_update_tempo_from_midiclock_tempo (_bpm);
-		}
 	}
 
 	DEBUG_TRACE (DEBUG::MidiClock, string_compose (
