@@ -213,6 +213,9 @@ Butler::thread_work ()
 		Temporal::TempoMap::fetch ();
 
 	restart:
+		/* Ensure that no reads migrate before this fence */
+		std::atomic_thread_fence (std::memory_order_acquire);
+
 		DEBUG_TRACE (DEBUG::Butler, "at restart for disk work\n");
 		disk_work_outstanding = false;
 

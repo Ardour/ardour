@@ -737,6 +737,10 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		_need_butler = true;
 	}
 
+	/* Ensure that anything written during run() is visible in other threads */
+
+	std::atomic_thread_fence (std::memory_order_release);
+
 	// DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 writer run, needs butler = %2\n", name(), _need_butler));
 }
 
