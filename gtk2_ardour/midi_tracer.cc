@@ -384,6 +384,9 @@ MidiTracer::tracer (Parser&, MIDI::byte* msg, size_t len, samplecnt_t now)
 			case 0xf8:
 				s += snprintf (&buf[s], bufsize, "%16s\n", "Clock");
 				break;
+			case 0xf9:
+				s += snprintf (&buf[s], bufsize, "%16s\n", "Tick");
+				break;
 			case 0xfa:
 				s += snprintf (&buf[s], bufsize, "%16s\n", "Start");
 				break;
