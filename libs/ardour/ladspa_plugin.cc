@@ -188,6 +188,7 @@ LadspaPlugin::_default_value (uint32_t port) const
 	bool bounds_given = false;
 	bool sr_scaling = false;
 	bool earlier_hint = false;
+	bool logarithmic = LADSPA_IS_HINT_LOGARITHMIC (prh[port].HintDescriptor);
 
 	/* defaults - case 1 */
 
@@ -199,17 +200,29 @@ LadspaPlugin::_default_value (uint32_t port) const
 		}
 
 		else if (LADSPA_IS_HINT_DEFAULT_LOW(prh[port].HintDescriptor)) {
-			ret = prh[port].LowerBound * 0.75f + prh[port].UpperBound * 0.25f;
+			if (logarithmic && prh[port].LowerBound * prh[port].UpperBound > 0) {
+				ret = exp (log(prh[port].LowerBound)) * 0.75f + log (prh[port].UpperBound) * 0.25f;
+			} else {
+				ret = prh[port].LowerBound * 0.75f + prh[port].UpperBound * 0.25f;
+			}
 			bounds_given = true;
 			sr_scaling = true;
 		}
 		else if (LADSPA_IS_HINT_DEFAULT_MIDDLE(prh[port].HintDescriptor)) {
-			ret = prh[port].LowerBound * 0.5f + prh[port].UpperBound * 0.5f;
+			if (logarithmic && prh[port].LowerBound * prh[port].UpperBound > 0) {
+				ret = exp (log(prh[port].LowerBound)) * 0.5f + log (prh[port].UpperBound) * 0.5f;
+			} else {
+				ret = prh[port].LowerBound * 0.5f + prh[port].UpperBound * 0.5f;
+			}
 			bounds_given = true;
 			sr_scaling = true;
 		}
 		else if (LADSPA_IS_HINT_DEFAULT_HIGH(prh[port].HintDescriptor)) {
-			ret = prh[port].LowerBound * 0.25f + prh[port].UpperBound * 0.75f;
+			if (logarithmic && prh[port].LowerBound * prh[port].UpperBound > 0) {
+				ret = exp (log(prh[port].LowerBound)) * 0.25f + log (prh[port].UpperBound) * 0.75f;
+			} else {
+				ret = prh[port].LowerBound * 0.25f + prh[port].UpperBound * 0.75f;
+			}
 			bounds_given = true;
 			sr_scaling = true;
 		}
