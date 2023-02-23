@@ -64,6 +64,7 @@ CONFIG_VARIABLE (bool, trace_midi_output, "trace-midi-output", false)
 CONFIG_VARIABLE (bool, send_mtc, "send-mtc", false)
 CONFIG_VARIABLE (bool, send_mmc, "send-mmc", false)
 CONFIG_VARIABLE (bool, send_midi_clock, "send-midi-clock", false)
+CONFIG_VARIABLE (double, midi_clock_resolution, "midi-clock-resolution", 1.) /* 0 implies do not round, 1 implies round to integer, non-zero is the smallest fractional resolution, in bpm */
 CONFIG_VARIABLE (bool, mmc_control, "mmc-control", true)
 CONFIG_VARIABLE (bool, midi_feedback, "midi-feedback", false)
 CONFIG_VARIABLE (int32_t, mmc_receive_device_id, "mmc-receive-device-id", 0x7f)

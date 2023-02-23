@@ -249,11 +249,20 @@ MIDIClock_TransportMaster::update_midi_clock (Parser& /*parser*/, samplepos_t ti
 
 		_bpm = (ENGINE->sample_rate() * 60.0) / samples_per_quarter;
 
+		double mr = Config->get_midi_clock_resolution();
+
+		if (mr == 1.) {
+			_bpm = round (_bpm);
+		} else if (mr != 0.) {
+			_bpm -= fmod (_bpm, mr);
+		}
+
 		/* when rolling speed is always 1.0. The transport moves at wall-clock
 		 * speed. What changes is the music-time (BPM), not the speed.
 		 */
 		if (TransportMasterManager::instance().current().get() == this) {
 			/* TODO always set tempo, even when there is a map */
+
 			_session->maybe_update_tempo_from_midiclock_tempo (_bpm);
 		}
 
