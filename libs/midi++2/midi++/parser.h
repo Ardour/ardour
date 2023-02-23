@@ -102,6 +102,7 @@ class LIBMIDIPP_API Parser {
 	ZeroByteSignal        eox;
 
 	TimestampedSignal     timing;
+	TimestampedSignal     tick; /* rarely seen in the wild */
 	TimestampedSignal     start;
 	TimestampedSignal     stop;
 	TimestampedSignal     contineu;  /* note spelling */

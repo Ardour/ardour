@@ -54,6 +54,7 @@ namespace MIDI {
 	    tune = 0xF6,
 	    eox = 0xF7,
 	    timing = 0xF8,
+	    tick = 0xF9,
 	    start = 0xFA,
 	    contineu = 0xFB, /* note spelling */
 	    stop = 0xFC,

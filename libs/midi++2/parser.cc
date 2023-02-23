@@ -551,6 +551,9 @@ Parser::realtime_msg(unsigned char inbyte)
 	case 0xf8:
 		timing (*this, _timestamp);
 		break;
+	case 0xf9:
+		tick (*this, _timestamp);
+		break;
 	case 0xfa:
 		start (*this, _timestamp);
 		break;
