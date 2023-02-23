@@ -462,6 +462,8 @@
   meter type track
 [midi-audition-synth-uri]
   midi audition synthesizer plugin name id uri location
+[midi-clock-resolution]
+  midi clock resolution quantize limit precision
 [midi-clock-sets-tempo]
   midi clock mclk set tempo
 [midi-feedback]

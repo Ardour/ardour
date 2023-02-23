@@ -3708,6 +3708,23 @@ These settings will only take effect after %1 is restarted.\n\
 				   "timecode standard and the session standard."), PROGRAM_NAME));
 	add_option (_("Transport/Chase"), _sync_framerate);
 
+	auto mcr = new SpinOption<double> (
+		"midi-clock-resolution",
+		_("BPM Resolution for incoming MIDI Clock"),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_clock_resolution),
+		sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_clock_resolution),
+		0., 1., 0.01, 0.1, _("quarters"), 1, 2
+		);
+	Gtkmm2ext::UI::instance()->set_tip
+		(mcr->tip_widget(),
+		 _("This option can be used to quantize incoming MIDI clock to whole (or fractions of a) quarter note.\n\n"
+		   "Setting it to zero prevents any quantization, which can result in a rather jittery response to incoming MIDI Clock.\n\n"
+		   "Setting it to 1.0 quantizes to whole (integer) BPM values, and is the default.\n\n"
+		   "If you are using a MIDI clock source that quantizes to some fraction of a quarter note then adjust this setting to reflect that."));
+
+	add_option (_("Transport/Chase"), new OptionEditorHeading (_("MIDI Clock")));
+	add_option (_("Transport/Chase"), mcr);
+
 	add_option (_("Transport/Generate"), new OptionEditorHeading (_("Linear Timecode (LTC) Generator")));
 
 	add_option (_("Transport/Generate"),
@@ -3791,15 +3808,6 @@ These settings will only take effect after %1 is restarted.\n\
 			    _("Enable Mclk generator"),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_send_midi_clock),
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
-			    ));
-
-	add_option (_("Transport/Generate"),
-		    new SpinOption<double> (
-			    "midi-clock-resolution",
-			    _("Resolution of BPM from MIDI Clock"),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_clock_resolution),
-			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_clock_resolution),
-			    0., 1., 0.01, 0.1, _("quarters"), 1, 2
 			    ));
 
 	add_option (_("Transport"), new OptionEditorHeading (_("Plugins")));
