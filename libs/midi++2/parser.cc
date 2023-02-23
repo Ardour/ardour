@@ -221,6 +221,11 @@ Parser::trace_event (Parser &, MIDI::byte *msg, size_t len, samplecnt_t /*when*/
 				   << "Clock"
 				   << endmsg;
 				break;
+			case 0xf9:
+				*o << trace_prefix
+				   << "Tick"
+				   << endmsg;
+				break;
 			case 0xfa:
 				*o << trace_prefix
 				   << "Start"
