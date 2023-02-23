@@ -3793,6 +3793,15 @@ These settings will only take effect after %1 is restarted.\n\
 			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_send_midi_clock)
 			    ));
 
+	add_option (_("Transport/Generate"),
+		    new SpinOption<double> (
+			    "midi-clock-resolution",
+			    _("Resolution of BPM from MIDI Clock"),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::get_midi_clock_resolution),
+			    sigc::mem_fun (*_rc_config, &RCConfiguration::set_midi_clock_resolution),
+			    0., 1., 0.01, 0.1, _("quarters"), 1, 2
+			    ));
+
 	add_option (_("Transport"), new OptionEditorHeading (_("Plugins")));
 
 	bo = new BoolOption (
