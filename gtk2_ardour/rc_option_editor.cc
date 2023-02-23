@@ -1114,6 +1114,7 @@ class FontScalingOptions : public HSliderOption
 					1024, false)
 	{
 		const std::string dflt = _("100%");
+		const std::string dbl = _("200%");
 		const std::string empty = X_(""); // despite gtk-doc saying so, NULL does not work as reference
 
 		_hscale.set_name("FontScaleSlider");
@@ -1127,7 +1128,7 @@ class FontScalingOptions : public HSliderOption
 		_hscale.add_mark(125, Gtk::POS_TOP, empty);
 		_hscale.add_mark(150, Gtk::POS_TOP, empty);
 		_hscale.add_mark(175, Gtk::POS_TOP, empty);
-		_hscale.add_mark(200, Gtk::POS_TOP, empty);
+		_hscale.add_mark(200, Gtk::POS_TOP, dbl);
 		_hscale.add_mark(250, Gtk::POS_TOP, empty);
 
 		set_note (_("Adjusting the scale requires an application restart for fully accurate re-layout."));
