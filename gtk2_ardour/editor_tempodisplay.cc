@@ -338,9 +338,6 @@ Editor::tempo_map_changed ()
 
 	TempoMap::SharedPtr current_map = TempoMap::fetch ();
 
-	// std::cerr << "\n\n MAP CHANGE @ " << get_microseconds() << std::endl;
-	// current_map->dump (std::cerr);
-
 	/* If the tempo map was changed by something other than the Editor, we
 	 * will need to reassociate all visual elements used for tempo display
 	 * with the new map.
