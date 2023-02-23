@@ -7553,13 +7553,14 @@ Session::maybe_update_tempo_from_midiclock_tempo (float bpm)
 
 	if (tmap->n_tempos() == 1) {
 		Temporal::TempoMetric const & metric (tmap->metric_at (0));
-		if (fabs (metric.tempo().note_types_per_minute() - bpm) > (0.01 * metric.tempo().note_types_per_minute())) {
-			std::cerr << "\n\ntempo  from " << metric.tempo().note_types_per_minute() << " to " << bpm << " delta of "  << metric.tempo().note_types_per_minute() - bpm << " @ " << metric.tempo().note_types_per_minute() << " justifies map change\n";
-			tmap->change_tempo (metric.get_editable_tempo(), Tempo (bpm, 4.0, bpm));
+		if (fabs (metric.tempo().note_types_per_minute() - bpm) >= Config->get_midi_clock_resolution()) {
+			/* fix note type as quarters, because that's how MIDI clock works */
+			tmap->change_tempo (metric.get_editable_tempo(), Tempo (bpm, bpm, 4.0));
 			TempoMap::update (tmap);
 			return;
 		}
 	}
+
 	TempoMap::abort_update ();
 }
 
