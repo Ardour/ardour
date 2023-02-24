@@ -3489,7 +3489,7 @@ BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
 void
 BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
-	map = _editor->begin_tempo_map_edit ();
+	map = _editor->begin_tempo_mapping ();
 
 	Drag::start_grab (event, cursor);
 
@@ -3598,25 +3598,27 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 	}
 
+	XMLNode &after = map->get_state();
+
+	_editor->session()->add_command (new Temporal::TempoCommand (_("move BBT point"), _before_state, &after));
+	_editor->commit_reversible_command ();
+
 	/* 2nd argument means "update tempo map display after the new map is
 	 * installed. We need to do this because the code above has not
 	 * actually changed anything about how tempo is displayed, it simply
 	 * modified the map.
 	 */
 
-	_editor->commit_tempo_map_edit (map, true);
-
-	XMLNode &after = map->get_state();
-
-	_editor->session()->add_command (new Temporal::TempoCommand (_("move BBT point"), _before_state, &after));
-	_editor->commit_reversible_command ();
+	_editor->commit_tempo_mapping (map);
 }
 
 void
 BBTRulerDrag::aborted (bool moved)
 {
-	TempoMap::abort_update ();
+	_editor->abort_tempo_mapping ();
 }
+
+/*------------------------------------------------------------------*/
 
 TempoTwistDrag::TempoTwistDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i, Temporal::BeatTime)
