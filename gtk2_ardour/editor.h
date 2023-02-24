@@ -1744,6 +1744,7 @@ private:
 
 	Temporal::TempoMap::WritableSharedPtr begin_tempo_mapping ();
 	void abort_tempo_mapping ();
+	void commit_tempo_mapping (Temporal::TempoMap::WritableSharedPtr&);
 
 	enum MidTempoChanges {
 		TempoChanged = 0x1,
@@ -1755,7 +1756,6 @@ private:
 
 protected:
 	void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update = false);
-	void _commit_tempo_mapping (Temporal::TempoMap::WritableSharedPtr&);
 
 private:
 	friend class DragManager;

@@ -776,7 +776,7 @@ Editor::abort_tempo_mapping ()
 }
 
 void
-Editor::_commit_tempo_mapping (TempoMap::WritableSharedPtr& new_map)
+Editor::commit_tempo_mapping (TempoMap::WritableSharedPtr& new_map)
 {
 	TempoMap::update (new_map);
 	abort_tempo_mapping ();
