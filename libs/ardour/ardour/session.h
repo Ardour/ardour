@@ -1386,6 +1386,8 @@ public:
 	bool bang_trigger_at(int32_t route_index, int32_t row_index);
 	bool unbang_trigger_at(int32_t route_index, int32_t row_index);
 
+	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+
 protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
@@ -2374,8 +2376,6 @@ private:
 
 	int tb_with_filled_slots;
 	void handle_slots_empty_status (std::weak_ptr<Route> const &);
-
-	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
 };
 
 

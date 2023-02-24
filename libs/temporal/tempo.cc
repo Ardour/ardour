@@ -4128,3 +4128,41 @@ TempoCommand::operator() ()
 	map->set_state (*_after, Stateful::current_state_version);
 	TempoMap::update (map);
 }
+
+DomainSwapInformation* Temporal::domain_swap (0);
+
+DomainSwapInformation*
+DomainSwapInformation::start(TimeDomain prev)
+{
+	assert (!domain_swap);
+	domain_swap = new DomainSwapInformation (prev);
+	return domain_swap;
+}
+
+DomainSwapInformation::~DomainSwapInformation ()
+{
+	assert (this == domain_swap);
+	undo ();
+	domain_swap = 0;
+}
+
+void
+DomainSwapInformation::clear ()
+{
+	counts.clear ();
+	positions.clear ();
+}
+
+void
+DomainSwapInformation::undo ()
+{
+	for (auto & c : counts) {
+		c->set_time_domain (previous);
+	}
+
+	for (auto & p : positions) {
+		p->set_time_domain (previous);
+	}
+
+	clear ();
+}

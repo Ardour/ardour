@@ -766,6 +766,16 @@ Location::set_scene_change (std::shared_ptr<SceneChange>  sc)
 void
 Location::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
 {
+	assert (domain_swap);
+
+	if (_start.time_domain() == from) {
+
+		_start.set_time_domain (to);
+		_end.set_time_domain (to);
+
+		domain_swap->add (_start);
+		domain_swap->add (_end);
+	}
 }
 
 /*---------------------------------------------------------------------- */
@@ -1727,7 +1737,7 @@ Locations::globally_change_time_domain (Temporal::TimeDomain from, Temporal::Tim
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 	for (auto & l : locations) {
-		globally_change_time_domain (from, to);
+		l->globally_change_time_domain (from, to);
 	}
 
 }

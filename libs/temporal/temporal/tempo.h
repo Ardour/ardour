@@ -1141,6 +1141,28 @@ class LIBTEMPORAL_API TempoCommand : public Command {
 	XMLNode const * _after;
 };
 
+class DomainSwapInformation {
+   public:
+	static DomainSwapInformation* start (TimeDomain prev);
+
+	~DomainSwapInformation ();
+
+	void add (timecnt_t& t) { counts.push_back (&t); }
+	void add (timepos_t& p) { positions.push_back (&p); }
+	void clear ();
+
+   private:
+	DomainSwapInformation (TimeDomain prev) : previous (prev) {}
+
+	std::vector<timecnt_t*> counts;
+	std::vector<timepos_t*> positions;
+	TimeDomain previous;
+
+	void undo ();
+};
+
+extern DomainSwapInformation* domain_swap;
+
 } /* end of namespace Temporal */
 
 #ifdef COMPILER_MSVC
