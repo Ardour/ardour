@@ -2171,3 +2171,15 @@ Region::time_domain() const
 
 	return Temporal::BeatTime;
 }
+
+void
+Region::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+{
+	assert (Temporal::domain_swap);
+
+	if (_length.val().time_domain() == from) {
+		timecnt_t& l (_length.non_const_val());
+		l.set_time_domain (to);
+		Temporal::domain_swap->add (l);
+	}
+}

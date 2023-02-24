@@ -111,6 +111,7 @@ public:
 
 	const DataType& data_type () const { return _type; }
 	Temporal::TimeDomain time_domain() const;
+	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
 
 	/** How the region parameters play together:
 	 *

@@ -3510,4 +3510,8 @@ Playlist::time_domain() const
 void
 Playlist::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
 {
+	RegionReadLock rlock (this);
+	for (auto & region  : regions) {
+		region->globally_change_time_domain (from, to);
+	}
 }

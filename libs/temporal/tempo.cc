@@ -843,7 +843,6 @@ TempoMap::add_meter (MeterPoint* mp)
 void
 TempoMap::change_tempo (TempoPoint & p, Tempo const & t)
 {
-	std::cerr << "overwrite " << ((Tempo*)&p)->note_types_per_minute() << " with " << t.note_types_per_minute() << std::endl;
 	*((Tempo*)&p) = t;
 	reset_starting_at (p.sclock());
 }
@@ -4156,6 +4155,7 @@ DomainSwapInformation::clear ()
 void
 DomainSwapInformation::undo ()
 {
+	std::cerr << "DSI::undo on " << counts.size() << " lengths and " << positions.size() << " positions\n";
 	for (auto & c : counts) {
 		c->set_time_domain (previous);
 	}

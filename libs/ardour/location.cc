@@ -775,6 +775,8 @@ Location::globally_change_time_domain (Temporal::TimeDomain from, Temporal::Time
 
 		domain_swap->add (_start);
 		domain_swap->add (_end);
+	} else {
+		std::cerr << name() << " wrong domain: " << _start << " .. " << _end << std::endl;
 	}
 }
 
@@ -1735,6 +1737,7 @@ Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
 void
 Locations::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
 {
+	std::cerr << "L-gctd on " << locations.size() << std::endl;
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 	for (auto & l : locations) {
 		l->globally_change_time_domain (from, to);

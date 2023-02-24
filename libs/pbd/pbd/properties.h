@@ -111,6 +111,10 @@ public:
 		return _current;
 	}
 
+	T& non_const_val () {
+		return _current;
+	}
+
 	/* MANAGEMENT OF Stateful State */
 
 	bool set_value (XMLNode const & node) {
