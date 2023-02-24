@@ -1742,6 +1742,9 @@ private:
 	void mid_tempo_per_region_update (RegionView*);
 	bool ignore_map_change;
 
+	Temporal::TempoMap::WritableSharedPtr begin_tempo_mapping ();
+	void abort_tempo_mapping ();
+
 	enum MidTempoChanges {
 		TempoChanged = 0x1,
 		MeterChanged = 0x2,
@@ -1752,6 +1755,7 @@ private:
 
 protected:
 	void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update = false);
+	void _commit_tempo_mapping (Temporal::TempoMap::WritableSharedPtr&);
 
 private:
 	friend class DragManager;

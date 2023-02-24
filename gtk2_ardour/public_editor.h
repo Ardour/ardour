@@ -520,6 +520,12 @@ public:
 		_commit_tempo_map_edit (map, with_update);
 	}
 
+	virtual Temporal::TempoMap::WritableSharedPtr begin_tempo_mapping () = 0;
+	virtual void abort_tempo_mapping () = 0;
+	void commit_tempo_mapping (Temporal::TempoMap::WritableSharedPtr& map) {
+		_commit_tempo_mapping (map);
+	}
+
 	virtual void access_action (const std::string&, const std::string&) = 0;
 	virtual void set_toggleaction (const std::string&, const std::string&, bool) = 0;
 
@@ -584,6 +590,7 @@ protected:
 	virtual void suspend_route_redisplay () = 0;
 	virtual void resume_route_redisplay () = 0;
 	virtual void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update) = 0;
+	virtual void _commit_tempo_mapping (Temporal::TempoMap::WritableSharedPtr&) = 0;
 
 	std::atomic<int> _suspend_route_redisplay_counter;
 };

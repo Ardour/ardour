@@ -754,6 +754,34 @@ Editor::real_remove_meter_marker (Temporal::MeterPoint const * section)
 	return FALSE;
 }
 
+
+Temporal::TempoMap::WritableSharedPtr
+Editor::begin_tempo_mapping ()
+{
+	TempoMap::WritableSharedPtr wmap = TempoMap::fetch_writable ();
+	reassociate_metric_markers (wmap);
+	(void) Temporal::DomainSwapInformation::start (Temporal::BeatTime);
+	_session->globally_change_time_domain (Temporal::BeatTime, Temporal::AudioTime);
+	return wmap;
+}
+
+void
+Editor::abort_tempo_mapping ()
+{
+	delete domain_swap; /* undo the domain swap */
+	domain_swap = 0;
+
+	TempoMap::SharedPtr tmap (TempoMap::fetch());
+	reassociate_metric_markers (tmap);
+}
+
+void
+Editor::_commit_tempo_mapping (TempoMap::WritableSharedPtr& new_map)
+{
+	TempoMap::update (new_map);
+	abort_tempo_mapping ();
+}
+
 Temporal::TempoMap::WritableSharedPtr
 Editor::begin_tempo_map_edit ()
 {

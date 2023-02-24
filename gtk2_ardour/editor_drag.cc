@@ -3633,7 +3633,8 @@ TempoTwistDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	map = _editor->begin_tempo_map_edit ();
+	map = _editor->begin_tempo_mapping ();
+
 	/* Get the tempo point that starts this section */
 
 	_tempo = const_cast<TempoPoint*> (&map->tempo_at (raw_grab_time()));
@@ -3714,13 +3715,13 @@ TempoTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 	_editor->session()->add_command (new Temporal::TempoCommand (_("twist tempo"), _before_state, &after));
 	_editor->commit_reversible_command ();
 
-	_editor->commit_tempo_map_edit (map);
+	_editor->commit_tempo_mapping (map);
 }
 
 void
 TempoTwistDrag::aborted (bool moved)
 {
-	_editor->abort_tempo_map_edit ();
+	_editor->abort_tempo_mapping ();
 }
 
 TempoEndDrag::TempoEndDrag (Editor* e, ArdourCanvas::Item* i)
