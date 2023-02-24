@@ -302,6 +302,8 @@ public:
 
 	void set_capture_insertion_in_progress (bool yn);
 
+	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+
 protected:
 	friend class Session;
 

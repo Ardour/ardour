@@ -6355,3 +6355,8 @@ Route::tempo_map_changed ()
 		_triggerbox->tempo_map_changed ();
 	}
 }
+
+void
+Route::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+{
+}

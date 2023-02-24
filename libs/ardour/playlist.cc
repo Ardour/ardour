@@ -3506,3 +3506,8 @@ Playlist::time_domain() const
 
 	return Temporal::BeatTime;
 }
+
+void
+Playlist::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+{
+}

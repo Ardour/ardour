@@ -32,7 +32,9 @@
 #include "pbd/error.h"
 #include "pbd/enumwriter.h"
 
+#include "ardour/location.h"
 #include "ardour/session.h"
+#include "ardour/session_playlists.h"
 #include "ardour/tempo.h"
 #include "ardour/transport_fsm.h"
 
@@ -295,4 +297,19 @@ Session::any_duration_to_samples (samplepos_t position, AnyTime const & duration
 	}
 
 	return duration.samples;
+}
+
+void
+Session::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+{
+	{
+		std::shared_ptr<RouteList> rl (routes.reader());
+
+		for (auto & r : *rl) {
+			r->globally_change_time_domain (from, to);
+		}
+	}
+
+	_playlists->globally_change_time_domain (from, to);
+	_locations->globally_change_time_domain (from, to);
 }

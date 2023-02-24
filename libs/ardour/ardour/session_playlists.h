@@ -70,6 +70,8 @@ public:
 	std::vector<std::shared_ptr<Playlist> > get_unused () const;
 	uint32_t n_playlists() const;
 
+	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+
 private:
 	friend class Session;
 

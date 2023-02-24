@@ -41,6 +41,8 @@
 #include "pbd/controllable.h"
 #include "pbd/destructible.h"
 
+#include "temporal/types.h"
+
 #include "ardour/ardour.h"
 #include "ardour/gain_control.h"
 #include "ardour/instrument_info.h"
@@ -614,6 +616,8 @@ public:
 	bool slaved () const;
 
 	virtual void use_captured_sources (SourceList& srcs, CaptureInfos const &) {}
+
+	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
 
 protected:
 	friend class Session;

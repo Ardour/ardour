@@ -38,6 +38,8 @@
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 
+#include "temporal/types.h"
+
 #include "ardour/ardour.h"
 #include "ardour/scene_change.h"
 #include "ardour/session_handle.h"
@@ -169,6 +171,8 @@ public:
 	Temporal::TimeDomain position_time_domain() const { return _start.time_domain(); }
 	void set_position_time_domain (Temporal::TimeDomain ps);
 
+	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+
 	class ChangeSuspender {
 		public:
 			ChangeSuspender (Location* l) : _l (l) {
@@ -291,6 +295,8 @@ public:
 	Location* range_starts_at (timepos_t const &, timecnt_t const & slop = timecnt_t (Temporal::AudioTime), bool incl = false) const;
 
 	void find_all_between (timepos_t const & start, timepos_t const & end, LocationList&, Location::Flags);
+
+	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
 
 	PBD::Signal1<void,Location*> current_changed;
 

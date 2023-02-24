@@ -763,6 +763,11 @@ Location::set_scene_change (std::shared_ptr<SceneChange>  sc)
 	}
 }
 
+void
+Location::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+{
+}
+
 /*---------------------------------------------------------------------- */
 
 Locations::Locations (Session& s)
@@ -1715,4 +1720,14 @@ Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
 	}
 
 	return removed_at_least_one;
+}
+
+void
+Locations::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+{
+	Glib::Threads::RWLock::WriterLock lm (_lock);
+	for (auto & l : locations) {
+		globally_change_time_domain (from, to);
+	}
+
 }

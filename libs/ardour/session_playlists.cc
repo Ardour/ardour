@@ -684,3 +684,13 @@ SessionPlaylists::foreach (boost::function<void(std::shared_ptr<const Playlist>)
 		}
 	}
 }
+
+void
+SessionPlaylists::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+{
+	Glib::Threads::Mutex::Lock lm (lock);
+
+	for (auto & pl : playlists) {
+		pl->globally_change_time_domain (from, to);
+	}
+}
