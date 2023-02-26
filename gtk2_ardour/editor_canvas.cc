@@ -193,8 +193,10 @@ Editor::initialize_canvas ()
 	mapping_cursor->set_fill (false);
 	mapping_cursor->set_outline (true);
 	mapping_cursor->set_outline_color (0xff0000ff);
-	mapping_cursor->set_radius (timebar_height);
+	mapping_cursor->set_radius (timebar_height/2);
 	mapping_cursor->set_arc (360);
+	mapping_cursor->set_ignore_events (true);
+	mapping_cursor->set_center (ArdourCanvas::Duple (35., timebar_height/2.0)); // x is arbitrary at this time
 	mapping_cursor->hide ();
 
 	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
@@ -257,7 +259,7 @@ Editor::initialize_canvas ()
 	transport_punchout_line->hide();
 
 	tempo_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), tempo_bar, TempoBarItem, "tempo bar"));
-	mapping_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), tempo_bar, MappingBarItem, "mapping bar"));
+	mapping_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), mapping_bar, MappingBarItem, "mapping bar"));
 	meter_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), meter_bar, MeterBarItem, "meter bar"));
 	marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), marker_bar, MarkerBarItem, "marker bar"));
 	cd_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), cd_marker_bar, CdMarkerBarItem, "cd marker bar"));

@@ -1072,18 +1072,18 @@ Editor::canvas_ruler_bar_event (GdkEvent *event, ArdourCanvas::Item* item, ItemT
 	/* XXX consolidate with Editor::canvas_ruler_event ? */
 
 	switch (event->type) {
-		case GDK_ENTER_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				item->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color_mod (color_name, "marker bar")).lighter(0.20).color());
-			}
-			break;
-		case GDK_LEAVE_NOTIFY:
-			if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
-				item->set_fill_color (UIConfiguration::instance().color_mod (color_name, "marker bar"));
-			}
-			break;
-		default:
-			break;
+	case GDK_ENTER_NOTIFY:
+		if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			item->set_fill_color (Gtkmm2ext::HSV(UIConfiguration::instance().color_mod (color_name, "marker bar")).lighter(0.20).color());
+		}
+		break;
+	case GDK_LEAVE_NOTIFY:
+		if (event->crossing.detail != GDK_NOTIFY_INFERIOR) {
+			item->set_fill_color (UIConfiguration::instance().color_mod (color_name, "marker bar"));
+		}
+		break;
+	default:
+		break;
 	};
 
 	return typed_event (item, event, type);

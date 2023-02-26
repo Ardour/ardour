@@ -1987,6 +1987,10 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	choose_canvas_cursor_on_entry (item_type);
 
 	switch (item_type) {
+	case MappingBarItem:
+		mapping_cursor->show ();
+		break;
+
 	case ControlPointItem:
 		if (mouse_mode == MouseDraw || mouse_mode == MouseObject || mouse_mode == MouseContent) {
 			cp = static_cast<ControlPoint*>(item->get_data ("control_point"));
@@ -2132,6 +2136,10 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	}
 
 	switch (item_type) {
+	case MappingBarItem:
+		mapping_cursor->hide ();
+		break;
+
 	case ControlPointItem:
 		_verbose_cursor->hide ();
 		break;
@@ -2280,7 +2288,7 @@ Editor::scrub (samplepos_t sample, double current_x)
 }
 
 bool
-Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from_autoscroll)
+Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_autoscroll)
 {
 	_last_motion_y = event->motion.y;
 
@@ -2334,6 +2342,11 @@ Editor::motion_handler (ArdourCanvas::Item* /*item*/, GdkEvent* event, bool from
 			timepos_t t (where);
 			snap_to_with_modifier (t, event);
 			set_snapped_cursor_position (t);
+
+			if (item == mapping_bar) {
+				double const new_pos = sample_to_pixel_unrounded (where);
+				mapping_cursor->set_center (ArdourCanvas::Duple (new_pos, mapping_cursor->center().y));
+			}
 		}
 
 		if (!peaks_visible) {
