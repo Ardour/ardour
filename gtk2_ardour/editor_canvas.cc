@@ -177,13 +177,13 @@ Editor::initialize_canvas ()
 	meter_bar->set_outline(false);
 
 	tempo_bar = new ArdourCanvas::Rectangle (tempo_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
-	CANVAS_DEBUG_NAME (tempo_bar, "Tempo  Bar");
+	CANVAS_DEBUG_NAME (tempo_bar, "Tempo Bar");
 	tempo_bar->set_fill(true);
 	tempo_bar->set_outline(false);
 	tempo_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 
 	mapping_bar = new ArdourCanvas::Rectangle (mapping_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
-	CANVAS_DEBUG_NAME (tempo_bar, "Tempo  Bar");
+	CANVAS_DEBUG_NAME (mapping_bar, "Mapping Bar");
 	mapping_bar->set_fill(true);
 	mapping_bar->set_outline(false);
 	mapping_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
