@@ -3476,18 +3476,18 @@ BBTMarkerDrag::aborted (bool moved)
 	}
 }
 
-BBTRulerDrag::BBTRulerDrag (Editor* e, ArdourCanvas::Item* i)
+MappingDrag::MappingDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i, Temporal::BeatTime)
 	, _tempo (0)
 	, _before_state (0)
 	, _drag_valid (true)
 {
-	DEBUG_TRACE (DEBUG::Drags, "New BBTRulerDrag\n");
+	DEBUG_TRACE (DEBUG::Drags, "New MappingDrag\n");
 
 }
 
 void
-BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+MappingDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	map = _editor->begin_tempo_mapping ();
 
@@ -3515,7 +3515,7 @@ BBTRulerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 }
 
 void
-BBTRulerDrag::setup_pointer_offset ()
+MappingDrag::setup_pointer_offset ()
 {
 	/* get current state */
 	_before_state = &map->get_state();
@@ -3533,7 +3533,7 @@ BBTRulerDrag::setup_pointer_offset ()
 }
 
 void
-BBTRulerDrag::motion (GdkEvent* event, bool first_move)
+MappingDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (!_drag_valid) {
 		return;
@@ -3570,7 +3570,7 @@ BBTRulerDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
-BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
+MappingDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!_drag_valid) {
 		_editor->abort_tempo_map_edit ();
@@ -3613,7 +3613,7 @@ BBTRulerDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-BBTRulerDrag::aborted (bool moved)
+MappingDrag::aborted (bool moved)
 {
 	_editor->abort_tempo_mapping ();
 }

@@ -2530,7 +2530,7 @@ private:
 	friend class RegionDrag;
 	friend class RegionMoveDrag;
 	friend class TrimDrag;
-	friend class BBTRulerDrag;
+	friend class MappingDrag;
 	friend class MeterMarkerDrag;
 	friend class BBTMarkerDrag;
 	friend class TempoMarkerDrag;

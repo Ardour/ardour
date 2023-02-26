@@ -915,10 +915,10 @@ private:
 
 
 /** BBT Ruler drag */
-class BBTRulerDrag : public Drag
+class MappingDrag : public Drag
 {
 public:
-	BBTRulerDrag (Editor *, ArdourCanvas::Item *);
+	MappingDrag (Editor *, ArdourCanvas::Item *);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
