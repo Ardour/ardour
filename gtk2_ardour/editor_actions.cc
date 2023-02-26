@@ -177,6 +177,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("Subframes"), _("Subframes"));
 	ActionManager::register_action (editor_menu_actions, X_("SyncMenu"), _("Sync"));
 	ActionManager::register_action (editor_menu_actions, X_("TempoMenu"), _("Tempo"));
+	ActionManager::register_action (editor_menu_actions, X_("MappingMenu"), _("Mapping"));
 	ActionManager::register_action (editor_menu_actions, X_("Timecode"), _("Timecode fps"));
 	ActionManager::register_action (editor_menu_actions, X_("LayerDisplay"), _("Region Layers"));
 
@@ -709,6 +710,7 @@ Editor::register_actions ()
 	ruler_bbt_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-bbt-ruler"), _("Bars:Beats"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_meter_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-meter-ruler"), _("Time Signature"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_tempo_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-tempo-ruler"), _("Tempo"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
+	ruler_mapping_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-mapping-ruler"), _("Tempo Mapping"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_range_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-range-ruler"), _("Range Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_loop_punch_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch Ranges"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_cd_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-cd-marker-ruler"), _("CD Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));

@@ -142,6 +142,12 @@ Editor::initialize_canvas ()
 	_time_markers_group = new ArdourCanvas::Container (h_scroll_group);
 	CANVAS_DEBUG_NAME (_time_markers_group, "time bars");
 
+
+	/* Note that because of ascending-y-axis coordinates, this order is
+	 * bottom-to-top. But further note that the actual order is set in
+	 * ::update_ruler_visibility()
+	 */
+
 	cd_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
 	CANVAS_DEBUG_NAME (cd_marker_group, "cd marker group");
 	/* the vide is temporarily placed a the same location as the
@@ -159,6 +165,8 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (tempo_group, "tempo group");
 	meter_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
 	CANVAS_DEBUG_NAME (meter_group, "meter group");
+	mapping_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 6.0) + 1.0));
+	CANVAS_DEBUG_NAME (mapping_group, "mapping group");
 
 	float timebar_thickness = timebar_height; //was 4
 	float timebar_top = (timebar_height - timebar_thickness)/2;
@@ -173,6 +181,12 @@ Editor::initialize_canvas ()
 	tempo_bar->set_fill(true);
 	tempo_bar->set_outline(false);
 	tempo_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
+
+	mapping_bar = new ArdourCanvas::Rectangle (mapping_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	CANVAS_DEBUG_NAME (tempo_bar, "Tempo  Bar");
+	mapping_bar->set_fill(true);
+	mapping_bar->set_outline(false);
+	mapping_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 
 	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
@@ -234,6 +248,7 @@ Editor::initialize_canvas ()
 	transport_punchout_line->hide();
 
 	tempo_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), tempo_bar, TempoBarItem, "tempo bar"));
+	mapping_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), tempo_bar, MappingBarItem, "mapping bar"));
 	meter_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), meter_bar, MeterBarItem, "meter bar"));
 	marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), marker_bar, MarkerBarItem, "marker bar"));
 	cd_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), cd_marker_bar, CdMarkerBarItem, "cd marker bar"));
@@ -1040,6 +1055,8 @@ Editor::color_handler()
 	meter_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
 	tempo_bar->set_fill_color (UIConfiguration::instance().color_mod ("tempo bar", "marker bar"));
+
+	mapping_bar->set_fill_color (UIConfiguration::instance().color_mod ("mapping bar", "marker bar"));
 
 	marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("marker bar", "marker bar"));
 	marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));

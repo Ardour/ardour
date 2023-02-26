@@ -816,6 +816,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
+	case MappingBarItem:
+		break;
+
 	case TempoBarItem:
 	case TempoCurveItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
@@ -1690,6 +1693,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case TransportMarkerBarItem:
 			case CdMarkerBarItem:
 			case TempoBarItem:
+			case MappingBarItem:
 			case TempoCurveItem:
 			case MeterBarItem:
 			case VideoBarItem:
@@ -1815,6 +1819,9 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				mouse_add_new_marker (where, Location::IsCueMarker);
 			}
 			return true;
+		case MappingBarItem:
+			return true;
+
 		case TempoBarItem:
 		case TempoCurveItem:
 			if (!_dragging_playhead && Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {

@@ -915,6 +915,7 @@ private:
 	Gtk::VBox                time_bars_vbox;
 
 	ArdourCanvas::Container* tempo_group;
+	ArdourCanvas::Container* mapping_group;
 	ArdourCanvas::Container* meter_group;
 	ArdourCanvas::Container* marker_group;
 	ArdourCanvas::Container* range_marker_group;
@@ -961,6 +962,7 @@ private:
 	Glib::RefPtr<Gtk::ToggleAction> ruler_bbt_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_meter_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_tempo_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_mapping_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_range_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_loop_punch_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
@@ -1049,6 +1051,7 @@ private:
 	Gtk::Menu* editor_ruler_menu;
 
 	ArdourCanvas::Rectangle* tempo_bar;
+	ArdourCanvas::Rectangle* mapping_bar;
 	ArdourCanvas::Rectangle* meter_bar;
 	ArdourCanvas::Rectangle* marker_bar;
 	ArdourCanvas::Rectangle* range_marker_bar;
@@ -1064,6 +1067,7 @@ private:
 	Gtk::Label  timecode_label;
 	Gtk::Label  samples_label;
 	Gtk::Label  tempo_label;
+	Gtk::Label  mapping_label;
 	Gtk::Label  meter_label;
 	Gtk::Label  mark_label;
 	Gtk::Label  range_mark_label;

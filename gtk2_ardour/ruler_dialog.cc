@@ -33,6 +33,7 @@ RulerDialog::RulerDialog ()
 	get_vbox()->pack_start (timecode_button);
 	get_vbox()->pack_start (samples_button);
 	get_vbox()->pack_start (bbt_button);
+	get_vbox()->pack_start (mapping_button);
 	get_vbox()->pack_start (meter_button);
 	get_vbox()->pack_start (tempo_button);
 	get_vbox()->pack_start (range_button);
@@ -48,6 +49,7 @@ RulerDialog::RulerDialog ()
 	connect_action (timecode_button, "timecode-ruler");
 	connect_action (minsec_button, "minsec-ruler");
 	connect_action (bbt_button, "bbt-ruler");
+	connect_action (mapping_button, "mapping-ruler");
 	connect_action (tempo_button, "tempo-ruler");
 	connect_action (meter_button, "meter-ruler");
 	connect_action (loop_punch_button, "loop-punch-ruler");

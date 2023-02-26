@@ -43,6 +43,7 @@ enum ItemType {
 	TempoMarkerItem,
 	MeterBarItem,
 	TempoBarItem,
+	MappingBarItem,
 	RegionViewNameHighlight,
 	RegionViewName,
 	StartSelectionTrimItem,
