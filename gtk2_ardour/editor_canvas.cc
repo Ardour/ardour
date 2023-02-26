@@ -35,6 +35,7 @@
 
 #include "pbd/error.h"
 
+#include "canvas/arc.h"
 #include "canvas/canvas.h"
 #include "canvas/rectangle.h"
 #include "canvas/pixbuf.h"
@@ -187,6 +188,14 @@ Editor::initialize_canvas ()
 	mapping_bar->set_fill(true);
 	mapping_bar->set_outline(false);
 	mapping_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
+
+	mapping_cursor = new ArdourCanvas::Arc (mapping_group);
+	mapping_cursor->set_fill (false);
+	mapping_cursor->set_outline (true);
+	mapping_cursor->set_outline_color (0xff0000ff);
+	mapping_cursor->set_radius (timebar_height);
+	mapping_cursor->set_arc (360);
+	mapping_cursor->hide ();
 
 	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
