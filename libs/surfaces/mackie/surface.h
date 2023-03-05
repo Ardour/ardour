@@ -256,8 +256,8 @@ public:
 	bool is_qcon;
 
 	MidiByteArray display_line (std::string const& msg, int line_num);
-	MidiByteArray display_colors_on_xtouch(const XTouchColors color_values[]) const;
-	uint8_t convert_color_to_xtouch_value(uint32_t color) const;
+	MidiByteArray display_colors_on_xtouch (const XTouchColors color_values[]) const;
+	uint8_t convert_color_to_xtouch_value (uint32_t color) const;
 
   public:
 	/* IP MIDI devices need to keep a handle on this and destroy it */

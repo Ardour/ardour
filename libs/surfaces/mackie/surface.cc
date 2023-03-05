@@ -1204,7 +1204,7 @@ Surface::map_stripables (const vector<boost::shared_ptr<Stripable> >& stripables
 
 		if (!(*s)->locked()) {
 			if(xtouch){
-				colors[i] = static_cast<XTouchColors>(convert_color_to_xtouch_value((*r)->presentation_info().color()));
+				colors[i] = static_cast<XTouchColors> (convert_color_to_xtouch_value((*r)->presentation_info().color()));
 				++i;
 			}
 			(*s)->set_stripable (*r);
@@ -1216,7 +1216,7 @@ Surface::map_stripables (const vector<boost::shared_ptr<Stripable> >& stripables
 		(*s)->set_stripable (boost::shared_ptr<Stripable>());
 	}
 	if(xtouch){
-		_port->write(display_colors_on_xtouch(colors)); //write colors to strips for xtouch
+		_port->write (display_colors_on_xtouch(colors)); //write colors to strips for xtouch
 	}
 }
 
@@ -1640,7 +1640,7 @@ Surface::display_message_for (string const& msg, uint64_t msecs)
  *  @param color_values is assumed to be an array with a color value for each of the 8 scribble strips
 */
 MidiByteArray
-Surface::display_colors_on_xtouch(const XTouchColors color_values[]) const
+Surface::display_colors_on_xtouch (const XTouchColors color_values[]) const
 {
 	MidiByteArray midi_msg;
 	midi_msg << sysex_hdr ();
@@ -1648,7 +1648,7 @@ Surface::display_colors_on_xtouch(const XTouchColors color_values[]) const
 	
 	uint8_t displaycount = 8;
 	
-	for(uint8_t i = 0; i < displaycount; ++i){
+	for (uint8_t i = 0; i < displaycount; ++i) {
 		midi_msg << color_values[i];
 	}
 	
@@ -1661,41 +1661,52 @@ Surface::display_colors_on_xtouch(const XTouchColors color_values[]) const
  * return value can be casted to enum XTouchColor
 */
 uint8_t
-Surface::convert_color_to_xtouch_value(uint32_t color) const
+Surface::convert_color_to_xtouch_value (uint32_t color) const
 {
+
 	uint8_t red = color >> 24;
 	uint8_t green = (color >> 16) & 0xff;
 	uint8_t blue = (color >> 8) & 0xff;
 	
 	uint8_t max = red;
-	if(max < green){
+	if (max < green) {
 		max = green;
 	}
-	if(max < blue){
+	if (max < blue) {
 		max = blue;
 	}
 	
-	if(max != 0){
+	if (max != 0) {
+		
 		//set the highest value to 0xFF to be brightness independent
 		
 		float norm = 255.0/max;
-		red = static_cast<uint8_t>(red*norm);
-		green = static_cast<uint8_t>(green*norm);
-		blue = static_cast<uint8_t>(blue*norm);
+		red = static_cast<uint8_t> (red*norm);
+		green = static_cast<uint8_t> (green*norm);
+		blue = static_cast<uint8_t> (blue*norm);
 		
 		uint8_t xcolor = 0;
-		if(red > 0x7f){
+		if (red > 0x7f) {
+		
 			xcolor = xcolor | 0b001;	//lowest bit is red
+			
 		}
-		if(green > 0x7f){
+		if (green > 0x7f) {
+		
 			xcolor = xcolor | 0b010;	//second bit is green
+			
 		}
-		if(blue > 0x7f){
+		if (blue > 0x7f) {
+		
 			xcolor = xcolor | 0b100;	//third bit is blue
+			
 		}
+		
 		return xcolor;
-	}
-	else{
+	
+	} else {
+	
 		return White;				//if it would be black (color = 0x000000) return white, because black means off
+		
 	}
 }
