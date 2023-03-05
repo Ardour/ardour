@@ -62,6 +62,7 @@ DeviceInfo::DeviceInfo()
 	, _is_qcon(false)
 	, _is_platformMp(false)
 	, _is_proG2(false)
+	, _is_xtouch(false)
 	, _has_qcon_second_lcd(false)
 	, _has_qcon_master_meters(false)
 	, _has_meters (true)
@@ -340,6 +341,12 @@ DeviceInfo::set_state (const XMLNode& node, int /* version */)
 	} else {
 		_is_qcon = false;
 	}
+	
+	if ((child = node.child ("IsXTouch")) != 0) {
+		child->get_property ("value", _is_xtouch);
+	} else {
+		_is_xtouch = false;
+	}
 
 	if ((child = node.child ("IsPlatformMp")) != 0) {
 		child->get_property ("value", _is_platformMp);
@@ -521,6 +528,11 @@ bool DeviceInfo::is_platformMp () const
 bool DeviceInfo::is_proG2 () const
 {
 	return _is_proG2;
+}
+
+bool DeviceInfo::is_xtouch () const
+{
+	return _is_xtouch;
 }
 
 bool

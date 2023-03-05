@@ -1190,6 +1190,11 @@ Surface::map_stripables (const vector<boost::shared_ptr<Stripable> >& stripables
 
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Mapping %1 stripables to %2 strips\n", stripables.size(), strips.size()));
 
+	
+	bool xtouch = _mcp.device_info().is_xtouch();
+	XTouchColors colors[] { Off, Off, Off, Off, Off, Off, Off, Off };
+	uint8_t i = 0;
+
 	for (r = stripables.begin(); r != stripables.end() && s != strips.end(); ++s) {
 
 		/* don't try to assign stripables to a locked strip. it won't
@@ -1198,14 +1203,20 @@ Surface::map_stripables (const vector<boost::shared_ptr<Stripable> >& stripables
 		*/
 
 		if (!(*s)->locked()) {
+			if(xtouch){
+				colors[i] = static_cast<XTouchColors>(convert_color_to_xtouch_value((*r)->presentation_info().color()));
+				++i;
+			}
 			(*s)->set_stripable (*r);
 			++r;
 		}
 	}
-
 	for (; s != strips.end(); ++s) {
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("strip %1 being set to null stripable\n", (*s)->index()));
 		(*s)->set_stripable (boost::shared_ptr<Stripable>());
+	}
+	if(xtouch){
+		_port->write(display_colors_on_xtouch(colors)); //write colors to strips for xtouch
 	}
 }
 
@@ -1621,5 +1632,70 @@ Surface::display_message_for (string const& msg, uint64_t msecs)
 
 	for (Strips::const_iterator s = strips.begin(); s != strips.end(); ++s) {
 		(*s)->block_screen_display_for (msecs);
+	}
+}
+ 
+/** display @p color_values on the 8 scribble strips of the X-Touch
+ *
+ *  @param color_values is assumed to be an array with a color value for each of the 8 scribble strips
+*/
+MidiByteArray
+Surface::display_colors_on_xtouch(const XTouchColors color_values[]) const
+{
+	MidiByteArray midi_msg;
+	midi_msg << sysex_hdr ();
+	midi_msg << 0x72;
+	
+	uint8_t displaycount = 8;
+	
+	for(uint8_t i = 0; i < displaycount; ++i){
+		midi_msg << color_values[i];
+	}
+	
+	midi_msg << MIDI::eox;
+	
+	return midi_msg;
+}
+
+/** takes trackcolor in 0xRRGGBBAA (Red, Green, Blue, Alpha) and converts it to suitable xtouch colors
+ * return value can be casted to enum XTouchColor
+*/
+uint8_t
+Surface::convert_color_to_xtouch_value(uint32_t color) const
+{
+	uint8_t red = color >> 24;
+	uint8_t green = (color >> 16) & 0xff;
+	uint8_t blue = (color >> 8) & 0xff;
+	
+	uint8_t max = red;
+	if(max < green){
+		max = green;
+	}
+	if(max < blue){
+		max = blue;
+	}
+	
+	if(max != 0){
+		//set the highest value to 0xFF to be brightness independent
+		
+		float norm = 255.0/max;
+		red = static_cast<uint8_t>(red*norm);
+		green = static_cast<uint8_t>(green*norm);
+		blue = static_cast<uint8_t>(blue*norm);
+		
+		uint8_t xcolor = 0;
+		if(red > 0x7f){
+			xcolor = xcolor | 0b001;	//lowest bit is red
+		}
+		if(green > 0x7f){
+			xcolor = xcolor | 0b010;	//second bit is green
+		}
+		if(blue > 0x7f){
+			xcolor = xcolor | 0b100;	//third bit is blue
+		}
+		return xcolor;
+	}
+	else{
+		return White;				//if it would be black (color = 0x000000) return white, because black means off
 	}
 }

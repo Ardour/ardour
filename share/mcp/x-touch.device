@@ -12,4 +12,5 @@
   <JogWheel value="yes"/>
   <TouchSenseFaders value="yes"/>
   <HasSeparateMeters value="yes"/>
+  <IsXTouch value="yes"/>
 </MackieProtocolDevice>

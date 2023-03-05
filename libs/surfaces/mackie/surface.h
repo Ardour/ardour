@@ -68,6 +68,17 @@ class Led;
 class Surface : public PBD::ScopedConnectionList, public sigc::trackable
 {
 public:
+	enum XTouchColors {
+		Off,
+		Red,
+		Green,
+		Yellow,
+		Blue,
+		Purple,
+		Cyan,
+		White,
+	};
+	
 	Surface (MackieControlProtocol&, const std::string& name, uint32_t number, surface_type_t stype);
 	virtual ~Surface();
 
@@ -245,6 +256,8 @@ public:
 	bool is_qcon;
 
 	MidiByteArray display_line (std::string const& msg, int line_num);
+	MidiByteArray display_colors_on_xtouch(const XTouchColors color_values[]) const;
+	uint8_t convert_color_to_xtouch_value(uint32_t color) const;
 
   public:
 	/* IP MIDI devices need to keep a handle on this and destroy it */
