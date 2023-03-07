@@ -822,11 +822,6 @@ Track::set_align_choice_from_io ()
 #endif
 
 
-	/* metronome aligns to ExistingMaterial */
-	if (_input->connected_to (_session.click_io ())) {
-		have_physical = true;
-	}
-
 	if (have_physical) {
 		_disk_writer->set_align_style (ExistingMaterial);
 	} else {
