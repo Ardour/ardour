@@ -434,7 +434,7 @@ Route::process_output_buffers (BufferSet& bufs,
 	bool run_disk_writer = false;
 	if (_disk_writer && speed > 0) {
 		samplecnt_t latency_preroll = _session.remaining_latency_preroll ();
-		run_disk_writer = latency_preroll < nframes + (_signal_latency + _output_latency);
+		run_disk_writer = latency_preroll <= nframes + (_signal_latency + _output_latency);
 		if (end_sample - _disk_writer->input_latency () < _session.transport_sample ()) {
 			run_disk_writer = true;
 		}
@@ -5038,19 +5038,18 @@ Route::update_port_latencies (PortSet& from, PortSet& to, bool playback, samplec
 	 *
 	 * So for correct alignment we use the Delivery's playback latency.
 	 */
-	LatencyRange outport_latency = all_connections;
 	/* routes without latency delayline (master, monitor) always use the
 	 * actual connected latency.
 	 */
 	if (playback && _main_outs && !connected && _delayline) {
-		outport_latency.min = _main_outs->playback_offset () - _main_outs->input_latency ();
-		outport_latency.max = _main_outs->playback_offset () - _main_outs->input_latency ();
+		all_connections.min = _main_outs->playback_offset () - _main_outs->input_latency ();
+		all_connections.max = _main_outs->playback_offset () - _main_outs->input_latency ();
 	}
 
 	/* set the "from" port latencies to the max/min range of all their connections */
 
 	for (PortSet::iterator p = from.begin(); p != from.end(); ++p) {
-		p->set_private_latency_range (outport_latency, playback);
+		p->set_private_latency_range (all_connections, playback);
 	}
 
 	DEBUG_TRACE (DEBUG::LatencyRoute, string_compose ("%1: priv. port L(%2) = (%3, %4) + %5\n", _name, playback ? "playback" : "capture", all_connections.min, all_connections.max, our_latency));
