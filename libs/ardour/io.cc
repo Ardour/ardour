@@ -1700,6 +1700,12 @@ IO::copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, samplecn
 		port_buffer.read_from (*prev, nframes, offset);
 		++o;
 	}
+
+	/* when port is both externally and internally connected,
+	 * make data directly available to downstream internal ports */
+	for (auto const& p : _ports) {
+		p->flush_buffers (nframes);
+	}
 }
 
 boost::shared_ptr<Port>

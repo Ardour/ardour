@@ -42,6 +42,8 @@ public:
 	void cycle_end (pframes_t);
 	void cycle_split ();
 
+	void flush_buffers (pframes_t nframes);
+
 	/* reset SRC, clear out any state */
 	void reinit (bool with_ratio);
 
