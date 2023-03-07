@@ -89,6 +89,7 @@ AudioPort::cycle_start (pframes_t nframes)
 void
 AudioPort::cycle_end (pframes_t nframes)
 {
+	Port::cycle_end (nframes);
 	if (sends_output() && !_buffer->written() && _port_handle) {
 		if (!_buffer->data (0)) {
 			get_audio_buffer (nframes);

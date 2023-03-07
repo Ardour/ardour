@@ -64,7 +64,9 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 	: _name (n)
 	, _flags (f)
 	, _last_monitor (false)
+	, _in_cycle (false)
 	, _externally_connected (0)
+	, _internally_connected (0)
 {
 	_private_playback_latency.min = 0;
 	_private_playback_latency.max = 0;
@@ -374,7 +376,17 @@ Port::reset ()
 void
 Port::cycle_start (pframes_t)
 {
+	assert (!_in_cycle);
+	_in_cycle = true;
 }
+
+void
+Port::cycle_end (pframes_t)
+{
+	assert (_in_cycle);
+	_in_cycle = false;
+}
+
 
 void
 Port::set_public_latency_range (LatencyRange const& range, bool playback) const

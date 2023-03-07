@@ -225,8 +225,9 @@ MidiPort::read_and_parse_entire_midi_buffer_with_no_speed_adjustment (pframes_t 
 }
 
 void
-MidiPort::cycle_end (pframes_t /*nframes*/)
+MidiPort::cycle_end (pframes_t nframes)
 {
+	Port::cycle_end (nframes);
 	_data_fetched_for_cycle = false;
 }
 

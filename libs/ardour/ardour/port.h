@@ -119,7 +119,7 @@ public:
 
 	virtual DataType type () const = 0;
 	virtual void cycle_start (pframes_t);
-	virtual void cycle_end (pframes_t) = 0;
+	virtual void cycle_end (pframes_t);
 	virtual void cycle_split () = 0;
 	virtual void reinit (bool) {}
 	virtual Buffer& get_buffer (pframes_t nframes) = 0;
@@ -129,10 +129,17 @@ public:
 	virtual void set_buffer_size (pframes_t) {}
 
 	bool physically_connected () const;
+	bool in_cycle () const { return _in_cycle; }
+
 	uint32_t externally_connected () const { return _externally_connected; }
+	uint32_t internally_connected () const { return _internally_connected; }
 
 	void increment_external_connections() { _externally_connected++; }
 	void decrement_external_connections() { if (_externally_connected) _externally_connected--; }
+
+	void increment_internal_connections() { _internally_connected++; }
+	void decrement_internal_connections() { if (_internally_connected) _internally_connected--; }
+
 
 	PBD::Signal1<void,bool> MonitorInputChanged;
 	PBD::Signal3<void,boost::shared_ptr<Port>,boost::shared_ptr<Port>, bool > ConnectedOrDisconnected;
@@ -190,7 +197,9 @@ private:
 	std::string _name;  ///< port short name
 	PortFlags   _flags; ///< flags
 	bool        _last_monitor;
+	bool        _in_cycle;
 	uint32_t    _externally_connected;
+	uint32_t    _internally_connected;
 
 	/** ports that we are connected to, kept so that we can
 	    reconnect to the backend when required
