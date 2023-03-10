@@ -449,7 +449,7 @@ function factory (params)
 	else
 		if (snap_num==0) then
 			LuaDialog.Message ("Recall Mixer Settings:",
-				local_path .. 'does not exist!\nPlease run Store Mixer Settings first.',
+				folder_path .. 'does not exist!\nPlease run Store Mixer Settings first.',
 				LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run()
 		else
 			LuaDialog.Message ("Recall Mixer Settings:",
