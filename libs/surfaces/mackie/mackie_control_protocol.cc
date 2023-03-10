@@ -65,6 +65,7 @@
 #include "ardour/track.h"
 #include "ardour/types.h"
 #include "ardour/audioengine.h"
+#include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
 #include "temporal/tempo.h"
@@ -281,7 +282,7 @@ MackieControlProtocol::get_sorted_stripables()
 	// fetch all stripables
 	StripableList stripables;
 
-	session->get_stripables (stripables);
+	session->get_stripables (stripables, PresentationInfo::AllStripables);
 
 	// sort in presentation order, and exclude master, control and hidden stripables
 	// and any stripables that are already set.
@@ -319,7 +320,7 @@ MackieControlProtocol::get_sorted_stripables()
 				}
 #endif
 			} else {
-				if (!is_track(s) && !s->presentation_info().hidden()) {
+				if (!is_track (s) && !is_vca (s) && !is_foldback_bus (s)  && !s->presentation_info().hidden()) {
 					sorted.push_back (s);
 				}
 			}
@@ -331,17 +332,16 @@ MackieControlProtocol::get_sorted_stripables()
 			break;
 		case Auxes: // in ardour, for now aux and buss are same. for mixbus, "Busses" are mixbuses, "Auxes" are ardour buses
 #ifdef MIXBUS
-			if (!s->mixbus() && !is_track(s) && !s->presentation_info().hidden())
+			if (!s->mixbus() && !is_track(s) && !is_vca (s) && !is_foldback_bus (s) && !s->presentation_info().hidden())
 #else
-			if (!is_track(s) && !s->presentation_info().hidden())
+			if (!is_track (s) && !is_vca (s) && !is_foldback_bus (s) && !s->presentation_info().hidden())
 #endif
 			{
 				sorted.push_back (s);
 			}
 			break;
-		case Outputs: // Show all the tracks we have hidden
-			if (s->presentation_info().hidden()) {
-				// maybe separate groups
+		case Outputs:
+			if (is_foldback_bus (s) && !s->presentation_info().hidden()) {
 				sorted.push_back (s);
 			}
 			break;
@@ -351,12 +351,14 @@ MackieControlProtocol::get_sorted_stripables()
 			}
 			break;
 		case AudioInstr:
-			if (has_instrument (s)){
+			if (is_vca (s)){
 				sorted.push_back (s);
 			}
 			break;
 		case Inputs:
-			// nothing to do right now
+			if (is_trigger_track (s) && !s->presentation_info().hidden()){
+				sorted.push_back (s);
+			}
 			break;
 		}
 	}
@@ -2360,6 +2362,25 @@ bool
 MackieControlProtocol::is_midi_track (boost::shared_ptr<Stripable> r) const
 {
 	return boost::dynamic_pointer_cast<MidiTrack>(r) != 0;
+}
+
+bool
+MackieControlProtocol::is_trigger_track (boost::shared_ptr<Stripable> r) const
+{
+	boost::shared_ptr<Track> trk = boost::dynamic_pointer_cast<Track>(r);
+	return (trk && (r)->presentation_info ().trigger_track ());
+}
+
+bool
+MackieControlProtocol::is_foldback_bus (boost::shared_ptr<Stripable> r) const
+{
+	return ((r)->presentation_info ().flags () & PresentationInfo::FoldbackBus);
+}
+
+bool
+MackieControlProtocol::is_vca (boost::shared_ptr<Stripable> r) const
+{
+	return boost::dynamic_pointer_cast<VCA>(r) != 0;
 }
 
 bool

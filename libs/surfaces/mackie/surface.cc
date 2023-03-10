@@ -1356,9 +1356,9 @@ Surface::update_view_mode_display (bool with_helpful_text)
 		text = _("Auxes");
 		break;
 	case MackieControlProtocol::Outputs:
-		show_two_char_display ("HI");
+		show_two_char_display ("Fb");
 		id = Button::Outputs;
-		text = _("Hidden Tracks");
+		text = _("Foldback Busses");
 		break;
 	case MackieControlProtocol::Selected:
 		show_two_char_display ("SE");
@@ -1368,7 +1368,12 @@ Surface::update_view_mode_display (bool with_helpful_text)
 	case MackieControlProtocol::AudioInstr:
 		show_two_char_display ("IS");
 		id = Button::AudioInstruments;
-		text = _("Instruments");
+		text = _("VCAs");
+		break;
+	case MackieControlProtocol::Inputs:
+		show_two_char_display ("CU");
+		id = Button::Inputs;
+		text = _("Cue Tracks");
 		break;
 	default:
 		break;
