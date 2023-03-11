@@ -842,6 +842,22 @@ find "${MediaClips}" -type d -exec chmod 755 "{}" \;
 find "${MediaClips}" -type f -exec chmod 644 "{}" \;
 
 ################################################################################
+if test -n "$MIXBUS"; then
+
+	for file in `find ${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2 ${PRODUCT_PKG_DIR}/${APPROOT}/lib/ladspa -name "*.so"`; do
+		echo "Checking Plugin Binary: $file"
+		changes=""
+		for lib in `otool -L $file | egrep "(gtk/inst/|/opt/|/local/|libs/$STDCPP)" | awk '{print $1}'` ; do
+			base=`basename $lib`
+			changes="$changes -change $lib @executable_path/../lib/$base"
+		done
+		if test "x$changes" != "x" ; then
+			install_name_tool $changes $file
+		fi
+	done
+
+fi
+################################################################################
 
 if test x$DEMO_SESSION_URL != x ; then
 	mkdir -p ${PRODUCT_PKG_DIR}/$Shared/sessions
