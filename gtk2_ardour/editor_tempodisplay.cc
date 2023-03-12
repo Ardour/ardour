@@ -769,6 +769,7 @@ Editor::abort_tempo_mapping ()
 	delete domain_swap; /* undo the domain swap */
 	domain_swap = 0;
 
+	TempoMap::abort_update ();
 	TempoMap::SharedPtr tmap (TempoMap::fetch());
 	reassociate_metric_markers (tmap);
 }
@@ -777,7 +778,10 @@ void
 Editor::commit_tempo_mapping (TempoMap::WritableSharedPtr& new_map)
 {
 	TempoMap::update (new_map);
-	abort_tempo_mapping ();
+	delete domain_swap; /* undo the domain swap */
+	domain_swap = 0;
+	TempoMap::SharedPtr tmap (TempoMap::fetch());
+	reassociate_metric_markers (tmap);
 }
 
 Temporal::TempoMap::WritableSharedPtr
