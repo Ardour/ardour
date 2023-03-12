@@ -3259,7 +3259,6 @@ TempoCurveDrag::aborted (bool moved)
 
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i, Temporal::BeatTime)
-	, _grab_bpm (120.0, 4.0)
 	, _before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoMarkerDrag\n");
@@ -3267,7 +3266,7 @@ TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	_marker = reinterpret_cast<TempoMarker*> (_item->get_data ("marker"));
 	_real_section = &_marker->tempo();
 	_movable = !TempoMap::use()->is_initial (_marker->tempo());
-	_grab_bpm = Tempo (_real_section->note_types_per_minute(), _real_section->note_type(), _real_section->end_note_types_per_minute());
+	_grab_bpm = _real_section->note_types_per_minute();
 	_grab_qn = _real_section->beats();
 	assert (_marker);
 }
@@ -3308,7 +3307,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (ArdourKeyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 
-		double new_bpm = std::max (1.5, _grab_bpm.note_types_per_minute() - ((current_pointer_x() - grab_x()) / 5.0));
+		double new_bpm = std::max (1.5, _grab_bpm - ((current_pointer_x() - grab_x()) / 5.0));
 		stringstream strs;
 		Temporal::Tempo new_tempo (new_bpm, _marker->tempo().note_type());
 		map->change_tempo (const_cast<TempoPoint&>(_marker->tempo()), new_tempo);

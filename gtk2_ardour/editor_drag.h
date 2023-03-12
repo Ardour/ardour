@@ -879,7 +879,7 @@ private:
 	Temporal::TempoMap::WritableSharedPtr map;
 
 	bool _movable;
-	Temporal::Tempo _grab_bpm;
+	double _grab_bpm;
 	Temporal::Beats _grab_qn;
 	XMLNode* _before_state;
 };
