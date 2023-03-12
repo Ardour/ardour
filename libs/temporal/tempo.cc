@@ -25,6 +25,7 @@
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
+#include "pbd/integer_division.h"
 #include "pbd/failed_constructor.h"
 #include "pbd/stacktrace.h"
 #include "pbd/string_convert.h"
@@ -405,8 +406,11 @@ TempoPoint::set_state (XMLNode const & node, int version)
 	int ret;
 
 	if ((ret = Tempo::set_state (node, version)) == 0) {
-		if (node.get_property (X_("omega"), _omega)) {
-			/* XXX ?? */
+		if (node.get_property (X_("omega_beats"), _omega_beats)) {
+			/* Older versions only defined a single omega value */
+			if (node.get_property (X_("omega"), _omega_beats)) {
+				/* ???? */
+			}
 		}
 	}
 
@@ -418,29 +422,41 @@ TempoPoint::get_state () const
 {
 	XMLNode& base (Tempo::get_state());
 	Point::add_state (base);
-	base.set_property (X_("omega"), _omega);
+	base.set_property (X_("omega_beats"), _omega_beats);
 	return base;
 }
 
 TempoPoint::TempoPoint (TempoMap const & map, XMLNode const & node)
 	: Point (map, node)
 	, Tempo (node)
-	, _omega (0)
+	, _omega_beats (0.)
 {
-	node.get_property (X_("omega"), _omega);
+	if (node.get_property (X_("omega_beats"), _omega_beats)) {
+		/* Older versions only defined a single omega value */
+		if (node.get_property (X_("omega"), _omega_beats)) {
+			/* ???? */
+		}
+	}
 }
+
+void
+TempoPoint::set_omega_beats (double ob)
+{
+	_omega_beats = ob;
+}
+
 
 /* To understand the math(s) behind ramping, see the file doc/tempo.{pdf,tex}
  */
 
 void
-TempoPoint::compute_omega_from_next_tempo (TempoPoint const & next)
+TempoPoint::compute_omega_beats_from_next_tempo (TempoPoint const & next)
 {
-	compute_omega_from_distance_and_next_tempo (next.beats() - beats(), next);
+	compute_omega_beats_from_distance_and_next_tempo (next.beats() - beats(), next);
 }
 
 void
-TempoPoint::compute_omega_from_distance_and_next_tempo (Beats const & quarter_duration, TempoPoint const & next)
+TempoPoint::compute_omega_beats_from_distance_and_next_tempo (Beats const & quarter_duration, TempoPoint const & next)
 {
 	superclock_t end_scpqn;
 
@@ -453,25 +469,21 @@ TempoPoint::compute_omega_from_distance_and_next_tempo (Beats const & quarter_du
 	}
 
 	if (superclocks_per_quarter_note () == end_scpqn) {
-		_omega = 0.0;
+		_omega_beats = 0.0;
 		return;
 	}
 
-	compute_omega_from_quarter_duration (quarter_duration, end_scpqn);
+	compute_omega_beats_from_quarter_duration (quarter_duration, end_scpqn);
 }
 
 void
-TempoPoint::compute_omega_from_quarter_duration (Beats const & quarter_duration, superclock_t end_scpqn)
+TempoPoint::compute_omega_beats_from_quarter_duration (Beats const & quarter_duration, superclock_t end_scpqn)
 {
-	_omega = ((1.0/end_scpqn) - (1.0/superclocks_per_quarter_note())) / DoubleableBeats (quarter_duration).to_double();
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("quarter-computed omega from qtr duration = %1 dur was %2 start speed %3 end speed [%4]\n", _omega, quarter_duration.str(), superclocks_per_quarter_note(), end_scpqn));
-}
-
-void
-TempoPoint::compute_omega_from_audio_duration (samplecnt_t audio_duration, superclock_t end_scpqn)
-{
-	_omega = (1.0 / (samples_to_superclock (audio_duration, TEMPORAL_SAMPLE_RATE))) * log ((double) superclocks_per_note_type() / end_scpqn);
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("computed omega from audio duration= %1%2 dur was %3\n", std::setprecision(12), _omega, audio_duration));
+	_omega_beats = ((1.0/end_scpqn) - (1.0/superclocks_per_quarter_note())) / DoubleableBeats (quarter_duration).to_double();
+	if (!isfinite (_omega_beats)) {
+		abort ();
+	}
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("quarter-computed omega from qtr duration = %1 dur was %2 start speed %3 end speed [%4]\n", _omega_beats, quarter_duration.str(), superclocks_per_quarter_note(), end_scpqn));
 }
 
 superclock_t
@@ -483,6 +495,7 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 
 	if (qn < Beats()) {
 		/* negative */
+
 		assert (_quarters == Beats());
 	} else {
 		/* positive */
@@ -497,30 +510,36 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 	}
 
 	superclock_t r;
-	const double log_expr = superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double();
+	const double log_expr = superclocks_per_quarter_note() * _omega_beats * DoubleableBeats (qn - _quarters).to_double();
+
+	// std::cerr << "logexpr " << log_expr << " from " << superclocks_per_quarter_note() << " * " << _omega_beats << " * " << (qn - _quarters) << std::endl;
 
 	if (log_expr < -1) {
-		r = _sclock + llrint (log (-log_expr - 1.0) / -_omega);
+
+		r = _sclock + llrint (log (-log_expr - 1.0) / -_omega_beats);
 
 		if (r < 0) {
 			std::cerr << "CASE 1: " << *this << endl << " scpqn = " << superclocks_per_quarter_note() << std::endl;
 			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log (" << log_expr << ") "
 			          << log (-log_expr - 1.0)
-			          << " - omega = " << -_omega
+			          << " - omega = " << -_omega_beats
 			          << " => "
 			          << r << std::endl;
 			abort ();
 		}
 
 	} else {
-		r = _sclock + llrint (log1p (log_expr) / _omega);
+		r = _sclock + llrint (log1p (log_expr) / _omega_beats);
+
+		// std::cerr << "r = " << _sclock << " + " << log1p (log_expr) / _omega_beats << " => " << r << std::endl;
 
 		if (r < 0) {
 			std::cerr << "CASE 2: scpqn = " << superclocks_per_quarter_note() << std::endl;
-			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log1p (" << superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double() << " = "
-			          << log1p (superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double())
+			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log1p (" << superclocks_per_quarter_note() * _omega_beats * DoubleableBeats (qn - _quarters).to_double() << " = "
+			          << log1p (superclocks_per_quarter_note() * _omega_beats * DoubleableBeats (qn - _quarters).to_double())
 			          << " => "
 			          << r << std::endl;
+			_map->dump (std::cerr);
 			abort ();
 		}
 	}
@@ -535,14 +554,14 @@ TempoPoint::superclocks_per_note_type_at (timepos_t const &pos) const
 		return _superclocks_per_note_type;
 	}
 
-	return _superclocks_per_note_type * exp (-_omega * (pos.superclocks() - sclock()));
+	return _superclocks_per_note_type * exp (-_omega_beats * (pos.superclocks() - sclock()));
 }
 
 Temporal::Beats
 TempoPoint::quarters_at_superclock (superclock_t sc) const
 {
 	/* catch a special case. The maximum superclock_t value cannot be
-	   converted into a 32bit beat + 32 bit tick value for common tempos.
+	   converted into a 64 bit tick value for common tempos.
 	   Obviously, values less than this can also cause overflow, but are
 	   unlikely to be encountered.
 
@@ -591,7 +610,7 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 		return ret;
 	}
 
-	const double b = (exp (_omega * (sc - _sclock)) - 1) / (superclocks_per_quarter_note() * _omega);
+	const double b = (exp (_omega_beats * (sc - _sclock)) - 1) / (superclocks_per_quarter_note() * _omega_beats);
 	return _quarters + Beats::from_double (b);
 }
 
@@ -1009,7 +1028,13 @@ TempoMap::add_tempo (TempoPoint * tp)
 		delete tp;
 	}
 
-	reset_starting_at (ret->sclock());
+	TempoPoint* prev = const_cast<TempoPoint*> (previous_tempo (*ret));
+	if (prev) {
+		reset_starting_at (prev->sclock());
+	} else {
+		reset_starting_at (ret->sclock());
+	}
+
 	return ret;
 }
 
@@ -1255,7 +1280,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 	if (need_initial_ramp_reset) {
 		const TempoPoint *nxt = next_tempo (metric.tempo());
 		if (nxt) {
-			const_cast<TempoPoint*> (&metric.tempo())->compute_omega_from_next_tempo (*nxt);
+			const_cast<TempoPoint*> (&metric.tempo())->compute_omega_beats_from_next_tempo (*nxt);
 		}
 		need_initial_ramp_reset = false;
 	}
@@ -1296,7 +1321,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 
 			DEBUG_TRACE (DEBUG::MapReset, string_compose ("considering omega comp for %1 with nxt = %2\n", *tp, nxt_tempo));
 			if (tp->ramped() && nxt_tempo) {
-				tp->compute_omega_from_next_tempo (*nxt_tempo);
+				tp->compute_omega_beats_from_next_tempo (*nxt_tempo);
 			}
 		}
 
@@ -1522,7 +1547,7 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	 */
 
 	if (prev_t->actually_ramped()) {
-		prev_t->compute_omega_from_distance_and_next_tempo (beats - prev_t->beats(), tp);
+		prev_t->compute_omega_beats_from_distance_and_next_tempo (beats - prev_t->beats(), tp);
 	}
 
 	TempoMetric metric (*prev_t, *prev_m);
@@ -1954,6 +1979,10 @@ TempoMap::_get_tempo_and_meter (typename const_traits_t::tempo_point_type & tp,
 void
 TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, uint32_t bar_mod, uint32_t beat_div) const
 {
+	if (start == end) {
+		return;
+	}
+
 	/* note: @p bar_mod is "bar modulo", and describes the N in "give
 	   me every Nth bar". If the caller wants every 4th bar, bar_mod ==
 	   4. If we want every point defined by the tempo note type (e.g. every
@@ -2151,6 +2180,9 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			 * Skip metrics until p->bbt() is at or after up to next grid mod div.
 			 */
 
+			if (p->bbt() > bbt) {
+				std::cerr << "Point at " << *p << " wrong for " << bbt << std::endl;
+			}
 			assert (p->bbt() <= bbt);
 
 			/* If we just arrived at a point (indicated by bbt ==
@@ -2319,7 +2351,7 @@ std::operator<<(std::ostream& str, TempoPoint const & t)
 		} else {
 			str << ' ' << " !ramp to " << t.end_note_types_per_minute();
 		}
-		str << " omega = " << std::setprecision(12) << t.omega();
+		str << " omega_beats = " << std::setprecision(12) << t.omega_beats();
 	}
 	return str;
 }
@@ -2361,7 +2393,7 @@ std::operator<<(std::ostream& str, TempoMapPoint const & tmp)
 	}
 
 	if (tmp.is_explicit_tempo() && tmp.tempo().ramped()) {
-		str << " ramp omega = " << tmp.tempo().omega();
+		str << " ramp omega(beats) = " << tmp.tempo().omega_beats();
 	}
 
 	return str;
@@ -3296,116 +3328,85 @@ TempoMap::stretch_tempo_end (TempoPoint* ts, samplepos_t sample, samplepos_t end
 	reset_starting_at (prev_t->sclock());
 }
 void
-TempoMap::twist_tempi (TempoPoint* ts, samplepos_t start_sample, samplepos_t end_sample)
+TempoMap::twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& next, double tempo_value)
 {
-	if (!ts) {
+	if (tempo_value < 4.0 || tempo_value > 800) {
 		return;
 	}
 
-	TempoPoint* next_t = 0;
-	TempoPoint* next_to_next_t = 0;
+	TempoPoint old_prev (prev);
+	TempoPoint old_focus (focus);
 
-	/* minimum allowed measurement distance in superclocks */
-	const superclock_t min_delta_sclock = samples_to_superclock (2, TEMPORAL_SAMPLE_RATE);
-	const superclock_t start_sclock = samples_to_superclock (start_sample, TEMPORAL_SAMPLE_RATE);
-	const superclock_t end_sclock = samples_to_superclock (end_sample, TEMPORAL_SAMPLE_RATE);
+	/* fix end tempo of prev tempo marker then recompute its omega */
+	prev.set_end_npm (tempo_value);
+	prev.compute_omega_beats_from_next_tempo (focus);
 
-	TempoPoint* prev_t = 0;
-	const superclock_t sclock_offset = end_sclock - start_sclock;
+	/* reposition focus, using prev to define audio time; leave beat time
+	 * and BBT alone
+	 */
+
+	focus.set (prev.superclock_at (focus.beats()), focus.beats(), focus.bbt());
+
+	/* set focus start & end tempos appropriately */
+
+	focus.set_note_types_per_minute (tempo_value);
+	focus.set_end_npm (next.note_types_per_minute());
+
+	/* recompute focus omega */
+
+	focus.compute_omega_beats_from_next_tempo (next);
+
+	/* Now iteratively adjust focus.end_superclocks_per_quarter_note() so
+	 * that next.sclock() remains within 1 sample of its actual position
+	 */
+
+	superclock_t err = focus.superclock_at (next.beats()) - next.sclock();
+	const superclock_t one_sample = superclock_ticks_per_second() / TEMPORAL_SAMPLE_RATE;
+	Beats b (next.beats() - focus.beats());
+	double end_scpqn = focus.end_superclocks_per_quarter_note();
+	double new_end_npm;
+
+	while (std::abs(err) >= one_sample) {
 
 
-	if (ts->beats() > Beats()) {
-		prev_t = const_cast<TempoPoint*> (previous_tempo (*ts));
-	}
-
-	next_t = const_cast<TempoPoint*> (next_tempo (*ts));
-
-	if (!next_t) {
-		return;
-	}
-
-	next_to_next_t = const_cast<TempoPoint*> (next_tempo (*next_t));
-
-	if (!next_to_next_t) {
-		return;
-	}
-
-	double prev_contribution = 0.0;
-
-	if (next_t && prev_t && prev_t->type() == TempoPoint::Ramped) {
-		prev_contribution = (ts->sclock() - prev_t->sclock()) / (double) (next_t->sclock() - prev_t->sclock());
-	}
-
-	const sampleoffset_t ts_sclock_contribution = sclock_offset - (prev_contribution * (double) sclock_offset);
-
-	superclock_t old_tc_sclock = ts->sclock();
-	superclock_t old_next_sclock = next_t->sclock();
-	superclock_t old_next_to_next_sclock = next_to_next_t->sclock();
-
-	double new_bpm;
-	double new_next_bpm;
-	double new_copy_end_bpm;
-
-	if (start_sclock > ts->sclock() + min_delta_sclock && (start_sclock + ts_sclock_contribution) > ts->sclock() + min_delta_sclock) {
-		new_bpm = ts->note_types_per_minute() * ((start_sclock - ts->sclock()) / (double) (end_sclock - ts->sclock()));
-	} else {
-		new_bpm = ts->note_types_per_minute();
-	}
-
-	/* don't clamp and proceed here.
-	   testing has revealed that this can go negative,
-	   which is an entirely different thing to just being too low.
-	*/
-
-	if (new_bpm < 0.5) {
-		return;
-	}
-
-	new_bpm = std::min (new_bpm, (double) 1000.0);
-
-	bool was_constant = (ts->type() == TempoPoint::Constant);
-
-	ts->set_note_types_per_minute (new_bpm);
-
-	if (was_constant) {
-		ts->set_end_npm (new_bpm);
-	}
-
-	if (!next_t->actually_ramped()) {
-
-		if (start_sclock > ts->sclock() + min_delta_sclock && end_sclock > ts->sclock() + min_delta_sclock) {
-			new_next_bpm = next_t->note_types_per_minute() * ((next_to_next_t->sclock() - old_next_sclock) / (double) ((old_next_to_next_sclock) - old_next_sclock));
+		if (err > 0) {
+			/* estimated > actual: speed end tempo up a little aka
+			   reduce scpqn
+			*/
+			end_scpqn *= 0.99;
 		} else {
-			new_next_bpm = next_t->note_types_per_minute();
+			/* estimated < actual: reduce end tempo a little, aka
+			   increase scpqn
+			*/
+			end_scpqn *= 1.01;
 		}
 
-		next_t->set_note_types_per_minute (new_next_bpm);
-
-	} else {
-
-		double next_sclock_ratio = 1.0;
-		double copy_sclock_ratio = 1.0;
-
-		if (next_to_next_t) {
-			next_sclock_ratio = (next_to_next_t->sclock() - old_next_sclock) / (double) (old_next_to_next_sclock -  old_next_sclock);
-			copy_sclock_ratio = ((old_tc_sclock - next_t->sclock()) / (double) (old_tc_sclock - old_next_sclock));
+		if (end_scpqn < 1.0) {
+			goto no_can_do;
 		}
 
-		new_next_bpm = next_t->note_types_per_minute() * next_sclock_ratio;
-		new_copy_end_bpm = ts->end_note_types_per_minute() * copy_sclock_ratio;
+		/* recompute omega with this new end_scpqn value, and then
+		 * recompute the error in predicted position of next and its
+		 * actual position.
+		 */
 
-		ts->set_end_npm (new_copy_end_bpm);
-
-		if (next_t->continuing()) {
-			next_t->set_note_types_per_minute (new_copy_end_bpm);
-		} else {
-			next_t->set_note_types_per_minute (new_next_bpm);
-		}
-
-		ts->set_end_npm (new_copy_end_bpm);
+		focus.compute_omega_beats_from_quarter_duration (b, end_scpqn);
+		err = focus.superclock_at (next.beats()) - next.sclock();
 	}
 
-	reset_starting_at (ts->sclock());
+	new_end_npm = ((superclock_ticks_per_second() * 60.0) / end_scpqn) * (focus.note_type() / 4.0);
+
+	/* limit range of possible discovered tempo */
+
+	if (new_end_npm > 4.0 && new_end_npm < 800) {
+		focus.set_end_npm (new_end_npm);
+		return;
+	}
+
+  no_can_do:
+	prev = old_prev;
+	focus = old_focus;
+	return;
 }
 
 void
