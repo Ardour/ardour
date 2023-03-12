@@ -1755,7 +1755,8 @@ private:
 	enum MidTempoChanges {
 		TempoChanged = 0x1,
 		MeterChanged = 0x2,
-		BBTChanged   = 0x4
+		BBTChanged   = 0x4,
+		MappingChanged = 0x8
 	};
 
 	void mid_tempo_change (MidTempoChanges);

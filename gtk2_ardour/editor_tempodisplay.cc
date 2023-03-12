@@ -821,7 +821,7 @@ Editor::mid_tempo_change (MidTempoChanges what_changed)
 	// TempoMap::SharedPtr map (TempoMap::use());
 	// map->dump (std::cerr);
 
-	if ((what_changed & MidTempoChanges(BBTChanged|TempoChanged))) {
+	if ((what_changed & MidTempoChanges(BBTChanged|TempoChanged|MappingChanged))) {
 		double min_tempo = DBL_MAX;
 		double max_tempo = 0.0;
 
