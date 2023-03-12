@@ -568,6 +568,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	if (!_running) {
 		_processed_samples = next_processed_samples;
+		PortManager::cycle_end (nframes, _session);
 		return 0;
 	}
 
