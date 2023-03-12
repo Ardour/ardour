@@ -220,8 +220,7 @@ Editor::reset_tempo_marks ()
 	const uint32_t tc_color = UIConfiguration::instance().color ("tempo curve");
 	const samplecnt_t sr (_session->sample_rate());
 
-	Temporal::TempoMap::SharedPtr tmap (TempoMap::use());
-	TempoMap::Tempos const & tempi (tmap->tempos());
+	TempoMap::Tempos const & tempi (TempoMap::use()->tempos());
 	TempoPoint const * prev_ts = 0;
 	double max_tempo = 0.0;
 	double min_tempo = DBL_MAX;
@@ -252,8 +251,7 @@ Editor::reset_meter_marks ()
 		return;
 	}
 
-	Temporal::TempoMap::SharedPtr tmap (TempoMap::use());
-	TempoMap::Meters const & meters (tmap->meters());
+	TempoMap::Meters const & meters (TempoMap::use()->meters());
 
 	for (auto & m : meter_marks) {
 		delete m;
