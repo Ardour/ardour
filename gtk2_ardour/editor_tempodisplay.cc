@@ -850,8 +850,10 @@ Editor::mid_tempo_change (MidTempoChanges what_changed)
 	update_tempo_based_rulers ();
 	maybe_draw_grid_lines ();
 
-	if (!(what_changed & BBTChanged)) {
-		/* Nothing changes in tracks when it is a BBT change */
+	if (!(what_changed & (MappingChanged|BBTChanged))) {
+		/* Nothing changes in tracks when it is a tempo mapping
+		 * operation or a BBT change
+		 */
 		foreach_time_axis_view (sigc::mem_fun (*this, &Editor::mid_tempo_per_track_update));
 	}
 }
