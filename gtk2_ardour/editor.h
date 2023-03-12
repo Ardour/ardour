@@ -2523,6 +2523,8 @@ private:
 
 	void remove_gap_marker_callback (Temporal::timepos_t at, Temporal::timecnt_t distance);
 
+	void choose_mapping_drag (ArdourCanvas::Item*, GdkEvent*);
+
 	template<typename T>
 	Temporal::TimeDomain drag_time_domain (T* thing_with_time_domain) {
 		return thing_with_time_domain ? thing_with_time_domain->time_domain() : Temporal::AudioTime;
@@ -2538,7 +2540,9 @@ private:
 	friend class RegionDrag;
 	friend class RegionMoveDrag;
 	friend class TrimDrag;
-	friend class MappingDrag;
+	friend class MappingTwistDrag;
+	friend class MappingLinearDrag;
+	friend class MappingStretchDrag;
 	friend class MeterMarkerDrag;
 	friend class BBTMarkerDrag;
 	friend class TempoMarkerDrag;

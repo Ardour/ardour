@@ -3331,7 +3331,6 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	}
 }
 
-
 void
 TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
@@ -3475,31 +3474,33 @@ BBTMarkerDrag::aborted (bool moved)
 	}
 }
 
-MappingDrag::MappingDrag (Editor* e, ArdourCanvas::Item* i)
+/******************************************************************************/
+
+MappingLinearDrag::MappingLinearDrag (Editor* e, ArdourCanvas::Item* i, Temporal::TempoMap::WritableSharedPtr& wmap)
 	: Drag (e, i, Temporal::BeatTime)
 	, _tempo (0)
+	, _grab_bpm (0)
+	, map (wmap)
 	, _before_state (0)
 	, _drag_valid (true)
 {
-	DEBUG_TRACE (DEBUG::Drags, "New MappingDrag\n");
+	DEBUG_TRACE (DEBUG::Drags, "New MappingLinearDrag\n");
 
 }
 
 void
-MappingDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+MappingLinearDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
-	map = _editor->begin_tempo_mapping ();
-
 	Drag::start_grab (event, cursor);
 
 	_tempo = const_cast<TempoPoint*> (&map->metric_at (raw_grab_time().beats()).tempo());
+	_grab_bpm = _tempo->note_types_per_minute();
 
 	if (adjusted_current_time (event, false) <= _tempo->time()) {
+		std::cerr << "too early for " << *_tempo << std::endl;
 		_drag_valid = false;
 		return;
 	}
-
-	_editor->tempo_curve_selected (_tempo, true);
 
 	ostringstream sstr;
 	if (_tempo->continuing()) {
@@ -3514,12 +3515,12 @@ MappingDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 }
 
 void
-MappingDrag::setup_pointer_offset ()
+MappingLinearDrag::setup_pointer_offset ()
 {
 	/* get current state */
 	_before_state = &map->get_state();
 
-	_grab_qn = max (Beats(), raw_grab_time().beats());
+	Beats grab_qn = max (Beats(), raw_grab_time().beats());
 
 	uint32_t divisions = _editor->get_grid_beat_divisions (_editor->grid_type());
 
@@ -3527,52 +3528,33 @@ MappingDrag::setup_pointer_offset ()
 		divisions = 4;
 	}
 
-	_grab_qn = _grab_qn.round_to_subdivision (divisions, Temporal::RoundDownAlways);
-	_pointer_offset = timepos_t (_grab_qn).distance (raw_grab_time());
+	grab_qn = grab_qn.round_to_subdivision (divisions, Temporal::RoundDownAlways);
+	_pointer_offset = timepos_t (grab_qn).distance (raw_grab_time());
 }
 
 void
-MappingDrag::motion (GdkEvent* event, bool first_move)
+MappingLinearDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (!_drag_valid) {
 		return;
 	}
 
 	if (first_move) {
-		_editor->begin_reversible_command (_("stretch tempo"));
+		_editor->begin_reversible_command (_("map tempo"));
 	}
 
-	timepos_t pf;
-
-	if (_editor->grid_musical()) {
-		pf = adjusted_current_time (event, false);
-	} else {
-		pf = adjusted_current_time (event);
-	}
-
-	if (ArdourKeyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-		/* adjust previous tempo to match pointer sample */
-		map->stretch_tempo (_tempo, timepos_t (_grab_qn).samples(), pf.samples(), _grab_qn, pf.beats());
-		_editor->mid_tempo_change (Editor::BBTChanged);
-	}
-
-	ostringstream sstr;
-	if (_tempo->continuing()) {
-		TempoPoint const * prev = map->previous_tempo (*_tempo);
-		if (prev) {
-			_editor->tempo_curve_selected (prev, true);
-			sstr << "end: " << fixed << setprecision(3) << prev->end_note_types_per_minute() << "\n";
-		}
-	}
-	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
-	show_verbose_cursor_text (sstr.str());
+	double new_bpm = std::max (1.5, _grab_bpm - ((current_pointer_x() - grab_x()) / 5.0));
+	stringstream strs;
+	Temporal::Tempo new_tempo (new_bpm, _tempo->note_type());
+	map->change_tempo (*_tempo, new_tempo);
+	_editor->mid_tempo_change (Editor::MappingChanged);
 }
 
 void
-MappingDrag::finished (GdkEvent* event, bool movement_occurred)
+MappingLinearDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!_drag_valid) {
-		_editor->abort_tempo_map_edit ();
+		_editor->abort_tempo_mapping ();
 		return;
 	}
 
@@ -3580,21 +3562,12 @@ MappingDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		/* click, no drag */
 
-		_editor->abort_tempo_map_edit ();
+		_editor->abort_tempo_mapping ();
+		_editor->session()->request_locate (grab_sample(), false, _was_rolling ? MustRoll : RollIfAppropriate);
 		return;
 
 	} else {
 
-		_editor->tempo_curve_selected (_tempo, false);
-
-		if (_tempo->continuing()) {
-
-			TempoPoint const * prev_tempo = map->previous_tempo (*_tempo);
-
-			if (prev_tempo) {
-				_editor->tempo_curve_selected (prev_tempo, false);
-			}
-		}
 	}
 
 	XMLNode &after = map->get_state();
@@ -3612,7 +3585,253 @@ MappingDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-MappingDrag::aborted (bool moved)
+MappingLinearDrag::aborted (bool moved)
+{
+	_editor->abort_tempo_mapping ();
+}
+
+/******************************************************************************/
+
+MappingStretchDrag::MappingStretchDrag (Editor* e, ArdourCanvas::Item* i, Temporal::TempoMap::WritableSharedPtr& wmap)
+	: Drag (e, i, Temporal::BeatTime)
+	, _tempo (0)
+	, map (wmap)
+	, _before_state (0)
+	, _drag_valid (true)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New MappingStretchDrag\n");
+
+}
+
+void
+MappingStretchDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	Drag::start_grab (event, cursor);
+
+	_tempo = const_cast<TempoPoint*> (&map->metric_at (raw_grab_time().beats()).tempo());
+
+	if (adjusted_current_time (event, false) <= _tempo->time()) {
+		std::cerr << "too early for " << *_tempo << std::endl;
+		_drag_valid = false;
+		return;
+	}
+
+	ostringstream sstr;
+	if (_tempo->continuing()) {
+		TempoPoint const * prev = map->previous_tempo (*_tempo);
+		if (prev) {
+			sstr << "end: " << fixed << setprecision(3) << prev->end_note_types_per_minute() << "\n";
+		}
+	}
+
+	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
+	show_verbose_cursor_text (sstr.str());
+}
+
+void
+MappingStretchDrag::setup_pointer_offset ()
+{
+	/* get current state */
+	_before_state = &map->get_state();
+
+	_grab_qn = max (Beats(), raw_grab_time().beats());
+
+	uint32_t divisions = _editor->get_grid_beat_divisions (_editor->grid_type());
+
+	if (divisions == 0) {
+		divisions = 4;
+	}
+
+	_grab_qn = _grab_qn.round_to_subdivision (divisions, Temporal::RoundDownAlways);
+	_pointer_offset = timepos_t (_grab_qn).distance (raw_grab_time());
+}
+
+void
+MappingStretchDrag::motion (GdkEvent* event, bool first_move)
+{
+	if (!_drag_valid) {
+		return;
+	}
+
+	if (first_move) {
+		_editor->begin_reversible_command (_("map tempo w/stretch"));
+	}
+
+	timepos_t pf;
+
+	if (_editor->grid_musical()) {
+		pf = adjusted_current_time (event, false);
+	} else {
+		pf = adjusted_current_time (event);
+	}
+
+	map->stretch_tempo (_tempo, timepos_t (_grab_qn).samples(), pf.samples(), _grab_qn, pf.beats());
+	_editor->mapping_cursor->set_position (Duple (_editor->time_to_pixel_unrounded (pf), _editor->mapping_cursor->position().y));
+	_editor->mid_tempo_change (Editor::MappingChanged);
+}
+
+void
+MappingStretchDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	if (!movement_occurred) {
+
+		/* click, no drag */
+
+		_editor->abort_tempo_mapping ();
+		_editor->session()->request_locate (grab_sample(), false, _was_rolling ? MustRoll : RollIfAppropriate);
+		return;
+	}
+
+	if (!_drag_valid) {
+		_editor->abort_tempo_mapping ();
+		return;
+	}
+
+	XMLNode &after = map->get_state();
+
+	_editor->session()->add_command (new Temporal::TempoCommand (_("move BBT point"), _before_state, &after));
+	_editor->commit_reversible_command ();
+
+	/* 2nd argument means "update tempo map display after the new map is
+	 * installed. We need to do this because the code above has not
+	 * actually changed anything about how tempo is displayed, it simply
+	 * modified the map.
+	 */
+
+	_editor->commit_tempo_mapping (map);
+}
+
+void
+MappingStretchDrag::aborted (bool moved)
+{
+	_editor->abort_tempo_mapping ();
+}
+
+/******************************************************************************/
+
+MappingTwistDrag::MappingTwistDrag (Editor* e, ArdourCanvas::Item* i, Temporal::TempoMap::WritableSharedPtr& wmap,
+                                    TempoPoint& prv,
+                                    TempoPoint& fcus,
+                                    TempoPoint& nxt)
+	: Drag (e, i, Temporal::BeatTime)
+	, prev (prv)
+	, focus (fcus)
+	, next (nxt)
+	, map (wmap)
+	, direction (0.)
+	, delta (0.)
+	, _before_state (0)
+	, _drag_valid (true)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New MappingTwistDrag\n");
+	initial_npm = focus.note_types_per_minute ();
+}
+
+void
+MappingTwistDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+{
+	Drag::start_grab (event, cursor);
+}
+
+void
+MappingTwistDrag::setup_pointer_offset ()
+{
+	/* get current state */
+	_before_state = &map->get_state();
+
+	Beats grab_qn = max (Beats(), raw_grab_time().beats());
+
+	uint32_t divisions = _editor->get_grid_beat_divisions (_editor->grid_type());
+
+	if (divisions == 0) {
+		divisions = 4;
+	}
+
+	grab_qn = grab_qn.round_to_subdivision (divisions, Temporal::RoundDownAlways);
+	_pointer_offset = timepos_t (grab_qn).distance (raw_grab_time());
+}
+
+void
+MappingTwistDrag::motion (GdkEvent* event, bool first_move)
+{
+	if (first_move) {
+		_editor->begin_reversible_command (_("map tempo w/twist"));
+	}
+
+	samplepos_t mouse_pos;
+
+	if (_editor->grid_musical()) {
+		mouse_pos = adjusted_current_time (event, false).samples();
+	} else {
+		mouse_pos = adjusted_current_time (event).samples();
+	}
+
+	double pixels_moved = _drags->current_pointer_x() - last_pointer_x();
+
+	if (_drags->current_pointer_x() < last_pointer_x()) {
+		if (direction < 0.) {
+			direction = 1.;
+			initial_npm += delta;
+			delta = 0.;
+		}
+	} else {
+		if (direction >= 0.) {
+			direction = -1.;
+			initial_npm += delta;
+			delta = 0.;
+		}
+	}
+
+	if (_drags->current_pointer_time() >= timepos_t::from_superclock (next.sclock())) {
+		return;
+	}
+	if (_drags->current_pointer_time() <= timepos_t::from_superclock (prev.sclock())) {
+		return;
+	}
+
+	/* XXX needs to scale somehow with zoom level */
+
+	delta += 0.75 * (last_pointer_x() - _drags->current_pointer_x());
+
+	map->twist_tempi (prev, focus, next, initial_npm + delta);
+
+	// _editor->mapping_cursor->set_position (Duple (_editor->sample_to_pixel_unrounded (mouse_pos), _editor->mapping_cursor->position().y));
+	_editor->mid_tempo_change (Editor::MappingChanged);
+}
+
+void
+MappingTwistDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	if (!movement_occurred) {
+
+		/* click, no drag */
+
+		_editor->abort_tempo_mapping ();
+		_editor->session()->request_locate (grab_sample(), false, _was_rolling ? MustRoll : RollIfAppropriate);
+		return;
+	}
+
+	if (!_drag_valid) {
+		_editor->abort_tempo_mapping ();
+		return;
+	}
+
+	XMLNode &after = map->get_state();
+
+	_editor->session()->add_command (new Temporal::TempoCommand (_("move BBT point"), _before_state, &after));
+	_editor->commit_reversible_command ();
+
+	/* 2nd argument means "update tempo map display after the new map is
+	 * installed. We need to do this because the code above has not
+	 * actually changed anything about how tempo is displayed, it simply
+	 * modified the map.
+	 */
+
+	_editor->commit_tempo_mapping (map);
+}
+
+void
+MappingTwistDrag::aborted (bool moved)
 {
 	_editor->abort_tempo_mapping ();
 }
@@ -3633,8 +3852,6 @@ void
 TempoTwistDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
-
-	map = _editor->begin_tempo_mapping ();
 
 	/* Get the tempo point that starts this section */
 
@@ -3685,7 +3902,7 @@ TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	/* adjust this and the next tempi to match pointer sample */
-	map->twist_tempi (_tempo, adjusted_time (grab_time(), 0, false).samples(), mouse_pos);
+	// map->twist_tempi (_tempo, adjusted_time (grab_time(), 0, false).samples(), mouse_pos);
 
 	ostringstream sstr;
 	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute() << "\n";

@@ -913,12 +913,10 @@ private:
 	XMLNode* _before_state;
 };
 
-
-/** BBT Ruler drag */
-class MappingDrag : public Drag
+class MappingLinearDrag : public Drag
 {
 public:
-	MappingDrag (Editor *, ArdourCanvas::Item *);
+	MappingLinearDrag (Editor *, ArdourCanvas::Item *, Temporal::TempoMap::WritableSharedPtr&);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -936,13 +934,81 @@ public:
 	void setup_pointer_offset ();
 
 private:
-	Temporal::Beats _grab_qn;
 	Temporal::TempoPoint* _tempo;
+	double _grab_bpm;
 	Temporal::TempoMap::WritableSharedPtr map;
 
 	XMLNode* _before_state;
 	bool     _drag_valid;
 };
+
+class MappingStretchDrag : public Drag
+{
+public:
+	MappingStretchDrag (Editor *, ArdourCanvas::Item *, Temporal::TempoMap::WritableSharedPtr&);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
+		return false;
+	}
+
+	void setup_pointer_offset ();
+
+private:
+	Temporal::TempoPoint* _tempo;
+	Temporal::TempoMap::WritableSharedPtr map;
+	Temporal::Beats _grab_qn;
+
+	XMLNode* _before_state;
+	bool     _drag_valid;
+};
+
+class MappingTwistDrag : public Drag
+{
+public:
+	MappingTwistDrag (Editor *, ArdourCanvas::Item *, Temporal::TempoMap::WritableSharedPtr&,
+	                  Temporal::TempoPoint& prev,
+	                  Temporal::TempoPoint& focus,
+	                  Temporal::TempoPoint& next);
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool y_movement_matters () const {
+		return false;
+	}
+
+	void setup_pointer_offset ();
+
+private:
+	Temporal::TempoPoint& prev;
+	Temporal::TempoPoint& focus;
+	Temporal::TempoPoint& next;
+	double _grab_bpm;
+	Temporal::TempoMap::WritableSharedPtr map;
+
+	double direction;
+	double delta;
+	double initial_npm;
+
+	XMLNode* _before_state;
+	bool     _drag_valid;
+};
+
 
 /** tempo curve twist drag */
 class TempoTwistDrag : public Drag
