@@ -611,11 +611,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 #ifndef NDEBUG
 	if (DEBUG_ENABLED(PBD::DEBUG::CanvasEnterLeave)) {
 		for (auto const & item : items) {
-#ifdef CANVAS_DEBUG
-			// std::cerr << "\tItem " << (*it)->whatami() << '/' << (*it)->name << " ignore events ? " << (*it)->ignore_events() << " vis ? " << (*it)->visible() << std::endl;
-#else
-			// std::cerr << "\tItem " << (*it)->whatami() << '/' << " ignore events ? " << (*it)->ignore_events() << " vis ? " << (*it)->visible() << std::endl;
-#endif
+			std::cerr << "\tItem " << item->whoami() << " ignore events ? " << item->ignore_events() << " vis ? " << item->visible() << std::endl;
 		}
 	}
 #endif
