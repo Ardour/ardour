@@ -190,13 +190,14 @@ Editor::initialize_canvas ()
 	mapping_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 
 	mapping_cursor = new ArdourCanvas::Arc (mapping_group);
+	CANVAS_DEBUG_NAME (mapping_cursor, "Mapping Cursor");
 	mapping_cursor->set_fill (false);
 	mapping_cursor->set_outline (true);
 	mapping_cursor->set_outline_color (0xff0000ff);
-	mapping_cursor->set_radius (timebar_height/2);
+	mapping_cursor->set_outline_width (3. * UIConfiguration::instance().get_ui_scale());
+	mapping_cursor->set_radius ((timebar_height-5.)/2);
 	mapping_cursor->set_arc (360);
-	mapping_cursor->set_ignore_events (true);
-	mapping_cursor->set_center (ArdourCanvas::Duple (35., timebar_height/2.0)); // x is arbitrary at this time
+	mapping_cursor->set_position (ArdourCanvas::Duple (35., (timebar_height-5.)/2.0)); // x is arbitrary at this time
 	mapping_cursor->hide ();
 
 	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
