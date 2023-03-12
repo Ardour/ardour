@@ -493,7 +493,7 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 		/* not ramped, use linear */
 		const Beats delta = qn - _quarters;
 		const superclock_t spqn = superclocks_per_quarter_note ();
-		return _sclock + (spqn * delta.get_beats()) + int_div_round ((spqn * delta.get_ticks()), superclock_t (Temporal::ticks_per_beat));
+		return _sclock + (spqn * delta.get_beats()) + muldiv_round (spqn, delta.get_ticks(), superclock_t (Temporal::ticks_per_beat));
 	}
 
 	superclock_t r;
@@ -566,9 +566,8 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 		const superclock_t whole_seconds = sc_delta / superclock_ticks_per_second();
 		const superclock_t remainder = sc_delta - (whole_seconds * superclock_ticks_per_second());
 
-		const int64_t supernotes = ((_super_note_type_per_second) * whole_seconds) + int_div_round (superclock_t ((_super_note_type_per_second) * remainder), superclock_ticks_per_second());
-		/* multiply after divide to reduce overflow risk */
-		const int64_t superbeats = int_div_round (supernotes, (superclock_t) _note_type) * 4;
+		const int64_t supernotes = ((_super_note_type_per_second) * whole_seconds) + muldiv_round (superclock_t (_super_note_type_per_second), remainder, superclock_ticks_per_second());
+		const int64_t superbeats = muldiv_round (supernotes, 4, (superclock_t) _note_type);
 
 		/* convert superbeats to beats:ticks */
 		int32_t b;
@@ -696,7 +695,7 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 	   the current meter, which we'll call "grid"
 	*/
 
-	const int64_t note_value_count = int_div_round (dq.get_beats() * _meter->note_value(), int64_t (4));
+	const int64_t note_value_count = muldiv_round (dq.get_beats(), _meter->note_value(), int64_t (4));
 
 	/* now construct a BBT_Offset using the count in grid units */
 
