@@ -2387,6 +2387,11 @@ private:
 	                                  Temporal::RoundMode   direction,
 	                                  ARDOUR::SnapPref    gpref);
 
+	Temporal::timepos_t _snap_to_bbt (Temporal::timepos_t const & start,
+	                                  Temporal::RoundMode   direction,
+	                                  ARDOUR::SnapPref    gpref,
+	                                  Editing::GridType   grid_type);
+
 	void snap_to_internal (Temporal::timepos_t& first,
 	                       Temporal::RoundMode    direction = Temporal::RoundNearest,
 	                       ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,

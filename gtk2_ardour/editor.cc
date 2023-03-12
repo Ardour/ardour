@@ -2953,6 +2953,12 @@ Editor::snap_to_cd_frames (timepos_t const & presnap, Temporal::RoundMode direct
 timepos_t
 Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref)
 {
+	return _snap_to_bbt (presnap, direction, gpref, _grid_type);
+}
+
+timepos_t
+Editor::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref, GridType grid_type)
+{
 	timepos_t ret(presnap);
 	TempoMap::SharedPtr tmap (TempoMap::use());
 
@@ -2963,7 +2969,7 @@ Editor::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, S
 	 * nearby grid and walk towards the next bar point.
 	 */
 
-	if (_grid_type == GridTypeBar) {
+	if (grid_type == GridTypeBar) {
 		TempoMetric m (tmap->metric_at (presnap));
 		BBT_Argument bbt (m.bbt_at (presnap));
 		switch (direction) {
