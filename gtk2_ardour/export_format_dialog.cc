@@ -993,8 +993,7 @@ ExportFormatDialog::update_silence_end_selection ()
 void
 ExportFormatDialog::update_clock (AudioClock& clock, ARDOUR::AnyTime const& time)
 {
-	// TODO position
-	clock.set (timepos_t (_session->convert_to_samples (time)), true);
+	clock.set_duration (timecnt_t (_session->convert_to_samples (time)));
 
 	AudioClock::Mode mode (AudioClock::Timecode);
 
