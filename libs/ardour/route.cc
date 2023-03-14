@@ -5818,6 +5818,12 @@ Route::tape_drive_controllable () const
 	return boost::shared_ptr<AutomationControl>();
 }
 
+boost::shared_ptr<AutomationControl>
+Route::tape_drive_mode_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+
 boost::shared_ptr<ReadOnlyControl>
 Route::tape_drive_mtr_controllable () const
 {
