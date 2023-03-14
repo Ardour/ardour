@@ -1311,11 +1311,9 @@ Route::ab_plugins (bool forward)
 			if (!(*i)->display_to_user () || is_internal_processor (*i)) {
 				continue;
 			}
-#ifdef MIXBUS
 			if (boost::dynamic_pointer_cast<PluginInsert> (*i)->is_channelstrip()) {
 				continue;
 			}
-#endif
 
 			if ((*i)->enabled ()) {
 				(*i)->enable (false);
@@ -1336,11 +1334,9 @@ Route::ab_plugins (bool forward)
 			if (!(*i)->display_to_user () || is_internal_processor (*i)) {
 				continue;
 			}
-#ifdef MIXBUS
 			if (boost::dynamic_pointer_cast<PluginInsert> (*i)->is_channelstrip()) {
 				continue;
 			}
-#endif
 
 			(*i)->enable ((*i)->get_next_ab_is_active ());
 		}
@@ -1435,11 +1431,6 @@ Route::is_internal_processor (boost::shared_ptr<Processor> p) const
 	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim || p == _polarity || (_volume && p == _volume) || (_triggerbox && p == _triggerbox)) {
 		return true;
 	}
-#ifdef MIXBUS
-	if (p == _ch_pre || p == _ch_post || p == _ch_eq  || p == _ch_comp) {
-		return true;
-	}
-#endif
 	return false;
 }
 
@@ -2059,14 +2050,12 @@ Route::all_visible_processors_active (bool state)
 		if (!(*i)->display_to_user () || is_internal_processor (*i)) {
 			continue;
 		}
-#ifdef MIXBUS
 		boost::shared_ptr<PluginInsert> pi;
 		if (0 != (pi = boost::dynamic_pointer_cast<PluginInsert>(*i))) {
 			if (pi->is_channelstrip ()) {
 				continue;
 			}
 		}
-#endif
 		(*i)->enable (state);
 	}
 
@@ -5696,17 +5685,10 @@ Route::fill_buffers_with_input (BufferSet& bufs, boost::shared_ptr<IO> io, pfram
 boost::shared_ptr<AutomationControl>
 Route::pan_azimuth_control() const
 {
-#ifdef MIXBUS
-	if (_mixbus_send) {
-		return _mixbus_send->master_pan_ctrl ();
-	}
-	return boost::shared_ptr<AutomationControl>();
-#else
 	if (!_pannable || !panner()) {
 		return boost::shared_ptr<AutomationControl>();
 	}
 	return _pannable->pan_azimuth_control;
-#endif
 }
 
 boost::shared_ptr<AutomationControl>
@@ -5727,12 +5709,6 @@ Route::pan_elevation_control() const
 boost::shared_ptr<AutomationControl>
 Route::pan_width_control() const
 {
-#ifdef MIXBUS
-	if (mixbus() && _ch_pre) {
-		//mono blend
-		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl>(_ch_pre->control(Evoral::Parameter(PluginAutomation, 0, 1)));
-	}
-#endif
 	if (Profile->get_mixbus() || !_pannable || !panner()) {
 		return boost::shared_ptr<AutomationControl>();
 	}
@@ -5779,106 +5755,19 @@ Route::pan_lfe_control() const
 uint32_t
 Route::eq_band_cnt () const
 {
-	if (Profile->get_mixbus()) {
-#ifdef MIXBUS32C
-		if (is_master() || mixbus()) {
-			return 3;
-		} else {
-			return 4;
-		}
-#else
-		return 3;
-#endif
-	} else {
-		/* Ardour has no well-known EQ object */
-		return 0;
-	}
+	/* Ardour has no well-known EQ object */
+	return 0;
 }
 
 boost::shared_ptr<AutomationControl>
 Route::eq_gain_controllable (uint32_t band) const
 {
-#ifdef MIXBUS
-	boost::shared_ptr<PluginInsert> eq = _ch_eq;
-
-	if (!eq) {
-		return boost::shared_ptr<AutomationControl>();
-	}
-
-	uint32_t port_number;
-	if (is_master() || mixbus()) {
-		switch (band) {
-			case 0: port_number = 4; break;
-			case 1: port_number = 3; break;
-			case 2: port_number = 2; break;
-			default:
-				return boost::shared_ptr<AutomationControl>();
-		}
-	} else {
-#ifdef MIXBUS32C
-		switch (band) {
-			case 0: port_number = 14; break;
-			case 1: port_number = 12; break;
-			case 2: port_number = 10; break;
-			case 3: port_number =  8; break;
-			default:
-				return boost::shared_ptr<AutomationControl>();
-		}
-#else
-		switch (band) {
-			case 0: port_number = 8; break;
-			case 1: port_number = 6; break;
-			case 2: port_number = 4; break;
-			default:
-				return boost::shared_ptr<AutomationControl>();
-		}
-#endif
-	}
-
-	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_number)));
-#else
 	return boost::shared_ptr<AutomationControl>();
-#endif
 }
 boost::shared_ptr<AutomationControl>
 Route::eq_freq_controllable (uint32_t band) const
 {
-#ifdef MIXBUS
-	if (mixbus() || is_master()) {
-		/* no frequency controls for mixbusses or master */
-		return boost::shared_ptr<AutomationControl>();
-	}
-
-	boost::shared_ptr<PluginInsert> eq = _ch_eq;
-
-	if (!eq) {
-		return boost::shared_ptr<AutomationControl>();
-	}
-
-	uint32_t port_number;
-#ifdef MIXBUS32C
-	switch (band) {
-		case 0: port_number = 13; break; // lo
-		case 1: port_number = 11; break; // lo mid
-		case 2: port_number = 9; break; // hi mid
-		case 3: port_number = 7; break; // hi
-		default:
-			return boost::shared_ptr<AutomationControl>();
-	}
-#else
-	switch (band) {
-		case 0: port_number = 7; break;
-		case 1: port_number = 5; break;
-		case 2: port_number = 3; break;
-		default:
-			return boost::shared_ptr<AutomationControl>();
-	}
-#endif
-
-	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, port_number)));
-#else
 	return boost::shared_ptr<AutomationControl>();
-#endif
 }
 
 boost::shared_ptr<AutomationControl>
@@ -5890,66 +5779,19 @@ Route::eq_q_controllable (uint32_t band) const
 boost::shared_ptr<AutomationControl>
 Route::eq_shape_controllable (uint32_t band) const
 {
-#ifdef MIXBUS32C
-	if (is_master() || mixbus() || !eq) {
-		return boost::shared_ptr<AutomationControl>();
-	}
-	switch (band) {
-		case 0:
-			return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 4))); // lo bell
-			break;
-		case 3:
-			return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 3))); // hi bell
-			break;
-		default:
-			break;
-	}
-#endif
 	return boost::shared_ptr<AutomationControl>();
 }
 
 boost::shared_ptr<AutomationControl>
 Route::eq_enable_controllable () const
 {
-#ifdef MIXBUS
-	boost::shared_ptr<PluginInsert> eq = _ch_eq;
-
-	if (!eq) {
-		return boost::shared_ptr<AutomationControl>();
-	}
-
-	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 1)));
-#else
 	return boost::shared_ptr<AutomationControl>();
-#endif
 }
 
 boost::shared_ptr<AutomationControl>
 Route::filter_freq_controllable (bool hpf) const
 {
-#ifdef MIXBUS
-	boost::shared_ptr<PluginInsert> eq = _ch_eq;
-
-	if (is_master() || mixbus() || !eq) {
-		return boost::shared_ptr<AutomationControl>();
-	}
-	if (hpf) {
-#ifdef MIXBUS32C
-		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 5))); // HPF freq
-#else
-		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 2)));
-#endif
-	} else {
-#ifdef MIXBUS32C
-		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 6))); // LPF freq
-#else
-		return boost::shared_ptr<AutomationControl>();
-#endif
-	}
-
-#else
 	return boost::shared_ptr<AutomationControl>();
-#endif
 }
 
 boost::shared_ptr<AutomationControl>
@@ -5961,239 +5803,226 @@ Route::filter_slope_controllable (bool) const
 boost::shared_ptr<AutomationControl>
 Route::filter_enable_controllable (bool) const
 {
-#ifdef MIXBUS32C
-	boost::shared_ptr<PluginInsert> eq = _ch_eq;
-
-	if (is_master() || mixbus() || !eq) {
-		return boost::shared_ptr<AutomationControl>();
-	}
-
-	return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (eq->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 2)));
-#else
 	return boost::shared_ptr<AutomationControl>();
-#endif
+}
+
+std::string
+Route::tape_mode_name (uint32_t mode) const
+{
+	return _("???");
 }
 
 boost::shared_ptr<AutomationControl>
 Route::tape_drive_controllable () const
 {
-#ifdef MIXBUS
-	if (_ch_pre) {
-		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (_ch_pre->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 0)));
-	}
-#endif
 	return boost::shared_ptr<AutomationControl>();
 }
 
 boost::shared_ptr<ReadOnlyControl>
 Route::tape_drive_mtr_controllable () const
 {
-#ifdef MIXBUS
-	if (_ch_pre) {
-		return _ch_pre->control_output (is_master() ? 1 : 2);
-	}
-#endif
 	return boost::shared_ptr<ReadOnlyControl>();
 }
 
 boost::shared_ptr<ReadOnlyControl>
 Route::master_correlation_mtr_controllable (bool mm) const
 {
-#ifdef MIXBUS
-	if (is_master() && _ch_post) {
-		return _ch_post->control_output (mm ? 4 : 3);
-	}
-#endif
 	return boost::shared_ptr<ReadOnlyControl>();
 }
 
 boost::shared_ptr<AutomationControl>
 Route::master_limiter_enable_controllable () const
 {
-#ifdef MIXBUS
-	if (is_master() && _ch_post) {
-		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (_ch_post->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 1)));
-	}
-#endif
 	return boost::shared_ptr<AutomationControl>();
 }
 
 boost::shared_ptr<ReadOnlyControl>
 Route::master_limiter_mtr_controllable () const
 {
-#ifdef MIXBUS
-	if (is_master() && _ch_post) {
-		return _ch_post->control_output (2);
-	}
-#endif
 	return boost::shared_ptr<ReadOnlyControl>();
 }
 
 boost::shared_ptr<ReadOnlyControl>
 Route::master_k_mtr_controllable () const
 {
-#ifdef MIXBUS
-	if (is_master() && _ch_post) {
-		return _ch_post->control_output (5);
-	}
-#endif
 	return boost::shared_ptr<ReadOnlyControl>();
 }
 
 string
 Route::eq_band_name (uint32_t band) const
 {
-#ifdef MIXBUS32C
-	if (is_master() || mixbus()) {
-#endif
-	if (Profile->get_mixbus()) {
-		switch (band) {
-			case 0: return _("lo");
-			case 1: return _("mid");
-			case 2: return _("hi");
-			default: return string();
-		}
-	} else {
-		return string ();
-	}
-#ifdef MIXBUS32C
-	} else {
-		switch (band) {
-			case 0: return _("lo");
-			case 1: return _("lm");
-			case 2: return _("hm");
-			case 3: return _("hi");
-			default: return string();
-		}
-	}
-#endif
+	return string ();
 }
 
 boost::shared_ptr<AutomationControl>
 Route::comp_enable_controllable () const
 {
-#ifdef MIXBUS
-	if (_ch_comp) {
-		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (_ch_comp->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 1)));
-	}
-#endif
 	return boost::shared_ptr<AutomationControl>();
 }
 boost::shared_ptr<AutomationControl>
 Route::comp_threshold_controllable () const
 {
-#ifdef MIXBUS
-	if (_ch_comp) {
-		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (_ch_comp->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 2)));
-	}
-#endif
 	return boost::shared_ptr<AutomationControl>();
 }
 boost::shared_ptr<AutomationControl>
 Route::comp_speed_controllable () const
 {
-#ifdef MIXBUS
-	if (_ch_comp) {
-		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (_ch_comp->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 3)));
-	}
-#endif
 	return boost::shared_ptr<AutomationControl>();
 }
 boost::shared_ptr<AutomationControl>
 Route::comp_mode_controllable () const
 {
-#ifdef MIXBUS
-	if (_ch_comp) {
-		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (_ch_comp->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 4)));
-	}
-#endif
 	return boost::shared_ptr<AutomationControl>();
 }
 boost::shared_ptr<AutomationControl>
 Route::comp_makeup_controllable () const
 {
-#ifdef MIXBUS
-	if (_ch_comp) {
-		return boost::dynamic_pointer_cast<ARDOUR::AutomationControl> (_ch_comp->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, 5)));
-	}
-#endif
 	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::comp_ratio_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::comp_attack_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::comp_release_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::comp_key_filter_freq_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::comp_lookahead_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<ReadOnlyControl>
+Route::comp_meter_controllable () const
+{
+	return boost::shared_ptr<ReadOnlyControl>();
 }
 boost::shared_ptr<ReadOnlyControl>
 Route::comp_redux_controllable () const
 {
-#ifdef MIXBUS
-	if (_ch_comp) {
-		return _ch_comp->control_output (6);
-	}
-#endif
 	return boost::shared_ptr<ReadOnlyControl>();
 }
 
 string
 Route::comp_mode_name (uint32_t mode) const
 {
-#ifdef MIXBUS
-	switch (mode) {
-	case 0:
-		return _("Leveler");
-	case 1:
-		return _("Compressor");
-	case 2:
-		return _("Limiter");
-	case 3:
-		return mixbus() ? _("Sidechain") : _("Limiter");
-	}
-
 	return _("???");
-#else
-	return _("???");
-#endif
 }
 
 string
 Route::comp_speed_name (uint32_t mode) const
 {
-#ifdef MIXBUS
-	switch (mode) {
-	case 0:
-		return _("Attk");
-	case 1:
-		return _("Ratio");
-	case 2:
-	case 3:
-		return _("Rels");
-	}
 	return _("???");
-#else
+}
+
+string
+Route::gate_mode_name (uint32_t mode) const
+{
 	return _("???");
-#endif
+}
+
+boost::shared_ptr<AutomationControl>
+Route::gate_enable_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::gate_mode_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::gate_ratio_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::gate_knee_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::gate_threshold_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::gate_depth_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::gate_hysteresis_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::gate_hold_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::gate_attack_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::gate_release_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::gate_key_listen_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::gate_key_filter_enable_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::gate_key_filter_freq_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<AutomationControl>
+Route::gate_lookahead_controllable () const
+{
+	return boost::shared_ptr<AutomationControl>();
+}
+boost::shared_ptr<ReadOnlyControl>
+Route::gate_meter_controllable () const
+{
+	return boost::shared_ptr<ReadOnlyControl>();
+}
+boost::shared_ptr<ReadOnlyControl>
+Route::gate_redux_controllable () const
+{
+	return boost::shared_ptr<ReadOnlyControl>();
 }
 
 boost::shared_ptr<AutomationControl>
 Route::send_pan_azimuth_controllable (uint32_t n) const
 {
-#ifdef  MIXBUS
-	if (_mixbus_send) {
-		if (n < _mixbus_send->n_busses ()) {
-			return _mixbus_send->send_pan_ctrl (n + 1);
-		}
-	}
-#endif
 	return boost::shared_ptr<AutomationControl>();
 }
 
 boost::shared_ptr<AutomationControl>
 Route::send_level_controllable (uint32_t n) const
 {
-#ifdef  MIXBUS
-	if (_mixbus_send) {
-		if (n < _mixbus_send->n_busses ()) {
-			return _mixbus_send->send_gain_ctrl (n + 1);
-		}
-		n -= _mixbus_send->n_busses ();
-	}
-#endif
 	boost::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(nth_send (n));
 	if (s) {
 		return s->gain_control ();
@@ -6204,13 +6033,6 @@ Route::send_level_controllable (uint32_t n) const
 boost::shared_ptr<AutomationControl>
 Route::send_enable_controllable (uint32_t n) const
 {
-#ifdef  MIXBUS
-	if (_mixbus_send) {
-		if (n < _mixbus_send->n_busses ()) {
-			return _mixbus_send->send_enable_ctrl (n + 1);
-		}
-	}
-#endif
 	/* although Ardour sends have enable/disable as part of the Processor
 	 * API, it is not exposed as a controllable.
 	 *
@@ -6222,27 +6044,12 @@ Route::send_enable_controllable (uint32_t n) const
 boost::shared_ptr<AutomationControl>
 Route::send_pan_azimuth_enable_controllable (uint32_t n) const
 {
-#ifdef  MIXBUS
-	if (_mixbus_send) {
-		if (n < _mixbus_send->n_busses ()) {
-			return _mixbus_send->send_pan_enable_ctrl (n + 1);
-		}
-	}
-#endif
 	return boost::shared_ptr<AutomationControl>();
 }
 
 string
 Route::send_name (uint32_t n) const
 {
-#ifdef  MIXBUS
-	if (_mixbus_send) {
-		if (n < _mixbus_send->n_busses ()) {
-			return _session.get_mixbus (n)->name();
-		}
-		n -= _mixbus_send->n_busses ();
-	}
-#endif
 	boost::shared_ptr<Processor> p = nth_send (n);
 	if (p) {
 		return p->name();
@@ -6253,16 +6060,6 @@ Route::send_name (uint32_t n) const
 boost::shared_ptr<AutomationControl>
 Route::master_send_enable_controllable () const
 {
-#ifdef  MIXBUS
-	if (is_master() || is_monitor() || is_auditioner()) {
-		return boost::shared_ptr<AutomationControl>();
-	}
-
-	if (_mixbus_send) {
-		return _mixbus_send->master_send_enable_ctrl ();
-	}
-
-#endif
 	return boost::shared_ptr<AutomationControl>();
 }
 

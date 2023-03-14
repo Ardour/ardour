@@ -548,7 +548,9 @@ public:
 	boost::shared_ptr<AutomationControl> filter_slope_controllable (bool) const;
 	boost::shared_ptr<AutomationControl> filter_enable_controllable (bool) const;
 
+	std::string tape_mode_name (uint32_t) const;
 	boost::shared_ptr<AutomationControl> tape_drive_controllable () const;
+	boost::shared_ptr<AutomationControl> tape_drive_mode_controllable () const;
 	boost::shared_ptr<ReadOnlyControl>   tape_drive_mtr_controllable () const;
 
 	boost::shared_ptr<AutomationControl> comp_enable_controllable () const;
@@ -556,7 +558,31 @@ public:
 	boost::shared_ptr<AutomationControl> comp_speed_controllable () const;
 	boost::shared_ptr<AutomationControl> comp_mode_controllable () const;
 	boost::shared_ptr<AutomationControl> comp_makeup_controllable () const;
+	boost::shared_ptr<AutomationControl> comp_ratio_controllable () const;
+	boost::shared_ptr<AutomationControl> comp_attack_controllable () const;
+	boost::shared_ptr<AutomationControl> comp_release_controllable () const;
+	boost::shared_ptr<AutomationControl> comp_key_filter_freq_controllable () const;
+	boost::shared_ptr<AutomationControl> comp_lookahead_controllable () const;
+	boost::shared_ptr<ReadOnlyControl>   comp_meter_controllable () const;
 	boost::shared_ptr<ReadOnlyControl>   comp_redux_controllable () const;
+
+	std::string gate_mode_name (uint32_t) const;
+	boost::shared_ptr<AutomationControl> gate_enable_controllable () const;
+	boost::shared_ptr<AutomationControl> gate_mode_controllable () const;
+	boost::shared_ptr<AutomationControl> gate_ratio_controllable () const;
+	boost::shared_ptr<AutomationControl> gate_knee_controllable () const;
+	boost::shared_ptr<AutomationControl> gate_threshold_controllable () const;
+	boost::shared_ptr<AutomationControl> gate_depth_controllable () const;
+	boost::shared_ptr<AutomationControl> gate_hysteresis_controllable () const;
+	boost::shared_ptr<AutomationControl> gate_hold_controllable () const;
+	boost::shared_ptr<AutomationControl> gate_attack_controllable () const;
+	boost::shared_ptr<AutomationControl> gate_release_controllable () const;
+	boost::shared_ptr<AutomationControl> gate_key_listen_controllable () const;
+	boost::shared_ptr<AutomationControl> gate_key_filter_enable_controllable () const;
+	boost::shared_ptr<AutomationControl> gate_key_filter_freq_controllable () const;
+	boost::shared_ptr<AutomationControl> gate_lookahead_controllable () const;
+	boost::shared_ptr<ReadOnlyControl>   gate_meter_controllable () const;
+	boost::shared_ptr<ReadOnlyControl>   gate_redux_controllable () const;
 
 	std::string comp_mode_name (uint32_t mode) const;
 	std::string comp_speed_name (uint32_t mode) const;
