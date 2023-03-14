@@ -122,6 +122,9 @@ class LIBARDOUR_API VCA : public Stripable,
 	boost::shared_ptr<AutomationControl> pan_width_control() const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<AutomationControl> pan_frontback_control() const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<AutomationControl> pan_lfe_control() const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> tape_drive_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> tape_drive_mode_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<ReadOnlyControl> tape_drive_mtr_controllable () const { return boost::shared_ptr<ReadOnlyControl>(); }
 	uint32_t eq_band_cnt () const { return 0; }
 	std::string eq_band_name (uint32_t) const { return std::string(); }
 	boost::shared_ptr<AutomationControl> eq_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
@@ -137,9 +140,36 @@ class LIBARDOUR_API VCA : public Stripable,
 	boost::shared_ptr<AutomationControl> comp_speed_controllable () const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<AutomationControl> comp_mode_controllable () const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<AutomationControl> comp_makeup_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> comp_ratio_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> comp_attack_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> comp_release_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> comp_key_filter_freq_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> comp_lookahead_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<ReadOnlyControl>   comp_meter_controllable () const { return boost::shared_ptr<ReadOnlyControl>(); }
 	boost::shared_ptr<ReadOnlyControl>   comp_redux_controllable () const { return boost::shared_ptr<ReadOnlyControl>(); }
+
+	boost::shared_ptr<AutomationControl> gate_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> gate_mode_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> gate_ratio_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> gate_knee_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> gate_threshold_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> gate_depth_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> gate_hysteresis_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> gate_hold_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> gate_attack_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> gate_release_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> gate_key_listen_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> gate_key_filter_enable_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> gate_key_filter_freq_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<AutomationControl> gate_lookahead_controllable () const { return boost::shared_ptr<AutomationControl>(); }
+	boost::shared_ptr<ReadOnlyControl>   gate_meter_controllable () const { return boost::shared_ptr<ReadOnlyControl>(); }
+	boost::shared_ptr<ReadOnlyControl>   gate_redux_controllable () const { return boost::shared_ptr<ReadOnlyControl>(); }
+
+	std::string tape_mode_name (uint32_t) const {return std::string("");}
+	std::string gate_mode_name (uint32_t) const {return std::string("");}
 	std::string comp_mode_name (uint32_t mode) const { return std::string(); }
 	std::string comp_speed_name (uint32_t mode) const { return std::string(); }
+
 	boost::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const { return boost::shared_ptr<AutomationControl>(); }
 	boost::shared_ptr<AutomationControl> send_pan_azimuth_controllable (uint32_t n) const { return boost::shared_ptr<AutomationControl>(); }

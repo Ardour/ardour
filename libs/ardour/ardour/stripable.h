@@ -153,8 +153,10 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual boost::shared_ptr<AutomationControl> filter_slope_controllable (bool hp) const = 0;
 	virtual boost::shared_ptr<AutomationControl> filter_enable_controllable (bool hp) const = 0;
 
-	virtual boost::shared_ptr<AutomationControl> tape_drive_controllable () const { return boost::shared_ptr<AutomationControl>(); }
-	virtual boost::shared_ptr<ReadOnlyControl> tape_drive_mtr_controllable () const { return boost::shared_ptr<ReadOnlyControl>(); }
+	virtual std::string tape_mode_name (uint32_t) const = 0;
+	virtual boost::shared_ptr<AutomationControl> tape_drive_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> tape_drive_mode_controllable () const = 0;
+	virtual boost::shared_ptr<ReadOnlyControl> tape_drive_mtr_controllable () const = 0;
 
 	/* "well-known" controls for a compressor in this route. Any or all may
 	 * be null.
@@ -164,7 +166,31 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual boost::shared_ptr<AutomationControl> comp_speed_controllable () const = 0;
 	virtual boost::shared_ptr<AutomationControl> comp_mode_controllable () const = 0;
 	virtual boost::shared_ptr<AutomationControl> comp_makeup_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> comp_ratio_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> comp_attack_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> comp_release_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> comp_key_filter_freq_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> comp_lookahead_controllable () const = 0;
+	virtual boost::shared_ptr<ReadOnlyControl>   comp_meter_controllable () const = 0;
 	virtual boost::shared_ptr<ReadOnlyControl>   comp_redux_controllable () const = 0;
+
+	virtual std::string gate_mode_name (uint32_t) const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_enable_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_mode_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_ratio_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_knee_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_threshold_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_depth_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_hysteresis_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_hold_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_attack_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_release_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_key_listen_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_key_filter_enable_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_key_filter_freq_controllable () const = 0;
+	virtual boost::shared_ptr<AutomationControl> gate_lookahead_controllable () const = 0;
+	virtual boost::shared_ptr<ReadOnlyControl>   gate_meter_controllable () const = 0;
+	virtual boost::shared_ptr<ReadOnlyControl>   gate_redux_controllable () const = 0;
 
 	/* @param mode must be supplied by the comp_mode_controllable(). All other values
 	 * result in undefined behaviour
