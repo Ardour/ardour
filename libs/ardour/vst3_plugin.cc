@@ -2138,9 +2138,11 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 	while (sa_in.size () < (VSTSpeakerArrangements::size_type) _n_bus_in) {
 		bool enable                = false;
 		Vst::SpeakerArrangement sa = 0;
+		 _bus_info_in[sa_in.size ()].n_used_chn = 0;
 		for (int i = 0; i < _bus_info_in[sa_in.size ()].n_chn; ++i) {
 			if (ins[cnt++]) {
 				sa |= (uint64_t)1 << i;
+				 ++_bus_info_in[sa_in.size ()].n_used_chn;
 				enable = true;
 			}
 		}
@@ -2149,7 +2151,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 			sa = Vst::SpeakerArr::kMono; /* 1 << 19 */
 		}
 
-		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kInput, %1, %2, %3%4)\n", sa_in.size (), enable, std::hex, sa));
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kInput, %1, %2) used-chn: %3 spk-arr: %4\n", sa_in.size (), enable, _bus_info_in[sa_in.size ()].n_used_chn, std::hex, sa));
 		_component->activateBus (Vst::kAudio, Vst::kInput, sa_in.size (), enable);
 		sa_in.push_back (sa);
 	}
@@ -2158,9 +2160,11 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 	while (sa_out.size () < (VSTSpeakerArrangements::size_type) _n_bus_out) {
 		bool enable = false;
 		Vst::SpeakerArrangement sa = 0;
+		_bus_info_out[sa_out.size ()].n_used_chn = 0;
 		for (int i = 0; i < _bus_info_out[sa_out.size ()].n_chn; ++i) {
 			if (outs[cnt++]) {
 				sa |= (uint64_t)1 << i;
+				++_bus_info_out[sa_out.size ()].n_used_chn;
 				enable = true;
 			}
 		}
@@ -2168,7 +2172,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		if (sa == 1 /*Vst::SpeakerArr::kSpeakerL */) {
 			sa = Vst::SpeakerArr::kMono; /* 1 << 19 */
 		}
-		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kOutput, %1, %2, %3%4)\n", sa_out.size (), enable, std::hex, sa));
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kOutput, %1, %2) used-chn: %3 spk-arr: %4\n", sa_out.size (), enable, _bus_info_out[sa_out.size ()].n_used_chn, std::hex, sa));
 		_component->activateBus (Vst::kAudio, Vst::kOutput, sa_out.size (), enable);
 		sa_out.push_back (sa);
 	}
@@ -2200,6 +2204,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		}
 	}
 #endif
+
 	if (was_active) {
 		activate ();
 	}
@@ -2232,14 +2237,14 @@ VST3PI::process (float** ins, float** outs, uint32_t n_samples)
 
 	for (int i = 0; i < _n_bus_in; ++i) {
 		inputs[i].silenceFlags     = 0;
-		inputs[i].numChannels      = _bus_info_in[i].n_chn;
+		inputs[i].numChannels      = _bus_info_in[i].n_used_chn;
 		inputs[i].channelBuffers32 = &ins[used_ins];
 		used_ins += _bus_info_in[i].n_chn;
 	}
 
 	for (int i = 0; i < _n_bus_out; ++i) {
 		outputs[i].silenceFlags     = 0;
-		outputs[i].numChannels      = _bus_info_out[i].n_chn;
+		outputs[i].numChannels      = _bus_info_out[i].n_used_chn;
 		outputs[i].channelBuffers32 = &outs[used_outs];
 		used_outs += _bus_info_out[i].n_chn;
 	}

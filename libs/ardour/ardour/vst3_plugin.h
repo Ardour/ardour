@@ -143,10 +143,11 @@ public:
 	uint32_t n_audio_aux_out () const { return _n_aux_outputs; }
 
 	struct AudioBusInfo {
-		AudioBusInfo (Vst::BusType t, int32_t c, bool a) : type (t), n_chn (c), dflt (a) {}
-		AudioBusInfo () : type (Vst::kMain), n_chn (0) {}
+		AudioBusInfo (Vst::BusType t, int32_t c, bool a) : type (t), n_chn (c), n_used_chn (c), dflt (a) {}
+		AudioBusInfo () : type (Vst::kMain), n_chn (0), n_used_chn (0) {}
 		Vst::BusType type;
 		int32_t      n_chn;
+		int32_t      n_used_chn;
 		bool         dflt; // kDefaultActive
 	};
 
