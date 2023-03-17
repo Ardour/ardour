@@ -4046,7 +4046,7 @@ FadeInDrag::setup_pointer_offset ()
 }
 
 void
-FadeInDrag::motion (GdkEvent* event, bool)
+FadeInDrag::motion (GdkEvent* event, bool first_motion)
 {
 
 	timepos_t tpos (timepos_t (_editor->canvas_event_sample (event)) + snap_delta (event->button.state));
@@ -4073,6 +4073,10 @@ FadeInDrag::motion (GdkEvent* event, bool)
 
 		if (!tmp) {
 			continue;
+		}
+
+		if (first_motion) {
+			tmp->drag_start ();
 		}
 
 		tmp->reset_fade_in_shape_width (tmp->audio_region(), fade_length);
@@ -4116,6 +4120,8 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 			continue;
 		}
 
+		tmp->drag_end ();
+
 		boost::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_in();
 		XMLNode &before = alist->get_state();
 
@@ -4144,6 +4150,8 @@ FadeInDrag::aborted (bool)
 		if (!tmp) {
 			continue;
 		}
+
+		tmp->drag_end ();
 
 		tmp->reset_fade_in_shape_width (tmp->audio_region(), tmp->audio_region()->fade_in()->back()->when.samples());
 	}
@@ -4177,7 +4185,7 @@ FadeOutDrag::setup_pointer_offset ()
 }
 
 void
-FadeOutDrag::motion (GdkEvent* event, bool)
+FadeOutDrag::motion (GdkEvent* event, bool first_motion)
 {
 	samplecnt_t fade_length;
 
@@ -4203,6 +4211,10 @@ FadeOutDrag::motion (GdkEvent* event, bool)
 
 		if (!tmp) {
 			continue;
+		}
+
+		if (first_motion) {
+			tmp->drag_start ();
 		}
 
 		tmp->reset_fade_out_shape_width (tmp->audio_region(), fade_length);
@@ -4247,6 +4259,8 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 			continue;
 		}
 
+		tmp->drag_end ();
+
 		boost::shared_ptr<AutomationList> alist = tmp->audio_region()->fade_out();
 		XMLNode &before = alist->get_state();
 
@@ -4275,6 +4289,8 @@ FadeOutDrag::aborted (bool)
 		if (!tmp) {
 			continue;
 		}
+
+		tmp->drag_end ();
 
 		tmp->reset_fade_out_shape_width (tmp->audio_region(), tmp->audio_region()->fade_out()->back()->when.samples());
 	}
