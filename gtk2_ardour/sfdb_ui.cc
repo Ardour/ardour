@@ -394,6 +394,29 @@ SoundFileBox::setup_labels (const string& filename)
 
 	if(!AudioFileSource::get_soundfile_info (filename, sf_info, error_msg)) {
 
+		preview_label.set_markup (_("<b>File Information</b>"));
+		format_text.set_text ("");
+		channels_value.set_text ("");
+		samplerate_value.set_text ("");
+		tags_entry.get_buffer()->set_text ("");
+
+		length_clock.set_duration (timecnt_t());
+		timecode_clock.set (timepos_t());
+
+		tags_entry.set_sensitive (false);
+		play_btn.set_sensitive (false);
+
+		return false;
+	}
+
+	try {
+
+		preview_label.set_markup (string_compose ("<b>%1</b>", Glib::Markup::escape_text (Glib::path_get_basename (filename))));
+
+	} catch (Glib::ConvertError& err) {
+
+		error << string_compose (_("Could not use confusing filename [%1] (%2)"), filename, err.what()) << endmsg;
+
 		preview_label.set_markup (_("<b>Sound File Information</b>"));
 		format_text.set_text ("");
 		channels_value.set_text ("");
@@ -409,7 +432,6 @@ SoundFileBox::setup_labels (const string& filename)
 		return false;
 	}
 
-	preview_label.set_markup (string_compose ("<b>%1</b>", Glib::Markup::escape_text (Glib::path_get_basename (filename))));
 	std::string n = sf_info.format_name;
 	if (n.substr (0, 8) == X_("Format: ")) {
 		n = n.substr (8);
