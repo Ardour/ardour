@@ -2137,15 +2137,18 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 
 	while (sa_in.size () < (VSTSpeakerArrangements::size_type) _n_bus_in) {
 		bool enable                = false;
+		int32_t const n_chn        = _bus_info_in[sa_in.size ()].n_chn;
 		Vst::SpeakerArrangement sa = 0;
 		 _bus_info_in[sa_in.size ()].n_used_chn = 0;
-		for (int i = 0; i < _bus_info_in[sa_in.size ()].n_chn; ++i) {
-			if (ins[cnt++]) {
+		 /* use all channels before the last connected one */
+		for (int32_t i = n_chn - 1; i >= 0; --i) {
+			if (ins[cnt + i] || enable) {
 				sa |= (uint64_t)1 << i;
 				 ++_bus_info_in[sa_in.size ()].n_used_chn;
 				enable = true;
 			}
 		}
+		cnt += n_chn;
 		/* special case for Left only == Mono */
 		if (sa == 1 /*Vst::SpeakerArr::kSpeakerL */) {
 			sa = Vst::SpeakerArr::kMono; /* 1 << 19 */
@@ -2158,16 +2161,18 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 
 	cnt = 0;
 	while (sa_out.size () < (VSTSpeakerArrangements::size_type) _n_bus_out) {
-		bool enable = false;
+		bool enable                = false;
+		int32_t const n_chn        = _bus_info_out[sa_out.size ()].n_chn;
 		Vst::SpeakerArrangement sa = 0;
 		_bus_info_out[sa_out.size ()].n_used_chn = 0;
-		for (int i = 0; i < _bus_info_out[sa_out.size ()].n_chn; ++i) {
-			if (outs[cnt++]) {
+		for (int32_t i = n_chn - 1; i >= 0; --i) {
+			if (outs[cnt + i] || enable) {
 				sa |= (uint64_t)1 << i;
 				++_bus_info_out[sa_out.size ()].n_used_chn;
 				enable = true;
 			}
 		}
+		cnt += n_chn;
 		/* special case for Left only == Mono */
 		if (sa == 1 /*Vst::SpeakerArr::kSpeakerL */) {
 			sa = Vst::SpeakerArr::kMono; /* 1 << 19 */
