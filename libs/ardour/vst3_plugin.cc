@@ -2184,26 +2184,31 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 	_processor->setBusArrangements (sa_in.size () > 0 ? &sa_in[0] : &null_arrangement, sa_in.size (),
 	                                sa_out.size () > 0 ? &sa_out[0] : &null_arrangement, sa_out.size ());
 
-#ifndef NDEBUG
 	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: setBusArrangements ins = %1 outs = %2 | rv = %3\n", sa_in.size (), sa_out.size (), rv));
 
-	if (DEBUG_ENABLED (DEBUG::VST3Config)) {
-		for (int32 i = 0; i < _n_bus_in; ++i) {
-			Vst::SpeakerArrangement arr;
-			if (_processor->getBusArrangement (Vst::kInput, i, arr) == kResultOk) {
-				int cc = Vst::SpeakerArr::getChannelCount (arr);
-				DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3: Input BusArrangements: %1 chan: %2 bits: %3%4\n", i, cc, std::hex, arr));
-			}
-		}
-		for (int32 i = 0; i < _n_bus_out; ++i) {
-			Vst::SpeakerArrangement arr;
-			if (_processor->getBusArrangement (Vst::kOutput, i, arr) == kResultOk) {
-				int cc = Vst::SpeakerArr::getChannelCount (arr);
-				DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3: Output BusArrangements: %1 chan: %2 bits: %3%4\n", i, cc, std::hex, arr));
+	/* https://steinbergmedia.github.io/vst3_doc/vstinterfaces/classSteinberg_1_1Vst_1_1IAudioProcessor.html#ad3bc7bac3fd3b194122669be2a1ecc42 */
+	for (int32 i = 0; i < _n_bus_in; ++i) {
+		Vst::SpeakerArrangement arr;
+		if (_processor->getBusArrangement (Vst::kInput, i, arr) == kResultOk) {
+			int cc = Vst::SpeakerArr::getChannelCount (arr);
+			DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI: Input BusArrangements: %1 chan: %2 bits: %3%4\n", i, cc, std::hex, arr));
+			assert (cc <= _bus_info_in[i].n_chn);
+			if (cc <= _bus_info_in[i].n_used_chn) {
+				_bus_info_in[i].n_used_chn = cc;
 			}
 		}
 	}
-#endif
+	for (int32 i = 0; i < _n_bus_out; ++i) {
+		Vst::SpeakerArrangement arr;
+		if (_processor->getBusArrangement (Vst::kOutput, i, arr) == kResultOk) {
+			int cc = Vst::SpeakerArr::getChannelCount (arr);
+			DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI: Output BusArrangements: %1 chan: %2 bits: %3%4\n", i, cc, std::hex, arr));
+			assert (cc <= _bus_info_out[i].n_chn);
+			if (cc <= _bus_info_out[i].n_chn) {
+				_bus_info_out[i].n_used_chn = cc;
+			}
+		}
+	}
 
 	if (was_active) {
 		activate ();
