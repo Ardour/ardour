@@ -484,7 +484,7 @@
     <Modifier name="automation track fill" modifier="= alpha:0.29999999999999999"/>
     <Modifier name="covered region base" modifier="= alpha:0.69999999999999996"/>
     <Modifier name="crossfade alpha" modifier="= alpha:0.18029999999999999"/>
-    <Modifier name="dragging region" modifier="= alpha:0.90000000000000002"/>
+    <Modifier name="dragging region" modifier="= alpha:0.5"/>
     <Modifier name="editable region" modifier="= alpha:0.25"/>
     <Modifier name="gain line inactive" modifier="= alpha:0.77249999999999996"/>
     <Modifier name="ghost track base" modifier="= alpha:0.64078199999999996"/>

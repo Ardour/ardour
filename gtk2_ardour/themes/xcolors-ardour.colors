@@ -483,7 +483,7 @@
     <Modifier name="automation track fill" modifier="= alpha:0.5"/>
     <Modifier name="covered region base" modifier="= alpha:0.7"/>
     <Modifier name="crossfade alpha" modifier="= alpha:0.2"/>
-    <Modifier name="dragging region" modifier="= alpha:0.9"/>
+    <Modifier name="dragging region" modifier="= alpha:0.5"/>
     <Modifier name="editable region" modifier="= alpha:0.1"/>
     <Modifier name="gain line inactive" modifier="= alpha:0.8"/>
     <Modifier name="ghost track base" modifier="= alpha:0.7"/>
