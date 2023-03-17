@@ -897,10 +897,10 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 	}
 
 	if (_match.method == Split && !no_inplace) {
-		// TODO: also use this optimization if one source-buffer
-		// feeds _all_ *connected* inputs.
-		// currently this is *first* buffer to all only --
-		// see PluginInsert::check_inplace
+		/* This allows in-place processing. Copying a single source-port
+		 * to all the input pins of a plugin, using a dedicated buffer for each.
+		 * see PluginInsert::check_inplace
+		 */
 		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 			if (_configured_internal.get (*t) == 0) {
 				continue;
@@ -917,8 +917,6 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 				}
 			}
 		}
-		/* the copy operation produces a linear monotonic input map */
-		in_map[0] = ChanMapping (natural_input_streams ());
 	}
 
 	bufs.set_count(ChanCount::max(bufs.count(), _configured_internal));
