@@ -99,13 +99,13 @@ VST3Plugin::init ()
 	/* assume only default active busses are connected */
 	for (auto const& abi : _plug->bus_info_in ()) {
 		for (int32_t i = 0; i < abi.second.n_chn; ++i) {
-		_connected_inputs.push_back (abi.second.dflt);
+			_connected_inputs.push_back (abi.second.dflt);
 		}
 	}
 
 	for (auto const& abi : _plug->bus_info_out ()) {
 		for (int32_t i = 0; i < abi.second.n_chn; ++i) {
-		_connected_outputs.push_back (abi.second.dflt);
+			_connected_outputs.push_back (abi.second.dflt);
 		}
 	}
 
@@ -140,7 +140,7 @@ VST3Plugin::parameter_change_handler (VST3PI::ParameterChange t, uint32_t param,
 			Plugin::state_changed ();
 			break;
 		case VST3PI::PresetChange:
-			PresetsChanged (unique_id (), this, false); /* EMIT SIGNAL */
+			PresetsChanged (unique_id (), this, false);     /* EMIT SIGNAL */
 			size_t n_presets = _plug->n_factory_presets (); // ths may be old, invalidated count
 			if (_plug->program_change_port ().id != Vst::kNoParamId) {
 				int                         pgm  = value * (n_presets > 1 ? (n_presets - 1) : 1);
@@ -175,7 +175,7 @@ VST3Plugin::default_value (uint32_t port)
 void
 VST3Plugin::set_parameter (uint32_t port, float val, sampleoffset_t when)
 {
-	if (!_plug->active () || _plug->is_loading_state () || AudioEngine::instance()->in_process_thread() ) {
+	if (!_plug->active () || _plug->is_loading_state () || AudioEngine::instance ()->in_process_thread ()) {
 		/* directly use VST3PI::_input_param_changes */
 		_plug->set_parameter (port, val, when);
 	} else {
@@ -286,7 +286,7 @@ PluginOutputConfiguration
 VST3Plugin::possible_output () const
 {
 	auto const& bi (_plug->bus_info_out ());
-	if (bi.size() < 2) {
+	if (bi.size () < 2) {
 		return Plugin::possible_output ();
 	}
 #if 0
@@ -300,10 +300,10 @@ VST3Plugin::possible_output () const
 #else
 	/* first main out, + individual stereo main outs, +all main outs, + individual aux outs */
 
-	auto i         = bi.begin ();
-	int32_t sum    = i->second.n_chn;
-	bool seen_aux  = i->second.type == Vst::kAux;
-	bool seen_mono = sum == 1;
+	auto    i         = bi.begin ();
+	int32_t sum       = i->second.n_chn;
+	bool    seen_aux  = i->second.type == Vst::kAux;
+	bool    seen_mono = sum == 1;
 
 	PluginOutputConfiguration oc;
 	oc.insert (sum);
@@ -312,8 +312,7 @@ VST3Plugin::possible_output () const
 		if (seen_aux || seen_mono) {
 			sum += i->second.n_chn;
 			oc.insert (sum);
-		}
-		else if (i->second.type == Vst::kAux) {
+		} else if (i->second.type == Vst::kAux) {
 			oc.insert (sum);
 			seen_aux = true;
 			sum += i->second.n_chn;
@@ -718,14 +717,14 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 	context.systemTime           = g_get_monotonic_time ();
 
 	{
-		TempoMap::SharedPtr tmap (TempoMap::use());
+		TempoMap::SharedPtr tmap (TempoMap::use ());
 		const TempoMetric&  metric (tmap->metric_at (timepos_t (start)));
 		const BBT_Time&     bbt (metric.bbt_at (timepos_t (start)));
 
-		context.tempo              = metric.tempo().quarter_notes_per_minute ();
-		context.timeSigNumerator   = metric.meter().divisions_per_bar ();
-		context.timeSigDenominator = metric.meter().note_value ();
-		context.projectTimeMusic   = DoubleableBeats (metric.tempo().quarters_at_sample (start)).to_double();
+		context.tempo              = metric.tempo ().quarter_notes_per_minute ();
+		context.timeSigNumerator   = metric.meter ().divisions_per_bar ();
+		context.timeSigDenominator = metric.meter ().note_value ();
+		context.projectTimeMusic   = DoubleableBeats (metric.tempo ().quarters_at_sample (start)).to_double ();
 		context.barPositionMusic   = bbt.bars * 4; // PPQN, NOT tmap.metric_at(bbt).meter().divisions_per_bar()
 	}
 
@@ -743,10 +742,10 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 		try {
 			/* loop start/end in quarter notes */
 
-			TempoMap::SharedPtr tmap (TempoMap::use());
+			TempoMap::SharedPtr tmap (TempoMap::use ());
 			context.cycleStartMusic = DoubleableBeats (tmap->quarters_at (looploc->start ())).to_double ();
 			context.cycleEndMusic   = DoubleableBeats (tmap->quarters_at (looploc->end ())).to_double ();
-			 context.state |= Vst::ProcessContext::kCycleValid;
+			context.state |= Vst::ProcessContext::kCycleValid;
 			context.state |= Vst::ProcessContext::kCycleActive;
 		} catch (...) {
 		}
@@ -781,8 +780,8 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 		bool     valid = false;
 		index          = in_map.get (DataType::AUDIO, in_index++, &valid);
 		ins[i]         = (valid)
-		             ? bufs.get_audio (index).data (offset)
-		             : silent_bufs.get_audio (0).data (offset);
+		               ? bufs.get_audio (index).data (offset)
+		               : silent_bufs.get_audio (0).data (offset);
 		_connected_inputs[i] = valid;
 	}
 
@@ -792,8 +791,8 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 		bool     valid = false;
 		index          = out_map.get (DataType::AUDIO, out_index++, &valid);
 		outs[i]        = (valid)
-		              ? bufs.get_audio (index).data (offset)
-		              : scratch_bufs.get_audio (0).data (offset);
+		               ? bufs.get_audio (index).data (offset)
+		               : scratch_bufs.get_audio (0).data (offset);
 		_connected_outputs[i] = valid;
 	}
 
@@ -898,7 +897,7 @@ std::string
 VST3Plugin::do_save_preset (std::string name)
 {
 	boost::shared_ptr<VST3PluginInfo> nfo = boost::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
-	PBD::Searchpath psp = nfo->preset_search_path ();
+	PBD::Searchpath                   psp = nfo->preset_search_path ();
 	assert (!psp.empty ());
 
 	std::string dir = psp.front ();
@@ -930,7 +929,7 @@ void
 VST3Plugin::do_remove_preset (std::string name)
 {
 	boost::shared_ptr<VST3PluginInfo> nfo = boost::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
-	PBD::Searchpath psp = nfo->preset_search_path ();
+	PBD::Searchpath                   psp = nfo->preset_search_path ();
 	assert (!psp.empty ());
 
 	std::string dir = psp.front ();
@@ -1020,7 +1019,7 @@ VST3Plugin::find_presets ()
 	// IUnitData: programDataSupported -> setUnitProgramData (IBStream)
 
 	boost::shared_ptr<VST3PluginInfo> info = boost::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
-	PBD::Searchpath psp = info->preset_search_path ();
+	PBD::Searchpath                   psp  = info->preset_search_path ();
 
 	std::vector<std::string> preset_files;
 	find_paths_matching_filter (preset_files, psp, vst3_preset_filter, 0, false, true, false);
@@ -1078,7 +1077,7 @@ VST3PluginInfo::get_presets (bool user_only) const
 	 */
 	assert (user_only);
 
-	PBD::Searchpath psp = preset_search_path ();
+	PBD::Searchpath          psp = preset_search_path ();
 	std::vector<std::string> preset_files;
 	find_paths_matching_filter (preset_files, psp, vst3_preset_filter, 0, false, true, false);
 
@@ -1479,7 +1478,7 @@ VST3PI::restartComponent (int32 flags)
 
 	if (flags & Vst::kReloadComponent) {
 		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
-		if (!AudioEngine::instance()->in_process_thread() && !_is_loading_state) {
+		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state) {
 			pl.acquire ();
 		} else {
 			assert (0); // a plugin should not call this while processing
@@ -1497,7 +1496,7 @@ VST3PI::restartComponent (int32 flags)
 	}
 	if (flags & Vst::kParamValuesChanged) {
 		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
-		if (!AudioEngine::instance()->in_process_thread() && !_is_loading_state) {
+		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state) {
 			pl.acquire ();
 		}
 		update_shadow_data ();
@@ -1507,12 +1506,12 @@ VST3PI::restartComponent (int32 flags)
 		 * mentions that the host plugin should be deactivated before querying
 		 * latency. However the official spec does not require this.
 		 *
-		 * However other implementations do not call setActive(false/true) when 
+		 * However other implementations do not call setActive(false/true) when
 		 * the latency changes, and Ardour does not require it either, latency
 		 * changes are automatically picked up.
 		 */
 		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
-		if (!AudioEngine::instance()->in_process_thread() && !_is_loading_state) {
+		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state) {
 			/* Some plugins (e.g BlendEQ) call this from the process,
 			 * IPlugProcessor::ProcessBuffers. In that case taking the
 			 * _process_lock would deadlock.
@@ -1753,9 +1752,9 @@ VST3PI::count_channels (Vst::MediaType media, Vst::BusDirection dir, Vst::BusTyp
 				n_channels += bus.channelCount;
 
 				if (dir == Vst::kInput) {
-					_bus_info_in.insert (std::make_pair(i, AudioBusInfo (type, bus.channelCount, bus.flags & Vst::BusInfo::kDefaultActive)));
+					_bus_info_in.insert (std::make_pair (i, AudioBusInfo (type, bus.channelCount, bus.flags & Vst::BusInfo::kDefaultActive)));
 				} else {
-					_bus_info_out.insert (std::make_pair(i, AudioBusInfo (type, bus.channelCount, bus.flags & Vst::BusInfo::kDefaultActive)));
+					_bus_info_out.insert (std::make_pair (i, AudioBusInfo (type, bus.channelCount, bus.flags & Vst::BusInfo::kDefaultActive)));
 				}
 			}
 		}
@@ -1813,7 +1812,7 @@ VST3PI::get_parameter_descriptor (uint32_t port, ParameterDescriptor& desc) cons
 
 	FUnknownPtr<IEditControllerExtra> extra_ctrl (_controller);
 	if (extra_ctrl && port != designated_bypass_port ()) {
-		int32 flags      = extra_ctrl->getParamExtraFlags (id);
+		int32 flags = extra_ctrl->getParamExtraFlags (id);
 		if (Config->get_show_vst3_micro_edit_inline ()) {
 			desc.inline_ctrl = (flags & kParamFlagMicroEdit) ? true : false;
 		}
@@ -2429,7 +2428,7 @@ VST3PI::load_state (RAMStream& stream)
 		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::load_state: chunk: %1 off: %2 size: %3 type: %4\n", i, c._offset, c._size, c._id));
 	}
 
-	bool rv = true;
+	bool rv     = true;
 	bool synced = false;
 
 	/* parse chunks */
@@ -2456,7 +2455,7 @@ VST3PI::load_state (RAMStream& stream)
 			}
 		} else if (is_equal_ID (i->_id, Vst::getChunkID (Vst::kControllerState))) {
 			ROMStream s (stream, i->_offset, i->_size);
-			tresult res = _controller->setState (&s);
+			tresult   res = _controller->setState (&s);
 			if (res == kResultOk) {
 				synced = true;
 			}
