@@ -977,7 +977,8 @@ public:
 	MappingTwistDrag (Editor *, ArdourCanvas::Item *, Temporal::TempoMap::WritableSharedPtr&,
 	                  Temporal::TempoPoint& prev,
 	                  Temporal::TempoPoint& focus,
-	                  Temporal::TempoPoint& next);
+	                  Temporal::TempoPoint& next,
+	                  XMLNode&);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);

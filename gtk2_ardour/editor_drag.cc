@@ -3712,7 +3712,8 @@ MappingStretchDrag::aborted (bool moved)
 MappingTwistDrag::MappingTwistDrag (Editor* e, ArdourCanvas::Item* i, Temporal::TempoMap::WritableSharedPtr& wmap,
                                     TempoPoint& prv,
                                     TempoPoint& fcus,
-                                    TempoPoint& nxt)
+                                    TempoPoint& nxt,
+                                    XMLNode& before)
 	: Drag (e, i, Temporal::BeatTime)
 	, prev (prv)
 	, focus (fcus)
@@ -3720,7 +3721,7 @@ MappingTwistDrag::MappingTwistDrag (Editor* e, ArdourCanvas::Item* i, Temporal::
 	, map (wmap)
 	, direction (0.)
 	, delta (0.)
-	, _before_state (0)
+	, _before_state (&before)
 	, _drag_valid (true)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MappingTwistDrag\n");
@@ -3736,9 +3737,6 @@ MappingTwistDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 void
 MappingTwistDrag::setup_pointer_offset ()
 {
-	/* get current state */
-	_before_state = &map->get_state();
-
 	Beats grab_qn = max (Beats(), raw_grab_time().beats());
 
 	uint32_t divisions = _editor->get_grid_beat_divisions (_editor->grid_type());
@@ -3754,20 +3752,6 @@ MappingTwistDrag::setup_pointer_offset ()
 void
 MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (first_move) {
-		_editor->begin_reversible_command (_("map tempo w/twist"));
-	}
-
-	samplepos_t mouse_pos;
-
-	if (_editor->grid_musical()) {
-		mouse_pos = adjusted_current_time (event, false).samples();
-	} else {
-		mouse_pos = adjusted_current_time (event).samples();
-	}
-
-	double pixels_moved = _drags->current_pointer_x() - last_pointer_x();
-
 	if (_drags->current_pointer_x() < last_pointer_x()) {
 		if (direction < 0.) {
 			direction = 1.;
@@ -3795,7 +3779,7 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 
 	map->twist_tempi (prev, focus, next, initial_npm + delta);
 
-	// _editor->mapping_cursor->set_position (Duple (_editor->sample_to_pixel_unrounded (mouse_pos), _editor->mapping_cursor->position().y));
+	_editor->mapping_cursor->set_position (Duple (_editor->sample_to_pixel_unrounded (superclock_to_samples (focus.sclock(), TEMPORAL_SAMPLE_RATE)), _editor->mapping_cursor->position().y));
 	_editor->mid_tempo_change (Editor::MappingChanged);
 }
 
@@ -3807,26 +3791,21 @@ MappingTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 		/* click, no drag */
 
 		_editor->abort_tempo_mapping ();
+		_editor->abort_reversible_command ();
 		_editor->session()->request_locate (grab_sample(), false, _was_rolling ? MustRoll : RollIfAppropriate);
 		return;
 	}
 
 	if (!_drag_valid) {
 		_editor->abort_tempo_mapping ();
+		_editor->abort_reversible_command ();
 		return;
 	}
 
 	XMLNode &after = map->get_state();
 
-	_editor->session()->add_command (new Temporal::TempoCommand (_("move BBT point"), _before_state, &after));
+	_editor->session()->add_command (new Temporal::TempoCommand (_("twist tempo"), _before_state, &after));
 	_editor->commit_reversible_command ();
-
-	/* 2nd argument means "update tempo map display after the new map is
-	 * installed. We need to do this because the code above has not
-	 * actually changed anything about how tempo is displayed, it simply
-	 * modified the map.
-	 */
-
 	_editor->commit_tempo_mapping (map);
 }
 
@@ -3891,14 +3870,6 @@ TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 		if (_next_tempo) {
 			_editor->tempo_curve_selected (_next_tempo, true);
 		}
-	}
-
-	samplepos_t mouse_pos;
-
-	if (_editor->grid_musical()) {
-		mouse_pos = adjusted_current_time (event, false).samples();
-	} else {
-		mouse_pos = adjusted_current_time (event).samples();
 	}
 
 	/* adjust this and the next tempi to match pointer sample */

@@ -2993,6 +2993,11 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 	TempoPoint* before;
 	TempoPoint* focus;
 
+	/* Reversible command starts here, must be ended/aborted in drag */
+
+	begin_reversible_command (_("map tempo/twist"));
+	XMLNode* before_state = &map->get_state();
+
 	if (tempo.bbt() < bbt) {
 
 		/* Add a new tempo marker at the nearest beat point
@@ -3005,7 +3010,6 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		Tempo copied_no_ramp (map->tempo_at (bbt));
 		TempoPoint& added = const_cast<TempoPoint&> (map->set_tempo (copied_no_ramp, bbt));
 		focus = &added;
-		std::cerr << "Focus will be " << *focus << std::endl;
 		reset_tempo_marks ();
 
 	} else {
@@ -3019,12 +3023,6 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		focus = &tempo;
 	}
 
-	std::cerr << "Prev: " << *before << std::endl;
-	std::cerr << "Focus: " << *focus << std::endl;
-	std::cerr << "Next: " << *after << std::endl;
+	_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after, *before_state), event);
 
-	std::cerr << "focus says next at " << focus->superclock_at (after->beats()) << " vs. " << after->sclock() << std::endl;
-
-	_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after), event);
-	std::cerr << ":Twist\n";
 }
