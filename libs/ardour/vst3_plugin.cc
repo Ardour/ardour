@@ -2197,7 +2197,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 			int cc = Vst::SpeakerArr::getChannelCount (arr);
 			DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI: Input BusArrangements: %1 chan: %2 bits: %3%4\n", i, cc, std::hex, arr));
 			assert (cc <= _bus_info_in[i].n_chn);
-			if (cc <= _bus_info_in[i].n_used_chn) {
+			if (cc <= _bus_info_in[i].n_chn) {
 				_bus_info_in[i].n_used_chn = cc;
 			}
 		}
