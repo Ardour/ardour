@@ -1,0 +1,174 @@
+# Copyright (C) 2004 Paul Davis
+# This file is distributed under the same license as the gtkmm2ext package.
+# Author: Alex Krohn <alexkrohn@fastmail.fm>, 2004.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gtkmm2ext\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: \n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language: ca\n"
+"X-Generator: Poedit 2.4.2\n"
+
+#: actions.cc:215
+msgid "Unknown action name: %1/%2"
+msgstr "Nom d'acció desconegut:%1/%2"
+
+#: action_model.cc:56 action_model.cc:171
+msgid "Disabled"
+msgstr "Inhabilitat"
+
+#: action_model.cc:83
+msgid "Main_menu"
+msgstr "Main_menu"
+
+#: action_model.cc:85
+msgid "JACK"
+msgstr "JACK"
+
+#: action_model.cc:87
+msgid "redirectmenu"
+msgstr "redirectmenu"
+
+#: action_model.cc:89
+msgid "Editor_menus"
+msgstr "Editor_menus"
+
+#: action_model.cc:91
+msgid "RegionList"
+msgstr "RegionList"
+
+#: action_model.cc:93
+msgid "ProcessorMenu"
+msgstr "ProcessorMenu"
+
+#: bindings.cc:840 bindings.cc:842
+msgid "Window"
+msgstr "Finestra"
+
+#: bindings.cc:840
+msgid " (Categorized)"
+msgstr " (Categoritzat)"
+
+#: bindings.cc:842
+msgid " (Alphabetical)"
+msgstr " (Alfabètic)"
+
+#: bindings.cc:858
+msgid "Uncategorized"
+msgstr "Sense categoria"
+
+#: cursors.cc:81
+msgid "cursor hotspots info file %1 has an error on line %2"
+msgstr ""
+"el fitxer d'informació de hotspots del cursor %1 té un error a la línia "
+"%2"
+
+#: emscale.cc:52
+msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+
+#: gtk_ui.cc:126
+msgid "Log"
+msgstr "Registre"
+
+#: gtk_ui.cc:395
+msgid ""
+"\n"
+"\n"
+"Shortcut: "
+msgstr ""
+"\n"
+"\n"
+"Drecera: "
+
+#: gtk_ui.cc:694
+msgid "Press To Exit"
+msgstr "Premeu per sortir"
+
+#: gtk_ui.cc:730
+msgid "I'm sorry %1, I can't do that"
+msgstr "Em sap greu 1%, no puc fer-ho"
+
+#: keyboard.cc:75
+msgid "Command"
+msgstr "Command"
+
+#: keyboard.cc:76 keyboard.cc:98
+msgid "Control"
+msgstr "Control"
+
+#: keyboard.cc:77 keyboard.cc:82 keyboard.cc:100 keyboard.cc:105
+msgid "Key|Shift"
+msgstr "Maj"
+
+#: keyboard.cc:78
+msgid "Option"
+msgstr "Option"
+
+#: keyboard.cc:80
+msgid "Cmd"
+msgstr "Cmd"
+
+#: keyboard.cc:81 keyboard.cc:103
+msgid "Ctrl"
+msgstr "Ctrl"
+
+#: keyboard.cc:83
+msgid "Opt"
+msgstr "Opt"
+
+#: keyboard.cc:99 keyboard.cc:104
+msgid "Alt"
+msgstr "Alt"
+
+#: keyboard.cc:101
+msgid "Windows"
+msgstr "Windows"
+
+#: keyboard.cc:106
+msgid "Win"
+msgstr "Win"
+
+#: keyboard.cc:159 keyboard.cc:605
+msgid "Unknown"
+msgstr "Desconegut"
+
+#: keyboard.cc:616
+msgid "key bindings file not found at \"%2\" or contains errors."
+msgstr ""
+"no s'ha trobat el fitxer de vinculacions de tecles a \"%2\" o conté "
+"errors."
+
+#: keyboard.cc:642
+msgid "Keyboard binding found without a name"
+msgstr "S'ha trobat vinculació del teclat sense un nom"
+
+#: keyboard.cc:674
+msgid "Cannot save key bindings to %1"
+msgstr "No s'han pogut desar les vinculacions de tecles a %1"
+
+#: keyboard.cc:690
+msgid "Cannot rename your own keybinding file (%1)"
+msgstr ""
+"No es pot canviar el nom del vostre propi fitxer de vinculació de tecles "
+"(%1)"
+
+#: textviewer.cc:32
+msgid "Close"
+msgstr "Tanca"
+
+#~ msgid "operate controller now"
+#~ msgstr "Operar controlador ahora"
+
+#~ msgid "Click to tear this into its own window"
+#~ msgstr "Pulsa para tener esto en su propia ventana"
+
+#~ msgid "Click to put this back in the main window"
+#~ msgstr "Pulsa para llevarlo a la ventana principal"
