@@ -57,6 +57,13 @@ private:
 		Output
 	} CtrlType;
 
+	typedef enum {
+		DisconnectIn = 1,
+		DisconnectOut = 2,
+		DisconnectAll = 3, // includes thru
+	} ClearMode;
+
+
 	struct _CtrlElem {
 		_CtrlElem (CtrlType c, ARDOUR::DataType d, uint32_t i, uint32_t p, uint32_t b, bool s)
 			: ct (c), dt (d), id (i), ip (p), bn (b), sc (s) {}
@@ -153,6 +160,7 @@ private:
 	static std::string port_label (const std::string&, bool);
 
 	void reset_mapping ();
+	void clear_mapping (ClearMode);
 	void reset_configuration ();
 	void toggle_sidechain ();
 	void connect_sidechain ();

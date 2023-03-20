@@ -114,7 +114,11 @@ PluginPinWidget::PluginPinWidget (boost::shared_ptr<ARDOUR::PluginInsert> pi)
 	Menu_Helpers::MenuList& citems = reset_menu.items ();
 	reset_menu.set_name ("ArdourContextMenu");
 	citems.clear ();
-	citems.push_back (Menu_Helpers::MenuElem (_("Reset"), sigc::mem_fun (*this, &PluginPinWidget::reset_mapping)));
+	citems.push_back (Menu_Helpers::MenuElem (_("Reset to default"), sigc::mem_fun (*this, &PluginPinWidget::reset_mapping)));
+	citems.push_back (Menu_Helpers::SeparatorElem ());
+	citems.push_back (Menu_Helpers::MenuElem (_("Disconnect Inputs"), sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::clear_mapping), DisconnectIn)));
+	citems.push_back (Menu_Helpers::MenuElem (_("Disconnect Outputs"), sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::clear_mapping), DisconnectOut)));
+	citems.push_back (Menu_Helpers::MenuElem (_("Disconnect All"), sigc::bind (sigc::mem_fun (*this, &PluginPinWidget::clear_mapping), DisconnectAll)));
 
 	_pm_size_group  = SizeGroup::create (SIZE_GROUP_BOTH);
 	_add_plugin.set_tweaks (ArdourButton::Square);
@@ -1644,6 +1648,23 @@ void
 PluginPinWidget::reset_mapping ()
 {
 	_pi->reset_map ();
+}
+
+void
+PluginPinWidget::clear_mapping (ClearMode m)
+{
+	ChanMapping map;
+	for (uint32_t n = 0; n < _n_plugins; ++n) {
+		if (m & DisconnectIn) {
+			_pi->set_input_map (n, map);
+		}
+		if (m & DisconnectOut) {
+			_pi->set_output_map (n, map);
+		}
+	}
+	if (m == DisconnectAll) {
+		_pi->set_thru_map (map);
+	}
 }
 
 void
