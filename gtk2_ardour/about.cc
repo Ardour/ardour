@@ -271,9 +271,31 @@ static const char* translators[] = {
 	0
 };
 
-static const char* gpl = X_("\n\
+static char const* gpl = X_("\n\
 Ardour comes with NO WARRANTY. It is free software, and you are welcome to redistribute it\n\
-under the terms of the GNU General Public License, shown below.\n\
+under the terms of the GNU General Public License (GPL) v2.0 or any later version, shown below.\n\
+\n\
+			    Plugin Clarification\n\
+\n\
+The following states the Ardour developers understanding of the\n\
+relationship between Ardour's license (GPL v2.0 or later) and plugins.\n\
+\n\
+For the purposes of this understanding, \"plugins\" refer to software\n\
+dynamically loaded by another program, where the interaction between the\n\
+plugin and the loading program (typically called \"the host\") is defined by\n\
+a 3rd party API. Such APIs include (but are not limited to) VST,\n\
+AudioUnits, LV2, LADSPA and CLAP.\n\
+\n\
+Since (a) any such plugin may be loaded by any host that supports the API\n\
+and (b) any host may load any plugin that supports the API, we consider it\n\
+self-evident that there can be no \"derivative\" relationship (in the sense\n\
+of the GPL's use of this term) between the host and plugin.\n\
+\n\
+Consequently, Ardour may load arbitrarily licensed plugins, so as to cause\n\
+interactions between Ardour and the plugin via a 3rd party API, without any\n\
+implications for either Ardour or the plugin. In our understanding, Using\n\
+such plugins with Ardour is not impacted in any way by Ardour's GPL licensing.\n\
+\n\
 \n\
 		    GNU GENERAL PUBLIC LICENSE\n\
 		       Version 2, June 1991\n\
