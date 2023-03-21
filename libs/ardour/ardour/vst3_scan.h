@@ -42,6 +42,7 @@ struct VST3Info {
 		, n_aux_outputs (0)
 		, n_midi_inputs (0)
 		, n_midi_outputs (0)
+		, has_editor (false)
 	{}
 
 	VST3Info (XMLNode const&);
@@ -63,6 +64,8 @@ struct VST3Info {
 	int n_aux_outputs;
 	int n_midi_inputs;
 	int n_midi_outputs;
+
+	bool has_editor;
 };
 
 LIBARDOUR_API extern std::string

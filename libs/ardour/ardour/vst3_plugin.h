@@ -457,6 +457,7 @@ public:
 	PBD::Searchpath                   preset_search_path () const;
 
 	boost::shared_ptr<VST3PluginModule> m;
+	bool has_editor;
 };
 
 #if defined(__clang__)

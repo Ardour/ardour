@@ -47,7 +47,7 @@
 using namespace std;
 using namespace Steinberg;
 
-#define ARDOUR_VST3_CACHE_FILE_VERSION 2
+#define ARDOUR_VST3_CACHE_FILE_VERSION 3
 
 static const char* fmt_media (Vst::MediaType m) {
 	switch (m) {
@@ -203,7 +203,7 @@ discover_vst3 (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::vector<ARDOUR
 			}
 
 			if (processor->canProcessSampleSize (Vst::kSample32) != kResultTrue) {
-				cerr << "VST3: Cannot process 32bit float";
+				cerr << "VST3: Cannot process 32bit float\n";
 				component->terminate ();
 				component->release ();
 				continue;
@@ -216,8 +216,85 @@ discover_vst3 (boost::shared_ptr<ARDOUR::VST3PluginModule> m, std::vector<ARDOUR
 			nfo.n_midi_inputs  = count_channels (component, Vst::kEvent, Vst::kInput,  Vst::kMain, verbose);
 			nfo.n_midi_outputs = count_channels (component, Vst::kEvent, Vst::kOutput, Vst::kMain, verbose);
 
+			bool has_editor = false;
+			Vst::IEditController* controller = FUnknownPtr<Vst::IEditController> (component).take ();
+
+			if (!controller) {
+				TUID controllerCID;
+				if (component->getControllerClassId (controllerCID) == kResultTrue) {
+					if (factory->createInstance (controllerCID, Vst::IEditController::iid, (void**)&controller) != kResultTrue) {
+						component->terminate ();
+						component->release ();
+						cerr << "VST3: creating controller instance failed\n";
+						continue;
+					}
+				}
+			}
+			if (!controller) {
+				cerr << "VST3: no controller was found\n";
+				component->terminate ();
+				component->release ();
+				continue;
+			}
+
+			controller->initialize (HostApplication::getHostContext ());
+
+			FUnknownPtr<Vst::IConnectionPoint> componentCP (component);
+			FUnknownPtr<Vst::IConnectionPoint> controllerCP (controller);
+			boost::shared_ptr<ConnectionProxy> component_cproxy;
+			boost::shared_ptr<ConnectionProxy> controller_cproxy;
+
+			if (componentCP && controllerCP) {
+				component_cproxy  = boost::shared_ptr<ConnectionProxy> (new ConnectionProxy (componentCP));
+				controller_cproxy = boost::shared_ptr<ConnectionProxy> (new ConnectionProxy (controllerCP));
+				component_cproxy->connect (controllerCP);
+				controller_cproxy->connect (componentCP);
+			}
+
+			if (verbose) {
+				PBD::info << "Found controller, checking for GUI" << endmsg;
+			}
+
+			IPlugView* view = controller->createView (Vst::ViewType::kEditor);
+			if (!view) {
+				view = controller->createView (0);
+			}
+			if (!view) {
+				view = FUnknownPtr<IPlugView> (controller).take ();
+				if (view) {
+					view->addRef ();
+				}
+			}
+			if (view) {
+#ifdef PLATFORM_WINDOWS
+				has_editor = kResultOk == view->isPlatformTypeSupported (kPlatformTypeHWND);
+#elif defined(__APPLE__)
+				has_editor = kResultOk == view->isPlatformTypeSupported (kPlatformTypeNSView);
+#else
+				has_editor = kResultOk == view->isPlatformTypeSupported (kPlatformTypeX11EmbedWindowID);
+#endif
+				if (verbose) {
+					PBD::info << "Created View, platform support: " << has_editor << endmsg;
+				}
+				view->release ();
+			} else if (verbose) {
+					PBD::info << "Plugin does not have an IPlugView" << endmsg;
+			}
+			nfo.has_editor = has_editor;
+
 			processor->setProcessing (false);
 			component->setActive (false);
+
+			if (component_cproxy && controller_cproxy) {
+				component_cproxy->disconnect ();
+				controller_cproxy->disconnect ();
+				component_cproxy.reset ();
+				controller_cproxy.reset ();
+			}
+
+			controller->setComponentHandler (0);
+			controller->terminate ();
+			controller->release ();
 
 			component->terminate ();
 			component->release ();
@@ -508,6 +585,7 @@ VST3Info::VST3Info (XMLNode const& node)
 	, n_aux_outputs (0)
 	, n_midi_inputs (0)
 	, n_midi_outputs (0)
+	, has_editor (false)
 {
 	bool err = false;
 
@@ -529,6 +607,8 @@ VST3Info::VST3Info (XMLNode const& node)
 	err |= !node.get_property ("n_aux_outputs", n_aux_outputs);
 	err |= !node.get_property ("n_midi_inputs", n_midi_inputs);
 	err |= !node.get_property ("n_midi_outputs", n_midi_outputs);
+
+	err |= !node.get_property ("has_editor", has_editor);
 
 	if (err) {
 		throw failed_constructor ();
@@ -554,5 +634,7 @@ VST3Info::state () const
 	node->set_property ("n_aux_outputs",  n_aux_outputs);
 	node->set_property ("n_midi_inputs",  n_midi_inputs);
 	node->set_property ("n_midi_outputs", n_midi_outputs);
+
+	node->set_property ("has_editor", has_editor);
 	return *node;
 }

@@ -341,7 +341,12 @@ VST3Plugin::possible_output () const
 bool
 VST3Plugin::has_editor () const
 {
+#if 1
+	boost::shared_ptr<VST3PluginInfo> nfo = boost::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
+	return nfo->has_editor;
+#else
 	return _plug->has_editor ();
+#endif
 }
 
 Steinberg::IPlugView*
@@ -1040,6 +1045,7 @@ VST3Plugin::find_presets ()
 /* ****************************************************************************/
 
 VST3PluginInfo::VST3PluginInfo ()
+	: has_editor (false)
 {
 	type = ARDOUR::VST3;
 }
@@ -3069,14 +3075,17 @@ VST3PI::try_create_view () const
 {
 	IPlugView* view = _controller->createView (Vst::ViewType::kEditor);
 	if (!view) {
+		DEBUG_TRACE (DEBUG::VST3Config, "View: Trying createView (0)");
 		view = _controller->createView (0);
 	}
 	if (!view) {
+		DEBUG_TRACE (DEBUG::VST3Config, "View: Trying to cast controller");
 		view = FUnknownPtr<IPlugView> (_controller).take ();
 		if (view) {
 			view->addRef ();
 		}
 	}
+	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("View created: %1\n", view != 0));
 	return view;
 }
 

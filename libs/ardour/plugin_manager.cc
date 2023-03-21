@@ -2078,16 +2078,17 @@ PluginManager::vst3_discover_from_path (string const& path, bool cache_only)
 void
 PluginManager::vst3_plugin (string const& module_path, string const& bundle_path, VST3Info const& i)
 {
-	PluginInfoPtr info (new VST3PluginInfo ());
+	boost::shared_ptr<VST3PluginInfo> info (new VST3PluginInfo ());
 
-	info->path      = module_path;
-	info->index     = i.index;
-	info->unique_id = i.uid;
-	info->name      = i.name;
-	info->category  = i.category; // TODO process split at "|" -> tags
-	info->creator   = i.vendor;
-	info->n_inputs  = ChanCount();
-	info->n_outputs = ChanCount();
+	info->path       = module_path;
+	info->index      = i.index;
+	info->unique_id  = i.uid;
+	info->name       = i.name;
+	info->category   = i.category; // TODO process split at "|" -> tags
+	info->creator    = i.vendor;
+	info->n_inputs   = ChanCount();
+	info->n_outputs  = ChanCount();
+	info->has_editor = i.has_editor;
 
 	info->n_inputs.set_audio (i.n_inputs + i.n_aux_inputs);
 	info->n_inputs.set_midi (i.n_midi_inputs);
