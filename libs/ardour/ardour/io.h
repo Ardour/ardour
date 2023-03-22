@@ -206,7 +206,7 @@ protected:
 	bool     _sendish;
 
 private:
-	mutable Glib::Threads::Mutex io_lock;
+	mutable Glib::Threads::RWLock _io_lock;
 	PortSet   _ports;
 
 	void reestablish_port_subscriptions ();
