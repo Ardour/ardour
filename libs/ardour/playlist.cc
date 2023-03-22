@@ -2611,8 +2611,8 @@ Playlist::relayer ()
 		int end_division   = 0;
 
 		if (division_size > 0) {
-			start_division = floor ( (r->position_sample() - start.samples()) / division_size);
-			end_division = floor ( (r->position_sample() + r->length_samples() - start.samples()) / division_size );
+			start_division = start.distance (r->position ()).samples () / division_size;
+			end_division = start.distance (r->position () + r->length ()).samples () / division_size;
 			if (end_division == divisions) {
 				end_division--;
 			}
