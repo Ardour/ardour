@@ -117,3 +117,18 @@ template<> OverlapType Temporal::coverage_exclusive_ends<int64_t> (int64_t sa, i
 	/* convert end positions to inclusive */
 	return coverage_inclusive_ends (sa, eaE-1, sb, ebE-1);
 }
+
+std::ostream&
+std::operator<< (std::ostream & o, RangeList const & rl)
+{
+	rl.dump (o);
+	return o;
+}
+
+std::ostream&
+std::operator<< (std::ostream & o, Range const & r)
+{
+	r.dump (o);
+	return o;
+}
+

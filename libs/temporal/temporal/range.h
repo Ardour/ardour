@@ -187,12 +187,25 @@ class LIBTEMPORAL_API Range {
 		return Temporal::coverage_exclusive_ends (_start, _end, s, e);
 	}
 
+	void dump (std::ostream& ostr) const {
+		ostr << "Range @ " << this << ' ' << _start << " .. " << _end;
+	}
+
   private:
 	timepos_t _start; ///< start of the range
 	timepos_t _end;   ///< end of the range (exclusive, see above)
 };
 
 typedef Range TimeRange;
+
+}
+
+namespace std {
+LIBTEMPORAL_API std::ostream&  operator<< (std::ostream & o, Temporal::Range const &);
+}
+
+namespace Temporal {
+
 
 class LIBTEMPORAL_API RangeList {
 public:
@@ -239,6 +252,13 @@ public:
 		_dirty = false;
 	}
 
+	void dump (std::ostream& ostr) const {
+		ostr << "RangeList @ " << this << std::endl;
+		for (auto const & r : _list) {
+			ostr << r << std::endl;
+		}
+	}
+
 private:
 
 	List _list;
@@ -254,5 +274,10 @@ struct LIBTEMPORAL_API RangeMove {
 };
 
 }
+
+namespace std {
+LIBTEMPORAL_API std::ostream&  operator<< (std::ostream & o, Temporal::RangeList const &);
+}
+
 
 #endif /* __libtemporal_range_hpp__ */
