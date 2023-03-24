@@ -117,6 +117,16 @@ Session::process (pframes_t nframes)
 		io_graph_chain.reset (); /* drop reference */
 	}
 
+	/* set up processed_ranges with the default values.
+
+	   This will be updated by ::process_without_events(),
+	   ::process_with_events() and ::locate()
+	*/
+
+	processed_ranges.start[0] = _transport_sample;
+	processed_ranges.end[0] = _transport_sample;
+	processed_ranges.cnt = 1;
+
 	(this->*process_function) (nframes);
 
 	io_graph_chain = _io_graph_chain[1];
@@ -187,6 +197,8 @@ Session::process (pframes_t nframes)
 	} catch (...) {
 		/* don't bother with a message */
 	}
+
+	processed_ranges.end[processed_ranges.cnt - 1] = _transport_sample;
 
 	SendFeedback (); /* EMIT SIGNAL */
 }
@@ -657,6 +669,8 @@ Session::process_with_events (pframes_t nframes)
 
 	} /* implicit release of route lock */
 
+	processed_ranges.end[processed_ranges.cnt - 1] = _transport_sample;
+
 	clear_active_cue ();
 
 	if (session_needs_butler) {
@@ -750,6 +764,8 @@ Session::process_without_events (pframes_t nframes)
 		DEBUG_TRACE (DEBUG::Butler, "p-without-events: session needs butler, call it\n");
 		_butler->summon ();
 	}
+
+	processed_ranges.end[processed_ranges.cnt - 1] = _transport_sample;
 }
 
 /** Process callback used when the auditioner is active.

@@ -296,6 +296,12 @@ Session::locate (samplepos_t target_sample, bool for_loop_end, bool force, bool 
 		send_mmc_locate (_transport_sample);
 	}
 
+	if (for_loop_end) {
+		processed_ranges.end[0] = existing;
+		processed_ranges.start[1] = _transport_sample;
+		processed_ranges.cnt = 2;
+	}
+
 	_last_roll_location = _last_roll_or_reversal_location =  _transport_sample;
 
 	Located (); /* EMIT SIGNAL */
