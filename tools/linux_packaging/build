@@ -29,7 +29,6 @@ WITH_NLS=
 EXTERNAL_JACK=
 VENDOR=Ardour ;
 EXENAME=ardour
-WINEEXE=
 BUILDTYPE=""
 NOSTRIP="libsuil|libserd|libsord|liblilv|libsratom|liblrdf|libardour|libpbd|libevoral"
 

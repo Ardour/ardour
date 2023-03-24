@@ -449,7 +449,7 @@ fi
 # Setup derived variables
 ################################
 PGM_VERSION=$(echo ${BUNDLE_DIR} | cut -d- -f2)
-PGM_BUILDTYPE=$(echo ${BUNDLE_DIR} | cut -d- -f3)
+PGM_BUILDTYPE=$(echo ${BUNDLE_DIR} | cut -d- -f3-)
 
 if [ -z ${PGM_BUILDTYPE} ];
 then
