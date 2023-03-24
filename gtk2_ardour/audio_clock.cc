@@ -846,9 +846,6 @@ AudioClock::session_configuration_changed (std::string p)
 void
 AudioClock::set_duration (Temporal::timecnt_t const & dur, bool force)
 {
-	if (!is_duration) {
-		printf ("SET is_duration = true\n");
-	}
 	is_duration = true;
 
 	if ((!force && !get_visible()) || !_session) {
@@ -925,9 +922,6 @@ AudioClock::set_duration (Temporal::timecnt_t const & dur, bool force)
 void
 AudioClock::set (timepos_t const & w, bool force)
 {
-	if (is_duration) {
-		printf ("SET is_duration = false\n");
-	}
 	is_duration = false;
 
 	timepos_t when (w);
