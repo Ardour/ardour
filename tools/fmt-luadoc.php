@@ -82,10 +82,10 @@ function my_die ($msg) {
 }
 
 ##function ptr_strip ($ctype) {
-#	# boost::shared_ptr<std::list<boost::shared_ptr<ARDOUR::Route>> > >
+#	# std::shared_ptr<std::list<std::shared_ptr<ARDOUR::Route>> > >
 #	# -> std::list<ARDOUR::Route>
-#	$ctype = preg_replace ('/boost::shared_ptr<([^>]*)[ ]*>/', '$1', $ctype);
-#	return preg_replace ('/boost::shared_ptr<([^>]*)[ ]*>/', '$1', $ctype);
+#	$ctype = preg_replace ('/std::shared_ptr<([^>]*)[ ]*>/', '$1', $ctype);
+#	return preg_replace ('/std::shared_ptr<([^>]*)[ ]*>/', '$1', $ctype);
 #}
 
 function arg2lua ($argtype, $flags = 0) {
@@ -454,7 +454,7 @@ foreach ($classlist as $ns => $cl) {
 		if ($c['lua'] == $ns) {
 			if (strpos ($c['type'], 'Pointer Class') !== false) {
 				$classlist[$ns]['ptr'] = true;
-				$classlist[$ns]['cdecl'] = 'boost::shared_ptr< '.$c['decl']. ' >, boost::weak_ptr< '.$c['decl']. ' >';
+				$classlist[$ns]['cdecl'] = 'std::shared_ptr< '.$c['decl']. ' >, std::weak_ptr< '.$c['decl']. ' >';
 				break;
 			} else {
 				$classlist[$ns]['cdecl'] = $c['decl'];
@@ -519,8 +519,8 @@ function doxydoc ($canonical_declaration) {
 		return $api[$canonical_declaration]['doc'];
 	}
 	// remove template namespace e.g.
-	//  "ARDOUR::Track::bounceable(boost::shared_ptr<ARDOUR::Processor>"
-	//  "ARDOUR::Track::bounceable(boost::shared_ptr<Processor>"
+	//  "ARDOUR::Track::bounceable(std::shared_ptr<ARDOUR::Processor>"
+	//  "ARDOUR::Track::bounceable(std::shared_ptr<Processor>"
 	$cn = preg_replace ('/<[^>]*::([^>]*)>/', '<$1>', $canonical_declaration);
 	if (isset ($api[$cn])) {
 		$dox_found++;
@@ -943,7 +943,7 @@ print (rv, ref[1], ref[2])
 
 <h3>Pointer Classes</h3>
 <p>
-Libardour makes extensive use of reference counted <code>boost::shared_ptr</code> to manage lifetimes.
+Libardour makes extensive use of reference counted <code>std::shared_ptr</code> to manage lifetimes.
 The Lua bindings provide a complete abstraction of this. There are no pointers in Lua.
 For example a <?=typelink('ARDOUR:Route')?> is a pointer in C++, but Lua functions operate on it like it was a class instance.
 </p>
@@ -957,7 +957,7 @@ Construction may fail. e.g. <code><?=typelink('ARDOUR:LuaAPI')?>.newplugin()</co
 may not be able to find the given plugin and hence cannot create an object.
 </p>
 <p>
-The second case if for <code>boost::weak_ptr</code>. As opposed to <code>boost::shared_ptr</code> weak-pointers are not reference counted.
+The second case if for <code>std::weak_ptr</code>. As opposed to <code>std::shared_ptr</code> weak-pointers are not reference counted.
 The object may vanish at any time.
 If Lua code calls a method on a nil object, the interpreter will raise an exception and the script will not continue.
 This is not unlike <code>a = nil a:test()</code> which results in en error "<em>attempt to index a nil value</em>".
