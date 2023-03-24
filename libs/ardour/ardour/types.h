@@ -917,6 +917,24 @@ struct CueEvent {
 
 typedef std::vector<CueEvent> CueEvents;
 
+/* Describes the one or two contiguous time ranges processsed by a process
+ * callback. The @param cnt member indicates if there are 1 or 2 valid
+ * elements; It will only be 2 if a locate-for-loop-end occured during the
+ * process cycle.
+ *
+ * Owned by Session. Readable ONLY within process context AFTER
+ * Session::process() has returned.
+ */
+
+struct ProcessedRanges {
+	samplepos_t start[2];
+	samplepos_t end[2];
+	uint32_t    cnt;
+
+	ProcessedRanges() : start { 0, 0 }, end { 0, 0 }, cnt (0) {}
+};
+
+
 } // namespace ARDOUR
 
 /* for now, break the rules and use "using" to make this "global" */
