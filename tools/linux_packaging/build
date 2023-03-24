@@ -2,10 +2,9 @@
 
 # script for pulling together a Linux app bundle.
 #
-# This will create a bundle for a single architecture.
-# Execute this script on both x86 and x86_64 and then use
-# package to merge the 2 bundles into a final package with the
-# installer. See "noderun" for a complete build script.
+# This will create a bundle for a x86_64 architecture.
+# Execute this script and then use `package; to build
+# the installer.
 
 # where the GTK stack is installed
 GTKSTACK_ROOT=$HOME/gtk/inst
@@ -30,8 +29,6 @@ WITH_NLS=
 EXTERNAL_JACK=
 VENDOR=Ardour ;
 EXENAME=ardour
-GCC5ABI=false
-USEWINE=false
 WINEEXE=
 BUILDTYPE=""
 NOSTRIP="libsuil|libserd|libsord|liblilv|libsratom|liblrdf|libardour|libpbd|libevoral"
@@ -101,7 +98,7 @@ while [ $# -gt 0 ] ; do
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--nls) WITH_NLS=1 ; shift ;;
 	--harvid) WITH_HARVID=1 ; shift ;;
-	--gcc5abi) GCC5ABI=true ; shift ;;
+	--gcc5abi) shift ;;
 	--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
 
 	*)
@@ -133,14 +130,6 @@ echo "Info string is $info_string"
 
 # Figure out our CPU type
 case `uname -m` in
-	i[3456789]86|x86|i86pc)
-		echo "Architecture is x86"
-		ARCH='x86'
-		WARCH='i386'
-		HARCH='linux32'
-		ARCH_BITS='32-bit'
-		MULTIARCH='i386-linux-gnu'
-		;;
 	x86_64|amd64|AMD64)
 		echo "Architecture is x86_64"
 		ARCH='x86_64'
@@ -157,8 +146,17 @@ case `uname -m` in
 		;;
 esac
 
+if [ "$DEBUG" = "T" ]; then
+  BUILDTYPE="dbg"
+fi
+if [ "FREEBI" = "T" ]; then
+  BUILDTYPE="demo"
+fi
+if [ "$DEBUG$FREEBI" = "TT" ]; then
+  BUILDTYPE="demo-dbg"
+fi
+
 if [ x$DEBUG = xT ]; then
-    BUILDTYPE="dbg"
     if [ x$STRIP = xall ] ; then
         echo "A debug build with --strip all makes no sense - STRIP reset to \"some\""
         STRIP=some
@@ -261,7 +259,7 @@ fi
 
 echo export 'PATH="/usr/local/bin:/opt/bin:$PATH"' >> $ENVIRONMENT
 
-sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/;s/%EXENAME%/'"${EXENAME}"'/;s/%WINE%/'"$WINEEXE"'/' < ardour.sh.in > $APPBIN/${EXENAME}${major_version}
+sed -e "/^%ENV%/r $ENVIRONMENT" -e '/^%ENV%/d' -e 's/%VER%/'"${release_version}"'/;s/%EXENAME%/'"${EXENAME}"'/' < ardour.sh.in > $APPBIN/${EXENAME}${major_version}
 rm $ENVIRONMENT && chmod 775 $APPBIN/${EXENAME}${major_version}
 
 echo "Copying ardour executable ...."
@@ -723,11 +721,7 @@ if test -n "$MIXBUS"; then
 
 	echo "Adding Harrison Vamp Plugins"
 
-	if test "$GCC5ABI" = "true"; then
-		VAMPARCH="${HARCH}gcc5"
-	else
-		VAMPARCH="${HARCH}"
-	fi
+	VAMPARCH="${HARCH}gcc5"
 	curl -s -S --fail -# \
 		-z "${CACHEDIR}/harrison_vamp.${VAMPARCH}.so" \
 		-o "${CACHEDIR}/harrison_vamp.${VAMPARCH}.so" \
@@ -856,9 +850,8 @@ chmod a+x $APPBIN/${APP_VER_NAME}.uninstall.sh
 #
 # Add the stage2.run script
 #
-sed -e "s/%REPLACE_MAJOR_VERSION%/${major_version}/;s/%REPLACE_PGM%/${APPNAME}/;s/%REPLACE_VENDOR%/${VENDOR}/;s/%REPLACE_EXE%/${EXENAME}/;s/%REPLACE_GCC5%/${GCC5ABI}/;s/%REPLACE_WINE%/${USEWINE}/" < stage2.run.in > stage2.run
+sed -e "s/%REPLACE_MAJOR_VERSION%/${major_version}/;s/%REPLACE_PGM%/${APPNAME}/;s/%REPLACE_VENDOR%/${VENDOR}/;s/%REPLACE_EXE%/${EXENAME}/" < stage2.run.in > stage2.run
 chmod a+x stage2.run
-
 
 #Sanity Check file
 if [ -e $BUILD_ROOT/tools/sanity_check/sanityCheck ]; then

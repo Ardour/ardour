@@ -58,3 +58,9 @@ if grep -q "DEBUG = True" ../../build/c4che/_cache.py; then
 else
 	DEBUG="F"
 fi
+
+if grep -q "FREEBIE=1" ../../build/c4che/_cache.py; then
+	FREEBI="T"
+else
+	FREEBI="F"
+fi

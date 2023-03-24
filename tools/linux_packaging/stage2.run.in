@@ -31,7 +31,6 @@ USER_NAME=$(logname)
 
 #### Global Variables ####
 HAS_XDG="T"
-MULTABI_BUNDLE=""
 
 ########################
 # Function Definitions
@@ -271,12 +270,10 @@ case `uname -m` in
 	arm|armv7l|aarch32)
 		echo "Architecture is armhf"
 		ARCH='armhf'
-		NOABICHECK=1
 		;;
 	aarch64|armv8b)
 		echo "Architecture is arm64"
 		ARCH='arm64'
-		NOABICHECK=1
 		;;
 	*)
 		echo ""
@@ -287,35 +284,14 @@ case `uname -m` in
 		;;
 esac
 
-###################
-# Determine gcc ABI
-###################
-
-if test -n "$MULTABI_BUNDLE"; then
-	if ! "${PKG_PATH}/.gcc-glibmm-abi-check" --fail --gcc5; then
-		ABI=-gcc4
-	else
-		ABI=-gcc5
-	fi
-  # allow to manually override
-	if test "$1" = "--gcc4"; then
-		ABI=-gcc4
-	fi
-	if test "$1" = "--gcc5"; then
-		ABI=-gcc5
-	fi
-else
-	ABI=
-fi
-
 ####################################
 # Check if bundle is for this system
 ####################################
 
-if [ ! -e ${PGM_NAME}_${ARCH}${ABI}-*.tar ]; then
+if [ ! -e ${PGM_NAME}_${ARCH}-*.tar ]; then
 	echo ""
-	echo "!!! ERROR !!! Can't locate ${ARCH}${ABI} bundle file."
-	echo "The installer detected the system as ${ARCH}${ABI}, but this bundle"
+	echo "!!! ERROR !!! Can't locate ${ARCH} bundle file."
+	echo "The installer detected the system as ${ARCH}, but this bundle"
 	echo "does not contain the files needed for that configuration."
 	echo ""
 	read -p "Press ENTER to exit installer:" BLAH
@@ -331,15 +307,15 @@ fi
 # in case they are on different devices
 echo "Checking for required disk space"
 
-if [ ! -e .${PGM_NAME}_${ARCH}${ABI}-*.size ]; then
+if [ ! -e .${PGM_NAME}_${ARCH}-*.size ]; then
 	echo ""
-	echo "!!! ERROR !!! Can't locate .size file for ${ARCH}${ABI} bundle."
-	echo "This package is broken or does not support ${ARCH}${ABI}."
+	echo "!!! ERROR !!! Can't locate .size file for ${ARCH} bundle."
+	echo "This package is broken or does not support ${ARCH}."
 	echo ""
 	read -p "Press ENTER to exit installer:" BLAH
 	exit 1
 else
-	REQUIRED_BYTES=$(cat .${PGM_NAME}_${ARCH}${ABI}-*.size)
+	REQUIRED_BYTES=$(cat .${PGM_NAME}_${ARCH}-*.size)
 
 	#Installer needs 2x the space since the bundle is unpacked locally and then copied
 	REQUIRED_BYTES=$(($REQUIRED_BYTES + $REQUIRED_BYTES))
@@ -371,57 +347,6 @@ else
 	fi
 fi
 
-###############################
-# Determine C++11 stdlibc++ ABI
-###############################
-
-if test -z "$ABI" -a -z "$NOABICHECK"; then
-	if %REPLACE_GCC5%; then
-		# Ardour was compiled with gcc5, warn on gcc4 systems
-		if ! "${PKG_PATH}/.gcc-glibmm-abi-check" --gcc5; then
-			echo ""
-			echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
-			echo ""
-			echo "${PGM_NAME} was compiled with gcc5, your system uses an older version of the"
-			echo "standard c++ library. Plugins on your system may not load or plugin-UIs"
-			echo "may cause crashes."
-			echo ""
-			ANSWER=$(VaildateYesNoQuestion "Continue anyway?")
-			if test "n" = $ANSWER; then
-				exit 1
-			fi
-		fi
-	else
-		# Ardour was compiled with gcc4, warn on gcc5 systems
-		if ! "${PKG_PATH}/.gcc-glibmm-abi-check" --gcc4 ; then
-			echo ""
-			echo "WARNING: GCC4/5 libstdc++ ABI Mismatch"
-			echo ""
-			echo "${PGM_NAME} was compiled with gcc4, your system uses a newer version of the"
-			echo "standard c++ library. Plugins on your system may not load or plugin-UIs"
-			echo "may cause crashes."
-			echo ""
-			ANSWER=$(VaildateYesNoQuestion "Continue anyway?")
-			if test "n" = $ANSWER; then
-				exit 1
-			fi
-		fi
-	fi
-fi
-
-if %REPLACE_WINE%; then
-	if test -z "`which wine`"; then
-		echo ""
-		echo "!!! ERROR !!! - 'wine' was not found."
-		echo ""
-		echo "This version of ${PGM_NAME} with Windows VST support requires wine."
-		echo "https://www.winehq.org/"
-		echo ""
-		read -p "Press ENTER to exit installer:" BLAH
-		exit 1
-	fi
-fi
-
 #####################
 # Unpack the bundle
 #####################
@@ -430,11 +355,11 @@ FILESYSTEM_TYPE=$(df -P -T "${PKG_PATH}" | grep / | awk '{print $2}')
 echo "Bundle is on ${FILESYSTEM_TYPE} filesystem"
 
 # untar the correct bundle for us to install
-echo "Unpacking bundle for $ARCH${ABI}"
+echo "Unpacking bundle for $ARCH"
 
-if ! tar -xf ${PGM_NAME}_${ARCH}${ABI}-*.tar; then
+if ! tar -xf ${PGM_NAME}_${ARCH}-*.tar; then
 	echo ""
-	echo "!!! ERROR !!! Can't unpack ${ARCH}${ABI} bundle file."
+	echo "!!! ERROR !!! Can't unpack ${ARCH} bundle file."
 	echo ""
 	read -p "Press ENTER to exit installer:" BLAH
 	exit 1
@@ -474,54 +399,6 @@ if [ -z "$XDG_ICON_VER" ];
 then
 	echo "System does not have xdg-icon-resource installed"
 	HAS_XDG="F"
-fi
-
-#################################################
-# Set up libwine.so
-#################################################
-if %REPLACE_WINE%; then
-	echo ""
-	echo "Searching libwine.so (Windows VST support)"
-	# we need to add libwine to ardour's LD_LIBRARY_PATH
-	# libwine itself includes paths to the various system-components
-	# which may be different on each platform.
-	#
-	# There's some chicken/egg here: ardour.exe.so is linked against libwine.so
-	# at build-time. wine/wineloader assumes a windows-application (which does not use libwine
-	# directly) and does not set up the LD path to libwine itself. the application terminates
-	# (missing libs) before it even starts..
-	#
-	# wine itself does not provide means to find the location of libwine.
-	# /usr/bin/wine is usually shell-script and libwine.so can be found in
-	# various places on different distros.
-	#
-	# if this check were quick and easy.. it should be done in the startup-script, but it's not
-	# so here we go... (updating wine may require re-installing ardour)
-	#
-	# on recent Ubuntu wine does load both:
-	#   /usr/lib/i386-linux-gnu/libwine.so.1
-	# AND
-	#   /usr/lib/x86_64-linux-gnu/libwine.so.1
-	# so we need to work around this (thanks).
-	# (this hack break 64bit LinuxVST builds, but we don't do those anyway)
-
-	LIBWINE=$(
-		LD_DEBUG=files wine `pwd`/${BUNDLE_DIR}/lib/ardour-vst-scanner.exe.so 2>&1 \
-						 | grep -e "calling init:.*libwine" \
-						 | sed 's/^.*calling init: //' \
-						 | grep -v x86_64-linux-gnu \
-						 | uniq \
-			)
-	if ! test -f "$LIBWINE"; then
-		echo ""
-		echo "!!! ERROR !!! - 'libwine.so*' was not found."
-		echo ""
-		read -p "Press ENTER to exit installer:" BLAH
-		exit 1
-	fi
-	echo "Using: $LIBWINE"
-  # this replaces/overwrites the bundled libwine
-	cp -L "$LIBWINE" `pwd`/${BUNDLE_DIR}/lib/libwine.so.1
 fi
 
 #################################################

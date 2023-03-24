@@ -1477,7 +1477,6 @@ int main () { __int128 x = 0; return 0; }
         pass
     elif Options.options.dist_target != 'mingw':
         sub_config_and_use(conf, 'tools/sanity_check')
-        sub_config_and_use(conf, 'tools/gccabicheck')
 
     # explicitly link against libm. This is possible on all POSIX systems
     # and required on Linux for symbol versioning and ABI compatibility
@@ -1636,7 +1635,6 @@ def build(bld):
         pass
     elif bld.env['build_target'] != 'mingw':
         bld.recurse('tools/sanity_check')
-        bld.recurse('tools/gccabicheck')
 
         obj              = bld(features = 'subst')
         obj.source       = 'tools/avahi.sh'

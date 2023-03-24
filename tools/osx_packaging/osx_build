@@ -1012,14 +1012,20 @@ fi
 
 echo "Building DMG ..."
 
-# UC_DMG=$APPNAME-${release_version}-UC.dmg
-# FINAL_DMG=$APPNAME-${release_version}.dmg
+BUILDTYPE=""
 
 if [ x$DEBUG = xT ]; then
-	UC_DMG=$APPNAME-$release_version-dbg${DMG_ARCH}.dmg
-else
-	UC_DMG=$APPNAME-$release_version${DMG_ARCH}.dmg
+	BUILDTYPE="-dbg"
 fi
+if [ x$FREEBI = xT ]; then
+	BUILDTYPE="-demo"
+fi
+if [ x$DEBUG$FREEBI = xTT ]; then
+  BUILDTYPE="-demo-dbg"
+fi
+
+UC_DMG=$APPNAME-$release_version${BUILDTYPE}${DMG_ARCH}.dmg
+
 VOLNAME=$APPNAME-$release_version
 
 MNTPATH=`mktemp -d -t ardourimg`

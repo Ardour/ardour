@@ -6,10 +6,6 @@
 # and package them together with an installer script.
 
 BUILDTYPE=""
-SINGLE_ARCH="F"
-X86_BUNDLE_OK="F"
-X86_64_BUNDLE_OK="F"
-GCC5ABI="F"
 MAKESELF=""
 BUILD_ROOT=../../build
 
@@ -49,9 +45,9 @@ while [ $# -gt 0 ] ; do
 		MAKESELF=`which makeself`;
 		shift ;;
 
-	--singlearch) SINGLE_ARCH="T" ; shift ;;
+	--singlearch) shift ;;
 
-	--gcc5abi) GCC5ABI="T" ; shift ;;
+	--gcc5abi) shift ;;
 
 	--xz) MAKESELFOPTS="--xz --complevel 9" ; shift ;;
 
@@ -70,84 +66,26 @@ done
 if [ x$DEBUG = xT ]; then
 	BUILDTYPE="dbg"
 fi
+if [ x$FREEBI = xT ]; then
+	BUILDTYPE="demo"
+fi
+if [ x$DEBUG$FREEBI = xTT ]; then
+	BUILDTYPE="demo-dbg"
+fi
 
-X86_BUNDLE="${APPNAME}_x86-${release_version}"
 X86_64_BUNDLE="${APPNAME}_x86_64-${release_version}"
+PACKAGE="${APPNAME}-${release_version}-x86_64"
 
 if [ ! -z ${BUILDTYPE} ]; then
-	X86_BUNDLE="${X86_BUNDLE}-${BUILDTYPE}"
 	X86_64_BUNDLE="${X86_64_BUNDLE}-${BUILDTYPE}"
+	PACKAGE="${APPNAME}-${release_version}-${BUILDTYPE}-x86_64"
 fi 
-
-if [ ! -e ${X86_BUNDLE}.tar ] ; then
-	echo ""
-	echo "Can't locate x86 bundle file ${X86_BUNDLE}.tar"
-	echo ""
-elif [ ! -e ${X86_BUNDLE}.size ] ; then
-	echo ""
-	echo "Can't locate x86 bundle size file ${X86_BUNDLE}.size"
-	echo ""
-else
-	X86_BUNDLE_OK="T"
-fi
 
 if [ ! -e ${X86_64_BUNDLE}.tar ]; then
 	echo ""
 	echo "Can't locate x86_64 bundle file ${X86_64_BUNDLE}.tar"
 	echo ""
-elif [ ! -e ${X86_64_BUNDLE}.size ]; then
-	echo ""
-	echo "Can't locate x86 bundle size file ${X86_BUNDLE}.size"
-	echo ""
-else
-	X86_64_BUNDLE_OK="T"
-fi
-
-
-if [ "${X86_BUNDLE_OK}" = "F" ] || [ "${X86_64_BUNDLE_OK}" = "F" ]; then
-	if [ "${X86_BUNDLE_OK}" = "${X86_64_BUNDLE_OK}" ]; then
-		echo ""
-		echo "!!! ERROR !!! - Can't locate bundle files ${X86_BUNDLE} or ${X86_64_BUNDLE}"
-		echo ""
-		exit 1
-	elif [ "${SINGLE_ARCH}" = "T" ]; then
-		echo ""
-		echo "!!! Warning !!! - A single architecture package has been selected"
-		echo ""
-	else
-		echo ""
-		echo "!!! ERROR !!! - Missing bundle files."
-		echo ""
-		exit 1
-	fi
-fi
-
-
-
-if [ -z ${BUILDTYPE} ]; then
-	if [ "${SINGLE_ARCH}" = "T" ]; then
-		if [ "${X86_BUNDLE_OK}" = "T" ]; then
-			PACKAGE="${APPNAME}-${release_version}-x86"
-		else
-			PACKAGE="${APPNAME}-${release_version}-x86_64"
-		fi
-	else
-		PACKAGE="${APPNAME}-${release_version}"
-	fi
-else
-	if [ "${SINGLE_ARCH}" = "T" ]; then
-		if [ "${X86_BUNDLE_OK}" = "T" ]; then
-			PACKAGE="${APPNAME}-${release_version}-${BUILDTYPE}-x86"
-		else
-			PACKAGE="${APPNAME}-${release_version}-${BUILDTYPE}-x86_64"
-		fi
-	else
-		PACKAGE="${APPNAME}-${release_version}-${BUILDTYPE}"
-	fi
-fi 
-
-if [ "$GCC5ABI" = "T" ]; then
-	PACKAGE="${PACKAGE}-gcc5"
+	exit 1
 fi
 
 echo "Cleaning up any old package files for this build"
@@ -159,29 +97,12 @@ rm -rf ${PACKAGE}
 echo "Creating new package dir..."
 mkdir ${PACKAGE}
 
-if [ "${X86_BUNDLE_OK}" = "T" ]; then
-	mv ${X86_BUNDLE}.tar ${PACKAGE}
-	mv ${X86_BUNDLE}.size ${PACKAGE}/.${X86_BUNDLE}.size
-fi
-
-if [ "${X86_64_BUNDLE_OK}" = "T" ]; then
-	mv ${X86_64_BUNDLE}.tar ${PACKAGE}
-	mv ${X86_64_BUNDLE}.size ${PACKAGE}/.${X86_64_BUNDLE}.size
-fi
+mv ${X86_64_BUNDLE}.tar ${PACKAGE}
+mv ${X86_64_BUNDLE}.size ${PACKAGE}/.${X86_64_BUNDLE}.size
 
 cp install.sh ${PACKAGE}
 cp stage2.run ${PACKAGE}/.stage2.run
 cp README ${PACKAGE}
-
-# gcc4/5 ABI test tool
-if [ -e $BUILD_ROOT/tools/gccabicheck/gcc-glibmm-abi-check ]; then
-	cp $BUILD_ROOT/tools/gccabicheck/gcc-glibmm-abi-check ${PACKAGE}/.gcc-glibmm-abi-check
-else
-	echo "!!!ERROR !!! gcc-glibmm-abi-check program is missing. packager will exit without being complete"
-	rm -rf ${PACKAGE}
-	rm -f stage2.run
-	exit 1
-fi
 
 if test -n "$MAKESELF"; then
 	echo "Creating self-extracting installer"

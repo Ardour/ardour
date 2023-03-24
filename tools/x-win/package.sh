@@ -249,9 +249,27 @@ fi
 ### include static gdb - re-zipped binaries from
 ### http://sourceforge.net/projects/mingw/files/MinGW/Extension/gdb/gdb-7.6.1-1/gdb-7.6.1-1-mingw32-bin.tar.lzma
 ### http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.9.1/threads-win32/sjlj/x86_64-4.9.1-release-win32-sjlj-rt_v3-rev1.7z
-if ! grep " using ./waf configure" build/config.log | grep -q -- "--optimize"; then
+
+BUILDTYPE=""
+VERSIONINFO="Optimized Version."
+
+if [ "$DEBUG" = "T" ]; then
+  BUILDTYPE="-dbg"
 	PACKAGE_GDB=1
+	VERSIONINFO="Debug Build."
 fi
+if [ "$FREEBI" = "T" ]; then
+  BUILDTYPE="-demo"
+	VERSIONINFO="Optimized Demo Version."
+fi
+if [ "$DEBUG$FREEBI" = "TT" ]; then
+  BUILDTYPE="-demo-dbg"
+	PACKAGE_GDB=1
+	VERSIONINFO="Demo Version."
+fi
+
+OUTFILE="${TMPDIR}/${PRODUCT_NAME}-${ARDOURVERSION}${BUILDTYPE}-${WARCH}-Setup.exe"
+
 if test -n "$PACKAGE_GDB"; then
 	download gdb-static-win3264.tar.xz http://robin.linuxaudio.org/gdb-static-win3264.tar.xz
 	cd ${SRCCACHE}
@@ -264,11 +282,6 @@ if test -n "$PACKAGE_GDB"; then
 cd bin
 START ..\\gdb\\bin\\gdb.exe -iex "set logging overwrite on" -iex "set height 0" -iex "set logging on %UserProfile%\\${PRODUCT_NAME}-debug.log" -iex "target exec ${PRODUCT_EXE}" -iex "run"
 EOF
-	OUTFILE="${TMPDIR}/${PRODUCT_NAME}-${ARDOURVERSION}-dbg-${WARCH}-Setup.exe"
-	VERSIONINFO="Debug Version."
-else
-	OUTFILE="${TMPDIR}/${PRODUCT_NAME}-${ARDOURVERSION}-${WARCH}-Setup.exe"
-	VERSIONINFO="Optimized Version."
 fi
 
 ################################################################################
