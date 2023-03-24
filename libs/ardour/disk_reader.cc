@@ -693,7 +693,7 @@ DiskReader::overwrite_existing_audio ()
 	const size_t to_overwrite = c->front()->rbuf->overwritable_at (overwrite_offset);
 
 	chunk1_offset = overwrite_offset;
-	chunk1_cnt    = min (c->front()->rbuf->bufsize() - overwrite_offset, to_overwrite);
+	chunk1_cnt    = min (c->front()->rbuf->bufsize() - (size_t) overwrite_offset, to_overwrite);
 
 	/* note: because we are overwriting buffer contents but not moving the
 	 * write/read pointers, we actually want to fill all the way to the
