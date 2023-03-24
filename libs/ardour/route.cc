@@ -5762,6 +5762,11 @@ Route::eq_band_cnt () const
 }
 
 std::shared_ptr<AutomationControl>
+Route::eq_enable_controllable () const
+{
+	return std::shared_ptr<AutomationControl>();
+}
+std::shared_ptr<AutomationControl>
 Route::eq_gain_controllable (uint32_t band) const
 {
 	return std::shared_ptr<AutomationControl>();
