@@ -558,9 +558,10 @@ AudioEngine::process_callback (pframes_t nframes)
 
 		/* send timecode for current cycle */
 		samplepos_t end_sample = _session->transport_sample ();
+
 		_session->send_ltc_for_cycle (start_sample, end_sample, nframes);
 		/* and MIDI Clock */
-		_session->send_mclk_for_cycle (start_sample, end_sample, nframes, pre_roll);
+		_session->send_mclk_for_cycle (nframes, pre_roll);
 	}
 
 	if (_freewheeling) {

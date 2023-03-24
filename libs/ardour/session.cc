@@ -7570,9 +7570,9 @@ Session::maybe_update_tempo_from_midiclock_tempo (float bpm)
 }
 
 void
-Session::send_mclk_for_cycle (samplepos_t start_sample, samplepos_t end_sample, pframes_t n_samples, samplecnt_t pre_roll)
+Session::send_mclk_for_cycle (pframes_t n_samples, samplecnt_t pre_roll)
 {
-	midi_clock->tick (start_sample, end_sample, n_samples, pre_roll);
+	midi_clock->tick (processed_ranges, n_samples, pre_roll);
 }
 
 void
