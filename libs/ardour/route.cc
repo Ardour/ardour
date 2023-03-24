@@ -2053,7 +2053,7 @@ Route::all_visible_processors_active (bool state)
 		}
 
 		std::shared_ptr<PluginInsert> pi;
-		if (0 != (pi = boost::dynamic_pointer_cast<PluginInsert>(*i))) {
+		if (0 != (pi = std::dynamic_pointer_cast<PluginInsert>(*i))) {
 			if (pi->is_channelstrip ()) {
 				continue;
 			}
@@ -5764,7 +5764,7 @@ Route::eq_band_cnt () const
 std::shared_ptr<AutomationControl>
 Route::eq_gain_controllable (uint32_t band) const
 {
-	return boost::shared_ptr<AutomationControl>();
+	return std::shared_ptr<AutomationControl>();
 }
 std::shared_ptr<AutomationControl>
 Route::eq_freq_controllable (uint32_t band) const
@@ -5808,20 +5808,14 @@ Route::tape_mode_name (uint32_t mode) const
 	return _("???");
 }
 
-boost::shared_ptr<AutomationControl>
+std::shared_ptr<AutomationControl>
 Route::tape_drive_controllable () const
-{
-	return boost::shared_ptr<AutomationControl>();
-}
-
-boost::shared_ptr<AutomationControl>
-Route::tape_drive_mode_controllable () const
 {
 	return std::shared_ptr<AutomationControl>();
 }
 
 std::shared_ptr<AutomationControl>
-Route::tape_drive_controllable () const
+Route::tape_drive_mode_controllable () const
 {
 	return std::shared_ptr<AutomationControl>();
 }
@@ -5829,13 +5823,13 @@ Route::tape_drive_controllable () const
 std::shared_ptr<ReadOnlyControl>
 Route::tape_drive_mtr_controllable () const
 {
-	return std::shared_ptr<AutomationControl>();
+	return std::shared_ptr<ReadOnlyControl>();
 }
 
 std::shared_ptr<ReadOnlyControl>
 Route::master_correlation_mtr_controllable (bool mm) const
 {
-	return std::shared_ptr<AutomationControl>();
+	return std::shared_ptr<ReadOnlyControl>();
 }
 
 std::shared_ptr<AutomationControl>
@@ -6032,7 +6026,7 @@ Route::send_pan_azimuth_controllable (uint32_t n) const
 std::shared_ptr<AutomationControl>
 Route::send_level_controllable (uint32_t n) const
 {
-	std::shared_ptr<Send> s = boost::dynamic_pointer_cast<Send>(nth_send (n));
+	std::shared_ptr<Send> s = std::dynamic_pointer_cast<Send>(nth_send (n));
 	if (s) {
 		return s->gain_control ();
 	}

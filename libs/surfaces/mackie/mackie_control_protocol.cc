@@ -2365,7 +2365,6 @@ MackieControlProtocol::is_midi_track (std::shared_ptr<Stripable> r) const
 }
 
 bool
-<<<<<<< HEAD
 MackieControlProtocol::is_trigger_track (std::shared_ptr<Stripable> r) const
 {
 	std::shared_ptr<Track> trk = std::dynamic_pointer_cast<Track>(r);
