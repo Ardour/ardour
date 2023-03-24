@@ -64,7 +64,7 @@ public:
 		/* This just deletes the shared ptr, but of course this may
 		   also be the last reference to the managed object.
 		*/
-		delete managed_object;
+		delete managed_object.load ();
 	}
 
 	std::shared_ptr<T> reader () const
