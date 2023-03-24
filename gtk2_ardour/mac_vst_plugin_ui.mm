@@ -58,15 +58,15 @@ struct ERect{
 @end
 
 VSTPluginUI*
-create_mac_vst_gui (boost::shared_ptr<PlugInsertBase> pib)
+create_mac_vst_gui (std::shared_ptr<PlugInsertBase> pib)
 {
 	/* PluginUIWindow::create_mac_vst_editor assures this cast works */
-	boost::shared_ptr<MacVSTPlugin> mvst =  boost::dynamic_pointer_cast<MacVSTPlugin> (pib->plugin());
+	std::shared_ptr<MacVSTPlugin> mvst =  std::dynamic_pointer_cast<MacVSTPlugin> (pib->plugin());
 	return new MacVSTPluginUI (pib, mvst);
 }
 
 
-MacVSTPluginUI::MacVSTPluginUI (boost::shared_ptr<PlugInsertBase> pib, boost::shared_ptr<VSTPlugin> vst)
+MacVSTPluginUI::MacVSTPluginUI (std::shared_ptr<PlugInsertBase> pib, std::shared_ptr<VSTPlugin> vst)
 	: VSTPluginUI (pib, vst)
 	, _ns_view (0)
 {

@@ -395,7 +395,7 @@ static void interposed_drawIfNeeded (id receiver, SEL selector, NSRect rect)
 }
 @end
 
-AUPluginUI::AUPluginUI (boost::shared_ptr<PlugInsertBase> pib)
+AUPluginUI::AUPluginUI (std::shared_ptr<PlugInsertBase> pib)
 	: PlugUIBase (pib)
 	, automation_mode_label (_("Automation"))
 	, preset_label (_("Presets"))
@@ -419,7 +419,7 @@ AUPluginUI::AUPluginUI (boost::shared_ptr<PlugInsertBase> pib)
 	set_popdown_strings (automation_mode_selector, automation_mode_strings);
 	automation_mode_selector.set_active_text (automation_mode_strings.front());
 
-	if ((au = boost::dynamic_pointer_cast<AUPlugin> (pib->plugin())) == 0) {
+	if ((au = std::dynamic_pointer_cast<AUPlugin> (pib->plugin())) == 0) {
 		error << _("unknown type of editor-supplying plugin (note: no AudioUnit support in this version of ardour)") << endmsg;
 		throw failed_constructor ();
 	}
@@ -1348,7 +1348,7 @@ AUPluginUI::stop_updating (GdkEventAny*)
 }
 
 PlugUIBase*
-create_au_gui (boost::shared_ptr<PlugInsertBase> pib, VBox** box)
+create_au_gui (std::shared_ptr<PlugInsertBase> pib, VBox** box)
 {
 	AUPluginUI* aup = new AUPluginUI (pib);
 	(*box) = aup;
