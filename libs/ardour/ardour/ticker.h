@@ -40,13 +40,21 @@ class MidiPort;
 class LIBARDOUR_API MidiClockTicker : boost::noncopyable
 {
 public:
-	MidiClockTicker (Session*);
+	MidiClockTicker (Session&);
 	virtual ~MidiClockTicker ();
 
 	void tick (samplepos_t, samplepos_t, pframes_t, samplecnt_t);
 
 private:
+	ARDOUR::Session&      _session;
 	std::shared_ptr<MidiPort> _midi_port;
+	bool                  _rolling;
+	samplepos_t           _next_tick;
+	uint32_t              _beat_pos;
+	uint32_t              _clock_cnt;
+	samplepos_t           _transport_pos;
+	LatencyRange          _mclk_out_latency;
+	PBD::ScopedConnection _latency_connection;
 
 	void   reset ();
 	void   resync_latency (bool);
@@ -57,17 +65,6 @@ private:
 	void send_continue_event (pframes_t offset, pframes_t nframes);
 	void send_stop_event (pframes_t offset, pframes_t nframes);
 	void send_position_event (uint32_t midi_clocks, pframes_t offset, pframes_t nframes);
-
-	bool        _rolling;
-	double      _next_tick;
-	uint32_t    _beat_pos;
-	uint32_t    _clock_cnt;
-	samplepos_t _transport_pos;
-
-	ARDOUR::Session* _session;
-
-	LatencyRange          _mclk_out_latency;
-	PBD::ScopedConnection _latency_connection;
 };
 
 } // namespace ARDOUR

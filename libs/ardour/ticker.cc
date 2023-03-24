@@ -40,13 +40,17 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Temporal;
 
-MidiClockTicker::MidiClockTicker (Session* s)
+MidiClockTicker::MidiClockTicker (Session& s)
+	: _session (s)
+	, _midi_port (s.midi_clock_output_port ())
+	, _rolling (false)
+	, _next_tick (0)
+	, _beat_pos (0)
+	, _clock_cnt (0)
+	, _transport_pos (-1)
 {
-	_session   = s;
-	_midi_port = s->midi_clock_output_port ();
-	reset ();
 	resync_latency (true);
-	s->LatencyUpdated.connect_same_thread (_latency_connection, boost::bind (&MidiClockTicker::resync_latency, this, _1));
+	_session.LatencyUpdated.connect_same_thread (_latency_connection, boost::bind (&MidiClockTicker::resync_latency, this, _1));
 }
 
 MidiClockTicker::~MidiClockTicker ()
@@ -66,7 +70,7 @@ MidiClockTicker::reset ()
 void
 MidiClockTicker::resync_latency (bool playback)
 {
-	if (_session->deletion_in_progress() || !playback) {
+	if (_session.deletion_in_progress() || !playback) {
 		return;
 	}
 	assert (_midi_port);

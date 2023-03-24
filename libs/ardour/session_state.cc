@@ -267,7 +267,7 @@ Session::post_engine_init ()
 		/* MidiClock requires a tempo map */
 
 		delete midi_clock;
-		midi_clock = new MidiClockTicker (this);
+		midi_clock = new MidiClockTicker (*this);
 
 		/* crossfades require sample rate knowledge */
 
