@@ -327,7 +327,9 @@ ExportGraphBuilder::Encoder::destroy_writer (bool delete_out_file)
 bool
 ExportGraphBuilder::Encoder::operator== (FileSpec const & other_config) const
 {
-	return get_real_format (config) == get_real_format (other_config);
+	ExportFormatSpecification const& a = *config.format;
+	ExportFormatSpecification const& b = *other_config.format;
+	return a == b;
 }
 
 int
@@ -649,7 +651,21 @@ ExportGraphBuilder::SFC::operator== (FileSpec const& other_config) const
 	ExportFormatSpecification const& a = *config.format;
 	ExportFormatSpecification const& b = *other_config.format;
 
-	bool id = a.sample_format() == b.sample_format();
+	bool id;
+	if (a.analyse () || b.analyse ()) {
+		/* Show dedicated analysis result for files with different
+		 * quality or wav/bwav. This adds a dedicated SFC for each
+		 * format, rater than only running dedicated Encoders as 
+		 * childs of of the same SFC.
+		 *
+		 * TODO: separate normalizer, and limiter into a dedicated
+		 * graph-node, so that it can be shared.
+		 */
+		id = a == b;
+	} else {
+		/* delegate disambiguation to Encoder::operator== */
+		id = a.sample_format() == b.sample_format();
+	}
 
 	if (a.normalize_loudness () == b.normalize_loudness ()) {
 		id &= a.normalize_lufs () == b.normalize_lufs ();

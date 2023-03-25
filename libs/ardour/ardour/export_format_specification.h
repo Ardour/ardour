@@ -80,6 +80,7 @@ class LIBARDOUR_API ExportFormatSpecification : public ExportFormatBase {
 
 	void set_format (std::shared_ptr<ExportFormat> format);
 	bool is_format (std::shared_ptr<ExportFormat> format) const;
+	bool operator== (ExportFormatSpecification const&) const;
 
 	void set_name (std::string const & name) { _name = name; }
 

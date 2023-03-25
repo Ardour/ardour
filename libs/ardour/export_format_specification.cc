@@ -581,6 +581,27 @@ ExportFormatSpecification::is_complete () const
 	return true;
 }
 
+bool ExportFormatSpecification::operator== (ExportFormatSpecification const& other) const
+{
+	const int a = format_id() | sample_format() | endianness();
+	const int b = other.format_id() | other.sample_format() | other.endianness();
+	if (a != b) {
+		return false;
+	}
+
+	/* BWF has the same format id with wav, so we need to check this. */
+	if (has_broadcast_info () != other.has_broadcast_info ()) {
+		return false;
+	}
+
+	if (_has_codec_quality && other._has_codec_quality) {
+		if (_codec_quality != other._codec_quality) {
+			return false;
+		}
+	}
+	return true;
+}
+
 bool
 ExportFormatSpecification::is_format (std::shared_ptr<ExportFormat> format) const
 {
