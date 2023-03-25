@@ -70,6 +70,89 @@
 using namespace AudioGrapher;
 using std::string;
 
+/*
+ * The Export Graph is evaluated for each Timespan.
+ *
+ *  - The Graph has at least one ChannelConfig
+ *  - Each ChannnelConfig has at least one SilenceHandler.
+ *  - Each SilenceHandler feeds at least one SRC.
+ *  - Each SRC feeds at least one Intermediate or one SFC
+ *    Intermediates and SFC children are processed sequentally.
+ *  - Each Intermediate (tmp-file) runs SFC children in parallel.
+ *  - Each SFC feeds at least one Encoder.
+ *
+ *
+ * [process callback]
+ *      |
+ *      v
+ * {   ChannelConfig
+ * |    |
+ * |    \-> Interleaver -> Chunker
+ * }                          |
+ *                            v
+ *      /---------------------/
+ *      |
+ *      v
+ * {   SilenceHandler
+ * |    |
+ * |    \-> Silence Trimmer (trim and/or add)
+ * }                      |
+ *                        v
+ *      /-----------------/
+ *      |
+ *      v
+ * {   SRC
+ * |    \-> Sample Rate Conversion
+ * }                |
+ *                  v
+ *      /-----------+-------------------------------------\
+ *      |                                                 |
+ *      v                                                 |
+ * {   Intermediate (normalize or realtime)               |
+ * |    |                                                 |
+ * |    \---+------or-------+-------or-------\            |
+ * |        v               v                v            |
+ * |     Peak Reader -> Loudness Reader -> TMP File       |
+ * |                                         |            |
+ * |                                         v            |
+ * |               Threader (run SFC childs in parallel)  |
+ * }                                         |            |
+ *                                           v            |
+ *      /------------------------------------/            |
+ *      |                                                 |
+ *      v                    /----------------------------/
+ * {   SFC                   |
+ * |    |                    v
+ * |    \-> Normalizer -> Limiter
+ * |                         |
+ * |                         v
+ * |          /------or------+-or-\
+ * |         v                    |
+ * |      Chunker -> Analyzer -> -+
+ * |                              |
+ * |                    /---or----+
+ * |                    |         |
+ * |                    |         v
+ * |                    |     Demo Noise
+ * |                    |         |
+ * |                    +----<----/
+ * |                    |
+ * |                    v
+ * |      Int/Short/Float Converter & Dither
+ * }                    |
+ *      /---------------/
+ *      |
+ *      v
+ * {   Encoder
+ * |    |
+ * |    \---+------or-------+-------or------\
+ * |        v               v                v
+ * |     Int Writer    Float Writer      Pipe Writer
+ * |      (sndfile)     (sndfile)         (ffmpeg)
+ * }
+ *
+ */
+
 namespace ARDOUR {
 
 ExportGraphBuilder::ExportGraphBuilder (Session const & session)
@@ -655,11 +738,8 @@ ExportGraphBuilder::SFC::operator== (FileSpec const& other_config) const
 	if (a.analyse () || b.analyse ()) {
 		/* Show dedicated analysis result for files with different
 		 * quality or wav/bwav. This adds a dedicated SFC for each
-		 * format, rater than only running dedicated Encoders as 
+		 * format, rater than only running dedicated Encoders as
 		 * childs of of the same SFC.
-		 *
-		 * TODO: separate normalizer, and limiter into a dedicated
-		 * graph-node, so that it can be shared.
 		 */
 		id = a == b;
 	} else {
