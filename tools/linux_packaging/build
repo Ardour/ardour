@@ -148,7 +148,7 @@ esac
 if [ "$DEBUG" = "T" ]; then
   BUILDTYPE="dbg"
 fi
-if [ "FREEBI" = "T" ]; then
+if [ "$FREEBI" = "T" ]; then
   BUILDTYPE="demo"
 fi
 if [ "$DEBUG$FREEBI" = "TT" ]; then
