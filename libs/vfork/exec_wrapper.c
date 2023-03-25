@@ -45,7 +45,17 @@ static int close_allv (const int except_fds[]) {
 		return -1;
 	}
 
-	for (int fd = 0; fd < (int) rl.rlim_max; fd++) {
+	int max_fd;
+	if (rl.rlim_cur >= 4194304) {
+		/* Impose a sane limit, in case the value is
+		 * RLIM_INFINITY 2^63 -1
+		 */
+		max_fd = 4194304;
+	} else {
+		max_fd = (int)rl.rlim_cur;
+	}
+
+	for (int fd = 0; fd < max_fd; fd++) {
 		if (fd <= 3) {
 			continue;
 		}
@@ -81,8 +91,6 @@ int main(int argc, char *argv[]) {
 	pin[1]  = atoi(argv[4]);
 	pout[0] = atoi(argv[5]);
 	pout[1] = atoi(argv[6]);
-
-	int good_fds[3] = { pok[1], pout[1], -1 };
 
 	int stderr_mode = atoi(argv[7]);
 	int nicelevel = atoi(argv[8]);
@@ -137,6 +145,7 @@ int main(int argc, char *argv[]) {
 	signal(SIGPIPE, SIG_DFL);
 #endif
 
+	int good_fds[2] = { pok[1], -1 };
 	if (0 == close_allv (good_fds)) {
 		/* all systems go */
 		execve(argv[9], &argv[9], envp);
