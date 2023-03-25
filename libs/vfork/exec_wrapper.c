@@ -21,6 +21,9 @@
 #include <string.h>
 #include <fcntl.h>
 #include <signal.h>
+#include <errno.h>
+#include <sys/time.h>
+#include <sys/resource.h>
 
 #ifndef STDIN_FILENO
 #define STDIN_FILENO 0
@@ -34,6 +37,32 @@
 
 extern char **environ;
 static void close_fd (int *fd) { if ((*fd) >= 0) close (*fd); *fd = -1; }
+
+static int close_allv (const int except_fds[]) {
+	struct rlimit rl;
+
+	if (getrlimit (RLIMIT_NOFILE, &rl) < 0) {
+		return -1;
+	}
+
+	for (int fd = 0; fd < (int) rl.rlim_max; fd++) {
+		if (fd <= 3) {
+			continue;
+		}
+
+		for (int i = 0; except_fds[i] >= 0; i++) {
+			if (except_fds[i] == fd) {
+				continue;
+			}
+		}
+
+		if (close (fd) < 0 && errno != EBADF) {
+			return -1;
+		}
+	}
+
+	return 0;
+}
 
 int main(int argc, char *argv[]) {
 	if (argc < 10) {
@@ -52,6 +81,8 @@ int main(int argc, char *argv[]) {
 	pin[1]  = atoi(argv[4]);
 	pout[0] = atoi(argv[5]);
 	pout[1] = atoi(argv[6]);
+
+	int good_fds[3] = { pok[1], pout[1], -1 };
 
 	int stderr_mode = atoi(argv[7]);
 	int nicelevel = atoi(argv[8]);
@@ -106,8 +137,10 @@ int main(int argc, char *argv[]) {
 	signal(SIGPIPE, SIG_DFL);
 #endif
 
-	/* all systems go */
-	execve(argv[9], &argv[9], envp);
+	if (0 == close_allv (good_fds)) {
+		/* all systems go */
+		execve(argv[9], &argv[9], envp);
+	}
 
 	/* if we reach here something went wrong.. */
 	char buf = 0;

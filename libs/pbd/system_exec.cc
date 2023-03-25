@@ -920,6 +920,7 @@ SystemExec::close_stdin()
 	if (pin[1] < 0) {
 		return;
 	}
+	fsync (pin[1]);
 	close_fd (pin[0]);
 	close_fd (pin[1]);
 	fsync (pout[0]);
