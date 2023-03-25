@@ -1149,7 +1149,7 @@ class LIBTEMPORAL_API TempoCommand : public Command {
 	XMLNode const * _after;
 };
 
-class DomainSwapInformation {
+class LIBTEMPORAL_API DomainSwapInformation {
    public:
 	static DomainSwapInformation* start (TimeDomain prev);
 
@@ -1169,7 +1169,7 @@ class DomainSwapInformation {
 	void undo ();
 };
 
-extern DomainSwapInformation* domain_swap;
+extern LIBTEMPORAL_API DomainSwapInformation* domain_swap;
 
 } /* end of namespace Temporal */
 
