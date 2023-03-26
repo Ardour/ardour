@@ -1272,7 +1272,7 @@ PluginInsert::silence (samplecnt_t nframes, samplepos_t start_sample)
 	ChanCount maxbuf = ChanCount::max (natural_input_streams (), natural_output_streams());
 	_session.get_scratch_buffers (maxbuf, true).silence (nframes, 0);
 
-	int canderef;
+	int canderef (1);
 	if (_stat_reset.compare_exchange_strong (canderef, 0)) {
 		_timing_stats.reset ();
 	}
