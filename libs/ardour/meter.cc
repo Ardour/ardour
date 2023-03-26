@@ -99,6 +99,7 @@ PeakMeter::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end
 	int canderef (1);
 	const bool reset_max = _reset_max.compare_exchange_strong (canderef, 0);
 	/* max-peak is set from DPM's peak-buffer, so DPM also needs to be reset in sync */
+	canderef = 1;
 	const bool reset_dpm = _reset_dpm.compare_exchange_strong (canderef, 0) || reset_max;
 
 	const uint32_t n_audio = min (current_meters.n_audio (), bufs.count ().n_audio ());
