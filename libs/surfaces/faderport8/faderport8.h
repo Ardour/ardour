@@ -166,7 +166,7 @@ private:
 	void spill_plugins ();
 	void assign_processor_ctrls ();
 	bool assign_plugin_presets (std::shared_ptr<ARDOUR::PluginInsert>);
-	void build_well_known_processor_ctrls (std::shared_ptr<ARDOUR::Stripable>, bool);
+	void build_well_known_processor_ctrls (std::shared_ptr<ARDOUR::Stripable>, int);
 	void preset_changed ();
 	void select_plugin (int num);
 	void select_plugin_preset (size_t num);

@@ -1295,37 +1295,64 @@ FaderPort8::assign_plugin_presets (std::shared_ptr<PluginInsert> pi)
 }
 
 void
-FaderPort8::build_well_known_processor_ctrls (std::shared_ptr<Stripable> s, bool eq)
+FaderPort8::build_well_known_processor_ctrls (std::shared_ptr<Stripable> s, int which)
 {
 #define PUSH_BACK_NON_NULL(N, C) do {if (C) { _proc_params.push_back (ProcessorCtrl (N, C)); }} while (0)
 
 	_proc_params.clear ();
-	if (eq) {
-		int cnt = s->eq_band_cnt();
+	switch (which) {
+		case 1:
+			{ /* EQ */
+				int cnt = s->eq_band_cnt();
 
 #ifdef MIXBUS32C
-		PUSH_BACK_NON_NULL ("Flt In", s->filter_enable_controllable (true)); // both HP/LP
-		PUSH_BACK_NON_NULL ("HP Freq", s->filter_freq_controllable (true));
-		PUSH_BACK_NON_NULL ("LP Freq", s->filter_freq_controllable (false));
-		PUSH_BACK_NON_NULL ("EQ In", s->eq_enable_controllable ());
+				PUSH_BACK_NON_NULL ("Flt In", s->filter_enable_controllable (true)); // both HP/LP
+				PUSH_BACK_NON_NULL ("HP Freq", s->filter_freq_controllable (true));
+				PUSH_BACK_NON_NULL ("LP Freq", s->filter_freq_controllable (false));
+				PUSH_BACK_NON_NULL ("EQ In", s->eq_enable_controllable ());
 #elif defined (MIXBUS)
-		PUSH_BACK_NON_NULL ("EQ In", s->eq_enable_controllable ());
-		PUSH_BACK_NON_NULL ("HP Freq", s->filter_freq_controllable (true));
+				PUSH_BACK_NON_NULL ("EQ In", s->eq_enable_controllable ());
+				PUSH_BACK_NON_NULL ("HP Freq", s->filter_freq_controllable (true));
 #endif
 
-		for (int band = 0; band < cnt; ++band) {
-			std::string bn = s->eq_band_name (band);
-			PUSH_BACK_NON_NULL (string_compose ("Gain %1", bn), s->eq_gain_controllable (band));
-			PUSH_BACK_NON_NULL (string_compose ("Freq %1", bn), s->eq_freq_controllable (band));
-			PUSH_BACK_NON_NULL (string_compose ("Band %1", bn), s->eq_q_controllable (band));
-			PUSH_BACK_NON_NULL (string_compose ("Shape %1", bn), s->eq_shape_controllable (band));
-		}
-	} else {
-		PUSH_BACK_NON_NULL ("Comp In", s->comp_enable_controllable ());
-		PUSH_BACK_NON_NULL ("Threshold", s->comp_threshold_controllable ());
-		PUSH_BACK_NON_NULL ("Makeup", s->comp_makeup_controllable ());
-		PUSH_BACK_NON_NULL ("Speed", s->comp_speed_controllable ());
-		PUSH_BACK_NON_NULL ("Mode", s->comp_mode_controllable ());
+				for (int band = 0; band < cnt; ++band) {
+					std::string bn = s->eq_band_name (band);
+					PUSH_BACK_NON_NULL (string_compose ("Gain %1", bn), s->eq_gain_controllable (band));
+					PUSH_BACK_NON_NULL (string_compose ("Freq %1", bn), s->eq_freq_controllable (band));
+					PUSH_BACK_NON_NULL (string_compose ("Band %1", bn), s->eq_q_controllable (band));
+					PUSH_BACK_NON_NULL (string_compose ("Shape %1", bn), s->eq_shape_controllable (band));
+				}
+			}
+			break;
+		case 2:
+			PUSH_BACK_NON_NULL ("Comp In", s->comp_enable_controllable ());
+			PUSH_BACK_NON_NULL ("Threshold", s->comp_threshold_controllable ());
+			PUSH_BACK_NON_NULL ("Makeup", s->comp_makeup_controllable ());
+			PUSH_BACK_NON_NULL ("Speed", s->comp_speed_controllable ());
+			PUSH_BACK_NON_NULL ("Mode", s->comp_mode_controllable ());
+			PUSH_BACK_NON_NULL ("Makeup", s->comp_makeup_controllable ());
+			PUSH_BACK_NON_NULL ("Ratio", s->comp_ratio_controllable ());
+			PUSH_BACK_NON_NULL ("Attack", s->comp_attack_controllable ());
+			PUSH_BACK_NON_NULL ("Release", s->comp_release_controllable ());
+			PUSH_BACK_NON_NULL ("Emphasis", s->comp_key_filter_freq_controllable ());
+			break;
+		case 3:
+			PUSH_BACK_NON_NULL ("Gate In", s->gate_enable_controllable ());
+			PUSH_BACK_NON_NULL ("Exp", s->gate_mode_controllable ());
+			PUSH_BACK_NON_NULL ("Threshold", s->gate_threshold_controllable ());
+			PUSH_BACK_NON_NULL ("Depth", s->gate_depth_controllable ());
+			PUSH_BACK_NON_NULL ("Attack", s->gate_attack_controllable ());
+			PUSH_BACK_NON_NULL ("Release", s->gate_release_controllable ());
+			PUSH_BACK_NON_NULL ("Exp Ratio", s->gate_ratio_controllable ());
+			PUSH_BACK_NON_NULL ("Exp Knee", s->gate_knee_controllable ());
+			PUSH_BACK_NON_NULL ("Gate Hyst", s->gate_hysteresis_controllable ());
+			PUSH_BACK_NON_NULL ("Gate Hold", s->gate_hold_controllable ());
+			PUSH_BACK_NON_NULL ("SC Enable", s->gate_key_filter_enable_controllable ());
+			PUSH_BACK_NON_NULL ("SC Freq", s->gate_key_filter_freq_controllable ());
+			break;
+		default:
+			assert (0);
+			break;
 	}
 }
 
@@ -1358,11 +1385,58 @@ FaderPort8::select_plugin (int num)
 	}
 
 	if (num < 0) {
-		build_well_known_processor_ctrls (r, num == -1);
+		processor_connections.drop_connections ();
+		r->DropReferences.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FP8Controls::set_fader_mode, &_ctrls, ModeTrack), this);
+
+		build_well_known_processor_ctrls (r, -num);
 		assign_processor_ctrls ();
 		_showing_well_known = num;
+
+#ifdef MIXBUS
+		/* find proc */
+		std::shared_ptr<Processor> proc;
+		std::shared_ptr<PluginInsert> pi;
+		for (uint32_t i = 0; 0 != (proc = r->nth_plugin (i)); ++i) {
+			switch (std::dynamic_pointer_cast<PluginInsert> (proc)->channelstrip ()) {
+				case Processor::MBComp:
+					if (num == -2) {
+						pi = std::dynamic_pointer_cast<PluginInsert> (proc);
+					}
+					break;
+				case Processor::MBGate:
+					if (num == -3) {
+						pi = std::dynamic_pointer_cast<PluginInsert> (proc);
+					}
+					break;
+				case Processor::MBEq:
+					if (num == -1) {
+						pi = std::dynamic_pointer_cast<PluginInsert> (proc);
+					}
+					break;
+				default:
+					break;
+			}
+		}
+
+		if (!pi) {
+			return;
+		}
+
+		_plugin_insert = std::weak_ptr<ARDOUR::PluginInsert> (pi);
+		std::shared_ptr<ARDOUR::Plugin> plugin = pi->plugin ();
+
+		plugin->PresetAdded.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetRemoved.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetLoaded.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
+		plugin->PresetDirty.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
+
+		if (_auto_pluginui) {
+			pi->ShowUI (); /* EMIT SIGNAL */
+		}
+#endif
 		return;
 	}
+
 	_showing_well_known = 0;
 
 	std::shared_ptr<Processor> proc = r->nth_plugin (num);
@@ -1496,6 +1570,7 @@ FaderPort8::spill_plugins ()
 	int spillwidth = N_STRIPS;
 	bool have_well_known_eq = false;
 	bool have_well_known_comp = false;
+	bool have_well_known_gate = false;
 
 	// reserve last slot(s) for "well-known"
 	if (r->eq_band_cnt() > 0) {
@@ -1506,8 +1581,12 @@ FaderPort8::spill_plugins ()
 		--spillwidth;
 		have_well_known_comp = true;
 	}
+	if (r->gate_enable_controllable ()) {
+		--spillwidth;
+		have_well_known_gate = true;
+	}
 
-	if (n_plugins == 0 && !have_well_known_eq && !have_well_known_comp) {
+	if (n_plugins == 0 && !have_well_known_eq && !have_well_known_comp && !have_well_known_gate) {
 		_ctrls.set_fader_mode (ModeTrack);
 		return;
 	}
@@ -1550,15 +1629,15 @@ FaderPort8::spill_plugins ()
 		_ctrls.strip(id).unset_controllables ();
 	}
 
-	if (have_well_known_comp) {
+	if (have_well_known_gate) {
 			assert (id < N_STRIPS);
-		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -2));
+		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -3));
 		 _ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
 		 _ctrls.strip(id).set_select_cb (cb);
 		 _ctrls.strip(id).select_button ().set_color (0xffff00ff);
 		 _ctrls.strip(id).select_button ().set_active (true);
 		 _ctrls.strip(id).select_button ().set_blinking (false);
-		 _ctrls.strip(id).set_text_line (0, "Comp");
+		 _ctrls.strip(id).set_text_line (0, "Gate");
 		 _ctrls.strip(id).set_text_line (1, "Built-In");
 		 _ctrls.strip(id).set_text_line (2, "--");
 		 _ctrls.strip(id).set_text_line (3, "");
@@ -1573,6 +1652,20 @@ FaderPort8::spill_plugins ()
 		 _ctrls.strip(id).select_button ().set_active (true);
 		 _ctrls.strip(id).select_button ().set_blinking (false);
 		 _ctrls.strip(id).set_text_line (0, "EQ");
+		 _ctrls.strip(id).set_text_line (1, "Built-In");
+		 _ctrls.strip(id).set_text_line (2, "--");
+		 _ctrls.strip(id).set_text_line (3, "");
+		 ++id;
+	}
+	if (have_well_known_comp) {
+			assert (id < N_STRIPS);
+		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_plugin, this, -2));
+		 _ctrls.strip(id).unset_controllables (FP8Strip::CTRL_ALL & ~FP8Strip::CTRL_TEXT & ~FP8Strip::CTRL_SELECT);
+		 _ctrls.strip(id).set_select_cb (cb);
+		 _ctrls.strip(id).select_button ().set_color (0xffff00ff);
+		 _ctrls.strip(id).select_button ().set_active (true);
+		 _ctrls.strip(id).select_button ().set_blinking (false);
+		 _ctrls.strip(id).set_text_line (0, "Comp");
 		 _ctrls.strip(id).set_text_line (1, "Built-In");
 		 _ctrls.strip(id).set_text_line (2, "--");
 		 _ctrls.strip(id).set_text_line (3, "");
@@ -1638,6 +1731,7 @@ FaderPort8::assign_sends ()
 	}
 #ifdef MIXBUS // master-assign on last solo
 	_ctrls.strip(N_STRIPS - 1).set_solo_controllable (s->master_send_enable_controllable ());
+	AccessAction ("Mixer", "ShowStripBus");
 #endif
 	/* set select buttons */
 	assigned_stripable_connections.drop_connections ();
