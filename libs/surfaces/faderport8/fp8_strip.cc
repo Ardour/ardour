@@ -594,7 +594,7 @@ FP8Strip::periodic_update_meter ()
 	if (_displaymode == PluginParam) {
 		if (_fader_ctrl) {
 			set_bar_mode (2); // Fill
-			set_text_line (2, value_as_string(_fader_ctrl->desc(), _fader_ctrl->get_value()));
+			set_text_line (2, _fader_ctrl->get_user_string ());
 			float barpos = _fader_ctrl->internal_to_interface (_fader_ctrl->get_value());
 			int val = std::min (127.f, std::max (0.f, barpos * 128.f));
 			if (val != _last_barpos) {
