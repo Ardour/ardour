@@ -59,7 +59,7 @@ private:
 	void   reset ();
 	void   resync_latency (bool);
 	double one_ppqn_in_samples (samplepos_t transport_position) const;
-	void   sub_tick (samplepos_t start, samplepos_t end, pframes_t n_samples, samplecnt_t& pre_roll, double speed);
+	void   sub_tick (samplepos_t start, samplepos_t end, pframes_t n_samples, samplecnt_t& pre_roll, double speed, pframes_t offset);
 
 	void send_midi_clock_event (pframes_t offset, pframes_t nframes);
 	void send_start_event (pframes_t offset, pframes_t nframes);
