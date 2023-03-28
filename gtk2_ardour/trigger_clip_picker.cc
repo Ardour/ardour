@@ -61,6 +61,8 @@ using namespace Gtk;
 using namespace PBD;
 using namespace ARDOUR;
 
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
+
 TriggerClipPicker::TriggerClipPicker ()
 	: _fcd (_("Select clip folder"), FILE_CHOOSER_ACTION_SELECT_FOLDER)
 	, _seek_slider (0, 1000, 1)
@@ -108,6 +110,9 @@ TriggerClipPicker::TriggerClipPicker ()
 	_stop_btn.set_icon (ArdourWidgets::ArdourIcon::TransportStop);
 	_stop_btn.signal_clicked.connect (sigc::mem_fun (*this, &TriggerClipPicker::stop_audition));
 
+	_gain_control.set_name("monitor section knob");
+	_gain_control.set_size_request (PX_SCALE(24), PX_SCALE(24));
+
 	_open_library_btn.set_name ("generic button");
 	_open_library_btn.set_icon (ArdourWidgets::ArdourIcon::Folder);
 	_open_library_btn.signal_clicked.connect (sigc::mem_fun (*this, &TriggerClipPicker::open_library));
@@ -133,6 +138,7 @@ TriggerClipPicker::TriggerClipPicker ()
 
 	ArdourWidgets::set_tooltip (_play_btn, _("Audition selected clip"));
 	ArdourWidgets::set_tooltip (_stop_btn, _("Stop the audition"));
+	ArdourWidgets::set_tooltip (_gain_control, _("Audition Volume"));
 	ArdourWidgets::set_tooltip (_open_library_btn, _("Open clip library folder"));
 	ArdourWidgets::set_tooltip (_refresh_btn, _("Refresh clip list"));
 	ArdourWidgets::set_tooltip (_auditioner_combo, _("Select the Synth used for auditioning"));
@@ -153,9 +159,10 @@ TriggerClipPicker::TriggerClipPicker ()
 	_auditable.set_homogeneous(false);
 	_auditable.attach (_play_btn,         0, 1, r,r+1, SHRINK, SHRINK);
 	_auditable.attach (_stop_btn,         1, 2, r,r+1, SHRINK, SHRINK);
-	_auditable.attach (_autoplay_btn,     2, 3, r,r+1, EXPAND | FILL, SHRINK);  r++;
-	_auditable.attach (_seek_slider,      0, 4, r,r+1, EXPAND | FILL, SHRINK);  r++;
-	_auditable.attach (_midi_prop_table,  0, 4, r,r+1, EXPAND | FILL, SHRINK);
+	_auditable.attach (_gain_control,     2, 3, r,r+1, SHRINK, SHRINK);
+	_auditable.attach (_autoplay_btn,     3, 4, r,r+1, EXPAND | FILL, SHRINK); r++;
+	_auditable.attach (_seek_slider,      0, 5, r,r+1, EXPAND | FILL, SHRINK);  r++;
+	_auditable.attach (_midi_prop_table,  0, 5, r,r+1, EXPAND | FILL, SHRINK);
 	_auditable.set_border_width (4);
 	_auditable.set_spacings (4);
 
@@ -852,12 +859,16 @@ TriggerClipPicker::set_session (Session* s)
 		_auditioner_connections.drop_connections ();
 		_processor_connections.drop_connections ();
 		audition_processor_going_away ();
+		std::shared_ptr<Controllable> none;
+		_gain_control.set_controllable (none);
 	} else {
 		_auditioner_connections.drop_connections ();
 		_session->AuditionActive.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_active, this, _1), gui_context ());
 		_session->the_auditioner ()->AuditionProgress.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_progress, this, _1, _2), gui_context ());
 		_session->the_auditioner ()->processors_changed.connect (_auditioner_connections, invalidator (*this), boost::bind (&TriggerClipPicker::audition_processors_changed, this), gui_context ());
 		audition_processors_changed (); /* set sensitivity */
+
+		_gain_control.set_controllable (_session->the_auditioner ()->gain_control ());
 	}
 }
 

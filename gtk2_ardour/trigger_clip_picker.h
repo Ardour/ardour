@@ -36,6 +36,7 @@
 
 #include "widgets/ardour_dropdown.h"
 #include "widgets/ardour_button.h"
+#include "widgets/ardour_knob.h"
 
 #include "instrument_selector.h"
 
@@ -120,6 +121,7 @@ private:
 	Gtk::Table                   _auditable;
 	ArdourWidgets::ArdourButton  _play_btn;
 	ArdourWidgets::ArdourButton  _stop_btn;
+	ArdourWidgets::ArdourKnob    _gain_control;
 	ArdourWidgets::ArdourButton  _open_library_btn;
 	ArdourWidgets::ArdourButton  _refresh_btn;
 	ArdourWidgets::ArdourButton  _show_plugin_btn;
