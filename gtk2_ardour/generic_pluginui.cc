@@ -384,6 +384,10 @@ GenericPluginUI::build ()
 		const ParameterDescriptor& desc = d->second;
 		const Evoral::Parameter    param(PluginPropertyAutomation, 0, desc.key);
 
+		if (desc.label == X_("hidden")) {
+			continue;
+		}
+
 		std::shared_ptr<ARDOUR::AutomationControl> c (std::dynamic_pointer_cast<ARDOUR::AutomationControl>(_pib->control (param)));
 
 		if (!c) {
