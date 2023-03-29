@@ -159,8 +159,12 @@ veclib_compute_peak (const ARDOUR::Sample * buf, pframes_t nsamples, float curre
 void
 veclib_find_peaks (const ARDOUR::Sample * buf, pframes_t nframes, float *min, float *max)
 {
+	const float _min = *min;
+	const float _max = *max;
 	vDSP_maxv (const_cast<ARDOUR::Sample*>(buf), 1, max, nframes);
 	vDSP_minv (const_cast<ARDOUR::Sample*>(buf), 1, min, nframes);
+	*min = std::min (*min, _min);
+	*max = std::max (*max, _max);
 }
 
 void
