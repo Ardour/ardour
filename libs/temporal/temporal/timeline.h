@@ -403,7 +403,7 @@ class LIBTEMPORAL_API timecnt_t {
 	bool operator> (timecnt_t const & other) const { if (_distance.flagged() == other.distance().flagged()) return _distance > other.distance (); else return expensive_gt (other); }
 	bool operator>= (timecnt_t const & other) const { if (_distance.flagged() == other.distance().flagged()) return _distance >= other.distance(); else return expensive_gte (other); }
 	bool operator< (timecnt_t const & other) const { if (_distance.flagged() == other.distance().flagged()) return _distance < other.distance(); else return expensive_lt (other); }
-	bool operator<= (timecnt_t const & other) const { if (_distance.flagged() == other.distance().flagged()) return _distance <= other.distance(); else return expensive_gte (other); }
+	bool operator<= (timecnt_t const & other) const { if (_distance.flagged() == other.distance().flagged()) return _distance <= other.distance(); else return expensive_lte (other); }
 
 	timecnt_t & operator= (timecnt_t const & other) {
 		if (this != &other) {
