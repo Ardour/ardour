@@ -142,8 +142,8 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	 * return of a null ptr (or an empty string for eq_band_name()).
 	 */
 	virtual uint32_t eq_band_cnt () const = 0;
-	virtual std::shared_ptr<AutomationControl> eq_enable_controllable () const = 0;
 	virtual std::string eq_band_name (uint32_t) const = 0;
+	virtual std::shared_ptr<AutomationControl> eq_enable_controllable () const = 0;
 	virtual std::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const = 0;
 	virtual std::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const = 0;
 	virtual std::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const = 0;
@@ -153,8 +153,6 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual std::shared_ptr<AutomationControl> filter_slope_controllable (bool hp) const = 0;
 	virtual std::shared_ptr<AutomationControl> filter_enable_controllable (bool hp) const = 0;
 
-
-	virtual std::string tape_mode_name (uint32_t) const = 0;
 	virtual std::shared_ptr<AutomationControl> tape_drive_controllable () const = 0;
 	virtual std::shared_ptr<AutomationControl> tape_drive_mode_controllable () const = 0;
 	virtual std::shared_ptr<ReadOnlyControl> tape_drive_mtr_controllable () const = 0;
@@ -176,7 +174,6 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual std::shared_ptr<ReadOnlyControl>   comp_meter_controllable () const = 0;
 	virtual std::shared_ptr<ReadOnlyControl>   comp_redux_controllable () const = 0;
 
-	virtual std::string gate_mode_name (uint32_t) const = 0;
 	virtual std::shared_ptr<AutomationControl> gate_enable_controllable () const = 0;
 	virtual std::shared_ptr<AutomationControl> gate_mode_controllable () const = 0;
 	virtual std::shared_ptr<AutomationControl> gate_ratio_controllable () const = 0;
@@ -193,17 +190,6 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual std::shared_ptr<AutomationControl> gate_lookahead_controllable () const = 0;
 	virtual std::shared_ptr<ReadOnlyControl>   gate_meter_controllable () const = 0;
 	virtual std::shared_ptr<ReadOnlyControl>   gate_redux_controllable () const = 0;
-
-	/* @param mode must be supplied by the comp_mode_controllable(). All other values
-	 * result in undefined behaviour
-	 */
-	virtual std::string comp_mode_name (uint32_t mode) const = 0;
-
-	/* @param mode - as for comp mode name. This returns the name for the
-	 * parameter/control accessed via comp_speed_controllable(), which can
-	 * be mode dependent.
-	 */
-	virtual std::string comp_speed_name (uint32_t mode) const = 0;
 
 	/* "well-known" controls for sends to well-known busses in this route. Any or all may
 	 * be null.

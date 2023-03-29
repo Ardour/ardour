@@ -508,7 +508,7 @@ void DynamicsSubview::setup_vpot(
 	std::vector<AutomationType> params;
 
 	if (tc) { available.push_back (std::make_pair (tc, "Thresh")); }
-	if (sc) { available.push_back (std::make_pair (sc, mc ? _subview_stripable->comp_speed_name (mc->get_value()) : "Speed")); }
+	if (sc) { available.push_back (std::make_pair (sc, mc ? mc->get_user_string () : "Speed")); }
 	if (mc) { available.push_back (std::make_pair (mc, "Mode")); }
 	if (kc) { available.push_back (std::make_pair (kc, "Makeup")); }
 	if (ec) { available.push_back (std::make_pair (ec, "on/off")); }
@@ -571,7 +571,7 @@ DynamicsSubview::notify_change (std::weak_ptr<ARDOUR::AutomationControl> pc, uin
 	if (control) {
 		float val = control->get_value();
 		if (control == _subview_stripable->comp_mode_controllable ()) {
-			pending_display[1] = _subview_stripable->comp_mode_name (val);
+			pending_display[1] = control->get_user_string ();
 		} else {
 			do_parameter_display(pending_display[1], control->desc(), val, strip, true);
 		}

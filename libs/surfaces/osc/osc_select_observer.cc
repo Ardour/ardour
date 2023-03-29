@@ -1061,8 +1061,8 @@ void
 OSCSelectObserver::comp_mode ()
 {
 	change_message (X_("/select/comp_mode"), _strip->comp_mode_controllable());
-	_osc.text_message (X_("/select/comp_mode_name"), _strip->comp_mode_name(_strip->comp_mode_controllable()->get_value()), addr);
-	_osc.text_message (X_("/select/comp_speed_name"), _strip->comp_speed_name(_strip->comp_mode_controllable()->get_value()), addr);
+	_osc.text_message (X_("/select/comp_mode_name"), _strip->comp_mode_controllable()->get_user_string(), addr);
+	_osc.text_message (X_("/select/comp_speed_name"), _strip->comp_speed_controllable()->get_user_string(), addr);
 }
 
 void

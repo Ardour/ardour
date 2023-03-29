@@ -164,11 +164,6 @@ class LIBARDOUR_API VCA : public Stripable,
 	std::shared_ptr<ReadOnlyControl>   gate_meter_controllable () const { return std::shared_ptr<ReadOnlyControl>(); }
 	std::shared_ptr<ReadOnlyControl>   gate_redux_controllable () const { return std::shared_ptr<ReadOnlyControl>(); }
 
-	std::string tape_mode_name (uint32_t) const {return std::string("");}
-	std::string gate_mode_name (uint32_t) const {return std::string("");}
-	std::string comp_mode_name (uint32_t mode) const { return std::string(); }
-	std::string comp_speed_name (uint32_t mode) const { return std::string(); }
-
 	std::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const { return std::shared_ptr<AutomationControl>(); }
 	std::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const { return std::shared_ptr<AutomationControl>(); }
 	std::shared_ptr<AutomationControl> send_pan_azimuth_controllable (uint32_t n) const { return std::shared_ptr<AutomationControl>(); }

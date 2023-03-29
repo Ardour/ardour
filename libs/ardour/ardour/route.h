@@ -549,7 +549,6 @@ public:
 	std::shared_ptr<AutomationControl> filter_slope_controllable (bool) const;
 	std::shared_ptr<AutomationControl> filter_enable_controllable (bool) const;
 
-	std::string tape_mode_name (uint32_t) const;
 	std::shared_ptr<AutomationControl> tape_drive_controllable () const;
 	std::shared_ptr<AutomationControl> tape_drive_mode_controllable () const;
 	std::shared_ptr<ReadOnlyControl>   tape_drive_mtr_controllable () const;
@@ -567,7 +566,6 @@ public:
 	std::shared_ptr<ReadOnlyControl>   comp_meter_controllable () const;
 	std::shared_ptr<ReadOnlyControl>   comp_redux_controllable () const;
 
-	std::string gate_mode_name (uint32_t) const;
 	std::shared_ptr<AutomationControl> gate_enable_controllable () const;
 	std::shared_ptr<AutomationControl> gate_mode_controllable () const;
 	std::shared_ptr<AutomationControl> gate_ratio_controllable () const;
@@ -584,9 +582,6 @@ public:
 	std::shared_ptr<AutomationControl> gate_lookahead_controllable () const;
 	std::shared_ptr<ReadOnlyControl>   gate_meter_controllable () const;
 	std::shared_ptr<ReadOnlyControl>   gate_redux_controllable () const;
-
-	std::string comp_mode_name (uint32_t mode) const;
-	std::string comp_speed_name (uint32_t mode) const;
 
 	std::shared_ptr<AutomationControl> send_level_controllable (uint32_t n) const;
 	std::shared_ptr<AutomationControl> send_enable_controllable (uint32_t n) const;

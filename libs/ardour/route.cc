@@ -5807,12 +5807,6 @@ Route::filter_enable_controllable (bool) const
 	return std::shared_ptr<AutomationControl>();
 }
 
-std::string
-Route::tape_mode_name (uint32_t mode) const
-{
-	return _("???");
-}
-
 std::shared_ptr<AutomationControl>
 Route::tape_drive_controllable () const
 {
@@ -5923,24 +5917,6 @@ Route::comp_redux_controllable () const
 {
 	return std::shared_ptr<ReadOnlyControl>();
 }
-string
-Route::comp_mode_name (uint32_t mode) const
-{
-	return _("???");
-}
-
-string
-Route::comp_speed_name (uint32_t mode) const
-{
-	return _("???");
-}
-
-string
-Route::gate_mode_name (uint32_t mode) const
-{
-	return _("???");
-}
-
 std::shared_ptr<AutomationControl>
 Route::gate_enable_controllable () const
 {
