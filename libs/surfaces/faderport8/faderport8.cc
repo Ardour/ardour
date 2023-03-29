@@ -1328,9 +1328,8 @@ FaderPort8::build_well_known_processor_ctrls (std::shared_ptr<Stripable> s, int 
 			PUSH_BACK_NON_NULL ("Comp In", s->comp_enable_controllable ());
 			PUSH_BACK_NON_NULL ("Threshold", s->comp_threshold_controllable ());
 			PUSH_BACK_NON_NULL ("Makeup", s->comp_makeup_controllable ());
-			PUSH_BACK_NON_NULL ("Speed", s->comp_speed_controllable ());
 			PUSH_BACK_NON_NULL ("Mode", s->comp_mode_controllable ());
-			PUSH_BACK_NON_NULL ("Makeup", s->comp_makeup_controllable ());
+			PUSH_BACK_NON_NULL ("Speed", s->comp_speed_controllable ());
 			PUSH_BACK_NON_NULL ("Ratio", s->comp_ratio_controllable ());
 			PUSH_BACK_NON_NULL ("Attack", s->comp_attack_controllable ());
 			PUSH_BACK_NON_NULL ("Release", s->comp_release_controllable ());
