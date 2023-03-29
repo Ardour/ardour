@@ -17,6 +17,7 @@
 */
 
 #include <algorithm>
+#include <cmath>
 #include <vector>
 
 #include <inttypes.h>
@@ -480,7 +481,7 @@ void
 TempoPoint::compute_omega_beats_from_quarter_duration (Beats const & quarter_duration, superclock_t end_scpqn)
 {
 	_omega_beats = ((1.0/end_scpqn) - (1.0/superclocks_per_quarter_note())) / DoubleableBeats (quarter_duration).to_double();
-	if (!isfinite (_omega_beats)) {
+	if (!std::isfinite (_omega_beats)) {
 		abort ();
 	}
 	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("quarter-computed omega from qtr duration = %1 dur was %2 start speed %3 end speed [%4]\n", _omega_beats, quarter_duration.str(), superclocks_per_quarter_note(), end_scpqn));
