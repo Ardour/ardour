@@ -275,10 +275,6 @@ Canvas::item_shown_or_hidden (Item* item)
 {
 	Rect bbox = item->bounding_box ();
 	if (bbox) {
-		if (item->visible() && !item->ignore_events()) {
-			pick_current_item (0); /* no mouse state */
-		}
-
 		if (_queue_draw_frozen) {
 			frozen_area = frozen_area.extend (compute_draw_item_area (item, bbox));
 			return;
