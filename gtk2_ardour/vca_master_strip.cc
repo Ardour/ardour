@@ -51,6 +51,8 @@ using std::string;
 
 PBD::Signal1<void,VCAMasterStrip*> VCAMasterStrip::CatchDeletion;
 
+static bool no_propagate (GdkEventButton*) { return false; }
+
 VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	: SessionHandlePtr (s)
 	, _vca (v)
@@ -109,7 +111,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	/* horizontally centered, with a little space (5%) at the top */
 	vertical_button.set_angle (90);
 	vertical_button.set_layout_font (UIConfiguration::instance().get_NormalBoldFont());
-	vertical_button.signal_button_press_event().connect ([](GdkEventButton*) { return false;}, false);
+	vertical_button.signal_button_press_event().connect (sigc::ptr_fun (&no_propagate), false);
 	vertical_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vertical_button_release), false);
 	vertical_button.set_fallthrough_to_parent (true);
 	vertical_button.set_active_color (_vca->presentation_info().color ());
