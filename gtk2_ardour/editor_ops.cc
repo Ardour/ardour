@@ -2656,28 +2656,35 @@ Editor::unhide_ranges ()
 }
 
 /* INSERT/REPLACE */
-
-void
-Editor::insert_source_list_selection (float times)
+std::shared_ptr<Playlist>
+Editor::current_playlist () const
 {
-	RouteTimeAxisView *tv = 0;
 	std::shared_ptr<Playlist> playlist;
+	RouteTimeAxisView *tv = 0;
 
 	if (clicked_routeview != 0) {
 		tv = clicked_routeview;
 	} else if (!selection->tracks.empty()) {
 		if ((tv = dynamic_cast<RouteTimeAxisView*>(selection->tracks.front())) == 0) {
-			return;
+			return playlist;
 		}
 	} else if (entered_track != 0) {
 		if ((tv = dynamic_cast<RouteTimeAxisView*>(entered_track)) == 0) {
-			return;
+			return playlist;;
 		}
 	} else {
-		return;
+		return playlist;
 	}
 
-	if ((playlist = tv->playlist()) == 0) {
+	return tv->playlist ();
+}
+
+void
+Editor::insert_source_list_selection (float times)
+{
+	std::shared_ptr<Playlist> playlist = current_playlist ();
+
+	if (!playlist) {
 		return;
 	}
 
