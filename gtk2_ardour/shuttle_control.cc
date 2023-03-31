@@ -102,7 +102,7 @@ ShuttleInfoButton::parameter_changed (std::string p)
 		if (Config->get_shuttle_units() == Percentage) {
 			set_sizing_text (S_("LogestShuttle|> 888.9%"));
 		} else {
-			set_sizing_text (S_("LogestShuttle|+00 st"));
+			set_sizing_text (S_("LogestShuttle|> +00 st"));
 		}
 	}
 }
