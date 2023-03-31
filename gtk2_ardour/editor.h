@@ -1440,6 +1440,7 @@ private:
 
 	std::shared_ptr<ARDOUR::Playlist> current_playlist () const;
 	void insert_source_list_selection (float times);
+	void cut_copy_section (bool copy);
 
 	/* import & embed */
 

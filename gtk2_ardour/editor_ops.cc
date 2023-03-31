@@ -2708,6 +2708,16 @@ Editor::insert_source_list_selection (float times)
 	commit_reversible_command ();
 }
 
+void
+Editor::cut_copy_section (bool copy)
+{
+	timepos_t start, end;
+	if (!get_selection_extents (start, end) || !_session) {
+		return;
+	}
+	_session->cut_copy_section (start, end, get_preferred_edit_position(), copy);
+}
+
 /* BUILT-IN EFFECTS */
 
 void
