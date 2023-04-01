@@ -1786,9 +1786,9 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const& 
 	}
 
 	/* This method is ONLY used for interpolating to generate value/time
-        * duples not present in the actual ControlList, and because of this,
-        * the desired time domain is always audio time.
-        */
+	 * duples not present in the actual ControlList, and because of this,
+	 * the desired time domain is always audio time.
+	 */
 
 	double       a     = first->when.superclocks ();
 	double       b     = next->when.superclocks ();
