@@ -1704,7 +1704,7 @@ ControlList::rt_safe_earliest_event_linear_unlocked (Temporal::timepos_t const& 
 		build_search_cache_if_necessary (start);
 		const ControlEvent* first = *_search_cache.first;
 		if (_search_cache.first != _events.end ()) {
-			if (((first->when > start) || (inclusive && first->when == start)) && first->when < start + min_x_delta) {
+			if (((first->when > start) || (inclusive && first->when == start)) && ((first->when < start + min_x_delta) || (!inclusive && first->when == start + min_x_delta))) {
 				x = first->when;
 				y = first->value;
 				/* Move left of cache to this point
