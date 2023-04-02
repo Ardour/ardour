@@ -79,7 +79,7 @@ public:
 class LIBARDOUR_API PortExportChannel : public ExportChannel
 {
 public:
-	typedef std::set<std::weak_ptr<AudioPort>, std::owner_less<std::weak_ptr<AudioPort> > > PortSet;
+	typedef std::set<std::weak_ptr<AudioPort>, std::owner_less<std::weak_ptr<AudioPort>>> PortSet;
 
 	PortExportChannel ();
 	~PortExportChannel ();
@@ -102,10 +102,10 @@ public:
 	PortSet const& get_ports () const { return ports; }
 
 private:
-	PortSet                                               ports;
-	samplecnt_t                                           _buffer_size;
-	boost::scoped_array<Sample>                           _buffer;
-	mutable AudioBuffer                                   _buf;
+	PortSet                                             ports;
+	samplecnt_t                                         _buffer_size;
+	boost::scoped_array<Sample>                         _buffer;
+	mutable AudioBuffer                                 _buf;
 	std::list<std::shared_ptr<PBD::RingBuffer<Sample>>> _delaylines;
 };
 
@@ -143,8 +143,8 @@ public:
 
 private:
 	std::weak_ptr<MidiPort> _port;
-	mutable FixedDelay        _delayline;
-	mutable MidiBuffer        _buf;
+	mutable FixedDelay      _delayline;
+	mutable MidiBuffer      _buf;
 };
 
 /// Handles RegionExportChannels and does actual reading from region
@@ -231,8 +231,8 @@ class LIBARDOUR_API RouteExportChannel : public ExportChannel
 
 public:
 	RouteExportChannel (std::shared_ptr<CapturingProcessor> processor,
-	                    DataType                              type,
-	                    size_t                                channel,
+	                    DataType                            type,
+	                    size_t                              channel,
 	                    std::shared_ptr<ProcessorRemover>   remover);
 
 	~RouteExportChannel ();
