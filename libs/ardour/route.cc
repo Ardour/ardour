@@ -4333,20 +4333,18 @@ Route::listen_position_changed ()
 std::shared_ptr<CapturingProcessor>
 Route::add_export_point()
 {
-	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
-	if (!_capturing_processor) {
-		lm.release();
-		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
-		Glib::Threads::RWLock::WriterLock lw (_processor_lock);
+	assert (!_capturing_processor);
 
-		/* Align all tracks for stem-export w/o processing.
-		 * Compensate for all plugins between the this route's disk-reader
-		 * and the common final downstream output (ie alignment point for playback).
-		 */
-		_capturing_processor.reset (new CapturingProcessor (_session, playback_latency (true)));
-		configure_processors_unlocked (0, &lw);
-		_capturing_processor->activate ();
-	}
+	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
+	Glib::Threads::RWLock::WriterLock lw (_processor_lock);
+
+	/* Align all tracks for stem-export w/o processing.
+	 * Compensate for all plugins between the this route's disk-reader
+	 * and the common final downstream output (ie alignment point for playback).
+	 */
+	_capturing_processor.reset (new CapturingProcessor (_session, playback_latency (true)));
+	configure_processors_unlocked (0, &lw);
+	_capturing_processor->activate ();
 
 	return _capturing_processor;
 }
