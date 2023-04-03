@@ -4510,9 +4510,11 @@ Route::apply_latency_compensation ()
 void
 Route::set_block_size (pframes_t nframes)
 {
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->set_block_size (nframes);
 	}
+	lm.release ();
 
 	_session.ensure_buffers (n_process_buffers ());
 }
@@ -4520,8 +4522,10 @@ Route::set_block_size (pframes_t nframes)
 void
 Route::protect_automation ()
 {
-	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i)
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
 		(*i)->protect_automation();
+	}
 }
 
 /** Shift automation forwards from a particular place, thereby inserting time.
