@@ -1076,6 +1076,11 @@ ExportProfileManager::build_filenames (std::list<std::string>& result, ExportFil
 			result.push_back (filename->get_path (format));
 		}
 	}
+	/* no not retain the channel config - otherwise this retains
+	 * Route::_capturing_processor that may already be removed
+	 * from the processor chain.
+	 */
+	filename->set_channel_config (ExportChannelConfigPtr());
 }
 
 };
