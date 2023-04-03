@@ -288,8 +288,10 @@ PortInsertUI::edit_latency_button_clicked ()
 		   different WM's as possible.
 		*/
 		_latency_dialog->set_keep_above (true);
-		_latency_dialog->set_transient_for (*_parent);
 		_latency_dialog->add (*_latency_gui);
+		if (_parent) {
+			_latency_dialog->set_transient_for (*_parent);
+		}
 	}
 
 	_latency_gui->refresh ();

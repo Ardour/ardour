@@ -335,7 +335,9 @@ IOPluginWindow::IOPlugUI::edit_plugin (bool custom_ui)
 	_window_proxy->set_custom_ui_mode (custom_ui);
 	_window_proxy->show_the_right_window ();
 	Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
-	_window_proxy->set_transient_for (*tlw);
+	if (tlw) {
+		_window_proxy->set_transient_for (*tlw);
+	}
 }
 
 bool
