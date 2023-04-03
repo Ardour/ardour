@@ -370,6 +370,8 @@ RouteExportChannel::create_from_route (std::list<ExportChannelPtr>& result, std:
 	uint32_t                            n_audio   = processor->input_streams ().n_audio ();
 	uint32_t                            n_midi    = processor->input_streams ().n_midi ();
 
+	assert (n_audio + n_midi > 0);
+
 	std::shared_ptr<ProcessorRemover> remover (new ProcessorRemover (route, processor));
 	result.clear ();
 	for (uint32_t i = 0; i < n_audio; ++i) {
