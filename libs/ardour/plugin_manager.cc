@@ -2067,6 +2067,7 @@ PluginManager::vst3_discover_from_path (string const& path, bool cache_only)
 	size_t n = 1;
 	size_t all_modules = plugin_objects.size ();
 	for (vector<string>::iterator i = plugin_objects.begin(); i != plugin_objects.end (); ++i, ++n) {
+		DEBUG_TRACE (DEBUG::PluginManager, string_compose ("VST3: discover '%1'\n", *i));
 		reset_scan_cancel_state (true);
 		ARDOUR::PluginScanMessage (string_compose (_("VST3 (%1 / %2)"), n, all_modules), *i, !cache_only && !cancelled());
 		vst3_discover (*i, cache_only || cancelled ());
@@ -2113,6 +2114,11 @@ PluginManager::vst3_discover (string const& path, bool cache_only)
 		psl->msg (PluginScanLogEntry::Error, "Invalid Module Path");
 		_plugin_scan_log.erase (psl);
 		_plugin_scan_log.insert (psl);
+		return -1;
+	}
+
+	/* ignore - e.g. .vst3 DLL inside .vst3 bundle */
+	if (module_path == "-1") {
 		return -1;
 	}
 

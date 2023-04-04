@@ -307,7 +307,10 @@ ARDOUR::module_path_vst3 (string const& path)
 			/* Ignore *.vst3 dll if it resides inside a bundle with the same name.
 			 * Ardour will instead use the bundle.
 			 */
-			return "";
+#ifndef NDEBUG
+		cerr << "Ignore .vst3 file inside bundle '" << path << "'\n";
+#endif
+			return "-1";
 		}
 #endif
 		module_path = path;
