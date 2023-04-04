@@ -407,15 +407,21 @@ SystemExec::terminate ()
 	close_stdin();
 
 	if (pid) {
-		/* terminate */
-		EnumWindows(my_terminateApp, (LPARAM)pid->dwProcessId);
-		PostThreadMessage(pid->dwThreadId, WM_CLOSE, 0, 0);
+		/* close windows (if any) */
+		EnumWindows (my_terminateApp, (LPARAM)pid->dwProcessId);
+
+		if (PostThreadMessage (pid->dwThreadId, WM_CLOSE, 0, 0)) {
+			/* OK, wait for child to terminate cleanly */
+			WaitForSingleObject(pid->hProcess, 150 /*ms*/);
+		}
 
 		/* kill ! */
-		TerminateProcess(pid->hProcess, 0xf291);
+		TerminateProcess(pid->hProcess, 0);
+		wait ();
 
-		CloseHandle(pid->hThread);
 		CloseHandle(pid->hProcess);
+		CloseHandle(pid->hThread);
+		pid->hThread = pid->hProcess = 0;
 		destroy_pipe(stdinP);
 		destroy_pipe(stdoutP);
 		destroy_pipe(stderrP);
