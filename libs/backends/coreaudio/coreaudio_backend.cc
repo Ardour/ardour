@@ -1546,6 +1546,7 @@ CoreAudioBackend::buffer_size_callback ()
 	}
 	_samples_per_period = bs;
 	engine.buffer_size_change (_samples_per_period);
+	engine.update_latencies ();
 }
 
 void
