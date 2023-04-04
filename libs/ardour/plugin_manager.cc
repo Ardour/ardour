@@ -2111,7 +2111,7 @@ PluginManager::vst3_discover (string const& path, bool cache_only)
 	string module_path = module_path_vst3 (path);
 	if (module_path.empty ()) {
 		PSLEPtr psl = PSLEPtr (new PluginScanLogEntry (VST3, path));
-		psl->msg (PluginScanLogEntry::Error, "Invalid Module Path");
+		psl->msg (PluginScanLogEntry::Error, string_compose ("Invalid VST3 Module Path: '%1'", module_path));
 		_plugin_scan_log.erase (psl);
 		_plugin_scan_log.insert (psl);
 		return -1;
