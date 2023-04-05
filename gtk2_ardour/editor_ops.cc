@@ -4885,8 +4885,8 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 	timepos_t first_position = timepos_t::max (Temporal::AudioTime);
 
-	typedef set<std::shared_ptr<Playlist> > FreezeList;
-	FreezeList freezelist;
+	PlaylistSet freezelist;
+	RegionList  exclude;
 
 	/* get ordering correct before we cut/copy */
 
@@ -4981,7 +4981,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		case Delete:
 			pl->remove_region (r);
 			if (should_ripple()) {
-				do_ripple (pl, r->position(), -r->length(), std::shared_ptr<Region>(), false);
+				do_ripple (pl, r->position(), -r->length(), &exclude, freezelist, false);
 			}
 			break;
 
@@ -4990,7 +4990,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			npl->add_region (_xx, timepos_t (first_position.distance (r->position())));
 			pl->remove_region (r);
 			if (should_ripple()) {
-				do_ripple (pl, r->position(), -r->length(), std::shared_ptr<Region>(), false);
+				do_ripple (pl, r->position(), -r->length(), &exclude, freezelist, false);
 			}
 			break;
 
@@ -5002,7 +5002,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		case Clear:
 			pl->remove_region (r);
 			if (should_ripple()) {
-				do_ripple (pl, r->position(), -r->length(), std::shared_ptr<Region>(), false);
+				do_ripple (pl, r->position(), -r->length(), &exclude, freezelist, false);
 			}
 			break;
 		}
@@ -5301,7 +5301,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		}
 
 		for (PlaylistSet::iterator p = playlists.begin(); p != playlists.end(); ++p) {
-			do_ripple ((*p), start_time, span.scale (times), &exclude, false);
+			do_ripple ((*p), start_time, span.scale (times), &exclude, playlists, false);
 		}
 	}
 
@@ -9640,14 +9640,15 @@ void
 Editor::do_ripple (std::shared_ptr<ARDOUR::Playlist> target_playlist, timepos_t const & at, timecnt_t const & distance, std::shared_ptr<ARDOUR::Region> exclude, bool add_to_command)
 {
 	RegionList el;
+	PlaylistSet pls;
 	if (exclude) {
 		el.push_back (exclude);
 	}
-	do_ripple (target_playlist, at, distance, &el, add_to_command);
+	do_ripple (target_playlist, at, distance, &el, pls, add_to_command);
 }
 
 void
-Editor::do_ripple (std::shared_ptr<Playlist> target_playlist, timepos_t const & at, timecnt_t const & distance, RegionList* exclude, bool add_to_command)
+Editor::do_ripple (std::shared_ptr<Playlist> target_playlist, timepos_t const & at, timecnt_t const & distance, RegionList* exclude, PlaylistSet const &affected_pls, bool add_to_command)
 {
 	PlaylistSet playlists;
 
@@ -9683,9 +9684,6 @@ Editor::do_ripple (std::shared_ptr<Playlist> target_playlist, timepos_t const & 
 
 		if ((*p) == target_playlist) {
 
-			(*p)->clear_changes ();
-			(*p)->clear_owned_changes ();
-
 			(*p)->ripple (at, distance, exclude);
 
 			/* caller may put the target playlist into the undo
@@ -9695,9 +9693,7 @@ Editor::do_ripple (std::shared_ptr<Playlist> target_playlist, timepos_t const & 
 			if (add_to_command) {
 				(*p)->rdiff_and_add_command (_session);
 			}
-		} else {
-			/* all other playlists: do the ripple, and save to undo/redo */
-
+		} else if (affected_pls.find (*p) == affected_pls.end ()) {
 			(*p)->clear_changes ();
 			(*p)->clear_owned_changes ();
 			(*p)->ripple (at, distance, 0);
