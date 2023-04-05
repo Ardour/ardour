@@ -73,6 +73,7 @@ class AudioSource;
 class GraphNode;
 class Route;
 class Region;
+class Playlist;
 class Stripable;
 class VCA;
 class AutomationControl;
@@ -101,6 +102,7 @@ typedef std::list<std::pair<sampleoffset_t, sampleoffset_t> > AudioIntervalResul
 typedef std::map<std::shared_ptr<ARDOUR::Region>,AudioIntervalResult> AudioIntervalMap;
 
 typedef std::list<std::shared_ptr<Region> > RegionList;
+typedef std::set<std::shared_ptr<Playlist> > PlaylistSet;
 
 struct IOChange {
 

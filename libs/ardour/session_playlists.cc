@@ -39,8 +39,8 @@ SessionPlaylists::~SessionPlaylists ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, "delete playlists\n");
 
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ) {
-		SessionPlaylists::List::iterator tmp;
+	for (PlaylistSet::iterator i = playlists.begin(); i != playlists.end(); ) {
+		PlaylistSet::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -53,8 +53,8 @@ SessionPlaylists::~SessionPlaylists ()
 	}
 
 	DEBUG_TRACE (DEBUG::Destruction, "delete unused playlists\n");
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ) {
-		List::iterator tmp;
+	for (PlaylistSet::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ) {
+		PlaylistSet::iterator tmp;
 
 		tmp = i;
 		++tmp;
@@ -102,7 +102,7 @@ SessionPlaylists::remove (std::shared_ptr<Playlist> playlist)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	List::iterator i;
+	PlaylistSet::iterator i;
 
 	i = find (playlists.begin(), playlists.end(), playlist);
 	if (i != playlists.end()) {
@@ -123,7 +123,7 @@ SessionPlaylists::update_tracking ()
 	 * Check playlist refcnt, move unused playlist to unused_playlists
 	 * array (which may be the case when loading old sessions)
 	 */
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ) {
+	for (PlaylistSet::iterator i = playlists.begin(); i != playlists.end(); ) {
 		if ((*i)->hidden () || (*i)->used ()) {
 			++i;
 			continue;
@@ -134,7 +134,7 @@ SessionPlaylists::update_tracking ()
 		assert (unused_playlists.find (*i) == unused_playlists.end());
 		unused_playlists.insert (*i);
 
-		List::iterator rm = i;
+		PlaylistSet::iterator rm = i;
 		++i;
 		 playlists.erase (rm);
 	}
@@ -149,7 +149,7 @@ SessionPlaylists::track (bool inuse, std::weak_ptr<Playlist> wpl)
 		return;
 	}
 
-	List::iterator x;
+	PlaylistSet::iterator x;
 
 	if (pl->hidden()) {
 		/* its not supposed to be visible */
@@ -196,7 +196,7 @@ SessionPlaylists::for_pgroup (string pgroup_id, const PBD::ID& id)
 
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		if ((*i)->pgroup_id() == pgroup_id) {
 			if ((*i)->get_orig_track_id() == id) {
 				return* i;
@@ -204,7 +204,7 @@ SessionPlaylists::for_pgroup (string pgroup_id, const PBD::ID& id)
 		}
 	}
 
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		if ((*i)->pgroup_id() == pgroup_id) {
 			if ((*i)->get_orig_track_id() == id) {
 				return* i;
@@ -227,13 +227,13 @@ SessionPlaylists::playlists_for_pgroup (std::string pgroup)
 
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		if ((*i)->pgroup_id().compare(pgroup)==0) {
 			pl_tr.push_back (*i);
 		}
 	}
 
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		if ((*i)->pgroup_id().compare(pgroup)==0) {
 			pl_tr.push_back (*i);
 		}
@@ -247,13 +247,13 @@ SessionPlaylists::by_name (string name)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		if ((*i)->name() == name) {
 			return* i;
 		}
 	}
 
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		if ((*i)->name() == name) {
 			return* i;
 		}
@@ -267,13 +267,13 @@ SessionPlaylists::by_id (const PBD::ID& id)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		if ((*i)->id() == id) {
 			return* i;
 		}
 	}
 
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		if ((*i)->id() == id) {
 			return* i;
 		}
@@ -287,13 +287,13 @@ SessionPlaylists::unassigned (std::list<std::shared_ptr<Playlist> > & list)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		if (!(*i)->get_orig_track_id().to_s().compare ("0")) {
 			list.push_back (*i);
 		}
 	}
 
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		if (!(*i)->get_orig_track_id().to_s().compare ("0")) {
 			list.push_back (*i);
 		}
@@ -305,13 +305,13 @@ SessionPlaylists::update_orig_2X (PBD::ID old_orig, PBD::ID new_orig)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		if ((*i)->get_orig_track_id() == old_orig) {
 			(*i)->set_orig_track_id (new_orig);
 		}
 	}
 
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		if ((*i)->get_orig_track_id() == old_orig) {
 			(*i)->set_orig_track_id (new_orig);
 		}
@@ -323,11 +323,11 @@ SessionPlaylists::get (vector<std::shared_ptr<Playlist> >& s) const
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	for (List::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		s.push_back (*i);
 	}
 
-	for (List::const_iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (PlaylistSet::const_iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		s.push_back (*i);
 	}
 }
@@ -337,11 +337,11 @@ SessionPlaylists::destroy_region (std::shared_ptr<Region> r)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = playlists.begin(); i != playlists.end(); ++i) {
                 (*i)->destroy_region (r);
 	}
 
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
                 (*i)->destroy_region (r);
 	}
 }
@@ -358,14 +358,14 @@ SessionPlaylists::source_use_count (std::shared_ptr<const Source> src) const
 	 * between compound regions.
 	 */
 
-	for (List::const_iterator p = playlists.begin(); p != playlists.end(); ++p) {
+	for (PlaylistSet::const_iterator p = playlists.begin(); p != playlists.end(); ++p) {
                 if ((*p)->uses_source (src)) {
                         ++count;
                         break;
                 }
 	}
 
-	for (List::const_iterator p = unused_playlists.begin(); p != unused_playlists.end(); ++p) {
+	for (PlaylistSet::const_iterator p = unused_playlists.begin(); p != unused_playlists.end(); ++p) {
                 if ((*p)->uses_source (src)) {
                         ++count;
                         break;
@@ -380,7 +380,7 @@ SessionPlaylists::sync_all_regions_with_regions ()
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	for (List::const_iterator p = playlists.begin(); p != playlists.end(); ++p) {
+	for (PlaylistSet::const_iterator p = playlists.begin(); p != playlists.end(); ++p) {
                 (*p)->sync_all_regions_with_regions ();
         }
 }
@@ -388,11 +388,11 @@ SessionPlaylists::sync_all_regions_with_regions ()
 void
 SessionPlaylists::update_after_tempo_map_change ()
 {
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		(*i)->update_after_tempo_map_change ();
 	}
 
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		(*i)->update_after_tempo_map_change ();
 	}
 }
@@ -406,13 +406,12 @@ struct id_compare
 	}
 };
 
-typedef std::set<std::shared_ptr<Playlist> > List;
 typedef std::set<std::shared_ptr<Playlist>, id_compare> IDSortedList;
 
 static void
-get_id_sorted_playlists (const List& playlists, IDSortedList& id_sorted_playlists)
+get_id_sorted_playlists (const PlaylistSet& playlists, IDSortedList& id_sorted_playlists)
 {
-	for (List::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		id_sorted_playlists.insert(*i);
 	}
 }
@@ -469,7 +468,7 @@ SessionPlaylists::maybe_delete_unused (boost::function<int(std::shared_ptr<Playl
 	bool delete_remaining = false;
 	bool keep_remaining = false;
 
-	for (List::iterator x = unused_playlists.begin(); x != unused_playlists.end(); ++x) {
+	for (PlaylistSet::iterator x = unused_playlists.begin(); x != unused_playlists.end(); ++x) {
 
 		if (keep_remaining) {
 			break;
@@ -583,14 +582,14 @@ SessionPlaylists::find_crossfade (const PBD::ID& id)
 
 	std::shared_ptr<Crossfade> c;
 
-	for (List::iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		c = (*i)->find_crossfade (id);
 		if (c) {
 			return c;
 		}
 	}
 
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (PlaylistSet::iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		c = (*i)->find_crossfade (id);
 		if (c) {
 			return c;
@@ -606,11 +605,11 @@ SessionPlaylists::region_use_count (std::shared_ptr<Region> region) const
 	Glib::Threads::Mutex::Lock lm (lock);
         uint32_t cnt = 0;
 
-	for (List::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
-                cnt += (*i)->region_use_count (region);
+	for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+		cnt += (*i)->region_use_count (region);
 	}
 
-	for (List::const_iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (PlaylistSet::const_iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
                 cnt += (*i)->region_use_count (region);
 	}
 
@@ -624,7 +623,7 @@ SessionPlaylists::get_used () const
 
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	for (List::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
+	for (PlaylistSet::const_iterator i = playlists.begin(); i != playlists.end(); ++i) {
 		pl.push_back (*i);
 	}
 
@@ -638,7 +637,7 @@ SessionPlaylists::get_unused () const
 
 	Glib::Threads::Mutex::Lock lm (lock);
 
-	for (List::const_iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
+	for (PlaylistSet::const_iterator i = unused_playlists.begin(); i != unused_playlists.end(); ++i) {
 		pl.push_back (*i);
 	}
 
@@ -670,7 +669,7 @@ void
 SessionPlaylists::foreach (boost::function<void(std::shared_ptr<const Playlist>)> functor, bool incl_unused)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
-	for (List::iterator i = playlists.begin(); i != playlists.end(); i++) {
+	for (PlaylistSet::iterator i = playlists.begin(); i != playlists.end(); i++) {
 		if (!(*i)->hidden()) {
 			functor (*i);
 		}
@@ -678,7 +677,7 @@ SessionPlaylists::foreach (boost::function<void(std::shared_ptr<const Playlist>)
 	if (!incl_unused) {
 		return;
 	}
-	for (List::iterator i = unused_playlists.begin(); i != unused_playlists.end(); i++) {
+	for (PlaylistSet::iterator i = unused_playlists.begin(); i != unused_playlists.end(); i++) {
 		if (!(*i)->hidden()) {
 			functor (*i);
 		}

@@ -5104,7 +5104,7 @@ bool
 Session::playlist_is_active (std::shared_ptr<Playlist> playlist)
 {
 	Glib::Threads::Mutex::Lock lm (_playlists->lock);
-	for (SessionPlaylists::List::iterator i = _playlists->playlists.begin(); i != _playlists->playlists.end(); i++) {
+	for (PlaylistSet::iterator i = _playlists->playlists.begin(); i != _playlists->playlists.end(); i++) {
 		if ( (*i) == playlist ) {
 			return true;
 		}

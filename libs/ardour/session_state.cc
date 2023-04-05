@@ -1094,7 +1094,6 @@ Session::get_template ()
 	return state (true, NormalSave);
 }
 
-typedef std::set<std::shared_ptr<Playlist> > PlaylistSet;
 typedef std::set<std::shared_ptr<Source> > SourceSet;
 
 bool
@@ -1113,8 +1112,8 @@ Session::export_track_state (std::shared_ptr<RouteList> rl, const string& path)
 	XMLNode* node = new XMLNode("TrackState"); // XXX
 	XMLNode* child;
 
-	PlaylistSet playlists; // SessionPlaylists
-	SourceSet sources;
+		PlaylistSet playlists; // SessionPlaylists
+		SourceSet sources;
 
 	// these will work with  new_route_from_template()
 	// TODO: LV2 plugin-state-dir needs to be relative (on load?)

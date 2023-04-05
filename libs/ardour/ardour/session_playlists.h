@@ -92,9 +92,9 @@ private:
 	std::shared_ptr<Playlist> XMLPlaylistFactory (Session &, const XMLNode&);
 
 	mutable Glib::Threads::Mutex lock;
-	typedef std::set<std::shared_ptr<Playlist> > List;
-	List playlists;
-	List unused_playlists;
+
+	PlaylistSet playlists;
+	PlaylistSet unused_playlists;
 };
 
 }

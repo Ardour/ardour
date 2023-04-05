@@ -1162,6 +1162,7 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 	/* keep track of any dead space at end (for pasting into Ripple or RippleAll mode) */
 	const timecnt_t wanted_length = start.distance (end);
 	_end_space = wanted_length - _get_extent().first.distance (_get_extent().second);
+	cout << "PL: " << name() << " END SPACE: " << _end_space << " WANTED LEN: " << wanted_length << " EXT: " << _get_extent().first << " to " << get_extent().second << "\n";
 }
 
 std::shared_ptr<Playlist>
