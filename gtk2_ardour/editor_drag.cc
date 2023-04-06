@@ -2055,7 +2055,7 @@ RegionMoveDrag::finished_no_copy (
 		}
 	}
 
-	for (set<std::shared_ptr<Playlist> >::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
+	for (PlaylistSet::iterator p = frozen_playlists.begin(); p != frozen_playlists.end(); ++p) {
 		(*p)->thaw();
 	}
 
@@ -2101,7 +2101,7 @@ RegionMoveDrag::remove_region_from_playlist (
 	PlaylistSet& modified_playlists
 	)
 {
-	pair<set<std::shared_ptr<Playlist> >::iterator, bool> r = modified_playlists.insert (playlist);
+	pair<PlaylistSet::iterator, bool> r = modified_playlists.insert (playlist);
 
 	if (r.second) {
 		playlist->clear_changes ();
@@ -2771,7 +2771,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 {
 	RegionView* rv = _primary;
 
-	pair<set<std::shared_ptr<Playlist> >::iterator,bool> insert_result;
+	pair<PlaylistSet::iterator,bool> insert_result;
 	timecnt_t delta;
 	timepos_t adj_time = adjusted_time (_drags->current_pointer_time () + snap_delta (event->button.state), event, true);
 	timecnt_t dt = raw_grab_time().distance (adj_time) + _pointer_offset - snap_delta (event->button.state);
@@ -2979,7 +2979,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 		}
 
-		for (set<std::shared_ptr<Playlist> >::iterator p = _editor->motion_frozen_playlists.begin(); p != _editor->motion_frozen_playlists.end(); ++p) {
+		for (PlaylistSet::iterator p = _editor->motion_frozen_playlists.begin(); p != _editor->motion_frozen_playlists.end(); ++p) {
 			/* Trimming one region may affect others on the playlist, so we need
 			   to get undo Commands from the whole playlist rather than just the
 			   region.  Use motion_frozen_playlists (a set) to make sure we don't

@@ -66,7 +66,7 @@ public:
 
 	size_t n_midi_regions() const;
 
-	std::set<std::shared_ptr<ARDOUR::Playlist> > playlists () const;
+	ARDOUR::PlaylistSet playlists () const;
 	std::list<PBD::ID> pending;
 
 	ARDOUR::RegionList regionlist () const;

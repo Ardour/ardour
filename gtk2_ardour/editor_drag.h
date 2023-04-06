@@ -393,8 +393,7 @@ protected:
 	friend class DraggingView;
 
 protected:
-	typedef std::set<std::shared_ptr<ARDOUR::Playlist> > PlaylistSet;
-	void add_stateful_diff_commands_for_playlists (PlaylistSet const &);
+	void add_stateful_diff_commands_for_playlists (ARDOUR::PlaylistSet const &);
 
 private:
 
@@ -515,13 +514,13 @@ private:
 		RouteTimeAxisView*,
 		ARDOUR::layer_t,
 		Temporal::timepos_t const &,
-		PlaylistSet&
+		ARDOUR::PlaylistSet&
 		);
 
 	void remove_region_from_playlist (
 		std::shared_ptr<ARDOUR::Region>,
 		std::shared_ptr<ARDOUR::Playlist>,
-		PlaylistSet& modified_playlists
+		ARDOUR::PlaylistSet& modified_playlists
 		);
 
 

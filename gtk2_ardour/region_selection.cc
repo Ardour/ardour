@@ -323,10 +323,10 @@ RegionSelection::end_time () const
 }
 
 /** @return the playlists that the regions in the selection are on */
-set<std::shared_ptr<Playlist> >
+PlaylistSet
 RegionSelection::playlists () const
 {
-	set<std::shared_ptr<Playlist> > pl;
+	PlaylistSet pl;
 	for (RegionSelection::const_iterator i = begin(); i != end(); ++i) {
 		pl.insert ((*i)->region()->playlist ());
 	}

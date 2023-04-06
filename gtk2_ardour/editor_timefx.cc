@@ -87,7 +87,7 @@ Editor::time_stretch (RegionSelection& regions, Temporal::ratio_t const & ratio)
 		return aret;
 	}
 
-	set<std::shared_ptr<Playlist> > midi_playlists_affected;
+	PlaylistSet midi_playlists_affected;
 
 	for (RegionList::iterator i = midi.begin(); i != midi.end(); ++i) {
 		std::shared_ptr<Playlist> playlist = (*i)->playlist();
@@ -116,7 +116,7 @@ Editor::time_stretch (RegionSelection& regions, Temporal::ratio_t const & ratio)
 		midi_playlists_affected.insert (playlist);
 	}
 
-	for (set<std::shared_ptr<Playlist> >::iterator p = midi_playlists_affected.begin(); p != midi_playlists_affected.end(); ++p) {
+	for (PlaylistSet::iterator p = midi_playlists_affected.begin(); p != midi_playlists_affected.end(); ++p) {
 		PBD::StatefulDiffCommand* cmd = new StatefulDiffCommand (*p);
 		_session->add_command (cmd);
 		if (!cmd->empty ()) {

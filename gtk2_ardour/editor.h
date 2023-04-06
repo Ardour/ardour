@@ -1677,7 +1677,7 @@ private:
 
 	void fade_range ();
 
-	std::set<std::shared_ptr<ARDOUR::Playlist> > motion_frozen_playlists;
+	ARDOUR::PlaylistSet motion_frozen_playlists;
 
 	bool _dragging_playhead;
 

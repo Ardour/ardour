@@ -1395,7 +1395,7 @@ TimeAxisView::reset_visual_state ()
 TrackViewList
 TrackViewList::filter_to_unique_playlists ()
 {
-	std::set<std::shared_ptr<ARDOUR::Playlist> > playlists;
+	PlaylistSet playlists;
 	TrackViewList ts;
 
 	for (iterator i = begin(); i != end(); ++i) {

@@ -492,7 +492,7 @@ void
 Editor::mapover_tracks_with_unique_playlists (sigc::slot<void, RouteTimeAxisView&, uint32_t> sl, TimeAxisView* basis, PBD::PropertyID prop) const
 {
 	RouteTimeAxisView* route_basis = dynamic_cast<RouteTimeAxisView*> (basis);
-	set<std::shared_ptr<Playlist> > playlists;
+	PlaylistSet playlists;
 
 	if (route_basis == 0) {
 		return;
@@ -540,7 +540,7 @@ Editor::mapover_tracks_with_unique_playlists (sigc::slot<void, RouteTimeAxisView
 void
 Editor::mapover_all_tracks_with_unique_playlists (sigc::slot<void, RouteTimeAxisView&, uint32_t> sl) const
 {
-	set<std::shared_ptr<Playlist> > playlists;
+	PlaylistSet playlists;
 
 	set<RouteTimeAxisView*> tracks;
 

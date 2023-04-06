@@ -297,14 +297,14 @@ TimeInfoBox::selection_changed ()
 			}
 		} else {
 			/* this is more efficient than tracking changes per region in large selections */
-			std::set<std::shared_ptr<ARDOUR::Playlist> > playlists;
+			PlaylistSet playlists;
 			for (RegionSelection::iterator s = selection.regions.begin(); s != selection.regions.end(); ++s) {
 				std::shared_ptr<Playlist> pl = (*s)->region()->playlist();
 				if (pl) {
 					playlists.insert (pl);
 				}
 			}
-			for (std::set<std::shared_ptr<ARDOUR::Playlist> >::iterator ps = playlists.begin(); ps != playlists.end(); ++ps) {
+			for (PlaylistSet::iterator ps = playlists.begin(); ps != playlists.end(); ++ps) {
 				(*ps)->ContentsChanged.connect (region_property_connections, invalidator (*this),
 								boost::bind (&TimeInfoBox::region_selection_changed, this), gui_context());
 			}
