@@ -1894,10 +1894,13 @@ VST3PI::try_set_parameter_by_id (Vst::ParamID id, float value)
 void
 VST3PI::set_parameter (uint32_t p, float value, int32 sample_off, bool to_list)
 {
+	Vst::ParamID id = index_to_id (p);
+	value = _controller->plainParamToNormalized (id, value);
+	if (_shadow_data[p] == value && sample_off == 0) {
+		return;
+	}
 	if (to_list) {
-		set_parameter_internal (index_to_id (p), value, sample_off, false);
-	} else {
-		value = _controller->plainParamToNormalized (index_to_id (p), value);
+		set_parameter_internal (id, value, sample_off);
 	}
 	_shadow_data[p] = value;
 	_update_ctrl[p] = true;
@@ -2009,7 +2012,7 @@ void
 VST3PI::set_parameter_by_id (Vst::ParamID id, float value, int32 sample_off)
 {
 	/* called in rt-thread from evoral_to_vst3 */
-	set_parameter_internal (id, value, sample_off, true);
+	set_parameter_internal (id, value, sample_off);
 	std::map<Vst::ParamID, uint32_t>::const_iterator idx = _ctrl_id_index.find (id);
 	if (idx != _ctrl_id_index.end ()) {
 		_shadow_data[idx->second] = value;
@@ -2018,12 +2021,9 @@ VST3PI::set_parameter_by_id (Vst::ParamID id, float value, int32 sample_off)
 }
 
 void
-VST3PI::set_parameter_internal (Vst::ParamID id, float& value, int32 sample_off, bool normalized)
+VST3PI::set_parameter_internal (Vst::ParamID id, float value, int32 sample_off)
 {
 	int32 index;
-	if (!normalized) {
-		value = _controller->plainParamToNormalized (id, value);
-	}
 	/* must not be called concurrently with processing */
 	_input_param_changes.addParameterData (id, index)->addPoint (sample_off, value, index);
 }

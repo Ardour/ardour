@@ -232,7 +232,7 @@ private:
 	bool synchronize_states ();
 
 	void set_parameter_by_id (Vst::ParamID id, float value, int32 sample_off);
-	void set_parameter_internal (Vst::ParamID id, float& value, int32 sample_off, bool normalized);
+	void set_parameter_internal (Vst::ParamID id, float value, int32 sample_off);
 
 	void set_event_bus_state (bool enabled);
 
