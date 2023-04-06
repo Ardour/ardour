@@ -1279,20 +1279,118 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 			}
 
 		}
-
-	} else if (path[1] == X_("compressor")) {
-
-		if (path.size() == 3) {
-			if (path[2] == X_("enable")) {
-				c = s->comp_enable_controllable ();
-			} else if (path[2] == X_("threshold")) {
-				c = s->comp_threshold_controllable ();
-			} else if (path[2] == X_("mode")) {
-				c = s->comp_mode_controllable ();
-			} else if (path[2] == X_("speed")) {
-				c = s->comp_speed_controllable ();
-			} else if (path[2] == X_("makeup")) {
-				c = s->comp_makeup_controllable ();
+	}
+	else if (path[1] == X_("compressor"))
+	{
+		if (path.size() == 3)
+		{
+			if (path[2] == X_("enable"))
+			{
+				c = s->comp_enable_controllable();
+			}
+			else if (path[2] == X_("threshold"))
+			{
+				c = s->comp_threshold_controllable();
+			}
+			else if (path[2] == X_("mode"))
+			{
+				c = s->comp_mode_controllable();
+			}
+			else if (path[2] == X_("speed"))
+			{
+				c = s->comp_speed_controllable();
+			}
+			else if (path[2] == X_("attack"))
+			{
+				c = s->comp_attack_controllable();
+			}
+			else if (path[2] == X_("release"))
+			{
+				c = s->comp_release_controllable();
+			}
+			else if (path[2] == X_("makeup"))
+			{
+				c = s->comp_makeup_controllable();
+			}
+			else if (path[2] == X_("ratio"))
+			{
+				c = s->comp_ratio_controllable();
+			}
+			else if (path[2] == X_("key_filter_freq"))
+			{
+				c = s->comp_key_filter_freq_controllable();
+			}
+		}
+	}
+	else if (path[1] == X_("gate"))
+	{
+		if (path.size() == 3)
+		{
+			if (path[2] == X_("enable"))
+			{
+				c = s->gate_enable_controllable();
+			}
+			else if (path[2] == X_("threshold"))
+			{
+				c = s->gate_threshold_controllable();
+			}
+			else if (path[2] == X_("mode"))
+			{
+				c = s->gate_mode_controllable();
+			}
+			else if (path[2] == X_("ratio"))
+			{
+				c = s->gate_ratio_controllable();
+			}
+			else if (path[2] == X_("knee"))
+			{
+				c = s->gate_knee_controllable();
+			}
+			else if (path[2] == X_("depth"))
+			{
+				c = s->gate_depth_controllable();
+			}
+			else if (path[2] == X_("hysteresis"))
+			{
+				c = s->gate_hysteresis_controllable();
+			}
+			else if (path[2] == X_("hold"))
+			{
+				c = s->gate_hold_controllable();
+			}
+			else if (path[2] == X_("attack"))
+			{
+				c = s->gate_attack_controllable();
+			}
+			else if (path[2] == X_("release"))
+			{
+				c = s->gate_release_controllable();
+			}
+			else if (path[2] == X_("key_listen"))
+			{
+				c = s->gate_key_listen_controllable();
+			}
+			else if (path[2] == X_("key_filter_enable"))
+			{
+				c = s->gate_key_filter_enable_controllable();
+			}
+			else if (path[2] == X_("key_filter_freq"))
+			{
+				c = s->gate_key_filter_freq_controllable();
+			}
+		}
+	}
+	else if (path[1] == X_("tape"))
+	{
+		if (path.size() == 3)
+		{
+			if (path[2] == X_("drive"))
+			{
+				c = s->tape_drive_controllable();
+			}
+			else if (path[2] == X_("mode"))
+			{
+				c = s->tape_drive_mode_controllable();
 			}
 		}
 	}
