@@ -35,14 +35,14 @@ GraphActivision::GraphActivision ()
 node_set_t const&
 GraphActivision::activation_set (GraphChain const* const g) const
 {
-	std::shared_ptr<ActivationMap> m (_activation_set.reader ());
+	std::shared_ptr<ActivationMap const> m (_activation_set.reader ());
 	return m->at (g);
 }
 
 int
 GraphActivision::init_refcount (GraphChain const* const g) const
 {
-	std::shared_ptr<RefCntMap> m (_init_refcount.reader ());
+	std::shared_ptr<RefCntMap const> m (_init_refcount.reader ());
 	return m->at (g);
 }
 

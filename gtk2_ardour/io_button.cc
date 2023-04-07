@@ -252,7 +252,7 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, std::shar
 
 	/* Are all main-typed channels connected to the same route ? */
 	if (!have_label) {
-		std::shared_ptr<ARDOUR::RouteList> routes = session.get_routes ();
+		std::shared_ptr<ARDOUR::RouteList const> routes = session.get_routes ();
 		for (auto const& route : *routes) {
 			std::shared_ptr<IO> dest_io = input ? route->output () : route->input ();
 			if (io->bundle ()->connected_to (dest_io->bundle (), session.engine (), dt, true)) {
@@ -276,9 +276,9 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, std::shar
 
 	/* Are all main-typed channels connected to the same (user) bundle ? */
 	if (!have_label) {
-		std::shared_ptr<ARDOUR::BundleList> bundles       = session.bundles ();
-		std::shared_ptr<ARDOUR::Port>       ap            = std::dynamic_pointer_cast<ARDOUR::Port> (session.vkbd_output_port ());
-		std::string                           vkbd_portname = AudioEngine::instance ()->make_port_name_non_relative (ap->name ());
+		std::shared_ptr<ARDOUR::BundleList const> bundles       = session.bundles ();
+		std::shared_ptr<ARDOUR::Port>             ap            = std::dynamic_pointer_cast<ARDOUR::Port> (session.vkbd_output_port ());
+		std::string                               vkbd_portname = AudioEngine::instance ()->make_port_name_non_relative (ap->name ());
 		for (auto const& bundle : *bundles) {
 			if (std::dynamic_pointer_cast<UserBundle> (bundle) == 0) {
 				if (!bundle->offers_port (vkbd_portname)) {
@@ -576,20 +576,20 @@ IOButton::button_press (GdkEventButton* ev)
 	uint32_t const n_with_separator = citems.size ();
 
 	_menu_bundles.clear ();
-	ARDOUR::BundleList                    current = io ()->bundles_connected ();
-	std::shared_ptr<ARDOUR::BundleList> b       = _route->session ().bundles ();
+	ARDOUR::BundleList                        current = io ()->bundles_connected ();
+	std::shared_ptr<ARDOUR::BundleList const> b       = _route->session ().bundles ();
 
 	if (_input) {
 		/* give user bundles first chance at being in the menu */
-		for (ARDOUR::BundleList::iterator i = b->begin (); i != b->end (); ++i) {
-			if (std::dynamic_pointer_cast<UserBundle> (*i)) {
-				maybe_add_bundle_to_menu (*i, current);
+		for (auto const& i : *b) {
+			if (std::dynamic_pointer_cast<UserBundle> (i)) {
+				maybe_add_bundle_to_menu (i, current);
 			}
 		}
 
-		for (ARDOUR::BundleList::iterator i = b->begin (); i != b->end (); ++i) {
-			if (std::dynamic_pointer_cast<UserBundle> (*i) == 0) {
-				maybe_add_bundle_to_menu (*i, current);
+		for (auto const& i : *b) {
+			if (std::dynamic_pointer_cast<UserBundle> (i) == 0) {
+				maybe_add_bundle_to_menu (i, current);
 			}
 		}
 	} else {
@@ -603,8 +603,7 @@ IOButton::button_press (GdkEventButton* ev)
 		}
 	}
 
-	std::shared_ptr<ARDOUR::RouteList> routes = _route->session ().get_routes ();
-	RouteList                            copy   = *routes;
+	RouteList copy = *_route->session ().get_routes ();
 	copy.sort (RouteCompareByName ());
 
 	if (_input) {
@@ -642,16 +641,16 @@ IOButton::button_press (GdkEventButton* ev)
 		}
 
 		/* then try adding user output bundles, often labeled/grouped physical inputs */
-		for (ARDOUR::BundleList::iterator i = b->begin (); i != b->end (); ++i) {
-			if (std::dynamic_pointer_cast<UserBundle> (*i)) {
-				maybe_add_bundle_to_menu (*i, current, intended_type);
+		for (auto const& i : *b) {
+			if (std::dynamic_pointer_cast<UserBundle> (i)) {
+				maybe_add_bundle_to_menu (i, current, intended_type);
 			}
 		}
 
 		/* then all other bundles, including physical outs or other software */
-		for (ARDOUR::BundleList::iterator i = b->begin (); i != b->end (); ++i) {
-			if (std::dynamic_pointer_cast<UserBundle> (*i) == 0) {
-				maybe_add_bundle_to_menu (*i, current, intended_type);
+		for (auto const& i : *b) {
+			if (std::dynamic_pointer_cast<UserBundle> (i) == 0) {
+				maybe_add_bundle_to_menu (i, current, intended_type);
 			}
 		}
 

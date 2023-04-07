@@ -105,17 +105,17 @@ InternalSend::propagate_solo ()
 			_send_to->solo_isolate_control()->mod_solo_isolated_by_upstream (-1);
 		}
 		/* propagate further downstream alike Route::input_change_handler() */
-		std::shared_ptr<RouteList> routes = _session.get_routes ();
-		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-			if ((*i) == _send_to || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+		std::shared_ptr<RouteList const> routes = _session.get_routes ();
+		for (auto const& i : *routes) {
+			if (i == _send_to || i->is_master() || i->is_monitor() || i->is_auditioner()) {
 				continue;
 			}
-			bool does_feed = _send_to->feeds (*i);
+			bool does_feed = _send_to->feeds (i);
 			if (does_feed && to_soloed_upstream) {
-				(*i)->solo_control()->mod_solo_by_others_upstream (-1);
+				i->solo_control()->mod_solo_by_others_upstream (-1);
 			}
 			if (does_feed && to_isolated_upstream) {
-				(*i)->solo_isolate_control()->mod_solo_isolated_by_upstream (-1);
+				i->solo_isolate_control()->mod_solo_isolated_by_upstream (-1);
 			}
 		}
 	}
@@ -123,13 +123,13 @@ InternalSend::propagate_solo ()
 		_send_from->solo_control()->mod_solo_by_others_downstream (-1);
 
 		/* propagate further upstream alike Route::output_change_handler() */
-		std::shared_ptr<RouteList> routes = _session.get_routes ();
-		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-			if (*i == _send_from || !(*i)->can_solo()) {
+		std::shared_ptr<RouteList const> routes = _session.get_routes ();
+		for (auto const& i : *routes) {
+			if (i == _send_from || !i->can_solo()) {
 				continue;
 			}
-			if ((*i)->feeds (_send_from)) {
-				(*i)->solo_control()->mod_solo_by_others_downstream (-1);
+			if (i->feeds (_send_from)) {
+				i->solo_control()->mod_solo_by_others_downstream (-1);
 			}
 		}
 	}

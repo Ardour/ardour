@@ -283,9 +283,9 @@ BundleManager::BundleManager (Session* session)
 	_tree_view.append_column (_("Name"), _list_model_columns.name);
 	_tree_view.set_headers_visible (false);
 
-	std::shared_ptr<BundleList> bundles = _session->bundles ();
-	for (BundleList::iterator i = bundles->begin(); i != bundles->end(); ++i) {
-		add_bundle (*i);
+	std::shared_ptr<BundleList const> bundles = _session->bundles ();
+	for (auto const& i : *bundles) {
+		add_bundle (i);
 	}
 
 	/* New / Edit / Delete buttons */

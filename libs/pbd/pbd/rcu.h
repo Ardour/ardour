@@ -67,7 +67,7 @@ public:
 		delete managed_object.load ();
 	}
 
-	std::shared_ptr<T> reader () const
+	std::shared_ptr<T const> reader () const
 	{
 		std::shared_ptr<T> rv;
 

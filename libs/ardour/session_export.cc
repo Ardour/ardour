@@ -74,10 +74,10 @@ Session::pre_export ()
 	/* take everyone out of awrite to avoid disasters */
 
 	{
-		std::shared_ptr<RouteList> r = routes.reader ();
+		std::shared_ptr<RouteList const> r = routes.reader ();
 
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->protect_automation ();
+		for (auto const& i : *r) {
+			i->protect_automation ();
 		}
 	}
 
@@ -172,13 +172,12 @@ Session::start_audio_export (samplepos_t position, bool realtime, bool region_ex
 
 		/* get everyone to the right position */
 
-		std::shared_ptr<RouteList> rl = routes.reader();
+		std::shared_ptr<RouteList const> rl = routes.reader();
 
-		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
+		for (auto const& i : *rl) {
+			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
 			if (tr && tr->seek (position, true)) {
-				error << string_compose (_("%1: cannot seek to %2 for export"),
-						  (*i)->name(), position)
+				error << string_compose (_("%1: cannot seek to %2 for export"), i->name(), position)
 				      << endmsg;
 				return -1;
 			}

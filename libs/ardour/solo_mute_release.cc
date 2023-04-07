@@ -42,17 +42,18 @@ SoloMuteRelease::set_exclusive (bool e)
 void
 SoloMuteRelease::set (std::shared_ptr<Route> r)
 {
+	std::shared_ptr<RouteList> rl (new RouteList);
 	if (active) {
-		routes_on.reset (new RouteList);
-		routes_on->push_back (r);
+		rl->push_back (r);
+		routes_on = rl;
 	} else {
-		routes_off.reset (new RouteList);
-		routes_off->push_back (r);
+		rl->push_back (r);
+		routes_off = rl;
 	}
 }
 
 void
-SoloMuteRelease::set (std::shared_ptr<RouteList> rl)
+SoloMuteRelease::set (std::shared_ptr<RouteList const> rl)
 {
 	if (active) {
 		routes_on = rl;
@@ -62,7 +63,7 @@ SoloMuteRelease::set (std::shared_ptr<RouteList> rl)
 }
 
 void
-SoloMuteRelease::set (std::shared_ptr<RouteList> on, std::shared_ptr<RouteList> off)
+SoloMuteRelease::set (std::shared_ptr<RouteList const> on, std::shared_ptr<RouteList const> off)
 {
 	routes_on = on;
 	routes_off = off;

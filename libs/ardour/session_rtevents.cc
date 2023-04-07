@@ -132,18 +132,18 @@ Session::prepare_momentary_solo (SoloMuteRelease* smr, bool exclusive, std::shar
 {
 	std::shared_ptr<RouteList> routes_on (new RouteList);
 	std::shared_ptr<RouteList> routes_off (new RouteList);
-	std::shared_ptr<RouteList> routes = get_routes();
+	std::shared_ptr<RouteList const> routes = get_routes();
 
-	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+	for (auto const& i : *routes) {
 #ifdef MIXBUS
-		if (route && (0 == route->mixbus()) != (0 == (*i)->mixbus ())) {
+		if (route && (0 == route->mixbus()) != (0 == i->mixbus ())) {
 			continue;
 		}
 #endif
-		if ((*i)->soloed ()) {
-			routes_on->push_back (*i);
+		if (i->soloed ()) {
+			routes_on->push_back (i);
 		} else if (smr) {
-			routes_off->push_back (*i);
+			routes_off->push_back (i);
 		}
 	}
 
@@ -169,19 +169,19 @@ Session::prepare_momentary_solo (SoloMuteRelease* smr, bool exclusive, std::shar
 }
 
 void
-Session::clear_all_solo_state (std::shared_ptr<RouteList> rl)
+Session::clear_all_solo_state (std::shared_ptr<RouteList const> rl)
 {
 	queue_event (get_rt_event (rl, false, rt_cleanup, Controllable::NoGroup, &Session::rt_clear_all_solo_state));
 }
 
 void
-Session::rt_clear_all_solo_state (std::shared_ptr<RouteList> rl, bool /* yn */, Controllable::GroupControlDisposition /* group_override */)
+Session::rt_clear_all_solo_state (std::shared_ptr<RouteList const> rl, bool /* yn */, Controllable::GroupControlDisposition /* group_override */)
 {
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		if ((*i)->is_auditioner()) {
+	for (auto const& i : *rl) {
+		if (i->is_auditioner()) {
 			continue;
 		}
-		(*i)->clear_all_solo_state();
+		i->clear_all_solo_state();
 	}
 
 	_vca_manager->clear_all_solo_state ();

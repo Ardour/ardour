@@ -66,11 +66,11 @@ void
 Session::midi_panic()
 {
 	{
-		std::shared_ptr<RouteList> r = routes.reader ();
+		std::shared_ptr<RouteList const> r = routes.reader ();
 
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			MidiTrack *track = dynamic_cast<MidiTrack*>((*i).get());
-			if (track != 0) {
+		for (auto const& i : *r) {
+			std::shared_ptr<MidiTrack> track = std::dynamic_pointer_cast<MidiTrack>(i);
+			if (track) {
 				track->midi_panic();
 			}
 		}
@@ -344,13 +344,13 @@ Session::get_midi_nth_route_by_id (PresentationInfo::order_t n) const
 		f = PresentationInfo::Route;
 	}
 
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 	PresentationInfo::order_t match_cnt = 0;
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->presentation_info().flag_match (f)) {
+	for (auto const& i : *r) {
+		if (i->presentation_info().flag_match (f)) {
 			if (match_cnt++ == n) {
-				return *i;
+				return i;
 			}
 		}
 	}

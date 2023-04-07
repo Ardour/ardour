@@ -144,21 +144,21 @@ Session::process (pframes_t nframes)
 	bool one_or_more_routes_declicking = false;
 	{
 		ProcessorChangeBlocker pcb (this);
-		std::shared_ptr<RouteList> r = routes.reader ();
-		for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-			if ((*i)->apply_processor_changes_rt()) {
+		std::shared_ptr<RouteList const> r = routes.reader ();
+		for (auto const& i : *r) {
+			if (i->apply_processor_changes_rt()) {
 				_rt_emit_pending = true;
 			}
-			if ((*i)->declick_in_progress()) {
+			if (i->declick_in_progress()) {
 				one_or_more_routes_declicking = true;
 			}
 		}
 	}
 
 	if (_update_send_delaylines) {
-		std::shared_ptr<RouteList> r = routes.reader ();
-		for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->update_send_delaylines ();
+		std::shared_ptr<RouteList const> r = routes.reader ();
+		for (auto const& i : *r) {
+			i->update_send_delaylines ();
 		}
 	}
 
@@ -217,7 +217,7 @@ Session::no_roll (pframes_t nframes)
 
 	samplepos_t end_sample = _transport_sample + floor (nframes * _transport_fsm->transport_speed());
 	int ret = 0;
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 
 	if (_click_io) {
 		_click_io->silence (nframes);
@@ -236,14 +236,14 @@ Session::no_roll (pframes_t nframes)
 		_process_graph->routes_no_roll(graph_chain, nframes, _transport_sample, end_sample, non_realtime_work_pending());
 	} else {
 		PT_TIMING_CHECK (10);
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		for (auto const& i : *r) {
 
-			if ((*i)->is_auditioner()) {
+			if (i->is_auditioner()) {
 				continue;
 			}
 
-			if ((*i)->no_roll (nframes, _transport_sample, end_sample, non_realtime_work_pending())) {
-				error << string_compose(_("Session: error in no roll for %1"), (*i)->name()) << endmsg;
+			if (i->no_roll (nframes, _transport_sample, end_sample, non_realtime_work_pending())) {
+				error << string_compose(_("Session: error in no roll for %1"), i->name()) << endmsg;
 				ret = -1;
 				break;
 			}
@@ -262,7 +262,7 @@ int
 Session::process_routes (pframes_t nframes, bool& need_butler)
 {
 	TimerRAII tr (dsp_stats[Roll]);
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 
 	const samplepos_t start_sample = _transport_sample;
 	const samplepos_t end_sample = _transport_sample + floor (nframes * _transport_fsm->transport_speed());
@@ -287,24 +287,24 @@ Session::process_routes (pframes_t nframes, bool& need_butler)
 		}
 	} else {
 
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		for (auto const& i : *r) {
 
 			int ret;
 
-			if ((*i)->is_auditioner()) {
+			if (i->is_auditioner()) {
 				continue;
 			}
 
 			bool b = false;
 
-			if ((ret = (*i)->roll (nframes, start_sample, end_sample, b)) < 0) {
+			if ((ret = i->roll (nframes, start_sample, end_sample, b)) < 0) {
 				cerr << "ERR1 STOP\n";
 				TFSM_STOP (false, false);
 				return -1;
 			}
 
 			if (b) {
-				DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 rolled and needs butler\n", (*i)->name()));
+				DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 rolled and needs butler\n", i->name()));
 				need_butler = true;
 			}
 		}
@@ -319,10 +319,10 @@ Session::get_track_statistics ()
 	float pworst = 1.0f;
 	float cworst = 1.0f;
 
-	std::shared_ptr<RouteList> rl = routes.reader();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
+	std::shared_ptr<RouteList const> rl = routes.reader();
+	for (auto const& i : *rl) {
 
-		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
 
 		if (!tr || tr->is_private_route()) {
 			continue;
@@ -360,9 +360,9 @@ Session::compute_audible_delta (samplepos_t& pos_and_delta) const
 samplecnt_t
 Session::calc_preroll_subcycle (samplecnt_t ns) const
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
-	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		samplecnt_t route_offset = (*i)->playback_latency ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
+	for (auto const& i : *r) {
+		samplecnt_t route_offset = i->playback_latency ();
 		if (_remaining_latency_preroll > route_offset + ns) {
 			/* route will no-roll for complete pre-roll cycle */
 			continue;
@@ -775,16 +775,16 @@ void
 Session::process_audition (pframes_t nframes)
 {
 	SessionEvent* ev;
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 
 	std::shared_ptr<GraphChain> graph_chain = _graph_chain;
 	if (graph_chain) {
 		/* Ideally we'd use Session::rt_tasklist, since dependency is irrelevant. */
 		_process_graph->silence_routes (graph_chain, nframes);
 	} else {
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if (!(*i)->is_auditioner()) {
-				(*i)->silence (nframes);
+		for (auto const& i : *r) {
+			if (!i->is_auditioner()) {
+				i->silence (nframes);
 			}
 		}
 	}
@@ -1192,9 +1192,9 @@ Session::emit_route_signals ()
 	// TODO use RAII to allow using these signals in other places
 	BatchUpdateStart(); /* EMIT SIGNAL */
 	ProcessorChangeBlocker pcb (this);
-	std::shared_ptr<RouteList> r = routes.reader ();
-	for (RouteList::const_iterator ci = r->begin(); ci != r->end(); ++ci) {
-		(*ci)->emit_pending_signals ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
+	for (auto const& i : *r) {
+		i->emit_pending_signals ();
 	}
 	BatchUpdateEnd(); /* EMIT SIGNAL */
 }

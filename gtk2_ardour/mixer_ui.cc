@@ -4291,7 +4291,6 @@ void
 Mixer_UI::toggle_monitor_action (MonitorChoice monitor_choice, bool group_override, bool all)
 {
 	MonitorChoice mc;
-	std::shared_ptr<RouteList> rl;
 
 	for (AxisViewSelection::iterator i = _selection.axes.begin(); i != _selection.axes.end(); ++i) {
 		std::shared_ptr<ARDOUR::Route> rt = std::dynamic_pointer_cast<ARDOUR::Route> ((*i)->stripable());
@@ -4309,14 +4308,14 @@ Mixer_UI::toggle_monitor_action (MonitorChoice monitor_choice, bool group_overri
 
 		if (all) {
 			/* Primary-Tertiary-click applies change to all routes */
-			rl = _session->get_routes ();
+			std::shared_ptr<RouteList const> rl = _session->get_routes ();
 			_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::NoGroup);
 		} else if (group_override) {
-			rl.reset (new RouteList);
+			std::shared_ptr<RouteList> rl (new RouteList);
 			rl->push_back (rt);
 			_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::InverseGroup);
 		} else {
-			rl.reset (new RouteList);
+			std::shared_ptr<RouteList> rl (new RouteList);
 			rl->push_back (rt);
 			_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::UseGroup);
 		}

@@ -136,9 +136,8 @@ copy_session_routes (
 	}
 
 	/* get route state from first session */
-	std::shared_ptr<RouteList> rl = s->get_routes ();
-	for (RouteList::iterator i = rl->begin (); i != rl->end (); ++i) {
-		std::shared_ptr<Route> r = *i;
+	std::shared_ptr<RouteList const> rl = s->get_routes ();
+	for (auto const& r : *rl) {
 		if (r->is_master () || r->is_monitor () || r->is_auditioner ()) {
 			continue;
 		}
@@ -177,8 +176,7 @@ copy_session_routes (
 	 * setup internal return targets.
 	 */
 	rl = s->get_routes ();
-	for (RouteList::iterator i = rl->begin (); i != rl->end (); ++i) {
-		std::shared_ptr<Route> r = *i;
+	for (auto const& r : *rl) {
 		/* skip special busses */
 		if (r->is_master () || r->is_monitor () || r->is_auditioner ()) {
 			continue;
@@ -190,12 +188,12 @@ copy_session_routes (
 		std::map<std::string,XMLNode*>::iterator it = routestate.find (r->name ());
 		if (it == routestate.end ()) {
 			if (opt_verbose) {
-				printf (" -- no match for '%s'\n", (*i)->name ().c_str ());
+				printf (" -- no match for '%s'\n", r->name ().c_str ());
 			}
 			continue;
 		}
 		if (opt_verbose) {
-			printf ("-- found match '%s'\n", (*i)->name ().c_str ());
+			printf ("-- found match '%s'\n", r->name ().c_str ());
 		}
 		XMLNode *state = it->second;
 		// copy state
@@ -204,8 +202,7 @@ copy_session_routes (
 
 	/* iterate over all tracks in the target session.. */
 	rl = s->get_routes ();
-	for (RouteList::iterator i = rl->begin (); i != rl->end (); ++i) {
-		std::shared_ptr<Route> r = *i;
+	for (auto const& r : *rl) {
 		/* skip special busses */
 		if (r->is_master () || r->is_monitor () || r->is_auditioner ()) {
 			continue;
@@ -218,12 +215,12 @@ copy_session_routes (
 		std::map<std::string,XMLNode*>::iterator it = routestate.find (r->name ());
 		if (it == routestate.end ()) {
 			if (opt_verbose) {
-				printf (" -- no match for '%s'\n", (*i)->name ().c_str ());
+				printf (" -- no match for '%s'\n", r->name ().c_str ());
 			}
 			continue;
 		}
 		if (opt_verbose) {
-			printf ("-- found match '%s'\n", (*i)->name ().c_str ());
+			printf ("-- found match '%s'\n", r->name ().c_str ());
 		}
 		XMLNode *state = it->second;
 		/* copy state */

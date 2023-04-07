@@ -632,12 +632,12 @@ PluginPinWidget::add_port_to_table (std::shared_ptr<Port> p, uint32_t r, bool ca
 
 	if (single_source && _session) {
 		/* check if it's an Ardour Send feeding.. */
-		std::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
-		for (ARDOUR::RouteList::const_iterator i = routes->begin (); i != routes->end (); ++i) {
+		std::shared_ptr<ARDOUR::RouteList const> routes = _session->get_routes ();
+		for (auto const& i : *routes) {
 			uint32_t nth = 0;
 			std::shared_ptr<Processor> proc;
 			/* nth_send () takes a processor read-lock */
-			while ((proc = (*i)->nth_send (nth))) {
+			while ((proc = i->nth_send (nth))) {
 				std::shared_ptr<IOProcessor> send = std::dynamic_pointer_cast<IOProcessor> (proc);
 				if (!send || !send->output ()) {
 					++nth;

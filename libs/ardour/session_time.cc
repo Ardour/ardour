@@ -303,9 +303,9 @@ void
 Session::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
 {
 	{
-		std::shared_ptr<RouteList> rl (routes.reader());
+		std::shared_ptr<RouteList const> rl (routes.reader());
 
-		for (auto & r : *rl) {
+		for (auto const& r : *rl) {
 			r->globally_change_time_domain (from, to);
 		}
 	}

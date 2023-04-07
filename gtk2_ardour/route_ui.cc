@@ -890,7 +890,6 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 	}
 
 	MonitorChoice mc;
-	std::shared_ptr<RouteList> rl;
 
 	if (t->monitoring_control()->monitoring_choice() & monitor_choice) {
 		mc = MonitorChoice (t->monitoring_control()->monitoring_choice() & ~monitor_choice);
@@ -900,15 +899,15 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 
 	if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
 		/* Primary-Tertiary-click applies change to all routes */
-		rl = _session->get_routes ();
+		std::shared_ptr<RouteList const> rl = _session->get_routes ();
 		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::NoGroup);
 	} else if (Keyboard::is_group_override_event (ev)) {
 		/* Tertiary-click overrides group */
-		rl.reset (new RouteList);
+		std::shared_ptr<RouteList> rl (new RouteList);
 		rl->push_back (route());
 		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, GROUP_ACTION);
 	} else {
-		rl.reset (new RouteList);
+		std::shared_ptr<RouteList> rl (new RouteList);
 		rl->push_back (route());
 		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::UseGroup);
 	}
@@ -1562,18 +1561,18 @@ RouteUI::solo_safe_button_release (GdkEventButton* ev)
 
 	if (ev->button == 1) {
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
-			std::shared_ptr<RouteList> rl (_session->get_routes());
+			std::shared_ptr<RouteList const> rl (_session->get_routes());
 			if (model) {
 				/* disable solo safe for all routes */
 				DisplaySuspender ds;
-				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-					(*i)->solo_safe_control()->set_value (0.0, Controllable::NoGroup);
+				for (auto const& i : *rl) {
+					i->solo_safe_control()->set_value (0.0, Controllable::NoGroup);
 				}
 			} else {
 				/* enable solo safe for all routes */
 				DisplaySuspender ds;
-				for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-					(*i)->solo_safe_control()->set_value (1.0, Controllable::NoGroup);
+				for (auto const& i : *rl) {
+					i->solo_safe_control()->set_value (1.0, Controllable::NoGroup);
 				}
 			}
 		}

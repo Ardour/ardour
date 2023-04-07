@@ -34,7 +34,7 @@ namespace ARDOUR {
 template<class T> void
 Session::foreach_route (T *obj, void (T::*func)(Route&), bool sort)
 {
-	std::shared_ptr<RouteList> r = routes.reader();
+	std::shared_ptr<RouteList const> r = routes.reader();
 	RouteList public_order (*r);
 
 	if (sort) {
@@ -49,7 +49,7 @@ Session::foreach_route (T *obj, void (T::*func)(Route&), bool sort)
 template<class T> void
 Session::foreach_route (T *obj, void (T::*func)(std::shared_ptr<Route>), bool sort)
 {
-	std::shared_ptr<RouteList> r = routes.reader();
+	std::shared_ptr<RouteList const> r = routes.reader();
 	RouteList public_order (*r);
 
 	if (sort) {
@@ -64,7 +64,7 @@ Session::foreach_route (T *obj, void (T::*func)(std::shared_ptr<Route>), bool so
 template<class T, class A> void
 Session::foreach_route (T *obj, void (T::*func)(Route&, A), A arg1, bool sort)
 {
-	std::shared_ptr<RouteList> r = routes.reader();
+	std::shared_ptr<RouteList const> r = routes.reader();
 	RouteList public_order (*r);
 
 	if (sort) {
@@ -80,10 +80,10 @@ Session::foreach_route (T *obj, void (T::*func)(Route&, A), A arg1, bool sort)
 template<class A> void
 Session::foreach_track (void (Track::*method)(A), A arg)
 {
-	std::shared_ptr<RouteList> r = routes.reader();
+	std::shared_ptr<RouteList const> r = routes.reader();
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); i++) {
-		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
+	for (auto const& i : *r) {
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
 		if (tr) {
 			(tr.get()->*method) (arg);
 		}
@@ -93,10 +93,10 @@ Session::foreach_track (void (Track::*method)(A), A arg)
 template<class A1, class A2> void
 Session::foreach_track (void (Track::*method)(A1, A2), A1 arg1, A2 arg2)
 {
-	std::shared_ptr<RouteList> r = routes.reader();
+	std::shared_ptr<RouteList const> r = routes.reader();
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); i++) {
-		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
+	for (auto const& i : *r) {
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
 		if (tr) {
 			(tr.get()->*method) (arg1, arg2);
 		}
@@ -106,20 +106,19 @@ Session::foreach_track (void (Track::*method)(A1, A2), A1 arg1, A2 arg2)
 template<class A> void
 Session::foreach_route (void (Route::*method)(A), A arg)
 {
-	std::shared_ptr<RouteList> r = routes.reader();
-
-	for (RouteList::iterator i = r->begin(); i != r->end(); i++) {
-		((*i).get()->*method) (arg);
+	std::shared_ptr<RouteList const> r = routes.reader();
+	for (auto const& i : *r) {
+		(i.get()->*method) (arg);
 	}
 }
 
 template<class A1, class A2> void
 Session::foreach_route (void (Route::*method)(A1, A2), A1 arg1, A2 arg2)
 {
-	std::shared_ptr<RouteList> r = routes.reader();
+	std::shared_ptr<RouteList const> r = routes.reader();
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); i++) {
-		((*i).get()->*method) (arg1, arg2);
+	for (auto const& i : *r) {
+		(i.get()->*method) (arg1, arg2);
 	}
 }
 

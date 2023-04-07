@@ -83,11 +83,11 @@ Session::remove_bundle (std::shared_ptr<Bundle> bundle)
 std::shared_ptr<Bundle>
 Session::bundle_by_name (string name) const
 {
-	std::shared_ptr<BundleList> b = _bundles.reader ();
+	std::shared_ptr<BundleList const> b = _bundles.reader ();
 
-	for (BundleList::const_iterator i = b->begin(); i != b->end(); ++i) {
-		if ((*i)->name() == name) {
-			return* i;
+	for (auto const& i : *b) {
+		if (i->name() == name) {
+			return i;
 		}
 	}
 

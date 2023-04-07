@@ -193,10 +193,10 @@ PortMatrix::reconnect_to_routes ()
 {
 	_route_connections.drop_connections ();
 
-	std::shared_ptr<RouteList> routes = _session->get_routes ();
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		(*i)->processors_changed.connect (_route_connections, invalidator (*this), boost::bind (&PortMatrix::route_processors_changed, this, _1), gui_context());
-		(*i)->DropReferences.connect (_route_connections, invalidator (*this), boost::bind (&PortMatrix::routes_changed, this), gui_context());
+	std::shared_ptr<RouteList const> routes = _session->get_routes ();
+	for (auto const& i : *routes) {
+		i->processors_changed.connect (_route_connections, invalidator (*this), boost::bind (&PortMatrix::route_processors_changed, this, _1), gui_context());
+		i->DropReferences.connect (_route_connections, invalidator (*this), boost::bind (&PortMatrix::routes_changed, this), gui_context());
 	}
 }
 

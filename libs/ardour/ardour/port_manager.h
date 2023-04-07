@@ -286,7 +286,7 @@ protected:
 	void                    port_registration_failure (const std::string& portname);
 
 	/** List of ports to be used between \ref cycle_start() and \ref cycle_end() */
-	std::shared_ptr<Ports> _cycle_ports;
+	std::shared_ptr<Ports const> _cycle_ports;
 
 	void silence (pframes_t nframes, Session* s = 0);
 	void silence_outputs (pframes_t nframes);

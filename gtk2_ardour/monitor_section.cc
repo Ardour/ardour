@@ -1194,7 +1194,7 @@ bool
 MonitorSection::cancel_isolate (GdkEventButton*)
 {
 	if (_session) {
-		std::shared_ptr<RouteList> rl (_session->get_routes ());
+		std::shared_ptr<RouteList const> rl (_session->get_routes ());
 		_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_isolate_control), 0.0, Controllable::NoGroup);
 	}
 
@@ -1360,23 +1360,23 @@ MonitorSection::output_press (GdkEventButton *ev)
 
 		ARDOUR::BundleList current = _route->output()->bundles_connected ();
 
-		std::shared_ptr<ARDOUR::BundleList> b = _session->bundles ();
+		std::shared_ptr<ARDOUR::BundleList const> b = _session->bundles ();
 
 		/* give user bundles first chance at being in the menu */
 
-		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-			if (std::dynamic_pointer_cast<UserBundle> (*i)) {
-				maybe_add_bundle_to_output_menu (*i, current);
+		for (auto const& i : *b) {
+			if (std::dynamic_pointer_cast<UserBundle> (i)) {
+				maybe_add_bundle_to_output_menu (i, current);
 			}
 		}
 
-		for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-			if (std::dynamic_pointer_cast<UserBundle> (*i) == 0) {
-				maybe_add_bundle_to_output_menu (*i, current);
+		for (auto const& i : *b) {
+			if (std::dynamic_pointer_cast<UserBundle> (i) == 0) {
+				maybe_add_bundle_to_output_menu (i, current);
 			}
 		}
 
-		std::shared_ptr<ARDOUR::RouteList> routes = _session->get_routes ();
+		std::shared_ptr<ARDOUR::RouteList const> routes = _session->get_routes ();
 		RouteList copy = *routes;
 		copy.sort (RouteCompareByName ());
 		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {

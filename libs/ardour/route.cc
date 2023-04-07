@@ -771,15 +771,15 @@ Route::push_solo_isolate_upstream (int32_t delta)
 {
 	/* forward propagate solo-isolate status to everything fed by this route, but not those via sends only */
 
-	std::shared_ptr<RouteList> routes = _session.get_routes ();
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
+	std::shared_ptr<RouteList const> routes = _session.get_routes ();
+	for (auto const& i : *routes) {
 
-		if ((*i).get() == this || !(*i)->can_solo()) {
+		if (i.get() == this || !i->can_solo()) {
 			continue;
 		}
 
-		if (feeds (*i)) {
-			(*i)->solo_isolate_control()->mod_solo_isolated_by_upstream (delta);
+		if (feeds (i)) {
+			i->solo_isolate_control()->mod_solo_isolated_by_upstream (delta);
 		}
 	}
 }
@@ -3688,13 +3688,13 @@ Route::output_effectively_connected_real () const
 	}
 
 	/* now follow connections downstream */
-	std::shared_ptr<RouteList> routes = _session.get_routes ();
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		Route* rp = (*i).get();
+	std::shared_ptr<RouteList const> routes = _session.get_routes ();
+	for (auto const& i : *routes) {
+		Route* rp = i.get();
 		if (rp == this) {
 			continue;
 		}
-		if (!(*i)->input()->connected_to (_output)) {
+		if (!i->input()->connected_to (_output)) {
 			continue;
 		}
 		if (_connection_cache.find (rp) != _connection_cache.end ()) {
@@ -3706,7 +3706,7 @@ Route::output_effectively_connected_real () const
 		_connection_cache[rp] = false;
 
 		/* recurse downstream, check connected route */
-		bool rv = (*i)->output_effectively_connected_real ();
+		bool rv = i->output_effectively_connected_real ();
 		_connection_cache[rp] = rv;
 		if (rv) {
 			return true;
@@ -3767,17 +3767,17 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 	if (_solo_control->soloed_by_others_upstream() || _solo_isolate_control->solo_isolated_by_upstream()) {
 		int sbou = 0;
 		int ibou = 0;
-		std::shared_ptr<RouteList> routes = _session.get_routes ();
+		std::shared_ptr<RouteList const> routes = _session.get_routes ();
 		if (_input->connected()) {
-			for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-				if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+			for (auto const& i : *routes) {
+				if (i.get() == this || i->is_master() || i->is_monitor() || i->is_auditioner()) {
 					continue;
 				}
-				if ((*i)->direct_feeds_according_to_reality (std::dynamic_pointer_cast<Route> (shared_from_this()))) {
-					if ((*i)->soloed()) {
+				if (i->direct_feeds_according_to_reality (std::dynamic_pointer_cast<Route> (shared_from_this()))) {
+					if (i->soloed()) {
 						++sbou;
 					}
-					if ((*i)->solo_isolate_control()->solo_isolated()) {
+					if (i->solo_isolate_control()->solo_isolated()) {
 						++ibou;
 					}
 				}
@@ -3812,17 +3812,17 @@ Route::input_change_handler (IOChange change, void * /*src*/)
 
 		// Session::route_solo_changed  does not propagate indirect solo-changes
 		// propagate downstream to tracks
-		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-			if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+		for (auto const& i : *routes) {
+			if (i.get() == this || i->is_master() || i->is_monitor() || i->is_auditioner()) {
 				continue;
 			}
-			bool does_feed = feeds (*i);
+			bool does_feed = feeds (i);
 			if (delta <= 0 && does_feed) {
-				(*i)->solo_control()->mod_solo_by_others_upstream (delta);
+				i->solo_control()->mod_solo_by_others_upstream (delta);
 			}
 
 			if (idelta < 0 && does_feed) {
-				(*i)->solo_isolate_control()->mod_solo_isolated_by_upstream (-1);
+				i->solo_isolate_control()->mod_solo_isolated_by_upstream (-1);
 			}
 		}
 	}
@@ -3866,14 +3866,14 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 			 * ideally the input_change_handler() of the other route
 			 * would propagate the change to us.
 			 */
-			std::shared_ptr<RouteList> routes = _session.get_routes ();
+			std::shared_ptr<RouteList const> routes = _session.get_routes ();
 			if (_output->connected()) {
-				for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-					if ((*i).get() == this || (*i)->is_master() || (*i)->is_monitor() || (*i)->is_auditioner()) {
+				for (auto const& i : *routes) {
+					if (i.get() == this || i->is_master() || i->is_monitor() || i->is_auditioner()) {
 						continue;
 					}
-					if (direct_feeds_according_to_reality (*i)) {
-						if ((*i)->soloed()) {
+					if (direct_feeds_according_to_reality (i)) {
+						if (i->soloed()) {
 							++sbod;
 							break;
 						}
@@ -3888,12 +3888,12 @@ Route::output_change_handler (IOChange change, void * /*src*/)
 				// Session::route_solo_changed() does not propagate indirect solo-changes
 				// propagate upstream to tracks
 				std::shared_ptr<Route> shared_this = std::dynamic_pointer_cast<Route> (shared_from_this());
-				for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-					if ((*i).get() == this || !can_solo()) {
+				for (auto const& i : *routes) {
+					if (i.get() == this || !can_solo()) {
 						continue;
 					}
-					if (delta != 0 && (*i)->feeds (shared_this)) {
-						(*i)->solo_control()->mod_solo_by_others_downstream (delta);
+					if (delta != 0 && i->feeds (shared_this)) {
+						i->solo_control()->mod_solo_by_others_downstream (delta);
 					}
 				}
 

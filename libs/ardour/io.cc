@@ -1515,27 +1515,27 @@ IO::bundles_connected ()
 	BundleList bundles;
 
 	/* Session bundles */
-	std::shared_ptr<ARDOUR::BundleList> b = _session.bundles ();
-	for (ARDOUR::BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if ((*i)->connected_to (_bundle, _session.engine())) {
-			bundles.push_back (*i);
+	std::shared_ptr<ARDOUR::BundleList const> b = _session.bundles ();
+	for (auto const& i : *b) {
+		if (i->connected_to (_bundle, _session.engine())) {
+			bundles.push_back (i);
 		}
 	}
 
 	/* Route bundles */
 
-	std::shared_ptr<ARDOUR::RouteList> r = _session.get_routes ();
+	std::shared_ptr<ARDOUR::RouteList const> r = _session.get_routes ();
 
 	if (_direction == Input) {
-		for (ARDOUR::RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if ((*i)->output()->bundle()->connected_to (_bundle, _session.engine())) {
-				bundles.push_back ((*i)->output()->bundle());
+		for (auto const& i : *r) {
+			if (i->output()->bundle()->connected_to (_bundle, _session.engine())) {
+				bundles.push_back (i->output()->bundle());
 			}
 		}
 	} else {
-		for (ARDOUR::RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			if ((*i)->input()->bundle()->connected_to (_bundle, _session.engine())) {
-				bundles.push_back ((*i)->input()->bundle());
+		for (auto const& i : *r) {
+			if (i->input()->bundle()->connected_to (_bundle, _session.engine())) {
+				bundles.push_back (i->input()->bundle());
 			}
 		}
 	}

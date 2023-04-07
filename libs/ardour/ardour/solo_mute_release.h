@@ -39,8 +39,8 @@ public:
 	void set_exclusive (bool exclusive = true);
 
 	void set (std::shared_ptr<Route>);
-	void set (std::shared_ptr<RouteList>);
-	void set (std::shared_ptr<RouteList>, std::shared_ptr<RouteList>);
+	void set (std::shared_ptr<RouteList const>);
+	void set (std::shared_ptr<RouteList const>, std::shared_ptr<RouteList const>);
 	void set (std::shared_ptr<std::list<std::string> >);
 
 	void release (Session*, bool mute) const;
@@ -49,8 +49,8 @@ private:
 	bool active;
 	bool exclusive;
 
-	std::shared_ptr<RouteList> routes_on;
-	std::shared_ptr<RouteList> routes_off;
+	std::shared_ptr<RouteList const> routes_on;
+	std::shared_ptr<RouteList const> routes_off;
 
 	std::shared_ptr<std::list<std::string> > port_monitors;
 };

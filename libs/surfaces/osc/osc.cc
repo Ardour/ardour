@@ -3377,13 +3377,13 @@ OSC::route_get_receives(lo_message msg) {
 		return -1;
 	}
 
-	std::shared_ptr<RouteList> route_list = session->get_routes();
+	std::shared_ptr<RouteList const> route_list = session->get_routes();
 
 	lo_message reply = lo_message_new();
 	lo_message_add_int32(reply, rid);
 
-	for (RouteList::iterator i = route_list->begin(); i != route_list->end(); ++i) {
-		std::shared_ptr<Route> tr = std::dynamic_pointer_cast<Route> (*i);
+	for (auto const& i : *route_list) {
+		std::shared_ptr<Route> tr = std::dynamic_pointer_cast<Route> (i);
 		if (!tr) {
 			continue;
 		}

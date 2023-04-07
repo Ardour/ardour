@@ -630,14 +630,16 @@ GraphChain::GraphChain (GraphNodeList const& nodelist, GraphEdges const& edges)
 
 		/* Set up ni's activation set */
 		if (has_output) {
-			std::shared_ptr<GraphActivision::ActivationMap> m (ni->_activation_set.reader ());
+			std::shared_ptr<GraphActivision::ActivationMap const> m (ni->_activation_set.reader ());
 			for (auto const& i : fed_from_r) {
-				auto it = (*m)[this].insert (i);
+				auto mm = const_cast<GraphActivision::ActivationMap*> (&(*m));
+				auto it = (*mm)[this].insert (i);
 				assert (it.second);
 
 				/* Increment the refcount of any node that we directly feed */
-				std::shared_ptr<GraphActivision::RefCntMap> a ((*it.first)->_init_refcount.reader ());
-				(*a)[this] += 1;
+				std::shared_ptr<GraphActivision::RefCntMap const> a ((*it.first)->_init_refcount.reader ());
+				auto aa = const_cast<GraphActivision::RefCntMap*> (&(*a));
+				(*aa)[this] += 1;
 			}
 		}
 

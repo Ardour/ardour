@@ -219,7 +219,7 @@ DiskReader::buffer_load () const
 	 * are so low compared to audio, just use the audio value here.
 	 */
 
-	std::shared_ptr<ChannelList> c = channels.reader ();
+	std::shared_ptr<ChannelList const> c = channels.reader ();
 
 	if (c->empty ()) {
 		/* no channels, so no buffers, so completely full and ready to playback, sir! */
@@ -233,10 +233,10 @@ DiskReader::buffer_load () const
 void
 DiskReader::adjust_buffering ()
 {
-	std::shared_ptr<ChannelList> c = channels.reader ();
+	std::shared_ptr<ChannelList const> c = channels.reader ();
 
-	for (ChannelList::iterator chan = c->begin (); chan != c->end (); ++chan) {
-		(*chan)->resize (_session.butler ()->audio_playback_buffer_size ());
+	for (auto const& chan : *c) {
+		chan->resize (_session.butler ()->audio_playback_buffer_size ());
 	}
 }
 
@@ -273,13 +273,13 @@ DiskReader::use_playlist (DataType dt, std::shared_ptr<Playlist> playlist)
 void
 DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool result_required)
 {
-	uint32_t                       n;
-	std::shared_ptr<ChannelList> c = channels.reader ();
-	ChannelList::iterator          chan;
-	sampleoffset_t                 disk_samples_to_consume;
-	MonitorState                   ms = _track.monitoring_state ();
-	const bool                     midi_only = (c->empty() || !_playlists[DataType::AUDIO]);
-	bool                           no_disk_output = _no_disk_output.load () != 0;
+	uint32_t                           n;
+	std::shared_ptr<ChannelList const> c = channels.reader ();
+	ChannelList::const_iterator        chan;
+	sampleoffset_t                     disk_samples_to_consume;
+	MonitorState                       ms = _track.monitoring_state ();
+	const bool                         midi_only = (c->empty() || !_playlists[DataType::AUDIO]);
+	bool                               no_disk_output = _no_disk_output.load () != 0;
 
 	if (!check_active()) {
 		return;
@@ -358,9 +358,9 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		/* no need for actual disk data, just advance read pointer */
 
 		if (!still_locating || no_disk_output) {
-			for (ChannelList::iterator chan = c->begin (); chan != c->end (); ++chan) {
-				assert ((*chan)->rbuf);
-				(*chan)->rbuf->increment_read_ptr (disk_samples_to_consume);
+			for (auto const& chan : *c) {
+				assert (chan->rbuf);
+				chan->rbuf->increment_read_ptr (disk_samples_to_consume);
 			}
 		}
 
@@ -533,7 +533,7 @@ DiskReader::declick_in_progress () const
 void
 DiskReader::configuration_changed ()
 {
-	std::shared_ptr<ChannelList> c = channels.reader ();
+	std::shared_ptr<ChannelList const> c = channels.reader ();
 	if (!c->empty ()) {
 		ReaderChannelInfo* chaninfo = dynamic_cast<ReaderChannelInfo*> (c->front ());
 		if (!chaninfo->initialized) {
@@ -553,7 +553,7 @@ DiskReader::pending_overwrite () const
 void
 DiskReader::set_pending_overwrite (OverwriteReason why)
 {
-	std::shared_ptr<ChannelList> c = channels.reader ();
+	std::shared_ptr<ChannelList const> c = channels.reader ();
 
 	/* called from audio thread, so we can use the read ptr and playback sample as we wish */
 
@@ -567,7 +567,7 @@ DiskReader::set_pending_overwrite (OverwriteReason why)
 			 * ::refill_audio() and ::overwrite_existing_audio() expect
 			 * that read-pointers and fill_level of all buffers are in sync.
 			 */
-			ChannelList::iterator chan = c->begin ();
+			ChannelList::const_iterator chan = c->begin ();
 			for (++chan; chan != c->end (); ++chan) {
 				ReaderChannelInfo* chaninfo = dynamic_cast<ReaderChannelInfo*> (*chan);
 				if (!chaninfo->initialized) {
@@ -678,7 +678,7 @@ DiskReader::overwrite_existing_audio ()
 	 * simply replace the contents of the buffer.
 	 */
 
-	std::shared_ptr<ChannelList> c = channels.reader ();
+	std::shared_ptr<ChannelList const> c = channels.reader ();
 
 	if (c->empty ()) {
 		return true;
@@ -716,10 +716,10 @@ DiskReader::overwrite_existing_audio ()
 	bool                        ret = true;
 	samplepos_t                 start;
 
-	for (ChannelList::iterator chan = c->begin (); chan != c->end (); ++chan, ++n) {
+	for (auto const& chan : *c) {
 
-		Sample*            buf = (*chan)->rbuf->buffer ();
-		ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (*chan);
+		Sample*            buf = chan->rbuf->buffer ();
+		ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (chan);
 
 		/* Note that @p start is passed by reference and will be
 		 * updated by the ::audio_read() call
@@ -744,8 +744,8 @@ DiskReader::overwrite_existing_audio ()
 		}
 
 		if (!rci->initialized) {
-			DEBUG_TRACE (DEBUG::DiskIO, string_compose ("Init ReaderChannel '%1' overwriting at: %2, avail: %3\n", name (), overwrite_sample, (*chan)->rbuf->read_space ()));
-			if ((*chan)->rbuf->read_space () > 0) {
+			DEBUG_TRACE (DEBUG::DiskIO, string_compose ("Init ReaderChannel '%1' overwriting at: %2, avail: %3\n", name (), overwrite_sample, chan->rbuf->read_space ()));
+			if (chan->rbuf->read_space () > 0) {
 				rci->initialized = true;
 			}
 		}
@@ -818,7 +818,7 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 	const bool read_reversed = !_session.transport_will_roll_forwards ();
 	const bool read_loop     = (bool)_loop_location;
 
-	std::shared_ptr<ChannelList> c = channels.reader ();
+	std::shared_ptr<ChannelList const> c = channels.reader ();
 
 	if (c->empty ()) {
 		return 0;
@@ -853,9 +853,9 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 		return 0;
 	}
 
-	for (ChannelList::iterator chan = c->begin (); chan != c->end (); ++chan) {
-		(*chan)->rbuf->reset ();
-		assert ((*chan)->rbuf->reserved_size () == 0);
+	for (auto const& chan : *c) {
+		chan->rbuf->reset ();
+		assert (chan->rbuf->reserved_size () == 0);
 	}
 
 	/* move the intended read target, so that after the refill is done,
@@ -907,8 +907,8 @@ DiskReader::seek (samplepos_t sample, bool complete_refill)
 
 		shift = abs (shift);
 
-		for (ChannelList::iterator chan = c->begin (); chan != c->end (); ++chan) {
-			(*chan)->rbuf->increment_read_ptr (shift);
+		for (auto const& chan : *c) {
+			chan->rbuf->increment_read_ptr (shift);
 		}
 	}
 
@@ -920,11 +920,10 @@ DiskReader::can_internal_playback_seek (sampleoffset_t distance)
 {
 	/* 1. Audio */
 
-	ChannelList::iterator          chan;
-	std::shared_ptr<ChannelList> c = channels.reader ();
+	std::shared_ptr<ChannelList const> c = channels.reader ();
 
-	for (chan = c->begin (); chan != c->end (); ++chan) {
-		if (!(*chan)->rbuf->can_seek (distance)) {
+	for (auto const& chan : *c) {
+		if (!chan->rbuf->can_seek (distance)) {
 			return false;
 		}
 	}
@@ -943,13 +942,12 @@ DiskReader::internal_playback_seek (sampleoffset_t distance)
 
 	sampleoffset_t off = distance;
 
-	ChannelList::iterator          chan;
-	std::shared_ptr<ChannelList> c = channels.reader ();
-	for (chan = c->begin (); chan != c->end (); ++chan) {
+	std::shared_ptr<ChannelList const> c = channels.reader ();
+	for (auto const& chan : *c) {
 		if (distance < 0) {
-			off = 0 - (sampleoffset_t) (*chan)->rbuf->decrement_read_ptr (::llabs (distance));
+			off = 0 - (sampleoffset_t) chan->rbuf->decrement_read_ptr (::llabs (distance));
 		} else {
-			off = (*chan)->rbuf->increment_read_ptr (distance);
+			off = chan->rbuf->increment_read_ptr (distance);
 		}
 	}
 
@@ -1159,11 +1157,11 @@ DiskReader::refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gai
 		return 0;
 	}
 
-	int32_t                        ret = 0;
-	samplecnt_t                    zero_fill;
-	uint32_t                       chan_n;
-	ChannelList::iterator          i;
-	std::shared_ptr<ChannelList> c = channels.reader ();
+	int32_t                            ret = 0;
+	samplecnt_t                        zero_fill;
+	uint32_t                           chan_n;
+	ChannelList::const_iterator        i;
+	std::shared_ptr<ChannelList const> c = channels.reader ();
 
 	_last_read_reversed = reversed;
 
@@ -1936,7 +1934,7 @@ DiskReader::setup_preloop_buffer ()
 		return;
 	}
 
-	std::shared_ptr<ChannelList> c = channels.reader ();
+	std::shared_ptr<ChannelList const> c = channels.reader ();
 
 	if (c->empty () || !_playlists[DataType::AUDIO]) {
 		return;
@@ -1950,8 +1948,8 @@ DiskReader::setup_preloop_buffer ()
 
 	uint32_t channel = 0;
 
-	for (ChannelList::iterator chan = c->begin (); chan != c->end (); ++chan, ++channel) {
-		ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (*chan);
+	for (auto const& chan : *c) {
+		ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (chan);
 
 		rci->resize_preloop (loop_fade_length);
 
@@ -1960,5 +1958,6 @@ DiskReader::setup_preloop_buffer ()
 		} else {
 			memset (rci->pre_loop_buffer, 0, sizeof (Sample) * loop_fade_length);
 		}
+		++channel;
 	}
 }

@@ -323,7 +323,7 @@ public:
 	void refresh_disk_space ();
 
 	int load_routes (const XMLNode&, int);
-	std::shared_ptr<RouteList> get_routes() const {
+	std::shared_ptr<RouteList const> get_routes() const {
 		return routes.reader ();
 	}
 
@@ -356,7 +356,7 @@ public:
 
 	bool plot_process_graph (std::string const& file_name) const;
 
-	std::shared_ptr<BundleList> bundles () {
+	std::shared_ptr<BundleList const> bundles () {
 		return _bundles.reader ();
 	}
 
@@ -934,14 +934,14 @@ public:
 	bool unload_io_plugin (std::shared_ptr<IOPlug>);
 
 	std::shared_ptr<IOPlug> nth_io_plug (uint32_t n) {
-		std::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
+		std::shared_ptr<IOPlugList const> iop (_io_plugins.reader ());
 		if (n < iop->size ()) {
 			return (*iop)[n];
 		}
 		return std::shared_ptr<IOPlug> ();
 	}
 
-	std::shared_ptr<IOPlugList> io_plugs () const {
+	std::shared_ptr<IOPlugList const> io_plugs () const {
 		return _io_plugins.reader ();
 	}
 
@@ -966,7 +966,7 @@ public:
 	bool solo_selection_active ();
 	void solo_selection (StripableList&, bool);
 
-	void clear_all_solo_state (std::shared_ptr<RouteList>);
+	void clear_all_solo_state (std::shared_ptr<RouteList const>);
 	void prepare_momentary_solo (SoloMuteRelease* smr = NULL, bool exclusive = false, std::shared_ptr<Route> route = std::shared_ptr<Route> ());
 
 	static const SessionEvent::RTeventCallback rt_cleanup;
@@ -1980,7 +1980,7 @@ private:
 	void route_solo_changed (bool self_solo_change, PBD::Controllable::GroupControlDisposition group_override, std::weak_ptr<Route>);
 	void route_solo_isolated_changed (std::weak_ptr<Route>);
 
-	void update_route_solo_state (std::shared_ptr<RouteList> r = std::shared_ptr<RouteList>());
+	void update_route_solo_state (std::shared_ptr<RouteList const> r = std::shared_ptr<RouteList const>());
 
 	void listen_position_changed ();
 	void solo_control_mode_changed ();
@@ -2239,8 +2239,8 @@ private:
 
 	/* realtime "apply to set of routes" operations */
 	template<typename T> SessionEvent*
-		get_rt_event (std::shared_ptr<RouteList> rl, T targ, SessionEvent::RTeventCallback after, PBD::Controllable::GroupControlDisposition group_override,
-		              void (Session::*method) (std::shared_ptr<RouteList>, T, PBD::Controllable::GroupControlDisposition)) {
+		get_rt_event (std::shared_ptr<RouteList const> rl, T targ, SessionEvent::RTeventCallback after, PBD::Controllable::GroupControlDisposition group_override,
+		              void (Session::*method) (std::shared_ptr<RouteList const>, T, PBD::Controllable::GroupControlDisposition)) {
 		SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 		ev->rt_slot = boost::bind (method, this, rl, targ, group_override);
 		ev->rt_return = after;
@@ -2251,8 +2251,8 @@ private:
 
 	/* specialized version realtime "apply to set of routes" operations */
 	template<typename T1, typename T2> SessionEvent*
-		get_rt_event (std::shared_ptr<RouteList> rl, T1 t1arg, T2 t2arg, SessionEvent::RTeventCallback after, PBD::Controllable::GroupControlDisposition group_override,
-		              void (Session::*method) (std::shared_ptr<RouteList>, T1, T2, PBD::Controllable::GroupControlDisposition)) {
+		get_rt_event (std::shared_ptr<RouteList const> rl, T1 t1arg, T2 t2arg, SessionEvent::RTeventCallback after, PBD::Controllable::GroupControlDisposition group_override,
+		              void (Session::*method) (std::shared_ptr<RouteList const>, T1, T2, PBD::Controllable::GroupControlDisposition)) {
 		SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 		ev->rt_slot = boost::bind (method, this, rl, t1arg, t2arg, group_override);
 		ev->rt_return = after;
@@ -2272,7 +2272,7 @@ private:
 	}
 
 	void rt_set_controls (std::shared_ptr<WeakControlList>, double val, PBD::Controllable::GroupControlDisposition group_override);
-	void rt_clear_all_solo_state (std::shared_ptr<RouteList>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
+	void rt_clear_all_solo_state (std::shared_ptr<RouteList const>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
 
 	void setup_midi_machine_control ();
 

@@ -782,7 +782,6 @@ LuaBindings::common (lua_State* L)
 		 * shared_ptr<const T> and shared_ptr<T> in the same class.
 		 */
 		.addStaticFunction ("read", &Temporal::TempoMap::read)
-		.addStaticFunction ("fetch_writable", &Temporal::TempoMap::fetch_writable)
 		.addStaticFunction ("write_copy", &Temporal::TempoMap::write_copy)
 		.addStaticFunction ("update", &Temporal::TempoMap::update)
 		.addStaticFunction ("abort_update", &Temporal::TempoMap::abort_update)

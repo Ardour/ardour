@@ -296,10 +296,9 @@ PortEngineSharedImpl::get_ports (
 		}
 	}
 
-	std::shared_ptr<PortIndex> p = _ports.reader ();
+	std::shared_ptr<PortIndex const> p = _ports.reader ();
 
-	for (PortIndex::const_iterator i = p->begin (); i != p->end (); ++i) {
-		BackendPortPtr port = *i;
+	for (auto const& port : *p) {
 		if ((port->type () == type) && flags == (port->flags () & flags)) {
 			if (!use_regexp || !regexec (&port_regex, port->name ().c_str (), 0, NULL, 0)) {
 				port_names.push_back (port->name ());
@@ -328,10 +327,9 @@ PortEngineSharedImpl::port_is_physical (PortEngine::PortHandle port) const
 void
 PortEngineSharedImpl::get_physical_outputs (DataType type, std::vector<std::string>& port_names)
 {
-	std::shared_ptr<PortIndex> p = _ports.reader();
+	std::shared_ptr<PortIndex const> p = _ports.reader();
 
-	for (PortIndex::iterator i = p->begin (); i != p->end (); ++i) {
-		BackendPortPtr port = *i;
+	for (auto const& port : *p) {
 		if ((port->type () == type) && port->is_input () && port->is_physical ()) {
 			port_names.push_back (port->name ());
 		}
@@ -341,10 +339,9 @@ PortEngineSharedImpl::get_physical_outputs (DataType type, std::vector<std::stri
 void
 PortEngineSharedImpl::get_physical_inputs (DataType type, std::vector<std::string>& port_names)
 {
-	std::shared_ptr<PortIndex> p = _ports.reader();
+	std::shared_ptr<PortIndex const> p = _ports.reader();
 
-	for (PortIndex::iterator i = p->begin (); i != p->end (); ++i) {
-		BackendPortPtr port = *i;
+	for (auto const& port : *p) {
 		if ((port->type () == type) && port->is_output () && port->is_physical ()) {
 			port_names.push_back (port->name ());
 		}
@@ -357,10 +354,9 @@ PortEngineSharedImpl::n_physical_outputs () const
 	int n_midi = 0;
 	int n_audio = 0;
 
-	std::shared_ptr<PortIndex> p = _ports.reader();
+	std::shared_ptr<PortIndex const> p = _ports.reader();
 
-	for (PortIndex::const_iterator i = p->begin (); i != p->end (); ++i) {
-		BackendPortPtr port = *i;
+	for (auto const& port : *p) {
 		if (port->is_output () && port->is_physical ()) {
 			switch (port->type ()) {
 			case DataType::AUDIO: ++n_audio; break;
@@ -381,10 +377,9 @@ PortEngineSharedImpl::n_physical_inputs () const
 	int n_midi = 0;
 	int n_audio = 0;
 
-	std::shared_ptr<PortIndex> p = _ports.reader();
+	std::shared_ptr<PortIndex const> p = _ports.reader();
 
-	for (PortIndex::const_iterator i = p->begin (); i != p->end (); ++i) {
-		BackendPortPtr port = *i;
+	for (auto const& port : *p) {
 		if (port->is_input () && port->is_physical ()) {
 			switch (port->type ()) {
 			case DataType::AUDIO: ++n_audio; break;
@@ -831,9 +826,9 @@ PortEngineSharedImpl::update_system_port_latencies ()
 void
 PortEngineSharedImpl::list_ports () const
 {
-	std::shared_ptr<PortIndex> p = _ports.reader ();
-	for (PortIndex::const_iterator i = p->begin (); i != p->end (); ++i) {
-		std::cout << (*i)->name () << "\n";
+	std::shared_ptr<PortIndex const> p = _ports.reader ();
+	for (auto const& port : *p) {
+		std::cout << port->name () << "\n";
 	}
 }
 #endif

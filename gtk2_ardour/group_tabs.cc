@@ -218,7 +218,7 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 			if (_dragging_new_tab) {
 				run_new_group_dialog (&routes, false);
 			} else {
-				std::shared_ptr<RouteList> r = _session->get_routes ();
+				std::shared_ptr<RouteList const> r = _session->get_routes ();
 				/* First add new ones, then remove old ones.
 				 * We cannot allow the group to become temporarily empty, because
 				 * Session::route_removed_from_route_group() will delete empty groups.
@@ -227,16 +227,15 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 					/* RouteGroup::add () ignores routes already present in the set */
 					_dragging->group->add (*i);
 				}
-				for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
+				for (auto const& i : *r) {
 
 					bool const was_in_tab = find (
-						_initial_dragging_routes.begin(), _initial_dragging_routes.end(), *i
-						) != _initial_dragging_routes.end ();
+						_initial_dragging_routes.begin(), _initial_dragging_routes.end(), i) != _initial_dragging_routes.end ();
 
-					bool const now_in_tab = find (routes.begin(), routes.end(), *i) != routes.end();
+					bool const now_in_tab = find (routes.begin(), routes.end(), i) != routes.end();
 
 					if (was_in_tab && !now_in_tab) {
-						_dragging->group->remove (*i);
+						_dragging->group->remove (i);
 					}
 				}
 
@@ -584,12 +583,12 @@ GroupTabs::get_rec_enabled ()
 		return rec_enabled;
 	}
 
-	std::shared_ptr<RouteList> rl = _session->get_routes ();
+	std::shared_ptr<RouteList const> rl = _session->get_routes ();
 
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		std::shared_ptr<Track> trk (std::dynamic_pointer_cast<Track> (*i));
+	for (auto const& i : *rl) {
+		std::shared_ptr<Track> trk (std::dynamic_pointer_cast<Track> (i));
 		if (trk && trk->rec_enable_control()->get_value()) {
-			rec_enabled.push_back (*i);
+			rec_enabled.push_back (i);
 		}
 	}
 

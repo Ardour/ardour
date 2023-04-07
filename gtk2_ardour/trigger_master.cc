@@ -727,9 +727,8 @@ CueMaster::context_menu ()
 void
 CueMaster::get_boxen (TriggerBoxList &boxlist)
 {
-	std::shared_ptr<RouteList> rl = _session->get_routes();
-	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
-		std::shared_ptr<Route> route = *r;
+	std::shared_ptr<RouteList const> rl = _session->get_routes();
+	for (auto const& route : *rl) {
 		std::shared_ptr<TriggerBox> box = route->triggerbox();
 #warning @Ben disambiguate processor *active* vs *visibility*
 		if (box /*&& box.active*/) {

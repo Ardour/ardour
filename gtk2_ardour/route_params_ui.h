@@ -140,7 +140,7 @@ private:
 	Glib::RefPtr<Gtk::ListStore> route_display_model;
 
 
-	void add_routes (ARDOUR::RouteList&);
+	void add_routes (ARDOUR::RouteList const&);
 
 	void route_property_changed (const PBD::PropertyChange&, std::weak_ptr<ARDOUR::Route> route);
 	void route_removed (std::weak_ptr<ARDOUR::Route> route);

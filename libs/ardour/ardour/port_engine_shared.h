@@ -229,13 +229,13 @@ protected:
 	SerializedRCUManager<PortRegistry> _portregistry;
 
 	bool valid_port (BackendPortHandle port) const {
-		std::shared_ptr<PortRegistry> p = _portregistry.reader ();
+		std::shared_ptr<PortRegistry const> p = _portregistry.reader ();
 		return p->find (port) != p->end ();
 	}
 
 	BackendPortPtr find_port (const std::string& port_name) const {
-		std::shared_ptr<PortMap> p  = _portmap.reader ();
-		PortMap::const_iterator    it = p->find (port_name);
+		std::shared_ptr<PortMap const> p  = _portmap.reader ();
+		PortMap::const_iterator        it = p->find (port_name);
 		if (it == p->end ()) {
 			return BackendPortPtr();
 		}

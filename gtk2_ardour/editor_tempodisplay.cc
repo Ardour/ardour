@@ -756,7 +756,7 @@ Editor::real_remove_meter_marker (Temporal::MeterPoint const * section)
 Temporal::TempoMap::WritableSharedPtr
 Editor::begin_tempo_mapping ()
 {
-	TempoMap::WritableSharedPtr wmap = TempoMap::fetch_writable ();
+	TempoMap::WritableSharedPtr wmap = TempoMap::write_copy ();
 	reassociate_metric_markers (wmap);
 	(void) Temporal::DomainSwapInformation::start (Temporal::BeatTime);
 	_session->globally_change_time_domain (Temporal::BeatTime, Temporal::AudioTime);
@@ -787,7 +787,7 @@ Editor::commit_tempo_mapping (TempoMap::WritableSharedPtr& new_map)
 Temporal::TempoMap::WritableSharedPtr
 Editor::begin_tempo_map_edit ()
 {
-	TempoMap::WritableSharedPtr wmap = TempoMap::fetch_writable ();
+	TempoMap::WritableSharedPtr wmap = TempoMap::write_copy ();
 	reassociate_metric_markers (wmap);
 	return wmap;
 }

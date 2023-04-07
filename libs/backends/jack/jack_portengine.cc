@@ -189,8 +189,8 @@ PortEngine::PortPtr
 JACKAudioBackend::get_port_by_name (const std::string& name) const
 {
 	{
-		std::shared_ptr<JackPorts> ports = _jack_ports.reader ();
-		JackPorts::iterator p = ports->find (name);
+		std::shared_ptr<JackPorts const> ports = _jack_ports.reader ();
+		JackPorts::const_iterator p = ports->find (name);
 
 		if (p != ports->end()) {
 			return p->second;

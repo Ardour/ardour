@@ -246,7 +246,7 @@ Butler::thread_work ()
 			_session.the_auditioner ()->seek_response (audition_seek);
 		}
 
-		std::shared_ptr<RouteList> rl = _session.get_routes ();
+		std::shared_ptr<RouteList const> rl = _session.get_routes ();
 
 		RouteList rl_with_auditioner = *rl;
 		rl_with_auditioner.push_back (_session.the_auditioner ());
@@ -336,11 +336,11 @@ Butler::thread_work ()
 }
 
 bool
-Butler::flush_tracks_to_disk_normal (std::shared_ptr<RouteList> rl, uint32_t& errors)
+Butler::flush_tracks_to_disk_normal (std::shared_ptr<RouteList const> rl, uint32_t& errors)
 {
 	bool disk_work_outstanding = false;
 
-	for (RouteList::iterator i = rl->begin (); !transport_work_requested () && should_run && i != rl->end (); ++i) {
+	for (RouteList::const_iterator i = rl->begin (); !transport_work_requested () && should_run && i != rl->end (); ++i) {
 		// cerr << "write behind for " << (*i)->name () << endl;
 
 		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);

@@ -148,7 +148,7 @@ AudioEngine::split_cycle (pframes_t nframes)
 {
 	/* caller must hold process lock */
 
-	std::shared_ptr<Ports> p = _ports.reader();
+	std::shared_ptr<Ports const> p = _ports.reader();
 
 	/* This is mainly for the benefit of rt-control ports (MTC, MClk)
 	 *
@@ -171,8 +171,8 @@ AudioEngine::split_cycle (pframes_t nframes)
 	 * be relaxed, ignore ev->time() checks, and simply send
 	 * all events as-is.
 	 */
-	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		i->second->flush_buffers (nframes);
+	for (auto const& i : *p) {
+		i.second->flush_buffers (nframes);
 	}
 
 	Port::increment_global_port_buffer_offset (nframes);
@@ -180,8 +180,8 @@ AudioEngine::split_cycle (pframes_t nframes)
 	/* tell all Ports that we're going to start a new (split) cycle */
 
 
-	for (Ports::iterator i = p->begin(); i != p->end(); ++i) {
-		i->second->cycle_split ();
+	for (auto const& i : *p) {
+		i.second->cycle_split ();
 	}
 }
 
@@ -290,7 +290,7 @@ AudioEngine::process_callback (pframes_t nframes)
 		thread_init_callback (NULL);
 	}
 
-	Temporal::TempoMap::WritableSharedPtr current_map = Temporal::TempoMap::read ();
+	Temporal::TempoMap::SharedPtr current_map = Temporal::TempoMap::read ();
 	if (current_map != Temporal::TempoMap::use()) {
 		Temporal::TempoMap::set (current_map);
 	}

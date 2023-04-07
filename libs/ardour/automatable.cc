@@ -476,7 +476,7 @@ void
 Automatable::automation_run (samplepos_t start, pframes_t nframes, bool only_active)
 {
 	if (only_active) {
-		std::shared_ptr<ControlList> cl = _automated_controls.reader ();
+		std::shared_ptr<ControlList const> cl = _automated_controls.reader ();
 		for (ControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 			(*ci)->automation_run (start, nframes);
 		}
@@ -661,7 +661,7 @@ Automatable::find_next_event (timepos_t const & start, timepos_t const & end, Ev
 	next_event.when = start <= end ? timepos_t::max (start.time_domain()) : timepos_t (start.time_domain());
 
 	if (only_active) {
-		std::shared_ptr<ControlList> cl = _automated_controls.reader ();
+		std::shared_ptr<ControlList const> cl = _automated_controls.reader ();
 		for (ControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 			if ((*ci)->automation_playback()) {
 				if (start <= end) {

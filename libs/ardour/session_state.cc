@@ -320,9 +320,9 @@ Session::post_engine_init ()
 		{
 			Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 			ProcessorChangeBlocker pcb (this);
-			std::shared_ptr<RouteList> r = routes.reader ();
-			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-				(*i)->configure_processors (0);
+			std::shared_ptr<RouteList const> r = routes.reader ();
+			for (auto const& i : *r) {
+				i->configure_processors (0);
 			}
 			/* release process-lock, ProcessorChangeBlocker may trigger
 			 * latency-callback from non-rt thread which may take the lock */
@@ -1179,7 +1179,7 @@ Session::collect_sources_of_this_snapshot (set<std::shared_ptr<Source>>& s, bool
 	_playlists->sync_all_regions_with_regions ();
 	_playlists->foreach (boost::bind (merge_all_sources, _1, &s), incl_unused);
 
-	std::shared_ptr<RouteList> rl = routes.reader();
+	std::shared_ptr<RouteList const> rl = routes.reader();
 	for (auto const& r : *rl) {
 		std::shared_ptr<TriggerBox> tb = r->triggerbox ();
 		if (tb) {
@@ -1393,7 +1393,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 			 */
 			std::set<std::shared_ptr<Region>> tr;
 			{
-				std::shared_ptr<RouteList> rl = routes.reader();
+				std::shared_ptr<RouteList const> rl = routes.reader();
 				for (auto const& r : *rl) {
 					std::shared_ptr<TriggerBox> tb = r->triggerbox ();
 					if (tb) {
@@ -1492,9 +1492,9 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 
 	child = node->add_child ("Bundles");
 	{
-		std::shared_ptr<BundleList> bundles = _bundles.reader ();
-		for (BundleList::iterator i = bundles->begin(); i != bundles->end(); ++i) {
-			std::shared_ptr<UserBundle> b = std::dynamic_pointer_cast<UserBundle> (*i);
+		std::shared_ptr<BundleList const> bundles = _bundles.reader ();
+		for (auto const& i : *bundles) {
+			std::shared_ptr<UserBundle> b = std::dynamic_pointer_cast<UserBundle> (i);
 			if (b) {
 				child->add_child_nocopy (b->get_state());
 			}
@@ -1505,7 +1505,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 
 	child = node->add_child ("Routes");
 	{
-		std::shared_ptr<RouteList> r = routes.reader ();
+		std::shared_ptr<RouteList const> r = routes.reader ();
 
 		route_id_compare cmp;
 		RouteList xml_node_order (*r);
@@ -1592,7 +1592,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	}
 
 	{
-		std::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
+		std::shared_ptr<IOPlugList const> iop (_io_plugins.reader ());
 		XMLNode* iop_node = new XMLNode (X_("IOPlugins"));
 		for (auto const& i : *iop) {
 			iop_node->add_child_nocopy (i->get_state());
@@ -2625,9 +2625,9 @@ Session::get_sources_as_xml ()
 void
 Session::reset_write_sources (bool mark_write_complete, bool force)
 {
-	std::shared_ptr<RouteList> rl = routes.reader();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
+	std::shared_ptr<RouteList const> rl = routes.reader();
+	for (auto const& i : *rl) {
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
 		if (tr) {
 			_state_of_the_state = StateOfTheState (_state_of_the_state | InCleanup);
 			tr->reset_write_sources(mark_write_complete, force);
@@ -3581,7 +3581,7 @@ Session::cleanup_regions ()
 	/* collect Regions used by Triggers */
 	std::set<std::shared_ptr<Region>> tr;
 	{
-		std::shared_ptr<RouteList> rl = routes.reader();
+		std::shared_ptr<RouteList const> rl = routes.reader();
 		for (auto const& r : *rl) {
 			std::shared_ptr<TriggerBox> tb = r->triggerbox ();
 			if (tb) {

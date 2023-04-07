@@ -645,9 +645,9 @@ Editor::session_gui_extents (bool use_extra) const
 	 * NOTE: we should listen to playlists, and cache these values so we don't calculate them every time.
 	 */
 	{
-		std::shared_ptr<RouteList> rl = _session->get_routes();
-		for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
-			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*r);
+		std::shared_ptr<RouteList const> rl = _session->get_routes();
+		for (auto const& r : *rl) {
+			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (r);
 
 			if (!tr) {
 				continue;

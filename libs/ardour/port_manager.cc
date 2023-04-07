@@ -494,9 +494,9 @@ PortManager::get_port_by_name (const string& portname)
 		return std::shared_ptr<Port> ();
 	}
 
-	std::shared_ptr<Ports> pr  = _ports.reader ();
-	std::string              rel = make_port_name_relative (portname);
-	Ports::iterator          x   = pr->find (rel);
+	std::shared_ptr<Ports const> pr  = _ports.reader ();
+	std::string                  rel = make_port_name_relative (portname);
+	Ports::const_iterator        x   = pr->find (rel);
 
 	if (x != pr->end ()) {
 		/* its possible that the port was renamed by some 3rd party and
@@ -531,10 +531,10 @@ PortManager::port_renamed (const std::string& old_relative_name, const std::stri
 int
 PortManager::get_ports (DataType type, PortList& pl)
 {
-	std::shared_ptr<Ports> plist = _ports.reader ();
-	for (Ports::iterator p = plist->begin (); p != plist->end (); ++p) {
-		if (p->second->type () == type) {
-			pl.push_back (p->second);
+	std::shared_ptr<Ports const> plist = _ports.reader ();
+	for (auto const& p : *plist) {
+		if (p.second->type () == type) {
+			pl.push_back (p.second);
 		}
 	}
 	return pl.size ();
@@ -821,9 +821,10 @@ PortManager::disconnect (std::string const& name)
 int
 PortManager::reestablish_ports ()
 {
-	Ports::iterator i;
-	_midi_info_dirty           = true;
-	std::shared_ptr<Ports> p = _ports.reader ();
+	_midi_info_dirty = true;
+
+	Ports::const_iterator        i;
+	std::shared_ptr<Ports const> p = _ports.reader ();
 	DEBUG_TRACE (DEBUG::Ports, string_compose ("reestablish %1 ports\n", p->size ()));
 
 	for (i = p->begin (); i != p->end (); ++i) {
@@ -891,15 +892,15 @@ PortManager::set_pretty_names (std::vector<std::string> const& port_names, DataT
 int
 PortManager::reconnect_ports ()
 {
-	std::shared_ptr<Ports> p = _ports.reader ();
+	std::shared_ptr<Ports const> p = _ports.reader ();
 
 	/* re-establish connections */
 
 	DEBUG_TRACE (DEBUG::Ports, string_compose ("reconnect %1 ports\n", p->size ()));
 
-	for (Ports::iterator i = p->begin (); i != p->end (); ++i) {
-		if (i->second->reconnect ()) {
-			PortConnectedOrDisconnected (i->second, i->first, std::weak_ptr<Port> (), "", false);
+	for (auto const& i : *p) {
+		if (i.second->reconnect ()) {
+			PortConnectedOrDisconnected (i.second, i.first, std::weak_ptr<Port> (), "", false);
 		}
 	}
 
@@ -926,10 +927,10 @@ PortManager::connect_callback (const string& a, const string& b, bool conn)
 {
 	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose (X_("connect callback %1 + %2 connected ? %3\n"), a, b, conn));
 
-	std::shared_ptr<Port>  port_a;
-	std::shared_ptr<Port>  port_b;
-	Ports::iterator          x;
-	std::shared_ptr<Ports> pr = _ports.reader ();
+	std::shared_ptr<Port>        port_a;
+	std::shared_ptr<Port>        port_b;
+	Ports::const_iterator        x;
+	std::shared_ptr<Ports const> pr = _ports.reader ();
 
 	x = pr->find (make_port_name_relative (a));
 	if (x != pr->end ()) {
@@ -1021,7 +1022,7 @@ PortManager::update_input_ports (bool clear)
 		new_midi  = midi_ports;
 		_monitor_port.clear_ports (true);
 	} else {
-		std::shared_ptr<AudioInputPorts> aip = _audio_input_ports.reader ();
+		std::shared_ptr<AudioInputPorts const> aip = _audio_input_ports.reader ();
 		/* find new audio ports */
 		for (std::vector<std::string>::iterator p = audio_ports.begin (); p != audio_ports.end (); ++p) {
 			if (port_is_mine (*p) || !_backend->get_port_by_name (*p)) {
@@ -1033,13 +1034,13 @@ PortManager::update_input_ports (bool clear)
 		}
 
 		/* find stale audio ports */
-		for (AudioInputPorts::iterator p = aip->begin (); p != aip->end (); ++p) {
-			if (std::find (audio_ports.begin (), audio_ports.end (), p->first) == audio_ports.end ()) {
-				old_audio.push_back (p->first);
+		for (auto const& p : *aip) {
+			if (std::find (audio_ports.begin (), audio_ports.end (), p.first) == audio_ports.end ()) {
+				old_audio.push_back (p.first);
 			}
 		}
 
-		std::shared_ptr<MIDIInputPorts> mip = _midi_input_ports.reader ();
+		std::shared_ptr<MIDIInputPorts const> mip = _midi_input_ports.reader ();
 		/* find new MIDI ports */
 		for (std::vector<std::string>::iterator p = midi_ports.begin (); p != midi_ports.end (); ++p) {
 			if (port_is_mine (*p) || !_backend->get_port_by_name (*p)) {
@@ -1056,9 +1057,9 @@ PortManager::update_input_ports (bool clear)
 		}
 
 		/* find stale audio ports */
-		for (MIDIInputPorts::iterator p = mip->begin (); p != mip->end (); ++p) {
-			if (std::find (midi_ports.begin (), midi_ports.end (), p->first) == midi_ports.end ()) {
-				old_midi.push_back (p->first);
+		for (auto const& p : *mip) {
+			if (std::find (midi_ports.begin (), midi_ports.end (), p.first) == midi_ports.end ()) {
+				old_midi.push_back (p.first);
 			}
 		}
 	}
@@ -1250,17 +1251,17 @@ PortManager::cycle_start (pframes_t nframes, Session* s)
 		tl = s->rt_tasklist ();
 	}
 	if (tl && fabs (Port::resample_ratio ()) != 1.0) {
-		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
-			if (!(p->second->flags () & TransportSyncPort)) {
-				tl->push_back (boost::bind (&Port::cycle_start, p->second, nframes));
+		for (auto const& p : *_cycle_ports) {
+			if (!(p.second->flags () & TransportSyncPort)) {
+				tl->push_back (boost::bind (&Port::cycle_start, p.second, nframes));
 			}
 		}
 		tl->push_back (boost::bind (&PortManager::run_input_meters, this, nframes, s ? s->nominal_sample_rate () : 0));
 		tl->process ();
 	} else {
-		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
-			if (!(p->second->flags () & TransportSyncPort)) {
-				p->second->cycle_start (nframes);
+		for (auto const& p : *_cycle_ports) {
+			if (!(p.second->flags () & TransportSyncPort)) {
+				p.second->cycle_start (nframes);
 			}
 		}
 		run_input_meters (nframes, s ? s->nominal_sample_rate () : 0);
@@ -1276,24 +1277,24 @@ PortManager::cycle_end (pframes_t nframes, Session* s)
 		tl = s->rt_tasklist ();
 	}
 	if (tl && fabs (Port::resample_ratio ()) != 1.0) {
-		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
-			if (!(p->second->flags () & TransportSyncPort)) {
-				tl->push_back (boost::bind (&Port::cycle_end, p->second, nframes));
+		for (auto const& p : *_cycle_ports) {
+			if (!(p.second->flags () & TransportSyncPort)) {
+				tl->push_back (boost::bind (&Port::cycle_end, p.second, nframes));
 			}
 		}
 		tl->process ();
 	} else {
-		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
-			if (!(p->second->flags () & TransportSyncPort)) {
-				p->second->cycle_end (nframes);
+		for (auto const& p : *_cycle_ports) {
+			if (!(p.second->flags () & TransportSyncPort)) {
+				p.second->cycle_end (nframes);
 			}
 		}
 	}
 
-	for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
+	for (auto const& p : *_cycle_ports) {
 		/* AudioEngine::split_cycle flushes buffers until Port::port_offset.
 		 * Now only flush remaining events (after Port::port_offset) */
-		p->second->flush_buffers (nframes * Port::resample_ratio () - Port::port_offset ());
+		p.second->flush_buffers (nframes * Port::resample_ratio () - Port::port_offset ());
 	}
 
 	_cycle_ports.reset ();
@@ -1304,21 +1305,21 @@ PortManager::cycle_end (pframes_t nframes, Session* s)
 void
 PortManager::silence (pframes_t nframes, Session* s)
 {
-	for (Ports::iterator i = _cycle_ports->begin (); i != _cycle_ports->end (); ++i) {
-		if (s && i->second == s->mtc_output_port ()) {
+	for (auto const& p : *_cycle_ports) {
+		if (s && p.second == s->mtc_output_port ()) {
 			continue;
 		}
-		if (s && i->second == s->midi_clock_output_port ()) {
+		if (s && p.second == s->midi_clock_output_port ()) {
 			continue;
 		}
-		if (s && i->second == s->ltc_output_port ()) {
+		if (s && p.second == s->ltc_output_port ()) {
 			continue;
 		}
-		if (std::dynamic_pointer_cast<AsyncMIDIPort> (i->second)) {
+		if (std::dynamic_pointer_cast<AsyncMIDIPort> (p.second)) {
 			continue;
 		}
-		if (i->second->sends_output ()) {
-			i->second->get_buffer (nframes).silence (nframes);
+		if (p.second->sends_output ()) {
+			p.second->get_buffer (nframes).silence (nframes);
 		}
 	}
 }
@@ -1373,15 +1374,14 @@ PortManager::silence_outputs (pframes_t nframes)
 void
 PortManager::check_monitoring ()
 {
-	for (Ports::iterator i = _cycle_ports->begin (); i != _cycle_ports->end (); ++i) {
+	for (auto const& p : *_cycle_ports) {
 		bool x;
-
-		if (i->second->last_monitor () != (x = i->second->monitoring_input ())) {
-			i->second->set_last_monitor (x);
+		if (p.second->last_monitor () != (x = p.second->monitoring_input ())) {
+			p.second->set_last_monitor (x);
 			/* XXX I think this is dangerous, due to
 			   a likely mutex in the signal handlers ...
 			*/
-			i->second->MonitorInputChanged (x); /* EMIT SIGNAL */
+			p.second->MonitorInputChanged (x); /* EMIT SIGNAL */
 		}
 	}
 }
@@ -1395,25 +1395,25 @@ PortManager::cycle_end_fade_out (gain_t base_gain, gain_t gain_step, pframes_t n
 		tl = s->rt_tasklist ();
 	}
 	if (tl && fabs (Port::resample_ratio ()) != 1.0) {
-		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
-			if (!(p->second->flags () & TransportSyncPort)) {
-				tl->push_back (boost::bind (&Port::cycle_end, p->second, nframes));
+		for (auto const& p : *_cycle_ports) {
+			if (!(p.second->flags () & TransportSyncPort)) {
+				tl->push_back (boost::bind (&Port::cycle_end, p.second, nframes));
 			}
 		}
 		tl->process ();
 	} else {
-		for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
-			if (!(p->second->flags () & TransportSyncPort)) {
-				p->second->cycle_end (nframes);
+		for (auto const& p : *_cycle_ports) {
+			if (!(p.second->flags () & TransportSyncPort)) {
+				p.second->cycle_end (nframes);
 			}
 		}
 	}
 
-	for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
-		p->second->flush_buffers (nframes);
+	for (auto const& p : *_cycle_ports) {
+		p.second->flush_buffers (nframes);
 
-		if (p->second->sends_output ()) {
-			std::shared_ptr<AudioPort> ap = std::dynamic_pointer_cast<AudioPort> (p->second);
+		if (p.second->sends_output ()) {
+			std::shared_ptr<AudioPort> ap = std::dynamic_pointer_cast<AudioPort> (p.second);
 			if (ap) {
 				Sample* s = ap->engine_get_whole_audio_buffer ();
 				gain_t  g = base_gain;
@@ -1867,10 +1867,9 @@ PortManager::fill_midi_port_info_locked ()
 void
 PortManager::set_port_buffer_sizes (pframes_t n)
 {
-	std::shared_ptr<Ports> all = _ports.reader ();
-
-	for (Ports::iterator p = all->begin (); p != all->end (); ++p) {
-		p->second->set_buffer_size (n);
+	std::shared_ptr<Ports const> all = _ports.reader ();
+	for (auto const& p : *all) {
+		p.second->set_buffer_size (n);
 	}
 	_monitor_port.set_buffer_size (n);
 }
@@ -1878,10 +1877,10 @@ PortManager::set_port_buffer_sizes (pframes_t n)
 bool
 PortManager::check_for_ambiguous_latency (bool log) const
 {
-	bool                     rv    = false;
-	std::shared_ptr<Ports> plist = _ports.reader ();
-	for (Ports::iterator pi = plist->begin (); pi != plist->end (); ++pi) {
-		std::shared_ptr<Port> const& p (pi->second);
+	bool                         rv    = false;
+	std::shared_ptr<Ports const> plist = _ports.reader ();
+	for (auto const& pi : *plist) {
+		std::shared_ptr<Port> const& p (pi.second);
 		/* check one to many connections */
 		if (!p->sends_output () || (p->flags () & IsTerminal) || !p->connected ()) {
 			continue;
@@ -1916,14 +1915,14 @@ PortManager::reset_input_meters ()
 PortManager::AudioInputPorts
 PortManager::audio_input_ports () const
 {
-	std::shared_ptr<AudioInputPorts> p = _audio_input_ports.reader ();
+	std::shared_ptr<AudioInputPorts const> p = _audio_input_ports.reader ();
 	return *p;
 }
 
 PortManager::MIDIInputPorts
 PortManager::midi_input_ports () const
 {
-	std::shared_ptr<MIDIInputPorts> p = _midi_input_ports.reader ();
+	std::shared_ptr<MIDIInputPorts const> p = _midi_input_ports.reader ();
 	return *p;
 }
 
@@ -1940,15 +1939,15 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 	_monitor_port.monitor (port_engine (), n_samples);
 
 	/* calculate peak of all physical inputs (readable ports) */
-	std::shared_ptr<AudioInputPorts> aip = _audio_input_ports.reader ();
+	std::shared_ptr<AudioInputPorts const> aip = _audio_input_ports.reader ();
 
-	for (AudioInputPorts::iterator p = aip->begin (); p != aip->end (); ++p) {
-		assert (!port_is_mine (p->first));
-		AudioInputPort& ai (p->second);
+	for (auto const& p : *aip) {
+		assert (!port_is_mine (p.first));
+		AudioInputPort& ai = *const_cast<AudioInputPort*>(&p.second);
 
 		ai.apply_falloff (n_samples, rate, reset);
 
-		PortEngine::PortHandle ph = _backend->get_port_by_name (p->first);
+		PortEngine::PortHandle ph = _backend->get_port_by_name (p.first);
 		if (!ph) {
 			continue;
 		}
@@ -1964,16 +1963,16 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 	}
 
 	/* MIDI */
-	std::shared_ptr<MIDIInputPorts> mip = _midi_input_ports.reader ();
-	for (MIDIInputPorts::iterator p = mip->begin (); p != mip->end (); ++p) {
-		assert (!port_is_mine (p->first));
+	std::shared_ptr<MIDIInputPorts const> mip = _midi_input_ports.reader ();
+	for (auto const& p : *mip) {
+		assert (!port_is_mine (p.first));
 
-		PortEngine::PortHandle ph = _backend->get_port_by_name (p->first);
+		PortEngine::PortHandle ph = _backend->get_port_by_name (p.first);
 		if (!ph || !_backend->connected (ph)) {
 			continue;
 		}
 
-		MIDIInputPort& mi (p->second);
+		MIDIInputPort& mi = *const_cast<MIDIInputPort*>(&p.second);
 		mi.apply_falloff (n_samples, rate, reset);
 
 		void*           buffer      = _backend->get_buffer (ph, n_samples);
@@ -1993,17 +1992,17 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 void
 PortManager::list_all_ports () const
 {
-	std::shared_ptr<Ports> plist = _ports.reader ();
-	for (Ports::iterator p = plist->begin (); p != plist->end (); ++p) {
-		std::cout << p->first << "\n";
+	std::shared_ptr<Ports const> plist = _ports.reader ();
+	for (auto const& p : *plist) {
+		std::cout << p.first << "\n";
 	}
 }
 
 void
 PortManager::list_cycle_ports () const
 {
-	for (Ports::iterator p = _cycle_ports->begin (); p != _cycle_ports->end (); ++p) {
-		std::cout << p->first << "\n";
+	for (auto const& p : *_cycle_ports) {
+		std::cout << p.first << "\n";
 	}
 }
 #endif

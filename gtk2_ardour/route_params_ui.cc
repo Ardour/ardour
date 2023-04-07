@@ -145,12 +145,11 @@ RouteParams_UI::~RouteParams_UI ()
 }
 
 void
-RouteParams_UI::add_routes (RouteList& routes)
+RouteParams_UI::add_routes (RouteList const& routes)
 {
-	ENSURE_GUI_THREAD (*this, &RouteParams_UI::add_routes, routes)
+	ENSURE_GUI_THREAD (*this, &RouteParams_UI::add_routes, routes);
 
-	for (RouteList::iterator x = routes.begin(); x != routes.end(); ++x) {
-		std::shared_ptr<Route> route = (*x);
+	for (auto const& route : routes) {
 
 		if (route->is_auditioner()) {
 			return;
@@ -359,7 +358,7 @@ RouteParams_UI::set_session (Session *sess)
 	route_display_model->clear();
 
 	if (_session) {
-		std::shared_ptr<RouteList> r = _session->get_routes();
+		std::shared_ptr<RouteList const> r = _session->get_routes();
 		add_routes (*r);
 		_session->RouteAdded.connect (_session_connections, invalidator (*this), boost::bind (&RouteParams_UI::add_routes, this, _1), gui_context());
 	}

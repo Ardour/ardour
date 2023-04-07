@@ -63,7 +63,7 @@ public:
 	std::string write_source_name () const;
 
 	std::shared_ptr<AudioFileSource> audio_write_source (uint32_t n = 0) {
-		std::shared_ptr<ChannelList> c = channels.reader ();
+		std::shared_ptr<ChannelList const> c = channels.reader ();
 		if (n < c->size ()) {
 			return (*c)[n]->write_source;
 		}
@@ -161,7 +161,7 @@ private:
 	                             samplecnt_t& rec_offset);
 
 	void check_record_status (samplepos_t transport_sample, double speed, bool can_record);
-	void finish_capture (std::shared_ptr<ChannelList> c);
+	void finish_capture (std::shared_ptr<ChannelList const> c);
 	void reset_capture ();
 
 	void loop (samplepos_t);

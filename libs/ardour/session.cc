@@ -1207,15 +1207,15 @@ Session::setup_route_monitor_sends (bool enable, bool need_process_lock)
 		lx.acquire();
 	}
 
-	std::shared_ptr<RouteList> rls = routes.reader ();
+	std::shared_ptr<RouteList const> rl = routes.reader ();
 	ProcessorChangeBlocker  pcb (this, false /* XXX */);
 
-	for (RouteList::iterator x = rls->begin(); x != rls->end(); ++x) {
-		if ((*x)->can_monitor ()) {
+	for (auto const& x : *rl) {
+		if (x->can_monitor ()) {
 			if (enable) {
-				(*x)->enable_monitor_send ();
+				x->enable_monitor_send ();
 			} else {
-				(*x)->remove_monitor_send ();
+				x->remove_monitor_send ();
 			}
 		}
 	}
@@ -1442,10 +1442,10 @@ Session::record_enabling_legal () const
 void
 Session::set_track_monitor_input_status (bool yn)
 {
-	std::shared_ptr<RouteList> rl = routes.reader ();
+	std::shared_ptr<RouteList const> rl = routes.reader ();
 
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		std::shared_ptr<AudioTrack> tr = std::dynamic_pointer_cast<AudioTrack> (*i);
+	for (auto const& i : *rl) {
+		std::shared_ptr<AudioTrack> tr = std::dynamic_pointer_cast<AudioTrack> (i);
 		if (tr && tr->rec_enable_control()->get_value()) {
 			tr->request_input_monitoring (yn);
 		}
@@ -1960,8 +1960,7 @@ Session::enable_record ()
 void
 Session::set_all_tracks_record_enabled (bool enable )
 {
-	std::shared_ptr<RouteList> rl = routes.reader();
-	set_controls (route_list_to_control_list (rl, &Stripable::rec_enable_control), enable, Controllable::NoGroup);
+	set_controls (route_list_to_control_list (routes.reader (), &Stripable::rec_enable_control), enable, Controllable::NoGroup);
 }
 
 void
@@ -2164,7 +2163,7 @@ Session::set_block_size (pframes_t nframes)
 
 	foreach_route (&Route::set_block_size, nframes);
 
-	std::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
+	std::shared_ptr<IOPlugList const> iop (_io_plugins.reader ());
 	for (auto const& i : *iop) {
 		i->set_block_size (nframes);
 	}
@@ -2247,7 +2246,7 @@ Session::resort_routes_using (std::shared_ptr<RouteList> r)
 	}
 
 	/* now create IOPlugs graph-chains */
-	std::shared_ptr<IOPlugList> io_plugins (_io_plugins.reader ());
+	std::shared_ptr<IOPlugList const> io_plugins (_io_plugins.reader ());
 	GraphNodeList gnl_pre;
 	GraphNodeList gnl_post;
 	for (auto const& p : *io_plugins) {
@@ -2346,7 +2345,7 @@ Session::rechain_process_graph (GraphNodeList& g)
 bool
 Session::rechain_ioplug_graph (bool pre)
 {
-	std::shared_ptr<IOPlugList> io_plugins (_io_plugins.reader ());
+	std::shared_ptr<IOPlugList const> io_plugins (_io_plugins.reader ());
 
 	if (io_plugins->empty ()) {
 		_io_graph_chain[pre ? 0 : 1].reset ();
@@ -2434,10 +2433,10 @@ Session::count_existing_track_channels (ChanCount& in, ChanCount& out)
 	in  = ChanCount::ZERO;
 	out = ChanCount::ZERO;
 
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
+	for (auto const& i : *r) {
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
 		if (!tr) {
 			continue;
 		}
@@ -3395,11 +3394,11 @@ Session::load_and_connect_instruments (RouteList& new_routes, bool strict_io, st
 void
 Session::globally_set_send_gains_to_zero (std::shared_ptr<Route> dest)
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 	std::shared_ptr<Send> s;
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((s = (*i)->internal_send_for (dest)) != 0) {
+	for (auto const& i : *r) {
+		if ((s = i->internal_send_for (dest)) != 0) {
 			s->gain_control()->set_value (GAIN_COEFF_ZERO, Controllable::NoGroup);
 		}
 	}
@@ -3408,11 +3407,11 @@ Session::globally_set_send_gains_to_zero (std::shared_ptr<Route> dest)
 void
 Session::globally_set_send_gains_to_unity (std::shared_ptr<Route> dest)
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 	std::shared_ptr<Send> s;
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((s = (*i)->internal_send_for (dest)) != 0) {
+	for (auto const& i : *r) {
+		if ((s = i->internal_send_for (dest)) != 0) {
 			s->gain_control()->set_value (GAIN_COEFF_UNITY, Controllable::NoGroup);
 		}
 	}
@@ -3421,12 +3420,12 @@ Session::globally_set_send_gains_to_unity (std::shared_ptr<Route> dest)
 void
 Session::globally_set_send_gains_from_track(std::shared_ptr<Route> dest)
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 	std::shared_ptr<Send> s;
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((s = (*i)->internal_send_for (dest)) != 0) {
-			s->gain_control()->set_value ((*i)->gain_control()->get_value(), Controllable::NoGroup);
+	for (auto const& i : *r) {
+		if ((s = i->internal_send_for (dest)) != 0) {
+			s->gain_control()->set_value (i->gain_control()->get_value(), Controllable::NoGroup);
 		}
 	}
 }
@@ -3435,13 +3434,13 @@ Session::globally_set_send_gains_from_track(std::shared_ptr<Route> dest)
 void
 Session::globally_add_internal_sends (std::shared_ptr<Route> dest, Placement p, bool include_buses)
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 	std::shared_ptr<RouteList> t (new RouteList);
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+	for (auto const& i : *r) {
 		/* no MIDI sends because there are no MIDI busses yet */
-		if (include_buses || std::dynamic_pointer_cast<AudioTrack>(*i)) {
-			t->push_back (*i);
+		if (include_buses || std::dynamic_pointer_cast<AudioTrack>(i)) {
+			t->push_back (i);
 		}
 	}
 
@@ -3530,11 +3529,11 @@ Session::remove_routes (std::shared_ptr<RouteList> routes_to_remove)
 
 			if (!deletion_in_progress () && (*iter)->internal_return()) {
 
-				std::shared_ptr<RouteList> r = routes.reader ();
-				for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-					std::shared_ptr<Send> s = (*i)->internal_send_for (*iter);
+				std::shared_ptr<RouteList const> r = routes.reader ();
+				for (auto const& i : *r) {
+					std::shared_ptr<Send> s = i->internal_send_for (*iter);
 					if (s) {
-						(*i)->remove_processor (s);
+						i->remove_processor (s);
 					}
 				}
 			}
@@ -3645,20 +3644,20 @@ Session::route_listen_changed (Controllable::GroupControlDisposition group_overr
 			RouteGroup* rg = route->route_group ();
 			const bool group_already_accounted_for = (group_override == Controllable::ForGroup);
 
-			std::shared_ptr<RouteList> r = routes.reader ();
+			std::shared_ptr<RouteList const> r = routes.reader ();
 
-			for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-				if ((*i) == route) {
+			for (auto const& i : *r) {
+				if (i == route) {
 					/* already changed */
 					continue;
 				}
 
-				if ((*i)->solo_isolate_control()->solo_isolated() || !(*i)->can_monitor()) {
+				if (i->solo_isolate_control()->solo_isolated() || !i->can_monitor()) {
 					/* route does not get solo propagated to it */
 					continue;
 				}
 
-				if ((group_already_accounted_for && (*i)->route_group() && (*i)->route_group() == rg)) {
+				if ((group_already_accounted_for && i->route_group() && i->route_group() == rg)) {
 					/* this route is a part of the same solo group as the route
 					 * that was changed. Changing that route did change or will
 					 * change all group members appropriately, so we can ignore it
@@ -3666,7 +3665,7 @@ Session::route_listen_changed (Controllable::GroupControlDisposition group_overr
 					 */
 					continue;
 				}
-				(*i)->solo_control()->set_value (0.0, Controllable::NoGroup);
+				i->solo_control()->set_value (0.0, Controllable::NoGroup);
 			}
 		}
 
@@ -3732,7 +3731,7 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 		return;
 	}
 
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 	int32_t delta = route->solo_control()->transitioned_into_solo ();
 
 	/* the route may be a member of a group that has shared-solo
@@ -3761,19 +3760,19 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 		/* new solo: disable all other solos, but not the group if its solo-enabled */
 		_engine.monitor_port().clear_ports (false);
 
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+		for (auto const& i : *r) {
 
-			if ((*i) == route) {
+			if (i == route) {
 				/* already changed */
 				continue;
 			}
 
-			if ((*i)->solo_isolate_control()->solo_isolated() || !(*i)->can_solo()) {
+			if (i->solo_isolate_control()->solo_isolated() || !i->can_solo()) {
 				/* route does not get solo propagated to it */
 				continue;
 			}
 
-			if ((group_already_accounted_for && (*i)->route_group() && (*i)->route_group() == rg)) {
+			if ((group_already_accounted_for && i->route_group() && i->route_group() == rg)) {
 				/* this route is a part of the same solo group as the route
 				 * that was changed. Changing that route did change or will
 				 * change all group members appropriately, so we can ignore it
@@ -3782,7 +3781,7 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 				continue;
 			}
 
-			(*i)->solo_control()->set_value (0.0, group_override);
+			i->solo_control()->set_value (0.0, group_override);
 		}
 	}
 
@@ -3792,22 +3791,21 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 
 	DEBUG_TRACE (DEBUG::Solo, string_compose ("%1\n", route->name()));
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+	for (auto const& i : *r) {
 		bool in_signal_flow;
 
-		if ((*i) == route) {
+		if (i == route) {
 			/* already changed */
 			continue;
 		}
 
-		if ((*i)->solo_isolate_control()->solo_isolated() || !(*i)->can_solo()) {
+		if (i->solo_isolate_control()->solo_isolated() || !i->can_solo()) {
 			/* route does not get solo propagated to it */
-			DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 excluded from solo because iso = %2 can_solo = %3\n", (*i)->name(), (*i)->solo_isolate_control()->solo_isolated(),
-			                                          (*i)->can_solo()));
+			DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 excluded from solo because iso = %2 can_solo = %3\n", i->name(), i->solo_isolate_control()->solo_isolated(), i->can_solo()));
 			continue;
 		}
 
-		if ((group_already_accounted_for && (*i)->route_group() && (*i)->route_group() == rg)) {
+		if ((group_already_accounted_for && i->route_group() && i->route_group() == rg)) {
 			/* this route is a part of the same solo group as the route
 			 * that was changed. Changing that route did change or will
 			 * change all group members appropriately, so we can ignore it
@@ -3818,38 +3816,38 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 
 		in_signal_flow = false;
 
-		DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed from %1\n", (*i)->name()));
+		DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed from %1\n", i->name()));
 
-		if ((*i)->feeds (route)) {
-			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tthere is a feed from %1\n", (*i)->name()));
+		if (i->feeds (route)) {
+			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tthere is a feed from %1\n", i->name()));
 			if (!route->soloed_by_others_upstream()) {
-				(*i)->solo_control()->mod_solo_by_others_downstream (delta);
+				i->solo_control()->mod_solo_by_others_downstream (delta);
 			} else {
 				DEBUG_TRACE (DEBUG::Solo, "\talready soloed by others upstream\n");
 			}
 			in_signal_flow = true;
 		} else {
-			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tno feed from %1\n", (*i)->name()));
+			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tno feed from %1\n", i->name()));
 		}
 
-		DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed to %1\n", (*i)->name()));
+		DEBUG_TRACE (DEBUG::Solo, string_compose ("check feed to %1\n", i->name()));
 
-		if (route->feeds (*i)) {
+		if (route->feeds (i)) {
 			DEBUG_TRACE (DEBUG::Solo, string_compose ("%1 feeds %2 sboD %3 sboU %4\n",
 			                                          route->name(),
-			                                          (*i)->name(),
+			                                          i->name(),
 			                                          route->soloed_by_others_downstream(),
 			                                          route->soloed_by_others_upstream()));
 			//NB. Triggers Invert Push, which handles soloed by downstream
-			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tmod %1 by %2\n", (*i)->name(), delta));
-			(*i)->solo_control()->mod_solo_by_others_upstream (delta);
+			DEBUG_TRACE (DEBUG::Solo, string_compose ("\tmod %1 by %2\n", i->name(), delta));
+			i->solo_control()->mod_solo_by_others_upstream (delta);
 			in_signal_flow = true;
 		} else {
-			DEBUG_TRACE (DEBUG::Solo, string_compose("\tno feed to %1\n", (*i)->name()) );
+			DEBUG_TRACE (DEBUG::Solo, string_compose("\tno feed to %1\n", i->name()) );
 		}
 
 		if (!in_signal_flow) {
-			uninvolved.push_back (*i);
+			uninvolved.push_back (i);
 		}
 	}
 
@@ -3869,7 +3867,7 @@ Session::route_solo_changed (bool self_solo_changed, Controllable::GroupControlD
 }
 
 void
-Session::update_route_solo_state (std::shared_ptr<RouteList> r)
+Session::update_route_solo_state (std::shared_ptr<RouteList const> r)
 {
 	/* now figure out if anything that matters is soloed (or is "listening")*/
 
@@ -3882,20 +3880,20 @@ Session::update_route_solo_state (std::shared_ptr<RouteList> r)
 		r = routes.reader();
 	}
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->can_monitor() && Config->get_solo_control_is_listen_control()) {
-			if ((*i)->solo_control()->soloed_by_self_or_masters()) {
+	for (auto const& i : *r) {
+		if (i->can_monitor() && Config->get_solo_control_is_listen_control()) {
+			if (i->solo_control()->soloed_by_self_or_masters()) {
 				listeners++;
 				something_listening = true;
 			}
-		} else if ((*i)->can_solo()) {
-			(*i)->set_listen (false);
-			if ((*i)->can_solo() && (*i)->solo_control()->soloed_by_self_or_masters()) {
+		} else if (i->can_solo()) {
+			i->set_listen (false);
+			if (i->can_solo() && i->solo_control()->soloed_by_self_or_masters()) {
 				something_soloed = true;
 			}
 		}
 
-		if ((*i)->solo_isolate_control()->solo_isolated()) {
+		if (i->solo_isolate_control()->solo_isolated()) {
 			isolated++;
 		}
 	}
@@ -3983,10 +3981,10 @@ Session::cancel_all_mute ()
 void
 Session::get_stripables (StripableList& sl, PresentationInfo::Flag fl) const
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
-	for (RouteList::iterator it = r->begin(); it != r->end(); ++it) {
-		if ((*it)->presentation_info ().flags () & fl) {
-			sl.push_back (*it);
+	std::shared_ptr<RouteList const> r = routes.reader ();
+	for (auto const& i : *r) {
+		if (i->presentation_info ().flags () & fl) {
+			sl.push_back (i);
 		}
 	}
 
@@ -4009,11 +4007,11 @@ Session::get_stripables () const
 RouteList
 Session::get_routelist (bool mixer_order, PresentationInfo::Flag fl) const
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 	RouteList rv;
-	for (RouteList::iterator it = r->begin(); it != r->end(); ++it) {
-		if ((*it)->presentation_info ().flags () & fl) {
-			rv.push_back (*it);
+	for (auto const& i : *r) {
+		if (i->presentation_info ().flags () & fl) {
+			rv.push_back (i);
 		}
 	}
 	rv.sort (Stripable::Sorter (mixer_order));
@@ -4023,12 +4021,12 @@ Session::get_routelist (bool mixer_order, PresentationInfo::Flag fl) const
 std::shared_ptr<RouteList>
 Session::get_routes_with_internal_returns() const
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 	std::shared_ptr<RouteList> rl (new RouteList);
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->internal_return ()) {
-			rl->push_back (*i);
+	for (auto const& i : *r) {
+		if (i->internal_return ()) {
+			rl->push_back (i);
 		}
 	}
 	return rl;
@@ -4037,7 +4035,7 @@ Session::get_routes_with_internal_returns() const
 bool
 Session::io_name_is_legal (const std::string& name) const
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 
 	for (map<string,bool>::const_iterator reserved = reserved_io_names.begin(); reserved != reserved_io_names.end(); ++reserved) {
 		if (name == reserved->first) {
@@ -4050,17 +4048,17 @@ Session::io_name_is_legal (const std::string& name) const
 		}
 	}
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->name() == name) {
+	for (auto const& i : *r) {
+		if (i->name() == name) {
 			return false;
 		}
 
-		if ((*i)->has_io_processor_named (name)) {
+		if (i->has_io_processor_named (name)) {
 			return false;
 		}
 	}
 
-	std::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
+	std::shared_ptr<IOPlugList const> iop (_io_plugins.reader ());
 	for (auto const& i : *iop) {
 		if (i->io_name () == name) {
 			return false;
@@ -4141,11 +4139,11 @@ Session::set_exclusive_input_active (std::shared_ptr<RouteList> rl, bool onoff, 
 void
 Session::routes_using_input_from (const string& str, RouteList& rl)
 {
-	std::shared_ptr<RouteList> r = routes.reader();
+	std::shared_ptr<RouteList const> r = routes.reader();
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->input()->connected_to (str)) {
-			rl.push_back (*i);
+	for (auto const& i : *r) {
+		if (i->input()->connected_to (str)) {
+			rl.push_back (i);
 		}
 	}
 }
@@ -4153,11 +4151,11 @@ Session::routes_using_input_from (const string& str, RouteList& rl)
 std::shared_ptr<Route>
 Session::route_by_name (string name) const
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader();
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->name() == name) {
-			return *i;
+	for (auto const& i : *r) {
+		if (i->name() == name) {
+			return i;
 		}
 	}
 
@@ -4167,11 +4165,11 @@ Session::route_by_name (string name) const
 std::shared_ptr<Route>
 Session::route_by_id (PBD::ID id) const
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->id() == id) {
-			return *i;
+	for (auto const& i : *r) {
+		if (i->id() == id) {
+			return i;
 		}
 	}
 
@@ -4197,9 +4195,9 @@ Session::stripable_by_id (PBD::ID id) const
 std::shared_ptr<Trigger>
 Session::trigger_by_id (PBD::ID id) const
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		std::shared_ptr<TriggerBox> box = (*i)->triggerbox();
+	std::shared_ptr<RouteList const> r = routes.reader ();
+	for (auto const& i : *r) {
+		std::shared_ptr<TriggerBox> box = i->triggerbox();
 		if (box) {
 			TriggerPtr trigger = box->trigger_by_id(id);
 			if (trigger) {
@@ -4214,10 +4212,10 @@ Session::trigger_by_id (PBD::ID id) const
 std::shared_ptr<Processor>
 Session::processor_by_id (PBD::ID id) const
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		std::shared_ptr<Processor> p = (*i)->Route::processor_by_id (id);
+	for (auto const& i : *r) {
+		std::shared_ptr<Processor> p = i->Route::processor_by_id (id);
 		if (p) {
 			return p;
 		}
@@ -4333,9 +4331,9 @@ Session::reassign_track_numbers ()
 
 #ifndef NDEBUG
 	if (DEBUG_ENABLED(DEBUG::OrderKeys)) {
-		std::shared_ptr<RouteList> rl = routes.reader ();
-		for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1 numbered %2\n", (*i)->name(), (*i)->track_number()));
+		std::shared_ptr<RouteList const> rl = routes.reader ();
+		for (auto const& i : *rl) {
+			DEBUG_TRACE (DEBUG::OrderKeys, string_compose ("%1 numbered %2\n", i->name(), i->track_number()));
 		}
 	}
 #endif /* NDEBUG */
@@ -4506,9 +4504,9 @@ Session::remove_last_capture ()
 {
 	list<std::shared_ptr<Source> > srcs;
 
-	std::shared_ptr<RouteList> rl = routes.reader ();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
+	std::shared_ptr<RouteList const> rl = routes.reader ();
+	for (auto const& i : *rl) {
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
 		if (!tr) {
 			continue;
 		}
@@ -4535,9 +4533,9 @@ Session::remove_last_capture ()
 void
 Session::get_last_capture_sources (std::list<std::shared_ptr<Source> >& srcs)
 {
-	std::shared_ptr<RouteList> rl = routes.reader ();
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
+	std::shared_ptr<RouteList const> rl = routes.reader ();
+	for (auto const& i : *rl) {
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
 		if (!tr) {
 			continue;
 		}
@@ -5746,10 +5744,10 @@ Session::unmark_insert_id (uint32_t id)
 void
 Session::reset_native_file_format ()
 {
-	std::shared_ptr<RouteList> rl = routes.reader ();
+	std::shared_ptr<RouteList const> rl = routes.reader ();
 
-	for (RouteList::iterator i = rl->begin(); i != rl->end(); ++i) {
-		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
+	for (auto const& i : *rl) {
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
 		if (tr) {
 			/* don't save state as we do this, there's no point */
 			_state_of_the_state = StateOfTheState (_state_of_the_state | InCleanup);
@@ -5762,10 +5760,10 @@ Session::reset_native_file_format ()
 bool
 Session::route_name_unique (string n) const
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> rl = routes.reader ();
 
-	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		if ((*i)->name() == n) {
+	for (auto const& i : *rl) {
+		if (i->name() == n) {
 			return false;
 		}
 	}
@@ -5790,13 +5788,13 @@ Session::route_name_internal (string n) const
 int
 Session::freeze_all (InterThreadInfo& itt)
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+	for (auto const& i : *r) {
 
 		std::shared_ptr<Track> t;
 
-		if ((t = std::dynamic_pointer_cast<Track>(*i)) != 0) {
+		if ((t = std::dynamic_pointer_cast<Track>(i)) != 0) {
 			/* XXX this is wrong because itt.progress will keep returning to zero at the start
 			   of every track.
 			*/
@@ -6220,10 +6218,10 @@ Session::ntracks () const
 	/* XXX Could be optimized by caching */
 
 	uint32_t n = 0;
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 
-	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		if (std::dynamic_pointer_cast<Track> (*i)) {
+	for (auto const& i : *r) {
+		if (std::dynamic_pointer_cast<Track> (i)) {
 			++n;
 		}
 	}
@@ -6237,10 +6235,10 @@ Session::naudiotracks () const
 	/* XXX Could be optimized by caching */
 
 	uint32_t n = 0;
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 
-	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		if (std::dynamic_pointer_cast<AudioTrack> (*i)) {
+	for (auto const& i : *r) {
+		if (std::dynamic_pointer_cast<AudioTrack> (i)) {
 			++n;
 		}
 	}
@@ -6252,10 +6250,10 @@ uint32_t
 Session::nbusses () const
 {
 	uint32_t n = 0;
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 
-	for (RouteList::const_iterator i = r->begin(); i != r->end(); ++i) {
-		if (std::dynamic_pointer_cast<Track>(*i) == 0) {
+	for (auto const& i : *r) {
+		if (std::dynamic_pointer_cast<Track>(i) == 0) {
 			++n;
 		}
 	}
@@ -6308,8 +6306,8 @@ Session::have_rec_disabled_track () const
 void
 Session::update_route_record_state ()
 {
-	std::shared_ptr<RouteList> rl = routes.reader ();
-	RouteList::iterator i = rl->begin();
+	std::shared_ptr<RouteList const> rl = routes.reader ();
+	RouteList::const_iterator i = rl->begin();
 	while (i != rl->end ()) {
 
 		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
@@ -6354,9 +6352,9 @@ Session::listen_position_changed ()
 		return;
 	}
 	ProcessorChangeBlocker pcb (this);
-	std::shared_ptr<RouteList> r = routes.reader ();
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		(*i)->listen_position_changed ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
+	for (auto const& i : *r) {
+		i->listen_position_changed ();
 	}
 }
 
@@ -6426,13 +6424,12 @@ Session::get_nth_audio_track (uint32_t nth) const
 std::shared_ptr<RouteList>
 Session::get_tracks () const
 {
-	std::shared_ptr<RouteList> rl = routes.reader ();
+	std::shared_ptr<RouteList const> rl = routes.reader ();
 	std::shared_ptr<RouteList> tl (new RouteList);
 
-	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
-		if (std::dynamic_pointer_cast<Track> (*r)) {
-			assert (!(*r)->is_auditioner()); // XXX remove me
-			tl->push_back (*r);
+	for (auto const& r : *rl) {
+		if (std::dynamic_pointer_cast<Track> (r)) {
+			tl->push_back (r);
 		}
 	}
 	return tl;
@@ -6441,11 +6438,11 @@ Session::get_tracks () const
 std::shared_ptr<RouteList>
 Session::get_routes_with_regions_at (timepos_t const & p) const
 {
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 	std::shared_ptr<RouteList> rl (new RouteList);
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
+	for (auto const& i : *r) {
+		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
 		if (!tr) {
 			continue;
 		}
@@ -6456,7 +6453,7 @@ Session::get_routes_with_regions_at (timepos_t const & p) const
 		}
 
 		if (pl->has_region_at (p)) {
-			rl->push_back (*i);
+			rl->push_back (i);
 		}
 	}
 
@@ -6704,9 +6701,9 @@ Session::unknown_processors () const
 {
 	list<string> p;
 
-	std::shared_ptr<RouteList> r = routes.reader ();
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		list<string> t = (*i)->unknown_processors ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
+	for (auto const& i : *r) {
+		list<string> t = i->unknown_processors ();
 		copy (t.begin(), t.end(), back_inserter (p));
 	}
 
@@ -6788,15 +6785,13 @@ Session::update_route_latency (bool playback, bool apply_to_delayline, bool* del
 	DEBUG_TRACE (DEBUG::LatencyCompensation , string_compose ("update_route_latency: %1 apply_to_delayline? %2)\n", (playback ? "PLAYBACK" : "CAPTURE"), (apply_to_delayline ? "yes" : "no")));
 
 	/* Note: RouteList is process-graph sorted */
-	std::shared_ptr<RouteList> r = routes.reader ();
+	RouteList r = *routes.reader ();
 
 	if (playback) {
 		/* reverse the list so that we work backwards from the last route to run to the first,
 		 * this is not needed, but can help to reduce the iterations for aux-sends.
 		 */
-		RouteList* rl = routes.reader().get();
-		r.reset (new RouteList (*rl));
-		reverse (r->begin(), r->end());
+		reverse (r.begin(), r.end());
 	}
 
 	bool changed = false;
@@ -6805,10 +6800,10 @@ restart:
 	_send_latency_changes = 0;
 	_worst_route_latency = 0;
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+	for (auto const& i : r) {
 		// if (!(*i)->active()) { continue ; } // TODO
 		samplecnt_t l;
-		if ((*i)->signal_latency () != (l = (*i)->update_signal_latency (apply_to_delayline, delayline_update_needed))) {
+		if (i->signal_latency () != (l = i->update_signal_latency (apply_to_delayline, delayline_update_needed))) {
 			changed = true;
 		}
 		_worst_route_latency = std::max (l, _worst_route_latency);
@@ -6841,7 +6836,7 @@ Session::set_owned_port_public_latency (bool playback)
 		_click_io->set_public_port_latencies (_click_io->connected_latency (playback), playback);
 	}
 
-	std::shared_ptr<IOPlugList> iop (_io_plugins.reader ());
+	std::shared_ptr<IOPlugList const> iop (_io_plugins.reader ());
 	for (auto const& i : *iop) {
 		i->set_public_latency (playback);
 	}
@@ -6915,23 +6910,21 @@ Session::update_latency (bool playback)
 	}
 
 	/* Note; RouteList is sorted as process-graph */
-	std::shared_ptr<RouteList> r = routes.reader ();
+	RouteList r = *routes.reader ();
 
 	if (playback) {
 		/* reverse the list so that we work backwards from the last route to run to the first */
-		RouteList* rl = routes.reader().get();
-		r.reset (new RouteList (*rl));
-		reverse (r->begin(), r->end());
+		reverse (r.begin(), r.end());
 	}
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+	for (auto const& i : r) {
 		/* private port latency includes plugin and I/O delay,
 		 * but no latency compensation delaylines.
 		 */
-		samplecnt_t latency = (*i)->set_private_port_latencies (playback);
+		samplecnt_t latency = i->set_private_port_latencies (playback);
 		/* However we also need to reset the latency of connected external
 		 * ports, since those includes latency compensation delaylines.
 		 */
-		(*i)->set_public_port_latencies (latency, playback, false);
+		i->set_public_port_latencies (latency, playback, false);
 	}
 
 	set_owned_port_public_latency (playback);
@@ -6961,12 +6954,12 @@ Session::update_latency (bool playback)
 		update_route_latency (false, false, NULL);
 	}
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
+	for (auto const& i : r) {
 		/* Publish port latency. This includes latency-compensation
 		 * delaylines in the direction of signal flow.
 		 */
-		samplecnt_t latency = (*i)->set_private_port_latencies (playback);
-		(*i)->set_public_port_latencies (latency, playback, true);
+		samplecnt_t latency = i->set_private_port_latencies (playback);
+		i->set_public_port_latencies (latency, playback, true);
 	}
 
 	/* now handle non-route ports that we are responsible for */
@@ -7000,11 +6993,11 @@ Session::set_worst_output_latency ()
 		return;
 	}
 
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		_worst_output_latency = max (_worst_output_latency, (*i)->output()->latency());
-		_io_latency = max (_io_latency, (*i)->output()->latency() + (*i)->input()->latency());
+	for (auto const& i : *r) {
+		_worst_output_latency = max (_worst_output_latency, i->output()->latency());
+		_io_latency = max (_io_latency, i->output()->latency() + i->input()->latency());
 	}
 
 	if (_click_io) {
@@ -7027,10 +7020,10 @@ Session::set_worst_input_latency ()
 		return;
 	}
 
-	std::shared_ptr<RouteList> r = routes.reader ();
+	std::shared_ptr<RouteList const> r = routes.reader ();
 
-	for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-		_worst_input_latency = max (_worst_input_latency, (*i)->input()->latency());
+	for (auto const& i : *r) {
+		_worst_input_latency = max (_worst_input_latency, i->input()->latency());
 	}
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation, string_compose ("Worst input latency: %1\n", _worst_input_latency));
@@ -7103,9 +7096,9 @@ Session::update_latency_compensation (bool force_whole_graph, bool called_from_b
 #endif
 		lm.acquire ();
 
-		std::shared_ptr<RouteList> r = routes.reader ();
-		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
-			(*i)->apply_latency_compensation ();
+		std::shared_ptr<RouteList const> r = routes.reader ();
+		for (auto const& i : *r) {
+			i->apply_latency_compensation ();
 		}
 	}
 	DEBUG_TRACE (DEBUG::LatencyCompensation, "update_latency_compensation: complete\n");

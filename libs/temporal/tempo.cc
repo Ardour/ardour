@@ -48,7 +48,7 @@ std::string Tempo::xml_node_name = X_("Tempo");
 std::string Meter::xml_node_name = X_("Meter");
 
 SerializedRCUManager<TempoMap> TempoMap::_map_mgr (0);
-thread_local TempoMap::WritableSharedPtr TempoMap::_tempo_map_p;
+thread_local TempoMap::SharedPtr TempoMap::_tempo_map_p;
 PBD::Signal0<void> TempoMap::MapChanged;
 
 void

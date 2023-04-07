@@ -362,7 +362,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	   order key.
 	*/
 
-	std::shared_ptr<RouteList> routes = session->get_routes ();
+	std::shared_ptr<RouteList const> routes = session->get_routes ();
 	list<RouteIOs> route_ios;
 
 	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
@@ -440,19 +440,19 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	   that UserBundles that offer the same ports as a normal bundle get priority
 	*/
 
-	std::shared_ptr<BundleList> b = session->bundles ();
+	std::shared_ptr<BundleList const> b = session->bundles ();
 
-	for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-		if (std::dynamic_pointer_cast<UserBundle> (*i) && (*i)->ports_are_inputs() == inputs) {
-			system->add_bundle (*i, allow_dups);
+	for (auto const& i : *b) {
+		if (std::dynamic_pointer_cast<UserBundle> (i) && i->ports_are_inputs() == inputs) {
+			system->add_bundle (i, allow_dups);
 		}
 	}
 
 	/* Only look for non-user bundles if instructed to do so */
 	if (use_session_bundles) {
-		for (BundleList::iterator i = b->begin(); i != b->end(); ++i) {
-			if (std::dynamic_pointer_cast<UserBundle> (*i) == 0 && (*i)->ports_are_inputs() == inputs) {
-				system->add_bundle (*i, allow_dups);
+		for (auto const& i : *b) {
+			if (std::dynamic_pointer_cast<UserBundle> (i) == 0 && i->ports_are_inputs() == inputs) {
+				system->add_bundle (i, allow_dups);
 			}
 		}
 	}

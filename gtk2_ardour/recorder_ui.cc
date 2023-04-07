@@ -564,7 +564,7 @@ RecorderUI::start_updating ()
 
 	size_t iop_audio = 0;
 	size_t iop_midi  = 0;
-	std::shared_ptr<IOPlugList> iop;
+	std::shared_ptr<IOPlugList const> iop;
 	if (_session) {
 		iop = _session->io_plugs ();
 		for (auto& p : *iop) {
@@ -684,7 +684,7 @@ void
 RecorderUI::io_plugins_changed ()
 {
 	_fast_screen_update_connection.disconnect ();
-	std::shared_ptr<IOPlugList> iop (_session->io_plugs ());
+	std::shared_ptr<IOPlugList const> iop (_session->io_plugs ());
 	for (auto& p : *iop) {
 		if (_ioplugins.find (p) != _ioplugins.end ()) {
 			continue;
@@ -794,7 +794,7 @@ bool
 RecorderUI::update_meters ()
 {
 	PortManager::AudioInputPorts const aip (AudioEngine::instance ()->audio_input_ports ());
-	std::shared_ptr<IOPlugList>      iop;
+	std::shared_ptr<IOPlugList const>  iop;
 	if (_session) {
 		iop = _session->io_plugs ();
 	}
