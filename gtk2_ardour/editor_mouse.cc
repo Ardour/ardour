@@ -817,7 +817,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		break;
 
 	case MappingBarItem:
-	case MappingCursorItem:
 		choose_mapping_drag (item, event);
 		return true;
 
@@ -1692,7 +1691,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case CdMarkerBarItem:
 			case TempoBarItem:
 			case MappingBarItem:
-			case MappingCursorItem:
 			case TempoCurveItem:
 			case MeterBarItem:
 			case VideoBarItem:
@@ -1820,7 +1818,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 
 		case MappingBarItem:
-		case MappingCursorItem:
 			return true;
 
 		case TempoBarItem:
@@ -1984,13 +1981,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	choose_canvas_cursor_on_entry (item_type);
 
 	switch (item_type) {
-	case MappingCursorItem:
-		/* nothing to do ??? */
-		break;
-
 	case MappingBarItem:
-		mapping_cursor->show ();
-		mapping_cursor->raise_to_top ();
 		break;
 
 	case ControlPointItem:
@@ -2138,12 +2129,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	}
 
 	switch (item_type) {
-	case MappingCursorItem:
-		/* ignore */
-		break;
-
 	case MappingBarItem:
-		mapping_cursor->hide ();
 		break;
 
 	case ControlPointItem:
@@ -2349,39 +2335,30 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_aut
 			timepos_t t (where);
 			bool move_snapped_cursor = true;
 
-			if (item == mapping_bar || item == mapping_cursor) {
+			if (item == mapping_bar) {
 
 				/* Snap to the nearest beat, and figure out how
 				 * many pixels from the pointer cursor that is.
 				 */
 
-				timepos_t snapped = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBeat);
-				const double unsnapped_pos = time_to_pixel_unrounded (t);
-				const double snapped_pos = time_to_pixel_unrounded (snapped);
+				Editor::EnterContext* ctx = get_enter_context (MappingBarItem);
 
-				if (std::abs (snapped_pos - unsnapped_pos) < 10 * UIConfiguration::instance().get_ui_scale()) {
+				if (ctx) {
+					timepos_t snapped = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBeat);
+					const double unsnapped_pos = time_to_pixel_unrounded (t);
+					const double snapped_pos = time_to_pixel_unrounded (snapped);
 
-					/* Close to a beat, so snap the mapping
-					 * cursor *and* the snapped cursor to
-					 * the beat.
-					 */
+					if (std::abs (snapped_pos - unsnapped_pos) < 10 * UIConfiguration::instance().get_ui_scale()) {
 
-					mapping_cursor->show ();
-					mapping_cursor->raise_to_top ();
+						/* Close to a beat, so snap the mapping
+						 * cursor *and* the snapped cursor to
+						 * the beat.
+						 */
 
-					mapping_cursor->set_position (ArdourCanvas::Duple (snapped_pos, mapping_cursor->position().y));
-					set_snapped_cursor_position (snapped);
-
-					move_snapped_cursor = false;
-
-				} else {
-
-					/* Not close to a beat, hide the
-					 * mapping cursor, then move the
-					 * snapped cursor as normal.
-					 */
-
-					mapping_cursor->hide ();
+						ctx->cursor_ctx->change (cursors()->time_fx);
+					} else {
+						ctx->cursor_ctx->change (cursors()->trimmer);
+					}
 				}
 			}
 
@@ -2947,20 +2924,11 @@ Editor::get_pointer_position (double& x, double& y) const
 void
 Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 {
-	if (item != mapping_cursor && item != mapping_bar) {
+	if (item != mapping_bar) {
 		return;
 	}
 
 	Temporal::TempoMap::WritableSharedPtr map = begin_tempo_mapping ();
-
-	if (item == mapping_bar) {
-		/* Drag on the bar, not the cursor: just adjust tempo up or
-		 * down.
-		 */
-		_drags->set (new MappingLinearDrag (this, item, map), event);
-		std::cerr << ":Linear\n";
-		return;
-	}
 
 	/* Decide between a tempo twist drag, which we do if the
 	 * pointer is between two tempo markers, and a tempo stretch
@@ -2973,12 +2941,27 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 
 	TempoPoint* after = const_cast<TempoPoint*> (map->next_tempo (tempo));
 
+	std::cerr << "is there an after ? " << after << " for " << tempo <<std::endl;
+
 	if (!after || dynamic_cast<MusicTimePoint*>(after)) {
+		/* Drag on the bar, not the cursor: just adjust tempo up or
+		 * down.
+		 */
+		_drags->set (new MappingLinearDrag (this, item, map), event);
+		std::cerr << ":Linear\n";
+		return;
+	}
+
+	std::cerr << " cursor stack: " << _cursor_stack.size() << std::endl;
+
+	if (_cursor_stack.empty() || _cursor_stack.back() != cursors()->grabber) {
 		/* This is the final tempo, or the next one is a BBT marker.
 		 * No twisting, just stretch this one.
 		*/
 		std::cerr << "stretch!\n";
-		_drags->set (new MappingStretchDrag (this, item, map), event);
+		begin_reversible_command (_("map tempo/stretch"));
+		XMLNode* before_state = &map->get_state();
+		_drags->set (new MappingStretchDrag (this, item, map, *after, *before_state), event);
 		std::cerr << ":Stretch\n";
 		return;
 	}

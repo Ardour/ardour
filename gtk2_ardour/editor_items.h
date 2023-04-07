@@ -44,7 +44,6 @@ enum ItemType {
 	MeterBarItem,
 	TempoBarItem,
 	MappingBarItem,
-	MappingCursorItem,
 	RegionViewNameHighlight,
 	RegionViewName,
 	StartSelectionTrimItem,

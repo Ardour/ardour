@@ -255,7 +255,6 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		break;
 
 	case MappingBarItem:
-	case MappingCursorItem:
 #warning paul fix mapping bar context menu
 		ruler_items.push_back (MenuElem (_("New BBT Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
 		ruler_items.push_back (MenuElem (_("New Tempo Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));

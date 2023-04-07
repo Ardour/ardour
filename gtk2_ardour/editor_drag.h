@@ -944,7 +944,7 @@ private:
 class MappingStretchDrag : public Drag
 {
 public:
-	MappingStretchDrag (Editor *, ArdourCanvas::Item *, Temporal::TempoMap::WritableSharedPtr&);
+	MappingStretchDrag (Editor *, ArdourCanvas::Item *, Temporal::TempoMap::WritableSharedPtr&, Temporal::TempoPoint&, XMLNode&);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -962,11 +962,14 @@ public:
 	void setup_pointer_offset ();
 
 private:
-	Temporal::TempoPoint* _tempo;
+	Temporal::TempoPoint& _focus;
 	Temporal::TempoMap::WritableSharedPtr map;
-	Temporal::Beats _grab_qn;
 
-	XMLNode* _before_state;
+	double direction;
+	double delta;
+	double initial_npm;
+
+	XMLNode& _before_state;
 	bool     _drag_valid;
 };
 

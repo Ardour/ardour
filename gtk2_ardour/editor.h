@@ -1060,8 +1060,6 @@ private:
 	ArdourCanvas::Rectangle* cue_marker_bar;
 	ArdourCanvas::Line*      ruler_separator;
 
-	ArdourCanvas::Arc*       mapping_cursor;
-
 	void toggle_cue_behavior ();
 
 	Gtk::Label  minsec_label;
