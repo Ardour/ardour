@@ -44,6 +44,7 @@ public:
 	virtual ~MidiClockTicker ();
 
 	void tick (ProcessedRanges const &, pframes_t, samplecnt_t);
+	void locate (samplepos_t position, pframes_t);
 
 private:
 	ARDOUR::Session&      _session;
