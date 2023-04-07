@@ -6408,11 +6408,11 @@ Session::route_removed_from_route_group (RouteGroup* rg, std::weak_ptr<Route> r)
 std::shared_ptr<AudioTrack>
 Session::get_nth_audio_track (uint32_t nth) const
 {
-	std::shared_ptr<RouteList> rl = routes.reader ();
-	rl->sort (Stripable::Sorter ());
+	RouteList rl (*(routes.reader ()));
+	rl.sort (Stripable::Sorter());
 
-	for (RouteList::const_iterator r = rl->begin(); r != rl->end(); ++r) {
-		std::shared_ptr<AudioTrack> at = std::dynamic_pointer_cast<AudioTrack> (*r);
+	for (auto const& r: rl) {
+		std::shared_ptr<AudioTrack> at = std::dynamic_pointer_cast<AudioTrack> (r);
 		if (!at) {
 			continue;
 		}
