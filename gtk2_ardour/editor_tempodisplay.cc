@@ -894,3 +894,9 @@ Editor::mid_tempo_per_region_update (RegionView* rv)
 {
 	rv->tempo_map_changed ();
 }
+
+void
+Editor::set_tempo_edit_behavior (TempoEditBehavior teb)
+{
+	_tempo_edit_behavior = teb;
+}

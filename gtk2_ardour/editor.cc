@@ -470,6 +470,7 @@ Editor::Editor ()
 	, _stepping_axis_view (0)
 	, quantize_dialog (0)
 	, _main_menu_disabler (0)
+	, _tempo_edit_behavior (UIConfiguration::instance().get_default_tempo_edit_behavior())
 {
 	/* we are a singleton */
 

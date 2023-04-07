@@ -620,6 +620,9 @@ public:
 	void remove_region_marker (ARDOUR::CueMarker&);
 	void make_region_markers_global (bool as_cd_markers);
 
+	Editing::TempoEditBehavior tempo_edit_behavior() const { return _tempo_edit_behavior; }
+	void set_tempo_edit_behavior (Editing::TempoEditBehavior teb);
+
 protected:
 	void map_transport_state ();
 	void map_position_change (samplepos_t);
@@ -2524,6 +2527,8 @@ private:
 	void remove_gap_marker_callback (Temporal::timepos_t at, Temporal::timecnt_t distance);
 
 	void choose_mapping_drag (ArdourCanvas::Item*, GdkEvent*);
+
+	Editing::TempoEditBehavior _tempo_edit_behavior;
 
 	template<typename T>
 	Temporal::TimeDomain drag_time_domain (T* thing_with_time_domain) {

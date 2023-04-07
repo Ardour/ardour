@@ -53,6 +53,7 @@
 
 #include "canvas/text.h"
 
+#include "editing_convert.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"

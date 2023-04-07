@@ -107,3 +107,6 @@ EDITPOINT(EditAtMouse)
 INSERTTIMEOPT(LeaveIntersected)
 INSERTTIMEOPT(MoveIntersected)
 INSERTTIMEOPT(SplitIntersected)
+
+TEMPOEDITBEHAVIOR(TempoMapping)
+TEMPOEDITBEHAVIOR(TempoChanging)

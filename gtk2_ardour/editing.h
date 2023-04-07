@@ -41,6 +41,7 @@
 #define WAVEFORMSCALE(a) /*empty*/
 #define WAVEFORMSHAPE(a) /*empty*/
 #define INSERTTIMEOPT(a) /*empty*/
+#define TEMPOEDITBEHAVIOR(a) /*empty*/
 
 namespace Editing {
 
@@ -197,6 +198,18 @@ enum InsertTimeOption {
 #undef INSERTTIMEOPT
 #define INSERTTIMEOPT(a) /*empty*/
 
+#undef TEMPOEDITBEHAVIOR
+#define TEMPOEDITBEHAVIOR(a) a,
+enum TempoEditBehavior {
+	#include "editing_syms.h"
+};
+
+extern const char *tempoeditbehaviorstrs[];
+inline const char* enum2str(TempoEditBehavior m) {return tempoeditbehaviorstrs[m];}
+TempoEditBehavior str2tempoeditbehavior(const std::string &);
+
+#undef TEMPOEDITBEHAVIOR
+#define TEMPOEDITBEHAVIOR(a) /*empty*/
 
 /////////////////////
 // These don't need their state saved. yet...

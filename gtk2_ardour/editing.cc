@@ -163,5 +163,15 @@ const char *importmodestrs[] = {
 #undef IMPORTMODE
 #define IMPORTMODE(a) /*empty*/
 
+//TEMPOEDITBEHAVIOR
+#undef TEMPOEDITBEHAVIOR
+#define TEMPOEDITBEHAVIOR(s) N_(#s),
+const char *tempoeditbehaviorstrs[] = {
+	#include "editing_syms.h"
+	0
+};
+#undef TEMPOEDITBEHAVIOR
+#define TEMPOEDITBEHAVIOR(a) /*empty*/
+
 } // namespace Editing
 

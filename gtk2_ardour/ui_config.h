@@ -43,6 +43,7 @@
 #include "gtkmm2ext/colors.h"
 #include "widgets/ui_config.h"
 
+#include "editing.h"
 #include "utils.h"
 
 class UIConfiguration : public ArdourWidgets::UIConfigurationBase
