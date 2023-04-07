@@ -128,6 +128,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("AutomationMenu"), _("Automation"));
 	ActionManager::register_action (editor_menu_actions, X_("Crossfades"), _("Crossfades"));
 	ActionManager::register_action (editor_menu_actions, X_("Edit"), _("Edit"));
+	ActionManager::register_action (editor_menu_actions, X_("Tempo"), _("Tempo"));
 	ActionManager::register_action (editor_menu_actions, X_("EditCursorMovementOptions"), _("Move Selected Marker"));
 	ActionManager::register_action (editor_menu_actions, X_("EditSelectRangeOptions"), _("Select Range Operations"));
 	ActionManager::register_action (editor_menu_actions, X_("EditSelectRegionOptions"), _("Select Regions"));
@@ -204,6 +205,10 @@ Editor::register_actions ()
 	   when required. Editor::unlock() must be invoked directly.
 	*/
 	ActionManager::register_action (editor_actions, "lock", S_("Session|Lock"), sigc::mem_fun (*this, &Editor::lock));
+
+	RadioAction::Group tempo_edit_group;
+	ActionManager::register_radio_action (editor_actions, tempo_edit_group, "tempo-edit-is-mapping", _("Map Tempo"), sigc::bind (sigc::mem_fun (*this, &Editor::set_tempo_edit_behavior), Editing::TempoMapping));
+	ActionManager::register_radio_action (editor_actions, tempo_edit_group, "tempo-edit-is-change", _("Change Tempo"), sigc::bind (sigc::mem_fun (*this, &Editor::set_tempo_edit_behavior), Editing::TempoChanging));
 
 	toggle_reg_sens (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	toggle_reg_sens (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Editor::editor_list_button_toggled));
