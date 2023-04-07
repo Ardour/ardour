@@ -766,7 +766,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API int set_state (XMLNode const&, int version);
 
 	LIBTEMPORAL_API void twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& next, double tempo_delta);
-	LIBTEMPORAL_API void stretch_tempo (TempoPoint* ts, samplepos_t sample, samplepos_t end_sample, Beats const & start_qnote, Beats const & end_qnote);
+	LIBTEMPORAL_API void stretch_tempo (TempoPoint& ts, double new_npm);
 	LIBTEMPORAL_API void stretch_tempo_end (TempoPoint* ts, samplepos_t sample, samplepos_t end_sample);
 
 	/* END OF MODIFYING METHODS */
