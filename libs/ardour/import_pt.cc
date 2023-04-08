@@ -277,6 +277,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 	vector<string> to_import;
 	string fullpath;
 	uint32_t srate = sample_rate ();
+	timepos_t latest = timepos_t (0);
 
 	vector<struct ptflookup> ptfregpair;
 
@@ -386,9 +387,17 @@ Session::import_pt_rest (PTFFormat& ptf)
 				playlist->clear_changes ();
 				playlist->add_region (copy, timepos_t (a->reg.startpos));
 				//add_command (new StatefulDiffCommand (playlist));
+
+				/* Collect latest end of all regions */
+				timepos_t end_of_region = timepos_t (a->reg.startpos + a->reg.length);
+				if (latest < end_of_region) {
+					latest = end_of_region;
+				}
 			}
 		}
 	}
+
+	maybe_update_session_range (timepos_t (0), latest);
 
 	/* Playlist::thaw() all tracks */
 	for (pl = playlists.begin(); pl != playlists.end(); ++pl) {
