@@ -229,7 +229,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_CLASS_ENUM (AddRouteDialog, FoldbackBus);
 	REGISTER (type_wanted);
 
-	REGISTER_ENUM (TempoMapping);
-	REGISTER_ENUM (TempoChanging);
+	REGISTER_CLASS_ENUM (Editing, TempoMapping);
+	REGISTER_CLASS_ENUM (Editing, TempoChanging);
 	REGISTER (tempo_edit_behavior);
 }

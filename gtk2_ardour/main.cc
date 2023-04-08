@@ -450,6 +450,8 @@ int main (int argc, char *argv[])
 
 	DEBUG_TRACE (DEBUG::Locale, string_compose ("main() locale '%1'\n", setlocale (LC_NUMERIC, NULL)));
 
+	setup_gtk_ardour_enums ();
+
 	if (UIConfiguration::instance().pre_gui_init ()) {
 		error << _("Could not complete pre-GUI initialization") << endmsg;
 		exit (EXIT_FAILURE);

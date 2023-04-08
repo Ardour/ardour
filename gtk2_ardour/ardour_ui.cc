@@ -483,7 +483,6 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 
 	/* lets get this party started */
 
-	setup_gtk_ardour_enums ();
 	setup_profile ();
 
 	SessionEvent::create_per_thread_pool ("GUI", 4096);
