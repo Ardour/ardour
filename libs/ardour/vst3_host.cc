@@ -20,10 +20,6 @@
 #include <algorithm>
 #include <ctype.h>
 
-#if (__cplusplus >= 201103L)
-#include <boost/make_unique.hpp>
-#endif
-
 #include "ardour/vst3_host.h"
 
 #include "pbd/atomic.h"
@@ -461,11 +457,7 @@ PlugInterfaceSupport::addPlugInterfaceSupported (const TUID id)
 
 HostApplication::HostApplication ()
 {
-#if (__cplusplus >= 201103L)
-	_plug_interface_support = boost::make_unique<PlugInterfaceSupport> ();
-#else
 	_plug_interface_support.reset (new PlugInterfaceSupport);
-#endif
 }
 
 tresult

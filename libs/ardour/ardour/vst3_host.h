@@ -298,7 +298,7 @@ public:
 	tresult PLUGIN_API createInstance (TUID cid, TUID _iid, void** obj) SMTG_OVERRIDE;
 
 protected:
-	std::shared_ptr<PlugInterfaceSupport> _plug_interface_support;
+	std::unique_ptr<PlugInterfaceSupport> _plug_interface_support;
 };
 
 class LIBARDOUR_LOCAL Vst3ParamValueQueue : public Vst::IParamValueQueue
