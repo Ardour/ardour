@@ -332,7 +332,6 @@ Editor::Editor ()
 	, timecode_label (_("Timecode"))
 	, samples_label (_("Samples"))
 	, tempo_label (_("Tempo"))
-	, mapping_label (_("Tempo Mapping"))
 	, meter_label (_("Time Signature"))
 	, mark_label (_("Location Markers"))
 	, range_mark_label (_("Range Markers"))
@@ -544,13 +543,6 @@ Editor::Editor ()
 	tempo_label.set_padding (5,0);
 	tempo_label.hide();
 	tempo_label.set_no_show_all();
-
-	mapping_label.set_name ("EditorRulerLabel");
-	mapping_label.set_size_request (-1, (int)timebar_height);
-	mapping_label.set_alignment (1.0, 0.5);
-	mapping_label.set_padding (5,0);
-	mapping_label.hide();
-	mapping_label.set_no_show_all();
 
 	meter_label.set_name ("EditorRulerLabel");
 	meter_label.set_size_request (-1, (int)timebar_height);
@@ -890,6 +882,9 @@ Editor::Editor ()
 	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
+
+	/* force correct state for tempo edit behavior */
+	tempo_edit_behavior_toggled (_tempo_edit_behavior);
 }
 
 Editor::~Editor()

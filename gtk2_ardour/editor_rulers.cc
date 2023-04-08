@@ -173,7 +173,6 @@ Editor::initialize_rulers ()
 	lab_children.push_back (Element(timecode_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(samples_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(bbt_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(mapping_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(tempo_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(meter_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
@@ -336,7 +335,6 @@ Editor::store_ruler_visibility ()
 	node->set_property (X_("bbt"), ruler_bbt_action->get_active());
 	node->set_property (X_("meter"), ruler_meter_action->get_active());
 	node->set_property (X_("tempo"), ruler_tempo_action->get_active());
-	node->set_property (X_("mapping"), ruler_mapping_action->get_active());
 	node->set_property (X_("rangemarker"), ruler_range_action->get_active());
 	node->set_property (X_("transportmarker"), ruler_loop_punch_action->get_active());
 	node->set_property (X_("cdmarker"), ruler_cd_marker_action->get_active());
@@ -370,9 +368,6 @@ Editor::restore_ruler_visibility ()
 		}
 		if (node->get_property ("tempo", yn)) {
 			ruler_tempo_action->set_active (yn);
-		}
-		if (node->get_property ("mapping", yn)) {
-			ruler_mapping_action->set_active (yn);
 		}
 		if (node->get_property ("meter", yn)) {
 			ruler_meter_action->set_active (yn);
@@ -453,7 +448,6 @@ Editor::update_ruler_visibility ()
 	/* gtk update probs require this (damn) */
 	meter_label.hide();
 	tempo_label.hide();
-	mapping_label.hide();
 	range_mark_label.hide();
 	transport_mark_label.hide();
 	cd_mark_label.hide();
@@ -522,33 +516,18 @@ Editor::update_ruler_visibility ()
 		bbt_label.hide();
 	}
 
-	if (ruler_mapping_action->get_active()) {
-		old_unit_pos = mapping_group->position().y;
-		if (tbpos != old_unit_pos) {
-			mapping_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		mapping_group->show();
-		mapping_label.show();
-		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
-	} else {
-		mapping_group->hide();
-		mapping_label.hide();
-	}
-
 	if (ruler_tempo_action->get_active()) {
-		old_unit_pos = tempo_group->position().y;
+		old_unit_pos = tempo_meta_group->position().y;
 		if (tbpos != old_unit_pos) {
-			tempo_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+			tempo_meta_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
-		tempo_group->show();
+		tempo_meta_group->show();
 		tempo_label.show();
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
-		tempo_group->hide();
+		tempo_meta_group->hide();
 		tempo_label.hide();
 	}
 

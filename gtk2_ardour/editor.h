@@ -917,6 +917,7 @@ private:
 	Gtk::EventBox            time_bars_event_box;
 	Gtk::VBox                time_bars_vbox;
 
+ 	ArdourCanvas::Container* tempo_meta_group;
 	ArdourCanvas::Container* tempo_group;
 	ArdourCanvas::Container* mapping_group;
 	ArdourCanvas::Container* meter_group;
@@ -965,7 +966,6 @@ private:
 	Glib::RefPtr<Gtk::ToggleAction> ruler_bbt_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_meter_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_tempo_action;
-	Glib::RefPtr<Gtk::ToggleAction> ruler_mapping_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_range_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_loop_punch_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
@@ -1070,7 +1070,6 @@ private:
 	Gtk::Label  timecode_label;
 	Gtk::Label  samples_label;
 	Gtk::Label  tempo_label;
-	Gtk::Label  mapping_label;
 	Gtk::Label  meter_label;
 	Gtk::Label  mark_label;
 	Gtk::Label  range_mark_label;
@@ -2529,6 +2528,7 @@ private:
 	void choose_mapping_drag (ArdourCanvas::Item*, GdkEvent*);
 
 	Editing::TempoEditBehavior _tempo_edit_behavior;
+	void tempo_edit_behavior_toggled (Editing::TempoEditBehavior);
 
 	template<typename T>
 	Temporal::TimeDomain drag_time_domain (T* thing_with_time_domain) {

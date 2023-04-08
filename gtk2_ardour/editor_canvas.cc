@@ -162,12 +162,14 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (transport_marker_group, "transport marker group");
 	range_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 3.0) + 1.0));
 	CANVAS_DEBUG_NAME (range_marker_group, "range marker group");
-	tempo_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 4.0) + 1.0));
+	tempo_meta_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 4.0) + 1.0));
+	CANVAS_DEBUG_NAME (tempo_meta_group, "tempo meta group");
+	tempo_group = new ArdourCanvas::Container (tempo_meta_group, ArdourCanvas::Duple (0.0, 0.0));
 	CANVAS_DEBUG_NAME (tempo_group, "tempo group");
+	mapping_group = new ArdourCanvas::Container (tempo_meta_group, ArdourCanvas::Duple (0.0, 0.0));
+	CANVAS_DEBUG_NAME (tempo_group, "mapping group");
 	meter_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
 	CANVAS_DEBUG_NAME (meter_group, "meter group");
-	mapping_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 6.0) + 1.0));
-	CANVAS_DEBUG_NAME (mapping_group, "mapping group");
 
 	float timebar_thickness = timebar_height; //was 4
 	float timebar_top = (timebar_height - timebar_thickness)/2;
@@ -183,11 +185,12 @@ Editor::initialize_canvas ()
 	tempo_bar->set_outline(false);
 	tempo_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 
-	mapping_bar = new ArdourCanvas::Rectangle (mapping_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	mapping_bar = new ArdourCanvas::Rectangle (tempo_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
 	CANVAS_DEBUG_NAME (mapping_bar, "Mapping Bar");
 	mapping_bar->set_fill(true);
 	mapping_bar->set_outline(false);
 	mapping_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
+	mapping_bar->hide ();
 
 	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");

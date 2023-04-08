@@ -207,8 +207,8 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, "lock", S_("Session|Lock"), sigc::mem_fun (*this, &Editor::lock));
 
 	RadioAction::Group tempo_edit_group;
-	ActionManager::register_radio_action (editor_actions, tempo_edit_group, "tempo-edit-is-mapping", _("Map Tempo"), sigc::bind (sigc::mem_fun (*this, &Editor::set_tempo_edit_behavior), Editing::TempoMapping));
-	ActionManager::register_radio_action (editor_actions, tempo_edit_group, "tempo-edit-is-change", _("Change Tempo"), sigc::bind (sigc::mem_fun (*this, &Editor::set_tempo_edit_behavior), Editing::TempoChanging));
+	ActionManager::register_radio_action (editor_actions, tempo_edit_group, "tempo-edit-is-mapping", _("Map Tempo"), sigc::bind (sigc::mem_fun (*this, &Editor::tempo_edit_behavior_toggled), Editing::TempoMapping));
+	ActionManager::register_radio_action (editor_actions, tempo_edit_group, "tempo-edit-is-changing", _("Change Tempo"), sigc::bind (sigc::mem_fun (*this, &Editor::tempo_edit_behavior_toggled), Editing::TempoChanging));
 
 	toggle_reg_sens (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	toggle_reg_sens (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Editor::editor_list_button_toggled));
@@ -718,7 +718,6 @@ Editor::register_actions ()
 	ruler_bbt_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-bbt-ruler"), _("Bars:Beats"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_meter_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-meter-ruler"), _("Time Signature"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_tempo_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-tempo-ruler"), _("Tempo"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
-	ruler_mapping_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-mapping-ruler"), _("Tempo Mapping"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_range_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-range-ruler"), _("Range Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_loop_punch_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch Ranges"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_cd_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-cd-marker-ruler"), _("CD Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
