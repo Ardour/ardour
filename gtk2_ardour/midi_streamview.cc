@@ -339,7 +339,7 @@ MidiStreamView::draw_note_lines()
 	double prev_y = .5;
 	uint32_t color;
 
-	_note_lines->clear();
+	ArdourCanvas::LineSet::ResetRAII lr (*_note_lines);
 
 	if (child_height() < 140 || note_height() < 3) {
 		/* track is too small for note lines, or there are too many */

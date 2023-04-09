@@ -55,19 +55,19 @@ GridLines::hide ()
 void
 GridLines::draw (std::vector<Ruler::Mark> const & marks)
 {
-	lines.clear();
+	LineSet::ResetRAII lr (lines);
 
 	const uint32_t major_color = UIConfiguration::instance().color_mod("grid line major", "grid line");
 	const uint32_t minor_color = UIConfiguration::instance().color_mod("grid line minor", "grid line");
 	const uint32_t micro_color = UIConfiguration::instance().color_mod("grid line micro", "grid line");
 
-	for (vector<Ruler::Mark>::const_iterator m = marks.begin(); m != marks.end(); ++m) {
+	for (auto const & m : marks) {
 
-		samplepos_t s = m->position;
+		samplepos_t s = m.position;
 
-		if ((*m).style == ArdourCanvas::Ruler::Mark::Major) {
+		if (m.style == ArdourCanvas::Ruler::Mark::Major) {
 			lines.add_coord (PublicEditor::instance().sample_to_pixel_unrounded (s), 1.0, major_color);
-		} else if ((*m).style == ArdourCanvas::Ruler::Mark::Minor) {
+		} else if (m.style == ArdourCanvas::Ruler::Mark::Minor) {
 			lines.add_coord (PublicEditor::instance().sample_to_pixel_unrounded (s), 1.0, minor_color);
 		} else {
 			lines.add_coord (PublicEditor::instance().sample_to_pixel_unrounded (s), 1.0, micro_color);

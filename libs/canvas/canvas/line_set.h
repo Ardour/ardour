@@ -47,6 +47,15 @@ public:
 	void set_extent (Distance);
 	Distance extent() const { return _extent; }
 
+	void begin_add ();
+	void end_add ();
+
+	struct ResetRAII {
+		ResetRAII (LineSet& l) : lines (l) { lines.clear(); lines.begin_add(); }
+		~ResetRAII () { lines.end_add (); }
+		LineSet& lines;
+	};
+
 	void add_coord (Coord, Distance, Gtkmm2ext::Color);
 	void clear ();
 

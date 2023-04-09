@@ -131,12 +131,23 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 }
 
 void
-LineSet::add_coord (Coord y, Distance width, Gtkmm2ext::Color color)
+LineSet::add_coord (Coord pos, Distance width, Gtkmm2ext::Color color)
+{
+	_lines.push_back (Line (pos, width, color));
+}
+
+void
+LineSet::begin_add ()
 {
 	begin_change ();
+}
 
-	_lines.push_back (Line (y, width, color));
-	sort (_lines.begin(), _lines.end(), LineSorter());
+void
+LineSet::end_add ()
+{
+	if (!_lines.empty()) {
+		sort (_lines.begin(), _lines.end(), LineSorter());
+	}
 
 	set_bbox_dirty ();
 	end_change ();
