@@ -35,6 +35,7 @@
 #include "canvas/fwd.h"
 #include "canvas/types.h"
 #include "canvas/circle.h"
+#include "canvas/text.h"
 
 namespace Temporal {
 	class Point;
@@ -158,7 +159,7 @@ protected:
 
 	int          _cue_index;
 
-	void reposition ();
+	virtual void reposition ();
 	void setup_line_x ();
 	void setup_name_display ();
 
@@ -179,11 +180,12 @@ class MetricMarker : public ArdourMarker
 class TempoMarker : public MetricMarker
 {
   public:
-	TempoMarker (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, const std::string& text, Temporal::TempoPoint const &, samplepos_t sample, uint32_t curve_color);
+	TempoMarker (PublicEditor& editor, ArdourCanvas::Item & parent, ArdourCanvas::Item & text_parent, guint32 rgba, const std::string& text, Temporal::TempoPoint const &, samplepos_t sample, uint32_t curve_color);
 	~TempoMarker ();
 
 	void reset_tempo (Temporal::TempoPoint const & t);
 	void update ();
+	void reposition ();
 
 	Temporal::TempoPoint const & tempo() const { return *_tempo; }
 	Temporal::Point const & point() const;
@@ -193,6 +195,7 @@ class TempoMarker : public MetricMarker
   private:
 	Temporal::TempoPoint const * _tempo;
 	TempoCurve* _curve;
+	ArdourCanvas::Text* _mapping_text;
 };
 
 class MeterMarker : public MetricMarker

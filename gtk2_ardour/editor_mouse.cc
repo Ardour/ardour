@@ -2356,8 +2356,6 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_aut
 						 */
 
 						ctx->cursor_ctx->change (cursors()->time_fx);
-					} else {
-						ctx->cursor_ctx->change (cursors()->trimmer);
 					}
 				}
 			}
@@ -2952,17 +2950,12 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		return;
 	}
 
-	std::cerr << " cursor stack: " << _cursor_stack.size() << std::endl;
+	/* Use cursor state to determine if we are close enough to a beat line
+	 * to do a twist. We computed that in the motion handler.
+	 */
 
-	if (_cursor_stack.empty() || _cursor_stack.back() != cursors()->grabber) {
-		/* This is the final tempo, or the next one is a BBT marker.
-		 * No twisting, just stretch this one.
-		*/
-		std::cerr << "stretch!\n";
-		begin_reversible_command (_("map tempo/stretch"));
-		XMLNode* before_state = &map->get_state();
-		_drags->set (new MappingStretchDrag (this, item, map, *after, *before_state), event);
-		std::cerr << ":Stretch\n";
+	if (_cursor_stack.empty() || _cursor_stack.back() != cursors()->time_fx) {
+		std::cerr << "do nothing\n";
 		return;
 	}
 

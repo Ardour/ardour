@@ -672,14 +672,24 @@ MetricMarker::MetricMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 
 /***********************************************************************/
 
-TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Item& parent, guint32 rgba, const string& text, Temporal::TempoPoint const & temp, samplepos_t sample, uint32_t curve_color)
+TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Item& parent, ArdourCanvas::Item& text_parent, guint32 rgba, const string& text, Temporal::TempoPoint const & temp, samplepos_t sample, uint32_t curve_color)
 	: MetricMarker (editor, parent, rgba, text, Tempo, temp.time(), false)
 	, _tempo (&temp)
+	, _mapping_text (new ArdourCanvas::Text (&text_parent))
 {
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_marker_event), group, this));
 	/* points[1].x gives the width of the marker */
 	_curve = new TempoCurve (editor, *group, curve_color, temp, true, (*points)[1].x);
 	_curve->the_item().lower_to_bottom ();
+
+	_mapping_text->set_color (0xffffff);
+	_mapping_text->set_font_description (ARDOUR_UI_UTILS::get_font_for_style (N_("MarkerText")));
+	_mapping_text->set_position (ArdourCanvas::Duple (unit_position, 0.0));
+	_mapping_text->set_ignore_events (true);
+
+	char buf[64];
+	snprintf (buf, sizeof (buf), "%.2f", _tempo->note_types_per_minute ());
+	_mapping_text->set (buf);
 }
 
 TempoMarker::~TempoMarker ()
@@ -688,9 +698,23 @@ TempoMarker::~TempoMarker ()
 }
 
 void
+TempoMarker::reposition ()
+{
+	MetricMarker::reposition ();
+
+	_mapping_text->set_position (ArdourCanvas::Duple (unit_position, _mapping_text->position().y));
+}
+
+void
 TempoMarker::update ()
 {
 	set_position (_tempo->time());
+
+	_mapping_text->set_position (ArdourCanvas::Duple (unit_position, _mapping_text->position().y));
+
+	char buf[64];
+	snprintf (buf, sizeof (buf), "%.2f", _tempo->note_types_per_minute ());
+	_mapping_text->set (buf);
 }
 
 TempoCurve&

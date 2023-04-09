@@ -208,8 +208,6 @@ Editor::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType type)
 		return false;
 	}
 
-	std::cerr << "event for " << enum_2_string (type) << ' ' << item->whoami() << std::endl;
-
 	gint ret = FALSE;
 
 	switch (event->type) {
