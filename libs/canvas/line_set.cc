@@ -90,14 +90,14 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
 	/* area is in window coordinates */
 
-	for (vector<Line>::const_iterator i = _lines.begin(); i != _lines.end(); ++i) {
+	for (auto const & l : _lines) {
 
 		Rect self;
 
 		if (_orientation == Horizontal) {
-			self = item_to_window (Rect (0, i->pos - (i->width/2.0), _extent, i->pos + (i->width/2.0)));
+			self = item_to_window (Rect (0, l.pos - (l.width/2.0), _extent, l.pos + (l.width/2.0)));
 		} else {
-			self = item_to_window (Rect (i->pos - (i->width/2.0), 0, i->pos + (i->width/2.0), _extent));
+			self = item_to_window (Rect (l.pos - (l.width/2.0), 0, l.pos + (l.width/2.0), _extent));
 		}
 
 		Rect isect = self.intersection (area);
@@ -108,8 +108,8 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 
 		Rect intersection (isect);
 
-		Gtkmm2ext::set_source_rgba (context, i->color);
-		context->set_line_width (i->width);
+		Gtkmm2ext::set_source_rgba (context, l.color);
+		context->set_line_width (l.width);
 
 		/* Not 100% sure that the computation of the invariant
 		 * positions (y and x) below work correctly if the line width
