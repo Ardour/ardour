@@ -53,7 +53,7 @@ GridLines::hide ()
 }
 
 void
-GridLines::draw (std::vector<Ruler::Mark>     marks)
+GridLines::draw (std::vector<Ruler::Mark> const & marks)
 {
 	lines.clear();
 

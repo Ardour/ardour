@@ -28,7 +28,7 @@ public:
 	GridLines (ArdourCanvas::Container* group, double screen_height);
 	~GridLines ();
 
-	void draw (std::vector<ArdourCanvas::Ruler::Mark> marks);
+	void draw (std::vector<ArdourCanvas::Ruler::Mark> const & marks);
 
 	void show();
 	void hide();
