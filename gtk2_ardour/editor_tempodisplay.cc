@@ -757,6 +757,7 @@ Temporal::TempoMap::WritableSharedPtr
 Editor::begin_tempo_mapping ()
 {
 	TempoMap::WritableSharedPtr wmap = TempoMap::write_copy ();
+	TempoMap::set (wmap);
 	reassociate_metric_markers (wmap);
 	(void) Temporal::DomainSwapInformation::start (Temporal::BeatTime);
 	_session->globally_change_time_domain (Temporal::BeatTime, Temporal::AudioTime);
@@ -788,6 +789,7 @@ Temporal::TempoMap::WritableSharedPtr
 Editor::begin_tempo_map_edit ()
 {
 	TempoMap::WritableSharedPtr wmap = TempoMap::write_copy ();
+	TempoMap::set (wmap);
 	reassociate_metric_markers (wmap);
 	return wmap;
 }
