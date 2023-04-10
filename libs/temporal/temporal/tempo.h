@@ -705,7 +705,12 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	 */
 
 	LIBTEMPORAL_API static SharedPtr read() { return _map_mgr.reader(); }
-	LIBTEMPORAL_API static void      set (SharedPtr new_map) { _tempo_map_p = new_map; /* new_map must have been fetched with read() */ }
+
+	/* Because WritableSharedPtr can be implicitly cast to SharedPtr, this
+	 * can be used on either a write_copy()'ed map, or one obtained via the
+	 * RCU reader() method.
+	 */
+	LIBTEMPORAL_API static void      set (SharedPtr new_map) { _tempo_map_p = new_map; }
 
 	/* API for typical tempo map changes */
 
