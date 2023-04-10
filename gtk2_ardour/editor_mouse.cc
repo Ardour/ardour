@@ -2356,6 +2356,8 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_aut
 						 */
 
 						ctx->cursor_ctx->change (cursors()->time_fx);
+					} else {
+						ctx->cursor_ctx->change (cursors()->grabber);
 					}
 				}
 			}
