@@ -694,6 +694,12 @@ TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Item& parent, Ardo
 
 TempoMarker::~TempoMarker ()
 {
+	/* the mapping text is a little unusual in that we do not leave its
+	   parent (the editor's mapping_group) to manage its lifetime. We must
+	   explicitly remove and delete it.
+	*/
+	_mapping_text->parent()->remove (_mapping_text);
+	delete _mapping_text;
 	delete _curve;
 }
 
