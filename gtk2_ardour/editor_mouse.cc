@@ -2941,14 +2941,11 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 
 	TempoPoint* after = const_cast<TempoPoint*> (map->next_tempo (tempo));
 
-	std::cerr << "is there an after ? " << after << " for " << tempo <<std::endl;
-
 	if (!after || dynamic_cast<MusicTimePoint*>(after)) {
 		/* Drag on the bar, not the cursor: just adjust tempo up or
 		 * down.
 		 */
 		_drags->set (new MappingLinearDrag (this, item, map), event);
-		std::cerr << ":Linear\n";
 		return;
 	}
 
@@ -2957,16 +2954,12 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 	 */
 
 	if (_cursor_stack.empty() || _cursor_stack.back() != cursors()->time_fx) {
-		std::cerr << "do nothing\n";
 		return;
 	}
 
-	std::cerr << "Pointer time: " << pointer_time << std::endl;
 
 	BBT_Argument bbt = map->bbt_at (pointer_time);
-	std::cerr << " bbt " << bbt << std::endl;
 	bbt = BBT_Argument (bbt.reference(), bbt.round_to_beat ());
-	std::cerr << "rounded to " << bbt << " vs. " << tempo.bbt() << std::endl;
 
 	TempoPoint* before;
 	TempoPoint* focus;
