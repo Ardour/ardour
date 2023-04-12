@@ -2030,6 +2030,19 @@ public:
   //----------------------------------------------------------------------------
 
   template <class T>
+  Class<std::shared_ptr<const std::list<T> > > beginPtrConstStdList (char const* name)
+  {
+    typedef std::list<T> const LT;
+    typedef typename LT::size_type T_SIZE;
+    return beginClass<std::shared_ptr<LT> > (name)
+      .addPtrFunction ("empty", (bool (LT::*)()const)&LT::empty)
+      .addPtrFunction ("size", (T_SIZE (LT::*)()const)&LT::size)
+      .addPtrFunction ("reverse", (void (LT::*)())&LT::reverse)
+      .addExtCFunction ("iter", &CFunc::ptrListIter<T, LT>)
+      .addExtCFunction ("table", &CFunc::ptrListToTable<T, LT>);
+  }
+
+  template <class T>
   Class<std::shared_ptr<std::list<T> > > beginPtrStdList (char const* name)
   {
     typedef std::list<T> LT;
@@ -2049,6 +2062,21 @@ public:
 #endif
       .addPtrFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
       .addExtCFunction ("add", &CFunc::ptrTableToList<T, LT>)
+      .addExtCFunction ("iter", &CFunc::ptrListIter<T, LT>)
+      .addExtCFunction ("table", &CFunc::ptrListToTable<T, LT>);
+  }
+
+  template <class T>
+  Class<std::shared_ptr<const std::vector<T> > > beginPtrConstStdVector (char const* name)
+  {
+    typedef std::vector<T> const LT;
+    typedef typename std::vector<T>::reference T_REF;
+    typedef typename std::vector<T>::size_type T_SIZE;
+
+    return beginClass<std::shared_ptr<LT> > (name)
+      .addPtrFunction ("empty", (bool (LT::*)()const)&LT::empty)
+      .addPtrFunction ("size", (T_SIZE (LT::*)()const)&LT::size)
+      .addPtrFunction ("at", (T_REF (LT::*)(T_SIZE))&LT::at)
       .addExtCFunction ("iter", &CFunc::ptrListIter<T, LT>)
       .addExtCFunction ("table", &CFunc::ptrListToTable<T, LT>);
   }

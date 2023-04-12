@@ -2123,9 +2123,19 @@ LuaBindings::common (lua_State* L)
 		.beginConstStdVector <std::shared_ptr<VCA> > ("VCAVector")
 		.endClass ()
 
+		// std::shared_ptr<RouteList const>
+		.beginPtrConstStdList <std::shared_ptr<Route> > ("ConstRouteListPtr")
+		.addVoidPtrConstructor<std::list<std::shared_ptr <Route> > const > ()
+		.endClass ()
+
 		// std::shared_ptr<RouteList>
 		.beginPtrStdList <std::shared_ptr<Route> > ("RouteListPtr")
 		.addVoidPtrConstructor<std::list<std::shared_ptr <Route> > > ()
+		.endClass ()
+
+		// std::shared_ptr<BundleList const>
+		.beginPtrConstStdVector <std::shared_ptr<Bundle> > ("ConstBundleListPtr")
+		.addVoidPtrConstructor<std::vector<std::shared_ptr <Bundle> > const > ()
 		.endClass ()
 
 		// std::shared_ptr<BundleList>
