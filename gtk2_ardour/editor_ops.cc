@@ -9706,8 +9706,6 @@ Editor::do_ripple (std::shared_ptr<Playlist> target_playlist, timepos_t const & 
 
 	for (auto & p : playlists) {
 
-		std::cerr << "ripple " << p->name() << " @ " << p << std::endl;
-
 		/* exclude list is only for the target */
 
 		if (p == target_playlist) {
@@ -9719,11 +9717,9 @@ Editor::do_ripple (std::shared_ptr<Playlist> target_playlist, timepos_t const & 
 			 */
 
 			if (add_to_command) {
-				std::cerr << "\tatc\n";
 				p->rdiff_and_add_command (_session);
 			}
 		} else if (affected_pls.find (p) == affected_pls.end ()) {
-			std::cerr << "\trac\n";
 			p->clear_changes ();
 			p->clear_owned_changes ();
 			p->ripple (at, distance, 0);
