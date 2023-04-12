@@ -5061,14 +5061,15 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		}
 	}
 
-	for (PlaylistSet::iterator pl = freezelist.begin(); pl != freezelist.end(); ++pl) {
-		(*pl)->thaw ();
+	for (auto & pl : freezelist) {
+
+		pl->thaw ();
 
 		/* We might have removed regions, which alters other regions' layering_index,
 		   so we need to do a recursive diff here.
 		*/
 
-		(*pl)->rdiff_and_add_command (_session);
+		pl->rdiff_and_add_command (_session);
 	}
 }
 
@@ -9695,42 +9696,47 @@ Editor::do_ripple (std::shared_ptr<Playlist> target_playlist, timepos_t const & 
 	}
 
 	if (add_to_command) {
-		for (auto const& p : playlists) {
+		for (auto & p : playlists) {
+			std::cerr << "cc for " << p->name() << std::endl;
 			p->clear_changes ();
 			p->clear_owned_changes ();
 		}
 	}
 
-	for (auto const& p : playlists) {
+	for (auto & p : playlists) {
 		p->freeze ();
 	}
 
-	for (PlaylistSet::iterator p = playlists.begin(); p != playlists.end(); ++p) {
+	for (auto & p : playlists) {
+
+		std::cerr << "ripple " << p->name() << " @ " << p << std::endl;
 
 		/* exclude list is only for the target */
 
-		if ((*p) == target_playlist) {
+		if (p == target_playlist) {
 
-			(*p)->ripple (at, distance, exclude);
+			p->ripple (at, distance, exclude);
 
 			/* caller may put the target playlist into the undo
 			 * history, so only do this if asked
 			 */
 
 			if (add_to_command) {
-				(*p)->rdiff_and_add_command (_session);
+				std::cerr << "\tatc\n";
+				p->rdiff_and_add_command (_session);
 			}
-		} else if (affected_pls.find (*p) == affected_pls.end ()) {
-			(*p)->clear_changes ();
-			(*p)->clear_owned_changes ();
-			(*p)->ripple (at, distance, 0);
-			(*p)->rdiff_and_add_command (_session);
+		} else if (affected_pls.find (p) == affected_pls.end ()) {
+			std::cerr << "\trac\n";
+			p->clear_changes ();
+			p->clear_owned_changes ();
+			p->ripple (at, distance, 0);
+			p->rdiff_and_add_command (_session);
 		}
 
 	}
 
-	for (PlaylistSet::iterator p = playlists.begin(); p != playlists.end(); ++p) {
-		(*p)->thaw ();
+	for (auto & p : playlists) {
+		p->thaw ();
 	}
 
 	/* Ripple marks & ranges if appropriate */
