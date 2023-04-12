@@ -32,6 +32,7 @@
 
 #include <unistd.h>
 
+#include <algorithm>
 #include <cstdlib>
 #include <cmath>
 #include <string>
@@ -4886,7 +4887,6 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 	timepos_t first_position = timepos_t::max (Temporal::AudioTime);
 
 	PlaylistSet freezelist;
-	RegionList  exclude;
 
 	/* get ordering correct before we cut/copy */
 
@@ -4931,6 +4931,16 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			pmap.push_back (PlaylistMapping (tv));
 		}
 	}
+
+	struct Ripple {
+		std::shared_ptr<Playlist> playlist;
+		timepos_t position;
+		timecnt_t length;
+
+		Ripple (std::shared_ptr<Playlist> pl, timepos_t const & pos, timecnt_t const & len) : playlist (pl), position (pos), length (len) {}
+	};
+
+	std::vector<Ripple> ripple_list;
 
 	for (RegionSelection::iterator x = rs.begin(); x != rs.end(); ) {
 
@@ -4981,7 +4991,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		case Delete:
 			pl->remove_region (r);
 			if (should_ripple()) {
-				do_ripple (pl, r->position(), -r->length(), &exclude, freezelist, false);
+				ripple_list.push_back (Ripple (pl, r->position(), -r->length()));
 			}
 			break;
 
@@ -4990,7 +5000,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 			npl->add_region (_xx, timepos_t (first_position.distance (r->position())));
 			pl->remove_region (r);
 			if (should_ripple()) {
-				do_ripple (pl, r->position(), -r->length(), &exclude, freezelist, false);
+				ripple_list.push_back (Ripple (pl, r->position(), -r->length()));
 			}
 			break;
 
@@ -5002,12 +5012,29 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		case Clear:
 			pl->remove_region (r);
 			if (should_ripple()) {
-				do_ripple (pl, r->position(), -r->length(), &exclude, freezelist, false);
+				ripple_list.push_back (Ripple (pl, r->position(), -r->length()));
 			}
 			break;
 		}
 
 		x = tmp;
+	}
+
+	if (!ripple_list.empty()) {
+
+		/* The regions were sorted into (track, position) order. We
+		 * need to run the rippling in reverse order, so that later
+		 * cut/delete operations cause rippling further down the
+		 * timeline and then work towards zero.
+		 */
+
+		std::reverse (ripple_list.begin(), ripple_list.end());
+
+		for (auto const & ripple : ripple_list) {
+			do_ripple (ripple.playlist, ripple.position, ripple.length, nullptr, freezelist, false);
+		}
+
+		ripple_list.clear ();
 	}
 
 	if (op != Delete) {
