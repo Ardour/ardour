@@ -5058,7 +5058,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		}
 	}
 
-	for (auto & pl : freezelist) {
+	for (auto const & pl : freezelist) {
 
 		pl->thaw ();
 
@@ -6005,7 +6005,7 @@ Editor::fork_regions_from_unselected ()
 			affected_playlists.insert(mrv->region()->playlist());
 		}
 	}
-	for (auto p : affected_playlists) {
+	for (auto const & p : affected_playlists) {
 		p->clear_changes ();
 		p->freeze ();
 	}
@@ -9693,18 +9693,17 @@ Editor::do_ripple (std::shared_ptr<Playlist> target_playlist, timepos_t const & 
 	}
 
 	if (add_to_command) {
-		for (auto & p : playlists) {
-			std::cerr << "cc for " << p->name() << std::endl;
+		for (auto const & p : playlists) {
 			p->clear_changes ();
 			p->clear_owned_changes ();
 		}
 	}
 
-	for (auto & p : playlists) {
+	for (auto const & p : playlists) {
 		p->freeze ();
 	}
 
-	for (auto & p : playlists) {
+	for (auto const & p : playlists) {
 
 		/* exclude list is only for the target */
 
