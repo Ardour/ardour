@@ -3789,7 +3789,12 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 
 	/* XXX needs to scale somehow with zoom level */
 
-	delta += 0.75 * (last_pointer_x() - _drags->current_pointer_x());
+	const double pixel_distance = last_pointer_x() - _drags->current_pointer_x();
+	const double spp = _editor->get_current_zoom();
+	const double scaling_factor = 0.4 * (spp / 1000.);
+
+	delta += scaling_factor * pixel_distance;
+	std::cerr << "pixels: " << pixel_distance << " @ " << spp << " spp  SF " << scaling_factor << " =>  delta " << delta << std::endl;
 
 	map->twist_tempi (prev, focus, next, initial_npm + delta);
 	_editor->mid_tempo_change (Editor::MappingChanged);
