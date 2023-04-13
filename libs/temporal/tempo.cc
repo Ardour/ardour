@@ -480,9 +480,11 @@ TempoPoint::compute_omega_beats_from_distance_and_next_tempo (Beats const & quar
 void
 TempoPoint::compute_omega_beats_from_quarter_duration (Beats const & quarter_duration, superclock_t end_scpqn)
 {
-	_omega_beats = ((1.0/end_scpqn) - (1.0/superclocks_per_quarter_note())) / DoubleableBeats (quarter_duration).to_double();
-	if (!std::isfinite (_omega_beats)) {
-		abort ();
+	const double old = _omega_beats;
+
+	if (!std::isfinite (_omega_beats = ((1.0/end_scpqn) - (1.0/superclocks_per_quarter_note())) / DoubleableBeats (quarter_duration).to_double())) {
+		DEBUG_TRACE (DEBUG::TemporalMap, "quarter-computed omega out of bounds\n");
+		_omega_beats = old;
 	}
 	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("quarter-computed omega from qtr duration = %1 dur was %2 start speed %3 end speed [%4]\n", _omega_beats, quarter_duration.str(), superclocks_per_quarter_note(), end_scpqn));
 }
