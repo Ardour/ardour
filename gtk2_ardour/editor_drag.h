@@ -942,38 +942,6 @@ private:
 	bool     _drag_valid;
 };
 
-class MappingStretchDrag : public Drag
-{
-public:
-	MappingStretchDrag (Editor *, ArdourCanvas::Item *, Temporal::TempoMap::WritableSharedPtr&, Temporal::TempoPoint&, XMLNode&);
-
-	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *, bool);
-	void finished (GdkEvent *, bool);
-	void aborted (bool);
-
-	bool allow_vertical_autoscroll () const {
-		return false;
-	}
-
-	bool y_movement_matters () const {
-		return false;
-	}
-
-	void setup_pointer_offset ();
-
-private:
-	Temporal::TempoPoint& _focus;
-	Temporal::TempoMap::WritableSharedPtr map;
-
-	double direction;
-	double delta;
-	double initial_npm;
-
-	XMLNode& _before_state;
-	bool     _drag_valid;
-};
-
 class MappingTwistDrag : public Drag
 {
 public:
