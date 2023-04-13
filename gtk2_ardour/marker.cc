@@ -708,7 +708,7 @@ TempoMarker::reposition ()
 {
 	MetricMarker::reposition ();
 
-	_mapping_text->set_position (ArdourCanvas::Duple (unit_position, _mapping_text->position().y));
+	_mapping_text->set_position (ArdourCanvas::Duple (std::max (0., unit_position), _mapping_text->position().y));
 }
 
 void
@@ -716,7 +716,7 @@ TempoMarker::update ()
 {
 	set_position (_tempo->time());
 
-	_mapping_text->set_position (ArdourCanvas::Duple (unit_position, _mapping_text->position().y));
+	_mapping_text->set_position (ArdourCanvas::Duple (std::max (0., unit_position), _mapping_text->position().y));
 
 	char buf[64];
 	snprintf (buf, sizeof (buf), "%.2f", _tempo->note_types_per_minute ());
