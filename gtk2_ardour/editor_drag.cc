@@ -3476,12 +3476,13 @@ BBTMarkerDrag::aborted (bool moved)
 
 /******************************************************************************/
 
-MappingLinearDrag::MappingLinearDrag (Editor* e, ArdourCanvas::Item* i, Temporal::TempoMap::WritableSharedPtr& wmap)
+MappingLinearDrag::MappingLinearDrag (Editor* e, ArdourCanvas::Item* i, Temporal::TempoMap::WritableSharedPtr& wmap, TempoPoint& tp, TempoPoint& ap, XMLNode& before)
 	: Drag (e, i, Temporal::BeatTime)
-	, _tempo (0)
+	, _tempo (tp)
+	, _after (ap)
 	, _grab_bpm (0)
 	, map (wmap)
-	, _before_state (0)
+	, _before_state (&before)
 	, _drag_valid (true)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MappingLinearDrag\n");
@@ -3493,33 +3494,23 @@ MappingLinearDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	_tempo = const_cast<TempoPoint*> (&map->metric_at (raw_grab_time().beats()).tempo());
-	_grab_bpm = _tempo->note_types_per_minute();
-
-	if (adjusted_current_time (event, false) <= _tempo->time()) {
-		std::cerr << "too early for " << *_tempo << std::endl;
-		_drag_valid = false;
-		return;
-	}
+	_grab_bpm = _tempo.note_types_per_minute();
 
 	ostringstream sstr;
-	if (_tempo->continuing()) {
-		TempoPoint const * prev = map->previous_tempo (*_tempo);
+	if (_tempo.continuing()) {
+		TempoPoint const * prev = map->previous_tempo (_tempo);
 		if (prev) {
 			sstr << "end: " << fixed << setprecision(3) << prev->end_note_types_per_minute() << "\n";
 		}
 	}
 
-	sstr << "start: " << fixed << setprecision(3) << _tempo->note_types_per_minute();
+	sstr << "start: " << fixed << setprecision(3) << _tempo.note_types_per_minute();
 	show_verbose_cursor_text (sstr.str());
 }
 
 void
 MappingLinearDrag::setup_pointer_offset ()
 {
-	/* get current state */
-	_before_state = &map->get_state();
-
 	Beats grab_qn = max (Beats(), raw_grab_time().beats());
 
 	uint32_t divisions = _editor->get_grid_beat_divisions (_editor->grid_type());
@@ -3539,14 +3530,26 @@ MappingLinearDrag::motion (GdkEvent* event, bool first_move)
 		return;
 	}
 
-	if (first_move) {
-		_editor->begin_reversible_command (_("map tempo"));
+	const double pixel_distance = current_pointer_x() - grab_x();
+	const double spp = _editor->get_current_zoom();
+	const double scaling_factor = 0.4 * (spp / 1000.);
+	const double delta = scaling_factor * pixel_distance;
+
+	double new_bpm = std::min (300., std::max (3., _grab_bpm - delta));
+	Temporal::Tempo new_tempo (new_bpm, _tempo.note_type());
+
+	/* Change both the previous tempo and the one under the pointer */
+
+	map->change_tempo (_tempo, new_tempo);
+
+	/* if the user drags the last tempo, then _tempo and _focus are the
+	 * same object.
+	 */
+
+	if (_after.sclock() != _tempo.sclock()) {
+		map->change_tempo (_after, new_tempo);
 	}
 
-	double new_bpm = std::max (1.5, _grab_bpm - ((current_pointer_x() - grab_x()) / 5.0));
-	stringstream strs;
-	Temporal::Tempo new_tempo (new_bpm, _tempo->note_type());
-	map->change_tempo (*_tempo, new_tempo);
 	_editor->mid_tempo_change (Editor::MappingChanged);
 }
 
@@ -3554,7 +3557,7 @@ void
 MappingLinearDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!_drag_valid) {
-		_editor->abort_tempo_mapping ();
+		aborted (false);
 		return;
 	}
 
@@ -3572,7 +3575,7 @@ MappingLinearDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	XMLNode &after = map->get_state();
 
-	_editor->session()->add_command (new Temporal::TempoCommand (_("move BBT point"), _before_state, &after));
+	_editor->session()->add_command (new Temporal::TempoCommand (_("stretch tempo"), _before_state, &after));
 	_editor->commit_reversible_command ();
 
 	/* 2nd argument means "update tempo map display after the new map is
@@ -3585,8 +3588,9 @@ MappingLinearDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-MappingLinearDrag::aborted (bool moved)
+MappingLinearDrag::aborted (bool /* moved */)
 {
+	_editor->abort_reversible_command ();
 	_editor->abort_tempo_mapping ();
 }
 
@@ -3791,10 +3795,9 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 
 	const double pixel_distance = last_pointer_x() - _drags->current_pointer_x();
 	const double spp = _editor->get_current_zoom();
-	const double scaling_factor = 0.4 * (spp / 1000.);
+	const double scaling_factor = 0.4 * (spp / 1500.);
 
 	delta += scaling_factor * pixel_distance;
-	std::cerr << "pixels: " << pixel_distance << " @ " << spp << " spp  SF " << scaling_factor << " =>  delta " << delta << std::endl;
 
 	map->twist_tempi (prev, focus, next, initial_npm + delta);
 	_editor->mid_tempo_change (Editor::MappingChanged);

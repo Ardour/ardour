@@ -2928,6 +2928,11 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		return;
 	}
 
+	if (_cursor_stack.empty() || _cursor_stack.back() != cursors()->time_fx) {
+		/* Not close enough to a beat line to start any mapping drag */
+		return;
+	}
+
 	Temporal::TempoMap::WritableSharedPtr map = begin_tempo_mapping ();
 
 	/* Decide between a tempo twist drag, which we do if the
@@ -2941,33 +2946,20 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 
 	TempoPoint* after = const_cast<TempoPoint*> (map->next_tempo (tempo));
 
-	if (!after || dynamic_cast<MusicTimePoint*>(after)) {
-		/* Drag on the bar, not the cursor: just adjust tempo up or
-		 * down.
-		 */
-		_drags->set (new MappingLinearDrag (this, item, map), event);
-		return;
-	}
+	/* Create a new marker, or use the under the mouse */
 
-	/* Use cursor state to determine if we are close enough to a beat line
-	 * to do a twist. We computed that in the motion handler.
-	 */
-
-	if (_cursor_stack.empty() || _cursor_stack.back() != cursors()->time_fx) {
-		return;
-	}
-
-
-	BBT_Argument bbt = map->bbt_at (pointer_time);
-	bbt = BBT_Argument (bbt.reference(), bbt.round_to_beat ());
-
+	XMLNode* before_state = &map->get_state();
 	TempoPoint* before;
 	TempoPoint* focus;
 
-	/* Reversible command starts here, must be ended/aborted in drag */
+	bool stretch = false;
 
-	begin_reversible_command (_("map tempo/twist"));
-	XMLNode* before_state = &map->get_state();
+	if (!after || dynamic_cast<MusicTimePoint*>(after)) {
+		stretch = true;
+	}
+
+	BBT_Argument bbt = map->bbt_at (pointer_time);
+	bbt = BBT_Argument (bbt.reference(), bbt.round_to_beat ());
 
 	if (tempo.bbt() < bbt) {
 
@@ -2988,12 +2980,24 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		before = const_cast<TempoPoint*> (map->previous_tempo (tempo));
 
 		if (!before) {
+			delete before_state;
 			return;
 		}
 
 		focus = &tempo;
 	}
 
-	_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after, *before_state), event);
+	/* Reversible commands start here, must be ended/aborted in drag */
 
+	if (stretch) {
+		begin_reversible_command (_("map tempo/stretch"));
+		std::cerr << "STRETCH\n";
+		_drags->set (new MappingLinearDrag (this, item, map, tempo, *focus, *before_state), event);
+		return;
+	}
+
+
+	std::cerr << "TWIST\n";
+	begin_reversible_command (_("map tempo/twist"));
+	_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after, *before_state), event);
 }

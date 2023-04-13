@@ -915,7 +915,7 @@ private:
 class MappingLinearDrag : public Drag
 {
 public:
-	MappingLinearDrag (Editor *, ArdourCanvas::Item *, Temporal::TempoMap::WritableSharedPtr&);
+	MappingLinearDrag (Editor *, ArdourCanvas::Item *, Temporal::TempoMap::WritableSharedPtr&, Temporal::TempoPoint&, Temporal::TempoPoint& after, XMLNode& before_state);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -933,7 +933,8 @@ public:
 	void setup_pointer_offset ();
 
 private:
-	Temporal::TempoPoint* _tempo;
+	Temporal::TempoPoint& _tempo;
+	Temporal::TempoPoint& _after;
 	double _grab_bpm;
 	Temporal::TempoMap::WritableSharedPtr map;
 
