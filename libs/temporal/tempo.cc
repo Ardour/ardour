@@ -3269,9 +3269,9 @@ TempoMap::stretch_tempo (TempoPoint& focus, double tempo_value)
 		++cnt;
 	}
 
-	std::cerr << "that took " << cnt << " iterations to get to < 1 sample\n";
-	std::cerr << "final focus: " << focus << std::endl;
-	std::cerr << "final prev: " << *prev << std::endl;
+	// std::cerr << "that took " << cnt << " iterations to get to < 1 sample\n";
+	// std::cerr << "final focus: " << focus << std::endl;
+	// std::cerr << "final prev: " << *prev << std::endl;
 
 	reset_starting_at (prev->sclock());
 	// dump (std::cerr);
@@ -3529,7 +3529,7 @@ TempoMap::twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& next, do
 		++cnt;
 	}
 
-	std::cerr << "that took " << cnt << " iterations to get to < 1 sample\n";
+	// std::cerr << "that took " << cnt << " iterations to get to < 1 sample\n";
 }
 
 void
