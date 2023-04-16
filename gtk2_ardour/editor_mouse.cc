@@ -2961,7 +2961,9 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 	BBT_Argument bbt = map->bbt_at (pointer_time);
 	bbt = BBT_Argument (bbt.reference(), bbt.round_to_beat ());
 
-	if (tempo.bbt() < bbt) {
+	if (tempo.bbt() != bbt) {
+
+		std::cerr << "ADD TEMPO MARKER " << bbt << " != " << tempo.bbt() << "\n";
 
 		/* Add a new tempo marker at the nearest beat point
 		   (essentially the snapped grab point for the drag), so that
@@ -2975,7 +2977,11 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		focus = &added;
 		reset_tempo_marks ();
 
+		map->dump (std::cerr);
+
 	} else {
+
+		std::cerr << "USE TEMPO MARKER\n";
 
 		before = const_cast<TempoPoint*> (map->previous_tempo (tempo));
 

@@ -3667,6 +3667,7 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 	const double scaling_factor = 0.4 * (spp / 1500.);
 
 	delta += scaling_factor * pixel_distance;
+	std::cerr << "pixels " << pixel_distance << " spp " << spp << " SF " << scaling_factor << " delta = " << delta << std::endl;
 
 	map->twist_tempi (prev, focus, next, initial_npm + delta);
 	_editor->mid_tempo_change (Editor::MappingChanged);
