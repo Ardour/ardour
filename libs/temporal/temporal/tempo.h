@@ -1117,6 +1117,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	Temporal::BBT_Time bbt_lookup (superclock_t, bool & found) const;
 	Temporal::BBT_Time bbt_lookup (Temporal::Beats const & b, bool & found) const;
 
+	bool iteratively_solve_ramp (TempoPoint&, TempoPoint&);
+
 	/* These are not really const, but the lookup tables are marked mutable
 	 * to allow time domain conversions to store their results while being
 	 * marked const (which is more semantically correct).
