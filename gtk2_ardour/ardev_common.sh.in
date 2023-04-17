@@ -23,6 +23,7 @@ export ARDOUR_SURFACES_PATH=$libs/surfaces/osc:$libs/surfaces/faderport8:$libs/s
 export ARDOUR_PANNER_PATH=$libs/panners
 export ARDOUR_DATA_PATH=$TOP/share:$TOP/build:$TOP/gtk2_ardour:$TOP/build/gtk2_ardour
 export ARDOUR_MIDIMAPS_PATH=$TOP/share/midi_maps
+export ARDOUR_MIDI_PATCH_PATH=$TOP/share/patchfiles
 export ARDOUR_EXPORT_FORMATS_PATH=$TOP/share/export
 export ARDOUR_THEMES_PATH=$TOP/gtk2_ardour/themes
 export ARDOUR_BACKEND_PATH=$libs/backends/jack:$libs/backends/dummy:$libs/backends/alsa:$libs/backends/coreaudio:$libs/backends/portaudio:$libs/backends/pulseaudio
