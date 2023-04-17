@@ -366,7 +366,11 @@ RouteUI::set_route (std::shared_ptr<Route> rp)
 	}
 
 	if (set_color_from_route()) {
-		set_color (gdk_color_to_rgba (AxisView::unique_random_color ()));
+		if (UIConfiguration::instance().get_use_palette_for_new_route ()) {
+			set_color (gdk_color_to_rgba (AxisView::unique_random_color ()));
+		} else {
+			set_color (UIConfiguration::instance ().color (X_("neutral:midground")));
+		}
 	}
 
 	if (self_destruct) {

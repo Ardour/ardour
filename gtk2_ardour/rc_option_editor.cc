@@ -2946,6 +2946,31 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Colors"), new ColorThemeManager);
 	add_option (_("Appearance/Colors"), new OptionEditorBlank ());
 
+	bo = new BoolOption (
+		     "use-palette-for-new-route",
+		     _("Use color-palette to assign color for new tracks/busses"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_palette_for_new_route),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_palette_for_new_route)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+				_("<b>When enabled</b> new Routes are assigned a color from the stripable-color-palette in round-robin fashion.\n"
+				  "<b>When disabled</b> all new Routes will have a neutal color from the theme."
+					));
+	add_option (_("Appearance/Colors"), bo);
+
+
+	bo = new BoolOption (
+		     "use-palette-for-new-vca",
+		     _("Use color-palette to assign color for new VCA"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_palette_for_new_vca),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_palette_for_new_vca)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+				_("<b>When enabled</b> newly created VCAs are assigned a random color.\n"
+				  "<b>When disabled</b> all new VCAs will have a neutal color from the theme."
+					));
+	add_option (_("Appearance/Colors"), bo);
+
 	/* Quirks */
 
 	OptionEditorHeading* quirks_head = new OptionEditorHeading (_("Various Workarounds for Windowing Systems"));

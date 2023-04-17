@@ -64,7 +64,11 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	/* set color for the VCA, if not already done. */
 
 	if (!_vca->presentation_info().color_set()) {
-		_vca->presentation_info().set_color (Gtkmm2ext::gdk_color_to_rgba (unique_random_color()));
+		if (UIConfiguration::instance().get_use_palette_for_new_vca ()) {
+			_vca->presentation_info().set_color (Gtkmm2ext::gdk_color_to_rgba (unique_random_color()));
+		} else {
+			_vca->presentation_info().set_color (UIConfiguration::instance ().color (X_("neutral:midground")));
+		}
 	}
 
 	control_slave_ui.set_stripable (std::dynamic_pointer_cast<Stripable> (v));
