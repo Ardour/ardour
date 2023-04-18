@@ -28,13 +28,14 @@
 */
 //==============================================================================
 
+#include <memory>
+
 #ifdef LUABINDINGDOC
 #include <iostream>
 #include <typeinfo>
 #include <execinfo.h>
 #include <type_traits>
 #include <cxxabi.h>
-#include <memory>
 #include <string>
 #include <cstdlib>
 
@@ -1275,6 +1276,7 @@ private:
     WSPtrClass (char const* name, Namespace const* parent)
       : ClassBase (parent->L)
       , shared (name, parent)
+      , shared_const (name, parent)
       , weak (name, parent)
     {
 #ifdef LUABINDINGDOC
@@ -1285,13 +1287,14 @@ private:
           parent->_name + name,
           std::string(), type_name <T>())
       m_stackSize = shared.m_stackSize;
-      parent->m_stackSize = weak.m_stackSize = shared.m_stackSize = 0;
-      lua_pop (L, 3);
+      parent->m_stackSize = weak.m_stackSize = shared.m_stackSize = shared_const.m_stackSize = 0;
+      lua_pop (L, 6);
     }
 
-    WSPtrClass (char const* name, Namespace const* parent, void const* const sharedkey, void const* const weakkey)
+    WSPtrClass (char const* name, Namespace const* parent, void const* const sharedkey, void const* const sharedconstkey, void const* const weakkey)
       : ClassBase (parent->L)
       , shared (name, parent, sharedkey)
+      , shared_const (name, parent, sharedconstkey)
       , weak (name, parent, weakkey)
     {
 #ifdef LUABINDINGDOC
@@ -1299,8 +1302,8 @@ private:
       _name = parent->_name + name + ":";
 #endif
       m_stackSize = shared.m_stackSize;
-      parent->m_stackSize = weak.m_stackSize = shared.m_stackSize = 0;
-      lua_pop (L, 3);
+      parent->m_stackSize = weak.m_stackSize = shared.m_stackSize = shared_const.m_stackSize = 0;
+      lua_pop (L, 6);
     }
 
     template <class MemFn>
@@ -1309,6 +1312,9 @@ private:
       FUNDOC ("Weak/Shared Pointer Function", name, MemFn)
       set_shared_class ();
       CFunc::CallMemberPtrFunctionHelper <MemFn>::add (L, name, mf);
+
+      set_const_shared_class ();
+      CFunc::CallMemberCPtrFunctionHelper <MemFn>::add (L, name, mf);
 
       set_weak_class ();
       CFunc::CallMemberWPtrFunctionHelper <MemFn>::add (L, name, mf);
@@ -1322,6 +1328,9 @@ private:
       set_shared_class ();
       CFunc::CallMemberRefPtrFunctionHelper <MemFn>::add (L, name, mf);
 
+      set_const_shared_class ();
+      CFunc::CallMemberRefCPtrFunctionHelper <MemFn>::add (L, name, mf);
+
       set_weak_class ();
       CFunc::CallMemberRefWPtrFunctionHelper <MemFn>::add (L, name, mf);
       return *this;
@@ -1334,6 +1343,11 @@ private:
       set_shared_class ();
       lua_pushcclosure (L,
           &shared. template ctorPtrPlacementProxy <typename FuncTraits <MemFn>::Params, std::shared_ptr<T>, T >, 0);
+      rawsetfield(L, -2, "__call");
+
+      set_const_shared_class ();
+      lua_pushcclosure (L,
+          &shared_const. template ctorPtrPlacementProxy <typename FuncTraits <MemFn>::Params, std::shared_ptr<T const>, T >, 0);
       rawsetfield(L, -2, "__call");
 
       set_weak_class ();
@@ -1359,6 +1373,11 @@ private:
       lua_pushcclosure (L, &CFunc::Call <FP>::f, 1);
       rawsetfield (L, -2, name);
 
+      set_const_shared_class ();
+      new (lua_newuserdata (L, sizeof (fp))) FP (fp);
+      lua_pushcclosure (L, &CFunc::Call <FP>::f, 1);
+      rawsetfield (L, -2, name);
+
       set_weak_class ();
       new (lua_newuserdata (L, sizeof (fp))) FP (fp);
       lua_pushcclosure (L, &CFunc::Call <FP>::f, 1);
@@ -1372,6 +1391,11 @@ private:
       set_shared_class ();
       lua_pushcclosure (L,
           &shared. template ctorNilPtrPlacementProxy <std::shared_ptr<T> >, 0);
+      rawsetfield(L, -2, "__call");
+
+      set_const_shared_class ();
+      lua_pushcclosure (L,
+          &shared_const. template ctorNilPtrPlacementProxy <std::shared_ptr<T const> >, 0);
       rawsetfield(L, -2, "__call");
 
       set_weak_class ();
@@ -1388,6 +1412,13 @@ private:
     {
       DATADOC ("Weak/Shared Ext C Function", name, fp)
       set_shared_class ();
+      assert (lua_istable (L, -1));
+      lua_pushcclosure (L, fp, 0);
+      lua_pushvalue (L, -1);
+      rawsetfield (L, -5, name); // const table
+      rawsetfield (L, -3, name); // class table
+
+      set_const_shared_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, fp, 0);
       lua_pushvalue (L, -1);
@@ -1416,6 +1447,12 @@ private:
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, &CFunc::CastMemberPtr <T, U>::f, 0);
       rawsetfield (L, -3, name); // class table
+
+      set_const_shared_class ();
+      assert (lua_istable (L, -1));
+      lua_pushcclosure (L, &CFunc::CastMemberPtr <T const, U const>::f, 0);
+      rawsetfield (L, -3, name); // class table
+
       return *this;
     }
 
@@ -1425,6 +1462,11 @@ private:
       set_shared_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, &CFunc::PtrNullCheck <T>::f, 0);
+      rawsetfield (L, -3, "isnil"); // class table
+
+      set_const_shared_class ();
+      assert (lua_istable (L, -1));
+      lua_pushcclosure (L, &CFunc::PtrNullCheck <T const>::f, 0);
       rawsetfield (L, -3, "isnil"); // class table
 
       set_weak_class ();
@@ -1440,6 +1482,11 @@ private:
       set_shared_class ();
       assert (lua_istable (L, -1));
       lua_pushcclosure (L, &CFunc::PtrEqualCheck <T>::f, 0);
+      rawsetfield (L, -3, "sameinstance"); // class table
+
+      set_const_shared_class ();
+      assert (lua_istable (L, -1));
+      lua_pushcclosure (L, &CFunc::PtrEqualCheck <T const>::f, 0);
       rawsetfield (L, -3, "sameinstance"); // class table
 
       set_weak_class ();
@@ -1479,6 +1526,20 @@ private:
         lua_pushcclosure (L, &CFunc::setWPtrProperty <T,U>, 1);
         rawsetfield (L, -2, name);
         lua_pop (L, 1);
+      }
+
+      set_const_shared_class ();
+      assert (lua_istable (L, -1));
+      // Add to __propget in class and const tables.
+      {
+        rawgetfield (L, -2, "__propget");
+        rawgetfield (L, -4, "__propget");
+        new (lua_newuserdata (L, sizeof (mp_t))) mp_t (mp);
+        lua_pushcclosure (L, &CFunc::getPtrProperty <T const,U>, 1);
+        lua_pushvalue (L, -1);
+        rawsetfield (L, -4, name);
+        rawsetfield (L, -2, name);
+        lua_pop (L, 2);
       }
 
       set_shared_class ();
@@ -1532,7 +1593,17 @@ private:
       lua_insert (L, -3);
       lua_insert (L, -2);
     }
+    void set_const_shared_class () {
+      lua_pop (L, 3);
+      lua_rawgetp (L, LUA_REGISTRYINDEX, ClassInfo <std::shared_ptr<T const> >::getStaticKey ());
+      rawgetfield (L, -1, "__class");
+      rawgetfield (L, -1, "__const");
+      lua_insert (L, -3);
+      lua_insert (L, -2);
+    }
+
     Class<std::shared_ptr<T> > shared;
+    Class<std::shared_ptr<T const> > shared_const;
     Class<std::weak_ptr<T> > weak;
   };
 
@@ -2122,6 +2193,7 @@ public:
     CLASSDOC ("[C] Derived Pointer Class", _name << name, type_name <T>(), type_name <U>())
     return WSPtrClass <T> (name, this,
         ClassInfo <std::shared_ptr<U> >::getStaticKey (),
+        ClassInfo <std::shared_ptr<U const> >::getStaticKey (),
         ClassInfo <std::weak_ptr<U> >::getStaticKey ())
       .addNullCheck()
       .addEqualCheck();
