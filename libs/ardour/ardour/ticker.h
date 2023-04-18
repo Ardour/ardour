@@ -43,7 +43,7 @@ public:
 	MidiClockTicker (Session&);
 	virtual ~MidiClockTicker ();
 
-	void tick (ProcessedRanges const &, pframes_t, samplecnt_t);
+	void tick (samplepos_t, samplepos_t, pframes_t, samplecnt_t);
 
 private:
 	ARDOUR::Session&      _session;
@@ -59,7 +59,6 @@ private:
 	void   reset ();
 	void   resync_latency (bool);
 	double one_ppqn_in_samples (samplepos_t transport_position) const;
-	void   sub_tick (samplepos_t start, samplepos_t end, pframes_t n_samples, samplecnt_t& pre_roll, double speed);
 
 	void send_midi_clock_event (pframes_t offset, pframes_t nframes);
 	void send_start_event (pframes_t offset, pframes_t nframes);

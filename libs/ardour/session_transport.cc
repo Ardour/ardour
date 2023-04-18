@@ -178,7 +178,6 @@ Session::locate (samplepos_t target_sample, bool for_loop_end, bool force, bool 
 	}
 
 	bool need_butler = false;
-	samplepos_t existing = _transport_sample;
 
 	/* Locates for seamless looping are fairly different from other
 	 * locates. They assume that the diskstream buffers for each track
