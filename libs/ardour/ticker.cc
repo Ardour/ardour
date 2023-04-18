@@ -219,7 +219,7 @@ double
 MidiClockTicker::one_ppqn_in_samples (samplepos_t transport_position) const
 {
 	Tempo const & tempo (TempoMap::use()->metric_at (transport_position).tempo());
-	const double samples_per_quarter_note = tempo.samples_per_quarter_note (_session->nominal_sample_rate());
+	const double samples_per_quarter_note = tempo.samples_per_quarter_note (_session.nominal_sample_rate());
 	return samples_per_quarter_note / 24.0;
 }
 
