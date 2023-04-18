@@ -83,6 +83,7 @@ MidiClockTicker::resync_latency (bool playback)
 void
 MidiClockTicker::tick (ProcessedRanges const & pr, pframes_t n_samples, samplecnt_t pre_roll)
 {
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("tick for %1 ranges (%2) w/preroll %3\n", pr.cnt, n_samples, pre_roll));
 
 	const pframes_t full_nsamples = n_samples;
 	samplecnt_t total = pr.end[0] - pr.start[0];
@@ -92,9 +93,6 @@ MidiClockTicker::tick (ProcessedRanges const & pr, pframes_t n_samples, samplecn
 	}
 
 	const double speed = total / n_samples;
-	pframes_t offset = 0;
-
-	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("tick for %1 ranges (%2) w/preroll %3 @ %4, currently rolling %5\n", pr.cnt, n_samples, pre_roll, speed, _rolling));
 
 	_midi_port->cycle_start (n_samples);
 
@@ -102,7 +100,7 @@ MidiClockTicker::tick (ProcessedRanges const & pr, pframes_t n_samples, samplecn
 	 * ensure we have sent a stop message, reset and be done.
 	 */
 
-	if (!Config->get_send_midi_clock () || (pr.start[0] == pr.end[0]) || (pr.end[0] < pr.start[0])) { /*|| !TransportMasterManager::instance().current()*/
+	if (!Config->get_send_midi_clock () || pr.start[0] == pr.end[0] || pr.end[0] < pr.start[0]) { /*|| !TransportMasterManager::instance().current()*/
 		if (_rolling) {
 			send_stop_event (0, n_samples);
 			DEBUG_TRACE (DEBUG::MidiClock, "stopped sending!\n");
@@ -174,8 +172,7 @@ MidiClockTicker::tick (ProcessedRanges const & pr, pframes_t n_samples, samplecn
 		goto out;
 	}
 
-	sub_tick (pr.start[0], pr.end[0], n_samples, pre_roll, speed, offset);
-	offset = pr.end[0] - pr.start[0];
+	sub_tick (pr.start[0], pr.end[0], n_samples, pre_roll, speed);
 
 	if (pr.cnt > 1) {
 
@@ -196,11 +193,11 @@ MidiClockTicker::tick (ProcessedRanges const & pr, pframes_t n_samples, samplecn
 			_beat_pos      = beat_pos;
 			_next_tick     = clk_pos - _mclk_out_latency.max;
 
-			send_position_event (_beat_pos, offset, n_samples); // consider sending this early
-			send_continue_event (offset + (_next_tick - pr.start[1]), n_samples);
+			send_position_event (_beat_pos, 0, n_samples); // consider sending this early
+			send_continue_event (_next_tick - pr.start[1], n_samples);
 		}
 
-		sub_tick (pr.start[1], pr.end[1], n_samples, pre_roll, speed, offset);
+		sub_tick (pr.start[1], pr.end[1], n_samples, pre_roll, speed);
 	}
 
 	_transport_pos = pr.end[pr.cnt - 1];
@@ -218,9 +215,9 @@ out:
  */
 
 void
-MidiClockTicker::sub_tick (samplepos_t start_sample, samplepos_t end_sample, pframes_t n_samples, samplecnt_t& pre_roll, double speed, pframes_t offset)
+MidiClockTicker::sub_tick (samplepos_t start_sample, samplepos_t end_sample, pframes_t n_samples, samplecnt_t& pre_roll, double speed)
 {
-	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("sub-tick for %1 .. %2 (%3) w/preroll %4 offset = %5\n", start_sample, end_sample, n_samples, pre_roll, offset));
+	DEBUG_TRACE (DEBUG::MidiClock, string_compose ("sub-tick for %1 .. %2 (%3) w/preroll %4\n", start_sample, end_sample, n_samples, pre_roll));
 
 	/* silence buffer */
 
@@ -234,26 +231,27 @@ MidiClockTicker::sub_tick (samplepos_t start_sample, samplepos_t end_sample, pfr
 
 			_beat_pos      = beat_pos;
 			_next_tick     = clk_pos - _mclk_out_latency.max;
-		}
 
-		if (_next_tick >= start_sample && _next_tick < end_sample) {
-			DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Start rolling at %1 beat-pos: %2\n", _next_tick, _beat_pos));
+			if (_next_tick >= start_sample && _next_tick < end_sample) {
+				DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Start rolling at %1 beat-pos: %2\n", _next_tick, _beat_pos));
 
-			_rolling   = true;
-			_clock_cnt = 0;
+				_rolling   = true;
+				_clock_cnt = 0;
 
-			if (_beat_pos == 0 && _next_tick == 0 && start_sample == 0) {
-				send_start_event (offset, n_samples);
+				if (_beat_pos == 0 && _next_tick == 0 && start_sample == 0) {
+					send_start_event (0, n_samples);
+				} else {
+					send_position_event (_beat_pos, 0, n_samples); // consider sending this early
+					send_continue_event (_next_tick - start_sample, n_samples);
+				}
 			} else {
-				send_position_event (_beat_pos, offset, n_samples); // consider sending this early
-				send_continue_event (offset + (_next_tick - start_sample), n_samples);
+				return;
 			}
 
-			DEBUG_TRACE (DEBUG::MidiClock, string_compose ("next tick reset to %1 from %2 + %3\n", _next_tick, start_sample, _mclk_out_latency.max));
+			_rolling = true;
+			_clock_cnt = 0;
 
-		} else {
-			DEBUG_TRACE (DEBUG::MidiClock, string_compose ("not time for next tick at %1 from %2 + %3\n", _next_tick, start_sample, _mclk_out_latency.max));
-			return;
+			DEBUG_TRACE (DEBUG::MidiClock, string_compose ("next tick reset to %1 from %2 + %3 & %4\n", _next_tick, start_sample, _mclk_out_latency.max, clk_pos));
 		}
 	}
 
@@ -261,7 +259,7 @@ MidiClockTicker::sub_tick (samplepos_t start_sample, samplepos_t end_sample, pfr
 
 		DEBUG_TRACE (DEBUG::MidiClock, string_compose ("Tick @ %1 cycle: %2 .. %3 nsamples: %4, ticker-pos: %5\n",
 		                                               _next_tick, start_sample, end_sample, n_samples, _transport_pos));
-		send_midi_clock_event (offset + (_next_tick - start_sample), n_samples);
+		send_midi_clock_event (_next_tick - start_sample, n_samples);
 
 		if (++_clock_cnt == 6) {
 			_clock_cnt = 0;
