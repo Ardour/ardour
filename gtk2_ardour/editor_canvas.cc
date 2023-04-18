@@ -191,6 +191,15 @@ Editor::initialize_canvas ()
 	mapping_bar->set_outline(false);
 	mapping_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 
+	switch (UIConfiguration::instance().get_default_tempo_edit_behavior()) {
+	case Editing::TempoMapping:
+		tempo_group->hide ();
+		break;
+	case Editing::TempoChanging:
+		mapping_group->hide ();
+		break;
+	}
+
 	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
 
