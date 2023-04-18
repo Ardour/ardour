@@ -2954,7 +2954,7 @@ RCOptionEditor::RCOptionEditor ()
 		     );
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
 				_("<b>When enabled</b> new Routes are assigned a color from the stripable-color-palette in round-robin fashion.\n"
-				  "<b>When disabled</b> all new Routes will have a neutal color from the theme."
+				  "<b>When disabled</b> all new Routes will have a neutral color from the theme."
 					));
 	add_option (_("Appearance/Colors"), bo);
 
@@ -2966,8 +2966,8 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_palette_for_new_vca)
 		     );
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
-				_("<b>When enabled</b> newly created VCAs are assigned a random color.\n"
-				  "<b>When disabled</b> all new VCAs will have a neutal color from the theme."
+				_("<b>When enabled</b> newly created VCAs are assigned a color from the stripable-color-palette in round-robin fashion.\n"
+				  "<b>When disabled</b> all new VCAs will have a neutral color from the theme."
 					));
 	add_option (_("Appearance/Colors"), bo);
 
