@@ -680,7 +680,7 @@ ARDOUR_UI_UTILS::escape_underscores (string const & s)
 }
 
 Gdk::Color
-ARDOUR_UI_UTILS::unique_palette_color (list<Gdk::Color>& used_colors)
+ARDOUR_UI_UTILS::round_robin_palette_color ()
 {
 	Gdk::Color newcolor;
 	string cp = UIConfiguration::instance().get_stripable_color_palette ();

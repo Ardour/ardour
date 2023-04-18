@@ -122,18 +122,11 @@ public:
 	static GUIObjectState& gui_object_state();
 	void clear_property_cache() { property_hashtable.clear(); }
 
-	/**
-	 * Generate a new random TrackView color, unique from those colors already used.
-	 *
-	 * @return the unique random color.
-	 */
-	static Gdk::Color unique_random_color();
+	static Gdk::Color round_robin_palette_color ();
 
 protected:
 	AxisView ();
 	virtual ~AxisView();
-
-	static std::list<Gdk::Color> used_colors;
 
 	Gtk::Label name_label;
 	void set_name_ellipsize_mode ();

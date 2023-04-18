@@ -52,8 +52,6 @@ using namespace Gtkmm2ext;
 using namespace ARDOUR;
 using namespace ARDOUR_UI_UTILS;
 
-list<Gdk::Color> AxisView::used_colors;
-
 AxisView::AxisView ()
 {
 }
@@ -63,9 +61,9 @@ AxisView::~AxisView()
 }
 
 Gdk::Color
-AxisView::unique_random_color()
+AxisView::round_robin_palette_color ()
 {
-	return ARDOUR_UI_UTILS::unique_palette_color (used_colors);
+	return ARDOUR_UI_UTILS::round_robin_palette_color ();
 }
 
 string

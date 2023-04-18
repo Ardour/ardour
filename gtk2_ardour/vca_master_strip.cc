@@ -65,7 +65,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 
 	if (!_vca->presentation_info().color_set()) {
 		if (UIConfiguration::instance().get_use_palette_for_new_vca ()) {
-			_vca->presentation_info().set_color (Gtkmm2ext::gdk_color_to_rgba (unique_random_color()));
+			_vca->presentation_info().set_color (Gtkmm2ext::gdk_color_to_rgba (AxisView::round_robin_palette_color ()));
 		} else {
 			_vca->presentation_info().set_color (UIConfiguration::instance ().color (X_("neutral:midground")));
 		}
