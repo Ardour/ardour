@@ -1388,12 +1388,6 @@ public:
 
 	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
 
-	/* Can be accessed only in process() context, and only after
-	 * Session::process() has returned.
-	 */
-
-	ProcessedRanges processed_ranges;
-
 protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
