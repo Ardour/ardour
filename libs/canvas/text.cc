@@ -292,6 +292,7 @@ Text::set_font_description (Pango::FontDescription font_description)
 {
 	begin_change ();
 
+	delete _font_description;
 	_font_description = new Pango::FontDescription (font_description);
 	_need_redraw = true;
         _width_correction = -1.0;
