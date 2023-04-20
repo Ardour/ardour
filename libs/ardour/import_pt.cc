@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2018-2019 Damien Zammit <damien@zamaudio.com>
+ * Copyright (C) 2018-2023 Damien Zammit <damien@zamaudio.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -287,6 +287,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 	uint16_t i;
 	uint16_t nth = 0;
 	uint16_t ntr = 0;
+	uint16_t existing_ntracks = 0;
 	struct ptflookup utr;
 	vector<midipair> uniquetr;
 
@@ -338,7 +339,10 @@ Session::import_pt_rest (PTFFormat& ptf)
 		goto no_audio_tracks;
 	}
 
-	/* Create all tracks */
+	/* Get current number of ardour tracks */
+	existing_ntracks = naudiotracks ();
+
+	/* Create all PT tracks */
 	ntr = (ptf.tracks ().at (ptf.tracks ().size () - 1)).index + 1;
 	nth = -1;
 	for (vector<PTFFormat::track_t>::const_iterator a = ptf.tracks ().begin (); a != ptf.tracks ().end (); ++a) {
@@ -352,10 +356,10 @@ Session::import_pt_rest (PTFFormat& ptf)
 		}
 	}
 
-	/* Get all playlists of all tracks and Playlist::freeze() all tracks */
+	/* Get all playlists of all tracks just created and Playlist::freeze() them */
 	assert (ntr == nth + 1);
 	for (i = 0; i < ntr; ++i) {
-		existing_track = get_nth_audio_track (i);
+		existing_track = get_nth_audio_track (i + existing_ntracks);
 		std::shared_ptr<Playlist> playlist = existing_track->playlist();
 
 		PlaylistState before;
@@ -378,7 +382,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) tr(%3)\n", a->reg.wave.filename.c_str (), a->reg.index, a->index));
 
 				/* Use track we created earlier */
-				existing_track = get_nth_audio_track (a->index);
+				existing_track = get_nth_audio_track (a->index + existing_ntracks);
 				assert (existing_track);
 
 				/* Put on existing track */
