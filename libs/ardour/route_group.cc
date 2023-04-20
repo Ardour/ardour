@@ -539,36 +539,113 @@ RouteGroup::audio_track_group (set<std::shared_ptr<AudioTrack> >& ats)
 	}
 }
 
+bool
+RouteGroup::check_subgroup (bool aux, Placement placement, DataType& dt, uint32_t& nin) const
+{
+	assert (routes->size () > 0);
+
+	if (has_subgroup ()) {
+		return false;
+	}
+
+	bool midi_only  = true; // no audio ports at all
+	bool audio_ok   = true; // all have at least 1 audio port
+	bool have_midi  = false; // at least 1 MIDI port
+	bool have_audio = false; // at least 1 Audio port
+
+	for (auto const& r : *routes) {
+#ifdef MIXBUS
+		if ((*i)->mixbus ()) {
+			return false;
+		}
+#endif
+		ChanCount cc (r->output()->n_ports());
+		if (aux) {
+			std::shared_ptr<Processor> proc = (placement == PreFader) ? std::dynamic_pointer_cast <Processor> (r->amp ()) : std::dynamic_pointer_cast <Processor> (r->main_outs ());
+			if (proc) {
+				cc = proc->input_streams ();
+			}
+		}
+
+		if (cc.n_audio() == 0) {
+			audio_ok = false;
+		} else {
+			have_audio = true;
+			midi_only  = false;
+		}
+
+		if (cc.n_midi() == 0) {
+			midi_only = false;
+		} else {
+			have_midi = true;
+		}
+	}
+
+	/* if all tracks only have a MIDI output -> MIDI subgroup */
+	dt  = midi_only ? DataType::MIDI : DataType::AUDIO;
+	nin = 0;
+
+	/* for aux, all tracks need to have at least one of a given data-type */
+	if (aux) {
+		if (!(midi_only && have_midi) && !(audio_ok && have_audio)) {
+			return false;
+		}
+	}
+
+	bool have_one = false;
+
+	for (auto const& r : *routes) {
+		ChanCount cc (r->output()->n_ports());
+		if (aux) {
+			std::shared_ptr<Processor> proc = (placement == PreFader) ? std::dynamic_pointer_cast <Processor> (r->amp ()) : std::dynamic_pointer_cast <Processor> (r->main_outs ());
+			if (proc) {
+				cc = proc->input_streams ();
+			}
+		}
+		if (have_one && !aux && nin != cc.get (dt)) {
+			return false;
+		}
+		nin = max (nin, cc.get(dt));
+		have_one = true;
+	}
+
+	return have_one && nin > 0;
+}
+
+bool
+RouteGroup::can_subgroup (bool aux, Placement placement) const
+{
+	DataType dt (DataType::NIL);
+	uint32_t nin;
+	return check_subgroup (aux, placement, dt, nin);
+}
+
 void
 RouteGroup::make_subgroup (bool aux, Placement placement)
 {
+	DataType  dt (DataType::NIL);
+	uint32_t  nin;
 	RouteList rl;
-	uint32_t nin = 0;
 
-	/* since we don't do MIDI Busses yet, check quickly ... */
-
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		if ((*i)->output()->n_ports().n_midi() != 0) {
-			PBD::warning << _("You cannot subgroup MIDI tracks at this time") << endmsg;
-			return;
+	if (!check_subgroup (aux, placement, dt, nin)) {
+		if (has_subgroup ()) {
+			PBD::warning << _("So far only one subgroup per group is supported") << endmsg;
+		} else {
+			PBD::warning << _("You cannot subgroup tracks with different type or number of ports.") << endmsg;
 		}
-	}
-
-	for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
-		if (!aux && nin != 0 && nin != (*i)->output()->n_ports().n_audio()) {
-			PBD::warning << _("You cannot subgroup tracks with different number of outputs at this time.") << endmsg;
-			return;
-		}
-		nin = max (nin, (*i)->output()->n_ports().n_audio());
+		return;
 	}
 
 	try {
-		/* use master bus etc. to determine default nouts.
-		 *
-		 * (since tracks can't have fewer outs than ins,
-		 * "nin" currently defines the number of outputs if nin > 2)
-		 */
-		rl = _session.new_audio_route (nin, 2, 0, 1, string(), PresentationInfo::AudioBus, PresentationInfo::max_order);
+		if (dt == DataType::MIDI) {
+			rl = _session.new_midi_route (0, 1, string(), true, std::shared_ptr<PluginInfo>(), 0, PresentationInfo::MidiBus, PresentationInfo::max_order);
+		} else {
+			uint32_t nout = nin;
+			if (_session.master_out ()) {
+				nout = std::max (nout, _session.master_out ()->n_inputs ().n_audio ());
+			}
+			rl = _session.new_audio_route (nin, nout, 0, 1, string(), PresentationInfo::AudioBus, PresentationInfo::max_order);
+		}
 	} catch (...) {
 		return;
 	}
@@ -587,7 +664,7 @@ RouteGroup::make_subgroup (bool aux, Placement placement)
 
 		for (RouteList::iterator i = routes->begin(); i != routes->end(); ++i) {
 			(*i)->output()->disconnect (this);
-			(*i)->output()->connect_ports_to_bundle (bundle, false, this);
+			(*i)->output()->connect_ports_to_bundle (bundle, false, true, this);
 		}
 	}
 }

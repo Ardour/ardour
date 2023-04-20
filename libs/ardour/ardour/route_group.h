@@ -136,6 +136,7 @@ public:
 	}
 
 	bool has_subgroup() const;
+	bool can_subgroup (bool, Placement) const;
 	void make_subgroup (bool, Placement);
 	void destroy_subgroup ();
 
@@ -188,6 +189,7 @@ private:
 	std::shared_ptr<ControlGroup> _gain_group;
 	std::shared_ptr<ControlGroup> _monitoring_group;
 
+	bool check_subgroup (bool, Placement, DataType&, uint32_t&) const;
 	void remove_when_going_away (std::weak_ptr<Route>);
 	void unset_subgroup_bus ();
 	int set_state_2X (const XMLNode&, int);
