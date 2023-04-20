@@ -2867,7 +2867,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		/* Custom */
 		Gtk::HBox h;
 		Gtk::Label*      l = manage (new Label (string_compose (_("Audio Channels for new %1:"), add_route_dialog->type_wanted() == AddRouteDialog::AudioTrack ? _("Track") : _("Bus") )));
-		Gtk::Adjustment* a = manage (new Gtk::Adjustment (2, 0, 96, 1));
+		Gtk::Adjustment* a = manage (new Gtk::Adjustment (2, 0, 121, 1)); // arbitrary max 11^2 for 10th order amb)
 		Gtk::SpinButton* s = manage (new Gtk::SpinButton (*a, 1, 0));
 
 		h.set_spacing (6);
