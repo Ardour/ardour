@@ -858,6 +858,11 @@ save (LV2_Handle                instance,
 		if (!strcmp (features[i]->URI, LV2_STATE__mapPath)) {
 			map_path = (LV2_State_Map_Path*)features[i]->data;
 		}
+#ifdef LV2_STATE__freePath
+		else if (!strcmp (features[i]->URI, LV2_STATE__freePath)) {
+			free_path = (LV2_State_Free_Path*)features[i]->data;
+		}
+#endif
 	}
 
 	if (!map_path) {
