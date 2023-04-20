@@ -392,35 +392,18 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 
 		items.push_back (SeparatorElem());
 
-		bool can_subgroup = true;
-		std::shared_ptr<RouteList> rl = g->route_list();
-		for (RouteList::const_iterator i = rl->begin(); i != rl->end(); ++i) {
-#ifdef MIXBUS
-			if ((*i)->mixbus ()) {
-				can_subgroup = false;
-				break;
-			}
-#endif
-			if ((*i)->output()->n_ports().n_midi() != 0) {
-				can_subgroup = false;
-				break;
-			}
-		}
-
 		if (g->has_subgroup ()) {
 			items.push_back (MenuElem (_("Remove Subgroup Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::un_subgroup), g)));
-		} else if (can_subgroup) {
+		} else {
 			items.push_back (MenuElem (_("Add New Subgroup Bus"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, false, PreFader)));
-		}
-
-		if (can_subgroup) {
+			items.back().set_sensitive (g->can_subgroup (false, PostFader));
 			items.push_back (MenuElem (_("Add New Aux Bus (pre-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PreFader)));
+			items.back().set_sensitive (g->can_subgroup (true, PreFader));
 			items.push_back (MenuElem (_("Add New Aux Bus (post-fader)"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::subgroup), g, true, PostFader)));
+			items.back().set_sensitive (g->can_subgroup (true, PostFader));
 		}
 
-		if (can_subgroup || g->has_subgroup ()) {
-			items.push_back (SeparatorElem());
-		}
+		items.push_back (SeparatorElem());
 	}
 
 	add_menu_items (_menu, g);
