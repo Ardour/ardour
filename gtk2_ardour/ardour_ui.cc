@@ -2861,6 +2861,34 @@ ARDOUR_UI::add_route_dialog_response (int r)
 	bool strict_io = add_route_dialog->use_strict_io ();
 	bool trigger_visibility = add_route_dialog->show_on_cue_page ();
 
+	AddRouteDialog::TypeWanted type = add_route_dialog->type_wanted ();
+
+	if (input_chan.n_total () == 0 && type != AddRouteDialog::VCAMaster) {
+		/* Custom */
+		Gtk::HBox h;
+		Gtk::Label*      l = manage (new Label (string_compose (_("Audio Channels for new %1:"), add_route_dialog->type_wanted() == AddRouteDialog::AudioTrack ? _("Track") : _("Bus") )));
+		Gtk::Adjustment* a = manage (new Gtk::Adjustment (2, 0, 96, 1));
+		Gtk::SpinButton* s = manage (new Gtk::SpinButton (*a, 1, 0));
+
+		h.set_spacing (6);
+		h.pack_start (*l, false, false);
+		h.pack_start (*s, true, true);
+
+		ArdourDialog d (_("Custom Channel"), true, false);
+		d.get_vbox()->set_border_width (12);
+		d.get_vbox()->pack_start (h, false, false);
+
+		d.add_button(Stock::CANCEL, RESPONSE_CANCEL);
+		d.add_button(Stock::OK, RESPONSE_OK);
+		d.set_default_response (RESPONSE_OK);
+		d.set_position (WIN_POS_MOUSE);
+		d.show_all ();
+
+		if (d.run () == RESPONSE_OK) {
+			input_chan.set (DataType::AUDIO, a->get_value ());
+		}
+	}
+
 	if (oac & AutoConnectMaster) {
 		output_chan.set (DataType::AUDIO, (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan.n_audio()));
 		output_chan.set (DataType::MIDI, 0);
