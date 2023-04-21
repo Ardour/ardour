@@ -187,6 +187,8 @@ public:
 		return *this;
 	}
 
+	UnscopedConnection const & the_connection() const { return _c; }
+
 private:
 	UnscopedConnection _c;
 };
