@@ -275,7 +275,7 @@ def signal(f, n, v):
 \t}
 """, file=f)
     print("""
-\tbool size () const {
+\tsize_t size () const {
 \t\tGlib::Threads::Mutex::Lock lm (_mutex);
 \t\treturn _slots.size ();
 \t}
