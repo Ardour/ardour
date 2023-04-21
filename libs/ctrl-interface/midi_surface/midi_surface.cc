@@ -186,7 +186,8 @@ MIDISurface::port_registration_handler ()
 bool
 MIDISurface::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
 {
-	DEBUG_TRACE (DEBUG::MIDISurface, "FaderPort::connection_handler start\n");
+	DEBUG_TRACE (DEBUG::MIDISurface, "MIDISurface::connection_handler start\n");
+
 	if (!_input_port || !_output_port) {
 		return false;
 	}
