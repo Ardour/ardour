@@ -115,10 +115,12 @@ EventLoop::get_request_buffers_for_target_thread (const std::string& target_thre
 	vector<ThreadBufferMapping> ret;
 	Glib::Threads::RWLock::WriterLock lm (thread_buffer_requests_lock);
 
-	for (ThreadRequestBufferList::const_iterator x = thread_buffer_requests.begin();
-	     x != thread_buffer_requests.end(); ++x) {
+	DEBUG_TRACE (PBD::DEBUG::EventLoop, string_compose ("%1 look for request buffers via %2\n",  pthread_name(), target_thread));
+
+	for (ThreadRequestBufferList::const_iterator x = thread_buffer_requests.begin(); x != thread_buffer_requests.end(); ++x) {
 
 		if (x->second.target_thread_name == target_thread) {
+			DEBUG_TRACE (PBD::DEBUG::EventLoop, string_compose ("for thread \"%1\", request buffer for %2/%3 thread %4\n", target_thread, x->first, x->second.emitting_thread));
 			ret.push_back (x->second);
 		}
 	}
@@ -129,8 +131,7 @@ EventLoop::get_request_buffers_for_target_thread (const std::string& target_thre
 }
 
 void
-EventLoop::register_request_buffer_factory (const string& target_thread_name,
-                                            void* (*factory)(uint32_t))
+EventLoop::register_request_buffer_factory (const string& target_thread_name, void* (*factory)(uint32_t))
 {
 
 	RequestBufferSupplier trs;
@@ -141,6 +142,7 @@ EventLoop::register_request_buffer_factory (const string& target_thread_name,
 		Glib::Threads::RWLock::WriterLock lm (thread_buffer_requests_lock);
 		request_buffer_suppliers.push_back (trs);
 	}
+	DEBUG_TRACE (PBD::DEBUG::EventLoop, string_compose ("event loop %1 registered a buffer factory for %2\n", pthread_name(), target_thread_name));
 }
 
 void
