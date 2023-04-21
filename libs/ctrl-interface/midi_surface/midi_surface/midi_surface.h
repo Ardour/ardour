@@ -116,7 +116,6 @@ class MIDISurface : public ARDOUR::ControlProtocol
 
 	int _connection_state;
 
-	bool connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
 	PBD::ScopedConnectionList port_connections;
 
 	virtual int ports_acquire ();
@@ -129,4 +128,7 @@ class MIDISurface : public ARDOUR::ControlProtocol
 
 	void drop ();
 	void port_setup ();
+
+  private:
+	bool connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::weak_ptr<ARDOUR::Port>, std::string name2, bool yn);
 };
