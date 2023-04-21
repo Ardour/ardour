@@ -90,7 +90,7 @@ public:
 	};
 
 	virtual bool call_slot (InvalidationRecord*, const boost::function<void()>&) = 0;
-	virtual Glib::Threads::Mutex& slot_invalidation_mutex() = 0;
+	virtual Glib::Threads::RWLock& slot_invalidation_rwlock() = 0;
 
 	std::string event_loop_name() const { return _name; }
 

@@ -101,7 +101,7 @@ EventLoop::invalidate_request (void* data)
 
 	if (ir->event_loop) {
 		DEBUG_TRACE (PBD::DEBUG::EventLoop, string_compose ("%1: invalidating request from %2 (%3) @ %4\n", pthread_name(), ir->event_loop, ir->event_loop->event_loop_name(), ir));
-		Glib::Threads::Mutex::Lock lm (ir->event_loop->slot_invalidation_mutex());
+		Glib::Threads::RWLock::WriterLock lm (ir->event_loop->slot_invalidation_rwlock());
 		ir->invalidate ();
 		ir->event_loop->trash.push_back(ir);
 	}

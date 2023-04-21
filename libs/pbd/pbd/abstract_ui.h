@@ -61,9 +61,9 @@ public:
 
 	void register_thread (pthread_t, std::string, uint32_t num_requests);
 	bool call_slot (EventLoop::InvalidationRecord*, const boost::function<void()>&);
-	Glib::Threads::Mutex& slot_invalidation_mutex() { return request_buffer_map_lock; }
+	Glib::Threads::RWLock& slot_invalidation_rwlock() { return request_buffer_map_lock; }
 
-	Glib::Threads::Mutex request_buffer_map_lock;
+	Glib::Threads::RWLock request_buffer_map_lock;
 
 	static void* request_buffer_factory (uint32_t num_requests);
 
@@ -92,7 +92,6 @@ protected:
 #endif
 
 	RequestBufferMap request_buffers;
-	static Glib::Threads::Private<RequestBuffer> per_thread_request_buffer;
 
 	std::list<RequestObject*> request_list;
 
@@ -102,6 +101,9 @@ protected:
 
 	virtual void do_request (RequestObject *) = 0;
 	PBD::ScopedConnection new_thread_connection;
+
+	RequestBuffer* get_per_thread_request_buffer ();
+
 };
 
 #endif /* __pbd_abstract_ui_h__ */

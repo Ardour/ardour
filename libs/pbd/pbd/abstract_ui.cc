@@ -68,9 +68,6 @@ cleanup_request_buffer (void* ptr)
 	rb->dead = true;
 }
 
-template<typename R>
-Glib::Threads::Private<typename AbstractUI<R>::RequestBuffer> AbstractUI<R>::per_thread_request_buffer (cleanup_request_buffer<AbstractUI<R>::RequestBuffer>);
-
 template <typename RequestObject>
 AbstractUI<RequestObject>::AbstractUI (const string& name)
 	: BaseUI (name)
@@ -88,7 +85,8 @@ AbstractUI<RequestObject>::AbstractUI (const string& name)
 	vector<EventLoop::ThreadBufferMapping> tbm = EventLoop::get_request_buffers_for_target_thread (event_loop_name());
 
 	{
-		Glib::Threads::Mutex::Lock rbml (request_buffer_map_lock);
+		Glib::Threads::RWLock::WriterLock rbml (request_buffer_map_lock);
+
 		for (vector<EventLoop::ThreadBufferMapping>::iterator t = tbm.begin(); t != tbm.end(); ++t) {
 			request_buffers[t->emitting_thread] = static_cast<RequestBuffer*> (t->request_buffer);
 		}
@@ -126,46 +124,54 @@ AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string thread_n
 	   event loop will catch.
 	*/
 
-	RequestBuffer* b = per_thread_request_buffer.get();
-
-	if (!b) {
-
-		/* create a new request queue/ringbuffer */
-
-		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("create new request buffer for %1 in %2\n", thread_name, event_loop_name()));
-
-		b = new RequestBuffer (num_requests); // XXX leaks
-		/* set this thread's per_thread_request_buffer to this new
-		   queue/ringbuffer. remember that only this thread will
-		   get this queue when it calls per_thread_request_buffer.get()
-
-		   the second argument is a function that will be called
-		   when the thread exits, and ensures that the buffer is marked
-		   dead. it will then be deleted during a call to handle_ui_requests()
-		*/
-
-		per_thread_request_buffer.set (b);
-	} else {
-		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 : %2 is already registered\n", event_loop_name(), thread_name));
-	}
+	RequestBuffer* b = 0;
+	bool store = false;
 
 	{
+		Glib::Threads::RWLock::ReaderLock lm (request_buffer_map_lock);
+		typename RequestBufferMap::const_iterator ib = request_buffers.find (pthread_self());
+
+		if (ib == request_buffers.end()) {
+			/* create a new request queue/ringbuffer */
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("create new request buffer for %1 in %2 from %3/%4\n", thread_name, event_loop_name(), pthread_name(), thread_id));
+			b = new RequestBuffer (num_requests); // XXX leaks
+			store = true;
+		}
+	}
+
+	if (store) {
+
 		/* add the new request queue (ringbuffer) to our map
 		   so that we can iterate over it when the time is right.
 		   This step is not RT-safe, but is assumed to be called
 		   only at thread initialization time, not repeatedly,
 		   and so this is of little consequence.
 		*/
-		Glib::Threads::Mutex::Lock rbml (request_buffer_map_lock);
-		request_buffers[thread_id] = b;
-	}
 
+		Glib::Threads::RWLock::WriterLock rbml (request_buffer_map_lock);
+		request_buffers[thread_id] = b;
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2/%3 registered request buffer-B @ %4 for %5\n", event_loop_name(), pthread_name(), pthread_self(), b, thread_id));
+
+	} else {
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 : %2 is already registered\n", event_loop_name(), thread_name));
+	}
+}
+
+template<typename RequestObject> typename AbstractUI<RequestObject>::RequestBuffer*
+AbstractUI<RequestObject>::get_per_thread_request_buffer ()
+{
+	Glib::Threads::RWLock::ReaderLock lm (request_buffer_map_lock);
+	typename RequestBufferMap::iterator ib = request_buffers.find (pthread_self());
+	if (ib != request_buffers.end()) {
+		return ib->second;
+	}
+	return 0;
 }
 
 template <typename RequestObject> RequestObject*
 AbstractUI<RequestObject>::get_request (RequestType rt)
 {
-	RequestBuffer* rbuf = per_thread_request_buffer.get ();
+	RequestBuffer* rbuf = get_per_thread_request_buffer ();
 	RequestBufferVector vec;
 
 	/* see comments in ::register_thread() above for an explanation of
@@ -212,7 +218,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 	RequestBufferVector vec;
 
 	/* check all registered per-thread buffers first */
-	Glib::Threads::Mutex::Lock rbml (request_buffer_map_lock);
+	Glib::Threads::RWLock::ReaderLock rbml (request_buffer_map_lock);
 
 	/* clean up any dead invalidation records (object was deleted) */
 	trash.sort();
@@ -409,7 +415,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 		 * reader.
 		 */
 
-		RequestBuffer* rbuf = per_thread_request_buffer.get ();
+		RequestBuffer* rbuf = get_per_thread_request_buffer ();
 
 		if (rbuf != 0) {
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send per-thread request type %3 using ringbuffer @ %4 IR: %5\n", event_loop_name(), pthread_name(), req->type, rbuf, req->invalidation));
@@ -419,7 +425,7 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 			 * single-reader/single-writer semantics
 			 */
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2 send heap request type %3 IR %4\n", event_loop_name(), pthread_name(), req->type, req->invalidation));
-			Glib::Threads::Mutex::Lock lm (request_buffer_map_lock);
+			Glib::Threads::RWLock::WriterLock lm (request_buffer_map_lock);
 			request_list.push_back (req);
 		}
 
@@ -495,6 +501,5 @@ template<typename RequestObject> void*
 AbstractUI<RequestObject>::request_buffer_factory (uint32_t num_requests)
 {
 	RequestBuffer*  mcr = new RequestBuffer (num_requests); // XXX leaks
-	per_thread_request_buffer.set (mcr);
 	return mcr;
 }
