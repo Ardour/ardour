@@ -555,7 +555,7 @@ RouteGroup::check_subgroup (bool aux, Placement placement, DataType& dt, uint32_
 
 	for (auto const& r : *routes) {
 #ifdef MIXBUS
-		if ((*i)->mixbus ()) {
+		if (r->mixbus ()) {
 			return false;
 		}
 #endif
