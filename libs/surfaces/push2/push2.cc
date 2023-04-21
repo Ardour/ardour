@@ -197,7 +197,7 @@ Push2::begin_using_device ()
 	vblank_timeout->attach (main_loop()->get_context());
 
 	init_buttons (true);
-	init_touch_strip ();
+	init_touch_strip (false);
 	reset_pad_colors ();
 	splash ();
 
@@ -414,16 +414,10 @@ Push2::set_active (bool yn)
 }
 
 void
-Push2::init_touch_strip ()
+Push2::init_touch_strip (bool shift)
 {
-	MidiByteArray msg (9, 0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x17, 0x00, 0xf7);
-	/* flags are the final byte (ignore end-of-sysex */
-
-	/* show bar, not point
-	   autoreturn to center
-	   bar starts at center
-	*/
-	msg[7] = (1<<4) | (1<<5) | (1<<6);
+	const int bits = (shift ? 0xc : 0x68);
+	const MidiByteArray msg (9, 0xf0, 0x00, 0x21, 0x1d, 0x01, 0x01, 0x17, bits, 0xf7);
 	write (msg);
 }
 
@@ -885,6 +879,7 @@ Push2::start_shift ()
 	b->set_color (LED::White);
 	b->set_state (LED::Blinking16th);
 	write (b->state_msg());
+	init_touch_strip (true);
 }
 
 void
@@ -897,6 +892,7 @@ Push2::end_shift ()
 		b->set_color (LED::White);
 		b->set_state (LED::OneShot24th);
 		write (b->state_msg());
+		init_touch_strip (false);
 	}
 }
 

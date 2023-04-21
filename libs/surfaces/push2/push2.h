@@ -470,7 +470,7 @@ class Push2 : public MIDISurface
 	void start_press_timeout (std::shared_ptr<Button>, ButtonID);
 
 	void init_buttons (bool startup);
-	void init_touch_strip ();
+	void init_touch_strip (bool with_shift);
 
 	/* map of Pads by note number (the "fixed" note number sent by the
 	 * hardware, not the note number generated if the pad is touched)
