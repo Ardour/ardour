@@ -1451,10 +1451,10 @@ AudioEngine::thread_init_callback (void* arg)
 	   knows about it.
 	*/
 
-	pthread_set_name (X_("audioengine"));
-
 	const int thread_num = audioengine_thread_cnt.fetch_add (1);
 	const string thread_name = string_compose (X_("AudioEngine %1"), thread_num);
+
+	pthread_set_name (thread_name.c_str());
 
 	SessionEvent::create_per_thread_pool (thread_name, 512);
 	PBD::notify_event_loops_about_thread_creation (pthread_self(), thread_name, 4096);
