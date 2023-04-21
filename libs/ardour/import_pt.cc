@@ -284,10 +284,7 @@ Session::import_pt_rest (PTFFormat& ptf)
 	SourceList just_one_src;
 
 	std::shared_ptr<AudioTrack> existing_track;
-	uint16_t i;
 	uint16_t nth = 0;
-	uint16_t ntr = 0;
-	uint16_t existing_ntracks = 0;
 	struct ptflookup utr;
 	vector<midipair> uniquetr;
 
@@ -339,35 +336,29 @@ Session::import_pt_rest (PTFFormat& ptf)
 		goto no_audio_tracks;
 	}
 
-	/* Get current number of ardour tracks */
-	existing_ntracks = naudiotracks ();
-
-	/* Create all PT tracks */
-	ntr = (ptf.tracks ().at (ptf.tracks ().size () - 1)).index + 1;
+	/* Create all PT tracks if not already present and freeze all playlists of tracks we will touch */
 	nth = -1;
 	for (vector<PTFFormat::track_t>::const_iterator a = ptf.tracks ().begin (); a != ptf.tracks ().end (); ++a) {
 		if (a->index != nth) {
 			nth++;
-			DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\tcreate tr(%1) %2\n", nth, a->name.c_str()));
-			list<std::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, a->name.c_str(), PresentationInfo::max_order, Normal));
-			if (at.empty ()) {
-				return;
+			if (!(existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a->name)))) {
+				/* Create missing track */
+				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\tcreate tr(%1) %2\n", nth, a->name.c_str()));
+				list<std::shared_ptr<AudioTrack> > at (new_audio_track (1, 2, 0, 1, a->name.c_str(), PresentationInfo::max_order, Normal));
+				if (at.empty ()) {
+					return;
+				}
+				existing_track = at.back();
 			}
+			std::shared_ptr<Playlist> playlist = existing_track->playlist();
+
+			PlaylistState before;
+			before.playlist = playlist;
+			before.before = &playlist->get_state();
+			playlist->clear_changes ();
+			playlist->freeze ();
+			playlists.push_back(before);
 		}
-	}
-
-	/* Get all playlists of all tracks just created and Playlist::freeze() them */
-	assert (ntr == nth + 1);
-	for (i = 0; i < ntr; ++i) {
-		existing_track = get_nth_audio_track (i + existing_ntracks);
-		std::shared_ptr<Playlist> playlist = existing_track->playlist();
-
-		PlaylistState before;
-		before.playlist = playlist;
-		before.before = &playlist->get_state();
-		playlist->clear_changes ();
-		playlist->freeze ();
-		playlists.push_back(before);
 	}
 
 	/* Add regions */
@@ -381,8 +372,8 @@ Session::import_pt_rest (PTFFormat& ptf)
 				std::shared_ptr<Region> r = RegionFactory::region_by_id (p->id);
 				DEBUG_TRACE (DEBUG::FileUtils, string_compose ("\twav(%1) reg(%2) tr(%3)\n", a->reg.wave.filename.c_str (), a->reg.index, a->index));
 
-				/* Use track we created earlier */
-				existing_track = get_nth_audio_track (a->index + existing_ntracks);
+				/* Use audio track we know exists */
+				existing_track = dynamic_pointer_cast<AudioTrack> (route_by_name (a->name));
 				assert (existing_track);
 
 				/* Put on existing track */

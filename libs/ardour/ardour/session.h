@@ -346,8 +346,6 @@ public:
 	std::shared_ptr<RouteList> get_routes_with_internal_returns() const;
 	std::shared_ptr<RouteList> get_routes_with_regions_at (timepos_t const &) const;
 
-	std::shared_ptr<AudioTrack> get_nth_audio_track (uint32_t) const;
-
 	uint32_t nstripables (bool with_monitor = false) const;
 	uint32_t nroutes() const { return routes.reader()->size(); }
 	uint32_t ntracks () const;
