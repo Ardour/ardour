@@ -737,7 +737,9 @@ JACKAudioBackend::set_jack_callbacks ()
 {
 	GET_PRIVATE_JACK_POINTER (_priv_jack);
 
-        jack_set_thread_init_callback (_priv_jack, AudioEngine::thread_init_callback, 0);
+	/* no need to set the thread_init_callback because we use the
+	 * non-callback API, and run the thread init callback in our own code.
+	 */
 
         jack_set_process_thread (_priv_jack, _process_thread, this);
         jack_set_sample_rate_callback (_priv_jack, _sample_rate_callback, this);
