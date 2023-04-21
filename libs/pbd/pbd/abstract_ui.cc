@@ -114,7 +114,12 @@ AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string thread_n
 	 * do so in a realtime-safe manner (no locks).
 	 */
 
-	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("in %1 (thread name %4), %2 (%5) wants to register with UIs\n", event_loop_name(), thread_name, pthread_name(), DEBUG_THREAD_SELF));
+	if (thread_name == event_loop_name()) {
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 wanted to self-register, ignored\n", event_loop_name()));
+		return;
+	}
+
+	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("in %1 (thread name %2), [%3] (%4)  wants to register with us (%1)\n", event_loop_name(), pthread_name(), thread_name, thread_id));
 
 	/* the per_thread_request_buffer is a thread-private variable.
 	   See pthreads documentation for more on these, but the key
