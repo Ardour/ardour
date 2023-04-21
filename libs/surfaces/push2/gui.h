@@ -49,7 +49,6 @@ public:
 
 private:
 	Push2&                    _p2;
-	PBD::ScopedConnectionList _p2_connections;
 	Gtk::HBox                 _hpacker;
 	Gtk::Table                _table;
 	Gtk::Table                _action_table;
