@@ -77,12 +77,6 @@ probe_mackie_protocol (ControlProtocolDescriptor*)
 	return MackieControlProtocol::probe();
 }
 
-static void*
-mackie_request_buffer_factory (uint32_t num_requests)
-{
-	return MackieControlProtocol::request_factory (num_requests);
-}
-
 // Field names commented out by JE - 06-01-2010
 static ControlProtocolDescriptor mackie_descriptor = {
 	/*name :              */   "Mackie",
@@ -98,7 +92,6 @@ static ControlProtocolDescriptor mackie_descriptor = {
 	/*probe :             */   probe_mackie_protocol,
 	/*initialize :        */   new_mackie_protocol,
 	/*destroy :           */   delete_mackie_protocol,
-	/*request_buffer_factory */ mackie_request_buffer_factory
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &mackie_descriptor; }

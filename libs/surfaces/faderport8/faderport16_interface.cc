@@ -55,12 +55,6 @@ probe_faderport16_midi_protocol (ControlProtocolDescriptor* /*descriptor*/)
 	return FaderPort8::probe ();
 }
 
-static void*
-faderport16_request_buffer_factory (uint32_t num_requests)
-{
-	return FaderPort8::request_factory (num_requests);
-}
-
 static ControlProtocolDescriptor faderport16_midi_descriptor = {
 	/*name :              */    "PreSonus FaderPort16",
 	/*id :                */    "uri://ardour.org/surfaces/faderport16:0",
@@ -71,7 +65,6 @@ static ControlProtocolDescriptor faderport16_midi_descriptor = {
 	/*probe :             */    probe_faderport16_midi_protocol,
 	/*initialize :        */    new_faderport16_midi_protocol,
 	/*destroy :           */    delete_faderport16_midi_protocol,
-	/*request_buffer_factory */ faderport16_request_buffer_factory
 };
 
 extern "C" ARDOURSURFACE_API

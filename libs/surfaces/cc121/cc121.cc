@@ -202,17 +202,6 @@ CC121::~CC121 ()
 	BaseUI::quit ();
 }
 
-void*
-CC121::request_factory (uint32_t num_requests)
-{
-	/* AbstractUI<T>::request_buffer_factory() is a template method only
-	   instantiated in this source module. To provide something visible for
-	   use in the interface/descriptor, we have this static method that is
-	   template-free.
-	*/
-	return request_buffer_factory (num_requests);
-}
-
 void
 CC121::start_midi_handling ()
 {

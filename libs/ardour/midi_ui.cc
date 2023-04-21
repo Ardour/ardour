@@ -62,17 +62,6 @@ MidiControlUI::~MidiControlUI ()
 	_instance = 0;
 }
 
-void*
-MidiControlUI::request_factory (uint32_t num_requests)
-{
-	/* AbstractUI<T>::request_buffer_factory() is a template method only
-	   instantiated in this source module. To provide something visible for
-	   use when registering the factory, we have this static method that is
-	   template-free.
-	*/
-	return request_buffer_factory (num_requests);
-}
-
 void
 MidiControlUI::do_request (MidiUIRequest* req)
 {

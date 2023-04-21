@@ -85,7 +85,6 @@ public:
 	DeviceType device_type() const { return _device_type; }
 
 	static bool probe ();
-	static void* request_factory (uint32_t);
 
 	int set_active (bool yn);
 

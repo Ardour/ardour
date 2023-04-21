@@ -49,12 +49,6 @@ probe_ardour_websockets_protocol (ControlProtocolDescriptor* /*descriptor*/)
 	return true;
 }
 
-static void*
-ardour_websockets_request_buffer_factory (uint32_t num_requests)
-{
-	return ArdourWebsockets::request_factory (num_requests);
-}
-
 static ControlProtocolDescriptor ardour_websockets_descriptor = {
 	/*name :              */ surface_name,
 	/*id :                */ surface_id,
@@ -65,7 +59,6 @@ static ControlProtocolDescriptor ardour_websockets_descriptor = {
 	/*probe :             */ probe_ardour_websockets_protocol,
 	/*initialize :        */ new_ardour_websockets_protocol,
 	/*destroy :           */ delete_ardour_websockets_protocol,
-	/*request_buffer_factory */ ardour_websockets_request_buffer_factory
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor*

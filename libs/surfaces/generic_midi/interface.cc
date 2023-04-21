@@ -66,10 +66,6 @@ static ControlProtocolDescriptor generic_midi_descriptor = {
 	/*probe :             */   probe_generic_midi_protocol,
 	/*initialize :        */   new_generic_midi_protocol,
 	/*destroy :           */   delete_generic_midi_protocol,
-	/*request_buffer_factory : */ 0  /* no buffer factory because this runs
-	                                  * in the midiUI event loop (which has
-	                                  * its own request buffer factory.
-	                                  */
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &generic_midi_descriptor; }

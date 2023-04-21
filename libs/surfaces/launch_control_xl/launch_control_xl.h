@@ -358,7 +358,6 @@ public:
 
 
 	static bool probe();
-	static void *request_factory(uint32_t);
 
 	std::list<std::shared_ptr<ARDOUR::Bundle> > bundles();
 

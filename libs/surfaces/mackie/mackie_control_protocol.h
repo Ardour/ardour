@@ -161,7 +161,6 @@ class MackieControlProtocol
 	*/
 
 	static bool probe();
-	static void* request_factory (uint32_t);
 
 	mutable Glib::Threads::Mutex surfaces_lock;
 	typedef std::list<std::shared_ptr<Mackie::Surface> > Surfaces;

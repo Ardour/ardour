@@ -87,7 +87,6 @@ class CC121 : public ARDOUR::ControlProtocol, public AbstractUI<CC121Request> {
 	   there's no way to know if the device exists or not.
 	 */
 	static bool probe() { return true; }
-	static void* request_factory (uint32_t);
 
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);

@@ -74,12 +74,6 @@ probe_launch_control_xl (ControlProtocolDescriptor*)
 	return LaunchControlXL::probe();
 }
 
-static void*
-lcxl_request_buffer_factory (uint32_t num_requests)
-{
-	return LaunchControlXL::request_factory (num_requests);
-}
-
 static ControlProtocolDescriptor launch_control_xl_descriptor = {
 	/*name :              */   "Novation Launch Control XL",
 	/*id :                */   "uri://ardour.org/surfaces/launch_control_xl:0",
@@ -94,7 +88,6 @@ static ControlProtocolDescriptor launch_control_xl_descriptor = {
 	/*probe :             */   probe_launch_control_xl,
 	/*initialize :        */   new_launch_control_xl,
 	/*destroy :           */   delete_launch_control_xl,
-	/*request_buffer_factory */ lcxl_request_buffer_factory
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &launch_control_xl_descriptor; }

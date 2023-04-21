@@ -41,7 +41,6 @@ public:
 	virtual ~WiimoteControlProtocol ();
 
 	static bool probe ();
-	static void* request_factory (uint32_t);
 
 	int set_active (bool yn);
 

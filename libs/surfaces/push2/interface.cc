@@ -72,12 +72,6 @@ probe_push2 (ControlProtocolDescriptor*)
 	return Push2::probe();
 }
 
-static void*
-push2_request_buffer_factory (uint32_t num_requests)
-{
-	return MIDISurface::request_factory (num_requests);
-}
-
 static ControlProtocolDescriptor push2_descriptor = {
 	/*name :              */   "Ableton Push 2",
 	/*id :                */   "uri://ardour.org/surfaces/push2:0",
@@ -92,7 +86,6 @@ static ControlProtocolDescriptor push2_descriptor = {
 	/*probe :             */   probe_push2,
 	/*initialize :        */   new_push2,
 	/*destroy :           */   delete_push2,
-	/*request_buffer_factory */ push2_request_buffer_factory
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &push2_descriptor; }

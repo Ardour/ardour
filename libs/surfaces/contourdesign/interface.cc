@@ -49,12 +49,6 @@ probe_contourdesign_protocol (ControlProtocolDescriptor*)
 	return ContourDesignControlProtocol::probe ();
 }
 
-static void*
-contourdesign_request_buffer_factory (uint32_t num_requests)
-{
-	return ContourDesignControlProtocol::request_factory (num_requests);
-}
-
 static ControlProtocolDescriptor contourdesign_descriptor = {
 	/* name :                   */ "ContourDesign",
 	/* id :                     */ "uri://ardour.org/surfaces/contourdesign:0",
@@ -65,7 +59,6 @@ static ControlProtocolDescriptor contourdesign_descriptor = {
 	/* probe :                  */ probe_contourdesign_protocol,
 	/* initialize :             */ new_contourdesign_protocol,
 	/* destroy :                */ delete_contourdesign_protocol,
-	/* request_buffer_factory : */ contourdesign_request_buffer_factory
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &contourdesign_descriptor; }

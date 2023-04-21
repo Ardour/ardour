@@ -46,12 +46,6 @@ probe_wiimote_protocol (ControlProtocolDescriptor*)
 {
 	return WiimoteControlProtocol::probe ();
 }
-static void*
-wiimote_request_buffer_factory (uint32_t num_requests)
-{
-	return WiimoteControlProtocol::request_factory (num_requests);
-}
-
 
 static ControlProtocolDescriptor wiimote_descriptor = {
 	name : "Wiimote",
@@ -63,7 +57,6 @@ static ControlProtocolDescriptor wiimote_descriptor = {
 	probe : probe_wiimote_protocol,
 	initialize : new_wiimote_protocol,
 	destroy : delete_wiimote_protocol,
-	request_buffer_factory : wiimote_request_buffer_factory
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &wiimote_descriptor; }

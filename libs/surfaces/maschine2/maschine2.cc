@@ -125,12 +125,6 @@ Maschine2::~Maschine2 ()
 	hid_exit ();
 }
 
-void*
-Maschine2::request_factory (uint32_t num_requests)
-{
-	return request_buffer_factory (num_requests);
-}
-
 void
 Maschine2::do_request (Maschine2Request* req)
 {

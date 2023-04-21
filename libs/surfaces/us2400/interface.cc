@@ -74,12 +74,6 @@ probe_us2400_protocol (ControlProtocolDescriptor*)
 	return US2400Protocol::probe();
 }
 
-static void*
-us2400_request_buffer_factory (uint32_t num_requests)
-{
-	return US2400Protocol::request_factory (num_requests);
-}
-
 // Field names commented out by JE - 06-01-2010
 static ControlProtocolDescriptor us2400_descriptor = {
 	/*name :              */   "Tascam US-2400",
@@ -95,7 +89,6 @@ static ControlProtocolDescriptor us2400_descriptor = {
 	/*probe :             */   probe_us2400_protocol,
 	/*initialize :        */   new_us2400_protocol,
 	/*destroy :           */   delete_us2400_protocol,
-	/*request_buffer_factory */ us2400_request_buffer_factory
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &us2400_descriptor; }

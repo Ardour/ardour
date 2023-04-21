@@ -65,8 +65,6 @@ public:
 
 	Glib::Threads::RWLock request_buffer_map_lock;
 
-	static void* request_buffer_factory (uint32_t num_requests);
-
 protected:
 	struct RequestBuffer : public PBD::RingBufferNPT<RequestObject> {
 		bool dead;

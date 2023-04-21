@@ -57,8 +57,6 @@ public:
 	ArdourWebsockets (ARDOUR::Session&);
 	virtual ~ArdourWebsockets ();
 
-	static void* request_factory (uint32_t);
-
 	int set_active (bool);
 
 	ARDOUR::Session& ardour_session ()

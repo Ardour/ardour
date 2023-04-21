@@ -56,12 +56,6 @@ probe_cc121_midi_protocol (ControlProtocolDescriptor* /*descriptor*/)
 	return CC121::probe ();
 }
 
-static void*
-cc121_request_buffer_factory (uint32_t num_requests)
-{
-	return CC121::request_factory (num_requests);
-}
-
 static ControlProtocolDescriptor cc121_midi_descriptor = {
 	/*name :              */   "Steinberg CC121",
 	/*id :                */   "uri://ardour.org/surfaces/cc121:0",
@@ -72,7 +66,6 @@ static ControlProtocolDescriptor cc121_midi_descriptor = {
 	/*probe :             */   probe_cc121_midi_protocol,
 	/*initialize :        */   new_cc121_midi_protocol,
 	/*destroy :           */   delete_cc121_midi_protocol,
-	/*request_buffer_factory */ cc121_request_buffer_factory
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &cc121_midi_descriptor; }

@@ -513,9 +513,3 @@ AbstractUI<RequestObject>::call_slot (InvalidationRecord* invalidation, const bo
 	return true;
 }
 
-template<typename RequestObject> void*
-AbstractUI<RequestObject>::request_buffer_factory (uint32_t num_requests)
-{
-	RequestBuffer*  mcr = new RequestBuffer (num_requests); // XXX leaks
-	return mcr;
-}

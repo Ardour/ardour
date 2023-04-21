@@ -180,15 +180,6 @@ public:
 	bool (*probe) (ControlProtocolDescriptor*);
 	ControlProtocol* (*initialize) (ControlProtocolDescriptor*, Session*);
 	void (*destroy) (ControlProtocolDescriptor*, ControlProtocol*);
-	/* this is required if the control protocol connects to signals
-	 * from libardour. they all do. It should allocate a
-	 * type-specific request buffer for the calling thread, and
-	 * store it in a thread-local location that will be used to
-	 * find it when sending the event loop a message
-	 * (e.g. call_slot()). It should also return the allocated
-	 * buffer as a void*.
-	 */
-	void* (*request_buffer_factory) (uint32_t);
 };
 }
 }

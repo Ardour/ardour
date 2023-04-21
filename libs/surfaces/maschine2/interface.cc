@@ -57,12 +57,6 @@ probe_maschine2 (ControlProtocolDescriptor*)
 	return true;
 }
 
-static void*
-maschine2_request_buffer_factory (uint32_t num_requests)
-{
-	return Maschine2::request_factory (num_requests);
-}
-
 static ControlProtocolDescriptor maschine2_descriptor = {
 	/*name :              */   "NI Maschine2",
 	/*id :                */   "uri://ardour.org/surfaces/maschine2:0",
@@ -73,7 +67,6 @@ static ControlProtocolDescriptor maschine2_descriptor = {
 	/*probe :             */   probe_maschine2,
 	/*initialize :        */   new_maschine2,
 	/*destroy :           */   delete_maschine2,
-	/*request_buffer_factory */ maschine2_request_buffer_factory
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &maschine2_descriptor; }
