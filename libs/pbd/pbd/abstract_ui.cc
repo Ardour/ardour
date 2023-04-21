@@ -87,9 +87,11 @@ AbstractUI<RequestObject>::AbstractUI (const string& name)
 	{
 		Glib::Threads::RWLock::WriterLock rbml (request_buffer_map_lock);
 
-		for (vector<EventLoop::ThreadBufferMapping>::iterator t = tbm.begin(); t != tbm.end(); ++t) {
-			request_buffers[t->emitting_thread] = static_cast<RequestBuffer*> (t->request_buffer);
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%6: %1/%2/%3 create pre-registered request buffer-A @ %4 for %5\n", event_loop_name(), pthread_name(), pthread_self(), t->request_buffer, t->emitting_thread, this));
+		for (auto const & t : tbm) {
+			request_buffers[t.emitting_thread] = new RequestBuffer (t.num_requests);
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%6: %1/%2/%3 create pre-registered request buffer-A @ %4 for %5\n",
+			                                                     event_loop_name(), pthread_name(), pthread_self(),
+			                                                     request_buffers[t.emitting_thread], t.emitting_thread, this));
 		}
 	}
 }
@@ -97,12 +99,6 @@ AbstractUI<RequestObject>::AbstractUI (const string& name)
 template <typename RequestObject>
 AbstractUI<RequestObject>::~AbstractUI ()
 {
-	for (RequestBufferMapIterator i = request_buffers.begin(); i != request_buffers.end(); ++i) {
-		if ((*i).second->dead) {
-			EventLoop::remove_request_buffer_from_map ((*i).second);
-			delete (*i).second;
-		}
-	}
 }
 
 template <typename RequestObject> void
@@ -326,7 +322,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			RequestBufferMapIterator tmp = i;
 			++tmp;
 			/* remove it from the EventLoop static map of all request buffers */
-			EventLoop::remove_request_buffer_from_map ((*i).second);
+			EventLoop::remove_request_buffer_from_map (i->first);
 			/* delete it
 			 *
 			 * Deleting the ringbuffer destroys all RequestObjects

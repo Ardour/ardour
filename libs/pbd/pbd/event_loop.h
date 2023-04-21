@@ -99,15 +99,13 @@ public:
 
 	struct ThreadBufferMapping {
 		pthread_t emitting_thread;
-		std::string target_thread_name;
-		void* request_buffer;
+		size_t num_requests;
 	};
 
 	static std::vector<ThreadBufferMapping> get_request_buffers_for_target_thread (const std::string&);
 
-	static void register_request_buffer_factory (const std::string& target_thread_name, void* (*factory) (uint32_t));
 	static void pre_register (const std::string& emitting_thread_name, uint32_t num_requests);
-	static void remove_request_buffer_from_map (void* ptr);
+	static void remove_request_buffer_from_map (pthread_t);
 
 	std::list<InvalidationRecord*> trash;
 
@@ -115,9 +113,9 @@ private:
 	static Glib::Threads::Private<EventLoop> thread_event_loop;
 	std::string _name;
 
-	typedef std::map<std::string,ThreadBufferMapping> ThreadRequestBufferList;
+	typedef std::vector<ThreadBufferMapping> ThreadRequestBufferList;
 	static ThreadRequestBufferList thread_buffer_requests;
-	static Glib::Threads::RWLock   thread_buffer_requests_lock;
+	static Glib::Threads::Mutex   thread_buffer_requests_lock;
 
 	struct RequestBufferSupplier {
 

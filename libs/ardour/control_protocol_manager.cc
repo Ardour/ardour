@@ -578,24 +578,6 @@ ControlProtocolManager::midi_connectivity_established ()
 }
 
 void
-ControlProtocolManager::register_request_buffer_factories ()
-{
-	Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
-
-	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
-
-		if ((*i)->descriptor == 0) {
-			warning << string_compose (_("Control protocol \"%1\" has no descriptor"), (*i)->name) << endmsg;
-			continue;
-		}
-
-		if ((*i)->descriptor->request_buffer_factory) {
-			EventLoop::register_request_buffer_factory ((*i)->descriptor->name, (*i)->descriptor->request_buffer_factory);
-		}
-	}
-}
-
-void
 ControlProtocolManager::stripable_selection_changed (StripableNotificationListPtr sp)
 {
 	/* this sets up the (static) data structures owned by ControlProtocol

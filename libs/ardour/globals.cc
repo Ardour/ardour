@@ -651,20 +651,6 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 
 	ControlProtocolManager::instance ().discover_control_protocols ();
 
-	/* for each control protocol, check for a request buffer factory method
-	   and if it exists, store it in the EventLoop list of such
-	   methods. This allows the relevant threads to register themselves
-	   with EventLoops so that signal emission can be RT-safe.
-	*/
-
-	ControlProtocolManager::instance ().register_request_buffer_factories ();
-	/* it would be nice if this could auto-register itself in the
-	   constructor, since MidiControlUI is a singleton, but it can't be
-	   created until after the engine is running. Therefore we have to
-	   explicitly register it here.
-	*/
-	EventLoop::register_request_buffer_factory (X_("midiUI"), MidiControlUI::request_factory);
-
 	/* Every Process Graph thread (up to hardware_concurrency) keeps a buffer.
 	 * The main engine callback uses one (but returns it after use
 	 * each cycle). Session Export uses one, and the GUI requires

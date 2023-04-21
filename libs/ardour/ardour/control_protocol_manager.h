@@ -72,7 +72,6 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	void load_mandatory_protocols ();
 	void midi_connectivity_established ();
 	void drop_protocols ();
-	void register_request_buffer_factories ();
 
 	int activate (ControlProtocolInfo&);
         int deactivate (ControlProtocolInfo&);

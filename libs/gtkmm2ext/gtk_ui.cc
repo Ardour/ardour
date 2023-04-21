@@ -106,10 +106,6 @@ UI::UI (string application_name, string thread_name, int *argc, char ***argv)
 
 	set_event_loop_for_thread (this);
 
-	/* we will be receiving requests */
-
-	EventLoop::register_request_buffer_factory ("gui", request_buffer_factory);
-
 	/* attach our request source to the default main context */
 
 	attach_request_source ();
