@@ -63,17 +63,8 @@ export WINRC=${XPREFIX}-windres
 export RANLIB=${XPREFIX}-ranlib
 export DLLTOOL=${XPREFIX}-dlltool
 
-if grep -q optimize <<<"$ARDOURCFG"; then
-	OPT=""
-else
-	#debug-build luabindings.cc, has > 60k symbols.
-	# -Wa,-mbig-obj has an unreasonable long build-time
-	# -Og to the rescue.
-	OPT=" -Og"
-fi
-
-CFLAGS="-mstackrealign$OPT" \
-CXXFLAGS="-mstackrealign$OPT" \
+CFLAGS="-mstackrealign" \
+CXXFLAGS="-mstackrealign" \
 LDFLAGS="-L${PREFIX}/lib" \
 DEPSTACK_ROOT="$PREFIX" \
 ./waf configure \

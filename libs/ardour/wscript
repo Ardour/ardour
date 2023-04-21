@@ -129,7 +129,6 @@ libardour_sources = [
         'ltc_file_reader.cc',
         'ltc_slave.cc',
         'lua_api.cc',
-        'luabindings.cc',
         'luaproc.cc',
         'luascripting.cc',
         'meter.cc',
@@ -460,6 +459,25 @@ def build(bld):
 
     if bld.is_defined('AUDIOUNIT_SUPPORT'):
         obj.source += [ 'audio_unit.cc', 'auv2_scan.cc' ]
+
+    lua_cxxflags = bld.env['compiler_flags_dict']['pic']
+    if bld.env['build_target'] == 'mingw' and bld.env['DEBUG']:
+        lua_cxxflags += " -Og -Wa,-mbig-obj"
+
+    bld(features = 'cxx cxxstlib asm',
+        source   = "luabindings.cc" ,
+        cxxflags = lua_cxxflags,
+        includes = obj.includes,
+        use      = ['libpbd','libmidipp','libevoral',
+                    'libtemporal',
+                    'liblua',
+                    'zita-resampler',
+                    'zita-convolver',
+                   ],
+        uselib   = obj.uselib,
+        target   = 'luabindings')
+
+    obj.use += ['luabindings' ]
 
     avx_sources = []
     fma_sources = []
