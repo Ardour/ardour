@@ -49,6 +49,7 @@
 #include "ardour/midi_track.h"
 #include "ardour/midi_ui.h"
 #include "ardour/profile.h"
+#include "ardour/route_group.h"
 #include "ardour/session.h"
 #include "ardour/transport_master.h"
 #include "ardour/transport_fsm.h"
@@ -771,6 +772,11 @@ Session::rewire_selected_midi (std::shared_ptr<MidiTrack> new_midi_target)
 		return;
 	}
 
+	/* TODO: return, if this is triggered multiple times due to
+	 * group selection. Only handle this for the first route
+	 * in a group.
+	 */
+
 	vector<string> msp;
 	AudioEngine::instance()->get_midi_selection_ports (msp);
 
@@ -780,6 +786,15 @@ Session::rewire_selected_midi (std::shared_ptr<MidiTrack> new_midi_target)
 			disconnect_port_for_rewire (*p);
 			/* connect it to the new target */
 			new_midi_target->input()->connect (new_midi_target->input()->nth(0), (*p), this);
+			/* and grouped tracks */
+			RouteGroup* group = new_midi_target->route_group ();
+			if (group && group->is_active () && group->is_select ()) {
+				for (auto const& r : *group->route_list ()) {
+					if (dynamic_pointer_cast<MidiTrack> (r)) {
+						r->input()->connect (r->input()->nth(0), (*p), this);
+					}
+				}
+			}
 		}
 	}
 
@@ -811,5 +826,14 @@ Session::rewire_midi_selection_ports ()
 	for (vector<string>::const_iterator p = msp.begin(); p != msp.end(); ++p) {
 		disconnect_port_for_rewire (*p);
 		target->input()->connect (target->input()->nth (0), (*p), this);
+
+		RouteGroup* group = target->route_group ();
+		if (group && group->is_active () && group->is_select ()) {
+			for (auto const& r : *group->route_list ()) {
+				if (dynamic_pointer_cast<MidiTrack> (r)) {
+					r->input()->connect (r->input()->nth(0), (*p), this);
+				}
+			}
+		}
 	}
 }
