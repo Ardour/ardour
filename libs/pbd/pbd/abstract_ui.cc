@@ -152,7 +152,7 @@ AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string thread_n
 
 		Glib::Threads::RWLock::WriterLock rbml (request_buffer_map_lock);
 		request_buffers[thread_id] = b;
-		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2/%3 registered request buffer-B @ %4 for %5\n", event_loop_name(), pthread_name(), pthread_self(), b, thread_id));
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2/%3 registered request buffer-B @ %4 for %5\n", event_loop_name(), pthread_name(), DEBUG_THREAD_SELF, b, thread_id));
 
 	} else {
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 : %2 is already registered\n", event_loop_name(), thread_name));
@@ -194,7 +194,7 @@ AbstractUI<RequestObject>::get_request (RequestType rt)
 			return 0;
 		}
 
-		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: allocated per-thread request of type %2, caller %3 aka %4\n", event_loop_name(), rt, pthread_name(), pthread_self()));
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1: allocated per-thread request of type %2, caller %3 aka %4\n", event_loop_name(), rt, pthread_name(), DEBUG_THREAD_SELF));
 
 		vec.buf[0]->type = rt;
 		return vec.buf[0];
@@ -434,13 +434,13 @@ AbstractUI<RequestObject>::send_request (RequestObject *req)
 		RequestBuffer* rbuf = get_per_thread_request_buffer ();
 
 		if (rbuf != 0) {
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2/%6 send per-thread request type %3 using ringbuffer @ %4 IR: %5\n", event_loop_name(), pthread_name(), req->type, rbuf, req->invalidation, pthread_self()));
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2/%6 send per-thread request type %3 using ringbuffer @ %4 IR: %5\n", event_loop_name(), pthread_name(), req->type, rbuf, req->invalidation, DEBUG_THREAD_SELF));
 			rbuf->increment_write_ptr (1);
 		} else {
 			/* no per-thread buffer, so just use a list with a lock so that it remains
 			 * single-reader/single-writer semantics
 			 */
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2/%5 send heap request type %3 IR %4\n", event_loop_name(), pthread_name(), req->type, req->invalidation, pthread_self()));
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2/%5 send heap request type %3 IR %4\n", event_loop_name(), pthread_name(), req->type, req->invalidation, DEBUG_THREAD_SELF));
 			Glib::Threads::RWLock::WriterLock lm (request_buffer_map_lock);
 			request_list.push_back (req);
 		}
