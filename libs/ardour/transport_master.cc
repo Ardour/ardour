@@ -246,9 +246,6 @@ void
 TransportMaster::set_session (Session* s)
 {
 	_session = s;
-	if (!_session) {
-		unregister_port ();
-	}
 }
 
 int
