@@ -404,6 +404,7 @@ def build(bld):
                         ]
     if bld.env['build_target'] != 'mingw':
         obj.uselib += ['DL']
+
     if bld.is_defined('USE_EXTERNAL_LIBS'):
         obj.uselib.extend(['VAMPSDK', 'LIBLTC', 'LIBFLUIDSYNTH'])
     else:
@@ -461,6 +462,7 @@ def build(bld):
         obj.source += [ 'audio_unit.cc', 'auv2_scan.cc' ]
 
     lua_cxxflags = bld.env['compiler_flags_dict']['pic']
+    lua_use = list(obj.use);
     if bld.env['build_target'] == 'mingw' and bld.env['DEBUG']:
         lua_cxxflags += " -Og -Wa,-mbig-obj"
 
@@ -468,12 +470,7 @@ def build(bld):
         source   = "luabindings.cc" ,
         cxxflags = lua_cxxflags,
         includes = obj.includes,
-        use      = ['libpbd','libmidipp','libevoral',
-                    'libtemporal',
-                    'liblua',
-                    'zita-resampler',
-                    'zita-convolver',
-                   ],
+        use      = lua_use,
         uselib   = obj.uselib,
         target   = 'luabindings')
 
