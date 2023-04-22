@@ -63,8 +63,18 @@ export WINRC=${XPREFIX}-windres
 export RANLIB=${XPREFIX}-ranlib
 export DLLTOOL=${XPREFIX}-dlltool
 
-CFLAGS="-mstackrealign" \
-CXXFLAGS="-mstackrealign" \
+if grep -q optimize <<<"$ARDOURCFG"; then
+	OPT=""
+else
+	# debug-build luabindings.cc, has > 60k symbols.
+	# -Wa,-mbig-obj has an unreasonable long build-time
+	# so libs/ardour/wscript only uses it for luabindings.cc.
+	# session.cc is also big, -Og to the rescue.
+	OPT=" -Og"
+fi
+
+CFLAGS="-mstackrealign$OPT" \
+CXXFLAGS="-mstackrealign$OPT" \
 LDFLAGS="-L${PREFIX}/lib" \
 DEPSTACK_ROOT="$PREFIX" \
 ./waf configure \
