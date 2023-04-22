@@ -234,6 +234,7 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	// really private, but needing static access:
 	int process_callback(uint32_t, uint64_t);
 	void error_callback();
+	void halted_callback();
 	void xrun_callback();
 	void buffer_size_callback();
 	void sample_rate_callback();
@@ -370,6 +371,8 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	/* coreaudio specific  */
 	enum DeviceFilter { All, Input, Output, Duplex };
 	uint32_t name_to_id(std::string, DeviceFilter filter = All) const;
+
+	void unset_callbacks ();
 
 	/* processing */
 	float  _dsp_load;

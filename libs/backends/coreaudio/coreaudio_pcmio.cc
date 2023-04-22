@@ -139,6 +139,9 @@ static OSStatus property_callback_ptr (AudioObjectID inObjectID, UInt32 inNumber
 			case kAudioDevicePropertyNominalSampleRate:
 				self->sample_rate_callback();
 				break;
+			case kAudioDevicePropertyDeviceIsAlive:
+				self->halted_callback();
+				break;
 			default:
 				break;
 		}
@@ -222,6 +225,7 @@ CoreAudioPCM::CoreAudioPCM ()
 	, _n_devices (0)
 	, _process_callback (0)
 	, _error_callback (0)
+	, _halted_callback (0)
 	, _hw_changed_callback (0)
 	, _xrun_callback (0)
 	, _buffer_size_callback (0)
@@ -266,7 +270,6 @@ CoreAudioPCM::~CoreAudioPCM ()
 	pthread_mutex_destroy (&_discovery_lock);
 }
 
-
 void
 CoreAudioPCM::hw_changed_callback() {
 #ifndef NDEBUG
@@ -278,6 +281,15 @@ CoreAudioPCM::hw_changed_callback() {
 	}
 }
 
+void
+CoreAudioPCM::halted_callback() {
+#ifndef NDEBUG
+	printf("CoreAudio halted callback..\n");
+#endif
+	if (_halted_callback) {
+		_halted_callback(_halted_arg);
+	}
+}
 
 int
 CoreAudioPCM::available_sample_rates(uint32_t device_id, std::vector<float>& sampleRates)
@@ -711,12 +723,15 @@ CoreAudioPCM::pcm_stop ()
 			AudioObjectRemovePropertyListener(_active_device_id, &prop, &property_callback_ptr, this);
 			prop.mSelector = kAudioDevicePropertyNominalSampleRate;
 			AudioObjectRemovePropertyListener(_active_device_id, &prop, &property_callback_ptr, this);
+			prop.mSelector = kAudioDevicePropertyDeviceIsAlive;
+			AudioObjectRemovePropertyListener(_active_device_id, &prop, &property_callback_ptr, this);
 		}
 #else
 		if (_active_device_id > 0) {
 			AudioDeviceRemovePropertyListener(_active_device_id, 0, true, kAudioDeviceProcessorOverload, property_callback_ptr);
 			AudioDeviceRemovePropertyListener(_active_device_id, 0, true, kAudioDevicePropertyBufferFrameSize, property_callback_ptr);
 			AudioDeviceRemovePropertyListener(_active_device_id, 0, true, kAudioDevicePropertyNominalSampleRate, property_callback_ptr);
+			AudioDeviceRemovePropertyListener(_active_device_id, 0, true, kAudioDevicePropertyDeviceIsAlive, property_callback_ptr);
 		}
 #endif
 	}
@@ -746,6 +761,7 @@ CoreAudioPCM::pcm_stop ()
 	_output_names.clear();
 
 	_error_callback = 0;
+	_halted_callback = 0;
 	_process_callback = 0;
 	_xrun_callback = 0;
 }
@@ -972,6 +988,10 @@ CoreAudioPCM::pcm_start (
 
 	err = add_listener (_active_device_id, kAudioDevicePropertyNominalSampleRate, this);
 	if (err != noErr) { errorMsg="kAudioDevicePropertyNominalSampleRate, Listen"; _state = -9; goto error; }
+
+	err = add_listener (_active_device_id, kAudioDevicePropertyDeviceIsAlive, this);
+	if (err != noErr) { errorMsg="kAudioDevicePropertyNominalSampleRate, Listen"; _state = -9; goto error; }
+
 
 	_samples_per_period = current_buffer_size_id(_active_device_id);
 

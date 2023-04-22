@@ -60,6 +60,12 @@ static void error_callback_ptr (void *arg)
 	d->error_callback();
 }
 
+static void halted_callback_ptr (void *arg)
+{
+	CoreAudioBackend *d = static_cast<CoreAudioBackend*> (arg);
+	d->halted_callback();
+}
+
 static void xrun_callback_ptr (void *arg)
 {
 	CoreAudioBackend *d = static_cast<CoreAudioBackend*> (arg);
@@ -544,6 +550,7 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 	_last_process_start = 0;
 
 	_pcmio->set_error_callback (error_callback_ptr, this);
+	_pcmio->set_halted_callback (halted_callback_ptr, this);
 	_pcmio->set_buffer_size_callback (buffer_size_callback_ptr, this);
 	_pcmio->set_sample_rate_callback (sample_rate_callback_ptr, this);
 
@@ -1521,14 +1528,29 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 }
 
 void
-CoreAudioBackend::error_callback ()
+CoreAudioBackend::unset_callbacks ()
 {
 	_pcmio->set_error_callback (NULL, NULL);
+	_pcmio->set_halted_callback (NULL, NULL);
 	_pcmio->set_sample_rate_callback (NULL, NULL);
 	_pcmio->set_xrun_callback (NULL, NULL);
 	_midiio->set_port_changed_callback(NULL, NULL);
+}
+
+void
+CoreAudioBackend::error_callback ()
+{
+	unset_callbacks ();
 	engine.halted_callback("CoreAudio Process aborted.");
 	_active_ca = false;
+}
+
+void
+CoreAudioBackend::halted_callback ()
+{
+	unset_callbacks ();
+	engine.halted_callback("Audio device was disconnected or shut down.");
+	stop ();
 }
 
 void
@@ -1558,10 +1580,7 @@ CoreAudioBackend::sample_rate_callback ()
 #endif
 		return;
 	}
-	_pcmio->set_error_callback (NULL, NULL);
-	_pcmio->set_sample_rate_callback (NULL, NULL);
-	_pcmio->set_xrun_callback (NULL, NULL);
-	_midiio->set_port_changed_callback(NULL, NULL);
+	unset_callbacks ();
 	engine.halted_callback("Sample Rate Changed.");
 	stop();
 }
