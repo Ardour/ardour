@@ -311,7 +311,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 
 #ifndef NDEBUG
 	if (!buf_found) {
-		std::cerr << event_loop_name() << " woken, but not request buffers have any requests " << std::endl;
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 woken, but not request buffers have any requests\n", event_loop_name()));
 	}
 #endif
 
