@@ -40,7 +40,6 @@ private:
 	Gtk::CheckButton minsec_button;
 	Gtk::CheckButton bbt_button;
 	Gtk::CheckButton tempo_button;
-	Gtk::CheckButton mapping_button;
 	Gtk::CheckButton meter_button;
 	Gtk::CheckButton loop_punch_button;
 	Gtk::CheckButton range_button;

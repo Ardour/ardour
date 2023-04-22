@@ -33,7 +33,6 @@ RulerDialog::RulerDialog ()
 	get_vbox()->pack_start (timecode_button);
 	get_vbox()->pack_start (samples_button);
 	get_vbox()->pack_start (bbt_button);
-	get_vbox()->pack_start (mapping_button);
 	get_vbox()->pack_start (meter_button);
 	get_vbox()->pack_start (tempo_button);
 	get_vbox()->pack_start (range_button);
