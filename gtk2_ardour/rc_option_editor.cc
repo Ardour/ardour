@@ -4501,8 +4501,8 @@ These settings will only take effect after %1 is restarted.\n\
 	ComboOption<Editing::TempoEditBehavior>* teb = new ComboOption<Editing::TempoEditBehavior> (
 		"default-tempo-edit-behavior",
 		_("Default tempo ruler state for new sessions"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_default_tempo_edit_behavior),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_default_tempo_edit_behavior));
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_tempo_edit_behavior),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_tempo_edit_behavior));
 	teb->add (Editing::TempoMapping, _("mapping a recorded performance"));
 	teb->add (Editing::TempoChanging, _("constructing a tempo map from scratch"));
 

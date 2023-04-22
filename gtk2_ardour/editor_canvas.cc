@@ -191,7 +191,7 @@ Editor::initialize_canvas ()
 	mapping_bar->set_outline(false);
 	mapping_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 
-	switch (UIConfiguration::instance().get_default_tempo_edit_behavior()) {
+	switch (UIConfiguration::instance().get_tempo_edit_behavior()) {
 	case Editing::TempoMapping:
 		tempo_group->hide ();
 		break;

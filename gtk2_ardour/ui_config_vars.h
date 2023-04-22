@@ -149,9 +149,9 @@ UI_CONFIG_VARIABLE (bool, ask_before_closing_last_window, "ask-before-closing-la
 UI_CONFIG_VARIABLE (std::string, freesound_dir, "freesound-dir", "")
 UI_CONFIG_VARIABLE (int, max_note_height, "max-note-height", 20)
 #ifdef MIXBUS
-UI_CONFIG_VARIABLE (Editing::TempoEditBehavior, default_tempo_edit_behavior, "default-tempo-edit-behavior", Editing::TempoMapping)
+UI_CONFIG_VARIABLE (Editing::TempoEditBehavior, tempo_edit_behavior, "tempo-edit-behavior", Editing::TempoMapping)
 #else
-UI_CONFIG_VARIABLE (Editing::TempoEditBehavior, default_tempo_edit_behavior, "default-tempo-edit-behavior", Editing::TempoChanging)
+UI_CONFIG_VARIABLE (Editing::TempoEditBehavior, tempo_edit_behavior, "tempo-edit-behavior", Editing::TempoChanging)
 #endif
 
 /* these are visibility-type selections in the New Track dialog that we should make persistent for the user's choices */

@@ -469,7 +469,7 @@ Editor::Editor ()
 	, _stepping_axis_view (0)
 	, quantize_dialog (0)
 	, _main_menu_disabler (0)
-	, _tempo_edit_behavior (UIConfiguration::instance().get_default_tempo_edit_behavior())
+	, _tempo_edit_behavior (UIConfiguration::instance().get_tempo_edit_behavior())
 {
 	/* we are a singleton */
 
@@ -6754,6 +6754,8 @@ Editor::ui_parameter_changed (string parameter)
 		_track_canvas->request_redraw (_track_canvas->visible_area());
 	} else if (parameter == "use-note-color-for-velocity") {
 		/* handled individually by each MidiRegionView */
+	} else if (parameter == "tempo-edit-behavior") {
+		set_tempo_edit_behavior (UIConfiguration::instance().get_tempo_edit_behavior());
 	}
 }
 
