@@ -554,6 +554,7 @@ Parser::realtime_msg(unsigned char inbyte)
 
 	switch (inbyte) {
 	case 0xf8:
+		std::cerr << "tick\n";
 		timing (*this, _timestamp);
 		break;
 	case 0xf9:

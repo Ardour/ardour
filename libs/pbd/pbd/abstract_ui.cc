@@ -115,7 +115,7 @@ AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string thread_n
 		return;
 	}
 
-	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("in %1 (thread name %2), [%3] (%4)  wants to register with us (%1)\n", event_loop_name(), pthread_name(), thread_name, thread_id));
+	DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("in %1 (thread name %2), [%3] (%4)  wants to register with us (%1)\n", event_loop_name(), pthread_name(), thread_name, DEBUG_THREAD_PRINT(thread_id)));
 
 	/* the per_thread_request_buffer is a thread-private variable.
 	   See pthreads documentation for more on these, but the key
@@ -135,7 +135,7 @@ AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string thread_n
 
 		if (ib == request_buffers.end()) {
 			/* create a new request queue/ringbuffer */
-			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("create new request buffer for %1 in %2 from %3/%4\n", thread_name, event_loop_name(), pthread_name(), thread_id));
+			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("create new request buffer for %1 in %2 from %3/%4\n", thread_name, event_loop_name(), pthread_name(), DEBUG_THREAD_PRINT(thread_id)));
 			b = new RequestBuffer (num_requests); // XXX leaks
 			store = true;
 		}
@@ -152,7 +152,7 @@ AbstractUI<RequestObject>::register_thread (pthread_t thread_id, string thread_n
 
 		Glib::Threads::RWLock::WriterLock rbml (request_buffer_map_lock);
 		request_buffers[thread_id] = b;
-		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2/%3 registered request buffer-B @ %4 for %5\n", event_loop_name(), pthread_name(), DEBUG_THREAD_SELF, b, thread_id));
+		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1/%2/%3 registered request buffer-B @ %4 for %5\n", event_loop_name(), pthread_name(), DEBUG_THREAD_SELF, b, DEBUG_THREAD_PRINT(thread_id)));
 
 	} else {
 		DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 : %2 is already registered\n", event_loop_name(), thread_name));

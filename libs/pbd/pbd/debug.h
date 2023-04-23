@@ -84,8 +84,10 @@ namespace PBD {
 #define DEBUG_ENABLED(bits) (((bits) & PBD::debug_bits).any())
 #ifdef PTW32_VERSION
 #define DEBUG_THREAD_SELF pthread_self().p
+#define DEBUG_THREAD_PRINT(t) t.p
 #else
 #define DEBUG_THREAD_SELF pthread_self()
+#define DEBUG_THREAD_PRINT(t) t
 #endif
 
 #define DEBUG_TIMING_START(bits,td) if (DEBUG_ENABLED (bits)) { td.start_timing (); }
