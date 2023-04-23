@@ -1524,6 +1524,58 @@ VST3PI::restartComponent (int32 flags)
 		}
 		_plugin_latency.reset ();
 	}
+	if (flags & Vst::kIoTitlesChanged) {
+		/* Input and/or Output bus titles have changed
+		 * compare to VST3PI::count_channels
+		 */
+		const Vst::MediaTypes medien [] = { Vst::kAudio, Vst::kEvent };
+		const Vst::BusDirections dirs[] = { Vst::kInput, Vst::kOutput };
+		for (auto const& media : medien) {
+			for (auto const& dir : dirs) {
+				int32 n_busses = _component->getBusCount (media, dir);
+				for (int32 i = 0; i < n_busses; ++i) {
+					Vst::BusInfo bus;
+					if (_component->getBusInfo (media, dir, i, bus) != kResultTrue) {
+						continue;
+					}
+					std::string bus_name = tchar_to_utf8 (bus.name);
+					if (media == Vst::kEvent && _io_name[media][dir].size () == 1) {
+						_io_name[media][dir][0].name = bus_name;
+					} else if (media == Vst::kAudio && _io_name[media][dir].size () == size_t(bus.channelCount)) {
+						for (int32_t j = 0; j < bus.channelCount; ++j) {
+							std::string channel_name;
+							if (bus.channelCount > 1) {
+								channel_name = string_compose ("%1 %2", bus_name, j + 1);
+							} else {
+								channel_name = bus_name;
+							}
+							_io_name[media][dir][j].name = channel_name;
+						}
+					}
+				}
+			}
+		}
+	}
+	if (flags & Vst::kParamTitlesChanged) {
+		/* titles or default values or flags have changed */
+		int32 n_params = _controller->getParameterCount ();
+		for (int32 i = 0; i < n_params; ++i) {
+			Vst::ParameterInfo pi;
+			if (_controller->getParameterInfo (i, pi) != kResultTrue) {
+				continue;
+			}
+			std::map<Vst::ParamID, uint32_t>::const_iterator idx = _ctrl_id_index.find (pi.id);
+			if (idx != _ctrl_id_index.end ()) {
+				Param& p (_ctrl_params[idx->second]);
+				p.label  = tchar_to_utf8 (pi.title).c_str ();
+				p.normal = pi.defaultNormalizedValue;
+			}
+		}
+		// TODO notify GUI:
+		//  * ProcessorEntry caches _controls
+		//  * call RouteTimeAxisView::processors_changed
+		// invalidate Automatable::_controls ParameterDescriptor ?
+	}
 	if (flags & Vst::kIoChanged) {
 		warning << "VST3: Vst::kIoChanged (not implemented)" << endmsg;
 #if 0
