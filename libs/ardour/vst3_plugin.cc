@@ -1562,13 +1562,23 @@ VST3PI::restartComponent (int32 flags)
 		for (int32 i = 0; i < n_params; ++i) {
 			Vst::ParameterInfo pi;
 			if (_controller->getParameterInfo (i, pi) != kResultTrue) {
+#ifndef NDEBUG
+				printf ("Vst::kParamTitlesChanged: getParameterInfo (%d) failed\n", i);
+#endif
 				continue;
 			}
 			std::map<Vst::ParamID, uint32_t>::const_iterator idx = _ctrl_id_index.find (pi.id);
 			if (idx != _ctrl_id_index.end ()) {
 				Param& p (_ctrl_params[idx->second]);
+#ifndef NDEBUG
+				printf ("Vst::kParamTitlesChanged: update label (%d) '%s' -> '%s'\n", i, p.label.c_str(), tchar_to_utf8 (pi.title).c_str ());
+#endif
 				p.label  = tchar_to_utf8 (pi.title).c_str ();
 				p.normal = pi.defaultNormalizedValue;
+			} else {
+#ifndef NDEBUG
+				printf ("Vst::kParamTitlesChanged: no Ctrl for (%d)\n", i);
+#endif
 			}
 		}
 		// TODO notify GUI:
