@@ -1576,10 +1576,10 @@ VST3PI::restartComponent (int32 flags)
 				p.normal = pi.defaultNormalizedValue;
 			}
 		}
-		// TODO notify GUI:
-		//  * ProcessorEntry caches _controls
-		//  * call RouteTimeAxisView::processors_changed
-		// invalidate Automatable::_controls ParameterDescriptor ?
+		Route* r = dynamic_cast<Route*> (_owner);
+		if (r) {
+			r->processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+		}
 	}
 	if (flags & Vst::kIoChanged) {
 		warning << "VST3: Vst::kIoChanged (not implemented)" << endmsg;
