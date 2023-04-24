@@ -270,6 +270,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	Glib::Threads::Cond        session_removed;
 	bool                       session_remove_pending;
 	sampleoffset_t             session_removal_countdown;
+	bool                       session_deleted;
 	gain_t                     session_removal_gain;
 	gain_t                     session_removal_gain_step;
 	bool                      _running;

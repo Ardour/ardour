@@ -84,6 +84,7 @@ static std::atomic<int> audioengine_thread_cnt (1);
 AudioEngine::AudioEngine ()
 	: session_remove_pending (false)
 	, session_removal_countdown (-1)
+	, session_deleted (false)
 	, _running (false)
 	, _freewheeling (false)
 	, monitor_check_interval (INT32_MAX)
@@ -261,12 +262,12 @@ AudioEngine::process_callback (pframes_t nframes)
 		if (_session) {
 			Xrun();
 		}
-		/* really only JACK requires this
-		 * (other backends clear the output buffers
-		 * before the process_callback. it may even be
-		 * jack/alsa only). but better safe than sorry.
+		/* only JACK requires this (other backends clear the
+		 * output buffers before the process_callback.
 		 */
-		PortManager::silence_outputs (nframes);
+		if (!session_deleted) {
+			PortManager::silence_outputs (nframes);
+		}
 		return 0;
 	}
 
@@ -454,7 +455,9 @@ AudioEngine::process_callback (pframes_t nframes)
 
 		} else {
 			/* fade out done */
-			_session = 0;
+			PortManager::silence_outputs (nframes);
+			session_deleted = true;
+			SessionHandlePtr::set_session (0);
 			session_removal_countdown = -1; // reset to "not in progress"
 			session_remove_pending = false;
 			session_removed.signal(); // wakes up thread that initiated session removal
@@ -475,7 +478,7 @@ AudioEngine::process_callback (pframes_t nframes)
 
 	if (_session == 0) {
 
-		if (!_freewheeling) {
+		if (!_freewheeling && !session_deleted) {
 			PortManager::silence_outputs (nframes);
 		}
 
@@ -799,6 +802,7 @@ AudioEngine::set_session (Session *s)
 	SessionHandlePtr::set_session (s);
 
 	if (_session) {
+		session_deleted = false;
 		_init_countdown = std::max (4, (int)(_backend->sample_rate () / _backend->buffer_size ()) / 8);
 		_pending_playback_latency_callback.store (0);
 		_pending_capture_latency_callback.store (0);
@@ -820,6 +824,7 @@ AudioEngine::remove_session ()
 		}
 
 	} else {
+		session_deleted = true;
 		SessionHandlePtr::set_session (0);
 	}
 
