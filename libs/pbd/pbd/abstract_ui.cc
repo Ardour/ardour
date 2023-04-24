@@ -90,8 +90,8 @@ AbstractUI<RequestObject>::AbstractUI (const string& name)
 		for (auto const & t : tbm) {
 			request_buffers[t.emitting_thread] = new RequestBuffer (t.num_requests);
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%6: %1/%2/%3 create pre-registered request buffer-A @ %4 for %5\n",
-			                                                     event_loop_name(), pthread_name(), pthread_self(),
-			                                                     request_buffers[t.emitting_thread], t.emitting_thread, this));
+			                                                     event_loop_name(), pthread_name(), DEBUG_THREAD_PRINT (pthread_self()),
+			                                                     request_buffers[t.emitting_thread], DEBUG_THREAD_PRINT (t.emitting_thread), this));
 		}
 	}
 }
@@ -266,7 +266,7 @@ AbstractUI<RequestObject>::handle_ui_requests ()
 			i->second->get_read_vector (&vec);
 
 			DEBUG_TRACE (PBD::DEBUG::AbstractUI, string_compose ("%1 reading requests from RB[%2] @ %5 for thread %6, requests = %3 + %4\n",
-			                                                     event_loop_name(), std::distance (request_buffers.begin(), i), vec.len[0], vec.len[1], i->second, i->first));
+			                                                     event_loop_name(), std::distance (request_buffers.begin(), i), vec.len[0], vec.len[1], i->second, DEBUG_THREAD_PRINT(i->first)));
 
 			if (vec.len[0] == 0) {
 				break;
