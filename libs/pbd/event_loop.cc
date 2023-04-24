@@ -115,7 +115,7 @@ EventLoop::get_request_buffers_for_target_thread (const std::string& target_thre
 	vector<ThreadBufferMapping> ret;
 	Glib::Threads::Mutex::Lock lm (thread_buffer_requests_lock);
 
-	DEBUG_TRACE (PBD::DEBUG::EventLoop, string_compose ("%1 look for request buffers via %2\n",  pthread_name(), DEBUG_THREAD_PRINT (target_thread)));
+	DEBUG_TRACE (PBD::DEBUG::EventLoop, string_compose ("%1 look for request buffers via %2\n",  pthread_name(), target_thread));
 
 	for (auto const & tbr : thread_buffer_requests) {
 		DEBUG_TRACE (PBD::DEBUG::EventLoop, string_compose ("for thread \"%1\", request buffer for %2 (%3) thread %4\n", target_thread, DEBUG_THREAD_PRINT(tbr.emitting_thread), tbr.num_requests));
