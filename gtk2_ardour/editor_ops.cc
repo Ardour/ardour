@@ -4418,11 +4418,32 @@ Editor::delete_ ()
 	//special case: if the user is pointing in the editor/mixer strip, they may be trying to delete a plugin.
 	//we need this because the editor-mixer strip is in the editor window, so it doesn't get the bindings from the mix window
 	bool deleted = false;
-	if (current_mixer_strip && current_mixer_strip == MixerStrip::entered_mixer_strip())
-		deleted = current_mixer_strip->delete_processors ();
 
-	if (!deleted)
+	if (current_mixer_strip && current_mixer_strip == MixerStrip::entered_mixer_strip()) {
+		deleted = current_mixer_strip->delete_processors ();
+	}
+
+	if (internal_editing()) {
+		if (!selection->points.empty()) {
+			begin_reversible_command (_("delete control points"));
+			cut_copy_points (Delete, timepos_t (Temporal::AudioTime));
+			selection->clear_points ();
+			commit_reversible_command ();
+		} else {
+			midi_action (&MidiRegionView::delete_selection);
+		}
+		return;
+	}
+
+	if (!deleted) {
 		cut_copy (Delete);
+	}
+}
+
+void
+Editor::alt_delete_ ()
+{
+	delete_ ();
 }
 
 /** Cut selected regions, automation points or a time range */

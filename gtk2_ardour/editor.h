@@ -1408,6 +1408,7 @@ private:
 	void split_region ();
 
 	void delete_ ();
+	void alt_delete_ ();
 	void cut ();
 	void copy ();
 	void paste (float times, bool from_context_menu);

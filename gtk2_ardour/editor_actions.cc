@@ -821,9 +821,6 @@ Editor::register_midi_actions (Bindings* midi_bindings)
 
 	/* two versions to allow same action for Delete and Backspace */
 
-	ActionManager::register_action (_midi_actions, X_("delete"), _("Delete Selection"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::delete_selection));
-	ActionManager::register_action (_midi_actions, X_("alt-delete"), _("Delete Selection (alternate)"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::delete_selection));
-
 	ActionManager::register_action (_midi_actions, X_("clear-selection"), _("Clear Note Selection"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::clear_note_selection));
 	ActionManager::register_action (_midi_actions, X_("invert-selection"), _("Invert Note Selection"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::invert_selection));
 	ActionManager::register_action (_midi_actions, X_("extend-selection"), _("Extend Note Selection"), sigc::bind (sigc::mem_fun (*this, &Editor::midi_action), &MidiRegionView::extend_selection));

@@ -484,9 +484,7 @@ This mode provides many different operations on both regions and control points,
 
 @notes|Notes/quantize-selected-notes|q|Quantize Selected Notes
 
-@notes|Notes/delete|            Backspace|Delete Note Selection
-@notes|Notes/alt-delete|           Delete|Delete Note Selection
-@notes|Main/Escape|Clear selection
+@notes|Main/Escape|			Clear selection
 
 @notes|Notes/select-next|                                              Tab|Select next note
 @notes|Notes/select-previous|                               <@PRIMARY@>Tab|Select previous note
