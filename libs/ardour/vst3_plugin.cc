@@ -799,7 +799,7 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 	/* apply parameter changes */
 	PV pv;
 	while (_parameter_queue.read (&pv, 1)) {
-		_plug->set_parameter (pv.port, pv.val, 0, true);
+		_plug->set_parameter (pv.port, pv.val, 0, true, true);
 	}
 
 	in_index = 0;
@@ -1949,11 +1949,11 @@ VST3PI::try_set_parameter_by_id (Vst::ParamID id, float value)
 }
 
 void
-VST3PI::set_parameter (uint32_t p, float value, int32 sample_off, bool to_list)
+VST3PI::set_parameter (uint32_t p, float value, int32 sample_off, bool to_list, bool force)
 {
 	Vst::ParamID id = index_to_id (p);
 	value = _controller->plainParamToNormalized (id, value);
-	if (_shadow_data[p] == value && sample_off == 0 && to_list) {
+	if (_shadow_data[p] == value && sample_off == 0 && to_list && !force) {
 		return;
 	}
 	if (to_list) {

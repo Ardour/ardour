@@ -164,7 +164,7 @@ public:
 
 	/* API for Ardour -- Parameters */
 	bool         try_set_parameter_by_id (Vst::ParamID id, float value);
-	void         set_parameter (uint32_t p, float value, int32 sample_off, bool to_list = true);
+	void         set_parameter (uint32_t p, float value, int32 sample_off, bool to_list = true, bool force = false);
 	float        get_parameter (uint32_t p) const;
 	std::string  format_parameter (uint32_t p) const;
 	Vst::ParamID index_to_id (uint32_t) const;
