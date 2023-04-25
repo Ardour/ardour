@@ -177,7 +177,7 @@ VST3Plugin::set_parameter (uint32_t port, float val, sampleoffset_t when)
 {
 	if (!_plug->active () || _plug->is_loading_state () || AudioEngine::instance ()->in_process_thread ()) {
 		/* directly use VST3PI::_input_param_changes */
-		_plug->set_parameter (port, val, when);
+		_plug->set_parameter (port, val, when, true);
 	} else {
 		assert (when == 0);
 		_plug->set_parameter (port, val, when, false);
@@ -799,7 +799,7 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 	/* apply parameter changes */
 	PV pv;
 	while (_parameter_queue.read (&pv, 1)) {
-		_plug->set_parameter (pv.port, pv.val, 0);
+		_plug->set_parameter (pv.port, pv.val, 0, true);
 	}
 
 	in_index = 0;
@@ -1953,7 +1953,7 @@ VST3PI::set_parameter (uint32_t p, float value, int32 sample_off, bool to_list)
 {
 	Vst::ParamID id = index_to_id (p);
 	value = _controller->plainParamToNormalized (id, value);
-	if (_shadow_data[p] == value && sample_off == 0) {
+	if (_shadow_data[p] == value && sample_off == 0 && to_list) {
 		return;
 	}
 	if (to_list) {
@@ -2037,6 +2037,7 @@ VST3PI::update_shadow_data ()
 			_input_param_changes.addParameterData (i->second, index)->addPoint (0, v, index);
 #endif
 			_shadow_data[i->first] = v;
+			_update_ctrl[i->first] = true;
 			OnParameterChange (ParamValueChanged, i->first, v); /* EMIT SIGNAL */
 		}
 	}
