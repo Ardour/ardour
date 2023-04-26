@@ -6,6 +6,28 @@
  Everyone is permitted to copy and distribute verbatim copies
  of this license document, but changing it is not allowed.
 
+		     Plugin Clarification
+
+The following states the Ardour developers understanding of the
+relationship between Ardour's license (GPL v2.0 or later) and plugins.
+
+For the purposes of this understanding, "plugins" refer to software
+dynamically loaded by another program, where the interaction between the
+plugin and the loading program (typically called "the host") is defined by
+a 3rd party API. Such APIs include (but are not limited to) VST,
+AudioUnits, LV2, LADSPA and CLAP.
+
+Since (a) any such plugin may be loaded by any host that supports the API
+and (b) any host may load any plugin that supports the API, we consider it
+self-evident that there can be no "derivative" relationship (in the sense
+of the GPL's use of this term) between the host and plugin.
+
+Consequently, Ardour may load arbitrarily licensed plugins, so as to cause
+interactions between Ardour and the plugin via a 3rd party API, without any
+implications for either Ardour or the plugin. In our understanding, Using
+such plugins with Ardour is not impacted in any way by Ardour's GPL licensing.
+
+
                             Preamble
 
   The licenses for most software are designed to take away your
