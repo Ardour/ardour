@@ -89,6 +89,7 @@ libpbd_sources = [
     'tlsf.cc',
     'transmitter.cc',
     'undo.cc',
+    'utf8_utils.cc',
     'uuid.cc',
     'whitespace.cc',
     'xml++.cc',
