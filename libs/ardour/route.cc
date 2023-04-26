@@ -4378,7 +4378,7 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 	 * Since the output is not used, Send::_thru_delay is not relevant, and
 	 * Send->effective_latency () should return zero.
 	 */
-	if (is_master() || output_effectively_connected ()) {
+	if (is_master() || is_monitor () || output_effectively_connected ()) {
 		_output_latency = _output->latency ();
 	} else if (_session.master_out ()) {
 		/* We cannot use `_session.master_out()->input()->latency()` because that would return capture latency.

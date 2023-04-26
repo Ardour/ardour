@@ -6922,7 +6922,6 @@ Session::update_latency (bool playback)
 
 		/* prevent any concurrent latency updates */
 		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
-		set_worst_output_latency ();
 		update_route_latency (true, /*apply_to_delayline*/ true, NULL);
 
 		/* release before emitting signals */
@@ -6932,7 +6931,6 @@ Session::update_latency (bool playback)
 		/* process lock is not needed to update worst-case latency */
 		lm.release ();
 		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
-		set_worst_input_latency ();
 		update_route_latency (false, false, NULL);
 	}
 
@@ -6946,6 +6944,14 @@ Session::update_latency (bool playback)
 
 	/* now handle non-route ports that we are responsible for */
 	set_owned_port_public_latency (playback);
+
+	if (playback) {
+		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+		set_worst_output_latency ();
+	} else {
+		Glib::Threads::Mutex::Lock lx (_update_latency_lock);
+		set_worst_input_latency ();
+	}
 
 
 	DEBUG_TRACE (DEBUG::LatencyCompensation, "Engine latency callback: DONE\n");
