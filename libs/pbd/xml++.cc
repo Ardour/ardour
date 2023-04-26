@@ -9,6 +9,7 @@
 #include <string.h>
 #include <iostream>
 
+#include "pbd/utf8_utils.h"
 #include "pbd/xml++.h"
 
 #include <libxml/debugXML.h>
@@ -595,15 +596,17 @@ XMLNode::set_property(const char* name, const string& value)
 {
 	XMLPropertyIterator iter = _proplist.begin();
 
+	std::string const v = PBD::sanitize_utf8 (value);
+
 	while (iter != _proplist.end()) {
 		if ((*iter)->name() == name) {
-			(*iter)->set_value (value);
+			(*iter)->set_value (v);
 			return *iter;
 		}
 		++iter;
 	}
 
-	XMLProperty* new_property = new XMLProperty(name, value);
+	XMLProperty* new_property = new XMLProperty(name, v);
 
 	if (!new_property) {
 		return 0;
