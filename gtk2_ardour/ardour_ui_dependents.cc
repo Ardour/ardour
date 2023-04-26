@@ -86,9 +86,6 @@ ARDOUR_UI::we_have_dependents ()
 	 */
 	mixer->monitor_section().use_others_actions ();
 
-	/* Create "static" actions that apply to all ProcessorBoxes
-	 */
-	ProcessorBox::register_actions ();
 	StepEntry::setup_actions_and_bindings ();
 	ClipEditorBox::init ();
 

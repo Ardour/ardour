@@ -454,10 +454,6 @@ MixerStrip::mixer_strip_enter_event (GdkEventCrossing* /*ev*/)
 {
 	_entered_mixer_strip = this;
 
-	//although we are triggering on the "enter", to the user it will appear that it is happenin on the "leave"
-	//because the mixerstrip control is a parent that encompasses the strip
-	deselect_all_processors();
-
 	return false;
 }
 
