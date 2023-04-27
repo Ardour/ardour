@@ -3561,18 +3561,6 @@ MappingLinearDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	if (!movement_occurred) {
-
-		/* click, no drag */
-
-		_editor->abort_tempo_mapping ();
-		_editor->session()->request_locate (grab_sample(), false, _was_rolling ? MustRoll : RollIfAppropriate);
-		return;
-
-	} else {
-
-	}
-
 	XMLNode &after = map->get_state();
 
 	_editor->session()->add_command (new Temporal::TempoCommand (_("stretch tempo"), _before_state, &after));
