@@ -47,7 +47,7 @@ static pid_t parent_pid = 0;
 
 static void wearedone(int sig) {
 	(void) sig; // skip 'unused variable' compiler warning;
-	fprintf(stderr, ARD_PROG_NAME ": caught signal - shutting down.\n");
+	fprintf(stdout, ARD_PROG_NAME ": caught signal - shutting down.\n");
 	run=0;
 }
 
