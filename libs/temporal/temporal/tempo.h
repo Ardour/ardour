@@ -1119,6 +1119,9 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	bool iteratively_solve_ramp (TempoPoint&, TempoPoint&);
 
+	bool core_remove_meter (MeterPoint const &);
+	bool core_remove_tempo (TempoPoint const &);
+
 	/* These are not really const, but the lookup tables are marked mutable
 	 * to allow time domain conversions to store their results while being
 	 * marked const (which is more semantically correct).

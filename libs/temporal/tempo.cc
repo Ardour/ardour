@@ -1048,7 +1048,24 @@ TempoMap::remove_tempo (TempoPoint const & tp, bool with_reset)
 		return;
 	}
 
+	if (!core_remove_tempo (tp)) {
+		return;
+	}
+
 	superclock_t sc (tp.sclock());
+
+	remove_point (tp);
+
+	if (with_reset) {
+		reset_starting_at (sc);
+	}
+
+}
+
+bool
+TempoMap::core_remove_tempo (TempoPoint const & tp)
+
+{
 	Tempos::iterator t;
 
 	/* the argument is likely to be a Point-derived object that doesn't
@@ -1070,12 +1087,12 @@ TempoMap::remove_tempo (TempoPoint const & tp, bool with_reset)
 
 	if (t == _tempos.end()) {
 		/* not found */
-		return;
+		return false;
 	}
 
 	if (t->sclock() != tp.sclock()) {
 		/* error ... no tempo point at the time of tp */
-		return;
+		return false;
 	}
 
 	Tempos::iterator nxt = _tempos.begin();
@@ -1094,15 +1111,12 @@ TempoMap::remove_tempo (TempoPoint const & tp, bool with_reset)
 	const bool was_end = (nxt == _tempos.end());
 
 	_tempos.erase (t);
-	remove_point (*t);
 
 	if (prev != _tempos.end() && was_end) {
 		prev->set_end_npm (prev->note_types_per_minute()); /* remove any ramp */
-	} else {
-		if (with_reset) {
-			reset_starting_at (sc);
-		}
 	}
+
+	return true;
 }
 
 void
@@ -1160,13 +1174,21 @@ TempoMap::remove_bartime (MusicTimePoint const & tp, bool with_reset)
 
 	for (m = _bartimes.begin(); m != _bartimes.end() && m->sclock() < tp.sclock(); ++m);
 
-	if (m->sclock() != tp.sclock()) {
+	if (m == _bartimes.end()) {
+		/* error ... not found */
+		return;
+	}
+
+	if  (m->sclock() != tp.sclock()) {
 		/* error ... no music time point at the time of tp */
 		return;
 	}
 
+	remove_point (tp);
+	core_remove_tempo (tp);
+	core_remove_meter (tp);
 	_bartimes.erase (m);
-	remove_point (*m);
+
 	if (with_reset) {
 		reset_starting_at (sc);
 	}
@@ -1176,18 +1198,14 @@ void
 TempoMap::remove_point (Point const & point)
 {
 	Points::iterator p;
-	Point const * tpp (&point);
 
-	/* note that the point passed here must be an element of the _points
-	 * list, which is not true for the point passed to the callees
-	 * (remove_tempo(), remove_meter(), remove_bartime().
-	 *
-	 * in those methods, we effectively search for a match on a duple of
-	 * (type, time), but here we are comparing pointer addresses.
+	/* Again, we do not allow multiple MusicTimePoints at the same
+	 * location, so if sclock() matches, @param point matches
+	 * the point in the list.
 	 */
 
 	for (p = _points.begin(); p != _points.end(); ++p) {
-		if (&(*p) == tpp) {
+		if (p->sclock() == point.sclock()) {
 			// XXX need to fix this leak delete tpp;
 			_points.erase (p);
 			break;
@@ -1685,7 +1703,22 @@ TempoMap::remove_meter (MeterPoint const & mp, bool with_reset)
 		return;
 	}
 
+	if (!core_remove_meter (mp)) {
+		return;
+	}
+
 	superclock_t sc = mp.sclock();
+
+	remove_point (mp);
+
+	if (with_reset) {
+		reset_starting_at (sc);
+	}
+}
+
+bool
+TempoMap::core_remove_meter (MeterPoint const & mp)
+{
 	Meters::iterator m;
 
 	/* the argument is likely to be a Point-derived object that doesn't
@@ -1707,19 +1740,17 @@ TempoMap::remove_meter (MeterPoint const & mp, bool with_reset)
 
 	if (m == _meters.end()) {
 		/* not found */
-		return;
+		return false;
 	}
 
 	if (m->sclock() != mp.sclock()) {
 		/* error ... no meter point at the time of mp */
-		return;
+		return false;
 	}
 
 	_meters.erase (m);
-	remove_point (*m);
-	if (with_reset) {
-		reset_starting_at (sc);
-	}
+
+	return true;
 }
 
 Temporal::BBT_Argument
