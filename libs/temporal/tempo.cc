@@ -2165,7 +2165,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 		if (bar_mod != 0) {
 			if (bbt.is_bar() && (bar_mod == 1 || ((bbt.bars % bar_mod == 1)))) {
 				ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       [%2]\n", metric, ret.back()));
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("Ga %1\t       [%2]\n", metric, ret.back()));
 			} else {
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("-- skip %1 not on bar_mod %2\n", bbt, bar_mod));
 			}
@@ -2177,7 +2177,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 		} else {
 
 			ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
-			DEBUG_TRACE (DEBUG::Grid, string_compose ("G %1\t       [%2]\n", metric, ret.back()));
+			DEBUG_TRACE (DEBUG::Grid, string_compose ("Gb %1\t       [%2]\n", metric, ret.back()));
 
 			/* Advance beats by 1 meter-defined "beat */
 
@@ -2200,6 +2200,8 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 			if (start >= p->sclock()) {
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("we've reached/passed the next point via sclock, BBT %1 audio %2 point %3\n", bbt, start, *p));
 				reset = true;
+			} else {
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("confirmed that BBT %1 has audio time %2 before next point %3\n", bbt, start, *p));
 			}
 		}
 
@@ -2208,53 +2210,67 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 		if (reset) {
 
 			/* bbt is position for the next grid-line.
-			 * It is already increameted above depending on mod_bar and beat_div
-			 * and must not be changed here.
-			 *
-			 * Skip metrics until p->bbt() is at or after up to next grid mod div.
 			 */
 
-			if (p->bbt() > bbt) {
-				std::cerr << "Point at " << *p << " wrong for " << bbt << std::endl;
-			}
-			assert (p->bbt() <= bbt);
+			MusicTimePoint const *mtp = dynamic_cast<MusicTimePoint const *> (&*p);
 
-			/* If we just arrived at a point (indicated by bbt ==
-			 * p->bbt()), use all points at the same location to
-			 * potentially reconstruct the metric. Note that a BBT point is
-			 * both a tempo and a meter point, which is why we do test each
-			 * point found at this location as both.
-			 */
+			if (mtp) {
 
-			bool rebuild_metric = false;
+				/* next point has an earlier BBT tag than our
+				 * next-grid-line, so the user has "reset" the
+				 * BBT ruler. We should do the same, unconditionally.
+				 */
 
-			while (p != _points.end() && p->bbt() <= bbt) {
+				tp = dynamic_cast<TempoPoint const *> (&*p);
+				mp = dynamic_cast<MeterPoint const *> (&*p);
 
-				TempoPoint const * tpp;
-				MeterPoint const * mpp;
+				assert (tp);
+				assert (mp);
 
-				if ((tpp = dynamic_cast<TempoPoint const *> (&(*p))) != 0) {
-					rebuild_metric = true;
-					tp = tpp;
-				}
+				metric = TempoMetric (*tp, *mp);
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("reset metric from music-time point %1, now %2\n", *mtp, metric));
 
-				if ((mpp = dynamic_cast<MeterPoint const *> (&(*p))) != 0) {
-					rebuild_metric = true;
-					mp = mpp;
-				}
+				bbt = BBT_Argument (timepos_t::from_superclock (p->sclock()), p->bbt());
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start using bbt %1 as %2\n", p->bbt(), bbt));
+				start = p->sclock();
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start to %1\n", start));
+
+				/* Advance p to the next point */
 
 				++p;
+
+			} else {
+
+				bool rebuild_metric = false;
+
+				while (p != _points.end() && p->bbt() <= bbt) {
+
+					TempoPoint const * tpp;
+					MeterPoint const * mpp;
+
+					if ((tpp = dynamic_cast<TempoPoint const *> (&(*p))) != 0) {
+						rebuild_metric = true;
+						tp = tpp;
+					}
+
+					if ((mpp = dynamic_cast<MeterPoint const *> (&(*p))) != 0) {
+						rebuild_metric = true;
+						mp = mpp;
+					}
+
+					++p;
+				}
+
+				/* reset the metric to use the most recent tempo & meter */
+
+				if (rebuild_metric) {
+					metric = TempoMetric (*tp, *mp);
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("second| with start = %1 aka %2 rebuilt metric from points, now %3\n", start, bbt, metric));
+				}
+
+				/* this is potentially ambiguous */
+				start = metric.superclock_at (bbt);
 			}
-
-			/* reset the metric to use the most recent tempo & meter */
-
-			if (rebuild_metric) {
-				metric = TempoMetric (*tp, *mp);
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("second| with start = %1 aka %2 rebuilt metric from points, now %3\n", start, bbt, metric));
-			}
-
-			/* this is potentially ambiguous */
-			start = metric.superclock_at (bbt);
 		}
 
 		/* Update the quarter-note time value to match the BBT and
