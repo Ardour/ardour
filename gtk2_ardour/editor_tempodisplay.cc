@@ -666,6 +666,7 @@ void
 Editor::edit_tempo_section (TempoPoint& section)
 {
 	TempoDialog tempo_dialog (TempoMap::use(), section, _("done"));
+	Temporal::TempoMetric tm (TempoMap::use()->metric_at (section.sclock()));
 
 	switch (tempo_dialog.run ()) {
 	case RESPONSE_ACCEPT:
@@ -683,7 +684,7 @@ Editor::edit_tempo_section (TempoPoint& section)
 
 	Temporal::BBT_Time w;
 	tempo_dialog.get_bbt_time (w);
-	Temporal::BBT_Argument when (timepos_t::zero (Temporal::BeatTime), w);
+	Temporal::BBT_Argument when (tm.reftime(), w);
 
 	TempoMapChange tmc (*this, _("edit tempo"));
 	tmc.map().replace_tempo (section, tempo, timepos_t (tmc.map().quarters_at (when)));
