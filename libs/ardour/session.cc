@@ -7212,6 +7212,7 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 			}
 
 			/* now make space at the insertion-point */
+			pl->split (to);
 			pl->ripple (to, start.distance(end), NULL);
 
 			pl->paste (p, to, 1);
