@@ -3877,8 +3877,6 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 		}
 	}
 
-	timepos_t const pos = adjusted_current_time (event, false);
-	// map->stretch_tempo_end (_tempo, timepos_t (_grab_qn).samples(), pos.samples());
 	_editor->mid_tempo_change (Editor::TempoChanged);
 
 	ostringstream sstr;
