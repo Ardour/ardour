@@ -106,6 +106,7 @@ setup_gtk_ardour_enums ()
 	REGISTER (region_list_sort_type);
 
 	REGISTER_ENUM (GridTypeNone);
+	REGISTER_ENUM (GridTypePlayhead);
 	REGISTER_ENUM (GridTypeBar);
 	REGISTER_ENUM (GridTypeBeat);
 	REGISTER_ENUM (GridTypeBeatDiv2);
