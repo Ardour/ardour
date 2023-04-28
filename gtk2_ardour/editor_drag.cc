@@ -3450,7 +3450,7 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	BBT_Time bbt (_point->bbt());
 	string name (_point->name());
 
-	map->remove_bartime (*_point);
+	map->remove_bartime (*_point, false);
 
 	/* bartime must be set using audio time */
 
