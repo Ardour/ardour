@@ -3173,7 +3173,8 @@ Editor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapP
 		check_best_snap (presnap, test, dist, best);
 	}
 
-	if ((pref == SnapToAny_Visual) && uic.get_snap_to_playhead ()) {
+	/* check snap-to-playhead */
+	if ((pref == SnapToAny_Visual) && uic.get_snap_to_playhead () && !_session->transport_rolling ()) {
 		test = timepos_t (_session->audible_sample());
 		check_best_snap (presnap, test, dist, best);
 	}
