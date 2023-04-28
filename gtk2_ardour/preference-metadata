@@ -204,6 +204,8 @@
   snap grid editor mouse
 [snap-to-marks]
   snap grid editor mouse markers marks
+[snap-to-playhead]
+  snap grid editor mouse playhead
 [snap-to-region-end]
   snap grid editor mouse regions boundaries boundary
 [snap-to-region-start]

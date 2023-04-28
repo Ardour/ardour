@@ -3173,6 +3173,11 @@ Editor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapP
 		check_best_snap (presnap, test, dist, best);
 	}
 
+	if ((pref == SnapToAny_Visual) && uic.get_snap_to_playhead ()) {
+		test = timepos_t (_session->audible_sample());
+		check_best_snap (presnap, test, dist, best);
+	}
+
 	/* check snap-to-region-{start/end/sync} */
 	if ((pref == SnapToAny_Visual) && (uic.get_snap_to_region_start () || uic.get_snap_to_region_end () || uic.get_snap_to_region_sync ())) {
 

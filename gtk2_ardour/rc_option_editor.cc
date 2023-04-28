@@ -3395,6 +3395,14 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
+		     "snap-to-playhead",
+		     _("Playhead"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_playhead),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_playhead)
+		     ));
+
+	add_option (_("Editor/Snap"),
+	     new BoolOption (
 		     "snap-to-region-sync",
 		     _("Region Sync Points"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_region_sync),
