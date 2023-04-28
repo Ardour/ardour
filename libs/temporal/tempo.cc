@@ -51,6 +51,12 @@ SerializedRCUManager<TempoMap> TempoMap::_map_mgr (0);
 thread_local TempoMap::SharedPtr TempoMap::_tempo_map_p;
 PBD::Signal0<void> TempoMap::MapChanged;
 
+#ifndef NDEBUG
+#define TEMPO_MAP_ASSERT(expr) TempoMap::map_assert(expr, #expr, __FILE__, __LINE__)
+#else
+#define TEMPO_MAP_ASSERT(expr)
+#endif
+
 void
 Point::add_state (XMLNode & node) const
 {
@@ -83,7 +89,7 @@ Point::sample() const
 
 Tempo::Tempo (XMLNode const & node)
 {
-	assert (node.name() == xml_node_name);
+	TEMPO_MAP_ASSERT (node.name() == xml_node_name);
 
 
 	node.get_property (X_("npm"), _npm);
@@ -184,7 +190,7 @@ Tempo::set_state (XMLNode const & node, int /*version*/)
 
 Meter::Meter (XMLNode const & node)
 {
-	assert (node.name() == xml_node_name);
+	TEMPO_MAP_ASSERT (node.name() == xml_node_name);
 	if (!node.get_property (X_("note-value"), _note_value)) {
 		throw failed_constructor ();
 	}
@@ -499,10 +505,10 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 	if (qn < Beats()) {
 		/* negative */
 
-		assert (_quarters == Beats());
+		TEMPO_MAP_ASSERT (_quarters == Beats());
 	} else {
 		/* positive */
-		assert (qn >= _quarters);
+		TEMPO_MAP_ASSERT (qn >= _quarters);
 	}
 
 	if (!actually_ramped()) {
@@ -581,7 +587,7 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 
 	if (!actually_ramped()) {
 
-		// assert (sc >= _sclock);
+		// TEMPO_MAP_ASSERT (sc >= _sclock);
 		superclock_t sc_delta = sc - _sclock;
 
 		/* convert sc into superbeats, given that sc represents some number of seconds */
@@ -1122,7 +1128,7 @@ TempoMap::core_remove_tempo (TempoPoint const & tp)
 void
 TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos, std::string name)
 {
-	assert (pos.time_domain() == AudioTime);
+	TEMPO_MAP_ASSERT (pos.time_domain() == AudioTime);
 
 	superclock_t sc (pos.superclocks());
 	TempoMetric metric (metric_at (sc));
@@ -1223,8 +1229,8 @@ TempoMap::reset_starting_at (superclock_t sc)
 	}
 #endif
 
-	assert (!_tempos.empty());
-	assert (!_meters.empty());
+	TEMPO_MAP_ASSERT (!_tempos.empty());
+	TEMPO_MAP_ASSERT (!_meters.empty());
 
 
 	TempoPoint*     tp;
@@ -1384,8 +1390,8 @@ TempoMap::reset_starting_at (superclock_t sc)
 bool
 TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool earlier, bool push)
 {
-	assert (!_tempos.empty());
-	assert (!_meters.empty());
+	TEMPO_MAP_ASSERT (!_tempos.empty());
+	TEMPO_MAP_ASSERT (!_meters.empty());
 
 	if (_meters.size() < 2 || mp == _meters.front()) {
 		/* not movable */
@@ -1481,7 +1487,7 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool earlie
 		}
 
 		/* existing meter must have been found */
-		assert (current != _meters.end());
+		TEMPO_MAP_ASSERT (current != _meters.end());
 
 		/* reposition in list */
 		_meters.splice (insert_before, _meters, current);
@@ -1503,7 +1509,7 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool earlie
 		}
 
 		/* existing meter must have been found */
-		assert (current != _points.end());
+		TEMPO_MAP_ASSERT (current != _points.end());
 
 		/* reposition in list */
 		_points.splice (insert_before, _points, current);
@@ -1519,8 +1525,8 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool earlie
 bool
 TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 {
-	assert (!_tempos.empty());
-	assert (!_meters.empty());
+	TEMPO_MAP_ASSERT (!_tempos.empty());
+	TEMPO_MAP_ASSERT (!_meters.empty());
 
 	if (_tempos.size() < 2 || tp == _tempos.front()) {
 		/* not movable */
@@ -1535,7 +1541,7 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 
 	beats = when.beats();
 
-	/* XXX need to assert that meter note value is >= 4 */
+	/* XXX need to TEMPO_MAP_ASSERT that meter note value is >= 4 */
 
 	MeterPoint const & mm (meter_at (beats));
 
@@ -1606,7 +1612,7 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 		}
 
 		/* existing tempo must have been found */
-		assert (current != _tempos.end());
+		TEMPO_MAP_ASSERT (current != _tempos.end());
 		/* reposition in list */
 		_tempos.splice (insert_before, _tempos, current);
 	}
@@ -1627,7 +1633,7 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 		}
 
 		/* existing tempo must have been found */
-		assert (current != _points.end());
+		TEMPO_MAP_ASSERT (current != _points.end());
 
 		/* reposition in list */
 		_points.splice (insert_before, _points, current);
@@ -1937,9 +1943,9 @@ TempoMap::_get_tempo_and_meter (typename const_traits_t::tempo_point_type & tp,
 	bool tempo_done = false;
 	bool meter_done = false;
 
-	assert (!_tempos.empty());
-	assert (!_meters.empty());
-	assert (!_points.empty());
+	TEMPO_MAP_ASSERT (!_tempos.empty());
+	TEMPO_MAP_ASSERT (!_meters.empty());
+	TEMPO_MAP_ASSERT (!_points.empty());
 
 	/* If the starting position is the beginning of the timeline (indicated
 	 * by the default constructor value for the time_type (superclock_t,
@@ -2023,9 +2029,9 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 	   quarter not, then bar_mod is zero.
 	*/
 
-	assert (!_tempos.empty());
-	assert (!_meters.empty());
-	assert (!_points.empty());
+	TEMPO_MAP_ASSERT (!_tempos.empty());
+	TEMPO_MAP_ASSERT (!_meters.empty());
+	TEMPO_MAP_ASSERT (!_points.empty());
 
 #ifndef NDEBUG
 	if (DEBUG_ENABLED (DEBUG::Grid)) {
@@ -2224,8 +2230,8 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 				tp = dynamic_cast<TempoPoint const *> (&*p);
 				mp = dynamic_cast<MeterPoint const *> (&*p);
 
-				assert (tp);
-				assert (mp);
+				TEMPO_MAP_ASSERT (tp);
+				TEMPO_MAP_ASSERT (mp);
 
 				metric = TempoMetric (*tp, *mp);
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("reset metric from music-time point %1, now %2\n", *mtp, metric));
@@ -2457,8 +2463,8 @@ TempoMap::bbt_walk (BBT_Argument const & bbt, BBT_Offset const & o) const
 	Tempos::const_iterator t, prev_t, next_t;
 	Meters::const_iterator m, prev_m, next_m;
 
-	assert (!_tempos.empty());
-	assert (!_meters.empty());
+	TEMPO_MAP_ASSERT (!_tempos.empty());
+	TEMPO_MAP_ASSERT (!_meters.empty());
 
 	/* trivial (and common) case: single tempo, single meter */
 
@@ -2890,8 +2896,8 @@ TempoMap::n_tempos () const
 void
 TempoMap::insert_time (timepos_t const & pos, timecnt_t const & duration)
 {
-	assert (!_tempos.empty());
-	assert (!_meters.empty());
+	TEMPO_MAP_ASSERT (!_tempos.empty());
+	TEMPO_MAP_ASSERT (!_meters.empty());
 
 	if (pos == std::numeric_limits<timepos_t>::min()) {
 		/* can't insert time at the front of the map: those entries are fixed */
@@ -3180,7 +3186,7 @@ TempoMap::metric_at (BBT_Argument const & bbt, bool can_match) const
 bool
 TempoMap::set_ramped (TempoPoint & tp, bool yn)
 {
-	assert (!_tempos.empty());
+	TEMPO_MAP_ASSERT (!_tempos.empty());
 
 	if (tp.ramped() == yn) {
 		return false;
@@ -3372,7 +3378,7 @@ TempoMap::stretch_tempo (TempoPoint* ts, samplepos_t sample, samplepos_t end_sam
 		 */
 
 		TempoPoint* prev_to_ts = const_cast<TempoPoint*> (previous_tempo (*ts));
-		assert (prev_to_ts);
+		TEMPO_MAP_ASSERT (prev_to_ts);
 		/* the change in samples is the result of changing the slope of at most 2 previous tempo sections.
 		 * constant to constant is straightforward, as the tempo prev to ts has constant slope.
 		 */
@@ -3769,7 +3775,7 @@ TempoMap::midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_p
 	 */
 	clk_beat = b.get_beats () * 4 ; // 4 = 24 / 6;
 
-	assert (clk_pos >= pos);
+	TEMPO_MAP_ASSERT (clk_pos >= pos);
 }
 
 /******** OLD STATE LOADING CODE SECTION *************/
@@ -4134,6 +4140,16 @@ TempoMap::set_state_3x (const XMLNode& node)
 	return 0;
 }
 
+void
+TempoMap::map_assert (bool expr, char const * exprstr, char const * file, int line)
+{
+	if (!expr) {
+		TempoMap::SharedPtr map = TempoMap::use();
+		std::cerr << "TEMPO MAP LOGIC FAILURE: [" << exprstr << "] at " << file << ':' << line << std::endl;
+		map->dump (std::cerr);
+		abort ();
+	}
+}
 
 
 #if 0
@@ -4335,14 +4351,14 @@ DomainSwapInformation* Temporal::domain_swap (0);
 DomainSwapInformation*
 DomainSwapInformation::start(TimeDomain prev)
 {
-	assert (!domain_swap);
+	TEMPO_MAP_ASSERT (!domain_swap);
 	domain_swap = new DomainSwapInformation (prev);
 	return domain_swap;
 }
 
 DomainSwapInformation::~DomainSwapInformation ()
 {
-	assert (this == domain_swap);
+	TEMPO_MAP_ASSERT (this == domain_swap);
 	undo ();
 	domain_swap = 0;
 }

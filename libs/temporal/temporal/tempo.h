@@ -924,6 +924,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API	void midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_pos, uint32_t& clk_beat) const;
 
+	static void map_assert (bool expr, char const * exprstr, char const * file, int line);
+
   private:
 	Tempos       _tempos;
 	Meters       _meters;
