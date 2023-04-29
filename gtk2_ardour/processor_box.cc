@@ -2554,7 +2554,9 @@ ProcessorBox::leave_notify (GdkEventCrossing* ev)
 		gtk_window_set_focus (win->gobj(), 0);
 	}
 
-	processor_display.select_none ();
+	if (ev->detail != GDK_NOTIFY_NONLINEAR && ev->detail != GDK_NOTIFY_NONLINEAR_VIRTUAL) {
+		processor_display.select_none ();
+	}
 
 	return false;
 }
