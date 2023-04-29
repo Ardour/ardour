@@ -102,7 +102,7 @@ class LIBARDOUR_API Stripable : public SessionObject,
 
 	PBD::Signal2<void,std::string,void*> gui_changed;
 
-	/***************************************************************
+	/* *************************************************************
 	 * Pure interface begins here
 	 ***************************************************************/
 
