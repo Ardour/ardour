@@ -637,7 +637,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 
 	if (within_items.empty()) {
 
-		/* no items at point, just send leave event below */
+		/* no items at point, do not send a LEAVE event in this case */
 		_new_current_item = 0;
 
 	} else {
@@ -649,10 +649,10 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 		}
 
 		_new_current_item = const_cast<Item*> (within_items.front());
-	}
 
-	if (_new_current_item != _current_item) {
-		deliver_enter_leave (point, state);
+		if (_new_current_item != _current_item) {
+			deliver_enter_leave (point, state);
+		}
 	}
 
 	if (_current_item) {
