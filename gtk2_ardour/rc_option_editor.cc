@@ -1629,14 +1629,11 @@ class ControlSurfacesOptions : public OptionEditorMiniPage
 			_store->clear ();
 
 			ControlProtocolManager& m = ControlProtocolManager::instance ();
-			for (list<ControlProtocolInfo*>::iterator i = m.control_protocol_info.begin(); i != m.control_protocol_info.end(); ++i) {
-
-				if (!(*i)->mandatory) {
-					TreeModel::Row r = *_store->append ();
-					r[_model.name] = (*i)->name;
-					r[_model.enabled] = 0 != (*i)->protocol;
-					r[_model.protocol_info] = *i;
-				}
+			for (auto const& i : m.control_protocol_info) {
+				TreeModel::Row r = *_store->append ();
+				r[_model.name] = i->name;
+				r[_model.enabled] = 0 != i->protocol;
+				r[_model.protocol_info] = i;
 			}
 		}
 
