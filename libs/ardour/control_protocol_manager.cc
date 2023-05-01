@@ -382,6 +382,7 @@ ControlProtocolManager::control_protocol_discover (string path)
 			cpi->path = path;
 			cpi->protocol = 0;
 			cpi->requested = false;
+			cpi->automatic = false;
 			cpi->state = 0;
 
 			control_protocol_info.push_back (cpi);
@@ -512,7 +513,7 @@ ControlProtocolManager::get_state () const
 
 		if ((*i)->protocol) {
 			XMLNode& child_state ((*i)->protocol->get_state());
-			child_state.set_property (X_("active"), true);
+			child_state.set_property (X_("active"), !(*i)->automatic);
 			delete ((*i)->state);
 			(*i)->state = new XMLNode (child_state);
 			root->add_child_nocopy (child_state);
@@ -550,6 +551,38 @@ ControlProtocolManager::midi_connectivity_established ()
 
 	for (list<ControlProtocol*>::iterator p = control_protocols.begin(); p != control_protocols.end(); ++p) {
 		(*p)->midi_connectivity_established ();
+	}
+}
+
+void
+ControlProtocolManager::probe_midi_control_protocols ()
+{
+	if (!Config->get_auto_enable_surfaces ()) {
+		return;
+	}
+	for (auto const& cpi : control_protocol_info) {
+		/* Note: manual teardown deletes the descriptor */
+		if (!cpi->descriptor) {
+			cpi->automatic = false;
+			continue;
+		}
+		if (!cpi->descriptor->probe_port) {
+			continue;
+		}
+		bool active = 0 != cpi->protocol;
+		bool found = cpi->descriptor->probe_port ();
+
+		if (!active && found) {
+			cpi->automatic = true;
+			activate (*cpi);
+		} else if (active && cpi->automatic && !found) {
+			cpi->automatic = false;
+			deactivate (*cpi);
+			/* allow to auto-enable again */
+			if (!cpi->descriptor) {
+				cpi->descriptor = get_descriptor (cpi->path);
+			}
+		}
 	}
 }
 

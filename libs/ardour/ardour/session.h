@@ -2323,6 +2323,9 @@ private:
 	void setup_click_state (const XMLNode*);
 	void setup_bundles ();
 
+	void port_registry_changed ();
+	void probe_ctrl_surfaces ();
+
 	void save_as_bring_callback (uint32_t, uint32_t, std::string);
 
 	static const uint32_t session_end_shift;

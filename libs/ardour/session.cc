@@ -597,7 +597,7 @@ Session::immediately_post_engine ()
 
 	/* TODO, connect in different thread. (PortRegisteredOrUnregistered may be in RT context)
 	 * can we do that? */
-	 _engine.PortRegisteredOrUnregistered.connect_same_thread (*this, boost::bind (&Session::setup_bundles, this));
+	 _engine.PortRegisteredOrUnregistered.connect_same_thread (*this, boost::bind (&Session::port_registry_changed, this));
 	 _engine.PortPrettyNameChanged.connect_same_thread (*this, boost::bind (&Session::setup_bundles, this));
 
 	// set samplerate for plugins added early
@@ -871,6 +871,21 @@ Session::destroy ()
 	BOOST_SHOW_POINTERS ();
 }
 
+void
+Session::port_registry_changed()
+{
+	setup_bundles ();
+	_butler->delegate (boost::bind (&Session::probe_ctrl_surfaces, this));
+}
+
+void
+Session::probe_ctrl_surfaces()
+{
+	if (!_engine.running() || deletion_in_progress ()) {
+		return;
+	}
+	ControlProtocolManager::instance ().probe_midi_control_protocols ();
+}
 
 void
 Session::block_processing()
