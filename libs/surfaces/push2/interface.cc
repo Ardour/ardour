@@ -75,14 +75,7 @@ probe_push2 (ControlProtocolDescriptor*)
 static ControlProtocolDescriptor push2_descriptor = {
 	/*name :              */   "Ableton Push 2",
 	/*id :                */   "uri://ardour.org/surfaces/push2:0",
-	/*ptr :               */   0,
 	/*module :            */   0,
-	/*mandatory :         */   0,
-	// actually, the surface does support feedback, but all this
-	// flag does is show a submenu on the UI, which is useless for the mackie
-	// because feedback is always on. In any case, who'd want to use the
-	// mcu without the motorised sliders doing their thing?
-	/*supports_feedback : */   false,
 	/*probe :             */   probe_push2,
 	/*initialize :        */   new_push2,
 	/*destroy :           */   delete_push2,

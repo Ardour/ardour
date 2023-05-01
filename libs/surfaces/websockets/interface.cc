@@ -52,10 +52,7 @@ probe_ardour_websockets_protocol (ControlProtocolDescriptor* /*descriptor*/)
 static ControlProtocolDescriptor ardour_websockets_descriptor = {
 	/*name :              */ surface_name,
 	/*id :                */ surface_id,
-	/*ptr :               */ 0,
 	/*module :            */ 0,
-	/*mandatory :         */ 0,
-	/*supports_feedback : */ true,
 	/*probe :             */ probe_ardour_websockets_protocol,
 	/*initialize :        */ new_ardour_websockets_protocol,
 	/*destroy :           */ delete_ardour_websockets_protocol,

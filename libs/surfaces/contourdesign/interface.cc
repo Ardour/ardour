@@ -52,10 +52,7 @@ probe_contourdesign_protocol (ControlProtocolDescriptor*)
 static ControlProtocolDescriptor contourdesign_descriptor = {
 	/* name :                   */ "ContourDesign",
 	/* id :                     */ "uri://ardour.org/surfaces/contourdesign:0",
-	/* ptr :                    */ 0,
 	/* module :                 */ 0,
-	/* mandatory :              */ 0,
-	/* supports_feedback :      */ false,
 	/* probe :                  */ probe_contourdesign_protocol,
 	/* initialize :             */ new_contourdesign_protocol,
 	/* destroy :                */ delete_contourdesign_protocol,

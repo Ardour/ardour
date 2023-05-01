@@ -50,10 +50,7 @@ probe_wiimote_protocol (ControlProtocolDescriptor*)
 static ControlProtocolDescriptor wiimote_descriptor = {
 	name : "Wiimote",
 	id : "uri://ardour.org/surfaces/wiimote:0",
-	ptr : 0,
 	module : 0,
-	mandatory : 0,
-	supports_feedback : false,
 	probe : probe_wiimote_protocol,
 	initialize : new_wiimote_protocol,
 	destroy : delete_wiimote_protocol,

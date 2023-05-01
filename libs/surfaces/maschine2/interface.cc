@@ -60,10 +60,7 @@ probe_maschine2 (ControlProtocolDescriptor*)
 static ControlProtocolDescriptor maschine2_descriptor = {
 	/*name :              */   "NI Maschine2",
 	/*id :                */   "uri://ardour.org/surfaces/maschine2:0",
-	/*ptr :               */   0,
 	/*module :            */   0,
-	/*mandatory :         */   0,
-	/*supports_feedback : */   false,
 	/*probe :             */   probe_maschine2,
 	/*initialize :        */   new_maschine2,
 	/*destroy :           */   delete_maschine2,

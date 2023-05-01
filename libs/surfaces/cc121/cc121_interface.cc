@@ -59,10 +59,7 @@ probe_cc121_midi_protocol (ControlProtocolDescriptor* /*descriptor*/)
 static ControlProtocolDescriptor cc121_midi_descriptor = {
 	/*name :              */   "Steinberg CC121",
 	/*id :                */   "uri://ardour.org/surfaces/cc121:0",
-	/*ptr :               */   0,
 	/*module :            */   0,
-	/*mandatory :         */   0,
-	/*supports_feedback : */   true,
 	/*probe :             */   probe_cc121_midi_protocol,
 	/*initialize :        */   new_cc121_midi_protocol,
 	/*destroy :           */   delete_cc121_midi_protocol,

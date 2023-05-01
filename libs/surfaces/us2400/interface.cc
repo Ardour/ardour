@@ -78,14 +78,7 @@ probe_us2400_protocol (ControlProtocolDescriptor*)
 static ControlProtocolDescriptor us2400_descriptor = {
 	/*name :              */   "Tascam US-2400",
 	/*id :                */   "uri://ardour.org/surfaces/us2400:0",
-	/*ptr :               */   0,
 	/*module :            */   0,
-	/*mandatory :         */   0,
-	// actually, the surface does support feedback, but all this
-	// flag does is show a submenu on the UI, which is useless for the mackie
-	// because feedback is always on. In any case, who'd want to use the
-	// mcu without the motorised sliders doing their thing?
-	/*supports_feedback : */   false,
 	/*probe :             */   probe_us2400_protocol,
 	/*initialize :        */   new_us2400_protocol,
 	/*destroy :           */   delete_us2400_protocol,

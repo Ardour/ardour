@@ -58,10 +58,7 @@ probe_faderport8_midi_protocol (ControlProtocolDescriptor* /*descriptor*/)
 static ControlProtocolDescriptor faderport8_midi_descriptor = {
 	/*name :              */    "PreSonus FaderPort8",
 	/*id :                */    "uri://ardour.org/surfaces/faderport8:0",
-	/*ptr :               */    0,
 	/*module :            */    0,
-	/*mandatory :         */    0,
-	/*supports_feedback : */    true,
 	/*probe :             */    probe_faderport8_midi_protocol,
 	/*initialize :        */    new_faderport8_midi_protocol,
 	/*destroy :           */    delete_faderport8_midi_protocol,

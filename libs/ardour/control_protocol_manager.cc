@@ -100,7 +100,7 @@ ControlProtocolManager::set_session (Session* s)
 		Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
 
 		for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
-			if ((*i)->requested || (*i)->mandatory) {
+			if ((*i)->requested) {
 				(void) activate (**i);
 			}
 		}
@@ -262,10 +262,6 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 		return 0;
 	}
 
-	if (cpi.mandatory) {
-		return 0;
-	}
-
 	/* save current state */
 
 	delete cpi.state;
@@ -304,24 +300,6 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 	ProtocolStatusChange (&cpi);
 
 	return 0;
-}
-
-void
-ControlProtocolManager::load_mandatory_protocols ()
-{
-	if (_session == 0) {
-		return;
-	}
-
-	Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
-
-	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
-		if ((*i)->mandatory && ((*i)->protocol == 0)) {
-			DEBUG_TRACE (DEBUG::ControlProtocols,
-				     string_compose (_("Instantiating mandatory control protocol %1"), (*i)->name));
-			instantiate (**i);
-		}
-	}
 }
 
 struct ControlProtocolOrderByName
@@ -406,8 +384,6 @@ ControlProtocolManager::control_protocol_discover (string path)
 			cpi->path = path;
 			cpi->protocol = 0;
 			cpi->requested = false;
-			cpi->mandatory = descriptor->mandatory;
-			cpi->supports_feedback = descriptor->supports_feedback;
 			cpi->state = 0;
 
 			control_protocol_info.push_back (cpi);

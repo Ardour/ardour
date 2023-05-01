@@ -48,12 +48,13 @@ class LIBARDOUR_API ControlProtocolInfo {
 		std::string name;
 		std::string path;
 		bool requested;
-		bool mandatory;
-		bool supports_feedback;
 		XMLNode* state;
 
-		ControlProtocolInfo() : descriptor (0), protocol (0), requested(false),
-		mandatory(false), supports_feedback(false), state (0)
+		ControlProtocolInfo()
+			: descriptor (0)
+			, protocol (0)
+			, requested(false)
+			, state (0)
 	{}
 		~ControlProtocolInfo();
 
@@ -69,7 +70,6 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	void set_session (Session*);
 	void discover_control_protocols ();
 	void foreach_known_protocol (boost::function<void(const ControlProtocolInfo*)>);
-	void load_mandatory_protocols ();
 	void midi_connectivity_established ();
 	void drop_protocols ();
 
