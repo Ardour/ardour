@@ -6763,9 +6763,9 @@ Editor::ui_parameter_changed (string parameter)
 		edit_pane.set_drag_cursor (*_cursors->expand_left_right);
 		editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
 
-	} else if (parameter == "draggable-playhead") {
-		if (_verbose_cursor) {
-			_playhead_cursor->set_sensitive (UIConfiguration::instance().get_draggable_playhead());
+	} else if (parameter == "sensitize-playhead") {
+		if (_playhead_cursor) {
+			_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());
 		}
 	} else if (parameter == "use-note-bars-for-velocity") {
 		ArdourCanvas::Note::set_show_velocity_bars (UIConfiguration::instance().get_use_note_bars_for_velocity());

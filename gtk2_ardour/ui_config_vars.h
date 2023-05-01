@@ -39,7 +39,7 @@ UI_CONFIG_VARIABLE (bool, editor_stereo_only_meters, "editor-stereo-only-meters"
 UI_CONFIG_VARIABLE (bool, show_waveform_clipping, "show-waveform-clipping", true)
 UI_CONFIG_VARIABLE (uint32_t, lock_gui_after_seconds, "lock-gui-after-seconds", 0)
 UI_CONFIG_VARIABLE (ARDOUR::ScreenSaverMode, screen_saver_mode, "screen-saver-mode", InhibitWhileRecording)
-UI_CONFIG_VARIABLE (bool, draggable_playhead, "draggable-playhead", true)
+UI_CONFIG_VARIABLE (bool, sensitize_playhead, "sensitize-playhead", false)
 UI_CONFIG_VARIABLE (float, draggable_playhead_speed, "draggable-playhead-speed", 0.5)
 UI_CONFIG_VARIABLE (float, extra_ui_extents_time, "extra-ui-extents-time", 1.0)
 UI_CONFIG_VARIABLE (bool, new_automation_points_on_lane, "new-automation-points-on-lane", false)
