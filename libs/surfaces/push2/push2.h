@@ -296,7 +296,7 @@ class Push2 : public MIDISurface
 	Push2 (ARDOUR::Session&);
 	~Push2 ();
 
-	static bool probe ();
+	static bool available ();
 
 	std::string input_port_name () const;
 	std::string output_port_name () const;

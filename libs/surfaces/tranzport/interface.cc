@@ -24,7 +24,7 @@
 using namespace ARDOUR;
 
 static ControlProtocol*
-new_tranzport_protocol (ControlProtocolDescriptor* descriptor, Session* s)
+new_tranzport_protocol (Session* s)
 {
 	TranzportControlProtocol* tcp = new TranzportControlProtocol (*s);
 
@@ -38,24 +38,20 @@ new_tranzport_protocol (ControlProtocolDescriptor* descriptor, Session* s)
 }
 
 static void
-delete_tranzport_protocol (ControlProtocolDescriptor* descriptor, ControlProtocol* cp)
+delete_tranzport_protocol (ControlProtocol* cp)
 {
 	delete cp;
 }
 
-static bool
-probe_tranzport_protocol (ControlProtocolDescriptor* descriptor)
-{
-	return TranzportControlProtocol::probe();
-}
-
 static ControlProtocolDescriptor tranzport_descriptor = {
-	name : "Tranzport",
-	id : "uri://ardour.org/surfaces/tranzport:0",
-	module : 0,
-	probe : probe_tranzport_protocol,
-	initialize : new_tranzport_protocol,
-	destroy : delete_tranzport_protocol
+	/* name       */ "Tranzport",
+	/* id         */ "uri://ardour.org/surfaces/tranzport:0",
+	/* module     */ 0,
+	/* available  */ TranzportControlProtocol::available,
+	/* probe_port */ 0,
+	/* match usb  */ 0,
+	/* initialize */ new_tranzport_protocol,
+	/* destroy    */ delete_tranzport_protocol,
 };
 
 

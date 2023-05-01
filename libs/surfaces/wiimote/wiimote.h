@@ -40,8 +40,6 @@ public:
 	WiimoteControlProtocol (ARDOUR::Session &);
 	virtual ~WiimoteControlProtocol ();
 
-	static bool probe ();
-
 	int set_active (bool yn);
 
 	XMLNode& get_state () const;

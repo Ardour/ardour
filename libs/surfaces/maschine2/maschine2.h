@@ -64,6 +64,7 @@ class Maschine2: public ARDOUR::ControlProtocol, public AbstractUI<Maschine2Requ
 		Maschine2 (ARDOUR::Session&);
 		~Maschine2 ();
 
+		static bool available ();
 
 #if 0
 		bool has_editor () const { return false; }

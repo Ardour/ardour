@@ -421,12 +421,6 @@ LaunchControlXL::init_knobs ()
 	}
 }
 
-bool
-LaunchControlXL::probe ()
-{
-	return true;
-}
-
 void
 LaunchControlXL::do_request (LaunchControlRequest * req)
 {

@@ -356,9 +356,6 @@ public:
 	LaunchControlXL(ARDOUR::Session &);
 	~LaunchControlXL();
 
-
-	static bool probe();
-
 	std::list<std::shared_ptr<ARDOUR::Bundle> > bundles();
 
 	bool has_editor() const { return true; }

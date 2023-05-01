@@ -115,11 +115,6 @@ const int MackieControlProtocol::MAIN_MODIFIER_MASK = (MackieControlProtocol::MO
 
 MackieControlProtocol* MackieControlProtocol::_instance = 0;
 
-bool MackieControlProtocol::probe()
-{
-	return true;
-}
-
 MackieControlProtocol::MackieControlProtocol (Session& session)
 	: ControlProtocol (session, X_("Mackie"))
 	, AbstractUI<MackieControlUIRequest> (name())

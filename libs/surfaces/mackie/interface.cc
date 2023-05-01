@@ -35,7 +35,7 @@ using namespace ArdourSurface;
 using namespace Mackie;
 
 static ControlProtocol*
-new_mackie_protocol (ControlProtocolDescriptor*, Session* s)
+new_mackie_protocol (Session* s)
 {
 	MackieControlProtocol* mcp = 0;
 
@@ -53,7 +53,7 @@ new_mackie_protocol (ControlProtocolDescriptor*, Session* s)
 }
 
 static void
-delete_mackie_protocol (ControlProtocolDescriptor*, ControlProtocol* cp)
+delete_mackie_protocol (ControlProtocol* cp)
 {
 	try
 	{
@@ -65,26 +65,16 @@ delete_mackie_protocol (ControlProtocolDescriptor*, ControlProtocol* cp)
 	}
 }
 
-/**
-	This is called on startup to check whether the lib should be loaded.
-
-	So anything that can be changed in the UI should not be used here to
-	prevent loading of the lib.
-*/
-static bool
-probe_mackie_protocol (ControlProtocolDescriptor*)
-{
-	return MackieControlProtocol::probe();
-}
-
 // Field names commented out by JE - 06-01-2010
 static ControlProtocolDescriptor mackie_descriptor = {
-	/*name :              */   "Mackie",
-	/*id :                */   "uri://ardour.org/surfaces/mackie:0",
-	/*module :            */   0,
-	/*probe :             */   probe_mackie_protocol,
-	/*initialize :        */   new_mackie_protocol,
-	/*destroy :           */   delete_mackie_protocol,
+	/* name       */ "Mackie",
+	/* id         */ "uri://ardour.org/surfaces/mackie:0",
+	/* module     */ 0,
+	/* available  */ 0,
+	/* probe_port */ 0,
+	/* match usb  */ 0,
+	/* initialize */ new_mackie_protocol,
+	/* destroy    */ delete_mackie_protocol,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &mackie_descriptor; }

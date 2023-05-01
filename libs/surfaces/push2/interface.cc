@@ -30,7 +30,7 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_push2 (ControlProtocolDescriptor*, Session* s)
+new_push2 (Session* s)
 {
 	Push2 * p2 = 0;
 
@@ -48,7 +48,7 @@ new_push2 (ControlProtocolDescriptor*, Session* s)
 }
 
 static void
-delete_push2 (ControlProtocolDescriptor*, ControlProtocol* cp)
+delete_push2 (ControlProtocol* cp)
 {
 	try
 	{
@@ -60,25 +60,15 @@ delete_push2 (ControlProtocolDescriptor*, ControlProtocol* cp)
 	}
 }
 
-/**
-	This is called on startup to check whether the lib should be loaded.
-
-	So anything that can be changed in the UI should not be used here to
-	prevent loading of the lib.
-*/
-static bool
-probe_push2 (ControlProtocolDescriptor*)
-{
-	return Push2::probe();
-}
-
 static ControlProtocolDescriptor push2_descriptor = {
-	/*name :              */   "Ableton Push 2",
-	/*id :                */   "uri://ardour.org/surfaces/push2:0",
-	/*module :            */   0,
-	/*probe :             */   probe_push2,
-	/*initialize :        */   new_push2,
-	/*destroy :           */   delete_push2,
+	/* name       */ "Ableton Push 2",
+	/* id         */ "uri://ardour.org/surfaces/push2:0",
+	/* module     */ 0,
+	/* available  */ Push2::available,
+	/* probe_port */ 0,
+	/* match usb  */ 0,
+	/* initialize */ new_push2,
+	/* destroy    */ delete_push2,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &push2_descriptor; }

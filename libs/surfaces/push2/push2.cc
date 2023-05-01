@@ -96,6 +96,16 @@ row_interval_semitones (const Push2::RowInterval row_interval, const bool inkey)
 	return 5;
 }
 
+bool
+Push2::available ()
+{
+	bool rv = LIBUSB_SUCCESS == libusb_init (0);
+	if (rv) {
+		libusb_exit (0);
+	}
+	return rv;
+}
+
 Push2::Push2 (ARDOUR::Session& s)
 	: MIDISurface (s, X_("Ableton Push 2"), X_("Push 2"), true)
 	, _handle (0)
@@ -340,12 +350,6 @@ Push2::init_buttons (bool startup)
 			write (b.second->state_msg());
 		}
 	}
-}
-
-bool
-Push2::probe ()
-{
-	return true;
 }
 
 void

@@ -69,7 +69,6 @@ public:
 	void thread_init ();
 
 	int set_active (bool yn);
-	static bool probe() { return true; }
 
 	void stripable_selection_changed () {}
 

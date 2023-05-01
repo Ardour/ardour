@@ -28,7 +28,7 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_maschine2 (ControlProtocolDescriptor*, Session* s)
+new_maschine2 (Session* s)
 {
 	Maschine2* m2 = 0;
 
@@ -46,24 +46,20 @@ new_maschine2 (ControlProtocolDescriptor*, Session* s)
 }
 
 static void
-delete_maschine2 (ControlProtocolDescriptor*, ControlProtocol* cp)
+delete_maschine2 (ControlProtocol* cp)
 {
 	delete cp;
 }
 
-static bool
-probe_maschine2 (ControlProtocolDescriptor*)
-{
-	return true;
-}
-
 static ControlProtocolDescriptor maschine2_descriptor = {
-	/*name :              */   "NI Maschine2",
-	/*id :                */   "uri://ardour.org/surfaces/maschine2:0",
-	/*module :            */   0,
-	/*probe :             */   probe_maschine2,
-	/*initialize :        */   new_maschine2,
-	/*destroy :           */   delete_maschine2,
+	/* name       */ "NI Maschine2",
+	/* id         */ "uri://ardour.org/surfaces/maschine2:0",
+	/* module     */ 0,
+	/* available  */ Maschine2::available,
+	/* probe_port */ 0,
+	/* match usb  */ 0,
+	/* initialize */ new_maschine2,
+	/* destroy    */ delete_maschine2,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &maschine2_descriptor; }

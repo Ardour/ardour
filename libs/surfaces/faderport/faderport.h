@@ -71,11 +71,6 @@ class FaderPort : public MIDISurface {
 
 	int set_active (bool yn);
 
-	/* we probe for a device when our ports are connected. Before that,
-	   there's no way to know if the device exists or not.
-	 */
-	static bool probe() { return true; }
-
 	std::string input_port_name () const;
 	std::string output_port_name () const;
 

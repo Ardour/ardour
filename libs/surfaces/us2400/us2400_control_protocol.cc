@@ -100,11 +100,6 @@ const int US2400Protocol::MAIN_MODIFIER_MASK = (US2400Protocol::MODIFIER_OPTION|
 
 US2400Protocol* US2400Protocol::_instance = 0;
 
-bool US2400Protocol::probe()
-{
-	return true;
-}
-
 US2400Protocol::US2400Protocol (Session& session)
 	: ControlProtocol (session, X_("Tascam US-2400"))
 	, AbstractUI<US2400ControlUIRequest> (name())

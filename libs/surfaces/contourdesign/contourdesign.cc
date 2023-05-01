@@ -88,7 +88,7 @@ ContourDesignControlProtocol::~ContourDesignControlProtocol ()
 }
 
 bool
-ContourDesignControlProtocol::probe ()
+ContourDesignControlProtocol::available ()
 {
 	bool rv = LIBUSB_SUCCESS == libusb_init (0);
 	if (rv) {

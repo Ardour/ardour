@@ -50,12 +50,6 @@ WiimoteControlProtocol::~WiimoteControlProtocol ()
 	stop ();
 }
 
-bool
-WiimoteControlProtocol::probe ()
-{
-	return true;
-}
-
 int
 WiimoteControlProtocol::set_active (bool yn)
 {

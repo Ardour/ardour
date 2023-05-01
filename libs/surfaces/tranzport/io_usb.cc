@@ -44,7 +44,7 @@ using namespace PBD;
 // pure boilerplate and could easily be abstracted elsewhere
 
 bool
-TranzportControlProtocol::probe ()
+TranzportControlProtocol::available ()
 {
 	struct usb_bus *bus;
 	struct usb_device *dev;

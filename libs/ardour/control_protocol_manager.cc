@@ -52,7 +52,7 @@ PBD::Signal1<void,StripableNotificationListPtr> ControlProtocolManager::Stripabl
 ControlProtocolInfo::~ControlProtocolInfo ()
 {
 	if (protocol && descriptor) {
-		descriptor->destroy (descriptor, protocol);
+		descriptor->destroy (protocol);
 		protocol = 0;
 	}
 
@@ -226,7 +226,7 @@ ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
 
 	DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("initializing %1\n", cpi.name));
 
-	if ((cpi.protocol = cpi.descriptor->initialize (cpi.descriptor, _session)) == 0) {
+	if ((cpi.protocol = cpi.descriptor->initialize (_session)) == 0) {
 		error << string_compose (_("control protocol name \"%1\" could not be initialized"), cpi.name) << endmsg;
 		return 0;
 	}
@@ -267,7 +267,7 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 	cpi.state = new XMLNode (cpi.protocol->get_state());
 	cpi.state->set_property (X_("active"), false);
 
-	cpi.descriptor->destroy (cpi.descriptor, cpi.protocol);
+	cpi.descriptor->destroy (cpi.protocol);
 
 	Glib::Threads::RWLock::WriterLock lm (protocols_lock, Glib::Threads::NOT_LOCK);
 	if (lock_required) {
@@ -370,7 +370,7 @@ ControlProtocolManager::control_protocol_discover (string path)
 
 	if ((descriptor = get_descriptor (path)) != 0) {
 
-		if (!descriptor->probe (descriptor)) {
+		if (descriptor->available && !descriptor->available ()) {
 			warning << string_compose (_("Control protocol %1 not usable"), descriptor->name) << endmsg;
 			delete (Glib::Module*) descriptor->module;
 		} else {

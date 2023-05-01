@@ -103,6 +103,16 @@ class TestLayout : public Maschine2Layout
 static TestLayout* tl = NULL;
 #endif
 
+bool
+Maschine2::available ()
+{
+	if (hid_init()) {
+		return false;
+	}
+	hid_exit ();
+	return true;
+}
+
 Maschine2::Maschine2 (ARDOUR::Session& s)
 	: ControlProtocol (s, string (X_("NI Maschine2")))
 	, AbstractUI<Maschine2Request> (name())

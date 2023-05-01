@@ -46,7 +46,7 @@ public:
 
 	int set_active (bool yn);
 
-	static bool probe ();
+	static bool available ();
 
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&);

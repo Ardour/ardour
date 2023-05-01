@@ -32,7 +32,7 @@ using namespace std;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_launch_control_xl (ControlProtocolDescriptor*, Session* s)
+new_launch_control_xl (Session* s)
 {
 	LaunchControlXL * lcxl = 0;
 
@@ -50,7 +50,7 @@ new_launch_control_xl (ControlProtocolDescriptor*, Session* s)
 }
 
 static void
-delete_launch_control_xl (ControlProtocolDescriptor*, ControlProtocol* cp)
+delete_launch_control_xl (ControlProtocol* cp)
 {
 	try
 	{
@@ -62,25 +62,15 @@ delete_launch_control_xl (ControlProtocolDescriptor*, ControlProtocol* cp)
 	}
 }
 
-/**
-	This is called on startup to check whether the lib should be loaded.
-
-	So anything that can be changed in the UI should not be used here to
-	prevent loading of the lib.
-*/
-static bool
-probe_launch_control_xl (ControlProtocolDescriptor*)
-{
-	return LaunchControlXL::probe();
-}
-
 static ControlProtocolDescriptor launch_control_xl_descriptor = {
-	/*name :              */   "Novation Launch Control XL",
-	/*id :                */   "uri://ardour.org/surfaces/launch_control_xl:0",
-	/*module :            */   0,
-	/*probe :             */   probe_launch_control_xl,
-	/*initialize :        */   new_launch_control_xl,
-	/*destroy :           */   delete_launch_control_xl,
+	/* name       */ "Novation Launch Control XL",
+	/* id         */ "uri://ardour.org/surfaces/launch_control_xl:0",
+	/* module     */ 0,
+	/* available  */ 0,
+	/* probe_port */ 0,
+	/* match usb  */ 0,
+	/* initialize */ new_launch_control_xl,
+	/* destroy    */ delete_launch_control_xl,
 };
 
 extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &launch_control_xl_descriptor; }

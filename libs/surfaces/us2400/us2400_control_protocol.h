@@ -138,8 +138,6 @@ class US2400Protocol
 	   support for the protocol is not optional.
 	*/
 
-	static bool probe();
-
 	mutable Glib::Threads::Mutex surfaces_lock;
 	typedef std::list<std::shared_ptr<US2400::Surface> > Surfaces;
 	Surfaces surfaces;

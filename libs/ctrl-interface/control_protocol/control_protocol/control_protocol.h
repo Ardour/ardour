@@ -171,12 +171,14 @@ extern "C" {
 class ControlProtocolDescriptor
 {
 public:
-	const char* name;              /* descriptive */
-	const char* id;                /* unique and version-specific */
-	void*       module;            /* not for public access */
-	bool (*probe) (ControlProtocolDescriptor*);
-	ControlProtocol* (*initialize) (ControlProtocolDescriptor*, Session*);
-	void (*destroy) (ControlProtocolDescriptor*, ControlProtocol*);
+	const char* name;                       /* descriptive */
+	const char* id;                         /* unique and version-specific */
+	void*       module;                     /* not for public access */
+	bool (*available) ();                   /* called directly after loading module */
+	bool (*probe_port) ();                  /* called when ports change (PortRegisteredOrUnregistered) */
+	bool (*match_usb) (uint16_t, uint16_t); /* called when USB devices are hotplugged (libusb) */
+	ControlProtocol* (*initialize) (Session*);
+	void (*destroy) (ControlProtocol*);
 };
 }
 }

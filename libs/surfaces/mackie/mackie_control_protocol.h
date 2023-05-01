@@ -160,8 +160,6 @@ class MackieControlProtocol
 	   support for the protocol is not optional.
 	*/
 
-	static bool probe();
-
 	mutable Glib::Threads::Mutex surfaces_lock;
 	typedef std::list<std::shared_ptr<Mackie::Surface> > Surfaces;
 	Surfaces surfaces;
