@@ -3997,6 +3997,9 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 		}
 	}
 
+	/* during fake-locate, the mouse position is delievered to the (red) playhead line, so we have to momentarily sensitize it */
+	_editor->playhead_cursor ()->set_sensitive(true);
+
 	fake_locate (where.earlier (snap_delta (event->button.state)).samples());
 
 	_last_mx = event->button.x;
@@ -4069,6 +4072,8 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 		s->request_locate (_editor->playhead_cursor ()->current_sample (), false, _was_rolling ? MustRoll : RollIfAppropriate);
 		s->request_resume_timecode_transmission ();
 	}
+
+	_editor->playhead_cursor ()->set_sensitive(UIConfiguration::instance().get_sensitize_playhead());
 }
 
 void
@@ -4082,6 +4087,7 @@ CursorDrag::aborted (bool)
 	}
 
 	_editor->playhead_cursor()->set_position (adjusted_time (grab_time (), 0, false).samples());
+	_editor->playhead_cursor ()->set_sensitive(UIConfiguration::instance().get_sensitize_playhead());
 }
 
 FadeInDrag::FadeInDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const & v, Temporal::TimeDomain td)
