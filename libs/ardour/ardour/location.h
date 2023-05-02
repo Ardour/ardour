@@ -258,6 +258,8 @@ public:
 
 	bool clear_cue_markers (samplepos_t start, samplepos_t end);
 
+	void cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, bool const copy);
+
 	void ripple (timepos_t const & at, timecnt_t const & distance, bool include_locked, bool notify);
 
 	XMLNode& get_state () const;

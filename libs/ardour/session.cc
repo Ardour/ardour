@@ -7206,7 +7206,6 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 			pl->clear_owned_changes ();
 
 			std::shared_ptr<Playlist> p = copy ? pl->copy (ltr) : pl->cut (ltr);
-			// TODO copy interpolated MIDI events
 			if (!copy) {
 				pl->ripple (start, end.distance(start), NULL);
 			}
@@ -7230,11 +7229,19 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 		Config->set_automation_follows_regions (automation_follows);
 	}
 
+	/* automation */
 	for (auto& r : *(routes.reader())) {
 		r->cut_copy_section (start, end, to, copy);
 	}
 
-	// TODO: update ranges and Tempo-Map
+	{
+		XMLNode &before = _locations->get_state();
+		_locations->cut_copy_section (start, end, to, copy);
+		XMLNode &after = _locations->get_state();
+		add_command (new MementoCommand<Locations> (*_locations, &before, &after));
+	}
+
+	// TODO: update Tempo-Map
 
 	if (!abort_empty_reversible_command ()) {
 		commit_reversible_command ();

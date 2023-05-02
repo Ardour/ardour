@@ -1680,6 +1680,87 @@ Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool includ
 	}
 }
 
+void
+Locations::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, bool const copy)
+{
+	LocationList ll;
+
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+		ll = locations;
+	}
+
+	for (auto const& i : ll) {
+		if (i->is_session_range () || i->is_auto_punch () || i->is_auto_loop ()) {
+			continue;
+		}
+		if (i->locked ()) {
+			continue;
+		}
+
+		if (!i->is_mark ()) {
+			if (i->start () >= start && i->end () <= end) {
+				/* range is inside the selction, process it */
+			} else if (i->start () < start && i->end () < start) {
+				/* range is entirely outside the selection, possible ripple it */
+			} else if (i->start () >= end && i->end () >= end) {
+				/* range is entirely outside the selection, possible ripple it */
+			} else {
+				// TODO - How do we handle ranges that intersect start/end ?
+				continue;
+			}
+		}
+
+		if (!copy) {
+			timecnt_t distance = timecnt_t (i->start ().time_domain ());
+
+			if (i->start () < start) {
+				/* Not affected, unless paste-point `to` is earlier,
+				 * in which case we need to make space there
+				 */
+				if (i->start () >= to) {
+					distance = start.distance(end);
+				}
+			}
+			else if (i->start () >= end) {
+				/* data before this mark is "cut", so move it towards 0, unless
+				 * the whole cut/paste operation is earlier, in which case this mark
+				 * is not affected.
+				 */
+				if (i->start () <= to + start.distance(end)) {
+					distance = end.distance(start);
+				}
+			}
+			else {
+				/* process cut/paste */
+				distance = start.distance (to);
+			}
+
+
+			if (i->is_mark ()) {
+				i->set_start (i->start () + distance);
+				continue;
+			}
+
+			/* process range-end, by default use same distance as i->start
+			 * to retain the range length, but additionally consider the following.
+			 */
+			timecnt_t dist_end = distance;
+			if (i->end () >= end) {
+				if (i->end () > to + start.distance(end)) {
+					/* paste inside range, extend range: keep range end */
+					dist_end = timecnt_t (i->end ().time_domain ());
+				}
+			}
+
+			i->set (i->start () + distance, i->end () + dist_end);
+
+		} else {
+			// TODO Copy/Paste: add new markers, disambiugate names
+		}
+	}
+}
+
 bool
 Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
 {
