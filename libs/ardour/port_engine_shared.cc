@@ -616,6 +616,12 @@ PortEngineSharedImpl::get_port_property (PortEngine::PortHandle port, const std:
 			return 0;
 		}
 	}
+	if (key == "http://ardour.org/metadata/hardware-port-name") {
+		value = std::static_pointer_cast<BackendPort>(port)->hw_port_name ();
+		if (!value.empty()) {
+			return 0;
+		}
+	}
 	return -1;
 }
 

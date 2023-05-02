@@ -355,6 +355,26 @@ PortManager::get_pretty_name_by_name (const std::string& portname) const
 	return string ();
 }
 
+std::string
+PortManager::get_hardware_port_name_by_name (const std::string& portname) const
+{
+	PortEngine::PortHandle ph = _backend->get_port_by_name (portname);
+
+	if (ph) {
+		std::string value;
+		std::string type;
+		if (0 == _backend->get_port_property (ph, "http://ardour.org/metadata/hardware-port-name", value, type)) {
+			return value;
+		} else {
+			return short_port_name_from_port_name (portname);
+		}
+	}
+
+	return string ();
+}
+
+
+
 bool
 PortManager::port_is_mine (const string& portname) const
 {

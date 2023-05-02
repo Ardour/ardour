@@ -160,6 +160,7 @@ public:
 	std::string             make_port_name_relative (const std::string& name) const;
 	std::string             make_port_name_non_relative (const std::string& name) const;
 	std::string             get_pretty_name_by_name (const std::string& portname) const;
+	std::string             get_hardware_port_name_by_name (const std::string& portname) const;
 	std::string             short_port_name_from_port_name (std::string const& full_name) const;
 	bool                    port_is_mine (const std::string& fullname) const;
 
