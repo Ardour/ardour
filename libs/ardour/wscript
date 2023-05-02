@@ -391,7 +391,7 @@ def build(bld):
     obj.includes     = ['.', '../vst3/', '../ctrl-interface/control_protocol', '..']
     obj.name         = 'libardour'
     obj.target       = 'ardour'
-    obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID', 'LO',
+    obj.uselib       = ['GLIBMM','GTHREAD','AUBIO','SIGCPP','XML','UUID', 'LO', 'USB',
                         'SNDFILE','SAMPLERATE','LRDF','AUDIOUNITS', 'GIOMM', 'FFTW3F',
                         'OSX','BOOST','CURL','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
     obj.use          = ['libpbd','libmidipp','libevoral',
@@ -591,7 +591,7 @@ def build(bld):
         testcommon.includes     = obj.includes + ['test', '../pbd', '..']
         testcommon.source       = ['test/testrunner.cc', 'test/test_needing_session.cc',
                                    'test/dummy_lxvst.cc', 'test/audio_region_test.cc', 'test/test_util.cc', 'test/test_ui.cc']
-        testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD', 'OSX', 'FFTW3F',
+        testcommon.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD', 'OSX', 'FFTW3F', 'USB',
                                    'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
         testcommon.use          = ['libpbd', 'libmidipp', 'libevoral', 'libaudiographer', 'libardour']
         if bld.is_defined('USE_EXTERNAL_LIBS'):
@@ -711,7 +711,7 @@ def create_ardour_test_program(bld, includes, name, target, sources):
     testobj              = bld(features = 'cxx cxxprogram')
     testobj.includes     = includes + ['test', '../pbd', '..']
     testobj.source       = sources
-    testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD', 'FFTW3F', 'OSX',
+    testobj.uselib       = ['CPPUNIT','SIGCPP','GLIBMM','GTHREAD', 'FFTW3F', 'OSX', 'USB',
                             'SAMPLERATE','XML','LRDF','COREAUDIO','TAGLIB','VAMPSDK','VAMPHOSTSDK','RUBBERBAND']
     testobj.use          = [ 'testcommon' ]
     testobj.name         = name

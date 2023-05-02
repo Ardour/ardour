@@ -42,7 +42,6 @@ def configure(conf):
 
     autowaf.set_recursive()
 
-    autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', mandatory=False)
     #if Options.options.tranzport and conf.is_defined('HAVE_USB'):
     #    conf.define('BUILD_TRANZPORT', 1)
 

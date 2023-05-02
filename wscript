@@ -1201,6 +1201,8 @@ def configure(conf):
     autowaf.check_pkg(conf, 'vamp-hostsdk', uselib_store='VAMPHOSTSDK', atleast_version='2.1', mandatory=True)
     autowaf.check_pkg(conf, 'rubberband', uselib_store='RUBBERBAND', mandatory=True)
 
+    autowaf.check_pkg(conf, 'libusb-1.0', uselib_store='USB', atleast_version='1.0.16', mandatory=False)
+
     # we cannot rely on pkg-config - https://lists.linuxaudio.org/archives/linux-audio-dev/2022-July/038395.html
     conf.check_cc(
                   features  = 'cxx',

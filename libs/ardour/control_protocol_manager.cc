@@ -21,6 +21,19 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifdef HAVE_USB
+#include <libusb.h>
+/* ControlProtocolManager is a singleton, so we can use static
+ * here. This has the advantage that libusb.h does not need
+ * to be used in ardour/control_protocol_manager.h which
+ * is included by various UIs
+ */
+static libusb_hotplug_callback_handle _hpcp = 0;
+static libusb_context*                _usb_ctx = NULL;
+static pthread_t                      _hotplug_thread;
+static bool                           _hotplug_thread_run = false;
+#endif
+
 #include <glibmm/module.h>
 
 #include <glibmm/fileutils.h>
@@ -29,6 +42,7 @@
 #include "pbd/event_loop.h"
 #include "pbd/file_utils.h"
 #include "pbd/error.h"
+#include "pbd/stacktrace.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -49,6 +63,33 @@ ControlProtocolManager* ControlProtocolManager::_instance = 0;
 const string ControlProtocolManager::state_node_name = X_("ControlProtocols");
 PBD::Signal1<void,StripableNotificationListPtr> ControlProtocolManager::StripableSelectionChanged;
 
+#ifdef HAVE_USB
+static int
+usb_hotplug_cb (libusb_context* ctx, libusb_device* device, libusb_hotplug_event event, void* user_data)
+{
+	ControlProtocolManager* cpm = static_cast<ControlProtocolManager*> (user_data);
+	struct libusb_device_descriptor desc;
+	if (LIBUSB_SUCCESS == libusb_get_device_descriptor (device, &desc)) {
+		DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("USB Hotplug: %1 vendor: %2 product: %3\n",
+					(event == LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED) ? "arrived" : "removed", std::hex, desc.idVendor, desc.idProduct));
+		cpm->probe_usb_control_protocols (event == LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED, desc.idVendor, desc.idProduct);
+	}
+
+	return _hotplug_thread_run ? 0 : 1;
+}
+
+static void*
+usb_hotplug_thread (void* user_data)
+{
+	while (_hotplug_thread_run) {
+		if (libusb_handle_events (_usb_ctx) < 0) {
+			break;
+		}
+	}
+	return 0;
+}
+#endif
+
 ControlProtocolInfo::~ControlProtocolInfo ()
 {
 	if (protocol && descriptor) {
@@ -62,6 +103,9 @@ ControlProtocolInfo::~ControlProtocolInfo ()
 		delete (Glib::Module*) descriptor->module;
 		descriptor = 0;
 	}
+#ifdef HAVE_USB
+	assert (!_hotplug_thread_run);
+#endif
 }
 
 ControlProtocolManager::ControlProtocolManager ()
@@ -93,6 +137,17 @@ ControlProtocolManager::set_session (Session* s)
 	SessionHandlePtr::set_session (s);
 
 	if (!_session) {
+#ifdef HAVE_USB
+		if (_hotplug_thread_run) {
+			_hotplug_thread_run = false;
+			libusb_hotplug_deregister_callback (_usb_ctx, _hpcp);
+			pthread_join (_hotplug_thread, NULL);
+		}
+		if (_usb_ctx) {
+			libusb_exit (_usb_ctx);
+			_usb_ctx = NULL;
+		}
+#endif
 		return;
 	}
 
@@ -116,6 +171,24 @@ ControlProtocolManager::set_session (Session* s)
 			StripableSelectionChanged (v); /* EMIT SIGNAL */
 		}
 	}
+
+#ifdef HAVE_USB
+	if (LIBUSB_SUCCESS == libusb_init (&_usb_ctx) && libusb_has_capability (LIBUSB_CAP_HAS_HOTPLUG)) {
+		if (LIBUSB_SUCCESS == libusb_hotplug_register_callback (_usb_ctx,
+					LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT,
+					LIBUSB_HOTPLUG_ENUMERATE,
+					LIBUSB_HOTPLUG_MATCH_ANY,
+					LIBUSB_HOTPLUG_MATCH_ANY,
+					LIBUSB_HOTPLUG_MATCH_ANY,
+					usb_hotplug_cb, this,
+					&_hpcp)) {
+			_hotplug_thread_run = true;
+			if (pthread_create (&_hotplug_thread, NULL, usb_hotplug_thread, this)) {
+				_hotplug_thread_run = false;
+			}
+		}
+	}
+#endif
 }
 
 int
@@ -576,6 +649,38 @@ ControlProtocolManager::probe_midi_control_protocols ()
 			cpi->automatic = true;
 			activate (*cpi);
 		} else if (active && cpi->automatic && !found) {
+			cpi->automatic = false;
+			deactivate (*cpi);
+			/* allow to auto-enable again */
+			if (!cpi->descriptor) {
+				cpi->descriptor = get_descriptor (cpi->path);
+			}
+		}
+	}
+}
+
+void
+ControlProtocolManager::probe_usb_control_protocols (bool arrived, uint16_t vendor, uint16_t product)
+{
+	if (!Config->get_auto_enable_surfaces ()) {
+		return;
+	}
+	for (auto const& cpi : control_protocol_info) {
+		/* Note: manual teardown deletes the descriptor */
+		if (!cpi->descriptor) {
+			cpi->automatic = false;
+			continue;
+		}
+		if (!cpi->descriptor->match_usb || !cpi->descriptor->match_usb (vendor, product)) {
+			continue;
+		}
+
+		bool active = 0 != cpi->protocol;
+
+		if (!active && arrived) {
+			cpi->automatic = true;
+			activate (*cpi);
+		} else if (active && cpi->automatic && !arrived) {
 			cpi->automatic = false;
 			deactivate (*cpi);
 			/* allow to auto-enable again */
