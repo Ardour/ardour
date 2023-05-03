@@ -97,6 +97,15 @@ ContourDesignControlProtocol::available ()
 	return rv;
 }
 
+bool
+ContourDesignControlProtocol::match_usb (uint16_t vendor, uint16_t p)
+{
+	if (vendor != ContourDesign) {
+		return false;
+	}
+	return (p == ShuttlePRO_id || p == ShuttlePRO_v2_id || p == ShuttleXpress_id);
+}
+
 int
 ContourDesignControlProtocol::set_active (bool yn)
 {

@@ -50,7 +50,7 @@ static ControlProtocolDescriptor contourdesign_descriptor = {
 	/* module     */ 0,
 	/* available  */ ContourDesignControlProtocol::available,
 	/* probe port */ 0,
-	/* match usb  */ 0,
+	/* match usb  */ ContourDesignControlProtocol::match_usb,
 	/* initialize */ new_contourdesign_protocol,
 	/* destroy    */ delete_contourdesign_protocol,
 };

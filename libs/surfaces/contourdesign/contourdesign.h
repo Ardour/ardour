@@ -85,6 +85,7 @@ public:
 	DeviceType device_type() const { return _device_type; }
 
 	static bool available ();
+	static bool match_usb (uint16_t, uint16_t);
 
 	int set_active (bool yn);
 
