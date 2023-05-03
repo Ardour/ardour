@@ -48,12 +48,14 @@ class LIBARDOUR_API ControlProtocolInfo {
 		std::string name;
 		std::string path;
 		bool requested;
+		bool automatic;
 		XMLNode* state;
 
 		ControlProtocolInfo()
 			: descriptor (0)
 			, protocol (0)
-			, requested(false)
+			, requested (false)
+			, automatic (false)
 			, state (0)
 	{}
 		~ControlProtocolInfo();

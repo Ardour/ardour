@@ -96,13 +96,9 @@ ControlProtocolManager::set_session (Session* s)
 		return;
 	}
 
-	{
-		Glib::Threads::RWLock::ReaderLock lm (protocols_lock);
-
-		for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
-			if ((*i)->requested) {
-				(void) activate (**i);
-			}
+	for (list<ControlProtocolInfo*>::iterator i = control_protocol_info.begin(); i != control_protocol_info.end(); ++i) {
+		if ((*i)->requested) {
+			(void) activate (**i);
 		}
 	}
 
@@ -134,6 +130,7 @@ ControlProtocolManager::activate (ControlProtocolInfo& cpi)
 		return 0;
 	}
 
+	Glib::Threads::RWLock::WriterLock lm (protocols_lock);
 	if ((cp = instantiate (cpi)) == 0) {
 		return -1;
 	}
@@ -216,7 +213,9 @@ ControlProtocolManager::instantiate (ControlProtocolInfo& cpi)
 		return 0;
 	}
 
-	cpi.descriptor = get_descriptor (cpi.path);
+	if (!cpi.descriptor) {
+		cpi.descriptor = get_descriptor (cpi.path);
+	}
 
 	DEBUG_TRACE (DEBUG::ControlProtocols, string_compose ("instantiating %1\n", cpi.name));
 
@@ -270,26 +269,24 @@ ControlProtocolManager::teardown (ControlProtocolInfo& cpi, bool lock_required)
 
 	cpi.descriptor->destroy (cpi.descriptor, cpi.protocol);
 
+	Glib::Threads::RWLock::WriterLock lm (protocols_lock, Glib::Threads::NOT_LOCK);
 	if (lock_required) {
 		/* the lock is required when the protocol is torn down by a user from the GUI. */
-		Glib::Threads::RWLock::WriterLock lm (protocols_lock);
-		list<ControlProtocol*>::iterator p = find (control_protocols.begin(), control_protocols.end(), cpi.protocol);
-		if (p != control_protocols.end()) {
-			control_protocols.erase (p);
-		} else {
-			cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocols" << endl;
-		}
+		lm.acquire ();
+	}
+
+	list<ControlProtocol*>::iterator p = find (control_protocols.begin(), control_protocols.end(), cpi.protocol);
+	if (p != control_protocols.end()) {
+		control_protocols.erase (p);
 	} else {
-		list<ControlProtocol*>::iterator p = find (control_protocols.begin(), control_protocols.end(), cpi.protocol);
-		if (p != control_protocols.end()) {
-			control_protocols.erase (p);
-		} else {
-			cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocols" << endl;
-		}
+		cerr << "Programming error: ControlProtocolManager::teardown() called for " << cpi.name << ", but it was not found in control_protocols" << endl;
+	}
+
+	if (lock_required) {
+		lm.release();
 	}
 
 	cpi.protocol = 0;
-
 	delete (Glib::Module*) cpi.descriptor->module;
 	/* cpi->descriptor is now inaccessible since dlclose() or equivalent
 	 * has been performed, and the descriptor is (or could be) a static
@@ -375,6 +372,7 @@ ControlProtocolManager::control_protocol_discover (string path)
 
 		if (!descriptor->probe (descriptor)) {
 			warning << string_compose (_("Control protocol %1 not usable"), descriptor->name) << endmsg;
+			delete (Glib::Module*) descriptor->module;
 		} else {
 
 			ControlProtocolInfo* cpi = new ControlProtocolInfo ();
@@ -422,6 +420,8 @@ ControlProtocolManager::get_descriptor (string path)
 
 	if (descriptor) {
 		descriptor->module = (void*)module;
+	} else {
+		delete module;
 	}
 
 	return descriptor;
