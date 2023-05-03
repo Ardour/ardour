@@ -60,13 +60,21 @@ delete_push2 (ControlProtocol* cp)
 	}
 }
 
+static bool
+probe_push2_midi_protocol ()
+{
+	std::string i, o;
+	return Push2::probe (i, o);
+}
+
+
 static ControlProtocolDescriptor push2_descriptor = {
 	/* name       */ "Ableton Push 2",
 	/* id         */ "uri://ardour.org/surfaces/push2:0",
 	/* module     */ 0,
 	/* available  */ Push2::available,
-	/* probe_port */ 0,
-	/* match usb  */ 0,
+	/* probe_port */ probe_push2_midi_protocol,
+	/* match usb  */ 0, // Push2::match_usb,
 	/* initialize */ new_push2,
 	/* destroy    */ delete_push2,
 };
