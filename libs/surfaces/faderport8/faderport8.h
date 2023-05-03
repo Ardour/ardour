@@ -67,6 +67,8 @@ public:
 	FaderPort8 (ARDOUR::Session&);
 	virtual ~FaderPort8();
 
+	static bool probe (std::string&, std::string&);
+
 	int set_active (bool yn);
 
 	XMLNode& get_state () const;

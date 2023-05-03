@@ -98,6 +98,36 @@ FaderPort8::ProcessorCtrl::operator< (const FaderPort8::ProcessorCtrl& other) co
 	return ac->desc().display_priority > other.ac->desc().display_priority;
 }
 
+bool
+FaderPort8::probe (std::string& i, std::string& o)
+{
+	vector<string> midi_inputs;
+	vector<string> midi_outputs;
+	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsOutput|IsTerminal), midi_inputs);
+	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsInput|IsTerminal), midi_outputs);
+
+	auto has_fp8 = [](string const& s) {
+		std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name (s);
+#ifdef FADERPORT16
+		return pn.find ("PreSonus FP16") != string::npos;
+#elif defined FADERPORT2
+		return pn.find ("PreSonus FP1") != string::npos;
+#else
+		return pn.find ("PreSonus FP8") != string::npos;
+#endif
+	};
+
+	auto pi = std::find_if (midi_inputs.begin (), midi_inputs.end (), has_fp8);
+	auto po = std::find_if (midi_outputs.begin (), midi_outputs.end (), has_fp8);
+
+	if (pi == midi_inputs.end () || po == midi_outputs.end ()) {
+		return false;
+	}
+
+	i = *pi;
+	o = *po;
+	return true;
+}
 
 FaderPort8::FaderPort8 (Session& s)
 #ifdef FADERPORT16
@@ -180,6 +210,12 @@ FaderPort8::FaderPort8 (Session& s)
 
 	_ctrls.FaderModeChanged.connect_same_thread (modechange_connections, boost::bind (&FaderPort8::notify_fader_mode_changed, this));
 	_ctrls.MixModeChanged.connect_same_thread (modechange_connections, boost::bind (&FaderPort8::assign_strips, this));
+
+	std::string  pn_in, pn_out;
+	if (probe (pn_in, pn_out)) {
+		inp->connect (pn_in);
+		outp->connect (pn_out);
+	}
 }
 
 FaderPort8::~FaderPort8 ()

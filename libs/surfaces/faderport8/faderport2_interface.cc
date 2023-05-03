@@ -49,12 +49,19 @@ delete_faderport2_midi_protocol (ControlProtocol* cp)
 	delete cp;
 }
 
+static bool
+probe_faderport2_midi_protocol ()
+{
+	std::string i, o;
+	return FaderPort8::probe (i, o);
+}
+
 static ControlProtocolDescriptor faderport2_midi_descriptor = {
 	/* name       */ "PreSonus FaderPort2",
 	/* id         */ "uri://ardour.org/surfaces/faderport2:0",
 	/* module     */ 0,
 	/* available  */ 0,
-	/* probe_port */ 0,
+	/* probe_port */ probe_faderport2_midi_protocol,
 	/* match usb  */ 0,
 	/* initialize */ new_faderport2_midi_protocol,
 	/* destroy    */ delete_faderport2_midi_protocol,
