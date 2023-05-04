@@ -1684,6 +1684,7 @@ void
 Locations::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, bool const copy)
 {
 	LocationList ll;
+	LocationList pastebuf;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -1756,7 +1757,40 @@ Locations::cut_copy_section (timepos_t const& start, timepos_t const& end, timep
 			i->set (i->start () + distance, i->end () + dist_end);
 
 		} else {
-			// TODO Copy/Paste: add new markers, disambiugate names
+			if (i->start() >= start && i->start() < end) {
+				Location* copy = new Location (*i);
+				pastebuf.push_back (copy);
+			}
+		}
+	}
+
+	if (copy) {
+		/* ripple */
+		timecnt_t distance = start.distance(end);
+		for (auto const& i : ll) {
+			if (i->start() >= to) {
+				if (i->is_mark ()) {
+					i->set_start (i->start () + distance);
+				} else {
+					i->set (i->start () + distance, i->end () + distance);
+				}
+			} else if (!i->is_mark () && i->end() >= to) {
+				i->set_end (i->end () + distance);
+			}
+		}
+		/* paste */
+		distance = start.distance (to);
+		for (auto const& i : pastebuf) {
+			if (i->is_mark ()) {
+				i->set_start (i->start () + distance);
+			} else {
+				i->set (i->start () + distance, i->end () + distance);
+			}
+			locations.push_back (i);
+			added (i); /* EMIT SIGNAL */
+			if (i->is_cue_marker()) {
+				Location::cue_change (i); /* EMIT SIGNAL */
+			}
 		}
 	}
 }
