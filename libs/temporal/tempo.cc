@@ -3119,6 +3119,33 @@ TempoMap::previous_tempo (TempoPoint const & point) const
 	return &(*i);
 }
 
+MeterPoint const *
+TempoMap::next_meter (MeterPoint const & t) const
+{
+	Meters::const_iterator i = _meters.iterator_to (t);
+	++i;
+
+	if (i != _meters.end()) {
+		return &(*i);
+	}
+
+	return 0;
+}
+
+MeterPoint const *
+TempoMap::previous_meter (MeterPoint const & point) const
+{
+	Meters::const_iterator i = _meters.iterator_to (point);
+
+	if (i == _meters.begin()) {
+		return 0;
+	}
+
+	--i;
+
+	return &(*i);
+}
+
 double
 TempoMap::quarters_per_minute_at (timepos_t const & pos) const
 {

@@ -796,6 +796,9 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API TempoPoint const* previous_tempo (TempoPoint const &) const;
 	LIBTEMPORAL_API TempoPoint const* next_tempo (TempoPoint const &) const;
 
+	LIBTEMPORAL_API MeterPoint const* previous_meter (MeterPoint const &) const;
+	LIBTEMPORAL_API MeterPoint const* next_meter (MeterPoint const &) const;
+
 	LIBTEMPORAL_API bool tempo_exists_before (TempoPoint const & t) const { return (bool) previous_tempo (t); }
 	LIBTEMPORAL_API bool tempo_exists_after (TempoPoint const & t) const { return (bool) next_tempo (t); }
 
