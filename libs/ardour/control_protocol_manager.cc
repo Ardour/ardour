@@ -175,7 +175,7 @@ ControlProtocolManager::set_session (Session* s)
 #ifdef HAVE_USB
 	if (LIBUSB_SUCCESS == libusb_init (&_usb_ctx) && libusb_has_capability (LIBUSB_CAP_HAS_HOTPLUG)) {
 		if (LIBUSB_SUCCESS == libusb_hotplug_register_callback (_usb_ctx,
-					LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT,
+					libusb_hotplug_event(LIBUSB_HOTPLUG_EVENT_DEVICE_ARRIVED | LIBUSB_HOTPLUG_EVENT_DEVICE_LEFT),
 					LIBUSB_HOTPLUG_ENUMERATE,
 					LIBUSB_HOTPLUG_MATCH_ANY,
 					LIBUSB_HOTPLUG_MATCH_ANY,
