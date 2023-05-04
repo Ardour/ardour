@@ -867,7 +867,56 @@ TempoMap::copy ( timepos_t const & start, timepos_t const & end)
 TempoMapCutBuffer*
 TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy)
 {
-	TempoMapCutBuffer* cb;
+	TempoMetric sm (metric_at (start));
+	TempoMetric em (metric_at (end));
+	timecnt_t dur = start.distance (end);
+
+	TempoMapCutBuffer* cb = new TempoMapCutBuffer (dur, sm, em);
+
+	superclock_t start_sclock = start.superclocks();
+	superclock_t end_sclock = end.superclocks();
+	bool removed = false;
+	
+	for (auto const & p : _points) {
+
+		/* XXX might to check time domain of start/end, and use beat
+		 * time here.
+		 */
+
+		if (p.sclock() < start_sclock || p.sclock() >= end_sclock) {
+			continue;
+		}
+
+		TempoPoint const * tp;
+		MeterPoint const * mp;
+		MusicTimePoint const * mtp;
+
+		if ((mtp = dynamic_cast<MusicTimePoint const *> (&p))) {
+			cb->add (*mtp);
+			if (!copy) {
+				core_remove_bartime (*mtp);
+				removed = true;
+			}
+		} else {
+			if ((tp = dynamic_cast<TempoPoint const *> (&p))) {
+				cb->add (*tp);
+				if (!copy) {
+					core_remove_tempo (*tp);
+					removed = true;
+				}
+			} else if ((mp = dynamic_cast<MeterPoint const *> (&p))) {
+				cb->add (*mp);
+				if (!copy) {
+					core_remove_meter (*mp);
+					removed = true;
+				}
+			}
+		}
+	}
+
+	if (!copy && removed) {
+		reset_starting_at (start_sclock);
+	}
 
 	return cb;
 }
@@ -1096,7 +1145,6 @@ TempoMap::remove_tempo (TempoPoint const & tp, bool with_reset)
 
 bool
 TempoMap::core_remove_tempo (TempoPoint const & tp)
-
 {
 	Tempos::iterator t;
 
@@ -1183,10 +1231,9 @@ TempoMap::add_or_replace_bartime (MusicTimePoint* mtp)
 	return ret;
 }
 
-void
-TempoMap::remove_bartime (MusicTimePoint const & tp, bool with_reset)
+bool
+TempoMap::core_remove_bartime (MusicTimePoint const & mtp)
 {
-	superclock_t sc (tp.sclock());
 	MusicTimes::iterator m;
 
 	/* the argument is likely to be a Point-derived object that doesn't
@@ -1204,22 +1251,32 @@ TempoMap::remove_bartime (MusicTimePoint const & tp, bool with_reset)
 	 * _points list.
 	 */
 
-	for (m = _bartimes.begin(); m != _bartimes.end() && m->sclock() < tp.sclock(); ++m);
+	for (m = _bartimes.begin(); m != _bartimes.end() && m->sclock() < mtp.sclock(); ++m);
 
 	if (m == _bartimes.end()) {
 		/* error ... not found */
-		return;
+		return false;
 	}
 
-	if  (m->sclock() != tp.sclock()) {
+	if  (m->sclock() != mtp.sclock()) {
 		/* error ... no music time point at the time of tp */
-		return;
+		return false;
 	}
 
-	remove_point (tp);
-	core_remove_tempo (tp);
-	core_remove_meter (tp);
+	remove_point (mtp);
+	core_remove_tempo (mtp);
+	core_remove_meter (mtp);
 	_bartimes.erase (m);
+
+	return true;
+
+}
+void
+TempoMap::remove_bartime (MusicTimePoint const & mtp, bool with_reset)
+{
+	superclock_t sc (mtp.sclock());
+
+	core_remove_bartime (mtp);
 
 	if (with_reset) {
 		reset_starting_at (sc);

@@ -1133,6 +1133,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	bool core_remove_meter (MeterPoint const &);
 	bool core_remove_tempo (TempoPoint const &);
+	bool core_remove_bartime (MusicTimePoint const &);
 
 	void reset_section (Points::iterator& begin, Points::iterator& end, superclock_t, TempoMetric& metric);
 
