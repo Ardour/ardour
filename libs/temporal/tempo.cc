@@ -3631,7 +3631,49 @@ TempoMap::iteratively_solve_ramp (TempoPoint& earlier, TempoPoint& later)
 }
 
 void
-TempoMap::twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& next, double tempo_value)
+TempoMap::linear_twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& next, double tempo_value)
+{
+	/* Check if the new tempo value is within an acceptable range */
+
+	if (tempo_value < 4.0 || tempo_value > 400) {
+		return;
+	}
+
+	TempoPoint old_prev (prev);
+	TempoPoint old_focus (focus);
+
+	/* Our job here is to reposition @param focus without altering the
+	 * positions of @param prev and @param next. We do this by changing
+	 * the tempo of prev (as opposed to ramped_twist_tempi, below )
+	 */
+
+	/* set a fixed tempo for the previous marker (this results in 'focus' moving a bit with the mouse) */
+	prev.set_note_types_per_minute (tempo_value);
+	prev.set_end_npm (tempo_value);
+
+	/* reposition focus, using prev to define audio time; leave beat time
+	 * and BBT alone
+	 */
+
+	focus.set (prev.superclock_at (focus.beats()), focus.beats(), focus.bbt());
+
+	/* Now iteratively adjust focus.superclocks_per_quarter_note() (the
+	 * section's starting tempo) so that next.sclock() remains within 1
+	 * sample of its current position
+	 */
+
+	std::cerr << "pre-iter\n";
+	dump (std::cerr);
+
+	if (!iteratively_solve_ramp (focus, next)) {
+		prev = old_prev;
+		focus = old_focus;
+		return;
+	}
+}
+
+void
+TempoMap::ramped_twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& next, double tempo_value)
 {
 	/* Check if the new tempo value is within an acceptable range */
 
