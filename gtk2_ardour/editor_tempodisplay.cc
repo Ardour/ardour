@@ -623,18 +623,46 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 		return;
 	}
 
+	Temporal::TempoMetric tm (TempoMap::use()->metric_at (section.sclock()));
+	Temporal::MeterPoint const * mpp (TempoMap::use()->previous_meter (tm.meter()));
+
 	double bpb = meter_dialog.get_bpb ();
 	bpb = max (1.0, bpb); // XXX is this a reasonable limit?
 
 	double const note_type = meter_dialog.get_note_type ();
 	const Meter meter (bpb, note_type);
 
-	Temporal::BBT_Time w;
-	meter_dialog.get_bbt_time (w);
-	Temporal::BBT_Argument when (timepos_t::zero (Temporal::BeatTime), w);
+	Temporal::Beats new_pos;
+
+	if (!mpp) {
+		/* first meter, cannot move */
+		new_pos = section.beats ();
+	} else {
+		/* Compute the given BBT time using a tempo metric composed
+		   from the tempo in effect at the current position, and the
+		   previous meter.
+
+		   Step 1: get BBT time from dialog
+		*/
+
+		Temporal::BBT_Time w;
+		meter_dialog.get_bbt_time (w);
+
+		/* Step 2: construct the relevant tempo metric */
+
+		TempoMetric prev_tm (tm.tempo(), *mpp);
+
+		/* Step 3: construct new BBT_Argument */
+
+		Temporal::BBT_Argument when (tm.reftime(), w);
+
+		/* Step 4: convert to quarters */
+
+		new_pos = prev_tm.quarters_at (when);
+	}
 
 	TempoMapChange tmc (*this, _("edit time signature"));
-	tmc.map().set_meter (meter, when);
+	tmc.map().set_meter (meter, timepos_t (new_pos));
 }
 
 void
@@ -666,7 +694,6 @@ void
 Editor::edit_tempo_section (TempoPoint& section)
 {
 	TempoDialog tempo_dialog (TempoMap::use(), section, _("done"));
-	Temporal::TempoMetric tm (TempoMap::use()->metric_at (section.sclock()));
 
 	switch (tempo_dialog.run ()) {
 	case RESPONSE_ACCEPT:
@@ -675,6 +702,9 @@ Editor::edit_tempo_section (TempoPoint& section)
 		return;
 	}
 
+	Temporal::TempoMetric tm (TempoMap::use()->metric_at (section.sclock()));
+	Temporal::TempoPoint const * tpp (TempoMap::use()->previous_tempo (tm.tempo()));
+
 	double bpm = tempo_dialog.get_bpm ();
 	double end_bpm = tempo_dialog.get_end_bpm ();
 	int nt = tempo_dialog.get_note_type ();
@@ -682,12 +712,41 @@ Editor::edit_tempo_section (TempoPoint& section)
 
 	const Tempo tempo (bpm, end_bpm, nt);
 
-	Temporal::BBT_Time w;
-	tempo_dialog.get_bbt_time (w);
-	Temporal::BBT_Argument when (tm.reftime(), w);
+	Temporal::Beats new_pos;
+
+	if (!tpp) {
+		/* first tempo, cannot move */
+		new_pos = section.beats ();
+	} else {
+		/* Compute the given BBT time using a tempo metric composed
+		   from the meter in effect at the current position, and the
+		   previous tempo.
+
+		   Step 1: get BBT time from dialog
+		*/
+
+		Temporal::BBT_Time w;
+		tempo_dialog.get_bbt_time (w);
+
+		/* Step 2: construct the relevant tempo metric */
+
+		TempoMetric prev_tm (*tpp, tm.meter());
+
+		/* Step 3: construct new BBT_Argument */
+
+		Temporal::BBT_Argument when (tm.reftime(), w);
+
+		/* Step 4: convert to quarters */
+
+		new_pos = prev_tm.quarters_at (when);
+	}
 
 	TempoMapChange tmc (*this, _("edit tempo"));
-	tmc.map().replace_tempo (section, tempo, timepos_t (tmc.map().quarters_at (when)));
+
+	// std::cerr << "using tempometric " << tm << std::endl;
+	// std::cerr << "edit tempo at " << when << " via quarters at = " << tmc.map().quarters_at (when) << std::endl;
+
+	tmc.map().replace_tempo (section, tempo, timepos_t (new_pos));
 }
 
 void
