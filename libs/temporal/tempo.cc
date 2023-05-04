@@ -851,6 +851,32 @@ TempoMap::copy_points (TempoMap const & other)
 	}
 }
 
+TempoMapCutBuffer*
+TempoMap::cut (timepos_t const & start, timepos_t const & end)
+{
+	return cut_copy (start, end, false);
+}
+
+TempoMapCutBuffer*
+TempoMap::copy ( timepos_t const & start, timepos_t const & end)
+{
+	return cut_copy (start, end, true);
+}
+
+
+TempoMapCutBuffer*
+TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy)
+{
+	TempoMapCutBuffer* cb;
+
+	return cb;
+}
+
+void
+TempoMap::paste (TempoMapCutBuffer& cb, timepos_t const & position)
+{
+}
+
 MeterPoint*
 TempoMap::add_meter (MeterPoint* mp)
 {

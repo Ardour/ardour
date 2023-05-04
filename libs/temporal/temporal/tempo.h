@@ -61,6 +61,7 @@ namespace Temporal {
 
 class Meter;
 class TempoMap;
+class TempoMapCutBuffer;
 
 class MapOwned {
  protected:
@@ -817,6 +818,10 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API	TempoMetric metric_at (Beats const &, bool can_match = true) const;
 	LIBTEMPORAL_API	TempoMetric metric_at (BBT_Argument const &, bool can_match = true) const;
 
+	LIBTEMPORAL_API TempoMapCutBuffer* cut (timepos_t const & start, timepos_t const & end);
+	LIBTEMPORAL_API TempoMapCutBuffer* copy (timepos_t const & start, timepos_t const & end);
+	LIBTEMPORAL_API void paste (TempoMapCutBuffer&, timepos_t const & position);
+
   private:
 	template<typename TimeType, typename Comparator> TempoPoint const & _tempo_at (TimeType when, Comparator cmp) const {
 		assert (!_tempos.empty());
@@ -1130,6 +1135,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	bool core_remove_tempo (TempoPoint const &);
 
 	void reset_section (Points::iterator& begin, Points::iterator& end, superclock_t, TempoMetric& metric);
+
+	TempoMapCutBuffer* cut_copy (timepos_t const & start, timepos_t const & end, bool copy);
 
 	/* These are not really const, but the lookup tables are marked mutable
 	 * to allow time domain conversions to store their results while being
