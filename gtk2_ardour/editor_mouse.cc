@@ -2924,6 +2924,13 @@ Editor::get_pointer_position (double& x, double& y) const
 void
 Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 {
+	/* In a departure from convention, this event is not handled by a widget
+	 * 'on' the ruler-bar, like a tempo marker, but is instead handled by the
+	 * mapping-bar widget itself. The intent is for the user to feel that they
+	 * are manipulating the 'beat and bar grid' which may or may not have tempo
+	 * markers already assigned at the point under the mouse.
+	 */
+
 	if (item != mapping_bar) {
 		return;
 	}
@@ -2935,9 +2942,9 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 
 	Temporal::TempoMap::WritableSharedPtr map = begin_tempo_mapping ();
 
-	/* Decide between a tempo twist drag, which we do if the
-	 * pointer is between two tempo markers, and a tempo stretch
-	 * drag, which we do if the pointer is after the last tempo
+	/* Decide between a mid-twist, which we do if the
+	 * pointer is between two tempo markers, and an end-stretch,
+	 * which we do if the pointer is after the last tempo
 	 * marker before the end of the map or a BBT Marker.
 	 */
 
@@ -2952,17 +2959,38 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 	TempoPoint* before;
 	TempoPoint* focus;
 
-	bool stretch = false;
-
+	bool at_end = false;
 	if (!after || dynamic_cast<MusicTimePoint*>(after)) {
-		stretch = true;
+		at_end = true;
 	}
 
 	BBT_Argument bbt = map->bbt_at (pointer_time);
 	bbt = BBT_Argument (bbt.reference(), bbt.round_to_beat ());
 
-	if (tempo.bbt() != bbt) {
+	/* BBT_Argument is meter-agnostic so we need to use the map's meter to resolve bar boundaries */
+	const Meter& m = map->meter_at (pointer_time);
+	if (bbt.beats > m.divisions_per_bar()){
+		bbt.beats = 1;
+		bbt.bars++;
+	}
 
+	if (tempo.bbt() == bbt) {
+		std::cerr << "we are on the RIGHT side of an EXISTING tempo marker" << bbt << " == " << tempo.bbt() << "\n";
+
+		before = const_cast<TempoPoint*> (map->previous_tempo (tempo));
+		focus = &tempo;
+
+	} else if ((after && after->bbt() == bbt )) {
+		std::cerr << "we are on the LEFT side of an EXISTING tempo marker" << bbt << " == " << after->bbt() << "\n";
+
+		before = const_cast<TempoPoint*> (&tempo);
+		focus = after;
+		after = const_cast<TempoPoint*> (map->next_tempo (*focus));
+		if (!after) {
+			at_end = true;  //but it's the last one, so we're operating on the last 
+		}
+
+	} else {
 		std::cerr << "ADD TEMPO MARKER " << bbt << " != " << tempo.bbt() << "\n";
 
 		/* Add a new tempo marker at the nearest beat point
@@ -2978,32 +3006,20 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		reset_tempo_marks ();
 
 		map->dump (std::cerr);
-
-	} else {
-
-		std::cerr << "USE TEMPO MARKER\n";
-
-		before = const_cast<TempoPoint*> (map->previous_tempo (tempo));
-
-		if (!before) {
-			delete before_state;
-			return;
-		}
-
-		focus = &tempo;
 	}
 
 	/* Reversible commands start here, must be ended/aborted in drag */
 
-	if (stretch) {
-		begin_reversible_command (_("map tempo/stretch"));
-		std::cerr << "STRETCH\n";
-		_drags->set (new MappingLinearDrag (this, item, map, tempo, *focus, *before_state), event);
+	if (at_end) {
+		begin_reversible_command (_("tempo mapping: end-stretch"));
+		std::cerr << "END STRETCH\n";
+		_drags->set (new MappingEndDrag (this, item, map, tempo, *focus, *before_state), event);
 		return;
 	}
 
-
-	std::cerr << "TWIST\n";
-	begin_reversible_command (_("map tempo/twist"));
-	_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after, *before_state), event);
+	if (before && focus && after) {
+		std::cerr << "TWIST\n";
+		begin_reversible_command (_("tempo mapping: mid-twist"));
+		_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after, *before_state), event);
+	}
 }

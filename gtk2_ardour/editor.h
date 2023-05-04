@@ -2547,8 +2547,7 @@ private:
 	friend class RegionMoveDrag;
 	friend class TrimDrag;
 	friend class MappingTwistDrag;
-	friend class MappingLinearDrag;
-	friend class MappingStretchDrag;
+	friend class MappingEndDrag;
 	friend class MeterMarkerDrag;
 	friend class BBTMarkerDrag;
 	friend class TempoMarkerDrag;

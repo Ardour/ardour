@@ -912,10 +912,10 @@ private:
 	XMLNode* _before_state;
 };
 
-class MappingLinearDrag : public Drag
+class MappingEndDrag : public Drag
 {
 public:
-	MappingLinearDrag (Editor *, ArdourCanvas::Item *, Temporal::TempoMap::WritableSharedPtr&, Temporal::TempoPoint&, Temporal::TempoPoint& after, XMLNode& before_state);
+	MappingEndDrag (Editor *, ArdourCanvas::Item *, Temporal::TempoMap::WritableSharedPtr&, Temporal::TempoPoint&, Temporal::TempoPoint& after, XMLNode& before_state);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -975,7 +975,8 @@ private:
 
 	double direction;
 	double delta;
-	double initial_npm;
+	double initial_focus_npm;
+	double initial_pre_npm;
 
 	XMLNode* _before_state;
 	bool     _drag_valid;

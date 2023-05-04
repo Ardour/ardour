@@ -3476,7 +3476,7 @@ BBTMarkerDrag::aborted (bool moved)
 
 /******************************************************************************/
 
-MappingLinearDrag::MappingLinearDrag (Editor* e, ArdourCanvas::Item* i, Temporal::TempoMap::WritableSharedPtr& wmap, TempoPoint& tp, TempoPoint& ap, XMLNode& before)
+MappingEndDrag::MappingEndDrag (Editor* e, ArdourCanvas::Item* i, Temporal::TempoMap::WritableSharedPtr& wmap, TempoPoint& tp, TempoPoint& ap, XMLNode& before)
 	: Drag (e, i, Temporal::BeatTime)
 	, _tempo (tp)
 	, _after (ap)
@@ -3485,12 +3485,12 @@ MappingLinearDrag::MappingLinearDrag (Editor* e, ArdourCanvas::Item* i, Temporal
 	, _before_state (&before)
 	, _drag_valid (true)
 {
-	DEBUG_TRACE (DEBUG::Drags, "New MappingLinearDrag\n");
+	DEBUG_TRACE (DEBUG::Drags, "New MappingEndDrag\n");
 
 }
 
 void
-MappingLinearDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
+MappingEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
@@ -3509,7 +3509,7 @@ MappingLinearDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 }
 
 void
-MappingLinearDrag::setup_pointer_offset ()
+MappingEndDrag::setup_pointer_offset ()
 {
 	Beats grab_qn = max (Beats(), raw_grab_time().beats());
 
@@ -3524,7 +3524,7 @@ MappingLinearDrag::setup_pointer_offset ()
 }
 
 void
-MappingLinearDrag::motion (GdkEvent* event, bool first_move)
+MappingEndDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (!_drag_valid) {
 		return;
@@ -3554,7 +3554,7 @@ MappingLinearDrag::motion (GdkEvent* event, bool first_move)
 }
 
 void
-MappingLinearDrag::finished (GdkEvent* event, bool movement_occurred)
+MappingEndDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!_drag_valid) {
 		aborted (false);
@@ -3576,7 +3576,7 @@ MappingLinearDrag::finished (GdkEvent* event, bool movement_occurred)
 }
 
 void
-MappingLinearDrag::aborted (bool /* moved */)
+MappingEndDrag::aborted (bool /* moved */)
 {
 	_editor->abort_reversible_command ();
 	_editor->abort_tempo_mapping ();
@@ -3600,7 +3600,8 @@ MappingTwistDrag::MappingTwistDrag (Editor* e, ArdourCanvas::Item* i, Temporal::
 	, _drag_valid (true)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MappingTwistDrag\n");
-	initial_npm = focus.note_types_per_minute ();
+	initial_focus_npm = focus.note_types_per_minute ();
+	initial_pre_npm = prv.note_types_per_minute ();
 }
 
 void
@@ -3630,13 +3631,15 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 	if (_drags->current_pointer_x() < last_pointer_x()) {
 		if (direction < 0.) {
 			direction = 1.;
-			initial_npm += delta;
+			initial_focus_npm += delta;
+			initial_pre_npm += delta;
 			delta = 0.;
 		}
 	} else {
 		if (direction >= 0.) {
 			direction = -1.;
-			initial_npm += delta;
+			initial_focus_npm += delta;
+			initial_pre_npm += delta;
 			delta = 0.;
 		}
 	}
@@ -3657,7 +3660,12 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 	delta += scaling_factor * pixel_distance;
 	std::cerr << "pixels " << pixel_distance << " spp " << spp << " SF " << scaling_factor << " delta = " << delta << std::endl;
 
-	map->twist_tempi (prev, focus, next, initial_npm + delta);
+	bool do_a_ramp = true;  // @ben
+	if (do_a_ramp) {
+		map->ramped_twist_tempi (prev, focus, next, initial_pre_npm + delta);
+	} else {
+		map->linear_twist_tempi (prev, focus, next, initial_focus_npm + delta);
+	}
 	_editor->mid_tempo_change (Editor::MappingChanged);
 }
 
