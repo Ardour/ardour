@@ -1127,6 +1127,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	bool core_remove_meter (MeterPoint const &);
 	bool core_remove_tempo (TempoPoint const &);
 
+	void reset_section (Points::iterator& begin, Points::iterator& end, superclock_t, TempoMetric& metric);
+
 	/* These are not really const, but the lookup tables are marked mutable
 	 * to allow time domain conversions to store their results while being
 	 * marked const (which is more semantically correct).
