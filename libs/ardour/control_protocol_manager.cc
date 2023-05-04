@@ -194,16 +194,15 @@ ControlProtocolManager::set_session (Session* s)
 int
 ControlProtocolManager::activate (ControlProtocolInfo& cpi)
 {
+	Glib::Threads::RWLock::WriterLock lm (protocols_lock);
 	ControlProtocol* cp;
 
-	cpi.requested = true;
-
 	if (cpi.protocol && cpi.protocol->active()) {
-		warning << string_compose (_("Control protocol %1 was already active."), cpi.name) << endmsg;
 		return 0;
 	}
 
-	Glib::Threads::RWLock::WriterLock lm (protocols_lock);
+	cpi.requested = true;
+
 	if ((cp = instantiate (cpi)) == 0) {
 		return -1;
 	}
