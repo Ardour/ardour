@@ -192,6 +192,8 @@ Push2::~Push2 ()
 {
 	DEBUG_TRACE (DEBUG::Push2, "push2 control surface object being destroyed\n");
 
+	stop_event_loop ();
+
 	MIDISurface::drop ();
 
 	if (_current_layout) {
@@ -209,10 +211,7 @@ Push2::~Push2 ()
 	_track_mix_layout = 0;
 	delete _cue_layout;
 	_cue_layout = 0;
-
-	stop_event_loop ();
 }
-
 
 void
 Push2::run_event_loop ()
