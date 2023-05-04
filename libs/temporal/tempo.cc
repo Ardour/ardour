@@ -4510,3 +4510,54 @@ DomainSwapInformation::undo ()
 
 	clear ();
 }
+
+TempoMapCutBuffer::TempoMapCutBuffer (timecnt_t const & dur, TempoMetric const & start, TempoMetric const & end)
+	: _start_metric (start)
+	, _end_metric (end)
+	, _duration (dur)
+{
+}
+
+void
+TempoMapCutBuffer::add (TempoPoint const & tp)
+{
+	TempoPoint* ntp = new TempoPoint (tp);
+
+	ntp->set (tp.sclock() - _duration.position().superclocks(), tp.beats(), tp.bbt());
+
+	_tempos.push_back (*ntp);
+	_points.push_back (*ntp);
+}
+
+void
+TempoMapCutBuffer::add (MeterPoint const & mp)
+{
+	MeterPoint* ntp = new MeterPoint (mp);
+
+	ntp->set (mp.sclock() - _duration.position().superclocks(), mp.beats(), mp.bbt());
+
+	_meters.push_back (*ntp);
+	_points.push_back (*ntp);
+}
+
+void
+TempoMapCutBuffer::add (MusicTimePoint const & mtp)
+{
+	MusicTimePoint* ntp = new MusicTimePoint (mtp);
+
+	ntp->set (mtp.sclock() - _duration.position().superclocks(), mtp.beats(), mtp.bbt());
+
+	_bartimes.push_back (*ntp);
+	_tempos.push_back (*ntp);
+	_meters.push_back (*ntp);
+	_points.push_back (*ntp);
+}
+
+void
+TempoMapCutBuffer::clear ()
+{
+	_tempos.clear ();
+	_meters.clear ();
+	_bartimes.clear ();
+	_points.clear ();
+}

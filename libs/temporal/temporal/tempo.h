@@ -1144,6 +1144,44 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	void drop_lookup_table ();
 };
 
+class LIBTEMPORAL_API TempoMapCutBuffer
+{
+  public:
+	TempoMapCutBuffer (timecnt_t const &, TempoMetric const &, TempoMetric const &);
+
+	timecnt_t duration() const { return _duration; }
+
+	TempoMetric const & metric_at_start () const { return _start_metric; }
+	TempoMetric const & metric_at_end () const { return _end_metric; }
+
+	typedef boost::intrusive::list<TempoPoint, boost::intrusive::base_hook<tempo_hook>> Tempos;
+	typedef boost::intrusive::list<MeterPoint, boost::intrusive::base_hook<meter_hook>> Meters;
+	typedef boost::intrusive::list<MusicTimePoint, boost::intrusive::base_hook<bartime_hook>> MusicTimes;
+	typedef boost::intrusive::list<Point, boost::intrusive::base_hook<point_hook>> Points;
+
+	void add (TempoPoint const &);
+	void add (MeterPoint const &);
+	void add (MusicTimePoint const &);
+	void add (Point const &);
+
+	void clear ();
+
+	Tempos const & tempos() const { return _tempos; }
+	Meters const & meters() const { return _meters; }
+	MusicTimes const & bartimes() const { return _bartimes; }
+	Points const & points() const { return _points; }
+
+  private:
+	TempoMetric _start_metric;
+	TempoMetric _end_metric;
+	timecnt_t   _duration;
+
+	Tempos       _tempos;
+	Meters       _meters;
+	MusicTimes   _bartimes;
+	Points       _points;
+};
+
 class LIBTEMPORAL_API TempoCommand : public Command {
 	public:
 
