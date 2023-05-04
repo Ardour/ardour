@@ -68,6 +68,9 @@ def build(bld):
     if bld.is_defined('HAVE_SUIL'):
         obj.uselib += ' SUIL'
 
+    if bld.is_defined('HAVE_USB'):
+        obj.uselib += ' USB'
+
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX'
         obj.use    += ' libappleutility'

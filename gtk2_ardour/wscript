@@ -577,6 +577,8 @@ def build(bld):
         obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
         obj.source += [ 'luadoc.cc', 'bundle_env_linux.cc' ]
         obj.use += [ 'X11' ]
+        if bld.is_defined('HAVE_USB'):
+            obj.uselib += ' USB'
         if bld.is_defined('HAVE_SUIL'):
             obj.source += [ 'lv2_plugin_ui.cc' ]
             obj.use += [ 'SUIL' ]
@@ -663,6 +665,8 @@ def build(bld):
     obj.linkflags    = ''
     obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
 
+    if bld.is_defined('HAVE_USB'):
+        obj.uselib += ' USB'
     if sys.platform == 'darwin':
         obj.uselib += ' AUDIOUNITS OSX '
         obj.use    += ' libappleutility'

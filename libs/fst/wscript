@@ -43,6 +43,8 @@ def build(bld):
         obj.use = [ 'libpbd' ]
         obj.uselib = 'GIOMM DL UUID ARCHIVE CURL XML'
 
+        if bld.is_defined('HAVE_USB'):
+            obj.uselib += ' USB'
         if sys.platform == 'darwin':
             obj.uselib += ' OSX'
         if bld.env['build_target'] == 'mingw':
@@ -67,6 +69,9 @@ def build(bld):
         else:
             obj.uselib = ['GIOMM', 'DL', 'OSX', 'ARCHIVE', 'CURL', 'XML' ]
             obj.use = [ 'libpbd', 'libtemporal', 'libevoral' ]
+
+        if bld.is_defined('HAVE_USB'):
+            obj.uselib += ['USB']
 
         obj.includes  = [ '../pbd/', '../ardour/', '.' ]
         obj.defines = [
