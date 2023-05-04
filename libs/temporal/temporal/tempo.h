@@ -820,7 +820,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API TempoMapCutBuffer* cut (timepos_t const & start, timepos_t const & end);
 	LIBTEMPORAL_API TempoMapCutBuffer* copy (timepos_t const & start, timepos_t const & end);
-	LIBTEMPORAL_API void paste (TempoMapCutBuffer&, timepos_t const & position);
+	LIBTEMPORAL_API void paste (TempoMapCutBuffer const &, timepos_t const & position, bool ripple);
 
   private:
 	template<typename TimeType, typename Comparator> TempoPoint const & _tempo_at (TimeType when, Comparator cmp) const {
@@ -1173,6 +1173,7 @@ class LIBTEMPORAL_API TempoMapCutBuffer
 	void add (Point const &);
 
 	void clear ();
+	void dump (std::ostream&);
 
 	Tempos const & tempos() const { return _tempos; }
 	Meters const & meters() const { return _meters; }

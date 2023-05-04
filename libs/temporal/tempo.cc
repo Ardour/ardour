@@ -876,7 +876,7 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy)
 	superclock_t start_sclock = start.superclocks();
 	superclock_t end_sclock = end.superclocks();
 	bool removed = false;
-	
+
 	for (auto const & p : _points) {
 
 		/* XXX might to check time domain of start/end, and use beat
@@ -922,8 +922,41 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy)
 }
 
 void
-TempoMap::paste (TempoMapCutBuffer& cb, timepos_t const & position)
+TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool ripple)
 {
+	if (ripple) {
+
+
+	}
+
+	bool replaced_ignored;
+
+	/* iterate over _points since they are already in sclock order, and we
+	 * won't need to post-sort the way we would if we handled tempos,
+	 * meters, bartimes separately.
+	 */
+
+	for (auto const & p : cb.points()) {
+		TempoPoint const * tp;
+		MeterPoint const * mp;
+		MusicTimePoint const * mtp;
+
+		if ((mtp = dynamic_cast<MusicTimePoint const *> (&p))) {
+			MusicTimePoint *ntp = new MusicTimePoint (*mtp);
+			ntp->set (ntp->sclock() + position.superclocks(), ntp->beats() + position.beats(), ntp->bbt());
+			core_add_bartime (ntp, replaced_ignored);
+		} else {
+			if ((tp = dynamic_cast<TempoPoint const *> (&p))) {
+				TempoPoint *ntp = new TempoPoint (*tp);
+				ntp->set (ntp->sclock() + position.superclocks(), ntp->beats() + position.beats(), ntp->bbt());
+				core_add_tempo (ntp, replaced_ignored);
+			} else if ((mp = dynamic_cast<MeterPoint const *> (&p))) {
+				MeterPoint *ntp = new MeterPoint (*mp);
+				ntp->set (ntp->sclock() + position.superclocks(), ntp->beats() + position.beats(), ntp->bbt());
+				core_add_meter (ntp, replaced_ignored);
+			}
+		}
+	}
 }
 
 MeterPoint*
@@ -2410,7 +2443,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 						DEBUG_TRACE (DEBUG::Grid, "\tthat was that\n");
 					}
 
-				} 
+				}
 
 				/* reset the metric to use the most recent tempo & meter */
 
@@ -4602,11 +4635,28 @@ TempoMapCutBuffer::TempoMapCutBuffer (timecnt_t const & dur, TempoMetric const &
 }
 
 void
+TempoMapCutBuffer::dump (std::ostream& ostr)
+{
+	ostr << "TempoMapCutBuffer @ " << this << std::endl;
+	ostr << "Tempos:\n";
+
+	for (auto const & t : _tempos) {
+		ostr << '\t' << &t << t << std::endl;
+	}
+}
+
+void
 TempoMapCutBuffer::add (TempoPoint const & tp)
 {
 	TempoPoint* ntp = new TempoPoint (tp);
 
-	ntp->set (tp.sclock() - _duration.position().superclocks(), tp.beats(), tp.bbt());
+	/* We must reset the audio and beat time position, but we can't do
+	 * anything useful with the BBT time designation.
+	 */
+
+	ntp->set (ntp->sclock() - _duration.position().superclocks(),
+	          ntp->beats() - _duration.position().beats(),
+	          ntp->bbt());
 
 	_tempos.push_back (*ntp);
 	_points.push_back (*ntp);
@@ -4617,7 +4667,13 @@ TempoMapCutBuffer::add (MeterPoint const & mp)
 {
 	MeterPoint* ntp = new MeterPoint (mp);
 
-	ntp->set (mp.sclock() - _duration.position().superclocks(), mp.beats(), mp.bbt());
+	/* We must reset the audio and beat time position, but we can't do
+	 * anything useful with the BBT time designation.
+	 */
+
+	ntp->set (ntp->sclock() - _duration.position().superclocks(),
+	          ntp->beats() - _duration.position().beats(),
+	          ntp->bbt());
 
 	_meters.push_back (*ntp);
 	_points.push_back (*ntp);
@@ -4628,7 +4684,13 @@ TempoMapCutBuffer::add (MusicTimePoint const & mtp)
 {
 	MusicTimePoint* ntp = new MusicTimePoint (mtp);
 
-	ntp->set (mtp.sclock() - _duration.position().superclocks(), mtp.beats(), mtp.bbt());
+	/* We must reset the audio and beat time position, but we can't do
+	 * anything useful with the BBT time designation.
+	 */
+
+	ntp->set (ntp->sclock() - _duration.position().superclocks(),
+	          ntp->beats() - _duration.position().beats(),
+	          ntp->bbt());
 
 	_bartimes.push_back (*ntp);
 	_tempos.push_back (*ntp);
