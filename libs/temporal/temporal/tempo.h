@@ -818,7 +818,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API	TempoMetric metric_at (Beats const &, bool can_match = true) const;
 	LIBTEMPORAL_API	TempoMetric metric_at (BBT_Argument const &, bool can_match = true) const;
 
-	LIBTEMPORAL_API TempoMapCutBuffer* cut (timepos_t const & start, timepos_t const & end);
+	LIBTEMPORAL_API TempoMapCutBuffer* cut (timepos_t const & start, timepos_t const & end, bool ripple);
 	LIBTEMPORAL_API TempoMapCutBuffer* copy (timepos_t const & start, timepos_t const & end);
 	LIBTEMPORAL_API void paste (TempoMapCutBuffer const &, timepos_t const & position, bool ripple);
 
@@ -1137,7 +1137,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	void reset_section (Points::iterator& begin, Points::iterator& end, superclock_t, TempoMetric& metric);
 
-	TempoMapCutBuffer* cut_copy (timepos_t const & start, timepos_t const & end, bool copy);
+	TempoMapCutBuffer* cut_copy (timepos_t const & start, timepos_t const & end, bool copy, bool ripple);
 
 	/* These are not really const, but the lookup tables are marked mutable
 	 * to allow time domain conversions to store their results while being

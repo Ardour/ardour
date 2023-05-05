@@ -852,20 +852,20 @@ TempoMap::copy_points (TempoMap const & other)
 }
 
 TempoMapCutBuffer*
-TempoMap::cut (timepos_t const & start, timepos_t const & end)
+TempoMap::cut (timepos_t const & start, timepos_t const & end, bool ripple)
 {
-	return cut_copy (start, end, false);
+	return cut_copy (start, end, false, ripple);
 }
 
 TempoMapCutBuffer*
 TempoMap::copy ( timepos_t const & start, timepos_t const & end)
 {
-	return cut_copy (start, end, true);
+	return cut_copy (start, end, true, false);
 }
 
 
 TempoMapCutBuffer*
-TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy)
+TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, bool ripple)
 {
 	TempoMetric sm (metric_at (start));
 	TempoMetric em (metric_at (end));
@@ -916,6 +916,10 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy)
 
 	if (!copy && removed) {
 		reset_starting_at (start_sclock);
+	}
+
+	if (!copy && ripple) {
+
 	}
 
 	return cb;
