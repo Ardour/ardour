@@ -738,7 +738,7 @@ Editor::edit_tempo_section (TempoPoint& section)
 
 		/* Step 4: convert to quarters */
 
-		new_pos = prev_tm.quarters_at (when);
+		new_pos = prev_tm.quarters_at (when).round_to_beat ();
 	}
 
 	TempoMapChange tmc (*this, _("edit tempo"));
