@@ -2221,8 +2221,6 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 	/* determine the BBT at start */
 
-#warning paul need to double check bbt reference time when changing bbt
-
 	bbt = metric.bbt_at (timepos_t::from_superclock (start));
 
 	/* first task: get to the right starting point for the requested
