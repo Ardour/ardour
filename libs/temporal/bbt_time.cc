@@ -20,6 +20,7 @@
 #include <cassert>
 
 #include "temporal/bbt_time.h"
+#include "temporal/bbt_argument.h"
 
 using namespace Temporal;
 
@@ -116,3 +117,13 @@ std::operator>>(std::istream& i, Temporal::BBT_Time& bbt)
 
 	return i;
 }
+
+/* define this here to avoid adding another .cc file for just this operator */
+
+std::ostream&
+std::operator<< (std::ostream& o, Temporal::BBT_Argument const & bbt)
+{
+	o << '@' << bbt.reference() << ':' << bbt.bars << '|' << bbt.beats << '|' << bbt.ticks;
+	return o;
+}
+

@@ -45,4 +45,10 @@ struct LIBTEMPORAL_API BBT_Argument : public BBT_Time
 
 } // end namespace
 
+namespace std {
+
+LIBTEMPORAL_API std::ostream& operator<< (std::ostream& o, Temporal::BBT_Argument const & bbt);
+
+}
+
 #endif /* __libtemporal_bbt_argument_h__ */
