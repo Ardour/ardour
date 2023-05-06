@@ -1522,8 +1522,18 @@ TempoMap::reset_section (Points::iterator& begin, Points::iterator& end, supercl
 					core_remove_meter (*mp);
 				}
 			} else {
-				DEBUG_TRACE (DEBUG::MapReset, string_compose ("\tbased on %1 move to %2,%3\n", p->bbt(), sc, metric.meter().quarters_at (p->bbt())));
-				p->set (sc, metric.meter().quarters_at (p->bbt()), p->bbt());
+
+				if (mp) {
+					/* Meter markers must be on-bar */
+					BBT_Time rounded = metric.meter().round_to_bar (p->bbt());
+					p->set (sc, metric.meter().quarters_at (rounded), rounded);
+					DEBUG_TRACE (DEBUG::MapReset, string_compose ("\tbased on %1 move meter point to %2,%3\n", p->bbt(), sc, p->beats()));
+				} else {
+					/* Tempo markers must be on-beat */
+					BBT_Time rounded = metric.meter().round_to_beat (p->bbt());
+					p->set (sc, metric.meter().quarters_at (rounded), rounded);
+					DEBUG_TRACE (DEBUG::MapReset, string_compose ("\tbased on %1 move tempo point to %2,%3\n", p->bbt(), sc, p->beats()));
+				}
 			}
 
 		} else {
