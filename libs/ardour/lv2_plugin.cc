@@ -76,7 +76,7 @@
 
 #include <lilv/lilv.h>
 
-#ifdef HAVE_LV2_1_18_1
+#ifdef HAVE_LV2_1_18_6
 #include <lv2/atom/atom.h>
 #include <lv2/atom/forge.h>
 #include <lv2/log/log.h>
