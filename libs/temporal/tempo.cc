@@ -2221,6 +2221,8 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 	/* determine the BBT at start */
 
+#warning paul need to double check bbt reference time when changing bbt
+
 	bbt = metric.bbt_at (timepos_t::from_superclock (start));
 
 	/* first task: get to the right starting point for the requested
@@ -2294,7 +2296,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 		if (bar != bbt) {
 
-			bbt = BBT_Argument (bbt.reference(), bar);
+			bbt = BBT_Argument (metric.reftime(), bar);
 
 			/* rebuild metric */
 
@@ -2400,7 +2402,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 				metric = TempoMetric (*tp, *mp);
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("reset metric from music-time point %1, now %2\n", *mtp, metric));
 
-				bbt = BBT_Argument (timepos_t::from_superclock (p->sclock()), p->bbt());
+				bbt = BBT_Argument (metric.reftime(), p->bbt());
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start using bbt %1 as %2\n", p->bbt(), bbt));
 				start = p->sclock();
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start to %1\n", start));
@@ -2417,6 +2419,8 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 				if (p != _points.end()) {
 					DEBUG_TRACE (DEBUG::Grid, string_compose ("\tstarting point is %1\n", *p));
+				} else  {
+					DEBUG_TRACE (DEBUG::Grid, "\treached end already\n");
 				}
 
 				/* Find all points at this BBT time (the next
@@ -2424,7 +2428,9 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 				 * we find, so that we will use that going forward.
 				 */
 
-				while (p != _points.end() && p->bbt() == bbt) {
+				superclock_t sc = p->sclock();
+
+				while (p != _points.end() && p->bbt() <= bbt && p->sclock() == sc) {
 
 					TempoPoint const * tpp;
 					MeterPoint const * mpp;
@@ -2442,7 +2448,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 					++p;
 
 					if (p != _points.end()) {
-						DEBUG_TRACE (DEBUG::Grid, string_compose ("\next point is %1\n", *p));
+						DEBUG_TRACE (DEBUG::Grid, string_compose ("next point is %1\n", *p));
 					} else {
 						DEBUG_TRACE (DEBUG::Grid, "\tthat was that\n");
 					}
@@ -2455,6 +2461,8 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 					metric = TempoMetric (*tp, *mp);
 					bbt = BBT_Argument (metric.reftime(), bbt);
 					DEBUG_TRACE (DEBUG::Grid, string_compose ("second| with start = %1 aka %2 rebuilt metric from points, now %3\n", start, bbt, metric));
+				} else {
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("not rebuilding metric, continuing with %1\n", metric));
 				}
 			}
 
