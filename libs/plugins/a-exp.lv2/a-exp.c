@@ -29,7 +29,11 @@
 #include "ardour/lv2_extensions.h"
 #endif
 
-#include "lv2/lv2plug.in/ns/lv2core/lv2.h"
+#ifdef HAVE_LV2_1_18_6
+#include <lv2/v2core/lv2.h>
+#else
+#include <lv2/lv2plug.in/ns/lv2core/lv2.h>
+#endif
 
 #define AEXP_URI "urn:ardour:a-exp"
 #define AEXP_STEREO_URI "urn:ardour:a-exp#stereo"
