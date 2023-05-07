@@ -699,6 +699,8 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	reserved_io_names[_("FaderPort8 Send")]  = false;
 	reserved_io_names[_("FaderPort16 Recv")] = false;
 	reserved_io_names[_("FaderPort16 Send")] = false;
+	reserved_io_names[_("Console1 Recv")]    = false;
+	reserved_io_names[_("Console1 Send")]    = false;
 
 	MIDI::Name::MidiPatchManager::instance ().load_midnams_in_thread ();
 

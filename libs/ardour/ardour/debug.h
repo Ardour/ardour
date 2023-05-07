@@ -48,6 +48,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits CC121;
 		LIBARDOUR_API extern DebugBits CaptureAlignment;
 		LIBARDOUR_API extern DebugBits ChanMapping;
+		LIBARDOUR_API extern DebugBits Console1;
 		LIBARDOUR_API extern DebugBits ContourDesignControl;
 		LIBARDOUR_API extern DebugBits ControlProtocols;
 		LIBARDOUR_API extern DebugBits CycleTimers;
