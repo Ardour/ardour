@@ -7256,7 +7256,18 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 		add_command (new MementoCommand<Locations> (*_locations, &before, &after));
 	}
 
-	// TODO: update Tempo-Map
+#if 0 // TODO - enable once tempo-map cut/copy/paste works
+	TempoMap::WritableSharedPtr wmap = TempoMap::write_copy ();
+	TempoMapCutBuffer* tmcb;
+	if (copy) {
+		tmcb = wmap->copy (start, end);
+	} else {
+		tmcb = wmap->cut (start, end, true);
+	}
+	wmap->paste (*tmcb, to, !copy);
+	TempoMap::update (wmap);
+	delete tmcb;
+#endif
 
 	if (!abort_empty_reversible_command ()) {
 		commit_reversible_command ();
