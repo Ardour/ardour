@@ -43,6 +43,7 @@ PBD::DebugBits PBD::DEBUG::Butler = PBD::new_debug_bit ("Butler");
 PBD::DebugBits PBD::DEBUG::CC121 = PBD::new_debug_bit ("cc121");
 PBD::DebugBits PBD::DEBUG::CaptureAlignment = PBD::new_debug_bit ("capturealignment");
 PBD::DebugBits PBD::DEBUG::ChanMapping = PBD::new_debug_bit ("chanmapping");
+PBD::DebugBits PBD::DEBUG::Console1 = PBD::new_debug_bit ("console1");
 PBD::DebugBits PBD::DEBUG::ContourDesignControl = PBD::new_debug_bit ("contourdesigncontrol");
 PBD::DebugBits PBD::DEBUG::ControlProtocols = PBD::new_debug_bit ("controlprotocols");
 PBD::DebugBits PBD::DEBUG::CycleTimers = PBD::new_debug_bit ("cycletimers");
