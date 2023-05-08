@@ -215,7 +215,7 @@ Console1::connect_internal_signals ()
 	GotoView.connect (
 	  console1_connections,
 	  MISSING_INVALIDATOR,
-	  [] (uint val) { DEBUG_TRACE (DEBUG::Console1, string_compose ("GotooView: %1\n", val)); },
+	  [] (uint32_t val) { DEBUG_TRACE (DEBUG::Console1, string_compose ("GotooView: %1\n", val)); },
 	  this);
 	VerticalZoomInSelected.connect (
 	  console1_connections, MISSING_INVALIDATOR, [] () { DEBUG_TRACE (DEBUG::Console1, "VerticalZoomIn\n"); }, this);
