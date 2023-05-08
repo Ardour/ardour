@@ -2369,7 +2369,6 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t start, superclock_t end, u
 
 		if (!mtp) {
 			if (bbt == p->bbt()) {
-				ret.push_back (TempoMapPoint (*this, metric, start, beats, bbt));
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("Gc %1\t       [%2]\n", metric, ret.back()));
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("we've reached the next point via BBT, BBT %1 audio %2 point %3\n", bbt, start, *p));
 				reset = true;
