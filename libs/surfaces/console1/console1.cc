@@ -1082,7 +1082,7 @@ Console1::create_strip_invetory ()
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("insert strip at index %1, order %2\n", index, pi.order ()));
 		++index;
 	}
-	if (master_order.has_value ()) {
+	if (master_order) {
 		strip_inventory.insert (std::make_pair (index, master_order.value ()));
 	}
 	DEBUG_TRACE (DEBUG::Console1,
