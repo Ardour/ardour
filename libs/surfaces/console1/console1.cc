@@ -16,9 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "console1.h"
 
-#include "glibmm-2.4/glibmm/main.h"
+#include <glibmm-2.4/glibmm/main.h>
+#include <boost/optional.hpp>
+
 #include "pbd/abstract_ui.cc" // instantiate template
 #include "pbd/controllable.h"
 #include "pbd/i18n.h"
@@ -34,6 +35,7 @@
 #include "ardour/track.h"
 #include "ardour/vca_manager.h"
 
+#include "console1.h"
 #include "c1_gui.h"
 #include "c1_control.h"
 
