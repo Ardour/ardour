@@ -1957,7 +1957,7 @@ VST3PI::set_parameter (uint32_t p, float value, int32 sample_off, bool to_list, 
 	if (_shadow_data[p] == value && sample_off == 0 && to_list && !force) {
 		return;
 	}
-	if (to_list && parameter_is_automatable (p)) {
+	if (to_list && (sample_off == 0 || parameter_is_automatable (p))) {
 		set_parameter_internal (id, value, sample_off);
 	}
 	_shadow_data[p] = value;
