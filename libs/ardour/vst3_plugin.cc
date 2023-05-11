@@ -1268,8 +1268,6 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 	memset (&_program_change_port, 0, sizeof (_program_change_port));
 	_program_change_port.id = Vst::kNoParamId;
 
-	FUnknownPtr<Vst::IEditControllerHostEditing> host_editing (_controller);
-
 	FUnknownPtr<Vst::IEditController2> controller2 (_controller);
 	if (controller2) {
 		controller2->setKnobMode (Vst::kLinearMode);
@@ -1286,13 +1284,6 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 		if (pi.flags & Vst::ParameterInfo::kIsProgramChange) {
 			_program_change_port = pi;
 			continue;
-		}
-		/* allow non-automatable parameters IFF IEditControllerHostEditing is available */
-		if (0 == (pi.flags & Vst::ParameterInfo::kCanAutomate) && !host_editing) {
-			/* but allow read-only, not automatable params (ctrl outputs) */
-			if (0 == (pi.flags & Vst::ParameterInfo::kIsReadOnly)) {
-				continue;
-			}
 		}
 		if (tchar_to_utf8 (pi.title).find ("MIDI CC ") != std::string::npos) {
 			/* Some JUCE plugins add 16 * 128 automatable MIDI CC parameters */
@@ -1312,6 +1303,16 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 		if (pi.flags & /*Vst::ParameterInfo::kIsHidden*/ (1 << 4)) {
 			p.label = X_("hidden");
 		}
+
+#if 1 // if (host_editing == 0) // FUnknownPtr<Vst::IEditControllerHostEditing> host_editing (_controller);
+		if (0 == (pi.flags & (Vst::ParameterInfo::kCanAutomate | Vst::ParameterInfo::kIsReadOnly))) {
+			/* Hide writable parameters that cannot be automated in the generic UI.
+			 * Those are usually internal params or MIDI ctrl hacks.
+			 * index_to_id() needs to work for those.
+			 */
+			p.label = X_("hidden");
+		}
+#endif
 
 		uint32_t idx = _ctrl_params.size ();
 		_ctrl_params.push_back (p);
@@ -1956,7 +1957,7 @@ VST3PI::set_parameter (uint32_t p, float value, int32 sample_off, bool to_list, 
 	if (_shadow_data[p] == value && sample_off == 0 && to_list && !force) {
 		return;
 	}
-	if (to_list) {
+	if (to_list && parameter_is_automatable (p)) {
 		set_parameter_internal (id, value, sample_off);
 	}
 	_shadow_data[p] = value;
@@ -2055,12 +2056,11 @@ VST3PI::update_contoller_param ()
 			continue;
 		}
 		_update_ctrl[i->first] = false;
-		if (!parameter_is_automatable (i->first) && !parameter_is_readonly (i->first)) {
-			assert (host_editing);
+		if (host_editing && !parameter_is_automatable (i->first) && !parameter_is_readonly (i->first)) {
 			host_editing->beginEditFromHost (i->second);
 		}
 		_controller->setParamNormalized (i->second, _shadow_data[i->first]);
-		if (!parameter_is_automatable (i->first) && !parameter_is_readonly (i->first)) {
+		if (host_editing && !parameter_is_automatable (i->first) && !parameter_is_readonly (i->first)) {
 			host_editing->endEditFromHost (i->second);
 		}
 	}
@@ -2094,12 +2094,11 @@ VST3PI::get_parameter (uint32_t p) const
 		_update_ctrl[p] = false;
 
 		FUnknownPtr<Vst::IEditControllerHostEditing> host_editing (_controller);
-		if (!parameter_is_automatable (p) && !parameter_is_readonly (p)) {
-			assert (host_editing);
+		if (host_editing && !parameter_is_automatable (p) && !parameter_is_readonly (p)) {
 			host_editing->beginEditFromHost (id);
 		}
 		_controller->setParamNormalized (id, _shadow_data[p]); // GUI thread only
-		if (!parameter_is_automatable (p) && !parameter_is_readonly (p)) {
+		if (host_editing && !parameter_is_automatable (p) && !parameter_is_readonly (p)) {
 			host_editing->endEditFromHost (id);
 		}
 	}
