@@ -147,6 +147,14 @@ Console1::shift (const uint32_t val)
 }
 
 void
+Console1::plugin_state (const uint32_t)
+{
+	DEBUG_TRACE (DEBUG::Console1, "plugin_state()\n");
+	in_plugin_state = !in_plugin_state;
+	PluginStateChange (in_plugin_state);
+}
+
+void
 Console1::solo (const uint32_t)
 {
 	DEBUG_TRACE (DEBUG::Console1, "Console1::solo())\n");
@@ -654,6 +662,28 @@ Console1::map_shift (bool shift)
 		map_stripable_state ();
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
+	}
+}
+
+void
+Console1::map_plugin_state (bool plugin_state)
+{
+	DEBUG_TRACE (DEBUG::Console1, "map_plugin_state()\n");
+	try {
+		ControllerButton& controllerButton = static_cast<ControllerButton&> (get_button (TRACK_GROUP));
+		controllerButton.set_led_state (in_plugin_state);
+	} catch (ControlNotFoundException& e) {
+		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
+	}
+	if (!plugin_state) {
+		for (uint32_t i = 0; i < bank_size; ++i) {
+			stop_blinking (ControllerID (FOCUS1 + i));
+		}
+		map_stripable_state ();
+	} else {
+        // I don't plan shift functionality with plugins...
+		shift (0);
+        // map all plugin related operations
 	}
 }
 
