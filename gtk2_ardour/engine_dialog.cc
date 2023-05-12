@@ -2679,7 +2679,9 @@ EngineControl::on_response (int r)
 	 * StartupFSM does hide us after response(); Window > Audio/MIDI Setup
 	 * does not.
 	 */
-	pop_splash ();
+	if (r == RESPONSE_OK) {
+		pop_splash ();
+	}
 	Gtk::Dialog::on_response (r);
 }
 
@@ -2696,16 +2698,18 @@ EngineControl::start_stop_button_clicked ()
 		return;
 	}
 
+	int rv = RESPONSE_OK;
+
 	if (ARDOUR::AudioEngine::instance ()->running ()) {
 		ARDOUR::AudioEngine::instance ()->stop ();
 	} else {
 		/* whoever displayed this dialog is expected to do its own
 		   check on whether or not the engine is running.
 		*/
-		start_engine ();
+		rv = start_engine () ? RESPONSE_OK : RESPONSE_ACCEPT;
 	}
 
-	response (RESPONSE_OK);
+	response (rv);
 }
 
 void
