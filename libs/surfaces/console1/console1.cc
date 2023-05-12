@@ -167,10 +167,6 @@ Console1::begin_using_device ()
 	create_strip_invetory ();
 	connect_internal_signals ();
 	map_shift (false);
-	if (!first_selected_stripable ()) {
-		select_rid_by_index (0);
-	}
-	stripable_selection_changed ();
 	return 0;
 }
 
