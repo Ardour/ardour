@@ -45,10 +45,13 @@ class ControllerButton : public Controller
 	ControllerButton (Console1& console1,
 	                  ControllerID id,
 	                  boost::function<void (uint32_t)> action,
-	                  boost::function<void (uint32_t)> shift_action = 0)
+	                  boost::function<void (uint32_t)> shift_action = 0,
+	                  boost::function<void (uint32_t)> plugin_action = 0
+                      )
 	  : Controller (console1, id)
 	  , action (action)
 	  , shift_action (shift_action)
+      , plugin_action (plugin_action)
 	{
 		console1.buttons.insert (std::make_pair (id, *this));
 	}
@@ -78,6 +81,7 @@ class ControllerButton : public Controller
 	}
 	boost::function<void (uint32_t)> action;
 	boost::function<void (uint32_t)> shift_action;
+	boost::function<void (uint32_t)> plugin_action;
 };
 
 class MultiStateButton : public Controller

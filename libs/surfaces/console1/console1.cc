@@ -26,6 +26,7 @@
 
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/meter.h"
 #include "ardour/monitor_control.h"
 #include "ardour/phase_control.h"
@@ -36,8 +37,8 @@
 #include "ardour/vca_manager.h"
 
 #include "console1.h"
-#include "c1_gui.h"
 #include "c1_control.h"
+#include "c1_gui.h"
 
 using namespace ARDOUR;
 using namespace ArdourSurface;
@@ -67,7 +68,6 @@ Console1::~Console1 ()
 
 	BaseUI::quit ();
 }
-
 
 void
 Console1::all_lights_out ()
@@ -149,6 +149,7 @@ Console1::begin_using_device ()
 	  f0 7d 20 00 00 00 01 00 7f 49 6f 6c 73 00 f7
 	*/
 
+	load_mappings ();
 	setup_controls ();
 
 	/*
@@ -208,6 +209,8 @@ Console1::connect_internal_signals ()
 {
 	BankChange.connect (console1_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_bank, this), this);
 	ShiftChange.connect (console1_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_shift, this, _1), this);
+	PluginStateChange.connect (
+	  console1_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_plugin_state, this, _1), this);
 	GotoView.connect (
 	  console1_connections,
 	  MISSING_INVALIDATOR,
@@ -227,11 +230,18 @@ Console1::setup_controls ()
 		ControllerButton track_select_button (
 		  *this,
 		  ControllerID (FOCUS1 + i),
-		  boost::function<void (uint32_t)> (boost::bind (&Console1::select, this, i)));
+		  boost::function<void (uint32_t)> (boost::bind (&Console1::select, this, i)),
+		  0,
+		  boost::function<void (uint32_t)> (boost::bind (&Console1::select_plugin, this, i)));
 	}
 
 	ControllerButton shift_button (
 	  *this, ControllerID::PRESET, boost::function<void (uint32_t)> (boost::bind (&Console1::shift, this, _1)));
+
+	ControllerButton plugin_state_button (
+	  *this,
+	  ControllerID::TRACK_GROUP,
+	  boost::function<void (uint32_t)> (boost::bind (&Console1::plugin_state, this, _1)));
 
 	ControllerButton rude_solo (
 	  *this, ControllerID::DISPLAY_ON, boost::function<void (uint32_t)> (boost::bind (&Console1::rude_solo, this, _1)));
@@ -411,7 +421,10 @@ Console1::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb
 
 	try {
 		ControllerButton& b = get_button (ControllerID (controller_number));
-		if (shift_state && b.shift_action) {
+		if (in_plugin_state && b.plugin_action) {
+			DEBUG_TRACE (DEBUG::Console1, "Executing plugin_action\n");
+			b.plugin_action (value);
+		} else if (shift_state && b.shift_action) {
 			DEBUG_TRACE (DEBUG::Console1, "Executing shift_action\n");
 			b.shift_action (value);
 		} else {
