@@ -757,6 +757,9 @@ VideoTimeLine::find_xjadeo () {
 				else if (v_major == 0 && v_minor >= 8) v_ok = true;
 				else if (v_major == 0 && v_minor >= 7 && v_micro >= 7) v_ok = true;
 			}
+			if (v_ok) {
+				info << string_compose ("xjadeo version: %1.%2.%3", v_major, v_minor, v_micro) << endmsg;
+			}
 		}
 		if (!v_ok) {
 			_xjadeo_bin = X_("");
