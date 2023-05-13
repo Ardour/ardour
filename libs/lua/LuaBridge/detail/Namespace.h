@@ -2030,6 +2030,7 @@ public:
       .addFunction ("unique", (void (LT::*)())&LT::unique)
 # endif
 #endif
+      .addFunction ("clear", (void (LT::*)())&LT::clear)
       .addFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
       .addExtCFunction ("add", &CFunc::tableToList<T, LT>);
   }
@@ -2066,6 +2067,7 @@ public:
       .addFunction ("unique", (void (LT::*)())&LT::unique)
 # endif
 #endif
+      .addFunction ("clear", (void (LT::*)())&LT::clear)
       .addExtCFunction ("push_back", &CFunc::pushbackptr<T, LT>);
   }
 
@@ -2131,6 +2133,7 @@ public:
       .addPtrFunction ("unique", (void (LT::*)())&LT::unique)
 # endif
 #endif
+      .addPtrFunction ("clear", (void (LT::*)())&LT::clear)
       .addPtrFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
       .addExtCFunction ("add", &CFunc::ptrTableToList<T, LT>)
       .addExtCFunction ("iter", &CFunc::ptrListIter<T, LT>)
@@ -2163,6 +2166,7 @@ public:
       //.addVoidPtrConstructor<LT> ()
       .addPtrFunction ("empty", (bool (LT::*)()const)&LT::empty)
       .addPtrFunction ("size", (T_SIZE (LT::*)()const)&LT::size)
+      .addPtrFunction ("clear", (void (LT::*)())&LT::clear)
       .addPtrFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
       .addPtrFunction ("at", (T_REF (LT::*)(T_SIZE))&LT::at)
       .addExtCFunction ("add", &CFunc::ptrTableToList<T, LT>)
