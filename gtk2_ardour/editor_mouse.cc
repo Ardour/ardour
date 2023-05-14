@@ -2951,12 +2951,10 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 	timepos_t pointer_time (canvas_event_sample (event, nullptr, nullptr));
 	Temporal::TempoPoint& tempo = const_cast<Temporal::TempoPoint&>(map->tempo_at (pointer_time));
 
+	TempoPoint* before = const_cast<TempoPoint*> (map->previous_tempo (tempo));
 	TempoPoint* after = const_cast<TempoPoint*> (map->next_tempo (tempo));
 
-	/* Create a new marker, or use the under the mouse */
-
 	XMLNode* before_state = &map->get_state();
-	TempoPoint* before;
 	TempoPoint* focus;
 
 	bool at_end = false;
@@ -2974,20 +2972,34 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		bbt.bars++;
 	}
 
+	/* Create a new marker, or use the one under the mouse */
+
 	if (tempo.bbt() == bbt) {
 		std::cerr << "we are on the RIGHT side of an EXISTING tempo marker" << bbt << " == " << tempo.bbt() << "\n";
 
-		before = const_cast<TempoPoint*> (map->previous_tempo (tempo));
+		/* special case 1: we are on the right side of the FIRST marker: do not allow the user to manipulate the very first (session global) tempo */
+		if (!before) {
+			abort_tempo_mapping ();
+			return;
+		}
+
 		focus = &tempo;
+
+		/* special case 2: if we are on the right side of the LAST marker: behave as if we clicked the marker prior*/
+		if (at_end) {
+			focus = before;
+		}
 
 	} else if ((after && after->bbt() == bbt )) {
 		std::cerr << "we are on the LEFT side of an EXISTING tempo marker" << bbt << " == " << after->bbt() << "\n";
 
 		before = const_cast<TempoPoint*> (&tempo);
 		focus = after;
-		after = const_cast<TempoPoint*> (map->next_tempo (*focus));
-		if (!after) {
-			at_end = true;  //but it's the last one, so we're operating on the last 
+
+		/* special case 3: if we are on the left side of the LAST marker: behave as if we clicked the marker prior*/
+		TempoPoint* after_after = const_cast<TempoPoint*> (map->next_tempo (*focus));
+		if (!after_after) {
+			at_end = true; 
 		}
 
 	} else {
