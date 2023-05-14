@@ -5343,6 +5343,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 				/* successfully inserted into set, so it's the first time we've seen this playlist */
 				playlist->clear_changes ();
 				playlist->clear_owned_changes ();
+				playlist->freeze ();
 			}
 		}
 
@@ -5383,6 +5384,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 			if (playlists.insert (playlist).second) {
 				playlist->clear_changes ();
 				playlist->clear_owned_changes ();
+				playlist->freeze ();
 			}
 		}
 
@@ -5394,6 +5396,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 	}
 
 	for (PlaylistSet::iterator p = playlists.begin(); p != playlists.end(); ++p) {
+		(*p)->thaw ();
 		(*p)->rdiff_and_add_command (_session);
 	}
 
