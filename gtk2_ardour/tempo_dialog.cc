@@ -50,7 +50,7 @@ using namespace PBD;
 using namespace Temporal;
 
 TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, timepos_t const & pos, const string&)
-	: ArdourDialog (_("New Tempo"))
+	: ArdourDialog (_("New Tempo"), true)
 	, _map (map)
 	, _section (0)
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
@@ -71,7 +71,7 @@ TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, timepos_t const & pos
 }
 
 TempoDialog::TempoDialog (TempoMap::SharedPtr const & map, TempoPoint& point, const string&)
-	: ArdourDialog (_("Edit Tempo"))
+	: ArdourDialog (_("Edit Tempo"), true)
 	, _map (map)
 	, _section (&point)
 	, bpm_adjustment (60.0, 1.0, 999.9, 0.1, 1.0)
