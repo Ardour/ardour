@@ -351,10 +351,9 @@ protected:
 	PBD::ScopedConnectionList            region_drop_references_connections;
 	DataType                             _type;
 	uint32_t                             _sort_id;
-	mutable std::atomic<int>            block_notifications;
-	mutable std::atomic<int>            ignore_state_changes;
-	std::set<std::shared_ptr<Region> > pending_adds;
-	std::set<std::shared_ptr<Region> > pending_removes;
+	mutable std::atomic<int>             block_notifications;
+	std::set<std::shared_ptr<Region> >   pending_adds;
+	std::set<std::shared_ptr<Region> >   pending_removes;
 	RegionList                           pending_bounds;
 	bool                                 pending_contents_change;
 	bool                                 pending_layering;
@@ -393,8 +392,7 @@ protected:
 
 	bool holding_state () const
 	{
-		return block_notifications.load () != 0 ||
-		       ignore_state_changes.load () != 0;
+		return block_notifications.load () != 0;
 	}
 
 	void         delay_notifications ();
@@ -472,7 +470,6 @@ private:
 	mutable Glib::Threads::RWLock region_lock;
 
 private:
-	void freeze_locked ();
 	void setup_layering_indices (RegionList const &);
 	void coalesce_and_check_crossfades (std::list<Temporal::TimeRange>);
 	std::shared_ptr<RegionList> find_regions_at (timepos_t const &);

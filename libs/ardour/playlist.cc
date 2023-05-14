@@ -322,7 +322,6 @@ Playlist::init (bool hide)
 	_xml_node_name = X_("Playlist");
 
 	block_notifications.store (0);
-	ignore_state_changes.store (0);
 	pending_contents_change     = false;
 	pending_layering            = false;
 	first_set_state             = true;
@@ -422,22 +421,14 @@ Playlist::freeze ()
 	/* flush any ongoing reads, paricularly AudioPlaylist::read(),
 	 * before beginning to modify the playlist.
 	 */
-	RegionWriteLock rlock (this);
-	freeze_locked ();
-}
-
-void
-Playlist::freeze_locked ()
-{
+	RegionWriteLock rlock (this, false);
 	delay_notifications ();
-	ignore_state_changes.fetch_add (1);
 }
 
 /** @param from_undo true if this thaw is triggered by the end of an undo on this playlist */
 void
 Playlist::thaw (bool from_undo)
 {
-	PBD::atomic_dec_and_test (ignore_state_changes);
 	release_notifications (from_undo);
 }
 
@@ -2217,20 +2208,15 @@ Playlist::update (const RegionListProperty::ChangeRecord& change)
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("Playlist %1 updates from a change record with %2 adds %3 removes\n",
 	                                                name (), change.added.size (), change.removed.size ()));
 
-	{
-		RegionWriteLock rlock (this);
-		freeze_locked ();
-		/* add the added regions */
-		for (RegionListProperty::ChangeContainer::const_iterator i = change.added.begin(); i != change.added.end(); ++i) {
-			add_region_internal ((*i), (*i)->position(), rlock.thawlist);
-		}
-		/* remove the removed regions */
-		for (RegionListProperty::ChangeContainer::const_iterator i = change.removed.begin (); i != change.removed.end (); ++i) {
-			remove_region_internal (*i, rlock.thawlist);
-		}
+	RegionWriteLock rlock (this);
+	/* add the added regions */
+	for (RegionListProperty::ChangeContainer::const_iterator i = change.added.begin(); i != change.added.end(); ++i) {
+		add_region_internal ((*i), (*i)->position(), rlock.thawlist);
 	}
-
-	thaw ();
+	/* remove the removed regions */
+	for (RegionListProperty::ChangeContainer::const_iterator i = change.removed.begin (); i != change.removed.end (); ++i) {
+		remove_region_internal (*i, rlock.thawlist);
+	}
 }
 
 int
@@ -3002,19 +2988,13 @@ Playlist::ripple (timepos_t const & at, timecnt_t const & distance, RegionList *
 void
 Playlist::update_after_tempo_map_change ()
 {
-	{
-		RegionWriteLock rlock (const_cast<Playlist*> (this));
-		RegionList      copy (regions.rlist ());
+	RegionWriteLock rlock (const_cast<Playlist*> (this));
+	RegionList      copy (regions.rlist ());
 
-		freeze_locked ();
-
-		for (auto & r : copy) {
-			rlock.thawlist.add (r);
-			r->update_after_tempo_map_change ();
-		}
+	for (auto & r : copy) {
+		rlock.thawlist.add (r);
+		r->update_after_tempo_map_change ();
 	}
-	/* possibly causes a contents changed notification (flush_notifications()) */
-	thaw ();
 }
 
 void
