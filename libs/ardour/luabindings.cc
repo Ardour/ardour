@@ -416,6 +416,20 @@ static RCConfiguration* _libardour_config () {
 	return ARDOUR::Config;
 }
 
+template <class T>
+static int to_ptr (lua_State *L)
+{
+	int top = lua_gettop (L);
+	if (top != 1) {
+		return luaL_argerror (L, 1, "invalid number of arguments.");
+	}
+	T o = luabridge::Stack<T>::get (L, 1);
+	T* p = new T (o);
+	std::shared_ptr<T> sp (p);
+	luabridge::Stack<std::shared_ptr<T>>::push (L, sp);
+	return 1;
+}
+
 void
 LuaBindings::stddef (lua_State* L)
 {
@@ -2131,6 +2145,7 @@ LuaBindings::common (lua_State* L)
 		// std::shared_ptr<RouteList>
 		.beginPtrStdList <std::shared_ptr<Route> > ("RouteListPtr")
 		.addVoidPtrConstructor<std::list<std::shared_ptr <Route> > > ()
+		.addStaticCFunction ("from_routelist", &to_ptr<ARDOUR::RouteList>)
 		.endClass ()
 
 		// std::shared_ptr<BundleList const>
@@ -2190,6 +2205,7 @@ LuaBindings::common (lua_State* L)
 		// std::shared_ptr <std::list<std::shared_ptr<Region> > >
 		.beginPtrStdList <std::shared_ptr<Region> > ("RegionListPtr")
 		.addVoidPtrConstructor<std::list<std::shared_ptr <Region> > > ()
+		.addStaticCFunction ("from_regionlist", &to_ptr<ARDOUR::RegionList>)
 		.endClass ()
 
 		// RegionFactory::RegionMap
@@ -2912,6 +2928,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("new_route_group", &Session::new_route_group)
 		.addFunction ("session_range_is_free", &Session::session_range_is_free)
 		.addFunction ("set_session_range_is_free", &Session::set_session_range_is_free)
+		.addFunction ("remove_route", &Session::remove_route)
+		.addFunction ("remove_routes", &Session::remove_routes)
 		.addFunction ("remove_route_group", (void (Session::*)(RouteGroup*))&Session::remove_route_group)
 		.addFunction ("cut_copy_section", &Session::cut_copy_section)
 		.addFunction ("vca_manager", &Session::vca_manager_ptr)
