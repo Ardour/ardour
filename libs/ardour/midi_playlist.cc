@@ -335,6 +335,9 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 	regs.sort (cmp);
 
 	bool all_transparent = true;
+	bool no_layers = true;
+
+	layer_t layer = regs.front()->layer ();
 
 	/* skip bottom-most region, transparency is irrelevant */
 	for (auto i = ++regs.begin(); i != regs.end(); ++i) {
@@ -342,11 +345,14 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 			all_transparent = false;
 			break;
 		}
+		if ((*i)->layer () != layer) {
+			no_layers = false;
+		}
 	}
 
 	Evoral::EventList<samplepos_t> evlist;
 
-	if (all_transparent) {
+	if (all_transparent || no_layers) {
 
 		DEBUG_TRACE (DEBUG::MidiPlaylistIO, string_compose ("\t%1 regions to read\n", regs.size()));
 
