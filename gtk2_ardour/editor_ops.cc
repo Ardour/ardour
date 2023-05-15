@@ -5315,6 +5315,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		return;
 	}
 
+	std::vector<sigc::connection> cl;
 	std::shared_ptr<Playlist> playlist;
 	PlaylistSet playlists; // list of unique playlists affected by duplication
 	RegionSelection sel = regions; // clear (below) may  clear the argument list if its the current region selection
@@ -5358,8 +5359,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 
 		TimeAxisView& tv = (*i)->get_time_axis_view();
 		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
-		latest_regionviews.clear ();
-		sigc::connection c = rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view));
+		cl.push_back (rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view)));
 
 		/* XXX problem arew here. When duplicating audio regions, the
 		 * next one must be positioned 1 sample after the end of the
@@ -5390,14 +5390,17 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 
 		playlist->duplicate (r, position, span, times);
 
-		c.disconnect ();
-
-		foo.insert (foo.end(), latest_regionviews.begin(), latest_regionviews.end());
 	}
 
 	for (PlaylistSet::iterator p = playlists.begin(); p != playlists.end(); ++p) {
+		latest_regionviews.clear ();
 		(*p)->thaw ();
 		(*p)->rdiff_and_add_command (_session);
+		foo.insert (foo.end(), latest_regionviews.begin(), latest_regionviews.end());
+	}
+
+	for (auto& c: cl) {
+		c.disconnect ();
 	}
 
 	if (!foo.empty()) {
