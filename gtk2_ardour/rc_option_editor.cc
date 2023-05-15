@@ -2945,13 +2945,25 @@ RCOptionEditor::RCOptionEditor ()
 
 	bo = new BoolOption (
 		     "use-palette-for-new-route",
-		     _("Use color-palette to assign color for new tracks/busses"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_palette_for_new_route),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_palette_for_new_route)
+		     _("Use color-palette to assign color for new Tracks"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_palette_for_new_track),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_palette_for_new_track)
 		     );
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
-				_("<b>When enabled</b> new Routes are assigned a color from the stripable-color-palette in round-robin fashion.\n"
-				  "<b>When disabled</b> all new Routes will have a neutral color from the theme."
+				_("<b>When enabled</b> new Tracks are assigned a color from the stripable-color-palette in round-robin fashion.\n"
+				  "<b>When disabled</b> all new Tracks will use the FIRST color from the stripable-color-palette."
+					));
+	add_option (_("Appearance/Colors"), bo);
+
+	bo = new BoolOption (
+		     "use-palette-for-new-route",
+		     _("Use color-palette to assign color for new Busses"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_palette_for_new_bus),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_palette_for_new_bus)
+		     );
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+				_("<b>When enabled</b> new Buses are assigned a color from the stripable-color-palette in round-robin fashion.\n"
+				  "<b>When disabled</b> all new Buses will use the FIRST color from the stripable-color-palette."
 					));
 	add_option (_("Appearance/Colors"), bo);
 
