@@ -3984,8 +3984,11 @@ ProcessorBox::get_editor_window (std::shared_ptr<Processor> processor, bool use_
 
 		if (std::dynamic_pointer_cast<InternalSend> (processor) == 0) {
 			Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
-			assert (tlw);
-			gidget = new SendUIWindow (*tlw, _session, send);
+			if (tlw) {
+				gidget = new SendUIWindow (*tlw, _session, send);
+			} else {
+				gidget = new SendUIWindow (_session, send);
+			}
 		}
 
 	} else if ((retrn = std::dynamic_pointer_cast<Return> (processor)) != 0) {
@@ -4047,8 +4050,11 @@ ProcessorBox::get_editor_window (std::shared_ptr<Processor> processor, bool use_
 
 		if (w == 0) {
 			Gtk::Window* tlw = dynamic_cast<Gtk::Window*> (get_toplevel ());
-			assert (tlw);
-			io_selector = new PortInsertWindow (*tlw, _session, port_insert);
+			if (tlw) {
+				io_selector = new PortInsertWindow (*tlw, _session, port_insert);
+			} else {
+				io_selector = new PortInsertWindow (_session, port_insert);
+			}
 			set_processor_ui (port_insert, io_selector);
 
 		} else {

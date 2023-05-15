@@ -65,6 +65,7 @@ class SendUIWindow : public ArdourWindow
 {
 public:
 	SendUIWindow (Gtk::Window&, ARDOUR::Session*, std::shared_ptr<ARDOUR::Send>);
+	SendUIWindow (ARDOUR::Session*, std::shared_ptr<ARDOUR::Send>);
 
 private:
 	SendUI _ui;

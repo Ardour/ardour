@@ -159,3 +159,12 @@ SendUIWindow::SendUIWindow (Gtk::Window& parent, ARDOUR::Session* session, std::
 	add (_ui);
 	_ui.show ();
 }
+
+SendUIWindow::SendUIWindow (ARDOUR::Session* session, std::shared_ptr<Send> send)
+	: ArdourWindow (string_compose (_("Send: %1"), send->name ()))
+	, _ui (this, session, send)
+{
+	set_name ("SendUIWindow");
+	add (_ui);
+	_ui.show ();
+}

@@ -91,6 +91,7 @@ class PortInsertWindow : public ArdourWindow
 {
 public:
 	PortInsertWindow (Gtk::Window&, ARDOUR::Session*, std::shared_ptr<ARDOUR::PortInsert>);
+	PortInsertWindow (ARDOUR::Session*, std::shared_ptr<ARDOUR::PortInsert>);
 
 private:
 	PortInsertUI _portinsertui;

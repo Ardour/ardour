@@ -339,4 +339,15 @@ PortInsertWindow::PortInsertWindow (Gtk::Window& parent, ARDOUR::Session* s, std
 {
 	set_name ("IOSelectorWindow");
 	add (_portinsertui);
+	_portinsertui.show ();
+}
+
+
+PortInsertWindow::PortInsertWindow (ARDOUR::Session* s, std::shared_ptr<ARDOUR::PortInsert> pi)
+	: ArdourWindow (string_compose (_("Port Insert: %1"), pi->name ()))
+	, _portinsertui (this, s, pi)
+{
+	set_name ("IOSelectorWindow");
+	add (_portinsertui);
+	_portinsertui.show ();
 }
