@@ -67,7 +67,10 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 		if (UIConfiguration::instance().get_use_palette_for_new_vca ()) {
 			_vca->presentation_info().set_color (Gtkmm2ext::gdk_color_to_rgba (AxisView::round_robin_palette_color ()));
 		} else {
-			_vca->presentation_info().set_color (UIConfiguration::instance ().color (X_("neutral:midground")));
+			string cp = UIConfiguration::instance().get_stripable_color_palette ();
+			Gdk::ArrayHandle_Color gc = ColorSelection::palette_from_string (cp);
+			std::vector<Gdk::Color> c (gc);
+			_vca->presentation_info().set_color (gdk_color_to_rgba (c[0]));
 		}
 	}
 
