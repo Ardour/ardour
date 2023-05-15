@@ -125,7 +125,7 @@ UI_CONFIG_VARIABLE (bool, check_announcements, "check-announcements,", true)
 UI_CONFIG_VARIABLE (bool, use_wm_visibility, "use-wm-visibility", true)
 UI_CONFIG_VARIABLE (bool, use_palette_for_new_route, "use-palette-for-new-route", true)
 UI_CONFIG_VARIABLE (bool, use_palette_for_new_vca, "use-palette-for-new-vca", true)
-UI_CONFIG_VARIABLE (std::string, stripable_color_palette, "stripable-color-palette", "#AA3939:#FFAAAA:#D46A6A:#801515:#550000:#AA8E39:#FFEAAA:#D4BA6A:#806515:#554000:#343477:#8080B3:#565695:#1A1A59:#09093B:#2D882D:#88CC88:#55AA55:#116611:#004400")  /* Gtk::ColorSelection::palette_to_string */
+UI_CONFIG_VARIABLE (std::string, stripable_color_palette, "stripable-color-palette", "#006E90:#008DB8:#00ACE0:#0AC6FF:#7EE8FA:#AA8E39:#FFEAAA:#D4BA6A:#806515:#554000:#343477:#8080B3:#565695:#1A1A59:#09093B:#2D882D:#88CC88:#55AA55:#116611:#004400")  /* Gtk::ColorSelection::palette_to_string */
 UI_CONFIG_VARIABLE (bool, use_note_bars_for_velocity, "use-note-bars-for-velocity", true)
 UI_CONFIG_VARIABLE (bool, use_note_color_for_velocity, "use-note-color-for-velocity", true)
 UI_CONFIG_VARIABLE (bool, show_snapped_cursor, "show-snapped-cursor", true)
