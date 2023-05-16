@@ -69,7 +69,9 @@ public:
 		PunchIn,
 		PunchOut,
 		RegionCue,
-		Cue
+		Cue,
+		SelectionStart,
+		SelectionEnd,
 	};
 
 

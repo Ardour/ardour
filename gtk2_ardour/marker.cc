@@ -128,6 +128,8 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 	 * (0,MH)   <-  (6,MH)
 	 *
 	 *
+	 * PunchIn:
+	 * LoopStart:
 	 * SessionStart:
 	 * RangeStart:
 	 *
@@ -139,6 +141,8 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 	 *       0,MH
 	 *
 	 *
+	 * PunchOut:
+	 * LoopEnd:
 	 * SessionEnd:
 	 * RangeEnd:
 	 *
@@ -150,9 +154,9 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 	 *         \12,MH
 	 *
 	 *
-	 * PunchIn:
+	 * SelectionStart:
 	 *
-	 *   0,0 ------> marker_height,0
+	 *   0,0 ------> MH,0
 	 *    |       /
 	 *    |      /
 	 *    |     /
@@ -162,9 +166,9 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 	 *   0,MH
 	 *
 	 *
-	 *   PunchOut
+	 * SelectionEnd:
 	 *
-	 *   0,0 ------> MH,0
+	 * -MH,0 ------> 0,0
 	 *    \        |
 	 *     \       |
 	 *      \      |
@@ -172,15 +176,15 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 	 *        \    |
 	 *         \   |
 	 *          \  |
-	 *   MH,MH
+	 *           0,MH
 	 *
 	 * Cue:
 	 *  ben: put your shape here :)
 	 */
 
-	switch (type) {
-	case Mark:
-	case RegionCue:
+	switch (_type) {
+	case Mark: /* fallthough */
+	case RegionCue: /* fallthough */
 	case BBTPosition:
 		points = new ArdourCanvas::Points ();
 
@@ -195,7 +199,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 		_label_offset = 8.0 * scale;
 		break;
 
-	case Tempo:
+	case Tempo: /* fallthough */
 	case Meter:
 		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple ( M5, 0.0));
@@ -209,9 +213,9 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 		_label_offset = 12.0 * scale;
 		break;
 
-	case PunchIn:
-	case LoopStart:
-	case SessionStart:
+	case PunchIn: /* fallthough */
+	case LoopStart: /* fallthough */
+	case SessionStart: /* fallthough */
 	case RangeStart:
 		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (    0.0, 0.0));
@@ -223,9 +227,10 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 		_label_offset = 8.0 * scale;
 		break;
 
-	case PunchOut:
-	case LoopEnd:
-	case SessionEnd:
+
+	case PunchOut: /* fallthough */
+	case LoopEnd: /* fallthough */
+	case SessionEnd: /* fallthough */
 	case RangeEnd:
 		points = new ArdourCanvas::Points (); // leaks
 		points->push_back (ArdourCanvas::Duple ( M6, 0.0));
@@ -237,7 +242,29 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 		_label_offset = 0.0 * scale;
 		break;
 
+	case SelectionStart:
+		points = new ArdourCanvas::Points ();
+		points->push_back (ArdourCanvas::Duple (     0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (.75 * MH, 0.0));
+		points->push_back (ArdourCanvas::Duple (     0.0, .75 * MH));
+		points->push_back (ArdourCanvas::Duple (     0.0, 0.0));
+		_shift = 0;
+		_label_offset = 0;
+		break;
+
+	case SelectionEnd:
+		points = new ArdourCanvas::Points ();
+		points->push_back (ArdourCanvas::Duple (-.75 * MH, 0.0));
+		points->push_back (ArdourCanvas::Duple (      0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (      0.0, .75 * MH));
+		points->push_back (ArdourCanvas::Duple (-.75 * MH, 0.0));
+
+		_shift = 0;
+		_label_offset = 0;
+		break;
+
 	case Cue:
+		// XXX TODO scope offs
 		float offs = 1.0 * scale;
 
 		points = new ArdourCanvas::Points ();
@@ -250,7 +277,6 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 		_shift = MH/2;
 		_label_offset = 2.0 * scale;
 		break;
-
 	}
 
 	_position = pos;
@@ -262,13 +288,24 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 	group->name = string_compose ("Marker::group for %1", annotation);
 #endif
 
-	if ((type != RegionCue) && (type != Meter) && (type != Tempo)) {
-		_name_flag = new ArdourCanvas::Rectangle (group);
+	switch (_type) {
+		case RegionCue:
+			/* fallthrough */
+		case Meter:
+			/* fallthrough */
+		case Tempo:
+			/* fallthrough */
+		case SelectionStart:
+			/* fallthrough */
+		case SelectionEnd:
+			_name_flag = 0;
+			break;
+		default:
+			_name_flag = new ArdourCanvas::Rectangle (group);
 #ifdef CANVAS_DEBUG
-		_name_flag->name = string_compose ("Marker::_name_flag for %1", annotation);
+			_name_flag->name = string_compose ("Marker::_name_flag for %1", annotation);
 #endif
-	} else {
-		_name_flag = 0;
+			break;
 	}
 
 	/* adjust to properly locate the tip */
@@ -279,20 +316,29 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 
 	_pmark->set (*points);
 
-	if (_type == Cue) {
-		_pcue->set_outline(false);
-		_pcue->set_fill(true);
-		_pcue->set_center ( ArdourCanvas::Duple (MH/2, MH/2) );
-		_pcue->set_radius ( MH/2 );
+	switch (_type) {
+		case SelectionStart:
+			/* fallthrough */
+		case SelectionEnd:
+			_pcue->hide();
+			_pmark->show();
+			break;
+		case Cue:
+			_pcue->set_outline(false);
+			_pcue->set_fill(true);
+			_pcue->set_center ( ArdourCanvas::Duple (MH/2, MH/2) );
+			_pcue->set_radius ( MH/2 );
 
-		_pcue->show();
-		_pmark->hide();
-		if (_name_flag) {
-			_name_flag->hide();
-		}
-	} else {
-		_pcue->hide();
-		_pmark->show();
+			_pcue->show();
+			_pmark->hide();
+			if (_name_flag) {
+				_name_flag->hide();
+			}
+			break;
+		default:
+			_pcue->hide();
+			_pmark->show();
+			break;
 	}
 
 	/* setup name pixbuf sizes */
