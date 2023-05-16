@@ -1300,6 +1300,8 @@ Editor::time_selection_changed ()
 			_session->clear_range_selection ();
 		}
 	}
+
+	update_selection_markers ();
 }
 
 /** Set all region actions to have a given sensitivity */
@@ -1737,6 +1739,7 @@ Editor::region_selection_changed ()
 			set_mouse_mode (MouseObject, false);
 		}
 	}
+	update_selection_markers ();
 }
 
 void

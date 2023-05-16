@@ -2642,6 +2642,14 @@ RCOptionEditor::RCOptionEditor ()
 			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_name)
 			));
 
+	add_option (_("Appearance/Editor"),
+			new BoolOption (
+			"show-selection-marker",
+			_("Show Selection Marker"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_selection_marker),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_selection_marker)
+			));
+
 
 	HSliderOption *gui_hs;
 

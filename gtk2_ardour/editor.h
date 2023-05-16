@@ -729,6 +729,7 @@ private:
 	void trigger_script_by_name (const std::string script_name, const std::string args = "");
 	void toggle_marker_lines ();
 	void set_marker_line_visibility (bool);
+	void update_selection_markers ();
 
 	void jump_forward_to_mark ();
 	void jump_backward_to_mark ();
@@ -929,6 +930,10 @@ private:
 
 	/* parent for groups which themselves contain time markers */
 	ArdourCanvas::Container* _time_markers_group;
+
+	/* parent for group for selection marker (above ruler) */
+	ArdourCanvas::Container* _selection_marker_group;
+	LocationMarkers          _selection_marker;
 
 	/* The group containing all other groups that are scrolled vertically
 	   and horizontally.

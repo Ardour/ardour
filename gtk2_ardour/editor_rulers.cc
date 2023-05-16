@@ -428,6 +428,7 @@ void
 Editor::update_ruler_visibility ()
 {
 	int visible_timebars = 0;
+	bool have_timebar = false;
 
 	if (no_ruler_shown_update) {
 		return;
@@ -466,6 +467,7 @@ Editor::update_ruler_visibility ()
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
+		have_timebar = true;
 	} else {
 		minsec_ruler->hide();
 		minsec_label.hide();
@@ -481,6 +483,7 @@ Editor::update_ruler_visibility ()
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
+		have_timebar = true;
 	} else {
 		timecode_ruler->hide();
 		timecode_label.hide();
@@ -496,6 +499,7 @@ Editor::update_ruler_visibility ()
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
+		have_timebar = true;
 	} else {
 		samples_ruler->hide();
 		samples_label.hide();
@@ -511,6 +515,7 @@ Editor::update_ruler_visibility ()
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
+		have_timebar = true;
 	} else {
 		bbt_ruler->hide();
 		bbt_label.hide();
@@ -659,6 +664,12 @@ Editor::update_ruler_visibility ()
 		videotl_group->hide();
 		videotl_label.hide();
 		update_video_timeline(true);
+	}
+
+	if (have_timebar && UIConfiguration::instance().get_show_selection_marker ()) {
+		_selection_marker_group->show ();
+	} else {
+		_selection_marker_group->hide ();
 	}
 
 	ruler_separator->set_y_position ((int)(timebar_height * visible_timebars));

@@ -143,6 +143,12 @@ Editor::initialize_canvas ()
 	_time_markers_group = new ArdourCanvas::Container (h_scroll_group);
 	CANVAS_DEBUG_NAME (_time_markers_group, "time bars");
 
+	/* group above rulers, to show selection triangles */
+	_selection_marker_group = new ArdourCanvas::Container (h_scroll_group);
+	CANVAS_DEBUG_NAME (_selection_marker_group, "Canvas Selection Ruler");
+	_selection_marker.start = new SelectionMarker (*this, *_selection_marker_group, 0xff0000ff, ArdourMarker::SelectionStart);
+	_selection_marker.end = new SelectionMarker (*this, *_selection_marker_group, 0xff0000ff, ArdourMarker::SelectionEnd);
+	_selection_marker_group->raise_to_top ();
 
 	/* Note that because of ascending-y-axis coordinates, this order is
 	 * bottom-to-top. But further note that the actual order is set in

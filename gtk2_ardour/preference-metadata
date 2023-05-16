@@ -170,6 +170,8 @@
   regions gain envelope volume modes
 [show-region-name]
   regions name appearance editor
+[show-selection-marker]
+  selection ruler marker range
 [show-region-xrun-markers]
   regions xruns markers dropouts
 [show-secondary-clock]

@@ -2015,6 +2015,18 @@ Editor::find_marker_from_location_id (PBD::ID const & id, bool is_start) const
 }
 
 void
+Editor::update_selection_markers ()
+{
+	timepos_t start, end;
+	if (get_selection_extents (start, end)) {
+		_selection_marker.set_position (start, end);
+		_selection_marker.show ();
+	} else {
+		_selection_marker.hide ();
+	}
+}
+
+void
 Editor::toggle_cue_behavior ()
 {
 	CueBehavior cb (_session->config.get_cue_behavior());

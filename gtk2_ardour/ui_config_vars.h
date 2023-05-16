@@ -138,6 +138,7 @@ UI_CONFIG_VARIABLE (bool, snap_to_region_sync, "snap-to-region-sync", true)
 UI_CONFIG_VARIABLE (bool, snap_to_region_start, "snap-to-region-start", true)
 UI_CONFIG_VARIABLE (bool, snap_to_region_end, "snap-to-region-end", true)
 UI_CONFIG_VARIABLE (bool, snap_to_grid, "snap-to-grid", true)
+UI_CONFIG_VARIABLE (bool, show_selection_marker, "show-selection-marker", true)
 UI_CONFIG_VARIABLE (bool, show_grids_ruler, "show-grids-ruler", true)
 UI_CONFIG_VARIABLE (bool, rulers_follow_grid, "rulers-follow-grid", false)
 UI_CONFIG_VARIABLE (bool, grid_follows_internal, "grid-follows-internal", false)  //this feature is deprecated, default it FALSE for now; remove it in v6

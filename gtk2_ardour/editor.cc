@@ -294,6 +294,7 @@ Editor::Editor ()
 	, transport_marker_group (0)
 	, cd_marker_group (0)
 	, _time_markers_group (0)
+	, _selection_marker_group (0)
 	, hv_scroll_group (0)
 	, h_scroll_group (0)
 	, cursor_scroll_group (0)
@@ -6774,6 +6775,8 @@ Editor::ui_parameter_changed (string parameter)
 		/* handled individually by each MidiRegionView */
 	} else if (parameter == "tempo-edit-behavior") {
 		set_tempo_edit_behavior (UIConfiguration::instance().get_tempo_edit_behavior());
+	} else if (parameter == "show-selection-marker") {
+		update_ruler_visibility ();
 	}
 }
 
