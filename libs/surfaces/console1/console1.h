@@ -93,6 +93,8 @@ class Console1 : public MIDISurface
   public:
 	Console1 (ARDOUR::Session&);
 	virtual ~Console1 ();
+    void map_p();
+
 
 	int set_active (bool yn);
 
@@ -295,6 +297,10 @@ class Console1 : public MIDISurface
 	std::weak_ptr<ARDOUR::Stripable> pre_master_stripable;
 	std::weak_ptr<ARDOUR::Stripable> pre_monitor_stripable;
 
+	void create_encoder (ControllerID id,
+	                     boost::function<void (uint32_t)> action,
+	                     boost::function<void (uint32_t)> shift_action = 0);
+
 	void setup_controls ();
 
 	bool strip_recenabled = false;
@@ -327,22 +333,22 @@ class Console1 : public MIDISurface
 	void select_rid_by_index (const uint32_t index);
 
 	/* Controller Maps*/
-	typedef std::map<ControllerID, ArdourSurface::ControllerButton> ButtonMap;
-	typedef std::map<ControllerID, ArdourSurface::MultiStateButton> MultiStateButtonMap;
-	typedef std::map<ControllerID, ArdourSurface::Meter> MeterMap;
-	typedef std::map<ControllerID, ArdourSurface::Encoder> EncoderMap;
+	typedef std::map<ControllerID, ArdourSurface::ControllerButton*> ButtonMap;
+	typedef std::map<ControllerID, ArdourSurface::MultiStateButton*> MultiStateButtonMap;
+	typedef std::map<ControllerID, ArdourSurface::Meter*> MeterMap;
+	typedef std::map<ControllerID, ArdourSurface::Encoder*> EncoderMap;
 
 	ButtonMap buttons;
-	ControllerButton& get_button (ControllerID) const;
+	ControllerButton* get_button (ControllerID) const;
 
 	MultiStateButtonMap multi_buttons;
-	MultiStateButton& get_mbutton (ControllerID id) const;
+	MultiStateButton* get_mbutton (ControllerID id) const;
 
 	MeterMap meters;
-	Meter& get_meter (ControllerID) const;
+	Meter* get_meter (ControllerID) const;
 
 	EncoderMap encoders;
-	Encoder& get_encoder (ControllerID) const;
+	Encoder* get_encoder (ControllerID) const;
 
 	typedef std::map<uint32_t, ControllerID> SendControllerMap;
 	SendControllerMap send_controllers{ { 0, LOW_FREQ },       { 1, LOW_MID_FREQ },   { 2, HIGH_MID_FREQ },
@@ -389,6 +395,7 @@ class Console1 : public MIDISurface
 	/*PBD::ScopedConnection selection_connection;*/
 	PBD::ScopedConnectionList stripable_connections;
 	PBD::ScopedConnectionList console1_connections;
+	PBD::ScopedConnectionList plugin_connections;
 
 	void map_stripable_state ();
 
