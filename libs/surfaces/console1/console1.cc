@@ -63,6 +63,19 @@ Console1::~Console1 ()
 
 	tear_down_gui ();
 
+    for( const auto &[a, b] : buttons ){
+		delete b;
+	}
+    for( const auto &[a, b] : encoders ){
+		delete b;
+	}
+    for( const auto &[a, b] : meters ){
+		delete b;
+	}
+    for( const auto &[a, b] : multi_buttons ){
+		delete b;
+	}
+
 	/* stop event loop */
 	DEBUG_TRACE (DEBUG::Console1, "BaseUI::quit ()\n");
 
@@ -73,7 +86,7 @@ void
 Console1::all_lights_out ()
 {
 	for (ButtonMap::iterator b = buttons.begin (); b != buttons.end (); ++b) {
-		b->second.set_led_state (false);
+		b->second->set_led_state (false);
 	}
 }
 
@@ -94,7 +107,7 @@ Console1::set_active (bool yn)
 
 		BaseUI::run ();
 
-		connect_session_signals ();
+		// connect_session_signals ();
 
 	} else {
 		/* Control Protocol Manager never calls us with false, but
@@ -227,161 +240,150 @@ Console1::setup_controls ()
 {
 
 	for (uint32_t i = 0; i < 20; ++i) {
-		ControllerButton track_select_button (
-		  *this,
-		  ControllerID (FOCUS1 + i),
-		  boost::function<void (uint32_t)> (boost::bind (&Console1::select, this, i)),
-		  0,
-		  boost::function<void (uint32_t)> (boost::bind (&Console1::select_plugin, this, i)));
+		new ControllerButton (this,
+		                      ControllerID (FOCUS1 + i),
+		                      boost::function<void (uint32_t)> (boost::bind (&Console1::select, this, i)),
+		                      0,
+		                      boost::function<void (uint32_t)> (boost::bind (&Console1::select_plugin, this, i)));
 	}
 
-	ControllerButton shift_button (
-	  *this, ControllerID::PRESET, boost::function<void (uint32_t)> (boost::bind (&Console1::shift, this, _1)));
+	new ControllerButton (
+	  this, ControllerID::PRESET, boost::function<void (uint32_t)> (boost::bind (&Console1::shift, this, _1)));
 
-	ControllerButton plugin_state_button (
-	  *this,
-	  ControllerID::TRACK_GROUP,
-	  boost::function<void (uint32_t)> (boost::bind (&Console1::plugin_state, this, _1)));
+	new ControllerButton (this,
+	                      ControllerID::TRACK_GROUP,
+	                      boost::function<void (uint32_t)> (boost::bind (&Console1::plugin_state, this, _1)));
 
-	ControllerButton rude_solo (
-	  *this, ControllerID::DISPLAY_ON, boost::function<void (uint32_t)> (boost::bind (&Console1::rude_solo, this, _1)));
-	ControllerButton zoom_button (
-	  *this, ControllerID::MODE, boost::function<void (uint32_t)> (boost::bind (&Console1::zoom, this, _1)));
-	MultiStateButton view (*this,
-	                       ControllerID::EXTERNAL_SIDECHAIN,
-	                       std::vector<uint32_t>{ 0, 63, 127 },
-	                       boost::function<void (uint32_t)> (boost::bind (&Console1::window, this, _1)));
+	new ControllerButton (
+	  this, ControllerID::DISPLAY_ON, boost::function<void (uint32_t)> (boost::bind (&Console1::rude_solo, this, _1)));
+	new ControllerButton (
+	  this, ControllerID::MODE, boost::function<void (uint32_t)> (boost::bind (&Console1::zoom, this, _1)));
+	new MultiStateButton (this,
+	                      ControllerID::EXTERNAL_SIDECHAIN,
+	                      std::vector<uint32_t>{ 0, 63, 127 },
+	                      boost::function<void (uint32_t)> (boost::bind (&Console1::window, this, _1)));
 
-	ControllerButton bank_up_button (
-	  *this, ControllerID::PAGE_UP, boost::function<void (uint32_t)> (boost::bind (&Console1::bank, this, true)));
-	ControllerButton bank_down_button (
-	  *this, ControllerID::PAGE_DOWN, boost::function<void (uint32_t)> (boost::bind (&Console1::bank, this, false)));
+	new ControllerButton (
+	  this, ControllerID::PAGE_UP, boost::function<void (uint32_t)> (boost::bind (&Console1::bank, this, true)));
+	new ControllerButton (
+	  this, ControllerID::PAGE_DOWN, boost::function<void (uint32_t)> (boost::bind (&Console1::bank, this, false)));
 
-	ControllerButton mute_button (
-	  *this, ControllerID::MUTE, boost::function<void (uint32_t)> (boost::bind (&Console1::mute, this, _1)));
-	ControllerButton solo_button (
-	  *this, ControllerID::SOLO, boost::function<void (uint32_t)> (boost::bind (&Console1::solo, this, _1)));
-	ControllerButton phase_button (
-	  *this, ControllerID::PHASE_INV, boost::function<void (uint32_t)> (boost::bind (&Console1::phase, this, _1)));
+	new ControllerButton (
+	  this, ControllerID::MUTE, boost::function<void (uint32_t)> (boost::bind (&Console1::mute, this, _1)));
+	new ControllerButton (
+	  this, ControllerID::SOLO, boost::function<void (uint32_t)> (boost::bind (&Console1::solo, this, _1)));
+	new ControllerButton (
+	  this, ControllerID::PHASE_INV, boost::function<void (uint32_t)> (boost::bind (&Console1::phase, this, _1)));
 
 	/*
 	Console 1: Input Gain - Ardour / Mixbus: Trim
 	*/
-	Encoder trim_encoder (
-	  *this, ControllerID::GAIN, boost::function<void (uint32_t)> (boost::bind (&Console1::trim, this, _1)));
+	new Encoder (this, ControllerID::GAIN, boost::function<void (uint32_t)> (boost::bind (&Console1::trim, this, _1)));
 
 	/*
 	Console 1: Volume - Ardour / Mixbus: Gain
 	*/
-	Encoder gain_encoder (
-	  *this, ControllerID::VOLUME, boost::function<void (uint32_t)> (boost::bind (&Console1::gain, this, _1)));
+	new Encoder (
+	  this, ControllerID::VOLUME, boost::function<void (uint32_t)> (boost::bind (&Console1::gain, this, _1)));
 
-	Encoder pan_encoder (
-	  *this, ControllerID::PAN, boost::function<void (uint32_t)> (boost::bind (&Console1::pan, this, _1)));
+	new Encoder (this, ControllerID::PAN, boost::function<void (uint32_t)> (boost::bind (&Console1::pan, this, _1)));
 
 	/* Filter Section*/
-	ControllerButton filter_button (*this,
-	                                ControllerID::FILTER_TO_COMPRESSORS,
-	                                boost::function<void (uint32_t)> (boost::bind (&Console1::filter, this, _1)));
-	Encoder low_cut_encoder (
-	  *this, ControllerID::LOW_CUT, boost::function<void (uint32_t)> (boost::bind (&Console1::low_cut, this, _1)));
-	Encoder high_cut_encoder (
-	  *this, ControllerID::HIGH_CUT, boost::function<void (uint32_t)> (boost::bind (&Console1::high_cut, this, _1)));
+	new ControllerButton (this,
+	                      ControllerID::FILTER_TO_COMPRESSORS,
+	                      boost::function<void (uint32_t)> (boost::bind (&Console1::filter, this, _1)));
+	new Encoder (
+	  this, ControllerID::LOW_CUT, boost::function<void (uint32_t)> (boost::bind (&Console1::low_cut, this, _1)));
+	new Encoder (
+	  this, ControllerID::HIGH_CUT, boost::function<void (uint32_t)> (boost::bind (&Console1::high_cut, this, _1)));
 
 	/* Gate Section */
-	ControllerButton gate_on_off (
-	  *this, ControllerID::SHAPE, boost::function<void (uint32_t)> (boost::bind (&Console1::gate, this, _1)));
-	ControllerButton gate_scf_listen (
-	  *this,
-	  ControllerID::HARD_GATE,
-	  boost::function<void (uint32_t)> (boost::bind (&Console1::gate_scf, this, _1)),
-	  boost::function<void (uint32_t)> (boost::bind (&Console1::gate_listen, this, _1)));
-	Encoder gate_thresh_encoder (*this,
-	                             ControllerID::SHAPE_GATE,
-	                             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_thresh, this, _1)));
-	Encoder gate_release_encoder (*this,
-	                              ControllerID::SHAPE_RELEASE,
-	                              boost::function<void (uint32_t)> (boost::bind (&Console1::gate_release, this, _1)),
-	                              boost::function<void (uint32_t)> (boost::bind (&Console1::gate_hyst, this, _1)));
-	Encoder gate_attack_encoder (*this,
-	                             ControllerID::SHAPE_SUSTAIN,
-	                             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_attack, this, _1)),
-	                             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_hold, this, _1)));
-	Encoder gate_depth_encoder (*this,
-	                            ControllerID::SHAPE_PUNCH,
-	                            boost::function<void (uint32_t)> (boost::bind (&Console1::gate_depth, this, _1)),
-	                            boost::function<void (uint32_t)> (boost::bind (&Console1::gate_filter_freq, this, _1)));
+	new ControllerButton (
+	  this, ControllerID::SHAPE, boost::function<void (uint32_t)> (boost::bind (&Console1::gate, this, _1)));
+	new ControllerButton (this,
+	                      ControllerID::HARD_GATE,
+	                      boost::function<void (uint32_t)> (boost::bind (&Console1::gate_scf, this, _1)),
+	                      boost::function<void (uint32_t)> (boost::bind (&Console1::gate_listen, this, _1)));
+	new Encoder (this,
+	             ControllerID::SHAPE_GATE,
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_thresh, this, _1)));
+	new Encoder (this,
+	             ControllerID::SHAPE_RELEASE,
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_release, this, _1)),
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_hyst, this, _1)));
+	new Encoder (this,
+	             ControllerID::SHAPE_SUSTAIN,
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_attack, this, _1)),
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_hold, this, _1)));
+	new Encoder (this,
+	             ControllerID::SHAPE_PUNCH,
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_depth, this, _1)),
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::gate_filter_freq, this, _1)));
 
-	Meter gate_meter (*this, ControllerID::SHAPE_METER, boost::function<void ()> ([] () {}));
+	new Meter (this, ControllerID::SHAPE_METER, boost::function<void ()> ([] () {}));
 
 	/* EQ Section */
-	ControllerButton eq_on_off (
-	  *this, ControllerID::EQ, boost::function<void (uint32_t)> (boost::bind (&Console1::eq, this, _1)));
+	new ControllerButton (
+	  this, ControllerID::EQ, boost::function<void (uint32_t)> (boost::bind (&Console1::eq, this, _1)));
 
 	for (uint32_t i = 0; i < 4; ++i) {
-		Encoder low_freq_encoder (
-		  *this,
-		  eq_freq_controller_for_band (i),
-		  boost::function<void (uint32_t)> (boost::bind (&Console1::eq_freq, this, i, _1)),
-		  boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, i, _1)));
-		Encoder low_gain_encoder (
-		  *this,
-		  eq_gain_controller_for_band (i),
-		  boost::function<void (uint32_t)> (boost::bind (&Console1::eq_gain, this, i, _1)),
-		  boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, i + 4, _1)));
+		new Encoder (this,
+		             eq_freq_controller_for_band (i),
+		             boost::function<void (uint32_t)> (boost::bind (&Console1::eq_freq, this, i, _1)),
+		             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, i, _1)));
+		new Encoder (this,
+		             eq_gain_controller_for_band (i),
+		             boost::function<void (uint32_t)> (boost::bind (&Console1::eq_gain, this, i, _1)),
+		             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, i + 4, _1)));
 	}
-	Encoder low_mid_shape_encoder (
-	  *this,
-	  ControllerID::LOW_MID_SHAPE,
-	  boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 10, _1)),
-	  boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 8, _1)));
-	Encoder high_mid_shape_encoder (
-	  *this,
-	  ControllerID::HIGH_MID_SHAPE,
-	  boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 11, _1)),
-	  boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 9, _1)));
+	new Encoder (this,
+	             ControllerID::LOW_MID_SHAPE,
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 10, _1)),
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 8, _1)));
+	new Encoder (this,
+	             ControllerID::HIGH_MID_SHAPE,
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 11, _1)),
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::mb_send_level, this, 9, _1)));
 
-	ControllerButton eq_low_shape (*this,
-	                               ControllerID::LOW_SHAPE,
-	                               boost::function<void (uint32_t)> (boost::bind (&Console1::eq_low_shape, this, _1)));
-	ControllerButton eq_high_shape (
-	  *this,
-	  ControllerID::HIGH_SHAPE,
-	  boost::function<void (uint32_t)> (boost::bind (&Console1::eq_high_shape, this, _1)));
+	new ControllerButton (this,
+	                      ControllerID::LOW_SHAPE,
+	                      boost::function<void (uint32_t)> (boost::bind (&Console1::eq_low_shape, this, _1)));
+	new ControllerButton (this,
+	                      ControllerID::HIGH_SHAPE,
+	                      boost::function<void (uint32_t)> (boost::bind (&Console1::eq_high_shape, this, _1)));
 
-	Encoder drive_encoder (
-	  *this, ControllerID::CHARACTER, boost::function<void (uint32_t)> (boost::bind (&Console1::drive, this, _1)));
+	new Encoder (
+	  this, ControllerID::CHARACTER, boost::function<void (uint32_t)> (boost::bind (&Console1::drive, this, _1)));
 
 	/* Compressor Section */
-	ControllerButton comp_on_off (
-	  *this, ControllerID::COMP, boost::function<void (uint32_t)> (boost::bind (&Console1::comp, this, _1)));
-	MultiStateButton comp_mode (*this,
-	                            ControllerID::ORDER,
-	                            std::vector<uint32_t>{ 0, 63, 127 },
-	                            boost::function<void (uint32_t)> (boost::bind (&Console1::comp_mode, this, _1)));
+	new ControllerButton (
+	  this, ControllerID::COMP, boost::function<void (uint32_t)> (boost::bind (&Console1::comp, this, _1)));
+	new MultiStateButton (this,
+	                      ControllerID::ORDER,
+	                      std::vector<uint32_t>{ 0, 63, 127 },
+	                      boost::function<void (uint32_t)> (boost::bind (&Console1::comp_mode, this, _1)));
 
-	Encoder comp_thresh_encoder (*this,
-	                             ControllerID::COMP_THRESH,
-	                             boost::function<void (uint32_t)> (boost::bind (&Console1::comp_thresh, this, _1)));
-	Encoder comp_attack_encoder (*this,
-	                             ControllerID::COMP_ATTACK,
-	                             boost::function<void (uint32_t)> (boost::bind (&Console1::comp_attack, this, _1)));
-	Encoder comp_release_encoder (*this,
-	                              ControllerID::COMP_RELEASE,
-	                              boost::function<void (uint32_t)> (boost::bind (&Console1::comp_release, this, _1)));
-	Encoder comp_ratio_encoder (*this,
-	                            ControllerID::COMP_RATIO,
-	                            boost::function<void (uint32_t)> (boost::bind (&Console1::comp_ratio, this, _1)));
-	Encoder comp_makeup_encoder (
-	  *this, ControllerID::COMP_PAR, boost::function<void (uint32_t)> (boost::bind (&Console1::comp_makeup, this, _1)));
-	Encoder comp_emph_encoder (
-	  *this, ControllerID::DRIVE, boost::function<void (uint32_t)> (boost::bind (&Console1::comp_emph, this, _1)));
+	new Encoder (this,
+	             ControllerID::COMP_THRESH,
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::comp_thresh, this, _1)));
+	new Encoder (this,
+	             ControllerID::COMP_ATTACK,
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::comp_attack, this, _1)));
+	new Encoder (this,
+	             ControllerID::COMP_RELEASE,
+	             boost::function<void (uint32_t)> (boost::bind (&Console1::comp_release, this, _1)));
+	new Encoder (
+	  this, ControllerID::COMP_RATIO, boost::function<void (uint32_t)> (boost::bind (&Console1::comp_ratio, this, _1)));
+	new Encoder (
+	  this, ControllerID::COMP_PAR, boost::function<void (uint32_t)> (boost::bind (&Console1::comp_makeup, this, _1)));
+	new Encoder (
+	  this, ControllerID::DRIVE, boost::function<void (uint32_t)> (boost::bind (&Console1::comp_emph, this, _1)));
 
-	Meter compressor_meter (*this, ControllerID::COMP_METER, boost::function<void ()> ([] () {}));
+	new Meter (this, ControllerID::COMP_METER, boost::function<void ()> ([] () {}));
 
 	/* Output Section */
-	Meter output_meter_l (*this, ControllerID::OUTPUT_METER_L, boost::function<void ()> ([] () {}));
-	Meter output_meter_r (*this, ControllerID::OUTPUT_METER_R, boost::function<void ()> ([] () {}));
+	new Meter (this, ControllerID::OUTPUT_METER_L, boost::function<void ()> ([] () {}));
+	new Meter (this, ControllerID::OUTPUT_METER_R, boost::function<void ()> ([] () {}));
 }
 
 int
@@ -404,11 +406,13 @@ Console1::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb
 	DEBUG_TRACE (DEBUG::Console1,
 	             string_compose ("handle_midi_controller_message cn: '%1' val: '%2'\n", controller_number, value));
 	try {
-		Encoder e = get_encoder (ControllerID (controller_number));
-		if (shift_state && e.shift_action) {
-			e.shift_action (value);
+		Encoder* e = get_encoder (ControllerID (controller_number));
+		if (in_plugin_state && e->plugin_action) {
+			e->plugin_action (value);
+		} else if (shift_state && e->shift_action) {
+			e->shift_action (value);
 		} else {
-			e.action (value);
+			e->action (value);
 		}
 		return;
 	} catch (ControlNotFoundException& e) {
@@ -420,16 +424,16 @@ Console1::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb
 	}
 
 	try {
-		ControllerButton& b = get_button (ControllerID (controller_number));
-		if (in_plugin_state && b.plugin_action) {
+		ControllerButton* b = get_button (ControllerID (controller_number));
+		if (in_plugin_state && b->plugin_action) {
 			DEBUG_TRACE (DEBUG::Console1, "Executing plugin_action\n");
-			b.plugin_action (value);
-		} else if (shift_state && b.shift_action) {
+			b->plugin_action (value);
+		} else if (shift_state && b->shift_action) {
 			DEBUG_TRACE (DEBUG::Console1, "Executing shift_action\n");
-			b.shift_action (value);
+			b->shift_action (value);
 		} else {
 			DEBUG_TRACE (DEBUG::Console1, "Executing action\n");
-			b.action (value);
+			b->action (value);
 		}
 		return;
 	} catch (ControlNotFoundException& e) {
@@ -441,11 +445,11 @@ Console1::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb
 	}
 
 	try {
-		MultiStateButton mb = get_mbutton (ControllerID (controller_number));
-		if (shift_state && mb.shift_action) {
-			mb.shift_action (value);
+		MultiStateButton* mb = get_mbutton (ControllerID (controller_number));
+		if (shift_state && mb->shift_action) {
+			mb->shift_action (value);
 		} else {
-			mb.action (value);
+			mb->action (value);
 		}
 
 		return;
@@ -469,7 +473,7 @@ Console1::notify_solo_active_changed (bool state)
 {
 	DEBUG_TRACE (DEBUG::Console1, "notify_active_solo_changed() \n");
 	try {
-		get_button (ControllerID::DISPLAY_ON).set_led_value (state ? 127 : 0);
+		get_button (ControllerID::DISPLAY_ON)->set_led_value (state ? 127 : 0);
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "button not found");
 	}
@@ -517,6 +521,8 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 
 	if (_current_stripable) {
 		DEBUG_TRACE (DEBUG::Console1, "current_stripable found:  \n");
+
+		current_plugin_index = -1;
 
 		PresentationInfo pi = _current_stripable->presentation_info ();
 
@@ -835,14 +841,14 @@ void
 Console1::stop_blinking (ControllerID id)
 {
 	blinkers.remove (id);
-	get_button (id).set_led_state (false);
+	get_button (id)->set_led_state (false);
 }
 
 void
 Console1::start_blinking (ControllerID id)
 {
 	blinkers.push_back (id);
-	get_button (id).set_led_state (true);
+	get_button (id)->set_led_state (true);
 }
 
 bool
@@ -852,7 +858,7 @@ Console1::blinker ()
 
 	for (Blinkers::iterator b = blinkers.begin (); b != blinkers.end (); b++) {
 		try {
-			get_button (*b).set_led_state (blink_state);
+			get_button (*b)->set_led_state (blink_state);
 		} catch (ControlNotFoundException& e) {
 			DEBUG_TRACE (DEBUG::Console1, "Blinking Button not found ...\n");
 		}
@@ -861,40 +867,40 @@ Console1::blinker ()
 	return true;
 }
 
-ControllerButton&
+ControllerButton*
 Console1::get_button (ControllerID id) const
 {
 	ButtonMap::const_iterator b = buttons.find (id);
 	if (b == buttons.end ())
 		throw (ControlNotFoundException ());
-	return const_cast<ControllerButton&> (b->second);
+	return const_cast<ControllerButton*> (b->second);
 }
 
-Meter&
+Meter*
 Console1::get_meter (ControllerID id) const
 {
 	MeterMap::const_iterator m = meters.find (id);
 	if (m == meters.end ())
 		throw (ControlNotFoundException ());
-	return const_cast<Meter&> (m->second);
+	return const_cast<Meter*> (m->second);
 }
 
-Encoder&
+Encoder*
 Console1::get_encoder (ControllerID id) const
 {
 	EncoderMap::const_iterator m = encoders.find (id);
 	if (m == encoders.end ())
 		throw (ControlNotFoundException ());
-	return const_cast<Encoder&> (m->second);
+	return const_cast<Encoder*> (m->second);
 }
 
-MultiStateButton&
+MultiStateButton*
 Console1::get_mbutton (ControllerID id) const
 {
 	MultiStateButtonMap::const_iterator m = multi_buttons.find (id);
 	if (m == multi_buttons.end ())
 		throw (ControlNotFoundException ());
-	return const_cast<MultiStateButton&> (m->second);
+	return const_cast<MultiStateButton*> (m->second);
 }
 
 ControllerID
@@ -934,11 +940,11 @@ Console1::periodic_update_meter ()
 			}
 			try {
 				if (val_l != last_output_meter_l) {
-					get_meter (OUTPUT_METER_L).set_value (val_l);
+					get_meter (OUTPUT_METER_L)->set_value (val_l);
 					last_output_meter_l = val_l;
 				}
 				if (val_r != last_output_meter_r) {
-					get_meter (OUTPUT_METER_R).set_value (val_r);
+					get_meter (OUTPUT_METER_R)->set_value (val_r);
 					last_output_meter_r = val_r;
 				}
 			} catch (ControlNotFoundException& e) {
@@ -955,7 +961,7 @@ Console1::periodic_update_meter ()
 			}
 			try {
 				if (val != last_gate_meter) {
-					get_meter (SHAPE_METER).set_value (val);
+					get_meter (SHAPE_METER)->set_value (val);
 					last_gate_meter = val;
 				}
 			} catch (ControlNotFoundException& e) {
@@ -975,7 +981,7 @@ Console1::periodic_update_meter ()
 				if (val != last_comp_redux) {
 					last_comp_redux = val;
 					val = val * 0.6 + last_comp_redux * 0.4;
-					get_meter (COMP_METER).set_value (val);
+					get_meter (COMP_METER)->set_value (val);
 				}
 			} catch (ControlNotFoundException& e) {
 				DEBUG_TRACE (DEBUG::Console1, "Meter not found ...\n");

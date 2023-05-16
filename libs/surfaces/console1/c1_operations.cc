@@ -123,7 +123,7 @@ Console1::rude_solo (const uint32_t value)
 		session->cancel_all_solo ();
 	} else {
 		try {
-			get_button (ControllerID::DISPLAY_ON).set_led_state (false);
+			get_button (ControllerID::DISPLAY_ON)->set_led_state (false);
 		} catch (ControlNotFoundException& e) {
 			DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 		}
@@ -547,8 +547,8 @@ Console1::map_bank ()
 {
 	uint32_t list_size = strip_inventory.size ();
 	try {
-		get_button (PAGE_UP).set_led_state (list_size > (current_bank + 1) * bank_size);
-		get_button (PAGE_DOWN).set_led_state (current_bank > 0);
+		get_button (PAGE_UP)->set_led_state (list_size > (current_bank + 1) * bank_size);
+		get_button (PAGE_DOWN)->set_led_state (current_bank > 0);
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -581,7 +581,7 @@ Console1::map_mute ()
 	DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute ...\n");
 	if (_current_stripable) {
 		if (_current_stripable->mute_control ()->muted ()) {
-			get_button (MUTE).set_led_state (true);
+			get_button (MUTE)->set_led_state (true);
 		} else if (_current_stripable->mute_control ()->muted_by_others_soloing () ||
 		           _current_stripable->mute_control ()->muted_by_masters ()) {
 
@@ -611,7 +611,7 @@ void
 Console1::map_phase ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "map_phase \n");
-	ControllerButton& controllerButton = static_cast<ControllerButton&> (get_button (PHASE_INV));
+	ControllerButton* controllerButton = get_button (PHASE_INV);
 	if (_current_stripable) {
 		uint32_t channels = _current_stripable->phase_control ()->size ();
 		uint32_t inverted = 0;
@@ -621,14 +621,14 @@ Console1::map_phase ()
 		}
 		if (inverted == 0) {
 			stop_blinking (PHASE_INV);
-			controllerButton.set_led_state (false);
+			controllerButton->set_led_state (false);
 		} else if (inverted == channels) {
 			stop_blinking (PHASE_INV);
-			controllerButton.set_led_state (true);
+			controllerButton->set_led_state (true);
 		} else
 			start_blinking (PHASE_INV);
 	} else {
-		controllerButton.set_led_state (false);
+		controllerButton->set_led_state (false);
 	}
 }
 
@@ -648,7 +648,7 @@ Console1::map_select ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "map_select())\n");
 	for (uint32_t i = 0; i < bank_size; ++i) {
-		get_button (ControllerID (FOCUS1 + i)).set_led_state (i == current_strippable_index);
+		get_button (ControllerID (FOCUS1 + i))->set_led_state (i == current_strippable_index);
 	}
 }
 
@@ -657,8 +657,8 @@ Console1::map_shift (bool shift)
 {
 	DEBUG_TRACE (DEBUG::Console1, "map_shift()\n");
 	try {
-		ControllerButton& controllerButton = static_cast<ControllerButton&> (get_button (PRESET));
-		controllerButton.set_led_state (shift);
+		ControllerButton* controllerButton = get_button (PRESET);
+		controllerButton->set_led_state (shift);
 		map_stripable_state ();
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
@@ -670,8 +670,8 @@ Console1::map_plugin_state (bool plugin_state)
 {
 	DEBUG_TRACE (DEBUG::Console1, "map_plugin_state()\n");
 	try {
-		ControllerButton& controllerButton = static_cast<ControllerButton&> (get_button (TRACK_GROUP));
-		controllerButton.set_led_state (in_plugin_state);
+		ControllerButton* controllerButton = get_button (TRACK_GROUP);
+		controllerButton->set_led_state (in_plugin_state);
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -692,11 +692,11 @@ Console1::map_solo ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "map_solo()\n");
 	try {
-		ControllerButton& controllerButton = static_cast<ControllerButton&> (get_button (SOLO));
+		ControllerButton* controllerButton = get_button (SOLO);
 		if (_current_stripable) {
-			controllerButton.set_led_state (_current_stripable->solo_control ()->soloed ());
+			controllerButton->set_led_state (_current_stripable->solo_control ()->soloed ());
 		} else {
-			controllerButton.set_led_state (false);
+			controllerButton->set_led_state (false);
 		}
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
@@ -722,7 +722,7 @@ Console1::map_filter ()
 	}
 	try {
 		get_button (ControllerID::FILTER_TO_COMPRESSORS)
-		  .set_led_state (_current_stripable->filter_enable_controllable (true)
+		  ->set_led_state (_current_stripable->filter_enable_controllable (true)
 		                    ? _current_stripable->filter_enable_controllable (true)->get_value ()
 		                    : false);
 	} catch (ControlNotFoundException& e) {
@@ -758,7 +758,7 @@ Console1::map_gate ()
 		return;
 	try {
 		get_button (ControllerID::SHAPE)
-		  .set_led_state (_current_stripable->gate_enable_controllable ()
+		  ->set_led_state (_current_stripable->gate_enable_controllable ()
 		                    ? _current_stripable->gate_enable_controllable ()->get_value ()
 		                    : false);
 	} catch (ControlNotFoundException& e) {
@@ -774,7 +774,7 @@ Console1::map_gate_scf ()
 	try {
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("map_gate_scf() - shift: %1\n", shift_state));
 		get_button (ControllerID::HARD_GATE)
-		  .set_led_state (_current_stripable->gate_key_filter_enable_controllable ()
+		  ->set_led_state (_current_stripable->gate_key_filter_enable_controllable ()
 		                    ? _current_stripable->gate_key_filter_enable_controllable ()->get_value ()
 		                    : false);
 	} catch (ControlNotFoundException& e) {
@@ -790,7 +790,7 @@ Console1::map_gate_listen ()
 	try {
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("map_gate_listen() - shift: %1\n", shift_state));
 		get_button (ControllerID::HARD_GATE)
-		  .set_led_state (_current_stripable->gate_key_listen_controllable ()
+		  ->set_led_state (_current_stripable->gate_key_listen_controllable ()
 		                    ? _current_stripable->gate_key_listen_controllable ()->get_value ()
 		                    : false);
 	} catch (ControlNotFoundException& e) {
@@ -893,7 +893,7 @@ Console1::map_eq ()
 	if (!_current_stripable)
 		return;
 	try {
-		get_button (EQ).set_led_state (_current_stripable->eq_enable_controllable ()
+		get_button (EQ)->set_led_state (_current_stripable->eq_enable_controllable ()
 		                                 ? _current_stripable->eq_enable_controllable ()->get_value ()
 		                                 : false);
 	} catch (ControlNotFoundException& e) {
@@ -936,7 +936,7 @@ Console1::map_eq_low_shape ()
 		uint32_t led_value = _current_stripable->eq_shape_controllable (0)
 		                       ? _current_stripable->eq_shape_controllable (0)->get_value () == 0 ? 0 : 63
 		                       : 0;
-		get_button (ControllerID::LOW_SHAPE).set_led_state (led_value);
+		get_button (ControllerID::LOW_SHAPE)->set_led_state (led_value);
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -951,7 +951,7 @@ Console1::map_eq_high_shape ()
 		uint32_t led_value = _current_stripable->eq_shape_controllable (3)
 		                       ? _current_stripable->eq_shape_controllable (3)->get_value () == 0 ? 0 : 63
 		                       : 0;
-		get_button (ControllerID::HIGH_SHAPE).set_led_state (led_value);
+		get_button (ControllerID::HIGH_SHAPE)->set_led_state (led_value);
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -969,7 +969,7 @@ Console1::map_drive ()
 			double val = control->get_value ();
 			DEBUG_TRACE (DEBUG::Console1, string_compose ("map_drive audio track %1\n", val));
 			try {
-				get_encoder (controllerID).set_value (val == 1 ? 127 : 0);
+				get_encoder (controllerID)->set_value (val == 1 ? 127 : 0);
 			} catch (ControlNotFoundException& e) {
 				DEBUG_TRACE (DEBUG::Console1, "Encoder not found\n");
 			}
@@ -1011,7 +1011,7 @@ Console1::map_comp ()
 		return;
 	try {
 		get_button (ControllerID::COMP)
-		  .set_led_state (_current_stripable->comp_enable_controllable ()
+		  ->set_led_state (_current_stripable->comp_enable_controllable ()
 		                    ? _current_stripable->comp_enable_controllable ()->get_value ()
 		                    : false);
 	} catch (ControlNotFoundException& e) {
@@ -1029,7 +1029,7 @@ Console1::map_comp_mode ()
 		                 ? _current_stripable->comp_mode_controllable ()->get_value ()
 		                 : false;
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("****value from comp-type %1\n", value));
-		get_mbutton (ControllerID::ORDER).set_led_state (value);
+		get_mbutton (ControllerID::ORDER)->set_led_state (value);
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -1100,7 +1100,7 @@ Console1::map_encoder (ControllerID controllerID)
 {
 	if (!_current_stripable) {
 		try {
-			get_encoder (controllerID).set_value (0);
+			get_encoder (controllerID)->set_value (0);
 		} catch (ControlNotFoundException& e) {
 			DEBUG_TRACE (DEBUG::Console1, "Encoder not found\n");
 			return false;
@@ -1116,7 +1116,7 @@ Console1::map_encoder (ControllerID controllerID, std::shared_ptr<ARDOUR::Automa
 
 	if (!_current_stripable) {
 		try {
-			get_encoder (controllerID).set_value (0);
+			get_encoder (controllerID)->set_value (0);
 		} catch (ControlNotFoundException& e) {
 			DEBUG_TRACE (DEBUG::Console1, "Encoder not found\n");
 		}
@@ -1133,7 +1133,7 @@ Console1::map_encoder (ControllerID controllerID, std::shared_ptr<ARDOUR::Automa
 		gain = control_to_midi (control, val);
 	}
 	try {
-		get_encoder (controllerID).set_value (gain);
+		get_encoder (controllerID)->set_value (gain);
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Encoder not found\n");
 	}
