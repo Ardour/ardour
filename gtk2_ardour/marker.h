@@ -171,6 +171,12 @@ private:
 	ArdourMarker & operator= (ArdourMarker const &);
 };
 
+class SelectionMarker : public ArdourMarker
+{
+  public:
+	SelectionMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint32 rgba, Type);
+};
+
 class MetricMarker : public ArdourMarker
 {
   public:

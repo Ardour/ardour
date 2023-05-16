@@ -979,6 +979,12 @@ Editor::canvas_marker_event (GdkEvent *event, ArdourCanvas::Item* item, ArdourMa
 }
 
 bool
+Editor::canvas_selection_marker_event (GdkEvent *event, ArdourCanvas::Item* item)
+{
+	return typed_event (item, event, SelectionMarkerItem);
+}
+
+bool
 Editor::canvas_videotl_bar_event (GdkEvent *event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, VideoBarItem);

@@ -849,6 +849,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case SamplesRulerItem:
 	case MinsecRulerItem:
 	case MarkerBarItem:
+	case SelectionMarkerItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
 		    && !ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
@@ -1698,6 +1699,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case SamplesRulerItem:
 			case MinsecRulerItem:
 			case BBTRulerItem:
+			case SelectionMarkerItem:
 				popup_ruler_menu (where, item_type);
 				break;
 
@@ -1839,6 +1841,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case SamplesRulerItem:
 		case MinsecRulerItem:
 		case BBTRulerItem:
+		case SelectionMarkerItem:
 			return true;
 			break;
 

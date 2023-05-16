@@ -717,6 +717,17 @@ MetricMarker::MetricMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint3
 }
 
 /***********************************************************************/
+SelectionMarker::SelectionMarker (PublicEditor& editor, ArdourCanvas::Item& parent, guint32 rgba, Type type)
+	: ArdourMarker (editor, parent, rgba, "", type, timepos_t(0), false)
+{
+	assert (type == SelectionStart || type == SelectionEnd);
+#ifdef CANVAS_DEBUG
+	group->name = string_compose ("Marker::group for %1", type == SelectionStart ? "SelectionStart" : "SelectionEnd");
+#endif
+	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_selection_marker_event), group));
+}
+
+/***********************************************************************/
 
 TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Item& parent, ArdourCanvas::Item& text_parent, guint32 rgba, const string& text, Temporal::TempoPoint const & temp, samplepos_t sample, uint32_t curve_color)
 	: MetricMarker (editor, parent, rgba, text, Tempo, temp.time(), false)

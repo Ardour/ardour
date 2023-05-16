@@ -1728,6 +1728,7 @@ private:
 
 	bool canvas_ruler_event (GdkEvent* event, ArdourCanvas::Item*, ItemType);
 	bool canvas_ruler_bar_event (GdkEvent* event, ArdourCanvas::Item*, ItemType, std::string const&);
+	bool canvas_selection_marker_event (GdkEvent* event, ArdourCanvas::Item*);
 
 	bool canvas_videotl_bar_event (GdkEvent* event, ArdourCanvas::Item*);
 	void update_video_timeline (bool flush = false);

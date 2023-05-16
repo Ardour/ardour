@@ -66,6 +66,7 @@ enum ItemType {
 	MinsecRulerItem,
 	BBTRulerItem,
 	SamplesRulerItem,
+	SelectionMarkerItem,
 	DropZoneItem,
 
 	/* don't remove this */
