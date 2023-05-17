@@ -518,7 +518,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 			}
 
 			if (!from_autoscroll) {
-				_editor->maybe_autoscroll (true, allow_vertical_autoscroll (), false);
+				_editor->maybe_autoscroll (allow_horizontal_autoscroll (), allow_vertical_autoscroll (), false);
 			}
 
 			if (!_editor->autoscroll_active() || from_autoscroll) {
