@@ -193,7 +193,7 @@
     <ColorAlias name="meter background top" alias="neutral:midground"/>
     <ColorAlias name="meter bar" alias="theme:bg1"/>
     <ColorAlias name="meter color BBC" alias="alert:orange"/>
-    <ColorAlias name="meter marker" alias="widget:orsend alert button: fillange"/>
+    <ColorAlias name="meter marker" alias="widget:orange"/>
     <ColorAlias name="meter marker music" alias="widget:orange"/>
     <ColorAlias name="meterbridge label: fill" alias="theme:bg"/>
     <ColorAlias name="meterbridge label: fill active" alias="neutral:background2"/>
