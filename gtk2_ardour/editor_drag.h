@@ -957,7 +957,8 @@ public:
 	                  Temporal::TempoPoint& prev,
 	                  Temporal::TempoPoint& focus,
 	                  Temporal::TempoPoint& next,
-	                  XMLNode&);
+	                  XMLNode&,
+	                  bool ramped);
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent *, bool);
@@ -992,6 +993,7 @@ private:
 
 	XMLNode* _before_state;
 	bool     _drag_valid;
+	bool     _do_ramp;
 };
 
 

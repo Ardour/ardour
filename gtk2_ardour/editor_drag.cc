@@ -3588,7 +3588,8 @@ MappingTwistDrag::MappingTwistDrag (Editor* e, ArdourCanvas::Item* i, Temporal::
                                     TempoPoint& prv,
                                     TempoPoint& fcus,
                                     TempoPoint& nxt,
-                                    XMLNode& before)
+                                    XMLNode& before,
+									bool ramped)
 	: Drag (e, i, Temporal::BeatTime)
 	, prev (prv)
 	, focus (fcus)
@@ -3598,6 +3599,7 @@ MappingTwistDrag::MappingTwistDrag (Editor* e, ArdourCanvas::Item* i, Temporal::
 	, delta (0.)
 	, _before_state (&before)
 	, _drag_valid (true)
+	, _do_ramp (ramped)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MappingTwistDrag\n");
 	initial_focus_npm = focus.note_types_per_minute ();
@@ -3660,11 +3662,10 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 	delta += scaling_factor * pixel_distance;
 	std::cerr << "pixels " << pixel_distance << " spp " << spp << " SF " << scaling_factor << " delta = " << delta << std::endl;
 
-	bool do_a_ramp = true;  // @ben
-	if (do_a_ramp) {
-		map->ramped_twist_tempi (prev, focus, next, initial_pre_npm + delta);
+	if (_do_ramp) {
+		map->ramped_twist_tempi (prev, focus, next, initial_focus_npm + delta);  //was: PRE ... maybe we don't need 2 anymore?
 	} else {
-		map->linear_twist_tempi (prev, focus, next, initial_focus_npm + delta);
+		map->constant_twist_tempi (prev, focus, next, initial_focus_npm + delta);
 	}
 	_editor->mid_tempo_change (Editor::MappingChanged);
 }

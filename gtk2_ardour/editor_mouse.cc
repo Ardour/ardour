@@ -3001,7 +3001,9 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 
 		/* special case 3: if we are on the left side of the LAST marker: behave as if we clicked the marker prior*/
 		TempoPoint* after_after = const_cast<TempoPoint*> (map->next_tempo (*focus));
-		if (!after_after) {
+		if (after_after) {
+			after = after_after;
+		} else {
 			at_end = true; 
 		}
 
