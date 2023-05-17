@@ -767,7 +767,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API int set_state (XMLNode const&, int version);
 
-	LIBTEMPORAL_API void linear_twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& next, double tempo_delta);
+	LIBTEMPORAL_API void constant_twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& next, double tempo_delta);
 	LIBTEMPORAL_API void ramped_twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& next, double tempo_delta);
 
 	LIBTEMPORAL_API void stretch_tempo (TempoPoint& ts, double new_npm);
@@ -1129,7 +1129,8 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	Temporal::BBT_Time bbt_lookup (superclock_t, bool & found) const;
 	Temporal::BBT_Time bbt_lookup (Temporal::Beats const & b, bool & found) const;
 
-	bool iteratively_solve_ramp (TempoPoint&, TempoPoint&);
+	bool solve_ramped_twist (TempoPoint&, TempoPoint&);  /* this is implemented by iteration, and it might fail. */
+	bool solve_constant_twist (TempoPoint&, TempoPoint&);  //TODO:  currently also done by iteration; should be possible to calculate directly
 
 	bool core_remove_meter (MeterPoint const &);
 	bool core_remove_tempo (TempoPoint const &);
