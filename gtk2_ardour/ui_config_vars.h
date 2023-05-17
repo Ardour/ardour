@@ -83,6 +83,7 @@ UI_CONFIG_VARIABLE (ARDOUR::ClockDeltaMode, secondary_clock_delta_mode, "seconda
 UI_CONFIG_VARIABLE (ARDOUR::samplecnt_t, clock_display_limit, "clock-display-limit", 359999) /* seconds; default 99h, 0 = unlimited */
 UI_CONFIG_VARIABLE (bool, show_track_meters, "show-track-meters", true)
 UI_CONFIG_VARIABLE (bool, follow_edits, "follow-edits", false)
+UI_CONFIG_VARIABLE (ARDOUR::TimeSelectionAfterSectionPaste, after_section_op, "after-section-op", ARDOUR::SectionSelectRetainAndMovePlayhead)
 UI_CONFIG_VARIABLE (bool, super_rapid_clock_update, "super-rapid-clock-update", false)
 UI_CONFIG_VARIABLE (bool, autoscroll_editor, "autoscroll-editor", true)
 UI_CONFIG_VARIABLE (bool, link_region_and_track_selection, "link-region-and-track-selection", false)  // DEPRECATED
