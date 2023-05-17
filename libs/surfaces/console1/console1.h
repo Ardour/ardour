@@ -93,8 +93,7 @@ class Console1 : public MIDISurface
   public:
 	Console1 (ARDOUR::Session&);
 	virtual ~Console1 ();
-    void map_p();
-
+	void map_p ();
 
 	int set_active (bool yn);
 
@@ -572,12 +571,12 @@ class Console1 : public MIDISurface
 	};
 
 	/* plugin handling */
-	bool spill_plugins (uint32_t plugin_index);
+	bool spill_plugins (const uint32_t plugin_index);
 
 	/* plugin operations */
-	void select_plugin (const uint32_t i);
+	bool select_plugin (const uint32_t plugin_index);
 
-	void map_select_plugin ();
+	bool map_select_plugin (const uint32_t plugin_index);
 
 	using PluginMappingMap = std::map<std::string, PluginMapping>;
 	PluginMappingMap pluginMappingMap;
