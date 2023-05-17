@@ -75,7 +75,7 @@ public:
 	};
 
 
-	ArdourMarker (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, const std::string& text, Type,
+	ArdourMarker (PublicEditor& editor, ArdourCanvas::Item &, std::string const& color_name, std::string const& text, Type,
 	              Temporal::timepos_t const & position, bool handle_events = true, RegionView* rv = 0);
 
 	virtual ~ArdourMarker ();
@@ -93,8 +93,8 @@ public:
 
 	void set_position (Temporal::timepos_t const &);
 	void set_name (const std::string&, const std::string & tooltip = std::string());
-	void set_points_color (uint32_t rgba);
-	void set_color_rgba (uint32_t rgba);
+	void set_color (std::string const& color_name);
+	void set_points_color (std::string const& color_name);
 	void setup_line ();
 
 	ARDOUR::timepos_t position() const { return _position; }
@@ -149,9 +149,10 @@ protected:
 	bool         _entered;
 	bool         _shown;
 	bool         _line_shown;
-	uint32_t     _color;
-	uint32_t      pre_enter_color;
-	uint32_t     _points_color;
+
+	std::string  _color;
+	std::string  _points_color;
+
 	double       _left_label_limit; ///< the number of pixels available to the left of this marker for a label
 	double       _right_label_limit; ///< the number of pixels available to the right of this marker for a label
 	double       _label_offset;
@@ -169,18 +170,22 @@ private:
 	/* disallow copy construction */
 	ArdourMarker (ArdourMarker const &);
 	ArdourMarker & operator= (ArdourMarker const &);
+
+	static uint32_t color (std::string const&);
+	void apply_color ();
+	void color_handler ();
 };
 
 class SelectionMarker : public ArdourMarker
 {
   public:
-	SelectionMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint32 rgba, Type);
+	SelectionMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::string const& color_name, Type);
 };
 
 class MetricMarker : public ArdourMarker
 {
   public:
-	MetricMarker (PublicEditor& ed, ArdourCanvas::Item& parent, guint32 rgba, const std::string& annotation, Type type, Temporal::timepos_t const & pos, bool handle_events);
+	MetricMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::string const& color_name, const std::string& annotation, Type type, Temporal::timepos_t const & pos, bool handle_events);
 	virtual Temporal::Point const & point() const = 0;
 	virtual void update() = 0;
 };
@@ -188,7 +193,7 @@ class MetricMarker : public ArdourMarker
 class TempoMarker : public MetricMarker
 {
   public:
-	TempoMarker (PublicEditor& editor, ArdourCanvas::Item & parent, ArdourCanvas::Item & text_parent, guint32 rgba, const std::string& text, Temporal::TempoPoint const &, samplepos_t sample, uint32_t curve_color);
+	TempoMarker (PublicEditor& editor, ArdourCanvas::Item & parent, ArdourCanvas::Item & text_parent, std::string const& color_name, const std::string& text, Temporal::TempoPoint const &, samplepos_t sample, uint32_t curve_color);
 	~TempoMarker ();
 
 	void reset_tempo (Temporal::TempoPoint const & t);
@@ -209,7 +214,7 @@ class TempoMarker : public MetricMarker
 class MeterMarker : public MetricMarker
 {
   public:
-	MeterMarker (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, const std::string& text, Temporal::MeterPoint const &);
+	MeterMarker (PublicEditor& editor, ArdourCanvas::Item &, std::string const& color_name, const std::string& text, Temporal::MeterPoint const &);
 	~MeterMarker ();
 
 	void reset_meter (Temporal::MeterPoint const & m);
@@ -225,7 +230,7 @@ class MeterMarker : public MetricMarker
 class BBTMarker : public MetricMarker
 {
   public:
-	BBTMarker (PublicEditor& editor, ArdourCanvas::Item &, guint32 rgba, Temporal::MusicTimePoint const &);
+	BBTMarker (PublicEditor& editor, ArdourCanvas::Item &, std::string const& color_name, Temporal::MusicTimePoint const &);
 	~BBTMarker ();
 
 	void reset_point (Temporal::MusicTimePoint const &);

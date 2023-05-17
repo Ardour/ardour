@@ -3095,7 +3095,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		_marker = new MeterMarker (
 			*_editor,
 			*_editor->meter_group,
-			UIConfiguration::instance().color ("meter marker"),
+			"meter marker",
 			name,
 			_marker->meter()
 			);
