@@ -3706,14 +3706,14 @@ TempoMap::stretch_tempo_end (TempoPoint* ts, samplepos_t sample, samplepos_t end
 }
 
 bool
-TempoMap::iteratively_solve_ramp (TempoPoint& earlier, TempoPoint& later)
+TempoMap::solve_ramped_twist (TempoPoint& earlier, TempoPoint& later)
 {
 	superclock_t err = earlier.superclock_at (later.beats()) - later.sclock();
 	const superclock_t one_sample = superclock_ticks_per_second() / TEMPORAL_SAMPLE_RATE;
 	const Beats b (later.beats() - earlier.beats());
-	const double end_scpqn = earlier.end_superclocks_per_quarter_note();
-	double scpqn = earlier.superclocks_per_quarter_note ();
-	double new_npm;
+	double end_scpqn = earlier.end_superclocks_per_quarter_note();
+	double start_scpqn = earlier.superclocks_per_quarter_note ();
+	double new_end_npm;
 	int cnt = 0;
 
 	while (std::abs(err) >= one_sample) {
@@ -3722,26 +3722,26 @@ TempoMap::iteratively_solve_ramp (TempoPoint& earlier, TempoPoint& later)
 			/* estimated > actual: speed end tempo up a little aka
 			   reduce scpqn
 			*/
-			scpqn *= 0.99;
+			end_scpqn *= 0.99;
 		} else {
 			/* estimated < actual: reduce end tempo a little, aka
 			   increase scpqn
 			*/
-			scpqn *= 1.01;
+			end_scpqn *= 1.01;
 		}
 
-		if (scpqn < 1.0) {
+		if (end_scpqn < 1.0) {
 			/* mathematically too small, bail out */
 			return false;
 		}
 
 		/* Convert scpqn to notes-per-minute */
 
-		new_npm = ((superclock_ticks_per_second() * 60.0) / scpqn) * (earlier.note_type() / 4.0);
+		new_end_npm = ((superclock_ticks_per_second() * 60.0) / end_scpqn) * (earlier.note_type() / 4.0);
 
 		/* limit range of possible discovered tempo */
 
-		if (new_npm < 4.0 && new_npm > 400) {
+		if (new_end_npm < 4.0 && new_end_npm > 400) {
 			/* too low of a tempo for our taste, bail out */
 			return false;
 		}
@@ -3751,12 +3751,70 @@ TempoMap::iteratively_solve_ramp (TempoPoint& earlier, TempoPoint& later)
 		 * the later marker and its actual (fixed) position.
 		 */
 
-		earlier.set_note_types_per_minute (new_npm);
-		earlier.compute_omega_beats_from_quarter_duration (b, end_scpqn);
+		earlier.set_end_npm (new_end_npm);
+		earlier.compute_omega_beats_from_next_tempo (later);
 		err = earlier.superclock_at (later.beats()) - later.sclock();
-		if (cnt % 1000 == 0) {
-			std::cerr << "nn: " << new_npm << " err " << err << " @ " << cnt << std::endl;
+
+		if (cnt > 20000) {
+			std::cerr << "nn: " << new_end_npm << " err " << err << " @ " << cnt << "solve_ramped_twist FAILED\n";
+			return false;
 		}
+
+		++cnt;
+	}
+
+	std::cerr << "that took " << cnt << " iterations to get to < 1 sample\n";
+
+	return true;
+}
+
+bool
+TempoMap::solve_constant_twist (TempoPoint& earlier, TempoPoint& later)
+{
+	superclock_t err = earlier.superclock_at (later.beats()) - later.sclock();
+	const superclock_t one_sample = superclock_ticks_per_second() / TEMPORAL_SAMPLE_RATE;
+	const Beats b (later.beats() - earlier.beats());
+	double start_npm = earlier.superclocks_per_quarter_note ();
+	int cnt = 0;
+
+	while (std::abs(err) >= one_sample) {
+
+		if (err > 0) {
+			/* estimated > actual: speed end tempo up a little aka
+			   reduce scpqn
+			*/
+			start_npm *= 0.99;
+		} else {
+			/* estimated < actual: reduce end tempo a little, aka
+			   increase scpqn
+			*/
+			start_npm *= 1.01;
+		}
+
+		/* Convert scpqn to notes-per-minute */
+
+		double new_npm = ((superclock_ticks_per_second() * 60.0) / start_npm) * (earlier.note_type() / 4.0);
+
+		/* limit range of possible discovered tempo */
+
+		if (new_npm < 4.0 && new_npm > 400) {
+			/* too low of a tempo for our taste, bail out */
+			return false;
+		}
+
+		/* set the (initial) tempo, and then compute
+		 * the (new) error (distance between the predicted position of
+		 * the later marker and its actual (fixed) position.
+		 */
+		earlier.set_note_types_per_minute (new_npm);
+		earlier.set_end_npm (new_npm);
+		err = earlier.superclock_at (later.beats()) - later.sclock();
+
+		if (cnt > 20000) {
+			std::cerr << "nn: " << new_npm << " err " << err << " @ " << cnt << "solve_constant_twist FAILED\n";
+			return false;
+		}
+
 		++cnt;
 	}
 
@@ -3766,11 +3824,12 @@ TempoMap::iteratively_solve_ramp (TempoPoint& earlier, TempoPoint& later)
 }
 
 void
-TempoMap::linear_twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& next, double tempo_value)
+TempoMap::constant_twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& next, double tempo_value)
 {
 	/* Check if the new tempo value is within an acceptable range */
 
 	if (tempo_value < 4.0 || tempo_value > 400) {
+		std::cerr << "can't set tempo to " << tempo_value << " ....fail\n";
 		return;
 	}
 
@@ -3800,15 +3859,16 @@ TempoMap::linear_twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& n
 	std::cerr << "pre-iter\n";
 	dump (std::cerr);
 
-	if (!iteratively_solve_ramp (focus, next)) {
+	if (!solve_constant_twist (focus, next)) {
 		prev = old_prev;
 		focus = old_focus;
 		return;
 	}
+
 }
 
 void
-TempoMap::ramped_twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& next, double tempo_value)
+TempoMap::ramped_twist_tempi (TempoPoint& unused, TempoPoint& focus, TempoPoint& next, double tempo_value)
 {
 	/* Check if the new tempo value is within an acceptable range */
 
@@ -3816,11 +3876,12 @@ TempoMap::ramped_twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& n
 		return;
 	}
 
-	/* Our job here is to reposition @param focus without altering the
-	 * tempos or positions of @param prev and @param next. We are
-	 * "twisting" the tempo section before and after focus
+	/* Our job here is to tweak the ramp of @param focus without
+	 * altering the positions of @param focus and @param next.
+	 * We are "twisting" the tempo section between those markers
+	 * to enact a change but without moving the markers themselves
 	 *
-	 * Start by saving the current state of prev and focus in case we need
+	 * Start by saving the current state of focus in case we need
 	 * to bail out because change is impossible.
 	 */
 
@@ -3828,51 +3889,18 @@ TempoMap::ramped_twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint& n
 	dump (std::cerr);
 	std::cerr << "----------------------------\n";
 
-	TempoPoint old_prev (prev);
 	TempoPoint old_focus (focus);
 
-	/* fix end tempo of prev tempo marker then recompute its omega */
-	prev.set_end_npm (tempo_value);
-	prev.compute_omega_beats_from_next_tempo (focus);
-
-	/* reposition focus, using prev to define audio time; leave beat time
-	 * and BBT alone
-	 */
-
-	focus.set (prev.superclock_at (focus.beats()), focus.beats(), focus.bbt());
-
-	/* set focus start & end tempos appropriately */
-
+	/* set start tempo of prev tempo marker; we will iteratively solve for the required ramp value */
 	focus.set_note_types_per_minute (tempo_value);
-
-	/* recompute focus omega */
-
-	focus.compute_omega_beats_from_next_tempo (next);
-
-	/* Now iteratively adjust focus.superclocks_per_quarter_note() (the
-	 * section's starting tempo) so that next.sclock() remains within 1
-	 * sample of its current position
-	 */
 
 	std::cerr << "pre-iter\n";
 	dump (std::cerr);
 
-	if (!iteratively_solve_ramp (focus, next)) {
-		prev = old_prev;
+	if (!solve_ramped_twist (focus, next)) {
 		focus = old_focus;
 		return;
 	}
-
-#if 0
-	prev.set_end_npm (focus.note_types_per_minute());
-	prev.compute_omega_beats_from_next_tempo (focus);
-
-	if (!iteratively_solve_ramp (prev, focus)) {
-		prev = old_prev;
-		focus = old_focus;
-		return;
-	}
-#endif
 
 	std::cerr << "Twisted with " << tempo_value << std::endl;
 	dump (std::cerr);
