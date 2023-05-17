@@ -220,6 +220,10 @@ public:
 		return true;
 	}
 
+	virtual bool allow_horizontal_autoscroll () const {
+		return true;
+	}
+
 	/** @return true if x movement matters to this drag */
 	virtual bool x_movement_matters () const {
 		return true;
@@ -926,6 +930,10 @@ public:
 		return false;
 	}
 
+	bool allow_horizontal_autoscroll () const {
+		return false;
+	}
+
 	bool y_movement_matters () const {
 		return false;
 	}
@@ -957,6 +965,10 @@ public:
 	void aborted (bool);
 
 	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool allow_horizontal_autoscroll () const {
 		return false;
 	}
 
