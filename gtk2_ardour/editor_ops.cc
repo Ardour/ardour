@@ -2715,7 +2715,26 @@ Editor::cut_copy_section (bool copy)
 	if (!get_selection_extents (start, end) || !_session) {
 		return;
 	}
-	_session->cut_copy_section (start, end, get_preferred_edit_position(), copy);
+	timepos_t to (get_preferred_edit_position ());
+	_session->cut_copy_section (start, end, to, copy);
+
+	timepos_t to_end (to + start.distance (end));
+
+	switch (UIConfiguration::instance().get_after_section_op ()) {
+		case SectionSelectNoop:
+			return;
+		case SectionSelectClear:
+			selection->clear ();
+			break;
+		case SectionSelectRetainAndMovePlayhead:
+			_session->request_locate (copy ? to_end.samples (): to.samples ());
+			/* fallthough */
+		case SectionSelectRetain:
+			if (!copy || to < end) {
+				selection->set (to, to_end);
+			}
+			break;
+	}
 }
 
 /* BUILT-IN EFFECTS */
