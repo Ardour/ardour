@@ -450,6 +450,13 @@ enum RangeSelectionAfterSplit {
 	ForceSel = 2      // bit 1
 };
 
+enum TimeSelectionAfterSectionPaste {
+	SectionSelectNoop = 0,
+	SectionSelectClear = 1,
+	SectionSelectRetain = 2,
+	SectionSelectRetainAndMovePlayhead = 3,
+};
+
 enum RegionPoint {
 	Start,
 	End,
