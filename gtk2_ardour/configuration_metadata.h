@@ -72,6 +72,7 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("show-region-cue-markers"), _("cue"), _("markers"), _("regions"), _("editor"),  NULL);
 	VAR_META (X_("show-region-gain"), _("regions"), _("gain"), _("envelope"), _("volume"), _("modes"),  NULL);
 	VAR_META (X_("show-region-name"), _("regions"), _("name"), _("appearance"), _("editor"),  NULL);
+	VAR_META (X_("show-selection-marker"), _("selection"), _("ruler"), _("marker"), _("range"),  NULL);
 	VAR_META (X_("show-region-xrun-markers"), _("regions"), _("xruns"), _("markers"), _("dropouts"),  NULL);
 	VAR_META (X_("show-secondary-clock"), _("clock"), _("toolbar"), _("visibility"), _("secondary"),  NULL);
 	VAR_META (X_("show-snapped-cursor"), _("cursor"), _("snap"), _("edit"), _("point"), _("line"),  NULL);
@@ -88,6 +89,7 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("snap-threshold"), _("snap"), _("threshold"), _("distance"), _("mouse"),  NULL);
 	VAR_META (X_("snap-to-grid"), _("snap"), _("grid"), _("editor"), _("mouse"),  NULL);
 	VAR_META (X_("snap-to-marks"), _("snap"), _("grid"), _("editor"), _("mouse"), _("markers"), _("marks"),  NULL);
+	VAR_META (X_("snap-to-playhead"), _("snap"), _("grid"), _("editor"), _("mouse"), _("playhead"),  NULL);
 	VAR_META (X_("snap-to-region-end"), _("snap"), _("grid"), _("editor"), _("mouse"), _("regions"), _("boundaries"), _("boundary"),  NULL);
 	VAR_META (X_("snap-to-region-start"), _("snap"), _("grid"), _("editor"), _("mouse"), _("regions"), _("boundaries"), _("boundary"),  NULL);
 	VAR_META (X_("snap-to-region-sync"), _("snap"), _("grid"), _("editor"), _("mouse"), _("regions"), _("sync"),  NULL);
@@ -183,6 +185,7 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("meter-type-master"), _("meter"), _("type"), _("master"),  NULL);
 	VAR_META (X_("meter-type-track"), _("meter"), _("type"), _("track"),  NULL);
 	VAR_META (X_("midi-audition-synth-uri"), _("midi"), _("audition"), _("synthesizer"), _("plugin"), _("name"), _("id"), _("uri"), _("location"),  NULL);
+	VAR_META (X_("midi-clock-resolution"), _("midi"), _("clock"), _("resolution"), _("quantize"), _("limit"), _("precision"),  NULL);
 	VAR_META (X_("midi-clock-sets-tempo"), _("midi"), _("clock"), _("mclk"), _("set"), _("tempo"),  NULL);
 	VAR_META (X_("midi-feedback"), _("midi"), _("generic"), _("control"), _("surface"), _("feedback"),  NULL);
 	VAR_META (X_("midi-input-follows-selection"), _("midi"), _("inputs"), _("port"), _("device"), _("follow"), _("selection"), _("tracks"),  NULL);
@@ -210,7 +213,7 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("plugins-stop-with-transport"), _("plugins"), _("stop"), _("transport"), _("tail"), _("reverb"), _("ringing"), _("reset"),  NULL);
 	VAR_META (X_("port-resampler-quality"), _("resampling"), _("audioengine"), _("global"), _("quality"), _("level"),  NULL);
 	VAR_META (X_("processor-usage"), _("cpu"), _("threads"), _("usage"), _("distribute"), _("parallel"),  NULL);
-	VAR_META (X_("quieten-at-speed"), _("volume"), _("gain"), _("level"), _("reduce"), _("quieten"), _("cut"), _("speed"), _("fast"), _("foward"), _("rewind"), _("ffwd"),  NULL);
+	VAR_META (X_("quieten-at-speed"), _("volume"), _("gain"), _("level"), _("reduce"), _("quieten"), _("cut"), _("speed"), _("fast"), _("forward"), _("rewind"), _("ffwd"),  NULL);
 	VAR_META (X_("range-selection-after-split"), _("editing"), _("split"), _("selection"), _("range"), _("after"), _("split"),  NULL);
 	VAR_META (X_("recording-resets-xrun-count"), _("recording"), _("resets"), _("xruns"),  NULL);
 	VAR_META (X_("region-boundaries-from-onscreen_tracks"), _("grid"), _("region"), _("boundaries"), _("from"), _("visible"), _("onscreen"), _("tracks"), _("lanes"),  NULL);
