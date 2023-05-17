@@ -63,16 +63,16 @@ Console1::~Console1 ()
 
 	tear_down_gui ();
 
-    for( const auto &[a, b] : buttons ){
+    for( const auto &[_, b] : buttons ){
 		delete b;
 	}
-    for( const auto &[a, b] : encoders ){
+    for( const auto &[_, b] : encoders ){
 		delete b;
 	}
-    for( const auto &[a, b] : meters ){
+    for( const auto &[_, b] : meters ){
 		delete b;
 	}
-    for( const auto &[a, b] : multi_buttons ){
+    for( const auto &[_, b] : multi_buttons ){
 		delete b;
 	}
 
@@ -106,8 +106,6 @@ Console1::set_active (bool yn)
 		DEBUG_TRACE (DEBUG::Console1, "Console1::set_active\n");
 
 		BaseUI::run ();
-
-		// connect_session_signals ();
 
 	} else {
 		/* Control Protocol Manager never calls us with false, but

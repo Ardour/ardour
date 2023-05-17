@@ -126,50 +126,59 @@ Console1::load_mapping (FILE* fin)
 	return true;
 }
 
-void
-Console1::select_plugin (uint32_t plugin_index)
+bool
+Console1::select_plugin (const uint32_t plugin_index)
 {
 	DEBUG_TRACE (DEBUG::Console1, "Console1::select_plugin\n");
 	if (current_plugin_index == plugin_index) {
 		std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (_current_stripable);
 		if (!r) {
-			return;
+			return false;
 		}
 		std::shared_ptr<Processor> proc = r->nth_plugin (plugin_index);
 		if (!proc) {
-			return;
+			return false;
 		}
 		if (!proc->display_to_user ()) {
-			return;
+			return false;
 		}
 		std::shared_ptr<PluginInsert> plugin_insert = std::dynamic_pointer_cast<PluginInsert> (proc);
 		if (!plugin_insert)
-			return;
+			return false;
 		plugin_insert->ToggleUI ();
-		return;
+		return true;
 	}
-	current_plugin_index = plugin_index;
-	map_select_plugin ();
-}
-
-void
-Console1::map_select_plugin ()
-{
-	DEBUG_TRACE (DEBUG::Console1, "map_select_plugin())\n");
-	bool plugin_availabe = spill_plugins (current_plugin_index);
-	for (uint32_t i = 0; i < bank_size; ++i) {
-		if (i == current_plugin_index && plugin_availabe) {
-			start_blinking (ControllerID (FOCUS1 + i));
-		} else if (i != current_strippable_index) {
-			stop_blinking (ControllerID (FOCUS1 + i));
-		}
+	if (map_select_plugin (plugin_index)) {
+		return true;
 	}
+	return false;
 }
 
 bool
-Console1::spill_plugins (uint32_t plugin_index)
+Console1::map_select_plugin (const uint32_t plugin_index)
+{
+	DEBUG_TRACE (DEBUG::Console1, "map_select_plugin())\n");
+	if (spill_plugins (plugin_index)) {
+		for (uint32_t i = 0; i < bank_size; ++i) {
+			if (i == plugin_index) {
+				start_blinking (ControllerID (FOCUS1 + i));
+			} else if (i != current_strippable_index) {
+				stop_blinking (ControllerID (FOCUS1 + i));
+			}
+		}
+		current_plugin_index = plugin_index;
+		return true;
+	} else {
+		get_button (ControllerID (FOCUS1 + plugin_index))->set_led_state (plugin_index == current_strippable_index);
+	}
+	return false;
+}
+
+bool
+Console1::spill_plugins (const uint32_t plugin_index)
 {
 	DEBUG_TRACE (DEBUG::Console1, string_compose ("spill_plugins(%1)\n", plugin_index));
+	bool mapping_found = false;
 	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (_current_stripable);
 	if (!r) {
 		return false;
@@ -182,9 +191,9 @@ Console1::spill_plugins (uint32_t plugin_index)
 		e.second->set_value (0);
 	}
 	for (auto& c : buttons) {
-        if( c.first == ControllerID::TRACK_GROUP )
+		if (c.first == ControllerID::TRACK_GROUP)
 			continue;
-        if( c.first >= ControllerID::FOCUS1 && c.first <= ControllerID::FOCUS20 )
+		if (c.first >= ControllerID::FOCUS1 && c.first <= ControllerID::FOCUS20)
 			continue;
 		c.second->set_plugin_action (0);
 		c.second->set_led_state (false);
@@ -218,9 +227,7 @@ Console1::spill_plugins (uint32_t plugin_index)
 	DEBUG_TRACE (DEBUG::Console1, string_compose ("Found plugin id %1\n", plugin->unique_id ()));
 
 	PluginMappingMap::iterator pmmit = pluginMappingMap.find (plugin->unique_id ());
-	if (pmmit == pluginMappingMap.end ()) {
-		return true;
-	}
+	mapping_found = (pmmit != pluginMappingMap.end ());
 
 	PluginMapping pluginMapping = pmmit->second;
 	DEBUG_TRACE (DEBUG::Console1,
@@ -228,24 +235,24 @@ Console1::spill_plugins (uint32_t plugin_index)
 
 	set<Evoral::Parameter> p = proc->what_can_be_automated ();
 
-	PluginParameterMapping enableMapping = pluginMapping.parameters[-1];
-	if (enableMapping.controllerId != 0) {
-		try {
-			ControllerButton* cb = get_button (enableMapping.controllerId);
-			boost::function<void ()> plugin_mapping = [=] () -> void { cb->set_led_state (plugin_insert->enabled ()); };
-			cb->set_plugin_action ([=] (uint32_t val) {
-				plugin_insert->enable (val == 127);
-				DEBUG_TRACE (DEBUG::Console1,
-				             string_compose ("ControllerButton Plugin parameter %1: %2 \n", n_controls, val));
-			});
+    try {
+        ControllerButton* cb = get_button (ControllerID::MUTE);
+        boost::function<void ()> plugin_mapping = [=] () -> void { cb->set_led_state (plugin_insert->enabled ()); };
+        cb->set_plugin_action ([=] (uint32_t val) {
+            plugin_insert->enable (val == 127);
+            DEBUG_TRACE (DEBUG::Console1,
+                            string_compose ("ControllerButton Plugin parameter %1: %2 \n", n_controls, val));
+        });
 
-			plugin_insert->ActiveChanged.connect (
-			  plugin_connections, MISSING_INVALIDATOR, boost::bind (plugin_mapping), this);
-			plugin_insert->ActiveChanged ();
-		} catch (ControlNotFoundException&) {
-			DEBUG_TRACE (DEBUG::Console1, string_compose ("No ControllerButton found %1\n", n_controls));
-		}
-	}
+        plugin_insert->ActiveChanged.connect (
+            plugin_connections, MISSING_INVALIDATOR, boost::bind (plugin_mapping), this);
+        plugin_insert->ActiveChanged ();
+    } catch (ControlNotFoundException&) {
+        DEBUG_TRACE (DEBUG::Console1, string_compose ("No ControllerButton found %1\n", n_controls));
+    }
+
+    if( !mapping_found )
+		return true;
 
 	for (set<Evoral::Parameter>::iterator j = p.begin (); j != p.end (); ++j) {
 		++n_controls;
@@ -274,50 +281,51 @@ Console1::spill_plugins (uint32_t plugin_index)
 					swtch = true;
 				}
 				PluginParameterMapping ppm = pluginMapping.parameters[n_controls];
-				try {
-					Encoder* e = get_encoder (ppm.controllerId);
-					boost::function<void (bool b, PBD::Controllable::GroupControlDisposition d)> plugin_mapping =
-					  [=] (bool b, PBD::Controllable::GroupControlDisposition d) -> void {
-						double v = parameterDescriptor.to_interface (c->get_value (), true);
-						e->set_value (v * 127);
-					};
-					e->set_plugin_action ([=] (uint32_t val) {
-						double v = val / 127.f;
-						c->set_value (parameterDescriptor.from_interface (v, true),
-						              PBD::Controllable::GroupControlDisposition::UseGroup);
-						DEBUG_TRACE (DEBUG::Console1,
-						             string_compose ("Encoder Plugin parameter %1: %2 - %3\n", n_controls, val, v));
-					});
-					c->Changed.connect (
-					  plugin_connections, MISSING_INVALIDATOR, boost::bind (plugin_mapping, _1, _2), this);
-					c->Changed (true, PBD::Controllable::GroupControlDisposition::UseGroup);
-					continue;
-				} catch (ControlNotFoundException&) {
-					DEBUG_TRACE (DEBUG::Console1, string_compose ("No Encoder found %1\n", n_controls));
-				}
-				try {
-					ControllerButton* cb = get_button (ppm.controllerId);
-					boost::function<void (bool b, PBD::Controllable::GroupControlDisposition d)> plugin_mapping =
-					  [=] (bool b, PBD::Controllable::GroupControlDisposition d) -> void {
-						// double v = parameterDescriptor.to_interface (c->get_value (), true);
-						// e->set_value (v * 127);
-						cb->set_led_state (c->get_value ());
-					};
-					cb->set_plugin_action ([=] (uint32_t val) {
-						double v = val / 127.f;
-						c->set_value (parameterDescriptor.from_interface (v, true),
-						              PBD::Controllable::GroupControlDisposition::UseGroup);
-						DEBUG_TRACE (
-						  DEBUG::Console1,
-						  string_compose ("ControllerButton Plugin parameter %1: %2 - %3\n", n_controls, val, v));
-					});
+				if (!swtch) {
+					try {
+						Encoder* e = get_encoder (ppm.controllerId);
+						boost::function<void (bool b, PBD::Controllable::GroupControlDisposition d)> plugin_mapping =
+						  [=] (bool b, PBD::Controllable::GroupControlDisposition d) -> void {
+							double v = parameterDescriptor.to_interface (c->get_value (), true);
+							e->set_value (v * 127);
+						};
+						e->set_plugin_action ([=] (uint32_t val) {
+							double v = val / 127.f;
+							c->set_value (parameterDescriptor.from_interface (v, true),
+							              PBD::Controllable::GroupControlDisposition::UseGroup);
+							DEBUG_TRACE (DEBUG::Console1,
+							             string_compose ("Encoder Plugin parameter %1: %2 - %3\n", n_controls, val, v));
+						});
+						c->Changed.connect (
+						  plugin_connections, MISSING_INVALIDATOR, boost::bind (plugin_mapping, _1, _2), this);
+						c->Changed (true, PBD::Controllable::GroupControlDisposition::UseGroup);
+						continue;
+					} catch (ControlNotFoundException&) {
+						DEBUG_TRACE (DEBUG::Console1, string_compose ("No Encoder found %1\n", n_controls));
+					}
+				} else {
+					try {
+						ControllerButton* cb = get_button (ppm.controllerId);
+						boost::function<void (bool b, PBD::Controllable::GroupControlDisposition d)> plugin_mapping =
+						  [=] (bool b, PBD::Controllable::GroupControlDisposition d) -> void {
+							cb->set_led_state (c->get_value ());
+						};
+						cb->set_plugin_action ([=] (uint32_t val) {
+							double v = val / 127.f;
+							c->set_value (parameterDescriptor.from_interface (v, true),
+							              PBD::Controllable::GroupControlDisposition::UseGroup);
+							DEBUG_TRACE (
+							  DEBUG::Console1,
+							  string_compose ("ControllerButton Plugin parameter %1: %2 - %3\n", n_controls, val, v));
+						});
 
-					c->Changed.connect (
-					  plugin_connections, MISSING_INVALIDATOR, boost::bind (plugin_mapping, _1, _2), this);
-					c->Changed (true, PBD::Controllable::GroupControlDisposition::UseGroup);
-					continue;
-				} catch (ControlNotFoundException&) {
-					DEBUG_TRACE (DEBUG::Console1, string_compose ("No ControllerButton found %1\n", n_controls));
+						c->Changed.connect (
+						  plugin_connections, MISSING_INVALIDATOR, boost::bind (plugin_mapping, _1, _2), this);
+						c->Changed (true, PBD::Controllable::GroupControlDisposition::UseGroup);
+						continue;
+					} catch (ControlNotFoundException&) {
+						DEBUG_TRACE (DEBUG::Console1, string_compose ("No ControllerButton found %1\n", n_controls));
+					}
 				}
 			}
 		}
