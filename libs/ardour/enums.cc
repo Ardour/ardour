@@ -109,6 +109,7 @@ setup_enum_writer ()
 	FadeShape _FadeShape;
 	RegionSelectionAfterSplit _RegionSelectionAfterSplit;
 	RangeSelectionAfterSplit _RangeSelectionAfterSplit;
+	TimeSelectionAfterSectionPaste _TimeSelectionAfterSectionPaste;
 	IOChange _IOChange;
 	AutomationType _AutomationType;
 	AutoState _AutoState;
@@ -570,6 +571,12 @@ setup_enum_writer ()
 	REGISTER_ENUM(ExistingNewlyCreatedRight);
 	REGISTER_ENUM(ExistingNewlyCreatedBoth);
 	REGISTER (_RegionSelectionAfterSplit);
+	REGISTER (_RangeSelectionAfterSplit);
+
+	REGISTER_ENUM(SectionSelectNoop);
+	REGISTER_ENUM(SectionSelectClear);
+	REGISTER_ENUM(SectionSelectRetain);
+	REGISTER_ENUM(SectionSelectRetainAndMovePlayhead);
 	REGISTER (_RangeSelectionAfterSplit);
 
 	REGISTER_CLASS_ENUM (DiskIOProcessor, Recordable);
