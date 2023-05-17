@@ -2699,60 +2699,6 @@ RCOptionEditor::RCOptionEditor ()
 	gap->add (4, _("Large"));
 	add_option (_("Appearance/Editor"), gap);
 
-	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Waveforms")));
-
-	if (!Profile->get_mixbus()) {
-		add_option (_("Appearance/Editor"),
-				new BoolOption (
-					"show-waveforms",
-					_("Show waveforms in regions"),
-					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms),
-					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms)
-					));
-	}  // !mixbus
-
-	add_option (_("Appearance/Editor"),
-	     new BoolOption (
-		     "show-waveforms-while-recording",
-		     _("Show waveforms while recording"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms_while_recording),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms_while_recording)
-		     ));
-
-	add_option (_("Appearance/Editor"),
-			new BoolOption (
-			"show-waveform-clipping",
-			_("Show waveform clipping"),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveform_clipping),
-			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveform_clipping)
-			));
-
-	add_option (_("Appearance/Editor"), new ClipLevelOptions ());
-
-	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
-		"waveform-scale",
-		_("Waveform scale"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_scale),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_scale)
-		);
-
-	wfs->add (Linear, _("linear"));
-	wfs->add (Logarithmic, _("logarithmic"));
-
-	add_option (_("Appearance/Editor"), wfs);
-
-	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
-		"waveform-shape",
-		_("Waveform shape"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_shape),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_shape)
-		);
-
-	wfsh->add (Traditional, _("traditional"));
-	wfsh->add (Rectified, _("rectified"));
-
-	add_option (_("Appearance/Editor"), wfsh);
-
 	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("Editor Meters")));
 
 	add_option (_("Appearance/Editor"),
@@ -2807,6 +2753,61 @@ RCOptionEditor::RCOptionEditor ()
 		            ));
 
 	add_option (_("Appearance/Editor"), new OptionEditorBlank ());
+
+	add_option (_("Appearance/Waveform"), new OptionEditorHeading (_("Editor Waveforms")));
+
+	if (!Profile->get_mixbus()) {
+		add_option (_("Appearance/Waveform"),
+				new BoolOption (
+					"show-waveforms",
+					_("Show waveforms in regions"),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms),
+					sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms)
+					));
+	}  // !mixbus
+
+	add_option (_("Appearance/Waveform"),
+	     new BoolOption (
+		     "show-waveforms-while-recording",
+		     _("Show waveforms while recording"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveforms_while_recording),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveforms_while_recording)
+		     ));
+
+	add_option (_("Appearance/Waveform"),
+			new BoolOption (
+			"show-waveform-clipping",
+			_("Show waveform clipping"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_waveform_clipping),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_waveform_clipping)
+			));
+
+	add_option (_("Appearance/Waveform"), new ClipLevelOptions ());
+
+	ComboOption<WaveformScale>* wfs = new ComboOption<WaveformScale> (
+		"waveform-scale",
+		_("Waveform scale"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_scale),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_scale)
+		);
+
+	wfs->add (Linear, _("linear"));
+	wfs->add (Logarithmic, _("logarithmic"));
+
+	add_option (_("Appearance/Waveform"), wfs);
+
+	ComboOption<WaveformShape>* wfsh = new ComboOption<WaveformShape> (
+		"waveform-shape",
+		_("Waveform shape"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_waveform_shape),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_waveform_shape)
+		);
+
+	wfsh->add (Traditional, _("traditional"));
+	wfsh->add (Rectified, _("rectified"));
+
+	add_option (_("Appearance/Waveform"), wfsh);
+	add_option (_("Appearance/Waveform"), new OptionEditorBlank ());
 
 	/* The names of these controls must be the same as those given in MixerStrip
 	   for the actual widgets being controlled.
