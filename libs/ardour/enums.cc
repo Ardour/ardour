@@ -577,7 +577,7 @@ setup_enum_writer ()
 	REGISTER_ENUM(SectionSelectClear);
 	REGISTER_ENUM(SectionSelectRetain);
 	REGISTER_ENUM(SectionSelectRetainAndMovePlayhead);
-	REGISTER (_RangeSelectionAfterSplit);
+	REGISTER (_TimeSelectionAfterSectionPaste);
 
 	REGISTER_CLASS_ENUM (DiskIOProcessor, Recordable);
 	REGISTER_CLASS_ENUM (DiskIOProcessor, Hidden);
