@@ -2039,7 +2039,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		entered_marker = m_marker;
 		/* "music" currently serves as a stand-in for "entered". */
-		m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker music"));
+		m_marker->set_color ("meter marker music");
 		break;
 
 	case TempoMarkerItem:
@@ -2048,7 +2048,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 		}
 		entered_marker = t_marker;
 		/* "music" currently serves as a stand-in for "entered". */
-		t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker music"));
+		t_marker->set_color ("tempo marker music");
 		break;
 
 	case FadeInHandleItem:
@@ -2162,7 +2162,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		if ((m_marker = static_cast<MeterMarker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
-		m_marker->set_color_rgba (UIConfiguration::instance().color ("meter marker"));
+		m_marker->set_color ("meter marker");
 		entered_marker = 0;
 		break;
 
@@ -2170,7 +2170,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 		if ((t_marker = static_cast<TempoMarker *> (item->get_data ("marker"))) == 0) {
 			break;
 		}
-		t_marker->set_color_rgba (UIConfiguration::instance().color ("tempo marker"));
+		t_marker->set_color ("tempo marker");
 		entered_marker = 0;
 		break;
 

@@ -146,8 +146,8 @@ Editor::initialize_canvas ()
 	/* group above rulers, to show selection triangles */
 	_selection_marker_group = new ArdourCanvas::Container (h_scroll_group);
 	CANVAS_DEBUG_NAME (_selection_marker_group, "Canvas Selection Ruler");
-	_selection_marker.start = new SelectionMarker (*this, *_selection_marker_group, 0xff0000ff, ArdourMarker::SelectionStart);
-	_selection_marker.end = new SelectionMarker (*this, *_selection_marker_group, 0xff0000ff, ArdourMarker::SelectionEnd);
+	_selection_marker.start = new SelectionMarker (*this, *_selection_marker_group, "play head", ArdourMarker::SelectionStart);
+	_selection_marker.end = new SelectionMarker (*this, *_selection_marker_group, "play head", ArdourMarker::SelectionEnd);
 	_selection_marker_group->raise_to_top ();
 
 	/* Note that because of ascending-y-axis coordinates, this order is
@@ -1112,12 +1112,6 @@ Editor::color_handler()
 
 	rubberband_rect->set_outline_color (UIConfiguration::instance().color ("rubber band rect"));
 	rubberband_rect->set_fill_color (UIConfiguration::instance().color_mod ("rubber band rect", "selection rect"));
-
-	location_marker_color = UIConfiguration::instance().color ("location marker");
-	location_range_color = UIConfiguration::instance().color ("location range");
-	location_cd_marker_color = UIConfiguration::instance().color ("location cd marker");
-	location_loop_color = UIConfiguration::instance().color ("location loop");
-	location_punch_color = UIConfiguration::instance().color ("location punch");
 
 	refresh_location_display ();
 

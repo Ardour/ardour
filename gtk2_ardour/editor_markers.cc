@@ -100,21 +100,21 @@ ArdourCanvas::Container*
 Editor::add_new_location_internal (Location* location)
 {
 	LocationMarkers *lam = new LocationMarkers;
-	uint32_t color;
+	std::string color;
 
 	/* make a note here of which group this marker ends up in */
 	ArdourCanvas::Container* group = 0;
 
 	if (location->is_cd_marker()) {
-		color = location_cd_marker_color;
+		color = X_("location cd marker");
 	} else if (location->is_mark()) {
-		color = location_marker_color;
+		color = X_("location marker");
 	} else if (location->is_auto_loop()) {
-		color = location_loop_color;
+		color = X_("location loop");
 	} else if (location->is_auto_punch()) {
-		color = location_punch_color;
+		color = X_("location punch");
 	} else {
-		color = location_range_color;
+		color = X_("location range");
 	}
 
 	if (location->is_mark()) {
@@ -414,15 +414,15 @@ Editor::location_flags_changed (Location *location)
 	ensure_cd_marker_updated (lam, location);
 
 	if (location->is_cd_marker()) {
-		lam->set_color_rgba (location_cd_marker_color);
+		lam->set_color ("location cd marker");
 	} else if (location->is_mark()) {
-		lam->set_color_rgba (location_marker_color);
+		lam->set_color ("location marker");
 	} else if (location->is_auto_punch()) {
-		lam->set_color_rgba (location_punch_color);
+		lam->set_color ("location punch");
 	} else if (location->is_auto_loop()) {
-		lam->set_color_rgba (location_loop_color);
+		lam->set_color ("location loop");
 	} else {
-		lam->set_color_rgba (location_range_color);
+		lam->set_color ("location range");
 	}
 
 	if (location->is_hidden()) {
@@ -691,11 +691,11 @@ Editor::LocationMarkers::set_position (timepos_t const & startt,
 }
 
 void
-Editor::LocationMarkers::set_color_rgba (uint32_t rgba)
+Editor::LocationMarkers::set_color (std::string const& color_name)
 {
-	start->set_color_rgba (rgba);
+	start->set_color (color_name);
 	if (end) {
-		end->set_color_rgba (rgba);
+		end->set_color (color_name);
 	}
 }
 

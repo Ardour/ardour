@@ -164,7 +164,7 @@ Editor::reassociate_bartime_marker (TempoMap::SharedPtr const & tmap, TempoMap::
 void
 Editor::make_bbt_marker (MusicTimePoint const  * mtp, Marks::iterator before)
 {
-	bbt_marks.insert (before, new BBTMarker (*this, *bbt_ruler, UIConfiguration::instance().color ("meter marker"), *mtp));
+	bbt_marks.insert (before, new BBTMarker (*this, *bbt_ruler, "meter marker", *mtp));
 }
 
 void
@@ -173,7 +173,7 @@ Editor::make_meter_marker (Temporal::MeterPoint const * ms, Marks::iterator befo
 	char buf[64];
 
 	snprintf (buf, sizeof(buf), "%d/%d", ms->divisions_per_bar(), ms->note_value ());
-	meter_marks.insert (before, new MeterMarker (*this, *meter_group, UIConfiguration::instance().color ("meter marker"), buf, *ms));
+	meter_marks.insert (before, new MeterMarker (*this, *meter_group, "meter marker", buf, *ms));
 }
 
 void
@@ -187,16 +187,16 @@ Editor::make_tempo_marker (Temporal::TempoPoint const * ts, double& min_tempo, d
 	const std::string tname (X_(""));
 	char const * color_name = X_("tempo marker");
 
-	tempo_marks.insert (before, new TempoMarker (*this, *tempo_group, *mapping_group, UIConfiguration::instance().color (color_name), tname, *ts, ts->sample (sr), tc_color));
+	tempo_marks.insert (before, new TempoMarker (*this, *tempo_group, *mapping_group, color_name, tname, *ts, ts->sample (sr), tc_color));
 
 	/* XXX the point of this code was "a jump in tempo by more than 1 ntpm results in a red
 	   tempo mark pointer."  (3a7bc1fd3f32f0)
 	*/
 
 	if (prev_ts && abs (prev_ts->end_note_types_per_minute() - ts->note_types_per_minute()) < 1.0) {
-		tempo_marks.back()->set_points_color (UIConfiguration::instance().color ("tempo marker music"));
+		tempo_marks.back()->set_points_color ("tempo marker music");
 	} else {
-		tempo_marks.back()->set_points_color (UIConfiguration::instance().color ("tempo marker"));
+		tempo_marks.back()->set_points_color ("tempo marker");
 	}
 
 	prev_ts = ts;

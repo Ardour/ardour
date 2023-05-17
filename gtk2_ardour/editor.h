@@ -734,12 +734,6 @@ private:
 	void jump_forward_to_mark ();
 	void jump_backward_to_mark ();
 
-	uint32_t location_marker_color;
-	uint32_t location_range_color;
-	uint32_t location_loop_color;
-	uint32_t location_punch_color;
-	uint32_t location_cd_marker_color;
-
 	struct LocationMarkers {
 		ArdourMarker* start;
 		ArdourMarker* end;
@@ -759,7 +753,7 @@ private:
 
 		void set_name (const std::string&);
 		void set_position (Temporal::timepos_t const & start, Temporal::timepos_t const & end = Temporal::timepos_t());
-		void set_color_rgba (uint32_t);
+		void set_color (std::string const&);
 	};
 
 	LocationMarkers*  find_location_markers (ARDOUR::Location*) const;

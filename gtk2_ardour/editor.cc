@@ -267,11 +267,6 @@ Editor::Editor ()
 	, internal_snap_mode (SnapOff)
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 	, _notebook_shrunk (false)
-	, location_marker_color (0)
-	, location_range_color (0)
-	, location_loop_color (0)
-	, location_punch_color (0)
-	, location_cd_marker_color (0)
 	, entered_marker (0)
 	, _show_marker_lines (false)
 	, clicked_axisview (0)
@@ -501,12 +496,6 @@ Editor::Editor ()
 	build_grid_type_menu();
 	build_draw_midi_menus();
 	build_edit_point_menu();
-
-	location_marker_color = UIConfiguration::instance().color ("location marker");
-	location_range_color = UIConfiguration::instance().color ("location range");
-	location_cd_marker_color = UIConfiguration::instance().color ("location cd marker");
-	location_loop_color = UIConfiguration::instance().color ("location loop");
-	location_punch_color = UIConfiguration::instance().color ("location punch");
 
 	timebar_height = std::max (12., ceil (15. * UIConfiguration::instance().get_ui_scale()));
 

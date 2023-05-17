@@ -546,9 +546,6 @@ RegionView::update_cue_markers ()
 
 	const timepos_t start = region()->start();
 	const timepos_t end = region()->start() + region()->length();
-	const Gtkmm2ext::SVAModifier alpha = UIConfiguration::instance().modifier (X_("region mark"));
-	const uint32_t color = Gtkmm2ext::HSV (UIConfiguration::instance().color ("region mark")).mod (alpha).color();
-
 	/* We assume that if the region has multiple sources, any of them will
 	 * be appropriate as the origin of cue markers. We use the first one.
 	 */
@@ -593,8 +590,8 @@ RegionView::update_cue_markers ()
 
 			/* Create a new ViewCueMarker */
 
-			auto* mark = new ArdourMarker (trackview.editor(), *group, color , model_marker.text(), ArdourMarker::RegionCue, timepos_t (start.distance (model_marker.position())), true, this);
-			mark->set_points_color (color);
+			auto* mark = new ArdourMarker (trackview.editor(), *group, "region mark" , model_marker.text(), ArdourMarker::RegionCue, timepos_t (start.distance (model_marker.position())), true, this);
+			mark->set_points_color ("region mark");
 			mark->set_show_line (true);
 			/* make sure the line has a clean end, before the frame
 			   of the region view
@@ -715,13 +712,6 @@ RegionView::set_colors ()
 {
 	TimeAxisViewItem::set_colors ();
 	set_sync_mark_color ();
-
-	const Gtkmm2ext::SVAModifier alpha = UIConfiguration::instance().modifier (X_("region mark"));
-	const uint32_t color = Gtkmm2ext::HSV (UIConfiguration::instance().color ("region mark")).mod (alpha).color();
-
-	for (auto& _cue_marker : _cue_markers) {
-		_cue_marker->view_marker->set_color_rgba (color);
-	}
 }
 
 void
