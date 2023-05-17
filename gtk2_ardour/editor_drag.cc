@@ -3646,12 +3646,6 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 		}
 	}
 
-	if (_drags->current_pointer_time() >= timepos_t::from_superclock (next.sclock())) {
-		return;
-	}
-	if (_drags->current_pointer_time() <= timepos_t::from_superclock (prev.sclock())) {
-		return;
-	}
 
 	/* XXX needs to scale somehow with zoom level */
 
