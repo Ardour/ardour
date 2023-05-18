@@ -25,18 +25,21 @@
 #include "ardour/libardour_visibility.h"
 #include "ardour/types.h"
 
+namespace PBD {
+	class Progress;
+}
+
 namespace ARDOUR {
 
 class Region;
 class Session;
-class Progress;
 
 class LIBARDOUR_API Filter {
 
   public:
 	virtual ~Filter() {}
 
-	virtual int run (std::shared_ptr<ARDOUR::Region>, Progress* progress = 0) = 0;
+	virtual int run (std::shared_ptr<ARDOUR::Region>, PBD::Progress* progress = 0) = 0;
 	std::vector<std::shared_ptr<ARDOUR::Region> > results;
 
   protected:

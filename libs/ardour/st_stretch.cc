@@ -22,13 +22,13 @@
 #include <cmath>
 
 #include "pbd/error.h"
+#include "pbd/progress.h"
 
 #include "ardour/types.h"
 #include "ardour/stretch.h"
 #include "ardour/audiofilesource.h"
 #include "ardour/session.h"
 #include "ardour/audioregion.h"
-#include "ardour/progress.h"
 
 #include "pbd/i18n.h"
 

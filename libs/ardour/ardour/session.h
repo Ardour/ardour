@@ -108,6 +108,7 @@ class Parser;
 
 namespace PBD {
 class Controllable;
+class Progress;
 }
 
 namespace luabridge {
@@ -161,7 +162,6 @@ class PluginInfo;
 class Port;
 class PortInsert;
 class ProcessThread;
-class Progress;
 class Processor;
 class Region;
 class Return;
@@ -609,7 +609,7 @@ public:
 	                     ArchiveEncode compress_audio = FLAC_16BIT,
 	                     PBD::FileArchive::CompressionLevel compression_level = PBD::FileArchive::CompressGood,
 	                     bool only_used_sources = false,
-	                     Progress* p = 0);
+	                     PBD::Progress* p = 0);
 
 	int restore_state (std::string snapshot_name);
 	int save_template (const std::string& template_name, const std::string& description = "", bool replace_existing = false);

@@ -45,6 +45,10 @@
 
 class XMLNode;
 
+namespace PBD {
+	class Progress;
+}
+
 namespace ARDOUR {
 
 namespace Properties {
@@ -78,7 +82,6 @@ namespace Properties {
 class Playlist;
 class Filter;
 class ExportSpecification;
-class Progress;
 
 enum LIBARDOUR_API RegionEditState {
 	EditChangesNothing = 0,
@@ -314,7 +317,7 @@ public:
 
 	Temporal::Beats absolute_time_to_region_beats (Temporal::timepos_t const &) const;
 
-	int apply (Filter &, Progress* progress = 0);
+	int apply (Filter &, PBD::Progress* progress = 0);
 
 	std::shared_ptr<ARDOUR::Playlist> playlist () const { return _playlist.lock(); }
 	virtual void set_playlist (std::weak_ptr<ARDOUR::Playlist>);

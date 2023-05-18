@@ -28,7 +28,9 @@
 using namespace std;
 using namespace ARDOUR;
 
-namespace ARDOUR { class Progress; class Session; }
+namespace ARDOUR {
+class Session;
+}
 
 Reverse::Reverse (Session& s)
 	: Filter (s)
@@ -40,7 +42,7 @@ Reverse::~Reverse ()
 }
 
 int
-Reverse::run (std::shared_ptr<Region> r, Progress*)
+Reverse::run (std::shared_ptr<Region> r, PBD::Progress*)
 {
 	SourceList nsrcs;
 	SourceList::iterator si;

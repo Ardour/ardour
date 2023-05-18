@@ -24,6 +24,7 @@
 
 #include "pbd/stateful_diff_command.h"
 #include "pbd/openuri.h"
+#include "pbd/progress.h"
 
 #include "temporal/bbt_time.h"
 #include "temporal/range.h"
@@ -80,7 +81,6 @@
 #include "ardour/plugin_manager.h"
 #include "ardour/polarity_processor.h"
 #include "ardour/port_manager.h"
-#include "ardour/progress.h"
 #include "ardour/raw_midi_parser.h"
 #include "ardour/runtime_functions.h"
 #include "ardour/region.h"
@@ -481,6 +481,9 @@ LuaBindings::common (lua_State* L)
 
 		.beginClass <XMLNode> ("XMLNode")
 		.addFunction ("name", &XMLNode::name)
+		.endClass ()
+
+		.beginClass <PBD::Progress> ("Progress")
 		.endClass ()
 
 		.beginClass <PBD::Stateful> ("Stateful")
@@ -1077,9 +1080,6 @@ LuaBindings::common (lua_State* L)
 		.addData ("cancel", (bool InterThreadInfo::*)&InterThreadInfo::cancel)
 #endif
 		.addData ("progress", const_cast<float InterThreadInfo::*>(&InterThreadInfo::progress))
-		.endClass ()
-
-		.beginClass <Progress> ("Progress")
 		.endClass ()
 
 		.beginClass <TimelineRange> ("TimelineRange")

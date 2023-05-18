@@ -19,12 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/progress.h"
 #include "pbd/property_list.h"
 
 #include "ardour/strip_silence.h"
 #include "ardour/audioregion.h"
 #include "ardour/region_factory.h"
-#include "ardour/progress.h"
 
 using namespace ARDOUR;
 
@@ -43,7 +43,7 @@ StripSilence::StripSilence (Session & s, const AudioIntervalMap& sm, samplecnt_t
 }
 
 int
-StripSilence::run (std::shared_ptr<Region> r, Progress* progress)
+StripSilence::run (std::shared_ptr<Region> r, PBD::Progress* progress)
 {
 	results.clear ();
 

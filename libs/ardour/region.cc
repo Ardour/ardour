@@ -54,7 +54,6 @@ using namespace ARDOUR;
 using namespace PBD;
 
 namespace ARDOUR {
-	class Progress;
 	namespace Properties {
 		PBD::PropertyDescriptor<bool> muted;
 		PBD::PropertyDescriptor<bool> opaque;
