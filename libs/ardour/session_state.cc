@@ -5618,7 +5618,7 @@ Session::archive_session (const std::string& dest,
 	string archive = Glib::build_filename (dest, name + session_archive_suffix);
 
 	PBD::ScopedConnectionList progress_connection;
-	PBD::FileArchive ar (archive);
+	PBD::FileArchive ar (archive, progress);
 
 	/* collect files to archive */
 	std::map<string,string> filemap;
@@ -5733,6 +5733,13 @@ Session::archive_session (const std::string& dest,
 		}
 	}
 
+	vector<string> extra_files;
+	size_t prefix_len;
+
+	if (progress && progress->cancelled ()) {
+		goto out;
+	}
+
 	/* encode audio */
 	if (compress_audio != NO_ENCODE) {
 		if (progress) {
@@ -5797,6 +5804,9 @@ Session::archive_session (const std::string& dest,
 
 			if (progress) {
 				progress->ascend ();
+				if (progress->cancelled ()) {
+					break;
+				}
 			}
 		}
 	}
@@ -5804,6 +5814,9 @@ Session::archive_session (const std::string& dest,
 	if (progress) {
 		progress->set_progress (-1); // set to "archiving"
 		progress->set_progress (0);
+		if (progress->cancelled ()) {
+			goto out;
+		}
 	}
 
 	/* index files relevant for this session */
@@ -5868,22 +5881,20 @@ Session::archive_session (const std::string& dest,
 
 	save_default_options ();
 
-	size_t prefix_len = _path.size();
+	prefix_len = _path.size();
 	if (prefix_len > 0 && _path.at (prefix_len - 1) != G_DIR_SEPARATOR) {
 		++prefix_len;
 	}
 
 	/* collect session-state files */
-	vector<string> files;
 	do_not_copy_extensions.clear ();
 	do_not_copy_extensions.push_back (history_suffix);
 
 	blacklist_dirs.clear ();
 	blacklist_dirs.push_back (string (externals_dir_name) + G_DIR_SEPARATOR);
 
-	find_files_matching_filter (files, to_dir, accept_all_files, 0, false, true, true);
-	for (vector<string>::const_iterator i = files.begin (); i != files.end (); ++i) {
-		std::string from = *i;
+	find_files_matching_filter (extra_files, to_dir, accept_all_files, 0, false, true, true);
+	for (auto const& from : extra_files) {
 		bool do_copy = true;
 		for (vector<string>::iterator v = blacklist_dirs.begin(); v != blacklist_dirs.end(); ++v) {
 			if (from.find (*v) != string::npos) {
@@ -5901,6 +5912,8 @@ Session::archive_session (const std::string& dest,
 			filemap[from] = name + G_DIR_SEPARATOR + from.substr (prefix_len);
 		}
 	}
+
+out:
 
 	/* restore original values */
 	_path = old_path;
@@ -5921,6 +5934,11 @@ Session::archive_session (const std::string& dest,
 	}
 	for (std::map<std::shared_ptr<AudioFileSource>, uint16_t>::iterator i = orig_channel.begin (); i != orig_channel.end (); ++i) {
 		i->first->set_channel (i->second);
+	}
+
+	if (progress && progress->cancelled ()) {
+		remove_directory (to_dir);
+		return 0;
 	}
 
 	int rv = ar.create (filemap, compression_level);
