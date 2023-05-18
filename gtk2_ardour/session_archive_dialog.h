@@ -48,9 +48,8 @@ public:
 	void set_compression_level (PBD::FileArchive::CompressionLevel);
 	void set_only_used_sources (bool);
 
-	void on_response (int response_id) {
-		Gtk::Dialog::on_response (response_id);
-	}
+protected:
+	void on_response (int);
 
 private:
 	Gtk::FileChooserButton target_folder_selector;
