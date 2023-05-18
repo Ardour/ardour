@@ -36,6 +36,7 @@
 
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
+#include "pbd/progress.h"
 
 #ifdef COMPILER_MSVC
 #include <sys/utime.h>

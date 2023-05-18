@@ -39,6 +39,7 @@
 #include "pbd/xml++.h"
 #include "pbd/enumwriter.h"
 #include "pbd/convert.h"
+#include "pbd/progress.h"
 
 #include "evoral/Curve.h"
 
@@ -56,7 +57,6 @@
 #include "ardour/sndfilesource.h"
 #include "ardour/transient_detector.h"
 #include "ardour/parameter_descriptor.h"
-#include "ardour/progress.h"
 
 #include "audiographer/general/interleaver.h"
 #include "audiographer/general/sample_format_converter.h"

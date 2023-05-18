@@ -29,7 +29,10 @@
 
 #include "ardour/audiofilesource.h"
 #include "ardour/broadcast_info.h"
-#include "ardour/progress.h"
+
+namespace PBD {
+	class Progress;
+}
 
 namespace ARDOUR {
 
@@ -56,7 +59,7 @@ class LIBARDOUR_API SndFileSource : public AudioFileSource {
 	SndFileSource (Session&, const XMLNode&);
 
 	/** Constructor to losslessly compress existing source */
-	SndFileSource (Session& s, const AudioFileSource& other, const std::string& path, bool use16bits = false, Progress* p = NULL);
+	SndFileSource (Session& s, const AudioFileSource& other, const std::string& path, bool use16bits = false, PBD::Progress* p = NULL);
 
 	~SndFileSource ();
 

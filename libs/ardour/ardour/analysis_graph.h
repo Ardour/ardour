@@ -37,15 +37,18 @@ namespace AudioGrapher {
 	template <typename T> class Interleaver;
 }
 
-namespace ARDOUR {
+namespace PBD {
 	class Progress;
+}
+
+namespace ARDOUR {
 
 class LIBARDOUR_API AnalysisGraph {
 	public:
 		AnalysisGraph (ARDOUR::Session*);
 		~AnalysisGraph ();
 
-		void analyze_region (ARDOUR::AudioRegion const*, bool raw = false, ARDOUR::Progress* = 0);
+		void analyze_region (ARDOUR::AudioRegion const*, bool raw = false, PBD::Progress* = 0);
 		void analyze_region (std::shared_ptr<ARDOUR::AudioRegion>, bool raw = false);
 
 		void analyze_range (std::shared_ptr<ARDOUR::Route>, std::shared_ptr<ARDOUR::AudioPlaylist>, const std::list<TimelineRange>&);
