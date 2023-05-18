@@ -2021,8 +2021,12 @@ Editor::update_selection_markers ()
 	if (get_selection_extents (start, end)) {
 		_selection_marker.set_position (start, end);
 		_selection_marker.show ();
+		ActionManager::get_action ("Editor", "cut-paste-section")->set_sensitive (true);
+		ActionManager::get_action ("Editor", "copy-paste-section")->set_sensitive (true);
 	} else {
 		_selection_marker.hide ();
+		ActionManager::get_action ("Editor", "cut-paste-section")->set_sensitive (false);
+		ActionManager::get_action ("Editor", "copy-paste-section")->set_sensitive (false);
 	}
 }
 

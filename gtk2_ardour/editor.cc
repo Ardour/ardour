@@ -1967,10 +1967,6 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_range), false)));
 
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Copy/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), true)));
-	edit_items.push_back (MenuElem (_("Cut/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), false)));
-
-	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Consolidate"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, false)));
 	edit_items.push_back (MenuElem (_("Consolidate (with processing)"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, true)));
 	edit_items.push_back (MenuElem (_("Bounce"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), NewSource, false)));
@@ -2051,17 +2047,6 @@ Editor::add_dstream_context_items (Menu_Helpers::MenuList& edit_items)
 		edit_items.back ().set_sensitive (false);
 	}
 	edit_items.push_back (MenuElem (_("Insert Existing Media"), sigc::bind (sigc::mem_fun(*this, &Editor::add_external_audio_action), ImportToTrack)));
-
-	/* Cut/Copy Section */
-
-	timepos_t unused;
-	bool have_time_selection = get_selection_extents (unused, unused);
-	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Copy/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), true)));
-	edit_items.back ().set_sensitive (have_time_selection);
-	edit_items.push_back (MenuElem (_("Cut/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), false)));
-	edit_items.back ().set_sensitive (have_time_selection);
-
 
 	/* Nudge track */
 
