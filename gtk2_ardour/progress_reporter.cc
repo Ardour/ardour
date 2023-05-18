@@ -23,19 +23,24 @@
 #include "progress_reporter.h"
 
 ProgressReporter::ProgressReporter ()
+	: _p (-1)
 {
-
 }
 
 ProgressReporter::~ProgressReporter ()
 {
-
 }
 
 void
 ProgressReporter::set_overall_progress (float p)
 {
+	/* rate-limit, move in 0.2% steps */
+	int pt = 500 * p;
+	if (pt == _p && p > 0 && p < 1.0) {
+		return;
+	}
+	_p = pt;
+
 	update_progress_gui (p);
 	ARDOUR::GUIIdle ();
 }
-
