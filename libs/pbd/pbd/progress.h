@@ -16,17 +16,46 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_progress_h__
-#define __ardour_progress_h__
+#ifndef _libpbd_progress_h_
+#define _libpbd_progress_h_
 
-#include "pbd/progress.h"
+#include <list>
 
-#include "ardour/libardour_visibility.h"
+#include "pbd/libpbd_visibility.h"
 
-namespace ARDOUR {
+namespace PBD {
 
-class LIBPBD_API Progress : public PBD::Progress
+/** A class to handle reporting of progress of something */
+class LIBPBD_API Progress
 {
+public:
+	Progress ();
+	virtual ~Progress () {}
+	void set_progress (float);
+
+	void ascend ();
+	void descend (float);
+
+	bool cancelled () const;
+
+protected:
+	void cancel ();
+
+private:
+	/** Report overall progress.
+	 *  @param p Current progress (from 0 to 1)
+	 */
+	virtual void set_overall_progress (float p) = 0;
+
+	struct Level {
+		Level (float a) : allocation (a), normalised (0) {}
+
+		float allocation;
+		float normalised;
+	};
+
+	std::list<Level> _stack;
+	bool _cancelled;
 };
 
 }

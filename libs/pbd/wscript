@@ -66,6 +66,7 @@ libpbd_sources = [
     'pbd.cc',
     'pcg_rand.cc',
     'pool.cc',
+    'progress.cc',
     'property_list.cc',
     'pthread_utils.cc',
     'reallocpool.cc',
