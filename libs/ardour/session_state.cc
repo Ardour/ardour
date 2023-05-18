@@ -5552,11 +5552,6 @@ Session::save_as (SaveAs& saveas)
 	return 0;
 }
 
-static void set_progress (Progress* p, size_t n, size_t t)
-{
-	p->set_progress (float (n) / float(t));
-}
-
 int
 Session::archive_session (const std::string& dest,
                           const std::string& name,
@@ -5624,9 +5619,6 @@ Session::archive_session (const std::string& dest,
 
 	PBD::ScopedConnectionList progress_connection;
 	PBD::FileArchive ar (archive);
-	if (progress) {
-		ar.progress.connect_same_thread (progress_connection, boost::bind (&set_progress, progress, _1, _2));
-	}
 
 	/* collect files to archive */
 	std::map<string,string> filemap;
