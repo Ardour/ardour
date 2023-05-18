@@ -5566,6 +5566,7 @@ Session::archive_session (const std::string& dest,
                           Progress* progress)
 {
 	if (dest.empty () || name.empty ()) {
+		error << _("Cannot archive session: invalid destination path/name") << endmsg;
 		return -1;
 	}
 
@@ -5592,6 +5593,7 @@ Session::archive_session (const std::string& dest,
 		}
 	}
 	if (!ok) {
+		error << _("Cannot archive: session media-search path does not include current session-path.") << endmsg;
 		return -1;
 	}
 
@@ -5613,6 +5615,7 @@ Session::archive_session (const std::string& dest,
 	if (!_session_dir->create()) {
 		(*_session_dir) = old_sd;
 		remove_directory (to_dir);
+		error << string_compose(_("Session archive failed to create SessionDirectory `%1'"), to_dir) << endmsg;
 		return -1;
 	}
 
