@@ -35,6 +35,7 @@ private:
 	 *  @param p Progress, from 0 to 1.
 	 */
 	virtual void update_progress_gui (float p) = 0;
+	int _p;
 };
 
 #endif
