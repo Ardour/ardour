@@ -199,6 +199,9 @@
       <menuitem action='editor-copy'/>
       <menuitem action='editor-paste'/>
       <separator/>
+      <menuitem action='cut-paste-section'/>
+      <menuitem action='copy-paste-section'/>
+      <separator/>
       <menu action="SelectMenu">
         <menuitem action='select-all-objects'/>
         <menuitem action='select-all-tracks'/>
