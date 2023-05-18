@@ -192,7 +192,6 @@ libardour_sources = [
         'presentation_info.cc',
         'process_thread.cc',
         'processor.cc',
-        'progress.cc',
         'quantize.cc',
         'rc_configuration.cc',
         'readable.cc',

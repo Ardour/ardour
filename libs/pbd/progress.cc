@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2010 Carl Hetherington <carl@carlh.net>
+ * Copyright (C) 2023 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -18,11 +19,11 @@
 
 #include <cassert>
 #include <iostream>
-#include "ardour/progress.h"
+#include "pbd/progress.h"
 
 using namespace std;
 
-ARDOUR::Progress::Progress ()
+PBD::Progress::Progress ()
 	: _cancelled (false)
 {
 	descend (1);
@@ -37,13 +38,13 @@ ARDOUR::Progress::Progress ()
  *  @param p Percentage (from 0 to 1) of the current task to allocate to the subtask.
  */
 void
-ARDOUR::Progress::descend (float a)
+PBD::Progress::descend (float a)
 {
 	_stack.push_back (Level (a));
 }
 
 void
-ARDOUR::Progress::ascend ()
+PBD::Progress::ascend ()
 {
 	assert (!_stack.empty ());
 	float const a = _stack.back().allocation;
@@ -55,7 +56,7 @@ ARDOUR::Progress::ascend ()
  *  @param p Progress (from 0 to 1)
  */
 void
-ARDOUR::Progress::set_progress (float p)
+PBD::Progress::set_progress (float p)
 {
 	assert (!_stack.empty ());
 
@@ -72,13 +73,13 @@ ARDOUR::Progress::set_progress (float p)
 }
 
 void
-ARDOUR::Progress::cancel ()
+PBD::Progress::cancel ()
 {
 	_cancelled = true;
 }
 
 bool
-ARDOUR::Progress::cancelled () const
+PBD::Progress::cancelled () const
 {
 	return _cancelled;
 }
