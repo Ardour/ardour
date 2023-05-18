@@ -473,13 +473,6 @@ accept_all_files (string const &, void *)
 	return true;
 }
 
-static void
-_set_progress (Progress* p, size_t n, size_t t)
-{
-	p->set_progress (float (n) / float(t));
-}
-
-
 void
 TemplateManager::export_all_templates ()
 {
@@ -564,7 +557,6 @@ TemplateManager::export_all_templates ()
 
 	PBD::FileArchive ar (filename);
 	PBD::ScopedConnectionList progress_connection;
-	ar.progress.connect_same_thread (progress_connection, boost::bind (&_set_progress, this, _1, _2));
 	ar.create (filemap);
 
 	PBD::remove_directory (tmpdir);
@@ -593,7 +585,6 @@ TemplateManager::import_template_set ()
 
 	FileArchive ar (dialog.get_filename ());
 	PBD::ScopedConnectionList progress_connection;
-	ar.progress.connect_same_thread (progress_connection, boost::bind (&_set_progress, this, _1, _2));
 
 	for (std::string fn = ar.next_file_name(); !fn.empty(); fn = ar.next_file_name()) {
 		const size_t pos = fn.find (templates_dir_basename ());

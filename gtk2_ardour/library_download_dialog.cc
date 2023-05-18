@@ -174,7 +174,7 @@ LibraryDownloadDialog::install (std::string const & path, Gtk::TreePath const & 
 	std::string destdir = Glib::path_get_dirname (path);
 
 	inflater = new Inflater (path,  destdir);
-	inflater->progress.connect (install_connection, invalidator(*this), boost::bind (&LibraryDownloadDialog::install_progress, this, _1, _2, path, treepath), gui_context());
+	//inflater->progress.connect (install_connection, invalidator(*this), boost::bind (&LibraryDownloadDialog::install_progress, this, _1, _2, path, treepath), gui_context());
 	inflater->start (); /* starts unpacking in a thread */
 }
 
