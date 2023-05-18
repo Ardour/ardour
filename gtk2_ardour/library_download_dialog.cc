@@ -174,12 +174,12 @@ LibraryDownloadDialog::install (std::string const & path, Gtk::TreePath const & 
 	std::string destdir = Glib::path_get_dirname (path);
 
 	inflater = new Inflater (path,  destdir);
-	//inflater->progress.connect (install_connection, invalidator(*this), boost::bind (&LibraryDownloadDialog::install_progress, this, _1, _2, path, treepath), gui_context());
+	inflater->Progress.connect (install_connection, invalidator(*this), boost::bind (&LibraryDownloadDialog::install_progress, this, _1, path, treepath), gui_context());
 	inflater->start (); /* starts unpacking in a thread */
 }
 
 void
-LibraryDownloadDialog::install_progress (size_t nread, size_t total, std::string path, Gtk::TreePath treepath)
+LibraryDownloadDialog::install_progress (float p, std::string path, Gtk::TreePath treepath)
 {
 	Gtk::TreeModel::iterator row = _model->get_iter (treepath);
 
@@ -192,7 +192,7 @@ LibraryDownloadDialog::install_progress (size_t nread, size_t total, std::string
 		return;
 	}
 
-	(*row)[_columns.progress] = (int) round ((double) nread / total);
+	(*row)[_columns.progress] = (int) round (100.0 * p);
 }
 
 void

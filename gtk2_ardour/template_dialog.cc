@@ -555,7 +555,7 @@ TemplateManager::export_all_templates ()
 
 	_current_action = _("Exporting templates");
 
-	PBD::FileArchive ar (filename);
+	PBD::FileArchive ar (filename, this);
 	PBD::ScopedConnectionList progress_connection;
 	ar.create (filemap);
 
@@ -583,7 +583,7 @@ TemplateManager::import_template_set ()
 
 	_current_action = _("Importing templates");
 
-	FileArchive ar (dialog.get_filename ());
+	FileArchive ar (dialog.get_filename (), this);
 	PBD::ScopedConnectionList progress_connection;
 
 	for (std::string fn = ar.next_file_name(); !fn.empty(); fn = ar.next_file_name()) {
