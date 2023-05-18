@@ -27,7 +27,7 @@
 using namespace PBD;
 
 Inflater::Inflater (std::string const & ap, std::string const & dd)
-	: FileArchive (ap)
+	: FileArchive (ap, this)
 	, thread (0)
 	, _status (-1) /* means "unknown" */
 	, archive_path (ap)
@@ -51,8 +51,6 @@ Inflater::start ()
 void
 Inflater::threaded_inflate ()
 {
-	require_progress ();
-
 	try {
 		std::string pwd (Glib::get_current_dir ());
 
@@ -72,6 +70,11 @@ Inflater::threaded_inflate ()
 	 * set to be >= 0
 	 */
 
-	progress (1, 1);
+	set_progress (1);
 }
 
+void
+Inflater::set_overall_progress (float p)
+{
+	Progress (p); /* EMIT SIGNAL */
+}

@@ -39,6 +39,7 @@
 #include "pbd/file_archive.h"
 #include "pbd/file_utils.h"
 #include "pbd/pthread_utils.h"
+#include "pbd/progress.h"
 
 using namespace PBD;
 
@@ -69,11 +70,14 @@ get_url (void* arg)
 	curl_easy_setopt (curl, CURLOPT_FOLLOWLOCATION, 1L);
 
 	/* get size */
-	if (r->mp.progress) {
+	if (r->mp.query_length) {
+		double content_length = 0;
 		curl_easy_setopt(curl, CURLOPT_NOBODY, 1L);
 		curl_easy_setopt(curl, CURLOPT_HEADER, 0L);
 		curl_easy_perform (curl);
-		curl_easy_getinfo (curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &r->mp.length);
+		if (CURLE_OK == curl_easy_getinfo (curl, CURLINFO_CONTENT_LENGTH_DOWNLOAD, &content_length) && content_length > 0) {
+			r->mp.length = content_length;
+		}
 	}
 
 	curl_easy_setopt(curl, CURLOPT_NOBODY, 0L);
@@ -113,8 +117,8 @@ ar_read (struct archive* a, void* d, const void** buff)
 	p->size -= rv;
 	p->processed += rv;
 	*buff = p->buf;
-	if (p->progress) {
-		p->progress->progress (p->processed, p->length);
+	if (p->progress && p->length > 0) {
+		p->progress->set_progress ((float)p->processed / p->length);
 	}
 	p->unlock ();
 	return rv;
@@ -153,8 +157,9 @@ setup_archive ()
 	return a;
 }
 
-FileArchive::FileArchive (const std::string& url)
-	: _req (url)
+FileArchive::FileArchive (const std::string& url, Progress* p)
+	: _req (url, p)
+	, _progress (p)
 	, _current_entry (0)
 	, _archive (0)
 {
@@ -164,9 +169,9 @@ FileArchive::FileArchive (const std::string& url)
 	}
 
 	if (_req.is_remote ()) {
-		_req.mp.progress = this;
+		_req.mp.query_length = true;
 	} else {
-		_req.mp.progress = 0;
+		_req.mp.query_length = false;
 	}
 }
 
@@ -176,12 +181,6 @@ FileArchive::~FileArchive ()
 		archive_read_close (_archive);
 		archive_read_free (_archive);
 	}
-}
-
-void
-FileArchive::require_progress ()
-{
-	_req.mp.progress = this;
 }
 
 std::string
@@ -211,26 +210,6 @@ FileArchive::fetch (const std::string & url, const std::string & destdir) const
 	}
 
 	return Glib::build_filename (destdir, Glib::path_get_basename (url));
-}
-
-
-int
-FileArchive::make_local (const std::string& destdir)
-{
-	if (!_req.is_remote()) {
-		return 0;
-	}
-
-	std::string downloaded = fetch (_req.url, destdir);
-
-	if (downloaded.empty()) {
-		return -1;
-	}
-
-	_req.url = strdup (downloaded.c_str());
-	_req.mp.progress = 0;
-
-	return 0;
 }
 
 int
@@ -277,10 +256,9 @@ FileArchive::next_file_name ()
 	}
 
 	int r = archive_read_next_header (_archive, &_current_entry);
-	if (!_req.mp.progress) {
-		// file i/o -- not URL
+	if (_progress && _req.mp.length > 0) {
 		const uint64_t read = archive_filter_bytes (_archive, -1);
-		progress (read, _req.mp.length);
+		_progress->set_progress ((float) read / _req.mp.length);
 	}
 
 	if (r == ARCHIVE_EOF) {
@@ -384,7 +362,6 @@ FileArchive::extract_url ()
 {
 	_req.mp.reset ();
 	pthread_create (&_tid, NULL, get_url, (void*)&_req);
-
 	struct archive* a = setup_archive ();
 	archive_read_open (a, (void*)&_req.mp, NULL, ar_read, NULL);
 	int rv = do_extract (a);
@@ -400,10 +377,9 @@ FileArchive::get_contents (struct archive* a)
 	struct archive_entry* entry;
 	for (;;) {
 		int r = archive_read_next_header (a, &entry);
-		if (!_req.mp.progress) {
-			// file i/o -- not URL
+		if (_progress && _req.mp.length > 0) {
 			const uint64_t read = archive_filter_bytes (a, -1);
-			progress (read, _req.mp.length);
+			_progress->set_progress ((float) read / _req.mp.length);
 		}
 		if (r == ARCHIVE_EOF) {
 			break;
@@ -435,10 +411,13 @@ FileArchive::do_extract (struct archive* a)
 	for (;;) {
 		int r = archive_read_next_header (a, &entry);
 
-		if (_req.mp.progress) {
-			// file i/o -- not URL
+		if (_progress && _req.mp.length > 0) {
 			const uint64_t read = archive_filter_bytes (a, -1);
-			progress (read, _req.mp.length);
+			_progress->set_progress ((float)read / _req.mp.length);
+		}
+
+		if (_progress && _progress->cancelled ()) {
+			break;
 		}
 
 		if (r == ARCHIVE_EOF) {
@@ -466,6 +445,10 @@ FileArchive::do_extract (struct archive* a)
 				break;
 			}
 		}
+	}
+
+	if (_progress && !_progress->cancelled ()) {
+		_progress->set_progress (1.f);
 	}
 
 	archive_read_close (a);
@@ -503,6 +486,10 @@ FileArchive::create (const std::string& srcdir, CompressionLevel compression_lev
 int
 FileArchive::create (const std::map<std::string, std::string>& filemap, CompressionLevel compression_level)
 {
+	if (_req.is_remote ()) {
+		return -1;
+	}
+
 	struct archive *a;
 	struct archive_entry *entry;
 
@@ -521,7 +508,9 @@ FileArchive::create (const std::map<std::string, std::string>& filemap, Compress
 		return -1;
 	}
 
-	progress (0, total_bytes);
+	if (_progress) {
+		_progress->set_progress (0);
+	}
 
 	a = archive_write_new ();
 	archive_write_set_format_pax_restricted (a);
@@ -574,15 +563,31 @@ FileArchive::create (const std::map<std::string, std::string>& filemap, Compress
 		while (len > 0) {
 			read_bytes += len;
 			archive_write_data (a, buf, len);
-			progress (read_bytes, total_bytes);
+			if (_progress) {
+				_progress->set_progress ((float)read_bytes / total_bytes);
+				if (_progress->cancelled ()) {
+					break;
+				}
+			}
 			len = read (fd, buf, sizeof (buf));
 		}
 		close (fd);
+		if (_progress && _progress->cancelled ()) {
+			break;
+		}
 	}
 
 	archive_entry_free (entry);
 	archive_write_close (a);
 	archive_write_free (a);
+
+	if (_progress) {
+		if (_progress->cancelled ()) {
+			g_unlink (_req.url);
+		} else {
+			_progress->set_progress (1.f);
+		}
+	}
 
 #ifndef NDEBUG
 	const int64_t elapsed_time_us = g_get_monotonic_time() - archive_start_time;
