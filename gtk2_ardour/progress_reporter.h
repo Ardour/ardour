@@ -19,10 +19,10 @@
 #ifndef __ardour_progress_reporter_h__
 #define __ardour_progress_reporter_h__
 
-#include "ardour/progress.h"
+#include "pbd/progress.h"
 
 /** A parent class for classes which can report progress on something */
-class ProgressReporter : public ARDOUR::Progress
+class ProgressReporter : public PBD::Progress
 {
 public:
 	ProgressReporter ();
