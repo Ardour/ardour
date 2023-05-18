@@ -30,17 +30,16 @@
 
 
 namespace PBD {
+class Progress;
 
 class LIBPBD_API FileArchive
 {
 	public:
-		FileArchive (const std::string& url);
+		FileArchive (const std::string& url, Progress* p = NULL);
 		~FileArchive ();
 
 		int inflate (const std::string& destdir);
 		std::vector<std::string> contents ();
-
-		int make_local (const std::string& destdir);
 
 		std::string next_file_name ();
 		int extract_current_file (const std::string& destpath);
@@ -57,15 +56,12 @@ class LIBPBD_API FileArchive
 		int create (const std::string& srcdir, CompressionLevel compression_level = CompressGood);
 		int create (const std::map <std::string, std::string>& filemap, CompressionLevel compression_level = CompressGood);
 
-		PBD::Signal2<void, size_t, size_t> progress; // TODO
-
-		void require_progress ();
-
 		struct MemPipe {
 			public:
-				MemPipe ()
+				MemPipe (Progress* p)
 					: data (NULL)
-					, progress (0)
+					, query_length (false)
+					, progress (p)
 				{
 					pthread_mutex_init (&_lock, NULL);
 					pthread_cond_init (&_ready, NULL);
@@ -90,7 +86,7 @@ class LIBPBD_API FileArchive
 					size = 0;
 					done = false;
 					processed = 0;
-					length = -1;
+					length = 0;
 					unlock ();
 				}
 
@@ -104,9 +100,11 @@ class LIBPBD_API FileArchive
 				size_t   size;
 				bool     done;
 
-				size_t   processed;
-				size_t   length;
-				FileArchive* progress;
+				size_t processed;
+				size_t length;
+				bool   query_length;
+
+				Progress* progress;
 
 			private:
 				pthread_mutex_t _lock;
@@ -115,7 +113,8 @@ class LIBPBD_API FileArchive
 
 		struct Request {
 			public:
-				Request (const std::string& u)
+				Request (const std::string& u, Progress* p)
+					: mp (p)
 				{
 					if (u.size () > 0) {
 						url = strdup (u.c_str());
@@ -142,7 +141,6 @@ class LIBPBD_API FileArchive
 		};
 
 	private:
-
 		int process_file ();
 		int process_url ();
 
@@ -159,13 +157,15 @@ class LIBPBD_API FileArchive
 
 		struct archive* setup_file_archive ();
 
+		std::string fetch (const std::string & url, const std::string& destdir) const;
+
 		Request   _req;
 		pthread_t _tid;
 
+		Progress* _progress;
+
 		struct archive_entry* _current_entry;
 		struct archive* _archive;
-
-		std::string fetch (const std::string & url, const std::string& destdir) const;
 };
 
 } /* namespace */
