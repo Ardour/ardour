@@ -2715,6 +2715,16 @@ Editor::cut_copy_section (bool copy)
 	if (!get_selection_extents (start, end) || !_session) {
 		return;
 	}
+#if 1
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	if (tmap->tempos ().size () > 1 || tmap->meters ().size () > 1 || tmap->bartimes ().size () > 1) {
+		ArdourMessageDialog msg (_("Cut/Copy Section does not yet include the Tempo Map\nDo you still want to proceed?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO, true)  ;
+		msg.set_title (_("Cut/Copy without Tempo Map"));
+		if (msg.run () != RESPONSE_YES) {
+			return;
+		}
+	}
+#endif
 	timepos_t to (get_preferred_edit_position ());
 	_session->cut_copy_section (start, end, to, copy);
 
