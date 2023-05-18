@@ -112,7 +112,7 @@ class LibraryDownloadDialog : public ArdourDialog
 
 	PBD::Inflater* inflater;
 	void install (std::string const & path, Gtk::TreePath const & treepath);
-	void install_progress (size_t, size_t, std::string, Gtk::TreePath);
+	void install_progress (float, std::string, Gtk::TreePath);
 	void install_finished (Gtk::TreeModel::iterator row, std::string path, int status);
 	PBD::ScopedConnection install_connection;
 
