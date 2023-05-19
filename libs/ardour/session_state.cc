@@ -5735,6 +5735,7 @@ Session::archive_session (const std::string& dest,
 
 	vector<string> extra_files;
 	size_t prefix_len;
+	int rv = 0;
 
 	if (progress && progress->cancelled ()) {
 		goto out;
@@ -5800,6 +5801,8 @@ Session::archive_session (const std::string& dest,
 				delete ns;
 			} catch (...) {
 				error << "failed to encode " << afs->path() << " to " << new_path << endmsg;
+				rv = -1;
+				break;
 			}
 
 			if (progress) {
@@ -5811,6 +5814,9 @@ Session::archive_session (const std::string& dest,
 		}
 	}
 
+	if (rv) {
+		goto out;
+	}
 	if (progress) {
 		progress->set_progress (-1); // set to "archiving"
 		progress->set_progress (0);
@@ -5877,7 +5883,11 @@ Session::archive_session (const std::string& dest,
 	_path = to_dir;
 	g_mkdir_with_parents (externals_dir ().c_str (), 0755);
 
-	save_state (name, false, false, false, true, only_used_sources);
+	if (save_state (name, false, false, false, true, only_used_sources)) {
+		error << string_compose(_("Session archive failed to save state `%1'"), to_dir) << endmsg;
+		rv = -1;
+		goto out;
+	}
 
 	save_default_options ();
 
@@ -5936,12 +5946,13 @@ out:
 		i->first->set_channel (i->second);
 	}
 
-	if (progress && progress->cancelled ()) {
-		remove_directory (to_dir);
-		return 0;
+	if (0 == rv && !(progress && progress->cancelled ())) {
+		rv = ar.create (filemap, compression_level);
+		if (rv) {
+			error << string_compose(_("Session archive failed write output: `%1'"), archive) << endmsg;
+		}
 	}
 
-	int rv = ar.create (filemap, compression_level);
 	remove_directory (to_dir);
 
 	return rv;
