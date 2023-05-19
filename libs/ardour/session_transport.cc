@@ -325,6 +325,11 @@ void
 Session::set_default_play_speed (double spd)
 {
 	ENSURE_PROCESS_THREAD;
+	if (synced_to_engine()) {
+		if (spd != 0 && spd != 1) {
+			return;
+		}
+	}
 	/* see also Port::set_speed_ratio and
 	 * VMResampler::set_rratio() for min/max range.
 	 * speed must be > +/- 100 / 16 %
@@ -348,6 +353,10 @@ Session::set_transport_speed (double speed)
 {
 	ENSURE_PROCESS_THREAD;
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("@ %1 Set transport speed to %2 from %3 (es = %4)\n", _transport_sample, speed, _transport_fsm->transport_speed(), _engine_speed));
+
+	if (synced_to_engine() && speed != 1.0) {
+		return;
+	}
 
 	double default_speed = _transport_fsm->default_speed();
 
