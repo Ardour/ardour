@@ -190,8 +190,8 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 	 */
 
 	switch (_type) {
-	case Mark: /* fallthough */
-	case RegionCue: /* fallthough */
+	case Mark: [[fallthrough]];
+	case RegionCue: [[fallthrough]];
 	case BBTPosition:
 		points = new ArdourCanvas::Points ();
 
@@ -297,13 +297,13 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 
 	switch (_type) {
 		case RegionCue:
-			/* fallthrough */
+			[[fallthrough]];
 		case Meter:
-			/* fallthrough */
+			[[fallthrough]];
 		case Tempo:
-			/* fallthrough */
+			[[fallthrough]];
 		case SelectionStart:
-			/* fallthrough */
+			[[fallthrough]];
 		case SelectionEnd:
 			_name_flag = 0;
 			break;
@@ -325,7 +325,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 
 	switch (_type) {
 		case SelectionStart:
-			/* fallthrough */
+			[[fallthrough]];
 		case SelectionEnd:
 			_pcue->hide();
 			_pmark->show();

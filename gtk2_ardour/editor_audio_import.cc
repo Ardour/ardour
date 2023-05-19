@@ -1073,7 +1073,7 @@ Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
 	}
 
 	case ImportAsTrigger:
-	/* fallthrough */
+	[[fallthrough]];
 	case ImportAsTrack:
 	{
 		if (!existing_track) {

@@ -327,16 +327,16 @@ APianoKeyboard::handle_fixed_keys (GdkEventKey* ev)
 	} else if (ev->type == GDK_KEY_RELEASE) {
 		switch (ev->keyval) {
 			case GDK_KEY_F1:
-				/* fallthrough */
+				[[fallthrough]];
 			case GDK_KEY_F2:
-				/* fallthrough */
+				[[fallthrough]];
 			case GDK_KEY_F3:
-				/* fallthrough */
+				[[fallthrough]];
 			case GDK_KEY_F4:
 				PitchBend (8192, false);
 				break;
 			case GDK_KEY_Up:
-				/* fallthrough */
+				[[fallthrough]];
 			case GDK_KEY_Down:
 				PitchBend (8192, true);
 				return true;

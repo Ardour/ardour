@@ -231,7 +231,7 @@ VSTPluginUI::dispatch_effeditkey (GdkEventKey* gdk_key)
 			special_key = 15;
 			break;
 		case GDK_Page_Down:
-			/* fallthrough */
+			[[fallthrough]];
 		case GDK_KP_Page_Down:
 			special_key = 16;
 			break;

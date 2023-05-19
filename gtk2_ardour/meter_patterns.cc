@@ -516,7 +516,7 @@ meter_render_ticks (Gtk::Widget& w, MeterType type, vector<ARDOUR::DataType> typ
 					points.insert (std::pair<float,float>(  3, 1.0));
 					points.insert (std::pair<float,float>(  4, 0.5));
 					points.insert (std::pair<float,float>(  5, 0.5));
-					/* fallthrough */
+					[[fallthrough]];
 				case MeterPeak0dB:
 					points.insert (std::pair<float,float>(-60, 0.5));
 					points.insert (std::pair<float,float>(-50, 1.0));
@@ -752,12 +752,12 @@ meter_render_metrics (Gtk::Widget& w, MeterType type, vector<DataType> types)
 					points.insert (std::pair<float,string>(  0.0f, "+20"));
 					break;
 				case MeterPeak:
-					/* fallthrough */
+					[[fallthrough]];
 				case MeterKrms:
-					/* fallthrough */
+					[[fallthrough]];
 				default:
 					points.insert (std::pair<float,string>(  3.0f, "+3"));
-					/* fallthrough */
+					[[fallthrough]];
 				case MeterPeak0dB:
 					points.insert (std::pair<float,string>(-50.0f, "-50"));
 					points.insert (std::pair<float,string>(-40.0f, "-40"));

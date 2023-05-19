@@ -5176,8 +5176,7 @@ Editor::get_preferred_edit_position (EditIgnoreOption ignore, bool from_context_
 				break;
 			}
 		}
-		/* fallthrough */
-
+		[[fallthrough]];
 	default:
 	case EditAtMouse:
 		if (!mouse_sample (ms, ignored)) {
@@ -6840,14 +6839,14 @@ Editor::default_time_domain () const
 
 	switch (_grid_type) {
 		case GridTypeNone:
-			/* fallthrough */
+			[[fallthrough]];
 		case GridTypeMinSec:
-			/* fallthrough */
+			[[fallthrough]];
 		case GridTypeCDFrame:
-			/* fallthrough */
+			[[fallthrough]];
 		case GridTypeTimecode:
-			/* fallthrough */
 			return AudioTime;
+			[[fallthrough]];
 		default:
 			break;
 	}

@@ -2738,7 +2738,7 @@ Editor::cut_copy_section (bool copy)
 			break;
 		case SectionSelectRetainAndMovePlayhead:
 			_session->request_locate (copy ? to_end.samples (): to.samples ());
-			/* fallthough */
+			[[fallthrough]];
 		case SectionSelectRetain:
 			if (!copy || to < end) {
 				selection->set (to, to_end);

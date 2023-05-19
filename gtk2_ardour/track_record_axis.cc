@@ -615,12 +615,12 @@ TrackRecordAxis::entry_key_press (GdkEventKey* ev)
 {
 	switch (ev->keyval) {
 		case GDK_Escape:
-			/* fallthrough */
+			[[fallthrough]];
 		case GDK_ISO_Left_Tab:
-			/* fallthrough */
+			[[fallthrough]];
 		case GDK_Tab:
-			/* fallthrough */
 			return true;
+			[[fallthrough]];
 		default:
 			break;
 	}
