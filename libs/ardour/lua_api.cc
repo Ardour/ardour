@@ -839,9 +839,9 @@ LuaTableRef::set (lua_State* L)
 					}
 					// invalid userdata -- fall through
 				}
-				/* fallthrough */
+				[[fallthrough]];
 			case LUA_TFUNCTION: // no support -- we could... string.format("%q", string.dump(value, true))
-				/* fallthrough */
+				[[fallthrough]];
 			case LUA_TTABLE: // no nested tables, sorry.
 			case LUA_TNIL:
 			default:

@@ -1686,56 +1686,56 @@ OSC::surface_parse (const char *path, const char* types, lo_arg **argv, int argc
 				} else {
 					linkid = argv[8]->i;
 				}
-				/* fallthrough */
+				[[fallthrough]];
 			case 8:
 				if (types[7] == 'f') {
 					linkset = (int) argv[7]->f;
 				} else {
 					linkset = argv[7]->i;
 				}
-				/* fallthrough */
+				[[fallthrough]];
 			case 7:
 				if (types[6] == 'f') {
 					port = (int) argv[6]->f;
 				} else {
 					port = argv[6]->i;
 				}
-				/* fallthrough */
+				[[fallthrough]];
 			case 6:
 				if (types[5] == 'f') {
 					pi_page = (int) argv[5]->f;
 				} else {
 					pi_page = argv[5]->i;
 				}
-				/* fallthrough */
+				[[fallthrough]];
 			case 5:
 				if (types[4] == 'f') {
 					se_page = (int) argv[4]->f;
 				} else {
 					se_page = argv[4]->i;
 				}
-				/* fallthrough */
+				[[fallthrough]];
 			case 4:
 				if (types[3] == 'f') {
 					fadermode = (int) argv[3]->f;
 				} else {
 					fadermode = argv[3]->i;
 				}
-				/* fallthrough */
+				[[fallthrough]];
 			case 3:
 				if (types[2] == 'f') {
 					feedback = (int) argv[2]->f;
 				} else {
 					feedback = argv[2]->i;
 				}
-				/* fallthrough */
+				[[fallthrough]];
 			case 2:
 				if (types[1] == 'f') {
 					strip_types = (int) argv[1]->f;
 				} else {
 					strip_types = argv[1]->i;
 				}
-				/* fallthrough */
+				[[fallthrough]];
 			case 1:
 				bank_size = data;
 				set_surface_port (port, msg);

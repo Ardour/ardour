@@ -131,7 +131,7 @@ VST3Plugin::parameter_change_handler (VST3PI::ParameterChange t, uint32_t param,
 			break;
 		case VST3PI::ValueChange:
 			_parameter_queue.write_one (PV (param, value));
-			/* fallthrough */
+			[[fallthrough]];
 		case VST3PI::ParamValueChanged:
 			/* emit ParameterChangedExternally, mark preset dirty */
 			Plugin::parameter_changed_externally (param, value);

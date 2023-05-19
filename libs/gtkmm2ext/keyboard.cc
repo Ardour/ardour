@@ -561,7 +561,7 @@ Keyboard::leave_window (GdkEventCrossing* ev, Gtk::Window* /*win*/)
 
 			case GDK_NOTIFY_VIRTUAL:
 				DEBUG_TRACE (DEBUG::Keyboard, "VIRTUAL crossing ... out\n");
-				/* fallthrough */
+				[[fallthrough]];
 
 			default:
 				DEBUG_TRACE (DEBUG::Keyboard, "REAL crossing ... out\n");

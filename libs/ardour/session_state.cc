@@ -2735,7 +2735,7 @@ retry:
 
 				case 3:
 					no_questions_about_missing_files = true;
-					/* fallthrough */
+					[[fallthrough]];
 
 				case -1:
 				default:

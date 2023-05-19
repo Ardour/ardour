@@ -327,7 +327,7 @@ bool	AUCarbonViewControl::HandleEvent(EventHandlerCallRef inHandlerRef, EventRef
 				case kEventControlSetFocusPart:	// tab
 					handled = !handled;		// fall through to next case
 					mLastControl = this;
-					/* fallthrough */
+					[[fallthrough]];
 				case kEventControlValueFieldChanged:
 					GetEventParameter(event, kEventParamDirectObject, typeControlRef, NULL, sizeof(ControlRef), NULL, &control);
 					verify(control == mControl);

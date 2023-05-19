@@ -56,10 +56,10 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 
 	switch((AutomationType)parameter.type()) {
 	case BusSendLevel:
-		/* fallthrough */
+		[[fallthrough]];
 	case InsertReturnLevel:
 		inline_ctrl = true;
-		/* fallthrough */
+		[[fallthrough]];
 	case GainAutomation:
 		upper  = Config->get_max_gain();
 		normal = 1.0f;
@@ -325,16 +325,16 @@ ParameterDescriptor::to_interface (float val, bool rotary) const
 	val = std::min (upper, std::max (lower, val));
 	switch(type) {
 		case GainAutomation:
-			/* fallthrough */
+			[[fallthrough]];
 		case BusSendLevel:
-			/* fallthrough */
+			[[fallthrough]];
 		case InsertReturnLevel:
-			/* fallthrough */
+			[[fallthrough]];
 		case EnvelopeAutomation:
 			val = gain_to_slider_position_with_max (val, upper);
 			break;
 		case TrimAutomation:
-			/* fallthrough */
+			[[fallthrough]];
 		case MainOutVolume:
 			{
 				const float lower_db = accurate_coefficient_to_dB (lower);

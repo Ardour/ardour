@@ -999,7 +999,7 @@ LaunchControlXL::filter_stripables(StripableList& strips) const
 
 	switch ((int)template_number()) {
 		default:
-			/* FALLTHROUGH */
+			[[fallthrough]];
 		case 8:
 			flt = &flt_default;
 			break;

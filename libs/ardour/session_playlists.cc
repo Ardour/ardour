@@ -495,7 +495,7 @@ SessionPlaylists::maybe_delete_unused (boost::function<int(std::shared_ptr<Playl
 			// delete this and all later
 			delete_remaining = true;
 
-			/* fallthrough */
+			[[fallthrough]];
 		case 1:
 			// delete this
 			playlists_tbd.push_back (*x);

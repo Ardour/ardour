@@ -389,7 +389,7 @@ std::ostream& operator<<(std::ostream& o, ARDOUR::SessionEvent const& ev) {
 			o << " force: " << ev.yes_or_no;
 			break;
 		case SessionEvent::SetDefaultPlaySpeed:
-			/* fallthrough */
+			[[fallthrough]];
 		case SessionEvent::SetTransportSpeed:
 			o << " speed: " << ev.speed;
 			break;

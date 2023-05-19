@@ -277,7 +277,7 @@ int main (int argc, char* argv[])
 							settings._sample_format = ExportFormatBase::SF_Float;
 							break;
 						}
-						/* fallthrough */
+						[[fallthrough]];
 					default:
 						fprintf(stderr, "Invalid Bit Depth\n");
 						break;

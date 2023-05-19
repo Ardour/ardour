@@ -52,7 +52,7 @@ order_of_magnitude (const char* i)
 		case 'd':
 			return 100;
 		case 'k':
-			/* fallthrough */
+			[[fallthrough]];
 		case 'K':
 			return 1e6;
 		case 'M':
