@@ -219,10 +219,10 @@ RTMidiBuffer::write (TimeType time, Evoral::EventType /*type*/, uint32_t size, c
 		switch (size) {
 		case 3:
 			_data[_size].bytes[3] = buf[2];
-			/* fallthru */
+			[[fallthrough]];
 		case 2:
 			_data[_size].bytes[2] = buf[1];
-			/* fallthru */
+			[[fallthrough]];
 		case 1:
 			_data[_size].bytes[1] = buf[0];
 			break;
