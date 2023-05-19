@@ -65,6 +65,11 @@ ARDOUR_UI::toggle_external_sync()
 			msg.run ();
 			return;
 		}
+		if (_session->default_play_speed() != 1.0f && (TransportMasterManager::instance().current()->type() == Engine)) {
+			ArdourMessageDialog msg (_("It is not possible to use JACK as the sync source\n when the vari-speed is enabled."));
+			msg.run ();
+			return;
+		}
 
 		ActionManager::toggle_config_state_foo ("Transport", "ToggleExternalSync", sigc::mem_fun (_session->config, &SessionConfiguration::set_external_sync), sigc::mem_fun (_session->config, &SessionConfiguration::get_external_sync));
 
