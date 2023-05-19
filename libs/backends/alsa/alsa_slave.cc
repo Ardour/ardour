@@ -323,7 +323,7 @@ AlsaAudioSlave::process_thread ()
 			} else {
 				if (!drain) {
 #ifndef NDEBUG
-					printf ("Slave Process: Playback Buffer Underflow, have %u want %lu\n", _rb_playback.read_space (), _pcmi.nplay () * spp); // XXX DEBUG 
+					printf ("Slave Process: Playback Buffer Underflow, have %zu want %lu\n", _rb_playback.read_space (), _pcmi.nplay () * spp); // XXX DEBUG
 #endif
 					_play_latency += spp * _ratio;
 					update_latencies (_play_latency, _capt_latency);
@@ -391,7 +391,7 @@ AlsaAudioSlave::cycle_start (double tme, double mst_speed, bool drain)
 	const double rratio = _ratio * mst_speed / slave_speed;
 	if (_rb_capture.read_space() < ceil (nchn * _samples_per_period / rratio)) {
 #ifndef NDEBUG
-		printf ("--- UNDERFLOW ---  have %u  want %.1f\n", _rb_capture.read_space(), ceil (nchn * _samples_per_period / rratio)); // XXX DEBUG
+		printf ("--- UNDERFLOW ---  have %zu  want %.1f\n", _rb_capture.read_space(), ceil (nchn * _samples_per_period / rratio)); // XXX DEBUG
 #endif
 		_capt_latency += _samples_per_period;
 		update_latencies (_play_latency, _capt_latency);
