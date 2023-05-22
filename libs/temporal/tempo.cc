@@ -3487,7 +3487,6 @@ TempoMap::stretch_tempo (TempoPoint& focus, double tempo_value)
 
 	superclock_t err = prev->superclock_at (focus.beats()) - focus.sclock();
 	const superclock_t one_sample = superclock_ticks_per_second() / TEMPORAL_SAMPLE_RATE;
-	const Beats b (focus.beats() - prev->beats());
 	// const double end_scpqn = focus.superclocks_per_quarter_note();
 	double scpqn = focus.superclocks_per_quarter_note ();
 	double new_npm;
@@ -3710,9 +3709,7 @@ TempoMap::solve_ramped_twist (TempoPoint& earlier, TempoPoint& later)
 {
 	superclock_t err = earlier.superclock_at (later.beats()) - later.sclock();
 	const superclock_t one_sample = superclock_ticks_per_second() / TEMPORAL_SAMPLE_RATE;
-	const Beats b (later.beats() - earlier.beats());
 	double end_scpqn = earlier.end_superclocks_per_quarter_note();
-	double start_scpqn = earlier.superclocks_per_quarter_note ();
 	double new_end_npm;
 	int cnt = 0;
 
@@ -3773,7 +3770,6 @@ TempoMap::solve_constant_twist (TempoPoint& earlier, TempoPoint& later)
 {
 	superclock_t err = earlier.superclock_at (later.beats()) - later.sclock();
 	const superclock_t one_sample = superclock_ticks_per_second() / TEMPORAL_SAMPLE_RATE;
-	const Beats b (later.beats() - earlier.beats());
 	double start_npm = earlier.superclocks_per_quarter_note ();
 	int cnt = 0;
 
