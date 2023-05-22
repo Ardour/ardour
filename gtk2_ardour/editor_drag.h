@@ -983,7 +983,6 @@ private:
 	Temporal::TempoPoint& prev;
 	Temporal::TempoPoint& focus;
 	Temporal::TempoPoint& next;
-	double _grab_bpm;
 	Temporal::TempoMap::WritableSharedPtr map;
 
 	double direction;
@@ -1021,7 +1020,6 @@ public:
 private:
 	Temporal::Beats _grab_qn;
 	Temporal::TempoPoint* _tempo;
-	Temporal::TempoPoint*  _grab_tempo;
 	Temporal::TempoPoint const * _next_tempo;
 	Temporal::TempoMap::WritableSharedPtr map;
 	bool _drag_valid;
@@ -1199,7 +1197,6 @@ private:
 	ControlPoint* _point;
 	double _fixed_grab_x;
 	double _fixed_grab_y;
-	double _cumulative_x_drag;
 	double _cumulative_y_drag;
 	bool     _pushing;
         uint32_t _final_index;

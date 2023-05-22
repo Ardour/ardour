@@ -4725,7 +4725,6 @@ ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i, e->default_time_domain ()) /* XXX NUTEMPO FIX TIME DOMAIN */
 	, _fixed_grab_x (0.0)
 	, _fixed_grab_y (0.0)
-	, _cumulative_x_drag (0.0)
 	, _cumulative_y_drag (0.0)
 	, _pushing (false)
 	, _final_index (0)
