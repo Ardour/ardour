@@ -3,6 +3,7 @@
    <Binding key="d" action="Mixer/toggle-disk-monitor" group="Operations on the selected strip(s)"/>
    <Binding key="i" action="Mixer/toggle-input-monitor" group="Operations on the selected strip(s)"/>
    <Binding key="m" action="Mixer/mute" group="Operations on the selected strip(s)"/>
+   <Binding key="s" action="Mixer/solo" group="Operations on the selected strip(s)"/>
    <Binding key="Secondary-i" action="Mixer/toggle-midi-input-active" group="Operations on the selected strip(s)"/>
    <Binding key="r" action="Mixer/recenable" group="Operations on the selected strip(s)"/>
    <Binding key="0" action="Mixer/unity-gain" group="Operations on the selected strip(s)"/>
