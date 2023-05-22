@@ -24,6 +24,7 @@
 extern "C" {
 #endif
 
+#include <stdint.h>
 #include "gdither_types.h"
 
 /* Create and initialise a state structure, takes a dither type, a number of
