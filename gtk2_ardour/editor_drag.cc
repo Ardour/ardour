@@ -3626,15 +3626,6 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 void
 MappingTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!movement_occurred) {
-		/* click, no drag */
-
-		_editor->abort_tempo_mapping ();
-		_editor->abort_reversible_command ();
-		_editor->session ()->request_locate (grab_sample (), false, _was_rolling ? MustRoll : RollIfAppropriate);
-		return;
-	}
-
 	if (!_drag_valid) {
 		_editor->abort_tempo_mapping ();
 		_editor->abort_reversible_command ();
