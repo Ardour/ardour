@@ -189,7 +189,7 @@ gdither_innner_loop (const GDitherType dt,
 	uint8_t* o8  = (uint8_t*)y;
 	int16_t* o16 = (int16_t*)y;
 	int32_t* o32 = (int32_t*)y;
-	float    tmp, r, ideal;
+	float    tmp, r, err;
 	int64_t  clamped;
 
 	i = channel;
@@ -208,21 +208,24 @@ gdither_innner_loop (const GDitherType dt,
 				ts[channel] = r;
 				break;
 			case GDitherShaped:
-				/* Save raw value for error calculations */
 				assert (ss);
-				ideal = tmp;
 
-				/* Run FIR and add white noise */
-				ss->buffer[ss->phase] = gdither_noise () * 0.5f;
+				/* Run FIR */
 				tmp += ss->buffer[ss->phase] * shaped_bs[0]
 				    + ss->buffer[(ss->phase - 1) & GDITHER_SH_BUF_MASK] * shaped_bs[1]
 				    + ss->buffer[(ss->phase - 2) & GDITHER_SH_BUF_MASK] * shaped_bs[2]
 				    + ss->buffer[(ss->phase - 3) & GDITHER_SH_BUF_MASK] * shaped_bs[3]
 				    + ss->buffer[(ss->phase - 4) & GDITHER_SH_BUF_MASK] * shaped_bs[4];
 
+				/* Capture signal for error calculation before adding white noise */
+				err = tmp;
+
+				/* Add white noise */
+				tmp += (gdither_noise () + gdither_noise ()) * 0.5f;
+
 				/* Roll buffer and store last error */
 				ss->phase             = (ss->phase + 1) & GDITHER_SH_BUF_MASK;
-				ss->buffer[ss->phase] = (float)lrintf (tmp) - ideal;
+				ss->buffer[ss->phase] = err - (float)lrintf (tmp);
 				break;
 		}
 
@@ -259,7 +262,7 @@ gdither_innner_loop_fp (const GDitherType dt,
 	uint32_t pos, i;
 	float*   oflt = (float*)y;
 	double*  odbl = (double*)y;
-	float    tmp, r, ideal;
+	float    tmp, r, err;
 	double   clamped;
 
 	i = channel;
@@ -279,20 +282,23 @@ gdither_innner_loop_fp (const GDitherType dt,
 				break;
 			case GDitherShaped:
 				assert (ss);
-				/* Save raw value for error calculations */
-				ideal = tmp;
 
-				/* Run FIR and add white noise */
-				ss->buffer[ss->phase] = gdither_noise () * 0.5f;
+				/* Run FIR */
 				tmp += ss->buffer[ss->phase] * shaped_bs[0]
 				    + ss->buffer[(ss->phase - 1) & GDITHER_SH_BUF_MASK] * shaped_bs[1]
 				    + ss->buffer[(ss->phase - 2) & GDITHER_SH_BUF_MASK] * shaped_bs[2]
 				    + ss->buffer[(ss->phase - 3) & GDITHER_SH_BUF_MASK] * shaped_bs[3]
 				    + ss->buffer[(ss->phase - 4) & GDITHER_SH_BUF_MASK] * shaped_bs[4];
 
+				/* Capture signal for error calculation before adding white noise */
+				err = tmp;
+
+				/* Add white noise */
+				tmp += (gdither_noise () + gdither_noise ()) * 0.5f;
+
 				/* Roll buffer and store last error */
 				ss->phase             = (ss->phase + 1) & GDITHER_SH_BUF_MASK;
-				ss->buffer[ss->phase] = (float)lrintf (tmp) - ideal;
+				ss->buffer[ss->phase] = err - (float)lrintf (tmp);
 				break;
 		}
 
