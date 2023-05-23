@@ -134,6 +134,8 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	bool freewheeling() const { return _freewheeling; }
 	bool running() const { return _running; }
 
+	std::string backend_id (bool for_input);
+
 	Glib::Threads::Mutex& process_lock() { return _process_lock; }
 	Glib::Threads::Mutex& latency_lock() { return _latency_lock; }
 
