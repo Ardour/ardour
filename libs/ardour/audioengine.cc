@@ -1778,3 +1778,27 @@ AudioEngine::add_pending_port_deletion (Port* p)
 		delete p;
 	}
 }
+
+std::string
+AudioEngine::backend_id (bool for_input)
+{
+	if (!_backend) {
+		return "";
+	}
+	if (!setup_required ()) {
+		return "JACK";
+	}
+
+	std::stringstream ss;
+	ss << _backend->name() << ";" << _backend->driver_name () << ";";
+	if (_backend->use_separate_input_and_output_devices ()) {
+		if (for_input) {
+			ss << _backend->input_device_name ();
+		} else {
+			ss << _backend->output_device_name ();
+		}
+	} else {
+		ss << _backend->device_name ();
+	}
+	return ss.str ();
+}
