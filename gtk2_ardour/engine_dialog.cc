@@ -133,7 +133,7 @@ EngineControl::EngineControl ()
 	AttachOptions  xopt = AttachOptions (FILL | EXPAND);
 	int            row;
 
-	set_resizable (false);
+	//set_resizable (false);
 	set_name (X_("AudioMIDISetup"));
 
 	/* the backend combo is the one thing that is ALWAYS visible */
