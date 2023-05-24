@@ -598,7 +598,7 @@ IOButton::button_press (GdkEventButton* ev)
 
 		/* try adding the master bus first */
 		std::shared_ptr<Route> master = _route->session ().master_out ();
-		if (master) {
+		if (master && !_route->is_monitor ()) {
 			maybe_add_bundle_to_menu (master->input ()->bundle (), current, intended_type);
 		}
 	}
