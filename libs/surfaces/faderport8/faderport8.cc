@@ -109,7 +109,7 @@ FaderPort8::probe (std::string& i, std::string& o)
 	auto has_fp8 = [](string const& s) {
 		std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name (s);
 #ifdef FADERPORT16
-		return pn.find ("PreSonus FP16") != string::npos;
+		return pn.find ("PreSonus FP16 Port 1") != string::npos;
 #elif defined FADERPORT2
 		return pn.find ("PreSonus FP1") != string::npos;
 #else
