@@ -85,7 +85,7 @@ MonitorSection::MonitorSection ()
 	, dim_display (0)
 	, solo_boost_display (0)
 	, solo_cut_display (0)
-	, _output_selector (0)
+	, _output_button (false)
 	, solo_in_place_button (_("SiP"), ArdourButton::led_default_elements)
 	, afl_button (_("AFL"), ArdourButton::led_default_elements)
 	, pfl_button (_("PFL"), ArdourButton::led_default_elements)
@@ -304,12 +304,6 @@ MonitorSection::MonitorSection ()
 	Label* output_label = manage (new Label (_("Output")));
 	output_label->set_name (X_("MonitorSectionLabel"));
 
-	output_button = new ArdourButton ();
-	output_button->set_text (_("Output"));
-	output_button->set_name (X_("monitor section button"));
-	output_button->set_text_ellipsize (Pango::ELLIPSIZE_MIDDLE);
-	output_button->set_layout_ellipsize_width (PX_SCALE(128) * PANGO_SCALE);
-
 	channel_table_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 	channel_table_scroller.set_size_request (-1, PX_SCALE(150));
 	channel_table_scroller.set_shadow_type (Gtk::SHADOW_NONE);
@@ -432,7 +426,7 @@ MonitorSection::MonitorSection ()
 	VBox* out_packer = manage (new VBox);
 	out_packer->set_spacing (PX_SCALE(2));
 	out_packer->pack_start (*output_label, false, false);
-	out_packer->pack_start (*output_button, false, false);
+	out_packer->pack_start (_output_button, false, false);
 
 	/****************************************************************************
 	 * TOP LEVEL LAYOUT
@@ -481,9 +475,6 @@ MonitorSection::MonitorSection ()
 
 	map_state ();
 
-	output_button->signal_button_press_event().connect (sigc::mem_fun(*this, &MonitorSection::output_press), false);
-	output_button->signal_button_release_event().connect (sigc::mem_fun(*this, &MonitorSection::output_release), false);
-
 	signal_enter_notify_event().connect (sigc::mem_fun (*this, &MonitorSection::enter_handler));
 	signal_leave_notify_event().connect (sigc::mem_fun (*this, &MonitorSection::leave_handler));
 	set_can_focus ();
@@ -499,17 +490,10 @@ MonitorSection::MonitorSection ()
 	_tearoff->tearoff_window().set_title (X_("Monitor"));
 	_tearoff->tearoff_window().signal_key_press_event().connect (sigc::bind (sigc::ptr_fun (relay_key_press), (Gtk::Window*) &_tearoff->tearoff_window()), false);
 
-	update_output_display ();
 	update_processor_box ();
 	_ui_initialized = true;
 
 	/* catch changes that affect us */
-	AudioEngine::instance()->PortConnectedOrDisconnected.connect (
-		*this, invalidator (*this), boost::bind (&MonitorSection::port_connected_or_disconnected, this, _1, _3), gui_context ()
-		);
-	AudioEngine::instance()->PortPrettyNameChanged.connect (
-		*this, invalidator (*this), boost::bind (&MonitorSection::port_pretty_name_changed, this, _1), gui_context ()
-		);
 	Config->ParameterChanged.connect (config_connection, invalidator (*this), boost::bind (&MonitorSection::parameter_changed, this, _1), gui_context());
 }
 
@@ -523,7 +507,6 @@ MonitorSection::~MonitorSection ()
 	route_connections.drop_connections ();
 
 	delete insert_box; insert_box = 0;
-	delete output_button; output_button = 0;
 	delete gain_control; gain_control = 0;
 	delete gain_display; gain_display = 0;
 	delete dim_control; dim_control = 0;
@@ -533,7 +516,6 @@ MonitorSection::~MonitorSection ()
 	delete solo_cut_control; solo_cut_control = 0;
 	delete solo_cut_display; solo_cut_display = 0;
 	delete _tearoff; _tearoff = 0;
-	delete _output_selector; _output_selector = 0;
 	delete channel_table; channel_table = 0;
 }
 
@@ -617,14 +599,12 @@ MonitorSection::set_session (Session* s)
 		ActionManager::get_toggle_action (X_("Solo"), X_("toggle-mute-overrides-solo"))->set_active (Config->get_solo_mute_override());
 
 		_route = _session->monitor_out ();
+		_output_button.set_route (_route, this);
 
 		if (_route) {
 			/* session with monitor section */
 			_monitor = _route->monitor_control ();
 			assign_controllables ();
-			_route->output()->changed.connect (route_connections, invalidator (*this),
-			                                   boost::bind (&MonitorSection::update_output_display, this),
-			                                   gui_context());
 			insert_box->set_route (_route);
 			_route->processors_changed.connect (route_connections, invalidator (*this), boost::bind (&MonitorSection::processors_changed, this, _1), gui_context());
 			_route->output()->PortCountChanged.connect (route_connections, invalidator (*this), boost::bind (&MonitorSection::populate_buttons, this), gui_context());
@@ -632,7 +612,6 @@ MonitorSection::set_session (Session* s)
 
 			if (_ui_initialized) {
 				update_processor_box ();
-				update_output_display ();
 			}
 
 			SYNCHRONIZE_TOGGLE_ACTION (ActionManager::get_toggle_action (X_("Monitor"), "UseMonitorSection"), true);
@@ -645,8 +624,6 @@ MonitorSection::set_session (Session* s)
 			route_connections.drop_connections();
 			_monitor.reset ();
 			_route.reset ();
-			delete _output_selector;
-			_output_selector = 0;
 
 			SYNCHRONIZE_TOGGLE_ACTION (ActionManager::get_toggle_action (X_("Monitor"), "UseMonitorSection"), false);
 			ActionManager::set_sensitive (global_monitor_actions, false);
@@ -683,8 +660,6 @@ MonitorSection::drop_route ()
 	unassign_controllables ();
 	rude_iso_button.unset_active_state ();
 	rude_solo_button.unset_active_state ();
-	delete _output_selector;
-	_output_selector = 0;
 }
 
 MonitorSection::ChannelButtonSet::ChannelButtonSet ()
@@ -1271,339 +1246,6 @@ MonitorSection::state_id() const
 {
 	return "monitor-section";
 }
-
-void
-MonitorSection::maybe_add_bundle_to_output_menu (std::shared_ptr<Bundle> b, ARDOUR::BundleList const& /*current*/)
-{
-	using namespace Menu_Helpers;
-
-	if (b->ports_are_inputs() == false || b->nchannels() != _route->n_outputs() || *b == *_route->input()->bundle()) {
-		return;
-	}
-
-	list<std::shared_ptr<Bundle> >::iterator i = output_menu_bundles.begin ();
-	while (i != output_menu_bundles.end() && b->has_same_ports (*i) == false) {
-		++i;
-	}
-
-	if (i != output_menu_bundles.end()) {
-		return;
-	}
-
-	output_menu_bundles.push_back (b);
-
-	MenuList& citems = output_menu.items();
-
-	std::string n = b->name ();
-	replace_all (n, "_", " ");
-
-	citems.push_back (MenuElem (n, sigc::bind (sigc::mem_fun(*this, &MonitorSection::bundle_output_chosen), b)));
-}
-
-void
-MonitorSection::bundle_output_chosen (std::shared_ptr<ARDOUR::Bundle> c)
-{
-
-	ARDOUR::BundleList current = _route->output()->bundles_connected ();
-
-	if (std::find (current.begin(), current.end(), c) == current.end()) {
-		_route->output()->connect_ports_to_bundle (c, true, this);
-	} else {
-		_route->output()->disconnect_ports_from_bundle (c, this);
-	}
-}
-
-gint
-MonitorSection::output_release (GdkEventButton *ev)
-{
-	switch (ev->button) {
-	case 3:
-		edit_output_configuration ();
-		break;
-	}
-
-	return false;
-}
-
-struct RouteCompareByName {
-	bool operator() (std::shared_ptr<Route> a, std::shared_ptr<Route> b) {
-		return a->name().compare (b->name()) < 0;
-	}
-};
-
-gint
-MonitorSection::output_press (GdkEventButton *ev)
-{
-	using namespace Menu_Helpers;
-	if (!_session) {
-		MessageDialog msg (_("No session - no I/O changes are possible"));
-		msg.run ();
-		return true;
-	}
-
-	MenuList& citems = output_menu.items();
-	switch (ev->button) {
-
-	case 3:
-		return false;  //wait for the mouse-up to pop the dialog
-
-	case 1:
-	{
-		output_menu.set_name ("ArdourContextMenu");
-		citems.clear ();
-		output_menu_bundles.clear ();
-
-		citems.push_back (MenuElem (_("Disconnect"), sigc::mem_fun (*(this), &MonitorSection::disconnect_output)));
-
-		citems.push_back (SeparatorElem());
-		uint32_t const n_with_separator = citems.size ();
-
-		ARDOUR::BundleList current = _route->output()->bundles_connected ();
-
-		std::shared_ptr<ARDOUR::BundleList const> b = _session->bundles ();
-
-		/* give user bundles first chance at being in the menu */
-
-		for (auto const& i : *b) {
-			if (std::dynamic_pointer_cast<UserBundle> (i)) {
-				maybe_add_bundle_to_output_menu (i, current);
-			}
-		}
-
-		for (auto const& i : *b) {
-			if (std::dynamic_pointer_cast<UserBundle> (i) == 0) {
-				maybe_add_bundle_to_output_menu (i, current);
-			}
-		}
-
-		std::shared_ptr<ARDOUR::RouteList const> routes = _session->get_routes ();
-		RouteList copy = *routes;
-		copy.sort (RouteCompareByName ());
-		for (ARDOUR::RouteList::const_iterator i = copy.begin(); i != copy.end(); ++i) {
-			maybe_add_bundle_to_output_menu ((*i)->output()->bundle(), current);
-		}
-
-		if (citems.size() == n_with_separator) {
-			/* no routes added; remove the separator */
-			citems.pop_back ();
-		}
-
-		citems.push_back (SeparatorElem());
-		citems.push_back (MenuElem (_("Routing Grid"), sigc::mem_fun (*(this), &MonitorSection::edit_output_configuration)));
-
-		output_menu.popup (1, ev->time);
-		break;
-	}
-
-	default:
-		break;
-	}
-	return TRUE;
-}
-
-void
-MonitorSection::update_output_display ()
-{
-	if (!_route || !_monitor || _session->deletion_in_progress()) {
-		return;
-	}
-
-	uint32_t io_count;
-	uint32_t io_index;
-	std::shared_ptr<Port> port;
-	vector<string> port_connections;
-
-	uint32_t total_connection_count = 0;
-	uint32_t io_connection_count = 0;
-	uint32_t ardour_connection_count = 0;
-	uint32_t system_connection_count = 0;
-	uint32_t other_connection_count = 0;
-
-	ostringstream label;
-
-	bool have_label = false;
-	bool each_io_has_one_connection = true;
-
-	string connection_name;
-	string ardour_track_name;
-	string other_connection_type;
-	string system_ports;
-	string system_port;
-
-	ostringstream tooltip;
-	char * tooltip_cstr;
-
-	io_count = _route->n_outputs().n_total();
-	tooltip << string_compose (_("<b>OUTPUT</b> from %1"), Gtkmm2ext::markup_escape_text (_route->name()));
-
-
-	for (io_index = 0; io_index < io_count; ++io_index) {
-
-		port = _route->output()->nth (io_index);
-
-		//ignore any port connections that don't match our DataType
-		if (port->type() != DataType::AUDIO) {
-			continue;
-		}
-
-		port_connections.clear ();
-		port->get_connections(port_connections);
-		io_connection_count = 0;
-
-		if (!port_connections.empty()) {
-			for (vector<string>::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
-				string pn = "";
-				string& connection_name (*i);
-
-				if (connection_name.find("system:") == 0) {
-					pn = AudioEngine::instance()->get_pretty_name_by_name (connection_name);
-				}
-
-				if (io_connection_count == 0) {
-					tooltip << endl << Gtkmm2ext::markup_escape_text (port->name().substr(port->name().find("/") + 1))
-						<< " -> "
-						<< Gtkmm2ext::markup_escape_text ( pn.empty() ? connection_name : pn );
-				} else {
-					tooltip << ", "
-						<< Gtkmm2ext::markup_escape_text ( pn.empty() ? connection_name : pn );
-				}
-
-				if (connection_name.find(RouteUI::program_port_prefix) == 0) {
-					if (ardour_track_name.empty()) {
-						// "ardour:Master/in 1" -> "ardour:Master/"
-						string::size_type slash = connection_name.find("/");
-						if (slash != string::npos) {
-							ardour_track_name = connection_name.substr(0, slash + 1);
-						}
-					}
-
-					if (connection_name.find(ardour_track_name) == 0) {
-						++ardour_connection_count;
-					}
-				} else if (!pn.empty()) {
-					if (system_ports.empty()) {
-						system_ports += pn;
-					} else {
-						system_ports += "/" + pn;
-					}
-					if (connection_name.find("system:") == 0) {
-						++system_connection_count;
-					}
-				} else if (connection_name.find("system:") == 0) {
-					// "system:playback_123" -> "123"
-					system_port = connection_name.substr(16);
-					if (system_ports.empty()) {
-						system_ports += system_port;
-					} else {
-						system_ports += "/" + system_port;
-					}
-
-					++system_connection_count;
-				} else {
-					if (other_connection_type.empty()) {
-						// "jamin:in 1" -> "jamin:"
-						other_connection_type = connection_name.substr(0, connection_name.find(":") + 1);
-					}
-
-					if (connection_name.find(other_connection_type) == 0) {
-						++other_connection_count;
-					}
-				}
-
-				++total_connection_count;
-				++io_connection_count;
-			}
-		}
-
-		if (io_connection_count != 1) {
-			each_io_has_one_connection = false;
-		}
-	}
-
-	if (total_connection_count == 0) {
-		tooltip << endl << _("Disconnected");
-	}
-
-	tooltip_cstr = new char[tooltip.str().size() + 1];
-	strcpy(tooltip_cstr, tooltip.str().c_str());
-
-	set_tooltip (output_button, tooltip_cstr, "");
-
-	if (each_io_has_one_connection) {
-		if (total_connection_count == ardour_connection_count) {
-			// all connections are to the same track in ardour
-			// "ardour:Master/" -> "Master"
-			string::size_type slash = ardour_track_name.find("/");
-			if (slash != string::npos) {
-				label << ardour_track_name.substr(7, slash - 7);
-				have_label = true;
-			}
-		} else if (total_connection_count == system_connection_count) {
-			// all connections are to system ports
-			label << system_ports;
-			have_label = true;
-		} else if (total_connection_count == other_connection_count) {
-			// all connections are to the same external program eg jamin
-			// "jamin:" -> "jamin"
-			label << other_connection_type.substr(0, other_connection_type.size() - 1);
-			have_label = true;
-		}
-	}
-
-	if (!have_label) {
-		if (total_connection_count == 0) {
-			// Disconnected
-			label << "-";
-		} else {
-			// Odd configuration
-			label << "*" << total_connection_count << "*";
-		}
-	}
-
-	output_button->set_text (label.str());
-}
-
-void
-MonitorSection::disconnect_output ()
-{
-	if (_route) {
-		_route->output()->disconnect(this);
-	}
-}
-
-void
-MonitorSection::edit_output_configuration ()
-{
-	if (_output_selector == 0) {
-		_output_selector = new MonitorSelectorWindow (_session, _route->output());
-	}
-	_output_selector->present ();
-}
-
-void
-MonitorSection::port_connected_or_disconnected (std::weak_ptr<Port> wa, std::weak_ptr<Port> wb)
-{
-	if (!_route) {
-		return;
-	}
-	std::shared_ptr<Port> a = wa.lock ();
-	std::shared_ptr<Port> b = wb.lock ();
-	if ((a && _route->output()->has_port (a)) || (b && _route->output()->has_port (b))) {
-		update_output_display ();
-	}
-}
-
-void
-MonitorSection::port_pretty_name_changed (std::string pn)
-{
-	if (!_route) {
-		return;
-	}
-	if (_route->output()->connected_to (pn)) {
-		update_output_display ();
-	}
-}
-
 
 void
 MonitorSection::load_bindings ()

@@ -34,9 +34,9 @@
 #include "widgets/ardour_knob.h"
 #include "widgets/ardour_display.h"
 
+#include "io_button.h"
 #include "level_meter.h"
 #include "route_ui.h"
-#include "monitor_selector.h"
 
 #include "processor_box.h"
 #include "processor_selection.h"
@@ -99,16 +99,7 @@ private:
 	ArdourWidgets::ArdourDisplay*  solo_boost_display;
 	ArdourWidgets::ArdourDisplay*  solo_cut_display;
 
-	std::list<std::shared_ptr<ARDOUR::Bundle> > output_menu_bundles;
-	Gtk::Menu output_menu;
-	MonitorSelectorWindow *_output_selector;
-	ArdourWidgets::ArdourButton* output_button;
-
-	void maybe_add_bundle_to_output_menu (std::shared_ptr<ARDOUR::Bundle>, ARDOUR::BundleList const &);
-	void bundle_output_chosen (std::shared_ptr<ARDOUR::Bundle>);
-	void update_output_display ();
-	void disconnect_output ();
-	void edit_output_configuration ();
+	IOButton _output_button;
 
 	void populate_buttons ();
 	void map_state ();
@@ -132,8 +123,6 @@ private:
 	void dim_level_changed ();
 	void solo_boost_changed ();
 	void gain_value_changed ();
-	gint output_press (GdkEventButton *);
-	gint output_release (GdkEventButton *);
 
 	ArdourWidgets::ArdourButton solo_in_place_button;
 	ArdourWidgets::ArdourButton afl_button;
@@ -172,9 +161,6 @@ private:
 
 	void assign_controllables ();
 	void unassign_controllables ();
-
-	void port_connected_or_disconnected (std::weak_ptr<ARDOUR::Port>, std::weak_ptr<ARDOUR::Port>);
-	void port_pretty_name_changed (std::string);
 
 	void update_processor_box ();
 
