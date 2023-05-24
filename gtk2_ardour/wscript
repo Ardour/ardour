@@ -189,7 +189,6 @@ gtk2_ardour_sources = [
         'meter_strip.cc',
         'meter_patterns.cc',
         'monitor_section.cc',
-        'monitor_selector.cc',
         'mono_panner.cc',
         'mono_panner_editor.cc',
         'mouse_cursors.cc',
