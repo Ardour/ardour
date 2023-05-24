@@ -548,34 +548,7 @@ IO::state () const
 	}
 
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
-
-		vector<string> connections;
-
-		XMLNode* pnode = new XMLNode (X_("Port"));
-		pnode->set_property (X_("type"), i->type());
-		pnode->set_property (X_("name"), i->name());
-
-		if (i->get_connections (connections)) {
-			vector<string>::const_iterator ci;
-			std::sort (connections.begin(), connections.end());
-
-			for (n = 0, ci = connections.begin(); ci != connections.end(); ++ci, ++n) {
-
-				/* if its a connection to our own port,
-				   return only the port name, not the
-				   whole thing. this allows connections
-				   to be re-established even when our
-				   client name is different.
-				*/
-
-				XMLNode* cnode = new XMLNode (X_("Connection"));
-
-				cnode->set_property (X_("other"), _session.engine().make_port_name_relative (*ci));
-				pnode->add_child_nocopy (*cnode);
-			}
-		}
-
-		node->add_child_nocopy (*pnode);
+		node->add_child_nocopy (i->get_state ());
 	}
 
 	return *node;

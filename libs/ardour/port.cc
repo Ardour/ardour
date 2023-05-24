@@ -91,7 +91,7 @@ Port::Port (std::string const & n, DataType t, PortFlags f)
 
 	PortDrop.connect_same_thread (drop_connection, boost::bind (&Port::session_global_drop, this));
 	PortSignalDrop.connect_same_thread (drop_connection, boost::bind (&Port::signal_drop, this));
-	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection, boost::bind (&Port::port_connected_or_disconnected, this, _1, _3, _5));
+	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection, boost::bind (&Port::port_connected_or_disconnected, this, _1, _2, _3, _4, _5));
 }
 
 /** Port destructor */
@@ -160,7 +160,7 @@ Port::drop ()
 }
 
 void
-Port::port_connected_or_disconnected (std::weak_ptr<Port> w0, std::weak_ptr<Port> w1, bool con)
+Port::port_connected_or_disconnected (std::weak_ptr<Port> w0, std::string n1, std::weak_ptr<Port> w1, std::string n2, bool con)
 {
 	std::shared_ptr<Port> p0 = w0.lock ();
 	std::shared_ptr<Port> p1 = w1.lock ();
@@ -168,10 +168,85 @@ Port::port_connected_or_disconnected (std::weak_ptr<Port> w0, std::weak_ptr<Port
 	std::shared_ptr<Port> pself = AudioEngine::instance()->get_port_by_name (name());
 
 	if (p0 == pself) {
+		if (con) {
+			insert_connection (n2);
+		} else {
+			erase_connection (n2);
+		}
 		ConnectedOrDisconnected (p0, p1, con); // emit signal
 	}
 	if (p1 == pself) {
+		if (con) {
+			insert_connection (n1);
+		} else {
+			erase_connection (n1);
+		}
 		ConnectedOrDisconnected (p1, p0, con); // emit signal
+	}
+}
+
+void
+Port::insert_connection (std::string const& pn)
+{
+#if 1 // include external JACK clients
+	if (!AudioEngine::instance()->port_is_mine (pn))
+#else
+	if (port_manager->port_is_physical (pn))
+#endif
+	{
+		std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
+		Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+		_ext_connections[bid].insert (pn);
+		_int_connections.erase (pn); // XXX
+	} else {
+		Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+		_int_connections.insert (pn);
+	}
+}
+
+void
+Port::erase_connection (std::string const& pn)
+{
+#if 1 // include external JACK clients
+	if (!AudioEngine::instance()->port_is_mine (pn))
+#else
+	if (port_manager->port_is_physical (pn))
+#endif
+	{
+		std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
+		Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+		_ext_connections[bid].erase (pn);
+	} else {
+		Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+		_int_connections.erase (pn);
+	}
+}
+
+void
+Port::increment_external_connections ()
+{
+	_externally_connected++;
+}
+
+void
+Port::decrement_external_connections ()
+{
+	if (_externally_connected) {
+		_externally_connected--;
+	}
+}
+
+void
+Port::increment_internal_connections ()
+{
+	_internally_connected++;
+}
+
+void
+Port::decrement_internal_connections ()
+{
+	if (_internally_connected) {
+		_internally_connected--;
 	}
 }
 
@@ -194,7 +269,12 @@ Port::disconnect_all ()
 		get_connections (connections);
 
 		port_engine.disconnect_all (_port_handle);
-		_connections.clear ();
+		{
+			std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
+			Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+			_int_connections.clear ();
+			_ext_connections[bid].clear ();
+		}
 
 		/* a cheaper, less hacky way to do boost::shared_from_this() ...
 		 */
@@ -202,7 +282,7 @@ Port::disconnect_all ()
 		for (vector<string>::const_iterator c = connections.begin(); c != connections.end() && pself; ++c) {
 			std::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (*c);
 			if (pother) {
-				pother->_connections.erase (_name);
+				pother->erase_connection (_name);
 				ConnectedOrDisconnected (pself, pother, false); // emit signal
 			}
 		}
@@ -229,11 +309,17 @@ Port::connected_to (std::string const & o) const
 }
 
 int
-Port::get_connections (std::vector<std::string> & c) const
+Port::get_connections (std::vector<std::string>& c) const
 {
 	if (!port_manager->running()) {
-		c.insert (c.end(), _connections.begin(), _connections.end());
-		return c.size();
+		std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
+		Glib::Threads::RWLock::ReaderLock lm (_connections_lock);
+		c.insert (c.end(), _int_connections.begin(), _int_connections.end());
+		try {
+			c.insert (c.end(), _ext_connections.at(bid).begin(), _ext_connections.at(bid).end());
+		} catch (std::out_of_range&) {
+		}
+		return c.size ();
 	}
 
 	if (_port_handle) {
@@ -244,7 +330,7 @@ Port::get_connections (std::vector<std::string> & c) const
 }
 
 int
-Port::connect (std::string const & other)
+Port::connect_internal (std::string const & other)
 {
 	std::string const other_name = AudioEngine::instance()->make_port_name_non_relative (other);
 	std::string const our_name = AudioEngine::instance()->make_port_name_non_relative (_name);
@@ -262,6 +348,13 @@ Port::connect (std::string const & other)
 		DEBUG_TRACE (DEBUG::Ports, string_compose ("Connect %1 to %2\n", other_name, our_name));
 		r = port_engine.connect (other_name, our_name);
 	}
+	return r;
+}
+
+int
+Port::connect (std::string const& other)
+{
+	int r = connect_internal (other);
 
 	if (r == 0) {
 		/* Connections can be saved on either or both sides. The code above works regardless
@@ -274,11 +367,11 @@ Port::connect (std::string const & other)
 		 *
 		 * This is also nicer when reading the session file's <Port><Connection>.
 		 */
-		_connections.insert (other);
+		insert_connection (other);
 
 		std::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (other);
 		if (pother) {
-			pother->_connections.insert (_name);
+			pother->insert_connection (_name);
 		}
 	}
 
@@ -300,7 +393,7 @@ Port::disconnect (std::string const & other)
 	}
 
 	if (r == 0) {
-		_connections.erase (other);
+		erase_connection (other);
 	}
 
 	/* a cheaper, less hacky way to do boost::shared_from_this() ...  */
@@ -308,7 +401,7 @@ Port::disconnect (std::string const & other)
 	std::shared_ptr<Port> pother = AudioEngine::instance()->get_port_by_name (other);
 
 	if (r == 0 && pother) {
-		pother->_connections.erase (_name);
+		pother->erase_connection (_name);
 	}
 
 	if (pself && pother) {
@@ -601,7 +694,7 @@ Port::reestablish ()
 
 	reset ();
 
-	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection, boost::bind (&Port::port_connected_or_disconnected, this, _1, _3, _5));
+	port_manager->PortConnectedOrDisconnected.connect_same_thread (engine_connection, boost::bind (&Port::port_connected_or_disconnected, this, _1, _2, _3, _4, _5));
 	return 0;
 }
 
@@ -611,22 +704,36 @@ Port::reconnect ()
 {
 	/* caller must hold process lock; intended to be used only after reestablish() */
 
-	if (_connections.empty ()) {
+	std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
+
+	Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+
+	if (_int_connections.empty () && _ext_connections[bid].empty ()) {
 		return 0; /* OK */
 	}
 
-	DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() Connect %1 to %2 destinations\n",name(), _connections.size()));
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() Connect %1 to %2 destinations\n",name(), _int_connections.size() + _ext_connections[bid].size()));
 
 	int count = 0;
-	std::set<string>::iterator i = _connections.begin();
 
-	while (i != _connections.end()) {
-		std::set<string>::iterator current = i++;
-		if (connect (*current)) {
+	ConnectionSet::iterator i = _int_connections.begin();
+	while (i != _int_connections.end()) {
+		ConnectionSet::iterator current = i++;
+		if (connect_internal (*current)) {
 			DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() failed to connect %1 to %2\n", name(), (*current)));
-			_connections.erase (current);
+			_int_connections.erase (current);
+		} else {
+			++count;
 		}
-		else {
+	}
+
+	i = _ext_connections[bid].begin();
+	while (i != _ext_connections[bid].end()) {
+		ConnectionSet::iterator current = i++;
+		if (connect_internal (*current)) {
+			DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() failed to connect %1 to %2\n", name(), (*current)));
+			_ext_connections[bid].erase (current);
+		} else {
 			++count;
 		}
 	}
@@ -669,21 +776,28 @@ Port::get_state () const
 	XMLNode* root = new XMLNode (state_node_name);
 
 	root->set_property (X_("name"), AudioEngine::instance()->make_port_name_relative (name()));
+	root->set_property (X_("type"), type ());
 
 	if (receives_input()) {
-		root->set_property (X_("direction"), X_("input"));
+		root->set_property (X_("direction"), X_("Input"));
 	} else {
-		root->set_property (X_("direction"), X_("output"));
+		root->set_property (X_("direction"), X_("Output"));
 	}
 
-	vector<string> c;
-
-	get_connections (c);
-
-	for (vector<string>::const_iterator i = c.begin(); i != c.end(); ++i) {
+	Glib::Threads::RWLock::ReaderLock lm (_connections_lock);
+	for (auto const& c : _int_connections) {
 		XMLNode* child = new XMLNode (X_("Connection"));
-		child->set_property (X_("other"), *i);
+		child->set_property (X_("other"), AudioEngine::instance()->make_port_name_relative (c));
 		root->add_child_nocopy (*child);
+	}
+
+	for (auto const& hwc : _ext_connections) {
+		for (auto const& c : hwc.second) {
+			XMLNode* child = new XMLNode (X_("ExtConnection"));
+			child->set_property (X_("for"), hwc.first);
+			child->set_property (X_("other"), c);
+			root->add_child_nocopy (*child);
+		}
 	}
 
 	return *root;
@@ -703,19 +817,20 @@ Port::set_state (const XMLNode& node, int)
 
 	const XMLNodeList& children (node.children());
 
-	_connections.clear ();
+	_int_connections.clear ();
+	_ext_connections.clear ();
 
 	for (XMLNodeList::const_iterator c = children.begin(); c != children.end(); ++c) {
 
-		if ((*c)->name() != X_("Connection")) {
+		if ((*c)->name() == X_("Connection") && (*c)->get_property (X_("other"), str)) {
+			_int_connections.insert (AudioEngine::instance()->make_port_name_non_relative (str));
 			continue;
 		}
 
-		if (!(*c)->get_property (X_("other"), str)) {
-			continue;
+		std::string hw;
+		if ((*c)->name() == X_("ExtConnection") && (*c)->get_property (X_("for"), hw) && (*c)->get_property (X_("other"), str)) {
+			_ext_connections[hw].insert (str);
 		}
-
-		_connections.insert (str);
 	}
 
 	return 0;

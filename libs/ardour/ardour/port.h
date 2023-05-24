@@ -134,11 +134,11 @@ public:
 	uint32_t externally_connected () const { return _externally_connected; }
 	uint32_t internally_connected () const { return _internally_connected; }
 
-	void increment_external_connections() { _externally_connected++; }
-	void decrement_external_connections() { if (_externally_connected) _externally_connected--; }
+	void increment_external_connections ();
+	void decrement_external_connections ();
 
-	void increment_internal_connections() { _internally_connected++; }
-	void decrement_internal_connections() { if (_internally_connected) _internally_connected--; }
+	void increment_internal_connections ();
+	void decrement_internal_connections ();
 
 
 	PBD::Signal1<void,bool> MonitorInputChanged;
@@ -201,15 +201,23 @@ private:
 	uint32_t    _externally_connected;
 	uint32_t    _internally_connected;
 
-	/** ports that we are connected to, kept so that we can
-	    reconnect to the backend when required
-	*/
-	std::set<std::string> _connections;
+	typedef std::set<std::string> ConnectionSet;
+	/* ports that we are connected to, kept so that we can
+	 * reconnect to the backend when required
+	 */
+	mutable Glib::Threads::RWLock        _connections_lock;
+	ConnectionSet                        _int_connections;
+	std::map<std::string, ConnectionSet> _ext_connections;
 
 	static uint32_t _resampler_quality; // 8 <= q <= 96
 	static uint32_t _resampler_latency; // = _resampler_quality - 1
 
-	void port_connected_or_disconnected (std::weak_ptr<Port>, std::weak_ptr<Port>, bool);
+	void port_connected_or_disconnected (std::weak_ptr<Port>, std::string, std::weak_ptr<Port>, std::string, bool);
+
+	int  connect_internal (std::string const &);
+	void insert_connection (std::string const&);
+	void erase_connection (std::string const&);
+
 	void signal_drop ();
 	void session_global_drop ();
 	void drop ();
