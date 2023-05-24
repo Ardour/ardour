@@ -654,6 +654,7 @@ MonitorSection::set_session (Session* s)
 void
 MonitorSection::drop_route ()
 {
+	_output_button.set_route (std::shared_ptr<Route>(), 0);
 	route_connections.drop_connections();
 	_monitor.reset ();
 	_route.reset ();
