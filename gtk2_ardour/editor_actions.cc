@@ -566,7 +566,7 @@ Editor::register_actions ()
 	smart_mode_button.set_text (_("Smart"));
 	smart_mode_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Object Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
 	mouse_move_button.set_related_action (act);
 	mouse_move_button.set_icon (ArdourWidgets::ArdourIcon::ToolGrab);
 	mouse_move_button.set_name ("mouse mode button");
@@ -591,7 +591,7 @@ Editor::register_actions ()
 	mouse_timefx_button.set_icon (ArdourWidgets::ArdourIcon::ToolStretch);
 	mouse_timefx_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Content Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseContent));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseContent));
 	mouse_content_button.set_related_action (act);
 	mouse_content_button.set_icon (ArdourWidgets::ArdourIcon::ToolContent);
 	mouse_content_button.set_name ("mouse mode button");
