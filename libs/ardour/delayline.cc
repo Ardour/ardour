@@ -77,8 +77,6 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 
 	_pending_flush = false;
 
-	// TODO handle pending_flush.
-
 	/* Audio buffers */
 	if (_buf.size () == bufs.count ().n_audio () && _buf.size () > 0) {
 
@@ -116,10 +114,14 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 					rb[off] *= s / (float) fade_out_len;
 				}
 				/* clear data in rb */
-				// TODO optimize this using memset
-				for (uint32_t s = 0; s < -delay_diff; ++s) {
-					sampleoffset_t off = (_woff + _bsiz + s) & _bsiz_mask;
-					rb[off] = 0.f;
+				if (delay_diff >= 0) {
+					/* do nothing */
+				} else if (_woff - delay_diff <= _bsiz) {
+					memset (&rb[_woff], 0, sizeof (Sample) * -delay_diff);
+				} else {
+					size_t remain = -delay_diff - (_bsiz - _woff);
+					memset (&rb[_woff], 0, sizeof (Sample) * (_bsiz - _woff));
+					memset (rb, 0, sizeof (Sample) * remain);
 				}
 			}
 
@@ -143,8 +145,6 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 				Sample* rb = (*bi).get ();
 				Sample* src = i->data ();
 
-				// TODO consider handling fade_out & fade_in separately
-				// if fade_out_len < fade_in_len.
 				for (uint32_t s = 0; s < xfade_len; ++s) {
 					sampleoffset_t off = (_roff + s) & _bsiz_mask;
 					const gain_t g = s / (float) xfade_len;
@@ -182,7 +182,6 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 				}
 				assert (_woff == ((_roff + s) & _bsiz_mask));
 			}
-			// TODO consider adding a fade-in to bufs
 		}
 
 		/* delay audio buffers */
@@ -221,11 +220,10 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 		_roff = 0;
 	}
 
-	if (_midi_buf.get ()) {
-		for (BufferSet::midi_iterator i = bufs.midi_begin (); i != bufs.midi_end (); ++i) {
-			if (i != bufs.midi_begin ()) { break; } // XXX only one buffer for now
-
-			MidiBuffer* dly = _midi_buf.get ();
+	if (_midi_buf.size () >= bufs.count ().n_midi () /* && (_delay !=0 || delay_diff != 0) */) {
+		MidiDlyBuf::iterator bi = _midi_buf.begin ();
+		for (BufferSet::midi_iterator i = bufs.midi_begin (); i != bufs.midi_end (); ++i, ++bi) {
+			std::shared_ptr<ARDOUR::MidiBuffer> dly = *bi;
 			MidiBuffer& mb (*i);
 			if (pending_flush) {
 				dly->silence (n_samples);
@@ -421,10 +419,13 @@ DelayLine::configure_io (ChanCount in, ChanCount out)
 			string_compose ("configure IO: %1 Ain: %2 Aout: %3 Min: %4 Mout: %5\n",
 				name (), in.n_audio (), out.n_audio (), in.n_midi (), out.n_midi ()));
 
-	// TODO support multiple midi buffers
-	if (in.n_midi () > 0 && !_midi_buf) {
-		_midi_buf.reset (new MidiBuffer (16384));
+	while (in.n_midi () > _midi_buf.size ()) {
+		_midi_buf.push_back (std::shared_ptr<MidiBuffer> (new MidiBuffer (16384)));
 	}
+	while (in.n_midi () < _midi_buf.size ()) {
+		_midi_buf.pop_back ();
+	}
+
 #ifndef NDEBUG
 	lm.release ();
 #endif
