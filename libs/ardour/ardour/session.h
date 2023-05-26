@@ -161,6 +161,7 @@ class PluginInsert;
 class PluginInfo;
 class Port;
 class PortInsert;
+class PortManager;
 class ProcessThread;
 class Processor;
 class Region;
@@ -2192,7 +2193,9 @@ private:
 	std::shared_ptr<Route> _master_out;
 	std::shared_ptr<Route> _monitor_out;
 
+	friend class PortManager;
 	void auto_connect_master_bus ();
+	void auto_connect_monitor_bus ();
 
 	void setup_route_monitor_sends (bool enable, bool need_process_lock);
 

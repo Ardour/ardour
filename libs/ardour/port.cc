@@ -215,7 +215,9 @@ Port::erase_connection (std::string const& pn)
 	{
 		std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
 		Glib::Threads::RWLock::WriterLock lm (_connections_lock);
-		_ext_connections[bid].erase (pn);
+		if (_ext_connections.find (bid) != _ext_connections.end ()) {
+			_ext_connections[bid].erase (pn);
+		}
 	} else {
 		Glib::Threads::RWLock::WriterLock lm (_connections_lock);
 		_int_connections.erase (pn);
@@ -273,7 +275,9 @@ Port::disconnect_all ()
 			std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
 			Glib::Threads::RWLock::WriterLock lm (_connections_lock);
 			_int_connections.clear ();
-			_ext_connections[bid].clear ();
+			if (_ext_connections.find (bid) != _ext_connections.end ()) {
+				_ext_connections[bid].clear ();
+			}
 		}
 
 		/* a cheaper, less hacky way to do boost::shared_from_this() ...
@@ -315,9 +319,8 @@ Port::get_connections (std::vector<std::string>& c) const
 		std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
 		Glib::Threads::RWLock::ReaderLock lm (_connections_lock);
 		c.insert (c.end(), _int_connections.begin(), _int_connections.end());
-		try {
+		if (_ext_connections.find (bid) != _ext_connections.end ()) {
 			c.insert (c.end(), _ext_connections.at(bid).begin(), _ext_connections.at(bid).end());
-		} catch (std::out_of_range&) {
 		}
 		return c.size ();
 	}
@@ -698,23 +701,42 @@ Port::reestablish ()
 	return 0;
 }
 
+bool
+Port::has_ext_connection () const
+{
+	std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
+
+	Glib::Threads::RWLock::ReaderLock lm (_connections_lock);
+
+	return _ext_connections.find (bid) != _ext_connections.end ();
+}
 
 int
 Port::reconnect ()
 {
 	/* caller must hold process lock; intended to be used only after reestablish() */
 
+	int count = 0;
+
 	std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
 
 	Glib::Threads::RWLock::WriterLock lm (_connections_lock);
 
-	if (_int_connections.empty () && _ext_connections[bid].empty ()) {
-		return 0; /* OK */
+	if (_ext_connections.find (bid) != _ext_connections.end ()) {
+		if (_int_connections.empty () && _ext_connections[bid].empty ()) {
+			return 0; /* OK */
+		}
+		count = _int_connections.size() + _ext_connections[bid].size();
+	} else {
+		if (_int_connections.empty ()) {
+			return 0; /* OK */
+		}
+		count = _int_connections.size();
 	}
 
-	DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() Connect %1 to %2 destinations\n",name(), _int_connections.size() + _ext_connections[bid].size()));
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() Connect %1 to %2 destinations\n",name(), count));
 
-	int count = 0;
+	count = 0;
 
 	ConnectionSet::iterator i = _int_connections.begin();
 	while (i != _int_connections.end()) {
@@ -727,14 +749,16 @@ Port::reconnect ()
 		}
 	}
 
-	i = _ext_connections[bid].begin();
-	while (i != _ext_connections[bid].end()) {
-		ConnectionSet::iterator current = i++;
-		if (connect_internal (*current)) {
-			DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() failed to connect %1 to %2\n", name(), (*current)));
-			_ext_connections[bid].erase (current);
-		} else {
-			++count;
+	if (_ext_connections.find (bid) != _ext_connections.end ()) {
+		i = _ext_connections[bid].begin();
+		while (i != _ext_connections[bid].end()) {
+			ConnectionSet::iterator current = i++;
+			if (connect_internal (*current)) {
+				DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() failed to connect %1 to %2\n", name(), (*current)));
+				_ext_connections[bid].erase (current);
+			} else {
+				++count;
+			}
 		}
 	}
 
@@ -792,6 +816,9 @@ Port::get_state () const
 	}
 
 	for (auto const& hwc : _ext_connections) {
+		XMLNode* child = new XMLNode (X_("ExtConnection"));
+		child->set_property (X_("for"), hwc.first);
+		root->add_child_nocopy (*child);
 		for (auto const& c : hwc.second) {
 			XMLNode* child = new XMLNode (X_("ExtConnection"));
 			child->set_property (X_("for"), hwc.first);
@@ -828,8 +855,12 @@ Port::set_state (const XMLNode& node, int)
 		}
 
 		std::string hw;
-		if ((*c)->name() == X_("ExtConnection") && (*c)->get_property (X_("for"), hw) && (*c)->get_property (X_("other"), str)) {
+		if ((*c)->name() == X_("ExtConnection") && (*c)->get_property (X_("for"), hw)) {
+			if ((*c)->get_property (X_("other"), str)) {
 			_ext_connections[hw].insert (str);
+			} else {
+			_ext_connections[hw]; // create
+			}
 		}
 	}
 
