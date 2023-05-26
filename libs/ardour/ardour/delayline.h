@@ -69,10 +69,10 @@ private:
 	bool           _pending_flush;
 
 	typedef std::vector<boost::shared_array<Sample> > AudioDlyBuf;
-	typedef std::vector<boost::shared_array<MidiBuffer> > MidiDlyBuf;
+	typedef std::vector<std::shared_ptr<MidiBuffer> > MidiDlyBuf;
 
 	AudioDlyBuf _buf;
-	std::shared_ptr<MidiBuffer> _midi_buf;
+	MidiDlyBuf  _midi_buf;
 
 #ifndef NDEBUG
 	Glib::Threads::Mutex _set_delay_mutex;
