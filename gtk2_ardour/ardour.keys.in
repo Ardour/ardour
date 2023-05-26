@@ -216,8 +216,8 @@ This mode provides many different operations on both regions and control points,
 @wvis|Window/toggle-virtual-keyboard|                     <@SECONDARY@>k|show virtual MIDI keyboard
 @trans|Transport/Loop|                                                 l|loop play (the loop range)
 @select|Editor/select-all-in-loop-range|                    <@PRIMARY@>l|select all in loop range
-@wvis|Window/toggle-locations|                            <@SECONDARY@>l| toggle locations dialog
-@edit|Editor/show-editor-list|                             <@TERTIARY@>l| show editor list
+@wvis|Window/toggle-locations|                            <@SECONDARY@>l|toggle locations dialog
+@edit|Editor/show-editor-list|                             <@TERTIARY@>l|show editor list
 
 ;; BOTTOM ROW
 
