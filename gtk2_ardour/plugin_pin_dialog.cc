@@ -1704,7 +1704,9 @@ PluginPinWidget::add_remove_port_clicked (bool add, ARDOUR::DataType dt)
 		for (uint32_t i = n_before; i < outs.get (dt); ++i) {
 			uint32_t pc = i / src.get (dt);
 			uint32_t pn = i % src.get (dt);
-			assert (pc <= _n_plugins);
+			if (pc > _n_plugins) {
+				continue;
+			}
 			ChanMapping map (_pi->output_map (pc));
 			map.set (dt, pn, pn);
 			_pi->set_output_map (pc, map);
