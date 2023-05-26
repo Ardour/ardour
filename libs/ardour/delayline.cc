@@ -85,15 +85,17 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 		/* handle delay-changes first */
 		if (delay_diff < 0) {
 			/* delay increases: fade out, insert silence, fade-in */
-			const samplecnt_t fade_in_len = std::min (n_samples, (pframes_t)FADE_LEN);
-			samplecnt_t fade_out_len;
+			const samplecnt_t max_fade_len = std::min<samplecnt_t> (FADE_LEN, n_samples);
+			const samplecnt_t fade_in_len  = max_fade_len;
+			samplecnt_t       fade_out_len = max_fade_len;
 
-			if (_delay < FADE_LEN) {
+			if (_delay < max_fade_len) {
 				/* if old delay was 0 or smaller than new-delay, add some data to fade.
 				 * Add at most (FADE_LEN - _delay) samples, but no more than -delay_diff
 				 */
-				samplecnt_t add = std::min ((samplecnt_t)FADE_LEN - _delay, (samplecnt_t) -delay_diff);
-				fade_out_len = std::min (_delay + add, (samplecnt_t)FADE_LEN);
+				samplecnt_t add = std::min (max_fade_len - _delay, (samplecnt_t)-delay_diff);
+				fade_out_len    = std::min (_delay + add, max_fade_len);
+				assert (fade_out_len >= 0 && add > 0);
 
 				if (add > 0) {
 					AudioDlyBuf::iterator bi = _buf.begin ();
@@ -104,8 +106,6 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 					_woff = (_woff + add) & _bsiz_mask;
 					delay_diff += add;
 				}
-			} else {
-				fade_out_len = FADE_LEN;
 			}
 
 			/* fade-out, end of previously written data */
@@ -134,9 +134,9 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 			}
 		} else if (delay_diff > 0) {
 			/* delay decreases: cross-fade, if possible */
-			const samplecnt_t fade_out_len = std::min (_delay, (samplecnt_t)FADE_LEN);
-			const samplecnt_t fade_in_len = std::min (n_samples, (pframes_t)FADE_LEN);
-			const samplecnt_t xfade_len = std::min (fade_out_len, fade_in_len);
+			const samplecnt_t fade_out_len = std::min<samplecnt_t> (_delay, FADE_LEN);
+			const samplecnt_t fade_in_len  = std::min<samplecnt_t> (n_samples, FADE_LEN);
+			const samplecnt_t xfade_len    = std::min (fade_out_len, fade_in_len);
 
 			AudioDlyBuf::iterator bi = _buf.begin ();
 			for (BufferSet::audio_iterator i = bufs.audio_begin (); i != bufs.audio_end (); ++i, ++bi) {
@@ -167,7 +167,7 @@ DelayLine::run (BufferSet& bufs, samplepos_t /* start_sample */, samplepos_t /* 
 
 		if (pending_flush) {
 			/* fade out data after read-pointer, clear buffer until write-pointer */
-			const samplecnt_t fade_out_len = std::min (_delay, (samplecnt_t)FADE_LEN);
+			const samplecnt_t fade_out_len = std::min<samplecnt_t> (_delay, FADE_LEN);
 
 			for (AudioDlyBuf::iterator i = _buf.begin(); i != _buf.end (); ++i) {
 				Sample* rb = (*i).get ();
