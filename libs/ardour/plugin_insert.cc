@@ -989,6 +989,14 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 		_signal_analysis_collect_nsamples += nframes;
 	}
 
+	if (has_midi_bypass () && _delaybuffers.delay () > 0) {
+		BufferSet& inplace_bufs =_session.get_noinplace_buffers();
+		Buffer& mb (bufs.get_available (DataType::MIDI, 0));
+		Buffer& mi (inplace_bufs.get_available (DataType::MIDI, 0));
+		dynamic_cast<MidiBuffer*>(&mi)->copy (dynamic_cast<MidiBuffer*>(&mb));
+		_delaybuffers.delay (DataType::MIDI, 0, mb, mi, nframes, offset, offset);
+	}
+
 #ifdef MIXBUS
 	if (is_channelstrip ()) {
 		if (_configured_in.n_audio() > 0) {
