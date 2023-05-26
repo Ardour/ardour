@@ -128,6 +128,7 @@ public:
 	virtual void realtime_locate (bool for_loop_end) {}
 	virtual void set_buffer_size (pframes_t) {}
 
+	bool has_ext_connection () const;
 	bool physically_connected () const;
 	bool in_cycle () const { return _in_cycle; }
 

@@ -1149,58 +1149,7 @@ Session::add_monitor_section ()
 		}
 	}
 
-	/* if monitor section is not connected, connect it to physical outs */
-
-	if ((Config->get_auto_connect_standard_busses () || Profile->get_mixbus ()) && !_monitor_out->output()->connected ()) {
-
-		if (!Config->get_monitor_bus_preferred_bundle().empty()) {
-
-			std::shared_ptr<Bundle> b = bundle_by_name (Config->get_monitor_bus_preferred_bundle());
-
-			if (b) {
-				_monitor_out->output()->connect_ports_to_bundle (b, true, this);
-			} else {
-				warning << string_compose (_("The preferred I/O for the monitor bus (%1) cannot be found"),
-							   Config->get_monitor_bus_preferred_bundle())
-					<< endmsg;
-			}
-
-		} else {
-
-			/* Monitor bus is audio only */
-
-			vector<string> outputs[DataType::num_types];
-
-			for (uint32_t i = 0; i < DataType::num_types; ++i) {
-				_engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
-			}
-
-			uint32_t mod = outputs[DataType::AUDIO].size();
-			uint32_t limit = _monitor_out->n_outputs().get (DataType::AUDIO);
-
-			if (mod != 0) {
-
-				for (uint32_t n = 0; n < limit; ++n) {
-
-					std::shared_ptr<Port> p = _monitor_out->output()->ports().port(DataType::AUDIO, n);
-					string connect_to;
-					if (outputs[DataType::AUDIO].size() > (n % mod)) {
-						connect_to = outputs[DataType::AUDIO][n % mod];
-					}
-
-					if (!connect_to.empty()) {
-						if (_monitor_out->output()->connect (p, connect_to, this)) {
-							error << string_compose (
-								_("cannot connect control output %1 to %2"),
-								n, connect_to)
-							      << endmsg;
-							break;
-						}
-					}
-				}
-			}
-		}
-	}
+	auto_connect_monitor_bus ();
 
 	/* Hold process lock while doing this so that we don't hear bits and
 	 * pieces of audio as we work on each route.
@@ -1209,6 +1158,68 @@ Session::add_monitor_section ()
 	setup_route_monitor_sends (true, true);
 
 	MonitorBusAddedOrRemoved (); /* EMIT SIGNAL */
+}
+
+void
+Session::auto_connect_monitor_bus ()
+{
+	if (!_master_out || !_monitor_out) {
+		return;
+	}
+
+	if ((!Config->get_auto_connect_standard_busses () && !Profile->get_mixbus ()) || _monitor_out->output()->connected ()) {
+		return;
+	}
+
+	/* if monitor section is not connected, connect it to physical outs */
+
+	if (!Config->get_monitor_bus_preferred_bundle().empty()) {
+
+		std::shared_ptr<Bundle> b = bundle_by_name (Config->get_monitor_bus_preferred_bundle());
+
+		if (b) {
+			_monitor_out->output()->connect_ports_to_bundle (b, true, this);
+		} else {
+			warning << string_compose (_("The preferred I/O for the monitor bus (%1) cannot be found"),
+					Config->get_monitor_bus_preferred_bundle())
+				<< endmsg;
+		}
+
+	} else {
+
+		/* Monitor bus is audio only */
+
+		vector<string> outputs[DataType::num_types];
+
+		for (uint32_t i = 0; i < DataType::num_types; ++i) {
+			_engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
+		}
+
+		uint32_t mod = outputs[DataType::AUDIO].size();
+		uint32_t limit = _monitor_out->n_outputs().get (DataType::AUDIO);
+
+		if (mod != 0) {
+
+			for (uint32_t n = 0; n < limit; ++n) {
+
+				std::shared_ptr<Port> p = _monitor_out->output()->ports().port(DataType::AUDIO, n);
+				string connect_to;
+				if (outputs[DataType::AUDIO].size() > (n % mod)) {
+					connect_to = outputs[DataType::AUDIO][n % mod];
+				}
+
+				if (!connect_to.empty()) {
+					if (_monitor_out->output()->connect (p, connect_to, this)) {
+						error << string_compose (
+								_("cannot connect control output %1 to %2"),
+								n, connect_to)
+							<< endmsg;
+						break;
+					}
+				}
+			}
+		}
+	}
 }
 
 void

@@ -118,6 +118,7 @@ public:
 	bool connected_to (const std::string&) const;
 	bool connected () const;
 	bool physically_connected () const;
+	bool has_ext_connection () const;
 
 	samplecnt_t latency () const;
 	samplecnt_t connected_latency (bool for_playback) const;

@@ -1718,6 +1718,18 @@ IO::physically_connected () const
 }
 
 bool
+IO::has_ext_connection () const
+{
+	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
+		if (i->has_ext_connection()) {
+			return true;
+		}
+	}
+
+	return false;
+}
+
+bool
 IO::has_port (std::shared_ptr<Port> p) const
 {
 	Glib::Threads::RWLock::ReaderLock rl (_io_lock);

@@ -918,6 +918,14 @@ PortManager::reconnect_ports ()
 
 	DEBUG_TRACE (DEBUG::Ports, string_compose ("reconnect %1 ports\n", p->size ()));
 
+	Session* s = AudioEngine::instance ()->session ();
+	if (s && s->master_out() && !s->master_out ()->output()->has_ext_connection()) {
+		s->auto_connect_master_bus ();
+	}
+	if (s && s->monitor_out() && !s->monitor_out ()->output()->has_ext_connection()) {
+		s->auto_connect_monitor_bus ();
+	}
+
 	for (auto const& i : *p) {
 		if (i.second->reconnect ()) {
 			PortConnectedOrDisconnected (i.second, i.first, std::weak_ptr<Port> (), "", false);
