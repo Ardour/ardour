@@ -714,52 +714,62 @@ Port::has_ext_connection () const
 int
 Port::reconnect ()
 {
-	/* caller must hold process lock; intended to be used only after reestablish() */
-
-	int count = 0;
-
 	std::string const bid (AudioEngine::instance()->backend_id (receives_input ()));
 
-	Glib::Threads::RWLock::WriterLock lm (_connections_lock);
+	std::vector <std::string> c_int, c_ext, f_int, f_ext;
+
+	Glib::Threads::RWLock::ReaderLock lm (_connections_lock);
 
 	if (_ext_connections.find (bid) != _ext_connections.end ()) {
 		if (_int_connections.empty () && _ext_connections[bid].empty ()) {
 			return 0; /* OK */
 		}
-		count = _int_connections.size() + _ext_connections[bid].size();
+		c_int.insert (c_int.end(), _int_connections.begin(), _int_connections.end());
+		c_ext.insert (c_ext.end(), _ext_connections.at(bid).begin(), _ext_connections.at(bid).end());
 	} else {
 		if (_int_connections.empty ()) {
 			return 0; /* OK */
 		}
-		count = _int_connections.size();
+		c_int.insert (c_int.end(), _int_connections.begin(), _int_connections.end());
 	}
 
-	DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() Connect %1 to %2 destinations\n",name(), count));
+	/* Must hold the lock while calling port_engine.connect. It could lead to deadlock:
+	 *
+	 * XXBackend::main_process_thread -> PortManager::connect_callback
+	 * -> Port::port_connected_or_disconnected -> Port::insert_connection -> take WriterLock
+	 */
+	lm.release ();
 
-	count = 0;
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() Connect %1 to %2 destinations\n",name(), c_int.size () + c_ext.size ()));
 
-	ConnectionSet::iterator i = _int_connections.begin();
-	while (i != _int_connections.end()) {
-		ConnectionSet::iterator current = i++;
-		if (connect_internal (*current)) {
-			DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() failed to connect %1 to %2\n", name(), (*current)));
-			_int_connections.erase (current);
+	int count = 0;
+
+	for (auto const& c : c_int) {
+		if (connect_internal (c)) {
+			DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() failed to connect %1 to %2\n", name(), (c)));
+			f_int.push_back (c);
 		} else {
 			++count;
 		}
 	}
 
-	if (_ext_connections.find (bid) != _ext_connections.end ()) {
-		i = _ext_connections[bid].begin();
-		while (i != _ext_connections[bid].end()) {
-			ConnectionSet::iterator current = i++;
-			if (connect_internal (*current)) {
-				DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() failed to connect %1 to %2\n", name(), (*current)));
-				_ext_connections[bid].erase (current);
-			} else {
-				++count;
-			}
+	for (auto const& c : c_ext) {
+		if (connect_internal (c)) {
+			DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() failed to connect %1 to %2\n", name(), (c)));
+			f_ext.push_back (c);
+		} else {
+			++count;
 		}
+	}
+
+	lm.acquire ();
+
+	for (auto const& c : f_int) {
+		_int_connections.erase (c);
+	}
+
+	for (auto const& c : f_ext) {
+		_ext_connections[bid].erase (c);
 	}
 
 	return count == 0 ? -1 : 0;
