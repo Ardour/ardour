@@ -535,7 +535,6 @@ XMLNode&
 IO::state () const
 {
 	XMLNode* node = new XMLNode (state_node_name);
-	int n;
 	Glib::Threads::RWLock::WriterLock wl (_io_lock);
 
 	node->set_property ("name", name());
