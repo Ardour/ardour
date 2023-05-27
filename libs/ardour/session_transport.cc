@@ -203,7 +203,7 @@ Session::locate (samplepos_t target_sample, bool for_loop_end, bool force, bool 
 	// thread(s?) can restart.
 	_seek_counter.fetch_add (1);
 	_last_roll_or_reversal_location = target_sample;
-	if (!for_loop_end) {
+	if (!for_loop_end && !_exporting) {
 		_remaining_latency_preroll = worst_latency_preroll_buffer_size_ceil ();
 	}
 	timecode_time(_transport_sample, transmitting_timecode_time); // XXX here?
