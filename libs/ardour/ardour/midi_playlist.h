@@ -87,10 +87,6 @@ public:
 	std::shared_ptr<Region> combine (const RegionList&, std::shared_ptr<Track>);
 	void uncombine (std::shared_ptr<Region>);
 
-  protected:
-	void remove_dependents (std::shared_ptr<Region> region);
-	void region_going_away (std::weak_ptr<Region> region);
-
   private:
 	void dump () const;
 

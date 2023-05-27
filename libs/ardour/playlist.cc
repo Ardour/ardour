@@ -598,7 +598,6 @@ Playlist::flush_notifications (bool from_undo)
 	std::shared_ptr<RegionList> rl (new RegionList);
 	for (s = pending_removes.begin (); s != pending_removes.end (); ++s) {
 		crossfade_ranges.push_back ((*s)->range ());
-		remove_dependents (*s);
 		RegionRemoved (std::weak_ptr<Region> (*s)); /* EMIT SIGNAL */
 		rl->push_back (*s);
 	}
@@ -824,7 +823,6 @@ Playlist::remove_region_internal (std::shared_ptr<Region> region, ThawList& thaw
 
 			if (!holding_state ()) {
 				relayer ();
-				remove_dependents (region);
 			}
 
 			notify_region_removed (region);
@@ -1711,10 +1709,6 @@ Playlist::clear (bool with_signals)
 		}
 
 		regions.clear ();
-
-		for (auto & r : pending_removes) {
-			remove_dependents (r);
-		}
 	}
 
 	if (with_signals) {
