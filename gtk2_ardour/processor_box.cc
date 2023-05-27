@@ -2519,7 +2519,7 @@ ProcessorBox::show_processor_menu (int arg)
 	/* disallow rename for multiple selections, for plugin inserts and for the fader */
 	rename_action->set_sensitive (single_selection
 #ifdef MIXBUS
-			&& !mixbus_is_channelstrip (single_selection)
+			&& !mixbus_is_channelstrip (single_selection->processor ())
 #endif
 			/* aux-send names are kept in sync with the target bus name */
 			&& !std::dynamic_pointer_cast<InternalSend> (single_selection->processor ())
