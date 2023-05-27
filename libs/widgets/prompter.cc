@@ -18,6 +18,7 @@
  */
 
 #include <string>
+#include <gtkmm/image.h>
 #include <gtkmm/stock.h>
 
 #include "pbd/whitespace.h"
@@ -67,11 +68,17 @@ Prompter::init (bool with_cancel)
 	entryLabel.set_line_wrap (true);
 	entryLabel.set_name ("PrompterLabel");
 
+	Widget* w = manage (new Gtk::Image (Gtk::Stock::REVERT_TO_SAVED, Gtk::ICON_SIZE_MENU));
+	w->show ();
+	resetButton.add (*w);
+	resetButton.set_no_show_all ();
+
 	entryBox.set_homogeneous (false);
 	entryBox.set_spacing (5);
 	entryBox.set_border_width (10);
 	entryBox.pack_start (entryLabel, false, false);
 	entryBox.pack_start (entry, true, true);
+	entryBox.pack_start (resetButton, false, false);
 
 	get_vbox()->pack_start (entryBox);
 	show_all_children();
@@ -87,6 +94,26 @@ Prompter::set_allow_empty (bool yn)
 	if (allow_empty) {
 		can_accept_from_entry = true;
 	}
+}
+
+void
+Prompter::set_initial_text (std::string txt, bool allow_replace)
+{
+	entry.set_text (txt);
+	entry.select_region (0, entry.get_text_length());
+	if (allow_replace) {
+		on_entry_changed ();
+	}
+	resetButton.set_sensitive (txt != default_text);
+}
+
+void
+Prompter::set_default_text (std::string const& txt)
+{
+	default_text = txt;
+	resetButton.show ();
+	resetButton.signal_clicked ().connect (sigc::track_obj([this] { entry.set_text (default_text);}, *this));
+	resetButton.set_sensitive (entry.get_text() != default_text);
 }
 
 void
@@ -149,4 +176,6 @@ Prompter::on_entry_changed ()
 	} else {
 		set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	}
+
+	resetButton.set_sensitive (entry.get_text() != default_text);
 }
