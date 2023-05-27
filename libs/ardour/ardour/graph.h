@@ -137,14 +137,12 @@ private:
 	pframes_t   _process_nframes;
 	samplepos_t _process_start_sample;
 	samplepos_t _process_end_sample;
-	bool        _process_can_record;
 	bool        _process_non_rt_pending;
 
 	enum ProcessMode {
 		Roll, NoRoll, Silence
 	} _process_mode;
 
-	bool _process_noroll;
 	int  _process_retval;
 	bool _process_need_butler;
 
