@@ -2518,7 +2518,11 @@ ProcessorBox::show_processor_menu (int arg)
 
 	/* disallow rename for multiple selections, for plugin inserts and for the fader */
 	rename_action->set_sensitive (single_selection
-			&& !pi
+#ifdef MIXBUS
+			&& !mixbus_is_channelstrip (single_selection)
+#endif
+			/* aux-send names are kept in sync with the target bus name */
+			&& !std::dynamic_pointer_cast<InternalSend> (single_selection->processor ())
 			&& !std::dynamic_pointer_cast<Amp> (single_selection->processor ())
 			&& !std::dynamic_pointer_cast<UnknownProcessor> (single_selection->processor ()));
 
@@ -3578,46 +3582,61 @@ ProcessorBox::idle_delete_processor (std::weak_ptr<Processor> weak_processor)
 void
 ProcessorBox::rename_processor (std::shared_ptr<Processor> processor)
 {
+	shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (processor);
+
 	Prompter name_prompter (true);
-	string result;
-	name_prompter.set_title (_("Rename Processor"));
+	name_prompter.set_title (pi ? _("Rename Processor") : _("Rename Plugin"));
 	name_prompter.set_prompt (_("New name:"));
 	name_prompter.set_initial_text (processor->name());
 	name_prompter.add_button (_("Rename"), Gtk::RESPONSE_ACCEPT);
 	name_prompter.set_response_sensitive (Gtk::RESPONSE_ACCEPT, false);
 	name_prompter.show_all ();
 
-	switch (name_prompter.run ()) {
-
-	case Gtk::RESPONSE_ACCEPT:
-		name_prompter.get_result (result);
-		if (result.length() && result != processor->name ()) {
-
-			int tries = 0;
-			string test = result;
-
-			while (tries < 100) {
-				if (_session->io_name_is_legal (test)) {
-					result = test;
-					break;
-				}
-				tries++;
-
-				test = string_compose ("%1-%2", result, tries);
-			}
-
-			if (tries < 100) {
-				processor->set_name (result);
-			} else {
-				/* unlikely! */
-				ARDOUR_UI::instance()->popup_error
-				       (string_compose (_("At least 100 IO objects exist with a name like %1 - name not changed"), result));
-			}
-		}
-		break;
+	if (pi) {
+		name_prompter.set_default_text (pi->plugin ()->name ());
 	}
 
-	return;
+	if (name_prompter.run () != Gtk::RESPONSE_ACCEPT) {
+		return;
+	}
+
+	string result;
+	name_prompter.get_result (result);
+
+	if (0 == result.length() || result == processor->name ()) {
+		return;
+	}
+
+	if (pi) {
+		processor->set_name (result);
+
+		PluginUIWindow* plugin_ui = dynamic_cast<PluginUIWindow*> (get_processor_ui (pi));
+		if (plugin_ui) {
+			plugin_ui->set_title (generate_processor_title (pi));
+		}
+		return;
+	}
+
+	/* for sends and inserts, check if the name is legal */
+	int tries = 0;
+	string test = result;
+
+	while (tries < 100) {
+		if (_session->io_name_is_legal (test)) {
+			result = test;
+			break;
+		}
+		tries++;
+
+		test = string_compose ("%1-%2", result, tries);
+	}
+
+	if (tries < 100) {
+		processor->set_name (result);
+	} else {
+		/* unlikely! */
+		ARDOUR_UI::instance()->popup_error (string_compose (_("At least 100 IO objects exist with a name like %1 - name not changed"), result));
+	}
 }
 
 void
@@ -4525,7 +4544,6 @@ ProcessorBox::manage_pins (std::shared_ptr<Processor> processor)
 		proxy->present();
 	}
 }
-
 
 void
 ProcessorBox::route_property_changed (const PropertyChange& what_changed)
