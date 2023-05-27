@@ -108,20 +108,6 @@ struct EventsSortByTimeAndType {
 	}
 };
 
-void
-MidiPlaylist::remove_dependents (std::shared_ptr<Region> region)
-{
-}
-
-void
-MidiPlaylist::region_going_away (std::weak_ptr<Region> region)
-{
-	std::shared_ptr<Region> r = region.lock();
-	if (r) {
-		remove_dependents(r);
-	}
-}
-
 int
 MidiPlaylist::set_state (const XMLNode& node, int version)
 {
