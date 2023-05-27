@@ -2089,16 +2089,17 @@ PluginPinWidget::Control::control_changed ()
 	_ignore_ui_adjustment = false;
 }
 
-
-
 PluginPinDialog::PluginPinDialog (std::shared_ptr<ARDOUR::PluginInsert> pi)
 	: ArdourWindow (string_compose (_("Pin Configuration: %1"), pi->name ()))
+	, _pi (pi)
 {
 	ppw.push_back (PluginPinWidgetPtr(new PluginPinWidget (pi)));
 	add (*ppw.back());
 	unset_transient_for ();
-}
 
+	_pi->PropertyChanged.connect (_connections, invalidator (*this), boost::bind (&PluginPinDialog::processor_property_changed, this, _1), gui_context());
+	/* Note: PluginPinWindowProxy handles DropReferences */
+}
 
 PluginPinDialog::PluginPinDialog (std::shared_ptr<ARDOUR::Route> r)
 	: ArdourWindow (string_compose (_("Pin Configuration: %1"), r->name ()))
@@ -2119,13 +2120,14 @@ PluginPinDialog::PluginPinDialog (std::shared_ptr<ARDOUR::Route> r)
 	_route->foreach_processor (sigc::mem_fun (*this, &PluginPinDialog::add_processor));
 
 	_route->processors_changed.connect (
-		_route_connections, invalidator (*this), boost::bind (&PluginPinDialog::route_processors_changed, this, _1), gui_context()
+		_connections, invalidator (*this), boost::bind (&PluginPinDialog::route_processors_changed, this, _1), gui_context()
 		);
 
 	_route->DropReferences.connect (
-		_route_connections, invalidator (*this), boost::bind (&PluginPinDialog::route_going_away, this), gui_context()
+		_connections, invalidator (*this), boost::bind (&PluginPinDialog::going_away, this), gui_context()
 		);
 }
+
 void
 PluginPinDialog::set_session (ARDOUR::Session *s)
 {
@@ -2158,9 +2160,18 @@ PluginPinDialog::route_processors_changed (ARDOUR::RouteProcessorChange)
 }
 
 void
-PluginPinDialog::route_going_away ()
+PluginPinDialog::processor_property_changed (PropertyChange const& what_changed)
+{
+	if (what_changed.contains (ARDOUR::Properties::name)) {
+	 set_title (string_compose (_("Pin Configuration: %1"), _pi->name ()));
+	}
+}
+
+void
+PluginPinDialog::going_away ()
 {
 	ppw.clear ();
+	_pi.reset ();
 	_route.reset ();
 	remove ();
 }

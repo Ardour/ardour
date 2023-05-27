@@ -252,14 +252,16 @@ private:
 	typedef std::shared_ptr<PluginPinWidget> PluginPinWidgetPtr;
 	typedef std::vector<PluginPinWidgetPtr> PluginPinWidgetList;
 
-	void route_going_away ();
+	void going_away ();
+	void processor_property_changed (PBD::PropertyChange const&);
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
 	void add_processor (std::weak_ptr<ARDOUR::Processor>);
 	void map_height (Gtk::Allocation&);
 
+	std::shared_ptr<ARDOUR::PluginInsert> _pi;
 	std::shared_ptr<ARDOUR::Route> _route;
 	PluginPinWidgetList ppw;
-	PBD::ScopedConnectionList _route_connections;
+	PBD::ScopedConnectionList _connections;
 	bool _height_mapped;
 };
 
