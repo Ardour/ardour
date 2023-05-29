@@ -360,7 +360,7 @@ RegionListBase::regions_changed (std::shared_ptr<RegionList> rl, const PropertyC
 				region_row_map.erase (map_it);
 				_model->erase (r_it);
 			}
-			break;
+			continue;
 		}
 
 		if (map_it != region_row_map.end ()) {
