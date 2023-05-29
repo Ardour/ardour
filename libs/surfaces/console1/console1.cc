@@ -17,6 +17,9 @@
  */
 
 
+#include <chrono>
+#include <thread>
+
 #include <glibmm-2.4/glibmm/main.h>
 #include <boost/optional.hpp>
 
@@ -63,16 +66,16 @@ Console1::~Console1 ()
 
 	tear_down_gui ();
 
-    for( const auto &[_, b] : buttons ){
+	for (const auto& [_, b] : buttons) {
 		delete b;
 	}
-    for( const auto &[_, b] : encoders ){
+	for (const auto& [_, b] : encoders) {
 		delete b;
 	}
-    for( const auto &[_, b] : meters ){
+	for (const auto& [_, b] : meters) {
 		delete b;
 	}
-    for( const auto &[_, b] : multi_buttons ){
+	for (const auto& [_, b] : multi_buttons) {
 		delete b;
 	}
 
@@ -114,6 +117,9 @@ Console1::set_active (bool yn)
 	}
 
 	ControlProtocol::set_active (yn);
+	/* this needs to be done that early, otherwise we'll miss the call of the signal */
+	session->SessionLoaded.connect (
+	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::notify_session_loaded, this), this);
 
 	DEBUG_TRACE (DEBUG::Console1, string_compose ("Console1::set_active done with yn: '%1'\n", yn));
 
@@ -176,9 +182,7 @@ Console1::begin_using_device ()
 	periodic_timer->attach (main_loop ()->get_context ());
 
 	DEBUG_TRACE (DEBUG::Console1, "************** begin_using_device() ********************\n");
-	create_strip_invetory ();
 	connect_internal_signals ();
-	map_shift (false);
 	return 0;
 }
 
@@ -231,6 +235,25 @@ Console1::connect_internal_signals ()
 	  console1_connections, MISSING_INVALIDATOR, [] () { DEBUG_TRACE (DEBUG::Console1, "VerticalZoomIn\n"); }, this);
 	VerticalZoomOutSelected.connect (
 	  console1_connections, MISSING_INVALIDATOR, [] () { DEBUG_TRACE (DEBUG::Console1, "VerticalZoomOut\n"); }, this);
+}
+
+void
+Console1::notify_session_loaded ()
+{
+	DEBUG_TRACE (DEBUG::Console1, "************** Session Loaded() ********************\n");
+	create_strip_invetory ();
+	connect_internal_signals ();
+	if (session) {
+		DEBUG_TRACE (DEBUG::Console1, "session available\n");
+		uint32_t i = 0;
+		while (!first_selected_stripable () && i < 10 ) {
+			DEBUG_TRACE (DEBUG::Console1, "no stripable selected\n");
+			std::this_thread::sleep_for (std::chrono::milliseconds (1000));
+			++i;
+		}
+		if( i < 11)
+            stripable_selection_changed ();
+	}
 }
 
 void
@@ -762,7 +785,7 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 	}
 
 	// ToDo: subscribe to the fader automation modes so we can light the LEDs
-
+	map_shift (shift_state);
 	map_stripable_state ();
 }
 
