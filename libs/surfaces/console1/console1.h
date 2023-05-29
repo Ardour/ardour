@@ -49,6 +49,7 @@ namespace ARDOUR {
 class AsyncMIDIPort;
 class Bundle;
 class Port;
+class Processor;
 class Session;
 class MidiPort;
 }
@@ -103,9 +104,6 @@ class Console1 : public MIDISurface
 
 	std::string input_port_name () const override;
 	std::string output_port_name () const override;
-
-	uint32_t load_mappings ();
-	bool load_mapping (FILE* fin);
 
 	/*XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);*/
@@ -273,6 +271,7 @@ class Console1 : public MIDISurface
 		                         { "TRACK_GROUP", ControllerID::TRACK_GROUP } };
 
   private:
+	std::string config_dir_name = "c1mappings";
 	/* GUI */
 	mutable C1GUI* gui;
 	void build_gui ();
@@ -288,7 +287,10 @@ class Console1 : public MIDISurface
 	uint32_t current_bank = 0;
 	uint32_t current_strippable_index = 0;
 
-	uint32_t current_plugin_index = 0;
+	int32_t current_plugin_index = -1;
+#ifdef MIXBUS
+	int32_t selected_intern_plugin_index = -1;
+#endif
 
 	std::shared_ptr<ARDOUR::AutomationControl> current_pan_control = nullptr;
 
@@ -360,6 +362,7 @@ class Console1 : public MIDISurface
 	/* */
 	void all_lights_out ();
 
+	void notify_session_loaded ();
 	void notify_transport_state_changed () override;
 	void notify_solo_active_changed (bool) override;
 
@@ -557,6 +560,8 @@ class Console1 : public MIDISurface
 	struct PluginParameterMapping
 	{
 		int paramIndex;
+		bool shift = false;
+		bool is_switch = false;
 		std::string name;
 		ControllerID controllerId;
 	};
@@ -571,12 +576,19 @@ class Console1 : public MIDISurface
 	};
 
 	/* plugin handling */
-	bool spill_plugins (const uint32_t plugin_index);
+	bool ensure_config_dir ();
+	uint32_t load_mappings ();
+	bool load_mapping (XMLNode* fin);
+	void create_mapping (const std::shared_ptr<ARDOUR::Processor> proc, const std::shared_ptr<ARDOUR::Plugin> plugin);
+
+	bool spill_plugins (const int32_t plugin_index);
 
 	/* plugin operations */
-	bool select_plugin (const uint32_t plugin_index);
+	void remove_plugin_operations ();
+	std::shared_ptr<ARDOUR::Processor> find_plugin (const int32_t plugin_index);
+	bool select_plugin (const int32_t plugin_index);
 
-	bool map_select_plugin (const uint32_t plugin_index);
+	bool map_select_plugin (const int32_t plugin_index);
 
 	using PluginMappingMap = std::map<std::string, PluginMapping>;
 	PluginMappingMap pluginMappingMap;
