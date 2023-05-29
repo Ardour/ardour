@@ -33,10 +33,10 @@ SourceListBase::SourceListBase ()
 void
 SourceListBase::set_session (ARDOUR::Session* s)
 {
+	RegionListBase::set_session (s);
 	if (s) {
 		s->SourceRemoved.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&SourceListBase::remove_weak_source, this, _1), gui_context ());
 	}
-	RegionListBase::set_session (s);
 }
 
 void
@@ -53,14 +53,15 @@ SourceListBase::remove_source (std::shared_ptr<ARDOUR::Source> source)
 {
 	TreeModel::iterator i;
 	TreeModel::Children rows = _model->children ();
-	for (i = rows.begin (); i != rows.end (); ++i) {
+	for (i = rows.begin (); i != rows.end ();) {
 		std::shared_ptr<ARDOUR::Region> rr = (*i)[_columns.region];
-		if (rr->source () == source) {
+		if (rr->uses_source (source)) {
 			RegionRowMap::iterator map_it = region_row_map.find (rr);
 			assert (map_it != region_row_map.end () && i == map_it->second);
 			region_row_map.erase (map_it);
-			_model->erase (i);
-			break;
+			i = _model->erase (i);
+		} else {
+			++i;
 		}
 	}
 }
