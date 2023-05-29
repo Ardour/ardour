@@ -192,7 +192,15 @@ EditorSources::remove_selected_sources ()
 	int opt = prompter.run ();
 
 	if (opt >= 1) {
-		std::list<std::weak_ptr<ARDOUR::Source>> to_be_removed;
+		struct WeakPtrCompare {
+			bool operator() (weak_ptr<ARDOUR::Source> const& lhs, weak_ptr<ARDOUR::Source> const& rhs) const {
+				auto lptr = lhs.lock(), rptr = rhs.lock();
+				if (!rptr) return false;
+				if (!lptr) return true;
+				return lptr->id() < rptr->id();
+			}
+		};
+		std::set<std::weak_ptr<ARDOUR::Source>, WeakPtrCompare> to_be_removed;
 
 		if (_display.get_selection ()->count_selected_rows () > 0) {
 			TreeIter                             iter;
@@ -204,21 +212,21 @@ EditorSources::remove_selected_sources ()
 				if ((iter = _model->get_iter (*i))) {
 					std::shared_ptr<ARDOUR::Region> region = (*iter)[_columns.region];
 
-					if (!region)
+					if (!region) {
 						continue;
+					}
 
-					std::shared_ptr<ARDOUR::Source> source = region->source ();
-					if (source) {
+					for (auto const& source : region->sources ()) {
 						set<std::shared_ptr<Region>> regions;
 						RegionFactory::get_regions_using_source (source, regions);
 
-						for (set<std::shared_ptr<Region>>::iterator region = regions.begin (); region != regions.end (); region++) {
+						for (auto const& region : regions) {
 							_change_connection.block (true);
-							_editor->set_selected_regionview_from_region_list (*region, Selection::Add);
+							_editor->set_selected_regionview_from_region_list (region, Selection::Add);
 							_change_connection.block (false);
 						}
 
-						to_be_removed.push_back (source);
+						to_be_removed.insert (source);
 					}
 				}
 			}
@@ -226,9 +234,11 @@ EditorSources::remove_selected_sources ()
 			_editor->remove_regions (_editor->get_regions_from_selection_and_entered (), false /*can_ripple*/, false /*as_part_of_other_command*/); // this operation is undo-able
 
 			if (opt == 2) {
-				for (std::list<std::weak_ptr<ARDOUR::Source>>::iterator i = to_be_removed.begin (); i != to_be_removed.end (); ++i) {
-					_session->remove_source (*i); // this operation is (currently) not undo-able
+				for (auto const& s : to_be_removed) {
+					_session->remove_source (s); // this operation is (currently) not undo-able
 				}
+				// TODO Session::_history.clear(); or otherwise remove all
+				// undo operations that reference regions using the removed sources
 			}
 		}
 	}
