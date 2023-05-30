@@ -853,6 +853,20 @@ Playlist::remove_region_internal (std::shared_ptr<Region> region, ThawList& thaw
 		}
 	}
 
+#if 0
+	for (set<std::shared_ptr<Region> >::iterator x = all_regions.begin(); x != all_regions.end(); ++x) {
+		if ((*x) == region) {
+			all_regions.erase (x);
+			break;
+		}
+	}
+#else /* sync_all_regions_with_regions */
+	all_regions.clear ();
+	for (auto const& r: regions) {
+		all_regions.insert (r);
+	}
+#endif
+
 	return -1;
 }
 
