@@ -105,8 +105,12 @@ class Console1 : public MIDISurface
 	std::string input_port_name () const override;
 	std::string output_port_name () const override;
 
-	/*XMLNode& get_state () const;
-	int set_state (const XMLNode&, int version);*/
+	XMLNode& get_state () const override;
+	int set_state (const XMLNode&, int version) override;
+
+	bool swap_solo_mute;
+	bool create_mapping_stubs;
+
 	PBD::Signal0<void> ConnectionChange;
 
 	/* Timer Events */
@@ -326,7 +330,7 @@ class Console1 : public MIDISurface
 
 	StripInventoryMap strip_inventory;
 
-	void create_strip_invetory ();
+	void create_strip_inventory ();
 
 	order_t get_inventory_order_by_index (const uint32_t index);
 	uint32_t get_index_by_inventory_order (order_t order);

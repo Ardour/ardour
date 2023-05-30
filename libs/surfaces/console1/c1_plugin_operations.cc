@@ -338,7 +338,7 @@ Console1::spill_plugins (const int32_t plugin_index)
 	PluginMappingMap::iterator pmmit = pluginMappingMap.find (plugin->unique_id ());
 	mapping_found = (pmmit != pluginMappingMap.end ());
 
-	if (!mapping_found) {
+	if (!mapping_found && create_mapping_stubs ) {
 		create_mapping (proc, plugin);
 		return true;
 	}
