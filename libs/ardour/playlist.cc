@@ -1752,7 +1752,7 @@ FINDING THINGS
 std::shared_ptr<RegionList>
 Playlist::region_list ()
 {
-	RegionReadLock                rlock (this);
+	RegionReadLock              rlock (this);
 	std::shared_ptr<RegionList> rlist (new RegionList (regions.rlist ()));
 	return rlist;
 }
@@ -1913,7 +1913,7 @@ Playlist::find_regions_at (timepos_t const & pos)
 std::shared_ptr<RegionList>
 Playlist::regions_with_start_within (Temporal::Range range)
 {
-	RegionReadLock                rlock (this);
+	RegionReadLock              rlock (this);
 	std::shared_ptr<RegionList> rlist (new RegionList);
 
 	for (auto & r : regions) {
@@ -1928,7 +1928,7 @@ Playlist::regions_with_start_within (Temporal::Range range)
 std::shared_ptr<RegionList>
 Playlist::regions_with_end_within (Temporal::Range range)
 {
-	RegionReadLock                rlock (this);
+	RegionReadLock              rlock (this);
 	std::shared_ptr<RegionList> rlist (new RegionList);
 
 	for (auto & r : regions) {
@@ -2022,7 +2022,7 @@ Playlist::find_next_transient (timepos_t const & from, int dir)
 std::shared_ptr<Region>
 Playlist::find_next_region (timepos_t const & pos, RegionPoint point, int dir)
 {
-	RegionReadLock            rlock (this);
+	RegionReadLock          rlock (this);
 	std::shared_ptr<Region> ret;
 	timecnt_t closest = timecnt_t::max (pos.time_domain());
 
