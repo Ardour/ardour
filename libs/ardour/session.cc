@@ -4616,6 +4616,10 @@ Session::add_source (std::shared_ptr<Source> source)
 		source->DropReferences.connect_same_thread (*this, boost::bind (&Session::remove_source, this, std::weak_ptr<Source> (source), false));
 
 		SourceAdded (std::weak_ptr<Source> (source)); /* EMIT SIGNAL */
+	} else {
+		/* If this happens there is a duplicate PBD::ID */
+		assert (0);
+		fatal << string_compose (_("programming error: %1"), "Failed to add source to source-list") << endmsg;
 	}
 }
 
