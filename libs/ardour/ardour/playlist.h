@@ -426,7 +426,7 @@ protected:
 	void ripple_locked (timepos_t const & at, timecnt_t const & distance, RegionList *exclude);
 	void ripple_unlocked (timepos_t const & at, timecnt_t const & distance, RegionList *exclude, ThawList& thawlist, bool notify = true);
 
-	virtual void region_going_away (std::weak_ptr<Region> /*region*/) {}
+	virtual void region_going_away (std::weak_ptr<Region> /*region*/);
 
 	virtual XMLNode& state (bool) const;
 

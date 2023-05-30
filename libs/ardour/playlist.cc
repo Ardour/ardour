@@ -662,6 +662,29 @@ Playlist::clear_pending ()
 	pending_layering        = false;
 }
 
+void
+Playlist::region_going_away (std::weak_ptr<Region> region)
+{
+	if (_session.deletion_in_progress ()) {
+		return;
+	}
+	/* Before a region can be destroyed it must already
+	 * be removed from all playlists.
+	 */
+#ifndef NDEBUG
+	std::shared_ptr<Region> r = region.lock();
+	if (!r) {
+		return;
+	}
+	assert (find_region (r->id ()));
+	{
+		RegionReadLock rlock (this);
+		assert (all_regions.find (r) != all_regions.end());
+	}
+#endif
+	//remove_region (r);
+}
+
 /*************************************************************
  * PLAYLIST OPERATIONS
  *************************************************************/
