@@ -853,7 +853,7 @@ public:
 	static PBD::Signal4<void, std::string, std::string, bool, samplepos_t> Exported;
 
 	void add_source (std::shared_ptr<Source>);
-	void remove_source (std::weak_ptr<Source>);
+	void remove_source (std::weak_ptr<Source>, bool drop_references = true);
 
 	void cleanup_regions();
 	bool can_cleanup_peakfiles () const;
