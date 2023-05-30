@@ -4613,14 +4613,14 @@ Session::add_source (std::shared_ptr<Source> source)
 			}
 		}
 
-		source->DropReferences.connect_same_thread (*this, boost::bind (&Session::remove_source, this, std::weak_ptr<Source> (source)));
+		source->DropReferences.connect_same_thread (*this, boost::bind (&Session::remove_source, this, std::weak_ptr<Source> (source), false));
 
 		SourceAdded (std::weak_ptr<Source> (source)); /* EMIT SIGNAL */
 	}
 }
 
 void
-Session::remove_source (std::weak_ptr<Source> src)
+Session::remove_source (std::weak_ptr<Source> src, bool drop_references)
 {
 	if (deletion_in_progress ()) {
 		return;
@@ -4638,11 +4638,20 @@ Session::remove_source (std::weak_ptr<Source> src)
 
 		if ((i = sources.find (source->id())) != sources.end()) {
 			sources.erase (i);
-			SourceRemoved (src); /* EMIT SIGNAL */
 		} else {
 			return;
 		}
 	}
+
+	SourceRemoved (src); /* EMIT SIGNAL */
+	if (drop_references) {
+		/* It would not matter to recurse here, the
+		 * source was already removed from the sources.
+		 * But there is no need to take the source_lock again.
+		 */
+		source->drop_references ();
+	}
+	assert (!source->used ());
 
 	if (source->empty ()) {
 		/* No need to save when empty sources are removed.
