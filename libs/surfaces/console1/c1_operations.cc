@@ -43,11 +43,13 @@ Console1::bank (bool up)
 		if ((current_bank + 1) * bank_size < list_size) {
 			changed = true;
 			++current_bank;
+			current_strippable_index = 0;
 		}
 	} else {
 		if (current_bank > 0) {
 			changed = true;
 			--current_bank;
+			current_strippable_index = bank_size - 1;
 		}
 	}
 	if (changed) {
@@ -134,7 +136,7 @@ void
 Console1::select (const uint32_t i)
 {
 	uint32_t strip_index = current_bank * bank_size + i;
-	DEBUG_TRACE (DEBUG::Console1, string_compose ("select( %1 ) : idx %2\n", i, strip_index));
+	DEBUG_TRACE (DEBUG::Console1, string_compose ("select( %1 / %2 ) : idx %3\n", current_bank, i, strip_index));
 	select_rid_by_index (strip_index);
 }
 
@@ -581,19 +583,19 @@ Console1::map_mute ()
 	DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute ...\n");
 	if (_current_stripable) {
 		if (_current_stripable->mute_control ()->muted ()) {
-			get_button (MUTE)->set_led_state (true);
+			get_button (swap_solo_mute ? SOLO : MUTE)->set_led_state (true);
 		} else if (_current_stripable->mute_control ()->muted_by_others_soloing () ||
 		           _current_stripable->mute_control ()->muted_by_masters ()) {
 
 			DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute start blinking\n");
-			start_blinking (MUTE);
+			start_blinking (swap_solo_mute ? SOLO : MUTE);
 		} else {
 			DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute stop blinking\n");
-			stop_blinking (MUTE);
+			stop_blinking (swap_solo_mute ? SOLO : MUTE);
 		}
 	} else {
 		DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute stop blinking 2\n");
-		stop_blinking (MUTE);
+		stop_blinking (swap_solo_mute ? SOLO : MUTE);
 	}
 }
 
@@ -612,7 +614,7 @@ Console1::map_phase ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "map_phase \n");
 	ControllerButton* controllerButton = get_button (PHASE_INV);
-	if (_current_stripable) {
+	if (_current_stripable && _current_stripable->phase_control ()) {
 		uint32_t channels = _current_stripable->phase_control ()->size ();
 		uint32_t inverted = 0;
 		for (uint32_t i = 0; i < channels; ++i) {
@@ -681,9 +683,9 @@ Console1::map_plugin_state (bool plugin_state)
 		}
 		map_stripable_state ();
 	} else {
-        // I don't plan shift functionality with plugins...
+		// I don't plan shift functionality with plugins...
 		shift (0);
-        // map all plugin related operations
+		// map all plugin related operations
 	}
 }
 
@@ -692,7 +694,7 @@ Console1::map_solo ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "map_solo()\n");
 	try {
-		ControllerButton* controllerButton = get_button (SOLO);
+		ControllerButton* controllerButton = get_button (swap_solo_mute ? MUTE : SOLO);
 		if (_current_stripable) {
 			controllerButton->set_led_state (_current_stripable->solo_control ()->soloed ());
 		} else {
@@ -723,8 +725,8 @@ Console1::map_filter ()
 	try {
 		get_button (ControllerID::FILTER_TO_COMPRESSORS)
 		  ->set_led_state (_current_stripable->filter_enable_controllable (true)
-		                    ? _current_stripable->filter_enable_controllable (true)->get_value ()
-		                    : false);
+		                     ? _current_stripable->filter_enable_controllable (true)->get_value ()
+		                     : false);
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -759,8 +761,8 @@ Console1::map_gate ()
 	try {
 		get_button (ControllerID::SHAPE)
 		  ->set_led_state (_current_stripable->gate_enable_controllable ()
-		                    ? _current_stripable->gate_enable_controllable ()->get_value ()
-		                    : false);
+		                     ? _current_stripable->gate_enable_controllable ()->get_value ()
+		                     : false);
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -775,8 +777,8 @@ Console1::map_gate_scf ()
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("map_gate_scf() - shift: %1\n", shift_state));
 		get_button (ControllerID::HARD_GATE)
 		  ->set_led_state (_current_stripable->gate_key_filter_enable_controllable ()
-		                    ? _current_stripable->gate_key_filter_enable_controllable ()->get_value ()
-		                    : false);
+		                     ? _current_stripable->gate_key_filter_enable_controllable ()->get_value ()
+		                     : false);
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -791,8 +793,8 @@ Console1::map_gate_listen ()
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("map_gate_listen() - shift: %1\n", shift_state));
 		get_button (ControllerID::HARD_GATE)
 		  ->set_led_state (_current_stripable->gate_key_listen_controllable ()
-		                    ? _current_stripable->gate_key_listen_controllable ()->get_value ()
-		                    : false);
+		                     ? _current_stripable->gate_key_listen_controllable ()->get_value ()
+		                     : false);
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -894,8 +896,8 @@ Console1::map_eq ()
 		return;
 	try {
 		get_button (EQ)->set_led_state (_current_stripable->eq_enable_controllable ()
-		                                 ? _current_stripable->eq_enable_controllable ()->get_value ()
-		                                 : false);
+		                                  ? _current_stripable->eq_enable_controllable ()->get_value ()
+		                                  : false);
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
@@ -1012,8 +1014,8 @@ Console1::map_comp ()
 	try {
 		get_button (ControllerID::COMP)
 		  ->set_led_state (_current_stripable->comp_enable_controllable ()
-		                    ? _current_stripable->comp_enable_controllable ()->get_value ()
-		                    : false);
+		                     ? _current_stripable->comp_enable_controllable ()->get_value ()
+		                     : false);
 	} catch (ControlNotFoundException& e) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}

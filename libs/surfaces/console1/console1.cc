@@ -16,12 +16,13 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "console1.h"
 
 #include <chrono>
 #include <thread>
 
-#include <glibmm-2.4/glibmm/main.h>
 #include <boost/optional.hpp>
+#include <glibmm-2.4/glibmm/main.h>
 
 #include "pbd/abstract_ui.cc" // instantiate template
 #include "pbd/controllable.h"
@@ -38,8 +39,6 @@
 #include "ardour/stripable.h"
 #include "ardour/track.h"
 #include "ardour/vca_manager.h"
-
-#include "console1.h"
 #include "c1_control.h"
 #include "c1_gui.h"
 
@@ -139,6 +138,27 @@ Console1::input_port_name () const
 #endif
 }
 
+XMLNode&
+Console1::get_state () const
+{
+	XMLNode& node = MIDISurface::get_state ();
+	node.set_property ("swap-solo-mute", swap_solo_mute);
+	node.set_property ("create-mapping-stubs", create_mapping_stubs);
+	return node;
+}
+
+int
+Console1::set_state (const XMLNode& node, int version)
+{
+	MIDISurface::set_state (node, version);
+	std::string tmp;
+	node.get_property ("swap-solo-mute", tmp);
+	swap_solo_mute = (tmp == "1");
+	node.get_property ("create-mapping-stubs", tmp);
+	create_mapping_stubs = (tmp == "1");
+	return 0;
+}
+
 std::string
 Console1::output_port_name () const
 {
@@ -192,10 +212,10 @@ Console1::connect_session_signals ()
 	DEBUG_TRACE (DEBUG::Console1, "connect_session_signals\n");
 	// receive routes added
 	session->RouteAdded.connect (
-	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::create_strip_invetory, this), this);
+	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::create_strip_inventory, this), this);
 	// receive VCAs added
 	session->vca_manager ().VCAAdded.connect (
-	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::create_strip_invetory, this), this);
+	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::create_strip_inventory, this), this);
 
 	// receive record state toggled
 	// session->RecordStateChanged.connect(session_connections,
@@ -241,18 +261,18 @@ void
 Console1::notify_session_loaded ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "************** Session Loaded() ********************\n");
-	create_strip_invetory ();
+	create_strip_inventory ();
 	connect_internal_signals ();
 	if (session) {
 		DEBUG_TRACE (DEBUG::Console1, "session available\n");
 		uint32_t i = 0;
-		while (!first_selected_stripable () && i < 10 ) {
+		while (!first_selected_stripable () && i < 10) {
 			DEBUG_TRACE (DEBUG::Console1, "no stripable selected\n");
 			std::this_thread::sleep_for (std::chrono::milliseconds (1000));
 			++i;
 		}
-		if( i < 11)
-            stripable_selection_changed ();
+		if (i < 11)
+			stripable_selection_changed ();
 	}
 }
 
@@ -289,10 +309,13 @@ Console1::setup_controls ()
 	new ControllerButton (
 	  this, ControllerID::PAGE_DOWN, boost::function<void (uint32_t)> (boost::bind (&Console1::bank, this, false)));
 
-	new ControllerButton (
-	  this, ControllerID::MUTE, boost::function<void (uint32_t)> (boost::bind (&Console1::mute, this, _1)));
-	new ControllerButton (
-	  this, ControllerID::SOLO, boost::function<void (uint32_t)> (boost::bind (&Console1::solo, this, _1)));
+	new ControllerButton (this,
+	                      swap_solo_mute ? ControllerID::SOLO : ControllerID::MUTE,
+	                      boost::function<void (uint32_t)> (boost::bind (&Console1::mute, this, _1)));
+	new ControllerButton (this,
+	                      swap_solo_mute ? ControllerID::MUTE : ControllerID::SOLO,
+	                      boost::function<void (uint32_t)> (boost::bind (&Console1::solo, this, _1)));
+
 	new ControllerButton (
 	  this, ControllerID::PHASE_INV, boost::function<void (uint32_t)> (boost::bind (&Console1::phase, this, _1)));
 
@@ -523,6 +546,7 @@ Console1::stripable_selection_changed ()
 void
 Console1::drop_current_stripable ()
 {
+	DEBUG_TRACE (DEBUG::Console1, "drop_current_stripable \n");
 	if (_current_stripable) {
 		if (_current_stripable == session->monitor_out ()) {
 			set_current_stripable (session->master_out ());
@@ -576,14 +600,20 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 		_current_stripable->DropReferences.connect (
 		  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::drop_current_stripable, this), this);
 
-		_current_stripable->mute_control ()->Changed.connect (
-		  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_mute, this), this);
+		if (_current_stripable->mute_control ()) {
+			_current_stripable->mute_control ()->Changed.connect (
+			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_mute, this), this);
+		}
 
-		_current_stripable->solo_control ()->Changed.connect (
-		  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_solo, this), this);
+		if (_current_stripable->solo_control ()) {
+			_current_stripable->solo_control ()->Changed.connect (
+			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_solo, this), this);
+		}
 
-		_current_stripable->phase_control ()->Changed.connect (
-		  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_phase, this), this);
+		if (_current_stripable->phase_control ()) {
+			_current_stripable->phase_control ()->Changed.connect (
+			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_phase, this), this);
+		}
 
 		// Rec Enabled
 		std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track> (_current_stripable);
@@ -1091,16 +1121,17 @@ Console1::midi_to_control (Controllable controllable, uint32_t val, uint32_t max
 }
 
 void
-Console1::create_strip_invetory ()
+Console1::create_strip_inventory ()
 {
-	DEBUG_TRACE (DEBUG::Console1, "create_strip_invetory()\n");
-	StripableList sl;
+	DEBUG_TRACE (DEBUG::Console1, "create_strip_inventory()\n");
+	// StripableList sl;
 	boost::optional<order_t> master_order;
 	strip_inventory.clear ();
-	session->get_stripables (sl);
+	StripableList sl = session->get_stripables ();
 	uint32_t index = 0;
 	for (const auto& s : sl) {
 		PresentationInfo pi = s->presentation_info ();
+		DEBUG_TRACE (DEBUG::Console1, string_compose ("%1: ", s->name ()));
 		if (pi.flags () & ARDOUR::PresentationInfo::Hidden) {
 			DEBUG_TRACE (DEBUG::Console1, string_compose ("strip hidden: index %1, order %2\n", index, pi.order ()));
 			continue;
@@ -1113,7 +1144,7 @@ Console1::create_strip_invetory ()
 		}
 		if (pi.flags () & ARDOUR::PresentationInfo::MonitorOut) {
 			DEBUG_TRACE (DEBUG::Console1,
-			             string_compose ("monitor strip found at index %1, order %2\n", index, pi.order ()));
+			             string_compose ("monitor strip found at index %1, order %2 - ignoring\n", index, pi.order ()));
 			continue;
 		}
 		strip_inventory.insert (std::make_pair (index, pi.order ()));
@@ -1124,7 +1155,7 @@ Console1::create_strip_invetory ()
 		strip_inventory.insert (std::make_pair (index, master_order.value ()));
 	}
 	DEBUG_TRACE (DEBUG::Console1,
-	             string_compose ("create_strip_invetory - inventory size %1\n", strip_inventory.size ()));
+	             string_compose ("create_strip_inventory - inventory size %1\n", strip_inventory.size ()));
 }
 
 order_t
