@@ -222,6 +222,12 @@ EditorSources::remove_selected_sources ()
 
 						for (auto const& region : regions) {
 							_change_connection.block (true);
+							/* Note: this ignores regions without RegionView.
+							 * When removing sources (opt == 2),
+							 * Playlist::region_going_away takes care of that
+							 * (Source::drop_references -> Region::source_deleted,
+							 *  -> Region::drop_references). see f58f5bef55a5aa1
+							 */
 							_editor->set_selected_regionview_from_region_list (region, Selection::Add);
 							_change_connection.block (false);
 						}
@@ -237,8 +243,6 @@ EditorSources::remove_selected_sources ()
 				for (auto const& s : to_be_removed) {
 					_session->remove_source (s); // this operation is (currently) not undo-able
 				}
-				// TODO Session::_history.clear(); or otherwise remove all
-				// undo operations that reference regions using the removed sources
 			}
 		}
 	}
