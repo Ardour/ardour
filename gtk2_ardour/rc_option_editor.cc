@@ -1151,7 +1151,7 @@ public:
 				sigc::mem_fun (*c, &RCConfiguration::set_plugin_scan_timeout),
 				1, 900, 50, 50)
 	{
-		_label.set_alignment (1.0, 0.5); // match buttons below
+		_label->set_alignment (1.0, 0.5); // match buttons below
 		_hscale.set_digits (0);
 		_hscale.set_draw_value(false);
 		_hscale.add_mark ( 10,  Gtk::POS_TOP, _("1 sec"));

@@ -436,7 +436,7 @@ protected:
 	sigc::slot<bool, float> _set;
 	Gtk::Adjustment _adj;
 	Gtk::HScale _hscale;
-	Gtk::Label _label;
+	Gtk::Label* _label;
 	double _mult;
 	bool _log;
 };
@@ -611,7 +611,7 @@ private:
 	Gtk::Adjustment _db_adjustment;
 	ArdourWidgets::HSliderController* _db_slider;
 	Gtk::Entry _db_display;
-	Gtk::Label _label;
+	Gtk::Label* _label;
 	Gtk::HBox _box;
 	Gtk::VBox _fader_centering_box;
 	sigc::slot<ARDOUR::gain_t> _get;
@@ -646,7 +646,7 @@ public:
 
 private:
 	void save_clock_time ();
-	Gtk::Label _label;
+	Gtk::Label* _label;
 	AudioClock _clock;
 	sigc::slot<std::string> _get;
 	sigc::slot<bool, std::string> _set;
