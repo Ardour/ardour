@@ -665,7 +665,6 @@ Playlist::clear_pending ()
 void
 Playlist::region_going_away (std::weak_ptr<Region> region)
 {
-	printf ("Playlist::region_going_away..\n");
 	if (_session.deletion_in_progress ()) {
 		return;
 	}
