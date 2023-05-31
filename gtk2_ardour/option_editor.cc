@@ -442,12 +442,11 @@ HSliderOption::HSliderOption (
 	, _set (s)
 	, _adj (lower, lower, upper, step_increment, page_increment, 0)
 	, _hscale (_adj)
-	, _label (n + ":")
 	, _mult (mult)
 	, _log (logarithmic)
 {
-	_label.set_alignment (0, 0.5);
-	_label.set_name ("OptionsLabel");
+	_label = manage (left_aligned_label (n + ":"));
+	_label->set_name ("OptionsLabel");
 	_adj.set_value (_get());
 	_adj.signal_value_changed().connect (sigc::mem_fun (*this, &HSliderOption::changed));
 	_hscale.set_update_policy (Gtk::UPDATE_DISCONTINUOUS);
@@ -483,7 +482,7 @@ HSliderOption::changed ()
 void
 HSliderOption::add_to_page (OptionEditorPage* p)
 {
-	add_widgets_to_page (p, &_label, &_hscale);
+	add_widgets_to_page (p, _label, &_hscale);
 }
 
 void
@@ -611,9 +610,8 @@ FaderOption::FaderOption (string const & i, string const & n, sigc::slot<gain_t>
 {
 	_db_slider = manage (new ArdourWidgets::HSliderController (&_db_adjustment, std::shared_ptr<PBD::Controllable>(), 220, 18));
 
-	_label.set_text (n + ":");
-	_label.set_alignment (0, 0.5);
-	_label.set_name (X_("OptionsLabel"));
+	_label = manage (left_aligned_label (n + ":"));
+	_label->set_name (X_("OptionsLabel"));
 
 	_fader_centering_box.pack_start (*_db_slider, true, false);
 
@@ -677,7 +675,7 @@ FaderOption::on_key_press (GdkEventKey* ev)
 void
 FaderOption::add_to_page (OptionEditorPage* p)
 {
-	add_widgets_to_page (p, &_label, &_box);
+	add_widgets_to_page (p, _label, &_box);
 }
 
 /*--------------------------*/
@@ -688,9 +686,8 @@ ClockOption::ClockOption (string const & i, string const & n, sigc::slot<std::st
 	, _get (g)
 	, _set (s)
 {
-	_label.set_text (n + ":");
-	_label.set_alignment (0, 0.5);
-	_label.set_name (X_("OptionsLabel"));
+	_label = manage (left_aligned_label (n + ":"));
+	_label->set_name (X_("OptionsLabel"));
 	_clock.ValueChanged.connect (sigc::mem_fun (*this, &ClockOption::save_clock_time));
 }
 
@@ -720,7 +717,7 @@ ClockOption::save_clock_time ()
 void
 ClockOption::add_to_page (OptionEditorPage* p)
 {
-	add_widgets_to_page (p, &_label, &_clock);
+	add_widgets_to_page (p, _label, &_clock);
 }
 
 void
