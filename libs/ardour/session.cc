@@ -4649,11 +4649,13 @@ Session::remove_source (std::weak_ptr<Source> src, bool drop_references)
 
 	SourceRemoved (src); /* EMIT SIGNAL */
 	if (drop_references) {
-		/* It would not matter to recurse here, the
-		 * source was already removed from the sources.
-		 * But there is no need to take the source_lock again.
-		 */
+		printf ("Source->drop_references!\n");
 		source->drop_references ();
+		/* Removing a Source cannot be undone.
+		 * We need to clear all undo commands that reference the
+		 * removed source - or just clear all of the undo history.
+		 */
+		_history.clear();
 	}
 	assert (!source->used ());
 
