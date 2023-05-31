@@ -3154,8 +3154,10 @@ Session::load_route_groups (const XMLNode& node, int version)
 static bool
 state_file_filter (const string &str, void* /*arg*/)
 {
-	return (str.length() > strlen(statefile_suffix) &&
-		str.find (statefile_suffix) == (str.length() - strlen (statefile_suffix)));
+	return (str.length() > strlen(statefile_suffix)
+	        && str.find (statefile_suffix) == (str.length() - strlen (statefile_suffix))
+	        && str.substr (0, 2) != "._" /* ignore HFS+ extended data */
+	       );
 }
 
 static string
@@ -3876,13 +3878,14 @@ Session::cleanup_sources (CleanupReport& rep)
 			tmppath1 = canonical_path (spath);
 			tmppath2 = canonical_path ((*i));
 
-			cerr << "\t => " << tmppath2 << endl;
 
 			if (tmppath1 == tmppath2) {
 				used = true;
 				break;
 			}
 		}
+
+		cerr << "\t" << (used ? "keep: " : "drop: ")  << spath << endl;
 
 		if (!used) {
 			unused.push_back (spath);
