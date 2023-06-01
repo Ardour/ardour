@@ -703,9 +703,8 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 
 	engine.reconnect_ports ();
 
-	// force  an initial registration_callback() & latency re-compute
+	// force an initial registration_callback() & latency re-compute
 	_port_change_flag.store (1);
-	pre_process ();
 
 	_dsp_load_calc.reset ();
 	// all systems go.

@@ -702,6 +702,7 @@ PortAudioBackend::_start (bool for_latency_measurement)
 			stop ();
 			return ProcessThreadStartError;
 		}
+		_port_change_flag.store (1);
 	}
 
 	return NoError;
