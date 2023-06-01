@@ -111,7 +111,7 @@ FaderPort8::probe (std::string& i, std::string& o)
 #ifdef FADERPORT16
 		return pn.find ("PreSonus FP16 Port 1") != string::npos;
 #elif defined FADERPORT2
-		return pn.find ("PreSonus FP1") != string::npos;
+		return pn.find ("PreSonus FP2") != string::npos;
 #else
 		return pn.find ("PreSonus FP8") != string::npos;
 #endif
