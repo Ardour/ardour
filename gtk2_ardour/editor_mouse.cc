@@ -800,6 +800,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		_drags->set (new BBTMarkerDrag (this, item), event);
 		return true;
 
+	case SelectionMarkerItem:
+		_drags->set (new SelectionMarkerDrag (this, item), event);
+		return true;
+
 	case MeterMarkerItem:
 		_drags->set (
 			new MeterMarkerDrag (
@@ -849,7 +853,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case SamplesRulerItem:
 	case MinsecRulerItem:
 	case MarkerBarItem:
-	case SelectionMarkerItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
 		    && !ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
@@ -1794,6 +1797,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case AutomationLineItem:
 		case StartSelectionTrimItem:
 		case EndSelectionTrimItem:
+		case SelectionMarkerItem:
 			return true;
 
 		case MarkerBarItem:
@@ -1841,7 +1845,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case SamplesRulerItem:
 		case MinsecRulerItem:
 		case BBTRulerItem:
-		case SelectionMarkerItem:
 			return true;
 			break;
 
