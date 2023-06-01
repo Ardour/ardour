@@ -3672,6 +3672,17 @@ Editor::begin_reversible_selection_op (string name)
 }
 
 void
+Editor::abort_reversible_selection_op ()
+{
+	if (!_session) {
+		return;
+	}
+	if (selection_op_cmd_depth > 0) {
+		selection_op_cmd_depth--;
+	}
+}
+
+void
 Editor::commit_reversible_selection_op ()
 {
 	if (_session) {
