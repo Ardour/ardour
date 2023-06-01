@@ -1378,6 +1378,23 @@ private:
 	Temporal::timepos_t end_at_start;
 };
 
+/** Drag time-selection markers */
+class SelectionMarkerDrag : public Drag
+{
+public:
+	SelectionMarkerDrag (Editor*, ArdourCanvas::Item*);
+
+	void start_grab (GdkEvent*, Gdk::Cursor* c = 0);
+	void motion (GdkEvent*, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+private:
+	bool                _edit_start;
+	Temporal::timepos_t _start_at_start;
+	Temporal::timepos_t _end_at_start;
+};
+
 /** Range marker drag */
 class RangeMarkerBarDrag : public Drag
 {

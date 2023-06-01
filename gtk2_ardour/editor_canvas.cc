@@ -1480,7 +1480,6 @@ Editor::which_canvas_cursor(ItemType type) const
 	case MinsecRulerItem:
 	case BBTRulerItem:
 	case SamplesRulerItem:
-	case SelectionMarkerItem:
 		cursor = _cursors->timebar;
 		break;
 
@@ -1498,6 +1497,7 @@ Editor::which_canvas_cursor(ItemType type) const
 	case VideoBarItem:
 	case TransportMarkerBarItem:
 	case DropZoneItem:
+	case SelectionMarkerItem:
 		cursor = _cursors->grabber;
 		break;
 

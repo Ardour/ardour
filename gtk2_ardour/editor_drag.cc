@@ -5805,6 +5805,64 @@ SelectionDrag::aborted (bool)
 	/* XXX: TODO */
 }
 
+SelectionMarkerDrag::SelectionMarkerDrag (Editor* e, ArdourCanvas::Item* i)
+	: Drag (e, i, e->default_time_domain ())
+	, _edit_start (true)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New SelectionMarkerDrag\n");
+	bool ok = _editor->get_selection_extents (_start_at_start, _end_at_start);
+	assert (ok);
+
+	// SelectionStart, SelectionEnd
+	cout << " SelectionMarkerDrag " << _start_at_start << " - " << _end_at_start << " " << i->whoami() << "\n";
+}
+
+void
+SelectionMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
+{
+	Drag::start_grab (event);
+	timepos_t const pos = adjusted_current_time (event, false);
+	_edit_start = pos.distance (_start_at_start).abs () <  pos.distance (_end_at_start).abs ();
+}
+
+void
+SelectionMarkerDrag::motion (GdkEvent* event, bool first_move)
+{
+	if (first_move) {
+		_editor->begin_reversible_selection_op (X_("set time selection"));
+	}
+	timepos_t const pos = adjusted_current_time (event, true);
+	if (_edit_start) {
+		if (pos < _end_at_start) {
+			_editor->get_selection ().clear_time ();
+			_editor->get_selection ().add (pos, _end_at_start);
+		}
+	} else {
+		if (pos > _start_at_start) {
+			_editor->get_selection ().clear_time ();
+			_editor->get_selection ().add (_start_at_start, pos);
+		}
+	}
+}
+
+void
+SelectionMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
+{
+	if (movement_occurred) {
+		_editor->commit_reversible_selection_op ();
+	}
+}
+
+void
+SelectionMarkerDrag::aborted (bool movement_occurred)
+{
+	if (movement_occurred) {
+		_editor->abort_reversible_selection_op ();
+	}
+	_editor->get_selection ().clear_time ();
+	_editor->get_selection ().add (_start_at_start, _end_at_start);
+}
+
 RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i, e->default_time_domain (), false)
 	, _operation (o)
