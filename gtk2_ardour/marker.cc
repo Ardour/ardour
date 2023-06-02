@@ -190,8 +190,8 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 	 */
 
 	switch (_type) {
-	case Mark: /* fallthough */
-	case RegionCue: /* fallthough */
+	case Mark: /* fallthrough */
+	case RegionCue: /* fallthrough */
 	case BBTPosition:
 		points = new ArdourCanvas::Points ();
 
@@ -206,7 +206,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 		_label_offset = 8.0 * scale;
 		break;
 
-	case Tempo: /* fallthough */
+	case Tempo: /* fallthrough */
 	case Meter:
 		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple ( M5, 0.0));
@@ -220,9 +220,9 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 		_label_offset = 12.0 * scale;
 		break;
 
-	case PunchIn: /* fallthough */
-	case LoopStart: /* fallthough */
-	case SessionStart: /* fallthough */
+	case PunchIn: /* fallthrough */
+	case LoopStart: /* fallthrough */
+	case SessionStart: /* fallthrough */
 	case RangeStart:
 		points = new ArdourCanvas::Points ();
 		points->push_back (ArdourCanvas::Duple (    0.0, 0.0));
@@ -235,9 +235,9 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 		break;
 
 
-	case PunchOut: /* fallthough */
-	case LoopEnd: /* fallthough */
-	case SessionEnd: /* fallthough */
+	case PunchOut: /* fallthrough */
+	case LoopEnd: /* fallthrough */
+	case SessionEnd: /* fallthrough */
 	case RangeEnd:
 		points = new ArdourCanvas::Points (); // leaks
 		points->push_back (ArdourCanvas::Duple ( M6, 0.0));

@@ -2741,7 +2741,7 @@ Editor::cut_copy_section (ARDOUR::SectionOperation const op)
 			break;
 		case SectionSelectRetainAndMovePlayhead:
 			_session->request_locate (op != CutPasteSection ? to_end.samples (): to.samples ());
-			/* fallthough */
+			/* fallthrough */
 		case SectionSelectRetain:
 			if (op == CutPasteSection || to < end) {
 				selection->set (to, to_end);
