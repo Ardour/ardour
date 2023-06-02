@@ -1778,12 +1778,20 @@ EngineControl::State
 EngineControl::get_matching_state (
     const string& backend,
     const string& driver,
-    const string& device)
+    const string& device,
+    const float   sample_rate)
 {
-	for (StateList::iterator i = states.begin (); i != states.end (); ++i) {
-		if ((*i)->backend == backend &&
-		    (!_have_control || ((*i)->driver == driver && (*i)->device == device))) {
-			return (*i);
+	for (auto const& i : states) {
+		if (i->backend != backend) {
+			continue;
+		}
+		if (!_have_control) {
+			return i;
+		}
+		if (i->driver == driver && i->device == device) {
+			if (sample_rate == 0 || i->sample_rate == sample_rate) {
+				return i;
+			}
 		}
 	}
 	return State ();
@@ -1794,12 +1802,20 @@ EngineControl::get_matching_state (
     const string& backend,
     const string& driver,
     const string& input_device,
-    const string& output_device)
+    const string& output_device,
+    const float   sample_rate)
 {
-	for (StateList::iterator i = states.begin (); i != states.end (); ++i) {
-		if ((*i)->backend == backend &&
-		    (!_have_control || ((*i)->driver == driver && ((*i)->input_device == input_device) && (*i)->output_device == output_device))) {
-			return (*i);
+	for (auto const& i : states) {
+		if (i->backend != backend) {
+			continue;
+		}
+		if (!_have_control) {
+			return i;
+		}
+		if (i->driver == driver && i->input_device == input_device && i->output_device == output_device) {
+			if (sample_rate == 0 || i->sample_rate == sample_rate) {
+				return i;
+			}
 		}
 	}
 	return State ();
@@ -1815,17 +1831,20 @@ EngineControl::get_saved_state_for_currently_displayed_backend_and_device ()
 			return get_matching_state (backend_combo.get_active_text (),
 			                           (backend->requires_driver_selection () ? (std::string)driver_combo.get_active_text () : string ()),
 			                           input_device_combo.get_active_text (),
-			                           output_device_combo.get_active_text ());
+			                           output_device_combo.get_active_text (),
+			                           get_rate ());
 		} else {
 			return get_matching_state (backend_combo.get_active_text (),
 			                           (backend->requires_driver_selection () ? (std::string)driver_combo.get_active_text () : string ()),
-			                           device_combo.get_active_text ());
+			                           device_combo.get_active_text (),
+			                           get_rate ());
 		}
 	}
 
 	return get_matching_state (backend_combo.get_active_text (),
 	                           string (),
-	                           device_combo.get_active_text ());
+	                           device_combo.get_active_text (),
+	                           get_rate ());
 }
 
 bool
@@ -1836,7 +1855,8 @@ EngineControl::equivalent_states (const EngineControl::State& state1,
 	    state1->driver == state2->driver &&
 	    state1->device == state2->device &&
 	    state1->input_device == state2->input_device &&
-	    state1->output_device == state2->output_device) {
+	    state1->output_device == state2->output_device &&
+	    state1->sample_rate == state2->sample_rate) {
 		return true;
 	}
 	return false;
