@@ -162,10 +162,6 @@ Editor::undo (uint32_t n)
 
 	if (_session) {
 		_session->undo (n);
-		if (_session->undo_depth() == 0) {
-			undo_action->set_sensitive(false);
-		}
-		redo_action->set_sensitive(true);
 		begin_selection_op_history ();
 	}
 }
@@ -186,11 +182,7 @@ Editor::redo (uint32_t n)
 	paste_count = 0;
 
 	if (_session) {
-	_session->redo (n);
-		if (_session->redo_depth() == 0) {
-			redo_action->set_sensitive(false);
-		}
-		undo_action->set_sensitive(true);
+		_session->redo (n);
 		begin_selection_op_history ();
 	}
 }

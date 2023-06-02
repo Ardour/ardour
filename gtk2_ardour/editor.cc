@@ -3796,8 +3796,6 @@ Editor::commit_reversible_command ()
 	if (_session) {
 		if (before.size() == 1) {
 			_session->add_command (new MementoCommand<SelectionMemento>(*(_selection_memento), before.front(), &_selection_memento->get_state ()));
-			redo_action->set_sensitive(false);
-			undo_action->set_sensitive(true);
 			begin_selection_op_history ();
 		}
 
@@ -3815,18 +3813,24 @@ Editor::commit_reversible_command ()
 void
 Editor::history_changed ()
 {
+	if (!_session) {
+		return;
+	}
+
 	string label;
 
-	if (undo_action && _session) {
+	if (undo_action) {
 		if (_session->undo_depth() == 0) {
 			label = S_("Command|Undo");
+			undo_action->set_sensitive(false);
 		} else {
 			label = string_compose(S_("Command|Undo (%1)"), _session->next_undo());
+			undo_action->set_sensitive(true);
 		}
 		undo_action->property_label() = label;
 	}
 
-	if (redo_action && _session) {
+	if (redo_action) {
 		if (_session->redo_depth() == 0) {
 			label = _("Redo");
 			redo_action->set_sensitive (false);
