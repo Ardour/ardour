@@ -271,6 +271,7 @@ private:
 		StateStruct ()
 		    : sample_rate (48000)
 		    , buffer_size (1024)
+		    , n_periods (0)
 		    , input_latency (0)
 		    , output_latency (0)
 		    , active (false)
@@ -281,8 +282,8 @@ private:
 	};
 
 	typedef std::shared_ptr<StateStruct> State;
-	typedef std::list<State>               StateList;
-	static bool                            state_sort_cmp (const State& a, const State& b);
+	typedef std::list<State>             StateList;
+	static bool                          state_sort_cmp (const State& a, const State& b);
 
 	StateList states;
 
@@ -290,11 +291,13 @@ private:
 
 	State get_matching_state (const std::string& backend,
 	                          const std::string& driver,
-	                          const std::string& device);
+	                          const std::string& device,
+	                          const float        sample_rate = 0);
 	State get_matching_state (const std::string& backend,
 	                          const std::string& driver,
 	                          const std::string& input_device,
-	                          const std::string& output_device);
+	                          const std::string& output_device,
+	                          const float        sample_rate = 0);
 
 	State get_saved_state_for_currently_displayed_backend_and_device ();
 	void  maybe_display_saved_state ();
