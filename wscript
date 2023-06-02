@@ -1174,9 +1174,7 @@ def configure(conf):
     conf.check_cxx(fragment = "#include <boost/version.hpp>\n#if !defined (BOOST_VERSION) || BOOST_VERSION < 105600\n#error boost >= 1.56 is not available\n#endif\nint main(void) { return 0; }\n",
               execute = False,
               mandatory = True,
-              msg = 'Checking for boost library >= 1.56',
-              okmsg = 'ok',
-              errmsg = 'too old\nPlease install boost version 1.56 or higher.')
+              msg = 'Checking for boost library >= 1.56')
 
     if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw':
         autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
