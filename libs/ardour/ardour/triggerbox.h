@@ -934,7 +934,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static CustomMidiMap _custom_midi_map;
 
 	static void midi_input_handler (MIDI::Parser&, MIDI::byte*, size_t, samplecnt_t);
-	static MIDI::Parser* input_parser;
+	static std::shared_ptr<MIDI::Parser> input_parser;
 	static PBD::ScopedConnection midi_input_connection;
 	static void input_port_check ();
 	static PBD::ScopedConnectionList static_connections;
