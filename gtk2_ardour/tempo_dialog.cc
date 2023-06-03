@@ -292,7 +292,7 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 	assert (_midi_tap_port);
 	_midi_tap_parser = std::shared_ptr<MIDI::Parser> (new MIDI::Parser);
 	_midi_tap_parser->any.connect_same_thread (_parser_connection, boost::bind (&TempoDialog::midi_event, this, _2, _3, _4));
-	_midi_tap_port->set_trace (_midi_tap_parser.get ());
+	//_midi_tap_port->set_trace (_midi_tap_parser);
 	_midi_tap_signal.connect (_xthread_connection, invalidator (*this), boost::bind (&TempoDialog::tap_tempo, this, _1), gui_context ());
 
 	/* init state */
