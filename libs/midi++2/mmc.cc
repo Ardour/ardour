@@ -610,7 +610,7 @@ MachineControl::do_step (MIDI::byte *msg, size_t /*msglen*/)
 int
 MachineControl::do_shuttle (MIDI::byte *msg, size_t /*msglen*/)
 {
-	size_t forward;
+	bool forward;
 	byte sh = msg[2];
 	byte sm = msg[3];
 	byte sl = msg[4];
