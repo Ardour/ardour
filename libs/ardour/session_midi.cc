@@ -167,7 +167,7 @@ void
 Session::mmc_record_exit (MIDI::MachineControl &/*mmc*/)
 {
 	if (Config->get_mmc_control ()) {
-		disable_record (false);
+		disable_record (false, true);
 	}
 }
 
@@ -175,7 +175,8 @@ void
 Session::mmc_stop (MIDI::MachineControl &/*mmc*/)
 {
 	if (Config->get_mmc_control ()) {
-		request_stop ();
+		request_transport_speed (1.0, TRS_MMC);
+		request_stop (false, true, TRS_MMC);
 	}
 }
 
@@ -192,7 +193,7 @@ Session::mmc_pause (MIDI::MachineControl &/*mmc*/)
 		if (actively_recording()) {
 			maybe_enable_record ();
 		} else {
-			request_stop ();
+			request_stop (false, false, TRS_MMC);
 		}
 	}
 }
@@ -258,7 +259,7 @@ void
 Session::mmc_rewind (MIDI::MachineControl &/*mmc*/)
 {
 	if (Config->get_mmc_control ()) {
-		request_transport_speed(-8.0f);
+		request_transport_speed(-Config->get_max_transport_speed());
 	}
 }
 
@@ -266,7 +267,7 @@ void
 Session::mmc_fast_forward (MIDI::MachineControl &/*mmc*/)
 {
 	if (Config->get_mmc_control ()) {
-		request_transport_speed(8.0f);
+		request_transport_speed (Config->get_max_transport_speed());
 	}
 }
 
@@ -302,12 +303,12 @@ Session::mmc_locate (MIDI::MachineControl &/*mmc*/, const MIDI::byte* mmc_tc)
 
 	std::shared_ptr<MTC_TransportMaster> mtcs = std::dynamic_pointer_cast<MTC_TransportMaster> (transport_master());
 
-	if (mtcs) {
+	if (mtcs && config.get_external_sync ()) {
 		// cerr << "Locate *with* MTC slave\n";
 		mtcs->handle_locate (mmc_tc);
 	} else {
 		// cerr << "Locate without MTC slave\n";
-		request_locate (target_sample, false, MustStop);
+		request_locate (target_sample, false, MustStop, TRS_MMC);
 	}
 }
 
@@ -323,9 +324,9 @@ Session::mmc_shuttle (MIDI::MachineControl &/*mmc*/, float speed, bool forw)
 	}
 
 	if (forw) {
-		request_transport_speed_nonzero (speed);
+		request_transport_speed (speed, TRS_MMC);
 	} else {
-		request_transport_speed_nonzero (-speed);
+		request_transport_speed (-speed, TRS_MMC);
 	}
 }
 
