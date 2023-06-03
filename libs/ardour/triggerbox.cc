@@ -3049,7 +3049,7 @@ TriggerBox::CustomMidiMap TriggerBox::_custom_midi_map;
 std::pair<int,int> TriggerBox::learning_for;
 PBD::Signal0<void> TriggerBox::TriggerMIDILearned;
 
-MIDI::Parser* TriggerBox::input_parser (new MIDI::Parser); /* leak */
+std::shared_ptr<MIDI::Parser> TriggerBox::input_parser;
 PBD::ScopedConnectionList TriggerBox::static_connections;
 PBD::ScopedConnection TriggerBox::midi_input_connection;
 std::shared_ptr<MidiPort> TriggerBox::current_input;
@@ -3068,6 +3068,7 @@ TriggerBox::init ()
 void
 TriggerBox::static_init (Session & s)
 {
+	input_parser = std::shared_ptr<MIDI::Parser>(new MIDI::Parser); /* leak */
 	Config->ParameterChanged.connect_same_thread (static_connections, boost::bind (&TriggerBox::static_parameter_changed, _1));
 	input_parser->any.connect_same_thread (midi_input_connection, boost::bind (&TriggerBox::midi_input_handler, _1, _2, _3, _4));
 	std::dynamic_pointer_cast<MidiPort> (s.trigger_input_port())->set_trace (input_parser);

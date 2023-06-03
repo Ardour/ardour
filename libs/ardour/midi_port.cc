@@ -43,7 +43,6 @@ MidiPort::MidiPort (const std::string& name, PortFlags flags)
 	: Port (name, DataType::MIDI, flags)
 	, _resolve_required (false)
 	, _input_active (true)
-	, _trace_parser (0)
 	, _data_fetched_for_cycle (false)
 {
 	_buffer = new MidiBuffer (AudioEngine::instance()->raw_buffer_size (DataType::MIDI));
@@ -75,8 +74,11 @@ MidiPort::cycle_start (pframes_t nframes)
 		port_engine.midi_clear (port_engine.get_buffer (_port_handle, nframes));
 	}
 
-	if (receives_input() && _trace_parser) {
-		read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, *_trace_parser, AudioEngine::instance()->sample_time_at_cycle_start());
+	if (receives_input()) {
+		std::shared_ptr<MIDI::Parser> trace_parser = _trace_parser.lock ();
+		if (trace_parser) {
+			read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, *trace_parser.get(), AudioEngine::instance()->sample_time_at_cycle_start());
+		}
 	}
 
 	if (_inbound_midi_filter) {
@@ -293,16 +295,19 @@ MidiPort::flush_buffers (pframes_t nframes)
 
 			const samplepos_t adjusted_time = ev.time() + _global_port_buffer_offset;
 
-			if (sends_output() && _trace_parser) {
-				uint8_t const * const buf = ev.buffer();
-				const samplepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
+			if (sends_output()) {
+				std::shared_ptr<MIDI::Parser> trace_parser = _trace_parser.lock ();
+				if (trace_parser) {
+					uint8_t const * const buf = ev.buffer();
+					const samplepos_t now = AudioEngine::instance()->sample_time_at_cycle_start();
 
-				_trace_parser->set_timestamp (now + adjusted_time / speed_ratio);
+					trace_parser->set_timestamp (now + adjusted_time / speed_ratio);
 
-				uint32_t limit = ev.size();
+					uint32_t limit = ev.size();
 
-				for (size_t n = 0; n < limit; ++n) {
-					_trace_parser->scanner (buf[n]);
+					for (size_t n = 0; n < limit; ++n) {
+						trace_parser->scanner (buf[n]);
+					}
 				}
 			}
 
@@ -386,7 +391,7 @@ MidiPort::reset ()
 }
 
 void
-MidiPort::set_trace (MIDI::Parser * p)
+MidiPort::set_trace (std::weak_ptr<MIDI::Parser> p)
 {
 	_trace_parser = p;
 }
