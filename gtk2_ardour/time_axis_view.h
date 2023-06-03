@@ -285,12 +285,6 @@ protected:
 	virtual bool controls_ebox_motion (GdkEventMotion*);
 	virtual bool controls_ebox_leave (GdkEventCrossing*);
 
-	/** Display the standard LHS control menu at when.
-	 *
-	 * @param when the popup activation time
-	 */
-	virtual void popup_display_menu (guint32 when);
-
 	/** Build the standard LHS control menu.
 	 * Subclasses should extend this method to add their own menu options.
 	 */
@@ -336,6 +330,8 @@ private:
 
 	void compute_heights ();
 	bool maybe_set_cursor (int y);
+	void popup_display_menu (int button, guint32 when);
+
 
 }; /* class TimeAxisView */
 

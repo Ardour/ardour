@@ -544,7 +544,7 @@ TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 		break;
 
 	case 3:
-		popup_display_menu (ev->time);
+		popup_display_menu (3, ev->time);
 		break;
 	}
 
@@ -767,14 +767,14 @@ TimeAxisView::conditionally_add_to_selection ()
 }
 
 void
-TimeAxisView::popup_display_menu (guint32 when)
+TimeAxisView::popup_display_menu (int button, guint32 when)
 {
 	conditionally_add_to_selection ();
 
 	build_display_menu ();
 
 	if (!display_menu->items().empty()) {
-		display_menu->popup (1, when);
+		display_menu->popup (button, when);
 	}
 }
 
