@@ -29,6 +29,8 @@
 
 #include "midi++/types.h"
 
+#include "temporal/tempo.h"
+
 #include "ardour/async_midi_port.h"
 #include "ardour/audioengine.h"
 #include "ardour/midi_buffer.h"
@@ -329,6 +331,10 @@ AsyncMIDIPort::read (MIDI::byte *, size_t)
 	Evoral::EventType type;
 	uint32_t size;
 	vector<MIDI::byte> buffer(input_fifo.capacity());
+
+	if (!is_process_thread()) {
+		(void) Temporal::TempoMap::fetch();
+	}
 
 	while (input_fifo.read (&time, &type, &size, &buffer[0])) {
 		_parser->set_timestamp (time);
