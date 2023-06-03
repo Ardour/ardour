@@ -787,8 +787,13 @@ static const MIDISequence s9[] = {
 	{-1.0, 0, {0} }, // MClk Generator
 };
 
+static const MIDISequence s10[] = {
+	{-3.0, 0, {0} }, // MMC Generator
+};
+
+
 static const MIDISequence *sequences[] = {
-	s0, s1, s2, s3, s4, s5, s6, s7, s8, s9
+	s0, s1, s2, s3, s4, s5, s6, s7, s8, s9, s10
 };
 
 static const char *sequence_names[] = {
@@ -801,7 +806,8 @@ static const char *sequence_names[] = {
 	"Aftertouch",
 	"Nonsense, Dups",
 	"MTC 25fps",
-	"MClk 120 BPM"
+	"MClk 120 BPM",
+	"MMC SysEx"
 };
 
 }} // namespace
