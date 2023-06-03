@@ -240,7 +240,7 @@ MidiTracer::port_changed ()
 		if (0 == tracer_port->connect (pn)) {
 			_midi_parser = std::shared_ptr<MIDI::Parser> (new MIDI::Parser);
 			_midi_parser->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
-			tracer_port->set_trace (_midi_parser.get ());
+			//tracer_port->set_trace (_midi_parser);
 		} else {
 			std::cerr << "CANNOT TRACE PORT " << pn << "\n";
 		}
@@ -275,7 +275,7 @@ MidiTracer::port_changed ()
 			} else {
 				_midi_parser = std::shared_ptr<MIDI::Parser> (new MIDI::Parser);
 				_midi_parser->any.connect_same_thread (_parser_connection, boost::bind (&MidiTracer::tracer, this, _1, _2, _3, _4));
-				mp->set_trace (_midi_parser.get ());
+				//mp->set_trace (_midi_parser);
 				traced_port = mp;
 			}
 		}
@@ -291,10 +291,10 @@ MidiTracer::disconnect ()
 	_parser_connection.disconnect ();
 
 	tracer_port->disconnect_all ();
-	tracer_port->set_trace (0);
+	//tracer_port->set_trace (std::weak_ptr<MIDI::Parser>());
 
 	if (traced_port) {
-		traced_port->set_trace (0);
+		//traced_port->set_trace (std::weak_ptr<MIDI::Parser>());
 		traced_port.reset ();
 	}
 	_midi_parser.reset ();
