@@ -298,6 +298,7 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		bool  _freewheel_ack;
 		bool  _reinit_thread_callback;
 		bool  _measure_latency;
+		int   _freewheel_processed;
 
 		ARDOUR::DSPLoadCalculator _dsp_calc;
 
