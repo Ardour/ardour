@@ -544,7 +544,7 @@ TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 		break;
 
 	case 3:
-		popup_display_menu (3, ev->time);
+		popup_display_menu (1, ev->time);
 		break;
 	}
 
