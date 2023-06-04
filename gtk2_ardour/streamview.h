@@ -137,11 +137,13 @@ public:
 protected:
 	StreamView (RouteTimeAxisView&, ArdourCanvas::Container* canvas_group = 0);
 
-	void         transport_changed();
-	void         transport_looped();
-	void         rec_enable_changed();
-	void         sess_rec_enable_changed();
-	void         create_rec_box(samplepos_t sample_pos, double width);
+	void transport_changed();
+	void transport_looped();
+	void rec_enable_changed();
+	void sess_rec_enable_changed();
+	void create_rec_box(samplepos_t sample_pos, double width);
+	void cleanup_rec_box ();
+
 	virtual void setup_rec_box () = 0;
 	virtual void update_rec_box ();
 

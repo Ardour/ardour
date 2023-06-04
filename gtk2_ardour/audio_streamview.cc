@@ -276,40 +276,7 @@ AudioStreamView::setup_rec_box ()
 
 		// cerr << "\tNOT rolling, rec_rects = " << rec_rects.size() << " rec_regions = " << rec_regions.size() << endl;
 
-		if (!rec_rects.empty() || !rec_regions.empty()) {
-
-			/* disconnect rapid update */
-			screen_update_connection.disconnect();
-			rec_data_ready_connections.drop_connections ();
-			rec_updating = false;
-			rec_active = false;
-
-			/* remove temp regions */
-
-			for (list<pair<std::shared_ptr<Region>,RegionView*> >::iterator iter = rec_regions.begin(); iter != rec_regions.end(); ) {
-				list<pair<std::shared_ptr<Region>,RegionView*> >::iterator tmp;
-
-				tmp = iter;
-				++tmp;
-
-				(*iter).first->drop_references ();
-
-				iter = tmp;
-			}
-
-			rec_regions.clear();
-
-			// cerr << "\tclear " << rec_rects.size() << " rec rects\n";
-
-			/* transport stopped, clear boxes */
-			for (vector<RecBoxInfo>::iterator iter=rec_rects.begin(); iter != rec_rects.end(); ++iter) {
-				RecBoxInfo &rect = (*iter);
-				delete rect.rectangle;
-			}
-
-			rec_rects.clear();
-
-		}
+		cleanup_rec_box ();
 	}
 }
 

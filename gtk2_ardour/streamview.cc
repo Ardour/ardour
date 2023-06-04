@@ -463,6 +463,35 @@ StreamView::update_rec_box ()
 	}
 }
 
+void
+StreamView::cleanup_rec_box ()
+{
+	if (rec_rects.empty() && rec_regions.empty()) {
+		return;
+	}
+
+	/* disconnect rapid update */
+	screen_update_connection.disconnect();
+	rec_data_ready_connections.drop_connections ();
+	rec_updating = false;
+	rec_active = false;
+
+	/* remove temp regions */
+	for (auto const& i : rec_regions) {
+		i.first->drop_references ();
+	}
+
+	rec_regions.clear();
+
+	// cerr << "\tclear " << rec_rects.size() << " rec rects\n";
+
+	/* transport stopped, clear boxes */
+	for (auto const& i : rec_rects) {
+		delete i.rectangle;
+	}
+	rec_rects.clear();
+}
+
 RegionView*
 StreamView::find_view (std::shared_ptr<const Region> region)
 {
