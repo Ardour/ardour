@@ -4657,7 +4657,6 @@ Session::remove_source (std::weak_ptr<Source> src, bool drop_references)
 		 */
 		_history.clear();
 	}
-	assert (!source->used ());
 
 	if (source->empty ()) {
 		/* No need to save when empty sources are removed.
@@ -4666,6 +4665,8 @@ Session::remove_source (std::weak_ptr<Source> src, bool drop_references)
 		 */
 		return;
 	}
+
+	assert (!source->used ());
 
 	if (!in_cleanup () && !loading ()) {
 		/* save state so we don't end up with a session file
