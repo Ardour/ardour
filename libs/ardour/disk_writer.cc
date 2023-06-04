@@ -710,6 +710,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		/* not recording this time, but perhaps we were before .. */
 
 		if (_was_recording) {
+			Glib::Threads::Mutex::Lock lm (capture_info_lock);
 			finish_capture (c);
 			_accumulated_capture_offset = 0;
 			_capture_start_sample.reset ();
@@ -1157,6 +1158,7 @@ DiskWriter::use_new_write_source (DataType dt, uint32_t n)
 void
 DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abort_capture)
 {
+	Glib::Threads::Mutex::Lock lm (capture_info_lock);
 	bool more_work = true;
 	int err = 0;
 	SourceList audio_srcs;
@@ -1186,7 +1188,6 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	}
 
 	/* XXX is there anything we can do if err != 0 ? */
-	Glib::Threads::Mutex::Lock lm (capture_info_lock);
 
 	if (capture_info.empty()) {
 		return;
@@ -1326,6 +1327,7 @@ DiskWriter::loop (samplepos_t transport_sample)
 {
 	_transport_looped = false;
 	if (_was_recording) {
+		Glib::Threads::Mutex::Lock lm (capture_info_lock);
 		// all we need to do is finish this capture, with modified capture length
 		std::shared_ptr<ChannelList const> c = channels.reader();
 
