@@ -10,8 +10,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-06-04 14:59+0200\n"
-"PO-Revision-Date: 2023-06-04 16:21+0200\n"
+"POT-Creation-Date: 2023-06-04 16:41+0200\n"
+"PO-Revision-Date: 2023-06-04 16:42+0200\n"
 "Last-Translator: Edgar Aichinger <edgar.aichinger@aon.at>\n"
 "Language-Team: German <kde-i18n-de@kde.org>\n"
 "Language: de\n"
@@ -929,7 +929,7 @@ msgstr "Manuelle Konfiguration"
 msgid "Audio"
 msgstr "Audio"
 
-#: add_route_dialog.cc:638 add_route_dialog.cc:811 ardour_ui.cc:2869
+#: add_route_dialog.cc:638 add_route_dialog.cc:811
 msgid "Bus"
 msgstr "Bus"
 
@@ -1051,8 +1051,7 @@ msgstr "FFT-Analysefenster"
 msgid "Spectral Analysis"
 msgstr "FFT-Analyse"
 
-#: analysis_window.cc:64 ardour_ui.cc:2869 editor_actions.cc:192
-#: session_metadata_dialog.cc:729
+#: analysis_window.cc:64 editor_actions.cc:192 session_metadata_dialog.cc:729
 msgid "Track"
 msgstr "Spur"
 
@@ -1672,8 +1671,12 @@ msgstr ""
 "ist."
 
 #: ardour_ui.cc:2869
-msgid "Audio Channels for new %1:"
-msgstr ""
+msgid "Audio Channels for new track:"
+msgstr "Audiokanäle für neue Spur:"
+
+#: ardour_ui.cc:2869
+msgid "Audio Channels for new bus:"
+msgstr "Audiokanäle für neuen Bus:"
 
 #: ardour_ui.cc:2877
 msgid "Custom Channel"
@@ -14912,8 +14915,8 @@ msgid ""
 "<b>When disabled</b> all new Tracks will use the FIRST color from the "
 "stripable-color-palette."
 msgstr ""
-"<b>Wenn aktiviert</b>, wird neuen Spuren eine Farbe der Farbpalette nach "
-"der Round-Robin Methode zugewiesen.\n"
+"<b>Wenn aktiviert</b>, wird neuen Spuren eine Farbe der Farbpalette nach der "
+"Round-Robin Methode zugewiesen.\n"
 "<b>Wenn deaktiviert</b>, erhalten alle Spuren die ERSTE Farbe der  "
 "Farbpalette."
 
@@ -14928,8 +14931,8 @@ msgid ""
 "<b>When disabled</b> all new Buses will use the FIRST color from the "
 "stripable-color-palette."
 msgstr ""
-"<b>Wenn aktiviert</b>, wird neuen Bussen eine Farbe der Farbpalette nach "
-"der Round-Robin Methode zugewiesen.\n"
+"<b>Wenn aktiviert</b>, wird neuen Bussen eine Farbe der Farbpalette nach der "
+"Round-Robin Methode zugewiesen.\n"
 "<b>Wenn deaktiviert</b>, erhalten alle Busse die ERSTE Farbe der abreißbaren "
 "Farbpalette."
 
@@ -14943,10 +14946,10 @@ msgid ""
 "stripable-color-palette in round-robin fashion.\n"
 "<b>When disabled</b> all new VCAs will have a neutral color from the theme."
 msgstr ""
-"<b>Wenn aktiviert</b>, wird neu erzeugten VCAs eine Farbe der Farbpalette"
-" nach "
-"der Round-Robin Methode zugewiesen.\n"
-"<b>Wenn deaktiviert</b>, erhalten alle VCAs eine neutrale Farbe aus dem Thema."
+"<b>Wenn aktiviert</b>, wird neu erzeugten VCAs eine Farbe der Farbpalette "
+"nach der Round-Robin Methode zugewiesen.\n"
+"<b>Wenn deaktiviert</b>, erhalten alle VCAs eine neutrale Farbe aus dem "
+"Thema."
 
 #: rc_option_editor.cc:2994
 msgid "Various Workarounds for Windowing Systems"
