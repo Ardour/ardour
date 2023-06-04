@@ -932,6 +932,10 @@ DummyAudioBackend::main_process_thread ()
 	manager.registration_callback();
 	manager.graph_order_callback();
 
+#ifdef PLATFORM_WINDOWS
+	PBD::MMTIMERS::set_min_resolution();
+#endif
+
 	int64_t clock1;
 	clock1 = -1;
 	while (_running) {
@@ -1036,6 +1040,9 @@ DummyAudioBackend::main_process_thread ()
 		}
 
 	}
+#ifdef PLATFORM_WINDOWS
+	PBD::MMTIMERS::reset_resolution();
+#endif
 	_running = false;
 	return 0;
 }

@@ -681,12 +681,14 @@ PortAudioBackend::_start (bool for_latency_measurement)
 		if (!start_blocking_process_thread()) {
 			return ProcessThreadStartError;
 		}
+		PBD::MMTIMERS::set_min_resolution();
 	} else {
 		if (_pcmio->start_stream() != paNoError) {
 			DEBUG_AUDIO("Unable to start stream\n");
 			return AudioDeviceOpenError;
 		}
 
+		PBD::MMTIMERS::set_min_resolution();
 		if (!start_freewheel_process_thread()) {
 			DEBUG_AUDIO("Unable to start freewheel thread\n");
 			stop();
@@ -833,6 +835,7 @@ PortAudioBackend::stop ()
 	}
 
 	_midiio->stop();
+	PBD::MMTIMERS::reset_resolution();
 
 	_run = false;
 

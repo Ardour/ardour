@@ -26,7 +26,6 @@
 
 #include "pbd/error.h"
 #include "pbd/compose.h"
-#include "pbd/windows_timer_utils.h"
 
 #include "winmmemidi_io.h"
 #include "debug.h"
@@ -137,7 +136,6 @@ WinMMEMidiIO::start ()
 	m_run = true;
 	DEBUG_MIDI ("Starting MIDI driver\n");
 
-	PBD::MMTIMERS::set_min_resolution();
 	discover();
 	start_devices ();
 }
@@ -156,8 +154,6 @@ WinMMEMidiIO::stop ()
 	pthread_mutex_lock (&m_device_lock);
 	cleanup ();
 	pthread_mutex_unlock (&m_device_lock);
-
-	PBD::MMTIMERS::reset_resolution();
 }
 
 void
