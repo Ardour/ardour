@@ -2866,7 +2866,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 	if (input_chan.n_total () == 0 && type != AddRouteDialog::VCAMaster) {
 		/* Custom */
 		Gtk::HBox h;
-		Gtk::Label*      l = manage (new Label (add_route_dialog->type_wanted() == AddRouteDialog::AudioTrack ? _("Audio Channels for new Track:") : _("Audio Channels for new Bus:")));
+		Gtk::Label*      l = manage (new Label (add_route_dialog->type_wanted() == AddRouteDialog::AudioTrack ? _("Audio Channels for new track:") : _("Audio Channels for new bus:")));
 		Gtk::Adjustment* a = manage (new Gtk::Adjustment (2, 0, 121, 1)); // arbitrary max 11^2 for 10th order amb)
 		Gtk::SpinButton* s = manage (new Gtk::SpinButton (*a, 1, 0));
 
