@@ -5,6 +5,7 @@ VALGRIND_OPTIONS="$VALGRIND_OPTIONS --error-limit=no"
 #VALGRIND_OPTIONS="$VALGRIND_OPTIONS --show-leak-kinds=all -v"
 #VALGRIND_OPTIONS="$VALGRIND_OPTIONS --log-file=/tmp/ardour-%p.log"
 #VALGRIND_OPTIONS="$VALGRIND_OPTIONS --gen-suppressions=all"
+#VALGRIND_OPTIONS="$VALGRIND_OPTIONS -q --vgdb-error=0"
 
 TOP=`dirname "$0"`/..
 . $TOP/build/gtk2_ardour/ardev_common_waf.sh
