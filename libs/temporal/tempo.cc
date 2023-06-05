@@ -871,7 +871,7 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 	TempoMetric em (metric_at (end));
 	timecnt_t dur = start.distance (end);
 
-	TempoMapCutBuffer* cb = new TempoMapCutBuffer (dur, sm, em);
+	TempoMapCutBuffer* cb = new TempoMapCutBuffer (dur);
 
 	superclock_t start_sclock = start.superclocks();
 	superclock_t end_sclock = end.superclocks();
@@ -920,6 +920,22 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 
 	if (!copy && ripple) {
 
+	}
+
+	if (cb->tempos().empty() || cb->tempos().front().sclock() != start.superclocks()) {
+		cb->add_start_tempo (tempo_at (start));
+	}
+
+	if (!cb->tempos().empty() && cb->tempos().back().sclock() != start.superclocks()) {
+		cb->add_end_tempo (tempo_at (start));
+	}
+
+	if (cb->meters().empty() || cb->meters().front().sclock() != start.superclocks()) {
+		cb->add_start_meter (meter_at (start));
+	}
+
+	if (!cb->meters().empty() && cb->meters().back().sclock() != start.superclocks()) {
+		cb->add_end_meter (meter_at (start));
 	}
 
 	return cb;
@@ -4670,21 +4686,79 @@ DomainSwapInformation::undo ()
 	clear ();
 }
 
-TempoMapCutBuffer::TempoMapCutBuffer (timecnt_t const & dur, TempoMetric const & start, TempoMetric const & end)
-	: _start_metric (start)
-	, _end_metric (end)
+TempoMapCutBuffer::TempoMapCutBuffer (timecnt_t const & dur)
+	: _start_tempo (nullptr)
+	, _end_tempo (nullptr)
+	, _start_meter (nullptr)
+	, _end_meter (nullptr)
 	, _duration (dur)
 {
+}
+
+TempoMapCutBuffer::~TempoMapCutBuffer ()
+{
+	delete _start_tempo;
+	delete _end_tempo;
+	delete _start_meter;
+	delete _end_meter;
+}
+
+void
+TempoMapCutBuffer::add_start_tempo (Tempo const & t)
+{
+	delete _start_tempo;
+	_start_tempo = new Tempo (t);
+}
+
+void
+TempoMapCutBuffer::add_end_tempo (Tempo const & t)
+{
+	delete _end_tempo;
+	_end_tempo = new Tempo (t);
+}
+
+void
+TempoMapCutBuffer::add_start_meter (Meter const & t)
+{
+	delete _start_meter;
+	_start_meter = new Meter (t);
+}
+
+void
+TempoMapCutBuffer::add_end_meter (Meter const & t)
+{
+	delete _end_meter;
+	_end_meter = new Meter (t);
 }
 
 void
 TempoMapCutBuffer::dump (std::ostream& ostr)
 {
 	ostr << "TempoMapCutBuffer @ " << this << std::endl;
+
+	if (_start_tempo) {
+		ostr << "Start Tempo: " << *_start_tempo << std::endl;
+	}
+	if (_end_tempo) {
+		ostr << "End Tempo: " << *_end_tempo << std::endl;
+	}
+	if (_start_meter) {
+		ostr << "Start Meter: " << *_start_meter << std::endl;
+	}
+	if (_end_meter) {
+		ostr << "End Meter: " << *_end_meter << std::endl;
+	}
+
 	ostr << "Tempos:\n";
 
 	for (auto const & t : _tempos) {
-		ostr << '\t' << &t << t << std::endl;
+		ostr << '\t' << &t << ' ' << t << std::endl;
+	}
+
+	ostr << "Meters:\n";
+
+	for (auto const & m : _meters) {
+		ostr << '\t' << &m << ' ' << m << std::endl;
 	}
 }
 
