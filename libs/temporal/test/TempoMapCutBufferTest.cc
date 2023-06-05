@@ -18,19 +18,25 @@ void
 TempoMapCutBufferTest::cutTest()
 {
 	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
-	TempoPoint& tp = tmap->set_tempo (Tempo (180, 4), BBT_Argument (6, 1, 0));
-	tmap->set_meter (Meter (6, 8), BBT_Argument (3, 1, 0));
 
-	/* tp is at 6|1|0 which is 3|0|0 after the 6/8 meter at ((3-1) * 4 =) 8
-	 * quarter notes), so 3 bars of 6
-	 * 8th notes, or 18 8 notes, or 9 4th notes. So its quarter time should
-	 * be 8 + 9 = 17
-	 */
+	(void) tmap->set_tempo (Tempo (180, 4), BBT_Argument (6, 1, 0));
+	(void) tmap->set_meter (Meter (6, 8), BBT_Argument (3, 1, 0));
 
-	std::cout << "\n\n\n ***************** tp = " << tp.beats() << std::endl;
+	(void) tmap->set_tempo (Tempo (180, 4), BBT_Argument (15, 1, 0));
+	(void) tmap->set_meter (Meter (6, 8), BBT_Argument (15, 1, 0));
 
-	CPPUNIT_ASSERT (tp.beats() == Beats (17,0));
+	(void) tmap->set_tempo (Tempo (180, 4), BBT_Argument (31, 1, 0));
+	(void) tmap->set_meter (Meter (6, 8), BBT_Argument (32, 1, 0));
 
+	std::cerr << "Before cut\n";
+	tmap->dump (std::cerr);
+
+	TempoMapCutBuffer* cb = tmap->cut (timepos_t::from_superclock (tmap->superclock_at (BBT_Argument (8, 1, 0))),
+	                                   timepos_t::from_superclock (tmap->superclock_at (BBT_Argument (31, 1, 0))),
+	                                   false);
+
+	std::cerr << "After cut\n";
+	tmap->dump (std::cerr);
 
 	tmap->abort_update ();
 }
