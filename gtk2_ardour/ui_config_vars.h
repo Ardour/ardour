@@ -150,6 +150,7 @@ UI_CONFIG_VARIABLE (bool, one_plugin_window_only, "one-plugin-window-only", fals
 UI_CONFIG_VARIABLE (int, default_lower_midi_note, "default-lower-midi-note", 60)
 UI_CONFIG_VARIABLE (int, default_upper_midi_note, "default-upper-midi-note", 71)
 UI_CONFIG_VARIABLE (bool, ask_before_closing_last_window, "ask-before-closing-last-window", true)
+UI_CONFIG_VARIABLE (bool, ask_cut_copy_section_tempo_map, "ask-cut-copy-section-tempo-map", true)
 UI_CONFIG_VARIABLE (std::string, freesound_dir, "freesound-dir", "")
 UI_CONFIG_VARIABLE (int, max_note_height, "max-note-height", 20)
 #ifdef MIXBUS
