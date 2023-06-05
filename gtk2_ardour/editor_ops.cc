@@ -2724,7 +2724,7 @@ Editor::cut_copy_section (bool copy)
 	}
 #endif
 	timepos_t to (get_preferred_edit_position ());
-	_session->cut_copy_section (start, end, to, copy);
+	//_session->cut_copy_section (start, end, to, copy ? CopyPasteSection : CutCopySection);
 
 	timepos_t to_end (to + start.distance (end));
 
