@@ -2113,7 +2113,9 @@ samplepos_t
 AudioClock::samples_from_bbt_string (timepos_t const & pos, const string& str) const
 {
 	if (_session == 0) {
-		error << "AudioClock::samples_from_bbt_string() called with BBT mode but without session!" << endmsg;
+#ifndef NDEBUG
+		cout << "AudioClock::samples_from_bbt_string() called with BBT mode but without session!\n";
+#endif
 		return 0;
 	}
 
@@ -2137,7 +2139,9 @@ samplepos_t
 AudioClock::sample_duration_from_bbt_string (timepos_t const & pos, const string& str) const
 {
 	if (_session == 0) {
-		error << "AudioClock::sample_duration_from_bbt_string() called with BBT mode but without session!" << endmsg;
+#ifndef NDEBUG
+		cout << "AudioClock::sample_duration_from_bbt_string() called with BBT mode but without session!\n";
+#endif
 		return 0;
 	}
 
