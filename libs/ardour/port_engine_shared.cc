@@ -444,7 +444,7 @@ PortEngineSharedImpl::unregister_port (PortEngine::PortHandle port_handle)
 		PortIndex::iterator i = std::find (ps->begin(), ps->end(), std::dynamic_pointer_cast<BackendPort> (port_handle));
 
 		if (i == ps->end ()) {
-			PBD::error << string_compose (_("%1::unregister_port: Failed to find port"), _instance_name) << endmsg;
+			PBD::error << string_compose (_("%1::unregister_port: Failed to find port: (%2)"), _instance_name, port ? port->name() : "(invalid)") << endmsg;
 			return;
 		}
 
@@ -542,12 +542,12 @@ PortEngineSharedImpl::set_port_name (PortEngine::PortHandle port_handle, const s
 	BackendPortPtr port = std::dynamic_pointer_cast<BackendPort>(port_handle);
 
 	if (!valid_port (port)) {
-		PBD::error << string_compose (_("%1::set_port_name: Invalid Port"), _instance_name) << endmsg;
+		PBD::error << string_compose (_("%1::set_port_name: Invalid port: (%2)"), _instance_name, name) << endmsg;
 		return -1;
 	}
 
 	if (find_port (newname)) {
-		PBD::error << string_compose (_("%1::set_port_name: Port with given name already exists"), _instance_name) << endmsg;
+		PBD::error << string_compose (_("%1::set_port_name: Port with given name ('%2') already exists"), _instance_name, name) << endmsg;
 		return -1;
 	}
 
@@ -742,7 +742,7 @@ PortEngineSharedImpl::disconnect_all (PortEngine::PortHandle port_handle)
 	BackendPortPtr port = std::dynamic_pointer_cast<BackendPort> (port_handle);
 
 	if (!valid_port (port)) {
-		PBD::warning << string_compose (_("%1::disconnect_all: invalid port"), _instance_name) << endmsg;
+		PBD::warning << string_compose (_("%1::disconnect_all: Invalid Port"), _instance_name) << endmsg;
 		return -1;
 	}
 
@@ -757,7 +757,7 @@ PortEngineSharedImpl::connected (PortEngine::PortHandle port_handle, bool /* pro
 	BackendPortPtr port = std::dynamic_pointer_cast<BackendPort> (port_handle);
 
 	if (!valid_port (port)) {
-		PBD::error << string_compose (_("%1::disconnect_all: Invalid Port"), _instance_name) << endmsg;
+		PBD::error << string_compose (_("%1::connected: Invalid Port"), _instance_name) << endmsg;
 		return false;
 	}
 	return port->is_connected ();
