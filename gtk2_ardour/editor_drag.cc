@@ -252,7 +252,7 @@ DragManager::have_item (ArdourCanvas::Item* i) const
 	return j != _drags.end ();
 }
 
-Drag::Drag (Editor* e, ArdourCanvas::Item* i, Temporal::TimeDomain td, bool trackview_only)
+Drag::Drag (Editor* e, ArdourCanvas::Item* i, Temporal::TimeDomain td, bool trackview_only, bool hide_snapped_cursor)
 	: _editor (e)
 	, _drags (0)
 	, _item (i)
@@ -264,6 +264,7 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, Temporal::TimeDomain td, bool trac
 	, _was_rolling (false)
 	, _earliest_time_limit (0)
 	, _trackview_only (trackview_only)
+	, _hide_snapped_cursor (hide_snapped_cursor)
 	, _move_threshold_passed (false)
 	, _starting_point_passed (false)
 	, _initially_vertical (false)
@@ -339,6 +340,9 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	setup_video_offset ();
 	if (!UIConfiguration::instance ().get_preview_video_frame_on_drag ()) {
 		_preview_video = false;
+	}
+	if (_hide_snapped_cursor) {
+		_editor->snapped_cursor ()->hide ();
 	}
 
 	_grab_time         = adjusted_time (_raw_grab_time, event);
@@ -604,8 +608,8 @@ struct TimeAxisViewStripableSorter {
 	}
 };
 
-RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, Temporal::TimeDomain td)
-	: Drag (e, i, td)
+RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, Temporal::TimeDomain td, bool hide_snapped_cursor)
+	: Drag (e, i, td, true, hide_snapped_cursor)
 	, _primary (p)
 	, _ntracks (0)
 {
@@ -808,7 +812,7 @@ RegionBrushDrag::aborted (bool movement_occurred)
 }
 
 RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, TimeDomain td)
-	: RegionDrag (e, i, p, v, td)
+	: RegionDrag (e, i, p, v, td, false)
 	, _ignore_video_lock (false)
 	, _total_x_delta (0)
 	, _last_pointer_time_axis_view (0)
@@ -3019,7 +3023,7 @@ TrimDrag::setup_pointer_offset ()
 }
 
 MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
-	: Drag (e, i, Temporal::BeatTime)
+	: Drag (e, i, Temporal::BeatTime, true, false)
 	, _marker (reinterpret_cast<MeterMarker*> (_item->get_data ("marker")))
 	, _old_grid_type (e->grid_type ())
 	, _old_snap_mode (e->snap_mode ())
@@ -4713,7 +4717,7 @@ MarkerDrag::update_item (Location*)
 }
 
 ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, e->default_time_domain ()) /* XXX NUTEMPO FIX TIME DOMAIN */
+	: Drag (e, i, e->default_time_domain (), true, false) /* XXX NUTEMPO FIX TIME DOMAIN */
 	, _fixed_grab_x (0.0)
 	, _fixed_grab_y (0.0)
 	, _cumulative_y_drag (0.0)
@@ -4836,6 +4840,10 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 	pair<float, float> result;
 	result = _point->line ().drag_motion (dt, fraction, false, _pushing, _final_index);
 	show_verbose_cursor_text (_point->line ().get_verbose_cursor_relative_string (result.first, result.second));
+
+	timepos_t const offset = _point->line ().get_origin ().shift_earlier (_point->line ().offset ());
+	double px = _point->get_x () + _editor->time_to_pixel_unrounded (offset);
+	_editor->set_snapped_cursor_position (timepos_t (_editor->pixel_to_sample (px)));
 }
 
 void
@@ -5806,7 +5814,7 @@ SelectionDrag::aborted (bool)
 }
 
 SelectionMarkerDrag::SelectionMarkerDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, e->default_time_domain ())
+	: Drag (e, i, e->default_time_domain (), false, false)
 	, _edit_start (true)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New SelectionMarkerDrag\n");
@@ -5836,11 +5844,13 @@ SelectionMarkerDrag::motion (GdkEvent* event, bool first_move)
 		if (pos < _end_at_start) {
 			_editor->get_selection ().clear_time ();
 			_editor->get_selection ().add (pos, _end_at_start);
+			_editor->set_snapped_cursor_position (pos);
 		}
 	} else {
 		if (pos > _start_at_start) {
 			_editor->get_selection ().clear_time ();
 			_editor->get_selection ().add (_start_at_start, pos);
+			_editor->set_snapped_cursor_position (pos);
 		}
 	}
 }
@@ -6102,7 +6112,7 @@ RangeMarkerBarDrag::update_item (Location* location)
 }
 
 NoteDrag::NoteDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, Temporal::BeatTime)
+	: Drag (e, i, Temporal::BeatTime, true, false)
 	, _cumulative_dy (0)
 	, _was_selected (false)
 	, _copy (false)
@@ -6238,25 +6248,23 @@ NoteDrag::motion (GdkEvent* event, bool first_move)
 
 		int8_t note_delta = total_dy ();
 
-		if (!tdx.is_zero () || tdy) {
-			if (_copy) {
-				_region->move_copies (dx_qn, tdy, note_delta);
-			} else {
-				_region->move_selection (dx_qn, tdy, note_delta);
-			}
-
-			/* the new note value may be the same as the old one, but we
-			 * don't know what that means because the selection may have
-			 * involved more than one note and we might be doing something
-			 * odd with them. so show the note value anyway, always.
-			 */
-
-			uint8_t new_note = min (max (_primary->note ()->note () + note_delta, 0), 127);
-
-			_region->show_verbose_cursor_for_new_note_value (_primary->note (), new_note);
-
-			_editor->set_snapped_cursor_position (_region->region ()->source_beats_to_absolute_time (_primary->note ()->time ()));
+		if (_copy) {
+			_region->move_copies (dx_qn, tdy, note_delta);
+		} else {
+			_region->move_selection (dx_qn, tdy, note_delta);
 		}
+
+		/* the new note value may be the same as the old one, but we
+		 * don't know what that means because the selection may have
+		 * involved more than one note and we might be doing something
+		 * odd with them. so show the note value anyway, always.
+		 */
+
+		uint8_t new_note = min (max (_primary->note ()->note () + note_delta, 0), 127);
+
+		_region->show_verbose_cursor_for_new_note_value (_primary->note (), new_note);
+
+		_editor->set_snapped_cursor_position (_region->region ()->region_beats_to_absolute_time (_primary->note ()->time ()) + dx_qn);
 	}
 }
 
@@ -6624,7 +6632,7 @@ DraggingView::DraggingView (RegionView* v, RegionDrag* parent, TimeAxisView* ita
 }
 
 PatchChangeDrag::PatchChangeDrag (Editor* e, PatchChange* i, MidiRegionView* r)
-	: Drag (e, i->canvas_item (), Temporal::BeatTime)
+	: Drag (e, i->canvas_item (), Temporal::BeatTime, true, false)
 	, _region_view (r)
 	, _patch_change (i)
 	, _cumulative_dx (0)
@@ -6647,6 +6655,8 @@ PatchChangeDrag::motion (GdkEvent* ev, bool)
 	double const    dxu = _editor->duration_to_pixels (dxf); // permitted fx in units
 	_patch_change->move (ArdourCanvas::Duple (dxu - _cumulative_dx, 0));
 	_cumulative_dx = dxu;
+
+	_editor->set_snapped_cursor_position (f);
 }
 
 void
