@@ -121,6 +121,9 @@ public:
 	bool is_xrun() const { return _flags & IsXrun; }
 	bool matches (Flags f) const { return _flags & f; }
 
+	/* any range with start < end  -- not a marker */
+	bool is_range() const { return _flags & (IsSessionRange | IsRangeMarker | IsAutoLoop | IsAutoPunch | IsCDMarker); }
+
 	Flags flags () const { return _flags; }
 
 	std::shared_ptr<SceneChange> scene_change() const { return _scene_change; }
@@ -258,7 +261,7 @@ public:
 
 	bool clear_cue_markers (samplepos_t start, samplepos_t end);
 
-	void cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, bool const copy);
+	void cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, SectionOperation const op);
 
 	void ripple (timepos_t const & at, timecnt_t const & distance, bool include_locked, bool notify);
 

@@ -249,6 +249,13 @@ enum RecordMode {
 	RecSoundOnSound
 };
 
+enum SectionOperation {
+	CopyPasteSection,
+	CutPasteSection,
+	InsertSection,
+	DeleteSection,
+};
+
 enum NoteMode {
 	Sustained,
 	Percussive

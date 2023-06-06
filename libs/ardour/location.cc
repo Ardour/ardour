@@ -1681,7 +1681,7 @@ Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool includ
 }
 
 void
-Locations::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, bool const copy)
+Locations::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, SectionOperation const op)
 {
 	LocationList ll;
 	LocationList pastebuf;
@@ -1699,20 +1699,38 @@ Locations::cut_copy_section (timepos_t const& start, timepos_t const& end, timep
 			continue;
 		}
 
-		if (!i->is_mark ()) {
+		if (i->is_range ()) {
 			if (i->start () >= start && i->end () <= end) {
 				/* range is inside the selction, process it */
 			} else if (i->start () < start && i->end () < start) {
 				/* range is entirely outside the selection, possible ripple it */
 			} else if (i->start () >= end && i->end () >= end) {
 				/* range is entirely outside the selection, possible ripple it */
+			} else if (i->start () < start && i->end () >= end) {
+				/* selection is inside the range, possible shorten or extend it */
+				if (op != DeleteSection && op != InsertSection) {
+					continue;
+				}
 			} else {
 				// TODO - How do we handle ranges that intersect start/end ?
 				continue;
 			}
 		}
 
-		if (!copy) {
+		if (op == DeleteSection) {
+			timecnt_t distance = end.distance(start);
+			if (i->start () >= start && i->start () < end) {
+				_session.locations()->remove (i);
+			} else if (i->start () >= end) {
+				if (i->is_range ()) {
+					i->set (i->start () + distance, i->end () + distance);
+				} else {
+					i->set_start (i->start () + distance);
+				}
+			} else if (i->end () >= start) {
+				i->set (i->start (), i->end () + distance);
+			}
+		} else if (op == CutPasteSection) {
 			timecnt_t distance = timecnt_t (i->start ().time_domain ());
 
 			if (i->start () < start) {
@@ -1738,7 +1756,7 @@ Locations::cut_copy_section (timepos_t const& start, timepos_t const& end, timep
 			}
 
 
-			if (i->is_mark ()) {
+			if (!i->is_range ()) {
 				i->set_start (i->start () + distance);
 				continue;
 			}
@@ -1756,7 +1774,7 @@ Locations::cut_copy_section (timepos_t const& start, timepos_t const& end, timep
 
 			i->set (i->start () + distance, i->end () + dist_end);
 
-		} else {
+		} else if (op == CopyPasteSection) {
 			if (i->start() >= start && i->start() < end) {
 				Location* copy = new Location (*i);
 				pastebuf.push_back (copy);
@@ -1764,27 +1782,30 @@ Locations::cut_copy_section (timepos_t const& start, timepos_t const& end, timep
 		}
 	}
 
-	if (copy) {
+	if (op == CopyPasteSection || op == InsertSection) {
 		/* ripple */
 		timecnt_t distance = start.distance(end);
 		for (auto const& i : ll) {
 			if (i->start() >= to) {
-				if (i->is_mark ()) {
-					i->set_start (i->start () + distance);
-				} else {
+				if (i->is_range ()) {
 					i->set (i->start () + distance, i->end () + distance);
+				} else {
+					i->set_start (i->start () + distance);
 				}
-			} else if (!i->is_mark () && i->end() >= to) {
+			} else if (i->is_range () && i->end() >= to) {
 				i->set_end (i->end () + distance);
 			}
 		}
+	}
+	if (op == CopyPasteSection) {
 		/* paste */
+		timecnt_t distance = start.distance(end);
 		distance = start.distance (to);
 		for (auto const& i : pastebuf) {
-			if (i->is_mark ()) {
-				i->set_start (i->start () + distance);
-			} else {
+			if (i->is_range ()) {
 				i->set (i->start () + distance, i->end () + distance);
+			} else {
+				i->set_start (i->start () + distance);
 			}
 			locations.push_back (i);
 			added (i); /* EMIT SIGNAL */

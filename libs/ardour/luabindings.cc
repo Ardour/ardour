@@ -2343,6 +2343,13 @@ LuaBindings::common (lua_State* L)
 		.addConst ("SrcBest", ARDOUR::SrcQuality(SrcBest))
 		.endNamespace ()
 
+		.beginNamespace ("SectionOperation")
+		.addConst ("CopyPaste", ARDOUR::SectionOperation(CopyPasteSection))
+		.addConst ("CutPaste", ARDOUR::SectionOperation(CutPasteSection))
+		.addConst ("Insert", ARDOUR::SectionOperation(InsertSection))
+		.addConst ("Delete", ARDOUR::SectionOperation(DeleteSection))
+		.endNamespace ()
+
 		.beginNamespace ("MeterType")
 		.addConst ("MeterMaxSignal", ARDOUR::MeterType(MeterMaxSignal))
 		.addConst ("MeterMaxPeak", ARDOUR::MeterType(MeterMaxPeak))
