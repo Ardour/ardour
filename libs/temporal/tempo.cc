@@ -1038,7 +1038,7 @@ TempoMap::shift (timepos_t const & at, timecnt_t const & by)
 void
 TempoMap::shift (timepos_t const & at, BBT_Offset const & offset)
 {
-	if (offset.bars < 1) {
+	if (std::abs (offset.bars) < 1) {
 		return;
 	}
 
@@ -1050,7 +1050,7 @@ TempoMap::shift (timepos_t const & at, BBT_Offset const & offset)
 
 	for (auto & p : _points) {
 		if (p.sclock() < at_superclocks) {
-			BBT_Time new_bbt (p.bbt().bars + offset.bars, p.bbt().beats, p.bbt().ticks);
+			BBT_Time new_bbt (std::max (0, p.bbt().bars + offset.bars), p.bbt().beats, p.bbt().ticks);
 			p.set (p.sclock(), p.beats(), new_bbt);
 		}
 	}
