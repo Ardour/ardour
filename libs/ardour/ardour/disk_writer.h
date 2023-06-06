@@ -169,6 +169,8 @@ private:
 	CaptureInfos                 capture_info;
 	mutable Glib::Threads::Mutex capture_info_lock;
 
+	samplepos_t get_capture_start_sample_locked (uint32_t n = 0) const;
+
 	boost::optional<samplepos_t> _capture_start_sample;
 
 	samplecnt_t   _capture_captured;

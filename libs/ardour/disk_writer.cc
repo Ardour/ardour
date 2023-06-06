@@ -312,7 +312,12 @@ ARDOUR::samplepos_t
 DiskWriter::get_capture_start_sample (uint32_t n) const
 {
 	Glib::Threads::Mutex::Lock lm (capture_info_lock);
+	return get_capture_start_sample_locked (n);
+}
 
+ARDOUR::samplepos_t
+DiskWriter::get_capture_start_sample_locked (uint32_t n) const
+{
 	if (capture_info.size() > n) {
 		/* this is a completed capture */
 		return capture_info[n]->start;
@@ -1038,7 +1043,14 @@ DiskWriter::do_flush (RunContext ctxt, bool force_flush)
 
 		if ((total > _chunk_samples) || force_flush) {
 			Source::WriterLock lm(_midi_write_source->mutex());
-			if (_midi_write_source->midi_write (lm, *_midi_buf, timepos_t (get_capture_start_sample (0)), timecnt_t (to_write)) != to_write) {
+			timepos_t start_sample;
+			if (ctxt == TransportContext) {
+				start_sample = timepos_t(get_capture_start_sample_locked (0));
+			} else {
+				start_sample = timepos_t(get_capture_start_sample (0));
+			}
+
+			if (_midi_write_source->midi_write (lm, *_midi_buf, start_sample, timecnt_t (to_write)) != to_write) {
 				error << string_compose(_("MidiDiskstream %1: cannot write to disk"), id()) << endmsg;
 				return -1;
 			}
