@@ -2701,7 +2701,7 @@ Editor::insert_source_list_selection (float times)
 }
 
 void
-Editor::cut_copy_section (bool copy)
+Editor::cut_copy_section (ARDOUR::SectionOperation const op)
 {
 	timepos_t start, end;
 	if (!get_selection_extents (start, end) || !_session) {
@@ -2724,7 +2724,12 @@ Editor::cut_copy_section (bool copy)
 	}
 #endif
 	timepos_t to (get_preferred_edit_position ());
-	//_session->cut_copy_section (start, end, to, copy ? CopyPasteSection : CutCopySection);
+	_session->cut_copy_section (start, end, to, op);
+
+	if (op == DeleteSection) {
+		selection->clear ();
+		return;
+	}
 
 	timepos_t to_end (to + start.distance (end));
 
@@ -2735,10 +2740,10 @@ Editor::cut_copy_section (bool copy)
 			selection->clear ();
 			break;
 		case SectionSelectRetainAndMovePlayhead:
-			_session->request_locate (copy ? to_end.samples (): to.samples ());
+			_session->request_locate (op != CutPasteSection ? to_end.samples (): to.samples ());
 			/* fallthough */
 		case SectionSelectRetain:
-			if (!copy || to < end) {
+			if (op == CutPasteSection || to < end) {
 				selection->set (to, to_end);
 			}
 			break;
