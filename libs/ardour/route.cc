@@ -4556,7 +4556,7 @@ Route::shift (timepos_t const & pos, timecnt_t const & distance)
 }
 
 void
-Route::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, bool const copy)
+Route::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, SectionOperation const op)
 {
 	ControllableSet acs;
 	automatables (acs);
@@ -4571,14 +4571,27 @@ Route::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t
 		}
 
 		XMLNode &before = al->get_state ();
-		std::shared_ptr<Evoral::ControlList> cl = copy ? al->copy (start, end) : al->cut (start, end);
-		if (!copy) {
+		std::shared_ptr<Evoral::ControlList> cl;
+		if (op == CopyPasteSection) {
+			cl = al->copy (start, end);
+		} else if (op == CutPasteSection) {
+			cl = al->cut (start, end);
+		} else if (op == DeleteSection) {
+			al->clear (start, end);
+		}
+
+		if (op == CutPasteSection || op == DeleteSection) {
 			/* remove time (negative distance), ripple */
 			al->shift (start, end.distance (start));
 		}
-		/* make space at the inserion point */
-		al->shift (to, start.distance (end));
-		al->paste (*cl, to);
+
+		if (op != DeleteSection) {
+			/* make space at the inserion point */
+			al->shift (to, start.distance (end));
+		}
+		if (op == CopyPasteSection || op == CutPasteSection) {
+			al->paste (*cl, to);
+		}
 
 		XMLNode &after = al->get_state ();
 		_session.add_command (new MementoCommand<AutomationList> (*al.get(), &before, &after));

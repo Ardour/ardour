@@ -7225,16 +7225,25 @@ Session::clear_object_selection ()
 }
 
 void
-Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, bool const copy)
+Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, SectionOperation const op)
 {
 	std::list<TimelineRange> ltr;
 	TimelineRange tlr (start, end, 0);
 	ltr.push_back (tlr);
 
-	if (copy) {
-		begin_reversible_command (_("Copy Section"));
-	} else {
-		begin_reversible_command (_("Move Section"));
+	switch (op) {
+		case CopyPasteSection:
+			begin_reversible_command (_("Copy Section"));
+			break;
+		case CutPasteSection:
+			begin_reversible_command (_("Move Section"));
+			break;
+		case InsertSection:
+			begin_reversible_command (_("Insert Section"));
+			break;
+		case DeleteSection:
+			begin_reversible_command (_("Delete Section"));
+			break;
 	}
 
 	{
@@ -7247,16 +7256,26 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 			pl->clear_changes ();
 			pl->clear_owned_changes ();
 
-			std::shared_ptr<Playlist> p = copy ? pl->copy (ltr) : pl->cut (ltr);
-			if (!copy) {
+			std::shared_ptr<Playlist> p;
+			if (op == CopyPasteSection) {
+				p = pl->copy (ltr);
+			} else if (op == CutPasteSection || op == DeleteSection) {
+				p = pl->cut (ltr);
+			}
+
+			if (op == CutPasteSection || op == DeleteSection) {
 				pl->ripple (start, end.distance(start), NULL);
 			}
 
-			/* now make space at the insertion-point */
-			pl->split (to);
-			pl->ripple (to, start.distance(end), NULL);
+			if (op != DeleteSection) {
+				/* now make space at the insertion-point */
+				pl->split (to);
+				pl->ripple (to, start.distance(end), NULL);
+			}
 
-			pl->paste (p, to, 1);
+			if (op == CopyPasteSection || op == CutPasteSection) {
+				pl->paste (p, to, 1);
+			}
 
 			vector<Command*> cmds;
 			pl->rdiff (cmds);
@@ -7273,12 +7292,12 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 
 	/* automation */
 	for (auto& r : *(routes.reader())) {
-		r->cut_copy_section (start, end, to, copy);
+		r->cut_copy_section (start, end, to, op);
 	}
 
 	{
 		XMLNode &before = _locations->get_state();
-		_locations->cut_copy_section (start, end, to, copy);
+		_locations->cut_copy_section (start, end, to, op);
 		XMLNode &after = _locations->get_state();
 		add_command (new MementoCommand<Locations> (*_locations, &before, &after));
 	}
