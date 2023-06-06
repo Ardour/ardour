@@ -147,7 +147,7 @@ private:
 class Drag
 {
 public:
-	Drag (Editor *, ArdourCanvas::Item *, Temporal::TimeDomain td, bool trackview_only = true);
+	Drag (Editor *, ArdourCanvas::Item *, Temporal::TimeDomain td, bool trackview_only = true, bool hide_snapped_cursor = true);
 	virtual ~Drag () {}
 
 	void set_manager (DragManager* m) {
@@ -321,6 +321,7 @@ protected:
 
 private:
 	bool _trackview_only; ///< true if pointer y value should always be relative to the top of the trackview group
+	bool _hide_snapped_cursor; ///< set true of ::motion does not call `set_snapped_cursor_position`
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
 	bool _starting_point_passed; ///< true if we called move () with first_move flag, otherwise false
 	bool _initially_vertical; ///< true if after move threshold is passed we appear to be moving vertically; undefined before that
@@ -375,7 +376,7 @@ public:
 class RegionDrag : public Drag, public sigc::trackable
 {
 public:
-	RegionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, Temporal::TimeDomain);
+	RegionDrag (Editor *, ArdourCanvas::Item *, RegionView *, std::list<RegionView*> const &, Temporal::TimeDomain, bool hide_snapped_cursor = true);
 	virtual ~RegionDrag () {}
 
 protected:
