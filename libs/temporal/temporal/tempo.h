@@ -1165,12 +1165,12 @@ class LIBTEMPORAL_API TempoMapCutBuffer
 	void add_end_tempo (Tempo const & t);
 	void add_start_meter (Meter const & t);
 	void add_end_meter (Meter const & t);
-	
-	Tempo const * tempo_at_start () const { return _start_tempo; }
-	Tempo const * tempo_at_end () const { return _end_tempo; }
 
-	Meter const * meter_at_start () const { return _start_meter; }
-	Meter const * meter_at_end () const { return _end_meter; }
+	Tempo const * start_tempo () const { return _start_tempo; }
+	Tempo const * end_tempo () const { return _end_tempo; }
+
+	Meter const * start_meter () const { return _start_meter; }
+	Meter const * end_meter () const { return _end_meter; }
 
 	typedef boost::intrusive::list<TempoPoint, boost::intrusive::base_hook<tempo_hook>> Tempos;
 	typedef boost::intrusive::list<MeterPoint, boost::intrusive::base_hook<meter_hook>> Meters;

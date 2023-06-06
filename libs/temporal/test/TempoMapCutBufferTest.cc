@@ -35,6 +35,9 @@ TempoMapCutBufferTest::cutTest()
 	                                   timepos_t::from_superclock (tmap->superclock_at (BBT_Argument (31, 1, 0))),
 	                                   false);
 
+	std::cerr << "Cut Buffer:\n";
+	cb->dump (std::cerr);
+
 	std::cerr << "After cut\n";
 	tmap->dump (std::cerr);
 
