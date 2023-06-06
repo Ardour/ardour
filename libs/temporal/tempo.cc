@@ -945,8 +945,7 @@ void
 TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool ripple)
 {
 	if (ripple) {
-
-
+		shift (position, cb.duration());
 	}
 
 	bool replaced_ignored;
@@ -1010,30 +1009,24 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 
 }
 
-#if 0
 void
 TempoMap::shift (timepos_t const & at, timecnt_t const & by)
 {
-	if (by.time_domain() == BeatTime) {
+	superclock_t distance = by.superclocks ();
+	superclock_t at_superclocks = by.superclocks ();
+	Points::iterator p = _points.begin();
 
-	} else {
-		superclock_t distance = by.superclocks ();
-		superclock_t at_superclocks = by.superclocks ();
-		Points::iterator p = _points.begin();
-
-		while (p.sclock() < at_superclocks) {
-			++p;
-		}
-
-		if (p == _points.end()) {
-			return;
-		}
-
-		p->set (at_superclocks + distance, p->beats(), p->bbt());
-		reset_starting_at (at_superclocks);
+	while (p->sclock() < at_superclocks) {
+		++p;
 	}
+
+	if (p == _points.end()) {
+		return;
+	}
+
+	p->set (at_superclocks + distance, p->beats(), p->bbt());
+	reset_starting_at (at_superclocks);
 }
-#endif
 
 void
 TempoMap::shift (timepos_t const & at, BBT_Offset const & offset)
