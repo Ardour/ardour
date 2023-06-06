@@ -1038,6 +1038,8 @@ TempoMap::shift (timepos_t const & at, timecnt_t const & by)
 void
 TempoMap::shift (timepos_t const & at, BBT_Offset const & offset)
 {
+	/* for now we require BBT-based shifts to be in units of whole bars */
+
 	if (std::abs (offset.bars) < 1) {
 		return;
 	}
@@ -1046,13 +1048,33 @@ TempoMap::shift (timepos_t const & at, BBT_Offset const & offset)
 		return;
 	}
 
-	superclock_t at_superclocks = at.superclocks();
+	const superclock_t at_superclocks = at.superclocks();
 
-	for (auto & p : _points) {
-		if (p.sclock() < at_superclocks) {
-			BBT_Time new_bbt (std::max (0, p.bbt().bars + offset.bars), p.bbt().beats, p.bbt().ticks);
-			p.set (p.sclock(), p.beats(), new_bbt);
+	for (Points::iterator p = _points.begin(); p != _points.end(); ) {
+
+		Points::iterator nxt = p;
+		++nxt;
+
+		if (p->sclock() >= at_superclocks) {
+			if (offset.bars > p->bbt().bars) {
+
+				TempoPoint* tp;
+				MeterPoint* mp;
+
+				if (dynamic_cast<MusicTimePoint*> (&*p)) {
+					break;
+				} else if ((mp = dynamic_cast<MeterPoint*> (&*p))) {
+					core_remove_meter (*mp);
+				} else if ((tp = dynamic_cast<TempoPoint*> (&*p))) {
+					core_remove_tempo (*tp);
+				}
+			} else {
+				BBT_Time new_bbt (p->bbt().bars + offset.bars, p->bbt().beats, p->bbt().ticks);
+				p->set (p->sclock(), p->beats(), new_bbt);
+			}
 		}
+
+		p = nxt;
 	}
 
 	reset_starting_at (at_superclocks);
