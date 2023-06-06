@@ -1010,6 +1010,54 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 
 }
 
+#if 0
+void
+TempoMap::shift (timepos_t const & at, timecnt_t const & by)
+{
+	if (by.time_domain() == BeatTime) {
+
+	} else {
+		superclock_t distance = by.superclocks ();
+		superclock_t at_superclocks = by.superclocks ();
+		Points::iterator p = _points.begin();
+
+		while (p.sclock() < at_superclocks) {
+			++p;
+		}
+
+		if (p == _points.end()) {
+			return;
+		}
+
+		p->set (at_superclocks + distance, p->beats(), p->bbt());
+		reset_starting_at (at_superclocks);
+	}
+}
+#endif
+
+void
+TempoMap::shift (timepos_t const & at, BBT_Offset const & offset)
+{
+	if (offset.bars < 1) {
+		return;
+	}
+
+	if (offset.beats || offset.ticks) {
+		return;
+	}
+
+	superclock_t at_superclocks = at.superclocks();
+
+	for (auto & p : _points) {
+		if (p.sclock() < at_superclocks) {
+			BBT_Time new_bbt (p.bbt().bars + offset.bars, p.bbt().beats, p.bbt().ticks);
+			p.set (p.sclock(), p.beats(), new_bbt);
+		}
+	}
+
+	reset_starting_at (at_superclocks);
+}
+
 MeterPoint*
 TempoMap::add_meter (MeterPoint* mp)
 {
