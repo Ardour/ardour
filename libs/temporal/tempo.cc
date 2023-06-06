@@ -956,8 +956,8 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 	 * meters, bartimes separately.
 	 */
 
-	const BBT_Time pos_bbt = bbt_at (position);
-	const Beats    pos_beats = quarters_at (position);
+	BBT_Time pos_bbt = bbt_at (position);
+	Beats    pos_beats = quarters_at (position);
 
 	Tempo const * st = cb.start_tempo();
 	if (st) {
@@ -993,14 +993,18 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 		}
 	}
 
+	const timepos_t end_position = position + cb.duration();
+	pos_bbt = bbt_at (end_position);
+	pos_beats = quarters_at (end_position);
+
 	st = cb.end_tempo();
 	if (st) {
-		TempoPoint *ntp = new TempoPoint (*this, *st, position.superclocks(), pos_beats, pos_bbt);
+		TempoPoint *ntp = new TempoPoint (*this, *st, end_position.superclocks(), pos_beats, pos_bbt);
 		core_add_tempo (ntp, replaced_ignored);
 	}
 	mt = cb.end_meter();
 	if (mt) {
-		MeterPoint *ntp = new MeterPoint (*this, *mt, position.superclocks(), pos_beats, pos_bbt);
+		MeterPoint *ntp = new MeterPoint (*this, *mt, end_position.superclocks(), pos_beats, pos_bbt);
 		core_add_meter (ntp, replaced_ignored);
 	}
 
