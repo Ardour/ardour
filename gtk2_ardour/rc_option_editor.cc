@@ -4652,6 +4652,7 @@ These settings will only take effect after %1 is restarted.\n\
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_master)
 		);
 	mtm->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
+	mtm->add (MeterPeak0dB, ArdourMeter::meter_type_string(MeterPeak0dB));
 	mtm->add (MeterK20,     ArdourMeter::meter_type_string(MeterK20));
 	mtm->add (MeterK14,     ArdourMeter::meter_type_string(MeterK14));
 	mtm->add (MeterK12,     ArdourMeter::meter_type_string(MeterK12));
@@ -4669,6 +4670,7 @@ These settings will only take effect after %1 is restarted.\n\
 		sigc::mem_fun (*_rc_config, &RCConfiguration::set_meter_type_bus)
 		);
 	mtb->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
+	mtb->add (MeterPeak0dB, ArdourMeter::meter_type_string(MeterPeak0dB));
 	mtb->add (MeterK20,     ArdourMeter::meter_type_string(MeterK20));
 	mtb->add (MeterK14,     ArdourMeter::meter_type_string(MeterK14));
 	mtb->add (MeterK12,     ArdourMeter::meter_type_string(MeterK12));
@@ -4687,6 +4689,13 @@ These settings will only take effect after %1 is restarted.\n\
 		);
 	mtt->add (MeterPeak,    ArdourMeter::meter_type_string(MeterPeak));
 	mtt->add (MeterPeak0dB, ArdourMeter::meter_type_string(MeterPeak0dB));
+	mtt->add (MeterK20,     ArdourMeter::meter_type_string(MeterK20));
+	mtt->add (MeterK14,     ArdourMeter::meter_type_string(MeterK14));
+	mtt->add (MeterK12,     ArdourMeter::meter_type_string(MeterK12));
+	mtt->add (MeterIEC1DIN, ArdourMeter::meter_type_string(MeterIEC1DIN));
+	mtt->add (MeterIEC1NOR, ArdourMeter::meter_type_string(MeterIEC1NOR));
+	mtt->add (MeterIEC2BBC, ArdourMeter::meter_type_string(MeterIEC2BBC));
+	mtt->add (MeterIEC2EBU, ArdourMeter::meter_type_string(MeterIEC2EBU));
 
 	add_option (S_("Preferences|Metering"), mtt);
 
