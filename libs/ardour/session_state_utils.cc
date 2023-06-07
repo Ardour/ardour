@@ -45,25 +45,4 @@ create_backup_file (const std::string & file_path)
 	return copy_file (file_path, file_path + backup_suffix);
 }
 
-void
-get_state_files_in_directory (const std::string & directory_path,
-			      vector<std::string> & result)
-{
-	find_files_matching_pattern (result, directory_path,
-	                             '*' + string(statefile_suffix));
-}
-
-vector<string>
-get_file_names_no_extension (const vector<std::string> & file_paths)
-{
-	vector<string> result;
-
-	std::transform (file_paths.begin(), file_paths.end(),
-			std::back_inserter(result), PBD::basename_nosuffix);
-
-	sort (result.begin(), result.end(), std::less<string>());
-
-	return result;
-}
-
 } // namespace ARDOUR
