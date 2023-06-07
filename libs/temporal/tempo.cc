@@ -977,12 +977,14 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 	if (st) {
 		TempoPoint *ntp = new TempoPoint (*this, *st, position.superclocks(), pos_beats, pos_bbt);
 		core_add_tempo (ntp, replaced_ignored);
+		core_add_point (ntp);
 	}
 
 	Meter const * mt = cb.start_meter();
 	if (mt) {
 		MeterPoint *ntp = new MeterPoint (*this, *mt, position.superclocks(), pos_beats, pos_bbt);
 		core_add_meter (ntp, replaced_ignored);
+		core_add_point (ntp);
 	}
 
 	for (auto const & p : cb.points()) {
@@ -994,15 +996,18 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 			MusicTimePoint *ntp = new MusicTimePoint (*mtp);
 			ntp->set (ntp->sclock() + position.superclocks(), ntp->beats() + position.beats(), ntp->bbt());
 			core_add_bartime (ntp, replaced_ignored);
+			core_add_point (ntp);
 		} else {
 			if ((tp = dynamic_cast<TempoPoint const *> (&p))) {
 				TempoPoint *ntp = new TempoPoint (*tp);
 				ntp->set (ntp->sclock() + position.superclocks(), ntp->beats() + position.beats(), ntp->bbt());
 				core_add_tempo (ntp, replaced_ignored);
+				core_add_point (ntp);
 			} else if ((mp = dynamic_cast<MeterPoint const *> (&p))) {
 				MeterPoint *ntp = new MeterPoint (*mp);
 				ntp->set (ntp->sclock() + position.superclocks(), ntp->beats() + position.beats(), ntp->bbt());
 				core_add_meter (ntp, replaced_ignored);
+				core_add_point (ntp);
 			}
 		}
 	}
@@ -1015,11 +1020,13 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 	if (st) {
 		TempoPoint *ntp = new TempoPoint (*this, *st, end_position.superclocks(), pos_beats, pos_bbt);
 		core_add_tempo (ntp, replaced_ignored);
+		core_add_point (ntp);
 	}
 	mt = cb.end_meter();
 	if (mt) {
 		MeterPoint *ntp = new MeterPoint (*this, *mt, end_position.superclocks(), pos_beats, pos_bbt);
 		core_add_meter (ntp, replaced_ignored);
+		core_add_point (ntp);
 	}
 
 }
