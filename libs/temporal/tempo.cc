@@ -882,41 +882,51 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 	Meter start_meter (meter_at (start));
 	Meter end_meter (meter_at (end));
 
-	for (auto const & p : _points) {
+	for (Points::iterator p = _points.begin(); p != _points.end(); ) {
+
 
 		/* XXX might to check time domain of start/end, and use beat
 		 * time here.
 		 */
 
-		if (p.sclock() < start_sclock || p.sclock() >= end_sclock) {
+		if (p->sclock() < start_sclock || p->sclock() >= end_sclock) {
+			++p;
 			continue;
 		}
+
+		Points::iterator nxt (p);
+		++nxt;
 
 		TempoPoint const * tp;
 		MeterPoint const * mp;
 		MusicTimePoint const * mtp;
 
-		if ((mtp = dynamic_cast<MusicTimePoint const *> (&p))) {
+		if ((mtp = dynamic_cast<MusicTimePoint const *> (&*p))) {
 			cb->add (*mtp);
-			if (!copy) {
+			if (!copy && !mtp->sclock() == 0) {
 				core_remove_bartime (*mtp);
+				remove_point (*mtp);
 				removed = true;
 			}
 		} else {
-			if ((tp = dynamic_cast<TempoPoint const *> (&p))) {
+			if ((tp = dynamic_cast<TempoPoint const *> (&*p))) {
 				cb->add (*tp);
-				if (!copy) {
+				if (!copy && !tp->sclock() == 0) {
 					core_remove_tempo (*tp);
+					remove_point (*tp);
 					removed = true;
 				}
-			} else if ((mp = dynamic_cast<MeterPoint const *> (&p))) {
+			} else if ((mp = dynamic_cast<MeterPoint const *> (&*p))) {
 				cb->add (*mp);
-				if (!copy) {
+				if (!copy && !mp->sclock() == 0) {
 					core_remove_meter (*mp);
+					remove_point (*mp);
 					removed = true;
 				}
 			}
 		}
+
+		p = nxt;
 	}
 
 	if (!copy && removed) {
