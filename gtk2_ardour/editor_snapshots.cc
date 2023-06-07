@@ -202,16 +202,11 @@ EditorSnapshots::redisplay ()
 		return;
 	}
 
-	vector<std::string> state_file_paths;
+	vector<string> state_file_names = _session->possible_states ();
 
-	get_state_files_in_directory (_session->session_directory().root_path(),
-	                              state_file_paths);
-
-	if (state_file_paths.empty()) {
+	if (state_file_names.empty()) {
 		return;
 	}
-
-	vector<string> state_file_names (get_file_names_no_extension(state_file_paths));
 
 	_snapshot_model->clear ();
 

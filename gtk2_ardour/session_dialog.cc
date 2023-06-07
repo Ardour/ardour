@@ -786,14 +786,7 @@ SessionDialog::redisplay_recent_sessions ()
 	int session_snapshot_count = 0;
 
 	for (vector<std::string>::const_iterator i = session_directories.begin(); i != session_directories.end(); ++i) {
-		std::vector<std::string> state_file_paths;
 
-		// now get available states for this session
-
-		get_state_files_in_directory (*i, state_file_paths);
-
-		vector<string> states;
-		vector<const gchar*> item;
 		string dirname = *i;
 
 		/* remove any trailing / */
@@ -813,17 +806,10 @@ SessionDialog::redisplay_recent_sessions ()
 		}
 
 		/* now get available states for this session */
-
-		states = Session::possible_states (dirname);
-
-		if (states.empty()) {
-			/* no state file? */
-			continue;
-		}
-
-		std::vector<string> state_file_names(get_file_names_no_extension (state_file_paths));
+		vector<string> state_file_names = Session::possible_states (dirname);
 
 		if (state_file_names.empty()) {
+			/* no state file? */
 			continue;
 		}
 

@@ -1109,9 +1109,7 @@ ARDOUR_UI::process_snapshot_session_prompter (Prompter& prompter, bool switch_to
 		}
 	}
 
-	vector<std::string> p;
-	get_state_files_in_directory (_session->session_directory().root_path(), p);
-	vector<string> n = get_file_names_no_extension (p);
+	vector<std::string> n = Session::possible_states (_session->session_directory().root_path());
 
 	if (find (n.begin(), n.end(), snapname) != n.end()) {
 
