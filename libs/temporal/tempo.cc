@@ -877,6 +877,11 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 	superclock_t end_sclock = end.superclocks();
 	bool removed = false;
 
+	Tempo start_tempo (tempo_at (start));
+	Tempo end_tempo (tempo_at (end));
+	Meter start_meter (meter_at (start));
+	Meter end_meter (meter_at (end));
+
 	for (auto const & p : _points) {
 
 		/* XXX might to check time domain of start/end, and use beat
@@ -923,19 +928,19 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 	}
 
 	if (cb->tempos().empty() || cb->tempos().front().sclock() != start.superclocks()) {
-		cb->add_start_tempo (tempo_at (start));
+		cb->add_start_tempo (start_tempo);
 	}
 
 	if (!cb->tempos().empty() && cb->tempos().back().sclock() != start.superclocks()) {
-		cb->add_end_tempo (tempo_at (start));
+		cb->add_end_tempo (end_tempo);
 	}
 
 	if (cb->meters().empty() || cb->meters().front().sclock() != start.superclocks()) {
-		cb->add_start_meter (meter_at (start));
+		cb->add_start_meter (start_meter);
 	}
 
 	if (!cb->meters().empty() && cb->meters().back().sclock() != start.superclocks()) {
-		cb->add_end_meter (meter_at (start));
+		cb->add_end_meter (end_meter);
 	}
 
 	return cb;
