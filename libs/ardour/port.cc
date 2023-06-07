@@ -722,12 +722,14 @@ Port::reconnect ()
 
 	if (_ext_connections.find (bid) != _ext_connections.end ()) {
 		if (_int_connections.empty () && _ext_connections[bid].empty ()) {
+			DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect(%1) no internal or external connections for backend '%2'\n", name(), bid));
 			return 0; /* OK */
 		}
 		c_int.insert (c_int.end(), _int_connections.begin(), _int_connections.end());
 		c_ext.insert (c_ext.end(), _ext_connections.at(bid).begin(), _ext_connections.at(bid).end());
 	} else {
 		if (_int_connections.empty ()) {
+			DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect(%1) no internal connections\n", name()));
 			return 0; /* OK */
 		}
 		c_int.insert (c_int.end(), _int_connections.begin(), _int_connections.end());
@@ -740,7 +742,7 @@ Port::reconnect ()
 	 */
 	lm.release ();
 
-	DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect() Connect %1 to %2 destinations\n",name(), c_int.size () + c_ext.size ()));
+	DEBUG_TRACE (DEBUG::Ports, string_compose ("Port::reconnect(%1) to %2 destinations for backend '%3'\n", name(), c_int.size () + c_ext.size (), bid));
 
 	int count = 0;
 
