@@ -38,26 +38,6 @@ namespace ARDOUR {
  */
 LIBARDOUR_API bool create_backup_file (const std::string & file_path);
 
-/**
- * Get the absolute paths to all state files in the directory
- * at path directory_path.
- *
- * @param directory_path The absolute path to a directory.
- * @param result vector to contain resulting state files.
- */
-LIBARDOUR_API void get_state_files_in_directory (const std::string& directory_path,
-						 std::vector<std::string>& result);
-
-/**
- * Given a vector of paths to files, return a vector containing
- * the filenames without any extension.
- *
- * @param file_paths a vector containing the file paths
- * @return a vector containing a list of file names without any
- * filename extension.
- */
-LIBARDOUR_API std::vector<std::string> get_file_names_no_extension (const std::vector<std::string> & file_paths);
-
 } // namespace ARDOUR
 
 #endif
