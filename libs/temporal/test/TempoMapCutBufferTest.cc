@@ -23,12 +23,12 @@ TempoMapCutBufferTest::cutTest()
 	(void) tmap->set_meter (Meter (6, 8), BBT_Argument (3, 1, 0));
 
 	(void) tmap->set_tempo (Tempo (180, 4), BBT_Argument (15, 1, 0));
-	(void) tmap->set_meter (Meter (6, 8), BBT_Argument (15, 1, 0));
+	(void) tmap->set_meter (Meter (3, 4), BBT_Argument (15, 1, 0));
 
 	(void) tmap->set_tempo (Tempo (180, 4), BBT_Argument (31, 1, 0));
-	(void) tmap->set_meter (Meter (6, 8), BBT_Argument (32, 1, 0));
+	(void) tmap->set_meter (Meter (5, 4), BBT_Argument (32, 1, 0));
 
-	std::cerr << "Before cut\n";
+	std::cerr << "\n\nBefore cut\n";
 	tmap->dump (std::cerr);
 
 	TempoMapCutBuffer* cb = tmap->cut (timepos_t::from_superclock (tmap->superclock_at (BBT_Argument (8, 1, 0))),
