@@ -928,7 +928,7 @@ private:
 
 	/* parent for group for selection marker (above ruler) */
 	ArdourCanvas::Container* _selection_marker_group;
-	LocationMarkers          _selection_marker;
+	LocationMarkers*         _selection_marker;
 
 	/* The group containing all other groups that are scrolled vertically
 	   and horizontally.
