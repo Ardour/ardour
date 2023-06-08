@@ -290,6 +290,7 @@ Editor::Editor ()
 	, cd_marker_group (0)
 	, _time_markers_group (0)
 	, _selection_marker_group (0)
+	, _selection_marker (new LocationMarkers)
 	, hv_scroll_group (0)
 	, h_scroll_group (0)
 	, cursor_scroll_group (0)
@@ -887,6 +888,7 @@ Editor::~Editor()
 	delete new_transport_marker_menu;
 	delete editor_ruler_menu;
 	delete _popup_region_menu_item;
+	delete _selection_marker;
 
 	delete button_bindings;
 	delete _routes;
