@@ -1273,7 +1273,7 @@ Playlist::paste (std::shared_ptr<Playlist> other, timepos_t const & position, fl
 		int itimes = (int) floor (times);
 		timepos_t pos = position;
 		timecnt_t const shift (other->_get_extent().second, other->_get_extent().first);
-		layer_t top = top_layer ();
+		layer_t top = top_layer () + 1;
 
 		{
 			RegionWriteLock rl1 (this);
@@ -1286,13 +1286,12 @@ Playlist::paste (std::shared_ptr<Playlist> other, timepos_t const & position, fl
 					*/
 
 					add_region_internal (copy_of_region, r->position() + pos, rl1.thawlist);
-					copy_of_region->set_layer (copy_of_region->layer() + top);
+					set_layer (copy_of_region, copy_of_region->layer() + top);
 				}
 				pos += shift;
 			}
 		}
 	}
-	relayer ();
 	return 0;
 }
 
