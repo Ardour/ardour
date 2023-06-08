@@ -7251,7 +7251,10 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 		bool automation_follows = Config->get_automation_follows_regions ();
 		Config->set_automation_follows_regions (false);
 
-		for (auto& pl : _playlists->playlists) {
+		vector<std::shared_ptr<Playlist>> playlists;
+		_playlists->get (playlists);
+
+		for (auto& pl : playlists) {
 			pl->freeze ();
 			pl->clear_changes ();
 			pl->clear_owned_changes ();
