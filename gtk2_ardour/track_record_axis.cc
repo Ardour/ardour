@@ -120,10 +120,6 @@ TrackRecordAxis::TrackRecordAxis (Session* s, std::shared_ptr<ARDOUR::Route> rt)
 	_number_label.set_fallthrough_to_parent (true);
 	_number_label.signal_button_press_event().connect (sigc::mem_fun(*this, &TrackRecordAxis::route_ops_click), false);
 
-	PropertyList* plist = new PropertyList();
-	plist->add (ARDOUR::Properties::group_mute, true);
-	plist->add (ARDOUR::Properties::group_solo, true);
-
 	_playlist_button.set_name ("route button");
 	_playlist_button.signal_button_press_event().connect (sigc::mem_fun(*this, &TrackRecordAxis::playlist_click), false);
 
