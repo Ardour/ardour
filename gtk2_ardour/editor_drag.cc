@@ -5302,7 +5302,9 @@ TimeFXDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	timepos_t where (_primary->region ()->position ());
 	setup_snap_delta (_primary->region ()->position ());
 
-	show_verbose_cursor_duration (where, adjusted_current_time (event), 0);
+	timepos_t clicked_pos = adjusted_current_time (event);
+	show_verbose_cursor_duration (where, clicked_pos, 0);
+	_dragging_start = clicked_pos < _primary->region ()->position () + _primary->region ()->length ().scale(ratio_t(1, 2));
 }
 
 void
@@ -5319,8 +5321,15 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 	_editor->snap_to_with_modifier (pf, event);
 	pf.shift_earlier (snap_delta (event->button.state));
 
-	if (pf > rv->region ()->position ()) {
-		rv->get_time_axis_view ().show_timestretch (rv->region ()->position (), pf, layers, layer);
+	if (_dragging_start) {
+		if (pf < rv->region ()->end ()) {
+			rv->get_time_axis_view ().show_timestretch (pf, rv->region ()->end (), layers, layer);
+
+		}
+	} else {
+		if (pf > rv->region ()->position ()) {
+			rv->get_time_axis_view ().show_timestretch (rv->region ()->position (), pf, layers, layer);
+		}
 	}
 
 	show_verbose_cursor_duration (_primary->region ()->position (), pf);
@@ -5342,7 +5351,7 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (!movement_occurred) {
 		_primary->get_time_axis_view ().hide_timestretch ();
 
-		if (_editor->time_stretch (_editor->get_selection ().regions, ratio_t (1, 1)) == -1) {
+		if (_editor->time_stretch (_editor->get_selection ().regions, ratio_t (1, 1), false) == -1) {
 			error << _("An error occurred while executing time stretch operation") << endmsg;
 		}
 		return;
@@ -5355,13 +5364,22 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 	_primary->get_time_axis_view ().hide_timestretch ();
 
 	timepos_t adjusted_pos = adjusted_current_time (event);
+	timecnt_t newlen;
 
-	if (adjusted_pos < _primary->region ()->position ()) {
-		/* backwards drag of the left edge - not usable */
-		return;
+	if (_dragging_start) {
+		if (adjusted_pos > _primary->region ()->end ()) {
+			/* forwards drag of the right edge - not usable */
+			return;
+		}
+		newlen = _primary->region ()->end ().distance (adjusted_pos);
+	} else {
+		if (adjusted_pos < _primary->region ()->position ()) {
+			/* backwards drag of the left edge - not usable */
+			return;
+		}
+		newlen = _primary->region ()->position ().distance (adjusted_pos);
 	}
 
-	timecnt_t newlen = _primary->region ()->position ().distance (adjusted_pos);
 
 	if (_primary->region ()->length ().time_domain () == Temporal::BeatTime) {
 		ratio = ratio_t (newlen.ticks (), _primary->region ()->length ().ticks ());
@@ -5383,7 +5401,7 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 	   selection.
 	*/
 
-	if (_editor->time_stretch (_editor->get_selection ().regions, ratio) == -1) {
+	if (_editor->time_stretch (_editor->get_selection ().regions, ratio, _dragging_start) == -1) {
 		error << _("An error occurred while executing time stretch operation") << endmsg;
 	}
 }

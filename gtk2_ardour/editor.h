@@ -2251,9 +2251,9 @@ private:
 
 	TimeFXDialog* current_timefx;
 	static void* timefx_thread (void* arg);
-	void do_timefx ();
+	void do_timefx (bool fixed_end);
 
-	int time_stretch (RegionSelection&, Temporal::ratio_t const & fraction);
+	int time_stretch (RegionSelection&, Temporal::ratio_t const & fraction, bool fixed_end);
 	int pitch_shift (RegionSelection&, float cents);
 	void pitch_shift_region ();
 
@@ -2486,7 +2486,7 @@ private:
 	void set_show_touched_automation (bool);
 	bool _show_touched_automation;
 
-	int time_fx (ARDOUR::RegionList&, Temporal::ratio_t ratio, bool pitching);
+	int time_fx (ARDOUR::RegionList&, Temporal::ratio_t ratio, bool pitching, bool fixed_end);
 	void note_edit_done (int, EditNoteDialog*);
 	void toggle_sound_midi_notes ();
 

@@ -42,7 +42,7 @@ class TimeFXDialog : public ArdourDialog, public ProgressReporter
 {
 public:
 	/* We need a position so that BBT mode in the clock can function */
-	TimeFXDialog (Editor& e, bool for_pitch, Temporal::timecnt_t const & old_length, Temporal::timecnt_t const & new_length, Temporal::ratio_t const &, Temporal::timepos_t const & position);
+	TimeFXDialog (Editor& e, bool for_pitch, Temporal::timecnt_t const & old_length, Temporal::timecnt_t const & new_length, Temporal::ratio_t const &, Temporal::timepos_t const & position, bool fixed_end);
 
 	ARDOUR::TimeFXRequest request;
 	Editor&               editor;
@@ -65,6 +65,7 @@ public:
 	Gtk::Button*          action_button;
 	Gtk::VBox             packer;
 	int                   status;
+	bool                  fixed_end;
 
 	sigc::connection first_cancel;
 	sigc::connection first_delete;
