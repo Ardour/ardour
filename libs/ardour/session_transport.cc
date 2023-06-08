@@ -943,6 +943,10 @@ Session::request_locate (samplepos_t target_sample, bool force, LocateTransportD
 		return;
 	}
 
+	if (type == SessionEvent::LocateRoll) {
+		request_cancel_play_range ();
+	}
+
 	SessionEvent *ev = new SessionEvent (type, SessionEvent::Add, SessionEvent::Immediate, target_sample, 0, force);
 	ev->locate_transport_disposition = ltd;
 	DEBUG_TRACE (DEBUG::Transport, string_compose ("Request locate to %1 ltd = %2\n", target_sample, enum_2_string (ltd)));
