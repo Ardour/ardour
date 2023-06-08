@@ -217,63 +217,61 @@ Playlist::Playlist (std::shared_ptr<const Playlist> other, timepos_t const & sta
 
 	in_set_state++;
 
-	ThawList thawlist;
-	for (RegionList::const_iterator i = other->regions.begin (); i != other->regions.end (); ++i) {
-		std::shared_ptr<Region> region;
-		std::shared_ptr<Region> new_region;
-		timecnt_t offset;
-		timepos_t position;
-		timecnt_t len;
-		string    new_name;
-		Temporal::OverlapType overlap;
+	{
+		RegionWriteLock rlock (this);
+		for (auto const& region : other->regions) {
+			std::shared_ptr<Region> new_region;
+			timecnt_t offset;
+			timepos_t position;
+			timecnt_t len;
+			string    new_name;
+			Temporal::OverlapType overlap;
 
-		region = *i;
+			overlap = region->coverage (start, end);
 
-		overlap = region->coverage (start, end);
+			switch (overlap) {
+				case Temporal::OverlapNone:
+					continue;
 
-		switch (overlap) {
-		case Temporal::OverlapNone:
-			continue;
+				case Temporal::OverlapInternal:
+					offset = region->position().distance (start);
+					position = timepos_t(start.time_domain());
+					len = timecnt_t (cnt);
+					break;
 
-		case Temporal::OverlapInternal:
-			offset = region->position().distance (start);
-			position = timepos_t(start.time_domain());
-			len = timecnt_t (cnt);
-			break;
+				case Temporal::OverlapStart:
+					offset = timecnt_t (start.time_domain());
+					position = start.distance(region->position());
+					len = region->position().distance (end);
+					break;
 
-		case Temporal::OverlapStart:
-			offset = timecnt_t (start.time_domain());
-			position = start.distance(region->position());
-			len = region->position().distance (end);
-			break;
+				case Temporal::OverlapEnd:
+					offset = region->position().distance (start);
+					position = timepos_t (start.time_domain());
+					len = region->length() - offset;
+					break;
 
-		case Temporal::OverlapEnd:
-			offset = region->position().distance (start);
-			position = timepos_t (start.time_domain());
-			len = region->length() - offset;
-			break;
+				case Temporal::OverlapExternal:
+					offset = timecnt_t (start.time_domain());
+					position = start.distance(region->position());
+					len = region->length();
+					break;
+			}
 
-		case Temporal::OverlapExternal:
-			offset = timecnt_t (start.time_domain());
-			position = start.distance(region->position());
-			len = region->length();
-			break;
+			RegionFactory::region_name (new_name, region->name (), false);
+
+			PropertyList plist (region->derive_properties ());
+
+			plist.add (Properties::start, region->start() + offset);
+			plist.add (Properties::length, len);
+			plist.add (Properties::name, new_name);
+
+			new_region = RegionFactory::create (region, offset, plist, true, &rlock.thawlist);
+
+			add_region_internal (new_region, position, rlock.thawlist);
 		}
-
-		RegionFactory::region_name (new_name, region->name (), false);
-
-		PropertyList plist (region->derive_properties ());
-
-		plist.add (Properties::start, region->start() + offset);
-		plist.add (Properties::length, len);
-		plist.add (Properties::name, new_name);
-
-		new_region = RegionFactory::create (region, offset, plist, true, &thawlist);
-
-		add_region_internal (new_region, position, thawlist);
 	}
 
-	thawlist.release ();
 
 	/* keep track of any dead space at end (for pasting into Ripple or
 	 * RippleAll mode) at the end of construction, any length of cnt beyond
@@ -1288,12 +1286,13 @@ Playlist::paste (std::shared_ptr<Playlist> other, timepos_t const & position, fl
 					*/
 
 					add_region_internal (copy_of_region, r->position() + pos, rl1.thawlist);
-					set_layer (copy_of_region, copy_of_region->layer() + top);
+					copy_of_region->set_layer (copy_of_region->layer() + top);
 				}
 				pos += shift;
 			}
 		}
 	}
+	relayer ();
 	return 0;
 }
 
