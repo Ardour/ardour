@@ -1019,7 +1019,7 @@ Session::process_event (SessionEvent* ev)
 		break;
 
 	case SessionEvent::RangeStop:
-		cerr << "RANGE STOP\n";
+		// cerr << "RANGE STOP\n";
 		TFSM_STOP (ev->yes_or_no, false);
 		remove = false;
 		del = false;
