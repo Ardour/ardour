@@ -66,7 +66,7 @@ using namespace Gtkmm2ext;
 
 /** @return -1 in case of error, 1 if operation was cancelled by the user, 0 if everything went ok */
 int
-Editor::time_stretch (RegionSelection& regions, Temporal::ratio_t const & ratio)
+Editor::time_stretch (RegionSelection& regions, Temporal::ratio_t const & ratio, bool fixed_end)
 {
 	RegionList audio;
 	RegionList midi;
@@ -81,7 +81,7 @@ Editor::time_stretch (RegionSelection& regions, Temporal::ratio_t const & ratio)
 		}
 	}
 
-	int aret = time_fx (audio, ratio, false);
+	int aret = time_fx (audio, ratio, false, fixed_end);
 	if (aret < 0) {
 		abort_reversible_command ();
 		return aret;
@@ -111,8 +111,14 @@ Editor::time_stretch (RegionSelection& regions, Temporal::ratio_t const & ratio)
 		MidiStretch stretch (*_session, request);
 		stretch.run (*i);
 
-		playlist->replace_region (regions.front()->region(), stretch.results[0],
-		                          regions.front()->region()->position());
+		timepos_t newpos;
+
+		if (fixed_end)
+			newpos = regions.front()->region()->end().earlier(stretch.results[0]->length());
+		else
+			newpos = regions.front()->region()->position();
+
+		playlist->replace_region (regions.front()->region(), stretch.results[0], newpos);
 		midi_playlists_affected.insert (playlist);
 	}
 
@@ -144,7 +150,7 @@ Editor::pitch_shift (RegionSelection& regions, float fraction)
 
 	begin_reversible_command (_("pitch shift"));
 
-	int ret = time_fx (rl, fraction, true);
+	int ret = time_fx (rl, fraction, true, false);
 
 	if (ret > 0) {
 		commit_reversible_command ();
@@ -159,7 +165,7 @@ Editor::pitch_shift (RegionSelection& regions, float fraction)
  *  @param pitching true to pitch shift, false to time stretch.
  *  @return -1 in case of error, otherwise number of regions processed */
 int
-Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching)
+Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching, bool fixed_end)
 {
 	delete current_timefx;
 
@@ -172,7 +178,7 @@ Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching)
 	const timecnt_t newlen = regions.front()->length().scale (ratio);
 	const timepos_t pos = regions.front()->position ();
 
-	current_timefx = new TimeFXDialog (*this, pitching, oldlen, newlen, ratio, pos);
+	current_timefx = new TimeFXDialog (*this, pitching, oldlen, newlen, ratio, pos, fixed_end);
 	current_timefx->regions = regions;
 
 	switch (current_timefx->run ()) {
@@ -355,7 +361,7 @@ Editor::time_fx (RegionList& regions, Temporal::ratio_t ratio, bool pitching)
 }
 
 void
-Editor::do_timefx ()
+Editor::do_timefx (bool fixed_end)
 {
 	typedef std::map<std::shared_ptr<Region>, std::shared_ptr<Region> > ResultMap;
 	ResultMap results;
@@ -426,7 +432,11 @@ Editor::do_timefx ()
 			std::shared_ptr<Playlist> playlist = region->playlist();
 
 			playlist->clear_changes ();
-			playlist->replace_region (region, new_region, region->position());
+			if (fixed_end)
+				playlist->replace_region (region, new_region, region->end ().earlier(new_region->length ()));
+			else
+				playlist->replace_region (region, new_region, region->position());
+
 			PBD::StatefulDiffCommand* cmd = new StatefulDiffCommand (playlist);
 			_session->add_command (cmd);
 			if (!cmd->empty ()) {
@@ -449,7 +459,7 @@ Editor::timefx_thread (void *arg)
 
 	pthread_setcanceltype (PTHREAD_CANCEL_ASYNCHRONOUS, 0);
 
-	tsd->editor.do_timefx ();
+	tsd->editor.do_timefx (tsd->fixed_end);
 
 	/* GACK! HACK! sleep for a bit so that our request buffer for the GUI
 	   event loop doesn't die before any changes we made are processed

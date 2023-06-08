@@ -1335,6 +1335,8 @@ public:
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
 	void aborted (bool);
+private:
+	bool _dragging_start;
 };
 
 /** Scrub drag in audition mode */

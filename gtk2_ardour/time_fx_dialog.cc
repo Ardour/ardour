@@ -55,7 +55,7 @@ using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 
-TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, timecnt_t const & new_length, Temporal::ratio_t const & ratio, timepos_t const & position)
+TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, timecnt_t const & new_length, Temporal::ratio_t const & ratio, timepos_t const & position, bool fixed_end)
 	: ArdourDialog (X_("time fx dialog"))
 	, editor (e)
 	, pitching (pitch)
@@ -64,6 +64,7 @@ TimeFXDialog::TimeFXDialog (Editor& e, bool pitch, timecnt_t const & oldlen, tim
 	, stretch_opts_label (_("Contents"))
 	, precise_button (_("Minimize time distortion"))
 	, preserve_formants_button(_("Preserve Formants"))
+	, fixed_end (fixed_end)
 	, original_length (oldlen)
 	, pitch_octave_adjustment (0.0, -4.0, 4.0, 1, 2.0)
 	, pitch_semitone_adjustment (0.0, -12.0, 12.0, 1.0, 4.0)
