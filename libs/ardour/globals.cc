@@ -754,6 +754,7 @@ ARDOUR::cleanup ()
 	engine_startup_connection.disconnect ();
 
 	delete &ControlProtocolManager::instance ();
+	ARDOUR::TransportMasterManager::instance ().clear ();
 	ARDOUR::AudioEngine::destroy ();
 	ARDOUR::TransportMasterManager::destroy ();
 
