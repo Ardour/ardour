@@ -375,6 +375,9 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, std::shar
 		     ++port) {
 			port_connections.clear ();
 			port->get_connections (port_connections);
+			if (port_connections.empty ()) {
+				continue;
+			}
 			string connection = port_connections.front ();
 
 			vector<string>::iterator i = connections.begin ();
