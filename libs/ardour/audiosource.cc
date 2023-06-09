@@ -116,11 +116,14 @@ AudioSource::AudioSource (Session& s, const XMLNode& node)
 
 AudioSource::~AudioSource ()
 {
-	/* shouldn't happen but make sure we don't leak file descriptors anyway */
-
+#ifndef NDEBUG
+	/* shouldn't happen but make sure we don't leak file descriptors anyway,
+	 * (it can happen with stop-and-forget capture)
+	 */
 	if (peak_leftover_cnt) {
 		cerr << "AudioSource destroyed with leftover peak data pending" << endl;
 	}
+#endif
 
 	if (-1 != _peakfile_fd) {
 		close (_peakfile_fd);
