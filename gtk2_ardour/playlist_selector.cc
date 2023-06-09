@@ -397,9 +397,11 @@ PlaylistSelector::selection_changed ()
 			return;
 		}
 
+		XMLNode* before = &_rui->track ()->playlist_state ();
 		switch (_mode) {
 			/*  @Robin:  I dont see a way to undo these playlist actions
 			 *  @Ben: me neither :)
+			 *  @Robin: Now I do.
 			 */
 			case plCopy:
 				{
@@ -425,6 +427,15 @@ PlaylistSelector::selection_changed ()
 					PublicEditor::instance ().mapover_grouped_routes (sigc::bind (sigc::mem_fun (PublicEditor::instance (), &PublicEditor::mapped_select_playlist_matching), pl), _rui, ARDOUR::Properties::group_select.property_id);
 				}
 				break;
+		}
+
+		XMLNode* after = &_rui->track ()->playlist_state ();
+		if (*before != *after) {
+			_session->begin_reversible_command (string_compose (_("Switch Playlist for track %1"), _rui->track ()->name ()));
+			_session->commit_reversible_command (new MementoCommand<Track>(*_rui->track (), before, after));
+		} else {
+			delete before;
+			delete after;
 		}
 	}
 }
