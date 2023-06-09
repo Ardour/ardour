@@ -557,12 +557,6 @@ FileSource::replace_file (const std::string& newpath)
 	_name = Glib::path_get_basename (newpath);
 }
 
-void
-FileSource::inc_use_count ()
-{
-        Source::inc_use_count ();
-}
-
 bool
 FileSource::is_stub () const
 {
