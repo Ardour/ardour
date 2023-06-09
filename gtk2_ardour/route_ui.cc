@@ -2562,13 +2562,28 @@ RouteUI::use_new_playlist (std::string name, std::string gid, vector<std::shared
 		return;
 	}
 
+	XMLNode* before = &tr->playlist_state ();
+
 	if (copy) {
 		tr->use_copy_playlist ();
 	} else {
 		tr->use_default_new_playlist ();
 	}
+
+	tr->playlist()->clear_changes ();
+	tr->playlist()->clear_owned_changes ();
 	tr->playlist()->set_name (name);
 	tr->playlist()->set_pgroup_id (gid);
+
+	XMLNode* after = &tr->playlist_state ();
+	if (*before != *after) {
+		_session->begin_reversible_command (string_compose (_("New Playlist for track %1"), tr->name ()));
+		tr->playlist()->rdiff_and_add_command (_session);
+		_session->commit_reversible_command (new MementoCommand<Track>(*tr, before, after));
+	} else {
+		delete before;
+		delete after;
+	}
 }
 
 void
@@ -2692,24 +2707,26 @@ RouteUI::select_playlist_matching (std::weak_ptr<Playlist> wpl)
 		return;
 	}
 
-	if (track()->id() == pl->get_orig_track_id()) {
+	std::shared_ptr<Playlist> ipl;
+	std::shared_ptr<Track> t = track ();
+	XMLNode* before = &t->playlist_state ();
+
+	if (t->id() == pl->get_orig_track_id()) {
 		/* this playlist is one of this track's own, no need to match by pgroup-id or name */
-		track()->use_playlist(track()->data_type(), pl);
-		return;
+		t->use_playlist(t->data_type(), pl);
+		goto checkdiff;
 	}
 
 	/* Search for a matching playlist .. either by pgroup_id or name */
-	std::string pgrp_id = pl->pgroup_id();
-	std::shared_ptr<Playlist> ipl = session()->playlists()->for_pgroup(pgrp_id, track()->id());
-	if (ipl) {
-		//found a playlist that matches the pgroup_id, use it
-		track()->use_playlist (track()->data_type(), ipl);
-	} else {  //fallback to prior behavior ... try to find matching names /*DEPRECATED*/
+	if (0 != (ipl = session()->playlists()->for_pgroup(pl->pgroup_id(), t->id()))) {
+		// found a playlist that matches the pgroup_id, use it
+		t->use_playlist (t->data_type(), ipl);
+	} else { // fallback to prior behavior ... try to find matching names /*DEPRECATED*/
 
 		std::string take_name = pl->name();
 		std::string group_name;
-		if (track()->route_group()) {
-			group_name = track()->route_group()->name();
+		if (t->route_group()) {
+			group_name = t->route_group()->name();
 		}
 		std::string group_string = "." + group_name + ".";
 
@@ -2717,14 +2734,24 @@ RouteUI::select_playlist_matching (std::weak_ptr<Playlist> wpl)
 
 		if (idx != std::string::npos) {
 			take_name = take_name.substr(idx + group_string.length()); // find the bit containing the take number / name
-			std::string playlist_name = track()->name()+group_string+take_name;
+			std::string playlist_name = t->name()+group_string+take_name;
 
 			std::shared_ptr<Playlist> ipl = session()->playlists()->by_name(playlist_name);
 			if (ipl) {
-				track()->use_playlist(track()->data_type(), ipl);
+				t->use_playlist(t->data_type(), ipl);
 			}
 		}
-	} //fallback
+	}
+
+checkdiff:
+	XMLNode* after = &t->playlist_state ();
+	if (*before != *after) {
+		_session->begin_reversible_command (string_compose (_("Switch Playlist for track %1"), t->name ()));
+		_session->commit_reversible_command (new MementoCommand<Track>(*t, before, after));
+	} else {
+		delete before;
+		delete after;
+	}
 }
 
 void
