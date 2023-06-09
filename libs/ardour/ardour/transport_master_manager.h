@@ -52,7 +52,7 @@ class LIBARDOUR_API TransportMasterManager : public boost::noncopyable
 
 	int add (SyncSource type, std::string const & name, bool removeable = true);
 	int remove (std::string const & name);
-	void clear ();
+	void clear (bool emit = true);
 
 	PBD::Signal1<void,std::shared_ptr<TransportMaster> > Added;
 	PBD::Signal1<void,std::shared_ptr<TransportMaster> > Removed; // null argument means "clear"

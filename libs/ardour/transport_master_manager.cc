@@ -582,7 +582,7 @@ TransportMasterManager::set_current (std::string const & str)
 
 
 void
-TransportMasterManager::clear ()
+TransportMasterManager::clear (bool emit)
 {
 	{
 		Glib::Threads::RWLock::WriterLock lm (lock);
@@ -590,7 +590,9 @@ TransportMasterManager::clear ()
 		_transport_masters.clear ();
 	}
 
-	Removed (std::shared_ptr<TransportMaster>());
+	if (emit) {
+		Removed (std::shared_ptr<TransportMaster>());
+	}
 }
 
 int
