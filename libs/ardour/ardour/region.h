@@ -511,6 +511,7 @@ private:
 	void trim_to_internal (timepos_t const & position, timecnt_t const & length);
 
 	void maybe_uncopy ();
+	void subscribe_to_source_drop ();
 
 	bool verify_start (timepos_t const &);
 	bool verify_length (timecnt_t&);
@@ -546,7 +547,9 @@ private:
 
 	void use_sources (SourceList const &);
 
-	std::atomic<int> _source_deleted;
+	std::atomic<int>          _source_deleted;
+	Glib::Threads::Mutex      _source_list_lock;
+	PBD::ScopedConnectionList _source_deleted_connections;
 };
 
 } /* namespace ARDOUR */

@@ -1559,12 +1559,12 @@ Region::source_deleted (std::weak_ptr<Source>)
 
 	if (!_session.deletion_in_progress()) {
 		/* this is a very special case: at least one of the region's
-		   sources has bee deleted, so invalidate all references to
-		   ourselves. Do NOT do this during session deletion, because
-		   then we run the risk that this will actually result
-		   in this object being deleted (as refcnt goes to zero)
-		   while emitting DropReferences.
-		*/
+		 * sources has been deleted, so invalidate all references to
+		 * ourselves. We run the risk that this will actually result
+		 * in this object being deleted (as refcnt goes to zero)
+		 * while emitting DropReferences.
+		 */
+		std::shared_ptr<Region> me (shared_from_this ());
 
 		drop_references ();
 	}
@@ -1586,6 +1586,7 @@ Region::master_source_names ()
 void
 Region::set_master_sources (const SourceList& srcs)
 {
+	Glib::Threads::Mutex::Lock lx (_source_list_lock);
 	for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
 		(*i)->dec_use_count ();
 	}
@@ -1596,6 +1597,7 @@ Region::set_master_sources (const SourceList& srcs)
 	for (SourceList::const_iterator i = _master_sources.begin (); i != _master_sources.end(); ++i) {
 		(*i)->inc_use_count ();
 	}
+	subscribe_to_source_drop ();
 }
 
 bool
@@ -1944,6 +1946,7 @@ Region::rename_cue_marker (CueMarker& cm, std::string const & str)
 void
 Region::drop_sources ()
 {
+	Glib::Threads::Mutex::Lock lx (_source_list_lock);
 	for (SourceList::const_iterator i = _sources.begin (); i != _sources.end(); ++i) {
 		(*i)->dec_use_count ();
 	}
@@ -1955,27 +1958,38 @@ Region::drop_sources ()
 	}
 
 	_master_sources.clear ();
+	_source_deleted_connections.drop_connections ();
 }
 
 void
 Region::use_sources (SourceList const & s)
 {
-	_source_deleted.store (0);
-	set<std::shared_ptr<Source> > unique_srcs;
-
+	Glib::Threads::Mutex::Lock lx (_source_list_lock);
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {
-
 		_sources.push_back (*i);
 		(*i)->inc_use_count ();
 		_master_sources.push_back (*i);
 		(*i)->inc_use_count ();
+	}
+	subscribe_to_source_drop ();
+}
 
-		/* connect only once to DropReferences, even if sources are replicated
-		 */
-
-		if (unique_srcs.find (*i) == unique_srcs.end ()) {
-			unique_srcs.insert (*i);
-			(*i)->DropReferences.connect_same_thread (*this, boost::bind (&Region::source_deleted, this, std::weak_ptr<Source>(*i)));
+void
+Region::subscribe_to_source_drop ()
+{
+	_source_deleted.store (0);
+	_source_deleted_connections.drop_connections ();
+	set<std::shared_ptr<Source> > unique_srcs;
+	for (auto const& i : _sources) {
+		if (unique_srcs.find (i) == unique_srcs.end ()) {
+			unique_srcs.insert (i);
+			i->DropReferences.connect_same_thread (_source_deleted_connections, boost::bind (&Region::source_deleted, this, std::weak_ptr<Source>(i)));
+		}
+	}
+	for (auto const& i : _master_sources) {
+		if (unique_srcs.find (i) == unique_srcs.end ()) {
+			unique_srcs.insert (i);
+			i->DropReferences.connect_same_thread (_source_deleted_connections, boost::bind (&Region::source_deleted, this, std::weak_ptr<Source>(i)));
 		}
 	}
 }
