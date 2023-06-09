@@ -545,6 +545,8 @@ private:
 	void register_properties ();
 
 	void use_sources (SourceList const &);
+
+	std::atomic<int> _source_deleted;
 };
 
 } /* namespace ARDOUR */

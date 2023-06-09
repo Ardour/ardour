@@ -246,7 +246,7 @@ Region::register_properties ()
 Region::Region (Session& s, timepos_t const & start, timecnt_t const & length, const string& name, DataType type)
 	: SessionObject(s, name)
 	, _type (type)
-        , REGION_DEFAULT_STATE (start,length)
+	, REGION_DEFAULT_STATE (start,length)
 	, _last_length (length)
 	, _first_edit (EditChangesNothing)
 	, _layer (0)
@@ -1552,6 +1552,9 @@ Region::size_equivalent (std::shared_ptr<const Region> other) const
 void
 Region::source_deleted (std::weak_ptr<Source>)
 {
+	if (_source_deleted.fetch_add (1)) {
+		return;
+	}
 	drop_sources ();
 
 	if (!_session.deletion_in_progress()) {
@@ -1957,6 +1960,7 @@ Region::drop_sources ()
 void
 Region::use_sources (SourceList const & s)
 {
+	_source_deleted.store (0);
 	set<std::shared_ptr<Source> > unique_srcs;
 
 	for (SourceList::const_iterator i = s.begin (); i != s.end(); ++i) {

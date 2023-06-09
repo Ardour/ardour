@@ -96,6 +96,7 @@ Source::Source (Session& s, const XMLNode& node)
 Source::~Source ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("Source %1 destructor %2\n", _name, this));
+	assert (!used ());
 }
 
 void
@@ -448,20 +449,13 @@ Source::dec_use_count ()
 {
 #ifndef NDEBUG
 	int oldval = _use_count.fetch_sub (1);
-        if (oldval <= 0) {
-                cerr << "Bad use dec for " << name() << endl;
-                abort ();
-        }
-        assert (oldval > 0);
-#else
-        _use_count.fetch_sub (1);
-#endif
-
-	try {
-		std::shared_ptr<Source> sptr = shared_from_this();
-	} catch (...) {
-		/* no shared_ptr available, relax; */
+	if (oldval <= 0) {
+		cerr << "Bad use dec for " << name() << endl;
 	}
+	assert (oldval > 0);
+#else
+	_use_count.fetch_sub (1);
+#endif
 }
 
 bool
