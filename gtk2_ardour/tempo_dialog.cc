@@ -246,7 +246,7 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 	get_vbox ()->pack_end (*table, false, false);
 	table->show_all ();
 
-	table = manage (new Table (2, 2));
+	table = manage (new Table (3, 2));
 	table->set_spacings (6);
 	row = 0;
 
@@ -254,6 +254,9 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 	table->attach (_midi_port_combo, 1, 2, row, row + 1);
 	++row;
 	table->attach (tap_tempo_button, 0, 2, row, row + 1);
+	++row;
+	pbar.hide();
+	table->attach (pbar, 0, 2, row, row + 1);
 
 	get_vbox()->pack_end (*table, false, false);
 	table->show_all ();
@@ -297,7 +300,7 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 
 	/* init state */
 	tempo_type_change ();
-	tapped = false;
+	toggle_tap(false);
 #if 0
 	bpm_spinner.select_region (0, -1);
 	bpm_spinner.grab_focus ();
@@ -311,6 +314,17 @@ TempoDialog::~TempoDialog ()
 {
 	_parser_connection.disconnect ();
 	AudioEngine::instance ()->unregister_port (_midi_tap_port);
+}
+
+void
+TempoDialog::toggle_tap (bool active)
+{
+	tapped = active;
+	if (active) {
+		pbar.show();
+	} else {
+		pbar.hide();
+	}
 }
 
 void
@@ -387,7 +401,7 @@ void
 TempoDialog::port_changed ()
 {
 	bool rv = false;
-	tapped  = false;
+	toggle_tap(false);
 	_midi_tap_port->disconnect_all ();
 	TreeModel::iterator r = _midi_port_combo.get_active ();
 	if (r) {
@@ -575,12 +589,21 @@ TempoDialog::tap_tempo (int64_t usec)
 		sum_x += n;
 		sum_xy += n * t;
 		sum_xx += n * n;
+		
 		double T = (sum_xy / n - sum_x / n * sum_y / n) / (sum_xx / n - sum_x / n * sum_x / n);
+		/* Statistical error (95th percentile) is less relevant than considering the operator has the right 
+		 * number of pulses but an error of 1/2 period at the beggining and end so max error = 1 period */
+		double dT = T - (sum_xy / (n + 1) - sum_x / (n + 1) * sum_y / (n + 1)) / (sum_xx / (n + 1) - sum_x / (n + 1) * sum_x / (n + 1));
 
 		if (t - last_t < T / 1.2 || t - last_t > T * 1.2 || T <= .06 || T > 60) {
-			tapped = false;
+			toggle_tap(false);
 		} else {
 			bpm_spinner.set_value (60.0 / T);
+			if (T != 0) {
+				double accuracy = 1 - dT / T;
+				pbar.set_text(string_compose(_("Accuracy : %1 %% (+/- %2 BpM)"),(int)(accuracy * 100),60.0 * dT / (T * (T + dT))));
+				pbar.set_fraction (accuracy);
+			}
 		}
 	}
 	if (!tapped) {
@@ -592,7 +615,7 @@ TempoDialog::tap_tempo (int64_t usec)
 		sum_xx    = 1.0;
 		tap_count = 1.0;
 
-		tapped = true;
+		toggle_tap(true);
 	}
 	tap_count++;
 	last_t = t;
@@ -601,7 +624,7 @@ TempoDialog::tap_tempo (int64_t usec)
 bool
 TempoDialog::tap_tempo_focus_out (GdkEventFocus* )
 {
-	tapped = false;
+	toggle_tap(false);
 	return false;
 }
 
