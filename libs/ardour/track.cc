@@ -163,6 +163,23 @@ Track::chan_count_changed ()
 }
 
 XMLNode&
+Track::playlist_state () const
+{
+	XMLNode* node = new XMLNode("Route");
+	node->set_property("version", CURRENT_SESSION_FILE_VERSION);
+
+	if (_playlists[DataType::AUDIO]) {
+		node->set_property (X_("audio-playlist"), _playlists[DataType::AUDIO]->id().to_s());
+	}
+
+	if (_playlists[DataType::MIDI]) {
+		node->set_property (X_("midi-playlist"), _playlists[DataType::MIDI]->id().to_s());
+	}
+
+	return *node;
+}
+
+XMLNode&
 Track::state (bool save_template) const
 {
 	XMLNode& root (Route::state (save_template));

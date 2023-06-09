@@ -66,6 +66,8 @@ public:
 
 	bool set_processor_state (XMLNode const& node, int version, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure);
 
+	XMLNode& playlist_state () const;
+
 	bool declick_in_progress () const;
 
 	bool can_record();
