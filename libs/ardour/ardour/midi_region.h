@@ -104,8 +104,6 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	void fix_negative_start ();
 
-	void clobber_sources (std::shared_ptr<MidiSource> source);
-
 	int render (Evoral::EventSink<samplepos_t>& dst,
 	            uint32_t                        chan_n,
 	            NoteMode                        mode,
