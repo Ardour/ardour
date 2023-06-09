@@ -381,6 +381,9 @@ SlavableAutomationControl::remove_master (std::shared_ptr<AutomationControl> m)
 			if (*before != *after) {
 				_session.begin_reversible_command (string_compose (_("Merge VCA automation into %1"), name ()));
 				_session.commit_reversible_command (alist()->memento_command (before, after));
+			} else {
+				delete before;
+				delete after;
 			}
 		}
 	}
@@ -455,6 +458,9 @@ SlavableAutomationControl::clear_masters ()
 				if (*before != *after) {
 					_session.begin_reversible_command (string_compose (_("Merge VCA automation into %1"), name ()));
 					_session.commit_reversible_command (alist()->memento_command (before, after));
+				} else {
+					delete before;
+					delete after;
 				}
 			}
 	}
