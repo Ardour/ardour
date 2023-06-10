@@ -254,6 +254,7 @@ Selection::toggle (std::shared_ptr<Playlist> pl)
 		playlists.push_back(pl);
 	} else {
 		playlists.erase (i);
+		pl->release ();
 	}
 
 	PlaylistsChanged ();
@@ -591,6 +592,7 @@ Selection::remove (std::shared_ptr<Playlist> track)
 	list<std::shared_ptr<Playlist> >::iterator i;
 	if ((i = find (playlists.begin(), playlists.end(), track)) != playlists.end()) {
 		playlists.erase (i);
+		(*i)->release ();
 		PlaylistsChanged();
 	}
 }
@@ -605,6 +607,7 @@ Selection::remove (const list<std::shared_ptr<Playlist> >& pllist)
 		list<std::shared_ptr<Playlist> >::iterator x;
 
 		if ((x = find (playlists.begin(), playlists.end(), (*i))) != playlists.end()) {
+			(*x)->release ();
 			playlists.erase (x);
 			changed = true;
 		}
@@ -832,7 +835,6 @@ Selection::empty (bool internal_selection)
 		playlists.empty () &&
 		lines.empty () &&
 		time.empty () &&
-		playlists.empty () &&
 		markers.empty() &&
 		triggers.empty()
 		;

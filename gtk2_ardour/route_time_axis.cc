@@ -1330,7 +1330,6 @@ RouteTimeAxisView::cut_copy_clear (Selection& selection, CutCopyOp op)
 				playlist->ripple (time.start_time(), -time.length(), NULL);
 			}
 			playlist->rdiff_and_add_command (_session);
-			what_we_got->release ();
 		}
 		break;
 	}
