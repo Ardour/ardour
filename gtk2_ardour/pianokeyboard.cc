@@ -315,6 +315,18 @@ APianoKeyboard::handle_fixed_keys (GdkEventKey* ev)
 			case GDK_KEY_F4:
 				PitchBend (16383, false);
 				return true;
+			case GDK_KEY_F5:
+				SetVelocity (32);
+				return true;
+			case GDK_KEY_F6:
+				SetVelocity (64);
+				return true;
+			case GDK_KEY_F7:
+				SetVelocity (96);
+				return true;
+			case GDK_KEY_F8:
+				SetVelocity (127);
+				return true;
 			case GDK_KEY_Down:
 				PitchBend (0, true);
 				return true;

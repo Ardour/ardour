@@ -111,6 +111,7 @@ private:
 	void modwheel_slider_adjusted ();
 
 	void octave_key_event_handler (bool);
+	void velocity_key_event_handler (int);
 	void pitch_bend_key_event_handler (int, bool);
 	bool pitch_bend_timeout ();
 
