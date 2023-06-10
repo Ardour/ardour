@@ -143,7 +143,7 @@ public:
 	void release ();
 
 	bool            empty () const;
-	bool            used () const          { return _refcnt != 0; }
+	bool            used () const          { return _refcnt.load () != 0; }
 	int             sort_id () const       { return _sort_id; }
 	bool            frozen () const        { return _frozen; }
 	const DataType& data_type () const     { return _type; }
@@ -377,7 +377,7 @@ protected:
 	bool               _rippling;
 	bool               _shuffling;
 	bool               _nudging;
-	uint32_t           _refcnt;
+	std::atomic<int>   _refcnt;
 	bool               in_flush;
 	bool               in_partition;
 	bool               _frozen;

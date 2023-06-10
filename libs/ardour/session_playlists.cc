@@ -78,7 +78,11 @@ SessionPlaylists::add (std::shared_ptr<Playlist> playlist)
 	bool const existing = find (playlists.begin(), playlists.end(), playlist) != playlists.end();
 
 	if (!existing) {
-		playlists.insert (playlists.begin(), playlist);
+		if (playlist->used ()) {
+			playlists.insert (playlists.begin(), playlist);
+		} else {
+			unused_playlists.insert (unused_playlists.begin(), playlist);
+		}
 		playlist->InUse.connect_same_thread (*this, boost::bind (&SessionPlaylists::track, this, _1, std::weak_ptr<Playlist>(playlist)));
 		playlist->DropReferences.connect_same_thread (
 			*this, boost::bind (&SessionPlaylists::remove_weak, this, std::weak_ptr<Playlist> (playlist))

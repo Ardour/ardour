@@ -902,7 +902,7 @@ public:
 	std::shared_ptr<MidiSource> midi_source_by_path (const std::string&, bool need_source_lock) const;
 	uint32_t count_sources_by_origin (const std::string&);
 
-	void add_playlist (std::shared_ptr<Playlist>, bool unused = false);
+	void add_playlist (std::shared_ptr<Playlist>);
 
 	/* Curves and AutomationLists (TODO when they go away) */
 	void add_automation_list(AutomationList*);

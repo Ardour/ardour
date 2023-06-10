@@ -32,10 +32,10 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
-PBD::Signal2<void,std::shared_ptr<Playlist>, bool> PlaylistFactory::PlaylistCreated;
+PBD::Signal1<void,std::shared_ptr<Playlist>> PlaylistFactory::PlaylistCreated;
 
 std::shared_ptr<Playlist>
-PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden, bool unused)
+PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden)
 {
 	XMLProperty const * type = node.property("type");
 
@@ -51,7 +51,7 @@ PlaylistFactory::create (Session& s, const XMLNode& node, bool hidden, bool unus
 		pl->set_region_ownership ();
 
 		if (pl && !hidden) {
-			PlaylistCreated (pl, unused);
+			PlaylistCreated (pl);
 		}
 		return pl;
 
@@ -72,7 +72,7 @@ PlaylistFactory::create (DataType type, Session& s, string name, bool hidden)
 			pl = std::shared_ptr<Playlist> (new MidiPlaylist (s, name, hidden));
 
 		if (pl && !hidden) {
-			PlaylistCreated (pl, false);
+			PlaylistCreated (pl);
 		}
 
 		return pl;
@@ -99,7 +99,7 @@ PlaylistFactory::create (std::shared_ptr<const Playlist> old, string name, bool 
 		}
 
 		if (pl && !hidden) {
-			PlaylistCreated (pl, false);
+			PlaylistCreated (pl);
 		}
 
 		return pl;
