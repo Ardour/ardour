@@ -1489,7 +1489,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("split_region", &Playlist::split_region)
 		.addFunction ("get_orig_track_id", &Playlist::get_orig_track_id)
 		//.addFunction ("split", &Playlist::split) // XXX needs MusicSample
-		.addFunction ("cut", (std::shared_ptr<Playlist> (Playlist::*)(std::list<TimelineRange>&, bool))&Playlist::cut)
+		.addFunction ("cut", (std::shared_ptr<Playlist> (Playlist::*)(std::list<TimelineRange>&))&Playlist::cut)
 #if 0
 		.addFunction ("copy", &Playlist::copy)
 		.addFunction ("paste", &Playlist::paste)

@@ -205,9 +205,9 @@ public:
 
 	void update_after_tempo_map_change ();
 
-	std::shared_ptr<Playlist> cut  (std::list<TimelineRange>&, bool result_is_hidden = true);
-	std::shared_ptr<Playlist> copy (std::list<TimelineRange>&, bool result_is_hidden = true);
-	int                         paste (std::shared_ptr<Playlist>, timepos_t const & position, float times);
+	std::shared_ptr<Playlist> cut  (std::list<TimelineRange>&);
+	std::shared_ptr<Playlist> copy (std::list<TimelineRange>&);
+	int                       paste (std::shared_ptr<Playlist>, timepos_t const & position, float times);
 
 	const RegionListProperty& region_list_property () const
 	{
@@ -439,10 +439,10 @@ protected:
 
 	std::pair<timepos_t, timepos_t> _get_extent() const;
 
-	std::shared_ptr<Playlist> cut_copy (std::shared_ptr<Playlist> (Playlist::*pmf)(timepos_t const &, timecnt_t const &, bool),
-	                                      std::list<TimelineRange>& ranges, bool result_is_hidden);
-	std::shared_ptr<Playlist> cut (timepos_t const & start, timecnt_t const & cnt, bool result_is_hidden);
-	std::shared_ptr<Playlist> copy (timepos_t const & start, timecnt_t const & cnt, bool result_is_hidden);
+	std::shared_ptr<Playlist> cut_copy (std::shared_ptr<Playlist> (Playlist::*pmf)(timepos_t const &, timecnt_t const &),
+	                                      std::list<TimelineRange>& ranges);
+	std::shared_ptr<Playlist> cut (timepos_t const & start, timecnt_t const & cnt);
+	std::shared_ptr<Playlist> copy (timepos_t const & start, timecnt_t const & cnt);
 
 	void relayer ();
 
