@@ -442,7 +442,7 @@ ARDOUR_UI::bind_lua_action_script (GdkEventButton*ev, int i)
 	if (Gtkmm2ext::Keyboard::modifier_state_equals (ev->state, Gtkmm2ext::Keyboard::TertiaryModifier)) {
 		li->remove_lua_action (i);
 	} else {
-		li->interactive_add (LuaScriptInfo::EditorAction, i);
+		li->interactive_add (*editor->current_toplevel (), LuaScriptInfo::EditorAction, i);
 	}
 	return true;
 }
