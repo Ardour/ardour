@@ -124,7 +124,7 @@ public:
 	int load_state ();
 	int save_state ();
 
-	bool interactive_add (ARDOUR::LuaScriptInfo::ScriptType, int);
+	bool interactive_add (Gtk::Window&, ARDOUR::LuaScriptInfo::ScriptType, int);
 
 	/* actions */
 	void call_action (const int);

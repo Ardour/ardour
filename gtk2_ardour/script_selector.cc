@@ -29,8 +29,8 @@ using namespace std;
 using namespace Gtk;
 using namespace ARDOUR;
 
-ScriptSelector::ScriptSelector (std::string title, LuaScriptInfo::ScriptType type)
-	: ArdourDialog (title)
+ScriptSelector::ScriptSelector (Gtk::Window& parent, std::string title, LuaScriptInfo::ScriptType type)
+	: ArdourDialog (parent, title, true)
 	, _type_label ("<b>Type:</b>", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)
 	, _type ("", Gtk::ALIGN_START, Gtk::ALIGN_CENTER)
 	, _author_label ("<b>Author:</b>", Gtk::ALIGN_END, Gtk::ALIGN_CENTER)

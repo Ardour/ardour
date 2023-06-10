@@ -1532,7 +1532,7 @@ LuaInstance::pre_seed_scripts ()
 }
 
 bool
-LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
+LuaInstance::interactive_add (Gtk::Window& parent, LuaScriptInfo::ScriptType type, int id)
 {
 	std::string title;
 	std::string param_function = "action_params";
@@ -1560,7 +1560,7 @@ LuaInstance::interactive_add (LuaScriptInfo::ScriptType type, int id)
 	}
 
 	LuaScriptInfoPtr spi;
-	ScriptSelector ss (title, type);
+	ScriptSelector ss (parent, title, type);
 	switch (ss.run ()) {
 		case Gtk::RESPONSE_ACCEPT:
 			spi = ss.script();

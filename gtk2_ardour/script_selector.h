@@ -27,7 +27,7 @@
 class ScriptSelector : public ArdourDialog
 {
 public:
-	ScriptSelector (std::string title, ARDOUR::LuaScriptInfo::ScriptType t);
+	ScriptSelector (Gtk::Window& parent, std::string title, ARDOUR::LuaScriptInfo::ScriptType t);
 	ARDOUR::LuaScriptInfoPtr script() const { return _script; }
 
 private:
