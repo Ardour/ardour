@@ -221,6 +221,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_piano.NoteOff.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::note_off_event_handler));
 	_piano.SwitchOctave.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::octave_key_event_handler));
 	_piano.PitchBend.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::pitch_bend_key_event_handler));
+	_piano.SetVelocity.connect (sigc::mem_fun (*this, &VirtualKeyboardWindow::velocity_key_event_handler));
 
 	/* initialize GUI */
 
@@ -446,6 +447,17 @@ VirtualKeyboardWindow::update_cc (size_t i, int cc)
 	char buf[16];
 	sprintf (buf, "%d", cc);
 	_cc_key[i].set_active (buf);
+}
+
+void
+VirtualKeyboardWindow::velocity_key_event_handler (int v)
+{
+	if (v < 1 || v > 127) {
+		return;
+	}
+	char buf[16];
+	sprintf (buf, "%d", v);
+	_piano_velocity.set_active (buf);
 }
 
 void
