@@ -1186,7 +1186,7 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 }
 
 std::shared_ptr<Playlist>
-Playlist::cut_copy (std::shared_ptr<Playlist> (Playlist::*pmf)(timepos_t const &, timecnt_t const &,bool), list<TimelineRange>& ranges, bool result_is_hidden)
+Playlist::cut_copy (std::shared_ptr<Playlist> (Playlist::*pmf)(timepos_t const &, timecnt_t const &), list<TimelineRange>& ranges)
 {
 	std::shared_ptr<Playlist> ret;
 	std::shared_ptr<Playlist> pl;
@@ -1200,7 +1200,7 @@ Playlist::cut_copy (std::shared_ptr<Playlist> (Playlist::*pmf)(timepos_t const &
 
 	for (list<TimelineRange>::iterator i = ranges.begin(); i != ranges.end(); ++i) {
 
-		pl = (this->*pmf)((*i).start(), (*i).length(), result_is_hidden);
+		pl = (this->*pmf)((*i).start(), (*i).length());
 
 		if (i == ranges.begin ()) {
 			ret = pl;
@@ -1218,21 +1218,21 @@ Playlist::cut_copy (std::shared_ptr<Playlist> (Playlist::*pmf)(timepos_t const &
 }
 
 std::shared_ptr<Playlist>
-Playlist::cut (list<TimelineRange>& ranges, bool result_is_hidden)
+Playlist::cut (list<TimelineRange>& ranges)
 {
-	std::shared_ptr<Playlist> (Playlist::*pmf) (timepos_t const & , timecnt_t const &, bool) = &Playlist::cut;
-	return cut_copy (pmf, ranges, result_is_hidden);
+	std::shared_ptr<Playlist> (Playlist::*pmf) (timepos_t const & , timecnt_t const &) = &Playlist::cut;
+	return cut_copy (pmf, ranges);
 }
 
 std::shared_ptr<Playlist>
-Playlist::copy (list<TimelineRange>& ranges, bool result_is_hidden)
+Playlist::copy (list<TimelineRange>& ranges )
 {
-	std::shared_ptr<Playlist> (Playlist::*pmf) (timepos_t const &, timecnt_t const &, bool) = &Playlist::copy;
-	return cut_copy (pmf, ranges, result_is_hidden);
+	std::shared_ptr<Playlist> (Playlist::*pmf) (timepos_t const &, timecnt_t const &) = &Playlist::copy;
+	return cut_copy (pmf, ranges);
 }
 
 std::shared_ptr<Playlist>
-Playlist::cut (timepos_t const & start, timecnt_t const & cnt, bool result_is_hidden)
+Playlist::cut (timepos_t const & start, timecnt_t const & cnt)
 {
 	std::shared_ptr<Playlist> the_copy;
 	char                        buf[32];
@@ -1242,7 +1242,7 @@ Playlist::cut (timepos_t const & start, timecnt_t const & cnt, bool result_is_hi
 	new_name += '.';
 	new_name += buf;
 
-	if ((the_copy = PlaylistFactory::create (shared_from_this(), start, timepos_t (cnt), new_name, result_is_hidden)) == 0) {
+	if ((the_copy = PlaylistFactory::create (shared_from_this(), start, timepos_t (cnt), new_name, true)) == 0) {
 		return std::shared_ptr<Playlist>();
 	}
 
@@ -1255,7 +1255,7 @@ Playlist::cut (timepos_t const & start, timecnt_t const & cnt, bool result_is_hi
 }
 
 std::shared_ptr<Playlist>
-Playlist::copy (timepos_t const & start, timecnt_t const & cnt, bool result_is_hidden)
+Playlist::copy (timepos_t const & start, timecnt_t const & cnt)
 {
 	char buf[32];
 
@@ -1266,7 +1266,7 @@ Playlist::copy (timepos_t const & start, timecnt_t const & cnt, bool result_is_h
 
 	// cnt = min (_get_extent().second - start, cnt);  (We need the full range length when copy/pasting in Ripple.  Why was this limit here?  It's not in CUT... )
 
-	return PlaylistFactory::create (shared_from_this (), start, timepos_t (cnt), new_name, result_is_hidden);
+	return PlaylistFactory::create (shared_from_this (), start, timepos_t (cnt), new_name, true);
 }
 
 int
@@ -1372,7 +1372,7 @@ Playlist::duplicate_until (std::shared_ptr<Region> region, timepos_t & position,
 void
 Playlist::duplicate_range (TimelineRange& range, float times)
 {
-	std::shared_ptr<Playlist> pl = copy (range.start(), range.length(), true);
+	std::shared_ptr<Playlist> pl = copy (range.start(), range.length());
 	paste (pl, range.end(), times);
 }
 
@@ -1399,7 +1399,7 @@ Playlist::duplicate_ranges (std::list<TimelineRange>& ranges, float times)
 	int itimes = (int)floor (times);
 	while (itimes--) {
 		for (list<TimelineRange>::iterator i = ranges.begin (); i != ranges.end (); ++i) {
-			std::shared_ptr<Playlist> pl = copy ((*i).start(), (*i).length (), true);
+			std::shared_ptr<Playlist> pl = copy ((*i).start(), (*i).length ());
 			paste (pl, (*i).start() + (offset.scale (count)), 1.0f);
 		}
 		++count;
