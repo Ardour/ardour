@@ -162,7 +162,7 @@ public:
 	timepos_t           _natural_position;
 	bool                _have_natural_position;
 	bool                _analysed;
-	std::atomic<int> _use_count; /* atomic */
+	std::atomic<int>    _use_count;
 	uint32_t            _level; /* how deeply nested is this source w.r.t a disk file */
 	std::string         _ancestor_name;
 	std::string        _captured_for;
