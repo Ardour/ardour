@@ -417,7 +417,8 @@ SourceFactory::createFromPlaylist (DataType type, Session& s, std::shared_ptr<Pl
 					start = timecnt_t::zero (Temporal::AudioTime);
 				}
 
-				Source*                   src = new AudioPlaylistSource (s, orig, name, ap, chn, start, len, Source::Flag (0));
+				Source* src = new AudioPlaylistSource (s, orig, name, ap, chn, start, len, Source::Flag (0));
+
 				std::shared_ptr<Source> ret (src);
 
 				if (setup_peakfile (ret, defer_peaks)) {

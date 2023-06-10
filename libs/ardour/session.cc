@@ -5151,17 +5151,13 @@ Session::playlist_is_active (std::shared_ptr<Playlist> playlist)
 }
 
 void
-Session::add_playlist (std::shared_ptr<Playlist> playlist, bool unused)
+Session::add_playlist (std::shared_ptr<Playlist> playlist)
 {
 	if (playlist->hidden()) {
 		return;
 	}
 
 	_playlists->add (playlist);
-
-	if (unused) {
-		playlist->release();
-	}
 
 	set_dirty();
 }

@@ -244,7 +244,7 @@ AudioPlaylistImporter::_move ()
 	}
 
 	// Create playlist
-	playlist = PlaylistFactory::create (session, xml_playlist, false, true);
+	playlist = PlaylistFactory::create (session, xml_playlist, false);
 }
 
 void

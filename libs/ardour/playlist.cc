@@ -287,18 +287,23 @@ Playlist::Playlist (std::shared_ptr<const Playlist> other, timepos_t const & sta
 void
 Playlist::use ()
 {
-	++_refcnt;
-	InUse (true); /* EMIT SIGNAL */
+	if (0 == _refcnt.fetch_add (1)) {
+		InUse (true); /* EMIT SIGNAL */
+	}
 }
 
 void
 Playlist::release ()
 {
-	if (_refcnt > 0) {
-		_refcnt--;
+	int oldval = _refcnt.fetch_sub (1);
+#ifndef NDEBUG
+	if (oldval <= 0) {
+		cerr << "Bad Playlist::release for " << name() << endl;
 	}
+	assert (oldval > 0);
+#endif
 
-	if (_refcnt == 0) {
+	if (oldval == 1) {
 		InUse (false); /* EMIT SIGNAL */
 	}
 }
@@ -323,7 +328,6 @@ Playlist::init (bool hide)
 	pending_contents_change     = false;
 	pending_layering            = false;
 	first_set_state             = true;
-	_refcnt                     = 0;
 	_hidden                     = hide;
 	_rippling                   = false;
 	_shuffling                  = false;
@@ -335,7 +339,10 @@ Playlist::init (bool hide)
 	subcnt                      = 0;
 	_frozen                     = false;
 	_capture_insertion_underway = false;
-	_combine_ops = 0;
+	_combine_ops                = 0;
+
+	_refcnt.store (0);
+
 	_end_space = timecnt_t (_type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime);
 	_playlist_shift_active = false;
 

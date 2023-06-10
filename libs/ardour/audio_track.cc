@@ -449,8 +449,8 @@ void
 AudioTrack::unfreeze ()
 {
 	if (_freeze_record.playlist) {
-		_freeze_record.playlist->release();
 		use_playlist (DataType::AUDIO, _freeze_record.playlist);
+		_freeze_record.playlist->release();
 
 		{
 			Glib::Threads::RWLock::ReaderLock lm (_processor_lock); // should this be a write lock? jlc

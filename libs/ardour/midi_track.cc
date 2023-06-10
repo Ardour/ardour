@@ -96,6 +96,9 @@ MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 
 MidiTrack::~MidiTrack ()
 {
+	if (_freeze_record.playlist && !_session.deletion_in_progress()) {
+		_freeze_record.playlist->release();
+	}
 }
 
 int
