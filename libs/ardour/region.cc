@@ -1564,9 +1564,12 @@ Region::source_deleted (std::weak_ptr<Source>)
 		 * in this object being deleted (as refcnt goes to zero)
 		 * while emitting DropReferences.
 		 */
-		std::shared_ptr<Region> me (shared_from_this ());
-
-		drop_references ();
+		try {
+			std::shared_ptr<Region> me (shared_from_this ());
+			drop_references ();
+		} catch (...) {
+			/* relax */
+		}
 	}
 }
 
