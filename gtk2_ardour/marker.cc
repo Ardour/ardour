@@ -298,7 +298,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 	}
 
 	_position = pos;
-	unit_position = editor.sample_to_pixel (pos.samples());
+	unit_position = editor.sample_to_pixel (pos.is_zero () ? 0 : pos.samples());
 	unit_position -= _shift;
 
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (unit_position, 1));
