@@ -1121,6 +1121,12 @@ TempoMap::change_tempo (TempoPoint & p, Tempo const & t)
 void
 TempoMap::replace_tempo (TempoPoint const & old, Tempo const & t, timepos_t const & time)
 {
+	if (old.sclock() == 0) {
+		_tempos.front() = t;
+		reset_starting_at (0);
+		return;
+	}
+
 	remove_tempo (old, false);
 	set_tempo (t, time);
 }
