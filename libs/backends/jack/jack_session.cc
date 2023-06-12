@@ -126,7 +126,7 @@ JACKSession::timebase_callback (jack_transport_state_t /*state*/,
 
 	/* BBT info */
 
-	TempoMetric metric (tempo_map->metric_at (tf));
+	TempoMetric metric (tempo_map->metric_at (timepos_t (tf)));
 
 	try {
 		bbt = tempo_map->bbt_at (timepos_t (tf));
