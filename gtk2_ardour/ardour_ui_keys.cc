@@ -125,6 +125,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 	GtkWidget* focus = gtk_window_get_focus (win);
 	bool special_handling_of_unmodified_accelerators = false;
 	const guint mask = (Keyboard::RelevantModifierKeyMask & ~(Gdk::SHIFT_MASK|Gdk::LOCK_MASK));
+	bool cutcopypaste = false;
 
 	if (focus) {
 
@@ -152,7 +153,20 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
                                                           (focus ? gtk_widget_get_name (focus) : "no focus widget"),
                                                           ((ev->state & mask) ? "yes" : "no"),
 	                                                  window.get_title(),
-	                                                  gdk_keyval_name (ev->keyval)))
+	                                                  gdk_keyval_name (ev->keyval)));
+
+	if (Keyboard::some_magic_widget_has_focus() && (ev->state == Keyboard::PrimaryModifier)) {
+		switch (ev->keyval) {
+		case GDK_x:
+		case GDK_c:
+		case GDK_v:
+			cutcopypaste = true;
+			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("seen cut/copy/paste keys with magic widget focus, Primary-%1\n", gdk_keyval_name (ev->keyval)));
+			break;
+		default:
+			break;
+		}
+	}
 
 	/* This exists to allow us to override the way GTK handles
 	   key events. The normal sequence is:
@@ -186,7 +200,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 	*/
 
 
-	if (!special_handling_of_unmodified_accelerators || (ev->state & mask)) {
+	if (!cutcopypaste && (!special_handling_of_unmodified_accelerators || (ev->state & mask))) {
 
 		/* no special handling or there are modifiers in effect: accelerate first */
 
@@ -243,7 +257,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 
 	} else {
 
-		/* no modifiers, propagate first */
+		/* no modifiers or cut/copy/paste key event, propagate first */
 
 		DEBUG_TRACE (DEBUG::Accelerators, "\tpropagate, then activate\n");
 
