@@ -145,7 +145,7 @@ VerboseCursor::set_duration (samplepos_t start, samplepos_t end)
 	Timecode::Time timecode;
 	Temporal::BBT_Time sbbt;
 	Temporal::BBT_Time ebbt;
-	Meter const & meter_at_start (TempoMap::use()->metric_at (start).meter());
+	Meter const & meter_at_start (TempoMap::use()->metric_at (timepos_t (start)).meter());
 
 	if (_editor->_session == 0) {
 		return;

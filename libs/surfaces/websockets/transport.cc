@@ -29,7 +29,7 @@ using namespace Temporal;
 double
 ArdourTransport::tempo () const
 {
-	const Tempo& tempo (TempoMap::fetch()->metric_at (0).tempo());
+	const Tempo& tempo (TempoMap::fetch()->metric_at (timepos_t (0)).tempo());
 	return tempo.note_types_per_minute ();
 }
 
@@ -40,7 +40,7 @@ ArdourTransport::set_tempo (double bpm)
 
 	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 
-	Tempo tempo (bpm, tmap->metric_at (0).tempo().note_type ());
+	Tempo tempo (bpm, tmap->metric_at (timepos_t (0)).tempo().note_type ());
 
 	tmap->set_tempo (tempo, timepos_t());
 	TempoMap::update (tmap);

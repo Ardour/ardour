@@ -814,7 +814,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	   Meter at the given time. If can_match is false, the TempoMetric will
 	   only refer to the Tempo or Metric preceding the given time.
 	*/
-	LIBTEMPORAL_API	TempoMetric metric_at (superclock_t, bool can_match = true) const;
 	LIBTEMPORAL_API	TempoMetric metric_at (Beats const &, bool can_match = true) const;
 	LIBTEMPORAL_API	TempoMetric metric_at (BBT_Argument const &, bool can_match = true) const;
 
@@ -1090,6 +1089,13 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, Beats const & b, bool can_match, bool ret_iterator_after_not_at) const {
 		return _get_tempo_and_meter<const_traits<Beats const &, Beats> > (t, m, &Point::beats, b, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
 	}
+
+	/* This is private, and should not be callable from outside the map
+	   because of potential confusion between samplepos_t and
+	   superclock_t. The timepos_t variant of ::metric_at() handles any
+	   samplepos_t-passing call.
+	*/
+	TempoMetric metric_at (superclock_t, bool can_match = true) const;
 
 	/* parsing legacy tempo maps */
 

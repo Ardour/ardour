@@ -623,7 +623,7 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 		return;
 	}
 
-	Temporal::TempoMetric tm (TempoMap::use()->metric_at (section.sclock()));
+	Temporal::TempoMetric tm (TempoMap::use()->metric_at (timepos_t (section.sample(TEMPORAL_SAMPLE_RATE))));
 	Temporal::MeterPoint const * mpp (TempoMap::use()->previous_meter (tm.meter()));
 
 	double bpb = meter_dialog.get_bpb ();
@@ -702,7 +702,7 @@ Editor::edit_tempo_section (TempoPoint& section)
 		return;
 	}
 
-	Temporal::TempoMetric tm (TempoMap::use()->metric_at (section.sclock()));
+	Temporal::TempoMetric tm (TempoMap::use()->metric_at (timepos_t (section.sample (TEMPORAL_SAMPLE_RATE))));
 	Temporal::TempoPoint const * tpp (TempoMap::use()->previous_tempo (tm.tempo()));
 
 	double bpm = tempo_dialog.get_bpm ();
