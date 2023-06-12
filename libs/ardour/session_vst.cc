@@ -317,7 +317,7 @@ intptr_t Session::vst_callback (
 		// returns tempo (in bpm * 10000) at sample sample location passed in <value>
 		if (session) {
 			TempoMap::SharedPtr tmap (TempoMap::fetch());
-			const Tempo& t (tmap->metric_at (value).tempo());
+			const Tempo& t (tmap->metric_at (timepos_t (value)).tempo());
 			return t.quarter_notes_per_minute() * 1000;
 		} else {
 			return 0;

@@ -560,7 +560,7 @@ Session::start_transport (bool after_loop)
 			 * - use [fixed] tempo/meter at _transport_sample
 			 * - calc duration of 1 bar + time-to-beat before or at transport_sample
 			 */
-			TempoMetric const & tempometric = tmap->metric_at (_transport_sample);
+			TempoMetric const & tempometric = tmap->metric_at (timepos_t (_transport_sample));
 
 			const double num = tempometric.divisions_per_bar ();
 			/* XXX possible optimization: get meter and BBT time in one call */

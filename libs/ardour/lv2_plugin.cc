@@ -2767,7 +2767,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	samplepos_t start0 = std::max (samplepos_t (0), start);
 
 	TempoMap::SharedPtr tmap (TempoMap::use());
-	TempoMetric metric (tmap->metric_at (samples_to_superclock (start0, TEMPORAL_SAMPLE_RATE)));
+	TempoMetric metric (tmap->metric_at (timepos_t (start0)));
 
 	TempoMapPoints tempo_map_points;
 	tmap->get_grid (tempo_map_points,

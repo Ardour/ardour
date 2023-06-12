@@ -2128,7 +2128,7 @@ Session::preroll_samples (samplepos_t pos) const
 {
 	const float pr = Config->get_preroll_seconds();
 	if (pos >= 0 && pr < 0) {
-		Temporal::TempoMetric const & metric (TempoMap::use()->metric_at (pos));
+		Temporal::TempoMetric const & metric (TempoMap::use()->metric_at (timepos_t (pos)));
 		return metric.samples_per_bar (sample_rate()) * -pr;
 	}
 	if (pr < 0) {
@@ -7615,7 +7615,7 @@ Session::maybe_update_tempo_from_midiclock_tempo (float bpm)
 	TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
 
 	if (tmap->n_tempos() == 1) {
-		Temporal::TempoMetric const & metric (tmap->metric_at (0));
+		Temporal::TempoMetric const & metric (tmap->metric_at (timepos_t (0)));
 		if (fabs (metric.tempo().note_types_per_minute() - bpm) >= Config->get_midi_clock_resolution()) {
 			/* fix note type as quarters, because that's how MIDI clock works */
 			tmap->change_tempo (metric.get_editable_tempo(), Tempo (bpm, bpm, 4.0));
