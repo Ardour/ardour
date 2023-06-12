@@ -171,7 +171,9 @@ protected:
 	virtual void regions_changed (std::shared_ptr<ARDOUR::RegionList>, PBD::PropertyChange const&);
 
 	void name_editing_started (Gtk::CellEditable*, const Glib::ustring&);
+	void name_editing_canceled ();
 	void tag_editing_started (Gtk::CellEditable*, const Glib::ustring&);
+	void tag_editing_canceled ();
 
 	virtual void name_edit (const std::string&, const std::string&);
 	virtual void tag_edit (const std::string&, const std::string&);
