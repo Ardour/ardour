@@ -38,6 +38,7 @@
 #include "ardour/smf_source.h"
 
 #include "gtkmm2ext/colors.h"
+#include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/treeutils.h"
 #include "gtkmm2ext/utils.h"
 
@@ -159,6 +160,7 @@ RegionListBase::add_name_column ()
 	region_name_cell->property_editable () = true;
 	region_name_cell->signal_edited ().connect (sigc::mem_fun (*this, &RegionListBase::name_edit));
 	region_name_cell->signal_editing_started ().connect (sigc::mem_fun (*this, &RegionListBase::name_editing_started));
+	region_name_cell->signal_editing_canceled ().connect (sigc::mem_fun (*this, &RegionListBase::name_editing_canceled));
 	/* Region Name: color turns red if source is missing. */
 	tvc->add_attribute (region_name_cell->property_text (), _columns.name);
 	tvc->add_attribute (region_name_cell->property_foreground_gdk (), _columns.color_);
@@ -176,6 +178,7 @@ RegionListBase::add_tag_column ()
 	region_tags_cell->property_editable () = true;
 	region_tags_cell->signal_edited ().connect (sigc::mem_fun (*this, &RegionListBase::tag_edit));
 	region_tags_cell->signal_editing_started ().connect (sigc::mem_fun (*this, &RegionListBase::tag_editing_started));
+	region_tags_cell->signal_editing_canceled ().connect (sigc::mem_fun (*this, &RegionListBase::tag_editing_canceled));
 }
 
 bool
@@ -218,17 +221,22 @@ RegionListBase::enter_notify (GdkEventCrossing*)
 	}
 
 	Keyboard::magic_widget_grab_focus ();
+
 	return false;
 }
 
 bool
-RegionListBase::leave_notify (GdkEventCrossing*)
+RegionListBase::leave_notify (GdkEventCrossing* ev)
 {
 	if (_old_focus) {
 		_old_focus->grab_focus ();
 		_old_focus = 0;
 	}
-	Keyboard::magic_widget_drop_focus ();
+
+	if (ev->detail != GDK_NOTIFY_INFERIOR && ev->detail != GDK_NOTIFY_ANCESTOR) {
+		Keyboard::magic_widget_drop_focus ();
+	}
+
 	return false;
 }
 
@@ -775,6 +783,12 @@ RegionListBase::key_press (GdkEventKey* ev)
 }
 
 void
+RegionListBase::name_editing_canceled ()
+{
+	Keyboard::magic_widget_drop_focus ();
+}
+
+void
 RegionListBase::name_editing_started (CellEditable* ce, const Glib::ustring& path)
 {
 	_name_editable = ce;
@@ -792,6 +806,7 @@ RegionListBase::name_editing_started (CellEditable* ce, const Glib::ustring& pat
 
 			if (region) {
 				e->set_text (region->name ());
+				Keyboard::magic_widget_grab_focus ();
 			}
 		}
 	}
@@ -814,7 +829,14 @@ RegionListBase::name_edit (const std::string& path, const std::string& new_text)
 		region->set_name (new_text);
 
 		populate_row_name (region, (*row_iter));
+		Keyboard::magic_widget_drop_focus ();
 	}
+}
+
+void
+RegionListBase::tag_editing_canceled ()
+{
+	Keyboard::magic_widget_drop_focus ();
 }
 
 void
@@ -835,6 +857,7 @@ RegionListBase::tag_editing_started (CellEditable* ce, const Glib::ustring& path
 
 			if (region) {
 				e->set_text (region->tags ());
+				Keyboard::magic_widget_grab_focus ();
 			}
 		}
 	}
@@ -857,6 +880,7 @@ RegionListBase::tag_edit (const std::string& path, const std::string& new_text)
 		region->set_tags (new_text);
 
 		populate_row_name (region, (*row_iter));
+		Keyboard::magic_widget_drop_focus ();
 	}
 }
 
