@@ -275,7 +275,9 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		 * top level tab or a top level window)
 		 */
 
-		DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing top level bindings %1 @ %2 for this event\n", top_level_bindings->name(), top_level_bindings));
+		if (top_level_bindings) {
+			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing top level bindings %1 @ %2 for this event\n", top_level_bindings->name(), top_level_bindings));
+		}
 
 		if (top_level_bindings && top_level_bindings->activate (k, Bindings::Press)) {
 			DEBUG_TRACE (DEBUG::Accelerators, "\t\thandled\n");
