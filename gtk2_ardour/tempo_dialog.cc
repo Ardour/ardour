@@ -279,7 +279,8 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 	tap_tempo_button.signal_button_press_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_button_press), false);
 	tap_tempo_button.signal_key_press_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_key_press), false);
 	tap_tempo_button.signal_focus_out_event().connect (sigc::mem_fun (*this, &TempoDialog::tap_tempo_focus_out));
-	_midi_port_combo.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::port_changed));
+
+	_port_changed_connection = _midi_port_combo.signal_changed().connect (sigc::mem_fun (*this, &TempoDialog::port_changed));
 
 	/* Setup MIDI Tap */
 	_midi_port_list = ListStore::create (_midi_port_cols);
@@ -352,6 +353,8 @@ TempoDialog::ports_changed ()
 		cpn = (*r)[_midi_port_cols.port_name];
 	}
 
+	_port_changed_connection.block ();
+
 	_midi_port_list->clear ();
 
 	TreeModel::Row row               = *_midi_port_list->append ();
@@ -387,6 +390,7 @@ TempoDialog::ports_changed ()
 		row[_midi_port_cols.port_name]   = pn;
 	}
 
+	_port_changed_connection.unblock ();
 	_midi_port_combo.set_active (act);
 }
 
