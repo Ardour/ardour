@@ -29,7 +29,7 @@ using ArdourCanvas::Coord;
 using ArdourCanvas::Duple;
 
 Lollipop::Lollipop (
-	MidiRegionView& region, ArdourCanvas::Item* parent, const boost::shared_ptr<NoteType> note, bool with_events)
+	MidiRegionView& region, ArdourCanvas::Item* parent, const std::shared_ptr<NoteType> note, bool with_events)
 	: NoteBase (region, with_events, note)
 	, _lollipop (new ArdourCanvas::Lollipop (parent))
 {

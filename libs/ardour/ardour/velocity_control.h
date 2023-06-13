@@ -21,8 +21,6 @@
 
 #include <string>
 
-#include <boost/shared_ptr.hpp>
-
 #include "pbd/controllable.h"
 
 #include "evoral/Parameter.h"
