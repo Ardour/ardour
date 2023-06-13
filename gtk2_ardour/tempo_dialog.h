@@ -137,11 +137,12 @@ private:
 	Glib::RefPtr<Gtk::ListStore> _midi_port_list;
 
 	PBD::Signal1<void, int64_t>         _midi_tap_signal;
-	std::shared_ptr<MIDI::Parser>     _midi_tap_parser;
-	std::shared_ptr<ARDOUR::MidiPort> _midi_tap_port;
+	std::shared_ptr<MIDI::Parser>       _midi_tap_parser;
+	std::shared_ptr<ARDOUR::MidiPort>   _midi_tap_port;
 	PBD::ScopedConnection               _parser_connection;
 	PBD::ScopedConnection               _manager_connection;
 	PBD::ScopedConnection               _xthread_connection;
+	sigc::connection                    _port_changed_connection;
 };
 
 class MeterDialog : public ArdourDialog
