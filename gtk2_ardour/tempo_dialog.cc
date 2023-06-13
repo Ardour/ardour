@@ -243,7 +243,7 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 	get_vbox ()->set_border_width (12);
 	get_vbox ()->set_spacing (6);
 
-	get_vbox ()->pack_end (*table, false, false);
+	get_vbox ()->pack_start (*table, false, false);
 	table->show_all ();
 
 	table = manage (new Table (2, 2));
@@ -298,19 +298,26 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 	/* init state */
 	tempo_type_change ();
 	tapped = false;
-#if 0
-	bpm_spinner.select_region (0, -1);
-	bpm_spinner.grab_focus ();
-#else
-	tap_tempo_button.set_can_focus ();
-	tap_tempo_button.grab_focus ();
-#endif
 }
 
 TempoDialog::~TempoDialog ()
 {
 	_parser_connection.disconnect ();
 	AudioEngine::instance ()->unregister_port (_midi_tap_port);
+}
+
+void
+TempoDialog::on_show ()
+{
+	ArdourDialog::on_show ();
+
+	if (!UIConfiguration::instance().get_prefer_tap_tempo()) {
+		bpm_spinner.select_region (0, -1);
+		bpm_spinner.grab_focus ();
+	} else {
+		tap_tempo_button.set_can_focus ();
+		tap_tempo_button.grab_focus ();
+	}
 }
 
 void
@@ -398,7 +405,7 @@ TempoDialog::port_changed ()
 	}
 	tap_tempo_button.set_sensitive (!rv);
 	bpm_spinner.set_sensitive (!rv);
-	if (!rv) {
+	if (!rv && UIConfiguration::instance().get_prefer_tap_tempo()) {
 		tap_tempo_button.grab_focus ();
 	}
 }
