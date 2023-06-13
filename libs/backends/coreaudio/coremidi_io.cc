@@ -252,14 +252,18 @@ CoreMidiIo::recv_event (uint32_t port, double cycle_time_us, uint64_t &time, uin
 	const size_t minsize = 1 + sizeof(uint32_t) + sizeof(MIDITimeStamp) + sizeof(UInt16);
 
 	while (_rb[port]->read_space() > minsize) {
-		MIDIPacket packet;
+		int32_t packet[1024];
 		size_t rv;
 		uint32_t s = 0;
 		rv = _rb[port]->read((uint8_t*)&s, sizeof(uint32_t));
 		assert(rv == sizeof(uint32_t));
-		rv = _rb[port]->read((uint8_t*)&packet, s);
+		if (s > 1024) {
+			_rb[port]->increment_read_idx (s);
+			continue;
+		}
+		rv = _rb[port]->read((uint8_t*)packet, s);
 		assert(rv == s);
-		_input_queue[port].push_back(std::shared_ptr<CoreMIDIPacket>(new _CoreMIDIPacket (&packet)));
+		_input_queue[port].push_back(std::shared_ptr<CoreMIDIPacket>(new _CoreMIDIPacket ((MIDIPacket*)&packet)));
 	}
 
 	UInt64 start = _time_at_cycle_start;
