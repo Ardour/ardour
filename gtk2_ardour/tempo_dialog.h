@@ -65,6 +65,8 @@ public:
 	Temporal::Tempo::Type get_tempo_type ();
 	Temporal::TimeDomain get_lock_style ();
 
+	void on_show ();
+
 private:
 	void init (const Temporal::BBT_Time& start, double bpm, double end_bpm, double note_type, Temporal::TempoPoint::Type type, bool movable, Temporal::TimeDomain style);
 	bool is_user_input_valid() const;

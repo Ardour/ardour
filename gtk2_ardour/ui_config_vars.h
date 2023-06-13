@@ -153,6 +153,7 @@ UI_CONFIG_VARIABLE (bool, ask_before_closing_last_window, "ask-before-closing-la
 UI_CONFIG_VARIABLE (bool, ask_cut_copy_section_tempo_map, "ask-cut-copy-section-tempo-map", true)
 UI_CONFIG_VARIABLE (std::string, freesound_dir, "freesound-dir", "")
 UI_CONFIG_VARIABLE (int, max_note_height, "max-note-height", 20)
+UI_CONFIG_VARIABLE (bool, prefer_tap_tempo, "prefer-tap-tempo", false)
 #ifdef MIXBUS
 UI_CONFIG_VARIABLE (Editing::TempoEditBehavior, tempo_edit_behavior, "tempo-edit-behavior", Editing::TempoMapping)
 #else
