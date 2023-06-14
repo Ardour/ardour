@@ -372,6 +372,7 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "cut-paste-section", _("Cut/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CutPasteSection));
 	reg_sens (editor_actions, "insert-section", _("Insert Time Section at Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), InsertSection));
 	reg_sens (editor_actions, "delete-section", _("Delete Range Section"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), DeleteSection));
+	reg_sens (editor_actions, "alternate-delete-section", _("Delete Range Section"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), DeleteSection));
 
 	/* this is a duplicated action so that the main menu can use a different label */
 	reg_sens (editor_actions, "main-menu-play-selected-regions", _("Play Selected Regions"), sigc::mem_fun (*this, &Editor::play_selected_region));
