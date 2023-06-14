@@ -329,10 +329,13 @@ MidiPlaylist::render (MidiChannelFilter* filter)
 	for (auto i = ++regs.begin(); i != regs.end(); ++i) {
 		if ((*i)->opaque ()) {
 			all_transparent = false;
-			break;
 		}
 		if ((*i)->layer () != layer) {
 			no_layers = false;
+		}
+		if (!all_transparent && !no_layers) {
+			/* no need to check further */
+			break;
 		}
 	}
 
