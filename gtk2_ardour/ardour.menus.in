@@ -201,6 +201,7 @@
       <separator/>
       <menuitem action='cut-paste-section'/>
       <menuitem action='copy-paste-section'/>
+      <menuitem action='delete-section'/>
       <separator/>
       <menu action="SelectMenu">
         <menuitem action='select-all-objects'/>
