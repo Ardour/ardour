@@ -550,7 +550,7 @@ public:
 	double    _last_event_y;
 	bool      _entered;
 	NoteBase* _entered_note;
-	bool      _pasting;
+	bool      _select_all_notes_after_add;
 
 	bool _mouse_changed_selection;
 
