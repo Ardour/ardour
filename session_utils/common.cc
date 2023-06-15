@@ -243,7 +243,6 @@ SessionUtils::unload_session (Session *s)
 {
 	delete s;
 	AudioEngine::instance()->stop ();
-	AudioEngine::destroy ();
 }
 
 void
