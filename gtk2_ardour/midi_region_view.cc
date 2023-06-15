@@ -126,7 +126,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_event_y (0)
 	, _entered (false)
 	, _entered_note (0)
-	, _pasting (false)
+	, _select_all_notes_after_add (false)
 	, _mouse_changed_selection (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
@@ -169,7 +169,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _last_event_y (0)
 	, _entered (false)
 	, _entered_note (0)
-	, _pasting (false)
+	, _select_all_notes_after_add (false)
 	, _mouse_changed_selection (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
@@ -1007,21 +1007,24 @@ MidiRegionView::apply_note_diff (bool as_subcommand, bool was_copy)
 
 	if (!was_copy && add_or_remove) {
 		// Mark all selected notes for selection when model reloads
-		for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-			_marked_for_selection.insert((*i)->note());
+		for (auto const & sel : _selection) {
+			_marked_for_selection.insert (sel->note());
 		}
 	}
 
-	/*note that we don't use as_commit here, because that would BEGIN a new undo record; we already have one underway*/
-	_model->apply_diff_command_as_subcommand (*trackview.session(), _note_diff_command);
+	{
+		PBD::Unwinder<bool> puw (_select_all_notes_after_add, true);
+		/*note that we don't use as_commit here, because that would BEGIN a new undo record; we already have one underway*/
+		_model->apply_diff_command_as_subcommand (*trackview.session(), _note_diff_command);
+	}
 
 	if (!as_subcommand) {
 		trackview.editor().commit_reversible_command ();  /*instead, we can explicitly commit the command in progress */
 	}
 
-	_note_diff_command = 0;
+	_note_diff_command = nullptr;
 
-	if (add_or_remove) {
+	if (add_or_remove && !was_copy) {
 		_marked_for_selection.clear();
 	}
 
@@ -1248,11 +1251,7 @@ MidiRegionView::model_changed()
 		bool visible;
 
 		if (note_in_region_range (note, visible)) {
-			if (visible) {
-				cne = add_note (note, true);
-			} else {
-				cne = add_note (note, false);
-			}
+			cne = add_note (note, visible);
 		} else {
 			cne = add_note (note, false);
 		}
@@ -1260,6 +1259,7 @@ MidiRegionView::model_changed()
 		for (set<Evoral::event_id_t>::iterator it = _pending_note_selection.begin(); it != _pending_note_selection.end(); ++it) {
 			if ((*it) == note->id()) {
 				add_to_selection (cne);
+				break;
 			}
 		}
 	}
@@ -1927,10 +1927,12 @@ MidiRegionView::add_note(const std::shared_ptr<NoteType> note, bool visible)
 			}
 		}
 
-		if (_pasting) {
+		if (_select_all_notes_after_add) {
 			note_selected (event, true);
-		} else if (_marked_for_selection.find(note) != _marked_for_selection.end()) {
-			note_selected (event, false);
+		} else {
+			if (_marked_for_selection.find(note) != _marked_for_selection.end()) {
+				note_selected (event, false);
+			}
 		}
 
 		if (_marked_for_velocity.find(note) != _marked_for_velocity.end()) {
@@ -2832,17 +2834,17 @@ MidiRegionView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, b
 
 		start_note_diff_command (_("move notes"));
 
-		for (Selection::iterator i = _selection.begin(); i != _selection.end() ; ++i) {
+		for (auto & sel : _selection) {
 
-			Temporal::Beats new_time = (*i)->note()->time() + d_qn.beats ();
+			Temporal::Beats new_time = sel->note()->time() + d_qn.beats ();
 
 			if (new_time < Temporal::Beats()) {
 				continue;
 			}
 
-			note_diff_add_change (*i, MidiModel::NoteDiffCommand::StartTime, new_time);
+			note_diff_add_change (sel, MidiModel::NoteDiffCommand::StartTime, new_time);
 
-			uint8_t original_pitch = (*i)->note()->note();
+			uint8_t original_pitch = sel->note()->note();
 			uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
 
 			// keep notes in standard midi range
@@ -2851,7 +2853,7 @@ MidiRegionView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, b
 			lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
 			highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
 
-			note_diff_add_change (*i, MidiModel::NoteDiffCommand::NoteNumber, new_pitch);
+			note_diff_add_change (sel, MidiModel::NoteDiffCommand::NoteNumber, new_pitch);
 		}
 	} else {
 
@@ -2870,23 +2872,23 @@ MidiRegionView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, b
 
 		start_note_diff_command (_("copy notes"));
 
-		for (CopyDragEvents::iterator i = _copy_drag_events.begin(); i != _copy_drag_events.end() ; ++i) {
+		for (auto & copy_event : _copy_drag_events) {
 
 			/* update time */
-			Temporal::Beats new_time = (*i)->note()->time() + d_qn.beats();
+			Temporal::Beats new_time = copy_event->note()->time() + d_qn.beats();
 
 			if (new_time < Temporal::Beats()) {
 				continue;
 			}
 
-			(*i)->note()->set_time (new_time);
+			copy_event->note()->set_time (new_time);
 
 			/* update pitch */
 
-			uint8_t original_pitch = (*i)->note()->note();
+			uint8_t original_pitch = copy_event->note()->note();
 			uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
 
-			(*i)->note()->set_note (new_pitch);
+			copy_event->note()->set_note (new_pitch);
 
 			// keep notes in standard midi range
 			clamp_to_0_127(new_pitch);
@@ -2894,9 +2896,9 @@ MidiRegionView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, b
 			lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
 			highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
 
-			note_diff_add_note ((*i)->note(), true);
+			note_diff_add_note (copy_event->note(), true);
 
-			delete *i;
+			delete copy_event;
 		}
 
 		_copy_drag_events.clear ();
@@ -3858,17 +3860,14 @@ MidiRegionView::paste (timepos_t const & pos, const ::Selection& selection, Past
 			commit = true;
 		}
 
-		/* clear any current selection because we're going to select the duplicated ones */
+		/* clear any current selection because we're going to select the paste ones */
 		clear_note_selection ();
-
 		paste_internal (pos, ctx.count, ctx.times, **m);
 	}
 
 	// Paste control points to automation children, if available
-	typedef RouteTimeAxisView::AutomationTracks ATracks;
-	const ATracks& atracks = midi_view()->automation_tracks();
-	for (ATracks::const_iterator a = atracks.begin(); a != atracks.end(); ++a) {
-		if (a->second->paste(pos, selection, ctx)) {
+	for (auto & at : midi_view()->automation_tracks()) {
+		if (at.second->paste(pos, selection, ctx)) {
 			commit = true;
 		}
 	}
@@ -3884,7 +3883,7 @@ MidiRegionView::paste_internal (timepos_t const & pos, unsigned paste_count, flo
 		return;
 	}
 
-	PBD::Unwinder<bool> puw (_pasting, true);
+	PBD::Unwinder<bool> puw (_select_all_notes_after_add, true);
 
 	_note_diff_command = _model->new_note_diff_command (_("paste")); /* we are a subcommand, so we don't want to use start_note_diff */
 
@@ -3905,9 +3904,9 @@ MidiRegionView::paste_internal (timepos_t const & pos, unsigned paste_count, flo
 
 	for (int n = 0; n < (int) times; ++n) {
 
-		for (Notes::const_iterator i = mcb.notes().begin(); i != mcb.notes().end(); ++i) {
+		for (auto const & note : mcb.notes()) {
 
-			std::shared_ptr<NoteType> copied_note (new NoteType (*((*i).get())));
+			std::shared_ptr<NoteType> copied_note (new NoteType (*(note.get())));
 			copied_note->set_time (quarter_note + copied_note->time() - first_time);
 			copied_note->set_id (Evoral::next_event_id());
 
@@ -3936,8 +3935,8 @@ MidiRegionView::paste_internal (timepos_t const & pos, unsigned paste_count, flo
 	_marked_for_selection.clear ();
 	_pending_note_selection.clear ();
 
-	_model->apply_diff_command_as_subcommand(*trackview.session(), _note_diff_command);
-	_note_diff_command=0;
+	_model->apply_diff_command_as_subcommand (*trackview.session(), _note_diff_command);
+	_note_diff_command = nullptr;
 }
 
 struct EventNoteTimeEarlyFirstComparator {
