@@ -103,7 +103,6 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		Rect self;
 		const double shift = l.width * 0.5;
 
-
 		if (_orientation == Horizontal) {
 			self = Rect (0, l.pos - (l.width/2.0), _extent, l.pos + (l.width/2.0));
 			if (fmod (l.width, 2.)) {
@@ -116,6 +115,7 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 			}
 		}
 
+		self = item_to_window (self);
 		Rect isect = self.intersection (area);
 
 		if (!isect) {
