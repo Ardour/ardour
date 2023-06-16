@@ -18,6 +18,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <cmath>
+
 #include "canvas/line_set.h"
 
 using namespace std;
@@ -55,19 +57,25 @@ LineSet::compute_bounding_box () const
 
 		if (_orientation == Horizontal) {
 
-			_bounding_box = Rect (0, /* x0 */
-					      _lines.front().pos - (_lines.front().width/2.0), /* y0 */
-					      _extent, /* x1 */
-					      _lines.back().pos - (_lines.back().width/2.0) /* y1 */
-				);
+			double y0 = _lines.front().pos - (_lines.front().width/2.0);
+			double y1 = _lines.back().pos - (_lines.back().width/2.0);
+
+			if (fmod (_lines.front().width, 2.)) {
+				y0 -= _lines.front().width * 0.5;
+			}
+
+			_bounding_box = Rect (0, y0, _extent, y1);
 
 		} else {
 
-			_bounding_box = Rect (_lines.front().pos - _lines.front().width/2.0, /* x0 */
-					      0, /* y0 */
-					      _lines.back().pos + _lines.back().width/2.0, /* x1 */
-					      _extent /* y1 */
-				);
+			double x0 = _lines.front().pos - _lines.front().width/2.0;
+			double x1 = _lines.back().pos + _lines.back().width/2.0;
+
+			if (fmod (_lines.front().width, 2.)) {
+				x0 -= _lines.front().width * 0.5;
+			}
+
+			_bounding_box = Rect (x0, 0, x1, _extent);
 		}
 	}
 
@@ -93,11 +101,19 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	for (auto const & l : _lines) {
 
 		Rect self;
+		const double shift = l.width * 0.5;
+
 
 		if (_orientation == Horizontal) {
-			self = item_to_window (Rect (0, l.pos - (l.width/2.0), _extent, l.pos + (l.width/2.0)));
+			self = Rect (0, l.pos - (l.width/2.0), _extent, l.pos + (l.width/2.0));
+			if (fmod (l.width, 2.)) {
+				self.y0 -= shift;
+			}
 		} else {
-			self = item_to_window (Rect (l.pos - (l.width/2.0), 0, l.pos + (l.width/2.0), _extent));
+			self = Rect (l.pos - (l.width/2.0), 0, l.pos + (l.width/2.0), _extent);
+			if (fmod (l.width, 2.)) {
+				self.x0 -= shift;
+			}
 		}
 
 		Rect isect = self.intersection (area);
@@ -114,16 +130,17 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		/* Not 100% sure that the computation of the invariant
 		 * positions (y and x) below work correctly if the line width
 		 * is not 1.0, but visual inspection suggests it is OK.
+		 * See Cairo FAQ on single pixel lines to understand why we add 0.5
 		 */
 
 		if (_orientation == Horizontal) {
-			double y = self.y0 + ((self.y1 - self.y0)/2.0);
-			context->move_to (intersection.x0, y);
-			context->line_to (intersection.x1, y);
+			const double y = item_to_window (Duple (0, l.pos)).y;
+			context->move_to (intersection.x0, y + shift);
+			context->line_to (intersection.x1, y + shift);
 		} else {
-			double x = self.x0 + ((self.x1 - self.x0)/2.0);
-			context->move_to (x, intersection.y0);
-			context->line_to (x, intersection.y1);
+			const double x = item_to_window (Duple (l.pos, 0)).x;
+			context->move_to (x + shift, intersection.y0);
+			context->line_to (x + shift, intersection.y1);
 		}
 
 		context->stroke ();
