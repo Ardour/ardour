@@ -2505,8 +2505,8 @@ MidiRegionView::update_drag_selection(timepos_t const & start, timepos_t const &
 
 	// Convert to local coordinates
 	const double     y  = midi_view()->y_position();
-	const double     x0 = editor.sample_to_pixel (max<samplepos_t>(0, _region->region_relative_position (start).samples()));
-	const double     x1 = editor.sample_to_pixel (max<samplepos_t>(0, _region->region_relative_position (end).samples()));
+	const double     x0 = editor.sample_to_pixel_unrounded (max<samplepos_t>(0, _region->region_relative_position (start).samples()));
+	const double     x1 = editor.sample_to_pixel_unrounded (max<samplepos_t>(0, _region->region_relative_position (end).samples()));
 	const double     y0 = max(0.0, gy0 - y);
 	const double     y1 = max(0.0, gy1 - y);
 
