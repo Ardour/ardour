@@ -1546,4 +1546,35 @@ class RegionMarkerDrag : public Drag
 	ARDOUR::CueMarker dragging_model;
 };
 
+
+class LollipopDrag : public Drag
+{
+  public:
+	LollipopDrag (Editor*, MidiRegionView*, ArdourCanvas::Item*);
+	~LollipopDrag ();
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent *, bool);
+	void finished (GdkEvent *, bool);
+	void aborted (bool);
+
+	bool allow_vertical_autoscroll () const {
+		return false;
+	}
+
+	bool allow_horizontal_autoscroll () const {
+		return false;
+	}
+
+	bool x_movement_matters () const {
+		return false;
+	}
+
+	void setup_pointer_sample_offset ();
+
+  private:
+	MidiRegionView* _region;
+	NoteBase*       _primary;
+};
+
 #endif /* __gtk2_ardour_editor_drag_h_ */

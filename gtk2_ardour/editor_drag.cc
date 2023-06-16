@@ -7177,3 +7177,39 @@ RegionMarkerDrag::setup_pointer_sample_offset ()
 	const timepos_t model_abs_pos = rv->region ()->position () + (rv->region ()->start ().distance (model.position ()));
 	_pointer_offset               = model_abs_pos.distance (raw_grab_time ());
 }
+
+LollipopDrag::LollipopDrag (Editor* ed, MidiRegionView* r, ArdourCanvas::Item* i)
+	: Drag (ed, i, r->region ()->position ().time_domain ())
+{
+}
+
+LollipopDrag::~LollipopDrag ()
+{
+}
+
+void
+LollipopDrag::start_grab (GdkEvent *ev, Gdk::Cursor* c)
+{
+	Drag::start_grab (ev, c);
+}
+
+void
+LollipopDrag::motion (GdkEvent *ev, bool first_move)
+{
+}
+
+void
+LollipopDrag::finished (GdkEvent *ev, bool did_move)
+{
+}
+
+void
+LollipopDrag::aborted (bool)
+{
+}
+
+void
+LollipopDrag::setup_pointer_sample_offset ()
+{
+}
+
