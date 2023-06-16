@@ -552,37 +552,63 @@ MidiRegion::set_name (const std::string& str)
 void
 MidiRegion::merge (std::shared_ptr<MidiRegion const> other_region)
 {
+	std::shared_ptr<MidiModel const> self  = model ();
 	std::shared_ptr<MidiModel const> other = other_region->model();
-	std::shared_ptr<MidiModel> self = model();
 
 	Temporal::Beats other_region_start (other_region->start().beats());
 	Temporal::Beats other_region_end ((other_region->start() + other_region->length()).beats());
 
-	self->start_write ();
+	Evoral::Sequence<Temporal::Beats>::const_iterator e1 = self->begin();
+	Evoral::Sequence<Temporal::Beats>::const_iterator e2 = other->begin();
 
-	for (Evoral::Sequence<Temporal::Beats>::const_iterator e = other->begin(); e != other->end(); ++e) {
+	Source::WriterLock sl (midi_source()->mutex ());
+	midi_source ()->drop_model (sl);
+	std::shared_ptr<MidiModel> new_model (new MidiModel (*midi_source()));
+	new_model->start_write ();
 
-		if (e->time() < other_region_start) {
+	/* Note: merge() is called with sorted region list so that
+	 * self->position <= other->position ()
+	 */
+
+	while ((e1 != self->end ()) || (e2 != other->end ())) {
+		/* map time from other region to this region */
+		Temporal::Beats e2t;
+		if (e2 != other->end ()) {
+			timepos_t abs_time (other_region->source_beats_to_absolute_time (e2->time()));
+			e2t = position().distance (abs_time).beats();
+		}
+
+		if (e2 == other->end () || (e1 != self->end () && e1->time() < e2t)) {
+			Evoral::Event<Temporal::Beats> ev (*e1, true);
+			new_model->append (ev, Evoral::next_event_id());
+			++e1;
 			continue;
 		}
 
-		/* other_region_end is an inclusive end, not
-		 * exclusive, since we allow simultaneous MIDI events
-		 * (given appropriate semantic sorting)
-		 */
+		if (e1 == self->end () || (e2 != other->end () && e1->time() >= e2t)) {
+			if (e2->time() < other_region_start) {
+				++e2;
+				continue;
+			}
+			if (e2->time() > other_region_end) {
+				/* No more events form other region */
+				e2 = other->end ();
+				continue;
+			}
 
-		if (e->time() > other_region_end) {
-			break;
+			Evoral::Event<Temporal::Beats> ev (*e2, true);
+			ev.set_time (e2t);
+			new_model->append (ev, Evoral::next_event_id());
+			++e2;
+			continue;
 		}
 
-		Evoral::Event<Temporal::Beats> ev (*e, true);
-		timepos_t abs_time (other_region->source_beats_to_absolute_time (ev.time()));
-		Temporal::Beats srt = position().distance (abs_time).beats();
-		ev.set_time (srt);
-
-		self->append (ev, Evoral::next_event_id());
+		assert (0);
+		break;
 	}
 
-	set_length (position().distance (other_region->end()));
-	self->end_write (Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, length().beats());
+	new_model->end_write (Evoral::Sequence<Temporal::Beats>::ResolveStuckNotes, length().beats());
+	midi_source()->set_model (sl, new_model);
+
+	set_length (max (length(), position().distance (other_region->end())));
 }
