@@ -1817,13 +1817,13 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 
 		const samplepos_t note_end_samples = _region->position().distance ((note_end + session_source_start)).samples();
 
-		x1 = std::max(1., trackview.editor().sample_to_pixel (note_end_samples)) - 1;
+		x1 = std::max(1., trackview.editor().sample_to_pixel (note_end_samples));
 
 	} else {
 
 		/* nascent note currently being recorded, noteOff has not yet arrived */
 
-		x1 = std::max(1., trackview.editor().duration_to_pixels (_region->length())) - 1;
+		x1 = std::max(1., trackview.editor().duration_to_pixels (_region->length()));
 	}
 
 	y1 = y0 + std::max(1., floor(note_height()) - 1);
