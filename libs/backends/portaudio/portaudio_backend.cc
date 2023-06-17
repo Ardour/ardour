@@ -354,6 +354,9 @@ PortAudioBackend::set_systemic_midi_input_latency (std::string const device, uin
 	MidiDeviceInfo* nfo = midi_device_info (device);
 	if (!nfo) return -1;
 	nfo->systemic_input_latency = sl;
+	if (_run && nfo->enable) {
+		update_systemic_midi_latencies ();
+	}
 	return 0;
 }
 
@@ -363,6 +366,9 @@ PortAudioBackend::set_systemic_midi_output_latency (std::string const device, ui
 	MidiDeviceInfo* nfo = midi_device_info (device);
 	if (!nfo) return -1;
 	nfo->systemic_output_latency = sl;
+	if (_run && nfo->enable) {
+		update_systemic_midi_latencies ();
+	}
 	return 0;
 }
 
@@ -500,7 +506,11 @@ PortAudioBackend::enumerate_midi_devices () const
 	     ++i) {
 		midi_device_status.push_back(DeviceStatus((*i)->device_name, true));
 	}
+#if 0
 	return midi_device_status;
+#else
+	return std::vector<AudioBackend::DeviceStatus> ();
+#endif
 }
 
 MidiDeviceInfo*
@@ -528,6 +538,8 @@ PortAudioBackend::set_midi_device_enabled (std::string const device, bool enable
 	MidiDeviceInfo* nfo = midi_device_info(device);
 	if (!nfo) return -1;
 	nfo->enable = enable;
+	// TODO add/remove ports
+	//update_systemic_midi_latencies ();
 	return 0;
 }
 
@@ -1201,19 +1213,8 @@ PortAudioBackend::register_system_audio_ports()
 	const uint32_t a_ins = _n_inputs;
 	const uint32_t a_out = _n_outputs;
 
-	uint32_t capture_latency = 0;
-	uint32_t playback_latency = 0;
-
-	// guard against erroneous latency values
-	if (_pcmio->capture_latency() > _samples_per_period) {
-		capture_latency = _pcmio->capture_latency() - _samples_per_period;
-	}
-	if (_pcmio->playback_latency() > _samples_per_period) {
-		playback_latency = _pcmio->playback_latency() - _samples_per_period;
-	}
-
 	/* audio ports */
-	lr.min = lr.max = capture_latency + (_measure_latency ? 0 : _systemic_audio_input_latency);
+	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_input_latency);
 	for (uint32_t i = 0; i < a_ins; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:capture_%d", i+1);
@@ -1226,7 +1227,7 @@ PortAudioBackend::register_system_audio_ports()
 		_system_inputs.push_back (audio_port);
 	}
 
-	lr.min = lr.max = playback_latency + (_measure_latency ? 0 : _systemic_audio_output_latency);
+	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_output_latency);
 	for (uint32_t i = 0; i < a_out; ++i) {
 		char tmp[64];
 		snprintf(tmp, sizeof(tmp), "system:playback_%d", i+1);
@@ -1250,7 +1251,6 @@ PortAudioBackend::register_system_midi_ports()
 	}
 
 	LatencyRange lr;
-	lr.min = lr.max = _samples_per_period;
 
 	const std::vector<WinMMEMidiInputDevice*> inputs = _midiio->get_inputs();
 
@@ -1265,8 +1265,9 @@ PortAudioBackend::register_system_midi_ports()
 		}
 
 		MidiDeviceInfo* info = _midiio->get_device_info((*i)->name());
+		lr.min = lr.max = 0;
 		if (info) { // assert?
-			lr.min = lr.max = _samples_per_period + info->systemic_input_latency;
+			lr.min = lr.max = (_measure_latency ? 0 : info->systemic_input_latency);
 		}
 		set_latency_range (p, false, lr);
 
@@ -1289,8 +1290,9 @@ PortAudioBackend::register_system_midi_ports()
 		}
 
 		MidiDeviceInfo* info = _midiio->get_device_info((*i)->name());
+		lr.min = lr.max = 0;
 		if (info) { // assert?
-			lr.min = lr.max = _samples_per_period + info->systemic_output_latency;
+			lr.min = lr.max = (_measure_latency ? 0 : info->systemic_output_latency);
 		}
 		set_latency_range (p, false, lr);
 
@@ -1302,6 +1304,32 @@ PortAudioBackend::register_system_midi_ports()
 	}
 	return 0;
 }
+
+void
+PortAudioBackend::update_systemic_midi_latencies ()
+{
+	for (std::vector<BackendPortPtr>::iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
+		MidiDeviceInfo* info = _midiio->get_device_info((*it)->name().substr(21)); // "system:midi_playback_"
+		if (!info) {
+			continue;
+		}
+		LatencyRange lr;
+		lr.min = lr.max = (_measure_latency ? 0 : info->systemic_output_latency);
+		set_latency_range (*it, true, lr);
+	}
+
+	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_in.begin (); it != _system_midi_in.end (); ++it) {
+		MidiDeviceInfo* info = _midiio->get_device_info((*it)->name().substr(20)); // "system:midi_capture_"
+		if (!info) {
+			continue;
+		}
+		LatencyRange lr;
+		lr.min = lr.max = (_measure_latency ? 0 : info->systemic_input_latency);
+		set_latency_range (*it, false, lr);
+	}
+	update_latencies ();
+}
+
 
 BackendPort*
 PortAudioBackend::port_factory (std::string const & name, ARDOUR::DataType type, ARDOUR::PortFlags flags)
@@ -1431,15 +1459,25 @@ PortAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool fo
 	}
 
 	r = port->latency_range (for_playback);
-	// TODO MIDI
-	if (port->is_physical() && port->is_terminal() && port->type() == DataType::AUDIO) {
-		if (port->is_input() && for_playback) {
-			r.min += _samples_per_period;
-			r.max += _samples_per_period;
-		}
-		if (port->is_output() && !for_playback) {
-			r.min += _samples_per_period;
-			r.max += _samples_per_period;
+	if (port->is_physical() && port->is_terminal()) {
+		if (port->type() == DataType::AUDIO) {
+			if (port->is_input() && for_playback) {
+				r.min += _pcmio->playback_latency();
+				r.max += _pcmio->playback_latency();
+			}
+			if (port->is_output() && !for_playback) {
+				r.min += _pcmio->capture_latency();
+				r.max += _pcmio->capture_latency();
+			}
+		} else {
+			if (port->is_input() && for_playback) {
+				r.min += _samples_per_period;
+				r.max += _samples_per_period;
+			}
+			if (port->is_output() && !for_playback) {
+				r.min += _samples_per_period;
+				r.max += _samples_per_period;
+			}
 		}
 	}
 	return r;
