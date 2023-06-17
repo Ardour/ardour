@@ -371,6 +371,8 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		int register_system_audio_ports ();
 		int register_system_midi_ports ();
 
+		void update_systemic_midi_latencies ();
+
 }; // class PortAudioBackend
 
 } // namespace
