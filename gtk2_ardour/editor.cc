@@ -1420,7 +1420,6 @@ Editor::set_session (Session *t)
 
 	_snapped_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
 	_snapped_cursor->set_color (UIConfiguration::instance().color ("edit point"));
-	_snapped_cursor->show ();
 
 	boost::function<void (string)> pc (boost::bind (&Editor::parameter_changed, this, _1));
 	Config->map_parameters (pc);
@@ -2398,9 +2397,11 @@ Editor::set_edit_point_preference (EditPoint ep, bool force)
 	switch (_edit_point) {
 	case EditAtPlayhead:
 		action = "edit-at-playhead";
+		_snapped_cursor->hide ();
 		break;
 	case EditAtSelectedMarker:
 		action = "edit-at-selected-marker";
+		_snapped_cursor->hide ();
 		break;
 	case EditAtMouse:
 		action = "edit-at-mouse";
