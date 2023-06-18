@@ -718,7 +718,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 			lua_time["musicTime"]    = DoubleableBeats (metric.tempo ().quarters_at_sample (start)).to_double ();
 			lua_time["musicTimeEnd"] = DoubleableBeats (metric_end.tempo ().quarters_at_sample (end)).to_double ();
 
-			lua_time["barPositionMusic"]   = bbt.bars * 4;
+			lua_time["barPositionMusic"]   = (bbt.bars - 1) * 4;
 			lua_time["timeSigNumerator"]   = metric.meter ().divisions_per_bar ();
 			lua_time["timeSigDenominator"] = metric.meter ().note_value ();
 
