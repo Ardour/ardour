@@ -2601,7 +2601,7 @@ EngineControl::get_buffer_size () const
 	uint32_t samples;
 
 	if (sscanf (txt.c_str (), "%d", &samples) != 1) {
-		fprintf (stderr, "Find a trout and repeatedly slap the nearest C++ who throws exceptions without catching them.\n");
+		fprintf (stderr, "Find a trout and repeatedly slap the nearest C++ developer who throws exceptions without catching them.\n");
 		fprintf (stderr, "Ardour will likely crash now, giving you time to get the trout.\n");
 		throw exception ();
 	}
