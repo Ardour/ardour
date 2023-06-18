@@ -725,7 +725,7 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 		context.timeSigNumerator   = metric.meter ().divisions_per_bar ();
 		context.timeSigDenominator = metric.meter ().note_value ();
 		context.projectTimeMusic   = DoubleableBeats (metric.tempo ().quarters_at_sample (start)).to_double ();
-		context.barPositionMusic   = bbt.bars * 4; // PPQN, NOT tmap.metric_at(bbt).meter().divisions_per_bar()
+		context.barPositionMusic   = (bbt.bars - 1) * 4; // PPQN, NOT tmap.metric_at(bbt).meter().divisions_per_bar()
 	}
 
 	const double tcfps                = _session.timecode_frames_per_second ();
