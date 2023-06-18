@@ -369,7 +369,7 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		BackendPort* port_factory (std::string const & name, ARDOUR::DataType dt, ARDOUR::PortFlags flags);
 
 		int register_system_audio_ports ();
-		int register_system_midi_ports ();
+		int register_system_midi_ports (std::string const& device = "");
 
 		void update_systemic_midi_latencies ();
 
