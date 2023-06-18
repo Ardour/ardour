@@ -899,7 +899,7 @@ EngineControl::midi_latency_adjustment_changed (Gtk::Adjustment* a, MidiDeviceSe
 	if (ARDOUR::AudioEngine::instance ()->running () && !_measure_midi) {
 		std::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance ()->current_backend ();
 		assert (backend);
-		if (backend->can_change_systemic_latency_when_running () && device->enabled) {
+		if (device->enabled) {
 			if (for_input) {
 				backend->set_systemic_midi_input_latency (device->name, device->input_latency);
 			} else {
@@ -920,7 +920,7 @@ EngineControl::midi_device_enabled_toggled (ArdourButton* b, MidiDeviceSettings 
 		std::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance ()->current_backend ();
 		assert (backend);
 		backend->set_midi_device_enabled (device->name, device->enabled);
-		if (backend->can_change_systemic_latency_when_running () && device->enabled) {
+		if (device->enabled) {
 			backend->set_systemic_midi_input_latency (device->name, device->input_latency);
 			backend->set_systemic_midi_output_latency (device->name, device->output_latency);
 		}
@@ -2881,10 +2881,8 @@ EngineControl::on_switch_page (GtkNotebookPage*, guint page_num)
 		/* undo special case from push_state_to_backend() when measuring midi latency */
 		if (_measure_midi && ARDOUR::AudioEngine::instance ()->running ()) {
 			std::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance ()->current_backend ();
-			if (backend->can_change_systemic_latency_when_running ()) {
-				for (vector<MidiDeviceSettings>::const_iterator p = _midi_devices.begin (); p != _midi_devices.end (); ++p) {
-					backend->set_midi_device_enabled ((*p)->name, (*p)->enabled);
-				}
+			for (vector<MidiDeviceSettings>::const_iterator p = _midi_devices.begin (); p != _midi_devices.end (); ++p) {
+				backend->set_midi_device_enabled ((*p)->name, (*p)->enabled);
 			}
 		}
 		_measure_midi.reset ();
@@ -3195,10 +3193,8 @@ EngineControl::use_latency_button_clicked ()
 		uint32_t            one_way       = max ((ARDOUR::samplecnt_t)0, extra / 2);
 		_measure_midi->input_latency      = one_way;
 		_measure_midi->output_latency     = one_way;
-		if (backend->can_change_systemic_latency_when_running ()) {
-			backend->set_systemic_midi_input_latency (_measure_midi->name, one_way);
-			backend->set_systemic_midi_output_latency (_measure_midi->name, one_way);
-		}
+		backend->set_systemic_midi_input_latency (_measure_midi->name, one_way);
+		backend->set_systemic_midi_output_latency (_measure_midi->name, one_way);
 		notebook.set_current_page (midi_tab);
 	} else {
 		MTDM* mtdm = ARDOUR::AudioEngine::instance ()->mtdm ();
