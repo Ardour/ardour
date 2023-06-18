@@ -61,6 +61,7 @@ LuaProc::LuaProc (AudioEngine& engine,
 	, _lua_does_channelmapping (false)
 	, _lua_has_inline_display (false)
 	, _connect_all_audio_outputs (false)
+	, _set_time_info (false)
 	, _designated_bypass_port (UINT32_MAX)
 	, _signal_latency (0)
 	, _control_data (0)
@@ -278,6 +279,26 @@ LuaProc::load_script ()
 					}
 					if (i.key().cast<std::string> () == "connect_all_audio_outputs" && i.value().isBoolean ()) {
 						_connect_all_audio_outputs = i.value().cast<bool> ();
+					}
+				}
+			}
+		} catch (...) {
+			return true;
+		}
+	}
+
+	/* parse options */
+	luabridge::LuaRef options = luabridge::getGlobal (L, "dsp_options");
+	if (options.isFunction ()) {
+		try {
+			luabridge::LuaRef opts = options ();
+			if (opts.isTable ()) {
+				for (luabridge::Iterator i (opts); !i.isNil (); ++i) {
+					if (!i.key().isString()) {
+						continue;
+					}
+					if (i.key().cast<std::string> () == "time_info" && i.value().isBoolean ()) {
+						_set_time_info = i.value().cast<bool> ();
 					}
 				}
 			}
@@ -678,6 +699,47 @@ LuaProc::connect_and_run (BufferSet& bufs,
 #endif
 
 	try {
+		lua_State* L = lua.getState ();
+
+		if (_set_time_info) {
+			using namespace Temporal;
+			TempoMap::SharedPtr tmap (TempoMap::use ());
+			const TempoMetric&  metric (tmap->metric_at (timepos_t (start)));
+			const TempoMetric&  metric_end (tmap->metric_at (timepos_t (end)));
+			const BBT_Time&     bbt (metric.bbt_at (timepos_t (start)));
+
+			luabridge::LuaRef lua_time (luabridge::newTable (L));
+
+			lua_time["sampleTime"]    = start;
+			lua_time["sampleTimeEnd"] = end;
+
+			lua_time["tempo"]        = metric.tempo ().quarter_notes_per_minute ();
+			lua_time["tempoEnd"]     = metric_end.tempo ().quarter_notes_per_minute ();
+			lua_time["musicTime"]    = DoubleableBeats (metric.tempo ().quarters_at_sample (start)).to_double ();
+			lua_time["musicTimeEnd"] = DoubleableBeats (metric_end.tempo ().quarters_at_sample (end)).to_double ();
+
+			lua_time["barPositionMusic"]   = bbt.bars * 4;
+			lua_time["timeSigNumerator"]   = metric.meter ().divisions_per_bar ();
+			lua_time["timeSigDenominator"] = metric.meter ().note_value ();
+
+			lua_time["TCframesPerSecond"]  = _session.timecode_frames_per_second ();
+			lua_time["TCdropFrames"]       = _session.timecode_drop_frames ();
+
+			if (_session.get_play_loop ()) {
+				Location* looploc = _session.locations ()->auto_loop_location ();
+				lua_time["looping"]        = true;
+				lua_time["loopStart"]      = looploc->start ().samples ();
+				lua_time["loopEnd"]        = looploc->end ().samples ();
+				lua_time["loopStartMusic"] = DoubleableBeats (tmap->quarters_at (looploc->start ())).to_double ();
+				lua_time["loopEndMusic"]   = DoubleableBeats (tmap->quarters_at (looploc->end ())).to_double ();
+			} else {
+				lua_time["looping"] = false;
+			}
+
+			luabridge::push (L, lua_time);
+			lua_setglobal (L, "time");
+		}
+
 		if (_lua_does_channelmapping) {
 			// run the DSP function
 			(*_lua_dsp)(&bufs, &in, &out, nframes, offset);
@@ -686,7 +748,6 @@ LuaProc::connect_and_run (BufferSet& bufs,
 			BufferSet& silent_bufs  = _session.get_silent_buffers (ChanCount (DataType::AUDIO, 1));
 			BufferSet& scratch_bufs = _session.get_scratch_buffers (ChanCount (DataType::AUDIO, 1));
 
-			lua_State* L = lua.getState ();
 			luabridge::LuaRef in_map (luabridge::newTable (L));
 			luabridge::LuaRef out_map (luabridge::newTable (L));
 

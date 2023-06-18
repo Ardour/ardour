@@ -157,6 +157,7 @@ private:
 	bool _lua_does_channelmapping;
 	bool _lua_has_inline_display;
 	bool _connect_all_audio_outputs;
+	bool _set_time_info;
 
 	void queue_draw () { QueueDraw(); /* EMIT SIGNAL */ }
 	DSP::DspShm lshm;
