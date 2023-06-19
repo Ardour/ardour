@@ -708,33 +708,30 @@ LuaProc::connect_and_run (BufferSet& bufs,
 			const TempoMetric&  metric_end (tmap->metric_at (timepos_t (end)));
 			const BBT_Time&     bbt (metric.bbt_at (timepos_t (start)));
 
-			const Beats last_beat (metric.quarters_at (bbt).get_beats (), 0);
-
 			luabridge::LuaRef lua_time (luabridge::newTable (L));
 
-			lua_time["sampleTime"]    = start;
-			lua_time["sampleTimeEnd"] = end;
+			lua_time["sample"]     = start;
+			lua_time["sample_end"] = end;
 
-			lua_time["tempo"]        = metric.tempo ().quarter_notes_per_minute ();
-			lua_time["tempoEnd"]     = metric_end.tempo ().quarter_notes_per_minute ();
-			lua_time["musicTime"]    = DoubleableBeats (metric.tempo ().quarters_at_sample (start)).to_double ();
-			lua_time["musicTimeEnd"] = DoubleableBeats (metric_end.tempo ().quarters_at_sample (end)).to_double ();
+			lua_time["tempo"]     = metric.tempo ().quarter_notes_per_minute ();
+			lua_time["tempo_end"] = metric_end.tempo ().quarter_notes_per_minute ();
+			lua_time["beat"]      = DoubleableBeats (metric.tempo ().quarters_at_sample (start)).to_double ();
+			lua_time["beat_end"]  = DoubleableBeats (metric_end.tempo ().quarters_at_sample (end)).to_double ();
+			lua_time["bar"]       = (bbt.bars - 1) * 4;
 
-			lua_time["beatPosition"]       = metric.sample_at (last_beat);
-			lua_time["barPositionMusic"]   = (bbt.bars - 1) * 4;
-			lua_time["timeSigNumerator"]   = metric.meter ().divisions_per_bar ();
-			lua_time["timeSigDenominator"] = metric.meter ().note_value ();
+			lua_time["ts_numerator"]   = metric.meter ().divisions_per_bar ();
+			lua_time["ts_denominator"] = metric.meter ().note_value ();
 
-			lua_time["TCframesPerSecond"]  = _session.timecode_frames_per_second ();
-			lua_time["TCdropFrames"]       = _session.timecode_drop_frames ();
+			lua_time["tc_fps"]       = _session.timecode_frames_per_second ();
+			lua_time["tc_dropframe"] = _session.timecode_drop_frames ();
 
 			if (_session.get_play_loop ()) {
 				Location* looploc = _session.locations ()->auto_loop_location ();
-				lua_time["looping"]        = true;
-				lua_time["loopStart"]      = looploc->start ().samples ();
-				lua_time["loopEnd"]        = looploc->end ().samples ();
-				lua_time["loopStartMusic"] = DoubleableBeats (tmap->quarters_at (looploc->start ())).to_double ();
-				lua_time["loopEndMusic"]   = DoubleableBeats (tmap->quarters_at (looploc->end ())).to_double ();
+				lua_time["looping"]         = true;
+				lua_time["loop_start"]      = looploc->start ().samples ();
+				lua_time["loop_end"]        = looploc->end ().samples ();
+				lua_time["loop_beat_start"] = DoubleableBeats (tmap->quarters_at (looploc->start ())).to_double ();
+				lua_time["loop_beat_end"]   = DoubleableBeats (tmap->quarters_at (looploc->end ())).to_double ();
 			} else {
 				lua_time["looping"] = false;
 			}
