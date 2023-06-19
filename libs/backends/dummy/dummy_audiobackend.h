@@ -183,9 +183,10 @@ class DummyMidiPort : public DummyPort {
 		DummyMidiData::MIDISequence const * _midi_seq_dat;
 }; // class DummyMidiPort
 
-class DummyAudioBackend : public AudioBackend, public PortEngineSharedImpl {
+class DummyAudioBackend : public AudioBackend, public PortEngineSharedImpl
+{
 	public:
-	         DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info);
+		DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info);
 		~DummyAudioBackend ();
 
 		bool is_running () const { return _running; }
@@ -350,7 +351,8 @@ class DummyAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		struct DriverSpeed {
 			std::string name;
 			float speedup;
-			DriverSpeed (const std::string& n, float s) : name (n), speedup (s) {}
+			bool realtime;
+			DriverSpeed (const std::string& n, float s, bool r = false) : name (n), speedup (s), realtime (r) {}
 		};
 
 		std::string _instance_name;
@@ -361,6 +363,7 @@ class DummyAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		bool  _running;
 		bool  _freewheel;
 		bool  _freewheeling;
+		bool  _realtime;
 		float _speedup;
 
 		std::string _device;
