@@ -708,6 +708,8 @@ LuaProc::connect_and_run (BufferSet& bufs,
 			const TempoMetric&  metric_end (tmap->metric_at (timepos_t (end)));
 			const BBT_Time&     bbt (metric.bbt_at (timepos_t (start)));
 
+			const Beats last_beat (metric.quarters_at (bbt).get_beats (), 0);
+
 			luabridge::LuaRef lua_time (luabridge::newTable (L));
 
 			lua_time["sampleTime"]    = start;
@@ -718,6 +720,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 			lua_time["musicTime"]    = DoubleableBeats (metric.tempo ().quarters_at_sample (start)).to_double ();
 			lua_time["musicTimeEnd"] = DoubleableBeats (metric_end.tempo ().quarters_at_sample (end)).to_double ();
 
+			lua_time["beatPosition"]       = metric.sample_at (last_beat);
 			lua_time["barPositionMusic"]   = (bbt.bars - 1) * 4;
 			lua_time["timeSigNumerator"]   = metric.meter ().divisions_per_bar ();
 			lua_time["timeSigDenominator"] = metric.meter ().note_value ();
