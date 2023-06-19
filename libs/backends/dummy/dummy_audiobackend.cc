@@ -65,6 +65,7 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _running (false)
 	, _freewheel (false)
 	, _freewheeling (false)
+	, _realtime (false)
 	, _speedup (1.0)
 	, _device ("")
 	, _samplerate (48000)
@@ -85,6 +86,7 @@ DummyAudioBackend::DummyAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	if (_driver_speed.empty()) {
 		_driver_speed.push_back (DriverSpeed (_("Half Speed"),   2.0f));
 		_driver_speed.push_back (DriverSpeed (_("Normal Speed"), 1.0f));
+		_driver_speed.push_back (DriverSpeed (_("Realtime"),     1.0f, true));
 		_driver_speed.push_back (DriverSpeed (_("Double Speed"), 0.5f));
 		_driver_speed.push_back (DriverSpeed (_("5x Speed"),     0.2f));
 		_driver_speed.push_back (DriverSpeed (_("10x Speed"),    0.1f));
@@ -227,6 +229,7 @@ DummyAudioBackend::set_driver (const std::string& d)
 	for (std::vector<DriverSpeed>::const_iterator it = _driver_speed.begin () ; it != _driver_speed.end (); ++it) {
 		if (d == it->name) {
 			_speedup = it->speedup;
+			_realtime = it->realtime;
 			return 0;
 		}
 	}
@@ -463,7 +466,13 @@ DummyAudioBackend::_start (bool /*for_latency_measurement*/)
 	engine.reconnect_ports ();
 	_port_change_flag.store (0);
 
-	if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_main_thread, pthread_process, this)) {
+	bool ok = _realtime;
+	if (_realtime && pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_MAIN, PBD_RT_STACKSIZE_PROC, &_main_thread, pthread_process, this)) {
+		PBD::warning << _("DummyAudioBackend: failed to acquire realtime permissions.") << endmsg;
+		ok = false;
+	}
+
+	if (!ok && pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &_main_thread, pthread_process, this)) {
 		PBD::error << _("DummyAudioBackend: cannot start.") << endmsg;
 	}
 
@@ -556,7 +565,8 @@ DummyAudioBackend::create_process_thread (boost::function<void()> func)
 	pthread_t   thread_id;
 	ThreadData* td = new ThreadData (this, func, PBD_RT_STACKSIZE_PROC);
 
-	if (pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &thread_id, dummy_process_thread, td)) {
+	bool ok = _realtime && 0 == pbd_realtime_pthread_create (PBD_SCHED_FIFO, PBD_RT_PRI_PROC, PBD_RT_STACKSIZE_PROC, &thread_id, dummy_process_thread, td);
+	if (!ok && pbd_pthread_create (PBD_RT_STACKSIZE_PROC, &thread_id, dummy_process_thread, td)) {
 		PBD::error << _("AudioEngine: cannot create process thread.") << endmsg;
 		return -1;
 	}
@@ -997,13 +1007,13 @@ DummyAudioBackend::main_process_thread ()
 			const int64_t nominal_time = _dsp_load_calc.get_max_time_us ();
 			if (elapsed_time < nominal_time) {
 				const int64_t sleepy = _speedup * (nominal_time - elapsed_time);
-				Glib::usleep (std::max ((int64_t) 100, sleepy));
+				Glib::usleep (std::max ((int64_t) 10, sleepy));
 			} else {
-				Glib::usleep (100); // don't hog cpu
+				Glib::usleep (10); // don't hog cpu
 			}
 		} else {
 			_dsp_load = 1.0f;
-			Glib::usleep (100); // don't hog cpu
+			Glib::usleep (10); // don't hog cpu
 		}
 
 		/* beginning of next cycle */
