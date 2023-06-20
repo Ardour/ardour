@@ -79,6 +79,8 @@ VelocityGhostRegion::add_note (NoteBase* nb)
 	events.insert (std::make_pair (nb->note(), event));
 	l->Event.connect (sigc::bind (sigc::mem_fun (*this, &VelocityGhostRegion::lollevent), event));
 	l->raise_to_top ();
+	l->set_data (X_("ghostregionview"), this);
+	l->set_data (X_("note"), nb);
 
 	event->item->set_fill_color (UIConfiguration::instance().color_mod(nb->base_color(), "ghost track midi fill"));
 	event->item->set_outline_color (_outline);
@@ -124,4 +126,46 @@ void
 VelocityGhostRegion::set_colors ()
 {
 	base_rect->set_fill_color (Gtkmm2ext::Color (0xff000085));
+}
+
+void
+VelocityGhostRegion::drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev)
+{
+	ArdourCanvas::Rect r (base_rect->item_to_window (base_rect->get()));
+
+	/* translate event y-coord so that zero matches the top of base_rect */
+
+	ev->y -= r.y0;
+
+	/* clamp y to be within the range defined by the base_rect height minus
+	 * the lollipop radius at top and bottom 
+	 */
+
+	const double effective_y = std::max (lollipop_radius, std::min (r.height() - (2.0 * lollipop_radius), ev->y));
+
+	std::cerr << "new y " << effective_y << std::endl;
+
+	l->set (ArdourCanvas::Duple (l->x(), effective_y), r.height() - effective_y - lollipop_radius, lollipop_radius);
+
+}
+
+int
+VelocityGhostRegion::y_position_to_velocity (double y) const
+{
+	const ArdourCanvas::Rect r (base_rect->get());
+	int velocity;
+
+	std::cerr << "y = " << y << " h = " << r.height() << std::endl;
+
+	if (y >= r.height() - (2.0 * lollipop_radius))  {
+		velocity = 0;
+	} else if (y <= lollipop_radius) {
+		velocity = 127;
+	} else {
+		velocity = floor (127. * ((r.height() - y) / r.height()));
+	}
+
+	std::cerr << " y = " << y << " vel = " << velocity << std::endl;
+
+	return velocity;
 }

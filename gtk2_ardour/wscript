@@ -152,7 +152,6 @@ gtk2_ardour_sources = [
         'level_meter.cc',
         'library_download_dialog.cc',
         'location_ui.cc',
-        'lollipop.cc',
         'loudness_dialog.cc',
         'loudness_settings.cc',
         'lua_script_manager.cc',

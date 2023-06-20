@@ -674,7 +674,7 @@ Editor::canvas_control_point_event (GdkEvent *event, ArdourCanvas::Item* item, C
 bool
 Editor::canvas_velocity_event (GdkEvent *event, ArdourCanvas::Item* item)
 {
-	std::cerr << "Velocity event: " << Gtkmm2ext::event_type_string (event->type) << std::endl;
+	// std::cerr << "Velocity event: " << Gtkmm2ext::event_type_string (event->type) << std::endl;
 	return typed_event (item, event, VelocityItem);
 }
 

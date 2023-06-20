@@ -3370,6 +3370,31 @@ MidiRegionView::change_note_length (NoteBase* event, Temporal::Beats t)
 }
 
 void
+MidiRegionView::set_velocity (NoteBase* note, int velocity)
+{
+	if (_selection.empty()) {
+		return;
+	}
+
+	int delta = velocity - note->note()->velocity();
+
+	std::cerr << "vel delta = " << delta << std::endl;
+
+	start_note_diff_command (_("set velocities"));
+
+	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
+		Selection::iterator next = i;
+		++next;
+
+		change_note_velocity (*i, delta, true);
+
+		i = next;
+	}
+
+	apply_note_diff();
+}
+
+void
 MidiRegionView::change_velocities (bool up, bool fine, bool allow_smush, bool all_together)
 {
 	int8_t delta;

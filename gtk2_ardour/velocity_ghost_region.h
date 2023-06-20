@@ -23,6 +23,10 @@
 
 #include "ghostregion.h"
 
+namespace ArdourCanvas {
+class Lollipop;
+}
+
 class VelocityGhostRegion : public MidiGhostRegion
 {
 public:
@@ -36,6 +40,9 @@ public:
 	void remove_note (NoteBase*);
 
 	void set_colors ();
+	void drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev);
+
+	int y_position_to_velocity (double y) const;
 
 private:
 	bool lollevent (GdkEvent*, MidiGhostRegion::GhostEvent*);

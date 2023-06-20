@@ -56,6 +56,7 @@ namespace ArdourCanvas {
 	class Item;
 	class Line;
 	class Rectangle;
+	class Lollipop;
 }
 
 namespace PBD {
@@ -81,6 +82,7 @@ class ControlPoint;
 class AudioRegionView;
 class AutomationLine;
 class AutomationTimeAxisView;
+class VelocityGhostRegion;
 
 /** Class to manage current drags */
 class DragManager
@@ -1550,7 +1552,7 @@ class RegionMarkerDrag : public Drag
 class LollipopDrag : public Drag
 {
   public:
-	LollipopDrag (Editor*, MidiRegionView*, ArdourCanvas::Item*);
+	LollipopDrag (Editor*, ArdourCanvas::Item*);
 	~LollipopDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -1573,8 +1575,8 @@ class LollipopDrag : public Drag
 	void setup_pointer_sample_offset ();
 
   private:
-	MidiRegionView* _region;
-	NoteBase*       _primary;
+	VelocityGhostRegion*      _region;
+	ArdourCanvas::Lollipop*   _primary;
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */
