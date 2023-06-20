@@ -221,8 +221,7 @@ MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g
 	: event (e)
 {
 	if (dynamic_cast<Note*>(e)) {
-		item = new ArdourCanvas::Rectangle(
-			g, ArdourCanvas::Rect(e->x0(), e->y0(), e->x1(), e->y1()));
+		item = new ArdourCanvas::Rectangle (g, ArdourCanvas::Rect(e->x0(), e->y0(), e->x1(), e->y1()));
 		is_hit = false;
 	} else {
 		Hit* hit = dynamic_cast<Hit*>(e);

@@ -31,17 +31,17 @@ namespace ArdourCanvas {
 	class Lollipop;
 }
 
-class Lollipop : public NoteBase
+class NoteVelocity : public NoteBase
 {
 public:
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 
-	Lollipop (MidiRegionView&                   region,
+	NoteVelocity (MidiRegionView&                   region,
 	          ArdourCanvas::Item*               parent,
 	          const std::shared_ptr<NoteType> note = std::shared_ptr<NoteType>(),
 	          bool with_events = true);
 
-	~Lollipop ();
+	~NoteVelocity ();
 
 	void set (ArdourCanvas::Duple const &, ArdourCanvas::Coord, ArdourCanvas::Coord);
 	void set_x (ArdourCanvas::Coord);
@@ -57,6 +57,8 @@ public:
 	void hide ();
 
 	void set_ignore_events (bool);
+
+	ArdourCanvas::Lollipop& lolli() { return *_lollipop; }
 
 	void move_event (double dx, double dy);
 

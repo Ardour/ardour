@@ -28,7 +28,7 @@ using namespace ARDOUR;
 using ArdourCanvas::Coord;
 using ArdourCanvas::Duple;
 
-Lollipop::Lollipop (
+NoteVelocityLollipop (
 	MidiRegionView& region, ArdourCanvas::Item* parent, const std::shared_ptr<NoteType> note, bool with_events)
 	: NoteBase (region, with_events, note)
 	, _lollipop (new ArdourCanvas::Lollipop (parent))
@@ -37,73 +37,74 @@ Lollipop::Lollipop (
 	set_item (_lollipop);
 }
 
-Lollipop::~Lollipop ()
+NoteVelocity~Lollipop ()
 {
 	delete _lollipop;
 }
 
 void
-Lollipop::move_event (double dx, double dy)
+NoteVelocitymove_event (double dx, double dy)
 {
+	std::cerr << "move lolli to: " <<  (Duple (_lollipop->x(), _lollipop->y0()).translate (Duple (dx, dy)), _lollipop->length(), _lollipop->radius()) << std::endl;
 	_lollipop->set (Duple (_lollipop->x(), _lollipop->y0()).translate (Duple (dx, dy)), _lollipop->length(), _lollipop->radius());
 }
 
 void
-Lollipop::set_outline_color (uint32_t color)
+NoteVelocityset_outline_color (uint32_t color)
 {
 	_lollipop->set_outline_color (color);
 }
 
 void
-Lollipop::set_fill_color (uint32_t color)
+NoteVelocityset_fill_color (uint32_t color)
 {
 	_lollipop->set_fill_color (color);
 }
 
 void
-Lollipop::show ()
+NoteVelocityshow ()
 {
 	_lollipop->show ();
 }
 
 void
-Lollipop::hide ()
+NoteVelocityhide ()
 {
 	_lollipop->hide ();
 }
 
 void
-Lollipop::set (ArdourCanvas::Duple const & d, ArdourCanvas::Coord len, ArdourCanvas::Coord radius)
+NoteVelocityset (ArdourCanvas::Duple const & d, ArdourCanvas::Coord len, ArdourCanvas::Coord radius)
 {
 	_lollipop->set (d, len, radius);
 }
 
 void
-Lollipop::set_x (Coord x)
+NoteVelocityset_x (Coord x)
 {
 	_lollipop->set_x (x);
 }
 
 void
-Lollipop::set_len (Coord l)
+NoteVelocityset_len (Coord l)
 {
 	_lollipop->set_length (l);
 }
 
 void
-Lollipop::set_outline_what (ArdourCanvas::Rectangle::What what)
+NoteVelocityset_outline_what (ArdourCanvas::Rectangle::What what)
 {
 	// _lollipop->set_outline_what (what);
 }
 
 void
-Lollipop::set_outline_all ()
+NoteVelocityset_outline_all ()
 {
 	// _lollipop->set_outline_all ();
 }
 
 void
-Lollipop::set_ignore_events (bool ignore)
+NoteVelocityset_ignore_events (bool ignore)
 {
 	_lollipop->set_ignore_events (ignore);
 }

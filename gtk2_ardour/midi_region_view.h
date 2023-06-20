@@ -54,10 +54,10 @@ namespace MIDI {
 };
 
 class SysEx;
-class NoteBase;
 class Note;
 class Hit;
 class MidiTimeAxisView;
+class NoteBase;
 class GhostRegion;
 class AutomationTimeAxisView;
 class AutomationRegionView;
@@ -67,6 +67,7 @@ class EditNoteDialog;
 class PatchChange;
 class ItemCounts;
 class CursorContext;
+class VelocityGhostRegion;
 
 class MidiRegionView : public RegionView
 {
@@ -286,6 +287,7 @@ public:
 	void goto_next_note (bool add_to_selection);
 	void change_note_lengths (bool, bool, Temporal::Beats beats, bool start, bool end);
 	void change_velocities (bool up, bool fine, bool allow_smush, bool all_together);
+	void set_velocity (NoteBase* primary, int velocity);
 	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward, bool fine);
 	void channel_edit ();
@@ -502,6 +504,7 @@ public:
 	std::shared_ptr<PatchChange> find_canvas_patch_change (ARDOUR::MidiModel::PatchChangePtr p);
 	std::shared_ptr<SysEx> find_canvas_sys_ex (ARDOUR::MidiModel::SysExPtr s);
 
+	friend class VelocityGhostRegion;
 	void update_note (NoteBase*, bool update_ghost_regions = true);
 	void update_sustained (Note *, bool update_ghost_regions = true);
 	void update_hit (Hit *, bool update_ghost_regions = true);

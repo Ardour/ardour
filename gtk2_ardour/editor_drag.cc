@@ -52,6 +52,7 @@
 #include "ardour/session_playlists.h"
 
 #include "canvas/canvas.h"
+#include "canvas/lollipop.h"
 #include "canvas/scroll_group.h"
 
 #include "ardour_ui.h"
@@ -77,6 +78,7 @@
 #include "region_gain_line.h"
 #include "selection.h"
 #include "ui_config.h"
+#include "velocity_ghost_region.h"
 #include "verbose_cursor.h"
 #include "video_timeline.h"
 
@@ -7178,9 +7180,11 @@ RegionMarkerDrag::setup_pointer_sample_offset ()
 	_pointer_offset               = model_abs_pos.distance (raw_grab_time ());
 }
 
-LollipopDrag::LollipopDrag (Editor* ed, MidiRegionView* r, ArdourCanvas::Item* i)
-	: Drag (ed, i, r->region ()->position ().time_domain ())
+LollipopDrag::LollipopDrag (Editor* ed, ArdourCanvas::Item* l)
+	: Drag (ed, l, Temporal::BeatTime)
+	, _primary (dynamic_cast<ArdourCanvas::Lollipop*> (l))
 {
+	_region = reinterpret_cast<VelocityGhostRegion*> (_item->get_data ("ghostregionview"));
 }
 
 LollipopDrag::~LollipopDrag ()
@@ -7191,25 +7195,48 @@ void
 LollipopDrag::start_grab (GdkEvent *ev, Gdk::Cursor* c)
 {
 	Drag::start_grab (ev, c);
+
+	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&_region->parent_rv);
+	assert (mrv);
+
+	bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
+	bool extend = Keyboard::modifier_state_equals (ev->button.state, Keyboard::TertiaryModifier);
+
+	mrv->note_selected (note, add, extend);
 }
 
 void
 LollipopDrag::motion (GdkEvent *ev, bool first_move)
 {
+	_region->drag_lolli (_primary, &ev->motion);
 }
 
 void
 LollipopDrag::finished (GdkEvent *ev, bool did_move)
 {
+	if (!did_move) {
+		return;
+	}
+
+	int velocity = _region->y_position_to_velocity (_primary->y0());
+	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&_region->parent_rv);
+	assert (mrv);
+
+	mrv->set_velocity (note, velocity);
 }
 
 void
 LollipopDrag::aborted (bool)
 {
+	/* XXX get ghost velocity view etc. to redraw with original values */
 }
 
 void
 LollipopDrag::setup_pointer_sample_offset ()
 {
+	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
+	_pointer_offset = _region->parent_rv.region()->source_beats_to_absolute_time (note->note()->time ()).distance (raw_grab_time ());
 }
 
