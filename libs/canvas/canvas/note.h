@@ -36,6 +36,8 @@ public:
 	void set_fill_color (Gtkmm2ext::Color);
 	void set_outline_color (Gtkmm2ext::Color);
 
+	double velocity() const { return _velocity; }
+
 	static void set_show_velocity_bars (bool);
 
   private:
