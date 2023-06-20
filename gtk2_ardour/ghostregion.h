@@ -138,6 +138,7 @@ public:
 	ArdourCanvas::Polygon* _tmp_poly;
 
 	MidiRegionView& parent_mrv;
+	/* must match typedef in NoteBase */
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 	MidiGhostRegion::GhostEvent* find_event (std::shared_ptr<NoteType>);
 
