@@ -66,6 +66,8 @@ public:
 
 	static ArdourCanvas::Points points(ArdourCanvas::Distance height);
 
+	double visual_velocity() const;
+
 private:
 	ArdourCanvas::Polygon* _polygon;
 };

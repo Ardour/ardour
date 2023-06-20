@@ -62,11 +62,13 @@ public:
 
 	void set_ignore_events (bool);
 
+	/* Just changes the visual display of velocity during a drag */
 	void set_velocity (double);
+	double visual_velocity () const;
 	void move_event (double dx, double dy);
 
 private:
-	ArdourCanvas::Note* _note;
+	ArdourCanvas::Note* _visual_note;
 };
 
 #endif /* __gtk_ardour_note_h__ */

@@ -505,6 +505,8 @@ public:
 	std::shared_ptr<SysEx> find_canvas_sys_ex (ARDOUR::MidiModel::SysExPtr s);
 
 	friend class VelocityGhostRegion;
+	void sync_velocity_drag (double factor);
+
 	void update_note (NoteBase*, bool update_ghost_regions = true);
 	void update_sustained (Note *, bool update_ghost_regions = true);
 	void update_hit (Hit *, bool update_ghost_regions = true);

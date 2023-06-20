@@ -150,6 +150,14 @@ VelocityGhostRegion::drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev)
 
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
 	assert (mrv);
+
+	/* This will redraw the velocity bars for the selected notes, without
+	 * changing the note velocities.
+	 */
+
+	const double factor = newlen / l->length();
+	mrv->sync_velocity_drag (factor);
+
 	MidiRegionView::Selection const & sel (mrv->selection());
 
 	for (auto & s : sel) {
@@ -175,8 +183,6 @@ VelocityGhostRegion::y_position_to_velocity (double y) const
 	} else {
 		velocity = floor (127. * (((r.height() - 2.0 * lollipop_radius)- y) / r.height()));
 	}
-
-	std::cerr << " y = " << y << " vel = " << velocity << std::endl;
 
 	return velocity;
 }

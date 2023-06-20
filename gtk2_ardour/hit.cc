@@ -145,3 +145,10 @@ Hit::set_ignore_events (bool ignore)
 {
 	_polygon->set_ignore_events (ignore);
 }
+
+double
+Hit::visual_velocity() const
+{
+	/* We don't display velocity in any explicit way */
+	return 0.0;
+}

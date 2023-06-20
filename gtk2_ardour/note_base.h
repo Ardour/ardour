@@ -105,6 +105,9 @@ class NoteBase : public sigc::trackable
 	virtual ArdourCanvas::Coord x1 () const = 0;
 	virtual ArdourCanvas::Coord y1 () const = 0;
 
+	virtual void set_velocity (double) {}
+	virtual double visual_velocity() const = 0;
+
 	float mouse_x_fraction() const { return _mouse_x_fraction; }
 	float mouse_y_fraction() const { return _mouse_y_fraction; }
 
@@ -137,7 +140,7 @@ protected:
 	ArdourCanvas::Item*               _item;
 	ArdourCanvas::Text*               _text;
 	State                             _state;
-	const std::shared_ptr<NoteType> _note;
+	const std::shared_ptr<NoteType>   _note;
 	bool                              _with_events;
 	bool                              _own_note;
 	Flags                             _flags;
