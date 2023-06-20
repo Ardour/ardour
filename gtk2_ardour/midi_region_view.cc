@@ -1859,7 +1859,6 @@ MidiRegionView::update_sustained (Note* ev, bool update_ghost_regions)
 	const uint32_t base_col = ev->base_color();
 	ev->set_fill_color(base_col);
 	ev->set_outline_color(ev->calculate_outline(base_col, ev->selected()));
-
 }
 
 void
@@ -3378,8 +3377,6 @@ MidiRegionView::set_velocity (NoteBase* note, int velocity)
 
 	int delta = velocity - note->note()->velocity();
 
-	std::cerr << "vel delta = " << delta << std::endl;
-
 	start_note_diff_command (_("set velocities"));
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end();) {
@@ -4659,4 +4656,12 @@ MidiRegionView::quantize_selected_notes ()
 	}
 
 	trackview.editor().apply_midi_note_edit_op (quant, rs);
+}
+
+void
+MidiRegionView::sync_velocity_drag (double factor)
+{
+	for (auto & s : _selection) {
+		s->set_velocity (s->visual_velocity() * factor);
+	}
 }
