@@ -37,6 +37,7 @@
 #include "editor_drag.h"
 #include "gui_thread.h"
 #include "midi_automation_line.h"
+#include "midi_region_view.h"
 #include "note_base.h"
 #include "public_editor.h"
 #include "ui_config.h"
@@ -133,20 +134,32 @@ VelocityGhostRegion::drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev)
 {
 	ArdourCanvas::Rect r (base_rect->item_to_window (base_rect->get()));
 
-	/* translate event y-coord so that zero matches the top of base_rect */
+	/* translate event y-coord so that zero matches the top of base_rect
+	 * (event coordinates use window coordinate space)
+	 */
 
 	ev->y -= r.y0;
 
 	/* clamp y to be within the range defined by the base_rect height minus
-	 * the lollipop radius at top and bottom 
+	 * the lollipop radius at top and bottom
 	 */
 
 	const double effective_y = std::max (lollipop_radius, std::min (r.height() - (2.0 * lollipop_radius), ev->y));
+	const double newlen = r.height() - effective_y - lollipop_radius;
+	const double delta = newlen - l->length();
 
-	std::cerr << "new y " << effective_y << std::endl;
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
+	assert (mrv);
+	MidiRegionView::Selection const & sel (mrv->selection());
 
-	l->set (ArdourCanvas::Duple (l->x(), effective_y), r.height() - effective_y - lollipop_radius, lollipop_radius);
+	for (auto & s : sel) {
+		GhostEvent* x = find_event (s->note());
 
+		if (x) {
+			ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (x->item);
+			l->set (ArdourCanvas::Duple (l->x(), l->y0() - delta), l->length() + delta, lollipop_radius);
+		}
+	}
 }
 
 int
@@ -155,14 +168,12 @@ VelocityGhostRegion::y_position_to_velocity (double y) const
 	const ArdourCanvas::Rect r (base_rect->get());
 	int velocity;
 
-	std::cerr << "y = " << y << " h = " << r.height() << std::endl;
-
 	if (y >= r.height() - (2.0 * lollipop_radius))  {
 		velocity = 0;
 	} else if (y <= lollipop_radius) {
 		velocity = 127;
 	} else {
-		velocity = floor (127. * ((r.height() - y) / r.height()));
+		velocity = floor (127. * (((r.height() - 2.0 * lollipop_radius)- y) / r.height()));
 	}
 
 	std::cerr << " y = " << y << " vel = " << velocity << std::endl;
