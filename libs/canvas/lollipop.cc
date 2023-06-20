@@ -46,7 +46,8 @@ Lollipop::Lollipop (Item* parent)
 void
 Lollipop::compute_bounding_box () const
 {
-	_bounding_box = Rect (-_radius, -_radius, _radius, _length + _radius).expand (0.5 + (_outline_width / 2));
+	_bounding_box = Rect (_center.x -_radius, _center.y -_radius, _center.x + _radius, _center.y + _length + _radius);
+	_bounding_box = _bounding_box.expand (2. * _outline_width);
 	set_bbox_clean ();
 }
 
@@ -55,20 +56,18 @@ Lollipop::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 {
 	setup_outline_context (context);
 
-	Duple p = _parent->item_to_window (Duple (_position.x, _position.y));
+	Duple p = _parent->item_to_window (Duple (_center.x, _center.y));
+	Duple l (p);
 
-	if (_outline_width <= 1.0) {
-		/* See Cairo FAQ on single pixel lines to understand why we add 0.5
-		 */
-
-		const Duple half_a_pixel (0.5, 0.5);
-		p = p.translate (half_a_pixel);
+	if (fmod (_outline_width, 2.0)) {
+		const Duple half_a_pixel (0.5 * _outline_width, 0.);
+		l = l.translate (half_a_pixel);
 	}
 
 	/* the line */
 
-	context->move_to (p.x, p.y + _radius);
-	context->line_to (p.x, p.y + _length - _radius);
+	context->move_to (l.x, l.y + _radius);
+	context->line_to (l.x, l.y + _length - _radius);
 	context->stroke ();
 
 	/* the circle */
@@ -106,9 +105,9 @@ Lollipop::set_radius (Coord r)
 void
 Lollipop::set_x (Coord x)
 {
-	if (x != _position.x) {
+	if (x != _center.x) {
 		begin_change ();
-		_position.x = x;
+		_center.x = x;
 		set_bbox_dirty ();
 		end_change ();
 	}
@@ -132,7 +131,7 @@ Lollipop::set (Duple const & d, Coord l, Coord r)
 
 	_radius = r;
 	_length = l;
-	_position = d;
+	_center = d;
 
 	set_bbox_dirty ();
 	end_change ();
@@ -146,8 +145,8 @@ Lollipop::covers (Duple const & point) const
 
 	/* only the circle is considered as "covering" */
 
-	if (((fabs (_position.x - p.x)) <= (_radius + threshold)) &&
-	    ((fabs (_position.y - p.y)) <= (_radius + threshold))) {
+	if (((fabs (_center.x - p.x)) <= (_radius + threshold)) &&
+	    ((fabs (_center.y - p.y)) <= (_radius + threshold))) {
 		/* inside circle */
 		return true;
 	}

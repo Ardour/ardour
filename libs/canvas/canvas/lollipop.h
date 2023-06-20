@@ -50,11 +50,12 @@ public:
 	void set (Duple const &, Coord, Coord);
 	void set_x (Coord);
 
-	Coord x ()  const { return _position.x; }
-	Coord y0 () const { return _position.y; }
-	Coord y1 () const { return _position.y + _length; }
+	Coord x ()  const { return _center.x; }
+	Coord y0 () const { return _center.y; }
+	Coord y1 () const { return _center.y + _length; }
 
   private:
+	Duple _center;
 	Coord _radius;
 	Coord _length;
 };
