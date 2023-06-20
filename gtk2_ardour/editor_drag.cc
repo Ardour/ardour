@@ -7183,6 +7183,7 @@ RegionMarkerDrag::setup_pointer_sample_offset ()
 LollipopDrag::LollipopDrag (Editor* ed, ArdourCanvas::Item* l)
 	: Drag (ed, l, Temporal::BeatTime)
 	, _primary (dynamic_cast<ArdourCanvas::Lollipop*> (l))
+	, cumulative_delta (0.)
 {
 	_region = reinterpret_cast<VelocityGhostRegion*> (_item->get_data ("ghostregionview"));
 }
@@ -7203,7 +7204,9 @@ LollipopDrag::start_grab (GdkEvent *ev, Gdk::Cursor* c)
 	bool add = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
 	bool extend = Keyboard::modifier_state_equals (ev->button.state, Keyboard::TertiaryModifier);
 
-	mrv->note_selected (note, add, extend);
+	if (mrv->selection().find (note) == mrv->selection().end()) {
+		mrv->note_selected (note, add, extend);
+	}
 }
 
 void
@@ -7223,6 +7226,9 @@ LollipopDrag::finished (GdkEvent *ev, bool did_move)
 	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&_region->parent_rv);
 	assert (mrv);
+
+	double this_delta = velocity - note->note()->velocity();
+	cumulative_delta += this_delta;
 
 	mrv->set_velocity (note, velocity);
 }

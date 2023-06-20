@@ -296,7 +296,7 @@ public:
 	void show_list_editor ();
 
 	typedef std::set<NoteBase*> Selection;
-	Selection selection () const {
+	Selection const & selection () const {
 		return _selection;
 	}
 

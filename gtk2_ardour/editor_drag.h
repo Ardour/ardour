@@ -1577,6 +1577,7 @@ class LollipopDrag : public Drag
   private:
 	VelocityGhostRegion*      _region;
 	ArdourCanvas::Lollipop*   _primary;
+	double                    cumulative_delta;
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */
