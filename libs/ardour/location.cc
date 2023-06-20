@@ -1139,7 +1139,6 @@ Locations::remove (Location *loc)
 				_session.set_auto_punch_location (0);
 				lm.acquire ();
 			}
-			delete *i;
 			locations.erase (i);
 			was_removed = true;
 			if (current_location == loc) {
@@ -1168,6 +1167,7 @@ Locations::remove (Location *loc)
 		if (was_current) {
 			current_changed (0); /* EMIT SIGNAL */
 		}
+		delete loc;
 	}
 }
 
