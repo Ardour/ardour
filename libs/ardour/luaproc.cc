@@ -717,7 +717,6 @@ LuaProc::connect_and_run (BufferSet& bufs,
 			lua_time["tempo_end"] = metric_end.tempo ().quarter_notes_per_minute ();
 			lua_time["beat"]      = DoubleableBeats (metric.tempo ().quarters_at_sample (start)).to_double ();
 			lua_time["beat_end"]  = DoubleableBeats (metric_end.tempo ().quarters_at_sample (end)).to_double ();
-			lua_time["bar"]       = (bbt.bars - 1) * 4;
 
 			lua_time["ts_numerator"]   = metric.meter ().divisions_per_bar ();
 			lua_time["ts_denominator"] = metric.meter ().note_value ();
