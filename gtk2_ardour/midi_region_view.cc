@@ -4662,6 +4662,6 @@ void
 MidiRegionView::sync_velocity_drag (double factor)
 {
 	for (auto & s : _selection) {
-		s->set_velocity (s->visual_velocity() * factor);
+		s->set_velocity (factor);
 	}
 }
