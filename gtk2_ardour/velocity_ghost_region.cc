@@ -75,6 +75,7 @@ void
 VelocityGhostRegion::add_note (NoteBase* nb)
 {
 	ArdourCanvas::Lollipop* l = new ArdourCanvas::Lollipop (_note_group);
+	l->set_bounding_parent (base_rect);
 
 	GhostEvent* event = new GhostEvent (nb, _note_group, l);
 	events.insert (std::make_pair (nb->note(), event));
@@ -101,7 +102,7 @@ void
 VelocityGhostRegion::set_size_and_position (GhostEvent& ev)
 {
 	ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (ev.item);
-	const double available_height = base_rect->y1() - (2.0 * lollipop_radius);
+	const double available_height = base_rect->y1();
 	const double actual_height = (ev.event->note()->velocity() / 127.0) * available_height;
 	l->set (ArdourCanvas::Duple (ev.event->x0() - 1.0, base_rect->y1() - actual_height), actual_height, lollipop_radius);
 }
@@ -132,11 +133,12 @@ VelocityGhostRegion::set_colors ()
 void
 VelocityGhostRegion::drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev)
 {
-	ArdourCanvas::Rect r (base_rect->item_to_window (base_rect->get()));
+	ArdourCanvas::Rect r (base_rect->item_to_canvas (base_rect->get()));
 
 	/* translate event y-coord so that zero matches the top of base_rect
 	 * (event coordinates use window coordinate space)
 	 */
+
 
 	ev->y -= r.y0;
 
@@ -144,8 +146,8 @@ VelocityGhostRegion::drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev)
 	 * the lollipop radius at top and bottom
 	 */
 
-	const double effective_y = std::max (lollipop_radius, std::min (r.height() - (2.0 * lollipop_radius), ev->y));
-	const double newlen = r.height() - effective_y - lollipop_radius;
+	const double effective_y = std::max (0.0, std::min (r.height(), ev->y));
+	const double newlen = r.height() - effective_y;
 	const double delta = newlen - l->length();
 
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
@@ -155,7 +157,7 @@ VelocityGhostRegion::drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev)
 	 * changing the note velocities.
 	 */
 
-	const double factor = newlen / l->length();
+	const double factor = newlen / base_rect->height();
 	mrv->sync_velocity_drag (factor);
 
 	MidiRegionView::Selection const & sel (mrv->selection());
@@ -176,12 +178,12 @@ VelocityGhostRegion::y_position_to_velocity (double y) const
 	const ArdourCanvas::Rect r (base_rect->get());
 	int velocity;
 
-	if (y >= r.height() - (2.0 * lollipop_radius))  {
+	if (y >= r.height())  {
 		velocity = 0;
-	} else if (y <= lollipop_radius) {
+	} else if (y <= 0.) {
 		velocity = 127;
 	} else {
-		velocity = floor (127. * (((r.height() - 2.0 * lollipop_radius)- y) / r.height()));
+		velocity = floor (127. * (1.0 - (y / r.height())));
 	}
 
 	return velocity;
