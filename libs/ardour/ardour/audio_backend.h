@@ -562,10 +562,6 @@ public:
 	virtual uint32_t systemic_midi_input_latency (std::string const) const  = 0;
 	virtual uint32_t systemic_midi_output_latency (std::string const) const = 0;
 
-	/* defaults as reported by device driver */
-	virtual uint32_t systemic_hw_input_latency () const { return 0; }
-	virtual uint32_t systemic_hw_output_latency () const { return 0; }
-
 	virtual uint32_t period_size () const { return 0; }
 
 	/** override this if this implementation returns true from
