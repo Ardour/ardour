@@ -1961,12 +1961,8 @@ EngineControl::maybe_display_saved_state ()
 		}
 	} else {
 		DEBUG_ECONTROL ("Unable to find saved state for backend and devices");
-
-		std::shared_ptr<ARDOUR::AudioBackend> backend = ARDOUR::AudioEngine::instance ()->current_backend ();
-		if (backend) {
-			input_latency.set_value (backend->systemic_hw_input_latency ());
-			output_latency.set_value (backend->systemic_hw_output_latency ());
-		}
+		input_latency.set_value (0);
+		output_latency.set_value (0);
 	}
 }
 
