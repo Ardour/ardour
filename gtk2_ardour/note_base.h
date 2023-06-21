@@ -27,6 +27,8 @@
 #include "canvas/types.h"
 #include "gtkmm2ext/colors.h"
 
+#include "ardour/types.h"
+
 #include "rgb_macros.h"
 #include "ui_config.h"
 
@@ -85,6 +87,7 @@ class NoteBase : public sigc::trackable
 	virtual void move_event(double dx, double dy) = 0;
 
 	uint32_t base_color();
+	static uint32_t base_color (int velocity, ARDOUR::ColorMode color_mode, Gtkmm2ext::Color, int channel, bool selected);
 
 	void show_velocity();
 	void hide_velocity();
@@ -129,7 +132,7 @@ class NoteBase : public sigc::trackable
 
 	/// hue circle divided into 16 equal-looking parts, courtesy Thorsten Wilms
 	static const uint32_t midi_channel_colors[16];
-
+	
 	bool mouse_near_ends () const;
 	virtual bool big_enough_to_trim () const;
 

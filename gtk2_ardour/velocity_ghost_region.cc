@@ -41,6 +41,7 @@
 #include "note_base.h"
 #include "public_editor.h"
 #include "ui_config.h"
+#include "verbose_cursor.h"
 
 #include "pbd/i18n.h"
 
@@ -84,7 +85,7 @@ VelocityGhostRegion::add_note (NoteBase* nb)
 	l->set_data (X_("ghostregionview"), this);
 	l->set_data (X_("note"), nb);
 
-	event->item->set_fill_color (UIConfiguration::instance().color_mod(nb->base_color(), "ghost track midi fill"));
+	event->item->set_fill_color (nb->base_color());
 	event->item->set_outline_color (_outline);
 
 	MidiStreamView* mv = midi_view();
@@ -108,15 +109,17 @@ VelocityGhostRegion::set_size_and_position (GhostEvent& ev)
 }
 
 void
-VelocityGhostRegion::update_note (GhostEvent* ev)
+VelocityGhostRegion::update_note (GhostEvent* gev)
 {
-	set_size_and_position (*ev);
+	set_size_and_position (*gev);
+	gev->item->set_fill_color (gev->event->base_color());
 }
 
 void
-VelocityGhostRegion::update_hit (GhostEvent* ev)
+VelocityGhostRegion::update_hit (GhostEvent* gev)
 {
-	set_size_and_position (*ev);
+	set_size_and_position (*gev);
+	gev->item->set_fill_color (gev->event->base_color());
 }
 
 void
@@ -127,7 +130,11 @@ VelocityGhostRegion::remove_note (NoteBase*)
 void
 VelocityGhostRegion::set_colors ()
 {
-	base_rect->set_fill_color (Gtkmm2ext::Color (0xff000085));
+	base_rect->set_fill_color (UIConfiguration::instance().color ("ghost track base"));
+
+	for (auto & gev : events) {
+		gev.second->item->set_fill_color (gev.second->event->base_color());
+	}
 }
 
 void
@@ -161,15 +168,46 @@ VelocityGhostRegion::drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev)
 	mrv->sync_velocity_drag (factor);
 
 	MidiRegionView::Selection const & sel (mrv->selection());
+	int verbose_velocity = -1;
+	GhostEvent* primary_ghost = 0;
 
 	for (auto & s : sel) {
 		GhostEvent* x = find_event (s->note());
 
 		if (x) {
-			ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (x->item);
-			l->set (ArdourCanvas::Duple (l->x(), l->y0() - delta), l->length() + delta, lollipop_radius);
+			ArdourCanvas::Lollipop* lolli = dynamic_cast<ArdourCanvas::Lollipop*> (x->item);
+			lolli->set (ArdourCanvas::Duple (lolli->x(), lolli->y0() - delta), lolli->length() + delta, lollipop_radius);
+			/* note: length is now set to the new value */
+			const int newvel = floor (127. * (l->length() / r.height()));
+			/* since we're not actually changing the note velocity
+			   (yet), we have to use the static method to compute
+			   the color.
+			*/
+			lolli->set_fill_color (NoteBase::base_color (newvel, mrv->color_mode(), mrv->midi_stream_view()->get_region_color(), x->event->note()->channel(), true));
+
+			if (l == lolli) {
+				/* This is the value we will display */
+				verbose_velocity = newvel;
+				primary_ghost = x;
+			}
 		}
 	}
+
+	assert (verbose_velocity >= 0);
+	char buf[128];
+	const int  oldvel = primary_ghost->event->note()->velocity();
+
+	if (verbose_velocity > oldvel) {
+		snprintf (buf, sizeof (buf), "Velocity %d (+%d)", verbose_velocity, verbose_velocity - oldvel);
+	} else if (verbose_velocity == oldvel) {
+		snprintf (buf, sizeof (buf), "Velocity %d", verbose_velocity);
+	} else {
+		snprintf (buf, sizeof (buf), "Velocity %d (%d)", verbose_velocity, verbose_velocity - oldvel);
+	}
+
+	trackview.editor().verbose_cursor()->set (buf);
+	trackview.editor().verbose_cursor()->show ();
+	trackview.editor().verbose_cursor()->set_offset (ArdourCanvas::Duple (10., 10.));
 }
 
 int

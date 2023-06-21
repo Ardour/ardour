@@ -181,32 +181,36 @@ NoteBase::set_selected(bool selected)
 #define SCALE_USHORT_TO_UINT8_T(x) ((x) / 257)
 
 uint32_t
-NoteBase::base_color()
+NoteBase::base_color ()
+{
+	return base_color (_note->velocity(), _region.color_mode(), _region.midi_stream_view()->get_region_color(), _note->channel(), selected());
+}
+
+uint32_t
+NoteBase::base_color (int velocity, ARDOUR::ColorMode color_mode, Gtkmm2ext::Color default_color, int channel, bool selected)
 {
 	using namespace ARDOUR;
 
-	ColorMode mode = _region.color_mode();
-
 	const uint8_t min_opacity = 15;
-	uint8_t       opacity = std::max(min_opacity, uint8_t(_note->velocity() + _note->velocity()));
+	uint8_t       opacity = std::max(min_opacity, uint8_t(velocity + velocity));
 
-	switch (mode) {
-	case TrackColor:
+	switch (color_mode) {
+	case ARDOUR::TrackColor:
 	{
-		const uint32_t region_color = _region.midi_stream_view()->get_region_color();
+		const uint32_t region_color = default_color;
 		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (region_color, opacity), _selected_col,
 					 0.5);
 	}
 
-	case ChannelColors:
-		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (NoteBase::midi_channel_colors[_note->channel()], opacity),
+	case ARDOUR::ChannelColors:
+		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (NoteBase::midi_channel_colors[channel], opacity),
 		                          _selected_col, 0.5);
 
 	default:
 		if (UIConfiguration::instance().get_use_note_color_for_velocity()) {
-			return meter_style_fill_color(_note->velocity(), selected());
+			return meter_style_fill_color(velocity, selected);
 		} else {
-			const uint32_t region_color = _region.midi_stream_view()->get_region_color();
+			const uint32_t region_color = default_color;
 			return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (region_color, opacity), _selected_col,
 			                         0.5);
 		}
