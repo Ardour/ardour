@@ -368,6 +368,9 @@ class CoreAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 	uint32_t _systemic_audio_input_latency;
 	uint32_t _systemic_audio_output_latency;
 
+	uint32_t _hw_audio_input_latency;
+	uint32_t _hw_audio_output_latency;
+
 	/* coreaudio specific  */
 	enum DeviceFilter { All, Input, Output, Duplex };
 	uint32_t name_to_id(std::string, DeviceFilter filter = All) const;
