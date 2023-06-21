@@ -450,26 +450,6 @@ CoreAudioBackend::systemic_output_latency () const
 	return _systemic_audio_output_latency;
 }
 
-uint32_t
-CoreAudioBackend::systemic_hw_input_latency () const
-{
-	return 0;
-	if (name_to_id (_input_audio_device) != UINT32_MAX) {
-		return _pcmio->get_latency(name_to_id(_input_audio_device, Input), true);
-	}
-	return 0;
-}
-
-uint32_t
-CoreAudioBackend::systemic_hw_output_latency () const
-{
-	return 0;
-	if (name_to_id (_output_audio_device) != UINT32_MAX) {
-		return _pcmio->get_latency(name_to_id(_output_audio_device, Output), false);
-	}
-	return 0;
-}
-
 /* MIDI */
 
 std::vector<std::string>
