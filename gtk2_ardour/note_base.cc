@@ -195,14 +195,14 @@ NoteBase::base_color (int velocity, ARDOUR::ColorMode color_mode, Gtkmm2ext::Col
 	uint8_t       opacity = std::max(min_opacity, uint8_t(velocity + velocity));
 
 	switch (color_mode) {
-	case ARDOUR::TrackColor:
+	case TrackColor:
 	{
 		const uint32_t region_color = default_color;
 		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (region_color, opacity), _selected_col,
 					 0.5);
 	}
 
-	case ARDOUR::ChannelColors:
+	case ChannelColors:
 		return UINT_INTERPOLATE (UINT_RGBA_CHANGE_A (NoteBase::midi_channel_colors[channel], opacity),
 		                          _selected_col, 0.5);
 
