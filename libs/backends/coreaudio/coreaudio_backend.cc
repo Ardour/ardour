@@ -112,6 +112,8 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _n_outputs (0)
 	, _systemic_audio_input_latency (0)
 	, _systemic_audio_output_latency (0)
+	, _hw_audio_input_latency (0)
+	, _hw_audio_output_latency (0)
 	, _dsp_load (0)
 	, _processed_samples (0)
 {
@@ -451,6 +453,7 @@ CoreAudioBackend::systemic_output_latency () const
 uint32_t
 CoreAudioBackend::systemic_hw_input_latency () const
 {
+	return 0;
 	if (name_to_id (_input_audio_device) != UINT32_MAX) {
 		return _pcmio->get_latency(name_to_id(_input_audio_device, Input), true);
 	}
@@ -460,6 +463,7 @@ CoreAudioBackend::systemic_hw_input_latency () const
 uint32_t
 CoreAudioBackend::systemic_hw_output_latency () const
 {
+	return 0;
 	if (name_to_id (_output_audio_device) != UINT32_MAX) {
 		return _pcmio->get_latency(name_to_id(_output_audio_device, Output), false);
 	}
@@ -640,6 +644,16 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		_samplerate = _pcmio->sample_rate();
 		engine.sample_rate_change (_samplerate);
 		PBD::warning << _("CoreAudioBackend: sample rate does not match.") << endmsg;
+	}
+
+	_hw_audio_input_latency = _hw_audio_output_latency = 0;
+
+	if (device1 != UINT32_MAX) {
+		_hw_audio_input_latency = _pcmio->get_latency(device1, true);
+	}
+
+	if (device2 != UINT32_MAX) {
+		_hw_audio_output_latency = _pcmio->get_latency(device2, false);
 	}
 
 	_measure_latency = for_latency_measurement;
@@ -1244,12 +1258,12 @@ CoreAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool fo
 	r = port->latency_range (for_playback);
 	if (port->is_physical() && port->is_terminal() && port->type() == DataType::AUDIO) {
 		if (port->is_input() && for_playback) {
-			r.min += _samples_per_period;
-			r.max += _samples_per_period;
+			r.min += _samples_per_period + _hw_audio_input_latency;
+			r.max += _samples_per_period + _hw_audio_input_latency;
 		}
 		if (port->is_output() && !for_playback) {
-			r.min += _samples_per_period;
-			r.max += _samples_per_period;
+			r.min += _samples_per_period + _hw_audio_output_latency;
+			r.max += _samples_per_period + _hw_audio_output_latency;
 		}
 	}
 	return r;
