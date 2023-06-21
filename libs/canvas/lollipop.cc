@@ -33,6 +33,7 @@ Lollipop::Lollipop (Canvas* c)
 	: Item (c)
 	, _radius (8)
 	, _length (0)
+	, bounding_parent (0)
 {
 }
 
@@ -40,7 +41,14 @@ Lollipop::Lollipop (Item* parent)
 	: Item (parent)
 	, _radius (8)
 	, _length (0)
+	, bounding_parent (0)
 {
+}
+
+void
+Lollipop::set_bounding_parent (Item* bp)
+{
+	bounding_parent = bp;
 }
 
 void
@@ -67,10 +75,17 @@ Lollipop::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	/* the line */
 
 	context->move_to (l.x, l.y + _radius);
-	context->line_to (l.x, l.y + _length - _radius);
+	context->line_to (l.x, l.y + _length);
 	context->stroke ();
 
-	/* the circle */
+	/* the circle: clip to avoid weirdness at top and bottom of parent */
+
+	if (bounding_parent) {
+		context->save ();
+		Rect b (bounding_parent->item_to_window (bounding_parent->bounding_box()));
+		context->rectangle (b.x0, b.y0, b.width(), b.height());
+		context->clip();
+	}
 
 	context->arc (p.x, p.y, _radius, 0.0 * (M_PI/180.0), 360.0 * (M_PI/180.0));
 
@@ -86,6 +101,10 @@ Lollipop::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 	if (outline()) {
 		setup_outline_context (context);
 		context->stroke ();
+	}
+
+	if (bounding_parent) {
+		context->restore ();
 	}
 
 	render_children (area, context);

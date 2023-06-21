@@ -54,10 +54,13 @@ public:
 	Coord y0 () const { return _center.y; }
 	Coord y1 () const { return _center.y + _length; }
 
+	void set_bounding_parent (Item*);
+
   private:
 	Duple _center;
 	Coord _radius;
 	Coord _length;
+	Item* bounding_parent;
 };
 
 }
