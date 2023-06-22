@@ -56,17 +56,17 @@ BackendPort::connect (BackendPortHandle port, BackendPortHandle self)
 	}
 
 	if (type () != port->type ()) {
-		PBD::error << _("BackendPort::connect (): wrong port-type") << endmsg;
+		PBD::error << string_compose (_("BackendPort::connect (): wrong port-type trying to connect %1 and %2"), name(), port->name()) << endmsg;
 		return -1;
 	}
 
 	if (is_output () && port->is_output ()) {
-		PBD::error << _("BackendPort::connect (): cannot inter-connect output ports.") << endmsg;
+		PBD::error << string_compose (_("BackendPort::connect (): cannot inter-connect output ports %1 and %2."), name(), port->name()) << endmsg;
 		return -1;
 	}
 
 	if (is_input () && port->is_input ()) {
-		PBD::error << _("BackendPort::connect (): cannot inter-connect input ports.") << endmsg;
+		PBD::error << string_compose (_("BackendPort::connect (): cannot inter-connect input ports."), name(), port->name()) << endmsg;
 		return -1;
 	}
 
