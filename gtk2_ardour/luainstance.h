@@ -40,6 +40,10 @@ namespace luabridge {
 	class LuaRef;
 }
 
+namespace Gtk {
+	class Window;
+}
+
 typedef std::bitset<LuaSignal::LAST_SIGNAL> ActionHook;
 
 class LuaCallback : public ARDOUR::SessionHandlePtr, public sigc::trackable
