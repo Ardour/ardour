@@ -183,6 +183,7 @@ private:
 	uint32_t maybe_add_route_to_input_menu (std::shared_ptr<ARDOUR::Route>, ARDOUR::DataType, std::weak_ptr<ARDOUR::Port>);
 	void port_connected_or_disconnected (std::weak_ptr<ARDOUR::Port>, std::weak_ptr<ARDOUR::Port>);
 	void port_pretty_name_changed (std::string);
+	void property_changed (PBD::PropertyChange const&);
 
 	bool sc_input_press (GdkEventButton *, std::weak_ptr<ARDOUR::Port>);
 	bool sc_input_release (GdkEventButton *);
@@ -254,6 +255,7 @@ private:
 
 	void going_away ();
 	void processor_property_changed (PBD::PropertyChange const&);
+	void route_property_changed (PBD::PropertyChange const&);
 	void route_processors_changed (ARDOUR::RouteProcessorChange);
 	void add_processor (std::weak_ptr<ARDOUR::Processor>);
 	void map_height (Gtk::Allocation&);
