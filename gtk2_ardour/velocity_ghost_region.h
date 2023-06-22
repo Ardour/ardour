@@ -46,8 +46,14 @@ public:
 	int y_position_to_velocity (double y) const;
 
 private:
+	bool dragging;
+
+	bool base_event (GdkEvent*);
 	bool lollevent (GdkEvent*, MidiGhostRegion::GhostEvent*);
 	void set_size_and_position (MidiGhostRegion::GhostEvent&);
+	void lollis_close_to_x (int x, double distance, std::vector<NoteBase*>& events);
+	void desensitize_lollis ();
+	void sensitize_lollis ();
 };
 
 #endif /* __gtk_ardour_velocity_region_view_h__ */

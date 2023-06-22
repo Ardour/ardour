@@ -28,6 +28,7 @@
 #include "ardour/session.h"
 
 #include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/utils.h"
 
 #include "canvas/lollipop.h"
 
@@ -51,11 +52,51 @@ static double const lollipop_radius = 8.0;
 
 VelocityGhostRegion::VelocityGhostRegion (MidiRegionView& mrv, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
 	: MidiGhostRegion (mrv, tv, source_tv, initial_unit_pos)
+	, dragging (false)
 {
+	base_rect->Event.connect (sigc::mem_fun (*this, &VelocityGhostRegion::base_event));
 }
 
 VelocityGhostRegion::~VelocityGhostRegion ()
 {
+}
+
+bool
+VelocityGhostRegion::base_event (GdkEvent* ev)
+{
+	std::vector<NoteBase*> affected_lollis;
+
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
+	ArdourCanvas::Rect r = base_rect->item_to_canvas (base_rect->get());
+
+	switch (ev->type) {
+	case GDK_MOTION_NOTIFY:
+		if (dragging) {
+			lollis_close_to_x (ev->motion.x, 20., affected_lollis);
+			if (!affected_lollis.empty()) {
+				int velocity = y_position_to_velocity (r.height() - (r.y1 - ev->motion.y));
+				mrv->set_velocity_for_notes (affected_lollis, velocity);
+			}
+		}
+		break;
+	case GDK_BUTTON_PRESS:
+		if (ev->button.button == 1) {
+			desensitize_lollis ();
+			dragging = true;
+		}
+		break;
+	case GDK_BUTTON_RELEASE:
+		if (ev->button.button == 1) {
+			sensitize_lollis ();
+			dragging = false;
+		}
+		break;
+	default:
+		// std::cerr << "vgr event type " << Gtkmm2ext::event_type_string (ev->type) << std::endl;
+		break;
+	}
+
+	return false;
 }
 
 void
@@ -81,6 +122,7 @@ VelocityGhostRegion::add_note (NoteBase* nb)
 	GhostEvent* event = new GhostEvent (nb, _note_group, l);
 	events.insert (std::make_pair (nb->note(), event));
 	l->Event.connect (sigc::bind (sigc::mem_fun (*this, &VelocityGhostRegion::lollevent), event));
+	l->set_ignore_events (true);
 	l->raise_to_top ();
 	l->set_data (X_("ghostregionview"), this);
 	l->set_data (X_("note"), nb);
@@ -238,5 +280,35 @@ VelocityGhostRegion::note_selected (NoteBase* ev)
 
 	ArdourCanvas::Lollipop* lolli = dynamic_cast<ArdourCanvas::Lollipop*> (gev->item);
 	lolli->set_outline_color (ev->selected() ? UIConfiguration::instance().color ("midi note selected outline") : 0x000000ff);
+}
+
+void
+VelocityGhostRegion::lollis_close_to_x (int x, double distance, std::vector<NoteBase*>& within)
+{
+	for (auto & gev : events) {
+		ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (gev.second->item);
+		if (l) {
+			ArdourCanvas::Duple pos = l->item_to_canvas (ArdourCanvas::Duple (l->x(), l->y0()));
+			if (std::abs (pos.x - x) < distance) {
+				within.push_back (gev.second->event);
+			}
+		}
+	}
+}
+
+void
+VelocityGhostRegion::desensitize_lollis ()
+{
+	for (auto & gev : events) {
+		gev.second->item->set_ignore_events (true);
+	}
+}
+
+void
+VelocityGhostRegion::sensitize_lollis ()
+{
+	for (auto & gev : events) {
+		gev.second->item->set_ignore_events (false);
+	}
 }
 

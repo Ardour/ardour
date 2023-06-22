@@ -288,6 +288,7 @@ public:
 	void change_note_lengths (bool, bool, Temporal::Beats beats, bool start, bool end);
 	void change_velocities (bool up, bool fine, bool allow_smush, bool all_together);
 	void set_velocity (NoteBase* primary, int velocity);
+	void set_velocity_for_notes (std::vector<NoteBase*> notes, int velocity);
 	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward, bool fine);
 	void channel_edit ();

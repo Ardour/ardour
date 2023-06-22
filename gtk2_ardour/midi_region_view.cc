@@ -3384,6 +3384,33 @@ MidiRegionView::change_note_length (NoteBase* event, Temporal::Beats t)
 {
 	note_diff_add_change (event, MidiModel::NoteDiffCommand::Length, t);
 }
+void
+MidiRegionView::set_velocity_for_notes (std::vector<NoteBase*> notes, int velocity)
+{
+	/* Does not use selection, used when drawing/dragging in velocity lane */
+
+	bool changed = false;
+
+	start_note_diff_command (_("set velocities"));
+
+	for (auto & note : notes) {
+
+		int delta = velocity - note->note()->velocity();
+
+		if (!delta) {
+			continue;
+		}
+
+		changed = true;
+		change_note_velocity (note, delta, true);
+	}
+
+	if (changed) {
+		apply_note_diff ();
+	} else {
+		abort_note_diff ();
+	}
+}
 
 void
 MidiRegionView::set_velocity (NoteBase* note, int velocity)
@@ -3393,6 +3420,10 @@ MidiRegionView::set_velocity (NoteBase* note, int velocity)
 	}
 
 	int delta = velocity - note->note()->velocity();
+
+	if (!delta) {
+		return;
+	}
 
 	start_note_diff_command (_("set velocities"));
 
