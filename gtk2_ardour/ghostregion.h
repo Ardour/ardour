@@ -126,6 +126,7 @@ public:
 	virtual void update_note (GhostEvent* note);
 	virtual void update_hit (GhostEvent* hit);
 	virtual void remove_note (NoteBase*);
+	virtual void note_selected (NoteBase*) {}
 
 	void model_changed();
 	void view_changed();

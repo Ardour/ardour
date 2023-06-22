@@ -226,3 +226,17 @@ VelocityGhostRegion::y_position_to_velocity (double y) const
 
 	return velocity;
 }
+
+void
+VelocityGhostRegion::note_selected (NoteBase* ev)
+{
+	GhostEvent* gev = find_event (ev->note());
+
+	if (!gev) {
+		return;
+	}
+
+	ArdourCanvas::Lollipop* lolli = dynamic_cast<ArdourCanvas::Lollipop*> (gev->item);
+	lolli->set_outline_color (ev->selected() ? UIConfiguration::instance().color ("midi note selected outline") : 0x000000ff);
+}
+
