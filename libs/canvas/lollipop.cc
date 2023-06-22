@@ -34,6 +34,7 @@ Lollipop::Lollipop (Canvas* c)
 	, _radius (8)
 	, _length (0)
 	, bounding_parent (0)
+	, line_color_is_fill (true)
 {
 }
 
@@ -42,6 +43,7 @@ Lollipop::Lollipop (Item* parent)
 	, _radius (8)
 	, _length (0)
 	, bounding_parent (0)
+	, line_color_is_fill (true)
 {
 }
 
@@ -62,8 +64,6 @@ Lollipop::compute_bounding_box () const
 void
 Lollipop::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 {
-	setup_outline_context (context);
-
 	Duple p = _parent->item_to_window (Duple (_center.x, _center.y));
 	Duple l (p);
 
@@ -72,11 +72,14 @@ Lollipop::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 		l = l.translate (half_a_pixel);
 	}
 
-	/* the line */
+	setup_outline_context (context);
 
-	context->move_to (l.x, l.y + _radius);
-	context->line_to (l.x, l.y + _length);
-	context->stroke ();
+	if (!line_color_is_fill) {
+		/* draw line in outline color */
+		context->move_to (l.x, l.y + _radius);
+		context->line_to (l.x, l.y + _length);
+		context->stroke ();
+	}
 
 	/* the circle: clip to avoid weirdness at top and bottom of parent */
 
@@ -89,6 +92,7 @@ Lollipop::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 	context->arc (p.x, p.y, _radius, 0.0 * (M_PI/180.0), 360.0 * (M_PI/180.0));
 
+
 	if (fill()) {
 		setup_fill_context (context);
 		if (outline()) {
@@ -100,6 +104,14 @@ Lollipop::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) cons
 
 	if (outline()) {
 		setup_outline_context (context);
+		context->stroke ();
+	}
+
+	if (line_color_is_fill) {
+		setup_fill_context (context);
+		/* draw line in fill color */
+		context->move_to (l.x, l.y + _radius);
+		context->line_to (l.x, l.y + _length);
 		context->stroke ();
 	}
 
@@ -172,3 +184,4 @@ Lollipop::covers (Duple const & point) const
 
 	return false;
 }
+
