@@ -2245,9 +2245,10 @@ MidiRegionView::clear_selection_internal ()
 {
 	DEBUG_TRACE(DEBUG::Selection, "MRV::clear_selection_internal\n");
 
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		(*i)->set_selected(false);
-		(*i)->hide_velocity();
+	for (auto & sel : _selection) {
+		sel->set_selected(false);
+		sel->hide_velocity();
+		sync_ghost_selection (sel);
 	}
 	_selection.clear();
 }
@@ -2586,6 +2587,8 @@ MidiRegionView::remove_from_selection (NoteBase* ev)
 	ev->set_selected (false);
 	ev->hide_velocity ();
 
+	sync_ghost_selection (ev);
+
 	if (_selection.empty()) {
 		PublicEditor& editor (trackview.editor());
 		editor.get_selection().remove (this);
@@ -2629,6 +2632,20 @@ MidiRegionView::add_to_selection (NoteBase* ev)
 	if (_selection.insert (ev).second == true) {
 		ev->set_selected (true);
 		start_playing_midi_note ((ev)->note());
+		sync_ghost_selection (ev);
+	}
+}
+
+void
+MidiRegionView::sync_ghost_selection (NoteBase* ev)
+{
+	for (auto & ghost : ghosts) {
+
+		MidiGhostRegion* gr;
+
+		if ((gr = dynamic_cast<MidiGhostRegion*>(ghost)) != 0) {
+			gr->note_selected (ev);
+		}
 	}
 }
 
@@ -4232,6 +4249,7 @@ MidiRegionView::maybe_select_by_position (GdkEventButton* ev, double /*x*/, doub
 	for (Events::iterator i = e.begin(); i != e.end(); ++i) {
 		if (_selection.insert (i->second).second) {
 			i->second->set_selected (true);
+			sync_ghost_selection (i->second);
 		}
 	}
 
@@ -4251,6 +4269,7 @@ MidiRegionView::color_handler ()
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
 		i->second->set_selected (i->second->selected()); // will change color
+		sync_ghost_selection (i->second);
 	}
 
 	/* XXX probably more to do here */

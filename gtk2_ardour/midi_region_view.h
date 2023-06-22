@@ -580,6 +580,8 @@ public:
 	void update_sysexes ();
 	void view_changed ();
 	void model_changed ();
+
+	void sync_ghost_selection (NoteBase*);
 };
 
 

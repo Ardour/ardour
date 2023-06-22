@@ -38,6 +38,7 @@ public:
 	void update_note (GhostEvent* note);
 	void update_hit (GhostEvent* hit);
 	void remove_note (NoteBase*);
+	void note_selected (NoteBase*);
 
 	void set_colors ();
 	void drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev);
