@@ -2147,8 +2147,11 @@ PluginPinDialog::map_height (Gtk::Allocation&)
 }
 
 void
-PluginPinDialog::route_processors_changed (ARDOUR::RouteProcessorChange)
+PluginPinDialog::route_processors_changed (ARDOUR::RouteProcessorChange c)
 {
+	if (c.type == RouteProcessorChange::CustomPinChange) {
+		return;
+	}
 	ppw.clear ();
 	_height_mapped = false;
 	scroller->remove ();
