@@ -635,6 +635,13 @@ IO::set_state (const XMLNode& node, int version)
 
 			if (p) {
 				p->set_state (**i, version);
+
+				if (!_session.inital_connect_or_deletion_in_progress ()) {
+					/* re-apply connection if create_ports(), ensure_ports()
+					 * disconnected the port
+					 */
+					p->reconnect ();
+				}
 			}
 		}
 	}
@@ -864,7 +871,7 @@ IO::create_ports (const XMLNode& node, int version)
 	{
 		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
 
-		if (ensure_ports (n, true, this)) {
+		if (ensure_ports (n, !_session.inital_connect_or_deletion_in_progress (), this)) {
 			error << string_compose(_("%1: cannot create I/O ports"), _name) << endmsg;
 			return -1;
 		}
