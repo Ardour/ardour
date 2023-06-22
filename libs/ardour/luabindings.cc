@@ -2609,6 +2609,13 @@ LuaBindings::common (lua_State* L)
 		.addConst ("ForceSel", ARDOUR::RangeSelectionAfterSplit(ForceSel))
 		.endNamespace ()
 
+		.beginNamespace ("TimeSelectionAfterSectionPaste")
+		.addConst ("SectionSelectNoop", ARDOUR::TimeSelectionAfterSectionPaste(SectionSelectNoop))
+		.addConst ("SectionSelectClear", ARDOUR::TimeSelectionAfterSectionPaste(SectionSelectClear))
+		.addConst ("SectionSelectRetain", ARDOUR::TimeSelectionAfterSectionPaste(SectionSelectRetain))
+		.addConst ("SectionSelectRetainAndMovePlayhead", ARDOUR::TimeSelectionAfterSectionPaste(SectionSelectRetainAndMovePlayhead))
+		.endNamespace ()
+
 		.beginNamespace ("ScreenSaverMode")
 		.addConst ("InhibitNever", ARDOUR::ScreenSaverMode(InhibitNever))
 		.addConst ("InhibitWhileRecording", ARDOUR::ScreenSaverMode(InhibitWhileRecording))
