@@ -83,12 +83,14 @@ VelocityGhostRegion::base_event (GdkEvent* ev)
 		if (ev->button.button == 1) {
 			desensitize_lollis ();
 			dragging = true;
+			base_rect->grab();
 		}
 		break;
 	case GDK_BUTTON_RELEASE:
 		if (ev->button.button == 1) {
-			sensitize_lollis ();
+			base_rect->ungrab();
 			dragging = false;
+			sensitize_lollis ();
 		}
 		break;
 	default:
