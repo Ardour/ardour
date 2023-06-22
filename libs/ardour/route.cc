@@ -2488,7 +2488,7 @@ Route::customize_plugin_insert (std::shared_ptr<Processor> proc, uint32_t count,
 		configure_processors_unlocked (0, &lm);
 	}
 
-	processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+	processors_changed (RouteProcessorChange (RouteProcessorChange::CustomPinChange, false)); /* EMIT SIGNAL */
 	_session.set_dirty ();
 	return true;
 }
@@ -2526,7 +2526,7 @@ Route::set_strict_io (const bool enable)
 		configure_processors (0);
 		lx.release ();
 
-		processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
+		processors_changed (RouteProcessorChange (RouteProcessorChange::CustomPinChange, false)); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 	return true;
