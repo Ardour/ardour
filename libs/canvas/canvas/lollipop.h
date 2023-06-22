@@ -61,6 +61,7 @@ public:
 	Coord _radius;
 	Coord _length;
 	Item* bounding_parent;
+	bool  line_color_is_fill;
 };
 
 }
