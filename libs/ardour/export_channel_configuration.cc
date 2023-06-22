@@ -79,6 +79,8 @@ ExportChannelConfiguration::set_state (const XMLNode& root)
 	std::string str;
 	if (root.get_property ("region-processing", str)) {
 		set_region_processing_type ((RegionExportChannelFactory::Type) string_2_enum (str, RegionExportChannelFactory::Type));
+	} else {
+		set_region_processing_type (RegionExportChannelFactory::None);
 	}
 
 	/* load old state, if any */
