@@ -53,6 +53,8 @@ static double const lollipop_radius = 8.0;
 VelocityGhostRegion::VelocityGhostRegion (MidiRegionView& mrv, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
 	: MidiGhostRegion (mrv, tv, source_tv, initial_unit_pos)
 	, dragging (false)
+	, dragging_line (nullptr)
+	, last_drag_x (-1)
 {
 	base_rect->Event.connect (sigc::mem_fun (*this, &VelocityGhostRegion::base_event));
 }
@@ -72,10 +74,22 @@ VelocityGhostRegion::base_event (GdkEvent* ev)
 	switch (ev->type) {
 	case GDK_MOTION_NOTIFY:
 		if (dragging) {
-			lollis_close_to_x (ev->motion.x, 20., affected_lollis);
+			if (last_drag_x < 0) {
+				lollis_close_to_x (ev->motion.x, 20., affected_lollis);
+			} else if (last_drag_x < ev->motion.x) {
+				/* rightward, "later" motion */
+				lollis_between (last_drag_x, ev->motion.x, affected_lollis);
+			} else {
+				/* leftward, "earlier" motion */
+				lollis_between (ev->motion.x, last_drag_x, affected_lollis);
+			}
 			if (!affected_lollis.empty()) {
 				int velocity = y_position_to_velocity (r.height() - (r.y1 - ev->motion.y));
 				mrv->set_velocity_for_notes (affected_lollis, velocity);
+			}
+			if (dragging) {
+				dragging_line->add_point (ArdourCanvas::Duple (ev->motion.x - r.x0, ev->motion.y - r.y0));
+				last_drag_x = ev->motion.x;
 			}
 		}
 		break;
@@ -83,12 +97,22 @@ VelocityGhostRegion::base_event (GdkEvent* ev)
 		if (ev->button.button == 1) {
 			desensitize_lollis ();
 			dragging = true;
+			last_drag_x = -1;
+			if (!dragging_line) {
+				dragging_line = new ArdourCanvas::PolyLine (_note_group);
+				dragging_line->set_ignore_events (true);
+				dragging_line->set_outline_color (0x00ff00ff);
+			}
+			dragging_line->set (ArdourCanvas::Points());
+			dragging_line->show();
+			dragging_line->raise_to_top();
 			base_rect->grab();
 		}
 		break;
 	case GDK_BUTTON_RELEASE:
 		if (ev->button.button == 1) {
 			base_rect->ungrab();
+			dragging_line->hide ();
 			dragging = false;
 			sensitize_lollis ();
 		}
@@ -282,6 +306,20 @@ VelocityGhostRegion::note_selected (NoteBase* ev)
 
 	ArdourCanvas::Lollipop* lolli = dynamic_cast<ArdourCanvas::Lollipop*> (gev->item);
 	lolli->set_outline_color (ev->selected() ? UIConfiguration::instance().color ("midi note selected outline") : 0x000000ff);
+}
+
+void
+VelocityGhostRegion::lollis_between (int x0, int x1, std::vector<NoteBase*>& within)
+{
+	for (auto & gev : events) {
+		ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (gev.second->item);
+		if (l) {
+			ArdourCanvas::Duple pos = l->item_to_canvas (ArdourCanvas::Duple (l->x(), l->y0()));
+			if (pos.x >= x0 && pos.x < x1) {
+				within.push_back (gev.second->event);
+			}
+		}
+	}
 }
 
 void
