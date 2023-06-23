@@ -307,6 +307,14 @@ foreach ($doc as $b) {
 			$args = array ();
 			$ret = array (luafn2class ($b['lua']) => 0);
 			$canon = 'ARDOUR::LuaAPI::datatype_ctor_'.strtolower (luafn2name ($b['lua'])).'(lua_State*)';
+		} else if (strpos ($b['lua'], 'ARDOUR:RouteListPtr') === 0) {
+			$ret = array ('ARDOUR.RouteListPtr' => 0);
+			$args = decl2args ('void (RouteList::*)(std::list<std::shared_ptr<ARDOUR::Route> >)');
+			$canon = '';
+		} else if (strpos ($b['lua'], 'ARDOUR:RegionListPtr') === 0) {
+			$ret = array ('ARDOUR.RegionListPtr' => 0);
+			$args = decl2args ('void (RouteList::*)(std::list<std::shared_ptr<ARDOUR::Region> >)');
+			$canon = '';
 		} else {
 			my_die ('unhandled Static C: ' . print_r($b, true));
 		}
