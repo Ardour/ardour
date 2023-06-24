@@ -55,6 +55,7 @@ VelocityGhostRegion::VelocityGhostRegion (MidiRegionView& mrv, TimeAxisView& tv,
 	, dragging (false)
 	, dragging_line (nullptr)
 	, last_drag_x (-1)
+	, drag_did_change (false)
 {
 	base_rect->Event.connect (sigc::mem_fun (*this, &VelocityGhostRegion::base_event));
 }
@@ -79,13 +80,14 @@ VelocityGhostRegion::base_event (GdkEvent* ev)
 			} else if (last_drag_x < ev->motion.x) {
 				/* rightward, "later" motion */
 				lollis_between (last_drag_x, ev->motion.x, affected_lollis);
-			} else {
+ 			} else {
 				/* leftward, "earlier" motion */
 				lollis_between (ev->motion.x, last_drag_x, affected_lollis);
 			}
 			if (!affected_lollis.empty()) {
 				int velocity = y_position_to_velocity (r.height() - (r.y1 - ev->motion.y));
-				mrv->set_velocity_for_notes (affected_lollis, velocity);
+				drag_did_change |= mrv->set_velocity_for_notes (affected_lollis, velocity);
+				mrv->mid_drag_edit ();
 			}
 			if (dragging) {
 				dragging_line->add_point (ArdourCanvas::Duple (ev->motion.x - r.x0, ev->motion.y - r.y0));
@@ -97,6 +99,7 @@ VelocityGhostRegion::base_event (GdkEvent* ev)
 		if (ev->button.button == 1) {
 			desensitize_lollis ();
 			dragging = true;
+			drag_did_change = false;
 			last_drag_x = -1;
 			if (!dragging_line) {
 				dragging_line = new ArdourCanvas::PolyLine (_note_group);
@@ -107,10 +110,12 @@ VelocityGhostRegion::base_event (GdkEvent* ev)
 			dragging_line->show();
 			dragging_line->raise_to_top();
 			base_rect->grab();
+			mrv->begin_drag_edit (_("draw velocities"));
 		}
 		break;
 	case GDK_BUTTON_RELEASE:
 		if (ev->button.button == 1) {
+			mrv->end_drag_edit (drag_did_change);
 			base_rect->ungrab();
 			dragging_line->hide ();
 			dragging = false;

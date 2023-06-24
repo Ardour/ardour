@@ -51,6 +51,7 @@ private:
 	bool dragging;
 	ArdourCanvas::PolyLine* dragging_line;
 	int last_drag_x;
+	bool drag_did_change;
 
 	bool base_event (GdkEvent*);
 	bool lollevent (GdkEvent*, MidiGhostRegion::GhostEvent*);
