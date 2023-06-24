@@ -3384,14 +3384,61 @@ MidiRegionView::change_note_length (NoteBase* event, Temporal::Beats t)
 {
 	note_diff_add_change (event, MidiModel::NoteDiffCommand::Length, t);
 }
+
 void
+MidiRegionView::begin_drag_edit (std::string const & why)
+{
+	start_note_diff_command (why);
+}
+
+void
+MidiRegionView::drag_apply ()
+{
+	if (!_note_diff_command) {
+		return;
+	}
+
+	bool add_or_remove = _note_diff_command->adds_or_removes();
+
+	if (add_or_remove) {
+		// Mark all selected notes for selection when model reloads
+		for (auto const & sel : _selection) {
+			_marked_for_selection.insert (sel->note());
+		}
+	}
+
+	{
+		PBD::Unwinder<bool> puw (_select_all_notes_after_add, true);
+		/*note that we don't use as_commit here, because that would BEGIN a new undo record; we already have one underway*/
+		_model->apply_diff_command_as_subcommand (*trackview.session(), _note_diff_command);
+	}
+}
+
+void
+MidiRegionView::mid_drag_edit ()
+{
+	drag_apply ();
+	_note_diff_command = _model->new_note_diff_command ();
+}
+
+void
+MidiRegionView::end_drag_edit (bool apply)
+{
+	if (apply) {
+		drag_apply ();
+		trackview.editor().commit_reversible_command ();
+		_note_diff_command = nullptr;
+	} else {
+		abort_note_diff ();
+	}
+}
+
+bool
 MidiRegionView::set_velocity_for_notes (std::vector<NoteBase*> notes, int velocity)
 {
 	/* Does not use selection, used when drawing/dragging in velocity lane */
 
 	bool changed = false;
-
-	start_note_diff_command (_("set velocities"));
 
 	for (auto & note : notes) {
 
@@ -3405,11 +3452,7 @@ MidiRegionView::set_velocity_for_notes (std::vector<NoteBase*> notes, int veloci
 		change_note_velocity (note, delta, true);
 	}
 
-	if (changed) {
-		apply_note_diff ();
-	} else {
-		abort_note_diff ();
-	}
+	return changed;
 }
 
 void

@@ -180,6 +180,10 @@ public:
 	void end_write();
 	void extend_active_notes();
 
+	void begin_drag_edit (std::string const & why);
+	void mid_drag_edit ();
+	void end_drag_edit (bool apply);
+
 	void display_model(std::shared_ptr<ARDOUR::MidiModel> model);
 
 	/* note_diff commands should start here; this initiates an undo record */
@@ -288,7 +292,7 @@ public:
 	void change_note_lengths (bool, bool, Temporal::Beats beats, bool start, bool end);
 	void change_velocities (bool up, bool fine, bool allow_smush, bool all_together);
 	void set_velocity (NoteBase* primary, int velocity);
-	void set_velocity_for_notes (std::vector<NoteBase*> notes, int velocity);
+	bool set_velocity_for_notes (std::vector<NoteBase*> notes, int velocity);
 	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward, bool fine);
 	void channel_edit ();
@@ -583,6 +587,7 @@ public:
 	void model_changed ();
 
 	void sync_ghost_selection (NoteBase*);
+	void drag_apply ();
 };
 
 
