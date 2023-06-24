@@ -200,6 +200,10 @@ private:
 	ParameterMenuMap _controller_menu_map;
 
 	StepEditor* _step_editor;
+
+	std::shared_ptr<AutomationTimeAxisView> velocity_track;
+	Gtk::CheckMenuItem* velocity_menu_item;
+	void create_velocity_automation_child (Evoral::Parameter const &, bool show);
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

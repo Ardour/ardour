@@ -136,6 +136,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	, _step_edit_item (0)
 	, controller_menu (0)
 	, _step_editor (0)
+	, velocity_menu_item (nullptr)
 {
 	_midnam_model_selector.disable_scrolling();
 	_midnam_custom_device_mode_selector.disable_scrolling();
@@ -192,6 +193,10 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	/* if set_state above didn't create a mute automation child, we need to make one */
 	if (automation_child (MuteAutomation) == 0) {
 		create_automation_child (MuteAutomation, false);
+	}
+
+	if (automation_child (MidiVelocityAutomation) == 0) {
+		create_automation_child (MidiVelocityAutomation, false);
 	}
 
 	if (_route->panner_shell()) {
@@ -722,19 +727,20 @@ MidiTimeAxisView::build_automation_action_menu (bool for_selection)
 
 	uint16_t selected_channels = midi_track()->get_playback_channel_mask();
 
+	automation_items.push_back (CheckMenuElem (_("Velocity"), sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::toggle_automation_track), MidiVelocityAutomation)));
+	velocity_menu_item = dynamic_cast<Gtk::CheckMenuItem*> (&automation_items.back ());
+	velocity_menu_item->set_active (string_to<bool> (velocity_track->gui_property ("visible")));
+
 	if (selected_channels != 0) {
 
 		automation_items.push_back (SeparatorElem());
 
-		/* these 3 MIDI "command" types are semantically more like automation
+		/* these 2 MIDI "command" types are semantically more like automation
 		 * than note data, but they are not MIDI controllers. We give them
 		 * special status in this menu, since they will not show up in the
 		 * controller list and anyone who actually knows something about MIDI
 		 * (!) would not expect to find them there.
 		 */
-
-		add_channel_command_menu_item (automation_items, _("Velocity"), MidiVelocityAutomation, 0);
-		automation_items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);
 
 		add_channel_command_menu_item (automation_items, _("Bender"), MidiPitchBenderAutomation, 0);
 		automation_items.back().set_sensitive (!for_selection || _editor.get_selection().tracks.size() == 1);
@@ -1368,6 +1374,9 @@ MidiTimeAxisView::create_automation_child (const Evoral::Parameter& param, bool 
 		break;
 
 	case MidiVelocityAutomation:
+		create_velocity_automation_child (param, show);
+		break;
+
 	case MidiCCAutomation:
 	case MidiPgmChangeAutomation:
 	case MidiPitchBenderAutomation:
@@ -1659,6 +1668,10 @@ MidiTimeAxisView::automation_child_menu_item (Evoral::Parameter param)
 		return m;
 	}
 
+	if (param.type() == MidiVelocityAutomation) {
+		return velocity_menu_item;
+	}
+
 	ParameterMenuMap::iterator i = _controller_menu_map.find (param);
 	if (i != _controller_menu_map.end()) {
 		return i->second;
@@ -1810,4 +1823,29 @@ void
 MidiTimeAxisView::get_regions_with_selected_data (RegionSelection& rs)
 {
 	midi_view()->get_regions_with_selected_data (rs);
+}
+
+void
+MidiTimeAxisView::create_velocity_automation_child (Evoral::Parameter const &, bool show)
+{
+	std::shared_ptr<AutomationControl> c = midi_track()->velocity_control();
+
+	if (!c) {
+		error << "MidiTrack has no velocity automation, unable to add automation track view." << endmsg;
+		return;
+	}
+
+	velocity_track.reset (new AutomationTimeAxisView (_session,
+	                                                  _route, midi_track(), c, c->parameter(),
+	                                                  _editor,
+	                                                  *this,
+	                                                  false,
+	                                                  parent_canvas,
+	                                                  midi_track()->describe_parameter(c->parameter())));
+
+	if (_view) {
+		_view->foreach_regionview (sigc::mem_fun (*velocity_track.get(), &TimeAxisView::add_ghost));
+	}
+
+	add_automation_child (Evoral::Parameter(MidiVelocityAutomation), velocity_track, show);
 }
