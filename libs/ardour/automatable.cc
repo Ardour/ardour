@@ -210,7 +210,7 @@ Automatable::describe_parameter (Evoral::Parameter param)
 	} else if (param.type() == PhaseAutomation) {
 		return _("Polarity Invert");
 	} else if (param.type() == MidiVelocityAutomation) {
-		return string_compose("Velocity [%1]", int(param.channel()) + 1);
+		return _("Velocity");
 	} else if (param.type() == MidiCCAutomation) {
 		return string_compose("Controller %1 [%2]", param.id(), int(param.channel()) + 1);
 	} else if (param.type() == MidiPgmChangeAutomation) {
