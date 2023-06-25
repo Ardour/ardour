@@ -96,10 +96,11 @@ public:
 	virtual void drag_end();
 	bool dragging() const { return _dragging; }
 
-	virtual void raise () { return; }
-	virtual void raise_to_top () { return; }
-	virtual void lower () { return; }
-	virtual void lower_to_bottom () { return; }
+	virtual void visual_layer_on_top() {}
+	virtual void raise () {}
+	virtual void raise_to_top () {}
+	virtual void lower () {}
+	virtual void lower_to_bottom () {}
 
 	/** @return true if the name area should respond to events */
 	bool name_active() const { return name_connected; }

@@ -294,7 +294,7 @@ StreamView::layer_regions()
 
 	// Fix canvas layering by raising each to the top in the sorted order.
 	for (RegionViewList::iterator i = copy.begin(); i != copy.end(); ++i) {
-		(*i)->get_canvas_group()->raise_to_top ();
+		(*i)->visual_layer_on_top ();
 	}
 }
 

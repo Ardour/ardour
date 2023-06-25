@@ -153,7 +153,7 @@ protected:
 
 	void         display_track (std::shared_ptr<ARDOUR::Track>);
 	virtual void undisplay_track ();
-	void         layer_regions ();
+	void layer_regions ();
 
 	void playlist_switched (std::weak_ptr<ARDOUR::Track>);
 

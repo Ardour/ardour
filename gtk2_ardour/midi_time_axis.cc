@@ -1849,3 +1849,4 @@ MidiTimeAxisView::create_velocity_automation_child (Evoral::Parameter const &, b
 
 	add_automation_child (Evoral::Parameter(MidiVelocityAutomation), velocity_track, show);
 }
+

@@ -657,6 +657,16 @@ RegionView::lower_to_bottom ()
 	_region->lower_to_bottom ();
 }
 
+void
+RegionView::visual_layer_on_top ()
+{
+	get_canvas_group()->raise_to_top ();
+
+	for (auto& ghost : ghosts) {
+		ghost->group->raise_to_top ();
+	}
+}
+
 bool
 RegionView::set_position (timepos_t const & pos, void* /*src*/, double* ignored)
 {
