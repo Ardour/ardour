@@ -58,6 +58,7 @@ VelocityGhostRegion::VelocityGhostRegion (MidiRegionView& mrv, TimeAxisView& tv,
 	, drag_did_change (false)
 {
 	base_rect->Event.connect (sigc::mem_fun (*this, &VelocityGhostRegion::base_event));
+	base_rect->set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
 	base_rect->set_outline_color (UIConfiguration::instance().color ("automation track outline"));
 	base_rect->set_outline (true);
 	base_rect->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
@@ -206,7 +207,7 @@ VelocityGhostRegion::remove_note (NoteBase*)
 void
 VelocityGhostRegion::set_colors ()
 {
-	base_rect->set_fill_color (UIConfiguration::instance().color ("ghost track base"));
+	base_rect->set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
 
 	for (auto & gev : events) {
 		gev.second->item->set_fill_color (gev.second->event->base_color());
