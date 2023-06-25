@@ -58,6 +58,9 @@ VelocityGhostRegion::VelocityGhostRegion (MidiRegionView& mrv, TimeAxisView& tv,
 	, drag_did_change (false)
 {
 	base_rect->Event.connect (sigc::mem_fun (*this, &VelocityGhostRegion::base_event));
+	base_rect->set_outline_color (UIConfiguration::instance().color ("automation track outline"));
+	base_rect->set_outline (true);
+	base_rect->set_outline_what (ArdourCanvas::Rectangle::What (ArdourCanvas::Rectangle::LEFT|ArdourCanvas::Rectangle::RIGHT));
 }
 
 VelocityGhostRegion::~VelocityGhostRegion ()
@@ -152,14 +155,14 @@ VelocityGhostRegion::add_note (NoteBase* nb)
 
 	GhostEvent* event = new GhostEvent (nb, _note_group, l);
 	events.insert (std::make_pair (nb->note(), event));
+
 	l->Event.connect (sigc::bind (sigc::mem_fun (*this, &VelocityGhostRegion::lollevent), event));
 	l->set_ignore_events (true);
 	l->raise_to_top ();
 	l->set_data (X_("ghostregionview"), this);
 	l->set_data (X_("note"), nb);
-
-	event->item->set_fill_color (nb->base_color());
-	event->item->set_outline_color (_outline);
+	l->set_fill_color (nb->base_color());
+	l->set_outline_color (_outline);
 
 	MidiStreamView* mv = midi_view();
 
