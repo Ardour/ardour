@@ -68,6 +68,8 @@ public:
 
 	void set_duration(double units);
 
+	virtual void set_selected (bool) {}
+
 	guint source_track_color(unsigned char alpha = 0xff);
 	bool is_automation_ghost();
 

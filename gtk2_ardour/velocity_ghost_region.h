@@ -47,11 +47,14 @@ public:
 
 	int y_position_to_velocity (double y) const;
 
+	void set_selected (bool);
+
 private:
 	bool dragging;
 	ArdourCanvas::PolyLine* dragging_line;
 	int last_drag_x;
 	bool drag_did_change;
+	bool selected;
 
 	bool base_event (GdkEvent*);
 	bool lollevent (GdkEvent*, MidiGhostRegion::GhostEvent*);
