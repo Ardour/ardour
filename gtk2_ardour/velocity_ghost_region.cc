@@ -116,7 +116,7 @@ VelocityGhostRegion::base_event (GdkEvent* ev)
 			if (!dragging_line) {
 				dragging_line = new ArdourCanvas::PolyLine (_note_group);
 				dragging_line->set_ignore_events (true);
-				dragging_line->set_outline_color (0x00ff00ff);
+				dragging_line->set_outline_color (UIConfiguration::instance().color ("midi note selected outline"));
 			}
 			dragging_line->set (ArdourCanvas::Points());
 			dragging_line->show();
