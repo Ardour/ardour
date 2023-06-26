@@ -56,6 +56,7 @@ VelocityGhostRegion::VelocityGhostRegion (MidiRegionView& mrv, TimeAxisView& tv,
 	, dragging_line (nullptr)
 	, last_drag_x (-1)
 	, drag_did_change (false)
+	, selected (false)
 {
 	base_rect->Event.connect (sigc::mem_fun (*this, &VelocityGhostRegion::base_event));
 	base_rect->set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
@@ -71,6 +72,11 @@ VelocityGhostRegion::~VelocityGhostRegion ()
 bool
 VelocityGhostRegion::base_event (GdkEvent* ev)
 {
+	if (!selected) {
+		/* eat event to prevent it passing up th the automation track */
+		return true;
+	}
+
 	std::vector<NoteBase*> affected_lollis;
 
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
@@ -97,10 +103,12 @@ VelocityGhostRegion::base_event (GdkEvent* ev)
 				dragging_line->add_point (ArdourCanvas::Duple (ev->motion.x - r.x0, ev->motion.y - r.y0));
 				last_drag_x = ev->motion.x;
 			}
+			return true;
 		}
 		break;
 	case GDK_BUTTON_PRESS:
 		if (ev->button.button == 1) {
+			assert (!dragging);
 			desensitize_lollis ();
 			dragging = true;
 			drag_did_change = false;
@@ -115,21 +123,24 @@ VelocityGhostRegion::base_event (GdkEvent* ev)
 			dragging_line->raise_to_top();
 			base_rect->grab();
 			mrv->begin_drag_edit (_("draw velocities"));
+			return true;
 		}
 		break;
 	case GDK_BUTTON_RELEASE:
-		if (ev->button.button == 1) {
+		if (ev->button.button == 1 && dragging) {
 			mrv->end_drag_edit (drag_did_change);
 			base_rect->ungrab();
 			dragging_line->hide ();
 			dragging = false;
 			sensitize_lollis ();
+			return true;
 		}
 		break;
 	default:
 		// std::cerr << "vgr event type " << Gtkmm2ext::event_type_string (ev->type) << std::endl;
 		break;
 	}
+
 
 	return false;
 }
@@ -210,7 +221,13 @@ VelocityGhostRegion::set_colors ()
 	base_rect->set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
 
 	for (auto & gev : events) {
-		gev.second->item->set_fill_color (gev.second->event->base_color());
+		if (selected) {
+			gev.second->item->set_fill_color (gev.second->event->base_color());
+			gev.second->item->set_ignore_events (false);
+		} else {
+			gev.second->item->set_fill_color (UIConfiguration::instance().color ("ghost track wave"));
+			gev.second->item->set_ignore_events (true);
+		}
 	}
 }
 
@@ -361,3 +378,9 @@ VelocityGhostRegion::sensitize_lollis ()
 	}
 }
 
+void
+VelocityGhostRegion::set_selected (bool yn)
+{
+	selected = yn;
+	set_colors ();
+}

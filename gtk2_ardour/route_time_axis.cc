@@ -1145,6 +1145,10 @@ RouteTimeAxisView::set_selected_regionviews (RegionSelection& regions)
 	if (_view) {
 		_view->set_selected_regionviews (regions);
 	}
+
+	for (auto & child : children) {
+		child->set_selected_regionviews (regions);
+	}
 }
 
 /** Add the selectable things that we have to a list.

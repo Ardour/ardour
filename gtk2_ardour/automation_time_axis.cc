@@ -56,6 +56,7 @@
 
 #include "automation_time_axis.h"
 #include "automation_streamview.h"
+#include "ghostregion.h"
 #include "gui_thread.h"
 #include "route_time_axis.h"
 #include "automation_line.h"
@@ -1248,5 +1249,21 @@ AutomationTimeAxisView::set_velocity_mode (VelocityMode vm, bool force)
 	case VelocityModeLine:
 		_ghost_group->hide ();
 		break;
+	}
+}
+
+void
+AutomationTimeAxisView::set_selected_regionviews (RegionSelection& rs)
+{
+	if (_parameter.type() != MidiVelocityAutomation) {
+		return;
+	}
+
+	for (auto & ghost : ghosts) {
+		if (std::find (rs.begin(), rs.end(), &ghost->parent_rv) != rs.end()) {
+			ghost->set_selected (true);
+		} else {
+			ghost->set_selected (false);
+		}
 	}
 }
