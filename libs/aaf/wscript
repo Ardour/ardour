@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+
+# Version of this package (even if built as a child)
+LIBAAF_VERSION = '0.0.0'
+LIBAAF_LIB_VERSION = '0.0.0'
+
+# Variables for 'waf dist'
+APPNAME = 'libaaf'
+VERSION = LIBAAF_VERSION
+I18N_PACKAGE = 'libaaf'
+
+# Mandatory variables
+top = '.'
+out = 'build'
+
+libaaf_sources = [
+	'AAFClass.c',
+	'AAFCore.c',
+	'AAFDump.c',
+	'AAFIAudioFiles.c',
+	'AAFIface.c',
+	'AAFIParser.c',
+	'AAFToText.c',
+	'CFBDump.c',
+	'LibCFB.c',
+	'ProTools.c',
+	'Resolve.c',
+	'RIFFParser.c',
+	'URIParser.c',
+	'utils.c',
+	'debug.c',
+]
+
+def options(opt):
+    autowaf.set_options(opt)
+
+def configure(conf):
+    if conf.is_defined('USE_EXTERNAL_LIBS'):
+        autowaf.check_pkg(conf, 'aaf', uselib_store='LIBAAF', mandatory=True)
+
+def build(bld):
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        return
+
+    if bld.is_defined ('INTERNAL_SHARED_LIBS'):
+        obj              = bld.shlib(features = 'c cshlib', source=libaaf_sources)
+        obj.defines = [ 'LIBAAF_DLL_EXPORTS=1' ]
+    else:
+        obj              = bld.stlib(features = 'c cshlib', source=libaaf_sources)
+        obj.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
+        obj.defines      = []
+
+    obj.export_includes  = ['.']
+    obj.includes         = ['.']
+    obj.name             = 'libaaf'
+    obj.target           = 'aaf'
+    #obj.uselib          = 'GLIB'
+    obj.vnum             = LIBAAF_LIB_VERSION
+    obj.install_path     = bld.env['LIBDIR']
+    obj.defines         += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+
+def shutdown():
+    autowaf.shutdown()
