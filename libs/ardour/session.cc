@@ -995,6 +995,33 @@ Session::get_physical_ports (vector<string>& inputs, vector<string>& outputs, Da
 	_engine.get_physical_outputs (type, outputs, include, exclude);
 }
 
+void
+Session::auto_connect_io (std::shared_ptr<IO> io)
+{
+	vector<string> outputs[DataType::num_types];
+
+	for (uint32_t i = 0; i < DataType::num_types; ++i) {
+		_engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
+	}
+
+	uint32_t limit = io->n_ports ().n_total ();
+
+	for (uint32_t n = 0; n < limit; ++n) {
+		std::shared_ptr<Port> p = io->nth (n);
+		string connect_to;
+		if (outputs[p->type()].size() > n) {
+			connect_to = outputs[p->type()][n];
+		}
+		if (connect_to.empty() || p->connected_to (connect_to)) {
+			continue;
+		}
+
+		if (io->connect (p, connect_to, this)) {
+			error << string_compose (_("cannot connect %1 output %2 to %3"), io->name(), n, connect_to) << endmsg;
+			break;
+		}
+	}
+}
 
 void
 Session::auto_connect_master_bus ()
@@ -1003,31 +1030,8 @@ Session::auto_connect_master_bus ()
 		return;
 	}
 
-	/* if requested auto-connect the outputs to the first N physical ports.
-	 */
-
-	uint32_t limit = _master_out->n_outputs().n_total();
-	vector<string> outputs[DataType::num_types];
-
-	for (uint32_t i = 0; i < DataType::num_types; ++i) {
-		_engine.get_physical_outputs (DataType (DataType::Symbol (i)), outputs[i]);
-	}
-
-	for (uint32_t n = 0; n < limit; ++n) {
-		std::shared_ptr<Port> p = _master_out->output()->nth (n);
-		string connect_to;
-		if (outputs[p->type()].size() > n) {
-			connect_to = outputs[p->type()][n];
-		}
-
-		if (!connect_to.empty() && p->connected_to (connect_to) == false) {
-			if (_master_out->output()->connect (p, connect_to, this)) {
-				error << string_compose (_("cannot connect master output %1 to %2"), n, connect_to)
-				      << endmsg;
-				break;
-			}
-		}
-	}
+	/* if requested auto-connect the outputs to the first N physical ports.  */
+	auto_connect_io (_master_out->output());
 }
 
 std::shared_ptr<GainControl>
