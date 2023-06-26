@@ -507,7 +507,7 @@ cp $BUILD_ROOT/libs/ardour-avahi $APPLIB/ardour-avahi
 chmod +x $APPLIB/ardour-avahi
 
 OURLIBDIR=$BUILD_ROOT/libs
-OURLIBS=$OURLIBDIR/ctrl-interface/midi_surface:$OURLIBDIR/ctrl-interface/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/glibmm2:$OURLIBDIR/canvas:$OURLIBDIR/widgets:$OURLIBDIR/waveview:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/temporal:$OURLIBDIR/libltc:$OURLIBDIR/qm-dsp:$OURLIBDIR/ardouralsautil:$OURLIBDIR/ptformat:$BUILD_ROOT/gtk2_ardour
+OURLIBS=$OURLIBDIR/ctrl-interface/midi_surface:$OURLIBDIR/ctrl-interface/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/glibmm2:$OURLIBDIR/canvas:$OURLIBDIR/widgets:$OURLIBDIR/waveview:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/temporal:$OURLIBDIR/libltc:$OURLIBDIR/qm-dsp:$OURLIBDIR/ardouralsautil:$OURLIBDIR/ptformat:$OURLIBDIR/aaf:$BUILD_ROOT/gtk2_ardour
 
 echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 

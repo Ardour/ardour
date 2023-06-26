@@ -139,6 +139,7 @@ cp build/libs/midi++2/midipp-*.dll $DESTDIR/bin/
 cp build/libs/evoral/evoral-*.dll $DESTDIR/bin/
 cp build/libs/ardour/ardour-*.dll $DESTDIR/bin/
 cp build/libs/temporal/temporal-*.dll $DESTDIR/bin/
+cp build/libs/aaf/aaf-*.dll $DESTDIR/bin/
 cp build/libs/canvas/canvas-*.dll $DESTDIR/bin/
 cp build/libs/widgets/widgets-*.dll $DESTDIR/bin/
 cp build/libs/waveview/waveview-*.dll $DESTDIR/bin/
