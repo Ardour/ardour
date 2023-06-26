@@ -925,6 +925,10 @@ PortManager::reconnect_ports ()
 	if (s && s->monitor_out() && !s->monitor_out ()->output()->has_ext_connection()) {
 		s->auto_connect_monitor_bus ();
 	}
+	if (s && s->click_io() && !s->click_io ()->has_ext_connection()) {
+		s->auto_connect_io (s->click_io());
+	}
+
 
 	for (auto const& i : *p) {
 		if (i.second->reconnect ()) {
