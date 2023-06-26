@@ -211,8 +211,9 @@ VelocityGhostRegion::update_hit (GhostEvent* gev)
 }
 
 void
-VelocityGhostRegion::remove_note (NoteBase*)
+VelocityGhostRegion::remove_note (NoteBase* nb)
 {
+	MidiGhostRegion::remove_note (nb);
 }
 
 void
