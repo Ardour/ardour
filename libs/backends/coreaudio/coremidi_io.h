@@ -75,7 +75,6 @@ public:
 	void start_cycle ();
 
 	int send_event (uint32_t, double, const uint8_t *, const size_t);
-	int send_events (uint32_t, double, const void *);
 	size_t recv_event (uint32_t, double, uint64_t &, uint8_t *, size_t &);
 
 	uint32_t n_midi_inputs (void) const { return _n_midi_in; }

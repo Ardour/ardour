@@ -319,40 +319,6 @@ CoreMidiIo::recv_event (uint32_t port, double cycle_time_us, uint64_t &time, uin
 }
 
 int
-CoreMidiIo::send_events (uint32_t port, double timescale, const void *b)
-{
-	if (!_active || _time_at_cycle_start == 0) {
-		return 0;
-	}
-
-	assert(port < _n_midi_out);
-	const UInt64 ts = AudioConvertHostTimeToNanos(_time_at_cycle_start);
-
-	const CoreMidiBuffer *src = static_cast<CoreMidiBuffer const *>(b);
-
-	int32_t bytes[8192]; // int for alignment
-	MIDIPacketList *mpl = (MIDIPacketList*)bytes;
-	MIDIPacket *cur = MIDIPacketListInit(mpl);
-
-	for (CoreMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
-		assert(mit->size() < 256);
-		cur = MIDIPacketListAdd(mpl, sizeof(bytes), cur,
-				AudioConvertNanosToHostTime(ts + mit->timestamp() / timescale),
-				mit->size(), mit->data());
-		if (!cur) {
-#ifndef DEBUG
-			printf("CoreMidi: Packet list overflow, dropped events\n");
-#endif
-			break;
-		}
-	}
-	if (mpl->numPackets > 0) {
-		MIDISend(_output_ports[port], _output_endpoints[port], mpl);
-	}
-	return 0;
-}
-
-int
 CoreMidiIo::send_event (uint32_t port, double reltime_us, const uint8_t *d, const size_t s)
 {
 	if (!_active || _time_at_cycle_start == 0) {
