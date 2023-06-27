@@ -72,10 +72,10 @@ public:
 	void start ();
 	void stop ();
 
-	void start_cycle ();
+	void start_cycle (MIDITimeStamp, double cycle_ns);
 
 	int send_event (uint32_t, double, const uint8_t *, const size_t);
-	size_t recv_event (uint32_t, double, uint64_t &, uint8_t *, size_t &);
+	size_t recv_event (uint32_t, uint64_t &, uint8_t *, size_t &);
 
 	uint32_t n_midi_inputs (void) const { return _n_midi_in; }
 	uint32_t n_midi_outputs (void) const { return _n_midi_out; }
@@ -108,7 +108,9 @@ private:
 	uint32_t          _n_midi_in;
 	uint32_t          _n_midi_out;
 
-	MIDITimeStamp     _time_at_cycle_start;
+	MIDITimeStamp     _send_start;
+	MIDITimeStamp     _recv_start;
+	MIDITimeStamp     _recv_end;
 	bool              _active; // internal deactivate during discovery etc
 	bool              _enabled; // temporary disable, e.g. during freewheeli
 	bool              _run; // general status

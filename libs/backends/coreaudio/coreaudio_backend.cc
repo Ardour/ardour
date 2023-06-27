@@ -1067,7 +1067,7 @@ CoreAudioBackend::coremidi_rediscover()
 			continue;
 		}
 		LatencyRange lr;
-		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
+		lr.min = lr.max = 0; // TODO add per-port midi-systemic latency
 		set_latency_range (p, false, lr);
 		BackendPortPtr pp = std::dynamic_pointer_cast<BackendPort>(p);
 		pp->set_hw_port_name(_midiio->port_name(i, true));
@@ -1090,14 +1090,13 @@ CoreAudioBackend::coremidi_rediscover()
 			continue;
 		}
 		LatencyRange lr;
-		lr.min = lr.max = _samples_per_period; // TODO add per-port midi-systemic latency
+		lr.min = lr.max = 0; // TODO add per-port midi-systemic latency
 		set_latency_range (p, false, lr);
 		BackendPortPtr pp = std::dynamic_pointer_cast<BackendPort>(p);
 		pp->set_hw_port_name(_midiio->port_name(i, false));
 		_system_midi_out.push_back(pp);
 		_port_change_flag.store (1);
 	}
-
 
 	assert(_system_midi_out.size() == _midiio->n_midi_outputs());
 	assert(_system_midi_in.size() == _midiio->n_midi_inputs());
@@ -1236,14 +1235,25 @@ CoreAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool fo
 	}
 
 	r = port->latency_range (for_playback);
-	if (port->is_physical() && port->is_terminal() && port->type() == DataType::AUDIO) {
-		if (port->is_input() && for_playback) {
-			r.min += _samples_per_period + _hw_audio_input_latency;
-			r.max += _samples_per_period + _hw_audio_input_latency;
-		}
-		if (port->is_output() && !for_playback) {
-			r.min += _samples_per_period + _hw_audio_output_latency;
-			r.max += _samples_per_period + _hw_audio_output_latency;
+	if (port->is_physical() && port->is_terminal()) {
+		if (port->type() == DataType::AUDIO) {
+			if (port->is_input() && for_playback) {
+				r.min += _samples_per_period + _hw_audio_input_latency;
+				r.max += _samples_per_period + _hw_audio_input_latency;
+			}
+			if (port->is_output() && !for_playback) {
+				r.min += _samples_per_period + _hw_audio_output_latency;
+				r.max += _samples_per_period + _hw_audio_output_latency;
+			}
+		} else {
+			if (port->is_input() && for_playback) {
+				//r.min += _samples_per_period;
+				//r.max += _samples_per_period;
+			}
+			if (port->is_output() && !for_playback) {
+				r.min += _samples_per_period;
+				r.max += _samples_per_period;
+			}
 		}
 	}
 	return r;
@@ -1440,10 +1450,11 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	/* port-connection change */
 	pre_process();
 
-	// cycle-length in usec
-	const double nominal_time = 1e6 * n_samples / _samplerate;
-
 	clock1 = g_get_monotonic_time();
+
+	//_midiio->start_cycle (AudioGetCurrentHostTime (), 1e9 * n_samples / _samplerate);
+	_midiio->start_cycle (host_time, 1e9 * n_samples / _samplerate);
+	_last_process_start = host_time;
 
 	/* get midi */
 	i=0;
@@ -1458,7 +1469,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 
 		port->clear_events ();
 
-		while (_midiio->recv_event (i, nominal_time, time_ns, data, size)) {
+		while (_midiio->recv_event (i, time_ns, data, size)) {
 			pframes_t time = floor((float) time_ns * _samplerate * 1e-9);
 			assert (time < n_samples);
 			port->parse_events (time, data, size);
@@ -1476,9 +1487,6 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	for (std::vector<BackendPortPtr>::const_iterator it = _system_outputs.begin (); it != _system_outputs.end (); ++it) {
 		memset ((*it)->get_buffer (n_samples), 0, n_samples * sizeof (Sample));
 	}
-
-	_midiio->start_cycle();
-	_last_process_start = host_time;
 
 	if (engine.process_callback (n_samples)) {
 		fprintf(stderr, "ENGINE PROCESS ERROR\n");
@@ -1498,7 +1506,7 @@ CoreAudioBackend::process_callback (const uint32_t n_samples, const uint64_t hos
 	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it, ++i) {
 		const CoreMidiBuffer *src = std::dynamic_pointer_cast<CoreMidiPort>(*it)->const_buffer();
 		for (CoreMidiBuffer::const_iterator mit = src->begin (); mit != src->end (); ++mit) {
-			_midiio->send_event (i, mit->timestamp (), mit->data (), mit->size ());
+			_midiio->send_event (i, mit->timestamp () * 1e9 / _samplerate , mit->data (), mit->size ());
 		}
 	}
 
