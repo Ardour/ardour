@@ -1236,6 +1236,10 @@ AutomationTimeAxisView::color () const
 void
 AutomationTimeAxisView::set_velocity_mode (VelocityMode vm, bool force)
 {
+	if (_parameter.type() != MidiVelocityAutomation) {
+		return;
+	}
+
 	if (vm == _velocity_mode && !force) {
 		return;
 	}
