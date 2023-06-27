@@ -72,11 +72,6 @@ VelocityGhostRegion::~VelocityGhostRegion ()
 bool
 VelocityGhostRegion::base_event (GdkEvent* ev)
 {
-	if (!selected) {
-		/* eat event to prevent it passing up th the automation track */
-		return true;
-	}
-
 	std::vector<NoteBase*> affected_lollis;
 
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
@@ -219,16 +214,14 @@ VelocityGhostRegion::remove_note (NoteBase* nb)
 void
 VelocityGhostRegion::set_colors ()
 {
-	base_rect->set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
+	if (selected) {
+		base_rect->set_fill_color (UIConfiguration::instance().color ("ghost track base"));
+	} else {
+		base_rect->set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
+	}
 
 	for (auto & gev : events) {
-		if (selected) {
-			gev.second->item->set_fill_color (gev.second->event->base_color());
-			gev.second->item->set_ignore_events (false);
-		} else {
-			gev.second->item->set_fill_color (UIConfiguration::instance().color ("ghost track wave"));
-			gev.second->item->set_ignore_events (true);
-		}
+		gev.second->item->set_fill_color (gev.second->event->base_color());
 	}
 }
 
@@ -384,4 +377,9 @@ VelocityGhostRegion::set_selected (bool yn)
 {
 	selected = yn;
 	set_colors ();
+
+	if (yn) {
+		std::cerr << parent_rv.get_item_name() << " raise to top\n";
+		group->raise_to_top ();
+	} 
 }

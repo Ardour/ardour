@@ -3388,6 +3388,7 @@ MidiRegionView::change_note_length (NoteBase* event, Temporal::Beats t)
 void
 MidiRegionView::begin_drag_edit (std::string const & why)
 {
+	trackview.editor().get_selection().set (this, true);
 	start_note_diff_command (why);
 }
 
