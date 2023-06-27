@@ -326,6 +326,7 @@ VelocityGhostRegion::note_selected (NoteBase* ev)
 
 	ArdourCanvas::Lollipop* lolli = dynamic_cast<ArdourCanvas::Lollipop*> (gev->item);
 	lolli->set_outline_color (ev->selected() ? UIConfiguration::instance().color ("midi note selected outline") : 0x000000ff);
+	lolli->raise_to_top();
 }
 
 void
