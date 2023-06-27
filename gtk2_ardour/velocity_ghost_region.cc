@@ -379,7 +379,6 @@ VelocityGhostRegion::set_selected (bool yn)
 	set_colors ();
 
 	if (yn) {
-		std::cerr << parent_rv.get_item_name() << " raise to top\n";
 		group->raise_to_top ();
 	} 
 }
