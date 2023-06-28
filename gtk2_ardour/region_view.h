@@ -66,7 +66,7 @@ public:
 
 	~RegionView ();
 
-	void set_selected (bool yn);
+	virtual void set_selected (bool yn);
 
 	virtual void init (bool what_changed);
 
