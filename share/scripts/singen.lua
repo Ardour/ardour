@@ -7,6 +7,19 @@ ardour {
 	description = [[Simple sine wave generator with gain and frequency controls]]
 }
 
+function presets ()
+	return
+	{
+		-- one can speficy parmaters by name..
+		{ name = "1k", params = { Frequency = 1000, Gain = -18 } },
+		{ name = "440", params = { Frequency = 440, Gain = -3 } },
+		-- ..or using zero-based indexing as number.
+		{ name = "C4", params = { [0] = 261.625565, [1] = -6 } },
+		-- partial preset are also possible
+		{ name = "max volume", params = { [1] = 0 } },
+	}
+end
+
 local lpf = 0
 
 function dsp_params ()
