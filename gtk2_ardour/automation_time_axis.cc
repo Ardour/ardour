@@ -1255,6 +1255,10 @@ AutomationTimeAxisView::set_velocity_mode (VelocityMode vm, bool force)
 void
 AutomationTimeAxisView::set_selected_regionviews (RegionSelection& rs)
 {
+	if (_view) {
+		_view->set_selected_regionviews (rs);
+	}
+
 	if (_parameter.type() != MidiVelocityAutomation) {
 		return;
 	}
