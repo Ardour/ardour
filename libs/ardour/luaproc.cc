@@ -330,6 +330,8 @@ LuaProc::load_script ()
 		_lua_has_inline_display = true;
 	}
 
+	std::map<std::string, uint32_t> param_map;
+
 	luabridge::LuaRef lua_params = luabridge::getGlobal (L, "dsp_params");
 	if (lua_params.isFunction ()) {
 
@@ -391,6 +393,10 @@ LuaProc::load_script ()
 				_param_desc[pn].label        = (lr["name"]).cast<std::string> ();
 				_param_desc[pn].scale_points = parse_scale_points (&lr);
 
+				if (type == "input") {
+					param_map[_param_desc[pn].label] = pn - 1;
+				}
+
 				luabridge::LuaRef doc = lr["doc"];
 				if (doc.isString ()) {
 					_param_doc[pn] = doc.cast<std::string> ();
@@ -408,6 +414,52 @@ LuaProc::load_script ()
 	for (uint32_t i = 0; i < parameter_count (); ++i) {
 		if (parameter_is_input (i)) {
 			_control_data[i] = _shadow_data[i] = default_value (i);
+		}
+	}
+
+	/* parse factory presets */
+	luabridge::LuaRef lua_presets = luabridge::getGlobal (L, "presets");
+	if (lua_presets.isFunction ()) {
+		luabridge::LuaRef preset_tbl = lua_presets ();
+		if (preset_tbl.isTable () && parameter_count () > 0) {
+			std::vector<ARDOUR::Plugin::PresetRecord> psets;
+			try {
+				for (luabridge::Iterator p (preset_tbl); !p.isNil (); ++p) {
+					if (!p.value ().isTable ()) { continue; }
+					if (!p.value ()["name"].isString ()) { continue; }
+					if (!p.value ()["params"].isTable ()) { continue; }
+
+					FactoryPreset pset;
+					pset.name = p.value ()["name"].cast<std::string> ();
+
+					luabridge::LuaRef params = p.value ()["params"];
+					for (luabridge::Iterator i (params); !i.isNil (); ++i) {
+						if (!i.value ().isNumber ()) { continue; }
+						uint32_t param_index = 0;
+						if (i.key ().isString ()) {
+							std::string key = i.key ().cast<std::string> ();
+							if (param_map.find (key) == param_map.end ()) {
+								continue;
+							}
+							param_index = param_map[key];
+						} else if (i.key ().isNumber ()) {
+							param_index = i.key ().cast<int> ();
+						} else {
+							continue;
+						}
+						pset.param[param_index] = i.value().cast<float> ();
+					}
+
+					_factory_presets.insert (make_pair (preset_name_to_uri (pset.name), pset));
+				}
+			} catch (...) {
+			}
+
+			std::vector<Plugin::PresetRecord> fps;
+			for (auto const& p : _factory_presets) {
+				fps.push_back (PresetRecord (p.first, p.second.name, false));
+			}
+			lpi->set_factory_presets (fps);
 		}
 	}
 
@@ -706,7 +758,6 @@ LuaProc::connect_and_run (BufferSet& bufs,
 			TempoMap::SharedPtr tmap (TempoMap::use ());
 			const TempoMetric&  metric (tmap->metric_at (timepos_t (start)));
 			const TempoMetric&  metric_end (tmap->metric_at (timepos_t (end)));
-			const BBT_Time&     bbt (metric.bbt_at (timepos_t (start)));
 
 			luabridge::LuaRef lua_time (luabridge::newTable (L));
 
@@ -1208,6 +1259,33 @@ LuaProc::presets_tree () const
 bool
 LuaProc::load_preset (PresetRecord r)
 {
+	if (!r.user) {
+		return load_factory_preset (r);
+	} else {
+		return load_user_preset (r);
+	}
+}
+
+bool
+LuaProc::load_factory_preset (PresetRecord const& r)
+{
+	auto const i = _factory_presets.find (r.uri);
+	if (i == _factory_presets.end ()) {
+		return false;
+	}
+
+	FactoryPreset const& fp = i->second;
+	for (auto const& pv : fp.param) {
+		set_parameter (pv.first, pv.second, 0);
+		PresetPortSetValue (pv.first, pv.second); /* EMIT SIGNAL */
+	}
+
+	return Plugin::load_preset(r);
+}
+
+bool
+LuaProc::load_user_preset (PresetRecord const& r)
+{
 	std::shared_ptr<XMLTree> t (presets_tree ());
 	if (t == 0) {
 		return false;
@@ -1291,6 +1369,11 @@ LuaProc::do_remove_preset (std::string name)
 void
 LuaProc::find_presets ()
 {
+	for (auto const& p : _factory_presets) {
+		PresetRecord r (p.first, p.second.name, false);
+		_presets.insert (make_pair (r.uri, r));
+	}
+
 	std::shared_ptr<XMLTree> t (presets_tree ());
 	if (t) {
 		XMLNode* root = t->root ();
@@ -1359,9 +1442,14 @@ LuaPluginInfo::load (Session& session)
 }
 
 std::vector<Plugin::PresetRecord>
-LuaPluginInfo::get_presets (bool /*user_only*/) const
+LuaPluginInfo::get_presets (bool user_only) const
 {
 	std::vector<Plugin::PresetRecord> p;
+
+	if (!user_only) {
+		p.insert (p.end (), _factory_presets.begin (), _factory_presets.end ());
+	}
+
 	XMLTree* t = new XMLTree;
 	std::string pf = Glib::build_filename (ARDOUR::user_config_directory (), "presets", string_compose ("lua-%1", unique_id));
 	if (Glib::file_test (pf, Glib::FILE_TEST_EXISTS)) {
