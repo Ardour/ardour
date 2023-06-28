@@ -134,10 +134,9 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 
 	PublicEditor& e = trackview.editor ();
 
-	if (trackview.editor().internal_editing() &&
-	    ev->type == GDK_BUTTON_RELEASE &&
+	if (ev->type == GDK_BUTTON_RELEASE &&
 	    ev->button.button == 1 &&
-	    e.current_mouse_mode() == Editing::MouseDraw &&
+	    (e.current_mouse_mode() == Editing::MouseDraw || e.current_mouse_mode() == Editing::MouseObject) &&
 	    !e.drags()->active()) {
 
 		double x = ev->button.x;
