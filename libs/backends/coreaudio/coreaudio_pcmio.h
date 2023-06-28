@@ -67,7 +67,6 @@ public:
 	uint32_t available_channels (uint32_t device_id, bool input);
 	float    current_sample_rate (uint32_t device_id, bool input = false);
 	uint32_t get_latency (uint32_t device_id, bool input);
-	uint32_t get_latency (bool input);
 
 	std::string cached_port_name (uint32_t portnum, bool input) const;
 
