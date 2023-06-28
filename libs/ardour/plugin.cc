@@ -362,6 +362,7 @@ const Plugin::PresetRecord *
 Plugin::preset_by_label (const string& label)
 {
 	if (!_have_presets) {
+		_presets.clear ();
 		find_presets ();
 		_have_presets = true;
 	}
@@ -383,6 +384,7 @@ Plugin::preset_by_uri (const string& uri)
 		return 0;
 	}
 	if (!_have_presets) {
+		_presets.clear ();
 		find_presets ();
 		_have_presets = true;
 	}
@@ -469,6 +471,7 @@ Plugin::get_presets ()
 	vector<PresetRecord> p;
 
 	if (!_have_presets) {
+		_presets.clear ();
 		find_presets ();
 		_have_presets = true;
 	}
