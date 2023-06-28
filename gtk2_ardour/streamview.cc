@@ -562,6 +562,8 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
 
 		selected = false;
 
+		/* Linear search: probably as good as anything else */
+
 		for (RegionSelection::iterator ii = regions.begin(); ii != regions.end(); ++ii) {
 			if (*i == *ii) {
 				selected = true;
