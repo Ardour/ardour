@@ -2857,6 +2857,11 @@ Editor::update_join_object_range_location (double y)
 
 	if (entered_regionview) {
 
+		if (dynamic_cast<AutomationRegionView*> (entered_regionview)) {
+			_join_object_range_state = JOIN_OBJECT_RANGE_NONE;
+			return;
+		}
+
 		/* TODO: there is currently a bug here(?)
 		 * when we are inside a region fade handle, it acts as though we are in range mode because it is in the top half of the region
 		 * can it be fixed here?
