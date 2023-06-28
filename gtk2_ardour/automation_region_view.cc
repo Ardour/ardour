@@ -342,3 +342,14 @@ AutomationRegionView::exited ()
 		_line->track_exited();
 	}
 }
+void
+AutomationRegionView::set_selected (bool yn)
+{
+	/* don't call RegionView::set_selected() because for automation
+	 * regionviews, we don't use visual "clues" to indicate selection.
+	 */
+
+	if (yn && _parameter.type() == ARDOUR::MidiCCAutomation) {
+		group->raise_to_top ();
+	}
+}

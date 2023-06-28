@@ -50,6 +50,8 @@ public:
 
 	void init (bool wfd);
 
+	void set_selected (bool yn);
+
 	bool paste (Temporal::timepos_t const &                     pos,
 	            unsigned                                        paste_count,
 	            float                                           times,
