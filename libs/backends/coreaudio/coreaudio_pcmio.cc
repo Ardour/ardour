@@ -495,15 +495,6 @@ CoreAudioPCM::get_latency(uint32_t device_id, bool input)
 }
 
 uint32_t
-CoreAudioPCM::get_latency(bool input)
-{
-	if (_active_device_id == 0) {
-		return 0;
-	}
-	return get_latency (_active_device_id, input);
-}
-
-uint32_t
 CoreAudioPCM::current_buffer_size_id(AudioDeviceID id) {
 	UInt32 buffer_size;
 	UInt32 size = sizeof(UInt32);
