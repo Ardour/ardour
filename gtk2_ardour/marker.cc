@@ -857,9 +857,13 @@ MeterMarker::point() const
 
 /***********************************************************************/
 
-BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Item& parent, std::string const& color_name, Temporal::MusicTimePoint const & p)
+BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Item& parent, std::string const& color_name, Temporal::MusicTimePoint const & p,
+                      ArdourCanvas::Item& tempo_parent,
+                      ArdourCanvas::Item& mapping_parent,
+                      ArdourCanvas::Item& meter_parent)
 	: MetricMarker (editor, parent, color_name, p.name(), BBTPosition, p.time(), false)
 	, _point (&p)
+	, tempo_marker (new TempoMarker (editor, tempo_parent, mapping_parent, X_("tempo marker"), "", p, p.sample (TEMPORAL_SAMPLE_RATE), UIConfiguration::instance().color (X_("tempo curve"))))
 {
 	std::stringstream full_tooltip;
 
@@ -870,6 +874,14 @@ BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Item& parent, std::str
 
 	set_name (name(), full_tooltip.str());
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_bbt_marker_event), group, this));
+
+	char buf[64];
+
+	snprintf (buf, sizeof(buf), "%d/%d", p.divisions_per_bar(), p.note_value ());
+	meter_marker = new MeterMarker (editor, meter_parent, "meter marker", buf, p);
+
+	tempo_marker->the_item().set_ignore_events (true);
+	meter_marker->the_item().set_ignore_events (true);
 }
 
 BBTMarker::~BBTMarker ()
@@ -880,6 +892,9 @@ void
 BBTMarker::update ()
 {
 	set_position (_point->time());
+
+	tempo_marker->update ();
+	meter_marker->update ();
 }
 
 void
@@ -892,4 +907,12 @@ Temporal::Point const &
 BBTMarker::point() const
 {
 	return *_point;
+}
+
+void
+BBTMarker::set_position (Temporal::timepos_t const & pos)
+{
+	ArdourMarker::set_position (pos);
+	tempo_marker->set_position (pos);
+	meter_marker->set_position (pos);
 }
