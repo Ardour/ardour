@@ -832,6 +832,9 @@ LuaProc::connect_and_run (BufferSet& bufs,
 				if (valid) {
 					for (MidiBuffer::iterator m = bufs.get_midi(idx).begin();
 							m != bufs.get_midi(idx).end(); ++m, ++e) {
+						if ((*m).time() < offset || (*m).time() >= offset + nframes) {
+							continue;
+						}
 						const Evoral::Event<samplepos_t> ev(*m, false);
 						luabridge::LuaRef lua_midi_data (luabridge::newTable (L));
 						const uint8_t* data = ev.buffer();
@@ -839,7 +842,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 							lua_midi_data [i + 1] = data[i];
 						}
 						luabridge::LuaRef lua_midi_event (luabridge::newTable (L));
-						lua_midi_event["time"] = 1 + (*m).time();
+						lua_midi_event["time"] = 1 + (*m).time() - offset;
 						lua_midi_event["data"] = lua_midi_data;
 						lua_midi_event["bytes"] = data;
 						lua_midi_event["size"] = ev.size();
@@ -869,7 +872,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 				const uint32_t idx = out.get(DataType::MIDI, 0, &valid);
 				if (valid && bufs.count().n_midi() > idx) {
 					MidiBuffer& mbuf = bufs.get_midi(idx);
-					mbuf.silence(0, 0);
+					mbuf.silence (nframes, offset);
 					for (luabridge::Iterator i (lua_midi_sink_tbl); !i.isNil (); ++i) {
 						if (!i.key ().isNumber ()) { continue; }
 						if (!i.value ()["time"].isNumber ()) { continue; }
@@ -883,7 +886,11 @@ LuaProc::connect_and_run (BufferSet& bufs,
 							data[size] = di.value ();
 						}
 						if (size > 0 && size < 64) {
-							mbuf.push_back(tme - 1, Evoral::MIDI_EVENT, size, data);
+							if (tme >= 1 && tme < nframes + 1) {
+								mbuf.push_back(tme - 1 + offset, Evoral::MIDI_EVENT, size, data);
+							} else {
+								std::cerr << string_compose ("LuaException: MIDI Event timestamp %1 is out of bounds (0, %2)\n", tme, nframes + 1);
+							}
 						}
 					}
 
