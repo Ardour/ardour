@@ -164,7 +164,7 @@ Editor::reassociate_bartime_marker (TempoMap::SharedPtr const & tmap, TempoMap::
 void
 Editor::make_bbt_marker (MusicTimePoint const  * mtp, Marks::iterator before)
 {
-	bbt_marks.insert (before, new BBTMarker (*this, *bbt_ruler, "meter marker", *mtp));
+	bbt_marks.insert (before, new BBTMarker (*this, *bbt_ruler, "meter marker", *mtp, *tempo_group, *mapping_group, *meter_group));
 }
 
 void

@@ -91,7 +91,7 @@ public:
 	void set_show_line (bool);
 	void set_line_height (double);
 
-	void set_position (Temporal::timepos_t const &);
+	virtual void set_position (Temporal::timepos_t const &);
 	void set_name (const std::string&, const std::string & tooltip = std::string());
 	void set_color (std::string const& color_name);
 	void set_points_color (std::string const& color_name);
@@ -230,17 +230,23 @@ class MeterMarker : public MetricMarker
 class BBTMarker : public MetricMarker
 {
   public:
-	BBTMarker (PublicEditor& editor, ArdourCanvas::Item &, std::string const& color_name, Temporal::MusicTimePoint const &);
+	BBTMarker (PublicEditor& editor, ArdourCanvas::Item &, std::string const& color_name, Temporal::MusicTimePoint const &,
+	           ArdourCanvas::Item & tempo_parent,
+	           ArdourCanvas::Item & mapping_parent,
+	           ArdourCanvas::Item & meter_parent);
 	~BBTMarker ();
 
 	void reset_point (Temporal::MusicTimePoint const &);
 	void update ();
+	void set_position (Temporal::timepos_t const &);
 
 	Temporal::MusicTimePoint const & mt_point() const { return *_point; }
 	Temporal::Point const & point() const;
 
   private:
 	Temporal::MusicTimePoint const * _point;
+	TempoMarker* tempo_marker;
+	MeterMarker* meter_marker;
 };
 
 #endif /* __gtk_ardour_marker_h__ */
