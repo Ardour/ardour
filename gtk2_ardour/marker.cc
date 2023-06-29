@@ -886,6 +886,8 @@ BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Item& parent, std::str
 
 BBTMarker::~BBTMarker ()
 {
+	delete tempo_marker;
+	delete meter_marker;
 }
 
 void
