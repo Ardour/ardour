@@ -534,13 +534,17 @@ ArdourMarker::setup_name_display ()
 		limit = _right_label_limit;
 	}
 
-	float scale = UIConfiguration::instance().get_ui_scale();
+	double scale = UIConfiguration::instance().get_ui_scale();
 
-	const float padding =  std::max(2.f, rintf(2.f * scale));
-	const double M3 = std::max(1.f, rintf(3.f * scale));
+	const double padding =  std::max (2., rint (2. * scale));
+	const double M3 = std::max(1., rint (3. * scale));
 
 	/* Work out how wide the name can be */
-	int name_width = min ((double) pixel_width (_name, name_font) + padding, limit);
+	int name_width;
+	int name_height;
+
+	pixel_size (_name, name_font, name_width, name_height);
+	name_width = min ((double) name_width + padding, limit);
 
 	if (name_width == 0) {
 		_name_item->hide ();
@@ -607,7 +611,8 @@ ArdourMarker::setup_name_display ()
 
 	if (_name_flag) {
 		_name_flag->set_y0 (0);
-		_name_flag->set_y1 (marker_height - 2);
+		_name_flag->set_y1 (marker_height - 2.);
+		_name_item->set_position (ArdourCanvas::Duple (2., (name_height - marker_height - 2.)));
 	}
 }
 
