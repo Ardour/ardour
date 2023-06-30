@@ -87,6 +87,7 @@ public:
 	void cleanup () { }
 
 	int set_block_size (pframes_t /*nframes*/) { return 0; }
+	bool requires_fixed_sized_buffers () const { return _requires_fixed_sized_buffers; }
 	bool connect_all_audio_outputs () const { return _connect_all_audio_outputs; }
 
 	int connect_and_run (BufferSet& bufs,
@@ -163,6 +164,7 @@ private:
 	std::string _docs;
 	bool _lua_does_channelmapping;
 	bool _lua_has_inline_display;
+	bool _requires_fixed_sized_buffers;
 	bool _connect_all_audio_outputs;
 	bool _set_time_info;
 
