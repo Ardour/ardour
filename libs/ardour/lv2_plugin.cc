@@ -1048,13 +1048,6 @@ LV2Plugin::requires_fixed_sized_buffers () const
 	 * e.g The process cycle may be split when looping, also
 	 * the period-size may change any time: see set_block_size()
 	 */
-	if (get_info()->n_inputs.n_midi() > 0) {
-		/* we don't yet implement midi buffer offsets (for split cycles).
-		 * Also connect_and_run() also uses _session.transport_sample() directly
-		 * (for BBT) which is not offset for plugin cycle split.
-		 */
-		return true;
-	}
 	return _no_sample_accurate_ctrl;
 }
 
