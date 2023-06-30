@@ -111,8 +111,6 @@ int main (int argc, char* argv[])
 
 	AudioEngine::instance()->stop ();
 
-	AudioEngine::destroy ();
-
 	delete test_ui;
 
 	ARDOUR::cleanup ();

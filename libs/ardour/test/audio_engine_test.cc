@@ -36,8 +36,6 @@ AudioEngineTest::test_backends ()
 		i != backends.end(); ++i) {
 		print_audio_backend_info(*i);
 	}
-
-	AudioEngine::destroy ();
 }
 
 void
@@ -56,6 +54,4 @@ AudioEngineTest::test_start ()
 	Glib::usleep(2000);
 
 	CPPUNIT_ASSERT (engine->stop () == 0);
-
-	AudioEngine::destroy ();
 }

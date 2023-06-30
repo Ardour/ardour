@@ -116,7 +116,6 @@ stop_and_destroy_backend ()
 {
 	AudioEngine::instance()->remove_session ();
 	AudioEngine::instance()->stop ();
-	AudioEngine::destroy ();
 }
 
 /** @param dir Session directory.

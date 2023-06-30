@@ -275,6 +275,6 @@ main (int argc, char* argv[])
 	delete s;
 	AudioEngine::instance ()->stop ();
 
-	AudioEngine::destroy ();
+	ARDOUR::cleanup ();
 	return 0;
 }
