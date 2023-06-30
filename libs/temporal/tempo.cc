@@ -1111,6 +1111,114 @@ TempoMap::add_meter (MeterPoint* mp)
 	return ret;
 }
 
+bool
+TempoMap::clear_tempos_before (timepos_t const & t, bool stop_at_music_time)
+{
+	if (_tempos.size() < 2) {
+		return false;
+	}
+
+	bool removed = false;
+	superclock_t sc = t.superclocks();
+	Tempos::iterator tp = _tempos.end();
+	--tp;
+	MusicTimePoint* mtp (nullptr);
+
+	while (tp != _tempos.begin()) {
+
+		if (tp->sclock() > sc) {
+			--tp;
+			mtp = nullptr;
+			continue;
+		}
+
+		if ((mtp = dynamic_cast<MusicTimePoint*> (&*tp)) && stop_at_music_time) {
+			break;
+		}
+
+		Tempos::iterator nxt = tp;
+		--nxt;
+
+		if (mtp) {
+			Meters::iterator mpi = _meters.s_iterator_to (*(static_cast<MeterPoint*> (&*mtp)));
+			_meters.erase (mpi);
+			MusicTimes::iterator mtpi = _bartimes.s_iterator_to (*mtp);
+			_bartimes.erase (mtpi);
+		}
+
+		Points::iterator pi = _points.s_iterator_to (*(static_cast<Point*> (&*tp)));
+
+		if (pi != _points.end()) {
+			_points.erase (pi);
+		}
+
+		_tempos.erase (tp);
+		removed = true;
+		tp = nxt;
+		mtp = nullptr;
+	}
+
+	if (removed) {
+		reset_starting_at (sc);
+	}
+
+	return removed;
+}
+
+bool
+TempoMap::clear_tempos_after (timepos_t const & t, bool stop_at_music_time)
+{
+	if (_tempos.size() < 2) {
+		return false;
+	}
+
+	bool removed = false;
+	superclock_t sc = t.superclocks();
+	Tempos::iterator tp = _tempos.begin();
+	MusicTimePoint* mtp (nullptr);
+	++tp;
+
+	while (tp != _tempos.end()) {
+
+		if (tp->sclock() < sc) {
+			++tp;
+			mtp = nullptr;
+			continue;
+		}
+
+		if ((mtp = dynamic_cast<MusicTimePoint*> (&*tp)) && stop_at_music_time) {
+			break;
+		}
+
+		Tempos::iterator nxt = tp;
+		++nxt;
+
+		if (mtp) {
+			Meters::iterator mpi = _meters.s_iterator_to (*(static_cast<MeterPoint*> (&*mtp)));
+			_meters.erase (mpi);
+			MusicTimes::iterator mtpi = _bartimes.s_iterator_to (*mtp);
+			_bartimes.erase (mtpi);
+		}
+
+		Points::iterator pi = _points.s_iterator_to (*(static_cast<Point*> (&*tp)));
+
+		if (pi != _points.end()) {
+			_points.erase (pi);
+		}
+
+		_tempos.erase (tp);
+		removed = true;
+		tp = nxt;
+		mtp = nullptr;
+	}
+
+	if (removed) {
+		reset_starting_at (sc);
+	}
+
+	return removed;
+}
+
 void
 TempoMap::change_tempo (TempoPoint & p, Tempo const & t)
 {
@@ -2378,7 +2486,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 	 * arbitrarily placed with respect to the earlier elements of the tempo
 	 * map.
 	 *
-	 * So we can just start at the later of the two of them, 
+	 * So we can just start at the later of the two of them,
 	 */
 
 	superclock_t start;
@@ -4911,5 +5019,3 @@ TempoMapCutBuffer::clear ()
 	_bartimes.clear ();
 	_points.clear ();
 }
-
-
