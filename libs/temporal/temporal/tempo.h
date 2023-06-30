@@ -1052,42 +1052,18 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	 * other similar call sites where we do not modify the map
 	 */
 
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, BBT_Argument const & bbt, bool can_match, bool ret_iterator_after_not_at) const {
-
-		/* because `this` is const (because the method is marked
-		 * const), the following:
-
-		   _points.begin()
-		   _points.end()
-		   _tempos.front()
-		   _meters.front()
-
-		   will all be the const versions of these methods.
-		*/
-
-		/* Use the reference time of the BBT_Argument to determine
-		 * where to start iterating.
-		 */
-
-		Points::const_iterator pi = _points.begin();
-		Tempos::const_iterator ti = _tempos.begin();
-		Meters::const_iterator mi = _meters.begin();
-
-		while (pi != _points.end() && pi->sclock() < bbt.reference().superclocks()) ++pi;
-		while (ti != _tempos.end() && ti->sclock() < bbt.reference().superclocks()) ++ti;
-		while (mi != _meters.end() && mi->sclock() < bbt.reference().superclocks()) ++mi;
-
-		if (pi == _points.end()) { --pi; }
-		if (ti == _tempos.end()) { --ti; }
-		if (mi == _meters.end()) { --mi; }
-
-		return _get_tempo_and_meter<const_traits<BBT_Time const  &, BBT_Time> > (t, m, &Point::bbt, bbt, pi, _points.end(), &*ti, &*mi, can_match, ret_iterator_after_not_at);
-	}
 	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, superclock_t sc, bool can_match, bool ret_iterator_after_not_at) const {
 		return _get_tempo_and_meter<const_traits<superclock_t, superclock_t> > (t, m, &Point::sclock, sc, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
 	}
 	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, Beats const & b, bool can_match, bool ret_iterator_after_not_at) const {
 		return _get_tempo_and_meter<const_traits<Beats const &, Beats> > (t, m, &Point::beats, b, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
+	}
+	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, timepos_t const & pos, bool can_match, bool ret_iterator_after_not_at) const {
+		if (pos.time_domain() == BeatTime) {
+			return get_tempo_and_meter (t, m, pos.beats(), can_match, ret_iterator_after_not_at);
+		} else {
+			return get_tempo_and_meter (t, m, pos.superclocks(), can_match, ret_iterator_after_not_at);
+		}
 	}
 
 	/* This is private, and should not be callable from outside the map

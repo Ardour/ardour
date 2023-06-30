@@ -3503,7 +3503,12 @@ TempoMap::metric_at (BBT_Argument const & bbt, bool can_match) const
 	TempoPoint const * tp = 0;
 	MeterPoint const * mp = 0;
 
-	(void) get_tempo_and_meter (tp, mp, bbt, can_match, false);
+	/* Since the reference time of a BBT_Argument is the time of the
+	 * latest tempo/meter marker before or at BBT, we can use the reference
+	 * time to get the metric.
+	 */
+
+	(void) get_tempo_and_meter (tp, mp, bbt.reference(), can_match, false);
 
 	return TempoMetric (*tp, *mp);
 }
