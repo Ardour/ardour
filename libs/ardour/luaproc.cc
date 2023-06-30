@@ -60,6 +60,7 @@ LuaProc::LuaProc (AudioEngine& engine,
 	, _script (script)
 	, _lua_does_channelmapping (false)
 	, _lua_has_inline_display (false)
+	, _requires_fixed_sized_buffers (false)
 	, _connect_all_audio_outputs (false)
 	, _set_time_info (false)
 	, _designated_bypass_port (UINT32_MAX)
@@ -299,6 +300,9 @@ LuaProc::load_script ()
 					}
 					if (i.key().cast<std::string> () == "time_info" && i.value().isBoolean ()) {
 						_set_time_info = i.value().cast<bool> ();
+					}
+					if (i.key().cast<std::string> () == "regular_block_length" && i.value().isBoolean ()) {
+						_requires_fixed_sized_buffers = i.value().cast<bool> ();
 					}
 				}
 			}
