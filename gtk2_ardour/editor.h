@@ -2543,6 +2543,12 @@ private:
 		return thing_with_time_domain ? thing_with_time_domain->time_domain() : Temporal::AudioTime;
 	}
 
+	void clear_tempo_markers_before (Temporal::timepos_t where, bool stop_at_music_times);
+	void clear_tempo_markers_after (Temporal::timepos_t where, bool stop_at_music_times);
+	void clear_tempo_markers () {
+		clear_tempo_markers_after (Temporal::timepos_t (0), false);
+	}
+
 	friend class Drag;
 	friend class RegionCutDrag;
 	friend class RegionDrag;
