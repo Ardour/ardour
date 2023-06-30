@@ -887,7 +887,10 @@ LuaProc::connect_and_run (BufferSet& bufs,
 						}
 						if (size > 0 && size < 64) {
 							if (tme >= 1 && tme < nframes + 1) {
-								mbuf.push_back(tme - 1 + offset, Evoral::MIDI_EVENT, size, data);
+								Evoral::Event<samplepos_t> ev;
+								ev.set (data, size, tme - 1 + offset);
+								ev.set_event_type (Evoral::MIDI_EVENT);
+								mbuf.insert_event (ev);
 							} else {
 								std::cerr << string_compose ("LuaException: MIDI Event timestamp %1 is out of bounds (0, %2)\n", tme, nframes + 1);
 							}
