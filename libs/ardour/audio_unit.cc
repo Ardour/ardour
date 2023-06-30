@@ -1489,10 +1489,10 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 			MidiBuffer& m = bufs.get_midi (i);
 			for (MidiBuffer::iterator i = m.begin(); i != m.end(); ++i) {
 				Evoral::Event<samplepos_t> ev (*i);
-				if (ev.is_channel_event()) {
+				if (ev.is_channel_event () && ev.time() >= offset && ev.time() < offset + nframes) {
 					const uint8_t* b = ev.buffer();
 					DEBUG_TRACE (DEBUG::AudioUnitProcess, string_compose ("%1: MIDI event %2\n", name(), ev));
-					unit->MIDIEvent (b[0], b[1], b[2], ev.time());
+					unit->MIDIEvent (b[0], b[1], b[2], ev.time() - offset);
 				}
 				/* XXX need to handle sysex and other message types */
 			}
