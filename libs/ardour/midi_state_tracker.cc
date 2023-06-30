@@ -49,38 +49,42 @@ MidiNoteTracker::reset ()
 void
 MidiNoteTracker::add (uint8_t note, uint8_t chn)
 {
-	if (_active_notes[note+128 * chn] == 0) {
+	const int coff = chn << 7;
+	if (_active_notes[note + coff] == 0) {
 		++_on;
 	}
-	++_active_notes[note + 128 * chn];
+	++_active_notes[note + coff];
 
-	if (_active_notes[note+128 * chn] > 1) {
-		//cerr << this << " note " << (int) note << '/' << (int) chn << " was already on, now at " << (int) _active_notes[note+128*chn] << endl;
+#if 0
+	if (_active_notes[note + coff] > 1) {
+		cerr << this << " note " << (int) note << '/' << (int) chn << " was already on, now at " << (int) _active_notes[note + coff] << endl;
 	}
+#endif
 
 	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 ON %2/%3 voices %5 total on %4\n",
 							       this, (int) note, (int) chn, _on,
-							       (int) _active_notes[note+128 * chn]));
+							       (int) _active_notes[note + coff]));
 }
 
 void
 MidiNoteTracker::remove (uint8_t note, uint8_t chn)
 {
-	switch (_active_notes[note + 128 * chn]) {
+	const int coff = chn << 7;
+	switch (_active_notes[note + coff]) {
 	case 0:
 		break;
 	case 1:
 		--_on;
-		_active_notes [note + 128 * chn] = 0;
+		_active_notes [note + coff] = 0;
 		break;
 	default:
-		--_active_notes [note + 128 * chn];
+		--_active_notes [note + coff];
 		break;
 
 	}
 	DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1 OFF %2/%3 current voices = %5 total on %4\n",
 							       this, (int) note, (int) chn, _on,
-							       (int) _active_notes[note+128 * chn]));
+							       (int) _active_notes[note + coff]));
 }
 
 void
@@ -131,15 +135,16 @@ MidiNoteTracker::push_notes (MidiBuffer &dst, samplepos_t time, bool reset, int 
 	}
 
 	for (int channel = 0; channel < 16; ++channel) {
+		const int coff = channel << 7;
 		for (int note = 0; note < 128; ++note) {
-			while (_active_notes[note + 128 * channel]) {
+			while (_active_notes[note + coff]) {
 				uint8_t buffer[3] = { ((uint8_t) (cmd | channel)), uint8_t (note), (uint8_t) velocity };
 				Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, time, 3, buffer, false);
 				/* note that we do not care about failure from
 				   push_back() ... should we warn someone ?
 				*/
 				dst.push_back (ev);
-				_active_notes[note + 128 * channel]--;
+				_active_notes[note + coff]--;
 				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MB-push note %2/%3 at %4\n", this, (int) note, (int) channel, time));
 			}
 		}
@@ -161,8 +166,9 @@ MidiNoteTracker::resolve_notes (Evoral::EventSink<samplepos_t> &dst, samplepos_t
 	}
 
 	for (int channel = 0; channel < 16; ++channel) {
+		const int coff = channel << 7;
 		for (int note = 0; note < 128; ++note) {
-			while (_active_notes[note + 128 * channel]) {
+			while (_active_notes[note + coff]) {
 				buf[0] = MIDI_CMD_NOTE_OFF|channel;
 				buf[1] = note;
 				buf[2] = 0;
@@ -170,7 +176,7 @@ MidiNoteTracker::resolve_notes (Evoral::EventSink<samplepos_t> &dst, samplepos_t
 				   write() ... should we warn someone ?
 				*/
 				dst.write (time, Evoral::MIDI_EVENT, 3, buf);
-				_active_notes[note + 128 * channel]--;
+				_active_notes[note + coff]--;
 				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: EVS-resolved note %2/%3 at %4\n",
 										       this, (int) note, (int) channel, time));
 			}
@@ -192,8 +198,9 @@ MidiNoteTracker::resolve_notes (MidiSource& src, const MidiSource::WriterLock& l
 	/* NOTE: the src must be locked */
 
 	for (int channel = 0; channel < 16; ++channel) {
+		const int coff = channel << 7;
 		for (int note = 0; note < 128; ++note) {
-			while (_active_notes[note + 128 * channel]) {
+			while (_active_notes[note + coff]) {
 				Evoral::Event<Temporal::Beats> ev (Evoral::MIDI_EVENT, time, 3, 0, true);
 				ev.set_type (MIDI_CMD_NOTE_OFF);
 				ev.set_channel (channel);
@@ -202,7 +209,7 @@ MidiNoteTracker::resolve_notes (MidiSource& src, const MidiSource::WriterLock& l
 				src.append_event_beats (lock, ev);
 				DEBUG_TRACE (PBD::DEBUG::MidiTrackers, string_compose ("%1: MS-resolved note %2/%3 at %4\n",
 										       this, (int) note, (int) channel, time));
-				_active_notes[note + 128 * channel]--;
+				_active_notes[note + coff]--;
 				/* don't stack events up at the same time */
 				time += Temporal::Beats::one_tick();
 			}
@@ -217,10 +224,11 @@ MidiNoteTracker::dump (ostream& o)
 {
 	o << "****** NOTES\n";
 	for (int c = 0; c < 16; ++c) {
+		const int coff = c << 7;
 		for (int x = 0; x < 128; ++x) {
-			if (_active_notes[c * 128 + x]) {
+			if (_active_notes[coff + x]) {
 				o << "Channel " << c+1 << " Note " << x << " is on ("
-				  << (int) _active_notes[c*128+x] <<  " times)\n";
+				  << (int) _active_notes[coff+x] <<  " times)\n";
 			}
 		}
 	}
