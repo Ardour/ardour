@@ -2912,13 +2912,13 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 				while (m != m_end || ((tempo_map_point != tempo_map_points.end()) && ((*tempo_map_point).sample(TEMPORAL_SAMPLE_RATE) < tend))) {
 
-					if (m != m_end && ((tempo_map_point == tempo_map_points.end()) || (*tempo_map_point).sample(TEMPORAL_SAMPLE_RATE) > (*m).time())) {
+					if (m != m_end && ((tempo_map_point == tempo_map_points.end()) || (*tempo_map_point).sample(TEMPORAL_SAMPLE_RATE) > (*m).time() + offset)) {
 
 						const Evoral::Event<samplepos_t> ev (*m, false);
 
-						if (ev.time() < nframes) {
+						if (ev.time() >= offset && ev.time() < offset + nframes) {
 							LV2_Evbuf_Iterator eend = lv2_evbuf_end(_ev_buffers[port_index]);
-							lv2_evbuf_write(&eend, ev.time(), 0, type, ev.size(), ev.buffer());
+							lv2_evbuf_write(&eend, ev.time() - offset, 0, type, ev.size(), ev.buffer());
 						}
 
 						++m;
@@ -3041,7 +3041,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			const uint32_t buf_index = out_map.get(
 				DataType::MIDI, midi_out_index++, &valid);
 			if (valid) {
-				bufs.forward_lv2_midi(_ev_buffers[port_index], buf_index);
+				bufs.forward_lv2_midi(_ev_buffers[port_index], buf_index, nframes, offset);
 			}
 		}
 		// Flush MIDI (write back to Ardour MIDI buffers) -- MIDI THRU
@@ -3049,7 +3049,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			const uint32_t buf_index = out_map.get(
 				DataType::MIDI, midi_out_index++, &valid);
 			if (valid) {
-				bufs.flush_lv2_midi(true, buf_index);
+				bufs.flush_lv2_midi (true, buf_index, nframes, offset);
 			}
 		}
 

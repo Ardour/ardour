@@ -123,10 +123,10 @@ public:
 	void ensure_lv2_bufsize(bool input, size_t i, size_t buffer_capacity);
 
 	/** Flush modified LV2 event output buffers back to Ardour buffers */
-	void flush_lv2_midi(bool input, size_t i);
+	void flush_lv2_midi(bool input, size_t i, pframes_t, samplecnt_t);
 
 	/** Forward plugin MIDI output to to Ardour buffers */
-	void forward_lv2_midi(LV2_Evbuf*, size_t, bool purge_ardour_buffer = true);
+	void forward_lv2_midi(LV2_Evbuf*, size_t, pframes_t, samplecnt_t);
 
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 	VstEvents* get_vst_midi (size_t);
