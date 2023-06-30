@@ -519,7 +519,7 @@ Editor::mouse_add_new_meter_event (timepos_t pos)
 
 	Temporal::BBT_Time r;
 	meter_dialog.get_bbt_time (r);
-	Temporal::BBT_Argument requested (timepos_t::zero (Temporal::BeatTime), r);
+	Temporal::BBT_Argument requested (superclock_t (0), r);
 
 	TempoMapChange tmc (*this, _("add time signature"));
 	pos = timepos_t (tmc.map().quarters_at (requested));
