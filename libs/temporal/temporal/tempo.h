@@ -773,6 +773,9 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API void stretch_tempo (TempoPoint& ts, double new_npm);
 	LIBTEMPORAL_API void stretch_tempo_end (TempoPoint* ts, samplepos_t sample, samplepos_t end_sample);
 
+	LIBTEMPORAL_API bool clear_tempos_before (timepos_t const &, bool stop_at_music_time);
+	LIBTEMPORAL_API bool clear_tempos_after (timepos_t const &, bool stop_at_music_time);
+
 	/* END OF MODIFYING METHODS */
 
 	/* rather than giving direct access to the intrusive list members,
