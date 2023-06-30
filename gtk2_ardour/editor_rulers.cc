@@ -253,16 +253,19 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		}
 		break;
 
-	case MappingBarItem:
-#warning paul fix mapping bar context menu
-		ruler_items.push_back (MenuElem (_("New BBT Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
-		ruler_items.push_back (MenuElem (_("New Tempo Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
-		ruler_items.push_back (MenuElem (_("Clear")));
-		break;
-
 	case TempoBarItem:
 	case TempoCurveItem:
-		ruler_items.push_back (MenuElem (_("New Tempo"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
+		ruler_items.push_back (MenuElem (_("Add New Tempo"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
+		ruler_items.push_back (SeparatorElem ());
+		/* fallthrough */
+	case MappingBarItem:
+		ruler_items.push_back (MenuElem (_("Clear All Tempos"), sigc::mem_fun (*this, &Editor::clear_tempo_markers)));
+		ruler_items.push_back (SeparatorElem ());
+		ruler_items.push_back (MenuElem (_("Clear All Earlier Tempos"), sigc::bind (sigc::mem_fun (*this, &Editor::clear_tempo_markers_before), where, true)));
+		ruler_items.push_back (MenuElem (_("Clear All Later Tempos"), sigc::bind (sigc::mem_fun (*this, &Editor::clear_tempo_markers_after), where, true)));
+		ruler_items.push_back (SeparatorElem ());
+		ruler_items.push_back (MenuElem (_("Clear All Earlier Tempos (w/BBT markers)"), sigc::bind (sigc::mem_fun (*this, &Editor::clear_tempo_markers_before), where, false)));
+		ruler_items.push_back (MenuElem (_("Clear All Later Tempos (w/BBT markers)"), sigc::bind (sigc::mem_fun (*this, &Editor::clear_tempo_markers_after), where, false)));
 		break;
 
 	case MeterBarItem:

@@ -1019,3 +1019,46 @@ Editor::tempo_edit_behavior_toggled (TempoEditBehavior teb)
 		break;
 	}
 }
+
+void
+Editor::clear_tempo_markers_before (timepos_t where, bool stop_at_music_times)
+{
+	if (!_session) {
+		return;
+	}
+
+	TempoMap::WritableSharedPtr wmap = begin_tempo_map_edit ();
+	XMLNode* before_state = &wmap->get_state ();
+
+	if (!wmap->clear_tempos_before (where, stop_at_music_times)) {
+		abort_tempo_map_edit ();
+		return;
+	}
+
+	begin_reversible_command (_("clear earlier tempos"));
+	commit_tempo_map_edit (wmap, true);
+	XMLNode& after = wmap->get_state ();
+	_session->add_command (new Temporal::TempoCommand (_("clear earlier tempos"), before_state, &after));
+	commit_reversible_command ();
+}
+
+void
+Editor::clear_tempo_markers_after (timepos_t where, bool stop_at_music_times)
+{
+	if (!_session) {
+		return;
+	}
+
+	TempoMap::WritableSharedPtr wmap = begin_tempo_map_edit ();
+	XMLNode* before_state = &wmap->get_state ();
+	if (!wmap->clear_tempos_after (where, stop_at_music_times)) {
+		abort_tempo_map_edit ();
+		return;
+	}
+
+	begin_reversible_command (_("clear later tempos"));
+	commit_tempo_map_edit (wmap, true);
+	XMLNode& after = wmap->get_state ();
+	_session->add_command (new Temporal::TempoCommand (_("clear later tempos"), before_state, &after));
+	commit_reversible_command ();
+}
