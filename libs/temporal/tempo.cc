@@ -263,11 +263,11 @@ Meter::bbt_add (Temporal::BBT_Time const & bbt, Temporal::BBT_Offset const & add
 	if (r.ticks >= tpg) {
 
 		/* ticks per bar */
-		const int32_t tpb = tpg * _divisions_per_bar;
+		const int32_t tpB = tpg * _divisions_per_bar;
 
-		if (r.ticks >= tpb) {
-			r.bars += r.ticks / tpb;
-			r.ticks %= tpb;
+		if (r.ticks >= tpB) {
+			r.bars += r.ticks / tpB;
+			r.ticks %= tpB;
 		}
 
 		if (r.ticks >= tpg) {
