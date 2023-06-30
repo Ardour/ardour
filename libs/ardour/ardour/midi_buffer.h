@@ -43,6 +43,7 @@ public:
 	MidiBuffer(size_t capacity);
 	~MidiBuffer();
 
+	void clear();
 	void silence (samplecnt_t nframes, samplecnt_t offset = 0);
 	void read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t dst_offset = 0, sampleoffset_t src_offset = 0);
 	void merge_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t dst_offset = 0, sampleoffset_t src_offset = 0);
@@ -152,8 +153,9 @@ public:
 
 		size_t total_data_deleted = align32 (sizeof(TimeType) + sizeof (Evoral::EventType) + event_size);
 
-		if (i.offset + total_data_deleted > _size) {
+		if (i.offset + total_data_deleted >= _size) {
 			_size = 0;
+			_silent = true;
 			return end();
 		}
 
@@ -166,6 +168,8 @@ public:
 		}
 
 		_size -= total_data_deleted;
+
+		assert (_size > 0);
 
 		/* all subsequent iterators are now invalid, and the one we
 		 * return should refer to the event we copied, which was after

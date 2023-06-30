@@ -96,7 +96,6 @@ MidiBuffer::copy(MidiBuffer const * const copy)
 	memcpy(_data, copy->_data, _size);
 }
 
-
 void
 MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t dst_offset, sampleoffset_t src_offset)
 {
@@ -107,21 +106,13 @@ MidiBuffer::read_from (const Buffer& src, samplecnt_t nframes, sampleoffset_t ds
 
 	assert (_capacity >= msrc.size());
 
-	clear ();
-	assert (_size == 0);
+	MidiBuffer::silence (nframes, dst_offset);
 
 	for (MidiBuffer::const_iterator i = msrc.begin(); i != msrc.end(); ++i) {
 		const Evoral::Event<TimeType> ev(*i, false);
 
 		if (ev.time() >= src_offset && ev.time() < nframes + src_offset) {
 			push_back (ev.time() + dst_offset - src_offset, ev.event_type (), ev.size(), ev.buffer());
-		} else {
-			cerr << "\t!!!! MIDI event @ " <<  ev.time()
-			     << " skipped, not within range. nframes: " << nframes
-			     << " src_offset: " << src_offset
-			     << " dst_offset: " << dst_offset
-			     << "\n";
-			PBD::stacktrace (cerr, 30);
 		}
 	}
 
@@ -299,16 +290,32 @@ MidiBuffer::reserve(TimeType time, Evoral::EventType event_type, size_t size)
 	return write_loc;
 }
 
-
 void
-MidiBuffer::silence (samplecnt_t /*nframes*/, samplecnt_t /*offset*/)
+MidiBuffer::clear ()
 {
-	/* XXX iterate over existing events, find all in range given by offset & nframes,
-	   and delete them.
-	*/
-
 	_size = 0;
 	_silent = true;
+}
+
+void
+MidiBuffer::silence (samplecnt_t nframes, samplecnt_t offset)
+{
+	/* iterate over existing events, find all in range given by offset & nframes,
+	 * and delete them.
+	 */
+	if (nframes == _capacity && offset == 0) {
+		MidiBuffer::clear ();
+		return;
+	}
+
+	for (MidiBuffer::iterator i = begin(); i != end();) {
+		const Evoral::Event<TimeType> ev(*i, false);
+		if (ev.time() >= offset && ev.time() < nframes + offset) {
+			i = erase (i);
+		} else {
+			++i;
+		}
+	}
 }
 
 bool
