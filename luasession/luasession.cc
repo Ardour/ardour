@@ -648,7 +648,6 @@ main (int argc, char** argv)
 	lua = NULL;
 
 	AudioEngine::instance ()->stop ();
-	AudioEngine::destroy ();
 
 	ARDOUR::cleanup ();
 	delete event_loop;
