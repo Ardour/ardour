@@ -663,13 +663,13 @@ MeterPoint::get_state () const
 	return base;
 }
 
-timepos_t
+superclock_t
 TempoMetric::reftime() const
 {
 	return _tempo->map().reftime (*this);
 }
 
-timepos_t
+superclock_t
 TempoMap::reftime (TempoMetric const &tm) const
 {
 	Points::const_iterator pi;
@@ -689,7 +689,7 @@ TempoMap::reftime (TempoMetric const &tm) const
 		--pi;
 	}
 
-	return timepos_t (pi->sclock());
+	return pi->sclock();
 }
 
 Temporal::BBT_Argument
@@ -731,7 +731,7 @@ TempoMetric::bbt_at (timepos_t const & pos) const
 
 	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("BBT offset from %3 @ %1: %2\n", (_tempo->beats() < _meter->beats() ?  _meter->bbt() : _tempo->bbt()), bbt_offset,
 	                                                 (_tempo->beats() < _meter->beats() ? "meter" : "tempo")));
-	timepos_t ref (std::min (_meter->sclock(), _tempo->sclock()));
+	superclock_t ref (std::min (_meter->sclock(), _tempo->sclock()));
 
 	return BBT_Argument (ref, _meter->bbt_add (reference_point->bbt(), bbt_offset));
 }
@@ -2079,7 +2079,7 @@ TempoMap::bbt_at (superclock_t s) const
 {
 	TempoMetric metric (metric_at (s));
 
-	timepos_t ref (std::min (metric.tempo().sclock(), metric.meter().sclock()));
+	superclock_t ref (std::min (metric.tempo().sclock(), metric.meter().sclock()));
 	return BBT_Argument (ref, metric.bbt_at (timepos_t::from_superclock (s)));
 }
 
@@ -2087,7 +2087,7 @@ Temporal::BBT_Argument
 TempoMap::bbt_at (Temporal::Beats const & qn) const
 {
 	TempoMetric metric (metric_at (qn));
-	timepos_t ref (std::min (metric.tempo().sclock(), metric.meter().sclock()));
+	superclock_t ref (std::min (metric.tempo().sclock(), metric.meter().sclock()));
 	return BBT_Argument (ref, metric.bbt_at (qn));
 }
 

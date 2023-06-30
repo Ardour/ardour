@@ -27,19 +27,19 @@ namespace Temporal {
 struct LIBTEMPORAL_API BBT_Argument : public BBT_Time
 {
   public:
-	BBT_Argument () : BBT_Time (), _reference (Temporal::timepos_t (Temporal::BeatTime)) {}
-	BBT_Argument (int32_t B, int32_t b, int32_t t) : BBT_Time (B, b, t),  _reference (Temporal::timepos_t (Temporal::BeatTime)) {}
+	BBT_Argument () : BBT_Time (), _reference (0) {}
+	BBT_Argument (int32_t B, int32_t b, int32_t t) : BBT_Time (B, b, t),  _reference (0) {}
 
-	BBT_Argument (Temporal::timepos_t const & r) : BBT_Time (), _reference (r) {}
-	BBT_Argument (Temporal::timepos_t const & r, int32_t B, int32_t b, int32_t t) : BBT_Time (B, b, t), _reference (r) {}
+	BBT_Argument (superclock_t r) : BBT_Time (), _reference (r) {}
+	BBT_Argument (superclock_t r, int32_t B, int32_t b, int32_t t) : BBT_Time (B, b, t), _reference (r) {}
 
-	explicit BBT_Argument (BBT_Time const & bbt) : BBT_Time (bbt),  _reference (Temporal::timepos_t (Temporal::BeatTime)) {}
-	BBT_Argument (Temporal::timepos_t const & r, BBT_Time const & bbt) : BBT_Time (bbt),  _reference (r) {}
+	explicit BBT_Argument (BBT_Time const & bbt) : BBT_Time (bbt),  _reference (0) {}
+	BBT_Argument (superclock_t r, BBT_Time const & bbt) : BBT_Time (bbt),  _reference (r) {}
 
-	Temporal::timepos_t reference() const { return _reference; }
+	superclock_t reference() const { return _reference; }
 
   private:
-	Temporal::timepos_t _reference;
+	superclock_t _reference;
 
 };
 

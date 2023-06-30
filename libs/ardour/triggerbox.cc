@@ -1447,7 +1447,7 @@ AudioTrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal:
            _beatcnt : the expected duration of the trigger, based on analysis of its tempo .. can be overridden by the user later
 	*/
 
-	const Temporal::BBT_Argument transition_bba (timepos_t::zero (Temporal::BeatTime), transition_bbt);
+	const Temporal::BBT_Argument transition_bba (superclock_t (0), transition_bbt);
 
 	samplepos_t end_by_follow_length = tmap->sample_at (tmap->bbt_walk (transition_bba, _follow_length));
 	samplepos_t end_by_data_length = transition_sample + (data.length - _start_offset);
@@ -2315,7 +2315,7 @@ MIDITrigger::start_and_roll_to (samplepos_t start_pos, samplepos_t end_position,
 timepos_t
 MIDITrigger::compute_end (Temporal::TempoMap::SharedPtr const & tmap, Temporal::BBT_Time const & transition_bbt, samplepos_t, Temporal::Beats & effective_length)
 {
-	const Temporal::BBT_Argument transition_bba (timepos_t::zero(Temporal::BeatTime), transition_bbt);
+	const Temporal::BBT_Argument transition_bba (superclock_t (0), transition_bbt);
 
 	Temporal::Beats end_by_follow_length = tmap->quarters_at (tmap->bbt_walk (transition_bba, _follow_length));
 	Temporal::Beats end_by_data_length = tmap->quarters_at (tmap->bbt_walk (transition_bba, Temporal::BBT_Offset (0, data_length.get_beats(), data_length.get_ticks())));
