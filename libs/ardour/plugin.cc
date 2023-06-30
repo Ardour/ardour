@@ -410,7 +410,7 @@ int
 Plugin::connect_and_run (BufferSet& bufs,
 		samplepos_t /*start*/, samplepos_t /*end*/, double /*speed*/,
 		ChanMapping const& /*in_map*/, ChanMapping const& /*out_map*/,
-		pframes_t nframes, samplecnt_t /*offset*/)
+		pframes_t nframes, samplecnt_t offset)
 {
 	if (bufs.count().n_midi() > 0) {
 
@@ -421,7 +421,11 @@ Plugin::connect_and_run (BufferSet& bufs,
 		/* Track notes that we are sending to the plugin */
 		const MidiBuffer& b = bufs.get_midi (0);
 
-		_tracker.track (b.begin(), b.end());
+		for (auto const ev : b) {
+			if (ev.time () >= offset && ev.time () < nframes + offset) {
+				_tracker.track (ev);
+			}
+		}
 
 		if (_have_pending_stop_events) {
 			/* Transmit note-offs that are pending from the last transport stop */
