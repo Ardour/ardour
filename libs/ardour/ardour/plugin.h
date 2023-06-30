@@ -23,6 +23,7 @@
 #ifndef __ardour_plugin_h__
 #define __ardour_plugin_h__
 
+#include <atomic>
 #include <memory>
 #include <set>
 #include <string>
@@ -425,15 +426,16 @@ private:
 	PresetRecord     _last_preset;
 	bool             _parameter_changed_since_last_preset;
 
-	PBD::ScopedConnection _preset_connection;
-
 	MidiRingBuffer<samplepos_t> _immediate_events;
+	std::atomic<bool>           _resolve_midi;
 
 	void invalidate_preset_cache (std::string const&, Plugin*, bool);
 	void resolve_midi ();
 
 	PluginInsert* _pi;
 	uint32_t      _num;
+
+	PBD::ScopedConnection _preset_connection;
 };
 
 struct PluginPreset {

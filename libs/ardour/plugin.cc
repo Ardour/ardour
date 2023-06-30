@@ -95,6 +95,7 @@ Plugin::Plugin (AudioEngine& e, Session& s)
 	, _have_pending_stop_events (false)
 	, _parameter_changed_since_last_preset (false)
 	, _immediate_events(6096) // FIXME: size?
+	, _resolve_midi (false)
 	, _pi (0)
 	, _num (0)
 {
@@ -116,6 +117,7 @@ Plugin::Plugin (const Plugin& other)
 	, _last_preset (other._last_preset)
 	, _parameter_changed_since_last_preset (false)
 	, _immediate_events(6096) // FIXME: size?
+	, _resolve_midi (false)
 	, _pi (other._pi)
 	, _num (other._num)
 {
@@ -427,6 +429,11 @@ Plugin::connect_and_run (BufferSet& bufs,
 			}
 		}
 
+		bool canderef (true);
+		if (_resolve_midi.compare_exchange_strong (canderef, false)) {
+			resolve_midi ();
+		}
+
 		if (_have_pending_stop_events) {
 			/* Transmit note-offs that are pending from the last transport stop */
 			bufs.merge_from (_pending_stop_events, 0);
@@ -440,21 +447,21 @@ Plugin::connect_and_run (BufferSet& bufs,
 void
 Plugin::realtime_handle_transport_stopped ()
 {
-	resolve_midi ();
+	_resolve_midi = true;
 }
 
 void
 Plugin::realtime_locate (bool for_loop_end)
 {
 	if (!for_loop_end) {
-		resolve_midi ();
+		_resolve_midi = true;
 	}
 }
 
 void
 Plugin::monitoring_changed ()
 {
-	resolve_midi ();
+	_resolve_midi = true;
 }
 
 void
