@@ -132,18 +132,18 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 			continue;
 		}
 
-		for (TempoMapPoints::iterator i = _click_points.begin(); i != _click_points.end(); ++i) {
+		for (auto const & p : _click_points) {
 
-			if (superclock_to_samples ((*i).sclock(), sample_rate()) < start) {
+			if (superclock_to_samples (p.sclock(), sample_rate()) < start) {
 				continue;
 			}
 
-			assert (superclock_to_samples ((*i).sclock(), sample_rate()) < end);
+			assert (superclock_to_samples (p.sclock(), sample_rate()) < end);
 
-			if (i->bbt().is_bar() && (click_emphasis_data && Config->get_use_click_emphasis())) {
-				add_click ((*i).sample (sample_rate()), true);
+			if (p.bbt().is_bar() && (click_emphasis_data && Config->get_use_click_emphasis())) {
+				add_click (p.sample (sample_rate()), true);
 			} else {
-				add_click ((*i).sample (sample_rate()), false);
+				add_click (p.sample (sample_rate()), false);
 			}
 		}
 
