@@ -104,7 +104,7 @@ ARDOUR::get_alsa_audio_device_names (std::map<std::string, std::string>& devices
 					assert (!have_multiple_subdevices);
 					have_multiple_subdevices = true;
 
-					uniq_name += " (" + PBD::to_string (device) + ")";
+					uniq_name += " (" + hwname + ")";
 					devices.insert (std::make_pair (uniq_name, hwname));
 #if 0 // disabled (blame the_CLA's laptop)
 					/* It may happen that the soundcard has multiple sub-devices for playback
