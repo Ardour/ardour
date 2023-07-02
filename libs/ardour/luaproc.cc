@@ -315,7 +315,7 @@ LuaProc::load_script ()
 	luabridge::LuaRef lua_dsp_init = luabridge::getGlobal (L, "dsp_init");
 	if (lua_dsp_init.type () == LUA_TFUNCTION) {
 		try {
-			lua_dsp_init (_session.nominal_sample_rate ());
+			lua_dsp_init (_session.sample_rate ());
 		} catch (luabridge::LuaException const& e) {
 #ifndef NDEBUG
 			std::cerr << "LuaException:" << e.what () << std::endl;
