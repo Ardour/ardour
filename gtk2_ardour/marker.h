@@ -145,6 +145,7 @@ protected:
 	double       _shift;
 	Type         _type;
 	int           name_height;
+	int           name_descent;
 	bool         _selected;
 	bool         _entered;
 	bool         _shown;
