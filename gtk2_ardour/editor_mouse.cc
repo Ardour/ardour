@@ -1045,11 +1045,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case RegionItem:
-			if (dynamic_cast<AutomationRegionView*>(clicked_regionview)) {
-				/* rubberband drag to select automation points */
-				_drags->set (new EditorRubberbandSelectDrag (this, item), event);
-				return true;
-			}
+			/* rubberband drag to select region gain points */
+			_drags->set (new EditorRubberbandSelectDrag (this, item), event);
+			return true;
 			break;
 
 		default:
@@ -2324,6 +2322,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_aut
 	update_join_object_range_location (event->motion.y);
 
 	if (_drags->active ()) {
+		_region_peak_cursor->hide ();
 		//drags change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
 		return _drags->motion_handler (event, from_autoscroll);
 	} else {
