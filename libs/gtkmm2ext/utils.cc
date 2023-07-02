@@ -57,12 +57,29 @@ Gtkmm2ext::init (const char* localedir)
 void
 Gtkmm2ext::get_ink_pixel_size (Glib::RefPtr<Pango::Layout> layout,
 			       int& width,
-			       int& height)
+                               int& height)
 {
 	Pango::Rectangle ink_rect = layout->get_ink_extents ();
 
+	std::string s = layout->get_text ();
+
 	width = PANGO_PIXELS(ink_rect.get_width());
 	height = PANGO_PIXELS(ink_rect.get_height());
+}
+
+void
+Gtkmm2ext::get_ink_pixel_size_with_descent (Glib::RefPtr<Pango::Layout> layout,
+                                            int& width,
+                                            int& height,
+                                            int& descent)
+{
+	Pango::Rectangle ink_rect = layout->get_ink_extents ();
+
+	std::string s = layout->get_text ();
+
+	width = PANGO_PIXELS(ink_rect.get_width());
+	height = PANGO_PIXELS(ink_rect.get_height());
+	descent = PANGO_PIXELS(ink_rect.get_descent());
 }
 
 static void
