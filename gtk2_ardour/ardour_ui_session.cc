@@ -442,7 +442,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 		(void) msg.run ();
 		msg.hide ();
-		delete escaped_error_txt;
+		g_free (escaped_error_txt);
 
 		goto out;
 	}
@@ -473,7 +473,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 		(void) msg.run ();
 		msg.hide ();
-		delete escaped_error_txt;
+		g_free (escaped_error_txt);
 
 		goto out;
 	}
@@ -501,7 +501,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 
 		(void) msg.run ();
 		msg.hide ();
-		delete escaped_error_txt;
+		g_free (escaped_error_txt);
 
 		goto out;
 	}
@@ -700,7 +700,7 @@ ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& 
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.run ();
-		delete escaped_error_txt;
+		g_free (escaped_error_txt);
 		return -1;
 	}
 	catch (Glib::Error const& e) {
@@ -724,7 +724,7 @@ ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& 
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.run ();
-		delete escaped_error_txt;
+		g_free (escaped_error_txt);
 		return -1;
 	}
 	catch (...) {
@@ -745,7 +745,7 @@ ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& 
 		msg.set_title (_("Loading Error"));
 		msg.set_position (Gtk::WIN_POS_CENTER);
 		msg.run ();
-		delete escaped_error_txt;
+		g_free (escaped_error_txt);
 		return -1;
 	}
 
