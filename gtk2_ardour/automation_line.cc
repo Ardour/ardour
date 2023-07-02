@@ -948,13 +948,12 @@ void
 AutomationLine::get_selectables (timepos_t const & start, timepos_t const & end, double botfrac, double topfrac, list<Selectable*>& results)
 {
 	/* convert fractions to display coordinates with 0 at the top of the track */
-	double const bot_track = (1 - topfrac) * trackview.current_height ();
-	double const top_track = (1 - botfrac) * trackview.current_height ();
+	double const bot_track = (1 - topfrac) * trackview.current_height (); // this should StreamView::child_height () for RegionGain
+	double const top_track = (1 - botfrac) * trackview.current_height (); //  --"--
 
 	for (auto const & cp : control_points) {
 
 		const timepos_t w = session_position ((*cp->model())->when);
-
 
 		if (w >= start && w <= end && cp->get_y() >= bot_track && cp->get_y() <= top_track) {
 			results.push_back (cp);

@@ -40,9 +40,11 @@
 #include "canvas/rectangle.h"
 #include "canvas/debug.h"
 
+#include "audio_region_view.h"
 #include "streamview.h"
 #include "region_view.h"
 #include "route_time_axis.h"
+#include "region_gain_line.h"
 #include "region_selection.h"
 #include "selection.h"
 #include "public_editor.h"
@@ -585,10 +587,6 @@ StreamView::set_selected_regionviews (RegionSelection& regions)
 void
 StreamView::get_selectables (timepos_t const & start, timepos_t const & end, double top, double bottom, list<Selectable*>& results, bool within)
 {
-	if (_trackview.editor().internal_editing()) {
-		return;  // Don't select regions with an internal tool
-	}
-
 	layer_t min_layer = 0;
 	layer_t max_layer = 0;
 
@@ -619,17 +617,27 @@ StreamView::get_selectables (timepos_t const & start, timepos_t const & end, dou
 			layer_t const l = (*i)->region()->layer ();
 			layer_ok = (min_layer <= l && l <= max_layer);
 		}
-
-		if (within) {
-			if ((*i)->region()->coverage (start, end) == Temporal::OverlapExternal && layer_ok) {
-				results.push_back (*i);
-			}
-		} else {
-			if ((*i)->region()->coverage (start, end) != Temporal::OverlapNone && layer_ok) {
+		if (!layer_ok) {
+			continue;
+		}
+		if ((within && (*i)->region()->coverage (start, end) == Temporal::OverlapExternal)
+		    || (!within && (*i)->region()->coverage (start, end) != Temporal::OverlapNone)) {
+			if (_trackview.editor().internal_editing()) {
+				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
+				if (arv && arv->get_gain_line ()) {
+					/* Note: AutomationLine::get_selectables() uses trackview.current_height (),
+					 * disregarding Stacked layer display height
+					 */
+					double const c = height; // child_height (); // XXX
+					double const y = (*i)->get_canvas_group ()->position().y;
+					double t = 1.0 - std::min (1.0, std::max (0., (top - _trackview.y_position () - y) / c));
+					double b = 1.0 - std::min (1.0, std::max (0., (bottom - _trackview.y_position () - y) / c));
+					arv->get_gain_line()->get_selectables (start, end, b, t, results);
+				}
+			} else {
 				results.push_back (*i);
 			}
 		}
-
 	}
 }
 
