@@ -1704,8 +1704,7 @@ Session::set_state (const XMLNode& node, int version)
 
 	if (node.get_property (X_("sample-rate"), _base_sample_rate)) {
 
-		/* required to convert positions during session load */
-		Temporal::set_sample_rate (_base_sample_rate);
+		bool reconfigured = false;
 
 		while (!AudioEngine::instance()->running () || _base_sample_rate != AudioEngine::instance()->sample_rate ()) {
 			boost::optional<int> r = AskAboutSampleRateMismatch (_base_sample_rate, _current_sample_rate);
@@ -1715,7 +1714,7 @@ Session::set_state (const XMLNode& node, int version)
 				break;
 			} else if (rv == -1 && AudioEngine::instance()->running ()) {
 				/* retry */
-				set_block_size (_engine.samples_per_cycle());
+				reconfigured = true;
 				continue;
 			} else {
 				if (AudioEngine::instance()->running ()) {
@@ -1728,14 +1727,32 @@ Session::set_state (const XMLNode& node, int version)
 			}
 		}
 
-		if (_base_sample_rate != _engine.sample_rate ()) {
+		if (reconfigured) {
+			set_block_size (_engine.samples_per_cycle());
+		}
+
+		if (_base_sample_rate != _engine.sample_rate () || reconfigured) {
+			/* set _current_sample_rate early on. It is used when instantiating plugins.
+			 * This also calls Temporal::set_sample_rate, which is required to
+			 * to convert positions during session load.
+			 */
 			set_sample_rate (_base_sample_rate);
 			/* post_engine_init() calls initialize_latencies()
 			 * which sets up resampling. However by that time all session
 			 * ports will exist and would be need to be reinitialized.
 			 */
 			setup_engine_resampling ();
+		} else {
+			/* required to convert positions during session load */
+			Temporal::set_sample_rate (_base_sample_rate);
+			/* all other initialization is correctly done by 
+			 * Session::immediately_post_engine
+			 */
 		}
+
+	} else {
+		error << _("Session: XML state has no sample-rate ") << endmsg;
+		goto out;
 	}
 
 	/* need the tempo map setup ASAP */
