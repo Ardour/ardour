@@ -1052,6 +1052,7 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 
 	_midi_device_thread_active = listen_for_midi_device_changes ();
 
+	devices.clear ();
 	get_alsa_audio_device_names (devices, (AlsaDuplex)slave_duplex);
 
 	if (!slave_device.empty () && (di = devices.find (slave_device)) != devices.end ()) {
