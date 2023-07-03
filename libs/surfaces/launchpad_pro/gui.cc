@@ -90,7 +90,7 @@ LPPRO_GUI::LPPRO_GUI (LaunchPadPro& p)
 	_table.set_homogeneous (false);
 
 	std::string data_file_path;
-	std::string name = "push2-small.png";
+	std::string name = "launchpad-pro.png";
 	Searchpath spath(ARDOUR::ardour_data_search_path());
 	spath.add_subdirectory_to_paths ("icons");
 	find_file (spath, name, data_file_path);

@@ -115,6 +115,7 @@ LaunchPadPro::probe (std::string& i, std::string& o)
 
 LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
 	: MIDISurface (s, X_("Novation Launchpad Pro"), X_("Launchpad Pro"), true)
+	, _gui (nullptr)
 {
 	run_event_loop ();
 	port_setup ();
