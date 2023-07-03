@@ -359,17 +359,12 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 	layout->set_font_description (name_font);
 	Gtkmm2ext::get_ink_pixel_size_with_descent (layout, width, name_height, name_descent);
 
-	/* compute descent below baseline, since pango returns the overall
-	   height from descender to top ... what were they thinking?
-	*/
-	name_descent -= name_height;
-
 	_name_item = new ArdourCanvas::Text (group);
 	CANVAS_DEBUG_NAME (_name_item, string_compose ("ArdourMarker::_name_item for %1", annotation));
 	_name_item->set_font_description (name_font);
 	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
 
-	_name_item->set_position (ArdourCanvas::Duple (_label_offset, -name_descent));
+	_name_item->set_position (ArdourCanvas::Duple (_label_offset, floor (.5 * (name_height - name_descent - .5))));
 
 	apply_color ();
 
