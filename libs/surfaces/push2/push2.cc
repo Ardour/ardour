@@ -120,13 +120,13 @@ Push2::probe (std::string& i, std::string& o)
 	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsOutput|IsTerminal), midi_inputs);
 	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsInput|IsTerminal), midi_outputs);
 
-	auto has_fp8 = [](string const& s) {
+	auto has_push2 = [](string const& s) {
 		std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name (s);
 		return pn.find ("Ableton Push 2 MIDI 1") != string::npos;
 	};
 
-	auto pi = std::find_if (midi_inputs.begin (), midi_inputs.end (), has_fp8);
-	auto po = std::find_if (midi_outputs.begin (), midi_outputs.end (), has_fp8);
+	auto pi = std::find_if (midi_inputs.begin (), midi_inputs.end (), has_push2);
+	auto po = std::find_if (midi_outputs.begin (), midi_outputs.end (), has_push2);
 
 	if (pi == midi_inputs.end () || po == midi_outputs.end ()) {
 		return false;
