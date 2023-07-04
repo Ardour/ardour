@@ -61,39 +61,56 @@ class LPPRO_GUI;
 class LaunchPadPro : public MIDISurface
 {
   public:
-	enum ButtonID {
-		Left,
-		Right,
-		Session,
-		Note,
-		Chord,
-		Custom,
-		Sequencer,
-		Projects,
-		Patterns,
-		Steps,
-		PatternSettings,
-		Velocity,
-		Probability,
-		Mutation,
-		MicroStep,
-		PrintToClip,
-		StopClip,
-		Device,
-		Sends,
-		Pan,
-		Volume,
-		Solo,
-		Mute,
-		RecordArm,
-		CaptureMIDI,
-		Play,
-		FixedLength,
-		Quantize,
-		Duplicate,
-		Clear,
-		Down,
-		Up
+	/* use hex for these constants, because we'll see them (as note numbers
+	   and CC numbers) in hex within MIDI messages when debugging.
+	*/
+	enum PadID {
+		/* top */
+		Shift = 0x5a,
+		Left = 0x5b,
+		Right = 0x5c,
+		Session = 0x5d,
+		Note = 0x5e,
+		Chord = 0x5f,
+		Custom = 0x60,
+		Sequencer = 0x61,
+		Projects = 0x62,
+		/* right side */
+		Patterns = 0x59,
+		Steps = 0x4f,
+		PatternSettings = 0x45,
+		Velocity = 0x3b,
+		Probability = 0x31,
+		Mutation = 0x27,
+		MicroStep = 0x1d,
+		PrintToClip = 0x13,
+		/* lower bottom */
+		StopClip = 0x8,
+		Device = 0x7,
+		Sends = 0x6,
+		Pan = 0x5,
+		Volume = 0x4,
+		Solo = 0x3,
+		Mute = 0x2,
+		RecordArm = 0x1,
+		/* left side */
+		CaptureMIDI = 0xa,
+		Play = 0x14,
+		FixedLength = 0x1e,
+		Quantize = 0x28,
+		Duplicate = 0x32,
+		Clear = 0x3c,
+		Down = 0x46,
+		Up = 0x50,
+		/* upper bottom */
+		Lower1 = 0x65,
+		Lower2 = 0x66,
+		Lower3 = 0x67,
+		Lower4 = 0x68,
+		Lower5 = 0x69,
+		Lower6 = 0x6a,
+		Lower7 = 0x6b,
+		Lower8 = 0x6c
 	};
 
 	LaunchPadPro (ARDOUR::Session&);
@@ -115,6 +132,81 @@ class LaunchPadPro : public MIDISurface
 	int set_state (const XMLNode & node, int version);
 
   private:
+	enum DeviceMode {
+		Standalone,
+		DAW,
+		Live,
+		Programmer
+	};
+
+	typedef std::map<int,int> ColorMap;
+	ColorMap color_map;
+	void build_color_map ();
+
+	struct Pad  {
+
+		enum WhenPressed {
+			Nothing,
+			FlashOn,
+			FlashOff,
+		};
+
+		enum ColorMode {
+			Static = 0x0,
+			Flashing = 0x1,
+			Pulsing = 0x2
+		};
+
+		Pad (PadID pid)
+			: id (pid)
+			, x (-1)
+			, y (-1)
+			, do_when_pressed (FlashOn)
+			, filtered (false)
+			, perma_color (0)
+			, color (0)
+			, mode (Static)
+		{}
+
+		Pad (int pid, int xx, int yy)
+			: id (pid)
+			, x (xx)
+			, y (yy)
+			, do_when_pressed (FlashOn)
+			, filtered (true)
+			, perma_color (0)
+			, color (0)
+			, mode (Static)
+		{}
+
+		void set (int c, ColorMode m) {
+			color = c;
+			mode = m;
+		}
+		void off() { set (0, Static); }
+
+		MidiByteArray state_msg () const { return MidiByteArray (3, 0x90|mode, id, color); }
+
+		/* This returns a negative value for edge pads */
+		int coord () const { return (y * 8) + x; } 
+		/* Just an alias, really. */
+		int note_number() const { return id; }
+
+		int id;
+		int x;
+		int y;
+		int do_when_pressed;
+		int filtered;
+		int perma_color;
+		int color;
+		ColorMode mode;
+	};
+
+	typedef std::map<int,Pad> PadMap;
+	PadMap pad_map;
+	void build_pad_map();
+	Pad* pad_by_id (int pid);
+
 	int begin_using_device ();
 	int stop_using_device ();
 	int device_acquire () { return 0; }
@@ -123,6 +215,18 @@ class LaunchPadPro : public MIDISurface
 	void stop_event_loop ();
 
 	void stripable_selection_changed ();
+
+	void light_pad (int pad_id, int color, Pad::ColorMode);
+	void pad_off (int pad_id);
+	void all_pads_off ();
+	void all_pads_on ();
+
+	void set_device_mode (DeviceMode);
+
+	void handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes*);
+	void handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes*);
+	void handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes*);
+	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
 
 	mutable LPPRO_GUI* _gui;
 	void build_gui ();

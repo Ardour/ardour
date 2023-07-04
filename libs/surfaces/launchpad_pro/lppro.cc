@@ -98,7 +98,7 @@ LaunchPadPro::probe (std::string& i, std::string& o)
 
 	auto has_lppro = [](string const& s) {
 		std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name (s);
-		return pn.find ("Launchpad Pro MK3 MIDI 1") != string::npos;
+		return pn.find ("Launchpad Pro MK3 MIDI 3") != string::npos;
 	};
 
 	auto pi = std::find_if (midi_inputs.begin (), midi_inputs.end (), has_lppro);
@@ -125,6 +125,9 @@ LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
 		_async_in->connect (pn_in);
 		_async_out->connect (pn_out);
 	}
+
+	build_color_map ();
+	build_pad_map ();
 }
 
 LaunchPadPro::~LaunchPadPro ()
@@ -152,6 +155,7 @@ LaunchPadPro::set_active (bool yn)
 		}
 
 		if ((_connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
+			std::cerr << "LPP claims connection state is " << _connection_state << std::endl;
 			begin_using_device ();
 		} else {
 			/* begin_using_device () will get called once we're connected */
@@ -189,6 +193,9 @@ LaunchPadPro::begin_using_device ()
 {
 	DEBUG_TRACE (DEBUG::Launchpad, "begin using device\n");
 
+	set_device_mode (Programmer);
+	// all_pads_off ();
+	all_pads_on ();
 #if 0
 	init_buttons (true);
 	init_touch_strip (false);
@@ -213,6 +220,9 @@ LaunchPadPro::stop_using_device ()
 		DEBUG_TRACE (DEBUG::Launchpad, "nothing to do, device not in use\n");
 		return 0;
 	}
+
+	set_device_mode (Standalone);
+
 #if 0
 	init_buttons (false);
 	strip_buttons_off ();
@@ -258,7 +268,7 @@ LaunchPadPro::input_port_name () const
 	*/
 	return X_("system:midi_capture_1319078870");
 #else
-	return X_("Launchpad Pro MK3 MIDI 1 in");
+	return X_("Launchpad Pro MK3 MIDI 3 in");
 #endif
 }
 
@@ -271,11 +281,267 @@ LaunchPadPro::output_port_name () const
 	*/
 	return X_("system:midi_playback_3409210341");
 #else
-	return X_("Launchpad Pro MK3 MIDI 1 out");
+	return X_("Launchpad Pro MK3 MIDI 3 out");
 #endif
 }
 
 void
 LaunchPadPro::stripable_selection_changed ()
 {
+}
+
+void
+LaunchPadPro::build_color_map ()
+{
+	/* RGB values taken from using color picker on PDF of LP manual, page 10 */
+
+	static int novation_color_chart_right_side[] = {
+		0x0,
+		0xb3b3b3,
+		0xdddddd,
+		0xffffff,
+		0xffb3b3,
+		0xff6161,
+		0xdd6161,
+		0xb36161,
+		0xfff3d5,
+		0xffb361,
+		0xdd8c61,
+		0xb37661,
+		0xffeea1,
+		0xffff61,
+		0xdddd61,
+		0xb3b361,
+		0xddffa1,
+		0xc2ff61,
+		0xa1dd61,
+		0x81b361,
+		0xc2ffb3,
+		0x61ff61,
+		0x61dd61,
+		0x61b361,
+		0xc2ffc2,
+		0x61ff8c,
+		0x61dd76,
+		0x61b36b,
+		0xc2ffcc,
+		0x61ffcc,
+		0x61dda1,
+		0x61b381,
+		0xc2fff3,
+		0x61ffe9,
+		0x61ddc2,
+		0x61b396,
+		0xc2f3ff,
+		0x61eeff,
+		0x61c7dd,
+		0x61a1b3,
+		0xc2ddff,
+		0x61c7ff,
+		0x61a1dd,
+		0x6181b3,
+		0xa18cff,
+		0x6161ff,
+		0x6161dd,
+		0x6161b3,
+		0xccb3ff,
+		0xa161ff,
+		0x8161dd,
+		0x7661b3,
+		0xffb3ff,
+		0xff61ff,
+		0xdd61dd,
+		0xb361b3,
+		0xffb3d5,
+		0xff61c2,
+		0xdd61a1,
+		0xb3618c,
+		0xff7661,
+		0xe9b361,
+		0xddc261,
+		0xa1a161,
+	};
+
+	for (size_t n = 0; n < sizeof (novation_color_chart_right_side) / sizeof (novation_color_chart_right_side[0]); ++n) {
+		int color = novation_color_chart_right_side[n];
+		std::pair<int,int> p (n, color);
+		color_map.insert (p);
+	}
+
+	assert (color_map.size() == 64);
+}
+
+void
+LaunchPadPro::build_pad_map ()
+{
+#define EDGE_PAD(id) if (!(pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id)))).second)) abort()
+
+	EDGE_PAD (Shift);
+
+	EDGE_PAD (Left);
+	EDGE_PAD (Right);
+	EDGE_PAD (Session);
+	EDGE_PAD (Note);
+	EDGE_PAD (Chord);
+	EDGE_PAD (Custom);
+	EDGE_PAD (Sequencer);
+	EDGE_PAD (Projects);
+
+	EDGE_PAD (Patterns);
+	EDGE_PAD (Steps);
+	EDGE_PAD (PatternSettings);
+	EDGE_PAD (Velocity);
+	EDGE_PAD (Probability);
+	EDGE_PAD (Mutation);
+	EDGE_PAD (MicroStep);
+	EDGE_PAD (PrintToClip);
+
+	EDGE_PAD (StopClip);
+	EDGE_PAD (Device);
+	EDGE_PAD (Sends);
+	EDGE_PAD (Pan);
+	EDGE_PAD (Volume);
+	EDGE_PAD (Solo);
+	EDGE_PAD (Mute);
+	EDGE_PAD (RecordArm);
+
+	EDGE_PAD (CaptureMIDI);
+	EDGE_PAD (Play);
+	EDGE_PAD (FixedLength);
+	EDGE_PAD (Quantize);
+	EDGE_PAD (Duplicate);
+	EDGE_PAD (Clear);
+	EDGE_PAD (Down);
+	EDGE_PAD (Up);
+
+	EDGE_PAD (Lower1);
+	EDGE_PAD (Lower2);
+	EDGE_PAD (Lower3);
+	EDGE_PAD (Lower4);
+	EDGE_PAD (Lower5);
+	EDGE_PAD (Lower6);
+	EDGE_PAD (Lower7);
+	EDGE_PAD (Lower8);
+
+	/* Now add the 8x8 central pad grid */
+
+	for (int row = 0; row < 8; ++row) {
+		for (int col = 0; col < 8; ++col) {
+			int pid = (11 + (row * 10)) + col;
+			std::pair<int,Pad> p (pid, Pad (pid, row, col));
+			if (!pad_map.insert (p).second) abort();
+		}
+	}
+
+	std::cerr << "pad map is " << pad_map.size() << std::endl;
+
+	/* The +1 is for the shift pad at upper left */
+	assert (pad_map.size() == (64 + (5 * 8) + 1));
+}
+
+LaunchPadPro::Pad*
+LaunchPadPro::pad_by_id (int pid)
+{
+	PadMap::iterator p = pad_map.find (pid);
+	if (p == pad_map.end()) {
+		return nullptr;
+	}
+	return &p->second;
+}
+
+void
+LaunchPadPro::light_pad (int pad_id, int color, Pad::ColorMode mode)
+{
+	Pad* pad = pad_by_id (pad_id);
+	if (!pad) {
+		return;
+	}
+	pad->set (color, mode);
+	write (pad->state_msg());
+}
+
+void
+LaunchPadPro::pad_off (int pad_id)
+{
+	Pad* pad = pad_by_id (pad_id);
+	if (!pad) {
+		return;
+	}
+	pad->set (0, Pad::Static);
+	write (pad->state_msg());
+}
+
+void
+LaunchPadPro::all_pads_off ()
+{
+	for (PadMap::iterator p = pad_map.begin(); p != pad_map.end(); ++p) {
+		Pad& pad (p->second);
+		pad.set (13, Pad::Static);
+		write (pad.state_msg());
+	}
+}
+
+void
+LaunchPadPro::all_pads_on ()
+{
+	for (PadMap::iterator p = pad_map.begin(); p != pad_map.end(); ++p) {
+		Pad& pad (p->second);
+		pad.set (random() % color_map.size(), Pad::Static);
+		write (pad.state_msg());
+	}
+}
+
+void
+LaunchPadPro::set_device_mode (DeviceMode m)
+{
+	MidiByteArray msg (9, 0xf0, 0x00, 0x20, 0x29, 0x2, 0xe, 0x10, 0x0, 0xf7);
+
+	switch (m) {
+	case Standalone:
+		msg[7] = 0x0;
+		break;
+	case DAW:
+		msg[7] = 0x1;
+		break;
+	case Live:
+		msg[6] = 0xe;
+		msg[7] = 0x0;
+		break;
+	case Programmer:
+		msg[6] = 0xe;
+		msg[6] = 0x1;
+		break;
+	}
+
+	write (msg);
+}
+
+void
+LaunchPadPro::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t sz)
+{
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Sysex, %1 bytes\n", sz));
+}
+
+void
+LaunchPadPro::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
+{
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("CC %1 (value %2)\n", (int) ev->controller_number, (int) ev->value));
+
+}
+
+void
+LaunchPadPro::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* ev)
+{
+	// DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Note On %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
+
+	if (ev->velocity == 0) {
+		handle_midi_note_off_message (parser, ev);
+		return;
+	}
+}
+
+void
+LaunchPadPro::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
+{
+	// DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Note Off %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
 }
