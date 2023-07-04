@@ -193,7 +193,7 @@ LaunchPadPro::begin_using_device ()
 {
 	DEBUG_TRACE (DEBUG::Launchpad, "begin using device\n");
 
-	set_device_mode (Programmer);
+	set_device_mode (Standalone);
 	// all_pads_off ();
 	all_pads_on ();
 #if 0
@@ -498,7 +498,7 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 
 	switch (m) {
 	case Standalone:
-		msg[7] = 0x0;
+		/* no edit necessary */
 		break;
 	case DAW:
 		msg[7] = 0x1;
@@ -509,9 +509,11 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 		break;
 	case Programmer:
 		msg[6] = 0xe;
-		msg[6] = 0x1;
+		msg[7] = 0x1;
 		break;
 	}
+
+	std::cerr << "Send " << msg << " to enter mode " << m << std::endl;
 
 	write (msg);
 }
