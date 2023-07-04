@@ -135,7 +135,7 @@ class LaunchPadPro : public MIDISurface
 	enum DeviceMode {
 		Standalone,
 		DAW,
-		Live,
+		LiveSession,
 		Programmer
 	};
 
@@ -227,6 +227,24 @@ class LaunchPadPro : public MIDISurface
 	void handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes*);
 	void handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes*);
 	void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t count);
+
+	MIDI::Port* _daw_in_port;
+	MIDI::Port* _daw_out_port;
+	std::shared_ptr<ARDOUR::Port> _daw_in;
+	std::shared_ptr<ARDOUR::Port> _daw_out;
+
+	void port_registration_handler ();
+	int ports_acquire ();
+	void ports_release ();
+	std::string input_daw_port_name () const;
+	std::string output_daw_port_name () const;
+	void connect_daw_ports ();
+
+	void daw_write (const MidiByteArray&);
+	void daw_write (MIDI::byte const *, size_t);
+
+	void reconnect_for_programmer ();
+	void reconnect_for_session ();
 
 	mutable LPPRO_GUI* _gui;
 	void build_gui ();

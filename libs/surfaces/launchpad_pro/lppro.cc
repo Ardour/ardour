@@ -98,7 +98,7 @@ LaunchPadPro::probe (std::string& i, std::string& o)
 
 	auto has_lppro = [](string const& s) {
 		std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name (s);
-		return pn.find ("Launchpad Pro MK3 MIDI 3") != string::npos;
+		return pn.find ("Launchpad Pro MK3 MIDI 1") != string::npos;
 	};
 
 	auto pi = std::find_if (midi_inputs.begin (), midi_inputs.end (), has_lppro);
@@ -114,7 +114,8 @@ LaunchPadPro::probe (std::string& i, std::string& o)
 }
 
 LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
-	: MIDISurface (s, X_("Novation Launchpad Pro"), X_("Launchpad Pro"), true)
+	: MIDISurface (s, X_("Novation Launchpad Pro"), X_("Launchpad Pro"), false)
+	, _daw_out_port (nullptr)
 	, _gui (nullptr)
 {
 	run_event_loop ();
@@ -125,6 +126,8 @@ LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
 		_async_in->connect (pn_in);
 		_async_out->connect (pn_out);
 	}
+
+	connect_daw_ports ();
 
 	build_color_map ();
 	build_pad_map ();
@@ -193,7 +196,7 @@ LaunchPadPro::begin_using_device ()
 {
 	DEBUG_TRACE (DEBUG::Launchpad, "begin using device\n");
 
-	set_device_mode (Standalone);
+	set_device_mode (Programmer);
 	// all_pads_off ();
 	all_pads_on ();
 #if 0
@@ -242,6 +245,13 @@ LaunchPadPro::get_state() const
 {
 	XMLNode& node (MIDISurface::get_state());
 
+	XMLNode* child = new XMLNode (X_("DAWInput"));
+	child->add_child_nocopy (_daw_in->get_state());
+	node.add_child_nocopy (*child);
+	child = new XMLNode (X_("DAWOutput"));
+	child->add_child_nocopy (_daw_out->get_state());
+	node.add_child_nocopy (*child);
+
 	return node;
 }
 
@@ -268,12 +278,38 @@ LaunchPadPro::input_port_name () const
 	*/
 	return X_("system:midi_capture_1319078870");
 #else
+	return X_("Launchpad Pro MK3 MIDI 1 in");
+#endif
+}
+
+std::string
+LaunchPadPro::input_daw_port_name () const
+{
+#ifdef __APPLE__
+	/* the origin of the numeric magic identifiers is known only to Novation
+	   and may change in time. This is part of how CoreMIDI works.
+	*/
+	return X_("system:midi_capture_1319078870");
+#else
 	return X_("Launchpad Pro MK3 MIDI 3 in");
 #endif
 }
 
 std::string
 LaunchPadPro::output_port_name () const
+{
+#ifdef __APPLE__
+	/* the origin of the numeric magic identifiers is known only to Novation
+	   and may change in time. This is part of how CoreMIDI works.
+	*/
+	return X_("system:midi_playback_3409210341");
+#else
+	return X_("Launchpad Pro MK3 MIDI 1 out");
+#endif
+}
+
+std::string
+LaunchPadPro::output_daw_port_name () const
 {
 #ifdef __APPLE__
 	/* the origin of the numeric magic identifiers is known only to Novation
@@ -494,6 +530,7 @@ LaunchPadPro::all_pads_on ()
 void
 LaunchPadPro::set_device_mode (DeviceMode m)
 {
+	/* LP Pro MK3 programming manual, pages 14 and 18 */
 	MidiByteArray msg (9, 0xf0, 0x00, 0x20, 0x29, 0x2, 0xe, 0x10, 0x0, 0xf7);
 
 	switch (m) {
@@ -503,7 +540,7 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 	case DAW:
 		msg[7] = 0x1;
 		break;
-	case Live:
+	case LiveSession:
 		msg[6] = 0xe;
 		msg[7] = 0x0;
 		break;
@@ -513,9 +550,15 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 		break;
 	}
 
-	std::cerr << "Send " << msg << " to enter mode " << m << std::endl;
 
-	write (msg);
+	if (m == Programmer) {
+		std::cerr << "Send to port 1 " << msg << " to enter mode " << m << std::endl;
+		write (msg);
+	} else {
+		std::cerr << "back to live mode\n";
+		MidiByteArray first_msg (9, 0xf0, 0x00, 0x20, 0x29, 0x2, 0xe, 0xe, 0x0, 0xf7);
+		write (first_msg);
+	}
 }
 
 void
@@ -534,16 +577,110 @@ LaunchPadPro::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes
 void
 LaunchPadPro::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* ev)
 {
-	// DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Note On %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
-
 	if (ev->velocity == 0) {
 		handle_midi_note_off_message (parser, ev);
 		return;
 	}
+
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Note On %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
 }
 
 void
 LaunchPadPro::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
 {
-	// DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Note Off %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Note Off %1 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity));
+}
+
+void
+LaunchPadPro::port_registration_handler ()
+{
+	MIDISurface::port_registration_handler ();
+	connect_daw_ports ();
+}
+
+void
+LaunchPadPro::connect_daw_ports ()
+{
+	if (!_daw_in || !_daw_out) {
+		/* ports not registered yet */
+		return;
+	}
+
+	if (_daw_in->connected() && _daw_out->connected()) {
+		/* don't waste cycles here */
+		return;
+	}
+
+	std::vector<std::string> in;
+	std::vector<std::string> out;
+
+	AudioEngine::instance()->get_ports (string_compose (".*%1", input_daw_port_name()), DataType::MIDI, PortFlags (IsPhysical|IsOutput), in);
+	AudioEngine::instance()->get_ports (string_compose (".*%1", output_daw_port_name()), DataType::MIDI, PortFlags (IsPhysical|IsInput), out);
+
+	if (!in.empty() && !out.empty()) {
+		if (!_daw_in->connected()) {
+			AudioEngine::instance()->connect (_daw_in->name(), in.front());
+		}
+		if (!_daw_out->connected()) {
+			AudioEngine::instance()->connect (_daw_out->name(), out.front());
+		}
+	}
+}
+
+int
+LaunchPadPro::ports_acquire ()
+{
+	int ret = MIDISurface::ports_acquire ();
+
+	if (!ret) {
+		_daw_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, string_compose (X_("%1 daw in"), port_name_prefix), true);
+		if (_daw_in) {
+			_daw_in_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_daw_in).get();
+			_daw_out = AudioEngine::instance()->register_output_port (DataType::MIDI, string_compose (X_("%1 daw out"), port_name_prefix), true);
+		}
+		if (_daw_out) {
+			_daw_out_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
+			return 0;
+		}
+
+		connect_to_port_parser (*_daw_in_port);
+
+		ret = -1;
+	}
+
+	return ret;
+}
+
+void
+LaunchPadPro::ports_release ()
+{
+	/* wait for button data to be flushed */
+	MIDI::Port* daw_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_daw_out).get();
+	AsyncMIDIPort* asp;
+	asp = dynamic_cast<AsyncMIDIPort*> (daw_port);
+	asp->drain (10000, 500000);
+
+	{
+		Glib::Threads::Mutex::Lock em (AudioEngine::instance()->process_lock());
+		AudioEngine::instance()->unregister_port (_daw_in);
+		AudioEngine::instance()->unregister_port (_daw_out);
+	}
+
+	_daw_in.reset ((ARDOUR::Port*) 0);
+	_daw_out.reset ((ARDOUR::Port*) 0);
+
+	MIDISurface::ports_release ();
+}
+
+void
+LaunchPadPro::daw_write (const MidiByteArray& data)
+{
+	/* immediate delivery */
+	_daw_out_port->write (&data[0], data.size(), 0);
+}
+
+void
+LaunchPadPro::daw_write (MIDI::byte const * data, size_t size)
+{
+	_daw_out_port->write (data, size, 0);
 }
