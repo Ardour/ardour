@@ -154,6 +154,7 @@ public:
 	static PBD::Signal0<void> LuaTimerS; // deci-seconds (Timer every 1s)
 	static PBD::Signal0<void> LuaTimerDS; // deci-seconds (Timer every .1s)
 	static PBD::Signal0<void> SetSession; // emitted when a session is loaded
+	static PBD::Signal0<void> SelectionChanged; // emitted when editor selection changes
 
 private:
 	LuaInstance();
@@ -180,11 +181,14 @@ private:
 	LuaCallbackMap _callbacks;
 	PBD::ScopedConnectionList _slotcon;
 
+	void selection_changed ();
+
 	void every_second ();
 	sigc::connection second_connection;
 
 	void every_point_one_seconds ();
 	sigc::connection point_one_second_connection;
+
 };
 
 #endif

@@ -91,6 +91,9 @@ STATIC(LuaTimerDS, &LuaInstance::LuaTimerDS, 0)
 // Session load
 STATIC(SetSession, &LuaInstance::SetSession, 0)
 
+// Editor Selection Changed
+STATIC(SelectionChanged, &LuaInstance::SelectionChanged, 0)
+
 // TODO per track/route signals,
 // TODO per plugin actions / controllables
 // TODO per region actions

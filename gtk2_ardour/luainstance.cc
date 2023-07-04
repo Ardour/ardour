@@ -539,6 +539,7 @@ using namespace ARDOUR;
 PBD::Signal0<void> LuaInstance::LuaTimerS;
 PBD::Signal0<void> LuaInstance::LuaTimerDS;
 PBD::Signal0<void> LuaInstance::SetSession;
+PBD::Signal0<void> LuaInstance::SelectionChanged;
 
 void
 LuaInstance::register_hooks (lua_State* L)
@@ -1346,6 +1347,12 @@ LuaInstance::init ()
 
 	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
 	lua_setglobal (L, "Editor");
+
+	Selection& sel (PublicEditor::instance().get_selection ());
+	sel.TimeChanged.connect (sigc::mem_fun (*this, &LuaInstance::selection_changed));
+	sel.RegionsChanged.connect (sigc::mem_fun (*this, &LuaInstance::selection_changed));
+	sel.TracksChanged.connect (sigc::mem_fun (*this, &LuaInstance::selection_changed));
+	sel.MarkersChanged.connect (sigc::mem_fun (*this, &LuaInstance::selection_changed));
 }
 
 int
@@ -1456,6 +1463,12 @@ void
 LuaInstance::every_point_one_seconds ()
 {
 	LuaTimerDS (); // emit signal
+}
+
+void
+LuaInstance::selection_changed ()
+{
+	SelectionChanged (); // emit signal
 }
 
 int
