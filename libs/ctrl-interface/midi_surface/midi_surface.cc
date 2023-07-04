@@ -301,9 +301,15 @@ MIDISurface::midi_input_handler (IOCondition ioc, MIDI::Port* port)
 void
 MIDISurface::connect_to_parser ()
 {
-	DEBUG_TRACE (DEBUG::MIDISurface, string_compose ("Connecting to signals on port %2\n", _input_port->name()));
+	connect_to_port_parser (*_input_port);
+}
 
-	MIDI::Parser* p = _input_port->parser();
+void
+MIDISurface::connect_to_port_parser (MIDI::Port& port)
+{
+	DEBUG_TRACE (DEBUG::MIDISurface, string_compose ("Connecting to signals on port %1\n", port.name()));
+
+	MIDI::Parser* p = port.parser();
 
 	/* Incoming sysex */
 	p->sysex.connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_sysex, this, _1, _2, _3));

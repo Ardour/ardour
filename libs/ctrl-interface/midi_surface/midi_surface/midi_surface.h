@@ -86,6 +86,7 @@ class MIDISurface : public ARDOUR::ControlProtocol
 	void do_request (MidiSurfaceRequest*);
 
 	virtual void connect_to_parser ();
+	virtual void connect_to_port_parser (MIDI::Port&);
 	virtual void handle_midi_pitchbend_message (MIDI::Parser&, MIDI::pitchbend_t) {}
 	virtual void handle_midi_polypressure_message (MIDI::Parser&, MIDI::EventTwoBytes*) {}
 	virtual void handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes*) {}
