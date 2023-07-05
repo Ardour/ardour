@@ -100,3 +100,10 @@ STATIC(SelectionChanged, &LuaInstance::SelectionChanged, 0)
 //SESSIONOBJECT(PropertyChanged, &ARDOUR::Stateful::PropertyChanged, 1)
 
 // TODO any location action
+
+// /////////////////////////////////////////////////////////////////////
+// NOTE: WHEN ADDING/REMOVING SIGNALS, UPDATE libs/ardour/luabindings.cc
+// TO MATCH THE TOTAL NUMBER OF SIGNALS.
+//
+// CLASSKEYS(std::bitset<50ul>); // LuaSignal::LAST_SIGNAL
+// /////////////////////////////////////////////////////////////////////
