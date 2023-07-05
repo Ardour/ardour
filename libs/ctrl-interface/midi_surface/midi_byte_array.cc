@@ -26,11 +26,15 @@
 #include <iomanip>
 #include <stdexcept>
 
-MidiByteArray::MidiByteArray (size_t size, MIDI::byte array[])
-  : std::vector<MIDI::byte>()
+MidiByteArray::MidiByteArray (std::vector<MIDI::byte> const & v)
 {
-	for  (size_t i = 0; i < size; ++i)
-	{
+	insert (end(), v.begin(), v.end());
+}
+
+MidiByteArray::MidiByteArray (size_t size, MIDI::byte array[])
+	: std::vector<MIDI::byte>()
+{
+	for  (size_t i = 0; i < size; ++i) {
 		push_back (array[i]);
 	}
 }
@@ -41,8 +45,7 @@ MidiByteArray::MidiByteArray (size_t count, MIDI::byte first, ...)
 	push_back (first);
 	va_list var_args;
 	va_start (var_args, first);
-	for  (size_t i = 1; i < count; ++i)
-	{
+	for  (size_t i = 1; i < count; ++i) {
 		MIDI::byte b = va_arg (var_args, int);
 		push_back (b);
 	}
@@ -110,4 +113,3 @@ MidiByteArray::compare_n (const MidiByteArray& other, MidiByteArray::size_type n
 
 	return true;
 }
-	
