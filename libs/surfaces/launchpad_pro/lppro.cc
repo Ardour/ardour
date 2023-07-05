@@ -71,15 +71,13 @@ using namespace Gtkmm2ext;
 
 #define NOVATION          0x1235
 #define LAUNCHPADPROMK3   0x0123
+static const std::vector<MIDI::byte> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xe });
 
 bool
 LaunchPadPro::available ()
 {
-	bool rv = LIBUSB_SUCCESS == libusb_init (0);
-	if (rv) {
-		libusb_exit (0);
-	}
-	return rv;
+	/* no preconditions other than the device being present */
+	return true;
 }
 
 bool
@@ -197,8 +195,8 @@ LaunchPadPro::begin_using_device ()
 	DEBUG_TRACE (DEBUG::Launchpad, "begin using device\n");
 
 	set_device_mode (Programmer);
-	// all_pads_off ();
-	all_pads_on ();
+	scroll_text ("hello, world", 13, true, 3);
+
 #if 0
 	init_buttons (true);
 	init_touch_strip (false);
@@ -531,32 +529,38 @@ void
 LaunchPadPro::set_device_mode (DeviceMode m)
 {
 	/* LP Pro MK3 programming manual, pages 14 and 18 */
-	MidiByteArray msg (9, 0xf0, 0x00, 0x20, 0x29, 0x2, 0xe, 0x10, 0x0, 0xf7);
+	MidiByteArray msg (sysex_header);
 
 	switch (m) {
 	case Standalone:
-		/* no edit necessary */
+		msg.push_back (0x10);
+		msg.push_back (0x0);
 		break;
 	case DAW:
+		msg.push_back (0x10);
+		msg.push_back (0x1);
+		msg[6] = 0x10;
 		msg[7] = 0x1;
 		break;
 	case LiveSession:
-		msg[6] = 0xe;
-		msg[7] = 0x0;
+		msg.push_back (0xe);
+		msg.push_back (0x0);
 		break;
 	case Programmer:
-		msg[6] = 0xe;
-		msg[7] = 0x1;
+		msg.push_back (0xe);
+		msg.push_back (0x1);
 		break;
 	}
 
+	msg.push_back (0xf7);
 
 	if (m == Programmer) {
-		std::cerr << "Send to port 1 " << msg << " to enter mode " << m << std::endl;
+		std::cerr << "Send to port 1 " << msg << " of size " << msg.size() << " to enter mode " << m << std::endl;
 		write (msg);
 	} else {
 		std::cerr << "back to live mode\n";
-		MidiByteArray first_msg (9, 0xf0, 0x00, 0x20, 0x29, 0x2, 0xe, 0xe, 0x0, 0xf7);
+		MIDI::byte m[] = {0xf0, 0x00, 0x20, 0x29, 0x2, 0xe, 0xe, 0x0, 0xf7};
+		MidiByteArray first_msg (9, m);
 		write (first_msg);
 	}
 }
@@ -683,4 +687,28 @@ void
 LaunchPadPro::daw_write (MIDI::byte const * data, size_t size)
 {
 	_daw_out_port->write (data, size, 0);
+}
+
+void
+LaunchPadPro::scroll_text (std::string const & txt, int color, bool loop, float speed)
+{
+	MidiByteArray msg (sysex_header);
+
+	msg.push_back (0x32);
+	msg.push_back (color);
+	msg.push_back (loop ? 1: 0);
+
+	for (std::string::size_type i = 0; i < txt.size(); ++i) {
+		msg.push_back (txt[i] & 0xf7);
+	}
+
+	msg.push_back (0xf7);
+	write (msg);
+
+	if (speed != 0.f) {
+		msg[sysex_header.size() + 3] = (MIDI::byte) (floor (1.f + (speed * 6.f)));
+		msg[sysex_header.size() + 4] = 0xf7;
+		msg.resize (sysex_header.size() + 5);
+		write (msg);
+	}
 }

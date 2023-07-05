@@ -246,6 +246,8 @@ class LaunchPadPro : public MIDISurface
 	void reconnect_for_programmer ();
 	void reconnect_for_session ();
 
+	void scroll_text (std::string const &, int color, bool loop, float speed = 0);
+
 	mutable LPPRO_GUI* _gui;
 	void build_gui ();
 };
