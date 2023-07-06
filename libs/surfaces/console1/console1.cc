@@ -35,6 +35,7 @@
 #include "ardour/monitor_control.h"
 #include "ardour/phase_control.h"
 #include "ardour/readonly_control.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/stripable.h"
 #include "ardour/track.h"
@@ -263,7 +264,7 @@ Console1::notify_session_loaded ()
 	DEBUG_TRACE (DEBUG::Console1, "************** Session Loaded() ********************\n");
 	create_strip_inventory ();
 	connect_internal_signals ();
-	if (session) {
+	/*if (session) {
 		DEBUG_TRACE (DEBUG::Console1, "session available\n");
 		uint32_t i = 0;
 		while (!first_selected_stripable () && i < 10) {
@@ -271,9 +272,11 @@ Console1::notify_session_loaded ()
 			std::this_thread::sleep_for (std::chrono::milliseconds (1000));
 			++i;
 		}
-		if (i < 11)
+		if (i < 10)
 			stripable_selection_changed ();
-	}
+        else
+			DEBUG_TRACE (DEBUG::Console1, "no selected stripable found\n");
+	}*/
 }
 
 void
@@ -540,7 +543,13 @@ void
 Console1::stripable_selection_changed ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "stripable_selection_changed \n");
-	set_current_stripable (first_selected_stripable ());
+	std::shared_ptr<Stripable> r = ControlProtocol::first_selected_stripable ();
+	if ( r )
+    	set_current_stripable (r);
+
+	// select_rid_by_index (0);
+	// set_current_stripable (ControlProtocol::first_selected_stripable ());
+	// set_current_stripable (first_selected_stripable ());
 }
 
 void
@@ -551,8 +560,10 @@ Console1::drop_current_stripable ()
 		if (_current_stripable == session->monitor_out ()) {
 			set_current_stripable (session->master_out ());
 		} else {
-			set_current_stripable (std::shared_ptr<Stripable> ());
+			set_current_stripable (_current_stripable);
 		}
+	} else {
+		set_current_stripable (std::shared_ptr<Stripable> ());
 	}
 }
 
@@ -1181,9 +1192,16 @@ Console1::get_index_by_inventory_order (order_t order)
 void
 Console1::select_rid_by_index (uint32_t index)
 {
+	int rid = 0;
 #ifdef MIXBUS
-	set_rid_selection (index + 1);
+	rid = index + 1;
+	// set_rid_selection (index + 1);
 #else
-	set_rid_selection (index + 2);
+	rid = index + 2;
+	// set_rid_selection (index + 2);
 #endif
+	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
+	if (s) {
+		session->selection ().select_stripable_and_maybe_group (s, true, false, 0);
+	}
 }

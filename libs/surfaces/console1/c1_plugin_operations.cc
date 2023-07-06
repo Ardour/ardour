@@ -117,8 +117,6 @@ Console1::load_mapping (XMLNode* mapping_xml)
 
 		(*i)->get_property ("type", param_type);
 
-        
-
 		const XMLNodeList& plist = (*i)->children ();
 
 		XMLNodeConstIterator j;
@@ -245,15 +243,22 @@ Console1::remove_plugin_operations ()
 
 	for (auto& e : encoders) {
 		e.second->set_plugin_action (0);
+		e.second->set_plugin_shift_action (0);
 		e.second->set_value (0);
 	}
-	for (auto& c : buttons) {
-		if (c.first == ControllerID::TRACK_GROUP)
+	for (auto& b : buttons) {
+		if (b.first == ControllerID::TRACK_GROUP)
 			continue;
-		if (c.first >= ControllerID::FOCUS1 && c.first <= ControllerID::FOCUS20)
+		if (b.first >= ControllerID::FOCUS1 && b.first <= ControllerID::FOCUS20)
 			continue;
-		c.second->set_plugin_action (0);
-		c.second->set_led_state (false);
+		b.second->set_plugin_action (0);
+		b.second->set_plugin_shift_action (0);
+		b.second->set_led_state (false);
+	}
+	for (auto& m : multi_buttons) {
+		m.second->set_plugin_action (0);
+		m.second->set_plugin_shift_action (0);
+		m.second->set_led_state (false);
 	}
 }
 
@@ -338,8 +343,10 @@ Console1::spill_plugins (const int32_t plugin_index)
 	PluginMappingMap::iterator pmmit = pluginMappingMap.find (plugin->unique_id ());
 	mapping_found = (pmmit != pluginMappingMap.end ());
 
-	if (!mapping_found && create_mapping_stubs ) {
-		create_mapping (proc, plugin);
+	if (!mapping_found) {
+		if (create_mapping_stubs) {
+			create_mapping (proc, plugin);
+		}
 		return true;
 	}
 
@@ -376,7 +383,7 @@ Console1::spill_plugins (const int32_t plugin_index)
 				bool swtch = false;
 				if (parameterDescriptor.integer_step && parameterDescriptor.upper == 1) {
 					swtch = true;
-				} else if (ppm.is_switch ){
+				} else if (ppm.is_switch) {
 					swtch = true;
 				}
 				if (!swtch) {
@@ -386,15 +393,17 @@ Console1::spill_plugins (const int32_t plugin_index)
 						  [=] (bool b, PBD::Controllable::GroupControlDisposition d) -> void {
 							double v = parameterDescriptor.to_interface (c->get_value (), true);
 							e->set_value (v * 127);
-							DEBUG_TRACE (DEBUG::Console1,
-							             string_compose ("<-Encoder Plugin parameter %1: %2 - %3\n", n_controls, v*127, v));
+							DEBUG_TRACE (
+							  DEBUG::Console1,
+							  string_compose ("<-Encoder Plugin parameter %1: %2 - %3\n", n_controls, v * 127, v));
 						};
 						e->set_plugin_action ([=] (uint32_t val) {
 							double v = val / 127.f;
 							c->set_value (parameterDescriptor.from_interface (v, true),
 							              PBD::Controllable::GroupControlDisposition::UseGroup);
-							DEBUG_TRACE (DEBUG::Console1,
-							             string_compose ("->Encoder Plugin parameter %1: %2 - %3\n", n_controls, val, v));
+							DEBUG_TRACE (
+							  DEBUG::Console1,
+							  string_compose ("->Encoder Plugin parameter %1: %2 - %3\n", n_controls, val, v));
 						});
 						c->Changed.connect (
 						  plugin_connections, MISSING_INVALIDATOR, boost::bind (plugin_mapping, _1, _2), this);
@@ -410,7 +419,9 @@ Console1::spill_plugins (const int32_t plugin_index)
 						  [=] (bool b, PBD::Controllable::GroupControlDisposition d) -> void {
 							cb->set_led_state (c->get_value ());
 							DEBUG_TRACE (DEBUG::Console1,
-							             string_compose ("<-ControllerButton Plugin parameter %1: %2 \n", n_controls, c->get_value()));
+							             string_compose ("<-ControllerButton Plugin parameter %1: %2 \n",
+							                             n_controls,
+							                             c->get_value ()));
 						};
 						cb->set_plugin_action ([=] (uint32_t val) {
 							double v = val / 127.f;
