@@ -113,6 +113,8 @@ class LaunchPadPro : public MIDISurface
 		Lower8 = 0x6c
 	};
 
+	static const PadID all_pad_ids[];
+
 	LaunchPadPro (ARDOUR::Session&);
 	~LaunchPadPro ();
 
@@ -138,6 +140,31 @@ class LaunchPadPro : public MIDISurface
 		LiveSession,
 		Programmer
 	};
+
+	enum Layout {
+		SessionLayout,
+		Fader,
+		ChordLayout,
+		CustomLayout,
+		NoteLayout,
+		Scale,
+		SequencerSettings,
+		SequencerSteps,
+		SequencerVelocity,
+		SequencerPatternSettings,
+		SequencerProbability,
+		SequencerMutation,
+		SequencerMicroStep,
+		SequencerProjects,
+		SequencerPatterns,
+		SequencerTempo,
+		SequencerSwing,
+		ProgrammerLayout,
+		Settings,
+		CustomSettings
+	};
+
+	static const Layout AllLayouts[];
 
 	typedef std::map<int,int> ColorMap;
 	ColorMap color_map;
@@ -219,7 +246,7 @@ class LaunchPadPro : public MIDISurface
 	void light_pad (int pad_id, int color, Pad::ColorMode);
 	void pad_off (int pad_id);
 	void all_pads_off ();
-	void all_pads_on ();
+	void all_pads_on (int color);
 
 	void set_device_mode (DeviceMode);
 
@@ -250,6 +277,15 @@ class LaunchPadPro : public MIDISurface
 
 	mutable LPPRO_GUI* _gui;
 	void build_gui ();
+
+	typedef int XY_Note_Map[8][8];
+	typedef int Note_XY_Map[127];
+
+	std::vector<int> layout_xy_note_map;
+	std::vector<int> layout_note_xy_map;
+
+	void build_layout_maps ();
+	Layout _current_layout;
 };
 
 } /* namespace */
