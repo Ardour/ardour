@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- 2017-4-13 Nathan Stewart: Map file creation                     -->
+<!-- Based on Nathan Stewart's Alesis_QX25 map                      -->
 <ArdourMIDIBindings version="1.0.0" name="Devine VersaKey">
 
   <Binding channel="1" ctl="11" function="transport-stop"/>
@@ -9,8 +9,5 @@
 
   <Binding channel="1" ctl="14" function="transport-end"/>
   <Binding channel="1" ctl="15" function="transport-start"/>
-
-  <!-- bind the foot controller to toggle transport -->
-  <!--Binding channel="1" ctl="64" action="Transport/ToggleRoll"/ -->
 
 </ArdourMIDIBindings>
