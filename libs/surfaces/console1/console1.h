@@ -397,7 +397,7 @@ class Console1 : public MIDISurface
 	void drop_current_stripable ();
 	/*void use_master ();
 	void use_monitor ();*/
-	void stripable_selection_changed ();
+	void stripable_selection_changed () override;
 	/*PBD::ScopedConnection selection_connection;*/
 	PBD::ScopedConnectionList stripable_connections;
 	PBD::ScopedConnectionList console1_connections;

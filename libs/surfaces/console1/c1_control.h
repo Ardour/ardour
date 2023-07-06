@@ -44,11 +44,13 @@ class ControllerButton : public Controller
 	                  ControllerID id,
 	                  boost::function<void (uint32_t)> action,
 	                  boost::function<void (uint32_t)> shift_action = 0,
-	                  boost::function<void (uint32_t)> plugin_action = 0)
+	                  boost::function<void (uint32_t)> plugin_action = 0,
+                      boost::function<void (uint32_t)> plugin_shift_action = 0 )
 	  : Controller (console1, id)
 	  , action (action)
 	  , shift_action (shift_action)
 	  , plugin_action (plugin_action)
+      , plugin_shift_action (plugin_shift_action)
 	{
 		console1->buttons.insert (std::make_pair (id, this));
 	}
@@ -56,6 +58,7 @@ class ControllerButton : public Controller
 	ControllerType get_type () { return CONTROLLER_BUTTON; }
 
 	void set_plugin_action (boost::function<void (uint32_t)> action) { plugin_action = action; }
+	void set_plugin_shift_action (boost::function<void (uint32_t)> action) { plugin_shift_action = action; }
 
 	virtual void set_led_state (bool onoff)
 	{
@@ -81,6 +84,7 @@ class ControllerButton : public Controller
 	boost::function<void (uint32_t)> action;
 	boost::function<void (uint32_t)> shift_action;
 	boost::function<void (uint32_t)> plugin_action;
+	boost::function<void (uint32_t)> plugin_shift_action;
 };
 
 class MultiStateButton : public Controller
@@ -90,10 +94,15 @@ class MultiStateButton : public Controller
 	                  ControllerID id,
 	                  std::vector<uint32_t> state_values,
 	                  boost::function<void (uint32_t)> action,
-	                  boost::function<void (uint32_t)> shift_action = 0)
+	                  boost::function<void (uint32_t)> shift_action = 0,
+	                  boost::function<void (uint32_t)> plugin_action = 0,
+	                  boost::function<void (uint32_t)> plugin_shift_action = 0
+                      )
 	  : Controller (console1, id)
 	  , action (action)
 	  , shift_action (shift_action)
+	  , plugin_action (action)
+	  , plugin_shift_action (shift_action)
 	  , state_values (state_values)
 	{
 		console1->multi_buttons.insert (std::make_pair (id, this));
@@ -113,10 +122,15 @@ class MultiStateButton : public Controller
 		console1->write (buf, 3);
 	}
 
+	void set_plugin_action (boost::function<void (uint32_t)> action) { plugin_action = action; }
+	void set_plugin_shift_action (boost::function<void (uint32_t)> action) { plugin_shift_action = action; }
+
 	uint32_t state_count () { return state_values.size (); }
 
 	boost::function<void (uint32_t)> action;
 	boost::function<void (uint32_t)> shift_action;
+	boost::function<void (uint32_t)> plugin_action;
+	boost::function<void (uint32_t)> plugin_shift_action;
 
   private:
 	std::vector<uint32_t> state_values;
@@ -158,11 +172,13 @@ class Encoder : public Controller
 	         ControllerID id,
 	         boost::function<void (uint32_t)> action,
 	         boost::function<void (uint32_t)> shift_action = 0,
-	         boost::function<void (uint32_t)> plugin_action = 0)
+	         boost::function<void (uint32_t)> plugin_action = 0,
+             boost::function<void (uint32_t)> plugin_shift_action = 0)
 	  : Controller (console1, id)
 	  , action (action)
 	  , shift_action (shift_action)
 	  , plugin_action (plugin_action)
+	  , plugin_shift_action (plugin_action)
 	{
 		console1->encoders.insert (std::make_pair (id, this));
 	}
@@ -170,6 +186,7 @@ class Encoder : public Controller
 	ControllerType get_type () { return ENCODER; }
 
 	void set_plugin_action (boost::function<void (uint32_t)> action) { plugin_action = action; }
+	void set_plugin_shift_action (boost::function<void (uint32_t)> action) { plugin_shift_action = action; }
 
 	virtual void set_value (uint32_t value)
 	{
@@ -183,6 +200,7 @@ class Encoder : public Controller
 	boost::function<void (uint32_t)> action;
 	boost::function<void (uint32_t val)> shift_action;
 	boost::function<void (uint32_t val)> plugin_action;
+	boost::function<void (uint32_t val)> plugin_shift_action;
 
 	PBD::Signal1<void, uint32_t>* plugin_signal;
 };
