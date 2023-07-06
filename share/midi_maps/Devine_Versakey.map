@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Based on Nathan Stewart's Alesis_QX25 map                      -->
+<ArdourMIDIBindings version="1.0.0" name="Devine VersaKey">
+
+  <Binding channel="1" ctl="11" function="transport-stop"/>
+  <Binding channel="1" ctl="12" function="transport-roll"/>
+
+  <Binding channel="1" ctl="16" function="toggle-rec-enable"/>
+
+  <Binding channel="1" ctl="14" function="transport-end"/>
+  <Binding channel="1" ctl="15" function="transport-start"/>
+
+</ArdourMIDIBindings>
