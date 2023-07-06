@@ -44,6 +44,7 @@ namespace PBD {
 	LIBPBD_API extern DebugBits debug_bits;
 	LIBPBD_API DebugBits new_debug_bit (const char* name);
 	LIBPBD_API void debug_print (const char* prefix, std::string str);
+	LIBPBD_API void debug_only_print (const char* prefix, std::string str);
 	LIBPBD_API void set_debug_bits (DebugBits bits);
 	LIBPBD_API int parse_debug_options (const char* str);
 	LIBPBD_API void list_debug_options ();

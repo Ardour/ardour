@@ -100,13 +100,20 @@ PBD::new_debug_bit (const char* name)
 }
 
 void
-PBD::debug_print (const char* prefix, string str)
+PBD::debug_only_print (const char* prefix, string str)
 {
 	if ((PBD::debug_bits & DEBUG::DebugTimestamps).any()) {
 		printf ("%ld %s: %s", g_get_monotonic_time(), prefix, str.c_str());
 	} else {
 		printf ("%s: %s", prefix, str.c_str());
 	}
+}
+
+void
+PBD::debug_print (const char* prefix, string str)
+{
+	debug_only_print (prefix, str);
+
 	if ((PBD::debug_bits & DEBUG::DebugLogToGUI).any()) {
 		std::replace (str.begin (), str.end (), '\n', ' ');
 		debug << prefix << ": "  << str << endmsg;
