@@ -73,6 +73,8 @@ class MIDISurface : public ARDOUR::ControlProtocol
 
 	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
 
+	virtual bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
+
   protected:
 	bool with_pad_filter;
 	bool _in_use;
@@ -94,7 +96,6 @@ class MIDISurface : public ARDOUR::ControlProtocol
 	virtual void handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes*) {}
 	virtual void handle_midi_sysex (MIDI::Parser&, MIDI::byte *, size_t) {}
 
-	virtual bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
 
 	virtual void thread_init ();
 
