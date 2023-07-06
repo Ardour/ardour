@@ -186,7 +186,7 @@ MIDISurface::port_registration_handler ()
 bool
 MIDISurface::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1, std::weak_ptr<ARDOUR::Port>, std::string name2, bool yn)
 {
-	DEBUG_TRACE (DEBUG::MIDISurface, "MIDISurface::connection_handler start\n");
+	DEBUG_TRACE (DEBUG::MIDISurface, string_compose ("MIDISurface::connection_handler start, %1 %2 %3\n", name1, (yn ? "connected" : "disconnected"), name2));
 
 	if (!_input_port || !_output_port) {
 		return false;
@@ -213,8 +213,8 @@ MIDISurface::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1,
 		return false;
 	}
 
-	DEBUG_TRACE (DEBUG::MIDISurface, string_compose ("our ports changed connection state: %1 -> %2 connected ? %3\n",
-	                                           name1, name2, yn));
+	DEBUG_TRACE (DEBUG::MIDISurface, string_compose ("our ports changed connection state: %1 -> %2 connected ? %3, connection state now %4\n",
+	                                                 name1, name2, yn, _connection_state));
 
 	if ((_connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
 
@@ -223,8 +223,8 @@ MIDISurface::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1,
 		   sent and/or the responses from being received.
 		*/
 
-		g_usleep (100000);
                 DEBUG_TRACE (DEBUG::MIDISurface, "device now connected for both input and output\n");
+		g_usleep (100000);
 
                 /* may not have the device open if it was just plugged
                    in. Really need USB device detection rather than MIDI port
@@ -307,9 +307,9 @@ MIDISurface::connect_to_parser ()
 void
 MIDISurface::connect_to_port_parser (MIDI::Port& port)
 {
-	DEBUG_TRACE (DEBUG::MIDISurface, string_compose ("Connecting to signals on port %1\n", port.name()));
-
 	MIDI::Parser* p = port.parser();
+
+	DEBUG_TRACE (DEBUG::MIDISurface, string_compose ("Connecting to signals on port %1 using parser %2\n", port.name(), p));
 
 	/* Incoming sysex */
 	p->sysex.connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_sysex, this, _1, _2, _3));
