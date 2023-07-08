@@ -6273,7 +6273,7 @@ Route::monitoring_state () const
 	 * I don't think it's ever going to be too pretty too look at.
 	 */
 
-	bool const roll        = _session.transport_rolling ();
+	bool const roll        = _session.transport_state_rolling ();
 	bool const auto_input  = _session.config.get_auto_input ();
 	bool const track_rec   = _disk_writer->record_enabled ();
 	bool session_rec;
