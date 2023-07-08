@@ -217,6 +217,8 @@ EventTypeMap::from_symbol(const string& str) const
 		assert(channel < 16);
 		assert(p_id < 127);
 		p_channel = channel;
+	} else if (str == "midi-velocity") {
+		p_type = MidiVelocityAutomation;
 	} else {
 		PBD::warning << "Unknown Parameter '" << str << "'" << endmsg;
 	}
@@ -293,6 +295,8 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		return std::string("midi-channel-pressure-") + PBD::to_string(param.channel());
 	} else if (t == MidiNotePressureAutomation) {
 		return std::string ("midi-note-pressure-") + PBD::to_string (param.channel()) + "-" + PBD::to_string (param.id());
+	} else if (t == MidiVelocityAutomation) {
+		return "midi-velocity";
 	} else {
 		PBD::warning << "Uninitialized Parameter symbol() called." << endmsg;
 		return "";
