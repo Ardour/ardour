@@ -232,8 +232,13 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	/* add the buttons */
 	controls_table.set_border_width (0);
 	controls_table.attach (hide_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-	controls_table.attach (name_label,  2, 3, 1, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 2, 0);
-	controls_table.attach (auto_dropdown, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+
+	if (show_automation_controls()) {
+		controls_table.attach (name_label,  2, 3, 1, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 2, 0);
+		controls_table.attach (auto_dropdown, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+	} else {
+		controls_table.attach (name_label,  3, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 2, 0);
+	}
 
 	Gtk::DrawingArea *blank0 = manage (new Gtk::DrawingArea());
 	Gtk::DrawingArea *blank1 = manage (new Gtk::DrawingArea());
@@ -274,7 +279,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	name_label.show ();
 	hide_button.show ();
 
-	if (_controller) {
+	if (show_automation_controls() && _controller) {
 		_controller->disable_vertical_scroll ();
 		controls_table.attach (*_controller.get(), 2, 4, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 0, 0);
 	}
@@ -310,6 +315,12 @@ AutomationTimeAxisView::~AutomationTimeAxisView ()
 	}
 	delete _view;
 	CatchDeletion (this);
+}
+
+bool
+AutomationTimeAxisView::show_automation_controls() const
+{
+	return (_parameter.type() != MidiVelocityAutomation) || (velocity_mode() != VelocityModeLollipops);
 }
 
 void

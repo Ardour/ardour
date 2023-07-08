@@ -232,6 +232,8 @@ protected:
 
 	VelocityMode _velocity_mode;
 
+	bool show_automation_controls () const;
+
 private:
 	int set_state_2X (const XMLNode &, int);
 };
