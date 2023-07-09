@@ -7174,7 +7174,7 @@ RegionMarkerDrag::aborted (bool)
 }
 
 void
-RegionMarkerDrag::setup_pointer_sample_offset ()
+RegionMarkerDrag::setup_pointer_offset ()
 {
 	const timepos_t model_abs_pos = rv->region ()->position () + (rv->region ()->start ().distance (model.position ()));
 	_pointer_offset               = model_abs_pos.distance (raw_grab_time ());
@@ -7236,7 +7236,7 @@ LollipopDrag::aborted (bool)
 }
 
 void
-LollipopDrag::setup_pointer_sample_offset ()
+LollipopDrag::setup_pointer_offset ()
 {
 	NoteBase* note = static_cast<NoteBase*> (_primary->get_data (X_("note")));
 	_pointer_offset = _region->parent_rv.region()->source_beats_to_absolute_time (note->note()->time ()).distance (raw_grab_time ());

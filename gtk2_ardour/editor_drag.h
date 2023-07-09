@@ -1539,7 +1539,7 @@ class RegionMarkerDrag : public Drag
 		return false;
 	}
 
-	void setup_pointer_sample_offset ();
+	void setup_pointer_offset ();
 
   private:
 	RegionView* rv;
@@ -1572,7 +1572,7 @@ class LollipopDrag : public Drag
 		return false;
 	}
 
-	void setup_pointer_sample_offset ();
+	void setup_pointer_offset ();
 
   private:
 	VelocityGhostRegion*      _region;
