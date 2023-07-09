@@ -1324,6 +1324,15 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 			}
 
+		case AutomationTrackItem:
+			{
+				AutomationTimeAxisView* atv = static_cast<AutomationTimeAxisView*> (item->get_data ("trackview"));
+				if (atv) {
+					_drags->set (new AutomationDrawDrag (this, atv->base_item(), Temporal::AudioTime), event);
+				}
+			}
+			break;
+
 		case AutomationLineItem:
 			_drags->set (new LineDrag (this, item), event);
 			break;

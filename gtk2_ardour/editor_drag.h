@@ -1582,7 +1582,7 @@ class LollipopDrag : public Drag
 class AutomationDrawDrag : public Drag
 {
   public:
-	AutomationDrawDrag (Editor*, ArdourCanvas::Item*, Temporal::TimeDomain);
+	AutomationDrawDrag (Editor*, ArdourCanvas::Rectangle&, Temporal::TimeDomain);
 	~AutomationDrawDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -1590,7 +1590,9 @@ class AutomationDrawDrag : public Drag
 	void finished (GdkEvent*, bool);
 	void aborted (bool);
 
-	void setup_pointer_sample_offset ();
+private:
+	ArdourCanvas::Rectangle& base_rect; /* we do not own this */
+	ArdourCanvas::PolyLine* dragging_line;
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */

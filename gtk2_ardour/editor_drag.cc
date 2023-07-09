@@ -7242,28 +7242,50 @@ LollipopDrag::setup_pointer_offset ()
 	_pointer_offset = _region->parent_rv.region()->source_beats_to_absolute_time (note->note()->time ()).distance (raw_grab_time ());
 }
 
-AutomationDrawDrag::AutomationDrawDrag (Editor* editor, ArdourCanvas::Item* i, Temporal::TimeDomain time_domain)
-	: Drag (editor, i, time_domain)
+AutomationDrawDrag::AutomationDrawDrag (Editor* editor, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
+	: Drag (editor, &r, time_domain)
+	, base_rect (r)
+	, dragging_line (nullptr)
 {
+	DEBUG_TRACE (DEBUG::Drags, "New AutomationDrawDrag\n");
 }
 
 AutomationDrawDrag::~AutomationDrawDrag ()
 {
+	delete dragging_line;
 }
 
 void
-AutomationDrawDrag::start_grab (GdkEvent*, Gdk::Cursor* c)
+AutomationDrawDrag::start_grab (GdkEvent* ev, Gdk::Cursor* c)
 {
+	Drag::start_grab (ev, c);
 }
 
 void
-AutomationDrawDrag::motion (GdkEvent*, bool)
+AutomationDrawDrag::motion (GdkEvent* ev, bool first_move)
 {
+	if (first_move) {
+		dragging_line = new ArdourCanvas::PolyLine (item());
+		dragging_line->set_ignore_events (true);
+		dragging_line->set_outline_color (UIConfiguration::instance().color ("midi note selected outline"));
+	}
+
+	ArdourCanvas::Rect r = base_rect.item_to_canvas (base_rect.get());
+
+	dragging_line->add_point (ArdourCanvas::Duple (ev->motion.x - r.x0, ev->motion.y - r.y0));
 }
 
 void
-AutomationDrawDrag::finished (GdkEvent*, bool)
+AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 {
+	std::cerr << "ADD finished, mo " << motion_occured << std::endl;
+
+	if (!motion_occured) {
+		/* DragManager will tell editor that no motion happened, and
+		   Editor::button_release_handler() will do the right thing.
+		*/
+		return;
+	}
 }
 
 void
@@ -7271,9 +7293,4 @@ AutomationDrawDrag::aborted (bool)
 {
 }
 
-
-void
-AutomationDrawDrag::setup_pointer_sample_offset ()
-{
-}
 
