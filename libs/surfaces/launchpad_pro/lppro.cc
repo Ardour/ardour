@@ -201,10 +201,8 @@ LaunchPadPro::stop_event_loop ()
 int
 LaunchPadPro::begin_using_device ()
 {
-	// if (((DEBUG::Launchpad) & PBD::debug_bits).any()) { PBD::debug_print ("Fooey", "bar!"); }
 	DEBUG_TRACE (DEBUG::Launchpad, "begin using device\n");
 
-	std::cerr << "connect to daw port parser\n";
 	connect_to_port_parser (*_daw_in_port);
 
 	/* Connect DAW input port to event loop */
@@ -215,20 +213,17 @@ LaunchPadPro::begin_using_device ()
 	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &MIDISurface::midi_input_handler), _daw_in_port));
 	asp->xthread().attach (main_loop()->get_context());
 
-	set_device_mode (Programmer);
-	all_pads_off ();
-	// scroll_text ("hello, world", 13, true, 3);
+	/* request current layout */
+	MidiByteArray msg (sysex_header);
+	msg.push_back (0x0);
+	msg.push_back (0xf7);
+	write (msg);
 
-#if 0
-	init_buttons (true);
-	init_touch_strip (false);
-	reset_pad_colors ();
+	set_device_mode (DAW);
+	//set_layout (SessionLayout);
 
 	/* catch current selection, if any so that we can wire up the pads if appropriate */
 	stripable_selection_changed ();
-
-	request_pressure_mode ();
-#endif
 
 	return MIDISurface::begin_using_device ();
 }
@@ -245,17 +240,6 @@ LaunchPadPro::stop_using_device ()
 
 	set_device_mode (Standalone);
 
-#if 0
-	init_buttons (false);
-	strip_buttons_off ();
-
-	for (auto & pad : _xy_pad_map) {
-		pad->set_color (LED::Black);
-		pad->set_state (LED::NoTransition);
-		write (pad->state_msg());
-	}
-
-#endif
 	return MIDISurface::stop_using_device ();
 }
 
@@ -488,8 +472,6 @@ LaunchPadPro::build_pad_map ()
 		}
 	}
 
-	std::cerr << "pad map is " << pad_map.size() << std::endl;
-
 	/* The +1 is for the shift pad at upper left */
 	assert (pad_map.size() == (64 + (5 * 8) + 1));
 }
@@ -512,7 +494,7 @@ LaunchPadPro::light_pad (int pad_id, int color, Pad::ColorMode mode)
 		return;
 	}
 	pad->set (color, mode);
-	write (pad->state_msg());
+	daw_write (pad->state_msg());
 }
 
 void
@@ -523,7 +505,7 @@ LaunchPadPro::pad_off (int pad_id)
 		return;
 	}
 	pad->set (0, Pad::Static);
-	write (pad->state_msg());
+	daw_write (pad->state_msg());
 }
 
 void
@@ -538,7 +520,7 @@ LaunchPadPro::all_pads_off ()
 		msg.push_back (13);
 	}
 	msg.push_back (0xf7);
-	write (msg);
+	daw_write (msg);
 }
 
 void
@@ -548,54 +530,75 @@ LaunchPadPro::all_pads_on (int color)
 	msg.push_back (0xe);
 	msg.push_back (color & 0x7f);
 	msg.push_back (0xf7);
-	write (msg);
+	daw_write (msg);
 
 #if 0
 	for (PadMap::iterator p = pad_map.begin(); p != pad_map.end(); ++p) {
 		Pad& pad (p->second);
 		pad.set (random() % color_map.size(), Pad::Static);
-		write (pad.state_msg());
+		daw_write (pad.state_msg());
 	}
 #endif
+}
+
+void
+LaunchPadPro::set_layout (Layout l, int page)
+{
+	MidiByteArray msg (sysex_header);
+	msg.push_back (0x0);
+	msg.push_back (l);
+	msg.push_back (page);
+	msg.push_back (0x0);
+	msg.push_back (0xf7);
+	std::cerr << "switch to layout " << l << " using " << msg << std::endl;
+	daw_write (msg);
 }
 
 void
 LaunchPadPro::set_device_mode (DeviceMode m)
 {
 	/* LP Pro MK3 programming manual, pages 14 and 18 */
-	MidiByteArray msg (sysex_header);
+	MidiByteArray standalone_or_daw (sysex_header);
+	MidiByteArray live_or_programmer (sysex_header);
 
 	switch (m) {
 	case Standalone:
-		msg.push_back (0x10);
-		msg.push_back (0x0);
+		std::cerr << "entering standalone mode\n";
+		live_or_programmer.push_back (0xe);
+		live_or_programmer.push_back (0x0);
+		live_or_programmer.push_back (0xf7);
+		/* Back to "live" state */
+		write (live_or_programmer);
+		g_usleep (100000);
+		/* disable "daw" mode */
+		standalone_or_daw.push_back (0x10);
+		standalone_or_daw.push_back (0x0);
+		standalone_or_daw.push_back (0xf7);
+		write (standalone_or_daw);
 		break;
+
 	case DAW:
-		msg.push_back (0x10);
-		msg.push_back (0x1);
-		msg[6] = 0x10;
-		msg[7] = 0x1;
+		// live_or_programmer.push_back (0xe);
+		// live_or_programmer.push_back (0x0);
+		// live_or_programmer.push_back (0xf7);
+		/* Back to "live" state */
+		// daw_write (live_or_programmer);
+		// g_usleep (100000);
+		/* Enable DAW mode */
+		standalone_or_daw.push_back (0x10);
+		standalone_or_daw.push_back (0x1);
+		standalone_or_daw.push_back (0xf7);
+		write (standalone_or_daw);
 		break;
-	case LiveSession:
-		msg.push_back (0xe);
-		msg.push_back (0x0);
-		break;
+
 	case Programmer:
-		msg.push_back (0xe);
-		msg.push_back (0x1);
+		std::cerr << "entering programmer mode\n";
+		live_or_programmer.push_back (0xe);
+		live_or_programmer.push_back (0x1);
+		live_or_programmer.push_back (0xf7);
+		/* enter "programmer" state */
+		write (live_or_programmer);
 		break;
-	}
-
-	msg.push_back (0xf7);
-
-	if (m == Programmer) {
-		std::cerr << "Send to port 1 " << msg << " of size " << msg.size() << " to enter mode " << m << std::endl;
-		write (msg);
-	} else {
-		std::cerr << "back to live mode\n";
-		MIDI::byte m[] = {0xf0, 0x00, 0x20, 0x29, 0x2, 0xe, 0xe, 0x0, 0xf7};
-		MidiByteArray first_msg (9, m);
-		write (first_msg);
 	}
 }
 
@@ -608,6 +611,8 @@ LaunchPadPro::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t sz
 		return;
 	}
 
+	const size_t num_layouts = sizeof (AllLayouts) / sizeof (AllLayouts[0]);
+
 	raw_bytes += sysex_header.size();
 
 	switch (raw_bytes[0]) {
@@ -615,8 +620,13 @@ LaunchPadPro::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t sz
 		if (sz < sysex_header.size() + 2) {
 			return;
 		}
-		_current_layout = AllLayouts[raw_bytes[1]];
-		std::cerr << "Current layout = " << _current_layout << std::endl;
+
+		if (raw_bytes[1] < num_layouts) {
+			_current_layout = AllLayouts[raw_bytes[1]];
+			std::cerr << "Current layout = " << _current_layout << std::endl;
+		} else {
+			std::cerr << "ignore illegal layout index " << (int) raw_bytes[1] << std::endl;
+		}
 		break;
 	default:
 		break;
@@ -758,13 +768,13 @@ LaunchPadPro::scroll_text (std::string const & txt, int color, bool loop, float 
 	}
 
 	msg.push_back (0xf7);
-	write (msg);
+	daw_write (msg);
 
 	if (speed != 0.f) {
 		msg[sysex_header.size() + 3] = (MIDI::byte) (floor (1.f + (speed * 6.f)));
 		msg[sysex_header.size() + 4] = 0xf7;
 		msg.resize (sysex_header.size() + 5);
-		write (msg);
+		daw_write (msg);
 	}
 }
 

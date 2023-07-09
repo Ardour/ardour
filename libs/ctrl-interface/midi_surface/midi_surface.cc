@@ -262,6 +262,7 @@ void
 MIDISurface::write (const MidiByteArray& data)
 {
 	/* immediate delivery */
+	std::cerr << "out to " << _async_out->name() << data << std::endl;
 	_output_port->write (&data[0], data.size(), 0);
 }
 

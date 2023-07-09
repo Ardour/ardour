@@ -137,7 +137,6 @@ class LaunchPadPro : public MIDISurface
 	enum DeviceMode {
 		Standalone,
 		DAW,
-		LiveSession,
 		Programmer
 	};
 
@@ -249,6 +248,7 @@ class LaunchPadPro : public MIDISurface
 	void all_pads_on (int color);
 
 	void set_device_mode (DeviceMode);
+	void set_layout (Layout, int page = 0);
 
 	void handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes*);
 	void handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes*);
