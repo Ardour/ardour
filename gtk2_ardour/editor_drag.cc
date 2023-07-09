@@ -7242,3 +7242,38 @@ LollipopDrag::setup_pointer_sample_offset ()
 	_pointer_offset = _region->parent_rv.region()->source_beats_to_absolute_time (note->note()->time ()).distance (raw_grab_time ());
 }
 
+AutomationDrawDrag::AutomationDrawDrag (Editor* editor, ArdourCanvas::Item* i, Temporal::TimeDomain time_domain)
+	: Drag (editor, i, time_domain)
+{
+}
+
+AutomationDrawDrag::~AutomationDrawDrag ()
+{
+}
+
+void
+AutomationDrawDrag::start_grab (GdkEvent*, Gdk::Cursor* c)
+{
+}
+
+void
+AutomationDrawDrag::motion (GdkEvent*, bool)
+{
+}
+
+void
+AutomationDrawDrag::finished (GdkEvent*, bool)
+{
+}
+
+void
+AutomationDrawDrag::aborted (bool)
+{
+}
+
+
+void
+AutomationDrawDrag::setup_pointer_sample_offset ()
+{
+}
+

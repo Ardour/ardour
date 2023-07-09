@@ -1579,4 +1579,18 @@ class LollipopDrag : public Drag
 	ArdourCanvas::Lollipop*   _primary;
 };
 
+class AutomationDrawDrag : public Drag
+{
+  public:
+	AutomationDrawDrag (Editor*, ArdourCanvas::Item*, Temporal::TimeDomain);
+	~AutomationDrawDrag ();
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
+	void motion (GdkEvent*, bool);
+	void finished (GdkEvent*, bool);
+	void aborted (bool);
+
+	void setup_pointer_sample_offset ();
+};
+
 #endif /* __gtk2_ardour_editor_drag_h_ */
