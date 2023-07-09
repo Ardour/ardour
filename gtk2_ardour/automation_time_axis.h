@@ -121,8 +121,8 @@ public:
 		return _parameter;
 	}
 
-	ArdourCanvas::Item* base_item () const {
-		return _base_rect;
+	ArdourCanvas::Rectangle& base_item () const {
+		return *_base_rect;
 	}
 
 	bool has_automation () const;

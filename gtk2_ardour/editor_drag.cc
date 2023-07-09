@@ -6343,7 +6343,7 @@ NoteDrag::aborted (bool)
 
 /** Make an AutomationRangeDrag for lines in an AutomationTimeAxisView */
 AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView* atv, float initial_value, list<TimelineRange> const& r)
-	: Drag (editor, atv->base_item (), editor->default_time_domain ()) /* XXX NUTEMPO FIX TIME DOMAIN */
+	: Drag (editor, &atv->base_item (), editor->default_time_domain ()) /* XXX NUTEMPO FIX TIME DOMAIN */
 	, _ranges (r)
 	, _y_origin (atv->y_position ())
 	, _y_height (atv->effective_height ()) // or atv->lines()->front()->height() ?!
