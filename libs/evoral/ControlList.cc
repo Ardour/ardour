@@ -717,6 +717,12 @@ bool
 ControlList::editor_add_ordered (OrderedPoints const & points, bool with_guard)
 {
 	/* this is for making changes from a graphical line editor */
+
+	/* Note that as the name suggests, @p points must be in time
+	 * order. This code does not check for this condition to be satisfied,
+	 * but it will break if not honored.
+	 */
+
 	if (points.empty()) {
 		return false;
 	}
@@ -731,52 +737,60 @@ ControlList::editor_add_ordered (OrderedPoints const & points, bool with_guard)
 			swap (earliest, latest);
 		}
 
+		timecnt_t distance = earliest.distance (latest);
+
 		(void) erase_range_internal (earliest, latest, _events);
+
+		if (with_guard) {
+			ControlEvent cp (earliest, 0.0);
+			double v = unlocked_eval (earliest);
+			iterator     s = lower_bound (_events.begin (), _events.end (), &cp, time_comparator);
+			if (s != _events.end ()) {
+				_events.insert (s, new ControlEvent (earliest, v));
+			}
+		}
+		if (with_guard && distance > 0) {
+			ControlEvent cp (latest, 0.0);
+			double v = unlocked_eval (latest);
+			iterator     s = lower_bound (_events.begin (), _events.end (), &cp, time_comparator);
+			if (s != _events.end ()) {
+				_events.insert (s, new ControlEvent (latest, v));
+			}
+		}
 
 		/* Get the iterator where we should start insertion */
 
-		timepos_t when = ensure_time_domain (points.front().when);
-		ControlEvent xp (when, 0.0f);
-		iterator     i = lower_bound (_events.begin (), _events.end (), &xp, time_comparator);
+		timepos_t    when = ensure_time_domain (points.front().when);
+		ControlEvent cp (when, 0.0f);
+		iterator     i = lower_bound (_events.begin (), _events.end (), &cp, time_comparator);
+		double       value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, points.front().value));
 
 		if (i != _events.end () && (*i)->when == when) {
 			return false;
 		}
 
+		/* if we are creating the first point in the list, and it will
+		 * not be at zero, add an "anchor" point there at zero, with
+		 * the same value.
+		 */
+
+		if (_events.empty () && when > timecnt_t (_time_domain)) {
+			_events.insert (_events.end (), new ControlEvent (timepos_t (_time_domain), value));
+			DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added value %2 at zero\n", this, value));
+		}
+
 		for (auto const & p : points) {
 
+			/* ensure time domain for point is correct */
 			when = ensure_time_domain (p.when);
 
 			/* clamp new value to allowed range */
-
-			double value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, p.value));
-
-			if (_events.empty ()) {
-				/* as long as the point we're adding is not at zero,
-				 * add an "anchor" point there.
-				 */
-
-				if (when >= 1) {
-					_events.insert (_events.end (), new ControlEvent (timepos_t (_time_domain), value));
-					DEBUG_TRACE (DEBUG::ControlList, string_compose ("@%1 added value %2 at zero\n", this, value));
-				}
-			}
+			value = std::min ((double)_desc.upper, std::max ((double)_desc.lower, p.value));
 
 			insert_position = when;
-			if (with_guard) {
-				add_guard_point (p.when, -GUARD_POINT_DELTA (when));
-				maybe_add_insert_guard (when);
-				ControlEvent cp (when, 0.0f);
-				i = lower_bound (_events.begin (), _events.end (), &cp, time_comparator);
-			}
 
-			iterator result;
 			DEBUG_TRACE (DEBUG::ControlList, string_compose ("editor_add: actually add when= %1 value= %2\n", when, value));
-			result = _events.insert (i, new ControlEvent (when, value));
-
-			if (i == result) {
-				/* insertion failed, but we don't really care */
-			}
+			_events.insert (i, new ControlEvent (when, value));
 		}
 
 		mark_dirty ();
