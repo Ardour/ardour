@@ -733,9 +733,7 @@ ControlList::editor_add_ordered (OrderedPoints const & points, bool with_guard)
 		Temporal::timepos_t earliest = points.front().when;
 		Temporal::timepos_t latest = points.back().when;
 
-		if (earliest > latest) {
-			swap (earliest, latest);
-		}
+		assert (earliest <= latest);
 
 		timecnt_t distance = earliest.distance (latest);
 
