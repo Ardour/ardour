@@ -7320,21 +7320,21 @@ AutomationDrawDrag::maybe_add_point (GdkEvent* ev, timepos_t const & cpos)
 	bool add_point = false;
 	bool pop_point = false;
 
-	if (direction > 0) {
-		if ((pointer_x > edge_x)  || (pointer_x == edge_x && ev->motion.y != last_pointer_y())) {
+	const bool line = Keyboard::modifier_state_equals (ev->motion.state, Keyboard::PrimaryModifier);
 
-			bool line = Keyboard::modifier_state_equals (ev->motion.state, Keyboard::PrimaryModifier);
+	if (direction > 0) {
+		if (line || (pointer_x > edge_x)  || (pointer_x == edge_x && ev->motion.y != last_pointer_y())) {
 
 			if (line && dragging_line->get().size() > 1) {
 				pop_point = true;
 			}
+
 			add_point = true;
 		}
 
-	} else if (direction < 0) {
-		if ((pointer_x < edge_x) || (pointer_x == edge_x && ev->motion.y != last_pointer_y())) {
 
-			bool line = Keyboard::modifier_state_equals (ev->motion.state, Keyboard::PrimaryModifier);
+	} else if (direction < 0) {
+		if (line || (pointer_x < edge_x) || (pointer_x == edge_x && ev->motion.y != last_pointer_y())) {
 
 			if (line && dragging_line->get().size() > 1) {
 				pop_point = true;
