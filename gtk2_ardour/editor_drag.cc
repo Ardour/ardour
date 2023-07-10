@@ -7248,6 +7248,7 @@ AutomationDrawDrag::AutomationDrawDrag (Editor* editor, ArdourCanvas::Rectangle&
 	, dragging_line (nullptr)
 	, direction (0)
 	, edge_x (0)
+	, did_snap (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationDrawDrag\n");
 }
@@ -7282,6 +7283,11 @@ AutomationDrawDrag::motion (GdkEvent* ev, bool first_move)
 
 	timepos_t pos (_drags->current_pointer_time ());
 	_editor->snap_to_with_modifier (pos, ev);
+
+	if (pos != _drags->current_pointer_time()) {
+		did_snap = true;
+	}
+
 	double const pointer_x = _editor->time_to_pixel (pos);
 
 	ArdourCanvas::Rect r = base_rect.item_to_canvas (base_rect.get());
@@ -7346,11 +7352,13 @@ AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 		return;
 	}
 
-	atv->merge_drawn_line (drawn_points);
+	/* ControlList::thin() works very badly with the stair-cased lines that
+	   result from snapping.
+	*/
+	atv->merge_drawn_line (drawn_points, !did_snap);
 }
 
 void
 AutomationDrawDrag::aborted (bool)
 {
 }
-

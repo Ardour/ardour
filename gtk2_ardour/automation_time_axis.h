@@ -154,7 +154,7 @@ public:
 	};
 
 	typedef std::vector<DrawnPoint> DrawnPoints;
-	void merge_drawn_line (DrawnPoints const &);
+	void merge_drawn_line (DrawnPoints const &, bool thin);
 
 protected:
 	/* Note that for MIDI controller "automation" (in regions), all of these

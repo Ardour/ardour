@@ -1597,6 +1597,7 @@ private:
 	int direction;
 	int edge_x;
 	AutomationTimeAxisView::DrawnPoints drawn_points;
+	bool did_snap;
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */

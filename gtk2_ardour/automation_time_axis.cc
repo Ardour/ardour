@@ -791,7 +791,7 @@ AutomationTimeAxisView::build_display_menu ()
 }
 
 void
-AutomationTimeAxisView::merge_drawn_line (DrawnPoints const & points)
+AutomationTimeAxisView::merge_drawn_line (DrawnPoints const & points, bool thin)
 {
 	if (points.empty()) {
 		return;
@@ -812,7 +812,6 @@ AutomationTimeAxisView::merge_drawn_line (DrawnPoints const & points)
 
 	XMLNode& before = list->get_state();
 	std::list<Selectable*> results;
-	bool failed = false;
 
 	Temporal::timepos_t earliest = points.front().when;
 	Temporal::timepos_t latest = points.back().when;
@@ -830,18 +829,12 @@ AutomationTimeAxisView::merge_drawn_line (DrawnPoints const & points)
 		/* map using line */
 		_line->view_to_model_coord_y (y);
 
-		if (!list->editor_add (dp.when, y, false)) {
-			failed = true;
-			break;
-		}
+		list->editor_add (dp.when, y, false);
 	}
 
-	if (failed) {
-		/* XXX do something */
-		return;
+	if (thin) {
+		list->thin (50.0);
 	}
-
-	list->thin (1.0);
 
 	if (_control->automation_state () == ARDOUR::Off) {
 		set_automation_state (ARDOUR::Play);
