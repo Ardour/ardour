@@ -834,7 +834,7 @@ AutomationTimeAxisView::merge_drawn_line (Evoral::ControlList::OrderedPoints& po
 	list->freeze ();
 	list->editor_add_ordered (points, false);
 	if (thin) {
-		list->thin (50.0);
+		list->thin (Config->get_automation_thinning_factor());
 	}
 	list->thaw ();
 
