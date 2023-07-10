@@ -7246,6 +7246,8 @@ AutomationDrawDrag::AutomationDrawDrag (Editor* editor, ArdourCanvas::Rectangle&
 	: Drag (editor, &r, time_domain)
 	, base_rect (r)
 	, dragging_line (nullptr)
+	, direction (0)
+	, edge_x (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationDrawDrag\n");
 }
@@ -7268,18 +7270,40 @@ AutomationDrawDrag::motion (GdkEvent* ev, bool first_move)
 		dragging_line = new ArdourCanvas::PolyLine (item());
 		dragging_line->set_ignore_events (true);
 		dragging_line->set_outline_color (UIConfiguration::instance().color ("midi note selected outline"));
+
+		if (ev->motion.x > grab_x()) {
+			direction = 1;
+		} else {
+			direction = -1;
+		}
+
+		edge_x = grab_x ();
 	}
 
 	ArdourCanvas::Rect r = base_rect.item_to_canvas (base_rect.get());
 
-	dragging_line->add_point (ArdourCanvas::Duple (ev->motion.x - r.x0, ev->motion.y - r.y0));
+	double x = ev->motion.x - r.x0;
+	double y = ev->motion.y - r.y0;
+
+	x = std::max (0., x);
+	y = std::max (0., std::min (r.height(), y));
+
+	if (direction > 0) {
+		if ((ev->motion.x > edge_x)  || (ev->motion.x == edge_x && ev->motion.y != last_pointer_y())) {
+			dragging_line->add_point (ArdourCanvas::Duple (x, y));
+			edge_x = x;
+		}
+	} else if (direction < 0) {
+		if ((ev->motion.x < edge_x) || (ev->motion.x == edge_x && ev->motion.y != last_pointer_y())) {
+			dragging_line->add_point (ArdourCanvas::Duple (x, y));
+			edge_x = x;
+		}
+	}
 }
 
 void
 AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 {
-	std::cerr << "ADD finished, mo " << motion_occured << std::endl;
-
 	if (!motion_occured) {
 		/* DragManager will tell editor that no motion happened, and
 		   Editor::button_release_handler() will do the right thing.

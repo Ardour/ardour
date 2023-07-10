@@ -1593,6 +1593,8 @@ class AutomationDrawDrag : public Drag
 private:
 	ArdourCanvas::Rectangle& base_rect; /* we do not own this */
 	ArdourCanvas::PolyLine* dragging_line;
+	int direction;
+	int edge_x;
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */
