@@ -7280,6 +7280,7 @@ AutomationDrawDrag::motion (GdkEvent* ev, bool first_move)
 	if (first_move) {
 		dragging_line = new ArdourCanvas::PolyLine (item());
 		dragging_line->set_ignore_events (true);
+		dragging_line->set_outline_width (2.0);
 		dragging_line->set_outline_color (UIConfiguration::instance().color ("automation line"));
 
 		if (ev->motion.x > grab_x()) {
