@@ -7341,7 +7341,6 @@ AutomationDrawDrag::maybe_add_point (GdkEvent* ev, timepos_t const & cpos)
 			}
 			add_point = true;
 		}
-
 	}
 
 	if (pop_point) {
@@ -7372,14 +7371,23 @@ AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 		return;
 	}
 
+	if (drawn_points.empty()) {
+		return;
+	}
+
 	AutomationTimeAxisView* atv = static_cast<AutomationTimeAxisView*>(base_rect.get_data ("trackview"));
 	if (!atv) {
 		return;
 	}
 
-	/* ControlList::thin() works very badly with the stair-cased lines that
-	   result from snapping.
-	*/
+	/* Points must be in time order, so if the user draw right to left, fix
+	 * that here
+	 */
+
+	if (drawn_points.front().when > drawn_points.back().when) {
+		std::reverse (drawn_points.begin(), drawn_points.end());
+	}
+
 	atv->merge_drawn_line (drawn_points, !did_snap);
 }
 
