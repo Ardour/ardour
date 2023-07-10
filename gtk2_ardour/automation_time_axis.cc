@@ -813,14 +813,20 @@ AutomationTimeAxisView::merge_drawn_line (DrawnPoints const & points)
 	XMLNode& before = list->get_state();
 	std::list<Selectable*> results;
 	bool failed = false;
-	Temporal::timepos_t earliest = timepos_t::max (points.front().when.time_domain());
-	Temporal::timepos_t latest = timepos_t::zero (points.front().when.time_domain());
+
+	Temporal::timepos_t earliest = points.front().when;
+	Temporal::timepos_t latest = points.back().when;
+
+	if (earliest > latest) {
+		swap (earliest, latest);
+	}
+
+	list->erase_range (earliest, latest);;
 
 	for (auto const & dp : points) {
 
 		/* compute vertical fractional position */
 		double y = 1.0 - (dp.y / _line->height());
-		std::cerr << "merge point at fract " << y << std::endl;
 		/* map using line */
 		_line->view_to_model_coord_y (y);
 
@@ -828,8 +834,11 @@ AutomationTimeAxisView::merge_drawn_line (DrawnPoints const & points)
 			failed = true;
 			break;
 		}
-		earliest = std::min (earliest, dp.when);
-		latest = std::max (latest, dp.when);
+	}
+
+	if (failed) {
+		/* XXX do something */
+		return;
 	}
 
 	list->thin (1.0);
