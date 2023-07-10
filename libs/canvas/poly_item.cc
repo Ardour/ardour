@@ -149,6 +149,15 @@ PolyItem::add_point (Duple const & d)
 	end_change ();
 }
 
+void
+PolyItem::pop_back ()
+{
+	begin_change ();
+	_points.pop_back ();
+	set_bbox_dirty ();
+	end_change ();
+}
+
 Points const&
 PolyItem::get () const
 {
