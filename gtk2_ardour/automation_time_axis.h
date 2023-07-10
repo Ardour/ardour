@@ -147,14 +147,7 @@ public:
 
 	void set_selected_regionviews (RegionSelection&);
 
-	struct DrawnPoint {
-		DrawnPoint (Temporal::timepos_t w, double v) : when (w), y (v) {}
-		Temporal::timepos_t when;
-		double              y;
-	};
-
-	typedef std::vector<DrawnPoint> DrawnPoints;
-	void merge_drawn_line (DrawnPoints const &, bool thin);
+	void merge_drawn_line (Evoral::ControlList::OrderedPoints&, bool thin);
 
 protected:
 	/* Note that for MIDI controller "automation" (in regions), all of these

@@ -7259,12 +7259,6 @@ AutomationDrawDrag::~AutomationDrawDrag ()
 }
 
 void
-AutomationDrawDrag::start_grab (GdkEvent* ev, Gdk::Cursor* c)
-{
-	Drag::start_grab (ev, c);
-}
-
-void
 AutomationDrawDrag::motion (GdkEvent* ev, bool first_move)
 {
 	if (first_move) {
@@ -7278,10 +7272,19 @@ AutomationDrawDrag::motion (GdkEvent* ev, bool first_move)
 			direction = -1;
 		}
 
-		edge_x = grab_x ();
+		/* Add a point correspding to the start of the drag */
+
+		maybe_add_point (ev, raw_grab_time());
 	}
 
-	timepos_t pos (_drags->current_pointer_time ());
+	maybe_add_point (ev, _drags->current_pointer_time());
+}
+
+void
+AutomationDrawDrag::maybe_add_point (GdkEvent* ev, timepos_t const & cpos)
+{
+	timepos_t pos (cpos);
+
 	_editor->snap_to_with_modifier (pos, ev);
 
 	if (pos != _drags->current_pointer_time()) {
@@ -7333,7 +7336,7 @@ AutomationDrawDrag::motion (GdkEvent* ev, bool first_move)
 	if (add_point) {
 		if (drawn_points.empty() || (pos != drawn_points.back().when)) {
 			dragging_line->add_point (ArdourCanvas::Duple (x, y));
-			drawn_points.push_back (AutomationTimeAxisView::DrawnPoint (pos, y));
+			drawn_points.push_back (Evoral::ControlList::OrderedPoint (pos, y));
 		}
 		edge_x = x;
 	}

@@ -791,7 +791,7 @@ AutomationTimeAxisView::build_display_menu ()
 }
 
 void
-AutomationTimeAxisView::merge_drawn_line (DrawnPoints const & points, bool thin)
+AutomationTimeAxisView::merge_drawn_line (Evoral::ControlList::OrderedPoints& points, bool thin)
 {
 	if (points.empty()) {
 		return;
@@ -820,21 +820,23 @@ AutomationTimeAxisView::merge_drawn_line (DrawnPoints const & points, bool thin)
 		swap (earliest, latest);
 	}
 
-	list->erase_range (earliest, latest);;
+	/* Convert each point's "value" from geometric coordinate space to
+	 * value space for the control
+	 */
 
-	for (auto const & dp : points) {
-
+	for (auto & dp : points) {
 		/* compute vertical fractional position */
-		double y = 1.0 - (dp.y / _line->height());
+		dp.value = 1.0 - (dp.value / _line->height());
 		/* map using line */
-		_line->view_to_model_coord_y (y);
-
-		list->editor_add (dp.when, y, false);
+		_line->view_to_model_coord_y (dp.value);
 	}
 
+	list->freeze ();
+	list->editor_add_ordered (points, false);
 	if (thin) {
 		list->thin (50.0);
 	}
+	list->thaw ();
 
 	if (_control->automation_state () == ARDOUR::Off) {
 		set_automation_state (ARDOUR::Play);
@@ -843,7 +845,6 @@ AutomationTimeAxisView::merge_drawn_line (DrawnPoints const & points, bool thin)
 	if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && _control == _session->recently_touched_controllable ()) {
 		RouteTimeAxisView::signal_ctrl_touched (false);
 	}
-
 
 	XMLNode& after = list->get_state();
 	_editor.begin_reversible_command (_("draw automation"));

@@ -35,11 +35,12 @@
 #include "ardour/tempo.h"
 #include "ardour/types.h"
 
+#include "evoral/ControlList.h"
+
 #include "canvas/types.h"
 
 #include "gtkmm2ext/bindings.h"
 
-#include "automation_time_axis.h"
 #include "cursor_context.h"
 #include "editor_items.h"
 #include "mouse_cursors.h"
@@ -1586,7 +1587,6 @@ class AutomationDrawDrag : public Drag
 	AutomationDrawDrag (Editor*, ArdourCanvas::Rectangle&, Temporal::TimeDomain);
 	~AutomationDrawDrag ();
 
-	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void motion (GdkEvent*, bool);
 	void finished (GdkEvent*, bool);
 	void aborted (bool);
@@ -1596,8 +1596,10 @@ private:
 	ArdourCanvas::PolyLine* dragging_line;
 	int direction;
 	int edge_x;
-	AutomationTimeAxisView::DrawnPoints drawn_points;
+	Evoral::ControlList::OrderedPoints drawn_points;
 	bool did_snap;
+
+	void maybe_add_point (GdkEvent*, Temporal::timepos_t const &);
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */
