@@ -95,7 +95,7 @@ public:
 	~DragManager ();
 
 	bool motion_handler (GdkEvent *, bool);
-
+	bool mid_drag_key_event (GdkEventKey*);
 	void abort ();
 	void add (Drag *);
 	void set (Drag *, GdkEvent *, Gdk::Cursor* c = MouseCursors::invalid_cursor());
@@ -237,6 +237,8 @@ public:
 	virtual bool y_movement_matters () const {
 		return true;
 	}
+
+	virtual bool mid_drag_key_event (GdkEventKey*)  { return false; }
 
 	bool initially_vertical() const {
 		return _initially_vertical;

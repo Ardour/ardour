@@ -157,6 +157,21 @@ DragManager::preview_video () const
 	return false;
 }
 
+bool
+DragManager::mid_drag_key_event (GdkEventKey* ev)
+{
+	bool handled = false;
+
+	for (auto & drag : _drags) {
+		if (drag->mid_drag_key_event (ev)) {
+			handled = true;
+			break;
+		}
+	}
+
+	return handled;
+}
+
 void
 DragManager::start_grab (GdkEvent* e, Gdk::Cursor* c)
 {

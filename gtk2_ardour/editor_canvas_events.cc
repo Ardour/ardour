@@ -410,6 +410,18 @@ Editor::canvas_automation_track_event (GdkEvent *event, ArdourCanvas::Item* item
 		ret = leave_handler (item, event, AutomationTrackItem);
 		break;
 
+	case GDK_KEY_PRESS:
+		if (_drags->active()) {
+			return _drags->mid_drag_key_event (&event->key);
+		}
+		break;
+
+	case GDK_KEY_RELEASE:
+		if (_drags->active()) {
+			return _drags->mid_drag_key_event (&event->key);
+		}
+		break;
+
 	default:
 		break;
 	}
