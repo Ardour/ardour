@@ -7331,8 +7331,10 @@ AutomationDrawDrag::motion (GdkEvent* ev, bool first_move)
 	}
 
 	if (add_point) {
-		dragging_line->add_point (ArdourCanvas::Duple (x, y));
-		drawn_points.push_back (AutomationTimeAxisView::DrawnPoint (pos, y));
+		if (drawn_points.empty() || (pos != drawn_points.back().when)) {
+			dragging_line->add_point (ArdourCanvas::Duple (x, y));
+			drawn_points.push_back (AutomationTimeAxisView::DrawnPoint (pos, y));
+		}
 		edge_x = x;
 	}
 }
