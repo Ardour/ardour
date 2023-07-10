@@ -171,6 +171,15 @@ public:
 	 */
 	virtual bool editor_add (Temporal::timepos_t const & when, double value, bool with_guard);
 
+	struct OrderedPoint {
+		Temporal::timepos_t when;
+		double value;
+		OrderedPoint (Temporal::timepos_t const & t, double v) : when (t), value (v) {}
+	};
+	typedef std::vector<OrderedPoint> OrderedPoints;
+
+	virtual bool editor_add_ordered (OrderedPoints const &, bool with_guard);
+
 	/* to be used only for loading pre-sorted data from saved state */
 	void fast_simple_add (Temporal::timepos_t const & when, double value);
 
