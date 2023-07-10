@@ -7264,6 +7264,7 @@ AutomationDrawDrag::AutomationDrawDrag (Editor* editor, ArdourCanvas::Rectangle&
 	, direction (0)
 	, edge_x (0)
 	, did_snap (false)
+	, line_break_pending (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationDrawDrag\n");
 }
@@ -7344,8 +7345,12 @@ AutomationDrawDrag::maybe_add_point (GdkEvent* ev, timepos_t const & cpos)
 	}
 
 	if (pop_point) {
-		dragging_line->pop_back();
-		drawn_points.pop_back ();
+		if (line_break_pending) {
+			line_break_pending = false;
+		} else {
+			dragging_line->pop_back();
+			drawn_points.pop_back ();
+		}
 	}
 
 	if (add_point) {
@@ -7381,4 +7386,23 @@ AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 void
 AutomationDrawDrag::aborted (bool)
 {
+}
+
+bool
+AutomationDrawDrag::mid_drag_key_event (GdkEventKey* ev)
+{
+	if (ev->type == GDK_KEY_PRESS) {
+		switch (ev->keyval) {
+
+		case GDK_Alt_R:
+		case GDK_Alt_L:
+			line_break_pending = true;
+			return true;
+
+		default:
+			break;
+		}
+	}
+
+	return false;
 }

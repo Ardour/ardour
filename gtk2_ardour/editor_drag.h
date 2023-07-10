@@ -1592,6 +1592,7 @@ class AutomationDrawDrag : public Drag
 	void motion (GdkEvent*, bool);
 	void finished (GdkEvent*, bool);
 	void aborted (bool);
+	bool mid_drag_key_event (GdkEventKey*);
 
 private:
 	ArdourCanvas::Rectangle& base_rect; /* we do not own this */
@@ -1600,6 +1601,7 @@ private:
 	int edge_x;
 	Evoral::ControlList::OrderedPoints drawn_points;
 	bool did_snap;
+	bool line_break_pending;
 
 	void maybe_add_point (GdkEvent*, Temporal::timepos_t const &);
 };
