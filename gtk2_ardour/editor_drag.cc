@@ -7199,6 +7199,7 @@ LollipopDrag::LollipopDrag (Editor* ed, ArdourCanvas::Item* l)
 	: Drag (ed, l, Temporal::BeatTime)
 	, _primary (dynamic_cast<ArdourCanvas::Lollipop*> (l))
 {
+	DEBUG_TRACE (DEBUG::Drags, "New LollipopDrag\n");
 	_region = reinterpret_cast<VelocityGhostRegion*> (_item->get_data ("ghostregionview"));
 }
 
@@ -7257,7 +7258,10 @@ LollipopDrag::setup_pointer_offset ()
 	_pointer_offset = _region->parent_rv.region()->source_beats_to_absolute_time (note->note()->time ()).distance (raw_grab_time ());
 }
 
-AutomationDrawDrag::AutomationDrawDrag (Editor* editor, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
+/********/
+
+template<typename OrderedPointList, typename OrderedPoint>
+FreehandLineDrag<OrderedPointList,OrderedPoint>::FreehandLineDrag (Editor* editor, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
 	: Drag (editor, &r, time_domain)
 	, base_rect (r)
 	, dragging_line (nullptr)
@@ -7269,13 +7273,15 @@ AutomationDrawDrag::AutomationDrawDrag (Editor* editor, ArdourCanvas::Rectangle&
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationDrawDrag\n");
 }
 
-AutomationDrawDrag::~AutomationDrawDrag ()
+template<typename OrderedPointList, typename OrderedPoint>
+FreehandLineDrag<OrderedPointList,OrderedPoint>::~FreehandLineDrag ()
 {
 	delete dragging_line;
 }
 
+template<typename OrderedPointList, typename OrderedPoint>
 void
-AutomationDrawDrag::motion (GdkEvent* ev, bool first_move)
+FreehandLineDrag<OrderedPointList,OrderedPoint>::motion (GdkEvent* ev, bool first_move)
 {
 	if (first_move) {
 		dragging_line = new ArdourCanvas::PolyLine (item());
@@ -7293,14 +7299,15 @@ AutomationDrawDrag::motion (GdkEvent* ev, bool first_move)
 
 		/* Add a point correspding to the start of the drag */
 
-		maybe_add_point (ev, raw_grab_time());
+		maybe_add_point (ev, raw_grab_time(), true);
 	}
 
-	maybe_add_point (ev, _drags->current_pointer_time());
+	maybe_add_point (ev, _drags->current_pointer_time(), first_move);
 }
 
+template<typename OrderedPointList, typename OrderedPoint>
 void
-AutomationDrawDrag::maybe_add_point (GdkEvent* ev, timepos_t const & cpos)
+FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, timepos_t const & cpos, bool first_move)
 {
 	timepos_t pos (cpos);
 
@@ -7347,22 +7354,89 @@ AutomationDrawDrag::maybe_add_point (GdkEvent* ev, timepos_t const & cpos)
 		}
 	}
 
+	bool child_call = false;
+
 	if (pop_point) {
 		if (line_break_pending) {
 			line_break_pending = false;
 		} else {
 			dragging_line->pop_back();
 			drawn_points.pop_back ();
+			child_call = true;
 		}
 	}
 
 	if (add_point) {
 		if (drawn_points.empty() || (pos != drawn_points.back().when)) {
 			dragging_line->add_point (ArdourCanvas::Duple (x, y));
-			drawn_points.push_back (Evoral::ControlList::OrderedPoint (pos, y));
+			drawn_points.push_back (OrderedPoint (pos, y));
+			child_call = true;
 		}
+	}
+
+	if (child_call) {
+		point_added (ArdourCanvas::Duple (pointer_x, y), base_rect, first_move ? -1 : edge_x);
+	}
+
+	if (add_point) {
 		edge_x = pointer_x;
 	}
+}
+
+template<typename OrderedPointList, typename OrderedPoint>
+void
+FreehandLineDrag<OrderedPointList,OrderedPoint>::finished (GdkEvent* event, bool motion_occured)
+{
+	if (!motion_occured) {
+		/* DragManager will tell editor that no motion happened, and
+		   Editor::button_release_handler() will do the right thing.
+		*/
+		return;
+	}
+
+	if (drawn_points.empty()) {
+		return;
+	}
+
+	/* Points must be in time order, so if the user draw right to left, fix
+	 * that here
+	 */
+
+	if (drawn_points.front().when > drawn_points.back().when) {
+		std::reverse (drawn_points.begin(), drawn_points.end());
+	}
+}
+
+template<typename OrderedPointList, typename OrderedPoint>
+bool
+FreehandLineDrag<OrderedPointList,OrderedPoint>::mid_drag_key_event (GdkEventKey* ev)
+{
+	if (ev->type == GDK_KEY_PRESS) {
+		switch (ev->keyval) {
+
+		case GDK_Alt_R:
+		case GDK_Alt_L:
+			line_break_pending = true;
+			return true;
+
+		default:
+			break;
+		}
+	}
+
+	return false;
+}
+
+/**********************/
+
+AutomationDrawDrag::AutomationDrawDrag (Editor* editor, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
+	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (editor, r, time_domain)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New AutomationDrawDrag\n");
+}
+
+AutomationDrawDrag::~AutomationDrawDrag ()
+{
 }
 
 void
@@ -7384,37 +7458,58 @@ AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 		return;
 	}
 
-	/* Points must be in time order, so if the user draw right to left, fix
-	 * that here
-	 */
-
-	if (drawn_points.front().when > drawn_points.back().when) {
-		std::reverse (drawn_points.begin(), drawn_points.end());
-	}
+	FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint>::finished (event, motion_occured);
 
 	atv->merge_drawn_line (drawn_points, !did_snap);
 }
 
-void
-AutomationDrawDrag::aborted (bool)
+/*****************/
+
+VelocityLineDrag::VelocityLineDrag (Editor* editor, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
+	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (editor, r, time_domain)
+	, grv (static_cast<VelocityGhostRegion*> (r.get_data ("ghostregionview")))
+	, drag_did_change (false)
+{
+	DEBUG_TRACE (DEBUG::Drags, "New VelocityLineDrag\n");
+	assert (grv);
+}
+
+VelocityLineDrag::~VelocityLineDrag ()
 {
 }
 
-bool
-AutomationDrawDrag::mid_drag_key_event (GdkEventKey* ev)
+void
+VelocityLineDrag::start_grab (GdkEvent* ev, Gdk::Cursor* c)
 {
-	if (ev->type == GDK_KEY_PRESS) {
-		switch (ev->keyval) {
+	FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint>::start_grab (ev, c);
+	grv->start_line_drag ();
+}
 
-		case GDK_Alt_R:
-		case GDK_Alt_L:
-			line_break_pending = true;
-			return true;
+void
+VelocityLineDrag::point_added (Duple const & d, Rectangle const & r, double last_x)
+{
+	drag_did_change |= grv->line_draw_motion (d, r, last_x);
+}
 
-		default:
-			break;
-		}
+void
+VelocityLineDrag::finished (GdkEvent* event, bool motion_occured)
+{
+	if (!motion_occured) {
+		/* DragManager will tell editor that no motion happened, and
+		   Editor::button_release_handler() will do the right thing.
+		*/
+		return;
 	}
 
-	return false;
+	/* no need to call FreehandLineDrag::finished(), because we do not use
+	 * drawn_points
+	 */
+
+	grv->end_line_drag (drag_did_change);
+}
+
+void
+VelocityLineDrag::aborted (bool)
+{
+	grv->end_line_drag (false);
 }

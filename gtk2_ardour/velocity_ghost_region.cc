@@ -58,6 +58,7 @@ VelocityGhostRegion::VelocityGhostRegion (MidiRegionView& mrv, TimeAxisView& tv,
 	, drag_did_change (false)
 	, selected (false)
 {
+	base_rect->set_data (X_("ghostregionview"), this);
 	base_rect->Event.connect (sigc::mem_fun (*this, &VelocityGhostRegion::base_event));
 	base_rect->set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
 	base_rect->set_outline_color (UIConfiguration::instance().color ("automation track outline"));
@@ -70,74 +71,36 @@ VelocityGhostRegion::~VelocityGhostRegion ()
 }
 
 bool
-VelocityGhostRegion::base_event (GdkEvent* ev)
+VelocityGhostRegion::line_draw_motion (ArdourCanvas::Duple const & d, ArdourCanvas::Rectangle const & r, double last_x)
 {
 	std::vector<NoteBase*> affected_lollis;
-
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
-	ArdourCanvas::Rect r = base_rect->item_to_canvas (base_rect->get());
 
-	switch (ev->type) {
-	case GDK_MOTION_NOTIFY:
-		if (dragging) {
-			if (last_drag_x < 0) {
-				lollis_close_to_x (ev->motion.x, 20., affected_lollis);
-			} else if (last_drag_x < ev->motion.x) {
-				/* rightward, "later" motion */
-				lollis_between (last_drag_x, ev->motion.x, affected_lollis);
- 			} else {
-				/* leftward, "earlier" motion */
-				lollis_between (ev->motion.x, last_drag_x, affected_lollis);
-			}
-			if (!affected_lollis.empty()) {
-				int velocity = y_position_to_velocity (r.height() - (r.y1 - ev->motion.y));
-				drag_did_change |= mrv->set_velocity_for_notes (affected_lollis, velocity);
-				mrv->mid_drag_edit ();
-			}
-			if (dragging) {
-				dragging_line->add_point (ArdourCanvas::Duple (ev->motion.x - r.x0, ev->motion.y - r.y0));
-				last_drag_x = ev->motion.x;
-			}
-			return true;
-		}
-		break;
-	case GDK_BUTTON_PRESS:
-		if (ev->button.button == 1) {
-			assert (!dragging);
-			desensitize_lollis ();
-			dragging = true;
-			drag_did_change = false;
-			last_drag_x = -1;
-			if (!dragging_line) {
-				dragging_line = new ArdourCanvas::PolyLine (_note_group);
-				dragging_line->set_ignore_events (true);
-				dragging_line->set_outline_color (UIConfiguration::instance().color ("midi note selected outline"));
-			}
-			dragging_line->set (ArdourCanvas::Points());
-			dragging_line->show();
-			dragging_line->raise_to_top();
-			base_rect->grab();
-			mrv->begin_drag_edit (_("draw velocities"));
-			return true;
-		}
-		break;
-	case GDK_BUTTON_RELEASE:
-		if (ev->button.button == 1 && dragging) {
-			mrv->end_drag_edit (drag_did_change);
-			base_rect->ungrab();
-			dragging_line->hide ();
-			dragging = false;
-			sensitize_lollis ();
-			return true;
-		}
-		break;
-	default:
-		// std::cerr << "vgr event type " << Gtkmm2ext::event_type_string (ev->type) << std::endl;
-		break;
+	if (last_x < 0) {
+		lollis_close_to_x (d.x, 20., affected_lollis);
+	} else if (last_x < d.x) {
+		/* rightward, "later" motion */
+		lollis_between (last_x, d.x, affected_lollis);
+	} else {
+		/* leftward, "earlier" motion */
+		lollis_between (d.x, last_x, affected_lollis);
 	}
 
+	bool ret = false;
 
-	return false;
+	if (!affected_lollis.empty()) {
+		int velocity = y_position_to_velocity (r.height() - (r.y1() - d.y));
+		ret = mrv->set_velocity_for_notes (affected_lollis, velocity);
+		mrv->mid_drag_edit ();
+	}
+
+	return ret;
+}
+
+bool
+VelocityGhostRegion::base_event (GdkEvent* ev)
+{
+	return trackview.editor().canvas_velocity_base_event (ev, base_rect);
 }
 
 void
@@ -233,7 +196,6 @@ VelocityGhostRegion::drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev)
 	/* translate event y-coord so that zero matches the top of base_rect
 	 * (event coordinates use window coordinate space)
 	 */
-
 
 	ev->y -= r.y0;
 
@@ -358,6 +320,22 @@ VelocityGhostRegion::lollis_close_to_x (int x, double distance, std::vector<Note
 }
 
 void
+VelocityGhostRegion::start_line_drag ()
+{
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
+	mrv->begin_drag_edit (_("draw velocities"));
+	desensitize_lollis ();
+}
+
+void
+VelocityGhostRegion::end_line_drag (bool did_change)
+{
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
+	mrv->end_drag_edit (did_change);
+	sensitize_lollis ();
+}
+
+void
 VelocityGhostRegion::desensitize_lollis ()
 {
 	for (auto & gev : events) {
@@ -381,5 +359,5 @@ VelocityGhostRegion::set_selected (bool yn)
 
 	if (yn) {
 		group->raise_to_top ();
-	} 
+	}
 }

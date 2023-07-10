@@ -49,6 +49,12 @@ public:
 
 	void set_selected (bool);
 
+	bool line_draw_motion (ArdourCanvas::Duple const & d, ArdourCanvas::Rectangle const & r, double last_x);
+	void start_line_drag ();
+	void end_line_drag (bool did_change);
+
+	ArdourCanvas::Rectangle& base_item() { return *base_rect; }
+
 private:
 	bool dragging;
 	ArdourCanvas::PolyLine* dragging_line;
