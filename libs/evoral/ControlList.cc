@@ -749,7 +749,7 @@ ControlList::editor_add_ordered (OrderedPoints const & points, bool with_guard)
 				_events.insert (s, new ControlEvent (earliest, v));
 			}
 		}
-		if (with_guard && distance > 0) {
+		if (with_guard && !distance.is_zero()) {
 			ControlEvent cp (latest, 0.0);
 			double v = unlocked_eval (latest);
 			iterator     s = lower_bound (_events.begin (), _events.end (), &cp, time_comparator);
