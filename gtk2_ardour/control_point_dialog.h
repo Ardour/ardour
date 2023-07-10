@@ -17,19 +17,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ardour_dialog.h"
 #include <gtkmm/entry.h>
+#include <gtkmm/checkbutton.h>
+
+#include "ardour_dialog.h"
 
 class ControlPoint;
 
 class ControlPointDialog : public ArdourDialog
 {
 public:
-	ControlPointDialog (ControlPoint *);
+	ControlPointDialog (ControlPoint *, bool multi);
 
 	double get_y_fraction () const;
+
+	bool all_selected_points () const;
 
 private:
 	ControlPoint* point_;
 	Gtk::Entry value_;
+	Gtk::CheckButton toggle_all_;
+	bool all_selected_points_;
 };

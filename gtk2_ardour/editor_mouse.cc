@@ -2452,13 +2452,29 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 		abort(); /*NOTREACHED*/
 	}
 
-	ControlPointDialog d (p);
+	std::vector<ControlPoint*> cps;
+
+	for (auto const& cp : selection->points) {
+		if (&cp->line() == &p->line ()) {
+			cps.push_back (cp);
+		}
+	}
+
+	assert (cps.size() > 0);
+
+	ControlPointDialog d (p, cps.size() > 1);
 
 	if (d.run () != RESPONSE_ACCEPT) {
 		return;
 	}
 
-	p->line().modify_point_y (*p, d.get_y_fraction ());
+	if (d.all_selected_points ()) {
+		p->line().modify_points_y (cps, d.get_y_fraction ());
+	} else {
+		cps.clear ();
+		cps.push_back (p);
+		p->line().modify_points_y (cps, d.get_y_fraction ());
+	}
 }
 
 void

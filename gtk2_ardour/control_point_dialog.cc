@@ -31,9 +31,11 @@
  *    @param p ControlPoint to edit.
  */
 
-ControlPointDialog::ControlPointDialog (ControlPoint* p)
+ControlPointDialog::ControlPointDialog (ControlPoint* p, bool multi)
 	: ArdourDialog (_("Control point"))
 	, point_ (p)
+	, toggle_all_ (_("Change all selected points"))
+	, all_selected_points_ (true)
 {
 	assert (point_);
 
@@ -53,27 +55,43 @@ ControlPointDialog::ControlPointDialog (ControlPoint* p)
 	std::size_t sep = val.find_last_of (" ");
 
 	value_.set_text (val.substr (0, sep));
-	value_.set_activates_default ();
 
 	Gtk::HBox* b = Gtk::manage (new Gtk::HBox ());
 
+	b->set_spacing (4);
 	b->pack_start (*Gtk::manage (new Gtk::Label (_("Value"))));
 	b->pack_start (value_);
 
 	if (sep != std::string::npos) {
 		b->pack_start (*Gtk::manage (new Gtk::Label (val.substr (sep + 1))));
 	}
+	get_vbox ()->pack_start (*b);
+	if (multi) {
+		toggle_all_.set_active (true);
+		get_vbox ()->pack_start (toggle_all_);
+	}
 
-	get_vbox ()->pack_end (*b);
-	b->show_all ();
+	get_vbox ()->set_spacing (4);
+	show_all ();
 
 	add_button (Gtk::Stock::CANCEL, Gtk::RESPONSE_CANCEL);
 	add_button (Gtk::Stock::APPLY, Gtk::RESPONSE_ACCEPT);
 	set_default_response (Gtk::RESPONSE_ACCEPT);
+
+	value_.set_activates_default ();
+	/* TODO: this does not work, one has to click on the entry.. */
+	value_.set_can_focus ();
+	value_.grab_focus ();
 }
 
 double
 ControlPointDialog::get_y_fraction () const
 {
 	return point_->line().string_to_fraction (value_.get_text ());
+}
+
+bool
+ControlPointDialog::all_selected_points () const
+{
+	return toggle_all_.get_active ();
 }

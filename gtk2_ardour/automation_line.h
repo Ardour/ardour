@@ -149,7 +149,7 @@ public:
 	int set_state (const XMLNode&, int version);
 	void set_colors();
 
-	void modify_point_y (ControlPoint&, double);
+	void modify_points_y (std::vector<ControlPoint*> const&, double);
 
 	virtual MementoCommandBinder<ARDOUR::AutomationList>* memento_command_binder ();
 
