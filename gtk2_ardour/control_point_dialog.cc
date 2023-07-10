@@ -19,6 +19,8 @@
 #include <string>
 #include <gtkmm/stock.h>
 
+#include "gtkmm2ext/gtk_ui.h"
+
 #include "automation_line.h"
 #include "control_point.h"
 #include "control_point_dialog.h"
@@ -34,7 +36,7 @@
 ControlPointDialog::ControlPointDialog (ControlPoint* p, bool multi)
 	: ArdourDialog (_("Control point"))
 	, point_ (p)
-	, toggle_all_ (_("Change all selected points"))
+	, toggle_all_ (_("Apply to selected points"))
 	, all_selected_points_ (true)
 {
 	assert (point_);
@@ -66,10 +68,13 @@ ControlPointDialog::ControlPointDialog (ControlPoint* p, bool multi)
 		b->pack_start (*Gtk::manage (new Gtk::Label (val.substr (sep + 1))));
 	}
 	get_vbox ()->pack_start (*b);
-	if (multi) {
-		toggle_all_.set_active (true);
-		get_vbox ()->pack_start (toggle_all_);
-	}
+
+	toggle_all_.set_active (true);
+	get_vbox ()->pack_start (toggle_all_);
+	Gtkmm2ext::UI::instance()->set_tip (toggle_all_,
+			_("<b>When enabled</b> the given value is applied to all selected automation points on the same line as the point being edited.\n\n"
+			  "<b>When disabled</b> only the current automation point is modified."));
+	toggle_all_.set_sensitive (multi);
 
 	get_vbox ()->set_spacing (4);
 	show_all ();
