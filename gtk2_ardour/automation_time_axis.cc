@@ -791,6 +791,70 @@ AutomationTimeAxisView::build_display_menu ()
 }
 
 void
+AutomationTimeAxisView::merge_drawn_line (DrawnPoints const & points)
+{
+	if (points.empty()) {
+		return;
+	}
+
+	if (!_line) {
+		return;
+	}
+
+	std::shared_ptr<AutomationList> list = _line->the_list ();
+
+	if (list->in_write_pass()) {
+		/* do not allow the GUI to add automation events during an
+		   automation write pass.
+		*/
+		return;
+	}
+
+	XMLNode& before = list->get_state();
+	std::list<Selectable*> results;
+	bool failed = false;
+	Temporal::timepos_t earliest = timepos_t::max (points.front().when.time_domain());
+	Temporal::timepos_t latest = timepos_t::zero (points.front().when.time_domain());
+
+	for (auto const & dp : points) {
+
+		/* compute vertical fractional position */
+		double y = 1.0 - (dp.y / _line->height());
+		std::cerr << "merge point at fract " << y << std::endl;
+		/* map using line */
+		_line->view_to_model_coord_y (y);
+
+		if (!list->editor_add (dp.when, y, false)) {
+			failed = true;
+			break;
+		}
+		earliest = std::min (earliest, dp.when);
+		latest = std::max (latest, dp.when);
+	}
+
+	list->thin (1.0);
+
+	if (_control->automation_state () == ARDOUR::Off) {
+		set_automation_state (ARDOUR::Play);
+	}
+
+	if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && _control == _session->recently_touched_controllable ()) {
+		RouteTimeAxisView::signal_ctrl_touched (false);
+	}
+
+
+	XMLNode& after = list->get_state();
+	_editor.begin_reversible_command (_("draw automation"));
+	_session->add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
+
+	_line->get_selectables (earliest, latest, 0.0, 1.0, results);
+	_editor.get_selection ().set (results);
+
+	_editor.commit_reversible_command ();
+	_session->set_dirty ();
+}
+
+void
 AutomationTimeAxisView::add_automation_event (GdkEvent* event, timepos_t const & pos, double y, bool with_guard_points)
 {
 	if (!_line) {

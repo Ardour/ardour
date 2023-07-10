@@ -7280,24 +7280,54 @@ AutomationDrawDrag::motion (GdkEvent* ev, bool first_move)
 		edge_x = grab_x ();
 	}
 
+	timepos_t pos (_drags->current_pointer_time ());
+	_editor->snap_to_with_modifier (pos, ev);
+	double const pointer_x = _editor->time_to_pixel (pos);
+
 	ArdourCanvas::Rect r = base_rect.item_to_canvas (base_rect.get());
 
-	double x = ev->motion.x - r.x0;
+	double x = pointer_x - r.x0;
 	double y = ev->motion.y - r.y0;
 
 	x = std::max (0., x);
 	y = std::max (0., std::min (r.height(), y));
 
+	bool add_point = false;
+	bool pop_point = false;
+
 	if (direction > 0) {
-		if ((ev->motion.x > edge_x)  || (ev->motion.x == edge_x && ev->motion.y != last_pointer_y())) {
-			dragging_line->add_point (ArdourCanvas::Duple (x, y));
-			edge_x = x;
+		if ((pointer_x > edge_x)  || (pointer_x == edge_x && ev->motion.y != last_pointer_y())) {
+
+			bool line = Keyboard::modifier_state_equals (ev->motion.state, Keyboard::PrimaryModifier);
+
+			if (line && dragging_line->get().size() > 1) {
+				pop_point = true;
+			}
+			add_point = true;
 		}
+
 	} else if (direction < 0) {
-		if ((ev->motion.x < edge_x) || (ev->motion.x == edge_x && ev->motion.y != last_pointer_y())) {
-			dragging_line->add_point (ArdourCanvas::Duple (x, y));
-			edge_x = x;
+		if ((pointer_x < edge_x) || (pointer_x == edge_x && ev->motion.y != last_pointer_y())) {
+
+			bool line = Keyboard::modifier_state_equals (ev->motion.state, Keyboard::PrimaryModifier);
+
+			if (line && dragging_line->get().size() > 1) {
+				pop_point = true;
+			}
+			add_point = true;
 		}
+
+	}
+
+	if (pop_point) {
+		dragging_line->pop_back();
+		drawn_points.pop_back ();
+	}
+
+	if (add_point) {
+		dragging_line->add_point (ArdourCanvas::Duple (x, y));
+		drawn_points.push_back (AutomationTimeAxisView::DrawnPoint (pos, y));
+		edge_x = x;
 	}
 }
 
@@ -7310,11 +7340,17 @@ AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 		*/
 		return;
 	}
+
+	AutomationTimeAxisView* atv = static_cast<AutomationTimeAxisView*>(base_rect.get_data ("trackview"));
+	if (!atv) {
+		return;
+	}
+
+	atv->merge_drawn_line (drawn_points);
 }
 
 void
 AutomationDrawDrag::aborted (bool)
 {
 }
-
 

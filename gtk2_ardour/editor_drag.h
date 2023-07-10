@@ -39,6 +39,7 @@
 
 #include "gtkmm2ext/bindings.h"
 
+#include "automation_time_axis.h"
 #include "cursor_context.h"
 #include "editor_items.h"
 #include "mouse_cursors.h"
@@ -1595,6 +1596,7 @@ private:
 	ArdourCanvas::PolyLine* dragging_line;
 	int direction;
 	int edge_x;
+	AutomationTimeAxisView::DrawnPoints drawn_points;
 };
 
 #endif /* __gtk2_ardour_editor_drag_h_ */
