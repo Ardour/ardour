@@ -7285,8 +7285,10 @@ AutomationDrawDrag::motion (GdkEvent* ev, bool first_move)
 
 		if (ev->motion.x > grab_x()) {
 			direction = 1;
+			edge_x = 0;
 		} else {
 			direction = -1;
+			edge_x = std::numeric_limits<int>::max();
 		}
 
 		/* Add a point correspding to the start of the drag */
@@ -7340,6 +7342,7 @@ AutomationDrawDrag::maybe_add_point (GdkEvent* ev, timepos_t const & cpos)
 			if (line && dragging_line->get().size() > 1) {
 				pop_point = true;
 			}
+
 			add_point = true;
 		}
 	}
@@ -7358,7 +7361,7 @@ AutomationDrawDrag::maybe_add_point (GdkEvent* ev, timepos_t const & cpos)
 			dragging_line->add_point (ArdourCanvas::Duple (x, y));
 			drawn_points.push_back (Evoral::ControlList::OrderedPoint (pos, y));
 		}
-		edge_x = x;
+		edge_x = pointer_x;
 	}
 }
 
