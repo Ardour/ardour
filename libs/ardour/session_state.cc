@@ -1749,10 +1749,11 @@ Session::set_state (const XMLNode& node, int version)
 			 * Session::immediately_post_engine
 			 */
 		}
-
 	} else {
-		error << _("Session: XML state has no sample-rate ") << endmsg;
-		goto out;
+		/* creating session from template */
+		assert (_base_sample_rate > 0 && AudioEngine::instance()->running ());
+		/* required to convert positions during session load */
+		Temporal::set_sample_rate (_base_sample_rate);
 	}
 
 	/* need the tempo map setup ASAP */
