@@ -2872,6 +2872,13 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						write_position(&_impl->forge, _ev_buffers[port_index],
 						               metric, bbt, speed, time_scale,  bpm, start, 0);
 					}
+
+					if (!got_grid) {
+						got_grid = true;
+						tmap->get_grid (tempo_map_points,
+								samples_to_superclock (start0, TEMPORAL_SAMPLE_RATE),
+								samples_to_superclock (end, TEMPORAL_SAMPLE_RATE), 0);
+					}
 				}
 
 				// Get MIDI iterator range (empty range if no MIDI)
@@ -2885,13 +2892,6 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				// Now merge MIDI and any transport events into the buffer
 				const uint32_t     type = _uri_map.urids.midi_MidiEvent;
 				const samplepos_t  tend = end;
-
-				if (!got_grid) {
-					got_grid = true;
-					tmap->get_grid (tempo_map_points,
-					                samples_to_superclock (start0, TEMPORAL_SAMPLE_RATE),
-					                samples_to_superclock (end, TEMPORAL_SAMPLE_RATE), 0);
-				}
 
 				/* move to next explicit point
 				 * (if any)
