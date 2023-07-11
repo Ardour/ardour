@@ -27,4 +27,17 @@ function factory () return function ()
 	Temporal.TempoMap.write_copy()
 	Temporal.TempoMap.abort_update()
 
+	-- get grid -- currently only available in debug-builds
+	-- Temporal.superclock_ticks_per_second = 282240000
+	tm = Temporal.TempoMap.read ()
+	local grid = tm:get_grid (Temporal.TempoMapPoints(), 0, Temporal.superclock_ticks_per_second (), 0, 1)
+	for t in grid[1]:iter () do
+		-- each t is-a TempoMapPoint
+		local metric = t:to_tempometric ()
+		local tempo_point = metric:tempo ()
+		local meter_point = metric:meter()
+		print (t:time(), tempo_point:to_tempo():quarter_notes_per_minute(), meter_point:note_value())
+	end
+	tm = nil
+
 end end

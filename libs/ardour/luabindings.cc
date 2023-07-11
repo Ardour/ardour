@@ -794,6 +794,24 @@ LuaBindings::common (lua_State* L)
 		.addCast<Temporal::Point> ("to_point")
 		.endClass ()
 
+		.beginClass <Temporal::TempoMetric> ("TempoMetric")
+		.addFunction ("tempo", &Temporal::TempoMetric::tempo)
+		.addFunction ("meter", &Temporal::TempoMetric::meter)
+		.addFunction ("sample_at", &Temporal::TempoMetric::sample_at)
+		.addFunction ("quarters_at", &Temporal::TempoMetric::quarters_at)
+		.addFunction ("note_type", &Temporal::TempoMetric::note_type)
+		.addFunction ("note_value", &Temporal::TempoMetric::note_value)
+		.addFunction ("divisions_per_bar", &Temporal::TempoMetric::divisions_per_bar)
+		.endClass ()
+
+		.deriveClass <Temporal::TempoMapPoint, Temporal::Point> ("TempoMapPoint")
+		.addCast<Temporal::TempoMetric> ("to_tempometric")
+		.addFunction ("time", &Temporal::TempoMapPoint::time)
+		.endClass ()
+
+		.beginStdList <Temporal::TempoMapPoint> ("TempoMapPoints")
+		.endClass ()
+
 		.beginWSPtrClass <Temporal::TempoMap> ("TempoMap")
 		/* we cannot use ::fetch or ::use because LuaBridge cannot overload
 		 * shared_ptr<const T> and shared_ptr<T> in the same class.
@@ -841,6 +859,9 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("convert_duration", &Temporal::TempoMap::convert_duration)
 		.addFunction ("bbt_walk", &Temporal::TempoMap::bbt_walk)
 		.addFunction ("count_bars", &Temporal::TempoMap::count_bars)
+#ifdef WITH_SUPERCLOCK_BINDINGS
+		.addRefFunction ("get_grid", &Temporal::TempoMap::get_grid)
+#endif
 
 		.addFunction ("quarters_per_minute_at", &Temporal::TempoMap::quarters_per_minute_at)
 		.addFunction ("round_to_bar", &Temporal::TempoMap::round_to_bar)
