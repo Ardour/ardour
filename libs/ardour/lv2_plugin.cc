@@ -2762,11 +2762,6 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	TempoMap::SharedPtr tmap (TempoMap::use());
 	TempoMetric metric (tmap->metric_at (timepos_t (start0)));
 
-	TempoMapPoints tempo_map_points;
-	tmap->get_grid (tempo_map_points,
-	                samples_to_superclock (start0, TEMPORAL_SAMPLE_RATE),
-	                samples_to_superclock (end, TEMPORAL_SAMPLE_RATE), 0);
-
 	if (_freewheel_control_port) {
 		*_freewheel_control_port = _session.engine().freewheeling() ? 1.f : 0.f;
 	}
@@ -2808,6 +2803,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	uint32_t midi_in_index   = 0;
 	uint32_t midi_out_index  = 0;
 	uint32_t atom_port_index = 0;
+
+	TempoMapPoints tempo_map_points;
+	bool got_grid = false;
 
 	for (uint32_t port_index = 0; port_index < num_ports; ++port_index) {
 		void*     buf   = NULL;
@@ -2887,6 +2885,13 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				// Now merge MIDI and any transport events into the buffer
 				const uint32_t     type = _uri_map.urids.midi_MidiEvent;
 				const samplepos_t  tend = end;
+
+				if (!got_grid) {
+					got_grid = true;
+					tmap->get_grid (tempo_map_points,
+					                samples_to_superclock (start0, TEMPORAL_SAMPLE_RATE),
+					                samples_to_superclock (end, TEMPORAL_SAMPLE_RATE), 0);
+				}
 
 				/* move to next explicit point
 				 * (if any)
