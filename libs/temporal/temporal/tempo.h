@@ -1101,21 +1101,9 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	int parse_meter_state_3x (const XMLNode& node, LegacyMeterState& lts);
 	int set_state_3x (XMLNode const &);
 
-	typedef std::unordered_map<int64_t,int64_t> LookupTable;
-
-	mutable LookupTable superclock_beat_lookup_table;
-	mutable LookupTable beat_superclock_lookup_table;
-	mutable LookupTable beat_bbt_lookup_table;
-	mutable LookupTable superclock_bbt_lookup_table;
-
 	friend class TempoPoint;
 	friend class MeterPoint;
 	friend class TempoMetric;
-	Temporal::Beats beat_lookup (superclock_t, bool& found) const;
-	superclock_t superclock_lookup (Temporal::Beats const &, bool& found) const;
-
-	Temporal::BBT_Time bbt_lookup (superclock_t, bool & found) const;
-	Temporal::BBT_Time bbt_lookup (Temporal::Beats const & b, bool & found) const;
 
 	bool solve_ramped_twist (TempoPoint&, TempoPoint&);  /* this is implemented by iteration, and it might fail. */
 	bool solve_constant_twist (TempoPoint&, TempoPoint&);  //TODO:  currently also done by iteration; should be possible to calculate directly
@@ -1127,18 +1115,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	void reset_section (Points::iterator& begin, Points::iterator& end, superclock_t, TempoMetric& metric);
 
 	TempoMapCutBuffer* cut_copy (timepos_t const & start, timepos_t const & end, bool copy, bool ripple);
-
-	/* These are not really const, but the lookup tables are marked mutable
-	 * to allow time domain conversions to store their results while being
-	 * marked const (which is more semantically correct).
-	 */
-
-	void superclock_to_beat_store (superclock_t, Temporal::Beats const &) const;
-	void beat_to_superclock_store (Temporal::Beats const &, superclock_t) const;;
-	void beat_to_bbt_store (Temporal::Beats const &, Temporal::BBT_Time const &) const;;
-	void superclock_to_bbt_store (superclock_t, Temporal::BBT_Time const &) const;;
-
-	void drop_lookup_table ();
 };
 
 class LIBTEMPORAL_API TempoMapCutBuffer
