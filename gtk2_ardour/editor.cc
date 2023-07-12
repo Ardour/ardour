@@ -4253,6 +4253,7 @@ Editor::update_grid ()
 		hide_grid_lines ();
 	} else if (grid_musical()) {
 		Temporal::TempoMapPoints grid;
+		grid.reserve (4096);
 		if (bbt_ruler_scale != bbt_show_many) {
 			compute_current_bbt_points (grid, _leftmost_sample, _leftmost_sample + current_page_samples());
 		}

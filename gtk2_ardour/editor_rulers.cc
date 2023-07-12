@@ -1193,6 +1193,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 	const samplecnt_t sr (_session->sample_rate());
 
 	Temporal::TempoMapPoints grid;
+	grid.reserve (4096);
 
 	compute_current_bbt_points (grid, lower, upper);
 
