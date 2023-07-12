@@ -858,7 +858,6 @@ LuaBindings::common (lua_State* L)
 
 		.addFunction ("convert_duration", &Temporal::TempoMap::convert_duration)
 		.addFunction ("bbt_walk", &Temporal::TempoMap::bbt_walk)
-		.addFunction ("count_bars", &Temporal::TempoMap::count_bars)
 #ifdef WITH_SUPERCLOCK_BINDINGS
 		.addRefFunction ("get_grid", &Temporal::TempoMap::get_grid)
 #endif
