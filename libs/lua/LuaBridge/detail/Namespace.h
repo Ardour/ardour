@@ -2092,10 +2092,12 @@ public:
   Class<std::vector<T> > beginStdVector (char const* name)
   {
     typedef std::vector<T> LT;
+    typedef typename std::vector<T>::size_type T_SIZE;
     return beginConstStdVector<T> (name)
       .addVoidConstructor ()
       .addFunction ("push_back", (void (LT::*)(const T&))&LT::push_back)
       .addFunction ("clear", (void (LT::*)())&LT::clear)
+      .addFunction ("reserve", (void (LT::*)(T_SIZE))&LT::reserve)
       .addExtCFunction ("to_array", &CFunc::vectorToArray<T, LT>)
       .addExtCFunction ("add", &CFunc::tableToList<T, LT>);
   }
