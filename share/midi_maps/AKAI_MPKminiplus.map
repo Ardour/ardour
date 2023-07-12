@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="AKAI MPK miniplus">
+
+<!-- Created 2023-07-12 by Albert Gräf. This assumes the default factory
+     settings, otherwise you may have to adjust the controller numbers. The
+     map should also work with the MPK mini (which lacks the transport control
+     buttons, so that functionality won't be available, but the encoders
+     should work the same). -->
+
+<DeviceInfo bank-size="8"/>
+
+<!-- Transport Control (uncomment Rewind/Forward if you need those, otherwise we abuse them for bank switches below) -->
+
+<!--
+<Binding channel="1" ctl="115" action="Transport/Rewind"/>
+<Binding channel="1" ctl="116" action="Transport/Forward"/>
+-->
+<Binding channel="1" ctl="117" function="transport-stop"/>
+<Binding channel="1" ctl="118" function="transport-roll"/>
+<Binding channel="1" ctl="119" function="toggle-rec-enable"/>
+
+<!-- Gain controls -->
+
+<Binding channel="1" ctl="70" uri="/route/gain B1"/>
+<Binding channel="1" ctl="71" uri="/route/gain B2"/>
+<Binding channel="1" ctl="72" uri="/route/gain B3"/>
+<Binding channel="1" ctl="73" uri="/route/gain B4"/>
+<Binding channel="1" ctl="74" uri="/route/gain B5"/>
+<Binding channel="1" ctl="75" uri="/route/gain B6"/>
+<Binding channel="1" ctl="76" uri="/route/gain B7"/>
+<Binding channel="1" ctl="77" uri="/route/gain B8"/>
+<!-- <Binding channel="1" ctl="7" uri="/bus/gain master"/> -->
+
+<!-- Bank Control (the MPK doesn't have those, use the Rewind/Forward buttons instead) -->
+
+<Binding channel="1" ctl="115" function="prev-bank"/>
+<Binding channel="1" ctl="116" function="next-bank"/>
+
+</ArdourMIDIBindings>

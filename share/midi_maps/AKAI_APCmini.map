@@ -1,0 +1,133 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="AKAI APC mini">
+
+<!-- Created 2023-07-12 by Albert Gräf. This is a bare-bones implementation
+     which at least makes all buttons and faders on the APC mini do something
+     useful. If you need something more comprehensive, have a look at
+     https://github.com/agraef/apcmini/tree/clip-launcher.
+
+     Limitations:
+     - Ardour doesn't seem to send feedback to any of the buttons even if it
+       is enabled in the protocol settings, so the scene buttons and the 8x8
+       grid buttons won't light up.
+     - The APC mini has the bank switch buttons on shifted keys, which as
+       far as I can tell aren't supported in binding maps, so you'll have to
+       use a secondary device to switch banks if you'd like to utilize the
+       fader bindings.
+-->
+
+<DeviceInfo bank-size="8"/>
+
+<!-- faders 1-9 control 8 channels and the master gain -->
+
+<Binding channel="1" ctl="48"  uri="/route/gain B1"/>
+<Binding channel="1" ctl="49"  uri="/route/gain B2"/>
+<Binding channel="1" ctl="50"  uri="/route/gain B3"/>
+<Binding channel="1" ctl="51"  uri="/route/gain B4"/>
+<Binding channel="1" ctl="52"  uri="/route/gain B5"/>
+<Binding channel="1" ctl="53"  uri="/route/gain B6"/>
+<Binding channel="1" ctl="54"  uri="/route/gain B7"/>
+<Binding channel="1" ctl="55"  uri="/route/gain B8"/>
+<Binding channel="1" ctl="56"  uri="/bus/gain master"/>
+
+<!-- trigger cues in the session view using the scene launch buttons -->
+
+<Binding channel="1" note="82" action="Cues/trigger-cue-0"/>
+<Binding channel="1" note="83" action="Cues/trigger-cue-1"/>
+<Binding channel="1" note="84" action="Cues/trigger-cue-2"/>
+<Binding channel="1" note="85" action="Cues/trigger-cue-3"/>
+<Binding channel="1" note="86" action="Cues/trigger-cue-4"/>
+<Binding channel="1" note="87" action="Cues/trigger-cue-5"/>
+<Binding channel="1" note="88" action="Cues/trigger-cue-6"/>
+<Binding channel="1" note="89" action="Cues/trigger-cue-7"/>
+
+<!-- trigger individual slots using the 8x8 grid buttons -->
+
+<Binding channel="1" note="56" action="Cues/trigger-slot-0-0"/>
+<Binding channel="1" note="57" action="Cues/trigger-slot-1-0"/>
+<Binding channel="1" note="58" action="Cues/trigger-slot-2-0"/>
+<Binding channel="1" note="59" action="Cues/trigger-slot-3-0"/>
+<Binding channel="1" note="60" action="Cues/trigger-slot-4-0"/>
+<Binding channel="1" note="61" action="Cues/trigger-slot-5-0"/>
+<Binding channel="1" note="62" action="Cues/trigger-slot-6-0"/>
+<Binding channel="1" note="63" action="Cues/trigger-slot-7-0"/>
+
+<Binding channel="1" note="48" action="Cues/trigger-slot-0-1"/>
+<Binding channel="1" note="49" action="Cues/trigger-slot-1-1"/>
+<Binding channel="1" note="50" action="Cues/trigger-slot-2-1"/>
+<Binding channel="1" note="51" action="Cues/trigger-slot-3-1"/>
+<Binding channel="1" note="52" action="Cues/trigger-slot-4-1"/>
+<Binding channel="1" note="53" action="Cues/trigger-slot-5-1"/>
+<Binding channel="1" note="54" action="Cues/trigger-slot-6-1"/>
+<Binding channel="1" note="55" action="Cues/trigger-slot-7-1"/>
+
+<Binding channel="1" note="40" action="Cues/trigger-slot-0-2"/>
+<Binding channel="1" note="41" action="Cues/trigger-slot-1-2"/>
+<Binding channel="1" note="42" action="Cues/trigger-slot-2-2"/>
+<Binding channel="1" note="43" action="Cues/trigger-slot-3-2"/>
+<Binding channel="1" note="44" action="Cues/trigger-slot-4-2"/>
+<Binding channel="1" note="45" action="Cues/trigger-slot-5-2"/>
+<Binding channel="1" note="46" action="Cues/trigger-slot-6-2"/>
+<Binding channel="1" note="47" action="Cues/trigger-slot-7-2"/>
+
+<Binding channel="1" note="32" action="Cues/trigger-slot-0-3"/>
+<Binding channel="1" note="33" action="Cues/trigger-slot-1-3"/>
+<Binding channel="1" note="34" action="Cues/trigger-slot-2-3"/>
+<Binding channel="1" note="35" action="Cues/trigger-slot-3-3"/>
+<Binding channel="1" note="36" action="Cues/trigger-slot-4-3"/>
+<Binding channel="1" note="37" action="Cues/trigger-slot-5-3"/>
+<Binding channel="1" note="38" action="Cues/trigger-slot-6-3"/>
+<Binding channel="1" note="39" action="Cues/trigger-slot-7-3"/>
+
+<Binding channel="1" note="24" action="Cues/trigger-slot-0-4"/>
+<Binding channel="1" note="25" action="Cues/trigger-slot-1-4"/>
+<Binding channel="1" note="26" action="Cues/trigger-slot-2-4"/>
+<Binding channel="1" note="27" action="Cues/trigger-slot-3-4"/>
+<Binding channel="1" note="28" action="Cues/trigger-slot-4-4"/>
+<Binding channel="1" note="29" action="Cues/trigger-slot-5-4"/>
+<Binding channel="1" note="30" action="Cues/trigger-slot-6-4"/>
+<Binding channel="1" note="31" action="Cues/trigger-slot-7-4"/>
+
+<Binding channel="1" note="16" action="Cues/trigger-slot-0-5"/>
+<Binding channel="1" note="17" action="Cues/trigger-slot-1-5"/>
+<Binding channel="1" note="18" action="Cues/trigger-slot-2-5"/>
+<Binding channel="1" note="19" action="Cues/trigger-slot-3-5"/>
+<Binding channel="1" note="20" action="Cues/trigger-slot-4-5"/>
+<Binding channel="1" note="21" action="Cues/trigger-slot-5-5"/>
+<Binding channel="1" note="22" action="Cues/trigger-slot-6-5"/>
+<Binding channel="1" note="23" action="Cues/trigger-slot-7-5"/>
+
+<Binding channel="1" note="8" action="Cues/trigger-slot-0-6"/>
+<Binding channel="1" note="9" action="Cues/trigger-slot-1-6"/>
+<Binding channel="1" note="10" action="Cues/trigger-slot-2-6"/>
+<Binding channel="1" note="11" action="Cues/trigger-slot-3-6"/>
+<Binding channel="1" note="12" action="Cues/trigger-slot-4-6"/>
+<Binding channel="1" note="13" action="Cues/trigger-slot-5-6"/>
+<Binding channel="1" note="14" action="Cues/trigger-slot-6-6"/>
+<Binding channel="1" note="15" action="Cues/trigger-slot-7-6"/>
+
+<Binding channel="1" note="0" action="Cues/trigger-slot-0-7"/>
+<Binding channel="1" note="1" action="Cues/trigger-slot-1-7"/>
+<Binding channel="1" note="2" action="Cues/trigger-slot-2-7"/>
+<Binding channel="1" note="3" action="Cues/trigger-slot-3-7"/>
+<Binding channel="1" note="4" action="Cues/trigger-slot-4-7"/>
+<Binding channel="1" note="5" action="Cues/trigger-slot-5-7"/>
+<Binding channel="1" note="6" action="Cues/trigger-slot-6-7"/>
+<Binding channel="1" note="7" action="Cues/trigger-slot-7-7"/>
+
+<!-- stop cues using the buttons in the bottom row -->
+
+<Binding channel="1" note="64" action="Cues/stop-cues-0-soon"/>
+<Binding channel="1" note="65" action="Cues/stop-cues-1-soon"/>
+<Binding channel="1" note="66" action="Cues/stop-cues-2-soon"/>
+<Binding channel="1" note="67" action="Cues/stop-cues-3-soon"/>
+<Binding channel="1" note="68" action="Cues/stop-cues-4-soon"/>
+<Binding channel="1" note="69" action="Cues/stop-cues-5-soon"/>
+<Binding channel="1" note="70" action="Cues/stop-cues-6-soon"/>
+<Binding channel="1" note="71" action="Cues/stop-cues-7-soon"/>
+
+<!-- stop *all* cues using the SHIFT key -->
+
+<Binding channel="1" note="98" action="Cues/stop-all-cues-soon"/>
+
+</ArdourMIDIBindings>
