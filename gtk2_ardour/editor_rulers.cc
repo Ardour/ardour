@@ -1062,6 +1062,18 @@ Editor::metric_get_timecode (std::vector<ArdourCanvas::Ruler::Mark>& marks, int6
 	}
 }
 
+uint32_t
+Editor::count_bars (Beats const & start, Beats const & end) const
+{
+	TempoMapPoints bar_grid;
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	bar_grid.reserve (4096);
+	superclock_t s (tmap->superclock_at (start));
+	superclock_t e (tmap->superclock_at (end));
+	tmap->get_grid (bar_grid, s, e, 1);
+	return bar_grid.size();
+}
+
 void
 Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 {
@@ -1095,7 +1107,7 @@ Editor::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 		return;
 	}
 
-	bbt_bars = tmap->count_bars (floor_lower_beat, ceil_upper_beat);
+	bbt_bars = count_bars (floor_lower_beat, ceil_upper_beat);
 
 	double ruler_line_granularity = UIConfiguration::instance().get_ruler_granularity ();  //in pixels
 	ruler_line_granularity = _visible_canvas_width / (ruler_line_granularity*5);  //fudge factor '5' probably related to (4+1 beats)/measure, I think

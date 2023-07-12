@@ -1039,9 +1039,10 @@ private:
 	};
 
 	BBTRulerScale bbt_ruler_scale;
-
 	uint32_t bbt_bars;
 	uint32_t bbt_bar_helper_on;
+
+	uint32_t count_bars (Temporal::Beats const & start, Temporal::Beats const & end) const;
 	void compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper);
 
 	ArdourCanvas::Ruler* timecode_ruler;
