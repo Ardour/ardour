@@ -2765,16 +2765,6 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 	DEBUG_TRACE (DEBUG::Grid, "<<< GRID DONE\n");
 }
 
-uint32_t
-TempoMap::count_bars (Beats const & start, Beats const & end) const
-{
-	TempoMapPoints bar_grid;
-	superclock_t s (superclock_at (start));
-	superclock_t e (superclock_at (end));
-	get_grid (bar_grid, s, e, 1);
-	return bar_grid.size();
-}
-
 std::ostream&
 std::operator<<(std::ostream& str, Meter const & m)
 {

@@ -647,7 +647,7 @@ class LIBTEMPORAL_API TempoMapPoint : public Point, public TempoMetric
 	bool         _floating;
 };
 
-typedef std::list<TempoMapPoint> TempoMapPoints;
+typedef std::vector<TempoMapPoint> TempoMapPoints;
 
 class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 {
@@ -913,7 +913,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API	BBT_Argument bbt_walk (BBT_Argument const &, BBT_Offset const &) const;
 
 	LIBTEMPORAL_API	void get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
-	LIBTEMPORAL_API	uint32_t count_bars (Beats const & start, Beats const & end) const;
 
 	struct EmptyTempoMapException : public std::exception {
 		virtual const char* what() const throw() { return "TempoMap is empty"; }
