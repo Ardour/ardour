@@ -773,19 +773,6 @@ MusicTimePoint::set_name (std::string const & str)
 	/* XXX need a signal or something to announce change */
 }
 
-
-void
-TempoMapPoint::start_float ()
-{
-	_floating = true;
-}
-
-void
-TempoMapPoint::end_float ()
-{
-	_floating = false;
-}
-
 /* TEMPOMAP */
 
 TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter)

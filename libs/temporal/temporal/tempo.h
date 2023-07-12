@@ -628,13 +628,8 @@ class LIBTEMPORAL_API TempoMapPoint : public Point, public TempoMetric
 {
   public:
 	TempoMapPoint (TempoMap const & map, TempoMetric const & tm, superclock_t sc, Beats const & q, BBT_Time const & bbt)
-		: Point (map, sc, q, bbt), TempoMetric (tm), _floating (false) {}
+		: Point (map, sc, q, bbt), TempoMetric (tm) {}
 	~TempoMapPoint () {}
-
-	/* called by a GUI that is manipulating the position of this point */
-	void start_float ();
-	void end_float ();
-	bool floating() const { return _floating; }
 
 	bool is_explicit_meter() const { return _meter->sclock() == sclock(); }
 	bool is_explicit_tempo() const { return _tempo->sclock() == sclock(); }
@@ -642,9 +637,6 @@ class LIBTEMPORAL_API TempoMapPoint : public Point, public TempoMetric
 	bool is_explicit () const { return is_explicit_meter() || is_explicit_tempo() || is_explicit_position(); }
 
 	timepos_t time() const { if (is_explicit_meter()) { return _meter->time(); } else if (is_explicit_tempo()) { return _tempo->time(); } else { return timepos_t::from_superclock (sclock()); } }
-
-  private:
-	bool         _floating;
 };
 
 typedef std::vector<TempoMapPoint> TempoMapPoints;
