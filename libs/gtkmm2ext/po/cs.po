@@ -2,20 +2,21 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Pavel Fric <pavelfric@seznam.cz>, 2013, 2020.
+# Martin Vlk <martin@vlkk.cz>, 2023.
 msgid ""
 msgstr ""
 "Project-Id-Version: \n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-05-20 14:36-0600\n"
-"PO-Revision-Date: 2020-05-09 14:07+0200\n"
-"Last-Translator: Pavel Fric <pavelfric@seznam.cz>\n"
+"POT-Creation-Date: 2023-07-13 12:07+0200\n"
+"PO-Revision-Date: 2023-07-13 16:33+0200\n"
+"Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n != 1);\n"
-"X-Generator: Lokalize 19.04.0\n"
+"X-Generator: Lokalize 21.12.3\n"
 
 #: actions.cc:215
 msgid "Unknown action name: %1/%2"
@@ -27,7 +28,7 @@ msgstr "Zakázáno"
 
 #: action_model.cc:83
 msgid "Main_menu"
-msgstr "Hlavní_nabídka"
+msgstr "Main_menu"
 
 #: action_model.cc:85
 msgid "JACK"
@@ -35,33 +36,37 @@ msgstr "JACK"
 
 #: action_model.cc:87
 msgid "redirectmenu"
-msgstr "přesměrovacínabídka"
+msgstr "redirectmenu"
 
 #: action_model.cc:89
 msgid "Editor_menus"
-msgstr "Nabídky_úprav"
+msgstr "Editor_menus"
 
 #: action_model.cc:91
 msgid "RegionList"
-msgstr "SeznamOblastí"
+msgstr "RegionList"
 
 #: action_model.cc:93
 msgid "ProcessorMenu"
-msgstr "NabídkaZpracování"
+msgstr "ProcessorMenu"
 
-#: bindings.cc:840 bindings.cc:842
+#: bindings.cc:502
+msgid "Escape"
+msgstr "Escape"
+
+#: bindings.cc:852 bindings.cc:854
 msgid "Window"
 msgstr "Okno"
 
-#: bindings.cc:840
+#: bindings.cc:852
 msgid " (Categorized)"
 msgstr "(Zařazeno)"
 
-#: bindings.cc:842
+#: bindings.cc:854
 msgid " (Alphabetical)"
 msgstr "(abecedně)"
 
-#: bindings.cc:858
+#: bindings.cc:870
 msgid "Uncategorized"
 msgstr "Nezařazeno"
 
@@ -73,11 +78,11 @@ msgstr "Soubor s údaji o kontrolním bodu ukazatele %1 má chybu na řádku %2"
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-#: gtk_ui.cc:126
+#: gtk_ui.cc:121
 msgid "Log"
 msgstr "Zápis"
 
-#: gtk_ui.cc:395
+#: gtk_ui.cc:410
 msgid ""
 "\n"
 "\n"
@@ -87,72 +92,84 @@ msgstr ""
 "\n"
 "Klávesová zkratka: "
 
-#: gtk_ui.cc:694
+#: gtk_ui.cc:719
 msgid "Press To Exit"
 msgstr "Stisknout pro ukončení"
 
-#: gtk_ui.cc:730
+#: gtk_ui.cc:755
 msgid "I'm sorry %1, I can't do that"
 msgstr "Bohužel to nelze udělat, %1"
 
-#: keyboard.cc:75
+#: keyboard.cc:80
 msgid "Command"
 msgstr "Příkaz"
 
-#: keyboard.cc:76 keyboard.cc:98
+#: keyboard.cc:85 keyboard.cc:146
 msgid "Control"
 msgstr "Ctrl"
 
-#: keyboard.cc:77 keyboard.cc:82 keyboard.cc:100 keyboard.cc:105
+#: keyboard.cc:90 keyboard.cc:120 keyboard.cc:156 keyboard.cc:186
 msgid "Key|Shift"
 msgstr "Shift"
 
-#: keyboard.cc:78
+#: keyboard.cc:95
 msgid "Option"
 msgstr "Volba"
 
-#: keyboard.cc:80
+#: keyboard.cc:100
+msgid "Middle Click (or Ctrl+Alt+Click)"
+msgstr "Kliknout prostředním (nebo Ctrl+Alt+Click)"
+
+#: keyboard.cc:105
+msgid "Cmd+Click (or Middle-Click)"
+msgstr "Cmd+Klik (nebo Prostřední-Click)"
+
+#: keyboard.cc:110
 msgid "Cmd"
 msgstr "Cmd"
 
-#: keyboard.cc:81 keyboard.cc:103
+#: keyboard.cc:115 keyboard.cc:176
 msgid "Ctrl"
 msgstr "Ctrl"
 
-#: keyboard.cc:83
+#: keyboard.cc:125
 msgid "Opt"
-msgstr "Alt"
+msgstr "Opt"
 
-#: keyboard.cc:99 keyboard.cc:104
+#: keyboard.cc:151 keyboard.cc:181
 msgid "Alt"
 msgstr "Alt"
 
-#: keyboard.cc:101
+#: keyboard.cc:161
 msgid "Windows"
 msgstr "Okna"
 
-#: keyboard.cc:106
+#: keyboard.cc:166 keyboard.cc:171
+msgid "Middle-Click"
+msgstr "Prostřední-Klik"
+
+#: keyboard.cc:191
 msgid "Win"
 msgstr "Win"
 
-#: keyboard.cc:159 keyboard.cc:605
+#: keyboard.cc:287 keyboard.cc:771
 msgid "Unknown"
 msgstr "Neznámý"
 
-#: keyboard.cc:616
+#: keyboard.cc:781
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
 "Soubor s přiřazením kláves \"%2\"se nepodařilo najít, nebo obsahuje chyby."
 
-#: keyboard.cc:642
+#: keyboard.cc:807
 msgid "Keyboard binding found without a name"
-msgstr "Přiřazení kláves nalezeno bez názvu"
+msgstr "Nalezeno přiřazení kláves bez názvu"
 
-#: keyboard.cc:674
+#: keyboard.cc:839
 msgid "Cannot save key bindings to %1"
 msgstr "Přiřazení kláves nelze uložit do %1"
 
-#: keyboard.cc:690
+#: keyboard.cc:854
 msgid "Cannot rename your own keybinding file (%1)"
 msgstr "Nelze přejmenovat váš vlastní soubor s přiřazením kláves (%1)"
 
