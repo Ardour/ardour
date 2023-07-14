@@ -940,7 +940,11 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	Meters const & meters() const { return _meters; }
 	MusicTimes const & bartimes() const { return _bartimes; }
 
-	LIBTEMPORAL_API	Points::const_iterator get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
+	LIBTEMPORAL_API void grid (TempoMapPoints& points, superclock_t start, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const {
+		get_grid (points, start, end, bar_mod, beat_div);
+	}
+
+	LIBTEMPORAL_API Points::const_iterator get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
 	LIBTEMPORAL_API void get_grid_with_iterator (GridIterator& iter, TempoMapPoints& ret, superclock_t rstart, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
 
 	struct EmptyTempoMapException : public std::exception {

@@ -30,7 +30,7 @@ function factory () return function ()
 	-- get grid -- currently only available in debug-builds
 	-- Temporal.superclock_ticks_per_second = 282240000
 	tm = Temporal.TempoMap.read ()
-	local grid = tm:get_grid (Temporal.TempoMapPoints(), 0, Temporal.superclock_ticks_per_second (), 0, 1)
+	local grid = tm:grid (Temporal.TempoMapPoints(), 0, Temporal.superclock_ticks_per_second (), 0, 1)
 	for t in grid[1]:iter () do
 		-- each t is-a TempoMapPoint
 		local metric = t:to_tempometric ()
