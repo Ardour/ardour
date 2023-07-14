@@ -110,7 +110,7 @@ Editor::reassociate_metric_markers (TempoMap::SharedPtr const& tmap)
 }
 
 void
-Editor::reassociate_tempo_marker (TempoMap::SharedPtr const & tmap, TempoMap::Tempos const & tempos, TempoMarker& marker)
+Editor::reassociate_tempo_marker (TempoMap::SharedPtr const & tmap, Tempos const & tempos, TempoMarker& marker)
 {
 	Temporal::MusicTimePoint const * mtp;
 
@@ -131,7 +131,7 @@ Editor::reassociate_tempo_marker (TempoMap::SharedPtr const & tmap, TempoMap::Te
 }
 
 void
-Editor::reassociate_meter_marker (TempoMap::SharedPtr const & tmap, TempoMap::Meters const & meters, MeterMarker& marker)
+Editor::reassociate_meter_marker (TempoMap::SharedPtr const & tmap, Meters const & meters, MeterMarker& marker)
 {
 	Temporal::MusicTimePoint const * mtp;
 
@@ -151,7 +151,7 @@ Editor::reassociate_meter_marker (TempoMap::SharedPtr const & tmap, TempoMap::Me
 }
 
 void
-Editor::reassociate_bartime_marker (TempoMap::SharedPtr const & tmap, TempoMap::MusicTimes const & bartimes, BBTMarker& marker)
+Editor::reassociate_bartime_marker (TempoMap::SharedPtr const & tmap, MusicTimes const & bartimes, BBTMarker& marker)
 {
 	for (auto const & bartime : bartimes) {
 		if (marker.point().sclock() == bartime.sclock()) {
@@ -220,7 +220,7 @@ Editor::reset_tempo_marks ()
 	const uint32_t tc_color = UIConfiguration::instance().color ("tempo curve");
 	const samplecnt_t sr (_session->sample_rate());
 
-	TempoMap::Tempos const & tempi (TempoMap::use()->tempos());
+	Tempos const & tempi (TempoMap::use()->tempos());
 	TempoPoint const * prev_ts = 0;
 	double max_tempo = 0.0;
 	double min_tempo = DBL_MAX;
@@ -251,7 +251,7 @@ Editor::reset_meter_marks ()
 		return;
 	}
 
-	TempoMap::Meters const & meters (TempoMap::use()->meters());
+	Meters const & meters (TempoMap::use()->meters());
 
 	for (auto & m : meter_marks) {
 		delete m;
@@ -277,7 +277,7 @@ Editor::reset_bbt_marks ()
 	}
 
 	Temporal::TempoMap::SharedPtr tmap (TempoMap::use());
-	TempoMap::MusicTimes const & bartimes (tmap->bartimes());
+	MusicTimes const & bartimes (tmap->bartimes());
 
 	for (auto & b : bbt_marks) {
 		delete b;

@@ -124,7 +124,7 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 		const samplepos_t end = start + move;
 
 		_click_points.clear ();
-		TempoMap::use()->get_grid (_click_points, samples_to_superclock (start, sample_rate()), samples_to_superclock (end, sample_rate()));
+		TempoMap::use()->get_grid_with_iterator (_click_iterator, _click_points, samples_to_superclock (start, sample_rate()), samples_to_superclock (end, sample_rate()));
 
 		if (_click_points.empty()) {
 			start += move;

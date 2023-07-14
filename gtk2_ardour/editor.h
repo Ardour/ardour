@@ -1903,9 +1903,9 @@ private:
 
 	void reassociate_metric_markers (Temporal::TempoMap::SharedPtr const &);
 
-	void reassociate_tempo_marker (Temporal::TempoMap::SharedPtr const & tmap, Temporal::TempoMap::Tempos const &, TempoMarker& marker);
-	void reassociate_meter_marker (Temporal::TempoMap::SharedPtr const & tmap, Temporal::TempoMap::Meters const &, MeterMarker& marker);
-	void reassociate_bartime_marker (Temporal::TempoMap::SharedPtr const & tmap, Temporal::TempoMap::MusicTimes const &, BBTMarker& marker);
+	void reassociate_tempo_marker (Temporal::TempoMap::SharedPtr const & tmap, Temporal::Tempos const &, TempoMarker& marker);
+	void reassociate_meter_marker (Temporal::TempoMap::SharedPtr const & tmap, Temporal::Meters const &, MeterMarker& marker);
+	void reassociate_bartime_marker (Temporal::TempoMap::SharedPtr const & tmap, Temporal::MusicTimes const &, BBTMarker& marker);
 
 	void make_bbt_marker (Temporal::MusicTimePoint const *, Marks::iterator before);
 	void make_meter_marker (Temporal::MeterPoint const *, Marks::iterator before);

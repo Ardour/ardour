@@ -478,10 +478,10 @@ class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public v
 class LIBTEMPORAL_API TempoMetric
 {
   public:
-	TempoMetric (TempoPoint const & t, MeterPoint const & m) : _tempo (&t), _meter (&m) {}
+	TempoMetric (TempoPoint const & t, MeterPoint const & m);
 	virtual ~TempoMetric () {}
 
-	superclock_t reftime() const;
+	superclock_t reftime() const { return _reftime; }
 
 	TempoPoint const & tempo() const { return *_tempo; }
 	MeterPoint const & meter() const { return *_meter; }
@@ -541,6 +541,7 @@ class LIBTEMPORAL_API TempoMetric
   protected:
 	TempoPoint const * _tempo;
 	MeterPoint const * _meter;
+	superclock_t       _reftime;
 
 };
 
@@ -641,6 +642,37 @@ class LIBTEMPORAL_API TempoMapPoint : public Point, public TempoMetric
 
 typedef std::vector<TempoMapPoint> TempoMapPoints;
 
+typedef boost::intrusive::list<TempoPoint, boost::intrusive::base_hook<tempo_hook>> Tempos;
+typedef boost::intrusive::list<MeterPoint, boost::intrusive::base_hook<meter_hook>> Meters;
+typedef boost::intrusive::list<MusicTimePoint, boost::intrusive::base_hook<bartime_hook>> MusicTimes;
+typedef boost::intrusive::list<Point, boost::intrusive::base_hook<point_hook>> Points;
+
+struct LIBTEMPORAL_API GridIterator
+{
+	GridIterator () : valid (false), sclock (0), tempo (nullptr), meter (nullptr), end (0) {}
+	GridIterator (TempoPoint const * tp, MeterPoint const * mp, superclock_t sc, Beats const & b, BBT_Time const & bb, Points::const_iterator p, superclock_t e)
+		: valid (false)
+		, sclock (sc)
+		, beats (b)
+		, bbt (bb)
+		, tempo (tp)
+		, meter (mp)
+		, points_iterator (p)
+		, end (e)
+	{
+		valid = (tempo && meter);
+	}
+
+	bool         valid;
+	superclock_t sclock;
+	Beats        beats;
+	BBT_Time     bbt;
+	TempoPoint const *  tempo;
+	MeterPoint const *  meter;
+	Points::const_iterator points_iterator;
+	superclock_t end;
+};
+
 class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 {
 	/* Any given thread must be able to carry out tempo-related arithmetic
@@ -712,7 +744,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API static void abort_update ();
 
 	/* not part of public API */
-	superclock_t reftime(TempoMetric const &) const;
+	superclock_t reftime(TempoPoint const &, MeterPoint const &) const;
 
 	/* and now on with the rest of the show ... */
 
@@ -904,7 +936,12 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API	BBT_Argument bbt_walk (BBT_Argument const &, BBT_Offset const &) const;
 
-	LIBTEMPORAL_API	void get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
+	Tempos const & tempos() const { return _tempos; }
+	Meters const & meters() const { return _meters; }
+	MusicTimes const & bartimes() const { return _bartimes; }
+
+	LIBTEMPORAL_API	Points::const_iterator get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
+	LIBTEMPORAL_API void get_grid_with_iterator (GridIterator& iter, TempoMapPoints& ret, superclock_t rstart, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
 
 	struct EmptyTempoMapException : public std::exception {
 		virtual const char* what() const throw() { return "TempoMap is empty"; }
@@ -915,15 +952,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API static PBD::Signal0<void> MapChanged;
 
 	LIBTEMPORAL_API XMLNode& get_state() const;
-
-	typedef boost::intrusive::list<TempoPoint, boost::intrusive::base_hook<tempo_hook>> Tempos;
-	typedef boost::intrusive::list<MeterPoint, boost::intrusive::base_hook<meter_hook>> Meters;
-	typedef boost::intrusive::list<MusicTimePoint, boost::intrusive::base_hook<bartime_hook>> MusicTimes;
-	typedef boost::intrusive::list<Point, boost::intrusive::base_hook<point_hook>> Points;
-
-	Tempos const & tempos() const { return _tempos; }
-	Meters const & meters() const { return _meters; }
-	MusicTimes const & bartimes() const { return _bartimes; }
 
 	LIBTEMPORAL_API	Beats quarters_at_sample (samplepos_t sc) const { return quarters_at_superclock (samples_to_superclock (sc, TEMPORAL_SAMPLE_RATE)); }
 	LIBTEMPORAL_API	Beats quarters_at_superclock (superclock_t sc) const;
@@ -1106,6 +1134,10 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	void reset_section (Points::iterator& begin, Points::iterator& end, superclock_t, TempoMetric& metric);
 
 	TempoMapCutBuffer* cut_copy (timepos_t const & start, timepos_t const & end, bool copy, bool ripple);
+
+	void fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p, TempoMetric& metric, superclock_t& start, superclock_t rstart,
+	                                           superclock_t end, int bar_mod, int beat_div, Beats& beats, BBT_Time& bbt) const;
+	void fill_grid_with_final_metric (TempoMapPoints& ret, TempoMetric metric, superclock_t start, superclock_t rstart, superclock_t end, int bar_mod, int beat_div, Beats beats, BBT_Time bbt) const;
 };
 
 class LIBTEMPORAL_API TempoMapCutBuffer
