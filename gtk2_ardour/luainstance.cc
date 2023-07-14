@@ -496,15 +496,15 @@ lua_actionlist (lua_State *L)
 		}
 
 		//kinda kludgy way to avoid displaying menu items as mappable
-		if (parts[1] == _("Main_menu"))
+		if (parts[1] == X_("Main_menu"))
 			continue;
-		if (parts[1] == _("JACK"))
+		if (parts[1] == X_("JACK"))
 			continue;
-		if (parts[1] == _("redirectmenu"))
+		if (parts[1] == X_("redirectmenu"))
 			continue;
-		if (parts[1] == _("RegionList"))
+		if (parts[1] == X_("RegionList"))
 			continue;
-		if (parts[1] == _("ProcessorMenu"))
+		if (parts[1] == X_("ProcessorMenu"))
 			continue;
 
 		if (!action_tbl[parts[1]].isTable()) {
