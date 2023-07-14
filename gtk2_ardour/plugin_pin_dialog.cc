@@ -655,6 +655,12 @@ PluginPinWidget::add_port_to_table (std::shared_ptr<Port> p, uint32_t r, bool ca
 				 */
 				set<Evoral::Parameter> p = proc->what_can_be_automated ();
 				for (set<Evoral::Parameter>::iterator i = p.begin (); i != p.end (); ++i) {
+					/* Do not display send phase invert toggle here.
+					 * (strictly we should only show BusSendLevel).
+					 */
+					if (i->type () == PhaseAutomation) {
+						continue;
+					}
 					Control* c = new Control (proc->automation_control (*i), _("Send"));
 					_controls.push_back (c);
 					++r; ++rv;
