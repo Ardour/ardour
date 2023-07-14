@@ -483,6 +483,9 @@ IOButton::port_pretty_name_changed (std::string pn)
 void
 IOButton::port_connected_or_disconnected (std::weak_ptr<Port> wa, std::weak_ptr<Port> wb)
 {
+	if (!_route) {
+		return;
+	}
 	std::shared_ptr<Port> a = wa.lock ();
 	std::shared_ptr<Port> b = wb.lock ();
 
@@ -701,6 +704,14 @@ IOButton::update ()
 {
 	std::shared_ptr<ARDOUR::Bundle> bundle;
 	_bundle_connections.drop_connections ();
+
+	if (!_route) {
+		/* There may still be a signal queued before `set_route (0)` unsets the route
+		 * and unsubscribes. invalidation only happens when the button is destroyed. */
+		set_text (_input ? _("Input") : _("Output"));
+		set_tooltip (this, "");
+		return;
+	}
 
 	set_label (*this, _route->session (), bundle, _input ? _route->input () : _route->output ());
 
