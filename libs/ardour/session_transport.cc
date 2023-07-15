@@ -299,7 +299,7 @@ Session::locate (samplepos_t target_sample, bool for_loop_end, bool force, bool 
 	}
 
 	_last_roll_location = _last_roll_or_reversal_location =  _transport_sample;
-	_click_iterator.valid = false;
+	_click_iterator.invalidate ();
 
 	Located (); /* EMIT SIGNAL */
 }

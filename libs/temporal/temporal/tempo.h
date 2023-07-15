@@ -647,30 +647,39 @@ typedef boost::intrusive::list<MeterPoint, boost::intrusive::base_hook<meter_hoo
 typedef boost::intrusive::list<MusicTimePoint, boost::intrusive::base_hook<bartime_hook>> MusicTimes;
 typedef boost::intrusive::list<Point, boost::intrusive::base_hook<point_hook>> Points;
 
-struct LIBTEMPORAL_API GridIterator
+class LIBTEMPORAL_API GridIterator
 {
-	GridIterator () : valid (false), sclock (0), tempo (nullptr), meter (nullptr), end (0) {}
-	GridIterator (TempoPoint const * tp, MeterPoint const * mp, superclock_t sc, Beats const & b, BBT_Time const & bb, Points::const_iterator p, superclock_t e)
-		: valid (false)
-		, sclock (sc)
+  public:
+	GridIterator () : sclock (0), tempo (nullptr), meter (nullptr), end (0), valid (false), map (nullptr) {}
+	GridIterator (TempoMap const & m, TempoPoint const * tp, MeterPoint const * mp, superclock_t sc, Beats const & b, BBT_Time const & bb, Points::const_iterator p, superclock_t e)
+		: sclock (sc)
 		, beats (b)
 		, bbt (bb)
 		, tempo (tp)
 		, meter (mp)
 		, points_iterator (p)
 		, end (e)
+		, valid (false)
+		, map (&m)
 	{
 		valid = (tempo && meter);
 	}
 
-	bool         valid;
-	superclock_t sclock;
-	Beats        beats;
-	BBT_Time     bbt;
-	TempoPoint const *  tempo;
-	MeterPoint const *  meter;
+	bool valid_for (TempoMap const & map, superclock_t start) const;
+	void catch_up_to (superclock_t e) { end = e; }
+	void invalidate () { valid = false; }
+
+	superclock_t           sclock;
+	Beats                  beats;
+	BBT_Time               bbt;
+	TempoPoint const *     tempo;
+	MeterPoint const *     meter;
 	Points::const_iterator points_iterator;
-	superclock_t end;
+	superclock_t           end;
+
+  private:
+	bool             valid;
+  	TempoMap const * map;
 };
 
 class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
@@ -940,11 +949,14 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	Meters const & meters() const { return _meters; }
 	MusicTimes const & bartimes() const { return _bartimes; }
 
+
+	LIBTEMPORAL_API Points::const_iterator get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
+
 	LIBTEMPORAL_API void grid (TempoMapPoints& points, superclock_t start, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const {
 		get_grid (points, start, end, bar_mod, beat_div);
 	}
 
-	LIBTEMPORAL_API Points::const_iterator get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
+
 	LIBTEMPORAL_API void get_grid_with_iterator (GridIterator& iter, TempoMapPoints& ret, superclock_t rstart, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
 
 	struct EmptyTempoMapException : public std::exception {

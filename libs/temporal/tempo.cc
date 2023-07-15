@@ -774,6 +774,17 @@ MusicTimePoint::set_name (std::string const & str)
 	/* XXX need a signal or something to announce change */
 }
 
+bool
+GridIterator::valid_for (TempoMap const & m, superclock_t start) const
+{
+	if (!valid || start != end || map != &m) {
+		return false;
+	}
+
+	return true;
+}
+
+
 /* TEMPOMAP */
 
 TempoMap::TempoMap (Tempo const & initial_tempo, Meter const & initial_meter)
@@ -2540,15 +2551,16 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 void
 TempoMap::get_grid_with_iterator (GridIterator& iter, TempoMapPoints& ret, superclock_t rstart, superclock_t end, uint32_t bar_mod, uint32_t beat_div) const
 {
-	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID-I START %1 .. %2 (barmod = %3) iter valid ? %4 iter for %5\n", rstart, end, bar_mod, iter.valid, iter.end));
+	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID-I START %1 .. %2 (barmod = %3) iter valid ? %4 iter for %5\n", rstart, end, bar_mod, iter.valid_for (*this, rstart), iter.end));
 
-	if (!iter.valid || rstart != iter.end) {
+	if (!iter.valid_for (*this, rstart)) {
+		std::cerr << "iterator @ " << &iter << " invalid, valid = " << iter.valid_for (*this, rstart) << " end " << iter.end << " rs " << rstart << std::endl;
 		Points::const_iterator p = get_grid (ret, rstart, end, bar_mod, beat_div);
 		if (!ret.empty()) {
 			TempoMapPoint& tmp (ret.back());
-			iter = GridIterator (&tmp.tempo(), &tmp.meter(), tmp.sclock(), tmp.beats(), tmp.bbt(), p, end);
+			iter = GridIterator (*this, &tmp.tempo(), &tmp.meter(), tmp.sclock(), tmp.beats(), tmp.bbt(), p, end);
 		} else {
-			iter.end = end;
+			iter.catch_up_to (end);
 		}
 		return;
 	}
@@ -2567,9 +2579,9 @@ TempoMap::get_grid_with_iterator (GridIterator& iter, TempoMapPoints& ret, super
 
 	if (!ret.empty()) {
 		TempoMapPoint& tmp (ret.back());
-		iter = GridIterator (&metric.tempo(), &metric.meter(), tmp.sclock(), tmp.beats(), tmp.bbt(), p, end);
+		iter = GridIterator (*this, &metric.tempo(), &metric.meter(), tmp.sclock(), tmp.beats(), tmp.bbt(), p, end);
 	} else {
-		iter.end = end;
+		iter.catch_up_to (end);
 	}
 
 	DEBUG_TRACE (DEBUG::Grid, "<<< GRID-I DONE\n");
