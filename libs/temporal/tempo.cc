@@ -2549,7 +2549,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 }
 
 void
-TempoMap::get_grid_with_iterator (GridIterator& iter, TempoMapPoints& ret, superclock_t rstart, superclock_t end, uint32_t bar_mod, uint32_t beat_div) const
+TempoMap::get_grid (GridIterator& iter, TempoMapPoints& ret, superclock_t rstart, superclock_t end, uint32_t bar_mod, uint32_t beat_div) const
 {
 	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID-I START %1 .. %2 (barmod = %3) iter valid ? %4 iter for %5\n", rstart, end, bar_mod, iter.valid_for (*this, rstart, bar_mod, beat_div), iter.end));
 

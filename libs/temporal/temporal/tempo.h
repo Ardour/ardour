@@ -647,7 +647,7 @@ typedef boost::intrusive::list<MeterPoint, boost::intrusive::base_hook<meter_hoo
 typedef boost::intrusive::list<MusicTimePoint, boost::intrusive::base_hook<bartime_hook>> MusicTimes;
 typedef boost::intrusive::list<Point, boost::intrusive::base_hook<point_hook>> Points;
 
-/* An object used to retain "position" across calls to get_grid_with_iterator()
+/* An object used to retain "position" across calls to get_grid()
  */
 class LIBTEMPORAL_API GridIterator
 {
@@ -713,7 +713,7 @@ class LIBTEMPORAL_API GridIterator
 
 
 	/* bar modulus and beat division used by GridIterator. These must match
-	   the current call to ::get_grid_with_iterator() for the iterator to
+	   the current call to ::get_grid() for the iterator to
 	   be valid.
 	*/
 
@@ -997,13 +997,12 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 
 	LIBTEMPORAL_API Points::const_iterator get_grid (TempoMapPoints & points, superclock_t start, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
+	LIBTEMPORAL_API void get_grid (GridIterator& iter, TempoMapPoints& ret, superclock_t rstart, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
 
+	/* This version exists for Lua bindings, to avoid having to wrap Points::iterator etc. */
 	LIBTEMPORAL_API void grid (TempoMapPoints& points, superclock_t start, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const {
 		get_grid (points, start, end, bar_mod, beat_div);
 	}
-
-
-	LIBTEMPORAL_API void get_grid_with_iterator (GridIterator& iter, TempoMapPoints& ret, superclock_t rstart, superclock_t end, uint32_t bar_mod = 0, uint32_t beat_div = 1) const;
 
 	struct EmptyTempoMapException : public std::exception {
 		virtual const char* what() const throw() { return "TempoMap is empty"; }
