@@ -30,6 +30,8 @@
 #include <vector>
 #include <boost/enable_shared_from_this.hpp>
 
+#include "temporal/tempo.h"
+
 #include "ardour/plugin.h"
 #include "ardour/plugin_scan_result.h"
 #include "ardour/uri_map.h"
@@ -389,6 +391,8 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	void do_remove_preset (std::string);
 	void find_presets ();
 	void add_state (XMLNode *) const;
+
+	Temporal::GridIterator grid_iterator;
 };
 
 
