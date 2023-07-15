@@ -789,6 +789,7 @@ private:
 	void ensure_cd_marker_updated (LocationMarkers* lam, ARDOUR::Location* location);
 	void update_cue_marker_display ();
 	void ensure_cue_marker_updated (LocationMarkers* lam, ARDOUR::Location* location);
+	void update_all_marker_lanes ();
 
 	TimeAxisView*      clicked_axisview;
 	RouteTimeAxisView* clicked_routeview;

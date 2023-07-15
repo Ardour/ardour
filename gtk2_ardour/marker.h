@@ -91,6 +91,7 @@ public:
 	void set_show_line (bool);
 	void set_line_height (double);
 
+	virtual void reposition ();
 	virtual void set_position (Temporal::timepos_t const &);
 	void set_name (const std::string&, const std::string & tooltip = std::string());
 	void set_color (std::string const& color_name);
@@ -163,7 +164,6 @@ protected:
 
 	int          _cue_index;
 
-	virtual void reposition ();
 	void setup_line_x ();
 	void setup_name_display ();
 
