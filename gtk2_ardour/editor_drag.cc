@@ -7486,7 +7486,7 @@ VelocityLineDrag::start_grab (GdkEvent* ev, Gdk::Cursor* c)
 }
 
 void
-VelocityLineDrag::point_added (Duple const & d, Rectangle const & r, double last_x)
+VelocityLineDrag::point_added (Duple const & d, ArdourCanvas::Rectangle const & r, double last_x)
 {
 	drag_did_change |= grv->line_draw_motion (d, r, last_x);
 }
