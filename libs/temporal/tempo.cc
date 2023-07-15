@@ -775,9 +775,9 @@ MusicTimePoint::set_name (std::string const & str)
 }
 
 bool
-GridIterator::valid_for (TempoMap const & m, superclock_t start) const
+GridIterator::valid_for (TempoMap const & m, superclock_t start, uint32_t bmod, uint32_t bdiv) const
 {
-	if (!valid || start != end || map != &m) {
+	if (!valid || start != end || map != &m || bar_mod != bmod || beat_div != bdiv) {
 		return false;
 	}
 
@@ -2551,14 +2551,13 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 void
 TempoMap::get_grid_with_iterator (GridIterator& iter, TempoMapPoints& ret, superclock_t rstart, superclock_t end, uint32_t bar_mod, uint32_t beat_div) const
 {
-	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID-I START %1 .. %2 (barmod = %3) iter valid ? %4 iter for %5\n", rstart, end, bar_mod, iter.valid_for (*this, rstart), iter.end));
+	DEBUG_TRACE (DEBUG::Grid, string_compose (">>> GRID-I START %1 .. %2 (barmod = %3) iter valid ? %4 iter for %5\n", rstart, end, bar_mod, iter.valid_for (*this, rstart, bar_mod, beat_div), iter.end));
 
-	if (!iter.valid_for (*this, rstart)) {
-		std::cerr << "iterator @ " << &iter << " invalid, valid = " << iter.valid_for (*this, rstart) << " end " << iter.end << " rs " << rstart << std::endl;
+	if (!iter.valid_for (*this, rstart, bar_mod, beat_div)) {
 		Points::const_iterator p = get_grid (ret, rstart, end, bar_mod, beat_div);
 		if (!ret.empty()) {
 			TempoMapPoint& tmp (ret.back());
-			iter = GridIterator (*this, &tmp.tempo(), &tmp.meter(), tmp.sclock(), tmp.beats(), tmp.bbt(), p, end);
+			iter.set (*this, &tmp.tempo(), &tmp.meter(), tmp.sclock(), tmp.beats(), tmp.bbt(), p, end, bar_mod, beat_div);
 		} else {
 			iter.catch_up_to (end);
 		}
@@ -2579,7 +2578,7 @@ TempoMap::get_grid_with_iterator (GridIterator& iter, TempoMapPoints& ret, super
 
 	if (!ret.empty()) {
 		TempoMapPoint& tmp (ret.back());
-		iter = GridIterator (*this, &metric.tempo(), &metric.meter(), tmp.sclock(), tmp.beats(), tmp.bbt(), p, end);
+		iter.set (*this, &metric.tempo(), &metric.meter(), tmp.sclock(), tmp.beats(), tmp.bbt(), p, end, bar_mod, beat_div);
 	} else {
 		iter.catch_up_to (end);
 	}

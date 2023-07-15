@@ -647,11 +647,14 @@ typedef boost::intrusive::list<MeterPoint, boost::intrusive::base_hook<meter_hoo
 typedef boost::intrusive::list<MusicTimePoint, boost::intrusive::base_hook<bartime_hook>> MusicTimes;
 typedef boost::intrusive::list<Point, boost::intrusive::base_hook<point_hook>> Points;
 
+/* An object used to retain "position" across calls to get_grid_with_iterator()
+ */
 class LIBTEMPORAL_API GridIterator
 {
   public:
-	GridIterator () : sclock (0), tempo (nullptr), meter (nullptr), end (0), valid (false), map (nullptr) {}
-	GridIterator (TempoMap const & m, TempoPoint const * tp, MeterPoint const * mp, superclock_t sc, Beats const & b, BBT_Time const & bb, Points::const_iterator p, superclock_t e)
+	GridIterator () : sclock (0), tempo (nullptr), meter (nullptr), end (0), bar_mod (0), beat_div (1), valid (false), map (nullptr) {}
+	GridIterator (TempoMap const & m, TempoPoint const * tp, MeterPoint const * mp, superclock_t sc, Beats const & b, BBT_Time const & bb, Points::const_iterator p, superclock_t e,
+	              uint32_t bmod, uint32_t bdiv)
 		: sclock (sc)
 		, beats (b)
 		, bbt (bb)
@@ -659,27 +662,70 @@ class LIBTEMPORAL_API GridIterator
 		, meter (mp)
 		, points_iterator (p)
 		, end (e)
+		, bar_mod (bmod)
+		, beat_div (bdiv)
 		, valid (false)
 		, map (&m)
 	{
 		valid = (tempo && meter);
 	}
 
-	bool valid_for (TempoMap const & map, superclock_t start) const;
+	void set (TempoMap const & m, TempoPoint const * tp, MeterPoint const * mp, superclock_t sc, Beats const & b, BBT_Time const & bb, Points::const_iterator p, superclock_t e,
+	          uint32_t bmod, uint32_t bdiv) {
+		map = &m;
+		tempo = tp;
+		meter = mp;
+		sclock = sc;
+		beats = b;
+		bbt = bb;
+		points_iterator = p;
+		end = e;
+		bar_mod = bmod;
+		beat_div = bdiv;
+	}
+
+	bool valid_for (TempoMap const & map, superclock_t start, uint32_t bar_mod, uint32_t beat_div) const;
 	void catch_up_to (superclock_t e) { end = e; }
 	void invalidate () { valid = false; }
 
+
+	/* These 3 members hold the position of the last discovered grid point */
 	superclock_t           sclock;
 	Beats                  beats;
 	BBT_Time               bbt;
+
+	/* These 3 members hold the TempoMetric information that was in effect
+	 * at the *end* of the last use of the GridIterator
+	 */
 	TempoPoint const *     tempo;
 	MeterPoint const *     meter;
+
+	/* the iterator in the tempo map's _points list that points to the next
+	 * point to be considered, or _points.end()
+	 */
 	Points::const_iterator points_iterator;
+
+	/* The position of the end of the last use of the GridIterator. For the
+	   iterator to be considered valid on the next call, the start must
+	   match this value (see ::valid_for() above).
+	*/
 	superclock_t           end;
+
+
+	/* bar modulus and beat division used by GridIterator. These must match
+	   the current call to ::get_grid_with_iterator() for the iterator to
+	   be valid.
+	*/
+
+	uint32_t bar_mod;
+	uint32_t beat_div;
 
   private:
 	bool             valid;
-  	TempoMap const * map;
+
+	TempoMap const * map; /* nullptr or the map instance this GridIterator 
+	                       * was last used with.
+	                       */
 };
 
 class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
