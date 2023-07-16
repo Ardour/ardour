@@ -11,7 +11,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-13 12:07+0200\n"
-"PO-Revision-Date: 2023-07-13 21:45+0200\n"
+"PO-Revision-Date: 2023-07-16 21:38+0200\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -427,7 +427,7 @@ msgstr "Nepodařilo se nahrát synth pro zkušební poslech MIDI."
 
 #: auditioner.cc:168
 msgid "Cannot setup auditioner processing flow."
-msgstr ""
+msgstr "Nemohu nastavit zpracování zkušebního poslechu."
 
 #: auditioner.cc:223
 msgid "no outputs available for auditioner - manual connection required"
@@ -475,7 +475,7 @@ msgstr "Zastřihnout"
 
 #: automatable.cc:201
 msgid "Master Volume"
-msgstr ""
+msgstr "Celková hlasitost"
 
 #: automatable.cc:203
 msgid "Mute"
@@ -483,7 +483,7 @@ msgstr "Ztlumit"
 
 #: automatable.cc:205
 msgid "Azimuth"
-msgstr ""
+msgstr "Azimut"
 
 #: automatable.cc:207
 msgid "Width"
@@ -491,11 +491,11 @@ msgstr "Šířka"
 
 #: automatable.cc:209
 msgid "Elevation"
-msgstr ""
+msgstr "Zdvih"
 
 #: automatable.cc:211
 msgid "Polarity Invert"
-msgstr ""
+msgstr "Převrácení polarity"
 
 #: automatable.cc:213 velocity_control.cc:36
 msgid "Velocity"
@@ -545,24 +545,24 @@ msgstr "Chyba zápisu butler při dstream %1"
 
 #: clip_library.cc:74
 msgid "Set Clip Library directory to '%1'"
-msgstr ""
+msgstr "Nastavit adresář knihovny klipů na '%1'"
 
 #: clip_library.cc:83
 msgid "Cannot create Clip Library directory '%1'"
-msgstr ""
+msgstr "Nemohu vytvořit adresář knihovny klipů '%1'"
 
 #: clip_library.cc:89
 msgid "Clip Library"
-msgstr ""
+msgstr "Knihovna klipů"
 
 #: clip_library.cc:94
 msgid "Could not save Clip Library meta-data in '%1'"
-msgstr ""
+msgstr "Nešlo uložit metadata knihovny klipů v '%1'"
 
 #: clip_library.cc:98
 msgid ""
 "Clip Library directory '%1' already exists and is not a directory/folder"
-msgstr ""
+msgstr "Adresář knihovny klipů '%1' již existuje a nejde o adresář/složku"
 
 #: control_protocol_manager.cc:232
 msgid "Control protocol support for %1 failed to activate"
@@ -638,37 +638,45 @@ msgstr "Poslouchat"
 
 #: disk_reader.cc:82
 msgid "Player"
-msgstr ""
+msgstr "Přehrávač"
 
 #: disk_reader.cc:729
 msgid ""
 "DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"
 msgstr ""
+"DiskReader %1: při přepisování(1), nelze číst %2 ze seznamu oblastí na vzorku"
+" %3"
 
 #: disk_reader.cc:737
 msgid ""
 "DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"
 msgstr ""
+"DiskReader %1: při přepisování(2), nelze číst %2 ze seznamu oblastí na vzorku"
+" %3"
 
 #: disk_reader.cc:1043
 msgid "DiskReader %1: cannot read %2 from playlist at sample %3"
-msgstr "DiskReader %1: nelze číst %2 ze seznamu skladeb při vzorku %3"
+msgstr "DiskReader %1: nelze číst %2 ze seznamu oblastí na vzorku %3"
 
 #: disk_reader.cc:1301
 msgid ""
 "DiskReader %1: when refilling, cannot read %2 from playlist at sample %3 "
 "(rv: %4)"
 msgstr ""
+"DiskReader %1: při doplňování, nelze číst %2 ze seznamu oblastí na vzorku %3 "
+"(rv: %4)"
 
 #: disk_reader.cc:1307
 msgid ""
 "DiskReader %1: when refilling, cannot write %2 into buffer (wrote %3, space "
 "%4)"
 msgstr ""
+"DiskReader %1: při doplňování, nemohu zapsat %2 do bufferu (zapsáno %3, místo "
+"%4)"
 
 #: disk_writer.cc:94
 msgid "Recorder"
-msgstr ""
+msgstr "Rekordér"
 
 #: disk_writer.cc:982 disk_writer.cc:1001
 msgid "AudioDiskstream %1: cannot write to disk"
@@ -703,6 +711,8 @@ msgstr "Nepodařilo se vyvést: %1"
 msgid ""
 "Existing export folder for this session (%1) does not exist - using default"
 msgstr ""
+"Stávající adresář pro export tohoto sezení (%1) neexistuje - použije se"
+" výchozí"
 
 #: export_filename.cc:293
 msgid "No Time"
@@ -758,27 +768,27 @@ msgstr "Datový tok sezení"
 
 #: export_format_specification.cc:671
 msgid "normalize loudness"
-msgstr "Normalizovat hlasitost"
+msgstr "normalizovat hlasitost"
 
 #: export_format_specification.cc:673
 msgid "limit peak"
-msgstr ""
+msgstr "omezit nejvyšší hodnotu"
 
 #: export_format_specification.cc:676
 msgid "normalize peak"
-msgstr "Normalizovat nejvyšší hodnotu"
+msgstr "normalizovat nejvyšší hodnotu"
 
 #: export_format_specification.cc:681
 msgid "trim"
-msgstr "Zastřihnout"
+msgstr "zastřihnout"
 
 #: export_format_specification.cc:683
 msgid "trim start"
-msgstr "Zastřihnout začátek"
+msgstr "zastřihnout začátek"
 
 #: export_format_specification.cc:685
 msgid "trim end"
-msgstr "Zastřihnout konec"
+msgstr "zastřihnout konec"
 
 #: export_formats.cc:57
 msgid "Shaped Noise"
@@ -826,11 +836,11 @@ msgstr "Vzorkovací formát Vorbis"
 
 #: export_formats.cc:183
 msgid "OPUS codec"
-msgstr ""
+msgstr "Kodek OPUS"
 
 #: export_formats.cc:185
 msgid "MPEG-2 Audio Layer III"
-msgstr ""
+msgstr "MPEG-2 Audio Layer III"
 
 #: export_formats.cc:187
 msgid "No sample format"

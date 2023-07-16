@@ -10,7 +10,7 @@ msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-07-13 12:07+0200\n"
-"PO-Revision-Date: 2023-07-13 22:46+0200\n"
+"PO-Revision-Date: 2023-07-16 21:18+0200\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -2038,8 +2038,8 @@ msgid ""
 "No action bound\n"
 "Right-click to assign"
 msgstr ""
-"Keine Aktion verknüpft\n"
-"Rechtsklick für Zuweisung"
+"Nepřiřazená akce\n"
+"Kliknutím pravým přiřadíte"
 
 #: ardour_ui_dependents.cc:480
 msgid ""
@@ -2051,9 +2051,9 @@ msgid ""
 msgstr ""
 "%1\n"
 "\n"
-"Klick für Start\n"
-"Rechtsklick für Neuzuweisung\n"
-"Shift+Rechtsklick, um Zuweisung aufzuheben"
+"Kliknutím spustíte\n"
+"Kliknutím pravým přenastavíte\n"
+"Shift+pravý klik vyprázdníte"
 
 #: ardour_ui_dialogs.cc:316
 msgid "Don't close"
@@ -4259,7 +4259,7 @@ msgstr "Atonální nárazy se stálými tóny"
 
 #: editor.cc:244
 msgid "Crisp monophonic instrumental"
-msgstr "Jemná jednokanálová nástrojová hudba"
+msgstr "Jasná jednokanálová instrumentální"
 
 #: editor.cc:245
 msgid "Unpitched solo percussion"
@@ -11474,7 +11474,7 @@ msgstr ""
 
 #: mixer_ui.cc:1009
 msgid "Instrument has only 1 output bus. Nothing to fan out."
-msgstr "Nástroj má jen 1 výstupní sběrnici. Není nic k rozvětvení se."
+msgstr "Nástroj má jen 1 výstupní sběrnici. Nedá se rozvětvit."
 
 #: mixer_ui.cc:2004 plugin_selector.cc:208 route_list_base.cc:387
 msgid "Show All"
@@ -12215,8 +12215,9 @@ msgid ""
 "Ardour is a multichannel hard disk recorder (HDR) and digital audio "
 "workstation (DAW)."
 msgstr ""
-"Ardour ist ein mehrkanaliges Festplatten-Aufnahmeprogramm (HDR) und eine "
-"Digitale Audio Workstation (DAW)."
+"Ardour je vícekanálový hard-disk rekordér (HDR) a pracovní stanice pro"
+" digitální "
+"audio (DAW)."
 
 #: opts.cc:70
 msgid "Options:\n"
@@ -12969,7 +12970,7 @@ msgstr "Rozvětvit"
 
 #: plugin_setup_dialog.cc:53
 msgid "An Instrument plugin is already present."
-msgstr "Přídavný modul nástroje je již přítomen."
+msgstr "Nástrojový přídavný modul je již přítomen."
 
 #: plugin_setup_dialog.cc:63
 msgid "with"
@@ -13520,7 +13521,7 @@ msgid ""
 "%1+double-click to toggle inline-display"
 msgstr ""
 "\n"
-"%1+Doppelklick, um Inline-Anzeige umzuschalten"
+"%1+dvojklik přepne zobrazení uvnitř"
 
 #: processor_box.cc:551
 msgid ""
@@ -20852,8 +20853,8 @@ msgid ""
 "ffmpeg installation was not found. Video Export is not possible. See the Log "
 "window for more information."
 msgstr ""
-"V tomto systému se nepodařilo najít žádnou instalaci ffmpeg. Vyvádění "
-"obrazových záznamů není, dokud tyto nástroje nenainstalujete, možné. "
+"V tomto systému se nepodařilo najít nainstalovaný ffmpeg. Vyvádění "
+"obrazových záznamů není možné, dokud tyto nástroje nenainstalujete. "
 "Podívejte se na okno se zápisem na další informace."
 
 #: export_video_dialog.cc:112
