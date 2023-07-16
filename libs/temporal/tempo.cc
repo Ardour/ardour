@@ -413,9 +413,9 @@ TempoPoint::set_state (XMLNode const & node, int version)
 	int ret;
 
 	if ((ret = Tempo::set_state (node, version)) == 0) {
-		if (node.get_property (X_("omega_beats"), _omega_beats)) {
+		if (node.get_property (X_("omega"), _omega)) {
+			if (node.get_property (X_("omega"), _omega)) {
 			/* Older versions only defined a single omega value */
-			if (node.get_property (X_("omega"), _omega_beats)) {
 				/* ???? */
 			}
 		}
@@ -429,27 +429,27 @@ TempoPoint::get_state () const
 {
 	XMLNode& base (Tempo::get_state());
 	Point::add_state (base);
-	base.set_property (X_("omega_beats"), _omega_beats);
+	base.set_property (X_("omega"), _omega);
 	return base;
 }
 
 TempoPoint::TempoPoint (TempoMap const & map, XMLNode const & node)
 	: Point (map, node)
 	, Tempo (node)
-	, _omega_beats (0.)
+	, _omega (0.)
 {
-	if (node.get_property (X_("omega_beats"), _omega_beats)) {
+	if (node.get_property (X_("omega"), _omega)) {
 		/* Older versions only defined a single omega value */
-		if (node.get_property (X_("omega"), _omega_beats)) {
+		if (node.get_property (X_("omega"), _omega)) {
 			/* ???? */
 		}
 	}
 }
 
 void
-TempoPoint::set_omega_beats (double ob)
+TempoPoint::set_omega (double ob)
 {
-	_omega_beats = ob;
+	_omega = ob;
 }
 
 
@@ -457,13 +457,13 @@ TempoPoint::set_omega_beats (double ob)
  */
 
 void
-TempoPoint::compute_omega_beats_from_next_tempo (TempoPoint const & next)
+TempoPoint::compute_omega_from_next_tempo (TempoPoint const & next)
 {
-	compute_omega_beats_from_distance_and_next_tempo (next.beats() - beats(), next);
+	compute_omega_from_distance_and_next_tempo (next.beats() - beats(), next);
 }
 
 void
-TempoPoint::compute_omega_beats_from_distance_and_next_tempo (Beats const & quarter_duration, TempoPoint const & next)
+TempoPoint::compute_omega_from_distance_and_next_tempo (Beats const & quarter_duration, TempoPoint const & next)
 {
 	superclock_t end_scpqn;
 
@@ -476,23 +476,23 @@ TempoPoint::compute_omega_beats_from_distance_and_next_tempo (Beats const & quar
 	}
 
 	if (superclocks_per_quarter_note () == end_scpqn) {
-		_omega_beats = 0.0;
+		_omega = 0.0;
 		return;
 	}
 
-	compute_omega_beats_from_quarter_duration (quarter_duration, end_scpqn);
+	compute_omega_from_quarter_duration (quarter_duration, end_scpqn);
 }
 
 void
-TempoPoint::compute_omega_beats_from_quarter_duration (Beats const & quarter_duration, superclock_t end_scpqn)
+TempoPoint::compute_omega_from_quarter_duration (Beats const & quarter_duration, superclock_t end_scpqn)
 {
-	const double old = _omega_beats;
+	const double old = _omega;
 
-	if (!std::isfinite (_omega_beats = ((1.0/end_scpqn) - (1.0/superclocks_per_quarter_note())) / DoubleableBeats (quarter_duration).to_double())) {
+	if (!std::isfinite (_omega = ((1.0/end_scpqn) - (1.0/superclocks_per_quarter_note())) / DoubleableBeats (quarter_duration).to_double())) {
 		DEBUG_TRACE (DEBUG::TemporalMap, "quarter-computed omega out of bounds\n");
-		_omega_beats = old;
+		_omega = old;
 	}
-	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("quarter-computed omega from qtr duration = %1 dur was %2 start speed %3 end speed [%4]\n", _omega_beats, quarter_duration.str(), superclocks_per_quarter_note(), end_scpqn));
+	DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("quarter-computed omega from qtr duration = %1 dur was %2 start speed %3 end speed [%4]\n", _omega, quarter_duration.str(), superclocks_per_quarter_note(), end_scpqn));
 }
 
 superclock_t
@@ -519,33 +519,33 @@ TempoPoint::superclock_at (Temporal::Beats const & qn) const
 	}
 
 	superclock_t r;
-	const double log_expr = superclocks_per_quarter_note() * _omega_beats * DoubleableBeats (qn - _quarters).to_double();
+	const double log_expr = superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double();
 
-	// std::cerr << "logexpr " << log_expr << " from " << superclocks_per_quarter_note() << " * " << _omega_beats << " * " << (qn - _quarters) << std::endl;
+	// std::cerr << "logexpr " << log_expr << " from " << superclocks_per_quarter_note() << " * " << _omega << " * " << (qn - _quarters) << std::endl;
 
 	if (log_expr < -1) {
 
-		r = _sclock + llrint (log (-log_expr - 1.0) / -_omega_beats);
+		r = _sclock + llrint (log (-log_expr - 1.0) / -_omega);
 
 		if (r < 0) {
 			std::cerr << "CASE 1: " << *this << endl << " scpqn = " << superclocks_per_quarter_note() << std::endl;
 			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log (" << log_expr << ") "
 			          << log (-log_expr - 1.0)
-			          << " - omega = " << -_omega_beats
+			          << " - omega = " << -_omega
 			          << " => "
 			          << r << std::endl;
 			abort ();
 		}
 
 	} else {
-		r = _sclock + llrint (log1p (log_expr) / _omega_beats);
+		r = _sclock + llrint (log1p (log_expr) / _omega);
 
-		// std::cerr << "r = " << _sclock << " + " << log1p (log_expr) / _omega_beats << " => " << r << std::endl;
+		// std::cerr << "r = " << _sclock << " + " << log1p (log_expr) / _omega << " => " << r << std::endl;
 
 		if (r < 0) {
 			std::cerr << "CASE 2: scpqn = " << superclocks_per_quarter_note() << std::endl;
-			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log1p (" << superclocks_per_quarter_note() * _omega_beats * DoubleableBeats (qn - _quarters).to_double() << " = "
-			          << log1p (superclocks_per_quarter_note() * _omega_beats * DoubleableBeats (qn - _quarters).to_double())
+			std::cerr << " for " << qn << " @ " << _quarters << " | " << _sclock << " + log1p (" << superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double() << " = "
+			          << log1p (superclocks_per_quarter_note() * _omega * DoubleableBeats (qn - _quarters).to_double())
 			          << " => "
 			          << r << std::endl;
 			_map->dump (std::cerr);
@@ -563,7 +563,7 @@ TempoPoint::superclocks_per_note_type_at (timepos_t const &pos) const
 		return _superclocks_per_note_type;
 	}
 
-	return _superclocks_per_note_type * exp (-_omega_beats * (pos.superclocks() - sclock()));
+	return _superclocks_per_note_type * exp (-_omega * (pos.superclocks() - sclock()));
 }
 
 Temporal::Beats
@@ -619,7 +619,7 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 		return ret;
 	}
 
-	const double b = (exp (_omega_beats * (sc - _sclock)) - 1) / (superclocks_per_quarter_note() * _omega_beats);
+	const double b = (exp (_omega * (sc - _sclock)) - 1) / (superclocks_per_quarter_note() * _omega);
 	return _quarters + Beats::from_double (b);
 }
 
@@ -1649,7 +1649,7 @@ TempoMap::reset_starting_at (superclock_t sc)
 	if (need_initial_ramp_reset) {
 		const TempoPoint *nxt = next_tempo (metric.tempo());
 		if (nxt) {
-			const_cast<TempoPoint*> (&metric.tempo())->compute_omega_beats_from_next_tempo (*nxt);
+			const_cast<TempoPoint*> (&metric.tempo())->compute_omega_from_next_tempo (*nxt);
 		}
 		need_initial_ramp_reset = false;
 	}
@@ -1749,7 +1749,7 @@ TempoMap::reset_section (Points::iterator& begin, Points::iterator& end, supercl
 
 			DEBUG_TRACE (DEBUG::MapReset, string_compose ("considering omega comp for %1 with nxt = %2\n", *tp, nxt_tempo));
 			if (tp->ramped() && nxt_tempo) {
-				tp->compute_omega_beats_from_next_tempo (*nxt_tempo);
+				tp->compute_omega_from_next_tempo (*nxt_tempo);
 			}
 		}
 
@@ -1987,7 +1987,7 @@ TempoMap::move_tempo (TempoPoint const & tp, timepos_t const & when, bool push)
 	 */
 
 	if (prev_t->actually_ramped()) {
-		prev_t->compute_omega_beats_from_distance_and_next_tempo (beats - prev_t->beats(), tp);
+		prev_t->compute_omega_from_distance_and_next_tempo (beats - prev_t->beats(), tp);
 	}
 
 	TempoMetric metric (*prev_t, *prev_m);
@@ -2892,7 +2892,7 @@ std::operator<<(std::ostream& str, TempoPoint const & t)
 		} else {
 			str << ' ' << " !ramp to " << t.end_note_types_per_minute();
 		}
-		str << " omega_beats = " << std::setprecision(12) << t.omega_beats();
+		str << " omega = " << std::setprecision(12) << t.omega();
 	}
 	return str;
 }
@@ -2934,7 +2934,7 @@ std::operator<<(std::ostream& str, TempoMapPoint const & tmp)
 	}
 
 	if (tmp.is_explicit_tempo() && tmp.tempo().ramped()) {
-		str << " ramp omega(beats) = " << tmp.tempo().omega_beats();
+		str << " ramp omega(beats) = " << tmp.tempo().omega();
 	}
 
 	return str;
@@ -3774,7 +3774,7 @@ TempoMap::stretch_tempo (TempoPoint& focus, double tempo_value)
 	focus.set_end_npm (tempo_value);
 
 	prev->set_end_npm (tempo_value);
-	prev->compute_omega_beats_from_next_tempo (focus);
+	prev->compute_omega_from_next_tempo (focus);
 
 	superclock_t err = prev->superclock_at (focus.beats()) - focus.sclock();
 	const superclock_t one_sample = superclock_ticks_per_second() / TEMPORAL_SAMPLE_RATE;
@@ -3828,7 +3828,7 @@ TempoMap::stretch_tempo (TempoPoint& focus, double tempo_value)
 		focus.set_note_types_per_minute (new_npm);
 		focus.set_end_npm (new_npm);
 		prev->set_end_npm (new_npm);
-		prev->compute_omega_beats_from_next_tempo (focus);
+		prev->compute_omega_from_next_tempo (focus);
 		err = prev->superclock_at (focus.beats()) - focus.sclock();
 		++cnt;
 	}
@@ -4040,7 +4040,7 @@ TempoMap::solve_ramped_twist (TempoPoint& earlier, TempoPoint& later)
 		 */
 
 		earlier.set_end_npm (new_end_npm);
-		earlier.compute_omega_beats_from_next_tempo (later);
+		earlier.compute_omega_from_next_tempo (later);
 		err = earlier.superclock_at (later.beats()) - later.sclock();
 
 		if (cnt > 20000) {

@@ -391,8 +391,8 @@ typedef boost::intrusive::list_base_hook<boost::intrusive::tag<struct tempo_tag>
 class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public virtual Point
 {
   public:
-	LIBTEMPORAL_API TempoPoint (TempoMap const & map, Tempo const & t, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt), Tempo (t), _omega_beats (0.), _omega_sc (0.) {}
-	LIBTEMPORAL_API TempoPoint (Tempo const & t, Point const & p) : Point (p), Tempo (t), _omega_beats (0.), _omega_sc (0.) {}
+	LIBTEMPORAL_API TempoPoint (TempoMap const & map, Tempo const & t, superclock_t sc, Beats const & b, BBT_Time const & bbt) : Point (map, sc, b, bbt), Tempo (t), _omega (0.)  {}
+	LIBTEMPORAL_API TempoPoint (Tempo const & t, Point const & p) : Point (p), Tempo (t), _omega (0.) {}
 	LIBTEMPORAL_API TempoPoint (TempoMap const & map, XMLNode const &);
 
 	virtual ~TempoPoint () {}
@@ -424,18 +424,13 @@ class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public v
 		return (superclock_ticks_per_second() * 60.0) / superclocks_per_note_type_at (pos);
 	}
 
-	LIBTEMPORAL_API double omega_beats() const { return _omega_beats; }
-	LIBTEMPORAL_API double omega_sc() const { return _omega_sc; }
+	LIBTEMPORAL_API double omega() const { return _omega; }
 
-	LIBTEMPORAL_API void compute_omega_beats_from_next_tempo (TempoPoint const & next_tempo);
-	LIBTEMPORAL_API void compute_omega_beats_from_distance_and_next_tempo (Beats const & quarter_duration, TempoPoint const & next_tempo);
-	LIBTEMPORAL_API void compute_omega_beats_from_quarter_duration (Beats const & quarter_duration, superclock_t end_scpqn);
+	LIBTEMPORAL_API void compute_omega_from_next_tempo (TempoPoint const & next_tempo);
+	LIBTEMPORAL_API void compute_omega_from_distance_and_next_tempo (Beats const & quarter_duration, TempoPoint const & next_tempo);
+	LIBTEMPORAL_API void compute_omega_from_quarter_duration (Beats const & quarter_duration, superclock_t end_scpqn);
 
-	LIBTEMPORAL_API void compute_omega_sc_from_next_tempo (TempoPoint const & next_tempo);
-	LIBTEMPORAL_API void compute_omega_sc_from_distance_and_next_tempo (samplecnt_t audio_duration, TempoPoint const & next_tempo);
-	LIBTEMPORAL_API void compute_omega_sc_from_audio_duration (superclock_t audio_duration, superclock_t end_scpqn);
-
-	LIBTEMPORAL_API bool actually_ramped () const { return Tempo::ramped() && ( _omega_beats != 0); /* do not need to check both omegas */ }
+	LIBTEMPORAL_API bool actually_ramped () const { return Tempo::ramped() && ( _omega != 0); /* do not need to check both omegas */ }
 
 	LIBTEMPORAL_API XMLNode& get_state () const;
 	LIBTEMPORAL_API int set_state (XMLNode const&, int version);
@@ -453,11 +448,10 @@ class /*LIBTEMPORAL_API*/ TempoPoint : public Tempo, public tempo_hook, public v
 	LIBTEMPORAL_API timepos_t time() const { return timepos_t (beats()); }
 
   private:
-	double _omega_beats;
-	double _omega_sc;
+	double _omega;
 
 	friend TempoMap;
-	void set_omega_beats (double v);
+	void set_omega (double v);
 };
 
 /** Helper class to perform computations that require both Tempo and Meter
@@ -525,7 +519,7 @@ class LIBTEMPORAL_API TempoMetric
 		if (!_tempo->actually_ramped()) {
 			return _tempo->superclocks_per_note_type ();
 		}
-		return _tempo->superclocks_per_note_type() * exp (-_tempo->omega_sc() * (sc - _tempo->sclock()));
+		return _tempo->superclocks_per_note_type() * exp (-_tempo->omega() * (sc - _tempo->sclock()));
 	}
 
 	BBT_Argument bbt_at (timepos_t const &) const;
