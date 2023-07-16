@@ -57,9 +57,12 @@ setup_libtemporal_enums ()
 	REGISTER(_OverlapType);
 
 
-	REGISTER_ENUM (Tempo::Ramped);
-	REGISTER_ENUM (Tempo::Constant);
+	REGISTER_CLASS_ENUM (Tempo, Ramped);
+	REGISTER_CLASS_ENUM (Tempo, Constant);
 	REGISTER (_TempoType);
+
+	enum_writer.add_to_hack_table ("Tempo::Ramped", "Ramped");
+	enum_writer.add_to_hack_table ("Tempo::Constant", "Constant");
 }
 
 void Temporal::init ()
