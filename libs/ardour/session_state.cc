@@ -1759,7 +1759,7 @@ Session::set_state (const XMLNode& node, int version)
 	/* need the tempo map setup ASAP */
 
 	if ((child = find_named_node (node, "TempoMap")) == 0) {
-		error << _("Session: XML state has no Tempo Map section") << endmsg;
+		error << _("Session: XML state has no 'Tempo Map' section") << endmsg;
 		goto out;
 	} else {
 		try {
@@ -1767,6 +1767,7 @@ Session::set_state (const XMLNode& node, int version)
 			tmap->set_state (*child, version); /* reset its state */
 			TempoMap::update (tmap); /* update the global tempo map manager */
 		} catch (...) {
+			error << _("Session: XML state has invalid Tempo Map section") << endmsg;
 			goto out;
 		}
 	}
@@ -1821,7 +1822,7 @@ Session::set_state (const XMLNode& node, int version)
 	} else if ((child = find_named_node (node, "Config")) != 0) { /* new style */
 		load_options (*child);
 	} else {
-		error << _("Session: XML state has no options section") << endmsg;
+		error << _("Session: XML state has no 'Options' section") << endmsg;
 	}
 
 	if ((child = find_named_node (node, X_("TriggerBindings"))) != 0) {
@@ -1830,8 +1831,9 @@ Session::set_state (const XMLNode& node, int version)
 
 	if (version >= 3000) {
 		if ((child = find_named_node (node, "Metadata")) == 0) {
-			warning << _("Session: XML state has no metadata section") << endmsg;
+			warning << _("Session: XML state has no 'Metadata' section") << endmsg;
 		} else if ( ARDOUR::SessionMetadata::Metadata()->set_state (*child, version) ) {
+			error << _("Session: XML state contains invalid session metadata") << endmsg;
 			goto out;
 		}
 	}
@@ -1841,16 +1843,18 @@ Session::set_state (const XMLNode& node, int version)
 	}
 
 	if ((child = find_named_node (node, "Sources")) == 0) {
-		error << _("Session: XML state has no sources section") << endmsg;
+		error << _("Session: XML state has no 'Sources' section") << endmsg;
 		goto out;
 	} else if (load_sources (*child)) {
+		error << _("Session: failed to load audio/MIDI sources") << endmsg;
 		goto out;
 	}
 
 	if ((child = find_named_node (node, "Locations")) == 0) {
-		error << _("Session: XML state has no locations section") << endmsg;
+		error << _("Session: XML state has no 'Locations' section") << endmsg;
 		goto out;
 	} else if (_locations->set_state (*child, version)) {
+		error << _("Session: failed to parse 'Locations' information") << endmsg;
 		goto out;
 	}
 
@@ -1861,34 +1865,38 @@ Session::set_state (const XMLNode& node, int version)
 	}
 
 	if ((child = find_named_node (node, "Regions")) == 0) {
-		error << _("Session: XML state has no Regions section") << endmsg;
+		error << _("Session: XML state has no 'Regions' section") << endmsg;
 		goto out;
 	} else if (load_regions (*child)) {
+		error << _("Session: failed to load regions") << endmsg;
 		goto out;
 	}
 
 	if ((child = find_named_node (node, "Playlists")) == 0) {
-		error << _("Session: XML state has no playlists section") << endmsg;
+		error << _("Session: XML state has no 'Playlists' section") << endmsg;
 		goto out;
 	} else if (_playlists->load (*this, *child)) {
+		error << _("Session: failed to load active playlists") << endmsg;
 		goto out;
 	}
 
 	if ((child = find_named_node (node, "UnusedPlaylists")) == 0) {
 		// this is OK
 	} else if (_playlists->load_unused (*this, *child)) {
+		error << _("Session: failed to load playlists") << endmsg;
 		goto out;
 	}
 
 	if ((child = find_named_node (node, "CompoundAssociations")) != 0) {
 		if (load_compounds (*child)) {
+			error << _("Session: failed to load region compound information") << endmsg;
 			goto out;
 		}
 	}
 
 	if (version >= 3000) {
 		if ((child = find_named_node (node, "Bundles")) == 0) {
-			warning << _("Session: XML state has no bundles section") << endmsg;
+			warning << _("Session: XML state has no 'Bundles' section") << endmsg;
 			//goto out;
 		} else {
 			/* We can't load Bundles yet as they need to be able
@@ -1966,9 +1974,10 @@ Session::set_state (const XMLNode& node, int version)
 	}
 
 	if ((child = find_named_node (node, "Routes")) == 0) {
-		error << _("Session: XML state has no routes section") << endmsg;
+		error << _("Session: XML state has no 'Routes' section") << endmsg;
 		goto out;
 	} else if (load_routes (*child, version)) {
+		error << _("Session: failed to load route state") << endmsg;
 		goto out;
 	}
 
@@ -1984,31 +1993,34 @@ Session::set_state (const XMLNode& node, int version)
 	if (version >= 3000) {
 
 		if ((child = find_named_node (node, "RouteGroups")) == 0) {
-			error << _("Session: XML state has no route groups section") << endmsg;
+			error << _("Session: XML state has no 'Route Groups' section") << endmsg;
 			goto out;
 		} else if (load_route_groups (*child, version)) {
+			error << _("Session: failed to load route group information") << endmsg;
 			goto out;
 		}
 
 	} else if (version < 3000) {
 
 		if ((child = find_named_node (node, "EditGroups")) == 0) {
-			error << _("Session: XML state has no edit groups section") << endmsg;
+			error << _("Session: XML state has no 'Edit Groups' section") << endmsg;
 			goto out;
 		} else if (load_route_groups (*child, version)) {
+			error << _("Session: failed to load edit group information") << endmsg;
 			goto out;
 		}
 
 		if ((child = find_named_node (node, "MixGroups")) == 0) {
-			error << _("Session: XML state has no mix groups section") << endmsg;
+			error << _("Session: XML state has no 'Mix Groups' section") << endmsg;
 			goto out;
 		} else if (load_route_groups (*child, version)) {
+			error << _("Session: failed to load mix group information") << endmsg;
 			goto out;
 		}
 	}
 
 	if ((child = find_named_node (node, "Click")) == 0) {
-		warning << _("Session: XML state has no click section") << endmsg;
+		warning << _("Session: XML state has no 'Click' section") << endmsg;
 	} else if (_click_io) {
 		setup_click_state (&node);
 	}
