@@ -82,6 +82,7 @@
 #include "mouse_cursors.h"
 #include "editor_cursors.h"
 #include "region_peak_cursor.h"
+#include "velocity_ghost_region.h"
 #include "verbose_cursor.h"
 #include "note.h"
 
@@ -902,6 +903,16 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
+	case VelocityBaseItem:
+		{
+			VelocityGhostRegion* grv = static_cast<VelocityGhostRegion*> (item->get_data ("ghostregionview"));
+			if (grv) {
+				_drags->set (new VelocityLineDrag (this, grv->base_item(), Temporal::BeatTime), event);
+			}
+		}
+		return true;
+		break;
+
 	default:
 		break;
 	}
@@ -1569,6 +1580,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		/* see if we're finishing a drag */
 
 		if (_drags->active ()) {
+
 			bool const r = _drags->end_grab (event);
 			if (r) {
 				/* grab dragged, so do nothing else */

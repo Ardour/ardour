@@ -2875,9 +2875,9 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 
 					if (!got_grid) {
 						got_grid = true;
-						tmap->get_grid (tempo_map_points,
-								samples_to_superclock (start0, TEMPORAL_SAMPLE_RATE),
-								samples_to_superclock (end, TEMPORAL_SAMPLE_RATE), 0);
+						tmap->get_grid (grid_iterator, tempo_map_points,
+						                samples_to_superclock (start0, TEMPORAL_SAMPLE_RATE),
+						                samples_to_superclock (end, TEMPORAL_SAMPLE_RATE), 0);
 					}
 				}
 

@@ -809,7 +809,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("time", &Temporal::TempoMapPoint::time)
 		.endClass ()
 
-		.beginStdList <Temporal::TempoMapPoint> ("TempoMapPoints")
+		.beginStdVector <Temporal::TempoMapPoint> ("TempoMapPoints")
 		.endClass ()
 
 		.beginWSPtrClass <Temporal::TempoMap> ("TempoMap")
@@ -858,9 +858,8 @@ LuaBindings::common (lua_State* L)
 
 		.addFunction ("convert_duration", &Temporal::TempoMap::convert_duration)
 		.addFunction ("bbt_walk", &Temporal::TempoMap::bbt_walk)
-		.addFunction ("count_bars", &Temporal::TempoMap::count_bars)
 #ifdef WITH_SUPERCLOCK_BINDINGS
-		.addRefFunction ("get_grid", &Temporal::TempoMap::get_grid)
+		.addRefFunction ("grid", &Temporal::TempoMap::grid)
 #endif
 
 		.addFunction ("quarters_per_minute_at", &Temporal::TempoMap::quarters_per_minute_at)

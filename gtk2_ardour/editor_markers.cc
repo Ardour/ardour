@@ -336,6 +336,17 @@ struct MarkerComparator {
 	}
 };
 
+void
+Editor::update_all_marker_lanes ()
+{
+	for (auto & lam : location_markers) {
+		lam.second->start->reposition ();
+		if (lam.second->end) {
+			lam.second->end->reposition ();
+		}
+	}
+}
+
 /** Update all marker labels in all groups */
 void
 Editor::update_marker_labels ()

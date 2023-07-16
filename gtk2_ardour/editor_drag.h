@@ -1583,27 +1583,56 @@ class LollipopDrag : public Drag
 	ArdourCanvas::Lollipop*   _primary;
 };
 
-class AutomationDrawDrag : public Drag
+template<typename OrderedPointList, typename OrderedPoint>
+class FreehandLineDrag : public Drag
+{
+  public:
+	FreehandLineDrag (Editor*, ArdourCanvas::Rectangle&, Temporal::TimeDomain);
+	~FreehandLineDrag ();
+
+	void motion (GdkEvent*, bool);
+	void finished (GdkEvent*, bool);
+	bool mid_drag_key_event (GdkEventKey*);
+	virtual void point_added  (ArdourCanvas::Duple const & d, ArdourCanvas::Rectangle const & r, double last_x) {}
+
+  protected:
+	ArdourCanvas::Rectangle& base_rect; /* we do not own this */
+	ArdourCanvas::PolyLine* dragging_line;
+	int direction;
+	int edge_x;
+	bool did_snap;
+	bool line_break_pending;
+	OrderedPointList drawn_points;
+
+	void maybe_add_point (GdkEvent*, Temporal::timepos_t const &, bool first_move);
+};
+
+class AutomationDrawDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoints, Evoral::ControlList::OrderedPoint>
 {
   public:
 	AutomationDrawDrag (Editor*, ArdourCanvas::Rectangle&, Temporal::TimeDomain);
 	~AutomationDrawDrag ();
 
-	void motion (GdkEvent*, bool);
+	void finished (GdkEvent*, bool);
+	void aborted (bool) {}
+};
+
+class VelocityLineDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoints, Evoral::ControlList::OrderedPoint>
+{
+  public:
+	VelocityLineDrag (Editor*, ArdourCanvas::Rectangle&, Temporal::TimeDomain);
+	~VelocityLineDrag ();
+
+	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
 	void finished (GdkEvent*, bool);
 	void aborted (bool);
-	bool mid_drag_key_event (GdkEventKey*);
+	void point_added  (ArdourCanvas::Duple const & d, ArdourCanvas::Rectangle const & r, double last_x);
 
-private:
-	ArdourCanvas::Rectangle& base_rect; /* we do not own this */
-	ArdourCanvas::PolyLine* dragging_line;
-	int direction;
-	int edge_x;
-	Evoral::ControlList::OrderedPoints drawn_points;
-	bool did_snap;
-	bool line_break_pending;
-
-	void maybe_add_point (GdkEvent*, Temporal::timepos_t const &);
+ private:
+	VelocityGhostRegion* grv;
+	bool drag_did_change;
 };
+
+
 
 #endif /* __gtk2_ardour_editor_drag_h_ */

@@ -2152,6 +2152,7 @@ private:
 	mutable Glib::Threads::RWLock click_lock;
 	samplecnt_t                  _click_io_latency;
 	PBD::ScopedConnection        _click_io_connection;
+	Temporal::GridIterator       _click_iterator;
 
 	static const Sample     default_click[];
 	static const samplecnt_t default_click_length;

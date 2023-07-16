@@ -124,7 +124,8 @@ Session::click (samplepos_t cycle_start, samplecnt_t nframes)
 		const samplepos_t end = start + move;
 
 		_click_points.clear ();
-		TempoMap::use()->get_grid (_click_points, samples_to_superclock (start, sample_rate()), samples_to_superclock (end, sample_rate()));
+		assert (_click_points.capacity() > 0);
+		TempoMap::use()->get_grid (_click_iterator, _click_points, samples_to_superclock (start, sample_rate()), samples_to_superclock (end, sample_rate()));
 
 		if (_click_points.empty()) {
 			start += move;
@@ -310,6 +311,12 @@ Session::setup_click_sounds (Sample** data, Sample const * default_data, samplec
 		delete[] tmp;
 		sf_close (sndfile);
 	}
+
+	/* Overwhelmingly likely that we will have zero or 1 click grid point
+	 * per cycle. So this is really overkill. If it is too low, it just
+	 * causes RT memory allocation inside TempoMap::get_grid().
+	 */
+	_click_points.reserve (16);
 }
 
 void
