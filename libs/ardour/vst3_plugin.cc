@@ -2211,7 +2211,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		cnt += n_chn;
 		/* special case for Left only == Mono */
 		if (sa == 1 /*Vst::SpeakerArr::kSpeakerL */) {
-			sa = Vst::SpeakerArr::kMono; /* 1 << 19 */
+			sa |= Vst::SpeakerArr::kMono; /* 1 << 19 */
 		}
 
 		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kInput, %1, %2) used-chn: %3 spk-arr: %4\n", sa_in.size (), enable, _bus_info_in[sa_in.size ()].n_used_chn, std::hex, sa));
@@ -2235,7 +2235,7 @@ VST3PI::enable_io (std::vector<bool> const& ins, std::vector<bool> const& outs)
 		cnt += n_chn;
 		/* special case for Left only == Mono */
 		if (sa == 1 /*Vst::SpeakerArr::kSpeakerL */) {
-			sa = Vst::SpeakerArr::kMono; /* 1 << 19 */
+			sa |= Vst::SpeakerArr::kMono; /* 1 << 19 */
 		}
 		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3PI::enable_io: activateBus (kAudio, kOutput, %1, %2) used-chn: %3 spk-arr: %4\n", sa_out.size (), enable, _bus_info_out[sa_out.size ()].n_used_chn, std::hex, sa));
 		_component->activateBus (Vst::kAudio, Vst::kOutput, sa_out.size (), enable);
