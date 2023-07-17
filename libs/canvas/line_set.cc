@@ -101,7 +101,7 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 	for (auto const & l : _lines) {
 
 		Rect self;
-		const double shift = l.width * 0.5;
+		const double shift = l.width * 0.5 - 1;
 
 		if (_orientation == Horizontal) {
 			self = Rect (0, l.pos - (l.width/2.0), _extent, l.pos + (l.width/2.0));
@@ -135,12 +135,12 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 
 		if (_orientation == Horizontal) {
 			const double y = item_to_window (Duple (0, l.pos)).y;
-			context->move_to (intersection.x0, y + shift);
-			context->line_to (intersection.x1, y + shift);
+			context->move_to (intersection.x0, y - shift);
+			context->line_to (intersection.x1, y - shift);
 		} else {
 			const double x = item_to_window (Duple (l.pos, 0)).x;
-			context->move_to (x + shift, intersection.y0);
-			context->line_to (x + shift, intersection.y1);
+			context->move_to (x - shift, intersection.y0);
+			context->line_to (x - shift, intersection.y1);
 		}
 
 		context->stroke ();
