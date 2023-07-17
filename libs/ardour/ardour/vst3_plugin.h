@@ -332,9 +332,6 @@ private:
 	int _n_midi_inputs;
 	int _n_midi_outputs;
 	int _n_factory_presets;
-
-	/* work around UADx plugin crash */
-	bool _no_kMono;
 };
 
 } // namespace Steinberg
