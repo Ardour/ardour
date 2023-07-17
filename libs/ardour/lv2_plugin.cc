@@ -2807,6 +2807,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	uint32_t atom_port_index = 0;
 
 	TempoMapPoints tempo_map_points;
+	tempo_map_points.reserve (16);
 	bool got_grid = false;
 
 	for (uint32_t port_index = 0; port_index < num_ports; ++port_index) {
