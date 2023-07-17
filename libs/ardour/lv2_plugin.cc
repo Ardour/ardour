@@ -2928,7 +2928,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 						assert (tempo_map_point != tempo_map_points.end());
 						const samplepos_t sample = tempo_map_point->sample (TEMPORAL_SAMPLE_RATE);
 						const Temporal::BBT_Time bbt = tempo_map_point->bbt();
-						double bpm = tempo_map_point->tempo().quarter_notes_per_minute ();
+						double bpm = (superclock_ticks_per_second() * 60) / tempo_map_point->superclocks_per_note_type_at_superclock (tempo_map_point->sclock());
 
 						write_position(&_impl->forge, _ev_buffers[port_index],
 						               *tempo_map_point, bbt, speed, Port::speed_ratio (),
