@@ -54,6 +54,8 @@
 #include "pbd/windows_special_dirs.h"
 #endif
 
+#include "temporal/superclock.h"
+
 #ifdef WAF_BUILD
 #include "libardour-config.h"
 #endif
@@ -2857,7 +2859,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 			if (valid && (flags & PORT_INPUT)) {
 				if ((flags & PORT_POSITION)) {
 					Temporal::BBT_Time bbt (metric.bbt_at (timepos_t (start0)));
-					double bpm = metric.tempo().note_types_per_minute();
+					double bpm = (superclock_ticks_per_second() * 60) / metric.superclocks_per_note_type_at_superclock (samples_to_superclock (start0, TEMPORAL_SAMPLE_RATE));
 					double time_scale = Port::speed_ratio ();
 					double beatpos = (bbt.bars - 1) * metric.meter().divisions_per_bar()
 						+ (bbt.beats - 1)
@@ -3244,7 +3246,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 		 * Note: for no-midi plugins, we only ever send information at cycle-start,
 		 * so it needs to be realative to that.
 		 */
-		_current_bpm = metric.tempo().note_types_per_minute();
+		_current_bpm = (superclock_ticks_per_second() * 60) / metric.superclocks_per_note_type_at_superclock (samples_to_superclock (start0, TEMPORAL_SAMPLE_RATE));
 		Temporal::BBT_Time bbt (metric.bbt_at (timepos_t (start0)));
 		double beatpos = (bbt.bars - 1) * metric.divisions_per_bar()
 		               + (bbt.beats - 1)
