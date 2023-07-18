@@ -482,7 +482,7 @@ PluginEqGui::run_impulse_analysis ()
 }
 
 void
-PluginEqGui::update_pointer_info( float x)
+PluginEqGui::update_pointer_info (float x)
 {
 	/* find the bin corresponding to x (see plot_impulse_amplitude) */
 	int i = roundf ((powf (10, _log_max * x / _analysis_width) - 1.0) * _impulse_fft->bins() / _log_coeff);
@@ -599,7 +599,7 @@ PluginEqGui::redraw_analysis_area ()
 		cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 		cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
 		cairo_set_line_width (cr, 1.0);
-		cairo_move_to (cr, _pointer_in_area_freq + .5, +.5);
+		cairo_move_to (cr, _pointer_in_area_freq + .5, .5);
 		cairo_line_to (cr, _pointer_in_area_freq + .5, _analysis_height + .5);
 		cairo_stroke (cr);
 	}
@@ -646,6 +646,7 @@ PluginEqGui::draw_scales_phase (Gtk::Widget*, cairo_t *cr)
 		cairo_stroke (cr);
 
 		y = _analysis_height / 2.0 + (float)i * (_analysis_height / 8.0) * PHASE_PROPORTION;
+		y = roundf (y);
 
 		// label
 		snprintf (buf,256, u8"-%d\u00b0", (i * 45));
@@ -654,8 +655,8 @@ PluginEqGui::draw_scales_phase (Gtk::Widget*, cairo_t *cr)
 		cairo_move_to (cr, _analysis_width - t_ext.width - t_ext.x_bearing - 2.0, y - extents.descent);
 		cairo_show_text (cr, buf);
 
-		y = roundf (y) + .5;
 		// line
+		y += .5;
 		cairo_set_source_rgba (cr, .8, .9, .2, 0.4);
 		cairo_move_to (cr, 0.0,             y);
 		cairo_line_to (cr, _analysis_width, y);
@@ -683,13 +684,14 @@ PluginEqGui::plot_impulse_phase (Gtk::Widget *w, cairo_t *cr)
 		// x coordinate of bin i
 		x  = log10f (1.0 + (float)i / (float)_impulse_fft->bins() * _log_coeff) / _log_max;
 		x *= _analysis_width;
+		x = roundf (x);
 		y  = analysis_height_2 - (_impulse_fft->phase_at_bin (i) / M_PI) * analysis_height_2 * PHASE_PROPORTION;
 
 		if (i == 0) {
-			cairo_move_to (cr, x, y);
+			cairo_move_to (cr, x + .5, y);
 			avgY = 0;
 			avgNum = 0;
-		} else if (rint (x) > prevX || i == _impulse_fft->bins() - 1) {
+		} else if (x > prevX || i == _impulse_fft->bins() - 1) {
 			avgY = avgY / (float)avgNum;
 			if (avgY > (height * 10.0)) {
 				avgY = height * 10.0;
@@ -698,13 +700,13 @@ PluginEqGui::plot_impulse_phase (Gtk::Widget *w, cairo_t *cr)
 				avgY = -height * 10.0;
 			}
 
-			cairo_line_to (cr, prevX, avgY);
+			cairo_line_to (cr, prevX + .5, avgY);
 
 			avgY = 0;
 			avgNum = 0;
 		}
 
-		prevX = rint (x);
+		prevX = x;
 		avgY += y;
 		avgNum++;
 	}
@@ -745,6 +747,8 @@ PluginEqGui::draw_scales_power (Gtk::Widget */*w*/, cairo_t *cr)
 			snprintf (buf, 256, "%0.0fk", scales[i]/1000.0);
 		}
 
+		x = round (x);
+
 		cairo_set_source_rgb (cr, 0.4, 0.4, 0.4);
 
 		cairo_move_to (cr, x - extents.height, 3.0);
@@ -754,23 +758,24 @@ PluginEqGui::draw_scales_power (Gtk::Widget */*w*/, cairo_t *cr)
 		cairo_rotate (cr, -M_PI / 2.0);
 		cairo_stroke (cr);
 
+		x += .5;
 		cairo_set_source_rgb (cr, 0.3, 0.3, 0.3);
 		cairo_move_to (cr, x, _analysis_height);
 		cairo_line_to (cr, x, 0.0);
 		cairo_stroke (cr);
 	}
 
-	float y;
-
 	//double dashes[] = { 1.0, 3.0, 4.5, 3.0 };
 	double dashes[] = { 3.0, 5.0 };
 
 	for (float dB = 0.0; dB < _max_dB; dB += _step_dB) {
+		float y;
 		snprintf (buf, 256, "+%0.0f", dB);
 
 		y  = (_max_dB - dB) / (_max_dB - _min_dB);
 		//std::cerr << " y = " << y << std::endl;
 		y *= _analysis_height;
+		y = roundf (y);
 
 		if (dB != 0.0) {
 			cairo_set_source_rgb (cr, 0.4, 0.4, 0.4);
@@ -779,6 +784,7 @@ PluginEqGui::draw_scales_power (Gtk::Widget */*w*/, cairo_t *cr)
 			cairo_stroke (cr);
 		}
 
+		y += .5;
 		cairo_set_source_rgb (cr, 0.2, 0.2, 0.2);
 		cairo_move_to (cr, 0,               y);
 		cairo_line_to (cr, _analysis_width, y);
@@ -790,16 +796,19 @@ PluginEqGui::draw_scales_power (Gtk::Widget */*w*/, cairo_t *cr)
 	}
 
 	for (float dB = - _step_dB; dB > _min_dB; dB -= _step_dB) {
+		float y;
 		snprintf (buf, 256, "%0.0f", dB);
 
 		y  = (_max_dB - dB) / (_max_dB - _min_dB);
 		y *= _analysis_height;
+		y = roundf (y);
 
 		cairo_set_source_rgb (cr, 0.4, 0.4, 0.4);
 		cairo_move_to (cr, 1.0, y - extents.descent - 1.0);
 		cairo_show_text (cr, buf);
 		cairo_stroke (cr);
 
+		y += .5;
 		cairo_set_source_rgb (cr, 0.2, 0.2, 0.2);
 		cairo_move_to (cr, 0,               y);
 		cairo_line_to (cr, _analysis_width, y);
@@ -827,16 +836,17 @@ PluginEqGui::plot_impulse_amplitude (Gtk::Widget *w, cairo_t *cr)
 		// x coordinate of bin i
 		x  = log10f (1.0 + (float)i / (float)_impulse_fft->bins() * _log_coeff) / _log_max;
 		x *= _analysis_width;
+		x = roundf (x);
 
 		float yCoeff = (power_to_dB (_impulse_fft->power_at_bin (i)) - _min_dB) / (_max_dB - _min_dB);
 
 		y = _analysis_height - _analysis_height * yCoeff;
 
 		if (i == 0) {
-			cairo_move_to (cr, x, y);
+			cairo_move_to (cr, x + .5, y);
 			avgY = 0;
 			avgNum = 0;
-		} else if (rint (x) > prevX || i == _impulse_fft->bins() - 1) {
+		} else if (x > prevX || i == _impulse_fft->bins() - 1) {
 			avgY = avgY / (float)avgNum;
 			if (avgY > (height * 10.0)) {
 				avgY = height * 10.0;
@@ -844,13 +854,13 @@ PluginEqGui::plot_impulse_amplitude (Gtk::Widget *w, cairo_t *cr)
 			if (avgY < (-height * 10.0)) {
 				avgY = -height * 10.0;
 			}
-			cairo_line_to (cr, prevX, avgY);
+			cairo_line_to (cr, prevX + .5, avgY);
 
 			avgY = 0;
 			avgNum = 0;
 		}
 
-		prevX = rint (x);
+		prevX = x;
 		avgY += y;
 		avgNum++;
 	}
@@ -876,6 +886,7 @@ PluginEqGui::plot_signal_amplitude_difference (Gtk::Widget *w, cairo_t *cr)
 		// x coordinate of bin i
 		x  = log10f (1.0 + (float)i / (float)_signal_input_fft->bins() * _log_coeff) / _log_max;
 		x *= _analysis_width;
+		x = roundf (x);
 
 		float power_out = _signal_output_fft->power_at_bin (i) + 1e-30;
 		float power_in  = _signal_input_fft ->power_at_bin (i) + 1e-30;
@@ -906,11 +917,11 @@ PluginEqGui::plot_signal_amplitude_difference (Gtk::Widget *w, cairo_t *cr)
 		y = _analysis_height - _analysis_height*yCoeff;
 
 		if (i == 0) {
-			cairo_move_to (cr, x, y);
+			cairo_move_to (cr, x + .5, y);
 
 			avgY = 0;
 			avgNum = 0;
-		} else if (rint (x) > prevX || i == _impulse_fft->bins() - 1) {
+		} else if (x > prevX || i == _impulse_fft->bins() - 1) {
 			avgY = avgY / (float)avgNum;
 			if (avgY > (height * 10.0)) {
 				avgY = height * 10.0;
@@ -918,14 +929,14 @@ PluginEqGui::plot_signal_amplitude_difference (Gtk::Widget *w, cairo_t *cr)
 			if (avgY < (-height * 10.0)) {
 				avgY = -height * 10.0;
 			}
-			cairo_line_to (cr, prevX, avgY);
+			cairo_line_to (cr, prevX + .5, avgY);
 
 			avgY = 0;
 			avgNum = 0;
 
 		}
 
-		prevX = rint (x);
+		prevX = x;
 		avgY += y;
 		avgNum++;
 	}
