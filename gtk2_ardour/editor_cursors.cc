@@ -86,7 +86,7 @@ EditorCursor::set_position (samplepos_t sample)
 	double const new_pos = _editor.sample_to_pixel_unrounded (sample);
 
 	if (rint(new_pos) != rint(_track_canvas_item->x ())) {
-		_track_canvas_item->set_x (new_pos-0.5);  //accommodate the 1/2 pixel "line" offset in cairo
+		_track_canvas_item->set_x (new_pos + 0.5);  //accommodate the 1/2 pixel "line" offset in cairo
 	}
 
 	_current_sample = sample;

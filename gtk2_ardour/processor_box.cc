@@ -1308,7 +1308,7 @@ ProcessorEntry::PortIcon::on_expose_event (GdkEventExpose* ev)
 	for (uint32_t i = 0; i < _ports.n_total(); ++i) {
 		set_routing_color (cr, i < _ports.n_midi());
 		const double x = ProcessorEntry::RoutingIcon::pin_x_pos (i, width, _ports.n_total(), 0 , false);
-		cairo_rectangle (cr, x - .5 - dx * .5, 0, 1 + dx, height);
+		cairo_rectangle (cr, x + .5 - dx * .5, 0, 1 + dx, height);
 		cairo_fill(cr);
 	}
 
@@ -1460,7 +1460,7 @@ void
 ProcessorEntry::RoutingIcon::draw_sidechain (cairo_t* cr, double x0, double y0, double height, bool midi)
 {
 	const double dx = 1 + rint (max(2., 2. * UIConfiguration::instance().get_ui_scale()));
-	const double y1 = rint (height * .5) - .5;
+	const double y1 = rint (height * .5) + .5;
 
 	cairo_save (cr);
 	cairo_translate (cr, x0, y0);

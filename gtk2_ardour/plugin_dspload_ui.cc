@@ -197,12 +197,12 @@ PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
 
 		const int dx = w * i / 9.; // == DEFLECT (v)
 
-		cairo_move_to (cr, x0 + dx - .5, y0);
-		cairo_line_to (cr, x0 + dx - .5, y1);
+		cairo_move_to (cr, x0 + dx + .5, y0);
+		cairo_line_to (cr, x0 + dx + .5, y1);
 		cairo_set_source_rgba (cr, 1., 1., 1., 1.);
 		cairo_stroke (cr);
 
-		cairo_move_to (cr, x0 + dx - .5 * text_width, y1 + 1);
+		cairo_move_to (cr, x0 + dx + .5 * text_width, y1 + 1);
 		cairo_set_source_rgb (cr, fg.get_red_p (), fg.get_green_p (), fg.get_blue_p ());
 		pango_cairo_show_layout (cr, layout->gobj ());
 	}
@@ -225,7 +225,7 @@ PluginLoadStatsGui::draw_bar (GdkEventExpose* ev)
 		double xd0 = DEFLECT((_avg - _dev) / 1000.);
 		double xd1 = DEFLECT((_avg + _dev) / 1000.);
 
-		cairo_move_to (cr, x0 + xavg - .5, y0 - 1);
+		cairo_move_to (cr, x0 + xavg + .5, y0 - 1);
 		cairo_rel_line_to (cr, -5, -5);
 		cairo_rel_line_to (cr, 10, 0);
 		cairo_close_path (cr);

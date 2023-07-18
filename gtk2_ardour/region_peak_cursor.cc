@@ -131,7 +131,7 @@ RegionPeakCursor::set (AudioRegionView* arv, samplepos_t when, samplecnt_t sampl
 	_canvas_text->set_x_position (xpos + 3);
 	_canvas_text->set_y_position (pos.y + 3);
 
-	_canvas_line->set_x (xpos - 0.5);
+	_canvas_line->set_x (xpos + 0.5);
 	_canvas_line->set_y0 (pos.y);
 	_canvas_line->set_y1 (pos.y + arv->height ());
 

@@ -599,8 +599,8 @@ PluginEqGui::redraw_analysis_area ()
 		cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);
 		cairo_set_source_rgb (cr, 1.0, 1.0, 1.0);
 		cairo_set_line_width (cr, 1.0);
-		cairo_move_to (cr, _pointer_in_area_freq - .5, -.5);
-		cairo_line_to (cr, _pointer_in_area_freq - .5, _analysis_height - .5);
+		cairo_move_to (cr, _pointer_in_area_freq + .5, +.5);
+		cairo_line_to (cr, _pointer_in_area_freq + .5, _analysis_height + .5);
 		cairo_stroke (cr);
 	}
 
@@ -637,7 +637,7 @@ PluginEqGui::draw_scales_phase (Gtk::Widget*, cairo_t *cr)
 			continue;
 		}
 
-		y = roundf (y) - .5;
+		y = roundf (y) + .5;
 
 		cairo_set_source_rgba (cr, .8, .9, .2, 0.4);
 		cairo_move_to (cr, 0.0,             y);
@@ -654,7 +654,7 @@ PluginEqGui::draw_scales_phase (Gtk::Widget*, cairo_t *cr)
 		cairo_move_to (cr, _analysis_width - t_ext.width - t_ext.x_bearing - 2.0, y - extents.descent);
 		cairo_show_text (cr, buf);
 
-		y = roundf (y) - .5;
+		y = roundf (y) + .5;
 		// line
 		cairo_set_source_rgba (cr, .8, .9, .2, 0.4);
 		cairo_move_to (cr, 0.0,             y);
