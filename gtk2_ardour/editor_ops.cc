@@ -6766,7 +6766,7 @@ Editor::toggle_solo ()
 {
 	bool new_state = false;
 	bool first = true;
-	std::shared_ptr<ControlList> cl (new ControlList);
+	std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		StripableTimeAxisView *stav = dynamic_cast<StripableTimeAxisView *>(*i);
@@ -6791,7 +6791,7 @@ Editor::toggle_mute ()
 {
 	bool new_state = false;
 	bool first = true;
-	std::shared_ptr<ControlList> cl (new ControlList);
+	std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		StripableTimeAxisView *stav = dynamic_cast<StripableTimeAxisView *>(*i);
