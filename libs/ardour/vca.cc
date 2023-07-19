@@ -220,10 +220,10 @@ VCA::assign (std::shared_ptr<VCA> v)
 	Slavable::assign (v);
 }
 
-SlavableControlList
+SlavableAutomationControlList
 VCA::slavables () const
 {
-	SlavableControlList rv;
+	SlavableAutomationControlList rv;
 	rv.push_back (_gain_control);
 	rv.push_back (_mute_control);
 	rv.push_back (_solo_control);

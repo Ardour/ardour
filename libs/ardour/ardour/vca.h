@@ -178,7 +178,7 @@ class LIBARDOUR_API VCA : public Stripable,
 	std::shared_ptr<AutomationControl> filter_enable_controllable () const { return std::shared_ptr<AutomationControl>(); }
 
 	protected:
-	SlavableControlList slavables () const;
+	SlavableAutomationControlList slavables () const;
 
   private:
 	int32_t _number;

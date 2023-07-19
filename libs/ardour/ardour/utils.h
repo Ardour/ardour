@@ -112,8 +112,8 @@ LIBARDOUR_API uint32_t how_many_dsp_threads ();
 
 LIBARDOUR_API std::string compute_sha1_of_file (std::string path);
 
-template<typename T> std::shared_ptr<ControlList> route_list_to_control_list (std::shared_ptr<RouteList const> rl, std::shared_ptr<T> (Stripable::*get_control)() const) {
-	std::shared_ptr<ControlList> cl (new ControlList);
+template<typename T> std::shared_ptr<AutomationControlList> route_list_to_control_list (std::shared_ptr<RouteList const> rl, std::shared_ptr<T> (Stripable::*get_control)() const) {
+	std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 	if (!rl) { return cl; }
 	for (auto const& r : *rl) {
 		std::shared_ptr<AutomationControl> ac = (r.get()->*get_control)();

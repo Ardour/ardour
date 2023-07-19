@@ -405,7 +405,7 @@ SlavableAutomationControl::clear_masters ()
 
 	const double old_val = AutomationControl::get_double ();
 
-	ControlList masters;
+	AutomationControlList masters;
 	bool update_value = false;
 	double master_ratio = 0;
 	double list_ratio = toggled () ? 0 : 1;
@@ -447,7 +447,7 @@ SlavableAutomationControl::clear_masters ()
 			if (_list) {
 				XMLNode* before = &alist ()->get_state ();
 				if (!masters.empty()) {
-					for (ControlList::const_iterator m = masters.begin(); m != masters.end(); ++m) {
+					for (AutomationControlList::const_iterator m = masters.begin(); m != masters.end(); ++m) {
 						_list->list_merge (*(*m)->list().get(), boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, _2));
 					}
 					_list->y_transform (boost::bind (&SlavableAutomationControl::scale_automation_callback, this, _1, list_ratio));

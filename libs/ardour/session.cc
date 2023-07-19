@@ -3986,7 +3986,7 @@ Session::cancel_all_mute ()
 	StripableList all;
 	get_stripables (all);
 	std::vector<std::weak_ptr<AutomationControl> > muted;
-	std::shared_ptr<ControlList> cl (new ControlList);
+	std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 	for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
 		assert (!(*i)->is_auditioner());
 		if ((*i)->is_monitor()) {

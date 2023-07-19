@@ -41,7 +41,7 @@ using namespace ARDOUR;
 using namespace Glib;
 
 void
-Session::set_controls (std::shared_ptr<ControlList> cl, double val, Controllable::GroupControlDisposition gcd)
+Session::set_controls (std::shared_ptr<AutomationControlList> cl, double val, Controllable::GroupControlDisposition gcd)
 {
 	if (cl->empty()) {
 		return;
@@ -71,8 +71,8 @@ Session::set_controls (std::shared_ptr<ControlList> cl, double val, Controllable
 	}
 #endif
 
-	std::shared_ptr<WeakControlList> wcl (new WeakControlList);
-	for (ControlList::iterator ci = cl->begin(); ci != cl->end(); ++ci) {
+	std::shared_ptr<WeakAutomationControlList> wcl (new WeakAutomationControlList);
+	for (AutomationControlList::iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 		/* as of july 2017 this is a no-op for everything except record enable */
 		(*ci)->pre_realtime_queue_stuff (val, gcd);
 		/* fill in weak pointer ctrl list */
@@ -89,13 +89,13 @@ Session::set_control (std::shared_ptr<AutomationControl> ac, double val, Control
 		return;
 	}
 
-	std::shared_ptr<ControlList> cl (new ControlList);
+	std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 	cl->push_back (ac);
 	set_controls (cl, val, gcd);
 }
 
 void
-Session::rt_set_controls (std::shared_ptr<WeakControlList> cl, double val, Controllable::GroupControlDisposition gcd)
+Session::rt_set_controls (std::shared_ptr<WeakAutomationControlList> cl, double val, Controllable::GroupControlDisposition gcd)
 {
 	/* Note that we require that all controls in the ControlList are of the
 	   same type.

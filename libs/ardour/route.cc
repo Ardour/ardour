@@ -6139,10 +6139,10 @@ Route::automatables (PBD::ControllableSet& s) const
 	}
 }
 
-SlavableControlList
+SlavableAutomationControlList
 Route::slavables () const
 {
-	SlavableControlList rv;
+	SlavableAutomationControlList rv;
 	rv.push_back (_gain_control);
 	rv.push_back (_mute_control);
 	rv.push_back (_solo_control);

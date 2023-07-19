@@ -122,7 +122,7 @@ public:
 	const ARDOUR::Session& session() const { return _session; }
 	void commit_transaction (bool did_write);
 
-	ControlList grouped_controls () const;
+	AutomationControlList grouped_controls () const;
 
 protected:
 	std::shared_ptr<ControlGroup> _group;

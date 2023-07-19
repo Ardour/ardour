@@ -153,13 +153,13 @@ AutomationControl::set_value (double val, PBD::Controllable::GroupControlDisposi
 	}
 }
 
-ControlList
+AutomationControlList
 AutomationControl::grouped_controls () const
 {
 	if (_group && _group->use_me (PBD::Controllable::UseGroup)) {
 		return _group->controls ();
 	} else {
-		return ControlList ();
+		return AutomationControlList ();
 	}
 }
 

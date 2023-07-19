@@ -125,7 +125,7 @@ protected:
 	void can_automate(Evoral::Parameter);
 
 	virtual void automation_list_automation_state_changed (Evoral::Parameter const&, AutoState);
-	SerializedRCUManager<ControlList> _automated_controls;
+	SerializedRCUManager<AutomationControlList> _automated_controls;
 
 	int load_automation (const std::string& path);
 	int old_set_automation_state(const XMLNode&);
@@ -134,7 +134,7 @@ protected:
 
 	samplepos_t _last_automation_snapshot;
 
-	SlavableControlList slavables () const { return SlavableControlList(); }
+	SlavableAutomationControlList slavables () const { return SlavableAutomationControlList(); }
 
 	void find_next_ac_event (std::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev) const;
 	void find_prev_ac_event (std::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev) const;

@@ -56,7 +56,7 @@ class LIBARDOUR_API ControlGroup : public std::enable_shared_from_this<ControlGr
 
 	void pop_all ();
 
-	ControlList controls () const;
+	AutomationControlList controls () const;
 
 	void clear (bool pop = false);
 

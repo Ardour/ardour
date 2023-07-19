@@ -134,8 +134,8 @@ Slavable::do_assign (VCAManager* manager)
 			assign (*v);
 		}
 
-		SlavableControlList scl = slavables ();
-		for (SlavableControlList::iterator i = scl.begin(); i != scl.end(); ++i) {
+		SlavableAutomationControlList scl = slavables ();
+		for (SlavableAutomationControlList::iterator i = scl.begin(); i != scl.end(); ++i) {
 				(*i)->use_saved_master_ratios ();
 		}
 	}
@@ -197,8 +197,8 @@ bool
 Slavable::assign_controls (std::shared_ptr<VCA> vca)
 {
 	bool rv = false;
-	SlavableControlList scl = slavables ();
-	for (SlavableControlList::iterator i = scl.begin(); i != scl.end(); ++i) {
+	SlavableAutomationControlList scl = slavables ();
+	for (SlavableAutomationControlList::iterator i = scl.begin(); i != scl.end(); ++i) {
 		rv |= assign_control (vca, *i);
 	}
 	return rv;
@@ -207,8 +207,8 @@ Slavable::assign_controls (std::shared_ptr<VCA> vca)
 void
 Slavable::unassign_controls (std::shared_ptr<VCA> vca)
 {
-	SlavableControlList scl = slavables ();
-	for (SlavableControlList::iterator i = scl.begin(); i != scl.end(); ++i) {
+	SlavableAutomationControlList scl = slavables ();
+	for (SlavableAutomationControlList::iterator i = scl.begin(); i != scl.end(); ++i) {
 		unassign_control (vca, *i);
 	}
 }

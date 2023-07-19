@@ -737,7 +737,7 @@ protected:
 
 	std::shared_ptr<Processor> the_instrument_unlocked() const;
 
-	SlavableControlList slavables () const;
+	SlavableAutomationControlList slavables () const;
 
 private:
 	/* no copy construction */

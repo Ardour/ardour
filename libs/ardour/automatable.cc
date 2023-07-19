@@ -62,7 +62,7 @@ const string Automatable::xml_node_name = X_("Automation");
 Automatable::Automatable(Session& session, Temporal::TimeDomain td)
 	: ControlSet ()
 	, _a_session(session)
-	, _automated_controls (new ControlList ())
+	, _automated_controls (new AutomationControlList ())
 	, _time_domain (td)
 {
 }
@@ -71,7 +71,7 @@ Automatable::Automatable (const Automatable& other)
 	: ControlSet (other)
 	, Slavable ()
 	, _a_session (other._a_session)
-	, _automated_controls (new ControlList)
+	, _automated_controls (new AutomationControlList)
 {
 	Glib::Threads::Mutex::Lock lm (other._control_lock);
 
@@ -84,8 +84,8 @@ Automatable::Automatable (const Automatable& other)
 Automatable::~Automatable ()
 {
 	{
-		RCUWriter<ControlList> writer (_automated_controls);
-		std::shared_ptr<ControlList> cl = writer.get_copy ();
+		RCUWriter<AutomationControlList> writer (_automated_controls);
+		std::shared_ptr<AutomationControlList> cl = writer.get_copy ();
 		cl->clear ();
 	}
 	_automated_controls.flush ();
@@ -478,8 +478,8 @@ void
 Automatable::automation_run (samplepos_t start, pframes_t nframes, bool only_active)
 {
 	if (only_active) {
-		std::shared_ptr<ControlList const> cl = _automated_controls.reader ();
-		for (ControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
+		std::shared_ptr<AutomationControlList const> cl = _automated_controls.reader ();
+		for (AutomationControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 			(*ci)->automation_run (start, nframes);
 		}
 		return;
@@ -502,10 +502,10 @@ Automatable::automation_list_automation_state_changed (Evoral::Parameter const& 
 		std::shared_ptr<AutomationControl> c (automation_control(param));
 		assert (c && c->list());
 
-		RCUWriter<ControlList> writer (_automated_controls);
-		std::shared_ptr<ControlList> cl = writer.get_copy ();
+		RCUWriter<AutomationControlList> writer (_automated_controls);
+		std::shared_ptr<AutomationControlList> cl = writer.get_copy ();
 
-		ControlList::iterator fi = std::find (cl->begin(), cl->end(), c);
+		AutomationControlList::iterator fi = std::find (cl->begin(), cl->end(), c);
 		if (fi != cl->end()) {
 			cl->erase (fi);
 		}
@@ -663,8 +663,8 @@ Automatable::find_next_event (timepos_t const & start, timepos_t const & end, Ev
 	next_event.when = start <= end ? timepos_t::max (start.time_domain()) : timepos_t (start.time_domain());
 
 	if (only_active) {
-		std::shared_ptr<ControlList const> cl = _automated_controls.reader ();
-		for (ControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
+		std::shared_ptr<AutomationControlList const> cl = _automated_controls.reader ();
+		for (AutomationControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 			if ((*ci)->automation_playback()) {
 				if (start <= end) {
 					find_next_ac_event (*ci, start, end, next_event);
