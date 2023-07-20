@@ -35,6 +35,7 @@
 #include "ardour/monitor_control.h"
 #include "ardour/phase_control.h"
 #include "ardour/readonly_control.h"
+#include "ardour/route.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/stripable.h"
@@ -203,7 +204,6 @@ Console1::begin_using_device ()
 	periodic_timer->attach (main_loop ()->get_context ());
 
 	DEBUG_TRACE (DEBUG::Console1, "************** begin_using_device() ********************\n");
-	connect_internal_signals ();
 	return 0;
 }
 
@@ -236,6 +236,12 @@ Console1::connect_session_signals ()
 	// receive rude solo changed
 	session->SoloActive.connect (
 	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::notify_solo_active_changed, this, _1), this);
+	session->MonitorBusAddedOrRemoved.connect (
+	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::master_monitor_has_changed, this), this);
+	session->MonitorChanged.connect (
+	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::master_monitor_has_changed, this), this);
+	session->RouteAdded.connect (
+	  session_connections, MISSING_INVALIDATOR, boost::bind (&Console1::strip_inventory_changed, this, _1), this);
 	// window.signal_window_state_event().connect (sigc::bind (sigc::mem_fun (*this,
 	// &ARDOUR_UI::tabbed_window_state_event_handler), owner));
 }
@@ -243,6 +249,7 @@ Console1::connect_session_signals ()
 void
 Console1::connect_internal_signals ()
 {
+	DEBUG_TRACE (DEBUG::Console1, "connect_internal_signals\n");
 	BankChange.connect (console1_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_bank, this), this);
 	ShiftChange.connect (console1_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_shift, this, _1), this);
 	PluginStateChange.connect (
@@ -264,19 +271,7 @@ Console1::notify_session_loaded ()
 	DEBUG_TRACE (DEBUG::Console1, "************** Session Loaded() ********************\n");
 	create_strip_inventory ();
 	connect_internal_signals ();
-	/*if (session) {
-		DEBUG_TRACE (DEBUG::Console1, "session available\n");
-		uint32_t i = 0;
-		while (!first_selected_stripable () && i < 10) {
-			DEBUG_TRACE (DEBUG::Console1, "no stripable selected\n");
-			std::this_thread::sleep_for (std::chrono::milliseconds (1000));
-			++i;
-		}
-		if (i < 10)
-			stripable_selection_changed ();
-        else
-			DEBUG_TRACE (DEBUG::Console1, "no selected stripable found\n");
-	}*/
+	stripable_selection_changed ();
 }
 
 void
@@ -546,10 +541,6 @@ Console1::stripable_selection_changed ()
 	std::shared_ptr<Stripable> r = ControlProtocol::first_selected_stripable ();
 	if ( r )
     	set_current_stripable (r);
-
-	// select_rid_by_index (0);
-	// set_current_stripable (ControlProtocol::first_selected_stripable ());
-	// set_current_stripable (first_selected_stripable ());
 }
 
 void
@@ -1135,7 +1126,6 @@ void
 Console1::create_strip_inventory ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "create_strip_inventory()\n");
-	// StripableList sl;
 	boost::optional<order_t> master_order;
 	strip_inventory.clear ();
 	StripableList sl = session->get_stripables ();
@@ -1158,13 +1148,20 @@ Console1::create_strip_inventory ()
 			             string_compose ("monitor strip found at index %1, order %2 - ignoring\n", index, pi.order ()));
 			continue;
 		}
+		if (pi.flags () & ARDOUR::PresentationInfo::FoldbackBus) {
+			DEBUG_TRACE (DEBUG::Console1,
+			             string_compose ("foldback bus found at index %1, order %2\n", index, pi.order ()));
+			continue;
+		}
 		strip_inventory.insert (std::make_pair (index, pi.order ()));
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("insert strip at index %1, order %2\n", index, pi.order ()));
 		++index;
 	}
 	if (master_order) {
+		master_index = index;
 		strip_inventory.insert (std::make_pair (index, master_order.value ()));
 	}
+	max_strip_index = index;
 	DEBUG_TRACE (DEBUG::Console1,
 	             string_compose ("create_strip_inventory - inventory size %1\n", strip_inventory.size ()));
 }
@@ -1192,16 +1189,39 @@ Console1::get_index_by_inventory_order (order_t order)
 void
 Console1::select_rid_by_index (uint32_t index)
 {
-	int rid = 0;
+	bool success = true;
+	DEBUG_TRACE (DEBUG::Console1, "select_rid_by_index()\n");
+	int offset = session->monitor_out () ? 1 : 0;
+	DEBUG_TRACE (DEBUG::Console1, string_compose ("offset %1\n", offset));
+	uint_fast32_t rid = 0;
 #ifdef MIXBUS
-	rid = index + 1;
-	// set_rid_selection (index + 1);
+	rid = index + offset;
 #else
-	rid = index + 2;
-	// set_rid_selection (index + 2);
+	if (index == master_index)
+		rid = 1;
+    else
+	    rid = index + 1 + offset;
 #endif
+	DEBUG_TRACE (DEBUG::Console1, string_compose ("rid %1\n", rid));
+    if (rid > ( max_strip_index + 1 + offset ))
+		success =  false;
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
 		session->selection ().select_stripable_and_maybe_group (s, true, false, 0);
 	}
+    else {
+    	success = false;
+    }
+    if( !success ){
+		map_select ();
+	}
+}
+
+void
+Console1::master_monitor_has_changed ()
+{
+	DEBUG_TRACE (DEBUG::Console1, "master_monitor_has_changed()\n");
+	bool monitor_active = session->monitor_active ();
+	DEBUG_TRACE (DEBUG::Console1, string_compose ("master_monitor_has_changed - monitor active %1\n", monitor_active));
+	create_strip_inventory ();
 }
