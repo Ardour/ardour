@@ -57,7 +57,7 @@ Console1::bank (bool up)
 		if (new_index > (list_size - 1))
 			new_index = list_size - 1;
 		select_rid_by_index (new_index);
-		void BankChange ();
+		BankChange ();
 	}
 }
 

@@ -50,6 +50,7 @@ class AsyncMIDIPort;
 class Bundle;
 class Port;
 class Processor;
+class Route;
 class Session;
 class MidiPort;
 }
@@ -291,6 +292,9 @@ class Console1 : public MIDISurface
 	uint32_t current_bank = 0;
 	uint32_t current_strippable_index = 0;
 
+	uint32_t max_strip_index = 0;
+	uint32_t master_index = 0;
+
 	int32_t current_plugin_index = -1;
 #ifdef MIXBUS
 	int32_t selected_intern_plugin_index = -1;
@@ -325,12 +329,18 @@ class Console1 : public MIDISurface
 
 	void tabbed_window_state_event_handler (GdkEventWindowState* ev, void* object);
 
+	void master_monitor_has_changed ();
+
 	/* Strip inventory */
 	typedef std::map<uint32_t, order_t> StripInventoryMap;
 
 	StripInventoryMap strip_inventory;
 
 	void create_strip_inventory ();
+
+    void strip_inventory_changed (ARDOUR::RouteList&) {
+		create_strip_inventory ();
+	}
 
 	order_t get_inventory_order_by_index (const uint32_t index);
 	uint32_t get_index_by_inventory_order (order_t order);
