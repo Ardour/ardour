@@ -4582,6 +4582,9 @@ Session::config_changed (std::string p, bool ours)
 		if (follow && !transport_state_rolling() && !loading()) {
 			request_locate (transport_sample(), true);
 		}
+	} else if (p == "default-time-domain") {
+		Temporal::TimeDomain td = config.get_default_time_domain ();
+		set_time_domain (td);
 	}
 
 	set_dirty ();
