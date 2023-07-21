@@ -53,7 +53,7 @@ class TimeDomainProvider {
 
 	bool has_own_time_domain() const { return have_domain; }
 	void clear_time_domain () { have_domain = false; TimeDomainChanged(); /* EMIT SIGNAL */ }
-	void set_time_domain (TimeDomain td) { have_domain = true; domain = td; TimeDomainChanged(); /* EMIT SIGNAL */}
+	void set_time_domain (TimeDomain td) { have_domain = true; domain = td; time_domain_changed(); TimeDomainChanged(); /* EMIT SIGNAL */}
 
 	TimeDomainProvider const * time_domain_parent() const { return parent; }
 	bool has_time_domain_parent() const { return (bool) parent; }
