@@ -105,8 +105,6 @@ Location::set_position_time_domain (TimeDomain domain)
 	emit_signal (Domain); /* EMIT SIGNAL */
 }
 
-
-
 Location::Location (const Location& other)
 	: SessionHandleRef (other._session)
 	, StatefulDestructible()
@@ -268,11 +266,18 @@ Location::set_name (const std::string& str)
  *  @param force true to force setting, even if the given new start is after the current end.
  */
 int
-Location::set_start (Temporal::timepos_t const & s, bool force)
+Location::set_start (Temporal::timepos_t const & s_, bool force)
 {
-
 	if (_locked) {
 		return -1;
+	}
+
+	timepos_t s;
+
+	if (_session.time_domain() == Temporal::AudioTime) {
+		s = timepos_t (s_.samples());
+	} else {
+		s = timepos_t (s_.beats());
 	}
 
 	if (!force) {
@@ -333,10 +338,18 @@ Location::set_start (Temporal::timepos_t const & s, bool force)
  *  @param force true to force setting, even if the given new end is before the current start.
  */
 int
-Location::set_end (Temporal::timepos_t const & e, bool force)
+Location::set_end (Temporal::timepos_t const & e_, bool force)
 {
 	if (_locked) {
 		return -1;
+	}
+
+	timepos_t e;
+
+	if (_session.time_domain() == Temporal::AudioTime) {
+		e = timepos_t (e_.samples());
+	} else {
+		e = timepos_t (e_.beats());
 	}
 
 	if (!force) {
@@ -381,15 +394,26 @@ Location::set_end (Temporal::timepos_t const & e, bool force)
 }
 
 int
-Location::set (Temporal::timepos_t const & s, Temporal::timepos_t const & e)
+Location::set (Temporal::timepos_t const & s_, Temporal::timepos_t const & e_)
 {
 	/* check validity */
-	if (((is_auto_punch() || is_auto_loop()) && s >= e) || (!is_mark() && s > e)) {
+	if (((is_auto_punch() || is_auto_loop()) && s_ >= e_) || (!is_mark() && s_ > e_)) {
 		return -1;
 	}
 
 	bool start_change = false;
 	bool end_change = false;
+
+	timepos_t s;
+	timepos_t e;
+
+	if (_session.time_domain() == Temporal::AudioTime) {
+		s = timepos_t (s_.samples());
+		e = timepos_t (e_.samples());
+	} else {
+		s = timepos_t (s_.beats());
+		e = timepos_t (e_.beats());
+	}
 
 	if (is_mark()) {
 
@@ -1884,7 +1908,6 @@ Locations::globally_change_time_domain (Temporal::TimeDomain from, Temporal::Tim
 void
 Locations::change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
 {
-	std::cerr << "change all locations to " << to << std::endl;
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 	for (auto & l : locations) {
 		l->change_time_domain (from, to);
