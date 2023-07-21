@@ -63,7 +63,7 @@ public:
 		Evoral::ParameterDescriptor desc;
 		desc.upper = 127;
 		desc.rangesteps = 128;
-		std::shared_ptr<ControlList> list(new ControlList(param, desc, Temporal::BeatTime));
+		std::shared_ptr<ControlList> list(new ControlList(param, desc, Temporal::TimeDomainProvider (Temporal::BeatTime)));
 		return std::shared_ptr<Control>(new Control(param, desc, list));
 	}
 };

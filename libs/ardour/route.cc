@@ -170,26 +170,28 @@ Route::init ()
 	 * Automatable API. -- Don't call add_control () here.
 	 */
 
-	_solo_control.reset (new SoloControl (_session, X_("solo"), *this, *this, time_domain()));
+	Temporal::TimeDomainProvider const & tdp (*this);
+
+	_solo_control.reset (new SoloControl (_session, X_("solo"), *this, *this, tdp));
 	add_control (_solo_control);
 	_solo_control->Changed.connect_same_thread (*this, boost::bind (&Route::solo_control_changed, this, _1, _2));
 
-	_mute_control.reset (new MuteControl (_session, X_("mute"), *this, time_domain()));
+	_mute_control.reset (new MuteControl (_session, X_("mute"), *this, tdp));
 	add_control (_mute_control);
 
-	_phase_control.reset (new PhaseControl (_session, X_("phase"), time_domain()));
+	_phase_control.reset (new PhaseControl (_session, X_("phase"), tdp));
 	add_control (_phase_control);
 
-	_solo_isolate_control.reset (new SoloIsolateControl (_session, X_("solo-iso"), *this, time_domain()));
+	_solo_isolate_control.reset (new SoloIsolateControl (_session, X_("solo-iso"), *this, tdp));
 	add_control (_solo_isolate_control);
 
-	_solo_safe_control.reset (new SoloSafeControl (_session, X_("solo-safe"), time_domain()));
+	_solo_safe_control.reset (new SoloSafeControl (_session, X_("solo-safe"), tdp));
 	add_control (_solo_safe_control);
 
 	/* panning */
 
 	if (!(_presentation_info.flags() & PresentationInfo::MonitorOut)) {
-		_pannable.reset (new Pannable (_session, Config->get_default_automation_time_domain()));
+		_pannable.reset (new Pannable (_session, Temporal::TimeDomainProvider (Config->get_default_automation_time_domain())));
 	}
 
 	/* input and output objects */
@@ -275,7 +277,7 @@ Route::init ()
 
 	if (is_monitor()) {
 		/* where we listen to tracks */
-		_intreturn.reset (new MonitorReturn (_session, time_domain()));
+		_intreturn.reset (new MonitorReturn (_session, tdp));
 		_intreturn->activate ();
 
 		/* the thing that provides proper control over a control/monitor/listen bus
@@ -956,7 +958,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 					if (_session.get_disable_all_loaded_plugins ()) {
 						processor.reset (new UnknownProcessor (_session, node, this));
 					} else {
-						processor.reset (new PluginInsert (_session, time_domain()));
+						processor.reset (new PluginInsert (_session, *this));
 					}
 
 				} else {
@@ -966,7 +968,7 @@ Route::add_processor_from_xml_2X (const XMLNode& node, int version)
 
 		} else if (node.name() == "Send") {
 
-			std::shared_ptr<Pannable> sendpan (new Pannable (_session, Config->get_default_automation_time_domain()));
+			std::shared_ptr<Pannable> sendpan (new Pannable (_session, Temporal::TimeDomainProvider (Config->get_default_automation_time_domain())));
 			processor.reset (new Send (_session, sendpan, _mute_master));
 
 		} else {
@@ -3118,6 +3120,7 @@ Route::set_processor_state (const XMLNode& node, int version)
 	XMLNodeConstIterator niter;
 	ProcessorList new_order;
 	bool must_configure = false;
+	Temporal::TimeDomainProvider const & tdp (*this);
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
 
@@ -3150,7 +3153,7 @@ Route::set_processor_state (const XMLNode& node, int version)
 			_main_outs->set_state (**niter, version);
 		} else if (prop->value() == "monreturn") {
 			if (!_intreturn) {
-				_intreturn.reset (new MonitorReturn (_session, time_domain()));
+				_intreturn.reset (new MonitorReturn (_session, tdp));
 				must_configure = true;
 			}
 			_intreturn->set_state (**niter, version);
@@ -3158,9 +3161,9 @@ Route::set_processor_state (const XMLNode& node, int version)
 			if (!_intreturn) {
 
 				if (is_monitor ()) {
-					_intreturn.reset (new MonitorReturn (_session, time_domain()));
+					_intreturn.reset (new MonitorReturn (_session, tdp));
 				} else {
-					_intreturn.reset (new InternalReturn (_session, time_domain()));
+					_intreturn.reset (new InternalReturn (_session, tdp));
 				}
 
 				must_configure = true;
@@ -3252,6 +3255,7 @@ bool
 Route::set_processor_state (XMLNode const& node, int version, XMLProperty const* prop, ProcessorList& new_order, bool& must_configure)
 {
 	ProcessorList::iterator o;
+	Temporal::TimeDomainProvider const & tdp (*this);
 
 	for (o = _processors.begin(); o != _processors.end(); ++o) {
 		XMLProperty const * id_prop = node.property(X_("id"));
@@ -3284,7 +3288,7 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 			if (_session.get_disable_all_loaded_plugins ()) {
 				processor.reset (new UnknownProcessor (_session, node, this));
 			} else {
-				processor.reset (new PluginInsert (_session, time_domain()));
+				processor.reset (new PluginInsert (_session, tdp));
 				processor->set_owner (this);
 			}
 		} else if (prop->value() == "port") {
@@ -3386,7 +3390,7 @@ void
 Route::add_internal_return ()
 {
 	if (!_intreturn) {
-		_intreturn.reset (new InternalReturn (_session, time_domain()));
+		_intreturn.reset (new InternalReturn (_session, *this));
 		add_processor (_intreturn, PreFader);
 	}
 }

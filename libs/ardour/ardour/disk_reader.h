@@ -41,7 +41,7 @@ template <typename T> class MidiRingBuffer;
 class LIBARDOUR_API DiskReader : public DiskIOProcessor
 {
 public:
-	DiskReader (Session&, Track&, std::string const& name, Temporal::TimeDomain, DiskIOProcessor::Flag f = DiskIOProcessor::Flag (0));
+	DiskReader (Session&, Track&, std::string const& name, Temporal::TimeDomainProvider const &, DiskIOProcessor::Flag f = DiskIOProcessor::Flag (0));
 	~DiskReader ();
 
 	bool set_name (std::string const& str);

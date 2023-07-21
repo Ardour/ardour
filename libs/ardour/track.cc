@@ -99,7 +99,7 @@ Track::init ()
 
 	DiskIOProcessor::Flag dflags = DiskIOProcessor::Recordable;
 
-	_disk_reader.reset (new DiskReader (_session, *this, name(), Config->get_default_automation_time_domain(), dflags));
+	_disk_reader.reset (new DiskReader (_session, *this, name(), Temporal::TimeDomainProvider (Config->get_default_automation_time_domain()), dflags));
 	_disk_reader->set_block_size (_session.get_block_size ());
 	_disk_reader->set_owner (this);
 
@@ -116,13 +116,13 @@ Track::init ()
 	std::shared_ptr<Route> rp (std::dynamic_pointer_cast<Route> (shared_from_this()));
 	std::shared_ptr<Track> rt = std::dynamic_pointer_cast<Track> (rp);
 
-	_record_enable_control.reset (new RecordEnableControl (_session, EventTypeMap::instance().to_symbol (RecEnableAutomation), *this, time_domain()));
+	_record_enable_control.reset (new RecordEnableControl (_session, EventTypeMap::instance().to_symbol (RecEnableAutomation), *this, *this));
 	add_control (_record_enable_control);
 
-	_record_safe_control.reset (new RecordSafeControl (_session, EventTypeMap::instance().to_symbol (RecSafeAutomation), *this, time_domain()));
+	_record_safe_control.reset (new RecordSafeControl (_session, EventTypeMap::instance().to_symbol (RecSafeAutomation), *this, *this));
 	add_control (_record_safe_control);
 
-	_monitoring_control.reset (new MonitorControl (_session, EventTypeMap::instance().to_symbol (MonitoringAutomation), *this, time_domain()));
+	_monitoring_control.reset (new MonitorControl (_session, EventTypeMap::instance().to_symbol (MonitoringAutomation), *this, *this));
 	add_control (_monitoring_control);
 
 	if (!name().empty()) {

@@ -366,7 +366,7 @@ CurveTest::constrainedCubic ()
 	Evoral::ParameterDescriptor pd;
 	pd.lower = 5;
 	pd.upper = 325;
-	Evoral::ControlList l(p, pd, AudioTime);
+	Evoral::ControlList l(p, pd, Temporal::TimeDomainProvider (AudioTime));
 
 	size_t i;
 	l.set_interpolation(Evoral::ControlList::Curved);

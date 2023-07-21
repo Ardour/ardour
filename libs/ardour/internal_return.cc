@@ -28,8 +28,8 @@
 using namespace std;
 using namespace ARDOUR;
 
-InternalReturn::InternalReturn (Session& s, Temporal::TimeDomain td, std::string const& name)
-	: Processor (s, name, td)
+InternalReturn::InternalReturn (Session& s, Temporal::TimeDomainProvider const & tdp, std::string const& name)
+	: Processor (s, name, tdp)
 {
 	_display_to_user = false;
 }

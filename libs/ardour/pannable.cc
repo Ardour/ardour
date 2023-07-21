@@ -39,14 +39,14 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 
-Pannable::Pannable (Session& s, Temporal::TimeDomain td)
-	: Automatable (s, td)
+Pannable::Pannable (Session& s, Temporal::TimeDomainProvider const & tdp)
+	: Automatable (s, tdp)
 	, SessionHandleRef (s)
-	, pan_azimuth_control (new PanControllable (s, "", this, PanAzimuthAutomation, td))
-	, pan_elevation_control (new PanControllable (s, "", this, PanElevationAutomation, td))
-	, pan_width_control (new PanControllable (s, "", this, PanWidthAutomation, td))
-	, pan_frontback_control (new PanControllable (s, "", this, PanFrontBackAutomation, td))
-	, pan_lfe_control (new PanControllable (s, "", this, PanLFEAutomation, td))
+	, pan_azimuth_control (new PanControllable (s, "", this, PanAzimuthAutomation, tdp))
+	, pan_elevation_control (new PanControllable (s, "", this, PanElevationAutomation, tdp))
+	, pan_width_control (new PanControllable (s, "", this, PanWidthAutomation, tdp))
+	, pan_frontback_control (new PanControllable (s, "", this, PanFrontBackAutomation, tdp))
+	, pan_lfe_control (new PanControllable (s, "", this, PanLFEAutomation, tdp))
 	, _auto_state (Off)
 	, _has_state (false)
 	, _responding_to_control_auto_state_change (0)

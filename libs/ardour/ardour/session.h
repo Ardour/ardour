@@ -68,6 +68,7 @@
 #include "lua/luastate.h"
 
 #include "temporal/range.h"
+#include "temporal/domain_provider.h"
 
 #include "midi++/types.h"
 #include "midi++/mmc.h"
@@ -199,7 +200,7 @@ private:
 };
 
 /** Ardour Session */
-class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager, public TransportAPI
+class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager, public TransportAPI, public Temporal::TimeDomainProvider
 {
 private:
 

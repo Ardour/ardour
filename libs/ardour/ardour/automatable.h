@@ -34,6 +34,8 @@
 
 #include "evoral/ControlSet.h"
 
+#include "temporal/domain_provider.h"
+
 #include "ardour/libardour_visibility.h"
 #include "ardour/slavable.h"
 #include "ardour/types.h"
@@ -48,10 +50,10 @@ class AutomationControl;
 /* The inherited ControlSet is virtual because AutomatableSequence inherits
  * from this AND EvoralSequence, which is also a ControlSet
  */
-class LIBARDOUR_API Automatable : virtual public Evoral::ControlSet, public Slavable
+class LIBARDOUR_API Automatable : virtual public Evoral::ControlSet, public Slavable, public Temporal::TimeDomainProvider
 {
 public:
-	Automatable(Session&, Temporal::TimeDomain);
+	Automatable(Session&, Temporal::TimeDomainProvider const &);
 	Automatable (const Automatable& other);
 
 	virtual ~Automatable();
@@ -117,8 +119,6 @@ public:
 
 	PBD::Signal0<void> AutomationStateChanged;
 
-	Temporal::TimeDomain time_domain() const { return _time_domain; }
-
 protected:
 	Session& _a_session;
 
@@ -141,7 +141,6 @@ protected:
 
 private:
 	PBD::ScopedConnectionList _control_connections; ///< connections to our controls' signals
-	Temporal::TimeDomain _time_domain;
 };
 
 

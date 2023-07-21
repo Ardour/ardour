@@ -29,9 +29,9 @@ using namespace ARDOUR;
 using namespace std;
 
 
-MuteControl::MuteControl (Session& session, std::string const & name, Muteable& m, Temporal::TimeDomain td)
+MuteControl::MuteControl (Session& session, std::string const & name, Muteable& m, Temporal::TimeDomainProvider const & tdp)
 	: SlavableAutomationControl (session, MuteAutomation, ParameterDescriptor (MuteAutomation),
-	                             std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (MuteAutomation), td)),
+	                             std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (MuteAutomation), tdp)),
 	                             name)
 	, _muteable (m)
 {

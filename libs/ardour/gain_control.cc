@@ -67,7 +67,7 @@ static std::shared_ptr<AutomationList> automation_list_new (Evoral::Parameter co
 		case InsertReturnLevel:
 			/* fallthrough */
 		case TrimAutomation:
-			return std::shared_ptr<AutomationList> (new AutomationList (param, Temporal::AudioTime));
+			return std::shared_ptr<AutomationList> (new AutomationList (param, Temporal::TimeDomainProvider (Temporal::AudioTime)));
 		case MainOutVolume:
 			/* not automatable */
 			break;

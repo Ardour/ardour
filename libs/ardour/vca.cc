@@ -79,8 +79,8 @@ VCA::VCA (Session& s, int32_t num, const string& name)
 int
 VCA::init ()
 {
-	_solo_control.reset (new SoloControl (_session, X_("solo"), *this, *this, time_domain()));
-	_mute_control.reset (new MuteControl (_session, X_("mute"), *this, time_domain()));
+	_solo_control.reset (new SoloControl (_session, X_("solo"), *this, *this, *this));
+	_mute_control.reset (new MuteControl (_session, X_("mute"), *this, *this));
 
 	add_control (_gain_control);
 	add_control (_solo_control);

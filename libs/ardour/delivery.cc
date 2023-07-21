@@ -57,7 +57,7 @@ bool                          Delivery::panners_legal = false;
 
 Delivery::Delivery (Session& s, std::shared_ptr<IO> io, std::shared_ptr<Pannable> pannable,
                     std::shared_ptr<MuteMaster> mm, const string& name, Role r)
-	: IOProcessor(s, std::shared_ptr<IO>(), (role_requires_output_ports (r) ? io : std::shared_ptr<IO>()), name, Temporal::AudioTime, (r == Send || r == Aux || r == Foldback))
+	: IOProcessor(s, std::shared_ptr<IO>(), (role_requires_output_ports (r) ? io : std::shared_ptr<IO>()), name, Temporal::TimeDomainProvider (Temporal::AudioTime), (r == Send || r == Aux || r == Foldback))
 	, _role (r)
 	, _output_buffers (new BufferSet())
 	, _current_gain (GAIN_COEFF_ZERO)
@@ -68,7 +68,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<IO> io, std::shared_ptr<Pannable
 	if (pannable) {
 		bool is_send = false;
 		if (r & (Delivery::Send|Delivery::Aux|Delivery::Foldback)) is_send = true;
-		_panshell = std::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, time_domain(), is_send));
+		_panshell = std::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, *this, is_send));
 	}
 
 	_display_to_user = false;
@@ -92,7 +92,7 @@ Delivery::Delivery (Session& s, std::shared_ptr<Pannable> pannable, std::shared_
 	if (pannable) {
 		bool is_send = false;
 		if (r & (Delivery::Send|Delivery::Aux|Delivery::Foldback)) is_send = true;
-		_panshell = std::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, time_domain(), is_send));
+		_panshell = std::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, *this, is_send));
 	}
 
 	_display_to_user = false;

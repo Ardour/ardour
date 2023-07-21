@@ -58,7 +58,7 @@ proc_type_map (std::string const& str)
 }
 
 UnknownProcessor::UnknownProcessor (Session&s, XMLNode const &state, SessionObject* o)
-	: Processor (s, "", Temporal::AudioTime)
+	: Processor (s, "", Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _state (state)
 	, have_ioconfig (false)
 	, saved_input (0)

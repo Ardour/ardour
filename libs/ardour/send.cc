@@ -97,7 +97,7 @@ Send::Send (Session& s, std::shared_ptr<Pannable> p, std::shared_ptr<MuteMaster>
 {
 	//boost_debug_shared_ptr_mark_interesting (this, "send");
 
-	std::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (BusSendLevel), time_domain()));
+	std::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (BusSendLevel), *this));
 	set_gain_control (std::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter(BusSendLevel), gl)));
 
 	gain_control ()->set_flag (Controllable::InlineControl);
@@ -110,7 +110,7 @@ Send::Send (Session& s, std::shared_ptr<Pannable> p, std::shared_ptr<MuteMaster>
 
 
 	if (_role == Delivery::Aux || _role == Delivery::Send) {
-		set_polarity_control (std::shared_ptr<AutomationControl> (new AutomationControl (_session, PhaseAutomation, ParameterDescriptor (PhaseAutomation), std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation), time_domain())), "polarity-invert")));
+		set_polarity_control (std::shared_ptr<AutomationControl> (new AutomationControl (_session, PhaseAutomation, ParameterDescriptor (PhaseAutomation), std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(PhaseAutomation), *this)), "polarity-invert")));
 		add_control (polarity_control ());
 	}
 

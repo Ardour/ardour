@@ -28,9 +28,9 @@ using namespace ARDOUR;
 using namespace std;
 using namespace PBD;
 
-SoloControl::SoloControl (Session& session, std::string const & name, Soloable& s, Muteable& m, Temporal::TimeDomain td)
+SoloControl::SoloControl (Session& session, std::string const & name, Soloable& s, Muteable& m, Temporal::TimeDomainProvider const & tdp)
 	: SlavableAutomationControl (session, SoloAutomation, ParameterDescriptor (SoloAutomation),
-	                             std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(SoloAutomation), td)),
+	                             std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(SoloAutomation), tdp)),
 	                             name)
 	, _soloable (s)
 	, _muteable (m)

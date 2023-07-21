@@ -918,7 +918,7 @@ Session::setup_click ()
 {
 	_clicking = false;
 
-	std::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation), Temporal::AudioTime));
+	std::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation), Temporal::TimeDomainProvider (Temporal::AudioTime)));
 	std::shared_ptr<GainControl> gain_control = std::shared_ptr<GainControl> (new GainControl (*this, Evoral::Parameter(GainAutomation), gl));
 
 	_click_io.reset (new ClickIO (*this, X_("Click")));
@@ -3397,7 +3397,7 @@ Session::load_and_connect_instruments (RouteList& new_routes, bool strict_io, st
 			if (pset) {
 				plugin->load_preset (*pset);
 			}
-			std::shared_ptr<PluginInsert> pi (new PluginInsert (*this, (*r)->time_domain(), plugin));
+			std::shared_ptr<PluginInsert> pi (new PluginInsert (*this, **r, plugin));
 			if (strict_io) {
 				pi->set_strict_io (true);
 			}

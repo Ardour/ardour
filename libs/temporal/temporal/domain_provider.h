@@ -19,26 +19,66 @@
 #ifndef __temporal_domain_provider_h__
 #define __temporal_domain_provider_h__
 
+#include "pbd/signals.h"
 #include "temporal/types.h"
 
 namespace Temporal {
 
 class TimeDomainProvider {
   public:
-	TimeDomainProvider () : have_domain (false), parent (nullptr) {}
-	TimeDomainProvider (TimeDomain td) : have_domain (true), domain (td), parent (nullptr) {}
-	TimeDomainProvider (TimeDomain td, TimeDomainProvider const & p) : have_domain (true), domain (td), parent (&p) {}
-	TimeDomainProvider (TimeDomainProvider const & p) : have_domain (false), parent (&p) {}
+	explicit TimeDomainProvider () : have_domain (false), parent (nullptr) {}
+	explicit TimeDomainProvider (TimeDomain td) : have_domain (true), domain (td), parent (nullptr) {}
+	TimeDomainProvider (TimeDomain td, TimeDomainProvider const & p) : have_domain (true), domain (td), parent (&p) { listen(); }
+	TimeDomainProvider (TimeDomainProvider const & other) : have_domain (other.have_domain), domain (other.domain), parent (other.parent) { listen(); }
 	virtual ~TimeDomainProvider() {}
 
+	TimeDomainProvider& operator= (TimeDomainProvider const & other) {
+		if (this != &other) {
+			parent_connection.disconnect ();
+			have_domain = other.have_domain;
+			domain = other.domain;
+			parent = other.parent;
+			listen ();
+		}
+		return *this;
+	}
+
 	TimeDomain time_domain() const { if (have_domain) return domain; if (parent) return parent->time_domain(); return AudioTime; }
-	void set_time_domain (TimeDomain td) { have_domain = true; domain = td; }
-	void clear_time_domain () { have_domain = false; }
+
+	void clear_time_domain () { have_domain = false; TimeDomainChanged(); /* EMIT SIGNAL */ }
+	void set_time_domain (TimeDomain td) { have_domain = true; domain = td; TimeDomainChanged(); /* EMIT SIGNAL */}
+
+	bool has_parent() const { return (bool) parent; }
+	void clear_time_domain_parent () { parent = nullptr; TimeDomainChanged (); /* EMIT SIGNAL */ }
+	void set_time_domain_parent (TimeDomainProvider const & p) {
+		parent_connection.disconnect ();
+		TimeDomain old_domain = time_domain();
+		parent = &p;
+		TimeDomain new_domain = time_domain ();
+		if (old_domain != new_domain) {
+			TimeDomainChanged ();
+		}
+	}
+
+	mutable PBD::Signal0<void> TimeDomainChanged;
+
+	virtual void time_domain_changed() {
+		/* Forward a time domain change to children */
+		TimeDomainChanged();
+	}
+
+  protected:
+	void listen () {
+		if (parent) {
+			parent->TimeDomainChanged.connect_same_thread (parent_connection, boost::bind (&TimeDomainProvider::time_domain_changed, this));
+		}
+	}
 
   private:
 	bool have_domain;
 	TimeDomain domain;
 	TimeDomainProvider const * parent;
+	PBD::ScopedConnection parent_connection;
 };
 
 }

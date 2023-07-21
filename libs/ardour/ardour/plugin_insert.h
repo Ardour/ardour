@@ -59,7 +59,7 @@ class Plugin;
 class LIBARDOUR_API PluginInsert : public Processor, public PlugInsertBase, public std::enable_shared_from_this <PluginInsert>
 {
 public:
-	PluginInsert (Session&, Temporal::TimeDomain td, std::shared_ptr<Plugin> = std::shared_ptr<Plugin>());
+	PluginInsert (Session&, Temporal::TimeDomainProvider const & tdp, std::shared_ptr<Plugin> = std::shared_ptr<Plugin>());
 	~PluginInsert ();
 
 	void drop_references ();

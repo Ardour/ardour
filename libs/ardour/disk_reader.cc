@@ -57,8 +57,8 @@ DiskReader::Declicker DiskReader::loop_declick_in;
 DiskReader::Declicker DiskReader::loop_declick_out;
 samplecnt_t           DiskReader::loop_fade_length (0);
 
-DiskReader::DiskReader (Session& s, Track& t, string const& str, Temporal::TimeDomain td, DiskIOProcessor::Flag f)
-	: DiskIOProcessor (s, t, X_("player:") + str, f, td)
+DiskReader::DiskReader (Session& s, Track& t, string const& str, Temporal::TimeDomainProvider const & tdp, DiskIOProcessor::Flag f)
+	: DiskIOProcessor (s, t, X_("player:") + str, f, tdp)
 	, overwrite_sample (0)
 	, run_must_resolve (false)
 	, _declick_amp (s.nominal_sample_rate ())

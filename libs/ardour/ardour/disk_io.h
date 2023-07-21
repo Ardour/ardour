@@ -59,7 +59,7 @@ public:
 
 	static const std::string state_node_name;
 
-	DiskIOProcessor (Session&, Track&, const std::string& name, Flag f, Temporal::TimeDomain td);
+	DiskIOProcessor (Session&, Track&, const std::string& name, Flag f, Temporal::TimeDomainProvider const &);
 
 	virtual ~DiskIOProcessor ();
 

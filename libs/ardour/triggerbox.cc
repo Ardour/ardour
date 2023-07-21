@@ -3079,7 +3079,7 @@ TriggerBox::static_init (Session & s)
 }
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
-	: Processor (s, _("TriggerBox"), Temporal::BeatTime)
+	: Processor (s, _("TriggerBox"), Temporal::TimeDomainProvider (Temporal::BeatTime))
 	, tracker (dt == DataType::MIDI ? new MidiStateTracker : 0)
 	, _data_type (dt)
 	, _order (-1)
@@ -3091,7 +3091,6 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _locate_armed (false)
 	, _cancel_locate_armed (false)
 	, _fast_forwarding (false)
-
 	, requests (1024)
 {
 	set_display_to_user (false);

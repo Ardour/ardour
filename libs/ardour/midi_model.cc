@@ -59,7 +59,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 MidiModel::MidiModel (MidiSource& s)
-	: AutomatableSequence<TimeType> (s.session(), Temporal::BeatTime)
+	: AutomatableSequence<TimeType> (s.session(), Temporal::TimeDomainProvider (Temporal::BeatTime))
 	, _midi_source (s)
 {
 	_midi_source.InterpolationChanged.connect_same_thread (_midi_source_connections, boost::bind (&MidiModel::source_interpolation_changed, this, _1, _2));

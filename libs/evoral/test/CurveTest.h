@@ -30,6 +30,6 @@ private:
 	std::shared_ptr<Evoral::ControlList> TestCtrlList() {
 		Evoral::Parameter param (Evoral::Parameter(0));
 		const Evoral::ParameterDescriptor desc;
-		return std::shared_ptr<Evoral::ControlList> (new Evoral::ControlList(param, desc, Temporal::AudioTime));
+		return std::shared_ptr<Evoral::ControlList> (new Evoral::ControlList(param, desc, Temporal::TimeDomainProvider (Temporal::AudioTime)));
 	}
 };

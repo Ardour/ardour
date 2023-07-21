@@ -59,17 +59,18 @@ bool Automatable::skip_saving_automation = false;
 
 const string Automatable::xml_node_name = X_("Automation");
 
-Automatable::Automatable(Session& session, Temporal::TimeDomain td)
+Automatable::Automatable(Session& session, Temporal::TimeDomainProvider const & tdp)
 	: ControlSet ()
+	, TimeDomainProvider (tdp)
 	, _a_session(session)
 	, _automated_controls (new AutomationControlList ())
-	, _time_domain (td)
 {
 }
 
 Automatable::Automatable (const Automatable& other)
 	: ControlSet (other)
 	, Slavable ()
+	, TimeDomainProvider (other.time_domain(), other._a_session)
 	, _a_session (other._a_session)
 	, _automated_controls (new AutomationControlList)
 {
@@ -554,7 +555,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 				if (!Variant::type_is_numeric(desc.datatype)) {
 					make_list = false;  // Can't automate non-numeric data yet
 				} else {
-					list = std::shared_ptr<AutomationList>(new AutomationList(param, desc, Temporal::AudioTime));
+					list = std::shared_ptr<AutomationList>(new AutomationList(param, desc, Temporal::TimeDomainProvider (Temporal::AudioTime)));
 				}
 				control = new PluginInsert::PluginPropertyControl(pi, param, desc, list);
 			}
@@ -574,35 +575,35 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == PanAzimuthAutomation || param.type() == PanWidthAutomation || param.type() == PanElevationAutomation) {
 		Pannable* pannable = dynamic_cast<Pannable*>(this);
 		if (pannable) {
-			control = new PanControllable (_a_session, describe_parameter (param), pannable, param, time_domain());
+			control = new PanControllable (_a_session, describe_parameter (param), pannable, param, *this);
 		} else {
 			warning << "PanAutomation for non-Pannable" << endl;
 		}
 	} else if (param.type() == RecEnableAutomation) {
 		Recordable* re = dynamic_cast<Recordable*> (this);
 		if (re) {
-			control = new RecordEnableControl (_a_session, X_("recenable"), *re, time_domain());
+			control = new RecordEnableControl (_a_session, X_("recenable"), *re, *this);
 		}
 	} else if (param.type() == MonitoringAutomation) {
 		Monitorable* m = dynamic_cast<Monitorable*>(this);
 		if (m) {
-			control = new MonitorControl (_a_session, X_("monitor"), *m, time_domain());
+			control = new MonitorControl (_a_session, X_("monitor"), *m, *this);
 		}
 	} else if (param.type() == SoloAutomation) {
 		Soloable* s = dynamic_cast<Soloable*>(this);
 		Muteable* m = dynamic_cast<Muteable*>(this);
 		if (s && m) {
-			control = new SoloControl (_a_session, X_("solo"), *s, *m, time_domain());
+			control = new SoloControl (_a_session, X_("solo"), *s, *m, *this);
 		}
 	} else if (param.type() == MuteAutomation) {
 		Muteable* m = dynamic_cast<Muteable*>(this);
 		if (m) {
-			control = new MuteControl (_a_session, X_("mute"), *m, time_domain());
+			control = new MuteControl (_a_session, X_("mute"), *m, *this);
 		}
 	}
 
 	if (make_list && !list) {
-		list = std::shared_ptr<AutomationList>(new AutomationList(param, desc, time_domain()));
+		list = std::shared_ptr<AutomationList>(new AutomationList(param, desc, *this));
 	}
 
 	if (!control) {

@@ -28,7 +28,6 @@
 
 #include <boost/utility.hpp>
 
-
 #include "pbd/signals.h"
 
 #include "ardour/automatable.h"
