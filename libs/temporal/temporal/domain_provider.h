@@ -29,7 +29,13 @@ class TimeDomainProvider {
 	explicit TimeDomainProvider () : have_domain (false), parent (nullptr) {}
 	explicit TimeDomainProvider (TimeDomain td) : have_domain (true), domain (td), parent (nullptr) {}
 	TimeDomainProvider (TimeDomain td, TimeDomainProvider const & p) : have_domain (true), domain (td), parent (&p) { listen(); }
+
+	/* Copy constructor - note how a constructor that only set the parent would have the same signature. */
 	TimeDomainProvider (TimeDomainProvider const & other) : have_domain (other.have_domain), domain (other.domain), parent (other.parent) { listen(); }
+
+	/* The extra bool argument is just to differentiate this from the copy constructor above */
+	TimeDomainProvider (TimeDomainProvider const & parnt, bool) : have_domain (false), parent (&parnt) { listen(); }
+
 	virtual ~TimeDomainProvider() {}
 
 	TimeDomainProvider& operator= (TimeDomainProvider const & other) {
@@ -45,10 +51,12 @@ class TimeDomainProvider {
 
 	TimeDomain time_domain() const { if (have_domain) return domain; if (parent) return parent->time_domain(); return AudioTime; }
 
+	bool has_own_time_domain() const { return have_domain; }
 	void clear_time_domain () { have_domain = false; TimeDomainChanged(); /* EMIT SIGNAL */ }
 	void set_time_domain (TimeDomain td) { have_domain = true; domain = td; TimeDomainChanged(); /* EMIT SIGNAL */}
 
-	bool has_parent() const { return (bool) parent; }
+	TimeDomainProvider const * time_domain_parent() const { return parent; }
+	bool has_time_domain_parent() const { return (bool) parent; }
 	void clear_time_domain_parent () { parent = nullptr; TimeDomainChanged (); /* EMIT SIGNAL */ }
 	void set_time_domain_parent (TimeDomainProvider const & p) {
 		parent_connection.disconnect ();
