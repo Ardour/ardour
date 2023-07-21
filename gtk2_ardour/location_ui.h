@@ -98,7 +98,6 @@ protected:
 	Gtk::CheckButton cd_check_button;
 	Gtk::CheckButton hide_check_button;
 	Gtk::CheckButton lock_check_button;
-	Gtk::CheckButton glue_check_button;
 
 	ArdourWidgets::ArdourButton remove_button;
 
@@ -134,7 +133,6 @@ protected:
 	void cd_toggled ();
 	void hide_toggled ();
 	void lock_toggled ();
-	void glue_toggled ();
 	void remove_button_pressed ();
 
 	void scms_toggled ();
@@ -146,7 +144,6 @@ protected:
 	void location_changed ();
 	void flags_changed ();
 	void lock_changed ();
-	void time_domain_changed ();
 
 	void set_clock_editable_status ();
 	void show_cd_track_details ();

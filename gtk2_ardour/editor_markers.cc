@@ -1104,12 +1104,6 @@ Editor::build_marker_menu (Location* loc)
 		lock_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_lock));
 	}
 
-	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
-	Gtk::CheckMenuItem* glue_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
-	glue_item->set_active (loc->position_time_domain() == Temporal::BeatTime);
-
-	glue_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_glue));
-
 	items.push_back (SeparatorElem());
 
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
@@ -1137,13 +1131,6 @@ Editor::build_range_marker_menu (Location* loc, bool loop_or_punch, bool session
 	items.push_back (MenuElem (_("Set Range from Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_menu_set_from_selection), false)));
 
 	items.push_back (MenuElem (_("Zoom to Range"), sigc::mem_fun (*this, &Editor::marker_menu_zoom_to_range)));
-
-	items.push_back (SeparatorElem());
-	items.push_back (CheckMenuElem (_("Glue to Bars and Beats")));
-
-	Gtk::CheckMenuItem* glue_item = static_cast<Gtk::CheckMenuItem*> (&items.back());
-	glue_item->set_active (loc->position_time_domain() == Temporal::BeatTime);
-	glue_item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_menu_glue));
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Loudness Assistant..."), sigc::mem_fun(*this, &Editor::loudness_assistant_marker)));
@@ -1957,39 +1944,6 @@ Editor::jump_to_loop_marker (bool start)
 	} else {
 		_session->request_locate (l->end_sample());
 	}
-}
-
-void
-Editor::toggle_marker_menu_glue ()
-{
-	ArdourMarker* marker;
-
-	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
-		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
-		abort(); /*NOTREACHED*/
-	}
-
-	Location* loc;
-	bool ignored;
-
-	loc = find_location_from_marker (marker, ignored);
-
-	if (!loc) {
-		return;
-	}
-
-	begin_reversible_command (_("change marker lock style"));
-	XMLNode &before = _session->locations()->get_state();
-
-	if (loc->position_time_domain() == Temporal::BeatTime) {
-		loc->set_position_time_domain (Temporal::AudioTime);
-	} else {
-		loc->set_position_time_domain (Temporal::BeatTime);
-	}
-
-	XMLNode &after = _session->locations()->get_state();
-	_session->add_command(new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-	commit_reversible_command ();
 }
 
 void

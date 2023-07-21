@@ -1849,7 +1849,6 @@ private:
 	void toggle_tempo_type ();
 	void ramp_to_next_tempo ();
 	void toggle_marker_menu_lock ();
-	void toggle_marker_menu_glue ();
 	void marker_menu_hide ();
 	void marker_menu_set_origin ();
 	void marker_menu_loop_range ();
