@@ -28,6 +28,9 @@
 #include "pbd/file_utils.h"
 #include "pbd/pathexpand.h"
 
+#include "temporal/types.h"
+#include "temporal/types_convert.h"
+
 #include "ardour/types.h"
 #include "ardour/types_convert.h"
 #include "ardour/filesystem_paths.h"

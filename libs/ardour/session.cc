@@ -59,6 +59,8 @@
 #include "pbd/types_convert.h"
 #include "pbd/unwind.h"
 
+#include "temporal/types_convert.h"
+
 #include "ardour/amp.h"
 #include "ardour/analyser.h"
 #include "ardour/async_midi_port.h"
