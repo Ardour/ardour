@@ -4386,22 +4386,15 @@ Editor::get_grid_beat_divisions (GridType gt)
 	return 0;
 }
 
-/** returns the current musical grid divisiions using the supplied modifier mask from a GtkEvent.
-    if the grid is non-musical, returns 0.
-    if the grid is snapped to bars, returns -1.
-    @param event_state the current keyboard modifier mask.
-*/
+/**
+ * Return the musical grid divisions
+ *
+ * @param event_state the current keyboard modifier mask.
+ * @return Music grid beat divisions
+ */
 int32_t
 Editor::get_grid_music_divisions (Editing::GridType gt, uint32_t event_state)
 {
-	if (snap_mode() == SnapOff && !ArdourKeyboard::indicates_snap (event_state)) {
-		return 0;
-	}
-
-	if (snap_mode() != SnapOff && ArdourKeyboard::indicates_snap (event_state)) {
-		return 0;
-	}
-
 	return get_grid_beat_divisions (gt);
 }
 
