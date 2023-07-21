@@ -837,8 +837,37 @@ RouteTimeAxisView::build_display_menu ()
 		}
 	}
 
+	Menu* time_domain_menu = manage (new Menu);
+	MenuList& time_domain_items = time_domain_menu->items();
+	time_domain_menu->set_name ("ArdourContextMenu");
+	time_domain_items.push_back (CheckMenuElem (_("Audio (wallclock) time")));
+	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&time_domain_items.back());
+	if (_route->has_own_time_domain() && _route->time_domain() == Temporal::AudioTime) {
+		i->set_active (true);
+	} else {
+		i->set_active (false);
+	}
+	// i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_time_domain), Temporal::AudioTime, true));
+	time_domain_items.push_back (CheckMenuElem (_("Musical (beat) time")));
+	i = dynamic_cast<Gtk::CheckMenuItem *> (&time_domain_items.back());
+	if (_route->has_own_time_domain() && _route->time_domain() == Temporal::BeatTime) {
+		i->set_active (true);
+	} else {
+		i->set_active (false);
+	}
+	// i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_time_domain), Temporal::BeatTime, true));
+	time_domain_items.push_back (CheckMenuElem (_("Follow Session time domain")));
+	i = dynamic_cast<Gtk::CheckMenuItem *> (&time_domain_items.back());
+	if (!_route->has_own_time_domain()) {
+		i->set_active (true);
+	} else {
+		i->set_active (false);
+	}
+	// i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::clear_route_time_domain), Temporal::BeatTime, true));
+	items.push_back (MenuElem (_("Time Domain"), *time_domain_menu));
+
 	items.push_back (CheckMenuElem (_("Active")));
-	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
+	i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
 	bool click_sets_active = true;
 	if (active > 0 && inactive == 0) {
 		i->set_active (true);
