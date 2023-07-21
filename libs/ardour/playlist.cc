@@ -143,6 +143,7 @@ RegionListProperty::get_content_from_xml (XMLNode const& node) const
 
 Playlist::Playlist (Session& sess, string nom, DataType type, bool hide)
 	: SessionObject (sess, nom)
+	, Temporal::TimeDomainProvider ((type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime), sess)
 	, regions (*this)
 	, _type (type)
 {
@@ -154,6 +155,7 @@ Playlist::Playlist (Session& sess, string nom, DataType type, bool hide)
 
 Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide)
 	: SessionObject (sess, "unnamed playlist")
+	, Temporal::TimeDomainProvider ((type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime), sess)
 	, regions (*this)
 	, _type (type)
 {
@@ -171,6 +173,7 @@ Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide
 
 Playlist::Playlist (std::shared_ptr<const Playlist> other, string namestr, bool hide)
 	: SessionObject (other->_session, namestr)
+	, Temporal::TimeDomainProvider ((other->_type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime), other->_session)
 	, regions (*this)
 	, _type (other->_type)
 	, _orig_track_id (other->_orig_track_id)
@@ -204,6 +207,7 @@ Playlist::Playlist (std::shared_ptr<const Playlist> other, string namestr, bool 
 
 Playlist::Playlist (std::shared_ptr<const Playlist> other, timepos_t const & start, timepos_t const & cnt, string str, bool hide)
 	: SessionObject(other->_session, str)
+	, Temporal::TimeDomainProvider ((other->_type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime), other->_session)
 	, regions (*this)
 	, _type (other->_type)
 	, _orig_track_id (other->_orig_track_id)
@@ -3500,19 +3504,6 @@ Playlist::rdiff_and_add_command (Session* session)
 	session->add_command (new StatefulDiffCommand (shared_from_this ()));
 }
 
-Temporal::TimeDomain
-Playlist::time_domain() const
-{
-	switch (_type) {
-	case DataType::AUDIO:
-		return Temporal::AudioTime;
-	default:
-		break;
-	}
-
-	return Temporal::BeatTime;
-}
-
 void
 Playlist::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
 {
@@ -3521,3 +3512,10 @@ Playlist::globally_change_time_domain (Temporal::TimeDomain from, Temporal::Time
 		region->globally_change_time_domain (from, to);
 	}
 }
+
+void
+Playlist::time_domain_changed ()
+{
+	TimeDomainProvider::time_domain_changed ();
+}
+

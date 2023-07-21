@@ -88,7 +88,7 @@ private:
 	Playlist& _playlist;
 };
 
-class LIBARDOUR_API Playlist : public SessionObject, public std::enable_shared_from_this<Playlist>
+class LIBARDOUR_API Playlist : public SessionObject, public Temporal::TimeDomainProvider, public std::enable_shared_from_this<Playlist>
 {
 public:
 	static void make_property_quarks ();
@@ -112,8 +112,6 @@ public:
 
 	bool set_name (const std::string& str);
 	void set_region_ownership ();
-
-	Temporal::TimeDomain time_domain() const;
 
 	/*playlist group IDs (pgroup_id) is a group identifier that is implicitly
 	 * or explicitly assigned to playlists so they can be associated with each other.
@@ -302,6 +300,7 @@ public:
 
 	void set_capture_insertion_in_progress (bool yn);
 
+	void time_domain_changed ();
 	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
 
 protected:
