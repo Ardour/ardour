@@ -4673,7 +4673,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 		   ControlList for each of our source lists to put the cut buffer data in.
 		*/
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
-			i->second.copy = i->first->create (i->first->parameter (), i->first->descriptor(), i->first->time_domain());
+			i->second.copy = i->first->create (i->first->parameter (), i->first->descriptor(), *i->first);
 		}
 
 		/* Add all selected points to the relevant copy ControlLists */

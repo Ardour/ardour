@@ -3479,7 +3479,7 @@ Mixer_UI::add_favorite_processor (ARDOUR::PluginPresetPtr ppp, ProcessorPosition
 		}
 
 		Route::ProcessorStreams err;
-		std::shared_ptr<Processor> processor (new PluginInsert (*_session, rt->time_domain(), p));
+		std::shared_ptr<Processor> processor (new PluginInsert (*_session, *rt, p));
 
 		switch (pos) {
 			case AddTop:

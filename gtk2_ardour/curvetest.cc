@@ -36,7 +36,7 @@ curvetest (string filename)
 	stringstream line;
 	//Evoral::Parameter param(GainAutomation, -1.0, +1.0, 0.0);
 	Evoral::Parameter param(GainAutomation);
-	AutomationList al (param, Temporal::AudioTime);
+	AutomationList al (param, Temporal::TimeDomainProvider (Temporal::AudioTime));
 	double minx = DBL_MAX;
 	double maxx = DBL_MIN;
 
