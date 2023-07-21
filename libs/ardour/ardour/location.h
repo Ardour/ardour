@@ -172,9 +172,9 @@ public:
 	int set_state (const XMLNode&, int version);
 
 	Temporal::TimeDomain position_time_domain() const { return _start.time_domain(); }
-	void set_position_time_domain (Temporal::TimeDomain ps);
 
 	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+	void change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
 
 	class ChangeSuspender {
 		public:
@@ -228,6 +228,8 @@ private:
 	std::set<Signal> _postponed_signals;
 
 	std::shared_ptr<SceneChange> _scene_change;
+
+	void set_position_time_domain (Temporal::TimeDomain);
 };
 
 /** A collection of session locations including unique dedicated locations (loop, punch, etc) */
@@ -302,6 +304,7 @@ public:
 	void find_all_between (timepos_t const & start, timepos_t const & end, LocationList&, Location::Flags);
 
 	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+	void change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
 
 	PBD::Signal1<void,Location*> current_changed;
 

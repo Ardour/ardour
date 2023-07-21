@@ -4584,6 +4584,7 @@ Session::config_changed (std::string p, bool ours)
 		}
 	} else if (p == "default-time-domain") {
 		Temporal::TimeDomain td = config.get_default_time_domain ();
+		std::cerr << "Setting time domain\n";
 		set_time_domain (td);
 	}
 

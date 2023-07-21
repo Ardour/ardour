@@ -87,23 +87,25 @@ Location::Location (Session& s, timepos_t const & start, timepos_t const & end, 
 	, _cue (cue_id)
 	, _signals_suspended (0)
 {
+	/* Locations follow the global Session time domain */
 
-	/* it would be nice if the caller could ensure that the start and end
-	   values simply use the correct domain, but that would involve
-	   enforcing/checking that at every place where we create a
-	   Location. So instead we centralize this here.
-
-	   NUTEMPO: it might make sense to switch time domains when <something>
-	   happens, but it's not clear what the <something> might be? Maybe
-	   changing some setting of the tempo map.
-	*/
-
-	if (s.config.get_glue_new_markers_to_bars_and_beats()) {
-		set_position_time_domain (Temporal::BeatTime);
-	} else {
-		set_position_time_domain (Temporal::AudioTime);
-	}
+	set_position_time_domain (_session.time_domain());
 }
+
+void
+Location::set_position_time_domain (TimeDomain domain)
+{
+	if (_start.time_domain() == domain) {
+		return;
+	}
+
+	_start.set_time_domain (domain);
+	_end.set_time_domain (domain);
+
+	emit_signal (Domain); /* EMIT SIGNAL */
+}
+
+
 
 Location::Location (const Location& other)
 	: SessionHandleRef (other._session)
@@ -727,19 +729,6 @@ Location::set_state (const XMLNode& node, int version)
 }
 
 void
-Location::set_position_time_domain (TimeDomain domain)
-{
-	if (_start.time_domain() == domain) {
-		return;
-	}
-
-	_start.set_time_domain (domain);
-	_end.set_time_domain (domain);
-
-	emit_signal (Domain); /* EMIT SIGNAL */
-}
-
-void
 Location::lock ()
 {
 	_locked = true;
@@ -781,6 +770,14 @@ Location::globally_change_time_domain (Temporal::TimeDomain from, Temporal::Time
 		domain_swap->add (_end);
 	} else {
 		std::cerr << name() << " wrong domain: " << _start << " .. " << _end << std::endl;
+	}
+}
+
+void
+Location::change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+{
+	if (_start.time_domain() == from) {
+		set_position_time_domain (to);
 	}
 }
 
@@ -1880,6 +1877,17 @@ Locations::globally_change_time_domain (Temporal::TimeDomain from, Temporal::Tim
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 	for (auto & l : locations) {
 		l->globally_change_time_domain (from, to);
+	}
+
+}
+
+void
+Locations::change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+{
+	std::cerr << "change all locations to " << to << std::endl;
+	Glib::Threads::RWLock::WriterLock lm (_lock);
+	for (auto & l : locations) {
+		l->change_time_domain (from, to);
 	}
 
 }
