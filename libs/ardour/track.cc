@@ -712,11 +712,28 @@ Track::use_playlist (DataType dt, std::shared_ptr<Playlist> p, bool set_orig)
 		if (rl->size () > 0) {
 			Region::RegionsPropertyChanged (rl, Properties::hidden);
 		}
+		/* we don't know for certain that we controlled the old
+		 * playlist's time domain, but it's a pretty good guess. If it
+		 * has an actual parent, revert to using its parent's domain
+		 */
+		if (old->time_domain_parent()) {
+			old->clear_time_domain ();
+		}
 	}
+
 	if (p) {
 		std::shared_ptr<RegionList> rl (new RegionList (p->region_list_property ().rlist ()));
 		if (rl->size () > 0) {
 			Region::RegionsPropertyChanged (rl, Properties::hidden);
+		}
+
+		/* If the playlist has no time domain parent or its parent is
+		 * the session, reset to the explicit time domain of this
+		 * track.
+		 */
+
+		if (!p->time_domain_parent() || p->time_domain_parent() == &_session) {
+			p->set_time_domain (time_domain());
 		}
 	}
 

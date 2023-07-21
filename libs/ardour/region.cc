@@ -2205,3 +2205,12 @@ Region::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDo
 		std::cerr << "new domain after GCTD " << _length.val() << std::endl;
 	}
 }
+
+void
+Region::change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+{
+	if (_length.val().time_domain() == from) {
+		timecnt_t& l (_length.non_const_val());
+		l.set_time_domain (to);
+	}
+}

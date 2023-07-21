@@ -3516,6 +3516,16 @@ Playlist::globally_change_time_domain (Temporal::TimeDomain from, Temporal::Time
 void
 Playlist::time_domain_changed ()
 {
+	using namespace Temporal;
+
 	TimeDomainProvider::time_domain_changed ();
+
+	Temporal::TimeDomain to = time_domain();
+	Temporal::TimeDomain from = (to == AudioTime ? BeatTime : AudioTime);
+
+	for (auto & region  : regions) {
+		region->change_time_domain (from, to);
+	}
+
 }
 
