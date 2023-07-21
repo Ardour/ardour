@@ -356,18 +356,18 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Meterbridge"), new OptionEditorBlank ());
 
-	/* Misc */
+	/* MIDI */
 
-	add_option (_("Misc"), new OptionEditorHeading (_("MIDI Options")));
+	add_option (_("MIDI"), new OptionEditorHeading (_("MIDI Options")));
 
-	add_option (_("Misc"), new BoolOption (
+	add_option (_("MIDI"), new BoolOption (
 				"draw-opaque-midi-regions",
 				_("Draw tool creates opaque MIDI regions"),
 				sigc::mem_fun (*_session_config, &SessionConfiguration::get_draw_opaque_midi_regions),
 				sigc::mem_fun (*_session_config, &SessionConfiguration::set_draw_opaque_midi_regions)
 				));
 
-	add_option (_("Misc"), new BoolOption (
+	add_option (_("MIDI"), new BoolOption (
 				"midi-copy-is-fork",
 				_("MIDI region copies are independent"),
 				sigc::mem_fun (*_session_config, &SessionConfiguration::get_midi_copy_is_fork),
@@ -388,23 +388,23 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	li->add (InsertMergeTruncateAddition, _("shorten the overlapping new note"));
 	li->add (InsertMergeExtend, _("replace both overlapping notes with a single note"));
 
-	add_option (_("Misc"), li);
+	add_option (_("MIDI"), li);
 
-	add_option (_("Misc"), new OptionEditorHeading (_("Glue to Bars and Beats")));
+	/* Misc */
 
-	add_option (_("Misc"), new BoolOption (
-				"glue-new-markers-to-bars-and-beats",
-				_("Glue new markers to bars and beats"),
-				sigc::mem_fun (*_session_config, &SessionConfiguration::get_glue_new_markers_to_bars_and_beats),
-				sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_markers_to_bars_and_beats)
-				));
+	add_option (_("Misc"), new OptionEditorHeading (_("Miscellaneous Options")));
 
-	add_option (_("Misc"), new BoolOption (
-				"glue-new-regions-to-bars-and-beats",
-				_("Glue new regions to bars and beats"),
-				sigc::mem_fun (*_session_config, &SessionConfiguration::get_glue_new_regions_to_bars_and_beats),
-				sigc::mem_fun (*_session_config, &SessionConfiguration::set_glue_new_regions_to_bars_and_beats)
-				));
+
+	ComboOption<Temporal::TimeDomain>* tdo = new ComboOption<Temporal::TimeDomain> (
+		            "default-time-domain",
+		            _("Default time domain"),
+		            sigc::mem_fun (*_session_config, &SessionConfiguration::get_default_time_domain),
+		            sigc::mem_fun (*_session_config, &SessionConfiguration::set_default_time_domain)
+		);
+
+	tdo->add (Temporal::AudioTime, _("Audio (wallclock) time"));
+	tdo->add (Temporal::BeatTime, _("Musical (beats) time"));
+	add_option (_("Misc"), tdo);
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Metronome")));
 
