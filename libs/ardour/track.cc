@@ -717,7 +717,7 @@ Track::use_playlist (DataType dt, std::shared_ptr<Playlist> p, bool set_orig)
 		 * has an actual parent, revert to using its parent's domain
 		 */
 		if (old->time_domain_parent()) {
-			old->clear_time_domain ();
+			old->clear_time_domain_parent ();
 		}
 	}
 
@@ -733,7 +733,10 @@ Track::use_playlist (DataType dt, std::shared_ptr<Playlist> p, bool set_orig)
 		 */
 
 		if (!p->time_domain_parent() || p->time_domain_parent() == &_session) {
-			p->set_time_domain (time_domain());
+			/* XXX DANGER : track could go away leaving playlist
+			 * with dead parent time domain provider
+			 */
+			p->set_time_domain_parent (*this);
 		}
 	}
 
@@ -1182,4 +1185,31 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 	pl->thaw ();
 	pl->set_capture_insertion_in_progress (false);
 	_session.add_command (new StatefulDiffCommand (pl));
+}
+
+void
+Track::time_domain_changed ()
+{
+	Route::time_domain_changed ();
+
+	std::cerr << this << " td changed to " << time_domain() << std::endl;
+
+	std::shared_ptr<Playlist> pl = _playlists[DataType::AUDIO];
+	if (pl) {
+		std::cerr << "Call for audio\n";
+		if (pl->time_domain_parent() == this) {
+			pl->time_domain_changed ();
+		} else {
+			std::cerr << "skip that pl\n";
+		}
+	}
+	pl = _playlists[DataType::MIDI];
+	if (pl) {
+		std::cerr << "Call for MIDI\n";
+		if (pl->time_domain_parent() == this) {
+			pl->time_domain_changed ();
+		} else {
+			std::cerr << "skip that pl\n";
+		}
+	}
 }
