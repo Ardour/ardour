@@ -847,7 +847,7 @@ RouteTimeAxisView::build_display_menu ()
 	} else {
 		i->set_active (false);
 	}
-	// i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_time_domain), Temporal::AudioTime, true));
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_time_domain), Temporal::AudioTime, true));
 	time_domain_items.push_back (CheckMenuElem (_("Musical (beat) time")));
 	i = dynamic_cast<Gtk::CheckMenuItem *> (&time_domain_items.back());
 	if (_route->has_own_time_domain() && _route->time_domain() == Temporal::BeatTime) {
@@ -855,7 +855,7 @@ RouteTimeAxisView::build_display_menu ()
 	} else {
 		i->set_active (false);
 	}
-	// i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_route_time_domain), Temporal::BeatTime, true));
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::set_time_domain), Temporal::BeatTime, true));
 	time_domain_items.push_back (CheckMenuElem (_("Follow Session time domain")));
 	i = dynamic_cast<Gtk::CheckMenuItem *> (&time_domain_items.back());
 	if (!_route->has_own_time_domain()) {
@@ -863,7 +863,7 @@ RouteTimeAxisView::build_display_menu ()
 	} else {
 		i->set_active (false);
 	}
-	// i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::clear_route_time_domain), Temporal::BeatTime, true));
+	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::clear_time_domain), true));
 	items.push_back (MenuElem (_("Time Domain"), *time_domain_menu));
 
 	items.push_back (CheckMenuElem (_("Active")));

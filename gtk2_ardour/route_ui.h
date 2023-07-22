@@ -159,6 +159,9 @@ public:
 	void set_disk_io_point (ARDOUR::DiskIOPoint);
 	void fan_out (bool to_busses = true, bool group = true);
 
+	void set_time_domain (Temporal::TimeDomain, bool);
+	void clear_time_domain (bool);
+
 	/* The editor calls these when mapping an operation across multiple tracks */
 	void use_new_playlist (std::string name, std::string group_id, std::vector<std::shared_ptr<ARDOUR::Playlist> > const&, bool copy);
 	void clear_playlist ();

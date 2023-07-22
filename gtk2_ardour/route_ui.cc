@@ -2844,3 +2844,27 @@ RouteUI::rename_current_playlist ()
 		}
 	}
 }
+
+void
+RouteUI::set_time_domain (Temporal::TimeDomain td, bool apply_to_selection)
+{
+	if (apply_to_selection) {
+		std::cerr << "change route TD to " << td << std::endl;
+		ARDOUR_UI::instance()->the_editor().get_selection().tracks.foreach_route_ui (boost::bind (&RouteUI::set_time_domain, _1, td, false));
+	} else {
+		route()->set_time_domain (td);
+	}
+}
+
+
+void
+RouteUI::clear_time_domain (bool apply_to_selection)
+{
+	if (apply_to_selection) {
+		ARDOUR_UI::instance()->the_editor().get_selection().tracks.foreach_route_ui (boost::bind (&RouteUI::clear_time_domain, _1, false));
+	} else {
+		route()->clear_time_domain ();
+	}
+
+}
+
