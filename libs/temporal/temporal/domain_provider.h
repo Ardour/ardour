@@ -62,6 +62,7 @@ class TimeDomainProvider {
 		parent_connection.disconnect ();
 		TimeDomain old_domain = time_domain();
 		parent = &p;
+		have_domain = false;
 		TimeDomain new_domain = time_domain ();
 		if (old_domain != new_domain) {
 			TimeDomainChanged ();
