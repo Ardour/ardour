@@ -68,8 +68,15 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 {
 	set_session (s);
 
-	_clock_group->set_clock_mode (ARDOUR_UI::instance()->primary_clock->mode());
-	ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun (*this, &RegionEditor::set_clock_mode_from_primary));
+	switch (r->time_domain()) {
+	case Temporal::AudioTime:
+		/* XXX check length of region and choose samples or minsec */
+		_clock_group->set_clock_mode (AudioClock::MinSec);
+		break;
+	default:
+		_clock_group->set_clock_mode (AudioClock::BBT);
+	}
+	// ARDOUR_UI::instance()->primary_clock->mode_changed.connect (sigc::mem_fun (*this, &RegionEditor::set_clock_mode_from_primary));
 
 	_clock_group->add (position_clock);
 	_clock_group->add (end_clock);
