@@ -406,6 +406,20 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	tdo->add (Temporal::BeatTime, _("Musical (beats) time"));
 	add_option (_("Misc"), tdo);
 
+	bo = new BoolOption (
+		"tracks-follow-session-time",
+		_("New tracks and busses use session time"),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::get_tracks_follow_session_time),
+		sigc::mem_fun (*_session_config, &SessionConfiguration::set_tracks_follow_session_time)
+		);
+
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+	                                    _("When enabled, new tracks and busses will use the current session default time domain.\n\n"
+	                                      "When disabled, new tracks and busses will use their primary data type to choose their time domain\n"
+	                                      "The time domain will determine what units are used for region and automation timing,\n"
+	                                      "which in turn will affect whether they will change to follow tempo map edits."));
+	add_option (_("Misc"), 	bo);
+
 	add_option (_("Misc"), new OptionEditorHeading (_("Metronome")));
 
 	add_option (_("Misc"), new BoolOption (
