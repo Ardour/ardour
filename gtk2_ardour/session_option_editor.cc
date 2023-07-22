@@ -406,6 +406,10 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	tdo->add (Temporal::BeatTime, _("Musical (beats) time"));
 	add_option (_("Misc"), tdo);
 
+#if 0
+	/* We cannot expose this option until it is possible (and sane) to
+	 * allow MIDI tracks to use audio time and audio tracks to use music time.
+	 */
 	bo = new BoolOption (
 		"tracks-follow-session-time",
 		_("New tracks and busses use session time"),
@@ -419,6 +423,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	                                      "The time domain will determine what units are used for region and automation timing,\n"
 	                                      "which in turn will affect whether they will change to follow tempo map edits."));
 	add_option (_("Misc"), 	bo);
+#endif
 
 	add_option (_("Misc"), new OptionEditorHeading (_("Metronome")));
 
