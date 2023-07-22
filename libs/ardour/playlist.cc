@@ -3516,15 +3516,12 @@ Playlist::globally_change_time_domain (Temporal::TimeDomain from, Temporal::Time
 void
 Playlist::time_domain_changed ()
 {
-	std::cerr << this << " playlist gets td change\n";
 	using namespace Temporal;
 
 	TimeDomainProvider::time_domain_changed ();
 
 	Temporal::TimeDomain to = time_domain();
 	Temporal::TimeDomain from = (to == AudioTime ? BeatTime : AudioTime);
-
-	std::cerr << "playlist new domain " << to << " old domain " << from << " have domain " << has_own_time_domain() << std::endl;
 
 	for (auto & region  : regions) {
 		region->change_time_domain (from, to);

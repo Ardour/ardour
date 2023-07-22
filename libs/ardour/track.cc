@@ -1192,24 +1192,16 @@ Track::time_domain_changed ()
 {
 	Route::time_domain_changed ();
 
-	std::cerr << this << " td changed to " << time_domain() << std::endl;
-
 	std::shared_ptr<Playlist> pl = _playlists[DataType::AUDIO];
 	if (pl) {
-		std::cerr << "Call for audio\n";
 		if (pl->time_domain_parent() == this) {
 			pl->time_domain_changed ();
-		} else {
-			std::cerr << "skip that pl\n";
 		}
 	}
 	pl = _playlists[DataType::MIDI];
 	if (pl) {
-		std::cerr << "Call for MIDI\n";
 		if (pl->time_domain_parent() == this) {
 			pl->time_domain_changed ();
-		} else {
-			std::cerr << "skip that pl\n";
 		}
 	}
 }
