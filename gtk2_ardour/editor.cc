@@ -6845,6 +6845,12 @@ Editor::duration_to_pixels_unrounded (timecnt_t const & dur) const
 Temporal::TimeDomain
 Editor::default_time_domain () const
 {
+	if (_session) {
+		return _session->config.get_default_time_domain();
+	}
+
+	/* Probably never reached */
+
 	if (_snap_mode == SnapOff) {
 		return AudioTime;
 	}
