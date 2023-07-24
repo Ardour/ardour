@@ -507,7 +507,32 @@ Region::set_length_internal (timecnt_t const & len)
 	 * component of _length, and set_position() can only be used to set the
 	 * position component.
 	 */
+
 	_last_length = timecnt_t (_length.val().distance(), _last_length.position());
+
+	std::shared_ptr<Playlist> pl (playlist());
+
+	if (pl) {
+		Temporal::TimeDomain td (pl->time_domain());
+
+		/* Note: timecnt_t::time_domain() returns the domain for the
+		 * length component, *not* the position.
+		 */
+
+		if (td != len.time_domain()) {
+			switch (td) {
+			case Temporal::AudioTime:
+				_length = timecnt_t::from_superclock (len.superclocks(), _length.val().position());
+				break;
+			default:
+				_length = timecnt_t::from_ticks (len.ticks(), _length.val().position());
+				break;
+			}
+			return;
+		}
+	}
+	/* either no playlist or time domain for distance is not changing */
+
 	_length = timecnt_t (len.distance(), _length.val().position());
 }
 
@@ -689,6 +714,10 @@ Region::set_position_unchecked (timepos_t const & pos)
 void
 Region::set_position_internal (timepos_t const & pos)
 {
+	if (position() == pos) {
+		return;
+	}
+
 	/* We emit a change of Properties::length even if the position hasn't changed
 	 * (see Region::set_position), so we must always set this up so that
 	 * e.g. Playlist::notify_region_moved doesn't use an out-of-date last_position.
@@ -700,20 +729,45 @@ Region::set_position_internal (timepos_t const & pos)
 	 * position component.
 	 */
 
-	if (position() != pos) {
+	_last_length.set_position (position());
 
-		_last_length.set_position (position());
-		_length = timecnt_t (_length.val().distance(), pos);
+	std::shared_ptr<Playlist> pl (playlist());
 
-		/* check that the new _position wouldn't make the current
-		 * length impossible - if so, change the length.
-		 *
-		 * XXX is this the right thing to do?
+	if (pl) {
+		Temporal::TimeDomain td (pl->time_domain());
+
+		/* Note: timecnt_t::time_domain() returns the domain for the
+		 * length component, *not* the position.
 		 */
-		if (timepos_t::max (_length.val().time_domain()).earlier (_length) < position()) {
-			_last_length = _length;
-			_length = position().distance (timepos_t::max (position().time_domain()));
+
+		if (td != _length.val().position.time_domain()) {
+			switch (td) {
+			case Temporal::AudioTime:
+				_length = timecnt_t::from_superclock (_length.val().distance(), timepos_t::from_superclock (pos.superclocks()));
+				break;
+			default:
+				_length = timecnt_t::from_ticks (_length.val().distance(), timepos_t::from_ticks (pos.ticks()));
+				break;
+			}
+		} else {
+			/* time domain of position not changing */
+			_length = timecnt_t (len.distance(), pos);
 		}
+
+	} else {
+		/* no playlist, so time domain is free to change */
+		_length = timecnt_t (len.distance(), pos);
+	}
+
+
+	/* check that the new _position wouldn't make the current
+	 * length impossible - if so, change the length.
+	 *
+	 * XXX is this the right thing to do?
+	 */
+	if (timepos_t::max (_length.val().time_domain()).earlier (_length) < position()) {
+		_last_length = _length;
+		_length = position().distance (timepos_t::max (position().time_domain()));
 	}
 }
 
