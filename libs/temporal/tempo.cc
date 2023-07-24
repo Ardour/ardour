@@ -1497,6 +1497,13 @@ MusicTimePoint*
 TempoMap::add_or_replace_bartime (MusicTimePoint* mtp)
 {
 	bool replaced;
+
+	/* A MusicTimePoint by definition defines a beat position. It's not
+	 * zero, but it must be "on beat". So ensure that this is true.
+	 */
+
+	mtp->set (mtp->sclock(), mtp->beats().round_up_to_beat(), mtp->bbt());
+
 	MusicTimePoint* ret = core_add_bartime (mtp, replaced);
 
 	if (!replaced) {
