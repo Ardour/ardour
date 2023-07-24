@@ -837,11 +837,15 @@ RouteTimeAxisView::build_display_menu ()
 		}
 	}
 
+	Gtk::CheckMenuItem* i;
+
+#if 0
+	/* Can't have these options until we have audio-timed MIDI and elastic audio */
 	Menu* time_domain_menu = manage (new Menu);
 	MenuList& time_domain_items = time_domain_menu->items();
 	time_domain_menu->set_name ("ArdourContextMenu");
 	time_domain_items.push_back (CheckMenuElem (_("Audio (wallclock) time")));
-	Gtk::CheckMenuItem* i = dynamic_cast<Gtk::CheckMenuItem *> (&time_domain_items.back());
+	i = dynamic_cast<Gtk::CheckMenuItem *> (&time_domain_items.back());
 	if (_route->has_own_time_domain() && _route->time_domain() == Temporal::AudioTime) {
 		i->set_active (true);
 	} else {
@@ -865,6 +869,7 @@ RouteTimeAxisView::build_display_menu ()
 	}
 	i->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &RouteUI::clear_time_domain), true));
 	items.push_back (MenuElem (_("Time Domain"), *time_domain_menu));
+#endif
 
 	items.push_back (CheckMenuElem (_("Active")));
 	i = dynamic_cast<Gtk::CheckMenuItem *> (&items.back());
