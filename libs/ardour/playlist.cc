@@ -779,6 +779,7 @@ Playlist::add_region_internal (std::shared_ptr<Region> region, timepos_t const &
 	}
 
 	region->set_position_unchecked (position);
+	region->set_position_time_domain (time_domain());
 
 	regions.insert (upper_bound (regions.begin (), regions.end (), region, cmp), region);
 	all_regions.insert (region);
