@@ -74,6 +74,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_piano_velocity.append_text_item ("32");
 	_piano_velocity.append_text_item ("64");
 	_piano_velocity.append_text_item ("82");
+	_piano_velocity.append_text_item ("96");
 	_piano_velocity.append_text_item ("100");
 	_piano_velocity.append_text_item ("127");
 #endif
