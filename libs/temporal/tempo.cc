@@ -1253,7 +1253,6 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 
 	if (time.is_beats()) {
 
-
 		/* tempo changes are required to be on-beat */
 
 		Beats on_beat = time.beats().round_to_beat();
@@ -1488,7 +1487,14 @@ TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos, std::string 
 
 	superclock_t sc (pos.superclocks());
 	TempoMetric metric (metric_at (sc));
-	MusicTimePoint* tp = new MusicTimePoint (*this, sc, metric.quarters_at_superclock (sc), bbt, metric.tempo(), metric.meter(), name);
+
+	/* MusicTimePoints define a beat position (even if it is not predicted
+	 * by the prior tempo map elements.
+	 */
+
+	Beats b = metric.quarters_at_superclock (sc).round_up_to_beat ();;
+
+	MusicTimePoint* tp = new MusicTimePoint (*this, sc, b, bbt, metric.tempo(), metric.meter(), name);
 
 	add_or_replace_bartime (tp);
 }
