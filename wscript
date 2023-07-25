@@ -1114,7 +1114,7 @@ def configure(conf):
 
         if (
                 # osx up to and including 10.6 (uname 10.X.X)
-                (re.search ("^[1-9][0-9]\.", os.uname()[2]) is None or not re.search ("^10\.", os.uname()[2]) is None)
+                (re.search (r"^[1-9][0-9]\.", os.uname()[2]) is None or not re.search (r"^10\.", os.uname()[2]) is None)
                 and (Options.options.generic or Options.options.ppc)
                 and not Options.options.nocarbon
            ):
