@@ -1493,6 +1493,18 @@ TempoMap::set_bartime (BBT_Time const & bbt, timepos_t const & pos, std::string 
 	add_or_replace_bartime (tp);
 }
 
+void
+TempoMap::replace_bartime (MusicTimePoint & mtp, bool with_reset)
+{
+	bool ignored;
+
+	core_add_bartime (&mtp, ignored);
+
+	if (with_reset) {
+		reset_starting_at (mtp.sclock());
+	}
+}
+
 MusicTimePoint*
 TempoMap::add_or_replace_bartime (MusicTimePoint* mtp)
 {

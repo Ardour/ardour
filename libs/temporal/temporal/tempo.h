@@ -822,6 +822,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API void set_bartime (BBT_Time const &, timepos_t const &, std::string name = std::string());
 	LIBTEMPORAL_API void remove_bartime (MusicTimePoint const & tp, bool with_reset = true);
+	LIBTEMPORAL_API void replace_bartime (MusicTimePoint & tp, bool with_reset = true);
 
 	LIBTEMPORAL_API TempoPoint& set_tempo (Tempo const &, BBT_Argument const &);
 	LIBTEMPORAL_API	TempoPoint& set_tempo (Tempo const &, timepos_t const &);
