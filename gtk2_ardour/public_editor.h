@@ -64,6 +64,11 @@
 #include "editing.h"
 #include "selection.h"
 
+namespace Temporal {
+	class TempoPoint;
+	class MeterPoint;
+}
+
 namespace ARDOUR {
 	class Session;
 	class Region;
@@ -544,6 +549,8 @@ public:
 
 	virtual ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool&) const = 0;
 	virtual ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const = 0;
+	virtual TempoMarker* find_marker_for_tempo (Temporal::TempoPoint const &) = 0;
+	virtual MeterMarker* find_marker_for_meter (Temporal::MeterPoint const &) = 0;
 
 	virtual void snap_to_with_modifier (Temporal::timepos_t & first,
 	                                    GdkEvent const*      ev,

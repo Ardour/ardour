@@ -231,10 +231,7 @@ class MeterMarker : public MetricMarker
 class BBTMarker : public MetricMarker
 {
   public:
-	BBTMarker (PublicEditor& editor, ArdourCanvas::Item &, std::string const& color_name, Temporal::MusicTimePoint const &,
-	           ArdourCanvas::Item & tempo_parent,
-	           ArdourCanvas::Item & mapping_parent,
-	           ArdourCanvas::Item & meter_parent);
+	BBTMarker (PublicEditor& editor, ArdourCanvas::Item &, std::string const& color_name, Temporal::MusicTimePoint const &);
 	~BBTMarker ();
 
 	void reset_point (Temporal::MusicTimePoint const &);

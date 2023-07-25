@@ -760,6 +760,8 @@ private:
 	LocationMarkers*  find_location_markers (ARDOUR::Location*) const;
 	ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool& is_start) const;
 	ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const;
+	TempoMarker* find_marker_for_tempo (Temporal::TempoPoint const &);
+	MeterMarker* find_marker_for_meter (Temporal::MeterPoint const &);
 	ArdourMarker* entered_marker;
 	bool _show_marker_lines;
 

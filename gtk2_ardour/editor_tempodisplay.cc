@@ -112,16 +112,7 @@ Editor::reassociate_metric_markers (TempoMap::SharedPtr const& tmap)
 void
 Editor::reassociate_tempo_marker (TempoMap::SharedPtr const & tmap, Tempos const & tempos, TempoMarker& marker)
 {
-	Temporal::MusicTimePoint const * mtp;
-
 	for (auto const & tempo : tempos) {
-		if ((mtp = dynamic_cast<Temporal::MusicTimePoint const *>(&tempo)) != 0) {
-			/* do nothing .. but we had to catch
-			   this first because MusicTimePoint
-			   IS-A TempoPoint
-			*/
-			continue;
-		}
 		if (marker.point().sclock() == tempo.sclock()) {
 			marker.reset_tempo (tempo);
 			marker.curve().reset_point  (tempo);
@@ -133,16 +124,7 @@ Editor::reassociate_tempo_marker (TempoMap::SharedPtr const & tmap, Tempos const
 void
 Editor::reassociate_meter_marker (TempoMap::SharedPtr const & tmap, Meters const & meters, MeterMarker& marker)
 {
-	Temporal::MusicTimePoint const * mtp;
-
 	for (auto const & meter : meters) {
-		if ((mtp = dynamic_cast<Temporal::MusicTimePoint const *>(&meter)) != 0) {
-			/* do nothing .. but we had to catch
-			   this first because MusicTimePoint
-			   IS-A MeterPoint
-			*/
-			continue;
-		}
 		if (marker.point().sclock() == meter.sclock()) {
 			marker.reset_meter (meter);
 			break;
@@ -164,7 +146,7 @@ Editor::reassociate_bartime_marker (TempoMap::SharedPtr const & tmap, MusicTimes
 void
 Editor::make_bbt_marker (MusicTimePoint const  * mtp, Marks::iterator before)
 {
-	bbt_marks.insert (before, new BBTMarker (*this, *bbt_ruler, "meter marker", *mtp, *tempo_group, *mapping_group, *meter_group));
+	bbt_marks.insert (before, new BBTMarker (*this, *bbt_ruler, "meter marker", *mtp));
 }
 
 void
@@ -207,6 +189,7 @@ Editor::reset_metric_marks ()
 {
 	reset_tempo_marks ();
 	reset_meter_marks ();
+	/* Must come last, after temp and meter marks are created and are discoverable */
 	reset_bbt_marks ();
 }
 
@@ -232,13 +215,8 @@ Editor::reset_tempo_marks ()
 	tempo_marks.clear ();
 
 	for (auto const & t : tempi) {
-
-		/* do not draw BBT position elements that are both tempo & meter points */
-
-		if (!dynamic_cast<Temporal::MusicTimePoint const *> (&t)) {
-			make_tempo_marker (&t, min_tempo, max_tempo, prev_ts, tc_color, sr, tempo_marks.end());
-			prev_ts = &t;
-		}
+		make_tempo_marker (&t, min_tempo, max_tempo, prev_ts, tc_color, sr, tempo_marks.end());
+		prev_ts = &t;
 	}
 
 	update_tempo_curves (min_tempo, max_tempo, sr);
@@ -260,12 +238,7 @@ Editor::reset_meter_marks ()
 	meter_marks.clear ();
 
 	for (auto const & m : meters) {
-
-		/* do not draw BBT position elements that are both tempo & meter points */
-
-		if (!dynamic_cast<Temporal::MusicTimePoint const *> (&m)) {
-			make_meter_marker (&m, meter_marks.end());
-		}
+		make_meter_marker (&m, meter_marks.end());
 	}
 }
 
@@ -1062,4 +1035,28 @@ Editor::clear_tempo_markers_after (timepos_t where, bool stop_at_music_times)
 	XMLNode& after = wmap->get_state ();
 	_session->add_command (new Temporal::TempoCommand (_("clear later tempos"), before_state, &after));
 	commit_reversible_command ();
+}
+
+TempoMarker*
+Editor::find_marker_for_tempo (Temporal::TempoPoint const & tp)
+{
+	for (auto const & tm : tempo_marks) {
+		TempoMarker* t;
+		if ((t = dynamic_cast<TempoMarker*>(tm))->tempo() == tp) {
+			return t;
+		}
+	}
+	return nullptr;
+}
+
+MeterMarker*
+Editor::find_marker_for_meter (Temporal::MeterPoint const & mp)
+{
+	for (auto const & mm : meter_marks) {
+		MeterMarker* m;
+		if ((m = dynamic_cast<MeterMarker*>(mm))->meter() == mp) {
+			return m;
+		}
+	}
+	return nullptr;
 }
