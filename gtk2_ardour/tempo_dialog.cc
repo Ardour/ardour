@@ -213,7 +213,9 @@ TempoDialog::init (const Temporal::BBT_Time& when, double bpm, double end_bpm, d
 	snprintf (buf, sizeof (buf), "%" PRIu32, when.beats);
 	when_beat_entry.set_text (buf);
 
-	if (!initial) {
+	/* no position edit fields for initial tempo or BBT markers */
+
+	if (!initial && !(_section && dynamic_cast<MusicTimePoint*> (_section)))  {
 		when_bar_entry.set_width_chars(4);
 		when_beat_entry.set_width_chars (4);
 		when_bar_entry.set_alignment (1.0);
@@ -622,17 +624,17 @@ MeterDialog::MeterDialog (TempoMap::SharedPtr const & map, timepos_t const & pos
 	Temporal::BBT_Argument when (map->round_to_bar (map->bbt_at (pos)));
 	Meter const & meter (map->meter_at (when));
 
-	init (when, meter.divisions_per_bar(), meter.note_value(), false, pos.time_domain());
+	init (when, meter.divisions_per_bar(), meter.note_value(), false, false, pos.time_domain());
 }
 
 MeterDialog::MeterDialog (Temporal::MeterPoint& section, const string&)
 	: ArdourDialog (_("Edit Time Signature"))
 {
-	init (section.bbt(), section.divisions_per_bar(), section.note_value(), section.map().is_initial(section), Temporal::BeatTime);
+	init (section.bbt(), section.divisions_per_bar(), section.note_value(), section.map().is_initial(section), dynamic_cast<MusicTimePoint*> (&section), Temporal::BeatTime);
 }
 
 void
-MeterDialog::init (const Temporal::BBT_Time& when, double bpb, double divisor, bool initial, TimeDomain style)
+MeterDialog::init (const Temporal::BBT_Time& when, double bpb, double divisor, bool initial, bool music_time_point, TimeDomain style)
 {
 	char buf[64];
 	vector<string> strings;
@@ -708,7 +710,9 @@ MeterDialog::init (const Temporal::BBT_Time& when, double bpb, double divisor, b
 	when_bar_entry.set_text (buf);
 	when_bar_entry.set_alignment (1.0);
 
-	if (!initial) {
+	/* no position edit fields for initial tempo or BBT markers */
+
+	if (!initial && !music_time_point) {
 		Label* when_label = manage (new Label(_("Time Signature begins at bar:"), ALIGN_START, ALIGN_CENTER));
 
 		table->attach (*when_label, 0, 1, 2, 3, FILL | EXPAND, FILL | EXPAND);

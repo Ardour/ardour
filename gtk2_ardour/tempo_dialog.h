@@ -157,7 +157,7 @@ public:
 	bool   get_bbt_time (Temporal::BBT_Time&);
 
 private:
-	void init (const Temporal::BBT_Time&, double, double, bool, Temporal::TimeDomain style);
+	void init (const Temporal::BBT_Time&, double, double, bool, bool, Temporal::TimeDomain style);
 	bool is_user_input_valid() const;
 	bool entry_key_press (GdkEventKey* );
 	bool entry_key_release (GdkEventKey* );

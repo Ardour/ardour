@@ -608,6 +608,20 @@ Editor::edit_meter_section (Temporal::MeterPoint& section)
 
 	Temporal::Beats new_pos;
 
+	MusicTimePoint* mtp;
+
+	if ((mtp = dynamic_cast<Temporal::MusicTimePoint*> (&section))) {
+
+		/* ignore positional changes, that must be done via the MTP */
+		const Temporal::MeterPoint mp (meter, *mtp);
+		MusicTimePoint replacement (*mtp);
+		*((Temporal::MeterPoint*)&replacement) = mp;
+		TempoMapChange tmc (*this, _("edit BBT meter"));
+		tmc.map().replace_bartime (replacement);
+		return;
+
+	}
+
 	if (!mpp) {
 		/* first meter, cannot move */
 		new_pos = section.beats ();
