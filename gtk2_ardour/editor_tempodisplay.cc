@@ -685,8 +685,19 @@ Editor::edit_tempo_section (TempoPoint& section)
 	bpm = max (0.01, bpm);
 
 	const Tempo tempo (bpm, end_bpm, nt);
-
 	Temporal::Beats new_pos;
+	MusicTimePoint* mtp;
+
+	if ((mtp = dynamic_cast<Temporal::MusicTimePoint*> (&section))) {
+
+		/* ignore positional changes, that must be done via the MTP */
+		MusicTimePoint replacement (*mtp);
+		*((TempoPoint*)&replacement) = tempo;
+		TempoMapChange tmc (*this, _("edit BBT tempo"));
+		tmc.map().replace_bartime (replacement);
+		return;
+
+	} 
 
 	if (!tpp) {
 		/* first tempo, cannot move */
