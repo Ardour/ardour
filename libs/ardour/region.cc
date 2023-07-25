@@ -740,23 +740,23 @@ Region::set_position_internal (timepos_t const & pos)
 		 * length component, *not* the position.
 		 */
 
-		if (td != _length.val().position.time_domain()) {
+		if (td != _length.val().position().time_domain()) {
 			switch (td) {
 			case Temporal::AudioTime:
-				_length = timecnt_t::from_superclock (_length.val().distance(), timepos_t::from_superclock (pos.superclocks()));
+				_length = timecnt_t::from_superclock (superclock_t (_length.val().distance()), timepos_t::from_superclock (pos.superclocks()));
 				break;
 			default:
-				_length = timecnt_t::from_ticks (_length.val().distance(), timepos_t::from_ticks (pos.ticks()));
+				_length = timecnt_t::from_ticks (int64_t (_length.val().distance()), timepos_t::from_ticks (pos.ticks()));
 				break;
 			}
 		} else {
 			/* time domain of position not changing */
-			_length = timecnt_t (len.distance(), pos);
+			_length = timecnt_t (_length.val().distance(), pos);
 		}
 
 	} else {
 		/* no playlist, so time domain is free to change */
-		_length = timecnt_t (len.distance(), pos);
+		_length = timecnt_t (_length.val().distance(), pos);
 	}
 
 
