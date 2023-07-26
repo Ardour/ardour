@@ -55,6 +55,7 @@
 
 namespace ARDOUR {
 	class IO;
+	class ControlGroup;
 	class GainControl;
 	class Session;
 	class Route;
@@ -188,6 +189,8 @@ protected:
 
 	void amp_stop_touch (int);
 	void amp_start_touch (int);
+
+	std::shared_ptr<ARDOUR::ControlGroup> _touch_control_group;
 
 	void set_route_group_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
 	void set_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);

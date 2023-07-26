@@ -34,6 +34,7 @@
 #include <gtkmm/style.h>
 
 #include "ardour/amp.h"
+#include "ardour/control_group.h"
 #include "ardour/logmeter.h"
 #include "ardour/route_group.h"
 #include "ardour/session_route.h"
@@ -754,6 +755,12 @@ GainMeterBase::meter_point_clicked (MeterPoint mp)
 void
 GainMeterBase::amp_start_touch (int state)
 {
+	if (state & Keyboard::UseSelectionModifier) {
+		_touch_control_group.reset (new GainControlGroup ());
+		_touch_control_group->fill_from_selection (_control->session().selection());
+		_touch_control_group->push (_control);
+	}
+
 	_control->start_touch (timepos_t (_control->session().transport_sample()));
 }
 
@@ -761,6 +768,10 @@ void
 GainMeterBase::amp_stop_touch (int state)
 {
 	_control->stop_touch (timepos_t (_control->session().transport_sample()));
+	if (_touch_control_group) {
+		_touch_control_group->pop (_control);
+		_touch_control_group.reset ();
+	}
 	effective_gain_display ();
 }
 
