@@ -386,10 +386,6 @@ AutomationControl::push_group (std::shared_ptr<ControlGroup> cg)
 bool
 AutomationControl::pop_group ()
 {
-	if (!_pushed_group) {
-		return false;
-	}
-
 	_group = _pushed_group;
 	_pushed_group.reset ();
 
