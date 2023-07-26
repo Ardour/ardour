@@ -752,13 +752,13 @@ GainMeterBase::meter_point_clicked (MeterPoint mp)
 }
 
 void
-GainMeterBase::amp_start_touch ()
+GainMeterBase::amp_start_touch (int state)
 {
 	_control->start_touch (timepos_t (_control->session().transport_sample()));
 }
 
 void
-GainMeterBase::amp_stop_touch ()
+GainMeterBase::amp_stop_touch (int state)
 {
 	_control->stop_touch (timepos_t (_control->session().transport_sample()));
 	effective_gain_display ();

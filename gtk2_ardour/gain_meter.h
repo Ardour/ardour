@@ -186,8 +186,8 @@ protected:
 	Gtk::Menu* meter_menu;
 	void popup_meter_menu (GdkEventButton*);
 
-	void amp_stop_touch ();
-	void amp_start_touch ();
+	void amp_stop_touch (int);
+	void amp_start_touch (int);
 
 	void set_route_group_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);
 	void set_meter_point (ARDOUR::Route&, ARDOUR::MeterPoint);

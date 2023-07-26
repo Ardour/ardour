@@ -39,8 +39,8 @@ public:
 	virtual ~ArdourFader ();
 	static void flush_pattern_cache();
 
-	sigc::signal<void> StartGesture;
-	sigc::signal<void> StopGesture;
+	sigc::signal<void,int> StartGesture;
+	sigc::signal<void,int> StopGesture;
 	sigc::signal<void> OnExpose;
 
 	void set_default_value (float);

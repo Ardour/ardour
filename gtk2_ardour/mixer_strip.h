@@ -240,8 +240,8 @@ private:
 	ArdourWidgets::ArdourButton* _loudess_analysis_button;
 	std::shared_ptr<AutomationController> _volume_controller;
 
-	void trim_start_touch ();
-	void trim_end_touch ();
+	void trim_start_touch (int);
+	void trim_end_touch (int);
 
 	void setup_comment_button ();
 

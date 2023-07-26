@@ -151,8 +151,8 @@ private:
 
 	bool peak_button_release (GdkEventButton*);
 
-	void gain_start_touch ();
-	void gain_end_touch ();
+	void gain_start_touch (int);
+	void gain_end_touch (int);
 
 	void parameter_changed (std::string const & p);
 	void redraw_metrics ();

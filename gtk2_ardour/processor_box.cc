@@ -1103,7 +1103,7 @@ ProcessorEntry::Control::slider_adjusted ()
 }
 
 void
-ProcessorEntry::Control::start_touch ()
+ProcessorEntry::Control::start_touch (int)
 {
 	std::shared_ptr<AutomationControl> c = _control.lock ();
 	if (!c) {
@@ -1113,7 +1113,7 @@ ProcessorEntry::Control::start_touch ()
 }
 
 void
-ProcessorEntry::Control::end_touch ()
+ProcessorEntry::Control::end_touch (int)
 {
 	std::shared_ptr<AutomationControl> c = _control.lock ();
 	if (!c) {

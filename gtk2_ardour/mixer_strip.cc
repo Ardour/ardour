@@ -500,7 +500,7 @@ MixerStrip::update_trim_control ()
 }
 
 void
-MixerStrip::trim_start_touch ()
+MixerStrip::trim_start_touch (int)
 {
 	assert (_route && _session);
 	if (route()->trim() && route()->trim()->active() && route()->n_inputs().n_audio() > 0) {
@@ -509,7 +509,7 @@ MixerStrip::trim_start_touch ()
 }
 
 void
-MixerStrip::trim_end_touch ()
+MixerStrip::trim_end_touch (int)
 {
 	assert (_route && _session);
 	if (route()->trim() && route()->trim()->active() && route()->n_inputs().n_audio() > 0) {

@@ -212,14 +212,14 @@ AutomationController::value_adjusted ()
 }
 
 void
-AutomationController::start_touch()
+AutomationController::start_touch (int state)
 {
 	_grabbed = true;
 	_controllable->start_touch (timepos_t (_controllable->session().transport_sample()));
 }
 
 void
-AutomationController::end_touch ()
+AutomationController::end_touch (int state)
 {
 	_controllable->stop_touch (timepos_t (_controllable->session().transport_sample()));
 	if (_grabbed) {
@@ -229,20 +229,20 @@ AutomationController::end_touch ()
 }
 
 bool
-AutomationController::button_press (GdkEventButton*)
+AutomationController::button_press (GdkEventButton* ev)
 {
 	ArdourButton* but = dynamic_cast<ArdourButton*>(_widget);
 	if (but) {
-		start_touch ();
+		start_touch (ev->state);
 		_controllable->set_value (but->get_active () ? 0.0 : 1.0, Controllable::UseGroup);
 	}
 	return false;
 }
 
 bool
-AutomationController::button_release (GdkEventButton*)
+AutomationController::button_release (GdkEventButton* ev)
 {
-	end_touch ();
+	end_touch (ev->state);
 	return true;
 }
 

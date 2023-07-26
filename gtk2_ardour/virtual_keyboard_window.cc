@@ -614,7 +614,7 @@ VirtualKeyboardWindow::pitch_bend_event_handler (int val)
 }
 
 void
-VirtualKeyboardWindow::pitch_bend_release ()
+VirtualKeyboardWindow::pitch_bend_release (int)
 {
 	_pitch_adjustment.set_value (8192);
 }

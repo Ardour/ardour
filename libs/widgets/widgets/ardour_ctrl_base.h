@@ -80,8 +80,8 @@ public:
 
 	void color_handler ();
 
-	sigc::signal<void> StartGesture;
-	sigc::signal<void> StopGesture;
+	sigc::signal<void,int> StartGesture;
+	sigc::signal<void,int> StopGesture;
 
 	void set_size_request (int, int);
 
