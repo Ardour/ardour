@@ -23,6 +23,7 @@
 #include "ardour/control_group.h"
 #include "ardour/gain_control.h"
 #include "ardour/selection.h"
+#include "ardour/stripable.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -213,8 +214,33 @@ ControlGroup::set_group_value (std::shared_ptr<AutomationControl> control, doubl
 }
 
 void
-ControlGroup::fill_from_selection (CoreSelection const & sel)
+ControlGroup::fill_from_selection (CoreSelection const & sel, Evoral::Parameter const & p)
 {
+	CoreSelection::StripableAutomationControls stripables;
+	Evoral::Parameter gain_p (GainAutomation);
+
+	sel.get_stripables (stripables);
+
+	/* Very unfortunate that gain control is special cased. Routes do not
+	 * call ::add_control() for their gain control, but instead pass it to
+	 * their Amp processor which takes a certain kind of ownership of it.
+	 */
+
+	if (p == gain_p) {
+		for (auto & s : stripables) {
+			std::shared_ptr<AutomationControl> ac = s.stripable->gain_control ();
+			if (ac) {
+				push (ac);
+			}
+		}
+	} else {
+		for (auto & s : stripables) {
+			std::shared_ptr<AutomationControl> ac = s.stripable->automation_control (p, true);
+			if (ac) {
+				push (ac);
+			}
+		}
+	}
 }
 
 bool

@@ -47,7 +47,7 @@ class LIBARDOUR_API ControlGroup : public std::enable_shared_from_this<ControlGr
 		Inverted = 0x2,
 	};
 
-	void fill_from_selection (CoreSelection const &);
+	void fill_from_selection (CoreSelection const &, Evoral::Parameter const &);
 
 	int add_control (std::shared_ptr<AutomationControl>, bool push = false);
 	int remove_control (std::shared_ptr<AutomationControl>, bool pop = false);
@@ -82,8 +82,10 @@ class LIBARDOUR_API ControlGroup : public std::enable_shared_from_this<ControlGr
 		}
 	}
 
-  protected:
 	typedef std::map<PBD::ID,std::shared_ptr<AutomationControl> > ControlMap;
+	ControlMap::size_type size() const { Glib::Threads::RWLock::ReaderLock lm (controls_lock); return _controls.size(); }
+
+  protected:
 	Evoral::Parameter _parameter;
 	mutable Glib::Threads::RWLock controls_lock;
 	ControlMap _controls;
