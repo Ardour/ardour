@@ -34,6 +34,8 @@
 
 namespace ARDOUR {
 
+class CoreSelection;
+
 class LIBARDOUR_API ControlGroup : public std::enable_shared_from_this<ControlGroup>
 {
   public:
@@ -45,8 +47,12 @@ class LIBARDOUR_API ControlGroup : public std::enable_shared_from_this<ControlGr
 		Inverted = 0x2,
 	};
 
-	int add_control (std::shared_ptr<AutomationControl>);
-	int remove_control (std::shared_ptr<AutomationControl>);
+	void fill_from_selection (CoreSelection const &);
+
+	int add_control (std::shared_ptr<AutomationControl>, bool push = false);
+	int remove_control (std::shared_ptr<AutomationControl>, bool pop = false);
+	bool push (std::shared_ptr<AutomationControl>);
+	bool pop (std::shared_ptr<AutomationControl>);
 
 	ControlList controls () const;
 

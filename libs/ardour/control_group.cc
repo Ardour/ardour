@@ -22,6 +22,7 @@
 
 #include "ardour/control_group.h"
 #include "ardour/gain_control.h"
+#include "ardour/selection.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -107,7 +108,7 @@ ControlGroup::control_going_away (std::weak_ptr<AutomationControl> wac)
 }
 
 int
-ControlGroup::remove_control (std::shared_ptr<AutomationControl> ac)
+ControlGroup::remove_control (std::shared_ptr<AutomationControl> ac, bool pop)
 {
 	int erased;
 
@@ -117,7 +118,11 @@ ControlGroup::remove_control (std::shared_ptr<AutomationControl> ac)
 	}
 
 	if (erased) {
-		ac->set_group (std::shared_ptr<ControlGroup>());
+		if (pop) {
+			ac->pop_group ();
+		} else {
+			ac->set_group (std::shared_ptr<ControlGroup>());
+		}
 	}
 
 	/* return zero if erased, non-zero otherwise */
@@ -125,7 +130,7 @@ ControlGroup::remove_control (std::shared_ptr<AutomationControl> ac)
 }
 
 int
-ControlGroup::add_control (std::shared_ptr<AutomationControl> ac)
+ControlGroup::add_control (std::shared_ptr<AutomationControl> ac, bool push)
 {
 	if (ac->parameter() != _parameter) {
 		if (_parameter.type () != PluginAutomation) {
@@ -152,7 +157,12 @@ ControlGroup::add_control (std::shared_ptr<AutomationControl> ac)
 
 	/* Inserted */
 
-	ac->set_group (shared_from_this());
+
+	if (push) {
+		ac->push_group (shared_from_this());
+	} else {
+		ac->set_group (shared_from_this());
+	}
 
 	ac->DropReferences.connect_same_thread (member_connections, boost::bind (&ControlGroup::control_going_away, this, std::weak_ptr<AutomationControl>(ac)));
 
@@ -200,6 +210,25 @@ ControlGroup::set_group_value (std::shared_ptr<AutomationControl> control, doubl
 			}
 		}
 	}
+}
+
+void
+ControlGroup::fill_from_selection (CoreSelection const & sel)
+{
+}
+
+bool
+ControlGroup::push (std::shared_ptr<AutomationControl> c)
+{
+	add_control (c, true);
+	return true;
+}
+
+bool
+ControlGroup::pop (std::shared_ptr<AutomationControl> c)
+{
+	remove_control (c, true);
+	return true;
 }
 
 /*---- GAIN CONTROL GROUP -----------*/
