@@ -237,7 +237,7 @@ Keyboard::format_modifier (uint32_t mod)
 
 guint Keyboard::GainFineScaleModifier      = Keyboard::PrimaryModifier;
 guint Keyboard::GainExtraFineScaleModifier = Keyboard::SecondaryModifier;
-guint Keyboard::UseSelectionModifier = Keyboard::TertiaryModifier;
+guint Keyboard::UseSelectionModifier = Keyboard::Level4Modifier;
 
 guint Keyboard::ScrollZoomVerticalModifier   = Keyboard::SecondaryModifier;
 guint Keyboard::ScrollZoomHorizontalModifier = Keyboard::PrimaryModifier;
