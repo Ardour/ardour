@@ -82,7 +82,7 @@ ArdourMarker::color (std::string const& color_name)
 
 
 ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::string const& color_name, string const& annotation,
-                            Type type, timepos_t const & pos, bool handle_events, RegionView* rv)
+                            Type type, timepos_t const & pos, bool handle_events, RegionView* rv, bool use_tooltip)
 
 	: editor (ed)
 	, _parent (&parent)
@@ -92,6 +92,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 	, _entered (false)
 	, _shown (false)
 	, _line_shown (false)
+	, _use_tooltip (use_tooltip)
 	, _color (color_name)
 	, _points_color (color_name)
 	, _left_label_limit (DBL_MAX)
@@ -503,15 +504,17 @@ ArdourMarker::set_name (const string& new_name, const string& tooltip)
 {
 	_name = new_name;
 
-	_pcue->set_tooltip (new_name);
-	_pmark->set_tooltip (new_name);
-	if (_name_flag) {
-		_name_flag->set_tooltip (new_name);
-	}
-	if (tooltip.empty()) {
-		_name_item->set_tooltip (new_name);
-	} else {
-		_name_item->set_tooltip (tooltip);
+	if (_use_tooltip) {
+		_pcue->set_tooltip (new_name);
+		_pmark->set_tooltip (new_name);
+		if (_name_flag) {
+			_name_flag->set_tooltip (new_name);
+		}
+		if (tooltip.empty()) {
+			_name_item->set_tooltip (new_name);
+		} else {
+			_name_item->set_tooltip (tooltip);
+		}
 	}
 
 	setup_name_display ();
@@ -738,7 +741,7 @@ ArdourMarker::set_right_label_limit (double p)
 
 MetricMarker::MetricMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::string const& color_name, const string& annotation,
                             Type type, timepos_t const & pos, bool handle_events)
-	: ArdourMarker (ed, parent, color_name, annotation, type, pos, false)
+	: ArdourMarker (ed, parent, color_name, annotation, type, pos, false, nullptr, false)
 {
 }
 

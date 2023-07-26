@@ -76,7 +76,7 @@ public:
 
 
 	ArdourMarker (PublicEditor& editor, ArdourCanvas::Item &, std::string const& color_name, std::string const& text, Type,
-	              Temporal::timepos_t const & position, bool handle_events = true, RegionView* rv = 0);
+	              Temporal::timepos_t const & position, bool handle_events = true, RegionView* rv = nullptr, bool use_tooltip = true);
 
 	virtual ~ArdourMarker ();
 
@@ -151,6 +151,7 @@ protected:
 	bool         _entered;
 	bool         _shown;
 	bool         _line_shown;
+	bool         _use_tooltip;
 
 	std::string  _color;
 	std::string  _points_color;
