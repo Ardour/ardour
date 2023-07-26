@@ -126,6 +126,7 @@ public:
 
 protected:
 	std::shared_ptr<ControlGroup> _group;
+	std::shared_ptr<ControlGroup> _pushed_group;
 
 	const ParameterDescriptor _desc;
 
@@ -156,6 +157,8 @@ private:
 	*/
 	friend class ControlGroup;
 	void set_group (std::shared_ptr<ControlGroup>);
+	bool push_group (std::shared_ptr<ControlGroup>);
+	bool pop_group ();
 	PBD::ScopedConnection _state_changed_connection;
 	bool _no_session;
 };

@@ -370,6 +370,32 @@ AutomationControl::get_user_string () const
 	return ARDOUR::value_as_string (_desc, get_value());
 }
 
+bool
+AutomationControl::push_group (std::shared_ptr<ControlGroup> cg)
+{
+	if (_pushed_group) {
+		return false;
+	}
+
+	_pushed_group = _group;
+	_group = cg;
+
+	return true;
+}
+
+bool
+AutomationControl::pop_group ()
+{
+	if (!_pushed_group) {
+		return false;
+	}
+
+	_group = _pushed_group;
+	_pushed_group.reset ();
+
+	return true;
+}
+
 void
 AutomationControl::set_group (std::shared_ptr<ControlGroup> cg)
 {
