@@ -757,8 +757,8 @@ GainMeterBase::amp_start_touch (int state)
 {
 	if (state & Keyboard::UseSelectionModifier) {
 		_touch_control_group.reset (new GainControlGroup ());
-		_touch_control_group->fill_from_selection (_control->session().selection());
-		_touch_control_group->push (_control);
+		_touch_control_group->set_mode (ControlGroup::Relative);
+		_touch_control_group->fill_from_selection (_control->session().selection(), _control->parameter());
 	}
 
 	_control->start_touch (timepos_t (_control->session().transport_sample()));
