@@ -3120,12 +3120,9 @@ These settings will only take effect after %1 is restarted.\n\
 	parameter_changed ("enable-translation");
 #endif // ENABLE_NLS
 
+	add_option (_("Appearance/Regions"), new OptionEditorHeading (_("Region Information")));
 
-	/* EDITOR *******************************************************************/
-
-	add_option (_("Editor"), new OptionEditorHeading (_("Region Information")));
-
-	add_option (_("Editor"),
+	add_option (_("Appearance/Regions"),
 			new BoolOption (
 		     "show-region-xrun-markers",
 		     _("Show xrun markers in regions"),
@@ -3133,7 +3130,7 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_xrun_markers)
 		     ));
 
-	add_option (_("Editor"),
+	add_option (_("Appearance/Regions"),
 			new BoolOption (
 		     "show-region-cue-markers",
 		     _("Show cue markers in regions"),
@@ -3141,7 +3138,7 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_cue_markers)
 		     ));
 
-	add_option (_("Editor"),
+	add_option (_("Appearance/Regions"),
 	     new BoolComboOption (
 		     "show-region-gain-envelopes",
 		     _("Show gain envelopes in audio regions"),
@@ -3150,6 +3147,10 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_gain),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_gain)
 		     ));
+
+
+
+	/* EDITOR *******************************************************************/
 
 	add_option (_("Editor"), new OptionEditorHeading (_("Scroll and Zoom Behaviors")));
 
