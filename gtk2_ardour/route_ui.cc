@@ -2891,8 +2891,13 @@ RouteUI::maybe_use_select_as_group (bool (RouteGroup::*method)() const) const
 		return false;
 	}
 
-	if (route()->route_group() && route()->route_group()->is_active() && (route()->route_group()->*method)()) {
-		/* active route group sharing the appropriate property */
+	if (ARDOUR_UI::instance()->the_editor().get_selection().tracks.size() < 2) {
+		/* only this track selected */
+		return false;
+	}
+
+	if (route()->route_group() && route()->route_group()->is_active() && !route()->route_group()->is_select()) {
+		/* active route group that does not share selection status */
 		return false;
 	}
 
