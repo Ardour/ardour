@@ -773,7 +773,7 @@ GainMeterBase::amp_stop_touch (int state)
 {
 	_control->stop_touch (timepos_t (_control->session().transport_sample()));
 	if (_touch_control_group) {
-		_touch_control_group->pop (_control);
+		_touch_control_group->pop_all ();
 		_touch_control_group.reset ();
 	}
 	effective_gain_display ();
