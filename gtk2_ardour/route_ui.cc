@@ -784,8 +784,9 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 	}
 
 	//if this is a binding action, let the ArdourButton handle it
-	if (BindingProxy::is_bind_action(ev) )
+	if (BindingProxy::is_bind_action(ev)) {
 		return false;
+	}
 
 	if (!ARDOUR_UI_UTILS::engine_is_running ()) {
 		return false;
