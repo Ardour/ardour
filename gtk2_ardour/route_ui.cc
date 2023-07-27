@@ -563,19 +563,22 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 				/* plain click applies change to this route */
 
+				Controllable::GroupControlDisposition gcd;
 				std::shared_ptr<RouteList> rl (new RouteList);
 
 				if (maybe_use_select_as_group (&RouteGroup::is_mute)) {
 					gather_selected_routes (rl);
+					gcd = Controllable::NoGroup;
 				} else {
 					rl->push_back (route());
+					gcd = Controllable::UseGroup;
 				}
 
 				if (_mute_release) {
 					_mute_release->set (rl);
 				}
 
-				_session->set_controls (route_list_to_control_list (rl, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, Controllable::InverseGroup);
+				_session->set_controls (route_list_to_control_list (rl, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, gcd);
 
 				// std::shared_ptr<MuteControl> mc = _route->mute_control();
 				// mc->start_touch (timepos_t (_session->audible_sample ()));
@@ -740,18 +743,21 @@ RouteUI::solo_press(GdkEventButton* ev)
 				/* click: solo this route */
 
 				std::shared_ptr<RouteList> rl (new RouteList);
+				Controllable::GroupControlDisposition gcd;
 
 				if (maybe_use_select_as_group (&RouteGroup::is_solo)) {
 					gather_selected_routes (rl);
+					gcd = Controllable::NoGroup;
 				} else {
 					rl->push_back (route());
+					gcd = Controllable::UseGroup;
 				}
 
 				if (_solo_release) {
 					_solo_release->set (rl);
 				}
 
-				_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_control), !_route->self_soloed(), Controllable::UseGroup);
+				_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_control), !_route->self_soloed(), gcd);
 			}
 		}
 	}
@@ -833,15 +839,18 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 			if (ev->button == 1) {
 
 				std::shared_ptr<RouteList> rl;
+				Controllable::GroupControlDisposition gcd;
 				rl.reset (new RouteList);
 
 				if (maybe_use_select_as_group (&RouteGroup::is_recenable)) {
 					gather_selected_routes (rl);
+					gcd = Controllable::NoGroup;
 				} else {
 					rl->push_back (route());
+					gcd = Controllable::UseGroup;
 				}
 
-				_session->set_controls (route_list_to_control_list (rl, &Stripable::rec_enable_control), !track()->rec_enable_control()->get_value(), GROUP_ACTION);
+				_session->set_controls (route_list_to_control_list (rl, &Stripable::rec_enable_control), !track()->rec_enable_control()->get_value(), gcd);
 			}
 
 			// std::shared_ptr<Track> trk = track();
