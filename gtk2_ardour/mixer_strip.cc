@@ -503,8 +503,18 @@ void
 MixerStrip::trim_start_touch (int)
 {
 	assert (_route && _session);
+
 	if (route()->trim() && route()->trim()->active() && route()->n_inputs().n_audio() > 0) {
-		route()->trim()->gain_control ()->start_touch (timepos_t (_session->transport_sample()));
+
+		std::shared_ptr<AutomationControl> control (route()->trim()->gain_control());
+
+		if (maybe_use_select_as_group ()) {
+			_touch_control_group.reset (new GainControlGroup (TrimAutomation));
+			_touch_control_group->set_mode (ControlGroup::Relative);
+			_touch_control_group->fill_from_selection (control->session().selection(), control->parameter());
+		}
+
+		control->start_touch (timepos_t (_session->transport_sample()));
 	}
 }
 
@@ -512,8 +522,17 @@ void
 MixerStrip::trim_end_touch (int)
 {
 	assert (_route && _session);
+
 	if (route()->trim() && route()->trim()->active() && route()->n_inputs().n_audio() > 0) {
-		route()->trim()->gain_control ()->stop_touch (timepos_t (_session->transport_sample()));
+
+		std::shared_ptr<AutomationControl> control (route()->trim()->gain_control());
+
+		control->stop_touch (timepos_t (_session->transport_sample()));
+
+		if (_touch_control_group) {
+			_touch_control_group->pop_all ();
+			_touch_control_group.reset ();
+		}
 	}
 }
 

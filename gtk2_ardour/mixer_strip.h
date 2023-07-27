@@ -243,6 +243,8 @@ private:
 	void trim_start_touch (int);
 	void trim_end_touch (int);
 
+	std::shared_ptr<ARDOUR::ControlGroup> _touch_control_group;
+
 	void setup_comment_button ();
 
 	void loudess_analysis_button_clicked ();
