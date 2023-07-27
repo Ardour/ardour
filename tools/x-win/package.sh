@@ -33,6 +33,7 @@ PRODUCT_VERSION=${major_version}
 WITH_HARRISON_LV2=1 ;
 WITH_COMMERCIAL_X42_LV2=
 WITH_GRATIS_X42_LV2=
+QUICKZIP=1
 
 # TODO: grep from build/config.log instead
 while [ $# -gt 0 ] ; do
