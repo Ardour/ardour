@@ -69,7 +69,6 @@ public:
 	static uint32_t RangeSelectModifier;
 	static uint32_t GainFineScaleModifier;
 	static uint32_t GainExtraFineScaleModifier;
-	static uint32_t UseSelectionModifier;
 
 	// Modifiers for scroll wheel
 	static uint32_t ScrollZoomVerticalModifier;
