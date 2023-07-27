@@ -179,14 +179,14 @@ ArdourCtrlBase::on_motion_notify_event (GdkEventMotion *ev)
 				delta = tozero + remain;
 				_dead_zone_delta = 0;
 			} else {
-				c->set_value (c->normal(), Controllable::NoGroup);
+				c->set_value (c->normal(), Controllable::UseGroup);
 				_dead_zone_delta = remain / px_deadzone;
 				return true;
 			}
 		}
 
 		if (fabsf (rintf((val - _normal) / scale) + _dead_zone_delta) < 1) {
-			c->set_value (c->normal(), Controllable::NoGroup);
+			c->set_value (c->normal(), Controllable::UseGroup);
 			_dead_zone_delta += delta / px_deadzone;
 			return true;
 		}
@@ -195,7 +195,7 @@ ArdourCtrlBase::on_motion_notify_event (GdkEventMotion *ev)
 	}
 
 	val += delta * scale;
-	c->set_interface (val, true);
+	c->set_interface (val, true, Controllable::UseGroup);
 
 	return true;
 }
