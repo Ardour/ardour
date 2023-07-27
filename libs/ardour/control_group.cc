@@ -55,7 +55,7 @@ ControlGroup::set_mode (Mode m)
 }
 
 void
-ControlGroup::clear ()
+ControlGroup::clear (bool pop)
 {
 	/* we're giving up on all members, so we don't care about their
 	 * DropReferences signals anymore
@@ -77,8 +77,12 @@ ControlGroup::clear ()
 
 	_controls.clear ();
 
-	for (std::vector<std::shared_ptr<AutomationControl> >::iterator c = controls.begin(); c != controls.end(); ++c) {
-		(*c)->set_group (std::shared_ptr<ControlGroup>());
+	for (auto & c : controls) {
+		if (pop) {
+			c->pop_group ();
+		} else {
+			c->set_group (std::shared_ptr<ControlGroup>());
+		}
 	}
 }
 
@@ -217,7 +221,6 @@ void
 ControlGroup::fill_from_selection (CoreSelection const & sel, Evoral::Parameter const & p)
 {
 	CoreSelection::StripableAutomationControls stripables;
-	Evoral::Parameter gain_p (GainAutomation);
 
 	sel.get_stripables (stripables);
 
@@ -226,41 +229,43 @@ ControlGroup::fill_from_selection (CoreSelection const & sel, Evoral::Parameter 
 	 * their Amp processor which takes a certain kind of ownership of it.
 	 */
 
-	if (p == gain_p) {
+	switch (p.type()) {
+	case GainAutomation:
 		for (auto & s : stripables) {
 			std::shared_ptr<AutomationControl> ac = s.stripable->gain_control ();
 			if (ac) {
-				push (ac);
+				add_control (ac, true);
 			}
 		}
-	} else {
+		break;
+	case TrimAutomation:
+		for (auto & s : stripables) {
+			std::shared_ptr<AutomationControl> ac = s.stripable->trim_control ();
+			if (ac) {
+				add_control (ac, true);
+			}
+		}
+		break;
+	default:
 		for (auto & s : stripables) {
 			std::shared_ptr<AutomationControl> ac = s.stripable->automation_control (p, true);
 			if (ac) {
-				push (ac);
+				add_control (ac, true);
 			}
 		}
 	}
 }
 
-bool
-ControlGroup::push (std::shared_ptr<AutomationControl> c)
+void
+ControlGroup::pop_all ()
 {
-	add_control (c, true);
-	return true;
-}
-
-bool
-ControlGroup::pop (std::shared_ptr<AutomationControl> c)
-{
-	remove_control (c, true);
-	return true;
+	clear (true);
 }
 
 /*---- GAIN CONTROL GROUP -----------*/
 
-GainControlGroup::GainControlGroup ()
-	: ControlGroup (GainAutomation)
+GainControlGroup::GainControlGroup (ARDOUR::AutomationType t)
+	: ControlGroup (t)
 {
 }
 

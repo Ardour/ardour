@@ -51,12 +51,12 @@ class LIBARDOUR_API ControlGroup : public std::enable_shared_from_this<ControlGr
 
 	int add_control (std::shared_ptr<AutomationControl>, bool push = false);
 	int remove_control (std::shared_ptr<AutomationControl>, bool pop = false);
-	bool push (std::shared_ptr<AutomationControl>);
-	bool pop (std::shared_ptr<AutomationControl>);
+
+	void pop_all ();
 
 	ControlList controls () const;
 
-	void clear ();
+	void clear (bool pop = false);
 
 	void set_active (bool);
 	bool active() const { return _active; }
@@ -101,7 +101,7 @@ class LIBARDOUR_API ControlGroup : public std::enable_shared_from_this<ControlGr
 class LIBARDOUR_API GainControlGroup : public ControlGroup
 {
   public:
-	GainControlGroup();
+	GainControlGroup (ARDOUR::AutomationType = GainAutomation);
 
 	void set_group_value (std::shared_ptr<AutomationControl>, double val);
 
