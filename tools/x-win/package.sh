@@ -91,7 +91,7 @@ fi
 export SRCCACHE
 
 if [ "$(id -u)" = "0" ]; then
-	apt-get -y install nsis curl wget
+	apt-get -y install nsis curl wget ca-certificates rsync zip unzip
 fi
 
 
