@@ -757,7 +757,7 @@ GainMeterBase::amp_start_touch (int state)
 {
 	assert (_route);
 
-	if (!_route->route_group() || !_route->route_group()->is_gain()) {
+	if (_route->is_selected() && (!_route->route_group() || !_route->route_group()->is_gain())) {
 		_touch_control_group.reset (new GainControlGroup ());
 		_touch_control_group->set_mode (ControlGroup::Relative);
 		_touch_control_group->fill_from_selection (_control->session().selection(), _control->parameter());
