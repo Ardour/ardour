@@ -733,7 +733,22 @@ RouteUI::solo_press(GdkEventButton* ev)
 				/* click: solo this route */
 
 				std::shared_ptr<RouteList> rl (new RouteList);
-				rl->push_back (route());
+
+				if (route() && (!route()->is_selected() || (route()->route_group() && route()->route_group()->is_solo()))) {
+					/* Not selected or part of a group that share solo, just start with this route */
+					rl->push_back (route());
+				} else {
+					TrackSelection& selected_tracks (ARDOUR_UI::instance()->the_editor().get_selection().tracks);
+					for (auto & st : selected_tracks) {
+						RouteTimeAxisView* rtv;
+						RouteUI* rui;
+						if ((rtv = dynamic_cast<RouteTimeAxisView*>(st)) != 0) {
+							if ((rui = dynamic_cast<RouteUI*>(rtv)) != 0) {
+								rl->push_back (rui->route());
+							}
+						}
+					}
+				}
 
 				if (_solo_release) {
 					_solo_release->set (rl);
