@@ -566,7 +566,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 				Controllable::GroupControlDisposition gcd;
 				std::shared_ptr<RouteList> rl (new RouteList);
 
-				if (maybe_use_select_as_group (&RouteGroup::is_mute)) {
+				if (maybe_use_select_as_group ()) {
 					gather_selected_routes (rl);
 					gcd = Controllable::NoGroup;
 				} else {
@@ -745,7 +745,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				std::shared_ptr<RouteList> rl (new RouteList);
 				Controllable::GroupControlDisposition gcd;
 
-				if (maybe_use_select_as_group (&RouteGroup::is_solo)) {
+				if (maybe_use_select_as_group ()) {
 					gather_selected_routes (rl);
 					gcd = Controllable::NoGroup;
 				} else {
@@ -842,7 +842,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 				Controllable::GroupControlDisposition gcd;
 				rl.reset (new RouteList);
 
-				if (maybe_use_select_as_group (&RouteGroup::is_recenable)) {
+				if (maybe_use_select_as_group ()) {
 					gather_selected_routes (rl);
 					gcd = Controllable::NoGroup;
 				} else {
@@ -2884,7 +2884,7 @@ RouteUI::rename_current_playlist ()
 }
 
 bool
-RouteUI::maybe_use_select_as_group (bool (RouteGroup::*method)() const) const
+RouteUI::maybe_use_select_as_group () const
 {
 	if (!UIConfiguration::instance().get_allow_selection_as_group()) {
 		return false;
