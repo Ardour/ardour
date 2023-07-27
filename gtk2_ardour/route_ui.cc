@@ -734,7 +734,9 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 				std::shared_ptr<RouteList> rl (new RouteList);
 
-				if (route() && (!route()->is_selected() || (route()->route_group() && route()->route_group()->is_solo()))) {
+				if (!UIConfiguration::instance().get_allow_selection_as_group() &&
+				    route() &&
+				    (!route()->is_selected() || (route()->route_group() && route()->route_group()->is_solo()))) {
 					/* Not selected or part of a group that share solo, just start with this route */
 					rl->push_back (route());
 				} else {
