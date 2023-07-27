@@ -564,15 +564,22 @@ RouteUI::mute_press (GdkEventButton* ev)
 				/* plain click applies change to this route */
 
 				std::shared_ptr<RouteList> rl (new RouteList);
-				rl->push_back (_route);
+
+				if (maybe_use_select_as_group (&RouteGroup::is_mute)) {
+					gather_selected_routes (rl);
+				} else {
+					rl->push_back (route());
+				}
 
 				if (_mute_release) {
 					_mute_release->set (rl);
 				}
 
-				std::shared_ptr<MuteControl> mc = _route->mute_control();
-				mc->start_touch (timepos_t (_session->audible_sample ()));
-				mc->set_value (!_route->muted_by_self(), Controllable::UseGroup);
+				_session->set_controls (route_list_to_control_list (rl, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, Controllable::InverseGroup);
+
+				// std::shared_ptr<MuteControl> mc = _route->mute_control();
+				// mc->start_touch (timepos_t (_session->audible_sample ()));
+				// mc->set_value (!_route->muted_by_self(), Controllable::UseGroup);
 			}
 		}
 	}
@@ -734,22 +741,10 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 				std::shared_ptr<RouteList> rl (new RouteList);
 
-				if (!UIConfiguration::instance().get_allow_selection_as_group() &&
-				    route() &&
-				    (!route()->is_selected() || (route()->route_group() && route()->route_group()->is_solo()))) {
-					/* Not selected or part of a group that share solo, just start with this route */
-					rl->push_back (route());
+				if (maybe_use_select_as_group (&RouteGroup::is_solo)) {
+					gather_selected_routes (rl);
 				} else {
-					TrackSelection& selected_tracks (ARDOUR_UI::instance()->the_editor().get_selection().tracks);
-					for (auto & st : selected_tracks) {
-						RouteTimeAxisView* rtv;
-						RouteUI* rui;
-						if ((rtv = dynamic_cast<RouteTimeAxisView*>(st)) != 0) {
-							if ((rui = dynamic_cast<RouteUI*>(rtv)) != 0) {
-								rl->push_back (rui->route());
-							}
-						}
-					}
+					rl->push_back (route());
 				}
 
 				if (_solo_release) {
@@ -835,8 +830,22 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 
 		} else {
 
-			std::shared_ptr<Track> trk = track();
-			trk->rec_enable_control()->set_value (!trk->rec_enable_control()->get_value(), Controllable::UseGroup);
+			if (ev->button == 1) {
+
+				std::shared_ptr<RouteList> rl;
+				rl.reset (new RouteList);
+
+				if (maybe_use_select_as_group (&RouteGroup::is_recenable)) {
+					gather_selected_routes (rl);
+				} else {
+					rl->push_back (route());
+				}
+
+				_session->set_controls (route_list_to_control_list (rl, &Stripable::rec_enable_control), !track()->rec_enable_control()->get_value(), GROUP_ACTION);
+			}
+
+			// std::shared_ptr<Track> trk = track();
+			// trk->rec_enable_control()->set_value (!trk->rec_enable_control()->get_value(), Controllable::UseGroup);
 		}
 	}
 
@@ -2861,6 +2870,47 @@ RouteUI::rename_current_playlist ()
 		vector<std::shared_ptr<Playlist> > playlists_gr = _session->playlists()->playlists_for_pgroup (pl->pgroup_id());
 		for (vector<std::shared_ptr<Playlist> >::iterator i = playlists_gr.begin(); i != playlists_gr.end(); ++i) {
 			(*i)->set_name (name);
+		}
+	}
+}
+
+bool
+RouteUI::maybe_use_select_as_group (bool (RouteGroup::*method)() const) const
+{
+	if (!UIConfiguration::instance().get_allow_selection_as_group()) {
+		return false;
+	}
+
+	if (!route()) {
+		/* Shouldn't happen but protects conditionals below */
+		return false;
+	}
+
+	if (!route()->is_selected()) {
+		/* Not selected, can't possibly use selection */
+		return false;
+	}
+
+	if (route()->route_group() && route()->route_group()->is_active() && (route()->route_group()->*method)()) {
+		/* active route group sharing the appropriate property */
+		return false;
+	}
+
+	return true;
+}
+
+void
+RouteUI::gather_selected_routes (std::shared_ptr<RouteList>& rl) const
+{
+	TrackSelection& selected_tracks (ARDOUR_UI::instance()->the_editor().get_selection().tracks);
+
+	for (auto & st : selected_tracks) {
+		RouteTimeAxisView* rtv;
+		RouteUI* rui;
+		if ((rtv = dynamic_cast<RouteTimeAxisView*>(st)) != 0) {
+			if ((rui = dynamic_cast<RouteUI*>(rtv)) != 0) {
+				rl->push_back (rui->route());
+			}
 		}
 	}
 }

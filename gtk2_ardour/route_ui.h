@@ -263,6 +263,9 @@ protected:
 	ARDOUR::SoloMuteRelease* _solo_release;
 	ARDOUR::SoloMuteRelease* _mute_release;
 
+	bool maybe_use_select_as_group (bool (ARDOUR::RouteGroup::*method)() const) const;
+	void gather_selected_routes (std::shared_ptr<ARDOUR::RouteList>& rl) const;
+
 private:
 	void invert_menu_toggled (uint32_t);
 	bool invert_press (GdkEventButton*);
