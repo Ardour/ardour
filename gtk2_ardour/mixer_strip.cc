@@ -73,6 +73,7 @@
 
 #include "widgets/tooltips.h"
 
+#include "ardour_ui.h"
 #include "ardour_window.h"
 #include "automation_controller.h"
 #include "context_menu_helper.h"
@@ -508,7 +509,7 @@ MixerStrip::trim_start_touch (int)
 
 		std::shared_ptr<AutomationControl> control (route()->trim()->gain_control());
 
-		if (maybe_use_select_as_group ()) {
+		if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
 			_touch_control_group.reset (new GainControlGroup (TrimAutomation));
 			_touch_control_group->set_mode (ControlGroup::Relative);
 			_touch_control_group->fill_from_selection (control->session().selection(), control->parameter());

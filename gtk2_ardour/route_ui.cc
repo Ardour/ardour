@@ -566,7 +566,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 				Controllable::GroupControlDisposition gcd;
 				std::shared_ptr<RouteList> rl (new RouteList);
 
-				if (maybe_use_select_as_group ()) {
+				if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
 					gather_selected_routes (rl);
 					gcd = Controllable::NoGroup;
 				} else {
@@ -745,7 +745,7 @@ RouteUI::solo_press(GdkEventButton* ev)
 				std::shared_ptr<RouteList> rl (new RouteList);
 				Controllable::GroupControlDisposition gcd;
 
-				if (maybe_use_select_as_group ()) {
+				if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
 					gather_selected_routes (rl);
 					gcd = Controllable::NoGroup;
 				} else {
@@ -842,7 +842,7 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 				Controllable::GroupControlDisposition gcd;
 				rl.reset (new RouteList);
 
-				if (maybe_use_select_as_group ()) {
+				if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
 					gather_selected_routes (rl);
 					gcd = Controllable::NoGroup;
 				} else {
@@ -2881,36 +2881,6 @@ RouteUI::rename_current_playlist ()
 			(*i)->set_name (name);
 		}
 	}
-}
-
-bool
-RouteUI::maybe_use_select_as_group () const
-{
-	if (!UIConfiguration::instance().get_allow_selection_as_group()) {
-		return false;
-	}
-
-	if (!route()) {
-		/* Shouldn't happen but protects conditionals below */
-		return false;
-	}
-
-	if (!route()->is_selected()) {
-		/* Not selected, can't possibly use selection */
-		return false;
-	}
-
-	if (ARDOUR_UI::instance()->the_editor().get_selection().tracks.size() < 2) {
-		/* only this track selected */
-		return false;
-	}
-
-	if (route()->route_group() && route()->route_group()->is_active() && !route()->route_group()->is_select()) {
-		/* active route group that does not share selection status */
-		return false;
-	}
-
-	return true;
 }
 
 void

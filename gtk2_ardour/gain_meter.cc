@@ -48,6 +48,7 @@
 
 #include "pbd/fastlog.h"
 
+#include "ardour_ui.h"
 #include "gain_meter.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -757,12 +758,10 @@ GainMeterBase::amp_start_touch (int state)
 {
 	assert (_route);
 
-	if (UIConfiguration::instance().get_allow_selection_as_group()) {
-		if (_route->is_selected() && (!_route->route_group() || !_route->route_group()->is_gain())) {
-			_touch_control_group.reset (new GainControlGroup ());
-			_touch_control_group->set_mode (ControlGroup::Relative);
-			_touch_control_group->fill_from_selection (_control->session().selection(), _control->parameter());
-		}
+	if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
+		_touch_control_group.reset (new GainControlGroup ());
+		_touch_control_group->set_mode (ControlGroup::Relative);
+		_touch_control_group->fill_from_selection (_control->session().selection(), _control->parameter());
 	}
 
 	_control->start_touch (timepos_t (_control->session().transport_sample()));
