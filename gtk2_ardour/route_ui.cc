@@ -1592,11 +1592,18 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 
 			if (model == view) {
 
-				/* flip just this route */
-
 				std::shared_ptr<RouteList> rl (new RouteList);
-				rl->push_back (_route);
-				_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_isolate_control), view ? 0.0 : 1.0, Controllable::NoGroup);
+				Controllable::GroupControlDisposition gcd;
+
+				if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
+					gather_selected_routes (rl);
+					gcd = Controllable::NoGroup;
+				} else {
+					rl->push_back (route());
+					gcd = Controllable::UseGroup;
+				}
+
+				_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_isolate_control), view ? 0.0 : 1.0, gcd);
 			}
 		}
 	}
@@ -1615,26 +1622,29 @@ RouteUI::solo_safe_button_release (GdkEventButton* ev)
 	bool model = _route->solo_safe_control()->solo_safe();
 
 	if (ev->button == 1) {
+
 		if (Keyboard::modifier_state_equals (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::TertiaryModifier))) {
+
 			std::shared_ptr<RouteList const> rl (_session->get_routes());
-			if (model) {
-				/* disable solo safe for all routes */
-				DisplaySuspender ds;
-				for (auto const& i : *rl) {
-					i->solo_safe_control()->set_value (0.0, Controllable::NoGroup);
-				}
-			} else {
-				/* enable solo safe for all routes */
-				DisplaySuspender ds;
-				for (auto const& i : *rl) {
-					i->solo_safe_control()->set_value (1.0, Controllable::NoGroup);
-				}
-			}
-		}
-		else {
+			/* toggle solo safe for all routes */
+			_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_safe_control), model ? 0.0 : 1.0, Controllable::NoGroup);
+
+		} else {
+
 			if (model == view) {
-				/* flip just this route */
-				_route->solo_safe_control()->set_value (view ? 0.0 : 1.0, Controllable::NoGroup);
+
+				std::shared_ptr<RouteList> rl (new RouteList);
+				Controllable::GroupControlDisposition gcd;
+
+				if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
+					gather_selected_routes (rl);
+					gcd = Controllable::NoGroup;
+				} else {
+					rl->push_back (route());
+					gcd = Controllable::UseGroup;
+				}
+
+				_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_safe_control), view ? 0.0 : 1.0, gcd);
 			}
 		}
 	}
