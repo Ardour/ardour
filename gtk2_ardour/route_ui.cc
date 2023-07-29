@@ -952,9 +952,19 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 		rl->push_back (route());
 		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, GROUP_ACTION);
 	} else {
+
 		std::shared_ptr<RouteList> rl (new RouteList);
-		rl->push_back (route());
-		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, Controllable::UseGroup);
+		Controllable::GroupControlDisposition gcd;
+
+		if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
+			gather_selected_routes (rl);
+			gcd = Controllable::NoGroup;
+		} else {
+			rl->push_back (route());
+			gcd = Controllable::UseGroup;
+		}
+
+		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, gcd);
 	}
 
 	return false;
