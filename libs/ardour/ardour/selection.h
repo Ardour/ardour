@@ -73,6 +73,8 @@ class LIBARDOUR_API CoreSelection : public PBD::Stateful {
 	typedef std::vector<StripableAutomationControl> StripableAutomationControls;
 
 	void get_stripables (StripableAutomationControls&) const;
+	void get_stripables_for_op (StripableList&, std::shared_ptr<Stripable> base, bool (RouteGroup::*group_predicate)() const) const;
+	void get_stripables_for_op (std::shared_ptr<StripableList>, std::shared_ptr<Stripable> base, bool (RouteGroup::*group_predicate)() const) const;
 
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);

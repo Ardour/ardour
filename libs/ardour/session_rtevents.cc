@@ -130,25 +130,25 @@ Session::rt_set_controls (std::shared_ptr<WeakControlList> cl, double val, Contr
 void
 Session::prepare_momentary_solo (SoloMuteRelease* smr, bool exclusive, std::shared_ptr<Route> route)
 {
-	std::shared_ptr<RouteList> routes_on (new RouteList);
-	std::shared_ptr<RouteList> routes_off (new RouteList);
+	std::shared_ptr<StripableList> routes_on (new StripableList);
+	std::shared_ptr<StripableList> routes_off (new StripableList);
 	std::shared_ptr<RouteList const> routes = get_routes();
 
-	for (auto const& i : *routes) {
+	for (auto const & r : *routes) {
 #ifdef MIXBUS
-		if (route && (0 == route->mixbus()) != (0 == i->mixbus ())) {
+		if (route && (0 == route->mixbus()) != (0 == r->mixbus ())) {
 			continue;
 		}
 #endif
-		if (i->soloed ()) {
-			routes_on->push_back (i);
+		if (r->soloed ()) {
+			routes_on->push_back (r);
 		} else if (smr) {
-			routes_off->push_back (i);
+			routes_off->push_back (r);
 		}
 	}
 
 	if (exclusive) {
-		set_controls (route_list_to_control_list (routes_on, &Stripable::solo_control), false, Controllable::UseGroup);
+		set_controls (stripable_list_to_control_list (routes_on, &Stripable::solo_control), false, Controllable::UseGroup);
 	}
 
 	if (smr) {

@@ -218,11 +218,11 @@ ControlGroup::set_group_value (std::shared_ptr<AutomationControl> control, doubl
 }
 
 void
-ControlGroup::fill_from_selection (CoreSelection const & sel, Evoral::Parameter const & p)
+ControlGroup::fill_from_selection_or_group (std::shared_ptr<Stripable> target, CoreSelection const & sel, Evoral::Parameter const & p, bool (RouteGroup::*group_predicate)() const)
 {
-	CoreSelection::StripableAutomationControls stripables;
+	StripableList sl;
 
-	sel.get_stripables (stripables);
+	sel.get_stripables_for_op (sl, target, group_predicate);
 
 	/* Very unfortunate that gain control is special cased. Routes do not
 	 * call ::add_control() for their gain control, but instead pass it to
@@ -231,24 +231,24 @@ ControlGroup::fill_from_selection (CoreSelection const & sel, Evoral::Parameter 
 
 	switch (p.type()) {
 	case GainAutomation:
-		for (auto & s : stripables) {
-			std::shared_ptr<AutomationControl> ac = s.stripable->gain_control ();
+		for (auto & s : sl) {
+			std::shared_ptr<AutomationControl> ac = s->gain_control ();
 			if (ac) {
 				add_control (ac, true);
 			}
 		}
 		break;
 	case TrimAutomation:
-		for (auto & s : stripables) {
-			std::shared_ptr<AutomationControl> ac = s.stripable->trim_control ();
+		for (auto & s : sl) {
+			std::shared_ptr<AutomationControl> ac = s->trim_control ();
 			if (ac) {
 				add_control (ac, true);
 			}
 		}
 		break;
 	default:
-		for (auto & s : stripables) {
-			std::shared_ptr<AutomationControl> ac = s.stripable->automation_control (p, true);
+		for (auto & s : sl) {
+			std::shared_ptr<AutomationControl> ac = s->automation_control (p, true);
 			if (ac) {
 				add_control (ac, true);
 			}
