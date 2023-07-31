@@ -756,9 +756,7 @@ GainMeterBase::meter_point_clicked (MeterPoint mp)
 void
 GainMeterBase::amp_start_touch (int state)
 {
-	assert (_route);
-
-	if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
+	if (_route && ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
 		_touch_control_group.reset (new GainControlGroup ());
 		_touch_control_group->set_mode (ControlGroup::Relative);
 		_touch_control_group->fill_from_selection_or_group (_route, _control->session().selection(), _control->parameter(), &RouteGroup::is_gain);
