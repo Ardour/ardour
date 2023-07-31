@@ -512,7 +512,7 @@ MixerStrip::trim_start_touch (int)
 		if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
 			_touch_control_group.reset (new GainControlGroup (TrimAutomation));
 			_touch_control_group->set_mode (ControlGroup::Relative);
-			_touch_control_group->fill_from_selection (control->session().selection(), control->parameter());
+			_touch_control_group->fill_from_selection_or_group (_route, control->session().selection(), control->parameter(), &RouteGroup::is_gain);
 		}
 
 		control->start_touch (timepos_t (_session->transport_sample()));

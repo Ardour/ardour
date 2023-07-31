@@ -53,6 +53,7 @@
 #include "ardour/phase_control.h"
 #include "ardour/send.h"
 #include "ardour/route.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/session_playlists.h"
 #include "ardour/solo_mute_release.h"
@@ -510,11 +511,11 @@ RouteUI::mute_press (GdkEventButton* ev)
 				 * on a copy.
 				 */
 
-				std::shared_ptr<RouteList> copy (new RouteList);
+				std::shared_ptr<StripableList> copy (new StripableList);
 
-				*copy = *_session->get_routes ();
+				*copy = _session->get_stripables ();
 
-				for (RouteList::iterator i = copy->begin(); i != copy->end(); ) {
+				for (StripableList::iterator i = copy->begin(); i != copy->end(); ) {
 					if ((*i)->is_master() || (*i)->is_monitor()) {
 						i = copy->erase (i);
 					} else {
@@ -526,7 +527,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 					_mute_release->set (copy);
 				}
 
-				_session->set_controls (route_list_to_control_list (copy, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, Controllable::UseGroup);
+				_session->set_controls (stripable_list_to_control_list (copy, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, Controllable::NoGroup);
 
 			} else if (Keyboard::is_group_override_event (ev)) {
 
@@ -543,46 +544,32 @@ RouteUI::mute_press (GdkEventButton* ev)
 				   NOTE: Primary-button2 is MIDI learn.
 				*/
 
-				std::shared_ptr<RouteList> rl;
 
 				if (ev->button == 1) {
-
-					rl.reset (new RouteList);
-					rl->push_back (_route);
+					std::shared_ptr<StripableList> sl (new StripableList);
+					sl->push_back (_route);
 
 					if (_mute_release) {
-						_mute_release->set (rl);
+						_mute_release->set (sl);
 					}
 
 					std::shared_ptr<MuteControl> mc = _route->mute_control();
 					mc->start_touch (timepos_t (_session->audible_sample ()));
-					_session->set_controls (route_list_to_control_list (rl, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, Controllable::InverseGroup);
+					_session->set_controls (stripable_list_to_control_list (sl, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, Controllable::InverseGroup);
 				}
 
 			} else {
 
 				/* plain click applies change to this route */
 
-				Controllable::GroupControlDisposition gcd;
-				std::shared_ptr<RouteList> rl (new RouteList);
-
-				if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
-					gather_selected_routes (rl);
-					gcd = Controllable::NoGroup;
-				} else {
-					rl->push_back (route());
-					gcd = Controllable::UseGroup;
-				}
+				std::shared_ptr<StripableList> sl (new StripableList);
+				_session->selection().get_stripables_for_op (sl, _route,  &RouteGroup::is_mute);
 
 				if (_mute_release) {
-					_mute_release->set (rl);
+					_mute_release->set (sl);
 				}
 
-				_session->set_controls (route_list_to_control_list (rl, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, gcd);
-
-				// std::shared_ptr<MuteControl> mc = _route->mute_control();
-				// mc->start_touch (timepos_t (_session->audible_sample ()));
-				// mc->set_value (!_route->muted_by_self(), Controllable::UseGroup);
+				_session->set_controls (stripable_list_to_control_list (sl, &Stripable::mute_control), _route->muted_by_self() ? 0.0 : 1.0, Controllable::NoGroup);
 			}
 		}
 	}
@@ -682,11 +669,15 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 				/* Primary-Tertiary-click applies change to all routes */
 
+				std::shared_ptr<StripableList> sl (new StripableList);
+				_session->get_stripables (*sl, PresentationInfo::Route);
+
+
 				if (_solo_release) {
-					_solo_release->set (_session->get_routes ());
+					_solo_release->set (sl);
 				}
 
-				_session->set_controls (route_list_to_control_list (_session->get_routes(), &Stripable::solo_control), !_route->solo_control()->get_value(), Controllable::UseGroup);
+				_session->set_controls (stripable_list_to_control_list (sl, &Stripable::solo_control), !_route->solo_control()->get_value(), Controllable::NoGroup);
 
 			} else if (Keyboard::modifier_state_contains (ev->state, Keyboard::ModifierMask (Keyboard::PrimaryModifier|Keyboard::SecondaryModifier)) || (!_route->self_soloed() && Config->get_exclusive_solo ())) {
 
@@ -742,22 +733,15 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 				/* click: solo this route */
 
-				std::shared_ptr<RouteList> rl (new RouteList);
-				Controllable::GroupControlDisposition gcd;
+				std::shared_ptr<StripableList> sl (new StripableList);
 
-				if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
-					gather_selected_routes (rl);
-					gcd = Controllable::NoGroup;
-				} else {
-					rl->push_back (route());
-					gcd = Controllable::UseGroup;
-				}
+				_session->selection().get_stripables_for_op (sl, _route, &RouteGroup::is_solo);
 
 				if (_solo_release) {
-					_solo_release->set (rl);
+					_solo_release->set (sl);
 				}
 
-				_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_control), !_route->self_soloed(), gcd);
+				_session->set_controls (stripable_list_to_control_list (sl, &Stripable::solo_control), !_route->self_soloed(), Controllable::NoGroup);
 			}
 		}
 	}
@@ -837,24 +821,10 @@ RouteUI::rec_enable_press(GdkEventButton* ev)
 		} else {
 
 			if (ev->button == 1) {
-
-				std::shared_ptr<RouteList> rl;
-				Controllable::GroupControlDisposition gcd;
-				rl.reset (new RouteList);
-
-				if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
-					gather_selected_routes (rl);
-					gcd = Controllable::NoGroup;
-				} else {
-					rl->push_back (route());
-					gcd = Controllable::UseGroup;
-				}
-
-				_session->set_controls (route_list_to_control_list (rl, &Stripable::rec_enable_control), !track()->rec_enable_control()->get_value(), gcd);
+				StripableList sl;
+				_session->selection().get_stripables_for_op (sl, _route, &RouteGroup::is_recenable);
+				_session->set_controls (stripable_list_to_control_list (sl, &Stripable::rec_enable_control), !track()->rec_enable_control()->get_value(), Controllable::NoGroup);
 			}
-
-			// std::shared_ptr<Track> trk = track();
-			// trk->rec_enable_control()->set_value (!trk->rec_enable_control()->get_value(), Controllable::UseGroup);
 		}
 	}
 
@@ -953,18 +923,10 @@ RouteUI::monitor_release (GdkEventButton* ev, MonitorChoice monitor_choice)
 		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, GROUP_ACTION);
 	} else {
 
-		std::shared_ptr<RouteList> rl (new RouteList);
-		Controllable::GroupControlDisposition gcd;
+		StripableList sl;
+		_session->selection().get_stripables_for_op (sl, _route, &RouteGroup::is_monitoring);
+		_session->set_controls (stripable_list_to_control_list (sl, &Stripable::monitoring_control), (double) mc, Controllable::NoGroup);
 
-		if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
-			gather_selected_routes (rl);
-			gcd = Controllable::NoGroup;
-		} else {
-			rl->push_back (route());
-			gcd = Controllable::UseGroup;
-		}
-
-		_session->set_controls (route_list_to_control_list (rl, &Stripable::monitoring_control), (double) mc, gcd);
 	}
 
 	return false;
@@ -1591,19 +1553,9 @@ RouteUI::solo_isolate_button_release (GdkEventButton* ev)
 		} else {
 
 			if (model == view) {
-
-				std::shared_ptr<RouteList> rl (new RouteList);
-				Controllable::GroupControlDisposition gcd;
-
-				if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
-					gather_selected_routes (rl);
-					gcd = Controllable::NoGroup;
-				} else {
-					rl->push_back (route());
-					gcd = Controllable::UseGroup;
-				}
-
-				_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_isolate_control), view ? 0.0 : 1.0, gcd);
+				StripableList sl;
+				_session->selection().get_stripables_for_op (sl, _route, &RouteGroup::is_solo);
+				_session->set_controls (stripable_list_to_control_list (sl, &Stripable::solo_isolate_control), view ? 0.0 : 1.0, Controllable::NoGroup);
 			}
 		}
 	}
@@ -1632,19 +1584,9 @@ RouteUI::solo_safe_button_release (GdkEventButton* ev)
 		} else {
 
 			if (model == view) {
-
-				std::shared_ptr<RouteList> rl (new RouteList);
-				Controllable::GroupControlDisposition gcd;
-
-				if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
-					gather_selected_routes (rl);
-					gcd = Controllable::NoGroup;
-				} else {
-					rl->push_back (route());
-					gcd = Controllable::UseGroup;
-				}
-
-				_session->set_controls (route_list_to_control_list (rl, &Stripable::solo_safe_control), view ? 0.0 : 1.0, gcd);
+				StripableList sl;
+				_session->selection().get_stripables_for_op (sl, _route, &RouteGroup::is_solo);
+				_session->set_controls (stripable_list_to_control_list (sl, &Stripable::solo_safe_control), view ? 0.0 : 1.0, Controllable::NoGroup);
 			}
 		}
 	}
@@ -2899,22 +2841,6 @@ RouteUI::rename_current_playlist ()
 		vector<std::shared_ptr<Playlist> > playlists_gr = _session->playlists()->playlists_for_pgroup (pl->pgroup_id());
 		for (vector<std::shared_ptr<Playlist> >::iterator i = playlists_gr.begin(); i != playlists_gr.end(); ++i) {
 			(*i)->set_name (name);
-		}
-	}
-}
-
-void
-RouteUI::gather_selected_routes (std::shared_ptr<RouteList>& rl) const
-{
-	TrackSelection& selected_tracks (ARDOUR_UI::instance()->the_editor().get_selection().tracks);
-
-	for (auto & st : selected_tracks) {
-		RouteTimeAxisView* rtv;
-		RouteUI* rui;
-		if ((rtv = dynamic_cast<RouteTimeAxisView*>(st)) != 0) {
-			if ((rui = dynamic_cast<RouteUI*>(rtv)) != 0) {
-				rl->push_back (rui->route());
-			}
 		}
 	}
 }

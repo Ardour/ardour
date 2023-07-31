@@ -761,7 +761,7 @@ GainMeterBase::amp_start_touch (int state)
 	if (ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
 		_touch_control_group.reset (new GainControlGroup ());
 		_touch_control_group->set_mode (ControlGroup::Relative);
-		_touch_control_group->fill_from_selection (_control->session().selection(), _control->parameter());
+		_touch_control_group->fill_from_selection_or_group (_route, _control->session().selection(), _control->parameter(), &RouteGroup::is_gain);
 	}
 
 	_control->start_touch (timepos_t (_control->session().transport_sample()));
