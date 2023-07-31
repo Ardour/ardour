@@ -126,8 +126,19 @@ template<typename T> std::shared_ptr<ControlList> route_list_to_control_list (st
 
 template<typename T> std::shared_ptr<ControlList> stripable_list_to_control_list (StripableList& sl, std::shared_ptr<T> (Stripable::*get_control)() const) {
 	std::shared_ptr<ControlList> cl (new ControlList);
-	for (StripableList::const_iterator s = sl.begin(); s != sl.end(); ++s) {
-		std::shared_ptr<AutomationControl> ac = ((*s).get()->*get_control)();
+	for (auto const & s : sl) {
+		std::shared_ptr<AutomationControl> ac = (s.get()->*get_control)();
+		if (ac) {
+			cl->push_back (ac);
+		}
+	}
+	return cl;
+}
+
+template<typename T> std::shared_ptr<ControlList> stripable_list_to_control_list (std::shared_ptr<StripableList const> sl, std::shared_ptr<T> (Stripable::*get_control)() const) {
+	std::shared_ptr<ControlList> cl (new ControlList);
+	for (auto const & s : *sl) {
+		std::shared_ptr<AutomationControl> ac = (s.get()->*get_control)();
 		if (ac) {
 			cl->push_back (ac);
 		}
