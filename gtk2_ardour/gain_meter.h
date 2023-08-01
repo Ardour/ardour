@@ -58,6 +58,7 @@ namespace ARDOUR {
 	class ControlGroup;
 	class GainControl;
 	class Session;
+	class Stripable;
 	class Route;
 	class RouteGroup;
 	class PeakMeter;
@@ -81,7 +82,7 @@ public:
 	GainMeterBase (ARDOUR::Session*, bool horizontal, int, int);
 	virtual ~GainMeterBase ();
 
-	virtual void set_controls (std::shared_ptr<ARDOUR::Route> route,
+	virtual void set_controls (std::shared_ptr<ARDOUR::Stripable> stripable,
 	                           std::shared_ptr<ARDOUR::PeakMeter> meter,
 	                           std::shared_ptr<ARDOUR::Amp> amp,
 	                           std::shared_ptr<ARDOUR::GainControl> control);
@@ -123,7 +124,7 @@ protected:
 	friend class MeterStrip;
 	friend class RouteTimeAxisView;
 	friend class VCAMasterStrip;
-	std::shared_ptr<ARDOUR::Route> _route;
+	std::shared_ptr<ARDOUR::Stripable> _stripable;
 	std::shared_ptr<ARDOUR::PeakMeter> _meter;
 	std::shared_ptr<ARDOUR::Amp> _amp;
 	std::shared_ptr<ARDOUR::GainControl> _control;
@@ -211,6 +212,8 @@ protected:
 	ARDOUR::DataType _data_type;
 	ARDOUR::ChanCount _previous_amp_output_streams;
 
+	std::shared_ptr<ARDOUR::Route> route();
+
 private:
 
 	bool level_meter_button_press (GdkEventButton *);
@@ -226,7 +229,7 @@ class GainMeter : public GainMeterBase, public Gtk::VBox
          GainMeter (ARDOUR::Session*, int);
 	virtual ~GainMeter ();
 
-	virtual void set_controls (std::shared_ptr<ARDOUR::Route> route,
+	virtual void set_controls (std::shared_ptr<ARDOUR::Stripable> stripable,
 	                           std::shared_ptr<ARDOUR::PeakMeter> meter,
 	                           std::shared_ptr<ARDOUR::Amp> amp,
 	                           std::shared_ptr<ARDOUR::GainControl> control);

@@ -170,7 +170,7 @@ VCATimeAxisView::set_vca (std::shared_ptr<VCA> v)
 	StripableTimeAxisView::set_stripable (v);
 	_vca = v;
 
-	gain_meter.set_controls (std::shared_ptr<Route>(),
+	gain_meter.set_controls (v,
 	                         std::shared_ptr<PeakMeter>(),
 	                         std::shared_ptr<Amp>(),
 	                         _vca->gain_control());
