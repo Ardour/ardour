@@ -623,6 +623,8 @@ CoreSelection::get_stripables_for_op (std::shared_ptr<StripableList> sl, std::sh
 void
 CoreSelection::get_stripables_for_op (StripableList& sl, std::shared_ptr<Stripable> target, bool (RouteGroup::*group_predicate)() const) const
 {
+	assert (target);
+
 	std::shared_ptr<Route> r (std::dynamic_pointer_cast<Route> (target));
 
 	if (_stripables.empty()) {
@@ -650,6 +652,7 @@ CoreSelection::get_stripables_for_op (StripableList& sl, std::shared_ptr<Stripab
 	} else {
 
 		if (target->is_selected()) {
+
 			/* Use full selection */
 
 			StripableAutomationControls sc;
