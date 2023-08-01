@@ -218,12 +218,8 @@ ControlGroup::set_group_value (std::shared_ptr<AutomationControl> control, doubl
 }
 
 void
-ControlGroup::fill_from_selection_or_group (std::shared_ptr<Stripable> target, CoreSelection const & sel, Evoral::Parameter const & p, bool (RouteGroup::*group_predicate)() const)
+ControlGroup::fill_from_stripable_list (StripableList& sl, Evoral::Parameter const & p)
 {
-	StripableList sl;
-
-	sel.get_stripables_for_op (sl, target, group_predicate);
-
 	/* Very unfortunate that gain control is special cased. Routes do not
 	 * call ::add_control() for their gain control, but instead pass it to
 	 * their Amp processor which takes a certain kind of ownership of it.

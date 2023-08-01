@@ -49,7 +49,7 @@ class LIBARDOUR_API ControlGroup : public std::enable_shared_from_this<ControlGr
 		Inverted = 0x2,
 	};
 
-	void fill_from_selection_or_group (std::shared_ptr<Stripable>, CoreSelection const &, Evoral::Parameter const &, bool (RouteGroup::*group_predicate)() const);
+	void fill_from_stripable_list (StripableList&, Evoral::Parameter const &);
 
 	int add_control (std::shared_ptr<AutomationControl>, bool push = false);
 	int remove_control (std::shared_ptr<AutomationControl>, bool pop = false);
