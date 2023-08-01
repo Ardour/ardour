@@ -37,6 +37,7 @@
 #include "ardour/control_group.h"
 #include "ardour/logmeter.h"
 #include "ardour/route_group.h"
+#include "ardour/selection.h"
 #include "ardour/session_route.h"
 #include "ardour/dB.h"
 #include "ardour/utils.h"
@@ -756,10 +757,14 @@ GainMeterBase::meter_point_clicked (MeterPoint mp)
 void
 GainMeterBase::amp_start_touch (int state)
 {
-	if (_route && ARDOUR_UI::instance()->maybe_use_select_as_group (*_route)) {
+	if (_route) {
+		StripableList sl;
+
+		_session->selection ().get_stripables_for_op (sl, _route, &RouteGroup::is_gain);
+
 		_touch_control_group.reset (new GainControlGroup ());
 		_touch_control_group->set_mode (ControlGroup::Relative);
-		_touch_control_group->fill_from_selection_or_group (_route, _control->session().selection(), _control->parameter(), &RouteGroup::is_gain);
+		_touch_control_group->fill_from_stripable_list (sl, _control->parameter());
 	}
 
 	_control->start_touch (timepos_t (_control->session().transport_sample()));

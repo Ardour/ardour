@@ -212,28 +212,3 @@ ARDOUR_UI::record_state_changed ()
 	}
 }
 
-bool
-ARDOUR_UI::maybe_use_select_as_group (Route const & route) const
-{
-	if (!UIConfiguration::instance().get_allow_selection_as_group()) {
-		return false;
-	}
-
-	if (!route.is_selected()) {
-		/* Not selected, can't possibly use selection */
-		return false;
-	}
-
-	if (editor->get_selection().tracks.size() < 2) {
-		/* only this track selected */
-		return false;
-	}
-
-	if (route.route_group() && route.route_group()->is_active() && !route.route_group()->is_select()) {
-		/* active route group that does not share selection status */
-		return false;
-	}
-
-	return true;
-}
-

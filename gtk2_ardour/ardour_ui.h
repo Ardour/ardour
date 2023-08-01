@@ -399,8 +399,6 @@ public:
 
 	void gui_idle_handler ();
 
-	bool maybe_use_select_as_group (ARDOUR::Route const&) const;
-
 protected:
 	friend class PublicEditor;
 
