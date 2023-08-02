@@ -3153,23 +3153,6 @@ These settings will only take effect after %1 is restarted.\n\
 	/* EDITOR *******************************************************************/
 
 
-	bo = new BoolOption (
-		"allow-selection-as-group",
-		_("Allow selection to function as a temporary track/bus group"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_selection_as_group),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_selection_as_group)
-		);
-
-	add_option (_("Editor"), bo);
-
-	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-	                                    _("<b>When enabled</b>, operations like gain control, solo, mute, record-enable etc."
-	                                      "will be applied to the current track/bus selection (if the target track is selected).\n\n"
-	                                      "This will not occur if the track/bus is a member of a group that already shares the"
-	                                      "relevant control.\n\n"
-	                                      "<b>When disabled</b> gain control, solo, mute etc. will apply only to the target track"
-	                                      "unless it is a member of an active group sharing the relevant control"));
-
 	add_option (_("Editor"), new OptionEditorHeading (_("Scroll and Zoom Behaviors")));
 
 	if (!Profile->get_mixbus()) {

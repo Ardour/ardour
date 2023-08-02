@@ -163,8 +163,3 @@ UI_CONFIG_VARIABLE (Editing::TempoEditBehavior, tempo_edit_behavior, "tempo-edit
 /* these are visibility-type selections in the New Track dialog that we should make persistent for the user's choices */
 UI_CONFIG_VARIABLE (bool, show_on_cue_page, "show-on-cue-page", true)
 UI_CONFIG_VARIABLE (uint32_t, insert_at_position, "insert-at-position", 3)
-#ifdef MIXBUS
-UI_CONFIG_VARIABLE (bool, allow_selection_as_group, "allow-selection-as-group", true)
-#else
-UI_CONFIG_VARIABLE (bool, allow_selection_as_group, "allow-selection-as-group", false)
-#endif
