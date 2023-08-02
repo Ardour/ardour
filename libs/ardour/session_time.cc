@@ -302,6 +302,8 @@ Session::any_duration_to_samples (samplepos_t position, AnyTime const & duration
 void
 Session::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
 {
+	std::cerr << "GCTD from " << from << " to " << to << std::endl;
+
 	{
 		std::shared_ptr<RouteList const> rl (routes.reader());
 

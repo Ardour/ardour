@@ -4882,6 +4882,10 @@ DomainSwapInformation::undo ()
 		p->set_time_domain (previous);
 	}
 
+	for (auto & tt : time_things) {
+		tt->swap_domain (previous == AudioTime ? BeatTime : AudioTime, previous);
+	}
+
 	clear ();
 }
 

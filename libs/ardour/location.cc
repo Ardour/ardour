@@ -770,8 +770,12 @@ Location::globally_change_time_domain (Temporal::TimeDomain from, Temporal::Time
 
 	if (_start.time_domain() == from) {
 
+		std::cerr << "switching location [" << name() << "] from " << _start;
+
 		_start.set_time_domain (to);
 		_end.set_time_domain (to);
+
+		std::cerr << " to " << _start << std::endl;
 
 		domain_swap->add (_start);
 		domain_swap->add (_end);

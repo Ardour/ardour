@@ -25,6 +25,7 @@
 #define __ardour_midi_model_h__
 
 #include <deque>
+#include <map>
 #include <queue>
 #include <utility>
 
@@ -252,6 +253,9 @@ public:
 		PatchChangePtr unmarshal_patch_change (XMLNode *);
 	};
 
+	void create_mapping_stash (Temporal::Beats const & offset);
+	void rebuild_from_mapping_stash (Temporal::Beats const & offset);
+
 	/** Start a new NoteDiff command.
 	 *
 	 * This has no side-effects on the model or Session, the returned command
@@ -359,6 +363,10 @@ private:
 
 	MidiSource& _midi_source;
 	InsertMergePolicy _insert_merge_policy;
+
+	typedef std::map<void*,superclock_t> TempoMappingStash;
+	TempoMappingStash tempo_mapping_stash;
+
 };
 
 } /* namespace ARDOUR */

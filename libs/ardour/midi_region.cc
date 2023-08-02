@@ -612,3 +612,25 @@ MidiRegion::merge (std::shared_ptr<MidiRegion const> other_region)
 
 	set_length (max (length(), position().distance (other_region->end())));
 }
+
+void
+MidiRegion::swap_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+{
+	if (from == Temporal::BeatTime) {
+		model()->create_mapping_stash (source_position().beats());
+	} else {
+		model()->rebuild_from_mapping_stash (source_position().beats());
+
+		_model_changed_connection.disconnect ();
+		model()->ContentsChanged ();
+		model()->ContentsChanged.connect_same_thread (_model_changed_connection, boost::bind (&MidiRegion::model_contents_changed, this));
+	}
+}
+
+void
+MidiRegion::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+{
+	Region::globally_change_time_domain (from, to);
+	swap_domain (from, to);
+	Temporal::domain_swap->add (*this);
+}

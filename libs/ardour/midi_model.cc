@@ -1772,3 +1772,101 @@ MidiModel::control_list_marked_dirty ()
 
 	ContentsChanged (); /* EMIT SIGNAL */
 }
+
+void
+MidiModel::create_mapping_stash (Temporal::Beats const & src_pos_offset)
+{
+	using namespace Evoral;
+	using namespace Temporal;
+
+	TempoMap::SharedPtr tmap (TempoMap::use());
+
+	if (!tempo_mapping_stash.empty()) {
+		return;
+	}
+
+	for (auto const & n : notes()) {
+		Event<Beats>& on (n->on_event());
+		superclock_t audio_time = tmap->superclock_at (src_pos_offset + on.time());
+		tempo_mapping_stash.insert (std::make_pair (&on, audio_time));
+
+		Event<Beats>& off (n->off_event());
+		audio_time = tmap->superclock_at (src_pos_offset + off.time());
+		tempo_mapping_stash.insert (std::make_pair (&off, audio_time));
+
+	}
+
+	for (auto const & s : sysexes()) {
+		superclock_t audio_time = tmap->superclock_at (src_pos_offset + s->time());
+		tempo_mapping_stash.insert (std::make_pair ((void*)s.get(), audio_time));
+	}
+
+	for (uint8_t chan = 0; chan < 16; ++chan) {
+		for (auto const & p : pitches(chan)) {
+			superclock_t audio_time = tmap->superclock_at (src_pos_offset + p->time());
+			tempo_mapping_stash.insert (std::make_pair ((void*) &p, audio_time));
+		}
+	}
+
+	for (auto & c : controls()) {
+		std::shared_ptr<Evoral::ControlList> l = c.second->list();
+		if (l) {
+			l->set_time_domain (AudioTime);
+		}
+	}
+}
+
+void
+MidiModel::rebuild_from_mapping_stash (Temporal::Beats const & src_pos_offset)
+{
+	using namespace Evoral;
+	using namespace Temporal;
+
+	if (tempo_mapping_stash.empty()) {
+		return;
+	}
+
+	TempoMap::SharedPtr tmap (TempoMap::use());
+
+	for (auto & n : notes()) {
+
+		Event<Beats>& on (n->on_event());
+		Event<Beats>& off (n->off_event());
+
+		TempoMappingStash::iterator tms (tempo_mapping_stash.find (&on));
+		assert (tms != tempo_mapping_stash.end());
+		Beats beat_time (tmap->quarters_at_superclock (tms->second) - src_pos_offset);
+		on.set_time (beat_time);
+
+		tms = tempo_mapping_stash.find (&off);
+		assert (tms != tempo_mapping_stash.end());
+		beat_time = tmap->quarters_at_superclock (tms->second) - src_pos_offset;
+		off.set_time (beat_time);
+
+	}
+
+	for (auto & s : sysexes()) {
+		TempoMappingStash::iterator tms (tempo_mapping_stash.find ((void*) &s));
+		assert (tms != tempo_mapping_stash.end());
+		Beats beat_time (tmap->quarters_at_superclock (tms->second) - src_pos_offset);
+		s->set_time (beat_time);
+	}
+
+	for (uint8_t chan = 0; chan < 16; ++chan) {
+		for (auto & p : pitches(chan)) {
+			TempoMappingStash::iterator tms (tempo_mapping_stash.find ((void*) &p));
+			assert (tms != tempo_mapping_stash.end());
+			Beats beat_time (tmap->quarters_at_superclock (tms->second) - src_pos_offset);
+			p->set_time (beat_time);
+		}
+	}
+
+	for (auto & c : controls()) {
+		std::shared_ptr<Evoral::ControlList> l = c.second->list();
+		if (l) {
+			l->set_time_domain (BeatTime);
+		}
+	}
+
+	tempo_mapping_stash.clear ();
+}

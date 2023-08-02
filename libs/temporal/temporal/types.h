@@ -124,6 +124,11 @@ enum RoundMode {
 
 extern void setup_enum_writer ();
 
+struct LIBTEMPORAL_API TimeThing {
+	virtual ~TimeThing() {}
+	virtual void swap_domain (Temporal::TimeDomain from, Temporal::TimeDomain to) = 0;
+};
+
 }
 
 std::ostream& operator<< (std::ostream& o, Temporal::ratio_t const & r);

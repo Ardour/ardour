@@ -27,6 +27,7 @@
 
 #include "temporal/beats.h"
 #include "temporal/range.h"
+#include "temporal/types.h"
 
 #include "pbd/string_convert.h"
 
@@ -54,7 +55,7 @@ class ThawList;
 
 template<typename T> class MidiRingBuffer;
 
-class LIBARDOUR_API MidiRegion : public Region
+class LIBARDOUR_API MidiRegion : public Region, public Temporal::TimeThing
 {
   public:
 	~MidiRegion();
@@ -115,6 +116,9 @@ class LIBARDOUR_API MidiRegion : public Region
 	                  timepos_t const &               read_start,
 	                  timecnt_t const &               read_length,
 	                  MidiChannelFilter*              filter) const;
+
+	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+	void swap_domain (Temporal::TimeDomain, Temporal::TimeDomain);
 
   protected:
 

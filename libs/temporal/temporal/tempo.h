@@ -1273,6 +1273,7 @@ class LIBTEMPORAL_API DomainSwapInformation {
 
 	void add (timecnt_t& t) { counts.push_back (&t); }
 	void add (timepos_t& p) { positions.push_back (&p); }
+	void add (TimeThing& tt) { time_things.push_back (&tt); }
 	void clear ();
 
    private:
@@ -1280,6 +1281,7 @@ class LIBTEMPORAL_API DomainSwapInformation {
 
 	std::vector<timecnt_t*> counts;
 	std::vector<timepos_t*> positions;
+	std::vector<TimeThing*> time_things;
 	TimeDomain previous;
 
 	void undo ();
