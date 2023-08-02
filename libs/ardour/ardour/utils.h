@@ -124,8 +124,8 @@ template<typename T> std::shared_ptr<AutomationControlList> route_list_to_contro
 	return cl;
 }
 
-template<typename T> std::shared_ptr<ControlList> stripable_list_to_control_list (StripableList& sl, std::shared_ptr<T> (Stripable::*get_control)() const) {
-	std::shared_ptr<ControlList> cl (new ControlList);
+template<typename T> std::shared_ptr<AutomationControlList> stripable_list_to_control_list (StripableList& sl, std::shared_ptr<T> (Stripable::*get_control)() const) {
+	std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 	for (auto const & s : sl) {
 		std::shared_ptr<AutomationControl> ac = (s.get()->*get_control)();
 		if (ac) {
@@ -135,8 +135,8 @@ template<typename T> std::shared_ptr<ControlList> stripable_list_to_control_list
 	return cl;
 }
 
-template<typename T> std::shared_ptr<ControlList> stripable_list_to_control_list (std::shared_ptr<StripableList const> sl, std::shared_ptr<T> (Stripable::*get_control)() const) {
-	std::shared_ptr<ControlList> cl (new ControlList);
+template<typename T> std::shared_ptr<AutomationControlList> stripable_list_to_control_list (std::shared_ptr<StripableList const> sl, std::shared_ptr<T> (Stripable::*get_control)() const) {
+	std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 	for (auto const & s : *sl) {
 		std::shared_ptr<AutomationControl> ac = (s.get()->*get_control)();
 		if (ac) {
