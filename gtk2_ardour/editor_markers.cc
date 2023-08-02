@@ -340,10 +340,7 @@ void
 Editor::update_all_marker_lanes ()
 {
 	for (auto & lam : location_markers) {
-		lam.second->start->reposition ();
-		if (lam.second->end) {
-			lam.second->end->reposition ();
-		}
+		lam.second->set_position (lam.first->start(), lam.first->end());
 	}
 }
 
