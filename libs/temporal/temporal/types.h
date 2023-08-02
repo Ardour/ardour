@@ -124,8 +124,8 @@ enum RoundMode {
 
 extern void setup_enum_writer ();
 
-struct LIBTEMPORAL_API TimeThing {
-	virtual ~TimeThing() {}
+struct LIBTEMPORAL_API TimeDomainSwapper {
+	virtual ~TimeDomainSwapper() {}
 	virtual void swap_domain (Temporal::TimeDomain from, Temporal::TimeDomain to) = 0;
 };
 

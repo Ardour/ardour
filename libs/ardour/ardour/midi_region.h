@@ -55,7 +55,7 @@ class ThawList;
 
 template<typename T> class MidiRingBuffer;
 
-class LIBARDOUR_API MidiRegion : public Region, public Temporal::TimeThing
+class LIBARDOUR_API MidiRegion : public Region, public Temporal::TimeDomainSwapper
 {
   public:
 	~MidiRegion();
