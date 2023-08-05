@@ -26,8 +26,8 @@
 #include <vector>
 
 #include "temporal/beats.h"
+#include "temporal/domainswap.h"
 #include "temporal/range.h"
-#include "temporal/types.h"
 
 #include "pbd/string_convert.h"
 
