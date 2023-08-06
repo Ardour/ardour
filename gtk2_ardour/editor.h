@@ -2295,7 +2295,7 @@ private:
 
 	void apply_filter (ARDOUR::Filter&, std::string cmd, ProgressReporter* progress = 0);
 
-	Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
+	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
 
 	/* plugin setup */
 	int plugin_setup (std::shared_ptr<ARDOUR::Route>, std::shared_ptr<ARDOUR::PluginInsert>, ARDOUR::Route::PluginSetupOptions);

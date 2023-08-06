@@ -26,7 +26,9 @@
 #include "temporal/beats.h"
 #include "evoral/Sequence.h"
 
+namespace PBD {
 class Command;
+}
 
 namespace ARDOUR {
 
@@ -37,9 +39,9 @@ class LIBARDOUR_API MidiOperator {
 	MidiOperator () {}
 	virtual ~MidiOperator() {}
 
-	virtual Command* operator() (std::shared_ptr<ARDOUR::MidiModel>,
-	                             Temporal::Beats,
-	                             std::vector<Evoral::Sequence<Temporal::Beats>::Notes>&) = 0;
+	virtual PBD::Command* operator() (std::shared_ptr<ARDOUR::MidiModel>,
+	                                  Temporal::Beats,
+	                                  std::vector<Evoral::Sequence<Temporal::Beats>::Notes>&) = 0;
 	virtual std::string name() const = 0;
 };
 

@@ -33,7 +33,7 @@ class PropertyList;
 /** A Command which stores its action as the differences between the before and after
  *  state of a Stateful object.
  */
-class LIBPBD_API StatefulDiffCommand : public Command
+class LIBPBD_API StatefulDiffCommand : public PBD::Command
 {
 public:
 	StatefulDiffCommand (std::shared_ptr<StatefulDestructible>);

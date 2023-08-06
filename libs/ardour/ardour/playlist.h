@@ -102,7 +102,7 @@ public:
 
 	void update (const RegionListProperty::ChangeRecord&);
 	void clear_owned_changes ();
-	void rdiff (std::vector<Command*>&) const;
+	void rdiff (std::vector<PBD::Command*>&) const;
 
 	void rdiff_and_add_command (Session*);
 

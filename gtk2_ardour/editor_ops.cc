@@ -5982,7 +5982,7 @@ Editor::strip_region_silence ()
 	}
 }
 
-Command*
+PBD::Command*
 Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv)
 {
 	Evoral::Sequence<Temporal::Beats>::Notes selected;

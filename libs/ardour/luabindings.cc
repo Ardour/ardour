@@ -507,9 +507,9 @@ LuaBindings::common (lua_State* L)
 		.deriveWSPtrClass <PBD::StatefulDestructible, PBD::Stateful> ("StatefulDestructiblePtr")
 		.endClass ()
 
-		.deriveClass <Command, PBD::StatefulDestructible> ("Command")
-		.addFunction ("set_name", &Command::set_name)
-		.addFunction ("name", &Command::name)
+		.deriveClass <PBD::Command, PBD::StatefulDestructible> ("Command")
+		.addFunction ("set_name", &PBD::Command::set_name)
+		.addFunction ("name", &PBD::Command::name)
 		.endClass ()
 
 		/* UndoTransaction::add_command() subscribes to DropReferences()
@@ -521,7 +521,7 @@ LuaBindings::common (lua_State* L)
 		 * use Session::add_stateful_diff_command()
 		 * and Session::abort_reversible_command()
 		 */
-		.deriveClass <PBD::StatefulDiffCommand, Command> ("StatefulDiffCommand")
+		.deriveClass <PBD::StatefulDiffCommand, PBD::Command> ("StatefulDiffCommand")
 		.addFunction ("undo", &PBD::StatefulDiffCommand::undo)
 		.addFunction ("empty", &PBD::StatefulDiffCommand::empty)
 		.endClass ()
@@ -1765,13 +1765,13 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <MidiModel, AutomatableSequence<Temporal::Beats> > ("MidiModel")
-		.addFunction ("apply_command", (void (MidiModel::*)(Session*, Command*))&MidiModel::apply_diff_command_as_commit) /* deprecated: left here in case any extant scripts use apply_command */
-		.addFunction ("apply_diff_command_as_commit", (void (MidiModel::*)(Session*, Command*))&MidiModel::apply_diff_command_as_commit)
+		.addFunction ("apply_command", (void (MidiModel::*)(Session*, PBD::Command*))&MidiModel::apply_diff_command_as_commit) /* deprecated: left here in case any extant scripts use apply_command */
+		.addFunction ("apply_diff_command_as_commit", (void (MidiModel::*)(Session*, PBD::Command*))&MidiModel::apply_diff_command_as_commit)
 		.addFunction ("new_note_diff_command", &MidiModel::new_note_diff_command)
 		.endClass ()
 
 		.beginNamespace ("MidiModel")
-		.deriveClass<ARDOUR::MidiModel::DiffCommand, Command> ("DiffCommand")
+		.deriveClass<ARDOUR::MidiModel::DiffCommand, PBD::Command> ("DiffCommand")
 		.endClass ()
 
 		.deriveClass<ARDOUR::MidiModel::NoteDiffCommand, ARDOUR::MidiModel::DiffCommand> ("NoteDiffCommand")

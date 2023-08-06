@@ -118,7 +118,7 @@ swing_position (Temporal::Beats pos, Temporal::Beats grid, double swing_strength
 	return pos;
 }
 
-Command*
+PBD::Command*
 Quantize::operator () (std::shared_ptr<MidiModel> model,
                        Temporal::Beats position,
                        std::vector<Evoral::Sequence<Temporal::Beats>::Notes>& seqs)

@@ -36,7 +36,7 @@
 namespace PBD {
 
 template <class obj_type, class arg_type>
-class /*LIBPBD_API*/ FunctorCommand : public Command
+class /*LIBPBD_API*/ FunctorCommand : public PBD::Command
 {
 	private:
 	typedef void (obj_type::*functor_type)(arg_type);

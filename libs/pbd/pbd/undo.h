@@ -41,7 +41,7 @@
 
 typedef sigc::slot<void> UndoAction;
 
-class LIBPBD_API UndoTransaction : public Command
+class LIBPBD_API UndoTransaction : public PBD::Command
 {
 public:
 	UndoTransaction ();
@@ -55,8 +55,8 @@ public:
 		return _clearing;
 	}
 
-	void add_command (Command* const);
-	void remove_command (Command* const);
+	void add_command (PBD::Command* const);
+	void remove_command (PBD::Command* const);
 
 	void operator() ();
 	void undo ();
@@ -75,7 +75,7 @@ public:
 	}
 
 private:
-	std::list<Command*> actions;
+	std::list<PBD::Command*> actions;
 	struct timeval      _timestamp;
 	bool                _clearing;
 

@@ -116,7 +116,7 @@ public:
 	XMLNode& get_state () const;
 	int set_state (const XMLNode &, int version);
 
-	Command* memento_command (XMLNode* before, XMLNode* after);
+	PBD::Command* memento_command (XMLNode* before, XMLNode* after);
 
 	bool operator!= (const AutomationList &) const;
 

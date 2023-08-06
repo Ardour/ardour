@@ -315,7 +315,7 @@ AutomationList::thaw ()
 	}
 }
 
-Command*
+PBD::Command*
 AutomationList::memento_command (XMLNode* before, XMLNode* after)
 {
 	return new MementoCommand<AutomationList> (*this, before, after);

@@ -110,6 +110,7 @@ class Parser;
 namespace PBD {
 class Controllable;
 class Progress;
+class Command;
 }
 
 namespace luabridge {
@@ -1084,9 +1085,9 @@ public:
 	 * This must only be called after begin_reversible_command ()
 	 * @param cmd (additional) command to add
 	 */
-	void commit_reversible_command (Command* cmd = 0);
+	void commit_reversible_command (PBD::Command* cmd = 0);
 
-	void add_command (Command *const cmd);
+	void add_command (PBD::Command *const cmd);
 
 	/** create an StatefulDiffCommand from the given object and add it to the stack.
 	 *
@@ -1127,13 +1128,13 @@ public:
 	 */
 	bool abort_empty_reversible_command ();
 
-	void add_commands (std::vector<Command*> const & cmds);
+	void add_commands (std::vector<PBD::Command*> const & cmds);
 
 	std::map<PBD::ID,PBD::StatefulDestructible*> registry;
 
 	// these commands are implemented in libs/ardour/session_command.cc
-	Command* memento_command_factory(XMLNode* n);
-	Command* stateful_diff_command_factory (XMLNode *);
+	PBD::Command* memento_command_factory(XMLNode* n);
+	PBD::Command* stateful_diff_command_factory (XMLNode *);
 	void register_with_memento_command_factory(PBD::ID, PBD::StatefulDestructible*);
 
 	/* clicking */
@@ -1386,7 +1387,7 @@ public:
 	bool bang_trigger_at(int32_t route_index, int32_t row_index);
 	bool unbang_trigger_at(int32_t route_index, int32_t row_index);
 
-	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+	PBD::Command* globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
 
 protected:
 	friend class AudioEngine;

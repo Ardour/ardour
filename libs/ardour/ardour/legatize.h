@@ -41,9 +41,9 @@ public:
 
 	typedef Evoral::Sequence<Temporal::Beats>::Notes Notes;
 
-	Command* operator()(std::shared_ptr<ARDOUR::MidiModel> model,
-	                    Temporal::Beats                      position,
-	                    std::vector<Notes>&                  seqs);
+	PBD::Command* operator()(std::shared_ptr<ARDOUR::MidiModel> model,
+	                         Temporal::Beats                      position,
+	                         std::vector<Notes>&                  seqs);
 
 	std::string name () const { return (_shrink_only ? std::string ("remove overlap") : std::string ("legatize")); }
 

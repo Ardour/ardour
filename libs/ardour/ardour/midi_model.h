@@ -63,7 +63,7 @@ public:
 
 	MidiModel (MidiSource&);
 
-	class LIBARDOUR_API DiffCommand : public Command {
+	class LIBARDOUR_API DiffCommand : public PBD::Command {
 	public:
 
 		DiffCommand (std::shared_ptr<MidiModel> m, const std::string& name);
@@ -275,22 +275,22 @@ public:
 	 * This STARTS and COMMITS an undo command.
 	 * The command will constitute one item on the undo stack.
 	 */
-	void apply_diff_command_as_commit (Session& session, Command* cmd);
+	void apply_diff_command_as_commit (Session& session, PBD::Command* cmd);
 
-	void apply_diff_command_as_commit (Session* session, Command* cmd) { if (session) { apply_diff_command_as_commit (*session, cmd); } }
+	void apply_diff_command_as_commit (Session* session, PBD::Command* cmd) { if (session) { apply_diff_command_as_commit (*session, cmd); } }
 
 	/** Add a command as part of a larger reversible transaction
 	 *
 	 * Ownership of cmd is taken, it must not be deleted by the caller.
 	 * The command will be incorporated into the current command.
 	 */
-	void apply_diff_command_as_subcommand (Session& session, Command* cmd);
+	void apply_diff_command_as_subcommand (Session& session, PBD::Command* cmd);
 
 	/** Apply the midi diff, but without any effect on undo
 	 *
 	 * Ownership of cmd is not changed.
 	 */
-	void apply_diff_command_only (Session& session, Command* cmd);
+	void apply_diff_command_only (Session& session, PBD::Command* cmd);
 
 	bool sync_to_source (const Source::WriterLock& source_lock);
 
