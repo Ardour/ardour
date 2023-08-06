@@ -1247,7 +1247,7 @@ class LIBTEMPORAL_API TempoMapCutBuffer
 	Points       _points;
 };
 
-class LIBTEMPORAL_API TempoCommand : public Command {
+class LIBTEMPORAL_API TempoCommand : public PBD::Command {
 	public:
 
 	TempoCommand (std::string const & name, XMLNode const * before, XMLNode const * after);
@@ -1266,30 +1266,6 @@ class LIBTEMPORAL_API TempoCommand : public Command {
 	XMLNode const * _before;
 	XMLNode const * _after;
 };
-
-class LIBTEMPORAL_API DomainSwapInformation {
-   public:
-	static DomainSwapInformation* start (TimeDomain prev);
-
-	~DomainSwapInformation ();
-
-	void add (timecnt_t& t) { counts.push_back (&t); }
-	void add (timepos_t& p) { positions.push_back (&p); }
-	void add (TimeDomainSwapper& tt) { time_things.push_back (&tt); }
-	void clear ();
-
-   private:
-	DomainSwapInformation (TimeDomain prev) : previous (prev) {}
-
-	std::vector<timecnt_t*> counts;
-	std::vector<timepos_t*> positions;
-	std::vector<TimeDomainSwapper*> time_things;
-	TimeDomain previous;
-
-	void undo ();
-};
-
-extern LIBTEMPORAL_API DomainSwapInformation* domain_swap;
 
 } /* end of namespace Temporal */
 

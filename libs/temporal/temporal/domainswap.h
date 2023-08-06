@@ -26,6 +26,7 @@
 #include "pbd/signals.h"
 
 #include "temporal/types.h"
+#include "temporal/timeline.h"
 
 namespace Temporal {
 
@@ -35,7 +36,7 @@ struct LIBTEMPORAL_API TimeDomainSwapper : public virtual PBD::Destructible {
 };
 
 
-struct LIBTEMPORAL_API TimeDomainCommand : public Command {
+struct LIBTEMPORAL_API TimeDomainCommand : public PBD::Command {
   public:
 	TimeDomainCommand (TimeDomain f, TimeDomain t) : from (f), to (t) {}
 	void add (TimeDomainSwapper&);
@@ -54,6 +55,30 @@ struct LIBTEMPORAL_API TimeDomainCommand : public Command {
 	void going_away (TimeDomainSwapper*);
 
 };
+
+class LIBTEMPORAL_API DomainSwapInformation {
+   public:
+	static DomainSwapInformation* start (TimeDomain prev);
+
+	~DomainSwapInformation ();
+
+	void add (timecnt_t& t) { counts.push_back (&t); }
+	void add (timepos_t& p) { positions.push_back (&p); }
+	void add (TimeDomainSwapper& tt) { time_things.push_back (&tt); }
+	void clear ();
+
+   private:
+	DomainSwapInformation (TimeDomain prev) : previous (prev) {}
+
+	std::vector<timecnt_t*> counts;
+	std::vector<timepos_t*> positions;
+	std::vector<TimeDomainSwapper*> time_things;
+	TimeDomain previous;
+
+	void undo ();
+};
+
+extern LIBTEMPORAL_API DomainSwapInformation* domain_swap;
 
 }
 
