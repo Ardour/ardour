@@ -3012,7 +3012,8 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		return;
 	}
 
-	Temporal::TempoMap::WritableSharedPtr map = begin_tempo_mapping ();
+	PBD::Command* swap_undo_command;
+	Temporal::TempoMap::WritableSharedPtr map = begin_tempo_mapping (&swap_undo_command);
 
 	/* Decide between a mid-twist, which we do if the
 	 * pointer is between two tempo markers, and an end-stretch,
@@ -3103,6 +3104,7 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 
 	if (at_end) {
 		begin_reversible_command (_("tempo mapping: end-stretch"));
+		_session->add_command (swap_undo_command);
 		std::cerr << "END STRETCH\n";
 		_drags->set (new MappingEndDrag (this, item, map, tempo, *focus, *before_state), event);
 		return;
@@ -3111,11 +3113,13 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 	if (before && focus && after) {
 		std::cerr << "TWIST\n";
 		begin_reversible_command (_("tempo mapping: mid-twist"));
+		_session->add_command (swap_undo_command);
 		_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after, *before_state, ramped), event);
 	} else if (ramped && focus && after) {
 		/* special case 4: user is manipulating a beat line after the INITIAL tempo marker, so there is no prior marker*/
 		std::cerr << "TWIST ON START\n";
 		begin_reversible_command (_("tempo mapping: mid-twist"));
+		_session->add_command (swap_undo_command);
 		before = focus; /* this is unused in MappingTwistDrag, when ramped is true, but let's not pass in garbage */
 		_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after, *before_state, ramped), event);
 	} else {

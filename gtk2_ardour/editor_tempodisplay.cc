@@ -813,13 +813,13 @@ Editor::real_remove_meter_marker (Temporal::MeterPoint const * section)
 
 
 Temporal::TempoMap::WritableSharedPtr
-Editor::begin_tempo_mapping ()
+Editor::begin_tempo_mapping (PBD::Command** cmd)
 {
 	TempoMap::WritableSharedPtr wmap = TempoMap::write_copy ();
-	TempoMap::set (wmap);
+	TempoMap::set (wmap); 
 	reassociate_metric_markers (wmap);
 	(void) Temporal::DomainSwapInformation::start (Temporal::BeatTime);
-	_session->globally_change_time_domain (Temporal::BeatTime, Temporal::AudioTime);
+	*cmd = _session->globally_change_time_domain (Temporal::BeatTime, Temporal::AudioTime);
 	return wmap;
 }
 

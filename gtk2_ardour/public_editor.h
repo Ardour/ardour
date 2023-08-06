@@ -528,7 +528,7 @@ public:
 		_commit_tempo_map_edit (map, with_update);
 	}
 
-	virtual Temporal::TempoMap::WritableSharedPtr begin_tempo_mapping () = 0;
+	virtual Temporal::TempoMap::WritableSharedPtr begin_tempo_mapping (PBD::Command**) = 0;
 	virtual void abort_tempo_mapping () = 0;
 	virtual void commit_tempo_mapping (Temporal::TempoMap::WritableSharedPtr& map) = 0;
 

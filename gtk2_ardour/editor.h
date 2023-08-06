@@ -1758,7 +1758,7 @@ private:
 	void mid_tempo_per_region_update (RegionView*);
 	bool ignore_map_change;
 
-	Temporal::TempoMap::WritableSharedPtr begin_tempo_mapping ();
+	Temporal::TempoMap::WritableSharedPtr begin_tempo_mapping (PBD::Command**);
 	void abort_tempo_mapping ();
 	void commit_tempo_mapping (Temporal::TempoMap::WritableSharedPtr&);
 
