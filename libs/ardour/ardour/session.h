@@ -1060,7 +1060,7 @@ public:
 	 */
 	void redo (uint32_t n);
 
-	UndoHistory& history() { return _history; }
+	PBD::UndoHistory& history() { return _history; }
 
 	uint32_t undo_depth() const { return _history.undo_depth(); }
 	uint32_t redo_depth() const { return _history.redo_depth(); }
@@ -2108,9 +2108,9 @@ private:
 	XMLNode* _bundle_xml_node;
 	int load_bundles (XMLNode const &);
 
-	UndoHistory      _history;
+	PBD::UndoHistory      _history;
 	/** current undo transaction, or 0 */
-	UndoTransaction* _current_trans;
+	PBD::UndoTransaction* _current_trans;
 	/** GQuarks to describe the reversible commands that are currently in progress.
 	 *  These may be nested, in which case more recently-started commands are toward
 	 *  the front of the list.

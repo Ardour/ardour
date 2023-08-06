@@ -39,6 +39,8 @@
 #include "pbd/command.h"
 #include "pbd/libpbd_visibility.h"
 
+namespace PBD {
+
 typedef sigc::slot<void> UndoAction;
 
 class LIBPBD_API UndoTransaction : public PBD::Command
@@ -139,5 +141,7 @@ private:
 
 	void remove (UndoTransaction*);
 };
+
+} /* namespace */
 
 #endif /* __lib_pbd_undo_h__ */
