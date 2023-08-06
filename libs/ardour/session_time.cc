@@ -299,9 +299,11 @@ Session::any_duration_to_samples (samplepos_t position, AnyTime const & duration
 	return duration.samples;
 }
 
-void
+PBD::Command*
 Session::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
 {
+	PBD::Command* undo_command = new Temporal::TimeDomainCommand (from, to);
+
 	{
 		std::shared_ptr<RouteList const> rl (routes.reader());
 
@@ -312,4 +314,6 @@ Session::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeD
 
 	_playlists->globally_change_time_domain (from, to);
 	_locations->globally_change_time_domain (from, to);
+
+	return undo_command;
 }

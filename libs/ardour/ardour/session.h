@@ -1387,7 +1387,7 @@ public:
 	bool bang_trigger_at(int32_t route_index, int32_t row_index);
 	bool unbang_trigger_at(int32_t route_index, int32_t row_index);
 
-	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+	PBD::Command* globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
 
 protected:
 	friend class AudioEngine;
