@@ -80,6 +80,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<float> shift;
 		PBD::PropertyDescriptor<uint64_t> layering_index;
 		PBD::PropertyDescriptor<std::string> tags;
+		PBD::PropertyDescriptor<uint64_t> reg_group;
 		PBD::PropertyDescriptor<bool> contents;
 
 /* these properties are used as a convenience for announcing changes to state, but aren't stored as properties */
@@ -89,6 +90,10 @@ namespace ARDOUR {
 }
 
 PBD::Signal2<void,std::shared_ptr<ARDOUR::RegionList>,const PropertyChange&> Region::RegionsPropertyChanged;
+
+/* these static values are used by Region Groups to assign a group-id across the scope of an operation that might span many function calls */
+uint64_t Region::_retained_group_id = 0;
+uint64_t Region::_next_group_id     = 0;
 
 void
 Region::make_property_quarks ()
@@ -147,6 +152,8 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for contents = %1\n",	Properties::contents.property_id));
 	Properties::time_domain.property_id = g_quark_from_static_string (X_("time_domain"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for time_domain = %1\n",	Properties::time_domain.property_id));
+	Properties::reg_group.property_id = g_quark_from_static_string (X_("rgroup"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region_group = %1\n", Properties::reg_group.property_id));
 }
 
 void
@@ -177,6 +184,7 @@ Region::register_properties ()
 	add_property (_shift);
 	add_property (_layering_index);
 	add_property (_tags);
+	add_property (_reg_group);
 	add_property (_contents);
 }
 
@@ -208,6 +216,7 @@ Region::register_properties ()
 	, _shift (Properties::shift, 1.0) \
 	, _layering_index (Properties::layering_index, 0) \
 	, _tags (Properties::tags, "") \
+	, _reg_group (Properties::reg_group, 0) \
 	, _contents (Properties::contents, false)
 
 #define REGION_COPY_STATE(other) \
@@ -240,6 +249,7 @@ Region::register_properties ()
 	, _shift (Properties::shift, other->_shift) \
 	, _layering_index (Properties::layering_index, other->_layering_index) \
 	, _tags (Properties::tags, other->_tags) \
+	, _reg_group (Properties::reg_group, other->_reg_group) \
 	, _contents (Properties::contents, other->_contents)
 
 /* derived-from-derived constructor (no sources in constructor) */
