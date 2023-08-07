@@ -587,8 +587,13 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t, RegionVi
 		return;
 	}
 
-	if (&tv == &basis->get_time_axis_view()) {
-		/* looking in same track as the original */
+	if (basis->region()->is_explicitly_ungrouped ()) {
+		/* this region is explicitly ungrouped; no need to check further */
+		return;
+	}
+
+	if (&tv == &basis->get_time_axis_view () && basis->region()->is_implicitly_ungrouped ()) {
+		/* fallback to region-equivalence: we do not check for equivalent regions in the same track as the basis */
 		return;
 	}
 
@@ -606,8 +611,12 @@ Editor::mapped_get_equivalent_regions (RouteTimeAxisView& tv, uint32_t, RegionVi
 void
 Editor::get_equivalent_regions (RegionView* basis, vector<RegionView*>& equivalent_regions, PBD::PropertyID property) const
 {
-	mapover_tracks_with_unique_playlists (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_time_axis_view(), property);
-
+	if (basis->region()->is_explicitly_grouped ()) {
+		/* if the user made an explicit region group, it can span tracks outside of the track-group */
+		mapover_all_tracks_with_unique_playlists (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions));
+	} else {
+		mapover_tracks_with_unique_playlists (sigc::bind (sigc::mem_fun (*this, &Editor::mapped_get_equivalent_regions), basis, &equivalent_regions), &basis->get_time_axis_view(), property);
+	}
 	/* add clicked regionview since we skipped all other regions in the same track as the one it was in */
 
 	equivalent_regions.push_back (basis);
