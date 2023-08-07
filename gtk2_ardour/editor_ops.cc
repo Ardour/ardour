@@ -199,6 +199,9 @@ Editor::split_regions_at (timepos_t const & where, RegionSelection& regions)
 		return;
 	}
 
+	/* the Split action will likely create new regions; we want them all assigned to the same region-group */
+	Region::RegionGroupRetainer rgr;
+
 	begin_reversible_command (_("split"));
 
 
@@ -3325,6 +3328,9 @@ Editor::separate_regions_between (const TimeSelection& ts)
 	std::shared_ptr<Playlist> playlist;
 	RegionSelection new_selection;
 
+	/* the Separate action will likely create a lot of regions; we want them all assigned to the same region-group */
+	Region::RegionGroupRetainer rgr;
+
 	TrackViewList tmptracks = get_tracks_for_range_action ();
 	sort_track_selection (tmptracks);
 
@@ -4514,6 +4520,9 @@ Editor::cut_copy (CutCopyOp op)
 
 	string opname;
 
+	/* the Cut action can create a lot of regions; we want them assigned to sensible region-groups */
+	Region::RegionGroupRetainer rgr;
+
 	switch (op) {
 	case Delete:
 		opname = _("delete");
@@ -5228,6 +5237,9 @@ Editor::paste_internal (timepos_t const & pos, float times)
 	if (cut_buffer->empty(internal_editing())) {
 		return;
 	}
+
+	/* the Paste operation will result in one or more new regions, and we want them to share a region-group-id */
+	Region::RegionGroupRetainer rgr;
 
 	if (position == timepos_t::max (position.time_domain())) {
 		position = get_preferred_edit_position();
