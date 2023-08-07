@@ -962,6 +962,9 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 		return;
 	}
 
+	/* all regions created from a recording pass should share the same group-id */
+	Region::RegionGroupRetainer rgr;
+
 	RecordMode rmode = _session.config.get_record_mode ();
 
 	samplecnt_t total_capture = 0;
@@ -1059,6 +1062,7 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 			plist.add (Properties::length, l);
 			plist.add (Properties::opaque, rmode != RecSoundOnSound);
 			plist.add (Properties::name, region_name);
+			plist.add (Properties::reg_group, Region::get_retained_group_id());
 
 			std::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 			midi_region = std::dynamic_pointer_cast<MidiRegion> (rx);
@@ -1163,6 +1167,7 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 			plist.add (Properties::length, timecnt_t ((*ci)->samples, timepos_t::zero (false)));
 			plist.add (Properties::name, region_name);
 			plist.add (Properties::opaque, rmode != RecSoundOnSound);
+			plist.add (Properties::reg_group, Region::get_retained_group_id());
 
 			std::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 			region = std::dynamic_pointer_cast<AudioRegion> (rx);

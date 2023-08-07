@@ -1063,6 +1063,7 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 					plist.add (Properties::automatic, true);
 					plist.add (Properties::left_of_split, true);
 					plist.add (Properties::right_of_split, true);
+					plist.add (Properties::reg_group, Region::get_retained_group_id(true));
 
 					/* see note in ::_split_region()
 					 */
@@ -1082,6 +1083,7 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 				plist.add (Properties::name, new_name);
 				plist.add (Properties::automatic, true);
 				plist.add (Properties::right_of_split, true);
+				plist.add (Properties::reg_group, Region::get_retained_group_id());
 
 				region = RegionFactory::create (current, pos1.distance (pos3), plist, true, &thawlist );
 
@@ -1159,6 +1161,7 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 					plist.add (Properties::name, new_name);
 					plist.add (Properties::automatic, true);
 					plist.add (Properties::right_of_split, true);
+					plist.add (Properties::reg_group, Region::get_retained_group_id());
 
 					region = RegionFactory::create (current, plist, true, &thawlist);
 
@@ -1309,6 +1312,9 @@ Playlist::paste (std::shared_ptr<Playlist> other, timepos_t const & position, fl
 			while (itimes--) {
 				for (auto const & r : other->regions) {
 					std::shared_ptr<Region> copy_of_region = RegionFactory::create (r, true, false, &rl1.thawlist);
+
+					/* we want newly-pasted regions to share one (implicit) group-id */
+					copy_of_region->set_region_group(false);
 
 					/* put these new regions on top of all existing ones, but preserve
 					   the ordering they had in the original playlist.
@@ -1533,6 +1539,7 @@ Playlist::_split_region (std::shared_ptr<Region> region, timepos_t const &  play
 		plist.add (Properties::length, after);
 		plist.add (Properties::name, after_name);
 		plist.add (Properties::right_of_split, true);
+		plist.add (Properties::reg_group, Region::get_retained_group_id());
 
 		/* same note as above */
 		right = RegionFactory::create (region, before, plist, true, &thawlist);

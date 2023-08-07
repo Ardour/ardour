@@ -1395,6 +1395,9 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished, bool will_
 		_state_of_the_state = StateOfTheState (_state_of_the_state | InCleanup);
 	}
 
+	/* finishing a capture will potentially create a lot of regions; we want them all assigned to the same region-group */
+	Region::RegionGroupRetainer rgr;
+
 	for (auto const& i : *rl) {
 		std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
 		if (tr) {
