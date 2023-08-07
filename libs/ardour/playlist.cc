@@ -920,37 +920,54 @@ Playlist::remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_
 }
 
 void
-Playlist::get_equivalent_regions (std::shared_ptr<Region> other, vector<std::shared_ptr<Region> >& results)
+Playlist::get_equivalent_regions (std::shared_ptr<Region> basis, vector<std::shared_ptr<Region>>& results)
 {
-	switch (Config->get_region_equivalence ()) {
-		case Exact:
-			for (auto const & r : regions) {
-				if (r->exact_equivalent (other)) {
-					results.push_back (r);
+	if (basis->is_explicitly_ungrouped ()) {
+		/*user explicitly ungrouped this region, so we bail */
+		return;
+	}
+
+	if (basis->is_implicitly_ungrouped ()) {
+		/* no group defined ... we must guess ... fallback to 'region equivalence' behavior */
+
+		switch (Config->get_region_equivalence ()) {
+			case Exact:
+				for (auto const& r : regions) {
+					if (r->exact_equivalent (basis)) {
+						results.push_back (r);
+					}
 				}
-			}
-			break;
-		case LayerTime:
-			for (auto const & r : regions) {
-				if (r->layer_and_time_equivalent (other)) {
-					results.push_back (r);
+				break;
+			case LayerTime:
+				for (auto const& r : regions) {
+					if (r->layer_and_time_equivalent (basis)) {
+						results.push_back (r);
+					}
 				}
-			}
-			break;
-		case Enclosed:
-			for (auto const & r : regions) {
-				if (r->enclosed_equivalent (other)) {
-					results.push_back (r);
+				break;
+			case Enclosed:
+				for (auto const& r : regions) {
+					if (r->enclosed_equivalent (basis)) {
+						results.push_back (r);
+					}
 				}
-			}
-			break;
-		case Overlap:
-			for (auto const & r : regions) {
-				if (r->overlap_equivalent (other)) {
-					results.push_back (r);
+				break;
+			case Overlap:
+				for (auto const& r : regions) {
+					if (r->overlap_equivalent (basis)) {
+						results.push_back (r);
+					}
 				}
-			}
-			break;
+				break;
+		}
+		return;
+	}
+
+	/* region has an implicit or explicit group-id; return all regions with the same group-id */
+	for (auto const& r : regions) {
+		if (r->region_group () == basis->region_group ()) {
+			results.push_back (r);
+		}
 	}
 }
 
