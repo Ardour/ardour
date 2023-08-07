@@ -378,6 +378,9 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "main-menu-play-selected-regions", _("Play Selected Regions"), sigc::mem_fun (*this, &Editor::play_selected_region));
 	reg_sens (editor_actions, "main-menu-tag-selected-regions", _("Tag Selected Regions"), sigc::mem_fun (*this, &Editor::tag_selected_region));
 
+	reg_sens (editor_actions, "group-selected-regions", _("Group Selected Regions"), sigc::mem_fun (*this, &Editor::group_selected_regions));
+	reg_sens (editor_actions, "ungroup-selected-regions", _("Ungroup Selected Regions"), sigc::mem_fun (*this, &Editor::ungroup_selected_regions));
+
 	reg_sens (editor_actions, "play-from-edit-point", _("Play from Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point));
 	reg_sens (editor_actions, "play-from-edit-point-and-return", _("Play from Edit Point and Return"), sigc::mem_fun(*this, &Editor::play_from_edit_point_and_return));
 

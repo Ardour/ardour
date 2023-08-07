@@ -210,6 +210,8 @@ This mode provides many different operations on both regions and control points,
 @wvis|Common/ToggleMaximalEditor|              <@PRIMARY@><@SECONDARY@>f|maximise editor space
 @wvis|Common/ToggleMaximalMixer|                <@PRIMARY@><@TERTIARY@>f|maximise mixer space
 @mmode|MouseMode/set-mouse-mode-object|                                g|object mode
+@edit|Editor/group-selected-regions|                        <@PRIMARY@>g|group selected regions
+@edit|Editor/ungroup-selected-regions|          <@PRIMARY@><@TERTIARY@>g|ungroup selected regions
 @edit|Region/play-selected-regions|                                    h|play selected region(s)
 @eep|Region/trim-front|                                                j|trim front
 @eep|Region/trim-back|                                                 k|trim back

@@ -3128,6 +3128,44 @@ Editor::play_edit_range ()
 }
 
 void
+Editor::group_selected_regions ()
+{
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+
+	if (rs.empty ()) {
+		return;
+	}
+
+	Region::RegionGroupRetainer rgr;
+	begin_reversible_command (_("group regions"));
+	for (RegionSelection::iterator i = rs.begin (); i != rs.end (); ++i) {
+		(*i)->region ()->clear_changes ();
+		(*i)->region ()->set_region_group (true);
+		_session->add_command (new StatefulDiffCommand ((*i)->region ()));
+	}
+	commit_reversible_command ();
+}
+
+void
+Editor::ungroup_selected_regions ()
+{
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+
+	if (rs.empty ()) {
+		return;
+	}
+
+	begin_reversible_command (_("ungroup regions"));
+	for (RegionSelection::iterator i = rs.begin (); i != rs.end (); ++i) {
+		(*i)->region ()->clear_changes ();
+		(*i)->region ()->unset_region_group ();
+		_session->add_command (new StatefulDiffCommand ((*i)->region ()));
+	}
+	selection->clear_regions ();
+	commit_reversible_command ();
+}
+
+void
 Editor::play_selected_region ()
 {
 	timepos_t start = timepos_t::max (Temporal::AudioTime);

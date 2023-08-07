@@ -346,6 +346,10 @@
       <menuitem action='insert-region-from-source-list'/>
       <menuitem action='play-selected-regions'/>
       <menuitem action='tag-selected-regions'/>
+      <separator/>
+      <menuitem action='group-selected-regions'/>
+      <menuitem action='ungroup-selected-regions'/>
+      <separator/>
       <menuitem action='loop-region'/>
       <menuitem action='rename-region'/>
       <menuitem action='show-region-properties'/>
@@ -860,6 +864,10 @@
   <popup name='PopupRegionMenu' action='PopupRegionMenu' accelerators='true'>
     <menuitem action='play-selected-regions'/>
     <menuitem action='tag-selected-regions'/>
+    <separator/>
+    <menuitem action='group-selected-regions'/>
+    <menuitem action='ungroup-selected-regions'/>
+    <separator/>
     <menuitem action='loop-region'/>
     <menuitem action='rename-region'/>
     <menuitem action='show-region-properties'/>

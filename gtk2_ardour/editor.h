@@ -1435,6 +1435,9 @@ private:
 	void play_location (ARDOUR::Location&);
 	void loop_location (ARDOUR::Location&);
 
+	void group_selected_regions ();
+	void ungroup_selected_regions ();
+
 	void calc_extra_zoom_edges(samplepos_t &start, samplepos_t &end);
 	void temporal_zoom_selection (Editing::ZoomAxis);
 	void temporal_zoom_session ();
