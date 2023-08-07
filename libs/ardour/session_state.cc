@@ -1272,6 +1272,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 
 	node->set_property ("id-counter", ID::counter());
 
+	node->set_property ("rg-counter", Region::next_group_id ());
+
 	node->set_property ("name-counter", name_id_counter ());
 
 	/* save the event ID counter */
@@ -1783,6 +1785,13 @@ Session::set_state (const XMLNode& node, int version)
 	node.get_property (X_("end-is-free"), _session_range_is_free);  //deprecated, but use old values if they are in the config
 
 	node.get_property (X_("session-range-is-free"), _session_range_is_free);
+
+	uint64_t rg_counter;
+	if (node.get_property (X_("rg-counter"), rg_counter)) {
+		Region::set_next_group_id (rg_counter);
+	} else {
+		Region::set_next_group_id (0);
+	}
 
 	uint64_t counter;
 	if (node.get_property (X_("id-counter"), counter)) {
