@@ -633,7 +633,20 @@ Region::set_position_time_domain (Temporal::TimeDomain td)
 	timecnt_t t (length ().distance (), p);
 	_length = t;
 
-	/* ensure time-domain matches Datatype -- this may trigger in old broken sessions */
+	/* for a while, we allowed the time domain of _length to not match the
+	 * region time domain. This ought to be prevented as of August 7th 2023
+	 * or earlier, but let's not abort() out if asked to load sessions
+	 * where this happened. Note that for reasons described in the previous
+	 * comment, this could still cause issues during reading from disk.
+	 */
+
+	if  (_length.val().time_domain () != time_domain ()) {
+		_length.non_const_val().set_time_domain (time_domain());
+#ifndef NDEBUG
+		std::cerr << "Fixed up a" << (time_domain() == Temporal::AudioTime ? "n audio" : " music") << "-timed region called " << name() << std::endl;
+#endif
+	}
+
 	assert (_length.val().time_domain () == time_domain ());
 
 	send_change (Properties::time_domain);
