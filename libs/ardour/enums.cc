@@ -595,6 +595,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Location, IsClockOrigin);
 	REGISTER_CLASS_ENUM (Location, IsXrun);
 	REGISTER_CLASS_ENUM (Location, IsCueMarker);
+	REGISTER_CLASS_ENUM (Location, IsSection);
 	REGISTER_BITS (_Location_Flags);
 
 	REGISTER_CLASS_ENUM (Track, NoFreeze);

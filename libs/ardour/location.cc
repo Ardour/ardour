@@ -576,6 +576,17 @@ Location::set_skipping (bool yn)
 }
 
 void
+Location::set_section (bool yn)
+{
+	if (is_session_range ()) {
+		return;
+	}
+	if (set_flag_internal (yn, IsSection)) {
+		emit_signal (Flag); /* EMIT SIGNAL */
+	}
+}
+
+void
 Location::set_auto_punch (bool yn, void*)
 {
 	if (is_mark() || _start == _end) {

@@ -67,6 +67,7 @@ public:
 		IsClockOrigin = 0x200,
 		IsXrun = 0x400,
 		IsCueMarker = 0x800,
+		IsSection = 0x1000,
 	};
 
 	Location (Session &);
@@ -108,6 +109,7 @@ public:
 	void set_is_clock_origin (bool yn, void* src);
 	void set_skip (bool yn);
 	void set_skipping (bool yn);
+	void set_section (bool yn);
 
 	bool is_auto_punch () const { return _flags & IsAutoPunch; }
 	bool is_auto_loop () const { return _flags & IsAutoLoop; }
@@ -121,6 +123,7 @@ public:
 	bool is_clock_origin() const { return _flags & IsClockOrigin; }
 	bool is_skipping() const { return (_flags & IsSkip) && (_flags & IsSkipping); }
 	bool is_xrun() const { return _flags & IsXrun; }
+	bool is_section() const { return _flags & IsSection; }
 	bool matches (Flags f) const { return _flags & f; }
 
 	/* any range with start < end  -- not a marker */
