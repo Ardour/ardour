@@ -759,6 +759,8 @@ private:
 		void set_color (std::string const&);
 	};
 
+	static void reparent_location_markers (LocationMarkers*, ArdourCanvas::Item*);
+
 	LocationMarkers*  find_location_markers (ARDOUR::Location*) const;
 	ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool& is_start) const;
 	ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const;
@@ -789,10 +791,8 @@ private:
 	void mouse_add_new_loop (Temporal::timepos_t);
 	void mouse_add_new_punch (Temporal::timepos_t);
 	bool choose_new_marker_name(std::string &name, bool is_range=false);
-	void update_cd_marker_display ();
-	void ensure_cd_marker_updated (LocationMarkers* lam, ARDOUR::Location* location);
-	void update_cue_marker_display ();
-	void ensure_cue_marker_updated (LocationMarkers* lam, ARDOUR::Location* location);
+	void update_marker_display ();
+	void ensure_marker_updated (LocationMarkers* lam, ARDOUR::Location* location);
 	void update_all_marker_lanes ();
 
 	TimeAxisView*      clicked_axisview;
@@ -926,6 +926,7 @@ private:
 	ArdourCanvas::Container* range_marker_group;
 	ArdourCanvas::Container* transport_marker_group;
 	ArdourCanvas::Container* cd_marker_group;
+	ArdourCanvas::Container* section_marker_group;
 	ArdourCanvas::Container* cue_marker_group;
 
 	/* parent for groups which themselves contain time markers */
@@ -974,6 +975,7 @@ private:
 	Glib::RefPtr<Gtk::ToggleAction> ruler_range_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_loop_punch_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_section_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_marker_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cue_marker_action;
 	bool                            no_ruler_shown_update;
@@ -1066,6 +1068,7 @@ private:
 	ArdourCanvas::Rectangle* range_marker_bar;
 	ArdourCanvas::Rectangle* transport_marker_bar;
 	ArdourCanvas::Rectangle* cd_marker_bar;
+	ArdourCanvas::Rectangle* section_marker_bar;
 	ArdourCanvas::Rectangle* cue_marker_bar;
 	ArdourCanvas::Line*      ruler_separator;
 
@@ -1081,6 +1084,7 @@ private:
 	Gtk::Label  range_mark_label;
 	Gtk::Label  transport_mark_label;
 	Gtk::Label  cd_mark_label;
+	Gtk::Label  section_mark_label;
 	Gtk::Label  cue_mark_label;
 
 	/* videtimline related actions */
@@ -1856,6 +1860,7 @@ private:
 	void toggle_tempo_type ();
 	void ramp_to_next_tempo ();
 	void toggle_marker_menu_lock ();
+	void toggle_marker_section ();
 	void marker_menu_hide ();
 	void marker_menu_set_origin ();
 	void marker_menu_loop_range ();

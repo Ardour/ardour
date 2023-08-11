@@ -728,6 +728,7 @@ Editor::register_actions ()
 	ruler_range_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-range-ruler"), _("Range Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_loop_punch_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch Ranges"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_cd_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-cd-marker-ruler"), _("CD Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
+	ruler_section_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-section-ruler"), _("Section Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-marker-ruler"), _("Location Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_cue_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-cue-marker-ruler"), _("Cue Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 

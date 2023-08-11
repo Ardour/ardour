@@ -854,6 +854,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case SamplesRulerItem:
 	case MinsecRulerItem:
 	case MarkerBarItem:
+	case SectionMarkerBarItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
 		    && !ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
@@ -1715,6 +1716,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case RangeMarkerBarItem:
 			case TransportMarkerBarItem:
 			case CdMarkerBarItem:
+			case SectionMarkerBarItem:
 			case TempoBarItem:
 			case MappingBarItem:
 			case TempoCurveItem:
@@ -1834,6 +1836,13 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				/* if we get here then a dragged range wasn't done */
 				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);
 				mouse_add_new_marker (where, Location::IsCDMarker);
+			}
+			return true;
+
+		case SectionMarkerBarItem:
+			if (!_dragging_playhead) {
+				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);
+				mouse_add_new_marker (where, Location::IsSection);
 			}
 			return true;
 

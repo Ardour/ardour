@@ -288,6 +288,7 @@ Editor::Editor ()
 	, range_marker_group (0)
 	, transport_marker_group (0)
 	, cd_marker_group (0)
+	, section_marker_group (0)
 	, _time_markers_group (0)
 	, _selection_marker_group (0)
 	, _selection_marker (new LocationMarkers)
@@ -318,11 +319,13 @@ Editor::Editor ()
 	, visible_timebars (0)
 	, editor_ruler_menu (0)
 	, tempo_bar (0)
+	, mapping_bar (0)
 	, meter_bar (0)
 	, marker_bar (0)
 	, range_marker_bar (0)
 	, transport_marker_bar (0)
 	, cd_marker_bar (0)
+	, section_marker_bar (0)
 	, cue_marker_bar (0)
 	, ruler_separator (0)
 	, minsec_label (_("Mins:Secs"))
@@ -335,6 +338,7 @@ Editor::Editor ()
 	, range_mark_label (_("Range Markers"))
 	, transport_mark_label (_("Loop/Punch Ranges"))
 	, cd_mark_label (_("CD Markers"))
+	, section_mark_label (_("Sections"))
 	, cue_mark_label (_("Cue Markers"))
 	, videotl_label (_("Video Timeline"))
 	, videotl_group (0)
@@ -557,6 +561,13 @@ Editor::Editor ()
 	cd_mark_label.set_padding (5,0);
 	cd_mark_label.hide();
 	cd_mark_label.set_no_show_all();
+
+	section_mark_label.set_name ("EditorRulerLabel");
+	section_mark_label.set_size_request (-1, (int)timebar_height);
+	section_mark_label.set_alignment (1.0, 0.5);
+	section_mark_label.set_padding (5,0);
+	section_mark_label.hide();
+	section_mark_label.set_no_show_all();
 
 	cue_mark_label.set_name ("EditorRulerLabel");
 	cue_mark_label.set_size_request (-1, (int)timebar_height);

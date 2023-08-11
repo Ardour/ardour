@@ -175,6 +175,7 @@
     <ColorAlias name="location marker" alias="theme:contrasting alt"/>
     <ColorAlias name="location punch" alias="alert:ruddy"/>
     <ColorAlias name="location range" alias="alert:green"/>
+    <ColorAlias name="location section marker" alias="theme:contrasting clock"/>
     <ColorAlias name="lock button: fill active" alias="widget:bg"/>
     <ColorAlias name="lock button: led active" alias="alert:red"/>
     <ColorAlias name="lua action button: fill" alias="widget:bg"/>
@@ -373,6 +374,7 @@
     <ColorAlias name="secondary delta clock: cursor" alias="theme:contrasting alt"/>
     <ColorAlias name="secondary delta clock: edited text" alias="theme:contrasting alt"/>
     <ColorAlias name="secondary delta clock: text" alias="theme:contrasting alt"/>
+    <ColorAlias name="section marker bar" alias="neutral:background2"/>
     <ColorAlias name="selected midi note frame" alias="neutral:foregroundest"/>
     <ColorAlias name="selected region base" alias="widget:ruddy"/>
     <ColorAlias name="selected time axis frame" alias="alert:blue"/>

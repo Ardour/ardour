@@ -107,6 +107,8 @@ Editor::add_new_location_internal (Location* location)
 
 	if (location->is_cd_marker()) {
 		color = X_("location cd marker");
+	} else if (location->is_section()) {
+		color = X_("location section marker");
 	} else if (location->is_mark()) {
 		color = X_("location marker");
 	} else if (location->is_auto_loop()) {
@@ -126,6 +128,9 @@ Editor::add_new_location_internal (Location* location)
 			lam->start = new ArdourMarker (*this, *cue_marker_group, color, location->name(), ArdourMarker::Cue, location->start());
 			lam->start->set_cue_index(location->cue_id());
 			group = cue_marker_group;
+		} else if (location->is_section() && ruler_section_action->get_active()) {
+			lam->start = new ArdourMarker (*this, *section_marker_group, color, location->name(), ArdourMarker::RangeStart, location->start());
+			group = section_marker_group;
 		} else {
 			lam->start = new ArdourMarker (*this, *marker_group, color, location->name(), ArdourMarker::Mark, location->start());
 			group = marker_group;
@@ -414,11 +419,13 @@ Editor::location_flags_changed (Location *location)
 		return;
 	}
 
-	// move cd markers to/from cd marker bar as appropriate
-	ensure_cd_marker_updated (lam, location);
+	// moved markers to/from cd marker bar as appropriate
+	ensure_marker_updated (lam, location);
 
 	if (location->is_cd_marker()) {
 		lam->set_color ("location cd marker");
+	} else if (location->is_section()) {
+		lam->set_color ("location section marker");
 	} else if (location->is_mark()) {
 		lam->set_color ("location marker");
 	} else if (location->is_auto_punch()) {
@@ -437,97 +444,48 @@ Editor::location_flags_changed (Location *location)
 }
 
 void
-Editor::update_cd_marker_display ()
+Editor::update_marker_display ()
 {
-	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
-		LocationMarkers * lam = i->second;
-		Location * location = i->first;
-
-		ensure_cd_marker_updated (lam, location);
-	}
-}
-
-
-void Editor::ensure_cd_marker_updated (LocationMarkers * lam, Location * location)
-{
-	if (location->is_cd_marker()
-	    && (ruler_cd_marker_action->get_active() &&  lam->start->get_parent() != cd_marker_group))
-	{
-		//cerr << "reparenting non-cd marker so it can be relocated: " << location->name() << endl;
-		if (lam->start) {
-			lam->start->reparent (*cd_marker_group);
-		}
-		if (lam->end) {
-			lam->end->reparent (*cd_marker_group);
-		}
-	}
-	else if ( (!location->is_cd_marker() || !ruler_cd_marker_action->get_active())
-		  && (lam->start->get_parent() == cd_marker_group))
-	{
-		//cerr << "reparenting non-cd marker so it can be relocated: " << location->name() << endl;
-		if (location->is_mark()) {
-			if (lam->start) {
-				lam->start->reparent (*marker_group);
-			}
-			if (lam->end) {
-				lam->end->reparent (*marker_group);
-			}
-		}
-		else {
-			if (lam->start) {
-				lam->start->reparent (*range_marker_group);
-			}
-			if (lam->end) {
-				lam->end->reparent (*range_marker_group);
-			}
-		}
+	for (auto const& i : location_markers) {
+		ensure_marker_updated (i.second, i.first);
 	}
 }
 
 void
-Editor::update_cue_marker_display ()
+Editor::reparent_location_markers (LocationMarkers* lam, ArdourCanvas::Item* new_parent)
 {
-	for (LocationMarkerMap::iterator i = location_markers.begin(); i != location_markers.end(); ++i) {
-		LocationMarkers * lam = i->second;
-		Location * location = i->first;
-
-		ensure_cue_marker_updated (lam, location);
+	if (lam->start && lam->start->get_parent() != new_parent) {
+		lam->start->reparent (*new_parent);
+	}
+	if (lam->end && lam->end->get_parent() != new_parent) {
+		lam->end->reparent (*new_parent);
 	}
 }
 
-void Editor::ensure_cue_marker_updated (LocationMarkers * lam, Location * location)
+void Editor::ensure_marker_updated (LocationMarkers* lam, Location* location)
 {
-	if (location->is_cd_marker()
-	    && (ruler_cd_marker_action->get_active() &&  lam->start->get_parent() != cd_marker_group))
-	{
-		//cerr << "reparenting non-cd marker so it can be relocated: " << location->name() << endl;
-		if (lam->start) {
-			lam->start->reparent (*cd_marker_group);
+	if (location->is_cd_marker()) {
+		if (ruler_cd_marker_action->get_active ()) {
+			reparent_location_markers (lam, cd_marker_group);
+		} else if (location->is_mark()) {
+			reparent_location_markers (lam, marker_group);
+		} else {
+			reparent_location_markers (lam, range_marker_group);
 		}
-		if (lam->end) {
-			lam->end->reparent (*cd_marker_group);
-		}
+		return;
 	}
-	else if ( (!location->is_cd_marker() || !ruler_cd_marker_action->get_active())
-		  && (lam->start->get_parent() == cd_marker_group))
-	{
-		//cerr << "reparenting non-cd marker so it can be relocated: " << location->name() << endl;
-		if (location->is_mark()) {
-			if (lam->start) {
-				lam->start->reparent (*marker_group);
-			}
-			if (lam->end) {
-				lam->end->reparent (*marker_group);
-			}
+
+	if (location->is_section()) {
+		if (ruler_section_action->get_active ()) {
+			reparent_location_markers (lam, section_marker_group);
+		} else {
+			reparent_location_markers (lam, marker_group);
 		}
-		else {
-			if (lam->start) {
-				lam->start->reparent (*range_marker_group);
-			}
-			if (lam->end) {
-				lam->end->reparent (*range_marker_group);
-			}
-		}
+		return;
+	}
+
+	if (location->is_mark() || location->matches (Location::Flags(0))) {
+		reparent_location_markers (lam, marker_group);
 	}
 }
 
@@ -1101,6 +1059,16 @@ Editor::build_marker_menu (Location* loc)
 	}
 
 	items.push_back (SeparatorElem());
+
+	if (!loc->is_range () && !loc->is_xrun ()) {
+		items.push_back (CheckMenuElem (_("Section Boundary")));
+		Gtk::CheckMenuItem* item = static_cast<Gtk::CheckMenuItem*> (&items.back());
+		if (loc->is_section ()) {
+			item->set_active ();
+		}
+		item->signal_activate().connect (sigc::mem_fun (*this, &Editor::toggle_marker_section));
+		items.push_back (SeparatorElem());
+	}
 
 	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(*this, &Editor::marker_menu_remove)));
 }
@@ -1726,6 +1694,28 @@ Editor::toggle_marker_menu_lock ()
 	} else {
 		loc->lock ();
 	}
+}
+
+void
+Editor::toggle_marker_section ()
+{
+	ArdourMarker* marker;
+
+	if ((marker = reinterpret_cast<ArdourMarker *> (marker_menu_item->get_data ("marker"))) == 0) {
+		fatal << _("programming error: marker canvas item has no marker object pointer!") << endmsg;
+		abort(); /*NOTREACHED*/
+	}
+
+	Location* loc;
+	bool ignored;
+
+	loc = find_location_from_marker (marker, ignored);
+
+	if (!loc) {
+		return;
+	}
+
+	loc->set_section (!loc->is_section ());
 }
 
 void
