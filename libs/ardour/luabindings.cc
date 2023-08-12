@@ -1229,6 +1229,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("remove", &Locations::remove)
 		.addRefFunction ("marks_either_side", &Locations::marks_either_side)
 		.addRefFunction ("find_all_between", &Locations::find_all_between)
+		.addRefFunction ("next_section", &Locations::next_section)
 		.endClass ()
 
 		.beginWSPtrClass <SessionObject> ("SessionObjectPtr")

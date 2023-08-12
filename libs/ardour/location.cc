@@ -1569,6 +1569,72 @@ Locations::marks_either_side (timepos_t const & pos, timepos_t& before, timepos_
 }
 
 Location*
+Locations::next_section (Location* l, timepos_t& start, timepos_t& end) const
+{
+	vector<LocationPair> locs;
+	Location* session_range = NULL;
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_lock);
+
+		for (auto const& i: locations) {
+			if (i->is_session_range ()) {
+				session_range = i;
+			} else if (i->is_section ()) {
+				locs.push_back (make_pair (i->start(), i));
+			}
+		}
+	}
+
+	LocationStartEarlierComparison cmp;
+	sort (locs.begin(), locs.end(), cmp);
+
+	if (session_range) {
+		if (locs.empty()) {
+			//locs.push_back (make_pair (session_range->start (), session_range));
+			locs.push_back (make_pair (session_range->end (), (ARDOUR::Location*)NULL));
+		} else {
+			if (locs.back().second->start () < session_range->end ()) {
+				locs.push_back (make_pair (session_range->end (), (ARDOUR::Location*)NULL));
+			}
+			if (locs.front().second->start () > session_range->start ()) {
+				//locs.insert (locs.begin (), make_pair (session_range->start (), session_range));
+			}
+		}
+	}
+
+	if (locs.size () < 2) {
+		return NULL;
+	}
+
+	/* special case fist element */
+	if (!l) {
+		l = locs[0].second;
+		start = locs[0].first;
+		end = locs[1].first;
+		return l;
+	}
+
+	Location* rv = NULL;
+	bool found = false;
+
+	for (auto const& i: locs) {
+		if (rv && found) {
+			end = i.first;
+			return rv;
+		}
+		else if (found) {
+			start = i.first;
+			rv    = i.second;
+		}
+		else if (i.second == l) {
+			found = true;
+		}
+	}
+
+	return NULL;
+}
+
+Location*
 Locations::session_range_location () const
 {
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
