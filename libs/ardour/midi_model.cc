@@ -1804,20 +1804,6 @@ MidiModel::create_mapping_stash (Temporal::Beats const & src_pos_offset)
 		superclock_t audio_time = tmap->superclock_at (src_pos_offset + pc->time());
 		tempo_mapping_stash.insert (std::make_pair (pc.get(), audio_time));
 	}
-
-	for (uint8_t chan = 0; chan < 16; ++chan) {
-		for (auto const & p : pitches(chan)) {
-			superclock_t audio_time = tmap->superclock_at (src_pos_offset + p->time());
-			tempo_mapping_stash.insert (std::make_pair (p.get(), audio_time));
-		}
-	}
-
-	for (auto & c : controls()) {
-		std::shared_ptr<Evoral::ControlList> l = c.second->list();
-		if (l) {
-			l->set_time_domain (AudioTime);
-		}
-	}
 }
 
 void
