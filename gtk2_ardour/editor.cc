@@ -122,6 +122,7 @@
 #include "editor_regions.h"
 #include "editor_route_groups.h"
 #include "editor_routes.h"
+#include "editor_sections.h"
 #include "editor_snapshots.h"
 #include "editor_sources.h"
 #include "editor_summary.h"
@@ -429,6 +430,7 @@ Editor::Editor ()
 	, _route_groups (0)
 	, _routes (0)
 	, _regions (0)
+	, _sections (0)
 	, _snapshots (0)
 	, _locations (0)
 	, autoscroll_horizontal_allowed (false)
@@ -682,6 +684,7 @@ Editor::Editor ()
 	_routes = new EditorRoutes ();
 	_regions = new EditorRegions (this);
 	_sources = new EditorSources (this);
+	_sections = new EditorSections ();
 	_snapshots = new EditorSnapshots ();
 	_locations = new EditorLocations (this);
 	_properties_box = new SelectionPropertiesBox ();
@@ -700,6 +703,7 @@ Editor::Editor ()
 	add_notebook_page (_("Sources"), _sources->widget ());
 	add_notebook_page (_("Regions"), _regions->widget ());
 	add_notebook_page (_("Clips"), _trigger_clip_picker);
+	add_notebook_page (_("Sections"), _sections->widget ());
 	add_notebook_page (_("Snapshots"), _snapshots->widget ());
 	add_notebook_page (_("Track & Bus Groups"), _route_groups->widget ());
 	add_notebook_page (_("Ranges & Marks"), _locations->widget ());
@@ -915,6 +919,7 @@ Editor::~Editor()
 	delete _group_tabs;
 	delete _regions;
 	delete _snapshots;
+	delete _sections;
 	delete _locations;
 	delete _properties_box;
 	delete selection;
@@ -1346,6 +1351,7 @@ Editor::set_session (Session *t)
 	_regions->set_session (_session);
 	_sources->set_session (_session);
 	_snapshots->set_session (_session);
+	_sections->set_session (_session);
 	_routes->set_session (_session);
 	_locations->set_session (_session);
 	_properties_box->set_session (_session);

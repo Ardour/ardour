@@ -126,6 +126,7 @@ class EditorCursor;
 class EditorGroupTabs;
 class EditorLocations;
 class EditorRegions;
+class EditorSections;
 class EditorSources;
 class EditorRoutes;
 class EditorRouteGroups;
@@ -1787,6 +1788,7 @@ private:
 	friend class DragManager;
 	friend class EditorRouteGroups;
 	friend class EditorRegions;
+	friend class EditorSections;
 	friend class EditorSources;
 
 	/* non-public event handlers */
@@ -2129,6 +2131,7 @@ private:
 	EditorRouteGroups* _route_groups;
 	EditorRoutes*      _routes;
 	EditorRegions*     _regions;
+	EditorSections*    _sections;
 	EditorSources*     _sources;
 	EditorSnapshots*   _snapshots;
 	EditorLocations*   _locations;
