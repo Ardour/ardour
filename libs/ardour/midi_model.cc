@@ -1835,16 +1835,16 @@ MidiModel::rebuild_from_mapping_stash (Temporal::Beats const & src_pos_offset)
 
 		TempoMappingStash::iterator tms (tempo_mapping_stash.find (&on));
 		assert (tms != tempo_mapping_stash.end());
-		Beats beat_time (tmap->quarters_at_superclock (tms->second) - src_pos_offset);
+		Beats start_time (tmap->quarters_at_superclock (tms->second) - src_pos_offset);
 
-		note_cmd->change (n, NoteDiffCommand::StartTime, beat_time);
+		note_cmd->change (n, NoteDiffCommand::StartTime, start_time);
 
 		tms = tempo_mapping_stash.find (&off);
 		assert (tms != tempo_mapping_stash.end());
-		beat_time = tmap->quarters_at_superclock (tms->second) - src_pos_offset;
-		off.set_time (beat_time);
+		Beats end_time = tmap->quarters_at_superclock (tms->second) - src_pos_offset;
 
-		note_cmd->change (n, NoteDiffCommand::Length, beat_time);
+		Beats len = end_time - start_time;
+		note_cmd->change (n, NoteDiffCommand::Length, len);
 	}
 
 	apply_diff_command_as_subcommand (_midi_source.session(), note_cmd);
