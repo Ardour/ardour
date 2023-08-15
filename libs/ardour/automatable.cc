@@ -747,10 +747,21 @@ Automatable::find_prev_ac_event (std::shared_ptr<AutomationControl> c, timepos_t
 void
 Automatable::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
-#warning paul automatable domain bouncing still needs work
+	for (auto & c : _controls) {
+		std::shared_ptr<Evoral::ControlList> cl = c.second->list();
+		if (cl) {
+			cl->start_domain_bounce (cmd);
+		}
+	}
 }
 
 void
 Automatable::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
+	for (auto & c : _controls) {
+		std::shared_ptr<Evoral::ControlList> cl = c.second->list();
+		if (cl) {
+			cl->finish_domain_bounce (cmd);
+		}
+	}
 }

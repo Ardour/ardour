@@ -35,6 +35,7 @@
 #include "pbd/signals.h"
 
 #include "temporal/domain_provider.h"
+#include "temporal/domain_swap.h"
 #include "temporal/timeline.h"
 #include "temporal/types.h"
 #include "temporal/range.h"
@@ -85,7 +86,7 @@ public:
 
 /** A list (sequence) of time-stamped values for a control
  */
-class LIBEVORAL_API ControlList : public Temporal::TimeDomainProvider
+class LIBEVORAL_API ControlList : public Temporal::TimeDomainProvider, public Temporal::TimeDomainSwapper
 {
 public:
 	typedef std::list<ControlEvent*> EventList;
@@ -370,6 +371,9 @@ public:
 	bool operator!= (ControlList const &) const;
 
 	void invalidate_insert_iterator ();
+
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
 
   protected:
 

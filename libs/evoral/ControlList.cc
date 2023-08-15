@@ -2235,6 +2235,44 @@ ControlList::set_interpolation (InterpolationStyle s)
 	return true;
 }
 
+void
+ControlList::start_domain_bounce (Temporal::DomainBounceInfo& dbi)
+{
+	if (time_domain() == dbi.to) {
+		return;
+	}
+
+	Glib::Threads::RWLock::ReaderLock olm (_lock);
+
+	for (auto const & e : _events) {
+		timepos_t t (e->when);
+		t.set_time_domain (dbi.to);
+		dbi.positions.insert (std::make_pair (&e->when, e->when));
+	}
+}
+
+void
+ControlList::finish_domain_bounce (Temporal::DomainBounceInfo& dbi)
+{
+	if (time_domain() == dbi.from) {
+		return;
+	}
+
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+		for (auto const & e : _events) {
+			Temporal::TimeDomainPosChanges::iterator tdc = dbi.positions.find (&e->when);
+			assert (tdc != dbi.positions.end());
+
+			timepos_t t (tdc->second);
+			t.set_time_domain (dbi.from);
+			e->when = t;
+		}
+	}
+
+	maybe_signal_changed ();
+}
+
 bool
 ControlList::operator!= (ControlList const& other) const
 {
