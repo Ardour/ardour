@@ -468,6 +468,7 @@ Editor::Editor ()
 	, quantize_dialog (0)
 	, _main_menu_disabler (0)
 	, _tempo_edit_behavior (UIConfiguration::instance().get_tempo_edit_behavior())
+	, domain_bounce_info (nullptr)
 {
 	/* we are a singleton */
 
@@ -3674,6 +3675,7 @@ Editor::begin_reversible_selection_op (string name)
 void
 Editor::abort_reversible_selection_op ()
 {
+	PBD::stacktrace (std::cerr, 20);
 	if (!_session) {
 		return;
 	}

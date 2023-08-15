@@ -1761,7 +1761,7 @@ private:
 	void mid_tempo_per_region_update (RegionView*);
 	bool ignore_map_change;
 
-	Temporal::TempoMap::WritableSharedPtr begin_tempo_mapping (PBD::Command**);
+	Temporal::TempoMap::WritableSharedPtr begin_tempo_mapping (Temporal::DomainBounceInfo&);
 	void abort_tempo_mapping ();
 	void commit_tempo_mapping (Temporal::TempoMap::WritableSharedPtr&);
 
@@ -2555,6 +2555,8 @@ private:
 	void clear_tempo_markers () {
 		clear_tempo_markers_after (Temporal::timepos_t (0), false);
 	}
+
+	Temporal::DomainBounceInfo* domain_bounce_info;
 
 	friend class Drag;
 	friend class RegionCutDrag;

@@ -711,7 +711,7 @@ Editor::edit_tempo_section (TempoPoint& section)
 		tmc.map().replace_bartime (replacement);
 		return;
 
-	} 
+	}
 
 	if (!tpp) {
 		/* first tempo, cannot move */
@@ -813,21 +813,20 @@ Editor::real_remove_meter_marker (Temporal::MeterPoint const * section)
 
 
 Temporal::TempoMap::WritableSharedPtr
-Editor::begin_tempo_mapping (PBD::Command** cmd)
+Editor::begin_tempo_mapping (Temporal::DomainBounceInfo& dbi)
 {
 	TempoMap::WritableSharedPtr wmap = TempoMap::write_copy ();
-	TempoMap::set (wmap); 
+	TempoMap::set (wmap);
 	reassociate_metric_markers (wmap);
-	(void) Temporal::DomainSwapInformation::start (Temporal::BeatTime);
-	*cmd = _session->globally_change_time_domain (Temporal::BeatTime, Temporal::AudioTime);
+	_session->start_domain_bounce (dbi);
 	return wmap;
 }
 
 void
 Editor::abort_tempo_mapping ()
 {
-	delete domain_swap; /* undo the domain swap */
-	domain_swap = 0;
+	delete domain_bounce_info;
+	domain_bounce_info = nullptr;
 
 	TempoMap::abort_update ();
 	TempoMap::SharedPtr tmap (TempoMap::fetch());
@@ -838,8 +837,14 @@ void
 Editor::commit_tempo_mapping (TempoMap::WritableSharedPtr& new_map)
 {
 	TempoMap::update (new_map);
-	delete domain_swap; /* undo the domain swap */
-	domain_swap = 0;
+
+	/* revert all positions */
+
+	_session->finish_domain_bounce (*domain_bounce_info);
+
+	delete domain_bounce_info;
+	domain_bounce_info = nullptr;
+
 	TempoMap::SharedPtr tmap (TempoMap::fetch());
 	reassociate_metric_markers (tmap);
 }

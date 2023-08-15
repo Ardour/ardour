@@ -3545,7 +3545,6 @@ MappingEndDrag::finished (GdkEvent* event, bool movement_occurred)
 	XMLNode& after = map->get_state ();
 
 	_editor->session ()->add_command (new Temporal::TempoCommand (_("stretch tempo"), _before_state, &after));
-	_editor->commit_reversible_command ();
 
 	/* 2nd argument means "update tempo map display after the new map is
 	 * installed. We need to do this because the code above has not
@@ -3554,6 +3553,8 @@ MappingEndDrag::finished (GdkEvent* event, bool movement_occurred)
 	 */
 
 	_editor->commit_tempo_mapping (map);
+
+	_editor->commit_reversible_command ();
 }
 
 void
@@ -3656,8 +3657,8 @@ MappingTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 	XMLNode& after = map->get_state ();
 
 	_editor->session ()->add_command (new Temporal::TempoCommand (_("twist tempo"), _before_state, &after));
-	_editor->commit_reversible_command ();
 	_editor->commit_tempo_mapping (map);
+	_editor->commit_reversible_command ();
 }
 
 void
