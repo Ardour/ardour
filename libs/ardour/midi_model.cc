@@ -1849,6 +1849,8 @@ MidiModel::rebuild_from_mapping_stash (Temporal::Beats const & src_pos_offset)
 
 	apply_diff_command_as_subcommand (_midi_source.session(), note_cmd);
 
+#warning paul midi model tempo mapping stash still needs sysex and pitch bend work
+
 	for (auto & s : sysexes()) {
 		TempoMappingStash::iterator tms (tempo_mapping_stash.find (s.get()));
 		assert (tms != tempo_mapping_stash.end());

@@ -747,6 +747,7 @@ Automatable::find_prev_ac_event (std::shared_ptr<AutomationControl> c, timepos_t
 void
 Automatable::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
+#warning paul automatable domain bouncing still needs work
 }
 
 void
