@@ -1876,23 +1876,5 @@ MidiModel::rebuild_from_mapping_stash (Temporal::Beats const & src_pos_offset)
 
 	apply_diff_command_as_subcommand (_midi_source.session(), pc_cmd);
 
-#warning paul midi model tempo mapping stash still pitch bend work
-
-	for (uint8_t chan = 0; chan < 16; ++chan) {
-		for (auto & p : pitches(chan)) {
-			TempoMappingStash::iterator tms (tempo_mapping_stash.find (p.get()));
-			assert (tms != tempo_mapping_stash.end());
-			Beats beat_time (tmap->quarters_at_superclock (tms->second) - src_pos_offset);
-			p->set_time (beat_time);
-		}
-	}
-
-	for (auto & c : controls()) {
-		std::shared_ptr<Evoral::ControlList> l = c.second->list();
-		if (l) {
-			l->set_time_domain (BeatTime);
-		}
-	}
-
 	tempo_mapping_stash.clear ();
 }
