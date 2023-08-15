@@ -1800,6 +1800,11 @@ MidiModel::create_mapping_stash (Temporal::Beats const & src_pos_offset)
 		tempo_mapping_stash.insert (std::make_pair (s.get(), audio_time));
 	}
 
+	for (auto & pc : patch_changes()) {
+		superclock_t audio_time = tmap->superclock_at (src_pos_offset + pc->time());
+		tempo_mapping_stash.insert (std::make_pair (pc.get(), audio_time));
+	}
+
 	for (uint8_t chan = 0; chan < 16; ++chan) {
 		for (auto const & p : pitches(chan)) {
 			superclock_t audio_time = tmap->superclock_at (src_pos_offset + p->time());
@@ -1849,14 +1854,29 @@ MidiModel::rebuild_from_mapping_stash (Temporal::Beats const & src_pos_offset)
 
 	apply_diff_command_as_subcommand (_midi_source.session(), note_cmd);
 
-#warning paul midi model tempo mapping stash still needs sysex and pitch bend work
+	SysExDiffCommand* sysex_cmd = new_sysex_diff_command (_("conform to tempo map"));
 
 	for (auto & s : sysexes()) {
 		TempoMappingStash::iterator tms (tempo_mapping_stash.find (s.get()));
 		assert (tms != tempo_mapping_stash.end());
 		Beats beat_time (tmap->quarters_at_superclock (tms->second) - src_pos_offset);
-		s->set_time (beat_time);
+		sysex_cmd->change (s, beat_time);
 	}
+
+	apply_diff_command_as_subcommand (_midi_source.session(), sysex_cmd);
+
+	PatchChangeDiffCommand* pc_cmd = new_patch_change_diff_command (_("conform to tempo map"));
+
+	for (auto & pc : patch_changes()) {
+		TempoMappingStash::iterator tms (tempo_mapping_stash.find (pc.get()));
+		assert (tms != tempo_mapping_stash.end());
+		Beats beat_time (tmap->quarters_at_superclock (tms->second) - src_pos_offset);
+		pc_cmd->change_time (pc, beat_time);
+	}
+
+	apply_diff_command_as_subcommand (_midi_source.session(), pc_cmd);
+
+#warning paul midi model tempo mapping stash still pitch bend work
 
 	for (uint8_t chan = 0; chan < 16; ++chan) {
 		for (auto & p : pitches(chan)) {
