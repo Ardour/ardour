@@ -42,7 +42,7 @@
 #include "temporal/beats.h"
 #include "temporal/bbt_argument.h"
 #include "temporal/bbt_time.h"
-#include "temporal/domainswap.h"
+#include "temporal/domain_swap.h"
 #include "temporal/superclock.h"
 #include "temporal/timeline.h"
 #include "temporal/types.h"

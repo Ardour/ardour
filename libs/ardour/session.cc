@@ -7787,15 +7787,3 @@ Session::foreach_route (void (Route::*method)())
 	}
 }
 
-void
-Session::time_domain_changed ()
-{
-	using namespace Temporal;
-
-	TimeDomainProvider::time_domain_changed ();
-
-	Temporal::TimeDomain to = time_domain();
-	Temporal::TimeDomain from = (to == AudioTime ? BeatTime : AudioTime);
-
-	_locations->change_time_domain (from, to);
-}

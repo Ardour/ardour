@@ -1793,18 +1793,17 @@ MidiModel::create_mapping_stash (Temporal::Beats const & src_pos_offset)
 		Event<Beats>& off (n->off_event());
 		audio_time = tmap->superclock_at (src_pos_offset + off.time());
 		tempo_mapping_stash.insert (std::make_pair (&off, audio_time));
-
 	}
 
 	for (auto const & s : sysexes()) {
 		superclock_t audio_time = tmap->superclock_at (src_pos_offset + s->time());
-		tempo_mapping_stash.insert (std::make_pair ((void*)s.get(), audio_time));
+		tempo_mapping_stash.insert (std::make_pair (s.get(), audio_time));
 	}
 
 	for (uint8_t chan = 0; chan < 16; ++chan) {
 		for (auto const & p : pitches(chan)) {
 			superclock_t audio_time = tmap->superclock_at (src_pos_offset + p->time());
-			tempo_mapping_stash.insert (std::make_pair ((void*) &p, audio_time));
+			tempo_mapping_stash.insert (std::make_pair (p.get(), audio_time));
 		}
 	}
 
@@ -1827,6 +1826,7 @@ MidiModel::rebuild_from_mapping_stash (Temporal::Beats const & src_pos_offset)
 	}
 
 	TempoMap::SharedPtr tmap (TempoMap::use());
+	NoteDiffCommand* note_cmd = new_note_diff_command (_("conform to tempo map"));
 
 	for (auto & n : notes()) {
 
@@ -1836,17 +1836,21 @@ MidiModel::rebuild_from_mapping_stash (Temporal::Beats const & src_pos_offset)
 		TempoMappingStash::iterator tms (tempo_mapping_stash.find (&on));
 		assert (tms != tempo_mapping_stash.end());
 		Beats beat_time (tmap->quarters_at_superclock (tms->second) - src_pos_offset);
-		on.set_time (beat_time);
+
+		note_cmd->change (n, NoteDiffCommand::StartTime, beat_time);
 
 		tms = tempo_mapping_stash.find (&off);
 		assert (tms != tempo_mapping_stash.end());
 		beat_time = tmap->quarters_at_superclock (tms->second) - src_pos_offset;
 		off.set_time (beat_time);
 
+		note_cmd->change (n, NoteDiffCommand::Length, beat_time);
 	}
 
+	apply_diff_command_as_subcommand (_midi_source.session(), note_cmd);
+
 	for (auto & s : sysexes()) {
-		TempoMappingStash::iterator tms (tempo_mapping_stash.find ((void*) &s));
+		TempoMappingStash::iterator tms (tempo_mapping_stash.find (s.get()));
 		assert (tms != tempo_mapping_stash.end());
 		Beats beat_time (tmap->quarters_at_superclock (tms->second) - src_pos_offset);
 		s->set_time (beat_time);
@@ -1854,7 +1858,7 @@ MidiModel::rebuild_from_mapping_stash (Temporal::Beats const & src_pos_offset)
 
 	for (uint8_t chan = 0; chan < 16; ++chan) {
 		for (auto & p : pitches(chan)) {
-			TempoMappingStash::iterator tms (tempo_mapping_stash.find ((void*) &p));
+			TempoMappingStash::iterator tms (tempo_mapping_stash.find (p.get()));
 			assert (tms != tempo_mapping_stash.end());
 			Beats beat_time (tmap->quarters_at_superclock (tms->second) - src_pos_offset);
 			p->set_time (beat_time);

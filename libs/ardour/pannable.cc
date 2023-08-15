@@ -266,3 +266,14 @@ Pannable::set_state (const XMLNode& root, int version)
 
 	return 0;
 }
+
+void
+Pannable::start_domain_bounce (Temporal::DomainBounceInfo&)
+{
+}
+
+void
+Pannable::finish_domain_bounce (Temporal::DomainBounceInfo&)
+{
+}
+

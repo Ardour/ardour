@@ -34,6 +34,7 @@
 
 #include "evoral/ControlSet.h"
 
+#include "temporal/domain_swap.h"
 #include "temporal/domain_provider.h"
 
 #include "ardour/libardour_visibility.h"
@@ -50,7 +51,7 @@ class AutomationControl;
 /* The inherited ControlSet is virtual because AutomatableSequence inherits
  * from this AND EvoralSequence, which is also a ControlSet
  */
-class LIBARDOUR_API Automatable : virtual public Evoral::ControlSet, public Slavable, public Temporal::TimeDomainProvider
+class LIBARDOUR_API Automatable : virtual public Evoral::ControlSet, public Slavable, public Temporal::TimeDomainProvider, public Temporal::TimeDomainSwapper
 {
 public:
 	Automatable(Session&, Temporal::TimeDomainProvider const &);
@@ -118,6 +119,9 @@ public:
 	XMLNode& get_automation_xml_state() const;
 
 	PBD::Signal0<void> AutomationStateChanged;
+
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
 
 protected:
 	Session& _a_session;

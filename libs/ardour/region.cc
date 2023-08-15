@@ -2270,27 +2270,39 @@ Region::time_domain() const
 }
 
 void
-Region::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+Region::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
-	assert (Temporal::domain_swap);
+	if (locked()) {
+		return;
+	}
 
 	/* recall that the _length member is a timecnt_t, and so holds both
 	 * position *and* length.
 	 */
 
-	if (_length.val().time_domain() == from) {
-		timecnt_t& l (_length.non_const_val());
-		l.set_time_domain (to);
-		Temporal::domain_swap->add (l);
+	if (_length.val().time_domain() != cmd.from) {
+		return;
 	}
+
+	timecnt_t& l (_length.non_const_val());
+
+	timecnt_t  saved (l);
+	saved.set_time_domain (cmd.to);
+
+	cmd.counts.insert (std::make_pair (&l, saved));
 }
 
 void
-Region::change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+Region::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
-	std::cerr << name() << " change td to " << to << std::endl;
-	if (_length.val().time_domain() == from) {
-		timecnt_t& l (_length.non_const_val());
-		l.set_time_domain (to);
-	}
+	clear_changes ();
+
+	Temporal::TimeDomainCntChanges::iterator tc = cmd.counts.find (&_length.non_const_val());
+	assert (tc != cmd.counts.end());
+
+	/* switch domains back (but with modified TempoMap, presumably */
+	tc->second.set_time_domain (cmd.from);
+	_length = tc->second;
+
+	send_change (Properties::length);
 }

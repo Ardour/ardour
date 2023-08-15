@@ -76,6 +76,9 @@ public:
 
 	bool has_state() const { return _has_state; }
 
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
+
 protected:
 	virtual XMLNode& state () const;
 

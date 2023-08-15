@@ -3530,17 +3530,38 @@ Playlist::rdiff_and_add_command (Session* session)
 }
 
 void
-Playlist::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+Playlist::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
 	RegionReadLock rlock (this);
 	for (auto & region  : regions) {
-		region->globally_change_time_domain (from, to);
+		region->start_domain_bounce (cmd);
 	}
+}
+
+
+void
+Playlist::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+	ThawList thawlist;
+
+	clear_changes ();
+
+	{
+		RegionWriteLock rlock (this);
+		for (auto & region  : regions) {
+			thawlist.add (region);
+			region->finish_domain_bounce (cmd);
+		}
+	}
+
+	thawlist.release ();
+	rdiff_and_add_command (&_session);
 }
 
 void
 Playlist::time_domain_changed ()
 {
+#if 0
 	using namespace Temporal;
 
 	TimeDomainProvider::time_domain_changed ();
@@ -3549,8 +3570,8 @@ Playlist::time_domain_changed ()
 	Temporal::TimeDomain from = (to == AudioTime ? BeatTime : AudioTime);
 
 	for (auto & region  : regions) {
-		region->change_time_domain (from, to);
+		region->swap_time_domain (from, to);
 	}
-
+#endif
 }
 

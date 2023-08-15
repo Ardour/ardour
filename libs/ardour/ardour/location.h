@@ -38,6 +38,8 @@
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 
+#include "temporal/domain_provider.h"
+#include "temporal/domain_swap.h"
 #include "temporal/types.h"
 
 #include "ardour/ardour.h"
@@ -173,8 +175,12 @@ public:
 
 	Temporal::TimeDomain position_time_domain() const { return _start.time_domain(); }
 
-	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
-	void change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+	/* Similar to, but not identical to the Temporal::TimeDomainSwapper API */
+
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
+
+	void set_time_domain (Temporal::TimeDomain);
 
 	class ChangeSuspender {
 		public:
@@ -209,7 +215,7 @@ private:
 		Lock,
 		Cue,
 		Scene,
-		Domain
+		Domain,
 	};
 
 	void emit_signal (Signal);
@@ -233,7 +239,7 @@ private:
 };
 
 /** A collection of session locations including unique dedicated locations (loop, punch, etc) */
-class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDestructible
+class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDestructible, public Temporal::TimeDomainProvider, public Temporal::TimeDomainSwapper
 {
 public:
 	typedef std::list<Location *> LocationList;
@@ -303,8 +309,11 @@ public:
 
 	void find_all_between (timepos_t const & start, timepos_t const & end, LocationList&, Location::Flags);
 
-	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
-	void change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+	void set_time_domain (Temporal::TimeDomain);
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
+
+	void time_domain_changed ();
 
 	PBD::Signal1<void,Location*> current_changed;
 

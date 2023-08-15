@@ -299,21 +299,42 @@ Session::any_duration_to_samples (samplepos_t position, AnyTime const & duration
 	return duration.samples;
 }
 
-PBD::Command*
-Session::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+void
+Session::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
-	PBD::Command* undo_command = new Temporal::TimeDomainCommand (from, to);
-
 	{
 		std::shared_ptr<RouteList const> rl (routes.reader());
 
 		for (auto const& r : *rl) {
-			r->globally_change_time_domain (from, to);
+			r->start_domain_bounce (cmd);
 		}
 	}
 
-	_playlists->globally_change_time_domain (from, to);
-	_locations->globally_change_time_domain (from, to);
-
-	return undo_command;
+	_playlists->start_domain_bounce(cmd);
+	_locations->start_domain_bounce (cmd);
 }
+
+void
+Session::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+	{
+		std::shared_ptr<RouteList const> rl (routes.reader());
+
+		for (auto const& r : *rl) {
+			r->finish_domain_bounce (cmd);
+		}
+	}
+
+	_playlists->finish_domain_bounce (cmd);
+	_locations->finish_domain_bounce (cmd);
+}
+
+void
+Session::time_domain_changed ()
+{
+	TimeDomainProvider::time_domain_changed ();
+
+	// _playlists->set_time_domain (time_domain());
+	// _locations->set_time_domain (time_domain());
+}
+

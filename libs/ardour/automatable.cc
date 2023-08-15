@@ -743,3 +743,13 @@ Automatable::find_prev_ac_event (std::shared_ptr<AutomationControl> c, timepos_t
 		++i;
 	}
 }
+
+void
+Automatable::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+}
+
+void
+Automatable::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+}

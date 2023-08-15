@@ -29,6 +29,7 @@
 
 #include <boost/utility.hpp>
 
+#include "temporal/domain_swap.h"
 #include "temporal/timeline.h"
 #include "temporal/range.h"
 
@@ -96,6 +97,7 @@ class LIBARDOUR_API Region
 	, public std::enable_shared_from_this<Region>
 	, public Trimmable
 	, public Movable
+	, public Temporal::TimeDomainSwapper
 {
 public:
 	typedef std::vector<std::shared_ptr<Source> > SourceList;
@@ -115,8 +117,8 @@ public:
 
 	const DataType& data_type () const { return _type; }
 	Temporal::TimeDomain time_domain() const;
-	virtual void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
-	virtual void change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
 
 	/** How the region parameters play together:
 	 *
@@ -386,7 +388,7 @@ public:
 	/* automation */
 
 	virtual std::shared_ptr<Evoral::Control>
-	control (const Evoral::Parameter& id, bool create=false) = 0;
+		control (const Evoral::Parameter& id, bool create=false) = 0;
 
 	virtual std::shared_ptr<const Evoral::Control>
 	control (const Evoral::Parameter& id) const = 0;

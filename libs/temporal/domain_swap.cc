@@ -16,39 +16,7 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "temporal/domainswap.h"
+#include "temporal/domain_swap.h"
 
 using namespace Temporal;
 
-void
-TimeDomainCommand::add (TimeDomainSwapper& tds)
-{
-	tds.DropReferences.connect_same_thread (tds_connections, boost::bind (&TimeDomainCommand::going_away, this, &tds));
-	swappers.insert (&tds);
-}
-
-void
-TimeDomainCommand::going_away (TimeDomainSwapper* tds)
-{
-	Swappers::iterator i = swappers.find (tds);
-
-	if (i != swappers.end()) {
-		swappers.erase (i);
-	}
-}
-
-void
-TimeDomainCommand::operator() ()
-{
-	for (auto & swapper : swappers) {
-		swapper->swap_domain (from, to);
-	}
-}
-
-void
-TimeDomainCommand::undo ()
-{
-	for (auto & swapper : swappers) {
-		swapper->swap_domain (to, from);
-	}
-}

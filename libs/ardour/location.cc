@@ -92,22 +92,8 @@ Location::Location (Session& s, timepos_t const & start, timepos_t const & end, 
 	set_position_time_domain (_session.time_domain());
 }
 
-void
-Location::set_position_time_domain (TimeDomain domain)
-{
-	if (_start.time_domain() == domain) {
-		return;
-	}
-
-	_start.set_time_domain (domain);
-	_end.set_time_domain (domain);
-
-	emit_signal (Domain); /* EMIT SIGNAL */
-}
-
 Location::Location (const Location& other)
 	: SessionHandleRef (other._session)
-	, StatefulDestructible()
 	, _name (other._name)
 	, _start (other._start)
 	, _end (other._end)
@@ -251,6 +237,26 @@ Location::actually_emit_signal (Signal s)
 			assert (0);
 			break;
 	}
+}
+
+
+void
+Location::set_position_time_domain (TimeDomain domain)
+{
+	if (_start.time_domain() == domain) {
+		return;
+	}
+
+	_start.set_time_domain (domain);
+	_end.set_time_domain (domain);
+
+	// emit_signal (Domain); /* EMIT SIGNAL */
+}
+
+void
+Location::set_time_domain (TimeDomain domain)
+{
+	set_position_time_domain (domain);
 }
 
 /** Set location name */
@@ -777,32 +783,53 @@ Location::set_scene_change (std::shared_ptr<SceneChange>  sc)
 }
 
 void
-Location::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+Location::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
-	assert (domain_swap);
-
-	if (_start.time_domain() == from) {
-
-		_start.set_time_domain (to);
-		_end.set_time_domain (to);
-
-		domain_swap->add (_start);
-		domain_swap->add (_end);
+	if (_start.time_domain() == cmd.to) {
+		/* has the right domain to begin with */
+		return;
 	}
+
+	timepos_t s (_start);
+	timepos_t e (_end);
+
+	s.set_time_domain (cmd.to);
+	e.set_time_domain (cmd.to);
+
+	cmd.positions.insert (std::make_pair (&_start, s));
+	cmd.positions.insert (std::make_pair (&_end, e));
 }
 
 void
-Location::change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+Location::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
-	if (_start.time_domain() == from) {
-		set_position_time_domain (to);
+	if (_start.time_domain() == cmd.to) {
+		/* had the right domain to begin with */
+		return;
 	}
+
+	TimeDomainPosChanges::iterator tpc;
+	timepos_t s;
+	timepos_t e;
+
+	tpc = cmd.positions.find (&_start);
+	assert (tpc != cmd.positions.end());
+	s = tpc->second;
+	s.set_time_domain (cmd.from);
+
+	tpc = cmd.positions.find (&_end);
+	assert (tpc != cmd.positions.end());
+	e = tpc->second;
+	e.set_time_domain (cmd.from);
+
+	set (s, e);
 }
 
 /*---------------------------------------------------------------------- */
 
 Locations::Locations (Session& s)
 	: SessionHandleRef (s)
+	, Temporal::TimeDomainProvider (s, false) /* session is our parent */
 {
 	current_location = 0;
 }
@@ -1890,21 +1917,28 @@ Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
 }
 
 void
-Locations::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+Locations::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
-	for (auto & l : locations) {
-		l->globally_change_time_domain (from, to);
-	}
 
+	for (auto & l : locations) {
+		l->start_domain_bounce (cmd);
+	}
 }
 
 void
-Locations::change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+Locations::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+	for (auto & l : locations) {
+		l->finish_domain_bounce (cmd);
+	}
+}
+
+void
+Locations::time_domain_changed ()
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 	for (auto & l : locations) {
-		l->change_time_domain (from, to);
+		l->set_time_domain (time_domain());
 	}
-
 }

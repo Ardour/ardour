@@ -4864,49 +4864,6 @@ TempoCommand::operator() ()
 	TempoMap::update (map);
 }
 
-DomainSwapInformation* Temporal::domain_swap (0);
-
-DomainSwapInformation*
-DomainSwapInformation::start(TimeDomain prev)
-{
-	TEMPO_MAP_ASSERT (!domain_swap);
-	domain_swap = new DomainSwapInformation (prev);
-	return domain_swap;
-}
-
-DomainSwapInformation::~DomainSwapInformation ()
-{
-	TEMPO_MAP_ASSERT (this == domain_swap);
-	undo ();
-	domain_swap = 0;
-}
-
-void
-DomainSwapInformation::clear ()
-{
-	counts.clear ();
-	positions.clear ();
-}
-
-void
-DomainSwapInformation::undo ()
-{
-	std::cerr << "DSI::undo on " << counts.size() << " lengths and " << positions.size() << " positions\n";
-	for (auto & c : counts) {
-		c->set_time_domain (previous);
-	}
-
-	for (auto & p : positions) {
-		p->set_time_domain (previous);
-	}
-
-	for (auto & tt : time_things) {
-		tt->swap_domain (previous == AudioTime ? BeatTime : AudioTime, previous);
-	}
-
-	clear ();
-}
-
 TempoMapCutBuffer::TempoMapCutBuffer (timecnt_t const & dur)
 	: _start_tempo (nullptr)
 	, _end_tempo (nullptr)

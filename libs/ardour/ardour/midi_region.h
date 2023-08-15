@@ -26,7 +26,6 @@
 #include <vector>
 
 #include "temporal/beats.h"
-#include "temporal/domainswap.h"
 #include "temporal/range.h"
 
 #include "pbd/string_convert.h"
@@ -55,7 +54,7 @@ class ThawList;
 
 template<typename T> class MidiRingBuffer;
 
-class LIBARDOUR_API MidiRegion : public Region, public Temporal::TimeDomainSwapper
+class LIBARDOUR_API MidiRegion : public Region
 {
   public:
 	~MidiRegion();
@@ -117,8 +116,8 @@ class LIBARDOUR_API MidiRegion : public Region, public Temporal::TimeDomainSwapp
 	                  timecnt_t const &               read_length,
 	                  MidiChannelFilter*              filter) const;
 
-	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
-	void swap_domain (Temporal::TimeDomain, Temporal::TimeDomain);
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
 
   protected:
 

@@ -689,11 +689,31 @@ SessionPlaylists::foreach (boost::function<void(std::shared_ptr<const Playlist>)
 }
 
 void
-SessionPlaylists::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+SessionPlaylists::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
 	Glib::Threads::Mutex::Lock lm (lock);
 
 	for (auto & pl : playlists) {
-		pl->globally_change_time_domain (from, to);
+		pl->start_domain_bounce (cmd);
+	}
+}
+
+void
+SessionPlaylists::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+	/* We cannot hold the playlist lock while finishing a domain bounce
+	 */
+
+	std::vector<std::shared_ptr<Playlist> > copy;
+
+	{
+		Glib::Threads::Mutex::Lock lm (lock);
+		for (auto & pl : playlists) {
+			copy.push_back (pl);
+		}
+	}
+
+	for (auto & pl : copy) {
+		pl->finish_domain_bounce (cmd);
 	}
 }

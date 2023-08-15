@@ -60,6 +60,8 @@ public:
 	void add_command (PBD::Command* const);
 	void remove_command (PBD::Command* const);
 
+	std::list<PBD::Command*>::size_type size() const { return actions.size(); }
+
 	void operator() ();
 	void undo ();
 	void redo ();

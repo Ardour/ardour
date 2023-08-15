@@ -614,23 +614,24 @@ MidiRegion::merge (std::shared_ptr<MidiRegion const> other_region)
 }
 
 void
-MidiRegion::swap_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+MidiRegion::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
-	if (from == Temporal::BeatTime) {
-		model()->create_mapping_stash (source_position().beats());
-	} else {
-		model()->rebuild_from_mapping_stash (source_position().beats());
+	/* Deal with the region position & length */
 
-		_model_changed_connection.disconnect ();
-		model()->ContentsChanged ();
-		model()->ContentsChanged.connect_same_thread (_model_changed_connection, boost::bind (&MidiRegion::model_contents_changed, this));
+	Region::start_domain_bounce (cmd);
+	if (cmd.from == Temporal::BeatTime) {
+		model()->create_mapping_stash (source_position().beats());
 	}
 }
 
 void
-MidiRegion::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+MidiRegion::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
-	Region::globally_change_time_domain (from, to);
-	swap_domain (from, to);
-	Temporal::domain_swap->add (*this);
+	Region::finish_domain_bounce (cmd);
+
+	model()->rebuild_from_mapping_stash (source_position().beats());
+
+	_model_changed_connection.disconnect ();
+	model()->ContentsChanged ();
+	model()->ContentsChanged.connect_same_thread (_model_changed_connection, boost::bind (&MidiRegion::model_contents_changed, this));
 }
