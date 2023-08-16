@@ -20,11 +20,13 @@
 #define __temporal_domain_provider_h__
 
 #include "pbd/signals.h"
+#include "pbd/stateful.h"
+
 #include "temporal/types.h"
 
 namespace Temporal {
 
-class TimeDomainProvider {
+class TimeDomainProvider  {
   public:
 	explicit TimeDomainProvider () : have_domain (false), parent (nullptr) {}
 	explicit TimeDomainProvider (TimeDomain td) : have_domain (true), domain (td), parent (nullptr) {}
@@ -37,6 +39,11 @@ class TimeDomainProvider {
 	TimeDomainProvider (TimeDomainProvider const & parnt, bool) : have_domain (false), parent (&parnt) { listen(); }
 
 	virtual ~TimeDomainProvider() {}
+
+	/* replicates part of Stateful API but we do not want inheritance */
+
+	XMLNode& get_state () const;
+	int set_state (const XMLNode&, int version);
 
 	TimeDomainProvider& operator= (TimeDomainProvider const & other) {
 		if (this != &other) {
