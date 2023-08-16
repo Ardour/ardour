@@ -1919,19 +1919,28 @@ Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
 void
 Locations::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
-	Glib::Threads::RWLock::WriterLock lm (_lock);
+	_session.add_command (new MementoCommand<Locations> (*this, &get_state(), nullptr));
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_lock);
 
-	for (auto & l : locations) {
-		l->start_domain_bounce (cmd);
+		for (auto & l : locations) {
+			l->start_domain_bounce (cmd);
+		}
 	}
 }
 
 void
 Locations::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
-	for (auto & l : locations) {
-		l->finish_domain_bounce (cmd);
+	{
+		/* We modify locations, but we do not change the list */
+		Glib::Threads::RWLock::ReaderLock lm (_lock);
+
+		for (auto & l : locations) {
+			l->finish_domain_bounce (cmd);
+		}
 	}
+	_session.add_command (new MementoCommand<Locations> (*this, nullptr, &get_state()));
 }
 
 void
