@@ -3066,8 +3066,6 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		}
 
 	} else if ((after && after->bbt() == bbt )) {
-		std::cerr << "we are on the LEFT side of an EXISTING tempo marker" << bbt << " == " << after->bbt() << "\n";
-
 		before = const_cast<TempoPoint*> (&tempo);
 		focus = after;
 
@@ -3085,8 +3083,6 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		focus = &tempo;
 
 	} else {
-		std::cerr << "ADD TEMPO MARKER " << bbt << " != " << tempo.bbt() << "\n";
-
 		/* Add a new tempo marker at the nearest beat point
 		   (essentially the snapped grab point for the drag), so that
 		   it becomes the middle one of three used by the twist tempo
