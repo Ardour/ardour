@@ -28,7 +28,6 @@ temporal_sources = [
     'debug.cc',
     'bbt_time.cc',
     'beats.cc',
-    'domain_swap.cc',
     'enums.cc',
     'range.cc',
     'superclock.cc',
