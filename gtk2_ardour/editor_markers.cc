@@ -227,11 +227,7 @@ Editor::location_changed (Location *location)
 		return;
 	}
 
-	if (location->position_time_domain() == Temporal::BeatTime) {
-		lam->set_name (string_compose ("%1%2", u8"\u266B", location->name ())); // BEAMED EIGHTH NOTES
-	} else {
-		lam->set_name (location->name ());
-	}
+	lam->set_name (location->name ());
 
 	if (location->is_cue_marker()) {
 		lam->start->set_cue_index (location->cue_id());
