@@ -2247,14 +2247,14 @@ ControlList::start_domain_bounce (Temporal::DomainBounceInfo& dbi)
 	for (auto const & e : _events) {
 		timepos_t t (e->when);
 		t.set_time_domain (dbi.to);
-		dbi.positions.insert (std::make_pair (&e->when, e->when));
+		dbi.positions.insert (std::make_pair (&e->when, t));
 	}
 }
 
 void
 ControlList::finish_domain_bounce (Temporal::DomainBounceInfo& dbi)
 {
-	if (time_domain() == dbi.from) {
+	if (time_domain() == dbi.to) {
 		return;
 	}
 

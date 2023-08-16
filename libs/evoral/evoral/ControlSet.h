@@ -30,6 +30,7 @@
 #include <glibmm/threads.h>
 #include "pbd/signals.h"
 
+#include "temporal/domain_swap.h"
 #include "temporal/types.h"
 
 #include "evoral/visibility.h"
@@ -41,7 +42,8 @@ namespace Evoral {
 class Control;
 class ControlEvent;
 
-class LIBEVORAL_API ControlSet : public boost::noncopyable {
+class LIBEVORAL_API ControlSet : public boost::noncopyable, public Temporal::TimeDomainSwapper
+{
 public:
 	ControlSet ();
 	ControlSet (const ControlSet&);
@@ -70,6 +72,9 @@ public:
 	void what_has_data(std::set<Parameter>&) const;
 
 	Glib::Threads::Mutex& control_lock() const { return _control_lock; }
+
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
 
 protected:
 	virtual void control_list_marked_dirty () {}

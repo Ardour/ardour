@@ -619,9 +619,12 @@ MidiRegion::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 	/* Deal with the region position & length */
 
 	Region::start_domain_bounce (cmd);
-	if (cmd.from == Temporal::BeatTime) {
-		model()->create_mapping_stash (source_position().beats());
+	if (cmd.from != Temporal::BeatTime) {
+		return;
 	}
+
+	model()->start_domain_bounce (cmd);
+	model()->create_mapping_stash (source_position().beats());
 }
 
 void
@@ -629,7 +632,12 @@ MidiRegion::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
 	Region::finish_domain_bounce (cmd);
 
+	if (cmd.from != Temporal::BeatTime) {
+		return;
+	}
+
 	model()->rebuild_from_mapping_stash (source_position().beats());
+	model()->finish_domain_bounce (cmd);
 
 	_model_changed_connection.disconnect ();
 	model()->ContentsChanged ();
