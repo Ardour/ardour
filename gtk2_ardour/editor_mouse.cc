@@ -3012,6 +3012,8 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		return;
 	}
 
+	/* The reversible command starts here, must be ended/aborted in drag */
+	begin_reversible_command ("");
 	domain_bounce_info = new Temporal::DomainBounceInfo (Temporal::BeatTime, Temporal::AudioTime);
 	Temporal::TempoMap::WritableSharedPtr map = begin_tempo_mapping (*domain_bounce_info);
 
@@ -3048,11 +3050,11 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 	/* Create a new marker, or use the one under the mouse */
 
 	if (tempo.bbt() == bbt) {
-		std::cerr << "we are on the RIGHT side of an EXISTING tempo marker" << bbt << " == " << tempo.bbt() << "\n";
 
 		/* special case 1: we are on the right side of the FIRST marker: do not allow the user to manipulate the very first (session global) tempo */
 		if (!before) {
 			abort_tempo_mapping ();
+			abort_reversible_command ();
 			return;
 		}
 
@@ -3096,26 +3098,23 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		TempoPoint& added = const_cast<TempoPoint&> (map->set_tempo (copied_no_ramp, bbt));
 		focus = &added;
 		reset_tempo_marks ();
-
-		map->dump (std::cerr);
 	}
 
-	/* Reversible commands start here, must be ended/aborted in drag */
+	/* Reversible commands get named here, now that we understand what we're doing */
 
 	if (at_end) {
-		begin_reversible_command (_("tempo mapping: end-stretch"));
-		std::cerr << "END STRETCH\n";
+		_session->current_reversible_command()->set_name (_("tempo mapping: end-stretch"));
 		_drags->set (new MappingEndDrag (this, item, map, tempo, *focus, *before_state), event);
 		return;
 	}
 
 	if (before && focus && after) {
-		std::cerr << "TWIST\n";
+		_session->current_reversible_command()->set_name (_("tempo mapping: end-stretch"));
 		begin_reversible_command (_("tempo mapping: mid-twist"));
 		_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after, *before_state, ramped), event);
 	} else if (ramped && focus && after) {
 		/* special case 4: user is manipulating a beat line after the INITIAL tempo marker, so there is no prior marker*/
-		std::cerr << "TWIST ON START\n";
+		_session->current_reversible_command()->set_name (_("tempo mapping: end-stretch"));
 		begin_reversible_command (_("tempo mapping: mid-twist"));
 		before = focus; /* this is unused in MappingTwistDrag, when ramped is true, but let's not pass in garbage */
 		_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after, *before_state, ramped), event);
