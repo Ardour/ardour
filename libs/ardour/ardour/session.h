@@ -1121,6 +1121,8 @@ public:
 		return _current_trans && !_current_trans->empty ();
 	}
 
+	PBD::UndoTransaction* current_reversible_command() { return _current_trans; }
+
 	/**
 	 * Abort reversible command IFF no undo changes
 	 * have been collected.
