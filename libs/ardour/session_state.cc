@@ -3346,7 +3346,6 @@ Session::add_stateful_diff_command (std::shared_ptr<PBD::StatefulDestructible> s
 void
 Session::begin_reversible_command (const string& name)
 {
-	std::cerr << "begin REV-C [" << name << "]\n";
 	begin_reversible_command (g_quark_from_string (name.c_str ()));
 }
 
@@ -3396,7 +3395,6 @@ Session::abort_reversible_command ()
 	if (_current_trans != 0) {
 		DEBUG_UNDO_HISTORY (
 		    string_compose ("Abort Reversible Command: %1", _current_trans->name ()));
-		std::cerr << "abort REV-C [" << _current_trans->name() << "]\n";
 		_current_trans->clear();
 		delete _current_trans;
 		_current_trans = 0;
@@ -3423,7 +3421,6 @@ Session::commit_reversible_command (Command *cmd)
 		return;
 	}
 
-	std::cerr << "commit REV-C [" << _current_trans->name() << "]\n";
 	struct timeval now;
 
 	if (cmd) {
