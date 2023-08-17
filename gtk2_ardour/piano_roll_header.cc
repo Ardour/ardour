@@ -497,35 +497,93 @@ PianoRollHeader::get_note_name (int note)
 bool
 PianoRollHeader::on_motion_notify_event (GdkEventMotion* ev)
 {
-	int note = _view.y_to_note (ev->y);
-	set_note_highlight (note);
+	if (!_scroomer_drag && ev->x < _scroomer_size){
+		Gdk::Cursor m_Cursor;
+		double scroomer_top = max(1.0, (1.0 - ((_adj.get_value()+_adj.get_page_size()) / 127.0)) * get_height () );
+		double scroomer_bottom = (1.0 - (_adj.get_value () / 127.0)) * get_height ();
+		if (ev->y > scroomer_top - 5 && ev->y < scroomer_top + 5){
+			m_Cursor = Gdk::Cursor (Gdk::TOP_SIDE);
+			get_window()->set_cursor(m_Cursor);
+			_scroomer_state = TOP;
+		}else if (ev->y > scroomer_bottom - 5 && ev->y < scroomer_bottom + 5){
+			m_Cursor = Gdk::Cursor (Gdk::BOTTOM_SIDE);
+			get_window()->set_cursor(m_Cursor);
+			_scroomer_state = BOTTOM;
+		}else {
+			_scroomer_state = MOVE;
+			get_window()->set_cursor();
+		}
+	}
 
-	if (_dragging) {
-		if (false /*editor().current_mouse_mode() == Editing::MouseRange*/) { //ToDo:  fix this.  this mode is buggy, and of questionable utility anyway
+	if (_scroomer_drag){
+		double pixel2val = 127.0 / get_height();
+		double delta = _old_y - ev->y;
+		double val_at_pointer = (delta * pixel2val);
+		double real_val_at_pointer = 127.0 - (ev->y * pixel2val);
+		double note_range = _adj.get_page_size ();
 
-			/* select note range */
+		switch (_scroomer_button_state){
+			case MOVE:
+				_fract += val_at_pointer;
+				_fract = (_fract + note_range > 127.0)? 127.0 - note_range : _fract;
+				_fract = max(0.0, _fract);
+				_adj.set_value (min(_fract, 127.0 - note_range));
+				break;
+			case TOP:
+				real_val_at_pointer = real_val_at_pointer <= _saved_top_val? _adj.get_value() + _adj.get_page_size() : real_val_at_pointer;
+				real_val_at_pointer = min(127.0, real_val_at_pointer);
+				if (_note_height >= 18.5){
+					_saved_top_val  = min(_adj.get_value() + _adj.get_page_size (), 127.0);
+				}else _saved_top_val = 0.0;
+				//if we are at largest note size & the user is moving down don't do anything
+				//FIXME we are using a heuristic of 18.5 for max note size, but this changes when track size is small to 19.5?
+				_view.apply_note_range (_adj.get_value (), real_val_at_pointer, true);
+				break;
+			case BOTTOM:
+				real_val_at_pointer = max(0.0, real_val_at_pointer);
+				real_val_at_pointer = real_val_at_pointer >= _saved_bottom_val? _adj.get_value() : real_val_at_pointer;
+				if (_note_height >= 18.5){
+					_saved_bottom_val  = _adj.get_value();
+				}else _saved_bottom_val = 127.0;
+				_view.apply_note_range (real_val_at_pointer, _adj.get_value () + _adj.get_page_size (), true);
+				break;
+			default:
+				break;
+		}
+	}else{
+		int note = _view.y_to_note(ev->y);
+		set_note_highlight (note);
 
-			if (Keyboard::no_modifiers_active (ev->state)) {
-				AddNoteSelection (note); // EMIT SIGNAL
-			}
+		if (_dragging) {
 
-		} else {
-			/* play notes */
-			/* redraw already taken care of above in set_note_highlight */
-			if (_clicked_note != NO_MIDI_NOTE && _clicked_note != note) {
-				_active_notes[_clicked_note] = false;
-				send_note_off (_clicked_note);
+			if ( false /*editor().current_mouse_mode() == Editing::MouseRange*/ ) {   //ToDo:  fix this.  this mode is buggy, and of questionable utility anyway
 
-				_clicked_note = note;
+				/* select note range */
 
-				if (!_active_notes[note]) {
-					_active_notes[note] = true;
-					send_note_on (note);
+				if (Keyboard::no_modifiers_active (ev->state)) {
+					AddNoteSelection (note); // EMIT SIGNAL
+				}
+
+			} else {
+				/* play notes */
+				/* redraw already taken care of above in set_note_highlight */
+				if (_clicked_note != NO_MIDI_NOTE && _clicked_note != note) {
+					_active_notes[_clicked_note] = false;
+					send_note_off(_clicked_note);
+
+					_clicked_note = note;
+
+					if (!_active_notes[note]) {
+						_active_notes[note] = true;
+						send_note_on(note);
+					}
 				}
 			}
 		}
 	}
-
+	_adj.value_changed ();
+	queue_draw ();
+	_old_y = ev->y;
 	//win->process_updates(false);
 
 	return true;
@@ -540,6 +598,7 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 		_old_y = ev->y;
 		_fract = _adj.get_value();
 		_fract_top = _adj.get_value() + _adj.get_page_size();
+		std::cerr << "scroomer drag ON\n";
 		return true;
 	}else {
 		int note = _view.y_to_note(ev->y);
@@ -583,6 +642,7 @@ PianoRollHeader::on_button_release_event (GdkEventButton* ev)
 {
 	if (_scroomer_drag){
 		_scroomer_drag = false;
+		std::cerr << "scroomer drag OFF\n";
 	}
 	int note = _view.y_to_note(ev->y);
 
