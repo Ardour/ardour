@@ -3672,6 +3672,8 @@ Editor::begin_reversible_selection_op (string name)
 	}
 }
 
+#include "pbd/stacktrace.h"
+
 void
 Editor::abort_reversible_selection_op ()
 {
@@ -3789,8 +3791,6 @@ Editor::abort_reversible_command ()
 		_session->abort_reversible_command ();
 	}
 }
-
-#include "pbd/stacktrace.h"
 
 void
 Editor::commit_reversible_command ()
