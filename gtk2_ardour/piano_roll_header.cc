@@ -31,24 +31,25 @@
 #include "piano_roll_header.h"
 #include "public_editor.h"
 #include "ui_config.h"
+#include "midi++/midnam_patch.h"
+
+#include "pbd/i18n.h"
 
 using namespace std;
 using namespace Gtkmm2ext;
 
-PianoRollHeader::Color PianoRollHeader::white             = PianoRollHeader::Color (0.77f, 0.78f, 0.76f);
-PianoRollHeader::Color PianoRollHeader::white_highlight   = PianoRollHeader::Color (1.00f, 0.40f, 0.40f);
-PianoRollHeader::Color PianoRollHeader::white_shade_light = PianoRollHeader::Color (0.95f, 0.95f, 0.95f);
-PianoRollHeader::Color PianoRollHeader::white_shade_dark  = PianoRollHeader::Color (0.56f, 0.56f, 0.56f);
+PianoRollHeader::Color PianoRollHeader::white = PianoRollHeader::Color(0.77f, 0.78f, 0.76f);
+PianoRollHeader::Color PianoRollHeader::white_highlight = PianoRollHeader::Color(1.00f, 0.40f, 0.40f);
 
-PianoRollHeader::Color PianoRollHeader::black             = PianoRollHeader::Color (0.24f, 0.24f, 0.24f);
-PianoRollHeader::Color PianoRollHeader::black_highlight   = PianoRollHeader::Color (0.60f, 0.10f, 0.10f);
-PianoRollHeader::Color PianoRollHeader::black_shade_light = PianoRollHeader::Color (0.46f, 0.46f, 0.46f);
-PianoRollHeader::Color PianoRollHeader::black_shade_dark  = PianoRollHeader::Color (0.1f, 0.1f, 0.1f);
+PianoRollHeader::Color PianoRollHeader::black = PianoRollHeader::Color(0.14f, 0.14f, 0.14f);
+PianoRollHeader::Color PianoRollHeader::black_highlight = PianoRollHeader::Color(0.60f, 0.10f, 0.10f);
 
-PianoRollHeader::Color::Color ()
-	: r (1.0f)
-	, g (1.0f)
-	, b (1.0f)
+PianoRollHeader::Color PianoRollHeader::gray = PianoRollHeader::Color(0.50f, 0.50f, 0.50f);
+
+PianoRollHeader::Color::Color()
+	: r(1.0f)
+	, g(1.0f)
+	, b(1.0f)
 {
 }
 
@@ -67,12 +68,38 @@ PianoRollHeader::Color::set (const PianoRollHeader::Color& c)
 	b = c.b;
 }
 
-PianoRollHeader::PianoRollHeader (MidiStreamView& v)
-	: _view (v)
+PianoRollHeader::PianoRollHeader(MidiStreamView& v)
+	: _adj(v.note_range_adjustment)
+	, _view(v)
+	, _font_descript ("Sans Bold")
+	, _font_descript_big_c ("Sans")
+	, _font_descript_midnam ("Sans")
 	, _highlighted_note (NO_MIDI_NOTE)
 	, _clicked_note (NO_MIDI_NOTE)
 	, _dragging (false)
+	, _scroomer_size (60.f)
+	, _scroomer_drag (false)
+	, _old_y (0.0)
+	, _fract (0.0)
+	, _scroomer_state (NONE)
+	, _scroomer_button_state (NONE)
+	, _saved_top_val (0.0)
+	, _saved_bottom_val (127.0)
+	, _mini_map_display (false)
 {
+	_layout = Pango::Layout::create (get_pango_context());
+	_big_c_layout = Pango::Layout::create (get_pango_context());
+	_font_descript_big_c.set_absolute_size (10.0 * Pango::SCALE);
+	_big_c_layout->set_font_description(_font_descript_big_c);
+	_midnam_layout = Pango::Layout::create (get_pango_context());
+
+	_adj.set_lower(0);
+	_adj.set_upper(127);
+
+	/* set minimum view range to one octave */
+	//set_min_page_size(12);
+
+	//_adj = v->note_range_adjustment;
 	add_events (Gdk::BUTTON_PRESS_MASK |
 	            Gdk::BUTTON_RELEASE_MASK |
 	            Gdk::POINTER_MOTION_MASK |
@@ -98,368 +125,373 @@ create_path (Cairo::RefPtr<Cairo::Context> cr, double x[], double y[], int start
 }
 
 inline void
-render_rect (Cairo::RefPtr<Cairo::Context> cr, int /*note*/, double x[], double y[],
-             PianoRollHeader::Color& bg, PianoRollHeader::Color& tl_shadow, PianoRollHeader::Color& br_shadow)
+render_rect(Cairo::RefPtr<Cairo::Context> cr, int note, double x[], double y[],
+	     PianoRollHeader::Color& bg)
 {
-	cr->set_source_rgb (bg.r, bg.g, bg.b);
-	create_path (cr, x, y, 0, 4);
-	cr->fill ();
-
-	cr->set_source_rgb (tl_shadow.r, tl_shadow.g, tl_shadow.b);
-	create_path (cr, x, y, 0, 2);
-	cr->stroke ();
-
-	cr->set_source_rgb (br_shadow.r, br_shadow.g, br_shadow.b);
-	create_path (cr, x, y, 2, 4);
-	cr->stroke ();
-}
-
-inline void
-render_cf (Cairo::RefPtr<Cairo::Context> cr, int /*note*/, double x[], double y[],
-           PianoRollHeader::Color& bg, PianoRollHeader::Color& tl_shadow, PianoRollHeader::Color& br_shadow)
-{
-	cr->set_source_rgb (bg.r, bg.g, bg.b);
-	create_path (cr, x, y, 0, 6);
-	cr->fill ();
-
-	cr->set_source_rgb (tl_shadow.r, tl_shadow.g, tl_shadow.b);
-	create_path (cr, x, y, 0, 4);
-	cr->stroke ();
-
-	cr->set_source_rgb (br_shadow.r, br_shadow.g, br_shadow.b);
-	create_path (cr, x, y, 4, 6);
-	cr->stroke ();
-}
-
-inline void
-render_eb (Cairo::RefPtr<Cairo::Context> cr, int /*note*/, double x[], double y[],
-           PianoRollHeader::Color& bg, PianoRollHeader::Color& tl_shadow, PianoRollHeader::Color& br_shadow)
-{
-	cr->set_source_rgb (bg.r, bg.g, bg.b);
-	create_path (cr, x, y, 0, 6);
-	cr->fill ();
-
-	cr->set_source_rgb (tl_shadow.r, tl_shadow.g, tl_shadow.b);
-	create_path (cr, x, y, 0, 2);
-	cr->stroke ();
-	create_path (cr, x, y, 4, 5);
-	cr->stroke ();
-
-	cr->set_source_rgb (br_shadow.r, br_shadow.g, br_shadow.b);
-	create_path (cr, x, y, 2, 4);
-	cr->stroke ();
-	create_path (cr, x, y, 5, 6);
-	cr->stroke ();
-}
-
-inline void
-render_dga (Cairo::RefPtr<Cairo::Context> cr, int /*note*/, double x[], double y[],
-            PianoRollHeader::Color& bg, PianoRollHeader::Color& tl_shadow, PianoRollHeader::Color& br_shadow)
-{
-	cr->set_source_rgb (bg.r, bg.g, bg.b);
-	create_path (cr, x, y, 0, 8);
-	cr->fill ();
-
-	cr->set_source_rgb (tl_shadow.r, tl_shadow.g, tl_shadow.b);
-	create_path (cr, x, y, 0, 4);
-	cr->stroke ();
-	create_path (cr, x, y, 6, 7);
-	cr->stroke ();
-
-	cr->set_source_rgb (br_shadow.r, br_shadow.g, br_shadow.b);
-	create_path (cr, x, y, 4, 6);
-	cr->stroke ();
-	create_path (cr, x, y, 7, 8);
-	cr->stroke ();
+	cr->set_source_rgb(bg.r, bg.g, bg.b);
+	create_path(cr, x, y, 0, 4);
+	cr->fill();
 }
 
 void
-PianoRollHeader::get_path (PianoRollHeader::ItemType note_type, int note, double x[], double y[])
+PianoRollHeader::render_scroomer(Cairo::RefPtr<Cairo::Context> cr)
 {
-	double y_pos = floor (_view.note_to_y (note)) + 1.5f;
+	double scroomer_top = max(1.0, (1.0 - ((_adj.get_value()+_adj.get_page_size()) / 127.0)) * get_height () );
+	double scroomer_bottom = (1.0 - (_adj.get_value () / 127.0)) * get_height ();
+	double scroomer_width = _scroomer_size;
+
+	cr->set_source_rgba(white.r, white.g, white.b, 0.15);
+	cr->move_to(1.f, scroomer_top);
+	cr->line_to(scroomer_width - 1.f, scroomer_top);
+	cr->line_to(scroomer_width - 1.f, scroomer_bottom);
+	cr->line_to(1.f, scroomer_bottom);
+	cr->line_to(1.f, scroomer_top);
+	cr->fill();
+}
+
+bool
+PianoRollHeader::on_scroll_event (GdkEventScroll* ev)
+{
+	int note_range = _adj.get_page_size ();
+	int note_lower = _adj.get_value ();
+
+	if(ev->state == GDK_SHIFT_MASK){
+		switch (ev->direction) {
+		case GDK_SCROLL_UP: //ZOOM IN
+			_view.apply_note_range (min(note_lower + 1, 127), max(note_lower + note_range - 1,0), true);
+			break;
+		case GDK_SCROLL_DOWN: //ZOOM OUT
+			_view.apply_note_range (max(note_lower - 1,0), min(note_lower + note_range + 1, 127), true);
+			break;
+		default:
+			return false;
+		}
+	}else{
+		switch (ev->direction) {
+		case GDK_SCROLL_UP:
+			_adj.set_value (min (note_lower + 1, 127 - note_range));
+			break;
+		case GDK_SCROLL_DOWN:
+			_adj.set_value (note_lower - 1.0);
+			break;
+		default:
+			return false;
+		}
+	}
+	std::cout << "hilight_note: " << std::to_string(_highlighted_note) << " Hov_Note: " << std::to_string(_view.y_to_note(ev->y)) << " Val: " << _adj.get_value() << " upper: " << _adj.get_upper() << " lower: " << _adj.get_lower() << " page_size: "<< _adj.get_page_size () << std::endl;
+	_adj.value_changed ();
+	queue_draw ();
+	return true;
+}
+
+
+void
+PianoRollHeader::get_path (int note, double x[], double y[])
+{
+	double scroomer_size = _scroomer_size;
+	double y_pos = floor(_view.note_to_y(note));
 	double note_height;
-	double other_y1 = floor (_view.note_to_y (note + 1)) + floor (_note_height / 2.0f) + 2.5f;
-	double other_y2 = floor (_view.note_to_y (note - 1)) + floor (_note_height / 2.0f) + 1.0f;
-	double width    = get_width ();
+	_raw_note_height = floor(_view.note_to_y(note - 1)) - y_pos;
+	double width = get_width() - 1.0f;
 
 	if (note == 0) {
-		note_height = floor (_view.contents_height ()) - y_pos + 2.;
+		note_height = floor(_view.contents_height()) - y_pos;
 	} else {
-		note_height = floor (_view.note_to_y (note - 1)) - y_pos + 2.;
+		note_height = _raw_note_height <= 3 ? _raw_note_height : _raw_note_height - 1.f;
 	}
 
-	switch (note_type) {
-		case BLACK_SEPARATOR:
-			x[0] = 1.5f;
-			y[0] = y_pos;
-			x[1] = _black_note_width;
-			y[1] = y_pos;
-			break;
-		case BLACK_MIDDLE_SEPARATOR:
-			x[0] = _black_note_width;
-			y[0] = y_pos + floor (_note_height / 2.0f);
-			x[1] = width - 1.0f;
-			y[1] = y[0];
-			break;
-		case BLACK:
-			x[0] = 1.5f;
-			y[0] = y_pos + note_height - 0.5f;
-			x[1] = 1.5f;
-			y[1] = y_pos + 1.0f;
-			x[2] = _black_note_width;
-			y[2] = y_pos + 1.0f;
-			x[3] = _black_note_width;
-			y[3] = y_pos + note_height - 0.5f;
-			x[4] = 1.5f;
-			y[4] = y_pos + note_height - 0.5f;
-			return;
-		case WHITE_SEPARATOR:
-			x[0] = 1.5f;
-			y[0] = y_pos;
-			x[1] = width - 1.5f;
-			y[1] = y_pos;
-			break;
-		case WHITE_RECT:
-			x[0] = 1.5f;
-			y[0] = y_pos + note_height - 0.5f;
-			x[1] = 1.5f;
-			y[1] = y_pos + 1.0f;
-			x[2] = width - 1.5f;
-			y[2] = y_pos + 1.0f;
-			x[3] = width - 1.5f;
-			y[3] = y_pos + note_height - 0.5f;
-			x[4] = 1.5f;
-			y[4] = y_pos + note_height - 0.5f;
-			return;
-		case WHITE_CF:
-			x[0] = 1.5f;
-			y[0] = y_pos + note_height - 1.5f;
-			x[1] = 1.5f;
-			y[1] = y_pos + 1.0f;
-			x[2] = _black_note_width + 1.0f;
-			y[2] = y_pos + 1.0f;
-			x[3] = _black_note_width + 1.0f;
-			y[3] = other_y1;
-			x[4] = width - 1.5f;
-			y[4] = other_y1;
-			x[5] = width - 1.5f;
-			y[5] = y_pos + note_height - 1.5f;
-			x[6] = 1.5f;
-			y[6] = y_pos + note_height - 1.5f;
-			return;
-		case WHITE_EB:
-			x[0] = 1.5f;
-			y[0] = y_pos + note_height - 1.5f;
-			x[1] = 1.5f;
-			y[1] = y_pos + 1.0f;
-			x[2] = width - 1.5f;
-			y[2] = y_pos + 1.0f;
-			x[3] = width - 1.5f;
-			y[3] = other_y2;
-			x[4] = _black_note_width + 1.0f;
-			y[4] = other_y2;
-			x[5] = _black_note_width + 1.0f;
-			y[5] = y_pos + note_height - 1.5f;
-			x[6] = 1.5f;
-			y[6] = y_pos + note_height - 1.5f;
-			return;
-		case WHITE_DGA:
-			x[0] = 1.5f;
-			y[0] = y_pos + note_height - 1.5f;
-			x[1] = 1.5f;
-			y[1] = y_pos + 1.0f;
-			x[2] = _black_note_width + 1.0f;
-			y[2] = y_pos + 1.0f;
-			x[3] = _black_note_width + 1.0f;
-			y[3] = other_y1;
-			x[4] = width - 1.5f;
-			y[4] = other_y1;
-			x[5] = width - 1.5f;
-			y[5] = other_y2;
-			x[6] = _black_note_width + 1.0f;
-			y[6] = other_y2;
-			x[7] = _black_note_width + 1.0f;
-			y[7] = y_pos + note_height - 1.5f;
-			x[8] = 1.5f;
-			y[8] = y_pos + note_height - 1.5f;
-			return;
-		default:
-			return;
-	}
+	x[0] = scroomer_size;
+	y[0] = y_pos + note_height;
+
+	x[1] = scroomer_size;
+	y[1] = y_pos;
+
+	x[2] = width;
+	y[2] = y_pos;
+
+	x[3] = width;
+	y[3] = y_pos + note_height;
+
+	x[4] = scroomer_size;
+	y[4] = y_pos + note_height;
+	return;
 }
 
 bool
 PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 {
 	GdkRectangle& rect = ev->area;
-	double        font_size;
-	int           lowest, highest;
-	double        x[9];
-	double        y[9];
-	Color         bg, tl_shadow, br_shadow;
-	int           oct_rel;
+	int lowest, highest;
+	PianoRollHeader::Color bg;
+	Cairo::RefPtr<Cairo::Context> cr = get_window()->create_cairo_context();
+	double x[9];
+	double y[9];
+	int oct_rel;
+	int y1 = max(rect.y, 0);
+	int y2 = min(rect.y + rect.height, (int) floor(_view.contents_height()));
+	double av_note_height = get_height () / _adj.get_page_size ();
+	int bc_height, bc_width;
 
-	int y1 = max (rect.y, 0);
-	int y2 = min (rect.y + rect.height, (int)floor (_view.contents_height () - 1.0f));
+	//Reduce the frequency of Pango layout resizing
+	//if (int(_old_av_note_height) != int(av_note_height)) {
+	//Set Pango layout keyboard c's size
+	_font_descript.set_absolute_size (av_note_height * 0.7 * Pango::SCALE);
+	_layout->set_font_description(_font_descript);
 
-	Cairo::RefPtr<Cairo::Context>        cr  = get_window ()->create_cairo_context ();
-	Cairo::RefPtr<Cairo::LinearGradient> pat = Cairo::LinearGradient::create (0, 0, _black_note_width, 0);
+	//change mode of midnam display
+	if (av_note_height >= 8.0) {
+		_mini_map_display = false;
+	} else {
+		_mini_map_display = true;
+	}
 
-	//Cairo::TextExtents te;
-	lowest  = max (_view.lowest_note (), _view.y_to_note (y2));
-	highest = min (_view.highest_note (), _view.y_to_note (y1));
+	//Set Pango layout midnam size
+	_font_descript_midnam.set_absolute_size (max(8.0 * 0.7 * Pango::SCALE, (int)av_note_height * 0.7 * Pango::SCALE));
+
+	_midnam_layout->set_font_description(_font_descript_midnam);
+
+	lowest = max(_view.lowest_note(), _view.y_to_note(y2));
+	highest = min(_view.highest_note(), _view.y_to_note(y1));
 
 	if (lowest > 127) {
 		lowest = 0;
 	}
 
-	cr->select_font_face ("Georgia", Cairo::FONT_SLANT_NORMAL, Cairo::FONT_WEIGHT_BOLD);
-	font_size = min ((double)10.0f, _note_height - 4.0f);
-	cr->set_font_size (font_size);
-
 	/* fill the entire rect with the color for non-highlighted white notes.
 	 * then we won't have to draw the background for those notes,
 	 * and would only have to draw the background for the one highlighted white note*/
-	//cr->rectangle(rect.x, rect.y, rect.width, rect.height);
-	//cr->set_source_rgb(white.r, white.g, white.b);
+	// cr->rectangle(rect.x, rect.y, rect.width, rect.height);
+	// cr->set_source_rgb(white.r, white.g, white.b);
 	//cr->fill();
 
 	cr->set_line_width (1.0f);
 
-	/* draw vertical lines with shade at both ends of the widget */
-	cr->set_source_rgb (0.0f, 0.0f, 0.0f);
-	cr->move_to (0.5f, rect.y);
-	cr->line_to (0.5f, rect.y + rect.height);
-	cr->stroke ();
-	cr->move_to (get_width () + 0.5f, rect.y);
-	cr->line_to (get_width () + 0.5f, rect.y + rect.height);
-	cr->stroke ();
+	/* draw vertical lines on both sides of the widget */
+	cr->set_source_rgb(0.0f, 0.0f, 0.0f);
+	cr->move_to(0.f, rect.y);
+	cr->line_to(0.f, rect.y + rect.height);
+	cr->stroke();
+	cr->move_to(get_width(),rect.y);
+	cr->line_to(get_width(), rect.y + get_height ());
+	cr->stroke();
 
-	//pat->add_color_stop_rgb(0.0, 0.33, 0.33, 0.33);
-	//pat->add_color_stop_rgb(0.2, 0.39, 0.39, 0.39);
-	//pat->add_color_stop_rgb(1.0, 0.22, 0.22, 0.22);
-	//cr->set_source(pat);
+	// Render the MIDNAM text or its equivalent.  First, set up a clip
+	// region so that the text doesn't spill, regardless of its length.
+
+	cr->save();
+
+	cr->rectangle (0,0,_scroomer_size, get_height () );
+	cr->clip();
+
+	/* Now draw the actual text */
+	for (int i = lowest; i <= highest; ++i) {
+		int size_x, size_y;
+		double y = floor(_view.note_to_y(i)) - 0.5f;
+		midnamName note = get_note_name (i);
+
+		_midnam_layout->set_text (note.name);
+
+		cr->set_source_rgb(white.r, white.g, white.b);
+		cr->move_to(2.f, y);
+
+		if (!_mini_map_display) {
+			_midnam_layout->show_in_cairo_context (cr);
+		} else {
+			/* Too small for text, just show a thing rect where the
+			   text would have been.
+			*/
+			if (!note.from_midnam) {
+				cr->set_source_rgb(gray.r, gray.g, gray.b);
+			}
+			pango_layout_get_pixel_size (_midnam_layout->gobj (), &size_x, &size_y);
+			cr->rectangle (2.f, y + (av_note_height * 0.5), size_x, av_note_height * 0.2);
+			cr->fill ();
+		}
+	}
+
+	/* Add a gradient over the text, to act as a sort of "visual
+	   elision". This avoids using text elision with "..." which takes up too
+	   much space.
+	*/
+	auto gradient_ptr = Cairo::LinearGradient::create (_scroomer_size - 20., 0, _scroomer_size, 0);
+	gradient_ptr->add_color_stop_rgba (0,.23,.23,.23,0);
+	gradient_ptr->add_color_stop_rgba (1,.23,.23,.23,1);
+	cr->set_source (gradient_ptr);
+	cr->rectangle (_scroomer_size - 20., 0, _scroomer_size, get_height () );
+	cr->fill();
+
+	/* Now draw the semi-transparent scroomer over the top */
+
+	render_scroomer(cr);
+
+	/* Done with clip region */
+
+	cr->restore();
+
+	/* Now draw black/white rects for each note, following standard piano
+	   layout, but without a setback/offset for the black keys
+	*/
 
 	for (int i = lowest; i <= highest; ++i) {
 		oct_rel = i % 12;
 
 		switch (oct_rel) {
-			case 1:
-			case 3:
-			case 6:
-			case 8:
-			case 10:
-				/* black note */
-				if (i == _highlighted_note) {
-					bg.set (black_highlight);
-				} else {
-					bg.set (black);
-				}
+		case 1:
+		case 3:
+		case 6:
+		case 8:
+		case 10:
+			/* black note */
+			if (i == _highlighted_note) {
+				bg.set (black_highlight);
+			} else {
+				bg.set (black);
+			}
 
-				if (_active_notes[i]) {
-					tl_shadow.set (black_shade_dark);
-					br_shadow.set (black_shade_light);
-				} else {
-					tl_shadow.set (black_shade_light);
-					br_shadow.set (black_shade_dark);
-				}
+			/* draw black separators */
+			cr->set_source_rgb (0.0f, 0.0f, 0.0f);
+			get_path (i, x, y);
+			create_path (cr, x, y, 0, 1);
+			cr->stroke();
 
-				/* draw black separators */
-				cr->set_source_rgb (0.0f, 0.0f, 0.0f);
-				get_path (BLACK_SEPARATOR, i, x, y);
-				create_path (cr, x, y, 0, 1);
-				cr->stroke ();
+			get_path (i, x, y);
+			create_path (cr, x, y, 0, 1);
+			cr->stroke();
 
-				get_path (BLACK_MIDDLE_SEPARATOR, i, x, y);
-				create_path (cr, x, y, 0, 1);
-				cr->stroke ();
-
-				get_path (BLACK, i, x, y);
-				render_rect (cr, i, x, y, bg, tl_shadow, br_shadow);
-				break;
-
-			default:
-				/* white note */
-				if (i == _highlighted_note) {
-					bg.set (white_highlight);
-				} else {
-					bg.set (white);
-				}
-
-				if (_active_notes[i]) {
-					tl_shadow.set (white_shade_dark);
-					br_shadow.set (white_shade_light);
-				} else {
-					tl_shadow.set (white_shade_light);
-					br_shadow.set (white_shade_dark);
-				}
-
-				switch (oct_rel) {
-					case 0:
-					case 5:
-						if (i == _view.highest_note ()) {
-							get_path (WHITE_RECT, i, x, y);
-							render_rect (cr, i, x, y, bg, tl_shadow, br_shadow);
-						} else {
-							get_path (WHITE_CF, i, x, y);
-							render_cf (cr, i, x, y, bg, tl_shadow, br_shadow);
-						}
-						break;
-
-					case 2:
-					case 7:
-					case 9:
-						if (i == _view.highest_note ()) {
-							get_path (WHITE_EB, i, x, y);
-							render_eb (cr, i, x, y, bg, tl_shadow, br_shadow);
-						} else if (i == _view.lowest_note ()) {
-							get_path (WHITE_CF, i, x, y);
-							render_cf (cr, i, x, y, bg, tl_shadow, br_shadow);
-						} else {
-							get_path (WHITE_DGA, i, x, y);
-							render_dga (cr, i, x, y, bg, tl_shadow, br_shadow);
-						}
-						break;
-
-					case 4:
-					case 11:
-						cr->set_source_rgb (0.0f, 0.0f, 0.0f);
-						get_path (WHITE_SEPARATOR, i, x, y);
-						create_path (cr, x, y, 0, 1);
-						cr->stroke ();
-
-						if (i == _view.lowest_note ()) {
-							get_path (WHITE_RECT, i, x, y);
-							render_rect (cr, i, x, y, bg, tl_shadow, br_shadow);
-						} else {
-							get_path (WHITE_EB, i, x, y);
-							render_eb (cr, i, x, y, bg, tl_shadow, br_shadow);
-						}
-						break;
-
-					default:
-						break;
-				}
-				break;
+			get_path (i, x, y);
+			render_rect (cr, i, x, y, bg);
+			break;
 		}
 
-		/* render the name of which C this is */
-		if (oct_rel == 0) {
+		switch(oct_rel) {
+		case 0:
+		case 2:
+		case 4:
+		case 5:
+		case 7:
+		case 9:
+		case 11:
+			if (i == _highlighted_note) {
+				bg.set (white_highlight);
+			} else {
+				bg.set (white);
+			}
+			get_path (i, x, y);
+			render_rect (cr, i, x, y, bg);
+			break;
+		default:
+			break;
+
+		}
+	}
+
+	/* render the C<N> of the key, when key is too small to contain text we
+	   place the C<N> on the midnam scroomer area.
+
+	   we render an additional 5 notes below the lowest note displayed
+	   so that the top of the C is shown to maintain visual context
+	 */
+	for (int i = lowest - 5; i <= highest; ++i) {
+		double y = floor(_view.note_to_y(i)) - 0.5f;
+		double note_height = i == 0? av_note_height : floor(_view.note_to_y(i - 1)) - y;
+		oct_rel = i % 12;
+
+		if (oct_rel == 0 || (oct_rel == 7 && _adj.get_page_size() <=10) ) {
 			std::stringstream s;
-			double            y           = floor (_view.note_to_y (i)) + 0.5f;
-			double            note_height = floor (_view.note_to_y (i - 1)) - y;
 
 			int cn = i / 12 - 1;
-			s << "C" << cn;
 
-			//cr->get_text_extents(s.str(), te);
-			cr->set_source_rgb (0.30f, 0.30f, 0.30f);
-			cr->move_to (2.0f, y + note_height - 1.0f - (note_height - font_size) / 2.0f);
-			cr->show_text (s.str ());
+			if (oct_rel == 0){
+				s << "C" << cn;
+			}else{
+				s << "G" << cn;
+			}
+
+			if (av_note_height > 12.0){
+				cr->set_source_rgb(0.30f, 0.30f, 0.30f);
+				_layout->set_text (s.str());
+				cr->move_to(_scroomer_size, y);
+				_layout->show_in_cairo_context (cr);
+			}else{
+				cr->set_source_rgb(white.r, white.g, white.b);
+				_big_c_layout->set_text (s.str());
+				pango_layout_get_pixel_size (_big_c_layout->gobj(), &bc_width, &bc_height);
+				cr->move_to(_scroomer_size - 18, y - bc_height + av_note_height);
+				_big_c_layout->show_in_cairo_context (cr);
+				cr->move_to(_scroomer_size - 18, y + note_height);
+				cr->line_to(_scroomer_size, y + note_height);
+				cr->stroke();
+			}
 		}
 	}
 
 	return true;
+}
+
+PianoRollHeader::midnamName
+PianoRollHeader::get_note_name (int note)
+{
+	using namespace MIDI::Name;
+	std::string name;
+	std::string note_n;
+    midnamName rtn;
+
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&_view.trackview());
+	if (mtv) {
+		int midnam_channel = stoi(mtv->gui_property (X_("midnam-channel")))-1;
+		name = mtv->route()->instrument_info ().get_note_name (
+			0,               //bank
+			0,               //program
+			midnam_channel,  //channel
+			note);           //note
+	}
+
+	int oct_rel = note % 12;
+	switch(oct_rel) {
+		case 0:
+			note_n = "C";
+			break;
+		case 1:
+			note_n = "C♯";
+			break;
+		case 2:
+			note_n = "D";
+			break;
+		case 3:
+			note_n = "D♯";
+			break;
+		case 4:
+			note_n = "E";
+			break;
+		case 5:
+			note_n = "F";
+			break;
+		case 6:
+			note_n = "F♯";
+			break;
+		case 7:
+			note_n = "G";
+			break;
+		case 8:
+			note_n = "G♯";
+			break;
+		case 9:
+			note_n = "A";
+			break;
+		case 10:
+			note_n = "A♯";
+			break;
+		case 11:
+			note_n = "B";
+			break;
+		default:
+			break;
+	}
+
+	std::string new_string = std::string(3 - std::to_string(note).length(), '0') + std::to_string(note);
+	rtn.name = name.empty()? new_string + " " + note_n : name;
+	rtn.from_midnam = !name.empty();
+	return rtn;
 }
 
 bool
@@ -502,37 +534,57 @@ PianoRollHeader::on_motion_notify_event (GdkEventMotion* ev)
 bool
 PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 {
-	int  note     = _view.y_to_note (ev->y);
-	bool tertiary = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
-
-	if (ev->button == 2 && Keyboard::no_modifiers_active (ev->state)) {
-		SetNoteSelection (note); // EMIT SIGNAL
+	_scroomer_button_state = _scroomer_state;
+	if (ev->button == 1 && ev->x <= _scroomer_size){
+		_scroomer_drag = true;
+		_old_y = ev->y;
+		_fract = _adj.get_value();
+		_fract_top = _adj.get_value() + _adj.get_page_size();
 		return true;
-	} else if (tertiary && (ev->button == 1 || ev->button == 2)) {
-		ExtendNoteSelection (note); // EMIT SIGNAL
-		return true;
-	} else if (ev->button == 1 && note >= 0 && note < 128) {
-		add_modal_grab ();
-		_dragging = true;
+	}else {
+		int note = _view.y_to_note(ev->y);
+		bool tertiary = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 
-		if (!_active_notes[note]) {
-			_active_notes[note] = true;
-			_clicked_note       = note;
-			send_note_on (note);
+		if (ev->state == GDK_CONTROL_MASK){
+			if (ev->type == GDK_2BUTTON_PRESS) {
+				_adj.set_value (0.0);
+				_adj.set_page_size (127.0);
+				_adj.value_changed ();
+				queue_draw ();
+				return false;
+			}
+			return false;
+		} else if (ev->button == 2 && Keyboard::no_modifiers_active (ev->state)) {
+			SetNoteSelection (note); // EMIT SIGNAL
+			return true;
+		} else if (tertiary && (ev->button == 1 || ev->button == 2)) {
+			ExtendNoteSelection (note); // EMIT SIGNAL
+			return true;
+		} else if (ev->button == 1 && note >= 0 && note < 128) {
+			add_modal_grab();
+			_dragging = true;
 
-			invalidate_note_range (note, note);
-		} else {
-			reset_clicked_note (note);
+			if (!_active_notes[note]) {
+				_active_notes[note] = true;
+				_clicked_note = note;
+				send_note_on(note);
+
+				invalidate_note_range(note, note);
+			} else {
+				reset_clicked_note(note);
+			}
 		}
 	}
-
 	return true;
 }
 
 bool
 PianoRollHeader::on_button_release_event (GdkEventButton* ev)
 {
-	int note = _view.y_to_note (ev->y);
+	if (_scroomer_drag){
+		_scroomer_drag = false;
+	}
+	int note = _view.y_to_note(ev->y);
 
 	if (false /*editor().current_mouse_mode() == Editing::MouseRange*/) { //Todo:  this mode is buggy, and of questionable utility anyway
 
@@ -590,22 +642,16 @@ PianoRollHeader::on_enter_notify_event (GdkEventCrossing* ev)
 bool
 PianoRollHeader::on_leave_notify_event (GdkEventCrossing*)
 {
-	if (has_grab () && _dragging) {
-		return true;
+	if (!_scroomer_drag){
+		get_window()->set_cursor();
 	}
-	invalidate_note_range (_highlighted_note, _highlighted_note);
+	invalidate_note_range(_highlighted_note, _highlighted_note);
 
 	if (_clicked_note != NO_MIDI_NOTE) {
 		reset_clicked_note (_clicked_note, _clicked_note != _highlighted_note);
 	}
 
 	_highlighted_note = NO_MIDI_NOTE;
-	return true;
-}
-
-bool
-PianoRollHeader::on_scroll_event (GdkEventScroll*)
-{
 	return true;
 }
 
@@ -619,38 +665,11 @@ PianoRollHeader::note_range_changed ()
 void
 PianoRollHeader::invalidate_note_range (int lowest, int highest)
 {
-	Glib::RefPtr<Gdk::Window> win = get_window ();
-	Gdk::Rectangle            rect;
+	Glib::RefPtr<Gdk::Window> win = get_window();
+	Gdk::Rectangle rect;
 
-	/* the non-rectangular geometry of some of the notes requires more
-	 * redraws than the notes that actually changed.
-	 */
-	switch (lowest % 12) {
-		case 0:
-		case 5:
-			lowest = max ((int)_view.lowest_note (), lowest);
-			break;
-		default:
-			lowest = max ((int)_view.lowest_note (), lowest - 1);
-			break;
-	}
-
-	switch (highest % 12) {
-		case 4:
-		case 11:
-			highest = min ((int)_view.highest_note (), highest);
-			break;
-		case 1:
-		case 3:
-		case 6:
-		case 8:
-		case 10:
-			highest = min ((int)_view.highest_note (), highest + 1);
-			break;
-		default:
-			highest = min ((int)_view.highest_note (), highest + 2);
-			break;
-	}
+	lowest = max((int) _view.lowest_note(), lowest - 1);
+	highest = min((int) _view.highest_note(), highest + 2);
 
 	double y      = _view.note_to_y (highest);
 	double height = _view.note_to_y (lowest - 1) - y;
@@ -663,20 +682,13 @@ PianoRollHeader::invalidate_note_range (int lowest, int highest)
 	if (win) {
 		win->invalidate_rect (rect, false);
 	}
+	queue_draw ();
 }
 
 void
 PianoRollHeader::on_size_request (Gtk::Requisition* r)
 {
-	r->width = std::max (20.f, rintf (20.f * UIConfiguration::instance ().get_ui_scale ()));
-}
-
-void
-PianoRollHeader::on_size_allocate (Gtk::Allocation& a)
-{
-	DrawingArea::on_size_allocate (a);
-
-	_black_note_width = floor (0.7 * get_width ()) + 0.5f;
+	r->width = std::max (80.f, rintf (80.f * UIConfiguration::instance().get_ui_scale()));
 }
 
 void
@@ -727,3 +739,9 @@ PianoRollHeader::editor () const
 {
 	return _view.trackview ().editor ();
 }
+
+void
+PianoRollHeader::set_min_page_size(double page_size)
+{
+	_min_page_size = page_size;
+};

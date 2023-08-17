@@ -45,7 +45,6 @@ public:
 	bool on_leave_notify_event (GdkEventCrossing*);
 
 	void on_size_request(Gtk::Requisition*);
-	void on_size_allocate(Gtk::Allocation& a);
 
 	void note_range_changed();
 	void set_note_highlight (uint8_t note);
@@ -66,6 +65,15 @@ public:
 	sigc::signal<void,uint8_t> ExtendNoteSelection;
 
 private:
+	struct midnamName {
+		std::string name;
+		bool from_midnam;
+	};
+	void set_min_page_size(double page_size);
+	void render_scroomer(Cairo::RefPtr<Cairo::Context>);
+	midnamName get_note_name (int note);
+
+	Gtk::Adjustment& _adj;
 	static Color white;
 	static Color white_highlight;
 	static Color white_shade_light;
@@ -74,6 +82,7 @@ private:
 	static Color black_highlight;
 	static Color black_shade_light;
 	static Color black_shade_dark;
+	static Color gray;
 
 	PianoRollHeader(const PianoRollHeader&);
 
@@ -90,7 +99,7 @@ private:
 
 	void invalidate_note_range(int lowest, int highest);
 
-	void get_path(ItemType, int note, double x[], double y[]);
+	void get_path(int note, double x[], double y[]);
 
 	void send_note_on(uint8_t note);
 	void send_note_off(uint8_t note);
@@ -101,15 +110,34 @@ private:
 
 	uint8_t _event[3];
 
-	Cairo::RefPtr<Cairo::Context> cc;
+	Glib::RefPtr<Pango::Layout> _layout;
+	Glib::RefPtr<Pango::Layout> _big_c_layout;
+	Glib::RefPtr<Pango::Layout> _midnam_layout;
+
+	Pango::FontDescription _font_descript;
+	Pango::FontDescription _font_descript_big_c;
+	Pango::FontDescription _font_descript_midnam;
 	bool _active_notes[128];
 	uint8_t _highlighted_note;
 	uint8_t _clicked_note;
 	double _grab_y;
 	bool _dragging;
+	double _scroomer_size;
+	bool _scroomer_drag;
+	double _old_y;
+	double _fract;
+	double _fract_top;
+	double _raw_note_height;
+	double _min_page_size;
+	enum scr_pos {TOP, BOTTOM, MOVE, NONE};
+	scr_pos _scroomer_state;
+	scr_pos _scroomer_button_state;
+	double _saved_top_val;
+	double _saved_bottom_val;
+	bool _mini_map_display;
 
 	double _note_height;
-	double _black_note_width;
+	double _old_av_note_height;
 
 	PublicEditor& editor() const;
 };

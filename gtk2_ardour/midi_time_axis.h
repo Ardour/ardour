@@ -120,6 +120,8 @@ protected:
 	void processors_changed (ARDOUR::RouteProcessorChange);
 
 private:
+  void _midnam_channel_changed();
+
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 
 	void setup_midnam_patches ();
@@ -164,6 +166,7 @@ private:
 	MidiChannelSelectorWindow*    _channel_selector;
 	ArdourWidgets::ArdourDropdown _midnam_model_selector;
 	ArdourWidgets::ArdourDropdown _midnam_custom_device_mode_selector;
+	ArdourWidgets::ArdourDropdown _midnam_channel_selector;
 
 	Gtk::CheckMenuItem*          _step_edit_item;
 	Gtk::Menu*                    default_channel_menu;
@@ -204,6 +207,8 @@ private:
 	std::shared_ptr<AutomationTimeAxisView> velocity_track;
 	Gtk::CheckMenuItem* velocity_menu_item;
 	void create_velocity_automation_child (Evoral::Parameter const &, bool show);
+
+	void update_patch_selector ();
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

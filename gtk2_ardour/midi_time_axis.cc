@@ -140,6 +140,7 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 {
 	_midnam_model_selector.disable_scrolling();
 	_midnam_custom_device_mode_selector.disable_scrolling();
+	_midnam_channel_selector.disable_scrolling();
 }
 
 void
@@ -156,10 +157,10 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 
 	if (is_track ()) {
 		_piano_roll_header = new PianoRollHeader(*midi_view());
-		_range_scroomer = new MidiScroomer(midi_view()->note_range_adjustment);
-		_range_scroomer->DoubleClicked.connect (
-			sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
-			            MidiStreamView::ContentsRange, false));
+		//_range_scroomer = new MidiScroomer(midi_view()->note_range_adjustment);
+		//_piano_roll_header->DoubleClicked.connect (
+		//	sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
+		//	            MidiStreamView::ContentsRange, false));
 	}
 
 	/* This next call will result in our height being set up, so it must come after
@@ -231,7 +232,7 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 		VBox* v = manage (new VBox);
 		HBox* h = manage (new HBox);
 		h->pack_end (*_piano_roll_header);
-		h->pack_end (*_range_scroomer);
+		//h->pack_end (*_range_scroomer);
 		v->pack_start (*separator, false, false);
 		v->pack_start (*h, true, true);
 		v->show ();
@@ -261,9 +262,11 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 
 	ArdourWidgets::set_tooltip (_midnam_model_selector, _("External MIDI Device"));
 	ArdourWidgets::set_tooltip (_midnam_custom_device_mode_selector, _("External Device Mode"));
+	ArdourWidgets::set_tooltip (_midnam_channel_selector, _("MIDNAM Channel Display"));
 
 	_midi_controls_box.pack_start (_midnam_model_selector, false, false, 2);
 	_midi_controls_box.pack_start (_midnam_custom_device_mode_selector, false, false, 2);
+	_midi_controls_box.pack_start (_midnam_channel_selector, false, false, 2);
 
 	_midi_controls_box.set_homogeneous(false);
 	_midi_controls_box.set_border_width (2);
@@ -308,6 +311,29 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 			create_automation_child (parameter, string_to<bool> (visible));
 		}
 	}
+	//Menu_Helpers::MenuElem elem = Gtk::Menu_Helpers::MenuElem(_("Plugin Provided"),
+	//				sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed),
+	//					model_name));
+
+	for (int i = 1; i < 17; i++){
+		//std::string text = "Channel " + std::to_string(i+1);
+		_midnam_channel_selector.append_text_item(std::to_string(i));
+	}
+	_midnam_channel_selector.StateChanged.connect (sigc::mem_fun (*this, &MidiTimeAxisView::_midnam_channel_changed));
+	if (gui_property (X_("midnam-channel")).empty()) {
+		set_gui_property (X_("midnam-channel"), "1");
+		_midnam_channel_selector.set_active("1");
+	} else {
+		_midnam_channel_selector.set_active(gui_property (X_("midnam-channel")));
+	}
+}
+
+void
+MidiTimeAxisView::_midnam_channel_changed ()
+{
+	set_gui_property (X_("midnam-channel"), _midnam_channel_selector.get_text());
+	//std::cout << "midnam_changed(): " << _midnam_channel_selector.get_text() << std::endl;
+	_piano_roll_header->queue_draw();
 }
 
 void
@@ -344,6 +370,7 @@ MidiTimeAxisView::processors_changed (RouteProcessorChange c)
 {
 	RouteTimeAxisView::processors_changed (c);
 	maybe_trigger_model_change ();
+	update_patch_selector ();
 }
 
 void
@@ -449,6 +476,56 @@ MidiTimeAxisView::setup_midnam_patches ()
 	} else {
 		model_changed (model);
 	}
+
+	_piano_roll_header->queue_draw();
+}
+
+void
+MidiTimeAxisView::update_patch_selector ()
+{
+	typedef MIDI::Name::MidiPatchManager PatchManager;
+	PatchManager& patch_manager = PatchManager::instance();
+
+	if (_route) {
+		std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ());
+		if (pi && pi->plugin ()->has_midnam ()) {
+			std::string model_name = pi->plugin ()->midnam_model ();
+			if (gui_property (X_("midnam-model-name")) != model_name) {
+				/* ensure that "Plugin Provided" is prefixed at the top of the list */
+				if (_midnam_model_selector.items().empty () || _midnam_model_selector.items().begin()->get_label() != _("Plugin Provided")) {
+					setup_midnam_patches ();
+				}
+				model_changed (model_name);
+			}
+		}
+	}
+
+	if (patch_manager.all_models().empty()) {
+		_midnam_model_selector.hide ();
+		_midnam_custom_device_mode_selector.hide ();
+		_midnam_channel_selector.hide ();
+	} else {
+		_midnam_model_selector.show ();
+		_midnam_channel_selector.show ();
+		if (_midnam_custom_device_mode_selector.items().size() > 1) {
+			_midnam_custom_device_mode_selector.show ();
+		}
+	}
+	_piano_roll_header->queue_draw();
+
+	/* call _midnam_model_selector.set_text ()
+	 * and show/hide _midnam_custom_device_mode_selector
+	 */
+	std::string model = gui_property (X_("midnam-model-name"));
+	if (model.empty() && _route->instrument_info().have_custom_plugin_info ()) {
+		/* use plugin's MIDNAM */
+		model_changed ("");
+	} else if (model.empty() || ! MIDI::Name::MidiPatchManager::instance ().master_device_by_model (model)) {
+		/* invalid model, switch to use default */
+		model_changed ("");
+	} else {
+		model_changed (model);
+	}
 }
 
 void
@@ -540,6 +617,7 @@ MidiTimeAxisView::model_changed (const std::string& m)
 	if (patch_change_dialog ()) {
 		patch_change_dialog ()->refresh ();
 	}
+	_piano_roll_header->queue_draw();
 }
 
 void
@@ -555,6 +633,8 @@ MidiTimeAxisView::custom_device_mode_changed(const std::string& mode)
 	}
 	/* inform the backend, route owned instrument info */
 	_route->instrument_info().set_external_instrument (model, mode);
+
+	_piano_roll_header->queue_draw();
 }
 
 MidiStreamView*
@@ -1805,7 +1885,7 @@ MidiTimeAxisView::note_range_changed ()
 void
 MidiTimeAxisView::contents_height_changed ()
 {
-	_range_scroomer->queue_resize ();
+	//_range_scroomer->queue_resize ();
 }
 
 bool

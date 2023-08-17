@@ -68,49 +68,23 @@ MidiScroomer::on_expose_event(GdkEventExpose* ev)
 		Component comp = (Component) i;
 		set_comp_rect(comp_rect, comp);
 
-		if (gdk_rectangle_intersect(&comp_rect, &ev->area, &clip_rect)) {
+		//if (gdk_rectangle_intersect(&comp_rect, &ev->area, &clip_rect)) {
+
+
 			get_colors(colors, comp);
 
+			cc->set_source_rgb (1.f,0.f,0.f);//(colors[3], colors[4], colors[5]);
 			cc->rectangle(clip_rect.x, clip_rect.y, clip_rect.width, clip_rect.height);
-			cc->set_source_rgb (colors[3], colors[4], colors[5]);
-			cc->fill_preserve();
-			cc->clip();
+			//cc->fill_preserve();
+			//cc->clip();
+			cc->fill ();
 
-			cc->set_source_rgb(colors[0], colors[1], colors[2]);
-			cc->set_line_width(note_height);
+			//cc->set_source_rgb(colors[0], colors[1], colors[2]);
+			//cc->set_line_width(note_height);
+
 
 			lnote = 127 - (int) floor((double) (clip_rect.y + clip_rect.height) * y2note) - 1;
 			hnote = 127 - (int) floor((double) clip_rect.y * y2note) + 1;
-
-			for (int note = lnote; note < hnote + 1; ++note) {
-				double y = height - note * note2y;
-				bool draw = false;
-
-				switch (note % 12) {
-				case 1:
-				case 6:
-					y -= black_shift;
-					draw = true;
-					break;
-				case 3:
-				case 10:
-					y += black_shift;
-					draw = true;
-					break;
-				case 8:
-					draw = true;
-					break;
-				default:
-					break;
-				}
-
-				if(draw) {
-					cc->set_line_width(1.4 * note2y);
-					cc->move_to(0, y);
-					cc->line_to(note_width, y);
-					cc->stroke();
-				}
-			}
 
 			if (i == Handle1 || i == Handle2) {
 				cc->rectangle(comp_rect.x + 0.5f, comp_rect.y + 0.5f, comp_rect.width - 1.0f, comp_rect.height - 1.0f);
@@ -120,7 +94,8 @@ MidiScroomer::on_expose_event(GdkEventExpose* ev)
 			}
 
 			cc->reset_clip();
-		}
+		//}
+
 	}
 
 	return true;
