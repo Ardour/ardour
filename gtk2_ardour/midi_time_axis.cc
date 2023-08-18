@@ -294,20 +294,20 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 		bool has_parameter;
 		Evoral::Parameter parameter (0, 0, 0);
 
-		bool const p = AutomationTimeAxisView::parse_state_id (
-			*i, route_id, has_parameter, parameter);
+		bool const p = AutomationTimeAxisView::parse_state_id (*i, route_id, has_parameter, parameter);
 		if (p && route_id == _route->id () && has_parameter) {
 			const std::string& visible = gui_object_state().get_string (*i, X_("visible"));
 			create_automation_child (parameter, string_to<bool> (visible));
 		}
 	}
+
 	//Menu_Helpers::MenuElem elem = Gtk::Menu_Helpers::MenuElem(_("Plugin Provided"),
 	//				sigc::bind(sigc::mem_fun(*this, &MidiTimeAxisView::model_changed),
 	//					model_name));
 
 	for (int i = 1; i < 17; i++){
-		//std::string text = "Channel " + std::to_string(i+1);
-		_midnam_channel_selector.append_text_item(std::to_string(i));
+		std::string text = "Channel " + std::to_string(i+1);
+		_midnam_channel_selector.append_text_item (text);
 	}
 	_midnam_channel_selector.StateChanged.connect (sigc::mem_fun (*this, &MidiTimeAxisView::_midnam_channel_changed));
 	if (gui_property (X_("midnam-channel")).empty()) {
