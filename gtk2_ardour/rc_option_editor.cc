@@ -2717,7 +2717,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_editor_stereo_only_meters)
 		     ));
 
-	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("MIDI Regions")));
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("MIDI Editing")));
 
 	add_option (_("Appearance/Editor"),
 		    new BoolOption (
@@ -2751,6 +2751,18 @@ RCOptionEditor::RCOptionEditor ()
 		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_color_for_velocity),
 		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_color_for_velocity)
 		            ));
+
+	ComboOption<Editing::NoteNameDisplay>* nnd = new ComboOption<Editing::NoteNameDisplay> (
+		"note-name-display",
+		_("Display note names in MIDI track headers"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_note_name_display),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_note_name_display)
+		);
+	nnd->add (Editing::Always, _("Always"));
+	nnd->add (Editing::WithMIDNAM, _("When Available"));
+	nnd->add (Editing::Never, _("Never"));
+
+	add_option (_("Appearance/Editor"), nnd);
 
 	add_option (_("Appearance/Editor"), new OptionEditorBlank ());
 
