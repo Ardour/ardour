@@ -159,3 +159,4 @@ UI_CONFIG_VARIABLE (bool, prefer_tap_tempo, "prefer-tap-tempo", false)
 /* these are visibility-type selections in the New Track dialog that we should make persistent for the user's choices */
 UI_CONFIG_VARIABLE (bool, show_on_cue_page, "show-on-cue-page", true)
 UI_CONFIG_VARIABLE (uint32_t, insert_at_position, "insert-at-position", 3)
+UI_CONFIG_VARIABLE (Editing::NoteNameDisplay, note_name_display, "note-name-display", Editing::Always)
