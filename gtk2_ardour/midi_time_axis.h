@@ -141,6 +141,7 @@ private:
 	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
 	void route_active_changed ();
 	void note_range_changed ();
+	void parameter_changed (std::string const &);
 
 	void update_scroomer_visbility (uint32_t, LayerDisplay);
 

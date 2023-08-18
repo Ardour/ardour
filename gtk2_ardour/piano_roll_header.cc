@@ -755,7 +755,14 @@ PianoRollHeader::invalidate_note_range (int lowest, int highest)
 void
 PianoRollHeader::on_size_request (Gtk::Requisition* r)
 {
-	r->width = std::max (80.f, rintf (80.f * UIConfiguration::instance().get_ui_scale()));
+	if (UIConfiguration::instance().get_note_name_display() == Editing::Never) {
+		_scroomer_size = 15.f;
+	} else {
+		_scroomer_size = 60.f;
+	}
+
+	float w = _scroomer_size + 20.f;
+	r->width = std::max (w, rintf (w * UIConfiguration::instance().get_ui_scale()));
 }
 
 void

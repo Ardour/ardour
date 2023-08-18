@@ -139,10 +139,25 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	_midnam_model_selector.disable_scrolling();
 	_midnam_custom_device_mode_selector.disable_scrolling();
 	_midnam_channel_selector.disable_scrolling();
+
+	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MidiTimeAxisView::parameter_changed));
+}
+
+
+void
+MidiTimeAxisView::parameter_changed (string const & param)
+{
+	if (param == X_("note-name-display")) {
+		if (_piano_roll_header) {
+			_piano_roll_header->queue_resize ();
+			_stripable->gui_changed ("visible_tracks", (void *) 0); /* EMIT SIGNAL */
+		}
+	}
 }
 
 void
-MidiTimeAxisView::set_note_highlight (uint8_t note) {
+MidiTimeAxisView::set_note_highlight (uint8_t note)
+{
 	_piano_roll_header->set_note_highlight (note);
 }
 
