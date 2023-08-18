@@ -234,4 +234,10 @@ setup_gtk_ardour_enums ()
 	REGISTER_CLASS_ENUM (AddRouteDialog, VCAMaster);
 	REGISTER_CLASS_ENUM (AddRouteDialog, FoldbackBus);
 	REGISTER (type_wanted);
+
+
+	REGISTER_CLASS_ENUM (Editing, Always);
+	REGISTER_CLASS_ENUM (Editing, WithMIDNAM);
+	REGISTER_CLASS_ENUM (Editing, Never);
+	REGISTER (note_name_display);
 }
