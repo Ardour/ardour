@@ -67,7 +67,6 @@ namespace Evoral {
 
 class PublicEditor;
 class MidiStreamView;
-class MidiScroomer;
 class PianoRollHeader;
 class StepEntry;
 class StepEditor;
@@ -142,7 +141,6 @@ private:
 	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
 	void route_active_changed ();
 	void note_range_changed ();
-	void contents_height_changed ();
 
 	void update_scroomer_visbility (uint32_t, LayerDisplay);
 
@@ -153,7 +151,6 @@ private:
 	bool                          _asked_all_automation;
 	std::string                   _effective_model;
 	std::string                   _effective_mode;
-	MidiScroomer*                 _range_scroomer;
 	PianoRollHeader*              _piano_roll_header;
 	ARDOUR::NoteMode              _note_mode;
 	Gtk::RadioMenuItem*           _note_mode_item;

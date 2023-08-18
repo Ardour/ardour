@@ -84,7 +84,6 @@
 #include "gui_thread.h"
 #include "keyboard.h"
 #include "midi_channel_selector.h"
-#include "midi_scroomer.h"
 #include "midi_streamview.h"
 #include "midi_region_view.h"
 #include "midi_time_axis.h"
@@ -123,7 +122,6 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	, RouteTimeAxisView (ed, sess, canvas)
 	, _ignore_signals(false)
 	, _asked_all_automation(false)
-	, _range_scroomer(0)
 	, _piano_roll_header(0)
 	, _note_mode(Sustained)
 	, _note_mode_item(0)
@@ -157,10 +155,6 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 
 	if (is_track ()) {
 		_piano_roll_header = new PianoRollHeader(*midi_view());
-		//_range_scroomer = new MidiScroomer(midi_view()->note_range_adjustment);
-		//_piano_roll_header->DoubleClicked.connect (
-		//	sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
-		//	            MidiStreamView::ContentsRange, false));
 	}
 
 	/* This next call will result in our height being set up, so it must come after
@@ -178,9 +172,6 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 		                               atoi (gui_property ("note-range-max").c_str()),
 		                               true);
 	}
-
-	_view->ContentsHeightChanged.connect (
-		sigc::mem_fun (*this, &MidiTimeAxisView::contents_height_changed));
 
 	if (is_midi_track()) {
 		_note_mode = midi_track()->note_mode();
@@ -232,7 +223,6 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 		VBox* v = manage (new VBox);
 		HBox* h = manage (new HBox);
 		h->pack_end (*_piano_roll_header);
-		//h->pack_end (*_range_scroomer);
 		v->pack_start (*separator, false, false);
 		v->pack_start (*h, true, true);
 		v->show ();
@@ -350,9 +340,6 @@ MidiTimeAxisView::~MidiTimeAxisView ()
 
 	delete _piano_roll_header;
 	_piano_roll_header = 0;
-
-	delete _range_scroomer;
-	_range_scroomer = 0;
 
 	delete controller_menu;
 	delete _step_editor;
@@ -684,16 +671,10 @@ MidiTimeAxisView::update_scroomer_visbility (uint32_t h, LayerDisplay d)
 		return;
 	}
 	if (h >= KEYBOARD_MIN_HEIGHT && d == Overlaid) {
-		if (_range_scroomer) {
-			_range_scroomer->show();
-		}
 		if (_piano_roll_header) {
 			_piano_roll_header->show();
 		}
 	} else {
-		if (_range_scroomer) {
-			_range_scroomer->hide();
-		}
 		if (_piano_roll_header) {
 			_piano_roll_header->hide();
 		}
@@ -1880,12 +1861,6 @@ MidiTimeAxisView::note_range_changed ()
 {
 	set_gui_property ("note-range-min", (int) midi_view()->lowest_note ());
 	set_gui_property ("note-range-max", (int) midi_view()->highest_note ());
-}
-
-void
-MidiTimeAxisView::contents_height_changed ()
-{
-	//_range_scroomer->queue_resize ();
 }
 
 bool

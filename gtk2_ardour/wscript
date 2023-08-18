@@ -174,7 +174,6 @@ gtk2_ardour_sources = [
         'midi_region_operations_box.cc',
         'midi_region_properties_box.cc',
         'midi_trigger_properties_box.cc',
-        'midi_scroomer.cc',
         'midi_selection.cc',
         'midi_streamview.cc',
         'midi_time_axis.cc',
