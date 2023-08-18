@@ -77,7 +77,7 @@ PianoRollHeader::PianoRollHeader(MidiStreamView& v)
 	, _highlighted_note (NO_MIDI_NOTE)
 	, _clicked_note (NO_MIDI_NOTE)
 	, _dragging (false)
-	, _scroomer_size (60.f)
+	, _scroomer_size (63.f)
 	, _scroomer_drag (false)
 	, _old_y (0.0)
 	, _fract (0.0)
@@ -313,11 +313,12 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 	   elision". This avoids using text elision with "..." which takes up too
 	   much space.
 	*/
-	auto gradient_ptr = Cairo::LinearGradient::create (_scroomer_size - 20., 0, _scroomer_size, 0);
+	double fade_width = 30.;
+	auto gradient_ptr = Cairo::LinearGradient::create (_scroomer_size - fade_width, 0, _scroomer_size, 0);
 	gradient_ptr->add_color_stop_rgba (0,.23,.23,.23,0);
 	gradient_ptr->add_color_stop_rgba (1,.23,.23,.23,1);
 	cr->set_source (gradient_ptr);
-	cr->rectangle (_scroomer_size - 20., 0, _scroomer_size, get_height () );
+	cr->rectangle (_scroomer_size - fade_width, 0, _scroomer_size, get_height () );
 	cr->fill();
 
 	/* Now draw the semi-transparent scroomer over the top */
@@ -434,11 +435,13 @@ PianoRollHeader::get_note_name (int note)
 	using namespace MIDI::Name;
 	std::string name;
 	std::string note_n;
-    midnamName rtn;
+	midnamName rtn;
 
 	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&_view.trackview());
+
 	if (mtv) {
 		int midnam_channel = stoi(mtv->gui_property (X_("midnam-channel")))-1;
+
 		name = mtv->route()->instrument_info ().get_note_name (
 			0,               //bank
 			0,               //program
