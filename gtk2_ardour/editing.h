@@ -42,6 +42,7 @@
 #define WAVEFORMSHAPE(a) /*empty*/
 #define INSERTTIMEOPT(a) /*empty*/
 #define TEMPOEDITBEHAVIOR(a) /*empty*/
+#define NOTENAMEDISPLAY(a) /*empty*/
 
 namespace Editing {
 

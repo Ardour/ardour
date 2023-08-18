@@ -173,5 +173,15 @@ const char *tempoeditbehaviorstrs[] = {
 #undef TEMPOEDITBEHAVIOR
 #define TEMPOEDITBEHAVIOR(a) /*empty*/
 
+#undef NOTENAMEDISPLAY
+#define NOTENAMEDISPLAY(s) N_(#s),
+const char *notenamedisplaystrs[] = {
+	#include "editing_syms.h"
+	0
+};
+#undef NOTENAMEDISPLAY
+#define NOTENAMEDISPLAY(a) /*empty*/
+
+
 } // namespace Editing
 
