@@ -149,8 +149,7 @@ MidiTimeAxisView::parameter_changed (string const & param)
 {
 	if (param == X_("note-name-display")) {
 		if (_piano_roll_header) {
-			_piano_roll_header->queue_resize ();
-			_stripable->gui_changed ("visible_tracks", (void *) 0); /* EMIT SIGNAL */
+			_piano_roll_header->instrument_info_change ();
 		}
 	}
 }
@@ -321,15 +320,16 @@ MidiTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	//					model_name));
 
 	for (int i = 1; i < 17; i++){
-		std::string text = "Channel " + std::to_string(i+1);
+		std::string text = string_compose ("%1 %2", _("Channel "), i);
 		_midnam_channel_selector.append_text_item (text);
 	}
 	_midnam_channel_selector.StateChanged.connect (sigc::mem_fun (*this, &MidiTimeAxisView::_midnam_channel_changed));
 	if (gui_property (X_("midnam-channel")).empty()) {
-		set_gui_property (X_("midnam-channel"), "1");
-		_midnam_channel_selector.set_active("1");
+		std::string str = string_compose ("%1 1", _("Channel "));
+		set_gui_property (X_("midnam-channel"), str);
+		_midnam_channel_selector.set_active (str);
 	} else {
-		_midnam_channel_selector.set_active(gui_property (X_("midnam-channel")));
+		_midnam_channel_selector.set_active (gui_property (X_("midnam-channel")));
 	}
 }
 
@@ -338,7 +338,7 @@ MidiTimeAxisView::_midnam_channel_changed ()
 {
 	set_gui_property (X_("midnam-channel"), _midnam_channel_selector.get_text());
 	//std::cout << "midnam_changed(): " << _midnam_channel_selector.get_text() << std::endl;
-	_piano_roll_header->queue_draw();
+	_piano_roll_header->instrument_info_change ();
 }
 
 void
@@ -479,7 +479,7 @@ MidiTimeAxisView::setup_midnam_patches ()
 		model_changed (model);
 	}
 
-	_piano_roll_header->queue_draw();
+	_piano_roll_header->instrument_info_change ();
 }
 
 void
@@ -513,7 +513,7 @@ MidiTimeAxisView::update_patch_selector ()
 			_midnam_custom_device_mode_selector.show ();
 		}
 	}
-	_piano_roll_header->queue_draw();
+	_piano_roll_header->instrument_info_change ();
 
 	/* call _midnam_model_selector.set_text ()
 	 * and show/hide _midnam_custom_device_mode_selector
@@ -619,7 +619,8 @@ MidiTimeAxisView::model_changed (const std::string& m)
 	if (patch_change_dialog ()) {
 		patch_change_dialog ()->refresh ();
 	}
-	_piano_roll_header->queue_draw();
+
+	_piano_roll_header->instrument_info_change ();
 }
 
 void
@@ -636,7 +637,7 @@ MidiTimeAxisView::custom_device_mode_changed(const std::string& mode)
 	/* inform the backend, route owned instrument info */
 	_route->instrument_info().set_external_instrument (model, mode);
 
-	_piano_roll_header->queue_draw();
+	_piano_roll_header->instrument_info_change ();
 }
 
 MidiStreamView*

@@ -69,7 +69,8 @@ PianoRollHeader::Color::set (const PianoRollHeader::Color& c)
 }
 
 PianoRollHeader::PianoRollHeader(MidiStreamView& v)
-	: _adj(v.note_range_adjustment)
+	: have_note_names (false)
+	, _adj(v.note_range_adjustment)
 	, _view(v)
 	, _font_descript ("Sans Bold")
 	, _font_descript_big_c ("Sans")
@@ -178,7 +179,7 @@ PianoRollHeader::on_scroll_event (GdkEventScroll* ev)
 			return false;
 		}
 	}
-	std::cout << "hilight_note: " << std::to_string(_highlighted_note) << " Hov_Note: " << std::to_string(_view.y_to_note(ev->y)) << " Val: " << _adj.get_value() << " upper: " << _adj.get_upper() << " lower: " << _adj.get_lower() << " page_size: "<< _adj.get_page_size () << std::endl;
+
 	_adj.value_changed ();
 	queue_draw ();
 	return true;
@@ -283,14 +284,16 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 	cr->rectangle (0,0,_scroomer_size, get_height () );
 	cr->clip();
 
-	if (UIConfiguration::instance().get_note_name_display() != Editing::Never) {
+	Editing::NoteNameDisplay nnd = UIConfiguration::instance().get_note_name_display();
+
+	if ((nnd == Editing::Always) || ((nnd == Editing::WithMIDNAM) && have_note_names)) {
 
 		/* Draw the actual text */
 
 		for (int i = lowest; i <= highest; ++i) {
 			int size_x, size_y;
 			double y = floor(_view.note_to_y(i)) - 0.5f;
-			midnamName note = get_note_name (i);
+			NoteName & note (note_names[i]);
 
 			_midnam_layout->set_text (note.name);
 
@@ -433,18 +436,45 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 	return true;
 }
 
-PianoRollHeader::midnamName
+void
+PianoRollHeader::instrument_info_change ()
+{
+	have_note_names = false;
+
+	for (int i = 0; i < 128; ++i) {
+		note_names[i] = get_note_name (i);
+
+		if (note_names[i].from_midnam) {
+			have_note_names = true;
+		}
+	}
+
+	queue_resize ();
+
+	/* need this to get editor to potentially sync all
+	   track header widths if our piano roll header changes
+	   width.
+	*/
+
+	_view.trackview().stripable()->gui_changed ("visible_tracks", (void *) 0); /* EMIT SIGNAL */
+}
+
+PianoRollHeader::NoteName
 PianoRollHeader::get_note_name (int note)
 {
 	using namespace MIDI::Name;
 	std::string name;
 	std::string note_n;
-	midnamName rtn;
+	NoteName rtn;
 
 	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&_view.trackview());
 
 	if (mtv) {
-		int midnam_channel = stoi(mtv->gui_property (X_("midnam-channel")))-1;
+		string chn = mtv->gui_property (X_("midnam-channel"));
+		int midnam_channel;
+
+		sscanf (chn.c_str(), "%*s %d", &midnam_channel);
+		midnam_channel--;
 
 		name = mtv->route()->instrument_info ().get_note_name (
 			0,               //bank
@@ -605,7 +635,6 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 		_old_y = ev->y;
 		_fract = _adj.get_value();
 		_fract_top = _adj.get_value() + _adj.get_page_size();
-		std::cerr << "scroomer drag ON\n";
 		return true;
 	}else {
 		int note = _view.y_to_note(ev->y);
@@ -649,7 +678,6 @@ PianoRollHeader::on_button_release_event (GdkEventButton* ev)
 {
 	if (_scroomer_drag){
 		_scroomer_drag = false;
-		std::cerr << "scroomer drag OFF\n";
 	}
 	int note = _view.y_to_note(ev->y);
 
@@ -755,10 +783,12 @@ PianoRollHeader::invalidate_note_range (int lowest, int highest)
 void
 PianoRollHeader::on_size_request (Gtk::Requisition* r)
 {
-	if (UIConfiguration::instance().get_note_name_display() == Editing::Never) {
-		_scroomer_size = 15.f;
-	} else {
+	Editing::NoteNameDisplay nnd = UIConfiguration::instance().get_note_name_display();
+
+	if ((nnd == Editing::Always) || ((nnd == Editing::WithMIDNAM) && have_note_names)) {
 		_scroomer_size = 60.f;
+	} else {
+		_scroomer_size = 20.f;
 	}
 
 	float w = _scroomer_size + 20.f;

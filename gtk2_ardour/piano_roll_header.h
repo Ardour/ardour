@@ -46,6 +46,8 @@ public:
 
 	void on_size_request(Gtk::Requisition*);
 
+	void instrument_info_change ();
+
 	void note_range_changed();
 	void set_note_highlight (uint8_t note);
 
@@ -65,13 +67,15 @@ public:
 	sigc::signal<void,uint8_t> ExtendNoteSelection;
 
 private:
-	struct midnamName {
+	struct NoteName {
 		std::string name;
 		bool from_midnam;
 	};
+	NoteName note_names[128];
+	bool have_note_names;
 	void set_min_page_size(double page_size);
 	void render_scroomer(Cairo::RefPtr<Cairo::Context>);
-	midnamName get_note_name (int note);
+	NoteName get_note_name (int note);
 
 	Gtk::Adjustment& _adj;
 	static Color white;
