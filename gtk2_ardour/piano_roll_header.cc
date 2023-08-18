@@ -283,43 +283,47 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 	cr->rectangle (0,0,_scroomer_size, get_height () );
 	cr->clip();
 
-	/* Now draw the actual text */
-	for (int i = lowest; i <= highest; ++i) {
-		int size_x, size_y;
-		double y = floor(_view.note_to_y(i)) - 0.5f;
-		midnamName note = get_note_name (i);
+	if (UIConfiguration::instance().get_note_name_display() != Editing::Never) {
 
-		_midnam_layout->set_text (note.name);
+		/* Draw the actual text */
 
-		cr->set_source_rgb(white.r, white.g, white.b);
-		cr->move_to(2.f, y);
+		for (int i = lowest; i <= highest; ++i) {
+			int size_x, size_y;
+			double y = floor(_view.note_to_y(i)) - 0.5f;
+			midnamName note = get_note_name (i);
 
-		if (!_mini_map_display) {
-			_midnam_layout->show_in_cairo_context (cr);
-		} else {
-			/* Too small for text, just show a thing rect where the
-			   text would have been.
-			*/
-			if (!note.from_midnam) {
-				cr->set_source_rgb(gray.r, gray.g, gray.b);
+			_midnam_layout->set_text (note.name);
+
+			cr->set_source_rgb(white.r, white.g, white.b);
+			cr->move_to(2.f, y);
+
+			if (!_mini_map_display) {
+				_midnam_layout->show_in_cairo_context (cr);
+			} else {
+				/* Too small for text, just show a thing rect where the
+				   text would have been.
+				*/
+				if (!note.from_midnam) {
+					cr->set_source_rgb(gray.r, gray.g, gray.b);
+				}
+				pango_layout_get_pixel_size (_midnam_layout->gobj (), &size_x, &size_y);
+				cr->rectangle (2.f, y + (av_note_height * 0.5), size_x, av_note_height * 0.2);
+				cr->fill ();
 			}
-			pango_layout_get_pixel_size (_midnam_layout->gobj (), &size_x, &size_y);
-			cr->rectangle (2.f, y + (av_note_height * 0.5), size_x, av_note_height * 0.2);
-			cr->fill ();
 		}
-	}
 
-	/* Add a gradient over the text, to act as a sort of "visual
-	   elision". This avoids using text elision with "..." which takes up too
-	   much space.
-	*/
-	double fade_width = 30.;
-	auto gradient_ptr = Cairo::LinearGradient::create (_scroomer_size - fade_width, 0, _scroomer_size, 0);
-	gradient_ptr->add_color_stop_rgba (0,.23,.23,.23,0);
-	gradient_ptr->add_color_stop_rgba (1,.23,.23,.23,1);
-	cr->set_source (gradient_ptr);
-	cr->rectangle (_scroomer_size - fade_width, 0, _scroomer_size, get_height () );
-	cr->fill();
+		/* Add a gradient over the text, to act as a sort of "visual
+		   elision". This avoids using text elision with "..." which takes up too
+		   much space.
+		*/
+		double fade_width = 30.;
+		auto gradient_ptr = Cairo::LinearGradient::create (_scroomer_size - fade_width, 0, _scroomer_size, 0);
+		gradient_ptr->add_color_stop_rgba (0,.23,.23,.23,0);
+		gradient_ptr->add_color_stop_rgba (1,.23,.23,.23,1);
+		cr->set_source (gradient_ptr);
+		cr->rectangle (_scroomer_size - fade_width, 0, _scroomer_size, get_height () );
+		cr->fill();
+	}
 
 	/* Now draw the semi-transparent scroomer over the top */
 
