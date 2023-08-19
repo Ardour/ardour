@@ -7301,9 +7301,9 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::motion (GdkEvent* ev, bool firs
 		/* Add a point correspding to the start of the drag */
 
 		maybe_add_point (ev, raw_grab_time(), true);
+	} else {
+		maybe_add_point (ev, _drags->current_pointer_time(), false);
 	}
-
-	maybe_add_point (ev, _drags->current_pointer_time(), first_move);
 }
 
 template<typename OrderedPointList, typename OrderedPoint>
