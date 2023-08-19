@@ -7312,6 +7312,12 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 {
 	timepos_t pos (cpos);
 
+	/* Enforce left-to-right drawing */
+
+	if (direction <= 0) {
+		return;
+	}
+
 	_editor->snap_to_with_modifier (pos, ev);
 
 	if (pos != _drags->current_pointer_time()) {
