@@ -3460,8 +3460,6 @@ Session::commit_reversible_command (Command *cmd)
 	gettimeofday (&now, 0);
 	_current_trans->set_timestamp (now);
 
-	std::cerr << "Add command with " << _current_trans->size() << std::endl;
-
 	_history.add (_current_trans);
 	_current_trans = 0;
 }
