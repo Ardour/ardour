@@ -2749,7 +2749,7 @@ Editor::set_snapped_cursor_position (timepos_t const & pos)
  *  @param event Event to get current key modifier information from, or 0.
  */
 void
-Editor::snap_to_with_modifier (timepos_t& start, GdkEvent const * event, Temporal::RoundMode direction, SnapPref pref)
+Editor::snap_to_with_modifier (timepos_t& start, GdkEvent const * event, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap)
 {
 	if (!_session || !event) {
 		return;
@@ -2757,7 +2757,7 @@ Editor::snap_to_with_modifier (timepos_t& start, GdkEvent const * event, Tempora
 
 	if (ArdourKeyboard::indicates_snap (event->button.state)) {
 		if (_snap_mode == SnapOff) {
-			snap_to_internal (start, direction, pref);
+			snap_to_internal (start, direction, pref, ensure_snap);
 		}
 
 	} else {
@@ -2765,7 +2765,7 @@ Editor::snap_to_with_modifier (timepos_t& start, GdkEvent const * event, Tempora
 			snap_to_internal (start, direction, pref);
 		} else if (ArdourKeyboard::indicates_snap_delta (event->button.state)) {
 			/* SnapOff, but we pressed the snap_delta modifier */
-			snap_to_internal (start, direction, pref);
+			snap_to_internal (start, direction, pref, ensure_snap);
 		}
 	}
 }

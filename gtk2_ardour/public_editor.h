@@ -555,7 +555,8 @@ public:
 	virtual void snap_to_with_modifier (Temporal::timepos_t & first,
 	                                    GdkEvent const*      ev,
 	                                    Temporal::RoundMode    direction = Temporal::RoundNearest,
-	                                    ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual) = 0;
+	                                    ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
+	                                    bool ensure_snap = false) = 0;
 	virtual Temporal::timepos_t snap_to_bbt (Temporal::timepos_t const & pos, Temporal::RoundMode, ARDOUR::SnapPref) = 0;
 
 	virtual void set_snapped_cursor_position (Temporal::timepos_t const & pos) = 0;
