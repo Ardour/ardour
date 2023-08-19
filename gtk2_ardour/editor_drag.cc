@@ -7318,7 +7318,7 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 		return;
 	}
 
-	_editor->snap_to_with_modifier (pos, ev);
+	_editor->snap_to_with_modifier (pos, ev, Temporal::RoundNearest, ARDOUR::SnapToAny_Visual, true);
 
 	if (pos != _drags->current_pointer_time()) {
 		did_snap = true;
