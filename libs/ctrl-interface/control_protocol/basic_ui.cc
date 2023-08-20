@@ -710,6 +710,8 @@ BasicUI::toggle_roll (bool with_abort, bool roll_out_of_bounded_mode)
 			} else if (session->get_play_range ()) {
 
 				session->request_cancel_play_range ();
+			} else {
+				session->request_stop (with_abort, true);
 			}
 
 		} else {
