@@ -127,9 +127,13 @@ LaunchPadPro::probe (std::string& i, std::string& o)
 
 LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
 	: MIDISurface (s, X_("Novation Launchpad Pro"), X_("Launchpad Pro"), true)
+	, logo_color (4)
+	, scroll_x_offset  (0)
+	, scroll_y_offset  (0)
 	, _daw_out_port (nullptr)
 	, _gui (nullptr)
 	, _current_layout (SessionLayout)
+	, _shift_pressed (false)
 {
 	run_event_loop ();
 	port_setup ();
@@ -211,11 +215,11 @@ LaunchPadPro::begin_using_device ()
 	asp->xthread().set_receive_handler (sigc::bind (sigc::mem_fun (this, &MIDISurface::midi_input_handler), _daw_in_port));
 	asp->xthread().attach (main_loop()->get_context());
 
-	/* request current layout */
-	MidiByteArray msg (sysex_header);
-	msg.push_back (0x0);
-	msg.push_back (0xf7);
-	write (msg);
+	light_logo ();
+
+	Glib::RefPtr<Glib::TimeoutSource> timeout = Glib::TimeoutSource::create (1000); // milliseconds
+	timeout->connect (sigc::mem_fun (*this, &LaunchPadPro::light_logo));
+	timeout->attach (main_loop()->get_context());
 
 	set_device_mode (DAW);
 	set_layout (SessionLayout);
@@ -236,6 +240,7 @@ LaunchPadPro::stop_using_device ()
 		return 0;
 	}
 
+	all_pads_out ();
 	set_device_mode (Standalone);
 
 	return MIDISurface::stop_using_device ();
@@ -325,67 +330,103 @@ LaunchPadPro::output_daw_port_name () const
 void
 LaunchPadPro::build_pad_map ()
 {
-#define EDGE_PAD(id) if (!(pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id)))).second)) abort()
+#define EDGE_PAD0(id) if (!(pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), &LaunchPadPro::relax))).second)) abort()
+#define EDGE_PAD(id, press) if (!(pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press)))).second)) abort()
+#define EDGE_PAD2(id, press, release) if (!(pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press), (release)))).second)) abort()
 
-	EDGE_PAD (Shift);
+	EDGE_PAD2 (Shift, &LaunchPadPro::shift_press, &LaunchPadPro::shift_release);
 
-	EDGE_PAD (Left);
-	EDGE_PAD (Right);
-	EDGE_PAD (Session);
-	EDGE_PAD (Note);
-	EDGE_PAD (Chord);
-	EDGE_PAD (Custom);
-	EDGE_PAD (Sequencer);
-	EDGE_PAD (Projects);
+	EDGE_PAD0 (Left);
+	EDGE_PAD0 (Right);
+	EDGE_PAD0 (Session);
+	EDGE_PAD0 (Note);
+	EDGE_PAD0 (Chord);
+	EDGE_PAD0 (Custom);
+	EDGE_PAD0 (Sequencer);
+	EDGE_PAD0 (Projects);
 
-	EDGE_PAD (Patterns);
-	EDGE_PAD (Steps);
-	EDGE_PAD (PatternSettings);
-	EDGE_PAD (Velocity);
-	EDGE_PAD (Probability);
-	EDGE_PAD (Mutation);
-	EDGE_PAD (MicroStep);
-	EDGE_PAD (PrintToClip);
+	EDGE_PAD (Patterns, &LaunchPadPro::patterns_press);
+	EDGE_PAD (Steps, &LaunchPadPro::steps_press);
+	EDGE_PAD (PatternSettings, &LaunchPadPro::pattern_settings_press);
+	EDGE_PAD (Velocity, &LaunchPadPro::velocity_press);
+	EDGE_PAD (Probability, &LaunchPadPro::probability_press);
+	EDGE_PAD (Mutation, &LaunchPadPro::mutation_press);
+	EDGE_PAD (MicroStep, &LaunchPadPro::microstep_press);
+	EDGE_PAD (PrintToClip, &LaunchPadPro::print_to_clip_press);
 
-	EDGE_PAD (StopClip);
-	EDGE_PAD (Device);
-	EDGE_PAD (Sends);
-	EDGE_PAD (Pan);
-	EDGE_PAD (Volume);
-	EDGE_PAD (Solo);
-	EDGE_PAD (Mute);
-	EDGE_PAD (RecordArm);
+	EDGE_PAD0 (StopClip);
+	EDGE_PAD0 (Device);
+	EDGE_PAD0 (Sends);
+	EDGE_PAD0 (Pan);
+	EDGE_PAD0 (Volume);
+	EDGE_PAD0 (Solo);
+	EDGE_PAD0 (Mute);
+	EDGE_PAD0 (RecordArm);
 
-	EDGE_PAD (CaptureMIDI);
-	EDGE_PAD (Play);
-	EDGE_PAD (FixedLength);
-	EDGE_PAD (Quantize);
-	EDGE_PAD (Duplicate);
-	EDGE_PAD (Clear);
-	EDGE_PAD (Down);
-	EDGE_PAD (Up);
+	EDGE_PAD0 (CaptureMIDI);
+	EDGE_PAD (Play, &LaunchPadPro::play_press);
+	EDGE_PAD0 (FixedLength);
+	EDGE_PAD0 (Quantize);
+	EDGE_PAD0 (Duplicate);
+	EDGE_PAD0 (Clear);
+	EDGE_PAD0 (Down);
+	EDGE_PAD0 (Up);
 
-	EDGE_PAD (Lower1);
-	EDGE_PAD (Lower2);
-	EDGE_PAD (Lower3);
-	EDGE_PAD (Lower4);
-	EDGE_PAD (Lower5);
-	EDGE_PAD (Lower6);
-	EDGE_PAD (Lower7);
-	EDGE_PAD (Lower8);
+	EDGE_PAD0 (Lower1);
+	EDGE_PAD0 (Lower2);
+	EDGE_PAD0 (Lower3);
+	EDGE_PAD0 (Lower4);
+	EDGE_PAD0 (Lower5);
+	EDGE_PAD0 (Lower6);
+	EDGE_PAD0 (Lower7);
+	EDGE_PAD0 (Lower8);
 
 	/* Now add the 8x8 central pad grid */
 
 	for (int row = 0; row < 8; ++row) {
 		for (int col = 0; col < 8; ++col) {
 			int pid = (11 + (row * 10)) + col;
-			std::pair<int,Pad> p (pid, Pad (pid, col, row));
+			std::pair<int,Pad> p (pid, Pad (pid, col, row, &LaunchPadPro::relax));
 			if (!pad_map.insert (p).second) abort();
 		}
 	}
 
 	/* The +1 is for the shift pad at upper left */
 	assert (pad_map.size() == (64 + (5 * 8) + 1));
+}
+
+void
+LaunchPadPro::all_pads_out ()
+{
+	MIDI::byte msg[3];
+	msg[0] = 0x90;
+	msg[2] = 0x0;
+
+	for (auto const & p : pad_map) {
+		msg[1] = p.second.id;
+		daw_write (msg, 3);
+	}
+}
+
+bool
+LaunchPadPro::light_logo ()
+{
+	MIDI::byte msg[3];
+
+	msg[0] = 0x90;
+	msg[1] = 0x63;
+
+	logo_color++;
+
+	if (logo_color > 60) {
+		logo_color = 4;
+	}
+
+	msg[2] = logo_color;
+
+	daw_write (msg, 3);
+
+	return true;
 }
 
 LaunchPadPro::Pad*
@@ -515,9 +556,14 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 }
 
 void
-LaunchPadPro::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t sz)
+LaunchPadPro::handle_midi_sysex (MIDI::Parser& parser, MIDI::byte* raw_bytes, size_t sz)
 {
-	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Sysex, %1 bytes\n", sz));
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Sysex, %1 bytes parser %2\n", sz, &parser));
+
+	if (&parser != _daw_in_port->parser()) {
+		DEBUG_TRACE (DEBUG::Launchpad, "sysex from non-DAW port, ignored\n");
+		return;
+	}
 
 	if (sz < sysex_header.size() + 1) {
 		return;
@@ -535,7 +581,7 @@ LaunchPadPro::handle_midi_sysex (MIDI::Parser&, MIDI::byte* raw_bytes, size_t sz
 
 		if (raw_bytes[1] < num_layouts) {
 			_current_layout = AllLayouts[raw_bytes[1]];
-			std::cerr << "Current layout = " << _current_layout << std::endl;
+			std::cerr << "Current layout = " << _current_layout << " from " << (int) raw_bytes[1] << std::endl;
 		} else {
 			std::cerr << "ignore illegal layout index " << (int) raw_bytes[1] << std::endl;
 		}
@@ -560,6 +606,17 @@ LaunchPadPro::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes
 	}
 
 	Pad& pad (p->second);
+	set<int>::iterator c = consumed.find (pad.id);
+
+	if (c == consumed.end()) {
+		if (ev->value) {
+			(this->*pad.on_press) (pad);
+		} else {
+			(this->*pad.on_release) (pad);
+		}
+	} else {
+		consumed.erase (c);
+	}
 }
 
 void
@@ -582,6 +639,7 @@ LaunchPadPro::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoB
 	}
 
 	Pad& pad (p->second);
+	(this->*pad.on_press) (pad);
 }
 
 void
@@ -599,6 +657,17 @@ LaunchPadPro::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* 
 	}
 
 	Pad& pad (p->second);
+
+	set<int>::iterator c = consumed.find (pad.id);
+
+	if (c == consumed.end()) {
+		(this->*pad.on_release) (pad);
+
+	} else {
+		/* used for long press */
+		consumed.erase (c);
+	}
+
 }
 
 void
@@ -651,7 +720,7 @@ LaunchPadPro::ports_acquire ()
 			_daw_out = AudioEngine::instance()->register_output_port (DataType::MIDI, string_compose (X_("%1 daw out"), port_name_prefix), true);
 		}
 		if (_daw_out) {
-			_daw_out_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_async_out).get();
+			_daw_out_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_daw_out).get();
 			return 0;
 		}
 
@@ -685,7 +754,6 @@ LaunchPadPro::ports_release ()
 void
 LaunchPadPro::daw_write (const MidiByteArray& data)
 {
-	/* immediate delivery */
 	_daw_out_port->write (&data[0], data.size(), 0);
 }
 
@@ -816,4 +884,305 @@ LaunchPadPro::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 	}
 
 	return matched;
+}
+
+void
+LaunchPadPro::start_press_timeout (Pad& pad)
+{
+	Glib::RefPtr<Glib::TimeoutSource> timeout = Glib::TimeoutSource::create (500); // milliseconds
+	pad.timeout_connection = timeout->connect (sigc::bind (sigc::mem_fun (*this, &LaunchPadPro::long_press_timeout), pad.id));
+	timeout->attach (main_loop()->get_context());
+}
+
+void
+LaunchPadPro::maybe_start_press_timeout (Pad& pad)
+{
+	if (pad.on_long_press == &LaunchPadPro::relax) {
+		return;
+	}
+	start_press_timeout (pad);
+}
+
+bool
+LaunchPadPro::long_press_timeout (int pad_id)
+{
+	PadMap::iterator p = pad_map.find (pad_id);
+	if (p == pad_map.end()) {
+		/* impossible */
+		return false;
+	}
+	Pad& pad (p->second);
+	(this->*pad.on_long_press) (pad);
+
+	/* Pad was used for long press, do not invoke release action */
+	consumed.insert (pad.id);
+
+	return false; /* don't get called again */
+}
+
+void
+LaunchPadPro::shift_press (Pad& pad)
+{
+	_shift_pressed = true;
+}
+
+void
+LaunchPadPro::shift_release (Pad& pad)
+{
+	_shift_pressed = false;
+}
+
+void
+LaunchPadPro::left_press (Pad& pad)
+{
+	if (scroll_x_offset) {
+		scroll_x_offset--;
+	}
+}
+
+void
+LaunchPadPro::right_press (Pad& pad)
+{
+	scroll_x_offset++;
+}
+
+void
+LaunchPadPro::session_press (Pad& pad)
+{
+	/* handled by device */
+}
+
+void
+LaunchPadPro::note_press (Pad& pad)
+{
+	/* handled by device */
+}
+
+void
+LaunchPadPro::chord_press (Pad& pad)
+{
+	/* handled by device */
+}
+
+void
+LaunchPadPro::custom_press (Pad& pad)
+{
+	/* handled by device */
+}
+
+void
+LaunchPadPro::sequencer_press (Pad& pad)
+{
+	/* handled by device */
+}
+
+void
+LaunchPadPro::projects_press (Pad& pad)
+{
+	/* handled by device */
+}
+
+void
+LaunchPadPro::patterns_press (Pad& pad)
+{
+	if (_current_layout == SessionLayout) {
+		session->trigger_cue_row (0 + scroll_y_offset);
+	}
+}
+
+void
+LaunchPadPro::steps_press (Pad& pad)
+{
+	if (_current_layout == SessionLayout) {
+		session->trigger_cue_row (1 + scroll_y_offset);
+	}
+}
+
+void
+LaunchPadPro::pattern_settings_press (Pad& pad)
+{
+	if (_current_layout == SessionLayout) {
+		session->trigger_cue_row (2 + scroll_y_offset);
+	}
+}
+
+void
+LaunchPadPro::velocity_press (Pad& pad)
+{
+	if (_current_layout == SessionLayout) {
+		session->trigger_cue_row (3 + scroll_y_offset);
+	}
+}
+
+void
+LaunchPadPro::probability_press (Pad& pad)
+{
+	if (_current_layout == SessionLayout) {
+		session->trigger_cue_row (4 + scroll_y_offset);
+	}
+}
+
+void
+LaunchPadPro::mutation_press (Pad& pad)
+{
+	if (_current_layout == SessionLayout) {
+		session->trigger_cue_row (5 + scroll_y_offset);
+	}
+}
+
+
+void
+LaunchPadPro::microstep_press (Pad& pad)
+{
+	if (_current_layout == SessionLayout) {
+		session->trigger_cue_row (6 + scroll_y_offset);
+	}
+}
+
+void
+LaunchPadPro::print_to_clip_press (Pad& pad)
+{
+	if (_current_layout == SessionLayout) {
+		session->trigger_cue_row (7  + scroll_y_offset);
+	}
+}
+
+void
+LaunchPadPro::stop_clip_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::device_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::sends_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::pan_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::volume_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::solo_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::mute_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::record_arm_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::capture_midi_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::play_press (Pad& pad)
+{
+	MIDI::byte velocity;
+	if (session->transport_rolling()) {
+		velocity = 17;
+	} else {
+		velocity = 21;
+	}
+
+	toggle_roll (false, true);
+
+	MIDI::byte msg[3];
+
+	msg[0] = 0x90;
+	msg[1] = pad.id;
+	msg[2] = velocity;
+
+	daw_write (msg, 3);
+}
+
+void
+LaunchPadPro::fixed_length_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::quantize_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::duplicate_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::clear_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::down_press (Pad& pad)
+{
+	if (scroll_y_offset) {
+		scroll_y_offset--;
+	}
+}
+
+void
+LaunchPadPro::up_press (Pad& pad)
+{
+	scroll_y_offset++;
+}
+
+void
+LaunchPadPro::lower1_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::lower2_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::lower3_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::lower4_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::lower5_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::lower6_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::lower7_press (Pad& pad)
+{
+}
+
+void
+LaunchPadPro::lower8_press (Pad& pad)
+{
 }

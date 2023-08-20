@@ -110,8 +110,13 @@ class LaunchPadPro : public MIDISurface
 		Lower5 = 0x69,
 		Lower6 = 0x6a,
 		Lower7 = 0x6b,
-		Lower8 = 0x6c
+		Lower8 = 0x6c,
+		/* Logo */
+		Logo = 0x63
 	};
+
+	bool light_logo();
+	void all_pads_out ();
 
 	static const PadID all_pad_ids[];
 
@@ -167,34 +172,34 @@ class LaunchPadPro : public MIDISurface
 
 	struct Pad  {
 
-		enum WhenPressed {
-			Nothing,
-			FlashOn,
-			FlashOff,
-		};
-
 		enum ColorMode {
 			Static = 0x0,
 			Flashing = 0x1,
 			Pulsing = 0x2
 		};
 
-		Pad (PadID pid)
+		typedef void (LaunchPadPro::*PadMethod)(Pad&);
+
+		Pad (PadID pid, PadMethod press_method, PadMethod release_method = &LaunchPadPro::relax, PadMethod long_press_method = &LaunchPadPro::relax)
 			: id (pid)
 			, x (-1)
 			, y (-1)
-			, do_when_pressed (FlashOn)
+			, on_press (press_method)
+			, on_release (release_method)
+			, on_long_press (long_press_method)
 			, filtered (false)
 			, perma_color (0)
 			, color (0)
 			, mode (Static)
 		{}
 
-		Pad (int pid, int xx, int yy)
+		Pad (int pid, int xx, int yy, PadMethod press_method, PadMethod release_method = &LaunchPadPro::relax, PadMethod long_press_method = &LaunchPadPro::relax)
 			: id (pid)
 			, x (xx)
 			, y (yy)
-			, do_when_pressed (FlashOn)
+			, on_press (press_method)
+			, on_release (release_method)
+			, on_long_press (long_press_method)
 			, filtered (true)
 			, perma_color (0)
 			, color (0)
@@ -207,22 +212,31 @@ class LaunchPadPro : public MIDISurface
 		}
 		void off() { set (0, Static); }
 
-		MidiByteArray state_msg () const { return MidiByteArray (3, 0x90|mode, id, color); }
 
-		/* This returns a negative value for edge pads */
-		int coord () const { return (y * 8) + x; }
-		/* Just an alias, really. */
-		int note_number() const { return id; }
+		MIDI::byte status_byte() const { if (x < 0) return 0xb0; return 0x90; }
+		bool is_pad () const { return x >= 0; }
+		bool is_button () const { return x < 0; }
+
+		MidiByteArray state_msg () const { return MidiByteArray (3, status_byte()|mode, id, color); }
 
 		int id;
 		int x;
 		int y;
-		int do_when_pressed;
+		PadMethod on_press;
+		PadMethod on_release;
+		PadMethod on_long_press;
 		int filtered;
 		int perma_color;
 		int color;
 		ColorMode mode;
+		sigc::connection timeout_connection;
 	};
+
+	void relax (Pad& p) {}
+
+	std::set<int> consumed;
+
+	MIDI::byte logo_color;
 
 	int scroll_x_offset;
 	int scroll_y_offset;
@@ -287,6 +301,137 @@ class LaunchPadPro : public MIDISurface
 	Layout _current_layout;
 
 	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;
+
+	void maybe_start_press_timeout (Pad& pad);
+	void start_press_timeout (Pad& pad);
+	bool long_press_timeout (int pad_id);
+
+	bool _shift_pressed;
+
+	/* named pad methods */
+	void shift_press (Pad&);
+	void shift_release (Pad&);
+	void shift_long_press (Pad&) {}
+	void left_press (Pad&);
+	void left_release (Pad&) {}
+	void left_long_press (Pad&) {}
+	void right_press (Pad&);
+	void right_release (Pad&) {}
+	void right_long_press (Pad&) {}
+	void session_press (Pad&);
+	void session_release (Pad&) {}
+	void session_long_press (Pad&) {}
+	void note_press (Pad&);
+	void note_release (Pad&) {}
+	void note_long_press (Pad&) {}
+	void chord_press (Pad&);
+	void chord_release (Pad&) {}
+	void chord_long_press (Pad&) {}
+	void custom_press (Pad&);
+	void custom_release (Pad&) {}
+	void custom_long_press (Pad&) {}
+	void sequencer_press (Pad&);
+	void sequencer_release (Pad&) {}
+	void sequencer_long_press (Pad&) {}
+	void projects_press (Pad&);
+	void projects_release (Pad&) {}
+	void projects_long_press (Pad&) {}
+	void patterns_press (Pad&);
+	void patterns_release (Pad&) {}
+	void patterns_long_press (Pad&) {}
+	void steps_press (Pad&);
+	void steps_release (Pad&) {}
+	void steps_long_press (Pad&) {}
+	void pattern_settings_press (Pad&);
+	void pattern_settings_release (Pad&) {}
+	void pattern_settings_long_press (Pad&) {}
+	void velocity_press (Pad&);
+	void velocity_release (Pad&) {}
+	void velocity_long_press (Pad&) {}
+	void probability_press (Pad&);
+	void probability_release (Pad&) {}
+	void probability_long_press (Pad&) {}
+	void mutation_press (Pad&);
+	void mutation_release (Pad&) {}
+	void mutation_long_press (Pad&) {}
+	void microstep_press (Pad&);
+	void microstep_release (Pad&) {}
+	void microstep_long_press (Pad&) {}
+	void print_to_clip_press (Pad&);
+	void print_to_clip_release (Pad&) {}
+	void print_to_clip_long_press (Pad&) {}
+	void stop_clip_press (Pad&);
+	void stop_clip_release (Pad&) {}
+	void stop_clip_long_press (Pad&) {}
+	void device_press (Pad&);
+	void device_release (Pad&) {}
+	void device_long_press (Pad&) {}
+	void sends_press (Pad&);
+	void sends_release (Pad&) {}
+	void sends_long_press (Pad&) {}
+	void pan_press (Pad&);
+	void pan_release (Pad&) {}
+	void pan_long_press (Pad&) {}
+	void volume_press (Pad&);
+	void volume_release (Pad&) {}
+	void volume_long_press (Pad&) {}
+	void solo_press (Pad&);
+	void solo_release (Pad&) {}
+	void solo_long_press (Pad&) {}
+	void mute_press (Pad&);
+	void mute_release (Pad&) {}
+	void mute_long_press (Pad&) {}
+	void record_arm_press (Pad&);
+	void record_arm_release (Pad&) {}
+	void record_arm_long_press (Pad&) {}
+	void capture_midi_press (Pad&);
+	void capture_midi_release (Pad&) {}
+	void capture_midi_long_press (Pad&) {}
+	void play_press (Pad&);
+	void play_release (Pad&) {}
+	void play_long_press (Pad&) {}
+	void fixed_length_press (Pad&);
+	void fixed_length_release (Pad&) {}
+	void fixed_length_long_press (Pad&) {}
+	void quantize_press (Pad&);
+	void quantize_release (Pad&) {}
+	void quantize_long_press (Pad&) {}
+	void duplicate_press (Pad&);
+	void duplicate_release (Pad&) {}
+	void duplicate_long_press (Pad&) {}
+	void clear_press (Pad&);
+	void clear_release (Pad&) {}
+	void clear_long_press (Pad&) {}
+	void down_press (Pad&);
+	void down_release (Pad&) {}
+	void down_long_press (Pad&) {}
+	void up_press (Pad&);
+	void up_release (Pad&) {}
+	void up_long_press (Pad&) {}
+	void lower1_press (Pad&);
+	void lower1_release (Pad&) {}
+	void lower1_long_press (Pad&) {}
+	void lower2_press (Pad&);
+	void lower2_release (Pad&) {}
+	void lower2_long_press (Pad&) {}
+	void lower3_press (Pad&);
+	void lower3_release (Pad&) {}
+	void lower3_long_press (Pad&) {}
+	void lower4_press (Pad&);
+	void lower4_release (Pad&) {}
+	void lower4_long_press (Pad&) {}
+	void lower5_press (Pad&);
+	void lower5_release (Pad&) {}
+	void lower5_long_press (Pad&) {}
+	void lower6_press (Pad&);
+	void lower6_release (Pad&) {}
+	void lower6_long_press (Pad&) {}
+	void lower7_press (Pad&);
+	void lower7_release (Pad&) {}
+	void lower7_long_press (Pad&) {}
+	void lower8_press (Pad&);
+	void lower8_release (Pad&) {}
+	void lower8_long_press (Pad&) {}
 };
 
 } /* namespace */
