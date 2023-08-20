@@ -142,7 +142,6 @@ LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
 
 	connect_daw_ports ();
 
-	build_color_map ();
 	build_pad_map ();
 	build_layout_maps ();
 }
@@ -220,7 +219,7 @@ LaunchPadPro::begin_using_device ()
 	write (msg);
 
 	set_device_mode (DAW);
-	//set_layout (SessionLayout);
+	set_layout (SessionLayout);
 
 	/* catch current selection, if any so that we can wire up the pads if appropriate */
 	stripable_selection_changed ();
@@ -327,87 +326,6 @@ LaunchPadPro::output_daw_port_name () const
 void
 LaunchPadPro::stripable_selection_changed ()
 {
-}
-
-void
-LaunchPadPro::build_color_map ()
-{
-	/* RGB values taken from using color picker on PDF of LP manual, page 10 */
-
-	static int novation_color_chart_right_side[] = {
-		0x0,
-		0xb3b3b3,
-		0xdddddd,
-		0xffffff,
-		0xffb3b3,
-		0xff6161,
-		0xdd6161,
-		0xb36161,
-		0xfff3d5,
-		0xffb361,
-		0xdd8c61,
-		0xb37661,
-		0xffeea1,
-		0xffff61,
-		0xdddd61,
-		0xb3b361,
-		0xddffa1,
-		0xc2ff61,
-		0xa1dd61,
-		0x81b361,
-		0xc2ffb3,
-		0x61ff61,
-		0x61dd61,
-		0x61b361,
-		0xc2ffc2,
-		0x61ff8c,
-		0x61dd76,
-		0x61b36b,
-		0xc2ffcc,
-		0x61ffcc,
-		0x61dda1,
-		0x61b381,
-		0xc2fff3,
-		0x61ffe9,
-		0x61ddc2,
-		0x61b396,
-		0xc2f3ff,
-		0x61eeff,
-		0x61c7dd,
-		0x61a1b3,
-		0xc2ddff,
-		0x61c7ff,
-		0x61a1dd,
-		0x6181b3,
-		0xa18cff,
-		0x6161ff,
-		0x6161dd,
-		0x6161b3,
-		0xccb3ff,
-		0xa161ff,
-		0x8161dd,
-		0x7661b3,
-		0xffb3ff,
-		0xff61ff,
-		0xdd61dd,
-		0xb361b3,
-		0xffb3d5,
-		0xff61c2,
-		0xdd61a1,
-		0xb3618c,
-		0xff7661,
-		0xe9b361,
-		0xddc261,
-		0xa1a161,
-	};
-
-	for (size_t n = 0; n < sizeof (novation_color_chart_right_side) / sizeof (novation_color_chart_right_side[0]); ++n) {
-		int color = novation_color_chart_right_side[n];
-		std::pair<int,int> p (n, color);
-		color_map.insert (p);
-	}
-
-	assert (color_map.size() == 64);
 }
 
 void
@@ -649,8 +567,8 @@ LaunchPadPro::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoB
 	}
 
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Note On %1/0x%3%4%5 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity, std::hex, (int) ev->note_number, std::dec));
-	const int idx = (_current_layout * 127) + ev->note_number;
-	const int coord  = layout_note_xy_map[idx];
+	std::pair<int,int> coord = note_to_xy (ev->note_number);
+	std::cerr << "x: " << coord.first << " y: " << coord.second << std::endl;
 }
 
 void
@@ -874,8 +792,7 @@ LaunchPadPro::build_layout_maps ()
 	for (auto const layout : AllLayouts) {
 		for (int row = 0; row < 8; ++row) {
 			for (int col = 0; col < 8; ++col) {
-				const int idx = (layout * 64) + (row*8) + col;
-				layout_xy_note_map[idx] = maps[layout][row][col];
+				layout_xy_note_map[xy_note_index (layout, col, row)] = maps[layout][row][col];
 			}
 		}
 	}
@@ -885,11 +802,45 @@ LaunchPadPro::build_layout_maps ()
 	for (auto const layout : AllLayouts) {
 		for (int row = 0; row < 8; ++row) {
 			for (int col = 0; col < 8; ++col) {
-				const int idx1 = (layout * 64) + (row*8) + col;
-				const int note = layout_xy_note_map[idx1];
-				const int idx2 = (layout * 127) + note;
-				layout_note_xy_map[idx2] = row*8 + col;
+				const int note = layout_xy_note_map[xy_note_index (layout, col, row)];
+				layout_note_xy_map[note_xy_index(layout,note)] = row*8 + col;
 			}
 		}
 	}
+}
+
+int
+LaunchPadPro::note_xy_index (int layout, int note) const
+{
+	return (layout * 127) + note;
+}
+
+int
+LaunchPadPro::xy_note_index (int layout, int col, int row) const
+{
+	return (layout * 64) + (row * 8) + col;
+}
+
+std::pair<int, int>
+LaunchPadPro::note_to_xy (int note) const
+{
+	int coord = layout_note_xy_map[note_xy_index ((int) _current_layout, note)];
+	return std::pair<int,int> (coord % 8, coord / 8);
+}
+
+LaunchPadPro::StripableSlot
+LaunchPadPro::get_stripable_slot (int x, int y) const
+{
+	x += scroll_x_offset;
+	y += scroll_y_offset;
+
+	if ((StripableSlotColumn::size_type) x > stripable_slots.size()) {
+		return StripableSlot (-1, -1);
+	}
+
+	if ((StripableSlotRow::size_type) y > stripable_slots[x].size()) {
+		return StripableSlot (-1, -1);
+	}
+
+	return stripable_slots[x][y];
 }

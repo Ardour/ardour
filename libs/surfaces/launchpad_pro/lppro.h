@@ -165,10 +165,6 @@ class LaunchPadPro : public MIDISurface
 
 	static const Layout AllLayouts[];
 
-	typedef std::map<int,int> ColorMap;
-	ColorMap color_map;
-	void build_color_map ();
-
 	struct Pad  {
 
 		enum WhenPressed {
@@ -214,7 +210,7 @@ class LaunchPadPro : public MIDISurface
 		MidiByteArray state_msg () const { return MidiByteArray (3, 0x90|mode, id, color); }
 
 		/* This returns a negative value for edge pads */
-		int coord () const { return (y * 8) + x; } 
+		int coord () const { return (y * 8) + x; }
 		/* Just an alias, really. */
 		int note_number() const { return id; }
 
@@ -227,6 +223,18 @@ class LaunchPadPro : public MIDISurface
 		int color;
 		ColorMode mode;
 	};
+
+	int scroll_x_offset;
+	int scroll_y_offset;
+	typedef std::pair<int32_t,int32_t> StripableSlot;
+	typedef std::vector<StripableSlot> StripableSlotRow;
+	typedef std::vector<StripableSlotRow> StripableSlotColumn;
+	StripableSlotColumn stripable_slots;
+
+	StripableSlot get_stripable_slot (int x, int y) const;
+	std::pair<int,int> note_to_xy (int note) const;
+	int xy_note_index (int layout, int col, int row) const;
+	int note_xy_index (int layout, int note) const;
 
 	typedef std::map<int,Pad> PadMap;
 	PadMap pad_map;

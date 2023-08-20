@@ -1178,13 +1178,13 @@ Editor::draw_velocity_action (int v)
 RefPtr<RadioAction>
 Editor::draw_channel_action (int c)
 {
+	char buf[64];
 	const char* action = 0;
 	RefPtr<Action> act;
 
 	if (c==DRAW_CHAN_AUTO) {
 		action = "draw-channel-auto";
 	} else if (c>=0 && c<=15) {
-		char buf[64];
 		sprintf(buf, X_("draw-channel-%d"), c+1);
 		action = buf;
 	}
