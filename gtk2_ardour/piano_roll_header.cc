@@ -471,16 +471,20 @@ PianoRollHeader::get_note_name (int note)
 
 	if (mtv) {
 		string chn = mtv->gui_property (X_("midnam-channel"));
-		int midnam_channel;
 
-		sscanf (chn.c_str(), "%*s %d", &midnam_channel);
-		midnam_channel--;
+		if (!chn.empty()) {
 
-		name = mtv->route()->instrument_info ().get_note_name (
-			0,               //bank
-			0,               //program
-			midnam_channel,  //channel
-			note);           //note
+			int midnam_channel;
+
+			sscanf (chn.c_str(), "%*s %d", &midnam_channel);
+			midnam_channel--;
+
+			name = mtv->route()->instrument_info ().get_note_name (
+				0,               //bank
+				0,               //program
+				midnam_channel,  //channel
+				note);           //note
+		}
 	}
 
 	int oct_rel = note % 12;
