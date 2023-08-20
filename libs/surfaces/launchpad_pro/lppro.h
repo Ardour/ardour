@@ -232,9 +232,6 @@ class LaunchPadPro : public MIDISurface
 	StripableSlotColumn stripable_slots;
 
 	StripableSlot get_stripable_slot (int x, int y) const;
-	std::pair<int,int> note_to_xy (int note) const;
-	int xy_note_index (int layout, int col, int row) const;
-	int note_xy_index (int layout, int note) const;
 
 	typedef std::map<int,Pad> PadMap;
 	PadMap pad_map;
@@ -249,6 +246,7 @@ class LaunchPadPro : public MIDISurface
 	void stop_event_loop ();
 
 	void stripable_selection_changed ();
+	std::weak_ptr<ARDOUR::MidiTrack> _current_pad_target;
 
 	void light_pad (int pad_id, int color, Pad::ColorMode);
 	void pad_off (int pad_id);
@@ -286,14 +284,9 @@ class LaunchPadPro : public MIDISurface
 	mutable LPPRO_GUI* _gui;
 	void build_gui ();
 
-	typedef int XY_Note_Map[8][8];
-	typedef int Note_XY_Map[127];
-
-	std::vector<int> layout_xy_note_map;
-	std::vector<int> layout_note_xy_map;
-
-	void build_layout_maps ();
 	Layout _current_layout;
+
+	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;
 };
 
 } /* namespace */
