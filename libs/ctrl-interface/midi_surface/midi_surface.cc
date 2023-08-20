@@ -107,7 +107,7 @@ MIDISurface::ports_acquire ()
 
 		if (shadow_port) {
 
-			_output_bundle.reset (new ARDOUR::Bundle (_("Push 2 Pads"), false));
+			_output_bundle.reset (new ARDOUR::Bundle (port_name_prefix, false));
 
 			_output_bundle->add_channel (
 				shadow_port->name(),
