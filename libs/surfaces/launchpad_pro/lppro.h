@@ -432,6 +432,9 @@ class LaunchPadPro : public MIDISurface
 	void lower8_press (Pad&);
 	void lower8_release (Pad&) {}
 	void lower8_long_press (Pad&) {}
+
+	void pad_press (Pad&);
+	void pad_long_press (Pad&);
 };
 
 } /* namespace */

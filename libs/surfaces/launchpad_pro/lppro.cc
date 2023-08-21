@@ -333,6 +333,7 @@ LaunchPadPro::build_pad_map ()
 #define EDGE_PAD0(id) if (!(pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), &LaunchPadPro::relax))).second)) abort()
 #define EDGE_PAD(id, press) if (!(pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press)))).second)) abort()
 #define EDGE_PAD2(id, press, release) if (!(pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press), (release)))).second)) abort()
+#define EDGE_PAD3(id, press, release, long_press) if (!(pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press), (release), (long_press)))).second)) abort()
 
 	EDGE_PAD2 (Shift, &LaunchPadPro::shift_press, &LaunchPadPro::shift_release);
 
@@ -386,7 +387,7 @@ LaunchPadPro::build_pad_map ()
 	for (int row = 0; row < 8; ++row) {
 		for (int col = 0; col < 8; ++col) {
 			int pid = (11 + (row * 10)) + col;
-			std::pair<int,Pad> p (pid, Pad (pid, col, row, &LaunchPadPro::relax));
+			std::pair<int,Pad> p (pid, Pad (pid, col, 7 - row, &LaunchPadPro::pad_press, &LaunchPadPro::relax, &LaunchPadPro::pad_long_press));
 			if (!pad_map.insert (p).second) abort();
 		}
 	}
@@ -1185,4 +1186,19 @@ LaunchPadPro::lower7_press (Pad& pad)
 void
 LaunchPadPro::lower8_press (Pad& pad)
 {
+}
+
+void
+LaunchPadPro::pad_press (Pad& pad)
+{
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("pad press on %1, %2 => %3\n", pad.x, pad.y, pad.id));
+	session->bang_trigger_at (pad.x, pad.y);
+	start_press_timeout (pad);
+}
+
+void
+LaunchPadPro::pad_long_press (Pad& pad)
+{
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("pad long press on %1, %2 => %3\n", pad.x, pad.y, pad.id));
+	session->unbang_trigger_at (pad.x, pad.y);
 }
