@@ -438,6 +438,10 @@ class LaunchPadPro : public MIDISurface
 
 	void trigger_property_change (PBD::PropertyChange, int x, int y);
 	PBD::ScopedConnectionList trigger_connections;
+
+	void display_session_layout ();
+	void transport_state_changed ();
+	void record_state_changed ();
 };
 
 } /* namespace */

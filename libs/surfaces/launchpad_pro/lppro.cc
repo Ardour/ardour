@@ -150,6 +150,10 @@ LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
 	build_pad_map ();
 
 	Trigger::TriggerPropertyChange.connect (trigger_connections, invalidator (*this), boost::bind (&LaunchPadPro::trigger_property_change, this, _1, _2, _3), this);
+
+	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchPadPro::record_state_changed, this), this);
+	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchPadPro::transport_state_changed, this), this);
+
 }
 
 LaunchPadPro::~LaunchPadPro ()
@@ -159,6 +163,28 @@ LaunchPadPro::~LaunchPadPro ()
 	stop_event_loop ();
 
 	MIDISurface::drop ();
+}
+
+void
+LaunchPadPro::transport_state_changed ()
+{
+	MIDI::byte msg[3];
+	msg[0] = 0x90;
+
+	if (session->transport_rolling()) {
+		msg[1] = Play;
+		msg[2] = 21;
+		daw_write (msg, 3);
+	} else {
+		msg[1] = Play;
+		msg[2] = 17;
+		daw_write (msg, 3);
+	}
+}
+
+void
+LaunchPadPro::record_state_changed ()
+{
 }
 
 int
@@ -358,7 +384,7 @@ LaunchPadPro::build_pad_map ()
 	EDGE_PAD (MicroStep, &LaunchPadPro::microstep_press);
 	EDGE_PAD (PrintToClip, &LaunchPadPro::print_to_clip_press);
 
-	EDGE_PAD0 (StopClip);
+	EDGE_PAD (StopClip, &LaunchPadPro::stop_clip_press);
 	EDGE_PAD0 (Device);
 	EDGE_PAD0 (Sends);
 	EDGE_PAD0 (Pan);
@@ -590,7 +616,9 @@ LaunchPadPro::handle_midi_sysex (MIDI::Parser& parser, MIDI::byte* raw_bytes, si
 
 		if (raw_bytes[1] < num_layouts) {
 			_current_layout = AllLayouts[raw_bytes[1]];
-			std::cerr << "Current layout = " << _current_layout << " from " << (int) raw_bytes[1] << std::endl;
+			if (_current_layout == SessionLayout) {
+				display_session_layout ();
+			}
 		} else {
 			std::cerr << "ignore illegal layout index " << (int) raw_bytes[1] << std::endl;
 		}
@@ -598,6 +626,110 @@ LaunchPadPro::handle_midi_sysex (MIDI::Parser& parser, MIDI::byte* raw_bytes, si
 	default:
 		break;
 	}
+}
+
+void
+LaunchPadPro::display_session_layout ()
+{
+	MIDI::byte msg[3];
+	msg[0] = 0x90;
+
+	msg[1] = Patterns;
+	msg[2] = 0x27;
+	daw_write (msg, 3);
+	msg[1] = Steps;
+	msg[2] = 0x27;
+	daw_write (msg, 3);
+	msg[1] = PatternSettings;
+	msg[2] = 0x27;
+	daw_write (msg, 3);
+	msg[1] = Velocity;
+	msg[2] = 0x27;
+	daw_write (msg, 3);
+	msg[1] = Probability;
+	msg[2] = 0x27;
+	daw_write (msg, 3);
+	msg[1] = Mutation;
+	msg[2] = 0x27;
+	daw_write (msg, 3);
+	msg[1] = MicroStep;
+	msg[2] = 0x27;
+	daw_write (msg, 3);
+	msg[1] = PrintToClip;
+	msg[2] = 0x27;
+	daw_write (msg, 3);
+
+	msg[1] = Play;
+	msg[2] = 17;
+	daw_write (msg, 3);
+
+	msg[1] = CaptureMIDI;
+	msg[2] = 5;
+	daw_write (msg, 3);
+
+	msg[1] = Up;
+	msg[2] = 46;
+	daw_write (msg, 3);
+	msg[1] = Down;
+	msg[2] = 46;
+	daw_write (msg, 3);
+	msg[1] = Left;
+	msg[2] = 46;
+	daw_write (msg, 3);
+	msg[1] = Right;
+	msg[2] = 46;
+	daw_write (msg, 3);
+
+
+	msg[1] = Lower1;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = Lower2;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = Lower3;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = Lower4;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = Lower5;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = Lower6;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = Lower7;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = Lower8;
+	msg[2] = 2;
+	daw_write (msg, 3);
+
+	msg[1] = StopClip;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = Device;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = Sends;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = Pan;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = Volume;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = Solo;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = Mute;
+	msg[2] = 2;
+	daw_write (msg, 3);
+	msg[1] = RecordArm;
+	msg[2] = 2;
+	daw_write (msg, 3);
 }
 
 void
@@ -1060,6 +1192,7 @@ LaunchPadPro::print_to_clip_press (Pad& pad)
 void
 LaunchPadPro::stop_clip_press (Pad& pad)
 {
+	session->trigger_stop_all (_shift_pressed);
 }
 
 void
@@ -1105,22 +1238,7 @@ LaunchPadPro::capture_midi_press (Pad& pad)
 void
 LaunchPadPro::play_press (Pad& pad)
 {
-	MIDI::byte velocity;
-	if (session->transport_rolling()) {
-		velocity = 17;
-	} else {
-		velocity = 21;
-	}
-
 	toggle_roll (false, true);
-
-	MIDI::byte msg[3];
-
-	msg[0] = 0x90;
-	msg[1] = pad.id;
-	msg[2] = velocity;
-
-	daw_write (msg, 3);
 }
 
 void
