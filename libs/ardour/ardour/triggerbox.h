@@ -166,7 +166,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<color_t>              _color;
 
   public:
-	/* this is positioner here so that we can easily keep it in sync
+	/* this is positioned here so that we can easily keep it in sync
 	   with the properties list above.
 	*/
 	struct UIState {
@@ -414,6 +414,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	/* examples: drag+dropping from slot to slot, or "Range->Bounce to Slot", where a single operation sets many  */
 	void get_ui_state (UIState &state) const;
 	void set_ui_state (UIState &state);
+
+	static PBD::Signal3<void,PBD::PropertyChange,int,int> TriggerPropertyChange;
 
   protected:
 	struct UIRequests {
@@ -843,6 +845,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static void start_transport_stop (Session&);
 
 	static PBD::PropertyChange all_trigger_props();
+
+	void send_property_change (PBD::PropertyChange pc);
+	static PBD::Signal2<void,PBD::PropertyChange,int> TriggerBoxPropertyChange;
 
 	void dump (std::ostream &) const;
 
