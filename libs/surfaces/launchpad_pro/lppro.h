@@ -435,6 +435,9 @@ class LaunchPadPro : public MIDISurface
 
 	void pad_press (Pad&);
 	void pad_long_press (Pad&);
+
+	void trigger_property_change (PBD::PropertyChange, int x, int y);
+	PBD::ScopedConnectionList trigger_connections;
 };
 
 } /* namespace */

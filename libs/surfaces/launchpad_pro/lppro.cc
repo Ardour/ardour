@@ -45,6 +45,7 @@
 #include "ardour/midi_port.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
+#include "ardour/triggerbox.h"
 #include "ardour/types_convert.h"
 
 #include "gtkmm2ext/gui_thread.h"
@@ -147,6 +148,8 @@ LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
 	connect_daw_ports ();
 
 	build_pad_map ();
+
+	Trigger::TriggerPropertyChange.connect (trigger_connections, invalidator (*this), boost::bind (&LaunchPadPro::trigger_property_change, this, _1, _2, _3), this);
 }
 
 LaunchPadPro::~LaunchPadPro ()
@@ -407,7 +410,12 @@ LaunchPadPro::all_pads_out ()
 		msg[1] = p.second.id;
 		daw_write (msg, 3);
 	}
+
+	/* Finally, the logo */
+	msg[1] = 0x63;
+	daw_write (msg, 3);
 }
+
 
 bool
 LaunchPadPro::light_logo ()
@@ -761,6 +769,7 @@ LaunchPadPro::daw_write (const MidiByteArray& data)
 void
 LaunchPadPro::daw_write (MIDI::byte const * data, size_t size)
 {
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("daw write %1\n", size));
 	_daw_out_port->write (data, size, 0);
 }
 
@@ -1201,4 +1210,48 @@ LaunchPadPro::pad_long_press (Pad& pad)
 {
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("pad long press on %1, %2 => %3\n", pad.x, pad.y, pad.id));
 	session->unbang_trigger_at (pad.x, pad.y);
+}
+
+void
+LaunchPadPro::trigger_property_change (PropertyChange pc, int x, int y)
+{
+	TriggerPtr trigger (session->trigger_at (x, y));
+	if (!trigger) {
+		return;
+	}
+
+
+	if (pc.contains (Properties::running)) {
+
+		int pid = (11 + ((7 - y) * 10)) + x;
+
+		PadMap::iterator p = pad_map.find (pid);
+		if (p == pad_map.end()) {
+			return;
+		}
+
+		MIDI::byte msg[3];
+		msg[0] = 0x90;
+		msg[1] = p->second.id;
+
+		switch (trigger->state()) {
+		case Trigger::Stopped:
+			msg[2] = 0;
+			break;
+		case Trigger::WaitingToStart:
+			msg[0] |= 1;
+			msg[2] = 0x27;
+			break;
+		case Trigger::Running:
+		case Trigger::WaitingForRetrigger:
+		case Trigger::WaitingToStop:
+		case Trigger::WaitingToSwitch:
+			msg[2] = 0x27;
+			break;
+		default:
+			msg[2] = 0;
+		}
+
+		daw_write (msg, 3);
+	}
 }
