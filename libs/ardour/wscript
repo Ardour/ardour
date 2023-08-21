@@ -482,7 +482,7 @@ def build(bld):
     fma_sources = []
     avx512f_sources = []
 
-    if Options.options.fpu_optimization:
+    if not Options.options.no_fpu_optimization:
         if (bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686'):
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s', ]
             avx_sources = [ 'sse_functions_avx_linux.cc' ]

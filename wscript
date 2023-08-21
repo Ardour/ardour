@@ -514,7 +514,7 @@ int main() { return 0; }''',
         #
         compiler_flags.append ('-U__STRICT_ANSI__')
 
-    if opt.fpu_optimization:
+    if not opt.no_fpu_optimization:
         if conf.env['build_target'] == 'armhf' or conf.env['build_target'] == 'aarch64':
             conf.define('ARM_NEON_SUPPORT', 1)
         elif conf.env['build_target'] == 'mingw':
@@ -848,12 +848,10 @@ def options(opt):
                     help='Directory/folder where dependency stack trees (gtk, a3) can be found (defaults to ~)')
     opt.add_option('--dist-target', type='string', default='auto', dest='dist_target',
                     help='Specify the target for cross-compiling [auto,none,x86,i386,i686,x86_64,tiger,leopard,mingw,msvc]')
-    opt.add_option('--dr-mingw', action='store_true', default=True, dest='drmingw',
-                    help='Write crashdumps using Dr.Mingw (Windows Only)')
-    opt.add_option('--no-dr-mingw', action='store_false', dest='drmingw')
-    opt.add_option('--fpu-optimization', action='store_true', default=True, dest='fpu_optimization',
-                    help='Build runtime checked assembler code (default)')
-    opt.add_option('--no-fpu-optimization', action='store_false', dest='fpu_optimization')
+    opt.add_option('--no-dr-mingw', action='store_true', default=False, dest='no_drmingw',
+                    help='Do not write crashdumps using Dr.Mingw (Windows ONLY)')
+    opt.add_option('--no-fpu-optimization', action='store_true', default=False, dest='no_fpu_optimization',
+                    help='Build without runtime checked assembler code')
     opt.add_option('--exports-hidden', action='store_true', default=False, dest='exports_hidden')
     opt.add_option('--freedesktop', action='store_true', default=False, dest='freedesktop',
                     help='Build MIME type and .desktop files as per freedesktop.org standards (will be placed in build/gtk2_ardour)')
@@ -880,22 +878,15 @@ def options(opt):
     opt.add_option('--beatbox', action='store_true', default=False, dest='beatbox',
                     help='Compile beatbox test app')
     opt.add_option('--lv2dir', type='string', help="install destination for builtin LV2 bundles [Default: LIBDIR/lv2]")
-    opt.add_option('--lxvst', action='store_true', default=True, dest='lxvst',
-                    help='Compile with support for linuxVST plugins')
-    opt.add_option('--no-lxvst', action='store_false', dest='lxvst',
+    opt.add_option('--no-lxvst', action='store_true', default=False, dest='no_lxvst',
                     help='Compile without support for linuxVST plugins')
-    opt.add_option('--vst3', action='store_true', default=True, dest='vst3',
-                    help='Compile with support for VST3 plugins')
-    opt.add_option('--no-vst3', action='store_false', dest='vst3',
+    opt.add_option('--vst3', action='store_true', default=False, dest='no_vst3',
                     help='Compile without support for VST3 plugins')
     opt.add_option('--no-lrdf', action='store_true', dest='no_lrdf',
                     help='Compile without support for LRDF LADSPA data even if present')
-    opt.add_option('--nls', action='store_true', default=True, dest='nls',
-                    help='Enable i18n (native language support) (default)')
-    opt.add_option('--no-nls', action='store_false', dest='nls')
-    opt.add_option('--phone-home', action='store_true', default=True, dest='phone_home',
-                   help='Contact ardour.org at startup for new announcements')
-    opt.add_option('--no-phone-home', action='store_false', dest='phone_home',
+    opt.add_option('--no-nls', action='store_true', default=False, dest='no_nls',
+                    help='Disable i18n (native language support)')
+    opt.add_option('--no-phone-home', action='store_true', default=False, dest='no_phone_home',
                    help='Do not contact ardour.org at startup for new announcements')
     opt.add_option('--stl-debug', action='store_true', default=False, dest='stl_debug',
                     help='Build with debugging for the STL')
@@ -923,10 +914,8 @@ def options(opt):
                     help='Compile with -arch arm64 (macOS ONLY)')
     opt.add_option('--versioned', action='store_true', default=False, dest='versioned',
                     help='Add revision information to executable name inside the build directory')
-    opt.add_option('--windows-vst', action='store_true', default=True, dest='windows_vst',
-                    help='Compile with support for Windows VST')
-    opt.add_option('--no-windows-vst', action='store_false', dest='windows_vst',
-                    help='Compile without support for Windows VST')
+    opt.add_option('--no-windows-vst', action='store_true', default=False, dest='no_windows_vst',
+                    help='Compile without support for Windows VST (Windows ONLY)')
     opt.add_option('--windows-key', type='string', action='store', dest='windows_key', default='Mod4><Super',
                     help='X Modifier(s) (Mod1,Mod2, etc) for the Windows key (X11 builds only). ' +
                     'Multiple modifiers must be separated by \'><\'')
@@ -1235,7 +1224,7 @@ int main () { int x = SFC_RF64_AUTO_DOWNGRADE; return 0; }
         conf.env.append_value('CFLAGS', "-DHAVE_RF64_RIFF")
 
     if Options.options.dist_target == 'mingw':
-        Options.options.fpu_optimization = True
+        Options.options.no_fpu_optimization = False
         conf.env.append_value('CFLAGS', '-DPLATFORM_WINDOWS')
         conf.env.append_value('CFLAGS', '-DCOMPILER_MINGW')
         conf.env.append_value('CXXFLAGS', '-DPLATFORM_WINDOWS')
@@ -1332,18 +1321,18 @@ int main () { __int128 x = 0; return 0; }
     else:
         conf.define ('EXPORT_VISIBILITY_HIDDEN', False)
 
-    if Options.options.dist_target == 'mingw' and opts.drmingw:
+    if Options.options.dist_target == 'mingw' and not opts.no_drmingw:
         conf.check_cc (function_name='ExcHndlInit', define_name='HAVE_DRMINGW', header_name='exchndl.h', lib=['exchndl', 'mgwhelp'], mandatory=True, uselib_store='DRMINGW')
 
     # Set up waf environment and C defines
-    if opts.phone_home:
+    if not opts.no_phone_home:
         conf.define('PHONE_HOME', 1)
         conf.env['PHONE_HOME'] = True
-    if opts.fpu_optimization:
+    if not opts.no_fpu_optimization:
         conf.env['FPU_OPTIMIZATION'] = True
     if opts.freedesktop:
         conf.env['FREEDESKTOP'] = True
-    if opts.nls:
+    if not opts.no_nls:
         conf.define('ENABLE_NLS', 1)
         conf.env['ENABLE_NLS'] = True
     else:
@@ -1356,13 +1345,13 @@ int main () { __int128 x = 0; return 0; }
         conf.env['SINGLE_TESTS'] = opts.single_tests
     #if opts.tranzport:
     #    conf.env['TRANZPORT'] = 1
-    if opts.windows_vst:
+    if not opts.no_windows_vst:
         if Options.options.dist_target == 'mingw':
             conf.define('WINDOWS_VST_SUPPORT', 1)
             conf.env['WINDOWS_VST_SUPPORT'] = True
         else:
             conf.env['WINDOWS_VST_SUPPORT'] = False
-    if opts.lxvst:
+    if not opts.no_lxvst:
         if sys.platform == 'darwin':
             conf.env['LXVST_SUPPORT'] = False
         elif Options.options.dist_target == 'mingw':
@@ -1370,7 +1359,7 @@ int main () { __int128 x = 0; return 0; }
         else:
             conf.define('LXVST_SUPPORT', 1)
             conf.env['LXVST_SUPPORT'] = True
-    if opts.vst3:
+    if not opts.no_vst3:
         conf.define('VST3_SUPPORT', 1)
         conf.env['VST3_SUPPORT'] = True
     conf.env['WINDOWS_KEY'] = opts.windows_key
@@ -1539,7 +1528,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Denormal exceptions',   conf.is_defined('DEBUG_DENORMAL_EXCEPTION'))
     write_config_text('Dr. Mingw',             conf.is_defined('HAVE_DRMINGW'))
     write_config_text('FLAC',                  conf.is_defined('HAVE_FLAC'))
-    write_config_text('FPU optimization',      opts.fpu_optimization)
+    write_config_text('FPU optimization',      not opts.no_fpu_optimization)
     write_config_text('FPU AVX512F support',   conf.is_defined('FPU_AVX512F_SUPPORT'))
     write_config_text('FPU AVX/FMA support',   conf.is_defined('FPU_AVX_FMA_SUPPORT'))
     write_config_text('Futex Semaphore',       conf.is_defined('USE_FUTEX_SEMAPHORE'))
@@ -1563,7 +1552,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('PTW32 Semaphore',       conf.is_defined('USE_PTW32_SEMAPHORE'))
 #    write_config_text('Soundtouch',            conf.is_defined('HAVE_SOUNDTOUCH'))
     write_config_text('Threaded WaveViews',    not opts.no_threaded_waveviews)
-    write_config_text('Translation',           opts.nls)
+    write_config_text('Translation',           not opts.no_nls)
 #    write_config_text('Tranzport',             opts.tranzport)
     write_config_text('Unit tests',            conf.env['BUILD_TESTS'])
     write_config_text('Use LLD linker',        opts.use_lld)
