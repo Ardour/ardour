@@ -151,8 +151,8 @@ LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
 
 	Trigger::TriggerPropertyChange.connect (trigger_connections, invalidator (*this), boost::bind (&LaunchPadPro::trigger_property_change, this, _1, _2, _3), this);
 
-	session->RecordStateChanged.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchPadPro::record_state_changed, this), this);
-	session->TransportStateChange.connect(session_connections, MISSING_INVALIDATOR, boost::bind (&LaunchPadPro::transport_state_changed, this), this);
+	session->RecordStateChanged.connect(session_connections, invalidator(*this), boost::bind (&LaunchPadPro::record_state_changed, this), this);
+	session->TransportStateChange.connect(session_connections, invalidator(*this), boost::bind (&LaunchPadPro::transport_state_changed, this), this);
 
 }
 
