@@ -423,7 +423,7 @@ Trigger::send_property_change (PropertyChange pc)
 
 	PropertyChanged (pc);
 	/* emit static signal for global observers */
-	TriggerPropertyChange (pc, _index, _box.order());
+	TriggerPropertyChange (pc, _box.order(), _index);
 }
 
 void
