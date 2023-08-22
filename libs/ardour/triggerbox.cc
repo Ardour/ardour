@@ -202,7 +202,7 @@ FollowAction::to_string () const
 
 
 Trigger * const Trigger::MagicClearPointerValue = (Trigger*) 0xfeedface;
-PBD::Signal3<void,PropertyChange,int,int> Trigger::TriggerPropertyChange;
+PBD::Signal2<void,PropertyChange,Trigger*> Trigger::TriggerPropertyChange;
 
 Trigger::Trigger (uint32_t n, TriggerBox& b)
 	: _launch_style (Properties::launch_style, OneShot)
@@ -423,7 +423,7 @@ Trigger::send_property_change (PropertyChange pc)
 
 	PropertyChanged (pc);
 	/* emit static signal for global observers */
-	TriggerPropertyChange (pc, _box.order(), _index);
+	TriggerPropertyChange (pc, this);
 }
 
 void

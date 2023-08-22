@@ -415,7 +415,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void get_ui_state (UIState &state) const;
 	void set_ui_state (UIState &state);
 
-	static PBD::Signal3<void,PBD::PropertyChange,int,int> TriggerPropertyChange;
+	static PBD::Signal2<void,PBD::PropertyChange,Trigger*> TriggerPropertyChange;
 
   protected:
 	struct UIRequests {
