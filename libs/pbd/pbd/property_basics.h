@@ -173,4 +173,8 @@ private:
 
 }
 
+namespace std {
+ostream& operator<< (std::ostream& os, PBD::PropertyChange const & pc);
+}
+
 #endif /* __libpbd_property_basics_h__ */
