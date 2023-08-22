@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <bitset>
+#include <limits>
 
 #include <stdlib.h>
 #include <pthread.h>
@@ -147,6 +148,7 @@ LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
 
 	connect_daw_ports ();
 
+	build_color_map ();
 	build_pad_map ();
 
 	Trigger::TriggerPropertyChange.connect (trigger_connections, invalidator (*this), boost::bind (&LaunchPadPro::trigger_property_change, this, _1, _2, _3), this);
@@ -246,15 +248,12 @@ LaunchPadPro::begin_using_device ()
 
 	light_logo ();
 
-	Glib::RefPtr<Glib::TimeoutSource> timeout = Glib::TimeoutSource::create (1000); // milliseconds
-	timeout->connect (sigc::mem_fun (*this, &LaunchPadPro::light_logo));
-	timeout->attach (main_loop()->get_context());
-
 	set_device_mode (DAW);
 	set_layout (SessionLayout);
 
 	/* catch current selection, if any so that we can wire up the pads if appropriate */
 	stripable_selection_changed ();
+	map_triggers ();
 
 	return MIDISurface::begin_using_device ();
 }
@@ -448,16 +447,9 @@ LaunchPadPro::light_logo ()
 {
 	MIDI::byte msg[3];
 
-	msg[0] = 0x90;
+	msg[0] = 0x91; /* pulse with tempo/midi clock */
 	msg[1] = 0x63;
-
-	logo_color++;
-
-	if (logo_color > 60) {
-		logo_color = 4;
-	}
-
-	msg[2] = logo_color;
+	msg[2] = 4 + (random() % 0x3c);
 
 	daw_write (msg, 3);
 
@@ -475,25 +467,30 @@ LaunchPadPro::pad_by_id (int pid)
 }
 
 void
-LaunchPadPro::light_pad (int pad_id, int color, Pad::ColorMode mode)
+LaunchPadPro::light_pad (int pad_id, int color)
 {
-	Pad* pad = pad_by_id (pad_id);
-	if (!pad) {
-		return;
-	}
-	pad->set (color, mode);
-	daw_write (pad->state_msg());
+	MidiByteArray s (sysex_header);
+
+	s.push_back (0x3);
+	s.push_back (0x3);
+	s.push_back (pad_id);
+
+	s.push_back (UINT_RGBA_R (color)/2);
+	s.push_back (UINT_RGBA_G (color)/2);
+	s.push_back (UINT_RGBA_B (color)/2);
+	s.push_back (0xf7);
+
+	daw_write (s);
 }
 
 void
 LaunchPadPro::pad_off (int pad_id)
 {
-	Pad* pad = pad_by_id (pad_id);
-	if (!pad) {
-		return;
-	}
-	pad->set (0, Pad::Static);
-	daw_write (pad->state_msg());
+	MIDI::byte msg[3];
+	msg[0] = 0x90;
+	msg[1] = pad_id;
+	msg[2] = 0;
+	daw_write (msg, 3);
 }
 
 void
@@ -538,7 +535,6 @@ LaunchPadPro::set_layout (Layout l, int page)
 	msg.push_back (page);
 	msg.push_back (0x0);
 	msg.push_back (0xf7);
-	std::cerr << "switch to layout " << l << " using " << msg << std::endl;
 	daw_write (msg);
 }
 
@@ -895,13 +891,26 @@ LaunchPadPro::ports_release ()
 void
 LaunchPadPro::daw_write (const MidiByteArray& data)
 {
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("daw write %1 %2\n", data.size(), data));
 	_daw_out_port->write (&data[0], data.size(), 0);
 }
 
 void
 LaunchPadPro::daw_write (MIDI::byte const * data, size_t size)
 {
-	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("daw write %1\n", size));
+
+#ifndef NDEBUG
+	std::stringstream str;
+
+	if (DEBUG_ENABLED(DEBUG::Launchpad)) {
+		str << hex;
+		for (size_t n = 0; n < size; ++n) {
+			str << (int) data[n] << ' ';
+		}
+	}
+#endif
+
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("daw write %1 [%2]\n", size, str.str()));
 	_daw_out_port->write (data, size, 0);
 }
 
@@ -1334,42 +1343,291 @@ void
 LaunchPadPro::trigger_property_change (PropertyChange pc, int x, int y)
 {
 	TriggerPtr trigger (session->trigger_at (x, y));
+
 	if (!trigger) {
 		return;
 	}
 
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("prop change %1 for trigger at %2, %3\n", pc, x, y));
+
+	if (y > scroll_y_offset + 7) {
+		/* not visible at present */
+		return;
+	}
+
+	if (x > scroll_x_offset + 7) {
+		/* not visible at present */
+		return;
+	}
 
 	if (pc.contains (Properties::running)) {
 
 		int pid = (11 + ((7 - y) * 10)) + x;
 
-		PadMap::iterator p = pad_map.find (pid);
-		if (p == pad_map.end()) {
-			return;
-		}
-
-		MIDI::byte msg[3];
-		msg[0] = 0x90;
-		msg[1] = p->second.id;
+		MidiByteArray msg;
 
 		switch (trigger->state()) {
 		case Trigger::Stopped:
-			msg[2] = 0;
+			msg.push_back (0x90);
+			msg.push_back (pid);
+			msg.push_back (find_closest_palette_color (trigger->color ()));
 			break;
+
 		case Trigger::WaitingToStart:
-			msg[0] |= 1;
-			msg[2] = 0x27;
+			msg.push_back (0x91); /* channel 1=> pulsing */
+			msg.push_back (pid);
+			msg.push_back (0x27);
 			break;
+
 		case Trigger::Running:
 		case Trigger::WaitingForRetrigger:
 		case Trigger::WaitingToStop:
 		case Trigger::WaitingToSwitch:
-			msg[2] = 0x27;
+			/* XXX choose contrasting color from the base one */
+			msg.push_back (0x90);
+			msg.push_back (pid);
+			msg.push_back (0x10);
 			break;
+
 		default:
-			msg[2] = 0;
+			msg.push_back (0x90);
+			msg.push_back (pid);
+			msg.push_back (0);
 		}
 
-		daw_write (msg, 3);
+		daw_write (msg);
 	}
+}
+
+void
+LaunchPadPro::map_triggers ()
+{
+	for (int x = 0; x < 8; ++x) {
+		map_triggerbox (x);
+	}
+}
+
+void
+LaunchPadPro::map_triggerbox (int x)
+{
+	MidiByteArray msg (sysex_header);
+
+	msg.push_back (0x3);
+	msg.push_back (0x3);
+
+	for (int y = 0; y < 8; ++y) {
+
+		int xp = x + scroll_x_offset;
+		int yp = y + scroll_y_offset;
+
+		int pid = (11 + ((7 - y) * 10)) + x;
+
+		TriggerPtr t = session->trigger_at (xp, yp);
+		int color;
+
+		if (!t) {
+			color = 0x0;
+		} else {
+			color = t->color();
+		}
+
+		msg.push_back (pid);
+		msg.push_back (UINT_RGBA_R (color)/2);
+		msg.push_back (UINT_RGBA_G (color)/2);
+		msg.push_back (UINT_RGBA_B (color)/2);
+	}
+
+	msg.push_back (0xf7);
+	daw_write (msg);
+
+}
+
+void
+LaunchPadPro::build_color_map ()
+{
+	/* RGB values taken from using color picker on PDF of LP manual, page
+	 * 10, but without zero (off)
+	 */
+
+	static uint32_t novation_color_chart_left_side[] = {
+		0xb3b3b3ff,
+		0xddddddff,
+		0xffffffff,
+		0xffb3b3ff,
+		0xff6161ff,
+		0xdd6161ff,
+		0xb36161ff,
+		0xfff3d5ff,
+		0xffb361ff,
+		0xdd8c61ff,
+		0xb37661ff,
+		0xffeea1ff,
+		0xffff61ff,
+		0xdddd61ff,
+		0xb3b361ff,
+		0xddffa1ff,
+		0xc2ff61ff,
+		0xa1dd61ff,
+		0x81b361ff,
+		0xc2ffb3ff,
+		0x61ff61ff,
+		0x61dd61ff,
+		0x61b361ff,
+		0xc2ffc2ff,
+		0x61ff8cff,
+		0x61dd76ff,
+		0x61b36bff,
+		0xc2ffccff,
+		0x61ffccff,
+		0x61dda1ff,
+		0x61b381ff,
+		0xc2fff3ff,
+		0x61ffe9ff,
+		0x61ddc2ff,
+		0x61b396ff,
+		0xc2f3ffff,
+		0x61eeffff,
+		0x61c7ddff,
+		0x61a1b3ff,
+		0xc2ddffff,
+		0x61c7ffff,
+		0x61a1ddff,
+		0x6181b3ff,
+		0xa18cffff,
+		0x6161ffff,
+		0x6161ddff,
+		0x6161b3ff,
+		0xccb3ffff,
+		0xa161ffff,
+		0x8161ddff,
+		0x7661b3ff,
+		0xffb3ffff,
+		0xff61ffff,
+		0xdd61ddff,
+		0xb361b3ff,
+		0xffb3d5ff,
+		0xff61c2ff,
+		0xdd61a1ff,
+		0xb3618cff,
+		0xff7661ff,
+		0xe9b361ff,
+		0xddc261ff,
+		0xa1a161ff,
+	};
+
+	static uint32_t novation_color_chart_right_side[] = {
+		0x61b361ff,
+		0x61b38cff,
+		0x618cd5ff,
+		0x6161ffff,
+		0x61b3b3ff,
+		0x8c61f3ff,
+		0xccb3c2ff,
+		0x8c7681ff,
+		/**/
+		0xff6161ff,
+		0xf3ffa1ff,
+		0xeefc61ff,
+		0xccff61ff,
+		0x76dd61ff,
+		0x61ffccff,
+		0x61e9ffff,
+		0x61a1ffff,
+		/**/
+		0x8c61ffff,
+		0xcc61fcff,
+		0xcc61fcff,
+		0xa17661ff,
+		0xffa161ff,
+		0xddf961ff,
+		0xd5ff8cff,
+		0x61ff61ff,
+		/**/
+		0xb3ffa1ff,
+		0xccfcd5ff,
+		0xb3fff6ff,
+		0xcce4ffff,
+		0xa1c2f6ff,
+		0xd5c2f9ff,
+		0xf98cffff,
+		0xff61ccff,
+		/**/
+		0xff61ccff,
+		0xf3ee61ff,
+		0xe4ff61ff,
+		0xddcc61ff,
+		0xb3a161ff,
+		0x61ba76ff,
+		0x76c28cff,
+		0x8181a1ff,
+		/**/
+		0x818cccff,
+		0xccaa81ff,
+		0xdd6161ff,
+		0xf9b3a1ff,
+		0xf9ba76ff,
+		0xfff38cff,
+		0xe9f9a1ff,
+		0xd5ee76ff,
+		/**/
+		0x8181a1ff,
+		0xf9f9d5ff,
+		0xddfce4ff,
+		0xe9e9ffff,
+		0xe4d5ffff,
+		0xb3b3b3ff,
+		0xd5d5d5ff,
+		0xf9ffffff,
+		/**/
+		0xe96161ff,
+		0xe96161ff,
+		0x81f661ff,
+		0x61b361ff,
+		0xf3ee61ff,
+		0xb3a161ff,
+		0xeec261ff,
+		0xc27661ff
+	};
+
+	for (size_t n = 0; n < sizeof (novation_color_chart_left_side) / sizeof (novation_color_chart_left_side[0]); ++n) {
+		uint32_t color = novation_color_chart_left_side[n];
+		std::pair<int,uint32_t> p (1 + n, color);
+		color_map.insert (p);
+	}
+
+	for (size_t n = 0; n < sizeof (novation_color_chart_right_side) / sizeof (novation_color_chart_right_side[0]); ++n) {
+		uint32_t color = novation_color_chart_right_side[n];
+		std::pair<int,uint32_t> p (40 + n, color);
+		color_map.insert (p);
+	}
+}
+
+int
+LaunchPadPro::find_closest_palette_color (uint32_t color)
+{
+	int64_t distance = std::numeric_limits<int64_t>::max();
+	int index = -1;
+
+	NearestMap::iterator n = nearest_map.find (color);
+	if (n != nearest_map.end()) {
+		return n->second;
+	}
+
+	for (auto const & c : color_map) {
+		int p = c.second;
+
+		int64_t rd = UINT_RGBA_R(p) - UINT_RGBA_R(color);
+		int64_t gd = UINT_RGBA_G(p) - UINT_RGBA_G(color);
+		int64_t bd = UINT_RGBA_B(p) - UINT_RGBA_B(color);
+		int64_t d = (rd * rd) + (gd * gd) + (bd * bd);
+
+		if (d < distance) {
+			index = c.first;
+			distance = d;
+		}
+	}
+
+	nearest_map.insert (std::pair<uint32_t,int> (color, index));
+
+	return index;
 }

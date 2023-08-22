@@ -187,10 +187,6 @@ class LaunchPadPro : public MIDISurface
 			, on_press (press_method)
 			, on_release (release_method)
 			, on_long_press (long_press_method)
-			, filtered (false)
-			, perma_color (0)
-			, color (0)
-			, mode (Static)
 		{}
 
 		Pad (int pid, int xx, int yy, PadMethod press_method, PadMethod release_method = &LaunchPadPro::relax, PadMethod long_press_method = &LaunchPadPro::relax)
@@ -200,24 +196,11 @@ class LaunchPadPro : public MIDISurface
 			, on_press (press_method)
 			, on_release (release_method)
 			, on_long_press (long_press_method)
-			, filtered (true)
-			, perma_color (0)
-			, color (0)
-			, mode (Static)
 		{}
-
-		void set (int c, ColorMode m) {
-			color = c;
-			mode = m;
-		}
-		void off() { set (0, Static); }
-
 
 		MIDI::byte status_byte() const { if (x < 0) return 0xb0; return 0x90; }
 		bool is_pad () const { return x >= 0; }
 		bool is_button () const { return x < 0; }
-
-		MidiByteArray state_msg () const { return MidiByteArray (3, status_byte()|mode, id, color); }
 
 		int id;
 		int x;
@@ -225,10 +208,6 @@ class LaunchPadPro : public MIDISurface
 		PadMethod on_press;
 		PadMethod on_release;
 		PadMethod on_long_press;
-		int filtered;
-		int perma_color;
-		int color;
-		ColorMode mode;
 		sigc::connection timeout_connection;
 	};
 
@@ -252,6 +231,14 @@ class LaunchPadPro : public MIDISurface
 	void build_pad_map();
 	Pad* pad_by_id (int pid);
 
+	typedef std::map<int,uint32_t> ColorMap;
+	ColorMap color_map;
+	void build_color_map ();
+	int find_closest_palette_color (uint32_t);
+
+	typedef std::map<uint32_t,int> NearestMap;
+	NearestMap nearest_map;
+
 	int begin_using_device ();
 	int stop_using_device ();
 	int device_acquire () { return 0; }
@@ -262,7 +249,7 @@ class LaunchPadPro : public MIDISurface
 	void stripable_selection_changed ();
 	std::weak_ptr<ARDOUR::MidiTrack> _current_pad_target;
 
-	void light_pad (int pad_id, int color, Pad::ColorMode);
+	void light_pad (int pad_id, int color);
 	void pad_off (int pad_id);
 	void all_pads_off ();
 	void all_pads_on (int color);
@@ -442,7 +429,11 @@ class LaunchPadPro : public MIDISurface
 	void display_session_layout ();
 	void transport_state_changed ();
 	void record_state_changed ();
+
+	void map_triggers ();
+	void map_triggerbox (int col);
 };
+
 
 } /* namespace */
 
