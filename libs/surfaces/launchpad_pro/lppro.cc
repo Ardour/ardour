@@ -19,6 +19,7 @@
 
 #include <algorithm>
 #include <bitset>
+#include <cmath>
 #include <limits>
 
 #include <stdlib.h>
@@ -151,11 +152,11 @@ LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
 	build_color_map ();
 	build_pad_map ();
 
-	Trigger::TriggerPropertyChange.connect (trigger_connections, invalidator (*this), boost::bind (&LaunchPadPro::trigger_property_change, this, _1, _2, _3), this);
+	Trigger::TriggerPropertyChange.connect (trigger_connections, invalidator (*this), boost::bind (&LaunchPadPro::trigger_property_change, this, _1, _2), this);
 
-	session->RecordStateChanged.connect(session_connections, invalidator(*this), boost::bind (&LaunchPadPro::record_state_changed, this), this);
-	session->TransportStateChange.connect(session_connections, invalidator(*this), boost::bind (&LaunchPadPro::transport_state_changed, this), this);
-
+	session->RecordStateChanged.connect (session_connections, invalidator(*this), boost::bind (&LaunchPadPro::record_state_changed, this), this);
+	session->TransportStateChange.connect (session_connections, invalidator(*this), boost::bind (&LaunchPadPro::transport_state_changed, this), this);
+	session->RouteAdded.connect (session_connections, invalidator(*this), boost::bind (&LaunchPadPro::viewport_changed, this), this);
 }
 
 LaunchPadPro::~LaunchPadPro ()
@@ -253,7 +254,7 @@ LaunchPadPro::begin_using_device ()
 
 	/* catch current selection, if any so that we can wire up the pads if appropriate */
 	stripable_selection_changed ();
-	map_triggers ();
+	viewport_changed ();
 
 	return MIDISurface::begin_using_device ();
 }
@@ -547,7 +548,6 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 
 	switch (m) {
 	case Standalone:
-		std::cerr << "entering standalone mode\n";
 		live_or_programmer.push_back (0xe);
 		live_or_programmer.push_back (0x0);
 		live_or_programmer.push_back (0xf7);
@@ -576,7 +576,6 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 		break;
 
 	case Programmer:
-		std::cerr << "entering programmer mode\n";
 		live_or_programmer.push_back (0xe);
 		live_or_programmer.push_back (0x1);
 		live_or_programmer.push_back (0xf7);
@@ -1340,13 +1339,10 @@ LaunchPadPro::pad_long_press (Pad& pad)
 }
 
 void
-LaunchPadPro::trigger_property_change (PropertyChange pc, int x, int y)
+LaunchPadPro::trigger_property_change (PropertyChange pc, Trigger* t)
 {
-	TriggerPtr trigger (session->trigger_at (x, y));
-
-	if (!trigger) {
-		return;
-	}
+	int x = t->box().order();
+	int y = t->index();
 
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("prop change %1 for trigger at %2, %3\n", pc, x, y));
 
@@ -1360,39 +1356,57 @@ LaunchPadPro::trigger_property_change (PropertyChange pc, int x, int y)
 		return;
 	}
 
-	if (pc.contains (Properties::running)) {
+	/* name property change is sent when slots are loaded or unloaded */
+
+	PropertyChange our_interests;
+	our_interests.add (Properties::running);
+	our_interests.add (Properties::name);;
+
+	if (pc.contains (our_interests)) {
 
 		int pid = (11 + ((7 - y) * 10)) + x;
-
 		MidiByteArray msg;
+		std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + x);
 
-		switch (trigger->state()) {
-		case Trigger::Stopped:
+		if (!r || !t->region()) {
 			msg.push_back (0x90);
 			msg.push_back (pid);
-			msg.push_back (find_closest_palette_color (trigger->color ()));
+			msg.push_back (0x0);
+			return;
+		}
+
+
+		switch (t->state()) {
+		case Trigger::Stopped:
+			std::cerr << "stopped, use color\n";
+			msg.push_back (0x90);
+			msg.push_back (pid);
+			msg.push_back (find_closest_palette_color (r->presentation_info().color()));
 			break;
 
 		case Trigger::WaitingToStart:
+		case Trigger::Stopping:
+			std::cerr << "wts/stp\n";
 			msg.push_back (0x91); /* channel 1=> pulsing */
 			msg.push_back (pid);
-			msg.push_back (0x27);
+			msg.push_back (find_closest_palette_color (r->presentation_info().color()));
 			break;
 
 		case Trigger::Running:
+			std::cerr << "runing\n";
+			/* choose contrasting color from the base one */
+			msg.push_back (0x90);
+			msg.push_back (pid);
+			msg.push_back (find_closest_palette_color (HSV(r->presentation_info().color()).opposite()));
+			break;
+
 		case Trigger::WaitingForRetrigger:
 		case Trigger::WaitingToStop:
 		case Trigger::WaitingToSwitch:
-			/* XXX choose contrasting color from the base one */
-			msg.push_back (0x90);
+			std::cerr << "waiting\n";
+			msg.push_back (0x91);
 			msg.push_back (pid);
-			msg.push_back (0x10);
-			break;
-
-		default:
-			msg.push_back (0x90);
-			msg.push_back (pid);
-			msg.push_back (0);
+			msg.push_back (find_closest_palette_color (HSV(r->presentation_info().color()).opposite()));
 		}
 
 		daw_write (msg);
@@ -1410,10 +1424,18 @@ LaunchPadPro::map_triggers ()
 void
 LaunchPadPro::map_triggerbox (int x)
 {
-	MidiByteArray msg (sysex_header);
+	MIDI::byte msg[3];
 
-	msg.push_back (0x3);
-	msg.push_back (0x3);
+	msg[0] = 0x90;
+
+	std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + x);
+	int palette_index;
+
+	if (r) {
+		palette_index = find_closest_palette_color (r->presentation_info().color());
+	} else {
+		palette_index = 0x0;
+	}
 
 	for (int y = 0; y < 8; ++y) {
 
@@ -1421,25 +1443,18 @@ LaunchPadPro::map_triggerbox (int x)
 		int yp = y + scroll_y_offset;
 
 		int pid = (11 + ((7 - y) * 10)) + x;
+		msg[1] = pid;
 
 		TriggerPtr t = session->trigger_at (xp, yp);
-		int color;
 
-		if (!t) {
-			color = 0x0;
+		if (!t || !t->region()) {
+			msg[2] = 0x0;
 		} else {
-			color = t->color();
+			msg[2] = palette_index;
 		}
 
-		msg.push_back (pid);
-		msg.push_back (UINT_RGBA_R (color)/2);
-		msg.push_back (UINT_RGBA_G (color)/2);
-		msg.push_back (UINT_RGBA_B (color)/2);
+		daw_write (msg, 3);
 	}
-
-	msg.push_back (0xf7);
-	daw_write (msg);
-
 }
 
 void
@@ -1591,12 +1606,14 @@ LaunchPadPro::build_color_map ()
 
 	for (size_t n = 0; n < sizeof (novation_color_chart_left_side) / sizeof (novation_color_chart_left_side[0]); ++n) {
 		uint32_t color = novation_color_chart_left_side[n];
+		/* Add 1 to account for missing zero at zero in the table */
 		std::pair<int,uint32_t> p (1 + n, color);
 		color_map.insert (p);
 	}
 
 	for (size_t n = 0; n < sizeof (novation_color_chart_right_side) / sizeof (novation_color_chart_right_side[0]); ++n) {
 		uint32_t color = novation_color_chart_right_side[n];
+		/* Add 40 to account for start offset number shown in page 10 of the LP manual */
 		std::pair<int,uint32_t> p (40 + n, color);
 		color_map.insert (p);
 	}
@@ -1605,7 +1622,7 @@ LaunchPadPro::build_color_map ()
 int
 LaunchPadPro::find_closest_palette_color (uint32_t color)
 {
-	int64_t distance = std::numeric_limits<int64_t>::max();
+	auto distance = std::numeric_limits<double>::max();
 	int index = -1;
 
 	NearestMap::iterator n = nearest_map.find (color);
@@ -1613,13 +1630,19 @@ LaunchPadPro::find_closest_palette_color (uint32_t color)
 		return n->second;
 	}
 
-	for (auto const & c : color_map) {
-		int p = c.second;
+	HSV hsv_c (color);
 
-		int64_t rd = UINT_RGBA_R(p) - UINT_RGBA_R(color);
-		int64_t gd = UINT_RGBA_G(p) - UINT_RGBA_G(color);
-		int64_t bd = UINT_RGBA_B(p) - UINT_RGBA_B(color);
-		int64_t d = (rd * rd) + (gd * gd) + (bd * bd);
+	for (auto const & c : color_map) {
+
+		HSV hsv_p (c.second);
+
+		double chr = M_PI * (hsv_c.h / 180.0);
+		double phr = M_PI * (hsv_p.h /180.0);
+		double t1 = (sin (chr) * hsv_c.s * hsv_c.v) - (sin (phr) * hsv_p.s* hsv_p.v);
+		double t2 = (cos (chr) * hsv_c.s * hsv_c.v) - (cos (phr) * hsv_p.s * hsv_p.v);
+		double t3 = hsv_c.v - hsv_p.v;
+		double d = (t1 * t1) + (t2 * t2) + (0.5 * (t3 * t3));
+
 
 		if (d < distance) {
 			index = c.first;
@@ -1630,4 +1653,32 @@ LaunchPadPro::find_closest_palette_color (uint32_t color)
 	nearest_map.insert (std::pair<uint32_t,int> (color, index));
 
 	return index;
+}
+
+void
+LaunchPadPro::viewport_changed ()
+{
+	route_connections.drop_connections ();
+
+	for (int n = 0; n < 8; ++n) {
+		std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + n);
+		if (r) {
+			r->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&LaunchPadPro::viewport_changed, this), this);
+			r->presentation_info().PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&LaunchPadPro::route_property_change, this, _1, n), this);
+		}
+	}
+
+	map_triggers ();
+}
+
+void
+LaunchPadPro::route_property_change (PropertyChange const & pc, int col)
+{
+	if (pc.contains (Properties::color)) {
+		map_triggerbox (col);
+	}
+
+
+	if (pc.contains (Properties::selected)) {
+	}
 }

@@ -52,6 +52,7 @@ namespace ARDOUR {
 	class Port;
 	class MidiBuffer;
 	class MidiTrack;
+	class Trigger;
 }
 
 namespace ArdourSurface {
@@ -423,7 +424,7 @@ class LaunchPadPro : public MIDISurface
 	void pad_press (Pad&);
 	void pad_long_press (Pad&);
 
-	void trigger_property_change (PBD::PropertyChange, int x, int y);
+	void trigger_property_change (PBD::PropertyChange, ARDOUR::Trigger*);
 	PBD::ScopedConnectionList trigger_connections;
 
 	void display_session_layout ();
@@ -432,6 +433,10 @@ class LaunchPadPro : public MIDISurface
 
 	void map_triggers ();
 	void map_triggerbox (int col);
+
+	void viewport_changed ();
+	void route_property_change (PBD::PropertyChange const &, int x);
+	PBD::ScopedConnectionList route_connections;
 };
 
 
