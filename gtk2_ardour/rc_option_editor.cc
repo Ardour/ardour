@@ -3056,6 +3056,18 @@ These settings will only take effect after %1 is restarted.\n\
 		add_option (_("Appearance/Quirks"), bo);
 	}
 
+#if !(defined PLATFORM_WINDOWS || defined __APPLE__)
+	bo = new BoolOption (
+			"allow-to-resize-engine-dialog",
+			_("Allow to resize Engine Dialog"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_to_resize_engine_dialog),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_to_resize_engine_dialog)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+				_("On some XWayland systems the engine-dialog is blank when shown a second time (from the main menu). Allowing to resize the window works around this oddity."));
+	add_option (_("Appearance/Quirks"), bo);
+#endif
+
 	add_option (_("Appearance/Quirks"), new OptionEditorBlank ());
 #if (!defined USE_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE || defined __APPLE__)
 	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
