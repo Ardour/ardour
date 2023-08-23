@@ -408,7 +408,7 @@ MIDISurface::do_request (MidiSurfaceRequest * req)
 {
 	if (req->type == CallSlot) {
 
-		call_slot (MISSING_INVALIDATOR, req->the_slot);
+		call_slot (PBD::EventLoop::__invalidator (*this, __FILE__, __LINE__), req->the_slot);
 
 	} else if (req->type == Quit) {
 
