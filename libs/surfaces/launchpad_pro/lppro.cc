@@ -50,6 +50,7 @@
 #include "ardour/tempo.h"
 #include "ardour/triggerbox.h"
 #include "ardour/types_convert.h"
+#include "ardour/utils.h"
 
 #include "gtkmm2ext/gui_thread.h"
 #include "gtkmm2ext/rgb_macros.h"
@@ -138,6 +139,8 @@ LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
 	, _gui (nullptr)
 	, _current_layout (SessionLayout)
 	, _shift_pressed (false)
+	, did_session_display (false)
+	, current_fader_bank (VolumeFaders)
 {
 	run_event_loop ();
 	port_setup ();
@@ -259,6 +262,10 @@ LaunchPadPro::begin_using_device ()
 	light_logo ();
 
 	set_device_mode (DAW);
+	setup_faders (VolumeFaders);
+	setup_faders (PanFaders);
+	setup_faders (SendFaders);
+	setup_faders (DeviceFaders);
 	set_layout (SessionLayout);
 
 	/* catch current selection, if any so that we can wire up the pads if appropriate */
@@ -374,57 +381,57 @@ void
 LaunchPadPro::build_pad_map ()
 {
 
-#define EDGE_PAD0(id)                             pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), &LaunchPadPro::relax)))
-#define EDGE_PAD(id, press)                       pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press))))
-#define EDGE_PAD2(id, press, long_press)          pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press), (long_press))))
-#define EDGE_PAD3(id, press, long_press, release) pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press), (long_press), (release))))
+#define BUTTON0(id)                             pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), &LaunchPadPro::relax)))
+#define BUTTON(id, press)                       pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press))))
+#define BUTTON2(id, press, long_press)          pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press), (long_press))))
+#define BUTTON3(id, press, long_press, release) pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press), (long_press), (release))))
 
-	EDGE_PAD3 (Shift, &LaunchPadPro::shift_press, &LaunchPadPro::relax, &LaunchPadPro::shift_release);
+	BUTTON3 (Shift, &LaunchPadPro::shift_press, &LaunchPadPro::relax, &LaunchPadPro::shift_release);
 
-	EDGE_PAD0 (Left);
-	EDGE_PAD0 (Right);
-	EDGE_PAD0 (Session);
-	EDGE_PAD0 (Note);
-	EDGE_PAD0 (Chord);
-	EDGE_PAD0 (Custom);
-	EDGE_PAD0 (Sequencer);
-	EDGE_PAD0 (Projects);
+	BUTTON0 (Left);
+	BUTTON0 (Right);
+	BUTTON0 (Session);
+	BUTTON0 (Note);
+	BUTTON0 (Chord);
+	BUTTON0 (Custom);
+	BUTTON0 (Sequencer);
+	BUTTON0 (Projects);
 
-	EDGE_PAD (Patterns, &LaunchPadPro::patterns_press);
-	EDGE_PAD (Steps, &LaunchPadPro::steps_press);
-	EDGE_PAD (PatternSettings, &LaunchPadPro::pattern_settings_press);
-	EDGE_PAD (Velocity, &LaunchPadPro::velocity_press);
-	EDGE_PAD (Probability, &LaunchPadPro::probability_press);
-	EDGE_PAD (Mutation, &LaunchPadPro::mutation_press);
-	EDGE_PAD (MicroStep, &LaunchPadPro::microstep_press);
-	EDGE_PAD (PrintToClip, &LaunchPadPro::print_to_clip_press);
+	BUTTON (Patterns, &LaunchPadPro::patterns_press);
+	BUTTON (Steps, &LaunchPadPro::steps_press);
+	BUTTON (PatternSettings, &LaunchPadPro::pattern_settings_press);
+	BUTTON (Velocity, &LaunchPadPro::velocity_press);
+	BUTTON (Probability, &LaunchPadPro::probability_press);
+	BUTTON (Mutation, &LaunchPadPro::mutation_press);
+	BUTTON (MicroStep, &LaunchPadPro::microstep_press);
+	BUTTON (PrintToClip, &LaunchPadPro::print_to_clip_press);
 
-	EDGE_PAD (StopClip, &LaunchPadPro::stop_clip_press);
-	EDGE_PAD0 (Device);
-	EDGE_PAD0 (Sends);
-	EDGE_PAD0 (Pan);
-	EDGE_PAD0 (Volume);
-	EDGE_PAD2 (Solo, &LaunchPadPro::solo_press, &LaunchPadPro::solo_long_press);
-	EDGE_PAD (Mute, &LaunchPadPro::mute_press);
-	EDGE_PAD (RecordArm, &LaunchPadPro::record_arm_press);
+	BUTTON (StopClip, &LaunchPadPro::stop_clip_press);
+	BUTTON (Device, &LaunchPadPro::device_press);
+	BUTTON (Sends, &LaunchPadPro::sends_press);
+	BUTTON (Pan, &LaunchPadPro::pan_press);
+	BUTTON (Volume, &LaunchPadPro::volume_press);
+	BUTTON2 (Solo, &LaunchPadPro::solo_press, &LaunchPadPro::solo_long_press);
+	BUTTON (Mute, &LaunchPadPro::mute_press);
+	BUTTON (RecordArm, &LaunchPadPro::record_arm_press);
 
-	EDGE_PAD0 (CaptureMIDI);
-	EDGE_PAD (Play, &LaunchPadPro::play_press);
-	EDGE_PAD0 (FixedLength);
-	EDGE_PAD0 (Quantize);
-	EDGE_PAD0 (Duplicate);
-	EDGE_PAD0 (Clear);
-	EDGE_PAD0 (Down);
-	EDGE_PAD0 (Up);
+	BUTTON (CaptureMIDI, &LaunchPadPro::capture_midi_press);
+	BUTTON (Play, &LaunchPadPro::play_press);
+	BUTTON0 (FixedLength);
+	BUTTON0 (Quantize);
+	BUTTON0 (Duplicate);
+	BUTTON0 (Clear);
+	BUTTON0 (Down);
+	BUTTON0 (Up);
 
-	EDGE_PAD (Lower1, &LaunchPadPro::lower1_press);
-	EDGE_PAD (Lower2, &LaunchPadPro::lower2_press);
-	EDGE_PAD (Lower3, &LaunchPadPro::lower3_press);
-	EDGE_PAD (Lower4, &LaunchPadPro::lower4_press);
-	EDGE_PAD (Lower5, &LaunchPadPro::lower5_press);
-	EDGE_PAD (Lower6, &LaunchPadPro::lower6_press);
-	EDGE_PAD (Lower7, &LaunchPadPro::lower7_press);
-	EDGE_PAD (Lower8, &LaunchPadPro::lower8_press);
+	BUTTON (Lower1, &LaunchPadPro::lower1_press);
+	BUTTON (Lower2, &LaunchPadPro::lower2_press);
+	BUTTON (Lower3, &LaunchPadPro::lower3_press);
+	BUTTON (Lower4, &LaunchPadPro::lower4_press);
+	BUTTON (Lower5, &LaunchPadPro::lower5_press);
+	BUTTON (Lower6, &LaunchPadPro::lower6_press);
+	BUTTON (Lower7, &LaunchPadPro::lower7_press);
+	BUTTON (Lower8, &LaunchPadPro::lower8_press);
 
 	/* Now add the 8x8 central pad grid */
 
@@ -545,6 +552,11 @@ LaunchPadPro::set_layout (Layout l, int page)
 	msg.push_back (0x0);
 	msg.push_back (0xf7);
 	daw_write (msg);
+
+	if (l == Fader) {
+		current_fader_bank = (FaderBank) page;
+		map_faders ();
+	}
 }
 
 void
@@ -566,7 +578,7 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 		standalone_or_daw.push_back (0x10);
 		standalone_or_daw.push_back (0x0);
 		standalone_or_daw.push_back (0xf7);
-		write (standalone_or_daw);
+		daw_write (standalone_or_daw);
 		break;
 
 	case DAW:
@@ -580,7 +592,7 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 		standalone_or_daw.push_back (0x10);
 		standalone_or_daw.push_back (0x1);
 		standalone_or_daw.push_back (0xf7);
-		write (standalone_or_daw);
+		daw_write (standalone_or_daw);
 		break;
 
 	case Programmer:
@@ -588,7 +600,7 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 		live_or_programmer.push_back (0x1);
 		live_or_programmer.push_back (0xf7);
 		/* enter "programmer" state */
-		write (live_or_programmer);
+		daw_write (live_or_programmer);
 		break;
 	}
 }
@@ -596,7 +608,8 @@ LaunchPadPro::set_device_mode (DeviceMode m)
 void
 LaunchPadPro::handle_midi_sysex (MIDI::Parser& parser, MIDI::byte* raw_bytes, size_t sz)
 {
-	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Sysex, %1 bytes parser %2\n", sz, &parser));
+	MidiByteArray m (sz, raw_bytes);
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Sysex, %1 bytes parser %2 %s\n", sz, &parser, m));
 
 	if (&parser != _daw_in_port->parser()) {
 		DEBUG_TRACE (DEBUG::Launchpad, "sysex from non-DAW port, ignored\n");
@@ -619,8 +632,17 @@ LaunchPadPro::handle_midi_sysex (MIDI::Parser& parser, MIDI::byte* raw_bytes, si
 
 		if (raw_bytes[1] < num_layouts) {
 			_current_layout = AllLayouts[raw_bytes[1]];
-			if (_current_layout == SessionLayout) {
+			DEBUG_TRACE (DEBUG::Launchpad, string_compose ("new layout: %1\n", _current_layout));
+			switch (_current_layout) {
+			case SessionLayout:
 				display_session_layout ();
+				map_triggers ();
+				break;
+			case Fader:
+				map_faders ();
+				break;
+			default:
+				break;
 			}
 		} else {
 			std::cerr << "ignore illegal layout index " << (int) raw_bytes[1] << std::endl;
@@ -634,6 +656,14 @@ LaunchPadPro::handle_midi_sysex (MIDI::Parser& parser, MIDI::byte* raw_bytes, si
 void
 LaunchPadPro::display_session_layout ()
 {
+	/* This only needs to be done once (in fact, the device even remembers
+	 * it across power-cycling!
+	 */
+
+	if (did_session_display) {
+		return;
+	}
+
 	MIDI::byte msg[3];
 	msg[0] = 0x90;
 
@@ -740,19 +770,20 @@ LaunchPadPro::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes
 {
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("CC %1 (value %2)\n", (int) ev->controller_number, (int) ev->value));
 
+	if (_current_layout == Fader) {
+		/* Trap fader move messages and act on them */
+		if (ev->controller_number >= 0x20 && ev->controller_number < 0x28) {
+			fader_move (ev->controller_number, ev->value);
+			return;
+		}
+	}
+
 	PadMap::iterator p = pad_map.find (ev->controller_number);
 	if (p == pad_map.end()) {
 		return;
 	}
 
 	Pad& pad (p->second);
-
-	if (_current_layout != SessionLayout) {
-		/* Allow Lower1..Lower8 to have selection effects in Note layout */
-		if (_current_layout != NoteLayout || (pad.id < Lower1 || pad.id > Lower8)) {
-			return;
-		}
-	}
 
 	set<int>::iterator c = consumed.find (pad.id);
 
@@ -1231,21 +1262,41 @@ LaunchPadPro::stop_clip_press (Pad& pad)
 void
 LaunchPadPro::device_press (Pad& pad)
 {
+	if (_current_layout == Fader && current_fader_bank == DeviceFaders) {
+		set_layout (SessionLayout);
+		return;
+	}
+	set_layout (Fader, DeviceFaders);
 }
 
 void
 LaunchPadPro::sends_press (Pad& pad)
 {
+	if (_current_layout == Fader && current_fader_bank == SendFaders) {
+		set_layout (SessionLayout);
+		return;
+	}
+	set_layout (Fader, SendFaders);
 }
 
 void
 LaunchPadPro::pan_press (Pad& pad)
 {
+	if (_current_layout == Fader && current_fader_bank == PanFaders) {
+		set_layout (SessionLayout);
+		return;
+	}
+	set_layout (Fader, PanFaders);
 }
 
 void
 LaunchPadPro::volume_press (Pad& pad)
 {
+	if (_current_layout == Fader && current_fader_bank == VolumeFaders) {
+		set_layout (SessionLayout);
+		return;
+	}
+	set_layout (Fader, VolumeFaders);
 }
 
 void
@@ -1308,6 +1359,7 @@ LaunchPadPro::record_arm_press (Pad& pad)
 void
 LaunchPadPro::capture_midi_press (Pad& pad)
 {
+	set_record_enable (!get_record_enabled());
 }
 
 void
@@ -1467,21 +1519,18 @@ LaunchPadPro::trigger_property_change (PropertyChange pc, Trigger* t)
 
 		switch (t->state()) {
 		case Trigger::Stopped:
-			std::cerr << "stopped, use color\n";
 			msg.push_back (0x90);
 			msg.push_back (pid);
 			msg.push_back (find_closest_palette_color (r->presentation_info().color()));
 			break;
 
 		case Trigger::WaitingToStart:
-			std::cerr << "wts/stp\n";
 			msg.push_back (0x91); /* channel 1=> pulsing */
 			msg.push_back (pid);
 			msg.push_back (0x17); // find_closest_palette_color (r->presentation_info().color()));
 			break;
 
 		case Trigger::Running:
-			std::cerr << "runing\n";
 			/* choose contrasting color from the base one */
 			msg.push_back (0x90);
 			msg.push_back (pid);
@@ -1492,7 +1541,6 @@ LaunchPadPro::trigger_property_change (PropertyChange pc, Trigger* t)
 		case Trigger::WaitingToStop:
 		case Trigger::WaitingToSwitch:
 		case Trigger::Stopping:
-			std::cerr << "waiting\n";
 			msg.push_back (0x91);
 			msg.push_back (pid);
 			msg.push_back (find_closest_palette_color (HSV(r->presentation_info().color()).opposite()));
@@ -1757,7 +1805,16 @@ LaunchPadPro::viewport_changed ()
 		}
 	}
 
-	map_triggers ();
+	switch (_current_layout) {
+	case SessionLayout:
+		map_triggers ();
+		break;
+	case Fader:
+		map_faders ();
+		break;
+	default:
+		break;
+	}
 }
 
 void
@@ -1770,4 +1827,102 @@ LaunchPadPro::route_property_change (PropertyChange const & pc, int col)
 
 	if (pc.contains (Properties::selected)) {
 	}
+}
+
+void
+LaunchPadPro::setup_faders (FaderBank bank)
+{
+	MidiByteArray msg (sysex_header);
+
+	msg.push_back (1); /* fader bank command */
+	msg.push_back (bank);
+	msg.push_back (0); /* vertical orientation */
+	for (int n = 0; n < 8; ++n) {
+		msg.push_back (n);              /* fader number */
+		msg.push_back (0);              /* unipolar */
+		msg.push_back (0x20+n);       /* CC number */
+		msg.push_back (random() % 127); /* color */
+	}
+
+	msg.push_back (0xf7);
+	daw_write (msg);
+}
+
+void
+LaunchPadPro::fader_move (int cc, int val)
+{
+	std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + (cc - 0x20));
+	std::shared_ptr<AutomationControl> ac;
+
+	if (r) {
+		switch (current_fader_bank) {
+		case VolumeFaders:
+			ac= r->gain_control();
+			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ARDOUR::Config->get_max_gain()), PBD::Controllable::NoGroup);
+			break;
+		default:
+			break;
+		}
+	}
+}
+
+void
+LaunchPadPro::map_faders ()
+{
+	MIDI::byte msg[3];
+	msg[0] = 0xb4;
+
+	control_connections.drop_connections ();
+
+	for (int n = 0; n < 8; ++n) {
+		std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + n);
+		std::shared_ptr<AutomationControl> ac;
+
+		msg[1] = 0x20 + n;
+
+		if (!r) {
+			msg[2] = 0;
+			daw_write (msg, 3);
+			continue;
+		}
+
+		switch (current_fader_bank) {
+		case VolumeFaders:
+			ac = r->gain_control();
+			if (ac) {
+				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
+			} else {
+				msg[2] = 0;
+			}
+			ac->Changed.connect (control_connections, invalidator (*this), boost::bind (&LaunchPadPro::automation_control_change, this, n, std::weak_ptr<AutomationControl> (ac)), this);
+			break;
+		default:
+			msg[2] = 0;
+			break;
+		}
+
+		daw_write (msg, 3);
+	}
+}
+
+void
+LaunchPadPro::automation_control_change (int n, std::weak_ptr<AutomationControl> wac)
+{
+	std::shared_ptr<AutomationControl> ac = wac.lock();
+	if (!ac) {
+		return;
+	}
+
+	MIDI::byte msg[3];
+	msg[0] = 0xb4;
+	msg[1] = 0x20 + n;
+
+	switch (current_fader_bank) {
+	case VolumeFaders:
+		msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
+		break;
+	default:
+		break;
+	}
+	daw_write (msg, 3);
 }

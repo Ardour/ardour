@@ -49,6 +49,7 @@ namespace MIDI {
 }
 
 namespace ARDOUR {
+	class AutomationControl;
 	class Port;
 	class MidiBuffer;
 	class MidiTrack;
@@ -167,6 +168,13 @@ class LaunchPadPro : public MIDISurface
 		ProgrammerLayout,
 		Settings,
 		CustomSettings
+	};
+
+	enum FaderBank {
+		VolumeFaders,
+		PanFaders,
+		SendFaders,
+		DeviceFaders
 	};
 
 	static const Layout AllLayouts[];
@@ -429,6 +437,7 @@ class LaunchPadPro : public MIDISurface
 	PBD::ScopedConnectionList trigger_connections;
 
 	void display_session_layout ();
+	bool did_session_display;
 	void transport_state_changed ();
 	void record_state_changed ();
 
@@ -438,6 +447,13 @@ class LaunchPadPro : public MIDISurface
 	void viewport_changed ();
 	void route_property_change (PBD::PropertyChange const &, int x);
 	PBD::ScopedConnectionList route_connections;
+
+	void setup_faders (FaderBank);
+	void map_faders ();
+	void fader_move (int cc, int val);
+	void automation_control_change (int n, std::weak_ptr<ARDOUR::AutomationControl>);
+	PBD::ScopedConnectionList control_connections;
+	FaderBank current_fader_bank;
 };
 
 
