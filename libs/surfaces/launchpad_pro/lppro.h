@@ -248,9 +248,10 @@ class LaunchPadPro : public MIDISurface
 	void stop_event_loop ();
 
 	void stripable_selection_changed ();
+	void select_stripable (int col);
 	std::weak_ptr<ARDOUR::MidiTrack> _current_pad_target;
 
-	void light_pad (int pad_id, int color);
+	void light_pad (int pad_id, int color, int mode = 0);
 	void pad_off (int pad_id);
 	void all_pads_off ();
 	void all_pads_on (int color);

@@ -45,6 +45,7 @@
 #include "ardour/midiport_manager.h"
 #include "ardour/midi_track.h"
 #include "ardour/midi_port.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/tempo.h"
 #include "ardour/triggerbox.h"
@@ -402,14 +403,14 @@ LaunchPadPro::build_pad_map ()
 	EDGE_PAD0 (Down);
 	EDGE_PAD0 (Up);
 
-	EDGE_PAD0 (Lower1);
-	EDGE_PAD0 (Lower2);
-	EDGE_PAD0 (Lower3);
-	EDGE_PAD0 (Lower4);
-	EDGE_PAD0 (Lower5);
-	EDGE_PAD0 (Lower6);
-	EDGE_PAD0 (Lower7);
-	EDGE_PAD0 (Lower8);
+	EDGE_PAD (Lower1, &LaunchPadPro::lower1_press);
+	EDGE_PAD (Lower2, &LaunchPadPro::lower2_press);
+	EDGE_PAD (Lower3, &LaunchPadPro::lower3_press);
+	EDGE_PAD (Lower4, &LaunchPadPro::lower4_press);
+	EDGE_PAD (Lower5, &LaunchPadPro::lower5_press);
+	EDGE_PAD (Lower6, &LaunchPadPro::lower6_press);
+	EDGE_PAD (Lower7, &LaunchPadPro::lower7_press);
+	EDGE_PAD (Lower8, &LaunchPadPro::lower8_press);
 
 	/* Now add the 8x8 central pad grid */
 
@@ -468,20 +469,13 @@ LaunchPadPro::pad_by_id (int pid)
 }
 
 void
-LaunchPadPro::light_pad (int pad_id, int color)
+LaunchPadPro::light_pad (int pad_id, int color, int mode)
 {
-	MidiByteArray s (sysex_header);
-
-	s.push_back (0x3);
-	s.push_back (0x3);
-	s.push_back (pad_id);
-
-	s.push_back (UINT_RGBA_R (color)/2);
-	s.push_back (UINT_RGBA_G (color)/2);
-	s.push_back (UINT_RGBA_B (color)/2);
-	s.push_back (0xf7);
-
-	daw_write (s);
+	MIDI::byte msg[3];
+	msg[0] = 0x90 | mode;
+	msg[1] = pad_id;
+	msg[2] = color;
+	daw_write (msg, 3);
 }
 
 void
@@ -732,16 +726,22 @@ LaunchPadPro::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes
 {
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("CC %1 (value %2)\n", (int) ev->controller_number, (int) ev->value));
 
-	if (_current_layout != SessionLayout) {
-		return;
-	}
-
 	PadMap::iterator p = pad_map.find (ev->controller_number);
 	if (p == pad_map.end()) {
 		return;
 	}
 
 	Pad& pad (p->second);
+
+	if (_current_layout != SessionLayout) {
+		/* Allow Lower1..Lower8 to have selection effects in Note layout */
+		if (_current_layout != NoteLayout || (pad.id < Lower1 || pad.id > Lower8)) {
+			return;
+		}
+	}
+
+
+
 	set<int>::iterator c = consumed.find (pad.id);
 
 	if (c == consumed.end()) {
@@ -962,6 +962,27 @@ LaunchPadPro::stripable_selection_changed ()
 	std::shared_ptr<MidiTrack> new_pad_target;
 	StripableNotificationList const & selected (last_selected());
 
+	light_pad (Lower1, 0);
+	light_pad (Lower2, 0);
+	light_pad (Lower3, 0);
+	light_pad (Lower4, 0);
+	light_pad (Lower5, 0);
+	light_pad (Lower6, 0);
+	light_pad (Lower7, 0);
+	light_pad (Lower8, 0);
+
+	std::shared_ptr<Stripable> first_selected;
+
+	if (!selected.empty()) {
+		first_selected = selected.front().lock();
+	}
+
+	if (first_selected && first_selected->presentation_info().order() >= (uint32_t) scroll_x_offset && first_selected->presentation_info().order() < (uint32_t) scroll_x_offset + 8) {
+		int pad = first_selected->presentation_info().order() - scroll_x_offset;
+		/* subtract 1 because Master always has order zero  XXX does * it? */
+		light_pad (PadID (Lower1 + (pad - 1)), 72); /* red */
+	}
+
 	/* See if there's a MIDI track selected */
 
 	for (StripableNotificationList::const_iterator si = selected.begin(); si != selected.end(); ++si) {
@@ -996,21 +1017,8 @@ LaunchPadPro::stripable_selection_changed ()
 		if (new_pad_target && pad_port) {
 			new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
 			_current_pad_target = new_pad_target;
-			// _selection_color = get_color_index (new_pad_target->presentation_info().color());
-			// _contrast_color = get_color_index (Gtkmm2ext::HSV (new_pad_target->presentation_info().color()).opposite().color());
-		} else {
-			// _current_pad_target.reset ();
-			// _selection_color = LED::Green;
-			// _contrast_color = LED::Green;
 		}
-
-		// reset_pad_colors ();
 	}
-
-	// TrackMixLayout* tml = dynamic_cast<TrackMixLayout*> (_track_mix_layout);
-	// assert (tml);
-
-	// tml->set_stripable (first_selected_stripable());
 }
 
 bool
@@ -1284,43 +1292,60 @@ LaunchPadPro::up_press (Pad& pad)
 }
 
 void
+LaunchPadPro::select_stripable (int n)
+{
+	std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + n);
+	if (r) {
+		session->selection().set (r, std::shared_ptr<AutomationControl>());
+	}
+}
+
+void
 LaunchPadPro::lower1_press (Pad& pad)
 {
+	select_stripable (0);
 }
 
 void
 LaunchPadPro::lower2_press (Pad& pad)
 {
+	select_stripable (1);
 }
 
 void
 LaunchPadPro::lower3_press (Pad& pad)
 {
+	select_stripable (2);
 }
 
 void
 LaunchPadPro::lower4_press (Pad& pad)
 {
+	select_stripable (3);
 }
 
 void
 LaunchPadPro::lower5_press (Pad& pad)
 {
+	select_stripable (4);
 }
 
 void
 LaunchPadPro::lower6_press (Pad& pad)
 {
+	select_stripable (5);
 }
 
 void
 LaunchPadPro::lower7_press (Pad& pad)
 {
+	select_stripable (6);
 }
 
 void
 LaunchPadPro::lower8_press (Pad& pad)
 {
+	select_stripable (7);
 }
 
 void
