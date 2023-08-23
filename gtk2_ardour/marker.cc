@@ -404,6 +404,7 @@ void ArdourMarker::reparent(ArdourCanvas::Item & parent)
 {
 	group->reparent (&parent);
 	_parent = &parent;
+	group->redraw ();
 }
 
 void
