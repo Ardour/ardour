@@ -109,6 +109,24 @@ EventLoop::invalidate_request (void* data)
 	return 0;
 }
 
+/** Create a PBD::EventLoop::InvalidationRecord and attach a callback
+ *  to a given sigc::trackable so that PBD::EventLoop::invalidate_request
+ *  is called when that trackable is destroyed.
+ */
+EventLoop::InvalidationRecord*
+EventLoop::__invalidator (sigc::trackable& trackable, const char* file, int line)
+{
+        PBD::EventLoop::InvalidationRecord* ir = new PBD::EventLoop::InvalidationRecord;
+
+        ir->file = file;
+        ir->line = line;
+
+        trackable.add_destroy_notify_callback (ir, PBD::EventLoop::invalidate_request);
+
+        return ir;
+}
+
+
 vector<EventLoop::ThreadBufferMapping>
 EventLoop::get_request_buffers_for_target_thread (const std::string& target_thread)
 {
@@ -197,3 +215,4 @@ EventLoop::remove_request_buffer_from_map (pthread_t pth)
 		}
 	}
 }
+
