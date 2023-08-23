@@ -100,6 +100,7 @@ AbstractUI<RequestObject>::AbstractUI (const string& name)
 template <typename RequestObject>
 AbstractUI<RequestObject>::~AbstractUI ()
 {
+	trackable::notify_callbacks ();
 }
 
 template <typename RequestObject> void
