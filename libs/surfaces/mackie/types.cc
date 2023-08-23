@@ -19,9 +19,7 @@
 
 #include "types.h"
 
-namespace ArdourSurface {
-
-namespace Mackie {
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 LedState on( LedState::on );
 LedState off( LedState::off );
@@ -31,7 +29,7 @@ LedState none( LedState::none );
 }
 }
 
-std::ostream & operator << ( std::ostream & os, const ArdourSurface::Mackie::ControlState & cs )
+std::ostream & operator << ( std::ostream & os, const ArdourSurface::MACKIE_NAMESPACE::ControlState & cs )
 {
 	os << "ControlState { ";
 	os << "pos: " << cs.pos;

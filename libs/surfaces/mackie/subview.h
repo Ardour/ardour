@@ -22,6 +22,7 @@
 
 #include <boost/smart_ptr.hpp>
 
+#include "pbd/signals.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
@@ -30,11 +31,9 @@ namespace ARDOUR {
 	class PluginInsert;
 }
 
-namespace ArdourSurface {
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 class MackieControlProtocol;
-
-namespace Mackie {
 
 class Pot;
 class Strip;

@@ -22,7 +22,7 @@
 #include "control_group.h"
 
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 const int Led::FaderTouch = 0x70;
 const int Led::Timecode = 0x71;

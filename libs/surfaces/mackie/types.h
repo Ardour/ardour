@@ -21,8 +21,13 @@
 
 #include <iostream>
 
-namespace ArdourSurface  {
-namespace Mackie {
+#ifdef UF8
+# define MACKIE_NAMESPACE NS_UF8
+#else
+# define MACKIE_NAMESPACE NS_MCU
+#endif
+
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 enum surface_type_t {
 	mcu,

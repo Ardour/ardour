@@ -49,7 +49,7 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 SurfacePort::SurfacePort (Surface& s)
 	: _surface (&s)
@@ -235,7 +235,7 @@ SurfacePort::write (const MidiByteArray & mba)
 }
 
 ostream &
-Mackie::operator <<  (ostream & os, const SurfacePort & port)
+MACKIE_NAMESPACE::operator << (ostream & os, const SurfacePort & port)
 {
 	os << "{ ";
 	os << "name: " << port.input_port().name() << " " << port.output_port().name();

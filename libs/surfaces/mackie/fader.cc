@@ -28,9 +28,9 @@
 #include "control_group.h"
 #include "mackie_control_protocol.h"
 
-using namespace ArdourSurface;
-using namespace Mackie;
 using namespace PBD;
+using namespace ArdourSurface;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 Control*
 Fader::factory (Surface& surface, int id, const char* name, Group& group)

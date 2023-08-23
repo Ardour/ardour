@@ -39,7 +39,7 @@
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 using std::string;
 using std::vector;
@@ -69,7 +69,11 @@ DeviceInfo::DeviceInfo()
 	, _has_separate_meters (false)
 	, _single_fader_follows_selection (false)
 	, _device_type (MCU)
+#ifdef UF8
+	, _name (X_("UF8/UF1"))
+#else
 	, _name (X_("Mackie Control Universal Pro"))
+#endif
 {
 	mackie_control_buttons ();
 }
@@ -576,8 +580,15 @@ devinfo_search_path ()
 static bool
 devinfo_filter (const string &str, void* /*arg*/)
 {
+#ifdef UF8
+	return (str.length() > strlen(devinfo_suffix) &&
+		str.find ("uf8") != string::npos &&
+		str.find (devinfo_suffix) == (str.length() - strlen (devinfo_suffix))
+		);
+#else
 	return (str.length() > strlen(devinfo_suffix) &&
 		str.find (devinfo_suffix) == (str.length() - strlen (devinfo_suffix)));
+#endif
 }
 
 void
@@ -617,7 +628,7 @@ DeviceInfo::reload_device_info ()
 	}
 }
 
-std::ostream& operator<< (std::ostream& os, const Mackie::DeviceInfo& di)
+std::ostream& operator<< (std::ostream& os, const MACKIE_NAMESPACE::DeviceInfo& di)
 {
 	os << di.name() << ' '
 	   << di.strip_cnt() << ' '

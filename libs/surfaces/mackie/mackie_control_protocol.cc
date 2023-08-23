@@ -94,7 +94,7 @@ using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 #include "pbd/i18n.h"
 
@@ -139,7 +139,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
-	_subview = Mackie::SubviewFactory::instance()->create_subview(Subview::None, *this, std::shared_ptr<Stripable>());
+	_subview = MACKIE_NAMESPACE::SubviewFactory::instance()->create_subview(Subview::None, *this, std::shared_ptr<Stripable>());
 
 	DeviceInfo::reload_device_info ();
 	DeviceProfile::reload_device_profiles ();
@@ -688,7 +688,7 @@ MackieControlProtocol::device_ready ()
 		}
 	}
 	update_surfaces ();
-	set_subview_mode (Mackie::Subview::None, std::shared_ptr<Stripable>());
+	set_subview_mode (MACKIE_NAMESPACE::Subview::None, std::shared_ptr<Stripable>());
 	set_flip_mode (Normal);
 }
 
@@ -849,9 +849,9 @@ MackieControlProtocol::set_device (const string& device_name, bool force)
 }
 
 gboolean
-ArdourSurface::ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data)
+ArdourSurface::MACKIE_NAMESPACE::ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data)
 {
-	ArdourSurface::MackieControlProtocol::ipMIDIHandler* ipm = static_cast<ArdourSurface::MackieControlProtocol::ipMIDIHandler*>(data);
+	MackieControlProtocol::ipMIDIHandler* ipm = static_cast<MackieControlProtocol::ipMIDIHandler*>(data);
 	return ipm->mcp->midi_input_handler (Glib::IOCondition (condition), ipm->port);
 }
 
@@ -1331,6 +1331,7 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 	if (x != surface->controls_by_device_independent_id.end()) {
 		Led* rude_solo = dynamic_cast<Led*> (x->second);
 		if (rude_solo) {
+			update_global_button (Button::ClearSolo, active);
 			surface->write (rude_solo->set_state (active ? flashing : off));
 		}
 	}
@@ -1493,7 +1494,7 @@ MackieControlProtocol::stop ()
 }
 
 void
-MackieControlProtocol::update_led (Surface& surface, Button& button, Mackie::LedState ls)
+MackieControlProtocol::update_led (Surface& surface, Button& button, MACKIE_NAMESPACE::LedState ls)
 {
 	if (ls != none) {
 		surface.port().write (button.set_state (ls));
@@ -1807,7 +1808,7 @@ MackieControlProtocol::set_subview_mode (Subview::Mode sm, std::shared_ptr<Strip
 			if (!surfaces.empty()) {
 				if (!reason_why_subview_not_possible.empty()) {
 					surfaces.front()->display_message_for (reason_why_subview_not_possible, 1000);
-					if (_subview->subview_mode() != Mackie::Subview::None) {
+					if (_subview->subview_mode() != MACKIE_NAMESPACE::Subview::None) {
 						/* redisplay current subview mode after
 						   that message goes away.
 						*/
@@ -1822,7 +1823,7 @@ MackieControlProtocol::set_subview_mode (Subview::Mode sm, std::shared_ptr<Strip
 		return false;
 	}
 
-	_subview = Mackie::SubviewFactory::instance()->create_subview(sm, *this, r);
+	_subview = MACKIE_NAMESPACE::SubviewFactory::instance()->create_subview(sm, *this, r);
 	/* Catch the current subview stripable going away */
 	if (_subview->subview_stripable()) {
 		_subview->subview_stripable()->DropReferences.connect (_subview->subview_stripable_connections(), MISSING_INVALIDATOR,
@@ -1854,7 +1855,7 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 
 	/* leave subview mode, whatever it was */
 	DEBUG_TRACE (DEBUG::MackieControl, "\t\t\tsubview mode reset in MackieControlProtocol::set_view_mode \n");
-	set_subview_mode (Mackie::Subview::None, std::shared_ptr<Stripable>());
+	set_subview_mode (MACKIE_NAMESPACE::Subview::None, std::shared_ptr<Stripable>());
 	display_view_mode ();
 }
 
@@ -2446,12 +2447,12 @@ MackieControlProtocol::stripable_selection_changed ()
 		 */
 
 		if (!set_subview_mode (_subview->subview_mode(), s)) {
-			set_subview_mode (Mackie::Subview::None, std::shared_ptr<Stripable>());
+			set_subview_mode (MACKIE_NAMESPACE::Subview::None, std::shared_ptr<Stripable>());
 		}
 	}
 	else {
 		// none selected or not on surface
-		set_subview_mode(Mackie::Subview::None, std::shared_ptr<Stripable>());
+		set_subview_mode(MACKIE_NAMESPACE::Subview::None, std::shared_ptr<Stripable>());
 	}
 }
 

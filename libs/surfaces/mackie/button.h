@@ -26,9 +26,7 @@
 #include "controls.h"
 #include "led.h"
 
-namespace ArdourSurface {
-
-namespace Mackie {
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 class Surface;
 

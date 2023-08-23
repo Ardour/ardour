@@ -57,15 +57,13 @@ namespace MIDI {
 	class Port;
 }
 
-namespace ArdourSurface {
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
-namespace Mackie {
-	class Surface;
-	class Control;
-	class SurfacePort;
-	class Button;
-	class Strip;
-}
+class Surface;
+class Control;
+class SurfacePort;
+class Button;
+class Strip;
 
 gboolean ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data);
 
@@ -114,11 +112,11 @@ class MackieControlProtocol
 
 	static MackieControlProtocol* instance() { return _instance; }
 
-	const Mackie::DeviceInfo& device_info() const { return _device_info; }
-	Mackie::DeviceProfile& device_profile() { return _device_profile; }
+	const MACKIE_NAMESPACE::DeviceInfo& device_info() const { return _device_info; }
+	MACKIE_NAMESPACE::DeviceProfile& device_profile() { return _device_profile; }
 
 	PBD::Signal0<void> DeviceChanged;
-	PBD::Signal1<void,std::shared_ptr<Mackie::Surface> > ConnectionChange;
+	PBD::Signal1<void,std::shared_ptr<MACKIE_NAMESPACE::Surface> > ConnectionChange;
 
         void device_ready ();
 
@@ -128,7 +126,7 @@ class MackieControlProtocol
 
 	FlipMode flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }
-	std::shared_ptr<Mackie::Subview> subview() { return _subview; }
+	std::shared_ptr<MACKIE_NAMESPACE::Subview> subview() { return _subview; }
 	bool zoom_mode () const { return modifier_state() & MODIFIER_ZOOM; }
 	bool     metering_active () const { return _metering_active; }
 
@@ -147,7 +145,7 @@ class MackieControlProtocol
 	void set_automation_state (ARDOUR::AutoState);
 
 	void set_view_mode (ViewMode);
-	bool set_subview_mode (Mackie::Subview::Mode, std::shared_ptr<ARDOUR::Stripable>);
+	bool set_subview_mode (MACKIE_NAMESPACE::Subview::Mode, std::shared_ptr<ARDOUR::Stripable>);
 	bool redisplay_subview_mode ();
 	void set_flip_mode (FlipMode);
 	void display_view_mode ();
@@ -161,14 +159,14 @@ class MackieControlProtocol
 	*/
 
 	mutable Glib::Threads::Mutex surfaces_lock;
-	typedef std::list<std::shared_ptr<Mackie::Surface> > Surfaces;
+	typedef std::list<std::shared_ptr<MACKIE_NAMESPACE::Surface> > Surfaces;
 	Surfaces surfaces;
 
-	std::shared_ptr<Mackie::Surface> get_surface_by_raw_pointer (void*) const;
-	std::shared_ptr<Mackie::Surface> nth_surface (uint32_t) const;
+	std::shared_ptr<MACKIE_NAMESPACE::Surface> get_surface_by_raw_pointer (void*) const;
+	std::shared_ptr<MACKIE_NAMESPACE::Surface> nth_surface (uint32_t) const;
 
-	uint32_t global_index (Mackie::Strip&);
-	uint32_t global_index_locked (Mackie::Strip&);
+	uint32_t global_index (MACKIE_NAMESPACE::Strip&);
+	uint32_t global_index_locked (MACKIE_NAMESPACE::Strip&);
 
 	std::list<std::shared_ptr<ARDOUR::Bundle> > bundles ();
 
@@ -181,7 +179,7 @@ class MackieControlProtocol
 	void* get_gui () const;
 	void tear_down_gui ();
 
-	void handle_button_event (Mackie::Surface&, Mackie::Button& button, Mackie::ButtonState);
+	void handle_button_event (MACKIE_NAMESPACE::Surface&, MACKIE_NAMESPACE::Button& button, MACKIE_NAMESPACE::ButtonState);
 
 	void notify_subview_stripable_deleted ();
 	void notify_routes_added (ARDOUR::RouteList &);
@@ -212,10 +210,10 @@ class MackieControlProtocol
 	void update_timecode_beats_led();
 
 	/// this is called to generate the midi to send in response to a button press.
-	void update_led(Mackie::Surface&, Mackie::Button & button, Mackie::LedState);
+	void update_led(MACKIE_NAMESPACE::Surface&, MACKIE_NAMESPACE::Button & button, MACKIE_NAMESPACE::LedState);
 
-	void update_global_button (int id, Mackie::LedState);
-	void update_global_led (int id, Mackie::LedState);
+	void update_global_button (int id, MACKIE_NAMESPACE::LedState);
+	void update_global_led (int id, MACKIE_NAMESPACE::LedState);
 
 	ARDOUR::Session & get_session() { return *session; }
 	samplepos_t transport_sample() const;
@@ -283,23 +281,23 @@ class MackieControlProtocol
   private:
 
 	struct ButtonHandlers {
-	    Mackie::LedState (MackieControlProtocol::*press) (Mackie::Button&);
-	    Mackie::LedState (MackieControlProtocol::*release) (Mackie::Button&);
+		MACKIE_NAMESPACE::LedState (MackieControlProtocol::*press) (MACKIE_NAMESPACE::Button&);
+		MACKIE_NAMESPACE::LedState (MackieControlProtocol::*release) (MACKIE_NAMESPACE::Button&);
 
-	    ButtonHandlers (Mackie::LedState (MackieControlProtocol::*p) (Mackie::Button&),
-			    Mackie::LedState (MackieControlProtocol::*r) (Mackie::Button&))
+	    ButtonHandlers (MACKIE_NAMESPACE::LedState (MackieControlProtocol::*p) (MACKIE_NAMESPACE::Button&),
+			    MACKIE_NAMESPACE::LedState (MackieControlProtocol::*r) (MACKIE_NAMESPACE::Button&))
 	    : press (p)
 	    , release (r) {}
 	};
 
-	typedef std::map<Mackie::Button::ID,ButtonHandlers> ButtonMap;
+	typedef std::map<MACKIE_NAMESPACE::Button::ID,ButtonHandlers> ButtonMap;
 
 	static MackieControlProtocol* _instance;
 
 	bool profile_exists (std::string const&) const;
 
-	Mackie::DeviceInfo       _device_info;
-	Mackie::DeviceProfile    _device_profile;
+	MACKIE_NAMESPACE::DeviceInfo       _device_info;
+	MACKIE_NAMESPACE::DeviceProfile    _device_profile;
 	sigc::connection          periodic_connection;
 	sigc::connection          redisplay_connection;
 	sigc::connection          hui_connection;
@@ -310,7 +308,7 @@ class MackieControlProtocol
 	PBD::ScopedConnectionList gui_connections;
 	PBD::ScopedConnectionList fader_automation_connections;
 	// timer for two quick marker left presses
-	Mackie::Timer            _frm_left_last;
+	MACKIE_NAMESPACE::Timer            _frm_left_last;
 	// last written timecode string
 	std::string              _timecode_last;
 	samplepos_t				 _sample_last;
@@ -324,7 +322,7 @@ class MackieControlProtocol
 	bool                     _scrub_mode;
 	FlipMode                 _flip_mode;
 	ViewMode                 _view_mode;
-	std::shared_ptr<Mackie::Subview> _subview;
+	std::shared_ptr<MACKIE_NAMESPACE::Subview> _subview;
 	int                      _current_selected_track;
 	int                      _modifier_state;
 	ButtonMap                 button_map;
@@ -338,14 +336,14 @@ class MackieControlProtocol
 	bool                     marker_modifier_consumed_by_button;
 	bool                     nudge_modifier_consumed_by_button;
 
-	std::shared_ptr<ArdourSurface::Mackie::Surface>	_master_surface;
+	std::shared_ptr<ArdourSurface::MACKIE_NAMESPACE::Surface>	_master_surface;
 
-        struct ipMIDIHandler {
-                MackieControlProtocol* mcp;
-                MIDI::Port* port;
-        };
-        friend struct ipMIDIHandler; /* is this necessary */
-	friend gboolean ArdourSurface::ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data);
+	struct ipMIDIHandler {
+		MackieControlProtocol* mcp;
+		MIDI::Port* port;
+	};
+	friend struct ipMIDIHandler; /* is this necessary */
+	friend gboolean ArdourSurface::MACKIE_NAMESPACE::ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data);
 
 	int create_surfaces ();
 	bool periodic();
@@ -379,170 +377,171 @@ class MackieControlProtocol
 	void pull_stripable_range (DownButtonList&, ARDOUR::StripableList&, uint32_t pressed);
 
 	/* implemented button handlers */
-	Mackie::LedState stop_press(Mackie::Button &);
-	Mackie::LedState stop_release(Mackie::Button &);
-	Mackie::LedState play_press(Mackie::Button &);
-	Mackie::LedState play_release(Mackie::Button &);
-	Mackie::LedState record_press(Mackie::Button &);
-	Mackie::LedState record_release(Mackie::Button &);
-	Mackie::LedState loop_press(Mackie::Button &);
-	Mackie::LedState loop_release(Mackie::Button &);
-	Mackie::LedState rewind_press(Mackie::Button & button);
-	Mackie::LedState rewind_release(Mackie::Button & button);
-	Mackie::LedState ffwd_press(Mackie::Button & button);
-	Mackie::LedState ffwd_release(Mackie::Button & button);
-	Mackie::LedState cursor_up_press (Mackie::Button &);
-	Mackie::LedState cursor_up_release (Mackie::Button &);
-	Mackie::LedState cursor_down_press (Mackie::Button &);
-	Mackie::LedState cursor_down_release (Mackie::Button &);
-	Mackie::LedState cursor_left_press (Mackie::Button &);
-	Mackie::LedState cursor_left_release (Mackie::Button &);
-	Mackie::LedState cursor_right_press (Mackie::Button &);
-	Mackie::LedState cursor_right_release (Mackie::Button &);
-	Mackie::LedState left_press(Mackie::Button &);
-	Mackie::LedState left_release(Mackie::Button &);
-	Mackie::LedState right_press(Mackie::Button &);
-	Mackie::LedState right_release(Mackie::Button &);
-	Mackie::LedState channel_left_press(Mackie::Button &);
-	Mackie::LedState channel_left_release(Mackie::Button &);
-	Mackie::LedState channel_right_press(Mackie::Button &);
-	Mackie::LedState channel_right_release(Mackie::Button &);
-	Mackie::LedState marker_press(Mackie::Button &);
-	Mackie::LedState marker_release(Mackie::Button &);
-	Mackie::LedState save_press(Mackie::Button &);
-	Mackie::LedState save_release(Mackie::Button &);
-	Mackie::LedState timecode_beats_press(Mackie::Button &);
-	Mackie::LedState timecode_beats_release(Mackie::Button &);
-	Mackie::LedState zoom_press(Mackie::Button &);
-	Mackie::LedState zoom_release(Mackie::Button &);
-	Mackie::LedState scrub_press(Mackie::Button &);
-	Mackie::LedState scrub_release(Mackie::Button &);
-	Mackie::LedState undo_press (Mackie::Button &);
-	Mackie::LedState undo_release (Mackie::Button &);
-	Mackie::LedState shift_press (Mackie::Button &);
-	Mackie::LedState shift_release (Mackie::Button &);
-	Mackie::LedState option_press (Mackie::Button &);
-	Mackie::LedState option_release (Mackie::Button &);
-	Mackie::LedState control_press (Mackie::Button &);
-	Mackie::LedState control_release (Mackie::Button &);
-	Mackie::LedState cmd_alt_press (Mackie::Button &);
-	Mackie::LedState cmd_alt_release (Mackie::Button &);
+	MACKIE_NAMESPACE::LedState stop_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState stop_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState play_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState play_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState record_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState record_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState loop_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState loop_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState rewind_press(MACKIE_NAMESPACE::Button & button);
+	MACKIE_NAMESPACE::LedState rewind_release(MACKIE_NAMESPACE::Button & button);
+	MACKIE_NAMESPACE::LedState ffwd_press(MACKIE_NAMESPACE::Button & button);
+	MACKIE_NAMESPACE::LedState ffwd_release(MACKIE_NAMESPACE::Button & button);
+	MACKIE_NAMESPACE::LedState cursor_up_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState cursor_up_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState cursor_down_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState cursor_down_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState cursor_left_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState cursor_left_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState cursor_right_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState cursor_right_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState left_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState left_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState right_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState right_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState channel_left_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState channel_left_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState channel_right_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState channel_right_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState marker_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState marker_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState save_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState save_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState timecode_beats_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState timecode_beats_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState zoom_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState zoom_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState scrub_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState scrub_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState undo_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState undo_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState shift_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState shift_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState option_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState option_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState control_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState control_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState cmd_alt_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState cmd_alt_release (MACKIE_NAMESPACE::Button &);
 
-	Mackie::LedState pan_press (Mackie::Button &);
-	Mackie::LedState pan_release (Mackie::Button &);
-	Mackie::LedState plugin_press (Mackie::Button &);
-	Mackie::LedState plugin_release (Mackie::Button &);
-	Mackie::LedState eq_press (Mackie::Button &);
-	Mackie::LedState eq_release (Mackie::Button &);
-	Mackie::LedState dyn_press (Mackie::Button &);
-	Mackie::LedState dyn_release (Mackie::Button &);
-	Mackie::LedState flip_press (Mackie::Button &);
-	Mackie::LedState flip_release (Mackie::Button &);
-	Mackie::LedState name_value_press (Mackie::Button &);
-	Mackie::LedState name_value_release (Mackie::Button &);
-//	Mackie::LedState F1_press (Mackie::Button &);
-//	Mackie::LedState F1_release (Mackie::Button &);
-//	Mackie::LedState F2_press (Mackie::Button &);
-//	Mackie::LedState F2_release (Mackie::Button &);
-//	Mackie::LedState F3_press (Mackie::Button &);
-//	Mackie::LedState F3_release (Mackie::Button &);
-//	Mackie::LedState F4_press (Mackie::Button &);
-//	Mackie::LedState F4_release (Mackie::Button &);
-//	Mackie::LedState F5_press (Mackie::Button &);
-//	Mackie::LedState F5_release (Mackie::Button &);
-//	Mackie::LedState F6_press (Mackie::Button &);
-//	Mackie::LedState F6_release (Mackie::Button &);
-//	Mackie::LedState F7_press (Mackie::Button &);
-//	Mackie::LedState F7_release (Mackie::Button &);
-//	Mackie::LedState F8_press (Mackie::Button &);
-//	Mackie::LedState F8_release (Mackie::Button &);
-	Mackie::LedState touch_press (Mackie::Button &);
-	Mackie::LedState touch_release (Mackie::Button &);
-	Mackie::LedState enter_press (Mackie::Button &);
-	Mackie::LedState enter_release (Mackie::Button &);
-	Mackie::LedState cancel_press (Mackie::Button &);
-	Mackie::LedState cancel_release (Mackie::Button &);
-	Mackie::LedState user_a_press (Mackie::Button &);
-	Mackie::LedState user_a_release (Mackie::Button &);
-	Mackie::LedState user_b_press (Mackie::Button &);
-	Mackie::LedState user_b_release (Mackie::Button &);
-	Mackie::LedState fader_touch_press (Mackie::Button &);
-	Mackie::LedState fader_touch_release (Mackie::Button &);
-	Mackie::LedState master_fader_touch_press (Mackie::Button &);
-	Mackie::LedState master_fader_touch_release (Mackie::Button &);
+	MACKIE_NAMESPACE::LedState pan_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState pan_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState plugin_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState plugin_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState eq_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState eq_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState dyn_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState dyn_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState flip_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState flip_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState name_value_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState name_value_release (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F1_press (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F1_release (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F2_press (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F2_release (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F3_press (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F3_release (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F4_press (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F4_release (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F5_press (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F5_release (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F6_press (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F6_release (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F7_press (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F7_release (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F8_press (MACKIE_NAMESPACE::Button &);
+//	MACKIE_NAMESPACE::LedState F8_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState touch_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState touch_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState enter_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState enter_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState cancel_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState cancel_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState user_a_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState user_a_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState user_b_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState user_b_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState fader_touch_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState fader_touch_release (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState master_fader_touch_press (MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState master_fader_touch_release (MACKIE_NAMESPACE::Button &);
 
-	Mackie::LedState read_press (Mackie::Button&);
-	Mackie::LedState read_release (Mackie::Button&);
-	Mackie::LedState write_press (Mackie::Button&);
-	Mackie::LedState write_release (Mackie::Button&);
-	Mackie::LedState clearsolo_press (Mackie::Button&);
-	Mackie::LedState clearsolo_release (Mackie::Button&);
-	Mackie::LedState track_press (Mackie::Button&);
-	Mackie::LedState track_release (Mackie::Button&);
-	Mackie::LedState send_press (Mackie::Button&);
-	Mackie::LedState send_release (Mackie::Button&);
-	Mackie::LedState miditracks_press (Mackie::Button&);
-	Mackie::LedState miditracks_release (Mackie::Button&);
-	Mackie::LedState inputs_press (Mackie::Button&);
-	Mackie::LedState inputs_release (Mackie::Button&);
-	Mackie::LedState audiotracks_press (Mackie::Button&);
-	Mackie::LedState audiotracks_release (Mackie::Button&);
-	Mackie::LedState audioinstruments_press (Mackie::Button&);
-	Mackie::LedState audioinstruments_release (Mackie::Button&);
-	Mackie::LedState aux_press (Mackie::Button&);
-	Mackie::LedState aux_release (Mackie::Button&);
-	Mackie::LedState busses_press (Mackie::Button&);
-	Mackie::LedState busses_release (Mackie::Button&);
-	Mackie::LedState outputs_press (Mackie::Button&);
-	Mackie::LedState outputs_release (Mackie::Button&);
-	Mackie::LedState user_press (Mackie::Button&);
-	Mackie::LedState user_release (Mackie::Button&);
-	Mackie::LedState trim_press (Mackie::Button&);
-	Mackie::LedState trim_release (Mackie::Button&);
-	Mackie::LedState latch_press (Mackie::Button&);
-	Mackie::LedState latch_release (Mackie::Button&);
-	Mackie::LedState grp_press (Mackie::Button&);
-	Mackie::LedState grp_release (Mackie::Button&);
-	Mackie::LedState nudge_press (Mackie::Button&);
-	Mackie::LedState nudge_release (Mackie::Button&);
-	Mackie::LedState drop_press (Mackie::Button&);
-	Mackie::LedState drop_release (Mackie::Button&);
-	Mackie::LedState replace_press (Mackie::Button&);
-	Mackie::LedState replace_release (Mackie::Button&);
-	Mackie::LedState click_press (Mackie::Button&);
-	Mackie::LedState click_release (Mackie::Button&);
-	Mackie::LedState view_press (Mackie::Button&);
-	Mackie::LedState view_release (Mackie::Button&);
+	MACKIE_NAMESPACE::LedState read_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState read_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState write_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState write_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState clearsolo_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState clearsolo_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState track_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState track_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState send_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState send_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState miditracks_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState miditracks_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState inputs_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState inputs_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState audiotracks_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState audiotracks_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState audioinstruments_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState audioinstruments_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState aux_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState aux_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState busses_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState busses_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState outputs_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState outputs_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState user_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState user_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState trim_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState trim_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState latch_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState latch_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState grp_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState grp_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState nudge_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState nudge_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState drop_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState drop_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState replace_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState replace_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState click_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState click_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState view_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState view_release (MACKIE_NAMESPACE::Button&);
 
-	Mackie::LedState bank_release (Mackie::Button&, uint32_t bank_num);
-	Mackie::LedState master_press(Mackie::Button &);
-	Mackie::LedState master_release(Mackie::Button &);
-	Mackie::LedState redo_press(Mackie::Button &);
-	Mackie::LedState redo_release(Mackie::Button &);
-	Mackie::LedState prev_marker_press(Mackie::Button &);
-	Mackie::LedState prev_marker_release(Mackie::Button &);
-	Mackie::LedState next_marker_press(Mackie::Button &);
-	Mackie::LedState next_marker_release(Mackie::Button &);
-	Mackie::LedState flip_window_press (Mackie::Button&);
-	Mackie::LedState flip_window_release (Mackie::Button&);
-	Mackie::LedState open_press(Mackie::Button &);
-	Mackie::LedState open_release(Mackie::Button &);
-	Mackie::LedState prog2_clear_solo_press(Mackie::Button &);
-	Mackie::LedState prog2_clear_solo_release(Mackie::Button &);
-	Mackie::LedState prog2_save_press(Mackie::Button &);
-	Mackie::LedState prog2_save_release(Mackie::Button &);
-	Mackie::LedState prog2_vst_press(Mackie::Button &);
-	Mackie::LedState prog2_vst_release(Mackie::Button &);
-	Mackie::LedState prog2_left_press(Mackie::Button &);
-	Mackie::LedState prog2_left_release(Mackie::Button &);
-	Mackie::LedState prog2_right_press(Mackie::Button &);
-	Mackie::LedState prog2_right_release(Mackie::Button &);
-	Mackie::LedState prog2_marker_press(Mackie::Button &);
-	Mackie::LedState prog2_marker_release(Mackie::Button &);
-	Mackie::LedState prog2_undo_press(Mackie::Button &);
-	Mackie::LedState prog2_undo_release(Mackie::Button &);
+	MACKIE_NAMESPACE::LedState bank_release (MACKIE_NAMESPACE::Button&, uint32_t bank_num);
+	MACKIE_NAMESPACE::LedState master_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState master_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState redo_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState redo_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prev_marker_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prev_marker_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState next_marker_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState next_marker_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState flip_window_press (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState flip_window_release (MACKIE_NAMESPACE::Button&);
+	MACKIE_NAMESPACE::LedState open_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState open_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_clear_solo_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_clear_solo_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_save_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_save_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_vst_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_vst_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_left_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_left_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_right_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_right_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_marker_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_marker_release(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_undo_press(MACKIE_NAMESPACE::Button &);
+	MACKIE_NAMESPACE::LedState prog2_undo_release(MACKIE_NAMESPACE::Button &);
 };
 
+} // namespace
 } // namespace
 
 #endif // ardour_mackie_control_protocol_h

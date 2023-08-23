@@ -79,7 +79,7 @@ using ARDOUR::Profile;
 using ARDOUR::AutomationControl;
 using ARDOUR::ChanCount;
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 #define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
 
@@ -366,7 +366,7 @@ Surface::init_controls()
 
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init_controls: creating jog wheel\n");
 	if (_mcp.device_info().has_jog_wheel()) {
-		_jog_wheel = new Mackie::JogWheel (_mcp);
+		_jog_wheel = new MACKIE_NAMESPACE::JogWheel (_mcp);
 	}
 
 	DEBUG_TRACE (DEBUG::MackieControl, "Surface::init_controls: creating global controls\n");

@@ -23,7 +23,7 @@
 #include "control_group.h"
 
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 int const Pot::External = 0x2e; /* specific ID for "vpot" representing external control */
 int const Pot::ID       = 0x10; /* base value for v-pot IDs */

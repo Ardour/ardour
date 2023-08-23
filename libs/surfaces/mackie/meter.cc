@@ -30,7 +30,7 @@
 
 using namespace PBD;
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 Control*
 Meter::factory (Surface& surface, int id, const char* name, Group& group)

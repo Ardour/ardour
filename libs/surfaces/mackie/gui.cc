@@ -35,6 +35,7 @@
 #include "pbd/error.h"
 #include "pbd/unwind.h"
 #include "pbd/strsplit.h"
+#include "pbd/file_utils.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/action_model.h"
@@ -43,6 +44,7 @@
 #include "gtkmm2ext/utils.h"
 
 #include "ardour/audioengine.h"
+#include "ardour/filesystem_paths.h"
 #include "ardour/port.h"
 #include "ardour/rc_configuration.h"
 
@@ -57,7 +59,7 @@
 using namespace std;
 using namespace Gtk;
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 void*
 MackieControlProtocol::get_gui () const
@@ -103,7 +105,9 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	, ignore_active_change (false)
 {
 	Gtk::Label* l;
+#ifndef UF8
 	Gtk::Alignment* align;
+#endif
 	int row = 0;
 
 	set_border_width (12);
@@ -112,6 +116,17 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	table.set_col_spacings (6);
 	table.set_border_width (12);
 	table.set_homogeneous (false);
+#ifdef UF8
+	std::string data_file_path;
+	string name = "ssl-uf8-small.png";
+	PBD::Searchpath spath(ARDOUR::ardour_data_search_path());
+	spath.add_subdirectory_to_paths ("icons");
+	find_file (spath, name, data_file_path);
+	if (!data_file_path.empty()) {
+		image.set (data_file_path);
+		hpacker.pack_start (image, false, false);
+	}
+#endif
 
 	l = manage (new Gtk::Label (_("Device Type:")));
 	l->set_alignment (1.0, 0.5);
@@ -149,6 +164,7 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	table.attach (*_device_dependent_widget, 0, 12, row, row+1, AttachOptions(0), AttachOptions(0), 0, 0);
 	row++;
 
+#ifndef UF8
 	/* back to the boilerplate */
 
 	RadioButtonGroup rb_group = absolute_touch_mode_button.get_group();
@@ -222,8 +238,11 @@ MackieControlProtocolGUI::MackieControlProtocolGUI (MackieControlProtocol& p)
 	_profile_combo.set_active_text (p.device_profile().name());
 	_profile_combo.signal_changed().connect (sigc::mem_fun (*this, &MackieControlProtocolGUI::profile_combo_changed));
 
-	append_page (table, _("Device Setup"));
-	table.show_all();
+#endif
+	hpacker.pack_start(table, false, false);
+	append_page (hpacker, _("Device Setup"));
+	hpacker.show_all();
+
 
 	/* function key editor */
 
@@ -503,13 +522,13 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 	DeviceProfile dp (_cp.device_profile());
 	DeviceInfo di (_cp.device_info());
 
-	for (int n = 0; n < Mackie::Button::FinalGlobalButton; ++n) {
+	for (int n = 0; n < MACKIE_NAMESPACE::Button::FinalGlobalButton; ++n) {
 
-		Mackie::Button::ID bid = (Mackie::Button::ID) n;
+		MACKIE_NAMESPACE::Button::ID bid = (MACKIE_NAMESPACE::Button::ID) n;
 
 		row = *(function_key_model->append());
 		if (di.global_buttons().find (bid) == di.global_buttons().end()) {
-			row[function_key_columns.name] = Mackie::Button::id_to_name (bid);
+			row[function_key_columns.name] = MACKIE_NAMESPACE::Button::id_to_name (bid);
 		} else {
 			row[function_key_columns.name] = di.get_global_button_name (bid) + "*";
 		}
@@ -523,7 +542,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 		 * reserved for hard-coded actions.
 		 */
 
-		if (bid >= Mackie::Button::F1 && bid <= Mackie::Button::F8) {
+		if (bid >= MACKIE_NAMESPACE::Button::F1 && bid <= MACKIE_NAMESPACE::Button::F8) {
 
 			action = dp.get_button_action (bid, 0);
 			if (action.empty()) {
@@ -548,7 +567,7 @@ MackieControlProtocolGUI::refresh_function_key_editor ()
 		 * reserved for hard-coded actions.
 		 */
 
-		if (bid >= Mackie::Button::F1 && bid <= Mackie::Button::F8) {
+		if (bid >= MACKIE_NAMESPACE::Button::F1 && bid <= MACKIE_NAMESPACE::Button::F8) {
 
 			action = dp.get_button_action (bid, MackieControlProtocol::MODIFIER_SHIFT);
 			if (action.empty()) {

@@ -23,8 +23,7 @@
 #include "controls.h"
 #include "pot.h"
 
-namespace ArdourSurface {
-namespace Mackie {
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 class Jog : public Pot
 {

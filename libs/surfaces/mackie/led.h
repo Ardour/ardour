@@ -24,9 +24,7 @@
 #include "midi_byte_array.h"
 #include "types.h"
 
-namespace ArdourSurface {
-
-namespace Mackie {
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 class Led : public Control
 {

@@ -24,8 +24,10 @@
 #include "pbd/error.h"
 
 #include "ardour/rc_configuration.h"
+#include "ardour/debug.h"
 
 #include "control_protocol/control_protocol.h"
+
 #include "mackie_control_protocol.h"
 
 using namespace ARDOUR;
@@ -35,16 +37,18 @@ using namespace ArdourSurface;
 using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 static ControlProtocol*
-new_mackie_protocol (Session* s)
+new_uf8_protocol (Session* s)
 {
 	MackieControlProtocol* mcp = 0;
+
+	DEBUG_TRACE (DEBUG::MackieControl, "making uf8-protocol");
 
 	try {
 		mcp = new MackieControlProtocol (*s);
 		/* do not set active here - wait for set_state() */
 	}
 	catch (exception & e) {
-		error << "Error instantiating MackieControlProtocol: " << e.what() << endmsg;
+		error << "Error instantiating MackieControlProtocol for UF8: " << e.what() << endmsg;
 		delete mcp;
 		mcp = 0;
 	}
@@ -53,7 +57,7 @@ new_mackie_protocol (Session* s)
 }
 
 static void
-delete_mackie_protocol (ControlProtocol* cp)
+delete_uf8_protocol (ControlProtocol* cp)
 {
 	try
 	{
@@ -61,20 +65,20 @@ delete_mackie_protocol (ControlProtocol* cp)
 	}
 	catch ( exception & e )
 	{
-		cout << "Exception caught trying to destroy MackieControlProtocol: " << e.what() << endl;
+		cout << "Exception caught trying to destroy MackieControlProtocol or UF8: " << e.what() << endl;
 	}
 }
 
 // Field names commented out by JE - 06-01-2010
-static ControlProtocolDescriptor mackie_descriptor = {
-	/* name       */ "Mackie",
-	/* id         */ "uri://ardour.org/surfaces/mackie:0",
+static ControlProtocolDescriptor uf8_descriptor = {
+	/* name       */ "SSL UF-8",
+	/* id         */ "uri://ardour.org/surfaces/ssl_uf8:0",
 	/* module     */ 0,
 	/* available  */ 0,
 	/* probe_port */ 0,
 	/* match usb  */ 0,
-	/* initialize */ new_mackie_protocol,
-	/* destroy    */ delete_mackie_protocol,
+	/* initialize */ new_uf8_protocol,
+	/* destroy    */ delete_uf8_protocol,
 };
 
-extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &mackie_descriptor; }
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &uf8_descriptor; }

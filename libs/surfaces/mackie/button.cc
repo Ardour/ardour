@@ -26,7 +26,7 @@
 #include "control_group.h"
 
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 Control*
 Button::factory (Surface& surface, Button::ID bid, int id, const std::string& name, Group& group)

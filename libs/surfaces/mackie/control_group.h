@@ -20,10 +20,12 @@
 #ifndef __ardour_mackie_control_protocol_control_group_h__
 #define __ardour_mackie_control_protocol_control_group_h__
 
+#include <string>
 #include <vector>
 
-namespace ArdourSurface {
-namespace Mackie {
+#include "types.h"
+
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 class Control;
 
