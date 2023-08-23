@@ -962,14 +962,14 @@ LaunchPadPro::stripable_selection_changed ()
 	std::shared_ptr<MidiTrack> new_pad_target;
 	StripableNotificationList const & selected (last_selected());
 
-	light_pad (Lower1, 0);
-	light_pad (Lower2, 0);
-	light_pad (Lower3, 0);
-	light_pad (Lower4, 0);
-	light_pad (Lower5, 0);
-	light_pad (Lower6, 0);
-	light_pad (Lower7, 0);
-	light_pad (Lower8, 0);
+	light_pad (Lower1, 2);
+	light_pad (Lower2, 2);
+	light_pad (Lower3, 2);
+	light_pad (Lower4, 2);
+	light_pad (Lower5, 2);
+	light_pad (Lower6, 2);
+	light_pad (Lower7, 2);
+	light_pad (Lower8, 2);
 
 	std::shared_ptr<Stripable> first_selected;
 
