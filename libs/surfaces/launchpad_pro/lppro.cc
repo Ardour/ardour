@@ -164,6 +164,14 @@ LaunchPadPro::~LaunchPadPro ()
 {
 	DEBUG_TRACE (DEBUG::Launchpad, "push2 control surface object being destroyed\n");
 
+	trigger_connections.drop_connections ();
+	route_connections.drop_connections ();
+	session_connections.drop_connections ();
+
+	for (auto & p : pad_map) {
+		p.second.timeout_connection.disconnect ();
+	}
+
 	stop_event_loop ();
 
 	MIDISurface::drop ();
@@ -358,14 +366,20 @@ LaunchPadPro::output_daw_port_name () const
 }
 
 void
+LaunchPadPro::relax (Pad & pad)
+{
+}
+
+void
 LaunchPadPro::build_pad_map ()
 {
-#define EDGE_PAD0(id) if (!(pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), &LaunchPadPro::relax))).second)) abort()
-#define EDGE_PAD(id, press) if (!(pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press)))).second)) abort()
-#define EDGE_PAD2(id, press, release) if (!(pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press), (release)))).second)) abort()
-#define EDGE_PAD3(id, press, release, long_press) if (!(pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press), (release), (long_press)))).second)) abort()
 
-	EDGE_PAD2 (Shift, &LaunchPadPro::shift_press, &LaunchPadPro::shift_release);
+#define EDGE_PAD0(id)                             pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), &LaunchPadPro::relax)))
+#define EDGE_PAD(id, press)                       pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press))))
+#define EDGE_PAD2(id, press, long_press)          pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press), (long_press))))
+#define EDGE_PAD3(id, press, long_press, release) pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press), (long_press), (release))))
+
+	EDGE_PAD3 (Shift, &LaunchPadPro::shift_press, &LaunchPadPro::relax, &LaunchPadPro::shift_release);
 
 	EDGE_PAD0 (Left);
 	EDGE_PAD0 (Right);
@@ -390,7 +404,7 @@ LaunchPadPro::build_pad_map ()
 	EDGE_PAD0 (Sends);
 	EDGE_PAD0 (Pan);
 	EDGE_PAD0 (Volume);
-	EDGE_PAD (Solo, &LaunchPadPro::solo_press);
+	EDGE_PAD2 (Solo, &LaunchPadPro::solo_press, &LaunchPadPro::solo_long_press);
 	EDGE_PAD (Mute, &LaunchPadPro::mute_press);
 	EDGE_PAD (RecordArm, &LaunchPadPro::record_arm_press);
 
@@ -417,7 +431,7 @@ LaunchPadPro::build_pad_map ()
 	for (int row = 0; row < 8; ++row) {
 		for (int col = 0; col < 8; ++col) {
 			int pid = (11 + (row * 10)) + col;
-			std::pair<int,Pad> p (pid, Pad (pid, col, 7 - row, &LaunchPadPro::pad_press, &LaunchPadPro::relax, &LaunchPadPro::pad_long_press));
+			std::pair<int,Pad> p (pid, Pad (pid, col, 7 - row, &LaunchPadPro::pad_press, &LaunchPadPro::pad_long_press, &LaunchPadPro::relax));
 			if (!pad_map.insert (p).second) abort();
 		}
 	}
@@ -740,14 +754,14 @@ LaunchPadPro::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes
 		}
 	}
 
-
-
 	set<int>::iterator c = consumed.find (pad.id);
 
 	if (c == consumed.end()) {
 		if (ev->value) {
+			maybe_start_press_timeout (pad);
 			(this->*pad.on_press) (pad);
 		} else {
+			pad.timeout_connection.disconnect ();
 			(this->*pad.on_release) (pad);
 		}
 	} else {
@@ -775,6 +789,7 @@ LaunchPadPro::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoB
 	}
 
 	Pad& pad (p->second);
+	maybe_start_press_timeout (pad);
 	(this->*pad.on_press) (pad);
 }
 
@@ -797,8 +812,8 @@ LaunchPadPro::handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes* 
 	set<int>::iterator c = consumed.find (pad.id);
 
 	if (c == consumed.end()) {
+		pad.timeout_connection.disconnect ();
 		(this->*pad.on_release) (pad);
-
 	} else {
 		/* used for long press */
 		consumed.erase (c);
@@ -1096,12 +1111,14 @@ LaunchPadPro::left_press (Pad& pad)
 	if (scroll_x_offset) {
 		scroll_x_offset--;
 	}
+	viewport_changed ();
 }
 
 void
 LaunchPadPro::right_press (Pad& pad)
 {
 	scroll_x_offset++;
+	viewport_changed ();
 }
 
 void
@@ -1234,6 +1251,11 @@ LaunchPadPro::volume_press (Pad& pad)
 void
 LaunchPadPro::solo_press (Pad& pad)
 {
+	if (_shift_pressed) {
+		toggle_click ();
+		return;
+	}
+
 	std::shared_ptr<Stripable> s = session->selection().first_selected_stripable();
 	if (s) {
 		std::shared_ptr<AutomationControl> ac = s->solo_control();
@@ -1244,8 +1266,19 @@ LaunchPadPro::solo_press (Pad& pad)
 }
 
 void
+LaunchPadPro::solo_long_press (Pad& pad)
+{
+	cancel_all_solo ();
+}
+
+void
 LaunchPadPro::mute_press (Pad& pad)
 {
+	if (_shift_pressed) {
+		redo ();
+		return;
+	}
+
 	std::shared_ptr<Stripable> s = session->selection().first_selected_stripable();
 	if (s) {
 		std::shared_ptr<AutomationControl> ac = s->mute_control();
@@ -1258,6 +1291,11 @@ LaunchPadPro::mute_press (Pad& pad)
 void
 LaunchPadPro::record_arm_press (Pad& pad)
 {
+	if (_shift_pressed) {
+		undo ();
+		return;
+	}
+
 	std::shared_ptr<Stripable> s = session->selection().first_selected_stripable();
 	if (s) {
 		std::shared_ptr<AutomationControl> ac = s->rec_enable_control();
@@ -1315,6 +1353,11 @@ LaunchPadPro::up_press (Pad& pad)
 void
 LaunchPadPro::select_stripable (int n)
 {
+	if (_shift_pressed) {
+		session->selection().clear_stripables ();
+		return;
+	}
+
 	std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + n);
 	if (r) {
 		session->selection().set (r, std::shared_ptr<AutomationControl>());
@@ -1431,11 +1474,10 @@ LaunchPadPro::trigger_property_change (PropertyChange pc, Trigger* t)
 			break;
 
 		case Trigger::WaitingToStart:
-		case Trigger::Stopping:
 			std::cerr << "wts/stp\n";
 			msg.push_back (0x91); /* channel 1=> pulsing */
 			msg.push_back (pid);
-			msg.push_back (find_closest_palette_color (r->presentation_info().color()));
+			msg.push_back (0x17); // find_closest_palette_color (r->presentation_info().color()));
 			break;
 
 		case Trigger::Running:
@@ -1449,6 +1491,7 @@ LaunchPadPro::trigger_property_change (PropertyChange pc, Trigger* t)
 		case Trigger::WaitingForRetrigger:
 		case Trigger::WaitingToStop:
 		case Trigger::WaitingToSwitch:
+		case Trigger::Stopping:
 			std::cerr << "waiting\n";
 			msg.push_back (0x91);
 			msg.push_back (pid);

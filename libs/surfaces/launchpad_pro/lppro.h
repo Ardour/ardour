@@ -181,7 +181,7 @@ class LaunchPadPro : public MIDISurface
 
 		typedef void (LaunchPadPro::*PadMethod)(Pad&);
 
-		Pad (PadID pid, PadMethod press_method, PadMethod release_method = &LaunchPadPro::relax, PadMethod long_press_method = &LaunchPadPro::relax)
+		Pad (PadID pid, PadMethod press_method, PadMethod long_press_method = &LaunchPadPro::relax, PadMethod release_method = &LaunchPadPro::relax)
 			: id (pid)
 			, x (-1)
 			, y (-1)
@@ -190,7 +190,7 @@ class LaunchPadPro : public MIDISurface
 			, on_long_press (long_press_method)
 		{}
 
-		Pad (int pid, int xx, int yy, PadMethod press_method, PadMethod release_method = &LaunchPadPro::relax, PadMethod long_press_method = &LaunchPadPro::relax)
+		Pad (int pid, int xx, int yy, PadMethod press_method, PadMethod long_press_method = &LaunchPadPro::relax, PadMethod release_method = &LaunchPadPro::relax)
 			: id (pid)
 			, x (xx)
 			, y (yy)
@@ -212,7 +212,7 @@ class LaunchPadPro : public MIDISurface
 		sigc::connection timeout_connection;
 	};
 
-	void relax (Pad& p) {}
+	void relax (Pad& p);
 
 	std::set<int> consumed;
 
@@ -366,7 +366,7 @@ class LaunchPadPro : public MIDISurface
 	void volume_long_press (Pad&) {}
 	void solo_press (Pad&);
 	void solo_release (Pad&) {}
-	void solo_long_press (Pad&) {}
+	void solo_long_press (Pad&);
 	void mute_press (Pad&);
 	void mute_release (Pad&) {}
 	void mute_long_press (Pad&) {}
