@@ -390,9 +390,9 @@ LaunchPadPro::build_pad_map ()
 	EDGE_PAD0 (Sends);
 	EDGE_PAD0 (Pan);
 	EDGE_PAD0 (Volume);
-	EDGE_PAD0 (Solo);
-	EDGE_PAD0 (Mute);
-	EDGE_PAD0 (RecordArm);
+	EDGE_PAD (Solo, &LaunchPadPro::solo_press);
+	EDGE_PAD (Mute, &LaunchPadPro::mute_press);
+	EDGE_PAD (RecordArm, &LaunchPadPro::record_arm_press);
 
 	EDGE_PAD0 (CaptureMIDI);
 	EDGE_PAD (Play, &LaunchPadPro::play_press);
@@ -1234,16 +1234,37 @@ LaunchPadPro::volume_press (Pad& pad)
 void
 LaunchPadPro::solo_press (Pad& pad)
 {
+	std::shared_ptr<Stripable> s = session->selection().first_selected_stripable();
+	if (s) {
+		std::shared_ptr<AutomationControl> ac = s->solo_control();
+		if (ac) {
+			session->set_control (ac, !ac->get_value(), PBD::Controllable::UseGroup);
+		}
+	}
 }
 
 void
 LaunchPadPro::mute_press (Pad& pad)
 {
+	std::shared_ptr<Stripable> s = session->selection().first_selected_stripable();
+	if (s) {
+		std::shared_ptr<AutomationControl> ac = s->mute_control();
+		if (ac) {
+			ac->set_value (!ac->get_value(), PBD::Controllable::UseGroup);
+		}
+	}
 }
 
 void
 LaunchPadPro::record_arm_press (Pad& pad)
 {
+	std::shared_ptr<Stripable> s = session->selection().first_selected_stripable();
+	if (s) {
+		std::shared_ptr<AutomationControl> ac = s->rec_enable_control();
+		if (ac) {
+			ac->set_value (!ac->get_value(), PBD::Controllable::UseGroup);
+		}
+	}
 }
 
 void
