@@ -732,7 +732,8 @@ UI::handle_fatal (const char *message)
 	hpacker.pack_start (quit, true, false);
 	win.get_vbox()->pack_start (hpacker, false, false);
 
-	quit.signal_clicked().connect(mem_fun(*this,&UI::quit));
+	quit.signal_clicked().connect ([&win] { win.response (-4); });
+	win.signal_response().connect([this] (int) { UI::quit (); });
 
 	win.show_all ();
 	win.set_modal (true);
