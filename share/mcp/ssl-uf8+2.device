@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<MackieProtocolDevice>
+  <Name value="UF8 x 3"/>
+  <DeviceType value="MCU"/>
+  <Strips value="8"/>
+  <MasterFader value="yes"/>
+  <TimecodeDisplay value="yes"/>
+  <TwoCharacterDisplay value="yes"/>
+  <Extenders value="2"/>
+  <MasterPosition value="0"/>
+  <GlobalControls value="yes"/>
+  <JogWheel value="yes"/>
+  <TouchSenseFaders value="yes"/>
+  <HasSeparateMeters value="yes"/>
+  <IsXTouch value="no"/>
+</MackieProtocolDevice>
