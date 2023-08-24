@@ -141,6 +141,8 @@ LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
 	, _shift_pressed (false)
 	, did_session_display (false)
 	, current_fader_bank (VolumeFaders)
+	, revert_layout_on_fader_release (false)
+	, pre_fader_layout (SessionLayout)
 {
 	run_event_loop ();
 	port_setup ();
@@ -407,10 +409,10 @@ LaunchPadPro::build_pad_map ()
 	BUTTON (PrintToClip, &LaunchPadPro::print_to_clip_press);
 
 	BUTTON (StopClip, &LaunchPadPro::stop_clip_press);
-	BUTTON (Device, &LaunchPadPro::device_press);
-	BUTTON (Sends, &LaunchPadPro::sends_press);
-	BUTTON (Pan, &LaunchPadPro::pan_press);
-	BUTTON (Volume, &LaunchPadPro::volume_press);
+	BUTTON3 (Device, &LaunchPadPro::device_press, &LaunchPadPro::fader_long_press, &LaunchPadPro::fader_release);
+	BUTTON3 (Sends, &LaunchPadPro::sends_press, &LaunchPadPro::fader_long_press, &LaunchPadPro::fader_release);
+	BUTTON3 (Pan, &LaunchPadPro::pan_press, &LaunchPadPro::fader_long_press, &LaunchPadPro::fader_release);
+	BUTTON3 (Volume, &LaunchPadPro::volume_press, &LaunchPadPro::fader_long_press, &LaunchPadPro::fader_release);
 	BUTTON2 (Solo, &LaunchPadPro::solo_press, &LaunchPadPro::solo_long_press);
 	BUTTON (Mute, &LaunchPadPro::mute_press);
 	BUTTON (RecordArm, &LaunchPadPro::record_arm_press);
@@ -554,6 +556,7 @@ LaunchPadPro::set_layout (Layout l, int page)
 	daw_write (msg);
 
 	if (l == Fader) {
+		pre_fader_layout = _current_layout;
 		current_fader_bank = (FaderBank) page;
 		map_faders ();
 	}
@@ -1116,10 +1119,8 @@ LaunchPadPro::long_press_timeout (int pad_id)
 		return false;
 	}
 	Pad& pad (p->second);
-	(this->*pad.on_long_press) (pad);
 
-	/* Pad was used for long press, do not invoke release action */
-	consumed.insert (pad.id);
+	(this->*pad.on_long_press) (pad);
 
 	return false; /* don't get called again */
 }
@@ -1260,6 +1261,23 @@ LaunchPadPro::stop_clip_press (Pad& pad)
 }
 
 void
+LaunchPadPro::fader_long_press (Pad&)
+{
+	std::cerr << "fader long press\n";
+	revert_layout_on_fader_release = true;
+}
+
+void
+LaunchPadPro::fader_release (Pad&)
+{
+	std::cerr << "fader rel " << revert_layout_on_fader_release << std::endl;
+	if (revert_layout_on_fader_release) {
+		set_layout (pre_fader_layout);
+		revert_layout_on_fader_release = false;
+	}
+}
+
+void
 LaunchPadPro::device_press (Pad& pad)
 {
 	if (_current_layout == Fader && current_fader_bank == DeviceFaders) {
@@ -1320,6 +1338,8 @@ void
 LaunchPadPro::solo_long_press (Pad& pad)
 {
 	cancel_all_solo ();
+	/* Pad was used for long press, do not invoke release action */
+	consumed.insert (pad.id);
 }
 
 void
@@ -1477,6 +1497,8 @@ LaunchPadPro::pad_long_press (Pad& pad)
 {
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("pad long press on %1, %2 => %3\n", pad.x, pad.y, pad.id));
 	session->unbang_trigger_at (pad.x, pad.y);
+	/* Pad was used for long press, do not invoke release action */
+	consumed.insert (pad.id);
 }
 
 void

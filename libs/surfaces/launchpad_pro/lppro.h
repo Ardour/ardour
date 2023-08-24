@@ -430,6 +430,9 @@ class LaunchPadPro : public MIDISurface
 	void lower8_release (Pad&) {}
 	void lower8_long_press (Pad&) {}
 
+	void fader_long_press (Pad&);
+	void fader_release (Pad&);
+
 	void pad_press (Pad&);
 	void pad_long_press (Pad&);
 
@@ -454,6 +457,8 @@ class LaunchPadPro : public MIDISurface
 	void automation_control_change (int n, std::weak_ptr<ARDOUR::AutomationControl>);
 	PBD::ScopedConnectionList control_connections;
 	FaderBank current_fader_bank;
+	bool revert_layout_on_fader_release;
+	Layout pre_fader_layout;
 };
 
 
