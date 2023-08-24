@@ -1858,10 +1858,24 @@ LaunchPadPro::setup_faders (FaderBank bank)
 
 	msg.push_back (1); /* fader bank command */
 	msg.push_back (bank);
-	msg.push_back (0); /* vertical orientation */
+	switch (bank) {
+	case PanFaders:
+		msg.push_back (1); /* vertical orientation */
+		break;
+	default:
+		msg.push_back (0); /* vertical orientation */
+		break;
+	}
 	for (int n = 0; n < 8; ++n) {
-		msg.push_back (n);              /* fader number */
-		msg.push_back (0);              /* unipolar */
+		msg.push_back (n);         /* fader number */
+		switch (bank) {
+		case PanFaders:
+			msg.push_back (1); /* bipolar */
+			break;
+		default:
+			msg.push_back (0); /* unipolar */
+			break;
+		}
 		msg.push_back (0x20+n);       /* CC number */
 		msg.push_back (random() % 127); /* color */
 	}
@@ -1879,8 +1893,16 @@ LaunchPadPro::fader_move (int cc, int val)
 	if (r) {
 		switch (current_fader_bank) {
 		case VolumeFaders:
-			ac= r->gain_control();
-			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ARDOUR::Config->get_max_gain()), PBD::Controllable::NoGroup);
+			ac = r->gain_control();
+			if (ac) {
+				session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ARDOUR::Config->get_max_gain()), PBD::Controllable::NoGroup);
+			}
+			break;
+		case PanFaders:
+			ac = r->pan_azimuth_control();
+			if (ac) {
+				session->set_control (ac, val/127.0, PBD::Controllable::NoGroup);
+			}
 			break;
 		default:
 			break;
@@ -1903,7 +1925,14 @@ LaunchPadPro::map_faders ()
 		msg[1] = 0x20 + n;
 
 		if (!r) {
-			msg[2] = 0;
+			switch (current_fader_bank) {
+			case PanFaders:
+				msg[2] = 63; /* neutral position is halfway across */
+				break;
+			default:
+				msg[2] = 0;  /* neutral position is at bottom */
+				break;
+			}
 			daw_write (msg, 3);
 			continue;
 		}
@@ -1916,11 +1945,22 @@ LaunchPadPro::map_faders ()
 			} else {
 				msg[2] = 0;
 			}
-			ac->Changed.connect (control_connections, invalidator (*this), boost::bind (&LaunchPadPro::automation_control_change, this, n, std::weak_ptr<AutomationControl> (ac)), this);
+			break;
+		case PanFaders:
+			ac = r->pan_azimuth_control ();
+			if (ac) {
+				msg[2] = (MIDI::byte) (ac->get_value() * 127.0);
+			} else {
+				msg[2] = 0;
+			}
 			break;
 		default:
 			msg[2] = 0;
 			break;
+		}
+
+		if (ac) {
+			ac->Changed.connect (control_connections, invalidator (*this), boost::bind (&LaunchPadPro::automation_control_change, this, n, std::weak_ptr<AutomationControl> (ac)), this);
 		}
 
 		daw_write (msg, 3);
@@ -1942,6 +1982,9 @@ LaunchPadPro::automation_control_change (int n, std::weak_ptr<AutomationControl>
 	switch (current_fader_bank) {
 	case VolumeFaders:
 		msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
+		break;
+	case PanFaders:
+		msg[2] = (MIDI::byte) (ac->get_value() * 127.0);
 		break;
 	default:
 		break;
