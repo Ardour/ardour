@@ -719,10 +719,11 @@ MackieControlProtocolGUI::action_changed (const Glib::ustring &sPath, const Tree
 				modifier = 0;
 			}
 
+			int id = (*row)[function_key_columns.id];
 			if (remove) {
-				_cp.device_profile().set_button_action ((*row)[function_key_columns.id], modifier, "");
+				_cp.device_profile().set_button_action ((Button::ID)id, modifier, "");
 			} else {
-				_cp.device_profile().set_button_action ((*row)[function_key_columns.id], modifier, action_path);
+				_cp.device_profile().set_button_action ((Button::ID)id, modifier, action_path);
 			}
 
 			_ignore_profile_changed = true;

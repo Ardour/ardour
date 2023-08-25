@@ -84,14 +84,14 @@ class MackieControlProtocolGUI : public Gtk::Notebook
 			add (cmdalt);
 			add (shiftcontrol);
 		};
-		Gtk::TreeModelColumn<std::string>                  name;
-		Gtk::TreeModelColumn<MACKIE_NAMESPACE::Button::ID> id;
-		Gtk::TreeModelColumn<std::string>                  plain;
-		Gtk::TreeModelColumn<std::string>                  shift;
-		Gtk::TreeModelColumn<std::string>                  control;
-		Gtk::TreeModelColumn<std::string>                  option;
-		Gtk::TreeModelColumn<std::string>                  cmdalt;
-		Gtk::TreeModelColumn<std::string>                  shiftcontrol;
+		Gtk::TreeModelColumn<std::string> name;
+		Gtk::TreeModelColumn<int>         id; // enum Button::ID
+		Gtk::TreeModelColumn<std::string> plain;
+		Gtk::TreeModelColumn<std::string> shift;
+		Gtk::TreeModelColumn<std::string> control;
+		Gtk::TreeModelColumn<std::string> option;
+		Gtk::TreeModelColumn<std::string> cmdalt;
+		Gtk::TreeModelColumn<std::string> shiftcontrol;
 	};
 
 	FunctionKeyColumns function_key_columns;
