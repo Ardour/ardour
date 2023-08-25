@@ -1276,7 +1276,9 @@ Locations::set_state (const XMLNode& node, int version)
 					lcs.emplace_back (std::move (loc));
 					loc->set_state (**niter, version);
 				} else {
-					loc = new Location (_session, **niter);
+					loc = new Location (_session);
+					lcs.emplace_back (std::move (loc));
+					loc->set_state (**niter, version);
 				}
 
 				bool add = true;
