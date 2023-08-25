@@ -122,7 +122,7 @@ class MackieControlProtocol
 
 	int set_active (bool yn);
 	int  set_device (const std::string&, bool force);
-        void set_profile (const std::string&);
+	void set_profile (const std::string&);
 
 	FlipMode flip_mode () const { return _flip_mode; }
 	ViewMode view_mode () const { return _view_mode; }

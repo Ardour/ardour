@@ -30,6 +30,7 @@
 #include "pbd/stl_delete.h"
 #include "pbd/replace_all.h"
 
+#include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 
 #include "mackie_control_protocol.h"
@@ -45,7 +46,8 @@ using namespace ArdourSurface::MACKIE_NAMESPACE;
 using std::string;
 using std::vector;
 
-std::map<std::string,DeviceProfile> DeviceProfile::device_profiles;
+std::map<std::string,DeviceProfile> MACKIE_NAMESPACE::DeviceProfile::device_profiles;
+
 const std::string DeviceProfile::edited_indicator (" (edited)");
 const std::string DeviceProfile::default_profile_name ("User");
 
@@ -102,6 +104,8 @@ DeviceProfile::reload_device_profiles ()
 	find_files_matching_filter (devprofiles, spath, devprofile_filter, 0, false, true);
 	device_profiles.clear ();
 
+	DEBUG_TRACE (DEBUG::MackieControl, "DeviceProfile::reload_device_profiles\n");
+
 	if (devprofiles.empty()) {
 		error << "No MCP device info files found using " << spath.to_string() << endmsg;
 		return;
@@ -123,6 +127,7 @@ DeviceProfile::reload_device_profiles ()
 		}
 
 		if (dp.set_state (*root, 3000) == 0) { /* version is ignored for now */
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Found profile '%1'\n", dp.name ()));
 			dp.set_path (fullpath);
 			device_profiles[dp.name()] = dp;
 		}
