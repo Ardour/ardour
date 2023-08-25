@@ -1794,7 +1794,7 @@ Locations::cut_copy_section (timepos_t const& start, timepos_t const& end, timep
 				 * the whole cut/paste operation is earlier, in which case this mark
 				 * is not affected.
 				 */
-				if (i->start () <= to + start.distance(end)) {
+				if (i->start () < to + start.distance(end)) {
 					distance = end.distance(start);
 				}
 			}
