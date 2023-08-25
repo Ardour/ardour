@@ -881,6 +881,17 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 	Meter start_meter (meter_at (start));
 	Meter end_meter (meter_at (end));
 
+	MusicTimePoint* mtp;
+	BBT_Time bbt (bbt_at (start));
+	Beats b (quarters_at (start));
+
+	if (!copy) {
+		mtp = new MusicTimePoint (*this, end_sclock - (end_sclock - start_sclock), b, bbt, em.tempo(), em.meter(), _("cut"));
+	} else {
+		mtp = nullptr;
+	}
+
+
 	for (Points::iterator p = _points.begin(); p != _points.end(); ) {
 
 
@@ -954,6 +965,10 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 
 	if (!cb->meters().empty() && cb->meters().back().sclock() != start.superclocks()) {
 		cb->add_end_meter (end_meter);
+	}
+
+	if (mtp) {
+		add_or_replace_bartime (mtp);
 	}
 
 	return cb;
