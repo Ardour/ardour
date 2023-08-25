@@ -390,8 +390,8 @@ LaunchPadPro::build_pad_map ()
 
 	BUTTON3 (Shift, &LaunchPadPro::shift_press, &LaunchPadPro::relax, &LaunchPadPro::shift_release);
 
-	BUTTON0 (Left);
-	BUTTON0 (Right);
+	BUTTON (Left, &LaunchPadPro::left_press);
+	BUTTON (Right, &LaunchPadPro::right_press);
 	BUTTON0 (Session);
 	BUTTON0 (Note);
 	BUTTON0 (Chord);
@@ -423,8 +423,8 @@ LaunchPadPro::build_pad_map ()
 	BUTTON0 (Quantize);
 	BUTTON0 (Duplicate);
 	BUTTON0 (Clear);
-	BUTTON0 (Down);
-	BUTTON0 (Up);
+	BUTTON (Down, &LaunchPadPro::down_press);
+	BUTTON (Up, &LaunchPadPro::up_press);
 
 	BUTTON (Lower1, &LaunchPadPro::lower1_press);
 	BUTTON (Lower2, &LaunchPadPro::lower2_press);
@@ -558,7 +558,6 @@ LaunchPadPro::set_layout (Layout l, int page)
 	if (l == Fader) {
 		pre_fader_layout = _current_layout;
 		current_fader_bank = (FaderBank) page;
-		map_faders ();
 	}
 }
 
@@ -647,6 +646,7 @@ LaunchPadPro::handle_midi_sysex (MIDI::Parser& parser, MIDI::byte* raw_bytes, si
 			default:
 				break;
 			}
+			stripable_selection_changed ();
 		} else {
 			std::cerr << "ignore illegal layout index " << (int) raw_bytes[1] << std::endl;
 		}
@@ -716,31 +716,6 @@ LaunchPadPro::display_session_layout ()
 	msg[2] = 46;
 	daw_write (msg, 3);
 
-
-	msg[1] = Lower1;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = Lower2;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = Lower3;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = Lower4;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = Lower5;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = Lower6;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = Lower7;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = Lower8;
-	msg[2] = 2;
-	daw_write (msg, 3);
 
 	msg[1] = StopClip;
 	msg[2] = 2;
@@ -1011,14 +986,9 @@ LaunchPadPro::stripable_selection_changed ()
 	std::shared_ptr<MidiTrack> new_pad_target;
 	StripableNotificationList const & selected (last_selected());
 
-	light_pad (Lower1, 2);
-	light_pad (Lower2, 2);
-	light_pad (Lower3, 2);
-	light_pad (Lower4, 2);
-	light_pad (Lower5, 2);
-	light_pad (Lower6, 2);
-	light_pad (Lower7, 2);
-	light_pad (Lower8, 2);
+	if (_current_layout == Fader) {
+		map_faders ();
+	}
 
 	std::shared_ptr<Stripable> first_selected;
 
@@ -1026,10 +996,29 @@ LaunchPadPro::stripable_selection_changed ()
 		first_selected = selected.front().lock();
 	}
 
+	/* Make selected selection button "pulse" */
+
+	int selected_pad = -1;
+
 	if (first_selected && first_selected->presentation_info().order() >= (uint32_t) scroll_x_offset && first_selected->presentation_info().order() < (uint32_t) scroll_x_offset + 8) {
-		int pad = first_selected->presentation_info().order() - scroll_x_offset;
 		/* subtract 1 because Master always has order zero  XXX does * it? */
-		light_pad (PadID (Lower1 + (pad - 1)), 72); /* red */
+		selected_pad = first_selected->presentation_info().order() - 1 - scroll_x_offset;
+		light_pad (PadID (Lower1 + selected_pad), find_closest_palette_color (first_selected->presentation_info().color()), 1);
+		std::cerr << "pulse on " << selected_pad  << std::endl;
+	}
+
+	/* Make all other selection buttons static */
+
+	for (int n = 0; n < 8; ++n) {
+		std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + n);
+		if (r) {
+			if (selected_pad >= 0 && (r == first_selected)) {
+				continue;
+			}
+			light_pad (PadID (Lower1 + n), find_closest_palette_color (r->presentation_info().color()));
+		} else {
+			light_pad (PadID (Lower1 + n), 0);
+		}
 	}
 
 	/* See if there's a MIDI track selected */
@@ -1538,7 +1527,6 @@ LaunchPadPro::trigger_property_change (PropertyChange pc, Trigger* t)
 			return;
 		}
 
-
 		switch (t->state()) {
 		case Trigger::Stopped:
 			msg.push_back (0x90);
@@ -1827,6 +1815,7 @@ LaunchPadPro::viewport_changed ()
 		}
 	}
 
+
 	switch (_current_layout) {
 	case SessionLayout:
 		map_triggers ();
@@ -1837,6 +1826,8 @@ LaunchPadPro::viewport_changed ()
 	default:
 		break;
 	}
+
+	stripable_selection_changed ();
 }
 
 void
@@ -1887,26 +1878,45 @@ LaunchPadPro::setup_faders (FaderBank bank)
 void
 LaunchPadPro::fader_move (int cc, int val)
 {
-	std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + (cc - 0x20));
+	std::shared_ptr<Route> r;
+
+	switch (current_fader_bank) {
+	case SendFaders:
+	case DeviceFaders:
+		r = std::dynamic_pointer_cast<Route> (session->selection().first_selected_stripable());
+		break;
+	default:
+		r = session->get_remote_nth_route (scroll_x_offset + (cc - 0x20));
+		break;
+	}
+
+	if (!r) {
+		return;
+	}
+
 	std::shared_ptr<AutomationControl> ac;
 
-	if (r) {
-		switch (current_fader_bank) {
-		case VolumeFaders:
-			ac = r->gain_control();
-			if (ac) {
-				session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ARDOUR::Config->get_max_gain()), PBD::Controllable::NoGroup);
-			}
-			break;
-		case PanFaders:
-			ac = r->pan_azimuth_control();
-			if (ac) {
-				session->set_control (ac, val/127.0, PBD::Controllable::NoGroup);
-			}
-			break;
-		default:
-			break;
+	switch (current_fader_bank) {
+	case VolumeFaders:
+		ac = r->gain_control();
+		if (ac) {
+			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ARDOUR::Config->get_max_gain()), PBD::Controllable::NoGroup);
 		}
+		break;
+	case PanFaders:
+		ac = r->pan_azimuth_control();
+		if (ac) {
+			session->set_control (ac, val/127.0, PBD::Controllable::NoGroup);
+		}
+		break;
+	case SendFaders:
+		ac = r->send_level_controllable (scroll_x_offset + (cc - 0x20));
+		if (ac) {
+			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ARDOUR::Config->get_max_gain()), PBD::Controllable::NoGroup);
+		}
+		break;
+	default:
+		break;
 	}
 }
 
@@ -1919,7 +1929,19 @@ LaunchPadPro::map_faders ()
 	control_connections.drop_connections ();
 
 	for (int n = 0; n < 8; ++n) {
-		std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + n);
+		std::shared_ptr<Route> r;
+
+
+		switch (current_fader_bank) {
+		case SendFaders:
+		case DeviceFaders:
+			r = std::dynamic_pointer_cast<Route> (session->selection().first_selected_stripable());
+			break;
+		default:
+			r = session->get_remote_nth_route (scroll_x_offset + n);
+			break;
+		}
+
 		std::shared_ptr<AutomationControl> ac;
 
 		msg[1] = 0x20 + n;
@@ -1954,6 +1976,16 @@ LaunchPadPro::map_faders ()
 				msg[2] = 0;
 			}
 			break;
+		case SendFaders:
+			ac = r->send_level_controllable (n);
+			if (ac) {
+				std::cerr << "got fader for send " << n << " on " << r->name() << std::endl;
+				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
+			} else {
+				std::cerr << "NO fader for send " << n << " on " << r->name() << std::endl;
+				msg[2] = 0;
+			}
+			break;
 		default:
 			msg[2] = 0;
 			break;
@@ -1981,6 +2013,7 @@ LaunchPadPro::automation_control_change (int n, std::weak_ptr<AutomationControl>
 
 	switch (current_fader_bank) {
 	case VolumeFaders:
+	case SendFaders:
 		msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
 		break;
 	case PanFaders:
