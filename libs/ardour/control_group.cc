@@ -270,10 +270,12 @@ GainControlGroup::get_min_factor (gain_t factor)
 {
 	/* CALLER MUST HOLD READER LOCK */
 
-	for (ControlMap::iterator c = _controls.begin(); c != _controls.end(); ++c) {
-		gain_t const g = c->second->get_value();
+	const gain_t min_factor = _controls.begin()->second->desc().from_interface (0.0);
 
-		if ((g + g * factor) >= 0.0f) {
+	for (auto const & c : _controls) {
+		gain_t const g = c.second->get_value();
+
+		if ((g + g * factor) >= min_factor) {
 			continue;
 		}
 
@@ -292,21 +294,23 @@ GainControlGroup::get_max_factor (gain_t factor)
 {
 	/* CALLER MUST HOLD READER LOCK */
 
-	for (ControlMap::iterator c = _controls.begin(); c != _controls.end(); ++c) {
-		gain_t const g = c->second->get_value();
+	const gain_t max_factor = _controls.begin()->second->desc().from_interface (1.0);
+
+	for (auto const & c : _controls) {
+		gain_t const g = c.second->get_value();
 
 		// if the current factor woulnd't raise this route above maximum
-		if ((g + g * factor) <= 1.99526231f) {
+		if ((g + g * factor) <= max_factor) {
 			continue;
 		}
 
 		// if route gain is already at peak, return 0.0f factor
-		if (g >= 1.99526231f) {
+		if (g >= max_factor) {
 			return 0.0f;
 		}
 
 		// factor is calculated so that it would raise current route to max
-		factor = 1.99526231f / g - 1.0f;
+		factor = max_factor / g - 1.0f;
 	}
 
 	return factor;
@@ -374,8 +378,8 @@ GainControlGroup::set_group_value (std::shared_ptr<AutomationControl> control, d
 
 		/* just set entire group */
 
-		for (ControlMap::iterator c = _controls.begin(); c != _controls.end(); ++c) {
-			c->second->set_value (val, Controllable::ForGroup);
+		for (auto & c : _controls) {
+			c.second->set_value (val, Controllable::ForGroup);
 		}
 	}
 }
