@@ -888,7 +888,11 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 		 * time here.
 		 */
 
-		if (p->sclock() < start_sclock || p->sclock() >= end_sclock) {
+		if (p->sclock() >= end_sclock) {
+			break;
+		}
+
+		if (p->sclock() < start_sclock) {
 			++p;
 			continue;
 		}
