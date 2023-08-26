@@ -21,9 +21,13 @@
 #include "ardour/session.h"
 #include "pbd/unwind.h"
 
+#include "gtkmm2ext/keyboard.h"
+
 #include "ardour_ui.h"
 #include "editor_sections.h"
 #include "gui_thread.h"
+#include "keyboard.h"
+#include "main_clock.h"
 #include "public_editor.h"
 #include "utils.h"
 
@@ -35,11 +39,14 @@ using namespace Gtk;
 using namespace ARDOUR;
 
 EditorSections::EditorSections ()
-	: _ignore_redisplay (false)
+	: _old_focus (0)
+	, _no_redisplay (false)
 {
 	_model = ListStore::create (_columns);
 	_view.set_model (_model);
 	_view.append_column (_("Name"), _columns.name);
+	_view.append_column (_("Start"), _columns.s_start);
+	_view.append_column (_("End"), _columns.s_end);
 	_view.set_headers_visible (true);
 	_view.get_selection ()->set_mode (Gtk::SELECTION_SINGLE);
 
@@ -61,6 +68,14 @@ EditorSections::EditorSections ()
 	_view.signal_drag_motion ().connect (sigc::mem_fun (*this, &EditorSections::drag_motion));
 	_view.signal_drag_leave ().connect (sigc::mem_fun (*this, &EditorSections::drag_leave));
 	_view.signal_drag_data_received ().connect (sigc::mem_fun (*this, &EditorSections::drag_data_received));
+
+	/* Allow to scroll using key up/down */
+	_view.signal_enter_notify_event ().connect (sigc::mem_fun (*this, &EditorSections::enter_notify), false);
+	_view.signal_leave_notify_event ().connect (sigc::mem_fun (*this, &EditorSections::leave_notify), false);
+	_scroller.signal_focus_in_event ().connect (sigc::mem_fun (*this, &EditorSections::focus_in), false);
+	_scroller.signal_focus_out_event ().connect (sigc::mem_fun (*this, &EditorSections::focus_out));
+
+	ARDOUR_UI::instance ()->primary_clock->mode_changed.connect (sigc::mem_fun (*this, &EditorSections::clock_format_changed));
 }
 
 void
@@ -85,7 +100,7 @@ EditorSections::set_session (Session* s)
 void
 EditorSections::redisplay ()
 {
-	if (_ignore_redisplay) {
+	if (_no_redisplay) {
 		return;
 	}
 	_view.set_model (Glib::RefPtr<ListStore> ());
@@ -112,32 +127,51 @@ EditorSections::redisplay ()
 		}
 	} while (l);
 
+	clock_format_changed ();
+
 	_view.set_model (_model);
+}
+
+void
+EditorSections::clock_format_changed ()
+{
+	if (!_session) {
+		return;
+	}
+
+	TreeModel::Children rows = _model->children ();
+	for (auto const& r : rows) {
+		char buf[16];
+		ARDOUR_UI_UTILS::format_position (_session, r[_columns.start], buf, sizeof (buf));
+		r[_columns.s_start] = buf;
+		ARDOUR_UI_UTILS::format_position (_session, r[_columns.end], buf, sizeof (buf));
+		r[_columns.s_end] = buf;
+	}
 }
 
 bool
 EditorSections::scroll_row_timeout ()
 {
-	int y;
-	Gdk::Rectangle visible_rect;
+	int              y;
+	Gdk::Rectangle   visible_rect;
 	Gtk::Adjustment* adj = _scroller.get_vadjustment ();
 
-	gdk_window_get_pointer (_view.get_window ()->gobj(), NULL, &y, NULL);
+	gdk_window_get_pointer (_view.get_window ()->gobj (), NULL, &y, NULL);
 	_view.get_visible_rect (visible_rect);
 
 	y += adj->get_value ();
 
 	int offset = y - (visible_rect.get_y () + 30);
 	if (offset > 0) {
-		offset = y - (visible_rect.get_y() + visible_rect.get_height() - 30);
+		offset = y - (visible_rect.get_y () + visible_rect.get_height () - 30);
 		if (offset < 0) {
 			return true;
 		}
 	}
 
 	float value = adj->get_value () + offset;
-	value = std::max<float> (0, value);
-	value = std::min<float> (value, adj->get_upper () - adj->get_page_size ());
+	value       = std::max<float> (0, value);
+	value       = std::min<float> (value, adj->get_upper () - adj->get_page_size ());
 	adj->set_value (value);
 
 	return true;
@@ -150,7 +184,7 @@ EditorSections::selection_changed ()
 	if (rows.empty ()) {
 		return;
 	}
-	Gtk::TreeModel::Row row  = *_model->get_iter (*rows.begin ());
+	Gtk::TreeModel::Row row = *_model->get_iter (*rows.begin ());
 
 	timepos_t start = row[_columns.start];
 	timepos_t end   = row[_columns.end];
@@ -225,7 +259,7 @@ EditorSections::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int 
 	_view.drag_highlight ();
 
 	if (!_scroll_timeout.connected ()) {
-		_scroll_timeout = Glib::signal_timeout().connect (sigc::mem_fun (*this, &EditorSections::scroll_row_timeout), 150);
+		_scroll_timeout = Glib::signal_timeout ().connect (sigc::mem_fun (*this, &EditorSections::scroll_row_timeout), 150);
 	}
 
 	return true;
@@ -296,10 +330,10 @@ EditorSections::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& contex
 	}
 
 #ifndef NDEBUG
-	cout << "cut copy '" << s.location->name () << "' " << s.start << " - " << s.end << " to " << to << "\n";
+	cout << "cut copy '" << s.location->name () << "' " << s.start << " - " << s.end << " to " << to << " op = " << op << "\n";
 #endif
 	{
-		PBD::Unwinder<bool> uw (_ignore_redisplay, true);
+		PBD::Unwinder<bool> uw (_no_redisplay, true);
 		_session->cut_copy_section (s.start, s.end, to, op);
 	}
 	redisplay ();
@@ -329,9 +363,56 @@ EditorSections::key_release (GdkEventKey* ev)
 	timepos_t start = row[_columns.start];
 	timepos_t end   = row[_columns.end];
 	{
-		PBD::Unwinder<bool> uw (_ignore_redisplay, true);
+		PBD::Unwinder<bool> uw (_no_redisplay, true);
 		_session->cut_copy_section (start, end, timepos_t (0), DeleteSection);
 	}
 	redisplay ();
 	return true;
+}
+
+bool
+EditorSections::focus_in (GdkEventFocus*)
+{
+	Window* win = dynamic_cast<Window*> (_scroller.get_toplevel ());
+
+	if (win) {
+		_old_focus = win->get_focus ();
+	} else {
+		_old_focus = 0;
+	}
+
+	/* try to do nothing on focus in (doesn't work, hence selection_count nonsense) */
+	return true;
+}
+
+bool
+EditorSections::focus_out (GdkEventFocus*)
+{
+	if (_old_focus) {
+		_old_focus->grab_focus ();
+		_old_focus = 0;
+	}
+	return false;
+}
+
+bool
+EditorSections::enter_notify (GdkEventCrossing*)
+{
+	Gtkmm2ext::Keyboard::magic_widget_grab_focus ();
+	return false;
+}
+
+bool
+EditorSections::leave_notify (GdkEventCrossing* ev)
+{
+	if (_old_focus) {
+		_old_focus->grab_focus ();
+		_old_focus = 0;
+	}
+
+	if (ev->detail != GDK_NOTIFY_INFERIOR && ev->detail != GDK_NOTIFY_ANCESTOR) {
+		Gtkmm2ext::Keyboard::magic_widget_drop_focus ();
+	}
+
+	return false;
 }

@@ -96,6 +96,7 @@ protected:
 
 	AudioClock    length_clock;
 	Gtk::CheckButton cd_check_button;
+	Gtk::CheckButton section_check_button;
 	Gtk::CheckButton hide_check_button;
 	Gtk::CheckButton lock_check_button;
 
@@ -131,6 +132,7 @@ protected:
 	bool locate_to_clock (GdkEventButton*, AudioClock*);
 
 	void cd_toggled ();
+	void section_toggled ();
 	void hide_toggled ();
 	void lock_toggled ();
 	void remove_button_pressed ();

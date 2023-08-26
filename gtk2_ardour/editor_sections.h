@@ -50,6 +50,12 @@ private:
 	bool key_release (GdkEventKey*);
 	void selection_changed ();
 	bool scroll_row_timeout ();
+	void clock_format_changed ();
+
+	bool focus_in (GdkEventFocus*);
+	bool focus_out (GdkEventFocus*);
+	bool enter_notify (GdkEventCrossing*);
+	bool leave_notify (GdkEventCrossing*);
 
 	struct Section {
 		Section ()
@@ -75,11 +81,15 @@ private:
 		Columns ()
 		{
 			add (name);
+			add (s_start);
+			add (s_end);
 			add (location);
 			add (start);
 			add (end);
 		}
 		Gtk::TreeModelColumn<std::string>         name;
+		Gtk::TreeModelColumn<std::string>         s_start;
+		Gtk::TreeModelColumn<std::string>         s_end;
 		Gtk::TreeModelColumn<ARDOUR::Location*>   location;
 		Gtk::TreeModelColumn<Temporal::timepos_t> start;
 		Gtk::TreeModelColumn<Temporal::timepos_t> end;
@@ -89,8 +99,9 @@ private:
 	Glib::RefPtr<Gtk::ListStore> _model;
 	Gtk::TreeView                _view;
 	Gtk::ScrolledWindow          _scroller;
+	Gtk::Widget*                 _old_focus;
 
-	bool             _ignore_redisplay;
+	bool             _no_redisplay;
 	sigc::connection _scroll_timeout;
 };
 

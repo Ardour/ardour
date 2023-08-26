@@ -65,6 +65,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	, locate_to_end_button (_("Goto"))
 	, length_clock (X_("locationlength"), true, "", true, false, true)
 	, cd_check_button (_("CD"))
+	, section_check_button (_("Sect."))
 	, hide_check_button (_("Hide"))
 	, lock_check_button (_("Lock"))
 	, _clock_group (0)
@@ -80,6 +81,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	name_label.set_name ("LocationEditNameLabel");
 	name_entry.set_name ("LocationEditNameEntry");
 	cd_check_button.set_name ("LocationEditCdButton");
+	section_check_button.set_name ("LocationEditSectionButton");
 	hide_check_button.set_name ("LocationEditHideButton");
 	lock_check_button.set_name ("LocationEditLockButton");
 	isrc_label.set_name ("LocationEditNumberLabel");
@@ -164,6 +166,7 @@ LocationEditRow::LocationEditRow(Session * sess, Location * loc, int32_t num)
 	length_clock.ValueChanged.connect (sigc::bind ( sigc::mem_fun(*this, &LocationEditRow::clock_changed), LocLength));
 
 	cd_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::cd_toggled));
+	section_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::section_toggled));
 	hide_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::hide_toggled));
 	lock_check_button.signal_toggled().connect(sigc::mem_fun(*this, &LocationEditRow::lock_toggled));
 
@@ -283,20 +286,21 @@ LocationEditRow::set_location (Location *loc)
 		name_entry.show();
 
 		if (!cd_check_button.get_parent()) {
-			item_table.attach (cd_check_button, 4, 5, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
+			item_table.attach (cd_check_button, 3, 4, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
+		}
+
+		if (!section_check_button.get_parent()) {
+			item_table.attach (section_check_button, 4, 5, 0, 1, FILL, Gtk::AttachOptions (0), 4, 0);
 		}
 
 		if (location->is_session_range()) {
 			remove_button.set_sensitive (false);
 		}
 
-		if (location->is_cue_marker()) {
-			cd_check_button.set_sensitive (false);
-		}
+		flags_changed ();
 
-		cd_check_button.set_active (location->is_cd_marker());
 		cd_check_button.show();
-
+		section_check_button.show();
 		hide_check_button.show();
 		lock_check_button.show();
 	}
@@ -535,6 +539,15 @@ LocationEditRow::cd_toggled ()
 }
 
 void
+LocationEditRow::section_toggled ()
+{
+	if (i_am_the_modifier || !location) {
+		return;
+	}
+	location->set_section (section_check_button.get_active());
+}
+
+void
 LocationEditRow::hide_toggled ()
 {
 	if (i_am_the_modifier || !location) {
@@ -667,7 +680,22 @@ LocationEditRow::flags_changed ()
 	i_am_the_modifier++;
 
 	cd_check_button.set_active (location->is_cd_marker());
+	section_check_button.set_active (location->is_section());
 	hide_check_button.set_active (location->is_hidden());
+
+	if (location->is_cue_marker()) {
+		cd_check_button.set_sensitive (false);
+		section_check_button.set_sensitive (false);
+	} else if (location->is_section()) {
+		cd_check_button.set_sensitive (false);
+		section_check_button.set_sensitive (true);
+	} else if (location->is_cd_marker()) {
+		cd_check_button.set_sensitive (true);
+		section_check_button.set_sensitive (false);
+	} else {
+		cd_check_button.set_sensitive (true);
+		section_check_button.set_sensitive (true);
+	}
 
 	i_am_the_modifier--;
 }
