@@ -13,4 +13,5 @@
   <TouchSenseFaders value="yes"/>
   <HasSeparateMeters value="yes"/>
   <IsXTouch value="no"/>
+  <NoHandShake value="yes"/>
 </MackieProtocolDevice>
