@@ -115,12 +115,8 @@ const int MACKIE_NAMESPACE::MackieControlProtocol::MAIN_MODIFIER_MASK = (MackieC
 
 MACKIE_NAMESPACE::MackieControlProtocol* MACKIE_NAMESPACE::MackieControlProtocol::_instance = 0;
 
-MackieControlProtocol::MackieControlProtocol (Session& session)
-#ifdef UF8
-	: ControlProtocol (session, X_("SSL-UFx"))
-#else
-	: ControlProtocol (session, X_("Mackie"))
-#endif
+MackieControlProtocol::MackieControlProtocol (Session& session, const char* pname)
+	: ControlProtocol (session, pname)
 	, AbstractUI<MackieControlUIRequest> (name())
 	, _current_initial_bank (0)
 	, _timecode_last (10, '\0')

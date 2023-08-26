@@ -107,7 +107,7 @@ class MackieControlProtocol
 		Zero,   /* fader controls primary, but doesn't move, vpot controls secondary */
 	};
 
-	MackieControlProtocol(ARDOUR::Session &);
+	MackieControlProtocol(ARDOUR::Session &, const char* name);
 	virtual ~MackieControlProtocol();
 
 	static MackieControlProtocol* instance() { return _instance; }

@@ -36,6 +36,8 @@ using namespace std;
 using namespace ArdourSurface;
 using namespace ArdourSurface::MACKIE_NAMESPACE;
 
+#define PROTOCOL_NAME ("SSL 360: UF8 UF1")
+
 static ControlProtocol*
 new_uf8_protocol (Session* s)
 {
@@ -44,7 +46,7 @@ new_uf8_protocol (Session* s)
 	DEBUG_TRACE (DEBUG::MackieControl, "making uf8-protocol");
 
 	try {
-		mcp = new MackieControlProtocol (*s);
+		mcp = new MackieControlProtocol (*s, PROTOCOL_NAME);
 		/* do not set active here - wait for set_state() */
 	}
 	catch (exception & e) {
@@ -71,7 +73,7 @@ delete_uf8_protocol (ControlProtocol* cp)
 
 // Field names commented out by JE - 06-01-2010
 static ControlProtocolDescriptor uf8_descriptor = {
-	/* name       */ "SSL UF-8",
+	/* name       */ PROTOCOL_NAME,
 	/* id         */ "uri://ardour.org/surfaces/ssl_uf8:0",
 	/* module     */ 0,
 	/* available  */ 0,
