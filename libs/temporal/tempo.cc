@@ -890,7 +890,7 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 	Beats b (quarters_at (start));
 
 	if (!copy) {
-		mtp = new MusicTimePoint (*this, end_sclock - (end_sclock - start_sclock), b, bbt, em.tempo(), em.meter(), _("cut"));
+		mtp = new MusicTimePoint (*this, start_sclock, b, bbt, em.tempo(), em.meter(), _("cut"));
 	} else {
 		mtp = nullptr;
 	}
