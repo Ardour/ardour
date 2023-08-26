@@ -55,6 +55,7 @@
 #include "ardour/auditioner.h"
 #include "ardour/audioengine.h"
 #include "ardour/filesystem_paths.h"
+#include "ardour/session.h"
 #include "ardour/search_paths.h"
 #include "ardour/triggerbox.h"
 
@@ -68,6 +69,7 @@
 #include "debug.h"
 #include "public_editor.h"
 #include "keyboard.h"
+#include "main_clock.h"
 #include "utils.h"
 #include "pbd/i18n.h"
 #include "gui_thread.h"
@@ -983,5 +985,75 @@ ARDOUR_UI_UTILS::copy_patch_changes (std::shared_ptr<ARDOUR::Auditioner> a, std:
 		} else {
 			mt->unset_patch_change (c);
 		}
+	}
+}
+
+void
+ARDOUR_UI_UTILS::format_position (ARDOUR::Session* s, Temporal::timepos_t const& p, char* buf, size_t bufsize, bool onoff)
+{
+	Temporal::BBT_Time bbt;
+	Timecode::Time     timecode;
+	samplepos_t        pos (p.samples ());
+
+	if (pos < 0) {
+		error << string_compose (_("format_position: negative timecode position: %1"), pos) << endmsg;
+		snprintf (buf, bufsize, "invalid");
+		return;
+	}
+
+	switch (ARDOUR_UI::instance ()->primary_clock->mode ()) {
+		case AudioClock::BBT:
+			bbt = Temporal::TempoMap::use ()->bbt_at (p);
+			if (onoff) {
+				snprintf (buf, bufsize, "%03d|%02d|%04d", bbt.bars, bbt.beats, bbt.ticks);
+			} else {
+				snprintf (buf, bufsize, "(%03d|%02d|%04d)", bbt.bars, bbt.beats, bbt.ticks);
+			}
+			break;
+
+		case AudioClock::MinSec:
+			samplepos_t left;
+			int         hrs;
+			int         mins;
+			float       secs;
+
+			left = pos;
+			hrs  = (int)floor (left / (s->sample_rate () * 60.0f * 60.0f));
+			left -= (samplecnt_t)floor (hrs * s->sample_rate () * 60.0f * 60.0f);
+			mins = (int)floor (left / (s->sample_rate () * 60.0f));
+			left -= (samplecnt_t)floor (mins * s->sample_rate () * 60.0f);
+			secs = left / (float)s->sample_rate ();
+			if (onoff) {
+				snprintf (buf, bufsize, "%02d:%02d:%06.3f", hrs, mins, secs);
+			} else {
+				snprintf (buf, bufsize, "(%02d:%02d:%06.3f)", hrs, mins, secs);
+			}
+			break;
+
+		case AudioClock::Seconds:
+			if (onoff) {
+				snprintf (buf, bufsize, "%.1f", pos / (float)s->sample_rate ());
+			} else {
+				snprintf (buf, bufsize, "(%.1f)", pos / (float)s->sample_rate ());
+			}
+			break;
+
+		case AudioClock::Samples:
+			if (onoff) {
+				snprintf (buf, bufsize, "%" PRId64, pos);
+			} else {
+				snprintf (buf, bufsize, "(%" PRId64 ")", pos);
+			}
+			break;
+
+		case AudioClock::Timecode:
+		default:
+			s->timecode_time (pos, timecode);
+			if (onoff) {
+				snprintf (buf, bufsize, "%02d:%02d:%02d:%02d", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+			} else {
+				snprintf (buf, bufsize, "(%02d:%02d:%02d:%02d)", timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
+			}
+			break;
 	}
 }
