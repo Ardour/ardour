@@ -40,8 +40,7 @@ using namespace Gtk;
 using namespace ARDOUR;
 
 EditorSections::EditorSections ()
-	: _old_focus (0)
-	, _no_redisplay (false)
+	: _no_redisplay (false)
 {
 	_model = ListStore::create (_columns);
 	_view.set_model (_model);
@@ -54,7 +53,7 @@ EditorSections::EditorSections ()
 	_scroller.add (_view);
 	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
-	_view.signal_key_release_event ().connect (sigc::mem_fun (*this, &EditorSections::key_release), false);
+	_view.signal_key_press_event ().connect (sigc::mem_fun (*this, &EditorSections::key_press), false);
 	_view.signal_button_press_event ().connect (sigc::mem_fun (*this, &EditorSections::button_press), false);
 	_view.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &EditorSections::selection_changed));
 
@@ -74,10 +73,10 @@ EditorSections::EditorSections ()
 	/* Allow to scroll using key up/down */
 	_view.signal_enter_notify_event ().connect (sigc::mem_fun (*this, &EditorSections::enter_notify), false);
 	_view.signal_leave_notify_event ().connect (sigc::mem_fun (*this, &EditorSections::leave_notify), false);
-	_scroller.signal_focus_in_event ().connect (sigc::mem_fun (*this, &EditorSections::focus_in), false);
-	_scroller.signal_focus_out_event ().connect (sigc::mem_fun (*this, &EditorSections::focus_out));
 
 	ARDOUR_UI::instance ()->primary_clock->mode_changed.connect (sigc::mem_fun (*this, &EditorSections::clock_format_changed));
+
+	_selection_change = PublicEditor::instance ().get_selection ().TimeChanged.connect (sigc::mem_fun (*this, &EditorSections::clear_selection));
 }
 
 void
@@ -180,6 +179,12 @@ EditorSections::scroll_row_timeout ()
 }
 
 void
+EditorSections::clear_selection ()
+{
+	_view.get_selection ()->unselect_all ();
+}
+
+void
 EditorSections::selection_changed ()
 {
 	TreeView::Selection::ListHandle_Path rows = _view.get_selection ()->get_selected_rows ();
@@ -191,8 +196,10 @@ EditorSections::selection_changed ()
 	timepos_t start = row[_columns.start];
 	timepos_t end   = row[_columns.end];
 
+	_selection_change.block ();
 	Selection& s (PublicEditor::instance ().get_selection ());
 	s.set (start, end);
+	_selection_change.unblock ();
 }
 
 void
@@ -362,7 +369,7 @@ EditorSections::delete_selected_section ()
 }
 
 bool
-EditorSections::key_release (GdkEventKey* ev)
+EditorSections::key_press (GdkEventKey* ev)
 {
 	switch (ev->keyval) {
 		case GDK_KP_Delete:
@@ -408,31 +415,6 @@ EditorSections::button_press (GdkEventButton* ev)
 }
 
 bool
-EditorSections::focus_in (GdkEventFocus*)
-{
-	Window* win = dynamic_cast<Window*> (_scroller.get_toplevel ());
-
-	if (win) {
-		_old_focus = win->get_focus ();
-	} else {
-		_old_focus = 0;
-	}
-
-	/* try to do nothing on focus in (doesn't work, hence selection_count nonsense) */
-	return true;
-}
-
-bool
-EditorSections::focus_out (GdkEventFocus*)
-{
-	if (_old_focus) {
-		_old_focus->grab_focus ();
-		_old_focus = 0;
-	}
-	return false;
-}
-
-bool
 EditorSections::enter_notify (GdkEventCrossing*)
 {
 	Gtkmm2ext::Keyboard::magic_widget_grab_focus ();
@@ -442,11 +424,6 @@ EditorSections::enter_notify (GdkEventCrossing*)
 bool
 EditorSections::leave_notify (GdkEventCrossing* ev)
 {
-	if (_old_focus) {
-		_old_focus->grab_focus ();
-		_old_focus = 0;
-	}
-
 	if (ev->detail != GDK_NOTIFY_INFERIOR && ev->detail != GDK_NOTIFY_ANCESTOR) {
 		Gtkmm2ext::Keyboard::magic_widget_drop_focus ();
 	}

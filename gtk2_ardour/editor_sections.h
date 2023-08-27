@@ -43,15 +43,14 @@ private:
 	void redisplay ();
 	bool delete_selected_section ();
 
+	void clear_selection ();
 	void selection_changed ();
 	void clock_format_changed ();
 	bool scroll_row_timeout ();
 	void show_context_menu (int, int);
 
-	bool key_release (GdkEventKey*);
+	bool key_press (GdkEventKey*);
 	bool button_press (GdkEventButton*);
-	bool focus_in (GdkEventFocus*);
-	bool focus_out (GdkEventFocus*);
 	bool enter_notify (GdkEventCrossing*);
 	bool leave_notify (GdkEventCrossing*);
 
@@ -103,10 +102,10 @@ private:
 	Glib::RefPtr<Gtk::ListStore> _model;
 	Gtk::TreeView                _view;
 	Gtk::ScrolledWindow          _scroller;
-	Gtk::Widget*                 _old_focus;
 
 	bool             _no_redisplay;
 	sigc::connection _scroll_timeout;
+	sigc::connection _selection_change;
 };
 
 #endif
