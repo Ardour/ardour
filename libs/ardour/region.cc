@@ -2298,7 +2298,10 @@ Region::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 	clear_changes ();
 
 	Temporal::TimeDomainCntChanges::iterator tc = cmd.counts.find (&_length.non_const_val());
-	assert (tc != cmd.counts.end());
+	if (tc == cmd.counts.end()) {
+		/* must have already been in the correct time domain */
+		return;
+	}
 
 	/* switch domains back (but with modified TempoMap, presumably */
 	tc->second.set_time_domain (cmd.from);
