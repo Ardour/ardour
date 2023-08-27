@@ -39,23 +39,27 @@ public:
 		return _scroller;
 	}
 
-	void redisplay ();
-
 private:
+	void redisplay ();
+	bool delete_selected_section ();
+
+	void selection_changed ();
+	void clock_format_changed ();
+	bool scroll_row_timeout ();
+	void show_context_menu (int, int);
+
+	bool key_release (GdkEventKey*);
+	bool button_press (GdkEventButton*);
+	bool focus_in (GdkEventFocus*);
+	bool focus_out (GdkEventFocus*);
+	bool enter_notify (GdkEventCrossing*);
+	bool leave_notify (GdkEventCrossing*);
+
 	void drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::SelectionData&, guint, guint);
 	void drag_begin (Glib::RefPtr<Gdk::DragContext> const&);
 	bool drag_motion (Glib::RefPtr<Gdk::DragContext> const&, int, int, guint);
 	void drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, int, int, Gtk::SelectionData const&, guint, guint);
 	void drag_leave (Glib::RefPtr<Gdk::DragContext> const&, guint);
-	bool key_release (GdkEventKey*);
-	void selection_changed ();
-	bool scroll_row_timeout ();
-	void clock_format_changed ();
-
-	bool focus_in (GdkEventFocus*);
-	bool focus_out (GdkEventFocus*);
-	bool enter_notify (GdkEventCrossing*);
-	bool leave_notify (GdkEventCrossing*);
 
 	struct Section {
 		Section ()

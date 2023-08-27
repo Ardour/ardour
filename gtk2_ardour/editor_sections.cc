@@ -24,6 +24,7 @@
 #include "gtkmm2ext/keyboard.h"
 
 #include "ardour_ui.h"
+#include "context_menu_helper.h"
 #include "editor_sections.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -54,6 +55,7 @@ EditorSections::EditorSections ()
 	_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
 
 	_view.signal_key_release_event ().connect (sigc::mem_fun (*this, &EditorSections::key_release), false);
+	_view.signal_button_press_event ().connect (sigc::mem_fun (*this, &EditorSections::button_press), false);
 	_view.get_selection ()->signal_changed ().connect (sigc::mem_fun (*this, &EditorSections::selection_changed));
 
 	/* DnD source */
@@ -340,21 +342,10 @@ EditorSections::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& contex
 }
 
 bool
-EditorSections::key_release (GdkEventKey* ev)
+EditorSections::delete_selected_section ()
 {
 	if (_view.get_selection ()->count_selected_rows () != 1) {
 		return false;
-	}
-
-	switch (ev->keyval) {
-		case GDK_KP_Delete:
-			/* fallthrough */
-		case GDK_Delete:
-			/* fallthrough */
-		case GDK_BackSpace:
-			break;
-		default:
-			return false;
 	}
 
 	TreeView::Selection::ListHandle_Path rows = _view.get_selection ()->get_selected_rows ();
@@ -368,6 +359,52 @@ EditorSections::key_release (GdkEventKey* ev)
 	}
 	redisplay ();
 	return true;
+}
+
+bool
+EditorSections::key_release (GdkEventKey* ev)
+{
+	switch (ev->keyval) {
+		case GDK_KP_Delete:
+			/* fallthrough */
+		case GDK_Delete:
+			/* fallthrough */
+		case GDK_BackSpace:
+			break;
+		default:
+			return false;
+	}
+
+	return delete_selected_section ();
+}
+
+void
+EditorSections::show_context_menu (int button, int time)
+{
+	using namespace Gtk::Menu_Helpers;
+	Gtk::Menu* menu  = ARDOUR_UI_UTILS::shared_popup_menu ();
+	MenuList&  items = menu->items ();
+	items.push_back (MenuElem (_("Remove the selected Section"), hide_return (sigc::mem_fun (*this, &EditorSections::delete_selected_section))));
+	menu->popup (button, time);
+}
+
+bool
+EditorSections::button_press (GdkEventButton* ev)
+{
+	TreeModel::Path path;
+	TreeViewColumn* column;
+	int             cellx;
+	int             celly;
+
+	if (!_view.get_path_at_pos ((int)ev->x, (int)ev->y, path, column, cellx, celly)) {
+		return false;
+	}
+
+	if (Gtkmm2ext::Keyboard::is_context_menu_event (ev)) {
+		show_context_menu (ev->button, ev->time);
+		/* return false to select item under the mouse */
+	}
+	return false;
 }
 
 bool
