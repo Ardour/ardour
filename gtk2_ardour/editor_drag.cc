@@ -7290,13 +7290,11 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::motion (GdkEvent* ev, bool firs
 		dragging_line->set_outline_width (2.0);
 		dragging_line->set_outline_color (UIConfiguration::instance().color ("automation line"));
 
-		if (ev->motion.x > grab_x()) {
-			direction = 1;
-			edge_x = 0;
-		} else {
-			direction = -1;
-			edge_x = std::numeric_limits<int>::max();
-		}
+		/* for freehand drawing, we only support left->right direction, for now. */
+		direction = 1;
+		edge_x = 0;
+		/* TODO:  allow the user to move "far" left, and then start drawing from the new leftmost position.
+		  ...start_grab() already occurred so this is non-trivial */
 
 		/* Add a point correspding to the start of the drag */
 
