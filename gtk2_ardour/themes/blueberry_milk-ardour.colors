@@ -124,7 +124,7 @@
     <ColorAlias name="gtk_background" alias="theme:bg"/>
     <ColorAlias name="gtk_bases" alias="theme:bg2"/>
     <ColorAlias name="gtk_bg_selected" alias="theme:contrasting less"/>
-    <ColorAlias name="gtk_bg_tooltip" alias="widget:ruddy"/>
+    <ColorAlias name="gtk_bg_tooltip" alias="neutral:foreground2"/>
     <ColorAlias name="gtk_bright_color" alias="widget:blue"/>
     <ColorAlias name="gtk_bright_indicator" alias="alert:blue"/>
     <ColorAlias name="gtk_clip_indicator" alias="alert:red"/>
