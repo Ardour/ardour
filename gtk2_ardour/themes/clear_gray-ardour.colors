@@ -52,6 +52,8 @@
     <ColorAlias name="active crossfade" alias="neutral:foreground"/>
     <ColorAlias name="arrange base" alias="neutral:foreground2"/>
     <ColorAlias name="arrangement marker bar" alias="neutral:background2"/>
+    <ColorAlias name="arrangement rect" alias="widget:blue"/>
+    <ColorAlias name="arrangement rect alt" alias="widget:blue darker"/>
     <ColorAlias name="audio automation track fill" alias="theme:bg"/>
     <ColorAlias name="audio bus base" alias="widget:blue darker"/>
     <ColorAlias name="audio master bus base" alias="neutral:backgroundest"/>

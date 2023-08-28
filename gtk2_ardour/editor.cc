@@ -611,6 +611,8 @@ Editor::Editor ()
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
 	selection->TracksChanged.connect (sigc::mem_fun(*this, &Editor::track_selection_changed));
 
+	ZoomChanged.connect (sigc::mem_fun (*this, &Editor::update_section_rects));
+
 	editor_regions_selection_changed_connection = selection->RegionsChanged.connect (sigc::mem_fun(*this, &Editor::region_selection_changed));
 
 	selection->PointsChanged.connect (sigc::mem_fun(*this, &Editor::point_selection_changed));
@@ -1432,6 +1434,10 @@ Editor::set_session (Session *t)
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->auto_loop_location_changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::loop_location_changed, this, _1), gui_context ());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
+
+	Location::start_changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_section_rects, this), gui_context ());
+	Location::end_changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_section_rects, this), gui_context ());
+	Location::flags_changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_section_rects, this), gui_context ());
 
 	_playhead_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
 	_playhead_cursor->show ();

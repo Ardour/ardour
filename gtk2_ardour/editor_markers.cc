@@ -90,6 +90,10 @@ Editor::add_new_location (Location *location)
 	if (location->is_auto_loop()) {
 		update_loop_range_view ();
 	}
+
+	if (location->is_section ()) {
+		update_section_rects ();
+	}
 }
 
 /** Add a new location, without a time-consuming update of all marker labels;
@@ -611,6 +615,43 @@ Editor::refresh_location_display ()
 }
 
 void
+Editor::update_section_rects ()
+{
+	ENSURE_GUI_THREAD (*this, &Editor::update_section_rects);
+	if (!_session) {
+		return;
+	}
+	section_marker_bar->clear (true);
+
+	timepos_t start;
+	timepos_t end;
+
+	Locations* loc = _session->locations ();
+	Location*  l   = NULL;
+	bool bright    = false;
+
+	do {
+		l = loc->next_section (l, start, end);
+		if (l) {
+			double const left  = sample_to_pixel (start.samples ());
+			double const right = sample_to_pixel (end.samples ());
+
+			ArdourCanvas::Rectangle* rect = new ArdourCanvas::Rectangle (section_marker_bar, ArdourCanvas::Rect (left, 2, right, timebar_height - 3));
+			rect->set_fill (true);
+			rect->set_outline_what(ArdourCanvas::Rectangle::What(0));
+			rect->raise_to_top ();
+			if (bright) {
+				rect->set_fill_color (UIConfiguration::instance().color ("arrangement rect"));
+			} else {
+				rect->set_fill_color (UIConfiguration::instance().color ("arrangement rect alt"));
+			}
+			bright = !bright;
+
+		}
+	} while (l);
+}
+
+void
 Editor::LocationMarkers::hide()
 {
 	start->hide ();
@@ -910,6 +951,10 @@ Editor::location_gone (Location *location)
 			refresh_location_display ();
 			break;
 		}
+	}
+
+	if (location->is_section ()) {
+		update_section_rects ();
 	}
 }
 

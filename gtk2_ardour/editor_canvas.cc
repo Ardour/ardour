@@ -171,7 +171,7 @@ Editor::initialize_canvas ()
 	tempo_meta_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 4.0) + 1.0));
 	CANVAS_DEBUG_NAME (tempo_meta_group, "tempo meta group");
 	section_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
-	CANVAS_DEBUG_NAME (tempo_meta_group, "Arranger marker group");
+	CANVAS_DEBUG_NAME (section_marker_group, "Arranger marker group");
 	tempo_group = new ArdourCanvas::Container (tempo_meta_group, ArdourCanvas::Duple (0.0, 0.0));
 	CANVAS_DEBUG_NAME (tempo_group, "tempo group");
 	mapping_group = new ArdourCanvas::Container (tempo_meta_group, ArdourCanvas::Duple (0.0, 0.0));
@@ -1123,6 +1123,7 @@ Editor::color_handler()
 	rubberband_rect->set_fill_color (UIConfiguration::instance().color_mod ("rubber band rect", "selection rect"));
 
 	refresh_location_display ();
+	update_section_rects ();
 
 	NoteBase::set_colors ();
 
