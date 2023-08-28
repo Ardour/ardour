@@ -1234,6 +1234,10 @@ class LIBTEMPORAL_API TempoMapCutBuffer
 	MusicTimes const & bartimes() const { return _bartimes; }
 	Points const & points() const { return _points; }
 
+	bool empty() const {
+		return _tempos.empty() && _meters.empty() && _bartimes.empty() && _points.empty();
+	}
+
   private:
 	Tempo* _start_tempo;
 	Tempo* _end_tempo;
