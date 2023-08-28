@@ -7304,23 +7304,46 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 		XMLNode &after = _locations->get_state();
 		add_command (new MementoCommand<Locations> (*_locations, &before, &after));
 	}
+#if 0
 
-#if 0 // TODO - enable once tempo-map cut/copy/paste works
 	TempoMap::WritableSharedPtr wmap = TempoMap::write_copy ();
 	TempoMapCutBuffer* tmcb;
-	if (copy) {
-		tmcb = wmap->copy (start, end);
-	} else {
-		tmcb = wmap->cut (start, end, true);
+	XMLNode& tm_before (wmap->get_state());
+
+	switch (op) {
+	case CopyPasteSection:
+		if ((tmcb = wmap->copy (start, end))) {
+			tmcb->dump (std::cerr);
+			wmap->paste (*tmcb, to, true);
+		}
+		break;
+	case CutPasteSection:
+		if ((tmcb = wmap->cut (start, end, true))) {
+			tmcb->dump (std::cerr);
+			wmap->paste (*tmcb, to, false);
+		}
+		break;
+	default:
+		tmcb = nullptr;
+		break;
 	}
-	wmap->paste (*tmcb, to, !copy);
-	TempoMap::update (wmap);
-	delete tmcb;
+
+	if (tmcb) {
+		TempoMap::update (wmap);
+		delete tmcb;
+		delete &tm_before;
+
+		XMLNode& tm_after (wmap->get_state());
+		std::cerr << "Saving tmap state as part of rev cmd\n";
+		add_command (new MementoCommand<TempoMap> (*wmap.get(), &tm_before, &tm_after));
+	}
 #endif
 
 	if (!abort_empty_reversible_command ()) {
-		commit_reversible_command ();
+		return;
 	}
+
+	commit_reversible_command ();
 }
 
 void

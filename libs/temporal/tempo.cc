@@ -866,6 +866,10 @@ TempoMap::copy ( timepos_t const & start, timepos_t const & end)
 TempoMapCutBuffer*
 TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, bool ripple)
 {
+	if (n_tempos() == 1 && n_meters() == 1) {
+		return nullptr;
+	}
+
 	TempoMetric sm (metric_at (start));
 	TempoMetric em (metric_at (end));
 	timecnt_t dur = start.distance (end);
@@ -977,11 +981,21 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 void
 TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool ripple)
 {
+	if (cb.empty()) {
+		std::cerr << "nothing to paste\n";
+		return;
+	}
+
+	std::cerr << "tm paste, ripple " << ripple << std::endl;
 	if (ripple) {
 		shift (position, cb.duration());
 	}
 
 	bool replaced_ignored;
+
+	const timepos_t end_position = position + cb.duration();
+	Tempo end_tempo = tempo_at (end_position);
+	Meter end_meter = meter_at (end_position);
 
 	/* iterate over _points since they are already in sclock order, and we
 	 * won't need to post-sort the way we would if we handled tempos,
@@ -990,19 +1004,26 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 
 	BBT_Time pos_bbt = bbt_at (position);
 	Beats    pos_beats = quarters_at (position);
-
+	bool     ignored;
 	Tempo const * st = cb.start_tempo();
-	if (st) {
-		TempoPoint *ntp = new TempoPoint (*this, *st, position.superclocks(), pos_beats, pos_bbt);
-		core_add_tempo (ntp, replaced_ignored);
-		core_add_point (ntp);
-	}
-
 	Meter const * mt = cb.start_meter();
-	if (mt) {
-		MeterPoint *ntp = new MeterPoint (*this, *mt, position.superclocks(), pos_beats, pos_bbt);
-		core_add_meter (ntp, replaced_ignored);
-		core_add_point (ntp);
+
+	if (!st && !mt) {
+		MusicTimePoint* mtp = new MusicTimePoint (*this, position.superclocks(), pos_beats, pos_bbt, tempo_at (position), meter_at (position), _("paste start"));
+		core_add_bartime (mtp, ignored);
+		core_add_point (mtp);
+	} else {
+		if (st) {
+			TempoPoint *ntp = new TempoPoint (*this, *st, position.superclocks(), pos_beats, pos_bbt);
+			core_add_tempo (ntp, replaced_ignored);
+			core_add_point (ntp);
+		}
+
+		if (mt) {
+			MeterPoint *ntp = new MeterPoint (*this, *mt, position.superclocks(), pos_beats, pos_bbt);
+			core_add_meter (ntp, replaced_ignored);
+			core_add_point (ntp);
+		}
 	}
 
 	for (auto const & p : cb.points()) {
@@ -1030,23 +1051,28 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 		}
 	}
 
-	const timepos_t end_position = position + cb.duration();
 	pos_bbt = bbt_at (end_position);
 	pos_beats = quarters_at (end_position);
 
 	st = cb.end_tempo();
-	if (st) {
-		TempoPoint *ntp = new TempoPoint (*this, *st, end_position.superclocks(), pos_beats, pos_bbt);
-		core_add_tempo (ntp, replaced_ignored);
-		core_add_point (ntp);
-	}
 	mt = cb.end_meter();
-	if (mt) {
-		MeterPoint *ntp = new MeterPoint (*this, *mt, end_position.superclocks(), pos_beats, pos_bbt);
-		core_add_meter (ntp, replaced_ignored);
-		core_add_point (ntp);
-	}
 
+	if (!st && !mt) {
+		MusicTimePoint* mtp = new MusicTimePoint (*this,  end_position.superclocks(), pos_beats, pos_bbt, end_tempo, end_meter, _("paste end"));
+		core_add_bartime (mtp, ignored);
+		core_add_point (mtp);
+	} else {
+		if (st) {
+			TempoPoint *ntp = new TempoPoint (*this, *st, end_position.superclocks(), pos_beats, pos_bbt);
+			core_add_tempo (ntp, replaced_ignored);
+			core_add_point (ntp);
+		}
+		if (mt) {
+			MeterPoint *ntp = new MeterPoint (*this, *mt, end_position.superclocks(), pos_beats, pos_bbt);
+			core_add_meter (ntp, replaced_ignored);
+			core_add_point (ntp);
+		}
+	}
 }
 
 void
@@ -1072,6 +1098,8 @@ void
 TempoMap::shift (timepos_t const & at, BBT_Offset const & offset)
 {
 	/* for now we require BBT-based shifts to be in units of whole bars */
+
+	std::cerr << "Ripple tempo map by " << offset << std::endl;
 
 	if (std::abs (offset.bars) < 1) {
 		return;
