@@ -246,7 +246,7 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		break;
 
 	case SectionMarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New Section Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
+		ruler_items.push_back (MenuElem (_("New Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
 		break;
 
 	case CueMarkerBarItem:
@@ -345,7 +345,7 @@ Editor::store_ruler_visibility ()
 	node->set_property (X_("rangemarker"), ruler_range_action->get_active());
 	node->set_property (X_("transportmarker"), ruler_loop_punch_action->get_active());
 	node->set_property (X_("cdmarker"), ruler_cd_marker_action->get_active());
-	node->set_property (X_("section"), ruler_section_action->get_active());
+	node->set_property (X_("arrangement"), ruler_section_action->get_active());
 	node->set_property (X_("marker"), ruler_marker_action->get_active());
 	node->set_property (X_("cuemarker"), ruler_cue_marker_action->get_active());
 	node->set_property (X_("videotl"), ruler_video_action->get_active());
@@ -406,7 +406,7 @@ Editor::restore_ruler_visibility ()
 			}
 		}
 
-		if (node->get_property ("section", yn)) {
+		if (node->get_property ("arrangement", yn)) {
 			ruler_section_action->set_active (yn);
 		} else {
 			ruler_section_action->set_active (true);

@@ -55,7 +55,7 @@ RulerDialog::RulerDialog ()
 	connect_action (range_button, "range-ruler");
 	connect_action (mark_button, "marker-ruler");
 	connect_action (cdmark_button, "cd-marker-ruler");
-	connect_action (section_button, "section-ruler");
+	connect_action (section_button, "arrangement-ruler");
 	connect_action (cuemark_button, "cue-marker-ruler");
 	connect_action (video_button, "video-ruler");
 }

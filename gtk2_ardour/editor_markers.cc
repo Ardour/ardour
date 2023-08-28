@@ -108,7 +108,7 @@ Editor::add_new_location_internal (Location* location)
 	if (location->is_cd_marker()) {
 		color = X_("location cd marker");
 	} else if (location->is_section()) {
-		color = X_("location section marker");
+		color = X_("location arrangement marker");
 	} else if (location->is_mark()) {
 		color = X_("location marker");
 	} else if (location->is_auto_loop()) {
@@ -425,7 +425,7 @@ Editor::location_flags_changed (Location *location)
 	if (location->is_cd_marker()) {
 		lam->set_color ("location cd marker");
 	} else if (location->is_section()) {
-		lam->set_color ("location section marker");
+		lam->set_color ("location arrangement marker");
 	} else if (location->is_mark()) {
 		lam->set_color ("location marker");
 	} else if (location->is_auto_punch()) {
@@ -714,7 +714,11 @@ Editor::mouse_add_new_marker (timepos_t where, Location::Flags extra_flags, int3
 		/* XXX i18n needed for cue letter names */
 		markername = string_compose (_("cue %1"), cue_marker_name (cue_id));
 	} else {
-		namebase = _("mark");
+		if (flags & Location::IsSection) {
+			namebase = _("verse");
+		} else {
+			namebase = _("mark");
+		}
 		_session->locations()->next_available_name (markername, namebase);
 
 		if (!choose_new_marker_name (markername)) {

@@ -339,7 +339,7 @@ Editor::Editor ()
 	, range_mark_label (_("Range Markers"))
 	, transport_mark_label (_("Loop/Punch Ranges"))
 	, cd_mark_label (_("CD Markers"))
-	, section_mark_label (_("Sections"))
+	, section_mark_label (_("Arrangement"))
 	, cue_mark_label (_("Cue Markers"))
 	, videotl_label (_("Video Timeline"))
 	, videotl_group (0)
@@ -703,7 +703,7 @@ Editor::Editor ()
 	add_notebook_page (_("Sources"), _sources->widget ());
 	add_notebook_page (_("Regions"), _regions->widget ());
 	add_notebook_page (_("Clips"), _trigger_clip_picker);
-	add_notebook_page (_("Sections"), _sections->widget ());
+	add_notebook_page (_("Arrangement"), _sections->widget ());
 	add_notebook_page (_("Snapshots"), _snapshots->widget ());
 	add_notebook_page (_("Track & Bus Groups"), _route_groups->widget ());
 	add_notebook_page (_("Ranges & Marks"), _locations->widget ());
