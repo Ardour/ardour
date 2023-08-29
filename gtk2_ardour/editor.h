@@ -761,7 +761,7 @@ private:
 		void set_color (std::string const&);
 	};
 
-	static void reparent_location_markers (LocationMarkers*, ArdourCanvas::Item*);
+	void reparent_location_markers (LocationMarkers*, ArdourCanvas::Item*);
 
 	LocationMarkers*  find_location_markers (ARDOUR::Location*) const;
 	ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool& is_start) const;

@@ -460,35 +460,23 @@ Editor::reparent_location_markers (LocationMarkers* lam, ArdourCanvas::Item* new
 {
 	if (lam->start && lam->start->get_parent() != new_parent) {
 		lam->start->reparent (*new_parent);
+		remove_sorted_marker (lam->start);
+		_sorted_marker_lists[new_parent].push_back (lam->start);
 	}
 	if (lam->end && lam->end->get_parent() != new_parent) {
 		lam->end->reparent (*new_parent);
+		remove_sorted_marker (lam->end);
+		_sorted_marker_lists[new_parent].push_back (lam->end);
 	}
 }
 
 void Editor::ensure_marker_updated (LocationMarkers* lam, Location* location)
 {
 	if (location->is_cd_marker()) {
-		if (ruler_cd_marker_action->get_active ()) {
-			reparent_location_markers (lam, cd_marker_group);
-		} else if (location->is_mark()) {
-			reparent_location_markers (lam, marker_group);
-		} else {
-			reparent_location_markers (lam, range_marker_group);
-		}
-		return;
-	}
-
-	if (location->is_section()) {
-		if (ruler_section_action->get_active ()) {
-			reparent_location_markers (lam, section_marker_group);
-		} else {
-			reparent_location_markers (lam, marker_group);
-		}
-		return;
-	}
-
-	if (location->is_mark() || location->matches (Location::Flags(0))) {
+		reparent_location_markers (lam, cd_marker_group);
+	} else if (location->is_section()) {
+		reparent_location_markers (lam, section_marker_group);
+	} else if (location->is_mark() || location->matches (Location::Flags(0))) {
 		reparent_location_markers (lam, marker_group);
 	}
 }
