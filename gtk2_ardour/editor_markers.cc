@@ -125,14 +125,14 @@ Editor::add_new_location_internal (Location* location)
 
 	if (location->is_mark()) {
 
-		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
+		if (location->is_cd_marker()) {
 			lam->start = new ArdourMarker (*this, *cd_marker_group, color, location->name(), ArdourMarker::Mark, location->start());
 			group = cd_marker_group;
-		} else if (location->is_cue_marker() && ruler_cue_marker_action->get_active()) {
+		} else if (location->is_cue_marker()) {
 			lam->start = new ArdourMarker (*this, *cue_marker_group, color, location->name(), ArdourMarker::Cue, location->start());
 			lam->start->set_cue_index(location->cue_id());
 			group = cue_marker_group;
-		} else if (location->is_section() && ruler_section_action->get_active()) {
+		} else if (location->is_section()) {
 			lam->start = new ArdourMarker (*this, *section_marker_group, color, location->name(), ArdourMarker::Mark, location->start());
 			group = section_marker_group;
 		} else {
@@ -169,7 +169,7 @@ Editor::add_new_location_internal (Location* location)
 
 	} else {
 		// range marker
-		if (location->is_cd_marker() && ruler_cd_marker_action->get_active()) {
+		if (location->is_cd_marker()) {
 			lam->start = new ArdourMarker (*this, *cd_marker_group, color,
 						 location->name(), ArdourMarker::RangeStart, location->start());
 			lam->end   = new ArdourMarker (*this, *cd_marker_group, color,
