@@ -178,9 +178,9 @@ Editor::initialize_rulers ()
 	lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(transport_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(section_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(cue_mark_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(section_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(videotl_label, PACK_SHRINK, PACK_START));
 
 	/* 1 event handler to bind them all ... */
@@ -624,26 +624,6 @@ Editor::update_ruler_visibility ()
 		update_marker_display();
 	}
 
-	if (ruler_section_action->get_active()) {
-		old_unit_pos = section_marker_group->position().y;
-		if (tbpos != old_unit_pos) {
-			section_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		section_marker_group->show();
-		section_mark_label.show();
-
-		section_marker_bar->set_outline(false);
-
-		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
-		update_marker_display();
-	} else {
-		section_marker_group->hide();
-		section_mark_label.hide();
-		update_marker_display();
-	}
-
 	if (ruler_marker_action->get_active()) {
 		old_unit_pos = marker_group->position().y;
 		if (tbpos != old_unit_pos) {
@@ -678,6 +658,26 @@ Editor::update_ruler_visibility ()
 	} else {
 		cue_marker_group->hide();
 		cue_mark_label.hide();
+	}
+
+	if (ruler_section_action->get_active()) {
+		old_unit_pos = section_marker_group->position().y;
+		if (tbpos != old_unit_pos) {
+			section_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+		}
+		section_marker_group->show();
+		section_mark_label.show();
+
+		section_marker_bar->set_outline(false);
+
+		tbpos += timebar_height;
+		tbgpos += timebar_height;
+		visible_timebars++;
+		update_marker_display();
+	} else {
+		section_marker_group->hide();
+		section_mark_label.hide();
+		update_marker_display();
 	}
 
 	if (ruler_video_action->get_active()) {
