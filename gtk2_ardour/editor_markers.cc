@@ -96,6 +96,30 @@ Editor::add_new_location (Location *location)
 	}
 }
 
+static ArdourMarker::Type
+marker_type (Location* l, bool start = true)
+{
+	if (l->is_mark()) {
+		if (l->is_cd_marker()) {
+			return ArdourMarker::Mark;
+		} else if (l->is_cue_marker()) {
+			return ArdourMarker::Cue;
+		} else if (l->is_section()) {
+			return ArdourMarker::Section;
+		} else {
+			return ArdourMarker::Mark;
+		}
+	} else if (l->is_auto_loop()) {
+		return start ? ArdourMarker::LoopStart : ArdourMarker::LoopEnd;
+	} else if (l->is_auto_punch()) {
+		return start ? ArdourMarker::PunchIn : ArdourMarker::PunchOut;
+	} else if (l->is_session_range()) {
+		return start ? ArdourMarker::SessionStart : ArdourMarker::SessionEnd;
+	} else {
+		return start ? ArdourMarker::RangeStart : ArdourMarker::RangeEnd;
+	}
+}
+
 /** Add a new location, without a time-consuming update of all marker labels;
  *  the caller must call update_marker_labels () after calling this.
  *  @return canvas group that the location's marker was added to.
@@ -126,17 +150,17 @@ Editor::add_new_location_internal (Location* location)
 	if (location->is_mark()) {
 
 		if (location->is_cd_marker()) {
-			lam->start = new ArdourMarker (*this, *cd_marker_group, color, location->name(), ArdourMarker::Mark, location->start());
+			lam->start = new ArdourMarker (*this, *cd_marker_group, color, location->name(), marker_type (location), location->start());
 			group = cd_marker_group;
 		} else if (location->is_cue_marker()) {
-			lam->start = new ArdourMarker (*this, *cue_marker_group, color, location->name(), ArdourMarker::Cue, location->start());
+			lam->start = new ArdourMarker (*this, *cue_marker_group, color, location->name(), marker_type (location), location->start());
 			lam->start->set_cue_index(location->cue_id());
 			group = cue_marker_group;
 		} else if (location->is_section()) {
-			lam->start = new ArdourMarker (*this, *section_marker_group, color, location->name(), ArdourMarker::Section, location->start());
+			lam->start = new ArdourMarker (*this, *section_marker_group, color, location->name(), marker_type (location), location->start());
 			group = section_marker_group;
 		} else {
-			lam->start = new ArdourMarker (*this, *marker_group, color, location->name(), ArdourMarker::Mark, location->start());
+			lam->start = new ArdourMarker (*this, *marker_group, color, location->name(), marker_type (location), location->start());
 			group = marker_group;
 		}
 
@@ -146,40 +170,40 @@ Editor::add_new_location_internal (Location* location)
 
 		// transport marker
 		lam->start = new ArdourMarker (*this, *transport_marker_group, color,
-					 location->name(), ArdourMarker::LoopStart, location->start());
+					 location->name(), marker_type (location), location->start());
 		lam->end   = new ArdourMarker (*this, *transport_marker_group, color,
-					 location->name(), ArdourMarker::LoopEnd, location->end());
+					 location->name(), marker_type (location, false), location->end());
 		group = transport_marker_group;
 
 	} else if (location->is_auto_punch()) {
 
 		// transport marker
 		lam->start = new ArdourMarker (*this, *transport_marker_group, color,
-					 location->name(), ArdourMarker::PunchIn, location->start());
+					 location->name(), marker_type (location), location->start());
 		lam->end   = new ArdourMarker (*this, *transport_marker_group, color,
-					 location->name(), ArdourMarker::PunchOut, location->end());
+					 location->name(), marker_type (location, false), location->end());
 		group = transport_marker_group;
 
 	} else if (location->is_session_range()) {
 
 		// session range
-		lam->start = new ArdourMarker (*this, *marker_group, color, _("start"), ArdourMarker::SessionStart, location->start());
-		lam->end = new ArdourMarker (*this, *marker_group, color, _("end"), ArdourMarker::SessionEnd, location->end());
+		lam->start = new ArdourMarker (*this, *marker_group, color, _("start"), marker_type (location), location->start());
+		lam->end = new ArdourMarker (*this, *marker_group, color, _("end"), marker_type (location, true), location->end());
 		group = marker_group;
 
 	} else {
 		// range marker
 		if (location->is_cd_marker()) {
 			lam->start = new ArdourMarker (*this, *cd_marker_group, color,
-						 location->name(), ArdourMarker::RangeStart, location->start());
+						 location->name(), marker_type (location), location->start());
 			lam->end   = new ArdourMarker (*this, *cd_marker_group, color,
-						 location->name(), ArdourMarker::RangeEnd, location->end());
+						 location->name(), marker_type (location, false), location->end());
 			group = cd_marker_group;
 		} else {
 			lam->start = new ArdourMarker (*this, *range_marker_group, color,
-						 location->name(), ArdourMarker::RangeStart, location->start());
+						 location->name(), marker_type (location), location->start());
 			lam->end   = new ArdourMarker (*this, *range_marker_group, color,
-						 location->name(), ArdourMarker::RangeEnd, location->end());
+						 location->name(), marker_type (location, false), location->end());
 			group = range_marker_group;
 		}
 	}
@@ -425,6 +449,15 @@ Editor::location_flags_changed (Location *location)
 		return;
 	}
 
+	if (lam->start->type () != marker_type (location)) {
+		/* this removes the current location and calls
+		 * refresh_location_display () which re-adds it
+		 * using the correct type.
+		 */
+		location_gone (location);
+		return;
+	}
+
 	// moved markers to/from cd marker bar as appropriate
 	ensure_marker_updated (lam, location);
 
@@ -559,8 +592,10 @@ Editor::refresh_location_display_internal (const Locations::LocationList& locati
 		LocationMarkerMap::iterator x;
 
 		if ((x = location_markers.find (*i)) != location_markers.end()) {
-			x->second->valid = true;
-			continue;
+			if (x->second->start && x->second->start->type () == marker_type (*i)) {
+				x->second->valid = true;
+				continue;
+			}
 		}
 
 		add_new_location_internal (*i);
