@@ -476,6 +476,8 @@ void Editor::ensure_marker_updated (LocationMarkers* lam, Location* location)
 		reparent_location_markers (lam, cd_marker_group);
 	} else if (location->is_section()) {
 		reparent_location_markers (lam, section_marker_group);
+	} else if (location->is_cue_marker()) {
+		reparent_location_markers (lam, cue_marker_group);
 	} else if (location->is_mark() || location->matches (Location::Flags(0))) {
 		reparent_location_markers (lam, marker_group);
 	}
