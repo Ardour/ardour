@@ -971,52 +971,60 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 }
 
 void
-TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool ripple)
+TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool ripple, std::string suggested_name)
 {
-	std::cerr << "\n\n PASTE \n\n";
-
 	if (cb.empty()) {
-		std::cerr << "nothing to paste\n";
 		return;
 	}
 
 	dump (std::cerr);
 
-	std::cerr << "tm paste, ripple " << ripple << std::endl;
 	if (ripple) {
 		shift (position, cb.duration());
 	}
 
 	dump (std::cerr);
 
-	bool replaced_ignored;
 
+	/* We need to look these up first, before we change the map */
 	const timepos_t end_position = position + cb.duration();
-	Tempo end_tempo = tempo_at (end_position);
-	Meter end_meter = meter_at (end_position);
+	const Tempo end_tempo = tempo_at (end_position);
+	const Meter end_meter = meter_at (end_position);
 
 	/* iterate over _points since they are already in sclock order, and we
 	 * won't need to post-sort the way we would if we handled tempos,
 	 * meters, bartimes separately.
 	 */
 
-	BBT_Time pos_bbt = bbt_at (position);
-	Beats    pos_beats = quarters_at (position);
-	bool     ignored;
-	bool     replaced;
-	Tempo const * st = cb.start_tempo();
-	Meter const * mt = cb.start_meter();
+	BBT_Time        pos_bbt = bbt_at (position);
+	Beats           pos_beats = quarters_at (position);
+	bool            ignored;
+	bool            replaced;
+	MusicTimePoint* mtp;
+	superclock_t    s;
+	std::string     name;
 
-#if 0
-	MusicTimePoint* mtp = new MusicTimePoint (*this, position.superclocks(), pos_beats, pos_bbt, tempo_at (position), meter_at (position), _("paste start"));
-	core_add_bartime (mtp, replaced);
-	if (!replaced) {
-		core_add_tempo (mtp, ignored);
-		core_add_meter (mtp, ignored);
-		core_add_point (mtp);
+	/* Do not try to put a BBT marker at absolute zero or anywhere on a bar */
+
+	if (!position.is_zero() && (pos_bbt.ticks != 0 || pos_bbt.beats != 1)) {
+
+		if (suggested_name.empty()) {
+			name = _("paste>");
+		} else {
+			name = string_compose (X_("%1>"), suggested_name);
+		}
+
+		mtp = new MusicTimePoint (*this, position.superclocks(), pos_beats, pos_bbt, tempo_at (position), meter_at (position), name);
+
+		core_add_bartime (mtp, replaced);
+
+		if (!replaced) {
+			core_add_tempo (mtp, ignored);
+			core_add_meter (mtp, ignored);
+			core_add_point (mtp);
+		}
 	}
-#endif
-	superclock_t s;
+
 
 	for (auto const & p : cb.points()) {
 		TempoPoint const * tp;
@@ -1067,15 +1075,22 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 	pos_bbt = bbt_at (end_position);
 	pos_beats = quarters_at (end_position);
 
-#if 0
-	mtp = new MusicTimePoint (*this,  end_position.superclocks(), pos_beats, pos_bbt, end_tempo, end_meter, _("paste end"));
-	core_add_bartime (mtp, replaced);
-	if (!replaced) {
-		core_add_tempo (mtp, ignored);
-		core_add_meter (mtp, ignored);
-		core_add_point (mtp);
+	if (pos_bbt.ticks != 0 || pos_bbt.beats != 1) {
+
+		if (suggested_name.empty()) {
+			name = _("<paste");
+		} else {
+			name = string_compose (X_("<%1"), suggested_name);
+		}
+
+		mtp = new MusicTimePoint (*this,  end_position.superclocks(), pos_beats, pos_bbt, end_tempo, end_meter, name);
+		core_add_bartime (mtp, replaced);
+		if (!replaced) {
+			core_add_tempo (mtp, ignored);
+			core_add_meter (mtp, ignored);
+			core_add_point (mtp);
+		}
 	}
-#endif
 
 	reset_starting_at (s);
 	dump (std::cerr);

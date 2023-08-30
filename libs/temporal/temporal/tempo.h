@@ -897,7 +897,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API TempoMapCutBuffer* cut (timepos_t const & start, timepos_t const & end, bool ripple);
 	LIBTEMPORAL_API TempoMapCutBuffer* copy (timepos_t const & start, timepos_t const & end);
-	LIBTEMPORAL_API void paste (TempoMapCutBuffer const &, timepos_t const & position, bool ripple);
+	LIBTEMPORAL_API void paste (TempoMapCutBuffer const &, timepos_t const & position, bool ripple, std::string = std::string());
 
 	LIBTEMPORAL_API void shift (timepos_t const & at, BBT_Offset const & by);
 	LIBTEMPORAL_API void shift (timepos_t const & at, timecnt_t const & by);
