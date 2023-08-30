@@ -184,9 +184,11 @@ Editor::add_new_location_internal (Location* location)
 		}
 	}
 
+#if 0
 	if (location->position_time_domain() == Temporal::BeatTime) {
 		lam->set_name (string_compose ("%1%2", u8"\u266B", location->name ())); // BEAMED EIGHTH NOTES
 	}
+#endif
 
 	if (location->is_hidden ()) {
 		lam->hide();
