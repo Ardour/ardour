@@ -188,7 +188,7 @@ Editor::add_new_location_internal (Location* location)
 
 		// session range
 		lam->start = new ArdourMarker (*this, *marker_group, color, _("start"), marker_type (location), location->start());
-		lam->end = new ArdourMarker (*this, *marker_group, color, _("end"), marker_type (location, true), location->end());
+		lam->end = new ArdourMarker (*this, *marker_group, color, _("end"), marker_type (location, false), location->end());
 		group = marker_group;
 
 	} else {
