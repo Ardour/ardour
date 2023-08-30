@@ -26,6 +26,7 @@
     <Color name="neutral:foregroundest" value="ffffffff"/>  <!--grid line major-->
     <Color name="widget:bg" value="4F4D4Dff"/>    <!--generic button-->
     <Color name="widget:blue" value="526d94ff"/>  <!--processor fader: fill-->
+    <Color name="widget:blue lighter" value="628db4ff"/>  <!--processor fader: fill-->
     <Color name="widget:blue darker" value="20242aff"/>  <!--gtk_audio_bus-->
     <Color name="widget:gray" value="595755ff"/>  <!--gtk_processor fader-->
     <Color name="widget:green" value="617552ff"/>  <!--gtk processor postfader,  gtk_midi_track-->
@@ -54,7 +55,7 @@
     <ColorAlias name="arrange base" alias="theme:bg"/>
     <ColorAlias name="arrangement marker bar" alias="neutral:background2"/>
     <ColorAlias name="arrangement rect" alias="widget:blue"/>
-    <ColorAlias name="arrangement rect alt" alias="widget:blue darker"/>
+    <ColorAlias name="arrangement rect alt" alias="widget:blue lighter"/>
     <ColorAlias name="audio automation track fill" alias="theme:bg"/>
     <ColorAlias name="audio bus base" alias="widget:blue darker"/>
     <ColorAlias name="audio master bus base" alias="neutral:backgroundest"/>
