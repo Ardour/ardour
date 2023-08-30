@@ -62,6 +62,7 @@ public:
 		BBTPosition,
 		SessionStart, ///< session start
 		SessionEnd,   ///< session end
+		Section,
 		RangeStart,
 		RangeEnd,
 		LoopStart,

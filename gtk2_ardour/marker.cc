@@ -235,6 +235,16 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 		_label_offset = 8.0 * scale;
 		break;
 
+	case Section:
+		points = new ArdourCanvas::Points (); //unused
+		points->push_back (ArdourCanvas::Duple (    0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (M6 + .5, MH * .5));
+		points->push_back (ArdourCanvas::Duple (    0.0, MH));
+		points->push_back (ArdourCanvas::Duple (    0.0, 0.0));
+
+		_shift = 0 * scale;
+		_label_offset = 4.0 * scale;
+		break;
 
 	case PunchOut: /* fallthrough */
 	case LoopEnd: /* fallthrough */
@@ -331,6 +341,13 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 			_pcue->hide();
 			_pmark->show();
 			break;
+		case Section:
+			_pmark->hide();
+			_pcue->hide();
+			if (_name_flag) {
+				_name_flag->show();
+			}
+			break;
 		case Cue:
 			_pcue->set_outline(false);
 			_pcue->set_fill(true);
@@ -365,7 +382,11 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 	_name_item->set_font_description (name_font);
 	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
 
-	_name_item->set_position (ArdourCanvas::Duple (_label_offset, floor (.5 * (name_height - name_descent - .5))));
+	if (_type==Section) {
+		_name_item->set_position (ArdourCanvas::Duple (_label_offset, 0.5 * marker_height - ceil (.5 * (name_height))));
+	} else {
+		_name_item->set_position (ArdourCanvas::Duple (_label_offset, floor (.5 * (name_height - name_descent - .5))));
+	}
 
 	apply_color ();
 
@@ -551,6 +572,11 @@ ArdourMarker::setup_name_display ()
 	pixel_size (_name, name_font, name_width, name_height);
 	name_width = min ((double) name_width + padding, limit);
 
+	if (_name_flag) {
+		_name_flag->set_y0 (0);
+		_name_flag->set_y1 (marker_height - padding);
+	}
+
 	if (name_width == 0) {
 		_name_item->hide ();
 	} else {
@@ -605,6 +631,11 @@ ArdourMarker::setup_name_display ()
 					_name_flag->set_x0 (M3);
 					_name_flag->set_x1 (_name_item->position().x + name_width + padding + 1*scale);
 					break;
+				case Section:
+					_name_flag->set_x0 (0);
+					_name_flag->set_x1 (_name_item->position().x + name_width + padding);
+					_name_flag->set_y1 (marker_height);  //full height
+					break;
 				default:
 					_name_flag->set_x0 (0);
 					_name_flag->set_x1 (_name_item->position().x + name_width + padding);
@@ -612,11 +643,6 @@ ArdourMarker::setup_name_display ()
 				}
 			}
 		}
-	}
-
-	if (_name_flag) {
-		_name_flag->set_y0 (0);
-		_name_flag->set_y1 (marker_height - padding);
 	}
 }
 

@@ -133,7 +133,7 @@ Editor::add_new_location_internal (Location* location)
 			lam->start->set_cue_index(location->cue_id());
 			group = cue_marker_group;
 		} else if (location->is_section()) {
-			lam->start = new ArdourMarker (*this, *section_marker_group, color, location->name(), ArdourMarker::Mark, location->start());
+			lam->start = new ArdourMarker (*this, *section_marker_group, color, location->name(), ArdourMarker::Section, location->start());
 			group = section_marker_group;
 		} else {
 			lam->start = new ArdourMarker (*this, *marker_group, color, location->name(), ArdourMarker::Mark, location->start());

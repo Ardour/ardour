@@ -4520,6 +4520,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			} else {
 				switch (_marker->type ()) {
 					case ArdourMarker::SessionStart:
+					case ArdourMarker::Section:
 					case ArdourMarker::RangeStart:
 					case ArdourMarker::LoopStart:
 					case ArdourMarker::PunchIn:
