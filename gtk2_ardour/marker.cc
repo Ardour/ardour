@@ -888,7 +888,9 @@ BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Item& parent, std::str
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_bbt_marker_event), group, this));
 
 	tempo_marker = editor.find_marker_for_tempo (p);
+	assert (tempo_marker);
 	meter_marker = editor.find_marker_for_meter (p);
+	assert (meter_marker);
 }
 
 BBTMarker::~BBTMarker ()
