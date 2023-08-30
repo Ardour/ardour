@@ -341,13 +341,6 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 			_pcue->hide();
 			_pmark->show();
 			break;
-		case Section:
-			_pmark->hide();
-			_pcue->hide();
-			if (_name_flag) {
-				_name_flag->show();
-			}
-			break;
 		case Cue:
 			_pcue->set_outline(false);
 			_pcue->set_fill(true);
