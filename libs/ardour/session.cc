@@ -7304,7 +7304,6 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 		XMLNode &after = _locations->get_state();
 		add_command (new MementoCommand<Locations> (*_locations, &before, &after));
 	}
-#if 0
 
 	TempoMap::WritableSharedPtr wmap = TempoMap::write_copy ();
 	TempoMapCutBuffer* tmcb;
@@ -7314,13 +7313,13 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 	case CopyPasteSection:
 		if ((tmcb = wmap->copy (start, end))) {
 			tmcb->dump (std::cerr);
-			wmap->paste (*tmcb, to, true);
+			wmap->paste (*tmcb, to, false);
 		}
 		break;
 	case CutPasteSection:
 		if ((tmcb = wmap->cut (start, end, true))) {
 			tmcb->dump (std::cerr);
-			wmap->paste (*tmcb, to, false);
+			wmap->paste (*tmcb, to, true);
 		}
 		break;
 	default:
@@ -7328,18 +7327,17 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 		break;
 	}
 
-	if (tmcb) {
+	if (tmcb && !tmcb->empty()) {
 		TempoMap::update (wmap);
 		delete tmcb;
-		delete &tm_before;
-
 		XMLNode& tm_after (wmap->get_state());
-		std::cerr << "Saving tmap state as part of rev cmd\n";
-		add_command (new MementoCommand<TempoMap> (*wmap.get(), &tm_before, &tm_after));
+		add_command (new TempoCommand (_("cut tempo map"), &tm_before, &tm_after));
+	} else {
+		std::cerr << "no tempo map cut buffer\n";
+		delete &tm_before;
 	}
-#endif
 
-	if (!abort_empty_reversible_command ()) {
+	if (abort_empty_reversible_command ()) {
 		return;
 	}
 
