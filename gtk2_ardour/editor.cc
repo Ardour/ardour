@@ -1337,6 +1337,8 @@ Editor::set_session (Session *t)
 	SessionHandlePtr::set_session (t);
 	_trigger_clip_picker.set_session (_session);
 
+	section_marker_bar->clear (true);
+
 	if (!_session) {
 		return;
 	}
