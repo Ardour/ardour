@@ -626,13 +626,17 @@ Editor::update_section_rects ()
 			double const left  = sample_to_pixel (start.samples ());
 			double const right = sample_to_pixel (end.samples ());
 
-			ArdourCanvas::Rectangle* rect = new ArdourCanvas::Rectangle (section_marker_bar, ArdourCanvas::Rect (left, 2, right, timebar_height - 3));
+			Editor::LocationMarkers* markers = find_location_markers (l);
+
+			ArdourCanvas::Rectangle* rect = new ArdourCanvas::Rectangle (section_marker_bar, ArdourCanvas::Rect (left, 1, right, timebar_height));
 			rect->set_fill (true);
 			rect->set_outline_what(ArdourCanvas::Rectangle::What(0));
 			rect->raise_to_top ();
 			if (bright) {
+				markers->set_color("arrangement rect");
 				rect->set_fill_color (UIConfiguration::instance().color ("arrangement rect"));
 			} else {
+				markers->set_color("arrangement rect alt");
 				rect->set_fill_color (UIConfiguration::instance().color ("arrangement rect alt"));
 			}
 			bright = !bright;
