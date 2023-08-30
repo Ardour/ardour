@@ -44,7 +44,16 @@ EditorSections::EditorSections ()
 {
 	_model = ListStore::create (_columns);
 	_view.set_model (_model);
-	_view.append_column (_("Name"), _columns.name);
+
+	Gtk::TreeViewColumn* c = manage (new Gtk::TreeViewColumn (_("Name"), _columns.name));
+	_view.append_column (*c);
+	c->set_resizable (true);
+	c->set_data ("mouse-edits-require-mod1", (gpointer)0x1);
+
+	CellRendererText* section_name_cell = dynamic_cast<CellRendererText*> (c->get_first_cell ());
+	section_name_cell->property_editable () = true;
+	section_name_cell->signal_edited ().connect (sigc::mem_fun (*this, &EditorSections::name_edited));
+
 	_view.append_column (_("Start"), _columns.s_start);
 	_view.append_column (_("End"), _columns.s_end);
 	_view.set_headers_visible (true);
@@ -412,6 +421,16 @@ EditorSections::button_press (GdkEventButton* ev)
 		/* return false to select item under the mouse */
 	}
 	return false;
+}
+
+void
+EditorSections::name_edited (const std::string& path, const std::string& new_text)
+{
+	TreeIter i;
+	if ((i = _model->get_iter (path))) {
+		Location* l = (*i)[_columns.location];
+		l->set_name (new_text);
+	}
 }
 
 bool

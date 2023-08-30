@@ -60,6 +60,8 @@ private:
 	void drag_data_received (Glib::RefPtr<Gdk::DragContext> const&, int, int, Gtk::SelectionData const&, guint, guint);
 	void drag_leave (Glib::RefPtr<Gdk::DragContext> const&, guint);
 
+	void name_edited (const std::string&, const std::string&);
+
 	struct Section {
 		Section ()
 		    : location (NULL)
