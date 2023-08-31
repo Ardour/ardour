@@ -104,7 +104,7 @@ void
 PBD::debug_only_print (const char* prefix, string str)
 {
 	if ((PBD::debug_bits & DEBUG::Threads).any()) {
-		printf ("0x%x (%s) ", (int) DEBUG_THREAD_SELF, pthread_name());
+		printf ("0x%lx (%s) ", (intptr_t) DEBUG_THREAD_SELF, pthread_name());
 	}
 
 	if ((PBD::debug_bits & DEBUG::DebugTimestamps).any()) {
