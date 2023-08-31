@@ -86,9 +86,9 @@ TempoCurve::TempoCurve (PublicEditor& ed, ArdourCanvas::Item& parent, guint32 rg
 	_start_text->set_color (RGBA_TO_UINT (255,255,255,255));
 	_end_text->set_color (RGBA_TO_UINT (255,255,255,255));
 	char buf[128];
-	snprintf (buf, sizeof (buf), "%.3f/%d", _tempo->note_types_per_minute(), _tempo->note_type());
+	snprintf (buf, sizeof (buf), "%.1f/%d", _tempo->note_types_per_minute(), _tempo->note_type());
 	_start_text->set (buf);
-	snprintf (buf, sizeof (buf), "%.3f", _tempo->end_note_types_per_minute());
+	snprintf (buf, sizeof (buf), "%.1f", _tempo->end_note_types_per_minute());
 	_end_text->set (buf);
 
 	set_color_rgba (rgba);
@@ -171,9 +171,9 @@ TempoCurve::set_duration (samplecnt_t duration)
 
 	char buf[129];
 
-	snprintf (buf, sizeof (buf), "%.3f/%d", _tempo->note_types_per_minute(), _tempo->note_type());
+	snprintf (buf, sizeof (buf), "%.1f/%d", _tempo->note_types_per_minute(), _tempo->note_type());
 	_start_text->set (buf);
-	snprintf (buf, sizeof (buf), "%.3f", _tempo->end_note_types_per_minute());
+	snprintf (buf, sizeof (buf), "%.1f", _tempo->end_note_types_per_minute());
 	_end_text->set (buf);
 
 	const double ui_scale  = UIConfiguration::instance ().get_ui_scale ();
