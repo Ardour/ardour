@@ -86,9 +86,9 @@ TempoCurve::TempoCurve (PublicEditor& ed, ArdourCanvas::Item& parent, guint32 rg
 	_start_text->set_color (RGBA_TO_UINT (255,255,255,255));
 	_end_text->set_color (RGBA_TO_UINT (255,255,255,255));
 	char buf[128];
-	snprintf (buf, sizeof (buf), "%.1f/%d", _tempo->note_types_per_minute(), _tempo->note_type());
+	format_tempo (_tempo->note_types_per_minute(), _tempo->note_type(), buf, sizeof(buf));
 	_start_text->set (buf);
-	snprintf (buf, sizeof (buf), "%.1f", _tempo->end_note_types_per_minute());
+	format_tempo (_tempo->end_note_types_per_minute(), _tempo->note_type(), buf, sizeof(buf));
 	_end_text->set (buf);
 
 	set_color_rgba (rgba);
@@ -116,6 +116,24 @@ TempoCurve::~TempoCurve ()
 
 	/* destroying the parent group destroys its contents, namely any polygons etc. that we added */
 	delete group;
+}
+
+void
+TempoCurve::format_tempo (double ntpm, int nt, char* buf, size_t bufsize)
+{
+	if (UIConfiguration::instance().get_allow_non_quarter_pulse()) {
+		if (fmod (ntpm, 1.0)  < 0.1) {
+			snprintf (buf, bufsize, "%d/%d", (int) ntpm, nt);
+		} else {
+			snprintf (buf, bufsize, "%.1f/%d", ntpm, nt);
+		}
+	} else {
+		if (fmod (ntpm, 1.0) < 0.1) {
+			snprintf (buf, bufsize, "%d", (int)  ntpm);
+		} else {
+			snprintf (buf, bufsize, "%.1f", ntpm);
+		}
+	}
 }
 
 ArdourCanvas::Item&
@@ -170,15 +188,12 @@ TempoCurve::set_duration (samplecnt_t duration)
 	_curve->set (points);
 
 	char buf[129];
-
-	snprintf (buf, sizeof (buf), "%.1f/%d", _tempo->note_types_per_minute(), _tempo->note_type());
-	_start_text->set (buf);
-	snprintf (buf, sizeof (buf), "%.1f", _tempo->end_note_types_per_minute());
+	format_tempo (_tempo->end_note_types_per_minute(), _tempo->note_type(), buf, sizeof(buf));
 	_end_text->set (buf);
 
 	const double ui_scale  = UIConfiguration::instance ().get_ui_scale ();
 
-	_start_text->set_position (ArdourCanvas::Duple (_marker_width + (10 * ui_scale), (.5 * ui_scale)));
+	_start_text->set_position (ArdourCanvas::Duple ((10 * ui_scale), (.5 * ui_scale)));
 	_end_text->set_position (ArdourCanvas::Duple (duration_pixels - _end_text->text_width() - _marker_width - (10. * ui_scale), (.5 * ui_scale)));
 
 	if (_end_text->text_width() + _start_text->text_width() + (20.0 * ui_scale) > duration_pixels) {

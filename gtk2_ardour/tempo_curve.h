@@ -61,6 +61,8 @@ public:
 	void set_max_tempo (const double& max) { _max_tempo = max; }
 	void set_min_tempo (const double& min) { _min_tempo = min; }
 
+	static void format_tempo (double ntpm, int nt, char*, size_t);
+
 protected:
 	PublicEditor& editor;
 

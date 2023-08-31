@@ -794,7 +794,7 @@ TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Item& parent, Ardo
 	_mapping_text->set_ignore_events (true);
 
 	char buf[64];
-	snprintf (buf, sizeof (buf), "%.1f", _tempo->note_types_per_minute ());
+	TempoCurve::format_tempo (_tempo->note_types_per_minute(), _tempo->note_type(), buf, sizeof (buf));
 	_mapping_text->set (buf);
 }
 
@@ -825,7 +825,7 @@ TempoMarker::update ()
 	_mapping_text->set_position (ArdourCanvas::Duple (std::max (3., unit_position), _mapping_text->position().y));
 
 	char buf[64];
-	snprintf (buf, sizeof (buf), "%.1f", _tempo->note_types_per_minute ());
+	TempoCurve::format_tempo (_tempo->note_types_per_minute(), _tempo->note_type(), buf, sizeof (buf));
 	_mapping_text->set (buf);
 }
 
