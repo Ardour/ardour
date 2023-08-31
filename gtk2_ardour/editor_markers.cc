@@ -1139,7 +1139,7 @@ Editor::build_marker_menu (Location* loc)
 	items.push_back (SeparatorElem());
 
 	if (!loc->is_range () && !loc->is_xrun ()) {
-		items.push_back (CheckMenuElem (_("Section Boundary")));
+		items.push_back (CheckMenuElem (_("Arrangement Boundary")));
 		Gtk::CheckMenuItem* item = static_cast<Gtk::CheckMenuItem*> (&items.back());
 		if (loc->is_section ()) {
 			item->set_active ();
