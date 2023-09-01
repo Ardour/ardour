@@ -56,6 +56,7 @@ EditorSections::EditorSections ()
 
 	_view.append_column (_("Start"), _columns.s_start);
 	_view.append_column (_("End"), _columns.s_end);
+	_view.set_enable_search(false);
 	_view.set_headers_visible (true);
 	_view.get_selection ()->set_mode (Gtk::SELECTION_SINGLE);
 
