@@ -954,7 +954,7 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 	dump (std::cerr);
 
 	if (!copy && ripple) {
-		shift (end, start.distance (end));
+		shift (start, -start.distance (end));
 		dump (std::cerr);
 	}
 
