@@ -376,7 +376,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
 
 	if (_type==Section) {
-		_name_item->set_position (ArdourCanvas::Duple (_label_offset, 0.5 * marker_height - ceil (.5 * (name_height))));
+		_name_item->set_position (ArdourCanvas::Duple (_label_offset, floor (.5 * (name_height - name_height))));
 	} else {
 		_name_item->set_position (ArdourCanvas::Duple (_label_offset, floor (.5 * (name_height - name_descent - .5))));
 	}
