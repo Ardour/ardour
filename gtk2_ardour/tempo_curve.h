@@ -58,8 +58,7 @@ public:
 	Temporal::TempoPoint const & tempo () const { return *_tempo; }
 	void reset_point (Temporal::TempoPoint const &);
 
-	void set_max_tempo (const double& max) { _max_tempo = max; }
-	void set_min_tempo (const double& min) { _min_tempo = min; }
+	void update_range (double min, double max) { _max_tempo = max; _min_tempo = min; }
 
 	static void format_tempo (double ntpm, int nt, char*, size_t);
 

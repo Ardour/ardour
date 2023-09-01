@@ -60,12 +60,12 @@ TempoCurve::TempoCurve (PublicEditor& ed, ArdourCanvas::Item& parent, guint32 rg
 	, _duration (UINT32_MAX)
 	, _marker_width (marker_width)
 	, _color (rgba)
-	, _min_tempo (temp.note_types_per_minute())
-	, _max_tempo (temp.note_types_per_minute())
 	, _tempo (&temp)
 	, _start_text (0)
 	, _end_text (0)
 {
+	ed.set_tempo_curve_range (_max_tempo, _min_tempo);
+
 	/* XXX x arg for Duple should probably be marker width, passed in from owner */
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (marker_width + 1, 1));
 #ifdef CANVAS_DEBUG

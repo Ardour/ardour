@@ -159,13 +159,8 @@ Editor::make_meter_marker (Temporal::MeterPoint const * ms, Marks::iterator befo
 }
 
 void
-Editor::make_tempo_marker (Temporal::TempoPoint const * ts, double& min_tempo, double& max_tempo, TempoPoint const *& prev_ts, uint32_t tc_color, samplecnt_t sr, Marks::iterator before)
+Editor::make_tempo_marker (Temporal::TempoPoint const * ts, TempoPoint const *& prev_ts, uint32_t tc_color, samplecnt_t sr, Marks::iterator before)
 {
-	max_tempo = max (max_tempo, ts->note_types_per_minute());
-	max_tempo = max (max_tempo, ts->end_note_types_per_minute());
-	min_tempo = min (min_tempo, ts->note_types_per_minute());
-	min_tempo = min (min_tempo, ts->end_note_types_per_minute());
-
 	const std::string tname (X_(""));
 	char const * color_name = X_("tempo marker");
 
@@ -205,8 +200,6 @@ Editor::reset_tempo_marks ()
 
 	Tempos const & tempi (TempoMap::use()->tempos());
 	TempoPoint const * prev_ts = 0;
-	double max_tempo = 0.0;
-	double min_tempo = DBL_MAX;
 
 	for (auto & t : tempo_marks) {
 		delete t;
@@ -215,11 +208,15 @@ Editor::reset_tempo_marks ()
 	tempo_marks.clear ();
 
 	for (auto const & t : tempi) {
-		make_tempo_marker (&t, min_tempo, max_tempo, prev_ts, tc_color, sr, tempo_marks.end());
+		make_tempo_marker (&t, prev_ts, tc_color, sr, tempo_marks.end());
 		prev_ts = &t;
 	}
 
-	update_tempo_curves (min_tempo, max_tempo, sr);
+	double max_tempo;
+	double min_tempo;
+
+	set_tempo_curve_range (max_tempo, min_tempo);
+	update_tempo_curves (min_tempo, max_tempo, sr);	
 }
 
 void
@@ -266,14 +263,6 @@ Editor::reset_bbt_marks ()
 void
 Editor::update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr)
 {
-	const double min_tempo_range = 5.0;
-	const double tempo_delta = fabs (max_tempo - min_tempo);
-
-	if (tempo_delta < min_tempo_range) {
-		max_tempo += min_tempo_range - tempo_delta;
-		min_tempo += tempo_delta - min_tempo_range;
-	}
-
 	for (Marks::iterator m = tempo_marks.begin(); m != tempo_marks.end(); ++m) {
 
 		TempoMarker* tm = static_cast<TempoMarker*>(*m);
@@ -282,8 +271,7 @@ Editor::update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr)
 
 		TempoCurve& curve (tm->curve());
 
-		curve.set_max_tempo (max_tempo);
-		curve.set_min_tempo (min_tempo);
+		curve.update_range (min_tempo, max_tempo);
 
 		if (tmp != tempo_marks.end()) {
 			TempoMarker* nxt = static_cast<TempoMarker*>(*tmp);
@@ -883,6 +871,26 @@ Editor::_commit_tempo_map_edit (TempoMap::WritableSharedPtr& new_map, bool with_
 }
 
 void
+Editor::set_tempo_curve_range (double& max_tempo, double& min_tempo) const
+{
+	TempoMap::SharedPtr map (TempoMap::use());
+
+	max_tempo = map->max_notes_per_minute();
+	min_tempo = map->min_notes_per_minute();
+
+	max_tempo = std::max (max_tempo, 200.);
+	min_tempo = std::min (min_tempo, 40.);
+
+	const double min_tempo_range = 5.0;
+	const double tempo_delta = fabs (max_tempo - min_tempo);
+
+	if (tempo_delta < min_tempo_range) {
+		max_tempo += min_tempo_range - tempo_delta;
+		min_tempo += tempo_delta - min_tempo_range;
+	}
+}
+
+void
 Editor::mid_tempo_change (MidTempoChanges what_changed)
 {
 	// std::cerr << "============== MID TEMPO\n";
@@ -890,20 +898,9 @@ Editor::mid_tempo_change (MidTempoChanges what_changed)
 	// map->dump (std::cerr);
 
 	if ((what_changed & MidTempoChanges(BBTChanged|TempoChanged|MappingChanged))) {
-		double min_tempo = DBL_MAX;
-		double max_tempo = 0.0;
-
-		for (auto & t : tempo_marks) {
-			t->update ();
-
-			TempoMarker* tm (dynamic_cast<TempoMarker*> (t));
-
-			max_tempo = max (max_tempo, tm->tempo().note_types_per_minute());
-			max_tempo = max (max_tempo, tm->tempo().end_note_types_per_minute());
-			min_tempo = min (min_tempo, tm->tempo().note_types_per_minute());
-			min_tempo = min (min_tempo, tm->tempo().end_note_types_per_minute());
-
-		}
+		double max_tempo;
+		double min_tempo;
+		set_tempo_curve_range (max_tempo, min_tempo);
 		update_tempo_curves (min_tempo, max_tempo, _session->sample_rate());
 	}
 

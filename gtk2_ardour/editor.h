@@ -1385,6 +1385,7 @@ private:
 	void reset_region_gain ();
 	ARDOUR::Quantize get_quantize_op (bool force_dialog, bool& did_show_dialog);
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
+	void set_tempo_curve_range (double& max, double& min) const;
 	void quantize_region ();
 	void quantize_regions (const RegionSelection& rs);
 	void legatize_region (bool shrink_only);
@@ -1924,7 +1925,7 @@ private:
 
 	void make_bbt_marker (Temporal::MusicTimePoint const *, Marks::iterator before);
 	void make_meter_marker (Temporal::MeterPoint const *, Marks::iterator before);
-	void make_tempo_marker (Temporal::TempoPoint const * ts, double& min_tempo, double& max_tempo, Temporal::TempoPoint const *& prev_ts, uint32_t tc_color, samplecnt_t sr3, Marks::iterator before);
+	void make_tempo_marker (Temporal::TempoPoint const * ts, Temporal::TempoPoint const *& prev_ts, uint32_t tc_color, samplecnt_t sr3, Marks::iterator before);
 	void update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr);
 
 	void tempo_map_changed ();
