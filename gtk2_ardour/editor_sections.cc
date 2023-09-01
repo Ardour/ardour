@@ -359,6 +359,21 @@ EditorSections::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& contex
 }
 
 bool
+EditorSections::rename_selected_section ()
+{
+	if (_view.get_selection ()->count_selected_rows () != 1) {
+		return false;
+	}
+
+	TreeView::Selection::ListHandle_Path rows = _view.get_selection ()->get_selected_rows ();
+
+	_view.set_cursor (*rows.begin (), *_view.get_column (0), true);
+
+	return true;
+}
+
+
+bool
 EditorSections::delete_selected_section ()
 {
 	if (_view.get_selection ()->count_selected_rows () != 1) {
@@ -401,6 +416,8 @@ EditorSections::show_context_menu (int button, int time)
 	using namespace Gtk::Menu_Helpers;
 	Gtk::Menu* menu  = ARDOUR_UI_UTILS::shared_popup_menu ();
 	MenuList&  items = menu->items ();
+	items.push_back (MenuElem (_("Rename the selected Section"), hide_return (sigc::mem_fun (*this, &EditorSections::rename_selected_section))));
+	items.push_back (SeparatorElem ());
 	items.push_back (MenuElem (_("Remove the selected Section"), hide_return (sigc::mem_fun (*this, &EditorSections::delete_selected_section))));
 	menu->popup (button, time);
 }

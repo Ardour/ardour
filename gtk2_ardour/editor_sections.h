@@ -42,6 +42,7 @@ public:
 private:
 	void redisplay ();
 	bool delete_selected_section ();
+	bool rename_selected_section ();
 
 	void clear_selection ();
 	void selection_changed ();
