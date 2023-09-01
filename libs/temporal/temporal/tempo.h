@@ -948,6 +948,9 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API	TempoPoint const& tempo_at (Beats const & b) const { return _tempo_at (b, Point::beat_comparator()); }
 	LIBTEMPORAL_API TempoPoint const& tempo_at (BBT_Argument const & bbt) const { return _tempo_at (bbt, Point::bbt_comparator()); }
 
+	LIBTEMPORAL_API double max_notes_per_minute() const;
+	LIBTEMPORAL_API double min_notes_per_minute() const;
+
 	/* convenience function that hides some complexities behind fetching
 	 * the bpm at position
 	 */

@@ -4756,6 +4756,38 @@ TempoMap::map_assert (bool expr, char const * exprstr, char const * file, int li
 	}
 }
 
+double
+TempoMap::max_notes_per_minute() const
+{
+	double npm = 0;
+	for (auto const & t : _tempos) {
+		if (t.note_types_per_minute() > npm) {
+			npm = t.note_types_per_minute();
+		}
+		if (t.end_note_types_per_minute() > npm) {
+			npm = t.end_note_types_per_minute();
+		}
+	}
+
+	return npm;
+}
+
+double
+TempoMap::min_notes_per_minute() const
+{
+	double npm = std::numeric_limits<double>::max();
+
+	for (auto const & t : _tempos) {
+		if (t.note_types_per_minute() < npm) {
+			npm = t.note_types_per_minute();
+		}
+		if (t.end_note_types_per_minute() < npm) {
+			npm = t.end_note_types_per_minute();
+		}
+	}
+
+	return npm;
+}
 
 #if 0
 void
