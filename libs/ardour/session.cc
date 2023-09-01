@@ -7313,7 +7313,7 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 	case CopyPasteSection:
 		if ((tmcb = wmap->copy (start, end))) {
 			tmcb->dump (std::cerr);
-			wmap->paste (*tmcb, to, false);
+			wmap->paste (*tmcb, to, true);
 		}
 		break;
 	case CutPasteSection:
