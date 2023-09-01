@@ -1099,20 +1099,40 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 void
 TempoMap::shift (timepos_t const & at, timecnt_t const & by)
 {
-	superclock_t distance = by.superclocks ();
-	superclock_t at_superclocks = by.superclocks ();
-	Points::iterator p = _points.begin();
+	timecnt_t abs_by (by.abs());
+	superclock_t distance = abs_by.superclocks ();
+	superclock_t at_superclocks = abs_by.superclocks ();
 
-	while (p->sclock() < at_superclocks) {
-		++p;
-	}
-
-	if (p == _points.end()) {
+	if (distance == 0) {
 		return;
 	}
 
-	p->set (at_superclocks + distance, p->beats(), p->bbt());
-	reset_starting_at (at_superclocks);
+	std::cerr << "tm ripple @ " << at.str() << " by " << by.str() << std::endl;
+
+	for (auto & p : _points) {
+
+		if (p.sclock() >= at_superclocks) {
+
+			if (distance >= 0 || p.sclock() > distance) {
+
+				if (dynamic_cast<MusicTimePoint*> (&p)) {
+					continue;
+				}
+
+				superclock_t s = p.sclock() + distance;
+				BBT_Time bb = bbt_at (s);
+				Beats b = quarters_at_superclock (s);
+				std::cerr << "Move " << p << std::endl;
+				p.set (s, b, bb);
+				std::cerr << "\tto " << p << std::endl;
+			}
+		}
+	}
+
+	std::cerr << "post-ripple, before reset\n";
+	dump (std::cerr);
+	reset_starting_at (at_superclocks + distance);
+	dump (std::cerr);
 }
 
 void
