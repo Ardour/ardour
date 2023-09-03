@@ -390,7 +390,7 @@
     <ColorAlias name="selection clock: cursor" alias="alert:ruddy"/>
     <ColorAlias name="selection clock: edited text" alias="alert:ruddy"/>
     <ColorAlias name="selection clock: text" alias="theme:contrasting clock"/>
-    <ColorAlias name="selection rect" alias="neutral:foreground"/>
+    <ColorAlias name="selection rect" alias="alert:red"/>
     <ColorAlias name="send alert button: fill" alias="theme:contrasting selection"/>
     <ColorAlias name="send alert button: fill active" alias="alert:cyan"/>
     <ColorAlias name="send alert button: led active" alias="alert:red"/>
@@ -511,7 +511,7 @@
     <Modifier name="recording rect" modifier="= alpha:0.25"/>
     <Modifier name="region alpha" modifier="= alpha:0.75"/>
     <Modifier name="selected midi note" modifier="= alpha:0.7529"/>
-    <Modifier name="selection rect" modifier="= alpha:0.4666"/>
+    <Modifier name="selection rect" modifier="= alpha:0.2"/>
     <Modifier name="silence" modifier="= alpha:0.4784"/>
     <Modifier name="stereo panner inverted" modifier="= alpha:0.7882"/>
     <Modifier name="stereo panner inverted bg" modifier="= alpha:0.7529"/>
