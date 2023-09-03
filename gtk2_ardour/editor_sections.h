@@ -19,6 +19,8 @@
 #ifndef _gtk_ardour_editor_sections_h_
 #define _gtk_ardour_editor_sections_h_
 
+#include <boost/unordered_map.hpp>
+
 #include "ardour/location.h"
 #include "ardour/session_handle.h"
 
@@ -44,7 +46,7 @@ private:
 	bool delete_selected_section ();
 	bool rename_selected_section ();
 
-	void clear_selection ();
+	void update_time_selection ();
 	void selection_changed ();
 	void clock_format_changed ();
 	bool scroll_row_timeout ();
@@ -101,11 +103,14 @@ private:
 		Gtk::TreeModelColumn<Temporal::timepos_t> end;
 	};
 
+	typedef boost::unordered_map<ARDOUR::Location*, Gtk::TreeModel::iterator> LocationRowMap;
+
 	Columns                      _columns;
 	Glib::RefPtr<Gtk::ListStore> _model;
 	Gtk::TreeView                _view;
 	Gtk::ScrolledWindow          _scroller;
 
+	LocationRowMap   _location_row_map;
 	bool             _no_redisplay;
 	sigc::connection _scroll_timeout;
 	sigc::connection _selection_change;

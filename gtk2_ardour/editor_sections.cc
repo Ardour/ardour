@@ -86,7 +86,7 @@ EditorSections::EditorSections ()
 
 	ARDOUR_UI::instance ()->primary_clock->mode_changed.connect (sigc::mem_fun (*this, &EditorSections::clock_format_changed));
 
-	_selection_change = PublicEditor::instance ().get_selection ().TimeChanged.connect (sigc::mem_fun (*this, &EditorSections::clear_selection));
+	_selection_change = PublicEditor::instance ().get_selection ().TimeChanged.connect (sigc::mem_fun (*this, &EditorSections::update_time_selection));
 }
 
 void
@@ -116,6 +116,7 @@ EditorSections::redisplay ()
 	}
 	_view.set_model (Glib::RefPtr<ListStore> ());
 	_model->clear ();
+	_location_row_map.clear ();
 
 	if (_session == 0) {
 		return;
@@ -135,6 +136,8 @@ EditorSections::redisplay ()
 			newrow[_columns.location] = l;
 			newrow[_columns.start]    = start;
 			newrow[_columns.end]      = end;
+
+			_location_row_map.insert (pair<ARDOUR::Location*, Gtk::TreeModel::iterator> (l, newrow));
 		}
 	} while (l);
 
@@ -189,9 +192,29 @@ EditorSections::scroll_row_timeout ()
 }
 
 void
-EditorSections::clear_selection ()
+EditorSections::update_time_selection ()
 {
 	_view.get_selection ()->unselect_all ();
+
+	Selection& selection (PublicEditor::instance ().get_selection ());
+
+	if (selection.time.empty ()) {
+		return;
+	}
+
+	Locations* loc = _session->locations ();
+	Location*  l   = NULL;
+	do {
+		timepos_t start, end;
+		l = loc->next_section (l, start, end);
+		if (l) {
+			if (start == selection.time.start_time () && end == selection.time.end_time ()) {
+				LocationRowMap::iterator map_it = _location_row_map.find (l);
+				TreeModel::iterator      j      = map_it->second;
+				_view.get_selection ()->select (*j);
+			}
+		}
+	} while (l);
 }
 
 void
@@ -208,6 +231,7 @@ EditorSections::selection_changed ()
 
 	_selection_change.block ();
 	Selection& s (PublicEditor::instance ().get_selection ());
+	s.clear ();
 	s.set (start, end);
 	_selection_change.unblock ();
 }
@@ -390,6 +414,9 @@ EditorSections::delete_selected_section ()
 		_session->cut_copy_section (start, end, timepos_t (0), DeleteSection);
 	}
 	redisplay ();
+
+	PublicEditor::instance ().get_selection ().clear ();
+
 	return true;
 }
 
