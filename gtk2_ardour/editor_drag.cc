@@ -5858,8 +5858,10 @@ SelectionMarkerDrag::SelectionMarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	bool ok = _editor->get_selection_extents (_start_at_start, _end_at_start);
 	assert (ok);
 
-	// SelectionStart, SelectionEnd
-	cout << " SelectionMarkerDrag " << _start_at_start << " - " << _end_at_start << " " << i->whoami() << "\n";
+	/* if the user adjusts the SelectionMarker, convert the selection to a timeline range (no track selection) */
+	_editor->get_selection ().clear_objects ();
+	_editor->get_selection ().clear_tracks ();
+	_editor->get_selection ().set (_start_at_start, _end_at_start);
 }
 
 void
