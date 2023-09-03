@@ -1370,18 +1370,16 @@ Locations::set_state (const XMLNode& node, int version)
 }
 
 
-typedef std::pair<timepos_t,Location*> LocationPair;
-
 struct LocationStartEarlierComparison
 {
-	bool operator() (LocationPair a, LocationPair b) {
+	bool operator() (Locations::LocationPair a, Locations::LocationPair b) {
 		return a.first < b.first;
 	}
 };
 
 struct LocationStartLaterComparison
 {
-	bool operator() (LocationPair a, LocationPair b) {
+	bool operator() (Locations::LocationPair a, Locations::LocationPair b) {
 		return a.first > b.first;
 	}
 };
@@ -1568,10 +1566,9 @@ Locations::marks_either_side (timepos_t const & pos, timepos_t& before, timepos_
 	before = *i;
 }
 
-Location*
-Locations::next_section (Location* l, timepos_t& start, timepos_t& end) const
+void
+Locations::sorted_section_locations (vector<LocationPair>& locs) const
 {
-	vector<LocationPair> locs;
 	{
 		Glib::Threads::RWLock::ReaderLock lm (_lock);
 
@@ -1586,6 +1583,13 @@ Locations::next_section (Location* l, timepos_t& start, timepos_t& end) const
 
 	LocationStartEarlierComparison cmp;
 	sort (locs.begin(), locs.end(), cmp);
+}
+
+Location*
+Locations::next_section (Location* l, timepos_t& start, timepos_t& end) const
+{
+	vector<LocationPair> locs;
+	sorted_section_locations (locs);
 
 	if (locs.size () < 2) {
 		return NULL;
@@ -1613,6 +1617,30 @@ Locations::next_section (Location* l, timepos_t& start, timepos_t& end) const
 		}
 		else if (i.second == l) {
 			found = true;
+		}
+	}
+
+	return NULL;
+}
+
+Location*
+Locations::section_at (timepos_t const& when, timepos_t& start, timepos_t& end) const
+{
+	vector<LocationPair> locs;
+	sorted_section_locations (locs);
+
+	if (locs.size () < 2) {
+		return NULL;
+	}
+
+	Location* rv = NULL;
+	for (auto const& i: locs) {
+		if (when >= i.first) {
+			start = i.first;
+			rv    = i.second;
+		} else {
+			end = i.first;
+			return rv;
 		}
 	}
 

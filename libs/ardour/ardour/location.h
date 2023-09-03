@@ -29,6 +29,7 @@
 #include <list>
 #include <iostream>
 #include <map>
+#include <vector>
 
 #include <sys/types.h>
 
@@ -246,6 +247,7 @@ class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDes
 {
 public:
 	typedef std::list<Location *> LocationList;
+	typedef std::pair<Temporal::timepos_t, Location*> LocationPair;
 
 	Locations (Session &);
 	~Locations ();
@@ -299,6 +301,7 @@ public:
 	timepos_t first_mark_after (timepos_t const &, bool include_special_ranges = false);
 
 	Location* next_section (Location*, timepos_t&, timepos_t&) const;
+	Location* section_at (timepos_t const&, timepos_t&, timepos_t&) const;
 
 	void marks_either_side (timepos_t const &, timepos_t &, timepos_t &) const;
 
@@ -343,6 +346,8 @@ public:
 	}
 
 private:
+	void sorted_section_locations (std::vector<LocationPair>&) const;
+
 	LocationList locations;
 	Location*    current_location;
 	mutable Glib::Threads::RWLock _lock;
