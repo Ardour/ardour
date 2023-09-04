@@ -2787,7 +2787,7 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 				/* Yep, too far. So we need to reset and take
 				   the next (music time point) into account.
 				*/
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("we've reached/passed the next point via sclock, BBT %1 audio %2 point %3\n", bbt, start, *p));
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("we've reached/passed the next point via sclock, BBT %1 audio %2 point %3, using metric %4\n", bbt, start, *p, metric));
 				reset = true;
 			} else {
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("confirmed that BBT %1 has audio time %2 before next point %3\n", bbt, start, *p));
@@ -2818,10 +2818,44 @@ TempoMap::fill_grid_by_walking (TempoMapPoints& ret, Points::const_iterator& p_i
 				metric = TempoMetric (*tp, *mp);
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("reset metric from music-time point %1, now %2\n", *mtp, metric));
 
-				bbt = BBT_Argument (metric.reftime(), p->bbt());
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start using bbt %1 as %2\n", p->bbt(), bbt));
-				start = p->sclock();
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start to %1\n", start));
+				if (p->bbt().ticks != 0) {
+
+					/* We do not want an arbitrary off-beat
+					 * BBT marker to interrupt the grid. So
+					 * round up from the marker's BBT time
+					 * to the nearest appropriate beat/bar
+					 * unit, and then reset from there.
+					 */
+
+					BBT_Time on_bar;
+
+					if (bar_mod == 1) {
+						on_bar = p->bbt().round_up_to_bar ();
+					} else {
+						on_bar = mp->round_up_to_beat_div (p->bbt(), beat_div);
+					}
+
+					bbt = BBT_Argument (metric.reftime(), on_bar);
+					BBT_Offset delta = Temporal::bbt_delta (on_bar, p->bbt());
+
+					if (delta != BBT_Offset ()) {
+						Beats beats_delta = mp->to_quarters (delta);
+						start = tp->superclock_at (tp->beats() + beats_delta);
+						DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start using bbt %1 as %2 via %3 (rounded by %4 beats %5)\n", p->bbt(), bbt, on_bar, delta, beats_delta));
+					} else {
+						start = p->sclock();
+						DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start using bbt %1 as %2 via %3 (rounded by %4)\n", p->bbt(), bbt, on_bar, delta));
+					}
+
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start to %1\n", start));
+
+				} else {
+
+					bbt = BBT_Argument (metric.reftime(), p->bbt());
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start using bbt %1 as %2\n", p->bbt(), bbt));
+					start = p->sclock();
+					DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start to %1\n", start));
+				}
 
 				/* Advance p to the next point */
 
