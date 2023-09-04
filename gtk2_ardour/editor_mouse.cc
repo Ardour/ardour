@@ -3109,13 +3109,11 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 	}
 
 	if (before && focus && after) {
-		_session->current_reversible_command()->set_name (_("tempo mapping: end-stretch"));
-		begin_reversible_command (_("tempo mapping: mid-twist"));
+		_session->current_reversible_command()->set_name (_("tempo mapping: mid-twist"));
 		_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after, *before_state, ramped), event);
 	} else if (ramped && focus && after) {
 		/* special case 4: user is manipulating a beat line after the INITIAL tempo marker, so there is no prior marker*/
-		_session->current_reversible_command()->set_name (_("tempo mapping: end-stretch"));
-		begin_reversible_command (_("tempo mapping: mid-twist"));
+		_session->current_reversible_command()->set_name (_("tempo mapping: mid-twist"));
 		before = focus; /* this is unused in MappingTwistDrag, when ramped is true, but let's not pass in garbage */
 		_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after, *before_state, ramped), event);
 	} else {
