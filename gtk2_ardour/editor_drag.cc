@@ -6946,17 +6946,8 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 
 	Beats const start = _region_view->region ()->absolute_time_to_region_beats (timepos_t (aligned_beats));
 
-	/* This code is like MidiRegionView::get_draw_length_beats() but
-	 * defaults to 1/64th note rather than a 1/4 note, since we're in
-	 * percussive mode.
-	 */
-
-	bool  success;
-	Beats length = _editor->get_draw_length_as_beats (success, pos);
-
-	if (!success) {
-		length = Beats::ticks (Beats::PPQN / 64);
-	}
+	/* Percussive hits are as short as possible */
+	Beats length (0, 1);
 
 	/* create_note_at() implements UNDO for us */
 	_region_view->create_note_at (timepos_t (start), _y, length, event->button.state, false);
