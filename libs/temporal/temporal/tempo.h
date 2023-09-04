@@ -339,7 +339,8 @@ class LIBTEMPORAL_API Meter {
 	BBT_Time bbt_add (BBT_Time const & bbt, BBT_Offset const & add) const;
 	BBT_Time bbt_subtract (BBT_Time const & bbt, BBT_Offset const & sub) const;
 	BBT_Time round_to_bar (BBT_Time const &) const;
-	BBT_Time round_up_to_beat (BBT_Time const &) const;
+	BBT_Time round_up_to_beat_div (BBT_Time const &, int beat_div) const;
+	BBT_Time round_up_to_beat (BBT_Time const & bbt) const { return round_up_to_beat_div (bbt, 1); }
 	BBT_Time round_to_beat (BBT_Time const &) const;
 	Beats    to_quarters (BBT_Offset const &) const;
 

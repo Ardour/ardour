@@ -364,9 +364,9 @@ Meter::round_to_bar (Temporal::BBT_Time const & bbt) const
 }
 
 Temporal::BBT_Time
-Meter::round_up_to_beat (Temporal::BBT_Time const & bbt) const
+Meter::round_up_to_beat_div (Temporal::BBT_Time const & bbt, int beat_div) const
 {
-	Temporal::BBT_Time b = bbt.round_up_to_beat ();
+	Temporal::BBT_Time b = bbt.round_up_to_beat_div (beat_div);
 	if (b.beats > _divisions_per_bar) {
 		b.bars++;
 		b.beats = 1;
