@@ -115,6 +115,7 @@ struct LIBTEMPORAL_API BBT_Time
 	BBT_Time round_to_beat () const { return ticks >= (ticks_per_beat/2) ? BBT_Time (bars, beats+1, 0) : BBT_Time (bars, beats, 0); }
 	BBT_Time round_down_to_beat () const { return BBT_Time (bars, beats, 0); }
 	BBT_Time round_up_to_beat () const { return ticks ? BBT_Time (bars, beats+1, 0) : *this; }
+	BBT_Time round_up_to_beat_div (int beat_div) const;
 
 	/* cannot implement round_to_bar() without knowing meter (time
 	 * signature) information, since it requires knowing how many beats
