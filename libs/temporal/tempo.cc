@@ -3012,10 +3012,10 @@ std::operator<<(std::ostream& str, TempoPoint const & t)
 std::ostream&
 std::operator<<(std::ostream& str, MusicTimePoint const & p)
 {
-	str << "MP @ ";
-	str << *((Point const *) &p);
-	str << *((Tempo const *) &p);
-	str << *((Meter const *) &p);
+	str << "MP @ "
+	    << *((Point const *) &p) << ' '
+	    << *((Tempo const *) &p) << ' ' 
+	    << *((Meter const *) &p);
 	return str;
 }
 
