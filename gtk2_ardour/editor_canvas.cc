@@ -292,9 +292,16 @@ Editor::initialize_canvas ()
 	_canvas_drop_zone->set_outline (false);
 	_canvas_drop_zone->Event.connect (sigc::mem_fun (*this, &Editor::canvas_drop_zone_event));
 
-	/* these signals will initially be delivered to the canvas itself, but if they end up remaining unhandled, they are passed to Editor-level
-	   handlers.
-	*/
+	_canvas_grid_zone = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 0.0));
+	/* this thing is transparent */
+	_canvas_grid_zone->set_fill (false);
+	_canvas_grid_zone->set_outline (false);
+	_canvas_grid_zone->Event.connect (sigc::mem_fun (*this, &Editor::canvas_grid_zone_event));
+	_canvas_grid_zone->set_ignore_events (true);
+
+	/* these signals will initially be delivered to the canvas itself, but if they end up remaining unhandled,
+	 * they are passed to Editor-level handlers.
+	 */
 
 	_track_canvas->signal_scroll_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_scroll_event), true));
 	_track_canvas->signal_motion_notify_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_motion_notify_event));
@@ -349,6 +356,8 @@ Editor::track_canvas_viewport_size_allocated ()
 	_visible_canvas_height = _canvas_viewport_allocation.get_height ();
 
 	_canvas_drop_zone->set_y1 (_canvas_drop_zone->y0() + (_visible_canvas_height - 20.0));
+
+	_canvas_grid_zone->set_y1 (_visible_canvas_height);
 
 	// SHOWTRACKS
 
@@ -1508,6 +1517,7 @@ Editor::which_canvas_cursor(ItemType type) const
 	case VideoBarItem:
 	case TransportMarkerBarItem:
 	case DropZoneItem:
+	case GridZoneItem:
 	case SelectionMarkerItem:
 		cursor = _cursors->grabber;
 		break;

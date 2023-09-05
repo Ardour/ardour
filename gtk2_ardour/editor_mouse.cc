@@ -1759,6 +1759,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 				break;
 
+			case GridZoneItem:
 			default:
 				break;
 			}
@@ -1854,6 +1855,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			return true;
 
+		case GridZoneItem:
 		case MappingBarItem:
 			return true;
 
@@ -2020,6 +2022,8 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	switch (item_type) {
 	case MappingBarItem:
 		break;
+	case GridZoneItem:
+		break;
 
 	case ControlPointItem:
 		if (mouse_mode == MouseDraw || mouse_mode == MouseObject || mouse_mode == MouseContent) {
@@ -2167,6 +2171,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 
 	switch (item_type) {
 	case MappingBarItem:
+	case GridZoneItem:
 		break;
 
 	case ControlPointItem:

@@ -69,6 +69,7 @@ enum ItemType {
 	SamplesRulerItem,
 	SelectionMarkerItem,
 	DropZoneItem,
+	GridZoneItem,
 	VelocityItem,
 	VelocityBaseItem,
 

@@ -1160,8 +1160,8 @@ Editor::canvas_drop_zone_event (GdkEvent* event)
 
 	case GDK_SCROLL:
 		/* convert coordinates back into window space so that
-		   we can just call canvas_scroll_event().
-		*/
+		 * we can just call canvas_scroll_event().
+		 */
 		winpos = _track_canvas->canvas_to_window (Duple (event->scroll.x, event->scroll.y));
 		scroll = event->scroll;
 		scroll.x = winpos.x;
@@ -1181,6 +1181,50 @@ Editor::canvas_drop_zone_event (GdkEvent* event)
 
 	default:
 		break;
+	}
+
+	return true;
+}
+
+bool
+Editor::canvas_grid_zone_event (GdkEvent* event)
+{
+	GdkEventScroll scroll;
+	ArdourCanvas::Duple winpos;
+
+	switch (event->type) {
+
+		case GDK_BUTTON_PRESS:
+			choose_mapping_drag (_canvas_grid_zone, event);
+			break;
+
+		case GDK_BUTTON_RELEASE:
+			return typed_event (_canvas_grid_zone, event, GridZoneItem);
+			break;
+
+		case GDK_SCROLL:
+			/* convert coordinates back into window space so that
+			 * we can just call canvas_scroll_event().
+			 */
+			winpos   = _track_canvas->canvas_to_window (Duple (event->scroll.x, event->scroll.y));
+			scroll   = event->scroll;
+			scroll.x = winpos.x;
+			scroll.y = winpos.y;
+			return canvas_scroll_event (&scroll, true);
+			break;
+
+		case GDK_ENTER_NOTIFY:
+			return typed_event (_canvas_grid_zone, event, GridZoneItem);
+
+		case GDK_LEAVE_NOTIFY:
+			return typed_event (_canvas_grid_zone, event, GridZoneItem);
+
+		case GDK_MOTION_NOTIFY:
+			return motion_handler (_canvas_grid_zone, event);
+			break;
+
+		default:
+			break;
 	}
 
 	return true;

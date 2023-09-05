@@ -968,6 +968,9 @@ private:
 	ArdourCanvas::Rectangle* _canvas_drop_zone;
 	bool canvas_drop_zone_event (GdkEvent* event);
 
+	ArdourCanvas::Rectangle* _canvas_grid_zone;
+	bool canvas_grid_zone_event (GdkEvent* event);
+
 	Glib::RefPtr<Gtk::ToggleAction> ruler_minsec_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_timecode_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_samples_action;
