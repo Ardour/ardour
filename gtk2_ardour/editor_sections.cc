@@ -50,13 +50,13 @@ EditorSections::EditorSections ()
 	c->set_resizable (true);
 	c->set_data ("mouse-edits-require-mod1", (gpointer)0x1);
 
-	CellRendererText* section_name_cell = dynamic_cast<CellRendererText*> (c->get_first_cell ());
+	CellRendererText* section_name_cell     = dynamic_cast<CellRendererText*> (c->get_first_cell ());
 	section_name_cell->property_editable () = true;
 	section_name_cell->signal_edited ().connect (sigc::mem_fun (*this, &EditorSections::name_edited));
 
 	_view.append_column (_("Start"), _columns.s_start);
 	_view.append_column (_("End"), _columns.s_end);
-	_view.set_enable_search(false);
+	_view.set_enable_search (false);
 	_view.set_headers_visible (true);
 	_view.get_selection ()->set_mode (Gtk::SELECTION_SINGLE);
 
@@ -395,7 +395,6 @@ EditorSections::rename_selected_section ()
 
 	return true;
 }
-
 
 bool
 EditorSections::delete_selected_section ()
