@@ -1017,6 +1017,18 @@ LaunchPadPro::stripable_selection_changed ()
 		light_pad (PadID (Lower1 + selected_pad), find_closest_palette_color (first_selected->presentation_info().color()), 1);
 	}
 
+	if (first_selected) {
+		MIDI::byte msg[3];
+		msg[0] = 0x90;
+		msg[1] = Sends;
+		if (first_selected->send_name (0).empty()) {
+			msg[2] = 0x0;
+		} else {
+			msg[2] = 0x2;
+		}
+		daw_write (msg, 3);
+	}
+
 	/* Make all other selection buttons static */
 
 	for (int n = 0; n < 8; ++n) {
