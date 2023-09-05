@@ -1633,9 +1633,10 @@ Locations::section_at (timepos_t const& when, timepos_t& start, timepos_t& end) 
 		return NULL;
 	}
 
-	Location* rv = NULL;
+	Location* rv   = NULL;
+	timepos_t test = when;
 	for (auto const& i: locs) {
-		if (when >= i.first) {
+		if (test >= i.first) {
 			start = i.first;
 			rv    = i.second;
 		} else {
