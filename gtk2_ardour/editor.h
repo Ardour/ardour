@@ -1966,6 +1966,7 @@ private:
 	ArdourWidgets::ArdourButton mouse_draw_button;
 	ArdourWidgets::ArdourButton mouse_move_button;
 	ArdourWidgets::ArdourButton mouse_timefx_button;
+	ArdourWidgets::ArdourButton mouse_grid_button;
 	ArdourWidgets::ArdourButton mouse_content_button;
 	ArdourWidgets::ArdourButton mouse_audition_button;
 	ArdourWidgets::ArdourButton mouse_cut_button;
@@ -2005,12 +2006,16 @@ private:
 	ArdourWidgets::ArdourDropdown draw_channel_selector;
 	void build_draw_midi_menus ();
 
+	Gtk::CheckButton stretch_midi_cb;
+
 	ArdourWidgets::ArdourButton snap_mode_button;
 	bool snap_mode_button_clicked (GdkEventButton*);
 
 	Gtk::HBox snap_box;
+	Gtk::HBox grid_box;
 	Gtk::HBox draw_box;
 
+	ArdourWidgets::ArdourVSpacer _grid_box_spacer;
 	ArdourWidgets::ArdourVSpacer _draw_box_spacer;
 
 	Gtk::HBox ebox_hpacker;
@@ -2550,6 +2555,7 @@ private:
 
 	void remove_gap_marker_callback (Temporal::timepos_t at, Temporal::timecnt_t distance);
 
+	Editing::GridType determine_mapping_grid_snap (Temporal::timepos_t t);
 	void choose_mapping_drag (ArdourCanvas::Item*, GdkEvent*);
 
 	Editing::TempoEditBehavior _tempo_edit_behavior;

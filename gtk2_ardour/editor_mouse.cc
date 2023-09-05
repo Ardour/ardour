@@ -270,6 +270,8 @@ Editor::get_mouse_mode_action(MouseMode m) const
 		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-draw"));
 	case MouseTimeFX:
 		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-timefx"));
+	case MouseGrid:
+		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-grid"));
 	case MouseContent:
 		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-content"));
 	case MouseAudition:
@@ -376,6 +378,15 @@ Editor::mouse_mode_toggled (MouseMode m)
 		_draw_box_spacer.hide();
 	}
 
+	if (mouse_mode == MouseGrid) {
+		grid_box.show();
+		_grid_box_spacer.show();
+		_canvas_grid_zone->set_ignore_events (false); // woohoo
+	} else {
+		grid_box.hide();
+		_grid_box_spacer.hide();
+		_canvas_grid_zone->set_ignore_events (true); // important !!!
+	}
 
 	if (internal_editing()) {
 
@@ -478,6 +489,7 @@ Editor::update_time_selection_display ()
 		selection->clear_tracks ();
 		break;
 
+	case MouseGrid:
 	default:
 		/*Clear everything */
 		selection->clear_objects();
@@ -1237,6 +1249,12 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
+	case MouseGrid:
+		/* MouseGrid clicks are handled by _canvas_grid_zone */
+		assert (0);
+		abort(); /*NOTREACHED*/
+		break;
+
 	case MouseDraw:
 		switch (item_type) {
 		case GainLineItem:
@@ -1917,6 +1935,12 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			break;
 
+		case MouseGrid:
+			/* MouseGrid clicks are handled by _canvas_grid_zone */
+			assert (0);
+			abort(); /*NOTREACHED*/
+			break;
+
 		case MouseAudition:
 			if (scrubbing_direction == 0) {
 				/* no drag, just a click */
@@ -2321,6 +2345,27 @@ Editor::scrub (samplepos_t sample, double current_x)
 	last_scrub_x = current_x;
 }
 
+GridType
+Editor::determine_mapping_grid_snap(timepos_t t)
+{
+	timepos_t snapped          = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBeat);
+	timepos_t snapped_to_bar   = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBar);
+	const double unsnapped_pos = time_to_pixel_unrounded (t);
+	const double snapped_pos   = time_to_pixel_unrounded (snapped);
+
+	double ruler_line_granularity = UIConfiguration::instance().get_ruler_granularity () * UIConfiguration::instance().get_ui_scale(); // in pixels
+
+	if (std::abs (snapped_pos - unsnapped_pos) < ruler_line_granularity) {
+		if (snapped == snapped_to_bar) {
+			return GridTypeBar;
+		} else {
+			return GridTypeBeat;
+		}
+	} else {
+		return GridTypeNone;
+	}
+}
+
 bool
 Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_autoscroll)
 {
@@ -2377,43 +2422,21 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_aut
 
 			timepos_t t (where);
 			bool move_snapped_cursor = true;
-
-			if (item == mapping_bar) {
-
-				/* Snap to the nearest beat, and figure out how
-				 * many pixels from the pointer cursor that is.
-				 */
-
-				Editor::EnterContext* ctx = get_enter_context (MappingBarItem);
-
-				if (ctx) {
-					timepos_t snapped = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBeat);
-					timepos_t snapped_to_bar = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBar);
-					const double unsnapped_pos = time_to_pixel_unrounded (t);
-					const double snapped_pos = time_to_pixel_unrounded (snapped);
-
-					if (std::abs (snapped_pos - unsnapped_pos) < 10 * UIConfiguration::instance().get_ui_scale()) {
-
-						/* Close to a beat, so snap the mapping
-						 * cursor *and* the snapped cursor to
-						 * the beat.
-						 */
-
-						if (snapped == snapped_to_bar) {
-							ctx->cursor_ctx->change (cursors()->time_fx);
-						} else {
-							/* snapped to a beat, not a bar .... we'll implement a TWIST here */
-							ctx->cursor_ctx->change (cursors()->expand_left_right);
-						}
-					} else {
-						ctx->cursor_ctx->change (cursors()->grabber);
-					}
-				}
-			}
-
 			if (move_snapped_cursor) {
 				snap_to_with_modifier (t, event);
 				set_snapped_cursor_position (t);
+			}
+
+			/* if tempo-mapping, set a cursor to indicate whether we are close to a bar line, beat line, or neither */
+			if (mouse_mode == MouseGrid && item == _canvas_grid_zone) {
+				GridType gt = determine_mapping_grid_snap (t);
+				if (gt == GridTypeBar) {
+					set_canvas_cursor (cursors()->time_fx);
+				} else if (gt == GridTypeBeat) {
+					set_canvas_cursor (cursors()->expand_left_right);
+				} else {
+					set_canvas_cursor (cursors()->grabber);
+				}
 			}
 		}
 
@@ -2996,29 +3019,29 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	/* In a departure from convention, this event is not handled by a widget
 	 * 'on' the ruler-bar, like a tempo marker, but is instead handled by the
-	 * mapping-bar widget itself. The intent is for the user to feel that they
+	 * whole canvas. The intent is for the user to feel that they
 	 * are manipulating the 'beat and bar grid' which may or may not have tempo
 	 * markers already assigned at the point under the mouse.
 	 */
 
-	if (item != mapping_bar) {
+	bool ignored;
+	samplepos_t where;
+
+	if (!mouse_sample (where, ignored)) {
 		return;
 	}
 
-	if (_cursor_stack.empty()) {
-		return;
-	}
-
+	/* if tempo-mapping, set a cursor to indicate whether we are close to a bar line, beat line, or neither */
 	bool ramped = false;
-	if (_cursor_stack.back() == cursors()->time_fx) {
-		/* We are on a BAR line  ... the user can drag the line exactly where it's needed */
-		ramped = false;
-	} else if (_cursor_stack.back() == cursors()->expand_left_right) {
-		/* We are on a BEAT line  ... we will nudge the beat line via ramping, without moving any tempo markers */
-		ramped = true;
-	} else {
-		/* Not close enough to a beat line to start any mapping drag */
-		return;
+	if (mouse_mode == MouseGrid && item ==_canvas_grid_zone) {
+		GridType gt = determine_mapping_grid_snap (timepos_t (where));
+		if (gt == GridTypeBar) {
+			ramped = false;
+		} else if (gt == GridTypeBeat) {
+			ramped = true;
+		} else {
+			return; // neither a bar nor a beat; don't start a drag
+		}
 	}
 
 	/* The reversible command starts here, must be ended/aborted in drag */
