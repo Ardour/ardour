@@ -859,7 +859,6 @@ LaunchPadPro::connect_daw_ports ()
 
 	if (_daw_in->connected() && _daw_out->connected()) {
 		/* don't waste cycles here */
-		std::cerr << "daw port already connected\n";
 		return;
 	}
 
@@ -1079,6 +1078,8 @@ LaunchPadPro::stripable_selection_changed ()
 			_current_pad_target = new_pad_target;
 		}
 	}
+
+	
 }
 
 bool
@@ -1300,14 +1301,12 @@ LaunchPadPro::stop_clip_press (Pad& pad)
 void
 LaunchPadPro::fader_long_press (Pad&)
 {
-	std::cerr << "fader long press\n";
 	revert_layout_on_fader_release = true;
 }
 
 void
 LaunchPadPro::fader_release (Pad&)
 {
-	std::cerr << "fader rel " << revert_layout_on_fader_release << std::endl;
 	if (revert_layout_on_fader_release) {
 		set_layout (pre_fader_layout);
 		revert_layout_on_fader_release = false;
@@ -2051,10 +2050,8 @@ LaunchPadPro::map_faders ()
 		case SendFaders:
 			ac = r->send_level_controllable (n);
 			if (ac) {
-				std::cerr << "got fader for send " << n << " on " << r->name() << std::endl;
 				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
 			} else {
-				std::cerr << "NO fader for send " << n << " on " << r->name() << std::endl;
 				msg[2] = 0;
 			}
 			break;
