@@ -2467,6 +2467,8 @@ Editor::set_state (const XMLNode& node, int version)
 		_playhead_cursor->set_position (0);
 	}
 
+	update_selection_markers ();
+
 	node.get_property ("mixer-width", editor_mixer_strip_width);
 
 	node.get_property ("zoom-focus", zoom_focus);

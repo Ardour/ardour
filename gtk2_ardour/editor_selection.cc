@@ -1273,6 +1273,8 @@ Editor::track_selection_changed ()
 
 	if ( _session->solo_selection_active() )
 		play_solo_selection(false);
+
+	update_selection_markers ();
 }
 
 void
@@ -1291,6 +1293,7 @@ Editor::time_selection_changed ()
 		(*i)->hide_selection ();
 	}
 
+	update_selection_markers ();
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		(*i)->show_selection (selection->time);
 	}
@@ -1313,8 +1316,6 @@ Editor::time_selection_changed ()
 			_session->clear_range_selection ();
 		}
 	}
-
-	update_selection_markers ();
 }
 
 /** Set all region actions to have a given sensitivity */
