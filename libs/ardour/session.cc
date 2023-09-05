@@ -7333,8 +7333,9 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 		XMLNode& tm_after (wmap->get_state());
 		add_command (new TempoCommand (_("cut tempo map"), &tm_before, &tm_after));
 	} else {
-		std::cerr << "no tempo map cut buffer\n";
 		delete &tm_before;
+		TempoMap::abort_update ();
+		TempoMap::SharedPtr tmap (TempoMap::fetch());
 	}
 
 	if (abort_empty_reversible_command ()) {
