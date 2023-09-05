@@ -1388,6 +1388,7 @@ public:
 	TriggerPtr trigger_at (int32_t route_index, int32_t row_index) const;
 	bool bang_trigger_at(int32_t route_index, int32_t row_index);
 	bool unbang_trigger_at(int32_t route_index, int32_t row_index);
+	void clear_cue (int row_index);
 
 	void start_domain_bounce (Temporal::DomainBounceInfo&);
 	void finish_domain_bounce (Temporal::DomainBounceInfo&);

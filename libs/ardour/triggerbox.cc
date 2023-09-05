@@ -3692,6 +3692,12 @@ TriggerBox::clear_all_triggers ()
 }
 
 void
+TriggerBox::clear_cue (int cue)
+{
+	all_triggers[cue]->set_region (std::shared_ptr<Region>());
+}
+
+void
 TriggerBox::set_all_launch_style (ARDOUR::Trigger::LaunchStyle ls)
 {
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {

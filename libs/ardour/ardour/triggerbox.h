@@ -774,6 +774,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	TriggerPtr trigger_by_id (PBD::ID);
 
 	void clear_all_triggers ();
+	void clear_cue (int cue);
 	void set_all_follow_action (ARDOUR::FollowAction const &, uint32_t n=0);
 	void set_all_launch_style (ARDOUR::Trigger::LaunchStyle);
 	void set_all_quantization (Temporal::BBT_Offset const&);

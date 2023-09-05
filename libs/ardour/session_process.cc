@@ -1806,6 +1806,26 @@ Session::triggerbox_at (int32_t route_index) const
 	return std::shared_ptr<TriggerBox>();
 }
 
+void
+Session::clear_cue (int row_index)
+{
+	StripableList sl;
+	get_stripables (sl);
+
+	for (StripableList::iterator s = sl.begin (); s != sl.end (); ++s) {
+		std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (*s);
+		if (!r || !r->triggerbox ()) {
+			continue;
+		}
+		/* we're only interested in Trigger Tracks */
+		if (!(r->presentation_info ().trigger_track ())) {
+			continue;
+		}
+
+		r->triggerbox()->clear_cue (row_index);
+	}
+}
+
 int
 Session::num_triggerboxes () const
 {
