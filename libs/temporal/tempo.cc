@@ -3164,33 +3164,36 @@ TempoMap::bbt_walk (BBT_Argument const & bbt, BBT_Offset const & o) const
 	 * TempoMetric in effect after each addition
 	 */
 
-#define TEMPO_CHECK_FOR_NEW_METRIC                                      \
-	if (((next_t != _tempos.end()) && (start >= next_t->bbt())) || \
-	    ((next_m != _meters.end()) && (start >= next_m->bbt()))) { \
+#define TEMPO_CHECK_FOR_NEW_METRIC \
+	{ \
 		/* need new metric */ \
-		if (start >= next_t->bbt()) { \
-			if (start >= next_m->bbt()) { \
-				metric = TempoMetric (*const_cast<TempoPoint*>(&*next_t), *const_cast<MeterPoint*>(&*next_m)); \
-				++next_t; \
-				++next_m; \
-			} else { \
-				metric = TempoMetric (*const_cast<TempoPoint*>(&*next_t), metric.meter()); \
-				++next_t; \
-			} \
-		} else if (start >= next_m->bbt()) { \
+		bool advance_t = false; \
+		bool advance_m = false; \
+		if (next_t != _tempos.end() && (start >= next_t->bbt())) { \
+			advance_t = true; \
+		}\
+		if (next_m != _meters.end() && (start >= next_m->bbt())) { \
+			advance_m = true; \
+		} \
+		if (advance_t && advance_m) { \
+			metric = TempoMetric (*const_cast<TempoPoint*>(&*next_t), *const_cast<MeterPoint*>(&*next_m)); \
+			++next_t; \
+			++next_m; \
+		} else if (advance_t && !advance_m) { \
+			metric = TempoMetric (*const_cast<TempoPoint*>(&*next_t), metric.meter()); \
+			++next_t; \
+		} else if (advance_m && !advance_t) { \
 			metric = TempoMetric (metric.tempo(), *const_cast<MeterPoint*>(&*next_m)); \
 			++next_m; \
 		} \
 	}
 
 	for (int32_t b = 0; b < offset.bars; ++b) {
-
 		TEMPO_CHECK_FOR_NEW_METRIC;
 		start.bars += 1;
 	}
 
 	for (int32_t b = 0; b < offset.beats; ++b) {
-
 		TEMPO_CHECK_FOR_NEW_METRIC;
 		start.beats += 1;
 		if (start.beats > metric.divisions_per_bar()) {
