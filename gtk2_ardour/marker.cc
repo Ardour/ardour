@@ -778,34 +778,18 @@ SelectionMarker::SelectionMarker (PublicEditor& editor, ArdourCanvas::Item& pare
 
 /***********************************************************************/
 
-TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Item& parent, ArdourCanvas::Item& text_parent, std::string const& color_name, const string& text, Temporal::TempoPoint const & temp, samplepos_t sample, uint32_t curve_color)
+TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Item& parent, std::string const& color_name, const string& text, Temporal::TempoPoint const & temp, samplepos_t sample, uint32_t curve_color)
 	: MetricMarker (editor, parent, color_name, text, Tempo, temp.time(), false)
 	, _tempo (&temp)
-	, _mapping_text (new ArdourCanvas::Text (&text_parent))
 {
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_marker_event), group, this));
 	/* points[1].x gives the width of the marker */
 	_curve = new TempoCurve (editor, *group, curve_color, temp, true, (*points)[1].x);
 	_curve->the_item().lower_to_bottom ();
-
-	_mapping_text->set_color (0xffffff);
-	_mapping_text->set_font_description (ARDOUR_UI_UTILS::get_font_for_style (N_("MarkerText")));
-	_mapping_text->set_position (ArdourCanvas::Duple (unit_position, 0.0));
-	_mapping_text->set_ignore_events (true);
-
-	char buf[64];
-	TempoCurve::format_tempo (_tempo->note_types_per_minute(), _tempo->note_type(), buf, sizeof (buf));
-	_mapping_text->set (buf);
 }
 
 TempoMarker::~TempoMarker ()
 {
-	/* the mapping text is a little unusual in that we do not leave its
-	   parent (the editor's mapping_group) to manage its lifetime. We must
-	   explicitly remove and delete it.
-	*/
-	_mapping_text->parent()->remove (_mapping_text);
-	delete _mapping_text;
 	delete _curve;
 }
 
@@ -813,20 +797,12 @@ void
 TempoMarker::reposition ()
 {
 	MetricMarker::reposition ();
-
-	_mapping_text->set_position (ArdourCanvas::Duple (std::max (3., unit_position), _mapping_text->position().y));
 }
 
 void
 TempoMarker::update ()
 {
 	set_position (_tempo->time());
-
-	_mapping_text->set_position (ArdourCanvas::Duple (std::max (3., unit_position), _mapping_text->position().y));
-
-	char buf[64];
-	TempoCurve::format_tempo (_tempo->note_types_per_minute(), _tempo->note_type(), buf, sizeof (buf));
-	_mapping_text->set (buf);
 }
 
 TempoCurve&

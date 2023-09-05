@@ -164,7 +164,7 @@ Editor::make_tempo_marker (Temporal::TempoPoint const * ts, TempoPoint const *& 
 	const std::string tname (X_(""));
 	char const * color_name = X_("tempo marker");
 
-	tempo_marks.insert (before, new TempoMarker (*this, *tempo_group, *mapping_group, color_name, tname, *ts, ts->sample (sr), tc_color));
+	tempo_marks.insert (before, new TempoMarker (*this, *tempo_group, color_name, tname, *ts, ts->sample (sr), tc_color));
 
 	/* XXX the point of this code was "a jump in tempo by more than 1 ntpm results in a red
 	   tempo mark pointer."  (3a7bc1fd3f32f0)
@@ -956,69 +956,6 @@ void
 Editor::mid_tempo_per_region_update (RegionView* rv)
 {
 	rv->tempo_map_changed ();
-}
-
-void
-Editor::set_tempo_edit_behavior (TempoEditBehavior teb)
-{
-	/* As with all things radio-action related, we carry out the change by
-	   toggling the action, and then actually do the model-view changes in
-	   the actions' toggled handler.
-	*/
-
-	Glib::RefPtr<Action> act;
-
-	switch (teb) {
-	case TempoMapping:
-		act = ActionManager::get_action (X_("Editor"), X_("tempo-edit-is-mapping"));
-		break;
-	case TempoChanging:
-		act = ActionManager::get_action (X_("Editor"), X_("tempo-edit-is-changing"));
-	}
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-
-	/* go there and back to ensure that the toggled handler is called to set up mouse_mode */
-	tact->set_active (false);
-	tact->set_active (true);
-}
-
-void
-Editor::tempo_edit_behavior_toggled (TempoEditBehavior teb)
-{
-	Glib::RefPtr<Action> act;
-
-	switch (teb) {
-	case TempoMapping:
-		act = ActionManager::get_action (X_("Editor"), X_("tempo-edit-is-mapping"));
-		break;
-	case TempoChanging:
-		act = ActionManager::get_action (X_("Editor"), X_("tempo-edit-is-changing"));
-	}
-
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-
-	if (!tact->get_active()) {
-		/* this was just the notification that the old mode has been
-		 * left. we'll get called again with the new mode active in a
-		 * jiffy.
-		 */
-		return;
-	}
-
-	/* change the ruler shown in the tempo position */
-	_tempo_edit_behavior = teb;
-
-	switch (teb) {
-	case TempoMapping:
-		tempo_group->hide ();
-		mapping_group->show ();
-		break;
-	case TempoChanging:
-		tempo_group->show ();
-		mapping_group->hide ();
-		break;
-	}
 }
 
 void

@@ -155,11 +155,6 @@ UI_CONFIG_VARIABLE (bool, ask_cut_copy_section_tempo_map, "ask-cut-copy-section-
 UI_CONFIG_VARIABLE (std::string, freesound_dir, "freesound-dir", "")
 UI_CONFIG_VARIABLE (int, max_note_height, "max-note-height", 20)
 UI_CONFIG_VARIABLE (bool, prefer_tap_tempo, "prefer-tap-tempo", false)
-#ifdef MIXBUS
-UI_CONFIG_VARIABLE (Editing::TempoEditBehavior, tempo_edit_behavior, "tempo-edit-behavior", Editing::TempoMapping)
-#else
-UI_CONFIG_VARIABLE (Editing::TempoEditBehavior, tempo_edit_behavior, "tempo-edit-behavior", Editing::TempoChanging)
-#endif
 
 /* these are visibility-type selections in the New Track dialog that we should make persistent for the user's choices */
 UI_CONFIG_VARIABLE (bool, show_on_cue_page, "show-on-cue-page", true)

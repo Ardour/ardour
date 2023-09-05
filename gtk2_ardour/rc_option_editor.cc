@@ -4534,22 +4534,6 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Metronome"), bo);
 	add_option (_("Metronome"), new OptionEditorBlank ());
 
-	/* TEMPO RELATED STUFF */
-
-	add_option (_("Metronome"), new OptionEditorHeading (_("Tempo")));
-
-	ComboOption<Editing::TempoEditBehavior>* teb = new ComboOption<Editing::TempoEditBehavior> (
-		"default-tempo-edit-behavior",
-		_("Default tempo ruler state for new sessions"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_tempo_edit_behavior),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_tempo_edit_behavior));
-	teb->add (Editing::TempoMapping, _("mapping a recorded performance"));
-	teb->add (Editing::TempoChanging, _("constructing a tempo map from scratch"));
-
-	add_option (_("Metronome"), teb);
-	Gtkmm2ext::UI::instance()->set_tip (teb->tip_widget(),
-	                                    _("Choose between constructing a tempo map from scratch or mapping a recorded performance as the default tempo ruler state"));
-
 	/* CONTROL SURFACES *********************************************************/
 
 	add_option (_("Control Surfaces"), new OptionEditorHeading (_("Control Surfaces")));

@@ -261,8 +261,6 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 	case TempoCurveItem:
 		ruler_items.push_back (MenuElem (_("Add New Tempo"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
 		ruler_items.push_back (SeparatorElem ());
-		/* fallthrough */
-	case MappingBarItem:
 		ruler_items.push_back (MenuElem (_("Clear All Tempos"), sigc::mem_fun (*this, &Editor::clear_tempo_markers)));
 		ruler_items.push_back (SeparatorElem ());
 		ruler_items.push_back (MenuElem (_("Clear All Earlier Tempos"), sigc::bind (sigc::mem_fun (*this, &Editor::clear_tempo_markers_before), where, true)));
@@ -537,17 +535,17 @@ Editor::update_ruler_visibility ()
 	}
 
 	if (ruler_tempo_action->get_active()) {
-		old_unit_pos = tempo_meta_group->position().y;
+		old_unit_pos = tempo_group->position().y;
 		if (tbpos != old_unit_pos) {
-			tempo_meta_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+			tempo_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
-		tempo_meta_group->show();
+		tempo_group->show();
 		tempo_label.show();
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
-		tempo_meta_group->hide();
+		tempo_group->hide();
 		tempo_label.hide();
 	}
 

@@ -833,10 +833,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
-	case MappingBarItem:
-		choose_mapping_drag (item, event);
-		return true;
-
 	case TempoBarItem:
 	case TempoCurveItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
@@ -1736,7 +1732,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case CdMarkerBarItem:
 			case SectionMarkerBarItem:
 			case TempoBarItem:
-			case MappingBarItem:
 			case TempoCurveItem:
 			case MeterBarItem:
 			case VideoBarItem:
@@ -1874,7 +1869,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 
 		case GridZoneItem:
-		case MappingBarItem:
 			return true;
 
 		case TempoBarItem:
@@ -2044,8 +2038,6 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	choose_canvas_cursor_on_entry (item_type);
 
 	switch (item_type) {
-	case MappingBarItem:
-		break;
 	case GridZoneItem:
 		break;
 
@@ -2194,7 +2186,6 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	}
 
 	switch (item_type) {
-	case MappingBarItem:
 	case GridZoneItem:
 		break;
 
@@ -2420,6 +2411,7 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_aut
 				}
 			}
 
+			/* show snapped cursor */
 			timepos_t t (where);
 			bool move_snapped_cursor = true;
 			if (move_snapped_cursor) {

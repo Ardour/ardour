@@ -624,9 +624,6 @@ public:
 	void remove_region_marker (ARDOUR::CueMarker&);
 	void make_region_markers_global (bool as_cd_markers);
 
-	Editing::TempoEditBehavior tempo_edit_behavior() const { return _tempo_edit_behavior; }
-	void set_tempo_edit_behavior (Editing::TempoEditBehavior teb);
-
 protected:
 	void map_transport_state ();
 	void map_position_change (samplepos_t);
@@ -920,9 +917,7 @@ private:
 	Gtk::EventBox            time_bars_event_box;
 	Gtk::VBox                time_bars_vbox;
 
- 	ArdourCanvas::Container* tempo_meta_group;
 	ArdourCanvas::Container* tempo_group;
-	ArdourCanvas::Container* mapping_group;
 	ArdourCanvas::Container* meter_group;
 	ArdourCanvas::Container* marker_group;
 	ArdourCanvas::Container* range_marker_group;
@@ -1067,7 +1062,6 @@ private:
 	Gtk::Menu* editor_ruler_menu;
 
 	ArdourCanvas::Rectangle* tempo_bar;
-	ArdourCanvas::Rectangle* mapping_bar;
 	ArdourCanvas::Rectangle* meter_bar;
 	ArdourCanvas::Rectangle* marker_bar;
 	ArdourCanvas::Rectangle* range_marker_bar;
@@ -2557,9 +2551,6 @@ private:
 
 	Editing::GridType determine_mapping_grid_snap (Temporal::timepos_t t);
 	void choose_mapping_drag (ArdourCanvas::Item*, GdkEvent*);
-
-	Editing::TempoEditBehavior _tempo_edit_behavior;
-	void tempo_edit_behavior_toggled (Editing::TempoEditBehavior);
 
 	template<typename T>
 	Temporal::TimeDomain drag_time_domain (T* thing_with_time_domain) {

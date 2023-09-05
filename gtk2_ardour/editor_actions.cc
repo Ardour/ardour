@@ -206,10 +206,6 @@ Editor::register_actions ()
 	*/
 	ActionManager::register_action (editor_actions, "lock", S_("Session|Lock"), sigc::mem_fun (*this, &Editor::lock));
 
-	RadioAction::Group tempo_edit_group;
-	ActionManager::register_radio_action (editor_actions, tempo_edit_group, "tempo-edit-is-mapping", _("Map Tempo"), sigc::bind (sigc::mem_fun (*this, &Editor::tempo_edit_behavior_toggled), Editing::TempoMapping));
-	ActionManager::register_radio_action (editor_actions, tempo_edit_group, "tempo-edit-is-changing", _("Change Tempo"), sigc::bind (sigc::mem_fun (*this, &Editor::tempo_edit_behavior_toggled), Editing::TempoChanging));
-
 	toggle_reg_sens (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	toggle_reg_sens (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Editor::editor_list_button_toggled));
 

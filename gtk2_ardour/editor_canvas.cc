@@ -168,14 +168,10 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (transport_marker_group, "transport marker group");
 	range_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 3.0) + 1.0));
 	CANVAS_DEBUG_NAME (range_marker_group, "range marker group");
-	tempo_meta_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 4.0) + 1.0));
-	CANVAS_DEBUG_NAME (tempo_meta_group, "tempo meta group");
+	tempo_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 4.0) + 1.0));
+	CANVAS_DEBUG_NAME (tempo_group, "tempo group");
 	section_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
 	CANVAS_DEBUG_NAME (section_marker_group, "Arranger marker group");
-	tempo_group = new ArdourCanvas::Container (tempo_meta_group, ArdourCanvas::Duple (0.0, 0.0));
-	CANVAS_DEBUG_NAME (tempo_group, "tempo group");
-	mapping_group = new ArdourCanvas::Container (tempo_meta_group, ArdourCanvas::Duple (0.0, 0.0));
-	CANVAS_DEBUG_NAME (mapping_group, "mapping group");
 	meter_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
 	CANVAS_DEBUG_NAME (meter_group, "meter group");
 
@@ -192,21 +188,6 @@ Editor::initialize_canvas ()
 	tempo_bar->set_fill(true);
 	tempo_bar->set_outline(false);
 	tempo_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
-
-	mapping_bar = new ArdourCanvas::Rectangle (mapping_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
-	CANVAS_DEBUG_NAME (mapping_bar, "Mapping Bar");
-	mapping_bar->set_fill(true);
-	mapping_bar->set_outline(false);
-	mapping_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
-
-	switch (UIConfiguration::instance().get_tempo_edit_behavior()) {
-	case Editing::TempoMapping:
-		tempo_group->hide ();
-		break;
-	case Editing::TempoChanging:
-		mapping_group->hide ();
-		break;
-	}
 
 	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
@@ -271,7 +252,6 @@ Editor::initialize_canvas ()
 	transport_punchout_line->hide();
 
 	tempo_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), tempo_bar, TempoBarItem, "tempo bar"));
-	mapping_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), mapping_bar, MappingBarItem, "mapping bar"));
 	meter_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), meter_bar, MeterBarItem, "meter bar"));
 	marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), marker_bar, MarkerBarItem, "marker bar"));
 	cd_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), cd_marker_bar, CdMarkerBarItem, "cd marker bar"));
@@ -1090,8 +1070,6 @@ Editor::color_handler()
 
 	tempo_bar->set_fill_color (UIConfiguration::instance().color_mod ("tempo bar", "marker bar"));
 
-	mapping_bar->set_fill_color (UIConfiguration::instance().color_mod ("mapping bar", "marker bar"));
-
 	marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("marker bar", "marker bar"));
 	marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
@@ -1385,9 +1363,6 @@ Editor::which_canvas_cursor(ItemType type) const
 		case StreamItem:
 		case AutomationTrackItem:
 			cursor = which_track_cursor ();
-			break;
-		case MappingBarItem:
-			cursor = _cursors->trimmer;
 			break;
 		case PlayheadCursorItem:
 			cursor = _cursors->grabber;

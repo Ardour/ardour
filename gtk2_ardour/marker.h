@@ -196,7 +196,7 @@ class MetricMarker : public ArdourMarker
 class TempoMarker : public MetricMarker
 {
   public:
-	TempoMarker (PublicEditor& editor, ArdourCanvas::Item & parent, ArdourCanvas::Item & text_parent, std::string const& color_name, const std::string& text, Temporal::TempoPoint const &, samplepos_t sample, uint32_t curve_color);
+	TempoMarker (PublicEditor& editor, ArdourCanvas::Item & parent, std::string const& color_name, const std::string& text, Temporal::TempoPoint const &, samplepos_t sample, uint32_t curve_color);
 	~TempoMarker ();
 
 	void reset_tempo (Temporal::TempoPoint const & t);
@@ -211,7 +211,6 @@ class TempoMarker : public MetricMarker
   private:
 	Temporal::TempoPoint const * _tempo;
 	TempoCurve* _curve;
-	ArdourCanvas::Text* _mapping_text;
 };
 
 class MeterMarker : public MetricMarker

@@ -321,7 +321,6 @@ Editor::Editor ()
 	, visible_timebars (0)
 	, editor_ruler_menu (0)
 	, tempo_bar (0)
-	, mapping_bar (0)
 	, meter_bar (0)
 	, marker_bar (0)
 	, range_marker_bar (0)
@@ -474,7 +473,6 @@ Editor::Editor ()
 	, _stepping_axis_view (0)
 	, quantize_dialog (0)
 	, _main_menu_disabler (0)
-	, _tempo_edit_behavior (UIConfiguration::instance().get_tempo_edit_behavior())
 	, domain_bounce_info (nullptr)
 {
 	/* we are a singleton */
@@ -893,9 +891,6 @@ Editor::Editor ()
 	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
-
-	/* force correct state for tempo edit behavior */
-	tempo_edit_behavior_toggled (_tempo_edit_behavior);
 }
 
 Editor::~Editor()
@@ -6806,8 +6801,6 @@ Editor::ui_parameter_changed (string parameter)
 		_track_canvas->request_redraw (_track_canvas->visible_area());
 	} else if (parameter == "use-note-color-for-velocity") {
 		/* handled individually by each MidiRegionView */
-	} else if (parameter == "tempo-edit-behavior") {
-		set_tempo_edit_behavior (UIConfiguration::instance().get_tempo_edit_behavior());
 	} else if (parameter == "show-selection-marker") {
 		update_ruler_visibility ();
 	}
