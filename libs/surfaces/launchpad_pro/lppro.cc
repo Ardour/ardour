@@ -139,6 +139,9 @@ LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
 	, _gui (nullptr)
 	, _current_layout (SessionLayout)
 	, _shift_pressed (false)
+	, _clear_pressed (false)
+	, _duplicate_pressed (false)
+	, _session_pressed (false)
 	, did_session_display (false)
 	, current_fader_bank (VolumeFaders)
 	, revert_layout_on_fader_release (false)
@@ -392,7 +395,7 @@ LaunchPadPro::build_pad_map ()
 
 	BUTTON (Left, &LaunchPadPro::left_press);
 	BUTTON (Right, &LaunchPadPro::right_press);
-	BUTTON0 (Session);
+	BUTTON3 (Session, &LaunchPadPro::session_press, &LaunchPadPro::session_long_press, &LaunchPadPro::session_release);
 	BUTTON0 (Note);
 	BUTTON0 (Chord);
 	BUTTON0 (Custom);
@@ -421,8 +424,8 @@ LaunchPadPro::build_pad_map ()
 	BUTTON (Play, &LaunchPadPro::play_press);
 	BUTTON0 (FixedLength);
 	BUTTON0 (Quantize);
-	BUTTON0 (Duplicate);
-	BUTTON0 (Clear);
+	BUTTON3 (Duplicate, &LaunchPadPro::duplicate_press, &LaunchPadPro::duplicate_long_press, &LaunchPadPro::duplicate_release);
+	BUTTON3 (Clear, &LaunchPadPro::clear_press, &LaunchPadPro::clear_long_press, &LaunchPadPro::clear_release);
 	BUTTON (Down, &LaunchPadPro::down_press);
 	BUTTON (Up, &LaunchPadPro::up_press);
 
@@ -693,6 +696,14 @@ LaunchPadPro::display_session_layout ()
 	daw_write (msg, 3);
 	msg[1] = PrintToClip;
 	msg[2] = 0x27;
+	daw_write (msg, 3);
+
+	msg[1] = Duplicate;
+	msg[2] = 79;
+	daw_write (msg, 3);
+
+	msg[1] = Clear;
+	msg[2] = 3;
 	daw_write (msg, 3);
 
 	msg[1] = Play;
@@ -1004,7 +1015,6 @@ LaunchPadPro::stripable_selection_changed ()
 		/* subtract 1 because Master always has order zero  XXX does * it? */
 		selected_pad = first_selected->presentation_info().order() - 1 - scroll_x_offset;
 		light_pad (PadID (Lower1 + selected_pad), find_closest_palette_color (first_selected->presentation_info().color()), 1);
-		std::cerr << "pulse on " << selected_pad  << std::endl;
 	}
 
 	/* Make all other selection buttons static */
@@ -1066,14 +1076,19 @@ LaunchPadPro::pad_filter (MidiBuffer& in, MidiBuffer& out) const
 	   context. It must use atomics to check state, and must not block.
 	*/
 
-	if (_current_layout != NoteLayout) {
+	switch (_current_layout) {
+	case NoteLayout:
+	case ChordLayout:
+		break;
+	default:
 		return false;
 	}
 
 	bool matched = false;
 
 	for (MidiBuffer::iterator ev = in.begin(); ev != in.end(); ++ev) {
-		if ((*ev).is_note_on() || (*ev).is_note_off()) {
+		if ((*ev).is_note_on() || (*ev).is_note_off() ||
+		    (*ev).is_channel_pressure() || (*ev).is_poly_pressure()) {
 			out.push_back (*ev);
 			matched = true;
 		}
@@ -1129,8 +1144,9 @@ LaunchPadPro::shift_release (Pad& pad)
 void
 LaunchPadPro::left_press (Pad& pad)
 {
-	if (scroll_x_offset) {
-		scroll_x_offset--;
+	const int shift = (_session_pressed ? 9 : 1);
+	if (scroll_x_offset >= shift) {
+		scroll_x_offset -= shift;
 	}
 	viewport_changed ();
 }
@@ -1138,14 +1154,25 @@ LaunchPadPro::left_press (Pad& pad)
 void
 LaunchPadPro::right_press (Pad& pad)
 {
-	scroll_x_offset++;
+	const int shift = (_session_pressed ? 9 : 1);
+	scroll_x_offset += shift;
 	viewport_changed ();
 }
 
 void
 LaunchPadPro::session_press (Pad& pad)
 {
-	/* handled by device */
+	if (_current_layout == SessionLayout) {
+		_session_pressed = true;
+	}
+}
+
+void
+LaunchPadPro::session_release (Pad& pad)
+{
+	if (_current_layout == SessionLayout) {
+		_session_pressed = false;
+	}
 }
 
 void
@@ -1395,20 +1422,30 @@ LaunchPadPro::duplicate_press (Pad& pad)
 void
 LaunchPadPro::clear_press (Pad& pad)
 {
+	_clear_pressed = true;
+}
+
+void
+LaunchPadPro::clear_release (Pad& pad)
+{
+	_clear_pressed = false;
 }
 
 void
 LaunchPadPro::down_press (Pad& pad)
 {
-	if (scroll_y_offset) {
-		scroll_y_offset--;
+	const int shift = (_session_pressed ? 9 : 1);
+
+	if (scroll_y_offset >= shift) {
+		scroll_y_offset -= shift;
 	}
 }
 
 void
 LaunchPadPro::up_press (Pad& pad)
 {
-	scroll_y_offset++;
+	const int shift = (_session_pressed ? 9 : 1);
+	scroll_y_offset += shift;
 }
 
 void
@@ -1477,6 +1514,15 @@ void
 LaunchPadPro::pad_press (Pad& pad)
 {
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("pad press on %1, %2 => %3\n", pad.x, pad.y, pad.id));
+
+	if (_clear_pressed) {
+		TriggerPtr tp = session->trigger_at (pad.x, pad.y);
+		if (tp) {
+			tp->clear_region ();
+		}
+		return;
+	}
+
 	session->bang_trigger_at (pad.x, pad.y);
 	start_press_timeout (pad);
 }
@@ -1524,6 +1570,7 @@ LaunchPadPro::trigger_property_change (PropertyChange pc, Trigger* t)
 			msg.push_back (0x90);
 			msg.push_back (pid);
 			msg.push_back (0x0);
+			daw_write (msg);
 			return;
 		}
 
@@ -1812,6 +1859,10 @@ LaunchPadPro::viewport_changed ()
 		if (r) {
 			r->DropReferences.connect (route_connections, invalidator (*this), boost::bind (&LaunchPadPro::viewport_changed, this), this);
 			r->presentation_info().PropertyChanged.connect (route_connections, invalidator (*this), boost::bind (&LaunchPadPro::route_property_change, this, _1, n), this);
+		} else {
+			if (n == 0) {
+				/* not even the first stripable ... so do nothing */
+			}
 		}
 	}
 

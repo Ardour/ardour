@@ -304,6 +304,9 @@ class LaunchPadPro : public MIDISurface
 	bool long_press_timeout (int pad_id);
 
 	bool _shift_pressed;
+	bool _clear_pressed;
+	bool _duplicate_pressed;
+	bool _session_pressed;
 
 	/* named pad methods */
 	void shift_press (Pad&);
@@ -316,7 +319,7 @@ class LaunchPadPro : public MIDISurface
 	void right_release (Pad&) {}
 	void right_long_press (Pad&) {}
 	void session_press (Pad&);
-	void session_release (Pad&) {}
+	void session_release (Pad&);
 	void session_long_press (Pad&) {}
 	void note_press (Pad&);
 	void note_release (Pad&) {}
@@ -397,7 +400,7 @@ class LaunchPadPro : public MIDISurface
 	void duplicate_release (Pad&) {}
 	void duplicate_long_press (Pad&) {}
 	void clear_press (Pad&);
-	void clear_release (Pad&) {}
+	void clear_release (Pad&);
 	void clear_long_press (Pad&) {}
 	void down_press (Pad&);
 	void down_release (Pad&) {}
