@@ -1206,10 +1206,20 @@ LaunchPadPro::projects_press (Pad& pad)
 }
 
 void
+LaunchPadPro::cue_press (Pad& pad, int row)
+{
+	if (_clear_pressed) {
+		session->clear_cue (row);
+	} else {
+		session->trigger_cue_row (row);
+	}
+}
+
+void
 LaunchPadPro::patterns_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		session->trigger_cue_row (0 + scroll_y_offset);
+		cue_press (pad, 0 + scroll_y_offset);
 	}
 }
 
@@ -1217,7 +1227,7 @@ void
 LaunchPadPro::steps_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		session->trigger_cue_row (1 + scroll_y_offset);
+		cue_press (pad, 1 + scroll_y_offset);
 	}
 }
 
@@ -1225,7 +1235,7 @@ void
 LaunchPadPro::pattern_settings_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		session->trigger_cue_row (2 + scroll_y_offset);
+		cue_press (pad, 2 + scroll_y_offset);
 	}
 }
 
@@ -1233,7 +1243,7 @@ void
 LaunchPadPro::velocity_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		session->trigger_cue_row (3 + scroll_y_offset);
+		cue_press (pad, 3 + scroll_y_offset);
 	}
 }
 
@@ -1241,7 +1251,7 @@ void
 LaunchPadPro::probability_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		session->trigger_cue_row (4 + scroll_y_offset);
+		cue_press (pad, 4 + scroll_y_offset);
 	}
 }
 
@@ -1249,16 +1259,15 @@ void
 LaunchPadPro::mutation_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		session->trigger_cue_row (5 + scroll_y_offset);
+		cue_press (pad, 5 + scroll_y_offset);
 	}
 }
-
 
 void
 LaunchPadPro::microstep_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		session->trigger_cue_row (6 + scroll_y_offset);
+		cue_press (pad, 6  + scroll_y_offset);
 	}
 }
 
@@ -1266,7 +1275,7 @@ void
 LaunchPadPro::print_to_clip_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		session->trigger_cue_row (7  + scroll_y_offset);
+		cue_press (pad, 7  + scroll_y_offset);
 	}
 }
 
@@ -1518,7 +1527,7 @@ LaunchPadPro::pad_press (Pad& pad)
 	if (_clear_pressed) {
 		TriggerPtr tp = session->trigger_at (pad.x, pad.y);
 		if (tp) {
-			tp->clear_region ();
+			tp->set_region (std::shared_ptr<Region>());
 		}
 		return;
 	}

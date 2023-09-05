@@ -308,6 +308,8 @@ class LaunchPadPro : public MIDISurface
 	bool _duplicate_pressed;
 	bool _session_pressed;
 
+	void cue_press (Pad&, int row);
+
 	/* named pad methods */
 	void shift_press (Pad&);
 	void shift_release (Pad&);
