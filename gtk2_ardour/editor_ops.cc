@@ -4642,13 +4642,19 @@ Editor::cut_copy (CutCopyOp op)
 		if (get_edit_op_range (start, end)) {
 			selection->set (start, end);
 		}
-	} else if (!selection->time.empty()) {
+	} else if (!selection->time.empty() && !selection->tracks.empty()) {
 		begin_reversible_command (opname + ' ' + _("range"));
 
 		did_edit = true;
 		cut_copy_ranges (op);
 
 		if (op == Cut || op == Delete) {
+			selection->clear_time ();
+		}
+	} else if (!selection->time.empty()) {
+		if (op == Delete) {
+			/* note: UNDO is handled inside cut_copy_section */
+			cut_copy_section (DeleteSection);
 			selection->clear_time ();
 		}
 	}
