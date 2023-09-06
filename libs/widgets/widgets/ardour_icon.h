@@ -41,6 +41,7 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		TransportEnd,
 		TransportMetronom,
 		ToolGrab,
+		ToolGrid,
 		ToolRange,
 		ToolCut,
 		ToolStretch,
