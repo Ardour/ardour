@@ -2355,10 +2355,17 @@ Editor::set_grid_to (GridType gt)
 
 	instant_save ();
 
-	if (grid_musical()) {
+	const bool grid_is_musical = grid_musical ();
+
+	if (grid_is_musical) {
 		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 		update_tempo_based_rulers ();
+	} else if (current_mouse_mode () == Editing::MouseGrid) {
+		Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("MouseMode"), X_("set-mouse-mode-object"));
+		ract->set_active (true);
 	}
+
+	ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-grid"))->set_sensitive (grid_is_musical);
 
 	mark_region_boundary_cache_dirty ();
 
