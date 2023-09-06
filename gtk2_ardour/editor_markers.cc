@@ -69,6 +69,8 @@ Editor::clear_marker_display ()
 		delete i->second;
 	}
 
+	entered_marker = 0;
+
 	location_markers.clear ();
 	_sorted_marker_lists.clear ();
 }
@@ -619,6 +621,11 @@ Editor::refresh_location_display_internal (const Locations::LocationList& locati
 
 			LocationMarkers* m = i->second;
 			location_markers.erase (i);
+
+			if (m && (entered_marker == m->start || entered_marker == m->end)) {
+				entered_marker = 0;
+			}
+
 			delete m;
 		}
 
@@ -896,6 +903,10 @@ Editor::remove_marker (ArdourMarker* marker)
 		return;
 	}
 
+	if (entered_marker == marker) {
+		entered_marker = 0;
+	}
+
 	if (marker->type() == ArdourMarker::RegionCue) {
 		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::really_remove_region_marker), marker));
 	} else {
@@ -970,6 +981,11 @@ Editor::location_gone (Location *location)
 
 			LocationMarkers* m = i->second;
 			location_markers.erase (i);
+
+			if (m && (entered_marker == m->start || entered_marker == m->end)) {
+				entered_marker = 0;
+			}
+
 			delete m;
 
 			/* Markers that visually overlap with this (removed) marker
