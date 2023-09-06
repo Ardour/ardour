@@ -1967,10 +1967,11 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 
 				/* still have data to push into the stretcher */
 
-				to_stretcher = (pframes_t) std::min (samplecnt_t (rb_blocksize), (last_readable_sample - read_index));
-				const bool at_end = (to_stretcher < rb_blocksize);
-
 				while ((pframes_t) avail < nframes && (read_index < last_readable_sample)) {
+
+					to_stretcher = (pframes_t) std::min (samplecnt_t (rb_blocksize), (last_readable_sample - read_index));
+					bool at_end = (to_stretcher < rb_blocksize);
+
 					/* keep feeding the stretcher in chunks of "to_stretcher",
 					 * until there's nframes of data available, or we reach
 					 * the end of the region
@@ -1988,6 +1989,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 					 */
 
 					_stretcher->process (&in[0], to_stretcher, at_end);
+
 					read_index += to_stretcher;
 					avail = _stretcher->available ();
 
