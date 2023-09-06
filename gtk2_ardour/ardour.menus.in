@@ -317,8 +317,6 @@
       <menu action="TempoMenu">
         <menuitem action='set-tempo-from-region'/>
         <menuitem action='set-tempo-from-edit-range'/>
-        <menuitem action='tempo-edit-is-mapping'/>
-        <menuitem action='tempo-edit-is-changing'/>
       </menu>
       <menuitem action='set-mouse-mode-object-range'/>
       <menuitem action='show-touched-automation'/>
