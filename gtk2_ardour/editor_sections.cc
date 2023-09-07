@@ -30,6 +30,7 @@
 #include "keyboard.h"
 #include "main_clock.h"
 #include "public_editor.h"
+#include "ui_config.h"
 #include "utils.h"
 
 #include "pbd/i18n.h"
@@ -233,6 +234,11 @@ EditorSections::selection_changed ()
 	Selection& s (PublicEditor::instance ().get_selection ());
 	s.clear ();
 	s.set (start, end);
+
+	if (UIConfiguration::instance ().get_follow_edits ()) {
+		_session->request_locate (start.samples());
+	}
+
 	_selection_change.unblock ();
 }
 
