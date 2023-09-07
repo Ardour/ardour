@@ -170,9 +170,12 @@ Rectangle::size_request (double& w, double& h) const
 void
 Rectangle::compute_bounding_box () const
 {
-	if (!_rect.empty()) {
-		// _bounding_box = _rect.fix().expand (1.0 + _outline_width * 0.5);
-		_bounding_box = _rect.fix().expand (_outline_width * 0.5);
+	if (_rect.empty ()) {
+		_bounding_box = Rect ();
+	} else if (_outline && _outline_width && _outline_what) {
+		 _bounding_box = _rect.fix().expand (ceil (_outline_width * 0.5));
+	} else {
+		_bounding_box = _rect.fix();
 	}
 
 	set_bbox_clean ();
