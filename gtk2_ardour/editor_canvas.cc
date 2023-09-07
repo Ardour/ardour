@@ -1261,6 +1261,7 @@ Editor::which_mode_cursor () const
 		mode_cursor = _cursors->scissors;
 		break;
 
+	case MouseGrid:
 	case MouseObject:
 	case MouseContent:
 		/* don't use mode cursor, pick a grabber cursor based on the item */
