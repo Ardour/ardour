@@ -4666,7 +4666,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 			_editor->commit_reversible_selection_op ();
 		}
 
-		if (_editor->edit_point() != Editing::EditAtSelectedMarker) {
+		if (!_editor->session()->config.get_external_sync () && (_editor->edit_point() != Editing::EditAtSelectedMarker)) {
 			bool is_start;
 			Location* location = _editor->find_location_from_marker (_marker, is_start);
 			if (location) {
