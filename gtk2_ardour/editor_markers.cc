@@ -677,6 +677,7 @@ Editor::update_section_rects ()
 
 			std::string const color = bright ? "arrangement rect" : "arrangement rect alt";
 			rect->set_fill_color (UIConfiguration::instance().color (color));
+			rect->Event.connect (sigc::bind (sigc::mem_fun (this, &Editor::section_rect_event), l,  rect, color));
 
 			Editor::LocationMarkers* markers = find_location_markers (l);
 			if (markers) {

@@ -231,6 +231,23 @@ EditorSections::selection_changed ()
 	timepos_t end   = row[_columns.end];
 
 	_selection_change.block ();
+
+	switch (PublicEditor::instance ().current_mouse_mode ()) {
+		case Editing::MouseRange:
+			/* OK */
+			break;
+		case Editing::MouseObject:
+			if (ActionManager::get_toggle_action ("MouseMode", "set-mouse-mode-object-range")->get_active ()) {
+				/* smart mode; OK */
+				break;
+			}
+			/*fallthrough*/
+		default:
+			Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("MouseMode"), X_("set-mouse-mode-range"));
+			ract->set_active (true);
+			break;
+	}
+
 	Selection& s (PublicEditor::instance ().get_selection ());
 	s.clear ();
 	s.set (start, end);

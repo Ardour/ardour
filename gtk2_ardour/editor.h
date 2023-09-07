@@ -716,6 +716,7 @@ private:
 	void location_flags_changed (ARDOUR::Location*);
 	void refresh_location_display ();
 	void update_section_rects ();
+	bool section_rect_event (GdkEvent*, ARDOUR::Location*, ArdourCanvas::Rectangle*, std::string);
 	void refresh_location_display_internal (const ARDOUR::Locations::LocationList&);
 	void add_new_location (ARDOUR::Location*);
 	ArdourCanvas::Container* add_new_location_internal (ARDOUR::Location*);

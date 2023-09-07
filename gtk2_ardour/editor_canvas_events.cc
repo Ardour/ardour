@@ -1127,6 +1127,78 @@ Editor::canvas_ruler_bar_event (GdkEvent *event, ArdourCanvas::Item* item, ItemT
 }
 
 bool
+Editor::section_rect_event (GdkEvent* ev, Location* loc, ArdourCanvas::Rectangle* rect, std::string color)
+{
+	switch (ev->type) {
+		case GDK_ENTER_NOTIFY:
+			if (UIConfiguration::instance ().get_widget_prelight ()) {
+				rect->set_fill_color (UIConfiguration::instance().color_mod (color, "marker bar"));
+				return true;
+			}
+			break;
+		case GDK_LEAVE_NOTIFY:
+			if (UIConfiguration::instance ().get_widget_prelight ()) {
+				rect->set_fill_color (UIConfiguration::instance().color (color));
+				return true;
+			}
+			break;
+		case GDK_BUTTON_PRESS:
+			if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
+				/* used to add markers */
+				return false;
+			}
+			if (ev->button.button == 1) {
+				_session->request_locate (loc->start().samples());
+			}
+			return true;
+		case GDK_2BUTTON_PRESS:
+		case GDK_3BUTTON_PRESS:
+			if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
+				return false;
+			}
+			if (ev->button.button == 1) {
+				assert (find_location_markers (loc));
+				rename_marker (find_location_markers (loc)->start);
+				return true;
+			}
+			break;
+		case GDK_BUTTON_RELEASE:
+			if (Keyboard::is_context_menu_event (&ev->button)) {
+				/* find section */
+				timepos_t start (loc->start ());
+				timepos_t end;
+				Location* l = _session->locations()->section_at (start, start, end);
+				assert (l);
+				/* set selection range */
+				selection->clear ();
+				selection->set (start, end);
+				/* switch to range tool - same as EditorSections::selection_changed */
+				switch (current_mouse_mode ()) {
+					case Editing::MouseRange:
+						/* OK */
+						break;
+					case Editing::MouseObject:
+						if (ActionManager::get_toggle_action ("MouseMode", "set-mouse-mode-object-range")->get_active ()) {
+							/* smart mode; OK */
+							break;
+						}
+						/*fallthrough*/
+					default:
+						ActionManager::get_radio_action (X_("MouseMode"), X_("set-mouse-mode-range"))->set_active (true);
+						break;
+				}
+				/* and show section context menu */
+				//popup_section_box_menu (ev->button.button, ev->button.time);
+				return true;
+			}
+			break;
+		default:
+			break;
+	}
+	return false;
+}
+
+bool
 Editor::canvas_playhead_cursor_event (GdkEvent *event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, PlayheadCursorItem);

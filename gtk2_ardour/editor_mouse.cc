@@ -1850,7 +1850,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			return true;
 
 		case SectionMarkerBarItem:
-			if (!_dragging_playhead) {
+			if (!_dragging_playhead && Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);
 				mouse_add_new_marker (where, Location::IsSection);
 			}
