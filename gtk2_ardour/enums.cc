@@ -60,6 +60,7 @@ setup_gtk_ardour_enums ()
 	StartupFSM::DialogID startup_dialog;
 	Gtk::ResponseType dialog_response;
 	AddRouteDialog::TypeWanted type_wanted;
+	NoteNameDisplay note_name_display;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()

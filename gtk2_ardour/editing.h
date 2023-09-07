@@ -199,6 +199,18 @@ enum InsertTimeOption {
 #undef INSERTTIMEOPT
 #define INSERTTIMEOPT(a) /*empty*/
 
+#undef NOTENAMEDISPLAY
+#define NOTENAMEDISPLAY(a) a,
+enum NoteNameDisplay {
+	#include "editing_syms.h"
+};
+
+extern const char *notenamedisplaystrs[];
+inline const char* enum2str(NoteNameDisplay m) {return notenamedisplaystrs[m];}
+
+#undef NOTENAMEDISPLAY
+#define NOTENAMEDISPLAY(a) /*empty*/
+
 /////////////////////
 // These don't need their state saved. yet...
 enum CutCopyOp {

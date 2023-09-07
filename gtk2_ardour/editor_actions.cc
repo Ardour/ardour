@@ -1180,7 +1180,6 @@ Editor::draw_channel_action (int c)
 {
 	char buf[64];
 	const char* action = 0;
-	char buf[64];
 	RefPtr<Action> act;
 
 	if (c==DRAW_CHAN_AUTO) {
