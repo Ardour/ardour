@@ -471,6 +471,10 @@ EditorSections::button_press (GdkEventButton* ev)
 		} else if (column == _view.get_column (2)) {
 			timepos_t end   = row[_columns.end];
 			_session->request_locate (end.samples());
+		} else {
+			/* double-click edits name even with `mouse-edits-require-mod1` stack */
+			_view.set_cursor (*rows.begin (), *_view.get_column(0), true);
+			return true;
 		}
 		return false;
 	}
