@@ -866,7 +866,7 @@ private:
 	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_region_context_items (Gtk::Menu_Helpers::MenuList&, std::shared_ptr<ARDOUR::Track>);
-	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&);
+	void add_selection_context_items (Gtk::Menu_Helpers::MenuList&, bool time_selection_only = false);
 	Gtk::MenuItem* _popup_region_menu_item;
 
 	void popup_control_point_context_menu (ArdourCanvas::Item*, GdkEvent*);
