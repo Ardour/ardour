@@ -39,6 +39,7 @@
 #include "editor.h"
 #include "editor_drag.h"
 #include "editor_routes.h"
+#include "editor_section_box.h"
 #include "editor_sources.h"
 #include "actions.h"
 #include "audio_time_axis.h"
@@ -1265,6 +1266,17 @@ Editor::presentation_info_changed (PropertyChange const & what_changed)
 }
 
 void
+Editor::update_section_box ()
+{
+	if (selection->tracks.size() == 0 && selection->regions.size () == 0 && selection->time.length() != 0) {
+		_section_box->set_position (selection->time.start_time().samples(), selection->time.end_time().samples());
+		_section_box->show ();
+	} else {
+		_section_box->hide();
+	}
+}
+
+void
 Editor::track_selection_changed ()
 {
 	/* reset paste count, so the plaste location doesn't get incremented
@@ -1275,6 +1287,7 @@ Editor::track_selection_changed ()
 		play_solo_selection(false);
 
 	update_selection_markers ();
+	update_section_box ();
 }
 
 void
@@ -1294,6 +1307,8 @@ Editor::time_selection_changed ()
 	}
 
 	update_selection_markers ();
+	update_section_box ();
+
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		(*i)->show_selection (selection->time);
 	}

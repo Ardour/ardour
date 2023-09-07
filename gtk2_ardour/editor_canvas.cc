@@ -53,6 +53,7 @@
 #include "editor_drag.h"
 #include "region_view.h"
 #include "editor_group_tabs.h"
+#include "editor_section_box.h"
 #include "editor_summary.h"
 #include "video_timeline.h"
 #include "keyboard.h"
@@ -142,13 +143,6 @@ Editor::initialize_canvas ()
 
 	_time_markers_group = new ArdourCanvas::Container (h_scroll_group);
 	CANVAS_DEBUG_NAME (_time_markers_group, "time bars");
-
-	/* group above rulers, to show selection triangles */
-	_selection_marker_group = new ArdourCanvas::Container (h_scroll_group);
-	CANVAS_DEBUG_NAME (_selection_marker_group, "Canvas Selection Ruler");
-	_selection_marker->start = new SelectionMarker (*this, *_selection_marker_group, "play head", ArdourMarker::SelectionStart);
-	_selection_marker->end = new SelectionMarker (*this, *_selection_marker_group, "play head", ArdourMarker::SelectionEnd);
-	_selection_marker_group->raise_to_top ();
 
 	/* Note that because of ascending-y-axis coordinates, this order is
 	 * bottom-to-top. But further note that the actual order is set in
@@ -278,6 +272,17 @@ Editor::initialize_canvas ()
 	_canvas_grid_zone->set_outline (false);
 	_canvas_grid_zone->Event.connect (sigc::mem_fun (*this, &Editor::canvas_grid_zone_event));
 	_canvas_grid_zone->set_ignore_events (true);
+
+	/* and now the timeline-selection rectangle which is controlled by the markers */
+	_section_box = new SectionBox (*this, cursor_scroll_group);
+	_section_box->Event.connect (sigc::mem_fun (*this, &Editor::canvas_section_box_event));
+
+	/* group above rulers, to show selection triangles */
+	_selection_marker_group = new ArdourCanvas::Container (cursor_scroll_group);
+	CANVAS_DEBUG_NAME (_selection_marker_group, "Canvas Selection Ruler");
+	_selection_marker->start = new SelectionMarker (*this, *_selection_marker_group, "selection", ArdourMarker::SelectionStart);
+	_selection_marker->end = new SelectionMarker (*this, *_selection_marker_group, "selection", ArdourMarker::SelectionEnd);
+	_selection_marker_group->raise_to_top ();
 
 	/* these signals will initially be delivered to the canvas itself, but if they end up remaining unhandled,
 	 * they are passed to Editor-level handlers.
@@ -1062,6 +1067,9 @@ Editor::color_handler()
 	samples_ruler->set_outline_color (text);
 	bbt_ruler->set_fill_color (base);
 	bbt_ruler->set_outline_color (text);
+
+	_section_box->set_fill_color (UIConfiguration::instance().color_mod ("selection", "selection rect"));
+	_section_box->set_outline_color (UIConfiguration::instance().color ("selection"));
 
 	_playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
 

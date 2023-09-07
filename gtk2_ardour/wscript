@@ -94,6 +94,7 @@ gtk2_ardour_sources = [
         'editor_cursors.cc',
         'editor_drag.cc',
         'editor_route_groups.cc',
+        'editor_section_box.cc',
         'editor_export_audio.cc',
         'editor_group_tabs.cc',
         'editor_keys.cc',

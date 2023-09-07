@@ -145,6 +145,7 @@ class QuantizeDialog;
 class RegionPeakCursor;
 class RhythmFerret;
 class RulerDialog;
+class SectionBox;
 class Selection;
 class SelectionPropertiesBox;
 class SoundFileOmega;
@@ -733,6 +734,7 @@ private:
 	void toggle_marker_lines ();
 	void set_marker_line_visibility (bool);
 	void update_selection_markers ();
+	void update_section_box ();
 
 	void jump_forward_to_mark ();
 	void jump_backward_to_mark ();
@@ -852,12 +854,14 @@ private:
 	void collect_new_region_view (RegionView*);
 	void collect_and_select_new_region_view (RegionView*);
 
+	Gtk::Menu section_box_menu;
 	Gtk::Menu track_context_menu;
 	Gtk::Menu track_region_context_menu;
 	Gtk::Menu track_selection_context_menu;
 
 	GdkEvent context_click_event;
 
+	void popup_section_box_menu (int, int);
 	void popup_track_context_menu (int, int, ItemType, bool);
 	Gtk::Menu* build_track_context_menu ();
 	Gtk::Menu* build_track_bus_context_menu ();
@@ -1795,6 +1799,7 @@ private:
 
 	/* non-public event handlers */
 
+	bool canvas_section_box_event (GdkEvent* event);
 	bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_scroll (GdkEventScroll* event);
 
@@ -2098,6 +2103,8 @@ private:
 	bool get_smart_mode() const;
 
 	bool audio_region_selection_covers (samplepos_t where);
+
+	SectionBox* _section_box;
 
 	/* playhead and edit cursor */
 

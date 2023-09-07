@@ -1188,7 +1188,7 @@ Editor::section_rect_event (GdkEvent* ev, Location* loc, ArdourCanvas::Rectangle
 						break;
 				}
 				/* and show section context menu */
-				//popup_section_box_menu (ev->button.button, ev->button.time);
+				popup_section_box_menu (ev->button.button, ev->button.time);
 				return true;
 			}
 			break;
@@ -1202,6 +1202,32 @@ bool
 Editor::canvas_playhead_cursor_event (GdkEvent *event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, PlayheadCursorItem);
+}
+
+bool
+Editor::canvas_section_box_event (GdkEvent *event)
+{
+	switch (event->type) {
+		case GDK_BUTTON_PRESS:
+			if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
+			   && event->button.button == 1) {
+				_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
+			}
+			/*fallthrough*/
+		case GDK_2BUTTON_PRESS:
+			/*fallthrough*/
+		case GDK_3BUTTON_PRESS:
+			return !Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
+		case GDK_BUTTON_RELEASE:
+			if (Keyboard::is_context_menu_event (&event->button)) {
+				popup_section_box_menu (event->button.button, event->button.time);
+				return true;
+			}
+			return false;
+		default:
+			break;
+	}
+	return false;
 }
 
 bool
