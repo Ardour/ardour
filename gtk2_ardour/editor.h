@@ -1780,6 +1780,8 @@ private:
 
 	void mid_tempo_change (MidTempoChanges);
 
+	Editing::EditPoint edit_point() const { return _edit_point; }
+
 protected:
 	void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update = false);
 

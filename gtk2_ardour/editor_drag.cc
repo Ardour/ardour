@@ -4637,7 +4637,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 
 		/* just a click, do nothing but finish
-		   off the selection process
+		   off the selection process (and locate if appropriate)
 		*/
 
 		Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
@@ -4664,6 +4664,14 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (_selection_changed) {
 			_editor->begin_reversible_selection_op (X_("Select Marker Release"));
 			_editor->commit_reversible_selection_op ();
+		}
+
+		if (_editor->edit_point() != Editing::EditAtSelectedMarker) {
+			bool is_start;
+			Location* location = _editor->find_location_from_marker (_marker, is_start);
+			if (location) {
+				_editor->session ()->request_locate (is_start ? location->start().samples() : location->end().samples());
+			}
 		}
 
 		return;
