@@ -379,13 +379,9 @@ Editor::mouse_mode_toggled (MouseMode m)
 	}
 
 	if (mouse_mode == MouseGrid) {
-		grid_box.show();
-		_grid_box_spacer.show();
-		_canvas_grid_zone->set_ignore_events (false); // woohoo
+		_canvas_grid_zone->set_ignore_events (false);
 	} else {
-		grid_box.hide();
-		_grid_box_spacer.hide();
-		_canvas_grid_zone->set_ignore_events (true); // important !!!
+		_canvas_grid_zone->set_ignore_events (true);
 	}
 
 	if (internal_editing()) {
