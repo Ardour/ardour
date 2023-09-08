@@ -655,7 +655,7 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 	std::shared_ptr<const Pad> pad_pressed = pm->second;
 
 	if (_current_layout == _cue_layout) {
-		_current_layout->pad_press (pad_pressed->x, pad_pressed->y);
+		_current_layout->pad_press (pad_pressed->x, pad_pressed->y, ev->velocity);
 		return;
 	}
 

@@ -569,7 +569,7 @@ CueLayout::show_running_boxen (bool yn)
 }
 
 void
-CueLayout::pad_press (int y, int x) /* fix coordinate order one day */
+CueLayout::pad_press (int y, int x, int velocity) /* fix coordinate order one day */
 {
 	if (!_route[x]) {
 		return;
@@ -582,7 +582,7 @@ CueLayout::pad_press (int y, int x) /* fix coordinate order one day */
 		return;
 	}
 
-	tb->bang_trigger_at (y + scene_base);
+	tb->bang_trigger_at (y + scene_base, velocity / 127.0f);
 }
 
 void
