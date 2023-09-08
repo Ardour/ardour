@@ -6,12 +6,13 @@ ardour { ["type"] = "EditorAction", name = "Search and Jump to Marker",
 
 function factory () return function ()
 	local keep = false
+	local search_term = ''
 
 	::restart::
 
 	local dlg = LuaDialog.Dialog ("Search and Jump to Marker",
 		{
-			{ type = "entry",    key = "marker", default = '',   title = "Marker Prefix" },
+			{ type = "entry",    key = "marker", default = search_term,   title = "Marker Prefix" },
 			{ type = "checkbox", key = "keep",   default = keep, title = "Keep Dialog Open" },
 		})
 
@@ -23,6 +24,8 @@ function factory () return function ()
 	if (rv['marker'] == "") then
 		if keep then goto restart end
 		return
+	else
+		search_term = rv['marker']
 	end
 
 	for l in Session:locations():list():iter() do
