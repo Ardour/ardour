@@ -560,11 +560,12 @@ Trigger::set_ui (void* p)
 }
 
 void
-Trigger::bang ()
+Trigger::bang (float velocity)
 {
 	if (!_region) {
 		return;
 	}
+	_pending_velocity_gain = velocity;
 	_bang.fetch_add (1);
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("bang on %1\n", _index));
 }
@@ -2072,7 +2073,13 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 				AudioBuffer& buf (bufs.get_audio (chn));
 				Sample* src = do_stretch ? bufp[channel] : (data[channel] + read_index);
 
-				gain_t gain = _velocity_gain * _gain;  //incorporate the gain from velocity_effect
+				gain_t gain;
+
+				if (_velocity_effect) {
+					gain = (_velocity_effect * _velocity_gain) * _gain;
+				} else {
+					gain = _gain;
+				}
 
 				if (gain != 1.0f) {
 					buf.accumulate_with_gain_from (src, from_stretcher, gain, dest_offset);
@@ -3762,11 +3769,11 @@ TriggerBox::stop_all_quantized ()
 }
 
 void
-TriggerBox::bang_trigger_at (Triggers::size_type row)
+TriggerBox::bang_trigger_at (Triggers::size_type row, float velocity)
 {
 	TriggerPtr t = trigger(row);
 	if (t && t->region()) {
-		t->bang();
+		t->bang (velocity);
 	} else {
 		/* by convention, an empty slot is effectively a STOP button */
 		stop_all_quantized();
