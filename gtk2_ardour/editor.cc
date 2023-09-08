@@ -2243,7 +2243,6 @@ Editor::grid_type_is_musical(GridType gt) const
 	case GridTypeBar:
 		return true;
 	case GridTypeNone:
-	case GridTypePlayhead:
 	case GridTypeTimecode:
 	case GridTypeMinSec:
 	case GridTypeCDFrame:
@@ -3090,7 +3089,6 @@ Editor::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, 
 				divisor = 1;
 				break;
 			case GridTypeNone:
-			case GridTypePlayhead:
 				return ret;
 			default:
 				divisor = 2;
@@ -3219,11 +3217,6 @@ Editor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapP
 	timepos_t test = timepos_t::max (start.time_domain()); // for each snap, we'll use this value
 	timepos_t dist = timepos_t::max (start.time_domain()); // this records the distance of the best snap result we've found so far
 	timepos_t best = timepos_t::max (start.time_domain()); // this records the best snap-result we've found so far
-
-	if (_grid_type == GridTypePlayhead) {
-		best = timepos_t (_session->transport_sample ());
-		goto check_distance;
-	}
 
 	/* check snap-to-marker */
 	if ((pref == SnapToAny_Visual) && uic.get_snap_to_marks ()) {
@@ -3581,10 +3574,12 @@ Editor::build_grid_type_menu ()
 {
 	using namespace Menu_Helpers;
 
-	/* main grid: bars, quarter-notes, etc */
+	/* there's no Grid, but if Snap is engaged, the Snap preferences will be applied */
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeNone],      sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeNone)));
+	grid_type_selector.AddMenuElem(SeparatorElem());
+
+	/* musical grid: bars, quarter-notes, etc */
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBar],       sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBar)));
-	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypePlayhead],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypePlayhead)));
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeat],      sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeat)));
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv2],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv2)));
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv4],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv4)));
@@ -4461,7 +4456,6 @@ Editor::get_grid_beat_divisions (GridType gt)
 	case GridTypeBar:        return -1;
 
 	case GridTypeNone:       return 0;
-	case GridTypePlayhead:   return 0;
 	case GridTypeTimecode:   return 0;
 	case GridTypeMinSec:     return 0;
 	case GridTypeCDFrame:    return 0;

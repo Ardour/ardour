@@ -711,7 +711,6 @@ Editor::register_actions ()
 
 	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeat)));
 	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBar)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-playhead"),       grid_type_strings[(int)GridTypePlayhead].c_str(),       (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypePlayhead)));
 
 	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-none"),           grid_type_strings[(int)GridTypeNone].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeNone)));
 
@@ -1258,9 +1257,6 @@ Editor::draw_length_action (GridType type)
 	case Editing::GridTypeBar:
 		action = "draw-length-bar";
 		break;
-	case Editing::GridTypePlayhead:
-		action = "draw-length-playhead";
-		break;
 	case Editing::GridTypeNone:
 		action = "draw-length-auto";
 		break;
@@ -1342,9 +1338,6 @@ Editor::grid_type_action (GridType type)
 	case Editing::GridTypeBar:
 		action = "grid-type-bar";
 		break;
-	case Editing::GridTypePlayhead:
-		action = "grid-type-playhead";
-		break;
 	case Editing::GridTypeNone:
 		action = "grid-type-none";
 		break;
@@ -1400,9 +1393,6 @@ Editor::next_grid_choice ()
 		set_grid_to (Editing::GridTypeBeat);
 		break;
 	case Editing::GridTypeNone:
-		set_grid_to (Editing::GridTypePlayhead);
-		break;
-	case Editing::GridTypePlayhead:
 		set_grid_to (Editing::GridTypeBar);
 		break;
 	case Editing::GridTypeBeatDiv3:
@@ -1445,10 +1435,7 @@ Editor::prev_grid_choice ()
 		set_grid_to (Editing::GridTypeBar);
 		break;
 	case Editing::GridTypeBar:
-		set_grid_to (Editing::GridTypePlayhead);
-		break;
-	case Editing::GridTypePlayhead:
-		set_grid_to (Editing::GridTypeBar);
+		set_grid_to (Editing::GridTypeNone);
 		break;
 	case Editing::GridTypeNone:
 		set_grid_to (Editing::GridTypeBeatDiv32);

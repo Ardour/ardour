@@ -22,7 +22,7 @@
 
 /* Changing this order will break the menu */
 GRIDTYPE(GridTypeNone)
-GRIDTYPE(GridTypePlayhead)
+GRIDTYPE(GridTypePlayhead)  
 GRIDTYPE(GridTypeBar)
 GRIDTYPE(GridTypeBeat)
 GRIDTYPE(GridTypeBeatDiv2)

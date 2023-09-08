@@ -105,7 +105,6 @@ setup_gtk_ardour_enums ()
 	REGISTER (region_list_sort_type);
 
 	REGISTER_ENUM (GridTypeNone);
-	REGISTER_ENUM (GridTypePlayhead);
 	REGISTER_ENUM (GridTypeBar);
 	REGISTER_ENUM (GridTypeBeat);
 	REGISTER_ENUM (GridTypeBeatDiv2);
@@ -127,6 +126,11 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (GridTypeMinSec);
 	REGISTER_ENUM (GridTypeCDFrame);
 	REGISTER (grid_type);
+
+	/*
+	 * GridTypePlayhead was not intended to get into the wild
+	*/
+	enum_writer.add_to_hack_table ("GridTypePlayhead", "GridTypeNone");
 
 	REGISTER_ENUM (SnapOff);
 	REGISTER_ENUM (SnapNormal);
