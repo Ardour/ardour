@@ -187,25 +187,28 @@ class LaunchPadPro : public MIDISurface
 			Pulsing = 0x2
 		};
 
-		typedef void (LaunchPadPro::*PadMethod)(Pad&);
+		typedef void (LaunchPadPro::*ButtonMethod)(Pad&);
+		typedef void (LaunchPadPro::*PadMethod)(Pad&, int velocity);
 
-		Pad (PadID pid, PadMethod press_method, PadMethod long_press_method = &LaunchPadPro::relax, PadMethod release_method = &LaunchPadPro::relax)
+		Pad (PadID pid, ButtonMethod press_method, ButtonMethod long_press_method = &LaunchPadPro::relax, ButtonMethod release_method = &LaunchPadPro::relax)
 			: id (pid)
 			, x (-1)
 			, y (-1)
-			, on_press (press_method)
-			, on_release (release_method)
-			, on_long_press (long_press_method)
-		{}
+		{
+			on_press = press_method;
+			on_release = release_method;
+			on_long_press = long_press_method;
+		}
 
-		Pad (int pid, int xx, int yy, PadMethod press_method, PadMethod long_press_method = &LaunchPadPro::relax, PadMethod release_method = &LaunchPadPro::relax)
+		Pad (int pid, int xx, int yy, PadMethod press_method, ButtonMethod long_press_method = &LaunchPadPro::relax, ButtonMethod release_method = &LaunchPadPro::relax)
 			: id (pid)
 			, x (xx)
 			, y (yy)
-			, on_press (press_method)
-			, on_release (release_method)
-			, on_long_press (long_press_method)
-		{}
+		{
+			on_pad_press = press_method;
+			on_release = release_method;
+			on_long_press = long_press_method;
+		}
 
 		MIDI::byte status_byte() const { if (x < 0) return 0xb0; return 0x90; }
 		bool is_pad () const { return x >= 0; }
@@ -214,9 +217,18 @@ class LaunchPadPro : public MIDISurface
 		int id;
 		int x;
 		int y;
-		PadMethod on_press;
-		PadMethod on_release;
-		PadMethod on_long_press;
+
+		/* It's either a button (CC number) or a pad (note number
+		 * w/velocity info), never both.
+		 */
+		union {
+			ButtonMethod on_press;
+			PadMethod on_pad_press;
+		};
+
+		ButtonMethod on_release;
+		ButtonMethod on_long_press;
+
 		sigc::connection timeout_connection;
 	};
 
@@ -438,7 +450,7 @@ class LaunchPadPro : public MIDISurface
 	void fader_long_press (Pad&);
 	void fader_release (Pad&);
 
-	void pad_press (Pad&);
+	void pad_press (Pad&, int velocity);
 	void pad_long_press (Pad&);
 
 	void trigger_property_change (PBD::PropertyChange, ARDOUR::Trigger*);
