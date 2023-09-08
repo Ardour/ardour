@@ -450,10 +450,16 @@ Editor::update_time_selection_display ()
 		break;
 	case MouseDraw:
 		/* Clear regions, but not time or tracks, since that
-		 would destroy the range selection rectangle, which we need to stick
-		 around for AutomationRangeDrag. */
+		 * would destroy the range selection rectangle, which we need to stick
+		 * around for AutomationRangeDrag. */
 		selection->clear_regions ();
 		selection->clear_playlists ();
+		/* .. unless there is no track selection (i.e. arrangement section
+		 * selection). In which case time is cleared too.
+		 */
+		if (selection->tracks.empty ()) {
+			selection->clear_time ();
+		}
 		break;
 	case MouseContent:
 		/* This handles internal edit.
