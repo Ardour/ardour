@@ -3899,7 +3899,7 @@ TriggerBox::midi_input_handler (MIDI::Parser&, MIDI::byte* buf, size_t sz, sampl
 		int y;
 
 		if (lookup_custom_midi_binding (msg, x, y)) {
-			AudioEngine::instance()->session()->bang_trigger_at (x, y);
+			AudioEngine::instance()->session()->bang_trigger_at (x, y, ev.velocity());
 		}
 	}
 
