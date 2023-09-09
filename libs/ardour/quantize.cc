@@ -81,8 +81,8 @@ swing_position (Temporal::Beats pos, Temporal::Beats grid, double swing_strength
 
 	using namespace Temporal;
 
-	const bool swing_quantize_grid_position = pos > Beats() && ((pos/grid) % Beats (2, 0)) != Beats();
-	const bool swing_previous_grid_position = pos > grid && (((pos-grid)/grid) % Beats (2, 0)) != Beats();
+	const bool swing_quantize_grid_position = pos > Beats() && ((pos/grid) % Beats (0, 2)) != Beats();
+	const bool swing_previous_grid_position = pos > grid && (((pos-grid)/grid) % Beats (0, 2)) != Beats();
 
 	/* one of these will not be subject to swing */
 
@@ -95,7 +95,7 @@ swing_position (Temporal::Beats pos, Temporal::Beats grid, double swing_strength
 		swung_previous_grid_position = Beats();
 	}
 
-	const ratio_t r (2 * swing_strength, 3);
+	const ratio_t r (200 * swing_strength, 300);
 
 	if (swing_previous_grid_position) {
 		swung_previous_grid_position = swung_previous_grid_position + (grid * r);
@@ -105,15 +105,15 @@ swing_position (Temporal::Beats pos, Temporal::Beats grid, double swing_strength
 		swung_pos = swung_pos + (grid * r);
 	}
 
-	/* now correct for start-of-model offset */
-
-	pos += offset;
-
 	if ((pos - swung_pos).abs() > (pos - swung_previous_grid_position).abs()) {
 		pos = swung_previous_grid_position;
 	} else {
 		pos = swung_pos;
 	}
+
+	/* now correct for start-of-model offset */
+
+	pos += offset;
 
 	return pos;
 }
