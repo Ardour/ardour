@@ -47,7 +47,7 @@ Quantize::Quantize (bool snap_start, bool snap_end,
 	, _start_grid(start_grid)
 	, _end_grid(end_grid)
 	, _strength (strength/100.0)
-	, _swing (swing/100.0)
+	, _swing (swing)
 	, _threshold (threshold)
 {
 }
@@ -95,7 +95,7 @@ swing_position (Temporal::Beats pos, Temporal::Beats grid, double swing_strength
 		swung_previous_grid_position = Beats();
 	}
 
-	const ratio_t r (200 * swing_strength, 300);
+	const ratio_t r (swing_strength, 300);
 
 	if (swing_previous_grid_position) {
 		swung_previous_grid_position = swung_previous_grid_position + (grid * r);
