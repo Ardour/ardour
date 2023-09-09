@@ -810,7 +810,7 @@ LaunchPadPro::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoB
 
 	Pad& pad (p->second);
 	maybe_start_press_timeout (pad);
-	(this->*pad.on_press) (pad);
+	(this->*pad.on_pad_press) (pad, ev->velocity);
 }
 
 void
@@ -1531,9 +1531,9 @@ LaunchPadPro::lower8_press (Pad& pad)
 }
 
 void
-LaunchPadPro::pad_press (Pad& pad)
+LaunchPadPro::pad_press (Pad& pad, int velocity)
 {
-	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("pad press on %1, %2 => %3\n", pad.x, pad.y, pad.id));
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("pad press on %1, %2 => %3 vel %4\n", pad.x, pad.y, pad.id, velocity));
 
 	if (_clear_pressed) {
 		TriggerPtr tp = session->trigger_at (pad.x, pad.y);
@@ -1543,7 +1543,7 @@ LaunchPadPro::pad_press (Pad& pad)
 		return;
 	}
 
-	session->bang_trigger_at (pad.x, pad.y);
+	session->bang_trigger_at (pad.x, pad.y, velocity / 127.0f);
 	start_press_timeout (pad);
 }
 

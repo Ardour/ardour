@@ -261,7 +261,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	/* Calling ::bang() will cause this Trigger to be placed in its owning
 	   TriggerBox's queue.
 	*/
-	void bang ();
+	void bang (float velocity = 1.0f);
 
 	/* Calling ::unbang() is equivalent to a mouse-up or note-off
 	    ... it MIGHT cause a clip to stop, but more likely has no effect, depending on the slot's launch-style.
@@ -745,7 +745,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	TriggerPtr trigger (Triggers::size_type);
 
-	void bang_trigger_at (Triggers::size_type row);
+	void bang_trigger_at (Triggers::size_type row, float velocity = 1.0f);
 	void unbang_trigger_at (Triggers::size_type row);
 
 	void add_trigger (TriggerPtr);

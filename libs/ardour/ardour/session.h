@@ -1386,7 +1386,7 @@ public:
 	int num_triggerboxes () const;
 	std::shared_ptr<TriggerBox> triggerbox_at (int32_t route_index) const;
 	TriggerPtr trigger_at (int32_t route_index, int32_t row_index) const;
-	bool bang_trigger_at(int32_t route_index, int32_t row_index);
+	bool bang_trigger_at(int32_t route_index, int32_t row_index, float velocity = 1.0);
 	bool unbang_trigger_at(int32_t route_index, int32_t row_index);
 	void clear_cue (int row_index);
 
