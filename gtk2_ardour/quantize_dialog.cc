@@ -194,5 +194,5 @@ QuantizeDialog::strength () const
 Temporal::Beats
 QuantizeDialog::threshold () const
 {
-	return Temporal::Beats::from_double (threshold_adjustment.get_value ());
+	return Temporal::Beats::ticks (threshold_adjustment.get_value ());
 }
