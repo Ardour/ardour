@@ -167,7 +167,7 @@ QuantizeDialog::grid_size_to_musical_time (const string& txt) const
 	for (size_t i = 1; i < grid_strings.size(); ++i) {
 		if (txt == grid_strings[i]) {
 			assert (_grid_beats[i] != 0);
-			b = Temporal::Beats::ticks (int_div_round (Temporal::Beats::PPQN, (int32_t) i));
+			b = Temporal::Beats::ticks (int_div_round (Temporal::Beats::PPQN, (int32_t) _grid_beats[i]));
 			break;
 		}
 	}
