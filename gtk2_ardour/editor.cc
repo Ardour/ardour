@@ -1608,10 +1608,9 @@ Editor::popup_section_box_menu (int button, int32_t time)
 #endif
 
 	timepos_t start, end;
-	if (get_selection_extents (start, end)) {
+	Location* l;
+	if (get_selection_extents (start, end) && NULL != (l = _session->locations ()->mark_at (start))) {
 		/* add some items from build_marker_menu () */
-		Location* l = _session->locations ()->mark_at (start);
-		assert (l);
 		LocationMarkers* lm = find_location_markers (l);
 		assert (lm && lm->start);
 		items.push_back (SeparatorElem());
