@@ -72,12 +72,9 @@ public:
 	ARDOUR::RegionList regionlist () const;
 
 private:
-	void remove_it (RegionView*);
-
 	void add_to_layer (RegionView *);
 
 	std::list<RegionView *> _bylayer; ///< list of regions sorted by layer
-	PBD::ScopedConnection death_connection;
 };
 
 #endif /* __ardour_gtk_region_selection_h__ */

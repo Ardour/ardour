@@ -77,6 +77,9 @@ Selection::Selection (const PublicEditor* e, bool mls)
 
 	void (Selection::*point_remove)(ControlPoint*) = &Selection::remove;
 	ControlPoint::CatchDeletion.connect (*this, MISSING_INVALIDATOR, boost::bind (point_remove, this, _1), gui_context());
+
+	void (Selection::*rv_remove)(RegionView*) = &Selection::remove;
+	RegionView::RegionViewGoingAway.connect (*this, MISSING_INVALIDATOR, boost::bind (rv_remove, this, _1), gui_context());
 }
 
 #if 0
