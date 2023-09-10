@@ -94,6 +94,9 @@ STATIC(SetSession, &LuaInstance::SetSession, 0)
 // Editor Selection Changed
 STATIC(SelectionChanged, &LuaInstance::SelectionChanged, 0)
 
+// Tempo Map Changed (old_map, new_map, from_undo)
+STATIC(TempoMapChanged, &Temporal::TempoMap::MapChanged, 3)
+
 // TODO per track/route signals,
 // TODO per plugin actions / controllables
 // TODO per region actions
