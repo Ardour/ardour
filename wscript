@@ -958,6 +958,7 @@ def configure(conf):
     set_version ()
     conf.load('compiler_c')
     conf.load('compiler_cxx')
+    conf.load('clang_compilation_database')
     if Options.options.dist_target == 'mingw':
         conf.load('winres')
     elif Options.options.clang_compile_db:

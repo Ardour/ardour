@@ -1,0 +1,6 @@
+Checks: >
+  -clang-analyzer-deadcode.DeadStores,
+  -clang-diagnostic-cast-qual,
+  -clang-diagnostic-enum-conversion,
+  -clang-diagnostic-literal-conversion,
+InheritParentConfig: true

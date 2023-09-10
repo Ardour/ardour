@@ -1,0 +1,7 @@
+Checks: >
+  -clang-analyzer-optin.cplusplus.VirtualCall,
+  -clang-diagnostic-logical-not-parentheses,
+  -clang-analyzer-core.CallAndMessage,
+  -clang-diagnostic-unused-but-set-variable,
+  -clang-analyzer-deadcode.DeadStores,
+InheritParentConfig: true

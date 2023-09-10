@@ -1,0 +1,4 @@
+Checks: >
+  -clang-analyzer-deadcode.DeadStores,
+  -clang-diagnostic-unused-but-set-variable,
+InheritParentConfig: true

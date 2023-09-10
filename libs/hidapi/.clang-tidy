@@ -1,0 +1,4 @@
+Checks: >
+  -clang-analyzer-core.UndefinedBinaryOperatorResult,
+  -clang-analyzer-unix.Malloc,
+InheritParentConfig: true

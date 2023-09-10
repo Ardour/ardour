@@ -1,0 +1,7 @@
+Checks: >
+  -clang-analyzer-core.NonNullParamChecker,
+  -clang-analyzer-cplusplus.NewDeleteLeaks,
+  -clang-analyzer-cplusplus.StringChecker,
+  -clang-analyzer-security.insecureAPI.vfork,
+  -clang-analyzer-unix.Vfork,
+InheritParentConfig: true

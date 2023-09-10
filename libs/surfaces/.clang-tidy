@@ -1,0 +1,12 @@
+Checks: >
+  -clang-analyzer-core.CallAndMessage,
+  -clang-analyzer-core.uninitialized.UndefReturn,
+  -clang-analyzer-cplusplus.NewDeleteLeaks,
+  -clang-analyzer-deadcode.DeadStores,
+  -clang-analyzer-optin.cplusplus.CallAndMessage,
+  -clang-analyzer-optin.cplusplus.VirtualCall,
+  -clang-diagnostic-sometimes-uninitialized,
+  -clang-diagnostic-unused-but-set-variable,
+  -clang-diagnostic-unused-variable,
+  -clang-diagnostic-varargs,
+InheritParentConfig: true

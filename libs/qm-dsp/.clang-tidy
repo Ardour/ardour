@@ -1,0 +1,8 @@
+Checks: >
+  -clang-analyzer-core.CallAndMessage,
+  -clang-analyzer-core.UndefinedBinaryOperatorResult,
+  -clang-analyzer-cplusplus.NewDeleteLeaks,
+  -clang-analyzer-deadcode.DeadStores,
+  -clang-diagnostic-cast-align,
+  -clang-diagnostic-cast-qual,
+InheritParentConfig: true

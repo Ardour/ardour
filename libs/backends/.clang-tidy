@@ -1,0 +1,7 @@
+Checks: >
+  -clang-analyzer-core.UndefinedBinaryOperatorResult,
+  -clang-analyzer-deadcode.DeadStores,
+  -clang-analyzer-optin.cplusplus.VirtualCall,
+  -clang-analyzer-security.insecureAPI.vfork,
+  -clang-diagnostic-unused-const-variable,
+InheritParentConfig: true

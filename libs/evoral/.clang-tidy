@@ -1,0 +1,4 @@
+Checks: >
+  -clang-analyzer-deadcode.DeadStores,
+  -clang-analyzer-optin.cplusplus.VirtualCall,
+InheritParentConfig: true

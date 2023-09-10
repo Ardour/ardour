@@ -1,0 +1,4 @@
+Checks: >
+  -clang-analyzer-optin.cplusplus.VirtualCall,
+  -clang-analyzer-optin.cplusplus.CallAndMessage,
+InheritParentConfig: true

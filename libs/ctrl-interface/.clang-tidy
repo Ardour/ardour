@@ -1,0 +1,4 @@
+Checks: >
+  -clang-diagnostic-varargs,
+  -clang-analyzer-cplusplus.NewDeleteLeaks,
+InheritParentConfig: true

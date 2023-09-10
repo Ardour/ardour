@@ -1,0 +1,17 @@
+Checks: >
+  -clang-analyzer-core.DivideZero,
+  -clang-analyzer-core.NullDereference,
+  -clang-analyzer-cplusplus.NewDeleteLeaks,
+  -clang-analyzer-cplusplus.StringChecker,
+  -clang-analyzer-deadcode.DeadStores,
+  -clang-analyzer-optin.cplusplus.UninitializedObject,
+  -clang-analyzer-optin.cplusplus.VirtualCall,
+  -clang-analyzer-security.insecureAPI.strcpy,
+  -clang-diagnostic-#warnings,
+  -clang-diagnostic-bitwise-instead-of-logical,
+  -clang-diagnostic-sign-compare,
+  -clang-diagnostic-uninitialized,
+  -clang-diagnostic-unused-but-set-variable,
+  -clang-diagnostic-unused-private-field,
+  -clang-diagnostic-unused-variable,
+InheritParentConfig: true

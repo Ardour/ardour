@@ -1,0 +1,4 @@
+Checks: >
+  -clang-analyzer-core.DivideZero,
+  -clang-analyzer-deadcode.DeadStores,
+InheritParentConfig: true

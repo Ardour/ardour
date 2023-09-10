@@ -1,0 +1,4 @@
+Checks: >
+  -clang-analyzer-core.uninitialized.Assign,
+  -clang-diagnostic-braced-scalar-init,
+InheritParentConfig: true

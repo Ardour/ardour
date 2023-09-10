@@ -1,0 +1,7 @@
+Checks: >
+  -clang-analyzer-core.CallAndMessage,
+  -clang-analyzer-cplusplus.NewDeleteLeaks,
+  -clang-analyzer-security.insecureAPI.strcpy,
+  -clang-diagnostic-c11-extensions,
+  -clang-diagnostic-strict-prototypes,
+InheritParentConfig: true

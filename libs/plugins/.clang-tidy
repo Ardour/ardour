@@ -1,0 +1,5 @@
+Checks: >
+  -clang-analyzer-core.NullDereference,
+  -clang-analyzer-deadcode.DeadStores,
+  -clang-analyzer-security.insecureAPI.strcpy,
+InheritParentConfig: true

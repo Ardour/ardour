@@ -1,0 +1,16 @@
+Checks: >
+  # The clang-* checks are enabled by default.  To enable extra checks, add
+  # patterns for them above this comment, for example:
+  # bugprone-*,
+  # cert-*,
+  # cppcoreguidelines-*,
+  # google-*,
+  # hicpp-*,
+  # misc-*,
+  # modernize-*,
+  # objc-*,
+  #
+  # Or go nuclear with "*"
+WarningsAsErrors: '*'
+HeaderFilterRegex: '.*'
+FormatStyle: file
