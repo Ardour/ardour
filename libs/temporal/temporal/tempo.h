@@ -791,7 +791,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	/* API for typical tempo map changes */
 
 	LIBTEMPORAL_API static WritableSharedPtr write_copy();
-	LIBTEMPORAL_API static int  update (WritableSharedPtr m);
+	LIBTEMPORAL_API static int  update (WritableSharedPtr m, bool from_undo = false);
 	LIBTEMPORAL_API static void abort_update ();
 
 	/* not part of public API */
@@ -1010,7 +1010,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API void dump (std::ostream&) const;
 
-	LIBTEMPORAL_API static PBD::Signal0<void> MapChanged;
+	LIBTEMPORAL_API static PBD::Signal3<void, SharedPtr, SharedPtr, bool> MapChanged;
 
 	LIBTEMPORAL_API XMLNode& get_state() const;
 

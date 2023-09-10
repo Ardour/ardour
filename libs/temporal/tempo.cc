@@ -49,7 +49,8 @@ std::string Meter::xml_node_name = X_("Meter");
 
 SerializedRCUManager<TempoMap> TempoMap::_map_mgr (0);
 thread_local TempoMap::SharedPtr TempoMap::_tempo_map_p;
-PBD::Signal0<void> TempoMap::MapChanged;
+
+PBD::Signal3<void, TempoMap::SharedPtr, TempoMap::SharedPtr, bool> TempoMap::MapChanged;
 
 #ifndef NDEBUG
 #define TEMPO_MAP_ASSERT(expr) TempoMap::map_assert(expr, #expr, __FILE__, __LINE__)
@@ -4357,8 +4358,10 @@ TempoMap::write_copy()
 }
 
 int
-TempoMap::update (TempoMap::WritableSharedPtr m)
+TempoMap::update (TempoMap::WritableSharedPtr m, bool from_undo)
 {
+	SharedPtr old_map = read ();
+
 	if (!_map_mgr.update (m)) {
 		return -1;
 	}
@@ -4372,7 +4375,7 @@ TempoMap::update (TempoMap::WritableSharedPtr m)
 	}
 #endif
 
-	MapChanged (); /* EMIT SIGNAL */
+	MapChanged (old_map, read (), from_undo); /* EMIT SIGNAL */
 
 	return 0;
 }
@@ -5005,7 +5008,7 @@ TempoCommand::undo ()
 
 	TempoMap::WritableSharedPtr map (TempoMap::write_copy());
 	map->set_state (*_before, Stateful::current_state_version);
-	TempoMap::update (map);
+	TempoMap::update (map, true);
 }
 
 void
