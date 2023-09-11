@@ -3340,14 +3340,6 @@ TempoMarkerDrag::aborted (bool moved)
 	 */
 
 	_editor->abort_tempo_map_edit ();
-
-	// _point->end_float ();
-	_marker->set_position (timepos_t (_marker->tempo ().beats ()));
-
-	if (moved) {
-		// delete the dummy (hidden) marker we used for events while moving.
-		delete _marker;
-	}
 }
 
 /********* */
