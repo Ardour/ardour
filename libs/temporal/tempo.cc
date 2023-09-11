@@ -105,9 +105,6 @@ Tempo::Tempo (XMLNode const & node)
 		throw failed_constructor ();
 	}
 
-	if (!node.get_property (X_("active"), _active)) {
-		throw failed_constructor ();
-	}
 	if (!node.get_property (X_("locked-to-meter"), _locked_to_meter)) {
 		_locked_to_meter = true;
 	}
@@ -150,7 +147,6 @@ Tempo::get_state () const
 	node->set_property (X_("enpm"), end_note_types_per_minute());
 	node->set_property (X_("note-type"), note_type());
 	node->set_property (X_("type"), type());
-	node->set_property (X_("active"), active());
 	node->set_property (X_("locked-to-meter"), _locked_to_meter);
 	node->set_property (X_("continuing"), _continuing);
 
@@ -173,7 +169,6 @@ Tempo::set_state (XMLNode const & node, int /*version*/)
 	_end_super_note_type_per_second = double_npm_to_snps (_enpm);
 
 	node.get_property (X_("note-type"), _note_type);
-	node.get_property (X_("active"), _active);
 
 	if (!node.get_property (X_("locked-to-meter"), _locked_to_meter)) {
 		_locked_to_meter = true;
@@ -4516,11 +4511,6 @@ TempoMap::parse_tempo_state_3x (const XMLNode& node, LegacyTempoState& lts)
 		} else {
 			lts.end_note_types_per_minute = -1.0;
 		}
-	}
-
-	if (!node.get_property ("active", lts.active)) {
-		warning << _("TempoSection XML node has no \"active\" property") << endmsg;
-		lts.active = true;
 	}
 
 	return 0;
