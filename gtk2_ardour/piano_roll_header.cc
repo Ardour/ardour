@@ -634,13 +634,24 @@ bool
 PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 {
 	_scroomer_button_state = _scroomer_state;
+
 	if (ev->button == 1 && ev->x <= _scroomer_size){
+
+		if (ev->type == GDK_2BUTTON_PRESS) {
+			MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&_view.trackview());
+			if (mtv) {
+				mtv->set_note_range (MidiStreamView::ContentsRange, false);
+			}
+			return true;
+		}
+
 		_scroomer_drag = true;
 		_old_y = ev->y;
 		_fract = _adj.get_value();
 		_fract_top = _adj.get_value() + _adj.get_page_size();
 		return true;
-	}else {
+
+	} else {
 		int note = _view.y_to_note(ev->y);
 		bool tertiary = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 

@@ -113,6 +113,8 @@ public:
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&);
 	void use_midnam_info ();
 
+	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
+
 protected:
 	void start_step_editing ();
 	void stop_step_editing ();
@@ -138,7 +140,6 @@ private:
 
 	void set_note_mode (ARDOUR::NoteMode mode, bool apply_to_selection = false);
 	void set_color_mode (ARDOUR::ColorMode, bool force = false, bool redisplay = true, bool apply_to_selection = false);
-	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
 	void route_active_changed ();
 	void note_range_changed ();
 	void parameter_changed (std::string const &);
