@@ -119,7 +119,7 @@ protected:
 	void processors_changed (ARDOUR::RouteProcessorChange);
 
 private:
-  void _midnam_channel_changed();
+	void _midnam_channel_changed();
 
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 
