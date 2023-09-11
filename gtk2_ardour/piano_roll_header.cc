@@ -185,6 +185,8 @@ PianoRollHeader::on_scroll_event (GdkEventScroll* ev)
 		}
 	}
 
+	set_note_highlight (_view.y_to_note (ev->y));
+
 	_adj.value_changed ();
 	queue_draw ();
 	return true;
