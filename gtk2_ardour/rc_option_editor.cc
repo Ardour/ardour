@@ -3426,8 +3426,20 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rulers_follow_grid)
 		     ));
 
-	add_option (_("Editor/Snap"), new OptionEditorHeading (_("When \"Snap\" is enabled, snap to:")));
+	add_option (_("Editor/Snap"), new OptionEditorHeading (_("Snap Target Mode:")));
 
+	ComboOption<SnapTarget> *stm = new ComboOption<SnapTarget> (
+		    "snap-target",
+		    _("When the Grid is enabled, snap to"),
+		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_target),
+		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_target));
+
+	stm->add(SnapTargetGrid,  _("Grid"));
+	stm->add(SnapTargetOther, _("Snap Targets"));
+	stm->add(SnapTargetBoth,  _("Both the Grid and Snap Targets"));
+	add_option (_("Editor/Snap"), stm);
+
+	add_option (_("Editor/Snap"), new OptionEditorHeading (_("Snap Targets:")));
 
 	add_option (_("Editor/Snap"),
 	     new BoolOption (

@@ -134,6 +134,7 @@ UI_CONFIG_VARIABLE (bool, use_note_color_for_velocity, "use-note-color-for-veloc
 UI_CONFIG_VARIABLE (bool, show_snapped_cursor, "show-snapped-cursor", true)
 UI_CONFIG_VARIABLE (uint32_t, snap_threshold, "snap-threshold", 25)
 UI_CONFIG_VARIABLE (uint32_t, ruler_granularity, "ruler-granularity", 25)
+UI_CONFIG_VARIABLE (ARDOUR::SnapTarget, snap_target, "snap-target", ARDOUR::SnapTargetGrid)
 UI_CONFIG_VARIABLE (bool, snap_to_marks, "snap-to-marks", true)
 UI_CONFIG_VARIABLE (bool, snap_to_playhead, "snap-to-playhead", true)
 UI_CONFIG_VARIABLE (bool, snap_to_region_sync, "snap-to-region-sync", true)
