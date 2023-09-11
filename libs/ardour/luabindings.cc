@@ -2619,6 +2619,11 @@ LuaBindings::common (lua_State* L)
 		.addConst ("ExternalMonitoring", ARDOUR::MonitorModel(ExternalMonitoring))
 		.endNamespace ()
 
+		.beginNamespace ("SnapTarget")
+		.addConst ("SnapTargetGrid", ARDOUR::SnapTarget(SnapTargetGrid))
+		.addConst ("SnapTargetOther", ARDOUR::SnapTarget(SnapTargetOther))
+		.addConst ("SnapTargetBoth", ARDOUR::SnapTarget(SnapTargetBoth))
+
 		.beginNamespace ("RegionSelectionAfterSplit")
 		.addConst ("None", ARDOUR::RegionSelectionAfterSplit(None))
 		.addConst ("NewlyCreatedLeft", ARDOUR::RegionSelectionAfterSplit(NewlyCreatedLeft))

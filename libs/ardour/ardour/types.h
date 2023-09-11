@@ -435,6 +435,12 @@ enum EditMode {
 	Lock
 };
 
+enum SnapTarget {
+	SnapTargetGrid,
+	SnapTargetOther,
+	SnapTargetBoth
+};
+
 enum RippleMode {
 	RippleSelected,
 	RippleAll,
