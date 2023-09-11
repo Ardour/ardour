@@ -388,7 +388,7 @@ EditorSections::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& contex
 	/* Section is POD, memcpy is fine.
 	 * data is free()ed by ~Gtk::SelectionData */
 	Section s;
-	memcpy (&s, data.get_data (), sizeof (Section));
+	memcpy ((void*) &s, data.get_data (), sizeof (Section));
 
 	if (op == CutPasteSection && to > s.start) {
 		/* offset/ripple `to` when using CutPasteSection */
