@@ -128,9 +128,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (GridTypeCDFrame);
 	REGISTER (grid_type);
 
-	/*
-	 * GridTypePlayhead was not intended to get into the wild
-	*/
+	/* GridTypePlayhead was not intended to get into the wild */
 	enum_writer.add_to_hack_table ("GridTypePlayhead", "GridTypeNone");
 
 	REGISTER_ENUM (SnapOff);
