@@ -24,6 +24,7 @@
 #include <iostream>
 
 #include "gtkmm2ext/keyboard.h"
+#include "gtkmm2ext/rgb_macros.h"
 
 #include "editing.h"
 #include "midi_streamview.h"
@@ -137,16 +138,20 @@ render_rect(Cairo::RefPtr<Cairo::Context> cr, int note, double x[], double y[],
 void
 PianoRollHeader::render_scroomer(Cairo::RefPtr<Cairo::Context> cr)
 {
-	double scroomer_top = max(1.0, (1.0 - ((_adj.get_value()+_adj.get_page_size()) / 127.0)) * get_height () );
+	double scroomer_top = max (1.0, (1.0 - ((_adj.get_value()+_adj.get_page_size()) / 127.0)) * get_height () );
 	double scroomer_bottom = (1.0 - (_adj.get_value () / 127.0)) * get_height ();
 	double scroomer_width = _scroomer_size;
 
-	cr->set_source_rgba(white.r, white.g, white.b, 0.15);
-	cr->move_to(1.f, scroomer_top);
-	cr->line_to(scroomer_width - 1.f, scroomer_top);
-	cr->line_to(scroomer_width - 1.f, scroomer_bottom);
-	cr->line_to(1.f, scroomer_bottom);
-	cr->line_to(1.f, scroomer_top);
+	double r, g, b, a;
+	Gtkmm2ext::Color c = UIConfiguration::instance().color_mod (X_("scroomer"), X_("scroomer alpha"));
+	Gtkmm2ext::color_to_rgba (c, r, g, b, a);
+
+	cr->set_source_rgba(r, g, b, a);
+	cr->move_to (1.f, scroomer_top);
+	cr->line_to (scroomer_width - 1.f, scroomer_top);
+	cr->line_to (scroomer_width - 1.f, scroomer_bottom);
+	cr->line_to (1.f, scroomer_bottom);
+	cr->line_to (1.f, scroomer_top);
 	cr->fill();
 }
 
