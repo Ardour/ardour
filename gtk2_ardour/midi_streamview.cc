@@ -331,7 +331,7 @@ MidiStreamView::draw_note_lines()
 	}
 
 	double y;
-	double prev_y = .5;
+	double prev_y = 0.;
 	uint32_t color;
 
 	ArdourCanvas::LineSet::ResetRAII lr (*_note_lines);
@@ -347,7 +347,7 @@ MidiStreamView::draw_note_lines()
 
 	for (int i = highest_note() + 1; i >= lowest_note(); --i) {
 
-		y = floor(note_to_y (i)) + .5;
+		y = floor (note_to_y (i));
 
 		/* this is the line actually corresponding to the division
 		 * between notes
@@ -376,6 +376,14 @@ MidiStreamView::draw_note_lines()
 
 		double h = y - prev_y;
 		double mid = y + (h/2.0);
+
+		/* Cairo: odd width lines must be placed on 0.5 coordinates to be
+		 * drawn correctly.
+		 */
+
+		if (!fmod (h, 2.) && !fmod (mid, 1.)) {
+			mid += 0.5;
+		}
 
 		if (mid >= 0 && h > 1.0) {
 			_note_lines->add_coord (mid, h, color);
