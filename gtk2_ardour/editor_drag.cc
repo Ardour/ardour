@@ -3260,15 +3260,9 @@ void
 TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
-	if (!_real_section->active ()) {
-		show_verbose_cursor_text (_("inactive"));
-	} else {
-		show_verbose_cursor_time (adjusted_current_time (event));
-
-		/* setup thread-local tempo map ptr as a writable copy */
-
-		map = _editor->begin_tempo_map_edit ();
-	}
+	show_verbose_cursor_time (adjusted_current_time (event));
+	/* setup thread-local tempo map ptr as a writable copy */
+	map = _editor->begin_tempo_map_edit ();
 }
 
 void
@@ -3280,10 +3274,6 @@ TempoMarkerDrag::setup_pointer_offset ()
 void
 TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (!_marker->tempo ().active ()) {
-		return;
-	}
-
 	if (first_move) {
 		/* get current state */
 		_before_state = &map->get_state ();
@@ -3318,9 +3308,6 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 void
 TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!_marker->tempo ().active ()) {
-		return;
-	}
 
 	if (!movement_occurred) {
 		/* reset the per-thread tempo map ptr back to the current

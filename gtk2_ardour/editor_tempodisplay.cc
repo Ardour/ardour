@@ -280,11 +280,7 @@ Editor::update_tempo_curves (double min_tempo, double max_tempo, samplecnt_t sr)
 			curve.set_duration (samplecnt_t (UINT32_MAX));
 		}
 
-		if (!tm->tempo().active()) {
-			curve.hide();
-		} else {
-			curve.show();
-		}
+		curve.show();
 	}
 }
 
@@ -568,7 +564,7 @@ Editor::remove_tempo_marker (ArdourCanvas::Item* item)
 		abort(); /*NOTREACHED*/
 	}
 
-	if (!tempo_marker->tempo().locked_to_meter() && tempo_marker->tempo().active()) {
+	if (!tempo_marker->tempo().locked_to_meter()) {
 		Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &Editor::real_remove_tempo_marker), &tempo_marker->tempo()));
 	}
 }

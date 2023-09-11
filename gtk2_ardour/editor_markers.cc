@@ -1030,9 +1030,6 @@ Editor::tempo_map_marker_context_menu (GdkEventButton* ev, ArdourCanvas::Item* i
 		build_meter_marker_menu (mm, can_remove);
 		meter_marker_menu->popup (1, ev->time);
 	} else if (tm) {
-		if (!tm->tempo().active()) {
-			return;
-		}
 		can_remove = !tm->tempo().map().is_initial(tm->tempo()) && !tm->tempo().locked_to_meter();
 		build_tempo_marker_menu (tm, can_remove);
 		tempo_marker_menu->popup (1, ev->time);
