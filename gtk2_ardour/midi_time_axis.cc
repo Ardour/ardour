@@ -497,7 +497,6 @@ MidiTimeAxisView::update_patch_selector ()
 				if (_midnam_model_selector.items().empty () || _midnam_model_selector.items().begin()->get_label() != _("Plugin Provided")) {
 					setup_midnam_patches ();
 				}
-				model_changed (model_name);
 			}
 		}
 	}
