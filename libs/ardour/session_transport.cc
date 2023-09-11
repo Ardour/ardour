@@ -76,11 +76,12 @@ using namespace Temporal;
 #ifdef NDEBUG
 # define ENSURE_PROCESS_THREAD do {} while (0)
 #else
-# define ENSURE_PROCESS_THREAD                           \
-  do {                                                   \
-    if (!AudioEngine::instance()->in_process_thread()) { \
-      PBD::stacktrace (std::cerr, 30);                   \
-    }                                                    \
+# define ENSURE_PROCESS_THREAD                        \
+  do {                                                \
+    if (!AudioEngine::instance()->in_process_thread() \
+        && !loading ()) {                              \
+      PBD::stacktrace (std::cerr, 30);                \
+    }                                                 \
   } while (0)
 #endif
 
