@@ -3481,14 +3481,6 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_region_end)
 		     ));
 
-	add_option (_("Editor/Snap"),
-	     new BoolOption (
-		     "snap-to-grid",
-		     _("Grid"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_grid),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_grid)
-		     ));
-
 	add_option (_("Editor/Modifiers"), new OptionEditorHeading (_("Keyboard Modifiers")));
 	add_option (_("Editor/Modifiers"), new KeyboardOptions);
 	add_option (_("Editor/Modifiers"), new OptionEditorBlank ());
