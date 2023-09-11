@@ -158,8 +158,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Temporal;
 
-#define DEBUG_UNDO_HISTORY(msg) DEBUG_TRACE (PBD::DEBUG::UndoHistory, string_compose ("%1: %2\n", __LINE__, msg));
-
 void
 Session::pre_engine_init (string fullpath)
 {
@@ -1747,7 +1745,7 @@ Session::set_state (const XMLNode& node, int version)
 		} else {
 			/* required to convert positions during session load */
 			Temporal::set_sample_rate (_base_sample_rate);
-			/* all other initialization is correctly done by 
+			/* all other initialization is correctly done by
 			 * Session::immediately_post_engine
 			 */
 		}
@@ -3328,8 +3326,8 @@ Session::add_command (Command* const cmd)
 		error << "Attempted to add an UNDO command without a current transaction.  ignoring command (" << cmd->name() <<  ")" << endl;
 		return;
 	}
-	DEBUG_UNDO_HISTORY (
-	    string_compose ("Current Undo Transaction %1, adding command: %2",
+	DEBUG_TRACE (DEBUG::UndoHistory,
+	    string_compose ("Current Undo Transaction %1, adding command: %2\n",
 	                    _current_trans->name (),
 	                    cmd->name ()));
 	_current_trans->add_command (cmd);
@@ -3373,17 +3371,15 @@ Session::begin_reversible_command (GQuark q)
 	*/
 
 	if (_current_trans == 0) {
-		DEBUG_UNDO_HISTORY (string_compose (
-		    "Begin Reversible Command, new transaction: %1", g_quark_to_string (q)));
+		DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("Begin Reversible Command, new transaction: %1\n", g_quark_to_string (q)));
 
 		/* start a new transaction */
 		assert (_current_trans_quarks.empty ());
+		std::cerr << "D\n";
 		_current_trans = new UndoTransaction();
 		_current_trans->set_name (g_quark_to_string (q));
 	} else {
-		DEBUG_UNDO_HISTORY (
-		    string_compose ("Begin Reversible Command, current transaction: %1",
-		                    _current_trans->name ()));
+		DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("Begin Reversible Command, current transaction: %1\n", _current_trans->name ()));
 	}
 
 	_current_trans_quarks.push_front (q);
@@ -3392,14 +3388,17 @@ Session::begin_reversible_command (GQuark q)
 void
 Session::abort_reversible_command ()
 {
-	if (_current_trans != 0) {
-		DEBUG_UNDO_HISTORY (
-		    string_compose ("Abort Reversible Command: %1", _current_trans->name ()));
-		_current_trans->clear();
-		delete _current_trans;
-		_current_trans = 0;
-		_current_trans_quarks.clear();
+	if (!_current_trans) {
+		std::cerr << "abort with no current reversible command\n";
+		PBD::stacktrace (std::cerr, 12);
+		return;
 	}
+	DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("Abort Reversible Command: %1\n", _current_trans->name ()));
+	_current_trans->clear();
+	delete _current_trans;
+	PBD::stacktrace (std::cerr, 12);
+	_current_trans = nullptr;
+	_current_trans_quarks.clear();
 }
 
 bool
@@ -3424,23 +3423,23 @@ Session::commit_reversible_command (Command *cmd)
 	struct timeval now;
 
 	if (cmd) {
-		DEBUG_UNDO_HISTORY (
-		    string_compose ("Current Undo Transaction %1, adding command: %2",
+		DEBUG_TRACE (DEBUG::UndoHistory,
+		    string_compose ("Current Undo Transaction %1, adding command: %2\n",
 		                    _current_trans->name (),
 		                    cmd->name ()));
 		_current_trans->add_command (cmd);
 	}
 
-	DEBUG_UNDO_HISTORY (
-	    string_compose ("Commit Reversible Command, current transaction: %1",
+	DEBUG_TRACE (DEBUG::UndoHistory,
+	    string_compose ("Commit Reversible Command, current transaction: %1\n",
 	                    _current_trans->name ()));
 
 	_current_trans_quarks.pop_front ();
 
 	if (!_current_trans_quarks.empty ()) {
-		DEBUG_UNDO_HISTORY (
+		DEBUG_TRACE (DEBUG::UndoHistory,
 		    string_compose ("Commit Reversible Command, transaction is not "
-		                    "top-level, current transaction: %1",
+		                    "top-level, current transaction: %1\n",
 		                    _current_trans->name ()));
 		/* the transaction we're committing is not the top-level one */
 		return;
@@ -3448,20 +3447,26 @@ Session::commit_reversible_command (Command *cmd)
 
 	if (_current_trans->empty()) {
 		/* no commands were added to the transaction, so just get rid of it */
-		DEBUG_UNDO_HISTORY (
+		DEBUG_TRACE (DEBUG::UndoHistory,
 		    string_compose ("Commit Reversible Command, No commands were "
-		                    "added to current transaction: %1",
+		                    "added to current transaction: %1\n",
 		                    _current_trans->name ()));
 		delete _current_trans;
-		_current_trans = 0;
+		std::cerr << "B\n";
+		_current_trans = nullptr;
 		return;
 	}
 
 	gettimeofday (&now, 0);
 	_current_trans->set_timestamp (now);
 
+	DEBUG_TRACE (DEBUG::UndoHistory,
+	             string_compose ("Commit Reversible Command, add to history %1\n",
+	                             _current_trans->name ()));
+	PBD::stacktrace (std::cerr, 12);
 	_history.add (_current_trans);
-	_current_trans = 0;
+	std::cerr << "C\n";
+	_current_trans = nullptr;
 }
 
 static bool
