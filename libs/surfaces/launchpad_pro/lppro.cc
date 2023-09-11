@@ -131,7 +131,7 @@ LaunchPadPro::probe (std::string& i, std::string& o)
 }
 
 LaunchPadPro::LaunchPadPro (ARDOUR::Session& s)
-	: MIDISurface (s, X_("Novation Launchpad Pro"), X_("Launchpad Pro"), true)
+	: MIDISurface (s, X_("Novation LaunchPad Pro"), X_("LaunchPad Pro"), true)
 	, logo_color (4)
 	, scroll_x_offset  (0)
 	, scroll_y_offset  (0)
