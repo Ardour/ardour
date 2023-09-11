@@ -904,6 +904,10 @@ Editor::mid_tempo_change (MidTempoChanges what_changed)
 		update_tempo_curves (min_tempo, max_tempo, _session->sample_rate());
 	}
 
+	for (auto & t : tempo_marks) {
+		t->update ();
+	}
+
 	for (auto & m : meter_marks) {
 		m->update ();
 	}
