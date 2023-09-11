@@ -3375,7 +3375,6 @@ Session::begin_reversible_command (GQuark q)
 
 		/* start a new transaction */
 		assert (_current_trans_quarks.empty ());
-		std::cerr << "D\n";
 		_current_trans = new UndoTransaction();
 		_current_trans->set_name (g_quark_to_string (q));
 	} else {
@@ -3389,14 +3388,11 @@ void
 Session::abort_reversible_command ()
 {
 	if (!_current_trans) {
-		std::cerr << "abort with no current reversible command\n";
-		PBD::stacktrace (std::cerr, 12);
 		return;
 	}
 	DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("Abort Reversible Command: %1\n", _current_trans->name ()));
 	_current_trans->clear();
 	delete _current_trans;
-	PBD::stacktrace (std::cerr, 12);
 	_current_trans = nullptr;
 	_current_trans_quarks.clear();
 }
@@ -3452,7 +3448,6 @@ Session::commit_reversible_command (Command *cmd)
 		                    "added to current transaction: %1\n",
 		                    _current_trans->name ()));
 		delete _current_trans;
-		std::cerr << "B\n";
 		_current_trans = nullptr;
 		return;
 	}
@@ -3463,9 +3458,7 @@ Session::commit_reversible_command (Command *cmd)
 	DEBUG_TRACE (DEBUG::UndoHistory,
 	             string_compose ("Commit Reversible Command, add to history %1\n",
 	                             _current_trans->name ()));
-	PBD::stacktrace (std::cerr, 12);
 	_history.add (_current_trans);
-	std::cerr << "C\n";
 	_current_trans = nullptr;
 }
 
