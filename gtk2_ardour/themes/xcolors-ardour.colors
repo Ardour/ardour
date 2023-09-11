@@ -370,6 +370,7 @@
     <ColorAlias name="rude solo: led active" alias="alert:red"/>
     <ColorAlias name="ruler base" alias="theme:bg2"/>
     <ColorAlias name="ruler text" alias="neutral:foreground2"/>
+    <ColorAlias name="scroomer" alias="alert:orange"/>
     <ColorAlias name="secondary clock: background" alias="theme:bg2"/>
     <ColorAlias name="secondary clock: cursor" alias="theme:contrasting alt"/>
     <ColorAlias name="secondary clock: edited text" alias="theme:contrasting alt"/>
@@ -508,6 +509,7 @@
     <Modifier name="piano roll white" modifier="= alpha:0.2"/>
     <Modifier name="recording rect" modifier="= alpha:0.25"/>
     <Modifier name="region alpha" modifier="= alpha:0.75"/>
+    <Modifier name="scroomer alpha" modifier="= alpha:0.15"/>
     <Modifier name="selected midi note" modifier="= alpha:1.0"/>
     <Modifier name="selection rect" modifier="= alpha:0.5"/>
     <Modifier name="silence" modifier="= alpha:0.5"/>
