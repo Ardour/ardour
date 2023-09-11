@@ -3217,6 +3217,16 @@ Editor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapP
 	timepos_t dist = timepos_t::max (start.time_domain()); // this records the distance of the best snap result we've found so far
 	timepos_t best = timepos_t::max (start.time_domain()); // this records the best snap-result we've found so far
 
+	/* check Grid */
+	if ( (_grid_type != GridTypeNone) && (uic.get_snap_target () != SnapTargetOther) ) {
+		timepos_t pre (presnap);
+		timepos_t post (snap_to_grid (pre, direction, pref));
+		check_best_snap (presnap, post, dist, best);
+		if (uic.get_snap_target () == SnapTargetGrid) {
+			goto check_distance;
+		}
+	}
+
 	/* check snap-to-marker */
 	if ((pref == SnapToAny_Visual) && uic.get_snap_to_marks ()) {
 		test = snap_to_marker (presnap, direction);
@@ -3261,18 +3271,12 @@ Editor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapP
 		check_best_snap (presnap, test, dist, best);
 	}
 
-	/* check Grid */
-	if (uic.get_snap_to_grid () && (_grid_type != GridTypeNone)) {
-		timepos_t pre (presnap);
-		timepos_t post (snap_to_grid (pre, direction, pref));
-		check_best_snap (presnap, post, dist, best);
-	}
+  check_distance:
 
 	if (timepos_t::max (start.time_domain()) == best) {
 		return;
 	}
 
-  check_distance:
 	/* now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
 	 * this also helps to avoid snapping to somewhere the user can't see.  (i.e.: I clicked on a region and it disappeared!!)
 	 * ToDo: Perhaps this should only occur if EditPointMouse?
