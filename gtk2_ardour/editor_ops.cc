@@ -2710,7 +2710,9 @@ Editor::cut_copy_section (ARDOUR::SectionOperation const op)
 	if (!get_selection_extents (start, end) || !_session) {
 		return;
 	}
-	timepos_t to (get_preferred_edit_position ());
+
+	timepos_t to = Profile->get_mixbus () ? timepos_t (_session->audible_sample ()) : get_preferred_edit_position ();
+
 	_session->cut_copy_section (start, end, to, op);
 
 	if (op == DeleteSection) {

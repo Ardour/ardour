@@ -1599,9 +1599,15 @@ Editor::popup_section_box_menu (int button, int32_t time)
 	MenuList& items (section_box_menu.items());
 	items.clear ();
 
-	items.push_back (MenuElem (_("Copy/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), CopyPasteSection)));
-	items.push_back (MenuElem (_("Cut/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), CutPasteSection)));
+	if (Profile->get_mixbus ()) {
+		items.push_back (MenuElem (_("Copy/Paste Range Section to Playhead"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), CopyPasteSection)));
+		items.push_back (MenuElem (_("Cut/Paste Range Section to Playhead"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), CutPasteSection)));
+	} else {
+		items.push_back (MenuElem (_("Copy/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), CopyPasteSection)));
+		items.push_back (MenuElem (_("Cut/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), CutPasteSection)));
+	}
 	items.push_back (MenuElem (_("Delete Range Section"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), DeleteSection)));
+
 #if 0
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Delete all markers in Section"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), DeleteSection)));

@@ -364,9 +364,16 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "set-punch-from-edit-range", _("Set Punch from Selection"), sigc::mem_fun(*this, &Editor::set_punch_from_selection));
 	reg_sens (editor_actions, "set-session-from-edit-range", _("Set Session Start/End from Selection"), sigc::mem_fun(*this, &Editor::set_session_extents_from_selection));
 
-	reg_sens (editor_actions, "copy-paste-section", _("Copy/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CopyPasteSection));
-	reg_sens (editor_actions, "cut-paste-section", _("Cut/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CutPasteSection));
-	reg_sens (editor_actions, "insert-section", _("Insert Time Section at Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), InsertSection));
+	if (Profile->get_mixbus ()) {
+		reg_sens (editor_actions, "copy-paste-section", _("Copy/Paste Range Section to Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CopyPasteSection));
+		reg_sens (editor_actions, "cut-paste-section", _("Cut/Paste Range Section to Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CutPasteSection));
+		reg_sens (editor_actions, "insert-section", _("Insert Time Section at Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), InsertSection));
+	} else {
+		reg_sens (editor_actions, "copy-paste-section", _("Copy/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CopyPasteSection));
+		reg_sens (editor_actions, "cut-paste-section", _("Cut/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CutPasteSection));
+		reg_sens (editor_actions, "insert-section", _("Insert Time Section at Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), InsertSection));
+	}
+
 	reg_sens (editor_actions, "delete-section", _("Delete Range Section"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), DeleteSection));
 	reg_sens (editor_actions, "alternate-delete-section", _("Delete Range Section"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), DeleteSection));
 
