@@ -3244,7 +3244,7 @@ TempoCurveDrag::aborted (bool moved)
 
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i, Temporal::BeatTime)
-	, _before_state (0)
+	, _before_state (nullptr)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoMarkerDrag\n");
 
