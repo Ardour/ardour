@@ -1181,9 +1181,11 @@ Editor::section_rect_event (GdkEvent* ev, Location* loc, ArdourCanvas::Rectangle
 
 				items.push_back (MenuElem (_("New Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
 				items.push_back (MenuElem (_("Select Arrangement Section"), sigc::bind (sigc::mem_fun(*_sections, &EditorSections::select), l)));
+#if 0
 				items.push_back (SeparatorElem());
+				add_section_context_items (items);   //TODO: section_context_items needs to be modified to operate on the marker you clicked on, not the range selection (which might not exist)
+#endif
 
-				add_section_context_items (items);
 				section_box_menu.popup (ev->button.button, ev->button.time);
 				return true;
 			}
