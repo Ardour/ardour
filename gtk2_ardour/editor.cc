@@ -1591,13 +1591,9 @@ Editor::popup_xfade_out_context_menu (int button, int32_t time, ArdourCanvas::It
 }
 
 void
-Editor::popup_section_box_menu (int button, int32_t time)
+Editor::add_section_context_items (Gtk::Menu_Helpers::MenuList& items)
 {
 	using namespace Menu_Helpers;
-
-	section_box_menu.set_name ("ArdourContextMenu");
-	MenuList& items (section_box_menu.items());
-	items.clear ();
 
 	if (Profile->get_mixbus ()) {
 		items.push_back (MenuElem (_("Copy/Paste Range Section to Playhead"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), CopyPasteSection)));
@@ -1626,8 +1622,6 @@ Editor::popup_section_box_menu (int button, int32_t time)
 
 	items.push_back (SeparatorElem());
 	add_selection_context_items (items, true);
-
-	section_box_menu.popup (button, time);
 }
 
 void

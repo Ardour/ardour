@@ -861,12 +861,12 @@ private:
 
 	GdkEvent context_click_event;
 
-	void popup_section_box_menu (int, int);
 	void popup_track_context_menu (int, int, ItemType, bool);
 	Gtk::Menu* build_track_context_menu ();
 	Gtk::Menu* build_track_bus_context_menu ();
 	Gtk::Menu* build_track_region_context_menu ();
 	Gtk::Menu* build_track_selection_context_menu ();
+	void add_section_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_dstream_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_bus_context_items (Gtk::Menu_Helpers::MenuList&);
 	void add_region_context_items (Gtk::Menu_Helpers::MenuList&, std::shared_ptr<ARDOUR::Track>);

@@ -110,6 +110,15 @@ EditorSections::set_session (Session* s)
 }
 
 void
+EditorSections::select (ARDOUR::Location* l)
+{
+	LocationRowMap::iterator map_it = _location_row_map.find (l);
+	if (map_it != _location_row_map.end ()) {
+		_view.get_selection ()->select (*map_it->second);
+	}
+}
+
+void
 EditorSections::redisplay ()
 {
 	if (_no_redisplay) {

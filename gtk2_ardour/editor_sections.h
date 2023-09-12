@@ -41,6 +41,8 @@ public:
 		return _scroller;
 	}
 
+	void select (ARDOUR::Location*);
+
 private:
 	void redisplay ();
 	bool delete_selected_section ();

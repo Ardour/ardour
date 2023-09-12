@@ -40,6 +40,7 @@
 #include "canvas/scroll_group.h"
 
 #include "editor.h"
+#include "editor_sections.h"
 #include "keyboard.h"
 #include "public_editor.h"
 #include "audio_region_view.h"
@@ -1164,31 +1165,26 @@ Editor::section_rect_event (GdkEvent* ev, Location* loc, ArdourCanvas::Rectangle
 			break;
 		case GDK_BUTTON_RELEASE:
 			if (Keyboard::is_context_menu_event (&ev->button)) {
+				using namespace Menu_Helpers;
+
 				/* find section */
 				timepos_t start (loc->start ());
 				timepos_t end;
 				Location* l = _session->locations()->section_at (start, start, end);
 				assert (l);
-				/* set selection range */
-				selection->clear ();
-				selection->set (start, end);
-				/* switch to range tool - same as EditorSections::selection_changed */
-				switch (current_mouse_mode ()) {
-					case Editing::MouseRange:
-						/* OK */
-						break;
-					case Editing::MouseObject:
-						if (ActionManager::get_toggle_action ("MouseMode", "set-mouse-mode-object-range")->get_active ()) {
-							/* smart mode; OK */
-							break;
-						}
-						/*fallthrough*/
-					default:
-						ActionManager::get_radio_action (X_("MouseMode"), X_("set-mouse-mode-range"))->set_active (true);
-						break;
-				}
-				/* and show section context menu */
-				popup_section_box_menu (ev->button.button, ev->button.time);
+
+				timepos_t where (canvas_event_time (ev));
+
+				section_box_menu.set_name ("ArdourContextMenu");
+				MenuList& items (section_box_menu.items());
+				items.clear ();
+
+				items.push_back (MenuElem (_("New Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
+				items.push_back (MenuElem (_("Select Arrangement Section"), sigc::bind (sigc::mem_fun(*_sections, &EditorSections::select), l)));
+				items.push_back (SeparatorElem());
+
+				add_section_context_items (items);
+				section_box_menu.popup (ev->button.button, ev->button.time);
 				return true;
 			}
 			break;
@@ -1220,7 +1216,11 @@ Editor::canvas_section_box_event (GdkEvent *event)
 			return !Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
 		case GDK_BUTTON_RELEASE:
 			if (Keyboard::is_context_menu_event (&event->button)) {
-				popup_section_box_menu (event->button.button, event->button.time);
+				section_box_menu.set_name ("ArdourContextMenu");
+				Gtk::Menu_Helpers::MenuList& items (section_box_menu.items());
+				items.clear ();
+				add_section_context_items (items);
+				section_box_menu.popup (event->button.button, event->button.time);
 				return true;
 			}
 			return false;
