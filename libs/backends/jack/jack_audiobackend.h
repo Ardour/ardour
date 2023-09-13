@@ -324,6 +324,8 @@ class JACKAudioBackend : public AudioBackend {
 
     JACKSession* _session;
 
+    Glib::Threads::Mutex port_registration_mutex;
+
   protected:
     int _start (bool for_latency_measurement);
 };

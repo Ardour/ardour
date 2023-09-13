@@ -583,11 +583,16 @@ JACKAudioBackend::monitoring_input (PortHandle port)
 PortEngine::PortPtr
 JACKAudioBackend::register_port (const std::string& shortname, ARDOUR::DataType type, ARDOUR::PortFlags flags)
 {
-	GET_PRIVATE_JACK_POINTER_RET (_priv_jack, PortEngine::PortPtr());
-	jack_port_t* jack_port = jack_port_register (_priv_jack, shortname.c_str(),
-	                                             ardour_data_type_to_jack_port_type (type),
-	                                             ardour_port_flags_to_jack_flags (flags),
-	                                             0);
+	jack_port_t* jack_port;
+	{
+		Glib::Threads::Mutex::Lock lm (port_registration_mutex);
+		GET_PRIVATE_JACK_POINTER_RET (_priv_jack, PortEngine::PortPtr());
+		jack_port = jack_port_register (_priv_jack, shortname.c_str(),
+		                                ardour_data_type_to_jack_port_type (type),
+		                                ardour_port_flags_to_jack_flags (flags),
+		                                0);
+	}
+
 	if (!jack_port) {
 		return PortEngine::PortPtr();
 	}
