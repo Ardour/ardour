@@ -796,6 +796,11 @@ Location::set_scene_change (std::shared_ptr<SceneChange>  sc)
 void
 Location::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
+	if (cmd.move_markers && cmd.to == AudioTime) {
+		/* user wants the markers to move during a tempo-map; skip this domain bounce */
+		return;
+	}
+
 	if (_start.time_domain() == cmd.to) {
 		/* has the right domain to begin with */
 		return;
@@ -814,6 +819,11 @@ Location::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 void
 Location::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
+	if ( cmd.move_markers && cmd.to == AudioTime ) {
+		/* user wants the markers to move during a tempo-map; skip this domain bounce */
+		return;
+	}
+
 	if (_start.time_domain() == cmd.to) {
 		/* had the right domain to begin with */
 		return;

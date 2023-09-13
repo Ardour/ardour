@@ -53,13 +53,19 @@ struct LIBTEMPORAL_API TimeDomainSwapper : public virtual PBD::Destructible {
 
 struct LIBTEMPORAL_API DomainBounceInfo
 {
-	DomainBounceInfo (TimeDomain f, TimeDomain t) : from (f), to (t) {}
+	DomainBounceInfo (TimeDomain f, TimeDomain t, bool m = false)
+		: from (f)
+		, to (t)
+		, move_markers (m)
+	{}
 
 	const TimeDomain from;
 	const TimeDomain to;
 
 	TimeDomainPosChanges positions;
 	TimeDomainCntChanges counts;
+
+	bool move_markers;
 };
 
 }
