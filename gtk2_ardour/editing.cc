@@ -182,6 +182,14 @@ const char *notenamedisplaystrs[] = {
 #undef NOTENAMEDISPLAY
 #define NOTENAMEDISPLAY(a) /*empty*/
 
+#undef MARKERCLICKBEHAVIOR
+#define MARKERCLICKBEHAVIOR(s) N_(#s),
+const char *markerclickbehaviorstrs[] = {
+	#include "editing_syms.h"
+	0
+};
+#undef MARKERCLICKBEHAVIOR
+#define MARKERCLICKBEHAVIOR(a) /*empty*/
 
 } // namespace Editing
 

@@ -4645,7 +4645,19 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 			_editor->commit_reversible_selection_op ();
 		}
 
-		if (!_editor->session()->config.get_external_sync () && (_editor->edit_point() != Editing::EditAtSelectedMarker)) {
+		bool do_locate;
+		switch (_editor->get_marker_click_behavior ()) {
+			case MarkerClickSelectOnly:
+				do_locate = false;
+				break;
+			case MarkerClickLocate:
+				do_locate = true;
+				break;
+			case MarkerClickLocateWhenStopped:
+				do_locate = !_editor->session()->transport_state_rolling ();
+		}
+
+		if (do_locate && !_editor->session()->config.get_external_sync () && (_editor->edit_point() != Editing::EditAtSelectedMarker)) {
 			bool is_start;
 			Location* location = _editor->find_location_from_marker (_marker, is_start);
 			if (location) {

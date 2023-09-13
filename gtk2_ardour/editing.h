@@ -43,6 +43,7 @@
 #define INSERTTIMEOPT(a) /*empty*/
 #define TEMPOEDITBEHAVIOR(a) /*empty*/
 #define NOTENAMEDISPLAY(a) /*empty*/
+#define MARKERCLICKBEHAVIOR(a) /*empty*/
 
 namespace Editing {
 
@@ -210,6 +211,18 @@ inline const char* enum2str(NoteNameDisplay m) {return notenamedisplaystrs[m];}
 
 #undef NOTENAMEDISPLAY
 #define NOTENAMEDISPLAY(a) /*empty*/
+
+#undef MARKERCLICKBEHAVIOR
+#define MARKERCLICKBEHAVIOR(a) a,
+enum MarkerClickBehavior {
+	#include "editing_syms.h"
+};
+#undef MARKERCLICKBEHAVIOR
+#define MARKERCLICKBEHAVIOR(a) /*empty*/
+
+extern const char *markerclickbehaviorstrs[];
+inline const char* enum2str(MarkerClickBehavior m) {return markerclickbehaviorstrs[m];}
+MarkerClickBehavior str2markerclickbehavior(const std::string &);
 
 /////////////////////
 // These don't need their state saved. yet...

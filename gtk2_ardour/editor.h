@@ -353,6 +353,10 @@ public:
 	void tav_zoom_step (bool coarser);
 	void tav_zoom_smooth (bool coarser, bool force_all);
 
+	void                         cycle_marker_click_behavior ();
+	void                         set_marker_click_behavior (Editing::MarkerClickBehavior);
+	Editing::MarkerClickBehavior get_marker_click_behavior () const { return marker_click_behavior; }
+
 	/* stuff that AudioTimeAxisView and related classes use */
 
 	void clear_playlist (std::shared_ptr<ARDOUR::Playlist>);
@@ -684,6 +688,8 @@ private:
 	Editing::GridType  internal_grid_type;
 	Editing::SnapMode  internal_snap_mode;
 	Editing::MouseMode effective_mouse_mode () const;
+
+	Editing::MarkerClickBehavior marker_click_behavior;
 
 	enum JoinObjectRangeState {
 		JOIN_OBJECT_RANGE_NONE,
@@ -2054,6 +2060,11 @@ private:
 	void zoom_focus_chosen (Editing::ZoomFocus);
 
 	Glib::RefPtr<Gtk::RadioAction> zoom_focus_action (Editing::ZoomFocus);
+
+	/* Marker Click Radio */
+	Glib::RefPtr<Gtk::RadioAction> marker_click_behavior_action (Editing::MarkerClickBehavior);
+	void marker_click_behavior_chosen (Editing::MarkerClickBehavior);
+	void marker_click_behavior_selection_done (Editing::MarkerClickBehavior);
 
 	Gtk::HBox _track_box;
 

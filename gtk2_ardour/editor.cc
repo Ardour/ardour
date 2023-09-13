@@ -267,6 +267,7 @@ Editor::Editor ()
 	, pre_internal_snap_mode (SnapOff)
 	, internal_grid_type (GridTypeBeat)
 	, internal_snap_mode (SnapOff)
+	, marker_click_behavior (MarkerClickSelectOnly)
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 	, _notebook_shrunk (false)
 	, entered_marker (0)
@@ -2527,6 +2528,9 @@ Editor::set_state (const XMLNode& node, int version)
 	node.get_property ("zoom-focus", zoom_focus);
 	zoom_focus_selection_done (zoom_focus);
 
+	node.get_property ("marker-click-behavior", marker_click_behavior);
+	marker_click_behavior_selection_done (marker_click_behavior);
+
 	double z;
 	if (node.get_property ("zoom", z)) {
 		/* older versions of ardour used floating point samples_per_pixel */
@@ -2738,6 +2742,7 @@ Editor::get_state () const
 	node->set_property ("pre-internal-snap-mode", pre_internal_snap_mode);
 	node->set_property ("edit-point", _edit_point);
 	node->set_property ("visible-track-count", _visible_track_count);
+	node->set_property ("marker-click-behavior", marker_click_behavior);
 
 	node->set_property ("draw-length", _draw_length);
 	node->set_property ("draw-velocity", _draw_velocity);
@@ -4140,6 +4145,15 @@ Editor::zoom_focus_selection_done (ZoomFocus f)
 }
 
 void
+Editor::marker_click_behavior_selection_done (MarkerClickBehavior m)
+{
+	RefPtr<RadioAction> ract = marker_click_behavior_action (m);
+	if (ract) {
+		ract->set_active ();
+	}
+}
+
+void
 Editor::build_track_count_menu ()
 {
 	using namespace Menu_Helpers;
@@ -4323,6 +4337,31 @@ Editor::cycle_zoom_focus ()
 		break;
 	case ZoomFocusEdit:
 		set_zoom_focus (ZoomFocusLeft);
+		break;
+	}
+}
+
+void
+Editor::set_marker_click_behavior (MarkerClickBehavior m)
+{
+	if (marker_click_behavior != m) {
+		marker_click_behavior = m;
+		instant_save ();
+	}
+}
+
+void
+Editor::cycle_marker_click_behavior ()
+{
+	switch (marker_click_behavior) {
+	case MarkerClickSelectOnly:
+		set_marker_click_behavior (MarkerClickLocate);
+		break;
+	case MarkerClickLocate:
+		set_marker_click_behavior (MarkerClickLocateWhenStopped);
+		break;
+	case MarkerClickLocateWhenStopped:
+		set_marker_click_behavior (MarkerClickSelectOnly);
 		break;
 	}
 }

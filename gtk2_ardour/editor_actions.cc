@@ -556,6 +556,14 @@ Editor::register_actions ()
 
 	ActionManager::register_action (editor_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), sigc::mem_fun (*this, &Editor::cycle_zoom_focus));
 
+	Glib::RefPtr<ActionGroup> marker_click_actions = ActionManager::create_action_group (bindings, X_("MarkerClickBehavior"));
+	RadioAction::Group marker_click_group;
+
+	radio_reg_sens (marker_click_actions, marker_click_group, "marker-click-select-only", _("Marker Click Only Selects"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_click_behavior_chosen), Editing::MarkerClickSelectOnly));
+	radio_reg_sens (marker_click_actions, marker_click_group, "marker-click-locate", _("Locate to Marker on Click"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_click_behavior_chosen), Editing::MarkerClickLocate));
+	radio_reg_sens (marker_click_actions, marker_click_group, "marker-click-locate-when-stopped", _("Locate To Marker When Transport Is Not Rolling "), sigc::bind (sigc::mem_fun(*this, &Editor::marker_click_behavior_chosen), Editing::MarkerClickLocateWhenStopped));
+	ActionManager::register_action (editor_actions, X_("cycle-marker-click-behavior"), _("Next Marker Click Mode"), sigc::mem_fun (*this, &Editor::cycle_marker_click_behavior));
+
 	Glib::RefPtr<ActionGroup> lua_script_actions = ActionManager::create_action_group (bindings, X_("LuaAction"));
 
 	for (int i = 1; i <= MAX_LUA_ACTION_SCRIPTS; ++i) {
@@ -1638,6 +1646,26 @@ Editor::edit_point_chosen (EditPoint ep)
 	}
 }
 
+RefPtr<RadioAction>
+Editor::marker_click_behavior_action (MarkerClickBehavior m)
+{
+	const char* action = 0;
+	RefPtr<Action> act;
+
+	switch (m) {
+	case MarkerClickSelectOnly:
+		action = X_("marker-click-select-only");
+		break;
+	case MarkerClickLocate:
+		action = X_("marker-click-locate");
+		break;
+	case MarkerClickLocateWhenStopped:
+		action = X_("marker-click-locate-when-stopped");
+		break;
+	}
+
+	return ActionManager::get_radio_action (X_("MarkerClickBehavior"), action);
+}
 
 RefPtr<RadioAction>
 Editor::zoom_focus_action (ZoomFocus focus)
@@ -1694,6 +1722,15 @@ Editor::zoom_focus_chosen (ZoomFocus focus)
 
 	if (ract && ract->get_active()) {
 		set_zoom_focus (focus);
+	}
+}
+
+void
+Editor::marker_click_behavior_chosen (Editing::MarkerClickBehavior m)
+{
+	RefPtr<RadioAction> ract = marker_click_behavior_action (m);
+	if (ract && ract->get_active()) {
+		set_marker_click_behavior (m);
 	}
 }
 

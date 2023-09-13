@@ -61,6 +61,7 @@ setup_gtk_ardour_enums ()
 	Gtk::ResponseType dialog_response;
 	AddRouteDialog::TypeWanted type_wanted;
 	NoteNameDisplay note_name_display;
+	MarkerClickBehavior marker_click_behavior;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -234,6 +235,10 @@ setup_gtk_ardour_enums ()
 	REGISTER_CLASS_ENUM (AddRouteDialog, FoldbackBus);
 	REGISTER (type_wanted);
 
+	REGISTER_CLASS_ENUM (Editing, MarkerClickSelectOnly);
+	REGISTER_CLASS_ENUM (Editing, MarkerClickLocate);
+	REGISTER_CLASS_ENUM (Editing, MarkerClickLocateWhenStopped);
+	REGISTER (marker_click_behavior);
 
 	REGISTER_CLASS_ENUM (Editing, Always);
 	REGISTER_CLASS_ENUM (Editing, WithMIDNAM);
