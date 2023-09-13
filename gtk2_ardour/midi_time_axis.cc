@@ -141,8 +141,15 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	_midnam_channel_selector.disable_scrolling();
 
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MidiTimeAxisView::parameter_changed));
+
+	_editor.MouseModeChanged.connect_same_thread (mouse_mode_connection, sigc::mem_fun (*this, &MidiTimeAxisView::mouse_mode_changed));
 }
 
+void
+MidiTimeAxisView::mouse_mode_changed ()
+{
+	_piano_roll_header->queue_resize ();
+}
 
 void
 MidiTimeAxisView::parameter_changed (string const & param)

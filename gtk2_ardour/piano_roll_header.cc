@@ -291,9 +291,7 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 	cr->rectangle (0,0,_scroomer_size, get_height () );
 	cr->clip();
 
-	Editing::NoteNameDisplay nnd = UIConfiguration::instance().get_note_name_display();
-
-	if ((nnd == Editing::Always) || ((nnd == Editing::WithMIDNAM) && have_note_names)) {
+	if (show_scroomer()) {
 
 		/* Draw the actual text */
 
@@ -802,12 +800,33 @@ PianoRollHeader::invalidate_note_range (int lowest, int highest)
 	queue_draw ();
 }
 
-void
-PianoRollHeader::on_size_request (Gtk::Requisition* r)
+bool
+PianoRollHeader::show_scroomer () const
 {
 	Editing::NoteNameDisplay nnd = UIConfiguration::instance().get_note_name_display();
 
-	if ((nnd == Editing::Always) || ((nnd == Editing::WithMIDNAM) && have_note_names)) {
+	if (nnd == Editing::Never) {
+		return false;
+	}
+
+	switch (editor().current_mouse_mode()) {
+	case Editing::MouseDraw:
+	case Editing::MouseContent:
+		if (nnd == Editing::WithMIDNAM) {
+			return have_note_names;
+		} else {
+			return true;
+		}
+	default:
+		break;
+	}
+	return false;
+}
+
+void
+PianoRollHeader::on_size_request (Gtk::Requisition* r)
+{
+	if (show_scroomer()) {
 		_scroomer_size = 60.f;
 	} else {
 		_scroomer_size = 20.f;

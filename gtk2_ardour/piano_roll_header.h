@@ -144,6 +144,7 @@ private:
 	double _old_av_note_height;
 
 	PublicEditor& editor() const;
+	bool show_scroomer () const;
 };
 
 #endif /* __ardour_piano_roll_header_h__ */

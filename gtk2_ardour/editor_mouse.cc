@@ -428,6 +428,11 @@ Editor::mouse_mode_toggled (MouseMode m)
 	update_all_enter_cursors ();
 
 	MouseModeChanged (); /* EMIT SIGNAL */
+
+	if ((was_internal && !internal_editing()) ||
+	    (!was_internal && internal_editing())) {
+		queue_redisplay_track_views ();
+	}
 }
 
 bool

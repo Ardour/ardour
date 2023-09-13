@@ -208,6 +208,8 @@ private:
 	void create_velocity_automation_child (Evoral::Parameter const &, bool show);
 
 	void update_patch_selector ();
+	void mouse_mode_changed ();
+	PBD::ScopedConnection mouse_mode_connection;
 };
 
 #endif /* __ardour_midi_time_axis_h__ */
