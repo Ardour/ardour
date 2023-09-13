@@ -280,6 +280,12 @@
         <menuitem action='cycle-edit-point'/>
         <menuitem action='cycle-edit-point-with-marker'/>
       </menu>
+      <menu action="MarkerClickBehavior">
+        <menuitem action='cycle-marker-click-behavior'/>
+        <menuitem action='marker-click-select-only'/>
+        <menuitem action='marker-click-locate'/>
+        <menuitem action='marker-click-locate-when-stopped'/>
+      </menu>
       <menuitem action='cycle-snap-mode'/>
       <menu name='GridChoice' action='GridChoice'>
         <menuitem action='prev-grid-choice'/>

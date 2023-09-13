@@ -4346,6 +4346,7 @@ Editor::set_marker_click_behavior (MarkerClickBehavior m)
 {
 	if (marker_click_behavior != m) {
 		marker_click_behavior = m;
+		marker_click_behavior_selection_done (marker_click_behavior);
 		instant_save ();
 	}
 }

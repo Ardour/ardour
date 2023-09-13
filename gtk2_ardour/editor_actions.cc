@@ -133,6 +133,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("EditSelectRangeOptions"), _("Select Range Operations"));
 	ActionManager::register_action (editor_menu_actions, X_("EditSelectRegionOptions"), _("Select Regions"));
 	ActionManager::register_action (editor_menu_actions, X_("EditPointMenu"), _("Edit Point"));
+	ActionManager::register_action (editor_menu_actions, X_("MarkerClickBehavior"), _("Marker Interaction"));
 	ActionManager::register_action (editor_menu_actions, X_("FadeMenu"), _("Fade"));
 	ActionManager::register_action (editor_menu_actions, X_("LatchMenu"), _("Latch"));
 	ActionManager::register_action (editor_menu_actions, X_("RegionMenu"), _("Region"));
