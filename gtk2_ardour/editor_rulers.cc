@@ -430,6 +430,21 @@ Editor::restore_ruler_visibility ()
 			ruler_video_action->set_active (yn);
 		}
 
+	} else {
+		Temporal::TimeDomain const td (_session->config.get_default_time_domain ());
+		/* New session: no rulers have been displayed yet. let's assign default rulers from the session's time domain */
+		ruler_minsec_action->set_active (td == Temporal::AudioTime);
+		ruler_timecode_action->set_active (td == Temporal::AudioTime);
+		ruler_samples_action->set_active (false);
+		ruler_bbt_action->set_active (td == Temporal::BeatTime);
+		ruler_meter_action->set_active (td == Temporal::BeatTime);
+		ruler_tempo_action->set_active (td == Temporal::BeatTime);
+		ruler_range_action->set_active (true);
+		ruler_loop_punch_action->set_active (td == Temporal::BeatTime);
+		ruler_cd_marker_action->set_active (td == Temporal::AudioTime);
+		ruler_marker_action->set_active (true);
+		ruler_cue_marker_action->set_active (td == Temporal::BeatTime);
+		ruler_section_action->set_active (td == Temporal::BeatTime);
 	}
 
 	no_ruler_shown_update = false;
