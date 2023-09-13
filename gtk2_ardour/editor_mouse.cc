@@ -379,8 +379,12 @@ Editor::mouse_mode_toggled (MouseMode m)
 	}
 
 	if (mouse_mode == MouseGrid) {
+		grid_box.show();
+		_grid_box_spacer.show ();
 		_canvas_grid_zone->set_ignore_events (false);
 	} else {
+		grid_box.hide ();
+		_grid_box_spacer.hide ();
 		_canvas_grid_zone->set_ignore_events (true);
 	}
 
@@ -3045,7 +3049,7 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 
 	/* The reversible command starts here, must be ended/aborted in drag */
 	begin_reversible_command ("");
-	domain_bounce_info = new Temporal::DomainBounceInfo (Temporal::BeatTime, Temporal::AudioTime);
+	domain_bounce_info = new Temporal::DomainBounceInfo (Temporal::BeatTime, Temporal::AudioTime, should_stretch_markers());
 	Temporal::TempoMap::WritableSharedPtr map = begin_tempo_mapping (*domain_bounce_info);
 
 	/* Decide between a mid-twist, which we do if the

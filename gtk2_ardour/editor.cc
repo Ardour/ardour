@@ -3332,6 +3332,8 @@ Editor::setup_toolbar ()
 		mouse_mode_size_group->add_widget (visible_tracks_selector);
 	}
 
+	mouse_mode_size_group->add_widget (stretch_marker_cb);
+
 	mouse_mode_size_group->add_widget (grid_type_selector);
 	mouse_mode_size_group->add_widget (draw_length_selector);
 	mouse_mode_size_group->add_widget (draw_velocity_selector);
@@ -3449,6 +3451,8 @@ Editor::setup_toolbar ()
 	snap_box.set_spacing (2);
 	snap_box.set_border_width (2);
 
+	stretch_marker_cb.set_name ("mouse mode button");
+
 	grid_type_selector.set_name ("mouse mode button");
 	draw_length_selector.set_name ("mouse mode button");
 	draw_velocity_selector.set_name ("mouse mode button");
@@ -3479,6 +3483,14 @@ Editor::setup_toolbar ()
 	nudge_box->pack_start (nudge_backward_button, false, false);
 	nudge_box->pack_start (nudge_forward_button, false, false);
 	nudge_box->pack_start (*nudge_clock, false, false);
+
+	stretch_marker_cb.set_label (_("Stretch Markers"));
+	stretch_marker_cb.set_active (true);
+
+	/* Grid  - these tools are only visible when in Grid mode */
+	grid_box.set_spacing (2);
+	grid_box.set_border_width (2);
+	grid_box.pack_start (stretch_marker_cb, false, false, 4);
 
 	/* Draw  - these MIDI tools are only visible when in Draw mode */
 	draw_box.set_spacing (2);
@@ -3518,6 +3530,8 @@ Editor::setup_toolbar ()
 	toolbar_hbox.pack_start (snap_box, false, false);
 	toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 	toolbar_hbox.pack_start (*nudge_box, false, false);
+	toolbar_hbox.pack_start (_grid_box_spacer, false, false, 3);
+	toolbar_hbox.pack_start (grid_box, false, false);
 	toolbar_hbox.pack_start (_draw_box_spacer, false, false, 3);
 	toolbar_hbox.pack_start (draw_box, false, false);
 	toolbar_hbox.pack_end (_zoom_box, false, false, 2);
@@ -3695,6 +3709,7 @@ Editor::setup_tooltips ()
 	set_tooltip (tav_expand_button, _("Expand Tracks"));
 	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
 	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
+	set_tooltip (stretch_marker_cb, _("Move markers and ranges when stretching the Grid\n(this option is only available when session Time Domain is Beat Time)"));
 	set_tooltip (draw_length_selector, _("Note Length to Draw (AUTO uses the current Grid setting)"));
 	set_tooltip (draw_velocity_selector, _("Note Velocity to Draw (AUTO uses the nearest note's velocity)"));
 	set_tooltip (draw_channel_selector, _("Note Channel to Draw (AUTO uses the nearest note's channel)"));

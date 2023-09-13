@@ -2014,12 +2014,20 @@ private:
 	ArdourWidgets::ArdourDropdown draw_channel_selector;
 	void build_draw_midi_menus ();
 
+	Gtk::CheckButton stretch_marker_cb;
+
+	bool should_stretch_markers() const {
+		return stretch_marker_cb.get_active ();
+	}
+
 	ArdourWidgets::ArdourButton snap_mode_button;
 	bool snap_mode_button_clicked (GdkEventButton*);
 
 	Gtk::HBox snap_box;
+	Gtk::HBox grid_box;
 	Gtk::HBox draw_box;
 
+	ArdourWidgets::ArdourVSpacer _grid_box_spacer;
 	ArdourWidgets::ArdourVSpacer _draw_box_spacer;
 
 	Gtk::HBox ebox_hpacker;

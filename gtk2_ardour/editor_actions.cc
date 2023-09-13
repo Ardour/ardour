@@ -1810,6 +1810,8 @@ Editor::parameter_changed (std::string p)
 		}
 	} else if (p == "track-name-number") {
 		queue_redisplay_track_views ();
+	} else if (p == "default-time-domain") {
+		stretch_marker_cb.set_sensitive (_session->config.get_default_time_domain () == Temporal::BeatTime);
 	}
 }
 
