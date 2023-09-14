@@ -572,8 +572,8 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		/* AUDIO */
 
 		const size_t n_buffers = bufs.count().n_audio();
-
 		uint32_t n = 0;
+
 		for (auto const& chaninfo : *c) {
 			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
 			++n;
@@ -610,6 +610,8 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 
 		/* MIDI */
+
+		uint32_t cnt = 0;
 
 		if (_midi_buf) {
 
@@ -658,7 +660,10 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 				bool skip_event = false;
 				if (mt) {
-					/* skip injected immediate/out-of-band events */
+					/* skip injected immediate/out-of-band
+					 * events, but allow those from
+					 * user_immediate_event_buffer
+					 */
 					MidiBuffer const& ieb (mt->immediate_event_buffer());
 					for (MidiBuffer::const_iterator j = ieb.begin(); j != ieb.end(); ++j) {
 						if (*j == ev) {
@@ -672,6 +677,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 				if (!filter || !filter->filter(ev.buffer(), ev.size())) {
 					_midi_buf->write (event_time, ev.event_type(), ev.size(), ev.buffer());
+					cnt++;
 				}
 			}
 
@@ -697,6 +703,9 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					}
 				}
 
+			}
+
+			if (cnt) {
 				DataRecorded (_midi_write_source); /* EMIT SIGNAL */
 			}
 		}
