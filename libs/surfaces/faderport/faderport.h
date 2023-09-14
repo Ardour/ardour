@@ -138,6 +138,10 @@ class FaderPort : public MIDISurface {
 	void set_action (ButtonID, std::string const& action_name, bool on_press, FaderPort::ButtonState = ButtonState (0));
 	std::string get_action (ButtonID, bool on_press, FaderPort::ButtonState = ButtonState (0));
 
+	void notify_record_state_changed ();
+	void notify_transport_state_changed ();
+	void notify_loop_state_changed ();
+
   private:
 	std::shared_ptr<ARDOUR::Stripable> _current_stripable;
 	std::weak_ptr<ARDOUR::Stripable> pre_master_stripable;
@@ -162,9 +166,10 @@ class FaderPort : public MIDISurface {
 
 	int begin_using_device ();
 	int stop_using_device ();
-
 	int device_acquire () { return 0; }
-	void device_release () {}
+	void device_release () { }
+	void run_event_loop ();
+	void stop_event_loop ();
 
 	ButtonState button_state;
 

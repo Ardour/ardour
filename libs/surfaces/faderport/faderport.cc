@@ -157,6 +157,7 @@ FaderPort::FaderPort (Session& s)
 	get_button (Output).set_action (boost::bind (&FaderPort::use_master, this), true);
 	get_button (Output).set_action (boost::bind (&FaderPort::use_monitor, this), true, ShiftDown);
 
+	run_event_loop ();
 	port_setup ();
 }
 
@@ -420,7 +421,7 @@ FaderPort::handle_midi_sysex (MIDI::Parser &p, MIDI::byte *buf, size_t sz)
 int
 FaderPort::set_active (bool yn)
 {
-	DEBUG_TRACE (DEBUG::FaderPort, string_compose("Faderport::set_active init with yn: '%1'\n", yn));
+	DEBUG_TRACE (DEBUG::FaderPort, string_compose("Faderport::set_active init with yn: '%1' while active = %2\n", yn, active()));
 
 	if (yn == active()) {
 		return 0;
@@ -428,19 +429,9 @@ FaderPort::set_active (bool yn)
 
 	if (yn) {
 
-		/* start event loop */
-
-		BaseUI::run ();
-
-		connect_session_signals ();
-
-		Glib::RefPtr<Glib::TimeoutSource> blink_timeout = Glib::TimeoutSource::create (200); // milliseconds
-		blink_connection = blink_timeout->connect (sigc::mem_fun (*this, &FaderPort::blink));
-		blink_timeout->attach (main_loop()->get_context());
-
-		Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
-		periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &FaderPort::periodic));
-		periodic_timeout->attach (main_loop()->get_context());
+		if (device_acquire ()) {
+			return -1;
+		}
 
 	} else {
 		/* Control Protocol Manager never calls us with false, but
@@ -652,14 +643,40 @@ FaderPort::output_port_name () const
 #endif
 }
 
+void
+FaderPort::run_event_loop ()
+{
+	DEBUG_TRACE (DEBUG::FaderPort, "start event loop\n");
+	BaseUI::run ();
+}
+
+void
+FaderPort::stop_event_loop ()
+{
+	DEBUG_TRACE (DEBUG::FaderPort, "stop event loop\n");
+	BaseUI::quit ();
+}
+
 int
 FaderPort::begin_using_device()
 {
-	DEBUG_TRACE (DEBUG::FaderPort, "sending device inquiry message...\n");
+	DEBUG_TRACE (DEBUG::FaderPort, "begin using device\n");
+
+	connect_session_signals ();
+
+	Glib::RefPtr<Glib::TimeoutSource> blink_timeout = Glib::TimeoutSource::create (200); // milliseconds
+	blink_connection = blink_timeout->connect (sigc::mem_fun (*this, &FaderPort::blink));
+	blink_timeout->attach (main_loop()->get_context());
+
+	Glib::RefPtr<Glib::TimeoutSource> periodic_timeout = Glib::TimeoutSource::create (100); // milliseconds
+	periodic_connection = periodic_timeout->connect (sigc::mem_fun (*this, &FaderPort::periodic));
+	periodic_timeout->attach (main_loop()->get_context());
 
 	if (MIDISurface::begin_using_device ()) {
 		return -1;
 	}
+
+	DEBUG_TRACE (DEBUG::FaderPort, "sending device inquiry message...\n");
 
 	/* send device inquiry */
 
@@ -684,10 +701,6 @@ FaderPort::stop_using_device ()
 	selection_connection.disconnect ();
 	stripable_connections.drop_connections ();
 	periodic_connection.disconnect ();
-
-#if 0
-	stripable_connections.drop_connections ();
-#endif
 
 	return 0;
 }
@@ -1114,3 +1127,21 @@ FaderPort::get_action (ButtonID id, bool press, ButtonState bs)
 	return get_button(id).get_action (press, bs);
 }
 
+
+void
+FaderPort::notify_record_state_changed ()
+{
+	map_recenable_state ();
+}
+
+void
+FaderPort::notify_transport_state_changed()
+{
+	map_transport_state ();
+}
+
+void
+FaderPort::notify_loop_state_changed ()
+{
+	map_transport_state ();
+}
