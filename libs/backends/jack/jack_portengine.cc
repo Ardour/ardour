@@ -38,7 +38,7 @@ using std::vector;
 
 #define GET_PRIVATE_JACK_POINTER(localvar)  jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(localvar,r) jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return r; }
-// #define JACK_SERVER_CALL(expr) { std::cerr << "JACK SERVER CALL: " << pthread_self() << '/' << pthread_name() << ' ' << #expr << std::endl; Glib::Threads::Mutex::Lock lm (server_call_mutex); expr; }
+// #define JACK_SERVER_CALL(expr) { std::cerr << "JACK SERVER CALL: " << DEBUG_THREAD_SELF << '/' << pthread_name() << ' ' << #expr << std::endl; Glib::Threads::Mutex::Lock lm (server_call_mutex); expr; }
 #define JACK_SERVER_CALL(expr) { Glib::Threads::Mutex::Lock lm (server_call_mutex); expr; }
 
 static uint32_t
@@ -227,7 +227,7 @@ JACKAudioBackend::get_port_by_name (const std::string& name) const
 void
 JACKAudioBackend::_registration_callback (jack_port_id_t id, int reg, void* arg)
 {
-	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack port registration callback\n", pthread_self(), pthread_name()));
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack port registration callback\n", DEBUG_THREAD_SELF, pthread_name()));
 
 	/* we don't use a virtual method for the registration callback, because
 	   JACK is the only backend that delivers the arguments shown above. So
@@ -297,14 +297,14 @@ JACKAudioBackend::jack_registration_callback (jack_port_id_t id, int reg)
 int
 JACKAudioBackend::_graph_order_callback (void *arg)
 {
-	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack graph order callback\n", pthread_self(), pthread_name()));
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack graph order callback\n", DEBUG_THREAD_SELF, pthread_name()));
 	return static_cast<JACKAudioBackend*> (arg)->manager.graph_order_callback ();
 }
 
 void
 JACKAudioBackend::_connect_callback (jack_port_id_t id_a, jack_port_id_t id_b, int conn, void* arg)
 {
-	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack connect/disconnect callback\n", pthread_self(), pthread_name()));
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack connect/disconnect callback\n", DEBUG_THREAD_SELF, pthread_name()));
 	static_cast<JACKAudioBackend*> (arg)->connect_callback (id_a, id_b, conn);
 }
 

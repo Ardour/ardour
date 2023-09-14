@@ -48,7 +48,7 @@ using std::vector;
 
 #define GET_PRIVATE_JACK_POINTER(localvar)  jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return; }
 #define GET_PRIVATE_JACK_POINTER_RET(localvar,r) jack_client_t* localvar = _jack_connection->jack(); if (!(localvar)) { return r; }
-// #define JACK_SERVER_CALL(expr) { std::cerr << "JACK SERVER CALL: " << pthread_self() << '/' << pthread_name() << ' ' << #expr << std::endl; Glib::Threads::Mutex::Lock lm (server_call_mutex); expr; }
+// #define JACK_SERVER_CALL(expr) { std::cerr << "JACK SERVER CALL: " << DEBUG_THREAD_SELF << '/' << pthread_name() << ' ' << #expr << std::endl; Glib::Threads::Mutex::Lock lm (server_call_mutex); expr; }
 #define JACK_SERVER_CALL(expr) { Glib::Threads::Mutex::Lock lm (server_call_mutex); expr; }
 
 JACKAudioBackend::JACKAudioBackend (AudioEngine& e, AudioBackendInfo& info, std::shared_ptr<JackConnection> jc)
@@ -771,7 +771,7 @@ void
 JACKAudioBackend::_jack_timebase_callback (jack_transport_state_t state, pframes_t nframes,
 				      jack_position_t* pos, int new_position, void *arg)
 {
-	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack timebase callback\n", pthread_self(), pthread_name()));
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack timebase callback\n", DEBUG_THREAD_SELF, pthread_name()));
 	static_cast<JACKAudioBackend*> (arg)->jack_timebase_callback (state, nframes, pos, new_position);
 }
 
@@ -790,7 +790,7 @@ JACKAudioBackend::jack_timebase_callback (jack_transport_state_t state, pframes_
 int
 JACKAudioBackend::_jack_sync_callback (jack_transport_state_t state, jack_position_t* pos, void* arg)
 {
-	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack sync callback\n", pthread_self(), pthread_name()));
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack sync callback\n", DEBUG_THREAD_SELF, pthread_name()));
 	return static_cast<JACKAudioBackend*> (arg)->jack_sync_callback (state, pos);
 }
 
@@ -829,7 +829,7 @@ JACKAudioBackend::jack_sync_callback (jack_transport_state_t state, jack_positio
 int
 JACKAudioBackend::_xrun_callback (void *arg)
 {
-	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack sync callback\n", pthread_self(), pthread_name()));
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack sync callback\n", DEBUG_THREAD_SELF, pthread_name()));
 
 	JACKAudioBackend* jab = static_cast<JACKAudioBackend*> (arg);
 	if (jab->available()) {
@@ -841,7 +841,7 @@ JACKAudioBackend::_xrun_callback (void *arg)
 void
 JACKAudioBackend::_session_callback (jack_session_event_t *event, void *arg)
 {
-	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack session callback\n", pthread_self(), pthread_name()));
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack session callback\n", DEBUG_THREAD_SELF, pthread_name()));
 
 	JACKAudioBackend* jab = static_cast<JACKAudioBackend*> (arg);
 	ARDOUR::Session* session = jab->engine.session();
@@ -855,7 +855,7 @@ JACKAudioBackend::_session_callback (jack_session_event_t *event, void *arg)
 void
 JACKAudioBackend::_freewheel_callback (int onoff, void *arg)
 {
-	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack freewheel callback\n", pthread_self(), pthread_name()));
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack freewheel callback\n", DEBUG_THREAD_SELF, pthread_name()));
 	static_cast<JACKAudioBackend*>(arg)->freewheel_callback (onoff);
 }
 
@@ -869,7 +869,7 @@ JACKAudioBackend::freewheel_callback (int onoff)
 void
 JACKAudioBackend::_latency_callback (jack_latency_callback_mode_t mode, void* arg)
 {
-	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack latency callback\n", pthread_self(), pthread_name()));
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack latency callback\n", DEBUG_THREAD_SELF, pthread_name()));
 	return static_cast<JACKAudioBackend*> (arg)->jack_latency_callback (mode);
 }
 
@@ -938,7 +938,7 @@ JACKAudioBackend::in_process_thread ()
 			return true;
 		}
 #else // pthreads
-		if (pthread_equal (thread, pthread_self()) != 0) {
+		if (pthread_equal (thread, DEBUG_THREAD_SELF) != 0) {
 			return true;
 		}
 #endif
@@ -1014,7 +1014,7 @@ JACKAudioBackend::process_thread ()
 int
 JACKAudioBackend::_sample_rate_callback (pframes_t nframes, void *arg)
 {
-	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack sample rate callback\n", pthread_self(), pthread_name()));
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack sample rate callback\n", DEBUG_THREAD_SELF, pthread_name()));
 	return static_cast<JACKAudioBackend*> (arg)->jack_sample_rate_callback (nframes);
 }
 
@@ -1034,7 +1034,7 @@ JACKAudioBackend::jack_latency_callback (jack_latency_callback_mode_t mode)
 int
 JACKAudioBackend::_bufsize_callback (pframes_t nframes, void *arg)
 {
-	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack buffer size callback\n", pthread_self(), pthread_name()));
+	DEBUG_TRACE (DEBUG::BackendCallbacks, string_compose ("%1/%2 jack buffer size callback\n", DEBUG_THREAD_SELF, pthread_name()));
 	return static_cast<JACKAudioBackend*> (arg)->jack_bufsize_callback (nframes);
 }
 
