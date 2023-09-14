@@ -1358,7 +1358,7 @@ GenericPluginUI::note_on_event_handler (int note, int)
 	event[1] = note;
 	event[2] = _piano_velocity.get_value_as_int ();
 	if (mt) {
-		mt->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
+		mt->write_user_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	} else {
 		_pib->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	}
@@ -1374,7 +1374,7 @@ GenericPluginUI::note_off_event_handler (int note)
 	event[1] = note;
 	event[2] = 0;
 	if (mt) {
-		mt->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
+		mt->write_user_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	} else {
 		_pib->write_immediate_event (Evoral::MIDI_EVENT, 3, event);
 	}
