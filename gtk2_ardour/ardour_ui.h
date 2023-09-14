@@ -227,7 +227,7 @@ public:
 	int copy_demo_sessions ();
 	int load_session (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());
 	bool session_load_in_progress;
-	int build_session (std::string const& path, std::string const& snapshot, std::string const& session_template, ARDOUR::BusProfile const&, bool from_startup_fsm, bool unnamed);
+	int build_session (std::string const& path, std::string const& snapshot, std::string const& session_template, ARDOUR::BusProfile const&, bool from_startup_fsm, bool unnamed, Temporal::TimeDomain domain);
 	bool session_is_new() const { return _session_is_new; }
 
 	ARDOUR::Session* the_session() { return _session; }
@@ -239,7 +239,7 @@ public:
 
 	void start_session_load (bool create_new);
 	void session_dialog_response_handler (int response, SessionDialog* session_dialog);
-	void build_session_from_dialog (SessionDialog&, std::string const& session_name, std::string const& session_path, std::string const& session_template);
+	void build_session_from_dialog (SessionDialog&, std::string const& session_name, std::string const& session_path, std::string const& session_template, Temporal::TimeDomain domain);
 	bool ask_about_loading_existing_session (const std::string& session_path);
 	int load_session_from_startup_fsm ();
 
@@ -473,8 +473,8 @@ private:
 
 	void audio_midi_setup_reconfigure_done (int response, std::string path, std::string snapshot, std::string mix_template);
 	int  load_session_stage_two (const std::string& path, const std::string& snapshot, std::string mix_template = std::string());
-	void audio_midi_setup_for_new_session_done (int response, std::string path, std::string snapshot, std::string session_template, ARDOUR::BusProfile const&, bool unnamed);
-	int  build_session_stage_two (std::string const& path, std::string const& snapshot, std::string const& session_template, ARDOUR::BusProfile const&, bool unnamed);
+	void audio_midi_setup_for_new_session_done (int response, std::string path, std::string snapshot, std::string session_template, ARDOUR::BusProfile const&, bool unnamed, Temporal::TimeDomain domain);
+	int  build_session_stage_two (std::string const& path, std::string const& snapshot, std::string const& session_template, ARDOUR::BusProfile const&, bool unnamed, Temporal::TimeDomain domain);
 	sigc::connection _engine_dialog_connection;
 
 	void save_session_at_its_request (std::string);

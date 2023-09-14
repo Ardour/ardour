@@ -705,8 +705,9 @@ StartupFSM::check_session_parameters (bool must_be_new)
 {
 	bool requested_new = false;
 
-	session_name = session_dialog->session_name (requested_new);
-	session_path = session_dialog->session_folder ();
+	session_name        = session_dialog->session_name (requested_new);
+	session_path        = session_dialog->session_folder ();
+	session_domain      = session_dialog->session_domain ();
 	session_name_edited = session_dialog->was_new_name_edited ();
 
 	if (must_be_new) {

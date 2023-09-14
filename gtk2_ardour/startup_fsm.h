@@ -63,13 +63,14 @@ class StartupFSM : public sigc::trackable
 	void start ();
 	void reset ();
 
-	std::string session_path;
-	std::string session_name;
-	std::string session_template;
-	int         session_existing_sample_rate;
-	XMLNode     session_engine_hints;
-	bool        session_is_new;
-	bool        session_name_edited;
+	std::string          session_path;
+	std::string          session_name;
+	std::string          session_template;
+	Temporal::TimeDomain session_domain;
+	int                  session_existing_sample_rate;
+	XMLNode              session_engine_hints;
+	bool                 session_is_new;
+	bool                 session_name_edited;
 
 	ARDOUR::BusProfile bus_profile;
 

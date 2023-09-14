@@ -78,12 +78,12 @@
 
 #include "pbd/i18n.h"
 
+using namespace Temporal;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace std;
-
 
 static bool
 _hide_splash (gpointer arg)
@@ -676,16 +676,17 @@ ARDOUR_UI::copy_demo_sessions ()
 int
 ARDOUR_UI::load_session_from_startup_fsm ()
 {
-	const string session_path = startup_fsm->session_path;
-	const string session_name = startup_fsm->session_name;
-	const string session_template = startup_fsm->session_template;
-	const bool   session_is_new = startup_fsm->session_is_new;
-	const BusProfile bus_profile = startup_fsm->bus_profile;
-	const bool   session_was_not_named = (!startup_fsm->session_name_edited && ARDOUR_COMMAND_LINE::session_name.empty());
+	const string     session_path          = startup_fsm->session_path;
+	const string     session_name          = startup_fsm->session_name;
+	const string     session_template      = startup_fsm->session_template;
+	const bool       session_is_new        = startup_fsm->session_is_new;
+	const bool       session_was_not_named = (!startup_fsm->session_name_edited && ARDOUR_COMMAND_LINE::session_name.empty());
+	const TimeDomain session_domain        = startup_fsm->session_domain;
+	const BusProfile bus_profile           = startup_fsm->bus_profile;
 
 	if (session_is_new) {
 
-		if (build_session (session_path, session_name, session_template, bus_profile, true, session_was_not_named)) {
+		if (build_session (session_path, session_name, session_template, bus_profile, true, session_was_not_named, session_domain)) {
 			return -1;
 		}
 		return 0;
@@ -886,7 +887,7 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 		if (nsm) {
 			BusProfile bus_profile;
 			bus_profile.master_out_channels = 2;
-			build_session (path, basename_nosuffix (path), "", bus_profile, true, false);
+			build_session (path, basename_nosuffix (path), "", bus_profile, true, false, AudioTime);
 		}
 		return;
 	}

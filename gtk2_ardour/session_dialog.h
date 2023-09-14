@@ -41,6 +41,8 @@
 #include <gtkmm/liststore.h>
 #include <gtkmm/combobox.h>
 
+#include "temporal/domain_provider.h"
+
 #include "ardour/utils.h"
 
 #include "ardour_dialog.h"
@@ -57,6 +59,8 @@ public:
 
 	std::string session_name (bool& should_be_new);
 	std::string session_folder ();
+
+	Temporal::TimeDomain session_domain () const;
 
 	bool use_session_template() const;
 	std::string session_template_name();
@@ -76,6 +80,8 @@ private:
 	Gtk::Button* open_button;
 	Gtk::Button* back_button;
 	Gtk::Button* quit_button;
+
+	Gtk::ComboBoxText  timebase_chooser;
 
 	bool back_button_pressed (GdkEventButton*);
 	bool open_button_pressed (GdkEventButton*);

@@ -112,20 +112,19 @@ ARDOUR_UI::ask_about_loading_existing_session (const std::string& session_path)
 }
 
 void
-ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& session_path, const std::string& session_name, std::string const& session_template)
+ARDOUR_UI::build_session_from_dialog (SessionDialog& sd, const std::string& session_path, const std::string& session_name, std::string const& session_template, Temporal::TimeDomain domain)
 {
 	BusProfile bus_profile;
 
 	if (nsm) {
 		bus_profile.master_out_channels = 2;
-	} else if ( Profile->get_mixbus()) {
+	} else if (Profile->get_mixbus ()) {
 		bus_profile.master_out_channels = 2;
 	} else {
 		/* get settings from advanced section of NSD */
 		bus_profile.master_out_channels = (uint32_t) sd.master_channel_count();
 	}
 
-	build_session (session_path, session_name, session_template, bus_profile, false, !sd.was_new_name_edited());
 }
 
 /** This is only ever used once Ardour is already running with a session
@@ -161,6 +160,7 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 	string session_name;
 	string session_path;
 	string template_name;
+	Temporal::TimeDomain session_domain;
 	bool likely_new = false;
 
 	session_path = "";
@@ -175,6 +175,7 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 
 	session_name = session_dialog->session_name (likely_new);
 	session_path = session_dialog->session_folder ();
+	session_domain = session_dialog->session_domain ();
 
 	if (nsm) {
 		likely_new = true;
@@ -289,7 +290,7 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 
 	if (!template_name.empty() || likely_new) {
 
-		build_session_from_dialog (*session_dialog, session_path, session_name, template_name);
+		build_session_from_dialog (*session_dialog, session_path, session_name, template_name, session_domain);
 
 	} else {
 
@@ -604,7 +605,7 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 }
 
 int
-ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name, const std::string& session_template, BusProfile const& bus_profile, bool from_startup_fsm, bool unnamed)
+ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name, const std::string& session_template, BusProfile const& bus_profile, bool from_startup_fsm, bool unnamed, Temporal::TimeDomain domain)
 {
 	int x;
 
@@ -623,11 +624,11 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	 * asked for the SR (even if try-autostart-engine is set)
 	 */
 	if (from_startup_fsm && AudioEngine::instance()->running ()) {
-		return build_session_stage_two (path, snap_name, session_template, bus_profile, unnamed);
+		return build_session_stage_two (path, snap_name, session_template, bus_profile, unnamed, domain);
 	}
 	/* Sample-rate cannot be changed when JACK is running */
 	if (!ARDOUR::AudioEngine::instance()->setup_required () && AudioEngine::instance()->running ()) {
-		return build_session_stage_two (path, snap_name, session_template, bus_profile, unnamed);
+		return build_session_stage_two (path, snap_name, session_template, bus_profile, unnamed, domain);
 	}
 
 	/* Work-around missing "OK" button:
@@ -643,7 +644,7 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	audio_midi_setup->set_position (WIN_POS_CENTER);
 	audio_midi_setup->set_modal ();
 	audio_midi_setup->present ();
-	_engine_dialog_connection = audio_midi_setup->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::audio_midi_setup_for_new_session_done), path, snap_name, session_template, bus_profile, unnamed));
+	_engine_dialog_connection = audio_midi_setup->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::audio_midi_setup_for_new_session_done), path, snap_name, session_template, bus_profile, unnamed, domain));
 
 	/* not done yet, but we're avoiding modal dialogs */
 	return 0;
@@ -651,7 +652,7 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 
 
 void
-ARDOUR_UI::audio_midi_setup_for_new_session_done (int response, std::string path, std::string snap_name, std::string template_name, BusProfile const& bus_profile, bool unnamed)
+ARDOUR_UI::audio_midi_setup_for_new_session_done (int response, std::string path, std::string snap_name, std::string template_name, BusProfile const& bus_profile, bool unnamed, Temporal::TimeDomain domain)
 {
 	_engine_dialog_connection.disconnect ();
 
@@ -669,11 +670,11 @@ ARDOUR_UI::audio_midi_setup_for_new_session_done (int response, std::string path
 	audio_midi_setup->set_modal (false);
 	audio_midi_setup->hide();
 
-	build_session_stage_two (path, snap_name, template_name, bus_profile, unnamed);
+	build_session_stage_two (path, snap_name, template_name, bus_profile, unnamed, domain);
 }
 
 int
-ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& snap_name, std::string const& session_template, BusProfile const& bus_profile, bool unnamed)
+ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& snap_name, std::string const& session_template, BusProfile const& bus_profile, bool unnamed, Temporal::TimeDomain domain)
 {
 	Session* new_session;
 
@@ -773,6 +774,8 @@ ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& 
 		n->set_property (X_("playhead"), X_("0"));
 		n->set_property (X_("left-frame"), X_("0"));
 	}
+
+	new_session->config.set_default_time_domain(domain);
 
 	set_session (new_session);
 
