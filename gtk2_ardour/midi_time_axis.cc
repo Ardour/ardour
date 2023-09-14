@@ -1856,6 +1856,16 @@ MidiTimeAxisView::get_preferred_midi_channel () const
 		return _editor.draw_channel();
 	}
 
+	if (_midnam_channel_selector.is_visible()) {
+		string chn = gui_property (X_("midnam-channel"));
+		if (!chn.empty()) {
+			int midnam_channel;
+			sscanf (chn.c_str(), "%*s %d", &midnam_channel);
+			midnam_channel--;
+			return midnam_channel;
+		}
+	}
+
 	uint16_t const chn_mask = midi_track()->get_playback_channel_mask();
 	int chn_cnt = 0;
 	uint8_t channel = 0;
