@@ -938,7 +938,7 @@ JACKAudioBackend::in_process_thread ()
 			return true;
 		}
 #else // pthreads
-		if (pthread_equal (thread, DEBUG_THREAD_SELF) != 0) {
+		if (pthread_equal (thread, pthread_self()) != 0) {
 			return true;
 		}
 #endif
