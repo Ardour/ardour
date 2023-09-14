@@ -182,7 +182,6 @@ double Editor::timebar_height = 15.0;
 
 static const gchar *_grid_type_strings[] = {
 	N_("No Grid"),
-	N_("Playhead"),
 	N_("Bar"),
 	N_("1/4 Note"),
 	N_("1/8 Note"),
