@@ -627,7 +627,7 @@ ArdourMarker::setup_name_display ()
 				case Section:
 					_name_flag->set_x0 (0);
 					_name_flag->set_x1 (_name_item->position().x + name_width + padding);
-					_name_flag->set_y1 (marker_height);  //full height
+					_name_flag->set_y1 (marker_height+0.5);  //full height
 					break;
 				default:
 					_name_flag->set_x0 (0);
