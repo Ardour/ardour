@@ -197,8 +197,8 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 				prev = pos.x;
 			}
 
-			if (_outline_width == 1.0) {
-				/* Cairo single pixel line correction */
+			if (fmod (_outline_width, 2.)) {
+				/* Cairo odd pixel width line correction */
 				cr->move_to (pos.x + 0.5, pos.y);
 			} else {
 				cr->move_to (pos.x, pos.y);
