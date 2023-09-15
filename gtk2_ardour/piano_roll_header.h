@@ -51,16 +51,6 @@ public:
 	void note_range_changed();
 	void set_note_highlight (uint8_t note);
 
-	struct Color {
-		Color();
-		Color(double _r, double _g, double _b);
-		inline void set(const Color& c);
-
-		double r;
-		double g;
-		double b;
-	};
-
 	sigc::signal<void,uint8_t> SetNoteSelection;
 	sigc::signal<void,uint8_t> AddNoteSelection;
 	sigc::signal<void,uint8_t> ToggleNoteSelection;
@@ -78,15 +68,6 @@ private:
 	NoteName get_note_name (int note);
 
 	Gtk::Adjustment& _adj;
-	static Color white;
-	static Color white_highlight;
-	static Color white_shade_light;
-	static Color white_shade_dark;
-	static Color black;
-	static Color black_highlight;
-	static Color black_shade_light;
-	static Color black_shade_dark;
-	static Color gray;
 
 	PianoRollHeader(const PianoRollHeader&);
 

@@ -23,6 +23,7 @@
 #include "evoral/midi_events.h"
 #include <iostream>
 
+#include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/rgb_macros.h"
 
@@ -38,36 +39,6 @@
 
 using namespace std;
 using namespace Gtkmm2ext;
-
-PianoRollHeader::Color PianoRollHeader::white = PianoRollHeader::Color(0.77f, 0.78f, 0.76f);
-PianoRollHeader::Color PianoRollHeader::white_highlight = PianoRollHeader::Color(1.00f, 0.40f, 0.40f);
-
-PianoRollHeader::Color PianoRollHeader::black = PianoRollHeader::Color(0.14f, 0.14f, 0.14f);
-PianoRollHeader::Color PianoRollHeader::black_highlight = PianoRollHeader::Color(0.60f, 0.10f, 0.10f);
-
-PianoRollHeader::Color PianoRollHeader::gray = PianoRollHeader::Color(0.50f, 0.50f, 0.50f);
-
-PianoRollHeader::Color::Color()
-	: r(1.0f)
-	, g(1.0f)
-	, b(1.0f)
-{
-}
-
-PianoRollHeader::Color::Color (double _r, double _g, double _b)
-	: r (_r)
-	, g (_g)
-	, b (_b)
-{
-}
-
-inline void
-PianoRollHeader::Color::set (const PianoRollHeader::Color& c)
-{
-	r = c.r;
-	g = c.g;
-	b = c.b;
-}
 
 PianoRollHeader::PianoRollHeader(MidiStreamView& v)
 	: have_note_names (false)
@@ -128,9 +99,9 @@ create_path (Cairo::RefPtr<Cairo::Context> cr, double x[], double y[], int start
 
 inline void
 render_rect(Cairo::RefPtr<Cairo::Context> cr, int note, double x[], double y[],
-	     PianoRollHeader::Color& bg)
+	     Gtkmm2ext::Color& bg)
 {
-	cr->set_source_rgb(bg.r, bg.g, bg.b);
+	set_source_rgba(cr, bg);
 	create_path(cr, x, y, 0, 4);
 	cr->fill();
 }
@@ -142,11 +113,9 @@ PianoRollHeader::render_scroomer(Cairo::RefPtr<Cairo::Context> cr)
 	double scroomer_bottom = (1.0 - (_adj.get_value () / 127.0)) * get_height ();
 	double scroomer_width = _scroomer_size;
 
-	double r, g, b, a;
 	Gtkmm2ext::Color c = UIConfiguration::instance().color_mod (X_("scroomer"), X_("scroomer alpha"));
-	Gtkmm2ext::color_to_rgba (c, r, g, b, a);
 
-	cr->set_source_rgba(r, g, b, a);
+	set_source_rgba(cr, c);
 	cr->move_to (1.f, scroomer_top);
 	cr->line_to (scroomer_width - 1.f, scroomer_top);
 	cr->line_to (scroomer_width - 1.f, scroomer_bottom);
@@ -230,7 +199,7 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 {
 	GdkRectangle& rect = ev->area;
 	int lowest, highest;
-	PianoRollHeader::Color bg;
+	Gtkmm2ext::Color bg;
 	Cairo::RefPtr<Cairo::Context> cr = get_window()->create_cairo_context();
 	double x[9];
 	double y[9];
@@ -268,11 +237,17 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 	/* fill the entire rect with the color for non-highlighted white notes.
 	 * then we won't have to draw the background for those notes,
 	 * and would only have to draw the background for the one highlighted white note*/
-	// cr->rectangle(rect.x, rect.y, rect.width, rect.height);
-	// cr->set_source_rgb(white.r, white.g, white.b);
+	//cr->rectangle(rect.x, rect.y, rect.width, rect.height);
+	//r->set_source_rgb(1, 0,0);
 	//cr->fill();
 
 	cr->set_line_width (1.0f);
+
+	Gtkmm2ext::Color white           = UIConfiguration::instance().color (X_("piano key white"));
+	Gtkmm2ext::Color white_highlight = UIConfiguration::instance().color (X_("piano key highlight"));
+	Gtkmm2ext::Color black           = UIConfiguration::instance().color (X_("piano key black"));
+	Gtkmm2ext::Color black_highlight = UIConfiguration::instance().color (X_("piano key highlight"));
+	Gtkmm2ext::Color textc           = UIConfiguration::instance().color (X_("gtk_foreground"));
 
 	/* draw vertical lines on both sides of the widget */
 	cr->set_source_rgb(0.0f, 0.0f, 0.0f);
@@ -302,7 +277,7 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 
 			_midnam_layout->set_text (note.name);
 
-			cr->set_source_rgb(white.r, white.g, white.b);
+			set_source_rgba(cr, textc);
 			cr->move_to(2.f, y);
 
 			if (!_mini_map_display) {
@@ -312,7 +287,7 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 				   text would have been.
 				*/
 				if (!note.from_midnam) {
-					cr->set_source_rgb(gray.r, gray.g, gray.b);
+					set_source_rgba(cr, textc);
 				}
 				pango_layout_get_pixel_size (_midnam_layout->gobj (), &size_x, &size_y);
 				cr->rectangle (2.f, y + (av_note_height * 0.5), size_x, av_note_height * 0.2);
@@ -324,10 +299,13 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 		   elision". This avoids using text elision with "..." which takes up too
 		   much space.
 		*/
+		Gtkmm2ext::Color bg = UIConfiguration::instance().color (X_("gtk_background"));
+		double r,g,b,a;
+		Gtkmm2ext::color_to_rgba(bg,r,g,b,a);
 		double fade_width = 30.;
 		auto gradient_ptr = Cairo::LinearGradient::create (_scroomer_size - fade_width, 0, _scroomer_size, 0);
-		gradient_ptr->add_color_stop_rgba (0,.23,.23,.23,0);
-		gradient_ptr->add_color_stop_rgba (1,.23,.23,.23,1);
+		gradient_ptr->add_color_stop_rgba (0,r,g,b,0);
+		gradient_ptr->add_color_stop_rgba (1,r,g,b,1);
 		cr->set_source (gradient_ptr);
 		cr->rectangle (_scroomer_size - fade_width, 0, _scroomer_size, get_height () );
 		cr->fill();
@@ -356,9 +334,9 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 		case 10:
 			/* black note */
 			if (i == _highlighted_note) {
-				bg.set (black_highlight);
+				bg = black_highlight;
 			} else {
-				bg.set (black);
+				bg = black;
 			}
 
 			/* draw black separators */
@@ -385,9 +363,9 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 		case 9:
 		case 11:
 			if (i == _highlighted_note) {
-				bg.set (white_highlight);
+				bg = white_highlight;
 			} else {
-				bg.set (white);
+				bg  = white;
 			}
 			get_path (i, x, y);
 			render_rect (cr, i, x, y, bg);
@@ -421,12 +399,12 @@ PianoRollHeader::on_expose_event (GdkEventExpose* ev)
 			}
 
 			if (av_note_height > 12.0){
-				cr->set_source_rgb(0.30f, 0.30f, 0.30f);
+				set_source_rgba(cr, black);
 				_layout->set_text (s.str());
-				cr->move_to(_scroomer_size, y);
+				cr->move_to(_scroomer_size, ceil(y+1.));
 				_layout->show_in_cairo_context (cr);
 			}else{
-				cr->set_source_rgb(white.r, white.g, white.b);
+				set_source_rgba(cr, textc);
 				_big_c_layout->set_text (s.str());
 				pango_layout_get_pixel_size (_big_c_layout->gobj(), &bc_width, &bc_height);
 				cr->move_to(_scroomer_size - 18, y - bc_height + av_note_height);
