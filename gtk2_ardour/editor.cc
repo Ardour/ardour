@@ -3484,7 +3484,7 @@ Editor::setup_toolbar ()
 	nudge_box->pack_start (nudge_forward_button, false, false);
 	nudge_box->pack_start (*nudge_clock, false, false);
 
-	stretch_marker_cb.set_label (_("Stretch Markers"));
+	stretch_marker_cb.set_label (_("Adjust Markers"));
 	stretch_marker_cb.set_active (true);
 
 	/* Grid  - these tools are only visible when in Grid mode */
