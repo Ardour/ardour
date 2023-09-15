@@ -167,7 +167,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 			Duple pos;
 			Pango::FontDescription* fd = (m->style == Mark::Major) ? (_second_font_description ? _second_font_description : _font_description) : _font_description;
 
-			pos.x = round ((m->position - _lower) / _metric->units_per_pixel);
+			pos.x = round (m->position/_metric->units_per_pixel) + self.x0;
 			pos.y = self.y1; /* bottom edge */
 
 			if (fd != last_font_description) {
