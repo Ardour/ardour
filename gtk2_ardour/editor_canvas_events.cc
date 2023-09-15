@@ -1174,6 +1174,7 @@ Editor::section_rect_event (GdkEvent* ev, Location* loc, ArdourCanvas::Rectangle
 				assert (l);
 
 				timepos_t where (canvas_event_time (ev));
+				snap_to (where, Temporal::RoundNearest);
 
 				section_box_menu.set_name ("ArdourContextMenu");
 				MenuList& items (section_box_menu.items());
