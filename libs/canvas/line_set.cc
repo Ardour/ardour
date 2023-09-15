@@ -116,13 +116,11 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		}
 
 		self = item_to_window (self);
-		Rect isect = self.intersection (area);
+		Rect intersection = self.intersection (area);
 
-		if (!isect) {
+		if (!intersection) {
 			continue;
 		}
-
-		Rect intersection (isect);
 
 		Gtkmm2ext::set_source_rgba (context, l.color);
 		context->set_line_width (l.width);
