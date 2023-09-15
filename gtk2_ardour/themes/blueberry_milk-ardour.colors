@@ -369,7 +369,7 @@
     <ColorAlias name="rude solo: led active" alias="alert:red"/>
     <ColorAlias name="ruler base" alias="theme:bg2"/>
     <ColorAlias name="ruler text" alias="neutral:background2"/>
-    <ColorAlias name="scroomer" alias="midi meter 55"/>
+    <ColorAlias name="scroomer" alias="alert:ruddy"/>
     <ColorAlias name="secondary clock: background" alias="theme:bg2"/>
     <ColorAlias name="secondary clock: cursor" alias="theme:contrasting alt"/>
     <ColorAlias name="secondary clock: edited text" alias="theme:contrasting alt"/>
