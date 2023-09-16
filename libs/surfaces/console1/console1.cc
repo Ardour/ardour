@@ -67,17 +67,17 @@ Console1::~Console1 ()
 
 	tear_down_gui ();
 
-	for (const auto& [_, b] : buttons) {
-		delete b;
+    for( const auto &b : buttons ){
+		delete b.second;
 	}
-	for (const auto& [_, b] : encoders) {
-		delete b;
+    for( const auto &e : encoders ){
+		delete e.second;
 	}
-	for (const auto& [_, b] : meters) {
-		delete b;
+    for( const auto &m : meters ){
+		delete m.second;
 	}
-	for (const auto& [_, b] : multi_buttons) {
-		delete b;
+    for( const auto &mb : multi_buttons ){
+		delete mb.second;
 	}
 
 	/* stop event loop */
