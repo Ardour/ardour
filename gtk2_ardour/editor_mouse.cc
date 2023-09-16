@@ -1751,6 +1751,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case MinsecRulerItem:
 			case BBTRulerItem:
 			case SelectionMarkerItem:
+				snap_to (where, Temporal::RoundNearest, SnapToGrid_Scaled, false);
 				popup_ruler_menu (where, item_type);
 				break;
 
