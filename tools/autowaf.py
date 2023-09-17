@@ -415,11 +415,11 @@ def make_simple_dox(name):
             ['%s_DEPRECATED ' % NAME, ''],
             ['group__%s.html' % name, ''],
             ['&#160;', ''],
-            ['<script.*><\/script>', ''],
-            ['<hr\/><a name="details" id="details"><\/a><h2>.*<\/h2>', ''],
-            ['<link href=\"tabs.css\" rel=\"stylesheet\" type=\"text\/css\"\/>',
+            [r'<script.*><\/script>', ''],
+            [r'<hr\/><a name="details" id="details"><\/a><h2>.*<\/h2>', ''],
+            [r'<link href=\"tabs.css\" rel=\"stylesheet\" type=\"text\/css\"\/>',
              ''],
-            ['<img class=\"footer\" src=\"doxygen.png\" alt=\"doxygen\"\/>',
+            [r'<img class=\"footer\" src=\"doxygen.png\" alt=\"doxygen\"\/>',
              'Doxygen']]:
             os.system("sed -i 's/%s/%s/g' %s" % (i[0], i[1], page))
         os.rename('group__%s.html' % name, 'index.html')
