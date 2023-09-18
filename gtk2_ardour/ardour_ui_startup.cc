@@ -550,8 +550,6 @@ ARDOUR_UI::sfsm_response (StartupFSM::Result r)
 
 		if (load_session_from_startup_fsm () == 0) {
 			startup_done ();
-			delete startup_fsm;
-			startup_fsm = 0;
 		} else {
 			DEBUG_TRACE (DEBUG::GuiStartup, "FSM reset\n");
 			startup_fsm->reset ();
@@ -621,6 +619,11 @@ ARDOUR_UI::starting ()
 		 */
 
 		startup_fsm->start ();
+
+		if (startup_fsm->complete()) {
+			delete startup_fsm;
+			startup_fsm = 0;
+		}
 	}
 
 	return 0;
@@ -692,8 +695,13 @@ ARDOUR_UI::load_session_from_startup_fsm ()
 		return 0;
 	}
 
-	return load_session (session_path, session_name, session_template);
+	int ret = load_session (session_path, session_name, session_template);
 
+	if (!ret) {
+		startup_fsm->set_complete ();
+	}
+
+	return ret;
 }
 
 void

@@ -133,6 +133,10 @@ StartupFSM::start ()
 	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("State at startup: %1\n"), enum_2_string (_state)));
 
 	switch (_state) {
+	case NotWaiting:
+		abort();
+		break;
+
 	case WaitingForPreRelease:
 		show_pre_release_dialog ();
 		break;
@@ -199,6 +203,10 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 	 */
 
 	switch (_state) {
+	case NotWaiting:
+		abort();
+		break;
+
 	case WaitingForPreRelease:
 		switch (dialog_id) {
 		case ApplicationPseudoDialog:
