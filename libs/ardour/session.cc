@@ -7225,8 +7225,16 @@ Session::clear_object_selection ()
 }
 
 void
-Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, SectionOperation const op)
+Session::cut_copy_section (timepos_t const& start_, timepos_t const& end_, timepos_t const& to_, SectionOperation const op)
 {
+	timepos_t start = timepos_t::from_superclock (start_.superclocks());
+	timepos_t end   = timepos_t::from_superclock (end_.superclocks());
+	timepos_t to    = timepos_t::from_superclock (to_.superclocks());
+
+#ifndef NDEBUG
+	cout << "Session::cut_copy_section " << start << " - " << end << " << to " << to << " op = " << op << "\n";
+#endif
+
 	std::list<TimelineRange> ltr;
 	TimelineRange tlr (start, end, 0);
 	ltr.push_back (tlr);
