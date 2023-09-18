@@ -2564,18 +2564,51 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 	/* The fast path: one tempo, one meter, just do (relatively) simple math */
 
 	if (_tempos.size() == 1 && _meters.size() == 1) {
+
 		TempoMetric metric (_tempos.front(), _meters.front());
 
-		/* Figure out the beat closest to but preceding rstart */
+		/* Figure out the beat preceding rstart */
 
-		superclock_t spnt = metric.superclocks_per_note_type() / beat_div;
-		superclock_t start = (rstart / spnt) * spnt; /* beat preceding rstart */
+		superclock_t spdiv;
+
+		if (bar_mod == 1) {
+			spdiv = llrintf (metric.superclocks_per_note_type() * (metric.meter().divisions_per_bar() * (4. / metric.meter().note_value())));
+		} else {
+			spdiv = metric.superclocks_per_note_type() / beat_div;
+		}
+
+		superclock_t start = (rstart / spdiv) * spdiv; /* div (bar/beat) preceding rstart */
 
 		/* determine BBT and beats at the position. Note that we know
 		 * that the tempo and meter must be at zero
 		 */
 
 		BBT_Time bbt (metric.bbt_at (timepos_t::from_superclock (start)));
+
+		/* Now round to bar mod or beat_div to keep the grid aligned
+		 * with what has been asked for.
+		 */
+
+		BBT_Time on_bar;
+
+		if (rstart != 0) {
+			if (bar_mod == 1) {
+				on_bar = bbt.round_up_to_bar ();
+			} else {
+				on_bar = metric.meter().round_up_to_beat_div (bbt, beat_div);
+			}
+
+			BBT_Offset delta = Temporal::bbt_delta (on_bar, bbt);
+
+			if (delta != BBT_Offset ()) {
+				bbt = on_bar;
+				Beats beats_delta = _meters.front().to_quarters (delta);
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("simple reset start using bbt %1 via %2 (rounded by %3 beats %4)\n", bbt, on_bar, delta, beats_delta));
+			} else {
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("bbt %1 was already on-bar or on-beat %2 start is %3\n", bbt, on_bar, start));
+			}
+		}
+
 		Beats    beats (metric.quarters_at_superclock (start));
 
 		fill_grid_with_final_metric (ret, metric, start, rstart, end, bar_mod, beat_div, beats, bbt);
