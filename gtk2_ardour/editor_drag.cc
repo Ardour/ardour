@@ -4813,6 +4813,12 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 void
 ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 {
+	if (first_motion) {
+		float const initial_fraction = 1.0 - (_fixed_grab_y / _point->line ().height ());
+		_editor->begin_reversible_command (_("automation event move"));
+		_point->line ().start_drag_single (_point, _fixed_grab_x, initial_fraction);
+	}
+
 	/* First y */
 
 	double dy = current_pointer_y () - last_pointer_y ();
@@ -4830,16 +4836,11 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 
 	_cumulative_y_drag = cy - _fixed_grab_y;
 
-	cy = max (0.0, cy);
-	cy = min ((double)_point->line ().height (), cy);
-
 	// make sure we hit zero when passing through
 
 	if ((cy < zero_gain_y && (cy - dy) > zero_gain_y) || (cy > zero_gain_y && (cy - dy) < zero_gain_y)) {
 		cy = zero_gain_y;
 	}
-
-	float const fraction = 1.0 - (cy / _point->line ().height ());
 
 	/* Now x axis */
 
@@ -4849,12 +4850,10 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 		dt = total_dt (event);
 	}
 
-	if (first_motion) {
-		float const initial_fraction = 1.0 - (_fixed_grab_y / _point->line ().height ());
-		_editor->begin_reversible_command (_("automation event move"));
-		_point->line ().start_drag_single (_point, _fixed_grab_x, initial_fraction);
-	}
+	cy = max (0.0, cy);
+	cy = min ((double)_point->line ().height (), cy);
 
+	float const fraction = 1.0 - (cy / _point->line ().height ());
 	pair<float, float> result;
 	result = _point->line ().drag_motion (dt, fraction, false, _pushing, _final_index);
 	show_verbose_cursor_text (_point->line ().get_verbose_cursor_relative_string (result.first, result.second));
