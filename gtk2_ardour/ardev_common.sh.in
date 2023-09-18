@@ -55,7 +55,11 @@ export DYLD_FALLBACK_LIBRARY_PATH=$LD_LIBRARY_PATH
 # - new_delete_type_mismatch=0  - because caps plugins do that
 # - leak_check_at_exit=0 - without ARDOUR_RUNNING_UNDER_VALGRIND=TRUE there are many false-positives
 #   besides, instant.xml leaks somewhat intentionally
-export ASAN_OPTIONS=halt_on_error=0:detect_odr_violation=0:leak_check_at_exit=0:new_delete_type_mismatch=0${ASAN_OPTIONS:+:$ASAN_OPTIONS}
+if [ x$ASAN_COREDUMP != x ] ; then
+    export ASAN_OPTIONS=abort_on_error=1:disable_coredump=0:unmap_shadow_on_exit=1:detect_odr_violation=0:leak_check_at_exit=0:new_delete_type_mismatch=0${ASAN_OPTIONS:+:$ASAN_OPTIONS}
+else
+    export ASAN_OPTIONS=halt_on_error=0:detect_odr_violation=0:leak_check_at_exit=0:new_delete_type_mismatch=0${ASAN_OPTIONS:+:$ASAN_OPTIONS}
+fi
 
 ARDOURVERSION=@VERSION@
 EXECUTABLE=@EXECUTABLE@
