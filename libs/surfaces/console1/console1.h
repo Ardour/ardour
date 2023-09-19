@@ -49,6 +49,8 @@ namespace ARDOUR {
 class AsyncMIDIPort;
 class Bundle;
 class Port;
+class Processor;
+class Route;
 class Session;
 class MidiPort;
 }
@@ -93,6 +95,7 @@ class Console1 : public MIDISurface
   public:
 	Console1 (ARDOUR::Session&);
 	virtual ~Console1 ();
+	void map_p ();
 
 	int set_active (bool yn);
 
@@ -103,8 +106,12 @@ class Console1 : public MIDISurface
 	std::string input_port_name () const override;
 	std::string output_port_name () const override;
 
-	/*XMLNode& get_state () const;
-	int set_state (const XMLNode&, int version);*/
+	XMLNode& get_state () const override;
+	int set_state (const XMLNode&, int version) override;
+
+	bool swap_solo_mute;
+	bool create_mapping_stubs;
+
 	PBD::Signal0<void> ConnectionChange;
 
 	/* Timer Events */
@@ -114,7 +121,7 @@ class Console1 : public MIDISurface
 	/* Local Signals */
 	PBD::Signal0<void> BankChange;
 	PBD::Signal1<void, bool> ShiftChange;
-
+	PBD::Signal1<void, bool> PluginStateChange;
 
 	enum ControllerID
 	{
@@ -193,7 +200,83 @@ class Console1 : public MIDISurface
 
 	};
 
+	using ControllerMap = std::map<std::string, ControllerID>;
+
+	ControllerMap controllerMap{ { "CONTROLLER_NONE", ControllerID::CONTROLLER_NONE },
+		                         { "VOLUME", ControllerID::VOLUME },
+		                         { "PAN", ControllerID::PAN },
+		                         { "MUTE", ControllerID::MUTE },
+		                         { "SOLO", ControllerID::SOLO },
+		                         { "ORDER", ControllerID::ORDER },
+		                         { "DRIVE", ControllerID::DRIVE },
+		                         { "EXTERNAL_SIDECHAIN", ControllerID::EXTERNAL_SIDECHAIN },
+		                         { "CHARACTER", ControllerID::CHARACTER },
+		                         { "FOCUS1", ControllerID::FOCUS1 },
+		                         { "FOCUS2", ControllerID::FOCUS2 },
+		                         { "FOCUS3", ControllerID::FOCUS3 },
+		                         { "FOCUS4", ControllerID::FOCUS4 },
+		                         { "FOCUS5", ControllerID::FOCUS5 },
+		                         { "FOCUS6", ControllerID::FOCUS6 },
+		                         { "FOCUS7", ControllerID::FOCUS7 },
+		                         { "FOCUS8", ControllerID::FOCUS8 },
+		                         { "FOCUS9", ControllerID::FOCUS9 },
+		                         { "FOCUS10", ControllerID::FOCUS10 },
+		                         { "FOCUS11", ControllerID::FOCUS11 },
+		                         { "FOCUS12", ControllerID::FOCUS12 },
+		                         { "FOCUS13", ControllerID::FOCUS13 },
+		                         { "FOCUS14", ControllerID::FOCUS14 },
+		                         { "FOCUS15", ControllerID::FOCUS15 },
+		                         { "FOCUS16", ControllerID::FOCUS16 },
+		                         { "FOCUS17", ControllerID::FOCUS17 },
+		                         { "FOCUS18", ControllerID::FOCUS18 },
+		                         { "FOCUS19", ControllerID::FOCUS19 },
+		                         { "FOCUS20", ControllerID::FOCUS20 },
+		                         { "COMP", ControllerID::COMP },
+		                         { "COMP_THRESH", ControllerID::COMP_THRESH },
+		                         { "COMP_RELEASE", ControllerID::COMP_RELEASE },
+		                         { "COMP_RATIO", ControllerID::COMP_RATIO },
+		                         { "COMP_PAR", ControllerID::COMP_PAR },
+		                         { "COMP_ATTACK", ControllerID::COMP_ATTACK },
+		                         { "SHAPE", ControllerID::SHAPE },
+		                         { "SHAPE_GATE", ControllerID::SHAPE_GATE },
+		                         { "SHAPE_SUSTAIN", ControllerID::SHAPE_SUSTAIN },
+		                         { "SHAPE_RELEASE", ControllerID::SHAPE_RELEASE },
+		                         { "SHAPE_PUNCH", ControllerID::SHAPE_PUNCH },
+		                         { "PRESET", ControllerID::PRESET },
+		                         { "HARD_GATE", ControllerID::HARD_GATE },
+		                         { "FILTER_TO_COMPRESSORS", ControllerID::FILTER_TO_COMPRESSORS },
+		                         { "HIGH_SHAPE", ControllerID::HIGH_SHAPE },
+		                         { "EQ", ControllerID::EQ },
+		                         { "HIGH_GAIN", ControllerID::HIGH_GAIN },
+		                         { "HIGH_FREQ", ControllerID::HIGH_FREQ },
+		                         { "HIGH_MID_GAIN", ControllerID::HIGH_MID_GAIN },
+		                         { "HIGH_MID_FREQ", ControllerID::HIGH_MID_FREQ },
+		                         { "HIGH_MID_SHAPE", ControllerID::HIGH_MID_SHAPE },
+		                         { "LOW_MID_GAIN", ControllerID::LOW_MID_GAIN },
+		                         { "LOW_MID_FREQ", ControllerID::LOW_MID_FREQ },
+		                         { "LOW_MID_SHAPE", ControllerID::LOW_MID_SHAPE },
+		                         { "LOW_GAIN", ControllerID::LOW_GAIN },
+		                         { "LOW_FREQ", ControllerID::LOW_FREQ },
+		                         { "LOW_SHAPE", ControllerID::LOW_SHAPE },
+		                         { "PAGE_UP", ControllerID::PAGE_UP },
+		                         { "PAGE_DOWN", ControllerID::PAGE_DOWN },
+		                         { "DISPLAY_ON", ControllerID::DISPLAY_ON },
+		                         { "LOW_CUT", ControllerID::LOW_CUT },
+		                         { "MODE", ControllerID::MODE },
+		                         { "HIGH_CUT", ControllerID::HIGH_CUT },
+		                         { "GAIN", ControllerID::GAIN },
+		                         { "PHASE_INV", ControllerID::PHASE_INV },
+		                         { "INPUT_METER_L", ControllerID::INPUT_METER_L },
+		                         { "INPUT_METER_R", ControllerID::INPUT_METER_R },
+		                         { "OUTPUT_METER_L", ControllerID::OUTPUT_METER_L },
+		                         { "OUTPUT_METER_R", ControllerID::OUTPUT_METER_R },
+		                         { "SHAPE_METER", ControllerID::SHAPE_METER },
+		                         { "COMP_METER", ControllerID::COMP_METER },
+		                         { "TRACK_COPY", ControllerID::TRACK_COPY },
+		                         { "TRACK_GROUP", ControllerID::TRACK_GROUP } };
+
   private:
+	std::string config_dir_name = "c1mappings";
 	/* GUI */
 	mutable C1GUI* gui;
 	void build_gui ();
@@ -201,17 +284,31 @@ class Console1 : public MIDISurface
 	/* Configuration */
 	const uint32_t bank_size = 20;
 
+	// Shift button
 	bool shift_state = false;
+	bool in_plugin_state = false;
 
 	bool rolling = false;
 	uint32_t current_bank = 0;
 	uint32_t current_strippable_index = 0;
+
+	uint32_t max_strip_index = 0;
+	uint32_t master_index = 0;
+
+	int32_t current_plugin_index = -1;
+#ifdef MIXBUS
+	int32_t selected_intern_plugin_index = -1;
+#endif
 
 	std::shared_ptr<ARDOUR::AutomationControl> current_pan_control = nullptr;
 
 	std::shared_ptr<ARDOUR::Stripable> _current_stripable;
 	std::weak_ptr<ARDOUR::Stripable> pre_master_stripable;
 	std::weak_ptr<ARDOUR::Stripable> pre_monitor_stripable;
+
+	void create_encoder (ControllerID id,
+	                     boost::function<void (uint32_t)> action,
+	                     boost::function<void (uint32_t)> shift_action = 0);
 
 	void setup_controls ();
 
@@ -232,12 +329,18 @@ class Console1 : public MIDISurface
 
 	void tabbed_window_state_event_handler (GdkEventWindowState* ev, void* object);
 
+	void master_monitor_has_changed ();
+
 	/* Strip inventory */
 	typedef std::map<uint32_t, order_t> StripInventoryMap;
 
 	StripInventoryMap strip_inventory;
 
-	void create_strip_invetory ();
+	void create_strip_inventory ();
+
+    void strip_inventory_changed (ARDOUR::RouteList&) {
+		create_strip_inventory ();
+	}
 
 	order_t get_inventory_order_by_index (const uint32_t index);
 	uint32_t get_index_by_inventory_order (order_t order);
@@ -245,22 +348,22 @@ class Console1 : public MIDISurface
 	void select_rid_by_index (const uint32_t index);
 
 	/* Controller Maps*/
-	typedef std::map<ControllerID, ArdourSurface::ControllerButton> ButtonMap;
-	typedef std::map<ControllerID, ArdourSurface::MultiStateButton> MultiStateButtonMap;
-	typedef std::map<ControllerID, ArdourSurface::Meter> MeterMap;
-	typedef std::map<ControllerID, ArdourSurface::Encoder> EncoderMap;
+	typedef std::map<ControllerID, ArdourSurface::ControllerButton*> ButtonMap;
+	typedef std::map<ControllerID, ArdourSurface::MultiStateButton*> MultiStateButtonMap;
+	typedef std::map<ControllerID, ArdourSurface::Meter*> MeterMap;
+	typedef std::map<ControllerID, ArdourSurface::Encoder*> EncoderMap;
 
 	ButtonMap buttons;
-	ControllerButton& get_button (ControllerID) const;
+	ControllerButton* get_button (ControllerID) const;
 
 	MultiStateButtonMap multi_buttons;
-	MultiStateButton& get_mbutton (ControllerID id) const;
+	MultiStateButton* get_mbutton (ControllerID id) const;
 
 	MeterMap meters;
-	Meter& get_meter (ControllerID) const;
+	Meter* get_meter (ControllerID) const;
 
 	EncoderMap encoders;
-	Encoder& get_encoder (ControllerID) const;
+	Encoder* get_encoder (ControllerID) const;
 
 	typedef std::map<uint32_t, ControllerID> SendControllerMap;
 	SendControllerMap send_controllers{ { 0, LOW_FREQ },       { 1, LOW_MID_FREQ },   { 2, HIGH_MID_FREQ },
@@ -273,6 +376,7 @@ class Console1 : public MIDISurface
 	/* */
 	void all_lights_out ();
 
+	void notify_session_loaded ();
 	void notify_transport_state_changed () override;
 	void notify_solo_active_changed (bool) override;
 
@@ -303,10 +407,11 @@ class Console1 : public MIDISurface
 	void drop_current_stripable ();
 	/*void use_master ();
 	void use_monitor ();*/
-	void stripable_selection_changed ();
+	void stripable_selection_changed () override;
 	/*PBD::ScopedConnection selection_connection;*/
 	PBD::ScopedConnectionList stripable_connections;
 	PBD::ScopedConnectionList console1_connections;
+	PBD::ScopedConnectionList plugin_connections;
 
 	void map_stripable_state ();
 
@@ -323,6 +428,7 @@ class Console1 : public MIDISurface
 	void rude_solo (const uint32_t);
 	void select (const uint32_t i);
 	void shift (const uint32_t);
+	void plugin_state (const uint32_t);
 	void solo (const uint32_t);
 	void trim (const uint32_t value);
 	void window (const uint32_t value);
@@ -418,6 +524,7 @@ class Console1 : public MIDISurface
 	void map_recenable ();
 	void map_select ();
 	void map_shift (bool shift);
+	void map_plugin_state (bool state);
 	void map_solo ();
 	void map_trim ();
 
@@ -463,6 +570,42 @@ class Console1 : public MIDISurface
 	float calculate_meter (float dB);
 	uint32_t control_to_midi (Controllable controllable, float val, uint32_t max_value_for_type = 127);
 	float midi_to_control (Controllable controllable, uint32_t val, uint32_t max_value_for_type = 127);
+
+	struct PluginParameterMapping
+	{
+		int paramIndex;
+		bool shift = false;
+		bool is_switch = false;
+		std::string name;
+		ControllerID controllerId;
+	};
+
+	using ParameterMap = std::map<uint32_t, PluginParameterMapping>;
+
+	struct PluginMapping
+	{
+		std::string id;
+		std::string name;
+		ParameterMap parameters;
+	};
+
+	/* plugin handling */
+	bool ensure_config_dir ();
+	uint32_t load_mappings ();
+	bool load_mapping (XMLNode* fin);
+	void create_mapping (const std::shared_ptr<ARDOUR::Processor> proc, const std::shared_ptr<ARDOUR::Plugin> plugin);
+
+	bool spill_plugins (const int32_t plugin_index);
+
+	/* plugin operations */
+	void remove_plugin_operations ();
+	std::shared_ptr<ARDOUR::Processor> find_plugin (const int32_t plugin_index);
+	bool select_plugin (const int32_t plugin_index);
+
+	bool map_select_plugin (const int32_t plugin_index);
+
+	using PluginMappingMap = std::map<std::string, PluginMapping>;
+	PluginMappingMap pluginMappingMap;
 };
 }
 #endif /* ardour_surface_console1_h */

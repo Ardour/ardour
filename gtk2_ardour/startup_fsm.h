@@ -50,6 +50,7 @@ class StartupFSM : public sigc::trackable
 	};
 
 	enum MainState {
+		NotWaiting,
 		WaitingForPreRelease,
 		WaitingForNewUser,
 		WaitingForSessionPath,
@@ -82,6 +83,9 @@ class StartupFSM : public sigc::trackable
 
 	bool brand_new_user() const { return new_user; }
 	void handle_path (std::string const & path);
+
+	bool complete() const { return _state == NotWaiting; }
+	void set_complete () { _state = NotWaiting; }
 
   private:
 	bool new_user;

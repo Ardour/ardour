@@ -4444,8 +4444,11 @@ Editor::bounce_range_selection (BounceTarget target, bool with_processing)
 			ranges.push_back (TimelineRange (start, start+cnt, 0));
 			playlist->cut (ranges); // discard result
 
-			/*SPECIAL CASE:  we are bouncing to a new Source *AND* replacing the existing range on the timeline  (consolidate)*/
-			/*we don't add the whole_file region here; we insert a discrete copy*/
+			/* SPECIAL CASE: we are bouncing to a new Source *AND*
+			 * replacing the existing range on the timeline
+			 * (consolidate) *we don't add the whole_file region
+			 * here; we insert a discrete copy.
+			 */
 			PropertyList plist;
 			plist.add (ARDOUR::Properties::whole_file, false);
 			std::shared_ptr<Region> copy (RegionFactory::create (r, plist));

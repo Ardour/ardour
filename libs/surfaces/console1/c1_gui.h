@@ -24,6 +24,7 @@
 
 #include <gtkmm/box.h>
 #include <gtkmm/combobox.h>
+#include <gtkmm/checkbutton.h>
 #include <gtkmm/image.h>
 #include <gtkmm/table.h>
 #include <gtkmm/treestore.h>
@@ -52,10 +53,11 @@ private:
 	PBD::ScopedConnectionList lcxl_connections;
 	Gtk::VBox hpacker;
 	Gtk::Table table;
-	Gtk::Table action_table;
 	Gtk::ComboBox input_combo;
 	Gtk::ComboBox output_combo;
-	Gtk::Image    image;
+	Gtk::Image image;
+	Gtk::CheckButton swap_solo_mute_cb;
+	Gtk::CheckButton create_plugin_stubs_btn;
 
 	void update_port_combos ();
 	PBD::ScopedConnection connection_change_connection;
@@ -76,6 +78,9 @@ private:
 
 	Glib::RefPtr<Gtk::ListStore> build_midi_port_list (std::vector<std::string> const & ports, bool for_input);
 	void active_port_changed (Gtk::ComboBox*,bool for_input);
+
+	void set_swap_solo_mute ();
+	void set_create_mapping_stubs ();
 
 };
 

@@ -530,14 +530,9 @@ Region::set_length_internal (timecnt_t const & len)
 		 */
 
 		if (td != len.time_domain()) {
-			switch (td) {
-			case Temporal::AudioTime:
-				_length = timecnt_t::from_superclock (len.superclocks(), _length.val().position());
-				break;
-			default:
-				_length = timecnt_t::from_ticks (len.ticks(), _length.val().position());
-				break;
-			}
+			timecnt_t l = _length.val();
+			l.set_time_domain (td);
+			_length = l;
 			return;
 		}
 	}
@@ -764,14 +759,10 @@ Region::set_position_internal (timepos_t const & pos)
 		 */
 
 		if (td != _length.val().position().time_domain()) {
-			switch (td) {
-			case Temporal::AudioTime:
-				_length = timecnt_t::from_superclock (superclock_t (_length.val().distance()), timepos_t::from_superclock (pos.superclocks()));
-				break;
-			default:
-				_length = timecnt_t::from_ticks (int64_t (_length.val().distance()), timepos_t::from_ticks (pos.ticks()));
-				break;
-			}
+			timecnt_t l = _length.val();
+			l.set_position (pos);
+			l.set_time_domain (td);
+			_length = l;
 		} else {
 			/* time domain of position not changing */
 			_length = timecnt_t (_length.val().distance(), pos);
