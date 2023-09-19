@@ -875,7 +875,13 @@ ARDOUR::setup_fpu ()
 /* this can be changed to modify the translation behaviour for
    cases where the user has never expressed a preference.
 */
+
+
+#if defined(PLATFORM_WINDOWS) || defined(__APPLE__)
+static const bool translate_by_default = false;
+#else
 static const bool translate_by_default = true;
+#endif
 
 string
 ARDOUR::translation_enable_path ()
