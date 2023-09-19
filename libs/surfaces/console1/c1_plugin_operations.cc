@@ -76,7 +76,7 @@ Console1::load_mappings ()
 
 		std::string file_path = Glib::build_filename (path, file_name);
 		XMLTree tree;
-		XMLNode* mapping_xml;
+		XMLNode* mapping_xml = 0;
 		if (tree.read (file_path)) {
 			mapping_xml = new XMLNode (*(tree.root ()));
 		} else {
