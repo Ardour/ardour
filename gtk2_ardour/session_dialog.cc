@@ -727,8 +727,8 @@ SessionDialog::setup_new_session_page ()
 	}
 
 	session_new_vbox.pack_start (*template_hbox, true, true);
-	session_new_vbox.pack_start (*folder_box, false, true);
 	session_new_vbox.pack_start (*timebase_box, false, true);
+	session_new_vbox.pack_start (*folder_box, false, true);
 	session_new_vbox.pack_start (*name_hbox, false, true);
 	session_new_vbox.show_all ();
 }
