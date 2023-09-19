@@ -530,14 +530,9 @@ Region::set_length_internal (timecnt_t const & len)
 		 */
 
 		if (td != len.time_domain()) {
-			switch (td) {
-			case Temporal::AudioTime:
-				_length = timecnt_t::from_superclock (len.superclocks(), _length.val().position());
-				break;
-			default:
-				_length = timecnt_t::from_ticks (len.ticks(), _length.val().position());
-				break;
-			}
+			timecnt_t l = _length.val();
+			l.set_time_domain (td);
+			_length = l;
 			return;
 		}
 	}
