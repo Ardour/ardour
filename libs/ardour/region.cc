@@ -763,7 +763,7 @@ Region::set_position_internal (timepos_t const & pos)
 			l.set_position (pos);
 			l.set_time_domain (td);
 			_length = l;
- 		} else {
+		} else {
 			/* time domain of position not changing */
 			_length = timecnt_t (_length.val().distance(), pos);
 		}
