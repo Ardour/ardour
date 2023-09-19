@@ -917,7 +917,7 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 
 		if ((mtp = dynamic_cast<MusicTimePoint const *> (&*p))) {
 			cb->add (*mtp);
-			if (!copy && !mtp->sclock() == 0) {
+			if (!copy && mtp->sclock() != 0) {
 				std::cerr << "remove mtp " << *mtp << std::endl;
 				core_remove_bartime (*mtp);
 				remove_point (*mtp);
@@ -926,7 +926,7 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 		} else {
 			if ((tp = dynamic_cast<TempoPoint const *> (&*p))) {
 				cb->add (*tp);
-				if (!copy && !tp->sclock() == 0) {
+				if (!copy && tp->sclock() != 0) {
 					std::cerr << "remove tempo " << *tp << std::endl;
 					core_remove_tempo (*tp);
 					remove_point (*tp);
@@ -934,7 +934,7 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 				}
 			} else if ((mp = dynamic_cast<MeterPoint const *> (&*p))) {
 				cb->add (*mp);
-				if (!copy && !mp->sclock() == 0) {
+				if (!copy && mp->sclock() != 0) {
 					std::cerr << "remove meter " << *mp << std::endl;
 					core_remove_meter (*mp);
 					remove_point (*mp);
