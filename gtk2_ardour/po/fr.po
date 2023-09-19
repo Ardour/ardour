@@ -18,7 +18,7 @@ msgstr ""
 "Project-Id-Version: Ardour 6\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2023-09-18 01:03+0200\n"
+"PO-Revision-Date: 2023-09-20 01:05+0200\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -10072,7 +10072,6 @@ msgid "Total gain:"
 msgstr "Gain total :"
 
 #: loudness_dialog.cc:249
-#, fuzzy
 msgid ""
 "<b>When enabled</b> an amplifier processor is used to apply the gain. This "
 "allows for custom positioning of the gain-stage in the master-bus' signal flow, "
@@ -10498,11 +10497,11 @@ msgstr "Impossible d'installer le gestionnaire d'erreurs SIGPIPE"
 
 #: main.cc:431
 msgid "Cannot install SIGUSR1 error handler"
-msgstr ""
+msgstr "Impossible d'installer le gestionnaire d'erreurs SIGUSR1"
 
 #: main.cc:433
 msgid "Installed SIGUSR1 debug handler"
-msgstr ""
+msgstr "Installation du gestionnaire de débogage SIGUSR1"
 
 #: main.cc:441
 msgid "Could not complete pre-GUI initialization"
@@ -11658,16 +11657,19 @@ msgid "Toggle Input Monitoring"
 msgstr "Basculer le monitoring d'entrée"
 
 #: mixer_ui.cc:3683
+#, fuzzy
 msgid "Store Mixer Scene #%1"
-msgstr ""
+msgstr "Stocker la scène de mixage #%1"
 
 #: mixer_ui.cc:3688
+#, fuzzy
 msgid "Recall Mixer Scene #%1"
-msgstr ""
+msgstr "Rappeler la scène de mixage #%1"
 
 #: mixer_ui.cc:3693
+#, fuzzy
 msgid "Clear Mixer Scene #%1"
-msgstr ""
+msgstr "Nettoyer la scène de mixage #%1"
 
 #: mixer_ui.cc:3917
 msgid "Scene is already set. Overwrite it?"
@@ -11686,32 +11688,44 @@ msgid "Store"
 msgstr "Stocker"
 
 #: mixer_ui.cc:3975
+#, fuzzy
 msgid ""
 "Recall mixer scene \"%1\"?\n"
 "This will overwrite your mixer settings!\n"
 "This operation cannot be undone."
 msgstr ""
+"Rappeler la scène de mixage #%1 ?\n"
+"Cela écrasera les paramètres de votre mélangeur !\n"
+"Cette opération ne peut pas être annulée."
 
 #: mixer_ui.cc:4021
+#, fuzzy
 msgid ""
 "Clear mixer scene \"%1\"?\n"
 "This operation cannot be undone."
 msgstr ""
+"Nettoyer la scène de mixage #%1 ?\n"
+"Cette opération ne peut pas être annulée."
 
 #: mixer_ui.cc:4065
 msgid "Rename Scene"
 msgstr "Renommer la scène"
 
 #: mixer_ui.cc:4104
+#, fuzzy
 msgid "Restore for selected tracks"
-msgstr ""
+msgstr "Restaurer les pistes sélectionnées"
 
 #: mixer_ui.cc:4187
+#, fuzzy
 msgid ""
 "Click to recall this mixer scene\n"
 "%1 for Momentary Restore\n"
 "Right-Click for Context menu"
 msgstr ""
+"Cliquer pour rappeler cette scène de mixage\n"
+"%1 pour une restauration momentanée\n"
+"Clic droit pour le menu contextuel"
 
 #: mixer_ui.cc:4208
 msgid "(Right-Click to Store)"
@@ -12128,8 +12142,9 @@ msgid ""
 msgstr ""
 
 #: new_user_wizard.cc:147
+#, fuzzy
 msgid "<span size=\"larger\">GUI and Font scaling:</span>"
-msgstr ""
+msgstr "<span size=\"larger\">Mise à l'échelle de l'IGU et des polices : </span>"
 
 #: new_user_wizard.cc:150
 msgid ""
@@ -12429,12 +12444,14 @@ msgid "Scope: "
 msgstr ""
 
 #: playlist_selector.cc:83
+#, fuzzy
 msgid "Only this track/group"
-msgstr ""
+msgstr "Seulement cette piste/groupe"
 
 #: playlist_selector.cc:84
+#, fuzzy
 msgid "Rec-armed tracks"
-msgstr ""
+msgstr "Enregistrer des pistes armées"
 
 #: playlist_selector.cc:85
 msgid "ALL tracks"
@@ -13987,8 +14004,9 @@ msgid "<b>Recommended Setting: %1-%2</b>%3"
 msgstr "<b>Réglage recommandé : %1-%2</b>%3"
 
 #: rc_option_editor.cc:574
+#, fuzzy
 msgid "Slip Contents using:"
-msgstr ""
+msgstr "Glisser le contenu en utilisant :"
 
 #: rc_option_editor.cc:595
 msgid "Constrain drag using:"
@@ -14627,8 +14645,9 @@ msgid "Use colors to show note velocity"
 msgstr "Utiliser des couleurs pour afficher la vélocité des notes"
 
 #: rc_option_editor.cc:2815
+#, fuzzy
 msgid "Trigger Masters"
-msgstr ""
+msgstr "Maîtres du déclenchement"
 
 #: rc_option_editor.cc:2818 rc_option_editor.cc:2827 rc_option_editor.cc:2831
 #: rc_option_editor.cc:2851 rc_option_editor.cc:2853
@@ -14701,8 +14720,9 @@ msgid "Display Monitor Section Info"
 msgstr "Afficher la section info du moniteur"
 
 #: rc_option_editor.cc:2902
+#, fuzzy
 msgid "Display Cue Rec/Play Controls"
-msgstr ""
+msgstr "Afficher enr. Cue/Controle lecture"
 
 #: rc_option_editor.cc:2910
 msgid "Display Navigation Timeline"
@@ -14778,8 +14798,11 @@ msgstr ""
 "la console, essayez de changer ce paramètre."
 
 #: rc_option_editor.cc:2974
+#, fuzzy
 msgid "Show/Hide splash screen instead of setting z-axis stack order"
 msgstr ""
+"Afficher/masquer l'écran de démarrage au lieu de définir l'ordre des colonnes "
+"sur l'axe z"
 
 #: rc_option_editor.cc:2983
 msgid "All floating windows are dialogs"
@@ -14900,8 +14923,9 @@ msgid "only in Draw and Internal Edit modes"
 msgstr "uniquement dans les modes Dessin et Édition Interne"
 
 #: rc_option_editor.cc:3093
+#, fuzzy
 msgid "Scroll and Zoom Behaviors"
-msgstr ""
+msgstr "Comportements de défilement et de zoom"
 
 #: rc_option_editor.cc:3100
 msgid "Zoom to mouse position when zooming with scroll wheel"
@@ -14990,10 +15014,14 @@ msgid "Ignore Y-axis when adding new automation-points"
 msgstr "Ignorer l'axe Y lors de l'ajout de nouveaux points d'automatisation"
 
 #: rc_option_editor.cc:3184
+#, fuzzy
 msgid ""
 "<b>When enabled</b> new points drawn in any automation lane will be placed on "
 "the existing line, regardless of mouse y-axis position."
 msgstr ""
+"<b>Si coché</b> les nouveaux points dessinés dans n'importe quel couloir "
+"d'automatisation seront placés sur la ligne existante, quelle que soit la "
+"position de l'axe y de la souris."
 
 #: rc_option_editor.cc:3188
 #, fuzzy
@@ -15343,7 +15371,7 @@ msgstr ""
 msgid "Rewind/Fast-forward buttons change direction immediately"
 msgstr ""
 "Les touches de rembobinage et d'avance rapide permettent de changer "
-"immédiatement de direction."
+"immédiatement de direction"
 
 #: rc_option_editor.cc:3553
 msgid ""
@@ -15652,11 +15680,16 @@ msgid "Scan for [new] Plugins on Application Start"
 msgstr "Recherche de [nouveaux] greffons au démarrage de l'application"
 
 #: rc_option_editor.cc:3808
+#, fuzzy
 msgid ""
 "<b>When enabled</b> new plugins are searched, tested and added to the cache "
 "index on application start. When disabled new plugins will only be available "
 "after triggering a 'Scan' manually"
 msgstr ""
+"<b>Si coché</b> les nouveaux greffons sont recherchés, testés et ajoutés à "
+"l'index du cache au démarrage de l'application. Lorsque cette option est "
+"désactivée, les nouveaux greffons ne seront disponibles qu'après avoir "
+"déclenché manuellement une analyse"
 
 #: rc_option_editor.cc:3812
 msgid "Always Display Plugin Scan Progress"
@@ -15675,10 +15708,13 @@ msgid "Verbose Plugin Scan"
 msgstr "Scan verbeux de greffon"
 
 #: rc_option_editor.cc:3828
+#, fuzzy
 msgid ""
 "<b>When enabled</b> additional information for every plugin is shown to the "
 "Plugin Manager Log."
 msgstr ""
+"<b>Si coché</b> des informations supplémentaires pour chaque greffon sont "
+"affichées dans le journal du gestionnaire de greffon."
 
 #: rc_option_editor.cc:3833
 #, fuzzy
@@ -15688,11 +15724,15 @@ msgstr ""
 "sont trouvés"
 
 #: rc_option_editor.cc:3839
+#, fuzzy
 msgid ""
 "<b>When enabled</b> the Plugin Manager is display at session load if the "
 "session contains any plugins that are missing, or plugins have been updated and "
 "require a rescan."
 msgstr ""
+"<b>Si coché</b> le gestionnaire de greffons s'affiche au chargement de la "
+"session si celle-ci contient des greffons manquants ou si des greffons ont été "
+"mis à jour et nécessitent une nouvelle analyse."
 
 #: rc_option_editor.cc:3843
 msgid "Make new plugins active"
@@ -15734,6 +15774,9 @@ msgid ""
 "<b>When enabled</b> at most one plugin GUI window can be on-screen at a time. "
 "<b>When disabled</b>, the number of visible plugin GUI windows is unlimited"
 msgstr ""
+"<b>Si coché</b> une seule fenêtre d'interface graphique de  peut être affichée "
+"à l'écran à la fois. <b>Si décoché</b> le nombre de fenêtres d'interface "
+"graphique de greffon visibles est illimité."
 
 #: rc_option_editor.cc:3872
 #, fuzzy
@@ -15743,7 +15786,7 @@ msgstr "Fermeture de la fenêtre d'interface graphique d'un greffon"
 #: rc_option_editor.cc:3876
 #, fuzzy
 msgid "only hides the window"
-msgstr "Cache seulement les fenêtres"
+msgstr "cache seulement les fenêtres"
 
 #: rc_option_editor.cc:3877
 #, fuzzy
@@ -18584,12 +18627,14 @@ msgid "Speed Display (Context-click for options)"
 msgstr "Affichage de la vitesse (clic contextuel pour les options)"
 
 #: shuttle_control.cc:103
+#, fuzzy
 msgid "LogestShuttle|> 888.9%"
-msgstr ""
+msgstr "> 888.9%"
 
 #: shuttle_control.cc:105
+#, fuzzy
 msgid "LogestShuttle|+00 st"
-msgstr ""
+msgstr "+00 st"
 
 #: shuttle_control.cc:136 time_fx_dialog.cc:172
 msgid "Percent"
@@ -18604,22 +18649,23 @@ msgid "Varispeed: change the default playback and recording speed"
 msgstr "Varispeed : modifier la vitesse de lecture et d'enregistrement par défaut"
 
 #: shuttle_control.cc:195
+#, fuzzy
 msgid "VariSpeed|VS"
-msgstr ""
+msgstr "VS"
 
 #: shuttle_control.cc:399
 msgid "Maximum speed"
 msgstr "Vitesse maximale"
 
 #: shuttle_control.cc:718
-#, c-format
+#, fuzzy, c-format
 msgid "< %+2d st"
-msgstr ""
+msgstr "< %+2d st"
 
 #: shuttle_control.cc:720
-#, c-format
+#, fuzzy, c-format
 msgid "> %+2d st"
-msgstr ""
+msgstr "> %+2d st"
 
 #: simple_export_dialog.cc:47
 msgid "Quick Audio Export"
@@ -18666,8 +18712,9 @@ msgid "Running Post-Export Command for '%1'"
 msgstr "Exécution de la commande de post-export pour '%1'"
 
 #: slot_properties_box.cc:76
+#, fuzzy
 msgid "Slot Properties:"
-msgstr ""
+msgstr "Propriétés d'emplacement :"
 
 #: slot_properties_box.cc:106
 msgid "Color:"
@@ -18923,6 +18970,7 @@ msgid "Pre-Release Warning"
 msgstr "Avertissement: version préliminaire"
 
 #: startup_fsm.cc:926
+#, fuzzy
 msgid ""
 "<span size=\"x-large\" weight=\"bold\">Welcome to this pre-release build of %1 "
 "%2</span>\n"
@@ -18949,6 +18997,38 @@ msgid ""
 "\n"
 "                http://ardour.org/support</span>\n"
 msgstr ""
+"<span size=\"x-large\" weight=\"bold\">Bienvenu(e)s dans cette version "
+"préliminaire de %1 %2</span>\n"
+"\n"
+"<span size=\"large\">Plusieurs problèmes et bogues doivent encore être "
+"résolus,\n"
+"ainsi que des améliorations générales du flux de travail, avant que cela puisse "
+"être considéré comme un\n"
+"un version stable du logiciel. Voici donc quelques lignes directrices :\n"
+"\n"
+"1) Veuillez <b>NE PAS</b> utiliser ce logiciel with the expectation en pensant "
+"qu'il est stable ou fiable,\n"
+" bien que cela puisse être le cas, en fonction de votre flux de travail.\n"
+"2) Nous vous invitons à patienter jusqu'à la publication d'un article sur les "
+"nouvelles fonctionnalités.\n"
+"3) <b>N'utilisez PAS les forums de ardour.org pour signaler des problèmes</b>.\n"
+"4) <b>Veuillez NE PAS déposer de bogues pour cette version de développement "
+"alpha à ce stade</b>.\n"
+"   Il n'y a pas de triage des bogues avant la fin du développement initial et\n"
+"   établir des rapports pour des travaux en cours incomplets est en grande "
+"partie inutile.\n"
+"5) <b>Rejoignez-nous</b> sur IRC pour des discussions en temps réel sur %1 %2. "
+"Vous pouvez\n"
+"   Vous pouvez y accéder directement depuis le programme via l'option de menu "
+"Help->Chat.\n"
+"\n"
+"6) Merci de soumettre de correctifs pour les problèmes après en avoir discuté "
+"sur IRC.\n"
+"\n"
+"Des informations complètes sur toutes ces questions sont disponibles sur la "
+"page d'assistance à l'adresse suivante\n"
+"\n"
+"                http://ardour.org/support</span>\n"
 
 #: step_entry.cc:69
 msgid ">beat"
@@ -19964,8 +20044,9 @@ msgstr ""
 "des slots sélectionnés."
 
 #: trigger_jump_dialog.cc:107
+#, fuzzy
 msgid "Jump Target for: %1"
-msgstr ""
+msgstr "Sauter la cible pour : %1"
 
 #: trigger_page.cc:105
 msgid ""
@@ -19984,12 +20065,14 @@ msgid "Window|Cues"
 msgstr "Cues"
 
 #: trigger_page.cc:763
+#, fuzzy
 msgid "Trigger Cue %1"
-msgstr ""
+msgstr "Déclencher Cue %1"
 
 #: trigger_page.cc:771
+#, fuzzy
 msgid "Trigger Slot %1/%2"
-msgstr ""
+msgstr "Déclencher l'emplacement %1/%2"
 
 #: trigger_master.cc:129
 msgid ""
@@ -20371,6 +20454,7 @@ msgid "CC-%1: "
 msgstr "CC-%1 : "
 
 #: virtual_keyboard_window.cc:510
+#, fuzzy
 msgid ""
 "Pitchbend: %1\n"
 "Use mouse-drag for sprung mode,\n"
@@ -20378,6 +20462,11 @@ msgid ""
 "F1-F4 and arrow-up/down keys jump\n"
 "to select values."
 msgstr ""
+"Pitchbend : %1\n"
+"Utilisez le déplacement de la souris pour le mode \"sprung\",\n"
+"la molette de la souris pour les bends persistants.\n"
+"Les touches F1-F4 et les flèches haut/bas permettent de sélectionner les "
+"valeurs."
 
 #: virtual_keyboard_window.cc:527
 msgid "Modulation: %1"
