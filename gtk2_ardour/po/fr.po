@@ -15,10 +15,10 @@
 # Nicolas Faure <sub26nico@laposte.net>, 2022.
 msgid ""
 msgstr ""
-"Project-Id-Version: Ardour 6\n"
+"Project-Id-Version: Ardour 8\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
-"PO-Revision-Date: 2023-09-20 01:08+0200\n"
+"PO-Revision-Date: 2023-09-21 00:37+0200\n"
 "Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
@@ -1583,7 +1583,7 @@ msgstr[0] ""
 "libérant %3 %4octets d'espace disque"
 msgstr[1] ""
 "Les %1 fichiers suivants ont été éffacés de %2,\n"
-"libérant %3 %4octets d'espace disque."
+"libérant %3 %4octets d'espace disque"
 
 #: ardour_ui.cc:2569
 msgid ""
@@ -3618,7 +3618,7 @@ msgid ""
 "tempo"
 msgstr ""
 "<b>Si coché</b>, le clip sera étiré pour correspondre au tempo actuel de la "
-"ligne de temps."
+"ligne de temps"
 
 # Chercher les termes Crisp, Smooth et Mixed pour voir comment ils sont traduits ailleurs dans le logiciel.
 #: audio_trigger_properties_box.cc:155
@@ -9160,7 +9160,7 @@ msgstr "+888.88 dB"
 #: export_report.cc:240 export_report.cc:464 export_report.cc:493
 #: loudness_dialog.cc:73
 msgid "Integrated Loudness:"
-msgstr "sonie intégrée :"
+msgstr "Sonie intégrée :"
 
 #: export_report.cc:241 export_report.cc:499 loudness_dialog.cc:710
 #: loudness_dialog.cc:711 loudness_dialog.cc:712
@@ -14387,7 +14387,7 @@ msgstr "Enregistrer une image de la console après l'export"
 
 #: rc_option_editor.cc:2468
 msgid "New Version Check"
-msgstr "vérification de la nouvelle version"
+msgstr "Vérification de la nouvelle version"
 
 #: rc_option_editor.cc:2471
 msgid "Check for announcements at application start"
@@ -15774,9 +15774,9 @@ msgid ""
 "<b>When enabled</b> at most one plugin GUI window can be on-screen at a time. "
 "<b>When disabled</b>, the number of visible plugin GUI windows is unlimited"
 msgstr ""
-"<b>Si coché</b> une seule fenêtre d'interface graphique de  peut être affichée "
-"à l'écran à la fois. <b>Si décoché</b> le nombre de fenêtres d'interface "
-"graphique de greffon visibles est illimité."
+"<b>Si coché</b> une seule fenêtre d'interface graphique peut être affichée à "
+"l'écran à la fois. <b>Si décoché</b> le nombre de fenêtres d'interface "
+"graphique de greffon visibles est illimité"
 
 #: rc_option_editor.cc:3872
 #, fuzzy
@@ -16403,8 +16403,9 @@ msgid "Lowest (prevent CPU sleep states)"
 msgstr "Le plus bas (empêche les états de sommeil du CPU)"
 
 #: rc_option_editor.cc:4619
+#, fuzzy
 msgid "%1 usec"
-msgstr ""
+msgstr "%1 usec"
 
 #: rc_option_editor.cc:4622
 msgid ""
@@ -16653,7 +16654,7 @@ msgid ""
 "take"
 msgstr ""
 "Décrochages : Les cas de sous ou de surcharge de la mémoire tampon de la carte "
-"son au cours de la dernière prise d'enregistrement."
+"son au cours de la dernière prise d'enregistrement"
 
 #: recorder_ui.cc:259
 #, fuzzy
@@ -16662,7 +16663,7 @@ msgid ""
 "armed tracks"
 msgstr ""
 "Temps restant : Temps d'enregistrement disponible sur le disque actuel avec les "
-"pistes actuellement armées."
+"pistes actuellement armées"
 
 #: recorder_ui.cc:260
 #, fuzzy
@@ -16806,8 +16807,9 @@ msgstr "modifier le point de synchro de la région"
 
 # not sure why no space between the words, or if it doesn't need to be translate ?
 #: region_layering_order_editor.cc:44
+#, fuzzy
 msgid "RegionLayeringOrderEditor"
-msgstr ""
+msgstr "RegionLayeringOrderEditor"
 
 #: region_layering_order_editor.cc:57
 msgid "Region Name"
@@ -16832,8 +16834,9 @@ msgstr "MANQUANT "
 # not sure why no space between the words, or if it doesn't need to be translate ?
 # PLUS, translation says "hide the text"
 #: region_view.cc:333
+#, fuzzy
 msgid "SilenceText"
-msgstr ""
+msgstr "SilenceText"
 
 #: region_view.cc:348 region_view.cc:367
 msgid "minutes"
@@ -16984,8 +16987,9 @@ msgstr "État actif"
 
 # not sure why no space between the words, or if it doesn't need to be translate ?
 #: route_group_dialog.cc:60
+#, fuzzy
 msgid "RouteGroupDialog"
-msgstr ""
+msgstr "RouteGroupDialog"
 
 #: route_group_dialog.cc:101
 msgid "<b>Sharing</b>"
@@ -19039,8 +19043,9 @@ msgid ">bar"
 msgstr ">mesure"
 
 #: step_entry.cc:71
+#, fuzzy
 msgid ">EP"
-msgstr ""
+msgstr ">EP"
 
 #: step_entry.cc:72
 msgid "sustain"
@@ -19600,7 +19605,7 @@ msgstr "noire"
 
 #: tempo_dialog.cc:113 tempo_dialog.cc:114 tempo_dialog.cc:524 tempo_dialog.cc:525
 msgid "eighth"
-msgstr "croche "
+msgstr "croche"
 
 #: tempo_dialog.cc:115 tempo_dialog.cc:116 tempo_dialog.cc:526 tempo_dialog.cc:527
 msgid "sixteenth"
@@ -19707,8 +19712,9 @@ msgid "Preserve Formants"
 msgstr "Préserver les formants"
 
 #: time_fx_dialog.cc:84
+#, fuzzy
 msgid "TimeFXDialog"
-msgstr ""
+msgstr "TimeFXDialog"
 
 #: time_fx_dialog.cc:87
 msgid "Pitch Shift Audio"
@@ -20080,7 +20086,7 @@ msgid ""
 "Right-click to select properties for all clips in this track"
 msgstr ""
 "Cliquez pour arrêter tous les clips de cette piste\n"
-"Cliquez-droit pour sélectionner les propriétés de tous les clips de cette piste."
+"Cliquez-droit pour sélectionner les propriétés de tous les clips de cette piste"
 
 #: trigger_master.cc:521
 msgid ""
@@ -20088,7 +20094,7 @@ msgid ""
 "Right-click to select properties for all clips in the grid"
 msgstr ""
 "Cliquez pour arrêter tous les clips\n"
-"Clic droit pour sélectionner les propriétés de tous les clips de la grille."
+"Clic droit pour sélectionner les propriétés de tous les clips de la grille"
 
 #: trigger_ui.cc:172
 msgid "Select file to load into slot"
@@ -20297,7 +20303,7 @@ msgstr "Couleur %1 introuvable"
 msgid "Unable to find UI style file %1 in search path %2. %3 will look strange"
 msgstr ""
 "Impossible de trouver le fichier de style \"%1\" dans \"%2\". L'interface de %3 "
-"sera étrange."
+"sera étrange"
 
 #: ui_config.cc:810
 msgid "Loading ui configuration file %1"
@@ -20435,7 +20441,7 @@ msgid ""
 "control"
 msgstr ""
 "La vélocité à utiliser avec le contrôle-clavier. Utiliser le défilement de la "
-"souris pour un contrôle fin."
+"souris pour un contrôle fin"
 
 #: virtual_keyboard_window.cc:116
 msgid ""
@@ -20519,7 +20525,7 @@ msgstr "D"
 
 #: vca_time_axis.cc:71
 msgid "Unassign all channels"
-msgstr "Désassigner tous les canaux."
+msgstr "Désassigner tous les canaux"
 
 #: vca_time_axis.cc:464
 msgid "Drop All Assigned Channels"
@@ -20823,7 +20829,7 @@ msgstr "Dossier-racine du serveur"
 
 #: utils_videotl.cc:67
 msgid "Destination is outside Video Server's docroot. "
-msgstr "La destination est en dehors du dossier-racine du serveur-vidéo."
+msgstr "La destination est en dehors du dossier-racine du serveur-vidéo. "
 
 #: utils_videotl.cc:68
 msgid ""
