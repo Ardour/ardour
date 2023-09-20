@@ -11,7 +11,7 @@
 # Edouard <edwsaintesprit@hotmail.com>, 2016.
 # Rivaud Julien <frnchfrgg@free.fr>, 2016, 2019.
 # Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019, 2020, 2021, 2022.
-# Julien Taverna <jujudusud@gmail.com>, 2022.
+# Julien Taverna <jujudusud@gmail.com>, 2022,2023.
 # Nicolas Faure <sub26nico@laposte.net>, 2022.
 msgid ""
 msgstr ""
@@ -19,7 +19,7 @@ msgstr ""
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2022-11-19 17:12+0100\n"
 "PO-Revision-Date: 2023-09-21 00:37+0200\n"
-"Last-Translator: Olivier Humbert <trebmuh@tuxfamily.org>\n"
+"Last-Translator: Julien Taverna <jujudusud@gmail.com>\n"
 "Language-Team: French <>\n"
 "Language: fr\n"
 "MIME-Version: 1.0\n"
