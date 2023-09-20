@@ -575,8 +575,22 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 
 	if (!actually_ramped()) {
 
+
+		/* The simple expression of the math we're computing here is
+		 * (if we could use floating point):
+		 *
+		 * double sc_delta = sc - _sclock;                                              // how far in superclocks from this point's superclock position?
+		 * double seconds = sc_delta / superclock_ticks_per_second;                     // how long is that in seconds?
+		 * double note_types_per_second = npm / 60.;                                    // how many note types in 1 second ?
+		 * double quarter_delta = note_types_per_second * (4. / * _note_type);          // how many quarters is that?
+		 * return _quarters + Beats (floor (quarter_delta), fmod (quarter_delta, 1.));  // add to this point's position in quarters
+		 *
+		 * But we can't use doubles, so this gets quite a bit more complex.
+		 */
+
 		// TEMPO_MAP_ASSERT (sc >= _sclock);
 		superclock_t sc_delta = sc - _sclock;
+
 
 		/* convert sc into superbeats, given that sc represents some number of seconds */
 		const superclock_t whole_seconds = sc_delta / superclock_ticks_per_second();
