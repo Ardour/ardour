@@ -365,8 +365,8 @@ cp -R $BUILD_ROOT/../share/web_surfaces $WebSurfaces
 rm $WebSurfaces/wscript
 
 # recursively copy clips/media
-cp -R $BUILD_ROOT/../share/media $MediaClips
-rm $MediaClips/wscript
+#cp -R $BUILD_ROOT/../share/media $MediaClips
+#rm $MediaClips/wscript
 
 # MackieControl data
 # got to be careful with names here

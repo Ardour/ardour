@@ -30,8 +30,10 @@ namespace Temporal {
 
 #ifdef COMPILER_MSVC
 	LIBTEMPORAL_API void init ();
+	LIBTEMPORAL_API void reset ();
 #else
 	extern void init ();
+	extern void reset ();
 #endif
 
 /* Any position measured in audio samples.

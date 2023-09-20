@@ -98,9 +98,6 @@ Tempo::Tempo (XMLNode const & node)
 	_superclocks_per_note_type = double_npm_to_scpn (_npm);
 	_end_superclocks_per_note_type = double_npm_to_scpn (_enpm);
 
-	_super_note_type_per_second = double_npm_to_snps (_npm);
-	_end_super_note_type_per_second = double_npm_to_snps (_enpm);
-
 	if (!node.get_property (X_("note-type"), _note_type)) {
 		throw failed_constructor ();
 	}
@@ -121,14 +118,12 @@ Tempo::set_note_types_per_minute (double npm)
 {
 	_npm = npm;
 	_superclocks_per_note_type = double_npm_to_scpn (_npm);
-	_super_note_type_per_second = double_npm_to_snps (_npm);
 }
 
 void
 Tempo::set_end_npm (double npm)
 {
 	_enpm = npm;
-	_end_super_note_type_per_second = double_npm_to_snps (_enpm);
 	_end_superclocks_per_note_type = double_npm_to_scpn (_enpm);
 }
 
@@ -165,8 +160,6 @@ Tempo::set_state (XMLNode const & node, int /*version*/)
 
 	_superclocks_per_note_type = double_npm_to_scpn (_npm);
 	_end_superclocks_per_note_type = double_npm_to_scpn (_enpm);
-	_super_note_type_per_second = double_npm_to_snps (_npm);
-	_end_super_note_type_per_second = double_npm_to_snps (_enpm);
 
 	node.get_property (X_("note-type"), _note_type);
 
@@ -582,21 +575,43 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 
 	if (!actually_ramped()) {
 
+
+		/* The simple expression of the math we're computing here is
+		 * (if we could use floating point):
+		 *
+		 * double sc_delta = sc - _sclock;                                              // how far in superclocks from this point's superclock position?
+		 * double seconds = sc_delta / superclock_ticks_per_second;                     // how long is that in seconds?
+		 * double note_types_per_second = npm / 60.;                                    // how many note types in 1 second ?
+		 * double quarter_delta = note_types_per_second * (4. / * _note_type);          // how many quarters is that?
+		 * return _quarters + Beats (floor (quarter_delta), fmod (quarter_delta, 1.));  // add to this point's position in quarters
+		 *
+		 * But we can't use doubles, so this gets quite a bit more complex.
+		 */
+
 		// TEMPO_MAP_ASSERT (sc >= _sclock);
 		superclock_t sc_delta = sc - _sclock;
+
 
 		/* convert sc into superbeats, given that sc represents some number of seconds */
 		const superclock_t whole_seconds = sc_delta / superclock_ticks_per_second();
 		const superclock_t remainder = sc_delta - (whole_seconds * superclock_ticks_per_second());
 
+		/* big number to allow most (fractional) BPMs to be represented as an integer "super note type per second"
+		 *
+		 * It is not required that big_numerator equal superclock_ticks_per_second but since the values in both cases have similar
+		 * desired properties (many, many factors), it doesn't hurt to use the same number.
+		 */
+		const superclock_t big_numerator = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
+
+		uint64_t _super_note_type_per_second = (uint64_t) llround (_npm * big_numerator / 60);
+
 		const int64_t supernotes = ((_super_note_type_per_second) * whole_seconds) + muldiv_round (superclock_t (_super_note_type_per_second), remainder, superclock_ticks_per_second());
 		const int64_t superbeats = muldiv_round (supernotes, 4, (superclock_t) _note_type);
 
 		/* convert superbeats to beats:ticks */
-		int32_t b;
-		int32_t t;
-
-		Tempo::superbeats_to_beats_ticks (superbeats, b, t);
+		int32_t b = superbeats / big_numerator;
+		int64_t remain = superbeats - (b * big_numerator);
+		int32_t t = PBD::muldiv_round (Temporal::ticks_per_beat, remain, big_numerator);
 
 		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%8 => \nsc %1 delta %9 = %2 secs rem = %3 rem snotes %4 sbeats = %5 => %6 : %7\n", sc, whole_seconds, remainder, supernotes, superbeats, b , t, *this, sc_delta));
 
@@ -3038,9 +3053,9 @@ std::ostream&
 std::operator<<(std::ostream& str, Tempo const & t)
 {
 	if (t.ramped()) {
-		return str << t.note_types_per_minute() << " .. " << t.end_note_types_per_minute() << " 1/" << t.note_type() << " RAMPED notes per minute [ " << t.super_note_type_per_second() << " => " << t.end_super_note_type_per_second() << " sntpm ] (" << t.superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
+		return str << t.note_types_per_minute() << " .. " << t.end_note_types_per_minute() << " 1/" << t.note_type() << " RAMPED notes per minute (" << t.superclocks_per_note_type() << " .. " << t.end_superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
 	} else {
-		return str << t.note_types_per_minute() << " 1/" << t.note_type() << " notes per minute [" << t.super_note_type_per_second() << " sntpm] (" << t.superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
+		return str << t.note_types_per_minute() << " 1/" << t.note_type() << " notes per minute (" << t.superclocks_per_note_type() << " sc-per-1/" << t.note_type() << ')';
 	}
 }
 
@@ -4373,7 +4388,7 @@ TempoMap::ramped_twist_tempi (TempoPoint& unused, TempoPoint& focus, TempoPoint&
 void
 TempoMap::init ()
 {
-	WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
+	WritableSharedPtr new_map (new TempoMap ());
 	_map_mgr.init (new_map);
 	fetch ();
 }
