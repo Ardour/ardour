@@ -897,7 +897,7 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 	echo "signing the main app"
 
 	# Sign everything from inside level working out, but skip MIDI files includes (there are too many to reasonably sign)
-	find ${PRODUCT_PKG_DIR}/${APPROOT}/Resources -type f -print0 -not -name \*.mid | xargs -0 -I {} -P 7 codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}"
+	find ${PRODUCT_PKG_DIR}/${APPROOT}/Resources -type f -not -name \*.mid -print0 | xargs -0 -I {} -P 7 codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}"
 	find ${PRODUCT_PKG_DIR}/${APPROOT}/lib -type f -print0 | xargs -0 -I {} -P 7 codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}"
 
 	find ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS -name "${lower_case_appname}${major_version}-*" -print0 | xargs -0 -I {} -P 7 codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}"
