@@ -3244,7 +3244,7 @@ TempoCurveDrag::aborted (bool moved)
 
 TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	: Drag (e, i, Temporal::BeatTime)
-	, _before_state (0)
+	, _before_state (nullptr)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoMarkerDrag\n");
 
@@ -3260,15 +3260,9 @@ void
 TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
-	if (!_real_section->active ()) {
-		show_verbose_cursor_text (_("inactive"));
-	} else {
-		show_verbose_cursor_time (adjusted_current_time (event));
-
-		/* setup thread-local tempo map ptr as a writable copy */
-
-		map = _editor->begin_tempo_map_edit ();
-	}
+	show_verbose_cursor_time (adjusted_current_time (event));
+	/* setup thread-local tempo map ptr as a writable copy */
+	map = _editor->begin_tempo_map_edit ();
 }
 
 void
@@ -3280,10 +3274,6 @@ TempoMarkerDrag::setup_pointer_offset ()
 void
 TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (!_marker->tempo ().active ()) {
-		return;
-	}
-
 	if (first_move) {
 		/* get current state */
 		_before_state = &map->get_state ();
@@ -3318,9 +3308,6 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 void
 TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	if (!_marker->tempo ().active ()) {
-		return;
-	}
 
 	if (!movement_occurred) {
 		/* reset the per-thread tempo map ptr back to the current
@@ -3353,14 +3340,6 @@ TempoMarkerDrag::aborted (bool moved)
 	 */
 
 	_editor->abort_tempo_map_edit ();
-
-	// _point->end_float ();
-	_marker->set_position (timepos_t (_marker->tempo ().beats ()));
-
-	if (moved) {
-		// delete the dummy (hidden) marker we used for events while moving.
-		delete _marker;
-	}
 }
 
 /********* */
@@ -3545,7 +3524,6 @@ MappingEndDrag::finished (GdkEvent* event, bool movement_occurred)
 	XMLNode& after = map->get_state ();
 
 	_editor->session ()->add_command (new Temporal::TempoCommand (_("stretch tempo"), _before_state, &after));
-	_editor->commit_reversible_command ();
 
 	/* 2nd argument means "update tempo map display after the new map is
 	 * installed. We need to do this because the code above has not
@@ -3554,6 +3532,8 @@ MappingEndDrag::finished (GdkEvent* event, bool movement_occurred)
 	 */
 
 	_editor->commit_tempo_mapping (map);
+
+	_editor->commit_reversible_command ();
 }
 
 void
@@ -3656,8 +3636,8 @@ MappingTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 	XMLNode& after = map->get_state ();
 
 	_editor->session ()->add_command (new Temporal::TempoCommand (_("twist tempo"), _before_state, &after));
-	_editor->commit_reversible_command ();
 	_editor->commit_tempo_mapping (map);
+	_editor->commit_reversible_command ();
 }
 
 void
@@ -4519,6 +4499,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			} else {
 				switch (_marker->type ()) {
 					case ArdourMarker::SessionStart:
+					case ArdourMarker::Section:
 					case ArdourMarker::RangeStart:
 					case ArdourMarker::LoopStart:
 					case ArdourMarker::PunchIn:
@@ -4635,7 +4616,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 
 		/* just a click, do nothing but finish
-		   off the selection process
+		   off the selection process (and locate if appropriate)
 		*/
 
 		Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
@@ -4662,6 +4643,26 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (_selection_changed) {
 			_editor->begin_reversible_selection_op (X_("Select Marker Release"));
 			_editor->commit_reversible_selection_op ();
+		}
+
+		bool do_locate;
+		switch (_editor->get_marker_click_behavior ()) {
+			case MarkerClickSelectOnly:
+				do_locate = false;
+				break;
+			case MarkerClickLocate:
+				do_locate = true;
+				break;
+			case MarkerClickLocateWhenStopped:
+				do_locate = !_editor->session()->transport_state_rolling ();
+		}
+
+		if (do_locate && !_editor->session()->config.get_external_sync () && (_editor->edit_point() != Editing::EditAtSelectedMarker)) {
+			bool is_start;
+			Location* location = _editor->find_location_from_marker (_marker, is_start);
+			if (location) {
+				_editor->session ()->request_locate (is_start ? location->start().samples() : location->end().samples());
+			}
 		}
 
 		return;
@@ -5856,8 +5857,10 @@ SelectionMarkerDrag::SelectionMarkerDrag (Editor* e, ArdourCanvas::Item* i)
 	bool ok = _editor->get_selection_extents (_start_at_start, _end_at_start);
 	assert (ok);
 
-	// SelectionStart, SelectionEnd
-	cout << " SelectionMarkerDrag " << _start_at_start << " - " << _end_at_start << " " << i->whoami() << "\n";
+	/* if the user adjusts the SelectionMarker, convert the selection to a timeline range (no track selection) */
+	_editor->get_selection ().clear_objects ();
+	_editor->get_selection ().clear_tracks ();
+	_editor->get_selection ().set (_start_at_start, _end_at_start);
 }
 
 void
@@ -6944,17 +6947,8 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 
 	Beats const start = _region_view->region ()->absolute_time_to_region_beats (timepos_t (aligned_beats));
 
-	/* This code is like MidiRegionView::get_draw_length_beats() but
-	 * defaults to 1/64th note rather than a 1/4 note, since we're in
-	 * percussive mode.
-	 */
-
-	bool  success;
-	Beats length = _editor->get_draw_length_as_beats (success, pos);
-
-	if (!success) {
-		length = Beats::ticks (Beats::PPQN / 64);
-	}
+	/* Percussive hits are as short as possible */
+	Beats length (0, 1);
 
 	/* create_note_at() implements UNDO for us */
 	_region_view->create_note_at (timepos_t (start), _y, length, event->button.state, false);
@@ -7289,20 +7283,18 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::motion (GdkEvent* ev, bool firs
 		dragging_line->set_outline_width (2.0);
 		dragging_line->set_outline_color (UIConfiguration::instance().color ("automation line"));
 
-		if (ev->motion.x > grab_x()) {
-			direction = 1;
-			edge_x = 0;
-		} else {
-			direction = -1;
-			edge_x = std::numeric_limits<int>::max();
-		}
+		/* for freehand drawing, we only support left->right direction, for now. */
+		direction = 1;
+		edge_x = 0;
+		/* TODO:  allow the user to move "far" left, and then start drawing from the new leftmost position.
+		  ...start_grab() already occurred so this is non-trivial */
 
 		/* Add a point correspding to the start of the drag */
 
 		maybe_add_point (ev, raw_grab_time(), true);
+	} else {
+		maybe_add_point (ev, _drags->current_pointer_time(), false);
 	}
-
-	maybe_add_point (ev, _drags->current_pointer_time(), first_move);
 }
 
 template<typename OrderedPointList, typename OrderedPoint>
@@ -7311,7 +7303,13 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 {
 	timepos_t pos (cpos);
 
-	_editor->snap_to_with_modifier (pos, ev);
+	/* Enforce left-to-right drawing */
+
+	if (direction <= 0) {
+		return;
+	}
+
+	_editor->snap_to_with_modifier (pos, ev, Temporal::RoundNearest, ARDOUR::SnapToAny_Visual, true);
 
 	if (pos != _drags->current_pointer_time()) {
 		did_snap = true;

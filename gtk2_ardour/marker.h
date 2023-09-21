@@ -62,6 +62,7 @@ public:
 		BBTPosition,
 		SessionStart, ///< session start
 		SessionEnd,   ///< session end
+		Section,
 		RangeStart,
 		RangeEnd,
 		LoopStart,
@@ -76,7 +77,7 @@ public:
 
 
 	ArdourMarker (PublicEditor& editor, ArdourCanvas::Item &, std::string const& color_name, std::string const& text, Type,
-	              Temporal::timepos_t const & position, bool handle_events = true, RegionView* rv = 0);
+	              Temporal::timepos_t const & position, bool handle_events = true, RegionView* rv = nullptr, bool use_tooltip = true);
 
 	virtual ~ArdourMarker ();
 
@@ -151,6 +152,7 @@ protected:
 	bool         _entered;
 	bool         _shown;
 	bool         _line_shown;
+	bool         _use_tooltip;
 
 	std::string  _color;
 	std::string  _points_color;
@@ -194,7 +196,7 @@ class MetricMarker : public ArdourMarker
 class TempoMarker : public MetricMarker
 {
   public:
-	TempoMarker (PublicEditor& editor, ArdourCanvas::Item & parent, ArdourCanvas::Item & text_parent, std::string const& color_name, const std::string& text, Temporal::TempoPoint const &, samplepos_t sample, uint32_t curve_color);
+	TempoMarker (PublicEditor& editor, ArdourCanvas::Item & parent, std::string const& color_name, const std::string& text, Temporal::TempoPoint const &, samplepos_t sample, uint32_t curve_color);
 	~TempoMarker ();
 
 	void reset_tempo (Temporal::TempoPoint const & t);
@@ -209,7 +211,6 @@ class TempoMarker : public MetricMarker
   private:
 	Temporal::TempoPoint const * _tempo;
 	TempoCurve* _curve;
-	ArdourCanvas::Text* _mapping_text;
 };
 
 class MeterMarker : public MetricMarker
@@ -231,10 +232,7 @@ class MeterMarker : public MetricMarker
 class BBTMarker : public MetricMarker
 {
   public:
-	BBTMarker (PublicEditor& editor, ArdourCanvas::Item &, std::string const& color_name, Temporal::MusicTimePoint const &,
-	           ArdourCanvas::Item & tempo_parent,
-	           ArdourCanvas::Item & mapping_parent,
-	           ArdourCanvas::Item & meter_parent);
+	BBTMarker (PublicEditor& editor, ArdourCanvas::Item &, std::string const& color_name, Temporal::MusicTimePoint const &);
 	~BBTMarker ();
 
 	void reset_point (Temporal::MusicTimePoint const &);

@@ -1,15 +1,8 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-from waflib import Options
 import os
-import sys
-import re
 
 I18N_PACKAGE = 'portaudio-backend'
-
-# Mandatory variables
-top = '.'
-out = 'build'
 
 def options(opt):
     autowaf.set_options(opt)

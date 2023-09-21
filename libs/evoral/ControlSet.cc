@@ -104,6 +104,29 @@ ControlSet::clear_controls ()
 	}
 }
 
+void
+ControlSet::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+	for (auto & c : _controls) {
+		std::shared_ptr<Evoral::ControlList> cl = c.second->list();
+		if (cl && cl->time_domain() != cmd.to) {
+			cl->start_domain_bounce (cmd);
+		}
+	}
+}
+
+void
+ControlSet::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+	for (auto & c : _controls) {
+		std::shared_ptr<Evoral::ControlList> cl = c.second->list();
+		if (cl && cl->time_domain() != cmd.to) {
+			cl->finish_domain_bounce (cmd);
+		}
+	}
+}
+
+
 } // namespace Evoral
 
 /* No good place for this so just put it here */
@@ -113,3 +136,4 @@ std::operator<< (std::ostream & str, Evoral::Parameter const & p)
 {
 	return str << p.type() << '-' << p.id() << '-' << (int) p.channel();
 }
+

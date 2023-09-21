@@ -60,7 +60,8 @@ setup_gtk_ardour_enums ()
 	StartupFSM::DialogID startup_dialog;
 	Gtk::ResponseType dialog_response;
 	AddRouteDialog::TypeWanted type_wanted;
-	TempoEditBehavior tempo_edit_behavior;
+	NoteNameDisplay note_name_display;
+	MarkerClickBehavior marker_click_behavior;
 
 #define REGISTER(e) enum_writer.register_distinct (typeid(e).name(), i, s); i.clear(); s.clear()
 #define REGISTER_BITS(e) enum_writer.register_bits (typeid(e).name(), i, s); i.clear(); s.clear()
@@ -106,7 +107,6 @@ setup_gtk_ardour_enums ()
 	REGISTER (region_list_sort_type);
 
 	REGISTER_ENUM (GridTypeNone);
-	REGISTER_ENUM (GridTypePlayhead);
 	REGISTER_ENUM (GridTypeBar);
 	REGISTER_ENUM (GridTypeBeat);
 	REGISTER_ENUM (GridTypeBeatDiv2);
@@ -129,6 +129,9 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (GridTypeCDFrame);
 	REGISTER (grid_type);
 
+	/* GridTypePlayhead was not intended to get into the wild */
+	enum_writer.add_to_hack_table ("GridTypePlayhead", "GridTypeNone");
+
 	REGISTER_ENUM (SnapOff);
 	REGISTER_ENUM (SnapNormal);
 	REGISTER_ENUM (SnapMagnetic);
@@ -150,6 +153,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (MarkerBarItem);
 	REGISTER_ENUM (RangeMarkerBarItem);
 	REGISTER_ENUM (CdMarkerBarItem);
+	REGISTER_ENUM (SectionMarkerBarItem);
 	REGISTER_ENUM (CueMarkerBarItem);
 	REGISTER_ENUM (VideoBarItem);
 	REGISTER_ENUM (TransportMarkerBarItem);
@@ -163,7 +167,6 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (BBTMarkerItem);
 	REGISTER_ENUM (MeterBarItem);
 	REGISTER_ENUM (TempoBarItem);
-	REGISTER_ENUM (MappingBarItem);
 	REGISTER_ENUM (RegionViewNameHighlight);
 	REGISTER_ENUM (RegionViewName);
 	REGISTER_ENUM (StartSelectionTrimItem);
@@ -191,6 +194,7 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM(MouseRange);
 	REGISTER_ENUM(MouseDraw);
 	REGISTER_ENUM(MouseTimeFX);
+	REGISTER_ENUM(MouseGrid);
 	REGISTER_ENUM(MouseAudition);
 	REGISTER_ENUM(MouseCut);
 	REGISTER_ENUM(MouseContent);
@@ -231,7 +235,13 @@ setup_gtk_ardour_enums ()
 	REGISTER_CLASS_ENUM (AddRouteDialog, FoldbackBus);
 	REGISTER (type_wanted);
 
-	REGISTER_CLASS_ENUM (Editing, TempoMapping);
-	REGISTER_CLASS_ENUM (Editing, TempoChanging);
-	REGISTER (tempo_edit_behavior);
+	REGISTER_CLASS_ENUM (Editing, MarkerClickSelectOnly);
+	REGISTER_CLASS_ENUM (Editing, MarkerClickLocate);
+	REGISTER_CLASS_ENUM (Editing, MarkerClickLocateWhenStopped);
+	REGISTER (marker_click_behavior);
+
+	REGISTER_CLASS_ENUM (Editing, Always);
+	REGISTER_CLASS_ENUM (Editing, WithMIDNAM);
+	REGISTER_CLASS_ENUM (Editing, Never);
+	REGISTER (note_name_display);
 }

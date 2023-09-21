@@ -48,8 +48,8 @@ const string DiskIOProcessor::state_node_name = X_("DiskIOProcessor");
 // PBD::Signal0<void> DiskIOProcessor::DiskOverrun;
 // PBD::Signal0<void>  DiskIOProcessor::DiskUnderrun;
 
-DiskIOProcessor::DiskIOProcessor (Session& s, Track& t, string const & str, Flag f, Temporal::TimeDomain td)
-	: Processor (s, str, td)
+DiskIOProcessor::DiskIOProcessor (Session& s, Track& t, string const & str, Flag f, Temporal::TimeDomainProvider const & tdp)
+	: Processor (s, str, tdp)
 	, _flags (f)
 	, _slaved (false)
 	, in_set_state (false)

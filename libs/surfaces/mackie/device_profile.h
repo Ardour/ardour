@@ -29,9 +29,7 @@
 
 class XMLNode;
 
-namespace ArdourSurface {
-
-namespace Mackie {
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 class DeviceProfile
 {

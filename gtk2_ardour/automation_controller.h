@@ -88,8 +88,8 @@ private:
 	                      Gtk::Adjustment*                             adj,
 	                      bool                                         use_knob);
 
-	void start_touch();
-	void end_touch();
+	void start_touch(int);
+	void end_touch(int);
 	bool button_press(GdkEventButton*);
 	bool button_release(GdkEventButton*);
 

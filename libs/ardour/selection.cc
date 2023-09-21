@@ -613,3 +613,77 @@ CoreSelection::selected () const
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	return _stripables.size();
 }
+
+void
+CoreSelection::get_stripables_for_op (std::shared_ptr<StripableList> sl, std::shared_ptr<Stripable> target, bool (RouteGroup::*group_predicate)() const) const
+{
+	return get_stripables_for_op (*sl.get(), target, group_predicate);
+}
+
+void
+CoreSelection::get_stripables_for_op (StripableList& sl, std::shared_ptr<Stripable> target, bool (RouteGroup::*group_predicate)() const) const
+{
+	assert (target);
+
+	std::shared_ptr<Route> r (std::dynamic_pointer_cast<Route> (target));
+
+	if (_stripables.empty()) {
+
+		if (r) {
+			RouteGroup* rg = r->route_group();
+
+			if (rg && rg->is_active() && (rg->*group_predicate)()) {
+				for (auto & r : *rg->route_list()) {
+					sl.push_back (r);
+				}
+			} else {
+				/* target is not member of an active group that
+				   shares the relevant property, and nothing is
+				   selected, so use it and it alone.
+				*/
+				sl.push_back (target);
+			}
+
+		} else {
+			/* Base is not a route, use it and it alone */
+			sl.push_back (target);
+		}
+
+	} else {
+
+		if (target->is_selected()) {
+
+			/* Use full selection */
+
+			StripableAutomationControls sc;
+			get_stripables (sc);
+
+			for (auto & s : sc) {
+				sl.push_back (s.stripable);
+			}
+
+		} else {
+
+			/* target not selected but might be part of a group */
+
+			if (r) {
+				RouteGroup* rg = r->route_group();
+
+				if (rg && rg->is_active() && (rg->*group_predicate)()) {
+					for (auto & r : *rg->route_list()) {
+						sl.push_back (r);
+					}
+				} else {
+					/* Target not selected, and not part of an
+					 * active group that shares the relevant
+					 * property, so use it and it alone
+					 */
+					sl.push_back (target);
+				}
+			} else {
+				/* Base is not a route, use it and it alone */
+				sl.push_back (target);
+			}
+		}
+	}
+}

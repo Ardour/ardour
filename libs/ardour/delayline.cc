@@ -36,7 +36,7 @@ using namespace PBD;
 using namespace ARDOUR;
 
 DelayLine::DelayLine (Session& s, const std::string& name)
-	: Processor (s, string_compose ("latcomp-%1-%2", name, this), Config->get_default_automation_time_domain())
+	: Processor (s, string_compose ("latcomp-%1-%2", name, this), Temporal::TimeDomainProvider (Config->get_default_automation_time_domain()))
 	, _bsiz (0)
 	, _delay (0)
 	, _pending_delay (0)

@@ -59,6 +59,8 @@
 #include "pbd/types_convert.h"
 #include "pbd/unwind.h"
 
+#include "temporal/types_convert.h"
+
 #include "ardour/amp.h"
 #include "ardour/analyser.h"
 #include "ardour/async_midi_port.h"
@@ -359,6 +361,8 @@ Session::Session (AudioEngine &eng,
 
 	_cue_events.reserve (1024);
 
+	Temporal::reset();
+
 	pre_engine_init (fullpath); // sets _is_new
 
 	setup_lua ();
@@ -388,10 +392,8 @@ Session::Session (AudioEngine &eng,
 		 * so that we have the state ready for ::set_state()
 		 * after the engine is started.
 		 *
-		 * Note that we do NOT try to get the sample rate from
-		 * the template at this time, though doing so would
-		 * be easy if we decided this was an appropriate part
-		 * of a template.
+		 * Note that templates are saved without sample rate, and the
+		 * current / previous sample rate will thus also be used after load_state()
 		 */
 
 		if (!mix_template.empty()) {
@@ -918,7 +920,7 @@ Session::setup_click ()
 {
 	_clicking = false;
 
-	std::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation), Temporal::AudioTime));
+	std::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation), Temporal::TimeDomainProvider (Temporal::AudioTime)));
 	std::shared_ptr<GainControl> gain_control = std::shared_ptr<GainControl> (new GainControl (*this, Evoral::Parameter(GainAutomation), gl));
 
 	_click_io.reset (new ClickIO (*this, X_("Click")));
@@ -3397,7 +3399,7 @@ Session::load_and_connect_instruments (RouteList& new_routes, bool strict_io, st
 			if (pset) {
 				plugin->load_preset (*pset);
 			}
-			std::shared_ptr<PluginInsert> pi (new PluginInsert (*this, (*r)->time_domain(), plugin));
+			std::shared_ptr<PluginInsert> pi (new PluginInsert (*this, **r, plugin));
 			if (strict_io) {
 				pi->set_strict_io (true);
 			}
@@ -3986,7 +3988,7 @@ Session::cancel_all_mute ()
 	StripableList all;
 	get_stripables (all);
 	std::vector<std::weak_ptr<AutomationControl> > muted;
-	std::shared_ptr<ControlList> cl (new ControlList);
+	std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 	for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
 		assert (!(*i)->is_auditioner());
 		if ((*i)->is_monitor()) {
@@ -7223,8 +7225,16 @@ Session::clear_object_selection ()
 }
 
 void
-Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, SectionOperation const op)
+Session::cut_copy_section (timepos_t const& start_, timepos_t const& end_, timepos_t const& to_, SectionOperation const op)
 {
+	timepos_t start = timepos_t::from_superclock (start_.superclocks());
+	timepos_t end   = timepos_t::from_superclock (end_.superclocks());
+	timepos_t to    = timepos_t::from_superclock (to_.superclocks());
+
+#ifndef NDEBUG
+	cout << "Session::cut_copy_section " << start << " - " << end << " << to " << to << " op = " << op << "\n";
+#endif
+
 	std::list<TimelineRange> ltr;
 	TimelineRange tlr (start, end, 0);
 	ltr.push_back (tlr);
@@ -7303,22 +7313,44 @@ Session::cut_copy_section (timepos_t const& start, timepos_t const& end, timepos
 		add_command (new MementoCommand<Locations> (*_locations, &before, &after));
 	}
 
-#if 0 // TODO - enable once tempo-map cut/copy/paste works
 	TempoMap::WritableSharedPtr wmap = TempoMap::write_copy ();
 	TempoMapCutBuffer* tmcb;
-	if (copy) {
-		tmcb = wmap->copy (start, end);
-	} else {
-		tmcb = wmap->cut (start, end, true);
-	}
-	wmap->paste (*tmcb, to, !copy);
-	TempoMap::update (wmap);
-	delete tmcb;
-#endif
+	XMLNode& tm_before (wmap->get_state());
 
-	if (!abort_empty_reversible_command ()) {
-		commit_reversible_command ();
+	switch (op) {
+	case CopyPasteSection:
+		if ((tmcb = wmap->copy (start, end))) {
+			tmcb->dump (std::cerr);
+			wmap->paste (*tmcb, to, true);
+		}
+		break;
+	case CutPasteSection:
+		if ((tmcb = wmap->cut (start, end, true))) {
+			tmcb->dump (std::cerr);
+			wmap->paste (*tmcb, to, true);
+		}
+		break;
+	default:
+		tmcb = nullptr;
+		break;
 	}
+
+	if (tmcb && !tmcb->empty()) {
+		TempoMap::update (wmap);
+		delete tmcb;
+		XMLNode& tm_after (wmap->get_state());
+		add_command (new TempoCommand (_("cut tempo map"), &tm_before, &tm_after));
+	} else {
+		delete &tm_before;
+		TempoMap::abort_update ();
+		TempoMap::SharedPtr tmap (TempoMap::fetch());
+	}
+
+	if (abort_empty_reversible_command ()) {
+		return;
+	}
+
+	commit_reversible_command ();
 }
 
 void

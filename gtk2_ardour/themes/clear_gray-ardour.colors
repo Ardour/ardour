@@ -51,6 +51,9 @@
   <ColorAliases>
     <ColorAlias name="active crossfade" alias="neutral:foreground"/>
     <ColorAlias name="arrange base" alias="neutral:foreground2"/>
+    <ColorAlias name="arrangement marker bar" alias="neutral:background2"/>
+    <ColorAlias name="arrangement rect" alias="widget:blue"/>
+    <ColorAlias name="arrangement rect alt" alias="widget:blue darker"/>
     <ColorAlias name="audio automation track fill" alias="theme:bg"/>
     <ColorAlias name="audio bus base" alias="widget:blue darker"/>
     <ColorAlias name="audio master bus base" alias="neutral:backgroundest"/>
@@ -176,6 +179,7 @@
     <ColorAlias name="location marker" alias="theme:contrasting"/>
     <ColorAlias name="location punch" alias="alert:ruddy"/>
     <ColorAlias name="location range" alias="alert:green"/>
+    <ColorAlias name="location arrangement marker" alias="theme:contrasting clock"/>
     <ColorAlias name="lock button: fill active" alias="widget:bg"/>
     <ColorAlias name="lock button: led active" alias="alert:red"/>
     <ColorAlias name="lua action button: fill" alias="widget:bg"/>
@@ -298,6 +302,9 @@
     <ColorAlias name="piano roll black" alias="theme:bg"/>
     <ColorAlias name="piano roll black outline" alias="widget:gray"/>
     <ColorAlias name="piano roll white" alias="neutral:foreground2"/>
+    <ColorAlias name="piano key black" alias="neutral:background2"/>
+    <ColorAlias name="piano key white" alias="neutral:foreground2"/>
+    <ColorAlias name="piano key highlight" alias="alert:ruddy"/>
     <ColorAlias name="pinrouting custom: led active" alias="alert:ruddy"/>
     <ColorAlias name="pinrouting sidechain: led active" alias="alert:green"/>
     <ColorAlias name="play head" alias="theme:contrasting clock"/>
@@ -366,6 +373,7 @@
     <ColorAlias name="rude solo: led active" alias="alert:red"/>
     <ColorAlias name="ruler base" alias="theme:bg2"/>
     <ColorAlias name="ruler text" alias="neutral:midground"/>
+    <ColorAlias name="scroomer" alias="neutral:backgroundest"/>
     <ColorAlias name="secondary clock: background" alias="theme:bg2"/>
     <ColorAlias name="secondary clock: cursor" alias="theme:contrasting alt"/>
     <ColorAlias name="secondary clock: edited text" alias="theme:contrasting alt"/>
@@ -504,8 +512,9 @@
     <Modifier name="piano roll white" modifier="= alpha:0.2"/>
     <Modifier name="recording rect" modifier="= alpha:0.25"/>
     <Modifier name="region alpha" modifier="= alpha:0.75"/>
+    <Modifier name="scroomer alpha" modifier="= alpha:0.25"/>
     <Modifier name="selected midi note" modifier="= alpha:0.7529"/>
-    <Modifier name="selection rect" modifier="= alpha:0.4666"/>
+    <Modifier name="selection rect" modifier="= alpha:0.15"/>
     <Modifier name="silence" modifier="= alpha:0.4784"/>
     <Modifier name="stereo panner inverted" modifier="= alpha:0.7882"/>
     <Modifier name="stereo panner inverted bg" modifier="= alpha:0.7529"/>

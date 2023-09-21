@@ -107,6 +107,7 @@ setup_enum_writer ()
 	TimecodeFormat _Session_TimecodeFormat;
 	Session::PullupFormat _Session_PullupFormat;
 	FadeShape _FadeShape;
+	SnapTarget _SnapTarget;
 	RegionSelectionAfterSplit _RegionSelectionAfterSplit;
 	RangeSelectionAfterSplit _RangeSelectionAfterSplit;
 	TimeSelectionAfterSectionPaste _TimeSelectionAfterSectionPaste;
@@ -574,6 +575,11 @@ setup_enum_writer ()
 	REGISTER (_RegionSelectionAfterSplit);
 	REGISTER (_RangeSelectionAfterSplit);
 
+	REGISTER_ENUM (SnapTargetGrid);
+	REGISTER_ENUM (SnapTargetOther);
+	REGISTER_ENUM (SnapTargetBoth);
+	REGISTER (_SnapTarget);
+
 	REGISTER_ENUM(SectionSelectNoop);
 	REGISTER_ENUM(SectionSelectClear);
 	REGISTER_ENUM(SectionSelectRetain);
@@ -595,6 +601,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Location, IsClockOrigin);
 	REGISTER_CLASS_ENUM (Location, IsXrun);
 	REGISTER_CLASS_ENUM (Location, IsCueMarker);
+	REGISTER_CLASS_ENUM (Location, IsSection);
 	REGISTER_BITS (_Location_Flags);
 
 	REGISTER_CLASS_ENUM (Track, NoFreeze);

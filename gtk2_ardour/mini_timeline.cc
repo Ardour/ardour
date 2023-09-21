@@ -636,10 +636,10 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	cairo_set_line_width (cr, 1.0);
 	double r,g,b,a;  Gtkmm2ext::color_to_rgba(_phead_color, r,g,b,a);
 	cairo_set_source_rgb (cr, r,g,b); // playhead color
-	cairo_move_to (cr, xc - .5, 0);
+	cairo_move_to (cr, xc + .5, 0);
 	cairo_rel_line_to (cr, 0, height);
 	cairo_stroke (cr);
-	cairo_move_to (cr, xc - .5, height);
+	cairo_move_to (cr, xc + .5, height);
 	cairo_rel_line_to (cr, -3,  0);
 	cairo_rel_line_to (cr,  3, -4);
 	cairo_rel_line_to (cr,  3,  4);

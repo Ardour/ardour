@@ -69,7 +69,7 @@ AutomationListPropertyTest::basicTest ()
 	descriptor.property_id = g_quark_from_static_string ("FadeIn");
 	AutomationListProperty property (
 		descriptor,
-		std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), Temporal::AudioTime))
+		std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), Temporal::TimeDomainProvider (Temporal::AudioTime)))
 		);
 
 	property.clear_changes ();
@@ -115,7 +115,7 @@ class Fred : public StatefulDestructible
 {
 public:
 	Fred ()
-		: _jim (_descriptor, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), Temporal::AudioTime)))
+		: _jim (_descriptor, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), Temporal::TimeDomainProvider (Temporal::AudioTime))))
 
 	{
 		add_property (_jim);

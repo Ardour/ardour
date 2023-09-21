@@ -236,7 +236,7 @@ FFMPEGFileImportableSource::did_read_data (std::string data, size_t size)
 		samplecnt_t written = 0;
 		for (int i = 0; i < 2; ++i) {
 			samplecnt_t cnt = std::min<samplecnt_t> (n_samples, wv.len[i]);
-			if (!cnt || !wv.buf[i]) {
+			if (!cnt) {
 				break;
 			}
 			memcpy (wv.buf[i], cur, cnt * sizeof (float));

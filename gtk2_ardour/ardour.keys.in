@@ -172,6 +172,7 @@ This mode provides many different operations on both regions and control points,
 @trans|Transport/Record|                                   <@TERTIARY@>r|engage record
 @mmode|MouseMode/set-mouse-mode-timefx|                                t|timefx mode
 @gselect|Common/select-all-visible-lanes|                   <@PRIMARY@>t|select all visible lanes
+@mmode|MouseMode/set-mouse-mode-grid|                                  y|grid mode
 @edit|Editor/alternate-redo|                                <@PRIMARY@>y|redo
 @select|Editor/select-all-between-cursors|                  <@PRIMARY@>u|select all regions enclosed by Range
 @select|Editor/select-all-within-cursors|                              u|select all regions touched by Range
@@ -210,6 +211,8 @@ This mode provides many different operations on both regions and control points,
 @wvis|Common/ToggleMaximalEditor|              <@PRIMARY@><@SECONDARY@>f|maximise editor space
 @wvis|Common/ToggleMaximalMixer|                <@PRIMARY@><@TERTIARY@>f|maximise mixer space
 @mmode|MouseMode/set-mouse-mode-object|                                g|object mode
+@edit|Editor/group-selected-regions|                        <@PRIMARY@>g|group selected regions
+@edit|Editor/ungroup-selected-regions|          <@PRIMARY@><@TERTIARY@>g|ungroup selected regions
 @edit|Region/play-selected-regions|                                    h|play selected region(s)
 @eep|Region/trim-front|                                                j|trim front
 @eep|Region/trim-back|                                                 k|trim back

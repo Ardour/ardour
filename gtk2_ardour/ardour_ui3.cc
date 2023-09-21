@@ -211,3 +211,4 @@ ARDOUR_UI::record_state_changed ()
 		big_clock->set_active (false);
 	}
 }
+

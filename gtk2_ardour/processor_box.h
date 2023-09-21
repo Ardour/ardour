@@ -234,8 +234,8 @@ private:
 		std::string state_id () const;
 		void set_tooltip ();
 
-		void start_touch ();
-		void end_touch ();
+		void start_touch (int);
+		void end_touch (int);
 
 		bool button_released (GdkEventButton*);
 

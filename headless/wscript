@@ -1,17 +1,7 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-from waflib import Options, TaskGen
-import waflib.Logs as Logs, waflib.Utils as Utils
 import os
-import shutil
 import sys
-import re
-import time
-from waflib.Task import Task
-
-# Mandatory variables
-top = '.'
-out = 'build'
 
 hardour_sources = [
         'load_session.cc',
@@ -25,9 +15,6 @@ def configure(conf):
     conf.load('misc')
 
 def build(bld):
-
-    VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
-
     # just the normal executable version of the GTK GUI
     obj = bld (features = 'cxx c cxxprogram')
     # this program does not do the whole hidden symbols thing

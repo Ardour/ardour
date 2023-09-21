@@ -89,8 +89,8 @@ class LIBPBD_API Stateful {
 
 	void clear_changes ();
 	virtual void clear_owned_changes ();
-	PropertyList* get_changes_as_properties (Command *) const;
-	virtual void rdiff (std::vector<Command*> &) const;
+	PropertyList* get_changes_as_properties (PBD::Command *) const;
+	virtual void rdiff (std::vector<PBD::Command*> &) const;
 	bool changed() const;
 
 	/* create a property list from an XMLNode */

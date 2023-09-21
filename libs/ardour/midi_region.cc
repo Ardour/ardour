@@ -612,3 +612,34 @@ MidiRegion::merge (std::shared_ptr<MidiRegion const> other_region)
 
 	set_length (max (length(), position().distance (other_region->end())));
 }
+
+void
+MidiRegion::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+	/* Deal with the region position & length */
+
+	Region::start_domain_bounce (cmd);
+	if (cmd.from != Temporal::BeatTime) {
+		return;
+	}
+
+	model()->start_domain_bounce (cmd);
+	model()->create_mapping_stash (source_position().beats());
+}
+
+void
+MidiRegion::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+	Region::finish_domain_bounce (cmd);
+
+	if (cmd.from != Temporal::BeatTime) {
+		return;
+	}
+
+	model()->rebuild_from_mapping_stash (source_position().beats());
+	model()->finish_domain_bounce (cmd);
+
+	_model_changed_connection.disconnect ();
+	model()->ContentsChanged ();
+	model()->ContentsChanged.connect_same_thread (_model_changed_connection, boost::bind (&MidiRegion::model_contents_changed, this));
+}

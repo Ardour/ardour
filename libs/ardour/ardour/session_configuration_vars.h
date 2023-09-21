@@ -62,9 +62,8 @@ CONFIG_VARIABLE (samplecnt_t, timecode_offset, "timecode-offset", 0)
 CONFIG_VARIABLE (bool, timecode_offset_negative, "timecode-offset-negative", true)
 CONFIG_VARIABLE (std::string, slave_timecode_offset, "slave-timecode-offset", " 00:00:00:00")
 CONFIG_VARIABLE (std::string, timecode_generator_offset, "timecode-generator-offset", " 00:00:00:00")
-CONFIG_VARIABLE (bool, glue_new_markers_to_bars_and_beats, "glue-new-markers-to-bars-and-beats", false)
 CONFIG_VARIABLE (bool, midi_copy_is_fork, "midi-copy-is-fork", true)
-CONFIG_VARIABLE (bool, glue_new_regions_to_bars_and_beats, "glue-new-regions-to-bars-and-beats", false)
+CONFIG_VARIABLE (bool, tracks_follow_session_time, "tracks-follow-session-time", false)
 CONFIG_VARIABLE (bool, realtime_export, "realtime-export", false)
 
 /* Video-settings are saved with the session and belong to the session.
@@ -92,3 +91,4 @@ CONFIG_VARIABLE (bool, show_monitor_on_meterbridge, "show-monitor-on-meterbridge
 CONFIG_VARIABLE (bool, show_name_on_meterbridge, "show-name-on-meterbridge", true)
 CONFIG_VARIABLE (bool, show_fader_on_meterbridge, "show-fader-on-meterbridge", false)
 CONFIG_VARIABLE (uint32_t, meterbridge_label_height,  "meterbridge-label-height", 0)
+CONFIG_VARIABLE (Temporal::TimeDomain, default_time_domain, "default-time-domain", Temporal::AudioTime)

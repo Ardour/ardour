@@ -122,6 +122,8 @@
 #include "editor_regions.h"
 #include "editor_route_groups.h"
 #include "editor_routes.h"
+#include "editor_section_box.h"
+#include "editor_sections.h"
 #include "editor_snapshots.h"
 #include "editor_sources.h"
 #include "editor_summary.h"
@@ -180,7 +182,6 @@ double Editor::timebar_height = 15.0;
 
 static const gchar *_grid_type_strings[] = {
 	N_("No Grid"),
-	N_("Playhead"),
 	N_("Bar"),
 	N_("1/4 Note"),
 	N_("1/8 Note"),
@@ -265,6 +266,7 @@ Editor::Editor ()
 	, pre_internal_snap_mode (SnapOff)
 	, internal_grid_type (GridTypeBeat)
 	, internal_snap_mode (SnapOff)
+	, marker_click_behavior (MarkerClickSelectOnly)
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 	, _notebook_shrunk (false)
 	, entered_marker (0)
@@ -288,6 +290,7 @@ Editor::Editor ()
 	, range_marker_group (0)
 	, transport_marker_group (0)
 	, cd_marker_group (0)
+	, section_marker_group (0)
 	, _time_markers_group (0)
 	, _selection_marker_group (0)
 	, _selection_marker (new LocationMarkers)
@@ -298,6 +301,7 @@ Editor::Editor ()
 	, _trackview_group (0)
 	, _drag_motion_group (0)
 	, _canvas_drop_zone (0)
+	, _canvas_grid_zone (0)
 	, no_ruler_shown_update (false)
 	,  ruler_grabbed_widget (0)
 	, ruler_dialog (0)
@@ -323,6 +327,7 @@ Editor::Editor ()
 	, range_marker_bar (0)
 	, transport_marker_bar (0)
 	, cd_marker_bar (0)
+	, section_marker_bar (0)
 	, cue_marker_bar (0)
 	, ruler_separator (0)
 	, minsec_label (_("Mins:Secs"))
@@ -335,6 +340,7 @@ Editor::Editor ()
 	, range_mark_label (_("Range Markers"))
 	, transport_mark_label (_("Loop/Punch Ranges"))
 	, cd_mark_label (_("CD Markers"))
+	, section_mark_label (_("Arrangement"))
 	, cue_mark_label (_("Cue Markers"))
 	, videotl_label (_("Video Timeline"))
 	, videotl_group (0)
@@ -405,6 +411,7 @@ Editor::Editor ()
 	, _last_region_menu_was_main (false)
 	, _track_selection_change_without_scroll (false)
 	, _editor_track_selection_change_without_scroll (false)
+	, _section_box (0)
 	, _playhead_cursor (0)
 	, _snapped_cursor (0)
 	, cd_marker_bar_drag_rect (0)
@@ -425,6 +432,7 @@ Editor::Editor ()
 	, _route_groups (0)
 	, _routes (0)
 	, _regions (0)
+	, _sections (0)
 	, _snapshots (0)
 	, _locations (0)
 	, autoscroll_horizontal_allowed (false)
@@ -467,7 +475,7 @@ Editor::Editor ()
 	, _stepping_axis_view (0)
 	, quantize_dialog (0)
 	, _main_menu_disabler (0)
-	, _tempo_edit_behavior (UIConfiguration::instance().get_tempo_edit_behavior())
+	, domain_bounce_info (nullptr)
 {
 	/* we are a singleton */
 
@@ -557,6 +565,13 @@ Editor::Editor ()
 	cd_mark_label.hide();
 	cd_mark_label.set_no_show_all();
 
+	section_mark_label.set_name ("EditorRulerLabel");
+	section_mark_label.set_size_request (-1, (int)timebar_height);
+	section_mark_label.set_alignment (1.0, 0.5);
+	section_mark_label.set_padding (5,0);
+	section_mark_label.hide();
+	section_mark_label.set_no_show_all();
+
 	cue_mark_label.set_name ("EditorRulerLabel");
 	cue_mark_label.set_size_request (-1, (int)timebar_height);
 	cue_mark_label.set_alignment (1.0, 0.5);
@@ -596,6 +611,8 @@ Editor::Editor ()
 
 	selection->TimeChanged.connect (sigc::mem_fun(*this, &Editor::time_selection_changed));
 	selection->TracksChanged.connect (sigc::mem_fun(*this, &Editor::track_selection_changed));
+
+	ZoomChanged.connect (sigc::mem_fun (*this, &Editor::update_section_rects));
 
 	editor_regions_selection_changed_connection = selection->RegionsChanged.connect (sigc::mem_fun(*this, &Editor::region_selection_changed));
 
@@ -670,6 +687,7 @@ Editor::Editor ()
 	_routes = new EditorRoutes ();
 	_regions = new EditorRegions (this);
 	_sources = new EditorSources (this);
+	_sections = new EditorSections ();
 	_snapshots = new EditorSnapshots ();
 	_locations = new EditorLocations (this);
 	_properties_box = new SelectionPropertiesBox ();
@@ -688,6 +706,7 @@ Editor::Editor ()
 	add_notebook_page (_("Sources"), _sources->widget ());
 	add_notebook_page (_("Regions"), _regions->widget ());
 	add_notebook_page (_("Clips"), _trigger_clip_picker);
+	add_notebook_page (_("Arrangement"), _sections->widget ());
 	add_notebook_page (_("Snapshots"), _snapshots->widget ());
 	add_notebook_page (_("Track & Bus Groups"), _route_groups->widget ());
 	add_notebook_page (_("Ranges & Marks"), _locations->widget ());
@@ -741,8 +760,8 @@ Editor::Editor ()
 	editor_summary_pane.add (_summary_hbox);
 	edit_pane.set_check_divider_position (true);
 	edit_pane.add (editor_summary_pane);
-	_editor_list_vbox.pack_start (*_properties_box, false, false, 0);
 	_editor_list_vbox.pack_start (_the_notebook);
+	_editor_list_vbox.pack_start (*_properties_box, false, false, 0);
 	edit_pane.add (_editor_list_vbox);
 	edit_pane.set_child_minsize (_editor_list_vbox, 30); /* rough guess at width of notebook tabs */
 
@@ -874,9 +893,6 @@ Editor::Editor ()
 	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
-
-	/* force correct state for tempo edit behavior */
-	tempo_edit_behavior_toggled (_tempo_edit_behavior);
 }
 
 Editor::~Editor()
@@ -903,11 +919,14 @@ Editor::~Editor()
 	delete _group_tabs;
 	delete _regions;
 	delete _snapshots;
+	delete _sections;
 	delete _locations;
+	delete _canvas_grid_zone;
 	delete _properties_box;
 	delete selection;
 	delete cut_buffer;
 	delete _cursors;
+	delete _section_box;
 
 	LuaInstance::destroy_instance ();
 
@@ -1094,6 +1113,7 @@ Editor::control_scroll (float fraction)
 	/* move visuals, we'll catch up with it later */
 
 	_playhead_cursor->set_position (*_control_scroll_target);
+	update_section_box ();
 	UpdateAllTransportClocks (*_control_scroll_target);
 
 	if (*_control_scroll_target > (current_page_samples() / 2)) {
@@ -1249,6 +1269,8 @@ Editor::map_position_change (samplepos_t sample)
 	if (!_session->locate_initiated()) {
 		_playhead_cursor->set_position (sample);
 	}
+
+	update_section_box ();
 }
 
 void
@@ -1318,6 +1340,8 @@ Editor::set_session (Session *t)
 	SessionHandlePtr::set_session (t);
 	_trigger_clip_picker.set_session (_session);
 
+	section_marker_bar->clear (true);
+
 	if (!_session) {
 		return;
 	}
@@ -1334,6 +1358,7 @@ Editor::set_session (Session *t)
 	_regions->set_session (_session);
 	_sources->set_session (_session);
 	_snapshots->set_session (_session);
+	_sections->set_session (_session);
 	_routes->set_session (_session);
 	_locations->set_session (_session);
 	_properties_box->set_session (_session);
@@ -1414,6 +1439,10 @@ Editor::set_session (Session *t)
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->auto_loop_location_changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::loop_location_changed, this, _1), gui_context ());
 	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
+
+	Location::start_changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_section_rects, this), gui_context ());
+	Location::end_changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_section_rects, this), gui_context ());
+	Location::flags_changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_section_rects, this), gui_context ());
 
 	_playhead_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
 	_playhead_cursor->show ();
@@ -1559,6 +1588,40 @@ Editor::popup_xfade_out_context_menu (int button, int32_t time, ArdourCanvas::It
 	fill_xfade_menu (items, false);
 
 	xfade_out_context_menu.popup (button, time);
+}
+
+void
+Editor::add_section_context_items (Gtk::Menu_Helpers::MenuList& items)
+{
+	using namespace Menu_Helpers;
+
+	if (Profile->get_mixbus ()) {
+		items.push_back (MenuElem (_("Copy/Paste Range Section to Playhead"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), CopyPasteSection)));
+		items.push_back (MenuElem (_("Cut/Paste Range Section to Playhead"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), CutPasteSection)));
+	} else {
+		items.push_back (MenuElem (_("Copy/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), CopyPasteSection)));
+		items.push_back (MenuElem (_("Cut/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), CutPasteSection)));
+	}
+	items.push_back (MenuElem (_("Delete Range Section"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), DeleteSection)));
+
+#if 0
+	items.push_back (SeparatorElem());
+	items.push_back (MenuElem (_("Delete all markers in Section"), sigc::bind (sigc::mem_fun (*this, &Editor::cut_copy_section), DeleteSection)));
+#endif
+
+	timepos_t start, end;
+	Location* l;
+	if (get_selection_extents (start, end) && NULL != (l = _session->locations ()->mark_at (start))) {
+		/* add some items from build_marker_menu () */
+		LocationMarkers* lm = find_location_markers (l);
+		assert (lm && lm->start);
+		items.push_back (SeparatorElem());
+		items.push_back (MenuElem (_("Move Playhead to Marker"), sigc::bind (sigc::mem_fun(*_session, &Session::request_locate), start.samples (), false, MustStop, TRS_UI)));
+		items.push_back (MenuElem (_("Rename..."), sigc::bind (sigc::mem_fun(*this, &Editor::rename_marker), lm->start)));
+	}
+
+	items.push_back (SeparatorElem());
+	add_selection_context_items (items, true);
 }
 
 void
@@ -1899,7 +1962,7 @@ Editor::add_region_context_items (Menu_Helpers::MenuList& edit_items, std::share
  * @param edit_items List to add the items to.
  */
 void
-Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
+Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items, bool time_selection_only)
 {
 	using namespace Menu_Helpers;
 
@@ -1909,47 +1972,51 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Zoom to Range"), sigc::bind (sigc::mem_fun(*this, &Editor::temporal_zoom_selection), Horizontal)));
 
-	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Loudness Analysis"), sigc::mem_fun(*this, &Editor::loudness_analyze_range_selection)));
-	edit_items.push_back (MenuElem (_("Spectral Analysis"), sigc::mem_fun(*this, &Editor::spectral_analyze_range_selection)));
-	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Loudness Assistant..."), sigc::bind (sigc::mem_fun (*this, &Editor::loudness_assistant), true)));
-	edit_items.push_back (SeparatorElem());
+	if (!time_selection_only) {
+		edit_items.push_back (SeparatorElem());
+		edit_items.push_back (MenuElem (_("Loudness Analysis"), sigc::mem_fun(*this, &Editor::loudness_analyze_range_selection)));
+		edit_items.push_back (MenuElem (_("Spectral Analysis"), sigc::mem_fun(*this, &Editor::spectral_analyze_range_selection)));
+		edit_items.push_back (SeparatorElem());
+		edit_items.push_back (MenuElem (_("Loudness Assistant..."), sigc::bind (sigc::mem_fun (*this, &Editor::loudness_assistant), true)));
+		edit_items.push_back (SeparatorElem());
 
-	edit_items.push_back (
-		MenuElem (
-			_("Move Range Start to Previous Region Boundary"),
-			sigc::bind (sigc::mem_fun (*this, &Editor::move_range_selection_start_or_end_to_region_boundary), false, false)
-			)
-		);
+		edit_items.push_back (
+			MenuElem (
+				_("Move Range Start to Previous Region Boundary"),
+				sigc::bind (sigc::mem_fun (*this, &Editor::move_range_selection_start_or_end_to_region_boundary), false, false)
+				)
+			);
 
-	edit_items.push_back (
-		MenuElem (
-			_("Move Range Start to Next Region Boundary"),
-			sigc::bind (sigc::mem_fun (*this, &Editor::move_range_selection_start_or_end_to_region_boundary), false, true)
-			)
-		);
+		edit_items.push_back (
+			MenuElem (
+				_("Move Range Start to Next Region Boundary"),
+				sigc::bind (sigc::mem_fun (*this, &Editor::move_range_selection_start_or_end_to_region_boundary), false, true)
+				)
+			);
 
-	edit_items.push_back (
-		MenuElem (
-			_("Move Range End to Previous Region Boundary"),
-			sigc::bind (sigc::mem_fun (*this, &Editor::move_range_selection_start_or_end_to_region_boundary), true, false)
-			)
-		);
+		edit_items.push_back (
+			MenuElem (
+				_("Move Range End to Previous Region Boundary"),
+				sigc::bind (sigc::mem_fun (*this, &Editor::move_range_selection_start_or_end_to_region_boundary), true, false)
+				)
+			);
 
-	edit_items.push_back (
-		MenuElem (
-			_("Move Range End to Next Region Boundary"),
-			sigc::bind (sigc::mem_fun (*this, &Editor::move_range_selection_start_or_end_to_region_boundary), true, true)
-			)
-		);
+		edit_items.push_back (
+			MenuElem (
+				_("Move Range End to Next Region Boundary"),
+				sigc::bind (sigc::mem_fun (*this, &Editor::move_range_selection_start_or_end_to_region_boundary), true, true)
+				)
+			);
+	}
 
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Separate"), mem_fun(*this, &Editor::separate_region_from_selection)));
 //	edit_items.push_back (MenuElem (_("Convert to Region in Region List"), sigc::mem_fun(*this, &Editor::new_region_from_selection)));
 
-	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Select All in Range"), sigc::mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
+	if (!time_selection_only) {
+		edit_items.push_back (SeparatorElem());
+		edit_items.push_back (MenuElem (_("Select All in Range"), sigc::mem_fun(*this, &Editor::select_all_selectables_using_time_selection)));
+	}
 
 	edit_items.push_back (SeparatorElem());
 	edit_items.push_back (MenuElem (_("Set Loop from Selection"), sigc::bind (sigc::mem_fun(*this, &Editor::set_loop_from_selection), false)));
@@ -1957,17 +2024,22 @@ Editor::add_selection_context_items (Menu_Helpers::MenuList& edit_items)
 	edit_items.push_back (MenuElem (_("Set Session Start/End from Selection"), sigc::mem_fun(*this, &Editor::set_session_extents_from_selection)));
 
 	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Add Range Markers"), sigc::mem_fun (*this, &Editor::add_location_from_selection)));
 
-	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Crop Region to Range"), sigc::mem_fun(*this, &Editor::crop_region_to_selection)));
-	edit_items.push_back (MenuElem (_("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_range), false)));
+	if (!time_selection_only) {
+		edit_items.push_back (MenuElem (_("Add Range Markers"), sigc::mem_fun (*this, &Editor::add_location_from_selection)));
 
-	edit_items.push_back (SeparatorElem());
-	edit_items.push_back (MenuElem (_("Consolidate"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, false)));
-	edit_items.push_back (MenuElem (_("Consolidate (with processing)"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, true)));
-	edit_items.push_back (MenuElem (_("Bounce"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), NewSource, false)));
-	edit_items.push_back (MenuElem (_("Bounce (with processing)"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), NewSource, true)));
+		edit_items.push_back (SeparatorElem());
+
+		edit_items.push_back (MenuElem (_("Crop Region to Range"), sigc::mem_fun(*this, &Editor::crop_region_to_selection)));
+		edit_items.push_back (MenuElem (_("Duplicate Range"), sigc::bind (sigc::mem_fun(*this, &Editor::duplicate_range), false)));
+
+		edit_items.push_back (SeparatorElem());
+		edit_items.push_back (MenuElem (_("Consolidate"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, false)));
+		edit_items.push_back (MenuElem (_("Consolidate (with processing)"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), ReplaceRange, true)));
+		edit_items.push_back (MenuElem (_("Bounce"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), NewSource, false)));
+		edit_items.push_back (MenuElem (_("Bounce (with processing)"), sigc::bind (sigc::mem_fun(*this, &Editor::bounce_range_selection), NewSource, true)));
+	}
+
 	edit_items.push_back (MenuElem (_("Export Range..."), sigc::mem_fun(*this, &Editor::export_selection)));
 	if (ARDOUR_UI::instance()->video_timeline->get_duration() > 0) {
 		edit_items.push_back (MenuElem (_("Export Video Range..."), sigc::bind (sigc::mem_fun(*(ARDOUR_UI::instance()), &ARDOUR_UI::export_video), true)));
@@ -2170,7 +2242,6 @@ Editor::grid_type_is_musical(GridType gt) const
 	case GridTypeBar:
 		return true;
 	case GridTypeNone:
-	case GridTypePlayhead:
 	case GridTypeTimecode:
 	case GridTypeMinSec:
 	case GridTypeCDFrame:
@@ -2332,10 +2403,17 @@ Editor::set_grid_to (GridType gt)
 
 	instant_save ();
 
-	if (grid_musical()) {
+	const bool grid_is_musical = grid_musical ();
+
+	if (grid_is_musical) {
 		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 		update_tempo_based_rulers ();
+	} else if (current_mouse_mode () == Editing::MouseGrid) {
+		Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("MouseMode"), X_("set-mouse-mode-object"));
+		ract->set_active (true);
 	}
+
+	ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-grid"))->set_sensitive (grid_is_musical);
 
 	mark_region_boundary_cache_dirty ();
 
@@ -2441,10 +2519,16 @@ Editor::set_state (const XMLNode& node, int version)
 		_playhead_cursor->set_position (0);
 	}
 
+	update_selection_markers ();
+	update_section_box ();
+
 	node.get_property ("mixer-width", editor_mixer_strip_width);
 
 	node.get_property ("zoom-focus", zoom_focus);
 	zoom_focus_selection_done (zoom_focus);
+
+	node.get_property ("marker-click-behavior", marker_click_behavior);
+	marker_click_behavior_selection_done (marker_click_behavior);
 
 	double z;
 	if (node.get_property ("zoom", z)) {
@@ -2657,6 +2741,7 @@ Editor::get_state () const
 	node->set_property ("pre-internal-snap-mode", pre_internal_snap_mode);
 	node->set_property ("edit-point", _edit_point);
 	node->set_property ("visible-track-count", _visible_track_count);
+	node->set_property ("marker-click-behavior", marker_click_behavior);
 
 	node->set_property ("draw-length", _draw_length);
 	node->set_property ("draw-velocity", _draw_velocity);
@@ -2748,7 +2833,7 @@ Editor::set_snapped_cursor_position (timepos_t const & pos)
  *  @param event Event to get current key modifier information from, or 0.
  */
 void
-Editor::snap_to_with_modifier (timepos_t& start, GdkEvent const * event, Temporal::RoundMode direction, SnapPref pref)
+Editor::snap_to_with_modifier (timepos_t& start, GdkEvent const * event, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap)
 {
 	if (!_session || !event) {
 		return;
@@ -2756,7 +2841,7 @@ Editor::snap_to_with_modifier (timepos_t& start, GdkEvent const * event, Tempora
 
 	if (ArdourKeyboard::indicates_snap (event->button.state)) {
 		if (_snap_mode == SnapOff) {
-			snap_to_internal (start, direction, pref);
+			snap_to_internal (start, direction, pref, ensure_snap);
 		}
 
 	} else {
@@ -2764,7 +2849,7 @@ Editor::snap_to_with_modifier (timepos_t& start, GdkEvent const * event, Tempora
 			snap_to_internal (start, direction, pref);
 		} else if (ArdourKeyboard::indicates_snap_delta (event->button.state)) {
 			/* SnapOff, but we pressed the snap_delta modifier */
-			snap_to_internal (start, direction, pref);
+			snap_to_internal (start, direction, pref, ensure_snap);
 		}
 	}
 }
@@ -3007,7 +3092,6 @@ Editor::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, 
 				divisor = 1;
 				break;
 			case GridTypeNone:
-			case GridTypePlayhead:
 				return ret;
 			default:
 				divisor = 2;
@@ -3137,9 +3221,14 @@ Editor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapP
 	timepos_t dist = timepos_t::max (start.time_domain()); // this records the distance of the best snap result we've found so far
 	timepos_t best = timepos_t::max (start.time_domain()); // this records the best snap-result we've found so far
 
-	if (_grid_type == GridTypePlayhead) {
-		best = timepos_t (_session->transport_sample ());
-		goto check_distance;
+	/* check Grid */
+	if ( (_grid_type != GridTypeNone) && (uic.get_snap_target () != SnapTargetOther) ) {
+		timepos_t pre (presnap);
+		timepos_t post (snap_to_grid (pre, direction, pref));
+		check_best_snap (presnap, post, dist, best);
+		if (uic.get_snap_target () == SnapTargetGrid) {
+			goto check_distance;
+		}
 	}
 
 	/* check snap-to-marker */
@@ -3186,18 +3275,12 @@ Editor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapP
 		check_best_snap (presnap, test, dist, best);
 	}
 
-	/* check Grid */
-	if (uic.get_snap_to_grid () && (_grid_type != GridTypeNone)) {
-		timepos_t pre (presnap);
-		timepos_t post (snap_to_grid (pre, direction, pref));
-		check_best_snap (presnap, post, dist, best);
-	}
+  check_distance:
 
 	if (timepos_t::max (start.time_domain()) == best) {
 		return;
 	}
 
-  check_distance:
 	/* now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
 	 * this also helps to avoid snapping to somewhere the user can't see.  (i.e.: I clicked on a region and it disappeared!!)
 	 * ToDo: Perhaps this should only occur if EditPointMouse?
@@ -3230,6 +3313,7 @@ Editor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (mouse_cut_button);
 	mouse_mode_size_group->add_widget (mouse_select_button);
 	mouse_mode_size_group->add_widget (mouse_timefx_button);
+	mouse_mode_size_group->add_widget (mouse_grid_button);
 	if (!Profile->get_mixbus()) {
 		mouse_mode_size_group->add_widget (mouse_audition_button);
 	}
@@ -3247,6 +3331,8 @@ Editor::setup_toolbar ()
 		mouse_mode_size_group->add_widget (zoom_preset_selector);
 		mouse_mode_size_group->add_widget (visible_tracks_selector);
 	}
+
+	mouse_mode_size_group->add_widget (stretch_marker_cb);
 
 	mouse_mode_size_group->add_widget (grid_type_selector);
 	mouse_mode_size_group->add_widget (draw_length_selector);
@@ -3275,6 +3361,7 @@ Editor::setup_toolbar ()
 	}
 
 	mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
+	mouse_mode_hbox->pack_start (mouse_grid_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_content_button, false, false);
 
@@ -3364,6 +3451,8 @@ Editor::setup_toolbar ()
 	snap_box.set_spacing (2);
 	snap_box.set_border_width (2);
 
+	stretch_marker_cb.set_name ("mouse mode button");
+
 	grid_type_selector.set_name ("mouse mode button");
 	draw_length_selector.set_name ("mouse mode button");
 	draw_velocity_selector.set_name ("mouse mode button");
@@ -3394,6 +3483,14 @@ Editor::setup_toolbar ()
 	nudge_box->pack_start (nudge_backward_button, false, false);
 	nudge_box->pack_start (nudge_forward_button, false, false);
 	nudge_box->pack_start (*nudge_clock, false, false);
+
+	stretch_marker_cb.set_label (_("Adjust Markers"));
+	stretch_marker_cb.set_active (true);
+
+	/* Grid  - these tools are only visible when in Grid mode */
+	grid_box.set_spacing (2);
+	grid_box.set_border_width (2);
+	grid_box.pack_start (stretch_marker_cb, false, false, 4);
 
 	/* Draw  - these MIDI tools are only visible when in Draw mode */
 	draw_box.set_spacing (2);
@@ -3433,6 +3530,8 @@ Editor::setup_toolbar ()
 	toolbar_hbox.pack_start (snap_box, false, false);
 	toolbar_hbox.pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 	toolbar_hbox.pack_start (*nudge_box, false, false);
+	toolbar_hbox.pack_start (_grid_box_spacer, false, false, 3);
+	toolbar_hbox.pack_start (grid_box, false, false);
 	toolbar_hbox.pack_start (_draw_box_spacer, false, false, 3);
 	toolbar_hbox.pack_start (draw_box, false, false);
 	toolbar_hbox.pack_end (_zoom_box, false, false, 2);
@@ -3496,10 +3595,12 @@ Editor::build_grid_type_menu ()
 {
 	using namespace Menu_Helpers;
 
-	/* main grid: bars, quarter-notes, etc */
+	/* there's no Grid, but if Snap is engaged, the Snap preferences will be applied */
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeNone],      sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeNone)));
+	grid_type_selector.AddMenuElem(SeparatorElem());
+
+	/* musical grid: bars, quarter-notes, etc */
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBar],       sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBar)));
-	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypePlayhead],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypePlayhead)));
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeat],      sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeat)));
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv2],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv2)));
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv4],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv4)));
@@ -3592,6 +3693,7 @@ Editor::setup_tooltips ()
 	set_tooltip (mouse_move_button, _("Grab Mode (select/move objects)"));
 	set_tooltip (mouse_cut_button, _("Cut Mode (split regions)"));
 	set_tooltip (mouse_select_button, _("Range Mode (select time ranges)"));
+	set_tooltip (mouse_grid_button, _("Grid Mode (edit tempo-map, drag/drop music-time grid)"));
 	set_tooltip (mouse_draw_button, _("Draw Mode (draw and edit gain/notes/automation)"));
 	set_tooltip (mouse_timefx_button, _("Stretch Mode (time-stretch audio and midi regions, preserving pitch)"));
 	set_tooltip (mouse_audition_button, _("Audition Mode (listen to regions)"));
@@ -3607,6 +3709,7 @@ Editor::setup_tooltips ()
 	set_tooltip (tav_expand_button, _("Expand Tracks"));
 	set_tooltip (tav_shrink_button, _("Shrink Tracks"));
 	set_tooltip (visible_tracks_selector, _("Number of visible tracks"));
+	set_tooltip (stretch_marker_cb, _("Move markers and ranges when stretching the Grid\n(this option is only available when session Time Domain is Beat Time)"));
 	set_tooltip (draw_length_selector, _("Note Length to Draw (AUTO uses the current Grid setting)"));
 	set_tooltip (draw_velocity_selector, _("Note Velocity to Draw (AUTO uses the nearest note's velocity)"));
 	set_tooltip (draw_channel_selector, _("Note Channel to Draw (AUTO uses the nearest note's channel)"));
@@ -3671,9 +3774,12 @@ Editor::begin_reversible_selection_op (string name)
 	}
 }
 
+#include "pbd/stacktrace.h"
+
 void
 Editor::abort_reversible_selection_op ()
 {
+	PBD::stacktrace (std::cerr, 20);
 	if (!_session) {
 		return;
 	}
@@ -3787,8 +3893,6 @@ Editor::abort_reversible_command ()
 		_session->abort_reversible_command ();
 	}
 }
-
-#include "pbd/stacktrace.h"
 
 void
 Editor::commit_reversible_command ()
@@ -4055,6 +4159,15 @@ Editor::zoom_focus_selection_done (ZoomFocus f)
 }
 
 void
+Editor::marker_click_behavior_selection_done (MarkerClickBehavior m)
+{
+	RefPtr<RadioAction> ract = marker_click_behavior_action (m);
+	if (ract) {
+		ract->set_active ();
+	}
+}
+
+void
 Editor::build_track_count_menu ()
 {
 	using namespace Menu_Helpers;
@@ -4243,6 +4356,32 @@ Editor::cycle_zoom_focus ()
 }
 
 void
+Editor::set_marker_click_behavior (MarkerClickBehavior m)
+{
+	if (marker_click_behavior != m) {
+		marker_click_behavior = m;
+		marker_click_behavior_selection_done (marker_click_behavior);
+		instant_save ();
+	}
+}
+
+void
+Editor::cycle_marker_click_behavior ()
+{
+	switch (marker_click_behavior) {
+	case MarkerClickSelectOnly:
+		set_marker_click_behavior (MarkerClickLocate);
+		break;
+	case MarkerClickLocate:
+		set_marker_click_behavior (MarkerClickLocateWhenStopped);
+		break;
+	case MarkerClickLocateWhenStopped:
+		set_marker_click_behavior (MarkerClickSelectOnly);
+		break;
+	}
+}
+
+void
 Editor::update_grid ()
 {
 	if (!_session) {
@@ -4374,7 +4513,6 @@ Editor::get_grid_beat_divisions (GridType gt)
 	case GridTypeBar:        return -1;
 
 	case GridTypeNone:       return 0;
-	case GridTypePlayhead:   return 0;
 	case GridTypeTimecode:   return 0;
 	case GridTypeMinSec:     return 0;
 	case GridTypeCDFrame:    return 0;
@@ -4383,22 +4521,15 @@ Editor::get_grid_beat_divisions (GridType gt)
 	return 0;
 }
 
-/** returns the current musical grid divisiions using the supplied modifier mask from a GtkEvent.
-    if the grid is non-musical, returns 0.
-    if the grid is snapped to bars, returns -1.
-    @param event_state the current keyboard modifier mask.
-*/
+/**
+ * Return the musical grid divisions
+ *
+ * @param event_state the current keyboard modifier mask.
+ * @return Music grid beat divisions
+ */
 int32_t
 Editor::get_grid_music_divisions (Editing::GridType gt, uint32_t event_state)
 {
-	if (snap_mode() == SnapOff && !ArdourKeyboard::indicates_snap (event_state)) {
-		return 0;
-	}
-
-	if (snap_mode() != SnapOff && ArdourKeyboard::indicates_snap (event_state)) {
-		return 0;
-	}
-
 	return get_grid_beat_divisions (gt);
 }
 
@@ -4981,6 +5112,7 @@ Editor::on_samples_per_pixel_changed ()
 	refresh_location_display();
 	_summary->set_overlays_dirty ();
 
+	update_section_box ();
 	update_marker_labels ();
 
 	instant_save ();
@@ -5665,6 +5797,7 @@ Editor::located ()
 		if (_follow_playhead && !_pending_initial_locate) {
 			reset_x_origin_to_follow_playhead ();
 		}
+		update_section_box ();
 	}
 
 	_pending_locate_request = false;
@@ -6434,6 +6567,8 @@ Editor::super_rapid_screen_update ()
 		_playhead_cursor->set_position (sample);
 	}
 
+	update_section_box ();
+
 	if (_session->requested_return_sample() >= 0) {
 		_last_update_time = 0;
 		return;
@@ -6765,8 +6900,6 @@ Editor::ui_parameter_changed (string parameter)
 		_track_canvas->request_redraw (_track_canvas->visible_area());
 	} else if (parameter == "use-note-color-for-velocity") {
 		/* handled individually by each MidiRegionView */
-	} else if (parameter == "tempo-edit-behavior") {
-		set_tempo_edit_behavior (UIConfiguration::instance().get_tempo_edit_behavior());
 	} else if (parameter == "show-selection-marker") {
 		update_ruler_visibility ();
 	}
@@ -6852,6 +6985,12 @@ Editor::duration_to_pixels_unrounded (timecnt_t const & dur) const
 Temporal::TimeDomain
 Editor::default_time_domain () const
 {
+	if (_session) {
+		return _session->config.get_default_time_domain();
+	}
+
+	/* Probably never reached */
+
 	if (_snap_mode == SnapOff) {
 		return AudioTime;
 	}

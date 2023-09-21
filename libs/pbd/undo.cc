@@ -30,6 +30,7 @@
 
 using namespace std;
 using namespace sigc;
+using namespace PBD;
 
 UndoTransaction::UndoTransaction ()
 	: _clearing (false)

@@ -32,7 +32,9 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace std;
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
+
+#define PROTOCOL_NAME ("Mackie")
 
 static ControlProtocol*
 new_mackie_protocol (Session* s)
@@ -40,7 +42,7 @@ new_mackie_protocol (Session* s)
 	MackieControlProtocol* mcp = 0;
 
 	try {
-		mcp = new MackieControlProtocol (*s);
+		mcp = new MackieControlProtocol (*s, PROTOCOL_NAME);
 		/* do not set active here - wait for set_state() */
 	}
 	catch (exception & e) {
@@ -65,9 +67,8 @@ delete_mackie_protocol (ControlProtocol* cp)
 	}
 }
 
-// Field names commented out by JE - 06-01-2010
 static ControlProtocolDescriptor mackie_descriptor = {
-	/* name       */ "Mackie",
+	/* name       */ PROTOCOL_NAME,
 	/* id         */ "uri://ardour.org/surfaces/mackie:0",
 	/* module     */ 0,
 	/* available  */ 0,

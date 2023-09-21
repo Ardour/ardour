@@ -74,7 +74,7 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 #ifndef timeradd /// only avail with __USE_BSD
 #define timeradd(a,b,result)                         \
@@ -91,7 +91,7 @@ using namespace Mackie;
 
 #define ui_context() MackieControlProtocol::instance() /* a UICallback-derived object that specifies the event loop for signal handling */
 
-Strip::Strip (Surface& s, const std::string& name, int index, const map<Button::ID,StripButtonInfo>& strip_buttons)
+Strip::Strip (Surface& s, const std::string& name, int index, const map<MACKIE_NAMESPACE::Button::ID,StripButtonInfo>& strip_buttons)
 	: Group (name)
 	, _solo (0)
 	, _recenable (0)

@@ -59,6 +59,7 @@
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/send.h"
+#include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
 #include "ardour/user_bundle.h"
@@ -73,6 +74,7 @@
 
 #include "widgets/tooltips.h"
 
+#include "ardour_ui.h"
 #include "ardour_window.h"
 #include "automation_controller.h"
 #include "context_menu_helper.h"
@@ -500,20 +502,41 @@ MixerStrip::update_trim_control ()
 }
 
 void
-MixerStrip::trim_start_touch ()
+MixerStrip::trim_start_touch (int)
 {
 	assert (_route && _session);
-	if (route()->trim() && route()->trim()->active() && route()->n_inputs().n_audio() > 0) {
-		route()->trim()->gain_control ()->start_touch (timepos_t (_session->transport_sample()));
+
+	if (!route()->trim() || !route()->trim()->active() || route()->n_inputs().n_audio() <= 0) {
+		return;
 	}
+
+	std::shared_ptr<AutomationControl> control (route()->trim()->gain_control());
+
+	StripableList sl;
+	_session->selection ().get_stripables_for_op (sl, _route, &RouteGroup::is_gain);
+
+	_touch_control_group.reset (new GainControlGroup (TrimAutomation));
+	_touch_control_group->set_mode (ControlGroup::Relative);
+	_touch_control_group->fill_from_stripable_list (sl, control->parameter());
+
+	control->start_touch (timepos_t (_session->transport_sample()));
 }
 
 void
-MixerStrip::trim_end_touch ()
+MixerStrip::trim_end_touch (int)
 {
 	assert (_route && _session);
+
 	if (route()->trim() && route()->trim()->active() && route()->n_inputs().n_audio() > 0) {
-		route()->trim()->gain_control ()->stop_touch (timepos_t (_session->transport_sample()));
+
+		std::shared_ptr<AutomationControl> control (route()->trim()->gain_control());
+
+		control->stop_touch (timepos_t (_session->transport_sample()));
+
+		if (_touch_control_group) {
+			_touch_control_group->pop_all ();
+			_touch_control_group.reset ();
+		}
 	}
 }
 

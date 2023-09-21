@@ -343,6 +343,12 @@ SessionDialog::session_folder ()
 	}
 }
 
+Temporal::TimeDomain
+SessionDialog::session_domain () const
+{
+	return timebase_chooser.get_active_row_number() == 1 ? Temporal::BeatTime : Temporal::AudioTime;
+}
+
 void
 SessionDialog::setup_recent_sessions ()
 {
@@ -660,6 +666,22 @@ SessionDialog::setup_new_session_page ()
 	new_folder_chooser.set_title (_("Select folder for session"));
 	Gtkmm2ext::add_volume_shortcuts (new_folder_chooser);
 
+	//Timebase for the new session
+	Label* session_domain_label = manage (new Label);
+	session_domain_label->set_text (_("Default Time Domain:"));
+	HBox* timebase_box = manage (new HBox);
+	timebase_box->set_spacing (8);
+	timebase_box->pack_start (*session_domain_label, false, false);
+	timebase_box->pack_start (timebase_chooser, true, true);
+
+	timebase_chooser.append (_("Audio Time"));
+	timebase_chooser.append (_("Beat Time"));
+#ifdef MIXBUS
+	timebase_chooser.set_active (1);
+#else
+	timebase_chooser.set_active (0);
+#endif
+
 	//Template & Template Description area
 	HBox* template_hbox = manage (new HBox);
 
@@ -705,6 +727,7 @@ SessionDialog::setup_new_session_page ()
 	}
 
 	session_new_vbox.pack_start (*template_hbox, true, true);
+	session_new_vbox.pack_start (*timebase_box, false, true);
 	session_new_vbox.pack_start (*folder_box, false, true);
 	session_new_vbox.pack_start (*name_hbox, false, true);
 	session_new_vbox.show_all ();

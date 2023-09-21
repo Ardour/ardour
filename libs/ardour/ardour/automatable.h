@@ -34,6 +34,8 @@
 
 #include "evoral/ControlSet.h"
 
+#include "temporal/domain_provider.h"
+
 #include "ardour/libardour_visibility.h"
 #include "ardour/slavable.h"
 #include "ardour/types.h"
@@ -48,10 +50,10 @@ class AutomationControl;
 /* The inherited ControlSet is virtual because AutomatableSequence inherits
  * from this AND EvoralSequence, which is also a ControlSet
  */
-class LIBARDOUR_API Automatable : virtual public Evoral::ControlSet, public Slavable
+class LIBARDOUR_API Automatable : virtual public Evoral::ControlSet, public Slavable, public Temporal::TimeDomainProvider
 {
 public:
-	Automatable(Session&, Temporal::TimeDomain);
+	Automatable(Session&, Temporal::TimeDomainProvider const &);
 	Automatable (const Automatable& other);
 
 	virtual ~Automatable();
@@ -117,7 +119,8 @@ public:
 
 	PBD::Signal0<void> AutomationStateChanged;
 
-	Temporal::TimeDomain time_domain() const { return _time_domain; }
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
 
 protected:
 	Session& _a_session;
@@ -125,7 +128,7 @@ protected:
 	void can_automate(Evoral::Parameter);
 
 	virtual void automation_list_automation_state_changed (Evoral::Parameter const&, AutoState);
-	SerializedRCUManager<ControlList> _automated_controls;
+	SerializedRCUManager<AutomationControlList> _automated_controls;
 
 	int load_automation (const std::string& path);
 	int old_set_automation_state(const XMLNode&);
@@ -134,14 +137,13 @@ protected:
 
 	samplepos_t _last_automation_snapshot;
 
-	SlavableControlList slavables () const { return SlavableControlList(); }
+	SlavableAutomationControlList slavables () const { return SlavableAutomationControlList(); }
 
 	void find_next_ac_event (std::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev) const;
 	void find_prev_ac_event (std::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev) const;
 
 private:
 	PBD::ScopedConnectionList _control_connections; ///< connections to our controls' signals
-	Temporal::TimeDomain _time_domain;
 };
 
 

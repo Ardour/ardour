@@ -30,6 +30,7 @@
 #include "pbd/convert.h"
 #include "pbd/stl_delete.h"
 
+#include "ardour/debug.h"
 #include "ardour/filesystem_paths.h"
 
 #include "device_info.h"
@@ -39,12 +40,12 @@
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 using std::string;
 using std::vector;
 
-std::map<std::string,DeviceInfo> DeviceInfo::device_info;
+std::map<std::string,DeviceInfo> MACKIE_NAMESPACE::DeviceInfo::device_info;
 
 DeviceInfo::DeviceInfo()
 	: _strip_cnt (8)
@@ -69,7 +70,11 @@ DeviceInfo::DeviceInfo()
 	, _has_separate_meters (false)
 	, _single_fader_follows_selection (false)
 	, _device_type (MCU)
+#ifdef UF8
+	, _name (X_("UF8/UF1"))
+#else
 	, _name (X_("Mackie Control Universal Pro"))
+#endif
 {
 	mackie_control_buttons ();
 }
@@ -576,8 +581,16 @@ devinfo_search_path ()
 static bool
 devinfo_filter (const string &str, void* /*arg*/)
 {
+#ifdef UF8
 	return (str.length() > strlen(devinfo_suffix) &&
+		str.find ("ssl-uf") != string::npos &&
+		str.find (devinfo_suffix) == (str.length() - strlen (devinfo_suffix))
+		);
+#else
+	return (str.length() > strlen(devinfo_suffix) &&
+		str.find ("ssl-uf") == string::npos &&
 		str.find (devinfo_suffix) == (str.length() - strlen (devinfo_suffix)));
+#endif
 }
 
 void
@@ -589,6 +602,8 @@ DeviceInfo::reload_device_info ()
 
 	find_files_matching_filter (devinfos, spath, devinfo_filter, 0, false, true);
 	device_info.clear ();
+
+	DEBUG_TRACE (DEBUG::MackieControl, "DeviceProfile::reload_device_info\n");
 
 	if (devinfos.empty()) {
 		error << "No MCP device info files found using " << spath.to_string() << endmsg;
@@ -612,12 +627,13 @@ DeviceInfo::reload_device_info ()
 		}
 
 		if (di.set_state (*root, 3000) == 0) { /* version is ignored for now */
+			DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Found profile '%1'\n", di.name ()));
 			device_info[di.name()] = di;
 		}
 	}
 }
 
-std::ostream& operator<< (std::ostream& os, const Mackie::DeviceInfo& di)
+std::ostream& operator<< (std::ostream& os, const MACKIE_NAMESPACE::DeviceInfo& di)
 {
 	os << di.name() << ' '
 	   << di.strip_cnt() << ' '

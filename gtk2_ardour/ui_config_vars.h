@@ -32,6 +32,7 @@ UI_CONFIG_VARIABLE (float, timeline_item_gradient_depth, "timeline-item-gradient
 UI_CONFIG_VARIABLE (bool, all_floating_windows_are_dialogs, "all-floating-windows-are-dialogs", false)
 UI_CONFIG_VARIABLE (bool, floating_monitor_section, "floating-monitor-section", false)
 UI_CONFIG_VARIABLE (bool, transients_follow_front, "transients-follow-front", false)
+UI_CONFIG_VARIABLE (bool, allow_to_resize_engine_dialog, "allow-to-resize-engine-dialog", false)
 UI_CONFIG_VARIABLE (bool, color_regions_using_track_color, "color-regions-using-track-color", false)
 UI_CONFIG_VARIABLE (bool, use_route_color_widely, "use-route-color-widely", false)
 UI_CONFIG_VARIABLE (uint32_t, vertical_region_gap, "vertical-region-gap", 0)
@@ -133,12 +134,12 @@ UI_CONFIG_VARIABLE (bool, use_note_color_for_velocity, "use-note-color-for-veloc
 UI_CONFIG_VARIABLE (bool, show_snapped_cursor, "show-snapped-cursor", true)
 UI_CONFIG_VARIABLE (uint32_t, snap_threshold, "snap-threshold", 25)
 UI_CONFIG_VARIABLE (uint32_t, ruler_granularity, "ruler-granularity", 25)
+UI_CONFIG_VARIABLE (ARDOUR::SnapTarget, snap_target, "snap-target", ARDOUR::SnapTargetGrid)
 UI_CONFIG_VARIABLE (bool, snap_to_marks, "snap-to-marks", true)
 UI_CONFIG_VARIABLE (bool, snap_to_playhead, "snap-to-playhead", true)
 UI_CONFIG_VARIABLE (bool, snap_to_region_sync, "snap-to-region-sync", true)
 UI_CONFIG_VARIABLE (bool, snap_to_region_start, "snap-to-region-start", true)
 UI_CONFIG_VARIABLE (bool, snap_to_region_end, "snap-to-region-end", true)
-UI_CONFIG_VARIABLE (bool, snap_to_grid, "snap-to-grid", true)
 UI_CONFIG_VARIABLE (bool, show_selection_marker, "show-selection-marker", true)
 UI_CONFIG_VARIABLE (bool, show_grids_ruler, "show-grids-ruler", true)
 UI_CONFIG_VARIABLE (bool, rulers_follow_grid, "rulers-follow-grid", false)
@@ -154,12 +155,8 @@ UI_CONFIG_VARIABLE (bool, ask_cut_copy_section_tempo_map, "ask-cut-copy-section-
 UI_CONFIG_VARIABLE (std::string, freesound_dir, "freesound-dir", "")
 UI_CONFIG_VARIABLE (int, max_note_height, "max-note-height", 20)
 UI_CONFIG_VARIABLE (bool, prefer_tap_tempo, "prefer-tap-tempo", false)
-#ifdef MIXBUS
-UI_CONFIG_VARIABLE (Editing::TempoEditBehavior, tempo_edit_behavior, "tempo-edit-behavior", Editing::TempoMapping)
-#else
-UI_CONFIG_VARIABLE (Editing::TempoEditBehavior, tempo_edit_behavior, "tempo-edit-behavior", Editing::TempoChanging)
-#endif
 
 /* these are visibility-type selections in the New Track dialog that we should make persistent for the user's choices */
 UI_CONFIG_VARIABLE (bool, show_on_cue_page, "show-on-cue-page", true)
 UI_CONFIG_VARIABLE (uint32_t, insert_at_position, "insert-at-position", 3)
+UI_CONFIG_VARIABLE (Editing::NoteNameDisplay, note_name_display, "note-name-display", Editing::Always)

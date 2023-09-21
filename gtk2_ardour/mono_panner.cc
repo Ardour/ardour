@@ -207,7 +207,7 @@ MonoPanner::on_expose_event (GdkEventExpose*)
 
 	/* right box */
 	rounded_right_half_rectangle (context,
-			right - half_lr_box - .5,
+			right - half_lr_box + .5,
 			half_lr_box + step_down,
 			lr_box_size, lr_box_size, corner_radius);
 	context->set_source_rgba (UINT_RGBA_R_FLT(f), UINT_RGBA_G_FLT(f), UINT_RGBA_B_FLT(f), UINT_RGBA_A_FLT(f));

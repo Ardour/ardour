@@ -32,7 +32,8 @@ DEFINE_ENUM_CONVERT(Editing::SnapMode)
 DEFINE_ENUM_CONVERT(Editing::EditPoint)
 DEFINE_ENUM_CONVERT(Editing::RegionListSortType)
 DEFINE_ENUM_CONVERT(Editing::MouseMode)
-DEFINE_ENUM_CONVERT(Editing::TempoEditBehavior)
+DEFINE_ENUM_CONVERT(Editing::NoteNameDisplay)
+DEFINE_ENUM_CONVERT(Editing::MarkerClickBehavior)
 
 } // namespace PBD
 

@@ -2010,10 +2010,6 @@
 				>
 			</File>
 			<File
-				RelativePath="..\gtk2_ardour\midi_scroomer.h"
-				>
-			</File>
-			<File
 				RelativePath="..\gtk2_ardour\midi_selection.h"
 				>
 			</File>

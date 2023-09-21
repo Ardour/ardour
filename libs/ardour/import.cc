@@ -204,7 +204,7 @@ static bool
 create_mono_sources_for_writing (const vector<string>& new_paths,
                                  Session& sess, uint32_t samplerate,
                                  vector<std::shared_ptr<Source> >& newfiles,
-                                 samplepos_t natural_position)
+                                 samplepos_t natural_position, bool announce)
 {
 	for (vector<string>::const_iterator i = new_paths.begin(); i != new_paths.end(); ++i) {
 
@@ -213,7 +213,7 @@ create_mono_sources_for_writing (const vector<string>& new_paths,
 		try {
 			const DataType type = SMFSource::safe_midi_file_extension (*i) ? DataType::MIDI : DataType::AUDIO;
 
-			source = SourceFactory::createWritable (type, sess, i->c_str(), samplerate);
+			source = SourceFactory::createWritable (type, sess, i->c_str(), samplerate, announce);
 		}
 
 		catch (const failed_constructor& err) {
@@ -530,19 +530,20 @@ Session::deinterlace_midi_region (std::shared_ptr<MidiRegion> mr)
 	Sources newfiles;
 
 	try {
-		std::shared_ptr<MidiSource> ms = mr->midi_source(0);
 		std::shared_ptr<SMFSource> smf = std::dynamic_pointer_cast<SMFSource> (mr->midi_source(0));  //ToDo: handle compound sources?
 		string source_path = smf->path();
 
-		/* write_midi_data_to_new_files expects to find raw midi on-disk (SMF*).
-		 *  this means that a split looks like a no-op if the file wasn't written to disk yet.
-		 *  I've chosen to flush the file to disk, rather than reimplement write_midi_data_to_new_files for a Source */
-		smf->session_saved();  //ToDo:  should we just expose flush_midi() instead?
+		/* Write_midi_data_to_new_files expects to find raw midi on-disk (SMF*).
+		 * this means that a split looks like a no-op if the file wasn't written to disk yet.
+		 * I've chosen to flush the file to disk, rather than reimplement
+		 * write_midi_data_to_new_files for a Source
+		 */
+		smf->session_saved(); //TODO:  should we just expose flush_midi() instead?
 
 		/* open the SMF file for reading */
 		boost::scoped_ptr<Evoral::SMF> smf_reader;
 		smf_reader.reset (new Evoral::SMF());
-		if (smf_reader->open( source_path )) {
+		if (smf_reader->open (source_path)) {
 			throw Evoral::SMF::FileError (source_path);
 		}
 
@@ -554,7 +555,7 @@ Session::deinterlace_midi_region (std::shared_ptr<MidiRegion> mr)
 		vector<string> new_paths = get_paths_for_new_sources (false, source_path, 16, smf_names);
 
 		/* create source files and write 1 channel of midi data to each of them */
-		if (create_mono_sources_for_writing (new_paths, *this, sample_rate(), newfiles, 0) ) {
+		if (create_mono_sources_for_writing (new_paths, *this, sample_rate(), newfiles, 0, false)) {
 			ImportStatus status;
 			write_midi_data_to_new_files (smf_reader.get(), status, newfiles, true /*split*/);
 		} else {
@@ -566,7 +567,7 @@ Session::deinterlace_midi_region (std::shared_ptr<MidiRegion> mr)
 		return;
 	}
 
-	/* not all 16 channels will have midi data;  delete any sources that turned up empty */
+	/* not all 16 channels will have midi data; delete any sources that turned up empty */
 	for (Sources::iterator x = newfiles.begin(); x != newfiles.end(); ) {
 		std::shared_ptr<SMFSource> smfs;
 		if ((smfs = std::dynamic_pointer_cast<SMFSource>(*x)) != 0 && smfs->is_empty()) {
@@ -736,7 +737,7 @@ Session::import_files (ImportStatus& status)
 			fatal << "THIS IS NOT IMPLEMENTED YET, IT SHOULD NEVER GET CALLED!!! DYING!" << endmsg;
 			status.cancel = !map_existing_mono_sources (new_paths, *this, sample_rate(), newfiles, this);
 		} else {
-			status.cancel = !create_mono_sources_for_writing (new_paths, *this, sample_rate(), newfiles, natural_position);
+			status.cancel = !create_mono_sources_for_writing (new_paths, *this, sample_rate(), newfiles, natural_position, true);
 		}
 
 		// copy on cancel/failure so that any files that were created will be removed below

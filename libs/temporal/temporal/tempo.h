@@ -42,6 +42,7 @@
 #include "temporal/beats.h"
 #include "temporal/bbt_argument.h"
 #include "temporal/bbt_time.h"
+#include "temporal/domain_swap.h"
 #include "temporal/superclock.h"
 #include "temporal/timeline.h"
 #include "temporal/types.h"
@@ -160,14 +161,6 @@ class /*LIBTEMPORAL_API*/ Point : public point_hook, public MapOwned  {
  */
 
 class LIBTEMPORAL_API Tempo {
-  private:
-	/* beats per minute * big_numerator => rational number expressing (possibly fractional) bpm as superbeats-per-minute
-	 *
-	 * It is not required that big_numerator equal superclock_ticks_per_second but since the values in both cases have similar
-	 * desired properties (many, many factors), it doesn't hurt to use the same number.
-	 */
-	static const superclock_t big_numerator = 508032000; // 2^10 * 3^4 * 5^3 * 7^2
-
   public:
 	enum Type {
 		Ramped,
@@ -188,10 +181,7 @@ class LIBTEMPORAL_API Tempo {
 		, _enpm (npm)
 		, _superclocks_per_note_type (double_npm_to_scpn (npm))
 		, _end_superclocks_per_note_type (double_npm_to_scpn (npm))
-		, _super_note_type_per_second (double_npm_to_snps (npm))
-		, _end_super_note_type_per_second (double_npm_to_snps (npm))
 		, _note_type (note_type)
-		, _active (true)
 		, _locked_to_meter (false)
 		, _continuing (false)
 		{}
@@ -201,10 +191,7 @@ class LIBTEMPORAL_API Tempo {
 		, _enpm (npm)
 		, _superclocks_per_note_type (double_npm_to_scpn (npm))
 		, _end_superclocks_per_note_type (double_npm_to_scpn (enpm))
-		, _super_note_type_per_second (double_npm_to_snps (npm))
-		, _end_super_note_type_per_second (double_npm_to_snps (enpm))
 		, _note_type (note_type)
-		, _active (true)
 		, _locked_to_meter (false)
 		, _continuing (false)
 		{}
@@ -221,7 +208,6 @@ class LIBTEMPORAL_API Tempo {
 	void   set_note_types_per_minute (double npm);
 
 	int note_type () const { return _note_type; }
-	Beats note_type_as_beats () const { return Beats (0, (1920 * 4) / _note_type); }
 
 	superclock_t superclocks_per_note_type () const {
 		return _superclocks_per_note_type;
@@ -241,18 +227,6 @@ class LIBTEMPORAL_API Tempo {
 	superclock_t end_superclocks_per_quarter_note () const {
 		return end_superclocks_per_note_type (4);
 	}
-	superclock_t superclocks_per_ppqn () const {
-		return superclocks_per_quarter_note() / ticks_per_beat;
-	}
-
-	static void superbeats_to_beats_ticks (int64_t sb, int32_t& b, int32_t& t) {
-		b = sb / big_numerator;
-		int64_t remain = sb - (b * big_numerator);
-		t = PBD::muldiv_round (Temporal::ticks_per_beat, remain, big_numerator);
-	}
-
-	bool active () const { return _active; }
-	void set_active (bool yn) { _active = yn; }
 
 	bool locked_to_meter ()  const { return _locked_to_meter; }
 	void set_locked_to_meter (bool yn) { _locked_to_meter = yn; }
@@ -270,7 +244,6 @@ class LIBTEMPORAL_API Tempo {
 		return _superclocks_per_note_type == other._superclocks_per_note_type &&
 		_end_superclocks_per_note_type == other._end_superclocks_per_note_type &&
 		_note_type == other._note_type &&
-		_active == other._active &&
 		_locked_to_meter == other._locked_to_meter &&
 		_continuing == other._continuing;
 	}
@@ -279,27 +252,19 @@ class LIBTEMPORAL_API Tempo {
 		return _superclocks_per_note_type != other._superclocks_per_note_type ||
 			_end_superclocks_per_note_type != other._end_superclocks_per_note_type ||
 			_note_type != other._note_type ||
-			_active != other._active ||
 			_locked_to_meter != other._locked_to_meter ||
 			_continuing != other._continuing;
 	}
-
-	uint64_t super_note_type_per_second() const { return _super_note_type_per_second; }
-	uint64_t end_super_note_type_per_second() const { return _end_super_note_type_per_second; }
 
   protected:
 	double       _npm;
 	double       _enpm;
 	superclock_t _superclocks_per_note_type;
 	superclock_t _end_superclocks_per_note_type;
-	uint64_t     _super_note_type_per_second;
-	uint64_t     _end_super_note_type_per_second;
 	int8_t       _note_type;
-	bool         _active;
 	bool         _locked_to_meter; /* XXX name has unclear meaning with nutempo */
 	bool         _continuing;
 
-	static inline uint64_t     double_npm_to_snps (double npm) { return (uint64_t) llround (npm * big_numerator / 60); }
 	static inline superclock_t double_npm_to_scpn (double npm) { return (superclock_t) llround ((60./npm) * superclock_ticks_per_second()); }
 
   protected:
@@ -338,7 +303,8 @@ class LIBTEMPORAL_API Meter {
 	BBT_Time bbt_add (BBT_Time const & bbt, BBT_Offset const & add) const;
 	BBT_Time bbt_subtract (BBT_Time const & bbt, BBT_Offset const & sub) const;
 	BBT_Time round_to_bar (BBT_Time const &) const;
-	BBT_Time round_up_to_beat (BBT_Time const &) const;
+	BBT_Time round_up_to_beat_div (BBT_Time const &, int beat_div) const;
+	BBT_Time round_up_to_beat (BBT_Time const & bbt) const { return round_up_to_beat_div (bbt, 1); }
 	BBT_Time round_to_beat (BBT_Time const &) const;
 	Beats    to_quarters (BBT_Offset const &) const;
 
@@ -496,7 +462,6 @@ class LIBTEMPORAL_API TempoMetric
 	superclock_t end_superclocks_per_note_type () const {return _tempo->end_superclocks_per_note_type (); }
 	superclock_t superclocks_per_note_type (int note_type) const {return _tempo->superclocks_per_note_type (note_type); }
 	superclock_t superclocks_per_quarter_note () const {return _tempo->superclocks_per_quarter_note (); }
-	superclock_t superclocks_per_ppqn () const {return _tempo->superclocks_per_ppqn (); }
 
 	int note_type () const { return _tempo->note_type(); }
 	int divisions_per_bar () const { return _meter->divisions_per_bar(); }
@@ -741,7 +706,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	 * one could hold the map for, etc.
 	 *
 	 * Elsewhere in the codebase, we use RCU to solve this sort of
-	 * issue. For example, if we need to operate an the current list of
+	 * issue. For example, if we need to operate on the current list of
 	 * Routes, we get read-only copy of the list, and iterate over it,
 	 * knowing that even if the canonical version is being changed, the
 	 * copy we are using will not.
@@ -798,6 +763,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	/* and now on with the rest of the show ... */
 
   public:
+	LIBTEMPORAL_API TempoMap () {}
 	LIBTEMPORAL_API TempoMap (Tempo const& initial_tempo, Meter const& initial_meter);
 	LIBTEMPORAL_API TempoMap (TempoMap const&);
 	LIBTEMPORAL_API TempoMap (XMLNode const&, int version);
@@ -822,6 +788,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API void set_bartime (BBT_Time const &, timepos_t const &, std::string name = std::string());
 	LIBTEMPORAL_API void remove_bartime (MusicTimePoint const & tp, bool with_reset = true);
+	LIBTEMPORAL_API void replace_bartime (MusicTimePoint & tp, bool with_reset = true);
 
 	LIBTEMPORAL_API TempoPoint& set_tempo (Tempo const &, BBT_Argument const &);
 	LIBTEMPORAL_API	TempoPoint& set_tempo (Tempo const &, timepos_t const &);
@@ -895,7 +862,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	LIBTEMPORAL_API TempoMapCutBuffer* cut (timepos_t const & start, timepos_t const & end, bool ripple);
 	LIBTEMPORAL_API TempoMapCutBuffer* copy (timepos_t const & start, timepos_t const & end);
-	LIBTEMPORAL_API void paste (TempoMapCutBuffer const &, timepos_t const & position, bool ripple);
+	LIBTEMPORAL_API void paste (TempoMapCutBuffer const &, timepos_t const & position, bool ripple, std::string = std::string());
 
 	LIBTEMPORAL_API void shift (timepos_t const & at, BBT_Offset const & by);
 	LIBTEMPORAL_API void shift (timepos_t const & at, timecnt_t const & by);
@@ -945,6 +912,9 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API	TempoPoint const& tempo_at (superclock_t sc) const { return _tempo_at (sc, Point::sclock_comparator()); }
 	LIBTEMPORAL_API	TempoPoint const& tempo_at (Beats const & b) const { return _tempo_at (b, Point::beat_comparator()); }
 	LIBTEMPORAL_API TempoPoint const& tempo_at (BBT_Argument const & bbt) const { return _tempo_at (bbt, Point::bbt_comparator()); }
+
+	LIBTEMPORAL_API double max_notes_per_minute() const;
+	LIBTEMPORAL_API double min_notes_per_minute() const;
 
 	/* convenience function that hides some complexities behind fetching
 	 * the bpm at position
@@ -1159,7 +1129,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 		double end_note_types_per_minute;
 		double note_type;
 		bool continuing; /* "clamped" in actual legacy stuff */
-		bool active;
 	};
 
 	struct LegacyMeterState
@@ -1232,6 +1201,10 @@ class LIBTEMPORAL_API TempoMapCutBuffer
 	MusicTimes const & bartimes() const { return _bartimes; }
 	Points const & points() const { return _points; }
 
+	bool empty() const {
+		return _tempos.empty() && _meters.empty() && _bartimes.empty() && _points.empty();
+	}
+
   private:
 	Tempo* _start_tempo;
 	Tempo* _end_tempo;
@@ -1245,7 +1218,7 @@ class LIBTEMPORAL_API TempoMapCutBuffer
 	Points       _points;
 };
 
-class LIBTEMPORAL_API TempoCommand : public Command {
+class LIBTEMPORAL_API TempoCommand : public PBD::Command {
 	public:
 
 	TempoCommand (std::string const & name, XMLNode const * before, XMLNode const * after);
@@ -1264,28 +1237,6 @@ class LIBTEMPORAL_API TempoCommand : public Command {
 	XMLNode const * _before;
 	XMLNode const * _after;
 };
-
-class LIBTEMPORAL_API DomainSwapInformation {
-   public:
-	static DomainSwapInformation* start (TimeDomain prev);
-
-	~DomainSwapInformation ();
-
-	void add (timecnt_t& t) { counts.push_back (&t); }
-	void add (timepos_t& p) { positions.push_back (&p); }
-	void clear ();
-
-   private:
-	DomainSwapInformation (TimeDomain prev) : previous (prev) {}
-
-	std::vector<timecnt_t*> counts;
-	std::vector<timepos_t*> positions;
-	TimeDomain previous;
-
-	void undo ();
-};
-
-extern LIBTEMPORAL_API DomainSwapInformation* domain_swap;
 
 } /* end of namespace Temporal */
 

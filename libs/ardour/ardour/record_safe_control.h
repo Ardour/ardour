@@ -34,7 +34,7 @@ class Session;
 class LIBARDOUR_API RecordSafeControl : public SlavableAutomationControl
 {
   public:
-	RecordSafeControl (Session& session, std::string const & name, Recordable& m, Temporal::TimeDomain td);
+	RecordSafeControl (Session& session, std::string const & name, Recordable& m, Temporal::TimeDomainProvider const & td);
 	~RecordSafeControl() {}
 
   protected:

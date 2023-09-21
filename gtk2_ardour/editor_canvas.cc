@@ -53,6 +53,7 @@
 #include "editor_drag.h"
 #include "region_view.h"
 #include "editor_group_tabs.h"
+#include "editor_section_box.h"
 #include "editor_summary.h"
 #include "video_timeline.h"
 #include "keyboard.h"
@@ -143,13 +144,6 @@ Editor::initialize_canvas ()
 	_time_markers_group = new ArdourCanvas::Container (h_scroll_group);
 	CANVAS_DEBUG_NAME (_time_markers_group, "time bars");
 
-	/* group above rulers, to show selection triangles */
-	_selection_marker_group = new ArdourCanvas::Container (h_scroll_group);
-	CANVAS_DEBUG_NAME (_selection_marker_group, "Canvas Selection Ruler");
-	_selection_marker->start = new SelectionMarker (*this, *_selection_marker_group, "play head", ArdourMarker::SelectionStart);
-	_selection_marker->end = new SelectionMarker (*this, *_selection_marker_group, "play head", ArdourMarker::SelectionEnd);
-	_selection_marker_group->raise_to_top ();
-
 	/* Note that because of ascending-y-axis coordinates, this order is
 	 * bottom-to-top. But further note that the actual order is set in
 	 * ::update_ruler_visibility()
@@ -157,7 +151,7 @@ Editor::initialize_canvas ()
 
 	cd_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
 	CANVAS_DEBUG_NAME (cd_marker_group, "cd marker group");
-	/* the vide is temporarily placed a the same location as the
+	/* the video ruler is temporarily placed a the same location as the
 	   cd_marker_group, but is moved later.
 	*/
 	videotl_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple(0.0, 0.0));
@@ -168,12 +162,10 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (transport_marker_group, "transport marker group");
 	range_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 3.0) + 1.0));
 	CANVAS_DEBUG_NAME (range_marker_group, "range marker group");
-	tempo_meta_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 4.0) + 1.0));
-	CANVAS_DEBUG_NAME (tempo_meta_group, "tempo meta group");
-	tempo_group = new ArdourCanvas::Container (tempo_meta_group, ArdourCanvas::Duple (0.0, 0.0));
+	tempo_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 4.0) + 1.0));
 	CANVAS_DEBUG_NAME (tempo_group, "tempo group");
-	mapping_group = new ArdourCanvas::Container (tempo_meta_group, ArdourCanvas::Duple (0.0, 0.0));
-	CANVAS_DEBUG_NAME (mapping_group, "mapping group");
+	section_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
+	CANVAS_DEBUG_NAME (section_marker_group, "Arranger marker group");
 	meter_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
 	CANVAS_DEBUG_NAME (meter_group, "meter group");
 
@@ -191,21 +183,6 @@ Editor::initialize_canvas ()
 	tempo_bar->set_outline(false);
 	tempo_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
 
-	mapping_bar = new ArdourCanvas::Rectangle (mapping_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
-	CANVAS_DEBUG_NAME (mapping_bar, "Mapping Bar");
-	mapping_bar->set_fill(true);
-	mapping_bar->set_outline(false);
-	mapping_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
-
-	switch (UIConfiguration::instance().get_tempo_edit_behavior()) {
-	case Editing::TempoMapping:
-		tempo_group->hide ();
-		break;
-	case Editing::TempoChanging:
-		mapping_group->hide ();
-		break;
-	}
-
 	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
 
@@ -217,6 +194,9 @@ Editor::initialize_canvas ()
 
 	cd_marker_bar = new ArdourCanvas::Rectangle (cd_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
 	CANVAS_DEBUG_NAME (cd_marker_bar, "CD Marker Bar");
+
+	section_marker_bar = new ArdourCanvas::Rectangle (section_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
+	CANVAS_DEBUG_NAME (section_marker_bar, "Arranger Marker Bar");
 
 	cue_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
 	cue_marker_bar = new ArdourCanvas::Rectangle (cue_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
@@ -266,10 +246,10 @@ Editor::initialize_canvas ()
 	transport_punchout_line->hide();
 
 	tempo_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), tempo_bar, TempoBarItem, "tempo bar"));
-	mapping_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), mapping_bar, MappingBarItem, "mapping bar"));
 	meter_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), meter_bar, MeterBarItem, "meter bar"));
 	marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), marker_bar, MarkerBarItem, "marker bar"));
 	cd_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), cd_marker_bar, CdMarkerBarItem, "cd marker bar"));
+	section_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), section_marker_bar, SectionMarkerBarItem, "arrangement marker bar"));
 	cue_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), cue_marker_bar, CueMarkerBarItem, "cd marker bar"));
 	videotl_group->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_videotl_bar_event), videotl_group));
 	range_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), range_marker_bar, RangeMarkerBarItem, "range marker bar"));
@@ -286,9 +266,27 @@ Editor::initialize_canvas ()
 	_canvas_drop_zone->set_outline (false);
 	_canvas_drop_zone->Event.connect (sigc::mem_fun (*this, &Editor::canvas_drop_zone_event));
 
-	/* these signals will initially be delivered to the canvas itself, but if they end up remaining unhandled, they are passed to Editor-level
-	   handlers.
-	*/
+	_canvas_grid_zone = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 0.0));
+	/* this thing is transparent */
+	_canvas_grid_zone->set_fill (false);
+	_canvas_grid_zone->set_outline (false);
+	_canvas_grid_zone->Event.connect (sigc::mem_fun (*this, &Editor::canvas_grid_zone_event));
+	_canvas_grid_zone->set_ignore_events (true);
+
+	/* and now the timeline-selection rectangle which is controlled by the markers */
+	_section_box = new SectionBox (*this, cursor_scroll_group);
+	_section_box->Event.connect (sigc::mem_fun (*this, &Editor::canvas_section_box_event));
+
+	/* group above rulers, to show selection triangles */
+	_selection_marker_group = new ArdourCanvas::Container (cursor_scroll_group);
+	CANVAS_DEBUG_NAME (_selection_marker_group, "Canvas Selection Ruler");
+	_selection_marker->start = new SelectionMarker (*this, *_selection_marker_group, "selection", ArdourMarker::SelectionStart);
+	_selection_marker->end = new SelectionMarker (*this, *_selection_marker_group, "selection", ArdourMarker::SelectionEnd);
+	_selection_marker_group->raise_to_top ();
+
+	/* these signals will initially be delivered to the canvas itself, but if they end up remaining unhandled,
+	 * they are passed to Editor-level handlers.
+	 */
 
 	_track_canvas->signal_scroll_event().connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_scroll_event), true));
 	_track_canvas->signal_motion_notify_event().connect (sigc::mem_fun (*this, &Editor::track_canvas_motion_notify_event));
@@ -344,6 +342,8 @@ Editor::track_canvas_viewport_size_allocated ()
 
 	_canvas_drop_zone->set_y1 (_canvas_drop_zone->y0() + (_visible_canvas_height - 20.0));
 
+	_canvas_grid_zone->set_y1 (_visible_canvas_height);
+
 	// SHOWTRACKS
 
 	if (height_changed) {
@@ -363,6 +363,7 @@ Editor::track_canvas_viewport_size_allocated ()
 	update_fixed_rulers();
 	update_tempo_based_rulers ();
 	redisplay_grid (false);
+	redisplay_track_views ();
 	_summary->set_overlays_dirty ();
 }
 
@@ -1068,6 +1069,9 @@ Editor::color_handler()
 	bbt_ruler->set_fill_color (base);
 	bbt_ruler->set_outline_color (text);
 
+	_section_box->set_fill_color (UIConfiguration::instance().color_mod ("selection", "selection rect"));
+	_section_box->set_outline_color (UIConfiguration::instance().color ("selection"));
+
 	_playhead_cursor->set_color (UIConfiguration::instance().color ("play head"));
 
 	meter_bar->set_fill_color (UIConfiguration::instance().color_mod ("meter bar", "marker bar"));
@@ -1075,13 +1079,14 @@ Editor::color_handler()
 
 	tempo_bar->set_fill_color (UIConfiguration::instance().color_mod ("tempo bar", "marker bar"));
 
-	mapping_bar->set_fill_color (UIConfiguration::instance().color_mod ("mapping bar", "marker bar"));
-
 	marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("marker bar", "marker bar"));
 	marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
 	cd_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("cd marker bar", "marker bar"));
 	cd_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
+
+	section_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("arrangement marker bar", "marker bar"));
+	section_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
 	cue_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("cd marker bar", "marker bar"));
 	cue_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
@@ -1114,6 +1119,7 @@ Editor::color_handler()
 	rubberband_rect->set_fill_color (UIConfiguration::instance().color_mod ("rubber band rect", "selection rect"));
 
 	refresh_location_display ();
+	update_section_rects ();
 
 	NoteBase::set_colors ();
 
@@ -1264,6 +1270,7 @@ Editor::which_mode_cursor () const
 		mode_cursor = _cursors->scissors;
 		break;
 
+	case MouseGrid:
 	case MouseObject:
 	case MouseContent:
 		/* don't use mode cursor, pick a grabber cursor based on the item */
@@ -1366,9 +1373,6 @@ Editor::which_canvas_cursor(ItemType type) const
 		case StreamItem:
 		case AutomationTrackItem:
 			cursor = which_track_cursor ();
-			break;
-		case MappingBarItem:
-			cursor = _cursors->trimmer;
 			break;
 		case PlayheadCursorItem:
 			cursor = _cursors->grabber;
@@ -1493,10 +1497,12 @@ Editor::which_canvas_cursor(ItemType type) const
 	case MarkerBarItem:
 	case RangeMarkerBarItem:
 	case CdMarkerBarItem:
+	case SectionMarkerBarItem:
 	case CueMarkerBarItem:
 	case VideoBarItem:
 	case TransportMarkerBarItem:
 	case DropZoneItem:
+	case GridZoneItem:
 	case SelectionMarkerItem:
 		cursor = _cursors->grabber;
 		break;

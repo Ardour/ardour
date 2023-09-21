@@ -109,6 +109,8 @@ public:
 
 	std::list<InvalidationRecord*> trash;
 
+	static InvalidationRecord* __invalidator (sigc::trackable& trackable, const char*, int);
+
 private:
 	static Glib::Threads::Private<EventLoop> thread_event_loop;
 	std::string _name;
@@ -136,6 +138,6 @@ private:
 
 }
 
-#define MISSING_INVALIDATOR 0 // used to mark places where we fail to provide an invalidator
+#define MISSING_INVALIDATOR nullptr // used to mark places where we fail to provide an invalidator
 
 #endif /* __pbd_event_loop_h__ */

@@ -30,6 +30,7 @@ enum ItemType {
 	MarkerBarItem,
 	RangeMarkerBarItem,
 	CdMarkerBarItem,
+	SectionMarkerBarItem,
 	CueMarkerBarItem,
 	VideoBarItem,
 	TransportMarkerBarItem,
@@ -43,7 +44,6 @@ enum ItemType {
 	TempoMarkerItem,
 	MeterBarItem,
 	TempoBarItem,
-	MappingBarItem,
 	RegionViewNameHighlight,
 	RegionViewName,
 	StartSelectionTrimItem,
@@ -68,6 +68,7 @@ enum ItemType {
 	SamplesRulerItem,
 	SelectionMarkerItem,
 	DropZoneItem,
+	GridZoneItem,
 	VelocityItem,
 	VelocityBaseItem,
 

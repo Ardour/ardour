@@ -82,7 +82,7 @@ ArdourMarker::color (std::string const& color_name)
 
 
 ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::string const& color_name, string const& annotation,
-                            Type type, timepos_t const & pos, bool handle_events, RegionView* rv)
+                            Type type, timepos_t const & pos, bool handle_events, RegionView* rv, bool use_tooltip)
 
 	: editor (ed)
 	, _parent (&parent)
@@ -92,6 +92,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 	, _entered (false)
 	, _shown (false)
 	, _line_shown (false)
+	, _use_tooltip (use_tooltip)
 	, _color (color_name)
 	, _points_color (color_name)
 	, _left_label_limit (DBL_MAX)
@@ -234,6 +235,16 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 		_label_offset = 8.0 * scale;
 		break;
 
+	case Section:
+		points = new ArdourCanvas::Points (); //unused
+		points->push_back (ArdourCanvas::Duple (    0.0, 0.0));
+		points->push_back (ArdourCanvas::Duple (M6 + .5, MH * .5));
+		points->push_back (ArdourCanvas::Duple (    0.0, MH));
+		points->push_back (ArdourCanvas::Duple (    0.0, 0.0));
+
+		_shift = 0 * scale;
+		_label_offset = 4.0 * scale;
+		break;
 
 	case PunchOut: /* fallthrough */
 	case LoopEnd: /* fallthrough */
@@ -287,7 +298,7 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 	}
 
 	_position = pos;
-	unit_position = editor.sample_to_pixel (pos.samples());
+	unit_position = editor.sample_to_pixel (pos.is_zero () ? 0 : pos.samples());
 	unit_position -= _shift;
 
 	group = new ArdourCanvas::Container (&parent, ArdourCanvas::Duple (unit_position, 1));
@@ -364,7 +375,11 @@ ArdourMarker::ArdourMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::s
 	_name_item->set_font_description (name_font);
 	_name_item->set_color (RGBA_TO_UINT (0,0,0,255));
 
-	_name_item->set_position (ArdourCanvas::Duple (_label_offset, floor (.5 * (name_height - name_descent - .5))));
+	if (_type==Section) {
+		_name_item->set_position (ArdourCanvas::Duple (_label_offset, floor (.5 * (name_height - name_height))));
+	} else {
+		_name_item->set_position (ArdourCanvas::Duple (_label_offset, floor (.5 * (name_height - name_descent - .5))));
+	}
 
 	apply_color ();
 
@@ -403,6 +418,7 @@ void ArdourMarker::reparent(ArdourCanvas::Item & parent)
 {
 	group->reparent (&parent);
 	_parent = &parent;
+	group->redraw ();
 }
 
 void
@@ -503,15 +519,17 @@ ArdourMarker::set_name (const string& new_name, const string& tooltip)
 {
 	_name = new_name;
 
-	_pcue->set_tooltip (new_name);
-	_pmark->set_tooltip (new_name);
-	if (_name_flag) {
-		_name_flag->set_tooltip (new_name);
-	}
-	if (tooltip.empty()) {
-		_name_item->set_tooltip (new_name);
-	} else {
-		_name_item->set_tooltip (tooltip);
+	if (_use_tooltip) {
+		_pcue->set_tooltip (new_name);
+		_pmark->set_tooltip (new_name);
+		if (_name_flag) {
+			_name_flag->set_tooltip (new_name);
+		}
+		if (tooltip.empty()) {
+			_name_item->set_tooltip (new_name);
+		} else {
+			_name_item->set_tooltip (tooltip);
+		}
 	}
 
 	setup_name_display ();
@@ -546,6 +564,11 @@ ArdourMarker::setup_name_display ()
 
 	pixel_size (_name, name_font, name_width, name_height);
 	name_width = min ((double) name_width + padding, limit);
+
+	if (_name_flag) {
+		_name_flag->set_y0 (0);
+		_name_flag->set_y1 (marker_height - padding);
+	}
 
 	if (name_width == 0) {
 		_name_item->hide ();
@@ -601,6 +624,11 @@ ArdourMarker::setup_name_display ()
 					_name_flag->set_x0 (M3);
 					_name_flag->set_x1 (_name_item->position().x + name_width + padding + 1*scale);
 					break;
+				case Section:
+					_name_flag->set_x0 (0);
+					_name_flag->set_x1 (_name_item->position().x + name_width + padding);
+					_name_flag->set_y1 (marker_height+0.5);  //full height
+					break;
 				default:
 					_name_flag->set_x0 (0);
 					_name_flag->set_x1 (_name_item->position().x + name_width + padding);
@@ -608,11 +636,6 @@ ArdourMarker::setup_name_display ()
 				}
 			}
 		}
-	}
-
-	if (_name_flag) {
-		_name_flag->set_y0 (0);
-		_name_flag->set_y1 (marker_height - padding);
 	}
 }
 
@@ -738,7 +761,7 @@ ArdourMarker::set_right_label_limit (double p)
 
 MetricMarker::MetricMarker (PublicEditor& ed, ArdourCanvas::Item& parent, std::string const& color_name, const string& annotation,
                             Type type, timepos_t const & pos, bool handle_events)
-	: ArdourMarker (ed, parent, color_name, annotation, type, pos, false)
+	: ArdourMarker (ed, parent, color_name, annotation, type, pos, false, nullptr, false)
 {
 }
 
@@ -755,34 +778,18 @@ SelectionMarker::SelectionMarker (PublicEditor& editor, ArdourCanvas::Item& pare
 
 /***********************************************************************/
 
-TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Item& parent, ArdourCanvas::Item& text_parent, std::string const& color_name, const string& text, Temporal::TempoPoint const & temp, samplepos_t sample, uint32_t curve_color)
+TempoMarker::TempoMarker (PublicEditor& editor, ArdourCanvas::Item& parent, std::string const& color_name, const string& text, Temporal::TempoPoint const & temp, samplepos_t sample, uint32_t curve_color)
 	: MetricMarker (editor, parent, color_name, text, Tempo, temp.time(), false)
 	, _tempo (&temp)
-	, _mapping_text (new ArdourCanvas::Text (&text_parent))
 {
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_tempo_marker_event), group, this));
 	/* points[1].x gives the width of the marker */
 	_curve = new TempoCurve (editor, *group, curve_color, temp, true, (*points)[1].x);
 	_curve->the_item().lower_to_bottom ();
-
-	_mapping_text->set_color (0xffffff);
-	_mapping_text->set_font_description (ARDOUR_UI_UTILS::get_font_for_style (N_("MarkerText")));
-	_mapping_text->set_position (ArdourCanvas::Duple (unit_position, 0.0));
-	_mapping_text->set_ignore_events (true);
-
-	char buf[64];
-	snprintf (buf, sizeof (buf), "%.2f", _tempo->note_types_per_minute ());
-	_mapping_text->set (buf);
 }
 
 TempoMarker::~TempoMarker ()
 {
-	/* the mapping text is a little unusual in that we do not leave its
-	   parent (the editor's mapping_group) to manage its lifetime. We must
-	   explicitly remove and delete it.
-	*/
-	_mapping_text->parent()->remove (_mapping_text);
-	delete _mapping_text;
 	delete _curve;
 }
 
@@ -790,20 +797,12 @@ void
 TempoMarker::reposition ()
 {
 	MetricMarker::reposition ();
-
-	_mapping_text->set_position (ArdourCanvas::Duple (std::max (3., unit_position), _mapping_text->position().y));
 }
 
 void
 TempoMarker::update ()
 {
 	set_position (_tempo->time());
-
-	_mapping_text->set_position (ArdourCanvas::Duple (std::max (3., unit_position), _mapping_text->position().y));
-
-	char buf[64];
-	snprintf (buf, sizeof (buf), "%.2f", _tempo->note_types_per_minute ());
-	_mapping_text->set (buf);
 }
 
 TempoCurve&
@@ -857,37 +856,21 @@ MeterMarker::point() const
 
 /***********************************************************************/
 
-BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Item& parent, std::string const& color_name, Temporal::MusicTimePoint const & p,
-                      ArdourCanvas::Item& tempo_parent,
-                      ArdourCanvas::Item& mapping_parent,
-                      ArdourCanvas::Item& meter_parent)
+BBTMarker::BBTMarker (PublicEditor& editor, ArdourCanvas::Item& parent, std::string const& color_name, Temporal::MusicTimePoint const & p)
 	: MetricMarker (editor, parent, color_name, p.name(), BBTPosition, p.time(), false)
 	, _point (&p)
-	, tempo_marker (new TempoMarker (editor, tempo_parent, mapping_parent, X_("tempo marker"), "", p, p.sample (TEMPORAL_SAMPLE_RATE), UIConfiguration::instance().color (X_("tempo curve"))))
 {
-	std::stringstream full_tooltip;
-
-	full_tooltip << name();
-	full_tooltip << " (";
-	full_tooltip << p.bbt();
-	full_tooltip << ')';
-
-	set_name (name(), full_tooltip.str());
+	set_name (name(), string());
 	group->Event.connect (sigc::bind (sigc::mem_fun (editor, &PublicEditor::canvas_bbt_marker_event), group, this));
 
-	char buf[64];
-
-	snprintf (buf, sizeof(buf), "%d/%d", p.divisions_per_bar(), p.note_value ());
-	meter_marker = new MeterMarker (editor, meter_parent, "meter marker", buf, p);
-
-	tempo_marker->the_item().set_ignore_events (true);
-	meter_marker->the_item().set_ignore_events (true);
+	tempo_marker = editor.find_marker_for_tempo (p);
+	assert (tempo_marker);
+	meter_marker = editor.find_marker_for_meter (p);
+	assert (meter_marker);
 }
 
 BBTMarker::~BBTMarker ()
 {
-	delete tempo_marker;
-	delete meter_marker;
 }
 
 void

@@ -68,6 +68,7 @@
 #include "lua/luastate.h"
 
 #include "temporal/range.h"
+#include "temporal/domain_provider.h"
 
 #include "midi++/types.h"
 #include "midi++/mmc.h"
@@ -109,6 +110,7 @@ class Parser;
 namespace PBD {
 class Controllable;
 class Progress;
+class Command;
 }
 
 namespace luabridge {
@@ -199,7 +201,7 @@ private:
 };
 
 /** Ardour Session */
-class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager, public TransportAPI
+class LIBARDOUR_API Session : public PBD::StatefulDestructible, public PBD::ScopedConnectionList, public SessionEventManager, public TransportAPI, public Temporal::TimeDomainProvider
 {
 private:
 
@@ -972,7 +974,7 @@ public:
 
 	/* Control-based methods */
 
-	void set_controls (std::shared_ptr<ControlList>, double val, PBD::Controllable::GroupControlDisposition);
+	void set_controls (std::shared_ptr<AutomationControlList>, double val, PBD::Controllable::GroupControlDisposition);
 	void set_control (std::shared_ptr<AutomationControl>, double val, PBD::Controllable::GroupControlDisposition);
 
 	void set_exclusive_input_active (std::shared_ptr<RouteList> rt, bool onoff, bool flip_others = false);
@@ -1058,7 +1060,7 @@ public:
 	 */
 	void redo (uint32_t n);
 
-	UndoHistory& history() { return _history; }
+	PBD::UndoHistory& history() { return _history; }
 
 	uint32_t undo_depth() const { return _history.undo_depth(); }
 	uint32_t redo_depth() const { return _history.redo_depth(); }
@@ -1083,9 +1085,9 @@ public:
 	 * This must only be called after begin_reversible_command ()
 	 * @param cmd (additional) command to add
 	 */
-	void commit_reversible_command (Command* cmd = 0);
+	void commit_reversible_command (PBD::Command* cmd = 0);
 
-	void add_command (Command *const cmd);
+	void add_command (PBD::Command *const cmd);
 
 	/** create an StatefulDiffCommand from the given object and add it to the stack.
 	 *
@@ -1119,6 +1121,8 @@ public:
 		return _current_trans && !_current_trans->empty ();
 	}
 
+	PBD::UndoTransaction* current_reversible_command() { return _current_trans; }
+
 	/**
 	 * Abort reversible command IFF no undo changes
 	 * have been collected.
@@ -1126,13 +1130,13 @@ public:
 	 */
 	bool abort_empty_reversible_command ();
 
-	void add_commands (std::vector<Command*> const & cmds);
+	void add_commands (std::vector<PBD::Command*> const & cmds);
 
 	std::map<PBD::ID,PBD::StatefulDestructible*> registry;
 
 	// these commands are implemented in libs/ardour/session_command.cc
-	Command* memento_command_factory(XMLNode* n);
-	Command* stateful_diff_command_factory (XMLNode *);
+	PBD::Command* memento_command_factory(XMLNode* n);
+	PBD::Command* stateful_diff_command_factory (XMLNode *);
 	void register_with_memento_command_factory(PBD::ID, PBD::StatefulDestructible*);
 
 	/* clicking */
@@ -1382,10 +1386,12 @@ public:
 	int num_triggerboxes () const;
 	std::shared_ptr<TriggerBox> triggerbox_at (int32_t route_index) const;
 	TriggerPtr trigger_at (int32_t route_index, int32_t row_index) const;
-	bool bang_trigger_at(int32_t route_index, int32_t row_index);
+	bool bang_trigger_at(int32_t route_index, int32_t row_index, float velocity = 1.0);
 	bool unbang_trigger_at(int32_t route_index, int32_t row_index);
+	void clear_cue (int row_index);
 
-	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
 
 protected:
 	friend class AudioEngine;
@@ -2106,9 +2112,9 @@ private:
 	XMLNode* _bundle_xml_node;
 	int load_bundles (XMLNode const &);
 
-	UndoHistory      _history;
+	PBD::UndoHistory      _history;
 	/** current undo transaction, or 0 */
-	UndoTransaction* _current_trans;
+	PBD::UndoTransaction* _current_trans;
 	/** GQuarks to describe the reversible commands that are currently in progress.
 	 *  These may be nested, in which case more recently-started commands are toward
 	 *  the front of the list.
@@ -2259,7 +2265,7 @@ private:
 	}
 
 	/* specialized version realtime "apply to set of controls" operations */
-	SessionEvent* get_rt_event (std::shared_ptr<WeakControlList> cl, double arg, PBD::Controllable::GroupControlDisposition group_override) {
+	SessionEvent* get_rt_event (std::shared_ptr<WeakAutomationControlList> cl, double arg, PBD::Controllable::GroupControlDisposition group_override) {
 		SessionEvent* ev = new SessionEvent (SessionEvent::RealTimeOperation, SessionEvent::Add, SessionEvent::Immediate, 0, 0.0);
 		ev->rt_slot = boost::bind (&Session::rt_set_controls, this, cl, arg, group_override);
 		ev->rt_return = Session::rt_cleanup;
@@ -2268,7 +2274,7 @@ private:
 		return ev;
 	}
 
-	void rt_set_controls (std::shared_ptr<WeakControlList>, double val, PBD::Controllable::GroupControlDisposition group_override);
+	void rt_set_controls (std::shared_ptr<WeakAutomationControlList>, double val, PBD::Controllable::GroupControlDisposition group_override);
 	void rt_clear_all_solo_state (std::shared_ptr<RouteList const>, bool yn, PBD::Controllable::GroupControlDisposition group_override);
 
 	void setup_midi_machine_control ();
@@ -2382,6 +2388,8 @@ private:
 
 	int tb_with_filled_slots;
 	void handle_slots_empty_status (std::weak_ptr<Route> const &);
+
+	void time_domain_changed ();
 };
 
 

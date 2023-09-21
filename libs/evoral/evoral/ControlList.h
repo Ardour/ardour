@@ -34,6 +34,8 @@
 
 #include "pbd/signals.h"
 
+#include "temporal/domain_provider.h"
+#include "temporal/domain_swap.h"
 #include "temporal/timeline.h"
 #include "temporal/types.h"
 #include "temporal/range.h"
@@ -84,7 +86,7 @@ public:
 
 /** A list (sequence) of time-stamped values for a control
  */
-class LIBEVORAL_API ControlList
+class LIBEVORAL_API ControlList : public Temporal::TimeDomainProvider, public Temporal::TimeDomainSwapper
 {
 public:
 	typedef std::list<ControlEvent*> EventList;
@@ -93,15 +95,12 @@ public:
 	typedef EventList::const_iterator const_iterator;
 	typedef EventList::const_reverse_iterator const_reverse_iterator;
 
-	ControlList (const Parameter& id, const ParameterDescriptor& desc, Temporal::TimeDomain);
+	ControlList (const Parameter& id, const ParameterDescriptor& desc, Temporal::TimeDomainProvider const &);
 	ControlList (const ControlList&, Temporal::timepos_t const & start, Temporal::timepos_t const & end);
 	ControlList (const ControlList&);
 	virtual ~ControlList();
 
-	Temporal::TimeDomain time_domain() const { return _time_domain; }
-	void set_time_domain (Temporal::TimeDomain td);
-
-	virtual std::shared_ptr<ControlList> create(const Parameter& id, const ParameterDescriptor& desc, Temporal::TimeDomain);
+	virtual std::shared_ptr<ControlList> create(const Parameter& id, const ParameterDescriptor& desc, Temporal::TimeDomainProvider const &);
 
 	void dump (std::ostream&);
 
@@ -373,6 +372,9 @@ public:
 
 	void invalidate_insert_iterator ();
 
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
+
   protected:
 
 	/** Called by unlocked_eval() to handle cases of 3 or more control points. */
@@ -389,8 +391,6 @@ public:
 
 	virtual void maybe_signal_changed ();
 
-	void set_time_domain_empty (Temporal::TimeDomain td);
-
 	void _x_scale (Temporal::ratio_t const &);
 
 	mutable LookupCache   _lookup_cache;
@@ -405,7 +405,6 @@ public:
 	int8_t                _frozen;
 	bool                  _changed_when_thawed;
 	bool                  _sort_pending;
-	Temporal::TimeDomain  _time_domain;
 
 	Curve* _curve;
 

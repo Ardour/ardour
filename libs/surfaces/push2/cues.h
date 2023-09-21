@@ -82,7 +82,7 @@ class CueLayout : public Push2Layout
 	void strip_vpot (int, int);
 	void strip_vpot_touch (int, bool);
 
-	void pad_press (int x, int y);
+	void pad_press (int x, int y, int velocity);
 	void pad_release (int x, int y);
 
 	/* override to use for clip progress */

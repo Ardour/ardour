@@ -28,7 +28,7 @@ using namespace ARDOUR;
 using namespace PBD;
 
 PolarityProcessor::PolarityProcessor (Session& s, std::shared_ptr<PhaseControl> control)
-	: Processor(s, "Polarity", Temporal::AudioTime)
+	: Processor(s, "Polarity", Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _control (control)
 {
 }

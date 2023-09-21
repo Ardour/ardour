@@ -87,27 +87,13 @@ Location::Location (Session& s, timepos_t const & start, timepos_t const & end, 
 	, _cue (cue_id)
 	, _signals_suspended (0)
 {
+	/* Locations follow the global Session time domain */
 
-	/* it would be nice if the caller could ensure that the start and end
-	   values simply use the correct domain, but that would involve
-	   enforcing/checking that at every place where we create a
-	   Location. So instead we centralize this here.
-
-	   NUTEMPO: it might make sense to switch time domains when <something>
-	   happens, but it's not clear what the <something> might be? Maybe
-	   changing some setting of the tempo map.
-	*/
-
-	if (s.config.get_glue_new_markers_to_bars_and_beats()) {
-		set_position_time_domain (Temporal::BeatTime);
-	} else {
-		set_position_time_domain (Temporal::AudioTime);
-	}
+	set_position_time_domain (_session.time_domain());
 }
 
 Location::Location (const Location& other)
 	: SessionHandleRef (other._session)
-	, StatefulDestructible()
 	, _name (other._name)
 	, _start (other._start)
 	, _end (other._end)
@@ -253,6 +239,26 @@ Location::actually_emit_signal (Signal s)
 	}
 }
 
+
+void
+Location::set_position_time_domain (TimeDomain domain)
+{
+	if (_start.time_domain() == domain) {
+		return;
+	}
+
+	_start.set_time_domain (domain);
+	_end.set_time_domain (domain);
+
+	// emit_signal (Domain); /* EMIT SIGNAL */
+}
+
+void
+Location::set_time_domain (TimeDomain domain)
+{
+	set_position_time_domain (domain);
+}
+
 /** Set location name */
 void
 Location::set_name (const std::string& str)
@@ -266,11 +272,18 @@ Location::set_name (const std::string& str)
  *  @param force true to force setting, even if the given new start is after the current end.
  */
 int
-Location::set_start (Temporal::timepos_t const & s, bool force)
+Location::set_start (Temporal::timepos_t const & s_, bool force)
 {
-
 	if (_locked) {
 		return -1;
+	}
+
+	timepos_t s;
+
+	if (_session.time_domain() == Temporal::AudioTime) {
+		s = timepos_t (s_.samples());
+	} else {
+		s = timepos_t (s_.beats());
 	}
 
 	if (!force) {
@@ -331,10 +344,18 @@ Location::set_start (Temporal::timepos_t const & s, bool force)
  *  @param force true to force setting, even if the given new end is before the current start.
  */
 int
-Location::set_end (Temporal::timepos_t const & e, bool force)
+Location::set_end (Temporal::timepos_t const & e_, bool force)
 {
 	if (_locked) {
 		return -1;
+	}
+
+	timepos_t e;
+
+	if (_session.time_domain() == Temporal::AudioTime) {
+		e = timepos_t (e_.samples());
+	} else {
+		e = timepos_t (e_.beats());
 	}
 
 	if (!force) {
@@ -379,15 +400,26 @@ Location::set_end (Temporal::timepos_t const & e, bool force)
 }
 
 int
-Location::set (Temporal::timepos_t const & s, Temporal::timepos_t const & e)
+Location::set (Temporal::timepos_t const & s_, Temporal::timepos_t const & e_)
 {
 	/* check validity */
-	if (((is_auto_punch() || is_auto_loop()) && s >= e) || (!is_mark() && s > e)) {
+	if (((is_auto_punch() || is_auto_loop()) && s_ >= e_) || (!is_mark() && s_ > e_)) {
 		return -1;
 	}
 
 	bool start_change = false;
 	bool end_change = false;
+
+	timepos_t s;
+	timepos_t e;
+
+	if (_session.time_domain() == Temporal::AudioTime) {
+		s = timepos_t (s_.samples());
+		e = timepos_t (e_.samples());
+	} else {
+		s = timepos_t (s_.beats());
+		e = timepos_t (e_.beats());
+	}
 
 	if (is_mark()) {
 
@@ -540,6 +572,17 @@ Location::set_skipping (bool yn)
 		if (set_flag_internal (yn, IsSkipping)) {
 			emit_signal (Flag); /* EMIT SIGNAL */
 		}
+	}
+}
+
+void
+Location::set_section (bool yn)
+{
+	if (is_session_range ()) {
+		return;
+	}
+	if (set_flag_internal (yn, IsSection)) {
+		emit_signal (Flag); /* EMIT SIGNAL */
 	}
 }
 
@@ -727,19 +770,6 @@ Location::set_state (const XMLNode& node, int version)
 }
 
 void
-Location::set_position_time_domain (TimeDomain domain)
-{
-	if (_start.time_domain() == domain) {
-		return;
-	}
-
-	_start.set_time_domain (domain);
-	_end.set_time_domain (domain);
-
-	emit_signal (Domain); /* EMIT SIGNAL */
-}
-
-void
 Location::lock ()
 {
 	_locked = true;
@@ -764,26 +794,63 @@ Location::set_scene_change (std::shared_ptr<SceneChange>  sc)
 }
 
 void
-Location::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+Location::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
-	assert (domain_swap);
-
-	if (_start.time_domain() == from) {
-
-		_start.set_time_domain (to);
-		_end.set_time_domain (to);
-
-		domain_swap->add (_start);
-		domain_swap->add (_end);
-	} else {
-		std::cerr << name() << " wrong domain: " << _start << " .. " << _end << std::endl;
+	if (cmd.move_markers && cmd.to == AudioTime) {
+		/* user wants the markers to move during a tempo-map; skip this domain bounce */
+		return;
 	}
+
+	if (_start.time_domain() == cmd.to) {
+		/* has the right domain to begin with */
+		return;
+	}
+
+	timepos_t s (_start);
+	timepos_t e (_end);
+
+	s.set_time_domain (cmd.to);
+	e.set_time_domain (cmd.to);
+
+	cmd.positions.insert (std::make_pair (&_start, s));
+	cmd.positions.insert (std::make_pair (&_end, e));
+}
+
+void
+Location::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+	if ( cmd.move_markers && cmd.to == AudioTime ) {
+		/* user wants the markers to move during a tempo-map; skip this domain bounce */
+		return;
+	}
+
+	if (_start.time_domain() == cmd.to) {
+		/* had the right domain to begin with */
+		return;
+	}
+
+	TimeDomainPosChanges::iterator tpc;
+	timepos_t s;
+	timepos_t e;
+
+	tpc = cmd.positions.find (&_start);
+	assert (tpc != cmd.positions.end());
+	s = tpc->second;
+	s.set_time_domain (cmd.from);
+
+	tpc = cmd.positions.find (&_end);
+	assert (tpc != cmd.positions.end());
+	e = tpc->second;
+	e.set_time_domain (cmd.from);
+
+	set (s, e);
 }
 
 /*---------------------------------------------------------------------- */
 
 Locations::Locations (Session& s)
 	: SessionHandleRef (s)
+	, Temporal::TimeDomainProvider (s, false) /* session is our parent */
 {
 	current_location = 0;
 }
@@ -1230,7 +1297,9 @@ Locations::set_state (const XMLNode& node, int version)
 					lcs.emplace_back (std::move (loc));
 					loc->set_state (**niter, version);
 				} else {
-					loc = new Location (_session, **niter);
+					loc = new Location (_session);
+					lcs.emplace_back (std::move (loc));
+					loc->set_state (**niter, version);
 				}
 
 				bool add = true;
@@ -1311,18 +1380,16 @@ Locations::set_state (const XMLNode& node, int version)
 }
 
 
-typedef std::pair<timepos_t,Location*> LocationPair;
-
 struct LocationStartEarlierComparison
 {
-	bool operator() (LocationPair a, LocationPair b) {
+	bool operator() (Locations::LocationPair a, Locations::LocationPair b) {
 		return a.first < b.first;
 	}
 };
 
 struct LocationStartLaterComparison
 {
-	bool operator() (LocationPair a, LocationPair b) {
+	bool operator() (Locations::LocationPair a, Locations::LocationPair b) {
 		return a.first > b.first;
 	}
 };
@@ -1507,6 +1574,88 @@ Locations::marks_either_side (timepos_t const & pos, timepos_t& before, timepos_
 
 	--i;
 	before = *i;
+}
+
+void
+Locations::sorted_section_locations (vector<LocationPair>& locs) const
+{
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_lock);
+
+		for (auto const& i: locations) {
+			if (i->is_session_range ()) {
+				continue;
+			} else if (i->is_section ()) {
+				locs.push_back (make_pair (i->start(), i));
+			}
+		}
+	}
+
+	LocationStartEarlierComparison cmp;
+	sort (locs.begin(), locs.end(), cmp);
+}
+
+Location*
+Locations::next_section (Location* l, timepos_t& start, timepos_t& end) const
+{
+	vector<LocationPair> locs;
+	sorted_section_locations (locs);
+
+	if (locs.size () < 2) {
+		return NULL;
+	}
+
+	/* special case fist element */
+	if (!l) {
+		l = locs[0].second;
+		start = locs[0].first;
+		end = locs[1].first;
+		return l;
+	}
+
+	Location* rv = NULL;
+	bool found = false;
+
+	for (auto const& i: locs) {
+		if (rv && found) {
+			end = i.first;
+			return rv;
+		}
+		else if (found) {
+			start = i.first;
+			rv    = i.second;
+		}
+		else if (i.second == l) {
+			found = true;
+		}
+	}
+
+	return NULL;
+}
+
+Location*
+Locations::section_at (timepos_t const& when, timepos_t& start, timepos_t& end) const
+{
+	vector<LocationPair> locs;
+	sorted_section_locations (locs);
+
+	if (locs.size () < 2) {
+		return NULL;
+	}
+
+	Location* rv   = NULL;
+	timepos_t test = when;
+	for (auto const& i: locs) {
+		if (test >= i.first) {
+			start = i.first;
+			rv    = i.second;
+		} else {
+			end = i.first;
+			return rv;
+		}
+	}
+
+	return NULL;
 }
 
 Location*
@@ -1746,7 +1895,7 @@ Locations::cut_copy_section (timepos_t const& start, timepos_t const& end, timep
 				 * the whole cut/paste operation is earlier, in which case this mark
 				 * is not affected.
 				 */
-				if (i->start () <= to + start.distance(end)) {
+				if (i->start () < to + start.distance(end)) {
 					distance = end.distance(start);
 				}
 			}
@@ -1871,11 +2020,37 @@ Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
 }
 
 void
-Locations::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+Locations::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+	_session.add_command (new MementoCommand<Locations> (*this, &get_state(), nullptr));
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_lock);
+
+		for (auto & l : locations) {
+			l->start_domain_bounce (cmd);
+		}
+	}
+}
+
+void
+Locations::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+	{
+		/* We modify locations, but we do not change the list */
+		Glib::Threads::RWLock::ReaderLock lm (_lock);
+
+		for (auto & l : locations) {
+			l->finish_domain_bounce (cmd);
+		}
+	}
+	_session.add_command (new MementoCommand<Locations> (*this, nullptr, &get_state()));
+}
+
+void
+Locations::time_domain_changed ()
 {
 	Glib::Threads::RWLock::WriterLock lm (_lock);
 	for (auto & l : locations) {
-		l->globally_change_time_domain (from, to);
+		l->set_time_domain (time_domain());
 	}
-
 }

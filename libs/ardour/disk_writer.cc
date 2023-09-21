@@ -48,7 +48,7 @@ ARDOUR::samplecnt_t DiskWriter::_chunk_samples = DiskWriter::default_chunk_sampl
 PBD::Signal0<void> DiskWriter::Overrun;
 
 DiskWriter::DiskWriter (Session& s, Track& t, string const & str, DiskIOProcessor::Flag f)
-        : DiskIOProcessor (s, t, X_("recorder:") + str, f, Config->get_default_automation_time_domain())
+	: DiskIOProcessor (s, t, X_("recorder:") + str, f, Temporal::TimeDomainProvider (Config->get_default_automation_time_domain()))
 	, _capture_captured (0)
 	, _was_recording (false)
 	, _xrun_flag (false)
@@ -572,8 +572,8 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		/* AUDIO */
 
 		const size_t n_buffers = bufs.count().n_audio();
-
 		uint32_t n = 0;
+
 		for (auto const& chaninfo : *c) {
 			AudioBuffer& buf (bufs.get_audio (n%n_buffers));
 			++n;
@@ -610,6 +610,8 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		}
 
 		/* MIDI */
+
+		uint32_t cnt = 0;
 
 		if (_midi_buf) {
 
@@ -658,7 +660,10 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 				bool skip_event = false;
 				if (mt) {
-					/* skip injected immediate/out-of-band events */
+					/* skip injected immediate/out-of-band
+					 * events, but allow those from
+					 * user_immediate_event_buffer
+					 */
 					MidiBuffer const& ieb (mt->immediate_event_buffer());
 					for (MidiBuffer::const_iterator j = ieb.begin(); j != ieb.end(); ++j) {
 						if (*j == ev) {
@@ -672,6 +677,7 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 				if (!filter || !filter->filter(ev.buffer(), ev.size())) {
 					_midi_buf->write (event_time, ev.event_type(), ev.size(), ev.buffer());
+					cnt++;
 				}
 			}
 
@@ -697,6 +703,9 @@ DiskWriter::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					}
 				}
 
+			}
+
+			if (cnt) {
 				DataRecorded (_midi_write_source); /* EMIT SIGNAL */
 			}
 		}
@@ -1179,6 +1188,9 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	std::shared_ptr<ChannelList const> c = channels.reader();
 	uint32_t n = 0;
 	bool mark_write_completed = false;
+
+	/* finishing a capture will potentially create a lot of regions; we want them all assigned to the same region-group */
+	Region::RegionGroupRetainer rgr;
 
 	finish_capture (c);
 

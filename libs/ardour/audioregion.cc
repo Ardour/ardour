@@ -205,17 +205,17 @@ AudioRegion::register_properties ()
 	add_property (_envelope);
 }
 
-#define AUDIOREGION_STATE_DEFAULT \
+#define AUDIOREGION_STATE_DEFAULT(tdp) \
 	_envelope_active (Properties::envelope_active, false) \
 	, _default_fade_in (Properties::default_fade_in, true) \
 	, _default_fade_out (Properties::default_fade_out, true) \
 	, _fade_in_active (Properties::fade_in_active, true) \
 	, _fade_out_active (Properties::fade_out_active, true) \
 	, _scale_amplitude (Properties::scale_amplitude, 1.0) \
-	, _fade_in (Properties::fade_in, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), Temporal::AudioTime))) \
-	, _inverse_fade_in (Properties::inverse_fade_in, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), Temporal::AudioTime))) \
-	, _fade_out (Properties::fade_out, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeOutAutomation), Temporal::AudioTime))) \
-	, _inverse_fade_out (Properties::inverse_fade_out, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeOutAutomation), Temporal::AudioTime)))
+	, _fade_in (Properties::fade_in, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), tdp))) \
+	, _inverse_fade_in (Properties::inverse_fade_in, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeInAutomation), tdp))) \
+	, _fade_out (Properties::fade_out, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeOutAutomation), tdp))) \
+	, _inverse_fade_out (Properties::inverse_fade_out, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (FadeOutAutomation), tdp)))
 
 #define AUDIOREGION_COPY_STATE(other) \
 	_envelope_active (Properties::envelope_active, other->_envelope_active) \
@@ -248,9 +248,9 @@ AudioRegion::init ()
 /** Constructor for use by derived types only */
 AudioRegion::AudioRegion (Session& s, timepos_t const &  start, timecnt_t const & len, std::string name)
 	: Region (s, start, len, name, DataType::AUDIO)
-	, AUDIOREGION_STATE_DEFAULT
-	, _envelope (Properties::envelope, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter(EnvelopeAutomation), Temporal::AudioTime)))
-	, _automatable (s, Temporal::AudioTime)
+	, AUDIOREGION_STATE_DEFAULT(Temporal::TimeDomainProvider (Temporal::AudioTime))
+	, _envelope (Properties::envelope, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter(EnvelopeAutomation), Temporal::TimeDomainProvider (Temporal::AudioTime))))
+	, _automatable (s, Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -261,9 +261,9 @@ AudioRegion::AudioRegion (Session& s, timepos_t const &  start, timecnt_t const 
 /** Basic AudioRegion constructor */
 AudioRegion::AudioRegion (const SourceList& srcs)
 	: Region (srcs)
-	, AUDIOREGION_STATE_DEFAULT
-	, _envelope (Properties::envelope, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter(EnvelopeAutomation), Temporal::AudioTime)))
-	, _automatable(srcs[0]->session(), Temporal::AudioTime)
+	, AUDIOREGION_STATE_DEFAULT(Temporal::TimeDomainProvider (Temporal::AudioTime))
+        , _envelope (Properties::envelope, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter(EnvelopeAutomation), Temporal::TimeDomainProvider (Temporal::AudioTime))))
+        , _automatable(srcs[0]->session(), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -278,7 +278,7 @@ AudioRegion::AudioRegion (std::shared_ptr<const AudioRegion> other)
 		 * to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
 		 */
 	, _envelope (Properties::envelope, std::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), timepos_t (Temporal::AudioTime), other->len_as_tpos ())))
-	, _automatable (other->session(), Temporal::AudioTime)
+	, _automatable (other->session(), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -300,7 +300,7 @@ AudioRegion::AudioRegion (std::shared_ptr<const AudioRegion> other, timecnt_t co
 	     to do with sources (and hence _start).  So when we copy the envelope, we just use the supplied offset.
 	  */
 	, _envelope (Properties::envelope, std::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val(), timepos_t (offset.samples()), other->len_as_tpos ())))
-	, _automatable (other->session(), Temporal::AudioTime)
+	, _automatable (other->session(), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -319,7 +319,7 @@ AudioRegion::AudioRegion (std::shared_ptr<const AudioRegion> other, const Source
 	: Region (std::static_pointer_cast<const Region>(other), srcs)
 	, AUDIOREGION_COPY_STATE (other)
 	, _envelope (Properties::envelope, std::shared_ptr<AutomationList> (new AutomationList (*other->_envelope.val())))
-	, _automatable (other->session(), Temporal::AudioTime)
+	, _automatable (other->session(), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -336,9 +336,9 @@ AudioRegion::AudioRegion (std::shared_ptr<const AudioRegion> other, const Source
 
 AudioRegion::AudioRegion (SourceList& srcs)
 	: Region (srcs)
-	, AUDIOREGION_STATE_DEFAULT
-	, _envelope (Properties::envelope, std::shared_ptr<AutomationList> (new AutomationList(Evoral::Parameter(EnvelopeAutomation), Temporal::AudioTime)))
-	, _automatable(srcs[0]->session(), Temporal::AudioTime)
+	, AUDIOREGION_STATE_DEFAULT(srcs[0]->session())
+	, _envelope (Properties::envelope, std::shared_ptr<AutomationList> (new AutomationList(Evoral::Parameter(EnvelopeAutomation), Temporal::TimeDomainProvider (Temporal::AudioTime))))
+	, _automatable(srcs[0]->session(), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -1037,9 +1037,9 @@ void
 AudioRegion::set_fade_in (FadeShape shape, samplecnt_t len)
 {
 	const ARDOUR::ParameterDescriptor desc(FadeInAutomation);
-	std::shared_ptr<Evoral::ControlList> c1 (new Evoral::ControlList (FadeInAutomation, desc, Temporal::AudioTime));
-	std::shared_ptr<Evoral::ControlList> c2 (new Evoral::ControlList (FadeInAutomation, desc, Temporal::AudioTime));
-	std::shared_ptr<Evoral::ControlList> c3 (new Evoral::ControlList (FadeInAutomation, desc, Temporal::AudioTime));
+	std::shared_ptr<Evoral::ControlList> c1 (new Evoral::ControlList (FadeInAutomation, desc, Temporal::TimeDomainProvider (Temporal::AudioTime)));
+	std::shared_ptr<Evoral::ControlList> c2 (new Evoral::ControlList (FadeInAutomation, desc, Temporal::TimeDomainProvider (Temporal::AudioTime)));
+	std::shared_ptr<Evoral::ControlList> c3 (new Evoral::ControlList (FadeInAutomation, desc, Temporal::TimeDomainProvider (Temporal::AudioTime)));
 
 	_fade_in->freeze ();
 	_fade_in->clear ();
@@ -1120,8 +1120,8 @@ void
 AudioRegion::set_fade_out (FadeShape shape, samplecnt_t len)
 {
 	const ARDOUR::ParameterDescriptor desc(FadeOutAutomation);
-	std::shared_ptr<Evoral::ControlList> c1 (new Evoral::ControlList (FadeOutAutomation, desc, Temporal::AudioTime));
-	std::shared_ptr<Evoral::ControlList> c2 (new Evoral::ControlList (FadeOutAutomation, desc, Temporal::AudioTime));
+	std::shared_ptr<Evoral::ControlList> c1 (new Evoral::ControlList (FadeOutAutomation, desc, Temporal::TimeDomainProvider (Temporal::AudioTime)));
+	std::shared_ptr<Evoral::ControlList> c2 (new Evoral::ControlList (FadeOutAutomation, desc, Temporal::TimeDomainProvider (Temporal::AudioTime)));
 
 	_fade_out->freeze ();
 	_fade_out->clear ();

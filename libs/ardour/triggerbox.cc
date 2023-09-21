@@ -202,6 +202,7 @@ FollowAction::to_string () const
 
 
 Trigger * const Trigger::MagicClearPointerValue = (Trigger*) 0xfeedface;
+PBD::Signal2<void,PropertyChange,Trigger*> Trigger::TriggerPropertyChange;
 
 Trigger::Trigger (uint32_t n, TriggerBox& b)
 	: _launch_style (Properties::launch_style, OneShot)
@@ -421,6 +422,8 @@ Trigger::send_property_change (PropertyChange pc)
 	}
 
 	PropertyChanged (pc);
+	/* emit static signal for global observers */
+	TriggerPropertyChange (pc, this);
 }
 
 void
@@ -557,11 +560,12 @@ Trigger::set_ui (void* p)
 }
 
 void
-Trigger::bang ()
+Trigger::bang (float velocity)
 {
 	if (!_region) {
 		return;
 	}
+	_pending_velocity_gain = velocity;
 	_bang.fetch_add (1);
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("bang on %1\n", _index));
 }
@@ -1964,10 +1968,11 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 
 				/* still have data to push into the stretcher */
 
-				to_stretcher = (pframes_t) std::min (samplecnt_t (rb_blocksize), (last_readable_sample - read_index));
-				const bool at_end = (to_stretcher < rb_blocksize);
-
 				while ((pframes_t) avail < nframes && (read_index < last_readable_sample)) {
+
+					to_stretcher = (pframes_t) std::min (samplecnt_t (rb_blocksize), (last_readable_sample - read_index));
+					bool at_end = (to_stretcher < rb_blocksize);
+
 					/* keep feeding the stretcher in chunks of "to_stretcher",
 					 * until there's nframes of data available, or we reach
 					 * the end of the region
@@ -1985,6 +1990,7 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 					 */
 
 					_stretcher->process (&in[0], to_stretcher, at_end);
+
 					read_index += to_stretcher;
 					avail = _stretcher->available ();
 
@@ -2067,7 +2073,13 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
 				AudioBuffer& buf (bufs.get_audio (chn));
 				Sample* src = do_stretch ? bufp[channel] : (data[channel] + read_index);
 
-				gain_t gain = _velocity_gain * _gain;  //incorporate the gain from velocity_effect
+				gain_t gain;
+
+				if (_velocity_effect) {
+					gain = (_velocity_effect * _velocity_gain) * _gain;
+				} else {
+					gain = _gain;
+				}
 
 				if (gain != 1.0f) {
 					buf.accumulate_with_gain_from (src, from_stretcher, gain, dest_offset);
@@ -3053,9 +3065,11 @@ std::shared_ptr<MIDI::Parser> TriggerBox::input_parser;
 PBD::ScopedConnectionList TriggerBox::static_connections;
 PBD::ScopedConnection TriggerBox::midi_input_connection;
 std::shared_ptr<MidiPort> TriggerBox::current_input;
+PBD::Signal2<void,PBD::PropertyChange,int> TriggerBox::TriggerBoxPropertyChange;
 
 typedef std::map <std::shared_ptr<Region>, std::shared_ptr<Trigger::UIState>> RegionStateMap;
 RegionStateMap enqueued_state_map;
+
 
 void
 TriggerBox::init ()
@@ -3078,8 +3092,15 @@ TriggerBox::static_init (Session & s)
 	}
 }
 
+void
+TriggerBox::send_property_change (PBD::PropertyChange pc)
+{
+	PropertyChanged (pc);
+	TriggerBoxPropertyChange (pc, _order);
+}
+
 TriggerBox::TriggerBox (Session& s, DataType dt)
-	: Processor (s, _("TriggerBox"), Temporal::BeatTime)
+	: Processor (s, _("TriggerBox"), Temporal::TimeDomainProvider (Temporal::BeatTime))
 	, tracker (dt == DataType::MIDI ? new MidiStateTracker : 0)
 	, _data_type (dt)
 	, _order (-1)
@@ -3091,7 +3112,6 @@ TriggerBox::TriggerBox (Session& s, DataType dt)
 	, _locate_armed (false)
 	, _cancel_locate_armed (false)
 	, _fast_forwarding (false)
-
 	, requests (1024)
 {
 	set_display_to_user (false);
@@ -3503,7 +3523,7 @@ TriggerBox::queue_explict (uint32_t n)
 	assert (n < all_triggers.size());
 	explicit_queue.write (&n, 1);
 
-	PropertyChanged (ARDOUR::Properties::queued);
+	send_property_change (ARDOUR::Properties::queued);
 
 	DEBUG_TRACE (DEBUG::Triggers, string_compose ("explicit queue %1, EQ = %2\n", n, explicit_queue.read_space()));
 
@@ -3681,6 +3701,12 @@ TriggerBox::clear_all_triggers ()
 }
 
 void
+TriggerBox::clear_cue (int cue)
+{
+	all_triggers[cue]->set_region (std::shared_ptr<Region>());
+}
+
+void
 TriggerBox::set_all_launch_style (ARDOUR::Trigger::LaunchStyle ls)
 {
 	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
@@ -3743,11 +3769,11 @@ TriggerBox::stop_all_quantized ()
 }
 
 void
-TriggerBox::bang_trigger_at (Triggers::size_type row)
+TriggerBox::bang_trigger_at (Triggers::size_type row, float velocity)
 {
 	TriggerPtr t = trigger(row);
 	if (t && t->region()) {
-		t->bang();
+		t->bang (velocity);
 	} else {
 		/* by convention, an empty slot is effectively a STOP button */
 		stop_all_quantized();
@@ -3873,7 +3899,7 @@ TriggerBox::midi_input_handler (MIDI::Parser&, MIDI::byte* buf, size_t sz, sampl
 		int y;
 
 		if (lookup_custom_midi_binding (msg, x, y)) {
-			AudioEngine::instance()->session()->bang_trigger_at (x, y);
+			AudioEngine::instance()->session()->bang_trigger_at (x, y, ev.velocity());
 		}
 	}
 
@@ -4045,7 +4071,7 @@ TriggerBox::handle_stopped_trigger (BufferSet& bufs, pframes_t dest_offset)
 		if (n < 0) {
 			DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 finished, no next trigger\n", _currently_playing->name()));
 			_currently_playing = 0;
-			PropertyChanged (Properties::currently_playing);
+			send_property_change (Properties::currently_playing);
 			return 1; /* no triggers to come next, break out of nframes loop */
 		}
 		if ((int) _currently_playing->index() == n) {
@@ -4056,10 +4082,10 @@ TriggerBox::handle_stopped_trigger (BufferSet& bufs, pframes_t dest_offset)
 		}
 		_currently_playing = all_triggers[n];
 		_currently_playing->startup (bufs, dest_offset, start_quantization);
-		PropertyChanged (Properties::currently_playing);
+		send_property_change (Properties::currently_playing);
 	} else {
 		_currently_playing = 0;
-		PropertyChanged (Properties::currently_playing);
+		send_property_change (Properties::currently_playing);
 		DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, but stop_all was set #1, leaving nf loop\n");
 		/* leave nframes loop */
 		return 1;
@@ -4194,7 +4220,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		if ((_currently_playing = get_next_trigger()) != 0) {
 			maybe_swap_pending (_currently_playing->index());
 			_currently_playing->startup (bufs, 0);
-			PropertyChanged (Properties::currently_playing);
+			send_property_change (Properties::currently_playing);
 			active_trigger_boxes.fetch_add (1);
 		}
 	}
@@ -4210,7 +4236,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		if (_currently_playing) {
 			_currently_playing->shutdown (bufs, 0);
 			_currently_playing = 0;
-			PropertyChanged (Properties::currently_playing);
+			send_property_change (Properties::currently_playing);
 		}
 
 		_cancel_locate_armed = false;
@@ -4340,7 +4366,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					/* and switch */
 					DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 => %2 switched to in legato mode\n", _currently_playing->index(), nxt->index()));
 					_currently_playing = nxt;
-					PropertyChanged (Properties::currently_playing);
+					send_property_change (Properties::currently_playing);
 
 				} else {
 
@@ -4357,7 +4383,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 						nxt->startup (bufs, dest_offset);
 						DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 was finished, started %2\n", _currently_playing->index(), nxt->index()));
 						_currently_playing = nxt;
-						PropertyChanged (Properties::currently_playing);
+						send_property_change (Properties::currently_playing);
 
 					} else if (_currently_playing->state() != Trigger::WaitingToSwitch) {
 
@@ -4393,7 +4419,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			} else {
 
 				_currently_playing = 0;
-				PropertyChanged (Properties::currently_playing);
+				send_property_change (Properties::currently_playing);
 				DEBUG_TRACE (DEBUG::Triggers, "currently playing was stopped, but stop_all was set #2, leaving nf loop\n");
 				/* leave nframes loop */
 				break;
@@ -4446,7 +4472,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				(void) handle_stopped_trigger (bufs, dest_offset);
 			} else {
 				_currently_playing = 0;
-				PropertyChanged (Properties::currently_playing);
+				send_property_change (Properties::currently_playing);
 			}
 		}
 	}

@@ -195,7 +195,7 @@ protected:
 	bool enter_notify (GdkEventCrossing*);
 	bool leave_notify (GdkEventCrossing*);
 
-	void format_position (Temporal::timepos_t const& pos, char* buf, size_t bufsize, bool onoff = true);
+	void format_position (Temporal::timepos_t const& pos, char* buf, size_t bufsize, bool onoff = true) const;
 
 	void add_region (std::shared_ptr<ARDOUR::Region>);
 

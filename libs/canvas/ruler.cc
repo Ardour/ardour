@@ -147,8 +147,8 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 
 	if (_outline_width == 1.0) {
 		/* Cairo single pixel line correction */
-		cr->move_to (self.x0, self.y1-0.5);
-		cr->line_to (self.x1, self.y1-0.5);
+		cr->move_to (self.x0, self.y1+0.5);
+		cr->line_to (self.x1, self.y1+0.5);
 	} else {
 		cr->move_to (self.x0, self.y1);
 		cr->line_to (self.x1, self.y1);
@@ -167,7 +167,7 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 			Duple pos;
 			Pango::FontDescription* fd = (m->style == Mark::Major) ? (_second_font_description ? _second_font_description : _font_description) : _font_description;
 
-			pos.x = floor ((m->position - _lower) / _metric->units_per_pixel);
+			pos.x = round (m->position/_metric->units_per_pixel) + self.x0;
 			pos.y = self.y1; /* bottom edge */
 
 			if (fd != last_font_description) {
@@ -197,8 +197,8 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 				prev = pos.x;
 			}
 
-			if (_outline_width == 1.0) {
-				/* Cairo single pixel line correction */
+			if (fmod (_outline_width, 2.)) {
+				/* Cairo odd pixel width line correction */
 				cr->move_to (pos.x + 0.5, pos.y);
 			} else {
 				cr->move_to (pos.x, pos.y);

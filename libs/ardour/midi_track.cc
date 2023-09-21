@@ -82,7 +82,9 @@ using namespace PBD;
 MidiTrack::MidiTrack (Session& sess, string name, TrackMode mode)
 	: Track (sess, name, PresentationInfo::MidiTrack, mode, DataType::MIDI)
 	, _immediate_events(6096) // FIXME: size?
+	, _user_immediate_events(2048) // FIXME: size?
 	, _immediate_event_buffer(6096)
+	, _user_immediate_event_buffer(2048)
 	, _step_edit_ring_buffer(64) // FIXME: size?
 	, _note_mode (Sustained)
 	, _step_editing (false)
@@ -502,7 +504,7 @@ MidiTrack::snapshot_out_of_band_data (samplecnt_t nframes)
 {
 	_immediate_event_buffer.clear ();
 	if (0 == _immediate_events.read_space()) {
-		return;
+		goto user;
 	}
 
 	assert (nframes > 0);
@@ -519,6 +521,28 @@ MidiTrack::snapshot_out_of_band_data (samplecnt_t nframes)
 	 */
 
 	_immediate_events.read (_immediate_event_buffer, 0, 1, nframes - 1, true);
+
+  user:
+	_user_immediate_event_buffer.clear ();
+	if (0 == _user_immediate_events.read_space()) {
+		return;
+	}
+
+	assert (nframes > 0);
+
+	DEBUG_TRACE (DEBUG::MidiIO, string_compose ("%1 has %2 of user immediate events to deliver\n", name(), _user_immediate_events.read_space()));
+
+	/* write as many of the user immediate events as we can, but give "true" as
+	 * the last argument ("stop on overflow in destination") so that we'll
+	 * ship the rest out next time.
+	 *
+	 * the (nframes-1) argument puts all these events at the last
+	 * possible position of the output buffer, so that we do not
+	 * violate monotonicity when writing.
+	 */
+
+	_user_immediate_events.read (_user_immediate_event_buffer, 0, 1, nframes - 1, true);
+
 }
 
 void
@@ -526,6 +550,7 @@ MidiTrack::write_out_of_band_data (BufferSet& bufs, samplecnt_t nframes) const
 {
 	MidiBuffer& buf (bufs.get_midi (0));
 	buf.merge_from (_immediate_event_buffer, nframes);
+	buf.merge_from (_user_immediate_event_buffer, nframes);
 }
 
 int
@@ -648,6 +673,16 @@ MidiTrack::write_immediate_event(Evoral::EventType event_type, size_t size, cons
 		return false;
 	}
 	return (_immediate_events.write (0, event_type, size, buf) == size);
+}
+
+bool
+MidiTrack::write_user_immediate_event(Evoral::EventType event_type, size_t size, const uint8_t* buf)
+{
+	if (!Evoral::midi_event_is_valid(buf, size)) {
+		cerr << "WARNING: Ignoring illegal immediate MIDI event" << endl;
+		return false;
+	}
+	return (_user_immediate_events.write (0, event_type, size, buf) == size);
 }
 
 void
@@ -952,6 +987,7 @@ MidiTrack::realtime_handle_transport_stopped ()
 {
 	Route::realtime_handle_transport_stopped ();
 	_disk_reader->resolve_tracker (_immediate_events, 0);
+	_disk_reader->resolve_tracker (_user_immediate_events, 0);
 }
 
 void

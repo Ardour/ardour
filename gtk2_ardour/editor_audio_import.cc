@@ -1059,6 +1059,7 @@ Editor::finish_bringing_in_material (std::shared_ptr<Region> region,
 
 		std::shared_ptr<Playlist> playlist = existing_track->playlist();
 		std::shared_ptr<Region> copy (RegionFactory::create (region, region->derive_properties ()));
+		copy->set_region_group(false);
 		playlist->clear_changes ();
 		playlist->clear_owned_changes ();
 		playlist->add_region (copy, pos);

@@ -26,12 +26,11 @@
 #include <map>
 
 #include "button.h"
+#include "types.h"
 
 class XMLNode;
 
-namespace ArdourSurface {
-
-namespace Mackie {
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 struct GlobalButtonInfo {
 	std::string label; // visible to user
@@ -141,6 +140,6 @@ class DeviceInfo
 } // Mackie namespace
 } // ArdourSurface namespace
 
-std::ostream& operator<< (std::ostream& os, const ArdourSurface::Mackie::DeviceInfo& di);
+std::ostream& operator<< (std::ostream& os, const ArdourSurface::MACKIE_NAMESPACE::DeviceInfo& di);
 
 #endif /* __ardour_mackie_control_protocol_device_info_h__ */

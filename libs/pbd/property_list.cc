@@ -89,3 +89,9 @@ OwnedPropertyList::add (PropertyBase& p)
 }
 
 
+std::ostream&
+std::operator<< (std::ostream& os, PropertyChange const & pc)
+{
+	pc.dump (os);
+	return os;
+}

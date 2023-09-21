@@ -180,6 +180,7 @@ Editor::initialize_rulers ()
 	lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(cue_mark_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(section_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(videotl_label, PACK_SHRINK, PACK_START));
 
 	/* 1 event handler to bind them all ... */
@@ -241,8 +242,11 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		break;
 
 	case CdMarkerBarItem:
-		// TODO
-		ruler_items.push_back (MenuElem (_("New CD Track Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCDMarker, 0)));
+		ruler_items.push_back (MenuElem (_("New CD Track Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark |Location::IsCDMarker), 0)));
+		break;
+
+	case SectionMarkerBarItem:
+		ruler_items.push_back (MenuElem (_("New Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
 		break;
 
 	case CueMarkerBarItem:
@@ -257,8 +261,6 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 	case TempoCurveItem:
 		ruler_items.push_back (MenuElem (_("Add New Tempo"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
 		ruler_items.push_back (SeparatorElem ());
-		/* fallthrough */
-	case MappingBarItem:
 		ruler_items.push_back (MenuElem (_("Clear All Tempos"), sigc::mem_fun (*this, &Editor::clear_tempo_markers)));
 		ruler_items.push_back (SeparatorElem ());
 		ruler_items.push_back (MenuElem (_("Clear All Earlier Tempos"), sigc::bind (sigc::mem_fun (*this, &Editor::clear_tempo_markers_before), where, true)));
@@ -341,6 +343,7 @@ Editor::store_ruler_visibility ()
 	node->set_property (X_("rangemarker"), ruler_range_action->get_active());
 	node->set_property (X_("transportmarker"), ruler_loop_punch_action->get_active());
 	node->set_property (X_("cdmarker"), ruler_cd_marker_action->get_active());
+	node->set_property (X_("arrangement"), ruler_section_action->get_active());
 	node->set_property (X_("marker"), ruler_marker_action->get_active());
 	node->set_property (X_("cuemarker"), ruler_cue_marker_action->get_active());
 	node->set_property (X_("videotl"), ruler_video_action->get_active());
@@ -401,6 +404,12 @@ Editor::restore_ruler_visibility ()
 			}
 		}
 
+		if (node->get_property ("arrangement", yn)) {
+			ruler_section_action->set_active (yn);
+		} else {
+			ruler_section_action->set_active (true);
+		}
+
 		if (node->get_property ("cuemarker", yn)) {
 			ruler_cue_marker_action->set_active (yn);
 		} else {
@@ -421,6 +430,21 @@ Editor::restore_ruler_visibility ()
 			ruler_video_action->set_active (yn);
 		}
 
+	} else {
+		Temporal::TimeDomain const td (_session->config.get_default_time_domain ());
+		/* New session: no rulers have been displayed yet. let's assign default rulers from the session's time domain */
+		ruler_minsec_action->set_active (td == Temporal::AudioTime);
+		ruler_timecode_action->set_active (td == Temporal::AudioTime);
+		ruler_samples_action->set_active (false);
+		ruler_bbt_action->set_active (td == Temporal::BeatTime);
+		ruler_meter_action->set_active (td == Temporal::BeatTime);
+		ruler_tempo_action->set_active (td == Temporal::BeatTime);
+		ruler_range_action->set_active (true);
+		ruler_loop_punch_action->set_active (td == Temporal::BeatTime);
+		ruler_cd_marker_action->set_active (td == Temporal::AudioTime);
+		ruler_marker_action->set_active (true);
+		ruler_cue_marker_action->set_active (td == Temporal::BeatTime);
+		ruler_section_action->set_active (td == Temporal::BeatTime);
 	}
 
 	no_ruler_shown_update = false;
@@ -455,6 +479,7 @@ Editor::update_ruler_visibility ()
 	range_mark_label.hide();
 	transport_mark_label.hide();
 	cd_mark_label.hide();
+	section_mark_label.hide();
 	cue_mark_label.hide();
 	mark_label.hide();
 	videotl_label.hide();
@@ -525,17 +550,17 @@ Editor::update_ruler_visibility ()
 	}
 
 	if (ruler_tempo_action->get_active()) {
-		old_unit_pos = tempo_meta_group->position().y;
+		old_unit_pos = tempo_group->position().y;
 		if (tbpos != old_unit_pos) {
-			tempo_meta_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+			tempo_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
 		}
-		tempo_meta_group->show();
+		tempo_group->show();
 		tempo_label.show();
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
 	} else {
-		tempo_meta_group->hide();
+		tempo_group->hide();
 		tempo_label.hide();
 	}
 
@@ -604,12 +629,12 @@ Editor::update_ruler_visibility ()
 		tbgpos += timebar_height;
 		visible_timebars++;
 		// make sure all cd markers show up in their respective places
-		update_cd_marker_display();
+		update_marker_display();
 	} else {
 		cd_marker_group->hide();
 		cd_mark_label.hide();
 		// make sure all cd markers show up in their respective places
-		update_cd_marker_display();
+		update_marker_display();
 	}
 
 	if (ruler_marker_action->get_active()) {
@@ -643,13 +668,29 @@ Editor::update_ruler_visibility ()
 		tbpos += timebar_height;
 		tbgpos += timebar_height;
 		visible_timebars++;
-		// make sure all cd markers show up in their respective places
-		update_cue_marker_display();
 	} else {
 		cue_marker_group->hide();
 		cue_mark_label.hide();
-		// make sure all cd markers show up in their respective places
-		update_cue_marker_display();
+	}
+
+	if (ruler_section_action->get_active()) {
+		old_unit_pos = section_marker_group->position().y;
+		if (tbpos != old_unit_pos) {
+			section_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+		}
+		section_marker_group->show();
+		section_mark_label.show();
+
+		section_marker_bar->set_outline(false);
+
+		tbpos += timebar_height;
+		tbgpos += timebar_height;
+		visible_timebars++;
+		update_marker_display();
+	} else {
+		section_marker_group->hide();
+		section_mark_label.hide();
+		update_marker_display();
 	}
 
 	if (ruler_video_action->get_active()) {

@@ -199,6 +199,9 @@ Editor::split_regions_at (timepos_t const & where, RegionSelection& regions)
 		return;
 	}
 
+	/* the Split action will likely create new regions; we want them all assigned to the same region-group */
+	Region::RegionGroupRetainer rgr;
+
 	begin_reversible_command (_("split"));
 
 
@@ -2707,23 +2710,9 @@ Editor::cut_copy_section (ARDOUR::SectionOperation const op)
 	if (!get_selection_extents (start, end) || !_session) {
 		return;
 	}
-#if 1
-	TempoMap::SharedPtr tmap (TempoMap::use());
-	if ((tmap->tempos ().size () > 1 || tmap->meters ().size () > 1 || tmap->bartimes ().size () > 1) && UIConfiguration::instance().get_ask_cut_copy_section_tempo_map ()) {
-		ArdourMessageDialog msg (_("Cut/Copy Section does not yet include the Tempo Map\nDo you still want to proceed?"), false, MESSAGE_QUESTION, BUTTONS_YES_NO, true)  ;
-		msg.set_title (_("Cut/Copy without Tempo Map"));
-		Gtk::CheckButton cb (_("Do not show this dialog again."));
-		msg.get_vbox()->pack_start (cb);
-		cb.show ();
-		if (msg.run () != RESPONSE_YES) {
-			return;
-		}
-		if (cb.get_active ()) {
-			UIConfiguration::instance().set_ask_cut_copy_section_tempo_map (false);
-		}
-	}
-#endif
-	timepos_t to (get_preferred_edit_position ());
+
+	timepos_t to = Profile->get_mixbus () ? timepos_t (_session->audible_sample ()) : get_preferred_edit_position ();
+
 	_session->cut_copy_section (start, end, to, op);
 
 	if (op == DeleteSection) {
@@ -3125,6 +3114,44 @@ Editor::play_edit_range ()
 }
 
 void
+Editor::group_selected_regions ()
+{
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+
+	if (rs.empty ()) {
+		return;
+	}
+
+	Region::RegionGroupRetainer rgr;
+	begin_reversible_command (_("group regions"));
+	for (RegionSelection::iterator i = rs.begin (); i != rs.end (); ++i) {
+		(*i)->region ()->clear_changes ();
+		(*i)->region ()->set_region_group (true);
+		_session->add_command (new StatefulDiffCommand ((*i)->region ()));
+	}
+	commit_reversible_command ();
+}
+
+void
+Editor::ungroup_selected_regions ()
+{
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+
+	if (rs.empty ()) {
+		return;
+	}
+
+	begin_reversible_command (_("ungroup regions"));
+	for (RegionSelection::iterator i = rs.begin (); i != rs.end (); ++i) {
+		(*i)->region ()->clear_changes ();
+		(*i)->region ()->unset_region_group ();
+		_session->add_command (new StatefulDiffCommand ((*i)->region ()));
+	}
+	selection->clear_regions ();
+	commit_reversible_command ();
+}
+
+void
 Editor::play_selected_region ()
 {
 	timepos_t start = timepos_t::max (Temporal::AudioTime);
@@ -3324,6 +3351,9 @@ Editor::separate_regions_between (const TimeSelection& ts)
 	bool in_command = false;
 	std::shared_ptr<Playlist> playlist;
 	RegionSelection new_selection;
+
+	/* the Separate action will likely create a lot of regions; we want them all assigned to the same region-group */
+	Region::RegionGroupRetainer rgr;
 
 	TrackViewList tmptracks = get_tracks_for_range_action ();
 	sort_track_selection (tmptracks);
@@ -4414,8 +4444,11 @@ Editor::bounce_range_selection (BounceTarget target, bool with_processing)
 			ranges.push_back (TimelineRange (start, start+cnt, 0));
 			playlist->cut (ranges); // discard result
 
-			/*SPECIAL CASE:  we are bouncing to a new Source *AND* replacing the existing range on the timeline  (consolidate)*/
-			/*we don't add the whole_file region here; we insert a discrete copy*/
+			/* SPECIAL CASE: we are bouncing to a new Source *AND*
+			 * replacing the existing range on the timeline
+			 * (consolidate) *we don't add the whole_file region
+			 * here; we insert a discrete copy.
+			 */
 			PropertyList plist;
 			plist.add (ARDOUR::Properties::whole_file, false);
 			std::shared_ptr<Region> copy (RegionFactory::create (r, plist));
@@ -4514,6 +4547,9 @@ Editor::cut_copy (CutCopyOp op)
 
 	string opname;
 
+	/* the Cut action can create a lot of regions; we want them assigned to sensible region-groups */
+	Region::RegionGroupRetainer rgr;
+
 	switch (op) {
 	case Delete:
 		opname = _("delete");
@@ -4595,13 +4631,19 @@ Editor::cut_copy (CutCopyOp op)
 		if (get_edit_op_range (start, end)) {
 			selection->set (start, end);
 		}
-	} else if (!selection->time.empty()) {
+	} else if (!selection->time.empty() && !selection->tracks.empty()) {
 		begin_reversible_command (opname + ' ' + _("range"));
 
 		did_edit = true;
 		cut_copy_ranges (op);
 
 		if (op == Cut || op == Delete) {
+			selection->clear_time ();
+		}
+	} else if (!selection->time.empty()) {
+		if (op == Delete) {
+			/* note: UNDO is handled inside cut_copy_section */
+			cut_copy_section (DeleteSection);
 			selection->clear_time ();
 		}
 	}
@@ -4673,7 +4715,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 		   ControlList for each of our source lists to put the cut buffer data in.
 		*/
 		for (Lists::iterator i = lists.begin(); i != lists.end(); ++i) {
-			i->second.copy = i->first->create (i->first->parameter (), i->first->descriptor(), i->first->time_domain());
+			i->second.copy = i->first->create (i->first->parameter (), i->first->descriptor(), *i->first);
 		}
 
 		/* Add all selected points to the relevant copy ControlLists */
@@ -5228,6 +5270,9 @@ Editor::paste_internal (timepos_t const & pos, float times)
 	if (cut_buffer->empty(internal_editing())) {
 		return;
 	}
+
+	/* the Paste operation will result in one or more new regions, and we want them to share a region-group-id */
+	Region::RegionGroupRetainer rgr;
 
 	if (position == timepos_t::max (position.time_domain())) {
 		position = get_preferred_edit_position();
@@ -5982,7 +6027,7 @@ Editor::strip_region_silence ()
 	}
 }
 
-Command*
+PBD::Command*
 Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv)
 {
 	Evoral::Sequence<Temporal::Beats>::Notes selected;
@@ -6766,7 +6811,7 @@ Editor::toggle_solo ()
 {
 	bool new_state = false;
 	bool first = true;
-	std::shared_ptr<ControlList> cl (new ControlList);
+	std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		StripableTimeAxisView *stav = dynamic_cast<StripableTimeAxisView *>(*i);
@@ -6791,7 +6836,7 @@ Editor::toggle_mute ()
 {
 	bool new_state = false;
 	bool first = true;
-	std::shared_ptr<ControlList> cl (new ControlList);
+	std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 
 	for (TrackSelection::iterator i = selection->tracks.begin(); i != selection->tracks.end(); ++i) {
 		StripableTimeAxisView *stav = dynamic_cast<StripableTimeAxisView *>(*i);

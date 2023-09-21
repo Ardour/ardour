@@ -22,7 +22,6 @@
 
 /* Changing this order will break the menu */
 GRIDTYPE(GridTypeNone)
-GRIDTYPE(GridTypePlayhead)
 GRIDTYPE(GridTypeBar)
 GRIDTYPE(GridTypeBeat)
 GRIDTYPE(GridTypeBeatDiv2)
@@ -66,6 +65,7 @@ MOUSEMODE(MouseObject)
 MOUSEMODE(MouseRange)
 MOUSEMODE(MouseCut)
 MOUSEMODE(MouseTimeFX)
+MOUSEMODE(MouseGrid)
 MOUSEMODE(MouseAudition)
 MOUSEMODE(MouseDraw)
 MOUSEMODE(MouseContent)
@@ -109,5 +109,10 @@ INSERTTIMEOPT(LeaveIntersected)
 INSERTTIMEOPT(MoveIntersected)
 INSERTTIMEOPT(SplitIntersected)
 
-TEMPOEDITBEHAVIOR(TempoMapping)
-TEMPOEDITBEHAVIOR(TempoChanging)
+MARKERCLICKBEHAVIOR(MarkerClickSelectOnly)
+MARKERCLICKBEHAVIOR(MarkerClickLocate)
+MARKERCLICKBEHAVIOR(MarkerClickLocateWhenStopped)
+
+NOTENAMEDISPLAY(Always)
+NOTENAMEDISPLAY(WithMIDNAM)
+NOTENAMEDISPLAY(Never)

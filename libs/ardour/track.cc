@@ -99,7 +99,7 @@ Track::init ()
 
 	DiskIOProcessor::Flag dflags = DiskIOProcessor::Recordable;
 
-	_disk_reader.reset (new DiskReader (_session, *this, name(), Config->get_default_automation_time_domain(), dflags));
+	_disk_reader.reset (new DiskReader (_session, *this, name(), Temporal::TimeDomainProvider (Config->get_default_automation_time_domain()), dflags));
 	_disk_reader->set_block_size (_session.get_block_size ());
 	_disk_reader->set_owner (this);
 
@@ -116,13 +116,13 @@ Track::init ()
 	std::shared_ptr<Route> rp (std::dynamic_pointer_cast<Route> (shared_from_this()));
 	std::shared_ptr<Track> rt = std::dynamic_pointer_cast<Track> (rp);
 
-	_record_enable_control.reset (new RecordEnableControl (_session, EventTypeMap::instance().to_symbol (RecEnableAutomation), *this, time_domain()));
+	_record_enable_control.reset (new RecordEnableControl (_session, EventTypeMap::instance().to_symbol (RecEnableAutomation), *this, *this));
 	add_control (_record_enable_control);
 
-	_record_safe_control.reset (new RecordSafeControl (_session, EventTypeMap::instance().to_symbol (RecSafeAutomation), *this, time_domain()));
+	_record_safe_control.reset (new RecordSafeControl (_session, EventTypeMap::instance().to_symbol (RecSafeAutomation), *this, *this));
 	add_control (_record_safe_control);
 
-	_monitoring_control.reset (new MonitorControl (_session, EventTypeMap::instance().to_symbol (MonitoringAutomation), *this, time_domain()));
+	_monitoring_control.reset (new MonitorControl (_session, EventTypeMap::instance().to_symbol (MonitoringAutomation), *this, *this));
 	add_control (_monitoring_control);
 
 	if (!name().empty()) {
@@ -712,11 +712,31 @@ Track::use_playlist (DataType dt, std::shared_ptr<Playlist> p, bool set_orig)
 		if (rl->size () > 0) {
 			Region::RegionsPropertyChanged (rl, Properties::hidden);
 		}
+		/* we don't know for certain that we controlled the old
+		 * playlist's time domain, but it's a pretty good guess. If it
+		 * has an actual parent, revert to using its parent's domain
+		 */
+		if (old->time_domain_parent()) {
+			old->clear_time_domain_parent ();
+		}
 	}
+
 	if (p) {
 		std::shared_ptr<RegionList> rl (new RegionList (p->region_list_property ().rlist ()));
 		if (rl->size () > 0) {
 			Region::RegionsPropertyChanged (rl, Properties::hidden);
+		}
+
+		/* If the playlist has no time domain parent or its parent is
+		 * the session, reset to the explicit time domain of this
+		 * track.
+		 */
+
+		if (!p->time_domain_parent() || p->time_domain_parent() == &_session) {
+			/* XXX DANGER : track could go away leaving playlist
+			 * with dead parent time domain provider
+			 */
+			p->set_time_domain_parent (*this);
 		}
 	}
 
@@ -942,6 +962,9 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 		return;
 	}
 
+	/* all regions created from a recording pass should share the same group-id */
+	Region::RegionGroupRetainer rgr;
+
 	RecordMode rmode = _session.config.get_record_mode ();
 
 	samplecnt_t total_capture = 0;
@@ -1039,6 +1062,7 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 			plist.add (Properties::length, l);
 			plist.add (Properties::opaque, rmode != RecSoundOnSound);
 			plist.add (Properties::name, region_name);
+			plist.add (Properties::reg_group, Region::get_retained_group_id());
 
 			std::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 			midi_region = std::dynamic_pointer_cast<MidiRegion> (rx);
@@ -1143,6 +1167,7 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 			plist.add (Properties::length, timecnt_t ((*ci)->samples, timepos_t::zero (false)));
 			plist.add (Properties::name, region_name);
 			plist.add (Properties::opaque, rmode != RecSoundOnSound);
+			plist.add (Properties::reg_group, Region::get_retained_group_id());
 
 			std::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 			region = std::dynamic_pointer_cast<AudioRegion> (rx);
@@ -1165,4 +1190,23 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 	pl->thaw ();
 	pl->set_capture_insertion_in_progress (false);
 	_session.add_command (new StatefulDiffCommand (pl));
+}
+
+void
+Track::time_domain_changed ()
+{
+	Route::time_domain_changed ();
+
+	std::shared_ptr<Playlist> pl = _playlists[DataType::AUDIO];
+	if (pl) {
+		if (pl->time_domain_parent() == this) {
+			pl->time_domain_changed ();
+		}
+	}
+	pl = _playlists[DataType::MIDI];
+	if (pl) {
+		if (pl->time_domain_parent() == this) {
+			pl->time_domain_changed ();
+		}
+	}
 }

@@ -45,8 +45,9 @@ using namespace std;
 
 #ifndef NDEBUG
 #undef DEBUG_TRACE
-/* cannot use debug transmitter system here because it will cause recursion */
-#define DEBUG_TRACE(bits,str) if (((bits) & PBD::debug_bits).any()) { std::cout << # bits << ": " <<  str; }
+/* cannot use the regular macro here, because PBD::debug_print() uses the debug
+ * transmitter system and it will cause recursion */
+#define DEBUG_TRACE(bits,str) if (((bits) & PBD::debug_bits).any()) { PBD::debug_only_print (#bits, str); }
 #endif
 
 template<typename RequestBuffer> void
@@ -99,6 +100,7 @@ AbstractUI<RequestObject>::AbstractUI (const string& name)
 template <typename RequestObject>
 AbstractUI<RequestObject>::~AbstractUI ()
 {
+	trackable::notify_callbacks ();
 }
 
 template <typename RequestObject> void

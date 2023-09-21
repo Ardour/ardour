@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-import os
 
 # Version of this package (even if built as a child)
 LIBPTFORMAT_VERSION = '0.0.0'
@@ -11,14 +10,7 @@ LIBPTFORMAT_VERSION = '0.0.0'
 # micro increment <=> no interface changes
 LIBPTFORMAT_LIB_VERSION = '0.0.0'
 
-# Variables for 'waf dist'
-APPNAME = 'libptformat'
-VERSION = LIBPTFORMAT_VERSION
 I18N_PACKAGE = 'libptformat'
-
-# Mandatory variables
-top = '.'
-out = 'build'
 
 def options(opt):
     autowaf.set_options(opt)

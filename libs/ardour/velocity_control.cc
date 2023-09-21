@@ -32,7 +32,7 @@ using namespace std;
 
 VelocityControl::VelocityControl (Session& session)
 	: SlavableAutomationControl (session, Evoral::Parameter (MidiVelocityAutomation), ParameterDescriptor (Evoral::Parameter (MidiVelocityAutomation)),
-	                             std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (MidiVelocityAutomation), Temporal::BeatTime)),
+	                             std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter (MidiVelocityAutomation), Temporal::TimeDomainProvider (Temporal::BeatTime))),
 	                             _("Velocity"))
 {
 }

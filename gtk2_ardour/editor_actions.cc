@@ -133,6 +133,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_menu_actions, X_("EditSelectRangeOptions"), _("Select Range Operations"));
 	ActionManager::register_action (editor_menu_actions, X_("EditSelectRegionOptions"), _("Select Regions"));
 	ActionManager::register_action (editor_menu_actions, X_("EditPointMenu"), _("Edit Point"));
+	ActionManager::register_action (editor_menu_actions, X_("MarkerClickBehavior"), _("Marker Interaction"));
 	ActionManager::register_action (editor_menu_actions, X_("FadeMenu"), _("Fade"));
 	ActionManager::register_action (editor_menu_actions, X_("LatchMenu"), _("Latch"));
 	ActionManager::register_action (editor_menu_actions, X_("RegionMenu"), _("Region"));
@@ -205,10 +206,6 @@ Editor::register_actions ()
 	   when required. Editor::unlock() must be invoked directly.
 	*/
 	ActionManager::register_action (editor_actions, "lock", S_("Session|Lock"), sigc::mem_fun (*this, &Editor::lock));
-
-	RadioAction::Group tempo_edit_group;
-	ActionManager::register_radio_action (editor_actions, tempo_edit_group, "tempo-edit-is-mapping", _("Map Tempo"), sigc::bind (sigc::mem_fun (*this, &Editor::tempo_edit_behavior_toggled), Editing::TempoMapping));
-	ActionManager::register_radio_action (editor_actions, tempo_edit_group, "tempo-edit-is-changing", _("Change Tempo"), sigc::bind (sigc::mem_fun (*this, &Editor::tempo_edit_behavior_toggled), Editing::TempoChanging));
 
 	toggle_reg_sens (editor_actions, "show-editor-mixer", _("Show Editor Mixer"), sigc::mem_fun (*this, &Editor::editor_mixer_button_toggled));
 	toggle_reg_sens (editor_actions, "show-editor-list", _("Show Editor List"), sigc::mem_fun (*this, &Editor::editor_list_button_toggled));
@@ -368,15 +365,25 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "set-punch-from-edit-range", _("Set Punch from Selection"), sigc::mem_fun(*this, &Editor::set_punch_from_selection));
 	reg_sens (editor_actions, "set-session-from-edit-range", _("Set Session Start/End from Selection"), sigc::mem_fun(*this, &Editor::set_session_extents_from_selection));
 
-	reg_sens (editor_actions, "copy-paste-section", _("Copy/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CopyPasteSection));
-	reg_sens (editor_actions, "cut-paste-section", _("Cut/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CutPasteSection));
-	reg_sens (editor_actions, "insert-section", _("Insert Time Section at Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), InsertSection));
+	if (Profile->get_mixbus ()) {
+		reg_sens (editor_actions, "copy-paste-section", _("Copy/Paste Range Section to Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CopyPasteSection));
+		reg_sens (editor_actions, "cut-paste-section", _("Cut/Paste Range Section to Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CutPasteSection));
+		reg_sens (editor_actions, "insert-section", _("Insert Time Section at Playhead"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), InsertSection));
+	} else {
+		reg_sens (editor_actions, "copy-paste-section", _("Copy/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CopyPasteSection));
+		reg_sens (editor_actions, "cut-paste-section", _("Cut/Paste Range Section to Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), CutPasteSection));
+		reg_sens (editor_actions, "insert-section", _("Insert Time Section at Edit Point"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), InsertSection));
+	}
+
 	reg_sens (editor_actions, "delete-section", _("Delete Range Section"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), DeleteSection));
 	reg_sens (editor_actions, "alternate-delete-section", _("Delete Range Section"), sigc::bind (sigc::mem_fun(*this, &Editor::cut_copy_section), DeleteSection));
 
 	/* this is a duplicated action so that the main menu can use a different label */
 	reg_sens (editor_actions, "main-menu-play-selected-regions", _("Play Selected Regions"), sigc::mem_fun (*this, &Editor::play_selected_region));
 	reg_sens (editor_actions, "main-menu-tag-selected-regions", _("Tag Selected Regions"), sigc::mem_fun (*this, &Editor::tag_selected_region));
+
+	reg_sens (editor_actions, "group-selected-regions", _("Group Selected Regions"), sigc::mem_fun (*this, &Editor::group_selected_regions));
+	reg_sens (editor_actions, "ungroup-selected-regions", _("Ungroup Selected Regions"), sigc::mem_fun (*this, &Editor::ungroup_selected_regions));
 
 	reg_sens (editor_actions, "play-from-edit-point", _("Play from Edit Point"), sigc::mem_fun(*this, &Editor::play_from_edit_point));
 	reg_sens (editor_actions, "play-from-edit-point-and-return", _("Play from Edit Point and Return"), sigc::mem_fun(*this, &Editor::play_from_edit_point_and_return));
@@ -550,6 +557,14 @@ Editor::register_actions ()
 
 	ActionManager::register_action (editor_actions, X_("cycle-zoom-focus"), _("Next Zoom Focus"), sigc::mem_fun (*this, &Editor::cycle_zoom_focus));
 
+	Glib::RefPtr<ActionGroup> marker_click_actions = ActionManager::create_action_group (bindings, X_("MarkerClickBehavior"));
+	RadioAction::Group marker_click_group;
+
+	radio_reg_sens (marker_click_actions, marker_click_group, "marker-click-select-only", _("Marker Click Only Selects"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_click_behavior_chosen), Editing::MarkerClickSelectOnly));
+	radio_reg_sens (marker_click_actions, marker_click_group, "marker-click-locate", _("Locate to Marker on Click"), sigc::bind (sigc::mem_fun(*this, &Editor::marker_click_behavior_chosen), Editing::MarkerClickLocate));
+	radio_reg_sens (marker_click_actions, marker_click_group, "marker-click-locate-when-stopped", _("Locate To Marker When Transport Is Not Rolling "), sigc::bind (sigc::mem_fun(*this, &Editor::marker_click_behavior_chosen), Editing::MarkerClickLocateWhenStopped));
+	ActionManager::register_action (editor_actions, X_("cycle-marker-click-behavior"), _("Next Marker Click Mode"), sigc::mem_fun (*this, &Editor::cycle_marker_click_behavior));
+
 	Glib::RefPtr<ActionGroup> lua_script_actions = ActionManager::create_action_group (bindings, X_("LuaAction"));
 
 	for (int i = 1; i <= MAX_LUA_ACTION_SCRIPTS; ++i) {
@@ -593,6 +608,11 @@ Editor::register_actions ()
 	mouse_timefx_button.set_related_action (act);
 	mouse_timefx_button.set_icon (ArdourWidgets::ArdourIcon::ToolStretch);
 	mouse_timefx_button.set_name ("mouse mode button");
+
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGrid));
+	mouse_grid_button.set_related_action (act);
+	mouse_grid_button.set_icon (ArdourWidgets::ArdourIcon::ToolGrid);
+	mouse_grid_button.set_name ("mouse mode button");
 
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseContent));
 	mouse_content_button.set_related_action (act);
@@ -707,7 +727,6 @@ Editor::register_actions ()
 
 	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeat)));
 	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBar)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-playhead"),       grid_type_strings[(int)GridTypePlayhead].c_str(),       (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypePlayhead)));
 
 	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-none"),           grid_type_strings[(int)GridTypeNone].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeNone)));
 
@@ -725,6 +744,7 @@ Editor::register_actions ()
 	ruler_range_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-range-ruler"), _("Range Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_loop_punch_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch Ranges"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_cd_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-cd-marker-ruler"), _("CD Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
+	ruler_section_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-arrangement-ruler"), _("Arrangement"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-marker-ruler"), _("Location Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_cue_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-cue-marker-ruler"), _("Cue Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 
@@ -1174,13 +1194,13 @@ Editor::draw_velocity_action (int v)
 RefPtr<RadioAction>
 Editor::draw_channel_action (int c)
 {
+	char buf[64];
 	const char* action = 0;
 	RefPtr<Action> act;
 
 	if (c==DRAW_CHAN_AUTO) {
 		action = "draw-channel-auto";
 	} else if (c>=0 && c<=15) {
-		char buf[64];
 		sprintf(buf, X_("draw-channel-%d"), c+1);
 		action = buf;
 	}
@@ -1252,9 +1272,6 @@ Editor::draw_length_action (GridType type)
 		break;
 	case Editing::GridTypeBar:
 		action = "draw-length-bar";
-		break;
-	case Editing::GridTypePlayhead:
-		action = "draw-length-playhead";
 		break;
 	case Editing::GridTypeNone:
 		action = "draw-length-auto";
@@ -1337,9 +1354,6 @@ Editor::grid_type_action (GridType type)
 	case Editing::GridTypeBar:
 		action = "grid-type-bar";
 		break;
-	case Editing::GridTypePlayhead:
-		action = "grid-type-playhead";
-		break;
 	case Editing::GridTypeNone:
 		action = "grid-type-none";
 		break;
@@ -1395,9 +1409,6 @@ Editor::next_grid_choice ()
 		set_grid_to (Editing::GridTypeBeat);
 		break;
 	case Editing::GridTypeNone:
-		set_grid_to (Editing::GridTypePlayhead);
-		break;
-	case Editing::GridTypePlayhead:
 		set_grid_to (Editing::GridTypeBar);
 		break;
 	case Editing::GridTypeBeatDiv3:
@@ -1440,10 +1451,7 @@ Editor::prev_grid_choice ()
 		set_grid_to (Editing::GridTypeBar);
 		break;
 	case Editing::GridTypeBar:
-		set_grid_to (Editing::GridTypePlayhead);
-		break;
-	case Editing::GridTypePlayhead:
-		set_grid_to (Editing::GridTypeBar);
+		set_grid_to (Editing::GridTypeNone);
 		break;
 	case Editing::GridTypeNone:
 		set_grid_to (Editing::GridTypeBeatDiv32);
@@ -1639,6 +1647,26 @@ Editor::edit_point_chosen (EditPoint ep)
 	}
 }
 
+RefPtr<RadioAction>
+Editor::marker_click_behavior_action (MarkerClickBehavior m)
+{
+	const char* action = 0;
+	RefPtr<Action> act;
+
+	switch (m) {
+	case MarkerClickSelectOnly:
+		action = X_("marker-click-select-only");
+		break;
+	case MarkerClickLocate:
+		action = X_("marker-click-locate");
+		break;
+	case MarkerClickLocateWhenStopped:
+		action = X_("marker-click-locate-when-stopped");
+		break;
+	}
+
+	return ActionManager::get_radio_action (X_("MarkerClickBehavior"), action);
+}
 
 RefPtr<RadioAction>
 Editor::zoom_focus_action (ZoomFocus focus)
@@ -1695,6 +1723,15 @@ Editor::zoom_focus_chosen (ZoomFocus focus)
 
 	if (ract && ract->get_active()) {
 		set_zoom_focus (focus);
+	}
+}
+
+void
+Editor::marker_click_behavior_chosen (Editing::MarkerClickBehavior m)
+{
+	RefPtr<RadioAction> ract = marker_click_behavior_action (m);
+	if (ract && ract->get_active()) {
+		set_marker_click_behavior (m);
 	}
 }
 
@@ -1773,6 +1810,8 @@ Editor::parameter_changed (std::string p)
 		}
 	} else if (p == "track-name-number") {
 		queue_redisplay_track_views ();
+	} else if (p == "default-time-domain") {
+		stretch_marker_cb.set_sensitive (_session->config.get_default_time_domain () == Temporal::BeatTime);
 	}
 }
 

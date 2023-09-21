@@ -50,6 +50,7 @@ class StartupFSM : public sigc::trackable
 	};
 
 	enum MainState {
+		NotWaiting,
 		WaitingForPreRelease,
 		WaitingForNewUser,
 		WaitingForSessionPath,
@@ -63,13 +64,14 @@ class StartupFSM : public sigc::trackable
 	void start ();
 	void reset ();
 
-	std::string session_path;
-	std::string session_name;
-	std::string session_template;
-	int         session_existing_sample_rate;
-	XMLNode     session_engine_hints;
-	bool        session_is_new;
-	bool        session_name_edited;
+	std::string          session_path;
+	std::string          session_name;
+	std::string          session_template;
+	Temporal::TimeDomain session_domain;
+	int                  session_existing_sample_rate;
+	XMLNode              session_engine_hints;
+	bool                 session_is_new;
+	bool                 session_name_edited;
 
 	ARDOUR::BusProfile bus_profile;
 
@@ -81,6 +83,9 @@ class StartupFSM : public sigc::trackable
 
 	bool brand_new_user() const { return new_user; }
 	void handle_path (std::string const & path);
+
+	bool complete() const { return _state == NotWaiting; }
+	void set_complete () { _state = NotWaiting; }
 
   private:
 	bool new_user;

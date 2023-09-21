@@ -38,7 +38,7 @@ class Session;
 class LIBARDOUR_API PhaseControl : public AutomationControl
 {
   public:
-	PhaseControl (Session& session, std::string const & name, Temporal::TimeDomain);
+	PhaseControl (Session& session, std::string const & name, Temporal::TimeDomainProvider const &);
 
 	/* There are two approaches to designing/using a PhaseControl. One is
 	 * to have one such control for every channel of the control's

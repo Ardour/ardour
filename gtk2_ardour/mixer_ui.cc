@@ -1041,7 +1041,7 @@ Mixer_UI::fan_out (std::weak_ptr<Route> wr, bool to_busses, bool group)
 					r = tl.front ();
 					assert (r);
 
-					std::shared_ptr<ControlList> cl (new ControlList);
+					std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 					cl->push_back (r->monitoring_control ());
 					_session->set_controls (cl, (double) MonitorInput, Controllable::NoGroup);
 				}
@@ -1155,7 +1155,7 @@ Mixer_UI::strip_button_release_event (GdkEventButton *ev, MixerStrip *strip)
 		if (_selection.selected (strip)) {
 			/* primary-click: toggle selection state of strip */
 			if (Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-				_selection.remove (strip, true);
+				_selection.remove (strip, false);
 			} else if (_selection.axes.size() > 1) {
 				/* de-select others */
 				_selection.set (strip);
@@ -3479,7 +3479,7 @@ Mixer_UI::add_favorite_processor (ARDOUR::PluginPresetPtr ppp, ProcessorPosition
 		}
 
 		Route::ProcessorStreams err;
-		std::shared_ptr<Processor> processor (new PluginInsert (*_session, rt->time_domain(), p));
+		std::shared_ptr<Processor> processor (new PluginInsert (*_session, *rt, p));
 
 		switch (pos) {
 			case AddTop:
@@ -3707,7 +3707,7 @@ Mixer_UI::load_bindings ()
 template<class T> void
 Mixer_UI::control_action (std::shared_ptr<T> (Stripable::*get_control)() const)
 {
-	std::shared_ptr<ControlList> cl (new ControlList);
+	std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 	std::shared_ptr<AutomationControl> ac;
 	bool val = false;
 	bool have_val = false;
@@ -3759,8 +3759,8 @@ Mixer_UI::selected_gaincontrols ()
 		MixerStrip* ms = dynamic_cast<MixerStrip*> (r);
 		if (ms) {
 			std::shared_ptr<GainControl> ac (ms->route()->gain_control());
-			ControlList cl (ac->grouped_controls());
-			for (ControlList::const_iterator c = cl.begin(); c != cl.end (); ++c) {
+			AutomationControlList cl (ac->grouped_controls());
+			for (AutomationControlList::const_iterator c = cl.begin(); c != cl.end (); ++c) {
 				rv.insert (*c);
 			}
 			rv.insert (ac);

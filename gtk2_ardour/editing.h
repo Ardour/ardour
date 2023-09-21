@@ -42,6 +42,8 @@
 #define WAVEFORMSHAPE(a) /*empty*/
 #define INSERTTIMEOPT(a) /*empty*/
 #define TEMPOEDITBEHAVIOR(a) /*empty*/
+#define NOTENAMEDISPLAY(a) /*empty*/
+#define MARKERCLICKBEHAVIOR(a) /*empty*/
 
 namespace Editing {
 
@@ -198,18 +200,29 @@ enum InsertTimeOption {
 #undef INSERTTIMEOPT
 #define INSERTTIMEOPT(a) /*empty*/
 
-#undef TEMPOEDITBEHAVIOR
-#define TEMPOEDITBEHAVIOR(a) a,
-enum TempoEditBehavior {
+#undef NOTENAMEDISPLAY
+#define NOTENAMEDISPLAY(a) a,
+enum NoteNameDisplay {
 	#include "editing_syms.h"
 };
 
-extern const char *tempoeditbehaviorstrs[];
-inline const char* enum2str(TempoEditBehavior m) {return tempoeditbehaviorstrs[m];}
-TempoEditBehavior str2tempoeditbehavior(const std::string &);
+extern const char *notenamedisplaystrs[];
+inline const char* enum2str(NoteNameDisplay m) {return notenamedisplaystrs[m];}
 
-#undef TEMPOEDITBEHAVIOR
-#define TEMPOEDITBEHAVIOR(a) /*empty*/
+#undef NOTENAMEDISPLAY
+#define NOTENAMEDISPLAY(a) /*empty*/
+
+#undef MARKERCLICKBEHAVIOR
+#define MARKERCLICKBEHAVIOR(a) a,
+enum MarkerClickBehavior {
+	#include "editing_syms.h"
+};
+#undef MARKERCLICKBEHAVIOR
+#define MARKERCLICKBEHAVIOR(a) /*empty*/
+
+extern const char *markerclickbehaviorstrs[];
+inline const char* enum2str(MarkerClickBehavior m) {return markerclickbehaviorstrs[m];}
+MarkerClickBehavior str2markerclickbehavior(const std::string &);
 
 /////////////////////
 // These don't need their state saved. yet...

@@ -435,6 +435,12 @@ enum EditMode {
 	Lock
 };
 
+enum SnapTarget {
+	SnapTargetGrid,
+	SnapTargetOther,
+	SnapTargetBoth
+};
+
 enum RippleMode {
 	RippleSelected,
 	RippleAll,
@@ -655,9 +661,9 @@ typedef std::list<std::shared_ptr<GraphNode> > GraphNodeList;
 typedef std::list<std::shared_ptr<Stripable> > StripableList;
 typedef std::list<std::weak_ptr  <Route> > WeakRouteList;
 typedef std::list<std::weak_ptr  <Stripable> > WeakStripableList;
-typedef std::list<std::shared_ptr<AutomationControl> > ControlList;
-typedef std::list<std::weak_ptr  <AutomationControl> > WeakControlList;
-typedef std::list<std::shared_ptr<SlavableAutomationControl> > SlavableControlList;
+typedef std::list<std::shared_ptr<AutomationControl> > AutomationControlList;
+typedef std::list<std::weak_ptr  <AutomationControl> > WeakAutomationControlList;
+typedef std::list<std::shared_ptr<SlavableAutomationControl> > SlavableAutomationControlList;
 typedef std::set <AutomationType> AutomationTypeSet;
 
 typedef std::list<std::shared_ptr<VCA> > VCAList;

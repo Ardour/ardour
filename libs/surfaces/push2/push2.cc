@@ -120,13 +120,13 @@ Push2::probe (std::string& i, std::string& o)
 	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsOutput|IsTerminal), midi_inputs);
 	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsInput|IsTerminal), midi_outputs);
 
-	auto has_fp8 = [](string const& s) {
+	auto has_push2 = [](string const& s) {
 		std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name (s);
 		return pn.find ("Ableton Push 2 MIDI 1") != string::npos;
 	};
 
-	auto pi = std::find_if (midi_inputs.begin (), midi_inputs.end (), has_fp8);
-	auto po = std::find_if (midi_outputs.begin (), midi_outputs.end (), has_fp8);
+	auto pi = std::find_if (midi_inputs.begin (), midi_inputs.end (), has_push2);
+	auto po = std::find_if (midi_outputs.begin (), midi_outputs.end (), has_push2);
 
 	if (pi == midi_inputs.end () || po == midi_outputs.end ()) {
 		return false;
@@ -655,7 +655,7 @@ Push2::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoBytes* e
 	std::shared_ptr<const Pad> pad_pressed = pm->second;
 
 	if (_current_layout == _cue_layout) {
-		_current_layout->pad_press (pad_pressed->x, pad_pressed->y);
+		_current_layout->pad_press (pad_pressed->x, pad_pressed->y, ev->velocity);
 		return;
 	}
 

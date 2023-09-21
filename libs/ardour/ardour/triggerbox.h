@@ -166,7 +166,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	PBD::Property<color_t>              _color;
 
   public:
-	/* this is positioner here so that we can easily keep it in sync
+	/* this is positioned here so that we can easily keep it in sync
 	   with the properties list above.
 	*/
 	struct UIState {
@@ -261,7 +261,7 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	/* Calling ::bang() will cause this Trigger to be placed in its owning
 	   TriggerBox's queue.
 	*/
-	void bang ();
+	void bang (float velocity = 1.0f);
 
 	/* Calling ::unbang() is equivalent to a mouse-up or note-off
 	    ... it MIGHT cause a clip to stop, but more likely has no effect, depending on the slot's launch-style.
@@ -414,6 +414,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	/* examples: drag+dropping from slot to slot, or "Range->Bounce to Slot", where a single operation sets many  */
 	void get_ui_state (UIState &state) const;
 	void set_ui_state (UIState &state);
+
+	static PBD::Signal2<void,PBD::PropertyChange,Trigger*> TriggerPropertyChange;
 
   protected:
 	struct UIRequests {
@@ -743,7 +745,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 
 	TriggerPtr trigger (Triggers::size_type);
 
-	void bang_trigger_at (Triggers::size_type row);
+	void bang_trigger_at (Triggers::size_type row, float velocity = 1.0f);
 	void unbang_trigger_at (Triggers::size_type row);
 
 	void add_trigger (TriggerPtr);
@@ -772,6 +774,7 @@ class LIBARDOUR_API TriggerBox : public Processor
 	TriggerPtr trigger_by_id (PBD::ID);
 
 	void clear_all_triggers ();
+	void clear_cue (int cue);
 	void set_all_follow_action (ARDOUR::FollowAction const &, uint32_t n=0);
 	void set_all_launch_style (ARDOUR::Trigger::LaunchStyle);
 	void set_all_quantization (Temporal::BBT_Offset const&);
@@ -843,6 +846,9 @@ class LIBARDOUR_API TriggerBox : public Processor
 	static void start_transport_stop (Session&);
 
 	static PBD::PropertyChange all_trigger_props();
+
+	void send_property_change (PBD::PropertyChange pc);
+	static PBD::Signal2<void,PBD::PropertyChange,int> TriggerBoxPropertyChange;
 
 	void dump (std::ostream &) const;
 

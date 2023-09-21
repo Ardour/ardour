@@ -280,6 +280,12 @@
         <menuitem action='cycle-edit-point'/>
         <menuitem action='cycle-edit-point-with-marker'/>
       </menu>
+      <menu action="MarkerClickBehavior">
+        <menuitem action='cycle-marker-click-behavior'/>
+        <menuitem action='marker-click-select-only'/>
+        <menuitem action='marker-click-locate'/>
+        <menuitem action='marker-click-locate-when-stopped'/>
+      </menu>
       <menuitem action='cycle-snap-mode'/>
       <menu name='GridChoice' action='GridChoice'>
         <menuitem action='prev-grid-choice'/>
@@ -317,8 +323,6 @@
       <menu action="TempoMenu">
         <menuitem action='set-tempo-from-region'/>
         <menuitem action='set-tempo-from-edit-range'/>
-        <menuitem action='tempo-edit-is-mapping'/>
-        <menuitem action='tempo-edit-is-changing'/>
       </menu>
       <menuitem action='set-mouse-mode-object-range'/>
       <menuitem action='show-touched-automation'/>
@@ -346,6 +350,10 @@
       <menuitem action='insert-region-from-source-list'/>
       <menuitem action='play-selected-regions'/>
       <menuitem action='tag-selected-regions'/>
+      <separator/>
+      <menuitem action='group-selected-regions'/>
+      <menuitem action='ungroup-selected-regions'/>
+      <separator/>
       <menuitem action='loop-region'/>
       <menuitem action='rename-region'/>
       <menuitem action='show-region-properties'/>
@@ -537,6 +545,7 @@
         <menuitem action="toggle-range-ruler"/>
         <menuitem action="toggle-loop-punch-ruler"/>
         <menuitem action="toggle-cd-marker-ruler"/>
+        <menuitem action="toggle-arrangement-ruler"/>
         <menuitem action="toggle-marker-ruler"/>
         <menuitem action="toggle-cue-marker-ruler"/>
         <separator/>
@@ -860,6 +869,10 @@
   <popup name='PopupRegionMenu' action='PopupRegionMenu' accelerators='true'>
     <menuitem action='play-selected-regions'/>
     <menuitem action='tag-selected-regions'/>
+    <separator/>
+    <menuitem action='group-selected-regions'/>
+    <menuitem action='ungroup-selected-regions'/>
+    <separator/>
     <menuitem action='loop-region'/>
     <menuitem action='rename-region'/>
     <menuitem action='show-region-properties'/>

@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-from waflib import Options
-from waflib import TaskGen
-import os
 
 # Version of this package (even if built as a child)
 MAJOR = '1'
@@ -16,14 +13,7 @@ ZRESAMPLER_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 # micro increment <=> no interface changes
 ZRESAMPLER_LIB_VERSION = '1.6.0'
 
-# Variables for 'waf dist'
-APPNAME = 'zita-resampler'
-VERSION = ZRESAMPLER_VERSION
 I18N_PACKAGE = 'libzita-resampler'
-
-# Mandatory variables
-top = '.'
-out = 'build'
 
 zresampler_sources = [
         'resampler.cc',

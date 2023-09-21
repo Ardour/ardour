@@ -42,8 +42,8 @@ public:
 	ArdourFader::Tweaks tweaks() const { return _slider.tweaks (); }
 	void set_tweaks (ArdourFader::Tweaks t) { _slider.set_tweaks (t);}
 
-	sigc::signal<void> StartGesture;
-	sigc::signal<void> StopGesture;
+	sigc::signal<void,int> StartGesture;
+	sigc::signal<void,int> StopGesture;
 
 	/* export this to allow direct connection to button events */
 	Gtk::Widget& event_widget() { return _slider; }
@@ -74,9 +74,8 @@ private:
 	bool _switching;
 	bool _switch_on_release;
 
-
-	void passtrhu_gesture_start() { StartGesture (); }
-	void passtrhu_gesture_stop()  { StopGesture (); }
+	void passtrhu_gesture_start (int state) { StartGesture (state); }
+	void passtrhu_gesture_stop  (int state) { StopGesture (state); }
 };
 
 

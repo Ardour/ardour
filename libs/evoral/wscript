@@ -14,13 +14,7 @@ EVORAL_VERSION = '0.0.0'
 #   0.0.0 = 0,0,0
 EVORAL_LIB_VERSION = '0.0.0'
 
-# Variables for 'waf dist'
 APPNAME = 'evoral'
-VERSION = EVORAL_VERSION
-
-# Mandatory variables
-top = '.'
-out = 'build'
 
 def options(opt):
     opt.load('compiler_c')

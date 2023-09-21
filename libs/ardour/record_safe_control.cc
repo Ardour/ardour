@@ -24,9 +24,9 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-RecordSafeControl::RecordSafeControl (Session& session, std::string const & name, Recordable& r, Temporal::TimeDomain td)
+RecordSafeControl::RecordSafeControl (Session& session, std::string const & name, Recordable& r, Temporal::TimeDomainProvider const & tdp)
 	: SlavableAutomationControl (session, RecSafeAutomation, ParameterDescriptor (RecSafeAutomation),
-	                             std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(RecSafeAutomation), td)),
+	                             std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(RecSafeAutomation), tdp)),
 	                             name)
 	, _recordable (r)
 {

@@ -49,7 +49,7 @@ public:
 	             ARDOUR::DataType default_type = DataType::AUDIO, bool sendish=false);
 
 	IOProcessor (Session&, std::shared_ptr<IO> input, std::shared_ptr<IO> output,
-	             const std::string& proc_name, Temporal::TimeDomain, bool sendish=false);
+	             const std::string& proc_name, Temporal::TimeDomainProvider const &, bool sendish=false);
 
 	virtual ~IOProcessor ();
 

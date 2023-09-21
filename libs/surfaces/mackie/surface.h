@@ -48,13 +48,9 @@ namespace ARDOUR {
 
 class MidiByteArray;
 
-namespace ArdourSurface {
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 class MackieControlProtocol;
-
-namespace Mackie
-{
-
 class MackieButtonHandler;
 class SurfacePort;
 class MackieMidiBuilder;
@@ -100,7 +96,7 @@ public:
 	std::map<int,Meter*> meters;
 	std::map<int,Control*> controls_by_device_independent_id;
 
-	Mackie::JogWheel* jog_wheel() const { return _jog_wheel; }
+	MACKIE_NAMESPACE::JogWheel* jog_wheel() const { return _jog_wheel; }
 	Fader* master_fader() const { return _master_fader; }
 
 	/// The collection of all numbered strips.
@@ -193,7 +189,7 @@ public:
 	MackieControlProtocol& mcp() const { return _mcp; }
 
 	void next_jog_mode ();
-	void set_jog_mode (Mackie::JogWheel::Mode);
+	void set_jog_mode (MACKIE_NAMESPACE::JogWheel::Mode);
 
         void notify_metering_state_changed();
 	void turn_it_on ();
@@ -213,20 +209,21 @@ public:
 	bool master_stripable_is_master_monitor ();
 
   private:
-	MackieControlProtocol& _mcp;
-	SurfacePort*           _port;
-	surface_type_t         _stype;
-	uint32_t               _number;
-	std::string            _name;
-	bool                   _active;
-	bool                   _connected;
-	Mackie::JogWheel*      _jog_wheel;
-	Fader*                 _master_fader;
-	float                  _last_master_gain_written;
-	PBD::ScopedConnection   master_connection;
-	bool                   _has_master_display;
-	bool                   _has_master_meter;
+	MackieControlProtocol&             _mcp;
+	SurfacePort*                       _port;
+	surface_type_t                     _stype;
+	uint32_t                           _number;
+	std::string                        _name;
+	bool                               _active;
+	bool                               _connected;
+	MACKIE_NAMESPACE::JogWheel*        _jog_wheel;
+	Fader*                             _master_fader;
+	float                              _last_master_gain_written;
+	PBD::ScopedConnection              master_connection;
+	bool                               _has_master_display;
+	bool                               _has_master_meter;
 	std::shared_ptr<ARDOUR::Stripable> _master_stripable;
+
 	std::string pending_display[2];
 	std::string current_display[2];
 

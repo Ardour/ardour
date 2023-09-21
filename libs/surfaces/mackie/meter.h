@@ -23,9 +23,7 @@
 #include "controls.h"
 #include "midi_byte_array.h"
 
-namespace ArdourSurface {
-
-namespace Mackie {
+namespace ArdourSurface  { namespace MACKIE_NAMESPACE {
 
 class SurfacePort;
 

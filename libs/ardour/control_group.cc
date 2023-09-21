@@ -22,6 +22,8 @@
 
 #include "ardour/control_group.h"
 #include "ardour/gain_control.h"
+#include "ardour/selection.h"
+#include "ardour/stripable.h"
 
 using namespace ARDOUR;
 using namespace PBD;
@@ -53,7 +55,7 @@ ControlGroup::set_mode (Mode m)
 }
 
 void
-ControlGroup::clear ()
+ControlGroup::clear (bool pop)
 {
 	/* we're giving up on all members, so we don't care about their
 	 * DropReferences signals anymore
@@ -75,15 +77,19 @@ ControlGroup::clear ()
 
 	_controls.clear ();
 
-	for (std::vector<std::shared_ptr<AutomationControl> >::iterator c = controls.begin(); c != controls.end(); ++c) {
-		(*c)->set_group (std::shared_ptr<ControlGroup>());
+	for (auto & c : controls) {
+		if (pop) {
+			c->pop_group ();
+		} else {
+			c->set_group (std::shared_ptr<ControlGroup>());
+		}
 	}
 }
 
-ControlList
+AutomationControlList
 ControlGroup::controls () const
 {
-	ControlList c;
+	AutomationControlList c;
 
 	if (_active) {
 		Glib::Threads::RWLock::WriterLock lm (controls_lock);
@@ -107,7 +113,7 @@ ControlGroup::control_going_away (std::weak_ptr<AutomationControl> wac)
 }
 
 int
-ControlGroup::remove_control (std::shared_ptr<AutomationControl> ac)
+ControlGroup::remove_control (std::shared_ptr<AutomationControl> ac, bool pop)
 {
 	int erased;
 
@@ -117,7 +123,11 @@ ControlGroup::remove_control (std::shared_ptr<AutomationControl> ac)
 	}
 
 	if (erased) {
-		ac->set_group (std::shared_ptr<ControlGroup>());
+		if (pop) {
+			ac->pop_group ();
+		} else {
+			ac->set_group (std::shared_ptr<ControlGroup>());
+		}
 	}
 
 	/* return zero if erased, non-zero otherwise */
@@ -125,7 +135,7 @@ ControlGroup::remove_control (std::shared_ptr<AutomationControl> ac)
 }
 
 int
-ControlGroup::add_control (std::shared_ptr<AutomationControl> ac)
+ControlGroup::add_control (std::shared_ptr<AutomationControl> ac, bool push)
 {
 	if (ac->parameter() != _parameter) {
 		if (_parameter.type () != PluginAutomation) {
@@ -152,7 +162,12 @@ ControlGroup::add_control (std::shared_ptr<AutomationControl> ac)
 
 	/* Inserted */
 
-	ac->set_group (shared_from_this());
+
+	if (push) {
+		ac->push_group (shared_from_this());
+	} else {
+		ac->set_group (shared_from_this());
+	}
 
 	ac->DropReferences.connect_same_thread (member_connections, boost::bind (&ControlGroup::control_going_away, this, std::weak_ptr<AutomationControl>(ac)));
 
@@ -202,10 +217,51 @@ ControlGroup::set_group_value (std::shared_ptr<AutomationControl> control, doubl
 	}
 }
 
+void
+ControlGroup::fill_from_stripable_list (StripableList& sl, Evoral::Parameter const & p)
+{
+	/* Very unfortunate that gain control is special cased. Routes do not
+	 * call ::add_control() for their gain control, but instead pass it to
+	 * their Amp processor which takes a certain kind of ownership of it.
+	 */
+
+	switch (p.type()) {
+	case GainAutomation:
+		for (auto & s : sl) {
+			std::shared_ptr<AutomationControl> ac = s->gain_control ();
+			if (ac) {
+				add_control (ac, true);
+			}
+		}
+		break;
+	case TrimAutomation:
+		for (auto & s : sl) {
+			std::shared_ptr<AutomationControl> ac = s->trim_control ();
+			if (ac) {
+				add_control (ac, true);
+			}
+		}
+		break;
+	default:
+		for (auto & s : sl) {
+			std::shared_ptr<AutomationControl> ac = s->automation_control (p, true);
+			if (ac) {
+				add_control (ac, true);
+			}
+		}
+	}
+}
+
+void
+ControlGroup::pop_all ()
+{
+	clear (true);
+}
+
 /*---- GAIN CONTROL GROUP -----------*/
 
-GainControlGroup::GainControlGroup ()
-	: ControlGroup (GainAutomation)
+GainControlGroup::GainControlGroup (ARDOUR::AutomationType t)
+	: ControlGroup (t)
 {
 }
 
@@ -214,10 +270,12 @@ GainControlGroup::get_min_factor (gain_t factor)
 {
 	/* CALLER MUST HOLD READER LOCK */
 
-	for (ControlMap::iterator c = _controls.begin(); c != _controls.end(); ++c) {
-		gain_t const g = c->second->get_value();
+	const gain_t min_factor = _controls.begin()->second->desc().from_interface (0.0);
 
-		if ((g + g * factor) >= 0.0f) {
+	for (auto const & c : _controls) {
+		gain_t const g = c.second->get_value();
+
+		if ((g + g * factor) >= min_factor) {
 			continue;
 		}
 
@@ -236,21 +294,23 @@ GainControlGroup::get_max_factor (gain_t factor)
 {
 	/* CALLER MUST HOLD READER LOCK */
 
-	for (ControlMap::iterator c = _controls.begin(); c != _controls.end(); ++c) {
-		gain_t const g = c->second->get_value();
+	const gain_t max_factor = _controls.begin()->second->desc().from_interface (1.0);
+
+	for (auto const & c : _controls) {
+		gain_t const g = c.second->get_value();
 
 		// if the current factor woulnd't raise this route above maximum
-		if ((g + g * factor) <= 1.99526231f) {
+		if ((g + g * factor) <= max_factor) {
 			continue;
 		}
 
 		// if route gain is already at peak, return 0.0f factor
-		if (g >= 1.99526231f) {
+		if (g >= max_factor) {
 			return 0.0f;
 		}
 
 		// factor is calculated so that it would raise current route to max
-		factor = 1.99526231f / g - 1.0f;
+		factor = max_factor / g - 1.0f;
 	}
 
 	return factor;
@@ -318,8 +378,8 @@ GainControlGroup::set_group_value (std::shared_ptr<AutomationControl> control, d
 
 		/* just set entire group */
 
-		for (ControlMap::iterator c = _controls.begin(); c != _controls.end(); ++c) {
-			c->second->set_value (val, Controllable::ForGroup);
+		for (auto & c : _controls) {
+			c.second->set_value (val, Controllable::ForGroup);
 		}
 	}
 }

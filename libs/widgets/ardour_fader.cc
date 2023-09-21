@@ -441,7 +441,7 @@ ArdourFader::on_grab_broken_event (GdkEventGrabBroken* ev)
 		remove_modal_grab();
 		_dragging = false;
 		gdk_pointer_ungrab (GDK_CURRENT_TIME);
-		StopGesture ();
+		StopGesture (0);
 	}
 	return (_tweaks & NoButtonForward) ? true : false;
 }
@@ -454,7 +454,7 @@ ArdourFader::on_button_press_event (GdkEventButton* ev)
 			remove_modal_grab();
 			_dragging = false;
 			gdk_pointer_ungrab (GDK_CURRENT_TIME);
-			StopGesture ();
+			StopGesture (ev->state);
 		}
 		return (_tweaks & NoButtonForward) ? true : false;
 	}
@@ -464,7 +464,7 @@ ArdourFader::on_button_press_event (GdkEventButton* ev)
 	}
 
 	add_modal_grab ();
-	StartGesture ();
+	StartGesture (ev->state);
 	_grab_loc = (_orien == VERT) ? ev->y : ev->x;
 	_grab_start = (_orien == VERT) ? ev->y : ev->x;
 	_grab_window = ev->window;
@@ -491,7 +491,7 @@ ArdourFader::on_button_release_event (GdkEventButton* ev)
 			remove_modal_grab();
 			_dragging = false;
 			gdk_pointer_ungrab (GDK_CURRENT_TIME);
-			StopGesture ();
+			StopGesture (ev->state);
 
 			if (!_hovering) {
 				if (!(_tweaks & NoVerticalScroll)) {
@@ -527,7 +527,7 @@ ArdourFader::on_button_release_event (GdkEventButton* ev)
 		if (_dragging) {
 			remove_modal_grab();
 			_dragging = false;
-			StopGesture ();
+			StopGesture (ev->state);
 			set_adjustment_from_event (ev);
 			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 			return true;

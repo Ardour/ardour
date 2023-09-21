@@ -69,7 +69,7 @@ public:
 	bool assigned_to (VCAManager*, std::shared_ptr<VCA>) const;
 
 protected:
-	virtual SlavableControlList slavables () const = 0;
+	virtual SlavableAutomationControlList slavables () const = 0;
 
 private:
 	bool assign_controls (std::shared_ptr<VCA>);

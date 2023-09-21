@@ -1729,7 +1729,7 @@ Session::trigger_cue_row (int32_t cue)
 
 
 bool
-Session::bang_trigger_at (int32_t route_index, int32_t row_index)
+Session::bang_trigger_at (int32_t route_index, int32_t row_index, float velocity)
 {
 	/* this is a convenience function for simple control surfaces to bang a trigger without any regards to banking */
 
@@ -1747,7 +1747,7 @@ Session::bang_trigger_at (int32_t route_index, int32_t row_index)
 			continue;
 		}
 		if (index == route_index) {
-			r->triggerbox()->bang_trigger_at(row_index);
+			r->triggerbox()->bang_trigger_at(row_index, velocity);
 			return true;
 		}
 		index++;
@@ -1804,6 +1804,26 @@ Session::triggerbox_at (int32_t route_index) const
 		index++;
 	}
 	return std::shared_ptr<TriggerBox>();
+}
+
+void
+Session::clear_cue (int row_index)
+{
+	StripableList sl;
+	get_stripables (sl);
+
+	for (StripableList::iterator s = sl.begin (); s != sl.end (); ++s) {
+		std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route> (*s);
+		if (!r || !r->triggerbox ()) {
+			continue;
+		}
+		/* we're only interested in Trigger Tracks */
+		if (!(r->presentation_info ().trigger_track ())) {
+			continue;
+		}
+
+		r->triggerbox()->clear_cue (row_index);
+	}
 }
 
 int

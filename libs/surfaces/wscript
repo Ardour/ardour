@@ -11,14 +11,6 @@ LIBSURFACES_VERSION = '4.1.0'
 # micro increment <=> no interface changes
 LIBSURFACES_LIB_VERSION = '4.1.0'
 
-# Variables for 'waf dist'
-APPNAME = 'libsurfaces'
-VERSION = LIBSURFACES_VERSION
-
-# Mandatory variables
-top = '.'
-out = 'build'
-
 children = [
     'faderport',
     'faderport8',
@@ -28,7 +20,8 @@ children = [
     'us2400',
     'launch_control_xl',
     'osc',
-    'console1'
+    'console1',
+    'launchpad_pro'
 ]
 
 def options(opt):
@@ -89,6 +82,7 @@ def build(bld):
     bld.recurse('launch_control_xl')
     bld.recurse('osc')
     bld.recurse('console1')
+    bld.recurse('launchpad_pro')
 
     if bld.is_defined('BUILD_WIIMOTE'):
         bld.recurse('wiimote')

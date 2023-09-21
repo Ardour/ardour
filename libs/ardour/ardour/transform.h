@@ -131,9 +131,9 @@ public:
 
 	Transform(const Program& prog);
 
-	Command* operator()(std::shared_ptr<ARDOUR::MidiModel> model,
-	                    Temporal::Beats                      position,
-	                    std::vector<Notes>&                  seqs);
+	PBD::Command* operator()(std::shared_ptr<ARDOUR::MidiModel> model,
+	                         Temporal::Beats                      position,
+	                         std::vector<Notes>&                  seqs);
 
 	std::string name() const { return std::string ("transform"); }
 

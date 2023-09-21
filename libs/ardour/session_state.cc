@@ -158,8 +158,6 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Temporal;
 
-#define DEBUG_UNDO_HISTORY(msg) DEBUG_TRACE (PBD::DEBUG::UndoHistory, string_compose ("%1: %2\n", __LINE__, msg));
-
 void
 Session::pre_engine_init (string fullpath)
 {
@@ -642,11 +640,6 @@ Session::create (const string& session_template, BusProfile const * bus_profile,
 				<< endmsg;
 			return -1;
 		}
-
-	} else {
-		(void) TempoMap::write_copy(); /* we are going to throw away the return value and replace the map entirely */
-		TempoMap::WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
-		TempoMap::update (new_map);;
 	}
 
 	/* set up Master Out and Monitor Out if necessary */
@@ -1272,6 +1265,8 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 
 	node->set_property ("id-counter", ID::counter());
 
+	node->set_property ("rg-counter", Region::next_group_id ());
+
 	node->set_property ("name-counter", name_id_counter ());
 
 	/* save the event ID counter */
@@ -1745,7 +1740,7 @@ Session::set_state (const XMLNode& node, int version)
 		} else {
 			/* required to convert positions during session load */
 			Temporal::set_sample_rate (_base_sample_rate);
-			/* all other initialization is correctly done by 
+			/* all other initialization is correctly done by
 			 * Session::immediately_post_engine
 			 */
 		}
@@ -1783,6 +1778,13 @@ Session::set_state (const XMLNode& node, int version)
 	node.get_property (X_("end-is-free"), _session_range_is_free);  //deprecated, but use old values if they are in the config
 
 	node.get_property (X_("session-range-is-free"), _session_range_is_free);
+
+	uint64_t rg_counter;
+	if (node.get_property (X_("rg-counter"), rg_counter)) {
+		Region::set_next_group_id (rg_counter);
+	} else {
+		Region::set_next_group_id (0);
+	}
 
 	uint64_t counter;
 	if (node.get_property (X_("id-counter"), counter)) {
@@ -3319,8 +3321,8 @@ Session::add_command (Command* const cmd)
 		error << "Attempted to add an UNDO command without a current transaction.  ignoring command (" << cmd->name() <<  ")" << endl;
 		return;
 	}
-	DEBUG_UNDO_HISTORY (
-	    string_compose ("Current Undo Transaction %1, adding command: %2",
+	DEBUG_TRACE (DEBUG::UndoHistory,
+	    string_compose ("Current Undo Transaction %1, adding command: %2\n",
 	                    _current_trans->name (),
 	                    cmd->name ()));
 	_current_trans->add_command (cmd);
@@ -3364,17 +3366,14 @@ Session::begin_reversible_command (GQuark q)
 	*/
 
 	if (_current_trans == 0) {
-		DEBUG_UNDO_HISTORY (string_compose (
-		    "Begin Reversible Command, new transaction: %1", g_quark_to_string (q)));
+		DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("Begin Reversible Command, new transaction: %1\n", g_quark_to_string (q)));
 
 		/* start a new transaction */
 		assert (_current_trans_quarks.empty ());
 		_current_trans = new UndoTransaction();
 		_current_trans->set_name (g_quark_to_string (q));
 	} else {
-		DEBUG_UNDO_HISTORY (
-		    string_compose ("Begin Reversible Command, current transaction: %1",
-		                    _current_trans->name ()));
+		DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("Begin Reversible Command, current transaction: %1\n", _current_trans->name ()));
 	}
 
 	_current_trans_quarks.push_front (q);
@@ -3383,14 +3382,14 @@ Session::begin_reversible_command (GQuark q)
 void
 Session::abort_reversible_command ()
 {
-	if (_current_trans != 0) {
-		DEBUG_UNDO_HISTORY (
-		    string_compose ("Abort Reversible Command: %1", _current_trans->name ()));
-		_current_trans->clear();
-		delete _current_trans;
-		_current_trans = 0;
-		_current_trans_quarks.clear();
+	if (!_current_trans) {
+		return;
 	}
+	DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("Abort Reversible Command: %1\n", _current_trans->name ()));
+	_current_trans->clear();
+	delete _current_trans;
+	_current_trans = nullptr;
+	_current_trans_quarks.clear();
 }
 
 bool
@@ -3415,23 +3414,23 @@ Session::commit_reversible_command (Command *cmd)
 	struct timeval now;
 
 	if (cmd) {
-		DEBUG_UNDO_HISTORY (
-		    string_compose ("Current Undo Transaction %1, adding command: %2",
+		DEBUG_TRACE (DEBUG::UndoHistory,
+		    string_compose ("Current Undo Transaction %1, adding command: %2\n",
 		                    _current_trans->name (),
 		                    cmd->name ()));
 		_current_trans->add_command (cmd);
 	}
 
-	DEBUG_UNDO_HISTORY (
-	    string_compose ("Commit Reversible Command, current transaction: %1",
+	DEBUG_TRACE (DEBUG::UndoHistory,
+	    string_compose ("Commit Reversible Command, current transaction: %1\n",
 	                    _current_trans->name ()));
 
 	_current_trans_quarks.pop_front ();
 
 	if (!_current_trans_quarks.empty ()) {
-		DEBUG_UNDO_HISTORY (
+		DEBUG_TRACE (DEBUG::UndoHistory,
 		    string_compose ("Commit Reversible Command, transaction is not "
-		                    "top-level, current transaction: %1",
+		                    "top-level, current transaction: %1\n",
 		                    _current_trans->name ()));
 		/* the transaction we're committing is not the top-level one */
 		return;
@@ -3439,20 +3438,23 @@ Session::commit_reversible_command (Command *cmd)
 
 	if (_current_trans->empty()) {
 		/* no commands were added to the transaction, so just get rid of it */
-		DEBUG_UNDO_HISTORY (
+		DEBUG_TRACE (DEBUG::UndoHistory,
 		    string_compose ("Commit Reversible Command, No commands were "
-		                    "added to current transaction: %1",
+		                    "added to current transaction: %1\n",
 		                    _current_trans->name ()));
 		delete _current_trans;
-		_current_trans = 0;
+		_current_trans = nullptr;
 		return;
 	}
 
 	gettimeofday (&now, 0);
 	_current_trans->set_timestamp (now);
 
+	DEBUG_TRACE (DEBUG::UndoHistory,
+	             string_compose ("Commit Reversible Command, add to history %1\n",
+	                             _current_trans->name ()));
 	_history.add (_current_trans);
-	_current_trans = 0;
+	_current_trans = nullptr;
 }
 
 static bool
@@ -4582,6 +4584,10 @@ Session::config_changed (std::string p, bool ours)
 		if (follow && !transport_state_rolling() && !loading()) {
 			request_locate (transport_sample(), true);
 		}
+	} else if (p == "default-time-domain") {
+		Temporal::TimeDomain td = config.get_default_time_domain ();
+		std::cerr << "Setting time domain\n";
+		set_time_domain (td);
 	}
 
 	set_dirty ();

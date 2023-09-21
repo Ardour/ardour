@@ -45,6 +45,7 @@ private:
 	Gtk::CheckButton range_button;
 	Gtk::CheckButton mark_button;
 	Gtk::CheckButton cdmark_button;
+	Gtk::CheckButton section_button;
 	Gtk::CheckButton cuemark_button;
 	Gtk::CheckButton video_button;
 

@@ -51,7 +51,7 @@ Return::Return (Session& s, bool internal)
 {
 	/* never muted */
 
-	std::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation), time_domain()));
+	std::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (GainAutomation), *this));
 	_gain_control = std::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter (GainAutomation), gl));
 	add_control (_gain_control);
 

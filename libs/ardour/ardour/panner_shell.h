@@ -51,7 +51,7 @@ class Pannable;
 class LIBARDOUR_API PannerShell : public SessionObject
 {
 public:
-	PannerShell (std::string name, Session&, std::shared_ptr<Pannable>, Temporal::TimeDomain, bool is_send = false);
+	PannerShell (std::string name, Session&, std::shared_ptr<Pannable>, Temporal::TimeDomainProvider const &, bool is_send = false);
 	virtual ~PannerShell ();
 
 	std::string describe_parameter (Evoral::Parameter param);

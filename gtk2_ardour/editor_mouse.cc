@@ -270,6 +270,8 @@ Editor::get_mouse_mode_action(MouseMode m) const
 		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-draw"));
 	case MouseTimeFX:
 		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-timefx"));
+	case MouseGrid:
+		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-grid"));
 	case MouseContent:
 		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-content"));
 	case MouseAudition:
@@ -376,6 +378,15 @@ Editor::mouse_mode_toggled (MouseMode m)
 		_draw_box_spacer.hide();
 	}
 
+	if (mouse_mode == MouseGrid) {
+		grid_box.show();
+		_grid_box_spacer.show ();
+		_canvas_grid_zone->set_ignore_events (false);
+	} else {
+		grid_box.hide ();
+		_grid_box_spacer.hide ();
+		_canvas_grid_zone->set_ignore_events (true);
+	}
 
 	if (internal_editing()) {
 
@@ -421,6 +432,11 @@ Editor::mouse_mode_toggled (MouseMode m)
 	update_all_enter_cursors ();
 
 	MouseModeChanged (); /* EMIT SIGNAL */
+
+	if ((was_internal && !internal_editing()) ||
+	    (!was_internal && internal_editing())) {
+		queue_redisplay_track_views ();
+	}
 }
 
 bool
@@ -443,10 +459,16 @@ Editor::update_time_selection_display ()
 		break;
 	case MouseDraw:
 		/* Clear regions, but not time or tracks, since that
-		 would destroy the range selection rectangle, which we need to stick
-		 around for AutomationRangeDrag. */
+		 * would destroy the range selection rectangle, which we need to stick
+		 * around for AutomationRangeDrag. */
 		selection->clear_regions ();
 		selection->clear_playlists ();
+		/* .. unless there is no track selection (i.e. arrangement section
+		 * selection). In which case time is cleared too.
+		 */
+		if (selection->tracks.empty ()) {
+			selection->clear_time ();
+		}
 		break;
 	case MouseContent:
 		/* This handles internal edit.
@@ -478,6 +500,7 @@ Editor::update_time_selection_display ()
 		selection->clear_tracks ();
 		break;
 
+	case MouseGrid:
 	default:
 		/*Clear everything */
 		selection->clear_objects();
@@ -619,7 +642,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		case ControlPointItem:
 			/* for object/track exclusivity, we don't call set_selected_track_as_side_effect (op); */
 
-			if (eff_mouse_mode != MouseRange) {
+			if (eff_mouse_mode == MouseContent) {
 				if (event->button.button != 3) {
 					_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
 				} else {
@@ -821,10 +844,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
-	case MappingBarItem:
-		choose_mapping_drag (item, event);
-		return true;
-
 	case TempoBarItem:
 	case TempoCurveItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
@@ -854,6 +873,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 	case SamplesRulerItem:
 	case MinsecRulerItem:
 	case MarkerBarItem:
+	case SectionMarkerBarItem:
 		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
 		    && !ArdourKeyboard::indicates_constraint (event->button.state)) {
 			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
@@ -1236,16 +1256,17 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
+	case MouseGrid:
+		/* MouseGrid clicks are handled by _canvas_grid_zone */
+		assert (0);
+		abort(); /*NOTREACHED*/
+		break;
+
 	case MouseDraw:
 		switch (item_type) {
 		case GainLineItem:
 			_drags->set (new LineDrag (this, item), event);
 			return true;
-
-		case ControlPointItem:
-			_drags->set (new ControlPointDrag (this, item), event);
-			return true;
-			break;
 
 		case SelectionItem:
 			{
@@ -1335,6 +1356,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 			}
 
+		case ControlPointItem:
+			item = &(static_cast<ControlPoint*> (item->get_data ("control_point"))->line().grab_item());
+			/*fallthrough*/
+		case AutomationLineItem:
 		case AutomationTrackItem:
 			{
 				AutomationTimeAxisView* atv = static_cast<AutomationTimeAxisView*> (item->get_data ("trackview"));
@@ -1342,10 +1367,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					_drags->set (new AutomationDrawDrag (this, atv->base_item(), Temporal::AudioTime), event);
 				}
 			}
-			break;
-
-		case AutomationLineItem:
-			_drags->set (new LineDrag (this, item), event);
 			break;
 
 		case NoteItem:
@@ -1720,8 +1741,8 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case RangeMarkerBarItem:
 			case TransportMarkerBarItem:
 			case CdMarkerBarItem:
+			case SectionMarkerBarItem:
 			case TempoBarItem:
-			case MappingBarItem:
 			case TempoCurveItem:
 			case MeterBarItem:
 			case VideoBarItem:
@@ -1730,6 +1751,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case MinsecRulerItem:
 			case BBTRulerItem:
 			case SelectionMarkerItem:
+				snap_to (where, Temporal::RoundNearest, SnapToGrid_Scaled, false);
 				popup_ruler_menu (where, item_type);
 				break;
 
@@ -1762,6 +1784,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				}
 				break;
 
+			case GridZoneItem:
 			default:
 				break;
 			}
@@ -1842,6 +1865,13 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			return true;
 
+		case SectionMarkerBarItem:
+			if (!_dragging_playhead && Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
+				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);
+				mouse_add_new_marker (where, Location::IsSection);
+			}
+			return true;
+
 		case CueMarkerBarItem:
 			if (!_dragging_playhead) {
 				/* if we get here then a dragged range wasn't done */
@@ -1850,7 +1880,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			return true;
 
-		case MappingBarItem:
+		case GridZoneItem:
 			return true;
 
 		case TempoBarItem:
@@ -1909,6 +1939,12 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			default:
 				break;
 			}
+			break;
+
+		case MouseGrid:
+			/* MouseGrid clicks are handled by _canvas_grid_zone */
+			assert (0);
+			abort(); /*NOTREACHED*/
 			break;
 
 		case MouseAudition:
@@ -2014,7 +2050,7 @@ Editor::enter_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_
 	choose_canvas_cursor_on_entry (item_type);
 
 	switch (item_type) {
-	case MappingBarItem:
+	case GridZoneItem:
 		break;
 
 	case ControlPointItem:
@@ -2162,7 +2198,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	}
 
 	switch (item_type) {
-	case MappingBarItem:
+	case GridZoneItem:
 		break;
 
 	case ControlPointItem:
@@ -2312,6 +2348,27 @@ Editor::scrub (samplepos_t sample, double current_x)
 	last_scrub_x = current_x;
 }
 
+GridType
+Editor::determine_mapping_grid_snap(timepos_t t)
+{
+	timepos_t snapped          = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBeat);
+	timepos_t snapped_to_bar   = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBar);
+	const double unsnapped_pos = time_to_pixel_unrounded (t);
+	const double snapped_pos   = time_to_pixel_unrounded (snapped);
+
+	double ruler_line_granularity = UIConfiguration::instance().get_ruler_granularity () * UIConfiguration::instance().get_ui_scale(); // in pixels
+
+	if (std::abs (snapped_pos - unsnapped_pos) < ruler_line_granularity) {
+		if (snapped == snapped_to_bar) {
+			return GridTypeBar;
+		} else {
+			return GridTypeBeat;
+		}
+	} else {
+		return GridTypeNone;
+	}
+}
+
 bool
 Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_autoscroll)
 {
@@ -2366,45 +2423,24 @@ Editor::motion_handler (ArdourCanvas::Item* item, GdkEvent* event, bool from_aut
 				}
 			}
 
+			/* show snapped cursor */
 			timepos_t t (where);
 			bool move_snapped_cursor = true;
-
-			if (item == mapping_bar) {
-
-				/* Snap to the nearest beat, and figure out how
-				 * many pixels from the pointer cursor that is.
-				 */
-
-				Editor::EnterContext* ctx = get_enter_context (MappingBarItem);
-
-				if (ctx) {
-					timepos_t snapped = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBeat);
-					timepos_t snapped_to_bar = _snap_to_bbt (t, RoundNearest, SnapToGrid_Unscaled, GridTypeBar);
-					const double unsnapped_pos = time_to_pixel_unrounded (t);
-					const double snapped_pos = time_to_pixel_unrounded (snapped);
-
-					if (std::abs (snapped_pos - unsnapped_pos) < 10 * UIConfiguration::instance().get_ui_scale()) {
-
-						/* Close to a beat, so snap the mapping
-						 * cursor *and* the snapped cursor to
-						 * the beat.
-						 */
-
-						if (snapped == snapped_to_bar) {
-							ctx->cursor_ctx->change (cursors()->time_fx);
-						} else {
-							/* snapped to a beat, not a bar .... we'll implement a TWIST here */
-							ctx->cursor_ctx->change (cursors()->expand_left_right);
-						}
-					} else {
-						ctx->cursor_ctx->change (cursors()->grabber);
-					}
-				}
-			}
-
 			if (move_snapped_cursor) {
 				snap_to_with_modifier (t, event);
 				set_snapped_cursor_position (t);
+			}
+
+			/* if tempo-mapping, set a cursor to indicate whether we are close to a bar line, beat line, or neither */
+			if (mouse_mode == MouseGrid && item == _canvas_grid_zone) {
+				GridType gt = determine_mapping_grid_snap (t);
+				if (gt == GridTypeBar) {
+					set_canvas_cursor (cursors()->time_fx);
+				} else if (gt == GridTypeBeat) {
+					set_canvas_cursor (cursors()->expand_left_right);
+				} else {
+					set_canvas_cursor (cursors()->grabber);
+				}
 			}
 		}
 
@@ -2987,32 +3023,35 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 {
 	/* In a departure from convention, this event is not handled by a widget
 	 * 'on' the ruler-bar, like a tempo marker, but is instead handled by the
-	 * mapping-bar widget itself. The intent is for the user to feel that they
+	 * whole canvas. The intent is for the user to feel that they
 	 * are manipulating the 'beat and bar grid' which may or may not have tempo
 	 * markers already assigned at the point under the mouse.
 	 */
 
-	if (item != mapping_bar) {
+	bool ignored;
+	samplepos_t where;
+
+	if (!mouse_sample (where, ignored)) {
 		return;
 	}
 
-	if (_cursor_stack.empty()) {
-		return;
-	}
-
+	/* if tempo-mapping, set a cursor to indicate whether we are close to a bar line, beat line, or neither */
 	bool ramped = false;
-	if (_cursor_stack.back() == cursors()->time_fx) {
-		/* We are on a BAR line  ... the user can drag the line exactly where it's needed */
-		ramped = false;
-	} else if (_cursor_stack.back() == cursors()->expand_left_right) {
-		/* We are on a BEAT line  ... we will nudge the beat line via ramping, without moving any tempo markers */
-		ramped = true;
-	} else {
-		/* Not close enough to a beat line to start any mapping drag */
-		return;
+	if (mouse_mode == MouseGrid && item ==_canvas_grid_zone) {
+		GridType gt = determine_mapping_grid_snap (timepos_t (where));
+		if (gt == GridTypeBar) {
+			ramped = false;
+		} else if (gt == GridTypeBeat) {
+			ramped = true;
+		} else {
+			return; // neither a bar nor a beat; don't start a drag
+		}
 	}
 
-	Temporal::TempoMap::WritableSharedPtr map = begin_tempo_mapping ();
+	/* The reversible command starts here, must be ended/aborted in drag */
+	begin_reversible_command ("");
+	domain_bounce_info = new Temporal::DomainBounceInfo (Temporal::BeatTime, Temporal::AudioTime, should_stretch_markers());
+	Temporal::TempoMap::WritableSharedPtr map = begin_tempo_mapping (*domain_bounce_info);
 
 	/* Decide between a mid-twist, which we do if the
 	 * pointer is between two tempo markers, and an end-stretch,
@@ -3047,11 +3086,11 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 	/* Create a new marker, or use the one under the mouse */
 
 	if (tempo.bbt() == bbt) {
-		std::cerr << "we are on the RIGHT side of an EXISTING tempo marker" << bbt << " == " << tempo.bbt() << "\n";
 
 		/* special case 1: we are on the right side of the FIRST marker: do not allow the user to manipulate the very first (session global) tempo */
 		if (!before) {
 			abort_tempo_mapping ();
+			abort_reversible_command ();
 			return;
 		}
 
@@ -3063,8 +3102,6 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		}
 
 	} else if ((after && after->bbt() == bbt )) {
-		std::cerr << "we are on the LEFT side of an EXISTING tempo marker" << bbt << " == " << after->bbt() << "\n";
-
 		before = const_cast<TempoPoint*> (&tempo);
 		focus = after;
 
@@ -3082,8 +3119,6 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		focus = &tempo;
 
 	} else {
-		std::cerr << "ADD TEMPO MARKER " << bbt << " != " << tempo.bbt() << "\n";
-
 		/* Add a new tempo marker at the nearest beat point
 		   (essentially the snapped grab point for the drag), so that
 		   it becomes the middle one of three used by the twist tempo
@@ -3095,27 +3130,22 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		TempoPoint& added = const_cast<TempoPoint&> (map->set_tempo (copied_no_ramp, bbt));
 		focus = &added;
 		reset_tempo_marks ();
-
-		map->dump (std::cerr);
 	}
 
-	/* Reversible commands start here, must be ended/aborted in drag */
+	/* Reversible commands get named here, now that we understand what we're doing */
 
 	if (at_end) {
-		begin_reversible_command (_("tempo mapping: end-stretch"));
-		std::cerr << "END STRETCH\n";
+		_session->current_reversible_command()->set_name (_("tempo mapping: end-stretch"));
 		_drags->set (new MappingEndDrag (this, item, map, tempo, *focus, *before_state), event);
 		return;
 	}
 
 	if (before && focus && after) {
-		std::cerr << "TWIST\n";
-		begin_reversible_command (_("tempo mapping: mid-twist"));
+		_session->current_reversible_command()->set_name (_("tempo mapping: mid-twist"));
 		_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after, *before_state, ramped), event);
 	} else if (ramped && focus && after) {
 		/* special case 4: user is manipulating a beat line after the INITIAL tempo marker, so there is no prior marker*/
-		std::cerr << "TWIST ON START\n";
-		begin_reversible_command (_("tempo mapping: mid-twist"));
+		_session->current_reversible_command()->set_name (_("tempo mapping: mid-twist"));
 		before = focus; /* this is unused in MappingTwistDrag, when ramped is true, but let's not pass in garbage */
 		_drags->set (new MappingTwistDrag (this, item, map, *before, *focus, *after, *before_state, ramped), event);
 	} else {

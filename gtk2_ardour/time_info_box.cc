@@ -266,8 +266,7 @@ TimeInfoBox::selection_changed ()
 	case Editing::MouseObject:
 		if (selection.regions.empty()) {
 			if (selection.points.empty()) {
-				Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action ("MouseMode", "set-mouse-mode-object-range");
-				if (tact->get_active() && !selection.time.empty()) {
+				if (!selection.time.empty()) {
 					/* show selected range */
 					selection_start->set_off (false);
 					selection_end->set_off (false);

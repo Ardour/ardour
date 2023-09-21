@@ -37,6 +37,7 @@
 #include "pbd/error.h"
 
 namespace PBD {
+class Command;
 
 /** A base class for properties whose state is a container of other
  *  things.  Its behaviour is `specialised' for this purpose in that
@@ -224,7 +225,7 @@ class /*LIBPBD_API*/ SequenceProperty : public PropertyBase
 		}
 	}
 
-	void rdiff (std::vector<Command*>& cmds) const {
+	void rdiff (std::vector<PBD::Command*>& cmds) const {
 		for (typename Container::const_iterator i = begin(); i != end(); ++i) {
 			if ((*i)->changed ()) {
 				StatefulDiffCommand* sdc = new StatefulDiffCommand (*i);

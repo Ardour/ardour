@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Donner StarryPad">
+
+<!-- Created 2023-07-14 by Albert Gräf. The Donner StarryPad is a cheap and
+     cheerful 4x4 drum pad controller sold by Donner with some transport
+     buttons, two faders (F1, F2), and two encoders (K1, K2), which makes it
+     worthwhile to have it as a generic MIDI surface in Ardour.
+
+     The map assigns the play/pause and rec buttons to the corresponding
+     transport controls, F1/K1 to the selected track (gain/pan), and F2/K2 to
+     the master bus (gain/pan). The A/B buttons of the device are mapped
+     rather arbitrarily to the transport-start and loop-toggle functions for
+     now. You may want to change these below, or comment them out if you
+     prefer to assign them with MIDI learn instead. -->
+
+<!-- Transport Control -->
+
+<!-- NOTE: To make this work, you need to change the play/pause button with
+     the StarryPad editor software so that it acts as a toggle switch (like
+     the rec button does by default). This is the most reasonable setting
+     anyway, and here we need it so that we can map this single button to both
+     transport-roll and transport-stop. -->
+
+<Binding msg="b0 3c 7f" function="transport-roll"/>
+<Binding msg="b0 3c 0"  function="transport-stop"/>
+<Binding msg="b0 3e 7f" function="rec-enable"/>
+<Binding msg="b0 3e 0"  function="rec-disable"/>
+
+<!-- A/B buttons (comment or change as needed) -->
+
+<Binding channel="1" ctl="26" function="transport-start"/>
+<Binding channel="1" ctl="27" function="loop-toggle"/>
+
+<!-- Gain/Pan controls -->
+
+<Binding channel="1" ctl="20" uri="/route/gain S1"/>
+<Binding channel="1" ctl="28" uri="/route/pandirection S1"/>
+<Binding channel="1" ctl="21" uri="/bus/gain master"/>
+<Binding channel="1" ctl="9"  uri="/bus/pandirection master"/>
+
+</ArdourMIDIBindings>

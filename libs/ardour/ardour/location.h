@@ -29,6 +29,7 @@
 #include <list>
 #include <iostream>
 #include <map>
+#include <vector>
 
 #include <sys/types.h>
 
@@ -38,6 +39,8 @@
 #include "pbd/stateful.h"
 #include "pbd/statefuldestructible.h"
 
+#include "temporal/domain_provider.h"
+#include "temporal/domain_swap.h"
 #include "temporal/types.h"
 
 #include "ardour/ardour.h"
@@ -65,6 +68,7 @@ public:
 		IsClockOrigin = 0x200,
 		IsXrun = 0x400,
 		IsCueMarker = 0x800,
+		IsSection = 0x1000,
 	};
 
 	Location (Session &);
@@ -106,6 +110,7 @@ public:
 	void set_is_clock_origin (bool yn, void* src);
 	void set_skip (bool yn);
 	void set_skipping (bool yn);
+	void set_section (bool yn);
 
 	bool is_auto_punch () const { return _flags & IsAutoPunch; }
 	bool is_auto_loop () const { return _flags & IsAutoLoop; }
@@ -119,6 +124,7 @@ public:
 	bool is_clock_origin() const { return _flags & IsClockOrigin; }
 	bool is_skipping() const { return (_flags & IsSkip) && (_flags & IsSkipping); }
 	bool is_xrun() const { return _flags & IsXrun; }
+	bool is_section() const { return _flags & IsSection; }
 	bool matches (Flags f) const { return _flags & f; }
 
 	/* any range with start < end  -- not a marker */
@@ -172,9 +178,13 @@ public:
 	int set_state (const XMLNode&, int version);
 
 	Temporal::TimeDomain position_time_domain() const { return _start.time_domain(); }
-	void set_position_time_domain (Temporal::TimeDomain ps);
 
-	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+	/* Similar to, but not identical to the Temporal::TimeDomainSwapper API */
+
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
+
+	void set_time_domain (Temporal::TimeDomain);
 
 	class ChangeSuspender {
 		public:
@@ -209,7 +219,7 @@ private:
 		Lock,
 		Cue,
 		Scene,
-		Domain
+		Domain,
 	};
 
 	void emit_signal (Signal);
@@ -228,13 +238,16 @@ private:
 	std::set<Signal> _postponed_signals;
 
 	std::shared_ptr<SceneChange> _scene_change;
+
+	void set_position_time_domain (Temporal::TimeDomain);
 };
 
 /** A collection of session locations including unique dedicated locations (loop, punch, etc) */
-class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDestructible
+class LIBARDOUR_API Locations : public SessionHandleRef, public PBD::StatefulDestructible, public Temporal::TimeDomainProvider, public Temporal::TimeDomainSwapper
 {
 public:
 	typedef std::list<Location *> LocationList;
+	typedef std::pair<Temporal::timepos_t, Location*> LocationPair;
 
 	Locations (Session &);
 	~Locations ();
@@ -287,6 +300,9 @@ public:
 	timepos_t first_mark_before (timepos_t const &, bool include_special_ranges = false);
 	timepos_t first_mark_after (timepos_t const &, bool include_special_ranges = false);
 
+	Location* next_section (Location*, timepos_t&, timepos_t&) const;
+	Location* section_at (timepos_t const&, timepos_t&, timepos_t&) const;
+
 	void marks_either_side (timepos_t const &, timepos_t &, timepos_t &) const;
 
 	/** Return range with closest start pos to the where argument
@@ -301,7 +317,11 @@ public:
 
 	void find_all_between (timepos_t const & start, timepos_t const & end, LocationList&, Location::Flags);
 
-	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+	void set_time_domain (Temporal::TimeDomain);
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
+
+	void time_domain_changed ();
 
 	PBD::Signal1<void,Location*> current_changed;
 
@@ -326,6 +346,8 @@ public:
 	}
 
 private:
+	void sorted_section_locations (std::vector<LocationPair>&) const;
+
 	LocationList locations;
 	Location*    current_location;
 	mutable Glib::Threads::RWLock _lock;

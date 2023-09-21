@@ -110,7 +110,7 @@ public:
 
 	typedef boost::function<void (SessionEvent*)> RTeventCallback;
 
-	std::shared_ptr<ControlList> controls; /* apply to */
+	std::shared_ptr<AutomationControlList> controls; /* apply to */
 	std::shared_ptr<RouteList> routes;     /* apply to */
 	boost::function<void (void)> rt_slot;    /* what to call in RT context */
 	RTeventCallback              rt_return;  /* called after rt_slot, with this event as an argument */

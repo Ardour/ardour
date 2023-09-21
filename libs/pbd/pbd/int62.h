@@ -26,7 +26,7 @@
 #include <exception>
 #include <limits>
 
-/* int62_t is a class the functions as a 62 bit signed integer complete with a flag that can be used to indicate a boolean property of
+/* int62_t is a class that functions as a 63 bit signed integer with a flag that can be used to indicate a boolean property of
  * the object. The flag is stored inside the 64 bit integer used by the object (as a single bit), and all operations on the object that
  * change either the flag or the value are atomic.
  *
@@ -38,10 +38,12 @@ class alignas(16) int62_t {
   protected:
 	/* std::atomic<> takes care of memory barriers for us; the actual load and stores
 	   are atomic on architectures that we're likely to care about.
+	   The 2nd highest bit is used for the flag, and the highest bit is used for the sign.
+	   Watch out for the impact of two's complement and overflow to and from the flag bit.
 	*/
 	std::atomic<int64_t> v;
 
-	/* this defines the bit used to indicate "flag" or not */
+	/* this defines the bit used to indicate "flag" or not: the 2nd highest bit */
 	static const int64_t flagbit_mask = (1LL<<62);
 
   protected:

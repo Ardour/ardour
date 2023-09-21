@@ -1010,13 +1010,13 @@ MeterStrip::color () const
 }
 
 void
-MeterStrip::gain_start_touch ()
+MeterStrip::gain_start_touch (int)
 {
 	_route->gain_control ()->start_touch (timepos_t (_session->transport_sample ()));
 }
 
 void
-MeterStrip::gain_end_touch ()
+MeterStrip::gain_end_touch (int)
 {
 	_route->gain_control ()->stop_touch (timepos_t (_session->transport_sample ()));
 }

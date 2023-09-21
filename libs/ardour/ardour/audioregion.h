@@ -161,12 +161,12 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	/* automation */
 
 	std::shared_ptr<Evoral::Control>
-	control(const Evoral::Parameter& id, bool create=false) {
+		control(const Evoral::Parameter& id, bool create=false) {
 		return _automatable.control(id, create);
 	}
 
 	virtual std::shared_ptr<const Evoral::Control>
-	control(const Evoral::Parameter& id) const {
+		control(const Evoral::Parameter& id) const {
 		return _automatable.control(id);
 	}
 

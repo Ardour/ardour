@@ -33,6 +33,8 @@ class LIBARDOUR_API ControlGroupMember
 	   mediated by the ControlGroup, not by operating on the member.
 	*/
 	virtual void set_group (std::shared_ptr<ControlGroup>) = 0;
+	virtual bool push_group (std::shared_ptr<ControlGroup>) = 0;
+	virtual bool pop_group () = 0;
 };
 
 } /* namespace */

@@ -39,9 +39,11 @@
 #include "pbd/command.h"
 #include "pbd/libpbd_visibility.h"
 
+namespace PBD {
+
 typedef sigc::slot<void> UndoAction;
 
-class LIBPBD_API UndoTransaction : public Command
+class LIBPBD_API UndoTransaction : public PBD::Command
 {
 public:
 	UndoTransaction ();
@@ -55,8 +57,10 @@ public:
 		return _clearing;
 	}
 
-	void add_command (Command* const);
-	void remove_command (Command* const);
+	void add_command (PBD::Command* const);
+	void remove_command (PBD::Command* const);
+
+	std::list<PBD::Command*>::size_type size() const { return actions.size(); }
 
 	void operator() ();
 	void undo ();
@@ -75,7 +79,7 @@ public:
 	}
 
 private:
-	std::list<Command*> actions;
+	std::list<PBD::Command*> actions;
 	struct timeval      _timestamp;
 	bool                _clearing;
 
@@ -139,5 +143,7 @@ private:
 
 	void remove (UndoTransaction*);
 };
+
+} /* namespace */
 
 #endif /* __lib_pbd_undo_h__ */

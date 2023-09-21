@@ -1,8 +1,5 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-from waflib import Options
-from waflib import TaskGen
-import os
 
 # Version of this package (even if built as a child)
 MAJOR = '4'
@@ -16,14 +13,7 @@ ZCONVOLVER_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 # micro increment <=> no interface changes
 ZCONVOLVER_LIB_VERSION = '4.0.0'
 
-# Variables for 'waf dist'
-APPNAME = 'zita-convolver'
-VERSION = ZCONVOLVER_VERSION
 I18N_PACKAGE = 'libzita-convolver'
-
-# Mandatory variables
-top = '.'
-out = 'build'
 
 def options(opt):
     autowaf.set_options(opt)

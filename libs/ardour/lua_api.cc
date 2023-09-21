@@ -115,7 +115,8 @@ ARDOUR::LuaAPI::new_luaproc_with_time_domain (Session *s, const string& name, Te
 		return std::shared_ptr<Processor> ();
 	}
 
-	return std::shared_ptr<Processor> (new PluginInsert (*s, td, p));
+	/* Lua processor takes time domain from session */
+	return std::shared_ptr<Processor> (new PluginInsert (*s, *s, p));
 }
 
 std::shared_ptr<Processor>
@@ -244,7 +245,8 @@ ARDOUR::LuaAPI::new_plugin_with_time_domain (Session *s, const string& name, ARD
 		}
 	}
 
-	return std::shared_ptr<Processor> (new PluginInsert (*s, td, p));
+	/* Lua processor takes time domain from session */
+	return std::shared_ptr<Processor> (new PluginInsert (*s, *s, p));
 }
 
 bool

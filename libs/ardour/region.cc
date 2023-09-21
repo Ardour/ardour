@@ -80,6 +80,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<float> shift;
 		PBD::PropertyDescriptor<uint64_t> layering_index;
 		PBD::PropertyDescriptor<std::string> tags;
+		PBD::PropertyDescriptor<uint64_t> reg_group;
 		PBD::PropertyDescriptor<bool> contents;
 
 /* these properties are used as a convenience for announcing changes to state, but aren't stored as properties */
@@ -89,6 +90,10 @@ namespace ARDOUR {
 }
 
 PBD::Signal2<void,std::shared_ptr<ARDOUR::RegionList>,const PropertyChange&> Region::RegionsPropertyChanged;
+
+/* these static values are used by Region Groups to assign a group-id across the scope of an operation that might span many function calls */
+uint64_t Region::_retained_group_id = 0;
+uint64_t Region::_next_group_id     = 0;
 
 void
 Region::make_property_quarks ()
@@ -147,6 +152,8 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for contents = %1\n",	Properties::contents.property_id));
 	Properties::time_domain.property_id = g_quark_from_static_string (X_("time_domain"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for time_domain = %1\n",	Properties::time_domain.property_id));
+	Properties::reg_group.property_id = g_quark_from_static_string (X_("rgroup"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region_group = %1\n", Properties::reg_group.property_id));
 }
 
 void
@@ -177,6 +184,7 @@ Region::register_properties ()
 	add_property (_shift);
 	add_property (_layering_index);
 	add_property (_tags);
+	add_property (_reg_group);
 	add_property (_contents);
 }
 
@@ -208,6 +216,7 @@ Region::register_properties ()
 	, _shift (Properties::shift, 1.0) \
 	, _layering_index (Properties::layering_index, 0) \
 	, _tags (Properties::tags, "") \
+	, _reg_group (Properties::reg_group, 0) \
 	, _contents (Properties::contents, false)
 
 #define REGION_COPY_STATE(other) \
@@ -240,6 +249,7 @@ Region::register_properties ()
 	, _shift (Properties::shift, other->_shift) \
 	, _layering_index (Properties::layering_index, other->_layering_index) \
 	, _tags (Properties::tags, other->_tags) \
+	, _reg_group (Properties::reg_group, other->_reg_group) \
 	, _contents (Properties::contents, other->_contents)
 
 /* derived-from-derived constructor (no sources in constructor) */
@@ -507,7 +517,27 @@ Region::set_length_internal (timecnt_t const & len)
 	 * component of _length, and set_position() can only be used to set the
 	 * position component.
 	 */
+
 	_last_length = timecnt_t (_length.val().distance(), _last_length.position());
+
+	std::shared_ptr<Playlist> pl (playlist());
+
+	if (pl) {
+		Temporal::TimeDomain td (pl->time_domain());
+
+		/* Note: timecnt_t::time_domain() returns the domain for the
+		 * length component, *not* the position.
+		 */
+
+		if (td != len.time_domain()) {
+			timecnt_t l = _length.val();
+			l.set_time_domain (td);
+			_length = l;
+			return;
+		}
+	}
+	/* either no playlist or time domain for distance is not changing */
+
 	_length = timecnt_t (len.distance(), _length.val().position());
 }
 
@@ -608,7 +638,20 @@ Region::set_position_time_domain (Temporal::TimeDomain td)
 	timecnt_t t (length ().distance (), p);
 	_length = t;
 
-	/* ensure time-domain matches Datatype -- this may trigger in old broken sessions */
+	/* for a while, we allowed the time domain of _length to not match the
+	 * region time domain. This ought to be prevented as of August 7th 2023
+	 * or earlier, but let's not abort() out if asked to load sessions
+	 * where this happened. Note that for reasons described in the previous
+	 * comment, this could still cause issues during reading from disk.
+	 */
+
+	if  (_length.val().time_domain () != time_domain ()) {
+		_length.non_const_val().set_time_domain (time_domain());
+#ifndef NDEBUG
+		std::cerr << "Fixed up a" << (time_domain() == Temporal::AudioTime ? "n audio" : " music") << "-timed region called " << name() << std::endl;
+#endif
+	}
+
 	assert (_length.val().time_domain () == time_domain ());
 
 	send_change (Properties::time_domain);
@@ -689,6 +732,10 @@ Region::set_position_unchecked (timepos_t const & pos)
 void
 Region::set_position_internal (timepos_t const & pos)
 {
+	if (position() == pos) {
+		return;
+	}
+
 	/* We emit a change of Properties::length even if the position hasn't changed
 	 * (see Region::set_position), so we must always set this up so that
 	 * e.g. Playlist::notify_region_moved doesn't use an out-of-date last_position.
@@ -700,20 +747,41 @@ Region::set_position_internal (timepos_t const & pos)
 	 * position component.
 	 */
 
-	if (position() != pos) {
+	_last_length.set_position (position());
 
-		_last_length.set_position (position());
-		_length = timecnt_t (_length.val().distance(), pos);
+	std::shared_ptr<Playlist> pl (playlist());
 
-		/* check that the new _position wouldn't make the current
-		 * length impossible - if so, change the length.
-		 *
-		 * XXX is this the right thing to do?
+	if (pl) {
+		Temporal::TimeDomain td (pl->time_domain());
+
+		/* Note: timecnt_t::time_domain() returns the domain for the
+		 * length component, *not* the position.
 		 */
-		if (timepos_t::max (_length.val().time_domain()).earlier (_length) < position()) {
-			_last_length = _length;
-			_length = position().distance (timepos_t::max (position().time_domain()));
+
+		if (td != _length.val().position().time_domain()) {
+			timecnt_t l = _length.val();
+			l.set_position (pos);
+			l.set_time_domain (td);
+			_length = l;
+		} else {
+			/* time domain of position not changing */
+			_length = timecnt_t (_length.val().distance(), pos);
 		}
+
+	} else {
+		/* no playlist, so time domain is free to change */
+		_length = timecnt_t (_length.val().distance(), pos);
+	}
+
+
+	/* check that the new _position wouldn't make the current
+	 * length impossible - if so, change the length.
+	 *
+	 * XXX is this the right thing to do?
+	 */
+	if (timepos_t::max (_length.val().time_domain()).earlier (_length) < position()) {
+		_last_length = _length;
+		_length = position().distance (timepos_t::max (position().time_domain()));
 	}
 }
 
@@ -2193,13 +2261,42 @@ Region::time_domain() const
 }
 
 void
-Region::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+Region::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
-	assert (Temporal::domain_swap);
-
-	if (_length.val().time_domain() == from) {
-		timecnt_t& l (_length.non_const_val());
-		l.set_time_domain (to);
-		Temporal::domain_swap->add (l);
+	if (locked()) {
+		return;
 	}
+
+	/* recall that the _length member is a timecnt_t, and so holds both
+	 * position *and* length.
+	 */
+
+	if (_length.val().time_domain() != cmd.from) {
+		return;
+	}
+
+	timecnt_t& l (_length.non_const_val());
+
+	timecnt_t  saved (l);
+	saved.set_time_domain (cmd.to);
+
+	cmd.counts.insert (std::make_pair (&l, saved));
+}
+
+void
+Region::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+	clear_changes ();
+
+	Temporal::TimeDomainCntChanges::iterator tc = cmd.counts.find (&_length.non_const_val());
+	if (tc == cmd.counts.end()) {
+		/* must have already been in the correct time domain */
+		return;
+	}
+
+	/* switch domains back (but with modified TempoMap, presumably */
+	tc->second.set_time_domain (cmd.from);
+	_length = tc->second;
+
+	send_change (Properties::length);
 }

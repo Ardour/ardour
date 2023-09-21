@@ -73,8 +73,8 @@ private:
 class LIBARDOUR_API AutomationList : public Evoral::ControlList, public PBD::StatefulDestructible
 {
 public:
-	AutomationList (const Evoral::Parameter& id, const Evoral::ParameterDescriptor& desc, Temporal::TimeDomain);
-	AutomationList (const Evoral::Parameter& id, Temporal::TimeDomain);
+	AutomationList (const Evoral::Parameter& id, const Evoral::ParameterDescriptor& desc, Temporal::TimeDomainProvider const &);
+	AutomationList (const Evoral::Parameter& id, Temporal::TimeDomainProvider const &);
 	AutomationList (const XMLNode&, Evoral::Parameter id);
 	AutomationList (const AutomationList&);
 	AutomationList (const AutomationList&, timepos_t const & start, timepos_t const & end);
@@ -82,7 +82,7 @@ public:
 
 	virtual std::shared_ptr<ControlList> create(const Evoral::Parameter&           id,
 	                                              const Evoral::ParameterDescriptor& desc,
-	                                              Temporal::TimeDomain);
+	                                              Temporal::TimeDomainProvider const &);
 
 	AutomationList& operator= (const AutomationList&);
 
@@ -116,7 +116,7 @@ public:
 	XMLNode& get_state () const;
 	int set_state (const XMLNode &, int version);
 
-	Command* memento_command (XMLNode* before, XMLNode* after);
+	PBD::Command* memento_command (XMLNode* before, XMLNode* after);
 
 	bool operator!= (const AutomationList &) const;
 

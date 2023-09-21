@@ -67,7 +67,6 @@ namespace Evoral {
 
 class PublicEditor;
 class MidiStreamView;
-class MidiScroomer;
 class PianoRollHeader;
 class StepEntry;
 class StepEditor;
@@ -114,12 +113,16 @@ public:
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&);
 	void use_midnam_info ();
 
+	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
+
 protected:
 	void start_step_editing ();
 	void stop_step_editing ();
 	void processors_changed (ARDOUR::RouteProcessorChange);
 
 private:
+	void _midnam_channel_changed();
+
 	sigc::signal<void, std::string, std::string>  _midi_patch_settings_changed;
 
 	void setup_midnam_patches ();
@@ -137,10 +140,9 @@ private:
 
 	void set_note_mode (ARDOUR::NoteMode mode, bool apply_to_selection = false);
 	void set_color_mode (ARDOUR::ColorMode, bool force = false, bool redisplay = true, bool apply_to_selection = false);
-	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
 	void route_active_changed ();
 	void note_range_changed ();
-	void contents_height_changed ();
+	void parameter_changed (std::string const &);
 
 	void update_scroomer_visbility (uint32_t, LayerDisplay);
 
@@ -151,7 +153,6 @@ private:
 	bool                          _asked_all_automation;
 	std::string                   _effective_model;
 	std::string                   _effective_mode;
-	MidiScroomer*                 _range_scroomer;
 	PianoRollHeader*              _piano_roll_header;
 	ARDOUR::NoteMode              _note_mode;
 	Gtk::RadioMenuItem*           _note_mode_item;
@@ -164,6 +165,7 @@ private:
 	MidiChannelSelectorWindow*    _channel_selector;
 	ArdourWidgets::ArdourDropdown _midnam_model_selector;
 	ArdourWidgets::ArdourDropdown _midnam_custom_device_mode_selector;
+	ArdourWidgets::ArdourDropdown _midnam_channel_selector;
 
 	Gtk::CheckMenuItem*          _step_edit_item;
 	Gtk::Menu*                    default_channel_menu;
@@ -204,6 +206,10 @@ private:
 	std::shared_ptr<AutomationTimeAxisView> velocity_track;
 	Gtk::CheckMenuItem* velocity_menu_item;
 	void create_velocity_automation_child (Evoral::Parameter const &, bool show);
+
+	void update_patch_selector ();
+	void mouse_mode_changed ();
+	PBD::ScopedConnection mouse_mode_connection;
 };
 
 #endif /* __ardour_midi_time_axis_h__ */

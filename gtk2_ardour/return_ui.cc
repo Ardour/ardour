@@ -40,7 +40,7 @@ ReturnUI::ReturnUI (Gtk::Window* parent, std::shared_ptr<Return> r, Session* ses
 	:_return (r)
 	, _gpm (session, 250)
 {
-	_gpm.set_controls (std::shared_ptr<Route>(), r->meter(), r->amp(), r->gain_control());
+	_gpm.set_controls (std::shared_ptr<Stripable>(), r->meter(), r->amp(), r->gain_control());
 
 	_hbox.pack_start (_gpm, true, true);
 	set_name (X_("ReturnUIFrame"));

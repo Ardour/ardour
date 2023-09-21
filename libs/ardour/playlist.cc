@@ -143,6 +143,7 @@ RegionListProperty::get_content_from_xml (XMLNode const& node) const
 
 Playlist::Playlist (Session& sess, string nom, DataType type, bool hide)
 	: SessionObject (sess, nom)
+	, Temporal::TimeDomainProvider ((type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime), sess)
 	, regions (*this)
 	, _type (type)
 {
@@ -154,6 +155,7 @@ Playlist::Playlist (Session& sess, string nom, DataType type, bool hide)
 
 Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide)
 	: SessionObject (sess, "unnamed playlist")
+	, Temporal::TimeDomainProvider ((type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime), sess)
 	, regions (*this)
 	, _type (type)
 {
@@ -171,6 +173,7 @@ Playlist::Playlist (Session& sess, const XMLNode& node, DataType type, bool hide
 
 Playlist::Playlist (std::shared_ptr<const Playlist> other, string namestr, bool hide)
 	: SessionObject (other->_session, namestr)
+	, Temporal::TimeDomainProvider ((other->_type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime), other->_session)
 	, regions (*this)
 	, _type (other->_type)
 	, _orig_track_id (other->_orig_track_id)
@@ -204,6 +207,7 @@ Playlist::Playlist (std::shared_ptr<const Playlist> other, string namestr, bool 
 
 Playlist::Playlist (std::shared_ptr<const Playlist> other, timepos_t const & start, timepos_t const & cnt, string str, bool hide)
 	: SessionObject(other->_session, str)
+	, Temporal::TimeDomainProvider ((other->_type == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime), other->_session)
 	, regions (*this)
 	, _type (other->_type)
 	, _orig_track_id (other->_orig_track_id)
@@ -775,6 +779,7 @@ Playlist::add_region_internal (std::shared_ptr<Region> region, timepos_t const &
 	}
 
 	region->set_position_unchecked (position);
+	region->set_position_time_domain (time_domain());
 
 	regions.insert (upper_bound (regions.begin (), regions.end (), region, cmp), region);
 	all_regions.insert (region);
@@ -915,37 +920,54 @@ Playlist::remove_gaps (timecnt_t const & gap_threshold, timecnt_t const & leave_
 }
 
 void
-Playlist::get_equivalent_regions (std::shared_ptr<Region> other, vector<std::shared_ptr<Region> >& results)
+Playlist::get_equivalent_regions (std::shared_ptr<Region> basis, vector<std::shared_ptr<Region>>& results)
 {
-	switch (Config->get_region_equivalence ()) {
-		case Exact:
-			for (auto const & r : regions) {
-				if (r->exact_equivalent (other)) {
-					results.push_back (r);
+	if (basis->is_explicitly_ungrouped ()) {
+		/*user explicitly ungrouped this region, so we bail */
+		return;
+	}
+
+	if (basis->is_implicitly_ungrouped ()) {
+		/* no group defined ... we must guess ... fallback to 'region equivalence' behavior */
+
+		switch (Config->get_region_equivalence ()) {
+			case Exact:
+				for (auto const& r : regions) {
+					if (r->exact_equivalent (basis)) {
+						results.push_back (r);
+					}
 				}
-			}
-			break;
-		case LayerTime:
-			for (auto const & r : regions) {
-				if (r->layer_and_time_equivalent (other)) {
-					results.push_back (r);
+				break;
+			case LayerTime:
+				for (auto const& r : regions) {
+					if (r->layer_and_time_equivalent (basis)) {
+						results.push_back (r);
+					}
 				}
-			}
-			break;
-		case Enclosed:
-			for (auto const & r : regions) {
-				if (r->enclosed_equivalent (other)) {
-					results.push_back (r);
+				break;
+			case Enclosed:
+				for (auto const& r : regions) {
+					if (r->enclosed_equivalent (basis)) {
+						results.push_back (r);
+					}
 				}
-			}
-			break;
-		case Overlap:
-			for (auto const & r : regions) {
-				if (r->overlap_equivalent (other)) {
-					results.push_back (r);
+				break;
+			case Overlap:
+				for (auto const& r : regions) {
+					if (r->overlap_equivalent (basis)) {
+						results.push_back (r);
+					}
 				}
-			}
-			break;
+				break;
+		}
+		return;
+	}
+
+	/* region has an implicit or explicit group-id; return all regions with the same group-id */
+	for (auto const& r : regions) {
+		if (r->region_group () == basis->region_group ()) {
+			results.push_back (r);
+		}
 	}
 }
 
@@ -1041,6 +1063,7 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 					plist.add (Properties::automatic, true);
 					plist.add (Properties::left_of_split, true);
 					plist.add (Properties::right_of_split, true);
+					plist.add (Properties::reg_group, Region::get_retained_group_id(true));
 
 					/* see note in ::_split_region()
 					 */
@@ -1060,6 +1083,7 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 				plist.add (Properties::name, new_name);
 				plist.add (Properties::automatic, true);
 				plist.add (Properties::right_of_split, true);
+				plist.add (Properties::reg_group, Region::get_retained_group_id());
 
 				region = RegionFactory::create (current, pos1.distance (pos3), plist, true, &thawlist );
 
@@ -1137,6 +1161,7 @@ Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bo
 					plist.add (Properties::name, new_name);
 					plist.add (Properties::automatic, true);
 					plist.add (Properties::right_of_split, true);
+					plist.add (Properties::reg_group, Region::get_retained_group_id());
 
 					region = RegionFactory::create (current, plist, true, &thawlist);
 
@@ -1287,6 +1312,9 @@ Playlist::paste (std::shared_ptr<Playlist> other, timepos_t const & position, fl
 			while (itimes--) {
 				for (auto const & r : other->regions) {
 					std::shared_ptr<Region> copy_of_region = RegionFactory::create (r, true, false, &rl1.thawlist);
+
+					/* we want newly-pasted regions to share one (implicit) group-id */
+					copy_of_region->set_region_group(false);
 
 					/* put these new regions on top of all existing ones, but preserve
 					   the ordering they had in the original playlist.
@@ -1511,6 +1539,7 @@ Playlist::_split_region (std::shared_ptr<Region> region, timepos_t const &  play
 		plist.add (Properties::length, after);
 		plist.add (Properties::name, after_name);
 		plist.add (Properties::right_of_split, true);
+		plist.add (Properties::reg_group, Region::get_retained_group_id());
 
 		/* same note as above */
 		right = RegionFactory::create (region, before, plist, true, &thawlist);
@@ -3500,24 +3529,49 @@ Playlist::rdiff_and_add_command (Session* session)
 	session->add_command (new StatefulDiffCommand (shared_from_this ()));
 }
 
-Temporal::TimeDomain
-Playlist::time_domain() const
-{
-	switch (_type) {
-	case DataType::AUDIO:
-		return Temporal::AudioTime;
-	default:
-		break;
-	}
-
-	return Temporal::BeatTime;
-}
-
 void
-Playlist::globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to)
+Playlist::start_domain_bounce (Temporal::DomainBounceInfo& cmd)
 {
 	RegionReadLock rlock (this);
 	for (auto & region  : regions) {
-		region->globally_change_time_domain (from, to);
+		region->start_domain_bounce (cmd);
 	}
 }
+
+
+void
+Playlist::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
+{
+	ThawList thawlist;
+
+	clear_changes ();
+
+	{
+		RegionWriteLock rlock (this);
+		for (auto & region  : regions) {
+			thawlist.add (region);
+			region->finish_domain_bounce (cmd);
+		}
+	}
+
+	thawlist.release ();
+	rdiff_and_add_command (&_session);
+}
+
+void
+Playlist::time_domain_changed ()
+{
+#if 0
+	using namespace Temporal;
+
+	TimeDomainProvider::time_domain_changed ();
+
+	Temporal::TimeDomain to = time_domain();
+	Temporal::TimeDomain from = (to == AudioTime ? BeatTime : AudioTime);
+
+	for (auto & region  : regions) {
+		region->swap_time_domain (from, to);
+	}
+#endif
+}
+

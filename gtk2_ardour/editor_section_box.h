@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2006-2007 John Anderson
- * Copyright (C) 2012-2015 Paul Davis <paul@linuxaudiosystems.com>
+ * Copyright (C) 2023 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2023 Ben Loftis <ben@harrisonaudio.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,29 +17,25 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "mackie_control_protocol.h"
+#ifndef __gtk_ardour_section_box_h__
+#define __gtk_ardour_section_box_h__
 
-#include "midi_byte_array.h"
-#include "surface_port.h"
+#include "ardour/types.h"
 
-#include "pbd/pthread_utils.h"
-#include "pbd/error.h"
+#include "canvas/rectangle.h"
+#include "canvas/types.h"
 
-#include "midi++/types.h"
-#include "midi++/port.h"
-#include "midi++/manager.h"
-#include "pbd/i18n.h"
+class Editor;
 
-#include <unistd.h>
-#include <fcntl.h>
-#include <errno.h>
-#include <string.h>
+class SectionBox : public ArdourCanvas::Rectangle
+{
+public:
+	SectionBox (Editor&, ArdourCanvas::Item*);
 
-#include <iostream>
-#include <string>
-#include <vector>
+	void set_position (samplepos_t, samplepos_t);
 
-using namespace std;
-using namespace Mackie;
-using namespace PBD;
+private:
+	Editor& _editor;
+};
 
+#endif // __gtk_ardour_editor_cursors_h__

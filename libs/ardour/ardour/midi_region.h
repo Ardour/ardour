@@ -116,6 +116,9 @@ class LIBARDOUR_API MidiRegion : public Region
 	                  timecnt_t const &               read_length,
 	                  MidiChannelFilter*              filter) const;
 
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
+
   protected:
 
 	virtual bool can_trim_start_before_source_start () const {

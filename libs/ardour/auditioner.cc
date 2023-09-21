@@ -153,7 +153,7 @@ Auditioner::load_synth ()
 
 	std::shared_ptr<Plugin> p = audition_synth_info->load (_session);
 	if (p) {
-		asynth = std::shared_ptr<Processor> (new PluginInsert (_session, time_domain(), p));
+		asynth = std::shared_ptr<Processor> (new PluginInsert (_session, *this, p));
 	}
 
 	if (asynth) {

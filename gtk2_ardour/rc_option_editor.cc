@@ -2717,7 +2717,7 @@ RCOptionEditor::RCOptionEditor ()
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_editor_stereo_only_meters)
 		     ));
 
-	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("MIDI Regions")));
+	add_option (_("Appearance/Editor"), new OptionEditorHeading (_("MIDI Editing")));
 
 	add_option (_("Appearance/Editor"),
 		    new BoolOption (
@@ -2751,6 +2751,18 @@ RCOptionEditor::RCOptionEditor ()
 		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_note_color_for_velocity),
 		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_note_color_for_velocity)
 		            ));
+
+	ComboOption<Editing::NoteNameDisplay>* nnd = new ComboOption<Editing::NoteNameDisplay> (
+		"note-name-display",
+		_("Display note names in MIDI track headers"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_note_name_display),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_note_name_display)
+		);
+	nnd->add (Editing::Always, _("Always"));
+	nnd->add (Editing::WithMIDNAM, _("When Available"));
+	nnd->add (Editing::Never, _("Never"));
+
+	add_option (_("Appearance/Editor"), nnd);
 
 	add_option (_("Appearance/Editor"), new OptionEditorBlank ());
 
@@ -3056,6 +3068,18 @@ These settings will only take effect after %1 is restarted.\n\
 		add_option (_("Appearance/Quirks"), bo);
 	}
 
+#if !(defined PLATFORM_WINDOWS || defined __APPLE__)
+	bo = new BoolOption (
+			"allow-to-resize-engine-dialog",
+			_("Allow to resize Engine Dialog"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_allow_to_resize_engine_dialog),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_allow_to_resize_engine_dialog)
+			);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget (),
+				_("On some XWayland systems the engine-dialog is blank when shown a second time (from the main menu). Allowing to resize the window works around this oddity."));
+	add_option (_("Appearance/Quirks"), bo);
+#endif
+
 	add_option (_("Appearance/Quirks"), new OptionEditorBlank ());
 #if (!defined USE_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE || defined __APPLE__)
 	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
@@ -3120,12 +3144,9 @@ These settings will only take effect after %1 is restarted.\n\
 	parameter_changed ("enable-translation");
 #endif // ENABLE_NLS
 
+	add_option (_("Appearance/Regions"), new OptionEditorHeading (_("Region Information")));
 
-	/* EDITOR *******************************************************************/
-
-	add_option (_("Editor"), new OptionEditorHeading (_("Region Information")));
-
-	add_option (_("Editor"),
+	add_option (_("Appearance/Regions"),
 			new BoolOption (
 		     "show-region-xrun-markers",
 		     _("Show xrun markers in regions"),
@@ -3133,7 +3154,7 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_xrun_markers)
 		     ));
 
-	add_option (_("Editor"),
+	add_option (_("Appearance/Regions"),
 			new BoolOption (
 		     "show-region-cue-markers",
 		     _("Show cue markers in regions"),
@@ -3141,7 +3162,7 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_cue_markers)
 		     ));
 
-	add_option (_("Editor"),
+	add_option (_("Appearance/Regions"),
 	     new BoolComboOption (
 		     "show-region-gain-envelopes",
 		     _("Show gain envelopes in audio regions"),
@@ -3150,6 +3171,11 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_region_gain),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_region_gain)
 		     ));
+
+
+
+	/* EDITOR *******************************************************************/
+
 
 	add_option (_("Editor"), new OptionEditorHeading (_("Scroll and Zoom Behaviors")));
 
@@ -3400,8 +3426,20 @@ These settings will only take effect after %1 is restarted.\n\
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_rulers_follow_grid)
 		     ));
 
-	add_option (_("Editor/Snap"), new OptionEditorHeading (_("When \"Snap\" is enabled, snap to:")));
+	add_option (_("Editor/Snap"), new OptionEditorHeading (_("Snap Target Mode:")));
 
+	ComboOption<SnapTarget> *stm = new ComboOption<SnapTarget> (
+		    "snap-target",
+		    _("When the Grid is enabled, snap to"),
+		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_target),
+		    sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_target));
+
+	stm->add(SnapTargetGrid,  _("Grid"));
+	stm->add(SnapTargetOther, _("Snap Targets"));
+	stm->add(SnapTargetBoth,  _("Both the Grid and Snap Targets"));
+	add_option (_("Editor/Snap"), stm);
+
+	add_option (_("Editor/Snap"), new OptionEditorHeading (_("Snap Targets:")));
 
 	add_option (_("Editor/Snap"),
 	     new BoolOption (
@@ -3441,14 +3479,6 @@ These settings will only take effect after %1 is restarted.\n\
 		     _("Region Ends"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_region_end),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_region_end)
-		     ));
-
-	add_option (_("Editor/Snap"),
-	     new BoolOption (
-		     "snap-to-grid",
-		     _("Grid"),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_snap_to_grid),
-		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_snap_to_grid)
 		     ));
 
 	add_option (_("Editor/Modifiers"), new OptionEditorHeading (_("Keyboard Modifiers")));
@@ -4519,22 +4549,6 @@ These settings will only take effect after %1 is restarted.\n\
 			string_compose (_("<b>When enabled</b> the metronome will remain silent if %1 is <b>not recording</b>."), PROGRAM_NAME));
 	add_option (_("Metronome"), bo);
 	add_option (_("Metronome"), new OptionEditorBlank ());
-
-	/* TEMPO RELATED STUFF */
-
-	add_option (_("Metronome"), new OptionEditorHeading (_("Tempo")));
-
-	ComboOption<Editing::TempoEditBehavior>* teb = new ComboOption<Editing::TempoEditBehavior> (
-		"default-tempo-edit-behavior",
-		_("Default tempo ruler state for new sessions"),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_tempo_edit_behavior),
-		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_tempo_edit_behavior));
-	teb->add (Editing::TempoMapping, _("mapping a recorded performance"));
-	teb->add (Editing::TempoChanging, _("constructing a tempo map from scratch"));
-
-	add_option (_("Metronome"), teb);
-	Gtkmm2ext::UI::instance()->set_tip (teb->tip_widget(),
-	                                    _("Choose between constructing a tempo map from scratch or mapping a recorded performance as the default tempo ruler state"));
 
 	/* CONTROL SURFACES *********************************************************/
 

@@ -133,6 +133,10 @@ StartupFSM::start ()
 	DEBUG_TRACE (DEBUG::GuiStartup, string_compose (X_("State at startup: %1\n"), enum_2_string (_state)));
 
 	switch (_state) {
+	case NotWaiting:
+		abort();
+		break;
+
 	case WaitingForPreRelease:
 		show_pre_release_dialog ();
 		break;
@@ -199,6 +203,10 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 	 */
 
 	switch (_state) {
+	case NotWaiting:
+		abort();
+		break;
+
 	case WaitingForPreRelease:
 		switch (dialog_id) {
 		case ApplicationPseudoDialog:
@@ -556,11 +564,22 @@ StartupFSM::get_session_parameters_from_command_line (bool new_session_required)
 }
 
 bool
-StartupFSM::get_session_parameters_from_path (string const & path, string const & template_name, bool new_session_required)
+StartupFSM::get_session_parameters_from_path (string const & path_, string const & template_name, bool new_session_required)
 {
-	if (path.empty()) {
+	if (path_.empty()) {
 		/* use GUI to ask the user */
 		return false;
+	}
+
+	string path (path_);
+
+	/*  ... did the  user give us a path or just a name? */
+
+	if (path.find (G_DIR_SEPARATOR) == string::npos) {
+		/* user gave session name with no path info, use
+		   default session folder.
+		*/
+		path = Glib::build_filename (Config->get_default_session_parent_dir (), path);
 	}
 
 	if (Glib::file_test (path.c_str(), Glib::FILE_TEST_EXISTS)) {
@@ -613,21 +632,10 @@ StartupFSM::get_session_parameters_from_path (string const & path, string const 
 
 	}
 
-	/*  Everything after this involves a new session
-	 *
-	 *  ... did the  user give us a path or just a name?
-	 */
+	/* Everything after this involves a new session */
 
-	if (path.find (G_DIR_SEPARATOR) == string::npos) {
-		/* user gave session name with no path info, use
-		   default session folder.
-		*/
-		session_name = ARDOUR_COMMAND_LINE::session_name;
-		session_path = Glib::build_filename (Config->get_default_session_parent_dir (), session_name);
-	} else {
-		session_name = basename_nosuffix (path);
-		session_path = path;
-	}
+	session_name = basename_nosuffix (path);
+	session_path = path;
 
 	session_template = string ();
 
@@ -705,8 +713,9 @@ StartupFSM::check_session_parameters (bool must_be_new)
 {
 	bool requested_new = false;
 
-	session_name = session_dialog->session_name (requested_new);
-	session_path = session_dialog->session_folder ();
+	session_name        = session_dialog->session_name (requested_new);
+	session_path        = session_dialog->session_folder ();
+	session_domain      = session_dialog->session_domain ();
 	session_name_edited = session_dialog->was_new_name_edited ();
 
 	if (must_be_new) {

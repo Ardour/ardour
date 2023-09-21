@@ -44,9 +44,7 @@ namespace ARDOUR {
 	class ChannelCount;
 }
 
-namespace ArdourSurface {
-
-namespace Mackie {
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 class Control;
 class Surface;

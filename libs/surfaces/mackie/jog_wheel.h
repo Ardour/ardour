@@ -26,12 +26,9 @@
 #include <deque>
 #include <queue>
 
-namespace ArdourSurface {
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 class MackieControlProtocol;
-
-namespace Mackie
-{
 
 class JogWheel
 {

@@ -116,7 +116,7 @@ private:
 	bool pitch_bend_timeout ();
 
 	void pitch_bend_event_handler (int);
-	void pitch_bend_release ();
+	void pitch_bend_release (int);
 	void pitch_bend_update_tooltip (int);
 	void pitch_slider_adjusted ();
 

@@ -4697,9 +4697,13 @@ MidiRegionView::get_grid_beats (timepos_t const & pos) const
 Temporal::Beats
 MidiRegionView::get_draw_length_beats (timepos_t const & pos) const
 {
+	if (midi_view()->note_mode() == Percussive) {
+		return Temporal::Beats (0, 1);
+	}
+
 	PublicEditor& editor  = trackview.editor();
 	bool          success = false;
-	Temporal::Beats beats   = editor.get_draw_length_as_beats (success, pos);
+	Temporal::Beats beats = editor.get_draw_length_as_beats (success, pos);
 
 	if (!success) {
 		beats = Temporal::Beats (1, 0);

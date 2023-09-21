@@ -74,6 +74,7 @@ VirtualKeyboardWindow::VirtualKeyboardWindow ()
 	_piano_velocity.append_text_item ("32");
 	_piano_velocity.append_text_item ("64");
 	_piano_velocity.append_text_item ("82");
+	_piano_velocity.append_text_item ("96");
 	_piano_velocity.append_text_item ("100");
 	_piano_velocity.append_text_item ("127");
 #endif
@@ -614,7 +615,7 @@ VirtualKeyboardWindow::pitch_bend_event_handler (int val)
 }
 
 void
-VirtualKeyboardWindow::pitch_bend_release ()
+VirtualKeyboardWindow::pitch_bend_release (int)
 {
 	_pitch_adjustment.set_value (8192);
 }

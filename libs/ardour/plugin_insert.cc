@@ -76,8 +76,8 @@ using namespace PBD;
 
 const string PluginInsert::port_automation_node_name = "PortAutomation";
 
-PluginInsert::PluginInsert (Session& s, Temporal::TimeDomain td, std::shared_ptr<Plugin> plug)
-	: Processor (s, (plug ? plug->name() : string ("toBeRenamed")), td)
+PluginInsert::PluginInsert (Session& s, Temporal::TimeDomainProvider const & tdp, std::shared_ptr<Plugin> plug)
+	: Processor (s, (plug ? plug->name() : string ("toBeRenamed")), tdp)
 	, _sc_playback_latency (0)
 	, _sc_capture_latency (0)
 	, _plugin_signal_latency (0)
@@ -537,7 +537,7 @@ PluginInsert::create_automatable_parameters ()
 
 		const bool automatable = a.find(param) != a.end();
 
-		std::shared_ptr<AutomationList> list(new AutomationList(param, desc, time_domain()));
+		std::shared_ptr<AutomationList> list(new AutomationList(param, desc, *this));
 		std::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
 		if (!automatable || (limit_automatables > 0 && what_can_be_automated ().size() > limit_automatables)) {
 			c->set_flag (Controllable::NotAutomatable);
@@ -557,7 +557,7 @@ PluginInsert::create_automatable_parameters ()
 		if (desc.datatype != Variant::NOTHING) {
 			std::shared_ptr<AutomationList> list;
 			if (Variant::type_is_numeric(desc.datatype)) {
-				list = std::shared_ptr<AutomationList>(new AutomationList(param, desc, time_domain()));
+				list = std::shared_ptr<AutomationList>(new AutomationList(param, desc, *this));
 			}
 			std::shared_ptr<AutomationControl> c (new PluginPropertyControl(this, param, desc, list));
 			if (!Variant::type_is_numeric(desc.datatype)) {
@@ -580,7 +580,7 @@ PluginInsert::create_automatable_parameters ()
 		desc.lower  = 0;
 		desc.upper  = 1;
 
-		std::shared_ptr<AutomationList> list(new AutomationList(param, desc, time_domain()));
+		std::shared_ptr<AutomationList> list(new AutomationList(param, desc, *this));
 		std::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
 
 		add_control (c);
@@ -923,8 +923,8 @@ PluginInsert::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t e
 	bufs.set_count(ChanCount::max(bufs.count(), _configured_out));
 
 	if (with_auto) {
-		std::shared_ptr<ControlList const> cl = _automated_controls.reader ();
-		for (ControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
+		std::shared_ptr<AutomationControlList const> cl = _automated_controls.reader ();
+		for (AutomationControlList::const_iterator ci = cl->begin(); ci != cl->end(); ++ci) {
 			AutomationControl& c = *(ci->get());
 			std::shared_ptr<const Evoral::ControlList> clist (c.list());
 			/* we still need to check for Touch and Latch */

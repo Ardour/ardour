@@ -2,9 +2,27 @@
 from waflib.extras import autowaf as autowaf
 import os
 
-# Mandatory variables
-top = '.'
-out = 'build'
+mackie_sources = [
+            'button.cc',
+            'controls.cc',
+            'device_info.cc',
+            'device_profile.cc',
+            'fader.cc',
+            'gui.cc',
+            'jog.cc',
+            'jog_wheel.cc',
+            'led.cc',
+            'mackie_control_protocol.cc',
+            'mcp_buttons.cc',
+            'meter.cc',
+            'midi_byte_array.cc',
+            'pot.cc',
+            'strip.cc',
+            'subview.cc',
+            'surface.cc',
+            'surface_port.cc',
+            'types.cc'
+]
 
 def options(opt):
     autowaf.set_options(opt)
@@ -14,28 +32,8 @@ def configure(conf):
 
 def build(bld):
     obj = bld(features = 'cxx cxxshlib')
-    obj.source = '''
-            button.cc
-            controls.cc
-            device_info.cc
-            device_profile.cc
-            fader.cc
-            gui.cc
-            interface.cc
-            jog.cc
-            jog_wheel.cc
-            led.cc
-            mackie_control_protocol.cc
-            mcp_buttons.cc
-            meter.cc
-            midi_byte_array.cc
-            pot.cc
-            strip.cc
-            subview.cc
-            surface.cc
-            surface_port.cc
-            types.cc
-    '''
+    obj.source       = list(mackie_sources)
+    obj.source      += [ 'interface.cc' ]
     obj.defines      = [ 'PACKAGE="ardour_mackie"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
     obj.includes     = [ '.' ]
@@ -44,6 +42,20 @@ def build(bld):
     obj.uselib       = 'GTKMM XML OSX'
     obj.use          = 'libardour libardour_cp libgtkmm2ext'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+
+    if bld.is_defined('MIXBUS') or bld.is_defined('MIXBUS32C'):
+        obj = bld(features = 'cxx cxxshlib')
+        obj.source       = list(mackie_sources)
+        obj.source      += [ 'uf8_interface.cc' ]
+        obj.defines      = [ 'PACKAGE="ardour_ssl_uf8"' ]
+        obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
+        obj.defines     += [ 'UF8' ]
+        obj.includes     = [ '.' ]
+        obj.name         = 'libardour_ssl_uf8'
+        obj.target       = 'ardour_ssl_uf8'
+        obj.uselib       = 'GTKMM XML OSX'
+        obj.use          = 'libardour libardour_cp libgtkmm2ext'
+        obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
 def shutdown():
     autowaf.shutdown()

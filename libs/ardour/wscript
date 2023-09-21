@@ -1,22 +1,13 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-from waflib import Options, Task, Tools
+from waflib import Options, Task
 import os
-import sys
 import re
-import subprocess
-import sys
 
 # default state file version for this build
 CURRENT_SESSION_FILE_VERSION = 7002
 
 I18N_PACKAGE = 'ardour'
-
-# Mandatory variables
-top = '.'
-out = 'build'
-
-path_prefix = 'libs/ardour/'
 
 libardour_sources = [
         'amp.cc',
@@ -482,7 +473,7 @@ def build(bld):
     fma_sources = []
     avx512f_sources = []
 
-    if Options.options.fpu_optimization:
+    if not Options.options.no_fpu_optimization:
         if (bld.env['build_target'] == 'i386' or bld.env['build_target'] == 'i686'):
             obj.source += [ 'sse_functions_xmm.cc', 'sse_functions.s', ]
             avx_sources = [ 'sse_functions_avx_linux.cc' ]
@@ -731,17 +722,17 @@ def shutdown():
     autowaf.shutdown()
 
 def i18n(bld):
-    autowaf.build_i18n(bld, top, 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
+    autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
                        'Paul Davis')
 
 def i18n_pot(bld):
-    autowaf.build_i18n(bld, top, 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
+    autowaf.build_i18n(bld, '.', 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
                        'Paul Davis')
 
 def i18n_po(bld):
-    autowaf.build_i18n_po(bld, top, 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
+    autowaf.build_i18n_po(bld, '.', 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
                        'Paul Davis')
 
 def i18n_mo(bld):
-    autowaf.build_i18n_mo(bld, top, 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
+    autowaf.build_i18n_mo(bld, '.', 'libs/ardour', I18N_PACKAGE + str(bld.env['MAJOR']), libardour_sources,
                        'Paul Davis')

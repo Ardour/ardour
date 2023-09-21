@@ -36,7 +36,7 @@ class Session;
 class LIBARDOUR_API MonitorControl : public SlavableAutomationControl
 {
   public:
-	MonitorControl (Session& session, std::string const & name, Monitorable& m, Temporal::TimeDomain);
+	MonitorControl (Session& session, std::string const & name, Monitorable& m, Temporal::TimeDomainProvider const &);
 	~MonitorControl() {}
 
 	MonitorChoice monitoring_choice() const { return static_cast<MonitorChoice> ((int)get_value()); }

@@ -48,7 +48,7 @@ namespace ARDOUR {
 }
 
 MonitorProcessor::MonitorProcessor (Session& s)
-	: Processor (s, X_("MonitorOut"), Temporal::AudioTime)
+	: Processor (s, X_("MonitorOut"), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, solo_cnt (0)
 	, _monitor_active (false)
 

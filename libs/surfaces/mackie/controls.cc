@@ -38,7 +38,7 @@
 
 using namespace std;
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 using ARDOUR::AutomationControl;
 
@@ -112,7 +112,7 @@ Control::stop_touch (Temporal::timepos_t const & when)
 	}
 }
 
-ostream & operator <<  (ostream & os, const ArdourSurface::Mackie::Control & control)
+ostream & operator <<  (ostream & os, const ArdourSurface::MACKIE_NAMESPACE::Control & control)
 {
 	os << typeid (control).name();
 	os << " { ";

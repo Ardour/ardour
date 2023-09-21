@@ -57,9 +57,12 @@ setup_libtemporal_enums ()
 	REGISTER(_OverlapType);
 
 
-	REGISTER_ENUM (Tempo::Ramped);
-	REGISTER_ENUM (Tempo::Constant);
+	REGISTER_CLASS_ENUM (Tempo, Ramped);
+	REGISTER_CLASS_ENUM (Tempo, Constant);
 	REGISTER (_TempoType);
+
+	enum_writer.add_to_hack_table ("Tempo::Ramped", "Ramped");
+	enum_writer.add_to_hack_table ("Tempo::Constant", "Constant");
 }
 
 void Temporal::init ()
@@ -71,6 +74,15 @@ void Temporal::init ()
 
 		libtemporal_initialized = true;
 	}
+}
+
+void Temporal::reset ()
+{
+	set_superclock_ticks_per_second (282240000);  /* 2^10 * 3^2 * 5^4 * 7^2 */
+
+	(void) TempoMap::write_copy(); /* we are going to throw away the return value and replace the map entirely */
+	TempoMap::WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
+	TempoMap::update (new_map);;
 }
 
 std::ostream&

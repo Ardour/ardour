@@ -29,6 +29,7 @@
 
 #include <boost/utility.hpp>
 
+#include "temporal/domain_swap.h"
 #include "temporal/timeline.h"
 #include "temporal/range.h"
 
@@ -76,6 +77,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<float>             shift;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          layering_index;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>       tags;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          reg_group;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              contents; // type doesn't matter here, used for signal only
 };
 
@@ -95,6 +97,7 @@ class LIBARDOUR_API Region
 	, public std::enable_shared_from_this<Region>
 	, public Trimmable
 	, public Movable
+	, public Temporal::TimeDomainSwapper
 {
 public:
 	typedef std::vector<std::shared_ptr<Source> > SourceList;
@@ -114,7 +117,8 @@ public:
 
 	const DataType& data_type () const { return _type; }
 	Temporal::TimeDomain time_domain() const;
-	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
+	void start_domain_bounce (Temporal::DomainBounceInfo&);
+	void finish_domain_bounce (Temporal::DomainBounceInfo&);
 
 	/** How the region parameters play together:
 	 *
@@ -153,6 +157,52 @@ public:
 	samplecnt_t ancestral_length_samples () const { return _ancestral_length.val().samples(); }
 	timepos_t ancestral_start ()  const { return _ancestral_start.val(); }
 	timecnt_t ancestral_length () const { return _ancestral_length.val(); }
+
+	/** Region Groups:
+	 * every region has a group-id. regions that have the same group-id (excepting zero) are 'grouped'
+	 * if you select a 'grouped' region, then all other regions in the group will be selected
+	 * operations like Import, Record, and Paste assign a group-id to the new regions they create
+	 * users can explicitly group regions, which implies a stronger connection and gets the 'explicit' flag
+	 * users can explicitly ungroup regions, which prevents ardour from applying equivalent-regions logic
+	 * regions with no flags and no group-id (prior sessions) will revert to equivalent-regions logic */
+
+	/** RegionGroupRetainer is an RAII construct to retain a group-id for the length of an operation that creates regions */
+	struct RegionGroupRetainer {
+		RegionGroupRetainer ()
+		{
+			if (_retained_group_id == 0) {
+				_next_group_id++;
+				_retained_group_id    = _next_group_id << 4;
+				_clear_on_destruction = true;
+			} else {
+				_clear_on_destruction = false;
+			}
+		}
+		~RegionGroupRetainer ()
+		{
+			if (_clear_on_destruction) {
+				_retained_group_id = 0;
+			}
+		}
+		bool _clear_on_destruction;
+	};
+
+	static uint64_t next_group_id () { return _next_group_id; }
+	static void set_next_group_id (uint64_t ngid) { _next_group_id = ngid; }
+
+	/* access the shared group-id, potentially with an Alt identifier (for left/center/right splits) */
+	static uint64_t get_retained_group_id (bool alt = false)
+	{
+		return _retained_group_id | (alt ? Alt : NoGroup);
+	}
+
+	uint64_t region_group () const { return _reg_group; }
+	void set_region_group (bool explicitly, bool alt = false) { _reg_group = get_retained_group_id (alt) | (explicitly ? Explicit : NoGroup); }
+	void unset_region_group () { _reg_group = Explicit; }
+
+	bool is_explicitly_grouped()   { return (_reg_group & Explicit) == Explicit; }
+	bool is_implicitly_ungrouped() { return (_reg_group == NoGroup); }
+	bool is_explicitly_ungrouped() { return (_reg_group == Explicit); }
 
 	float stretch () const { return _stretch; }
 	float shift ()   const { return _shift; }
@@ -338,7 +388,7 @@ public:
 	/* automation */
 
 	virtual std::shared_ptr<Evoral::Control>
-	control (const Evoral::Parameter& id, bool create=false) = 0;
+		control (const Evoral::Parameter& id, bool create=false) = 0;
 
 	virtual std::shared_ptr<const Evoral::Control>
 	control (const Evoral::Parameter& id) const = 0;
@@ -535,6 +585,7 @@ private:
 	PBD::Property<float>       _shift;
 	PBD::Property<uint64_t>    _layering_index;
 	PBD::Property<std::string> _tags;
+	PBD::Property<uint64_t>    _reg_group;
 	PBD::Property<bool>        _contents; // type is irrelevant
 
 	timecnt_t             _last_length;
@@ -546,6 +597,14 @@ private:
 	void register_properties ();
 
 	void use_sources (SourceList const &);
+
+	enum RegionGroupFlags : uint64_t {
+		NoGroup   = 0x0, //no flag: implicitly grouped if the id is nonzero; or implicitly 'un-grouped' if the group-id is zero
+		Explicit  = 0x1, //the user has explicitly grouped or ungrouped this region. explicitly grouped regions can cross track-group boundaries
+		Alt       = 0x8, //this accommodates some operations (separate) that generate left/center/right region groups.  add more bits here, if needed
+	};
+	static uint64_t _retained_group_id;
+	static uint64_t _next_group_id;
 
 	std::atomic<int>          _source_deleted;
 	Glib::Threads::Mutex      _source_list_lock;

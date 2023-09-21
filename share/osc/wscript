@@ -2,9 +2,6 @@
 
 import os
 
-top = '.'
-out = 'build'
-
 def configure(conf):
     pass
 

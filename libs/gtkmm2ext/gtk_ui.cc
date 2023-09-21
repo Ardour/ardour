@@ -456,23 +456,6 @@ UI::idle_add (int (*func)(void *), void *arg)
 
 /* END abstract_ui interfaces */
 
-/** Create a PBD::EventLoop::InvalidationRecord and attach a callback
- *  to a given sigc::trackable so that PBD::EventLoop::invalidate_request
- *  is called when that trackable is destroyed.
- */
-PBD::EventLoop::InvalidationRecord*
-__invalidator (sigc::trackable& trackable, const char* file, int line)
-{
-        PBD::EventLoop::InvalidationRecord* ir = new PBD::EventLoop::InvalidationRecord;
-
-        ir->file = file;
-        ir->line = line;
-
-        trackable.add_destroy_notify_callback (ir, PBD::EventLoop::invalidate_request);
-
-        return ir;
-}
-
 void
 UI::do_request (UIRequest* req)
 {
@@ -732,7 +715,8 @@ UI::handle_fatal (const char *message)
 	hpacker.pack_start (quit, true, false);
 	win.get_vbox()->pack_start (hpacker, false, false);
 
-	quit.signal_clicked().connect(mem_fun(*this,&UI::quit));
+	quit.signal_clicked().connect ([&win] { win.response (-4); });
+	win.signal_response().connect([this] (int) { UI::quit (); });
 
 	win.show_all ();
 	win.set_modal (true);

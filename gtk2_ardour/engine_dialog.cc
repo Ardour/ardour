@@ -133,7 +133,9 @@ EngineControl::EngineControl ()
 	AttachOptions  xopt = AttachOptions (FILL | EXPAND);
 	int            row;
 
-	set_resizable (false);
+	if (UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
+		set_resizable (false);
+	}
 	set_name (X_("AudioMIDISetup"));
 
 	/* the backend combo is the one thing that is ALWAYS visible */
@@ -1079,6 +1081,10 @@ EngineControl::backend_changed ()
 
 	if (!ignore_changes) {
 		maybe_display_saved_state ();
+	}
+
+	if (!UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
+		resize (1, 1); // shrink window
 	}
 }
 

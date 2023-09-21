@@ -29,6 +29,8 @@
 #include "pbd/signals.h"
 #include "pbd/statefuldestructible.h"
 
+namespace PBD {
+
 /** Base class for Undo/Redo commands and changesets */
 class LIBPBD_API Command : public PBD::StatefulDestructible, public PBD::ScopedConnectionList
 {
@@ -56,5 +58,7 @@ protected:
 
 	std::string _name;
 };
+
+} /* namespace */
 
 #endif // __lib_pbd_command_h_

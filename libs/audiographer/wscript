@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 from waflib.extras import autowaf as autowaf
-import os
 
 # Version of this package (even if built as a child)
 AUDIOGRAPHER_VERSION = '0.0.0'
@@ -13,14 +12,6 @@ AUDIOGRAPHER_VERSION = '0.0.0'
 # Version history:
 #   0.0.0 = 0,0,0
 AUDIOGRAPHER_LIB_VERSION = '0.0.0'
-
-# Variables for 'waf dist'
-APPNAME = 'audiographer'
-VERSION = AUDIOGRAPHER_VERSION
-
-# Mandatory variables
-top = '.'
-out = 'build'
 
 def options(opt):
     autowaf.set_options(opt)

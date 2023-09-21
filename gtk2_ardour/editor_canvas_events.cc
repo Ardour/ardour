@@ -40,6 +40,7 @@
 #include "canvas/scroll_group.h"
 
 #include "editor.h"
+#include "editor_sections.h"
 #include "keyboard.h"
 #include "public_editor.h"
 #include "audio_region_view.h"
@@ -1127,9 +1128,109 @@ Editor::canvas_ruler_bar_event (GdkEvent *event, ArdourCanvas::Item* item, ItemT
 }
 
 bool
+Editor::section_rect_event (GdkEvent* ev, Location* loc, ArdourCanvas::Rectangle* rect, std::string color)
+{
+	switch (ev->type) {
+		case GDK_ENTER_NOTIFY:
+			if (UIConfiguration::instance ().get_widget_prelight ()) {
+				rect->set_fill_color (UIConfiguration::instance().color_mod (color, "marker bar"));
+				return true;
+			}
+			break;
+		case GDK_LEAVE_NOTIFY:
+			if (UIConfiguration::instance ().get_widget_prelight ()) {
+				rect->set_fill_color (UIConfiguration::instance().color (color));
+				return true;
+			}
+			break;
+		case GDK_BUTTON_PRESS:
+			if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
+				/* used to add markers */
+				return false;
+			}
+			if (ev->button.button == 1) {
+				_session->request_locate (loc->start().samples());
+			}
+			return true;
+		case GDK_2BUTTON_PRESS:
+		case GDK_3BUTTON_PRESS:
+			if (Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier)) {
+				return false;
+			}
+			if (ev->button.button == 1) {
+				assert (find_location_markers (loc));
+				rename_marker (find_location_markers (loc)->start);
+				return true;
+			}
+			break;
+		case GDK_BUTTON_RELEASE:
+			if (Keyboard::is_context_menu_event (&ev->button)) {
+				using namespace Menu_Helpers;
+
+				/* find section */
+				timepos_t start (loc->start ());
+				timepos_t end;
+				Location* l = _session->locations()->section_at (start, start, end);
+				assert (l);
+
+				timepos_t where (canvas_event_time (ev));
+				snap_to (where, Temporal::RoundNearest);
+
+				section_box_menu.set_name ("ArdourContextMenu");
+				MenuList& items (section_box_menu.items());
+				items.clear ();
+
+				items.push_back (MenuElem (_("New Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
+				items.push_back (MenuElem (_("Select Arrangement Section"), sigc::bind (sigc::mem_fun(*_sections, &EditorSections::select), l)));
+#if 0
+				items.push_back (SeparatorElem());
+				add_section_context_items (items);   //TODO: section_context_items needs to be modified to operate on the marker you clicked on, not the range selection (which might not exist)
+#endif
+
+				section_box_menu.popup (ev->button.button, ev->button.time);
+				return true;
+			}
+			break;
+		default:
+			break;
+	}
+	return false;
+}
+
+bool
 Editor::canvas_playhead_cursor_event (GdkEvent *event, ArdourCanvas::Item* item)
 {
 	return typed_event (item, event, PlayheadCursorItem);
+}
+
+bool
+Editor::canvas_section_box_event (GdkEvent *event)
+{
+	switch (event->type) {
+		case GDK_BUTTON_PRESS:
+			if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
+			   && event->button.button == 1) {
+				_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
+			}
+			/*fallthrough*/
+		case GDK_2BUTTON_PRESS:
+			/*fallthrough*/
+		case GDK_3BUTTON_PRESS:
+			return !Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
+		case GDK_BUTTON_RELEASE:
+			if (Keyboard::is_context_menu_event (&event->button)) {
+				section_box_menu.set_name ("ArdourContextMenu");
+				Gtk::Menu_Helpers::MenuList& items (section_box_menu.items());
+				items.clear ();
+				add_section_context_items (items);
+				section_box_menu.popup (event->button.button, event->button.time);
+				return true;
+			}
+			return false;
+		default:
+			break;
+	}
+	return false;
 }
 
 bool
@@ -1160,8 +1261,8 @@ Editor::canvas_drop_zone_event (GdkEvent* event)
 
 	case GDK_SCROLL:
 		/* convert coordinates back into window space so that
-		   we can just call canvas_scroll_event().
-		*/
+		 * we can just call canvas_scroll_event().
+		 */
 		winpos = _track_canvas->canvas_to_window (Duple (event->scroll.x, event->scroll.y));
 		scroll = event->scroll;
 		scroll.x = winpos.x;
@@ -1181,6 +1282,50 @@ Editor::canvas_drop_zone_event (GdkEvent* event)
 
 	default:
 		break;
+	}
+
+	return true;
+}
+
+bool
+Editor::canvas_grid_zone_event (GdkEvent* event)
+{
+	GdkEventScroll scroll;
+	ArdourCanvas::Duple winpos;
+
+	switch (event->type) {
+
+		case GDK_BUTTON_PRESS:
+			choose_mapping_drag (_canvas_grid_zone, event);
+			break;
+
+		case GDK_BUTTON_RELEASE:
+			return typed_event (_canvas_grid_zone, event, GridZoneItem);
+			break;
+
+		case GDK_SCROLL:
+			/* convert coordinates back into window space so that
+			 * we can just call canvas_scroll_event().
+			 */
+			winpos   = _track_canvas->canvas_to_window (Duple (event->scroll.x, event->scroll.y));
+			scroll   = event->scroll;
+			scroll.x = winpos.x;
+			scroll.y = winpos.y;
+			return canvas_scroll_event (&scroll, true);
+			break;
+
+		case GDK_ENTER_NOTIFY:
+			return typed_event (_canvas_grid_zone, event, GridZoneItem);
+
+		case GDK_LEAVE_NOTIFY:
+			return typed_event (_canvas_grid_zone, event, GridZoneItem);
+
+		case GDK_MOTION_NOTIFY:
+			return motion_handler (_canvas_grid_zone, event);
+			break;
+
+		default:
+			break;
 	}
 
 	return true;

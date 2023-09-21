@@ -49,7 +49,7 @@ using namespace std;
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 SurfacePort::SurfacePort (Surface& s)
 	: _surface (&s)
@@ -60,20 +60,24 @@ SurfacePort::SurfacePort (Surface& s)
 
 	} else {
 
-		string in_name;
-		string out_name;
+#ifdef UF8
+		string in_name = X_("SSL-UFx control in");
+		string out_name = X_("SSL-UFx control out");
+#else
+		string in_name = X_("mackie control in");
+		string out_name = X_("mackie control out");
+#endif
 
 		if (_surface->mcp().device_info().extenders() > 0) {
-			if (_surface->number() == _surface->mcp().device_info().master_position()) {
-				in_name = X_("mackie control in");
-				out_name = X_("mackie control out");
-			} else {
+			if (_surface->number() != _surface->mcp().device_info().master_position()) {
+#ifdef UF8
+				in_name = string_compose (X_("SSL-UFx control in ext %1"), (_surface->number() + 1));
+				out_name = string_compose (X_("SSL-UFx control out ext %1"), _surface->number() + 1);
+#else
 				in_name = string_compose (X_("mackie control in ext %1"), (_surface->number() + 1));
 				out_name = string_compose (X_("mackie control out ext %1"), _surface->number() + 1);
+#endif
 			}
-		} else {
-			in_name = X_("mackie control in");
-			out_name = X_("mackie control out");
 		}
 
 		_async_in  = AudioEngine::instance()->register_input_port (DataType::MIDI, in_name, true);
@@ -235,7 +239,7 @@ SurfacePort::write (const MidiByteArray & mba)
 }
 
 ostream &
-Mackie::operator <<  (ostream & os, const SurfacePort & port)
+MACKIE_NAMESPACE::operator << (ostream & os, const SurfacePort & port)
 {
 	os << "{ ";
 	os << "name: " << port.input_port().name() << " " << port.output_port().name();

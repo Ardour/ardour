@@ -47,7 +47,7 @@ namespace ARDOUR { class Session; }
 
 IOProcessor::IOProcessor (Session& s, bool with_input, bool with_output,
 			  const string& proc_name, const string io_name, DataType dtype, bool sendish)
-	: Processor (s, proc_name, (dtype == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime))
+	: Processor (s, proc_name, Temporal::TimeDomainProvider (dtype == DataType::AUDIO ? Temporal::AudioTime : Temporal::BeatTime))
 {
 	/* these are true in this constructor whether we actually create the associated
 	   IO objects or not.
@@ -71,8 +71,8 @@ IOProcessor::IOProcessor (Session& s, bool with_input, bool with_output,
 /* create an IOProcessor that proxies to an existing IO object */
 
 IOProcessor::IOProcessor (Session& s, std::shared_ptr<IO> in, std::shared_ptr<IO> out,
-                          const string& proc_name, Temporal::TimeDomain td, bool sendish)
-	: Processor(s, proc_name, td)
+                          const string& proc_name, Temporal::TimeDomainProvider const & tdp, bool sendish)
+	: Processor(s, proc_name, tdp)
 	, _input (in)
 	, _output (out)
 {

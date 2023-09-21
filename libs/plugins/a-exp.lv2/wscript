@@ -1,13 +1,7 @@
 #!/usr/bin/env python
-import os
 import re
-import shutil
 import waflib.extras.autowaf as autowaf
-import waflib.Options as Options, waflib.Utils as Utils
-
-# Mandatory variables
-top = '.'
-out = 'build'
+import waflib.Utils as Utils
 
 def options(opt):
     autowaf.set_options(opt)

@@ -64,6 +64,11 @@
 #include "editing.h"
 #include "selection.h"
 
+namespace Temporal {
+	class TempoPoint;
+	class MeterPoint;
+}
+
 namespace ARDOUR {
 	class Session;
 	class Region;
@@ -523,7 +528,7 @@ public:
 		_commit_tempo_map_edit (map, with_update);
 	}
 
-	virtual Temporal::TempoMap::WritableSharedPtr begin_tempo_mapping () = 0;
+	virtual Temporal::TempoMap::WritableSharedPtr begin_tempo_mapping (Temporal::DomainBounceInfo&) = 0;
 	virtual void abort_tempo_mapping () = 0;
 	virtual void commit_tempo_mapping (Temporal::TempoMap::WritableSharedPtr& map) = 0;
 
@@ -544,11 +549,14 @@ public:
 
 	virtual ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool&) const = 0;
 	virtual ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const = 0;
+	virtual TempoMarker* find_marker_for_tempo (Temporal::TempoPoint const &) = 0;
+	virtual MeterMarker* find_marker_for_meter (Temporal::MeterPoint const &) = 0;
 
 	virtual void snap_to_with_modifier (Temporal::timepos_t & first,
 	                                    GdkEvent const*      ev,
 	                                    Temporal::RoundMode    direction = Temporal::RoundNearest,
-	                                    ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual) = 0;
+	                                    ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
+	                                    bool ensure_snap = false) = 0;
 	virtual Temporal::timepos_t snap_to_bbt (Temporal::timepos_t const & pos, Temporal::RoundMode, ARDOUR::SnapPref) = 0;
 
 	virtual void set_snapped_cursor_position (Temporal::timepos_t const & pos) = 0;
@@ -573,6 +581,8 @@ public:
 
 	virtual ARDOUR::Quantize get_quantize_op (bool force_dialog, bool& did_show_dialog) = 0;
 	virtual void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs) = 0;
+
+	virtual void set_tempo_curve_range (double& max, double& min) const = 0;
 
 	/// Singleton instance, set up by Editor::Editor()
 

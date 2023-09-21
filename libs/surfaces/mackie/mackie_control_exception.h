@@ -21,8 +21,9 @@
 
 #include <stdexcept>
 
-namespace ArdourSurface {
-namespace Mackie {
+#include "types.h"
+
+namespace ArdourSurface { namespace MACKIE_NAMESPACE {
 
 class MackieControlException : public std::exception
 {

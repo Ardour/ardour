@@ -94,29 +94,29 @@ using namespace std;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
-using namespace Mackie;
+using namespace ArdourSurface::MACKIE_NAMESPACE;
 
 #include "pbd/i18n.h"
 
 #include "pbd/abstract_ui.cc" // instantiate template
 
-const int MackieControlProtocol::MODIFIER_OPTION = 0x1;
-const int MackieControlProtocol::MODIFIER_CONTROL = 0x2;
-const int MackieControlProtocol::MODIFIER_SHIFT = 0x4;
-const int MackieControlProtocol::MODIFIER_CMDALT = 0x8;
-const int MackieControlProtocol::MODIFIER_ZOOM = 0x10;
-const int MackieControlProtocol::MODIFIER_SCRUB = 0x20;
-const int MackieControlProtocol::MODIFIER_MARKER = 0x40;
-const int MackieControlProtocol::MODIFIER_NUDGE = 0x80;
-const int MackieControlProtocol::MAIN_MODIFIER_MASK = (MackieControlProtocol::MODIFIER_OPTION|
+const int MACKIE_NAMESPACE::MackieControlProtocol::MODIFIER_OPTION = 0x1;
+const int MACKIE_NAMESPACE::MackieControlProtocol::MODIFIER_CONTROL = 0x2;
+const int MACKIE_NAMESPACE::MackieControlProtocol::MODIFIER_SHIFT = 0x4;
+const int MACKIE_NAMESPACE::MackieControlProtocol::MODIFIER_CMDALT = 0x8;
+const int MACKIE_NAMESPACE::MackieControlProtocol::MODIFIER_ZOOM = 0x10;
+const int MACKIE_NAMESPACE::MackieControlProtocol::MODIFIER_SCRUB = 0x20;
+const int MACKIE_NAMESPACE::MackieControlProtocol::MODIFIER_MARKER = 0x40;
+const int MACKIE_NAMESPACE::MackieControlProtocol::MODIFIER_NUDGE = 0x80;
+const int MACKIE_NAMESPACE::MackieControlProtocol::MAIN_MODIFIER_MASK = (MackieControlProtocol::MODIFIER_OPTION|
 						       MackieControlProtocol::MODIFIER_CONTROL|
 						       MackieControlProtocol::MODIFIER_SHIFT|
 						       MackieControlProtocol::MODIFIER_CMDALT);
 
-MackieControlProtocol* MackieControlProtocol::_instance = 0;
+MACKIE_NAMESPACE::MackieControlProtocol* MACKIE_NAMESPACE::MackieControlProtocol::_instance = 0;
 
-MackieControlProtocol::MackieControlProtocol (Session& session)
-	: ControlProtocol (session, X_("Mackie"))
+MackieControlProtocol::MackieControlProtocol (Session& session, const char* pname)
+	: ControlProtocol (session, pname)
 	, AbstractUI<MackieControlUIRequest> (name())
 	, _current_initial_bank (0)
 	, _timecode_last (10, '\0')
@@ -139,7 +139,7 @@ MackieControlProtocol::MackieControlProtocol (Session& session)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, "MackieControlProtocol::MackieControlProtocol\n");
 
-	_subview = Mackie::SubviewFactory::instance()->create_subview(Subview::None, *this, std::shared_ptr<Stripable>());
+	_subview = MACKIE_NAMESPACE::SubviewFactory::instance()->create_subview(Subview::None, *this, std::shared_ptr<Stripable>());
 
 	DeviceInfo::reload_device_info ();
 	DeviceProfile::reload_device_profiles ();
@@ -211,8 +211,8 @@ MackieControlProtocol::ping_devices ()
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
-		for (Surfaces::const_iterator si = surfaces.begin(); si != surfaces.end(); ++si) {
-			(*si)->connected ();
+		for (auto const& si : surfaces) {
+			si->connected ();
 		}
 	}
 }
@@ -624,9 +624,9 @@ MackieControlProtocol::update_timecode_beats_led()
 }
 
 void
-MackieControlProtocol::update_global_button (int id, LedState ls)
+MackieControlProtocol::update_global_button (int id, MACKIE_NAMESPACE::LedState ls)
 {
-	std::shared_ptr<Surface> surface;
+	std::shared_ptr<MACKIE_NAMESPACE::Surface> surface;
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -652,7 +652,7 @@ MackieControlProtocol::update_global_button (int id, LedState ls)
 }
 
 void
-MackieControlProtocol::update_global_led (int id, LedState ls)
+MackieControlProtocol::update_global_led (int id, MACKIE_NAMESPACE::LedState ls)
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
@@ -663,7 +663,7 @@ MackieControlProtocol::update_global_led (int id, LedState ls)
 	if (!_device_info.has_global_controls()) {
 		return;
 	}
-	std::shared_ptr<Surface> surface = _master_surface;
+	std::shared_ptr<MACKIE_NAMESPACE::Surface> surface = _master_surface;
 
 	map<int,Control*>::iterator x = surface->controls_by_device_independent_id.find (id);
 
@@ -688,7 +688,7 @@ MackieControlProtocol::device_ready ()
 		}
 	}
 	update_surfaces ();
-	set_subview_mode (Mackie::Subview::None, std::shared_ptr<Stripable>());
+	set_subview_mode (MACKIE_NAMESPACE::Subview::None, std::shared_ptr<Stripable>());
 	set_flip_mode (Normal);
 }
 
@@ -849,9 +849,9 @@ MackieControlProtocol::set_device (const string& device_name, bool force)
 }
 
 gboolean
-ArdourSurface::ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data)
+ArdourSurface::MACKIE_NAMESPACE::ipmidi_input_handler (GIOChannel*, GIOCondition condition, void *data)
 {
-	ArdourSurface::MackieControlProtocol::ipMIDIHandler* ipm = static_cast<ArdourSurface::MackieControlProtocol::ipMIDIHandler*>(data);
+	MackieControlProtocol::ipMIDIHandler* ipm = static_cast<MackieControlProtocol::ipMIDIHandler*>(data);
 	return ipm->mcp->midi_input_handler (Glib::IOCondition (condition), ipm->port);
 }
 
@@ -879,7 +879,11 @@ MackieControlProtocol::create_surfaces ()
 			if (_device_info.extenders() == 0) {
 				device_name = _device_info.name();
 			} else {
+#ifdef UF8
+				device_name = X_("SSL-UFx");
+#else
 				device_name = X_("mackie control");
+#endif
 			}
 
 		}
@@ -890,7 +894,7 @@ MackieControlProtocol::create_surfaces ()
 
 		DEBUG_TRACE (DEBUG::MackieControl, string_compose ("Port Name for surface %1 is %2\n", n, device_name));
 
-		std::shared_ptr<Surface> surface;
+		std::shared_ptr<MACKIE_NAMESPACE::Surface> surface;
 
 		if (is_master) {
 			stype = mcu;
@@ -898,7 +902,7 @@ MackieControlProtocol::create_surfaces ()
 			stype = ext;
 		}
 		try {
-			surface.reset (new Surface (*this, device_name, n, stype));
+			surface.reset (new MACKIE_NAMESPACE::Surface (*this, device_name, n, stype));
 		} catch (...) {
 			return -1;
 		}
@@ -1213,7 +1217,7 @@ MackieControlProtocol::update_timecode_display()
 		return;
 	}
 
-	std::shared_ptr<Surface> surface = _master_surface;
+	std::shared_ptr<MACKIE_NAMESPACE::Surface> surface = _master_surface;
 
 	if (surface->type() != mcu || !_device_info.has_timecode_display() || !surface->active ()) {
 		return;
@@ -1315,7 +1319,7 @@ MackieControlProtocol::notify_monitor_added_or_removed ()
 void
 MackieControlProtocol::notify_solo_active_changed (bool active)
 {
-	std::shared_ptr<Surface> surface;
+	std::shared_ptr<MACKIE_NAMESPACE::Surface> surface;
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -1331,6 +1335,7 @@ MackieControlProtocol::notify_solo_active_changed (bool active)
 	if (x != surface->controls_by_device_independent_id.end()) {
 		Led* rude_solo = dynamic_cast<Led*> (x->second);
 		if (rude_solo) {
+			update_global_button (Button::ClearSolo, active);
 			surface->write (rude_solo->set_state (active ? flashing : off));
 		}
 	}
@@ -1406,7 +1411,7 @@ MackieControlProtocol::notify_record_state_changed ()
 		return;
 	}
 
-	std::shared_ptr<Surface> surface;
+	std::shared_ptr<MACKIE_NAMESPACE::Surface> surface;
 
 	{
 		Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -1493,7 +1498,7 @@ MackieControlProtocol::stop ()
 }
 
 void
-MackieControlProtocol::update_led (Surface& surface, Button& button, Mackie::LedState ls)
+MackieControlProtocol::update_led (MACKIE_NAMESPACE::Surface& surface, MACKIE_NAMESPACE::Button& button, MACKIE_NAMESPACE::LedState ls)
 {
 	if (ls != none) {
 		surface.port().write (button.set_state (ls));
@@ -1614,7 +1619,7 @@ MackieControlProtocol::build_device_specific_button_map()
 }
 
 void
-MackieControlProtocol::handle_button_event (Surface& surface, Button& button, ButtonState bs)
+MackieControlProtocol::handle_button_event (MACKIE_NAMESPACE::Surface& surface, MACKIE_NAMESPACE::Button& button, MACKIE_NAMESPACE::ButtonState bs)
 {
 	Button::ID button_id = button.bid();
 
@@ -1787,7 +1792,7 @@ MackieControlProtocol::redisplay_subview_mode ()
 }
 
 bool
-MackieControlProtocol::set_subview_mode (Subview::Mode sm, std::shared_ptr<Stripable> r)
+MackieControlProtocol::set_subview_mode (MACKIE_NAMESPACE::Subview::Mode sm, std::shared_ptr<Stripable> r)
 {
 	DEBUG_TRACE (DEBUG::MackieControl, string_compose ("set subview mode %1 with stripable %2, current flip mode %3\n", sm, (r ? r->name() : string ("null")), _flip_mode));
 
@@ -1807,7 +1812,7 @@ MackieControlProtocol::set_subview_mode (Subview::Mode sm, std::shared_ptr<Strip
 			if (!surfaces.empty()) {
 				if (!reason_why_subview_not_possible.empty()) {
 					surfaces.front()->display_message_for (reason_why_subview_not_possible, 1000);
-					if (_subview->subview_mode() != Mackie::Subview::None) {
+					if (_subview->subview_mode() != MACKIE_NAMESPACE::Subview::None) {
 						/* redisplay current subview mode after
 						   that message goes away.
 						*/
@@ -1822,7 +1827,7 @@ MackieControlProtocol::set_subview_mode (Subview::Mode sm, std::shared_ptr<Strip
 		return false;
 	}
 
-	_subview = Mackie::SubviewFactory::instance()->create_subview(sm, *this, r);
+	_subview = MACKIE_NAMESPACE::SubviewFactory::instance()->create_subview(sm, *this, r);
 	/* Catch the current subview stripable going away */
 	if (_subview->subview_stripable()) {
 		_subview->subview_stripable()->DropReferences.connect (_subview->subview_stripable_connections(), MISSING_INVALIDATOR,
@@ -1854,7 +1859,7 @@ MackieControlProtocol::set_view_mode (ViewMode m)
 
 	/* leave subview mode, whatever it was */
 	DEBUG_TRACE (DEBUG::MackieControl, "\t\t\tsubview mode reset in MackieControlProtocol::set_view_mode \n");
-	set_subview_mode (Mackie::Subview::None, std::shared_ptr<Stripable>());
+	set_subview_mode (MACKIE_NAMESPACE::Subview::None, std::shared_ptr<Stripable>());
 	display_view_mode ();
 }
 
@@ -2281,8 +2286,8 @@ MackieControlProtocol::recalibrate_faders ()
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->recalibrate_faders ();
+	for (auto const& s : surfaces) {
+		s->recalibrate_faders ();
 	}
 }
 
@@ -2291,26 +2296,26 @@ MackieControlProtocol::toggle_backlight ()
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		(*s)->toggle_backlight ();
+	for (auto const& s : surfaces) {
+		s->toggle_backlight ();
 	}
 }
 
-std::shared_ptr<Surface>
+std::shared_ptr<MACKIE_NAMESPACE::Surface>
 MackieControlProtocol::get_surface_by_raw_pointer (void* ptr) const
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 
-	for (Surfaces::const_iterator s = surfaces.begin(); s != surfaces.end(); ++s) {
-		if ((*s).get() == (Surface*) ptr) {
-			return *s;
+	for (auto const& s : surfaces) {
+		if (s.get() == (MACKIE_NAMESPACE::Surface*) ptr) {
+			return s;
 		}
 	}
 
-	return std::shared_ptr<Surface> ();
+	return std::shared_ptr<MACKIE_NAMESPACE::Surface> ();
 }
 
-std::shared_ptr<Surface>
+std::shared_ptr<MACKIE_NAMESPACE::Surface>
 MackieControlProtocol::nth_surface (uint32_t n) const
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
@@ -2321,7 +2326,7 @@ MackieControlProtocol::nth_surface (uint32_t n) const
 		}
 	}
 
-	return std::shared_ptr<Surface> ();
+	return std::shared_ptr<MACKIE_NAMESPACE::Surface> ();
 }
 
 void
@@ -2446,12 +2451,12 @@ MackieControlProtocol::stripable_selection_changed ()
 		 */
 
 		if (!set_subview_mode (_subview->subview_mode(), s)) {
-			set_subview_mode (Mackie::Subview::None, std::shared_ptr<Stripable>());
+			set_subview_mode (MACKIE_NAMESPACE::Subview::None, std::shared_ptr<Stripable>());
 		}
 	}
 	else {
 		// none selected or not on surface
-		set_subview_mode(Mackie::Subview::None, std::shared_ptr<Stripable>());
+		set_subview_mode(MACKIE_NAMESPACE::Subview::None, std::shared_ptr<Stripable>());
 	}
 }
 
@@ -2479,14 +2484,14 @@ MackieControlProtocol::first_selected_stripable () const
 }
 
 uint32_t
-MackieControlProtocol::global_index (Strip& strip)
+MackieControlProtocol::global_index (MACKIE_NAMESPACE::Strip& strip)
 {
 	Glib::Threads::Mutex::Lock lm (surfaces_lock);
 	return global_index_locked (strip);
 }
 
 uint32_t
-MackieControlProtocol::global_index_locked (Strip& strip)
+MackieControlProtocol::global_index_locked (MACKIE_NAMESPACE::Strip& strip)
 {
 	uint32_t global = 0;
 

@@ -75,6 +75,7 @@ public:
 
 	void midi_panic(void);
 	bool write_immediate_event (Evoral::EventType event_type, size_t size, const uint8_t* buf);
+	bool write_user_immediate_event (Evoral::EventType event_type, size_t size, const uint8_t* buf);
 
 	std::shared_ptr<VelocityControl> velocity_control() const { return _velocity_control; }
 
@@ -135,7 +136,9 @@ public:
 	MonitorState get_input_monitoring_state (bool recording, bool talkback) const;
 
 	MidiBuffer const& immediate_event_buffer () const { return _immediate_event_buffer; }
+	MidiBuffer const& user_immediate_event_buffer () const { return _user_immediate_event_buffer; }
 	MidiRingBuffer<samplepos_t>& immediate_events () { return _immediate_events; }
+	MidiRingBuffer<samplepos_t>& user_immediate_events () { return _user_immediate_events; }
 
 	void set_input_active (bool);
 	bool input_active () const;
@@ -160,7 +163,9 @@ protected:
 
 private:
 	MidiRingBuffer<samplepos_t> _immediate_events;
+	MidiRingBuffer<samplepos_t> _user_immediate_events;
 	MidiBuffer                  _immediate_event_buffer;
+	MidiBuffer                  _user_immediate_event_buffer;
 	MidiRingBuffer<samplepos_t> _step_edit_ring_buffer;
 	NoteMode                    _note_mode;
 	bool                        _step_editing;

@@ -339,7 +339,7 @@ FaderPort8::button_solo_clear ()
 		cancel_all_solo (); // AccessAction ("Main", "cancel-solo");
 	} else {
 		/* restore solo */
-		std::shared_ptr<ControlList> cl (new ControlList);
+		std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 		for (std::vector <std::weak_ptr<AutomationControl> >::const_iterator i = _solo_state.begin(); i != _solo_state.end(); ++i) {
 			std::shared_ptr<AutomationControl> ac = (*i).lock();
 			if (!ac) {
@@ -363,7 +363,7 @@ FaderPort8::button_mute_clear ()
 		_mute_state = session->cancel_all_mute ();
 	} else {
 		/* restore mute */
-		std::shared_ptr<ControlList> cl (new ControlList);
+		std::shared_ptr<AutomationControlList> cl (new AutomationControlList);
 		for (std::vector <std::weak_ptr<AutomationControl> >::const_iterator i = _mute_state.begin(); i != _mute_state.end(); ++i) {
 			std::shared_ptr<AutomationControl> ac = (*i).lock();
 			if (!ac) {

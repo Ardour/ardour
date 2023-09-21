@@ -46,6 +46,14 @@ using namespace ArdourWidgets::ArdourIcon;
   cairo_set_source_rgba (cr, 1, 1, 1, (fillalpha)); \
   cairo_fill (cr);
 
+#define VECTORICONOUTLINEFILL(color)             \
+  cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND); \
+  cairo_set_line_width (cr, OUTLINEWIDTH);       \
+  ardour_icon_set_source_inv_rgba (cr, color);   \
+  cairo_stroke_preserve (cr);                    \
+  Gtkmm2ext::set_source_rgba (cr, color);        \
+  cairo_fill (cr);
+
 #define VECTORICONSTROKEOUTLINE(LW, color)        \
   cairo_set_line_cap (cr, CAIRO_LINE_CAP_ROUND);  \
   cairo_set_line_width (cr, (LW) + OUTLINEWIDTH); \
@@ -1006,6 +1014,43 @@ icon_strip_width (cairo_t* cr, const int width, const int height, const uint32_t
 	cairo_stroke (cr);
 }
 
+/** grid (tempo) tool */
+static void
+icon_tool_grid (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	/* cross (plus sign) */
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+	const double xc = rint (width * .5) - lc;
+	const double yc = rint (height * .5) - lc;
+	const double ln = rint (std::min (width, height) * .3);
+
+	cairo_rectangle (cr, xc - lw * .5, yc - ln, lw, ln * 2);
+	cairo_rectangle (cr, xc - ln, yc - lw * .5, ln * 2, lw);
+	VECTORICONOUTLINEFILL (0xffffffff)
+
+	/* arrows */
+	const double x0 = xc - ln;
+	const double x1 = xc + ln;
+
+	const double arx = ln * .5;
+	const double ary = ln * .25;
+
+	/* arrow left */
+	cairo_move_to (cr, x0, yc);
+	cairo_rel_line_to (cr, arx, -ary);
+	cairo_move_to (cr, x0, yc);
+	cairo_rel_line_to (cr, arx, ary);
+
+	/* arrow right */
+	cairo_move_to (cr, x1, yc);
+	cairo_rel_line_to (cr, -arx, -ary);
+	cairo_move_to (cr, x1, yc);
+	cairo_rel_line_to (cr, -arx, ary);
+
+	VECTORICONSTROKEOUTLINE (DEFAULT_LINE_WIDTH, 0xffffffff);
+}
+
 /** 5-pin DIN MIDI socket */
 static void
 icon_din_midi (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
@@ -1438,6 +1483,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 			break;
 		case ToolGrab:
 			icon_tool_grab (cr, width, height);
+			break;
+		case ToolGrid:
+			icon_tool_grid (cr, width, height, fg_color);
 			break;
 		case ToolCut:
 			icon_tool_cut (cr, width, height);

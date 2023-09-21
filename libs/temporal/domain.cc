@@ -1,6 +1,5 @@
 /*
- * Copyright (C) 2008-2009 David Robillard <d@drobilla.net>
- * Copyright (C) 2017 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2023 Paul Davis <paul@linuxaudiosystems.com>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -17,21 +16,31 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __ardour_midi_scroomer_h__
-#define __ardour_midi_scroomer_h__
+#include "temporal/domain_provider.h"
+#include "temporal/types_convert.h"
 
-#include "widgets/scroomer.h"
+#include "pbd/i18n.h"
 
-class MidiScroomer : public ArdourWidgets::Scroomer
+using namespace Temporal;
+
+XMLNode&
+TimeDomainProvider::get_state () const
 {
-public:
-	MidiScroomer(Gtk::Adjustment&);
-	~MidiScroomer();
+	XMLNode* node = new XMLNode (X_("TimeDomainProvider"));
+	node->set_property (X_("has-own"), have_domain);
+	if (have_domain) {
+		node->set_property (X_("domain"), domain);
+	}
+	return *node;
+}
 
-	bool on_expose_event(GdkEventExpose*);
-	void on_size_request(Gtk::Requisition*);
+int
+TimeDomainProvider::set_state (const XMLNode& node, int version)
+{
+	node.get_property (X_("has-own"), have_domain);
+	if (have_domain) {
+		node.get_property (X_("domain"), domain);
+	}
+	return 0;
+}
 
-	void get_colors(double color[], Component comp);
-};
-
-#endif /* __ardour_midi_scroomer_h__ */

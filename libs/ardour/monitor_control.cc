@@ -24,9 +24,9 @@
 using namespace ARDOUR;
 using namespace PBD;
 
-MonitorControl::MonitorControl (Session& session, std::string const & name, Monitorable& m, Temporal::TimeDomain td)
+MonitorControl::MonitorControl (Session& session, std::string const & name, Monitorable& m, Temporal::TimeDomainProvider const & tdp)
 	: SlavableAutomationControl (session, MonitoringAutomation, ParameterDescriptor (MonitoringAutomation),
-	                             std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(MonitoringAutomation), td)),
+	                             std::shared_ptr<AutomationList>(new AutomationList(Evoral::Parameter(MonitoringAutomation), tdp)),
 	                             name)
 
 	, _monitorable (m)

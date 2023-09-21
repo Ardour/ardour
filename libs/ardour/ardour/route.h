@@ -41,6 +41,7 @@
 #include "pbd/controllable.h"
 #include "pbd/destructible.h"
 
+#include "temporal/domain_swap.h"
 #include "temporal/types.h"
 
 #include "ardour/ardour.h"
@@ -612,7 +613,6 @@ public:
 
 	virtual void use_captured_sources (SourceList& srcs, CaptureInfos const &) {}
 
-	void globally_change_time_domain (Temporal::TimeDomain from, Temporal::TimeDomain to);
 
 protected:
 	friend class Session;
@@ -737,7 +737,7 @@ protected:
 
 	std::shared_ptr<Processor> the_instrument_unlocked() const;
 
-	SlavableControlList slavables () const;
+	SlavableAutomationControlList slavables () const;
 
 private:
 	/* no copy construction */

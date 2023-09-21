@@ -2,7 +2,6 @@
 from waflib.extras import autowaf as autowaf
 from waflib import Options
 from waflib import TaskGen
-import os
 import sys
 
 # Version of this package (even if built as a child)
@@ -18,16 +17,7 @@ LIBPBD_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
 LIBPBD_LIB_VERSION = '4.1.0'
 LIBPBD_MAJOR_VERSION = '4'
 
-# Variables for 'waf dist'
-APPNAME = 'libpbd'
-VERSION = LIBPBD_VERSION
 I18N_PACKAGE = 'libpbd4'
-
-# Mandatory variables
-top = '.'
-out = 'build'
-
-path_prefix = 'libs/pbd/'
 
 libpbd_sources = [
     'basename.cc',

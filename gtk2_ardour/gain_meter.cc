@@ -34,8 +34,10 @@
 #include <gtkmm/style.h>
 
 #include "ardour/amp.h"
+#include "ardour/control_group.h"
 #include "ardour/logmeter.h"
 #include "ardour/route_group.h"
+#include "ardour/selection.h"
 #include "ardour/session_route.h"
 #include "ardour/dB.h"
 #include "ardour/utils.h"
@@ -47,6 +49,7 @@
 
 #include "pbd/fastlog.h"
 
+#include "ardour_ui.h"
 #include "gain_meter.h"
 #include "gui_thread.h"
 #include "keyboard.h"
@@ -224,7 +227,7 @@ GainMeterBase::~GainMeterBase ()
 }
 
 void
-GainMeterBase::set_controls (std::shared_ptr<Route> r,
+GainMeterBase::set_controls (std::shared_ptr<Stripable> s,
 			     std::shared_ptr<PeakMeter> pm,
                              std::shared_ptr<Amp> amp,
                              std::shared_ptr<GainControl> control)
@@ -239,14 +242,14 @@ GainMeterBase::set_controls (std::shared_ptr<Route> r,
 		gain_slider->set_controllable (std::shared_ptr<PBD::Controllable>());
 		_meter.reset ();
 		_amp.reset ();
-		_route.reset ();
+		_stripable.reset ();
 		_control.reset ();
 		return;
 	}
 
 	_meter = pm;
 	_amp = amp;
-	_route = r;
+	_stripable = s;
 	_control = control;
 
 	level_meter->set_meter (pm.get());
@@ -260,7 +263,7 @@ GainMeterBase::set_controls (std::shared_ptr<Route> r,
 
 	setup_gain_adjustment ();
 
-	if (!_route || !_route->is_auditioner()) {
+	if (!route() || !route()->is_auditioner()) {
 
 		using namespace Menu_Helpers;
 
@@ -367,8 +370,8 @@ GainMeterBase::setup_meters (int len)
 	uint32_t meter_channels = 0;
 	if (_meter) {
 		meter_channels = _meter->input_streams().n_total();
-	} else if (_route) {
-		meter_channels = _route->shared_peak_meter()->input_streams().n_total();
+	} else if (route()) {
+		meter_channels = route()->shared_peak_meter()->input_streams().n_total();
 	}
 
 	switch (_width) {
@@ -401,8 +404,8 @@ GainMeter::setup_meters (int len)
 				uint32_t meter_channels = 0;
 				if (_meter) {
 					meter_channels = _meter->input_streams().n_total();
-				} else if (_route) {
-					meter_channels = _route->shared_peak_meter()->input_streams().n_total();
+				} else if (route()) {
+					meter_channels = route()->shared_peak_meter()->input_streams().n_total();
 				}
 				hbox.set_homogeneous(meter_channels < 7 ? true : false);
 			}
@@ -439,11 +442,11 @@ GainMeterBase::peak_button_release (GdkEventButton* ev)
 	if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier|Keyboard::TertiaryModifier)) {
 		ResetAllPeakDisplays ();
 	} else if (ev->button == 1 && Keyboard::modifier_state_equals (ev->state, Keyboard::PrimaryModifier)) {
-		if (_route) {
-			ResetGroupPeakDisplays (_route->route_group());
+		if (route()) {
+			ResetGroupPeakDisplays (route()->route_group());
 		}
 	} else {
-		ResetRoutePeakDisplays (_route.get());
+		ResetRoutePeakDisplays (route().get());
 	}
 
 	return true;
@@ -452,7 +455,7 @@ GainMeterBase::peak_button_release (GdkEventButton* ev)
 void
 GainMeterBase::reset_peak_display ()
 {
-	if (!_route) {
+	if (!route()) {
 		// catch "reset all" for VCAs
 		return;
 	}
@@ -461,9 +464,9 @@ GainMeterBase::reset_peak_display ()
 }
 
 void
-GainMeterBase::reset_route_peak_display (Route* route)
+GainMeterBase::reset_route_peak_display (Route* r)
 {
-	if (_route && _route.get() == route) {
+	if (route() && route().get() == r) {
 		reset_peak_display ();
 	}
 }
@@ -471,7 +474,7 @@ GainMeterBase::reset_route_peak_display (Route* route)
 void
 GainMeterBase::reset_group_peak_display (RouteGroup* group)
 {
-	if (_route && group == _route->route_group()) {
+	if (route() && group == route()->route_group()) {
 		reset_peak_display ();
 	}
 }
@@ -679,7 +682,7 @@ GainMeterBase::update_gain_sensitive ()
 gint
 GainMeterBase::meter_press(GdkEventButton* ev)
 {
-	if (!_route) {
+	if (!route()) {
 		return false;
 	}
 	if (!ignore_toggle) {
@@ -705,7 +708,7 @@ GainMeterBase::meter_press(GdkEventButton* ev)
 				}
 				Gtkmm2ext::anchored_menu_popup(&meter_point_menu,
 				                               &meter_point_button,
-				                               meterpt_string (_route->meter_point()),
+				                               meterpt_string (route()->meter_point()),
 				                               1, ev->time);
 				break;
 			default:
@@ -736,31 +739,45 @@ GainMeterBase::set_route_group_meter_point (Route& route, MeterPoint mp)
 void
 GainMeterBase::meter_point_clicked (MeterPoint mp)
 {
-	if (_route) {
+	if (route()) {
 		switch (meter_point_change_target) {
 			case MeterPointChangeAll:
 				_session->foreach_route (this, &GainMeterBase::set_meter_point, mp);
 				break;
 			case MeterPointChangeGroup:
-				set_route_group_meter_point (*_route, mp);
+				set_route_group_meter_point (*route(), mp);
 				break;
 			case MeterPointChangeSingle:
-				_route->set_meter_point (mp);
+				route()->set_meter_point (mp);
 				break;
 		}
 	}
 }
 
 void
-GainMeterBase::amp_start_touch ()
+GainMeterBase::amp_start_touch (int state)
 {
+	if (_stripable) {
+		StripableList sl;
+
+		_session->selection ().get_stripables_for_op (sl, _stripable, &RouteGroup::is_gain);
+
+		_touch_control_group.reset (new GainControlGroup ());
+		_touch_control_group->set_mode (ControlGroup::Relative);
+		_touch_control_group->fill_from_stripable_list (sl, _control->parameter());
+	}
+
 	_control->start_touch (timepos_t (_control->session().transport_sample()));
 }
 
 void
-GainMeterBase::amp_stop_touch ()
+GainMeterBase::amp_stop_touch (int state)
 {
 	_control->stop_touch (timepos_t (_control->session().transport_sample()));
+	if (_touch_control_group) {
+		_touch_control_group->pop_all ();
+		_touch_control_group.reset ();
+	}
 	effective_gain_display ();
 }
 
@@ -905,7 +922,7 @@ GainMeterBase::set_width (Width w, int len)
 {
 	_width = w;
 	int meter_width = 5;
-	if (_width == Wide && _route && _route->shared_peak_meter()->input_streams().n_total() == 1) {
+	if (_width == Wide && route() && route()->shared_peak_meter()->input_streams().n_total() == 1) {
 		meter_width = 10;
 	}
 	level_meter->setup_meters(len, meter_width);
@@ -923,6 +940,12 @@ GainMeterBase::redraw_metrics()
 	meter_metric_area.queue_draw ();
 	meter_ticks1_area.queue_draw ();
 	meter_ticks2_area.queue_draw ();
+}
+
+std::shared_ptr<Route>
+GainMeterBase::route ()
+{
+	return std::dynamic_pointer_cast<Route> (_stripable);
 }
 
 #define PX_SCALE(pxmin, dflt) rint(std::max((double)pxmin, (double)dflt * UIConfiguration::instance().get_ui_scale()))
@@ -992,7 +1015,7 @@ GainMeter::GainMeter (Session* s, int fader_length)
 GainMeter::~GainMeter () { }
 
 void
-GainMeter::set_controls (std::shared_ptr<Route> r,
+GainMeter::set_controls (std::shared_ptr<Stripable> s,
 			 std::shared_ptr<PeakMeter> meter,
                          std::shared_ptr<Amp> amp,
 			 std::shared_ptr<GainControl> control)
@@ -1005,7 +1028,7 @@ GainMeter::set_controls (std::shared_ptr<Route> r,
 //		fader_vbox->remove (gain_automation_state_button);
 //	}
 
-	GainMeterBase::set_controls (r, meter, amp, control);
+	GainMeterBase::set_controls (s, meter, amp, control);
 
 	if (_meter) {
 		_meter->ConfigurationChanged.connect (
@@ -1019,8 +1042,8 @@ GainMeter::set_controls (std::shared_ptr<Route> r,
 	}
 
 
-	if (_route) {
-		_route->active_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::route_active_changed, this), gui_context ());
+	if (route()) {
+		route()->active_changed.connect (model_connections, invalidator (*this), boost::bind (&GainMeter::route_active_changed, this), gui_context ());
 	}
 
 	hbox.pack_start (meter_hbox, true, true);
@@ -1061,31 +1084,31 @@ GainMeter::get_gm_width ()
 gint
 GainMeter::meter_metrics_expose (GdkEventExpose *ev)
 {
-	if (!_route) {
+	if (!route()) {
 		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
 		return meter_expose_metrics(ev, MeterPeak, _types, &meter_metric_area);
 	}
-	return meter_expose_metrics(ev, _route->meter_type(), _types, &meter_metric_area);
+	return meter_expose_metrics(ev, route()->meter_type(), _types, &meter_metric_area);
 }
 
 gint
 GainMeter::meter_ticks1_expose (GdkEventExpose *ev)
 {
-	if (!_route) {
+	if (!route()) {
 		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
 		return meter_expose_ticks(ev, MeterPeak, _types, &meter_ticks1_area);
 	}
-	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks1_area);
+	return meter_expose_ticks(ev, route()->meter_type(), _types, &meter_ticks1_area);
 }
 
 gint
 GainMeter::meter_ticks2_expose (GdkEventExpose *ev)
 {
-	if (!_route) {
+	if (!route()) {
 		if (_types.empty()) { _types.push_back(DataType::AUDIO); }
 		return meter_expose_ticks(ev, MeterPeak, _types, &meter_ticks2_area);
 	}
-	return meter_expose_ticks(ev, _route->meter_type(), _types, &meter_ticks2_area);
+	return meter_expose_ticks(ev, route()->meter_type(), _types, &meter_ticks2_area);
 }
 
 void
@@ -1124,26 +1147,26 @@ GainMeter::meter_configuration_changed (ChanCount c)
 		}
 	}
 
-	bool is_audio_track = _route && std::dynamic_pointer_cast<AudioTrack>(_route) != 0;
-	bool is_midi_track = _route && std::dynamic_pointer_cast<MidiTrack>(_route) != 0;
+	bool is_audio_track = route() && std::dynamic_pointer_cast<AudioTrack>(route()) != 0;
+	bool is_midi_track = route() && std::dynamic_pointer_cast<MidiTrack>(route()) != 0;
 
 	if (!is_audio_track && (is_midi_track || /* MIDI Bus */ (type == (1 << DataType::MIDI)))) {
-		if (!_route || _route->active()) {
+		if (!route() || route()->active()) {
 			set_meter_strip_name ("MidiTrackMetrics");
 		} else {
 			set_meter_strip_name ("MidiTrackMetricsInactive");
 		}
 	}
-	else if (_route && (!is_audio_track && !is_midi_track)) {
+	else if (route() && (!is_audio_track && !is_midi_track)) {
 			/* Bus */
-		if (_route->active()) {
+		if (route()->active()) {
 			set_meter_strip_name ("AudioBusMetrics");
 		} else {
 			set_meter_strip_name ("AudioBusMetricsInactive");
 		}
 	}
 	else {
-		if (!_route || _route->active()) {
+		if (!route() || route()->active()) {
 			set_meter_strip_name ("AudioTrackMetrics");
 		} else {
 			set_meter_strip_name ("AudioTrackMetricsInactive");
@@ -1168,3 +1191,4 @@ GainMeter::redraw_metrics ()
 {
 	GainMeterBase::redraw_metrics ();
 }
+

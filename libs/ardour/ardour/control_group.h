@@ -34,6 +34,10 @@
 
 namespace ARDOUR {
 
+class CoreSelection;
+class RouteGroup;
+class Stripable;
+
 class LIBARDOUR_API ControlGroup : public std::enable_shared_from_this<ControlGroup>
 {
   public:
@@ -45,12 +49,16 @@ class LIBARDOUR_API ControlGroup : public std::enable_shared_from_this<ControlGr
 		Inverted = 0x2,
 	};
 
-	int add_control (std::shared_ptr<AutomationControl>);
-	int remove_control (std::shared_ptr<AutomationControl>);
+	void fill_from_stripable_list (StripableList&, Evoral::Parameter const &);
 
-	ControlList controls () const;
+	int add_control (std::shared_ptr<AutomationControl>, bool push = false);
+	int remove_control (std::shared_ptr<AutomationControl>, bool pop = false);
 
-	void clear ();
+	void pop_all ();
+
+	AutomationControlList controls () const;
+
+	void clear (bool pop = false);
 
 	void set_active (bool);
 	bool active() const { return _active; }
@@ -76,8 +84,10 @@ class LIBARDOUR_API ControlGroup : public std::enable_shared_from_this<ControlGr
 		}
 	}
 
-  protected:
 	typedef std::map<PBD::ID,std::shared_ptr<AutomationControl> > ControlMap;
+	ControlMap::size_type size() const { Glib::Threads::RWLock::ReaderLock lm (controls_lock); return _controls.size(); }
+
+  protected:
 	Evoral::Parameter _parameter;
 	mutable Glib::Threads::RWLock controls_lock;
 	ControlMap _controls;
@@ -93,7 +103,7 @@ class LIBARDOUR_API ControlGroup : public std::enable_shared_from_this<ControlGr
 class LIBARDOUR_API GainControlGroup : public ControlGroup
 {
   public:
-	GainControlGroup();
+	GainControlGroup (ARDOUR::AutomationType = GainAutomation);
 
 	void set_group_value (std::shared_ptr<AutomationControl>, double val);
 

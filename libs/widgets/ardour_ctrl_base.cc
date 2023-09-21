@@ -179,14 +179,14 @@ ArdourCtrlBase::on_motion_notify_event (GdkEventMotion *ev)
 				delta = tozero + remain;
 				_dead_zone_delta = 0;
 			} else {
-				c->set_value (c->normal(), Controllable::NoGroup);
+				c->set_value (c->normal(), Controllable::UseGroup);
 				_dead_zone_delta = remain / px_deadzone;
 				return true;
 			}
 		}
 
 		if (fabsf (rintf((val - _normal) / scale) + _dead_zone_delta) < 1) {
-			c->set_value (c->normal(), Controllable::NoGroup);
+			c->set_value (c->normal(), Controllable::UseGroup);
 			_dead_zone_delta += delta / px_deadzone;
 			return true;
 		}
@@ -195,7 +195,7 @@ ArdourCtrlBase::on_motion_notify_event (GdkEventMotion *ev)
 	}
 
 	val += delta * scale;
-	c->set_interface (val, true);
+	c->set_interface (val, true, Controllable::UseGroup);
 
 	return true;
 }
@@ -211,7 +211,7 @@ ArdourCtrlBase::on_button_press_event (GdkEventButton *ev)
 		if (_grabbed) {
 			remove_modal_grab();
 			_grabbed = false;
-			StopGesture ();
+			StopGesture (ev->state);
 			gdk_pointer_ungrab (GDK_CURRENT_TIME);
 		}
 		return true;
@@ -229,7 +229,7 @@ ArdourCtrlBase::on_button_press_event (GdkEventButton *ev)
 	_tooltip.start_drag();
 	add_modal_grab();
 	_grabbed = true;
-	StartGesture ();
+	StartGesture (ev->state);
 	gdk_pointer_grab(ev->window,false,
 			GdkEventMask( Gdk::POINTER_MOTION_MASK | Gdk::BUTTON_PRESS_MASK |Gdk::BUTTON_RELEASE_MASK),
 			NULL,NULL,ev->time);
@@ -241,7 +241,7 @@ ArdourCtrlBase::on_button_release_event (GdkEventButton *ev)
 {
 	_tooltip.stop_drag();
 	_grabbed = false;
-	StopGesture ();
+	StopGesture (ev->state);
 	remove_modal_grab();
 	gdk_pointer_ungrab (GDK_CURRENT_TIME);
 

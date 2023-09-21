@@ -1,0 +1,71 @@
+What's going on with drawing sharp, odd-pixel-width lines in Cairo?
+-------------------------------------------------------------------
+
+First read the Cairo FAQ entry:
+
+    https://www.cairographics.org/FAQ/#sharp_lines
+
+Here is a slightly different explanation, based on our
+understanding as of July 2023:
+
+There are no pixels on integer positions; if you draw a
+single pixel line on any such integer position, it will
+(half) shade the row/col of pixels on either side of that
+position. The pixels are actually at N.5.
+
+If the line width is a multiple of two, then the row/col of
+pixels on either side of the integer coordinate will both be
+full shaded. So if you draw a 2-pixel wide line at 1.0, the
+pixel rows/cols at 0.5 and 1.5 will both be fully shaded and
+you get what you asked for: 2 rows/cols of pixels that are
+visible as intended.
+
+However, if you want to shade just a single (sharp) row/col
+of pixels, you must do so at N.5, which is where the pixels
+actually "are".  The first such row/col is at 0.5.  the
+second row/col is at 1.5 etc. etc.
+
+So ... to draw a single pixel line on the first row/col, the
+relevant x/y coordinate is 0.5.
+
+Consequently, if you are drawing lines that can ever be an
+odd number of pixels in width, you MUST shift the
+coordinates by + (line_width * 0.5) in order to shade only
+the pixels at that position (and adjacent ones, if the line
+is 3, 5, 7 etc. pixels wide).
+
+
+Below is a tiny test program that will allow you to
+experiment with 0.5 offset to see its effect (it generates
+/tmp/out.png which you should look at with a tool that can
+zoom in to view pixels easily)
+
+// gcc -o cairo-test cairo-test.c `pkg-config --cflags --libs cairo`
+#include <stdio.h>
+#include <cairo/cairo.h>
+
+int main (int argc, char **argv) {
+  char* fn = "/tmp/out.png";
+
+  cairo_surface_t* cs = cairo_image_surface_create (CAIRO_FORMAT_ARGB32, 100, 100);
+  cairo_t* cr = cairo_create (cs);
+
+  cairo_set_source_rgba (cr, 1, 1, 1, 1);
+
+  cairo_set_line_width (cr, 1);
+
+  /* Experiment with using 0., 0.5, -0.5 and more for the value
+   * of y, and check which rows of pixels are shaded as a result.
+   */
+
+  double y = 0.5;
+
+  cairo_move_to (cr, 0,  y);
+  cairo_line_to (cr, 100.5, y);
+  cairo_stroke (cr);
+
+  cairo_surface_write_to_png (cs, fn);
+  cairo_destroy (cr);
+  cairo_surface_destroy (cs);
+  return 0;
+}

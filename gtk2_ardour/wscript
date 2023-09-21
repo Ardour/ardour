@@ -3,26 +3,15 @@ from waflib.extras import autowaf as autowaf
 from waflib import Options, TaskGen
 import waflib.Logs as Logs, waflib.Utils as Utils
 import os
-import shutil
 import sys
 import re
-import time
-from waflib.Task import Task
-from waflib.Tools import winres
 import subprocess
 import glob
-import copy
-
-# Mandatory variables
-top = '.'
-out = 'build'
 
 @TaskGen.extension('.m')
 def m_hook(self, node):
     """Alias .m files to be compiled the same as .c files, gcc will do the right thing."""
     return self.create_compiled_task('c', node)
-
-path_prefix = 'gtk2_ardour/'
 
 gtk2_ardour_sources = [
         'about.cc',
@@ -94,6 +83,7 @@ gtk2_ardour_sources = [
         'editor_cursors.cc',
         'editor_drag.cc',
         'editor_route_groups.cc',
+        'editor_section_box.cc',
         'editor_export_audio.cc',
         'editor_group_tabs.cc',
         'editor_keys.cc',
@@ -105,6 +95,7 @@ gtk2_ardour_sources = [
         'editor_regions.cc',
         'editor_routes.cc',
         'editor_rulers.cc',
+        'editor_sections.cc',
         'editor_selection.cc',
         'editor_snapshots.cc',
         'editor_sources.cc',
@@ -172,7 +163,6 @@ gtk2_ardour_sources = [
         'midi_region_operations_box.cc',
         'midi_region_properties_box.cc',
         'midi_trigger_properties_box.cc',
-        'midi_scroomer.cc',
         'midi_selection.cc',
         'midi_streamview.cc',
         'midi_time_axis.cc',
@@ -428,13 +418,14 @@ def enoify (major, minor):
             return "\\n\\\"The Shutov Assembly\\\"" # 1992
         if minor == 5:
             return "\\n\\\"Neroli\\\"" # 1993
-        if minor == 6:
+    elif major == 8:
+        if minor == 0:
             return "\\n\\\"Spinner\\\"" # 1995
-        if minor == 7:
+        if minor == 1:
             return "\\n\\\"The Drop\\\"" # 1997
-        if minor == 8:
+        if minor == 2:
             return "\\n\\\"Tracks and Traces\\\"" # 1997
-        if minor == 9:
+        if minor == 3:
             return "\\n\\\"Music for White Cube\\\"" # 1997
     return "\\\"\\\""
 
@@ -493,66 +484,7 @@ def configure(conf):
     conf.write_config_header('gtk2ardour-version.h')
     conf.env['define_key'] = bak
 
-def _doPyp(infileName, deps = False):
-    outStr = ''
-    out = []
-    re_spaces = re.compile("\s+")
-
-    if infileName == '-':
-        fd = sys.stdin
-    else:
-        fd = open(infileName)
-    inLines = fd.readlines()
-    if fd != sys.stdin:
-        fd.close()
-
-    for line in inLines:
-        bits = re_spaces.split(line)
-        if bits[0] == '##include':
-            incName = bits[1]
-            if (deps):
-                out += [ incName ]
-            else:
-                # assume included file comes from same place as source file
-                incName = os.path.join (os.path.dirname (infileName), incName);
-                outStr += _doPyp(incName)
-        else:
-            if not deps:
-                outStr += line
-
-    # done
-    if deps:
-        return out
-    else:
-        return outStr
-
-def include_processor(task):
-    infileName = task.inputs[0].srcpath()
-    outfileName = os.path.join(out, task.outputs[0].bldpath())
-    fdOut = open (outfileName, "w")
-    fdOut.write (_doPyp(infileName))
-    fdOut.close ()
-
-def build_color_scheme(path, prefix):
-    f = open (path, 'r')
-    color_scheme = ''
-    for line in f:
-        if re.search ('^#@color', line):
-            line.strip() # remove newline
-            words = line.split()
-            if len(color_scheme):
-                color_scheme += ';'
-            color_scheme += prefix
-            color_scheme += '_'
-            color_scheme += words[1]
-            color_scheme += ':'
-            color_scheme += words[2]
-    f.close()
-    return color_scheme
-
 def build(bld):
-
-    VERSION = "%s.%s" % (bld.env['MAJOR'], bld.env['MINOR'])
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
 
     # Tool to dump lua-bindings (of gtk2ardour + libs)
@@ -772,7 +704,6 @@ def build(bld):
 
     font_subst_dict = {}
     font_sizes      = {}
-    base_font       = ""
 
     # Set up font sizes
     if sys.platform == 'darwin':
@@ -984,26 +915,26 @@ def build(bld):
 
 def i18n(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-    autowaf.build_i18n(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+    autowaf.build_i18n(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                        'Paul Davis')
     appdata_i18n_pot(bld)
     appdata_i18n_po(bld)
 
 def i18n_pot(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-    autowaf.build_i18n_pot(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+    autowaf.build_i18n_pot(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                            'Paul Davis')
     appdata_i18n_pot(bld)
 
 def i18n_po(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-    autowaf.build_i18n_po(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+    autowaf.build_i18n_po(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                           'Paul Davis')
     appdata_i18n_po(bld)
 
 def i18n_mo(bld):
     I18N_PACKAGE = 'gtk2_ardour' + bld.env['MAJOR']
-    autowaf.build_i18n_mo(bld, top, 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
+    autowaf.build_i18n_mo(bld, '.', 'gtk2_ardour', I18N_PACKAGE, gtk2_ardour_sources,
                           'Paul Davis')
 
 def appdata_i18n_pot(bld):
