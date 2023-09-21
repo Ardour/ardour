@@ -125,6 +125,7 @@ VelocityGhostRegion::add_note (NoteBase* nb)
 
 	GhostEvent* event = new GhostEvent (nb, _note_group, l);
 	events.insert (std::make_pair (nb->note(), event));
+	_optimization_iterator = events.end();
 
 	l->Event.connect (sigc::bind (sigc::mem_fun (*this, &VelocityGhostRegion::lollevent), event));
 	l->set_ignore_events (true);
