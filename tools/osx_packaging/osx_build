@@ -873,11 +873,17 @@ fi
 
 ##### App Signing ##############################################################
 
+if test -n "$ALTOOL_PASSWORD"; then
+	ALTOOL_PASS_ARG="@env:ALTOOL_PASSWORD"
+else
+	ALTOOL_PASS_ARG="@keychain:ALTOOL_PASSWORD"
+fi
+
 checkForSuccess() {
 	xcrun altool \
 		--notarization-info $1 \
 		-u ${ALTOOL_USERNAME} \
-		--password "@env:ALTOOL_PASSWORD" \
+		--password "$ALTOOL_PASS_ARG" \
 		2>&1 | grep -o "Status: success";
 }
 
@@ -917,7 +923,7 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 		ZIP_PATH=${PRODUCT_PKG_DIR}/${BUNDLENAME}.zip
 		/usr/bin/ditto -c -k --keepParent ${PRODUCT_PKG_DIR}/${APPDIR} $ZIP_PATH
 
-		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.zip" --username ${ALTOOL_USERNAME} --password "@env:ALTOOL_PASSWORD" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
+		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.zip" --username ${ALTOOL_USERNAME} --password "$ALTOOL_PASS_ARG" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
 
 		if [ $? = 0 ]; then
 			REQUEST_ID=$(echo ${notarize_output} | awk '{print $3}')
@@ -973,7 +979,7 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 		ZIP_PATH=${PRODUCT_PKG_DIR}/Jadeo.zip
 		/usr/bin/ditto -c -k --keepParent ${PRODUCT_PKG_DIR}/Jadeo.app $ZIP_PATH
 
-		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.jadeo.zip" --username ${ALTOOL_USERNAME} --password "@env:ALTOOL_PASSWORD" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
+		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.jadeo.zip" --username ${ALTOOL_USERNAME} --password "$ALTOOL_PASS_ARG" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
 
 		if [ $? = 0 ]; then
 			REQUEST_ID=$(echo ${notarize_output}  | awk '{print $3}')
@@ -1148,7 +1154,7 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 		echo "dmg: notarizing"
 		OK=0
 
-		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.dmg" --username ${ALTOOL_USERNAME} --password "@env:ALTOOL_PASSWORD" --file ${UC_DMG} 2>&1 | grep -o "RequestUUID = .*")
+		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.dmg" --username ${ALTOOL_USERNAME} --password "$ALTOOL_PASS_ARG" --file ${UC_DMG} 2>&1 | grep -o "RequestUUID = .*")
 
 		if [ $? = 0 ]; then
 			REQUEST_ID=$(echo ${notarize_output}  | awk '{print $3}')
