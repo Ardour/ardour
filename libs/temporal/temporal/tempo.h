@@ -1120,7 +1120,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 		Tempos::const_iterator tp = _tempos.begin();
 		Meters::const_iterator mp = _meters.begin();
-		superclock_t ref = bbt.sclock();
+		superclock_t ref = bbt.reference();
 
 		if (ref != 0) {
 			while (tp != _tempos.end()) {
