@@ -4757,6 +4757,9 @@ OSC::_strip_select2 (std::shared_ptr<Stripable> s, OSCSurface *sur, lo_address a
 		}
 		_select = s;
 	}
+	if (!s) {
+		return 0;
+	}
 	if (s != old_sel) {
 		sur->select = s;
 	}
