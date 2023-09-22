@@ -233,7 +233,7 @@ MidiPlaylist::_split_region (std::shared_ptr<Region> region, timepos_t const & p
 		plist.add (Properties::length, after);
 		plist.add (Properties::name, after_name);
 		plist.add (Properties::right_of_split, true);
-		plist.add (Properties::reg_group, Region::get_retained_group_id());
+		plist.add (Properties::reg_group, Region::get_region_operation_group_id (region->region_group(), RightOfSplit));
 
 		/* same note as above */
 		right = RegionFactory::create (region, before, plist, true, &thawlist);

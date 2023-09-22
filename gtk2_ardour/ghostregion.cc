@@ -333,6 +333,7 @@ MidiGhostRegion::add_note (NoteBase* n)
 {
 	GhostEvent* event = new GhostEvent (n, _note_group);
 	events.insert (make_pair (n->note(), event));
+	_optimization_iterator = events.end();
 
 	event->item->set_fill_color (UIConfiguration::instance().color_mod(n->base_color(), "ghost track midi fill"));
 	event->item->set_outline_color (_outline);

@@ -1120,6 +1120,7 @@ LuaInstance::register_classes (lua_State* L)
 #undef IMPORTPOSITION
 #undef IMPORTDISPOSITION
 #undef TEMPOEDITBEHAVIOR
+#undef NOTENAMEDISPLAY
 
 #define ZOOMFOCUS(NAME) .addConst (stringify(NAME), (Editing::ZoomFocus)Editing::NAME)
 #define GRIDTYPE(NAME) .addConst (stringify(NAME), (Editing::GridType)Editing::NAME)
@@ -1129,6 +1130,7 @@ LuaInstance::register_classes (lua_State* L)
 #define IMPORTMODE(NAME) .addConst (stringify(NAME), (Editing::ImportMode)Editing::NAME)
 #define IMPORTPOSITION(NAME) .addConst (stringify(NAME), (Editing::ImportPosition)Editing::NAME)
 #define IMPORTDISPOSITION(NAME) .addConst (stringify(NAME), (Editing::ImportDisposition)Editing::NAME)
+#define NOTENAMEDISPLAY(NAME) .addConst (stringify(NAME), (Editing::NoteNameDisplay)Editing::NAME)
 	luabridge::getGlobalNamespace (L)
 		.beginNamespace ("Editing")
 #		include "editing_syms.h"

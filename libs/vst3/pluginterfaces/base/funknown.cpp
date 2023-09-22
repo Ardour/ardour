@@ -44,11 +44,21 @@
 #endif
 
 #if SMTG_OS_LINUX
+#if !defined (SMTG_USE_STDATOMIC_H)
+#if defined (_LIBCPP_VERSION)
+#define SMTG_USE_STDATOMIC_H 1
+#else
 #include <ext/atomicity.h>
+#endif
+#endif
 /* UUID */
 #include <string>
 #include <boost/uuid/uuid.hpp>
 #include <boost/uuid/uuid_generators.hpp>
+#endif
+
+#if defined (SMTG_USE_STDATOMIC_H) && SMTG_USE_STDATOMIC_H
+#include <stdatomic.h>
 #endif
 
 namespace Steinberg {
@@ -79,7 +89,9 @@ namespace FUnknownPrivate {
 //------------------------------------------------------------------------
 int32 PLUGIN_API atomicAdd (int32& var, int32 d)
 {
-#if SMTG_OS_WINDOWS
+#if SMTG_USE_STDATOMIC_H
+	return atomic_fetch_add (reinterpret_cast<atomic_int_least32_t*> (&var), d) +d;
+#elif SMTG_OS_WINDOWS
 	return InterlockedExchangeAdd ((volatile long int*)&var, d) + d;
 #elif SMTG_OS_MACOS
 	return OSAtomicAdd32Barrier (d, (int32_t*)&var);

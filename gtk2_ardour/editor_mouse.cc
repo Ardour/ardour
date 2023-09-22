@@ -1943,7 +1943,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 		case MouseGrid:
 			/* MouseGrid clicks are handled by _canvas_grid_zone */
-			assert (0);
+			fatal << _("programming error: MouseGrid clicks are handled by _canvas_grid_zone!") << endmsg;
 			abort(); /*NOTREACHED*/
 			break;
 

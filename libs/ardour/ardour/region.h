@@ -91,6 +91,12 @@ enum LIBARDOUR_API RegionEditState {
 	EditChangesID      = 2
 };
 
+enum LIBARDOUR_API RegionOperationFlag {
+	LeftOfSplit    = 0,
+	InnerSplit     = 1, // when splitting a Range, there's left/center/right parts of the split
+	RightOfSplit   = 2,
+	Paste          = 4
+};
 
 class LIBARDOUR_API Region
 	: public SessionObject
@@ -170,9 +176,11 @@ public:
 	struct RegionGroupRetainer {
 		RegionGroupRetainer ()
 		{
+			Glib::Threads::Mutex::Lock lm (_operation_rgroup_mutex);
 			if (_retained_group_id == 0) {
-				_next_group_id++;
-				_retained_group_id    = _next_group_id << 4;
+				++_next_group_id;
+				_operation_rgroup_map.clear ();              // this is used for split & paste operations that honor the region's prior grouping
+				_retained_group_id    = _next_group_id << 4; // this is used for newly created regions via recording or importing
 				_clear_on_destruction = true;
 			} else {
 				_clear_on_destruction = false;
@@ -181,7 +189,9 @@ public:
 		~RegionGroupRetainer ()
 		{
 			if (_clear_on_destruction) {
+				Glib::Threads::Mutex::Lock lm (_operation_rgroup_mutex);
 				_retained_group_id = 0;
+				_operation_rgroup_map.clear();
 			}
 		}
 		bool _clear_on_destruction;
@@ -190,14 +200,16 @@ public:
 	static uint64_t next_group_id () { return _next_group_id; }
 	static void set_next_group_id (uint64_t ngid) { _next_group_id = ngid; }
 
-	/* access the shared group-id, potentially with an Alt identifier (for left/center/right splits) */
-	static uint64_t get_retained_group_id (bool alt = false)
-	{
-		return _retained_group_id | (alt ? Alt : NoGroup);
+	/* access the retained group-id for actions like Recording, Import */
+	static uint64_t get_retained_group_id () {
+		return _retained_group_id;
 	}
 
+	/* access the group-id for an operation on a region, honoring the existing region's group status */
+	static uint64_t get_region_operation_group_id (uint64_t old_region_group, RegionOperationFlag flags);
+
 	uint64_t region_group () const { return _reg_group; }
-	void set_region_group (bool explicitly, bool alt = false) { _reg_group = get_retained_group_id (alt) | (explicitly ? Explicit : NoGroup); }
+	void set_region_group (bool explicitly) { _reg_group = get_retained_group_id () | (explicitly ? Explicit : NoGroup); }
 	void unset_region_group () { _reg_group = Explicit; }
 
 	bool is_explicitly_grouped()   { return (_reg_group & Explicit) == Explicit; }
@@ -599,12 +611,14 @@ private:
 	void use_sources (SourceList const &);
 
 	enum RegionGroupFlags : uint64_t {
-		NoGroup   = 0x0, //no flag: implicitly grouped if the id is nonzero; or implicitly 'un-grouped' if the group-id is zero
-		Explicit  = 0x1, //the user has explicitly grouped or ungrouped this region. explicitly grouped regions can cross track-group boundaries
-		Alt       = 0x8, //this accommodates some operations (separate) that generate left/center/right region groups.  add more bits here, if needed
+		NoGroup   = 0x0, // no flag: implicitly grouped if the id is nonzero; or implicitly 'un-grouped' if the group-id is zero
+		Explicit  = 0x1, // the user has explicitly grouped or ungrouped this region. explicitly grouped regions can cross track-group boundaries
 	};
 	static uint64_t _retained_group_id;
 	static uint64_t _next_group_id;
+
+	static Glib::Threads::Mutex         _operation_rgroup_mutex;
+	static std::map<uint64_t, uint64_t> _operation_rgroup_map;
 
 	std::atomic<int>          _source_deleted;
 	Glib::Threads::Mutex      _source_list_lock;

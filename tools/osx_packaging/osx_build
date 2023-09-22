@@ -365,8 +365,8 @@ cp -R $BUILD_ROOT/../share/web_surfaces $WebSurfaces
 rm $WebSurfaces/wscript
 
 # recursively copy clips/media
-#cp -R $BUILD_ROOT/../share/media $MediaClips
-#rm $MediaClips/wscript
+cp -R $BUILD_ROOT/../share/media $MediaClips
+rm $MediaClips/wscript
 
 # MackieControl data
 # got to be careful with names here
@@ -873,11 +873,17 @@ fi
 
 ##### App Signing ##############################################################
 
+if test -n "$ALTOOL_PASSWORD"; then
+	ALTOOL_PASS_ARG="@env:ALTOOL_PASSWORD"
+else
+	ALTOOL_PASS_ARG="@keychain:ALTOOL_PASSWORD"
+fi
+
 checkForSuccess() {
 	xcrun altool \
 		--notarization-info $1 \
 		-u ${ALTOOL_USERNAME} \
-		--password "@keychain:ALTOOL_PASSWORD" \
+		--password "$ALTOOL_PASS_ARG" \
 		2>&1 | grep -o "Status: success";
 }
 
@@ -896,8 +902,8 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 
 	echo "signing the main app"
 
-	# Sign everything from inside level working out.
-	find ${PRODUCT_PKG_DIR}/${APPROOT}/Resources -type f -print0 | xargs -0 -I {} -P 7 codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}"
+	# Sign everything from inside level working out, but skip MIDI files includes (there are too many to reasonably sign)
+	find ${PRODUCT_PKG_DIR}/${APPROOT}/Resources -type f -not -name \*.mid -print0 | xargs -0 -I {} -P 7 codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}"
 	find ${PRODUCT_PKG_DIR}/${APPROOT}/lib -type f -print0 | xargs -0 -I {} -P 7 codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}"
 
 	find ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS -name "${lower_case_appname}${major_version}-*" -print0 | xargs -0 -I {} -P 7 codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}"
@@ -917,7 +923,7 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 		ZIP_PATH=${PRODUCT_PKG_DIR}/${BUNDLENAME}.zip
 		/usr/bin/ditto -c -k --keepParent ${PRODUCT_PKG_DIR}/${APPDIR} $ZIP_PATH
 
-		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.zip" --username ${ALTOOL_USERNAME} --password "@keychain:ALTOOL_PASSWORD" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
+		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.zip" --username ${ALTOOL_USERNAME} --password "$ALTOOL_PASS_ARG" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
 
 		if [ $? = 0 ]; then
 			REQUEST_ID=$(echo ${notarize_output} | awk '{print $3}')
@@ -973,7 +979,7 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 		ZIP_PATH=${PRODUCT_PKG_DIR}/Jadeo.zip
 		/usr/bin/ditto -c -k --keepParent ${PRODUCT_PKG_DIR}/Jadeo.app $ZIP_PATH
 
-		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.jadeo.zip" --username ${ALTOOL_USERNAME} --password "@keychain:ALTOOL_PASSWORD" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
+		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.jadeo.zip" --username ${ALTOOL_USERNAME} --password "$ALTOOL_PASS_ARG" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
 
 		if [ $? = 0 ]; then
 			REQUEST_ID=$(echo ${notarize_output}  | awk '{print $3}')
@@ -1148,7 +1154,7 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 		echo "dmg: notarizing"
 		OK=0
 
-		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.dmg" --username ${ALTOOL_USERNAME} --password "@keychain:ALTOOL_PASSWORD" --file ${UC_DMG} 2>&1 | grep -o "RequestUUID = .*")
+		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.dmg" --username ${ALTOOL_USERNAME} --password "$ALTOOL_PASS_ARG" --file ${UC_DMG} 2>&1 | grep -o "RequestUUID = .*")
 
 		if [ $? = 0 ]; then
 			REQUEST_ID=$(echo ${notarize_output}  | awk '{print $3}')
