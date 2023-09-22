@@ -1108,11 +1108,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 		if (_tempos.size() == 1 && _meters.size() == 1) { t = &_tempos.front(); m = &_meters.front();  return _points.end(); }
 		return _get_tempo_and_meter<const_traits<Beats const &, Beats> > (t, m, &Point::beats, b, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
 	}
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, timepos_t const & pos, bool can_match, bool ret_iterator_after_not_at) const {
-		if (pos.time_domain() == BeatTime) {
-			return get_tempo_and_meter (t, m, pos.beats(), can_match, ret_iterator_after_not_at);
-		} else {
-			return get_tempo_and_meter (t, m, pos.superclocks(), can_match, ret_iterator_after_not_at);
 		}
 	}
 
