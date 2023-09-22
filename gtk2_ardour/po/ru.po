@@ -12,7 +12,7 @@ msgstr ""
 "Project-Id-Version: Ardour 8\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2023-09-22 03:10+0200\n"
-"PO-Revision-Date: 2023-09-22 04:30+0200\n"
+"PO-Revision-Date: 2023-09-22 12:37+0200\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: Russian <gnome-cyr@lists.gnome.org>\n"
 "Language: ru\n"
@@ -3808,7 +3808,7 @@ msgstr "Интерполяция"
 
 #: automation_time_axis.cc:850
 msgid "draw automation"
-msgstr ""
+msgstr "рисование автоматизации"
 
 #: bbt_marker_dialog.cc:33
 msgid "New Music Time"
@@ -4266,7 +4266,7 @@ msgstr "По центру"
 
 #: editor.cc:235
 msgid "Edit point"
-msgstr "Курсор редактора"
+msgstr "Точка редактирования"
 
 #: editor.cc:241
 msgid "Mushy"
@@ -4422,7 +4422,7 @@ msgstr "Активировать"
 
 #: editor.cc:1599 editor_actions.cc:369
 msgid "Copy/Paste Range Section to Playhead"
-msgstr ""
+msgstr "Скопировать/Вставить часть аранжировки по указателю воспроизведения"
 
 #: editor.cc:1600 editor_actions.cc:370
 msgid "Cut/Paste Range Section to Playhead"
@@ -4430,11 +4430,11 @@ msgstr "Вырезать/Вставить часть аранжировки по
 
 #: editor.cc:1602 editor_actions.cc:373
 msgid "Copy/Paste Range Section to Edit Point"
-msgstr ""
+msgstr "Скопировать/Вставить часть аранжировки по точке редактирования"
 
 #: editor.cc:1603 editor_actions.cc:374
 msgid "Cut/Paste Range Section to Edit Point"
-msgstr "Вырезать/Вставить часть аранжировки по курсору редактирования"
+msgstr "Вырезать/Вставить часть аранжировки по точке редактирования"
 
 #: editor.cc:1605 editor_actions.cc:378 editor_actions.cc:379
 msgid "Delete Range Section"
@@ -4442,7 +4442,7 @@ msgstr "Удалить часть аранжировки"
 
 #: editor.cc:1609
 msgid "Delete all markers in Section"
-msgstr ""
+msgstr "Удалить все маркеры в части аранжировки"
 
 #: editor.cc:1619 editor_markers.cc:1132 editor_markers.cc:1181
 msgid "Move Playhead to Marker"
@@ -4606,11 +4606,11 @@ msgstr "Установить диапазон по выбранным облас
 
 #: editor.cc:2084 editor.cc:2161 editor_actions.cc:254 editor_actions.cc:255
 msgid "Select All After Edit Point"
-msgstr "Выделить всё после курсора редактора"
+msgstr "Выделить всё после точки редактирования"
 
 #: editor.cc:2085 editor.cc:2162 editor_actions.cc:256 editor_actions.cc:257
 msgid "Select All Before Edit Point"
-msgstr "Выделить всё до курсора редактора"
+msgstr "Выделить всё до точки редактирования"
 
 #: editor.cc:2086 editor.cc:2163
 msgid "Select All After Playhead"
@@ -4622,7 +4622,7 @@ msgstr "Выделить всё до указателя"
 
 #: editor.cc:2088
 msgid "Select All Between Playhead and Edit Point"
-msgstr "Выделить всё между указателем и курсором редактора"
+msgstr "Выделить всё между указателем и точкой редактирования"
 
 #: editor.cc:2089
 msgid "Select All Within Playhead and Edit Point"
@@ -4630,7 +4630,7 @@ msgstr "Выделить всё между указателем и точкой 
 
 #: editor.cc:2090
 msgid "Select Range Between Playhead and Edit Point"
-msgstr "Создать выделение между указателем и курсором редактора"
+msgstr "Создать выделение между указателем и точкой редактирования"
 
 #: editor.cc:2092 editor.cc:2166 editor_actions.cc:171 editor_actions.cc:172
 #: transport_masters_dialog.cc:79
@@ -4671,7 +4671,7 @@ msgstr "Толкнуть всю дорожку вперёд"
 
 #: editor.cc:2128 editor.cc:2185
 msgid "Nudge Track After Edit Point Later"
-msgstr "Толкнуть дорожку вперёд после курсора редактора"
+msgstr "Толкнуть дорожку вперёд после точки редактирования"
 
 #: editor.cc:2129 editor.cc:2186
 msgid "Nudge Entire Track Earlier"
@@ -4679,7 +4679,7 @@ msgstr "Толкнуть всю дорожку назад"
 
 #: editor.cc:2130 editor.cc:2187
 msgid "Nudge Track After Edit Point Earlier"
-msgstr "Толкнуть дорожку назад после курсора редактора"
+msgstr "Толкнуть дорожку назад после точки редактирования"
 
 #: editor.cc:2132 editor.cc:2189
 msgid "Nudge"
@@ -5601,7 +5601,7 @@ msgstr ""
 
 #: editor_actions.cc:375
 msgid "Insert Time Section at Edit Point"
-msgstr ""
+msgstr "Вставить часть по точке редактирования"
 
 #: editor_actions.cc:382 editor_actions.cc:1960
 msgid "Play Selected Regions"
@@ -5621,7 +5621,7 @@ msgstr "Разгруппировать выбранные области"
 
 #: editor_actions.cc:389
 msgid "Play from Edit Point and Return"
-msgstr "Воспроизвести от курсора редактора и вернуться"
+msgstr "Воспроизвести от точки редактирования и вернуться"
 
 #: editor_actions.cc:391
 msgid "Play Edit Range"
@@ -6464,11 +6464,11 @@ msgstr "Вставить резкий переход"
 
 #: editor_actions.cc:2018
 msgid "Trim Start at Edit Point"
-msgstr "Начало по курсору редактора"
+msgstr "Начало по точке редактирования"
 
 #: editor_actions.cc:2019
 msgid "Trim End at Edit Point"
-msgstr "Конец по курсору редактора"
+msgstr "Конец по точке редактирования"
 
 #: editor_actions.cc:2020
 msgid "Align Start"
@@ -6758,7 +6758,7 @@ msgstr "В"
 
 #: editor_route_groups.cc:92
 msgid "Group is visible?"
-msgstr "Группа видима"
+msgstr "Группа видима?"
 
 #: editor_route_groups.cc:93
 msgid "On"
@@ -6766,7 +6766,7 @@ msgstr "Вкл"
 
 #: editor_route_groups.cc:93
 msgid "Group is enabled?"
-msgstr "Группа включена"
+msgstr "Группа включена?"
 
 #: editor_route_groups.cc:94
 msgid "Group|G"
@@ -8213,11 +8213,11 @@ msgstr ""
 
 #: editor_tempodisplay.cc:636
 msgid "edit time signature"
-msgstr ""
+msgstr "правка размера такта"
 
 #: editor_tempodisplay.cc:660 editor_tempodisplay.cc:727
 msgid "edit tempo"
-msgstr ""
+msgstr "правка темпа"
 
 #: editor_tempodisplay.cc:694
 msgid "edit BBT tempo"
@@ -10841,7 +10841,7 @@ msgstr ""
 
 #: midi_region_view.cc:3472
 msgid "set velocities"
-msgstr ""
+msgstr "установка силы нажатия"
 
 #: midi_region_view.cc:3514
 msgid "change velocities"
@@ -10873,7 +10873,7 @@ msgstr "Канал "
 
 #: midi_region_view.cc:3927
 msgid "duplicate notes"
-msgstr ""
+msgstr "дублирование нот"
 
 #: midi_region_view.cc:4005
 msgid "paste"
@@ -10934,7 +10934,7 @@ msgstr ""
 #: midi_time_axis.cc:412 midi_time_axis.cc:418 midi_time_axis.cc:434
 #: midi_time_axis.cc:504 midi_time_axis.cc:565
 msgid "Plugin Provided"
-msgstr "Предосталвено плагином"
+msgstr "Предоставлено плагином"
 
 #: midi_time_axis.cc:739
 msgid "Show Full Range"
@@ -11310,7 +11310,7 @@ msgstr "Запись и монитор"
 
 #: mixer_strip.cc:407 rc_option_editor.cc:2830
 msgid "Solo Iso / Lock"
-msgstr "Соло Iso / Блок"
+msgstr "Изоляция и блокировка солирования"
 
 #: mixer_strip.cc:410 rc_option_editor.cc:2833
 msgid "VCA Assigns"
@@ -11322,7 +11322,7 @@ msgstr "Сетка триггеров"
 
 #: mixer_strip.cc:412
 msgid "Trigger Master"
-msgstr ""
+msgstr "Отсчёт триггеров"
 
 #: mixer_strip.cc:616
 msgid "Show/Hide Monitoring Section"
@@ -12466,7 +12466,7 @@ msgstr "Последняя нота:"
 
 #: patch_change_widget.cc:816 patch_change_widget.cc:835
 msgid "Trigger Patch Select"
-msgstr ""
+msgstr "Выбор патча для триггера"
 
 #: patch_change_widget.cc:820
 msgid "Chn %1"
@@ -14651,7 +14651,7 @@ msgstr "Когда доступно"
 
 #: rc_option_editor.cc:2763
 msgid "Never"
-msgstr ""
+msgstr "Никогда"
 
 #: rc_option_editor.cc:2769 rc_option_editor.cc:2772 rc_option_editor.cc:2781
 #: rc_option_editor.cc:2789 rc_option_editor.cc:2797 rc_option_editor.cc:2809
@@ -14701,7 +14701,7 @@ msgstr "От низа"
 
 #: rc_option_editor.cc:2835
 msgid "Trigger Masters"
-msgstr ""
+msgstr "Отсчёт триггеров"
 
 #: rc_option_editor.cc:2838 rc_option_editor.cc:2847 rc_option_editor.cc:2851
 #: rc_option_editor.cc:2871 rc_option_editor.cc:2873
@@ -15257,7 +15257,7 @@ msgstr "Линейки автоматически меняются вслед з
 
 #: rc_option_editor.cc:3429
 msgid "Snap Target Mode:"
-msgstr ""
+msgstr "Режим нацеливания прилипания:"
 
 #: rc_option_editor.cc:3433
 msgid "When the Grid is enabled, snap to"
@@ -15265,15 +15265,15 @@ msgstr ""
 
 #: rc_option_editor.cc:3438
 msgid "Snap Targets"
-msgstr ""
+msgstr "По целям прилипания"
 
 #: rc_option_editor.cc:3439
 msgid "Both the Grid and Snap Targets"
-msgstr ""
+msgstr "По сетке и по целям прилипания"
 
 #: rc_option_editor.cc:3442
 msgid "Snap Targets:"
-msgstr ""
+msgstr "Цели прилипания:"
 
 #: rc_option_editor.cc:3463
 msgid "Region Sync Points"
@@ -15865,7 +15865,7 @@ msgstr ""
 
 #: rc_option_editor.cc:4004
 msgid "Closing a Plugin GUI Window"
-msgstr ""
+msgstr "При закрытии окна с интерфейсом плагина"
 
 #: rc_option_editor.cc:4008
 msgid "only hides the window"
@@ -15873,11 +15873,11 @@ msgstr ""
 
 #: rc_option_editor.cc:4009
 msgid "destroys the GUI instance, releasing resources"
-msgstr ""
+msgstr "разрушать копию интерфейса, высвобождать ресурсы"
 
 #: rc_option_editor.cc:4010
 msgid "only destroys VST2/3 UIs, hides others"
-msgstr ""
+msgstr "разрушать только интерфейсы VST2/3, скрывать все остальные"
 
 #: rc_option_editor.cc:4013
 msgid ""
@@ -15894,11 +15894,11 @@ msgstr ""
 
 #: rc_option_editor.cc:4016
 msgid "Mixer Strip Inline Display"
-msgstr ""
+msgstr "Интерфейсы, встраиваемые в каналы микшера"
 
 #: rc_option_editor.cc:4020
 msgid "Show Plugin Inline Display on Mixer Strip by default"
-msgstr ""
+msgstr "Показывать встраиваемые интерфейсы плагинов по умолчанию"
 
 #: rc_option_editor.cc:4027
 msgid ""
@@ -16155,43 +16155,43 @@ msgstr "Включить управление выходным усиление�
 
 #: rc_option_editor.cc:4395
 msgid "I/O Resampler (vari-speed) quality"
-msgstr ""
+msgstr "Качество ввода-вывода ресэмплера (vari-speed)"
 
 #: rc_option_editor.cc:4400
 msgid "Off (no vari-speed)"
-msgstr ""
+msgstr "Выключено (без vari-speed)"
 
 #: rc_option_editor.cc:4401
 msgid "Low (16 samples latency)"
-msgstr ""
+msgstr "Низкое (задержка 16 сэмплов)"
 
 #: rc_option_editor.cc:4402
 msgid "Moderate (32 samples latency), default"
-msgstr ""
+msgstr "Умеренное (задержка 32 сэмпла), по умолчанию"
 
 #: rc_option_editor.cc:4403
 msgid "Medium (64 samples latency)"
-msgstr ""
+msgstr "Среднее (задержка 64 сэмпла)"
 
 #: rc_option_editor.cc:4404
 msgid "High (96 samples latency)"
-msgstr ""
+msgstr "Высокое (задержка 96 сэмплов)"
 
 #: rc_option_editor.cc:4405
 msgid "Very High (128 samples latency)"
-msgstr ""
+msgstr "Очень высокое (задержка 128 сэмплов)"
 
 #: rc_option_editor.cc:4406
 msgid "Extreme (184 samples latency)"
-msgstr ""
+msgstr "Крайне высокое (задержка 184 сэмпла)"
 
 #: rc_option_editor.cc:4418
 msgid "Custom (%1 samples latency)"
-msgstr ""
+msgstr "На заказ (задержка %1 сэмплов)"
 
 #: rc_option_editor.cc:4421
 msgid "This setting will only take effect when the Audio Engine is restarted."
-msgstr ""
+msgstr "Изменение вступит в силу только после перезапуска звукового движка."
 
 #: rc_option_editor.cc:4422
 msgid ""
@@ -16734,7 +16734,7 @@ msgstr ""
 
 #: recorder_ui.cc:261
 msgid "Delete the region AND the audio files of the last recording take"
-msgstr ""
+msgstr "Удалить область и звуковые файлы последнего дубля"
 
 #: recorder_ui.cc:393
 msgid "Reset Input Peak Hold"
@@ -17234,7 +17234,7 @@ msgstr ""
 
 #: route_time_axis.cc:871
 msgid "Time Domain"
-msgstr ""
+msgstr "Тип времени"
 
 #: route_time_axis.cc:1259
 msgid "The name \"%1\" is reserved for %2"
@@ -18622,7 +18622,7 @@ msgstr "По отметке времени файла"
 
 #: sfdb_ui.cc:1898 sfdb_ui.cc:2085
 msgid "edit point"
-msgstr "По курсору редактора"
+msgstr "По точке редактирования"
 
 #: sfdb_ui.cc:1899 sfdb_ui.cc:2087
 msgid "playhead"
@@ -20012,7 +20012,7 @@ msgstr ""
 
 #: trigger_clip_picker.cc:145
 msgid "Show the GUI for the Auditioner Synth"
-msgstr ""
+msgstr "Показать интерфейс к синтезатору прослушивания"
 
 #: trigger_clip_picker.cc:146
 msgid "Click to select a clip folder and edit your available clip folders"
@@ -20089,11 +20089,11 @@ msgstr "Очистить выбранный слот"
 
 #: trigger_page.cc:778
 msgid "Trigger Cue %1"
-msgstr ""
+msgstr "Очередь триггеров %1"
 
 #: trigger_page.cc:786
 msgid "Trigger Slot %1/%2"
-msgstr ""
+msgstr "Слот триггера %1/%2"
 
 #: trigger_page.cc:791 trigger_page.cc:792
 msgid "Stop Cues %1"
@@ -20105,7 +20105,7 @@ msgstr "Немедленно остановить все очереди"
 
 #: trigger_page.cc:796
 msgid "Stop all cues soon"
-msgstr ""
+msgstr "Остановить все очереди вскорости"
 
 #: trigger_master.cc:129
 msgid ""
@@ -20737,7 +20737,7 @@ msgstr "Сохранить перекодированный видеофайл"
 
 #: velocity_ghost_region.cc:326
 msgid "draw velocities"
-msgstr ""
+msgstr "рисование силы нажатия"
 
 #: video_server_dialog.cc:61
 msgid "Launch Video Server"
