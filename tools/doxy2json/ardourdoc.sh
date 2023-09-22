@@ -10,7 +10,7 @@ TMPFILE=`mktemp`
 trap 'rm -f $TMPFILE' exit SIGINT SIGTERM
 
 echo "# analyzing source.. -> $TMPFILE"
-time ./tools/doxy2json/doxy2json -j 4 \
+time nice ./tools/doxy2json/doxy2json -j 8 \
 	$LLVMINCLUDE \
 	-D PACKAGE=\"doc\" \
 	-D PROGRAM_NAME=\"Ardour\" -D PROGRAM_VERSION=\"6\" -D LOCALEDIR=\"/\" \
