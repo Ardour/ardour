@@ -682,7 +682,7 @@ class LIBTEMPORAL_API GridIterator
   private:
 	bool             valid;
 
-	TempoMap const * map; /* nullptr or the map instance this GridIterator 
+	TempoMap const * map; /* nullptr or the map instance this GridIterator
 	                       * was last used with.
 	                       */
 };
