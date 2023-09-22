@@ -1100,15 +1100,15 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	 * other similar call sites where we do not modify the map
 	 */
 
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, superclock_t sc, bool can_match, bool ret_iterator_after_not_at) const {
+	Points::const_iterator get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, superclock_t sc, bool can_match, bool ret_iterator_after_not_at) const {
 		if (_tempos.size() == 1 && _meters.size() == 1) { t = &_tempos.front(); m = &_meters.front();  return _points.end(); }
 		return _get_tempo_and_meter<const_traits<superclock_t, superclock_t> > (t, m, &Point::sclock, sc, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
 	}
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, Beats const & b, bool can_match, bool ret_iterator_after_not_at) const {
+	Points::const_iterator get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, Beats const & b, bool can_match, bool ret_iterator_after_not_at) const {
 		if (_tempos.size() == 1 && _meters.size() == 1) { t = &_tempos.front(); m = &_meters.front();  return _points.end(); }
 		return _get_tempo_and_meter<const_traits<Beats const &, Beats> > (t, m, &Point::beats, b, _points.begin(), _points.end(), &_tempos.front(), &_meters.front(), can_match, ret_iterator_after_not_at);
 	}
-	Points::const_iterator  get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, BBT_Argument const & bbt, bool can_match, bool ret_iterator_after_not_at) const {
+	Points::const_iterator get_tempo_and_meter (TempoPoint const *& t, MeterPoint const *& m, BBT_Argument const & bbt, bool can_match, bool ret_iterator_after_not_at) const {
 
 		if (_tempos.size() == 1 && _meters.size() == 1) { t = &_tempos.front(); m = &_meters.front();  return _points.end(); }
 
