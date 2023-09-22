@@ -1170,13 +1170,13 @@ Editor::edit_current_tempo ()
 RefPtr<RadioAction>
 Editor::draw_velocity_action (int v)
 {
+	char buf[64];
 	const char* action = 0;
 	RefPtr<Action> act;
 
 	if (v==DRAW_VEL_AUTO) {
 		action = "draw-velocity-auto";
 	} else if (v>=1 && v<=127) {
-		char buf[64];
 		sprintf(buf, X_("draw-velocity-%d"), v);  //we don't allow drawing a velocity 0;  some synths use that as note-off
 		action = buf;
 	}
