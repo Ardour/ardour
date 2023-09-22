@@ -95,6 +95,39 @@ PBD::Signal2<void,std::shared_ptr<ARDOUR::RegionList>,const PropertyChange&> Reg
 uint64_t Region::_retained_group_id = 0;
 uint64_t Region::_next_group_id     = 0;
 
+std::map<uint64_t, uint64_t> Region::_operation_rgroup_map;
+Glib::Threads::Mutex         Region::_operation_rgroup_mutex;
+
+/* access the group-id for an operation on a region, honoring the existing region's group status */
+uint64_t
+Region::get_region_operation_group_id (uint64_t old_region_group, RegionOperationFlag flags) {
+	/* if the region was ungrouped, stay ungrouped */
+	if ((old_region_group == NoGroup) || (old_region_group == Explicit)) {
+		return old_region_group;
+	}
+
+	/* separate and preserve the Explicit flag: */
+	bool expl = (old_region_group & Explicit) == Explicit;
+
+	/* remove all flags */
+	old_region_group = (old_region_group >> 4) << 4;
+
+	/* apply flags to create a key, which will be used to recognize regions that belong in the same group */
+	uint64_t region_group_key = old_region_group | flags;
+
+	/* since the GUI is single-threaded, and it's hard/impossible to edit
+	 * during a rec-stop, this 'should' never be contentious
+	 */
+	Glib::Threads::Mutex::Lock lm (_operation_rgroup_mutex);
+
+	/* if a region group has not been assigned for this key, assign one */
+	if (_operation_rgroup_map.find (region_group_key) == _operation_rgroup_map.end ()) {
+		_operation_rgroup_map[region_group_key] = _next_group_id++;
+	}
+
+	return ((_operation_rgroup_map[region_group_key] << 4) | expl);
+}
+
 void
 Region::make_property_quarks ()
 {
