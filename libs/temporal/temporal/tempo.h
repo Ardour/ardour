@@ -1135,6 +1135,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 				if (nxt == _meters.end() || mp->sclock() > ref) {
 					break;
 				}
+				mp = nxt;
 			}
 		}
 
