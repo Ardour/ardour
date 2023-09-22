@@ -3860,7 +3860,7 @@ TempoMap::metric_at (BBT_Argument const & bbt, bool can_match) const
 	 * time to get the metric.
 	 */
 
-	(void) get_tempo_and_meter (tp, mp, bbt.reference(), can_match, false);
+	(void) get_tempo_and_meter (tp, mp, bbt, can_match, false);
 
 	return TempoMetric (*tp, *mp);
 }
