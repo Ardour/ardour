@@ -962,9 +962,6 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 		return;
 	}
 
-	/* all regions created from a recording pass should share the same group-id */
-	Region::RegionGroupRetainer rgr;
-
 	RecordMode rmode = _session.config.get_record_mode ();
 
 	samplecnt_t total_capture = 0;

@@ -1189,9 +1189,6 @@ DiskWriter::transport_stopped_wallclock (struct tm& when, time_t twhen, bool abo
 	uint32_t n = 0;
 	bool mark_write_completed = false;
 
-	/* finishing a capture will potentially create a lot of regions; we want them all assigned to the same region-group */
-	Region::RegionGroupRetainer rgr;
-
 	finish_capture (c);
 
 	/* butler is already stopped, but there may be work to do
