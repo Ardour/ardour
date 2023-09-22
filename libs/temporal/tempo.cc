@@ -2316,35 +2316,8 @@ Temporal::BBT_Argument
 TempoMap::bbt_at (Temporal::Beats const & qn) const
 {
 	TempoMetric metric (metric_at (qn));
-	superclock_t ref (std::min (metric.tempo().sclock(), metric.meter().sclock()));
-	return BBT_Argument (ref, metric.bbt_at (qn));
+	return BBT_Argument (metric.reftime(), metric.bbt_at (qn));
 }
-
-#if 0
-samplepos_t
-TempoMap::sample_at (Temporal::Beats const & qn) const
-{
-	return superclock_to_samples (metric_at (qn).superclock_at (qn), TEMPORAL_SAMPLE_RATE);
-}
-
-samplepos_t
-TempoMap::sample_at (Temporal::BBT_Time const & bbt) const
-{
-	return samples_to_superclock (metric_at (bbt).superclock_at (bbt), TEMPORAL_SAMPLE_RATE);
-}
-
-samplepos_t
-TempoMap::sample_at (timepos_t const & pos) const
-{
-	if (pos.is_beat()) {
-		return sample_at (pos.beats ());
-	}
-
-	/* somewhat nonsensical to call this under these conditions but ... */
-
-	return pos.superclocks();
-}
-#endif
 
 superclock_t
 TempoMap::superclock_at (Temporal::Beats const & qn) const
