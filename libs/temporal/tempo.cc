@@ -2591,7 +2591,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 			if (delta != BBT_Offset ()) {
 				bbt = on_bar;
 				Beats beats_delta = _meters.front().to_quarters (delta);
-				DEBUG_TRACE (DEBUG::Grid, string_compose ("simple reset start using bbt %1 via %2 (rounded by %3 beats %4)\n", bbt, on_bar, delta, beats_delta));
+				DEBUG_TRACE (DEBUG::Grid, string_compose ("simple reset start using bbt %1 via %2 (rounded by %3 beats %4) sc %5\n", bbt, on_bar, delta, beats_delta, start));
 			} else {
 				DEBUG_TRACE (DEBUG::Grid, string_compose ("bbt %1 was already on-bar or on-beat %2 start is %3\n", bbt, on_bar, start));
 			}
@@ -2599,6 +2599,7 @@ TempoMap::get_grid (TempoMapPoints& ret, superclock_t rstart, superclock_t end, 
 
 		Beats    beats (metric.quarters_at_superclock (start));
 
+		DEBUG_TRACE (DEBUG::Grid, string_compose ("reset start to %1 with beats %2 for %3\n", start, beats, bbt));
 		fill_grid_with_final_metric (ret, metric, start, rstart, end, bar_mod, beat_div, beats, bbt);
 
 		return _points.end();
