@@ -349,7 +349,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	}
 
 	std::shared_ptr<PortGroup> bus (new PortGroup (_("Busses")));
-	std::shared_ptr<PortGroup> track (new PortGroup (("Tracks")));
+	std::shared_ptr<PortGroup> track (new PortGroup (_("Tracks")));
 	std::shared_ptr<PortGroup> sidechain (new PortGroup (_("Sidechains")));
 	std::shared_ptr<PortGroup> iop_pre  (new PortGroup (_("I/O Pre") ));
 	std::shared_ptr<PortGroup> iop_post (new PortGroup (_("I/O Post") ));
