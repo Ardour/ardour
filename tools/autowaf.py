@@ -400,45 +400,6 @@ def build_dir(name, subdir):
     else:
         return os.path.join('build', subdir)
 
-# Clean up messy Doxygen documentation after it is built
-def make_simple_dox(name):
-    name = name.lower()
-    NAME = name.upper()
-    try:
-        top = os.getcwd()
-        os.chdir(build_dir(name, 'doc/html'))
-        page = 'group__%s.html' % name
-        if not os.path.exists(page):
-            return
-        for i in [
-            ['%s_API ' % NAME, ''],
-            ['%s_DEPRECATED ' % NAME, ''],
-            ['group__%s.html' % name, ''],
-            ['&#160;', ''],
-            ['<script.*><\/script>', ''],
-            ['<hr\/><a name="details" id="details"><\/a><h2>.*<\/h2>', ''],
-            ['<link href=\"tabs.css\" rel=\"stylesheet\" type=\"text\/css\"\/>',
-             ''],
-            ['<img class=\"footer\" src=\"doxygen.png\" alt=\"doxygen\"\/>',
-             'Doxygen']]:
-            os.system("sed -i 's/%s/%s/g' %s" % (i[0], i[1], page))
-        os.rename('group__%s.html' % name, 'index.html')
-        for i in (glob.glob('*.png') +
-                  glob.glob('*.html') +
-                  glob.glob('*.js') +
-                  glob.glob('*.css')):
-            if i != 'index.html' and i != 'style.css':
-                os.remove(i)
-        os.chdir(top)
-        os.chdir(build_dir(name, 'doc/man/man3'))
-        for i in glob.glob('*.3'):
-            os.system("sed -i 's/%s_API //' %s" % (NAME, i))
-        for i in glob.glob('_*'):
-            os.remove(i)
-        os.chdir(top)
-    except Exception as e:
-        Logs.error("Failed to fix up %s documentation: %s" % (name, e))
-
 # Doxygen API documentation
 def build_dox(bld, name, version, srcdir, blddir, outdir=''):
     if not bld.env['DOCS']:
