@@ -59,14 +59,14 @@ BBT_Time::round_up_to_bar() const
 BBT_Time
 BBT_Time::round_up_to_beat_div (int beat_div) const
 {
-	/* XXX this doesn't work where "beats" are not quarters, because 
+	/* XXX this doesn't work where "beats" are not quarters, because
 	   we could have B|b|0 and this is not on a beat_div, even though it is
 	   an integer beat position (think triplets.
 	*/
 
-	int32_t div_ticks = ticks_per_beat / beat_div;
-	int32_t ticks_remainder = ticks % div_ticks;
-	int32_t rounded_up = ticks + div_ticks - ticks_remainder;
+	const int32_t div_ticks = ticks_per_beat / beat_div;
+	int32_t rounded_up = ticks + div_ticks - 1;
+	rounded_up -= rounded_up % div_ticks;
 
 	if (rounded_up == ticks_per_beat) {
 		return BBT_Time (bars, beats+1, 0);
