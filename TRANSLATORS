@@ -34,7 +34,8 @@ table for details.
 
 Here is the best workflow for existing translations.
 
-1. Build Ardour  using './waf' command (this step is actually optional).
+1. Configure Ardour build with the './waf configure' command.
+1a. Build Ardour  using './waf' command (this step is actually optional).
 
 2a. If there is no existing translation for your language, run './waf i18n_pot'
 which will generate a POT (.pot) file for each of the directories shown
