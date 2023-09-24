@@ -121,6 +121,8 @@
   sysex mtc midi regions messages events
 [new-automation-points-on-lane]
   automation y-axis click draw lane points
+[note-name-display]
+  notes names midnam display show
 [no-new-session-dialog]
 [one-plugin-window-only]
   plugins window single close
@@ -132,6 +134,8 @@
   plugins gui resources vst destroy window
 [prefer-inline-over-gui]
   plugins inline mixer strip
+[prefer-tap-tempo]
+  tap tempo preference
 [preview-video-frame-on-drag]
 [primary-clock-delta-mode]
   clocks mode primary delta difference edit cursor playhead
@@ -202,6 +206,8 @@
 [show-zoom-tools]
 [snap-threshold]
   snap threshold distance mouse
+[snap-target]
+  snap grid target
 [snap-to-grid]
   snap grid editor mouse
 [snap-to-marks]
@@ -274,6 +280,8 @@
 [count-in]
   transport count in count-in 
 [cue-behavior]
+[default-time-domain]
+  time domain musical audio markers
 [draw-opaque-midi_regions]
 [external-sync]
   transport use external synchronization master 

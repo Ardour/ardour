@@ -50,11 +50,13 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("name-new-markers"), _("markers"), _("name"), _("dialog"), _("naming"),  NULL);
 	VAR_META (X_("never-display-periodic-midi"), _("sysex"), _("mtc"), _("midi"), _("regions"), _("messages"), _("events"),  NULL);
 	VAR_META (X_("new-automation-points-on-lane"), _("automation"), _("y-axis"), _("click"), _("draw"), _("lane"), _("points"),  NULL);
+	VAR_META (X_("note-name-display"), _("notes"), _("names"), _("midnam"), _("display"), _("show"),  NULL);
 	VAR_META (X_("one-plugin-window-only"), _("plugins"), _("window"), _("single"), _("close"),  NULL);
 	VAR_META (X_("only-copy-imported-files"), _("drag"), _("drop"), _("import"), _("copy"), _("link"), _("files"),  NULL);
 	VAR_META (X_("open-gui-after-adding-plugin"), _("plugins"), _("gui"), _("open"), _("window"),  NULL);
 	VAR_META (X_("plugin-gui-behavior"), _("plugins"), _("gui"), _("resources"), _("vst"), _("destroy"), _("window"),  NULL);
 	VAR_META (X_("prefer-inline-over-gui"), _("plugins"), _("inline"), _("mixer"), _("strip"),  NULL);
+	VAR_META (X_("prefer-tap-tempo"), _("tap"), _("tempo"), _("preference"),  NULL);
 	VAR_META (X_("primary-clock-delta-mode"), _("clocks"), _("mode"), _("primary"), _("delta"), _("difference"), _("edit"), _("cursor"), _("playhead"),  NULL);
 	VAR_META (X_("rubberbanding-snaps-to-grid"), _("rubberband"), _("snap"), _("grid"), _("time"), _("stretch"),  NULL);
 	VAR_META (X_("ruler-granularity"), _("ruler"), _("spacing"), _("grid"), _("snap"), _("distance"),  NULL);
@@ -87,6 +89,7 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("show-waveforms"), _("waveform"), _("display"), _("box"), _("empty"), _("invisible"), _("hide"), _("show"),  NULL);
 	VAR_META (X_("show-waveforms-while-recording"), _("waveform"), _("display"), _("recording"),  NULL);
 	VAR_META (X_("snap-threshold"), _("snap"), _("threshold"), _("distance"), _("mouse"),  NULL);
+	VAR_META (X_("snap-target"), _("snap"), _("grid"), _("target"),  NULL);
 	VAR_META (X_("snap-to-grid"), _("snap"), _("grid"), _("editor"), _("mouse"),  NULL);
 	VAR_META (X_("snap-to-marks"), _("snap"), _("grid"), _("editor"), _("mouse"), _("markers"), _("marks"),  NULL);
 	VAR_META (X_("snap-to-playhead"), _("snap"), _("grid"), _("editor"), _("mouse"), _("playhead"),  NULL);
@@ -117,6 +120,7 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("auto-play"), _("transport"), _("autoplay"), _("automatically"), _("play"),  NULL);
 	VAR_META (X_("auto-return"), _("transport"), _("autoreturn"), _("automatically"), _("return"), _("go"), _("back"),  NULL);
 	VAR_META (X_("count-in"), _("transport"), _("count"), _("in"), _("count-in"),  NULL);
+	VAR_META (X_("default-time-domain"), _("time"), _("domain"), _("musical"), _("audio"), _("markers"),  NULL);
 	VAR_META (X_("external-sync"), _("transport"), _("use"), _("external"), _("synchronization"), _("master"),  NULL);
 	VAR_META (X_("glue-new-markers-to-bars-and-beats"), _("position"), _("time"), _("domain"), _("glue"), _("use"), _("markers"), _("bars"), _("beats"), _("musical"),  NULL);
 	VAR_META (X_("glue-new-regions-to-bars-and-beats"), _("position"), _("time"), _("domain"), _("glue"), _("use"), _("regions"), _("bars"), _("beats"), _("musical"),  NULL);
