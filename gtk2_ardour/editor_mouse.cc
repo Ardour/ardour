@@ -408,16 +408,11 @@ Editor::mouse_mode_toggled (MouseMode m)
 		*/
 		ActionManager::set_sensitive (_midi_actions, true);
 
-		/* mark "magic widget focus" so that we handle key events
-		 * correctly
-		 */
-		Keyboard::magic_widget_grab_focus ();
 	} else {
 		/* undo some of the above actions, since we're not in internal
 		   edit mode.
 		*/
 		ActionManager::set_sensitive (_midi_actions, false);
-		Keyboard::magic_widget_drop_focus ();
 	}
 
 	if (was_internal && !internal_editing()) {
