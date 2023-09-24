@@ -302,7 +302,12 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 						cmd->change (note, prop, (uint8_t) (note->velocity() + idelta));
 						break;
 					case MidiModel::NoteDiffCommand::Length:
-						if (note->length() + beat_delta >= Temporal::Beats::one_tick()) {
+						if (note->length() <= Temporal::Beats::one_tick() && beat_delta.to_ticks () > 0) {
+							/* Special case increments starting at 1 tick.
+							 * Next step up after 1 is 1920 (not 1921) - or fine grained 30 (not 31).
+							 */
+							cmd->change (note, prop, beat_delta);
+						} else if (note->length() + beat_delta >= Temporal::Beats::one_tick()) {
 							cmd->change (note, prop, note->length() + beat_delta);
 						} else {
 							cmd->change (note, prop, Temporal::Beats::one_tick());
