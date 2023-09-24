@@ -164,7 +164,6 @@ Quantize::operator () (std::shared_ptr<MidiModel> model,
 				if (_snap_start) {
 					/* this is here because Beats intentionally does not have operator* (double) */
 					delta = Temporal::Beats::ticks (llrintf (delta.to_ticks()) * _strength);
-					std::cerr << "new start " << (*i)->time() + delta << " shift was " << delta << std::endl;
 					cmd->change ((*i), MidiModel::NoteDiffCommand::StartTime, (*i)->time() + delta);
 				}
 			}
