@@ -26,6 +26,8 @@
 #include <gtkmm/table.h>
 #include <gtkmm/treeview.h>
 
+#include "temporal/beats.h"
+
 #include "ardour/session_handle.h"
 
 #include "ardour_window.h"
