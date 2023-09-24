@@ -213,7 +213,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 			beat_delta = Temporal::Beats (1, 0);
 		}
 		if (ev->direction == GDK_SCROLL_DOWN || ev->direction == GDK_SCROLL_LEFT) {
-			beat_delta = beat_delta;
+			beat_delta = -beat_delta;
 		}
 		prop = MidiModel::NoteDiffCommand::StartTime;
 		opname = _("edit note start");
