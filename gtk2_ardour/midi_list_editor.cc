@@ -1,7 +1,7 @@
 /*
  * Copyright (C) 2009-2015 David Robillard <d@drobilla.net>
  * Copyright (C) 2009-2017 Paul Davis <paul@linuxaudiosystems.com>
- * Copyright (C) 2014-2016 Robin Gareus <robin@gareus.org>
+ * Copyright (C) 2014-2023 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -129,7 +129,9 @@ MidiListEditor::MidiListEditor (Session* s, std::shared_ptr<MidiRegion> r, std::
 	view.get_selection()->set_mode (SELECTION_MULTIPLE);
 	view.get_selection()->signal_changed().connect (sigc::mem_fun (*this, &MidiListEditor::selection_changed));
 
-	for (int i = 0; i < 6; ++i) {
+	/* Editing the first column (BBT) as text is currently not supported
+	 * -> use editable AudioClock, implement parse_as_bbt */
+	for (int i = 1; i < 6; ++i) {
 		CellRendererText* renderer = dynamic_cast<CellRendererText*>(view.get_column_cell_renderer (i));
 
 		TreeViewColumn* col = view.get_column (i);
@@ -207,7 +209,10 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 
 	switch (colnum) {
 	case 0:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+		/* This is dangerous. Changing position with the mouse-wheel can reorder
+		 * notes. The mouse-position does not change and then affect different notes.
+		 */
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::GainFineScaleModifier)) {
 			beat_delta = Temporal::Beats::ticks (Temporal::ticks_per_beat / 64);
 		} else {
 			beat_delta = Temporal::Beats (1, 0);
@@ -250,7 +255,7 @@ MidiListEditor::scroll_event (GdkEventScroll* ev)
 		break;
 
 	case 5:
-		if (Keyboard::modifier_state_equals (ev->state, Keyboard::SecondaryModifier)) {
+		if (Keyboard::modifier_state_equals (ev->state, Keyboard::GainFineScaleModifier)) {
 			beat_delta = Temporal::Beats::ticks (Temporal::ticks_per_beat / 64);
 		} else {
 			beat_delta = Temporal::Beats (1, 0);
@@ -397,13 +402,18 @@ MidiListEditor::key_press (GdkEventKey* ev)
 			}
 			if (colnum >= 5) {
 				/* wrap to next line */
+				/* XXX never reached. Editing Length shows a dropdown menu,
+				 * which returns edit focus to the dialog.
+				 */
 				colnum = 0;
 				path.next();
 			} else {
 				colnum++;
 			}
-			col = view.get_column (colnum);
-			view.set_cursor (path, *col, true);
+			if (!path.empty ()) {
+				col = view.get_column (colnum);
+				view.set_cursor (path, *col, true);
+			}
 			ret = true;
 		}
 		break;
@@ -417,8 +427,10 @@ MidiListEditor::key_press (GdkEventKey* ev)
 				editing_editable->editing_done ();
 			}
 			path.prev ();
-			col = view.get_column (colnum);
-			view.set_cursor (path, *col, true);
+			if (!path.empty ()) {
+				col = view.get_column (colnum);
+				view.set_cursor (path, *col, true);
+			}
 			ret = true;
 		}
 		break;
@@ -432,8 +444,10 @@ MidiListEditor::key_press (GdkEventKey* ev)
 				editing_editable->editing_done ();
 			}
 			path.next ();
-			col = view.get_column (colnum);
-			view.set_cursor (path, *col, true);
+			if (!path.empty ()) {
+				col = view.get_column (colnum);
+				view.set_cursor (path, *col, true);
+			}
 			ret = true;
 		}
 		break;
@@ -461,21 +475,26 @@ MidiListEditor::key_release (GdkEventKey* ev)
 
 	switch (ev->keyval) {
 	case GDK_Insert:
-		/* add a new note to the model, based on the note at the cursor
-		 * pos
-		 */
+		/* add a new note to the model, based on the note at the cursor pos */
 		view.get_cursor (path, col);
 		iter = model->get_iter (path);
 		cmd = m->new_note_diff_command (_("insert new note"));
-		note = (*iter)[columns._note];
-		copy.reset (new NoteType (*note.get()));
+		if (iter) {
+			note = (*iter)[columns._note];
+			copy.reset (new NoteType (*note.get()));
+		} else {
+			Temporal::Beats pos = Temporal::TempoMap::use()->quarters_at_sample (region->start().samples());
+			copy.reset (new NoteType (0, pos, Temporal::Beats (1, 0), 60, 100));
+		}
 		cmd->add (copy);
 		m->apply_diff_command_as_commit (*_session, cmd);
 		/* model has been redisplayed by now */
 		path.next ();
-		/* select, start editing column 2 (note) */
-		col = view.get_column (2);
-		view.set_cursor (path, *col, true);
+		if (!path.empty ()) {
+			/* select, start editing column 2 (note) */
+			col = view.get_column (2);
+			view.set_cursor (path, *col, true);
+		}
 		break;
 
 	case GDK_Delete:
