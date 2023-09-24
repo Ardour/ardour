@@ -659,7 +659,7 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 				}
 
 				if (x != note_length_map.end()) {
-					bval = x->first / Temporal::ticks_per_beat;
+					bval = Temporal::Beats::ticks (x->first);
 				}
 
 			} else {
@@ -680,7 +680,7 @@ MidiListEditor::edited (const std::string& path, const std::string& text)
 
 					if (x != note_length_map.end()) {
 						/* convert to beats */
-						bval = x->first / Temporal::ticks_per_beat;
+						bval = Temporal::Beats::ticks (x->first);
 					}
 				}
 			}
