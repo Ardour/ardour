@@ -1391,7 +1391,7 @@ private:
 	void normalize_region ();
 	void adjust_region_gain (bool up);
 	void reset_region_gain ();
-	ARDOUR::Quantize get_quantize_op (bool force_dialog, bool& did_show_dialog);
+	ARDOUR::Quantize* get_quantize_op ();
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
 	void set_tempo_curve_range (double& max, double& min) const;
 	void quantize_region ();

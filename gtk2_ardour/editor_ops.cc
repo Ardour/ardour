@@ -6220,50 +6220,43 @@ Editor::quantize_regions (const RegionSelection& rs)
 	}
 
 	bool ignored;
-	Quantize quant = get_quantize_op (true, ignored);
+	Quantize* quant = get_quantize_op ();
 
-	if (!quant.empty()) {
-		apply_midi_note_edit_op (quant, rs);
+	if (!quant) {
+		return;
 	}
+
+	if (!quant->empty()) {
+		apply_midi_note_edit_op (*quant, rs);
+	}
+
+	delete quant;
 }
 
-Quantize
-Editor::get_quantize_op (bool force_dialog, bool& did_show_dialog)
+Quantize*
+Editor::get_quantize_op ()
 {
-	did_show_dialog = false;
-
 	if (!quantize_dialog) {
 		quantize_dialog = new QuantizeDialog (*this);
-		force_dialog = true;
 	}
 
-	if (quantize_dialog->get_mapped()) {
-		/* in progress already */
-		return Quantize (false, false, Temporal::Beats(), Temporal::Beats(), 0., 0., Temporal::Beats());
+	quantize_dialog->present ();
+	int r = quantize_dialog->run ();
+	quantize_dialog->hide ();
+
+
+	if (r != Gtk::RESPONSE_OK) {
+		return nullptr;
 	}
 
-	int r = Gtk::RESPONSE_OK;
-
-	if (force_dialog) {
-		quantize_dialog->present ();
-		r = quantize_dialog->run ();
-		quantize_dialog->hide ();
-		did_show_dialog = true;
-	}
-
-	if (r == Gtk::RESPONSE_OK) {
-		return Quantize (quantize_dialog->snap_start(),
-		                 quantize_dialog->snap_end(),
-		                 quantize_dialog->start_grid_size(),
-		                 quantize_dialog->end_grid_size(),
-		                 quantize_dialog->strength(),
-		                 quantize_dialog->swing(),
-		                 quantize_dialog->threshold());
-	}
-
-	return Quantize (false, false, Temporal::Beats(), Temporal::Beats(), 0., 0., Temporal::Beats());
+	return new Quantize (quantize_dialog->snap_start(),
+	                     quantize_dialog->snap_end(),
+	                     quantize_dialog->start_grid_size(),
+	                     quantize_dialog->end_grid_size(),
+	                     quantize_dialog->strength(),
+	                     quantize_dialog->swing(),
+	                     quantize_dialog->threshold());
 }
-
 
 void
 Editor::legatize_region (bool shrink_only)

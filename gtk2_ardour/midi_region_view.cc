@@ -4737,23 +4737,20 @@ MidiRegionView::note_to_y(uint8_t note) const
 void
 MidiRegionView::quantize_selected_notes ()
 {
+	std::cerr << "QSN!\n";
+
 	RegionSelection rs;
 	rs.push_back (this);
 
-	bool did_show_dialog;
-	Quantize quant = trackview.editor().get_quantize_op (false, did_show_dialog);
-	bool success;
+	Quantize* quant = trackview.editor().get_quantize_op ();
 
-	if (!did_show_dialog) {
-		/* use global grid */
-		quant.set_start_grid (trackview.editor().get_grid_type_as_beats (success, midi_region()->source_position()));
-		if (!success) {
-			return;
-		}
-		quant.set_end_grid (quant.start_grid());
+	if (!quant) {
+		return;
 	}
 
-	trackview.editor().apply_midi_note_edit_op (quant, rs);
+	trackview.editor().apply_midi_note_edit_op (*quant, rs);
+
+	delete quant;
 }
 
 void
