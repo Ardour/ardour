@@ -20,18 +20,18 @@
 #ifndef __ardour_gtk2_midi_list_editor_h_
 #define __ardour_gtk2_midi_list_editor_h_
 
-#include <gtkmm/treeview.h>
-#include <gtkmm/table.h>
 #include <gtkmm/box.h>
 #include <gtkmm/liststore.h>
 #include <gtkmm/scrolledwindow.h>
+#include <gtkmm/table.h>
+#include <gtkmm/treeview.h>
 
 #include "ardour/session_handle.h"
 
 #include "ardour_window.h"
 
 namespace Evoral {
-	template<typename Time> class Note;
+	template <typename Time> class Note;
 };
 
 namespace ARDOUR {
@@ -46,14 +46,14 @@ class MidiListEditor : public ArdourWindow
 public:
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 
-	MidiListEditor(ARDOUR::Session*, std::shared_ptr<ARDOUR::MidiRegion>,
-	               std::shared_ptr<ARDOUR::MidiTrack>);
-	~MidiListEditor();
+	MidiListEditor (ARDOUR::Session*, std::shared_ptr<ARDOUR::MidiRegion>,
+	                std::shared_ptr<ARDOUR::MidiTrack>);
+	~MidiListEditor ();
 
 private:
-	struct MidiListModelColumns : public Gtk::TreeModel::ColumnRecord
-	{
-		MidiListModelColumns() {
+	struct MidiListModelColumns : public Gtk::TreeModel::ColumnRecord {
+		MidiListModelColumns ()
+		{
 			add (channel);
 			add (note);
 			add (note_name);
@@ -62,18 +62,18 @@ private:
 			add (length);
 			add (_note);
 		};
-		Gtk::TreeModelColumn<uint8_t>     channel;
-		Gtk::TreeModelColumn<uint8_t>     note;
-		Gtk::TreeModelColumn<std::string> note_name;
-		Gtk::TreeModelColumn<uint8_t>     velocity;
-		Gtk::TreeModelColumn<std::string> start;
-		Gtk::TreeModelColumn<std::string> length;
-		Gtk::TreeModelColumn<std::shared_ptr<NoteType> > _note;
+		Gtk::TreeModelColumn<uint8_t>                   channel;
+		Gtk::TreeModelColumn<uint8_t>                   note;
+		Gtk::TreeModelColumn<std::string>               note_name;
+		Gtk::TreeModelColumn<uint8_t>                   velocity;
+		Gtk::TreeModelColumn<std::string>               start;
+		Gtk::TreeModelColumn<std::string>               length;
+		Gtk::TreeModelColumn<std::shared_ptr<NoteType>> _note;
 	};
 
-	struct NoteLengthColumns : public Gtk::TreeModel::ColumnRecord
-	{
-		NoteLengthColumns() {
+	struct NoteLengthColumns : public Gtk::TreeModel::ColumnRecord {
+		NoteLengthColumns ()
+		{
 			add (ticks);
 			add (name);
 		}
