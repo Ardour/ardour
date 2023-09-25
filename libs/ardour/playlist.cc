@@ -185,6 +185,9 @@ Playlist::Playlist (std::shared_ptr<const Playlist> other, string namestr, bool 
 	ThawList   thawlist;
 	other->copy_regions (tmp);
 
+	RegionSortByLayer cmp;
+	tmp.sort (cmp);
+
 	in_set_state++;
 
 	for (list<std::shared_ptr<Region> >::iterator x = tmp.begin(); x != tmp.end(); ++x) {
@@ -273,9 +276,9 @@ Playlist::Playlist (std::shared_ptr<const Playlist> other, timepos_t const & sta
 			new_region = RegionFactory::create (region, offset, plist, true, &rlock.thawlist);
 
 			add_region_internal (new_region, position, rlock.thawlist);
+			set_layer (new_region, region->layer ());
 		}
 	}
-
 
 	/* keep track of any dead space at end (for pasting into Ripple or
 	 * RippleAll mode) at the end of construction, any length of cnt beyond
@@ -286,6 +289,8 @@ Playlist::Playlist (std::shared_ptr<const Playlist> other, timepos_t const & sta
 
 	in_set_state--;
 	first_set_state = false;
+
+	relayer ();
 }
 
 void
@@ -1321,7 +1326,8 @@ Playlist::paste (std::shared_ptr<Playlist> other, timepos_t const & position, fl
 					*/
 
 					add_region_internal (copy_of_region, r->position() + pos, rl1.thawlist);
-					set_layer (copy_of_region, copy_of_region->layer() + top);
+					copy_of_region->set_layer (r->layer() + top);
+					set_layer (copy_of_region, copy_of_region->layer());
 				}
 				pos += shift;
 			}
