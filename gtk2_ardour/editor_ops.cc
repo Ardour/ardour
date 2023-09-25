@@ -5092,6 +5092,7 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 		case Cut:
 			_xx = RegionFactory::create (r, false);
 			npl->add_region (_xx, timepos_t (first_position.distance (r->position())));
+			npl->set_layer (_xx, r->layer ());
 			pl->remove_region (r);
 			if (should_ripple()) {
 				ripple_list.push_front (Ripple (pl, r->position(), -r->length()));
@@ -5100,7 +5101,9 @@ Editor::cut_copy_regions (CutCopyOp op, RegionSelection& rs)
 
 		case Copy:
 			/* copy region before adding, so we're not putting same object into two different playlists */
-			npl->add_region (RegionFactory::create (r, false), timepos_t (first_position.distance (r->position())));
+			_xx = RegionFactory::create (r, false);
+			npl->add_region (_xx, timepos_t (first_position.distance (r->position())));
+			npl->set_layer (_xx, r->layer ());
 			break;
 
 		case Clear:
