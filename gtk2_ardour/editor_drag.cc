@@ -7264,7 +7264,7 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::FreehandLineDrag (Editor* edito
 	, did_snap (false)
 	, line_break_pending (false)
 {
-	DEBUG_TRACE (DEBUG::Drags, "New AutomationDrawDrag\n");
+	DEBUG_TRACE (DEBUG::Drags, "New FreehandLinDrag\n");
 }
 
 template<typename OrderedPointList, typename OrderedPoint>
