@@ -328,10 +328,6 @@ Editor::set_selected_control_point_from_click (bool press, Selection::Operation 
 		return false;
 	}
 
-	if (mouse_mode != Editing::MouseContent) {
-		return false;
-	}
-
 	bool ret = false;
 
 	switch (op) {

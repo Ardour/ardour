@@ -112,7 +112,6 @@ AutomationLine::AutomationLine (const string&                              name,
 	line = new ArdourCanvas::PolyLine (group);
 	CANVAS_DEBUG_NAME (line, "region gain envelope line");
 	line->set_data ("line", this);
-	line->set_data ("trackview", &trackview);
 	line->set_outline_width (2.0);
 	line->set_covers_threshold (4.0);
 

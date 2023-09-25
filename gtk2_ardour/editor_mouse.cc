@@ -637,7 +637,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		case ControlPointItem:
 			/* for object/track exclusivity, we don't call set_selected_track_as_side_effect (op); */
 
-			if (eff_mouse_mode == MouseContent) {
+			if (eff_mouse_mode != MouseRange) {
 				if (event->button.button != 3) {
 					_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
 				} else {
@@ -1263,6 +1263,11 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			_drags->set (new LineDrag (this, item), event);
 			return true;
 
+		case ControlPointItem:
+			_drags->set (new ControlPointDrag (this, item), event);
+			return true;
+			break;
+
 		case SelectionItem:
 			{
 				if (selection->time.empty ()) {
@@ -1351,10 +1356,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 			}
 
-		case ControlPointItem:
-			item = &(static_cast<ControlPoint*> (item->get_data ("control_point"))->line().grab_item());
-			/*fallthrough*/
-		case AutomationLineItem:
 		case AutomationTrackItem:
 			{
 				AutomationTimeAxisView* atv = static_cast<AutomationTimeAxisView*> (item->get_data ("trackview"));
@@ -1362,6 +1363,10 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					_drags->set (new AutomationDrawDrag (this, atv->base_item(), Temporal::AudioTime), event);
 				}
 			}
+			break;
+
+		case AutomationLineItem:
+			_drags->set (new LineDrag (this, item), event);
 			break;
 
 		case NoteItem:
