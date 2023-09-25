@@ -77,7 +77,6 @@ private:
 	/* Welcome */
 	Gtk::ComboBoxText ui_font_scale;
 	void rescale_ui ();
-	void guess_default_ui_scale ();
 
 	/* first page */
 	Gtk::FileChooserButton* default_dir_chooser;

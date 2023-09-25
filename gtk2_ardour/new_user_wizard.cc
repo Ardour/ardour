@@ -171,7 +171,18 @@ using the program.</span> \
 	hbox->show ();
 	cbox->show ();
 
-	guess_default_ui_scale ();
+	int ui_scale = guess_default_ui_scale ();
+	if (ui_scale <= 100) {
+		ui_font_scale.set_active (0); // 100%
+	} else if (ui_scale <= 150) {
+		ui_font_scale.set_active (1); // 150%
+	} else if (ui_scale <= 200) {
+		ui_font_scale.set_active (2); // 200%
+	} else {
+		ui_font_scale.set_active (3); // 250%
+	}
+	rescale_ui ();
+
 	ui_font_scale.signal_changed ().connect (sigc::mem_fun (*this, &NewUserWizard::rescale_ui));
 #endif
 
@@ -189,47 +200,12 @@ void
 NewUserWizard::rescale_ui ()
 {
 	int rn = ui_font_scale.get_active_row_number ();
-	if (rn < 0 ) {
+	if (rn < 0) {
 		return;
 	}
 	float ui_scale = 100 + rn * 50;
 	UIConfiguration::instance ().set_font_scale (1024 * ui_scale);
 	UIConfiguration::instance ().reset_dpi ();
-}
-
-void
-NewUserWizard::guess_default_ui_scale ()
-{
-	gint width = 0;
-	gint height = 0;
-	GdkScreen* screen = gdk_display_get_screen (gdk_display_get_default (), 0);
-	gint n_monitors = gdk_screen_get_n_monitors (screen);
-
-	if (!screen) {
-		return;
-	}
-
-	for (gint i = 0; i < n_monitors; ++i) {
-		GdkRectangle rect;
-		gdk_screen_get_monitor_geometry (screen, i, &rect);
-		width = std::max (width, rect.width);
-		height = std::max (height, rect.height);
-	}
-
-	float wx = width  / 1920.f;
-	float hx = height / 1080.f;
-	float sx = std::min (wx, hx);
-
-	if (sx < 1.25) {
-		ui_font_scale.set_active (0); // 100%
-	} else if (sx < 1.6) {
-		ui_font_scale.set_active (1); // 150%
-	} else if (sx < 2.1) {
-		ui_font_scale.set_active (2); // 200%
-	} else {
-		ui_font_scale.set_active (3); // 250%
-	}
-	rescale_ui ();
 }
 
 void

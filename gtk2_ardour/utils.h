@@ -95,6 +95,8 @@ const char* const *get_xpm_data (std::string path);
 std::string longest (std::vector<std::string>&);
 bool key_is_legal_for_numeric_entry (guint keyval);
 
+int guess_default_ui_scale ();
+
 void resize_window_to_proportion_of_monitor (Gtk::Window*, int, int);
 
 std::string escape_underscores (std::string const &);

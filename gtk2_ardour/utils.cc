@@ -642,6 +642,40 @@ ARDOUR_UI_UTILS::key_is_legal_for_numeric_entry (guint keyval)
 	return false;
 }
 
+int
+ARDOUR_UI_UTILS::guess_default_ui_scale ()
+{
+	gint width = 0;
+	gint height = 0;
+	GdkScreen* screen = gdk_display_get_screen (gdk_display_get_default (), 0);
+	gint n_monitors = gdk_screen_get_n_monitors (screen);
+
+	if (!screen) {
+		return 100;
+	}
+
+	for (gint i = 0; i < n_monitors; ++i) {
+		GdkRectangle rect;
+		gdk_screen_get_monitor_geometry (screen, i, &rect);
+		width = std::max (width, rect.width);
+		height = std::max (height, rect.height);
+	}
+
+	float wx = width  / 1920.f;
+	float hx = height / 1080.f;
+	float sx = std::min (wx, hx);
+
+	if (sx < 1.25) {
+		return 100;
+	} else if (sx < 1.6) {
+		return 150;
+	} else if (sx < 2.1) {
+		return 200;
+	} else {
+		return 250;
+	}
+}
+
 void
 ARDOUR_UI_UTILS::resize_window_to_proportion_of_monitor (Gtk::Window* window, int max_width, int max_height)
 {
