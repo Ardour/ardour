@@ -59,6 +59,7 @@ PianoRollHeader::PianoRollHeader(MidiStreamView& v)
 	, _saved_top_val (0.0)
 	, _saved_bottom_val (127.0)
 	, _mini_map_display (false)
+	, entered (false)
 {
 	_layout = Pango::Layout::create (get_pango_context());
 	_big_c_layout = Pango::Layout::create (get_pango_context());
@@ -114,14 +115,33 @@ PianoRollHeader::render_scroomer(Cairo::RefPtr<Cairo::Context> cr)
 	double scroomer_width = _scroomer_size;
 
 	Gtkmm2ext::Color c = UIConfiguration::instance().color_mod (X_("scroomer"), X_("scroomer alpha"));
+	Gtkmm2ext::Color save_color (c);
 
-	set_source_rgba(cr, c);
+	if (entered) {
+		c = HSV (c).lighter (0.25).color();
+	}
+
+	set_source_rgba (cr, c);
 	cr->move_to (1.f, scroomer_top);
 	cr->line_to (scroomer_width - 1.f, scroomer_top);
 	cr->line_to (scroomer_width - 1.f, scroomer_bottom);
 	cr->line_to (1.f, scroomer_bottom);
 	cr->line_to (1.f, scroomer_top);
 	cr->fill();
+
+	if (entered) {
+		cr->save ();
+		c = HSV (save_color).lighter (0.9).color();
+		set_source_rgba (cr, c);
+		cr->set_line_width (4.);
+		cr->move_to (1.f, scroomer_top + 2.);
+		cr->line_to (scroomer_width - 1.f, scroomer_top + 2.);
+		cr->stroke ();
+		cr->line_to (scroomer_width - 1.f, scroomer_bottom - 2.);
+		cr->line_to (2.f, scroomer_bottom - 2.);
+		cr->stroke ();
+		cr->restore ();
+	}
 }
 
 bool
@@ -729,6 +749,8 @@ bool
 PianoRollHeader::on_enter_notify_event (GdkEventCrossing* ev)
 {
 	set_note_highlight (_view.y_to_note (ev->y));
+	entered = true;
+	queue_draw ();
 	return true;
 }
 
@@ -745,6 +767,9 @@ PianoRollHeader::on_leave_notify_event (GdkEventCrossing*)
 	}
 
 	_highlighted_note = NO_MIDI_NOTE;
+	entered = false;
+	queue_draw ();
+
 	return true;
 }
 

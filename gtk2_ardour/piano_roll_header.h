@@ -120,6 +120,7 @@ private:
 	double _saved_top_val;
 	double _saved_bottom_val;
 	bool _mini_map_display;
+	bool entered;
 
 	double _note_height;
 	double _old_av_note_height;
