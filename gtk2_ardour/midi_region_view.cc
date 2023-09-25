@@ -1740,17 +1740,21 @@ MidiRegionView::start_playing_midi_chord (vector<std::shared_ptr<NoteType> > not
 	player->play ();
 }
 
+bool
+MidiRegionView::note_in_region_time_range (const std::shared_ptr<NoteType> note) const
+{
+	const std::shared_ptr<ARDOUR::MidiRegion> midi_reg = midi_region();
+	return  (timepos_t (note->time()) >= _region->start()) && (timepos_t (note->time()) < _region->start() + _region->length());
+}
 
 bool
 MidiRegionView::note_in_region_range (const std::shared_ptr<NoteType> note, bool& visible) const
 {
 	const std::shared_ptr<ARDOUR::MidiRegion> midi_reg = midi_region();
 
-	/* must compare double explicitly as Beats::operator< rounds to ppqn */
-	const bool outside = (timepos_t (note->time()) < _region->start()) || (timepos_t (note->time()) >= _region->start() + _region->length());
+	const bool outside = !note_in_region_time_range (note);
 
-	visible = (note->note() >= _current_range_min) &&
-		(note->note() <= _current_range_max);
+	visible = (note->note() >= _current_range_min) && (note->note() <= _current_range_max);
 
 	return !outside;
 }

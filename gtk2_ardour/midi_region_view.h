@@ -234,6 +234,8 @@ public:
 	 * @return true iff the note is within the (time) extent of the region.
 	 */
 	bool note_in_region_range(const std::shared_ptr<NoteType> note, bool& visible) const;
+	/* Test if a note is withing this region's time range. Return true if so */
+	bool note_in_region_time_range(const std::shared_ptr<NoteType> note) const;
 
 	/** Get the region position in pixels relative to session. */
 	double get_position_pixels();

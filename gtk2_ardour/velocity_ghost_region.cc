@@ -138,10 +138,11 @@ VelocityGhostRegion::add_note (NoteBase* nb)
 	MidiStreamView* mv = midi_view();
 
 	if (mv) {
-		if (!nb->item()->visible()) {
-			l->hide();
-		} else {
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
+		if (mrv->note_in_region_time_range (nb->note())) {
 			set_size_and_position (*event);
+		} else {
+			l->hide();
 		}
 	}
 }
