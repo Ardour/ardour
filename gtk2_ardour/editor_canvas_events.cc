@@ -1133,7 +1133,7 @@ Editor::section_rect_event (GdkEvent* ev, Location* loc, ArdourCanvas::Rectangle
 	switch (ev->type) {
 		case GDK_ENTER_NOTIFY:
 			if (UIConfiguration::instance ().get_widget_prelight ()) {
-				rect->set_fill_color (UIConfiguration::instance().color_mod (color, "marker bar"));
+				rect->set_fill_color (Gtkmm2ext::HSV (UIConfiguration::instance().color (color)).lighter (0.25));
 				return true;
 			}
 			break;
