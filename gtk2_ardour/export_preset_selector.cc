@@ -19,12 +19,12 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <gtkmm/messagedialog.h>
 #include <gtkmm/stock.h>
 
 #include "ardour/export_preset.h"
 
 #include "export_preset_selector.h"
+#include "ardour_message.h"
 
 #include "pbd/i18n.h"
 
@@ -106,8 +106,9 @@ ExportPresetSelector::selection_changed ()
 	assert (list->iter_is_valid (it));
 	current = it->get_value (cols.preset);
 	if (!profile_manager->load_preset (current)) {
-		Gtk::MessageDialog dialog (_("The selected preset did not load successfully!\nPerhaps it references a format that has been removed?"),
-		                           false, Gtk::MESSAGE_WARNING);
+		ArdourMessageDialog dialog (dynamic_cast<Gtk::Window*> (get_toplevel ()),
+		                            _("The selected preset did not load successfully!\nPerhaps it references a format that has been removed?"),
+		                            false, Gtk::MESSAGE_WARNING);
 		dialog.run ();
 	}
 
@@ -131,8 +132,9 @@ ExportPresetSelector::update_selection ()
 	if (list->iter_is_valid (it)) {
 		previous = current = it->get_value (cols.preset);
 		if (!profile_manager->load_preset (current)) {
-			Gtk::MessageDialog dialog (_("The selected preset did not load successfully!\nPerhaps it references a format that has been removed?"),
-			                           false, Gtk::MESSAGE_WARNING);
+			ArdourMessageDialog dialog (dynamic_cast<Gtk::Window*> (get_toplevel ()),
+			                            _("The selected preset did not load successfully!\nPerhaps it references a format that has been removed?"),
+			                            false, Gtk::MESSAGE_WARNING);
 			dialog.run ();
 		}
 		sync_with_manager ();
@@ -189,10 +191,11 @@ ExportPresetSelector::remove_current ()
 		return;
 	}
 
-	Gtk::MessageDialog dialog (_("Do you really want to remove this preset?"),
-	                           false,
-	                           Gtk::MESSAGE_QUESTION,
-	                           Gtk::BUTTONS_YES_NO);
+	ArdourMessageDialog dialog (dynamic_cast<Gtk::Window*> (get_toplevel ()),
+	                            _("Do you really want to remove this preset?"),
+	                            false,
+	                            Gtk::MESSAGE_QUESTION,
+	                            Gtk::BUTTONS_YES_NO);
 
 	if (Gtk::RESPONSE_YES != dialog.run ()) {
 		/* User has selected "no" or closed the dialog, better
