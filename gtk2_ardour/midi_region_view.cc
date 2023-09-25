@@ -256,7 +256,7 @@ MidiRegionView::MidiRegionView (const MidiRegionView& other, std::shared_ptr<Mid
 void
 MidiRegionView::init (bool /*wfd*/)
 {
-	DisplaySuspender ds (*this);
+	DisplaySuspender ds (*this, true);
 
 	PublicEditor::DropDownKeys.connect (sigc::mem_fun (*this, &MidiRegionView::drop_down_keys));
 
