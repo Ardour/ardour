@@ -422,12 +422,19 @@ copy_configuration_files (string const& old_dir, string const& new_dir, int old_
 
 		copy_file (old_name, new_name);
 
+		old_name = Glib::build_filename (old_dir, X_("recent_templates"));
+		new_name = Glib::build_filename (new_dir, X_("recent_templates"));
+
+		copy_file (old_name, new_name);
+
 		old_name = Glib::build_filename (old_dir, X_("sfdb"));
 		new_name = Glib::build_filename (new_dir, X_("sfdb"));
 
 		copy_file (old_name, new_name);
 
-		/* can only copy ardour.rc/config - UI config is not compatible */
+		/* can only copy ardour.rc/config unconditionally, there are
+		 * issues with old ui_config versions.
+		 */
 
 		/* users who have been using git/nightlies since the last
 		 * release of 3.5 will have $CONFIG/config rather than
@@ -435,13 +442,20 @@ copy_configuration_files (string const& old_dir, string const& new_dir, int old_
 		 * to avoid confusion.
 		 */
 
-		string old_name = Glib::build_filename (old_dir, X_("config"));
+		old_name = Glib::build_filename (old_dir, X_("config"));
 
 		if (!Glib::file_test (old_name, Glib::FILE_TEST_EXISTS)) {
 			old_name = Glib::build_filename (old_dir, X_("ardour.rc"));
 		}
 
 		new_name = Glib::build_filename (new_dir, X_("config"));
+
+		copy_file (old_name, new_name);
+
+		/* default Session Properties */
+
+		old_name = Glib::build_filename (old_dir, X_("session.rc"));
+		new_name = Glib::build_filename (new_dir, X_("session.rc"));
 
 		copy_file (old_name, new_name);
 
@@ -457,7 +471,7 @@ copy_configuration_files (string const& old_dir, string const& new_dir, int old_
 
 		copy_recurse (old_name, new_name);
 
-		/* presets */
+		/* plugin presets (VST2, Lua) */
 
 		old_name = Glib::build_filename (old_dir, X_("presets"));
 		new_name = Glib::build_filename (new_dir, X_("presets"));
@@ -481,19 +495,45 @@ copy_configuration_files (string const& old_dir, string const& new_dir, int old_
 
 		copy_file (old_name, new_name);
 
-		/* export formats */
+
+		/* export formats and presets */
 
 		old_name = Glib::build_filename (old_dir, export_formats_dir_name);
 		new_name = Glib::build_filename (new_dir, export_formats_dir_name);
 
-		vector<string> export_formats;
+		vector<string> export_settings;
 		g_mkdir_with_parents (Glib::build_filename (new_dir, export_formats_dir_name).c_str (), 0755);
-		find_files_matching_pattern (export_formats, old_name, X_("*.format"));
-		for (vector<string>::iterator i = export_formats.begin (); i != export_formats.end (); ++i) {
-			std::string from = *i;
-			std::string to   = Glib::build_filename (new_name, Glib::path_get_basename (*i));
+		find_files_matching_pattern (export_settings, old_name, X_("*.format"));
+		find_files_matching_pattern (export_settings, old_name, X_("*.preset"));
+		for (auto const& from: export_settings) {
+			std::string to   = Glib::build_filename (new_name, Glib::path_get_basename (from));
 			copy_file (from, to);
 		}
+	}
+
+	if (old_version >= 7) {
+		/* Lua scripts  - older scripts are no longer compatible */
+		old_name = Glib::build_filename (old_dir, X_("scripts"));
+		new_name = Glib::build_filename (new_dir, X_("scripts"));
+		copy_recurse (old_name, new_name);
+
+		old_name = Glib::build_filename (old_dir, X_("ui_scripts"));
+		new_name = Glib::build_filename (new_dir, X_("ui_scripts"));
+		copy_file (old_name, new_name);
+
+		old_name = Glib::build_filename (old_dir, X_("luahist"));
+		new_name = Glib::build_filename (new_dir, X_("luahist"));
+		copy_file (old_name, new_name);
+
+		/* Port Metadata (since v7.0) */
+		old_name = Glib::build_filename (old_dir, X_("port_metadata"));
+		new_name = Glib::build_filename (new_dir, X_("port_metadata"));
+		copy_file (old_name, new_name);
+
+		/* UIConfig v7 compatible */
+		old_name = Glib::build_filename (old_dir, X_("ui_config"));
+		new_name = Glib::build_filename (new_dir, X_("ui_config"));
+		copy_file (old_name, new_name);
 	}
 
 	return 0;
