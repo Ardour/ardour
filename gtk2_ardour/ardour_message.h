@@ -37,6 +37,13 @@ public:
 	                     Gtk::ButtonsType buttons = Gtk::BUTTONS_OK,
 	                     bool modal = false);
 
+	ArdourMessageDialog (Gtk::Window* parent,
+	                     const Glib::ustring& message,
+	                     bool use_markup = false,
+	                     Gtk::MessageType type =  Gtk::MESSAGE_INFO,
+	                     Gtk::ButtonsType buttons = Gtk::BUTTONS_OK,
+	                     bool modal = false);
+
 	virtual ~ArdourMessageDialog ();
 
 	int run ();

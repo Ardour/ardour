@@ -45,6 +45,21 @@ ArdourMessageDialog::ArdourMessageDialog (Gtk::Window& parent,
 	set_position (WIN_POS_MOUSE);
 }
 
+ArdourMessageDialog::ArdourMessageDialog (Gtk::Window* parent,
+	                                        const Glib::ustring& message,
+	                                        bool use_markup,
+	                                        Gtk::MessageType type,
+	                                        Gtk::ButtonsType buttons,
+	                                        bool modal)
+	: Gtk::MessageDialog (message, use_markup, type, buttons, modal)
+	, _splash_pushed (false)
+{
+	if (parent) {
+		set_transient_for (*parent);
+	}
+	set_position (WIN_POS_MOUSE);
+}
+
 ArdourMessageDialog::~ArdourMessageDialog ()
 {
 	pop_splash ();
