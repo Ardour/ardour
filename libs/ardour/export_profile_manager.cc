@@ -227,9 +227,8 @@ ExportProfileManager::preset_filename (std::string const& preset_name)
 ExportPresetPtr
 ExportProfileManager::new_preset (string const& name)
 {
-	// Generate new ID and do regular save
-	string filename = preset_filename (name);
-	current_preset.reset (new ExportPreset (filename, session));
+	// Generate new and do regular save
+	current_preset.reset (new ExportPreset (session));
 	preset_list.push_back (current_preset);
 	return save_preset (name);
 }
@@ -240,7 +239,7 @@ ExportProfileManager::save_preset (string const& name)
 	string filename = preset_filename (name);
 
 	if (!current_preset) {
-		current_preset.reset (new ExportPreset (filename, session));
+		current_preset.reset (new ExportPreset (session, filename));
 		preset_list.push_back (current_preset);
 	}
 
@@ -288,7 +287,7 @@ ExportProfileManager::remove_preset ()
 void
 ExportProfileManager::load_preset_from_disk (std::string const& path)
 {
-	ExportPresetPtr preset (new ExportPreset (path, session));
+	ExportPresetPtr preset (new ExportPreset (session, path));
 
 	/* Handle id to filename mapping and don't add duplicates to list */
 

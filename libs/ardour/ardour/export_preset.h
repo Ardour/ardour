@@ -35,7 +35,7 @@ class Session;
 
 class LIBARDOUR_API ExportPreset {
   public:
-	ExportPreset (std::string filename, Session & s);
+	ExportPreset (Session&, std::string const& filename = "");
 	~ExportPreset ();
 
 	PBD::UUID const & id () const { return _id; }

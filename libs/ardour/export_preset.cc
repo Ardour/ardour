@@ -26,12 +26,19 @@
 using namespace std;
 using namespace ARDOUR;
 
-ExportPreset::ExportPreset (string filename, Session & s) :
-  session (s), global (filename), local (0)
+ExportPreset::ExportPreset (Session& s, string const& filename)
+	: session (s)
+	, local (0)
 {
-	XMLNode * root;
-	std::string str;
+	if (filename.empty ()) {
+		return;
+	}
+
+	global.read (filename);
+
+	XMLNode* root;
 	if ((root = global.root())) {
+		std::string str;
 		if (root->get_property ("id", str)) {
 			set_id (str);
 		}
