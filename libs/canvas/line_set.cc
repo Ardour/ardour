@@ -128,7 +128,7 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		/* Not 100% sure that the computation of the invariant
 		 * positions (y and x) below work correctly if the line width
 		 * is not 1.0, but visual inspection suggests it is OK.
-		 * See Cairo FAQ on single pixel lines to understand why we add 0.5
+		 * See doc/cairo-single-pixel-lines lines to understand why we add 0.5
 		 */
 
 		if (_orientation == Horizontal) {
