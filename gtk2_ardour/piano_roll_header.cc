@@ -834,13 +834,12 @@ void
 PianoRollHeader::on_size_request (Gtk::Requisition* r)
 {
 	if (show_scroomer()) {
-		_scroomer_size = 60.f;
+		_scroomer_size = 60.f * UIConfiguration::instance().get_ui_scale();
 	} else {
-		_scroomer_size = 20.f;
+		_scroomer_size = 20.f * UIConfiguration::instance().get_ui_scale();
 	}
 
-	float w = _scroomer_size + 20.f;
-	r->width = std::max (w, rintf (w * UIConfiguration::instance().get_ui_scale()));
+	r->width = _scroomer_size + 20.f;
 }
 
 void
