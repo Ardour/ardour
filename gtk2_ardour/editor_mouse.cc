@@ -689,7 +689,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 			break;
 
 		case AutomationLineItem:
-			if (eff_mouse_mode != MouseRange) {
+			if (eff_mouse_mode != MouseRange && eff_mouse_mode != MouseDraw) {
 				AutomationLine* al = reinterpret_cast<AutomationLine*> (item->get_data ("line"));
 				std::list<Selectable*> selectables;
 				double mx = event->button.x;
@@ -1356,6 +1356,8 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 			}
 
+		case AutomationLineItem:
+			/* fallthrough */
 		case AutomationTrackItem:
 			{
 				AutomationTimeAxisView* atv = static_cast<AutomationTimeAxisView*> (item->get_data ("trackview"));
@@ -1363,10 +1365,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 					_drags->set (new AutomationDrawDrag (this, atv->base_item(), Temporal::AudioTime), event);
 				}
 			}
-			break;
-
-		case AutomationLineItem:
-			_drags->set (new LineDrag (this, item), event);
 			break;
 
 		case NoteItem:
