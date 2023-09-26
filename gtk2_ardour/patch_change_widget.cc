@@ -485,7 +485,9 @@ void
 PatchChangeWidget::refresh ()
 {
 	if (get_visible ()) {
-		on_show ();
+		int chn = _channel;
+		_channel = -1;
+		select_channel (chn);
 	}
 }
 
@@ -493,7 +495,6 @@ void
 PatchChangeWidget::on_show ()
 {
 	Gtk::VBox::on_show ();
-	cancel_audition ();
 	_channel = -1;
 	select_channel (0);
 }
@@ -524,7 +525,11 @@ PatchChangeWidget::select_channel (uint8_t chn)
 
 	_ac_connections.drop_connections ();
 
-	if (std::dynamic_pointer_cast<MidiTrack> (_route)) {
+	std::shared_ptr<PluginInsert> pi;
+	if ((pi = std::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ())) && pi->plugin ()->knows_bank_patch ()) {
+		pi->plugin ()->BankPatchChange.connect (_ac_connections, invalidator (*this),
+		                                        boost::bind (&PatchChangeWidget::bankpatch_changed, this, _1), gui_context ());
+	} else if (std::dynamic_pointer_cast<MidiTrack> (_route)) {
 		std::shared_ptr<AutomationControl> bank_msb = _route->automation_control (Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
 		std::shared_ptr<AutomationControl> bank_lsb = _route->automation_control (Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_LSB_BANK), true);
 		std::shared_ptr<AutomationControl> program  = _route->automation_control (Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
@@ -535,14 +540,8 @@ PatchChangeWidget::select_channel (uint8_t chn)
 		                           boost::bind (&PatchChangeWidget::bank_changed, this), gui_context ());
 		program->Changed.connect (_ac_connections, invalidator (*this),
 		                          boost::bind (&PatchChangeWidget::program_changed, this), gui_context ());
-	} else if (std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ())) {
-		if (pi->plugin ()->knows_bank_patch ()) {
-			pi->plugin ()->BankPatchChange.connect (_ac_connections, invalidator (*this),
-			                                        boost::bind (&PatchChangeWidget::bankpatch_changed, this, _1), gui_context ());
-		} else {
-			_no_notifications = true;
-			// TODO add note: instrument does not report changes.
-		}
+	} else {
+		_no_notifications = true;
 	}
 
 	refill_banks ();
@@ -781,16 +780,17 @@ PatchChangeWidget::note_off_event_handler (int note)
 int
 PatchChangeWidget::bank (uint8_t chn) const
 {
+	if (std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ())) {
+		uint32_t bankpatch = pi->plugin ()->bank_patch (chn);
+		if (bankpatch != UINT32_MAX) {
+			return bankpatch >> 7;
+		}
+	}
 	if (std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (_route)) {
 		std::shared_ptr<AutomationControl> bank_msb = _route->automation_control (Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_MSB_BANK), true);
 		std::shared_ptr<AutomationControl> bank_lsb = _route->automation_control (Evoral::Parameter (MidiCCAutomation, chn, MIDI_CTL_LSB_BANK), true);
 
 		return ((int)bank_msb->get_value () << 7) + (int)bank_lsb->get_value ();
-	} else if (std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ())) {
-		uint32_t bankpatch = pi->plugin ()->bank_patch (chn);
-		if (bankpatch != UINT32_MAX) {
-			return bankpatch >> 7;
-		}
 	}
 	return 0;
 }
@@ -798,14 +798,15 @@ PatchChangeWidget::bank (uint8_t chn) const
 uint8_t
 PatchChangeWidget::program (uint8_t chn) const
 {
-	if (std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (_route)) {
-		std::shared_ptr<AutomationControl> program = _route->automation_control (Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
-		return program->get_value ();
-	} else if (std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ())) {
+	if (std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (_route->the_instrument ())) {
 		uint32_t bankpatch = pi->plugin ()->bank_patch (chn);
 		if (bankpatch != UINT32_MAX) {
 			return bankpatch & 127;
 		}
+	}
+	if (std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (_route)) {
+		std::shared_ptr<AutomationControl> program = _route->automation_control (Evoral::Parameter (MidiPgmChangeAutomation, chn), true);
+		return program->get_value ();
 	}
 	return 255;
 }
