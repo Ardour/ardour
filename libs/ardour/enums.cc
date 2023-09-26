@@ -746,6 +746,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (MidiModel::PatchChangeDiffCommand, Time);
 	REGISTER_CLASS_ENUM (MidiModel::PatchChangeDiffCommand, Program);
 	REGISTER_CLASS_ENUM (MidiModel::PatchChangeDiffCommand, Bank);
+	REGISTER_CLASS_ENUM (MidiModel::PatchChangeDiffCommand, Channel);
 	REGISTER (_MidiModel_PatchChangeDiffCommand_Property);
 
 	REGISTER_ENUM(MidiPortMusic);
