@@ -58,7 +58,7 @@ LineSet::compute_bounding_box () const
 		if (_orientation == Horizontal) {
 
 			double y0 = _lines.front().pos - (_lines.front().width/2.0);
-			double y1 = _lines.back().pos - (_lines.back().width/2.0);
+			double y1 = _lines.back().pos + (_lines.back().width/2.0);
 
 			if (fmod (_lines.front().width, 2.)) {
 				y0 -= _lines.front().width * 0.5;
