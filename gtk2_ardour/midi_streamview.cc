@@ -332,7 +332,10 @@ MidiStreamView::draw_note_lines()
 
 	double y;
 	double prev_y = 0.;
-	uint32_t color;
+	Gtkmm2ext::Color black = UIConfiguration::instance().color_mod ("piano roll black", "piano roll black");
+	Gtkmm2ext::Color white = UIConfiguration::instance().color_mod ("piano roll white", "piano roll white");
+	Gtkmm2ext::Color outline = UIConfiguration::instance().color ("piano roll black outline");
+	Gtkmm2ext::Color color;
 
 	ArdourCanvas::LineSet::ResetRAII lr (*_note_lines);
 
@@ -349,17 +352,7 @@ MidiStreamView::draw_note_lines()
 
 		y = floor (note_to_y (i));
 
-		/* this is the line actually corresponding to the division
-		 * between notes
-		 */
-
-		if (i <= highest_note()) {
-			_note_lines->add_coord (y, 1.0, UIConfiguration::instance().color ("piano roll black outline"));
-		}
-
-		/* now add a thicker line/bar which covers the entire vertical
-		 * height of this note.
-		 */
+		/* add a thicker line/bar which covers the entire vertical height of this note. */
 
 		switch (i % 12) {
 		case 1:
@@ -367,26 +360,27 @@ MidiStreamView::draw_note_lines()
 		case 6:
 		case 8:
 		case 10:
-			color = UIConfiguration::instance().color_mod ("piano roll black", "piano roll black");
+			color = black;
 			break;
+		case 4:
+		case 11:
+			/* this is the line actually corresponding to the division between B & C and E & F */
+			_note_lines->add_coord (y, 1.0, outline);
+			/* fallthrough */
 		default:
-			color = UIConfiguration::instance().color_mod ("piano roll white", "piano roll white");
+			color = white;
 			break;
 		}
 
 		double h = y - prev_y;
-		double mid = y + (h/2.0);
+		double middle = y + (h/2.0);
 
-		/* Cairo: odd width lines must be placed on 0.5 coordinates to be
-		 * drawn correctly.
-		 */
-
-		if (!fmod (h, 2.) && !fmod (mid, 1.)) {
-			mid += 0.5;
+		if (!fmod (h, 2.) && !fmod (middle, 1.)) {
+			middle += 0.5;
 		}
 
-		if (mid >= 0 && h > 1.0) {
-			_note_lines->add_coord (mid, h, color);
+		if (middle >= 0 && h > 1.0) {
+			_note_lines->add_coord (middle, h, color);
 		}
 
 		prev_y = y;
