@@ -106,12 +106,12 @@ LineSet::render (Rect const & area, Cairo::RefPtr<Cairo::Context> context) const
 		if (_orientation == Horizontal) {
 			self = Rect (0, l.pos - (l.width/2.0), _extent, l.pos + (l.width/2.0));
 			if (fmod (l.width, 2.)) {
-				self.y0 -= shift;
+				self.y0 += shift;
 			}
 		} else {
 			self = Rect (l.pos - (l.width/2.0), 0, l.pos + (l.width/2.0), _extent);
 			if (fmod (l.width, 2.)) {
-				self.x0 -= shift;
+				self.x0 += shift;
 			}
 		}
 
