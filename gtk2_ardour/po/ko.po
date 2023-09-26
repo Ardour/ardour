@@ -9,7 +9,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-09-22 03:10+0200\n"
+"POT-Creation-Date: 2023-09-26 21:06+0200\n"
 "PO-Revision-Date: 2023-09-25 00:03+0900\n"
 "Last-Translator: 이정희 <daemul72@gmail.com>\n"
 "Language-Team: Korean (https://app.transifex.com/marong/teams/161968/ko/)\n"
@@ -544,9 +544,8 @@ msgstr ""
 msgid ""
 "Czech:\n"
 "\t Pavel Fric <pavelfric@seznam.cz>\n"
+"\t Martin Vlk <martin@vlkk.cz>\n"
 msgstr ""
-"체코어:\n"
-"\t Pavel Fric <pavelfric@seznam.cz>\n"
 
 #: about.cc:267
 msgid ""
@@ -904,7 +903,7 @@ msgstr "MIDI"
 msgid "Manual Configuration"
 msgstr "매뉴얼 구성"
 
-#: add_route_dialog.cc:630 add_route_dialog.cc:809 ardour_ui.cc:1241
+#: add_route_dialog.cc:630 add_route_dialog.cc:809 ardour_ui.cc:1246
 #: ardour_ui_ed.cc:835 engine_dialog.cc:270 plugin_pin_dialog.cc:75
 msgid "Audio"
 msgstr "오디오"
@@ -1064,7 +1063,7 @@ msgstr "Non-Layered"
 msgid "Snd on Snd"
 msgstr "Snd on Snd"
 
-#: ardour_ui.cc:219
+#: ardour_ui.cc:223
 msgid ""
 "%1 %2.x has discovered configuration files from %1 %3.x.\n"
 "\n"
@@ -1078,159 +1077,159 @@ msgstr ""
 "\n"
 "(이렇게 하려면 %1를 다시 시작해야 합니다.)"
 
-#: ardour_ui.cc:302
+#: ardour_ui.cc:306
 msgid "Rec Cues"
 msgstr "큐 녹음"
 
-#: ardour_ui.cc:303
+#: ardour_ui.cc:307
 msgid "Play Cues"
 msgstr "큐 재생하기"
 
-#: ardour_ui.cc:307 editor_actions.cc:806 rc_option_editor.cc:3514
+#: ardour_ui.cc:311 editor_actions.cc:762 rc_option_editor.cc:3514
 #: region_editor.cc:58
 msgid "Audition"
 msgstr "오디션"
 
-#: ardour_ui.cc:308 editor_actions.cc:178 mixer_strip.cc:1709
+#: ardour_ui.cc:312 editor_actions.cc:178 mixer_strip.cc:1709
 #: monitor_section.cc:328 rc_option_editor.cc:4303 route_time_axis.cc:264
 #: route_time_axis.cc:2355 trigger_strip.cc:345 vca_master_strip.cc:237
 #: vca_time_axis.cc:283
 msgid "Solo"
 msgstr "솔로"
 
-#: ardour_ui.cc:309 ardour_ui2.cc:884
+#: ardour_ui.cc:313 ardour_ui2.cc:884
 msgid "Feedback"
 msgstr "피드백"
 
-#: ardour_ui.cc:321 speaker_dialog.cc:37
+#: ardour_ui.cc:325 speaker_dialog.cc:37
 msgid "Speaker Configuration"
 msgstr "스피커 구성"
 
-#: ardour_ui.cc:322
+#: ardour_ui.cc:326
 msgid "Add Tracks/Busses"
 msgstr "트랙/버스 추가하기"
 
-#: ardour_ui.cc:323
+#: ardour_ui.cc:327
 msgid "About"
 msgstr "정보"
 
-#: ardour_ui.cc:324 location_ui.cc:1183
+#: ardour_ui.cc:328 location_ui.cc:1183
 msgid "Ranges|Locations"
 msgstr "위치"
 
-#: ardour_ui.cc:325 route_params_ui.cc:65 route_params_ui.cc:561
+#: ardour_ui.cc:329 route_params_ui.cc:65 route_params_ui.cc:561
 msgid "Tracks and Busses"
 msgstr "트랙 및 버스"
 
-#: ardour_ui.cc:326 engine_dialog.cc:84 rc_option_editor.cc:2375
+#: ardour_ui.cc:330 engine_dialog.cc:84 rc_option_editor.cc:2375
 msgid "Audio/MIDI Setup"
 msgstr "오디오/MIDI 셋업"
 
-#: ardour_ui.cc:327
+#: ardour_ui.cc:331
 msgid "Video Export Dialog"
 msgstr "비디오 내보내기 대화 상자"
 
-#: ardour_ui.cc:328 lua_script_manager.cc:41
+#: ardour_ui.cc:332 lua_script_manager.cc:41
 msgid "Script Manager"
 msgstr "스크립트 관리자"
 
-#: ardour_ui.cc:329
+#: ardour_ui.cc:333
 msgid "Idle'o'Meter"
 msgstr "Idle'o'Meter"
 
-#: ardour_ui.cc:330 io_plugin_window.cc:56
+#: ardour_ui.cc:334 io_plugin_window.cc:56
 msgid "I/O Plugins"
 msgstr "I/O 플러그인"
 
-#: ardour_ui.cc:331 plugin_manager_ui.cc:51
+#: ardour_ui.cc:335 plugin_manager_ui.cc:51
 msgid "Plugin Manager"
 msgstr "플러그인 관리자"
 
-#: ardour_ui.cc:332 plugin_dspload_window.cc:36
+#: ardour_ui.cc:336 plugin_dspload_window.cc:36
 msgid "Plugin DSP Load"
 msgstr "플러그인 DSP 불러오기"
 
-#: ardour_ui.cc:333 dsp_stats_window.cc:29
+#: ardour_ui.cc:337 dsp_stats_window.cc:29
 msgid "Performance Meters"
 msgstr "퍼포먼스 미터"
 
-#: ardour_ui.cc:334 rc_option_editor.cc:3772 transport_masters_dialog.cc:652
+#: ardour_ui.cc:338 rc_option_editor.cc:3772 transport_masters_dialog.cc:652
 msgid "Transport Masters"
 msgstr "트랜스포트 마스터"
 
-#: ardour_ui.cc:335
+#: ardour_ui.cc:339
 msgid "Properties"
 msgstr "속성"
 
-#: ardour_ui.cc:336
+#: ardour_ui.cc:340
 msgid "Add Video"
 msgstr "비디오 추가하기"
 
-#: ardour_ui.cc:337 bundle_manager.cc:275
+#: ardour_ui.cc:341 bundle_manager.cc:275
 msgid "Bundle Manager"
 msgstr "번들 관리자"
 
-#: ardour_ui.cc:338 big_clock_window.cc:39
+#: ardour_ui.cc:342 big_clock_window.cc:39
 msgid "Big Clock"
 msgstr "큰 클록"
 
-#: ardour_ui.cc:339 big_transport_window.cc:31
+#: ardour_ui.cc:343 big_transport_window.cc:31
 msgid "Transport Controls"
 msgstr "트랜스포트 컨트롤"
 
-#: ardour_ui.cc:340 rc_option_editor.cc:3524
+#: ardour_ui.cc:344 rc_option_editor.cc:3524
 msgid "Virtual Keyboard"
 msgstr "가상 키보드"
 
-#: ardour_ui.cc:341
+#: ardour_ui.cc:345
 msgid "Library Downloader"
 msgstr "라이브러리 다운로드 도구"
 
-#: ardour_ui.cc:342
+#: ardour_ui.cc:346
 msgid "Audio Connections"
 msgstr "오디오 연결"
 
-#: ardour_ui.cc:343
+#: ardour_ui.cc:347
 msgid "MIDI Connections"
 msgstr "MIDI 연결"
 
-#: ardour_ui.cc:344 keyeditor.cc:94
+#: ardour_ui.cc:348 keyeditor.cc:94
 msgid "Keyboard Shortcuts"
 msgstr "키보드 단축키"
 
-#: ardour_ui.cc:345
+#: ardour_ui.cc:349
 msgid "Window|Scripting"
 msgstr "스크립팅"
 
-#: ardour_ui.cc:356
+#: ardour_ui.cc:360
 msgid "Window|Edit"
 msgstr "편집"
 
-#: ardour_ui.cc:357
+#: ardour_ui.cc:361
 msgid "Window|Mix"
 msgstr "믹스"
 
-#: ardour_ui.cc:358
+#: ardour_ui.cc:362
 msgid "Window|Prefs"
 msgstr "기본설정"
 
-#: ardour_ui.cc:359
+#: ardour_ui.cc:363
 msgid "Window|Rec"
 msgstr "녹음"
 
-#: ardour_ui.cc:360
+#: ardour_ui.cc:364
 msgid "Window|Cue"
 msgstr "큐"
 
-#: ardour_ui.cc:380
+#: ardour_ui.cc:385
 msgid "Your configuration files were copied. You can now restart %1."
 msgstr "구성 파일이 복사되었습니다. 이제 %1를 다시 시작할 수 있습니다."
 
-#: ardour_ui.cc:421
+#: ardour_ui.cc:426
 msgid "Global keybindings are missing"
 msgstr "전역 키바인딩이 누락되었습니다"
 
-#: ardour_ui.cc:643
+#: ardour_ui.cc:648
 msgid ""
 "The audio backend was shutdown because:\n"
 "\n"
@@ -1240,7 +1239,7 @@ msgstr ""
 "\n"
 "%1"
 
-#: ardour_ui.cc:645
+#: ardour_ui.cc:650
 msgid ""
 "The audio backend has either been shutdown or it\n"
 "disconnected %1 because %1\n"
@@ -1252,7 +1251,7 @@ msgstr ""
 "%1의 연결이 끊어졌습니다. \n"
 "오디오 백엔드를 다시 시작하고 세션을 저장하십시오."
 
-#: ardour_ui.cc:668
+#: ardour_ui.cc:673
 msgid ""
 "Indexing Audio Unit Plugin Failed.\n"
 "Automatic AU scanning has been disabled\n"
@@ -1262,35 +1261,35 @@ msgstr ""
 "자동 AU 스캔이 비활성화되었습니다\n"
 "('auval'로 확인한 다음 기본설정에서 스캔을 다시 활성화합니다)."
 
-#: ardour_ui.cc:713 ardour_ui.cc:790 keyeditor.cc:587
+#: ardour_ui.cc:718 ardour_ui.cc:795 keyeditor.cc:587
 msgid "Could not open temporary file to print bindings (%1)"
 msgstr "바인딩(%1)을 인쇄하기 위해 임시 파일을 열 수 없습니다"
 
-#: ardour_ui.cc:731 ardour_ui.cc:808 keyeditor.cc:605
+#: ardour_ui.cc:736 ardour_ui.cc:813 keyeditor.cc:605
 msgid "Could not save bindings to file (%1)"
 msgstr "파일(%1)에 대한 바인딩을 저장할 수 없습니다"
 
-#: ardour_ui.cc:1033
+#: ardour_ui.cc:1038
 msgid "Don't quit"
 msgstr "끝내기 안함"
 
-#: ardour_ui.cc:1036
+#: ardour_ui.cc:1041
 msgid "Discard session"
 msgstr "세션 폐기"
 
-#: ardour_ui.cc:1037
+#: ardour_ui.cc:1042
 msgid "Name session and quit"
 msgstr "세션 이름 지정하고 끝내기"
 
-#: ardour_ui.cc:1039
+#: ardour_ui.cc:1044
 msgid "Just quit"
 msgstr "그냥 끝내기"
 
-#: ardour_ui.cc:1040 ardour_ui_engine.cc:91
+#: ardour_ui.cc:1045 ardour_ui_engine.cc:91
 msgid "Save and quit"
 msgstr "저장하고 끝내기"
 
-#: ardour_ui.cc:1055
+#: ardour_ui.cc:1060
 msgid ""
 "%1 was unable to save your session.\n"
 "\n"
@@ -1304,11 +1303,11 @@ msgstr ""
 "\n"
 "\"그냥 끝내기\" 옵션을 사용하십시오."
 
-#: ardour_ui.cc:1128
+#: ardour_ui.cc:1133
 msgid "DANGER!"
 msgstr "위험!"
 
-#: ardour_ui.cc:1133
+#: ardour_ui.cc:1138
 msgid ""
 "You have not named this session yet.\n"
 "You can continue to use it as\n"
@@ -1328,172 +1327,172 @@ msgstr ""
 "\n"
 "삭제는 영구적이며 되돌릴 수 없습니다."
 
-#: ardour_ui.cc:1139
+#: ardour_ui.cc:1144
 msgid "SCRATCH SESSION - DANGER!"
 msgstr "스크래치 세션 - 위험!"
 
-#: ardour_ui.cc:1140
+#: ardour_ui.cc:1145
 msgid "Delete this session (IRREVERSIBLE!)"
 msgstr "이 세션 삭제하기 (되돌릴 수 없음!)"
 
-#: ardour_ui.cc:1141
+#: ardour_ui.cc:1146
 msgid "Do not delete"
 msgstr "삭제하지 않음"
 
-#: ardour_ui.cc:1247 ardour_ui.cc:1256 session_option_editor.cc:79 utils.cc:785
+#: ardour_ui.cc:1252 ardour_ui.cc:1261 session_option_editor.cc:79 utils.cc:819
 msgid "none"
 msgstr "없음"
 
-#: ardour_ui.cc:1263 editor_ops.cc:7994 editor_ops.cc:8005 rhythm_ferret.cc:131
+#: ardour_ui.cc:1268 editor_ops.cc:7990 editor_ops.cc:8001 rhythm_ferret.cc:131
 #: rhythm_ferret.cc:146
 msgid "ms"
 msgstr "ms"
 
-#: ardour_ui.cc:1278 plugin_manager_ui.cc:63
+#: ardour_ui.cc:1283 plugin_manager_ui.cc:63
 msgid "File"
 msgstr "파일"
 
-#: ardour_ui.cc:1282
+#: ardour_ui.cc:1287
 msgid "BWF"
 msgstr "BWF"
 
-#: ardour_ui.cc:1285
+#: ardour_ui.cc:1290
 msgid "WAV"
 msgstr "WAV"
 
-#: ardour_ui.cc:1288
+#: ardour_ui.cc:1293
 msgid "WAV64"
 msgstr "WAV64"
 
-#: ardour_ui.cc:1291 session_option_editor.cc:201
+#: ardour_ui.cc:1296 session_option_editor.cc:201
 msgid "CAF"
 msgstr "CAF"
 
-#: ardour_ui.cc:1294
+#: ardour_ui.cc:1299
 msgid "AIFF"
 msgstr "AIFF"
 
-#: ardour_ui.cc:1297
+#: ardour_ui.cc:1302
 msgid "iXML"
 msgstr "iXML"
 
-#: ardour_ui.cc:1300 session_option_editor.cc:202
+#: ardour_ui.cc:1305 session_option_editor.cc:202
 msgid "RF64"
 msgstr "RF64"
 
-#: ardour_ui.cc:1303
+#: ardour_ui.cc:1308
 msgid "RF64/WAV"
 msgstr "RF64/WAV"
 
-#: ardour_ui.cc:1306
+#: ardour_ui.cc:1311
 msgid "MBWF"
 msgstr "MBWF"
 
-#: ardour_ui.cc:1309 session_option_editor.cc:206
+#: ardour_ui.cc:1314 session_option_editor.cc:206
 msgid "FLAC"
 msgstr "FLAC"
 
-#: ardour_ui.cc:1317
+#: ardour_ui.cc:1322
 msgid "32-float"
 msgstr "32-float"
 
-#: ardour_ui.cc:1320
+#: ardour_ui.cc:1325
 msgid "24-int"
 msgstr "24-int"
 
-#: ardour_ui.cc:1323
+#: ardour_ui.cc:1328
 msgid "16-int"
 msgstr "16-int"
 
-#: ardour_ui.cc:1334 editor_sources.cc:97 plugin_manager_ui.cc:64
+#: ardour_ui.cc:1339 editor_sources.cc:97 plugin_manager_ui.cc:64
 msgid "Path"
 msgstr "경로"
 
-#: ardour_ui.cc:1350 ardour_ui_ed.cc:837
+#: ardour_ui.cc:1355 ardour_ui_ed.cc:837
 msgid "DSP"
 msgstr "DSP"
 
-#: ardour_ui.cc:1365 ardour_ui.cc:1367
+#: ardour_ui.cc:1370 ardour_ui.cc:1372
 msgid "Shift+Click to clear xruns."
 msgstr "Shift+클릭하여 xrun을 지웁니다."
 
-#: ardour_ui.cc:1381
+#: ardour_ui.cc:1386
 msgid "PkBld"
 msgstr "PkBld"
 
-#: ardour_ui.cc:1403
+#: ardour_ui.cc:1408
 msgid "N/A"
 msgstr "사용할 수 없음"
 
-#: ardour_ui.cc:1404 rec_info_box.cc:327
+#: ardour_ui.cc:1409 rec_info_box.cc:327
 msgid "Unknown"
 msgstr "알 수 없음"
 
-#: ardour_ui.cc:1414
+#: ardour_ui.cc:1419
 #, c-format
 msgid "%02dh:%02dm:%02ds"
 msgstr "%02d시간:%02d분:%02d초"
 
-#: ardour_ui.cc:1415
+#: ardour_ui.cc:1420
 msgid "Available record time"
 msgstr "사용 가능한 녹음 시간"
 
-#: ardour_ui.cc:1417 editor_route_groups.cc:98
+#: ardour_ui.cc:1422 editor_route_groups.cc:98
 msgid "Rec"
 msgstr "녹음"
 
-#: ardour_ui.cc:1420 rec_info_box.cc:288 rec_info_box.cc:329
+#: ardour_ui.cc:1425 rec_info_box.cc:288 rec_info_box.cc:329
 #: rec_info_box.cc:344
 msgid ">24h"
 msgstr ">24시간"
 
-#: ardour_ui.cc:1423 ardour_ui.cc:1426 rec_info_box.cc:347 rec_info_box.cc:350
+#: ardour_ui.cc:1428 ardour_ui.cc:1431 rec_info_box.cc:347 rec_info_box.cc:350
 msgid "hours|h"
 msgstr "시간"
 
-#: ardour_ui.cc:1429 plugin_scan_dialog.cc:224 rec_info_box.cc:353
+#: ardour_ui.cc:1434 plugin_scan_dialog.cc:224 rec_info_box.cc:353
 #: rec_info_box.cc:357
 msgid "minutes|m"
 msgstr "분"
 
-#: ardour_ui.cc:1474
+#: ardour_ui.cc:1479
 msgid "Timecode|TC"
 msgstr "타임코드"
 
-#: ardour_ui.cc:1493
+#: ardour_ui.cc:1498
 msgid "n/a"
 msgstr "사용할 수 없음"
 
-#: ardour_ui.cc:1530
+#: ardour_ui.cc:1535
 msgid "You cannot add a track without a session already loaded."
 msgstr "세션을 이미 불려오지 않은 상태에서는 트랙을 추가할 수 없습니다."
 
-#: ardour_ui.cc:1548
+#: ardour_ui.cc:1553
 msgid "could not create %1 new mixed track"
 msgid_plural "could not create %1 new mixed tracks"
 msgstr[0] "%1개의 새로운 오디오+MIDI 트랙을 만들 수 없습니다"
 
-#: ardour_ui.cc:1557
+#: ardour_ui.cc:1562
 msgid "could not create %1 new Midi Bus"
 msgid_plural "could not create %1 new Midi Busses"
 msgstr[0] "%1개의 MIDI 버스를 만들 수 없습니다"
 
-#: ardour_ui.cc:1591
+#: ardour_ui.cc:1596
 msgid "could not create %1 new audio track"
 msgid_plural "could not create %1 new audio tracks"
 msgstr[0] "%1개의 새 오디오 트랙을 만들 수 없습니다"
 
-#: ardour_ui.cc:1600
+#: ardour_ui.cc:1605
 msgid "could not create %1 new audio bus"
 msgid_plural "could not create %1 new audio busses"
 msgstr[0] "%1개의 새 오디오 버스를 만들 수 없습니다"
 
-#: ardour_ui.cc:1632
+#: ardour_ui.cc:1637
 msgid "could not create %1 new foldback bus"
 msgid_plural "could not create %1 new foldback busses"
 msgstr[0] "%1개의 새 폴드백 버스를 만들 수 없습니다"
 
-#: ardour_ui.cc:1647
+#: ardour_ui.cc:1652
 msgid ""
 "There are insufficient ports available\n"
 "to create a new track or bus.\n"
@@ -1505,7 +1504,7 @@ msgstr ""
 "%1를 저장하고 종료한 후 더 많은\n"
 "포트를 사용하여 다시 시작해야 합니다."
 
-#: ardour_ui.cc:1790
+#: ardour_ui.cc:1795
 msgid ""
 "Please create one or more tracks before trying to record.\n"
 "You can do this with the \"Add Track or Bus\" option in the Session menu."
@@ -1514,24 +1513,24 @@ msgstr ""
 "세션 메뉴의 \"트랙/버스 추가하기\"옵션을 사용하여 이 작업을 수행할 수 있습니"
 "다."
 
-#: ardour_ui.cc:2285 route_ui.cc:1945
+#: ardour_ui.cc:2290 route_ui.cc:1945
 msgid "Confirm Template Overwrite"
 msgstr "템플릿 덮어쓰기 확인"
 
-#: ardour_ui.cc:2286 route_ui.cc:1946
+#: ardour_ui.cc:2291 route_ui.cc:1946
 msgid "A template already exists with that name. Do you want to overwrite it?"
 msgstr "같은 이름의 템플릿이 이미 있습니다. 덮어쓰시겠습니까?"
 
-#: ardour_ui.cc:2484
+#: ardour_ui.cc:2489
 msgid "No files were ready for clean-up"
 msgstr "클린업용 오디오 파일이 없습니다"
 
-#: ardour_ui.cc:2488 ardour_ui.cc:2498 ardour_ui.cc:2631 ardour_ui.cc:2638
+#: ardour_ui.cc:2493 ardour_ui.cc:2503 ardour_ui.cc:2636 ardour_ui.cc:2643
 #: ardour_ui_ed.cc:167
 msgid "Clean-up"
 msgstr "클린업"
 
-#: ardour_ui.cc:2489
+#: ardour_ui.cc:2494
 msgid ""
 "If this seems surprising, \n"
 "check for any existing snapshots.\n"
@@ -1543,19 +1542,19 @@ msgstr ""
 "여기에는 사용하지 않는 파일을\n"
 "가리키는 영역이 포함될 수 있습니다."
 
-#: ardour_ui.cc:2548
+#: ardour_ui.cc:2553
 msgid "kilo"
 msgstr "킬로"
 
-#: ardour_ui.cc:2551
+#: ardour_ui.cc:2556
 msgid "mega"
 msgstr "메가"
 
-#: ardour_ui.cc:2554
+#: ardour_ui.cc:2559
 msgid "giga"
 msgstr "기가"
 
-#: ardour_ui.cc:2559
+#: ardour_ui.cc:2564
 msgid ""
 "The following file was deleted from %2,\n"
 "releasing %3 %4bytes of disk space"
@@ -1566,7 +1565,7 @@ msgstr[0] ""
 "다음 %1개의 파일이 %2에서 삭제되어,\n"
 "%3 %4바이트의 디스크 공간을 확보했습니다"
 
-#: ardour_ui.cc:2566
+#: ardour_ui.cc:2571
 msgid ""
 "The following file was not in use and \n"
 "has been moved to: %2\n"
@@ -1595,11 +1594,11 @@ msgstr[0] ""
 "\n"
 "추가로 %3 %4바이트의 디스크 공간을 확보했습니다.\n"
 
-#: ardour_ui.cc:2626
+#: ardour_ui.cc:2631
 msgid "Are you sure you want to clean-up?"
 msgstr "클린업을 하시겠습니까?"
 
-#: ardour_ui.cc:2633
+#: ardour_ui.cc:2638
 msgid ""
 "Clean-up is a destructive operation.\n"
 "ALL undo/redo information will be lost if you clean-up.\n"
@@ -1609,36 +1608,36 @@ msgstr ""
 "클린업하면 모든 실행 취소/다시 실행 정보가 손실됩니다.\n"
 "클린업은 사용하지 않는 모든 파일을 \"폐기된\" 위치로 이동합니다."
 
-#: ardour_ui.cc:2641
+#: ardour_ui.cc:2646
 msgid "CleanupDialog"
 msgstr "클린업대화상자"
 
-#: ardour_ui.cc:2667
+#: ardour_ui.cc:2672
 msgid "Cleaned Files"
 msgstr "정리된 파일"
 
-#: ardour_ui.cc:2684
+#: ardour_ui.cc:2689
 msgid "deleted file"
 msgstr "삭제된 파일"
 
-#: ardour_ui.cc:2802
+#: ardour_ui.cc:2807
 msgid "You cannot add tracks or busses without a session already loaded."
 msgstr ""
 "세션을 이미 불려오지 않은 상태에서는 트랙이나 버스를 추가할 수 없습니다."
 
-#: ardour_ui.cc:2869
+#: ardour_ui.cc:2874
 msgid "Audio Channels for new track:"
 msgstr "새 트랙의 오디오 채널:"
 
-#: ardour_ui.cc:2869
+#: ardour_ui.cc:2874
 msgid "Audio Channels for new bus:"
 msgstr "새 버스의 오디오 채널:"
 
-#: ardour_ui.cc:2877
+#: ardour_ui.cc:2882
 msgid "Custom Channel"
 msgstr "사용자 지정 채널"
 
-#: ardour_ui.cc:2933
+#: ardour_ui.cc:2938
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1652,7 +1651,7 @@ msgstr ""
 "구체적으로, 녹음 속도를 따라잡을 수 있을 만큼\n"
 "빠르게 디스크에 데이터를 쓰지 못했습니다.\n"
 
-#: ardour_ui.cc:2962
+#: ardour_ui.cc:2967
 msgid ""
 "The disk system on your computer\n"
 "was not able to keep up with %1.\n"
@@ -1666,11 +1665,11 @@ msgstr ""
 "구체적으로 말하면, 플레이백을 따라잡을 만큼\n"
 "디스크에서 데이터를 빠르게 읽지 못했습니다.\n"
 
-#: ardour_ui.cc:2992
+#: ardour_ui.cc:2997
 msgid "Crash Recovery"
 msgstr "충돌 복구"
 
-#: ardour_ui.cc:2993
+#: ardour_ui.cc:2998
 msgid ""
 "This session appears to have been modified\n"
 "without save, or in middle of recording when\n"
@@ -1688,11 +1687,11 @@ msgstr ""
 "복구하거나 무시할 수 있습니다. \n"
 "진행 방법을 결정하십시오.\n"
 
-#: ardour_ui.cc:3005
+#: ardour_ui.cc:3010
 msgid "Ignore crash data"
 msgstr "충돌 데이터 무시"
 
-#: ardour_ui.cc:3006
+#: ardour_ui.cc:3011
 msgid "Recover from crash"
 msgstr "충돌에서 복구하기"
 
@@ -2059,8 +2058,8 @@ msgid "Save and close"
 msgstr "저장 후 닫기"
 
 #: ardour_ui_dialogs.cc:1121 ardour_ui_ed.cc:443 ardour_ui_ed.cc:454
-#: audio_clock.cc:2199 editor.cc:202 editor.cc:335 editor_actions.cc:739
-#: editor_actions.cc:757 export_timespan_selector.cc:102
+#: audio_clock.cc:2199 editor.cc:202 editor.cc:335 editor_actions.cc:695
+#: editor_actions.cc:713 export_timespan_selector.cc:102
 #: session_option_editor.cc:46 session_option_editor.cc:66
 #: session_option_editor.cc:85 session_option_editor.cc:86
 #: session_option_editor.cc:99 session_option_editor.cc:112
@@ -2498,7 +2497,7 @@ msgid "Seconds"
 msgstr "초"
 
 #: ardour_ui_ed.cc:451 ardour_ui_ed.cc:462 audio_clock.cc:2203 editor.cc:336
-#: editor_actions.cc:740
+#: editor_actions.cc:696
 msgid "Samples"
 msgstr "샘플"
 
@@ -3339,7 +3338,7 @@ msgstr "복사된 데모 세션 `%1' 입니다."
 msgid "Failed to extract demo session `%1'."
 msgstr "데모 세션 `%1' 추출에 실패했습니다."
 
-#: ardour_ui_startup.cc:733 new_user_wizard.cc:290
+#: ardour_ui_startup.cc:733 new_user_wizard.cc:266
 msgid "%1 is ready for use"
 msgstr "%1를 사용할 준비가 되었습니다"
 
@@ -3476,8 +3475,8 @@ msgstr "TS"
 
 #: audio_clock.cc:1947 audio_streamview.cc:121 editor_actions.cc:1189
 #: editor_actions.cc:1213 editor_actions.cc:1294 editor_actions.cc:1381
-#: luainstance.cc:1333 luainstance.cc:1338 luainstance.cc:2199
-#: luainstance.cc:2204 plugin_pin_dialog.cc:895 session_metadata_dialog.cc:499
+#: luainstance.cc:1335 luainstance.cc:1340 luainstance.cc:2201
+#: luainstance.cc:2206 plugin_pin_dialog.cc:895 session_metadata_dialog.cc:499
 #: session_metadata_dialog.cc:547 session_metadata_dialog.cc:603
 #: session_metadata_dialog.cc:907 streamview.cc:475
 msgid "programming error: %1"
@@ -3487,7 +3486,7 @@ msgstr "프로그래밍 오류: %1"
 msgid "programming error: %1 %2"
 msgstr "프로그래밍 오류: %1 %2"
 
-#: audio_clock.cc:2200 editor.cc:334 editor_actions.cc:741
+#: audio_clock.cc:2200 editor.cc:334 editor_actions.cc:697
 #: export_timespan_selector.cc:112
 msgid "Bars:Beats"
 msgstr "마디:비트"
@@ -4296,44 +4295,44 @@ msgstr "음높이를 유지하지 않고 리샘플링"
 msgid "Vocal"
 msgstr "보컬"
 
-#: editor.cc:333 editor_actions.cc:738
+#: editor.cc:333 editor_actions.cc:694
 msgid "Mins:Secs"
 msgstr "분:초"
 
 #: editor.cc:337 editor_actions.cc:131 editor_actions.cc:181
-#: editor_actions.cc:743
+#: editor_actions.cc:699
 msgid "Tempo"
 msgstr "템포"
 
-#: editor.cc:338 editor_actions.cc:742
+#: editor.cc:338 editor_actions.cc:698
 msgid "Time Signature"
 msgstr "박자표"
 
-#: editor.cc:339 editor_actions.cc:748
+#: editor.cc:339 editor_actions.cc:704
 msgid "Location Markers"
 msgstr "마커 위치"
 
-#: editor.cc:340 editor_actions.cc:744
+#: editor.cc:340 editor_actions.cc:700
 msgid "Range Markers"
 msgstr "범위 마커"
 
-#: editor.cc:341 editor_actions.cc:745
+#: editor.cc:341 editor_actions.cc:701
 msgid "Loop/Punch Ranges"
 msgstr "루프/펀치 범위"
 
-#: editor.cc:342 editor_actions.cc:746
+#: editor.cc:342 editor_actions.cc:702
 msgid "CD Markers"
 msgstr "CD 마커"
 
-#: editor.cc:343 editor.cc:709 editor_actions.cc:747
+#: editor.cc:343 editor.cc:709 editor_actions.cc:703
 msgid "Arrangement"
 msgstr "편곡"
 
-#: editor.cc:344 editor_actions.cc:749
+#: editor.cc:344 editor_actions.cc:705
 msgid "Cue Markers"
 msgstr "큐 마커"
 
-#: editor.cc:345 editor_actions.cc:753
+#: editor.cc:345 editor_actions.cc:709
 msgid "Video Timeline"
 msgstr "비디오 타임라인"
 
@@ -4484,7 +4483,7 @@ msgstr "범위로 확대/축소"
 msgid "Loudness Analysis"
 msgstr "소리세기 분석"
 
-#: editor.cc:1980 editor_actions.cc:814 editor_markers.cc:1191
+#: editor.cc:1980 editor_actions.cc:770 editor_markers.cc:1191
 msgid "Loudness Assistant..."
 msgstr "소리세기 도우미..."
 
@@ -4683,7 +4682,7 @@ msgstr "조금씩 밀기"
 
 #: editor.cc:2317 editor.cc:2340 editor.cc:2361 editor.cc:3461 editor.cc:3462
 #: editor.cc:3663 editor.cc:3667 editor.cc:3678 editor.cc:3686
-#: editor_actions.cc:681 editor_actions.cc:685 editor_actions.cc:696
+#: editor_actions.cc:893 editor_actions.cc:897 editor_actions.cc:908
 msgid "Auto"
 msgstr "자동"
 
@@ -4998,7 +4997,7 @@ msgstr "재생목록 유지"
 msgid "Keep Remaining"
 msgstr "남은 항목 유지"
 
-#: editor.cc:4657 editor_audio_import.cc:722 editor_ops.cc:7635
+#: editor.cc:4657 editor_audio_import.cc:722 editor_ops.cc:7631
 #: engine_dialog.cc:3124 sfdb_freesound_mootcher.cc:88 keyeditor.cc:80
 #: library_download_dialog.cc:311 processor_box.cc:3889 processor_box.cc:3914
 #: pt_import_selector.cc:45 template_dialog.cc:518
@@ -5024,2473 +5023,39 @@ msgstr "재생목록 지우기"
 
 #: editor.cc:4880
 msgid "Copy Playlist for ALL Tracks"
-msgstr "모든 트랙의 재생목록 복사하기"
+msgstr ""
 
 #: editor.cc:4880
 msgid "New Playlist for ALL Tracks"
-msgstr "모든 트랙의 새 재생목록"
+msgstr ""
 
 #: editor.cc:4891
 msgid "Copy Playlist for this track/group"
-msgstr "이 트랙/그룹의 재생목록 복사하기"
+msgstr ""
 
 #: editor.cc:4891
 msgid "New Playlist for this track/group"
-msgstr "이 트랙/그룹의 새 재생목록"
+msgstr ""
 
 #: editor.cc:4902
 msgid "Copy Playlist for Selected Tracks"
-msgstr "선택된 트랙의 재생목록 복사하기"
+msgstr ""
 
 #: editor.cc:4902
 msgid "New Playlist for Selected Tracks"
-msgstr "선택된 트랙의 새 재생목록"
+msgstr ""
 
 #: editor.cc:4913
 msgid "Copy Playlist for Armed Tracks"
-msgstr "준비된 트랙의 재생목록 복사하기"
+msgstr ""
 
 #: editor.cc:4913
 msgid "New Playlist for Armed Tracks"
-msgstr "준비된 트랙의 새 재생목록"
+msgstr ""
 
 #: editor.cc:5686
 msgid "Please wait while %1 loads visual data."
-msgstmas"
-
-#: about.cc:155
-msgid "Hubert Figuière"
-msgstr "Hubert Figuière"
-
-#: about.cc:156
-msgid "Colin Fletcher"
-msgstr "Colin Fletcher"
-
-#: about.cc:157
-msgid "Dave Flick"
-msgstr "Dave Flick"
-
-#: about.cc:158
-msgid "Hans Fugal"
-msgstr "Hans Fugal"
-
-#: about.cc:159
-msgid "Robin Gareus"
-msgstr "Robin Gareus"
-
-#: about.cc:160
-msgid "Nil Geisweiller"
-msgstr "Nil Geisweiller"
-
-#: about.cc:161
-msgid "Christopher George"
-msgstr "Christopher George"
-
-#: about.cc:162
-msgid "Chris Goddard"
-msgstr "Chris Goddard"
-
-#: about.cc:163
-msgid "J. Abelardo Gutierrez"
-msgstr "J. Abelardo Gutierrez"
-
-#: about.cc:164
-msgid "Jeremy Hall"
-msgstr "Jeremy Hall"
-
-#: about.cc:165
-msgid "Audun Halland"
-msgstr "Audun Halland"
-
-#: about.cc:166
-msgid "David Halter"
-msgstr "David Halter"
-
-#: about.cc:167
-msgid "Steve Harris"
-msgstr "Steve Harris"
-
-#: about.cc:168
-msgid "Melvin Ray Herr"
-msgstr "Melvin Ray Herr"
-
-#: about.cc:169
-msgid "Carl Hetherington"
-msgstr "Carl Hetherington"
-
-#: about.cc:170
-msgid "Rob Holland"
-msgstr "Rob Holland"
-
-#: about.cc:171
-msgid "Robert Jordens"
-msgstr "Robert Jordens"
-
-#: about.cc:172
-msgid "Stefan Kersten"
-msgstr "Stefan Kersten"
-
-#: about.cc:173
-msgid "Mads Kiilerich"
-msgstr "Mads Kiilerich"
-
-#: about.cc:174
-msgid "Armand Klenk"
-msgstr "Armand Klenk"
-
-#: about.cc:175
-msgid "Julien de Kozak"
-msgstr "Julien de Kozak"
-
-#: about.cc:176
-msgid "Matt Krai"
-msgstr "Matt Krai"
-
-#: about.cc:177
-msgid "Georg Krause"
-msgstr "Georg Krause"
-
-#: about.cc:178
-msgid "Marijn Kruisselbrink"
-msgstr "Marijn Kruisselbrink"
-
-#: about.cc:179
-msgid "Nick Lanham"
-msgstr "Nick Lanham"
-
-#: about.cc:180
-msgid "Colin Law"
-msgstr "Colin Law"
-
-#: about.cc:181
-msgid "Joshua Leach"
-msgstr "Joshua Leach"
-
-#: about.cc:182
-msgid "Jan Lentfer"
-msgstr "Jan Lentfer"
-
-#: about.cc:183
-msgid "Ben Loftis"
-msgstr "Ben Loftis"
-
-#: about.cc:184
-msgid "Hector Martin"
-msgstr "Hector Martin"
-
-#: about.cc:185
-msgid "Matthias Mauch"
-msgstr "Matthias Mauch"
-
-#: about.cc:186
-msgid "Nick Mainsbridge"
-msgstr "Nick Mainsbridge"
-
-#: about.cc:187
-msgid "Tim Mayberry"
-msgstr "Tim Mayberry"
-
-#: about.cc:188
-msgid "Doug Mclain"
-msgstr "Doug Mclain"
-
-#: about.cc:189
-msgid "Johannes Mueller"
-msgstr "Johannes Mueller"
-
-#: about.cc:190
-msgid "Edward Tomasz Napierała"
-msgstr "Edward Tomasz Napierała"
-
-#: about.cc:191
-msgid "Todd Naugle"
-msgstr "Todd Naugle"
-
-#: about.cc:192
-msgid "André Nusser"
-msgstr "André Nusser"
-
-#: about.cc:193
-msgid "Bent Bisballe Nyeng"
-msgstr "Bent Bisballe Nyeng"
-
-#: about.cc:194
-msgid "Jack O'Quin"
-msgstr "Jack O'Quin"
-
-#: about.cc:195
-msgid "Len Ovens"
-msgstr "Len Ovens"
-
-#: about.cc:196
-msgid "Pavel Potocek"
-msgstr "Pavel Potocek"
-
-#: about.cc:197
-msgid "Caleb Potter"
-msgstr "Caleb Potter"
-
-#: about.cc:198
-msgid "Nimal Ratnayake"
-msgstr "Nimal Ratnayake"
-
-#: about.cc:199
-msgid "Julien Rivaud"
-msgstr "Julien Rivaud"
-
-#: about.cc:200
-msgid "David Robillard"
-msgstr "David Robillard"
-
-#: about.cc:201
-msgid "Julien Roger"
-msgstr "Julien Roger"
-
-#: about.cc:202
-msgid "Taybin Rutkin"
-msgstr "Taybin Rutkin"
-
-#: about.cc:203
-msgid "Andreas Ruge"
-msgstr "Andreas Ruge"
-
-#: about.cc:204
-msgid "Sampo Savolainen"
-msgstr "Sampo Savolainen"
-
-#: about.cc:205
-msgid "Rodrigo Severo"
-msgstr "Rodrigo Severo"
-
-#: about.cc:206
-msgid "Ayan Shafqat"
-msgstr "Ayan Shafqat"
-
-#: about.cc:207
-msgid "Daniel Sheeler"
-msgstr "Daniel Sheeler"
-
-#: about.cc:208
-msgid "Per Sigmond"
-msgstr "Per Sigmond"
-
-#: about.cc:209
-msgid "Lincoln Spiteri"
-msgstr "Lincoln Spiteri"
-
-#: about.cc:210
-msgid "Mike Start"
-msgstr "Mike Start"
-
-#: about.cc:211
-msgid "Mark Stewart"
-msgstr "Mark Stewart"
-
-#: about.cc:212
-msgid "Nathan Stewart"
-msgstr "Nathan Stewart"
-
-#: about.cc:213
-msgid "Roland Stigge"
-msgstr "Roland Stigge"
-
-#: about.cc:214
-msgid "Petter Sundlöf"
-msgstr "Petter Sundlöf"
-
-#: about.cc:215
-msgid "Mike Täht"
-msgstr "Mike Täht"
-
-#: about.cc:216
-msgid "Remi Thebault"
-msgstr "Remi Thebault"
-
-#: about.cc:217
-msgid "Roy Vegard"
-msgstr "Roy Vegard"
-
-#: about.cc:218
-msgid "Bruno Vernay"
-msgstr "Bruno Vernay"
-
-#: about.cc:219
-msgid "Florian Walpen"
-msgstr "Florian Walpen"
-
-#: about.cc:220
-msgid "Thorsten Wilms"
-msgstr "Thorsten Wilms"
-
-#: about.cc:221
-msgid "Damien Zammit"
-msgstr "Damien Zammit"
-
-#: about.cc:222
-msgid "Grygorii Zharun"
-msgstr "Grygorii Zharun"
-
-#: about.cc:223
-msgid "albatross"
-msgstr "albatross"
-
-#: about.cc:224
-msgid "cooltehno"
-msgstr "cooltehno"
-
-#: about.cc:225
-msgid "danceswithbugs"
-msgstr "danceswithbugs"
-
-#: about.cc:226
-msgid "dbolton"
-msgstr "dbolton"
-
-#: about.cc:227
-msgid "itmuckel"
-msgstr "itmuckel"
-
-#: about.cc:228
-msgid "mlachland"
-msgstr "mlachland"
-
-#: about.cc:229
-msgid "sra"
-msgstr "sra"
-
-#: about.cc:230
-msgid "tassyv"
-msgstr "tassyv"
-
-#: about.cc:235
-msgid ""
-"Catalan:\n"
-"\tAlbert Homs <alberthoms@gmail.com>\n"
 msgstr ""
-"카탈로니아어:\n"
-"\tAlbert Homs <alberthoms@gmail.com>\n"
-
-#: about.cc:236
-msgid ""
-"French:\n"
-"\tAlain Fréhel <alain.frehel@free.fr>\n"
-"\tChristophe Combelles <ccomb@free.fr>\n"
-"\tMartin Blanchard\n"
-"\tRomain Arnaud <roming22@gmail.com>\n"
-"\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
-"\tFrédéric Rech <fred_rech@laposte.net>\n"
-"\tJulien Taverna <jujudusud@gmail.com>\n"
-"\tNicolas Faure <sub26nico@laposte.net>\n"
-msgstr ""
-"프랑스어:\n"
-"\tAlain Fréhel <alain.frehel@free.fr>\n"
-"\tChristophe Combelles <ccomb@free.fr>\n"
-"\tMartin Blanchard\n"
-"\tRomain Arnaud <roming22@gmail.com>\n"
-"\tOlivier Humbert <trebmuh@tuxfamily.org>\n"
-"\tFrédéric Rech <fred_rech@laposte.net>\n"
-"\tJulien Taverna <jujudusud@gmail.com>\n"
-"\tNicolas Faure <sub26nico@laposte.net>\n"
-
-#: about.cc:244
-msgid ""
-"German:\n"
-"\tKarsten Petersen <kapet@kapet.de>\n"
-"\tSebastian Arnold <mail@sebastian-arnold.net>\n"
-"\tRobert Schwede <schwede@ironshark.com>\n"
-"\tBenjamin Scherrer <realhangman@web.de>\n"
-"\tEdgar Aichinger <edogawa@aon.at>\n"
-"\tRichard Oax <richard@pagliacciempire.de>\n"
-"\tRobin Gloster <robin@loc-com.de>\n"
-msgstr ""
-"독일어:\n"
-"\tKarsten Petersen <kapet@kapet.de>\n"
-"\tSebastian Arnold <mail@sebastian-arnold.net>\n"
-"\tRobert Schwede <schwede@ironshark.com>\n"
-"\tBenjamin Scherrer <realhangman@web.de>\n"
-"\tEdgar Aichinger <edogawa@aon.at>\n"
-"\tRichard Oax <richard@pagliacciempire.de>\n"
-"\tRobin Gloster <robin@loc-com.de>\n"
-
-#: about.cc:251
-msgid ""
-"Italian:\n"
-"\tVincenzo Reale <smart2128@baslug.org>\n"
-"\tFilippo Pappalardo <filippo@email.it>\n"
-"\tRaffaele Morelli <raffaele.morelli@gmail.com>\n"
-msgstr ""
-"이탈리아어:\n"
-"\tVincenzo Reale <smart2128@baslug.org>\n"
-"\tFilippo Pappalardo <filippo@email.it>\n"
-"\tRaffaele Morelli <raffaele.morelli@gmail.com>\n"
-
-#: about.cc:254
-msgid ""
-"Portuguese:\n"
-"\tRui Nuno Capela <rncbc@rncbc.org>\n"
-msgstr ""
-"포르투갈어:\n"
-"\tRui Nuno Capela <rncbc@rncbc.org>\n"
-
-#: about.cc:255
-msgid ""
-"Brazilian Portuguese:\n"
-"\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
-"\tChris Ross <chris@tebibyte.org>\n"
-msgstr ""
-"브라질 포르투갈어:\n"
-"\tAlexander da Franca Fernandes <alexander@nautae.eti.br>\n"
-"\tChris Ross <chris@tebibyte.org>\n"
-
-#: about.cc:257
-msgid ""
-"Spanish:\n"
-"\t Alex Krohn <alexkrohn@fastmail.fm>\n"
-"\tPablo Fernández <pablo.fbus@gmail.com>\n"
-msgstr ""
-"스페인어:\n"
-"\t Alex Krohn <alexkrohn@fastmail.fm>\n"
-"\tPablo Fernández <pablo.fbus@gmail.com>\n"
-
-#: about.cc:259
-msgid ""
-"Russian:\n"
-"\t Igor Blinov <pitstop@nm.ru>\n"
-"\tAleksandr Koltsov <ag1455@mail.ru>\n"
-"\tPetr Semiletov <tea@list.ru>\n"
-"\tAlexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
-msgstr ""
-"러시아어:\n"
-"\t Igor Blinov <pitstop@nm.ru>\n"
-"\tAleksandr Koltsov <ag1455@mail.ru>\n"
-"\tPetr Semiletov <tea@list.ru>\n"
-"\tAlexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
-
-#: about.cc:263
-msgid ""
-"Greek:\n"
-"\t Klearchos Gourgourinis <muadib@in.gr>\n"
-msgstr ""
-"그리스어:\n"
-"\t Klearchos Gourgourinis <muadib@in.gr>\n"
-
-#: about.cc:264
-msgid ""
-"Swedish:\n"
-"\t Petter Sundlöf <petter.sundlof@gmail.com>\n"
-msgstr ""
-"스웨덴어:\n"
-"\t Petter Sundlöf <petter.sundlof@gmail.com>\n"
-
-#: about.cc:265
-msgid ""
-"Polish:\n"
-"\t Piotr Zaryk <pzaryk@gmail.com>\n"
-msgstr ""
-"폴란드어:\n"
-"\t Piotr Zaryk <pzaryk@gmail.com>\n"
-
-#: about.cc:266
-msgid ""
-"Czech:\n"
-"\t Pavel Fric <pavelfric@seznam.cz>\n"
-msgstr ""
-"체코어:\n"
-"\t Pavel Fric <pavelfric@seznam.cz>\n"
-
-#: about.cc:267
-msgid ""
-"Norwegian:\n"
-"\t Eivind Ødegård\n"
-msgstr ""
-"노르웨이어:\n"
-"\t Eivind Ødegård\n"
-
-#: about.cc:268
-msgid ""
-"Chinese:\n"
-"\t Rui-huai Zhang <zrhzrh@mail.ustc.edu.cn>\n"
-msgstr ""
-"중국어:\n"
-"\t Rui-huai Zhang <zrhzrh@mail.ustc.edu.cn>\n"
-
-#: about.cc:269
-msgid ""
-"Japanese:\n"
-"\t Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
-msgstr ""
-"일본어:\n"
-"\t Hiroki Inagaki <hiroki.ingk@gmail.com>\n"
-
-#: about.cc:270
-msgid ""
-"Korean:\n"
-"\t Junghee Lee <daemul72@gmail.com>\n"
-msgstr ""
-"한국어:\n"
-"\t 이정희 <daemul72@gmail.com>\n"
-
-#: about.cc:613
-msgid "Intel 64-bit"
-msgstr "인텔 64-bit"
-
-#: about.cc:615
-msgid "Intel 32-bit"
-msgstr "인텔 32-bit"
-
-#: about.cc:617
-msgid "PowerPC 64-bit"
-msgstr "PowerPC 64-bit"
-
-#: about.cc:619
-msgid "PowerPC 32-bit"
-msgstr "PowerPC 32-bit"
-
-#: about.cc:621
-msgid "ARM 64-bit (aarch64)"
-msgstr "ARM 64-bit (aarch64)"
-
-#: about.cc:623
-msgid "ARM 32-bit (armhf)"
-msgstr "ARM 32-bit (armhf)"
-
-#: about.cc:625
-msgid "ARM 32-bit"
-msgstr "ARM 32-bit"
-
-#: about.cc:627
-msgid "64-bit"
-msgstr "64-bit"
-
-#: about.cc:629
-msgid "32-bit"
-msgstr "32-bit"
-
-#: about.cc:637
-msgid " - debug"
-msgstr " - 디버그"
-
-#: about.cc:643
-msgid "Copyright (C) 1999-2023 Paul Davis\n"
-msgstr "Copyright (C) 1999-2023 Paul Davis\n"
-
-#: about.cc:647
-msgid "http://ardour.org/"
-msgstr "http://ardour.org/"
-
-#: about.cc:648
-msgid ""
-"%1%2\n"
-"(rev %3)\n"
-"%4%5"
-msgstr ""
-"%1%2\n"
-"(리비전 %3)\n"
-"%4%5"
-
-#: about.cc:653
-msgid "Config"
-msgstr "구성"
-
-#: actions.cc:86
-msgid "Loading menus from %1"
-msgstr "%1에서 메뉴 불러오기"
-
-#: actions.cc:89 actions.cc:90
-msgid "badly formatted menu definition file: %1"
-msgstr "형식이 잘못된 메뉴 정의 파일: %1"
-
-#: actions.cc:92
-msgid "%1 menu definition file not found"
-msgstr "%1 메뉴 정의 파일을 찾을 수 없습니다"
-
-#: actions.cc:96 actions.cc:97
-msgid "%1 will not work without a valid menu definition file"
-msgstr "올바른 메뉴 정의 파일이 없으면 %1가 작동하지 않습니다"
-
-#: add_route_dialog.cc:69
-msgid "Add Track/Bus/VCA"
-msgstr "트랙/버스/VCA 추가하기"
-
-#: add_route_dialog.cc:72 add_route_dialog.cc:73
-msgid "Configuration:"
-msgstr "구성:"
-
-#: add_route_dialog.cc:74
-msgid "Add:"
-msgstr "추가:"
-
-#: add_route_dialog.cc:75 bundle_manager.cc:205 loudness_dialog.cc:524
-#: region_editor.cc:57 route_group_dialog.cc:72
-msgid "Name:"
-msgstr "이름:"
-
-#: add_route_dialog.cc:76
-msgid "Group:"
-msgstr "그룹:"
-
-#: add_route_dialog.cc:77 region_editor.cc:104
-#: region_layering_order_editor.cc:77
-msgid "Position:"
-msgstr "위치:"
-
-#: add_route_dialog.cc:78
-msgid "Pin Mode:"
-msgstr "핀 모드:"
-
-#: add_route_dialog.cc:79
-msgid "Record Mode:"
-msgstr "녹음 모드:"
-
-#: add_route_dialog.cc:80 recorder_ui.cc:1266
-msgid "Instrument:"
-msgstr "악기:"
-
-#: add_route_dialog.cc:82
-msgid "Show on Cue Page"
-msgstr "큐 페이지에 표시하기"
-
-#: add_route_dialog.cc:100 add_route_dialog.cc:589 add_route_dialog.cc:610
-#: add_route_dialog.cc:616
-msgid "Audio Tracks"
-msgstr "오디오 트랙"
-
-#: add_route_dialog.cc:101
-msgid "Use these settings to create one or more audio tracks."
-msgstr "이 설정을 사용하여 하나 이상의 오디오 트랙을 만들 수 있습니다."
-
-#: add_route_dialog.cc:102 add_route_dialog.cc:115 add_route_dialog.cc:128
-#: add_route_dialog.cc:141 add_route_dialog.cc:154 add_route_dialog.cc:162
-msgid "You may select:"
-msgstr "다음을 선택할 수 있음:"
-
-#: add_route_dialog.cc:103 add_route_dialog.cc:116
-msgid "The number of tracks to add"
-msgstr "추가할 트랙 수"
-
-#: add_route_dialog.cc:104 add_route_dialog.cc:117
-msgid "A name for the track(s)"
-msgstr "트랙의 이름"
-
-#: add_route_dialog.cc:105
-msgid "Mono, stereo, or multi-channel operation for the track(s)"
-msgstr "트랙에 대한 모노, 스테레오 또는 멀티 채널 오퍼레이션"
-
-#: add_route_dialog.cc:106 add_route_dialog.cc:119
-msgid "A group which the track(s) will be assigned to"
-msgstr "트랙이 할당될 그룹"
-
-#: add_route_dialog.cc:108 add_route_dialog.cc:121 add_route_dialog.cc:133
-#: add_route_dialog.cc:147
-msgid "The pin connections mode (see tooltip for details)"
-msgstr "핀 연결 모드 (자세한 내용은 도구 설명 참조)"
-
-#: add_route_dialog.cc:110 add_route_dialog.cc:123
-msgid "The track(s) will be added at the location specified by \"Position\""
-msgstr "트랙은 \"위치\"로 지정된 위치에 추가됩니다"
-
-#: add_route_dialog.cc:113 add_route_dialog.cc:587 add_route_dialog.cc:608
-msgid "MIDI Tracks"
-msgstr "MIDI 트랙"
-
-#: add_route_dialog.cc:114
-msgid "Use these settings to create one or more MIDI tracks."
-msgstr "이 설정을 사용하여 하나 이상의 MIDI 트랙을 만듭니다."
-
-#: add_route_dialog.cc:118 add_route_dialog.cc:144
-msgid "An instrument plugin (or select \"None\" to drive an external device)"
-msgstr "악기 플러그인 (또는 외부 장치를 구동하려면 \"없음\" 선택)"
-
-#: add_route_dialog.cc:126 add_route_dialog.cc:583 add_route_dialog.cc:604
-msgid "Audio Busses"
-msgstr "오디오 버스"
-
-#: add_route_dialog.cc:127
-msgid "Use these settings to create one or more audio busses."
-msgstr "이 설정을 사용하여 하나 이상의 오디오 버스를 만듭니다."
-
-#: add_route_dialog.cc:129 add_route_dialog.cc:142 add_route_dialog.cc:163
-msgid "The number of busses to add"
-msgstr "추가할 버스 수"
-
-#: add_route_dialog.cc:130 add_route_dialog.cc:143 add_route_dialog.cc:164
-msgid "A name for the buss(es)"
-msgstr "버스의 이름"
-
-#: add_route_dialog.cc:131 add_route_dialog.cc:145
-msgid "A group which the buss(es) will be assigned to"
-msgstr "버스가 할당될 그룹"
-
-#: add_route_dialog.cc:135 add_route_dialog.cc:149
-msgid "The buss(es) will be added at the location specified by \"Position\""
-msgstr "버스는 \"Position\"으로 지정된 위치에 추가됩니다."
-
-#: add_route_dialog.cc:138 add_route_dialog.cc:585 add_route_dialog.cc:606
-msgid "MIDI Busses"
-msgstr "MIDI 버스"
-
-#: add_route_dialog.cc:139
-msgid "Use these settings to create one or more MIDI busses."
-msgstr "이 설정을 사용하여 하나 이상의 MIDI 버스를 만듭니다."
-
-#: add_route_dialog.cc:140
-msgid ""
-"MIDI busses can combine the output of multiple tracks. They are sometimes "
-"used\n"
-"to host a single \"heavy\" instrument plugin which is fed from multiple MIDI "
-"tracks."
-msgstr ""
-"MIDI 버스는 여러 트랙의 출력을 결합할 수 있습니다. 미디 버스는 때때로 여러 "
-"MIDI 트랙에서 \n"
-"공급되는 하나의 \"강음\" 악기 플러그인을 호스팅하는 데 사용됩니다."
-
-#: add_route_dialog.cc:152 add_route_dialog.cc:591 add_route_dialog.cc:612
-msgid "VCA Masters"
-msgstr "VCA 마스터"
-
-#: add_route_dialog.cc:153
-msgid "Use these settings to create one or more VCA masters."
-msgstr "이 설정을 사용하여 하나 이상의 VCA 마스터를 만듭니다."
-
-#: add_route_dialog.cc:155
-msgid "The number of VCAs to add"
-msgstr "추가할 VCA 수"
-
-#: add_route_dialog.cc:156
-#, c-format
-msgid ""
-"A name for the VCA(s). \"%n\" will be replaced by an index number for each "
-"VCA"
-msgstr "VCA의 이름입니다. \"%n\"은 각 VCA에 대한 인덱스 번호로 바뀌게 됩니다"
-
-#: add_route_dialog.cc:159 add_route_dialog.cc:593 add_route_dialog.cc:614
-msgid "Foldback Busses"
-msgstr "폴드백 버스"
-
-#: add_route_dialog.cc:160
-msgid "Use these settings to create one or more foldback busses."
-msgstr "이 설정을 사용하여 하나 이상의 폴드백 버스를 만듭니다."
-
-#: add_route_dialog.cc:161
-msgid ""
-"Foldback busses are used as master outputs for monitor channels and are fed "
-"by\n"
-"hidden monitor sends."
-msgstr ""
-"폴드백 버스는 모니터 채널의 마스터 출력으로 사용되며 숨겨진 모니터 센드에 의"
-"해 공급됩니다."
-
-#: add_route_dialog.cc:169 add_route_dialog.cc:1138
-#: duplicate_routes_dialog.cc:57 duplicate_routes_dialog.cc:224
-#: trigger_ui.cc:743
-msgid "First"
-msgstr "처음"
-
-#: add_route_dialog.cc:170 add_route_dialog.cc:1142
-#: duplicate_routes_dialog.cc:58 duplicate_routes_dialog.cc:228
-msgid "Before Selection"
-msgstr "선택영역 이전"
-
-#: add_route_dialog.cc:171 add_route_dialog.cc:1140
-#: duplicate_routes_dialog.cc:59 duplicate_routes_dialog.cc:226
-msgid "After Selection"
-msgstr "선택영역 이후"
-
-#: add_route_dialog.cc:172 duplicate_routes_dialog.cc:60 trigger_ui.cc:745
-msgid "Last"
-msgstr "마지막"
-
-#: add_route_dialog.cc:175 recorder_ui.cc:1246
-msgid "Flexible-I/O"
-msgstr "유연한 I/O"
-
-#: add_route_dialog.cc:176 recorder_ui.cc:1247
-msgid "Strict-I/O"
-msgstr "엄격한 I/O"
-
-#: add_route_dialog.cc:210
-msgid "Template/Type"
-msgstr "템플릿/유형"
-
-#: add_route_dialog.cc:212 session_dialog.cc:362 session_dialog.cc:719
-msgid "Modified With"
-msgstr "다음으로 수정됨"
-
-#: add_route_dialog.cc:300 rc_option_editor.cc:4530 recorder_ui.cc:1278
-msgid ""
-"With strict-i/o enabled, Effect Processors will not modify the number of "
-"channels on a track. The number of output channels will always match the "
-"number of input channels."
-msgstr ""
-"엄격한 I/O가 활성화되면, 이펙트 프로세서는 트랙의 채널 수를 수정하지 않습니"
-"다. 출력 채널의 수는 항상 입력 채널의 수와 일치합니다."
-
-#: add_route_dialog.cc:323
-msgid "Add selected items (and leave dialog open)"
-msgstr "선택된 항목 추가하기 (및 대화상자를 열어 둡니다)"
-
-#: add_route_dialog.cc:350
-msgid "Add and Close"
-msgstr "추가하고 닫기"
-
-#: add_route_dialog.cc:447 add_route_dialog.cc:831 add_route_dialog.cc:844
-#: editor_actions.cc:539 editor_rulers.cc:286 time_axis_view.cc:1378
-msgid "Normal"
-msgstr "보통"
-
-#: add_route_dialog.cc:523 add_route_dialog.cc:810 editor_actions.cc:148
-#: engine_dialog.cc:272 missing_file_dialog.cc:65 mixer_ui.cc:2475
-#: plugin_pin_dialog.cc:76 rc_option_editor.cc:3491 rc_option_editor.cc:3503
-#: rc_option_editor.cc:3505 rc_option_editor.cc:3514 rc_option_editor.cc:3516
-#: rc_option_editor.cc:3524 rc_option_editor.cc:3541 rc_option_editor.cc:3543
-#: rc_option_editor.cc:3561 rc_option_editor.cc:3562 rc_option_editor.cc:3563
-#: rc_option_editor.cc:3566 rc_option_editor.cc:3568 rc_option_editor.cc:3579
-#: session_option_editor.cc:361 session_option_editor.cc:363
-#: session_option_editor.cc:370 session_option_editor.cc:391
-msgid "MIDI"
-msgstr "MIDI"
-
-#: add_route_dialog.cc:563
-msgid "Manual Configuration"
-msgstr "매뉴얼 구성"
-
-#: add_route_dialog.cc:630 add_route_dialog.cc:809 ardour_ui.cc:1241
-#: ardour_ui_ed.cc:835 engine_dialog.cc:270 plugin_pin_dialog.cc:75
-msgid "Audio"
-msgstr "오디오"
-
-#: add_route_dialog.cc:638 add_route_dialog.cc:811
-msgid "Bus"
-msgstr "버스"
-
-#: add_route_dialog.cc:641 add_route_dialog.cc:812
-msgid "Foldback"
-msgstr "폴드백"
-
-#: add_route_dialog.cc:846
-msgid "Non Layered"
-msgstr "Non Layered"
-
-#: add_route_dialog.cc:920 ardour_ui2.cc:460 monitor_section.cc:280
-#: monitor_section.cc:937 plugin_setup_dialog.cc:233
-msgid "Mono"
-msgstr "모노"
-
-#: add_route_dialog.cc:924 plugin_setup_dialog.cc:236
-msgid "Stereo"
-msgstr "스테레오"
-
-#: add_route_dialog.cc:933
-msgid "3 Channel"
-msgstr "3 채널"
-
-#: add_route_dialog.cc:937
-msgid "4 Channel"
-msgstr "4 채널"
-
-#: add_route_dialog.cc:941
-msgid "5 Channel"
-msgstr "5 채널"
-
-#: add_route_dialog.cc:945
-msgid "6 Channel"
-msgstr "6 채널"
-
-#: add_route_dialog.cc:949
-msgid "8 Channel"
-msgstr "8 채널"
-
-#: add_route_dialog.cc:953
-msgid "12 Channel"
-msgstr "12 채널"
-
-#: add_route_dialog.cc:957 gain_meter.cc:851 loudness_dialog.cc:337
-#: loudness_dialog.cc:527 loudness_dialog.cc:540 loudness_dialog.cc:585
-#: loudness_dialog.cc:640 mixer_strip.cc:1518 mixer_strip.cc:2004
-#: processor_box.cc:4202
-msgid "Custom"
-msgstr "사용자 지정"
-
-#: add_route_dialog.cc:998 session_dialog.cc:591 session_dialog.cc:592
-msgid "Factory Template"
-msgstr "공장 템플릿"
-
-#: add_route_dialog.cc:1082 add_route_dialog.cc:1098 route_group_menu.cc:86
-msgid "New Group..."
-msgstr "새 그룹..."
-
-#: add_route_dialog.cc:1086 mixer_strip.cc:1033 route_group_menu.cc:93
-msgid "No Group"
-msgstr "그룹 없음"
-
-#: ambiguous_file_dialog.cc:30
-msgid "Ambiguous File"
-msgstr "모호한 파일"
-
-#: ambiguous_file_dialog.cc:37
-msgid ""
-"%1 has found the file <i>%2</i> in the following places:\n"
-"\n"
-msgstr ""
-"%1가 다음 위치에서 <i>%2</i> 파일을 찾았음:\n"
-"\n"
-
-#: ambiguous_file_dialog.cc:46
-msgid ""
-"\n"
-"\n"
-"Please select the path that you want to get the file from."
-msgstr ""
-"\n"
-"\n"
-"파일을 가져올 경로를 선택합니다."
-
-#: ambiguous_file_dialog.cc:48 missing_file_dialog.cc:55 template_dialog.cc:204
-msgid "Done"
-msgstr "완료"
-
-#: analysis_window.cc:48
-msgid "Signal source"
-msgstr "시그널 소스"
-
-#: analysis_window.cc:49
-msgid "Selected ranges"
-msgstr "선택된 범위"
-
-#: analysis_window.cc:50
-msgid "Selected regions"
-msgstr "선택된 영역"
-
-#: analysis_window.cc:51
-msgid "Show frequency power range"
-msgstr "주파수 출력 범위 표시하기"
-
-#: analysis_window.cc:52
-msgid "Fit dB range"
-msgstr "dB 범위 맞추기"
-
-#: analysis_window.cc:53
-msgid "Proportional Spectrum, -18dB"
-msgstr "비례적 스펙트럼, -18dB"
-
-#: analysis_window.cc:56
-msgid "FFT analysis window"
-msgstr "FFT 분석 창"
-
-#: analysis_window.cc:57 editor.cc:1978 editor_actions.cc:434
-msgid "Spectral Analysis"
-msgstr "스펙트럼 분석"
-
-#: analysis_window.cc:64 editor_actions.cc:193 session_metadata_dialog.cc:729
-msgid "Track"
-msgstr "트랙"
-
-#: analysis_window.cc:65 ardour_ui_ed.cc:717 mixer_strip.cc:867 mixer_ui.cc:200
-#: mixer_ui.cc:2886
-msgid "Show"
-msgstr "표시하기"
-
-#: analysis_window.cc:110
-msgid "Re-analyze data"
-msgstr "데이터 재분석"
-
-#: ardour_http.cc:232 ardour_http.cc:235 ardour_http.cc:255
-msgid "HTTP request failed: (%1) %2"
-msgstr "HTTP 요청 실패: (%1) %2"
-
-#: ardour_http.cc:241 ardour_http.cc:244 ardour_http.cc:258
-msgid "HTTP request status: %1"
-msgstr "HTTP 요청 상태: %1"
-
-#: ardour_ui.cc:209
-msgid "Layered"
-msgstr "Layered"
-
-#: ardour_ui.cc:210
-msgid "Non-Layered"
-msgstr "Non-Layered"
-
-#: ardour_ui.cc:211
-msgid "Snd on Snd"
-msgstr "Snd on Snd"
-
-#: ardour_ui.cc:219
-msgid ""
-"%1 %2.x has discovered configuration files from %1 %3.x.\n"
-"\n"
-"Would you like these files to be copied and used for %1 %2.x?\n"
-"\n"
-"(This will require you to restart %1.)"
-msgstr ""
-"%1 %2.x가 %1 %3.x에서 구성 파일을 검색했습니다.\n"
-"\n"
-"이 파일을 복사하여 %1 %2.x에 사용하시겠습니까?\n"
-"\n"
-"(이렇게 하려면 %1를 다시 시작해야 합니다.)"
-
-#: ardour_ui.cc:302
-msgid "Rec Cues"
-msgstr "큐 녹음"
-
-#: ardour_ui.cc:303
-msgid "Play Cues"
-msgstr "큐 재생하기"
-
-#: ardour_ui.cc:307 editor_actions.cc:806 rc_option_editor.cc:3514
-#: region_editor.cc:58
-msgid "Audition"
-msgstr "오디션"
-
-#: ardour_ui.cc:308 editor_actions.cc:178 mixer_strip.cc:1709
-#: monitor_section.cc:328 rc_option_editor.cc:4303 route_time_axis.cc:264
-#: route_time_axis.cc:2355 trigger_strip.cc:345 vca_master_strip.cc:237
-#: vca_time_axis.cc:283
-msgid "Solo"
-msgstr "솔로"
-
-#: ardour_ui.cc:309 ardour_ui2.cc:884
-msgid "Feedback"
-msgstr "피드백"
-
-#: ardour_ui.cc:321 speaker_dialog.cc:37
-msgid "Speaker Configuration"
-msgstr "스피커 구성"
-
-#: ardour_ui.cc:322
-msgid "Add Tracks/Busses"
-msgstr "트랙/버스 추가하기"
-
-#: ardour_ui.cc:323
-msgid "About"
-msgstr "정보"
-
-#: ardour_ui.cc:324 location_ui.cc:1183
-msgid "Ranges|Locations"
-msgstr "위치"
-
-#: ardour_ui.cc:325 route_params_ui.cc:65 route_params_ui.cc:561
-msgid "Tracks and Busses"
-msgstr "트랙 및 버스"
-
-#: ardour_ui.cc:326 engine_dialog.cc:84 rc_option_editor.cc:2375
-msgid "Audio/MIDI Setup"
-msgstr "오디오/MIDI 셋업"
-
-#: ardour_ui.cc:327
-msgid "Video Export Dialog"
-msgstr "비디오 내보내기 대화 상자"
-
-#: ardour_ui.cc:328 lua_script_manager.cc:41
-msgid "Script Manager"
-msgstr "스크립트 관리자"
-
-#: ardour_ui.cc:329
-msgid "Idle'o'Meter"
-msgstr "Idle'o'Meter"
-
-#: ardour_ui.cc:330 io_plugin_window.cc:56
-msgid "I/O Plugins"
-msgstr "I/O 플러그인"
-
-#: ardour_ui.cc:331 plugin_manager_ui.cc:51
-msgid "Plugin Manager"
-msgstr "플러그인 관리자"
-
-#: ardour_ui.cc:332 plugin_dspload_window.cc:36
-msgid "Plugin DSP Load"
-msgstr "플러그인 DSP 불러오기"
-
-#: ardour_ui.cc:333 dsp_stats_window.cc:29
-msgid "Performance Meters"
-msgstr "퍼포먼스 미터"
-
-#: ardour_ui.cc:334 rc_option_editor.cc:3772 transport_masters_dialog.cc:652
-msgid "Transport Masters"
-msgstr "트랜스포트 마스터"
-
-#: ardour_ui.cc:335
-msgid "Properties"
-msgstr "속성"
-
-#: ardour_ui.cc:336
-msgid "Add Video"
-msgstr "비디오 추가하기"
-
-#: ardour_ui.cc:337 bundle_manager.cc:275
-msgid "Bundle Manager"
-msgstr "번들 관리자"
-
-#: ardour_ui.cc:338 big_clock_window.cc:39
-msgid "Big Clock"
-msgstr "큰 클록"
-
-#: ardour_ui.cc:339 big_transport_window.cc:31
-msgid "Transport Controls"
-msgstr "트랜스포트 컨트롤"
-
-#: ardour_ui.cc:340 rc_option_editor.cc:3524
-msgid "Virtual Keyboard"
-msgstr "가상 키보드"
-
-#: ardour_ui.cc:341
-msgid "Library Downloader"
-msgstr "라이브러리 다운로드 도구"
-
-#: ardour_ui.cc:342
-msgid "Audio Connections"
-msgstr "오디오 연결"
-
-#: ardour_ui.cc:343
-msgid "MIDI Connections"
-msgstr "MIDI 연결"
-
-#: ardour_ui.cc:344 keyeditor.cc:94
-msgid "Keyboard Shortcuts"
-msgstr "키보드 단축키"
-
-#: ardour_ui.cc:345
-msgid "Window|Scripting"
-msgstr "스크립팅"
-
-#: ardour_ui.cc:356
-msgid "Window|Edit"
-msgstr "편집"
-
-#: ardour_ui.cc:357
-msgid "Window|Mix"
-msgstr "믹스"
-
-#: ardour_ui.cc:358
-msgid "Window|Prefs"
-msgstr "기본설정"
-
-#: ardour_ui.cc:359
-msgid "Window|Rec"
-msgstr "녹음"
-
-#: ardour_ui.cc:360
-msgid "Window|Cue"
-msgstr "큐"
-
-#: ardour_ui.cc:380
-msgid "Your configuration files were copied. You can now restart %1."
-msgstr "구성 파일이 복사되었습니다. 이제 %1를 다시 시작할 수 있습니다."
-
-#: ardour_ui.cc:421
-msgid "Global keybindings are missing"
-msgstr "전역 키바인딩이 누락되었습니다"
-
-#: ardour_ui.cc:643
-msgid ""
-"The audio backend was shutdown because:\n"
-"\n"
-"%1"
-msgstr ""
-"다음과 같은 이유로 오디오 백엔드가 셧다운되었음:\n"
-"\n"
-"%1"
-
-#: ardour_ui.cc:645
-msgid ""
-"The audio backend has either been shutdown or it\n"
-"disconnected %1 because %1\n"
-"was not fast enough. Try to restart\n"
-"the audio backend and save the session."
-msgstr ""
-"%1가 충분히 빠르지 않기 때문에\n"
-"오디오 백엔드가 셧다운되었거나 \n"
-"%1의 연결이 끊어졌습니다. \n"
-"오디오 백엔드를 다시 시작하고 세션을 저장하십시오."
-
-#: ardour_ui.cc:668
-msgid ""
-"Indexing Audio Unit Plugin Failed.\n"
-"Automatic AU scanning has been disabled\n"
-"(check with 'auval', then re-enable scanning the in preferences)."
-msgstr ""
-"오디오 유닛 플러그인 인덱싱에 실패했습니다.\n"
-"자동 AU 스캔이 비활성화되었습니다\n"
-"('auval'로 확인한 다음 기본설정에서 스캔을 다시 활성화합니다)."
-
-#: ardour_ui.cc:713 ardour_ui.cc:790 keyeditor.cc:587
-msgid "Could not open temporary file to print bindings (%1)"
-msgstr "바인딩(%1)을 인쇄하기 위해 임시 파일을 열 수 없습니다"
-
-#: ardour_ui.cc:731 ardour_ui.cc:808 keyeditor.cc:605
-msgid "Could not save bindings to file (%1)"
-msgstr "파일(%1)에 대한 바인딩을 저장할 수 없습니다"
-
-#: ardour_ui.cc:1033
-msgid "Don't quit"
-msgstr "끝내기 안함"
-
-#: ardour_ui.cc:1036
-msgid "Discard session"
-msgstr "세션 폐기"
-
-#: ardour_ui.cc:1037
-msgid "Name session and quit"
-msgstr "세션 이름 지정하고 끝내기"
-
-#: ardour_ui.cc:1039
-msgid "Just quit"
-msgstr "그냥 끝내기"
-
-#: ardour_ui.cc:1040 ardour_ui_engine.cc:91
-msgid "Save and quit"
-msgstr "저장하고 끝내기"
-
-#: ardour_ui.cc:1055
-msgid ""
-"%1 was unable to save your session.\n"
-"\n"
-"If you still wish to quit, please use the\n"
-"\n"
-"\"Just quit\" option."
-msgstr ""
-"%1가 세션을 저장할 수 없습니다.\n"
-"\n"
-"그래도 끝내기하려면 \n"
-"\n"
-"\"그냥 끝내기\" 옵션을 사용하십시오."
-
-#: ardour_ui.cc:1128
-msgid "DANGER!"
-msgstr "위험!"
-
-#: ardour_ui.cc:1133
-msgid ""
-"You have not named this session yet.\n"
-"You can continue to use it as\n"
-"\n"
-"%1\n"
-"\n"
-"or it will be deleted.\n"
-"\n"
-"Deletion is permanent and irreversible."
-msgstr ""
-"이 세션의 이름을 아직 지정하지 않았습니다.\n"
-"\n"
-"%1\n"
-"\n"
-"로 계속 사용할 수 있습니다. \n"
-"그렇지 않으면 삭제됩니다.\n"
-"\n"
-"삭제는 영구적이며 되돌릴 수 없습니다."
-
-#: ardour_ui.cc:1139
-msgid "SCRATCH SESSION - DANGER!"
-msgstr "스크래치 세션 - 위험!"
-
-#: ardour_ui.cc:1140
-msgid "Delete this session (IRREVERSIBLE!)"
-msgstr "이 세션 삭제하기 (되돌릴 수 없음!)"
-
-#: ardour_ui.cc:1141
-msgid "Do not delete"
-msgstr "삭제하지 않음"
-
-#: ardour_ui.cc:1247 ardour_ui.cc:1256 session_option_editor.cc:79 utils.cc:785
-msgid "none"
-msgstr "없음"
-
-#: ardour_ui.cc:1263 editor_ops.cc:7994 editor_ops.cc:8005 rhythm_ferret.cc:131
-#: rhythm_ferret.cc:146
-msgid "ms"
-msgstr "ms"
-
-#: ardour_ui.cc:1278 plugin_manager_ui.cc:63
-msgid "File"
-msgstr "파일"
-
-#: ardour_ui.cc:1282
-msgid "BWF"
-msgstr "BWF"
-
-#: ardour_ui.cc:1285
-msgid "WAV"
-msgstr "WAV"
-
-#: ardour_ui.cc:1288
-msgid "WAV64"
-msgstr "WAV64"
-
-#: ardour_ui.cc:1291 session_option_editor.cc:201
-msgid "CAF"
-msgstr "CAF"
-
-#: ardour_ui.cc:1294
-msgid "AIFF"
-msgstr "AIFF"
-
-#: ardour_ui.cc:1297
-msgid "iXML"
-msgstr "iXML"
-
-#: ardour_ui.cc:1300 session_option_editor.cc:202
-msgid "RF64"
-msgstr "RF64"
-
-#: ardour_ui.cc:1303
-msgid "RF64/WAV"
-msgstr "RF64/WAV"
-
-#: ardour_ui.cc:1306
-msgid "MBWF"
-msgstr "MBWF"
-
-#: ardour_ui.cc:1309 session_option_editor.cc:206
-msgid "FLAC"
-msgstr "FLAC"
-
-#: ardour_ui.cc:1317
-msgid "32-float"
-msgstr "32-float"
-
-#: ardour_ui.cc:1320
-msgid "24-int"
-msgstr "24-int"
-
-#: ardour_ui.cc:1323
-msgid "16-int"
-msgstr "16-int"
-
-#: ardour_ui.cc:1334 editor_sources.cc:97 plugin_manager_ui.cc:64
-msgid "Path"
-msgstr "경로"
-
-#: ardour_ui.cc:1350 ardour_ui_ed.cc:837
-msgid "DSP"
-msgstr "DSP"
-
-#: ardour_ui.cc:1365 ardour_ui.cc:1367
-msgid "Shift+Click to clear xruns."
-msgstr "Shift+클릭하여 xrun을 지웁니다."
-
-#: ardour_ui.cc:1381
-msgid "PkBld"
-msgstr "PkBld"
-
-#: ardour_ui.cc:1403
-msgid "N/A"
-msgstr "사용할 수 없음"
-
-#: ardour_ui.cc:1404 rec_info_box.cc:327
-msgid "Unknown"
-msgstr "알 수 없음"
-
-#: ardour_ui.cc:1414
-#, c-format
-msgid "%02dh:%02dm:%02ds"
-msgstr "%02d시간:%02d분:%02d초"
-
-#: ardour_ui.cc:1415
-msgid "Available record time"
-msgstr "사용 가능한 녹음 시간"
-
-#: ardour_ui.cc:1417 editor_route_groups.cc:98
-msgid "Rec"
-msgstr "녹음"
-
-#: ardour_ui.cc:1420 rec_info_box.cc:288 rec_info_box.cc:329
-#: rec_info_box.cc:344
-msgid ">24h"
-msgstr ">24시간"
-
-#: ardour_ui.cc:1423 ardour_ui.cc:1426 rec_info_box.cc:347 rec_info_box.cc:350
-msgid "hours|h"
-msgstr "시간"
-
-#: ardour_ui.cc:1429 plugin_scan_dialog.cc:224 rec_info_box.cc:353
-#: rec_info_box.cc:357
-msgid "minutes|m"
-msgstr "분"
-
-#: ardour_ui.cc:1474
-msgid "Timecode|TC"
-msgstr "타임코드"
-
-#: ardour_ui.cc:1493
-msgid "n/a"
-msgstr "사용할 수 없음"
-
-#: ardour_ui.cc:1530
-msgid "You cannot add a track without a session already loaded."
-msgstr "세션을 이미 불려오지 않은 상태에서는 트랙을 추가할 수 없습니다."
-
-#: ardour_ui.cc:1548
-msgid "could not create %1 new mixed track"
-msgid_plural "could not create %1 new mixed tracks"
-msgstr[0] "%1개의 새로운 오디오+MIDI 트랙을 만들 수 없습니다"
-
-#: ardour_ui.cc:1557
-msgid "could not create %1 new Midi Bus"
-msgid_plural "could not create %1 new Midi Busses"
-msgstr[0] "%1개의 MIDI 버스를 만들 수 없습니다"
-
-#: ardour_ui.cc:1591
-msgid "could not create %1 new audio track"
-msgid_plural "could not create %1 new audio tracks"
-msgstr[0] "%1개의 새 오디오 트랙을 만들 수 없습니다"
-
-#: ardour_ui.cc:1600
-msgid "could not create %1 new audio bus"
-msgid_plural "could not create %1 new audio busses"
-msgstr[0] "%1개의 새 오디오 버스를 만들 수 없습니다"
-
-#: ardour_ui.cc:1632
-msgid "could not create %1 new foldback bus"
-msgid_plural "could not create %1 new foldback busses"
-msgstr[0] "%1개의 새 폴드백 버스를 만들 수 없습니다"
-
-#: ardour_ui.cc:1647
-msgid ""
-"There are insufficient ports available\n"
-"to create a new track or bus.\n"
-"You should save %1, exit and\n"
-"restart with more ports."
-msgstr ""
-"새 트랙 또는 버스를 만들 수 있는\n"
-"포트가 부족합니다.\n"
-"%1를 저장하고 종료한 후 더 많은\n"
-"포트를 사용하여 다시 시작해야 합니다."
-
-#: ardour_ui.cc:1790
-msgid ""
-"Please create one or more tracks before trying to record.\n"
-"You can do this with the \"Add Track or Bus\" option in the Session menu."
-msgstr ""
-"녹음하기 전에 하나 이상의 트랙을 추가하기하십시오.\n"
-"세션 메뉴의 \"트랙/버스 추가하기\"옵션을 사용하여 이 작업을 수행할 수 있습니"
-"다."
-
-#: ardour_ui.cc:2285 route_ui.cc:1945
-msgid "Confirm Template Overwrite"
-msgstr "템플릿 덮어쓰기 확인"
-
-#: ardour_ui.cc:2286 route_ui.cc:1946
-msgid "A template already exists with that name. Do you want to overwrite it?"
-msgstr "같은 이름의 템플릿이 이미 있습니다. 덮어쓰시겠습니까?"
-
-#: ardour_ui.cc:2484
-msgid "No files were ready for clean-up"
-msgstr "클린업용 오디오 파일이 없습니다"
-
-#: ardour_ui.cc:2488 ardour_ui.cc:2498 ardour_ui.cc:2631 ardour_ui.cc:2638
-#: ardour_ui_ed.cc:167
-msgid "Clean-up"
-msgstr "클린업"
-
-#: ardour_ui.cc:2489
-msgid ""
-"If this seems surprising, \n"
-"check for any existing snapshots.\n"
-"These may still include regions that\n"
-"require some unused files to continue to exist."
-msgstr ""
-"놀라운 결과인 경우, 존재하는\n"
-"모든 기존 스냅숏을 확인하십시오.\n"
-"여기에는 사용하지 않는 파일을\n"
-"가리키는 영역이 포함될 수 있습니다."
-
-#: ardour_ui.cc:2548
-msgid "kilo"
-msgstr "킬로"
-
-#: ardour_ui.cc:2551
-msgid "mega"
-msgstr "메가"
-
-#: ardour_ui.cc:2554
-msgid "giga"
-msgstr "기가"
-
-#: ardour_ui.cc:2559
-msgid ""
-"The following file was deleted from %2,\n"
-"releasing %3 %4bytes of disk space"
-msgid_plural ""
-"The following %1 files were deleted from %2,\n"
-"releasing %3 %4bytes of disk space"
-msgstr[0] ""
-"다음 %1개의 파일이 %2에서 삭제되어,\n"
-"%3 %4바이트의 디스크 공간을 확보했습니다"
-
-#: ardour_ui.cc:2566
-msgid ""
-"The following file was not in use and \n"
-"has been moved to: %2\n"
-"\n"
-"After a restart of %5\n"
-"\n"
-"<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n"
-"\n"
-"will release an additional %3 %4bytes of disk space.\n"
-msgid_plural ""
-"The following %1 files were not in use and \n"
-"have been moved to: %2\n"
-"\n"
-"After a restart of %5\n"
-"\n"
-"<span face=\"mono\">Session -> Clean-up -> Flush Wastebasket</span>\n"
-"\n"
-"will release an additional %3 %4bytes of disk space.\n"
-msgstr[0] ""
-"다음 %1개의 파일이 사용되지 않고 \n"
-"다음으로 이동되었음: %2\n"
-"\n"
-"%5을(를) 다시 시작한 후\n"
-"\n"
-"<span face=\"mono\">세션 -> 클린업 -> 휴지통 비우기</span>\n"
-"\n"
-"추가로 %3 %4바이트의 디스크 공간을 확보했습니다.\n"
-
-#: ardour_ui.cc:2626
-msgid "Are you sure you want to clean-up?"
-msgstr "클린업을 하시겠습니까?"
-
-#: ardour_ui.cc:2633
-msgid ""
-"Clean-up is a destructive operation.\n"
-"ALL undo/redo information will be lost if you clean-up.\n"
-"Clean-up will move all unused files to a \"dead\" location."
-msgstr ""
-"클린업은 파괴적인 작업입니다.\n"
-"클린업하면 모든 실행 취소/다시 실행 정보가 손실됩니다.\n"
-"클린업은 사용하지 않는 모든 파일을 \"폐기된\" 위치로 이동합니다."
-
-#: ardour_ui.cc:2641
-msgid "CleanupDialog"
-msgstr "클린업대화상자"
-
-#: ardour_ui.cc:2667
-msgid "Cleaned Files"
-msgstr "정리된 파일"
-
-#: ardour_ui.cc:2684
-msgid "deleted file"
-msgstr "삭제된 파일"
-
-#: ardour_ui.cc:2802
-msgid "You cannot add tracks or busses without a session already loaded."
-msgstr ""
-"세션을 이미 불려오지 않은 상태에서는 트랙이나 버스를 추가할 수 없습니다."
-
-#: ardour_ui.cc:2869
-msgid "Audio Channels for new track:"
-msgstr "새 트랙의 오디오 채널:"
-
-#: ardour_ui.cc:2869
-msgid "Audio Channels for new bus:"
-msgstr "새 버스의 오디오 채널:"
-
-#: ardour_ui.cc:2877
-msgid "Custom Channel"
-msgstr "사용자 지정 채널"
-
-#: ardour_ui.cc:2933
-msgid ""
-"The disk system on your computer\n"
-"was not able to keep up with %1.\n"
-"\n"
-"Specifically, it failed to write data to disk\n"
-"quickly enough to keep up with recording.\n"
-msgstr ""
-"사용자의 컴퓨터의 디스크 시스템이\n"
-"%1를 따라잡을 수 없습니다.\n"
-"\n"
-"구체적으로, 녹음 속도를 따라잡을 수 있을 만큼\n"
-"빠르게 디스크에 데이터를 쓰지 못했습니다.\n"
-
-#: ardour_ui.cc:2962
-msgid ""
-"The disk system on your computer\n"
-"was not able to keep up with %1.\n"
-"\n"
-"Specifically, it failed to read data from disk\n"
-"quickly enough to keep up with playback.\n"
-msgstr ""
-"컴퓨터의 디스크 시스템이\n"
-"%1를 따라가지 못했습니다.\n"
-"\n"
-"구체적으로 말하면, 플레이백을 따라잡을 만큼\n"
-"디스크에서 데이터를 빠르게 읽지 못했습니다.\n"
-
-#: ardour_ui.cc:2992
-msgid "Crash Recovery"
-msgstr "충돌 복구"
-
-#: ardour_ui.cc:2993
-msgid ""
-"This session appears to have been modified\n"
-"without save, or in middle of recording when\n"
-"%1 or the computer was shutdown.\n"
-"\n"
-"%1 can recover any changes for\n"
-"you, or it can ignore it. Please decide\n"
-"what you would like to do.\n"
-msgstr ""
-"이 세션은 저장하지 않고 수정되었거나, \n"
-"%1 또는 컴퓨터가 셧다운될 때\n"
-"녹음 중이었던 것 같습니다.\n"
-"\n"
-"%1는 변경사항을 \n"
-"복구하거나 무시할 수 있습니다. \n"
-"진행 방법을 결정하십시오.\n"
-
-#: ardour_ui.cc:3005
-msgid "Ignore crash data"
-msgstr "충돌 데이터 무시"
-
-#: ardour_ui.cc:3006
-msgid "Recover from crash"
-msgstr "충돌에서 복구하기"
-
-#: ardour_ui2.cc:93
-msgid "Return to last playback start when stopped"
-msgstr "중지된 경우 마지막 플레이백 시작으로 반환"
-
-#: ardour_ui2.cc:94
-msgid ""
-"<b>Layered</b>, new recordings will be added as regions on a layer atop "
-"existing regions.\n"
-"<b>SoundOnSound</b>, behaves like <i>Layered</i>, except underlying regions "
-"will be audible.\n"
-"<b>Non Layered</b>, the underlying region will be spliced and replaced with "
-"the newly recorded region."
-msgstr ""
-"<b>Layered</b>, 새 녹음은 기존 영역 위에 레이어에 영역으로 추가됩니다.\n"
-"<b>SoundOnSound</b>, 기본 영역을 들을 수 있다는 점을 제외하면 <i>Layered</i>"
-"처럼 동작합니다.\n"
-"<b>Non Layered</b>, 기본 영역이 접합되고 새로 녹음된 영역으로 교체됩니다."
-
-#: ardour_ui2.cc:95
-msgid "Playhead follows Range tool clicks, and Range selections"
-msgstr "플레이헤드는 범위 도구에서 클릭 및 범위 선택영역을 따릅니다"
-
-#: ardour_ui2.cc:97 monitor_section.cc:134
-msgid ""
-"When active, something is soloed.\n"
-"Click to de-solo everything"
-msgstr ""
-"활성화가 되면, 일부는 솔로로 표시됩니다.\n"
-"클릭: 모든 솔로 해제"
-
-#: ardour_ui2.cc:98
-msgid ""
-"When active, auditioning is taking place.\n"
-"Click to stop the audition"
-msgstr ""
-"활성화가 되면, 오디션이 진행됩니다.\n"
-"클릭: 오디션 중지"
-
-#: ardour_ui2.cc:99
-msgid ""
-"When lit, there is a ports connection issue, leading to feedback loop or "
-"ambiguous alignment.\n"
-"This is caused by connecting an output back to some input (feedback), or by "
-"multiple connections from a source to the same output via different paths "
-"(ambiguous latency, record alignment)."
-msgstr ""
-"불이 켜지면, 포트 연결 문제가 있어 피드백 루프 또는 모호한 정렬로 이어질 수 "
-"있습니다.\n"
-"이는 출력을 일부 입력(피드백)에 다시 연결하거나 다른 경로(모호한 대기 시간, "
-"녹음 정렬)를 통해 소스에서 동일한 출력으로 여러 번 연결하기 때문에 발생합니"
-"다."
-
-#: ardour_ui2.cc:100
-msgid ""
-"<b>Primary Clock</b> right-click to set display mode. Click to edit, "
-"click+drag a digit or mouse-over+scroll wheel to modify.\n"
-"Text edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: "
-"confirm; postfix the edit with '+' or '-' to enter delta times.\n"
-msgstr ""
-"<b>기본 클록</b>를 마우스 오른쪽 버튼으로 클릭하여 화면표시 모드를 설정합니"
-"다. 수정하려면 클릭하고, 숫자를 클릭+드래그하거나, 수정하려면 마우스 오버+스"
-"크롤 휠을 사용합니다.\n"
-"텍스트 편집: 우측에서 좌측으로 덮어쓰기 <tt>Esc</tt>: 취소; <tt>Enter</tt>: "
-"확인; 델타 시간을 입력하려면 편집 후 '+' 또는 '-'를 붙입니다.\n"
-
-#: ardour_ui2.cc:101
-msgid ""
-"<b>Secondary Clock</b> right-click to set display mode. Click to edit, "
-"click+drag a digit or mouse-over+scroll wheel to modify.\n"
-"Text edits: right-to-left overwrite <tt>Esc</tt>: cancel; <tt>Enter</tt>: "
-"confirm; postfix the edit with '+' or '-' to enter delta times.\n"
-msgstr ""
-"<b>보조 클록</b> 마우스 오른쪽 버튼을 클릭하여 화면표시 모드를 설정합니다. 수"
-"정하려면 클릭하고, 숫자를 클릭+드래그하거나, 수정하려면 마우스 오버+스크롤 휠"
-"을 사용합니다.\n"
-"텍스트 편집: 우측에서 좌측으로 덮어쓰기 <tt>Esc</tt>: 취소; <tt>Enter</tt>: "
-"확인; 델타 시간을 입력하려면 편집 후 '+' 또는 '-'를 붙입니다.\n"
-
-#: ardour_ui2.cc:102
-msgid "Reset All Peak Meters"
-msgstr "모든 피크 미터 재설정"
-
-#: ardour_ui2.cc:103
-msgid "Show Error Log and acknowledge warnings"
-msgstr "오류 로그 표시 및 경고 확인"
-
-#: ardour_ui2.cc:104
-msgid ""
-"<b>When enabled</b>, triggering Cues will result in Cue Markers added to the "
-"timeline"
-msgstr ""
-"<b>활성화된 경우</b>, 큐를 트리거링하면 타임라인에 큐 마커가 추가됩니다"
-
-#: ardour_ui2.cc:105
-msgid ""
-"<b>When enabled</b>, Cue Markers will trigger the associated Cue when passed "
-"on the timeline"
-msgstr ""
-"<b>활성화된 경우</b>, 타임라인에 전달될 때 큐 마커가 관련 큐를 트리거합니다"
-
-#: ardour_ui2.cc:107
-msgid ""
-"Disable all Plugin Delay Compensation. This results in the shortest delay "
-"from live input to output, but any paths with delay-causing plugins will "
-"sound later than those without."
-msgstr ""
-"모든 플러그인 딜레이 컴펜세이션을 비활성화합니다. 그 결과 실시간 입력에서 출"
-"력까지 가장 짧은 딜레이가 발생하지만, 딜레이를 유발하는 플러그인이 있는 경로"
-"는 없는 경로보다 늦게 들립니다."
-
-#: ardour_ui2.cc:138
-msgid "[ERROR]: "
-msgstr "[오류]: "
-
-#: ardour_ui2.cc:140
-msgid "[WARNING]: "
-msgstr "[경고]: "
-
-#: ardour_ui2.cc:142
-msgid "[INFO]: "
-msgstr "[정보]: "
-
-#: ardour_ui2.cc:329
-msgid "LogestSync|M-Clk"
-msgstr "M-클릭"
-
-#: ardour_ui2.cc:417
-msgid "Facdbeek"
-msgstr "Facdbeek"
-
-#: ardour_ui2.cc:446 ardour_ui_ed.cc:493
-msgid "Auto Return"
-msgstr "자동 반환하기"
-
-#: ardour_ui2.cc:447 ardour_ui_ed.cc:496
-msgid "Follow Range"
-msgstr "팔로우 범위"
-
-#: ardour_ui2.cc:448 ardour_ui_ed.cc:473 audio_region_properties_box.cc:166
-#: mixer_strip.cc:1501 mixer_strip.cc:1697 route_ui.cc:240
-#: track_record_axis.cc:259 trigger_strip.cc:341
-msgid "In"
-msgstr "입력"
-
-#: ardour_ui2.cc:449 ardour_ui_ed.cc:477 audio_region_properties_box.cc:168
-#: mixer_strip.cc:1513
-msgid "Out"
-msgstr "출력"
-
-#: ardour_ui2.cc:456
-msgid "Disable PDC"
-msgstr "PDC 비활성화"
-
-#: ardour_ui2.cc:457
-msgid "I/O Latency:"
-msgstr "I/O 레이턴시:"
-
-#: ardour_ui2.cc:459
-msgid "Dim All"
-msgstr "모두 점점 여리게"
-
-#: ardour_ui2.cc:461
-msgid "Mute All"
-msgstr "모두 음소거"
-
-#: ardour_ui2.cc:463
-msgid "Punch:"
-msgstr "펀치:"
-
-#: ardour_ui2.cc:464
-msgid "Rec:"
-msgstr "녹음:"
-
-#: ardour_ui2.cc:469 ardour_ui2.cc:473 ardour_ui2.cc:477 ardour_ui2.cc:481
-#: ardour_ui2.cc:485
-msgid ""
-"Left-Click to show the %1 window\n"
-"Right-click to show more options"
-msgstr ""
-"왼쪽 버튼 클릭: %1 창 표시하기\n"
-"오른쪽 버튼 클릭: 더 많은 옵션 표시하기"
-
-#: ardour_ui2.cc:488
-msgid "Start recording at auto-punch start"
-msgstr "자동 펀치 시작 부분에서 녹음 시작"
-
-#: ardour_ui2.cc:489
-msgid "Stop recording at auto-punch end"
-msgstr "자동 펀치 끝 부분에서 녹음 중지"
-
-#: ardour_ui2.cc:492
-msgid "Monitor section dim output"
-msgstr "모니터 섹션 점점 여리게 출력"
-
-#: ardour_ui2.cc:493
-msgid "Monitor section mono output"
-msgstr "모니터 섹션 모노 출력"
-
-#: ardour_ui2.cc:494
-msgid "Monitor section mute output"
-msgstr "모니터 섹션 음소거 출력"
-
-#: ardour_ui2.cc:891
-msgid "No Align"
-msgstr "정렬 없음"
-
-#: ardour_ui2.cc:973 rc_option_editor.cc:2482 rc_option_editor.cc:2495
-#: rc_option_editor.cc:2508 rc_option_editor.cc:2513 rc_option_editor.cc:2515
-#: rc_option_editor.cc:2522 rc_option_editor.cc:2529 rc_option_editor.cc:2536
-#: rc_option_editor.cc:2554 rc_option_editor.cc:2558 rc_option_editor.cc:2560
-#: rc_option_editor.cc:2568 rc_option_editor.cc:2586 rc_option_editor.cc:2588
-#: rc_option_editor.cc:2596 rc_option_editor.cc:3085 rc_option_editor.cc:3101
-#: rc_option_editor.cc:3114 rc_option_editor.cc:3126
-msgid "Appearance"
-msgstr "모양새"
-
-#: ardour_ui2.cc:982 rc_option_editor.cc:4384 rc_option_editor.cc:4385
-#: rc_option_editor.cc:4424 rc_option_editor.cc:4426 rc_option_editor.cc:4428
-#: rc_option_editor.cc:4436 rc_option_editor.cc:4444 rc_option_editor.cc:4452
-#: rc_option_editor.cc:4461 rc_option_editor.cc:4462 rc_option_editor.cc:4470
-#: rc_option_editor.cc:4472 rc_option_editor.cc:4482 rc_option_editor.cc:4490
-#: rc_option_editor.cc:4506 rc_option_editor.cc:4519 rc_option_editor.cc:4528
-msgid "Signal Flow"
-msgstr "시그널 플로"
-
-#: ardour_ui2.cc:991 ardour_ui_ed.cc:184 rc_option_editor.cc:3895
-#: rc_option_editor.cc:3910 rc_option_editor.cc:3911 rc_option_editor.cc:3915
-#: rc_option_editor.cc:3918 rc_option_editor.cc:3928 rc_option_editor.cc:3938
-#: rc_option_editor.cc:3948 rc_option_editor.cc:3959 rc_option_editor.cc:3969
-#: rc_option_editor.cc:3979 rc_option_editor.cc:4216 rc_option_editor.cc:4217
-#: rc_option_editor.cc:4224 rc_option_editor.cc:4232 rc_option_editor.cc:4240
-#: rc_option_editor.cc:4244 rc_option_editor.cc:4246 rc_option_editor.cc:4250
-#: rc_option_editor.cc:4259 rc_option_editor.cc:4268
-msgid "Plugins"
-msgstr "플러그인"
-
-#: ardour_ui2.cc:1004 rc_option_editor.cc:4536 rc_option_editor.cc:4537
-#: rc_option_editor.cc:4539 rc_option_editor.cc:4550 rc_option_editor.cc:4551
-#: session_option_editor.cc:428
-msgid "Metronome"
-msgstr "메트로놈"
-
-#: ardour_ui2.cc:1033 bbt_marker_dialog.cc:39 bbt_marker_dialog.cc:52
-#: bundle_manager.cc:283 bundle_manager.cc:448 editor_route_groups.cc:91
-#: editor_sections.cc:49 library_download_dialog.cc:53 lua_script_manager.cc:55
-#: lua_script_manager.cc:104 lua_script_manager.cc:145 midi_list_editor.cc:108
-#: playlist_selector.cc:64 plugin_manager_ui.cc:59 plugin_manager_ui.cc:117
-#: plugin_selector.cc:98 plugin_selector.cc:159 region_list_base.cc:154
-#: route_list_base.cc:150 session_metadata_dialog.cc:694
-#: transport_masters_dialog.cc:80 transport_masters_dialog.cc:689
-msgid "Name"
-msgstr "이름"
-
-#: ardour_ui_access_web.cc:54
-msgid ""
-"<b>Just ask and wait for an answer.\n"
-"It may take from minutes to hours.</b>"
-msgstr ""
-"<b>질문하고 답변을 기다리면 됩니다.\n"
-"몇 분에서 몇 시간까지 걸릴 수 있습니다.</b>"
-
-#: ardour_ui_access_web.cc:56
-msgid "About the Chat"
-msgstr "채팅 정보"
-
-#: ardour_ui_access_web.cc:57
-msgid ""
-"When you're inside the chat just ask your question and wait for an answer. "
-"The chat is occupied by real people with real lives so many of them are "
-"passively online and might not read your question before minutes or hours "
-"later.\n"
-"So please be patient and wait for an answer.\n"
-"\n"
-"You should just leave the chat window open and check back regularly until "
-"someone has answered your question."
-msgstr ""
-"채팅 중에 질문을 하고 답변을 기다리면 됩니다. 채팅은 실제 생활을 하는 실제 사"
-"람들이 차지하므로 많은 사람들이 수동적으로 온라인 상태이며 몇 분 또는 몇 시"
-"간 후에 질문을 읽지 않을 수 있습니다.\n"
-"그러니 인내심을 갖고 답변을 기다리십시오.\n"
-"\n"
-"채팅 창을 열어두고 누군가가 귀하의 질문에 답변할 때까지 정기적으로 확인해야 "
-"합니다."
-
-#: ardour_ui_dependents.cc:129
-msgid "Setup Editor"
-msgstr "셋업 편집기"
-
-#: ardour_ui_dependents.cc:131
-msgid "Setup Mixer"
-msgstr "셋업 믹서"
-
-#: ardour_ui_dependents.cc:139
-msgid "Reload Session History"
-msgstr "세션 히스토리 다시 불러오기"
-
-#: ardour_ui_dependents.cc:208
-msgid "Quit %1?"
-msgstr "%1를 끝내기하시겠습니까?"
-
-#: ardour_ui_dependents.cc:261
-msgid "UI: cannot setup editor"
-msgstr "UI: 편집기를 셋업할 수 없습니다"
-
-#: ardour_ui_dependents.cc:266
-msgid "UI: cannot setup mixer"
-msgstr "UI: 믹서를 셋업할 수 없습니다"
-
-#: ardour_ui_dependents.cc:271
-msgid "UI: cannot setup recorder"
-msgstr "UI: 녹음기를 셋업할 수 없습니다"
-
-#: ardour_ui_dependents.cc:276
-msgid "UI: cannot setup trigger"
-msgstr "UI: 트리거를 설정할 수 없음"
-
-#: ardour_ui_dependents.cc:281
-msgid "UI: cannot setup meterbridge"
-msgstr "UI: 미터브리지를 셋업할 수 없습니다"
-
-#: ardour_ui_dependents.cc:475 editor_actions.cc:572
-msgid "Unset #%1"
-msgstr "#%1 지정해제"
-
-#: ardour_ui_dependents.cc:476 editor_actions.cc:574
-msgid ""
-"No action bound\n"
-"Right-click to assign"
-msgstr ""
-"액션 바운드 없음\n"
-"오른쪽 버튼 클릭: 할당"
-
-#: ardour_ui_dependents.cc:480
-msgid ""
-"%1\n"
-"\n"
-"Click to run\n"
-"Right-click to re-assign\n"
-"Shift+right-click to unassign"
-msgstr ""
-"%1\n"
-"\n"
-"클릭: 실행\n"
-"오른쪽 버튼 클릭: 재할당 \n"
-"Shift+오른쪽 버튼 클릭: 할당 해제"
-
-#: ardour_ui_dialogs.cc:316
-msgid "Don't close"
-msgstr "닫지 않음"
-
-#: ardour_ui_dialogs.cc:318 template_dialog.cc:325
-msgid "Discard"
-msgstr "폐기"
-
-#: ardour_ui_dialogs.cc:320
-msgid "Just close"
-msgstr "그냥 닫기"
-
-#: ardour_ui_dialogs.cc:322
-msgid "Save and close"
-msgstr "저장 후 닫기"
-
-#: ardour_ui_dialogs.cc:1121 ardour_ui_ed.cc:443 ardour_ui_ed.cc:454
-#: audio_clock.cc:2199 editor.cc:202 editor.cc:335 editor_actions.cc:739
-#: editor_actions.cc:757 export_timespan_selector.cc:102
-#: session_option_editor.cc:46 session_option_editor.cc:66
-#: session_option_editor.cc:85 session_option_editor.cc:86
-#: session_option_editor.cc:99 session_option_editor.cc:112
-#: session_option_editor.cc:114 session_option_editor.cc:116
-#: session_option_editor.cc:443
-msgid "Timecode"
-msgstr "타임코드"
-
-#: ardour_ui_dialogs.cc:1134 session_option_editor.cc:176
-#: session_option_editor.cc:184 session_option_editor.cc:208
-msgid "Media"
-msgstr "미디어"
-
-#: ardour_ui_ed.cc:157
-msgid "Escape (deselect all)"
-msgstr "이스케이프 (모두 선택 해제)"
-
-#: ardour_ui_ed.cc:162
-msgid "Close Current Dialog"
-msgstr "현재 대화 상자 닫기"
-
-#: ardour_ui_ed.cc:166 rc_option_editor.cc:3491
-msgid "Session"
-msgstr "세션"
-
-#: ardour_ui_ed.cc:169 editor_actions.cc:180 editor_regions.cc:102
-#: port_group.cc:476 port_group.cc:532 session_option_editor.cc:125
-#: session_option_editor.cc:126 session_option_editor.cc:133
-#: session_option_editor.cc:140
-msgid "Sync"
-msgstr "싱크"
-
-#: ardour_ui_ed.cc:170 rc_option_editor.cc:4539
-msgid "Options"
-msgstr "옵션"
-
-#: ardour_ui_ed.cc:171
-msgid "Window"
-msgstr "창"
-
-#: ardour_ui_ed.cc:172 mixer_ui.cc:126 mixer_ui.cc:477
-msgid "Mixer"
-msgstr "믹서"
-
-#: ardour_ui_ed.cc:173 editor.cc:6672 editor.cc:6918 public_editor.cc:37
-#: rc_option_editor.cc:3180 rc_option_editor.cc:3184 rc_option_editor.cc:3193
-#: rc_option_editor.cc:3201 rc_option_editor.cc:3209 rc_option_editor.cc:3217
-#: rc_option_editor.cc:3236 rc_option_editor.cc:3251 rc_option_editor.cc:3253
-#: rc_option_editor.cc:3255 rc_option_editor.cc:3269 rc_option_editor.cc:3279
-#: rc_option_editor.cc:3302 rc_option_editor.cc:3317 rc_option_editor.cc:3329
-#: rc_option_editor.cc:3331 rc_option_editor.cc:3342 rc_option_editor.cc:3363
-msgid "Editor"
-msgstr "편집기"
-
-#: ardour_ui_ed.cc:174 ardour_ui_ed.cc:695 plugin_manager_ui.cc:171
-#: rc_option_editor.cc:2365 rc_option_editor.cc:5120
-msgid "Preferences"
-msgstr "기본설정"
-
-#: ardour_ui_ed.cc:175 recorder_ui.cc:80 recorder_ui.cc:343
-msgid "Recorder"
-msgstr "녹음기"
-
-#: ardour_ui_ed.cc:176
-msgid "Cue Grid"
-msgstr "큐 그리드"
-
-#: ardour_ui_ed.cc:177 ardour_ui_ed.cc:709 ardour_ui_ed.cc:710
-#: ardour_ui_ed.cc:711 ardour_ui_ed.cc:712 ardour_ui_ed.cc:713
-msgid "Detach"
-msgstr "떼내기"
-
-#: ardour_ui_ed.cc:178
-msgid "Help"
-msgstr "도움말"
-
-#: ardour_ui_ed.cc:179
-msgid "Misc. Shortcuts"
-msgstr "기타. 단축키"
-
-#: ardour_ui_ed.cc:180 session_option_editor.cc:176
-msgid "Audio File Format"
-msgstr "오디오 파일 형식"
-
-#: ardour_ui_ed.cc:181
-msgid "File Type"
-msgstr "파일 유형"
-
-#: ardour_ui_ed.cc:182 export_format_dialog.cc:97
-msgid "Sample Format"
-msgstr "샘플 형식"
-
-#: ardour_ui_ed.cc:183 rc_option_editor.cc:4555 rc_option_editor.cc:4556
-msgid "Control Surfaces"
-msgstr "컨트롤 표면"
-
-#: ardour_ui_ed.cc:185 rc_option_editor.cc:4564
-msgid "Metering"
-msgstr "미터링"
-
-#: ardour_ui_ed.cc:186
-msgid "Fall Off Rate"
-msgstr "하락률"
-
-#: ardour_ui_ed.cc:187
-msgid "Hold Time"
-msgstr "홀드 시간"
-
-#: ardour_ui_ed.cc:188
-msgid "Denormal Handling"
-msgstr "비정상 핸들링"
-
-#: ardour_ui_ed.cc:192
-msgid "New..."
-msgstr "새로 만들기..."
-
-#: ardour_ui_ed.cc:194
-msgid "Open..."
-msgstr "열기..."
-
-#: ardour_ui_ed.cc:195
-msgid "Recent..."
-msgstr "최근 파일..."
-
-#: ardour_ui_ed.cc:196 panner_editor.cc:29
-msgid "Close"
-msgstr "닫기"
-
-#: ardour_ui_ed.cc:199
-msgid "Add Track, Bus or VCA..."
-msgstr "트랙, 버스 또는 VCA 추가하기..."
-
-#: ardour_ui_ed.cc:204
-msgid "Duplicate Tracks/Busses..."
-msgstr "트랙/버스 복제하기..."
-
-#: ardour_ui_ed.cc:210
-msgid "Cancel Solo"
-msgstr "솔로 취소"
-
-#: ardour_ui_ed.cc:214
-msgid "Session|Scripting"
-msgstr "스크립팅"
-
-#: ardour_ui_ed.cc:217
-msgid "Open Video..."
-msgstr "비디오 열기..."
-
-#: ardour_ui_ed.cc:220
-msgid "Remove Video"
-msgstr "비디오 제거하기"
-
-#: ardour_ui_ed.cc:223
-msgid "Export to Video File..."
-msgstr "비디오 파일로 내보내기..."
-
-#: ardour_ui_ed.cc:227
-msgid "Snapshot (& keep working on current version) ..."
-msgstr "스냅숏 (& 현재 버전에서 계속 작업) ..."
-
-#: ardour_ui_ed.cc:230
-msgid "Snapshot (& switch to new version) ..."
-msgstr "스냅숏 (& 새 버전으로 전환하기) ..."
-
-#: ardour_ui_ed.cc:233
-msgid "Quick Snapshot (& keep working on current version) ..."
-msgstr "빠른 스냅숏 (& 현재 버전에서 계속 작업) ..."
-
-#: ardour_ui_ed.cc:236
-msgid "Quick Snapshot (& switch to new version) ..."
-msgstr "빠른 스냅숏 (& 새 버전으로 전환하기) ..."
-
-#: ardour_ui_ed.cc:240
-msgid "Save As..."
-msgstr "다른 이름으로 저장하기..."
-
-#: ardour_ui_ed.cc:243
-msgid "Archive..."
-msgstr "아카이브..."
-
-#: ardour_ui_ed.cc:246 editor.cc:1620 editor_actions.cc:1842
-#: editor_markers.cc:1142 editor_snapshots.cc:152 foldback_strip.cc:801
-#: mixer_strip.cc:1113 route_ui.cc:2646 track_record_axis.cc:504
-#: trigger_strip.cc:257
-msgid "Rename..."
-msgstr "이름 바꾸기..."
-
-#: ardour_ui_ed.cc:250
-msgid "Save Template..."
-msgstr "템플릿 저장하기..."
-
-#: ardour_ui_ed.cc:253
-msgid "Templates"
-msgstr "템플릿"
-
-#: ardour_ui_ed.cc:256 export_format_dialog.cc:324
-msgid "Metadata"
-msgstr "메타데이터"
-
-#: ardour_ui_ed.cc:259
-msgid "Edit Metadata..."
-msgstr "메타데이터 편집하기..."
-
-#: ardour_ui_ed.cc:262
-msgid "Import Metadata..."
-msgstr "메타데이터 가져오기..."
-
-#: ardour_ui_ed.cc:265 editor_export_audio.cc:79 export_channel_selector.cc:202
-#: export_channel_selector.cc:620 export_dialog.cc:159 rc_option_editor.cc:2448
-#: simple_export_dialog.cc:272 export_video_dialog.cc:76
-msgid "Export"
-msgstr "내보내기"
-
-#: ardour_ui_ed.cc:268
-msgid "Flush Wastebasket"
-msgstr "휴지통 비우기"
-
-#: ardour_ui_ed.cc:276
-msgid "Quit"
-msgstr "끝내기"
-
-#: ardour_ui_ed.cc:277 ardour_ui_ed.cc:697 ardour_ui_ed.cc:698
-#: ardour_ui_ed.cc:699 ardour_ui_ed.cc:700 ardour_ui_ed.cc:701
-#: automation_time_axis.cc:675 location_ui.cc:69 plugin_manager_ui.cc:114
-#: route_time_axis.cc:887
-msgid "Hide"
-msgstr "숨김"
-
-#: ardour_ui_ed.cc:280
-msgid "Show more UI preferences"
-msgstr "더 많은 UI 기본설정 표시하기"
-
-#: ardour_ui_ed.cc:283 meterbridge.cc:226 meterbridge.cc:232
-msgid "Window|Meterbridge"
-msgstr "미터브리지"
-
-#: ardour_ui_ed.cc:285 midi_tracer.cc:52
-msgid "MIDI Tracer"
-msgstr "MIDI 트레이서"
-
-#: ardour_ui_ed.cc:288
-msgid "Chat"
-msgstr "채팅"
-
-#: ardour_ui_ed.cc:289
-msgid "Help|Tutorial"
-msgstr "지침서"
-
-#: ardour_ui_ed.cc:290
-msgid "Manual|Reference"
-msgstr "참조"
-
-#: ardour_ui_ed.cc:291
-msgid "Report a Bug"
-msgstr "버그 신고"
-
-#: ardour_ui_ed.cc:292
-msgid "Website"
-msgstr "웹사이트"
-
-#: ardour_ui_ed.cc:293
-msgid "Development"
-msgstr "개발"
-
-#: ardour_ui_ed.cc:294
-msgid "User Forums"
-msgstr "사용자 포럼"
-
-#: ardour_ui_ed.cc:295
-msgid "How to Report a Bug"
-msgstr "버그 신고 방법"
-
-#: ardour_ui_ed.cc:297 loudness_dialog.cc:69 loudness_dialog.cc:525
-#: luawindow.cc:100 luawindow.cc:685 plugin_ui.cc:532 template_dialog.cc:324
-msgid "Save"
-msgstr "저장하기"
-
-#: ardour_ui_ed.cc:312 rc_option_editor.cc:3583 rc_option_editor.cc:3591
-#: rc_option_editor.cc:3606 rc_option_editor.cc:3615 rc_option_editor.cc:3625
-#: rc_option_editor.cc:3636 rc_option_editor.cc:3647 rc_option_editor.cc:3659
-#: rc_option_editor.cc:3672 rc_option_editor.cc:3693 rc_option_editor.cc:3696
-#: rc_option_editor.cc:3709 rc_option_editor.cc:3722 rc_option_editor.cc:3725
-#: rc_option_editor.cc:3735 rc_option_editor.cc:3743 rc_option_editor.cc:3751
-#: rc_option_editor.cc:3895 rc_option_editor.cc:3903
-msgid "Transport"
-msgstr "트랜스포트"
-
-#: ardour_ui_ed.cc:318 engine_dialog.cc:110 shuttle_control.cc:704
-#: trigger_ui.cc:735
-msgid "Stop"
-msgstr "중지하기"
-
-#: ardour_ui_ed.cc:321
-msgid "Roll"
-msgstr "롤"
-
-#: ardour_ui_ed.cc:325 ardour_ui_ed.cc:327
-msgid "Start/Stop"
-msgstr "시작/중지하기"
-
-#: ardour_ui_ed.cc:330
-msgid "Start/Continue/Stop"
-msgstr "시작/계속/중지"
-
-#: ardour_ui_ed.cc:333
-msgid "Stop and Forget Capture"
-msgstr "캡처 중지하고 폐기하기"
-
-#: ardour_ui_ed.cc:337
-msgid "Play Loop Range"
-msgstr "루프 범위 재생하기"
-
-#: ardour_ui_ed.cc:340
-msgid "Play Selection"
-msgstr "선택영역 재생하기"
-
-#: ardour_ui_ed.cc:343
-msgid "Play w/Preroll"
-msgstr "프리롤에서 재생하기"
-
-#: ardour_ui_ed.cc:348
-msgid "Record w/Preroll"
-msgstr "프리롤에서 녹음"
-
-#: ardour_ui_ed.cc:352
-msgid "Record w/Count-In"
-msgstr "카운트 인에서 녹음"
-
-#: ardour_ui_ed.cc:356
-msgid "Enable Record"
-msgstr "녹음 활성화"
-
-#: ardour_ui_ed.cc:359 ardour_ui_ed.cc:363
-msgid "Start Recording"
-msgstr "녹음 시작"
-
-#: ardour_ui_ed.cc:367
-msgid "Rewind"
-msgstr "되감기"
-
-#: ardour_ui_ed.cc:370
-msgid "Rewind (Slow)"
-msgstr "되감기 (느림)"
-
-#: ardour_ui_ed.cc:373
-msgid "Rewind (Fast)"
-msgstr "되감기 (빠름)"
-
-#: ardour_ui_ed.cc:376 trigger_ui.cc:739
-msgid "Forward"
-msgstr "앞으로 감기"
-
-#: ardour_ui_ed.cc:379
-msgid "Forward (Slow)"
-msgstr "앞으로 감기 (느림)"
-
-#: ardour_ui_ed.cc:382
-msgid "Forward (Fast)"
-msgstr "앞으로 감기 (빠름)"
-
-#: ardour_ui_ed.cc:385
-msgid "Go to Zero"
-msgstr "0으로 가기"
-
-#: ardour_ui_ed.cc:388 ardour_ui_ed.cc:391
-msgid "Go to Start"
-msgstr "시작으로 가기"
-
-#: ardour_ui_ed.cc:394
-msgid "Go to End"
-msgstr "끝으로 가기"
-
-#: ardour_ui_ed.cc:397
-msgid "Go to Wall Clock"
-msgstr "벽 클록으로 가기"
-
-#: ardour_ui_ed.cc:402 ardour_ui_ed.cc:405
-msgid "Numpad Decimal"
-msgstr "숫자패드 10진수"
-
-#: ardour_ui_ed.cc:408
-msgid "Numpad 0"
-msgstr "숫자패드 0"
-
-#: ardour_ui_ed.cc:411
-msgid "Numpad 1"
-msgstr "숫자패드 1"
-
-#: ardour_ui_ed.cc:414
-msgid "Numpad 2"
-msgstr "숫자패드 2"
-
-#: ardour_ui_ed.cc:417
-msgid "Numpad 3"
-msgstr "숫자패드 3"
-
-#: ardour_ui_ed.cc:420
-msgid "Numpad 4"
-msgstr "숫자패드 4"
-
-#: ardour_ui_ed.cc:423
-msgid "Numpad 5"
-msgstr "숫자패드 5"
-
-#: ardour_ui_ed.cc:426
-msgid "Numpad 6"
-msgstr "숫자패드 6"
-
-#: ardour_ui_ed.cc:429
-msgid "Numpad 7"
-msgstr "숫자패드 7"
-
-#: ardour_ui_ed.cc:432
-msgid "Numpad 8"
-msgstr "숫자패드 8"
-
-#: ardour_ui_ed.cc:435
-msgid "Numpad 9"
-msgstr "숫자패드 9"
-
-#: ardour_ui_ed.cc:439
-msgid "Focus On Clock"
-msgstr "클록에 초점"
-
-#: ardour_ui_ed.cc:445 ardour_ui_ed.cc:456
-msgid "Bars & Beats"
-msgstr "마디 & 비트"
-
-#: ardour_ui_ed.cc:447 ardour_ui_ed.cc:458
-msgid "Minutes & Seconds"
-msgstr "분 & 초"
-
-#: ardour_ui_ed.cc:449 ardour_ui_ed.cc:460 audio_clock.cc:2202
-msgid "Seconds"
-msgstr "초"
-
-#: ardour_ui_ed.cc:451 ardour_ui_ed.cc:462 audio_clock.cc:2203 editor.cc:336
-#: editor_actions.cc:740
-msgid "Samples"
-msgstr "샘플"
-
-#: ardour_ui_ed.cc:465
-msgid "All Input"
-msgstr "모든 출력"
-
-#: ardour_ui_ed.cc:466 recorder_ui.cc:86
-msgid "All In"
-msgstr "모든 입력"
-
-#: ardour_ui_ed.cc:468 ardour_ui_ed.cc:469 recorder_ui.cc:87
-msgid "All Disk"
-msgstr "모든 디스크"
-
-#: ardour_ui_ed.cc:472
-msgid "Punch In"
-msgstr "펀치 입력"
-
-#: ardour_ui_ed.cc:476
-msgid "Punch Out"
-msgstr "펀치 출력"
-
-#: ardour_ui_ed.cc:480
-msgid "Punch In/Out"
-msgstr "펀치 입력/출력"
-
-#: ardour_ui_ed.cc:481
-msgid "In/Out"
-msgstr "입력/출력"
-
-#: ardour_ui_ed.cc:484
-msgid "Click"
-msgstr "클릭"
-
-#: ardour_ui_ed.cc:487
-msgid "Auto Input"
-msgstr "자동 입력"
-
-#: ardour_ui_ed.cc:490
-msgid "Auto Play"
-msgstr "%1가 시각 데이터를 불러오는 동안 기다려 주십시오."
 
 #: editor.cc:6813 editor.cc:6848 editor_markers.cc:1244 editor_markers.cc:1260
 #: editor_markers.cc:1277 io_plugin_window.cc:355 panner_ui.cc:416
@@ -8147,7 +5712,7 @@ msgstr "팔로우 플레이헤드"
 msgid "Remove Last Capture"
 msgstr "마지막 캡처 제거하기"
 
-#: editor_actions.cc:495 editor_ops.cc:5657
+#: editor_actions.cc:495 editor_ops.cc:5660
 msgid "Tag Last Capture"
 msgstr "마지막 캡처 태그"
 
@@ -8167,7 +5732,7 @@ msgstr "시간 삽입하기"
 msgid "Remove Time"
 msgstr "시간 제거하기"
 
-#: editor_actions.cc:507 editor_ops.cc:9576
+#: editor_actions.cc:507 editor_ops.cc:9572
 msgid "Remove Gaps"
 msgstr "간격 제거하기"
 
@@ -8367,283 +5932,296 @@ msgstr "다음 퀀타이즈 그리드 선택"
 msgid "Previous Quantize Grid Choice"
 msgstr "이전 퀀타이즈 그리드 선택"
 
-#: editor_actions.cc:733
+#: editor_actions.cc:689
 msgid "Show Marker Lines"
 msgstr "마커 라인 표시하기"
 
-#: editor_actions.cc:751 editor_actions.cc:754 editor_rulers.cc:306
+#: editor_actions.cc:707 editor_actions.cc:710 editor_rulers.cc:306
 #: rc_option_editor.cc:1814
 msgid "Video Monitor"
 msgstr "비디오 모니터"
 
-#: editor_actions.cc:756
+#: editor_actions.cc:712
 msgid "Always on Top"
 msgstr "항상 위"
 
-#: editor_actions.cc:758
+#: editor_actions.cc:714
 msgid "Frame number"
 msgstr "프레임 번호"
 
-#: editor_actions.cc:759
+#: editor_actions.cc:715
 msgid "Timecode Background"
 msgstr "타임코드 배경"
 
-#: editor_actions.cc:760
+#: editor_actions.cc:716
 msgid "Fullscreen"
 msgstr "전체화면"
 
-#: editor_actions.cc:761
+#: editor_actions.cc:717
 msgid "Letterbox"
 msgstr "레터박스"
 
-#: editor_actions.cc:762
+#: editor_actions.cc:718
 msgid "Original Size"
 msgstr "원본 크기"
 
-#: editor_actions.cc:809
+#: editor_actions.cc:765
 msgid "Remove Unused"
 msgstr "사용되지 않은 항목 제거하기"
 
-#: editor_actions.cc:811
+#: editor_actions.cc:767
 msgid "Import PT session"
 msgstr "PT 세션 가져오기"
 
-#: editor_actions.cc:819
+#: editor_actions.cc:775
 msgid "Import to Source List..."
 msgstr "소스 목록으로 가져오기..."
 
-#: editor_actions.cc:822 session_import_dialog.cc:51
+#: editor_actions.cc:778 session_import_dialog.cc:51
 #: session_import_dialog.cc:72
 msgid "Import from Session"
 msgstr "세션에서 가져오기"
 
-#: editor_actions.cc:826
+#: editor_actions.cc:782
 msgid "Bring all media into session folder"
 msgstr "모든 미디어를 세션 폴더로 가져오기"
 
-#: editor_actions.cc:829
+#: editor_actions.cc:785
 msgid "Show Summary"
 msgstr "요약 표시하기"
 
-#: editor_actions.cc:831
+#: editor_actions.cc:787
 msgid "Show Group Tabs"
 msgstr "그룹 탭 표시하기"
 
-#: editor_actions.cc:833
+#: editor_actions.cc:789
 msgid "Toggle MIDI Input Active for Editor-Selected Tracks/Busses"
 msgstr "편집기에서 선택된 트랙/버스에 대한 MIDI 입력 활성화 토글하기"
 
-#: editor_actions.cc:838 quantize_dialog.cc:75 quantize_dialog.cc:132
+#: editor_actions.cc:794 quantize_dialog.cc:75 quantize_dialog.cc:132
 msgid "Quantize"
 msgstr "퀀타이즈"
 
-#: editor_actions.cc:848
+#: editor_actions.cc:804
 msgid "Clear Note Selection"
 msgstr "노트 선택 지우기"
 
-#: editor_actions.cc:849
+#: editor_actions.cc:805
 msgid "Invert Note Selection"
 msgstr "노트 선택 반전하기"
 
-#: editor_actions.cc:850
+#: editor_actions.cc:806
 msgid "Extend Note Selection"
 msgstr "노트 선택 확장"
 
-#: editor_actions.cc:851
+#: editor_actions.cc:807
 msgid "Duplicate Note Selection"
 msgstr "노트 선택 복제하기"
 
-#: editor_actions.cc:855
+#: editor_actions.cc:811
 msgid "Move Note Start Earlier (fine)"
 msgstr "노트 시작 앞으로 이동하기 (fine)"
 
-#: editor_actions.cc:856
+#: editor_actions.cc:812
 msgid "Move Note Start Earlier"
 msgstr "노트 시작 앞으로 이동하기"
 
-#: editor_actions.cc:857
+#: editor_actions.cc:813
 msgid "Move Note Ends Later (fine)"
 msgstr "노트 끝 뒤로 이동하기 (fine)"
 
-#: editor_actions.cc:858
+#: editor_actions.cc:814
 msgid "Move Note Ends Later"
 msgstr "노트 끝 뒤로 이동하기"
 
-#: editor_actions.cc:862
+#: editor_actions.cc:818
 msgid "Move Note Start Later (fine)"
 msgstr "노트 시작을 뒤로 이동하기 (fine)"
 
-#: editor_actions.cc:863
+#: editor_actions.cc:819
 msgid "Move Note Start Later"
 msgstr "노트 시작을 뒤로"
 
-#: editor_actions.cc:864
+#: editor_actions.cc:820
 msgid "Move Note Ends Earlier (fine)"
 msgstr "노트 끝을 더 빨리 이동하기 (fine)"
 
-#: editor_actions.cc:865
+#: editor_actions.cc:821
 msgid "Move Note Ends Earlier"
 msgstr "노트 끝을 더 빨리"
 
-#: editor_actions.cc:870
+#: editor_actions.cc:826
 msgid "Select Next"
 msgstr "다음 선택하기"
 
-#: editor_actions.cc:871
+#: editor_actions.cc:827
 msgid "Select Next (alternate)"
 msgstr "다음 선택하기 (대체)"
 
-#: editor_actions.cc:872
+#: editor_actions.cc:828
 msgid "Select Previous"
 msgstr "이전 선택하기"
 
-#: editor_actions.cc:873
+#: editor_actions.cc:829
 msgid "Select Previous (alternate)"
 msgstr "이전 선택하기 (대체)"
 
-#: editor_actions.cc:874
+#: editor_actions.cc:830
 msgid "Add Next to Selection"
 msgstr "다음 선택항목에 추가하기"
 
-#: editor_actions.cc:875
+#: editor_actions.cc:831
 msgid "Add Next to Selection (alternate)"
 msgstr "다음 선택항목에 추가하기 (대체)"
 
-#: editor_actions.cc:876
+#: editor_actions.cc:832
 msgid "Add Previous to Selection"
 msgstr "이전 선택에 추가하기"
 
-#: editor_actions.cc:877
+#: editor_actions.cc:833
 msgid "Add Previous to Selection (alternate)"
 msgstr "이전 선택에 추가하기 (대체)"
 
-#: editor_actions.cc:879
+#: editor_actions.cc:835
 msgid "Increase Velocity"
 msgstr "벨로시티 증가"
 
-#: editor_actions.cc:880
+#: editor_actions.cc:836
 msgid "Increase Velocity (fine)"
 msgstr "벨로시티 증가 (fine)"
 
-#: editor_actions.cc:881
+#: editor_actions.cc:837
 msgid "Increase Velocity (allow mush)"
 msgstr "벨로시티 증가 (allow mush)"
 
-#: editor_actions.cc:882
+#: editor_actions.cc:838
 msgid "Increase Velocity (non-relative)"
 msgstr "벨로시티 증가 (non-relative)"
 
-#: editor_actions.cc:883
+#: editor_actions.cc:839
 msgid "Increase Velocity (fine, allow mush)"
 msgstr "벨로시티 증가 (fine, allow mush)"
 
-#: editor_actions.cc:884
+#: editor_actions.cc:840
 msgid "Increase Velocity (fine, non-relative)"
 msgstr "벨로시티 증가 (fine, non-relative)"
 
-#: editor_actions.cc:885
+#: editor_actions.cc:841
 msgid "Increase Velocity (maintain ratios, allow mush)"
 msgstr "벨로시티 증가 (maintain ratios, allow mush)"
 
-#: editor_actions.cc:886
+#: editor_actions.cc:842
 msgid "Increase Velocity (fine, allow mush, non-relative)"
 msgstr "벨로시티 증가 (fine, allow mush, non-relative)"
 
-#: editor_actions.cc:888
+#: editor_actions.cc:844
 msgid "Decrease Velocity"
 msgstr "벨로시티 감소"
 
-#: editor_actions.cc:889
+#: editor_actions.cc:845
 msgid "Decrease Velocity (fine)"
 msgstr "벨로시티 감소 (fine)"
 
-#: editor_actions.cc:890
+#: editor_actions.cc:846
 msgid "Decrease Velocity (allow mush)"
 msgstr "벨로시티 감소 (allow mush)"
 
-#: editor_actions.cc:891
+#: editor_actions.cc:847
 msgid "Decrease Velocity (non-relative)"
 msgstr "벨로시티 감소 (non-relative)"
 
-#: editor_actions.cc:892
+#: editor_actions.cc:848
 msgid "Decrease Velocity (fine, allow mush)"
 msgstr "벨로시티 감소 (fine, allow mush)"
 
-#: editor_actions.cc:893
+#: editor_actions.cc:849
 msgid "Decrease Velocity (fine, non-relative)"
 msgstr "벨로시티 감소 (fine, non-relative)"
 
-#: editor_actions.cc:894
+#: editor_actions.cc:850
 msgid "Decrease Velocity (maintain ratios, allow mush)"
 msgstr "벨로시티 감소 (maintain ratios, allow mush)"
 
-#: editor_actions.cc:895
+#: editor_actions.cc:851
 msgid "Decrease Velocity (fine, allow mush, non-relative)"
 msgstr "벨로시티 감소 (fine, allow mush, non-relative)"
 
-#: editor_actions.cc:897
+#: editor_actions.cc:853
 msgid "Transpose Up (octave)"
 msgstr "위로 트랜스포즈 (octave)"
 
-#: editor_actions.cc:898
+#: editor_actions.cc:854
 msgid "Transpose Up (octave, allow mush)"
 msgstr "위로 트랜스포즈 (octave, allow mush)"
 
-#: editor_actions.cc:899
+#: editor_actions.cc:855
 msgid "Transpose Up (semitone)"
 msgstr "위로 트랜스포즈 (semitone)"
 
-#: editor_actions.cc:900
+#: editor_actions.cc:856
 msgid "Transpose Up (semitone, allow mush)"
 msgstr "위로 트랜스포즈 (semitone, allow mush)"
 
-#: editor_actions.cc:902
+#: editor_actions.cc:858
 msgid "Transpose Down (octave)"
 msgstr "아래로 트랜스포즈 (octave)"
 
-#: editor_actions.cc:903
+#: editor_actions.cc:859
 msgid "Transpose Down (octave, allow mush)"
 msgstr "아래로 트랜스포즈 (octave, allow mush)"
 
-#: editor_actions.cc:904
+#: editor_actions.cc:860
 msgid "Transpose Down (semitone)"
 msgstr "아래로 트랜스포즈 (semitone)"
 
-#: editor_actions.cc:905
+#: editor_actions.cc:861
 msgid "Transpose Down (semitone, allow mush)"
 msgstr "아래로 트랜스포즈 (semitone, allow mush)"
 
-#: editor_actions.cc:907
+#: editor_actions.cc:863
 msgid "Nudge Notes Later (grid)"
 msgstr "노트들을 뒤로 조금씩 밀기 (그리드)"
 
-#: editor_actions.cc:908
+#: editor_actions.cc:864
 msgid "Nudge Notes Later (1/4 grid)"
 msgstr "노트들을 뒤로 조금씩 밀기 (1/4 그리드)"
 
-#: editor_actions.cc:909
+#: editor_actions.cc:865
 msgid "Nudge Notes Earlier (grid)"
 msgstr "노트들을 앞으로 조금씩 밀기 (그리드)"
 
-#: editor_actions.cc:910
+#: editor_actions.cc:866
 msgid "Nudge Notes Earlier (1/4 grid)"
 msgstr "노트들을 앞으로 조금씩 밀기 (1/4 그리드)"
 
-#: editor_actions.cc:912
+#: editor_actions.cc:868
 msgid "Edit Note Channels"
 msgstr "노트 채널 편집하기"
 
-#: editor_actions.cc:913
+#: editor_actions.cc:869
 msgid "Edit Note Velocities"
 msgstr "노트 벨로시티 편집하기"
 
-#: editor_actions.cc:915
+#: editor_actions.cc:871
 msgid "Quantize Selected Notes"
 msgstr "퀀타이즈 선택된 노트들"
 
+#: editor_actions.cc:895 editor_actions.cc:1184
+msgid "Draw Velocity"
+msgstr ""
+
+#: editor_actions.cc:902
+#, c-format
+msgid "Velocity %d"
+msgstr ""
+
+#: editor_actions.cc:906 editor_actions.cc:1208
+msgid "Draw Channel"
+msgstr ""
+
 #: editor_actions.cc:1283 editor_actions.cc:1370 editor_actions.cc:1553
 #: editor_actions.cc:1564 editor_actions.cc:1619 editor_actions.cc:1630
-#: editor_actions.cc:1697 luainstance.cc:368 luainstance.cc:2325
+#: editor_actions.cc:1697 luainstance.cc:368 luainstance.cc:2327
 msgid "programming error: %1: %2"
 msgstr "프로그래밍 오류: %1 %2"
 
@@ -8822,7 +6400,7 @@ msgstr "패치 변경 삽입하기..."
 msgid "Unlink all selected regions"
 msgstr "선택된 모든 영역 링크 해제"
 
-#: editor_actions.cc:1985 editor_ops.cc:6138
+#: editor_actions.cc:1985 editor_ops.cc:6141
 msgid "Unlink from unselected"
 msgstr "선택되지 않은 영역에서 링크 해제"
 
@@ -9047,7 +6625,7 @@ msgstr "고정된 시간 영역 드래그"
 msgid "create region"
 msgstr "영역 만들기"
 
-#: editor_drag.cc:2395 midi_region_view.cc:3138
+#: editor_drag.cc:2395 midi_region_view.cc:3142
 msgid "resize notes"
 msgstr "노트 크기조정"
 
@@ -9264,7 +6842,7 @@ msgstr "활성화 상태를 공유하시겠습니까?"
 #: editor_markers.cc:1481 editor_markers.cc:1511 editor_markers.cc:1545
 #: editor_markers.cc:1576 editor_markers.cc:1601 editor_markers.cc:1651
 #: editor_markers.cc:1770 editor_markers.cc:1796 editor_markers.cc:1818
-#: editor_mouse.cc:2717
+#: editor_mouse.cc:2715
 msgid "programming error: marker canvas item has no marker object pointer!"
 msgstr "프로그래밍 오류: 마커 캔버스 항목에 마커 객체 포인터가 없습니다!"
 
@@ -9371,7 +6949,7 @@ msgstr "루프 범위 지정"
 msgid "set punch range"
 msgstr "펀치 범위 지정"
 
-#: editor_markers.cc:872 editor_ops.cc:4635 editor_ops.cc:7590
+#: editor_markers.cc:872 editor_ops.cc:4635 editor_ops.cc:7586
 msgid "range"
 msgstr "범위"
 
@@ -9487,7 +7065,7 @@ msgstr "마크 이름 바꾸기"
 msgid "Rename Range"
 msgstr "범위 이름 바꾸기"
 
-#: editor_markers.cc:1857 editor_mouse.cc:2734 mixer_ui.cc:4070
+#: editor_markers.cc:1857 editor_mouse.cc:2732 mixer_ui.cc:4070
 #: mixer_ui.cc:4105 processor_box.cc:3591 processor_box.cc:4178
 #: route_ui.cc:1715 route_ui.cc:2821 template_dialog.cc:226
 #: vca_master_strip.cc:473
@@ -9511,28 +7089,32 @@ msgstr "이 화면은 편집기 믹서를 화면표시하기에 충분히 높지
 msgid "Editor/Snap"
 msgstr "편집기/스냅"
 
-#: editor_mouse.cc:1629 editor_mouse.cc:1664 editor_tempodisplay.cc:558
+#: editor_mouse.cc:1627 editor_mouse.cc:1662 editor_tempodisplay.cc:558
 msgid ""
 "programming error: tempo marker canvas item has no marker object pointer!"
 msgstr "프로그래밍 오류: 템포 마커 캔버스 항목에 마커 객체 포인터가 없습니다!"
 
-#: editor_mouse.cc:1634 editor_tempodisplay.cc:563
+#: editor_mouse.cc:1632 editor_tempodisplay.cc:563
 msgid "programming error: marker for tempo is not a tempo marker!"
 msgstr "프로그래밍 오류: 템포 마커는 템포 마커가 아닙니다!"
 
-#: editor_mouse.cc:1646 editor_tempodisplay.cc:539
+#: editor_mouse.cc:1644 editor_tempodisplay.cc:539
 msgid "programming error: bbt marker canvas item has no marker object pointer!"
 msgstr "프로그래밍 오류: bbt 마커 캔버스 항목에 마커 객체 포인터가 없습니다!"
 
-#: editor_mouse.cc:1651 editor_tempodisplay.cc:544
+#: editor_mouse.cc:1649 editor_tempodisplay.cc:544
 msgid "programming error: marker for bbt is not a bbt marker!"
 msgstr "프로그래밍 오류: bbt에 대한 마커는 bbt 마커가 아닙니다!"
 
-#: editor_mouse.cc:1669 editor_tempodisplay.cc:781
+#: editor_mouse.cc:1667 editor_tempodisplay.cc:781
 msgid "programming error: marker for meter is not a meter marker!"
 msgstr "프로그래밍 오류: 미터용 마커는 미터 마커가 아닙니다!"
 
-#: editor_mouse.cc:2461 editor_mouse.cc:2486 editor_mouse.cc:2499
+#: editor_mouse.cc:1944
+msgid "programming error: MouseGrid clicks are handled by _canvas_grid_zone!"
+msgstr ""
+
+#: editor_mouse.cc:2459 editor_mouse.cc:2484 editor_mouse.cc:2497
 msgid ""
 "programming error: control point canvas item has no control point object "
 "pointer!"
@@ -9540,23 +7122,23 @@ msgstr ""
 "프로그래밍 오류: 컨트롤 포인트 캔버스 항목에 컨트롤 포인트 객체 포인터가 없습"
 "니다!"
 
-#: editor_mouse.cc:2655
+#: editor_mouse.cc:2653
 msgid "start point trim"
 msgstr "트림 시작 포인트"
 
-#: editor_mouse.cc:2680
+#: editor_mouse.cc:2678
 msgid "end point trim"
 msgstr "트림 끝 포인트"
 
-#: editor_mouse.cc:2732
+#: editor_mouse.cc:2730
 msgid "Name for region:"
 msgstr "영역의 이름:"
 
-#: editor_mouse.cc:3138
+#: editor_mouse.cc:3136
 msgid "tempo mapping: end-stretch"
 msgstr "템포 매핑: end-stretch"
 
-#: editor_mouse.cc:3144 editor_mouse.cc:3148
+#: editor_mouse.cc:3142 editor_mouse.cc:3146
 msgid "tempo mapping: mid-twist"
 msgstr "템포 매핑: mid-twist"
 
@@ -9862,15 +7444,15 @@ msgstr "영역 제거하기"
 msgid "recover regions"
 msgstr "영역 복구하기"
 
-#: editor_ops.cc:5516
+#: editor_ops.cc:5519
 msgid "duplicate range selection"
 msgstr "범위 선택 복제하기"
 
-#: editor_ops.cc:5608
+#: editor_ops.cc:5611
 msgid "nudge track"
 msgstr "트랙 조금씩 밀기"
 
-#: editor_ops.cc:5635
+#: editor_ops.cc:5638
 msgid ""
 "Do you really want to destroy the last capture?\n"
 "(This is destructive and cannot be undone)"
@@ -9878,186 +7460,186 @@ msgstr ""
 "마지막 캡처를 정말로 소실시키겠습니까?\n"
 "(이것은 파괴적이며 되돌릴 수 없습니다)"
 
-#: editor_ops.cc:5638 editor_ops.cc:8406 editor_regions.cc:279
+#: editor_ops.cc:5641 editor_ops.cc:8402 editor_regions.cc:279
 #: editor_snapshots.cc:187 editor_sources.cc:186 vca_master_strip.cc:523
 msgid "No, do nothing."
 msgstr "아니요, 아무 작업도 하지 않습니다."
 
-#: editor_ops.cc:5639
+#: editor_ops.cc:5642
 msgid "Yes, destroy it."
 msgstr "예, 폐기합니다."
 
-#: editor_ops.cc:5641
+#: editor_ops.cc:5644
 msgid "Destroy last capture"
 msgstr "마지막 캡처 소실시키기"
 
-#: editor_ops.cc:5659
+#: editor_ops.cc:5662
 msgid "Tag:"
 msgstr "태그:"
 
-#: editor_ops.cc:5674 session_archive_dialog.cc:53 session_archive_dialog.cc:54
+#: editor_ops.cc:5677 session_archive_dialog.cc:53 session_archive_dialog.cc:54
 #: session_archive_dialog.cc:227 sfdb_ui.cc:1981 sfdb_ui.cc:2101
 msgid "Good"
 msgstr "좋음"
 
-#: editor_ops.cc:5877
+#: editor_ops.cc:5880
 msgid "normalize"
 msgstr "노멀라이즈"
 
-#: editor_ops.cc:5989
+#: editor_ops.cc:5992
 msgid "reverse regions"
 msgstr "영역 역방향"
 
-#: editor_ops.cc:6026
+#: editor_ops.cc:6029
 msgid "strip silence"
 msgstr "무음 스트립"
 
-#: editor_ops.cc:6146 editor_ops.cc:6195
+#: editor_ops.cc:6149 editor_ops.cc:6198
 msgid "Could not unlink %1"
 msgstr "%1 연결을 해제할 수 없습니다"
 
-#: editor_ops.cc:6188
+#: editor_ops.cc:6191
 msgid "Fork Region(s)"
 msgstr "포크 영역"
 
-#: editor_ops.cc:6279
+#: editor_ops.cc:6275
 msgid "de-interlace midi"
 msgstr "디인터레이스 미디"
 
-#: editor_ops.cc:6522
+#: editor_ops.cc:6518
 msgid "reset region gain"
 msgstr "영역 게인 재설정"
 
-#: editor_ops.cc:6581
+#: editor_ops.cc:6577
 msgid "region polarity invert"
 msgstr "영역 극성 반전시키기"
 
-#: editor_ops.cc:6615
+#: editor_ops.cc:6611
 msgid "region gain envelope active"
 msgstr "영역 게인 엔벌로프 활성화"
 
-#: editor_ops.cc:6640
+#: editor_ops.cc:6636
 msgid "toggle region lock"
 msgstr "영역 잠금 토글하기"
 
-#: editor_ops.cc:6664
+#: editor_ops.cc:6660
 msgid "Toggle Video Lock"
 msgstr "비디오 잠금 토글하기"
 
-#: editor_ops.cc:6694
+#: editor_ops.cc:6690
 msgid "toggle region lock style"
 msgstr "영역 잠금 스타일 토글하기"
 
-#: editor_ops.cc:6719
+#: editor_ops.cc:6715
 msgid "change region opacity"
 msgstr "영역 불투명도 변경"
 
-#: editor_ops.cc:6872
+#: editor_ops.cc:6868
 msgid "fade range"
 msgstr "페이드 범위"
 
-#: editor_ops.cc:6910
+#: editor_ops.cc:6906
 msgid "set fade in length"
 msgstr "페이드 인 길이 지정"
 
-#: editor_ops.cc:6917
+#: editor_ops.cc:6913
 msgid "set fade out length"
 msgstr "페이드 아웃 길이 지정"
 
-#: editor_ops.cc:6982
+#: editor_ops.cc:6978
 msgid "set fade in shape"
 msgstr "페이드 인 모양 지정"
 
-#: editor_ops.cc:7017
+#: editor_ops.cc:7013
 msgid "set fade out shape"
 msgstr "페이드 아웃 모양 지정"
 
-#: editor_ops.cc:7053
+#: editor_ops.cc:7049
 msgid "set fade in active"
 msgstr "페이드 인 활성화 지정"
 
-#: editor_ops.cc:7087
+#: editor_ops.cc:7083
 msgid "set fade out active"
 msgstr "페이드 아웃 활성화 지정"
 
-#: editor_ops.cc:7147
+#: editor_ops.cc:7143
 msgid "toggle fade active"
 msgstr "페이드 활성화 토글하기"
 
-#: editor_ops.cc:7314
+#: editor_ops.cc:7310
 msgid "set loop range from selection"
 msgstr "선택영역에서 루프 범위 지정"
 
-#: editor_ops.cc:7328
+#: editor_ops.cc:7324
 msgid "set loop range from region"
 msgstr "영역에서 루프 범위 지정"
 
-#: editor_ops.cc:7346
+#: editor_ops.cc:7342
 msgid "set punch range from selection"
 msgstr "선택영역에서 펀치 범위 지정"
 
-#: editor_ops.cc:7370
+#: editor_ops.cc:7366
 msgid "Auto Punch In"
 msgstr "자동 펀치 인"
 
-#: editor_ops.cc:7377 editor_ops.cc:7381
+#: editor_ops.cc:7373 editor_ops.cc:7377
 msgid "Auto Punch In/Out"
 msgstr "자동 펀치 인/아웃"
 
-#: editor_ops.cc:7423
+#: editor_ops.cc:7419
 msgid "set session start/end from selection"
 msgstr "선택영역에서 세션 시작/끝 지정"
 
-#: editor_ops.cc:7458
+#: editor_ops.cc:7454
 msgid "set punch start from EP"
 msgstr "EP에서 펀치 시작 지정"
 
-#: editor_ops.cc:7482
+#: editor_ops.cc:7478
 msgid "set punch end from EP"
 msgstr "EP에서 펀치 끝 지정"
 
-#: editor_ops.cc:7513
+#: editor_ops.cc:7509
 msgid "set loop start from EP"
 msgstr "EP에서 루프 시작 지정"
 
-#: editor_ops.cc:7538
+#: editor_ops.cc:7534
 msgid "set loop end from EP"
 msgstr "EP에서 루프 끝 지정"
 
-#: editor_ops.cc:7549
+#: editor_ops.cc:7545
 msgid "set punch range from region"
 msgstr "영역에서 펀치 범위 지정"
 
-#: editor_ops.cc:7582
+#: editor_ops.cc:7578
 msgid "region"
 msgstr "영역"
 
-#: editor_ops.cc:7636
+#: editor_ops.cc:7632
 msgid "Add new marker"
 msgstr "새 마커 추가하기"
 
-#: editor_ops.cc:7637
+#: editor_ops.cc:7633
 msgid "Set global tempo"
 msgstr "전역 템포 지정"
 
-#: editor_ops.cc:7640
+#: editor_ops.cc:7636
 msgid "Define one bar"
 msgstr "한 마디 정의"
 
-#: editor_ops.cc:7641
+#: editor_ops.cc:7637
 msgid "Do you want to set the global tempo or add a new tempo marker?"
 msgstr ""
 "전역 템포를 지정하시겠습니까? 아니면 새 템포 마커를 추가하기하시겠습니까?"
 
-#: editor_ops.cc:7667
+#: editor_ops.cc:7663
 msgid "set tempo from %1"
 msgstr "%1에서 템포 지정"
 
-#: editor_ops.cc:7691
+#: editor_ops.cc:7687
 msgid "split regions"
 msgstr "분할 영역"
 
-#: editor_ops.cc:7733
+#: editor_ops.cc:7729
 msgid ""
 "You are about to split\n"
 "%1\n"
@@ -10069,11 +7651,11 @@ msgstr ""
 "분할하려고 합니다.\n"
 "시간이 오래 걸릴 수 있습니다."
 
-#: editor_ops.cc:7740
+#: editor_ops.cc:7736
 msgid "Call for the Ferret!"
 msgstr "페렛을 호출하세요!"
 
-#: editor_ops.cc:7741
+#: editor_ops.cc:7737
 msgid ""
 "Press OK to continue with this split operation\n"
 "or ask the Ferret dialog to tune the analysis"
@@ -10081,47 +7663,47 @@ msgstr ""
 "확인을 눌러 이 분할 오퍼레이션을 계속하거나 Ferret \n"
 "대화상자에서 분석을 조정하도록 요청하십시오"
 
-#: editor_ops.cc:7743
+#: editor_ops.cc:7739
 msgid "Press OK to continue with this split operation"
 msgstr "이 분할 오퍼레이션을 계속하려면 '확인'을 누르십시오"
 
-#: editor_ops.cc:7746
+#: editor_ops.cc:7742
 msgid "Excessive split?"
 msgstr "과도한 분할입니까?"
 
-#: editor_ops.cc:7905
+#: editor_ops.cc:7901
 msgid "place transient"
 msgstr "트래션트 배치하기"
 
-#: editor_ops.cc:7939
+#: editor_ops.cc:7935
 msgid "snap regions to grid"
 msgstr "그리드에 영역 스냅"
 
-#: editor_ops.cc:7980
+#: editor_ops.cc:7976
 msgid "Close Region Gaps"
 msgstr "영역 간격 닫기"
 
-#: editor_ops.cc:7985
+#: editor_ops.cc:7981
 msgid "Crossfade length"
 msgstr "크로스페이드 길이"
 
-#: editor_ops.cc:7996
+#: editor_ops.cc:7992
 msgid "Pull-back length"
 msgstr "풀-백 길이"
 
-#: editor_ops.cc:8009
+#: editor_ops.cc:8005
 msgid "Ok"
 msgstr "확인"
 
-#: editor_ops.cc:8028
+#: editor_ops.cc:8024
 msgid "close region gaps"
 msgstr "영역 간격 닫기"
 
-#: editor_ops.cc:8336
+#: editor_ops.cc:8332
 msgid "That would be bad news ...."
 msgstr "그것은 나쁜 소식이 될 것입니다 ...."
 
-#: editor_ops.cc:8340
+#: editor_ops.cc:8336
 msgid ""
 "Removing the master or monitor bus is such a bad idea\n"
 "that %1 is not going to allow it.\n"
@@ -10137,178 +7719,178 @@ msgstr ""
 "\"특수 버스 제거 허용\" 옵션을 \"yes\"로 \n"
 "지정하도록 ardour.rc 파일을 편집하십시오."
 
-#: editor_ops.cc:8357
+#: editor_ops.cc:8353
 msgid "track"
 msgid_plural "tracks"
 msgstr[0] "트랙"
 
-#: editor_ops.cc:8358
+#: editor_ops.cc:8354
 msgid "bus"
 msgid_plural "busses"
 msgstr[0] "버스"
 
-#: editor_ops.cc:8359
+#: editor_ops.cc:8355
 msgid "VCA"
 msgid_plural "VCAs"
 msgstr[0] "VCA"
 
-#: editor_ops.cc:8362
+#: editor_ops.cc:8358
 msgid "Remove various strips"
 msgstr "다양한 스트립 제거하기"
 
-#: editor_ops.cc:8363
+#: editor_ops.cc:8359
 msgid "Do you really want to remove %1 %2, %3 %4 and %5 %6?"
 msgstr "%1 %2, %3 %4 및 %5 %6을(를) 제거하시겠습니까?"
 
-#: editor_ops.cc:8367 editor_ops.cc:8372 editor_ops.cc:8377
+#: editor_ops.cc:8363 editor_ops.cc:8368 editor_ops.cc:8373
 msgid "Remove %1 and %2"
 msgstr "%1 및 %2 제거하기"
 
-#: editor_ops.cc:8368 editor_ops.cc:8373 editor_ops.cc:8378
+#: editor_ops.cc:8364 editor_ops.cc:8369 editor_ops.cc:8374
 msgid "Do you really want to remove %1 %2 and %3 %4?"
 msgstr "%1 %2 및 %3 %4을(를) 제거하시겠습니까?"
 
-#: editor_ops.cc:8382 editor_ops.cc:8387 editor_ops.cc:8392
+#: editor_ops.cc:8378 editor_ops.cc:8383 editor_ops.cc:8388
 #: vca_master_strip.cc:518
 msgid "Remove %1"
 msgstr "%1 제거하기"
 
-#: editor_ops.cc:8383 editor_ops.cc:8388 editor_ops.cc:8393
+#: editor_ops.cc:8379 editor_ops.cc:8384 editor_ops.cc:8389
 msgid "Do you really want to remove %1 %2?"
 msgstr "%1 %2을(를) 제거하시겠습니까?"
 
-#: editor_ops.cc:8401
+#: editor_ops.cc:8397
 msgid "You may also lose the playlists associated with the %1"
 msgstr "%1과(와) 연결된 재생 목록이 손실될 수도 있습니다"
 
-#: editor_ops.cc:8404
+#: editor_ops.cc:8400
 msgid "This action cannot be undone, and the session file will be overwritten!"
 msgstr "이 액션은 취소할 수 없으며 세션 파일을 덮어씁니다!"
 
-#: editor_ops.cc:8408
+#: editor_ops.cc:8404
 msgid "Yes, remove them."
 msgstr "예, 그것들을 제거합니다."
 
-#: editor_ops.cc:8410 editor_snapshots.cc:188 vca_master_strip.cc:524
+#: editor_ops.cc:8406 editor_snapshots.cc:188 vca_master_strip.cc:524
 msgid "Yes, remove it."
 msgstr "예, 제거합니다."
 
-#: editor_ops.cc:8462
+#: editor_ops.cc:8458
 msgid "You must first select some tracks to Insert Time."
 msgstr "먼저 시간을 삽입하기 위해 일부 트랙을 선택해야 합니다."
 
-#: editor_ops.cc:8469
+#: editor_ops.cc:8465
 msgid "You cannot insert time in Lock Edit mode."
 msgstr "잠금 편집 모드에서는 시간을 삽입할 수 없습니다."
 
-#: editor_ops.cc:8512 editor_ops.cc:8545 editor_ops.cc:8567 editor_ops.cc:8607
-#: editor_ops.cc:8617 editor_ops.cc:8625
+#: editor_ops.cc:8508 editor_ops.cc:8541 editor_ops.cc:8563 editor_ops.cc:8603
+#: editor_ops.cc:8613 editor_ops.cc:8621
 msgid "insert time"
 msgstr "시간 삽입하기"
 
-#: editor_ops.cc:8639
+#: editor_ops.cc:8635
 msgid "You must first select some tracks to Remove Time."
 msgstr "시간을 제거하려면 먼저 일부 트랙을 선택해야 합니다."
 
-#: editor_ops.cc:8646
+#: editor_ops.cc:8642
 msgid "You cannot remove time in Lock Edit mode."
 msgstr "잠금 편집 모드에서는 시간을 삭제할 수 없습니다."
 
-#: editor_ops.cc:8683
+#: editor_ops.cc:8679
 msgid "Cannot insert or delete time when in Lock edit."
 msgstr "잠금 편집 상태에서는 시간을 삽입하거나 삭제할 수 없습니다."
 
-#: editor_ops.cc:8697 editor_ops.cc:8716 editor_ops.cc:8789 editor_ops.cc:8803
-#: editor_ops.cc:8807
+#: editor_ops.cc:8693 editor_ops.cc:8712 editor_ops.cc:8785 editor_ops.cc:8799
+#: editor_ops.cc:8803
 msgid "remove time"
 msgstr "시간 제거하기"
 
-#: editor_ops.cc:8878
+#: editor_ops.cc:8874
 msgid "There are too many tracks to fit in the current window"
 msgstr "트랙이 너무 많아 현재 창에 맞지 않습니다"
 
-#: editor_ops.cc:8943
+#: editor_ops.cc:8939
 msgid "Sel"
 msgstr "선택"
 
-#: editor_ops.cc:8982
+#: editor_ops.cc:8978
 #, c-format
 msgid "Saved view %u"
 msgstr "저장된 보기 %u"
 
-#: editor_ops.cc:9007
+#: editor_ops.cc:9003
 msgid "mute regions"
 msgstr "음소거 영역"
 
-#: editor_ops.cc:9009
+#: editor_ops.cc:9005
 msgid "mute region"
 msgstr "음소거 영역"
 
-#: editor_ops.cc:9046
+#: editor_ops.cc:9042
 msgid "combine regions"
 msgstr "영역 결합"
 
-#: editor_ops.cc:9084
+#: editor_ops.cc:9080
 msgid "uncombine regions"
 msgstr "영역 결합 해제"
 
-#: editor_ops.cc:9123
+#: editor_ops.cc:9119
 msgid "%1: Locked"
 msgstr "%1: 잠김"
 
-#: editor_ops.cc:9131
+#: editor_ops.cc:9127
 msgid "Click to unlock"
 msgstr "클릭: 잠금 해제"
 
-#: editor_ops.cc:9182
+#: editor_ops.cc:9178
 msgid "Moving embedded files into session folder"
 msgstr "포함된 파일을 세션 폴더로 이동하는 중"
 
-#: editor_ops.cc:9364
+#: editor_ops.cc:9360
 msgid "New Cue Marker Name"
 msgstr "새 큐 마커 이름"
 
-#: editor_ops.cc:9413
+#: editor_ops.cc:9409
 msgid "add cue marker"
 msgstr "큐 마커 추가하기"
 
-#: editor_ops.cc:9455
+#: editor_ops.cc:9451
 msgid "remove cue marker"
 msgstr "큐 마커 제거하기"
 
-#: editor_ops.cc:9515
+#: editor_ops.cc:9511
 msgid "clear cue markers"
 msgstr "큐 마커 지우기"
 
-#: editor_ops.cc:9567
+#: editor_ops.cc:9563
 msgid "region markers -> global markers"
 msgstr "영역 마커 -> 전역 마커"
 
-#: editor_ops.cc:9579
+#: editor_ops.cc:9575
 msgid "Smallest gap size to remove (seconds):"
 msgstr "제거할 최소 간격 크기 (초):"
 
-#: editor_ops.cc:9588
+#: editor_ops.cc:9584
 msgid "Leave a gap of(seconds):"
 msgstr "간격두기 (초):"
 
-#: editor_ops.cc:9596
+#: editor_ops.cc:9592
 msgid "Shift global markers too"
 msgstr "전역 마커도 또한 시프트"
 
-#: editor_ops.cc:9619
+#: editor_ops.cc:9615
 msgid "The threshold value you entered is not a number"
 msgstr "입력한 임곗값은 숫자가 아닙니다"
 
-#: editor_ops.cc:9625 editor_ops.cc:9641
+#: editor_ops.cc:9621 editor_ops.cc:9637
 msgid "The threshold value must be larger than or equal to zero"
 msgstr "임곗값은 0보다 크거나 같아야 합니다"
 
-#: editor_ops.cc:9635
+#: editor_ops.cc:9631
 msgid "The leave-gap value you entered is not a number"
 msgstr "간격두기 값이 숫자가 아닙니다"
 
-#: editor_ops.cc:9705
+#: editor_ops.cc:9701
 msgid "remove gaps"
 msgstr "간격 제거하기"
 
@@ -11668,7 +9250,7 @@ msgstr "형식을 제거하시겠습니까?"
 msgid "Preset"
 msgstr "프리셋"
 
-#: export_preset_selector.cc:109 export_preset_selector.cc:134
+#: export_preset_selector.cc:110 export_preset_selector.cc:136
 msgid ""
 "The selected preset did not load successfully!\n"
 "Perhaps it references a format that has been removed?"
@@ -11676,7 +9258,7 @@ msgstr ""
 "선택된 프리셋을 불러올 수 없습니다!\n"
 "제거된 형식을 참조하시겠습니까?"
 
-#: export_preset_selector.cc:192
+#: export_preset_selector.cc:195
 msgid "Do you really want to remove this preset?"
 msgstr "이 프리셋을 제거하시겠습니까?"
 
@@ -12797,47 +10379,47 @@ msgstr "지정해제"
 msgid "Session script '%1' removal failed: %2"
 msgstr "세션 스크립트 '%1' 제거 실패: %2"
 
-#: luainstance.cc:1367
+#: luainstance.cc:1369
 msgid "Loading user ui scripts file %1"
 msgstr "사용자 UI 스크립트 파일 %1 불러오는 중"
 
-#: luainstance.cc:1370
+#: luainstance.cc:1372
 msgid "cannot read ui scripts file \"%1\""
 msgstr "UI 스크립트 파일 \"%1\"을(를) 읽을 수 없습니다"
 
-#: luainstance.cc:1375
+#: luainstance.cc:1377
 msgid "user ui scripts file \"%1\" not loaded successfully."
 msgstr "사용자 UI 스크립트 파일 \"%1\"이(가) 성공적으로 불려오지 않았습니다."
 
-#: luainstance.cc:1400
+#: luainstance.cc:1402
 msgid "UI script file %1 not saved"
 msgstr "UI 스크립트 파일 %1가 저장되지 않았습니다"
 
-#: luainstance.cc:1556
+#: luainstance.cc:1558
 msgid "Add Shortcut or Lua Script"
 msgstr "단축키 또는 Lua 스크립트 추가하기"
 
-#: luainstance.cc:1560
+#: luainstance.cc:1562
 msgid "Add Lua Callback Hook"
 msgstr "Lua 콜백 훅 추가하기"
 
-#: luainstance.cc:1567
+#: luainstance.cc:1569
 msgid "Add Lua Session Script"
 msgstr "Lua 세션 스크립트 추가하기"
 
-#: luainstance.cc:1590
+#: luainstance.cc:1592
 msgid "Cannot read script '%1': %2"
 msgstr "스크립트 '%1'을(를) 읽을 수 없음: %2"
 
-#: luainstance.cc:1607
+#: luainstance.cc:1609
 msgid "Set Script Parameters"
 msgstr "스크립트 매개변수 지정"
 
-#: luainstance.cc:1632
+#: luainstance.cc:1634
 msgid "Session script '%1' instantiation failed: %2"
 msgstr "세션 스크립트 '%1' 인스턴스화 실패: %2"
 
-#: luainstance.cc:1636 luainstance.cc:1640
+#: luainstance.cc:1638 luainstance.cc:1642
 msgid "Loading Session script '%1' failed: %2"
 msgstr "세션 스크립트 '%1'을(를) 불러오기 실패: %2"
 
@@ -13217,47 +10799,47 @@ msgstr "번호"
 msgid "Vel"
 msgstr "세기"
 
-#: midi_list_editor.cc:219
+#: midi_list_editor.cc:225
 msgid "edit note start"
 msgstr "노트 시작 편집하기"
 
-#: midi_list_editor.cc:228
+#: midi_list_editor.cc:234
 msgid "edit note channel"
 msgstr "노트 채널 편집하기"
 
-#: midi_list_editor.cc:238
+#: midi_list_editor.cc:244
 msgid "edit note number"
 msgstr "노트 번호 편집하기"
 
-#: midi_list_editor.cc:248
+#: midi_list_editor.cc:254
 msgid "edit note velocity"
 msgstr "노트 벨로시티 편집하기"
 
-#: midi_list_editor.cc:262
+#: midi_list_editor.cc:268
 msgid "edit note length"
 msgstr "노트 길이 편집하기"
 
-#: midi_list_editor.cc:464
+#: midi_list_editor.cc:475
 msgid "insert new note"
 msgstr "새 노트 삽입하기"
 
-#: midi_list_editor.cc:528
+#: midi_list_editor.cc:546
 msgid "delete notes (from list)"
 msgstr "노트들 삭제하기 (목록에서)"
 
-#: midi_list_editor.cc:603
+#: midi_list_editor.cc:621
 msgid "change note channel"
 msgstr "노트 채널 변경"
 
-#: midi_list_editor.cc:611 midi_list_editor.cc:620
+#: midi_list_editor.cc:629 midi_list_editor.cc:638
 msgid "change note number"
 msgstr "노트 번호 변경"
 
-#: midi_list_editor.cc:628
+#: midi_list_editor.cc:646
 msgid "change note velocity"
 msgstr "노트 벨로시티 변경"
 
-#: midi_list_editor.cc:692
+#: midi_list_editor.cc:705
 msgid "change note length"
 msgstr "노트 길이 변경"
 
@@ -13273,79 +10855,79 @@ msgstr "벨로시티 편집"
 msgid "add note"
 msgstr "노트 추가하기"
 
-#: midi_region_view.cc:1983
+#: midi_region_view.cc:1987
 msgid "step add"
 msgstr "스텝 추가하기"
 
-#: midi_region_view.cc:2077 midi_region_view.cc:2099
+#: midi_region_view.cc:2081 midi_region_view.cc:2103
 msgid "alter patch change"
 msgstr "패치 변경 바꾸기"
 
-#: midi_region_view.cc:2139
+#: midi_region_view.cc:2143
 msgid "add patch change"
 msgstr "패치 변경 추가하기"
 
-#: midi_region_view.cc:2156
+#: midi_region_view.cc:2160
 msgid "move patch change"
 msgstr "패치 변경 이동하기"
 
-#: midi_region_view.cc:2166
+#: midi_region_view.cc:2170
 msgid "delete patch change"
 msgstr "패치 변경 삭제하기"
 
-#: midi_region_view.cc:2211
+#: midi_region_view.cc:2215
 msgid "delete selection"
 msgstr "선택영역 삭제하기"
 
-#: midi_region_view.cc:2229
+#: midi_region_view.cc:2233
 msgid "delete note"
 msgstr "노트 삭제하기"
 
-#: midi_region_view.cc:2854
+#: midi_region_view.cc:2858
 msgid "move notes"
 msgstr "노트들 이동하기"
 
-#: midi_region_view.cc:2892
+#: midi_region_view.cc:2896
 msgid "copy notes"
 msgstr "노트들 복사하기"
 
-#: midi_region_view.cc:3472
+#: midi_region_view.cc:3476
 msgid "set velocities"
 msgstr "벨로시티 지정하기"
 
-#: midi_region_view.cc:3514
+#: midi_region_view.cc:3518
 msgid "change velocities"
 msgstr "벨로시티 변경하기"
 
-#: midi_region_view.cc:3580
+#: midi_region_view.cc:3584
 msgid "transpose"
 msgstr "트랜스포즈"
 
-#: midi_region_view.cc:3619
+#: midi_region_view.cc:3623
 msgid "change note lengths"
 msgstr "노트 길이 변경"
 
-#: midi_region_view.cc:3686
+#: midi_region_view.cc:3690
 msgid "nudge"
 msgstr "조금씩 밀기"
 
-#: midi_region_view.cc:3701
+#: midi_region_view.cc:3705
 msgid "change channel"
 msgstr "채널 변경"
 
-#: midi_region_view.cc:3749
+#: midi_region_view.cc:3753
 msgid "Bank "
 msgstr "뱅크 "
 
-#: midi_region_view.cc:3751 midi_time_axis.cc:330 midi_time_axis.cc:335
+#: midi_region_view.cc:3755 midi_time_axis.cc:330 midi_time_axis.cc:335
 msgid "Channel "
 msgstr "채널 "
 
-#: midi_region_view.cc:3927
+#: midi_region_view.cc:3931
 msgid "duplicate notes"
 msgstr "노트들 복제하기"
 
-#: midi_region_view.cc:4005
+#: midi_region_view.cc:4009
 msgid "paste"
 msgstr "붙여넣기"
 
@@ -13385,7 +10967,7 @@ msgstr "소스가 없는 MIDI 영역을 화면표시하려고 시도"
 msgid "attempt to display MIDI region with no model"
 msgstr "모델이 없는 MIDI 영역을 화면표시하려고 시도"
 
-#: midi_streamview.cc:541
+#: midi_streamview.cc:535
 msgid "failed to create MIDI region"
 msgstr "MIDI 영역을 만들지 못했습니다"
 
@@ -14689,15 +12271,15 @@ msgstr "200%"
 msgid "250%"
 msgstr "250%"
 
-#: new_user_wizard.cc:183
+#: new_user_wizard.cc:194
 msgid "Welcome to %1"
 msgstr "%1에 오신 것을 환영합니다"
 
-#: new_user_wizard.cc:247
+#: new_user_wizard.cc:223
 msgid "Default folder for %1 sessions"
 msgstr "%1 세션의 기본 폴더"
 
-#: new_user_wizard.cc:253
+#: new_user_wizard.cc:229
 msgid ""
 "<span size=\"larger\">Each project that you work on with %1 has its own "
 "folder.\n"
@@ -14714,7 +12296,7 @@ msgstr ""
 "\n"
 "<i>(새 세션은 어디에나 저장할 수 있습니다. 기본값일 뿐입니다.)</i></span>"
 
-#: new_user_wizard.cc:278
+#: new_user_wizard.cc:254
 msgid "Default folder for new sessions"
 msgstr "새 세션의 기본 폴더"
 
@@ -14937,19 +12519,19 @@ msgstr "시작 노트:"
 msgid "End Note:"
 msgstr "끝 노트:"
 
-#: patch_change_widget.cc:816 patch_change_widget.cc:835
+#: patch_change_widget.cc:817 patch_change_widget.cc:836
 msgid "Trigger Patch Select"
 msgstr "트리거 패치 선택"
 
-#: patch_change_widget.cc:820
+#: patch_change_widget.cc:821
 msgid "Chn %1"
 msgstr "Chn %1"
 
-#: patch_change_widget.cc:850
+#: patch_change_widget.cc:851
 msgid "Select Patch for \"%1\" - \"%2\""
 msgstr "\"%1\" - \"%2\"에 대한 패치 선택하기"
 
-#: patch_change_widget.cc:884 patch_change_widget.cc:897
+#: patch_change_widget.cc:885 patch_change_widget.cc:898
 msgid "Select Patch for \"%1\""
 msgstr "\"%1\"에 대한 패치 선택하기"
 
@@ -15866,6 +13448,10 @@ msgstr "플러그인 없음"
 #: port_group.cc:351
 msgid "Busses"
 msgstr "버스들"
+
+#: port_group.cc:352 trigger_page.cc:129
+msgid "Tracks"
+msgstr "트랙"
 
 #: port_group.cc:353
 msgid "Sidechains"
@@ -17407,2265 +14993,6 @@ msgid ""
 "When detaching the monitoring section, mark it as \"Utility\" window to stay "
 "in front."
 msgstr ""
-"모니터링 섹션을 � complete session, as it would be exported. When "
-"using this feature, remember to disable normalization in the session export "
-"profile."
-msgstr ""
-"이를 통해 사용자는 내보낼 때 전체 세션의 마스터 버스 출력에서 시그널의 소리세"
-"기를 분석하고 일치시킬 수 있습니다. 이 기능을 사용할 때 세션 내보내기 프로필"
-"에서 표준화를 비활성화해야 합니다."
-
-#: loudness_dialog.cc:303
-msgid ""
-"By default, a faster-than-realtime export is used to assess the loudness of "
-"the session. If any outboard gear is used, a <i>realtime</i> export is "
-"available, to play at normal speed."
-msgstr ""
-"기본적으로 실시간보다 빠른 내보내기가 세션의 소리세기를 평가하는 데 사용됩니"
-"다. 아웃보드 장비를 사용하는 경우 <i>실시간</i> 내보내기를 사용하여 정상 속도"
-"로 재생할 수 있습니다."
-
-#: loudness_dialog.cc:503
-msgid ""
-"Loudness measurement returned no results. Likely because the analyzed range "
-"is to short."
-msgstr ""
-"소리세기 측정값 결과가 반환되지 않았습니다. 분석 범위가 너무 짧기 때문일 수 "
-"있습니다."
-
-#: loudness_dialog.cc:513
-msgid "Export Loudness Report"
-msgstr "소리세기 보고서 내보내기"
-
-#: loudness_dialog.cc:523
-msgid "Save Loudness Preset"
-msgstr "소리세기 프리셋 저장하기"
-
-#: loudness_dialog.cc:689
-msgid ""
-"True-peak and loudness measurement failed. %1-VAMP analysis plugin is "
-"missing on your system. Please contact your vendor."
-msgstr ""
-"트루-피크 및 소리세기 측정값에 실패했습니다. %1-VAMP 분석 플러그인이 시스템"
-"에 없습니다. 벤더에 문의하시기 바랍니다."
-
-#: loudness_dialog.cc:776
-msgid "exceeds"
-msgstr "한도 초과"
-
-#: loudness_dialog.cc:777
-msgid "<b>    ±40 dB</b>"
-msgstr "<b>    ±40 dB</b>"
-
-#: loudness_dialog.cc:780
-msgid "<b>%1 dB</b>"
-msgstr "<b>%1 dB</b>"
-
-#: lua_script_manager.cc:42
-msgid "Add/Set"
-msgstr "추가/지정"
-
-#: lua_script_manager.cc:45
-msgid "Call"
-msgstr "호출"
-
-#: lua_script_manager.cc:46
-msgid "New Hook"
-msgstr "새 훅"
-
-#: lua_script_manager.cc:48 plugin_presets_ui.cc:36 slot_properties_box.cc:238
-msgid "Load"
-msgstr "불러오기"
-
-#: lua_script_manager.cc:81 lua_script_manager.cc:122 lua_script_manager.cc:158
-#: plugin_presets_ui.cc:81 plugin_ui.cc:538 script_selector.cc:57
-#: session_metadata_dialog.cc:715 session_metadata_dialog.cc:720
-#: template_dialog.cc:276
-msgid "Description"
-msgstr "설명"
-
-#: lua_script_manager.cc:83
-msgid ""
-"Action Scripts are user initiated actions (menu, shortcuts, toolbar-button) "
-"for batch processing or customized tasks."
-msgstr ""
-"액션 스크립트는 일괄 처리 또는 사용자 정의 작업을 위해 사용자 개시된 액션(메"
-"뉴, 단축키, 도구 모음 버튼)입니다."
-
-#: lua_script_manager.cc:98
-msgid "Action Scripts"
-msgstr "액션 스크립트"
-
-#: lua_script_manager.cc:105
-msgid "Signal(s)"
-msgstr "시그널"
-
-#: lua_script_manager.cc:124
-msgid ""
-"Lua action hooks are event-triggered callbacks for the Editor/Mixer GUI. "
-"Once a script is registered it is automatically triggered by events to "
-"perform some task."
-msgstr ""
-"Lua 액션 훅은 편집기/믹서 GUI에 대한 이벤트 트리거 콜백입니다. 스크립트가 등"
-"록되면 이벤트에 의해 자동으로 트리거되어 일부 작업을 수행합니다."
-
-#: lua_script_manager.cc:139
-msgid "Action Hooks"
-msgstr "액션 훅"
-
-#: lua_script_manager.cc:160
-msgid ""
-"Lua session scripts are loaded into processing engine and run in realtime. "
-"They are called periodically at the start of every audio cycle in the "
-"realtime process context before any processing takes place."
-msgstr ""
-"Lua 세션 스크립트는 처리 엔진에 로드되어 실시간으로 실행됩니다. 처리가 발생하"
-"기 전에 실시간 프로세스 컨텍스트에서 모든 오디오 사이클이 시작될 때 주기적으"
-"로 호출됩니다."
-
-#: lua_script_manager.cc:175
-msgid "Session Scripts"
-msgstr "세션 스크립트"
-
-#: lua_script_manager.cc:220
-msgid "Action %1"
-msgstr "액션 %1"
-
-#: lua_script_manager.cc:225 lua_script_manager.cc:307 rc_option_editor.cc:4788
-msgid "Unset"
-msgstr "지정해제"
-
-#: lua_script_manager.cc:446
-msgid "Session script '%1' removal failed: %2"
-msgstr "세션 스크립트 '%1' 제거 실패: %2"
-
-#: luainstance.cc:1367
-msgid "Loading user ui scripts file %1"
-msgstr "사용자 UI 스크립트 파일 %1 불러오는 중"
-
-#: luainstance.cc:1370
-msgid "cannot read ui scripts file \"%1\""
-msgstr "UI 스크립트 파일 \"%1\"을(를) 읽을 수 없습니다"
-
-#: luainstance.cc:1375
-msgid "user ui scripts file \"%1\" not loaded successfully."
-msgstr "사용자 UI 스크립트 파일 \"%1\"이(가) 성공적으로 불려오지 않았습니다."
-
-#: luainstance.cc:1400
-msgid "UI script file %1 not saved"
-msgstr "UI 스크립트 파일 %1가 저장되지 않았습니다"
-
-#: luainstance.cc:1556
-msgid "Add Shortcut or Lua Script"
-msgstr "단축키 또는 Lua 스크립트 추가하기"
-
-#: luainstance.cc:1560
-msgid "Add Lua Callback Hook"
-msgstr "Lua 콜백 훅 추가하기"
-
-#: luainstance.cc:1567
-msgid "Add Lua Session Script"
-msgstr "Lua 세션 스크립트 추가하기"
-
-#: luainstance.cc:1590
-msgid "Cannot read script '%1': %2"
-msgstr "스크립트 '%1'을(를) 읽을 수 없음: %2"
-
-#: luainstance.cc:1607
-msgid "Set Script Parameters"
-msgstr "스크립트 매개변수 지정"
-
-#: luainstance.cc:1632
-msgid "Session script '%1' instantiation failed: %2"
-msgstr "세션 스크립트 '%1' 인스턴스화 실패: %2"
-
-#: luainstance.cc:1636 luainstance.cc:1640
-msgid "Loading Session script '%1' failed: %2"
-msgstr "세션 스크립트 '%1'을(를) 불러오기 실패: %2"
-
-#: luawindow.cc:97
-msgid "Run"
-msgstr "실행"
-
-#: luawindow.cc:98
-msgid "Clear Output"
-msgstr "출력 지우기"
-
-#: luawindow.cc:102
-msgid "Revert"
-msgstr "되돌리기"
-
-#: luawindow.cc:167
-msgid "Select Editor Buffer"
-msgstr "편집기 버퍼 선택하기"
-
-#: luawindow.cc:258 luawindow.cc:263
-msgid "Window|Lua"
-msgstr "Lua"
-
-#: luawindow.cc:291 luawindow.cc:315
-msgid "LuaException: %1"
-msgstr "Lua 예외: %1"
-
-#: luawindow.cc:293 luawindow.cc:317
-msgid "Glib Exception: %1"
-msgstr "Glib 예외: %1"
-
-#: luawindow.cc:295 luawindow.cc:297 luawindow.cc:319 luawindow.cc:321
-msgid "C++ Exception: %1"
-msgstr "C++ 예외: %1"
-
-#: luawindow.cc:372
-msgid "Deleted %1"
-msgstr "%1 삭제됨"
-
-#: luawindow.cc:375
-msgid "Failed to delete %1"
-msgstr "%1 삭제 실패"
-
-#: luawindow.cc:441
-msgid ""
-"Missing script header.\n"
-"The script requires an '{ardour}' info table and a 'factory' function."
-msgstr ""
-"스크립트 헤더가 없습니다.\n"
-"스크립트에는 '{ardour}' 정보 테이블과 'factory' 함수가 필요합니다."
-
-#: luawindow.cc:446
-msgid "Script fails to compile."
-msgstr "스크립트가 컴파일되지 않습니다."
-
-#: luawindow.cc:453
-msgid "Invalid or missing script-name or script-type."
-msgstr "스크립트 이름 또는 스크립트 유형이 잘못되었거나 누락되었습니다."
-
-#: luawindow.cc:458
-msgid ""
-"Invalid script-type.\n"
-"Valid types are 'EditorAction' and 'Snippet'."
-msgstr ""
-"잘못된 스크립트 유형입니다.\n"
-"유효한 유형은 'EditorAction' 및 'Snippet'입니다."
-
-#: luawindow.cc:469 luawindow.cc:521
-msgid "Saved as %1"
-msgstr "%1(으)로 저장됨"
-
-#: luawindow.cc:472 luawindow.cc:524
-msgid "Error saving file: %1"
-msgstr "파일 저장 중 오류: %1"
-
-#: luawindow.cc:482
-msgid ""
-"Script with given name '%1' already exists.\n"
-"Use a different name in the descriptor."
-msgstr ""
-"이름이 '%1'인 스크립트가 이미 있습니다.\n"
-"설명자에서 다른 이름을 사용하십시오."
-
-#: luawindow.cc:667
-msgid "Scratch Buffer %1"
-msgstr "스크래치 버퍼 %1"
-
-#: luawindow.cc:669
-msgid "Action: '%1'"
-msgstr "액션: '%1'"
-
-#: luawindow.cc:671
-msgid "Snippet: %1"
-msgstr "스니펫: %1"
-
-#: luawindow.cc:683
-msgid "Save as"
-msgstr "다른 이름으로 저장하기"
-
-#: main.cc:102
-msgid "%1 could not connect to the audio backend."
-msgstr "%1를 오디오 백엔드에 연결할 수 없습니다."
-
-#: main.cc:152 main.cc:168
-msgid "The audio backend (%1) has failed, or terminated"
-msgstr "오디오 백엔드(%1)가 실패했거나 종료되었습니다"
-
-#: main.cc:155
-msgid ""
-"%2 exited unexpectedly, and without notifying %1.\n"
-"\n"
-"This could be due to misconfiguration or to an error inside %2.\n"
-"\n"
-"Click OK to exit %1."
-msgstr ""
-"%2이(가) %1에 알리지 않고 예기치 않게 종료되었습니다.\n"
-"\n"
-"잘못된 구성이나 %2 내부의 오류 때문일 수 있습니다.\n"
-"\n"
-"확인을 클릭하여 %1를 종료하십시오."
-
-#: main.cc:169
-msgid "%2 exited unexpectedly, and without notifying %1."
-msgstr "%2이(가) %1에 알리지 않고 예기치 않게 종료되었습니다."
-
-#: main.cc:216
-msgid ""
-"\n"
-"   %1 could not understand your command line      "
-msgstr ""
-"\n"
-"   %1에서 명령줄을 이해할 수 없습니다      "
-
-#: main.cc:218
-msgid "An error was encountered while launching %1"
-msgstr "%1를 실행하는 동안 오류가 발생했습니다"
-
-#: main.cc:357
-msgid " (built using "
-msgstr " (사용하여 구축 "
-
-#: main.cc:360
-msgid " and GCC version "
-msgstr " 및 GCC 버전 "
-
-#: main.cc:370
-msgid "Copyright (C) 1999-2023 Paul Davis"
-msgstr "Copyright (C) 1999-2023 Paul Davis"
-
-#: main.cc:371
-msgid ""
-"Some portions Copyright (C) Steve Harris, Ari Johnson, Brett Viren, Joel "
-"Baker, Robin Gareus"
-msgstr ""
-"몇몇 일부 저작권(C) Steve Harris, Ari Johnson, Brett Viren, Joel Baker, "
-"Robin Gareus"
-
-#: main.cc:373
-msgid "%1 comes with ABSOLUTELY NO WARRANTY"
-msgstr "%1는 '절대 보증 없음'으로 제공됩니다"
-
-#: main.cc:374
-msgid "not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE."
-msgstr "'상품성' 또는 '특정 목적에 대한 적합성'에도 해당되지 않습니다."
-
-#: main.cc:375
-msgid "This is free software, and you are welcome to redistribute it "
-msgstr ""
-"이것은 자유 소프트웨어이며, 그리고 당신이 그것을 재배포하는 것을 환영합니다 "
-
-#: main.cc:376
-msgid "under certain conditions; see the source for copying conditions."
-msgstr "특정 조건 하에서; 복사 조건에 대한 소스를 참조하십시오."
-
-#: main.cc:384
-msgid "%1 is already running."
-msgstr "%1는 이미 실행 중입니다."
-
-#: main.cc:426
-msgid "could not initialize %1."
-msgstr "%1를 초기화할 수 없습니다."
-
-#: main.cc:428
-msgid ""
-"Could not initialize %1 (likely due to corrupt config files).\n"
-"Run %1 from a commandline for more information."
-msgstr ""
-"%1를 초기화할 수 없습니다(손상된 구성 파일 때문일 수 있음).\n"
-"자세한 내용을 보려면 명령줄에서 %1를 실행하십시오."
-
-#: main.cc:437
-msgid "Cannot xinstall SIGPIPE error handler"
-msgstr "오류 핸들러를 설치 및 제거할 수 없습니다"
-
-#: main.cc:444
-msgid "Cannot install SIGUSR1 error handler"
-msgstr "SIGUSR1 오류 핸들러를 설치할 수 없습니다"
-
-#: main.cc:446
-msgid "Installed SIGUSR1 debug handler"
-msgstr "설치된 SIGUSR1 디버그 핸들러"
-
-#: main.cc:456
-msgid "Could not complete pre-GUI initialization"
-msgstr "사전 GUI 초기화를 완료할 수 없습니다"
-
-#: main.cc:463
-msgid "could not create %1 GUI"
-msgstr "%1 GUI를 만들 수 없습니다"
-
-#: main_clock.cc:68
-msgid "Display absolute time"
-msgstr "절대 시간 화면표시"
-
-#: main_clock.cc:73
-msgid "Display delta to edit cursor"
-msgstr "커서를 편집할 델타 화면표시"
-
-#: main_clock.cc:78
-msgid "Display delta to origin marker"
-msgstr "원점 마커에 대한 델타 화면표시"
-
-#: main_clock.cc:86 tempo_dialog.cc:74
-msgid "Edit Tempo"
-msgstr "템포 편집하기"
-
-#: main_clock.cc:87 tempo_dialog.cc:631
-msgid "Edit Time Signature"
-msgstr "박자표 편집하기"
-
-#: main_clock.cc:88
-msgid "Insert Tempo Change"
-msgstr "템포 변경 삽입하기"
-
-#: main_clock.cc:89
-msgid "Insert Time Signature Change"
-msgstr "박자표 변경 삽입하기"
-
-#: marker.cc:363 tempo_curve.cc:84 tempo_curve.cc:85
-msgid "MarkerText"
-msgstr "표시자텍스트"
-
-#: midi_channel_selector.cc:164 midi_channel_selector.cc:396
-#: midi_channel_selector.cc:435 rc_option_editor.cc:2697 recorder_ui.cc:83
-#: session_archive_dialog.cc:46 session_archive_dialog.cc:51
-#: session_archive_dialog.cc:199 session_archive_dialog.cc:210
-#: session_archive_dialog.cc:224 sfdb_ui.cc:785 trigger_ui.cc:700
-#: trigger_ui.cc:733
-msgid "None"
-msgstr "없음"
-
-#: midi_channel_selector.cc:172
-msgid "Force"
-msgstr "강제"
-
-#: midi_channel_selector.cc:331
-msgid "MIDI Channel Control"
-msgstr "MIDI 채널 컨트롤"
-
-#: midi_channel_selector.cc:333
-msgid "Playback all channels"
-msgstr "플레이백 모든 채널"
-
-#: midi_channel_selector.cc:334
-msgid "Play only selected channels"
-msgstr "선택된 채널만 재생하기"
-
-#: midi_channel_selector.cc:335
-msgid "Use a single fixed channel for all playback"
-msgstr "모든 플레이백에 하나의 고정된 채널 사용"
-
-#: midi_channel_selector.cc:336
-msgid "Record all channels"
-msgstr "모든 채널 녹음"
-
-#: midi_channel_selector.cc:337
-msgid "Record only selected channels"
-msgstr "선택된 채널만 녹음하기"
-
-#: midi_channel_selector.cc:338
-msgid "Force all channels to 1 channel"
-msgstr "한 채널에서 모든 채널 재생"
-
-#: midi_channel_selector.cc:373
-msgid "Inbound"
-msgstr "인바운드"
-
-#: midi_channel_selector.cc:392
-msgid "Click to enable recording all channels"
-msgstr "클릭: 모든 채널 녹음 활성화"
-
-#: midi_channel_selector.cc:397
-msgid "Click to disable recording all channels"
-msgstr "클릭: 모든 채널 녹음 비활성화"
-
-#: midi_channel_selector.cc:402
-msgid "Click to invert currently selected recording channels"
-msgstr "클릭: 현재 선택된 녹음 채널 반전하기"
-
-#: midi_channel_selector.cc:412
-msgid "Playback"
-msgstr "플레이백"
-
-#: midi_channel_selector.cc:431
-msgid "Click to enable playback of all channels"
-msgstr "클릭: 모든 채널의 플레이백 활성화"
-
-#: midi_channel_selector.cc:436
-msgid "Click to disable playback of all channels"
-msgstr "클릭: 모든 채널의 플레이백 비활성화"
-
-#: midi_channel_selector.cc:441
-msgid "Click to invert current selected playback channels"
-msgstr "클릭: 현재 선택된 플레이백 채널 반전하기"
-
-#: midi_channel_selector.cc:619
-msgid "Click to toggle playback of channel %1"
-msgstr "클릭: %1 채널의 플레이백 토글하기"
-
-#: midi_channel_selector.cc:627
-msgid "Click to force all MIDI channel messages to channel %1"
-msgstr "클릭: 모든 MIDI 채널 메시지를 %1 채널로 강제 실행"
-
-#: midi_channel_selector.cc:719
-msgid "Click to toggle recording of channel %1"
-msgstr "클릭: %1 채널의 녹음 토글하기"
-
-#: midi_channel_selector.cc:727
-msgid "Click to force all recorded channels to %1"
-msgstr "클릭: 녹음된 모든 채널을 %1(으)로 강제 실행"
-
-#: midi_clip_editor.cc:94
-msgid "MIDI Region Trimmer:"
-msgstr "MIDI 영역 트리머:"
-
-#: midi_export_dialog.cc:37
-msgid "Export MIDI: %1"
-msgstr "MIDI 내보내기: %1"
-
-#: midi_list_editor.cc:57 trigger_ui.cc:714
-msgid "Whole"
-msgstr "온음표"
-
-#: midi_list_editor.cc:58
-msgid "Half"
-msgstr "2분음표"
-
-#: midi_list_editor.cc:59
-msgid "Triplet"
-msgstr "셋잇단음표"
-
-#: midi_list_editor.cc:60
-msgid "Quarter"
-msgstr "4분음표"
-
-#: midi_list_editor.cc:61
-msgid "Eighth"
-msgstr "8분음표"
-
-#: midi_list_editor.cc:62
-msgid "Sixteenth"
-msgstr "16분음표"
-
-#: midi_list_editor.cc:63
-msgid "Thirty-second"
-msgstr "32분음표"
-
-#: midi_list_editor.cc:64
-msgid "Sixty-fourth"
-msgstr "64분음표"
-
-#: midi_list_editor.cc:107
-msgid "Num"
-msgstr "번호"
-
-#: midi_list_editor.cc:109
-msgid "Vel"
-msgstr "세기"
-
-#: midi_list_editor.cc:219
-msgid "edit note start"
-msgstr "노트 시작 편집하기"
-
-#: midi_list_editor.cc:228
-msgid "edit note channel"
-msgstr "노트 채널 편집하기"
-
-#: midi_list_editor.cc:238
-msgid "edit note number"
-msgstr "노트 번호 편집하기"
-
-#: midi_list_editor.cc:248
-msgid "edit note velocity"
-msgstr "노트 벨로시티 편집하기"
-
-#: midi_list_editor.cc:262
-msgid "edit note length"
-msgstr "노트 길이 편집하기"
-
-#: midi_list_editor.cc:464
-msgid "insert new note"
-msgstr "새 노트 삽입하기"
-
-#: midi_list_editor.cc:528
-msgid "delete notes (from list)"
-msgstr "노트들 삭제하기 (목록에서)"
-
-#: midi_list_editor.cc:603
-msgid "change note channel"
-msgstr "노트 채널 변경"
-
-#: midi_list_editor.cc:611 midi_list_editor.cc:620
-msgid "change note number"
-msgstr "노트 번호 변경"
-
-#: midi_list_editor.cc:628
-msgid "change note velocity"
-msgstr "노트 벨로시티 변경"
-
-#: midi_list_editor.cc:692
-msgid "change note length"
-msgstr "노트 길이 변경"
-
-#: midi_region_view.cc:807
-msgid "channel edit"
-msgstr "채널 편집"
-
-#: midi_region_view.cc:843
-msgid "velocity edit"
-msgstr "벨로시티 편집"
-
-#: midi_region_view.cc:902
-msgid "add note"
-msgstr "노트 추가하기"
-
-#: midi_region_view.cc:1983
-msgid "step add"
-msgstr "스텝 추가하기"
-
-#: midi_region_view.cc:2077 midi_region_view.cc:2099
-msgid "alter patch change"
-msgstr "패치 변경 바꾸기"
-
-#: midi_region_view.cc:2139
-msgid "add patch change"
-msgstr "패치 변경 추가하기"
-
-#: midi_region_view.cc:2156
-msgid "move patch change"
-msgstr "패치 변경 이동하기"
-
-#: midi_region_view.cc:2166
-msgid "delete patch change"
-msgstr "패치 변경 삭제하기"
-
-#: midi_region_view.cc:2211
-msgid "delete selection"
-msgstr "선택영역 삭제하기"
-
-#: midi_region_view.cc:2229
-msgid "delete note"
-msgstr "노트 삭제하기"
-
-#: midi_region_view.cc:2854
-msgid "move notes"
-msgstr "노트들 이동하기"
-
-#: midi_region_view.cc:2892
-msgid "copy notes"
-msgstr "노트들 복사하기"
-
-#: midi_region_view.cc:3472
-msgid "set velocities"
-msgstr "벨로시티 지정하기"
-
-#: midi_region_view.cc:3514
-msgid "change velocities"
-msgstr "벨로시티 변경하기"
-
-#: midi_region_view.cc:3580
-msgid "transpose"
-msgstr "트랜스포즈"
-
-#: midi_region_view.cc:3619
-msgid "change note lengths"
-msgstr "노트 길이 변경"
-
-#: midi_region_view.cc:3686
-msgid "nudge"
-msgstr "조금씩 밀기"
-
-#: midi_region_view.cc:3701
-msgid "change channel"
-msgstr "채널 변경"
-
-#: midi_region_view.cc:3749
-msgid "Bank "
-msgstr "뱅크 "
-
-#: midi_region_view.cc:3751 midi_time_axis.cc:330 midi_time_axis.cc:335
-msgid "Channel "
-msgstr "채널 "
-
-#: midi_region_view.cc:3927
-msgid "duplicate notes"
-msgstr "노트들 복제하기"
-
-#: midi_region_view.cc:4005
-msgid "paste"
-msgstr "붙여넣기"
-
-#: midi_region_operations_box.cc:48
-msgid "MIDI Region Operations:"
-msgstr "MIDI 영역 오퍼레이션:"
-
-#: midi_region_operations_box.cc:63
-msgid "Legatize..."
-msgstr "레가토..."
-
-#: midi_region_properties_box.cc:51
-msgid "MIDI Region Properties:"
-msgstr "MIDI 영역 속성:"
-
-#: midi_region_properties_box.cc:59
-msgid "Patches..."
-msgstr "패치들..."
-
-#: midi_region_properties_box.cc:65
-msgid "CCs..."
-msgstr "CC..."
-
-#: midi_trigger_properties_box.cc:57 slot_properties_box.cc:255
-msgid "Send Patches"
-msgstr "패치들 전송하기"
-
-#: midi_trigger_properties_box.cc:63
-msgid "Send CCs"
-msgstr "CC 전송하기"
-
-#: midi_streamview.cc:209
-msgid "attempt to display MIDI region with no source"
-msgstr "소스가 없는 MIDI 영역을 화면표시하려고 시도"
-
-#: midi_streamview.cc:214
-msgid "attempt to display MIDI region with no model"
-msgstr "모델이 없는 MIDI 영역을 화면표시하려고 시도"
-
-#: midi_streamview.cc:541
-msgid "failed to create MIDI region"
-msgstr "MIDI 영역을 만들지 못했습니다"
-
-#: midi_time_axis.cc:274
-msgid "External MIDI Device"
-msgstr "외부 MIDI 장치"
-
-#: midi_time_axis.cc:275
-msgid "External Device Mode"
-msgstr "외부 장치 모드"
-
-#: midi_time_axis.cc:276
-msgid "MIDNAM Channel Display"
-msgstr "MIDNAM 채널 화면표시"
-
-#: midi_time_axis.cc:412 midi_time_axis.cc:418 midi_time_axis.cc:434
-#: midi_time_axis.cc:504 midi_time_axis.cc:565
-msgid "Plugin Provided"
-msgstr "플러그인 제공됨"
-
-#: midi_time_axis.cc:739
-msgid "Show Full Range"
-msgstr "전체 범위 표시하기"
-
-#: midi_time_axis.cc:744
-msgid "Fit Contents"
-msgstr "콘텐츠 맞추기"
-
-#: midi_time_axis.cc:748
-msgid "Note Range"
-msgstr "노트 범위"
-
-#: midi_time_axis.cc:749
-msgid "Note Mode"
-msgstr "노트 모드"
-
-#: midi_time_axis.cc:750
-msgid "Channel Selector..."
-msgstr "채널 선택도구..."
-
-#: midi_time_axis.cc:753 mixer_strip.cc:1161 route_time_axis.cc:791
-#: trigger_strip.cc:295
-msgid "Patch Selector..."
-msgstr "패치 선택도구..."
-
-#: midi_time_axis.cc:756
-msgid "Restore Patch"
-msgstr "패치 복원"
-
-#: midi_time_axis.cc:761
-msgid "Color Mode"
-msgstr "색상 모드"
-
-#: midi_time_axis.cc:828
-msgid "Bender"
-msgstr "벤더"
-
-#: midi_time_axis.cc:831
-msgid "Pressure"
-msgstr "압력"
-
-#: midi_time_axis.cc:840 midi_time_axis.cc:1155
-msgid "Controllers"
-msgstr "컨트롤러"
-
-#: midi_time_axis.cc:842
-msgid "Polyphonic Pressure"
-msgstr "다운율 압력"
-
-#: midi_time_axis.cc:847
-msgid "No MIDI Channels selected"
-msgstr "선택된 MIDI 채널 없음"
-
-#: midi_time_axis.cc:904 midi_time_axis.cc:1032
-msgid "Hide all channels"
-msgstr "모든 채널 숨김"
-
-#: midi_time_axis.cc:908 midi_time_axis.cc:1036
-msgid "Show all channels"
-msgstr "모든 채널 표시하기"
-
-#: midi_time_axis.cc:919 midi_time_axis.cc:1047
-msgid "Channel %1"
-msgstr "채널 %1"
-
-#: midi_time_axis.cc:1193 midi_time_axis.cc:1196
-msgid "Controller %1"
-msgstr "컨트롤러 %1"
-
-#: midi_time_axis.cc:1205 midi_time_axis.cc:1208
-msgid "Controllers %1-%2"
-msgstr "컨트롤러 %1-%2"
-
-#: midi_time_axis.cc:1226
-msgid "Sustained"
-msgstr "서스테인됨"
-
-#: midi_time_axis.cc:1233
-msgid "Percussive"
-msgstr "퍼커시브"
-
-#: midi_time_axis.cc:1253
-msgid "Meter Colors"
-msgstr "미터 색상"
-
-#: midi_time_axis.cc:1260
-msgid "Channel Colors"
-msgstr "채널 색상"
-
-#: midi_time_axis.cc:1267
-msgid "Track Color"
-msgstr "트랙 색상"
-
-#: midi_time_axis.cc:1338
-msgid ""
-"Are you sure you want to\n"
-"show all MIDI automation lanes?"
-msgstr ""
-"모든 MIDI 오토메이션 레인을\n"
-"표시하시겠습니까?"
-
-#: midi_time_axis.cc:1340 route_time_axis.cc:555 vca_time_axis.cc:482
-msgid "Show All Automation"
-msgstr "모든 오토메이션 표시하기"
-
-#: midi_time_axis.cc:1342
-msgid ""
-"There are a total of 16 MIDI channels times 128 Control-Change parameters, "
-"not including other MIDI controls. Showing all will add more than 2000 "
-"automation lanes which is not generally useful. This will take some time and "
-"also slow down the GUI significantly."
-msgstr ""
-"다른 MIDI 컨트롤을 포함하지 않는 총 16개의 MIDI 채널과 128개의 컨트롤 변경 매"
-"개변수가 있습니다. 모두 표시하면 일반적으로 유용하지 않은 2000개 이상의 오토"
-"메이션 레인이 추가됩니다. 이 작업은 시간이 좀 걸리고 GUI 속도도 크게 느려집니"
-"다."
-
-#: midi_tracer.cc:55
-msgid "Line history: "
-msgstr "라인 히스토리: "
-
-#: midi_tracer.cc:62
-msgid "Auto-Scroll"
-msgstr "자동 스크롤"
-
-#: midi_tracer.cc:63
-msgid "Decimal"
-msgstr "소수"
-
-#: midi_tracer.cc:64
-msgid "Enabled"
-msgstr "활성화됨"
-
-#: midi_tracer.cc:65
-msgid "Delta times"
-msgstr "델타 시간"
-
-#: midi_tracer.cc:85
-msgid "Port:"
-msgstr "포트 :"
-
-#: midi_tracer.cc:194
-msgid "HW: %1"
-msgstr "HW: %1"
-
-#: midi_velocity_dialog.cc:31
-msgid "New velocity"
-msgstr "새로운 벨로시티"
-
-#: mini_timeline.cc:80
-msgid ""
-"<b>Navigation Timeline</b>. Use left-click to locate to time position or "
-"marker; scroll-wheel to jump, hold %1 for fine grained and %2 + %3 for extra-"
-"fine grained control. Right-click to set display range. The display unit is "
-"defined by the primary clock."
-msgstr ""
-"<b>네비게이션 타임라인</b>. 마우스 왼쪽 버튼을 클릭하여 시간 위치 또는 마커"
-"로 위치 지정; 스크롤 휠을 눌러 점프하고 미세 조정하려면 %1을 누르고 매우 미"
-"세 조정하려면 %2 + %3을 누르십시오. 마우스 오른쪽 버튼을 클릭하여 화면표시 범"
-"위를 설정합니다. 화면표시 단위는 기본 클록에 의해 정의됩니다."
-
-#: mini_timeline.cc:827 rc_option_editor.cc:1159
-msgid "30 sec"
-msgstr "30초"
-
-#: mini_timeline.cc:828 rc_option_editor.cc:1161
-msgid "1 min"
-msgstr "1분"
-
-#: mini_timeline.cc:829
-msgid "2 mins"
-msgstr "2분"
-
-#: mini_timeline.cc:830
-msgid "5 mins"
-msgstr "5분"
-
-#: mini_timeline.cc:831
-msgid "10 mins"
-msgstr "10분"
-
-#: mini_timeline.cc:832
-msgid "20 mins"
-msgstr "20분"
-
-#: missing_file_dialog.cc:40
-msgid "Missing File"
-msgstr "누락된 파일"
-
-#: missing_file_dialog.cc:43
-msgid "Select a folder to search"
-msgstr "검색할 폴더 선택하기"
-
-#: missing_file_dialog.cc:44
-msgid "Add chosen folder to search path, and try again"
-msgstr "선택한 폴더를 검색 경로에 추가하고 다시 시도하십시오"
-
-#: missing_file_dialog.cc:46
-msgid "Stop loading this session"
-msgstr "이 세션 불러오기 중지하기"
-
-#: missing_file_dialog.cc:47
-msgid "Skip all missing files"
-msgstr "누락된 모든 파일 건너뛰기"
-
-#: missing_file_dialog.cc:48
-msgid "Skip this file"
-msgstr "이 파일 건너뛰기"
-
-#: missing_file_dialog.cc:62 tempo_dialog.cc:166 tempo_dialog.cc:167
-#: tempo_dialog.cc:684 tempo_dialog.cc:685
-msgid "audio"
-msgstr "오디오"
-
-#: missing_file_dialog.cc:79
-msgid ""
-"%1 cannot find the %2 file\n"
-"\n"
-"<i>%3</i>\n"
-"\n"
-"in any of these folders:\n"
-"\n"
-"\t\t\t\t\t<tt>%4</tt>\n"
-"\n"
-msgstr ""
-"%1는 %2 파일을 찾을 수 없습니다\n"
-"\n"
-"<i>%3</i>\n"
-"\n"
-"다음 폴더 중 하나에서:\n"
-"\n"
-"\t\t\t\t\t<tt>%4</tt>\n"
-"\n"
-
-#: missing_file_dialog.cc:113
-msgid "Click to choose an additional folder"
-msgstr "클릭: 추가 폴더 고르기"
-
-#: missing_filesource_dialog.cc:33
-msgid "Missing Source Files"
-msgstr "누락된 원본 파일"
-
-#: missing_filesource_dialog.cc:40 missing_plugin_dialog.cc:51
-#: plugin_manager_ui.cc:355 transcode_video_dialog.cc:64
-msgid "OK"
-msgstr "확인"
-
-#: missing_filesource_dialog.cc:46
-msgid ""
-"This session misses following %1 files.\n"
-"They have been replaced with silence:\n"
-"\n"
-msgstr ""
-"이 세션은 %1 파일을 따르지 않습니다.\n"
-"그것은 무음으로 교체되었습니다 :\n"
-"\n"
-
-#: missing_filesource_dialog.cc:57
-msgid "... and %1 more files. See the Log window for a complete list.\n"
-msgstr ""
-"... 및 %1개 더 많은 파일이 있습니다. 전체 목록은 로그 창을 참조하십시오.\n"
-
-#: missing_filesource_dialog.cc:60
-msgid ""
-"\n"
-"The Regions and edits have been retained.\n"
-"If this is unexpected, manually locate the files and restore them in the "
-"session folder.\n"
-msgstr ""
-"\n"
-"영역 및 편집 내용이 유지됩니다.\n"
-"예기치 않은 경우, 파일을 수동으로 위치를 지정하고 세션 폴더에서 복원하십시"
-"오.\n"
-
-#: missing_filesource_dialog.cc:64
-msgid ""
-"Editing the MIDI files by adding new content will re-create the file and "
-"disable this warning,\n"
-"but also prevent future recovery of the original in the existing region(s).\n"
-msgstr ""
-"새 콘텐츠를 추가하여 MIDI 파일을 편집하면 파일이 다시 생성되고 이 경고가 비활"
-"성화되지만,\n"
-"기존 영역에서 원본을 나중에 복구할 수도 없습니다.\n"
-
-#: missing_plugin_dialog.cc:35
-msgid "Missing Plugins"
-msgstr "누락된 플러그인"
-
-#: missing_plugin_dialog.cc:43
-msgid ""
-"This session contains the following plugins that cannot be found on this "
-"system:\n"
-"\n"
-msgstr ""
-"이 세션에는 이 시스템에서 찾을 수 없는 다음 플러그인이 포함되어 있음:\n"
-"\n"
-
-#: missing_plugin_dialog.cc:48
-msgid ""
-"\n"
-"Those plugins will be replaced with inactive stubs until the session is "
-"reloaded.\n"
-msgstr ""
-"\n"
-"세션이 다시 불러오기될 때까지 이러한 플러그인은 비활성화 스텁으로 교체됩니"
-"다.\n"
-
-#: missing_plugin_dialog.cc:53
-msgid ""
-"It is recommended that you install missing, re-scan updated plugins, and re-"
-"load the session.\n"
-msgstr ""
-"누락된 플러그인을 설치하고 업데이트된 플러그인을 다시 스캔하고 세션을 다시 불"
-"러오는 것이 좋습니다.\n"
-
-#: missing_plugin_dialog.cc:55
-msgid "Third party plugins have not yet been indexed."
-msgstr "타사 플러그인은 아직 인덱스되지 않았습니다."
-
-#: missing_plugin_dialog.cc:56
-msgid "Scan %1 plugins now?"
-msgstr "지금 %1 플러그인을 스캔하시겠습니까?"
-
-#: missing_plugin_dialog.cc:58 plugin_selector.cc:1205
-msgid "AudioUnit and VST"
-msgstr "AudioUnit 및 VST"
-
-#: missing_plugin_dialog.cc:60 plugin_selector.cc:1199 plugin_selector.cc:1207
-#: rc_option_editor.cc:4036
-msgid "VST"
-msgstr "VST"
-
-#: missing_plugin_dialog.cc:64
-msgid "Yes"
-msgstr "예"
-
-#: missing_plugin_dialog.cc:65 rc_option_editor.cc:3097
-msgid "No"
-msgstr "아니요"
-
-#: mixer_strip.cc:192
-msgid "Click to toggle the width of this mixer strip."
-msgstr "이 믹서 스트립의 너비를 토글하려면 클릭하십시오."
-
-#: mixer_strip.cc:194
-msgid ""
-"\n"
-"%1-%2-click to toggle the width of all strips."
-msgstr ""
-"\n"
-"%1-%2-클릭하여 모든 스트립의 너비를 토글합니다."
-
-#: mixer_strip.cc:203
-msgid "Hide this mixer strip"
-msgstr "이 믹서 스트립 숨김"
-
-#: mixer_strip.cc:218
-msgid "Isolate Solo"
-msgstr "솔로 고립"
-
-#: mixer_strip.cc:226
-msgid "Lock Solo Status"
-msgstr "솔로 상태 잠금"
-
-#: mixer_strip.cc:228 mixer_strip.cc:1721
-msgid "SoloLock|Lock"
-msgstr "잠금"
-
-#: mixer_strip.cc:229 mixer_strip.cc:1720
-msgid "Iso"
-msgstr "고립"
-
-#: mixer_strip.cc:282
-msgid "Mix group"
-msgstr "그룹 섞기"
-
-#: mixer_strip.cc:294
-msgid "Trim: "
-msgstr "트림: "
-
-#: mixer_strip.cc:324
-msgid ""
-"Double-click to edit the route color.\n"
-"Right-click to show the route operations context menu."
-msgstr ""
-"경로 색상을 편집하려면 두 번 클릭합니다.\n"
-"경로 작업 컨텍스트 메뉴를 표시하려면 오른쪽 버튼을 클릭합니다."
-
-#: mixer_strip.cc:405 rc_option_editor.cc:2828
-msgid "Phase Invert"
-msgstr "페이즈 반전"
-
-#: mixer_strip.cc:406 rc_option_editor.cc:2829
-msgid "Record & Monitor"
-msgstr "녹음 & 모니터"
-
-#: mixer_strip.cc:407 rc_option_editor.cc:2830
-msgid "Solo Iso / Lock"
-msgstr "솔로 고립 / 잠금"
-
-#: mixer_strip.cc:410 rc_option_editor.cc:2833
-msgid "VCA Assigns"
-msgstr "VCA 할당"
-
-#: mixer_strip.cc:411 rc_option_editor.cc:2834
-msgid "Trigger Grid"
-msgstr "트리거 그리드"
-
-#: mixer_strip.cc:412
-msgid "Trigger Master"
-msgstr "트리거 마스터"
-
-#: mixer_strip.cc:616
-msgid "Show/Hide Monitoring Section"
-msgstr "모니터링 섹션 표시/숨김"
-
-#: mixer_strip.cc:639
-msgid "Loudness|LAN"
-msgstr "LAN"
-
-#: mixer_strip.cc:643
-msgid "Master output volume"
-msgstr "마스터 출력 볼륨"
-
-#: mixer_strip.cc:644
-msgid "Measure loudness of the session, normalize master output volume"
-msgstr "세션의 소리세기를 측정하고 마스터 출력 볼륨을 노멀라이즈합니다"
-
-#: mixer_strip.cc:679
-msgid "Enable/Disable MIDI input"
-msgstr "MIDI 입력 활성화/비활성화"
-
-#: mixer_strip.cc:991 mixer_strip.cc:1002
-msgid "Cmt"
-msgstr "주석"
-
-#: mixer_strip.cc:1052
-msgid "Grp"
-msgstr "그룹"
-
-#: mixer_strip.cc:1055
-msgid "~G"
-msgstr "~G"
-
-#: mixer_strip.cc:1093 route_time_axis.cc:639 track_record_axis.cc:499
-#: trigger_strip.cc:251
-msgid "Inputs..."
-msgstr "입력..."
-
-#: mixer_strip.cc:1136 plugin_pin_dialog.cc:1077 trigger_strip.cc:280
-msgid "Strict I/O"
-msgstr "엄격한 I/O"
-
-#: mixer_strip.cc:1146
-msgid "Record Pre-Fader"
-msgstr "프리페이더 녹음하기"
-
-#: mixer_strip.cc:1147
-msgid "Record Post-Fader"
-msgstr "포스트페이더 녹음하기"
-
-#: mixer_strip.cc:1148
-msgid "Custom Record+Playback Positions"
-msgstr "사용자 지정 녹음+플레이백 위치"
-
-#: mixer_strip.cc:1150
-msgid "Disk I/O..."
-msgstr "디스크 I/O..."
-
-#: mixer_strip.cc:1157 processor_box.cc:4195 trigger_strip.cc:291
-msgid "Pin Connections..."
-msgstr "핀 연결..."
-
-#: mixer_strip.cc:1167 trigger_strip.cc:301
-msgid "Fan out to Busses"
-msgstr "버스로 팬아웃"
-
-#: mixer_strip.cc:1168 trigger_strip.cc:302
-msgid "Fan out to Tracks"
-msgstr "트랙으로 팬아웃"
-
-#: mixer_strip.cc:1196 route_time_axis.cc:890 trigger_strip.cc:330
-msgid "Duplicate..."
-msgstr "복제하기..."
-
-#: mixer_strip.cc:1360 processor_box.cc:4205
-msgid "Custom LAN Amp Position"
-msgstr "사용자 지정 LAN 앰프 위치"
-
-#: mixer_strip.cc:1505
-msgid "Pre"
-msgstr "프리"
-
-#: mixer_strip.cc:1509
-msgid "Post"
-msgstr "포스트"
-
-#: mixer_strip.cc:1525
-msgid "Meter|In"
-msgstr "In"
-
-#: mixer_strip.cc:1529
-msgid "Meter|Pr"
-msgstr "Pr"
-
-#: mixer_strip.cc:1533
-msgid "Meter|Po"
-msgstr "Po"
-
-#: mixer_strip.cc:1537
-msgid "Meter|O"
-msgstr "O"
-
-#: mixer_strip.cc:1542
-msgid "Meter|C"
-msgstr "C"
-
-#: mixer_strip.cc:1698 route_ui.cc:246 track_record_axis.cc:260
-#: trigger_strip.cc:342
-msgid "Disk"
-msgstr "디스크"
-
-#: mixer_strip.cc:1700 mixer_strip.cc:1734
-msgid "Mon"
-msgstr "모니터"
-
-#: mixer_strip.cc:1731 meter_strip.cc:408 track_record_axis.cc:256
-msgid "MonitorInput|I"
-msgstr "I"
-
-#: mixer_strip.cc:1732 meter_strip.cc:409 track_record_axis.cc:257
-msgid "MonitorDisk|D"
-msgstr "D"
-
-#: mixer_strip.cc:1747 meter_strip.cc:400 route_time_axis.cc:2345
-#: vca_master_strip.cc:227 vca_time_axis.cc:273
-msgid "AfterFader|A"
-msgstr "A"
-
-#: mixer_strip.cc:1750
-msgid "Prefader|P"
-msgstr "P"
-
-#: mixer_strip.cc:1755
-msgid "SoloIso|I"
-msgstr "I"
-
-#: mixer_strip.cc:1756
-msgid "SoloLock|L"
-msgstr "L"
-
-#: mixer_strip.cc:2046 meter_strip.cc:895
-msgid "Change all in Group to %1"
-msgstr "그룹의 모든 항목을 %1(으)로 변경"
-
-#: mixer_strip.cc:2048 meter_strip.cc:897
-msgid "Change all to %1"
-msgstr "모두 %1(으)로 변경"
-
-#: mixer_strip.cc:2050 meter_strip.cc:899
-msgid "Change same track-type to %1"
-msgstr "동일한 트랙 유형을 %1(으)로 변경"
-
-#: mixer_ui.cc:175 mixer_ui.cc:1730
-msgid ""
-"Right-click or Double-click here\n"
-"to add Track, Bus, or VCA channels"
-msgstr ""
-"여기를 오른쪽 버튼 클릭 또는 두 번 클릭:\n"
-"트랙, 버스 또는 VCA 채널 추가"
-
-#: mixer_ui.cc:201 route_time_axis.cc:266 route_time_axis.cc:812
-msgid "Group"
-msgstr "그룹"
-
-#: mixer_ui.cc:246 mixer_ui.cc:268 mixer_ui.cc:271
-msgid "Favorite Plugins"
-msgstr "즐겨찾는 플러그인"
-
-#: mixer_ui.cc:269 mixer_ui.cc:3087
-msgid "Recent Plugins"
-msgstr "최근 플러그인"
-
-#: mixer_ui.cc:270 mixer_ui.cc:3085
-msgid "Top-10 Plugins"
-msgstr "상위 10개 플러그인"
-
-#: mixer_ui.cc:291
-msgid "Mixer Scenes (F1...F8 to recall)"
-msgstr "Mixer Scenes (F1...F8 재호출)"
-
-#: mixer_ui.cc:715
-msgid "Error adding GUI elements for new tracks/busses %1"
-msgstr "새 트랙/버스 %1에 대한 GUI 요소를 추가하는 동안 오류가 발생했습니다"
-
-#: mixer_ui.cc:991
-msgid ""
-"The Plugin's number of audio outputs ports (%1) does not match the Tracks's "
-"number of audio outputs (%2). Cannot fan out."
-msgstr ""
-"플러그인의 오디오 출력 포트 수(%1)가 트랙의 오디오 출력 수(%2)와 일치하지 않"
-"습니다. 팬아웃할 수 없습니다."
-
-#: mixer_ui.cc:1009
-msgid "Instrument has only 1 output bus. Nothing to fan out."
-msgstr "악기에는 1개의 출력 버스만 있습니다. 팬 아웃 할 것이 없습니다."
-
-#: mixer_ui.cc:2004 plugin_selector.cc:208 route_list_base.cc:387
-msgid "Show All"
-msgstr "모두 표시하기"
-
-#: mixer_ui.cc:2005 route_list_base.cc:388
-msgid "Hide All"
-msgstr "모두 숨김"
-
-#: mixer_ui.cc:2006 route_list_base.cc:389
-msgid "Show All Audio Tracks"
-msgstr "모든 오디오 트랙 표시하기"
-
-#: mixer_ui.cc:2007 route_list_base.cc:390
-msgid "Hide All Audio Tracks"
-msgstr "모든 오디오 트랙 숨김"
-
-#: mixer_ui.cc:2008 route_list_base.cc:391
-msgid "Show All Midi Tracks"
-msgstr "모든 미디 트랙 표시하기"
-
-#: mixer_ui.cc:2009 route_list_base.cc:392
-msgid "Hide All Midi Tracks"
-msgstr "모든 미디 트랙 숨김"
-
-#: mixer_ui.cc:2010 route_list_base.cc:393
-msgid "Show All Busses"
-msgstr "모든 버스 표시하기"
-
-#: mixer_ui.cc:2011 route_list_base.cc:394
-msgid "Hide All Busses"
-msgstr "모든 버스 숨김"
-
-#: mixer_ui.cc:2053
-msgid "track display list item for renamed strip not found!"
-msgstr "이름이 바뀐 스트립의 트랙 화면표시 목록 항목을 찾을 수 없습니다!"
-
-#: mixer_ui.cc:2151
-msgid "-all-"
-msgstr "-모두-"
-
-#: mixer_ui.cc:2887
-msgid "Strips"
-msgstr "스트립스트립"
-
-#: mixer_ui.cc:2948 mixer_ui.cc:2954
-msgid "Window|Mixer"
-msgstr "믹서"
-
-#: mixer_ui.cc:3343
-msgid "No Track/Bus is selected."
-msgstr "트랙/버스가 선택되지 않았습니다."
-
-#: mixer_ui.cc:3345
-msgid "Add at the top"
-msgstr "상단에 추가하기"
-
-#: mixer_ui.cc:3347
-msgid "Add Pre-Fader"
-msgstr "프리페이더 추가하기"
-
-#: mixer_ui.cc:3349
-msgid "Add Post-Fader"
-msgstr "포스트페이더 추가하기"
-
-#: mixer_ui.cc:3351
-msgid "Add at the end"
-msgstr "끝에 추가하기"
-
-#: mixer_ui.cc:3357
-msgid "Remove from favorites"
-msgstr "즐겨찾기에서 제거하기"
-
-#: mixer_ui.cc:3363
-msgid "Delete Preset"
-msgstr "프리셋 삭제하기"
-
-#: mixer_ui.cc:3641
-msgid "Toggle Solo on Mixer-Selected Tracks/Busses"
-msgstr "선택된 믹서 트랙/버스에서 솔로 토글하기"
-
-#: mixer_ui.cc:3642
-msgid "Toggle Mute on Mixer-Selected Tracks/Busses"
-msgstr "선택된 믹서 트랙/버스에서 음소거 토글하기"
-
-#: mixer_ui.cc:3643
-msgid "Toggle Rec-enable on Mixer-Selected Tracks/Busses"
-msgstr "선택된 믹서 트랙/버스에서 녹음-활성화 토글하기"
-
-#: mixer_ui.cc:3644
-msgid "Decrease Gain on Mixer-Selected Tracks/Busses"
-msgstr "선택된 믹서 트랙/버스의 게인 감소"
-
-#: mixer_ui.cc:3645
-msgid "Increase Gain on Mixer-Selected Tracks/Busses"
-msgstr "선택된 믹서 트랙/버스의 게인 증가"
-
-#: mixer_ui.cc:3646
-msgid "Set Gain to 0dB on Mixer-Selected Tracks/Busses"
-msgstr "선택된 믹서 트랙/버스에서 게인을 0dB로 지정"
-
-#: mixer_ui.cc:3649
-msgid "Copy Selected Processors"
-msgstr "선택된 프로세서 복사하기"
-
-#: mixer_ui.cc:3650
-msgid "Cut Selected Processors"
-msgstr "선택된 프로세서 잘라내기"
-
-#: mixer_ui.cc:3651
-msgid "Paste Selected Processors"
-msgstr "선택된 프로세서 붙여넣기"
-
-#: mixer_ui.cc:3652 mixer_ui.cc:3653
-msgid "Delete Selected Processors"
-msgstr "선택된 프로세서 삭제하기"
-
-#: mixer_ui.cc:3654
-msgid "Select All (visible) Processors"
-msgstr "모든 (보이는) 프로세서 선택하기"
-
-#: mixer_ui.cc:3655
-msgid "Toggle Selected Processors"
-msgstr "선택된 프로세서 토글하기"
-
-#: mixer_ui.cc:3656
-msgid "Toggle Selected Plugins"
-msgstr "선택된 플러그인 토글하기"
-
-#: mixer_ui.cc:3657
-msgid "Deselect all strips and processors"
-msgstr "모든 스트립 및 프로세서 선택 취소"
-
-#: mixer_ui.cc:3659
-msgid "Select Next Mixer Strip"
-msgstr "다음 믹서 스트립 선택하기"
-
-#: mixer_ui.cc:3660
-msgid "Select Previous Mixer Strip"
-msgstr "이전 믹서 스트립 선택하기"
-
-#: mixer_ui.cc:3662
-msgid "Scroll Mixer Window to the left"
-msgstr "믹서 창을 좌측으로 스크롤"
-
-#: mixer_ui.cc:3663
-msgid "Scroll Mixer Window to the right"
-msgstr "믹서 창을 우측으로 스크롤"
-
-#: mixer_ui.cc:3665
-msgid "Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"
-msgstr "선택된 믹서 트랙/버스에 대한 MIDI 입력 활성화 토글하기"
-
-#: mixer_ui.cc:3668
-msgid "Mixer: Show Mixer List"
-msgstr "믹서: 믹서 목록 표시하기"
-
-#: mixer_ui.cc:3670
-msgid "Mixer: Show VCAs"
-msgstr "믹서: VCA 표시하기"
-
-#: mixer_ui.cc:3673
-msgid "Mixer: Show Mixbusses"
-msgstr "믹서: 믹스버스 하기"
-
-#: mixer_ui.cc:3676
-msgid "Mixer: Show Monitor Section"
-msgstr "믹서: 모니터 섹션 표시하기"
-
-#: mixer_ui.cc:3678
-msgid "Mixer: Show Foldback Strip"
-msgstr "믹서: 폴드백 스트립 표시하기"
-
-#: mixer_ui.cc:3680
-msgid "Toggle Disk Monitoring"
-msgstr "디스크 모니터링 토글하기"
-
-#: mixer_ui.cc:3681
-msgid "Toggle Input Monitoring"
-msgstr "입력 모니터링 토글하기"
-
-#: mixer_ui.cc:3685
-msgid "Store Mixer Scene #%1"
-msgstr "Mixer Scene #%1 저장하기"
-
-#: mixer_ui.cc:3690
-msgid "Recall Mixer Scene #%1"
-msgstr "Mixer Scene #%1 재호출하기"
-
-#: mixer_ui.cc:3695
-msgid "Clear Mixer Scene #%1"
-msgstr "Mixer Scene #%1 지우기"
-
-#: mixer_ui.cc:3919
-msgid "Scene is already set. Overwrite it?"
-msgstr "Scene이 이미 설정되었습니다. 덮어쓰시겠습니까?"
-
-#: mixer_ui.cc:3935
-msgid "Store Scene"
-msgstr "Scene 저장하기"
-
-#: mixer_ui.cc:3936 mixer_ui.cc:4068
-msgid "Scene name:"
-msgstr "Scene 이름:"
-
-#: mixer_ui.cc:3938 mixer_ui.cc:4100
-msgid "Store"
-msgstr "저장하기"
-
-#: mixer_ui.cc:3977
-msgid ""
-"Recall mixer scene \"%1\"?\n"
-"This will overwrite your mixer settings!\n"
-"This operation cannot be undone."
-msgstr ""
-"\"%1\" Mixer Scene을 불러오시겠습니까?\n"
-"믹서 설정을 덮어씁니다!\n"
-"이 오퍼레이션은 실행 취소할 수 없습니다."
-
-#: mixer_ui.cc:4023
-msgid ""
-"Clear mixer scene \"%1\"?\n"
-"This operation cannot be undone."
-msgstr ""
-"\"%1\" Mixer Scene을 지우시겠습니까?\n"
-"이 오퍼레이션은 실행 취소할 수 없습니다."
-
-#: mixer_ui.cc:4067
-msgid "Rename Scene"
-msgstr "Scene 이름 바꾸기"
-
-#: mixer_ui.cc:4106
-msgid "Restore for selected tracks"
-msgstr "선택된 트랙에 대한 복원하기"
-
-#: mixer_ui.cc:4189
-msgid ""
-"Click to recall this mixer scene\n"
-"%1 for Momentary Restore\n"
-"Right-Click for Context menu"
-msgstr ""
-"클릭: 이 믹서 장면 재호출\n"
-"%1: 순간음 복원\n"
-"오른쪽 버튼 클릭: 컨텍스트 메뉴"
-
-#: mixer_ui.cc:4210
-msgid "(Right-Click to Store)"
-msgstr "(오른쪽 클릭: 저장)"
-
-#: meter_strip.cc:171
-msgid "Reset Peak"
-msgstr "피크 재설정"
-
-#: meter_strip.cc:403 route_time_axis.cc:2349 vca_master_strip.cc:231
-#: vca_time_axis.cc:277
-msgid "PreFader|P"
-msgstr "P"
-
-#: meter_strip.cc:930
-msgid "Variable height"
-msgstr "가변 높이"
-
-#: meter_strip.cc:931
-msgid "Short"
-msgstr "Short"
-
-#: meter_strip.cc:932
-msgid "Tall"
-msgstr "Tall"
-
-#: meter_strip.cc:933
-msgid "Grande"
-msgstr "Grande"
-
-#: meter_strip.cc:934
-msgid "Venti"
-msgstr "Venti"
-
-#: meter_patterns.cc:86
-msgid "Peak (+6dBFS)"
-msgstr "피크 (+6dBFS)"
-
-#: meter_patterns.cc:89
-msgid "Peak (0dBFS)"
-msgstr "피크 (0dBFS)"
-
-#: meter_patterns.cc:92
-msgid "RMS + Peak"
-msgstr "RMS + 피크"
-
-#: meter_patterns.cc:95
-msgid "IEC1/DIN"
-msgstr "IEC1/DIN"
-
-#: meter_patterns.cc:98
-msgid "IEC1/Nordic"
-msgstr "IEC1/Nordic"
-
-#: meter_patterns.cc:101
-msgid "IEC2/BBC"
-msgstr "IEC2/BBC"
-
-#: meter_patterns.cc:104
-msgid "IEC2/EBU"
-msgstr "IEC2/EBU"
-
-#: meter_patterns.cc:107
-msgid "K20/RMS"
-msgstr "K20/RMS"
-
-#: meter_patterns.cc:110
-msgid "K14/RMS"
-msgstr "K14/RMS"
-
-#: meter_patterns.cc:113
-msgid "K12/RMS"
-msgstr "K12/RMS"
-
-#: meter_patterns.cc:116
-msgid "VU"
-msgstr "VU"
-
-#: monitor_section.cc:89
-msgid "SiP"
-msgstr "SiP"
-
-#: monitor_section.cc:120 route_group_dialog.cc:51
-msgid "Soloing"
-msgstr "솔로하기"
-
-#: monitor_section.cc:124
-msgid "Isolated"
-msgstr "고립됨"
-
-#: monitor_section.cc:128
-msgid "Auditioning"
-msgstr "미리 듣는 중"
-
-#: monitor_section.cc:137
-msgid ""
-"When active, something is solo-isolated.\n"
-"Click to de-isolate everything"
-msgstr ""
-"활성화인 경우, 일부는 솔로로 고립됩니다.\n"
-"클릭: 모든 고립 해제"
-
-#: monitor_section.cc:140
-msgid ""
-"When active, auditioning is active.\n"
-"Click to stop the audition"
-msgstr ""
-"활성화인 경우, 오디션이 활성화됩니다.\n"
-"클릭: 오디션 중지하기"
-
-#: monitor_section.cc:157
-msgid "Solo controls affect solo-in-place"
-msgstr "솔로 컨트롤은 솔로-인-플레이스에 영향을 줍니다"
-
-#: monitor_section.cc:163
-msgid "Solo controls toggle after-fader-listen"
-msgstr "솔로 컨트롤은 애프터페이더 듣기를 토글합니다"
-
-#: monitor_section.cc:169
-msgid "Solo controls toggle pre-fader-listen"
-msgstr "솔로 컨트롤은 프리페이더 듣기를 토글합니다"
-
-#: monitor_section.cc:175
-msgid "Excl. Solo"
-msgstr "단독 솔로"
-
-#: monitor_section.cc:177
-msgid "Exclusive solo means that only 1 solo is active at a time"
-msgstr "익스클루시브 솔로는 한 번에 1개의 솔로만 활성화됨을 의미합니다"
-
-#: monitor_section.cc:184
-msgid "Solo » Mute"
-msgstr "솔로 » 음소거"
-
-#: monitor_section.cc:186
-msgid ""
-"If enabled, solo will override mute\n"
-"(a soloed & muted track or bus will be audible)"
-msgstr ""
-"활성화되면 솔로가 음소거보다 우선합니다\n"
-"(솔로 및 음소거된 트랙 또는 버스를 들을 수 있음)"
-
-#: monitor_section.cc:191
-msgid "Processors"
-msgstr "프로세서"
-
-#: monitor_section.cc:193
-msgid "Allow one to add monitor effect processors"
-msgstr "모니터 이펙트 프로세서를 추가하도록 허용"
-
-#: monitor_section.cc:208 monitor_section.cc:211
-msgid "Gain increase for soloed signals (0dB is normal)"
-msgstr "솔로된 시그널에 대한 게인 증가 (0dB는 정상)"
-
-#: monitor_section.cc:214 monitor_section.cc:232 monitor_section.cc:251
-#: monitor_section.cc:297
-msgid "0 dB"
-msgstr "0 dB"
-
-#: monitor_section.cc:215
-msgid "3 dB"
-msgstr "3 dB"
-
-#: monitor_section.cc:216
-msgid "6 dB"
-msgstr "6 dB"
-
-#: monitor_section.cc:217
-msgid "10 dB"
-msgstr "10 dB"
-
-#: monitor_section.cc:219
-msgid "Solo Boost"
-msgstr "솔로 부스트"
-
-#: monitor_section.cc:226 monitor_section.cc:229
-msgid ""
-"Gain reduction non-soloed signals\n"
-"A value above -inf dB causes \"solo-in-front\""
-msgstr ""
-"게인 감소 솔로됨이 아닌 시그널\n"
-"-inf dB 이상의 값은 \"솔로 인 프론트\"를 유발합니다"
-
-#: monitor_section.cc:233 monitor_section.cc:253 monitor_section.cc:299
-msgid "-6 dB"
-msgstr "-6 dB"
-
-#: monitor_section.cc:234 monitor_section.cc:254 monitor_section.cc:300
-msgid "-12 dB"
-msgstr "-12 dB"
-
-#: monitor_section.cc:235 monitor_section.cc:255 monitor_section.cc:301
-msgid "-20 dB"
-msgstr "-20 dB"
-
-#: monitor_section.cc:236
-msgid "OFF"
-msgstr "끄기"
-
-#: monitor_section.cc:238
-msgid "SiP Cut"
-msgstr "SiP 잘라내기"
-
-#: monitor_section.cc:245 monitor_section.cc:248
-msgid "Gain reduction to use when dimming monitor outputs"
-msgstr "모니터 출력을 점점 여리게할 때 사용할 게인 감소"
-
-#: monitor_section.cc:252 monitor_section.cc:298
-msgid "-3 dB"
-msgstr "-3 dB"
-
-#: monitor_section.cc:257 monitor_section.cc:271 monitor_section.cc:324
-#: monitor_section.cc:939
-msgid "Dim"
-msgstr "점점 여리게"
-
-#: monitor_section.cc:302
-msgid "-30 dB"
-msgstr "-30 dB"
-
-#: monitor_section.cc:332
-msgid "Inv"
-msgstr "반전"
-
-#: monitor_section.cc:396 port_group.cc:646
-msgid "Monitor"
-msgstr "모니터"
-
-#: monitor_section.cc:927
-msgid "Use Monitor Section"
-msgstr "모니터 섹션 사용하기"
-
-#: monitor_section.cc:941
-msgid "Toggle Monitor Section Processor Box"
-msgstr "모니터 섹션 프로세서 상자 토글하기"
-
-#: monitor_section.cc:948
-msgid "Cut monitor channel %1"
-msgstr "커트 모니터 채널 %1"
-
-#: monitor_section.cc:953
-msgid "Dim monitor channel %1"
-msgstr "점점 여리게 모니터 채널 %1"
-
-#: monitor_section.cc:958
-msgid "Solo monitor channel %1"
-msgstr "솔로 모니터 채널 %1"
-
-#: monitor_section.cc:963
-msgid "Invert monitor channel %1"
-msgstr "반전 모니터 채널 %1"
-
-#: monitor_section.cc:972
-msgid "In-place solo"
-msgstr "인플레이스 솔로"
-
-#: monitor_section.cc:974
-msgid "After Fade Listen (AFL) solo"
-msgstr "After Fade Listen (AFL) 솔로"
-
-#: monitor_section.cc:976
-msgid "Pre Fade Listen (PFL) solo"
-msgstr "Pre Fade Listen (PFL) 솔로"
-
-#: monitor_section.cc:979
-msgid "Toggle exclusive solo mode"
-msgstr "익스클루시브 솔로 모드 토글하기"
-
-#: monitor_section.cc:981
-msgid "Toggle mute overrides solo mode"
-msgstr "음소거 무시 단독 모드 토글하기"
-
-#: mono_panner.cc:107 stereo_panner.cc:120
-msgid "bypassed"
-msgstr "바이패스됨"
-
-#: mono_panner.cc:121
-#, c-format
-msgid "L:%3d R:%3d"
-msgstr "L:%3d R:%3d"
-
-#: mono_panner.cc:202 panner2d.cc:286 stereo_panner.cc:255 stereo_panner.cc:278
-msgid "Panner|L"
-msgstr "L"
-
-#: mono_panner.cc:219 panner2d.cc:287 stereo_panner.cc:253 stereo_panner.cc:280
-msgid "Panner|R"
-msgstr "R"
-
-#: mono_panner_editor.cc:36
-msgid "Mono Panner"
-msgstr "모노 패너"
-
-#: mono_panner_editor.cc:47 mono_panner_editor.cc:52 stereo_panner_editor.cc:47
-#: stereo_panner_editor.cc:52
-msgid "%"
-msgstr "%"
-
-#: multi_region_properties_box.cc:54
-msgid "Some regions are muted"
-msgstr "일부 영역은 음소거됩니다"
-
-#: nag.cc:41
-msgid "Support %1 Development"
-msgstr "%1 개발 지원"
-
-#: nag.cc:42
-msgid "I'd like to make a one-time donation"
-msgstr "일회성 기부를 하고 싶습니다"
-
-#: nag.cc:43
-msgid "Tell me more about becoming a subscriber"
-msgstr "구독자가 되는 방법에 대해 자세히 알려주세요"
-
-#: nag.cc:44
-msgid "I'm already a subscriber!"
-msgstr "나는 이미 구독자입니다!"
-
-#: nag.cc:45
-msgid "Ask about this the next time I export"
-msgstr "다음에 내보낼 때 이것에 대해 묻습니다"
-
-#: nag.cc:46
-msgid "Never ever ask me about this again"
-msgstr "다시는 이 문제에 대해 묻지 않습니다"
-
-#: nag.cc:49
-msgid ""
-"Congratulations on your session export.\n"
-"\n"
-"It looks as if you may already be a subscriber. If so, thanks, and sorry\n"
-"to bother you again about this - I'm working on improving our subscriber "
-"system\n"
-"so that I don't have to keep annoying you with this message.\n"
-"\n"
-"If you're not a subscriber, perhaps you might consider supporting my work\n"
-"on Ardour with either a one-time donation or subscription. Nothing will \n"
-"happen if you choose not to do so. However Ardour's continuing development\n"
-"relies on a stable, sustainable income stream. Thanks for using Ardour!"
-msgstr ""
-"사용자의 세션 내보내기를 축하드립니다.\n"
-"\n"
-"이미 구독자인 것 같습니다. 그렇다면 다시 한 번 귀찮게 해드려 죄송합니다. \n"
-"이 메시지로 계속 귀찮게 해드리지 않도록 구독자 시스템을 개선하기 위해 노력 중"
-"입니다.\n"
-"\n"
-"구독자가 아니시라면 일회성 기부 또는 구독을 통해 Ardour에 대한 저희의 작업을 "
-"후원해\n"
-"주실 수 있습니다. 당신이 그렇게하지 않기로 선택하면 아무 일도 일어나지 않을 "
-"것입니다.\n"
-"하지만 Ardour의 지속적인 발전은 안정적이고 지속 가능한 수입원에 달려 있습니"
-"다.\n"
-"Ardour를 사용해 주셔서 감사합니다!"
-
-#: nag.cc:58
-msgid ""
-"Congratulations on your session export.\n"
-"\n"
-"I hope you find Ardour a useful tool. I'd like to ask you to consider "
-"supporting\n"
-"its development with either a one-time donation or subscription. Nothing\n"
-"will happen if you choose not to do so. However Ardour's continuing "
-"development\n"
-"relies on a stable, sustainable income stream. Thanks for using Ardour!"
-msgstr ""
-"사용자의 세션 내보내기를 축하드립니다.\n"
-"\n"
-"Ardour가 당신에게 유용한 도구가 되길 바랍니다. 일회성 기부나 구독으로 개발"
-"을 \n"
-"지원하는 방안을 고려해 주셨으면 합니다. 당신이 그렇게하지 않기로 선택한다면\n"
-"아무 일도 일어나지 않을 것입니다. 하지만 Ardour의 지속적인 발전은 안정적이"
-"고\n"
-"지속 가능한 수입원에 의존합니다. Ardour를 사용해 주셔서 감사합니다!"
-
-#: new_plugin_preset_dialog.cc:29
-msgid "Replace existing preset with this name"
-msgstr "기존 프리셋을 이 이름으로 교체하기"
-
-#: new_plugin_preset_dialog.cc:33
-msgid "Name of new preset"
-msgstr "새 프리셋의 이름"
-
-#: new_plugin_preset_dialog.cc:43
-msgid "New Favorite Only"
-msgstr "새 즐겨찾기만"
-
-#: new_user_wizard.cc:129
-msgid ""
-"<span size=\"larger\">%1 is a digital audio workstation. \n"
-"\n"
-"You can use %1 to record an orchestra, create with audio/midi loops, edit "
-"the perfect vocal take, mix a live show with effects, dub a video, and "
-"master your tracks for digital distribution. \n"
-"\n"
-"There are a few things that need to be configured before you start using the "
-"program.</span> "
-msgstr ""
-"<span size=\"larger\">%1는 디지털 오디오 워크스테이션입니다. \n"
-"\n"
-"%1를 사용하여 오케스트라를 녹음하고, 오디오/미디 루프를 사용하여 만들고, 완벽"
-"한 보컬 테이크를 편집하고, 라이브 쇼를 이펙트와 믹스하고, 비디오를 새로 녹음"
-"하고, 디지털 배포를 위해 사용자의 트랙을 마스터할 수 있습니다. \n"
-"\n"
-"프로그램 사용을 시작하기 전에 구성해야 할 몇 가지 사항이 있습니다.</span>"
-
-#: new_user_wizard.cc:147
-msgid "<span size=\"larger\">GUI and Font scaling:</span>"
-msgstr "<span size=\"larger\">GUI 및 글꼴 크기조정:</span>"
-
-#: new_user_wizard.cc:150
-msgid ""
-"<small><i>This can later be changed in Preferences &gt; Appearance.</i></"
-"small>"
-msgstr ""
-"<small><i>나중에 기본설정 &gt; 모양새에서 변경할 수 있습니다.</i></small>"
-
-#: new_user_wizard.cc:152 new_user_wizard.cc:156 rc_option_editor.cc:1116
-#: rc_option_editor.cc:3235
-msgid "100%"
-msgstr "100%"
-
-#: new_user_wizard.cc:153
-msgid "150%"
-msgstr "150%"
-
-#: new_user_wizard.cc:154 rc_option_editor.cc:1117
-msgid "200%"
-msgstr "200%"
-
-#: new_user_wizard.cc:155
-msgid "250%"
-msgstr "250%"
-
-#: new_user_wizard.cc:183
-msgid "Welcome to %1"
-msgstr "%1에 오신 것을 환영합니다"
-
-#: new_user_wizard.cc:247
-msgid "Default folder for %1 sessions"
-msgstr "%1 세션의 기본 폴더"
-
-#: new_user_wizard.cc:253
-msgid ""
-"<span size=\"larger\">Each project that you work on with %1 has its own "
-"folder.\n"
-"These can require a lot of disk space if you are recording audio.\n"
-"\n"
-"Where would you like new %1 sessions to be stored by default?\n"
-"\n"
-"<i>(You can put new sessions anywhere, this is just a default)</i></span>"
-msgstr ""
-"<span size=\"larger\">%1로 작업하는 각 프로젝트에는 고유한 폴더가 있습니다.\n"
-"오디오를 녹음하는 경우 디스크 공간이 많이 필요할 수 있습니다.\n"
-"\n"
-"새 %1 세션을 기본적으로 어디에 저장하시겠습니까?\n"
-"\n"
-"<i>(새 세션은 어디에나 저장할 수 있습니다. 기본값일 뿐입니다.)</i></span>"
-
-#: new_user_wizard.cc:278
-msgid "Default folder for new sessions"
-msgstr "새 세션의 기본 폴더"
-
-#: normalize_dialog.cc:45
-msgid "Normalize regions"
-msgstr "영역 노멀라이즈"
-
-#: normalize_dialog.cc:45
-msgid "Normalize region"
-msgstr "영역 노멀라이즈"
-
-#: normalize_dialog.cc:65
-msgid "Constrain RMS to:"
-msgstr "RMS를 다음으로 제한:"
-
-#: normalize_dialog.cc:68
-msgid "Constrain LUFS to:"
-msgstr "LUFS를 다음으로 제한:"
-
-#: normalize_dialog.cc:81
-msgid "Normalize to:"
-msgstr "다음으로 노멀라이즈:"
-
-#: normalize_dialog.cc:99
-msgid "Normalize each region using its own peak value"
-msgstr "고유한 피크 값을 사용하여 각 영역 노멀라이즈"
-
-#: normalize_dialog.cc:101
-msgid "Normalize each region using the peak value of all regions"
-msgstr "모든 영역의 피크 값을 사용하여 각 영역 노멀라이즈"
-
-#: normalize_dialog.cc:118
-msgid "Normalize"
-msgstr "노멀라이즈"
-
-#: note_select_dialog.cc:27
-msgid "Select Note"
-msgstr "노트 선택하기"
-
-#: option_editor.cc:816 option_editor.cc:848
-msgid "Search here..."
-msgstr "여기서 검색하기..."
-
-#: opts.cc:66
-msgid "Usage: "
-msgstr "사용법: "
-
-#: opts.cc:66
-msgid " [ OPTIONS ] [ SESSION-NAME ]"
-msgstr " [ 옵션 ] [ 세션-이름 ]"
-
-#: opts.cc:68
-msgid ""
-"Ardour is a multichannel hard disk recorder (HDR) and digital audio "
-"workstation (DAW)."
-msgstr ""
-"Ardor는 다중 채널 하드 디스크 레코더(HDR) 및 디지털 오디오 워크스테이션(DAW)"
-"입니다."
-
-#: opts.cc:70
-msgid "Options:\n"
-msgstr "옵션:\n"
-
-#: opts.cc:71
-msgid ""
-"  -a, --no-announcements      Do not contact website for announcements\n"
-msgstr ""
-"  -a, --no-announcements      공지사항을 위해 웹 사이트에 문의하지 않음\n"
-
-#: opts.cc:72
-msgid "  -A, --actions               Print all possible menu action names\n"
-msgstr "  -A, --actions               가능한 모든 메뉴 액션 이름 출력\n"
-
-#: opts.cc:73
-msgid "  -b, --bindings              Display all current key bindings\n"
-msgstr "  -b, --bindings              모든 현재 키 바인딩 화면표시\n"
-
-#: opts.cc:74
-msgid ""
-"  -B, --bypass-plugins        Bypass all plugins in an existing session\n"
-msgstr "  -B, --bypass-plugins        기존 세션의 모든 플러그인 바이패스\n"
-
-#: opts.cc:75
-msgid ""
-"  -c, --name <name>           Use a specific backend client name, default is "
-"ardour\n"
-msgstr ""
-"  -c, --name <이름>           특정 백엔드 클라이언트 이름 사용, 기본값: "
-"ardor\n"
-
-#: opts.cc:76
-msgid "  -d, --disable-plugins       Disable all plugins (safe mode)\n"
-msgstr "  -d, --disable-plugins       모든 플러그인 비활성화 (안전 모드)\n"
-
-#: opts.cc:78
-msgid ""
-"  -D, --debug <options>       Set debug flags. Use \"-D list\" to see "
-"available options\n"
-msgstr ""
-"  -D, --debug <옵션>       디버그 플래그 지정. 사용 가능한 옵션을 보려면 \"-"
-"D list\" 사용\n"
-
-#: opts.cc:80
-msgid "  -h, --help                  Print this message\n"
-msgstr "  -h, --help                  이 메시지 출력\n"
-
-#: opts.cc:81
-msgid "  -k, --keybindings <file>    Path to the key bindings file to load\n"
-msgstr "  -k, --keybindings <파일>    불러올 키 바인딩 파일의 경로\n"
-
-#: opts.cc:82
-msgid "  -m, --menus file            Use \"file\" to define menus\n"
-msgstr "  -m, --menus file            \"파일\"을 사용하여 메뉴 정의\n"
-
-#: opts.cc:83
-msgid "  -n, --no-splash             Do not show splash screen\n"
-msgstr "  -n, --no-splash             시작 화면을 표시하지 않음\n"
-
-#: opts.cc:84
-msgid ""
-"  -N, --new <session-name>    Create a new session from the command line\n"
-msgstr "  -N, --new <세션-이름>      명령줄에서 새 세션 만들기\n"
-
-#: opts.cc:85
-msgid "  -O, --no-hw-optimizations   Disable h/w specific optimizations\n"
-msgstr "  -O, --no-hw-optimizations   하드웨어별 최적화 비활성화\n"
-
-#: opts.cc:86
-msgid "  -P, --no-connect-ports      Do not connect any ports at startup\n"
-msgstr "  -P, --no-connect-ports      시작할 때 포트를 연결하지 않음\n"
-
-#: opts.cc:87
-msgid "  -S, --sync                  Draw the GUI synchronously\n"
-msgstr "  -S, --sync                  GUI를 동시에 그리기\n"
-
-#: opts.cc:88
-msgid "  -T, --template <name>       Use given template for new session\n"
-msgstr "  -T, --template <이름>       새 세션에 지정된 템플릿 사용\n"
-
-#: opts.cc:89
-msgid "  -v, --version               Print version and exit\n"
-msgstr "  -v, --version               버전 출력 및 종료\n"
-
-#: opts.cc:91
-msgid "Report bugs to http://tracker.ardour.org\n"
-msgstr "http://tracker.ardour.org에 버그 보고\n"
-
-#: opts.cc:92
-msgid "Website http://ardour.org\n"
-msgstr "웹사이트 http://ardour.org\n"
-
-#: panner2d.cc:907
-msgid "Panner (2D)"
-msgstr "패너 (2D)"
-
-#: panner2d.cc:909 panner_ui.cc:406 plugin_ui.cc:596
-msgid "Bypass"
-msgstr "바이패스"
-
-#: panner2d.cc:915
-msgid "Panner"
-msgstr "패너"
-
-#: panner_ui.cc:78
-msgid "Pan automation mode"
-msgstr "팬 오토메이션 모드"
-
-#: panner_ui.cc:181
-msgid "Abs"
-msgstr "Abs"
-
-#: panner_ui.cc:421
-msgid "Link send and main panner"
-msgstr "링크 전송 및 기본 패너"
-
-#: patch_change_widget.cc:137 patch_change_widget.cc:197
-msgid "%1 (Pgm-%2)"
-msgstr "%1 (Pgm-%2)"
-
-#: patch_change_widget.cc:157 patch_change_widget.cc:182
-msgid "Bank %1"
-msgstr "뱅크 %1"
-
-#: patch_change_widget.cc:210
-msgid "Pgm-%1"
-msgstr "Pgm-%1"
-
-#: patch_change_widget.cc:243
-msgid "Override Patch Changes"
-msgstr "패치 변경사항 재정의"
-
-#: patch_change_widget.cc:253 patch_change_widget.cc:413
-msgid "Bank:"
-msgstr "뱅크:"
-
-#: patch_change_widget.cc:255 patch_change_widget.cc:415
-msgid "MSB:"
-msgstr "MSB:"
-
-#: patch_change_widget.cc:257 patch_change_widget.cc:417
-msgid "LSB:"
-msgstr "LSB:"
-
-#: patch_change_widget.cc:401
-msgid "Audition on Change"
-msgstr "변경 시 오디션"
-
-#: patch_change_��리할 때 \"유틸리티\" 창으로 표시하여 전면에 머물도록 합니"
-"다."
 
 #: rc_option_editor.cc:3074
 msgid "Allow to resize Engine Dialog"
@@ -24433,7 +19760,7 @@ msgstr "파일이 존재합니다"
 msgid "The file %1 already exists."
 msgstr "%1 파일이 이미 존재합니다."
 
-#: template_dialog.cc:517 utils.cc:868
+#: template_dialog.cc:517 utils.cc:902
 msgid "Overwrite"
 msgstr "덮어쓰기"
 
@@ -24987,10 +20314,6 @@ msgstr ""
 "새 트랙을 만들려면\n"
 "여기에 클립 드롭"
 
-#: trigger_page.cc:129
-msgid "Tracks"
-msgstr "트랙"
-
 #: trigger_page.cc:336 trigger_page.cc:341
 msgid "Window|Cues"
 msgstr "큐"
@@ -25269,7 +20592,7 @@ msgstr "%2을(를) 사용하여 %1에 대한 아이콘 이미지를 찾을 수 �
 msgid "Caught exception while loading icon named %1"
 msgstr "%1 이름의 아이콘을 불러오는 동안 예외가 발생했습니다"
 
-#: utils.cc:988
+#: utils.cc:1022
 msgid "format_position: negative timecode position: %1"
 msgstr "format_position: 네거티브 타임코드 위치: %1"
 
@@ -25680,7 +21003,7 @@ msgstr "트랜스코딩에 실패했습니다."
 msgid "Save Transcoded Video File"
 msgstr "트랜스코드된 비디오 파일 저장하기"
 
-#: velocity_ghost_region.cc:326
+#: velocity_ghost_region.cc:328
 msgid "draw velocities"
 msgstr "벨로시티 그리기"
 
@@ -25949,3 +21272,10 @@ msgstr ""
 #: export_video_dialog.cc:815
 msgid "Input Video File"
 msgstr "비디오 파일 입력"
+
+#~ msgid ""
+#~ "Czech:\n"
+#~ "\t Pavel Fric <pavelfric@seznam.cz>\n"
+#~ msgstr ""
+#~ "체코어:\n"
+#~ "\t Pavel Fric <pavelfric@seznam.cz>\n"
