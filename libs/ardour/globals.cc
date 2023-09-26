@@ -539,6 +539,31 @@ copy_configuration_files (string const& old_dir, string const& new_dir, int old_
 	return 0;
 }
 
+static int
+copy_cache_files (string const& old_dir, string const& new_dir, int old_version)
+{
+	if (g_mkdir_with_parents (new_dir.c_str (), 0755)) {
+		return -1;
+	}
+	/* since v7 plugin cache files are versioned */
+	if (old_version < 7) {
+		return 0;
+	}
+
+	/* copy complete cache:
+	 * - blacklist files
+	 * - vst/.*v2i (VST2 Cache - Intel)
+	 * - vst/.*v3i (VST3 Cache - Intel or Apple/Rosetta)
+	 * - vst-arm64/.*v3i (Apple/ARM native VST3 Cache)
+	 * - auv2/.*a3i (Audio Unit Cache)
+	 * - vst*_blacklist.txt
+	 * - auv2_*blacklist.txt
+	 */
+	copy_recurse (old_dir, new_dir, true);
+
+	return 0;
+}
+
 void
 ARDOUR::check_for_old_configuration_files ()
 {
@@ -570,9 +595,12 @@ ARDOUR::handle_old_configuration_files (boost::function<bool(std::string const&,
 		int    old_version        = current_version - 1;
 		string old_config_dir     = user_config_directory (old_version);
 		string current_config_dir = user_config_directory (current_version);
+		string old_cache_dir      = user_cache_directory (old_version);
+		string current_cache_dir  = user_cache_directory (current_version);
 
 		if (ui_handler (old_config_dir, current_config_dir, old_version)) {
 			copy_configuration_files (old_config_dir, current_config_dir, old_version);
+			copy_cache_files (old_cache_dir, current_cache_dir, old_version);
 			return 1;
 		}
 	}
