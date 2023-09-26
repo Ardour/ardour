@@ -45,7 +45,7 @@ namespace ARDOUR {
 	 * caches (e.g. plugin indices, blacklist/whitelist)
 	 * it defaults to XDG_CACHE_HOME
 	 */
-	LIBARDOUR_API std::string user_cache_directory (std::string cachename = "");
+	LIBARDOUR_API std::string user_cache_directory (int version = -1);
 
 	/**
 	 * @return the path used to store a persistent indication
