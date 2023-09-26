@@ -576,9 +576,11 @@ PianoRollHeader::on_motion_notify_event (GdkEventMotion* ev)
 			case TOP:
 				real_val_at_pointer = real_val_at_pointer <= _saved_top_val? _adj.get_value() + _adj.get_page_size() : real_val_at_pointer;
 				real_val_at_pointer = min(127.0, real_val_at_pointer);
-				if (_note_height >= 18.5){
+				if (_note_height >= UIConfiguration::instance().get_max_note_height()){
 					_saved_top_val  = min(_adj.get_value() + _adj.get_page_size (), 127.0);
-				}else _saved_top_val = 0.0;
+				} else {
+					_saved_top_val = 0.0;
+				}
 				//if we are at largest note size & the user is moving down don't do anything
 				//FIXME we are using a heuristic of 18.5 for max note size, but this changes when track size is small to 19.5?
 				_view.apply_note_range (_adj.get_value (), real_val_at_pointer, true);
@@ -586,9 +588,11 @@ PianoRollHeader::on_motion_notify_event (GdkEventMotion* ev)
 			case BOTTOM:
 				real_val_at_pointer = max(0.0, real_val_at_pointer);
 				real_val_at_pointer = real_val_at_pointer >= _saved_bottom_val? _adj.get_value() : real_val_at_pointer;
-				if (_note_height >= 18.5){
+				if (_note_height >= UIConfiguration::instance().get_max_note_height()){
 					_saved_bottom_val  = _adj.get_value();
-				}else _saved_bottom_val = 127.0;
+				} else {
+					_saved_bottom_val = 127.0;
+				}
 				_view.apply_note_range (real_val_at_pointer, _adj.get_value () + _adj.get_page_size (), true);
 				break;
 			default:
