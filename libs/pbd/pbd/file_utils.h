@@ -179,7 +179,7 @@ LIBPBD_API void copy_files(const std::string & from_path, const std::string & to
 /**
  * Attempt to copy all regular files from from_path to a new directory.
  */
-LIBPBD_API void copy_recurse(const std::string & from_path, const std::string & to_dir);
+LIBPBD_API void copy_recurse(const std::string & from_path, const std::string & to_dir, bool preseve_timestamps = false);
 
 /**
  * Update the access and modification times of file at path, creating file

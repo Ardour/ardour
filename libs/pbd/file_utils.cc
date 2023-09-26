@@ -29,6 +29,9 @@
 #ifdef COMPILER_MINGW
 #include <io.h> // For W_OK
 #include <windows.h>
+#include <sys/utime.h>
+#else
+#include <utime.h>
 #endif
 
 #include <glibmm/convert.h>
@@ -335,7 +338,7 @@ copy_files(const std::string & from_path, const std::string & to_dir)
 }
 
 void
-copy_recurse(const std::string & from_path, const std::string & to_dir)
+copy_recurse(const std::string & from_path, const std::string & to_dir, bool preseve_timestamps)
 {
 	vector<string> files;
 	find_files_matching_filter (files, from_path, accept_all_files, 0, false, true, true);
@@ -345,7 +348,19 @@ copy_recurse(const std::string & from_path, const std::string & to_dir)
 		std::string from = *i;
 		std::string to = Glib::build_filename (to_dir, (*i).substr(prefix_len));
 		g_mkdir_with_parents (Glib::path_get_dirname (to).c_str(), 0755);
-		copy_file (from, to);
+		if (copy_file (from, to) && preseve_timestamps) {
+			GStatBuf sb;
+			if (g_stat (from.c_str(), &sb) != 0) {
+				error << string_compose (_("Unable to query file timestamp from %1 to %2"), from) << endmsg;
+				continue;
+			}
+			struct utimbuf utb;
+			utb.actime = sb.st_atime;
+			utb.modtime = sb.st_mtime;
+			if (0 != g_utime (to.c_str (), &utb)) {
+				error << string_compose (_("Unable to preseve file timestamp from %1 to %2"), from, to) << endmsg;
+			}
+		}
 	}
 }
 
