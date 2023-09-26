@@ -168,6 +168,9 @@ PatchChangeDialog::instrument_info_changed ()
 	_patch_combo.clear ();
 	fill_bank_combo ();
 	fill_patch_combo ();
+
+	set_active_bank_combo ();
+	bank_combo_changed ();
 }
 
 Evoral::PatchChange<Temporal::Beats>
