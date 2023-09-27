@@ -26,9 +26,11 @@
 #include <glib.h>
 #include "pbd/gstdio_compat.h"
 
-#ifdef COMPILER_MINGW
+#if defined COMPILER_MINGW || defined COMPILER_MSVC
+#if defined COMPILER_MINGW
 #include <io.h> // For W_OK
 #include <windows.h>
+#endif
 #include <sys/utime.h>
 #else
 #include <utime.h>
