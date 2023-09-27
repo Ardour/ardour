@@ -360,7 +360,7 @@ PluginManager::cache_valid () const
 uint32_t
 PluginManager::cache_version ()
 {
-	return 1000 * atoi (X_(PROGRAM_VERSION)) + 2;
+	return 7002; // 1000 * atoi (X_(PROGRAM_VERSION)) + 2;
 }
 
 struct PluginInfoPtrNameSorter {
