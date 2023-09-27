@@ -64,6 +64,12 @@ IOPlug::~IOPlug ()
 	for (CtrlOutMap::const_iterator i = _control_outputs.begin(); i != _control_outputs.end(); ++i) {
 		std::dynamic_pointer_cast<ReadOnlyControl>(i->second)->drop_references ();
 	}
+
+	Glib::Threads::Mutex::Lock lm (_control_lock);
+	for (Controls::const_iterator li = _controls.begin(); li != _controls.end(); ++li) {
+		std::dynamic_pointer_cast<AutomationControl>(li->second)->drop_references ();
+	}
+	_controls.clear ();
 }
 
 std::string
