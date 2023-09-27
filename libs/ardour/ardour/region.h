@@ -209,8 +209,8 @@ public:
 	static uint64_t get_region_operation_group_id (uint64_t old_region_group, RegionOperationFlag flags);
 
 	uint64_t region_group () const { return _reg_group; }
-	void set_region_group (bool explicitly) { _reg_group = get_retained_group_id () | (explicitly ? Explicit : NoGroup); }
-	void unset_region_group () { _reg_group = Explicit; }
+	void set_region_group (uint64_t rg, bool explicitly = false) { _reg_group = rg | (explicitly ? Explicit : NoGroup); }
+	void unset_region_group (bool explicitly = false) { _reg_group = (explicitly ? Explicit : NoGroup); }
 
 	bool is_explicitly_grouped()   { return (_reg_group & Explicit) == Explicit; }
 	bool is_implicitly_ungrouped() { return (_reg_group == NoGroup); }

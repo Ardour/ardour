@@ -1549,6 +1549,8 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 
 		/* duplicate the regionview(s) and region(s) */
 
+		Region::RegionGroupRetainer rtr;
+
 		list<DraggingView> new_regionviews;
 
 		for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
@@ -1560,6 +1562,7 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 			std::shared_ptr<Region>             region_copy;
 
 			region_copy = RegionFactory::create (original, true);
+			region_copy->set_region_group( Region::get_region_operation_group_id (original->region_group(), Paste));
 
 			/* need to set this so that the drop zone code can work. This doesn't
 			   actually put the region into the playlist, but just sets a weak pointer

@@ -1318,8 +1318,8 @@ Playlist::paste (std::shared_ptr<Playlist> other, timepos_t const & position, fl
 				for (auto const & r : other->regions) {
 					std::shared_ptr<Region> copy_of_region = RegionFactory::create (r, true, false, &rl1.thawlist);
 
-					/* we want newly-pasted regions to share one (implicit) group-id */
-					copy_of_region->set_region_group(false);
+					/* we want newly-pasted regions to retain prior group-sharing relationship, but with a new group-id */
+					copy_of_region->set_region_group (Region::get_region_operation_group_id(r->region_group(), Paste));
 
 					/* put these new regions on top of all existing ones, but preserve
 					   the ordering they had in the original playlist.

@@ -3126,7 +3126,7 @@ Editor::group_selected_regions ()
 	begin_reversible_command (_("group regions"));
 	for (RegionSelection::iterator i = rs.begin (); i != rs.end (); ++i) {
 		(*i)->region ()->clear_changes ();
-		(*i)->region ()->set_region_group (true);
+		(*i)->region ()->set_region_group (Region::get_retained_group_id(), true);
 		_session->add_command (new StatefulDiffCommand ((*i)->region ()));
 	}
 	commit_reversible_command ();
@@ -3144,7 +3144,7 @@ Editor::ungroup_selected_regions ()
 	begin_reversible_command (_("ungroup regions"));
 	for (RegionSelection::iterator i = rs.begin (); i != rs.end (); ++i) {
 		(*i)->region ()->clear_changes ();
-		(*i)->region ()->unset_region_group ();
+		(*i)->region ()->unset_region_group (true);
 		_session->add_command (new StatefulDiffCommand ((*i)->region ()));
 	}
 	selection->clear_regions ();
