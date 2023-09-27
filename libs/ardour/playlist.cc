@@ -1353,6 +1353,7 @@ Playlist::duplicate (std::shared_ptr<Region> region, timepos_t & position, timec
 
 	while (itimes--) {
 		std::shared_ptr<Region> copy = RegionFactory::create (region, true, false, &rl.thawlist);
+		copy->set_region_group(Region::get_region_operation_group_id(region->region_group(), Paste));
 		add_region_internal (copy, position, rl.thawlist);
 		set_layer (copy, DBL_MAX);
 		position += gap;
@@ -1368,6 +1369,7 @@ Playlist::duplicate (std::shared_ptr<Region> region, timepos_t & position, timec
 			plist.add (Properties::length, length);
 
 			std::shared_ptr<Region> sub = RegionFactory::create (region, plist, true, &rl.thawlist);
+			sub->set_region_group(Region::get_region_operation_group_id(region->region_group(), Paste));
 			add_region_internal (sub, position, rl.thawlist);
 			set_layer (sub, DBL_MAX);
 		}
@@ -1384,6 +1386,7 @@ Playlist::duplicate_until (std::shared_ptr<Region> region, timepos_t & position,
 	while ((position + region->length()).decrement() < end) {
 		std::shared_ptr<Region> copy = RegionFactory::create (region, true, false, &rl.thawlist);
 		add_region_internal (copy, position, rl.thawlist);
+		copy->set_region_group(Region::get_region_operation_group_id(region->region_group(), Paste));
 		set_layer (copy, DBL_MAX);
 		position += gap;
 	}
@@ -1397,6 +1400,7 @@ Playlist::duplicate_until (std::shared_ptr<Region> region, timepos_t & position,
 			plist.add (Properties::length, length);
 
 			std::shared_ptr<Region> sub = RegionFactory::create (region, plist, false, &rl.thawlist);
+			sub->set_region_group(Region::get_region_operation_group_id(region->region_group(), Paste));
 			add_region_internal (sub, position, rl.thawlist);
 			set_layer (sub, DBL_MAX);
 		}
