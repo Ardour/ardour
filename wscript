@@ -450,6 +450,8 @@ int main() { return 0; }''',
             conf.env['build_host'] = 'monterey'
         elif re.search ("^22[.]", version) is not None:
             conf.env['build_host'] = 'ventura'
+        elif re.search ("^23[.]", version) is not None:
+            conf.env['build_host'] = 'sonoma'
         else:
             conf.env['build_host'] = 'irrelevant'
 
@@ -487,8 +489,10 @@ int main() { return 0; }''',
                 conf.env['build_target'] = 'bigsur'
             elif re.search ("^21[.]", version) is not None:
                 conf.env['build_target'] = 'monterey'
-            elif re.search ("^21[.]", version) is not None:
+            elif re.search ("^22[.]", version) is not None:
                 conf.env['build_target'] = 'ventura'
+            elif re.search ("^23[.]", version) is not None:
+                conf.env['build_target'] = 'sonoma'
             else:
                 conf.env['build_target'] = 'catalina'
         else:
@@ -543,7 +547,7 @@ int main() { return 0; }''',
         cxx_flags.append('--stdlib=libc++')
         linker_flags.append('--stdlib=libc++')
 
-    if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur', 'monterey', 'ventura' ]:
+    if conf.options.cxx11 or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur', 'monterey', 'ventura', 'sonoma' ]:
         conf.check_cxx(cxxflags=["-std=c++11"])
         cxx_flags.append('-std=c++11')
         if platform == "darwin":
@@ -551,7 +555,7 @@ int main() { return 0; }''',
             # from requiring a full path to requiring just the header name.
             cxx_flags.append('-DCARBON_FLAT_HEADERS')
 
-            if not opt.use_libcpp and not conf.env['build_host'] in [ 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina', 'bigsur', 'monterey', 'ventura' ]:
+            if not opt.use_libcpp and not conf.env['build_host'] in [ 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina', 'bigsur', 'monterey', 'ventura', 'sonoma' ]:
                 cxx_flags.append('--stdlib=libstdc++')
                 linker_flags.append('--stdlib=libstdc++')
             # Prevents visibility issues in standard headers
@@ -560,7 +564,7 @@ int main() { return 0; }''',
             cxx_flags.append('-DBOOST_NO_AUTO_PTR')
             cxx_flags.append('-DBOOST_BIND_GLOBAL_PLACEHOLDERS')
 
-    if (is_clang and platform == "darwin") or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur',  'monterey', 'ventura' ]:
+    if (is_clang and platform == "darwin") or conf.env['build_host'] in [ 'mavericks', 'yosemite', 'el_capitan', 'sierra', 'high_sierra', 'mojave', 'catalina' , 'bigsur',  'monterey', 'ventura', 'sonoma' ]:
         # Silence warnings about the non-existing osx clang compiler flags
         # -compatibility_version and -current_version.  These are Waf
         # generated and not needed with clang
@@ -690,7 +694,7 @@ int main() { return 0; }''',
                  "-mmacosx-version-min=10.11"))
         linker_flags.append("-mmacosx-version-min=10.11")
 
-    elif conf.env['build_target'] in ['bigsur', 'monterey', 'ventura']:
+    elif conf.env['build_target'] in ['bigsur', 'monterey', 'ventura', 'sonoma']:
         compiler_flags.extend(
                 ("-DMAC_OS_X_VERSION_MAX_ALLOWED=110000",
                  "-mmacosx-version-min=11.0"))
@@ -1458,7 +1462,7 @@ int main () { __int128 x = 0; return 0; }
     set_compiler_flags (conf, Options.options)
 
     if sys.platform == 'darwin':
-        if conf.env['build_host'] not in [ 'mojave', 'catalina', 'bigsur', 'monterey', 'ventura']:
+        if conf.env['build_host'] not in [ 'mojave', 'catalina', 'bigsur', 'monterey', 'ventura', 'sonoma']:
             conf.env.append_value('CXXFLAGS_OSX', '-F/System/Library/Frameworks')
 
         conf.env.append_value('CXXFLAGS_OSX', '-F/Library/Frameworks')
