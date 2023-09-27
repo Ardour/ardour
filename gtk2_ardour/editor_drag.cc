@@ -427,6 +427,7 @@ Drag::adjusted_time (timepos_t const& f, GdkEvent const* event, bool snap) const
 		_editor->snap_to_with_modifier (pos, event);
 	}
 
+	pos.set_time_domain (_time_domain);
 	return pos;
 }
 
