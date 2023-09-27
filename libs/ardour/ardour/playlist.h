@@ -435,7 +435,7 @@ protected:
 	int  remove_region_internal (std::shared_ptr<Region>, ThawList& thawlist);
 	void copy_regions (RegionList&) const;
 
-	void partition_internal (timepos_t const & start, timepos_t const & end, bool cutting, ThawList& thawlist);
+	void partition_internal (timepos_t start, timepos_t end, bool cutting, ThawList& thawlist);
 
 	std::pair<timepos_t, timepos_t> _get_extent() const;
 

@@ -988,8 +988,15 @@ Playlist::partition (timepos_t const & start, timepos_t const & end, bool cut)
  *  removed.
  */
 void
-Playlist::partition_internal (timepos_t const & start, timepos_t const & end, bool cutting, ThawList& thawlist)
+Playlist::partition_internal (timepos_t start, timepos_t end, bool cutting, ThawList& thawlist)
 {
+	if (start.time_domain () != end.time_domain () || start.time_domain () != time_domain () || end.time_domain () != time_domain ()) {
+		warning << string_compose (_("Playlist::partition_internal() with time domains mismatch %1 %2 (expected %3 time)"), start, end, time_domain () == Temporal::AudioTime ? "audio" : " music") << endmsg;
+	}
+
+	start.set_time_domain (time_domain ());
+	end.set_time_domain (time_domain ());
+
 	RegionList new_regions;
 
 	{
