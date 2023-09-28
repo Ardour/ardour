@@ -191,6 +191,9 @@ TempoCurve::set_duration (samplecnt_t duration)
 	format_tempo (_tempo->end_note_types_per_minute(), _tempo->note_type(), buf, sizeof(buf));
 	_end_text->set (buf);
 
+	format_tempo (_tempo->note_types_per_minute(), _tempo->note_type(), buf, sizeof(buf));
+	_start_text->set (buf);
+
 	const double ui_scale  = UIConfiguration::instance ().get_ui_scale ();
 
 	_start_text->set_position (ArdourCanvas::Duple ((10 * ui_scale), (.5 * ui_scale)));
