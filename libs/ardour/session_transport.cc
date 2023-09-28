@@ -1524,9 +1524,6 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished, bool will_
 		}
 	}
 
-	/* reset loop_changing so it does not affect next transport action */
-	loop_changing = false;
-
 	if (!will_locate && !_transport_fsm->declicking_for_locate()) {
 
 		DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: locate\n"));
@@ -1548,6 +1545,8 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished, bool will_
 		}
 	}
 
+	/* reset loop_changing so it does not affect next transport action */
+	loop_changing = false;
 	have_looped = false;
 
 	/* don't bother with this stuff if we're disconnected from the engine,
