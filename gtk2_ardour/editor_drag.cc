@@ -68,6 +68,7 @@
 #include "editor_drag.h"
 #include "gui_thread.h"
 #include "keyboard.h"
+#include "mergeable_line.h"
 #include "midi_region_view.h"
 #include "midi_selection.h"
 #include "midi_time_axis.h"
@@ -7456,13 +7457,16 @@ AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 	}
 
 	AutomationTimeAxisView* atv = static_cast<AutomationTimeAxisView*>(base_rect.get_data ("trackview"));
+
 	if (!atv) {
 		return;
 	}
 
 	FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint>::finished (event, motion_occured);
 
-	atv->merge_drawn_line (drawn_points, !did_snap);
+	MergeableLine* ml = atv->make_merger ();
+	ml->merge_drawn_line (*_editor, *_editor->session(), drawn_points, !did_snap);
+	delete ml;
 }
 
 /*****************/

@@ -40,6 +40,7 @@
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
 
+#include "line_merger.h"
 #include "time_axis_view.h"
 #include "automation_controller.h"
 
@@ -60,7 +61,7 @@ class AutomationStreamView;
 class AutomationController;
 class ItemCounts;
 
-class AutomationTimeAxisView : public TimeAxisView
+class AutomationTimeAxisView : public TimeAxisView, public LineMerger
 {
 public:
 	AutomationTimeAxisView (ARDOUR::Session*,
@@ -147,7 +148,7 @@ public:
 
 	void set_selected_regionviews (RegionSelection&);
 
-	void merge_drawn_line (Evoral::ControlList::OrderedPoints&, bool thin);
+	MergeableLine* make_merger ();
 
 protected:
 	/* Note that for MIDI controller "automation" (in regions), all of these

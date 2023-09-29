@@ -1385,6 +1385,14 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				_drags->set (new RegionCreateDrag (this, item, clicked_axisview), event);
 			}
 			return true;
+		case RegionItem: {
+			RegionView* rv;
+			if ((rv = dynamic_cast<RegionView*> (clicked_regionview))) {
+				ArdourCanvas::Rectangle* r = static_cast <ArdourCanvas::Rectangle*> (rv->get_canvas_frame());
+				_drags->set (new AutomationDrawDrag (this, *r, Temporal::AudioTime), event);
+			}
+		}
+			break;
 
 		default:
 			break;
