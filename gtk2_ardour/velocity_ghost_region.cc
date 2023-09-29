@@ -179,11 +179,7 @@ VelocityGhostRegion::remove_note (NoteBase* nb)
 void
 VelocityGhostRegion::set_colors ()
 {
-	if (selected) {
-		base_rect->set_fill_color (UIConfiguration::instance().color ("ghost track base"));
-	} else {
-		base_rect->set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
-	}
+	base_rect->set_fill_color (UIConfiguration::instance().color_mod ("ghost track base", "ghost track midi fill"));
 
 	for (auto & gev : events) {
 		gev.second->item->set_fill_color (gev.second->event->base_color());
