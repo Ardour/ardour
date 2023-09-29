@@ -93,7 +93,7 @@ class LIBARDOUR_API MidiRegion : public Region
 
 	std::shared_ptr<Evoral::Control> control(const Evoral::Parameter& id, bool create=false);
 
-	virtual std::shared_ptr<const Evoral::Control> control(const Evoral::Parameter& id) const;
+	std::shared_ptr<const Evoral::Control> control(const Evoral::Parameter& id) const;
 
 	/* export */
 
