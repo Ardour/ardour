@@ -153,7 +153,7 @@ VelocityGhostRegion::set_size_and_position (GhostEvent& ev)
 	ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (ev.item);
 	const double available_height = base_rect->y1();
 	const double actual_height = (ev.event->note()->velocity() / 127.0) * available_height;
-	l->set (ArdourCanvas::Duple (ev.event->x0() + lollipop_radius, base_rect->y1() - actual_height), actual_height, lollipop_radius);
+	l->set (ArdourCanvas::Duple (ev.event->x0(), base_rect->y1() - actual_height), actual_height, lollipop_radius);
 }
 
 void
