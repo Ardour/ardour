@@ -372,8 +372,7 @@ AutomationTimeAxisView::set_automation_state (AutoState state)
 
 	if (_automatable) {
 		_automatable->set_parameter_automation_state (_parameter, state);
-	}
-	else if (_control) {
+	} else if (_control) {
 		_control->set_automation_state (state);
 		_session->set_dirty ();
 	}
