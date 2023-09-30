@@ -298,6 +298,11 @@ Drag::Drag (Editor* e, ArdourCanvas::Item* i, Temporal::TimeDomain td, bool trac
 {
 }
 
+Drag::~Drag ()
+{
+	DEBUG_TRACE (DEBUG::Drags, "drag destroyed\n");
+}
+
 void
 Drag::set_time_domain (Temporal::TimeDomain td)
 {

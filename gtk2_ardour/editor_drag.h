@@ -152,7 +152,7 @@ class Drag
 {
 public:
 	Drag (Editor *, ArdourCanvas::Item *, Temporal::TimeDomain td, bool trackview_only = true, bool hide_snapped_cursor = true);
-	virtual ~Drag () {}
+	virtual ~Drag ();
 
 	void set_manager (DragManager* m) {
 		_drags = m;
