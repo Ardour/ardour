@@ -1068,8 +1068,7 @@ AutomationLine::reset_callback (const Evoral::ControlList& events)
 		double ty = model_to_view_coord_y ((*ai)->value);
 
 		if (isnan_local (ty)) {
-			warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""),
-			                           _name) << endmsg;
+			warning << string_compose (_("Ignoring illegal points on AutomationLine \"%1\""), _name) << endmsg;
 			continue;
 		}
 
