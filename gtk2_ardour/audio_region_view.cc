@@ -63,6 +63,7 @@
 #include "public_editor.h"
 #include "audio_region_editor.h"
 #include "audio_streamview.h"
+#include "mergeable_line.h"
 #include "region_gain_line.h"
 #include "control_point.h"
 #include "ghostregion.h"
@@ -275,6 +276,8 @@ AudioRegionView::init (bool wfd)
 	set_colors ();
 
 	setup_waveform_visibility ();
+
+	get_canvas_frame()->set_data ("linemerger", (LineMerger*) this);
 
 	/* XXX sync mark drag? */
 }
@@ -1849,4 +1852,10 @@ AudioRegionView::parameter_changed (string const & p)
 	if (p == "show-waveforms") {
 		setup_waveform_visibility ();
 	}
+}
+
+MergeableLine*
+AudioRegionView::make_merger ()
+{
+	return new MergeableLine (gain_line, std::shared_ptr<AutomationControl>(), boost::bind (&Region::absolute_time_to_region_time, _region, _1), nullptr, nullptr);
 }

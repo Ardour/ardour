@@ -1388,7 +1388,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case RegionItem: {
 			RegionView* rv;
 			if ((rv = dynamic_cast<RegionView*> (clicked_regionview))) {
-				ArdourCanvas::Rectangle* r = static_cast <ArdourCanvas::Rectangle*> (rv->get_canvas_frame());
+				ArdourCanvas::Rectangle* r = dynamic_cast<ArdourCanvas::Rectangle*> (rv->get_canvas_frame());
 				_drags->set (new AutomationDrawDrag (this, *r, Temporal::AudioTime), event);
 			}
 		}
@@ -1925,10 +1925,20 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				   points when doing this.
 				*/
 				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (clicked_regionview);
-				if (!were_dragging && arv) {
-					bool with_guard_points = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
-					arv->add_gain_point_event (item, event, with_guard_points);
+
+				if (!were_dragging) {
+					if (arv) {
+						bool with_guard_points = Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier);
+						arv->add_gain_point_event (item, event, with_guard_points);
+					}
+				} else {
+					AutomationRegionView* atv = dynamic_cast<AutomationRegionView*> (clicked_regionview);
+
+					if (atv) {
+						atv->add_automation_event (event);
+					}
 				}
+
 				return true;
 				break;
 			}
@@ -3116,7 +3126,7 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		if (after_after) {
 			after = after_after;
 		} else {
-			at_end = true; 
+			at_end = true;
 		}
 
 	} else if (ramped) {

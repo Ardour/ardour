@@ -38,6 +38,7 @@
 #include "editor.h"
 #include "editor_drag.h"
 #include "gui_thread.h"
+#include "mergeable_line.h"
 #include "midi_automation_line.h"
 #include "public_editor.h"
 #include "ui_config.h"
@@ -88,6 +89,8 @@ AutomationRegionView::init (bool /*wfd*/)
 	set_height (trackview.current_height());
 
 	set_colors ();
+
+	get_canvas_frame()->set_data ("linemerger", (LineMerger*) this);
 }
 
 void
@@ -132,43 +135,37 @@ AutomationRegionView::canvas_group_event (GdkEvent* ev)
 		return false;
 	}
 
+	return RegionView::canvas_group_event (ev);
+}
+
+void
+AutomationRegionView::add_automation_event (GdkEvent* ev)
+{
+	double x = ev->button.x;
+	double y = ev->button.y;
+
+	/* convert to item coordinates in the time axis view */
+	automation_view()->canvas_display()->canvas_to_item (x, y);
+
+	/* clamp y */
+	y = std::max (y, 0.0);
+	y = std::min (y, _height - NAME_HIGHLIGHT_SIZE);
+
+	/* the time domain doesn't matter here, because the automation
+	 * list will force the position to its own time domain when
+	 * adding the point.
+	 */
+
 	PublicEditor& e = trackview.editor ();
 
-	if (ev->type == GDK_BUTTON_RELEASE &&
-	    ev->button.button == 1 &&
-	    (e.current_mouse_mode() == Editing::MouseDraw || e.current_mouse_mode() == Editing::MouseObject) &&
-	    !e.drags()->active()) {
-
-		double x = ev->button.x;
-		double y = ev->button.y;
-
-		/* convert to item coordinates in the time axis view */
-		automation_view()->canvas_display()->canvas_to_item (x, y);
-
-		/* clamp y */
-		y = std::max (y, 0.0);
-		y = std::min (y, _height - NAME_HIGHLIGHT_SIZE);
-
-		/* guard points only if primary modifier is used */
-		bool with_guard_points = Gtkmm2ext::Keyboard::modifier_state_equals (ev->button.state, Gtkmm2ext::Keyboard::PrimaryModifier);
-
-		/* the time domain doesn't matter here, because the automation
-		 * list will force the position to its own time domain when
-		 * adding the point.
-		 */
-
-		add_automation_event (ev, timepos_t (e.pixel_to_sample (x)), y, with_guard_points);
-		return true;
-	}
-
-	return RegionView::canvas_group_event (ev);
+	add_automation_event (timepos_t (e.pixel_to_sample (x)), y, false);
 }
 
 /** @param when Position is global time position
  *  @param y y position, relative to our TimeAxisView.
  */
 void
-AutomationRegionView::add_automation_event (GdkEvent *, timepos_t const & w, double y, bool with_guard_points)
+AutomationRegionView::add_automation_event (timepos_t const & w, double y, bool with_guard_points)
 {
 	std::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
 	std::shared_ptr<ARDOUR::AutomationControl> ac = std::dynamic_pointer_cast<ARDOUR::AutomationControl>(c);
@@ -351,4 +348,18 @@ AutomationRegionView::set_selected (bool yn)
 	if (yn && _parameter.type() == ARDOUR::MidiCCAutomation) {
 		group->raise_to_top ();
 	}
+}
+
+timepos_t
+AutomationRegionView::drawn_time_filter (timepos_t const & t)
+{
+	return timepos_t (_region->absolute_time_to_source_beats (t));
+}
+
+MergeableLine*
+AutomationRegionView::make_merger()
+{
+	std::shared_ptr<Evoral::Control> c = _region->control(_parameter, true);
+	std::shared_ptr<ARDOUR::AutomationControl> ac = std::dynamic_pointer_cast<ARDOUR::AutomationControl>(c);
+	return new MergeableLine (_line, ac, boost::bind (&AutomationRegionView::drawn_time_filter, this, _1), nullptr, nullptr);
 }

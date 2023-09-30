@@ -38,6 +38,7 @@
 
 #include "waveview/wave_view.h"
 
+#include "line_merger.h"
 #include "region_view.h"
 #include "time_axis_view_item.h"
 #include "automation_line.h"
@@ -54,7 +55,7 @@ class GhostRegion;
 class AutomationTimeAxisView;
 class RouteTimeAxisView;
 
-class AudioRegionView : public RegionView
+class AudioRegionView : public RegionView, public LineMerger
 {
 public:
 	AudioRegionView (ArdourCanvas::Container *,
@@ -146,6 +147,8 @@ public:
 	bool end_xfade_visible () const {
 		return _end_xfade_visible;
 	}
+
+	MergeableLine* make_merger();
 
 protected:
 

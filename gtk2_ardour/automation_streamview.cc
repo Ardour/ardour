@@ -79,11 +79,12 @@ AutomationStreamView::add_region_view_internal (std::shared_ptr<Region> region, 
 		return 0;
 	}
 
+	std::shared_ptr<AutomationList> list;
+
 	const std::shared_ptr<AutomationControl> control = std::dynamic_pointer_cast<AutomationControl> (
 		region->control (_automation_view.parameter(), true)
 		);
 
-	std::shared_ptr<AutomationList> list;
 	if (control) {
 		list = std::dynamic_pointer_cast<AutomationList>(control->list());
 		if (control->list() && !list) {

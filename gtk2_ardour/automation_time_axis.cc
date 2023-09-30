@@ -167,6 +167,7 @@ AutomationTimeAxisView::AutomationTimeAxisView (
 	_base_rect->set_outline (false);
 	_base_rect->set_fill_color (UIConfiguration::instance().color_mod (fill_color_name, "automation track fill"));
 	_base_rect->set_data ("trackview", this);
+	_base_rect->set_data ("linemerger", (LineMerger*) this);
 	_base_rect->Event.connect (sigc::bind (sigc::mem_fun (_editor, &PublicEditor::canvas_automation_track_event), _base_rect, this));
 	if (!a) {
 		_base_rect->lower_to_bottom();
@@ -1285,6 +1286,6 @@ AutomationTimeAxisView::set_selected_regionviews (RegionSelection& rs)
 MergeableLine*
 AutomationTimeAxisView::make_merger ()
 {
-	return new MergeableLine (_line, _control, boost::bind (&AutomationTimeAxisView::set_automation_state, this, _1), boost::bind (RouteTimeAxisView::signal_ctrl_touched, false));
+	return new MergeableLine (_line, _control, nullptr, boost::bind (&AutomationTimeAxisView::set_automation_state, this, _1), boost::bind (RouteTimeAxisView::signal_ctrl_touched, false));
 }
 

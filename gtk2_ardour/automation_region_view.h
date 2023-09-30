@@ -27,6 +27,7 @@
 #include "automation_time_axis.h"
 #include "automation_line.h"
 #include "enums.h"
+#include "line_merger.h"
 
 namespace ARDOUR {
 	class AutomationList;
@@ -35,7 +36,7 @@ namespace ARDOUR {
 
 class TimeAxisView;
 
-class AutomationRegionView : public RegionView
+class AutomationRegionView : public RegionView, public LineMerger
 {
 public:
 	AutomationRegionView(ArdourCanvas::Container*,
@@ -72,12 +73,17 @@ public:
 
 	void tempo_map_changed ();
 
+	MergeableLine* make_merger ();
+
+	void add_automation_event (GdkEvent* event);
+	Temporal::timepos_t drawn_time_filter (Temporal::timepos_t const &);
+
 protected:
 	void create_line(std::shared_ptr<ARDOUR::AutomationList> list);
 	bool set_position(Temporal::timepos_t const & pos, void* src, double* ignored);
 	void region_resized (const PBD::PropertyChange&);
 	bool canvas_group_event(GdkEvent* ev);
-	void add_automation_event (GdkEvent* event, Temporal::timepos_t const & when, double y, bool with_guard_points);
+	void add_automation_event (Temporal::timepos_t const & when, double y, bool with_guard_points);
 	void mouse_mode_changed ();
 	void entered();
 	void exited();

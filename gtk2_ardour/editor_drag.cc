@@ -7329,10 +7329,20 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 
 	ArdourCanvas::Rect r = base_rect.item_to_canvas (base_rect.get());
 
+	/* Adjust event coordinates to be relative to the base rectangle */
+
 	double x = pointer_x - r.x0;
 	double y = ev->motion.y - r.y0;
 
-	x = std::max (0., x);
+	if (x < 0) {
+		dragging_line->clear ();
+		drawn_points.clear ();
+		edge_x = 0;
+		return;
+	}
+
+	/* Clamp y coordinate to the area of the base rect */
+
 	y = std::max (0., std::min (r.height(), y));
 
 	bool add_point = false;
@@ -7341,7 +7351,7 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 	const bool line = Keyboard::modifier_state_equals (ev->motion.state, Keyboard::PrimaryModifier);
 
 	if (direction > 0) {
-		if (line || (pointer_x > edge_x)  || (pointer_x == edge_x && ev->motion.y != last_pointer_y())) {
+		if (x < r.width() && (line || (pointer_x > edge_x) || (pointer_x == edge_x && ev->motion.y != last_pointer_y()))) {
 
 			if (line && dragging_line->get().size() > 1) {
 				pop_point = true;
@@ -7352,7 +7362,7 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 
 
 	} else if (direction < 0) {
-		if (line || (pointer_x < edge_x) || (pointer_x == edge_x && ev->motion.y != last_pointer_y())) {
+		if (x >= 0. && (line || (pointer_x < edge_x) || (pointer_x == edge_x && ev->motion.y != last_pointer_y()))) {
 
 			if (line && dragging_line->get().size() > 1) {
 				pop_point = true;
@@ -7461,15 +7471,15 @@ AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 		return;
 	}
 
-	AutomationTimeAxisView* atv = static_cast<AutomationTimeAxisView*>(base_rect.get_data ("trackview"));
+	LineMerger* lm = static_cast<LineMerger*>(base_rect.get_data ("linemerger"));
 
-	if (!atv) {
+	if (!lm) {
 		return;
 	}
 
 	FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint>::finished (event, motion_occured);
 
-	MergeableLine* ml = atv->make_merger ();
+	MergeableLine* ml = lm->make_merger();
 	ml->merge_drawn_line (*_editor, *_editor->session(), drawn_points, !did_snap);
 	delete ml;
 }
