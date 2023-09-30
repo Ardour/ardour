@@ -2218,7 +2218,13 @@ Region::source_beats_to_absolute_beats (Temporal::Beats beats) const
 Temporal::Beats
 Region::absolute_time_to_region_beats(timepos_t const & b) const
 {
-	 return (position().distance (b)).beats () + start().beats();;
+	 return (position().distance (b)).beats () + start().beats();
+}
+
+Temporal::timepos_t
+Region::absolute_time_to_region_time (timepos_t const & t) const
+{
+	return start() + position().distance (t);
 }
 
 Temporal::timepos_t

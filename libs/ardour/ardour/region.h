@@ -379,6 +379,8 @@ public:
 
 	Temporal::Beats absolute_time_to_region_beats (Temporal::timepos_t const &) const;
 
+	Temporal::timepos_t absolute_time_to_region_time (Temporal::timepos_t const &) const;
+
 	int apply (Filter &, PBD::Progress* progress = 0);
 
 	std::shared_ptr<ARDOUR::Playlist> playlist () const { return _playlist.lock(); }
