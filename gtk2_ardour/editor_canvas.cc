@@ -266,7 +266,7 @@ Editor::initialize_canvas ()
 	_canvas_drop_zone->set_outline (false);
 	_canvas_drop_zone->Event.connect (sigc::mem_fun (*this, &Editor::canvas_drop_zone_event));
 
-	_canvas_grid_zone = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 0.0));
+	_canvas_grid_zone = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, ArdourCanvas::COORD_MAX));
 	/* this thing is transparent */
 	_canvas_grid_zone->set_fill (false);
 	_canvas_grid_zone->set_outline (false);
@@ -341,8 +341,6 @@ Editor::track_canvas_viewport_size_allocated ()
 	_visible_canvas_height = _canvas_viewport_allocation.get_height ();
 
 	_canvas_drop_zone->set_y1 (_canvas_drop_zone->y0() + (_visible_canvas_height - 20.0));
-
-	_canvas_grid_zone->set_y1 (_visible_canvas_height);
 
 	// SHOWTRACKS
 
