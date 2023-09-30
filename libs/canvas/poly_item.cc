@@ -158,6 +158,17 @@ PolyItem::pop_back ()
 	end_change ();
 }
 
+void
+PolyItem::clear ()
+{
+	if (!_points.empty()) {
+		begin_change ();
+		_points.clear ();
+		set_bbox_dirty ();
+		end_change ();
+	}
+}
+
 Points const&
 PolyItem::get () const
 {

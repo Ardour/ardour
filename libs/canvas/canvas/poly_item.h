@@ -37,6 +37,7 @@ public:
 
 	virtual void  set (Points const&);
 	virtual void  add_point (Duple const &);
+	virtual void  clear ();
 	void pop_back();
 	Points const& get () const;
 
