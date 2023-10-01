@@ -479,7 +479,6 @@ Butler::process_delegated_work ()
 void
 Butler::drop_references ()
 {
-	std::cerr << "Butler drops pool trash\n";
 	SessionEvent::pool->set_trash (0);
 	process_delegated_work ();
 }
