@@ -1812,6 +1812,7 @@ Editor::parameter_changed (std::string p)
 		queue_redisplay_track_views ();
 	} else if (p == "default-time-domain") {
 		stretch_marker_cb.set_sensitive (_session->config.get_default_time_domain () == Temporal::BeatTime);
+		restore_ruler_visibility();  /* NOTE: if user has explicitly set rulers then this will have no effect */
 	}
 }
 
