@@ -30,6 +30,8 @@
     the value of the variable.
 *****************************************************/
 
+CONFIG_VARIABLE (Temporal::TimeDomain, preferred_time_domain, "preferred_time_domain", Temporal::BeatTime)
+
 /* IO connection */
 
 CONFIG_VARIABLE (bool, auto_connect_standard_busses, "auto-connect-standard-busses", true)
