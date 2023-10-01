@@ -2388,6 +2388,12 @@ RCOptionEditor::RCOptionEditor ()
 					    _("When opening an existing session, if the most recent audio engine is available and can open the session's sample rate, the audio engine dialog may be skipped."));
 	add_option (_("General"), bo );
 
+#if 0
+	/* "preferred-time-domain"
+	   unlike other preferences, this variable would not actually 'change' anything; the session's domain is stored in session-config
+	   so we don't show the rc-config value here.  instead, it is invisibly stored in the rc-config, with the user's most recent selection */
+#endif
+
 	add_option (_("General"), new OptionEditorHeading (S_("Options|Editor Undo")));
 
 	add_option (_("General"), new UndoOptions (_rc_config));
