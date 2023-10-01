@@ -76,6 +76,12 @@ Track::~Track ()
 {
 	DEBUG_TRACE (DEBUG::Destruction, string_compose ("track %1 destructor\n", _name));
 
+	for (auto const& p : _playlists) {
+		if (p) {
+			p->clear_time_domain_parent ();
+		}
+	}
+
 	if (_disk_reader) {
 		_disk_reader.reset ();
 	}
