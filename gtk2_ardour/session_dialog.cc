@@ -676,11 +676,7 @@ SessionDialog::setup_new_session_page ()
 
 	timebase_chooser.append (_("Audio Time"));
 	timebase_chooser.append (_("Beat Time"));
-#ifdef MIXBUS
-	timebase_chooser.set_active (1);
-#else
-	timebase_chooser.set_active (0);
-#endif
+	timebase_chooser.set_active (Config->get_preferred_time_domain() == Temporal::BeatTime ? 1 : 0);
 
 	//Template & Template Description area
 	HBox* template_hbox = manage (new HBox);
