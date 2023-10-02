@@ -678,6 +678,14 @@ SessionDialog::setup_new_session_page ()
 	timebase_chooser.append (_("Beat Time"));
 	timebase_chooser.set_active (Config->get_preferred_time_domain() == Temporal::BeatTime ? 1 : 0);
 
+	set_tooltip (timebase_chooser, _(
+	"The timebase controls how some items on the timeline respond to tempo map editing.\n\n"
+	"If you choose Beat Time, some items (like markers) will move when you change tempo.\n\n"
+	"If you choose Audio Time, these items will not move when you change tempo.\n\n"
+	"The timebase also affects which ruler lanes will be initially shown.\n\n"
+	"You can change the session's timebase anytime in Session->Properties." 
+		));
+
 	//Template & Template Description area
 	HBox* template_hbox = manage (new HBox);
 
