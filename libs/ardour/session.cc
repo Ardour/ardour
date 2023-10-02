@@ -7279,6 +7279,15 @@ Session::cut_copy_section (timepos_t const& start_, timepos_t const& end_, timep
 			}
 
 			if (op != DeleteSection) {
+				/* Commit changes so far, to retain undo sequence.
+				 * split() may create a new region replacing the already
+				 * rippled of regions, the length/position of which
+				 * would not be saved/restored.
+				 */
+				pl->rdiff_and_add_command (this);
+				pl->clear_changes ();
+				pl->clear_owned_changes ();
+
 				/* now make space at the insertion-point */
 				pl->split (to);
 				pl->ripple (to, start.distance(end), NULL);
@@ -7288,13 +7297,10 @@ Session::cut_copy_section (timepos_t const& start_, timepos_t const& end_, timep
 				pl->paste (p, to, 1);
 			}
 
-			vector<Command*> cmds;
-			pl->rdiff (cmds);
-			add_commands (cmds);
-			add_command (new StatefulDiffCommand (pl));
+			pl->rdiff_and_add_command (this);
 		}
 
-		for (auto& pl : _playlists->playlists) {
+		for (auto& pl : playlists) {
 			pl->thaw ();
 		}
 
