@@ -907,6 +907,10 @@ Editor::mid_tempo_change (MidTempoChanges what_changed)
 		b->update ();
 	}
 
+	for (auto const & lam : location_markers) {
+		lam.second->set_position (lam.first->start(), lam.first->end());
+	}
+
 	update_tempo_based_rulers ();
 	maybe_draw_grid_lines ();
 
