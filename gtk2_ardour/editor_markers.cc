@@ -786,8 +786,6 @@ Editor::mouse_add_new_marker (timepos_t where, Location::Flags extra_flags, int3
 	string namebase;
 	Location::Flags flags = Location::Flags (extra_flags|Location::IsMark);
 
-	std::cerr << "adding marker @ " << where << std::endl;
-
 	if (flags & Location::IsCueMarker) {
 		/* XXX i18n needed for cue letter names */
 		markername = string_compose (_("cue %1"), cue_marker_name (cue_id));
