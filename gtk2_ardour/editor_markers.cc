@@ -1844,10 +1844,12 @@ Editor::rename_marker(ArdourMarker *marker)
 
 	dialog.set_prompt (_("New Name:"));
 
-	if (loc->is_mark()) {
-		dialog.set_title (_("Rename Mark"));
-	} else {
+	if (loc->is_section()) {
+		dialog.set_title (_("Rename Arrangement Section"));
+	} else if (loc->is_range()) {
 		dialog.set_title (_("Rename Range"));
+	} else {
+		dialog.set_title (_("Rename Mark"));
 	}
 
 	dialog.set_name ("MarkRenameWindow");
