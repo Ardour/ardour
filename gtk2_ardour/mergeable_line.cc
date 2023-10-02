@@ -91,11 +91,11 @@ MergeableLine::merge_drawn_line (Editor& e, Session& s, Evoral::ControlList::Ord
 	}
 	list->thaw ();
 
-	if (_control && _control->automation_state () == ARDOUR::Off) {
+	if (automation_state_callback && _control && _control->automation_state () == ARDOUR::Off) {
 		automation_state_callback (ARDOUR::Play);
 	}
 
-	if (UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && _control == s.recently_touched_controllable ()) {
+	if (control_touched_callback && UIConfiguration::instance().get_automation_edit_cancels_auto_hide () && _control == s.recently_touched_controllable ()) {
 		control_touched_callback ();
 	}
 
