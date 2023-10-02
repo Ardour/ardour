@@ -1587,7 +1587,7 @@ template<typename OrderedPointList, typename OrderedPoint>
 class FreehandLineDrag : public Drag
 {
   public:
-	FreehandLineDrag (Editor*, ArdourCanvas::Rectangle&, Temporal::TimeDomain);
+	FreehandLineDrag (Editor*, ArdourCanvas::Item*, ArdourCanvas::Rectangle&, Temporal::TimeDomain);
 	~FreehandLineDrag ();
 
 	void motion (GdkEvent*, bool);
@@ -1596,6 +1596,7 @@ class FreehandLineDrag : public Drag
 	virtual void point_added  (ArdourCanvas::Duple const & d, ArdourCanvas::Rectangle const & r, double last_x) {}
 
   protected:
+	ArdourCanvas::Item* parent; /* we do not own this. If null, use base_rect as the parent */
 	ArdourCanvas::Rectangle& base_rect; /* we do not own this */
 	ArdourCanvas::PolyLine* dragging_line;
 	int direction;
@@ -1610,7 +1611,7 @@ class FreehandLineDrag : public Drag
 class AutomationDrawDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoints, Evoral::ControlList::OrderedPoint>
 {
   public:
-	AutomationDrawDrag (Editor*, ArdourCanvas::Rectangle&, Temporal::TimeDomain);
+	AutomationDrawDrag (Editor*, ArdourCanvas::Item*, ArdourCanvas::Rectangle&, Temporal::TimeDomain);
 	~AutomationDrawDrag ();
 
 	void finished (GdkEvent*, bool);

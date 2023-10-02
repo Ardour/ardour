@@ -7265,8 +7265,9 @@ LollipopDrag::setup_pointer_offset ()
 /********/
 
 template<typename OrderedPointList, typename OrderedPoint>
-FreehandLineDrag<OrderedPointList,OrderedPoint>::FreehandLineDrag (Editor* editor, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
+FreehandLineDrag<OrderedPointList,OrderedPoint>::FreehandLineDrag (Editor* editor, ArdourCanvas::Item* p, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
 	: Drag (editor, &r, time_domain)
+	, parent (p)
 	, base_rect (r)
 	, dragging_line (nullptr)
 	, direction (0)
@@ -7288,10 +7289,11 @@ void
 FreehandLineDrag<OrderedPointList,OrderedPoint>::motion (GdkEvent* ev, bool first_move)
 {
 	if (first_move) {
-		dragging_line = new ArdourCanvas::PolyLine (item());
+		dragging_line = new ArdourCanvas::PolyLine (parent ? parent : item());
 		dragging_line->set_ignore_events (true);
 		dragging_line->set_outline_width (2.0);
 		dragging_line->set_outline_color (UIConfiguration::instance().color ("automation line"));
+		dragging_line->raise_to_top ();
 
 		/* for freehand drawing, we only support left->right direction, for now. */
 		direction = 1;
@@ -7447,8 +7449,8 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::mid_drag_key_event (GdkEventKey
 
 /**********************/
 
-AutomationDrawDrag::AutomationDrawDrag (Editor* editor, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
-	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (editor, r, time_domain)
+AutomationDrawDrag::AutomationDrawDrag (Editor* editor, ArdourCanvas::Item* p, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
+	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (editor, p, r, time_domain)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationDrawDrag\n");
 }
@@ -7487,7 +7489,7 @@ AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 /*****************/
 
 VelocityLineDrag::VelocityLineDrag (Editor* editor, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
-	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (editor, r, time_domain)
+	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (editor, nullptr, r, time_domain)
 	, grv (static_cast<VelocityGhostRegion*> (r.get_data ("ghostregionview")))
 	, drag_did_change (false)
 {

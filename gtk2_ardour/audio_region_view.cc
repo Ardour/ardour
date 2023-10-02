@@ -278,6 +278,7 @@ AudioRegionView::init (bool wfd)
 	setup_waveform_visibility ();
 
 	get_canvas_frame()->set_data ("linemerger", (LineMerger*) this);
+	gain_line->canvas_group().raise_to_top ();
 
 	/* XXX sync mark drag? */
 }
