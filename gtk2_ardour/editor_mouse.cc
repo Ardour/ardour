@@ -3146,6 +3146,7 @@ Editor::choose_mapping_drag (ArdourCanvas::Item* item, GdkEvent* event)
 		TempoPoint& added = const_cast<TempoPoint&> (map->set_tempo (copied_no_ramp, bbt));
 		focus = &added;
 		reset_tempo_marks ();
+		reset_bbt_marks ();
 	}
 
 	/* Reversible commands get named here, now that we understand what we're doing */
