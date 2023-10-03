@@ -3,26 +3,30 @@
 # This file is distributed under the same license as the PACKAGE package.
 #
 # Piotr Zaryk <pzaryk@gmail.com>, 2008.
+# Krzysztof Gajdemski <songo@debian.org.pl>, 2023.
 msgid ""
 msgstr ""
 "Project-Id-Version: libgtkmm2ext\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2020-04-30 12:44-0600\n"
-"PO-Revision-Date: 2008-04-10 10:54+0100\n"
-"Last-Translator: Piotr Zaryk <pzaryk@gmail.com>\n"
-"Language-Team: Polish <pl@li.org>\n"
+"POT-Creation-Date: 2023-09-17 12:47+0000\n"
+"PO-Revision-Date: 2023-10-03 00:04+0200\n"
+"Last-Translator: Krzysztof Gajdemski <songo@debian.org.pl>\n"
+"Language-Team: Polish <songo@debian.org.pl>\n"
 "Language: pl\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=3; plural=(n==1 ? 0 : n%10>=2 && n%10<=4 && (n%100<10"
+" || n%100>=20) ? 1 : 2);\n"
+"X-Generator: Lokalize 20.12.0\n"
 
 #: actions.cc:215
 msgid "Unknown action name: %1/%2"
-msgstr ""
+msgstr "Nieznana nazwa działania: %1/%2"
 
 #: action_model.cc:56 action_model.cc:171
 msgid "Disabled"
-msgstr ""
+msgstr "Wyłączona"
 
 #: action_model.cc:83
 msgid "Main_menu"
@@ -48,21 +52,25 @@ msgstr ""
 msgid "ProcessorMenu"
 msgstr ""
 
-#: bindings.cc:840 bindings.cc:842
+#: bindings.cc:502
+msgid "Escape"
+msgstr "Escape"
+
+#: bindings.cc:852 bindings.cc:854
 msgid "Window"
-msgstr ""
+msgstr "Okno"
 
-#: bindings.cc:840
+#: bindings.cc:852
 msgid " (Categorized)"
-msgstr ""
+msgstr "(Kategorie)"
 
-#: bindings.cc:842
+#: bindings.cc:854
 msgid " (Alphabetical)"
-msgstr ""
+msgstr "(Alfabetycznie)"
 
-#: bindings.cc:858
+#: bindings.cc:870
 msgid "Uncategorized"
-msgstr ""
+msgstr "Bez kategorii"
 
 #: cursors.cc:81
 msgid "cursor hotspots info file %1 has an error on line %2"
@@ -70,86 +78,102 @@ msgstr ""
 
 #: emscale.cc:52
 msgid "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-msgstr ""
+msgstr "ABCDEFGHIJLKMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
 
-#: gtk_ui.cc:126
+#: gtk_ui.cc:121
 msgid "Log"
 msgstr "Log"
 
-#: gtk_ui.cc:395
+#: gtk_ui.cc:410
 msgid ""
 "\n"
 "\n"
 "Shortcut: "
 msgstr ""
+"\n"
+"\n"
+"Skrót: "
 
-#: gtk_ui.cc:694
+#: gtk_ui.cc:702
 msgid "Press To Exit"
 msgstr "Wciśnij by zakończyć"
 
-#: gtk_ui.cc:730
+#: gtk_ui.cc:739
 msgid "I'm sorry %1, I can't do that"
-msgstr ""
-
-#: keyboard.cc:75
-msgid "Command"
-msgstr ""
-
-#: keyboard.cc:76 keyboard.cc:98
-msgid "Control"
-msgstr ""
-
-#: keyboard.cc:77 keyboard.cc:82 keyboard.cc:100 keyboard.cc:105
-msgid "Key|Shift"
-msgstr ""
-
-#: keyboard.cc:78
-msgid "Option"
-msgstr ""
+msgstr "Przepraszam %1, nie mogę tego zrobić"
 
 #: keyboard.cc:80
+msgid "Command"
+msgstr "Komenda"
+
+#: keyboard.cc:85 keyboard.cc:146
+msgid "Control"
+msgstr "Control"
+
+#: keyboard.cc:90 keyboard.cc:120 keyboard.cc:156 keyboard.cc:186
+msgid "Key|Shift"
+msgstr "Shift"
+
+#: keyboard.cc:95
+msgid "Option"
+msgstr "Option"
+
+#: keyboard.cc:100
+msgid "Middle Click (or Ctrl+Alt+Click)"
+msgstr "Środkowy klik (lub Ctrl+Alt+klik)"
+
+#: keyboard.cc:105
+msgid "Cmd+Click (or Middle-Click)"
+msgstr "Cmd+Klick (lub środkowy klik)"
+
+#: keyboard.cc:110
 msgid "Cmd"
-msgstr ""
+msgstr "Cmd"
 
-#: keyboard.cc:81 keyboard.cc:103
+#: keyboard.cc:115 keyboard.cc:176
 msgid "Ctrl"
-msgstr ""
+msgstr "Ctrl"
 
-#: keyboard.cc:83
+#: keyboard.cc:125
 msgid "Opt"
-msgstr ""
+msgstr "Opt"
 
-#: keyboard.cc:99 keyboard.cc:104
+#: keyboard.cc:151 keyboard.cc:181
 msgid "Alt"
-msgstr ""
+msgstr "Alt"
 
-#: keyboard.cc:101
+#: keyboard.cc:161
 msgid "Windows"
-msgstr ""
+msgstr "Windows"
 
-#: keyboard.cc:106
+#: keyboard.cc:166 keyboard.cc:171
+msgid "Middle-Click"
+msgstr "Środkowy klik"
+
+#: keyboard.cc:191
 msgid "Win"
-msgstr ""
+msgstr "Win"
 
-#: keyboard.cc:159 keyboard.cc:605
+#: keyboard.cc:287 keyboard.cc:771
 msgid "Unknown"
-msgstr ""
+msgstr "Nieznany"
 
-#: keyboard.cc:616
+#: keyboard.cc:781
 msgid "key bindings file not found at \"%2\" or contains errors."
 msgstr ""
+"plik ze skrótami klawiaturowymi nie znaleziony w „%2” bądź zawiera błędy."
 
-#: keyboard.cc:642
+#: keyboard.cc:807
 msgid "Keyboard binding found without a name"
-msgstr ""
+msgstr "Znaleziono skrót klawiszowy bez nazwy"
 
-#: keyboard.cc:674
+#: keyboard.cc:839
 msgid "Cannot save key bindings to %1"
-msgstr ""
+msgstr "Nie można zapisać skrótów klawiaturowych do %1"
 
-#: keyboard.cc:690
+#: keyboard.cc:854
 msgid "Cannot rename your own keybinding file (%1)"
-msgstr ""
+msgstr "Nie można zmienić nazwy pliku ze skrótami klawiaturowymi (%1)"
 
 #: textviewer.cc:32
 msgid "Close"
