@@ -1293,10 +1293,13 @@ Editor::canvas_grid_zone_event (GdkEvent* event)
 	GdkEventScroll scroll;
 	ArdourCanvas::Duple winpos;
 
+
 	switch (event->type) {
 
 		case GDK_BUTTON_PRESS:
-			choose_mapping_drag (_canvas_grid_zone, event);
+			if (event->button.button == 1) {
+				choose_mapping_drag (_canvas_grid_zone, event);
+			}
 			break;
 
 		case GDK_BUTTON_RELEASE:
