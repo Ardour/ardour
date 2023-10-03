@@ -3624,7 +3624,6 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 	const double scaling_factor = 0.4 * (spp / 1500.);
 
 	delta += scaling_factor * pixel_distance;
-	std::cerr << "pixels " << pixel_distance << " spp " << spp << " SF " << scaling_factor << " delta = " << delta << std::endl;
 
 	if (_do_ramp) {
 		map->ramped_twist_tempi (prev, focus, next, initial_focus_npm + delta); // was: PRE ... maybe we don't need 2 anymore?

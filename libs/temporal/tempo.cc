@@ -4217,7 +4217,7 @@ TempoMap::solve_ramped_twist (TempoPoint& earlier, TempoPoint& later)
 		++cnt;
 	}
 
-	std::cerr << "that took " << cnt << " iterations to get to < 1 sample\n";
+	// std::cerr << "that took " << cnt << " iterations to get to < 1 sample\n";
 
 	return true;
 }
@@ -4309,9 +4309,6 @@ TempoMap::constant_twist_tempi (TempoPoint& prev, TempoPoint& focus, TempoPoint&
 	 * sample of its current position
 	 */
 
-	std::cerr << "pre-iter\n";
-	dump (std::cerr);
-
 	if (!solve_constant_twist (focus, next)) {
 		prev = old_prev;
 		focus = old_focus;
@@ -4338,25 +4335,15 @@ TempoMap::ramped_twist_tempi (TempoPoint& unused, TempoPoint& focus, TempoPoint&
 	 * to bail out because change is impossible.
 	 */
 
-	std::cerr << "on entry\n";
-	dump (std::cerr);
-	std::cerr << "----------------------------\n";
-
 	TempoPoint old_focus (focus);
 
 	/* set start tempo of prev tempo marker; we will iteratively solve for the required ramp value */
 	focus.set_note_types_per_minute (tempo_value);
 
-	std::cerr << "pre-iter\n";
-	dump (std::cerr);
-
 	if (!solve_ramped_twist (focus, next)) {
 		focus = old_focus;
 		return;
 	}
-
-	std::cerr << "Twisted with " << tempo_value << std::endl;
-	dump (std::cerr);
 }
 
 void
