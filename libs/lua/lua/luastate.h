@@ -27,7 +27,7 @@
 
 class LIBLUA_API LuaState {
 public:
-	LuaState();
+	LuaState (bool sandbox = true, bool rt_safe = false);
 	LuaState(lua_State *ls);
 	~LuaState();
 
@@ -36,7 +36,7 @@ public:
 	void collect_garbage () const;
 	void collect_garbage_step (int debt = 0);
 	void tweak_rt_gc ();
-	void sandbox (bool rt_safe = false);
+	void sandbox (bool rt_safe);
 
 	sigc::signal<void,std::string> Print;
 

@@ -26,11 +26,16 @@ static int panic (lua_State *L) {
 	return 0;  /* return to Lua to abort */
 }
 
-LuaState::LuaState()
+LuaState::LuaState(bool enable_sandbox, bool rt_safe)
 	: L (luaL_newstate ())
 {
 	assert (L);
 	init ();
+	if (enable_sandbox) {
+		sandbox (rt_safe);
+	} else {
+		do_command ("os.exit = nil os.setlocale = nil");
+	}
 }
 
 LuaState::LuaState(lua_State *ls)
@@ -38,6 +43,7 @@ LuaState::LuaState(lua_State *ls)
 {
 	assert (L);
 	init ();
+	sandbox (true);
 }
 
 LuaState::~LuaState() {
