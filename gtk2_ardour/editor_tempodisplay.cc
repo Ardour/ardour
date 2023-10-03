@@ -216,7 +216,7 @@ Editor::reset_tempo_marks ()
 	double min_tempo;
 
 	set_tempo_curve_range (max_tempo, min_tempo);
-	update_tempo_curves (min_tempo, max_tempo, sr);	
+	update_tempo_curves (min_tempo, max_tempo, sr);
 }
 
 void
