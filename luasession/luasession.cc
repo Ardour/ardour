@@ -416,7 +416,7 @@ setup_lua ()
 {
 	assert (!lua);
 
-	lua = new LuaState ();
+	lua = new LuaState (false, false);
 	lua->Print.connect (&my_lua_print);
 	lua_State* L = lua->getState ();
 
@@ -491,7 +491,7 @@ interactive_interpreter ()
 		}
 
 		do {
-			LuaState   lt;
+			LuaState   lt (false, false);
 			lua_State* L      = lt.getState ();
 			int        status = luaL_loadbuffer (L, line, strlen (line), "=stdin");
 			if (!incomplete (L, status)) {

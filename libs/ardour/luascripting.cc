@@ -184,7 +184,7 @@ LuaScripting::lua_print (std::string s) {
 LuaScriptInfoPtr
 LuaScripting::scan_script (const std::string &fn, const std::string &sc)
 {
-	LuaState lua;
+	LuaState lua (true, true);
 	if (!(fn.empty() ^ sc.empty())){
 		// give either file OR script
 		assert (0);
@@ -193,7 +193,6 @@ LuaScripting::scan_script (const std::string &fn, const std::string &sc)
 
 	lua_State* L = lua.getState();
 	lua.Print.connect (&LuaScripting::lua_print);
-	lua.sandbox (true);
 
 	lua.do_command (
 			"ardourluainfo = {}"
@@ -392,7 +391,7 @@ LuaScriptParams::script_params (const LuaScriptInfoPtr& lsi, const std::string &
 LuaScriptParamList
 LuaScriptParams::script_params (const std::string& s, const std::string &pname, bool file)
 {
-	LuaState lua;
+	LuaState lua (true, true);
 	return LuaScriptParams::script_params (lua, s, pname, file);
 }
 
@@ -402,7 +401,6 @@ LuaScriptParams::script_params (LuaState& lua, const std::string& s, const std::
 	LuaScriptParamList rv;
 
 	lua_State* L = lua.getState();
-	lua.sandbox (true);
 	lua.do_command ("function ardour () end");
 
 	try {
@@ -481,9 +479,8 @@ LuaScripting::try_compile (const std::string& script, const LuaScriptParamList& 
 	if (bytecode.empty()) {
 		return false;
 	}
-	LuaState l;
+	LuaState l (true, true);
 	l.Print.connect (&LuaScripting::lua_print);
-	l.sandbox (true);
 	lua_State* L = l.getState();
 
 	l.do_command (""
@@ -520,9 +517,8 @@ LuaScripting::try_compile (const std::string& script, const LuaScriptParamList& 
 std::string
 LuaScripting::get_factory_bytecode (const std::string& script, const std::string& ffn, const std::string& fp)
 {
-	LuaState l;
+	LuaState l (true, true);
 	l.Print.connect (&LuaScripting::lua_print);
-	l.sandbox (true);
 	lua_State* L = l.getState();
 
 	l.do_command (

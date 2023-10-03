@@ -51,7 +51,7 @@ LuaProc::LuaProc (AudioEngine& engine,
 #ifdef USE_TLSF
 	, lua (lua_newstate (&PBD::TLSF::lalloc, &_mempool))
 #elif defined USE_MALLOC
-	, lua ()
+	, lua (true, true)
 #else
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 #endif
@@ -87,7 +87,7 @@ LuaProc::LuaProc (const LuaProc &other)
 #ifdef USE_TLSF
 	, lua (lua_newstate (&PBD::TLSF::lalloc, &_mempool))
 #elif defined USE_MALLOC
-	, lua ()
+	, lua (true, true)
 #else
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
 #endif
@@ -176,8 +176,6 @@ LuaProc::init ()
 	luabridge::push <LuaProc *> (L, this);
 	lua_setglobal (L, "self");
 
-	// sandbox
-	lua.sandbox (true);
 #if 0
 	lua.do_command ("for n in pairs(_G) do print(n) end print ('----')"); // print global env
 #endif

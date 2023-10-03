@@ -5309,7 +5309,6 @@ void
 Session::setup_lua ()
 {
 	lua.Print.connect (&_lua_print);
-	lua.sandbox (true);
 	lua.do_command (
 			"function ArdourSession ()"
 			"  local self = { scripts = {}, instances = {} }"
