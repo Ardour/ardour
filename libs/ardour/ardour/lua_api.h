@@ -263,7 +263,7 @@ namespace ARDOUR { namespace LuaAPI {
 	int simple_export (lua_State* L);
 
 	/**
-	 * Delay execution until next prcess cycle starts.
+	 * Delay execution until next process cycle starts.
 	 * @param n_cycles process-cycles to wait for.
 	 *        0: means wait until next cycle-start, otherwise skip given number of cycles.
 	 * @param timeout_ms wait at most this many milliseconds
