@@ -688,7 +688,7 @@ Automatable::find_next_event (timepos_t const & start, timepos_t const & end, Ev
 			}
 		}
 	}
-	return next_event.when != (start <= end ? timepos_t::max (start.time_domain()) : timepos_t (start.time_domain()));
+	return next_event.when != (start <= end ? timepos_t::max (next_event.when.time_domain ()) : timepos_t (next_event.when.time_domain ()));
 }
 
 void
