@@ -6222,7 +6222,6 @@ Editor::quantize_regions (const RegionSelection& rs)
 		return;
 	}
 
-	bool ignored;
 	Quantize* quant = get_quantize_op ();
 
 	if (!quant) {
