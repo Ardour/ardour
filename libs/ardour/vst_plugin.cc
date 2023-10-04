@@ -112,10 +112,7 @@ VSTPlugin::designated_bypass_port ()
 		 */
 		intptr_t value = 0; // not bypassed
 		if (0 != _plugin->dispatcher (_plugin, 44 /*effSetBypass*/, 0, value, NULL, 0)) {
-			cerr << "Emulate VST Bypass Port for " << name() << endl; // XXX DEBUG
 			return UINT32_MAX - 1; // emulate a port
-		} else {
-			cerr << "Do *not* Emulate VST Bypass Port for " << name() << endl; // XXX DEBUG
 		}
 #endif
 	}
@@ -190,7 +187,6 @@ VSTPlugin::set_parameter (uint32_t which, float newval, sampleoffset_t when)
 	if (which == UINT32_MAX - 1) {
 		// ardour uses enable-semantics: 1: enabled, 0: bypassed
 		intptr_t value = (newval <= 0.f) ? 1 : 0;
-		cerr << "effSetBypass " << value << endl; // XXX DEBUG
 		int rv = _plugin->dispatcher (_plugin, 44 /*effSetBypass*/, 0, value, NULL, 0);
 		if (0 != rv) {
 			_eff_bypassed = (value == 1);
