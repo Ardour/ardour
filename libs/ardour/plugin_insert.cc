@@ -1396,14 +1396,26 @@ PluginInsert::automate_and_run (BufferSet& bufs, samplepos_t start, samplepos_t 
 
 		samplecnt_t cnt = min (timepos_t (start).distance (next_event.when).samples(), (samplecnt_t) nframes);
 
-		/* This may trigger when loopin a range < 1 sample (if that is even possible).
-		 * Or When there is more than 1 automation point on the same sample but at
-		 * different beat-time (which is probably possible, even though music-time has a much
-		 * larger granularity).
+		/* An event returned by find_next_event is always be *after* `start`. */
+		assert (timepos_t (start) < next_event.when);
+		/* However it may still be at the sample sample (when event is using BeatTime),
+		 * in which case we need to look for the next event, after that.
 		 */
-		assert (cnt > 0);
+		int timeout = 8; // just in case there is more than one music-time event for the given sample.
+		while (cnt == 0 && --timeout > 0 && Temporal::AudioTime != next_event.when.time_domain ()) {
+			timepos_t _start = next_event.when; // copy, since find_next_event uses a reference, and modifies next_event
+			if (!find_next_event (_start, timepos_t (end), next_event)) {
+				cnt = nframes;
+				break;
+			} else {
+				cnt = min (timepos_t (start).distance (next_event.when).samples(), (samplecnt_t) nframes);
+			}
+		}
+
 		if (cnt <= 0) {
-			/* prevent endless loops in optimized builds */
+			/* prevent endless loops, just skip over events until next cycle.
+			 * (alternatively we could single step and set  cnt = 1;)
+			 */
 			break;
 		}
 
