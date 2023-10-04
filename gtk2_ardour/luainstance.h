@@ -112,7 +112,7 @@ public:
 	static void destroy_instance();
 	~LuaInstance();
 
-	static void register_classes (lua_State* L);
+	static void register_classes (lua_State* L, bool sandbox);
 	static void register_hooks (lua_State* L);
 	static void bind_cairo (lua_State* L);
 	static void bind_dialog (lua_State* L);

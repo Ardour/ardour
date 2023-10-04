@@ -189,8 +189,7 @@ SessionDialog::meta_master_bus_profile (std::string script_path)
 		return UINT32_MAX;
 	}
 
-	LuaState lua;
-	lua.sandbox (true);
+	LuaState lua (true, true);
 	lua_State* L = lua.getState();
 
 	lua.do_command (

@@ -941,11 +941,16 @@ Editor::trigger_script_by_name (const std::string script_name, const std::string
 				return;
 			}
 
-			LuaState lua;
+#ifdef MIXBUS
+			bool sandbox = false; // mixer state save/reset/restore needs os.*
+#else
+			bool sandbox = UIConfiguration::instance().get_sandbox_all_lua_scripts ();
+#endif
+
+			LuaState lua (true, sandbox);
 			lua.Print.connect (&_lua_print);
-			lua.sandbox (false);
 			lua_State* L = lua.getState();
-			LuaInstance::register_classes (L);
+			LuaInstance::register_classes (L, sandbox);
 			LuaBindings::set_session (L, _session);
 			luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
 			lua_setglobal (L, "Editor");

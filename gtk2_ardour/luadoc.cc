@@ -33,7 +33,7 @@ int main (int argc, char **argv)
 {
 #ifdef LUABINDINGDOC
 	luabridge::setPrintBindings (true);
-	LuaState lua;
+	LuaState lua (false, false);
 	lua_State* L = lua.getState ();
 #ifdef LUADOCOUT
 	printf ("-- %s\n", ARDOUR::revision);
@@ -42,7 +42,7 @@ int main (int argc, char **argv)
 	printf ("[\n");
 	printf ("{\"version\" :  \"%s\"},\n\n", ARDOUR::revision);
 #endif
-	LuaInstance::register_classes (L);
+	LuaInstance::register_classes (L, false);
 	LuaInstance::register_hooks (L);
 	ARDOUR::LuaBindings::dsp (L);
 #ifdef LUADOCOUT

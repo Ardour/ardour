@@ -2350,12 +2350,11 @@ ARDOUR_UI::route_setup_info (const std::string& script_path)
 		return rv;
 	}
 
-	LuaState lua;
+	LuaState lua (true, true);
 	lua.Print.connect (&_lua_print);
-	lua.sandbox (true);
 
 	lua_State* L = lua.getState();
-	LuaInstance::register_classes (L);
+	LuaInstance::register_classes (L, true);
 	LuaBindings::set_session (L, _session);
 	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
 	lua_setglobal (L, "Editor");
@@ -2403,12 +2402,11 @@ ARDOUR_UI::meta_route_setup (const std::string& script_path)
 		return;
 	}
 
-	LuaState lua;
+	LuaState lua (true, true);
 	lua.Print.connect (&_lua_print);
-	lua.sandbox (true);
 
 	lua_State* L = lua.getState();
-	LuaInstance::register_classes (L);
+	LuaInstance::register_classes (L, true);
 	LuaBindings::set_session (L, _session);
 	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
 	lua_setglobal (L, "Editor");
@@ -2449,12 +2447,13 @@ ARDOUR_UI::meta_session_setup (const std::string& script_path)
 		return;
 	}
 
-	LuaState lua;
+	bool sandbox = UIConfiguration::instance().get_sandbox_all_lua_scripts ();
+
+	LuaState lua (true, sandbox);
 	lua.Print.connect (&_lua_print);
-	lua.sandbox (false);
 
 	lua_State* L = lua.getState();
-	LuaInstance::register_classes (L);
+	LuaInstance::register_classes (L, sandbox);
 	LuaBindings::set_session (L, _session);
 	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
 	lua_setglobal (L, "Editor");

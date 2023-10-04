@@ -778,7 +778,7 @@ LuaInstance::bind_dialog (lua_State* L)
 }
 
 void
-LuaInstance::register_classes (lua_State* L)
+LuaInstance::register_classes (lua_State* L, bool sandbox)
 {
 	LuaBindings::stddef (L);
 	LuaBindings::common (L);
@@ -1100,15 +1100,7 @@ LuaInstance::register_classes (lua_State* L)
 
 		.addFunction ("config", &_ui_config)
 
-		.endNamespace () // end ArdourUI
-
-		.beginNamespace ("os")
-#ifndef PLATFORM_WINDOWS
-		.addFunction ("execute", &lua_exec)
-#endif
-		.addCFunction ("forkexec", &lua_forkexec)
-		.endNamespace ();
-
+		.endNamespace (); // end ArdourUI
 	// Editing Symbols
 
 #undef ZOOMFOCUS
@@ -1135,6 +1127,16 @@ LuaInstance::register_classes (lua_State* L)
 		.beginNamespace ("Editing")
 #		include "editing_syms.h"
 		.endNamespace ();
+
+	if (!sandbox) {
+		luabridge::getGlobalNamespace (L)
+			.beginNamespace ("os")
+#ifndef PLATFORM_WINDOWS
+			.addFunction ("execute", &lua_exec)
+#endif
+			.addCFunction ("forkexec", &lua_forkexec)
+			.endNamespace ();
+	}
 }
 
 #undef xstr
@@ -1174,6 +1176,7 @@ LuaInstance::destroy_instance ()
 }
 
 LuaInstance::LuaInstance ()
+	: lua (true, UIConfiguration::instance().get_sandbox_all_lua_scripts ())
 {
 	lua.Print.connect (&_lua_print);
 	init ();
@@ -1196,7 +1199,6 @@ LuaInstance::~LuaInstance ()
 void
 LuaInstance::init ()
 {
-	lua.sandbox (false);
 	lua.do_command (
 			"function ScriptManager ()"
 			"  local self = { scripts = {}, instances = {}, icons = {} }"
@@ -1343,7 +1345,7 @@ LuaInstance::init ()
 		abort(); /*NOTREACHED*/
 	}
 
-	register_classes (L);
+	LuaInstance::register_classes (L, UIConfiguration::instance().get_sandbox_all_lua_scripts ());
 	register_hooks (L);
 
 	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
@@ -1527,8 +1529,8 @@ LuaInstance::pre_seed_script (std::string const& name, int& id)
 	if (spi) {
 		try {
 			std::string script = Glib::file_get_contents (spi->path);
-			LuaState ls;
-			register_classes (ls.getState ());
+			LuaState ls (true, true);
+			register_classes (ls.getState (), true);
 			LuaScriptParamList lsp = LuaScriptParams::script_params (ls, spi->path, "action_params");
 			LuaScriptParamPtr lspp (new LuaScriptParam("x-script-origin", "", spi->path, false, true));
 			lsp.push_back (lspp);
@@ -1595,8 +1597,8 @@ LuaInstance::interactive_add (Gtk::Window& parent, LuaScriptInfo::ScriptType typ
 		return false;
 	}
 
-	LuaState ls;
-	register_classes (ls.getState ());
+	LuaState ls (true, true);
+	register_classes (ls.getState (), true);
 	LuaScriptParamList lsp = LuaScriptParams::script_params (ls, spi->path, param_function);
 
 	/* allow cancel */
@@ -1865,9 +1867,8 @@ LuaInstance::register_lua_slot (const std::string& name, const std::string& scri
 	/* parse script, get ActionHook(s) from script */
 	ActionHook ah;
 	try {
-		LuaState l;
+		LuaState l (true, true);
 		l.Print.connect (&_lua_print);
-		l.sandbox (true);
 		lua_State* L = l.getState();
 		register_hooks (L);
 		l.do_command ("function ardour () end");
@@ -1972,6 +1973,7 @@ LuaCallback::LuaCallback (Session *s,
 		const ActionHook& ah,
 		const ARDOUR::LuaScriptParamList& args)
 	: SessionHandlePtr (s)
+	, lua (true, UIConfiguration::instance().get_sandbox_all_lua_scripts ())
 	, _id ("0")
 	, _name (name)
 	, _signals (ah)
@@ -2005,6 +2007,7 @@ LuaCallback::LuaCallback (Session *s,
 
 LuaCallback::LuaCallback (Session *s, XMLNode & node)
 	: SessionHandlePtr (s)
+	, lua (true, UIConfiguration::instance().get_sandbox_all_lua_scripts ())
 {
 	XMLNode* child = NULL;
 	if (node.name() != X_("LuaCallback")
@@ -2088,7 +2091,6 @@ void
 LuaCallback::init (void)
 {
 	lua.Print.connect (&_lua_print);
-	lua.sandbox (false);
 
 	lua.do_command (
 			"function ScriptManager ()"
@@ -2209,7 +2211,7 @@ LuaCallback::init (void)
 		abort(); /*NOTREACHED*/
 	}
 
-	LuaInstance::register_classes (L);
+	LuaInstance::register_classes (L, UIConfiguration::instance().get_sandbox_all_lua_scripts ());
 	LuaInstance::register_hooks (L);
 
 	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());

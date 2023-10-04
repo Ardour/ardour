@@ -197,12 +197,11 @@ void LuaWindow::reinit_lua ()
 {
 	ENSURE_GUI_THREAD (*this, &LuaWindow::session_going_away);
 	delete lua;
-	lua = new LuaState();
+	lua = new LuaState (true, UIConfiguration::instance().get_sandbox_all_lua_scripts ());
 	lua->Print.connect (sigc::mem_fun (*this, &LuaWindow::append_text));
-	lua->sandbox (false);
 
 	lua_State* L = lua->getState();
-	LuaInstance::register_classes (L);
+	LuaInstance::register_classes (L, UIConfiguration::instance().get_sandbox_all_lua_scripts ());
 	luabridge::push <PublicEditor *> (L, &PublicEditor::instance());
 	lua_setglobal (L, "Editor");
 }

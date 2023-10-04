@@ -1869,6 +1869,7 @@ ProcessorEntry::PluginInlineDisplay::display_frame (cairo_t* cr, double w, doubl
 ProcessorEntry::LuaPluginDisplay::LuaPluginDisplay (ProcessorEntry& e, std::shared_ptr<ARDOUR::LuaProc> p, uint32_t max_height)
 	: PluginInlineDisplay (e, p, max_height)
 	, _luaproc (p)
+	, lua_gui (true, true)
 	, _lua_render_inline (0)
 {
 	p->setup_lua_inline_gui (&lua_gui);
