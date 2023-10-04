@@ -1343,7 +1343,6 @@ private:
 	void toggle_solo ();
 	void toggle_solo_isolate ();
 	void toggle_mute ();
-	void toggle_region_lock_style ();
 
 	void play_solo_selection (bool restart);
 
@@ -1409,11 +1408,11 @@ private:
 	void fork_regions_from_unselected ();
 
 	void do_insert_time ();
-	void insert_time (Temporal::timepos_t const &, Temporal::timecnt_t const &, Editing::InsertTimeOption, bool, bool, bool, bool, bool, bool);
+	void insert_time (Temporal::timepos_t const &, Temporal::timecnt_t const &, Editing::InsertTimeOption, bool, bool, bool, bool);
 
 	void do_remove_time ();
-	void remove_time (Temporal::timepos_t const & pos, Temporal::timecnt_t const & distance, Editing::InsertTimeOption opt, bool ignore_music_glue, bool markers_too,
-	                  bool glued_markers_too, bool locked_markers_too, bool tempo_too);
+	void remove_time (Temporal::timepos_t const & pos, Temporal::timecnt_t const & distance, Editing::InsertTimeOption opt, bool markers_too,
+	                  bool locked_markers_too, bool tempo_too);
 
 	void tab_to_transient (bool forward);
 

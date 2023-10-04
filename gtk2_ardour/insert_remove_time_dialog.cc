@@ -98,20 +98,10 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 	_all_playlists.set_label (_("Apply to all playlists of the selected track(s)"));
 	get_vbox()->pack_start (_all_playlists);
 
-	_move_glued.set_label (_("Move glued-to-musical-time regions (MIDI regions)"));
-	_move_glued.set_active();
-	get_vbox()->pack_start (_move_glued);
 	_move_markers.set_label (_("Move markers"));
 	get_vbox()->pack_start (_move_markers);
 	_move_markers.signal_toggled().connect (sigc::mem_fun (*this, &InsertRemoveTimeDialog::move_markers_toggled));
-	_move_glued_markers.set_label (_("Move glued-to-musical-time markers"));
-	_move_glued_markers.set_active();
 	Alignment* indent = manage (new Alignment);
-	indent->set_padding (0, 0, 12, 0);
-	indent->add (_move_glued_markers);
-	get_vbox()->pack_start (*indent);
-	_move_locked_markers.set_label (_("Move locked markers"));
-	indent = manage (new Alignment);
 	indent->set_padding (0, 0, 12, 0);
 	indent->add (_move_locked_markers);
 	get_vbox()->pack_start (*indent);
@@ -159,12 +149,6 @@ InsertRemoveTimeDialog::all_playlists () const
 }
 
 bool
-InsertRemoveTimeDialog::move_glued () const
-{
-	return _move_glued.get_active ();
-}
-
-bool
 InsertRemoveTimeDialog::move_tempos () const
 {
 	return _move_tempos.get_active ();
@@ -174,12 +158,6 @@ bool
 InsertRemoveTimeDialog::move_markers () const
 {
 	return _move_markers.get_active ();
-}
-
-bool
-InsertRemoveTimeDialog::move_glued_markers () const
-{
-	return _move_glued_markers.get_active ();
 }
 
 bool
@@ -214,6 +192,5 @@ InsertRemoveTimeDialog::doit ()
 void
 InsertRemoveTimeDialog::move_markers_toggled ()
 {
-	_move_glued_markers.set_sensitive (_move_markers.get_active ());
 	_move_locked_markers.set_sensitive (_move_markers.get_active ());
 }

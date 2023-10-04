@@ -1865,7 +1865,6 @@ Editor::register_region_actions ()
 	/* Toggle `locked' status of selected regions */
 	register_toggle_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "toggle-region-lock", _("Lock"), sigc::mem_fun(*this, &Editor::toggle_region_lock));
 	register_toggle_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "toggle-region-video-lock", _("Lock to Video"), sigc::mem_fun(*this, &Editor::toggle_region_video_lock));
-	register_toggle_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "toggle-region-lock-style", _("Glue to Bars and Beats"), sigc::mem_fun (*this, &Editor::toggle_region_lock_style));
 
 	/* Remove sync points from selected regions */
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "remove-region-sync", _("Remove Sync"), sigc::mem_fun(*this, &Editor::remove_region_sync));

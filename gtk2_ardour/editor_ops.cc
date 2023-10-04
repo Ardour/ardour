@@ -6668,37 +6668,6 @@ Editor::toggle_region_video_lock ()
 }
 
 void
-Editor::toggle_region_lock_style ()
-{
-	if (_ignore_region_action) {
-		return;
-	}
-
-	RegionSelection rs = get_regions_from_selection_and_entered ();
-
-	if (!_session || rs.empty()) {
-		return;
-	}
-
-	Glib::RefPtr<ToggleAction> a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock-style"));
-	vector<Widget*> proxies = a->get_proxies();
-	Gtk::CheckMenuItem* cmi = dynamic_cast<Gtk::CheckMenuItem*> (proxies.front());
-
-	assert (cmi);
-
-	begin_reversible_command (_("toggle region lock style"));
-
-	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
-		(*i)->region()->clear_changes ();
-		Temporal::TimeDomain const td = ((*i)->region()->position_time_domain() == Temporal::AudioTime && !cmi->get_inconsistent()) ? Temporal::BeatTime : Temporal::AudioTime;
-		(*i)->region()->set_position_time_domain (td);
-		_session->add_command (new StatefulDiffCommand ((*i)->region()));
-	}
-
-	commit_reversible_command ();
-}
-
-void
 Editor::toggle_opaque_region ()
 {
 	if (_ignore_region_action) {
@@ -8483,9 +8452,7 @@ Editor::do_insert_time ()
 		d.distance(),
 		d.intersected_region_action (),
 		d.all_playlists(),
-		d.move_glued(),
 		d.move_markers(),
-		d.move_glued_markers(),
 		d.move_locked_markers(),
 		d.move_tempos()
 		);
@@ -8494,7 +8461,7 @@ Editor::do_insert_time ()
 void
 Editor::insert_time (
 	timepos_t const & pos, timecnt_t const & samples, InsertTimeOption opt,
-	bool all_playlists, bool ignore_music_glue, bool markers_too, bool glued_markers_too, bool locked_markers_too, bool tempo_too
+	bool all_playlists, bool markers_too, bool locked_markers_too, bool tempo_too
 	)
 {
 
@@ -8546,7 +8513,7 @@ Editor::insert_time (
 				(*i)->split (pos);
 			}
 
-			(*i)->shift (pos, samples, (opt == MoveIntersected), ignore_music_glue);
+			(*i)->shift (pos, samples, (opt == MoveIntersected), true);
 
 			vector<Command*> cmds;
 			(*i)->rdiff (cmds);
@@ -8576,7 +8543,7 @@ Editor::insert_time (
 
 			Locations::LocationList::const_iterator tmp;
 
-			if ((*i)->position_time_domain() == Temporal::AudioTime || glued_markers_too) {
+			if ((*i)->position_time_domain() == Temporal::AudioTime) {
 				bool const was_locked = (*i)->locked ();
 				if (locked_markers_too) {
 					(*i)->unlock ();
@@ -8662,9 +8629,7 @@ Editor::do_remove_time ()
 		d.position(),
 		distance,
 		SplitIntersected,
-		d.move_glued(),
 		d.move_markers(),
-		d.move_glued_markers(),
 		d.move_locked_markers(),
 		d.move_tempos()
 	);
@@ -8672,7 +8637,7 @@ Editor::do_remove_time ()
 
 void
 Editor::remove_time (timepos_t const & pos, timecnt_t const & duration, InsertTimeOption opt,
-                     bool ignore_music_glue, bool markers_too, bool glued_markers_too, bool locked_markers_too, bool tempo_too)
+                     bool markers_too, bool locked_markers_too, bool tempo_too)
 {
 	if (Config->get_edit_mode() == Lock) {
 		error << (_("Cannot insert or delete time when in Lock edit.")) << endmsg;
@@ -8697,7 +8662,7 @@ Editor::remove_time (timepos_t const & pos, timecnt_t const & duration, InsertTi
 			TimelineRange ar(pos, pos+duration, 0);
 			rl.push_back(ar);
 			pl->cut (rl);
-			pl->shift (pos, -duration, true, ignore_music_glue);
+			pl->shift (pos, -duration, true, true);
 
 			XMLNode &after = pl->get_state();
 
@@ -8724,7 +8689,7 @@ Editor::remove_time (timepos_t const & pos, timecnt_t const & duration, InsertTi
 		Locations::LocationList copy (_session->locations()->list());
 
 		for (Locations::LocationList::iterator i = copy.begin(); i != copy.end(); ++i) {
-			if ((*i)->position_time_domain() == Temporal::AudioTime || glued_markers_too) {
+			if ((*i)->position_time_domain() == Temporal::AudioTime) {
 
 				bool const was_locked = (*i)->locked ();
 				if (locked_markers_too) {

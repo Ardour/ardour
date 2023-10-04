@@ -100,7 +100,6 @@ protected:
 			add (fadein);   // 7
 			add (fadeout);  // 8
 			add (locked);   // 9
-			add (glued);    // 10
 			add (muted);    // 11
 			add (opaque);   // 12
 			add (path);     // 13
@@ -126,7 +125,6 @@ protected:
 		Gtk::TreeModelColumn<std::string>                       fadein;
 		Gtk::TreeModelColumn<std::string>                       fadeout;
 		Gtk::TreeModelColumn<bool>                              locked;
-		Gtk::TreeModelColumn<bool>                              glued;
 		Gtk::TreeModelColumn<bool>                              muted;
 		Gtk::TreeModelColumn<bool>                              opaque;
 		Gtk::TreeModelColumn<std::string>                       path;
@@ -179,7 +177,6 @@ protected:
 	virtual void tag_edit (const std::string&, const std::string&);
 
 	void locked_changed (std::string const&);
-	void glued_changed (std::string const&);
 	void muted_changed (std::string const&);
 	void opaque_changed (std::string const&);
 
@@ -208,7 +205,6 @@ protected:
 	void populate_row_fade_out (std::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row, std::shared_ptr<ARDOUR::AudioRegion>);
 	void populate_row_locked (std::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);
 	void populate_row_muted (std::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);
-	void populate_row_glued (std::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);
 	void populate_row_opaque (std::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);
 	void populate_row_length (std::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);
 	void populate_row_name (std::shared_ptr<ARDOUR::Region> region, Gtk::TreeModel::Row const& row);

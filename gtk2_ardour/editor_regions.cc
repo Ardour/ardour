@@ -83,10 +83,6 @@ EditorRegions::init ()
 	setup_col (tvc, -1, ALIGN_CENTER, S_("Lock|L"), _("Region position locked?"));
 	setup_toggle (tvc, sigc::mem_fun (*this, &EditorRegions::locked_changed));
 
-	tvc = append_col (_columns.glued, cb_width);
-	setup_col (tvc, -1, ALIGN_CENTER, S_("Glued|G"), _("Region position glued to Bars|Beats time?"));
-	setup_toggle (tvc, sigc::mem_fun (*this, &EditorRegions::glued_changed));
-
 	tvc = append_col (_columns.muted, cb_width);
 	setup_col (tvc, -1, ALIGN_CENTER, S_("Mute|M"), _("Region muted?"));
 	setup_toggle (tvc, sigc::mem_fun (*this, &EditorRegions::muted_changed));

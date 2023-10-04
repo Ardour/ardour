@@ -406,7 +406,6 @@
         <menuitem action='naturalize-region'/>
         <menuitem action='snap-regions-to-grid'/>
         <menuitem action='toggle-region-lock'/>
-        <menuitem action='toggle-region-lock-style'/>
         <menuitem action='toggle-region-video-lock'/>
         <menuitem action='set-region-sync-position'/>
         <menuitem action='remove-region-sync'/>
@@ -904,7 +903,6 @@
     <menu action='RegionMenuPosition'>
       <menuitem action='naturalize-region'/>
       <menuitem action='toggle-region-lock'/>
-      <menuitem action='toggle-region-lock-style'/>
       <menuitem action='toggle-region-video-lock'/>
       <menuitem action='snap-regions-to-grid'/>
       <menuitem action='set-region-sync-position'/>

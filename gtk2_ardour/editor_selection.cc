@@ -1439,8 +1439,6 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 	bool have_unlocked = false;
 	bool have_video_locked = false;
 	bool have_video_unlocked = false;
-	bool have_position_lock_style_audio = false;
-	bool have_position_lock_style_music = false;
 	bool have_muted = false;
 	bool have_unmuted = false;
 	bool have_opaque = false;
@@ -1488,12 +1486,6 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 			have_video_locked = true;
 		} else {
 			have_video_unlocked = true;
-		}
-
-		if (r->position_time_domain() == Temporal::BeatTime) {
-			have_position_lock_style_music = true;
-		} else {
-			have_position_lock_style_audio = true;
 		}
 
 		if (r->muted()) {
@@ -1635,17 +1627,6 @@ Editor::sensitize_the_right_region_actions (bool because_canvas_crossing)
 	a->set_active (have_video_locked && !have_video_unlocked);
 	if (have_video_locked && have_video_unlocked) {
 		// a->set_inconsistent ();
-	}
-
-	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-lock-style"));
-	a->set_active (have_position_lock_style_music && !have_position_lock_style_audio);
-
-	vector<Widget*> proxies = a->get_proxies();
-	for (vector<Widget*>::iterator p = proxies.begin(); p != proxies.end(); ++p) {
-		Gtk::CheckMenuItem* cmi = dynamic_cast<Gtk::CheckMenuItem*> (*p);
-		if (cmi) {
-			cmi->set_inconsistent (have_position_lock_style_music && have_position_lock_style_audio);
-		}
 	}
 
 	a = Glib::RefPtr<ToggleAction>::cast_dynamic (_region_actions->get_action("toggle-region-mute"));

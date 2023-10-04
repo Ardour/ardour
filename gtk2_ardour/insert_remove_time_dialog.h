@@ -28,9 +28,7 @@ public:
 
 	Editing::InsertTimeOption intersected_region_action ();
 	bool all_playlists () const;
-	bool move_glued () const;
 	bool move_markers () const;
-	bool move_glued_markers () const;
 	bool move_locked_markers () const;
 	bool move_tempos () const;
 	Temporal::timepos_t position () const;
@@ -43,9 +41,7 @@ private:
 	PublicEditor& _editor;
 	Gtk::ComboBoxText _intersected_combo;
 	Gtk::CheckButton _all_playlists;
-	Gtk::CheckButton _move_glued;
 	Gtk::CheckButton _move_markers;
-	Gtk::CheckButton _move_glued_markers;
 	Gtk::CheckButton _move_locked_markers;
 	Gtk::CheckButton _move_tempos;
 	Gtk::Label tempo_label;

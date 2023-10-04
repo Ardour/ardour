@@ -482,9 +482,6 @@ RegionListBase::populate_row (std::shared_ptr<Region> region, TreeModel::Row con
 	if (all || what_changed.contains (Properties::locked)) {
 		populate_row_locked (region, row);
 	}
-	if (all || what_changed.contains (Properties::time_domain)) {
-		populate_row_glued (region, row);
-	}
 	if (all || what_changed.contains (Properties::muted)) {
 		populate_row_muted (region, row);
 	}
@@ -599,16 +596,6 @@ void
 RegionListBase::populate_row_locked (std::shared_ptr<Region> region, TreeModel::Row const& row)
 {
 	row[_columns.locked] = region->locked ();
-}
-
-void
-RegionListBase::populate_row_glued (std::shared_ptr<Region> region, TreeModel::Row const& row)
-{
-	if (region->position_time_domain () == Temporal::BeatTime) {
-		row[_columns.glued] = true;
-	} else {
-		row[_columns.glued] = false;
-	}
 }
 
 void
@@ -858,19 +845,6 @@ RegionListBase::locked_changed (std::string const& path)
 		std::shared_ptr<ARDOUR::Region> region = (*i)[_columns.region];
 		if (region) {
 			region->set_locked (!(*i)[_columns.locked]);
-		}
-	}
-}
-
-void
-RegionListBase::glued_changed (std::string const& path)
-{
-	TreeIter i = _model->get_iter (path);
-	if (i) {
-		std::shared_ptr<ARDOUR::Region> region = (*i)[_columns.region];
-		if (region) {
-			/* `glued' means MusicTime, and we're toggling here */
-			region->set_position_time_domain ((*i)[_columns.glued] ? Temporal::AudioTime : Temporal::BeatTime);
 		}
 	}
 }
