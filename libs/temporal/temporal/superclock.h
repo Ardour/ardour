@@ -34,7 +34,7 @@ namespace Temporal {
 
 typedef int64_t superclock_t;
 
-#ifndef COMPILER_MSVC
+#ifndef PLATFORM_WINDOWS
 	extern superclock_t _superclock_ticks_per_second;
 #else
 	static superclock_t _superclock_ticks_per_second = 0;

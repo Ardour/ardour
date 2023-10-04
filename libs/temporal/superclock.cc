@@ -18,7 +18,7 @@
 
 #include "temporal/superclock.h"
 
-#ifndef COMPILER_MSVC
+#ifndef PLATFORM_WINDOWS
 Temporal::superclock_t Temporal::_superclock_ticks_per_second = 0;
 #endif
 
