@@ -449,29 +449,30 @@ MidiPlaylist::combine (RegionList const & rl, std::shared_ptr<Track> trk)
 
 	std::shared_ptr<Region> first = sorted.front();
 
-	timepos_t earliest (timepos_t::max (Temporal::BeatTime));
+	std::shared_ptr<MidiSource> ms (session().create_midi_source_by_stealing_name (trk));
+	std::shared_ptr<MidiRegion> new_region = std::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (ms, first->derive_properties (false), true, &rwl.thawlist));
+
+	timepos_t earliest (first->position ());
 	timepos_t latest (Temporal::BeatTime);
 
-	for (auto const & r : rl) {
-		assert (std::dynamic_pointer_cast<MidiRegion> (r));
+	new_region->set_position (earliest);
+
+	for (auto const & r : sorted) {
 		if (r->position() < earliest) {
 			earliest = r->position();
 		}
 		if (r->end() > latest) {
 			latest = r->end();
 		}
+		/* We need to explicit set the end, to terminate any MIDI notes
+		 * that extend beyond the end of the region at the region boundary.
+		 */
+		new_region->set_length_unchecked (earliest.distance (r->end()));
+		new_region->merge (std::dynamic_pointer_cast<MidiRegion> (r));
+		remove_region_internal (r, rwl.thawlist);
 	}
 
-	std::shared_ptr<MidiSource> ms (session().create_midi_source_by_stealing_name (trk));
-	std::shared_ptr<MidiRegion> new_region = std::dynamic_pointer_cast<MidiRegion> (RegionFactory::create (ms, first->derive_properties (false), true, &rwl.thawlist));
-
-	timepos_t pos (first->position());
-	new_region->set_position (pos);
-
-	for (auto const & other : sorted) {
-		new_region->merge (std::dynamic_pointer_cast<MidiRegion> (other));
-		remove_region_internal (other, rwl.thawlist);
-	}
+	new_region->set_length_unchecked (earliest.distance (latest));
 
 	/* thin automation.
 	 * Combining MIDI regions plays back automation, the compound
@@ -486,7 +487,7 @@ MidiPlaylist::combine (RegionList const & rl, std::shared_ptr<Track> trk)
 
 	new_region->midi_source (0)->session_saved ();
 
-	add_region_internal (new_region, pos, rwl.thawlist);
+	add_region_internal (new_region, earliest, rwl.thawlist);
 
 	return new_region;
 }
