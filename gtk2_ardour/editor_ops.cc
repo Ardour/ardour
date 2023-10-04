@@ -8513,7 +8513,7 @@ Editor::insert_time (
 				(*i)->split (pos);
 			}
 
-			(*i)->shift (pos, samples, (opt == MoveIntersected), true);
+			(*i)->shift (pos, samples, (opt == MoveIntersected), false);
 
 			vector<Command*> cmds;
 			(*i)->rdiff (cmds);
@@ -8662,7 +8662,7 @@ Editor::remove_time (timepos_t const & pos, timecnt_t const & duration, InsertTi
 			TimelineRange ar(pos, pos+duration, 0);
 			rl.push_back(ar);
 			pl->cut (rl);
-			pl->shift (pos, -duration, true, true);
+			pl->shift (pos, -duration, true, false);
 
 			XMLNode &after = pl->get_state();
 
@@ -8689,54 +8689,52 @@ Editor::remove_time (timepos_t const & pos, timecnt_t const & duration, InsertTi
 		Locations::LocationList copy (_session->locations()->list());
 
 		for (Locations::LocationList::iterator i = copy.begin(); i != copy.end(); ++i) {
-			if ((*i)->position_time_domain() == Temporal::AudioTime) {
 
-				bool const was_locked = (*i)->locked ();
-				if (locked_markers_too) {
-					(*i)->unlock ();
-				}
+			bool const was_locked = (*i)->locked ();
+			if (locked_markers_too) {
+				(*i)->unlock ();
+			}
 
-				if (!(*i)->is_mark()) {  // it's a range;  have to handle both start and end
-					if ((*i)->end() >= pos
-					&& (*i)->end() < pos+duration
-					&& (*i)->start() >= pos
-					&& (*i)->end() < pos+duration) {  // range is completely enclosed;  kill it
-						moved = true;
-						loc_kill_list.push_back(*i);
-					} else {  // only start or end is included, try to do the right thing
-						// move start before moving end, to avoid trying to move the end to before the start
-						// if we're removing more time than the length of the range
-						if ((*i)->start() >= pos && (*i)->start() < pos+duration) {
-							// start is within cut
-							(*i)->set_start (pos, false);  // bring the start marker to the beginning of the cut
-							moved = true;
-						} else if ((*i)->start() >= pos+duration) {
-							// start (and thus entire range) lies beyond end of cut
-							(*i)->set_start ((*i)->start().earlier (duration), false); // slip the start marker back
-							moved = true;
-						}
-						if ((*i)->end() >= pos && (*i)->end() < pos+duration) {
-							// end is inside cut
-							(*i)->set_end (pos, false);  // bring the end to the cut
-							moved = true;
-						} else if ((*i)->end() >= pos+duration) {
-							// end is beyond end of cut
-							(*i)->set_end ((*i)->end().earlier (duration), false); // slip the end marker back
-							moved = true;
-						}
-
-					}
-				} else if ((*i)->start() >= pos && (*i)->start() < pos+duration) {
+			if (!(*i)->is_mark()) {  // it's a range;  have to handle both start and end
+				if ((*i)->end() >= pos
+				    && (*i)->end() < pos+duration
+				    && (*i)->start() >= pos
+				    && (*i)->end() < pos+duration) {  // range is completely enclosed;  kill it
+					moved = true;
 					loc_kill_list.push_back(*i);
-					moved = true;
-				} else if ((*i)->start() >= pos) {
-					(*i)->set_start ((*i)->start().earlier (duration), false);
-					moved = true;
-				}
+				} else {  // only start or end is included, try to do the right thing
+					// move start before moving end, to avoid trying to move the end to before the start
+					// if we're removing more time than the length of the range
+					if ((*i)->start() >= pos && (*i)->start() < pos+duration) {
+						// start is within cut
+						(*i)->set_start (pos, false);  // bring the start marker to the beginning of the cut
+						moved = true;
+					} else if ((*i)->start() >= pos+duration) {
+						// start (and thus entire range) lies beyond end of cut
+						(*i)->set_start ((*i)->start().earlier (duration), false); // slip the start marker back
+						moved = true;
+					}
+					if ((*i)->end() >= pos && (*i)->end() < pos+duration) {
+						// end is inside cut
+						(*i)->set_end (pos, false);  // bring the end to the cut
+						moved = true;
+					} else if ((*i)->end() >= pos+duration) {
+						// end is beyond end of cut
+						(*i)->set_end ((*i)->end().earlier (duration), false); // slip the end marker back
+						moved = true;
+					}
 
-				if (was_locked) {
-					(*i)->lock ();
 				}
+			} else if ((*i)->start() >= pos && (*i)->start() < pos+duration) {
+				loc_kill_list.push_back(*i);
+				moved = true;
+			} else if ((*i)->start() >= pos) {
+				(*i)->set_start ((*i)->start().earlier (duration), false);
+				moved = true;
+			}
+
+			if (was_locked) {
+				(*i)->lock ();
 			}
 		}
 
