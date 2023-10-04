@@ -90,7 +90,7 @@ private:
 		std::string name;
 		Gtkmm2ext::Bindings* bindings;
 		Gtk::ScrolledWindow scroller;
-		Gtk::TreeView view;
+		mutable Gtk::TreeView view;
 		Glib::RefPtr<Gtk::TreeStore> data_model;
 		Glib::RefPtr<Gtk::TreeModelFilter> filter;
 		Glib::RefPtr<Gtk::TreeModelSort> sorted_filter;
