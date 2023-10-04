@@ -570,6 +570,8 @@ MidiRegion::merge (std::shared_ptr<MidiRegion const> other_region)
 	 * self->position <= other->position ()
 	 */
 
+	assert (position() <= other_region->position ());
+
 	while ((e1 != self->end ()) || (e2 != other->end ())) {
 		/* map time from other region to this region */
 		Temporal::Beats e2t;
