@@ -844,20 +844,32 @@ TempoMap::copy_points (TempoMap const & other)
 			_meters.push_back (*mtp);
 			_tempos.push_back (*mtp);
 			_points.push_back (*mtp);
+			mtp->set_map (*this);
 		} else if ((mp = dynamic_cast<MeterPoint const *> (&point))) {
 			MeterPoint* mpp = new MeterPoint (*mp);
 			_meters.push_back (*mpp);
 			_points.push_back (*mpp);
+			mpp->set_map (*this);
 		} else if ((tp = dynamic_cast<TempoPoint const *> (&point))) {
 			TempoPoint* tpp = new TempoPoint (*tp);
 			_tempos.push_back (*tpp);
 			_points.push_back (*tpp);
+			tpp->set_map (*this);
 		}
 	}
 
+#ifndef NDEBUG
 	for (auto & p : _points) {
-		p.set_map (*this);
+		assert (&p.map () == this);
 	}
+	for (auto & t : _tempos) {
+		assert (&t.map () == this);
+	}
+	for (auto & m : _meters) {
+		assert (&m.map () == this);
+	}
+#endif
+
 }
 
 TempoMapCutBuffer*
@@ -905,8 +917,6 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 		mtp = nullptr;
 	}
 
-	dump (std::cerr);
-
 	for (Points::iterator p = _points.begin(); p != _points.end(); ) {
 
 
@@ -933,7 +943,6 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 		if ((mtp = dynamic_cast<MusicTimePoint const *> (&*p))) {
 			cb->add (*mtp);
 			if (!copy && mtp->sclock() != 0) {
-				std::cerr << "remove mtp " << *mtp << std::endl;
 				core_remove_bartime (*mtp);
 				remove_point (*mtp);
 				removed = true;
@@ -942,7 +951,6 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 			if ((tp = dynamic_cast<TempoPoint const *> (&*p))) {
 				cb->add (*tp);
 				if (!copy && tp->sclock() != 0) {
-					std::cerr << "remove tempo " << *tp << std::endl;
 					core_remove_tempo (*tp);
 					remove_point (*tp);
 					removed = true;
@@ -950,7 +958,6 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 			} else if ((mp = dynamic_cast<MeterPoint const *> (&*p))) {
 				cb->add (*mp);
 				if (!copy && mp->sclock() != 0) {
-					std::cerr << "remove meter " << *mp << std::endl;
 					core_remove_meter (*mp);
 					remove_point (*mp);
 					removed = true;
@@ -961,11 +968,8 @@ TempoMap::cut_copy (timepos_t const & start, timepos_t const & end, bool copy, b
 		p = nxt;
 	}
 
-	dump (std::cerr);
-
 	if (!copy && ripple) {
 		shift (start, -start.distance (end));
-		dump (std::cerr);
 	}
 
 	if (mtp) {
@@ -987,13 +991,9 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 		return;
 	}
 
-	dump (std::cerr);
-
 	if (ripple) {
 		shift (position, cb.duration());
 	}
-
-	dump (std::cerr);
 
 
 	/* We need to look these up first, before we change the map */
@@ -1053,7 +1053,6 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 			mp = dynamic_cast<MeterPoint const *> (&p);
 
 			MusicTimePoint *ntp = new MusicTimePoint (*this, s, b, bb, *tp, *mp, mtp->name());
-			std::cerr << "Add mtp " << *ntp << std::endl;
 			core_add_bartime (ntp, replaced);
 
 			if (!replaced) {
@@ -1066,14 +1065,12 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 
 			if ((tp = dynamic_cast<TempoPoint const *> (&p))) {
 				TempoPoint *ntp = new TempoPoint (*this, *tp, s, b, bb);
-				std::cerr << "Add tempo " << *ntp << std::endl;
 				core_add_tempo (ntp, replaced);
 				if (!replaced) {
 					core_add_point (ntp);
 				}
 			} else if ((mp = dynamic_cast<MeterPoint const *> (&p))) {
 				MeterPoint *ntp = new MeterPoint (*this, *mp, s, b, bb);
-				std::cerr << "Add meter " << *ntp << std::endl;
 				core_add_meter (ntp, replaced);
 				if (!replaced) {
 					core_add_point (ntp);
@@ -1103,7 +1100,6 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 	}
 
 	reset_starting_at (s);
-	dump (std::cerr);
 }
 
 void
@@ -1116,8 +1112,6 @@ TempoMap::shift (timepos_t const & at, timecnt_t const & by)
 	if (distance == 0) {
 		return;
 	}
-
-	std::cerr << "tm ripple @ " << at.str() << " by " << by.str() << std::endl;
 
 	for (auto & p : _points) {
 
@@ -1132,17 +1126,12 @@ TempoMap::shift (timepos_t const & at, timecnt_t const & by)
 				superclock_t s = p.sclock() + distance;
 				BBT_Time bb = bbt_at (s);
 				Beats b = quarters_at_superclock (s);
-				std::cerr << "Move " << p << std::endl;
 				p.set (s, b, bb);
-				std::cerr << "\tto " << p << std::endl;
 			}
 		}
 	}
 
-	std::cerr << "post-ripple, before reset\n";
-	dump (std::cerr);
 	reset_starting_at (at_superclocks + distance);
-	dump (std::cerr);
 }
 
 void
@@ -4271,7 +4260,7 @@ TempoMap::solve_constant_twist (TempoPoint& earlier, TempoPoint& later)
 		++cnt;
 	}
 
-	std::cerr << "that took " << cnt << " iterations to get to < 1 sample\n";
+	// std::cerr << "that took " << cnt << " iterations to get to < 1 sample\n";
 
 	return true;
 }
