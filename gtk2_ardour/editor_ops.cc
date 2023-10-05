@@ -8513,7 +8513,7 @@ Editor::insert_time (
 				(*i)->split (pos);
 			}
 
-			(*i)->shift (pos, samples, (opt == MoveIntersected), false);
+			(*i)->shift (pos, samples, (opt == MoveIntersected));
 
 			vector<Command*> cmds;
 			(*i)->rdiff (cmds);
@@ -8662,7 +8662,7 @@ Editor::remove_time (timepos_t const & pos, timecnt_t const & duration, InsertTi
 			TimelineRange ar(pos, pos+duration, 0);
 			rl.push_back(ar);
 			pl->cut (rl);
-			pl->shift (pos, -duration, true, false);
+			pl->shift (pos, -duration, true);
 
 			XMLNode &after = pl->get_state();
 
