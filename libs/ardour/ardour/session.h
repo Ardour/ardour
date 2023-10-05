@@ -1498,7 +1498,6 @@ private:
 
 	void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
 
-	void process_scrub          (pframes_t);
 	void process_without_events (pframes_t);
 	void process_with_events    (pframes_t);
 	void process_audition       (pframes_t);
@@ -1910,7 +1909,6 @@ private:
 	void force_locate (samplepos_t sample, LocateTransportDisposition);
 	void realtime_stop (bool abort, bool clear_state);
 	void realtime_locate (bool);
-	void non_realtime_start_scrub ();
 	void non_realtime_set_speed ();
 	void non_realtime_locate ();
 	void non_realtime_stop (bool abort, int entry_request_count, bool& finished, bool will_locate);
