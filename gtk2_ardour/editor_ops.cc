@@ -8541,24 +8541,23 @@ Editor::insert_time (timepos_t const & pos, timecnt_t const & samples, InsertTim
 
 			Locations::LocationList::const_iterator tmp;
 
-			if ((*i)->position_time_domain() == Temporal::AudioTime) {
-				bool const was_locked = (*i)->locked ();
-				if (locked_markers_too) {
-					(*i)->unlock ();
-				}
+			bool const was_locked = (*i)->locked ();
 
-				if ((*i)->start() >= pos) {
-					// move end first, in case we're moving by more than the length of the range
-					if (!(*i)->is_mark()) {
-						(*i)->set_end ((*i)->end() + samples, false);
-					}
-					(*i)->set_start ((*i)->start() + samples, false);
-					moved = true;
-				}
+			if (locked_markers_too) {
+				(*i)->unlock ();
+			}
 
-				if (was_locked) {
-					(*i)->lock ();
+			if ((*i)->start() >= pos) {
+				// move end first, in case we're moving by more than the length of the range
+				if (!(*i)->is_mark()) {
+					(*i)->set_end ((*i)->end() + samples, false);
 				}
+				(*i)->set_start ((*i)->start() + samples, false);
+				moved = true;
+			}
+
+			if (was_locked) {
+				(*i)->lock ();
 			}
 		}
 
