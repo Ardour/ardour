@@ -3256,6 +3256,11 @@ Session::add_routes (RouteList& new_routes, bool input_auto_connect, bool output
 
 	update_route_record_state ();
 
+	/* Nobody should hear about changes to PresentationInfo
+	 * (e.g. selection) until all handlers of RouteAdded have executed
+	 */
+
+	PresentationInfo::ChangeSuspender cs;
 	RouteAdded (new_routes); /* EMIT SIGNAL */
 }
 
