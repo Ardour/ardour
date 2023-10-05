@@ -274,8 +274,6 @@ Editor::get_mouse_mode_action(MouseMode m) const
 		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-grid"));
 	case MouseContent:
 		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-content"));
-	case MouseAudition:
-		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-audition"));
 	}
 	return Glib::RefPtr<Action>();
 }
@@ -291,12 +289,6 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 		return;
 	}
 
-	if (ARDOUR::Profile->get_mixbus()) {
-		if (m == MouseAudition) {
-			m = MouseRange;
-		}
-	}
-
 	Glib::RefPtr<Action>       act  = get_mouse_mode_action(m);
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 
@@ -310,12 +302,6 @@ Editor::set_mouse_mode (MouseMode m, bool force)
 void
 Editor::mouse_mode_toggled (MouseMode m)
 {
-	if (ARDOUR::Profile->get_mixbus()) {
-		if (m == MouseAudition)  {
-			m = MouseRange;
-		}
-	}
-
 	Glib::RefPtr<Action>       act  = get_mouse_mode_action(m);
 	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
 
@@ -325,13 +311,6 @@ Editor::mouse_mode_toggled (MouseMode m)
 		 * jiffy.
 		 */
 		return;
-	}
-
-	if (_session && mouse_mode == MouseAudition) {
-		/* stop transport and reset default speed to avoid oddness with
-		   auditioning */
-		_session->request_stop ();
-		_session->reset_transport_speed ();
 	}
 
 	const bool was_internal = internal_editing();
@@ -487,14 +466,6 @@ Editor::update_time_selection_display ()
 		selection->clear_tracks ();
 		break;
 
-	case MouseAudition:
-		/*Don't lose lines or points if no action in this mode */
-		selection->clear_regions ();
-		selection->clear_playlists ();
-		selection->clear_time ();
-		selection->clear_tracks ();
-		break;
-
 	case MouseGrid:
 	default:
 		/*Clear everything */
@@ -562,7 +533,6 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 	}
 
 	if (((mouse_mode != MouseObject) &&
-	     (mouse_mode != MouseAudition || item_type != RegionItem) &&
 	     (mouse_mode != MouseTimeFX || item_type != RegionItem) &&
 	     (mouse_mode != MouseDraw) &&
 	     (mouse_mode != MouseContent || item_type == RegionItem)) ||
@@ -1416,15 +1386,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 		break;
 
-	case MouseAudition:
-		_drags->set (new ScrubDrag (this, item), event, _cursors->transparent);
-		scrub_reversals = 0;
-		scrub_reverse_distance = 0;
-		last_scrub_x = event->button.x;
-		scrubbing_direction = 0;
-		return true;
-		break;
-
 	default:
 		break;
 	}
@@ -1961,22 +1922,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			/* MouseGrid clicks are handled by _canvas_grid_zone */
 			fatal << _("programming error: MouseGrid clicks are handled by _canvas_grid_zone!") << endmsg;
 			abort(); /*NOTREACHED*/
-			break;
-
-		case MouseAudition:
-			if (scrubbing_direction == 0) {
-				/* no drag, just a click */
-				switch (item_type) {
-				case RegionItem:
-					play_selected_region ();
-					break;
-				default:
-					break;
-				}
-			} else if (_session) {
-				/* make sure we stop */
-				_session->request_stop ();
-			}
 			break;
 
 		default:

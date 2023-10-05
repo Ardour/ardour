@@ -66,7 +66,6 @@ MOUSEMODE(MouseRange)
 MOUSEMODE(MouseCut)
 MOUSEMODE(MouseTimeFX)
 MOUSEMODE(MouseGrid)
-MOUSEMODE(MouseAudition)
 MOUSEMODE(MouseDraw)
 MOUSEMODE(MouseContent)
 

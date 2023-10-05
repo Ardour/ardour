@@ -49,7 +49,6 @@ MouseCursors::MouseCursors ()
 	, zoom_out (0)
 	, time_fx (0)
 	, fader (0)
-	, speaker (0)
 	, midi_pencil (0)
 	, midi_select (0)
 	, midi_resize (0)
@@ -98,7 +97,6 @@ MouseCursors::drop_all ()
 	delete zoom_out; zoom_out = 0;
 	delete time_fx; time_fx = 0;
 	delete fader; fader = 0;
-	delete speaker; speaker = 0;
 	delete midi_pencil; midi_pencil = 0;
 	delete midi_select; midi_select = 0;
 	delete midi_resize; midi_resize = 0;
@@ -191,12 +189,6 @@ MouseCursors::set_cursor_set (const std::string& name)
 		RefPtr<Bitmap> source = Bitmap::create ((char const *) fader_cursor_bits, fader_cursor_width, fader_cursor_height);
 		RefPtr<Bitmap> mask = Bitmap::create ((char const *) fader_cursor_mask_bits, fader_cursor_width, fader_cursor_height);
 		fader = new Cursor (source, mask, ffg, fbg, fader_cursor_x_hot, fader_cursor_y_hot);
-	}
-
-	{
-		RefPtr<Bitmap> source = Bitmap::create ((char const *) speaker_cursor_bits, speaker_cursor_width, speaker_cursor_height);
-		RefPtr<Bitmap> mask = Bitmap::create ((char const *) speaker_cursor_mask_bits, speaker_cursor_width, speaker_cursor_height);
-		speaker = new Cursor (source, mask, ffg, fbg, speaker_cursor_width >> 1, speaker_cursor_height >> 1);
 	}
 
 	{

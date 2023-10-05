@@ -599,11 +599,6 @@ Editor::register_actions ()
 	mouse_draw_button.set_icon (ArdourWidgets::ArdourIcon::ToolDraw);
 	mouse_draw_button.set_name ("mouse mode button");
 
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-audition", _("Audition Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseAudition));
-	mouse_audition_button.set_related_action (act);
-	mouse_audition_button.set_icon (ArdourWidgets::ArdourIcon::ToolAudition);
-	mouse_audition_button.set_name ("mouse mode button");
-
 	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));
 	mouse_timefx_button.set_related_action (act);
 	mouse_timefx_button.set_icon (ArdourWidgets::ArdourIcon::ToolStretch);

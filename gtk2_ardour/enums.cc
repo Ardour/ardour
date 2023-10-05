@@ -132,6 +132,8 @@ setup_gtk_ardour_enums ()
 	/* GridTypePlayhead was not intended to get into the wild */
 	enum_writer.add_to_hack_table ("GridTypePlayhead", "GridTypeNone");
 
+	enum_writer.add_to_hack_table ("Editing", "MouseAudition");
+
 	REGISTER_ENUM (SnapOff);
 	REGISTER_ENUM (SnapNormal);
 	REGISTER_ENUM (SnapMagnetic);
@@ -195,7 +197,6 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM(MouseDraw);
 	REGISTER_ENUM(MouseTimeFX);
 	REGISTER_ENUM(MouseGrid);
-	REGISTER_ENUM(MouseAudition);
 	REGISTER_ENUM(MouseCut);
 	REGISTER_ENUM(MouseContent);
 	REGISTER (mouse_mode);

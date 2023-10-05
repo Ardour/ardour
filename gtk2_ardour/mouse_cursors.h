@@ -53,7 +53,6 @@ public:
 	Gdk::Cursor* zoom_out;
 	Gdk::Cursor* time_fx;
 	Gdk::Cursor* fader;
-	Gdk::Cursor* speaker;
 	Gdk::Cursor* midi_pencil;
 	Gdk::Cursor* midi_select;
 	Gdk::Cursor* midi_resize;

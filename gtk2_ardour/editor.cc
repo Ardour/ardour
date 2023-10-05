@@ -3314,9 +3314,6 @@ Editor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (mouse_select_button);
 	mouse_mode_size_group->add_widget (mouse_timefx_button);
 	mouse_mode_size_group->add_widget (mouse_grid_button);
-	if (!Profile->get_mixbus()) {
-		mouse_mode_size_group->add_widget (mouse_audition_button);
-	}
 	mouse_mode_size_group->add_widget (mouse_draw_button);
 	mouse_mode_size_group->add_widget (mouse_content_button);
 
@@ -3355,10 +3352,6 @@ Editor::setup_toolbar ()
 	mouse_mode_hbox->pack_start (mouse_select_button, false, false);
 
 	mouse_mode_hbox->pack_start (mouse_cut_button, false, false);
-
-	if (!ARDOUR::Profile->get_mixbus()) {
-		mouse_mode_hbox->pack_start (mouse_audition_button, false, false);
-	}
 
 	mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_grid_button, false, false);
@@ -3696,7 +3689,6 @@ Editor::setup_tooltips ()
 	set_tooltip (mouse_grid_button, _("Grid Mode (edit tempo-map, drag/drop music-time grid)"));
 	set_tooltip (mouse_draw_button, _("Draw Mode (draw and edit gain/notes/automation)"));
 	set_tooltip (mouse_timefx_button, _("Stretch Mode (time-stretch audio and midi regions, preserving pitch)"));
-	set_tooltip (mouse_audition_button, _("Audition Mode (listen to regions)"));
 	set_tooltip (mouse_content_button, _("Internal Edit Mode (edit notes and automation points)"));
 	set_tooltip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
 	set_tooltip (nudge_forward_button, _("Nudge Region/Selection Later"));

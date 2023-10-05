@@ -1975,7 +1975,6 @@ private:
 	ArdourWidgets::ArdourButton mouse_timefx_button;
 	ArdourWidgets::ArdourButton mouse_grid_button;
 	ArdourWidgets::ArdourButton mouse_content_button;
-	ArdourWidgets::ArdourButton mouse_audition_button;
 	ArdourWidgets::ArdourButton mouse_cut_button;
 
 	ArdourWidgets::ArdourButton smart_mode_button;

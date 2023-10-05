@@ -1281,10 +1281,6 @@ Editor::which_mode_cursor () const
 	case MouseTimeFX:
 		mode_cursor = _cursors->time_fx; // just use playhead
 		break;
-
-	case MouseAudition:
-		mode_cursor = _cursors->speaker;
-		break;
 	}
 
 	/* up-down cursor as a cue that automation can be dragged up and down when in join object/range mode */
