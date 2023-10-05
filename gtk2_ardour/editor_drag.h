@@ -1345,18 +1345,6 @@ private:
 	bool _dragging_start;
 };
 
-/** Scrub drag in audition mode */
-class ScrubDrag : public Drag
-{
-public:
-	ScrubDrag (Editor *, ArdourCanvas::Item *);
-
-	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
-	void motion (GdkEvent *, bool);
-	void finished (GdkEvent *, bool);
-	void aborted (bool);
-};
-
 /** Drag in range select mode */
 class SelectionDrag : public Drag
 {

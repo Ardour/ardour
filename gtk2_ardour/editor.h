@@ -1645,12 +1645,6 @@ private:
 	void reverse_selection ();
 	void edit_envelope ();
 
-	double last_scrub_x;
-	int scrubbing_direction;
-	int scrub_reversals;
-	int scrub_reverse_distance;
-	void scrub (samplepos_t, double);
-
 	void set_punch_start_from_edit_point ();
 	void set_punch_end_from_edit_point ();
 	void set_loop_start_from_edit_point ();
@@ -2616,7 +2610,6 @@ private:
 	friend class RubberbandSelectDrag;
 	friend class EditorRubberbandSelectDrag;
 	friend class TimeFXDrag;
-	friend class ScrubDrag;
 	friend class SelectionDrag;
 	friend class RangeMarkerBarDrag;
 	friend class MouseZoomDrag;

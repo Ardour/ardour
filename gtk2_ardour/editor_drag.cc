@@ -5439,39 +5439,6 @@ TimeFXDrag::aborted (bool)
 	_primary->get_time_axis_view ().hide_timestretch ();
 }
 
-ScrubDrag::ScrubDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, Temporal::AudioTime)
-{
-	DEBUG_TRACE (DEBUG::Drags, "New ScrubDrag\n");
-}
-
-void
-ScrubDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
-{
-	Drag::start_grab (event);
-}
-
-void
-ScrubDrag::motion (GdkEvent* /*event*/, bool)
-{
-	_editor->scrub (adjusted_current_time (0, false).samples (), _drags->current_pointer_x ());
-}
-
-void
-ScrubDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
-{
-	if (movement_occurred && _editor->session ()) {
-		/* make sure we stop */
-		_editor->session ()->request_stop ();
-	}
-}
-
-void
-ScrubDrag::aborted (bool)
-{
-	/* XXX: TODO */
-}
-
 SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
 	: Drag (e, i, e->default_time_domain ())
 	, _operation (o)
