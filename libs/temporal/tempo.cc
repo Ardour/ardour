@@ -145,6 +145,14 @@ Tempo::get_state () const
 	node->set_property (X_("locked-to-meter"), _locked_to_meter);
 	node->set_property (X_("continuing"), _continuing);
 
+	/* We don't have an _active property any more, but earlier versions of
+	   Ardour will crash during session loading if this property is not
+	   provided. For the 7.5 - 8.0 transition, there was theoretically no
+	   file format change, so leave this in place till at least the next
+	   format version change.
+	*/
+	node->set_property (X_("active"), true);
+
 	return *node;
 }
 
