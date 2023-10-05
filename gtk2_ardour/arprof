@@ -27,6 +27,6 @@ exec valgrind --tool=callgrind \
   --dump-instr=yes --collect-jumps=yes\
   --separate-threads=yes \
   --collect-systime=yes --collect-bus=yes \
+  --collect-atstart=no --instr-atstart=no\
   --callgrind-out-file=/tmp/ardour_profile/ardour-%p.log \
-	--toggle-collect="ARDOUR::AudioEngine::process_callback*" \
   $TOP/$EXECUTABLE "$@"
