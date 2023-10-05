@@ -1452,7 +1452,7 @@ Playlist::duplicate_ranges (std::list<TimelineRange>& ranges, float times)
 }
 
 void
-Playlist::shift (timepos_t const & at, timecnt_t const & distance, bool move_intersected, bool ignore_music_glue)
+Playlist::shift (timepos_t const & at, timecnt_t const & distance, bool move_intersected)
 {
 	PBD::Unwinder<bool> uw (_playlist_shift_active, true);
 	RegionWriteLock rlock (this);
@@ -1473,22 +1473,8 @@ Playlist::shift (timepos_t const & at, timecnt_t const & distance, bool move_int
 			}
 		}
 
-		/* do not move regions glued to music time - that
-		 * has to be done separately.
-		 */
-
-		if (!ignore_music_glue && r->position().time_domain() != Temporal::AudioTime) {
-			fixup.push_back (r);
-			continue;
-		}
-
 		rlock.thawlist.add (r);
 		r->set_position (r->position() + distance);
-	}
-
-	/* XXX: may not be necessary; Region::post_set should do this, I think */
-	for (auto & r : fixup) {
-		r->recompute_position_from_time_domain ();
 	}
 }
 

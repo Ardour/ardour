@@ -177,7 +177,7 @@ public:
 	void replace_region (std::shared_ptr<Region> old, std::shared_ptr<Region> newr, timepos_t const & pos);
 	void split_region (std::shared_ptr<Region>, timepos_t const & position);
 	void split (timepos_t const & at);
-	void shift (timepos_t const & at, timecnt_t const & distance, bool move_intersected, bool ignore_music_glue);
+	void shift (timepos_t const & at, timecnt_t const & distance, bool move_intersected);
 	void partition (timepos_t const & start, timepos_t const & end, bool cut = false);
 	void duplicate (std::shared_ptr<Region>, timepos_t & position, float times);
 	void duplicate (std::shared_ptr<Region>, timepos_t & position, timecnt_t const & gap, float times);
