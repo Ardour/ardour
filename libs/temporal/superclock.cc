@@ -18,11 +18,9 @@
 
 #include "temporal/superclock.h"
 
-#ifndef COMPILER_MSVC
-Temporal::superclock_t Temporal::_superclock_ticks_per_second = 0;
-#endif
-
 int Temporal::most_recent_engine_sample_rate = 48000; /* have to pick something as a default */
+
+Temporal::superclock_t Temporal::_superclock_ticks_per_second = 0;
 
 void
 Temporal::set_sample_rate (int sr)

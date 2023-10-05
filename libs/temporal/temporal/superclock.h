@@ -33,12 +33,7 @@
 namespace Temporal {
 
 typedef int64_t superclock_t;
-
-#ifndef COMPILER_MSVC
-	LIBTEMPORAL_API extern superclock_t _superclock_ticks_per_second;
-#else
-	static superclock_t _superclock_ticks_per_second = 0;
-#endif
+LIBTEMPORAL_API extern superclock_t _superclock_ticks_per_second;
 
 #ifdef DEBUG_EARLY_SCTS_USE
 static inline superclock_t superclock_ticks_per_second() {
