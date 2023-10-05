@@ -8459,10 +8459,8 @@ Editor::do_insert_time ()
 }
 
 void
-Editor::insert_time (
-	timepos_t const & pos, timecnt_t const & samples, InsertTimeOption opt,
-	bool all_playlists, bool markers_too, bool locked_markers_too, bool tempo_too
-	)
+Editor::insert_time (timepos_t const & pos, timecnt_t const & samples, InsertTimeOption opt, bool all_playlists, bool markers_too,
+                     bool locked_markers_too, bool tempo_too)
 {
 
 	if (Config->get_edit_mode() == Lock) {
