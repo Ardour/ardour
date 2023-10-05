@@ -122,7 +122,7 @@ protected:
 	Gtk::Menu*              _context_menu;
 	bool                    _ignore_menu_action;
 
-	Gtk::ColorSelectionDialog   _color_dialog;
+	Gtk::ColorSelectionDialog*   _color_dialog;
 
 	void                  trigger_swap (uint32_t);
 	PBD::ScopedConnection trigger_swap_connection;
