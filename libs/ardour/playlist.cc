@@ -1650,8 +1650,13 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, std::shared
 			return;
 		}
 
-		regions.erase (i);
-		regions.insert (upper_bound (regions.begin (), regions.end (), region, cmp), region);
+		{
+			RegionWriteLock rl (this);
+
+			regions.erase (i);
+			regions.insert (upper_bound (regions.begin (), regions.end (), region, cmp), region);
+		}
+
 
 		if (holding_state ()) {
 			pending_bounds.push_back (region);
@@ -3577,4 +3582,3 @@ Playlist::time_domain_changed ()
 	}
 #endif
 }
-
