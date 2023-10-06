@@ -1634,24 +1634,23 @@ Playlist::region_bounds_changed (const PropertyChange& what_changed, std::shared
 	}
 
 	if (what_changed.contains (Properties::length)) {
-		/* remove it from the list then add it back in
-		 * the right place again.
-		 */
-
-		RegionSortByPosition cmp;
-
-		RegionList::iterator i = find (regions.begin (), regions.end (), region);
-
-		if (i == regions.end ()) {
-			/* the region bounds are being modified but its not currently
-			 * in the region list. we will use its bounds correctly when/if
-			 * it is added
-			 */
-			return;
-		}
-
 		{
-			RegionWriteLock rl (this);
+			/* remove it from the list then add it back in
+			 * the right place again.
+			 */
+
+			RegionWriteLock rl (this, false);
+			RegionSortByPosition cmp;
+
+			RegionList::iterator i = find (regions.begin (), regions.end (), region);
+
+			if (i == regions.end ()) {
+				/* the region bounds are being modified but its not currently
+				 * in the region list. we will use its bounds correctly when/if
+				 * it is added
+				 */
+				return;
+			}
 
 			regions.erase (i);
 			regions.insert (upper_bound (regions.begin (), regions.end (), region, cmp), region);
