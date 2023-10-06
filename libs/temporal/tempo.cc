@@ -4207,7 +4207,7 @@ TempoMap::solve_ramped_twist (TempoPoint& earlier, TempoPoint& later)
 		err = earlier.superclock_at (later.beats()) - later.sclock();
 
 		if (cnt > 20000) {
-			std::cerr << "nn: " << new_end_npm << " err " << err << " @ " << cnt << "solve_ramped_twist FAILED\n";
+			// std::cerr << "nn: " << new_end_npm << " err " << err << " @ " << cnt << "solve_ramped_twist FAILED\n";
 			return false;
 		}
 
@@ -4261,7 +4261,7 @@ TempoMap::solve_constant_twist (TempoPoint& earlier, TempoPoint& later)
 		err = earlier.superclock_at (later.beats()) - later.sclock();
 
 		if (cnt > 20000) {
-			std::cerr << "nn: " << new_npm << " err " << err << " @ " << cnt << "solve_constant_twist FAILED\n";
+			// std::cerr << "nn: " << new_npm << " err " << err << " @ " << cnt << "solve_constant_twist FAILED\n";
 			return false;
 		}
 
