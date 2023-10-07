@@ -1881,7 +1881,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			switch (item_type) {
 			case RegionItem:
 			{
-				printf ("RegionItem\n");
 				/* since we have FreehandLineDrag we can only get here after a drag, when no movement has happend */
 				assert (were_dragging);
 
