@@ -1919,9 +1919,12 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			break;
 
 		case MouseGrid:
-			/* MouseGrid clicks are handled by _canvas_grid_zone */
-			fatal << _("programming error: MouseGrid clicks are handled by _canvas_grid_zone!") << endmsg;
-			abort(); /*NOTREACHED*/
+			cout << "MouseGrid item:" << item << " type: " << item_type << " event: "  << event << "\n";
+
+			/* MouseGrid clicks are handled by _canvas_grid_zone ,
+			 * We can still get here by single-click on a Tempo, Meter or BBT Marker in the ruler.
+			 */
+			return true;
 			break;
 
 		default:
