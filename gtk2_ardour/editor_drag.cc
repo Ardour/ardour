@@ -3133,10 +3133,13 @@ void
 MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
+		/* get reference before _marker is deleted via reset_meter_marks due to abort_tempo_map_edit */
+		Temporal::MeterPoint& section (const_cast<Temporal::MeterPoint&>(_marker->meter ()));
 		/* reset thread local tempo map to the original state */
 		_editor->abort_tempo_map_edit ();
+
 		if (was_double_click ()) {
-			_editor->edit_meter_marker (*_marker);
+			_editor->edit_meter_section (section);
 		}
 		return;
 	}
@@ -3226,7 +3229,8 @@ TempoCurveDrag::finished (GdkEvent* event, bool movement_occurred)
 		_editor->abort_tempo_map_edit ();
 
 		if (was_double_click ()) {
-			// XXX would be nice to do this
+			// XXX would be nice to do this,
+			// but note that ::abort_tempo_map_edit() will have deleted _marker
 			// _editor->edit_tempo_marker (*_marker);
 		}
 
@@ -3320,14 +3324,13 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 
 	if (!movement_occurred) {
-		/* reset the per-thread tempo map ptr back to the current
-		 * official version
-		 */
-
+		/* get reference before _marker is deleted by reset_tempo_marks due to abort_tempo_map_edit */
+		Temporal::TempoPoint& section (const_cast<Temporal::TempoPoint&>(_marker->tempo ()));
+		/* reset thread local tempo map to the original state */
 		_editor->abort_tempo_map_edit ();
 
 		if (was_double_click ()) {
-			_editor->edit_tempo_marker (*_marker);
+			_editor->edit_tempo_section (section);
 		}
 
 		return;
@@ -3403,14 +3406,12 @@ void
 BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
-		/* reset the per-thread tempo map ptr back to the current
-		 * official version
-		 */
-
+		Temporal::MusicTimePoint& point (const_cast<Temporal::MusicTimePoint&>(_marker->mt_point ()));
+		/* reset thread local tempo map to the original state */
 		_editor->abort_tempo_map_edit ();
 
 		if (was_double_click ()) {
-			_editor->edit_bbt_marker (*_marker);
+			_editor->edit_bbt (point);
 		}
 
 		return;
