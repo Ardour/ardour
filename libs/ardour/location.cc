@@ -75,7 +75,6 @@ Location::Location (Session& s)
 {
 }
 
-/** Construct a new Location, giving it the position lock style determined by glue-new-markers-to-bars-and-beats */
 Location::Location (Session& s, timepos_t const & start, timepos_t const & end, const std::string &name, Flags bits, int32_t cue_id)
 	: SessionHandleRef (s)
 	, _name (name)
