@@ -1920,7 +1920,7 @@ TempoMap::reset_section (Points::iterator& begin, Points::iterator& end, supercl
 
 
 bool
-TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool earlier, bool push)
+TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool push)
 {
 	TEMPO_MAP_ASSERT (!_tempos.empty());
 	TEMPO_MAP_ASSERT (!_meters.empty());
@@ -1933,15 +1933,8 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool earlie
 	superclock_t sc;
 	Beats beats;
 	BBT_Time bbt;
-	bool round_up;
 
 	beats = when.beats ();
-
-	if (earlier) {
-		round_up = false;
-	} else {
-		round_up = true;
-	}
 
 	/* Do not allow moving a meter marker to the same position as
 	 * an existing one.
@@ -1965,11 +1958,8 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool earlie
 	TempoMetric metric (*prev_t, *prev_m);
 	bbt = metric.bbt_at (beats);
 
-	if (round_up) {
-		bbt = bbt.round_up_to_bar ();
-	} else {
-		bbt = bbt.round_down_to_bar ();
-	}
+	bbt = metric.round_to_bar (bbt);
+
 	/* Now find the correct TempoMetric for the new BBT position (which may
 	 * differ from the one we determined earlier.
 	 *
@@ -1981,6 +1971,7 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool earlie
 
 	for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->bbt() < bbt && t->beats() < beats; ++t) { prev_t = t; }
 	for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end() && m->bbt() < bbt && *m != mp; ++m) { prev_m = m; }
+
 
 	if (prev_m == _meters.end()) {
 		return false;
