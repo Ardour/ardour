@@ -1970,8 +1970,16 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool earlie
 	} else {
 		bbt = bbt.round_down_to_bar ();
 	}
+	/* Now find the correct TempoMetric for the new BBT position (which may
+	 * differ from the one we determined earlier.
+	 *
+	 * The search for the correct meter will be limited by the meter we're
+	 * dragging. But the search for the correct tempo needs to bounded by
+	 * both the BBT *and* the beat position, in case there is an upcoming
+	 * BBT marker.
+	 */
 
-	for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->bbt() < bbt; ++t) { prev_t = t; }
+	for (t = _tempos.begin(), prev_t = _tempos.end(); t != _tempos.end() && t->bbt() < bbt && t->beats() < beats; ++t) { prev_t = t; }
 	for (m = _meters.begin(), prev_m = _meters.end(); m != _meters.end() && m->bbt() < bbt && *m != mp; ++m) { prev_m = m; }
 
 	if (prev_m == _meters.end()) {
