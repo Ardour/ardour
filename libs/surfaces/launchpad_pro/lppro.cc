@@ -113,9 +113,13 @@ LaunchPadPro::probe (std::string& i, std::string& o)
 	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsOutput|IsTerminal), midi_inputs);
 	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsInput|IsTerminal), midi_outputs);
 
+	/* the name "Launchpad Pro MK3" is the prefix used on all platforms,
+	 * according to Novation.
+	 */
+
 	auto has_lppro = [](string const& s) {
 		std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name (s);
-		return pn.find ("Launchpad Pro MK3 MIDI 1") != string::npos;
+		return pn.find ("Launchpad Pro MK3") != string::npos;
 	};
 
 	auto pi = std::find_if (midi_inputs.begin (), midi_inputs.end (), has_lppro);
