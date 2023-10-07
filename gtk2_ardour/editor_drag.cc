@@ -3116,12 +3116,11 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	timepos_t  pos;
-	const bool leftward_earlier = (current_pointer_x () < last_pointer_x ());
 
 	/* not useful to try to snap to a grid we're about to change */
 	pos = adjusted_current_time (event, false);
 
-	if (map->move_meter (_marker->meter (), pos, leftward_earlier, false)) {
+	if (map->move_meter (_marker->meter (), pos, false)) {
 		/* it was moved */
 		_editor->mid_tempo_change (Editor::MeterChanged);
 		show_verbose_cursor_time (timepos_t (_marker->meter ().beats ()));
