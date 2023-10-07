@@ -122,8 +122,6 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("count-in"), _("transport"), _("count"), _("in"), _("count-in"),  NULL);
 	VAR_META (X_("default-time-domain"), _("time"), _("domain"), _("musical"), _("audio"), _("markers"),  NULL);
 	VAR_META (X_("external-sync"), _("transport"), _("use"), _("external"), _("synchronization"), _("master"),  NULL);
-	VAR_META (X_("glue-new-markers-to-bars-and-beats"), _("position"), _("time"), _("domain"), _("glue"), _("use"), _("markers"), _("bars"), _("beats"), _("musical"),  NULL);
-	VAR_META (X_("glue-new-regions-to-bars-and-beats"), _("position"), _("time"), _("domain"), _("glue"), _("use"), _("regions"), _("bars"), _("beats"), _("musical"),  NULL);
 	VAR_META (X_("jack-time-master"), _("transport"), _("synchronization"), _("jack"), _("time"), _("master"),  NULL);
 	VAR_META (X_("meterbridge-label-height"), _("meter"), _("meterbridge"), _("bridge"), _("label"), _("height"),  NULL);
 	VAR_META (X_("midi-copy-is-fork"), _("midi"), _("copy"), _("clone"), _("duplicate"), _("fork"), _("linked"),  NULL);

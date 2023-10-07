@@ -285,10 +285,6 @@
 [draw-opaque-midi_regions]
 [external-sync]
   transport use external synchronization master 
-[glue-new-markers-to-bars-and-beats]
-  position time domain glue use markers bars beats musical
-[glue-new-regions-to-bars-and-beats]
-  position time domain glue use regions bars beats musical
 [insert-merge-policy]
 [jack-time-master]
   transport synchronization jack time master 
