@@ -1990,6 +1990,11 @@ TempoMap::move_meter (MeterPoint const & mp, timepos_t const & when, bool earlie
 		prev_t = _tempos.begin();
 	}
 
+	if (dynamic_cast<MusicTimePoint*> (&(*prev_t)) || dynamic_cast<MusicTimePoint*> (&(*prev_m))) {
+		/* game over ... cannot drag meter through a BBT Marker */
+		return false;
+	}
+
 	metric = TempoMetric (*prev_t, *prev_m);
 	beats = metric.quarters_at (bbt);
 
