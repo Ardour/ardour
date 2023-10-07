@@ -1858,5 +1858,7 @@ AudioRegionView::parameter_changed (string const & p)
 MergeableLine*
 AudioRegionView::make_merger ()
 {
-	return new MergeableLine (gain_line, std::shared_ptr<AutomationControl>(), boost::bind (&Region::absolute_time_to_region_time, _region, _1), nullptr, nullptr);
+	return new MergeableLine (gain_line, std::shared_ptr<AutomationControl>(),
+	                          [this](timepos_t const& t) { return timepos_t (_region->position().distance (t)); },
+	                          nullptr, nullptr);
 }
