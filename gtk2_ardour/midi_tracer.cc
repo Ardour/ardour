@@ -247,8 +247,6 @@ MidiTracer::port_changed ()
 		return;
 	}
 
-	std::shared_ptr<MidiPort> mp = std::dynamic_pointer_cast<MidiPort> (p);
-
 	/* The inheritance hierarchy makes this messy. AsyncMIDIPort has two
 	 * available MIDI::Parsers what we could connect to, ::self_parser()
 	 * (from ARDOUR::MidiPort) and ::parser() from MIDI::Port. One day,
