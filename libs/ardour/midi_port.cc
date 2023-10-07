@@ -74,13 +74,6 @@ MidiPort::cycle_start (pframes_t nframes)
 		port_engine.midi_clear (port_engine.get_buffer (_port_handle, nframes));
 	}
 
-	if (receives_input()) {
-		std::shared_ptr<MIDI::Parser> trace_parser = _trace_parser.lock ();
-		if (trace_parser) {
-			read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, *trace_parser.get(), AudioEngine::instance()->sample_time_at_cycle_start());
-		}
-	}
-
 	if (_inbound_midi_filter) {
 		MidiBuffer& mb (get_midi_buffer (nframes));
 		_inbound_midi_filter (mb, mb);
@@ -229,6 +222,12 @@ MidiPort::read_and_parse_entire_midi_buffer_with_no_speed_adjustment (pframes_t 
 void
 MidiPort::cycle_end (pframes_t nframes)
 {
+	if (receives_input()) {
+		std::shared_ptr<MIDI::Parser> trace_parser = _trace_parser.lock ();
+		if (trace_parser) {
+			read_and_parse_entire_midi_buffer_with_no_speed_adjustment (nframes, *trace_parser.get(), AudioEngine::instance()->sample_time_at_cycle_start());
+		}
+	}
 	Port::cycle_end (nframes);
 	_data_fetched_for_cycle = false;
 }
