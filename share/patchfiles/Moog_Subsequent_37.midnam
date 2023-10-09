@@ -1,0 +1,391 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "https://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+  <Author>Stian Grindvoll</Author>
+  <MasterDeviceNames>
+    <Manufacturer>Moog</Manufacturer>
+    <Model>Subsequent 37</Model>
+    <CustomDeviceMode Name="Default">
+      <ChannelNameSetAssignments>
+        <ChannelNameSetAssign Channel="1" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="2" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="3" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="4" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="5" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="6" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="7" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="8" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="9" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="10" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="11" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="12" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="13" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="14" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="15" NameSet="Names"/>
+        <ChannelNameSetAssign Channel="16" NameSet="Names"/>
+      </ChannelNameSetAssignments>
+    </CustomDeviceMode>
+    <ChannelNameSet Name="Names">
+      <AvailableForChannels>
+        <AvailableChannel Channel="1"/>
+        <AvailableChannel Channel="2"/>
+        <AvailableChannel Channel="3"/>
+        <AvailableChannel Channel="4"/>
+        <AvailableChannel Channel="5"/>
+        <AvailableChannel Channel="6"/>
+        <AvailableChannel Channel="7"/>
+        <AvailableChannel Channel="8"/>
+        <AvailableChannel Channel="9"/>
+        <AvailableChannel Channel="10"/>
+        <AvailableChannel Channel="11"/>
+        <AvailableChannel Channel="12"/>
+        <AvailableChannel Channel="13"/>
+        <AvailableChannel Channel="14"/>
+        <AvailableChannel Channel="15"/>
+        <AvailableChannel Channel="16"/>
+      </AvailableForChannels>
+      <UsesControlNameList Name="Controls"/>
+      <PatchBank Name="Factory Presets">
+        <!-- Placeholder for future content -->
+        <UsesPatchNameList Name="Factory Preset Names"/>
+      </PatchBank>
+    </ChannelNameSet>
+    <ValueNameList Name="Switch">
+      <Value Number="0" Name="Off"/>
+      <Value Number="64" Name="On"/>
+    </ValueNameList>
+    <ValueNameList Name="ClockDivs">
+      <!-- According to manual, however not being used here -->
+      <Value Number="0" Name="4 Whole Notes"/>
+      <Value Number="7" Name="3 Whole Notes"/>
+      <Value Number="13" Name="2 Whole Notes"/>
+      <Value Number="19" Name="Whole Note + Half Note"/>
+      <Value Number="25" Name="Whole Note"/>
+      <Value Number="31" Name="Dotted 1/2 Note"/>
+      <Value Number="37" Name="Whole Note Triplet"/>
+      <Value Number="43" Name="1/2 Note"/>
+      <Value Number="49" Name="Dotted 1/4 Note Triplet"/>
+      <Value Number="55" Name="1/2 Note Triplet"/>
+      <Value Number="61" Name="1/4 Note"/>
+      <Value Number="68" Name="Dotted 1/8 Note"/>
+      <Value Number="74" Name="1/4 Note Triplet"/>
+      <Value Number="80" Name="1/8 Note"/>
+      <Value Number="86" Name="Dotted 1/16 Note"/>
+      <Value Number="92" Name="1/8 Note Triplet"/>
+      <Value Number="98" Name="1/16 Note"/>
+      <Value Number="104" Name="1/16 Note Triplet"/>
+      <Value Number="110" Name="1/32 Note"/>
+      <Value Number="116" Name="1/32 Note Triplet"/>
+      <Value Number="122" Name="1/64 Note Triplet"/>
+    </ValueNameList>
+    <ValueNameList Name="BendRange">
+      <Value Number="0" Name="0 (Off)"/>
+      <Value Number="5" Name="1"/>
+      <Value Number="10" Name="2"/>
+      <Value Number="15" Name="3"/>
+      <Value Number="20" Name="4"/>
+      <Value Number="26" Name="5"/>
+      <Value Number="31" Name="6"/>
+      <Value Number="36" Name="7"/>
+      <Value Number="41" Name="8"/>
+      <Value Number="46" Name="9"/>
+      <Value Number="51" Name="10"/>
+      <Value Number="56" Name="11"/>
+      <Value Number="61" Name="12 (One Octave)"/>
+      <Value Number="67" Name="13"/>
+      <Value Number="72" Name="14"/>
+      <Value Number="77" Name="15"/>
+      <Value Number="82" Name="16"/>
+      <Value Number="87" Name="17"/>
+      <Value Number="92" Name="18"/>
+      <Value Number="97" Name="19"/>
+      <Value Number="102" Name="20"/>
+      <Value Number="108" Name="21"/>
+      <Value Number="113" Name="22"/>
+      <Value Number="118" Name="23"/>
+      <Value Number="123" Name="24 (Two Octaves)"/>
+    </ValueNameList>
+    <ValueNameList Name="ModSource">
+      <Value Number="0" Name="Triangle LFO"/>
+      <Value Number="21" Name="Square LFO"/>
+      <Value Number="43" Name="Saw LFO"/>
+      <Value Number="64" Name="Ramp LFO"/>
+      <Value Number="85" Name="S&amp;H LFO"/>
+      <Value Number="107" Name="F.EG/PGM"/>
+    </ValueNameList>
+    <ValueNameList Name="OSCOctave">
+      <Value Number="0" Name="16’"/>
+      <Value Number="32" Name="8’"/>
+      <Value Number="64" Name="4’"/>
+      <Value Number="96" Name="2’"/>
+    </ValueNameList>
+    <ValueNameList Name="ModDest">
+      <Value Number="0" Name="LFO2 Rate"/>
+      <Value Number="18" Name="VCA Level"/>
+      <Value Number="37" Name="OSC1 Wave"/>
+      <Value Number="55" Name="OSC1 + OSC2 Wave"/>
+      <Value Number="73" Name="OSC2 Wave"/>
+      <Value Number="91" Name="Noise Level"/>
+      <Value Number="110" Name="EG Time/PGM"/>
+    </ValueNameList>
+    <ControlNameList Name="Controls">
+      <Control Type="7bit" Number="0" Name="Bank Select">
+        <Values Min="0" Max="0"/>
+      </Control>
+      <Control Type="7bit" Number="1" Name="Mod Wheel"/>
+      <Control Type="7bit" Number="3" Name="LFO 1 Rate"/>
+      <Control Type="7bit" Number="4" Name="Mod 1 Pitch Amt"/>
+      <Control Type="7bit" Number="5" Name="Glide Time"/>
+      <Control Type="7bit" Number="7" Name="Master Volume"/>
+      <Control Type="7bit" Number="8" Name="LFO 2 Rate"/>
+      <Control Type="7bit" Number="9" Name="OSC 1 Wave"/>
+      <Control Type="7bit" Number="11" Name="Mod 1 Filter Amt"/>
+      <Control Type="7bit" Number="12" Name="OSC 2 Freq"/>
+      <Control Type="7bit" Number="13" Name="OSC 2 Beat Freq"/>
+      <Control Type="7bit" Number="14" Name="OSC 2 Wave"/>
+      <Control Type="7bit" Number="15" Name="Mod 2 Pitch Amt"/>
+      <Control Type="7bit" Number="16" Name="Mod 2 Filter Amt"/>
+      <Control Type="7bit" Number="17" Name="Mod 2 PGM Dest Amt"/>
+      <Control Type="7bit" Number="18" Name="Filter Multidrive"/>
+      <Control Type="7bit" Number="19" Name="Filter Cutoff"/>
+      <Control Type="7bit" Number="20" Name="Mod 1 PGM Dest Amt"/>
+      <Control Type="7bit" Number="21" Name="Filter Resonance"/>
+      <Control Type="7bit" Number="22" Name="Filter KB Amt"/>
+      <Control Type="7bit" Number="23" Name="Filter EG Attack Time"/>
+      <Control Type="7bit" Number="24" Name="Filter EG Decay Time"/>
+      <Control Type="7bit" Number="25" Name="Filter EG Sustain Time"/>
+      <Control Type="7bit" Number="26" Name="Filter EG Release Time"/>
+      <Control Type="7bit" Number="27" Name="Filter EG Amt"/>
+      <Control Type="7bit" Number="28" Name="Amp EG Attack Time"/>
+      <Control Type="7bit" Number="29" Name="Amp EG Decay Time"/>
+      <Control Type="7bit" Number="30" Name="Amp EG Sustain Time"/>
+      <Control Type="7bit" Number="31" Name="Amp EG Release Time"/>
+      <Control Type="7bit" Number="32" Name="Bank Select">
+        <Values Min="0" Max="1">
+          <ValueNameList>
+            <Value Number="0" Name="PRESET BANKS 1...8"/>
+            <Value Number="1" Name="PRESET BANKS 9...16"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="64" Name="Hold Pedal/Sustain">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="65" Name="Glide">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="69" Name="Arpeggiator Latch">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="70" Name="Mod 1 OSC 1/2 Sel">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="OSC1 + OSC2"/>
+            <Value Number="43" Name="OSC1"/>
+            <Value Number="85" Name="OSC2"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="71" Name="Mod 1 Source">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="ModSource"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="72" Name="Mod 2 Source">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="ModSource"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="73" Name="Arp On/Off">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="74" Name="OSC 1 Octave">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="OSCOctave"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="75" Name="OSC 2 Octave">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="OSCOctave"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="76" Name="LFO 1 Range">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Low Range"/>
+            <Value Number="43" Name="Med Range"/>
+            <Value Number="85" Name="Hi Range"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="77" Name="OSC 2 Hard Sync On/Off">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="78" Name="LFO 2 Range">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Low Range"/>
+            <Value Number="43" Name="Med Range"/>
+            <Value Number="85" Name="Hi Range"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="79" Name="Filter EG KB Amt"/>
+      <Control Type="7bit" Number="80" Name="Amp EG KB Amt"/>
+      <Control Type="7bit" Number="81" Name="OSC KB Reset On/Off">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="82" Name="Filter EG Reset">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="83" Name="Amp EG Reset">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="85" Name="Glide Type">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="LCR"/>
+            <Value Number="43" Name="LCT"/>
+            <Value Number="85" Name="Exp"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="86" Name="Filter EG Vel Amt"/>
+      <Control Type="7bit" Number="87" Name="Amp EG Vel Amt"/>
+      <Control Type="7bit" Number="88" Name="Mod 2 OSC 1/2 Sel">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="OSC1 + OSC2"/>
+            <Value Number="43" Name="OSC1"/>
+            <Value Number="85" Name="OSC2"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="89" Name="KB Octave">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="-2 Oct"/>
+            <Value Number="26" Name="-1 Oct"/>
+            <Value Number="51" Name="+0 Oct"/>
+            <Value Number="77" Name="+1 Oct"/>
+            <Value Number="102" Name="+2 Oct"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="91" Name="Mod 1 Dest">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="ModDest"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="92" Name="Mod 2 Dest">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="ModDest"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="93" Name="LFO 1 KB Reset">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="94" Name="Glide Legato">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="95" Name="LFO 2 KB Reset">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="102" Name="Glide Dest OSC 1/2/Both">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="OSC1 + OSC2"/>
+            <Value Number="43" Name="OSC1"/>
+            <Value Number="85" Name="OSC2"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="103" Name="Filter EG Delay"/>
+      <Control Type="7bit" Number="104" Name="Amp EG Delay"/>
+      <Control Type="7bit" Number="105" Name="Filter EG Hold"/>
+      <Control Type="7bit" Number="106" Name="Amp EG Hold"/>
+      <Control Type="7bit" Number="107" Name="Pitch Bend Up Amount">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="BendRange"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="108" Name="Pitch Bend Down Amount">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="BendRange"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="109" Name="Filter Slopes (Poles)">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="-6dB"/>
+            <Value Number="32" Name="-12dB"/>
+            <Value Number="64" Name="-18dB"/>
+            <Value Number="96" Name="-24dB"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="110" Name="OSC Duo Mode On/Off">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="111" Name="KB Ctrl Lo/Hi">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Neither"/>
+            <Value Number="32" Name="Lo"/>
+            <Value Number="64" Name="Hi"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="112" Name="Filter EG Multi Trig">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="113" Name="Amp EG Multi Trig">
+        <Values Min="0" Max="127">
+          <UsesValueNameList Name="Switch"/>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="114" Name="OSC 1 Level"/>
+      <Control Type="7bit" Number="115" Name="OSC 1 Sub Level"/>
+      <Control Type="7bit" Number="116" Name="OSC 2 Level"/>
+      <Control Type="7bit" Number="117" Name="Noise Level"/>
+      <Control Type="7bit" Number="118" Name="Feedback/Ext Level"/>
+      <Control Type="7bit" Number="122" Name="Local Control On/Off">
+        <Values Min="0" Max="127">
+          <ValueNameList>
+            <Value Number="0" Name="Off"/>
+            <Value Number="127" Name="On"/>
+          </ValueNameList>
+        </Values>
+      </Control>
+      <Control Type="7bit" Number="123" Name="All Notes Off">
+        <!-- No specific range or values specified -->
+      </Control>
+    </ControlNameList>
+  </MasterDeviceNames>
+</MIDINameDocument>
