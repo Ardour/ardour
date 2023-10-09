@@ -69,7 +69,8 @@ using std::string;
 using std::vector;
 
 StartupFSM::StartupFSM (EngineControl& amd)
-	: session_existing_sample_rate (0)
+	: session_domain (Config->get_preferred_time_domain())
+	, session_existing_sample_rate (0)
 	, session_engine_hints ("EngineHints")
 	, session_is_new (false)
 	, session_name_edited (false)
