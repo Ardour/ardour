@@ -85,7 +85,10 @@ class StartupFSM : public sigc::trackable
 	void handle_path (std::string const & path);
 
 	bool complete() const { return _state == NotWaiting; }
-	void set_complete () { _state = NotWaiting; }
+	void set_complete () {
+		app_quit_connection.disconnect ();
+		_state = NotWaiting;
+	}
 
   private:
 	bool new_user;
@@ -126,6 +129,7 @@ class StartupFSM : public sigc::trackable
 	PluginScanDialog* plugin_scan_dialog;
 
 	sigc::connection current_dialog_connection;
+	sigc::connection app_quit_connection;
 
 	sigc::signal1<void,Result> _signal_response;
 

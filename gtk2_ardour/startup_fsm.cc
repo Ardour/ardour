@@ -98,7 +98,7 @@ StartupFSM::StartupFSM (EngineControl& amd)
 
 	Application* app = Application::instance ();
 
-	app->ShouldQuit.connect (sigc::mem_fun (*this, &StartupFSM::queue_finish));
+	app_quit_connection = app->ShouldQuit.connect (sigc::mem_fun (*this, &StartupFSM::queue_finish));
 
 	Gtkmm2ext::Keyboard::HideMightMeanQuit.connect (sigc::mem_fun (*this, &StartupFSM::dialog_hidden));
 }
