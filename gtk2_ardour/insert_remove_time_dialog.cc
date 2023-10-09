@@ -101,6 +101,7 @@ InsertRemoveTimeDialog::InsertRemoveTimeDialog (PublicEditor& e, bool remove)
 	_move_markers.set_label (_("Move markers"));
 	get_vbox()->pack_start (_move_markers);
 	_move_markers.signal_toggled().connect (sigc::mem_fun (*this, &InsertRemoveTimeDialog::move_markers_toggled));
+	_move_locked_markers.set_label (_("Move locked markers"));
 	Alignment* indent = manage (new Alignment);
 	indent->set_padding (0, 0, 12, 0);
 	indent->add (_move_locked_markers);
