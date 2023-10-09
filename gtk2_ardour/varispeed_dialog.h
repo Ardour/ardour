@@ -34,7 +34,8 @@ public:
 	void adj_semi (double delta);
 
 private:
-	void apply_speed ();
+	void apply_semitones ();
+	void apply_percentage ();
 
 	void on_show ();
 	void on_hide ();
@@ -42,8 +43,12 @@ private:
 
 	Gtk::Adjustment _semitones_adjustment;
 	Gtk::Adjustment _cents_adjustment;
+	Gtk::Adjustment _percent_adjustment;
 	Gtk::SpinButton _semitones_spinner;
 	Gtk::SpinButton _cents_spinner;
+	Gtk::SpinButton _percent_spinner;
+
+	bool ignore_changes;
 };
 
 #endif
