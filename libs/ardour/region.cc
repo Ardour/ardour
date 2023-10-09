@@ -999,10 +999,13 @@ Region::cut_end (timepos_t const & new_endpoint)
 
 
 void
-Region::modify_front_unchecked (timepos_t const & new_position, bool reset_fade)
+Region::modify_front_unchecked (timepos_t const & npos, bool reset_fade)
 {
 	timepos_t last = end().decrement();
 	timepos_t source_zero;
+	timepos_t new_position (npos);
+
+	new_position.set_time_domain (time_domain());
 
 	if (position() > start()) {
 		source_zero = source_position ();
@@ -1082,10 +1085,14 @@ Region::trim_to (timepos_t const & position, timecnt_t const & length)
 }
 
 void
-Region::trim_to_internal (timepos_t const & pos, timecnt_t const & len)
+Region::trim_to_internal (timepos_t const & npos, timecnt_t const & nlen)
 {
-	timepos_t new_start (len.time_domain());
+	timepos_t pos (npos);
+	pos.set_time_domain (time_domain());
+	timecnt_t len (nlen);
+	len.set_time_domain (time_domain());
 
+	timepos_t new_start (time_domain());
 	timecnt_t const start_shift = position().distance (pos);
 
 	if (start_shift.is_positive()) {
