@@ -47,7 +47,7 @@
       <UsesControlNameList Name="Controls"/>
       <PatchBank Name="Factory Presets">
         <!-- Placeholder for future content -->
-        <UsesPatchNameList Name="Factory Preset Names"/>
+        <!-- <UsesPatchNameList Name="Factory Preset Names"/> -->
       </PatchBank>
     </ChannelNameSet>
     <ValueNameList Name="Switch">
