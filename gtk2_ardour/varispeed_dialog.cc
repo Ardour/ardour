@@ -99,10 +99,24 @@ VarispeedDialog::apply_semitones ()
 
 	int cents = _semitones_spinner.get_value () * 100 + _cents_spinner.get_value ();
 	double speed = pow (2.0, ((double)cents / 1200.0));
+	double const max_speed = ARDOUR::Config->get_max_transport_speed ();
 
 	{
 		PBD::Unwinder<bool> uw (ignore_changes, true);
-		_percent_adjustment.set_value (100. * pow (2.0, (cents/1200.0)));
+
+		if (speed >= max_speed) {
+			speed = max_speed;
+			double semitones = 12. * (log (speed) / log(2.));
+			int cents = 100 * fmod (semitones, 1.);
+			if (cents > 50) {
+				cents -= 100;
+				semitones += 1;
+			}
+			_semitones_adjustment.set_value (floor (semitones));
+			_cents_adjustment.set_value (cents);
+		}
+
+		_percent_adjustment.set_value (100. * speed);
 	}
 
 	if (_session && _session->default_play_speed () != speed) {
@@ -117,14 +131,26 @@ VarispeedDialog::apply_percentage ()
 		return;
 	}
 
-	double speed = 1.0 + (_percent_spinner.get_value() / 100.0);
+	double speed = _percent_spinner.get_value() / 100.0;
+	double max_speed = ARDOUR::Config->get_max_transport_speed ();
 
 	{
 		PBD::Unwinder<bool> uw (ignore_changes, true);
+
+		if (speed >= max_speed) {
+			speed = max_speed;
+			_percent_adjustment.set_value (100. * speed);
+		}
+
 		double absspeed = ::abs (speed);
-		double semitones = 12. * (log (absspeed - 1.0) / log(2.));
+		double semitones = 12. * (log (absspeed) / log(2.));
+		int cents = 100 * fmod (semitones, 1.);
+		if (cents > 50) {
+			cents -= 100;
+			semitones += 1;
+		}
 		_semitones_adjustment.set_value (floor (semitones));
-		_cents_adjustment.set_value (100. * fmod (semitones, 1.));
+		_cents_adjustment.set_value (cents);
 	}
 
 	if (_session && _session->default_play_speed () != speed) {
