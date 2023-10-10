@@ -155,6 +155,7 @@ ShuttleControl::ShuttleControl ()
 	shine_pattern         = 0;
 	last_shuttle_request  = 0;
 	last_speed_displayed  = -99999999;
+	last_shuttle_fract    = -99999999;
 	shuttle_grabbed       = false;
 	shuttle_speed_on_grab = 0;
 	shuttle_fract         = 0.0;
@@ -318,13 +319,6 @@ ShuttleControl::map_transport_state ()
 		speed = _session->actual_speed ();
 	}
 
-	if ((fabsf (speed - last_speed_displayed) < 0.005f) // dead-zone
-	    && !(speed == 1.f && last_speed_displayed != 1.f)
-	    && !(speed == 0.f && last_speed_displayed != 0.f)) {
-		return; // nothing to see here, move along.
-	}
-
-	// Q: is there a good reason why we  re-calculate this every time?
 	if (fabs (speed) <= (2 * DBL_EPSILON)) {
 		shuttle_fract = 0;
 	} else {
@@ -333,6 +327,11 @@ ShuttleControl::map_transport_state ()
 		} else {
 			shuttle_fract = speed_as_fract (speed);
 		}
+	}
+
+	if ((fabsf (shuttle_fract - last_shuttle_fract) < 0.005f)) {
+		/* dead-zone */
+		return;
 	}
 
 	queue_draw ();
@@ -725,6 +724,7 @@ ShuttleControl::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangl
 	}
 
 	last_speed_displayed = actual_speed;
+	last_shuttle_fract = shuttle_fract;
 
 	_info_button.set_text (buf);
 
@@ -765,6 +765,7 @@ ShuttleControl::parameter_changed (std::string p)
 	} else if (p == "shuttle-max-speed") {
 		shuttle_max_speed    = Config->get_shuttle_max_speed ();
 		last_speed_displayed = -99999999;
+		last_shuttle_fract = -99999999;
 		map_transport_state ();
 		use_shuttle_fract (true);
 		delete shuttle_context_menu;

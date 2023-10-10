@@ -111,6 +111,7 @@ protected:
 	bool                                   _hovering;
 	float                                  shuttle_max_speed;
 	float                                  last_speed_displayed;
+	float                                  last_shuttle_fract;
 	bool                                   shuttle_grabbed;
 	double                                 shuttle_speed_on_grab;
 	double                                 requested_speed;
