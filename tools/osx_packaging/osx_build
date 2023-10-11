@@ -381,7 +381,7 @@ for x in $BUILD_ROOT/../share/osc/*.preset ; do
 done
 
 # Mixbus MixerSettings (if any)
-for x in $BUILD_ROOT/../mixer_settings/*.lua ; do
+for x in $BUILD_ROOT/../share/mixer_settings/*.lua ; do
 	mkdir -p $MixerSettings  # create on demand
 	cp "$x" $MixerSettings
 done
@@ -532,7 +532,7 @@ for svndir in `find $APPDIR -name .svn -type dir`; do
 done
 
 # remove temp session utils start script
-rm $Frameworks/ardour-util.sh 
+rm $Frameworks/ardour-util.sh
 
 # install bundled LV2s to <app>/Contents/lib/LV2/
 cp -R $BUILD_ROOT/libs/LV2 $Frameworks/
