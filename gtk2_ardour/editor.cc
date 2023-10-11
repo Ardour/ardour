@@ -917,12 +917,10 @@ Editor::~Editor()
 	delete _snapshots;
 	delete _sections;
 	delete _locations;
-	delete _canvas_grid_zone;
 	delete _properties_box;
 	delete selection;
 	delete cut_buffer;
 	delete _cursors;
-	delete _section_box;
 
 	LuaInstance::destroy_instance ();
 
