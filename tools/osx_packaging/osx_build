@@ -877,20 +877,6 @@ fi
 
 ##### App Signing ##############################################################
 
-if test -n "$ALTOOL_PASSWORD"; then
-	ALTOOL_PASS_ARG="@env:ALTOOL_PASSWORD"
-else
-	ALTOOL_PASS_ARG="@keychain:ALTOOL_PASSWORD"
-fi
-
-checkForSuccess() {
-	xcrun altool \
-		--notarization-info $1 \
-		-u ${ALTOOL_USERNAME} \
-		--password "$ALTOOL_PASS_ARG" \
-		2>&1 | grep -o "Status: success";
-}
-
 if test $(sw_vers -productVersion | cut -d '.' -f 1) -lt 11 -a $(sw_vers -productVersion | cut -d '.' -f 2) -lt 14 -a $(sw_vers -productVersion | cut -d '.' -f 2) -lt 7; then
 	#less than 10.13.6 does not support notariztion
 	HARDENED_OPTIONS=
@@ -901,6 +887,29 @@ fi
 echo "checking for signing credentials"
 
 if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
+
+	####################
+	## Env compatibility
+
+	if test -n "$ALTOOL_PASSWORD"; then
+		ALTOOL_PASS_ARG="--password $ALTOOL_PASSWORD"
+	elif test -n "$NOTARYTOOL_PROFILE"; then
+		# store profile in keychain:
+		# notarytool store-credentials $NOTARYTOOL_PROFILE --apple-id apple@example.com --team-id 1234567890
+		ALTOOL_PASS_ARG="-p $NOTARYTOOL_PROFILE"
+	else
+		echo "either ALTOOL_PASSWORD or NOTARYTOOL_PROFILE needs to be set"
+		exit 1;
+	fi
+
+	if test -n "$ALTOOL_USERNAME" -a -z "$APPLE_ID"; then
+		APPLE_ID=$ALTOOL_USERNAME
+	fi
+
+	if test -z "$APPLE_TEAM_ID"; then
+		APPLE_TEAM_ID="$(echo $APPLE_DEVELOPER_ID_FOR_APPLICATION | sed 's/.*(\(.*\))/\1/')"
+	fi
+
 	####################
 	## Sign the main APP
 
@@ -922,40 +931,20 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 	# Notarize
 	if test -n "${HARDENED_OPTIONS}"; then
 		echo "Notarizing the main app"
-		OK=0
 
 		ZIP_PATH=${PRODUCT_PKG_DIR}/${BUNDLENAME}.zip
 		/usr/bin/ditto -c -k --keepParent ${PRODUCT_PKG_DIR}/${APPDIR} $ZIP_PATH
 
-		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.zip" --username ${ALTOOL_USERNAME} --password "$ALTOOL_PASS_ARG" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
+		xcrun notarytool submit $ZIP_PATH --apple-id ${APPLE_ID} --team-id ${APPLE_TEAM_ID} $ALTOOL_PASS_ARG --wait
 
 		if [ $? = 0 ]; then
-			REQUEST_ID=$(echo ${notarize_output} | awk '{print $3}')
-			echo "Main app waiting on RequestUUID=${REQUEST_ID}"
-
-			count=360
-			while [ "$count" != 0 -a "$OK" == 0 ]
-			do
-				echo -n .
-				sleep 60
-				count=$((count - 1))
-
-				if checkForSuccess ${REQUEST_ID}; then
-					OK=1;
-				fi
-			done
-
-			if [ "$OK" == 1 ]; then
-				echo "Main app notarize success"
-				xcrun stapler staple ${PRODUCT_PKG_DIR}/${APPDIR}
-			else
-				echo "ERROR: Main app notarize not approved after 6 hours"
-			fi
-
+			echo "Main app notarize success"
+			xcrun stapler staple ${PRODUCT_PKG_DIR}/${APPDIR}
 		else
 			echo "ERROR: Notarize upload failed"
 			exit 1;
 		fi
+
 		rm $ZIP_PATH
 	fi
 
@@ -978,40 +967,20 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 	# Notarize
 	if test -n "${HARDENED_OPTIONS}"; then
 		echo "notarizing Jadeo app"
-		OK=0
 
 		ZIP_PATH=${PRODUCT_PKG_DIR}/Jadeo.zip
 		/usr/bin/ditto -c -k --keepParent ${PRODUCT_PKG_DIR}/Jadeo.app $ZIP_PATH
 
-		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.jadeo.zip" --username ${ALTOOL_USERNAME} --password "$ALTOOL_PASS_ARG" --file $ZIP_PATH 2>&1 | grep -o "RequestUUID = .*")
+		xcrun notarytool submit $ZIP_PATH --apple-id ${APPLE_ID} --team-id ${APPLE_TEAM_ID} $ALTOOL_PASS_ARG --wait
 
 		if [ $? = 0 ]; then
-			REQUEST_ID=$(echo ${notarize_output}  | awk '{print $3}')
-			echo "Jadeo waiting on RequestUUID=${REQUEST_ID}"
-
-			count=360
-			while [ "$count" != 0 -a "$OK" == 0 ]
-			do
-				echo -n .
-				sleep 60
-				count=$((count - 1))
-
-				if checkForSuccess ${REQUEST_ID}; then
-					OK=1;
-				fi
-			done
-
-			if [ "$OK" == 1 ]; then
-				echo "Jadeo notarize success"
-				xcrun stapler staple ${PRODUCT_PKG_DIR}/Jadeo.app
-			else
-				echo "ERROR: Jadeo notarize not approved after 6 hours"
-			fi
-
+			echo "Jadeo notarize success"
+			xcrun stapler staple ${PRODUCT_PKG_DIR}/Jadeo.app
 		else
 			echo "ERROR: Notarize upload failed"
 			exit 1;
 		fi
+
 		rm $ZIP_PATH
 	fi
 fi
@@ -1156,37 +1125,17 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 
 	if test -n "${HARDENED_OPTIONS}"; then
 		echo "dmg: notarizing"
-		OK=0
 
-		notarize_output=$(xcrun altool --notarize-app --primary-bundle-id "${BUNDLE_ID_BASE}.${lower_case_appname}${major_version}.dmg" --username ${ALTOOL_USERNAME} --password "$ALTOOL_PASS_ARG" --file ${UC_DMG} 2>&1 | grep -o "RequestUUID = .*")
+		xcrun notarytool submit ${UC_DMG} --apple-id ${APPLE_ID} --team-id ${APPLE_TEAM_ID} $ALTOOL_PASS_ARG --wait
 
 		if [ $? = 0 ]; then
-			REQUEST_ID=$(echo ${notarize_output}  | awk '{print $3}')
-			echo "dmg: waiting on RequestUUID=${REQUEST_ID}"
-
-			count=360
-			while [ "$count" != 0 -a "$OK" == 0 ]
-			do
-				echo -n .
-				sleep 60
-				count=$((count - 1))
-
-				if checkForSuccess ${REQUEST_ID}; then
-					OK=1;
-				fi
-			done
-
-			if [ "$OK" == 1 ]; then
-				echo "dmg: notarize success"
-				xcrun stapler staple ${UC_DMG}
-			else
-				echo "ERROR: dmg notarize not approved after 6 hours"
-			fi
-
+			echo "dmg: notarize success"
+			xcrun stapler staple ${UC_DMG}
 		else
 			echo "ERROR: Notarize upload failed"
 			exit 1;
 		fi
+
 	fi
 fi
 
