@@ -173,8 +173,10 @@ LaunchPadPro::~LaunchPadPro ()
 	}
 
 	stop_event_loop ();
+	tear_down_gui ();
 
 	MIDISurface::drop ();
+
 }
 
 void
