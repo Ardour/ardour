@@ -110,27 +110,15 @@ LaunchPadPro::probe (std::string& i, std::string& o)
 {
 	vector<string> midi_inputs;
 	vector<string> midi_outputs;
-	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsOutput|IsTerminal), midi_inputs);
-	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsInput|IsTerminal), midi_outputs);
+	AudioEngine::instance()->get_ports (string_compose (".*%1", input_port_regex()), DataType::MIDI, PortFlags (IsOutput|IsTerminal), midi_inputs);
+	AudioEngine::instance()->get_ports (string_compose (".*%1", output_port_regex()), DataType::MIDI, PortFlags (IsInput|IsTerminal), midi_outputs);
 
-	/* the name "Launchpad Pro MK3" is the prefix used on all platforms,
-	 * according to Novation.
-	 */
-
-	auto has_lppro = [](string const& s) {
-		std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name (s);
-		return pn.find ("Launchpad Pro MK3") != string::npos;
-	};
-
-	auto pi = std::find_if (midi_inputs.begin (), midi_inputs.end (), has_lppro);
-	auto po = std::find_if (midi_outputs.begin (), midi_outputs.end (), has_lppro);
-
-	if (pi == midi_inputs.end () || po == midi_outputs.end ()) {
+	if (midi_inputs.empty() || midi_outputs.empty()) {
 		return false;
 	}
 
-	i = *pi;
-	o = *po;
+	i = midi_inputs.front();
+	o = midi_inputs.front();
 	return true;
 }
 
@@ -332,52 +320,52 @@ LaunchPadPro::set_state (const XMLNode & node, int version)
 std::string
 LaunchPadPro::input_port_name () const
 {
+	return input_port_regex();
+}
+
+std::string
+LaunchPadPro::input_port_regex ()
+{
 #ifdef __APPLE__
-	/* the origin of the numeric magic identifiers is known only to Novation
-	   and may change in time. This is part of how CoreMIDI works.
-	*/
-	return X_("system:midi_capture_1319078870");
+	return X_("Launchpad Pro MK3.*MIDI In");
 #else
-	return X_("Launchpad Pro MK3 MIDI 1");
+	return X_("Launchpad Pro MK3.*MIDI 1");
 #endif
 }
 
 std::string
-LaunchPadPro::input_daw_port_name () const
+LaunchPadPro::input_daw_port_regex ()
 {
 #ifdef __APPLE__
-	/* the origin of the numeric magic identifiers is known only to Novation
-	   and may change in time. This is part of how CoreMIDI works.
-	*/
-	return X_("system:midi_capture_1319078870");
+	return X_("Launchpad Pro MK3.*DAW");
 #else
-	return X_("Launchpad Pro MK3 MIDI 3");
+	return X_("Launchpad Pro MK3.*MIDI 3");
 #endif
 }
 
 std::string
 LaunchPadPro::output_port_name () const
 {
+	return output_port_regex();
+}
+
+std::string
+LaunchPadPro::output_port_regex()
+{
 #ifdef __APPLE__
-	/* the origin of the numeric magic identifiers is known only to Novation
-	   and may change in time. This is part of how CoreMIDI works.
-	*/
-	return X_("system:midi_playback_3409210341");
+	return X_("Launchpad Pro MK3.*MIDI Out");
 #else
-	return X_("Launchpad Pro MK3 MIDI 1");
+	return X_("Launchpad Pro MK3.*MIDI 1");
 #endif
 }
 
 std::string
-LaunchPadPro::output_daw_port_name () const
+LaunchPadPro::output_daw_port_regex ()
 {
 #ifdef __APPLE__
-	/* the origin of the numeric magic identifiers is known only to Novation
-	   and may change in time. This is part of how CoreMIDI works.
-	*/
-	return X_("system:midi_playback_3409210341");
+	return X_("Launchpad Pro MK3.*DAW");
 #else
-	return X_("Launchpad Pro MK3 MIDI 3");
+	return X_("Launchpad Pro MK3.*MIDI 3");
 #endif
 }
 
@@ -868,14 +856,15 @@ LaunchPadPro::connect_daw_ports ()
 
 	std::vector<std::string> in;
 	std::vector<std::string> out;
-
-	AudioEngine::instance()->get_ports (string_compose (".*%1", input_daw_port_name()), DataType::MIDI, PortFlags (IsPhysical|IsOutput), in);
-	AudioEngine::instance()->get_ports (string_compose (".*%1", output_daw_port_name()), DataType::MIDI, PortFlags (IsPhysical|IsInput), out);
+	AudioEngine::instance()->get_ports (string_compose (".*%1", input_daw_port_regex()), DataType::MIDI, PortFlags (IsPhysical|IsOutput), in);
+	AudioEngine::instance()->get_ports (string_compose (".*%1", output_daw_port_regex()), DataType::MIDI, PortFlags (IsPhysical|IsInput), out);
 
 	if (!in.empty() && !out.empty()) {
+
 		if (!_daw_in->connected()) {
 			AudioEngine::instance()->connect (_daw_in->name(), in.front());
 		}
+
 		if (!_daw_out->connected()) {
 			AudioEngine::instance()->connect (_daw_out->name(), out.front());
 		}

@@ -292,8 +292,10 @@ class LaunchPadPro : public MIDISurface
 	void port_registration_handler ();
 	int ports_acquire ();
 	void ports_release ();
-	std::string input_daw_port_name () const;
-	std::string output_daw_port_name () const;
+	static std::string input_port_regex ();
+	static std::string output_port_regex ();
+	static std::string input_daw_port_regex ();
+	static std::string output_daw_port_regex ();
 	void connect_daw_ports ();
 
 	void daw_write (const MidiByteArray&);
