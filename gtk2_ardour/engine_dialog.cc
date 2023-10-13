@@ -2605,6 +2605,7 @@ EngineControl::get_buffer_size () const
 	if (sscanf (txt.c_str (), "%d", &samples) != 1) {
 		fprintf (stderr, "Find a trout and repeatedly slap the nearest C++ developer who throws exceptions without catching them.\n");
 		fprintf (stderr, "Ardour will likely crash now, giving you time to get the trout.\n");
+		fprintf (stderr, "the buffer size combo said [%s]\n", txt.c_str());
 		throw exception ();
 	}
 
