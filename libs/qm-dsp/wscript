@@ -28,9 +28,15 @@ def configure(conf):
                               mandatory = False,
                               ):
             # The external qm-dsp might be built without embedded kiss - try to link with it explicitly and check again
-            conf.check_cxx(lib="kiss_fft_double", uselib_store="KISSFFT", mandatory=True)
-            conf.check_cxx(lib="kiss_fftr_double", uselib_store="KISSFFTR", mandatory=True)
-            conf.env.append_value('LIB_QMDSP', conf.env['LIB_KISSFFT'] + conf.env['LIB_KISSFFTR'])
+            if conf.check_cxx(lib="kissfft-double", uselib_store="KISSFFT", mandatory=False):
+                # kissfft ersions >= 130 have changed names (kiss_fft_double -> kissfft-double) and
+                # library organization
+                conf.env.append_value('LIB_QMDSP', conf.env['LIB_KISSFFT'])
+            else:
+                # kiss_fft <= 1.3.x
+                conf.check_cxx(lib="kiss_fft_double", uselib_store="KISS_FFT", mandatory=True)
+                conf.check_cxx(lib="kiss_fftr_double", uselib_store="KISS_FFTR", mandatory=True)
+                conf.env.append_value('LIB_QMDSP', conf.env['LIB_KISS_FFT'] + conf.env['LIB_KISS_FFTR'])
 
             conf.check_cxx(msg = 'Checking qm-dsp with explicit kiss linking',
                            features = 'cxx cxxprogram',
