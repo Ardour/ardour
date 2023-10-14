@@ -859,11 +859,15 @@ LaunchPadPro::connect_daw_ports ()
         auto pi = std::find_if (midi_inputs.begin(), midi_inputs.end(), is_dawport);
         auto po = std::find_if (midi_outputs.begin (), midi_outputs.end (), is_dawport);
 
-        if (pi != midi_inputs.end() && !_daw_in->connected()) {
+        if (pi == midi_inputs.end() || po == midi_inputs.end()) {
+	        return;
+        }
+
+        if (!_daw_in->connected()) {
 	        AudioEngine::instance()->connect (_daw_in->name(), *pi);
         }
 
-        if (po != midi_outputs.end() && !_daw_out->connected()) {
+        if (!_daw_out->connected()) {
 	        AudioEngine::instance()->connect (_daw_out->name(), *po);
         }
 }
