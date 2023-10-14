@@ -129,6 +129,10 @@ LaunchPadPro::probe (std::string& i, std::string& o)
 	auto pi = std::find_if (midi_inputs.begin(), midi_inputs.end(), has_lppro);
 	auto po = std::find_if (midi_outputs.begin (), midi_outputs.end (), has_lppro);
 
+	if (pi == midi_inputs.end () || po == midi_outputs.end ()) {
+		return false;
+	}
+
 	i = *pi;
 	o = *po;
 	return true;
