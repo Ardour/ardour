@@ -58,6 +58,17 @@ class MIDISurface : public ARDOUR::ControlProtocol
 
 	ARDOUR::Session & get_session() { return *session; }
 
+	/* These two names are used in a port registration handler to try to
+	   automatically connect the device when it is discovered.
+
+	   If the value returned by these methods begins with a colon, they
+	   will be assumed to be regular expressions, and passed (without the
+	   leading colon) into the constructor of a std::regex using
+	   std::regex::extended syntax.
+
+	   Otherwise, they are assumed to be unique string identifiers, and are
+	   merely searched for in port names with std::string::find().
+	*/
 	virtual std::string input_port_name () const = 0;
 	virtual std::string output_port_name () const = 0;
 

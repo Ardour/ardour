@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <regex>
+
 #include "pbd/debug.h"
 #include "pbd/i18n.h"
 
@@ -167,19 +169,78 @@ MIDISurface::port_registration_handler ()
 		return;
 	}
 
-	std::vector<std::string> in;
-	std::vector<std::string> out;
+	std::vector<std::string> midi_inputs;
+	std::vector<std::string> midi_outputs;
 
-	AudioEngine::instance()->get_ports (string_compose (".*%1", input_port_name()), DataType::MIDI, PortFlags (IsPhysical|IsOutput), in);
-	AudioEngine::instance()->get_ports (string_compose (".*%1", output_port_name()), DataType::MIDI, PortFlags (IsPhysical|IsInput), out);
+	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsPhysical|IsOutput), midi_inputs);
+	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsPhysical|IsInput), midi_outputs);
 
-	if (!in.empty() && !out.empty()) {
-		if (!_async_in->connected()) {
-			AudioEngine::instance()->connect (_async_in->name(), in.front());
+	if (midi_inputs.empty() || midi_outputs.empty()) {
+		return;
+	}
+
+        /* Try to find the input & output ports, whose pretty name varies on
+         * Linux depending on the version of ALSA, but is fairly consistent
+         * across newer ALSA and other platforms.
+         */
+
+	/* See if the input port is available, and maybe connect that */
+
+	string ip = input_port_name ();
+
+	if (ip[0] == ':') {
+		std::regex rx (ip.substr (1), std::regex::extended);
+
+		auto is_the_input = [&rx](string const &s) {
+			std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name(s);
+			return std::regex_search (pn, rx);
+		};
+
+		auto pi = std::find_if (midi_inputs.begin(), midi_inputs.end(), is_the_input);
+		if (pi != midi_inputs.end()) {
+			AudioEngine::instance()->connect (_async_in->name(), *pi);
 		}
-		if (!_async_out->connected()) {
-			AudioEngine::instance()->connect (_async_out->name(), out.front());
+	} else {
+		/* regular partial string search */
+		auto is_the_input = [&ip](string const &s) {
+			std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name(s);
+			return pn.find (ip) != string::npos;
+		};
+
+		auto pi = std::find_if (midi_inputs.begin(), midi_inputs.end(), is_the_input);
+		if (pi != midi_inputs.end()) {
+			AudioEngine::instance()->connect (_async_in->name(), *pi);
 		}
+	}
+
+	/* Now see if the output port is available, and maybe connect that */
+
+	string op = output_port_name ();
+
+	if (op[0] == ':') {
+		std::regex rx (op.substr (1), std::regex::extended);
+
+		auto is_the_output = [&rx](string const &s) {
+			std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name(s);
+			return std::regex_search (pn, rx);
+		};
+
+		auto po = std::find_if (midi_outputs.begin(), midi_outputs.end(), is_the_output);
+		if (po != midi_outputs.end()) {
+				AudioEngine::instance()->connect (_async_in->name(), *po);
+		}
+	} else {
+		/* regular partial string search */
+		auto is_the_output = [&op](string const &s) {
+			std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name(s);
+			return pn.find (op) != string::npos;
+		};
+
+		auto po = std::find_if (midi_outputs.begin(), midi_outputs.end(), is_the_output);
+		if (po != midi_outputs.end()) {
+			AudioEngine::instance()->connect (_async_in->name(), *po);
+		}
+
 	}
 }
 
@@ -442,4 +503,3 @@ MIDISurface::bundles ()
 
 	return b;
 }
-
