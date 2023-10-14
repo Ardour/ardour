@@ -213,9 +213,9 @@ public:
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
 	Editing::MidiEditMode current_midi_edit_mode () const;
-	void remove_midi_note (ArdourCanvas::Item*, GdkEvent*);
-
 	bool internal_editing() const;
+
+	void remove_midi_note (ArdourCanvas::Item*, GdkEvent*);
 
 	void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>);
 	void add_to_idle_resize (TimeAxisView*, int32_t);
@@ -450,10 +450,11 @@ public:
 
 	double get_y_origin () const;
 	void reset_x_origin (samplepos_t);
-	void reset_x_origin_to_follow_playhead ();
 	void reset_y_origin (double);
 	void reset_zoom (samplecnt_t);
 	void reposition_and_zoom (samplepos_t, double);
+
+	void reset_x_origin_to_follow_playhead ();
 
 	Temporal::timepos_t get_preferred_edit_position (Editing::EditIgnoreOption = Editing::EDIT_IGNORE_NONE,
 	                                                 bool use_context_click = false,
@@ -539,10 +540,10 @@ public:
 	void maybe_autoscroll (bool, bool, bool);
 	bool autoscroll_active() const;
 
-	Gdk::Cursor* get_canvas_cursor () const;
-
 	void set_current_trimmable (std::shared_ptr<ARDOUR::Trimmable>);
 	void set_current_movable (std::shared_ptr<ARDOUR::Movable>);
+
+	Gdk::Cursor* get_canvas_cursor () const;
 
 	MouseCursors const* cursors () const {
 		return _cursors;
