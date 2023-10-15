@@ -728,6 +728,7 @@ DiskReader::overwrite_existing_audio ()
 			if (audio_read (buf + chunk1_offset, mixdown_buffer.get (), gain_buffer.get (), start, chunk1_cnt, rci, n, reversed) != (samplecnt_t)chunk1_cnt) {
 				error << string_compose (_("DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"), id (), chunk1_cnt, overwrite_sample) << endmsg;
 				ret = false;
+				++n;
 				continue;
 			}
 		}
@@ -745,6 +746,7 @@ DiskReader::overwrite_existing_audio ()
 				rci->initialized = true;
 			}
 		}
+		++n;
 	}
 
 	file_sample[DataType::AUDIO] = start;
