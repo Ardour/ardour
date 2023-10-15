@@ -3409,6 +3409,7 @@ Playlist::uncombine (std::shared_ptr<Region> target)
 void
 Playlist::fade_range (list<TimelineRange>& ranges)
 {
+	ThawList thawlist;
 	RegionReadLock rlock (this);
 	for (list<TimelineRange>::iterator r = ranges.begin(); r != ranges.end(); ) {
 		list<TimelineRange>::iterator tmpr = r;
@@ -3416,11 +3417,14 @@ Playlist::fade_range (list<TimelineRange>& ranges)
 		for (RegionList::const_iterator i = regions.begin (); i != regions.end ();) {
 			RegionList::const_iterator tmpi = i;
 			++tmpi;
+			thawlist.add (*i);
 			(*i)->fade_range ((*r).start().samples(), (*r).end().samples());
 			i = tmpi;
 		}
 		r = tmpr;
 	}
+	rlock.release ();
+	thawlist.release ();
 }
 
 uint32_t
