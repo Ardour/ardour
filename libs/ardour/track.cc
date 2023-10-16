@@ -943,10 +943,18 @@ Track::bounce_range (samplepos_t start,
                           InterThreadInfo& itt,
                           std::shared_ptr<Processor> endpoint,
                           bool include_endpoint,
-                          std::string const& name)
+                          std::string const& nm, bool prefix_track_name)
 {
+	std::string source_name;
+
+	if (prefix_track_name && nm.length() > 0) {
+		source_name = string_compose ("%1 - %2", name(), nm);
+	} else {
+		source_name = nm;
+	}
+
 	vector<std::shared_ptr<Source> > srcs;
-	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false, false, name);
+	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false, false, source_name, nm);
 }
 
 void

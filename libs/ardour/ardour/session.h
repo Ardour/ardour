@@ -949,9 +949,10 @@ public:
 	/* flattening stuff */
 
 	std::shared_ptr<Region> write_one_track (Track&, samplepos_t start, samplepos_t end,
-	                                           bool overwrite, std::vector<std::shared_ptr<Source> >&, InterThreadInfo& wot,
-	                                           std::shared_ptr<Processor> endpoint,
-	                                           bool include_endpoint, bool for_export, bool for_freeze, std::string const& name);
+	                                         bool overwrite, std::vector<std::shared_ptr<Source> >&, InterThreadInfo& wot,
+	                                         std::shared_ptr<Processor> endpoint,
+	                                         bool include_endpoint, bool for_export, bool for_freeze,
+	                                         std::string const& source_name = "", std::string const& region_name = "");
 	int freeze_all (InterThreadInfo&);
 
 	/* session-wide solo/mute/rec-enable */

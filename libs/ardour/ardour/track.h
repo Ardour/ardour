@@ -110,7 +110,7 @@ public:
 	 */
 	virtual std::shared_ptr<Region> bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo& itt,
 	                                                std::shared_ptr<Processor> endpoint, bool include_endpoint,
-	                                                std::string const& name);
+	                                                std::string const& name = "", bool prefix_track_name = false);
 
 	virtual int export_stuff (BufferSet& bufs, samplepos_t start_sample, samplecnt_t nframes,
 	                          std::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,

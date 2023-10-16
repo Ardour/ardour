@@ -94,7 +94,7 @@ public:
 		return std::shared_ptr<Region> ();
 	}
 
-	std::shared_ptr<Region> bounce_range (samplepos_t, samplepos_t, InterThreadInfo&, std::shared_ptr<Processor>, bool, std::string const&) {
+	std::shared_ptr<Region> bounce_range (samplepos_t, samplepos_t, InterThreadInfo&, std::shared_ptr<Processor>, bool, std::string const&, bool) {
 		return std::shared_ptr<Region> ();
 	}
 

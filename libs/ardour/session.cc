@@ -5861,10 +5861,11 @@ struct MidiSourceLockMap
 
 std::shared_ptr<Region>
 Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
-			  bool /*overwrite*/, vector<std::shared_ptr<Source> >& srcs,
-			  InterThreadInfo& itt,
-			  std::shared_ptr<Processor> endpoint, bool include_endpoint,
-			  bool for_export, bool for_freeze, std::string const& name)
+                          bool /*overwrite*/, vector<std::shared_ptr<Source> >& srcs,
+                          InterThreadInfo& itt,
+                          std::shared_ptr<Processor> endpoint, bool include_endpoint,
+                          bool for_export, bool for_freeze,
+                          std::string const& source_name, std::string const& region_name)
 {
 	std::shared_ptr<Region> result;
 	std::shared_ptr<Playlist> playlist;
@@ -5879,7 +5880,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 	samplepos_t len = end - start;
 	bool need_block_size_reset = false;
 	ChanCount const max_proc = track.max_processor_streams ();
-	string legal_playlist_name;
+	string legal_name;
 	string possible_path;
 	MidiBuffer resolved (256);
 	MidiNoteTracker tracker;
@@ -5917,18 +5918,18 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 		goto out;
 	}
 
-	if (name.length() > 0) {
+	if (source_name.length() > 0) {
 		/*if the user passed in a name, we will use it, and also prepend the resulting sources with that name*/
-		legal_playlist_name.append (legalize_for_path (name));
+		legal_name = legalize_for_path (source_name);
 	} else {
-		legal_playlist_name.append (legalize_for_path (playlist->name ()));
+		legal_name = legalize_for_path (playlist->name ());
 	}
 
 	for (uint32_t chan_n = 0; chan_n < diskstream_channels.n(data_type); ++chan_n) {
 
 		string path = ((data_type == DataType::AUDIO)
-		               ? new_audio_source_path (legal_playlist_name, diskstream_channels.n_audio(), chan_n, false)
-		               : new_midi_source_path (legal_playlist_name));
+		               ? new_audio_source_path (legal_name, diskstream_channels.n_audio(), chan_n, false)
+		               : new_midi_source_path (legal_name));
 
 		if (path.empty()) {
 			goto out;
@@ -6161,12 +6162,17 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 		plist.add (Properties::whole_file, true);
 		plist.add (Properties::length, len); //ToDo: in nutempo, if the Range is snapped to bbt, this should be in bbt (?)
-		plist.add (Properties::name, region_name_from_path (srcs.front()->name(), true));
+		plist.add (Properties::name, region_name_from_path (srcs.front()->name(), true)); // TODO: allow custom region-name when consolidating 
 		plist.add (Properties::tags, "(bounce)");
 
 		result = RegionFactory::create (srcs, plist, true);
 
-		result->set_name(legal_playlist_name); /*setting name in the properties didn't seem to work, but this does*/
+		if (region_name.empty ()) {
+			/* setting name in the properties didn't seem to work, but this does */
+			result->set_name(legal_name);
+		} else {
+			result->set_name(region_name);
+		}
 	}
 
 	out:
