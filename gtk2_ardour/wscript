@@ -158,6 +158,7 @@ gtk2_ardour_sources = [
         'midi_channel_selector.cc',
         'midi_clip_editor.cc',
         'midi_cut_buffer.cc',
+        'midi_editing_context.cc',
         'midi_export_dialog.cc',
         'midi_list_editor.cc',
         'midi_region_view.cc',

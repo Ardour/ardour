@@ -33,8 +33,23 @@
 #ifndef __ardour_midi_editing_context_h__
 #define __ardour_midi_editing_context_h__
 
+#include "pbd/signals.h"
 
-class MidiEditingContext : public SessionHandlePtr, public PBD::ScopedConnectionList
+#include "temporal/timeline.h"
+
+#include "ardour/session_handle.h"
+#include "ardour/types.h"
+
+#include "editing.h"
+#include "selection.h"
+
+using ARDOUR::samplepos_t;
+using ARDOUR::samplecnt_t;
+
+class VerboseCursor;
+class MouseCursors;
+
+class MidiEditingContext : public ARDOUR::SessionHandlePtr
 {
 public:
 	MidiEditingContext ();
@@ -57,6 +72,19 @@ public:
 	virtual int32_t get_grid_beat_divisions (Editing::GridType gt) = 0;
 	virtual int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) = 0;
 
+	/** Set the snap type.
+	 * @param t Snap type (defined in editing_syms.h)
+	 */
+	virtual void set_grid_to (Editing::GridType t) = 0;
+
+	virtual Editing::GridType grid_type () const = 0;
+	virtual Editing::SnapMode snap_mode () const = 0;
+
+	/** Set the snap mode.
+	 * @param m Snap mode (defined in editing_syms.h)
+	 */
+	virtual void set_snap_mode (Editing::SnapMode m) = 0;
+
 	virtual void snap_to (Temporal::timepos_t & first,
 	                      Temporal::RoundMode   direction = Temporal::RoundNearest,
 	                      ARDOUR::SnapPref      pref = ARDOUR::SnapToAny_Visual,
@@ -75,26 +103,35 @@ public:
 	virtual double get_y_origin () const = 0;
 	virtual void reset_x_origin (samplepos_t) = 0;
 	virtual void reset_y_origin (double) = 0;
+
+	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
+	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
+	virtual samplecnt_t get_current_zoom () const = 0;
 	virtual void reset_zoom (samplecnt_t) = 0;
 	virtual void reposition_and_zoom (samplepos_t, double) = 0;
 
 	virtual Selection& get_selection() const = 0;
 
+	/** Set the mouse mode (gain, object, range, timefx etc.)
+	 * @param m Mouse mode (defined in editing_syms.h)
+	 * @param force Perform the effects of the change even if no change is required
+	 * (ie even if the current mouse mode is equal to @p m)
+	 */
 	virtual void set_mouse_mode (Editing::MouseMode, bool force = false) = 0;
+	/** Step the mouse mode onto the next or previous one.
+	 * @param next true to move to the next, otherwise move to the previous
+	 */
 	virtual void step_mouse_mode (bool next) = 0;
+	/** @return The current mouse mode (gain, object, range, timefx etc.)
+	 * (defined in editing_syms.h)
+	 */
 	virtual Editing::MouseMode current_mouse_mode () const = 0;
-	virtual Editing::MidiEditMode current_midi_edit_mode () const = 0;
+	/** @return Whether the current mouse mode is an "internal" editing mode. */
 	virtual bool internal_editing() const = 0;
 
-	Gdk::Cursor* get_canvas_cursor () const;
-
-	MouseCursors const* cursors () const {
-		return _cursors;
-	}
-
-	VerboseCursor* verbose_cursor () const {
-		return _verbose_cursor;
-	}
+	virtual Gdk::Cursor* get_canvas_cursor () const = 0;
+	virtual MouseCursors const* cursors () const = 0;
+	virtual VerboseCursor* verbose_cursor () const = 0;
 };
 
 #endif /* __ardour_midi_editing_context_h__ */

@@ -609,7 +609,7 @@ MiniTimeline::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 			timepos_t rounded = timepos_t (tmap->quarters_at (tmap->round_to_bar (tmap->bbt_at (timepos_t(when)))));
 			when = tmap->sample_at(rounded);
 		}
-		
+
 		double xpos = width * .5 + (when - phead) * _px_per_sample;
 
 		// TODO round to nearest display TC in +/- 1px
