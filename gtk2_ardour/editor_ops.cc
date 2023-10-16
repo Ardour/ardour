@@ -4272,15 +4272,19 @@ Editor::bounce_range_selection (BounceTarget target, bool with_processing)
 	}
 
 	string bounce_name;
+	bool   include_track_name;
 	switch (target) {
 		case NewSource:
 			bounce_name = "Bounced";
+			include_track_name = true;
 			break;
 		case ReplaceRange:
 			bounce_name = "Consolidated";
+			include_track_name = true;
 			break;
 		case NewTrigger:
 			bounce_name = "Unnamed Clip";
+			include_track_name = false;
 			break;
 	}
 	bool   copy_to_clip_library = false;
@@ -4420,9 +4424,9 @@ Editor::bounce_range_selection (BounceTarget target, bool with_processing)
 		/*make the "source" (whole-file region)*/
 		/*note: bounce_range() will append the playlist name to the resulting region and filename*/
 		if (with_processing) {
-			r = rtv->track()->bounce_range (start.samples(), (start+cnt).samples(), itt, rtv->track()->main_outs(), false, bounce_name);
+			r = rtv->track()->bounce_range (start.samples(), (start+cnt).samples(), itt, rtv->track()->main_outs(), false, bounce_name, include_track_name);
 		} else {
-			r = rtv->track()->bounce_range (start.samples(), (start+cnt).samples(), itt, std::shared_ptr<Processor>(), false, bounce_name);
+			r = rtv->track()->bounce_range (start.samples(), (start+cnt).samples(), itt, std::shared_ptr<Processor>(), false, bounce_name, include_track_name);
 		}
 
 		if (!r) {
