@@ -62,6 +62,7 @@
 
 #include "axis_provider.h"
 #include "editing.h"
+#include "midi_editing_context.h"
 #include "selection.h"
 
 namespace Temporal {
@@ -123,7 +124,7 @@ using ARDOUR::samplecnt_t;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public ArdourWidgets::Tabbable,  public ARDOUR::SessionHandlePtr, public AxisViewProvider
+class PublicEditor : public ArdourWidgets::Tabbable,  public MidiEditingContext, public AxisViewProvider
 {
 public:
 	PublicEditor (Gtk::Widget& content);
@@ -147,27 +148,7 @@ public:
 	 */
 	virtual void set_session (ARDOUR::Session* s) = 0;
 
-	/** Set the snap type.
-	 * @param t Snap type (defined in editing_syms.h)
-	 */
-	virtual void set_grid_to (Editing::GridType t) = 0;
-
-	virtual Editing::GridType grid_type () const = 0;
-	virtual Editing::SnapMode snap_mode () const = 0;
-
-	/** Set the snap mode.
-	 * @param m Snap mode (defined in editing_syms.h)
-	 */
-	virtual void set_snap_mode (Editing::SnapMode m) = 0;
-
-	/**
-	 * Snap a value according to the current snap setting.
-	 * ensure_snap overrides SnapOff and magnetic snap
-	 */
-	virtual void snap_to (Temporal::timepos_t & first,
-	                      Temporal::RoundMode   direction = Temporal::RoundNearest,
-	                      ARDOUR::SnapPref    gpref = ARDOUR::SnapToAny_Visual,
-	                      bool                ensure_snap = false) = 0;
+	virtual samplepos_t playhead_cursor_sample () const = 0;
 
 	/** Undo some transactions.
 	 * @param n Number of transactions to undo.
@@ -179,26 +160,6 @@ public:
 	 * @param n Number of transaction to redo.
 	 */
 	virtual void redo (uint32_t n = 1) = 0;
-
-	/** Set the mouse mode (gain, object, range, timefx etc.)
-	 * @param m Mouse mode (defined in editing_syms.h)
-	 * @param force Perform the effects of the change even if no change is required
-	 * (ie even if the current mouse mode is equal to @p m)
-	 */
-	virtual void set_mouse_mode (Editing::MouseMode m, bool force = false) = 0;
-
-	/** Step the mouse mode onto the next or previous one.
-	 * @param next true to move to the next, otherwise move to the previous
-	 */
-	virtual void step_mouse_mode (bool next) = 0;
-
-	/** @return The current mouse mode (gain, object, range, timefx etc.)
-	 * (defined in editing_syms.h)
-	 */
-	virtual Editing::MouseMode current_mouse_mode () const = 0;
-
-	/** @return Whether the current mouse mode is an "internal" editing mode. */
-	virtual bool internal_editing() const = 0;
 
 	/** Possibly start the audition of a region.
 	 *
@@ -226,16 +187,7 @@ public:
 	virtual void pitch_shift_region () = 0;
 
 	virtual void transition_to_rolling (bool fwd) = 0;
-	virtual samplepos_t pixel_to_sample (double pixel) const = 0;
-	virtual samplepos_t playhead_cursor_sample () const = 0;
-	virtual double sample_to_pixel (samplepos_t sample) const = 0;
-	virtual double sample_to_pixel_unrounded (samplepos_t sample) const = 0;
-	virtual double time_to_pixel (Temporal::timepos_t const &) const = 0;
-	virtual double time_to_pixel_unrounded (Temporal::timepos_t const &) const = 0;
-	virtual double duration_to_pixels (Temporal::timecnt_t const &) const = 0;
-	virtual double duration_to_pixels_unrounded (Temporal::timecnt_t const &) const = 0;
 
-	virtual Selection& get_selection () const = 0;
 	virtual bool get_selection_extents (Temporal::timepos_t &start, Temporal::timepos_t &end) const = 0;
 	virtual Selection& get_cut_buffer () const = 0;
 
@@ -326,10 +278,6 @@ public:
 	virtual void loudness_assistant (bool) = 0;
 
 	virtual void register_actions () = 0;
-	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
-	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
-	virtual samplecnt_t get_current_zoom () const = 0;
-	virtual void reset_zoom (samplecnt_t) = 0;
 	virtual void clear_playlist (std::shared_ptr<ARDOUR::Playlist>) = 0;
 	virtual void clear_grouped_playlists (RouteUI*) = 0;
 
@@ -388,9 +336,6 @@ public:
 	virtual void cleanup_regions () = 0;
 	virtual void prepare_for_cleanup () = 0;
 	virtual void finish_cleanup () = 0;
-	virtual void reset_x_origin (samplepos_t sample) = 0;
-	virtual double get_y_origin () const = 0;
-	virtual void reset_y_origin (double pos) = 0;
 	virtual void set_visible_track_count (int32_t) = 0;
 	virtual void fit_selection () = 0;
 	virtual void remove_last_capture () = 0;
@@ -410,9 +355,6 @@ public:
 
 	virtual int draw_velocity () const = 0;
 	virtual int draw_channel () const = 0;
-
-	virtual int32_t get_grid_beat_divisions (Editing::GridType gt) = 0;
-	virtual int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) = 0;
 
 	virtual void edit_notes (MidiRegionView*) = 0;
 
@@ -546,9 +488,6 @@ public:
 
 	virtual void access_action (const std::string&, const std::string&) = 0;
 	virtual void set_toggleaction (const std::string&, const std::string&, bool) = 0;
-
-	virtual MouseCursors const* cursors () const = 0;
-	virtual VerboseCursor* verbose_cursor () const = 0;
 
 	virtual EditorCursor* playhead_cursor () const = 0;
 	virtual EditorCursor* snapped_cursor () const = 0;

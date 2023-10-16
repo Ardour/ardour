@@ -212,7 +212,6 @@ public:
 	void set_mouse_mode (Editing::MouseMode, bool force = false);
 	void step_mouse_mode (bool next);
 	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
-	Editing::MidiEditMode current_midi_edit_mode () const;
 	bool internal_editing() const;
 
 	void remove_midi_note (ArdourCanvas::Item*, GdkEvent*);
