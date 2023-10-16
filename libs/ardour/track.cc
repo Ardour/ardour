@@ -931,6 +931,24 @@ Track::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 	return false;
 }
 
+std::shared_ptr<Region>
+Track::bounce (InterThreadInfo& itt, std::string const& name)
+{
+	return bounce_range (_session.current_start_sample(), _session.current_end_sample(), itt, main_outs(), false, name);
+}
+
+std::shared_ptr<Region>
+Track::bounce_range (samplepos_t start,
+                          samplepos_t end,
+                          InterThreadInfo& itt,
+                          std::shared_ptr<Processor> endpoint,
+                          bool include_endpoint,
+                          std::string const& name)
+{
+	vector<std::shared_ptr<Source> > srcs;
+	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false, false, name);
+}
+
 void
 Track::use_captured_sources (SourceList& srcs, CaptureInfos const & capture_info)
 {

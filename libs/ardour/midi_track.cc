@@ -604,22 +604,16 @@ MidiTrack::export_stuff (BufferSet&                   buffers,
 	return 0;
 }
 
-std::shared_ptr<Region>
-MidiTrack::bounce (InterThreadInfo& itt, std::string const& name)
+bool
+MidiTrack::bounceable (std::shared_ptr<Processor> endpoint, bool include_endpoint) const
 {
-	return bounce_range (_session.current_start_sample(), _session.current_end_sample(), itt, main_outs(), false, name);
-}
-
-std::shared_ptr<Region>
-MidiTrack::bounce_range (samplepos_t                  start,
-                         samplepos_t                  end,
-                         InterThreadInfo&             itt,
-                         std::shared_ptr<Processor> endpoint,
-                         bool                         include_endpoint,
-                         std::string const&           name)
-{
-	vector<std::shared_ptr<Source> > srcs;
-	return _session.write_one_track (*this, start, end, false, srcs, itt, endpoint, include_endpoint, false, false, name);
+	if (!endpoint && !include_endpoint) {
+		/* no processing - just read from the playlist and create new
+		 * files: always possible.
+		 */
+		return true;
+	}
+	return false; // a lie, Session::write_one_track can handle this.
 }
 
 void

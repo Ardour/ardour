@@ -98,7 +98,7 @@ public:
 	 * @param itt asynchronous progress report and cancel
 	 * @return a new audio region (or nil in case of error)
 	 */
-	virtual std::shared_ptr<Region> bounce (InterThreadInfo& itt, std::string const& name) = 0;
+	virtual std::shared_ptr<Region> bounce (InterThreadInfo& itt, std::string const& name);
 
 	/** Bounce the given range to a new audio region.
 	 * @param start start time (in samples)
@@ -110,7 +110,7 @@ public:
 	 */
 	virtual std::shared_ptr<Region> bounce_range (samplepos_t start, samplepos_t end, InterThreadInfo& itt,
 	                                                std::shared_ptr<Processor> endpoint, bool include_endpoint,
-	                                                std::string const& name) = 0;
+	                                                std::string const& name);
 
 	virtual int export_stuff (BufferSet& bufs, samplepos_t start_sample, samplecnt_t nframes,
 	                          std::shared_ptr<Processor> endpoint, bool include_endpoint, bool for_export, bool for_freeze,
