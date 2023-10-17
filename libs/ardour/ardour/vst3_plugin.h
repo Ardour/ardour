@@ -312,6 +312,8 @@ private:
 
 	boost::optional<uint32_t> _plugin_latency;
 
+	mutable boost::optional<bool> _has_editor;
+
 	int _n_bus_in;
 	int _n_bus_out;
 

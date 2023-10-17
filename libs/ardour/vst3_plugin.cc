@@ -341,6 +341,7 @@ VST3Plugin::possible_output () const
 bool
 VST3Plugin::has_editor () const
 {
+	/* consider caching has-editor in VST3Info */
 	return _plug->has_editor ();
 }
 
@@ -3179,6 +3180,10 @@ VST3PI::close_view ()
 bool
 VST3PI::has_editor () const
 {
+	if (_has_editor.has_value ()) {
+		return _has_editor.value ();
+	}
+
 	IPlugView* view = _view;
 	if (!view) {
 		view = try_create_view ();
@@ -3197,6 +3202,7 @@ VST3PI::has_editor () const
 			view->release ();
 		}
 	}
+	_has_editor = rv;
 	return rv;
 }
 
