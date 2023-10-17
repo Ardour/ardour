@@ -18,44 +18,44 @@
 
 #include <pbd/error.h>
 
-#include "editor.h"
+#include "editing_context.h"
 #include "cursor_context.h"
 
-CursorContext::CursorContext(Editor& editor, Gdk::Cursor* cursor)
-	: _editor(editor)
-	, _index(editor.push_canvas_cursor(cursor))
+CursorContext::CursorContext(EditingContext& ec, Gdk::Cursor* cursor)
+	: editing_context(ec)
+	, _index (editing_context.push_canvas_cursor(cursor))
 {}
 
 CursorContext::~CursorContext()
 {
-	if (_index == _editor._cursor_stack.size() - 1) {
-		_editor.pop_canvas_cursor();
+	if (_index == editing_context._cursor_stack.size() - 1) {
+		editing_context.pop_canvas_cursor();
 	} else {
-		_editor._cursor_stack[_index] = NULL;
+		editing_context._cursor_stack[_index] = NULL;
 	}
 }
 
 CursorContext::Handle
-CursorContext::create(Editor& editor, Gdk::Cursor* cursor)
+CursorContext::create(EditingContext& ec, Gdk::Cursor* cursor)
 {
-	return CursorContext::Handle(new CursorContext(editor, cursor));
+	return CursorContext::Handle(new CursorContext(ec, cursor));
 }
 
 void
 CursorContext::change(Gdk::Cursor* cursor)
 {
-	_editor._cursor_stack[_index] = cursor;
-	if (_index == _editor._cursor_stack.size() - 1) {
-		_editor.set_canvas_cursor(cursor);
+	editing_context._cursor_stack[_index] = cursor;
+	if (_index == editing_context._cursor_stack.size() - 1) {
+		editing_context.set_canvas_cursor(cursor);
 	}
 }
 
 void
-CursorContext::set(Handle* handle, Editor& editor, Gdk::Cursor* cursor)
+CursorContext::set(Handle* handle, EditingContext& ec, Gdk::Cursor* cursor)
 {
 	if (*handle) {
 		(*handle)->change(cursor);
 	} else {
-		*handle = CursorContext::create(editor, cursor);
+		*handle = CursorContext::create(ec, cursor);
 	}
 }

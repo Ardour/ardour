@@ -68,6 +68,7 @@ class PatchChange;
 class ItemCounts;
 class CursorContext;
 class VelocityGhostRegion;
+class EditingContext;
 
 class MidiRegionView : public RegionView
 {
@@ -76,12 +77,14 @@ public:
 	typedef Evoral::Sequence<Temporal::Beats>::Notes Notes;
 
 	MidiRegionView (ArdourCanvas::Container*              parent,
+	                EditingContext&,
 	                RouteTimeAxisView&                    tv,
 	                std::shared_ptr<ARDOUR::MidiRegion> r,
 	                double                                samples_per_pixel,
 	                uint32_t                              basic_color);
 
 	MidiRegionView (ArdourCanvas::Container*              parent,
+	                EditingContext&,
 	                RouteTimeAxisView&                    tv,
 	                std::shared_ptr<ARDOUR::MidiRegion> r,
 	                double                                samples_per_pixel,
@@ -348,7 +351,8 @@ public:
 	void _redisplay (bool view_only);
 
   protected:
-	friend class Editor;
+	friend class EditingContext;
+	friend class Editor; // grr, C++ does not allow inheritance of friendship
 
 	void invert_note_selection ();
 	void extend_note_selection ();
@@ -455,6 +459,8 @@ public:
 
 	uint8_t get_velocity_for_add (ARDOUR::MidiModel::TimeType time) const;
 	uint8_t get_channel_for_add (ARDOUR::MidiModel::TimeType time) const;
+
+	EditingContext& editing_context;
 
 	uint8_t  _current_range_min;
 	uint8_t  _current_range_max;

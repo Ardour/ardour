@@ -182,26 +182,7 @@ public:
 	}
 	double trackviews_height () const;
 
-	void cycle_snap_mode ();
-	void next_grid_choice ();
-	void prev_grid_choice ();
-	void set_grid_to (Editing::GridType);
-	void set_snap_mode (Editing::SnapMode);
-
-	void set_draw_length_to (Editing::GridType);
-	void set_draw_velocity_to (int);
-	void set_draw_channel_to (int);
-
-	Editing::SnapMode  snap_mode () const;
-	Editing::GridType  grid_type () const;
-	bool  grid_type_is_musical (Editing::GridType) const;
-	bool  grid_musical () const;
-
 	bool on_velocity_scroll_event (GdkEventScroll*);
-
-	Editing::GridType  draw_length () const;
-	int                draw_velocity () const;
-	int                draw_channel () const;
 
 	void undo (uint32_t n = 1);
 	void redo (uint32_t n = 1);
@@ -288,7 +269,6 @@ public:
 	void get_regionviews_at_or_after (Temporal::timepos_t const &, RegionSelection&);
 
 	void set_selection (std::list<Selectable*>, ARDOUR::SelectionOperation);
-	void set_selected_midi_region_view (MidiRegionView&);
 
 	std::shared_ptr<ARDOUR::Route> current_mixer_stripable () const;
 
@@ -557,12 +537,6 @@ public:
 
 	void get_pointer_position (double &, double &) const;
 
-	/** Context for mouse entry (stored in a stack). */
-	struct EnterContext {
-		ItemType                         item_type;
-		std::shared_ptr<CursorContext> cursor_ctx;
-	};
-
 	/** Get the topmost enter context for the given item type.
 	 *
 	 * This is used to change the cursor associated with a given enter context,
@@ -681,10 +655,6 @@ private:
 	void on_samples_per_pixel_changed ();
 
 	Editing::MouseMode mouse_mode;
-	Editing::GridType  pre_internal_grid_type;
-	Editing::SnapMode  pre_internal_snap_mode;
-	Editing::GridType  internal_grid_type;
-	Editing::SnapMode  internal_snap_mode;
 	Editing::MouseMode effective_mouse_mode () const;
 
 	Editing::MarkerClickBehavior marker_click_behavior;
@@ -892,10 +862,7 @@ private:
 	Gtk::HBox global_hpacker;
 	Gtk::VBox global_vpacker;
 
-	/* Cursor stuff.  Do not use directly, use via CursorContext. */
-	friend class CursorContext;
-	std::vector<Gdk::Cursor*> _cursor_stack;
-	void set_canvas_cursor (Gdk::Cursor*);
+	void set_canvas_cursor (Gdk::Cursor* cursor);
 	size_t push_canvas_cursor (Gdk::Cursor*);
 	void pop_canvas_cursor ();
 
@@ -1314,7 +1281,6 @@ private:
 
 	void register_actions ();
 	void register_region_actions ();
-	void register_midi_actions (Gtkmm2ext::Bindings*);
 
 	void load_bindings ();
 
@@ -1663,13 +1629,6 @@ private:
 	samplepos_t pending_keyboard_selection_start;
 
 	void move_range_selection_start_or_end_to_region_boundary (bool, bool);
-
-	Editing::GridType _grid_type;
-	Editing::SnapMode _snap_mode;
-
-	Editing::GridType _draw_length;
-	int _draw_velocity;
-	int _draw_channel;
 
 	bool ignore_gui_changes;
 
@@ -2028,13 +1987,6 @@ private:
 	void set_edit_mode (ARDOUR::EditMode);
 	void cycle_edit_mode ();
 
-	ArdourWidgets::ArdourDropdown grid_type_selector;
-	void build_grid_type_menu ();
-
-	ArdourWidgets::ArdourDropdown draw_length_selector;
-	ArdourWidgets::ArdourDropdown draw_velocity_selector;
-	ArdourWidgets::ArdourDropdown draw_channel_selector;
-	void build_draw_midi_menus ();
 
 	Gtk::CheckButton stretch_marker_cb;
 
@@ -2056,30 +2008,6 @@ private:
 	Gtk::VBox ebox_vpacker;
 
 	Gtk::HBox _box;
-
-	std::vector<std::string> grid_type_strings;
-	std::vector<std::string> snap_mode_strings;
-
-	void grid_type_selection_done (Editing::GridType);
-	void snap_mode_selection_done (Editing::SnapMode);
-	void snap_mode_chosen (Editing::SnapMode);
-	void grid_type_chosen (Editing::GridType);
-
-	void draw_length_selection_done (Editing::GridType);
-	void draw_length_chosen (Editing::GridType);
-
-	void draw_velocity_selection_done (int);
-	void draw_velocity_chosen (int);
-
-	void draw_channel_selection_done (int);
-	void draw_channel_chosen (int);
-
-	Glib::RefPtr<Gtk::RadioAction> grid_type_action (Editing::GridType);
-	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
-
-	Glib::RefPtr<Gtk::RadioAction> draw_length_action (Editing::GridType);
-	Glib::RefPtr<Gtk::RadioAction> draw_velocity_action (int);
-	Glib::RefPtr<Gtk::RadioAction> draw_channel_action (int);
 
 	//zoom focus menu stuff
 	ArdourWidgets::ArdourDropdown	zoom_focus_selector;
@@ -2577,8 +2505,6 @@ private:
 	QuantizeDialog* quantize_dialog;
 	MainMenuDisabler* _main_menu_disabler;
 
-	/* MIDI actions, proxied to selected MidiRegionView(s) */
-	void midi_action (void (MidiRegionView::*method)());
 	std::vector<MidiRegionView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const;
 
 	/* private helper functions to help with registering region actions */

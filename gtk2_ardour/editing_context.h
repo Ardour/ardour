@@ -40,7 +40,10 @@
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
 
+#include "widgets/ardour_dropdown.h"
+
 #include "editing.h"
+#include "editor_items.h"
 #include "selection.h"
 
 using ARDOUR::samplepos_t;
@@ -48,14 +51,41 @@ using ARDOUR::samplecnt_t;
 
 class VerboseCursor;
 class MouseCursors;
+class MidiRegionView;
+class CursorContext;
 
-class MidiEditingContext : public ARDOUR::SessionHandlePtr
+class EditingContext : public ARDOUR::SessionHandlePtr
 {
 public:
-	MidiEditingContext ();
-	~MidiEditingContext ();
+	/** Context for mouse entry (stored in a stack). */
+	struct EnterContext {
+		ItemType                       item_type;
+		std::shared_ptr<CursorContext> cursor_ctx;
+	};
+
+	EditingContext ();
+	~EditingContext ();
 
 	void set_session (ARDOUR::Session*);
+
+	virtual void instant_save() = 0;
+	virtual void redisplay_grid (bool immediate_redraw) = 0;
+	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) = 0;
+	/** Get the topmost enter context for the given item type.
+	 *
+	 * This is used to change the cursor associated with a given enter context,
+	 * which may not be on the top of the stack.
+	 */
+	virtual EnterContext* get_enter_context(ItemType type) = 0;
+
+	virtual void begin_reversible_selection_op (std::string cmd_name) = 0;
+	virtual void commit_reversible_selection_op () = 0;
+	virtual void begin_reversible_command (std::string cmd_name) = 0;
+	virtual void begin_reversible_command (GQuark) = 0;
+	virtual void abort_reversible_command () = 0;
+	virtual void commit_reversible_command () = 0;
+
+	virtual void set_selected_midi_region_view (MidiRegionView&);
 
 	virtual samplepos_t pixel_to_sample_from_event (double pixel) const = 0;
 	virtual samplepos_t pixel_to_sample (double pixel) const = 0;
@@ -72,18 +102,25 @@ public:
 	virtual int32_t get_grid_beat_divisions (Editing::GridType gt) = 0;
 	virtual int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) = 0;
 
-	/** Set the snap type.
-	 * @param t Snap type (defined in editing_syms.h)
-	 */
-	virtual void set_grid_to (Editing::GridType t) = 0;
+	Editing::GridType  grid_type () const;
+	bool  grid_type_is_musical (Editing::GridType) const;
+	bool  grid_musical () const;
 
-	virtual Editing::GridType grid_type () const = 0;
-	virtual Editing::SnapMode snap_mode () const = 0;
+	void cycle_snap_mode ();
+	void next_grid_choice ();
+	void prev_grid_choice ();
+	void set_grid_to (Editing::GridType);
+	void set_snap_mode (Editing::SnapMode);
 
-	/** Set the snap mode.
-	 * @param m Snap mode (defined in editing_syms.h)
-	 */
-	virtual void set_snap_mode (Editing::SnapMode m) = 0;
+	void set_draw_length_to (Editing::GridType);
+	void set_draw_velocity_to (int);
+	void set_draw_channel_to (int);
+
+	Editing::GridType  draw_length () const;
+	int                draw_velocity () const;
+	int                draw_channel () const;
+
+	Editing::SnapMode  snap_mode () const;
 
 	virtual void snap_to (Temporal::timepos_t & first,
 	                      Temporal::RoundMode   direction = Temporal::RoundNearest,
@@ -111,6 +148,7 @@ public:
 	virtual void reposition_and_zoom (samplepos_t, double) = 0;
 
 	virtual Selection& get_selection() const = 0;
+	virtual Selection& get_cut_buffer () const = 0;
 
 	/** Set the mouse mode (gain, object, range, timefx etc.)
 	 * @param m Mouse mode (defined in editing_syms.h)
@@ -132,6 +170,72 @@ public:
 	virtual Gdk::Cursor* get_canvas_cursor () const = 0;
 	virtual MouseCursors const* cursors () const = 0;
 	virtual VerboseCursor* verbose_cursor () const = 0;
+
+	virtual void set_snapped_cursor_position (Temporal::timepos_t const & pos) = 0;
+
+	static sigc::signal<void> DropDownKeys;
+
+	PBD::Signal0<void> SnapChanged;
+	PBD::Signal0<void> MouseModeChanged;
+
+	/* MIDI actions, proxied to selected MidiRegionView(s) */
+	void midi_action (void (MidiRegionView::*method)());
+	virtual std::vector<MidiRegionView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const = 0;
+
+	void register_midi_actions (Gtkmm2ext::Bindings*);
+
+	Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
+
+	/* Cursor stuff.  Do not use directly, use via CursorContext. */
+	friend class CursorContext;
+	std::vector<Gdk::Cursor*> _cursor_stack;
+	virtual void set_canvas_cursor (Gdk::Cursor*) = 0;
+	virtual size_t push_canvas_cursor (Gdk::Cursor*) = 0;
+	virtual void pop_canvas_cursor () = 0;
+
+	Editing::GridType  pre_internal_grid_type;
+	Editing::SnapMode  pre_internal_snap_mode;
+	Editing::GridType  internal_grid_type;
+	Editing::SnapMode  internal_snap_mode;
+
+	std::vector<std::string> grid_type_strings;
+
+	Glib::RefPtr<Gtk::RadioAction> grid_type_action (Editing::GridType);
+	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
+
+	Glib::RefPtr<Gtk::RadioAction> draw_length_action (Editing::GridType);
+	Glib::RefPtr<Gtk::RadioAction> draw_velocity_action (int);
+	Glib::RefPtr<Gtk::RadioAction> draw_channel_action (int);
+
+	Editing::GridType _grid_type;
+	Editing::SnapMode _snap_mode;
+
+	Editing::GridType _draw_length;
+
+	int _draw_velocity;
+	int _draw_channel;
+
+	ArdourWidgets::ArdourDropdown grid_type_selector;
+	void build_grid_type_menu ();
+
+	ArdourWidgets::ArdourDropdown draw_length_selector;
+	ArdourWidgets::ArdourDropdown draw_velocity_selector;
+	ArdourWidgets::ArdourDropdown draw_channel_selector;
+	void build_draw_midi_menus ();
+
+	void grid_type_selection_done (Editing::GridType);
+	void snap_mode_selection_done (Editing::SnapMode);
+	void snap_mode_chosen (Editing::SnapMode);
+	void grid_type_chosen (Editing::GridType);
+
+	void draw_length_selection_done (Editing::GridType);
+	void draw_length_chosen (Editing::GridType);
+
+	void draw_velocity_selection_done (int);
+	void draw_velocity_chosen (int);
+
+	 void draw_channel_selection_done (int);
+	void draw_channel_chosen (int);
 };
 
 #endif /* __ardour_midi_editing_context_h__ */
