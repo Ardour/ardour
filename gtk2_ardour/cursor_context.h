@@ -23,7 +23,7 @@
 
 #include <gdkmm/cursor.h>
 
-class Editor;
+class EditingContext;
 
 /**
    A scoped handle for changing the editor mouse cursor.
@@ -53,7 +53,7 @@ public:
 	 * When the returned handle goes out of scope, the cursor will be reset to
 	 * the previous value.
 	 */
-	static Handle create(Editor& editor, Gdk::Cursor* cursor);
+	static Handle create(EditingContext&, Gdk::Cursor* cursor);
 
 	/** Change the editor cursor of an existing cursor context. */
 	void change(Gdk::Cursor* cursor);
@@ -63,13 +63,13 @@ public:
 	 * If the handle points to an existing context, it will first be reset
 	 * before the new context is created.
 	 */
-	static void set(Handle* handle, Editor& editor, Gdk::Cursor* cursor);
+	static void set(Handle* handle, EditingContext&, Gdk::Cursor* cursor);
 
 private:
-	Editor&      _editor;
+	EditingContext& editing_context;
 	size_t       _index;
 
-	CursorContext(Editor& editor, Gdk::Cursor* cursor);
+	CursorContext(EditingContext&, Gdk::Cursor* cursor);
 };
 
 #endif /* __ardour_gtk_cursor_context_h__ */

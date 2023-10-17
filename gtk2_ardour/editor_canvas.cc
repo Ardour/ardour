@@ -893,7 +893,7 @@ Editor::stop_canvas_autoscroll ()
 	autoscroll_cnt = 0;
 }
 
-Editor::EnterContext*
+EditingContext::EnterContext*
 Editor::get_enter_context(ItemType type)
 {
 	for (ssize_t i = _enter_stack.size() - 1; i >= 0; --i) {

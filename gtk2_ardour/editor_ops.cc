@@ -9422,34 +9422,6 @@ Editor::filter_to_unique_midi_region_views (RegionSelection const & ms) const
 	return views;
 }
 
-
-void
-Editor::midi_action (void (MidiRegionView::*method)())
-{
-	MidiRegionSelection ms = selection->midi_regions();
-
-	if (ms.empty()) {
-		return;
-	}
-
-	if (ms.size() > 1) {
-
-		vector<MidiRegionView*> views = filter_to_unique_midi_region_views (ms);
-
-		for (vector<MidiRegionView*>::iterator mrv = views.begin(); mrv != views.end(); ++mrv) {
-			((*mrv)->*method) ();
-		}
-
-	} else {
-
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(ms.front());
-
-		if (mrv) {
-			(mrv->*method)();
-		}
-	}
-}
-
 void
 Editor::add_region_marker ()
 {

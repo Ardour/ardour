@@ -62,7 +62,7 @@
 
 #include "axis_provider.h"
 #include "editing.h"
-#include "midi_editing_context.h"
+#include "editing_context.h"
 #include "selection.h"
 
 namespace Temporal {
@@ -124,7 +124,7 @@ using ARDOUR::samplecnt_t;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public ArdourWidgets::Tabbable,  public MidiEditingContext, public AxisViewProvider
+class PublicEditor : public ArdourWidgets::Tabbable,  public EditingContext, public AxisViewProvider
 {
 public:
 	PublicEditor (Gtk::Widget& content);
@@ -189,10 +189,8 @@ public:
 	virtual void transition_to_rolling (bool fwd) = 0;
 
 	virtual bool get_selection_extents (Temporal::timepos_t &start, Temporal::timepos_t &end) const = 0;
-	virtual Selection& get_cut_buffer () const = 0;
 
 	virtual void set_selection (std::list<Selectable*>, ARDOUR::SelectionOperation) = 0;
-	virtual void set_selected_midi_region_view (MidiRegionView&) = 0;
 
 	virtual std::shared_ptr<ARDOUR::Route> current_mixer_stripable () const = 0;
 
@@ -347,14 +345,10 @@ public:
 	virtual void split_region_at_points (std::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
-	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) = 0;
 	virtual Temporal::timecnt_t get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count, Temporal::timecnt_t const & duration) = 0;
 
 	virtual Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
 	virtual Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
-
-	virtual int draw_velocity () const = 0;
-	virtual int draw_channel () const = 0;
 
 	virtual void edit_notes (MidiRegionView*) = 0;
 
@@ -387,8 +381,6 @@ public:
 
 	virtual bool pending_locate_request() const = 0;
 
-	static sigc::signal<void> DropDownKeys;
-
 	struct RegionAction {
 		Glib::RefPtr<Gtk::Action> action;
 		Editing::RegionActionTarget target;
@@ -405,7 +397,6 @@ public:
 	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
 	Glib::RefPtr<Gtk::ActionGroup> editor_menu_actions;
 	Glib::RefPtr<Gtk::ActionGroup> _region_actions;
-	Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 
 	virtual bool canvas_scroll_event (GdkEventScroll* event, bool from_canvas) = 0;
 	virtual bool canvas_control_point_event (GdkEvent* event, ArdourCanvas::Item*, ControlPoint*) = 0;
@@ -469,13 +460,6 @@ public:
 	virtual void stop_canvas_autoscroll () = 0;
 	virtual bool autoscroll_active() const = 0;
 
-	virtual void begin_reversible_selection_op (std::string cmd_name) = 0;
-	virtual void commit_reversible_selection_op () = 0;
-	virtual void begin_reversible_command (std::string cmd_name) = 0;
-	virtual void begin_reversible_command (GQuark) = 0;
-	virtual void abort_reversible_command () = 0;
-	virtual void commit_reversible_command () = 0;
-
 	virtual Temporal::TempoMap::WritableSharedPtr begin_tempo_map_edit () = 0;
 	virtual void abort_tempo_map_edit () = 0;
 	void commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr& map, bool with_update = false) {
@@ -509,8 +493,6 @@ public:
 	                                    ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
 	                                    bool ensure_snap = false) = 0;
 	virtual Temporal::timepos_t snap_to_bbt (Temporal::timepos_t const & pos, Temporal::RoundMode, ARDOUR::SnapPref) = 0;
-
-	virtual void set_snapped_cursor_position (Temporal::timepos_t const & pos) = 0;
 
 	virtual void get_regions_at (RegionSelection &, Temporal::timepos_t const & where, TrackViewList const &) const = 0;
 	virtual void get_regions_after (RegionSelection&, Temporal::timepos_t const & where, const TrackViewList& ts) const = 0;
@@ -546,9 +528,6 @@ public:
 
 	friend bool ARDOUR_UI_UTILS::relay_key_press (GdkEventKey*, Gtk::Window*);
 	friend bool ARDOUR_UI_UTILS::forward_key_press (GdkEventKey*);
-
-	PBD::Signal0<void> SnapChanged;
-	PBD::Signal0<void> MouseModeChanged;
 
 	Gtkmm2ext::Bindings* bindings;
 
