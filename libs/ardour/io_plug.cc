@@ -495,9 +495,7 @@ IOPlug::connect_and_run (samplepos_t start, pframes_t n_samples)
 			}
 		}
 	}
-	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-		i->flush_buffers (n_samples);
-	}
+	_output->flush_buffers (n_samples);;
 
 	const samplecnt_t l = effective_latency ();
 	if (_plugin_signal_latency != l) {

@@ -251,6 +251,7 @@ Session::run_click (samplepos_t start, samplepos_t nframes)
 
 	_click_gain->run (bufs, 0, 0, 1.0, nframes, false);
 	_click_io->copy_to_outputs (bufs, DataType::AUDIO, nframes, 0);
+	_click_io->flush_buffers (nframes);
 }
 
 void

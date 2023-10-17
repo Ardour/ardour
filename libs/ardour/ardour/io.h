@@ -193,6 +193,7 @@ public:
 
 	void collect_input (BufferSet& bufs, pframes_t nframes, ChanCount offset);
 	void copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, samplecnt_t offset);
+	void flush_buffers (pframes_t nframes);
 
 	/* AudioTrack::deprecated_use_diskstream_connections() needs these */
 

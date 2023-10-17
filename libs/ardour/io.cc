@@ -1688,9 +1688,13 @@ IO::copy_to_outputs (BufferSet& bufs, DataType type, pframes_t nframes, samplecn
 		port_buffer.read_from (*prev, nframes, offset);
 		++o;
 	}
+}
 
+void
+IO::flush_buffers (pframes_t nframes)
+{
 	/* when port is both externally and internally connected,
-	 * make data directly available to downstream internal ports */
+	 * make data available to downstream internal ports */
 	for (auto const& p : _ports) {
 		p->flush_buffers (nframes);
 	}

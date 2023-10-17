@@ -534,15 +534,9 @@ void
 Delivery::flush_buffers (samplecnt_t nframes)
 {
 	/* io_lock, not taken: function must be called from Session::process() calltree */
-
-	if (!_output) {
+	if (_output) {
+		_output->flush_buffers (nframes);
 		return;
-	}
-
-	PortSet& ports (_output->ports());
-
-	for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-		i->flush_buffers (nframes);
 	}
 }
 
