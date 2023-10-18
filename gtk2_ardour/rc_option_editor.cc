@@ -3517,6 +3517,16 @@ These settings will only take effect after %1 is restarted.\n\
 		     -1, 65536, 1, 10
 		     ));
 
+	add_option (_("MIDI"), new OptionEditorHeading (_("Selection")));
+
+	add_option (_("MIDI"),
+	     new BoolOption (
+		     "select-last-drawn-note-only",
+		     _("When drawing new notes, select only the last drawn note"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_select_last_drawn_note_only),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_select_last_drawn_note_only)
+		     ));
+
 	add_option (_("MIDI"), new OptionEditorHeading (_("Audition")));
 
 	add_option (_("MIDI"),

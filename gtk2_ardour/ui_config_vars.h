@@ -64,6 +64,7 @@ UI_CONFIG_VARIABLE (ARDOUR::WaveformShape, waveform_shape, "waveform-shape", Tra
 UI_CONFIG_VARIABLE (bool, update_editor_during_summary_drag, "update-editor-during-summary-drag", true)
 UI_CONFIG_VARIABLE (bool, never_display_periodic_midi, "never-display-periodic-midi", true)
 UI_CONFIG_VARIABLE (bool, sound_midi_notes, "sound-midi-notes", true)
+UI_CONFIG_VARIABLE (bool, select_last_drawn_note_only, "select-last-drawn-note-only", true)
 UI_CONFIG_VARIABLE (bool, show_plugin_scan_window, "show-plugin-scan-window", false)
 UI_CONFIG_VARIABLE (bool, show_manager_if_plugins_are_missing, "show-manager-if-plugins-are-missing", true)
 UI_CONFIG_VARIABLE (bool, show_zoom_tools, "show-zoom-tools", true)

@@ -6872,6 +6872,9 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 	Beats       length = max (Beats (0, 1), (_note[0].distance (_note[1]).abs ().beats ()));
 
 	/* create_note_at() implements UNDO for us */
+	if (UIConfiguration::instance().get_select_last_drawn_note_only()) {
+		_region_view->clear_note_selection ();
+	}
 	_region_view->create_note_at (timepos_t (start), _drag_rect->y0 (), length, ev->button.state, false);
 }
 

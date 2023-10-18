@@ -332,6 +332,7 @@ public:
 	ARDOUR::InstrumentInfo& instrument_info() const;
 
 	void note_deleted (NoteBase*);
+	void clear_note_selection ();
 
 	void show_verbose_cursor_for_new_note_value(std::shared_ptr<NoteType> current_note, uint8_t new_note) const;
 
@@ -349,7 +350,6 @@ public:
   protected:
 	friend class Editor;
 
-	void clear_note_selection ();
 	void invert_note_selection ();
 	void extend_note_selection ();
 
