@@ -725,11 +725,12 @@ enum AppleNSGLViewMode {
  */
 struct RouteProcessorChange {
 	enum Type {
-		MeterPointChange = 0x1,
-		RealTimeChange   = 0x2,
-		GeneralChange    = 0x4,
-		SendReturnChange = 0x8,
-		CustomPinChange  = 0x10
+		NoProcessorChange = 0x0,
+		MeterPointChange  = 0x1,
+		RealTimeChange    = 0x2,
+		GeneralChange     = 0x4,
+		SendReturnChange  = 0x8,
+		CustomPinChange   = 0x10
 	};
 
 	RouteProcessorChange () : type (GeneralChange), meter_visibly_changed (true)

@@ -212,6 +212,22 @@ public:
 	bool add_slave (Vst::IEditController*, bool);
 	bool remove_slave (Vst::IEditController*);
 
+	class RouteProcessorChangeBlock
+	{
+		public:
+			RouteProcessorChangeBlock (VST3PI* p) : _impl (p)
+		{
+			_impl->block_notifications ();
+		}
+
+		~RouteProcessorChangeBlock ()
+		{
+			_impl->resume_notifications ();
+		}
+		private:
+			VST3PI* _impl;
+	};
+
 private:
 	/* prevent copy construction */
 	VST3PI (const VST3PI&);
@@ -245,6 +261,10 @@ private:
 	bool setup_psl_info_handler ();
 	void psl_subscribe_to (std::shared_ptr<ARDOUR::AutomationControl>, FIDString);
 	void psl_stripable_property_changed (PBD::PropertyChange const&);
+
+	void block_notifications ();
+	void resume_notifications ();
+	void send_processors_changed (ARDOUR::RouteProcessorChange const&);
 
 	void forward_signal (Presonus::IContextInfoHandler2*, FIDString) const;
 
@@ -332,6 +352,9 @@ private:
 	int _n_midi_inputs;
 	int _n_midi_outputs;
 	int _n_factory_presets;
+
+	mutable std::atomic<int>     _block_rpc;
+	ARDOUR::RouteProcessorChange _rpc_queue;
 
 	/* work around UADx plugin crash */
 	bool _no_kMono;

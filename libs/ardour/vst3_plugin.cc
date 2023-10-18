@@ -341,6 +341,8 @@ VST3Plugin::possible_output () const
 bool
 VST3Plugin::has_editor () const
 {
+	VST3PI::RouteProcessorChangeBlock rpcb (_plug);
+
 	std::shared_ptr<VST3PluginInfo> nfo = std::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
 	if (nfo->has_editor.has_value ()) {
 		return nfo->has_editor.value ();
@@ -1168,6 +1170,8 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 	, _owner (0)
 	, _add_to_selection (false)
 	, _n_factory_presets (0)
+	, _block_rpc (0)
+	, _rpc_queue (RouteProcessorChange::NoProcessorChange, false)
 	, _no_kMono (false)
 {
 	using namespace std;
@@ -1595,10 +1599,7 @@ VST3PI::restartComponent (int32 flags)
 				p.normal = pi.defaultNormalizedValue;
 			}
 		}
-		Route* r = dynamic_cast<Route*> (_owner);
-		if (r) {
-			r->processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
-		}
+		send_processors_changed (RouteProcessorChange ()); /* EMIT SIGNAL */
 	}
 	if (flags & Vst::kIoChanged) {
 		warning << "VST3: Vst::kIoChanged (not implemented)" << endmsg;
@@ -3220,4 +3221,39 @@ VST3PI::resizeView (IPlugView* view, ViewRect* new_size)
 {
 	OnResizeView (new_size->getWidth (), new_size->getHeight ()); /* EMIT SIGNAL */
 	return view->onSize (new_size);
+}
+
+void
+VST3PI::block_notifications ()
+{
+	_block_rpc.fetch_add (1);
+}
+
+void
+VST3PI::resume_notifications ()
+{
+	if (!PBD::atomic_dec_and_test (_block_rpc)) {
+		return;
+	}
+	Route* r = dynamic_cast<Route*> (_owner);
+	if (r && _rpc_queue.type != RouteProcessorChange::NoProcessorChange) {
+		r->processors_changed (_rpc_queue); /* EMIT SIGNAL */
+	}
+	_rpc_queue.type = RouteProcessorChange::NoProcessorChange;
+	_rpc_queue.meter_visibly_changed = false;
+}
+
+void
+VST3PI::send_processors_changed (RouteProcessorChange const& rpc)
+{
+	if (_block_rpc.load () != 0) {
+		_rpc_queue.type = ARDOUR::RouteProcessorChange::Type (_rpc_queue.type | rpc.type);
+		_rpc_queue.meter_visibly_changed |= rpc.meter_visibly_changed;
+		return;
+	}
+
+	Route* r = dynamic_cast<Route*> (_owner);
+	if (r) {
+		r->processors_changed (rpc); /* EMIT SIGNAL */
+	}
 }
