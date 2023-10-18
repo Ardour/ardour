@@ -28,7 +28,7 @@
 
 class AutomationLine;
 class RouteTimeAxisView;
-class Editor;
+class EditingContext;
 
 namespace ARDOUR {
 	class Session;
@@ -50,7 +50,7 @@ class MergeableLine
 
 	virtual ~MergeableLine() {}
 
-	void merge_drawn_line (Editor& e, ARDOUR::Session& s, Evoral::ControlList::OrderedPoints& points, bool thin);
+	void merge_drawn_line (EditingContext& e, ARDOUR::Session& s, Evoral::ControlList::OrderedPoints& points, bool thin);
 
   private:
 	std::shared_ptr<AutomationLine> _line;

@@ -600,18 +600,6 @@ Editor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
 }
 
 bool
-Editor::drag_active () const
-{
-	return _drags->active();
-}
-
-bool
-Editor::preview_video_drag_active () const
-{
-	return _drags->preview_video ();
-}
-
-bool
 Editor::autoscroll_active () const
 {
 	return autoscroll_connection.connected ();

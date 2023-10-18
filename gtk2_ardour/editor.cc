@@ -338,7 +338,6 @@ Editor::Editor ()
 	, have_pending_keyboard_selection (false)
 	, pending_keyboard_selection_start (0)
 	, ignore_gui_changes (false)
-	, _drags (new DragManager (this))
 	, lock_dialog (0)
 	, last_event_time { 0, 0 }
 	, _dragging_playhead (false)
@@ -380,7 +379,6 @@ Editor::Editor ()
 	, transport_preroll_rect (0)
 	, transport_postroll_rect (0)
 	, temp_location (0)
-	, rubberband_rect (0)
 	, _route_groups (0)
 	, _routes (0)
 	, _regions (0)
@@ -3478,8 +3476,8 @@ Editor::begin_selection_op_history ()
 }
 
 void
-Editor::begin_reversible_selection_op (string name)
-{
+Editor::begin_reversible_selection_op (string name){
+
 	if (_session) {
 		//cerr << name << endl;
 		/* begin/commit pairs can be nested */

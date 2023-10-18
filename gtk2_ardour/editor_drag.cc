@@ -96,8 +96,8 @@ using Gtkmm2ext::Keyboard;
 
 double ControlPointDrag::_zero_gain_fraction = -1.0;
 
-DragManager::DragManager (Editor* e)
-	: _editor (e)
+DragManager::DragManager (EditingContext* ec)
+	: _editing_context (ec)
 	, _ending (false)
 	, _current_pointer_x (0.0)
 	, _current_pointer_y (0.0)
@@ -117,17 +117,17 @@ DragManager::abort ()
 {
 	_ending = true;
 
-	for (list<Drag*>::const_iterator i = _drags.begin (); i != _drags.end (); ++i) {
-		(*i)->abort ();
-		delete *i;
+	for (auto const & drag: _drags) {
+		drag->abort ();
+		delete drag;
 	}
 
 	if (!_drags.empty ()) {
-		_editor->set_follow_playhead (_old_follow_playhead, false);
+		_editing_context->set_follow_playhead (_old_follow_playhead, false);
 	}
 
 	_drags.clear ();
-	_editor->abort_reversible_command ();
+	_editing_context->abort_reversible_command ();
 
 	_ending = false;
 }
@@ -150,8 +150,8 @@ DragManager::set (Drag* d, GdkEvent* e, Gdk::Cursor* c)
 bool
 DragManager::preview_video () const
 {
-	for (list<Drag*>::const_iterator i = _drags.begin (); i != _drags.end (); ++i) {
-		if ((*i)->preview_video ()) {
+	for (auto const & drag : _drags) {
+		if (drag->preview_video ()) {
 			return true;
 		}
 	}
@@ -177,14 +177,14 @@ void
 DragManager::start_grab (GdkEvent* e, Gdk::Cursor* c)
 {
 	/* Prevent follow playhead during the drag to be nice to the user */
-	_old_follow_playhead = _editor->follow_playhead ();
-	_editor->set_follow_playhead (false);
+	_old_follow_playhead = _editing_context->follow_playhead ();
+	_editing_context->set_follow_playhead (false);
 
-	_current_pointer_time = timepos_t (_editor->canvas_event_sample (e, &_current_pointer_x, &_current_pointer_y));
+	_current_pointer_time = timepos_t (_editing_context->canvas_event_sample (e, &_current_pointer_x, &_current_pointer_y));
 
-	for (list<Drag*>::const_iterator i = _drags.begin (); i != _drags.end (); ++i) {
-		if ((*i)->grab_button () < 0) {
-			(*i)->start_grab (e, c);
+	for (auto const & drag : _drags) {
+		if (drag->grab_button () < 0) {
+			drag->start_grab (e, c);
 		}
 	}
 }
@@ -219,7 +219,7 @@ DragManager::end_grab (GdkEvent* e)
 	_ending = false;
 
 	if (_drags.empty ()) {
-		_editor->set_follow_playhead (_old_follow_playhead, false);
+		_editing_context->set_follow_playhead (_old_follow_playhead, false);
 	}
 
 	return r;
@@ -228,8 +228,8 @@ DragManager::end_grab (GdkEvent* e)
 void
 DragManager::mark_double_click ()
 {
-	for (list<Drag*>::const_iterator i = _drags.begin (); i != _drags.end (); ++i) {
-		(*i)->set_double_click (true);
+	for (auto const & drag : _drags) {
+		drag->set_double_click (true);
 	}
 }
 
@@ -244,10 +244,10 @@ DragManager::motion_handler (GdkEvent* e, bool from_autoscroll)
 	 * Can we guarantee that this is true?
 	 */
 
-	_current_pointer_time = timepos_t (_editor->canvas_event_sample (e, &_current_pointer_x, &_current_pointer_y));
+	_current_pointer_time = timepos_t (_editing_context->canvas_event_sample (e, &_current_pointer_x, &_current_pointer_y));
 
-	for (list<Drag*>::iterator i = _drags.begin (); i != _drags.end (); ++i) {
-		bool const t = (*i)->motion_handler (e, from_autoscroll);
+	for (auto & drag : _drags) {
+		bool const t = drag->motion_handler (e, from_autoscroll);
 		/* run all handlers; return true if at least one of them
 		   returns true (indicating that the event has been handled).
 		*/
@@ -270,8 +270,8 @@ DragManager::have_item (ArdourCanvas::Item* i) const
 	return j != _drags.end ();
 }
 
-Drag::Drag (Editor* e, ArdourCanvas::Item* i, Temporal::TimeDomain td, bool trackview_only, bool hide_snapped_cursor)
-	: _editor (e)
+Drag::Drag (EditingContext& ec, ArdourCanvas::Item* i, Temporal::TimeDomain td, bool trackview_only, bool hide_snapped_cursor)
+	: editing_context (ec)
 	, _drags (0)
 	, _item (i)
 	, _pointer_offset (0)
@@ -313,7 +313,7 @@ Drag::set_time_domain (Temporal::TimeDomain td)
 timepos_t
 Drag::pixel_to_time (double x) const
 {
-	samplepos_t p = _editor->pixel_to_sample (x);
+	samplepos_t p = editing_context.pixel_to_sample (x);
 
 	if (_time_domain == Temporal::AudioTime) {
 		return timepos_t (p);
@@ -329,7 +329,7 @@ Drag::swap_grab (ArdourCanvas::Item* new_item, Gdk::Cursor* cursor, uint32_t /*t
 	_item = new_item;
 
 	if (!_cursor_ctx) {
-		_cursor_ctx = CursorContext::create (*_editor, cursor);
+		_cursor_ctx = CursorContext::create (editing_context, cursor);
 	} else {
 		_cursor_ctx->change (cursor);
 	}
@@ -349,7 +349,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	/* we set up x/y dragging constraints on first move */
 	_constraint_pressed = ArdourKeyboard::indicates_constraint (event->button.state);
 
-	const samplepos_t pos = _editor->canvas_event_sample (event, &_grab_x, &_grab_y);
+	const samplepos_t pos = editing_context.canvas_event_sample (event, &_grab_x, &_grab_y);
 
 	if (_time_domain == Temporal::AudioTime) {
 		_raw_grab_time = timepos_t (pos);
@@ -365,7 +365,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		_preview_video = false;
 	}
 	if (_hide_snapped_cursor) {
-		_editor->snapped_cursor ()->hide ();
+		editing_context.snapped_cursor ()->hide ();
 	}
 
 	_grab_time         = adjusted_time (_raw_grab_time, event);
@@ -373,19 +373,22 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_last_pointer_x    = _grab_x;
 
 	if (_trackview_only) {
-		_grab_y = _grab_y - _editor->get_trackview_group ()->canvas_origin ().y;
+		Editor* editor = dynamic_cast<Editor*> (&editing_context);
+		if (editor) {
+			_grab_y = _grab_y - editor->get_trackview_group ()->canvas_origin ().y;
+		}
 	}
 
 	_last_pointer_y = _grab_y;
 
 	_item->grab ();
 
-	if (!_editor->cursors ()->is_invalid (cursor)) {
+	if (!editing_context.cursors ()->is_invalid (cursor)) {
 		/* CAIROCANVAS need a variant here that passes *cursor */
-		_cursor_ctx = CursorContext::create (*_editor, cursor);
+		_cursor_ctx = CursorContext::create (editing_context, cursor);
 	}
 
-	if (_editor->session () && _editor->session ()->transport_rolling ()) {
+	if (editing_context.session () && editing_context.session ()->transport_rolling ()) {
 		_was_rolling = true;
 	} else {
 		_was_rolling = false;
@@ -407,13 +410,13 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 bool
 Drag::end_grab (GdkEvent* event)
 {
-	_editor->stop_canvas_autoscroll ();
+	editing_context.stop_canvas_autoscroll ();
 
 	_item->ungrab ();
 
 	finished (event, _starting_point_passed);
 
-	_editor->verbose_cursor ()->hide ();
+	editing_context.verbose_cursor ()->hide ();
 	_cursor_ctx.reset ();
 
 	return _starting_point_passed;
@@ -430,7 +433,7 @@ Drag::adjusted_time (timepos_t const& f, GdkEvent const* event, bool snap) const
 	}
 
 	if (snap) {
-		_editor->snap_to_with_modifier (pos, event);
+		editing_context.snap_to_with_modifier (pos, event);
 	}
 
 	pos.set_time_domain (_time_domain);
@@ -450,7 +453,7 @@ Drag::snap_delta (guint state) const
 		return _snap_delta;
 	}
 
-	return timecnt_t (_editor->default_time_domain ());
+	return timecnt_t (editing_context.time_domain ());
 }
 
 double
@@ -466,14 +469,17 @@ Drag::current_pointer_y () const
 		return _drags->current_pointer_y ();
 	}
 
-	return _drags->current_pointer_y () - _editor->get_trackview_group ()->canvas_origin ().y;
+	Editor* editor = dynamic_cast<Editor*>(&editing_context);
+	assert (editor);
+
+	return _drags->current_pointer_y () - editor->get_trackview_group ()->canvas_origin ().y;
 }
 
 void
 Drag::setup_snap_delta (timepos_t const& pos)
 {
 	timepos_t snap (pos);
-	_editor->snap_to (snap, Temporal::RoundNearest, ARDOUR::SnapToAny_Visual, true);
+	editing_context.snap_to (snap, Temporal::RoundNearest, ARDOUR::SnapToAny_Visual, true);
 	_snap_delta = pos.distance (snap);
 }
 
@@ -498,7 +504,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 		_move_threshold_passed = ((xp && x_movement_matters ()) || (yp && y_movement_matters ()));
 	}
 
-	if (active (_editor->mouse_mode) && _move_threshold_passed) {
+	if (active (editing_context.current_mouse_mode()) && _move_threshold_passed) {
 		if (event->motion.state & Gdk::BUTTON1_MASK || event->motion.state & Gdk::BUTTON2_MASK) {
 			if (old_move_threshold_passed != _move_threshold_passed) {
 				/* just changed */
@@ -544,10 +550,10 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 			}
 
 			if (!from_autoscroll) {
-				_editor->maybe_autoscroll (allow_horizontal_autoscroll (), allow_vertical_autoscroll (), false);
+				editing_context.maybe_autoscroll (allow_horizontal_autoscroll (), allow_vertical_autoscroll (), false);
 			}
 
-			if (!_editor->autoscroll_active () || from_autoscroll) {
+			if (!editing_context.autoscroll_active () || from_autoscroll) {
 				bool first_move = (_move_threshold_passed != old_move_threshold_passed) || from_autoscroll;
 
 				motion (event, first_move && !_starting_point_passed);
@@ -578,29 +584,29 @@ Drag::abort ()
 
 	aborted (_move_threshold_passed);
 
-	_editor->stop_canvas_autoscroll ();
-	_editor->verbose_cursor ()->hide ();
+	editing_context.stop_canvas_autoscroll ();
+	editing_context.verbose_cursor ()->hide ();
 }
 
 void
 Drag::show_verbose_cursor_time (timepos_t const& pos)
 {
-	_editor->verbose_cursor ()->set_time (pos.samples ());
-	_editor->verbose_cursor ()->show ();
+	editing_context.verbose_cursor ()->set_time (pos.samples ());
+	editing_context.verbose_cursor ()->show ();
 }
 
 void
 Drag::show_verbose_cursor_duration (timepos_t const& start, timepos_t const& end, double /*xoffset*/)
 {
-	_editor->verbose_cursor ()->set_duration (start.samples (), end.samples ());
-	_editor->verbose_cursor ()->show ();
+	editing_context.verbose_cursor ()->set_duration (start.samples (), end.samples ());
+	editing_context.verbose_cursor ()->show ();
 }
 
 void
 Drag::show_verbose_cursor_text (string const& text)
 {
-	_editor->verbose_cursor ()->set (text);
-	_editor->verbose_cursor ()->show ();
+	editing_context.verbose_cursor ()->set (text);
+	editing_context.verbose_cursor ()->show ();
 }
 
 void
@@ -614,13 +620,19 @@ Drag::show_view_preview (timepos_t const& pos)
 std::shared_ptr<Region>
 Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
 {
-	if (_editor->session ()) {
+	if (editing_context.session ()) {
 		const timepos_t pos (grab_time ().beats ());
 		const timecnt_t len = pos.distance (max (timepos_t::zero (Temporal::BeatTime), timepos_t (pos.beats () + Beats (1, 0))));
 		return view->add_region (pos, len, commit);
 	}
 
 	return std::shared_ptr<Region> ();
+}
+
+EditorDrag::EditorDrag (Editor& e, ArdourCanvas::Item *i, Temporal::TimeDomain td, bool trackview_only, bool hide_snapped_cursor)
+	: Drag (e, i, td, trackview_only, hide_snapped_cursor)
+	, _editor (e)
+{
 }
 
 struct TimeAxisViewStripableSorter {
@@ -632,18 +644,18 @@ struct TimeAxisViewStripableSorter {
 	}
 };
 
-RegionDrag::RegionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, Temporal::TimeDomain td, bool hide_snapped_cursor)
-	: Drag (e, i, td, true, hide_snapped_cursor)
+RegionDrag::RegionDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, Temporal::TimeDomain td, bool hide_snapped_cursor)
+	: EditorDrag (e, i, td, true, hide_snapped_cursor)
 	, _primary (p)
 	, _ntracks (0)
 {
-	_editor->visible_order_range (&_visible_y_low, &_visible_y_high);
+	_editor.visible_order_range (&_visible_y_low, &_visible_y_high);
 
 	/* Make a list of tracks to refer to during the drag; we include hidden tracks,
 	   as some of the regions we are dragging may be on such tracks.
 	*/
 
-	TrackViewList track_views = _editor->track_views;
+	TrackViewList track_views = _editor.track_views;
 	track_views.sort (TimeAxisViewStripableSorter ());
 
 	for (TrackViewList::iterator i = track_views.begin (); i != track_views.end (); ++i) {
@@ -719,14 +731,14 @@ RegionDrag::add_stateful_diff_commands_for_playlists (PlaylistSet const& playlis
 	for (PlaylistSet::const_iterator i = playlists.begin (); i != playlists.end (); ++i) {
 		StatefulDiffCommand* c = new StatefulDiffCommand (*i);
 		if (!c->empty ()) {
-			_editor->session ()->add_command (c);
+			editing_context.session ()->add_command (c);
 		} else {
 			delete c;
 		}
 	}
 }
 
-RegionSlipContentsDrag::RegionSlipContentsDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, TimeDomain td)
+RegionSlipContentsDrag::RegionSlipContentsDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, TimeDomain td)
 	: RegionDrag (e, i, p, v, td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionSlipContentsDrag\n");
@@ -735,7 +747,7 @@ RegionSlipContentsDrag::RegionSlipContentsDrag (Editor* e, ArdourCanvas::Item* i
 void
 RegionSlipContentsDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
-	Drag::start_grab (event, _editor->cursors ()->trimmer);
+	Drag::start_grab (event, editing_context.cursors ()->trimmer);
 }
 
 void
@@ -743,7 +755,7 @@ RegionSlipContentsDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
 		/*prepare reversible cmd*/
-		_editor->begin_reversible_command (_("Slip Contents"));
+		editing_context.begin_reversible_command (_("Slip Contents"));
 		for (list<DraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {
 			RegionView* rv = i->view;
 			rv->region ()->clear_changes ();
@@ -768,11 +780,11 @@ RegionSlipContentsDrag::finished (GdkEvent*, bool movement_occurred)
 		/*finish reversible cmd*/
 		for (list<DraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {
 			RegionView* rv = i->view;
-			_editor->session ()->add_command (new StatefulDiffCommand (rv->region ()));
+			editing_context.session ()->add_command (new StatefulDiffCommand (rv->region ()));
 
 			rv->drag_end ();
 		}
-		_editor->commit_reversible_command ();
+		editing_context.commit_reversible_command ();
 	}
 }
 
@@ -780,10 +792,10 @@ void
 RegionSlipContentsDrag::aborted (bool movement_occurred)
 {
 	/* ToDo: revert to the original region properties */
-	_editor->abort_reversible_command ();
+	editing_context.abort_reversible_command ();
 }
 
-RegionBrushDrag::RegionBrushDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, TimeDomain td)
+RegionBrushDrag::RegionBrushDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, TimeDomain td)
 	: RegionDrag (e, i, p, v, td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionBrushDrag\n");
@@ -793,20 +805,20 @@ RegionBrushDrag::RegionBrushDrag (Editor* e, ArdourCanvas::Item* i, RegionView* 
 void
 RegionBrushDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
-	Drag::start_grab (event, _editor->cursors ()->trimmer);
+	Drag::start_grab (event, editing_context.cursors ()->trimmer);
 }
 
 void
 RegionBrushDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
-		_editor->begin_reversible_command (_("Region brush drag"));
+		editing_context.begin_reversible_command (_("Region brush drag"));
 		_already_pasted.insert (_primary->region ()->position ());
 	} else {
 		timepos_t snapped (adjusted_current_time (event, false));
-		_editor->snap_to (snapped, RoundDownAlways, SnapToGrid_Scaled, false);
+		editing_context.snap_to (snapped, RoundDownAlways, SnapToGrid_Scaled, false);
 		if (_already_pasted.find (snapped) == _already_pasted.end ()) {
-			_editor->mouse_brush_insert_region (_primary, snapped);
+			_editor.mouse_brush_insert_region (_primary, snapped);
 			_already_pasted.insert (snapped);
 		}
 	}
@@ -822,7 +834,7 @@ RegionBrushDrag::finished (GdkEvent*, bool movement_occurred)
 	PlaylistSet modified_playlists;
 	modified_playlists.insert (_primary->region ()->playlist ());
 	add_stateful_diff_commands_for_playlists (modified_playlists);
-	_editor->commit_reversible_command ();
+	editing_context.commit_reversible_command ();
 	_already_pasted.clear ();
 }
 
@@ -832,10 +844,10 @@ RegionBrushDrag::aborted (bool movement_occurred)
 	_already_pasted.clear ();
 
 	/* ToDo: revert to the original playlist properties */
-	_editor->abort_reversible_command ();
+	editing_context.abort_reversible_command ();
 }
 
-RegionMotionDrag::RegionMotionDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, TimeDomain td)
+RegionMotionDrag::RegionMotionDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, TimeDomain td)
 	: RegionDrag (e, i, p, v, td, false)
 	, _ignore_video_lock (false)
 	, _total_x_delta (0)
@@ -861,11 +873,11 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	 * here, and at this point they are not attached to a playlist.
 	 */
 
-	if (_editor->should_ripple () && _primary && _primary->region () && _primary->region ()->playlist ()) {
+	if (_editor.should_ripple () && _primary && _primary->region () && _primary->region ()->playlist ()) {
 		_earliest_time_limit = _primary->region ()->playlist ()->find_prev_region_start (_primary->region ()->position ());
 	}
 
-	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (current_pointer_y ());
+	pair<TimeAxisView*, double> const tv = _editor.trackview_by_y_position (current_pointer_y ());
 	if (tv.first) {
 		_last_pointer_time_axis_view = find_time_axis_view (tv.first);
 		assert (_last_pointer_time_axis_view >= 0);
@@ -876,7 +888,7 @@ RegionMotionDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		_ignore_video_lock = true;
 	}
 
-	if (_editor->should_ripple ()) {
+	if (_editor.should_ripple ()) {
 		/* we do not drag across tracks when rippling or brushing */
 		_y_constrained = true;
 	}
@@ -910,7 +922,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const* event, Temporal::timepos_t& p
 		} else {
 			sync_snap = pending_region_position.earlier (sync_offset) + sd;
 		}
-		_editor->snap_to_with_modifier (sync_snap, event);
+		editing_context.snap_to_with_modifier (sync_snap, event);
 		if (sync_offset.is_zero () && sd.is_zero ()) {
 			pending_region_position = sync_snap;
 		} else {
@@ -935,7 +947,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const* event, Temporal::timepos_t& p
 
 	if ((pending_region_position != _last_position) && x_move_allowed) {
 		/* x movement since last time (in pixels) */
-		dx = _editor->duration_to_pixels_unrounded (_last_position.distance (pending_region_position));
+		dx = editing_context.duration_to_pixels_unrounded (_last_position.distance (pending_region_position));
 
 		/* total x movement */
 		timecnt_t total_dx = timecnt_t (pixel_to_time (_total_x_delta + dx), grab_time ());
@@ -943,14 +955,14 @@ RegionMotionDrag::compute_x_delta (GdkEvent const* event, Temporal::timepos_t& p
 		for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
 			const timepos_t off = i->view->region ()->position () + total_dx;
 			if (off.is_negative ()) {
-				dx -= _editor->time_to_pixel_unrounded (off);
+				dx -= editing_context.time_to_pixel_unrounded (off);
 				pending_region_position = pending_region_position.earlier (timecnt_t (off, timepos_t (time_domain ())));
 				break;
 			}
 		}
 	}
 
-	_editor->set_snapped_cursor_position (pending_region_position);
+	editing_context.set_snapped_cursor_position (pending_region_position);
 
 	return dx;
 }
@@ -1059,26 +1071,26 @@ RegionMotionDrag::collect_ripple_views ()
 	TrackViewList   tracklist;
 
 	/* find all regions that we *might* ripple */
-	_editor->get_regionviews_at_or_after (_primary->region ()->position (), copy);
+	_editor.get_regionviews_at_or_after (_primary->region ()->position (), copy);
 
 	/* if we aren't in ripple-all, find which tracks we will be rippling, based on the current region selection */
-	if (!_editor->should_ripple_all ()) {
-		for (RegionSelection::iterator r = _editor->selection->regions.begin (); r != _editor->selection->regions.end (); ++r) {
+	if (!_editor.should_ripple_all ()) {
+		for (RegionSelection::iterator r = editing_context.get_selection().regions.begin (); r != editing_context.get_selection().regions.end (); ++r) {
 			tracklist.push_back (&(*r)->get_time_axis_view ());
 		}
 	}
 
 	for (RegionSelection::reverse_iterator i = copy.rbegin (); i != copy.rend (); ++i) {
 		TimeAxisView* tav = &(*i)->get_time_axis_view ();
-		if (_editor->should_ripple_all () || tracklist.contains (tav)) {
-			if (!_editor->selection->regions.contains (*i)) {
+		if (_editor.should_ripple_all () || tracklist.contains (tav)) {
+			if (!editing_context.get_selection().regions.contains (*i)) {
 				_views.push_back (DraggingView (*i, this, &(*i)->get_time_axis_view ()));
 			}
 		}
 	}
 
-	if (_editor->should_ripple_all ()) {
-		_editor->get_markers_to_ripple (_primary->region ()->playlist (), _primary->region ()->position (), ripple_markers);
+	if (_editor.should_ripple_all ()) {
+		_editor.get_markers_to_ripple (_primary->region ()->playlist (), _primary->region ()->position (), ripple_markers);
 	}
 }
 
@@ -1095,7 +1107,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 
 	/* Find the TimeAxisView that the pointer is now over */
 	const double                      cur_y = current_pointer_y ();
-	pair<TimeAxisView*, double> const r     = _editor->trackview_by_y_position (cur_y);
+	pair<TimeAxisView*, double> const r     = _editor.trackview_by_y_position (cur_y);
 	TimeAxisView*                     tv    = r.first;
 
 	if (!tv && cur_y < 0) {
@@ -1197,7 +1209,7 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 		/* move around inside the zone.
 		 * This allows to move further down until all regions are in the zone.
 		 */
-		const double ptr_y = cur_y + _editor->get_trackview_group ()->canvas_origin ().y;
+		const double ptr_y = cur_y + _editor.get_trackview_group ()->canvas_origin ().y;
 		assert (ptr_y >= last_track_bottom_edge);
 		assert (_ddropzone > 0);
 
@@ -1328,9 +1340,9 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 			ArdourCanvas::Item* rvg = rv->get_canvas_group ();
 
 			Duple rv_canvas_offset  = rvg->parent ()->canvas_origin ();
-			Duple dmg_canvas_offset = _editor->_drag_motion_group->canvas_origin ();
+			Duple dmg_canvas_offset = _editor._drag_motion_group->canvas_origin ();
 
-			rv->get_canvas_group ()->reparent (_editor->_drag_motion_group);
+			rv->get_canvas_group ()->reparent (_editor._drag_motion_group);
 			/* move the item so that it continues to appear at the
 			   same location now that its parent has changed.
 			   */
@@ -1543,15 +1555,15 @@ RegionMotionDrag::motion (GdkEvent* event, bool first_move)
 void
 RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (first_move && _editor->should_ripple () && !_copy) {
+	if (first_move && _editor.should_ripple () && !_copy) {
 		collect_ripple_views ();
 	}
 
 	if (_copy && first_move) {
 		if (_x_constrained) {
-			_editor->begin_reversible_command (Operations::fixed_time_region_copy);
+			editing_context.begin_reversible_command (Operations::fixed_time_region_copy);
 		} else {
-			_editor->begin_reversible_command (Operations::region_copy);
+			editing_context.begin_reversible_command (Operations::region_copy);
 		}
 
 		/* duplicate the regionview(s) and region(s) */
@@ -1613,9 +1625,9 @@ RegionMoveDrag::motion (GdkEvent* event, bool first_move)
 
 	} else if (!_copy && first_move) {
 		if (_x_constrained) {
-			_editor->begin_reversible_command (_("fixed time region drag"));
+			editing_context.begin_reversible_command (_("fixed time region drag"));
 		} else {
-			_editor->begin_reversible_command (Operations::region_drag);
+			editing_context.begin_reversible_command (Operations::region_drag);
 		}
 	}
 	RegionMotionDrag::motion (event, first_move);
@@ -1645,7 +1657,7 @@ RegionMoveDrag::finished (GdkEvent* ev, bool movement_occurred)
 
 		if (was_double_click () && !_views.empty ()) {
 			DraggingView dv = _views.front ();
-			_editor->edit_region (dv.view);
+			_editor.edit_region (dv.view);
 		}
 
 		return;
@@ -1714,21 +1726,21 @@ RegionMoveDrag::create_destination_time_axis (std::shared_ptr<Region> region, Ti
 		if (std::dynamic_pointer_cast<AudioRegion> (region)) {
 			list<std::shared_ptr<AudioTrack>> audio_tracks;
 			uint32_t                          output_chan = region->sources ().size ();
-			if ((Config->get_output_auto_connect () & AutoConnectMaster) && _editor->session ()->master_out ()) {
-				output_chan = _editor->session ()->master_out ()->n_inputs ().n_audio ();
+			if ((Config->get_output_auto_connect () & AutoConnectMaster) && editing_context.session ()->master_out ()) {
+				output_chan = editing_context.session ()->master_out ()->n_inputs ().n_audio ();
 			}
-			audio_tracks = _editor->session ()->new_audio_track (region->sources ().size (), output_chan, 0, 1,
+			audio_tracks = editing_context.session ()->new_audio_track (region->sources ().size (), output_chan, 0, 1,
 			                                                     region->name (), PresentationInfo::max_order);
-			tav          = _editor->time_axis_view_from_stripable (audio_tracks.front ());
+			tav          = _editor.time_axis_view_from_stripable (audio_tracks.front ());
 		} else {
 			ChanCount                        one_midi_port (DataType::MIDI, 1);
 			list<std::shared_ptr<MidiTrack>> midi_tracks;
-			midi_tracks = _editor->session ()->new_midi_track (one_midi_port, one_midi_port,
+			midi_tracks = editing_context.session ()->new_midi_track (one_midi_port, one_midi_port,
 			                                                   Config->get_strict_io () || Profile->get_mixbus (),
 			                                                   std::shared_ptr<ARDOUR::PluginInfo> (),
 			                                                   (ARDOUR::Plugin::PresetRecord*)0,
 			                                                   (ARDOUR::RouteGroup*)0, 1, region->name (), PresentationInfo::max_order, Normal, true);
-			tav         = _editor->time_axis_view_from_stripable (midi_tracks.front ());
+			tav         = _editor.time_axis_view_from_stripable (midi_tracks.front ());
 		}
 
 		if (tav) {
@@ -1766,7 +1778,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	/*x_contrained on the same track: this will just make a duplicate region in the same place: abort the operation */
 	if (_x_constrained && !changed_tracks) {
 		clear_draggingview_list ();
-		_editor->abort_reversible_command ();
+		editing_context.abort_reversible_command ();
 		return;
 	}
 
@@ -1851,15 +1863,15 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	clear_draggingview_list ();
 
 	for (PlaylistSet::iterator p = modified_playlists.begin (); p != modified_playlists.end (); ++p) {
-		if (_editor->should_ripple ()) {
+		if (_editor.should_ripple ()) {
 			(*p)->ripple (extent_min, extent_min.distance (extent_max), &ripple_exclude);
 		}
-		(*p)->rdiff_and_add_command (_editor->session ());
+		(*p)->rdiff_and_add_command (editing_context.session ());
 	}
 
 	/* Ripple marks & ranges if appropriate */
 
-	if (_editor->should_ripple_all ()) {
+	if (_editor.should_ripple_all () && _primary->region ()->playlist ()) {
 		_editor->ripple_marks (primary_playlist, extent_min, extent_min.distance (extent_max));
 	}
 
@@ -1868,10 +1880,10 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	*/
 
 	if (new_views.size () > 0) {
-		_editor->selection->set (new_views);
+		editing_context.get_selection().set (new_views);
 	}
 
-	_editor->commit_reversible_command ();
+	editing_context.commit_reversible_command ();
 }
 
 void
@@ -2025,7 +2037,7 @@ RegionMoveDrag::finished_no_copy (
 
 			rv->region ()->set_position (where);
 
-			_editor->session ()->add_command (new StatefulDiffCommand (rv->region ()));
+			editing_context.session ()->add_command (new StatefulDiffCommand (rv->region ()));
 		}
 
 		// ripple_exclude.push_back (i->view->region());
@@ -2063,8 +2075,8 @@ RegionMoveDrag::finished_no_copy (
 		(*p)->thaw ();
 	}
 
-	if (_editor->should_ripple_all ()) {
-		_editor->ripple_marks (_primary->region ()->playlist (), extent_min, -drag_delta);
+	if (_editor.should_ripple_all ()) {
+		_editor.ripple_marks (_primary->region ()->playlist (), extent_min, -drag_delta);
 	}
 
 	/* If we've created new regions either by copying or moving
@@ -2072,13 +2084,13 @@ RegionMoveDrag::finished_no_copy (
 	*/
 
 	if (new_views.size () > 0) {
-		_editor->selection->set (new_views);
+		editing_context.get_selection().set (new_views);
 	}
 
 	/* write commands for the accumulated diffs for all our modified playlists */
 	add_stateful_diff_commands_for_playlists (modified_playlists);
 
-	_editor->commit_reversible_command ();
+	editing_context.commit_reversible_command ();
 
 	/* We have futzed with the layering of canvas items on our streamviews.
 	   If any region changed layer, this will have resulted in the stream
@@ -2213,7 +2225,7 @@ RegionMotionDrag::aborted (bool)
 /** @param b true to brush, otherwise false.
  *  @param c true to make copies of the regions being moved, otherwise false.
  */
-RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, bool c, TimeDomain td)
+RegionMoveDrag::RegionMoveDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, bool c, TimeDomain td)
 	: RegionMotionDrag (e, i, p, v, td)
 	, _copy (c)
 	, _new_region_view (0)
@@ -2229,7 +2241,7 @@ RegionMoveDrag::setup_pointer_offset ()
 	_pointer_offset = _last_position.distance (raw_grab_time ());
 }
 
-RegionInsertDrag::RegionInsertDrag (Editor* e, std::shared_ptr<Region> r, RouteTimeAxisView* v, timepos_t const& pos, Temporal::TimeDomain td)
+RegionInsertDrag::RegionInsertDrag (Editor& e, std::shared_ptr<Region> r, RouteTimeAxisView* v, timepos_t const& pos, Temporal::TimeDomain td)
 	: RegionMotionDrag (e, 0, 0, list<RegionView*> (), td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionInsertDrag\n");
@@ -2261,20 +2273,20 @@ RegionInsertDrag::finished (GdkEvent* event, bool)
 
 	std::shared_ptr<Playlist> playlist = dest_rtv->playlist ();
 
-	_editor->begin_reversible_command (Operations::insert_region);
+	editing_context.begin_reversible_command (Operations::insert_region);
 	playlist->clear_changes ();
 	playlist->clear_owned_changes ();
-	_editor->snap_to_with_modifier (_last_position, event);
+	editing_context.snap_to_with_modifier (_last_position, event);
 
 	playlist->add_region (_primary->region (), _last_position, 1.0, false);
 
-	if (_editor->should_ripple ()) {
+	if (_editor.should_ripple ()) {
 		playlist->ripple (_last_position, _primary->region ()->length (), _primary->region ());
 	} else {
-		playlist->rdiff_and_add_command (_editor->session ());
+		playlist->rdiff_and_add_command (editing_context.session ());
 	}
 
-	_editor->commit_reversible_command ();
+	editing_context.commit_reversible_command ();
 
 	delete _primary;
 	_primary = 0;
@@ -2289,8 +2301,8 @@ RegionInsertDrag::aborted (bool)
 	_views.clear ();
 }
 
-RegionCreateDrag::RegionCreateDrag (Editor* e, ArdourCanvas::Item* i, TimeAxisView* v)
-	: Drag (e, i, e->default_time_domain ())
+RegionCreateDrag::RegionCreateDrag (Editor& e, ArdourCanvas::Item* i, TimeAxisView* v)
+	: EditorDrag (e, i, e.time_domain ())
 	, _view (dynamic_cast<MidiTimeAxisView*> (v))
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionCreateDrag\n");
@@ -2302,7 +2314,7 @@ void
 RegionCreateDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
-		_editor->begin_reversible_command (_("create region"));
+		editing_context.begin_reversible_command (_("create region"));
 		_region = add_midi_region (_view, false);
 		_view->playlist ()->freeze ();
 	} else {
@@ -2329,7 +2341,7 @@ RegionCreateDrag::finished (GdkEvent* event, bool movement_occurred)
 		add_midi_region (_view, true);
 	} else {
 		_view->playlist ()->thaw ();
-		_editor->commit_reversible_command ();
+		editing_context.commit_reversible_command ();
 	}
 }
 
@@ -2343,8 +2355,8 @@ RegionCreateDrag::aborted (bool)
 	/* XXX */
 }
 
-NoteResizeDrag::NoteResizeDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, Temporal::BeatTime)
+NoteResizeDrag::NoteResizeDrag (EditingContext& ec, ArdourCanvas::Item* i)
+	: Drag (ec, i, Temporal::BeatTime)
 	, region (0)
 	, relative (false)
 	, at_front (true)
@@ -2363,10 +2375,10 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 	float x_fraction = cnote->mouse_x_fraction ();
 
 	if (x_fraction > 0.0 && x_fraction < 0.25) {
-		cursor   = _editor->cursors ()->left_side_trim;
+		cursor   = editing_context.cursors ()->left_side_trim;
 		at_front = true;
 	} else {
-		cursor   = _editor->cursors ()->right_side_trim;
+		cursor   = editing_context.cursors ()->right_side_trim;
 		at_front = false;
 	}
 
@@ -2385,7 +2397,7 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 	} else {
 		relative = true;
 	}
-	MidiRegionSelection ms = _editor->get_selection ().midi_regions ();
+	MidiRegionSelection ms = editing_context.get_selection ().midi_regions ();
 
 	if (ms.size () > 1) {
 		/* has to be relative, may make no sense otherwise */
@@ -2403,9 +2415,9 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 void
 NoteResizeDrag::motion (GdkEvent* event, bool first_move)
 {
-	MidiRegionSelection ms = _editor->get_selection ().midi_regions ();
+	MidiRegionSelection ms = editing_context.get_selection ().midi_regions ();
 	if (first_move) {
-		_editor->begin_reversible_command (_("resize notes"));
+		editing_context.begin_reversible_command (_("resize notes"));
 
 		for (MidiRegionSelection::iterator r = ms.begin (); r != ms.end ();) {
 			MidiRegionSelection::iterator next;
@@ -2429,11 +2441,11 @@ NoteResizeDrag::motion (GdkEvent* event, bool first_move)
 			bool   apply_snap_delta = ArdourKeyboard::indicates_snap_delta (event->button.state);
 
 			if (ArdourKeyboard::indicates_snap (event->button.state)) {
-				if (_editor->snap_mode () != SnapOff) {
+				if (editing_context.snap_mode () != SnapOff) {
 					snap = false;
 				}
 			} else {
-				if (_editor->snap_mode () == SnapOff) {
+				if (editing_context.snap_mode () == SnapOff) {
 					snap = false;
 					/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
 					if (apply_snap_delta) {
@@ -2457,8 +2469,8 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (!movement_occurred) {
 		/* no motion - select note */
 		NoteBase* cnote = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
-		if (_editor->current_mouse_mode () == Editing::MouseContent ||
-		    _editor->current_mouse_mode () == Editing::MouseDraw) {
+		if (editing_context.current_mouse_mode () == Editing::MouseContent ||
+		    editing_context.current_mouse_mode () == Editing::MouseDraw) {
 			bool changed = false;
 
 			if (_was_selected) {
@@ -2474,15 +2486,15 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 
 			if (changed) {
-				_editor->begin_reversible_selection_op (X_("Resize Select Note Release"));
-				_editor->commit_reversible_selection_op ();
+				editing_context.begin_reversible_selection_op (X_("Resize Select Note Release"));
+				editing_context.commit_reversible_selection_op ();
 			}
 		}
 
 		return;
 	}
 
-	MidiRegionSelection ms = _editor->get_selection ().midi_regions ();
+	MidiRegionSelection ms = editing_context.get_selection ().midi_regions ();
 	for (MidiRegionSelection::iterator r = ms.begin (); r != ms.end (); ++r) {
 		NoteBase* nb = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 		assert (nb);
@@ -2492,11 +2504,11 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 		bool            apply_snap_delta = ArdourKeyboard::indicates_snap_delta (event->button.state);
 		if (mrv) {
 			if (ArdourKeyboard::indicates_snap (event->button.state)) {
-				if (_editor->snap_mode () != SnapOff) {
+				if (editing_context.snap_mode () != SnapOff) {
 					snap = false;
 				}
 			} else {
-				if (_editor->snap_mode () == SnapOff) {
+				if (editing_context.snap_mode () == SnapOff) {
 					snap = false;
 					/* inverted logic here - we;re in snapoff but we've pressed the snap delta modifier */
 					if (apply_snap_delta) {
@@ -2513,13 +2525,13 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 	}
 
-	_editor->commit_reversible_command ();
+	editing_context.commit_reversible_command ();
 }
 
 void
 NoteResizeDrag::aborted (bool)
 {
-	MidiRegionSelection ms = _editor->get_selection ().midi_regions ();
+	MidiRegionSelection ms = editing_context.get_selection ().midi_regions ();
 	for (MidiRegionSelection::iterator r = ms.begin (); r != ms.end (); ++r) {
 		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*r);
 		if (mrv) {
@@ -2534,15 +2546,15 @@ AVDraggingView::AVDraggingView (RegionView* v)
 	initial_position = v->region ()->position_sample ();
 }
 
-VideoTimeLineDrag::VideoTimeLineDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, e->default_time_domain ())
+VideoTimeLineDrag::VideoTimeLineDrag (Editor& e, ArdourCanvas::Item* i)
+	: EditorDrag (e, i, e.time_domain ())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New VideoTimeLineDrag\n");
 
 	RegionSelection rs;
 	TrackViewList   empty;
 	empty.clear ();
-	_editor->get_regions_after (rs, timepos_t::zero (Temporal::AudioTime), empty);
+	_editor.get_regions_after (rs, timepos_t::zero (Temporal::AudioTime), empty);
 	std::list<RegionView*> views = rs.by_layer ();
 
 	_stuck = false;
@@ -2562,7 +2574,7 @@ void
 VideoTimeLineDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 {
 	Drag::start_grab (event);
-	if (_editor->session () == 0) {
+	if (editing_context.session () == 0) {
 		return;
 	}
 
@@ -2590,7 +2602,7 @@ VideoTimeLineDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 
 	char           buf[128];
 	Timecode::Time timecode;
-	_editor->session ()->sample_to_timecode (abs (_startdrag_video_offset), timecode, true /* use_offset */, false /* use_subframes */);
+	editing_context.session ()->sample_to_timecode (abs (_startdrag_video_offset), timecode, true /* use_offset */, false /* use_subframes */);
 	snprintf (buf, sizeof (buf), "Video Start:\n%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32,
 	          _startdrag_video_offset < 0 ? '-' : ' ',
 	          timecode.hours, timecode.minutes, timecode.seconds, timecode.frames);
@@ -2600,7 +2612,7 @@ VideoTimeLineDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 void
 VideoTimeLineDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (_editor->session () == 0) {
+	if (editing_context.session () == 0) {
 		return;
 	}
 	if (ARDOUR_UI::instance ()->video_timeline->is_offset_locked ()) {
@@ -2637,8 +2649,8 @@ VideoTimeLineDrag::motion (GdkEvent* event, bool first_move)
 	Timecode::Time    timecode;
 	Timecode::Time    timediff;
 	char              buf[128];
-	_editor->session ()->sample_to_timecode (abs (offset), timecode, true /* use_offset */, false /* use_subframes */);
-	_editor->session ()->sample_to_timecode (abs (dt), timediff, false /* use_offset */, false /* use_subframes */);
+	editing_context.session ()->sample_to_timecode (abs (offset), timecode, true /* use_offset */, false /* use_subframes */);
+	editing_context.session ()->sample_to_timecode (abs (dt), timediff, false /* use_offset */, false /* use_subframes */);
 	snprintf (buf, sizeof (buf),
 	          "%s\n%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32
 	          "\n%s\n%c%02" PRId32 ":%02" PRId32 ":%02" PRId32 ":%02" PRId32,
@@ -2658,31 +2670,31 @@ VideoTimeLineDrag::finished (GdkEvent* /*event*/, bool movement_occurred)
 		return;
 	}
 
-	if (!movement_occurred || !_editor->session ()) {
+	if (!movement_occurred || !editing_context.session ()) {
 		return;
 	}
 
 	ARDOUR_UI::instance ()->flush_videotimeline_cache (true);
 
-	_editor->begin_reversible_command (_("Move Video"));
+	editing_context.begin_reversible_command (_("Move Video"));
 
 	XMLNode& before = ARDOUR_UI::instance ()->video_timeline->get_state ();
 	ARDOUR_UI::instance ()->video_timeline->save_undo ();
 	XMLNode& after = ARDOUR_UI::instance ()->video_timeline->get_state ();
-	_editor->session ()->add_command (new MementoCommand<VideoTimeLine> (*(ARDOUR_UI::instance ()->video_timeline), &before, &after));
+	editing_context.session ()->add_command (new MementoCommand<VideoTimeLine> (*(ARDOUR_UI::instance ()->video_timeline), &before, &after));
 
 	for (list<AVDraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {
 		i->view->drag_end ();
 		i->view->region ()->resume_property_changes ();
 
-		_editor->session ()->add_command (new StatefulDiffCommand (i->view->region ()));
+		editing_context.session ()->add_command (new StatefulDiffCommand (i->view->region ()));
 	}
 
-	_editor->session ()->maybe_update_session_range (
+	editing_context.session ()->maybe_update_session_range (
 	    timepos_t (std::max (ARDOUR_UI::instance ()->video_timeline->get_offset (), (sampleoffset_t)0)),
 	    timepos_t (std::max (ARDOUR_UI::instance ()->video_timeline->get_offset () + ARDOUR_UI::instance ()->video_timeline->get_duration (), (sampleoffset_t)0)));
 
-	_editor->commit_reversible_command ();
+	editing_context.commit_reversible_command ();
 }
 
 void
@@ -2700,7 +2712,7 @@ VideoTimeLineDrag::aborted (bool)
 	}
 }
 
-TrimDrag::TrimDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, Temporal::TimeDomain td, bool preserve_fade_anchor)
+TrimDrag::TrimDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, Temporal::TimeDomain td, bool preserve_fade_anchor)
 	: RegionDrag (e, i, p, v, td)
 	, _operation (StartTrim)
 	, _preserve_fade_anchor (preserve_fade_anchor)
@@ -2724,17 +2736,17 @@ TrimDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		/* closer to front */
 		_operation = StartTrim;
 		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_anchored_modifier ())) {
-			Drag::start_grab (event, _editor->cursors ()->anchored_left_side_trim);
+			Drag::start_grab (event, editing_context.cursors ()->anchored_left_side_trim);
 		} else {
-			Drag::start_grab (event, _editor->cursors ()->left_side_trim);
+			Drag::start_grab (event, editing_context.cursors ()->left_side_trim);
 		}
 	} else {
 		/* closer to end */
 		_operation = EndTrim;
 		if (Keyboard::modifier_state_equals (event->button.state, ArdourKeyboard::trim_anchored_modifier ())) {
-			Drag::start_grab (event, _editor->cursors ()->anchored_right_side_trim);
+			Drag::start_grab (event, editing_context.cursors ()->anchored_right_side_trim);
 		} else {
-			Drag::start_grab (event, _editor->cursors ()->right_side_trim);
+			Drag::start_grab (event, editing_context.cursors ()->right_side_trim);
 		}
 	}
 
@@ -2785,7 +2797,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 				break;
 		}
 
-		_editor->begin_reversible_command (trim_type);
+		editing_context.begin_reversible_command (trim_type);
 
 		for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
 			RegionView* rv = i->view;
@@ -2804,7 +2816,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			}
 
 			std::shared_ptr<Playlist> pl = rv->region ()->playlist ();
-			insert_result                = _editor->motion_frozen_playlists.insert (pl);
+			insert_result                = _editor.motion_frozen_playlists.insert (pl);
 
 			if (insert_result.second) {
 				pl->freeze ();
@@ -2814,10 +2826,10 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 			/* a MRV start trim may change the source length. ensure we cover all playlists here */
 			if (mrv && _operation == StartTrim) {
 				vector<std::shared_ptr<Playlist>> all_playlists;
-				_editor->session ()->playlists ()->get (all_playlists);
+				editing_context.session ()->playlists ()->get (all_playlists);
 				for (vector<std::shared_ptr<Playlist>>::iterator x = all_playlists.begin (); x != all_playlists.end (); ++x) {
 					if ((*x)->uses_source (rv->region ()->source (0))) {
-						insert_result = _editor->motion_frozen_playlists.insert (*x);
+						insert_result = _editor.motion_frozen_playlists.insert (*x);
 						if (insert_result.second) {
 							(*x)->clear_owned_changes ();
 							(*x)->freeze ();
@@ -2984,7 +2996,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 		}
 
-		if (!_editor->selection->selected (_primary)) {
+		if (!editing_context.get_selection().selected (_primary)) {
 			_primary->thaw_after_trim ();
 		} else {
 			for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
@@ -2992,7 +3004,7 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 		}
 
-		for (PlaylistSet::iterator p = _editor->motion_frozen_playlists.begin (); p != _editor->motion_frozen_playlists.end (); ++p) {
+		for (PlaylistSet::iterator p = _editor.motion_frozen_playlists.begin (); p != _editor.motion_frozen_playlists.end (); ++p) {
 			/* Trimming one region may affect others on the playlist, so we need
 			   to get undo Commands from the whole playlist rather than just the
 			   region.  Use motion_frozen_playlists (a set) to make sure we don't
@@ -3001,17 +3013,17 @@ TrimDrag::finished (GdkEvent* event, bool movement_occurred)
 
 			vector<Command*> cmds;
 			(*p)->rdiff (cmds);
-			_editor->session ()->add_commands (cmds);
+			editing_context.session ()->add_commands (cmds);
 			(*p)->thaw ();
 		}
 
-		_editor->motion_frozen_playlists.clear ();
-		_editor->commit_reversible_command ();
+		_editor.motion_frozen_playlists.clear ();
+		editing_context.commit_reversible_command ();
 
 	} else {
 		/* no mouse movement */
 		if (adjusted_current_time (event) != adjusted_time (_drags->current_pointer_time (), event, false)) {
-			_editor->point_trim (event, adjusted_current_time (event));
+			_editor.point_trim (event, adjusted_current_time (event));
 		}
 	}
 
@@ -3033,7 +3045,7 @@ TrimDrag::aborted (bool movement_occurred)
 	finished (&ev, movement_occurred);
 
 	if (movement_occurred) {
-		_editor->session ()->undo (1);
+		editing_context.session ()->undo (1);
 	}
 
 	for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
@@ -3063,11 +3075,11 @@ TrimDrag::setup_pointer_offset ()
 	}
 }
 
-MeterMarkerDrag::MeterMarkerDrag (Editor* e, ArdourCanvas::Item* i, bool c)
-	: Drag (e, i, Temporal::BeatTime, true, false)
+MeterMarkerDrag::MeterMarkerDrag (Editor& e, ArdourCanvas::Item* i, bool c)
+	: EditorDrag (e, i, Temporal::BeatTime, true, false)
 	, _marker (reinterpret_cast<MeterMarker*> (_item->get_data ("marker")))
-	, _old_grid_type (e->grid_type ())
-	, _old_snap_mode (e->snap_mode ())
+	, _old_grid_type (e.grid_type ())
+	, _old_snap_mode (e.snap_mode ())
 	, before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MeterMarkerDrag\n");
@@ -3085,7 +3097,7 @@ MeterMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	 * local reference
 	 */
 
-	map            = _editor->begin_tempo_map_edit ();
+	map            = _editor.begin_tempo_map_edit ();
 	initial_sclock = _marker->meter ().sclock ();
 }
 
@@ -3104,12 +3116,7 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 		char name[64];
 		snprintf (name, sizeof (name), "%d/%d", _marker->meter ().divisions_per_bar (), _marker->meter ().note_value ());
 
-		_marker = new MeterMarker (
-		    *_editor,
-		    *_editor->meter_group,
-		    "meter marker",
-		    name,
-		    _marker->meter ());
+		_marker = new MeterMarker (_editor, *_editor.meter_group, "meter marker", name, _marker->meter ());
 
 		/* use the new marker for the grab */
 		swap_grab (&_marker->the_item (), 0, GDK_CURRENT_TIME);
@@ -3117,12 +3124,12 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 		/* get current state */
 		before_state = &map->get_state ();
-		_editor->begin_reversible_command (_("move time signature"));
+		editing_context.begin_reversible_command (_("move time signature"));
 
 		/* only snap to bars. */
 
-		_editor->set_grid_to (GridTypeBar);
-		_editor->set_snap_mode (SnapMagnetic);
+		editing_context.set_grid_to (GridTypeBar);
+		editing_context.set_snap_mode (SnapMagnetic);
 	}
 
 	if (!_movable) {
@@ -3136,9 +3143,9 @@ MeterMarkerDrag::motion (GdkEvent* event, bool first_move)
 
 	if (map->move_meter (_marker->meter (), pos, false)) {
 		/* it was moved */
-		_editor->mid_tempo_change (Editor::MeterChanged);
+		_editor.mid_tempo_change (Editor::MeterChanged);
 		show_verbose_cursor_time (timepos_t (_marker->meter ().beats ()));
-		_editor->set_snapped_cursor_position (timepos_t (_marker->meter ().sample (_editor->session ()->sample_rate ())));
+		editing_context.set_snapped_cursor_position (timepos_t (_marker->meter ().sample (editing_context.session ()->sample_rate ())));
 	}
 }
 
@@ -3149,23 +3156,23 @@ MeterMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		/* get reference before _marker is deleted via reset_meter_marks due to abort_tempo_map_edit */
 		Temporal::MeterPoint& section (const_cast<Temporal::MeterPoint&>(_marker->meter ()));
 		/* reset thread local tempo map to the original state */
-		_editor->abort_tempo_map_edit ();
+		_editor.abort_tempo_map_edit ();
 
 		if (was_double_click ()) {
-			_editor->edit_meter_section (section);
+			_editor.edit_meter_section (section);
 		}
 		return;
 	}
 
 	/* reinstate old snap setting */
-	_editor->set_grid_to (_old_grid_type);
-	_editor->set_snap_mode (_old_snap_mode);
+	editing_context.set_grid_to (_old_grid_type);
+	editing_context.set_snap_mode (_old_snap_mode);
 
-	_editor->commit_tempo_map_edit (map);
+	_editor.commit_tempo_map_edit (map);
 	XMLNode& after = map->get_state ();
 
-	_editor->session ()->add_command (new Temporal::TempoCommand (_("move time signature"), before_state, &after));
-	_editor->commit_reversible_command ();
+	editing_context.session ()->add_command (new Temporal::TempoCommand (_("move time signature"), before_state, &after));
+	editing_context.commit_reversible_command ();
 
 	// delete the dummy marker we used for visual representation while moving.
 	// a new visual marker will show up automatically.
@@ -3182,8 +3189,8 @@ MeterMarkerDrag::aborted (bool moved)
 
 	if (moved) {
 		/* reinstate old snap setting */
-		_editor->set_grid_to (_old_grid_type);
-		_editor->set_snap_mode (_old_snap_mode);
+		editing_context.set_grid_to (_old_grid_type);
+		editing_context.set_snap_mode (_old_snap_mode);
 
 		// delete the dummy marker we used for visual representation while moving.
 		// a new visual marker will show up automatically.
@@ -3191,8 +3198,8 @@ MeterMarkerDrag::aborted (bool moved)
 	}
 }
 
-TempoCurveDrag::TempoCurveDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, Temporal::BeatTime)
+TempoCurveDrag::TempoCurveDrag (Editor& e, ArdourCanvas::Item* i)
+	: EditorDrag (e, i, Temporal::BeatTime)
 {
 }
 
@@ -3201,7 +3208,7 @@ TempoCurveDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 	/* setup thread-local tempo map ptr as a writable copy */
-	map            = _editor->begin_tempo_map_edit ();
+	map            = _editor.begin_tempo_map_edit ();
 	TempoCurve* tc = reinterpret_cast<TempoCurve*> (_item->get_data (X_("tempo curve")));
 	if (!tc) {
 		point = const_cast<TempoPoint*> (&map->tempo_at (raw_grab_time ()));
@@ -3217,7 +3224,7 @@ TempoCurveDrag::motion (GdkEvent* event, bool first_move)
 	if (first_move) {
 		/* get current state */
 		_before_state = &map->get_state ();
-		_editor->begin_reversible_command (_("change tempo"));
+		editing_context.begin_reversible_command (_("change tempo"));
 	}
 
 	double          new_bpm = std::max (1.5, initial_bpm - ((current_pointer_x () - grab_x ()) / 5.0));
@@ -3228,7 +3235,7 @@ TempoCurveDrag::motion (GdkEvent* event, bool first_move)
 	strs << "Tempo: " << fixed << setprecision (3) << new_bpm;
 	show_verbose_cursor_text (strs.str ());
 
-	_editor->mid_tempo_change (Editor::TempoChanged);
+	_editor.mid_tempo_change (Editor::TempoChanged);
 }
 
 void
@@ -3239,12 +3246,12 @@ TempoCurveDrag::finished (GdkEvent* event, bool movement_occurred)
 		 * official version
 		 */
 
-		_editor->abort_tempo_map_edit ();
+		_editor.abort_tempo_map_edit ();
 
 		if (was_double_click ()) {
 			// XXX would be nice to do this,
 			// but note that ::abort_tempo_map_edit() will have deleted _marker
-			// _editor->edit_tempo_marker (*_marker);
+			// _editor.edit_tempo_marker (*_marker);
 		}
 
 		return;
@@ -3252,11 +3259,11 @@ TempoCurveDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	/* push the current state of our writable map copy */
 
-	_editor->commit_tempo_map_edit (map);
+	_editor.commit_tempo_map_edit (map);
 	XMLNode& after = map->get_state ();
 
-	_editor->session ()->add_command (new Temporal::TempoCommand (_("change tempo"), _before_state, &after));
-	_editor->commit_reversible_command ();
+	editing_context.session ()->add_command (new Temporal::TempoCommand (_("change tempo"), _before_state, &after));
+	editing_context.commit_reversible_command ();
 }
 
 void
@@ -3266,11 +3273,11 @@ TempoCurveDrag::aborted (bool moved)
 	 * official version
 	 */
 
-	_editor->abort_tempo_map_edit ();
+	_editor.abort_tempo_map_edit ();
 }
 
-TempoMarkerDrag::TempoMarkerDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, Temporal::BeatTime)
+TempoMarkerDrag::TempoMarkerDrag (Editor& e, ArdourCanvas::Item* i)
+	: EditorDrag (e, i, Temporal::BeatTime)
 	, _before_state (nullptr)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoMarkerDrag\n");
@@ -3289,7 +3296,7 @@ TempoMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	Drag::start_grab (event, cursor);
 	show_verbose_cursor_time (adjusted_current_time (event));
 	/* setup thread-local tempo map ptr as a writable copy */
-	map = _editor->begin_tempo_map_edit ();
+	map = _editor.begin_tempo_map_edit ();
 }
 
 void
@@ -3304,14 +3311,14 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 	if (first_move) {
 		/* get current state */
 		_before_state = &map->get_state ();
-		_editor->begin_reversible_command (_("move tempo mark"));
+		editing_context.begin_reversible_command (_("move tempo mark"));
 	}
 
 	if (ArdourKeyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 		double          new_bpm = std::max (1.5, _grab_bpm - ((current_pointer_x () - grab_x ()) / 5.0));
 		Temporal::Tempo new_tempo (new_bpm, _marker->tempo ().note_type ());
 		map->change_tempo (const_cast<TempoPoint&> (_marker->tempo ()), new_tempo);
-		_editor->mid_tempo_change (Editor::TempoChanged);
+		_editor.mid_tempo_change (Editor::TempoChanged);
 
 		stringstream strs;
 		strs << "Tempo: " << fixed << setprecision (3) << new_bpm;
@@ -3326,7 +3333,7 @@ TempoMarkerDrag::motion (GdkEvent* event, bool first_move)
 		 */
 
 		if (map->move_tempo (_marker->tempo (), pos, false)) {
-			_editor->mid_tempo_change (Editor::TempoChanged);
+			_editor.mid_tempo_change (Editor::TempoChanged);
 			show_verbose_cursor_time (_marker->tempo ().time ());
 		}
 	}
@@ -3340,10 +3347,10 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		/* get reference before _marker is deleted by reset_tempo_marks due to abort_tempo_map_edit */
 		Temporal::TempoPoint& section (const_cast<Temporal::TempoPoint&>(_marker->tempo ()));
 		/* reset thread local tempo map to the original state */
-		_editor->abort_tempo_map_edit ();
+		_editor.abort_tempo_map_edit ();
 
 		if (was_double_click ()) {
-			_editor->edit_tempo_section (section);
+			_editor.edit_tempo_section (section);
 		}
 
 		return;
@@ -3351,11 +3358,11 @@ TempoMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	/* push the current state of our writable map copy */
 
-	_editor->commit_tempo_map_edit (map);
+	_editor.commit_tempo_map_edit (map);
 	XMLNode& after = map->get_state ();
 
-	_editor->session ()->add_command (new Temporal::TempoCommand (_("move tempo"), _before_state, &after));
-	_editor->commit_reversible_command ();
+	editing_context.session ()->add_command (new Temporal::TempoCommand (_("move tempo"), _before_state, &after));
+	editing_context.commit_reversible_command ();
 }
 
 void
@@ -3365,13 +3372,13 @@ TempoMarkerDrag::aborted (bool moved)
 	 * official version
 	 */
 
-	_editor->abort_tempo_map_edit ();
+	_editor.abort_tempo_map_edit ();
 }
 
 /********* */
 
-BBTMarkerDrag::BBTMarkerDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, Temporal::BeatTime)
+BBTMarkerDrag::BBTMarkerDrag (Editor& e, ArdourCanvas::Item* i)
+	: EditorDrag (e, i, Temporal::BeatTime)
 	, _before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New BBTMarkerDrag\n");
@@ -3390,7 +3397,7 @@ BBTMarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	/* setup thread-local tempo map ptr as a writable copy */
 
-	map = _editor->begin_tempo_map_edit ();
+	map = _editor.begin_tempo_map_edit ();
 }
 
 void
@@ -3405,7 +3412,7 @@ BBTMarkerDrag::motion (GdkEvent* event, bool first_move)
 	if (first_move) {
 		/* get current state */
 		_before_state = &map->get_state ();
-		_editor->begin_reversible_command (_("move BBT point"));
+		editing_context.begin_reversible_command (_("move BBT point"));
 	}
 
 	timepos_t pos = adjusted_current_time (event, false);
@@ -3421,10 +3428,10 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (!movement_occurred) {
 		Temporal::MusicTimePoint& point (const_cast<Temporal::MusicTimePoint&>(_marker->mt_point ()));
 		/* reset thread local tempo map to the original state */
-		_editor->abort_tempo_map_edit ();
+		_editor.abort_tempo_map_edit ();
 
 		if (was_double_click ()) {
-			_editor->edit_bbt (point);
+			_editor.edit_bbt (point);
 		}
 
 		return;
@@ -3441,11 +3448,11 @@ BBTMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	map->set_bartime (bbt, timepos_t (_marker->position ().samples ()), name);
 
-	_editor->commit_tempo_map_edit (map, true);
+	_editor.commit_tempo_map_edit (map, true);
 	XMLNode& after = map->get_state ();
 
-	_editor->session ()->add_command (new Temporal::TempoCommand (_("move BBT point"), _before_state, &after));
-	_editor->commit_reversible_command ();
+	editing_context.session ()->add_command (new Temporal::TempoCommand (_("move BBT point"), _before_state, &after));
+	editing_context.commit_reversible_command ();
 }
 
 void
@@ -3461,8 +3468,8 @@ BBTMarkerDrag::aborted (bool moved)
 
 /******************************************************************************/
 
-MappingEndDrag::MappingEndDrag (Editor* e, ArdourCanvas::Item* i, Temporal::TempoMap::WritableSharedPtr& wmap, TempoPoint& tp, TempoPoint& ap, XMLNode& before)
-	: Drag (e, i, Temporal::BeatTime)
+MappingEndDrag::MappingEndDrag (Editor& e, ArdourCanvas::Item* i, Temporal::TempoMap::WritableSharedPtr& wmap, TempoPoint& tp, TempoPoint& ap, XMLNode& before)
+	: EditorDrag (e, i, Temporal::BeatTime)
 	, _tempo (tp)
 	, _after (ap)
 	, _grab_bpm (0)
@@ -3497,7 +3504,7 @@ MappingEndDrag::setup_pointer_offset ()
 {
 	Beats grab_qn = max (Beats (), raw_grab_time ().beats ());
 
-	uint32_t divisions = _editor->get_grid_beat_divisions (_editor->grid_type ());
+	uint32_t divisions = editing_context.get_grid_beat_divisions (editing_context.grid_type ());
 
 	if (divisions == 0) {
 		divisions = 4;
@@ -3515,7 +3522,7 @@ MappingEndDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	const double pixel_distance = current_pointer_x () - grab_x ();
-	const double spp            = _editor->get_current_zoom ();
+	const double spp            = editing_context.get_current_zoom ();
 	const double scaling_factor = 0.4 * (spp / 1000.);
 	const double delta          = scaling_factor * pixel_distance;
 
@@ -3534,7 +3541,7 @@ MappingEndDrag::motion (GdkEvent* event, bool first_move)
 		map->change_tempo (_after, new_tempo);
 	}
 
-	_editor->mid_tempo_change (Editor::MappingChanged);
+	_editor.mid_tempo_change (Editor::MappingChanged);
 }
 
 void
@@ -3547,7 +3554,7 @@ MappingEndDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	XMLNode& after = map->get_state ();
 
-	_editor->session ()->add_command (new Temporal::TempoCommand (_("stretch tempo"), _before_state, &after));
+	editing_context.session ()->add_command (new Temporal::TempoCommand (_("stretch tempo"), _before_state, &after));
 
 	/* 2nd argument means "update tempo map display after the new map is
 	 * installed. We need to do this because the code above has not
@@ -3555,27 +3562,27 @@ MappingEndDrag::finished (GdkEvent* event, bool movement_occurred)
 	 * modified the map.
 	 */
 
-	_editor->commit_tempo_mapping (map);
+	_editor.commit_tempo_mapping (map);
 
-	_editor->commit_reversible_command ();
+	editing_context.commit_reversible_command ();
 }
 
 void
 MappingEndDrag::aborted (bool /* moved */)
 {
-	_editor->abort_reversible_command ();
-	_editor->abort_tempo_mapping ();
+	editing_context.abort_reversible_command ();
+	_editor.abort_tempo_mapping ();
 }
 
 /******************************************************************************/
 
-MappingTwistDrag::MappingTwistDrag (Editor* e, ArdourCanvas::Item* i, Temporal::TempoMap::WritableSharedPtr& wmap,
+MappingTwistDrag::MappingTwistDrag (Editor& e, ArdourCanvas::Item* i, Temporal::TempoMap::WritableSharedPtr& wmap,
                                     TempoPoint& prv,
                                     TempoPoint& fcus,
                                     TempoPoint& nxt,
                                     XMLNode&    before,
                                     bool        ramped)
-	: Drag (e, i, Temporal::BeatTime)
+	: EditorDrag (e, i, Temporal::BeatTime)
 	, prev (prv)
 	, focus (fcus)
 	, next (nxt)
@@ -3602,7 +3609,7 @@ MappingTwistDrag::setup_pointer_offset ()
 {
 	Beats grab_qn = max (Beats (), raw_grab_time ().beats ());
 
-	uint32_t divisions = _editor->get_grid_beat_divisions (_editor->grid_type ());
+	uint32_t divisions = editing_context.get_grid_beat_divisions (editing_context.grid_type ());
 
 	if (divisions == 0) {
 		divisions = 4;
@@ -3634,7 +3641,7 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 	/* XXX needs to scale somehow with zoom level */
 
 	const double pixel_distance = last_pointer_x () - _drags->current_pointer_x ();
-	const double spp            = _editor->get_current_zoom ();
+	const double spp            = editing_context.get_current_zoom ();
 	const double scaling_factor = 0.4 * (spp / 1500.);
 
 	delta += scaling_factor * pixel_distance;
@@ -3644,35 +3651,35 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 	} else {
 		map->constant_twist_tempi (prev, focus, next, initial_focus_npm + delta);
 	}
-	_editor->mid_tempo_change (Editor::MappingChanged);
+	_editor.mid_tempo_change (Editor::MappingChanged);
 }
 
 void
 MappingTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!_drag_valid) {
-		_editor->abort_tempo_mapping ();
-		_editor->abort_reversible_command ();
+		_editor.abort_tempo_mapping ();
+		editing_context.abort_reversible_command ();
 		return;
 	}
 
 	XMLNode& after = map->get_state ();
 
-	_editor->session ()->add_command (new Temporal::TempoCommand (_("twist tempo"), _before_state, &after));
-	_editor->commit_tempo_mapping (map);
-	_editor->commit_reversible_command ();
+	editing_context.session ()->add_command (new Temporal::TempoCommand (_("twist tempo"), _before_state, &after));
+	_editor.commit_tempo_mapping (map);
+	editing_context.commit_reversible_command ();
 }
 
 void
 MappingTwistDrag::aborted (bool moved)
 {
-	_editor->abort_tempo_mapping ();
+	_editor.abort_tempo_mapping ();
 }
 
 /*------------------------------------------------------------------*/
 
-TempoTwistDrag::TempoTwistDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, Temporal::BeatTime)
+TempoTwistDrag::TempoTwistDrag (Editor& e, ArdourCanvas::Item* i)
+	: EditorDrag (e, i, Temporal::BeatTime)
 	, _tempo (0)
 	, _drag_valid (true)
 	, _before_state (0)
@@ -3719,9 +3726,9 @@ TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 	if (first_move) {
 		/* get current state */
 		_before_state = &map->get_state ();
-		_editor->tempo_curve_selected (_tempo, true);
+		_editor.tempo_curve_selected (_tempo, true);
 		if (_next_tempo) {
-			_editor->tempo_curve_selected (_next_tempo, true);
+			_editor.tempo_curve_selected (_next_tempo, true);
 		}
 	}
 
@@ -3736,7 +3743,7 @@ TempoTwistDrag::motion (GdkEvent* event, bool first_move)
 	}
 	show_verbose_cursor_text (sstr.str ());
 
-	_editor->mid_tempo_change (Editor::TempoChanged);
+	_editor.mid_tempo_change (Editor::TempoChanged);
 }
 
 void
@@ -3747,27 +3754,27 @@ TempoTwistDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	_editor->tempo_curve_selected (_tempo, false);
+	_editor.tempo_curve_selected (_tempo, false);
 	if (_next_tempo) {
-		_editor->tempo_curve_selected (_next_tempo, false);
+		_editor.tempo_curve_selected (_next_tempo, false);
 	}
 
-	_editor->begin_reversible_command (_("twist tempo"));
+	editing_context.begin_reversible_command (_("twist tempo"));
 	XMLNode& after = map->get_state ();
-	_editor->session ()->add_command (new Temporal::TempoCommand (_("twist tempo"), _before_state, &after));
-	_editor->commit_reversible_command ();
+	editing_context.session ()->add_command (new Temporal::TempoCommand (_("twist tempo"), _before_state, &after));
+	editing_context.commit_reversible_command ();
 
-	_editor->commit_tempo_mapping (map);
+	_editor.commit_tempo_mapping (map);
 }
 
 void
 TempoTwistDrag::aborted (bool moved)
 {
-	_editor->abort_tempo_mapping ();
+	_editor.abort_tempo_mapping ();
 }
 
-TempoEndDrag::TempoEndDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, Temporal::BeatTime)
+TempoEndDrag::TempoEndDrag (Editor& e, ArdourCanvas::Item* i)
+	: EditorDrag (e, i, Temporal::BeatTime)
 	, _tempo (0)
 	, previous_tempo (0)
 	, _before_state (0)
@@ -3775,7 +3782,7 @@ TempoEndDrag::TempoEndDrag (Editor* e, ArdourCanvas::Item* i)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoEndDrag\n");
 
-	map = _editor->begin_tempo_map_edit ();
+	map = _editor.begin_tempo_map_edit ();
 
 	/* have to do this after the map switch because we need to operate on
 	 * the TempoPoint accessed via marker in the new map, not the old one
@@ -3801,13 +3808,13 @@ TempoEndDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	TempoPoint const* prev = 0;
 	if ((prev = map->previous_tempo (*_tempo)) != 0) {
-		_editor->tempo_curve_selected (prev, true);
-		const samplecnt_t sr = _editor->session ()->sample_rate ();
+		_editor.tempo_curve_selected (prev, true);
+		const samplecnt_t sr = _editor.session ()->sample_rate ();
 		sstr << "end: " << fixed << setprecision (3) << map->tempo_at (samples_to_superclock (_tempo->sample (sr) - 1, sr)).end_note_types_per_minute () << "\n";
 	}
 
 	if (_tempo->continuing ()) {
-		_editor->tempo_curve_selected (_tempo, true);
+		_editor.tempo_curve_selected (_tempo, true);
 		sstr << "start: " << fixed << setprecision (3) << _tempo->note_types_per_minute ();
 	}
 
@@ -3829,7 +3836,7 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 
 	if (first_move) {
 		_before_state = &map->get_state ();
-		_editor->begin_reversible_command (_("stretch end tempo"));
+		editing_context.begin_reversible_command (_("stretch end tempo"));
 
 		previous_tempo = const_cast<TempoPoint*> (map->previous_tempo (*_tempo));
 
@@ -3839,10 +3846,10 @@ TempoEndDrag::motion (GdkEvent* event, bool first_move)
 		}
 	}
 
-	_editor->mid_tempo_change (Editor::TempoChanged);
+	_editor.mid_tempo_change (Editor::TempoChanged);
 
 	ostringstream     sstr;
-	const samplecnt_t sr = _editor->session ()->sample_rate ();
+	const samplecnt_t sr = editing_context.session ()->sample_rate ();
 	sstr << "end: " << fixed << setprecision (3) << map->tempo_at (samples_to_superclock (_tempo->sample (sr) - 1, sr)).end_note_types_per_minute () << "\n";
 
 	if (_tempo->continuing ()) {
@@ -3856,24 +3863,24 @@ void
 TempoEndDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred || !_drag_valid) {
-		_editor->abort_tempo_map_edit ();
+		_editor.abort_tempo_map_edit ();
 		return;
 	}
 
-	_editor->commit_tempo_map_edit (map);
+	_editor.commit_tempo_map_edit (map);
 
 	XMLNode& after = map->get_state ();
-	_editor->session ()->add_command (new Temporal::TempoCommand (_("move tempo end"), _before_state, &after));
-	_editor->commit_reversible_command ();
+	editing_context.session ()->add_command (new Temporal::TempoCommand (_("move tempo end"), _before_state, &after));
+	editing_context.commit_reversible_command ();
 
 	TempoPoint const* prev = 0;
 
 	if ((prev = map->previous_tempo (*_tempo)) != 0) {
-		_editor->tempo_curve_selected (prev, false);
+		_editor.tempo_curve_selected (prev, false);
 	}
 
 	if (_tempo->continuing ()) {
-		_editor->tempo_curve_selected (_tempo, false);
+		_editor.tempo_curve_selected (_tempo, false);
 	}
 }
 
@@ -3883,8 +3890,8 @@ TempoEndDrag::aborted (bool moved)
 	TempoMap::abort_update ();
 }
 
-CursorDrag::CursorDrag (Editor* e, EditorCursor& c, bool s)
-	: Drag (e, &c.track_canvas_item (), e->default_time_domain (), false)
+CursorDrag::CursorDrag (Editor& e, EditorCursor& c, bool s)
+	: EditorDrag (e, &c.track_canvas_item (), e.time_domain (), false)
 	, _cursor (c)
 	, _stop (s)
 	, _grab_zoom (0.0)
@@ -3899,15 +3906,15 @@ CursorDrag::CursorDrag (Editor* e, EditorCursor& c, bool s)
 void
 CursorDrag::fake_locate (samplepos_t t)
 {
-	if (_editor->session () == 0) {
+	if (editing_context.session () == 0) {
 		return;
 	}
 
-	_editor->playhead_cursor ()->set_position (t);
+	editing_context.playhead_cursor ()->set_position (t);
 
-	Session* s = _editor->session ();
+	Session* s = editing_context.session ();
 	if (s->timecode_transmission_suspended ()) {
-		samplepos_t const f = _editor->playhead_cursor ()->current_sample ();
+		samplepos_t const f = editing_context.playhead_cursor ()->current_sample ();
 		/* This is asynchronous so it will be sent "now"
 		 */
 		s->send_mmc_locate (f);
@@ -3919,7 +3926,7 @@ CursorDrag::fake_locate (samplepos_t t)
 	}
 
 	show_verbose_cursor_time (timepos_t (t));
-	_editor->UpdateAllTransportClocks (t);
+	_editor.UpdateAllTransportClocks (t);
 }
 
 void
@@ -3927,18 +3934,18 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 {
 	Drag::start_grab (event, c);
 
-	setup_snap_delta (timepos_t (_editor->playhead_cursor ()->current_sample ()));
+	setup_snap_delta (timepos_t (editing_context.playhead_cursor ()->current_sample ()));
 
-	_grab_zoom = _editor->samples_per_pixel;
+	_grab_zoom = editing_context.get_current_zoom();
 
-	timepos_t where (timepos_t (_editor->canvas_event_sample (event)) + snap_delta (event->button.state));
+	timepos_t where (timepos_t (editing_context.canvas_event_sample (event)) + snap_delta (event->button.state));
 
-	_editor->snap_to_with_modifier (where, event);
+	editing_context.snap_to_with_modifier (where, event);
 
-	_editor->_dragging_playhead     = true;
-	_editor->_control_scroll_target = where.samples ();
+	_editor._dragging_playhead     = true;
+	_editor._control_scroll_target = where.samples ();
 
-	Session* s = _editor->session ();
+	Session* s = editing_context.session ();
 
 	/* grab the track canvas item as well */
 
@@ -3969,7 +3976,7 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 	}
 
 	/* during fake-locate, the mouse position is delievered to the (red) playhead line, so we have to momentarily sensitize it */
-	_editor->playhead_cursor ()->set_sensitive (true);
+	editing_context.playhead_cursor ()->set_sensitive (true);
 
 	fake_locate (where.earlier (snap_delta (event->button.state)).samples ());
 
@@ -3982,9 +3989,9 @@ CursorDrag::start_grab (GdkEvent* event, Gdk::Cursor* c)
 void
 CursorDrag::motion (GdkEvent* event, bool)
 {
-	timepos_t where (timepos_t (_editor->canvas_event_sample (event)) + snap_delta (event->button.state));
+	timepos_t where (timepos_t (editing_context.canvas_event_sample (event)) + snap_delta (event->button.state));
 
-	_editor->snap_to_with_modifier (where, event);
+	editing_context.snap_to_with_modifier (where, event);
 
 	if (where != last_pointer_time ()) {
 		fake_locate (where.earlier (snap_delta (event->button.state)).samples ());
@@ -4010,9 +4017,9 @@ CursorDrag::motion (GdkEvent* event, bool)
 			const double scale = 1.2;
 			if ((dy > dx) && (_last_dx == 0) && (y_delta != _last_y_delta)) {
 				if (_last_y_delta > y_delta) {
-					_editor->temporal_zoom_step_mouse_focus_scale (true, scale);
+					_editor.temporal_zoom_step_mouse_focus_scale (true, scale);
 				} else {
-					_editor->temporal_zoom_step_mouse_focus_scale (false, scale);
+					_editor.temporal_zoom_step_mouse_focus_scale (false, scale);
 				}
 				_last_y_delta = y_delta;
 			}
@@ -4027,7 +4034,7 @@ CursorDrag::motion (GdkEvent* event, bool)
 void
 CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	_editor->_dragging_playhead = false;
+	_editor._dragging_playhead = false;
 
 	_cursor.track_canvas_item ().ungrab ();
 
@@ -4037,14 +4044,14 @@ CursorDrag::finished (GdkEvent* event, bool movement_occurred)
 
 	motion (event, false);
 
-	Session* s = _editor->session ();
+	Session* s = editing_context.session ();
 	if (s) {
-		_editor->_pending_locate_request = true;
-		s->request_locate (_editor->playhead_cursor ()->current_sample (), false, _was_rolling ? MustRoll : RollIfAppropriate);
+		_editor._pending_locate_request = true;
+		s->request_locate (editing_context.playhead_cursor ()->current_sample (), false, _was_rolling ? MustRoll : RollIfAppropriate);
 		s->request_resume_timecode_transmission ();
 	}
 
-	_editor->playhead_cursor ()->set_sensitive (UIConfiguration::instance ().get_sensitize_playhead ());
+	editing_context.playhead_cursor ()->set_sensitive (UIConfiguration::instance ().get_sensitize_playhead ());
 }
 
 void
@@ -4052,16 +4059,16 @@ CursorDrag::aborted (bool)
 {
 	_cursor.track_canvas_item ().ungrab ();
 
-	if (_editor->_dragging_playhead) {
-		_editor->session ()->request_resume_timecode_transmission ();
-		_editor->_dragging_playhead = false;
+	if (_editor._dragging_playhead) {
+		editing_context.session ()->request_resume_timecode_transmission ();
+		_editor._dragging_playhead = false;
 	}
 
-	_editor->playhead_cursor ()->set_position (adjusted_time (grab_time (), 0, false).samples ());
-	_editor->playhead_cursor ()->set_sensitive (UIConfiguration::instance ().get_sensitize_playhead ());
+	editing_context.playhead_cursor ()->set_position (adjusted_time (grab_time (), 0, false).samples ());
+	editing_context.playhead_cursor ()->set_sensitive (UIConfiguration::instance ().get_sensitize_playhead ());
 }
 
-FadeInDrag::FadeInDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, Temporal::TimeDomain td)
+FadeInDrag::FadeInDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, Temporal::TimeDomain td)
 	: RegionDrag (e, i, p, v, td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New FadeInDrag\n");
@@ -4092,8 +4099,8 @@ FadeInDrag::setup_pointer_offset ()
 void
 FadeInDrag::motion (GdkEvent* event, bool first_motion)
 {
-	timepos_t tpos (timepos_t (_editor->canvas_event_sample (event)) + snap_delta (event->button.state));
-	_editor->snap_to_with_modifier (tpos, event);
+	timepos_t tpos (timepos_t (editing_context.canvas_event_sample (event)) + snap_delta (event->button.state));
+	editing_context.snap_to_with_modifier (tpos, event);
 	tpos.shift_earlier (snap_delta (event->button.state));
 
 	samplepos_t pos = tpos.samples ();
@@ -4135,8 +4142,8 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	timepos_t tpos (timepos_t (_editor->canvas_event_sample (event)) + snap_delta (event->button.state));
-	_editor->snap_to_with_modifier (tpos, event);
+	timepos_t tpos (timepos_t (editing_context.canvas_event_sample (event)) + snap_delta (event->button.state));
+	editing_context.snap_to_with_modifier (tpos, event);
 	tpos.shift_earlier (snap_delta (event->button.state));
 
 	samplepos_t pos = tpos.samples ();
@@ -4170,15 +4177,15 @@ FadeInDrag::finished (GdkEvent* event, bool movement_occurred)
 		tmp->audio_region ()->set_fade_in_active (true);
 
 		if (!in_command) {
-			_editor->begin_reversible_command (_("change fade in length"));
+			editing_context.begin_reversible_command (_("change fade in length"));
 			in_command = true;
 		}
 		XMLNode& after = alist->get_state ();
-		_editor->session ()->add_command (new MementoCommand<AutomationList> (*alist.get (), &before, &after));
+		editing_context.session ()->add_command (new MementoCommand<AutomationList> (*alist.get (), &before, &after));
 	}
 
 	if (in_command) {
-		_editor->commit_reversible_command ();
+		editing_context.commit_reversible_command ();
 	}
 }
 
@@ -4198,7 +4205,7 @@ FadeInDrag::aborted (bool)
 	}
 }
 
-FadeOutDrag::FadeOutDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, Temporal::TimeDomain td)
+FadeOutDrag::FadeOutDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, Temporal::TimeDomain td)
 	: RegionDrag (e, i, p, v, td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New FadeOutDrag\n");
@@ -4231,8 +4238,8 @@ FadeOutDrag::motion (GdkEvent* event, bool first_motion)
 {
 	samplecnt_t fade_length;
 
-	timepos_t tpos (timepos_t (_editor->canvas_event_sample (event)) + snap_delta (event->button.state));
-	_editor->snap_to_with_modifier (tpos, event);
+	timepos_t tpos (timepos_t (editing_context.canvas_event_sample (event)) + snap_delta (event->button.state));
+	editing_context.snap_to_with_modifier (tpos, event);
 	tpos.shift_earlier (snap_delta (event->button.state));
 
 	samplepos_t pos (tpos.samples ());
@@ -4272,8 +4279,8 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 		return;
 	}
 
-	timepos_t tpos (timepos_t (_editor->canvas_event_sample (event)) + snap_delta (event->button.state));
-	_editor->snap_to_with_modifier (tpos, event);
+	timepos_t tpos (timepos_t (editing_context.canvas_event_sample (event)) + snap_delta (event->button.state));
+	editing_context.snap_to_with_modifier (tpos, event);
 	tpos.shift_earlier (snap_delta (event->button.state));
 
 	samplepos_t pos (tpos.samples ());
@@ -4308,15 +4315,15 @@ FadeOutDrag::finished (GdkEvent* event, bool movement_occurred)
 		tmp->audio_region ()->set_fade_out_active (true);
 
 		if (!in_command) {
-			_editor->begin_reversible_command (_("change fade out length"));
+			editing_context.begin_reversible_command (_("change fade out length"));
 			in_command = true;
 		}
 		XMLNode& after = alist->get_state ();
-		_editor->session ()->add_command (new MementoCommand<AutomationList> (*alist.get (), &before, &after));
+		editing_context.session ()->add_command (new MementoCommand<AutomationList> (*alist.get (), &before, &after));
 	}
 
 	if (in_command) {
-		_editor->commit_reversible_command ();
+		editing_context.commit_reversible_command ();
 	}
 }
 
@@ -4336,12 +4343,12 @@ FadeOutDrag::aborted (bool)
 	}
 }
 
-MarkerDrag::MarkerDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, e->default_time_domain ())
+MarkerDrag::MarkerDrag (Editor& e, ArdourCanvas::Item* i)
+	: EditorDrag (e, i, e.time_domain ())
 	, _selection_changed (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MarkerDrag\n");
-	Gtk::Window* toplevel = _editor->current_toplevel ();
+	Gtk::Window* toplevel = _editor.current_toplevel ();
 	_marker               = reinterpret_cast<ArdourMarker*> (_item->get_data ("marker"));
 
 	assert (_marker);
@@ -4372,7 +4379,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	bool is_start;
 
-	Location* location = _editor->find_location_from_marker (_marker, is_start);
+	Location* location = _editor.find_location_from_marker (_marker, is_start);
 
 	update_item (location);
 
@@ -4403,7 +4410,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		Locations::LocationList ll;
 		list<ArdourMarker*>     to_add;
 		timepos_t               s, e;
-		_editor->selection->markers.range (s, e);
+		_editing_context.get_selection().markers.range (s, e);
 		s = min (_marker->position (), s);
 		e = max (_marker->position (), e);
 		s = min (s, e);
@@ -4424,13 +4431,13 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 			}
 		}
 		if (!to_add.empty ()) {
-			_editor->selection->add (to_add);
+			_editing_context.get_selection().add (to_add);
 			_selection_changed = true;
 		}
 		break;
 	}
 	case SelectionAdd:
-		_editor->selection->add (_marker);
+		editing_context.get_selection().add (_marker);
 		_selection_changed = true;
 		break;
 	default:
@@ -4440,8 +4447,8 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	/* Set up copies for us to manipulate during the drag
 	 */
 
-	for (MarkerSelection::iterator i = _editor->selection->markers.begin (); i != _editor->selection->markers.end (); ++i) {
-		Location* l = _editor->find_location_from_marker (*i, is_start);
+	for (MarkerSelection::iterator i = editing_context.get_selection().markers.begin (); i != editing_context.get_selection().markers.end (); ++i) {
+		Location* l = _editor.find_location_from_marker (*i, is_start);
 
 		if (!l) {
 			continue;
@@ -4474,7 +4481,7 @@ void
 MarkerDrag::setup_pointer_offset ()
 {
 	bool      is_start;
-	Location* location = _editor->find_location_from_marker (_marker, is_start);
+	Location* location = _editor.find_location_from_marker (_marker, is_start);
 	_pointer_offset    = (is_start ? location->start () : location->end ()).distance (raw_grab_time ());
 }
 
@@ -4514,7 +4521,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 			 * CopiedLocationMarkerInfo
 			 */
 
-			if ((real_location = _editor->find_location_from_marker (_marker, is_start)) == 0) {
+			if ((real_location = _editor.find_location_from_marker (_marker, is_start)) == 0) {
 				/* que pasa ?? */
 				return;
 			}
@@ -4557,7 +4564,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 	for (x = _copied_locations.begin (); x != _copied_locations.end (); ++x) {
 		copy_location = x->location;
 
-		if ((real_location = _editor->find_location_from_marker (x->markers.front (), is_start)) == 0) {
+		if ((real_location = _editor.find_location_from_marker (x->markers.front (), is_start)) == 0) {
 			continue;
 		}
 
@@ -4570,7 +4577,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 			if (copy_location->is_cue_marker ()) {
 				timepos_t s (copy_location->start () + f_delta);
-				_editor->snap_to_with_modifier (s, event, RoundNearest, SnapToGrid_Scaled);
+				editing_context.snap_to_with_modifier (s, event, RoundNearest, SnapToGrid_Scaled);
 				copy_location->set_start (s, false);
 			} else {
 				copy_location->set_start (copy_location->start () + f_delta, false);
@@ -4588,7 +4595,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 				} else if (new_start < copy_location->end ()) {
 					copy_location->set_start (new_start, false);
 				} else if (newpos.is_positive ()) {
-					//_editor->snap_to (next, RoundUpAlways, true);
+					//_editor.snap_to (next, RoundUpAlways, true);
 					copy_location->set_end (next, false);
 					copy_location->set_start (newpos, false);
 				}
@@ -4601,7 +4608,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 				} else if (new_end > copy_location->start ()) {
 					copy_location->set_end (new_end, false);
 				} else if (newpos.is_positive ()) {
-					//_editor->snap_to (next, RoundDownAlways, true);
+					//_editor.snap_to (next, RoundDownAlways, true);
 					copy_location->set_start (next, false);
 					copy_location->set_end (newpos, false);
 				}
@@ -4617,7 +4624,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 		 * the real Location itself.
 		 */
 
-		Editor::LocationMarkers* lm = _editor->find_location_markers (real_location);
+		Editor::LocationMarkers* lm = _editor.find_location_markers (real_location);
 
 		if (lm) {
 			lm->set_position (copy_location->start (), copy_location->end ());
@@ -4628,7 +4635,7 @@ MarkerDrag::motion (GdkEvent* event, bool)
 
 	show_verbose_cursor_time (newpos);
 	show_view_preview (newpos + _video_offset);
-	_editor->set_snapped_cursor_position (newpos);
+	_editor.set_snapped_cursor_position (newpos);
 }
 
 void
@@ -4636,7 +4643,7 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (!movement_occurred) {
 		if (was_double_click ()) {
-			_editor->rename_marker (_marker);
+			_editor.rename_marker (_marker);
 			return;
 		}
 
@@ -4648,14 +4655,14 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		switch (op) {
 		case SelectionSet:
 			if (_editor->selection->selected (_marker) && _editor->selection->markers.size () > 1) {
-				_editor->selection->set (_marker);
+				_editing_context.selection->set (_marker);
 				_selection_changed = true;
 			}
 			break;
 
 		case SelectionToggle:
 			/* we toggle on the button release, click only */
-			_editor->selection->toggle (_marker);
+			_editing_context.selection->toggle (_marker);
 			_selection_changed = true;
 
 			break;
@@ -4667,12 +4674,12 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 
 		if (_selection_changed) {
-			_editor->begin_reversible_selection_op (X_("Select Marker Release"));
-			_editor->commit_reversible_selection_op ();
+			editing_context.begin_reversible_selection_op (X_("Select Marker Release"));
+			editing_context.commit_reversible_selection_op ();
 		}
 
 		bool do_locate;
-		switch (_editor->get_marker_click_behavior ()) {
+		switch (_editor.get_marker_click_behavior ()) {
 			case MarkerClickSelectOnly:
 				do_locate = false;
 				break;
@@ -4680,38 +4687,38 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 				do_locate = true;
 				break;
 			case MarkerClickLocateWhenStopped:
-				do_locate = !_editor->session()->transport_state_rolling ();
+				do_locate = !editing_context.session()->transport_state_rolling ();
 		}
 
-		if (do_locate && !_editor->session()->config.get_external_sync () && (_editor->edit_point() != Editing::EditAtSelectedMarker)) {
+		if (do_locate && !editing_context.session()->config.get_external_sync () && (_editor.edit_point() != Editing::EditAtSelectedMarker)) {
 			bool is_start;
-			Location* location = _editor->find_location_from_marker (_marker, is_start);
+			Location* location = _editor.find_location_from_marker (_marker, is_start);
 			if (location) {
-				_editor->session ()->request_locate (is_start ? location->start().samples() : location->end().samples());
+				editing_context.session ()->request_locate (is_start ? location->start().samples() : location->end().samples());
 			}
 		}
 
 		return;
 	}
 
-	XMLNode& before     = _editor->session ()->locations ()->get_state ();
+	XMLNode& before     = editing_context.session ()->locations ()->get_state ();
 	bool     in_command = false;
 
 	MarkerSelection::iterator    i;
 	CopiedLocationInfo::iterator x;
 	bool                         is_start;
 
-	for (i = _editor->selection->markers.begin (), x = _copied_locations.begin ();
-	     x != _copied_locations.end () && i != _editor->selection->markers.end ();
+	for (i = editing_context.get_selection().markers.begin (), x = _copied_locations.begin ();
+	     x != _copied_locations.end () && i != editing_context.get_selection().markers.end ();
 	     ++i, ++x) {
-		Location* location = _editor->find_location_from_marker (*i, is_start);
+		Location* location = _editor.find_location_from_marker (*i, is_start);
 
 		if (location) {
 			if (location->locked ()) {
 				continue;
 			}
 			if (!in_command) {
-				_editor->begin_reversible_command (_("move marker"));
+				editing_context.begin_reversible_command (_("move marker"));
 				in_command = true;
 			}
 			if (location->is_mark ()) {
@@ -4721,15 +4728,15 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 			}
 
 			if (location->is_session_range ()) {
-				_editor->session ()->set_session_range_is_free (false);
+				editing_context.session ()->set_session_range_is_free (false);
 			}
 		}
 	}
 
 	if (in_command) {
-		XMLNode& after = _editor->session ()->locations ()->get_state ();
-		_editor->session ()->add_command (new MementoCommand<Locations> (*(_editor->session ()->locations ()), &before, &after));
-		_editor->commit_reversible_command ();
+		XMLNode& after = editing_context.session ()->locations ()->get_state ();
+		editing_context.session ()->add_command (new MementoCommand<Locations> (*(editing_context.session ()->locations ()), &before, &after));
+		editing_context.commit_reversible_command ();
 	}
 }
 
@@ -4745,7 +4752,7 @@ MarkerDrag::aborted (bool movement_occurred)
 
 		for (vector<ArdourMarker*>::iterator m = x->markers.begin (); m != x->markers.end (); ++m) {
 			bool      is_start;
-			Location* location = _editor->find_location_from_marker (*m, is_start);
+			Location* location = _editor.find_location_from_marker (*m, is_start);
 
 			if (location) {
 				(*m)->set_position (is_start ? location->start () : location->end ());
@@ -4760,8 +4767,8 @@ MarkerDrag::update_item (Location*)
 	/* noop */
 }
 
-ControlPointDrag::ControlPointDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, e->default_time_domain (), true, false) /* XXX NUTEMPO FIX TIME DOMAIN */
+ControlPointDrag::ControlPointDrag (Editor& e, ArdourCanvas::Item* i)
+	: EditorDrag (e, i, e.time_domain (), true, false)
 	, _fixed_grab_x (0.0)
 	, _fixed_grab_y (0.0)
 	, _cumulative_y_drag (0.0)
@@ -4796,7 +4803,7 @@ ControlPointDrag::total_dt (GdkEvent* event) const
 	/* Now adjust the absolute time by dx, and snap
 	 */
 	timepos_t snap = point_absolute + dx + snap_delta (event->button.state);
-	_editor->snap_to_with_modifier (snap, event);
+	editing_context.snap_to_with_modifier (snap, event);
 
 	/* Now measure the distance between the actual point position and
 	 * dragged one (possibly snapped), then subtract the snap delta again.
@@ -4808,7 +4815,7 @@ ControlPointDrag::total_dt (GdkEvent* event) const
 void
 ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 {
-	Drag::start_grab (event, _editor->cursors ()->fader);
+	Drag::start_grab (event, editing_context.cursors ()->fader);
 
 	// start the grab at the center of the control point so
 	// the point doesn't 'jump' to the mouse after the first drag
@@ -4819,12 +4826,12 @@ ControlPointDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 	 * the timline (e.g. for MIDI CC data exposed as automation)
 	 */
 
-	_fixed_grab_x = _point->get_x () + _editor->time_to_pixel_unrounded (timepos_t (_point->line ().offset ()));
+	_fixed_grab_x = _point->get_x () + editing_context.time_to_pixel_unrounded (timepos_t (_point->line ().offset ()));
 	_fixed_grab_y = _point->get_y ();
 
-	samplepos_t s = _editor->pixel_to_sample (_fixed_grab_x);
+	samplepos_t s = editing_context.pixel_to_sample (_fixed_grab_x);
 
-	if (_editor->default_time_domain () == Temporal::AudioTime) {
+	if (editing_context.time_domain () == Temporal::AudioTime) {
 		setup_snap_delta (timepos_t (s));
 	} else {
 		setup_snap_delta (timepos_t (timepos_t (s).beats ()));
@@ -4877,7 +4884,7 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 
 	if (first_motion) {
 		float const initial_fraction = 1.0 - (_fixed_grab_y / _point->line ().height ());
-		_editor->begin_reversible_command (_("automation event move"));
+		editing_context.begin_reversible_command (_("automation event move"));
 		_point->line ().start_drag_single (_point, _fixed_grab_x, initial_fraction);
 	}
 
@@ -4886,8 +4893,8 @@ ControlPointDrag::motion (GdkEvent* event, bool first_motion)
 	show_verbose_cursor_text (_point->line ().get_verbose_cursor_relative_string (result.first, result.second));
 
 	timepos_t const offset = _point->line ().get_origin ().shift_earlier (_point->line ().offset ());
-	double px = _point->get_x () + _editor->time_to_pixel_unrounded (offset);
-	_editor->set_snapped_cursor_position (timepos_t (_editor->pixel_to_sample (px)));
+	double px = _point->get_x () + editing_context.time_to_pixel_unrounded (offset);
+	editing_context.set_snapped_cursor_position (timepos_t (editing_context.pixel_to_sample (px)));
 }
 
 void
@@ -4896,12 +4903,12 @@ ControlPointDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (!movement_occurred) {
 		/* just a click */
 		if (Keyboard::modifier_state_equals (event->button.state, Keyboard::ModifierMask (Keyboard::TertiaryModifier))) {
-			_editor->reset_point_selection ();
+			_editor.reset_point_selection ();
 		}
 
 	} else {
 		_point->line ().end_drag (_pushing, _final_index);
-		_editor->commit_reversible_command ();
+		editing_context.commit_reversible_command ();
 	}
 }
 
@@ -4923,8 +4930,8 @@ ControlPointDrag::active (Editing::MouseMode m)
 	return dynamic_cast<AutomationLine*> (&(_point->line ())) != 0;
 }
 
-LineDrag::LineDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, e->default_time_domain ())
+LineDrag::LineDrag (Editor& e, ArdourCanvas::Item* i)
+	: EditorDrag (e, i, e.time_domain ())
 	, _line (0)
 	, _fixed_grab_x (0.0)
 	, _fixed_grab_y (0.0)
@@ -4939,7 +4946,7 @@ LineDrag::LineDrag (Editor* e, ArdourCanvas::Item* i)
 LineDrag::~LineDrag ()
 {
 	if (have_command) {
-		_editor->abort_reversible_command ();
+		editing_context.abort_reversible_command ();
 		have_command = false;
 	}
 }
@@ -4961,7 +4968,7 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	_line->grab_item ().canvas_to_item (mx, my);
 
-	samplecnt_t const sample_within_region = (samplecnt_t)floor (mx * _editor->samples_per_pixel);
+	samplecnt_t const sample_within_region = (samplecnt_t)floor (mx * editing_context.get_current_zoom());
 
 	if (!_line->control_points_adjacent (sample_within_region, _before, _after)) {
 		/* no adjacent points
@@ -4974,7 +4981,7 @@ LineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 		return;
 	}
 
-	Drag::start_grab (event, _editor->cursors ()->fader);
+	Drag::start_grab (event, editing_context.cursors ()->fader);
 
 	/* store grab start in item sample */
 	double const bx          = _line->nth (_before)->get_x ();
@@ -5012,7 +5019,7 @@ LineDrag::motion (GdkEvent* event, bool first_move)
 
 	if (first_move) {
 		float const initial_fraction = 1.0 - (_fixed_grab_y / _line->height ());
-		_editor->begin_reversible_command (_("automation range move"));
+		editing_context.begin_reversible_command (_("automation range move"));
 		_line->start_drag_line (_before, _after, initial_fraction);
 		have_command = true;
 	}
@@ -5031,7 +5038,7 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 		motion (event, false);
 		_line->end_drag (false, 0);
 		if (have_command) {
-			_editor->commit_reversible_command ();
+			editing_context.commit_reversible_command ();
 			have_command = false;
 		}
 	} else {
@@ -5039,7 +5046,7 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		AutomationTimeAxisView* atv;
 
-		if ((atv = dynamic_cast<AutomationTimeAxisView*> (_editor->clicked_axisview)) != 0) {
+		if ((atv = dynamic_cast<AutomationTimeAxisView*> (_editor.clicked_axisview)) != 0) {
 			timepos_t where = grab_time ();
 
 			double cx = 0;
@@ -5048,11 +5055,11 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 			_line->grab_item ().item_to_canvas (cx, cy);
 
 			atv->add_automation_event (event, where, cy, false);
-		} else if (dynamic_cast<AudioTimeAxisView*> (_editor->clicked_axisview) != 0) {
+		} else if (dynamic_cast<AudioTimeAxisView*> (_editor.clicked_axisview) != 0) {
 			AudioRegionView* arv;
 
-			if ((arv = dynamic_cast<AudioRegionView*> (_editor->clicked_regionview)) != 0) {
-				arv->add_gain_point_event (&arv->fx_line ()->grab_item (), event, false);
+			if ((arv = dynamic_cast<AudioRegionView*> (_editor.clicked_regionview)) != 0) {
+				arv->add_gain_point_event (&arv->get_gain_line ()->grab_item (), event, false);
 			}
 		}
 	}
@@ -5064,13 +5071,13 @@ LineDrag::aborted (bool)
 	_line->reset ();
 
 	if (have_command) {
-		_editor->abort_reversible_command ();
+		editing_context.abort_reversible_command ();
 		have_command = false;
 	}
 }
 
-FeatureLineDrag::FeatureLineDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, e->default_time_domain ())
+FeatureLineDrag::FeatureLineDrag (Editor& e, ArdourCanvas::Item* i)
+	: Drag (e, i, e.time_domain ())
 	, _line (0)
 	, _arv (0)
 	, _region_view_grab_x (0.0)
@@ -5103,7 +5110,7 @@ FeatureLineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 
 	_arv = reinterpret_cast<AudioRegionView*> (_item->get_data ("regionview"));
 
-	_max_x = _editor->duration_to_pixels (_arv->get_duration ());
+	_max_x = editing_context.duration_to_pixels (_arv->get_duration ());
 }
 
 void
@@ -5148,8 +5155,8 @@ FeatureLineDrag::aborted (bool)
 	//_line->reset ();
 }
 
-RubberbandSelectDrag::RubberbandSelectDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, e->default_time_domain ())
+RubberbandSelectDrag::RubberbandSelectDrag (EditingContext& ec, ArdourCanvas::Item* i)
+	: Drag (ec, i, ec.time_domain ())
 	, _vertical_only (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RubberbandSelectDrag\n");
@@ -5173,7 +5180,7 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 	timepos_t       grab (grab_time ());
 
 	if (UIConfiguration::instance ().get_rubberbanding_snaps_to_grid ()) {
-		_editor->snap_to_with_modifier (grab, event, RoundNearest, SnapToGrid_Scaled);
+		editing_context.snap_to_with_modifier (grab, event, RoundNearest, SnapToGrid_Scaled);
 	} else {
 		grab = raw_grab_time ();
 	}
@@ -5199,8 +5206,8 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 	if (start != end || y1 != y2) {
 		const double min_dimension = 2.0;
 
-		double x1 = _editor->time_to_pixel (start);
-		double x2 = _editor->time_to_pixel (end);
+		double x1 = editing_context.time_to_pixel (start);
+		double x2 = editing_context.time_to_pixel (end);
 
 		if (_vertical_only) {
 			/* fixed 10 pixel width */
@@ -5231,9 +5238,9 @@ RubberbandSelectDrag::motion (GdkEvent* event, bool)
 		 * to set the shape of the rubberband.
 		 */
 
-		_editor->rubberband_rect->set (r);
-		_editor->rubberband_rect->show ();
-		_editor->rubberband_rect->raise_to_top ();
+		editing_context.rubberband_rect->set (r);
+		editing_context.rubberband_rect->show ();
+		editing_context.rubberband_rect->raise_to_top ();
 
 		show_verbose_cursor_time (pf);
 
@@ -5254,7 +5261,7 @@ RubberbandSelectDrag::do_select_things (GdkEvent* event, bool drag_in_progress)
 
 		timepos_t pos (pixel_to_time (last_pointer_x ()));
 
-		if (_editor->default_time_domain () == Temporal::AudioTime) {
+		if (editing_context.time_domain () == Temporal::AudioTime) {
 			lpf = pos;
 		} else {
 			lpf = timepos_t (pos.beats ());
@@ -5291,20 +5298,23 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 		do_select_things (event, false);
 
 	} else {
+		Editor* editor = dynamic_cast<Editor*> (&editing_context);
+		assert (editor);
+
 		/* just a click */
 
 		bool                    do_deselect = true;
 		MidiTimeAxisView*       mtv;
 		AutomationTimeAxisView* atv;
 
-		if ((mtv = dynamic_cast<MidiTimeAxisView*> (_editor->clicked_axisview)) != 0) {
+		if ((mtv = dynamic_cast<MidiTimeAxisView*> (editor->clicked_axisview)) != 0) {
 			/* MIDI track */
-			if (_editor->selection->empty () && _editor->mouse_mode == MouseDraw) {
+			if (editing_context.get_selection().empty () && editing_context.current_mouse_mode() == MouseDraw) {
 				/* nothing selected */
 				add_midi_region (mtv, true);
 				do_deselect = false;
 			}
-		} else if ((atv = dynamic_cast<AutomationTimeAxisView*> (_editor->clicked_axisview)) != 0) {
+		} else if ((atv = dynamic_cast<AutomationTimeAxisView*> (editor->clicked_axisview)) != 0) {
 			timepos_t where = grab_time ();
 			atv->add_automation_event (event, where, event->button.y, false);
 			do_deselect = false;
@@ -5321,16 +5331,16 @@ RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 	}
 
-	_editor->rubberband_rect->hide ();
+	editing_context.rubberband_rect->hide ();
 }
 
 void
 RubberbandSelectDrag::aborted (bool)
 {
-	_editor->rubberband_rect->hide ();
+	editing_context.rubberband_rect->hide ();
 }
 
-TimeFXDrag::TimeFXDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p, std::list<RegionView*> const& v, Temporal::TimeDomain td)
+TimeFXDrag::TimeFXDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, std::list<RegionView*> const& v, Temporal::TimeDomain td)
 	: RegionDrag (e, i, p, v, td)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TimeFXDrag\n");
@@ -5342,7 +5352,7 @@ TimeFXDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	_editor->get_selection ().add (_primary);
+	editing_context.get_selection ().add (_primary);
 	timepos_t where (_primary->region ()->position ());
 	setup_snap_delta (_primary->region ()->position ());
 
@@ -5356,13 +5366,13 @@ TimeFXDrag::motion (GdkEvent* event, bool)
 {
 	RegionView*                       rv = _primary;
 	StreamView*                       cv = rv->get_time_axis_view ().view ();
-	pair<TimeAxisView*, double> const tv = _editor->trackview_by_y_position (grab_y ());
+	pair<TimeAxisView*, double> const tv = _editor.trackview_by_y_position (grab_y ());
 
 	int       layer  = tv.first->layer_display () == Overlaid ? 0 : tv.second;
 	int       layers = tv.first->layer_display () == Overlaid ? 1 : cv->layers ();
-	timepos_t pf (_editor->canvas_event_time (event) + snap_delta (event->button.state));
+	timepos_t pf (editing_context.canvas_event_time (event) + snap_delta (event->button.state));
 
-	_editor->snap_to_with_modifier (pf, event);
+	editing_context.snap_to_with_modifier (pf, event);
 	pf.shift_earlier (snap_delta (event->button.state));
 
 	if (_dragging_start) {
@@ -5387,7 +5397,7 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 	   parameters for the timestretch.
 	*/
 
-	if (_editor->get_selection ().regions.empty ()) {
+	if (editing_context.get_selection ().regions.empty ()) {
 		_primary->get_time_axis_view ().hide_timestretch ();
 		return;
 	}
@@ -5395,7 +5405,7 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 	if (!movement_occurred) {
 		_primary->get_time_axis_view ().hide_timestretch ();
 
-		if (_editor->time_stretch (_editor->get_selection ().regions, ratio_t (1, 1), false) == -1) {
+		if (_editor.time_stretch (editing_context.get_selection ().regions, ratio_t (1, 1), false) == -1) {
 			error << _("An error occurred while executing time stretch operation") << endmsg;
 		}
 		return;
@@ -5445,7 +5455,7 @@ TimeFXDrag::finished (GdkEvent* event, bool movement_occurred)
 	   selection.
 	*/
 
-	if (_editor->time_stretch (_editor->get_selection ().regions, ratio, _dragging_start) == -1) {
+	if (_editor.time_stretch (editing_context.get_selection ().regions, ratio, _dragging_start) == -1) {
 		error << _("An error occurred while executing time stretch operation") << endmsg;
 	}
 }
@@ -5456,24 +5466,24 @@ TimeFXDrag::aborted (bool)
 	_primary->get_time_axis_view ().hide_timestretch ();
 }
 
-SelectionDrag::SelectionDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
-	: Drag (e, i, e->default_time_domain ())
+SelectionDrag::SelectionDrag (Editor& e, ArdourCanvas::Item* i, Operation o)
+	: EditorDrag (e, i, e.time_domain ())
 	, _operation (o)
 	, _add (false)
-	, _time_selection_at_start (!_editor->get_selection ().time.empty ())
+	, _time_selection_at_start (!editing_context.get_selection ().time.empty ())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New SelectionDrag\n");
 
 	if (_time_selection_at_start) {
-		start_at_start = _editor->get_selection ().time.start_time ();
-		end_at_start   = _editor->get_selection ().time.end_time ();
+		start_at_start = editing_context.get_selection ().time.start_time ();
+		end_at_start   = editing_context.get_selection ().time.end_time ();
 	}
 }
 
 void
 SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 {
-	if (_editor->session () == 0) {
+	if (editing_context.session () == 0) {
 		return;
 	}
 
@@ -5486,22 +5496,22 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 			} else {
 				_add = false;
 			}
-			cursor = _editor->cursors ()->selector;
+			cursor = editing_context.cursors ()->selector;
 			Drag::start_grab (event, cursor);
 			break;
 
 		case SelectionStartTrim:
-			if (_editor->clicked_axisview) {
-				_editor->clicked_axisview->order_selection_trims (_item, true);
+			if (_editor.clicked_axisview) {
+				_editor.clicked_axisview->order_selection_trims (_item, true);
 			}
-			Drag::start_grab (event, _editor->cursors ()->left_side_trim);
+			Drag::start_grab (event, editing_context.cursors ()->left_side_trim);
 			break;
 
 		case SelectionEndTrim:
-			if (_editor->clicked_axisview) {
-				_editor->clicked_axisview->order_selection_trims (_item, false);
+			if (_editor.clicked_axisview) {
+				_editor.clicked_axisview->order_selection_trims (_item, false);
 			}
-			Drag::start_grab (event, _editor->cursors ()->right_side_trim);
+			Drag::start_grab (event, editing_context.cursors ()->right_side_trim);
 			break;
 
 		case SelectionMove:
@@ -5514,7 +5524,7 @@ SelectionDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 	}
 
 	if (_operation == SelectionMove) {
-		show_verbose_cursor_time (_editor->selection->time[_editor->clicked_selection].start ());
+		show_verbose_cursor_time (editing_context.get_selection().time[_editor.clicked_selection].start ());
 	} else {
 		show_verbose_cursor_time (adjusted_current_time (event));
 	}
@@ -5525,16 +5535,16 @@ SelectionDrag::setup_pointer_offset ()
 {
 	switch (_operation) {
 		case CreateSelection:
-			_pointer_offset = timecnt_t (time_domain());
+			_pointer_offset = timecnt_t (editing_context.time_domain ());
 			break;
 
 		case SelectionStartTrim:
 		case SelectionMove:
-			_pointer_offset = _editor->selection->time[_editor->clicked_selection].start ().distance (raw_grab_time ());
+			_pointer_offset = editing_context.get_selection().time[_editor.clicked_selection].start ().distance (raw_grab_time ());
 			break;
 
 		case SelectionEndTrim:
-			_pointer_offset = _editor->selection->time[_editor->clicked_selection].end ().distance (raw_grab_time ());
+			_pointer_offset = editing_context.get_selection().time[_editor.clicked_selection].end ().distance (raw_grab_time ());
 			break;
 
 		case SelectionExtend:
@@ -5558,10 +5568,10 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 	}
 
 	if (first_move) {
-		if (_editor->should_ripple_all ()) {
-			_editor->selection->set (_editor->get_track_views ());
+		if (_editor.should_ripple_all ()) {
+			editing_context.get_selection().set (_editor.get_track_views ());
 		}
-		_track_selection_at_start = _editor->selection->tracks;
+		_track_selection_at_start = editing_context.get_selection().tracks;
 	}
 
 	/* in the case where there was no existing selection, we can check the group_ovveride */
@@ -5576,9 +5586,9 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 			if (first_move) {
 				grab = adjusted_current_time (event, false);
 				if (grab < pending_position) {
-					_editor->snap_to (grab, RoundDownMaybe);
+					editing_context.snap_to (grab, RoundDownMaybe);
 				} else {
-					_editor->snap_to (grab, RoundUpMaybe);
+					editing_context.snap_to (grab, RoundUpMaybe);
 				}
 			}
 
@@ -5598,36 +5608,36 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 				if (_add) {
 					/* adding to the selection */
 					_editor->set_selected_track_as_side_effect (SelectionAdd, gcd);
-					_editor->clicked_selection = _editor->selection->add (start, end);
+					_editor->clicked_selection = _editing_context.get_selection().add (start, end);
 					_add                       = false;
 
 				} else {
 					/* new selection */
-					if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
+					if (_editor->clicked_axisview && !_editing_context.get_selection()selected (_editor->clicked_axisview)) {
 						_editor->set_selected_track_as_side_effect (SelectionSet, gcd);
 					}
 
-					_editor->clicked_selection = _editor->selection->set (start, end);
+					_editor.clicked_selection = editing_context.get_selection().set (start, end);
 				}
 			}
 
 			/* if user is selecting a range on an automation track, bail out here before we get to the grouped stuff,
 			 * because the grouped stuff will start working on tracks (routeTAVs), and end up removing this
 			 */
-			AutomationTimeAxisView* atest = dynamic_cast<AutomationTimeAxisView*> (_editor->clicked_axisview);
+			AutomationTimeAxisView* atest = dynamic_cast<AutomationTimeAxisView*> (_editor.clicked_axisview);
 			if (atest) {
-				_editor->selection->add (atest);
+				editing_context.get_selection().add (atest);
 				break;
 			}
 
 			/* select all tracks within the rectangle that we've marked out so far */
 			TrackViewList  new_selection;
-			TrackViewList& all_tracks (_editor->track_views);
+			TrackViewList& all_tracks (_editor.track_views);
 
 			ArdourCanvas::Coord const top    = grab_y ();
 			ArdourCanvas::Coord const bottom = current_pointer_y ();
 
-			bool RippleAll = _editor->should_ripple_all ();
+			bool RippleAll = _editor.should_ripple_all ();
 
 			if (!RippleAll && top >= 0 && bottom >= 0) {
 				/* first, find the tracks that are covered in the y range selection */
@@ -5646,7 +5656,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 				vector<RouteGroup*> selected_route_groups;
 
 				if (!first_move) {
-					for (TrackViewList::const_iterator i = _editor->selection->tracks.begin (); i != _editor->selection->tracks.end (); ++i) {
+					for (TrackViewList::const_iterator i = editing_context.get_selection().tracks.begin (); i != editing_context.get_selection().tracks.end (); ++i) {
 						if (!new_selection.contains (*i) && !_track_selection_at_start.contains (*i)) {
 							tracks_to_remove.push_back (*i);
 						} else {
@@ -5659,7 +5669,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 				}
 
 				for (TrackViewList::const_iterator i = new_selection.begin (); i != new_selection.end (); ++i) {
-					if (!_editor->selection->tracks.contains (*i)) {
+					if (!editing_context.get_selection().tracks.contains (*i)) {
 						tracks_to_add.push_back (*i);
 						RouteGroup* rg = (*i)->route_group ();
 
@@ -5669,7 +5679,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 					}
 				}
 
-				_editor->selection->add (tracks_to_add);
+				editing_context.get_selection().add (tracks_to_add);
 
 				if (!tracks_to_remove.empty ()) {
 					/* check all these to-be-removed tracks against the
@@ -5689,14 +5699,14 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 					/* remove whatever is left */
 
-					_editor->selection->remove (tracks_to_remove);
+					editing_context.get_selection().remove (tracks_to_remove);
 				}
 			}
 		} break;
 
 		case SelectionStartTrim:
 
-			end = _editor->selection->time[_editor->clicked_selection].end ();
+			end = editing_context.get_selection().time[_editor.clicked_selection].end ();
 
 			if (pending_position > end) {
 				start = end;
@@ -5707,7 +5717,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 		case SelectionEndTrim:
 
-			start = _editor->selection->time[_editor->clicked_selection].start ();
+			start = editing_context.get_selection().time[_editor.clicked_selection].start ();
 
 			if (pending_position < start) {
 				end = start;
@@ -5719,8 +5729,8 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 
 		case SelectionMove:
 
-			start = _editor->selection->time[_editor->clicked_selection].start ();
-			end   = _editor->selection->time[_editor->clicked_selection].end ();
+			start = editing_context.get_selection().time[_editor.clicked_selection].start ();
+			end   = editing_context.get_selection().time[_editor.clicked_selection].end ();
 
 			length = start.distance (end);
 			;
@@ -5728,7 +5738,7 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 			start    = pending_position;
 
 			start_mf = start;
-			_editor->snap_to (start_mf);
+			editing_context.snap_to (start_mf);
 
 			end = start_mf + length;
 
@@ -5742,11 +5752,11 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 		switch (_operation) {
 			case SelectionMove:
 				if (_time_selection_at_start) {
-					_editor->selection->move_time (distance);
+					editing_context.get_selection().move_time (distance);
 				}
 				break;
 			default:
-				_editor->selection->replace (_editor->clicked_selection, start, end);
+				editing_context.get_selection().replace (_editor.clicked_selection, start, end);
 		}
 	}
 
@@ -5760,14 +5770,14 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 void
 SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	Session* s = _editor->session ();
+	Session* s = editing_context.session ();
 
-	_editor->begin_reversible_selection_op (X_("Change Time Selection"));
+	editing_context.begin_reversible_selection_op (X_("Change Time Selection"));
 	if (movement_occurred) {
 		motion (event, false);
 		/* XXX this is not object-oriented programming at all. ick */
-		if (_editor->selection->time.consolidate ()) {
-			_editor->selection->TimeChanged ();
+		if (editing_context.get_selection().time.consolidate ()) {
+			editing_context.get_selection().TimeChanged ();
 		}
 
 		/* XXX what if its a music time selection? */
@@ -5776,17 +5786,17 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 			if (!s->config.get_external_sync () && s->transport_rolling ()) {
 				if (s->solo_selection_active ()) {
 					/* play the newly selected range, and move solos to match */
-					_editor->play_solo_selection (true);
+					_editor.play_solo_selection (true);
 				} else if (UIConfiguration::instance ().get_follow_edits () && s->get_play_range ()) {
 					/* already rolling a selected range, play the newly selected range */
-					s->request_play_range (&_editor->selection->time, true);
+					s->request_play_range (&editing_context.get_selection().time, true);
 				}
 			} else if (!s->transport_rolling () && UIConfiguration::instance ().get_follow_edits ()) {
-				s->request_locate (_editor->get_selection ().time.start_sample ());
+				s->request_locate (editing_context.get_selection ().time.start_sample ());
 			}
 
-			if (_editor->get_selection ().time.length () != 0) {
-				s->set_range_selection (_editor->get_selection ().time.start_time (), _editor->get_selection ().time.end_time ());
+			if (editing_context.get_selection ().time.length () != 0) {
+				s->set_range_selection (editing_context.get_selection ().time.start_time (), editing_context.get_selection ().time.end_time ());
 			} else {
 				s->clear_range_selection ();
 			}
@@ -5798,7 +5808,7 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		if (was_double_click ()) {
 			if (UIConfiguration::instance ().get_use_double_click_to_zoom_to_selection ()) {
-				_editor->temporal_zoom_selection (Both);
+				_editor.temporal_zoom_selection (Both);
 				return;
 			}
 		}
@@ -5808,22 +5818,22 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 				timepos_t pos   = adjusted_current_time (event, false);
 				timepos_t start = min (pos, start_at_start);
 				timepos_t end   = max (pos, end_at_start);
-				_editor->selection->set (start, end);
+				editing_context.get_selection().set (start, end);
 			}
 		} else {
 			if (Keyboard::modifier_state_equals (event->button.state, Keyboard::CopyModifier)) {
-				if (_editor->clicked_selection) {
-					_editor->selection->remove (_editor->clicked_selection);
+				if (_editor.clicked_selection) {
+					editing_context.get_selection().remove (_editor.clicked_selection);
 				}
 			} else {
-				if (!_editor->clicked_selection) {
-					_editor->selection->clear_time ();
+				if (!_editor.clicked_selection) {
+					editing_context.get_selection().clear_time ();
 				}
 			}
 		}
 
-		if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
-			_editor->selection->set (_editor->clicked_axisview);
+		if (_editor.clicked_axisview && !editing_context.get_selection().selected (_editor.clicked_axisview)) {
+			editing_context.get_selection().set (_editor.clicked_axisview);
 		}
 
 		if (s && s->get_play_range () && s->transport_rolling ()) {
@@ -5831,9 +5841,9 @@ SelectionDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 	}
 
-	_editor->stop_canvas_autoscroll ();
-	_editor->clicked_selection = 0;
-	_editor->commit_reversible_selection_op ();
+	editing_context.stop_canvas_autoscroll ();
+	_editor.clicked_selection = 0;
+	editing_context.commit_reversible_selection_op ();
 }
 
 void
@@ -5842,18 +5852,18 @@ SelectionDrag::aborted (bool)
 	/* XXX: TODO */
 }
 
-SelectionMarkerDrag::SelectionMarkerDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, e->default_time_domain (), false, false)
+SelectionMarkerDrag::SelectionMarkerDrag (Editor& e, ArdourCanvas::Item* i)
+	: EditorDrag (e, i, e.time_domain (), false, false)
 	, _edit_start (true)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New SelectionMarkerDrag\n");
-	bool ok = _editor->get_selection_extents (_start_at_start, _end_at_start);
+	bool ok = _editor.get_selection_extents (_start_at_start, _end_at_start);
 	assert (ok);
 
 	/* if the user adjusts the SelectionMarker, convert the selection to a timeline range (no track selection) */
-	_editor->get_selection ().clear_objects ();
-	_editor->get_selection ().clear_tracks ();
-	_editor->get_selection ().set (_start_at_start, _end_at_start);
+	editing_context.get_selection ().clear_objects ();
+	editing_context.get_selection ().clear_tracks ();
+	editing_context.get_selection ().set (_start_at_start, _end_at_start);
 }
 
 void
@@ -5868,20 +5878,20 @@ void
 SelectionMarkerDrag::motion (GdkEvent* event, bool first_move)
 {
 	if (first_move) {
-		_editor->begin_reversible_selection_op (X_("set time selection"));
+		editing_context.begin_reversible_selection_op (X_("set time selection"));
 	}
 	timepos_t const pos = adjusted_current_time (event, true);
 	if (_edit_start) {
 		if (pos < _end_at_start) {
-			_editor->get_selection ().clear_time ();
-			_editor->get_selection ().add (pos, _end_at_start);
-			_editor->set_snapped_cursor_position (pos);
+			editing_context.get_selection ().clear_time ();
+			editing_context.get_selection ().add (pos, _end_at_start);
+			editing_context.set_snapped_cursor_position (pos);
 		}
 	} else {
 		if (pos > _start_at_start) {
-			_editor->get_selection ().clear_time ();
-			_editor->get_selection ().add (_start_at_start, pos);
-			_editor->set_snapped_cursor_position (pos);
+			editing_context.get_selection ().clear_time ();
+			editing_context.get_selection ().add (_start_at_start, pos);
+			editing_context.set_snapped_cursor_position (pos);
 		}
 	}
 }
@@ -5890,7 +5900,7 @@ void
 SelectionMarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 {
 	if (movement_occurred) {
-		_editor->commit_reversible_selection_op ();
+		editing_context.commit_reversible_selection_op ();
 	}
 }
 
@@ -5898,22 +5908,22 @@ void
 SelectionMarkerDrag::aborted (bool movement_occurred)
 {
 	if (movement_occurred) {
-		_editor->abort_reversible_selection_op ();
+		editing_context.abort_reversible_selection_op ();
 	}
-	_editor->get_selection ().clear_time ();
-	_editor->get_selection ().add (_start_at_start, _end_at_start);
+	editing_context.get_selection ().clear_time ();
+	editing_context.get_selection ().add (_start_at_start, _end_at_start);
 }
 
-RangeMarkerBarDrag::RangeMarkerBarDrag (Editor* e, ArdourCanvas::Item* i, Operation o)
-	: Drag (e, i, e->default_time_domain (), false)
+RangeMarkerBarDrag::RangeMarkerBarDrag (Editor& e, ArdourCanvas::Item* i, Operation o)
+	: EditorDrag (e, i, e.time_domain (), false)
 	, _operation (o)
 	, _copy (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RangeMarkerBarDrag\n");
 
-	_drag_rect = new ArdourCanvas::Rectangle (_editor->time_line_group,
+	_drag_rect = new ArdourCanvas::Rectangle (_editor.time_line_group,
 	                                          ArdourCanvas::Rect (0.0, 0.0, 0.0,
-	                                                              physical_screen_height (_editor->current_toplevel ()->get_window ())));
+	                                                              physical_screen_height (_editor.current_toplevel ()->get_window ())));
 	_drag_rect->hide ();
 
 	_drag_rect->set_fill_color (UIConfiguration::instance ().color ("range drag rect"));
@@ -5932,14 +5942,14 @@ RangeMarkerBarDrag::~RangeMarkerBarDrag ()
 void
 RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 {
-	if (_editor->session () == 0) {
+	if (editing_context.session () == 0) {
 		return;
 	}
 
 	Gdk::Cursor* cursor = MouseCursors::invalid_cursor ();
 
-	if (!_editor->temp_location) {
-		_editor->temp_location = new Location (*_editor->session ());
+	if (!_editor.temp_location) {
+		_editor.temp_location = new Location (*editing_context.session ());
 	}
 
 	switch (_operation) {
@@ -5952,7 +5962,7 @@ RangeMarkerBarDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 			} else {
 				_copy = false;
 			}
-			cursor = _editor->cursors ()->selector;
+			cursor = editing_context.cursors ()->selector;
 			break;
 	}
 
@@ -5985,7 +5995,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 
 	if (_operation == CreateSkipMarker || _operation == CreateRangeMarker || _operation == CreateTransportMarker || _operation == CreateCDMarker) {
 		timepos_t grab (grab_time ());
-		_editor->snap_to (grab);
+		editing_context.snap_to (grab);
 
 		if (pf < grab_time ()) {
 			start = pf;
@@ -6000,25 +6010,25 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 		*/
 
 		if (first_move) {
-			_editor->temp_location->set (start, end);
+			_editor.temp_location->set (start, end);
 
 			crect->show ();
 
-			update_item (_editor->temp_location);
+			update_item (_editor.temp_location);
 			_drag_rect->show ();
 			//_drag_rect->raise_to_top();
 		}
 	}
 
 	if (start != end) {
-		_editor->temp_location->set (start, end);
+		_editor.temp_location->set (start, end);
 
-		double x1 = _editor->time_to_pixel (start);
-		double x2 = _editor->time_to_pixel (end);
+		double x1 = editing_context.time_to_pixel (start);
+		double x2 = editing_context.time_to_pixel (end);
 		crect->set_x0 (x1);
 		crect->set_x1 (x2);
 
-		update_item (_editor->temp_location);
+		update_item (_editor.temp_location);
 	}
 
 	show_verbose_cursor_time (pf);
@@ -6039,36 +6049,36 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			case CreateSkipMarker:
 			case CreateRangeMarker:
 			case CreateCDMarker: {
-				XMLNode& before = _editor->session ()->locations ()->get_state ();
+				XMLNode& before = editing_context.session ()->locations ()->get_state ();
 				if (_operation == CreateSkipMarker) {
-					_editor->begin_reversible_command (_("new skip marker"));
-					_editor->session ()->locations ()->next_available_name (rangename, _("skip"));
+					editing_context.begin_reversible_command (_("new skip marker"));
+					editing_context.session ()->locations ()->next_available_name (rangename, _("skip"));
 					flags = Location::Flags (Location::IsRangeMarker | Location::IsSkip);
-					_editor->range_bar_drag_rect->hide ();
+					_editor.range_bar_drag_rect->hide ();
 				} else if (_operation == CreateCDMarker) {
-					_editor->session ()->locations ()->next_available_name (rangename, _("CD"));
-					_editor->begin_reversible_command (_("new CD marker"));
+					editing_context.session ()->locations ()->next_available_name (rangename, _("CD"));
+					editing_context.begin_reversible_command (_("new CD marker"));
 					flags = Location::Flags (Location::IsRangeMarker | Location::IsCDMarker);
-					_editor->range_bar_drag_rect->hide ();
+					_editor.range_bar_drag_rect->hide ();
 				} else {
-					_editor->begin_reversible_command (_("new range marker"));
-					_editor->session ()->locations ()->next_available_name (rangename, _("unnamed"));
+					_editor.begin_reversible_command (_("new range marker"));
+					_editor.session ()->locations ()->next_available_name (rangename, _("unnamed"));
 					flags = Location::IsRangeMarker;
-					_editor->range_bar_drag_rect->hide ();
+					_editor.range_bar_drag_rect->hide ();
 				}
 
-				newloc = new Location (*_editor->session (), _editor->temp_location->start (), _editor->temp_location->end (), rangename, flags);
+				newloc = new Location (*editing_context.session (), _editor.temp_location->start (), _editor.temp_location->end (), rangename, flags);
 
-				_editor->session ()->locations ()->add (newloc, true);
-				XMLNode& after = _editor->session ()->locations ()->get_state ();
-				_editor->session ()->add_command (new MementoCommand<Locations> (*(_editor->session ()->locations ()), &before, &after));
-				_editor->commit_reversible_command ();
+				editing_context.session ()->locations ()->add (newloc, true);
+				XMLNode& after = editing_context.session ()->locations ()->get_state ();
+				editing_context.session ()->add_command (new MementoCommand<Locations> (*(editing_context.session ()->locations ()), &before, &after));
+				editing_context.commit_reversible_command ();
 				break;
 			}
 
 			case CreateTransportMarker:
 				// popup menu to pick loop or punch
-				_editor->new_transport_marker_context_menu (&event->button, _item);
+				_editor.new_transport_marker_context_menu (&event->button, _item);
 				break;
 		}
 
@@ -6078,7 +6088,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 		if (_operation == CreateTransportMarker) {
 			/* didn't drag, so just locate */
 
-			_editor->session ()->request_locate (grab_sample ());
+			editing_context.session ()->request_locate (grab_sample ());
 
 		} else if (_operation == CreateCDMarker) {
 			/* didn't drag, but mark is already created so do nothing */
@@ -6088,25 +6098,25 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			timepos_t start;
 			timepos_t end;
 
-			_editor->session ()->locations ()->marks_either_side (grab_time (), start, end);
+			editing_context.session ()->locations ()->marks_either_side (grab_time (), start, end);
 
 			if (end == timepos_t::max (end.time_domain ())) {
-				end = _editor->session ()->current_end ();
+				end = editing_context.session ()->current_end ();
 			}
 
 			if (start == timepos_t::max (start.time_domain ())) {
-				start = _editor->session ()->current_start ();
+				start = editing_context.session ()->current_start ();
 			}
 
-			switch (_editor->mouse_mode) {
+			switch (editing_context.current_mouse_mode()) {
 				case MouseObject:
 					/* find the two markers on either side and then make the selection from it */
-					_editor->select_all_within (start, end, 0.0f, FLT_MAX, _editor->track_views, SelectionSet, false);
+					_editing_context.select_all_within (start, end, 0.0f, FLT_MAX, _editor->track_views, SelectionSet, false);
 					break;
 
 				case MouseRange:
 					/* find the two markers on either side of the click and make the range out of it */
-					_editor->selection->set (start, end);
+					editing_context.get_selection().set (start, end);
 					break;
 
 				default:
@@ -6115,7 +6125,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 		}
 	}
 
-	_editor->stop_canvas_autoscroll ();
+	editing_context.stop_canvas_autoscroll ();
 }
 
 void
@@ -6129,15 +6139,15 @@ RangeMarkerBarDrag::aborted (bool movement_occurred)
 void
 RangeMarkerBarDrag::update_item (Location* location)
 {
-	double const x1 = _editor->time_to_pixel (location->start ());
-	double const x2 = _editor->time_to_pixel (location->end ());
+	double const x1 = editing_context.time_to_pixel (location->start ());
+	double const x2 = editing_context.time_to_pixel (location->end ());
 
 	_drag_rect->set_x0 (x1);
 	_drag_rect->set_x1 (x2);
 }
 
-NoteDrag::NoteDrag (Editor* e, ArdourCanvas::Item* i)
-	: Drag (e, i, Temporal::BeatTime, true, false)
+NoteDrag::NoteDrag (EditingContext& ec, ArdourCanvas::Item* i)
+	: Drag (ec, i, Temporal::BeatTime, true, false)
 	, _cumulative_dy (0)
 	, _was_selected (false)
 	, _copy (false)
@@ -6183,7 +6193,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 			if (add) {
 				_region->note_selected (_primary, true);
 			} else {
-				_editor->get_selection ().clear_points ();
+				editing_context.get_selection ().clear_points ();
 				_region->unique_select (_primary);
 			}
 		}
@@ -6221,7 +6231,7 @@ NoteDrag::total_dx (GdkEvent* event) const
 	timepos_t snap = n_qn + dx + snap_delta (event->button.state);
 
 	/* possibly snap and return corresponding delta (will be in beats) */
-	_editor->snap_to_with_modifier (snap, event);
+	editing_context.snap_to_with_modifier (snap, event);
 
 	/* we are trying to return the delta on the x-axis (almost certain in
 	 * beats), So now, having snapped etc., subtract the original note
@@ -6298,7 +6308,7 @@ NoteDrag::motion (GdkEvent* event, bool first_move)
 
 		_region->show_verbose_cursor_for_new_note_value (_primary->note (), new_note);
 
-		_editor->set_snapped_cursor_position (_region->region ()->region_beats_to_absolute_time (_primary->note ()->time ()) + dx_qn);
+		editing_context.set_snapped_cursor_position (_region->region ()->region_beats_to_absolute_time (_primary->note ()->time ()) + dx_qn);
 	}
 }
 
@@ -6308,8 +6318,8 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 	if (!moved) {
 		/* no motion - select note */
 
-		if (_editor->current_mouse_mode () == Editing::MouseContent ||
-		    _editor->current_mouse_mode () == Editing::MouseDraw) {
+		if (editing_context.current_mouse_mode () == Editing::MouseContent ||
+		    editing_context.current_mouse_mode () == Editing::MouseDraw) {
 			bool changed = false;
 
 			if (_was_selected) {
@@ -6318,7 +6328,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 					_region->note_deselected (_primary);
 					changed = true;
 				} else {
-					_editor->get_selection ().clear_points ();
+					editing_context.get_selection ().clear_points ();
 					_region->unique_select (_primary);
 					changed = true;
 				}
@@ -6327,7 +6337,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 				bool add    = Keyboard::modifier_state_equals (ev->button.state, Keyboard::PrimaryModifier);
 
 				if (!extend && !add && _region->selection_size () > 1) {
-					_editor->get_selection ().clear_points ();
+					editing_context.get_selection ().clear_points ();
 					_region->unique_select (_primary);
 					changed = true;
 				} else if (extend) {
@@ -6340,8 +6350,8 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			}
 
 			if (changed) {
-				_editor->begin_reversible_selection_op (X_("Select Note Release"));
-				_editor->commit_reversible_selection_op ();
+				editing_context.begin_reversible_selection_op (X_("Select Note Release"));
+				editing_context.commit_reversible_selection_op ();
 			}
 		}
 	} else {
@@ -6356,8 +6366,8 @@ NoteDrag::aborted (bool)
 }
 
 /** Make an AutomationRangeDrag for lines in an AutomationTimeAxisView */
-AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView* atv, float initial_value, list<TimelineRange> const& r)
-	: Drag (editor, &atv->base_item (), editor->default_time_domain ()) /* XXX NUTEMPO FIX TIME DOMAIN */
+AutomationRangeDrag::AutomationRangeDrag (EditingContext& ec, AutomationTimeAxisView* atv, float initial_value, list<TimelineRange> const& r)
+	: Drag (ec, &atv->base_item (), ec.time_domain ())
 	, _ranges (r)
 	, _y_origin (atv->y_position ())
 	, _y_height (atv->effective_height ()) // or atv->lines()->front()->height() ?!
@@ -6369,8 +6379,8 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, AutomationTimeAxisView
 }
 
 /** Make an AutomationRangeDrag for region gain lines or MIDI controller regions */
-AutomationRangeDrag::AutomationRangeDrag (Editor* editor, list<RegionView*> const& v, list<TimelineRange> const& r, double y_origin, double y_height)
-	: Drag (editor, v.front ()->get_canvas_group (), editor->default_time_domain ()) /* XXX NUTEMPO FIX TIME DOMAIN */
+AutomationRangeDrag::AutomationRangeDrag (EditingContext& ec, list<RegionView*> const& v, list<TimelineRange> const& r, double y_origin, double y_height)
+	: Drag (ec, v.front ()->get_canvas_group (), ec.time_domain ())
 	, _ranges (r)
 	, _y_origin (y_origin)
 	, _y_height (y_height)
@@ -6491,7 +6501,7 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 	}
 
 	if (first_move) {
-		_editor->begin_reversible_command (_("automation range move"));
+		editing_context.begin_reversible_command (_("automation range move"));
 
 		if (!_ranges.empty ()) {
 			/* add guard points */
@@ -6536,7 +6546,7 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 					bool const add_q  = the_list->editor_add (q, q_value, false);
 
 					if (add_p || add_q) {
-						_editor->session ()->add_command (
+						editing_context.session ()->add_command (
 						    new MementoCommand<AutomationList> (*the_list.get (), &before, &the_list->get_state ()));
 					}
 				}
@@ -6571,7 +6581,7 @@ AutomationRangeDrag::motion (GdkEvent*, bool first_move)
 					bool const add_q  = the_list->editor_add (q, value (the_list, q), false);
 
 					if (add_p || add_q) {
-						_editor->session ()->add_command (
+						editing_context.session ()->add_command (
 						    new MementoCommand<AutomationList> (*the_list.get (), &before, &the_list->get_state ()));
 					}
 				}
@@ -6636,7 +6646,7 @@ AutomationRangeDrag::finished (GdkEvent* event, bool motion_occurred)
 		i->line->end_drag (false, 0);
 	}
 
-	_editor->commit_reversible_command ();
+	editing_context.commit_reversible_command ();
 }
 
 void
@@ -6665,8 +6675,8 @@ DraggingView::DraggingView (RegionView* v, RegionDrag* parent, TimeAxisView* ita
 	initial_end      = v->region ()->position () + v->region ()->length ();
 }
 
-PatchChangeDrag::PatchChangeDrag (Editor* e, PatchChange* i, MidiRegionView* r)
-	: Drag (e, i->canvas_item (), Temporal::BeatTime, true, false)
+PatchChangeDrag::PatchChangeDrag (EditingContext& ec, PatchChange* i, MidiRegionView* r)
+	: Drag (ec, i->canvas_item (), Temporal::BeatTime, true, false)
 	, _region_view (r)
 	, _patch_change (i)
 	, _cumulative_dx (0)
@@ -6686,11 +6696,11 @@ PatchChangeDrag::motion (GdkEvent* ev, bool)
 	f           = min (f, r->nt_last ());
 
 	timecnt_t const dxf = grab_time ().distance (f);         // permitted dx
-	double const    dxu = _editor->duration_to_pixels (dxf); // permitted fx in units
+	double const    dxu = editing_context.duration_to_pixels (dxf); // permitted fx in units
 	_patch_change->move (ArdourCanvas::Duple (dxu - _cumulative_dx, 0));
 	_cumulative_dx = dxu;
 
-	_editor->set_snapped_cursor_position (f);
+	editing_context.set_snapped_cursor_position (f);
 }
 
 void
@@ -6725,8 +6735,8 @@ PatchChangeDrag::setup_pointer_offset ()
 	_pointer_offset                = region->source_beats_to_absolute_time (_patch_change->patch ()->time ()).distance (raw_grab_time ());
 }
 
-MidiRubberbandSelectDrag::MidiRubberbandSelectDrag (Editor* e, MidiRegionView* rv)
-	: RubberbandSelectDrag (e, rv->get_canvas_group ())
+MidiRubberbandSelectDrag::MidiRubberbandSelectDrag (EditingContext& ec, MidiRegionView* rv)
+	: RubberbandSelectDrag (ec, rv->get_canvas_group ())
 	, _region_view (rv)
 {
 }
@@ -6745,8 +6755,8 @@ MidiRubberbandSelectDrag::deselect_things ()
 	/* XXX */
 }
 
-MidiVerticalSelectDrag::MidiVerticalSelectDrag (Editor* e, MidiRegionView* rv)
-	: RubberbandSelectDrag (e, rv->get_canvas_group ())
+MidiVerticalSelectDrag::MidiVerticalSelectDrag (EditingContext& ec, MidiRegionView* rv)
+	: RubberbandSelectDrag (ec, rv->get_canvas_group ())
 	, _region_view (rv)
 {
 	_vertical_only = true;
@@ -6771,8 +6781,9 @@ MidiVerticalSelectDrag::deselect_things ()
 	/* XXX */
 }
 
-EditorRubberbandSelectDrag::EditorRubberbandSelectDrag (Editor* e, ArdourCanvas::Item* i)
+EditorRubberbandSelectDrag::EditorRubberbandSelectDrag (Editor& e, ArdourCanvas::Item* i)
 	: RubberbandSelectDrag (e, i)
+	, editor (e)
 {
 }
 
@@ -6786,29 +6797,27 @@ EditorRubberbandSelectDrag::select_things (int button_state, timepos_t const& x1
 
 	SelectionOperation op = ArdourKeyboard::selection_type (button_state);
 
-	_editor->begin_reversible_selection_op (X_("rubberband selection"));
-
-	_editor->select_all_within (x1, x2.decrement (), y1, y2, _editor->track_views, op, false);
-
-	_editor->commit_reversible_selection_op ();
+	editing_context.begin_reversible_selection_op (X_("rubberband selection"));
+	editing_context.select_all_within (x1, x2.decrement (), y1, y2, editor.track_views, op, false);
+	editing_context.commit_reversible_selection_op ();
 }
 
 void
 EditorRubberbandSelectDrag::deselect_things ()
 {
-	_editor->begin_reversible_selection_op (X_("Clear Selection (rubberband)"));
+	editing_context.begin_reversible_selection_op (X_("Clear Selection (rubberband)"));
 
-	_editor->selection->clear_tracks ();
-	_editor->selection->clear_regions ();
-	_editor->selection->clear_points ();
-	_editor->selection->clear_lines ();
-	_editor->selection->clear_midi_notes ();
+	editing_context.get_selection().clear_tracks ();
+	editing_context.get_selection().clear_regions ();
+	editing_context.get_selection().clear_points ();
+	editing_context.get_selection().clear_lines ();
+	editing_context.get_selection().clear_midi_notes ();
 
-	_editor->commit_reversible_selection_op ();
+	editing_context.commit_reversible_selection_op ();
 }
 
-NoteCreateDrag::NoteCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* rv)
-	: Drag (e, i, Temporal::BeatTime)
+NoteCreateDrag::NoteCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiRegionView* rv)
+	: Drag (ec, i, Temporal::BeatTime)
 	, _region_view (rv)
 	, _drag_rect (0)
 {
@@ -6824,7 +6833,7 @@ Temporal::Beats
 NoteCreateDrag::round_to_grid (timepos_t const& pos, GdkEvent const* event) const
 {
 	timepos_t snapped = pos;
-	_editor->snap_to (snapped, RoundNearest, SnapToGrid_Scaled);
+	editing_context.snap_to (snapped, RoundNearest, SnapToGrid_Scaled);
 	return snapped.beats ();
 }
 
@@ -6851,8 +6860,8 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	const timecnt_t rrp1 (_region_view->region ()->region_relative_position (_note[0]));
 	const timecnt_t rrp2 (_region_view->region ()->region_relative_position (_note[1]));
 
-	double const x0 = _editor->sample_to_pixel (rrp1.samples ());
-	double const x1 = _editor->sample_to_pixel (rrp2.samples ());
+	double const x0 = editing_context.sample_to_pixel (rrp1.samples ());
+	double const x1 = editing_context.sample_to_pixel (rrp2.samples ());
 	double const y  = _region_view->note_to_y (_region_view->y_to_note (y_to_region (event->button.y)));
 
 	_drag_rect->set (ArdourCanvas::Rect (x0, y, x1, y + floor (_region_view->midi_stream_view ()->note_height ())));
@@ -6875,8 +6884,8 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 	const timecnt_t rrp1 (_region_view->region ()->region_relative_position (_note[0]));
 	const timecnt_t rrp2 (_region_view->region ()->region_relative_position (_note[1]));
 
-	double const x0 = _editor->sample_to_pixel (rrp1.samples ());
-	double const x1 = _editor->sample_to_pixel (rrp2.samples ());
+	double const x0 = editing_context.sample_to_pixel (rrp1.samples ());
+	double const x1 = editing_context.sample_to_pixel (rrp2.samples ());
 	_drag_rect->set_x0 (std::min (x0, x1));
 	_drag_rect->set_x1 (std::max (x0, x1));
 }
@@ -6911,8 +6920,8 @@ NoteCreateDrag::aborted (bool)
 {
 }
 
-HitCreateDrag::HitCreateDrag (Editor* e, ArdourCanvas::Item* i, MidiRegionView* rv)
-	: Drag (e, i, Temporal::BeatTime)
+HitCreateDrag::HitCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiRegionView* rv)
+	: Drag (ec, i, Temporal::BeatTime)
 	, _region_view (rv)
 	, _last_pos (Temporal::Beats ())
 	, _y (0.0)
@@ -6941,7 +6950,7 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 	std::shared_ptr<MidiRegion> mr = _region_view->midi_region ();
 
 	timepos_t pos (_drags->current_pointer_time ());
-	_editor->snap_to (pos, RoundNearest, SnapToGrid_Scaled);
+	editing_context.snap_to (pos, RoundNearest, SnapToGrid_Scaled);
 	Temporal::Beats aligned_beats (pos.beats ());
 
 	Beats const start = _region_view->region ()->absolute_time_to_region_beats (timepos_t (aligned_beats));
@@ -6961,7 +6970,7 @@ HitCreateDrag::y_to_region (double y) const
 	return y;
 }
 
-CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor* e, AudioRegionView* rv, ArdourCanvas::Item* i, bool start_yn)
+CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor& e, AudioRegionView* rv, ArdourCanvas::Item* i, bool start_yn)
 	: Drag (e, i, Temporal::AudioTime)
 	, arv (rv)
 	, start (start_yn)
@@ -7028,7 +7037,7 @@ CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 	timecnt_t newlen = len + tdist;
 	new_length       = timecnt_t (ar->verify_xfade_bounds (newlen.samples (), start));
 
-	_editor->begin_reversible_command ("xfade trim");
+	editing_context.begin_reversible_command ("xfade trim");
 	ar->playlist ()->clear_owned_changes ();
 
 	if (start) {
@@ -7044,8 +7053,8 @@ CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 
 	vector<Command*> cmds;
 	ar->playlist ()->rdiff (cmds);
-	_editor->session ()->add_commands (cmds);
-	_editor->commit_reversible_command ();
+	editing_context.session ()->add_commands (cmds);
+	editing_context.commit_reversible_command ();
 }
 
 void
@@ -7058,8 +7067,8 @@ CrossfadeEdgeDrag::aborted (bool)
 	}
 }
 
-RegionCutDrag::RegionCutDrag (Editor* e, ArdourCanvas::Item* item, samplepos_t pos)
-	: Drag (e, item, e->default_time_domain (), true)
+RegionCutDrag::RegionCutDrag (Editor& e, ArdourCanvas::Item* item, samplepos_t pos)
+	: EditorDrag (e, item, e.time_domain (), true)
 {
 }
 
@@ -7082,18 +7091,18 @@ RegionCutDrag::motion (GdkEvent* event, bool)
 void
 RegionCutDrag::finished (GdkEvent* event, bool)
 {
-	_editor->get_track_canvas ()->canvas ()->re_enter ();
+	_editor.get_track_canvas ()->canvas ()->re_enter ();
 
 	timepos_t pos (_drags->current_pointer_time ());
-	_editor->snap_to_with_modifier (pos, event);
+	editing_context.snap_to_with_modifier (pos, event);
 
-	RegionSelection rs = _editor->get_regions_from_selection_and_mouse (pos);
+	RegionSelection rs = _editor.get_regions_from_selection_and_mouse (pos);
 
 	if (rs.empty ()) {
 		return;
 	}
 
-	_editor->split_regions_at (pos, rs);
+	_editor.split_regions_at (pos, rs);
 }
 
 void
@@ -7101,7 +7110,7 @@ RegionCutDrag::aborted (bool)
 {
 }
 
-RegionMarkerDrag::RegionMarkerDrag (Editor* ed, RegionView* r, ArdourCanvas::Item* i)
+RegionMarkerDrag::RegionMarkerDrag (Editor& ed, RegionView* r, ArdourCanvas::Item* i)
 	: Drag (ed, i, r->region ()->position ().time_domain ())
 	, rv (r)
 	, view (static_cast<ArdourMarker*> (i->get_data ("marker")))
@@ -7188,8 +7197,8 @@ RegionMarkerDrag::setup_pointer_offset ()
 	_pointer_offset               = model_abs_pos.distance (raw_grab_time ());
 }
 
-LollipopDrag::LollipopDrag (Editor* ed, ArdourCanvas::Item* l)
-	: Drag (ed, l, Temporal::BeatTime)
+LollipopDrag::LollipopDrag (EditingContext& ec, ArdourCanvas::Item* l)
+	: Drag (ec, l, Temporal::BeatTime)
 	, _primary (dynamic_cast<ArdourCanvas::Lollipop*> (l))
 {
 	DEBUG_TRACE (DEBUG::Drags, "New LollipopDrag\n");
@@ -7254,8 +7263,8 @@ LollipopDrag::setup_pointer_offset ()
 /********/
 
 template<typename OrderedPointList, typename OrderedPoint>
-FreehandLineDrag<OrderedPointList,OrderedPoint>::FreehandLineDrag (Editor* editor, ArdourCanvas::Item* p, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
-	: Drag (editor, &r, time_domain)
+FreehandLineDrag<OrderedPointList,OrderedPoint>::FreehandLineDrag (EditingContext& ec, ArdourCanvas::Item* p, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
+	: Drag (ec, &r, time_domain)
 	, parent (p)
 	, base_rect (r)
 	, dragging_line (nullptr)
@@ -7312,13 +7321,13 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 		return;
 	}
 
-	_editor->snap_to_with_modifier (pos, ev, Temporal::RoundNearest, ARDOUR::SnapToAny_Visual, true);
+	editing_context.snap_to_with_modifier (pos, ev, Temporal::RoundNearest, ARDOUR::SnapToAny_Visual, true);
 
 	if (pos != _drags->current_pointer_time()) {
 		did_snap = true;
 	}
 
-	double const pointer_x = _editor->time_to_pixel (pos);
+	double const pointer_x = editing_context.time_to_pixel (pos);
 
 	ArdourCanvas::Rect r = base_rect.item_to_canvas (base_rect.get());
 
@@ -7456,8 +7465,8 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::mid_drag_key_event (GdkEventKey
 
 /**********************/
 
-AutomationDrawDrag::AutomationDrawDrag (Editor* editor, ArdourCanvas::Item* p, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
-	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (editor, p, r, time_domain)
+AutomationDrawDrag::AutomationDrawDrag (EditingContext& ec, ArdourCanvas::Item* p, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
+	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (ec, p, r, time_domain)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New AutomationDrawDrag\n");
 }
@@ -7489,14 +7498,14 @@ AutomationDrawDrag::finished (GdkEvent* event, bool motion_occured)
 	FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint>::finished (event, motion_occured);
 
 	MergeableLine* ml = lm->make_merger();
-	ml->merge_drawn_line (*_editor, *_editor->session(), drawn_points, !did_snap);
+	ml->merge_drawn_line (editing_context, *editing_context.session(), drawn_points, !did_snap);
 	delete ml;
 }
 
 /*****************/
 
-VelocityLineDrag::VelocityLineDrag (Editor* editor, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
-	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (editor, nullptr, r, time_domain)
+VelocityLineDrag::VelocityLineDrag (EditingContext& ec, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
+	: FreehandLineDrag<Evoral::ControlList::OrderedPoints,Evoral::ControlList::OrderedPoint> (ec, nullptr, r, time_domain)
 	, grv (static_cast<VelocityGhostRegion*> (r.get_data ("ghostregionview")))
 	, drag_did_change (false)
 {

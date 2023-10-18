@@ -1210,7 +1210,7 @@ Editor::canvas_section_box_event (GdkEvent *event)
 		case GDK_BUTTON_PRESS:
 			if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)
 			   && event->button.button == 1) {
-				_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
+				_drags->set (new CursorDrag (*this, *_playhead_cursor, false), event);
 			}
 			/*fallthrough*/
 		case GDK_2BUTTON_PRESS:
@@ -1477,7 +1477,7 @@ Editor::drop_regions (const Glib::RefPtr<Gdk::DragContext>& /*context*/,
 
 		if ((std::dynamic_pointer_cast<AudioRegion> (region_copy) != 0 && dynamic_cast<AudioTimeAxisView*> (rtav) != 0) ||
 		    (std::dynamic_pointer_cast<MidiRegion> (region_copy) != 0 && dynamic_cast<MidiTimeAxisView*> (rtav) != 0)) {
-			_drags->set (new RegionInsertDrag (this, region_copy, rtav, timepos_t (pos), drag_time_domain (region_copy.get())), &event);
+			_drags->set (new RegionInsertDrag (*this, region_copy, rtav, timepos_t (pos), drag_time_domain (region_copy.get())), &event);
 			_drags->end_grab (&event);
 		}
 	}
