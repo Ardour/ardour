@@ -171,7 +171,7 @@ PatchChange::event_handler (GdkEvent* ev)
 					return true;
 
 				} else if (ev->button.button == 1) {
-					e->drags ()->set (new PatchChangeDrag (e, this, &_region), ev);
+					e->drags ()->set (new PatchChangeDrag (*e, this, &_region), ev);
 					return true;
 				}
 			}

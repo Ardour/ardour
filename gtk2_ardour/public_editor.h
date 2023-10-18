@@ -138,11 +138,6 @@ public:
 
 	virtual void setup_tooltips() = 0;
 
-	/* returns the time domain to be used when there's no other overriding
-	 * reason to choose one.
-	 */
-	virtual Temporal::TimeDomain default_time_domain() const = 0;
-
 	/** Attach this editor to a Session.
 	 * @param s Session to connect to.
 	 */
@@ -306,18 +301,6 @@ public:
 
 	virtual void toggle_cue_behavior () = 0;
 
-	/** Set whether the editor should follow the playhead.
-	 * @param yn true to follow playhead, otherwise false.
-	 * @param catch_up true to reset the editor view to show the playhead (if yn == true), otherwise false.
-	 */
-	virtual void set_follow_playhead (bool yn, bool catch_up = true) = 0;
-
-	/** Toggle whether the editor is following the playhead */
-	virtual void toggle_follow_playhead () = 0;
-
-	/** @return true if the editor is following the playhead */
-	virtual bool follow_playhead () const = 0;
-
 	/** @return true if the playhead is currently being dragged, otherwise false */
 	virtual bool dragging_playhead () const = 0;
 	virtual samplepos_t leftmost_sample() const = 0;
@@ -453,12 +436,6 @@ public:
 
 	virtual MixerStrip* get_current_mixer_strip () const = 0;
 
-	virtual DragManager* drags () const = 0;
-	virtual bool drag_active () const = 0;
-	virtual bool preview_video_drag_active () const = 0;
-	virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
-	virtual void stop_canvas_autoscroll () = 0;
-	virtual bool autoscroll_active() const = 0;
 
 	virtual Temporal::TempoMap::WritableSharedPtr begin_tempo_map_edit () = 0;
 	virtual void abort_tempo_map_edit () = 0;

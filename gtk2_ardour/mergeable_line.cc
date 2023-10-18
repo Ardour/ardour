@@ -21,7 +21,7 @@
 #include "ardour/session.h"
 
 #include "automation_line.h"
-#include "editor.h"
+#include "editing_context.h"
 #include "mergeable_line.h"
 #include "route_time_axis.h"
 #include "selectable.h"
@@ -32,7 +32,7 @@
 using namespace ARDOUR;
 
 void
-MergeableLine::merge_drawn_line (Editor& e, Session& s, Evoral::ControlList::OrderedPoints& points, bool thin)
+MergeableLine::merge_drawn_line (EditingContext& e, Session& s, Evoral::ControlList::OrderedPoints& points, bool thin)
 {
 	if (points.empty()) {
 		return;

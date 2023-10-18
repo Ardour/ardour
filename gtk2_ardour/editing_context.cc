@@ -18,10 +18,13 @@
 
 #include "pbd/error.h"
 
+#include "ardour/rc_configuration.h"
+
 #include "gtkmm2ext/bindings.h"
 
 #include "actions.h"
 #include "editing_context.h"
+#include "editor_drag.h"
 #include "midi_region_view.h"
 
 #include "pbd/i18n.h"
@@ -69,6 +72,8 @@ EditingContext::EditingContext ()
 	, _draw_length (GridTypeNone)
 	, _draw_velocity (DRAW_VEL_AUTO)
 	, _draw_channel (DRAW_CHAN_AUTO)
+	, _drags (new DragManager (this))
+	, rubberband_rect (0)
 {
 	grid_type_strings =  I18N (_grid_type_strings);
 }
@@ -1041,3 +1046,44 @@ EditingContext::build_draw_midi_menus ()
 	draw_channel_selector.AddMenuElem (MenuElem (_("Auto"), sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_channel_selection_done), DRAW_CHAN_AUTO)));
 }
 
+bool
+EditingContext::drag_active () const
+{
+	return _drags->active();
+}
+
+bool
+EditingContext::preview_video_drag_active () const
+{
+	return _drags->preview_video ();
+}
+
+Temporal::TimeDomain
+EditingContext::time_domain () const
+{
+	if (_session) {
+		return _session->config.get_default_time_domain();
+	}
+
+	/* Probably never reached */
+
+	if (_snap_mode == SnapOff) {
+		return Temporal::AudioTime;
+	}
+
+	switch (_grid_type) {
+		case GridTypeNone:
+			/* fallthrough */
+		case GridTypeMinSec:
+			/* fallthrough */
+		case GridTypeCDFrame:
+			/* fallthrough */
+		case GridTypeTimecode:
+			/* fallthrough */
+			return Temporal::AudioTime;
+		default:
+			break;
+	}
+
+	return Temporal::BeatTime;
+}

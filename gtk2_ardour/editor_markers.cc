@@ -1524,7 +1524,7 @@ Editor::marker_menu_set_from_playhead ()
 
 		timepos_t pos (_session->audible_sample());
 
-		if (default_time_domain() == Temporal::BeatTime) {
+		if (time_domain() == Temporal::BeatTime) {
 			pos = timepos_t (pos.beats());
 		}
 

@@ -505,9 +505,9 @@ MidiRegionView::button_press (GdkEventButton* ev)
 		if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
 
 			if (midi_view()->note_mode() == Percussive) {
-				// editor->drags()->set (new HitCreateDrag (dynamic_cast<Editor *> (editor), group, this), (GdkEvent *) ev);
+				editing_context.drags()->set (new HitCreateDrag (editing_context, group, this), (GdkEvent *) ev);
 			} else {
-				// editor->drags()->set (new NoteCreateDrag (dynamic_cast<Editor *> (editor), group, this), (GdkEvent *) ev);
+				editing_context.drags()->set (new NoteCreateDrag (editing_context, group, this), (GdkEvent *) ev);
 			}
 
 			_mouse_state = AddDragging;
@@ -575,7 +575,7 @@ MidiRegionView::button_release (GdkEventButton* ev)
 		/* Don't a ghost note when we added a note - wait until motion to avoid visual confusion.
 		   we don't want one when we were drag-selecting either. */
 	case SelectRectDragging:
-		// editor.drags()->end_grab ((GdkEvent *) ev);
+		editing_context.drags()->end_grab ((GdkEvent *) ev);
 		_mouse_state = None;
 		break;
 
@@ -642,7 +642,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 			MouseMode m = editing_context.current_mouse_mode();
 
 			if (m == MouseContent && !Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-				// editing_context.drags()->set (new MidiRubberbandSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
+				editing_context.drags()->set (new MidiRubberbandSelectDrag (editing_context, this), (GdkEvent *) ev);
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 					clear_selection_internal ();
 					_mouse_changed_selection = true;
@@ -650,7 +650,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 				_mouse_state = SelectRectDragging;
 				return true;
 			} else if (m == MouseRange) {
-				// editing_context.drags()->set (new MidiVerticalSelectDrag (dynamic_cast<Editor *> (&editor), this), (GdkEvent *) ev);
+				editing_context.drags()->set (new MidiVerticalSelectDrag (editing_context, this), (GdkEvent *) ev);
 				_mouse_state = SelectVerticalDragging;
 				return true;
 			}
@@ -661,7 +661,7 @@ MidiRegionView::motion (GdkEventMotion* ev)
 	case SelectRectDragging:
 	case SelectVerticalDragging:
 	case AddDragging:
-		// editing_context.drags()->motion_handler ((GdkEvent *) ev, false);
+		editing_context.drags()->motion_handler ((GdkEvent *) ev, false);
 		break;
 
 	case SelectTouchDragging:
@@ -680,9 +680,9 @@ MidiRegionView::motion (GdkEventMotion* ev)
 bool
 MidiRegionView::scroll (GdkEventScroll* ev)
 {
-	// if (editing_context.drags()->active()) {
-	// return false;
-	// }
+	if (editing_context.drags()->active()) {
+		return false;
+	}
 
 	if (!editing_context.get_selection().selected (this)) {
 		return false;
@@ -863,7 +863,7 @@ void
 MidiRegionView::show_list_editor ()
 {
 	if (!_list_editor) {
-		_list_editor = new MidiListEditor (trackview.session(), midi_region(), midi_view()->midi_track());
+		_list_editor = new MidiListEditor (editing_context.session(), midi_region(), midi_view()->midi_track());
 	}
 	_list_editor->present ();
 }
@@ -1022,7 +1022,7 @@ MidiRegionView::apply_note_diff (bool as_subcommand, bool was_copy)
 	{
 		PBD::Unwinder<bool> puw (_select_all_notes_after_add, true);
 		/*note that we don't use as_commit here, because that would BEGIN a new undo record; we already have one underway*/
-		_model->apply_diff_command_as_subcommand (*trackview.session(), _note_diff_command);
+		_model->apply_diff_command_as_subcommand (*editing_context.session(), _note_diff_command);
 	}
 
 	if (!as_subcommand) {
@@ -1454,7 +1454,7 @@ MidiRegionView::display_sysexes()
 
 			/* get an approximate value for the number of samples per video frame */
 
-			double video_frame = trackview.session()->sample_rate() * (1.0/30);
+			double video_frame = editing_context.session()->sample_rate() * (1.0/30);
 
 			/* if we are zoomed out beyond than the cutoff (i.e. more
 			 * samples per pixel than samples per 4 video frames), don't
@@ -2215,9 +2215,9 @@ MidiRegionView::delete_selection()
 		return;
 	}
 
-	// if (editing_context.drags()->active()) {
-	//	return;
-	// }
+	if (editing_context.drags()->active()) {
+		return;
+	}
 
 	start_note_diff_command (_("delete selection"));
 

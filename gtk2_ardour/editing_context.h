@@ -49,10 +49,13 @@
 using ARDOUR::samplepos_t;
 using ARDOUR::samplecnt_t;
 
-class VerboseCursor;
-class MouseCursors;
-class MidiRegionView;
 class CursorContext;
+class DragManager;
+class EditorCursor;
+class MidiRegionView;
+class MouseCursors;
+class VerboseCursor;
+class TrackViewList;
 
 class EditingContext : public ARDOUR::SessionHandlePtr
 {
@@ -68,9 +71,40 @@ public:
 
 	void set_session (ARDOUR::Session*);
 
+	Temporal::TimeDomain time_domain () const;
+
+	DragManager* drags () const {
+		return _drags;
+	}
+
+	bool drag_active () const;
+	bool preview_video_drag_active () const;
+
+	virtual void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, TrackViewList const &, Selection::Operation, bool) = 0;
+
+	virtual EditorCursor* playhead_cursor () const = 0;
+	virtual EditorCursor* snapped_cursor () const = 0;
+
+	virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
+	virtual void stop_canvas_autoscroll () = 0;
+	virtual bool autoscroll_active() const = 0;
+
 	virtual void instant_save() = 0;
 	virtual void redisplay_grid (bool immediate_redraw) = 0;
 	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) = 0;
+
+	/** Set whether the editor should follow the playhead.
+	 * @param yn true to follow playhead, otherwise false.
+	 * @param catch_up true to reset the editor view to show the playhead (if yn == true), otherwise false.
+	 */
+	virtual void set_follow_playhead (bool yn, bool catch_up = true) = 0;
+
+	/** Toggle whether the editor is following the playhead */
+	virtual void toggle_follow_playhead () = 0;
+
+	/** @return true if the editor is following the playhead */
+	virtual bool follow_playhead () const = 0;
+
 	/** Get the topmost enter context for the given item type.
 	 *
 	 * This is used to change the cursor associated with a given enter context,
@@ -78,8 +112,13 @@ public:
 	 */
 	virtual EnterContext* get_enter_context(ItemType type) = 0;
 
+	virtual void begin_selection_op_history () = 0;
 	virtual void begin_reversible_selection_op (std::string cmd_name) = 0;
 	virtual void commit_reversible_selection_op () = 0;
+	virtual void abort_reversible_selection_op () = 0;
+	virtual void undo_selection_op () = 0;
+	virtual void redo_selection_op () = 0;
+
 	virtual void begin_reversible_command (std::string cmd_name) = 0;
 	virtual void begin_reversible_command (GQuark) = 0;
 	virtual void abort_reversible_command () = 0;
@@ -95,6 +134,16 @@ public:
 	virtual double time_to_pixel_unrounded (Temporal::timepos_t const & pos) const = 0;
 	virtual double duration_to_pixels (Temporal::timecnt_t const & pos) const = 0;
 	virtual double duration_to_pixels_unrounded (Temporal::timecnt_t const & pos) const = 0;
+	/** computes the timeline sample (sample) of an event whose coordinates
+	 * are in canvas units (pixels, scroll offset included).
+	 */
+	virtual samplepos_t canvas_event_sample (GdkEvent const * event, double* pcx = nullptr, double* pcy = nullptr) const = 0;
+	/** computes the timeline position for an event whose coordinates
+	 * are in canvas units (pixels, scroll offset included). The time
+	 * domain used by the return value will match ::default_time_domain()
+	 * at the time of calling.
+	 */
+	virtual Temporal::timepos_t canvas_event_time (GdkEvent const*, double* px = nullptr, double* py = nullptr) const = 0;
 
 	virtual Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
 	virtual Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
@@ -234,8 +283,12 @@ public:
 	void draw_velocity_selection_done (int);
 	void draw_velocity_chosen (int);
 
-	 void draw_channel_selection_done (int);
+	void draw_channel_selection_done (int);
 	void draw_channel_chosen (int);
+
+	DragManager* _drags;
+
+	ArdourCanvas::Rectangle* rubberband_rect;
 };
 
 #endif /* __ardour_midi_editing_context_h__ */
