@@ -662,9 +662,8 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 		int note = _view.y_to_note(ev->y);
 		bool tertiary = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 		bool primary = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
-		bool toggle = (ev->state == GDK_CONTROL_MASK);
 
-		if (ev->type == GDK_2BUTTON_PRESS) {
+		if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
 			if (primary) {
 				_adj.set_value (0.0);
 				_adj.set_page_size (127.0);
@@ -679,7 +678,7 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 		} else if (tertiary && (ev->button == 1 || ev->button == 2)) {
 			ExtendNoteSelection (note); // EMIT SIGNAL
 			return true;
-		} else if (toggle && (ev->button == 1 || ev->button == 2)) {
+		} else if (primary && (ev->button == 1 || ev->button == 2)) {
 			ToggleNoteSelection (note); // EMIT SIGNAL
 			return true;
 		} else if (ev->button == 1 && note >= 0 && note < 128) {
