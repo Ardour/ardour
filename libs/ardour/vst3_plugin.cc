@@ -899,7 +899,7 @@ VST3Plugin::do_save_preset (std::string name)
 {
 
 	std::shared_ptr<VST3PluginInfo> nfo = std::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
-	PBD::Searchpath                   psp = nfo->preset_search_path ();
+	PBD::Searchpath                 psp = nfo->preset_search_path ();
 
 	assert (!psp.empty ());
 
@@ -932,7 +932,7 @@ void
 VST3Plugin::do_remove_preset (std::string name)
 {
 	std::shared_ptr<VST3PluginInfo> nfo = std::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
-	PBD::Searchpath                   psp = nfo->preset_search_path ();
+	PBD::Searchpath                 psp = nfo->preset_search_path ();
 
 	assert (!psp.empty ());
 
@@ -1024,7 +1024,7 @@ VST3Plugin::find_presets ()
 
 
 	std::shared_ptr<VST3PluginInfo> info = std::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
-	PBD::Searchpath                   psp  = info->preset_search_path ();
+	PBD::Searchpath                 psp  = info->preset_search_path ();
 
 	std::vector<std::string> preset_files;
 	find_paths_matching_filter (preset_files, psp, vst3_preset_filter, 0, false, true, false);
