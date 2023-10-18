@@ -2362,14 +2362,17 @@ MidiRegionView::select_notes (list<Evoral::event_id_t> notes, bool allow_auditio
 void
 MidiRegionView::select_matching_notes (uint8_t notenum, uint16_t channel_mask, bool add, bool extend)
 {
-	bool have_selection = !_selection.empty();
 	uint8_t low_note = 127;
 	uint8_t high_note = 0;
 	MidiModel::Notes& notes (_model->notes());
 	_optimization_iterator = _events.begin();
 
-	if (extend && !have_selection) {
+	if (_selection.empty()) {
 		extend = false;
+	}
+
+	if (!add && !extend && !_selection.empty()) {
+		clear_note_selection ();
 	}
 
 	/* scan existing selection to get note range */
