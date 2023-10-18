@@ -1068,7 +1068,7 @@ VST3PluginInfo::load (Session& session)
 		PluginPtr          plugin;
 		Steinberg::VST3PI* plug = new VST3PI (m, unique_id);
 		plugin.reset (new VST3Plugin (session.engine (), session, plug));
-		plugin->set_info (PluginInfoPtr (new VST3PluginInfo (*this)));
+		plugin->set_info (PluginInfoPtr (shared_from_this ()));
 		return plugin;
 	} catch (failed_constructor& err) {
 		;

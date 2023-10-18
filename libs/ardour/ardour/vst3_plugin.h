@@ -471,7 +471,7 @@ private:
 
 /* ****************************************************************************/
 
-class LIBARDOUR_API VST3PluginInfo : public PluginInfo
+class LIBARDOUR_API VST3PluginInfo : public PluginInfo, public std::enable_shared_from_this<ARDOUR::VST3PluginInfo>
 {
 public:
 	VST3PluginInfo ();
@@ -482,7 +482,7 @@ public:
 	bool                              is_instrument () const;
 	PBD::Searchpath                   preset_search_path () const;
 
-	mutable boost::optional<bool>     has_editor;
+	boost::optional<bool>             has_editor;
 
 	std::shared_ptr<VST3PluginModule> m;
 };
