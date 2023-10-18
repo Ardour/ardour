@@ -1576,11 +1576,11 @@ MidiTimeAxisView::set_note_selection (uint8_t note)
 
 	if (_view->num_selected_regionviews() == 0) {
 		_view->foreach_regionview (
-			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::add_note_selection_region_view),
+			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_selection_region_view),
 			            note, chn_mask));
 	} else {
 		_view->foreach_selected_regionview (
-			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::add_note_selection_region_view),
+			sigc::bind (sigc::mem_fun (*this, &MidiTimeAxisView::set_note_selection_region_view),
 			            note, chn_mask));
 	}
 
