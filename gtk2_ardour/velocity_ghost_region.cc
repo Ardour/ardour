@@ -292,7 +292,17 @@ VelocityGhostRegion::note_selected (NoteBase* ev)
 void
 VelocityGhostRegion::lollis_between (int x0, int x1, std::vector<NoteBase*>& within)
 {
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
+	assert (mrv);
+	MidiRegionView::Selection const & sel (mrv->selection());
+	bool only_selected = !sel.empty();
+
 	for (auto & gev : events) {
+		if (only_selected) {
+			if (!gev.second->event->selected()) {
+				continue;
+			}
+		}
 		ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (gev.second->item);
 		if (l) {
 			ArdourCanvas::Duple pos = l->item_to_canvas (ArdourCanvas::Duple (l->x(), l->y0()));
