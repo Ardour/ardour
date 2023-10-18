@@ -312,8 +312,6 @@ private:
 
 	boost::optional<uint32_t> _plugin_latency;
 
-	mutable boost::optional<bool> _has_editor;
-
 	int _n_bus_in;
 	int _n_bus_out;
 
@@ -460,6 +458,8 @@ public:
 	std::vector<Plugin::PresetRecord> get_presets (bool user_only) const;
 	bool                              is_instrument () const;
 	PBD::Searchpath                   preset_search_path () const;
+
+	mutable boost::optional<bool>     has_editor;
 
 	std::shared_ptr<VST3PluginModule> m;
 };

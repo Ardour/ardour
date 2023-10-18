@@ -341,8 +341,14 @@ VST3Plugin::possible_output () const
 bool
 VST3Plugin::has_editor () const
 {
-	/* consider caching has-editor in VST3Info */
-	return _plug->has_editor ();
+	std::shared_ptr<VST3PluginInfo> nfo = std::dynamic_pointer_cast<VST3PluginInfo> (get_info ());
+	if (nfo->has_editor.has_value ()) {
+		return nfo->has_editor.value ();
+	}
+
+	bool rv = _plug->has_editor ();
+	nfo->has_editor = rv;
+	return rv;
 }
 
 Steinberg::IPlugView*
@@ -3180,10 +3186,6 @@ VST3PI::close_view ()
 bool
 VST3PI::has_editor () const
 {
-	if (_has_editor.has_value ()) {
-		return _has_editor.value ();
-	}
-
 	IPlugView* view = _view;
 	if (!view) {
 		view = try_create_view ();
@@ -3202,7 +3204,6 @@ VST3PI::has_editor () const
 			view->release ();
 		}
 	}
-	_has_editor = rv;
 	return rv;
 }
 
