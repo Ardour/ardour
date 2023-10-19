@@ -3235,12 +3235,13 @@ VST3PI::resume_notifications ()
 	if (!PBD::atomic_dec_and_test (_block_rpc)) {
 		return;
 	}
+	ARDOUR::RouteProcessorChange rpc (RouteProcessorChange::NoProcessorChange, false);
+	std::swap (rpc, _rpc_queue);
+
 	Route* r = dynamic_cast<Route*> (_owner);
 	if (r && _rpc_queue.type != RouteProcessorChange::NoProcessorChange) {
-		r->processors_changed (_rpc_queue); /* EMIT SIGNAL */
+		r->processors_changed (rpc); /* EMIT SIGNAL */
 	}
-	_rpc_queue.type = RouteProcessorChange::NoProcessorChange;
-	_rpc_queue.meter_visibly_changed = false;
 }
 
 void
