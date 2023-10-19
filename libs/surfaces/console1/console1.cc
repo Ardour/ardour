@@ -457,7 +457,7 @@ Console1::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb
 			e->action (value);
 		}
 		return;
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1,
 		             string_compose ("handle_midi_controller_message: encoder not found cn: "
 		                             "'%1' val: '%2'\n",
@@ -478,7 +478,7 @@ Console1::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb
 			b->action (value);
 		}
 		return;
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1,
 		             string_compose ("handle_midi_controller_message: button not found cn: "
 		                             "'%1' val: '%2'\n",
@@ -495,7 +495,7 @@ Console1::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb
 		}
 
 		return;
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1,
 		             string_compose ("handle_midi_controller_message: mbutton not found cn: "
 		                             "'%1' val: '%2'\n",
@@ -516,7 +516,7 @@ Console1::notify_solo_active_changed (bool state)
 	DEBUG_TRACE (DEBUG::Console1, "notify_active_solo_changed() \n");
 	try {
 		get_button (ControllerID::DISPLAY_ON)->set_led_value (state ? 127 : 0);
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "button not found");
 	}
 }
@@ -912,7 +912,7 @@ Console1::blinker ()
 	for (Blinkers::iterator b = blinkers.begin (); b != blinkers.end (); b++) {
 		try {
 			get_button (*b)->set_led_state (blink_state);
-		} catch (ControlNotFoundException& e) {
+		} catch (ControlNotFoundException const&) {
 			DEBUG_TRACE (DEBUG::Console1, "Blinking Button not found ...\n");
 		}
 	}
@@ -1000,7 +1000,7 @@ Console1::periodic_update_meter ()
 					get_meter (OUTPUT_METER_R)->set_value (val_r);
 					last_output_meter_r = val_r;
 				}
-			} catch (ControlNotFoundException& e) {
+			} catch (ControlNotFoundException const&) {
 				DEBUG_TRACE (DEBUG::Console1, "Meter not found ...\n");
 			}
 		}
@@ -1017,7 +1017,7 @@ Console1::periodic_update_meter ()
 					get_meter (SHAPE_METER)->set_value (val);
 					last_gate_meter = val;
 				}
-			} catch (ControlNotFoundException& e) {
+			} catch (ControlNotFoundException const&) {
 				DEBUG_TRACE (DEBUG::Console1, "Meter not found ...\n");
 			}
 		}
@@ -1036,7 +1036,7 @@ Console1::periodic_update_meter ()
 					val = val * 0.6 + last_comp_redux * 0.4;
 					get_meter (COMP_METER)->set_value (val);
 				}
-			} catch (ControlNotFoundException& e) {
+			} catch (ControlNotFoundException const&) {
 				DEBUG_TRACE (DEBUG::Console1, "Meter not found ...\n");
 			}
 		}

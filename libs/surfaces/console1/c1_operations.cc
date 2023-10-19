@@ -126,7 +126,7 @@ Console1::rude_solo (const uint32_t value)
 	} else {
 		try {
 			get_button (ControllerID::DISPLAY_ON)->set_led_state (false);
-		} catch (ControlNotFoundException& e) {
+		} catch (ControlNotFoundException const&) {
 			DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 		}
 	}
@@ -551,7 +551,7 @@ Console1::map_bank ()
 	try {
 		get_button (PAGE_UP)->set_led_state (list_size > (current_bank + 1) * bank_size);
 		get_button (PAGE_DOWN)->set_led_state (current_bank > 0);
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
@@ -662,7 +662,7 @@ Console1::map_shift (bool shift)
 		ControllerButton* controllerButton = get_button (PRESET);
 		controllerButton->set_led_state (shift);
 		map_stripable_state ();
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
@@ -674,7 +674,7 @@ Console1::map_plugin_state (bool plugin_state)
 	try {
 		ControllerButton* controllerButton = get_button (TRACK_GROUP);
 		controllerButton->set_led_state (in_plugin_state);
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 	if (!plugin_state) {
@@ -700,7 +700,7 @@ Console1::map_solo ()
 		} else {
 			controllerButton->set_led_state (false);
 		}
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
@@ -727,7 +727,7 @@ Console1::map_filter ()
 		  ->set_led_state (_current_stripable->filter_enable_controllable (true)
 		                     ? _current_stripable->filter_enable_controllable (true)->get_value ()
 		                     : false);
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
@@ -763,7 +763,7 @@ Console1::map_gate ()
 		  ->set_led_state (_current_stripable->gate_enable_controllable ()
 		                     ? _current_stripable->gate_enable_controllable ()->get_value ()
 		                     : false);
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
@@ -779,7 +779,7 @@ Console1::map_gate_scf ()
 		  ->set_led_state (_current_stripable->gate_key_filter_enable_controllable ()
 		                     ? _current_stripable->gate_key_filter_enable_controllable ()->get_value ()
 		                     : false);
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
@@ -795,7 +795,7 @@ Console1::map_gate_listen ()
 		  ->set_led_state (_current_stripable->gate_key_listen_controllable ()
 		                     ? _current_stripable->gate_key_listen_controllable ()->get_value ()
 		                     : false);
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
@@ -898,7 +898,7 @@ Console1::map_eq ()
 		get_button (EQ)->set_led_state (_current_stripable->eq_enable_controllable ()
 		                                  ? _current_stripable->eq_enable_controllable ()->get_value ()
 		                                  : false);
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
@@ -939,7 +939,7 @@ Console1::map_eq_low_shape ()
 		                       ? _current_stripable->eq_shape_controllable (0)->get_value () == 0 ? 0 : 63
 		                       : 0;
 		get_button (ControllerID::LOW_SHAPE)->set_led_state (led_value);
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
@@ -954,7 +954,7 @@ Console1::map_eq_high_shape ()
 		                       ? _current_stripable->eq_shape_controllable (3)->get_value () == 0 ? 0 : 63
 		                       : 0;
 		get_button (ControllerID::HIGH_SHAPE)->set_led_state (led_value);
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
@@ -972,7 +972,7 @@ Console1::map_drive ()
 			DEBUG_TRACE (DEBUG::Console1, string_compose ("map_drive audio track %1\n", val));
 			try {
 				get_encoder (controllerID)->set_value (val == 1 ? 127 : 0);
-			} catch (ControlNotFoundException& e) {
+			} catch (ControlNotFoundException const&) {
 				DEBUG_TRACE (DEBUG::Console1, "Encoder not found\n");
 			}
 		} else {
@@ -1016,7 +1016,7 @@ Console1::map_comp ()
 		  ->set_led_state (_current_stripable->comp_enable_controllable ()
 		                     ? _current_stripable->comp_enable_controllable ()->get_value ()
 		                     : false);
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
@@ -1032,7 +1032,7 @@ Console1::map_comp_mode ()
 		                 : false;
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("****value from comp-type %1\n", value));
 		get_mbutton (ControllerID::ORDER)->set_led_state (value);
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
@@ -1103,7 +1103,7 @@ Console1::map_encoder (ControllerID controllerID)
 	if (!_current_stripable) {
 		try {
 			get_encoder (controllerID)->set_value (0);
-		} catch (ControlNotFoundException& e) {
+		} catch (ControlNotFoundException const&) {
 			DEBUG_TRACE (DEBUG::Console1, "Encoder not found\n");
 			return false;
 		}
@@ -1119,7 +1119,7 @@ Console1::map_encoder (ControllerID controllerID, std::shared_ptr<ARDOUR::Automa
 	if (!_current_stripable) {
 		try {
 			get_encoder (controllerID)->set_value (0);
-		} catch (ControlNotFoundException& e) {
+		} catch (ControlNotFoundException const&) {
 			DEBUG_TRACE (DEBUG::Console1, "Encoder not found\n");
 		}
 		return;
@@ -1136,7 +1136,7 @@ Console1::map_encoder (ControllerID controllerID, std::shared_ptr<ARDOUR::Automa
 	}
 	try {
 		get_encoder (controllerID)->set_value (gain);
-	} catch (ControlNotFoundException& e) {
+	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Encoder not found\n");
 	}
 }
