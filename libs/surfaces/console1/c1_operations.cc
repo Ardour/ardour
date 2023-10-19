@@ -581,21 +581,25 @@ void
 Console1::map_mute ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute ...\n");
-	if (_current_stripable) {
-		if (_current_stripable->mute_control ()->muted ()) {
-			get_button (swap_solo_mute ? SOLO : MUTE)->set_led_state (true);
-		} else if (_current_stripable->mute_control ()->muted_by_others_soloing () ||
-		           _current_stripable->mute_control ()->muted_by_masters ()) {
+	try {
+		if (_current_stripable) {
+			if (_current_stripable->mute_control ()->muted ()) {
+				get_button (swap_solo_mute ? SOLO : MUTE)->set_led_state (true);
+			} else if (_current_stripable->mute_control ()->muted_by_others_soloing () ||
+					_current_stripable->mute_control ()->muted_by_masters ()) {
 
-			DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute start blinking\n");
-			start_blinking (swap_solo_mute ? SOLO : MUTE);
+				DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute start blinking\n");
+				start_blinking (swap_solo_mute ? SOLO : MUTE);
+			} else {
+				DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute stop blinking\n");
+				stop_blinking (swap_solo_mute ? SOLO : MUTE);
+			}
 		} else {
-			DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute stop blinking\n");
+			DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute stop blinking 2\n");
 			stop_blinking (swap_solo_mute ? SOLO : MUTE);
 		}
-	} else {
-		DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute stop blinking 2\n");
-		stop_blinking (swap_solo_mute ? SOLO : MUTE);
+	} catch (ControlNotFoundException const&) {
+		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
 
@@ -613,24 +617,28 @@ void
 Console1::map_phase ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "map_phase \n");
-	ControllerButton* controllerButton = get_button (PHASE_INV);
-	if (_current_stripable && _current_stripable->phase_control ()) {
-		uint32_t channels = _current_stripable->phase_control ()->size ();
-		uint32_t inverted = 0;
-		for (uint32_t i = 0; i < channels; ++i) {
-			if (_current_stripable->phase_control ()->inverted (i))
-				++inverted;
-		}
-		if (inverted == 0) {
-			stop_blinking (PHASE_INV);
+	try {
+		ControllerButton* controllerButton = get_button (PHASE_INV);
+		if (_current_stripable && _current_stripable->phase_control ()) {
+			uint32_t channels = _current_stripable->phase_control ()->size ();
+			uint32_t inverted = 0;
+			for (uint32_t i = 0; i < channels; ++i) {
+				if (_current_stripable->phase_control ()->inverted (i))
+					++inverted;
+			}
+			if (inverted == 0) {
+				stop_blinking (PHASE_INV);
+				controllerButton->set_led_state (false);
+			} else if (inverted == channels) {
+				stop_blinking (PHASE_INV);
+				controllerButton->set_led_state (true);
+			} else
+				start_blinking (PHASE_INV);
+		} else {
 			controllerButton->set_led_state (false);
-		} else if (inverted == channels) {
-			stop_blinking (PHASE_INV);
-			controllerButton->set_led_state (true);
-		} else
-			start_blinking (PHASE_INV);
-	} else {
-		controllerButton->set_led_state (false);
+		}
+	} catch (ControlNotFoundException const&) {
+		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
 	}
 }
 
@@ -650,7 +658,11 @@ Console1::map_select ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "map_select())\n");
 	for (uint32_t i = 0; i < bank_size; ++i) {
-		get_button (ControllerID (FOCUS1 + i))->set_led_state (i == current_strippable_index);
+		try {
+			get_button (ControllerID (FOCUS1 + i))->set_led_state (i == current_strippable_index);
+		} catch (ControlNotFoundException const&) {
+			DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
+		}
 	}
 }
 
