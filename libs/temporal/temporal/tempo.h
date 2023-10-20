@@ -871,6 +871,10 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	template<typename TimeType, typename Comparator> TempoPoint const & _tempo_at (TimeType when, Comparator cmp) const {
 		assert (!_tempos.empty());
 
+		if (_tempos.size() == 1) {
+			return _tempos.front();
+		}
+
 		Tempos::const_iterator prev = _tempos.end();
 		for (Tempos::const_iterator t = _tempos.begin(); t != _tempos.end(); ++t) {
 			if (cmp (*t, when)) {
@@ -887,6 +891,10 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 
 	template<typename TimeType, typename Comparator> MeterPoint const & _meter_at (TimeType when, Comparator cmp) const {
 		assert (!_meters.empty());
+
+		if (_meters.size() == 1) {
+			return _meters.front();
+		}
 
 		Meters::const_iterator prev = _meters.end();
 		for (Meters::const_iterator m = _meters.begin(); m != _meters.end(); ++m) {
