@@ -21,7 +21,8 @@ children = [
     'launch_control_xl',
     'osc',
     'console1',
-    'launchpad_pro'
+    'launchpad_pro',
+    'launchpad_x'
 ]
 
 def options(opt):
@@ -79,6 +80,7 @@ def build(bld):
     bld.recurse('osc')
     bld.recurse('console1')
     bld.recurse('launchpad_pro')
+    bld.recurse('launchpad_x')
 
     if bld.is_defined('BUILD_WIIMOTE'):
         bld.recurse('wiimote')
