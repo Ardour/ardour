@@ -90,7 +90,7 @@ LPX_GUI::LPX_GUI (LaunchPadX& p)
 	_table.set_homogeneous (false);
 
 	std::string data_file_path;
-	std::string name = "launchpad-pro.png";
+	std::string name = "launchpad-x.png";
 	Searchpath spath(ARDOUR::ardour_data_search_path());
 	spath.add_subdirectory_to_paths ("icons");
 	find_file (spath, name, data_file_path);
