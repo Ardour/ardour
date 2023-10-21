@@ -61,7 +61,12 @@ AudioLibrary::AudioLibrary ()
 
 	sfdb_file_path = Glib::build_filename (sfdb_file_path, sfdb_file_name);
 
-	src = Glib::filename_to_uri (sfdb_file_path);
+	try {
+		src = Glib::filename_to_uri (sfdb_file_path);
+	} catch (Glib::ConvertError const& err) {
+		fatal << string_compose (_("Could not get config folder: %1"), err.what ()) << endmsg;
+		abort (); /*NOTREACHED*/
+	}
 
 	// workaround for possible bug in raptor that crashes when saving to a
 	// non-existant file.
