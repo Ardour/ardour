@@ -204,6 +204,12 @@ PortInsert::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 	}
 }
 
+void
+PortInsert::flush_buffers (samplecnt_t nframes)
+{
+	_out->flush_buffers (nframes);
+}
+
 XMLNode&
 PortInsert::state () const
 {

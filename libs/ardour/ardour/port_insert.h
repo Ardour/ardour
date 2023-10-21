@@ -58,9 +58,7 @@ public:
 
 	void run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool);
 
-	void flush_buffers (samplecnt_t nframes) {
-		_out->flush_buffers (nframes);
-	}
+	void flush_buffers (samplecnt_t nframes);
 
 	samplecnt_t signal_latency () const;
 
