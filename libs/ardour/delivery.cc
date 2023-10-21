@@ -536,7 +536,6 @@ Delivery::flush_buffers (samplecnt_t nframes)
 	/* io_lock, not taken: function must be called from Session::process() calltree */
 	if (_output) {
 		_output->flush_buffers (nframes);
-		return;
 	}
 }
 
