@@ -2891,7 +2891,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Toolbar"),
 	     new BoolOption (
 		     "show-toolbar-latency",
-		     _("Display Latency Compensation Info"),
+		     _("Display Latency Compensation"),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_toolbar_latency),
 		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_toolbar_latency)
 		     ));
