@@ -162,3 +162,4 @@ UI_CONFIG_VARIABLE (bool, sandbox_all_lua_scripts, "sandbox-all-lua-scripts", fa
 UI_CONFIG_VARIABLE (bool, show_on_cue_page, "show-on-cue-page", true)
 UI_CONFIG_VARIABLE (uint32_t, insert_at_position, "insert-at-position", 3)
 UI_CONFIG_VARIABLE (Editing::NoteNameDisplay, note_name_display, "note-name-display", Editing::Always)
+UI_CONFIG_VARIABLE (bool, scroll_velocity_editing, "scroll-velocity-editing", true)

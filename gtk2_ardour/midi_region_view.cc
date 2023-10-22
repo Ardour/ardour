@@ -734,20 +734,24 @@ MidiRegionView::scroll (GdkEventScroll* ev)
 
 	hide_verbose_cursor ();
 
-	bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
-	Keyboard::ModifierMask mask_together(Keyboard::PrimaryModifier|Keyboard::TertiaryModifier);
-	bool together = Keyboard::modifier_state_contains (ev->state, mask_together);
+	if (UIConfiguration::instance().get_scroll_velocity_editing()) {
+		bool fine = !Keyboard::modifier_state_contains (ev->state, Keyboard::SecondaryModifier);
+		Keyboard::ModifierMask mask_together(Keyboard::PrimaryModifier|Keyboard::TertiaryModifier);
+		bool together = Keyboard::modifier_state_contains (ev->state, mask_together);
 
-	if (ev->direction == GDK_SCROLL_UP) {
-		change_velocities (true, fine, false, together);
-	} else if (ev->direction == GDK_SCROLL_DOWN) {
-		change_velocities (false, fine, false, together);
-	} else {
-		/* left, right: we don't use them */
-		return false;
+		if (ev->direction == GDK_SCROLL_UP) {
+			change_velocities (true, fine, false, together);
+		} else if (ev->direction == GDK_SCROLL_DOWN) {
+			change_velocities (false, fine, false, together);
+		} else {
+			/* left, right: we don't use them */
+			return false;
+		}
+
+		return true;
 	}
 
-	return true;
+	return false;
 }
 
 bool
