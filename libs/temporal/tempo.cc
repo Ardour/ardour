@@ -4404,8 +4404,9 @@ TempoMap::midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_p
 	 *
 	 * from http://midi.teragonaudio.com/tech/midispec/seq.htm
 	 */
-
-	Temporal::Beats b = (quarters_at_sample (pos)).round_up_to_beat ();
+	superclock_t sc (samples_to_superclock (pos, TEMPORAL_SAMPLE_RATE));
+	TempoPoint const & tp (tempo_at (sc));
+	Temporal::Beats b = (tp.quarters_at_sample (pos)).round_up_to_beat ();
 
 	/* We cannot use
 	 *    clk_pos = sample_at (b);
@@ -4422,7 +4423,20 @@ TempoMap::midi_clock_beat_at_or_after (samplepos_t const pos, samplepos_t& clk_p
 	 */
 	clk_beat = b.get_beats () * 4 ; // 4 = 24 / 6;
 
-	TEMPO_MAP_ASSERT (clk_pos >= pos);
+	/* It can happen (mostly due to odd plugin latency) that the @p pos
+	 * argument is a few samples past the audio time of the current
+	 * beat. For example, beat 20 @ 120 bpm @ 44100Hz would be at sample
+	 * 441000 but the process() call that gets us here might start at
+	 * 441002. Check if the error is more than 1 tick at the relevant
+	 * tempo, and if so, round up the start (@p pos)
+	 */
+
+	if (clk_pos < pos) {
+		samplecnt_t one_tick_in_superclocks (tp.superclocks_per_note_type_at (timepos_t (sc))/ ((tp.note_type() * 1920) / 4));
+		if (abs (clk_pos - pos) < superclock_to_samples (one_tick_in_superclocks, TEMPORAL_SAMPLE_RATE)) {
+			clk_pos = pos;
+		}
+	}
 }
 
 /******** OLD STATE LOADING CODE SECTION *************/
