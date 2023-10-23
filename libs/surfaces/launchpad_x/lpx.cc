@@ -338,13 +338,13 @@ LaunchPadX::set_state (const XMLNode & node, int version)
 std::string
 LaunchPadX::input_port_name () const
 {
-	return X_(":Launchpad X MK3.*MIDI (In|1)");
+	return X_(":Launchpad X MK3.*MIDI (In|2)");
 }
 
 std::string
 LaunchPadX::output_port_name () const
 {
-	return X_(":Launchpad X MK3.*MIDI (Out|1)");
+	return X_(":Launchpad X MK3.*MIDI (Out|2)");
 }
 
 void
@@ -849,7 +849,7 @@ LaunchPadX::connect_daw_ports ()
          * newer ALSA and other platforms.
          */
 
-        std::regex rx (X_("Launchpad X.*(DAW|MIDI 2)"), std::regex::extended);
+        std::regex rx (X_("Launchpad X.*(DAW|MIDI 1)"), std::regex::extended);
 
         auto is_dawport = [&rx](string const &s) {
 	        std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name(s);
