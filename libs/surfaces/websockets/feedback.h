@@ -36,10 +36,13 @@ class FeedbackHelperUI : public AbstractUI<BaseUI::BaseRequestObject>
 {
 public:
 	FeedbackHelperUI ();
-	~FeedbackHelperUI () {};
+	~FeedbackHelperUI ();
 
 protected:
 	virtual void do_request (BaseUI::BaseRequestObject*);
+
+private:
+	PBD::EventLoop* _main_event_loop;
 
 };
 
