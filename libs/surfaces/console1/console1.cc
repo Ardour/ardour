@@ -67,16 +67,16 @@ Console1::~Console1 ()
 
 	tear_down_gui ();
 
-    for( const auto &b : buttons ){
+	for (const auto& b : buttons) {
 		delete b.second;
 	}
-    for( const auto &e : encoders ){
+	for (const auto& e : encoders) {
 		delete e.second;
 	}
-    for( const auto &m : meters ){
+	for (const auto& m : meters) {
 		delete m.second;
 	}
-    for( const auto &mb : multi_buttons ){
+	for (const auto& mb : multi_buttons) {
 		delete mb.second;
 	}
 
@@ -179,14 +179,14 @@ Console1::begin_using_device ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "sending device inquiry message...\n");
 
-	if (MIDISurface::begin_using_device ()) {
-		return -1;
-	}
 	/*
 	  with this sysex command we can enter the 'native mode'
 	  But there's no need to do so
 	  f0 7d 20 00 00 00 01 00 7f 49 6f 6c 73 00 f7
 	*/
+
+	if (_in_use)
+		return 0;
 
 	load_mappings ();
 	setup_controls ();
@@ -202,8 +202,27 @@ Console1::begin_using_device ()
 	Glib::RefPtr<Glib::TimeoutSource> periodic_timer = Glib::TimeoutSource::create (100);
 	periodic_connection = periodic_timer->connect (sigc::mem_fun (*this, &Console1::periodic));
 	periodic_timer->attach (main_loop ()->get_context ());
+	connect_session_signals ();
+	connect_internal_signals ();
+	create_strip_inventory ();
+	_in_use = true;
 
 	DEBUG_TRACE (DEBUG::Console1, "************** begin_using_device() ********************\n");
+	return 0;
+}
+
+int
+Console1::stop_using_device ()
+{
+	DEBUG_TRACE (DEBUG::Console1, "stop_using_device()\n");
+	if (!_in_use)
+		return 0;
+	blink_connection.disconnect ();
+	periodic_connection.disconnect ();
+	stripable_connections.drop_connections ();
+	session_connections.drop_connections ();
+	console1_connections.drop_connections ();
+	_in_use = false;
 	return 0;
 }
 
@@ -269,8 +288,6 @@ void
 Console1::notify_session_loaded ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "************** Session Loaded() ********************\n");
-	create_strip_inventory ();
-	connect_internal_signals ();
 	stripable_selection_changed ();
 }
 
@@ -428,17 +445,6 @@ Console1::setup_controls ()
 	new Meter (this, ControllerID::OUTPUT_METER_R, boost::function<void ()> ([] () {}));
 }
 
-int
-Console1::stop_using_device ()
-{
-	DEBUG_TRACE (DEBUG::Console1, "stop_using_device()\n");
-
-	blink_connection.disconnect ();
-	periodic_connection.disconnect ();
-	stripable_connections.drop_connections ();
-	return 0;
-}
-
 void
 Console1::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb)
 {
@@ -537,10 +543,12 @@ Console1::notify_transport_state_changed ()
 void
 Console1::stripable_selection_changed ()
 {
+	if (!_in_use)
+		return;
 	DEBUG_TRACE (DEBUG::Console1, "stripable_selection_changed \n");
 	std::shared_ptr<Stripable> r = ControlProtocol::first_selected_stripable ();
-	if ( r )
-    	set_current_stripable (r);
+	if (r)
+		set_current_stripable (r);
 }
 
 void
@@ -1199,20 +1207,19 @@ Console1::select_rid_by_index (uint32_t index)
 #else
 	if (index == master_index)
 		rid = 1;
-    else
-	    rid = index + 1 + offset;
+	else
+		rid = index + 1 + offset;
 #endif
 	DEBUG_TRACE (DEBUG::Console1, string_compose ("rid %1\n", rid));
-    if (rid > ( max_strip_index + 1 + offset ))
-		success =  false;
+	if (rid > (max_strip_index + 1 + offset))
+		success = false;
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
 		session->selection ().select_stripable_and_maybe_group (s, true, false, 0);
+	} else {
+		success = false;
 	}
-    else {
-    	success = false;
-    }
-    if( !success ){
+	if (!success) {
 		map_select ();
 	}
 }
