@@ -79,14 +79,6 @@ using namespace Gtkmm2ext;
 #define LAUNCHPADX   0x0103
 static const std::vector<MIDI::byte> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xc });
 
-const LaunchPadX::PadID LaunchPadX::all_pad_ids[] = {
-	Shift, Left, Right, Session, Note, Chord, Custom, Sequencer, Projects,
-	Patterns, Steps, PatternSettings, Velocity, Probability, Mutation, MicroStep, PrintToClip,
-	StopClip, Device, Sends, Pan, Volume, Solo, Mute, RecordArm,
-	CaptureMIDI, Play, FixedLength, Quantize, Duplicate, Clear, Down, Up,
-	Lower1, Lower2, Lower3, Lower4, Lower5, Lower6, Lower7, Lower8,
-};
-
 const LaunchPadX::Layout LaunchPadX::AllLayouts[] = {
 	SessionLayout, Fader, ChordLayout, CustomLayout, NoteLayout, Scale, SequencerSettings,
 	SequencerSteps, SequencerVelocity, SequencerPatternSettings, SequencerProbability, SequencerMutation,
@@ -146,11 +138,8 @@ LaunchPadX::LaunchPadX (ARDOUR::Session& s)
 	, _daw_out_port (nullptr)
 	, _gui (nullptr)
 	, _current_layout (SessionLayout)
-	, _shift_pressed (false)
-	, _clear_pressed (false)
-	, _duplicate_pressed (false)
 	, _session_pressed (false)
-	, did_session_display (false)
+	, _session_mode (SessionMode)
 	, current_fader_bank (VolumeFaders)
 	, revert_layout_on_fader_release (false)
 	, pre_fader_layout (SessionLayout)
@@ -361,52 +350,22 @@ LaunchPadX::build_pad_map ()
 #define BUTTON2(id, press, long_press)          pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press), (long_press))))
 #define BUTTON3(id, press, long_press, release) pad_map.insert (make_pair<int,Pad> ((id),  Pad ((id), (press), (long_press), (release))))
 
-	BUTTON3 (Shift, &LaunchPadX::shift_press, &LaunchPadX::relax, &LaunchPadX::shift_release);
-
-	BUTTON (Left, &LaunchPadX::left_press);
-	BUTTON (Right, &LaunchPadX::right_press);
+	BUTTON  (Down, &LaunchPadX::down_press);
+	BUTTON  (Up, &LaunchPadX::up_press);
+	BUTTON  (Left, &LaunchPadX::left_press);
+	BUTTON  (Right, &LaunchPadX::right_press);
 	BUTTON3 (Session, &LaunchPadX::session_press, &LaunchPadX::session_long_press, &LaunchPadX::session_release);
-	BUTTON0 (Note);
-	BUTTON0 (Chord);
 	BUTTON0 (Custom);
-	BUTTON0 (Sequencer);
-	BUTTON0 (Projects);
+	BUTTON  (CaptureMIDI, &LaunchPadX::capture_midi_press);
 
-	BUTTON (Patterns, &LaunchPadX::patterns_press);
-	BUTTON (Steps, &LaunchPadX::steps_press);
-	BUTTON (PatternSettings, &LaunchPadX::pattern_settings_press);
-	BUTTON (Velocity, &LaunchPadX::velocity_press);
-	BUTTON (Probability, &LaunchPadX::probability_press);
-	BUTTON (Mutation, &LaunchPadX::mutation_press);
-	BUTTON (MicroStep, &LaunchPadX::microstep_press);
-	BUTTON (PrintToClip, &LaunchPadX::print_to_clip_press);
-
-	BUTTON (StopClip, &LaunchPadX::stop_clip_press);
-	BUTTON3 (Device, &LaunchPadX::device_press, &LaunchPadX::fader_long_press, &LaunchPadX::fader_release);
-	BUTTON3 (Sends, &LaunchPadX::sends_press, &LaunchPadX::fader_long_press, &LaunchPadX::fader_release);
-	BUTTON3 (Pan, &LaunchPadX::pan_press, &LaunchPadX::fader_long_press, &LaunchPadX::fader_release);
-	BUTTON3 (Volume, &LaunchPadX::volume_press, &LaunchPadX::fader_long_press, &LaunchPadX::fader_release);
-	BUTTON2 (Solo, &LaunchPadX::solo_press, &LaunchPadX::solo_long_press);
-	BUTTON (Mute, &LaunchPadX::mute_press);
-	BUTTON (RecordArm, &LaunchPadX::record_arm_press);
-
-	BUTTON (CaptureMIDI, &LaunchPadX::capture_midi_press);
-	BUTTON (Play, &LaunchPadX::play_press);
-	BUTTON0 (FixedLength);
-	BUTTON0 (Quantize);
-	BUTTON3 (Duplicate, &LaunchPadX::duplicate_press, &LaunchPadX::duplicate_long_press, &LaunchPadX::duplicate_release);
-	BUTTON3 (Clear, &LaunchPadX::clear_press, &LaunchPadX::clear_long_press, &LaunchPadX::clear_release);
-	BUTTON (Down, &LaunchPadX::down_press);
-	BUTTON (Up, &LaunchPadX::up_press);
-
-	BUTTON (Lower1, &LaunchPadX::lower1_press);
-	BUTTON (Lower2, &LaunchPadX::lower2_press);
-	BUTTON (Lower3, &LaunchPadX::lower3_press);
-	BUTTON (Lower4, &LaunchPadX::lower4_press);
-	BUTTON (Lower5, &LaunchPadX::lower5_press);
-	BUTTON (Lower6, &LaunchPadX::lower6_press);
-	BUTTON (Lower7, &LaunchPadX::lower7_press);
-	BUTTON (Lower8, &LaunchPadX::lower8_press);
+	BUTTON (Volume, &LaunchPadX::rh0_press);
+	BUTTON (Pan, &LaunchPadX::rh1_press);
+	BUTTON (SendA, &LaunchPadX::rh2_press);
+	BUTTON (SendB, &LaunchPadX::rh3_press);
+	BUTTON (StopClip, &LaunchPadX::rh4_press);
+	BUTTON (Mute, &LaunchPadX::rh5_press);
+	BUTTON(Solo, &LaunchPadX::rh6_press);
+	BUTTON (RecordArm, &LaunchPadX::rh7_press);
 
 	/* Now add the 8x8 central pad grid */
 
@@ -417,9 +376,6 @@ LaunchPadX::build_pad_map ()
 			if (!pad_map.insert (p).second) abort();
 		}
 	}
-
-	/* The +1 is for the shift pad at upper left */
-	assert (pad_map.size() == (64 + (5 * 8) + 1));
 }
 
 void
@@ -636,48 +592,40 @@ LaunchPadX::display_session_layout ()
 	 * it across power-cycling!
 	 */
 
-	if (did_session_display) {
-		return;
-	}
-
 	MIDI::byte msg[3];
 	msg[0] = 0x90;
 
-	msg[1] = Patterns;
-	msg[2] = 0x27;
-	daw_write (msg, 3);
-	msg[1] = Steps;
-	msg[2] = 0x27;
-	daw_write (msg, 3);
-	msg[1] = PatternSettings;
-	msg[2] = 0x27;
-	daw_write (msg, 3);
-	msg[1] = Velocity;
-	msg[2] = 0x27;
-	daw_write (msg, 3);
-	msg[1] = Probability;
-	msg[2] = 0x27;
-	daw_write (msg, 3);
-	msg[1] = Mutation;
-	msg[2] = 0x27;
-	daw_write (msg, 3);
-	msg[1] = MicroStep;
-	msg[2] = 0x27;
-	daw_write (msg, 3);
-	msg[1] = PrintToClip;
-	msg[2] = 0x27;
+	MIDI::byte color = (_session_mode == SessionMode ? 0x27 : 0x9);
+
+	std::cerr << "redisplay sessionmode, sm " << _session_mode << std::endl;
+
+	msg[1] = Session;
+	msg[2] = color;
 	daw_write (msg, 3);
 
-	msg[1] = Duplicate;
-	msg[2] = 79;
+	msg[1] = Volume;
+	msg[2] = color;
 	daw_write (msg, 3);
-
-	msg[1] = Clear;
-	msg[2] = 3;
+	msg[1] = Pan;
+	msg[2] = color;
 	daw_write (msg, 3);
-
-	msg[1] = Play;
-	msg[2] = 17;
+	msg[1] = SendA;
+	msg[2] = color;
+	daw_write (msg, 3);
+	msg[1] = SendB;
+	msg[2] = color;
+	daw_write (msg, 3);
+	msg[1] = StopClip;
+	msg[2] = color;
+	daw_write (msg, 3);
+	msg[1] = Mute;
+	msg[2] = color;
+	daw_write (msg, 3);
+	msg[1] = Solo;
+	msg[2] = color;
+	daw_write (msg, 3);
+	msg[1] = RecordArm;
+	msg[2] = color;
 	daw_write (msg, 3);
 
 	msg[1] = CaptureMIDI;
@@ -696,38 +644,17 @@ LaunchPadX::display_session_layout ()
 	msg[1] = Right;
 	msg[2] = 46;
 	daw_write (msg, 3);
-
-
-	msg[1] = StopClip;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = Device;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = Sends;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = Pan;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = Volume;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = Solo;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = Mute;
-	msg[2] = 2;
-	daw_write (msg, 3);
-	msg[1] = RecordArm;
-	msg[2] = 2;
-	daw_write (msg, 3);
 }
 
 void
-LaunchPadX::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* ev)
+LaunchPadX::handle_midi_controller_message (MIDI::Parser& parser, MIDI::EventTwoBytes* ev)
 {
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("CC %1 (value %2)\n", (int) ev->controller_number, (int) ev->value));
+
+	if (&parser != _daw_in_port->parser()) {
+		/* we don't process CC messages from the regular port */
+		return;
+	}
 
 	if (_current_layout == Fader) {
 		/* Trap fader move messages and act on them */
@@ -985,123 +912,7 @@ LaunchPadX::get_stripable_slot (int x, int y) const
 void
 LaunchPadX::stripable_selection_changed ()
 {
-	std::shared_ptr<MidiPort> pad_port = std::dynamic_pointer_cast<AsyncMIDIPort>(_async_in)->shadow_port();
-	std::shared_ptr<MidiTrack> current_midi_track = _current_pad_target.lock();
-	std::shared_ptr<MidiTrack> new_pad_target;
-	StripableNotificationList const & selected (last_selected());
-
-	if (_current_layout == Fader) {
-		map_faders ();
-	}
-
-	std::shared_ptr<Stripable> first_selected;
-
-	if (!selected.empty()) {
-		first_selected = selected.front().lock();
-	}
-
-	/* Make selected selection button "pulse" */
-
-	int selected_pad = -1;
-
-	if (first_selected && first_selected->presentation_info().order() >= (uint32_t) scroll_x_offset && first_selected->presentation_info().order() < (uint32_t) scroll_x_offset + 8) {
-		/* subtract 1 because Master always has order zero  XXX does * it? */
-		selected_pad = first_selected->presentation_info().order() - 1 - scroll_x_offset;
-		light_pad (PadID (Lower1 + selected_pad), find_closest_palette_color (first_selected->presentation_info().color()), 1);
-	}
-
-	if (first_selected) {
-		MIDI::byte msg[3];
-		msg[0] = 0x90;
-		msg[1] = Sends;
-		if (first_selected->send_name (0).empty()) {
-			msg[2] = 0x0;
-		} else {
-			msg[2] = 0x2;
-		}
-		daw_write (msg, 3);
-	}
-
-	/* Make all other selection buttons static */
-
-	for (int n = 0; n < 8; ++n) {
-		std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + n);
-		if (r) {
-			if (selected_pad >= 0 && (r == first_selected)) {
-				continue;
-			}
-			light_pad (PadID (Lower1 + n), find_closest_palette_color (r->presentation_info().color()));
-		} else {
-			light_pad (PadID (Lower1 + n), 0);
-		}
-	}
-
-	/* See if there's a MIDI track selected */
-
-	for (StripableNotificationList::const_iterator si = selected.begin(); si != selected.end(); ++si) {
-
-		new_pad_target = std::dynamic_pointer_cast<MidiTrack> ((*si).lock());
-
-		if (new_pad_target) {
-			break;
-		}
-	}
-
-	if (current_midi_track != new_pad_target) {
-
-		/* disconnect from pad port, if appropriate */
-
-		if (current_midi_track && pad_port) {
-
-			/* XXX this could possibly leave dangling MIDI notes.
-			 *
-			 * A general libardour fix is required. It isn't obvious
-			 * how note resolution can be done unless disconnecting
-			 * becomes "slow" (i.e. deferred for as long as it takes
-			 * to resolve notes).
-			 */
-			current_midi_track->input()->disconnect (current_midi_track->input()->nth(0), pad_port->name(), this);
-		}
-
-		/* now connect the pad port to this (newly) selected midi
-		 * track, if indeed there is one.
-		 */
-
-		if (new_pad_target && pad_port) {
-			new_pad_target->input()->connect (new_pad_target->input()->nth (0), pad_port->name(), this);
-			_current_pad_target = new_pad_target;
-		}
-	}
-
-
-}
-
-bool
-LaunchPadX::pad_filter (MidiBuffer& in, MidiBuffer& out) const
-{
-	/* This filter is called asynchronously from a realtime process
-	   context. It must use atomics to check state, and must not block.
-	*/
-
-	switch (_current_layout) {
-	case NoteLayout:
-	case ChordLayout:
-		break;
-	default:
-		return false;
-	}
-
-	bool matched = false;
-
-	for (MidiBuffer::iterator ev = in.begin(); ev != in.end(); ++ev) {
-		if ((*ev).is_note_on() || (*ev).is_note_off() ||
-		    (*ev).is_channel_pressure() || (*ev).is_poly_pressure()) {
-			out.push_back (*ev);
-			matched = true;
-		}
-	}
-
-	return matched;
+	return;
 }
 
 void
@@ -1137,18 +948,6 @@ LaunchPadX::long_press_timeout (int pad_id)
 }
 
 void
-LaunchPadX::shift_press (Pad& pad)
-{
-	_shift_pressed = true;
-}
-
-void
-LaunchPadX::shift_release (Pad& pad)
-{
-	_shift_pressed = false;
-}
-
-void
 LaunchPadX::left_press (Pad& pad)
 {
 	const int shift = (_session_pressed ? 9 : 1);
@@ -1169,27 +968,23 @@ LaunchPadX::right_press (Pad& pad)
 void
 LaunchPadX::session_press (Pad& pad)
 {
-	if (_current_layout == SessionLayout) {
-		_session_pressed = true;
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("session press, mode %1\n", _session_mode));
+
+	if (_session_mode == SessionMode) {
+		_session_mode = MixerMode;
+	} else {
+		_session_mode = SessionMode;
 	}
+	display_session_layout ();
 }
 
 void
 LaunchPadX::session_release (Pad& pad)
 {
-	if (_current_layout == SessionLayout) {
-		_session_pressed = false;
-	}
 }
 
 void
 LaunchPadX::note_press (Pad& pad)
-{
-	/* handled by device */
-}
-
-void
-LaunchPadX::chord_press (Pad& pad)
 {
 	/* handled by device */
 }
@@ -1201,95 +996,110 @@ LaunchPadX::custom_press (Pad& pad)
 }
 
 void
-LaunchPadX::sequencer_press (Pad& pad)
-{
-	/* handled by device */
-}
-
-void
-LaunchPadX::projects_press (Pad& pad)
-{
-	/* handled by device */
-}
-
-void
 LaunchPadX::cue_press (Pad& pad, int row)
 {
-	if (_clear_pressed) {
-		session->clear_cue (row);
-	} else {
-		session->trigger_cue_row (row);
+	session->trigger_cue_row (row);
+}
+
+
+void
+LaunchPadX::rh0_press (Pad& pad)
+{
+	if (_current_layout == SessionLayout) {
+		if (_session_mode == SessionMode) {
+			cue_press (pad, 0 + scroll_y_offset);
+		}
 	}
 }
 
 void
-LaunchPadX::patterns_press (Pad& pad)
+LaunchPadX::rh1_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		cue_press (pad, 0 + scroll_y_offset);
+		if (_session_mode == SessionMode) {
+			cue_press (pad, 1 + scroll_y_offset);
+		} else {
+			pan_press (pad);
+		}
 	}
 }
 
 void
-LaunchPadX::steps_press (Pad& pad)
+LaunchPadX::rh2_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		cue_press (pad, 1 + scroll_y_offset);
+		if (_session_mode == SessionMode) {
+			cue_press (pad, 2 + scroll_y_offset);
+		} else {
+			send_a_press (pad);
+		}
 	}
 }
 
 void
-LaunchPadX::pattern_settings_press (Pad& pad)
+LaunchPadX::rh3_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		cue_press (pad, 2 + scroll_y_offset);
+		if (_session_mode == SessionMode) {
+			cue_press (pad, 3 + scroll_y_offset);
+		} else {
+			send_b_press (pad);
+		}
 	}
 }
 
 void
-LaunchPadX::velocity_press (Pad& pad)
+LaunchPadX::rh4_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		cue_press (pad, 3 + scroll_y_offset);
+		if (_session_mode == SessionMode) {
+			cue_press (pad, 4 + scroll_y_offset);
+		} else {
+			stop_clip_press (pad);
+		}
 	}
 }
 
 void
-LaunchPadX::probability_press (Pad& pad)
+LaunchPadX::rh5_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		cue_press (pad, 4 + scroll_y_offset);
+		if (_session_mode == SessionMode) {
+			cue_press (pad, 5 + scroll_y_offset);
+		} else {
+			mute_press (pad);
+		}
 	}
 }
 
 void
-LaunchPadX::mutation_press (Pad& pad)
+LaunchPadX::rh6_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		cue_press (pad, 5 + scroll_y_offset);
+		if (_session_mode == SessionMode) {
+			cue_press (pad, 6 + scroll_y_offset);
+		} else {
+			solo_press (pad);
+		}
 	}
 }
 
 void
-LaunchPadX::microstep_press (Pad& pad)
+LaunchPadX::rh7_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		cue_press (pad, 6  + scroll_y_offset);
-	}
-}
-
-void
-LaunchPadX::print_to_clip_press (Pad& pad)
-{
-	if (_current_layout == SessionLayout) {
-		cue_press (pad, 7  + scroll_y_offset);
+		if (_session_mode == SessionMode) {
+			cue_press (pad, 7 + scroll_y_offset);
+		} else {
+			record_arm_press (pad);
+		}
 	}
 }
 
 void
 LaunchPadX::stop_clip_press (Pad& pad)
 {
-	session->trigger_stop_all (_shift_pressed);
+
 }
 
 void
@@ -1308,23 +1118,13 @@ LaunchPadX::fader_release (Pad&)
 }
 
 void
-LaunchPadX::device_press (Pad& pad)
+LaunchPadX::volume_press (Pad& pad)
 {
-	if (_current_layout == Fader && current_fader_bank == DeviceFaders) {
+	if (_current_layout == Fader && current_fader_bank == VolumeFaders) {
 		set_layout (SessionLayout);
 		return;
 	}
-	set_layout (Fader, DeviceFaders);
-}
-
-void
-LaunchPadX::sends_press (Pad& pad)
-{
-	if (_current_layout == Fader && current_fader_bank == SendFaders) {
-		set_layout (SessionLayout);
-		return;
-	}
-	set_layout (Fader, SendFaders);
+	set_layout (Fader, VolumeFaders);
 }
 
 void
@@ -1338,23 +1138,40 @@ LaunchPadX::pan_press (Pad& pad)
 }
 
 void
-LaunchPadX::volume_press (Pad& pad)
+LaunchPadX::send_a_press (Pad& pad)
 {
-	if (_current_layout == Fader && current_fader_bank == VolumeFaders) {
+	if (_current_layout == Fader && current_fader_bank == SendFaders) {
 		set_layout (SessionLayout);
 		return;
 	}
-	set_layout (Fader, VolumeFaders);
+	set_layout (Fader, SendFaders);
+}
+
+void
+LaunchPadX::send_b_press (Pad& pad)
+{
+	if (_current_layout == Fader && current_fader_bank == SendFaders) {
+		set_layout (SessionLayout);
+		return;
+	}
+	set_layout (Fader, SendFaders);
+}
+
+void
+LaunchPadX::mute_press (Pad& pad)
+{
+	std::shared_ptr<Stripable> s = session->selection().first_selected_stripable();
+	if (s) {
+		std::shared_ptr<AutomationControl> ac = s->mute_control();
+		if (ac) {
+			ac->set_value (!ac->get_value(), PBD::Controllable::UseGroup);
+		}
+	}
 }
 
 void
 LaunchPadX::solo_press (Pad& pad)
 {
-	if (_shift_pressed) {
-		toggle_click ();
-		return;
-	}
-
 	std::shared_ptr<Stripable> s = session->selection().first_selected_stripable();
 	if (s) {
 		std::shared_ptr<AutomationControl> ac = s->solo_control();
@@ -1373,30 +1190,8 @@ LaunchPadX::solo_long_press (Pad& pad)
 }
 
 void
-LaunchPadX::mute_press (Pad& pad)
-{
-	if (_shift_pressed) {
-		redo ();
-		return;
-	}
-
-	std::shared_ptr<Stripable> s = session->selection().first_selected_stripable();
-	if (s) {
-		std::shared_ptr<AutomationControl> ac = s->mute_control();
-		if (ac) {
-			ac->set_value (!ac->get_value(), PBD::Controllable::UseGroup);
-		}
-	}
-}
-
-void
 LaunchPadX::record_arm_press (Pad& pad)
 {
-	if (_shift_pressed) {
-		undo ();
-		return;
-	}
-
 	std::shared_ptr<Stripable> s = session->selection().first_selected_stripable();
 	if (s) {
 		std::shared_ptr<AutomationControl> ac = s->rec_enable_control();
@@ -1410,39 +1205,6 @@ void
 LaunchPadX::capture_midi_press (Pad& pad)
 {
 	set_record_enable (!get_record_enabled());
-}
-
-void
-LaunchPadX::play_press (Pad& pad)
-{
-	toggle_roll (false, true);
-}
-
-void
-LaunchPadX::fixed_length_press (Pad& pad)
-{
-}
-
-void
-LaunchPadX::quantize_press (Pad& pad)
-{
-}
-
-void
-LaunchPadX::duplicate_press (Pad& pad)
-{
-}
-
-void
-LaunchPadX::clear_press (Pad& pad)
-{
-	_clear_pressed = true;
-}
-
-void
-LaunchPadX::clear_release (Pad& pad)
-{
-	_clear_pressed = false;
 }
 
 void
@@ -1463,80 +1225,9 @@ LaunchPadX::up_press (Pad& pad)
 }
 
 void
-LaunchPadX::select_stripable (int n)
-{
-	if (_shift_pressed) {
-		session->selection().clear_stripables ();
-		return;
-	}
-
-	std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + n);
-	if (r) {
-		session->selection().set (r, std::shared_ptr<AutomationControl>());
-	}
-}
-
-void
-LaunchPadX::lower1_press (Pad& pad)
-{
-	select_stripable (0);
-}
-
-void
-LaunchPadX::lower2_press (Pad& pad)
-{
-	select_stripable (1);
-}
-
-void
-LaunchPadX::lower3_press (Pad& pad)
-{
-	select_stripable (2);
-}
-
-void
-LaunchPadX::lower4_press (Pad& pad)
-{
-	select_stripable (3);
-}
-
-void
-LaunchPadX::lower5_press (Pad& pad)
-{
-	select_stripable (4);
-}
-
-void
-LaunchPadX::lower6_press (Pad& pad)
-{
-	select_stripable (5);
-}
-
-void
-LaunchPadX::lower7_press (Pad& pad)
-{
-	select_stripable (6);
-}
-
-void
-LaunchPadX::lower8_press (Pad& pad)
-{
-	select_stripable (7);
-}
-
-void
 LaunchPadX::pad_press (Pad& pad, int velocity)
 {
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("pad press on %1, %2 => %3 vel %4\n", pad.x, pad.y, pad.id, velocity));
-
-	if (_clear_pressed) {
-		TriggerPtr tp = session->trigger_at (pad.x, pad.y);
-		if (tp) {
-			tp->set_region (std::shared_ptr<Region>());
-		}
-		return;
-	}
-
 	session->bang_trigger_at (pad.x, pad.y, velocity / 127.0f);
 	start_press_timeout (pad);
 }

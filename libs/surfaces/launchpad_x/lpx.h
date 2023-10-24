@@ -68,59 +68,28 @@ class LaunchPadX : public MIDISurface
 	*/
 	enum PadID {
 		/* top */
-		Shift = 0x5a,
-		Left = 0x5b,
-		Right = 0x5c,
-		Session = 0x5d,
-		Note = 0x5e,
-		Chord = 0x5f,
-		Custom = 0x60,
-		Sequencer = 0x61,
-		Projects = 0x62,
+		Up = 0x5b,
+		Down = 0x5c,
+		Left = 0x5d,
+		Right = 0x5e,
+		Session = 0x5f,
+		Note = 0x60,
+		Custom = 0x61,
+		CaptureMIDI = 0x62,
 		/* right side */
-		Patterns = 0x59,
-		Steps = 0x4f,
-		PatternSettings = 0x45,
-		Velocity = 0x3b,
-		Probability = 0x31,
-		Mutation = 0x27,
-		MicroStep = 0x1d,
-		PrintToClip = 0x13,
-		/* lower bottom */
-		StopClip = 0x8,
-		Device = 0x7,
-		Sends = 0x6,
-		Pan = 0x5,
-		Volume = 0x4,
-		Solo = 0x3,
-		Mute = 0x2,
-		RecordArm = 0x1,
-		/* left side */
-		CaptureMIDI = 0xa,
-		Play = 0x14,
-		FixedLength = 0x1e,
-		Quantize = 0x28,
-		Duplicate = 0x32,
-		Clear = 0x3c,
-		Down = 0x46,
-		Up = 0x50,
-		/* upper bottom */
-		Lower1 = 0x65,
-		Lower2 = 0x66,
-		Lower3 = 0x67,
-		Lower4 = 0x68,
-		Lower5 = 0x69,
-		Lower6 = 0x6a,
-		Lower7 = 0x6b,
-		Lower8 = 0x6c,
-		/* Logo */
+		Volume = 0x59,
+		Pan = 0x4f,
+		SendA = 0x45,
+		SendB = 0x3b,
+		StopClip = 0x31,
+		Mute = 0x27,
+		Solo = 0x1d,
+		RecordArm = 0x13,
 		Logo = 0x63
 	};
 
 	bool light_logo();
 	void all_pads_out ();
-
-	static const PadID all_pad_ids[];
 
 	LaunchPadX (ARDOUR::Session&);
 	~LaunchPadX ();
@@ -307,23 +276,36 @@ class LaunchPadX : public MIDISurface
 
 	Layout _current_layout;
 
-	bool pad_filter (ARDOUR::MidiBuffer& in, ARDOUR::MidiBuffer& out) const;
-
 	void maybe_start_press_timeout (Pad& pad);
 	void start_press_timeout (Pad& pad);
 	bool long_press_timeout (int pad_id);
 
-	bool _shift_pressed;
-	bool _clear_pressed;
-	bool _duplicate_pressed;
+	enum SessionState {
+		SessionMode,
+		MixerMode
+	};
+
 	bool _session_pressed;
+	SessionState _session_mode;
 
 	void cue_press (Pad&, int row);
 
+	void rh0_press (Pad&);
+	void rh1_press (Pad&);
+	void rh2_press (Pad&);
+	void rh3_press (Pad&);
+	void rh4_press (Pad&);
+	void rh5_press (Pad&);
+	void rh6_press (Pad&);
+	void rh7_press (Pad&);
+
 	/* named pad methods */
-	void shift_press (Pad&);
-	void shift_release (Pad&);
-	void shift_long_press (Pad&) {}
+	void down_press (Pad&);
+	void down_release (Pad&) {}
+	void down_long_press (Pad&) {}
+	void up_press (Pad&);
+	void up_release (Pad&) {}
+	void up_long_press (Pad&) {}
 	void left_press (Pad&);
 	void left_release (Pad&) {}
 	void left_long_press (Pad&) {}
@@ -336,51 +318,14 @@ class LaunchPadX : public MIDISurface
 	void note_press (Pad&);
 	void note_release (Pad&) {}
 	void note_long_press (Pad&) {}
-	void chord_press (Pad&);
-	void chord_release (Pad&) {}
-	void chord_long_press (Pad&) {}
 	void custom_press (Pad&);
 	void custom_release (Pad&) {}
 	void custom_long_press (Pad&) {}
-	void sequencer_press (Pad&);
-	void sequencer_release (Pad&) {}
-	void sequencer_long_press (Pad&) {}
-	void projects_press (Pad&);
-	void projects_release (Pad&) {}
-	void projects_long_press (Pad&) {}
-	void patterns_press (Pad&);
-	void patterns_release (Pad&) {}
-	void patterns_long_press (Pad&) {}
-	void steps_press (Pad&);
-	void steps_release (Pad&) {}
-	void steps_long_press (Pad&) {}
-	void pattern_settings_press (Pad&);
-	void pattern_settings_release (Pad&) {}
-	void pattern_settings_long_press (Pad&) {}
-	void velocity_press (Pad&);
-	void velocity_release (Pad&) {}
-	void velocity_long_press (Pad&) {}
-	void probability_press (Pad&);
-	void probability_release (Pad&) {}
-	void probability_long_press (Pad&) {}
-	void mutation_press (Pad&);
-	void mutation_release (Pad&) {}
-	void mutation_long_press (Pad&) {}
-	void microstep_press (Pad&);
-	void microstep_release (Pad&) {}
-	void microstep_long_press (Pad&) {}
-	void print_to_clip_press (Pad&);
-	void print_to_clip_release (Pad&) {}
-	void print_to_clip_long_press (Pad&) {}
-	void stop_clip_press (Pad&);
-	void stop_clip_release (Pad&) {}
-	void stop_clip_long_press (Pad&) {}
-	void device_press (Pad&);
-	void device_release (Pad&) {}
-	void device_long_press (Pad&) {}
-	void sends_press (Pad&);
-	void sends_release (Pad&) {}
-	void sends_long_press (Pad&) {}
+
+	void send_a_press (Pad&);
+	void send_a_release (Pad&) {}
+	void send_b_press (Pad&);
+	void send_b_release (Pad&) {}
 	void pan_press (Pad&);
 	void pan_release (Pad&) {}
 	void pan_long_press (Pad&) {}
@@ -390,6 +335,8 @@ class LaunchPadX : public MIDISurface
 	void solo_press (Pad&);
 	void solo_release (Pad&) {}
 	void solo_long_press (Pad&);
+	void stop_clip_press (Pad&);
+	void stop_clip_release (Pad&) {}
 	void mute_press (Pad&);
 	void mute_release (Pad&) {}
 	void mute_long_press (Pad&) {}
@@ -399,51 +346,6 @@ class LaunchPadX : public MIDISurface
 	void capture_midi_press (Pad&);
 	void capture_midi_release (Pad&) {}
 	void capture_midi_long_press (Pad&) {}
-	void play_press (Pad&);
-	void play_release (Pad&) {}
-	void play_long_press (Pad&) {}
-	void fixed_length_press (Pad&);
-	void fixed_length_release (Pad&) {}
-	void fixed_length_long_press (Pad&) {}
-	void quantize_press (Pad&);
-	void quantize_release (Pad&) {}
-	void quantize_long_press (Pad&) {}
-	void duplicate_press (Pad&);
-	void duplicate_release (Pad&) {}
-	void duplicate_long_press (Pad&) {}
-	void clear_press (Pad&);
-	void clear_release (Pad&);
-	void clear_long_press (Pad&) {}
-	void down_press (Pad&);
-	void down_release (Pad&) {}
-	void down_long_press (Pad&) {}
-	void up_press (Pad&);
-	void up_release (Pad&) {}
-	void up_long_press (Pad&) {}
-	void lower1_press (Pad&);
-	void lower1_release (Pad&) {}
-	void lower1_long_press (Pad&) {}
-	void lower2_press (Pad&);
-	void lower2_release (Pad&) {}
-	void lower2_long_press (Pad&) {}
-	void lower3_press (Pad&);
-	void lower3_release (Pad&) {}
-	void lower3_long_press (Pad&) {}
-	void lower4_press (Pad&);
-	void lower4_release (Pad&) {}
-	void lower4_long_press (Pad&) {}
-	void lower5_press (Pad&);
-	void lower5_release (Pad&) {}
-	void lower5_long_press (Pad&) {}
-	void lower6_press (Pad&);
-	void lower6_release (Pad&) {}
-	void lower6_long_press (Pad&) {}
-	void lower7_press (Pad&);
-	void lower7_release (Pad&) {}
-	void lower7_long_press (Pad&) {}
-	void lower8_press (Pad&);
-	void lower8_release (Pad&) {}
-	void lower8_long_press (Pad&) {}
 
 	void fader_long_press (Pad&);
 	void fader_release (Pad&);
@@ -455,7 +357,6 @@ class LaunchPadX : public MIDISurface
 	PBD::ScopedConnectionList trigger_connections;
 
 	void display_session_layout ();
-	bool did_session_display;
 	void transport_state_changed ();
 	void record_state_changed ();
 
