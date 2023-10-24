@@ -37,10 +37,18 @@
 #include "pbd/failed_constructor.h"
 
 #include "pluginterfaces/base/ipluginbase.h"
+
+#include "ardour/debug.h"
 #include "ardour/vst3_module.h"
 
 #include "pbd/i18n.h"
 
+#ifdef VST3_SCANNER_APP
+# undef DEBUG_TRACE
+# define DEBUG_TRACE(bits,fmt,...) /*empty*/
+#endif
+
+using namespace PBD;
 using namespace ARDOUR;
 
 #ifdef __APPLE__
@@ -52,6 +60,9 @@ public:
 	{
 		std::string path = Glib::path_get_dirname (module_path); // Contents
 		path = Glib::path_get_dirname (path); // theVST.vst3
+#ifndef NDEBUG
+		_path = path;
+#endif
 		CFURLRef url = CFURLCreateFromFileSystemRepresentation (0, (const UInt8*)path.c_str (), (CFIndex)path.length (), true);
 		if (url) {
 			_bundle = CFBundleCreate (kCFAllocatorDefault, url);
@@ -99,6 +110,7 @@ private:
 	{
 		typedef bool (*init_fn_t) (CFBundleRef);
 		init_fn_t fn = (init_fn_t)fn_ptr ("bundleEntry");
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("Calling bundleEntry for '%1' @%2\n", _path, (void*)fn));
 		return (fn && fn (_bundle));
 	}
 
@@ -106,6 +118,7 @@ private:
 	{
 		typedef bool (*exit_fn_t) ();
 		exit_fn_t fn = (exit_fn_t)fn_ptr ("bundleExit");
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("Calling bundleExit for '%1' @%2\n", _path, (void*) fn));
 		return (fn && fn ());
 	}
 
@@ -119,6 +132,9 @@ class VST3WindowsModule : public VST3PluginModule
 public:
 	VST3WindowsModule (const std::string& path)
 	{
+#ifndef NDEBUG
+		_path = path;
+#endif
 		if ((_handle = LoadLibraryA (Glib::locale_from_utf8 (path).c_str ())) == 0) {
 			throw failed_constructor ();
 		}
@@ -147,6 +163,7 @@ public:
 private:
 	bool init ()
 	{
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("Calling InitDll for '%1'\n", _path));
 		typedef bool(__stdcall * init_fn_t) ();
 		init_fn_t fn = (init_fn_t)fn_ptr ("InitDll");
 		return (!fn || fn ()); // init is optional
@@ -154,6 +171,7 @@ private:
 
 	bool exit ()
 	{
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("Calling ExitDll for '%1'\n", _path));
 		typedef bool(__stdcall * exit_fn_t) ();
 		exit_fn_t fn = (exit_fn_t)fn_ptr ("ExitDll");
 		return (!fn || fn ()); // exit is optional
@@ -169,6 +187,9 @@ class VST3LinuxModule : public VST3PluginModule
 public:
 	VST3LinuxModule (std::string const& path)
 	{
+#ifndef NDEBUG
+		_path = path;
+#endif
 		if ((_dll = dlopen (path.c_str (), RTLD_LOCAL | RTLD_LAZY)) == 0) {
 			PBD::error << string_compose (_("Could not load VST3 plugin '%1': %2"), path, dlerror ()) << endmsg;
 			throw failed_constructor ();
@@ -210,6 +231,7 @@ private:
 	{
 		typedef bool (*init_fn_t) (void*);
 		init_fn_t fn = (init_fn_t)fn_ptr ("ModuleEntry");
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("Calling ModuleEntry for '%1' @%2\n", _path, (void*)fn));
 		return (fn && fn (_dll));
 	}
 
@@ -217,6 +239,7 @@ private:
 	{
 		typedef bool (*exit_fn_t) ();
 		exit_fn_t fn = (exit_fn_t)fn_ptr ("ModuleExit");
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("Calling ModuleExit for '%1' @%2\n", _path, (void*)fn));
 		return (fn && fn ());
 	}
 
@@ -241,6 +264,7 @@ void
 VST3PluginModule::release_factory ()
 {
 	if (_factory) {
+		DEBUG_TRACE (DEBUG::VST3Config, string_compose ("release_factory for '%1'\n", _path));
 		_factory->release ();
 	}
 }

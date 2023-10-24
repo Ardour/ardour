@@ -20,6 +20,7 @@
 #define _ardour_vst3_module_h_
 
 #include <memory>
+#include <string>
 
 #include "ardour/libardour_visibility.h"
 
@@ -45,6 +46,10 @@ protected:
 	virtual bool init () = 0;
 	virtual bool exit () = 0;
 	virtual void* fn_ptr (const char* name) const = 0;
+
+#ifndef NDEBUG
+	std::string _path;
+#endif
 
 private:
 	/* prevent copy construction */
