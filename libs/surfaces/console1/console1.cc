@@ -894,15 +894,23 @@ Console1::map_stripable_state ()
 void
 Console1::stop_blinking (ControllerID id)
 {
-	blinkers.remove (id);
-	get_button (id)->set_led_state (false);
+	try {
+		blinkers.remove (id);
+		get_button (id)->set_led_state (false);
+	} catch (ControlNotFoundException const&) {
+		DEBUG_TRACE (DEBUG::Console1, "Button to stop blinking not found ...\n");
+	}
 }
 
 void
 Console1::start_blinking (ControllerID id)
 {
-	blinkers.push_back (id);
-	get_button (id)->set_led_state (true);
+	try {
+		blinkers.push_back (id);
+		get_button (id)->set_led_state (true);
+	} catch (ControlNotFoundException const&) {
+		DEBUG_TRACE (DEBUG::Console1, "Button to start blinking not found ...\n");
+	}
 }
 
 bool

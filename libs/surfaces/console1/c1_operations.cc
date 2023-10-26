@@ -583,9 +583,13 @@ Console1::map_mute ()
 	DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute ...\n");
 	if (_current_stripable) {
 		if (_current_stripable->mute_control ()->muted ()) {
-			get_button (swap_solo_mute ? SOLO : MUTE)->set_led_state (true);
+			try {
+				get_button (swap_solo_mute ? SOLO : MUTE)->set_led_state (true);
+			} catch (ControlNotFoundException const&) {
+				DEBUG_TRACE (DEBUG::Console1, "solo/mute button not found\n");
+			}
 		} else if (_current_stripable->mute_control ()->muted_by_others_soloing () ||
-		           _current_stripable->mute_control ()->muted_by_masters ()) {
+				_current_stripable->mute_control ()->muted_by_masters ()) {
 
 			DEBUG_TRACE (DEBUG::Console1, "Console1::map_mute start blinking\n");
 			start_blinking (swap_solo_mute ? SOLO : MUTE);
