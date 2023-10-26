@@ -50,6 +50,8 @@ public:
 	ARDOUR::PluginInfoPtr selected_instrument () const;
 	std::string selected_instrument_name () const;
 
+	static sigc::signal<void> DropPluginInfoPtr;
+
 private:
 	struct InstrumentListColumns : public Gtk::TreeModel::ColumnRecord {
 		InstrumentListColumns() {
@@ -62,6 +64,7 @@ private:
 
 	void build_instrument_list();
 	void refill();
+	void drop_plugin_ptr();
 
 	std::string					 _longest_instrument_name;
 

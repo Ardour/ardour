@@ -146,6 +146,7 @@
 #include "gui_object.h"
 #include "gui_thread.h"
 #include "idleometer.h"
+#include "instrument_selector.h"
 #include "io_plugin_window.h"
 #include "keyboard.h"
 #include "keyeditor.h"
@@ -867,6 +868,8 @@ ARDOUR_UI::~ARDOUR_UI ()
 	if (recorder) {
 		recorder->cleanup ();
 	}
+
+	InstrumentSelector::DropPluginInfoPtr ();
 
 	if (getenv ("ARDOUR_RUNNING_UNDER_VALGRIND")) {
 		// don't bother at 'real' exit. the OS cleans up for us.

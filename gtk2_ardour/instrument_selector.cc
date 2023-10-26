@@ -29,6 +29,8 @@
 using namespace Gtk;
 using namespace ARDOUR;
 
+sigc::signal<void> InstrumentSelector::DropPluginInfoPtr;
+
 InstrumentSelector::InstrumentSelector (InstrumentListDisposition disp)
 	: _reasonable_synth_id (0)
 	, _gmsynth_id (UINT32_MAX)
@@ -37,6 +39,15 @@ InstrumentSelector::InstrumentSelector (InstrumentListDisposition disp)
 	refill ();
 
 	PluginManager::instance ().PluginListChanged.connect (_update_connection, invalidator (*this), boost::bind (&InstrumentSelector::refill, this), gui_context());
+	DropPluginInfoPtr.connect (sigc::mem_fun (*this, &InstrumentSelector::drop_plugin_ptr));
+}
+
+void
+InstrumentSelector::drop_plugin_ptr()
+{
+	unset_model ();
+	clear ();
+	_instrument_list->clear ();
 }
 
 void
