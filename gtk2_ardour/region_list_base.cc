@@ -613,7 +613,7 @@ RegionListBase::populate_row_opaque (std::shared_ptr<Region> region, TreeModel::
 void
 RegionListBase::populate_row_name (std::shared_ptr<Region> region, TreeModel::Row const& row)
 {
-	row[_columns.name] = Gtkmm2ext::markup_escape_text (region->name ());
+	row[_columns.name] = region->name ();
 
 	if (region->data_type () == DataType::MIDI) {
 		row[_columns.channels] = 0; /*TODO: some better recognition of midi regions*/
@@ -629,9 +629,9 @@ RegionListBase::populate_row_source (std::shared_ptr<Region> region, TreeModel::
 {
 	std::shared_ptr<ARDOUR::Source> source = region->source ();
 	if (std::dynamic_pointer_cast<SilentFileSource> (source)) {
-		row[_columns.path] = _("MISSING ") + Gtkmm2ext::markup_escape_text (source->name ());
+		row[_columns.path] = _("MISSING ") + source->name ();
 	} else {
-		row[_columns.path] = Gtkmm2ext::markup_escape_text (source->name ());
+		row[_columns.path] = source->name ();
 
 		std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (source);
 		if (fs) {
@@ -639,14 +639,14 @@ RegionListBase::populate_row_source (std::shared_ptr<Region> region, TreeModel::
 			if (afs) {
 				const string audio_directory = _session->session_directory ().sound_path ();
 				if (!PBD::path_is_within (audio_directory, fs->path ())) {
-					row[_columns.path] = Gtkmm2ext::markup_escape_text (fs->path ());
+					row[_columns.path] = fs->path ();
 				}
 			}
 			std::shared_ptr<SMFSource> mfs = std::dynamic_pointer_cast<SMFSource> (source);
 			if (mfs) {
 				const string midi_directory = _session->session_directory ().midi_path ();
 				if (!PBD::path_is_within (midi_directory, fs->path ())) {
-					row[_columns.path] = Gtkmm2ext::markup_escape_text (fs->path ());
+					row[_columns.path] = fs->path ();
 				}
 			}
 		}
