@@ -40,10 +40,6 @@ public:
 
 protected:
 	virtual void do_request (BaseUI::BaseRequestObject*);
-
-private:
-	PBD::EventLoop* _main_event_loop;
-
 };
 
 class ArdourFeedback : public SurfaceComponent
