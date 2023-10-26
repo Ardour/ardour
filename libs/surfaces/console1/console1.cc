@@ -436,6 +436,7 @@ Console1::stop_using_device ()
 	blink_connection.disconnect ();
 	periodic_connection.disconnect ();
 	stripable_connections.drop_connections ();
+	MIDISurface::stop_using_device ();
 	return 0;
 }
 
