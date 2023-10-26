@@ -186,6 +186,7 @@ static const char* authors[] = {
 	N_("Nick Mainsbridge"),
 	N_("Tim Mayberry"),
 	N_("Doug Mclain"),
+	N_("Alexander Mitchell"),
 	N_("Johannes Mueller"),
 	N_("Edward Tomasz Napierała"),
 	N_("Todd Naugle"),
