@@ -1807,6 +1807,30 @@ AudioRegionView::remove_transient (float pos)
 	}
 }
 
+samplepos_t
+AudioRegionView::get_transient_position(float pos){
+	list<std::pair<samplepos_t, ArdourCanvas::Line*> >::iterator l;
+	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
+		float *line_pos = (float*) (*l).second->get_data ("position");
+		if (rint(pos) == (rint(*line_pos))) {
+			return (*l).first;
+		}
+	}
+	return 0;
+}
+
+void
+AudioRegionView::get_transient_feature_line(samplepos_t pos, std::list<ArdourCanvas::Item*>& equivalent_transient_items)
+{
+	list<std::pair<samplepos_t, ArdourCanvas::Line*> >::iterator l;
+	for (l = feature_lines.begin(); l != feature_lines.end(); ++l) {
+		if (pos == (*l).first) {
+			equivalent_transient_items.push_back((*l).second);
+			break;
+		}
+	}
+}
+
 void
 AudioRegionView::thaw_after_trim ()
 {

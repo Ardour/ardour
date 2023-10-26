@@ -98,7 +98,8 @@ private:
 
 	Gtk::Adjustment trigger_gap_adjustment;
 	Gtk::SpinButton trigger_gap_spinner;
-
+	Gtk::CheckButton filter_to_grid;
+	
 	Gtk::Button action_button;
 
 	std::vector<std::string> analysis_mode_strings;
@@ -123,6 +124,14 @@ private:
 	void do_action ();
 	void do_split_action ();
 	void do_region_split (RegionView* rv, const ARDOUR::AnalysisFeatureList&);
+};
+
+struct GridFilterElement {
+	GridFilterElement(RegionView* reg_view, samplepos_t onset, samplepos_t snaped);
+	samplepos_t snaped_sample;
+	samplepos_t sample;
+	samplepos_t distance;
+	RegionView* region_view;
 };
 
 #endif /* __gtk2_ardour_rhythm_ferret_h__ */

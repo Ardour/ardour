@@ -114,6 +114,8 @@ public:
 
 	void update_transient(float old_pos, float new_pos);
 	void remove_transient(float pos);
+	samplepos_t get_transient_position(float pos);
+	void get_transient_feature_line(samplepos_t pos, std::list<ArdourCanvas::Item*>& equivalent_transient_items);
 
 	void show_region_editor ();
 

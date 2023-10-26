@@ -1093,14 +1093,39 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case FeatureLineItem:
 			{
+				std::list<ArdourCanvas::Item*> equivalent_transient_items;
+				ArdourCanvas::Line* line = reinterpret_cast<ArdourCanvas::Line*> (item);
+				assert (line);
+
+				RegionView* tmp_rv = reinterpret_cast<RegionView*> (item->get_data ("regionview"));
+				
+				vector<RegionView*> all_equivalent_regions;
+				get_equivalent_regions(tmp_rv, all_equivalent_regions, ARDOUR::Properties::group_select.property_id);
+				
+				AudioRegionView* tmp_arv = dynamic_cast<AudioRegionView*> (tmp_rv);
+				samplepos_t transient_position = tmp_arv->get_transient_position(*(float*) line->get_data("position"));
+// 				boost::shared_ptr<AudioRegionView> arv;
+				for (vector<RegionView*>::iterator i = all_equivalent_regions.begin(); i != all_equivalent_regions.end(); ++i){
+					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
+					arv->get_transient_feature_line(transient_position, equivalent_transient_items);
+				}
+				
+				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::PrimaryModifier)) {
+					equivalent_transient_items.clear();
+					equivalent_transient_items.push_back(item);
+				}
+					
 				if (Keyboard::modifier_state_contains (event->button.state, Keyboard::TertiaryModifier)) {
-					remove_transient(item);
+					for (std::list<ArdourCanvas::Item*>::iterator i = equivalent_transient_items.begin(); i != equivalent_transient_items.end(); ++i){
+						remove_transient(*i);
+					}
 					return true;
 				}
-
-				_drags->set (new FeatureLineDrag (this, item), event);
+				
+				for (std::list<ArdourCanvas::Item*>::iterator i = equivalent_transient_items.begin(); i != equivalent_transient_items.end(); ++i){
+					_drags->set (new FeatureLineDrag (this, *i), event);
+				}
 				return true;
-				break;
 			}
 
 			case RegionItem:
