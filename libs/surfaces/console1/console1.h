@@ -63,12 +63,20 @@ namespace ArdourSurface {
 
 class C1GUI;
 
+// XXX TODO: these classes should not be in the ArdourSurface namespace
+// which is shared with all other ctrl surfaces.
+//
+// ArdourSurface::Meter etc may cause conflicts.
+// best add a C1 prefix, or additional namespace
+
 class Controller;
 class ControllerButton;
 class MultiStateButton;
 class Meter;
 class Encoder;
 
+// 'using' in header files is frowned upon.
+// it may cause conflicts or result in amgibuities
 using Controllable = std::shared_ptr<PBD::Controllable>;
 using order_t = ARDOUR::PresentationInfo::order_t;
 
