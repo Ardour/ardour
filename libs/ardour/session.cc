@@ -134,6 +134,7 @@
 #include "ardour/utils.h"
 #include "ardour/vca_manager.h"
 #include "ardour/vca.h"
+#include "ardour/vst3_plugin.h"
 
 #include "midi++/port.h"
 #include "midi++/mmc.h"
@@ -863,6 +864,11 @@ Session::destroy ()
 	_selection = 0;
 
 	_transport_fsm->stop ();
+
+	/* close VST3 Modules */
+	for (auto const& nfo : PluginManager::instance().vst3_plugin_info()) {
+		std::dynamic_pointer_cast<VST3PluginInfo> (nfo)->m.reset ();
+	}
 
 	DEBUG_TRACE (DEBUG::Destruction, "Session::destroy() done\n");
 
