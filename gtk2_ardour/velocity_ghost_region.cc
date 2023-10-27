@@ -179,12 +179,12 @@ VelocityGhostRegion::add_note (NoteBase* nb)
 }
 
 void
-VelocityGhostRegion::set_size_and_position (GhostEvent& ev)
+VelocityGhostRegion::set_size_and_position (GhostEvent& gev)
 {
-	ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (ev.item);
+	ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (gev.item);
 	const double available_height = base_rect->y1();
-	const double actual_height = (ev.velocity_while_editing / 127.0) * available_height;
-	l->set (ArdourCanvas::Duple (ev.event->x0(), base_rect->y1() - actual_height), actual_height, lollipop_radius);
+	const double actual_height = ((dragging ? gev.velocity_while_editing : gev.event->note()->velocity()) / 127.0) * available_height;
+	l->set (ArdourCanvas::Duple (gev.event->x0(), base_rect->y1() - actual_height), actual_height, lollipop_radius);
 }
 
 void
@@ -370,6 +370,7 @@ VelocityGhostRegion::start_line_drag ()
 		gev->velocity_while_editing = gev->event->note()->velocity();
 	}
 
+	dragging = true;
 	desensitize_lollis ();
 }
 
@@ -377,6 +378,8 @@ void
 VelocityGhostRegion::end_line_drag (bool did_change)
 {
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
+
+	dragging = false;
 
 	if (did_change) {
 		std::vector<NoteBase*> notes;
