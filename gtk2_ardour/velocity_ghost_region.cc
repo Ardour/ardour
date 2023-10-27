@@ -86,13 +86,50 @@ VelocityGhostRegion::line_draw_motion (ArdourCanvas::Duple const & d, ArdourCanv
 		lollis_between (d.x, last_x, affected_lollis);
 	}
 
-	bool ret = false;
-
-	if (!affected_lollis.empty()) {
-		int velocity = y_position_to_velocity (r.height() - (r.y1() - d.y));
-		ret = mrv->set_velocity_for_notes (affected_lollis, velocity);
-		mrv->mid_drag_edit ();
+	if (affected_lollis.empty()) {
+		return false;
 	}
+
+	int velocity = y_position_to_velocity (r.height() - (r.y1() - d.y));
+	bool ret = mrv->set_velocity_for_notes (affected_lollis, velocity);
+	mrv->mid_drag_edit ();
+
+	return ret;
+}
+
+bool
+VelocityGhostRegion::line_extended (ArdourCanvas::Duple const & from, ArdourCanvas::Duple const & to, ArdourCanvas::Rectangle const & r, double last_x)
+{
+	std::vector<NoteBase*> affected_lollis;
+
+	lollis_between (from.x, to.x, affected_lollis);
+
+	if (affected_lollis.empty()) {
+		return false;
+	}
+
+	if (to.x == from.x) {
+		/* no x-axis motion */
+		return false;
+	}
+
+	double slope =  (to.y - from.y) / (to.x - from.x);
+	std::vector<int> velocities;
+
+	for (auto const & nb : affected_lollis) {
+		ArdourCanvas::Item* it = nb->item();
+		ArdourCanvas::Duple pos = it->item_to_canvas (ArdourCanvas::Duple (nb->x0(), 0.0));
+		int y = from.y + (slope * (pos.x - from.x));
+		int velocity = y_position_to_velocity (r.height() - (r.y1() - y));
+		velocities.push_back (velocity);
+	}
+
+	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
+	bool ret = mrv->set_velocities_for_notes (affected_lollis, velocities);
+
+	mrv->mid_drag_edit ();
+
+	model_changed ();
 
 	return ret;
 }

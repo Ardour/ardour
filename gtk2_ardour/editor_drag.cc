@@ -7243,6 +7243,8 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::FreehandLineDrag (Editor* edito
 	, edge_x (0)
 	, did_snap (false)
 	, line_break_pending (false)
+	, line_start_x (-1)
+	, line_start_y (-1)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New FreehandLinDrag\n");
 }
@@ -7305,6 +7307,11 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 	double x = pointer_x - r.x0;
 	double y = ev->motion.y - r.y0;
 
+	if (drawn_points.empty()) {
+		line_start_x = x;
+		line_start_y = y;
+	}
+
 	if (x < 0) {
 		dragging_line->clear ();
 		drawn_points.clear ();
@@ -7319,12 +7326,12 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 	bool add_point = false;
 	bool pop_point = false;
 
-	const bool line = Keyboard::modifier_state_equals (ev->motion.state, Keyboard::PrimaryModifier);
+	const bool straight_line = Keyboard::modifier_state_equals (ev->motion.state, Keyboard::PrimaryModifier);
 
 	if (direction > 0) {
-		if (x < r.width() && (line || (pointer_x > edge_x) || (pointer_x == edge_x && ev->motion.y != last_pointer_y()))) {
+		if (x < r.width() && (straight_line || (pointer_x > edge_x) || (pointer_x == edge_x && ev->motion.y != last_pointer_y()))) {
 
-			if (line && dragging_line->get().size() > 1) {
+			if (straight_line && dragging_line->get().size() > 1) {
 				pop_point = true;
 			}
 
@@ -7333,14 +7340,21 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 
 
 	} else if (direction < 0) {
-		if (x >= 0. && (line || (pointer_x < edge_x) || (pointer_x == edge_x && ev->motion.y != last_pointer_y()))) {
+		if (x >= 0. && (straight_line || (pointer_x < edge_x) || (pointer_x == edge_x && ev->motion.y != last_pointer_y()))) {
 
-			if (line && dragging_line->get().size() > 1) {
+			if (straight_line && dragging_line->get().size() > 1) {
 				pop_point = true;
 			}
 
 			add_point = true;
 		}
+	}
+
+	if (straight_line) {
+		if (dragging_line->get().size() > 1) {
+			pop_point = true;
+		}
+		add_point = true;
 	}
 
 	bool child_call = false;
@@ -7364,7 +7378,11 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 	}
 
 	if (child_call) {
-		point_added (ArdourCanvas::Duple (pointer_x, y), base_rect, first_move ? -1 : edge_x);
+		if (straight_line && !first_move) {
+			line_extended (ArdourCanvas::Duple (line_start_x, line_start_y), ArdourCanvas::Duple (pointer_x, y), base_rect, first_move ? -1 : edge_x);
+		} else {
+			point_added (ArdourCanvas::Duple (pointer_x, y), base_rect, first_move ? -1 : edge_x);
+		}
 	}
 
 	if (add_point) {
@@ -7481,6 +7499,12 @@ void
 VelocityLineDrag::point_added (Duple const & d, ArdourCanvas::Rectangle const & r, double last_x)
 {
 	drag_did_change |= grv->line_draw_motion (d, r, last_x);
+}
+
+void
+VelocityLineDrag::line_extended (Duple const & from, Duple const & to, ArdourCanvas::Rectangle const & r, double last_x)
+{
+	drag_did_change |= grv->line_extended (from, to, r, last_x);
 }
 
 void

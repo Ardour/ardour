@@ -3448,6 +3448,34 @@ MidiRegionView::end_drag_edit (bool apply)
 }
 
 bool
+MidiRegionView::set_velocities_for_notes (std::vector<NoteBase*> notes, std::vector<int> velocities)
+{
+	assert (notes.size() == velocities.size());
+
+	/* Does not use selection, used when drawing/dragging in velocity lane */
+
+	bool changed = false;
+
+	auto notei = notes.begin();
+	auto veloi = velocities.begin();
+
+	while (notei != notes.end()) {
+
+		int delta = (*veloi) - (*notei)->note()->velocity();
+
+		if (delta) {
+			changed = true;
+			change_note_velocity (*notei, delta, true);
+		}
+
+		++notei;
+		++veloi;
+	}
+
+	return changed;
+}
+
+bool
 MidiRegionView::set_velocity_for_notes (std::vector<NoteBase*> notes, int velocity)
 {
 	/* Does not use selection, used when drawing/dragging in velocity lane */

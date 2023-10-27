@@ -50,6 +50,8 @@ public:
 	void set_selected (bool);
 
 	bool line_draw_motion (ArdourCanvas::Duple const & d, ArdourCanvas::Rectangle const & r, double last_x);
+	bool line_extended (ArdourCanvas::Duple const & from, ArdourCanvas::Duple const & to, ArdourCanvas::Rectangle const & r, double last_x);
+
 	void start_line_drag ();
 	void end_line_drag (bool did_change);
 

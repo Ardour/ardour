@@ -1582,6 +1582,9 @@ class FreehandLineDrag : public Drag
 	void finished (GdkEvent*, bool);
 	bool mid_drag_key_event (GdkEventKey*);
 	virtual void point_added  (ArdourCanvas::Duple const & d, ArdourCanvas::Rectangle const & r, double last_x) {}
+	virtual void line_extended  (ArdourCanvas::Duple const & from, ArdourCanvas::Duple const & to, ArdourCanvas::Rectangle const & r, double last_x) {
+		point_added (to, r, last_x);
+	}
 
   protected:
 	ArdourCanvas::Item* parent; /* we do not own this. If null, use base_rect as the parent */
@@ -1592,6 +1595,8 @@ class FreehandLineDrag : public Drag
 	bool did_snap;
 	bool line_break_pending;
 	OrderedPointList drawn_points;
+	ArdourCanvas::Coord line_start_x;
+	ArdourCanvas::Coord line_start_y;
 
 	void maybe_add_point (GdkEvent*, Temporal::timepos_t const &, bool first_move);
 };
@@ -1616,6 +1621,7 @@ class VelocityLineDrag : public FreehandLineDrag<Evoral::ControlList::OrderedPoi
 	void finished (GdkEvent*, bool);
 	void aborted (bool);
 	void point_added  (ArdourCanvas::Duple const & d, ArdourCanvas::Rectangle const & r, double last_x);
+	void line_extended (ArdourCanvas::Duple const & from, ArdourCanvas::Duple const & to, ArdourCanvas::Rectangle const & r, double last_x);
 
  private:
 	VelocityGhostRegion* grv;

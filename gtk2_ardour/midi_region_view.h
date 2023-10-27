@@ -185,6 +185,7 @@ public:
 	void end_drag_edit (bool apply);
 
 	void display_model(std::shared_ptr<ARDOUR::MidiModel> model);
+	std::shared_ptr<ARDOUR::MidiModel> model() const { return _model; }
 
 	/* note_diff commands should start here; this initiates an undo record */
 	void start_note_diff_command (std::string name = "midi edit");
@@ -295,6 +296,7 @@ public:
 	void change_velocities (bool up, bool fine, bool allow_smush, bool all_together);
 	void set_velocity (NoteBase* primary, int velocity);
 	bool set_velocity_for_notes (std::vector<NoteBase*> notes, int velocity);
+	bool set_velocities_for_notes (std::vector<NoteBase*> notes, std::vector<int> velocities);
 	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward, bool fine);
 	void channel_edit ();

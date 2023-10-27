@@ -132,7 +132,7 @@ class NoteBase : public sigc::trackable
 
 	/// hue circle divided into 16 equal-looking parts, courtesy Thorsten Wilms
 	static const uint32_t midi_channel_colors[16];
-	
+
 	bool mouse_near_ends () const;
 	virtual bool big_enough_to_trim () const;
 
