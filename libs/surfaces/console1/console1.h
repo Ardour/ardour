@@ -93,10 +93,10 @@ public:
 
 	void map_p ();
 
-	int set_active (bool yn);
+	int set_active (bool yn) override;
 
-	bool has_editor () const { return true; }
-	void* get_gui () const;
+	bool has_editor () const override { return true; }
+	void* get_gui () const override;
 	void tear_down_gui () override;
 
 	std::string input_port_name () const override;
@@ -311,20 +311,20 @@ private:
 	bool strip_recenabled = false;
 	ARDOUR::MonitorState monitor_state = ARDOUR::MonitorState::MonitoringSilence;
 
-	int begin_using_device ();
-	int stop_using_device ();
+	int begin_using_device () override;
+	int stop_using_device () override;
 
-	int device_acquire () { return 0; }
-	void device_release () {}
+	int device_acquire () override { return 0; }
+	void device_release () override {}
 
-	void connect_session_signals ();
+	void connect_session_signals () override;
 	void connect_internal_signals ();
 
 	void run_event_loop ();
 	void stop_event_loop ();
 
 	/* MIDI-Message handler - we only have controller messages */
-	void handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb);
+	void handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb) override;
 
 	void master_monitor_has_changed ();
 
@@ -411,7 +411,7 @@ private:
 
 	void map_stripable_state ();
 
-	void notify_parameter_changed (std::string);
+	void notify_parameter_changed (std::string) override;
 
 	/* operations (defined in c1_operations.cc) */
 
