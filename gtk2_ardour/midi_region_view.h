@@ -181,8 +181,7 @@ public:
 	void extend_active_notes();
 
 	void begin_drag_edit (std::string const & why);
-	void mid_drag_edit ();
-	void end_drag_edit (bool apply);
+	void end_drag_edit ();
 
 	void display_model(std::shared_ptr<ARDOUR::MidiModel> model);
 	std::shared_ptr<ARDOUR::MidiModel> model() const { return _model; }
@@ -591,7 +590,6 @@ public:
 	void model_changed ();
 
 	void sync_ghost_selection (NoteBase*);
-	void drag_apply ();
 };
 
 

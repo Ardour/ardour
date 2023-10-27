@@ -73,8 +73,7 @@ VelocityGhostRegion::~VelocityGhostRegion ()
 bool
 VelocityGhostRegion::line_draw_motion (ArdourCanvas::Duple const & d, ArdourCanvas::Rectangle const & r, double last_x)
 {
-	std::vector<NoteBase*> affected_lollis;
-	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
+	std::vector<GhostEvent*> affected_lollis;
 
 	if (last_x < 0) {
 		lollis_close_to_x (d.x, 20., affected_lollis);
@@ -91,16 +90,19 @@ VelocityGhostRegion::line_draw_motion (ArdourCanvas::Duple const & d, ArdourCanv
 	}
 
 	int velocity = y_position_to_velocity (r.height() - (r.y1() - d.y));
-	bool ret = mrv->set_velocity_for_notes (affected_lollis, velocity);
-	mrv->mid_drag_edit ();
 
-	return ret;
+	for (auto & lolli : affected_lollis) {
+		lolli->velocity_while_editing = velocity;
+		set_size_and_position (*lolli);
+	}
+
+	return true;
 }
 
 bool
 VelocityGhostRegion::line_extended (ArdourCanvas::Duple const & from, ArdourCanvas::Duple const & to, ArdourCanvas::Rectangle const & r, double last_x)
 {
-	std::vector<NoteBase*> affected_lollis;
+	std::vector<GhostEvent*> affected_lollis;
 
 	lollis_between (from.x, to.x, affected_lollis);
 
@@ -114,24 +116,16 @@ VelocityGhostRegion::line_extended (ArdourCanvas::Duple const & from, ArdourCanv
 	}
 
 	double slope =  (to.y - from.y) / (to.x - from.x);
-	std::vector<int> velocities;
 
-	for (auto const & nb : affected_lollis) {
-		ArdourCanvas::Item* it = nb->item();
-		ArdourCanvas::Duple pos = it->item_to_canvas (ArdourCanvas::Duple (nb->x0(), 0.0));
+	for (auto const & lolli : affected_lollis) {
+		ArdourCanvas::Item* item = lolli->item;
+		ArdourCanvas::Duple pos = item->item_to_canvas (ArdourCanvas::Duple (lolli->event->x0(), 0.0));
 		int y = from.y + (slope * (pos.x - from.x));
-		int velocity = y_position_to_velocity (r.height() - (r.y1() - y));
-		velocities.push_back (velocity);
+		lolli->velocity_while_editing = y_position_to_velocity (r.height() - (r.y1() - y));
+		set_size_and_position (*lolli);
 	}
 
-	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
-	bool ret = mrv->set_velocities_for_notes (affected_lollis, velocities);
-
-	mrv->mid_drag_edit ();
-
-	model_changed ();
-
-	return ret;
+	return true;
 }
 
 bool
@@ -189,7 +183,7 @@ VelocityGhostRegion::set_size_and_position (GhostEvent& ev)
 {
 	ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (ev.item);
 	const double available_height = base_rect->y1();
-	const double actual_height = (ev.event->note()->velocity() / 127.0) * available_height;
+	const double actual_height = (ev.velocity_while_editing / 127.0) * available_height;
 	l->set (ArdourCanvas::Duple (ev.event->x0(), base_rect->y1() - actual_height), actual_height, lollipop_radius);
 }
 
@@ -327,7 +321,7 @@ VelocityGhostRegion::note_selected (NoteBase* ev)
 }
 
 void
-VelocityGhostRegion::lollis_between (int x0, int x1, std::vector<NoteBase*>& within)
+VelocityGhostRegion::lollis_between (int x0, int x1, std::vector<GhostEvent*>& within)
 {
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
 	assert (mrv);
@@ -344,21 +338,21 @@ VelocityGhostRegion::lollis_between (int x0, int x1, std::vector<NoteBase*>& wit
 		if (l) {
 			ArdourCanvas::Duple pos = l->item_to_canvas (ArdourCanvas::Duple (l->x(), l->y0()));
 			if (pos.x >= x0 && pos.x < x1) {
-				within.push_back (gev.second->event);
+				within.push_back (gev.second);
 			}
 		}
 	}
 }
 
 void
-VelocityGhostRegion::lollis_close_to_x (int x, double distance, std::vector<NoteBase*>& within)
+VelocityGhostRegion::lollis_close_to_x (int x, double distance, std::vector<GhostEvent*>& within)
 {
 	for (auto & gev : events) {
 		ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (gev.second->item);
 		if (l) {
 			ArdourCanvas::Duple pos = l->item_to_canvas (ArdourCanvas::Duple (l->x(), l->y0()));
 			if (std::abs (pos.x - x) < distance) {
-				within.push_back (gev.second->event);
+				within.push_back (gev.second);
 			}
 		}
 	}
@@ -368,7 +362,14 @@ void
 VelocityGhostRegion::start_line_drag ()
 {
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
+
 	mrv->begin_drag_edit (_("draw velocities"));
+
+	for (auto & e : events) {
+		GhostEvent* gev (e.second);
+		gev->velocity_while_editing = gev->event->note()->velocity();
+	}
+
 	desensitize_lollis ();
 }
 
@@ -376,7 +377,23 @@ void
 VelocityGhostRegion::end_line_drag (bool did_change)
 {
 	MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (&parent_rv);
-	mrv->end_drag_edit (did_change);
+
+	if (did_change) {
+		std::vector<NoteBase*> notes;
+		std::vector<int> velocities;
+
+		for (auto & e : events) {
+			GhostEvent* gev (e.second);
+			if (gev->event->note()->velocity() != gev->velocity_while_editing) {
+				notes.push_back (gev->event);
+				velocities.push_back (gev->velocity_while_editing);
+			}
+		}
+
+		mrv->set_velocities_for_notes (notes, velocities);
+	}
+
+	mrv->end_drag_edit ();
 	sensitize_lollis ();
 }
 

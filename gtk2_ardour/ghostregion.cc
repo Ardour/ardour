@@ -215,6 +215,7 @@ MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g
 	, item (i)
 	, is_hit (false)
 {
+	velocity_while_editing = event->note()->velocity();
 }
 
 MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g)
@@ -234,6 +235,8 @@ MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g
 		item = poly;
 		is_hit = true;
 	}
+
+	velocity_while_editing = event->note()->velocity();
 
 	CANVAS_DEBUG_NAME (item, "ghost note item");
 }

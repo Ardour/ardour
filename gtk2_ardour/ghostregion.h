@@ -108,6 +108,7 @@ public:
 		NoteBase* event;
 		ArdourCanvas::Item* item;
 		bool is_hit;
+		int velocity_while_editing;
 	};
 
 	MidiGhostRegion(MidiRegionView& rv,

@@ -7308,7 +7308,7 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::maybe_add_point (GdkEvent* ev, 
 	double y = ev->motion.y - r.y0;
 
 	if (drawn_points.empty()) {
-		line_start_x = x;
+		line_start_x = pointer_x;
 		line_start_y = y;
 	}
 
