@@ -19,7 +19,7 @@ def build(bld):
     '''
     obj.defines      = [ 'PACKAGE="ardour_console1"' ]
     obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
-    obj.includes     = [ '.', './console1', './midi_surface/midi_surface']
+    obj.includes     = [ '.', './console1']
     obj.name         = 'libardour_console1'
     obj.target       = 'ardour_console1'
     obj.uselib       = 'GTKMM GTK GDK XML OSX'
