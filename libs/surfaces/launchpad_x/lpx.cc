@@ -593,7 +593,7 @@ LaunchPadX::display_session_layout ()
 	 */
 
 	MIDI::byte msg[3];
-	msg[0] = 0x90;
+	msg[0] = 0xb0;
 
 	MIDI::byte color = (_session_mode == SessionMode ? 0x27 : 0x9);
 

@@ -641,7 +641,7 @@ LaunchPadPro::display_session_layout ()
 	}
 
 	MIDI::byte msg[3];
-	msg[0] = 0x90;
+	msg[0] = 0xb0;
 
 	msg[1] = Patterns;
 	msg[2] = 0x27;
