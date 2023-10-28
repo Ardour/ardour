@@ -98,8 +98,6 @@ Console1::set_active (bool yn)
 
 	ControlProtocol::set_active (yn);
 
-	DEBUG_TRACE (DEBUG::Console1, string_compose ("Console1::set_active done with yn: '%1'\n", yn));
-
 	return 0;
 }
 
@@ -187,14 +185,28 @@ Console1::begin_using_device ()
 	Glib::RefPtr<Glib::TimeoutSource> periodic_timer = Glib::TimeoutSource::create (100);
 	periodic_connection = periodic_timer->connect (sigc::mem_fun (*this, &Console1::periodic));
 	periodic_timer->attach (main_loop ()->get_context ());
+	connect_session_signals ();
+	connect_internal_signals ();
+	create_strip_inventory ();
 
 	DEBUG_TRACE (DEBUG::Console1, "************** begin_using_device() ********************\n");
 
-	create_strip_inventory ();
-	connect_internal_signals ();
-	stripable_selection_changed ();
-
 	return MIDISurface::begin_using_device ();
+}
+
+int
+Console1::stop_using_device ()
+{
+	DEBUG_TRACE (DEBUG::Console1, "stop_using_device()\n");
+	if (!_in_use)
+		return 0;
+	blink_connection.disconnect ();
+	periodic_connection.disconnect ();
+	stripable_connections.drop_connections ();
+	session_connections.drop_connections ();
+	console1_connections.drop_connections ();
+	MIDISurface::stop_using_device ();
+	return 0;
 }
 
 void
@@ -407,19 +419,6 @@ Console1::setup_controls ()
 	new Meter (this, ControllerID::OUTPUT_METER_R, boost::function<void ()> ([] () {}));
 }
 
-int
-Console1::stop_using_device ()
-{
-	DEBUG_TRACE (DEBUG::Console1, "stop_using_device()\n");
-
-	blink_connection.disconnect ();
-	periodic_connection.disconnect ();
-	stripable_connections.drop_connections ();
-	console1_connections.drop_connections ();
-	MIDISurface::stop_using_device ();
-	return 0;
-}
-
 void
 Console1::handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes* tb)
 {
@@ -513,6 +512,9 @@ void
 Console1::stripable_selection_changed ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "stripable_selection_changed \n");
+	if (!_in_use)
+		return;
+
 	std::shared_ptr<Stripable> r = ControlProtocol::first_selected_stripable ();
 	if (r) {
 		set_current_stripable (r);
@@ -1194,11 +1196,10 @@ Console1::select_rid_by_index (uint32_t index)
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
 		session->selection ().select_stripable_and_maybe_group (s, true, false, 0);
+	} else {
+		success = false;
 	}
-    else {
-    	success = false;
-    }
-    if( !success ){
+	if (!success) {
 		map_select ();
 	}
 }
