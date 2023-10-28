@@ -3442,18 +3442,6 @@ MidiRegionView::set_velocities_for_notes (std::vector<NoteBase*>& notes, std::ve
 	return changed;
 }
 
-void
-MidiRegionView::end_drag_edit (bool apply)
-{
-	if (apply) {
-		drag_apply ();
-		editing_context.commit_reversible_command ();
-		_note_diff_command = nullptr;
-	} else {
-		abort_note_diff ();
-	}
-}
-
 bool
 MidiRegionView::set_velocity_for_notes (std::vector<NoteBase*>& notes, int velocity)
 {
