@@ -3410,7 +3410,7 @@ MidiRegionView::end_drag_edit ()
 }
 
 bool
-MidiRegionView::set_velocities_for_notes (std::vector<NoteBase*> notes, std::vector<int> velocities)
+MidiRegionView::set_velocities_for_notes (std::vector<NoteBase*>& notes, std::vector<int>& velocities)
 {
 	start_note_diff_command (_("draw velocities"));
 
@@ -3445,7 +3445,7 @@ MidiRegionView::set_velocities_for_notes (std::vector<NoteBase*> notes, std::vec
 }
 
 bool
-MidiRegionView::set_velocity_for_notes (std::vector<NoteBase*> notes, int velocity)
+MidiRegionView::set_velocity_for_notes (std::vector<NoteBase*>& notes, int velocity)
 {
 	/* Does not use selection, used when drawing/dragging in velocity lane */
 

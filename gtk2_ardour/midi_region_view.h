@@ -294,8 +294,8 @@ public:
 	void change_note_lengths (bool, bool, Temporal::Beats beats, bool start, bool end);
 	void change_velocities (bool up, bool fine, bool allow_smush, bool all_together);
 	void set_velocity (NoteBase* primary, int velocity);
-	bool set_velocity_for_notes (std::vector<NoteBase*> notes, int velocity);
-	bool set_velocities_for_notes (std::vector<NoteBase*> notes, std::vector<int> velocities);
+	bool set_velocity_for_notes (std::vector<NoteBase*>& notes, int velocity);
+	bool set_velocities_for_notes (std::vector<NoteBase*>& notes, std::vector<int>& velocities);
 	void transpose (bool up, bool fine, bool allow_smush);
 	void nudge_notes (bool forward, bool fine);
 	void channel_edit ();
