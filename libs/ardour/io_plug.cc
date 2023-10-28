@@ -75,7 +75,7 @@ IOPlug::~IOPlug ()
 std::string
 IOPlug::io_name (std::string const& n) const
 {
-	return (string_compose ("%1/%2/%3", _("IO"), _pre ? _("Pre"): _("Post"), n.empty () ? name () : n));
+	return (string_compose ("%1/%2/%3", _("IO"), _pre ? S_("IO|Pre"): S_("IO|Post"), n.empty () ? name () : n));
 }
 
 std::string

@@ -333,9 +333,9 @@ Plugin::describe_io_port (ARDOUR::DataType dt, bool input, uint32_t id) const
 			break;
 	}
 	if (input) {
-		ss << _("In") << " ";
+		ss << S_("IO|In") << " ";
 	} else {
-		ss << _("Out") << " ";
+		ss << S_("IO|Out") << " ";
 	}
 
 	std::stringstream gn;

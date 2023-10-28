@@ -123,10 +123,10 @@ TrackMixLayout::TrackMixLayout (Push2& p, Session & s, std::string const & name)
 			break;
 		case 3:
 			_upper_text[n]->set (_("Track Trim"));
-			_lower_text[n]->set (_("In"));
+			_lower_text[n]->set (S_("Monitor|In"));
 			break;
 		case 4:
-			_lower_text[n]->set (_("Disk"));
+			_lower_text[n]->set (S_("Monitor|Disk"));
 			break;
 		case 5:
 			_lower_text[n]->set (_("Solo Iso"));

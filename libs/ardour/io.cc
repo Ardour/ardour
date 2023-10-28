@@ -1159,7 +1159,7 @@ IO::apply_pretty_name ()
 	for (PortSet::iterator i = _ports.begin (); i != _ports.end(); ++i, ++pn) {
 		(*i)->set_pretty_name (string_compose (("%1/%2 %3"),
 					_pretty_name_prefix,
-					_direction == Output ? _("Out") : _("In"),
+					_direction == Output ? S_("IO|Out") : S_("IO|In"),
 					pn));
 	}
 }
