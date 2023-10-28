@@ -176,21 +176,3 @@ msgstr "Nelze přejmenovat váš vlastní soubor s přiřazením kláves (%1)"
 #: textviewer.cc:32
 msgid "Close"
 msgstr "Zavřít"
-
-#~ msgid "Unknown action name: %1"
-#~ msgstr "Neznámý název pro činnost: %1"
-
-#~ msgid "operate controller now"
-#~ msgstr "Obsluhovat ovladač nyní"
-
-#~ msgid "button cannot watch state of non-existing Controllable\n"
-#~ msgstr "Tlačítko nemůže sledovat stav neexistujícího ovladatelného cíle\n"
-
-#~ msgid "Click to tear this into its own window"
-#~ msgstr "Klepněte pro odtržení do vlastního okna"
-
-#~ msgid "Click to put this back in the main window"
-#~ msgstr "Klepněte pro ukotvení do hlavního okna"
-
-#~ msgid "Meta"
-#~ msgstr "Meta"
