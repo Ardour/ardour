@@ -338,8 +338,8 @@ void
 TriggerStrip::set_button_names ()
 {
 	mute_button->set_text (_("Mute"));
-	monitor_input_button->set_text (_("In"));
-	monitor_disk_button->set_text (_("Disk"));
+	monitor_input_button->set_text (S_("Monitor|In"));
+	monitor_disk_button->set_text (S_("Monitor|Disk"));
 
 	if (!Config->get_solo_control_is_listen_control ()) {
 		solo_button->set_text (_("Solo"));

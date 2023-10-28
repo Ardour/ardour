@@ -237,13 +237,13 @@ RouteUI::init ()
 
 	monitor_input_button = new ArdourButton (ArdourButton::default_elements);
 	monitor_input_button->set_name ("monitor button");
-	monitor_input_button->set_text (_("In"));
+	monitor_input_button->set_text (S_("Monitor|In"));
 	UI::instance()->set_tip (monitor_input_button, _("Monitor input"), "");
 	monitor_input_button->set_no_show_all (true);
 
 	monitor_disk_button = new ArdourButton (ArdourButton::default_elements);
 	monitor_disk_button->set_name ("monitor button");
-	monitor_disk_button->set_text (_("Disk"));
+	monitor_disk_button->set_text (S_("Monitor|Disk"));
 	UI::instance()->set_tip (monitor_disk_button, _("Monitor playback"), "");
 	monitor_disk_button->set_no_show_all (true);
 

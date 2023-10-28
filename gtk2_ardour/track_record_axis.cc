@@ -256,8 +256,8 @@ TrackRecordAxis::set_button_names ()
 	monitor_input_button->set_text (S_("MonitorInput|I"));
 	monitor_disk_button->set_text (S_("MonitorDisk|D"));
 #else
-	monitor_input_button->set_text (_("In"));
-	monitor_disk_button->set_text (_("Disk"));
+	monitor_input_button->set_text (S_("Monitor|In"));
+	monitor_disk_button->set_text (S_("Monitor|Disk"));
 #endif
 
 	/* Solo/Listen is N/A */

@@ -445,8 +445,8 @@ ARDOUR_UI::setup_transport ()
 	/* and widget text */
 	auto_return_button.set_text(_("Auto Return"));
 	follow_edits_button.set_text(_("Follow Range"));
-	punch_in_button.set_text (_("In"));
-	punch_out_button.set_text (_("Out"));
+	punch_in_button.set_text (S_("Punch|In"));
+	punch_out_button.set_text (S_("Punch|Out"));
 
 	record_mode_selector.AddMenuElem (MenuElem (record_mode_strings[(int)RecLayered], sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_record_mode), RecLayered)));
 	record_mode_selector.AddMenuElem (MenuElem (record_mode_strings[(int)RecNonLayered], sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::set_record_mode), RecNonLayered)));

@@ -163,9 +163,9 @@ AudioRegionPropertiesBox::AudioRegionPropertiesBox ()
 
 	label = manage (new Gtk::Label (_("Fades:")));
 	label->set_alignment (1.0, 0.5);
-	fade_in_enable_button.set_text (_("In"));
+	fade_in_enable_button.set_text (S_("Fade|In"));
 	fade_in_enable_button.set_name ("generic button");
-	fade_out_enable_button.set_text (_("Out"));
+	fade_out_enable_button.set_text (S_("Fade|Out"));
 	fade_out_enable_button.set_name ("generic button");
 	audio_t->attach (*label,                 0, 1, row, row + 1, Gtk::FILL, Gtk::SHRINK);
 	audio_t->attach (fade_in_enable_button,  1, 2, row, row + 1, Gtk::FILL, Gtk::SHRINK);
