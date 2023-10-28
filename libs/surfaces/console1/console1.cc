@@ -198,12 +198,9 @@ int
 Console1::stop_using_device ()
 {
 	DEBUG_TRACE (DEBUG::Console1, "stop_using_device()\n");
-	if (!_in_use)
-		return 0;
 	blink_connection.disconnect ();
 	periodic_connection.disconnect ();
 	stripable_connections.drop_connections ();
-	session_connections.drop_connections ();
 	console1_connections.drop_connections ();
 	MIDISurface::stop_using_device ();
 	return 0;
