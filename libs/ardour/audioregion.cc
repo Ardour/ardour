@@ -1817,7 +1817,7 @@ You currently have \"auto-analyse-audio\" disabled, which means \
 that transient data must be generated every time it is required.\n\n\
 If you are doing work that will require transient data on a \
 regular basis, you should probably enable \"auto-analyse-audio\" \
-in Preferences > Audio > Regions, then quit %1 and restart.\n\n\
+in Preferences > Metering, then quit %1 and restart.\n\n\
 This dialog will not display again.  But you may notice a slight delay \
 in this and future transient-detection operations.\n\
 "), PROGRAM_NAME));
