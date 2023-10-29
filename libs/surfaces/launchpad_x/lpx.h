@@ -119,31 +119,15 @@ class LaunchPadX : public MIDISurface
 	enum Layout {
 		SessionLayout,
 		Fader,
-		ChordLayout,
-		CustomLayout,
 		NoteLayout,
-		Scale,
-		SequencerSettings,
-		SequencerSteps,
-		SequencerVelocity,
-		SequencerPatternSettings,
-		SequencerProbability,
-		SequencerMutation,
-		SequencerMicroStep,
-		SequencerProjects,
-		SequencerPatterns,
-		SequencerTempo,
-		SequencerSwing,
-		ProgrammerLayout,
-		Settings,
-		CustomSettings
+		CustomLayout,
 	};
 
 	enum FaderBank {
 		VolumeFaders,
 		PanFaders,
-		SendFaders,
-		DeviceFaders
+		SendAFaders,
+		SendBFaders,
 	};
 
 	static const Layout AllLayouts[];

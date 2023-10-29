@@ -80,9 +80,7 @@ using namespace Gtkmm2ext;
 static const std::vector<MIDI::byte> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xc });
 
 const LaunchPadX::Layout LaunchPadX::AllLayouts[] = {
-	SessionLayout, Fader, ChordLayout, CustomLayout, NoteLayout, Scale, SequencerSettings,
-	SequencerSteps, SequencerVelocity, SequencerPatternSettings, SequencerProbability, SequencerMutation,
-	SequencerMicroStep, SequencerProjects, SequencerPatterns, SequencerTempo, SequencerSwing, ProgrammerLayout, Settings, CustomSettings
+	SessionLayout, Fader, NoteLayout, CustomLayout,
 };
 
 bool
@@ -266,10 +264,6 @@ LaunchPadX::begin_using_device ()
 	light_logo ();
 
 	set_device_mode (DAW);
-	setup_faders (VolumeFaders);
-	setup_faders (PanFaders);
-	setup_faders (SendFaders);
-	setup_faders (DeviceFaders);
 	set_layout (SessionLayout);
 
 	/* catch current selection, if any so that we can wire up the pads if appropriate */
@@ -476,11 +470,33 @@ LaunchPadX::all_pads_on (int color)
 void
 LaunchPadX::set_layout (Layout l, int page)
 {
+	MIDI::byte layout;
+
+	if (l == Fader) {
+		switch ((FaderBank) page) {
+		case VolumeFaders:
+			setup_faders (VolumeFaders);
+			break;
+		case PanFaders:
+			setup_faders (PanFaders);
+			break;
+		case SendAFaders:
+			setup_faders (SendAFaders);
+			break;
+		case SendBFaders:
+			setup_faders (SendBFaders);
+			break;
+		default:
+			break;
+		}
+		layout = 0xd;
+	} else {
+		layout = 0x0;
+	}
+
 	MidiByteArray msg (sysex_header);
 	msg.push_back (0x0);
-	msg.push_back (l);
-	msg.push_back (page);
-	msg.push_back (0x0);
+	msg.push_back (layout);
 	msg.push_back (0xf7);
 	daw_write (msg);
 
@@ -566,10 +582,12 @@ LaunchPadX::handle_midi_sysex (MIDI::Parser& parser, MIDI::byte* raw_bytes, size
 			DEBUG_TRACE (DEBUG::Launchpad, string_compose ("new layout: %1\n", _current_layout));
 			switch (_current_layout) {
 			case SessionLayout:
+				std::cerr << "session\n";
 				display_session_layout ();
 				map_triggers ();
 				break;
 			case Fader:
+				std::cerr << "faders\n";
 				map_faders ();
 				break;
 			default:
@@ -1008,6 +1026,8 @@ LaunchPadX::rh0_press (Pad& pad)
 	if (_current_layout == SessionLayout) {
 		if (_session_mode == SessionMode) {
 			cue_press (pad, 0 + scroll_y_offset);
+		} else {
+			volume_press (pad);
 		}
 	}
 }
@@ -1051,10 +1071,14 @@ LaunchPadX::rh3_press (Pad& pad)
 void
 LaunchPadX::rh4_press (Pad& pad)
 {
+	std::cerr << "rh4\n";
 	if (_current_layout == SessionLayout) {
+		std::cerr << "SL\n";
 		if (_session_mode == SessionMode) {
+			std::cerr << "SM 4 + " << scroll_y_offset << std::endl;
 			cue_press (pad, 4 + scroll_y_offset);
 		} else {
+			std::cerr << "stop clips\n";
 			stop_clip_press (pad);
 		}
 	}
@@ -1099,7 +1123,9 @@ LaunchPadX::rh7_press (Pad& pad)
 void
 LaunchPadX::stop_clip_press (Pad& pad)
 {
-
+	if (session) {
+		session->trigger_stop_all (true);
+	}
 }
 
 void
@@ -1140,21 +1166,21 @@ LaunchPadX::pan_press (Pad& pad)
 void
 LaunchPadX::send_a_press (Pad& pad)
 {
-	if (_current_layout == Fader && current_fader_bank == SendFaders) {
+	if (_current_layout == Fader && current_fader_bank == SendAFaders) {
 		set_layout (SessionLayout);
 		return;
 	}
-	set_layout (Fader, SendFaders);
+	set_layout (Fader, SendAFaders);
 }
 
 void
 LaunchPadX::send_b_press (Pad& pad)
 {
-	if (_current_layout == Fader && current_fader_bank == SendFaders) {
+	if (_current_layout == Fader && current_fader_bank == SendBFaders) {
 		set_layout (SessionLayout);
 		return;
 	}
-	set_layout (Fader, SendFaders);
+	set_layout (Fader, SendBFaders);
 }
 
 void
@@ -1607,7 +1633,7 @@ LaunchPadX::setup_faders (FaderBank bank)
 	msg.push_back (bank);
 	switch (bank) {
 	case PanFaders:
-		msg.push_back (1); /* vertical orientation */
+		msg.push_back (1); /* horizontal orientation */
 		break;
 	default:
 		msg.push_back (0); /* vertical orientation */
@@ -1637,8 +1663,8 @@ LaunchPadX::fader_move (int cc, int val)
 	std::shared_ptr<Route> r;
 
 	switch (current_fader_bank) {
-	case SendFaders:
-	case DeviceFaders:
+	case SendAFaders:
+	case SendBFaders:
 		r = std::dynamic_pointer_cast<Route> (session->selection().first_selected_stripable());
 		break;
 	default:
@@ -1665,11 +1691,14 @@ LaunchPadX::fader_move (int cc, int val)
 			session->set_control (ac, val/127.0, PBD::Controllable::NoGroup);
 		}
 		break;
-	case SendFaders:
+	case SendAFaders:
 		ac = r->send_level_controllable (scroll_x_offset + (cc - 0x20));
 		if (ac) {
 			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ARDOUR::Config->get_max_gain()), PBD::Controllable::NoGroup);
 		}
+		break;
+	case SendBFaders:
+		/* unimplemented */
 		break;
 	default:
 		break;
@@ -1689,8 +1718,8 @@ LaunchPadX::map_faders ()
 
 
 		switch (current_fader_bank) {
-		case SendFaders:
-		case DeviceFaders:
+		case SendAFaders:
+		case SendBFaders:
 			r = std::dynamic_pointer_cast<Route> (session->selection().first_selected_stripable());
 			break;
 		default:
@@ -1732,7 +1761,7 @@ LaunchPadX::map_faders ()
 				msg[2] = 0;
 			}
 			break;
-		case SendFaders:
+		case SendAFaders:
 			ac = r->send_level_controllable (n);
 			if (ac) {
 				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
@@ -1767,7 +1796,8 @@ LaunchPadX::automation_control_change (int n, std::weak_ptr<AutomationControl> w
 
 	switch (current_fader_bank) {
 	case VolumeFaders:
-	case SendFaders:
+	case SendAFaders:
+	case SendBFaders:
 		msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
 		break;
 	case PanFaders:
