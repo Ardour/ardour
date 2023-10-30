@@ -5,16 +5,17 @@ ardour { ["type"] = "EditorAction", name = "Reverse MIDI events",
 }
 
 function factory () return function ()
-	print("Reverse MIDI regions, man!")
+	print ("Reverse MIDI regions, man!")
 	-- Reverse all selected MIDI regions
 	local sel = Editor:get_selection ()
 	for r in sel.regions:regionlist ():iter () do
-		print("Iterating through selected regions baby!")
+		print ("Iterating through selected regions baby!")
 		local mr = r:to_midiregion ()
 		if mr:isnil () then goto next end
 
-		print("mr =", mr, ", mr:position () =", mr:position ())
-		local mm = mr:midi_source(0):model()
+		print ("mr =", mr, ", mr:position () =", mr:position ())
+		local mm = mr:midi_source(0):model ()
+		print ("mm =", mm)
 		-- Look for NotePtr in luabindings.cc
 		
 		-- -- get list of MIDI-CC events for the given channel and parameter
