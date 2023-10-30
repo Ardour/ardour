@@ -645,6 +645,9 @@ ARDOUR_UI_UTILS::key_is_legal_for_numeric_entry (guint keyval)
 int
 ARDOUR_UI_UTILS::guess_default_ui_scale ()
 {
+#ifdef __APPLE__
+	return 100;
+#else
 	gint width = 0;
 	gint height = 0;
 	GdkScreen* screen = gdk_display_get_screen (gdk_display_get_default (), 0);
@@ -674,6 +677,7 @@ ARDOUR_UI_UTILS::guess_default_ui_scale ()
 	} else {
 		return 250;
 	}
+#endif
 }
 
 void
