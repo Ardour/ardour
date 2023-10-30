@@ -118,7 +118,6 @@ class LaunchPadX : public MIDISurface
 
 	enum Layout {
 		SessionLayout,
-		Fader,
 		NoteLayout,
 		CustomLayout,
 	};
@@ -129,8 +128,6 @@ class LaunchPadX : public MIDISurface
 		SendAFaders,
 		SendBFaders,
 	};
-
-	static const Layout AllLayouts[];
 
 	struct Pad  {
 
@@ -229,9 +226,6 @@ class LaunchPadX : public MIDISurface
 	void all_pads_off ();
 	void all_pads_on (int color);
 
-	void set_device_mode (DeviceMode);
-	void set_layout (Layout, int page = 0);
-
 	void handle_midi_controller_message (MIDI::Parser&, MIDI::EventTwoBytes*);
 	void handle_midi_note_on_message (MIDI::Parser&, MIDI::EventTwoBytes*);
 	void handle_midi_note_off_message (MIDI::Parser&, MIDI::EventTwoBytes*);
@@ -269,7 +263,9 @@ class LaunchPadX : public MIDISurface
 		MixerMode
 	};
 
-	bool _session_pressed;
+	void set_device_mode (DeviceMode);
+	void set_session_mode (SessionState);
+
 	SessionState _session_mode;
 
 	void cue_press (Pad&, int row);
@@ -282,6 +278,7 @@ class LaunchPadX : public MIDISurface
 	void rh5_press (Pad&);
 	void rh6_press (Pad&);
 	void rh7_press (Pad&);
+	void fader_mode_press (FaderBank);
 
 	/* named pad methods */
 	void down_press (Pad&);
@@ -330,9 +327,6 @@ class LaunchPadX : public MIDISurface
 	void capture_midi_press (Pad&);
 	void capture_midi_release (Pad&) {}
 	void capture_midi_long_press (Pad&) {}
-
-	void fader_long_press (Pad&);
-	void fader_release (Pad&);
 
 	void pad_press (Pad&, int velocity);
 	void pad_long_press (Pad&);

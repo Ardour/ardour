@@ -79,10 +79,6 @@ using namespace Gtkmm2ext;
 #define LAUNCHPADX   0x0103
 static const std::vector<MIDI::byte> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xc });
 
-const LaunchPadX::Layout LaunchPadX::AllLayouts[] = {
-	SessionLayout, Fader, NoteLayout, CustomLayout,
-};
-
 bool
 LaunchPadX::available ()
 {
@@ -136,10 +132,8 @@ LaunchPadX::LaunchPadX (ARDOUR::Session& s)
 	, _daw_out_port (nullptr)
 	, _gui (nullptr)
 	, _current_layout (SessionLayout)
-	, _session_pressed (false)
 	, _session_mode (SessionMode)
 	, current_fader_bank (VolumeFaders)
-	, revert_layout_on_fader_release (false)
 	, pre_fader_layout (SessionLayout)
 {
 	run_event_loop ();
@@ -264,7 +258,8 @@ LaunchPadX::begin_using_device ()
 	light_logo ();
 
 	set_device_mode (DAW);
-	set_layout (SessionLayout);
+	setup_faders (VolumeFaders);
+	set_session_mode (SessionMode);
 
 	/* catch current selection, if any so that we can wire up the pads if appropriate */
 	stripable_selection_changed ();
@@ -468,45 +463,6 @@ LaunchPadX::all_pads_on (int color)
 }
 
 void
-LaunchPadX::set_layout (Layout l, int page)
-{
-	MIDI::byte layout;
-
-	if (l == Fader) {
-		switch ((FaderBank) page) {
-		case VolumeFaders:
-			setup_faders (VolumeFaders);
-			break;
-		case PanFaders:
-			setup_faders (PanFaders);
-			break;
-		case SendAFaders:
-			setup_faders (SendAFaders);
-			break;
-		case SendBFaders:
-			setup_faders (SendBFaders);
-			break;
-		default:
-			break;
-		}
-		layout = 0xd;
-	} else {
-		layout = 0x0;
-	}
-
-	MidiByteArray msg (sysex_header);
-	msg.push_back (0x0);
-	msg.push_back (layout);
-	msg.push_back (0xf7);
-	daw_write (msg);
-
-	if (l == Fader) {
-		pre_fader_layout = _current_layout;
-		current_fader_bank = (FaderBank) page;
-	}
-}
-
-void
 LaunchPadX::set_device_mode (DeviceMode m)
 {
 	/* programming manual, pages 14 and 18 */
@@ -555,52 +511,6 @@ LaunchPadX::set_device_mode (DeviceMode m)
 void
 LaunchPadX::handle_midi_sysex (MIDI::Parser& parser, MIDI::byte* raw_bytes, size_t sz)
 {
-	MidiByteArray m (sz, raw_bytes);
-	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Sysex, %1 bytes parser %2 %s\n", sz, &parser, m));
-
-	if (&parser != _daw_in_port->parser()) {
-		DEBUG_TRACE (DEBUG::Launchpad, "sysex from non-DAW port, ignored\n");
-		return;
-	}
-
-	if (sz < sysex_header.size() + 1) {
-		return;
-	}
-
-	const size_t num_layouts = sizeof (AllLayouts) / sizeof (AllLayouts[0]);
-
-	raw_bytes += sysex_header.size();
-
-	switch (raw_bytes[0]) {
-	case 0x0: /* layout info */
-		if (sz < sysex_header.size() + 2) {
-			return;
-		}
-
-		if (raw_bytes[1] < num_layouts) {
-			_current_layout = AllLayouts[raw_bytes[1]];
-			DEBUG_TRACE (DEBUG::Launchpad, string_compose ("new layout: %1\n", _current_layout));
-			switch (_current_layout) {
-			case SessionLayout:
-				std::cerr << "session\n";
-				display_session_layout ();
-				map_triggers ();
-				break;
-			case Fader:
-				std::cerr << "faders\n";
-				map_faders ();
-				break;
-			default:
-				break;
-			}
-			stripable_selection_changed ();
-		} else {
-			std::cerr << "ignore illegal layout index " << (int) raw_bytes[1] << std::endl;
-		}
-		break;
-	default:
-		break;
-	}
 }
 
 void
@@ -614,8 +524,6 @@ LaunchPadX::display_session_layout ()
 	msg[0] = 0xb0;
 
 	MIDI::byte color = (_session_mode == SessionMode ? 0x27 : 0x9);
-
-	std::cerr << "redisplay sessionmode, sm " << _session_mode << std::endl;
 
 	msg[1] = Session;
 	msg[2] = color;
@@ -674,7 +582,7 @@ LaunchPadX::handle_midi_controller_message (MIDI::Parser& parser, MIDI::EventTwo
 		return;
 	}
 
-	if (_current_layout == Fader) {
+	if (_current_layout == SessionLayout && _session_mode == MixerMode) {
 		/* Trap fader move messages and act on them */
 		if (ev->controller_number >= 0x20 && ev->controller_number < 0x28) {
 			fader_move (ev->controller_number, ev->value);
@@ -715,6 +623,7 @@ LaunchPadX::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoByt
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Note On %1/0x%3%4%5 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity, std::hex, (int) ev->note_number, std::dec));
 
 	if (_current_layout != SessionLayout) {
+		std::cerr << "center pad, ignore because cl = " << _current_layout << std::endl;
 		return;
 	}
 
@@ -968,9 +877,8 @@ LaunchPadX::long_press_timeout (int pad_id)
 void
 LaunchPadX::left_press (Pad& pad)
 {
-	const int shift = (_session_pressed ? 9 : 1);
-	if (scroll_x_offset >= shift) {
-		scroll_x_offset -= shift;
+	if (scroll_x_offset >= 1) {
+		scroll_x_offset -= 1;
 	}
 	viewport_changed ();
 }
@@ -978,8 +886,7 @@ LaunchPadX::left_press (Pad& pad)
 void
 LaunchPadX::right_press (Pad& pad)
 {
-	const int shift = (_session_pressed ? 9 : 1);
-	scroll_x_offset += shift;
+	scroll_x_offset += 1;;
 	viewport_changed ();
 }
 
@@ -988,11 +895,18 @@ LaunchPadX::session_press (Pad& pad)
 {
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("session press, mode %1\n", _session_mode));
 
-	if (_session_mode == SessionMode) {
-		_session_mode = MixerMode;
+	if (_current_layout != SessionLayout) {
+		_current_layout = SessionLayout;
+		/* rest handled by device */
 	} else {
-		_session_mode = SessionMode;
+
+		if (_session_mode == SessionMode) {
+			set_session_mode (MixerMode);
+		} else {
+			set_session_mode (SessionMode);
+		}
 	}
+
 	display_session_layout ();
 }
 
@@ -1004,13 +918,15 @@ LaunchPadX::session_release (Pad& pad)
 void
 LaunchPadX::note_press (Pad& pad)
 {
-	/* handled by device */
+	_current_layout = NoteLayout;
+	/* rest handled by device */
 }
 
 void
 LaunchPadX::custom_press (Pad& pad)
 {
-	/* handled by device */
+	_current_layout = CustomLayout;
+	/* rest handled by device */
 }
 
 void
@@ -1071,14 +987,10 @@ LaunchPadX::rh3_press (Pad& pad)
 void
 LaunchPadX::rh4_press (Pad& pad)
 {
-	std::cerr << "rh4\n";
 	if (_current_layout == SessionLayout) {
-		std::cerr << "SL\n";
 		if (_session_mode == SessionMode) {
-			std::cerr << "SM 4 + " << scroll_y_offset << std::endl;
 			cue_press (pad, 4 + scroll_y_offset);
 		} else {
-			std::cerr << "stop clips\n";
 			stop_clip_press (pad);
 		}
 	}
@@ -1129,58 +1041,43 @@ LaunchPadX::stop_clip_press (Pad& pad)
 }
 
 void
-LaunchPadX::fader_long_press (Pad&)
+LaunchPadX::fader_mode_press (FaderBank bank)
 {
-	revert_layout_on_fader_release = true;
-}
+	if (_current_layout != SessionLayout) {
+		return;
+	}
 
-void
-LaunchPadX::fader_release (Pad&)
-{
-	if (revert_layout_on_fader_release) {
-		set_layout (pre_fader_layout);
-		revert_layout_on_fader_release = false;
+	if (current_fader_bank != bank) {
+		setup_faders (bank);
+	}
+
+	if (_session_mode != MixerMode) {
+		set_session_mode (MixerMode);
 	}
 }
 
 void
 LaunchPadX::volume_press (Pad& pad)
 {
-	if (_current_layout == Fader && current_fader_bank == VolumeFaders) {
-		set_layout (SessionLayout);
-		return;
-	}
-	set_layout (Fader, VolumeFaders);
+	fader_mode_press (VolumeFaders);
 }
 
 void
 LaunchPadX::pan_press (Pad& pad)
 {
-	if (_current_layout == Fader && current_fader_bank == PanFaders) {
-		set_layout (SessionLayout);
-		return;
-	}
-	set_layout (Fader, PanFaders);
+	fader_mode_press (PanFaders);
 }
 
 void
 LaunchPadX::send_a_press (Pad& pad)
 {
-	if (_current_layout == Fader && current_fader_bank == SendAFaders) {
-		set_layout (SessionLayout);
-		return;
-	}
-	set_layout (Fader, SendAFaders);
+	fader_mode_press (SendAFaders);
 }
 
 void
 LaunchPadX::send_b_press (Pad& pad)
 {
-	if (_current_layout == Fader && current_fader_bank == SendBFaders) {
-		set_layout (SessionLayout);
-		return;
-	}
-	set_layout (Fader, SendBFaders);
+	fader_mode_press (SendBFaders);
 }
 
 void
@@ -1236,18 +1133,15 @@ LaunchPadX::capture_midi_press (Pad& pad)
 void
 LaunchPadX::down_press (Pad& pad)
 {
-	const int shift = (_session_pressed ? 9 : 1);
-
-	if (scroll_y_offset >= shift) {
-		scroll_y_offset -= shift;
+	if (scroll_y_offset >= 1) {
+		scroll_y_offset -= 1;
 	}
 }
 
 void
 LaunchPadX::up_press (Pad& pad)
 {
-	const int shift = (_session_pressed ? 9 : 1);
-	scroll_y_offset += shift;
+	scroll_y_offset += 1;
 }
 
 void
@@ -1597,16 +1491,10 @@ LaunchPadX::viewport_changed ()
 		}
 	}
 
+	map_triggers ();
 
-	switch (_current_layout) {
-	case SessionLayout:
-		map_triggers ();
-		break;
-	case Fader:
+	if (_session_mode == MixerMode) {
 		map_faders ();
-		break;
-	default:
-		break;
 	}
 
 	stripable_selection_changed ();
@@ -1621,6 +1509,27 @@ LaunchPadX::route_property_change (PropertyChange const & pc, int col)
 
 
 	if (pc.contains (Properties::selected)) {
+	}
+}
+
+void
+LaunchPadX::set_session_mode (SessionState sm)
+{
+	MidiByteArray msg (sysex_header);
+	msg.push_back (0x0);
+	msg.push_back ((sm == SessionMode) ? 0x0 : 0xd);
+	msg.push_back (0xf7);
+	daw_write (msg);
+
+	_session_mode = sm;
+	_current_layout = SessionLayout;
+	std::cerr << "layout " << _current_layout << " sm " << _session_mode << std::endl;
+	display_session_layout ();
+
+	if (_session_mode == SessionMode) {
+		map_triggers ();
+	} else {
+		map_faders ();
 	}
 }
 
@@ -1655,6 +1564,7 @@ LaunchPadX::setup_faders (FaderBank bank)
 
 	msg.push_back (0xf7);
 	daw_write (msg);
+	current_fader_bank = bank;
 }
 
 void
@@ -1715,7 +1625,6 @@ LaunchPadX::map_faders ()
 
 	for (int n = 0; n < 8; ++n) {
 		std::shared_ptr<Route> r;
-
 
 		switch (current_fader_bank) {
 		case SendAFaders:
