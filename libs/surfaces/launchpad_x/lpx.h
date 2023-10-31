@@ -264,7 +264,10 @@ class LaunchPadX : public MIDISurface
 	};
 
 	void set_device_mode (DeviceMode);
-	void set_session_mode (SessionState);
+	void set_session_mode (SessionState, bool clear_pending);
+	void set_session_mode (SessionState sm) {
+		set_session_mode (sm, true);
+	}
 
 	SessionState _session_mode;
 
@@ -275,8 +278,10 @@ class LaunchPadX : public MIDISurface
 	void rh2_press (Pad&);
 	void rh3_press (Pad&);
 	void rh4_press (Pad&);
+	void rh4_long_press (Pad&);
 	void rh5_press (Pad&);
 	void rh6_press (Pad&);
+	void rh6_long_press (Pad&);
 	void rh7_press (Pad&);
 	void fader_mode_press (FaderBank);
 
@@ -353,6 +358,18 @@ class LaunchPadX : public MIDISurface
 	FaderBank current_fader_bank;
 	bool revert_layout_on_fader_release;
 	Layout pre_fader_layout;
+
+	enum PendingMixerOp {
+		PendingNone,
+		PendingStopClip,
+		PendingMute,
+		PendingSolo,
+		PendingRecArm
+	};
+
+	PendingMixerOp pending_mixer_op;
+	void set_pending_mixer_op (PendingMixerOp);
+	void handle_pending_mixer_op (int col);
 };
 
 

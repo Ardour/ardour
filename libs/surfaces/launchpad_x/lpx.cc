@@ -78,6 +78,7 @@ using namespace Gtkmm2ext;
 #define NOVATION     0x1235
 #define LAUNCHPADX   0x0103
 static const std::vector<MIDI::byte> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xc });
+static int first_fader = 0x9;
 
 bool
 LaunchPadX::available ()
@@ -135,6 +136,7 @@ LaunchPadX::LaunchPadX (ARDOUR::Session& s)
 	, _session_mode (SessionMode)
 	, current_fader_bank (VolumeFaders)
 	, pre_fader_layout (SessionLayout)
+	, pending_mixer_op (PendingNone)
 {
 	run_event_loop ();
 	port_setup ();
@@ -351,9 +353,9 @@ LaunchPadX::build_pad_map ()
 	BUTTON (Pan, &LaunchPadX::rh1_press);
 	BUTTON (SendA, &LaunchPadX::rh2_press);
 	BUTTON (SendB, &LaunchPadX::rh3_press);
-	BUTTON (StopClip, &LaunchPadX::rh4_press);
+	BUTTON2 (StopClip, &LaunchPadX::rh4_press, &LaunchPadX::rh4_long_press);
 	BUTTON (Mute, &LaunchPadX::rh5_press);
-	BUTTON(Solo, &LaunchPadX::rh6_press);
+	BUTTON2 (Solo, &LaunchPadX::rh6_press, &LaunchPadX::rh6_long_press);
 	BUTTON (RecordArm, &LaunchPadX::rh7_press);
 
 	/* Now add the 8x8 central pad grid */
@@ -361,7 +363,7 @@ LaunchPadX::build_pad_map ()
 	for (int row = 0; row < 8; ++row) {
 		for (int col = 0; col < 8; ++col) {
 			int pid = (11 + (row * 10)) + col;
-			std::pair<int,Pad> p (pid, Pad (pid, col, 7 - row, &LaunchPadX::pad_press, &LaunchPadX::pad_long_press, &LaunchPadX::relax));
+			std::pair<int,Pad> p (pid, Pad (pid, col, 7 - row, &LaunchPadX::pad_press, &LaunchPadX::pad_long_press));
 			if (!pad_map.insert (p).second) abort();
 		}
 	}
@@ -520,71 +522,96 @@ LaunchPadX::display_session_layout ()
 	 * it across power-cycling!
 	 */
 
+	std::list<PadID> rhs { Volume, Pan, SendA, SendB, StopClip, Mute, Solo, RecordArm };
 	MIDI::byte msg[3];
 	msg[0] = 0xb0;
 
-	MIDI::byte color = (_session_mode == SessionMode ? 0x27 : 0x9);
+	if (pending_mixer_op == PendingNone) {
 
-	msg[1] = Session;
-	msg[2] = color;
-	daw_write (msg, 3);
+		MIDI::byte color = (_session_mode == SessionMode ? 0x27 : 0x9);
 
-	msg[1] = Volume;
-	msg[2] = color;
-	daw_write (msg, 3);
-	msg[1] = Pan;
-	msg[2] = color;
-	daw_write (msg, 3);
-	msg[1] = SendA;
-	msg[2] = color;
-	daw_write (msg, 3);
-	msg[1] = SendB;
-	msg[2] = color;
-	daw_write (msg, 3);
-	msg[1] = StopClip;
-	msg[2] = color;
-	daw_write (msg, 3);
-	msg[1] = Mute;
-	msg[2] = color;
-	daw_write (msg, 3);
-	msg[1] = Solo;
-	msg[2] = color;
-	daw_write (msg, 3);
-	msg[1] = RecordArm;
-	msg[2] = color;
-	daw_write (msg, 3);
+		msg[1] = Session;
+		msg[2] = color;
+		daw_write (msg, 3);
 
-	msg[1] = CaptureMIDI;
-	msg[2] = 5;
-	daw_write (msg, 3);
+		for (auto pid : rhs) {
+			msg[1] = pid;
+			msg[2] = color;
+			daw_write (msg, 3);
+		}
 
-	msg[1] = Up;
-	msg[2] = 46;
-	daw_write (msg, 3);
-	msg[1] = Down;
-	msg[2] = 46;
-	daw_write (msg, 3);
-	msg[1] = Left;
-	msg[2] = 46;
-	daw_write (msg, 3);
-	msg[1] = Right;
-	msg[2] = 46;
+		msg[1] = CaptureMIDI;
+		msg[2] = 5;
+		daw_write (msg, 3);
+
+		msg[1] = Up;
+		msg[2] = 46;
+		daw_write (msg, 3);
+		msg[1] = Down;
+		msg[2] = 46;
+		daw_write (msg, 3);
+		msg[1] = Left;
+		msg[2] = 46;
+		daw_write (msg, 3);
+		msg[1] = Right;
+		msg[2] = 46;
+		daw_write (msg, 3);
+
+		return;
+	}
+
+	PadID special;
+	MIDI::byte color;
+
+	switch (pending_mixer_op) {
+	case PendingStopClip:
+		special = StopClip;
+		color = 0x3c;
+		break;
+	case PendingSolo:
+		special = Solo;
+		color = 0x13;
+		break;
+	case PendingMute:
+		special = Mute;
+		color = 0x25;
+		break;
+	case PendingRecArm:
+		special = RecordArm;
+		color = 0x5;
+		break;
+	default:
+		return;
+	}
+
+	rhs.remove (special);
+
+	for (auto pid : rhs) {
+		msg[1] = pid;
+		msg[2] = 0x2; /* dim */
+		daw_write (msg, 3);
+	}
+
+	msg[1] = special;
+	msg[2] = color;
 	daw_write (msg, 3);
 }
 
 void
 LaunchPadX::handle_midi_controller_message (MIDI::Parser& parser, MIDI::EventTwoBytes* ev)
 {
-	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("CC %1 (value %2)\n", (int) ev->controller_number, (int) ev->value));
 
 	if (&parser != _daw_in_port->parser()) {
 		/* we don't process CC messages from the regular port */
+		DEBUG_TRACE (DEBUG::Launchpad, string_compose ("skip non-DAW CC %1 (value %2)\n", (int) ev->controller_number, (int) ev->value));
 		return;
 	}
 
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("CC %1 (value %2)\n", (int) ev->controller_number, (int) ev->value));
+
 	if (_current_layout == SessionLayout && _session_mode == MixerMode) {
 		/* Trap fader move messages and act on them */
-		if (ev->controller_number >= 0x20 && ev->controller_number < 0x28) {
+		if (ev->controller_number >= first_fader && ev->controller_number < first_fader+8) {
 			fader_move (ev->controller_number, ev->value);
 			return;
 		}
@@ -620,10 +647,16 @@ LaunchPadX::handle_midi_note_on_message (MIDI::Parser& parser, MIDI::EventTwoByt
 		return;
 	}
 
+
+	if (&parser != _daw_in_port->parser()) {
+		/* we don't process CC messages from the regular port */
+		DEBUG_TRACE (DEBUG::Launchpad, string_compose ("skip non-DAW Note On %1/0x%3%4%5 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity, std::hex, (int) ev->note_number, std::dec));
+		return;
+	}
+
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("Note On %1/0x%3%4%5 (velocity %2)\n", (int) ev->note_number, (int) ev->velocity, std::hex, (int) ev->note_number, std::dec));
 
 	if (_current_layout != SessionLayout) {
-		std::cerr << "center pad, ignore because cl = " << _current_layout << std::endl;
 		return;
 	}
 
@@ -677,7 +710,6 @@ LaunchPadX::connect_daw_ports ()
 {
 	if (!_daw_in || !_daw_out) {
 		/* ports not registered yet */
-		std::cerr << "no daw port registered\n";
 		return;
 	}
 
@@ -997,10 +1029,20 @@ LaunchPadX::rh4_press (Pad& pad)
 }
 
 void
+LaunchPadX::rh4_long_press (Pad& pad)
+{
+	std::cerr << "\n\n>>>> stop long\n";
+	if (session) {
+		session->trigger_stop_all (true);
+	}
+	consumed.insert (pad.id);
+}
+
+void
 LaunchPadX::rh5_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		if (_session_mode == SessionMode) {
+		if (!pending_mixer_op && _session_mode == SessionMode) {
 			cue_press (pad, 5 + scroll_y_offset);
 		} else {
 			mute_press (pad);
@@ -1012,7 +1054,7 @@ void
 LaunchPadX::rh6_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		if (_session_mode == SessionMode) {
+		if (!pending_mixer_op && _session_mode == SessionMode) {
 			cue_press (pad, 6 + scroll_y_offset);
 		} else {
 			solo_press (pad);
@@ -1021,22 +1063,23 @@ LaunchPadX::rh6_press (Pad& pad)
 }
 
 void
+LaunchPadX::rh6_long_press (Pad& pad)
+{
+	std::cerr << "\n\n>>>> solo long\n";
+	cancel_all_solo ();
+	/* Pad was used for long press, do not invoke release action */
+	consumed.insert (pad.id);
+}
+
+void
 LaunchPadX::rh7_press (Pad& pad)
 {
 	if (_current_layout == SessionLayout) {
-		if (_session_mode == SessionMode) {
+		if (!pending_mixer_op && _session_mode == SessionMode) {
 			cue_press (pad, 7 + scroll_y_offset);
 		} else {
 			record_arm_press (pad);
 		}
-	}
-}
-
-void
-LaunchPadX::stop_clip_press (Pad& pad)
-{
-	if (session) {
-		session->trigger_stop_all (true);
 	}
 }
 
@@ -1081,47 +1124,27 @@ LaunchPadX::send_b_press (Pad& pad)
 }
 
 void
+LaunchPadX::stop_clip_press (Pad& pad)
+{
+	set_pending_mixer_op (PendingStopClip);
+}
+
+void
 LaunchPadX::mute_press (Pad& pad)
 {
-	std::shared_ptr<Stripable> s = session->selection().first_selected_stripable();
-	if (s) {
-		std::shared_ptr<AutomationControl> ac = s->mute_control();
-		if (ac) {
-			ac->set_value (!ac->get_value(), PBD::Controllable::UseGroup);
-		}
-	}
+	set_pending_mixer_op (PendingMute);
 }
 
 void
 LaunchPadX::solo_press (Pad& pad)
 {
-	std::shared_ptr<Stripable> s = session->selection().first_selected_stripable();
-	if (s) {
-		std::shared_ptr<AutomationControl> ac = s->solo_control();
-		if (ac) {
-			session->set_control (ac, !ac->get_value(), PBD::Controllable::UseGroup);
-		}
-	}
-}
-
-void
-LaunchPadX::solo_long_press (Pad& pad)
-{
-	cancel_all_solo ();
-	/* Pad was used for long press, do not invoke release action */
-	consumed.insert (pad.id);
+	set_pending_mixer_op (PendingSolo);
 }
 
 void
 LaunchPadX::record_arm_press (Pad& pad)
 {
-	std::shared_ptr<Stripable> s = session->selection().first_selected_stripable();
-	if (s) {
-		std::shared_ptr<AutomationControl> ac = s->rec_enable_control();
-		if (ac) {
-			ac->set_value (!ac->get_value(), PBD::Controllable::UseGroup);
-		}
-	}
+	set_pending_mixer_op (PendingRecArm);
 }
 
 void
@@ -1148,17 +1171,28 @@ void
 LaunchPadX::pad_press (Pad& pad, int velocity)
 {
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("pad press on %1, %2 => %3 vel %4\n", pad.x, pad.y, pad.id, velocity));
-	session->bang_trigger_at (pad.x, pad.y, velocity / 127.0f);
-	start_press_timeout (pad);
+
+	/* Check for bottom row press */
+
+	if (pending_mixer_op != PendingNone && pad.y == 7) {
+		handle_pending_mixer_op (pad.x);
+	} else {
+		session->bang_trigger_at (pad.x, pad.y, velocity / 127.0f);
+		start_press_timeout (pad);
+	}
 }
 
 void
 LaunchPadX::pad_long_press (Pad& pad)
 {
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("pad long press on %1, %2 => %3\n", pad.x, pad.y, pad.id));
-	session->unbang_trigger_at (pad.x, pad.y);
-	/* Pad was used for long press, do not invoke release action */
-	consumed.insert (pad.id);
+	if (pending_mixer_op != PendingNone && pad.y == 7) {
+		/* relax */
+	} else {
+		session->unbang_trigger_at (pad.x, pad.y);
+		/* Pad was used for long press, do not invoke release action */
+		consumed.insert (pad.id);
+	}
 }
 
 void
@@ -1167,7 +1201,7 @@ LaunchPadX::trigger_property_change (PropertyChange pc, Trigger* t)
 	int x = t->box().order();
 	int y = t->index();
 
-	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("prop change %1 for trigger at %2, %3\n", pc, x, y));
+	// DEBUG_TRACE (DEBUG::Launchpad, string_compose ("prop change %1 for trigger at %2, %3\n", pc, x, y));
 
 	if (y > scroll_y_offset + 7) {
 		/* not visible at present */
@@ -1513,7 +1547,7 @@ LaunchPadX::route_property_change (PropertyChange const & pc, int col)
 }
 
 void
-LaunchPadX::set_session_mode (SessionState sm)
+LaunchPadX::set_session_mode (SessionState sm, bool clear_pending)
 {
 	MidiByteArray msg (sysex_header);
 	msg.push_back (0x0);
@@ -1521,9 +1555,12 @@ LaunchPadX::set_session_mode (SessionState sm)
 	msg.push_back (0xf7);
 	daw_write (msg);
 
+	if (clear_pending) {
+		pending_mixer_op = PendingNone;
+	}
 	_session_mode = sm;
 	_current_layout = SessionLayout;
-	std::cerr << "layout " << _current_layout << " sm " << _session_mode << std::endl;
+
 	display_session_layout ();
 
 	if (_session_mode == SessionMode) {
@@ -1558,7 +1595,7 @@ LaunchPadX::setup_faders (FaderBank bank)
 			msg.push_back (0); /* unipolar */
 			break;
 		}
-		msg.push_back (0x20+n);       /* CC number */
+		msg.push_back (0x18+n);       /* CC number */
 		msg.push_back (random() % 127); /* color */
 	}
 
@@ -1578,7 +1615,7 @@ LaunchPadX::fader_move (int cc, int val)
 		r = std::dynamic_pointer_cast<Route> (session->selection().first_selected_stripable());
 		break;
 	default:
-		r = session->get_remote_nth_route (scroll_x_offset + (cc - 0x20));
+		r = session->get_remote_nth_route (scroll_x_offset + (cc - first_fader));
 		break;
 	}
 
@@ -1602,7 +1639,7 @@ LaunchPadX::fader_move (int cc, int val)
 		}
 		break;
 	case SendAFaders:
-		ac = r->send_level_controllable (scroll_x_offset + (cc - 0x20));
+		ac = r->send_level_controllable (scroll_x_offset + (cc - first_fader));
 		if (ac) {
 			session->set_control (ac, ARDOUR::slider_position_to_gain_with_max (val/127.0, ARDOUR::Config->get_max_gain()), PBD::Controllable::NoGroup);
 		}
@@ -1638,7 +1675,7 @@ LaunchPadX::map_faders ()
 
 		std::shared_ptr<AutomationControl> ac;
 
-		msg[1] = 0x20 + n;
+		msg[1] = first_fader + n;
 
 		if (!r) {
 			switch (current_fader_bank) {
@@ -1671,7 +1708,15 @@ LaunchPadX::map_faders ()
 			}
 			break;
 		case SendAFaders:
-			ac = r->send_level_controllable (n);
+			ac = r->send_level_controllable (0);
+			if (ac) {
+				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
+			} else {
+				msg[2] = 0;
+			}
+			break;
+		case SendBFaders:
+			ac = r->send_level_controllable (1);
 			if (ac) {
 				msg[2] = (MIDI::byte) (ARDOUR::gain_to_slider_position_with_max (ac->get_value(), ARDOUR::Config->get_max_gain()) * 127.0);
 			} else {
@@ -1701,7 +1746,7 @@ LaunchPadX::automation_control_change (int n, std::weak_ptr<AutomationControl> w
 
 	MIDI::byte msg[3];
 	msg[0] = 0xb4;
-	msg[1] = 0x20 + n;
+	msg[1] = first_fader + n;
 
 	switch (current_fader_bank) {
 	case VolumeFaders:
@@ -1715,5 +1760,86 @@ LaunchPadX::automation_control_change (int n, std::weak_ptr<AutomationControl> w
 	default:
 		break;
 	}
+
 	daw_write (msg, 3);
+}
+
+void
+LaunchPadX::set_pending_mixer_op (PendingMixerOp mop)
+{
+	pending_mixer_op = mop;
+
+	MIDI::byte msg[3];
+	msg[0] = 0x90;
+
+	switch (mop) {
+	case PendingNone:
+		/* display_session_layout() will already have done the right thing */
+		return;
+
+	case PendingStopClip:
+		msg[2] = 0x3c;
+		break;
+	case PendingSolo:
+		msg[2] = 0x13;
+		break;
+	case PendingMute:
+		msg[2] = 0x25;
+		break;
+	case PendingRecArm:
+		msg[2] = 0x5;
+		break;
+	}
+
+	set_session_mode (SessionMode, false);
+
+	/* Color the bottom row of pads */
+
+	for (int n = 0xb; n < 0x13; ++n) {
+		msg[1] = n;
+		daw_write (msg, 3);
+	}
+}
+
+void
+LaunchPadX::handle_pending_mixer_op (int col)
+{
+	int nth = col + scroll_x_offset;
+	std::shared_ptr<Stripable> s = session->get_remote_nth_route (nth);
+
+	if (!s) {
+		return;
+	}
+
+	std::shared_ptr<AutomationControl> ac;
+	std::shared_ptr<Route> r;
+
+	switch (pending_mixer_op) {
+	case PendingNone:
+		return;
+
+	case PendingStopClip:
+		r = std::dynamic_pointer_cast<Route> (s);
+		if (r) {
+			std::shared_ptr<TriggerBox> tb = r->triggerbox();
+			if (tb) {
+				tb->stop_all_quantized ();
+			}
+		}
+		return;
+
+	case PendingMute:
+		ac = s->mute_control();
+		break;
+	case PendingSolo:
+		ac = s->solo_control();
+		break;
+	case PendingRecArm:
+		ac = s->rec_enable_control();
+		break;
+	}
+
+	if (ac) {
+		ac->set_value (!ac->get_value(), PBD::Controllable::UseGroup);
+	}
 }
