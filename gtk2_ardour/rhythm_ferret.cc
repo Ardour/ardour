@@ -231,7 +231,9 @@ RhythmFerret::run_analysis ()
 
 	clear_transients ();
 
-	regions_with_transients = editor.get_selection().regions;
+	for (auto const& rv : editor.get_selection().regions) {
+		regions_with_transients.push_back (rv->region ());
+	}
 
 	current_results.clear ();
 
@@ -239,22 +241,22 @@ RhythmFerret::run_analysis ()
 		return;
 	}
 
-	for (RegionSelection::iterator i = regions_with_transients.begin(); i != regions_with_transients.end(); ++i) {
+	for (auto const& r : regions_with_transients) {
 
-		std::shared_ptr<AudioReadable> rd = std::static_pointer_cast<AudioRegion> ((*i)->region());
+		std::shared_ptr<AudioReadable> rd = std::static_pointer_cast<AudioRegion> (r);
 
 		switch (get_analysis_mode()) {
 		case PercussionOnset:
-			run_percussion_onset_analysis (rd, (*i)->region()->position_sample(), current_results);
+			run_percussion_onset_analysis (rd, r->position_sample(), current_results);
 			break;
 		case NoteOnset:
-			run_note_onset_analysis (rd, (*i)->region()->position_sample(), current_results);
+			run_note_onset_analysis (rd, r->position_sample(), current_results);
 			break;
 		default:
 			break;
 		}
 
-		(*i)->region()->set_onsets (current_results);
+		r->set_onsets (current_results);
 		current_results.clear();
 	}
 }
@@ -448,8 +450,8 @@ RhythmFerret::clear_transients ()
 {
 	current_results.clear ();
 
-	for (RegionSelection::iterator i = regions_with_transients.begin(); i != regions_with_transients.end(); ++i) {
-		(*i)->region()->set_onsets (current_results);
+	for (auto const& r : regions_with_transients) {
+		r->set_onsets (current_results);
 	}
 
 	regions_with_transients.clear ();

@@ -109,7 +109,7 @@ private:
 
 	void clear_transients ();
 	/** Regions that we have added transient marks to */
-	RegionSelection regions_with_transients;
+	ARDOUR::RegionList regions_with_transients;
 
 	AnalysisMode get_analysis_mode () const;
 	Action get_action() const;
