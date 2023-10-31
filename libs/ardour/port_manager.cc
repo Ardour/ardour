@@ -2001,7 +2001,7 @@ PortManager::run_input_meters (pframes_t n_samples, samplecnt_t rate)
 		assert (!port_is_mine (p.first));
 
 		PortEngine::PortHandle ph = _backend->get_port_by_name (p.first);
-		if (!ph || !_backend->connected (ph)) {
+		if (!ph) {
 			continue;
 		}
 
