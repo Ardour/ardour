@@ -5,8 +5,32 @@ ardour { ["type"] = "EditorAction", name = "Reverse MIDI Events",
 }
 
 function factory () return function ()
-	-- Reverse all selected MIDI regions
+	-- Calculate the minimal position and the maximum length of the
+	-- selection, ignoring non-MIDI region.
 	local sel = Editor:get_selection ()
+	-- local sel_position = Temporal.timepos_t.max (TimeDomain.BeatTime)
+	local sel_position = Temporal.timepos_t (9000000)
+	local sel_end = Temporal.timepos_t.zero ()
+	for r in sel.regions:regionlist ():iter () do
+		-- local mr = r:to_midiregion ()
+		-- if mr:isnil () then goto next end
+		if r:position () < sel_position then sel_position = r:position () end
+		r_end = r:position () + r:length ()
+		if sel_end < r_end then sel_end = r_end end
+		-- ::next::
+	end
+	local sel_length = sel_end - sel_position
+
+	-- Reverse the order of selected MIDI regions
+	for r in sel.regions:regionlist ():iter () do
+		-- local mr = r:to_midiregion ()
+		-- if mr:isnil () then goto next end
+		local new_position = sel_position + sel_position + sel_length - r:position () - r:length ()
+		r:set_position (new_position)
+		-- ::next::
+	end
+
+	-- Reverse the content inside selected MIDI regions
 	for r in sel.regions:regionlist ():iter () do
 		-- Get start and length of MIDI region
 		local mr = r:to_midiregion ()
