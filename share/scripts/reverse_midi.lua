@@ -1,11 +1,10 @@
-ardour { ["type"] = "EditorAction", name = "Reverse MIDI events",
+ardour { ["type"] = "EditorAction", name = "Reverse MIDI Events",
 	license     = "MIT",
 	author      = "Nil Geisweiller",
 	description = [[Reverse MIDI events of selected MIDI regions, so that events at the end appear at the beginning and so on.  Reverse the order of MIDI regions as well, so that MIDI regions at the end appear at the beginning and so on.  Reverse individual notes as well, so the ending of a note corresponds to its beginning.  Thus, for this effect to yeld good results, the notes should rather be quantized.]]
 }
 
 function factory () return function ()
-	print ("Reverse MIDI regions")
 	-- Reverse all selected MIDI regions
 	local sel = Editor:get_selection ()
 	for r in sel.regions:regionlist ():iter () do
@@ -18,24 +17,18 @@ function factory () return function ()
 		-- Iterate over all notes of the MIDI region and reverse them
 		-- TODO: make sure it works for regions with hidden notes
 		local mm = mr:midi_source(0):model ()
+		local midi_command = mm:new_note_diff_command ("Reverse MIDI Events")
 		for note in ARDOUR.LuaAPI.note_list (mm):iter () do
 			local new_time = start + start + length - note:time () - note:length ()
-			print ("new_time =", new_time)
+			local new_note = ARDOUR.LuaAPI.new_noteptr (note:channel (), new_time, note:length (), note:note (), note:velocity ())
+			midi_command:remove (note)
+			midi_command:add (new_note)
 		end
+		mm:apply_command (Session, midi_command)
 
 		-- TODO: support other MIDI events
 		::next::
 	end
-
-	-- -- save undo
-	-- if add_undo then
-	-- 	local after = al:get_state ()
-	-- 	Session:add_command (al:memento_command (before, after))
-	-- 	Session:commit_reversible_command (nil)
-	-- else
-	-- 	Session:abort_reversible_command ()
-	-- 	LuaDialog.Message ("Reverse MIDI events", "No event was reversed, was any non-empty region selected?", LuaDialog.MessageType.Info, LuaDialog.ButtonType.Close):run ()
-	-- end
 end end
 
 function icon (params) return function (ctx, width, height, fg)
