@@ -298,7 +298,7 @@ CueBoxUI::context_menu (uint64_t idx)
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Clear All..."), sigc::bind (sigc::mem_fun (*this, &CueBoxUI::clear_all_triggers), idx)));
 
-	_context_menu->popup (1, gtk_get_current_event_time ());
+	_context_menu->popup (3, gtk_get_current_event_time ());
 }
 
 void

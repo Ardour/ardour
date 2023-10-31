@@ -73,7 +73,7 @@ public:
 	void sample_chosen (int r);
 
 	void launch_context_menu ();
-	void follow_context_menu ();
+	void follow_context_menu (GdkEventButton*);
 	void context_menu ();
 
 	void edit_jump_done (int r, TriggerJumpDialog* d);

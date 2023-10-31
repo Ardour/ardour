@@ -1109,7 +1109,7 @@ ARDOUR_UI::tabbable_visibility_button_press (GdkEventButton* ev, string const& t
 	string menu_name = string ("/ui/") + tabbable_name + X_("TabbableButtonMenu");
 	Gtk::Menu* menu = dynamic_cast<Gtk::Menu*> (ActionManager::get_widget (menu_name.c_str()));
 	if (menu) {
-		menu->popup (3, ev->time);
+		menu->popup (ev->button, ev->time);
 	}
 	return true;
 }

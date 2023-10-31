@@ -148,7 +148,7 @@ EditorSources::show_context_menu (int button, int time)
 #endif
 	items.push_back (MenuElem (_("Remove the selected Sources"),
 	                           sigc::mem_fun (*this, &EditorSources::remove_selected_sources)));
-	menu->popup (1, time);
+	menu->popup (button, time);
 }
 
 void

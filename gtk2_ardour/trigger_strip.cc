@@ -574,7 +574,7 @@ TriggerStrip::name_button_press (GdkEventButton* ev)
 		if (ev->button == 1) {
 			Gtkmm2ext::anchored_menu_popup (_route_ops_menu, &_name_button, "", 1, ev->time);
 		} else {
-			_route_ops_menu->popup (3, ev->time);
+			_route_ops_menu->popup (ev->button, ev->time);
 		}
 
 		return true;

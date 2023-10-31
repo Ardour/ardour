@@ -2079,7 +2079,7 @@ Mixer_UI::group_display_button_press (GdkEventButton* ev)
 	RouteGroup* group = (*iter)[group_columns.group];
 
 	if (Keyboard::is_context_menu_event (ev)) {
-		_group_tabs->get_menu(group)->popup (1, ev->time);
+		_group_tabs->get_menu(group)->popup (ev->button, ev->time);
 		return true;
 	}
 
@@ -4107,7 +4107,7 @@ Mixer_UI::popup_scene_menu (GdkEventButton* ev, int scn_idx)
 		items.back().set_sensitive (!PublicEditor::instance().get_selection().tracks.routelist ().empty ());
 	}
 
-	menu->popup(1, ev->time);
+	menu->popup(ev->button, ev->time);
 }
 
 bool

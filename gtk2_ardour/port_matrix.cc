@@ -559,7 +559,7 @@ PortMatrix::popup_menu (BundleChannel column, BundleChannel row, uint32_t t)
 	items.push_back (MenuElem (_("Flip"), sigc::mem_fun (*this, &PortMatrix::flip)));
 	items.back().set_sensitive (can_flip ());
 
-	_menu->popup (1, t);
+	_menu->popup (3, t);
 }
 
 void

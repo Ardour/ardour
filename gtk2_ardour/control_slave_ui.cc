@@ -213,7 +213,7 @@ ControlSlaveUI::vca_button_release (GdkEventButton* ev, uint32_t n)
 	}
 
 	if (!items.empty()) {
-		context_menu->popup (1, ev->time);
+		context_menu->popup (ev->button, ev->time);
 		return true;
 	}
 

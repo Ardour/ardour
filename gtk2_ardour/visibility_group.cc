@@ -82,7 +82,7 @@ VisibilityGroup::button_press_event (GdkEventButton* ev)
 		j->signal_activate().connect (sigc::bind (sigc::mem_fun (*this, &VisibilityGroup::toggle), i));
 	}
 
-	m->popup (1, ev->time);
+	m->popup (ev->button, ev->time);
 	return true;
 }
 

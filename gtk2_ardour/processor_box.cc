@@ -2527,7 +2527,7 @@ ProcessorBox::show_processor_menu (int arg)
 			&& !std::dynamic_pointer_cast<Amp> (single_selection->processor ())
 			&& !std::dynamic_pointer_cast<UnknownProcessor> (single_selection->processor ()));
 
-	processor_menu->popup (1, arg);
+	processor_menu->popup (3, arg);
 
 	/* Add a placeholder gap to the processor list to indicate where a processor would be
 	   inserted were one chosen from the menu.

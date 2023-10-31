@@ -546,11 +546,11 @@ TriggerUI::launch_context_menu ()
 		dynamic_cast<Gtk::CheckMenuItem*> (&items.back ())->set_active (true);
 	}
 
-	_launch_context_menu->popup (1, gtk_get_current_event_time ());
+	_launch_context_menu->popup (3, gtk_get_current_event_time ());
 }
 
 void
-TriggerUI::follow_context_menu ()
+TriggerUI::follow_context_menu (GdkEventButton* ev)
 {
 	using namespace Gtk;
 	using namespace Gtk::Menu_Helpers;
@@ -583,7 +583,7 @@ TriggerUI::follow_context_menu ()
 
 	_ignore_menu_action = false;
 
-	_follow_context_menu->popup (1, gtk_get_current_event_time ());
+	_follow_context_menu->popup (ev->button, ev->time);
 }
 
 void

@@ -314,7 +314,7 @@ AutomationController::on_button_release(GdkEventButton* ev)
 		MenuList&  items = menu->items();
 		items.push_back(MenuElem(_("Select Note..."),
 		                         sigc::mem_fun(*this, &AutomationController::run_note_select_dialog)));
-		menu->popup(1, ev->time);
+		menu->popup(ev->button, ev->time);
 		return true;
 	} else if (desc.unit == ARDOUR::ParameterDescriptor::HZ) {
 		Gtk::Menu* menu  = ARDOUR_UI_UTILS::shared_popup_menu ();
@@ -338,7 +338,7 @@ AutomationController::on_button_release(GdkEventButton* ev)
 				                                    (double)beats)));
 			}
 		}
-		menu->popup(1, ev->time);
+		menu->popup(ev->button, ev->time);
 		return true;
 	}
 

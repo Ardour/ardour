@@ -497,7 +497,7 @@ GainMeterBase::popup_meter_menu (GdkEventButton *ev)
 		items.push_back (MenuElem ("-4 .. -2dBFS"));
 	}
 
-	meter_menu->popup (1, ev->time);
+	meter_menu->popup (ev->button, ev->time);
 }
 
 bool
