@@ -88,8 +88,8 @@ public:
 
 	std::shared_ptr<ReadOnlyControl> control_output (uint32_t) const;
 
-	bool reset_parameters_to_default () { return false;}
-	bool can_reset_all_parameters () { return false; }
+	bool reset_parameters_to_default ();
+	bool can_reset_all_parameters ();
 
 	virtual bool provides_stats () const { return true; }
 	virtual bool get_stats (PBD::microseconds_t&, PBD::microseconds_t&, double&, double&) const;

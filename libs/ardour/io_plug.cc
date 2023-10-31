@@ -598,6 +598,56 @@ IOPlug::direct_feeds_according_to_reality (std::shared_ptr<GraphNode> node, bool
 
 /* ****************************************************************************/
 
+bool
+IOPlug::can_reset_all_parameters ()
+{
+	bool all = true;
+	uint32_t params = 0;
+	for (uint32_t par = 0; par < _plugin->parameter_count(); ++par) {
+		bool ok=false;
+		const uint32_t cid = _plugin->nth_parameter (par, ok);
+
+		if (!ok || !_plugin->parameter_is_input(cid)) {
+			continue;
+		}
+
+		++params;
+	}
+	return all && (params > 0);
+}
+
+bool
+IOPlug::reset_parameters_to_default ()
+{
+	bool all = true;
+
+	for (uint32_t par = 0; par < _plugin->parameter_count(); ++par) {
+		bool ok=false;
+		const uint32_t cid = _plugin->nth_parameter (par, ok);
+
+		if (!ok || !_plugin->parameter_is_input(cid)) {
+			continue;
+		}
+
+		const float dflt = _plugin->default_value (cid);
+		const float curr = _plugin->get_parameter (cid);
+
+		if (dflt == curr) {
+			continue;
+		}
+
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl>(control (Evoral::Parameter(PluginAutomation, 0, cid)));
+		if (!ac) {
+			continue;
+		}
+
+		ac->set_value (dflt, Controllable::NoGroup);
+	}
+	return all;
+}
+
+/* ****************************************************************************/
+
 IOPlug::PluginControl::PluginControl (IOPlug*                     p,
                                       Evoral::Parameter const&    param,
                                       ParameterDescriptor const&  desc)
