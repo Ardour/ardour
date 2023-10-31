@@ -5,32 +5,25 @@ ardour { ["type"] = "EditorAction", name = "Reverse MIDI events",
 }
 
 function factory () return function ()
-	print ("Reverse MIDI regions, man!")
+	print ("Reverse MIDI regions")
 	-- Reverse all selected MIDI regions
 	local sel = Editor:get_selection ()
 	for r in sel.regions:regionlist ():iter () do
-		print ("Iterating through selected regions baby!")
+		-- Get start and length of MIDI region
 		local mr = r:to_midiregion ()
 		if mr:isnil () then goto next end
+		start = mr:start ():beats ()
+		length = mr:length ():beats ()
 
-		print ("mr =", mr, ", mr:position () =", mr:position ())
+		-- Iterate over all notes of the MIDI region and reverse them
+		-- TODO: make sure it works for regions with hidden notes
 		local mm = mr:midi_source(0):model ()
-		print ("mm =", mm)
-		-- Look for NotePtr in luabindings.cc
-		
-		-- -- get list of MIDI-CC events for the given channel and parameter
-		-- local ec = mr:control (Evoral.Parameter (ARDOUR.AutomationType.MidiCCAutomation, midi_channel, cc_param), false)
-		-- if ec:isnil () then goto next end
-		-- if ec:list ():events ():size () == 0 then goto next end
+		for note in ARDOUR.LuaAPI.note_list (mm):iter () do
+			local new_time = start + start + length - note:time () - note:length ()
+			print ("new_time =", new_time)
+		end
 
-		-- -- iterate over CC-events
-		-- for av in ec:list ():events ():iter () do
-		-- 	-- re-scale event to target range
-		-- 	local val = pd.lower + (pd.upper - pd.lower) * av.value / 127
-		-- 	-- and add it to the target-parameter automation-list
-		-- 	al:add (r:position () - r:start () + av.when, val, false, true)
-		-- 	add_undo = true
-		-- end
+		-- TODO: support other MIDI events
 		::next::
 	end
 
