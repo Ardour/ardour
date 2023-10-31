@@ -379,7 +379,7 @@ MIDISurface::connect_to_port_parser (MIDI::Port& port)
 	/* Button messages are NoteOn */
 	p->note_on.connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_note_on_message, this, _1, _2));
 	/* Button messages are NoteOn but libmidi++ sends note-on w/velocity = 0 as note-off so catch them too */
-	p->note_off.connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_note_on_message, this, _1, _2));
+	p->note_off.connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_note_off_message, this, _1, _2));
 	/* Fader messages are Pitchbend */
 	p->channel_pitchbend[0].connect_same_thread (*this, boost::bind (&MIDISurface::handle_midi_pitchbend_message, this, _1, _2));
 
