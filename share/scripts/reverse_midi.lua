@@ -44,18 +44,26 @@ function factory () return function ()
 		if mr:isnil () then goto continue3 end
 
 		-- Get start and length of MIDI region
-		start = mr:start ():beats ()
-		length = mr:length ():beats ()
+		local rstart = mr:start ():beats ()
+		local rlength = mr:length ():beats ()
+		local rend = rstart + rlength
 
 		-- Iterate over all notes of the MIDI region and reverse them
 		-- TODO: make sure it works for regions with hidden notes
 		local mm = mr:midi_source(0):model ()
 		local midi_command = mm:new_note_diff_command ("Reverse MIDI Events")
 		for note in ARDOUR.LuaAPI.note_list (mm):iter () do
-			local new_time = start + start + length - note:time () - note:length ()
+			-- Skip notes that are not within the region visible range
+			local time = note:time ()
+			if time < rstart or rend < time then goto continue4 end
+
+			-- Reverse if within the visible range
+			local new_time = rstart + rend - time - note:length ()
 			local new_note = ARDOUR.LuaAPI.new_noteptr (note:channel (), new_time, note:length (), note:note (), note:velocity ())
 			midi_command:remove (note)
 			midi_command:add (new_note)
+
+			::continue4::
 		end
 		mm:apply_command (Session, midi_command)
 
