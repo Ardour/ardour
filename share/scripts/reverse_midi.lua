@@ -8,8 +8,7 @@ function factory () return function ()
 	-- Calculate the minimal position and the maximum length of the
 	-- selection, ignoring non-MIDI region.
 	local sel = Editor:get_selection ()
-	-- local sel_position = Temporal.timepos_t.max (TimeDomain.BeatTime)
-	local sel_position = Temporal.timepos_t (9000000)
+	local sel_position = Temporal.timepos_t.max (Temporal.TimeDomain.BeatTime)
 	local sel_end = Temporal.timepos_t.zero ()
 	for r in sel.regions:regionlist ():iter () do
 		-- Skip non-MIDI region
