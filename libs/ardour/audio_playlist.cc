@@ -279,6 +279,8 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ti
 		assert (start.distance (i->range.start()).samples() + read_cnt <= scnt);
 		samplecnt_t nread = i->region->read_at (buf + start.distance (i->range.start()).samples(), mixdown_buffer, gain_buffer, read_pos, read_cnt, chan_n);
 		if (nread != read_cnt) {
+			std::cerr << name() << " tried to read " << read_cnt << " from " << nread << " in " << i->region->name() << " using range "
+			          << i->range.start() << " .. " << i->range.end() << " len " << i->range.length() << std::endl;
 #ifndef NDEBUG
 			/* forward error to DiskReader::audio_read. This does 2 things:
 			 *  - error "DiskReader %1: when refilling, cannot read ..."
