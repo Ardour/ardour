@@ -12,29 +12,39 @@ function factory () return function ()
 	local sel_position = Temporal.timepos_t (9000000)
 	local sel_end = Temporal.timepos_t.zero ()
 	for r in sel.regions:regionlist ():iter () do
-		-- local mr = r:to_midiregion ()
-		-- if mr:isnil () then goto next end
+		-- Skip non-MIDI region
+		local mr = r:to_midiregion ()
+		if mr:isnil () then goto continue1 end
+
+		-- Update sel_position and sel_end
 		if r:position () < sel_position then sel_position = r:position () end
-		r_end = r:position () + r:length ()
+		local r_end = r:position () + r:length ()
 		if sel_end < r_end then sel_end = r_end end
-		-- ::next::
+
+		::continue1::
 	end
 	local sel_length = sel_end - sel_position
 
 	-- Reverse the order of selected MIDI regions
 	for r in sel.regions:regionlist ():iter () do
-		-- local mr = r:to_midiregion ()
-		-- if mr:isnil () then goto next end
+		-- Skip non-MIDI region
+		local mr = r:to_midiregion ()
+		if mr:isnil () then goto continue2 end
+
+		-- Reverse region position
 		local new_position = sel_position + sel_position + sel_length - r:position () - r:length ()
 		r:set_position (new_position)
-		-- ::next::
+
+		::continue2::
 	end
 
 	-- Reverse the content inside selected MIDI regions
 	for r in sel.regions:regionlist ():iter () do
-		-- Get start and length of MIDI region
+		-- Skip non-MIDI region
 		local mr = r:to_midiregion ()
-		if mr:isnil () then goto next end
+		if mr:isnil () then goto continue3 end
+
+		-- Get start and length of MIDI region
 		start = mr:start ():beats ()
 		length = mr:length ():beats ()
 
@@ -51,7 +61,7 @@ function factory () return function ()
 		mm:apply_command (Session, midi_command)
 
 		-- TODO: support other MIDI events
-		::next::
+		::continue3::
 	end
 end end
 
