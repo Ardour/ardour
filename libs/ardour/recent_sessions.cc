@@ -30,6 +30,7 @@
 #include <glibmm/miscutils.h>
 
 #include "pbd/error.h"
+#include "pbd/file_utils.h"
 
 #include "ardour/rc_configuration.h"
 #include "ardour/filesystem_paths.h"
@@ -231,12 +232,14 @@ ARDOUR::store_recent_sessions (string name, string path)
 		return -1;
 	}
 
+	path = canonical_path (path);
+
 	pair<string,string> newpair;
 
 	newpair.first = name;
 	newpair.second = path;
 
-	rs.erase(remove(rs.begin(), rs.end(), newpair), rs.end());
+	rs.erase (remove_if (rs.begin(), rs.end(), [path](pair<string,string> const& p) { return p.second == path; }), rs.end());
 
 	rs.push_front (newpair);
 
