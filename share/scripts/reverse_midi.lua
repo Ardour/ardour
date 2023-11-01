@@ -1,7 +1,7 @@
 ardour { ["type"] = "EditorAction", name = "Reverse MIDI Events",
 	license     = "MIT",
 	author      = "Nil Geisweiller",
-	description = [[Reverse MIDI events of selected MIDI regions, so that events at the end appear at the beginning and so on.  Reverse the order of MIDI regions as well, so that MIDI regions at the end appear at the beginning and so on.  Reverse individual notes as well, so the ending of a note corresponds to its beginning.  Thus, for this effect to yeld good results, the notes should rather be quantized.]]
+	description = [[Reverse MIDI events of selected MIDI regions, so that events at the end appear at the beginning and so on.  Reverse the order of MIDI regions as well, so that MIDI regions at the end appear at the beginning and so on.  Reverse individual notes as well, so the ending of a note corresponds to its beginning.  Thus the notes should rather be quantized for this effect to yeld good results.  Note that track automations are not reversed, only region automations are.]]
 }
 
 function factory () return function ()
@@ -31,8 +31,9 @@ function factory () return function ()
 		if mr:isnil () then goto continue2 end
 
 		-- Reverse region position
-		local new_position = sel_position + sel_position + sel_length - r:position () - r:length ()
-		r:set_position (new_position)
+		local old_position = r:position ()
+		local new_position = sel_position + sel_position + sel_length - old_position - r:length ()
+		if new_position ~= old_position then r:set_position (new_position) end
 
 		::continue2::
 	end
@@ -54,14 +55,16 @@ function factory () return function ()
 		local midi_command = mm:new_note_diff_command ("Reverse MIDI Events")
 		for note in ARDOUR.LuaAPI.note_list (mm):iter () do
 			-- Skip notes that are not within the region visible range
-			local time = note:time ()
-			if time < rstart or rend < time then goto continue4 end
+			local old_time = note:time ()
+			if old_time < rstart or rend < old_time then goto continue4 end
 
 			-- Reverse if within the visible range
-			local new_time = rstart + rend - time - note:length ()
-			local new_note = ARDOUR.LuaAPI.new_noteptr (note:channel (), new_time, note:length (), note:note (), note:velocity ())
-			midi_command:remove (note)
-			midi_command:add (new_note)
+			local new_time = rstart + rend - old_time - note:length ()
+			if new_time ~= old_time then
+				local new_note = ARDOUR.LuaAPI.new_noteptr (note:channel (), new_time, note:length (), note:note (), note:velocity ())
+				midi_command:remove (note)
+				midi_command:add (new_note)
+			end
 
 			::continue4::
 		end
