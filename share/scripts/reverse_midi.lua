@@ -50,7 +50,6 @@ function factory () return function ()
 		local rend = rstart + rlength
 
 		-- Iterate over all notes of the MIDI region and reverse them
-		-- TODO: make sure it works for regions with hidden notes
 		local mm = mr:midi_source(0):model ()
 		local midi_command = mm:new_note_diff_command ("Reverse MIDI Events")
 		for note in ARDOUR.LuaAPI.note_list (mm):iter () do
