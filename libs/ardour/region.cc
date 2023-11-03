@@ -1001,7 +1001,7 @@ Region::cut_end (timepos_t const & new_endpoint)
 void
 Region::modify_front_unchecked (timepos_t const & npos, bool reset_fade)
 {
-	timepos_t last = end().decrement();
+	timepos_t last = nt_last();
 	timepos_t source_zero;
 	timepos_t new_position (npos);
 
