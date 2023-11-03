@@ -2197,7 +2197,7 @@ Region::end() const
 	/* one day we might want to enforce _position, _start and _length (or
 	   some combination thereof) all being in the same time domain.
 	*/
-	return position() + _length.val();
+	return _length.val().end();
 }
 
 timepos_t
