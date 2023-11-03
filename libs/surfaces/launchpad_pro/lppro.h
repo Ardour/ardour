@@ -449,7 +449,8 @@ class LaunchPadPro : public MIDISurface
 	void fader_release (Pad&);
 
 	void pad_press (Pad&, int velocity);
-	void pad_long_press (Pad&);
+        void pad_long_press (Pad&);
+	void pad_release (Pad&);
 
 	void trigger_property_change (PBD::PropertyChange, ARDOUR::Trigger*);
 	PBD::ScopedConnectionList trigger_connections;
