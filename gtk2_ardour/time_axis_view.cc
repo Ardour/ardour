@@ -895,7 +895,7 @@ TimeAxisView::show_selection (TimeSelection& ts)
 		rect = get_selection_rect ((*i).id);
 
 		x1 = _editor.time_to_pixel (start);
-		x2 = _editor.time_to_pixel (end.decrement());
+		x2 = _editor.time_to_pixel (end);
 		y2 = current_height() - 1;
 
 		if (dynamic_cast<AudioTimeAxisView*>(this)) {
