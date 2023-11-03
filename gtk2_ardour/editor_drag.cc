@@ -5508,7 +5508,7 @@ SelectionDrag::setup_pointer_offset ()
 {
 	switch (_operation) {
 		case CreateSelection:
-			_pointer_offset = timecnt_t (_editor->default_time_domain ());
+			_pointer_offset = timecnt_t (time_domain());
 			break;
 
 		case SelectionStartTrim:
