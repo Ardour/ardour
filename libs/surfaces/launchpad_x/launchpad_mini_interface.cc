@@ -13,7 +13,7 @@
  *
  * You should have received a copy of the GNU General Public License along
  * with this program; if not, write to the Free Software Foundation, Inc.,
- * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
+o * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
 #include <stdexcept>
@@ -30,25 +30,25 @@ using namespace PBD;
 using namespace ArdourSurface;
 
 static ControlProtocol*
-new_lpx (Session* s)
+new_lpmini (Session* s)
 {
-	LaunchPadX * p2 = 0;
+	LaunchPadX * lpm = nullptr;
 
 	try {
-		p2 = new LaunchPadX (*s);
+		lpm = new LaunchPadX (*s);
 		/* do not set active here - wait for set_state() */
 	}
 	catch (std::exception & e) {
-		error << "Error instantiating LaunchPad X support: " << e.what() << endmsg;
-		delete p2;
-		p2 = 0;
+		error << "Error instantiating LaunchPad Mini support: " << e.what() << endmsg;
+		delete lpm;
+		lpm = nullptr;
 	}
 
-	return p2;
+	return lpm;
 }
 
 static void
-delete_lpx (ControlProtocol* cp)
+delete_lpmini (ControlProtocol* cp)
 {
 	try
 	{
@@ -56,27 +56,26 @@ delete_lpx (ControlProtocol* cp)
 	}
 	catch ( std::exception & e )
 	{
-		std::cout << "Exception caught trying to finalize LaunchPad X support: " << e.what() << std::endl;
+		std::cout << "Exception caught trying to finalize LaunchPad Mini support: " << e.what() << std::endl;
 	}
 }
 
 static bool
-probe_lpx_midi_protocol ()
+probe_lpmini_midi_protocol ()
 {
 	std::string i, o;
 	return LaunchPadX::probe (i, o);
 }
 
-
-static ControlProtocolDescriptor lpx_descriptor = {
-	/* name       */ "Novation LaunchPad X",
-	/* id         */ "uri://ardour.org/surfaces/lpx:0",
+static ControlProtocolDescriptor lpmini_descriptor = {
+	/* name       */ "Novation LaunchPad Mini",
+	/* id         */ "uri://ardour.org/surfaces/lpmini:0",
 	/* module     */ 0,
-	/* available  */ LaunchPadX::available,
-	/* probe_port */ probe_lpx_midi_protocol,
+	/* available  */ 0,
+	/* probe_port */ probe_lpmini_midi_protocol,
 	/* match usb  */ 0, // LaunchPadX::match_usb,
-	/* initialize */ new_lpx,
-	/* destroy    */ delete_lpx,
+	/* initialize */ new_lpmini,
+	/* destroy    */ delete_lpmini,
 };
 
-extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &lpx_descriptor; }
+extern "C" ARDOURSURFACE_API ControlProtocolDescriptor* protocol_descriptor () { return &lpmini_descriptor; }

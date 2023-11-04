@@ -76,8 +76,15 @@ using namespace Gtkmm2ext;
 #include "pbd/abstract_ui.cc" // instantiate template
 
 #define NOVATION     0x1235
+
+#ifdef LAUNCHPAD_MINI
+#define LAUNCHPADX   0x0113
+static const std::vector<MIDI::byte> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xd });
+#else
 #define LAUNCHPADX   0x0103
 static const std::vector<MIDI::byte> sysex_header ({ 0xf0, 0x00, 0x20, 0x29, 0x2, 0xc });
+#endif
+
 static int first_fader = 0x9;
 
 bool
@@ -106,7 +113,11 @@ LaunchPadX::probe (std::string& i, std::string& o)
 		return false;
 	}
 
+#ifdef LAUNCHPAD_MINI
+	std::regex rx (X_("Launchpad Mini.*MIDI"));
+#else
 	std::regex rx (X_("Launchpad X.*MIDI"));
+#endif
 
 	auto has_lppro = [&rx](string const &s) {
 		std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name(s);
@@ -126,7 +137,11 @@ LaunchPadX::probe (std::string& i, std::string& o)
 }
 
 LaunchPadX::LaunchPadX (ARDOUR::Session& s)
+#ifdef LAUNCHPAD_MINI
+	: MIDISurface (s, X_("Novation LaunchPad Mini"), X_("LaunchPad Mini"), true)
+#else
 	: MIDISurface (s, X_("Novation LaunchPad X"), X_("LaunchPad X"), true)
+#endif
 	, logo_color (4)
 	, scroll_x_offset  (0)
 	, scroll_y_offset  (0)
@@ -318,13 +333,21 @@ LaunchPadX::set_state (const XMLNode & node, int version)
 std::string
 LaunchPadX::input_port_name () const
 {
+#ifdef LAUNCHPAD_MINI
+	return X_(":Launchpad Mini MK3.*MIDI (In|2)");
+#else
 	return X_(":Launchpad X MK3.*MIDI (In|2)");
+#endif
 }
 
 std::string
 LaunchPadX::output_port_name () const
 {
+#ifdef LAUNCHPAD_MINI
+	return X_(":Launchpad Mini MK3.*MIDI (Out|2)");
+#else
 	return X_(":Launchpad X MK3.*MIDI (Out|2)");
+#endif
 }
 
 void
@@ -363,7 +386,7 @@ LaunchPadX::build_pad_map ()
 	for (int row = 0; row < 8; ++row) {
 		for (int col = 0; col < 8; ++col) {
 			int pid = (11 + (row * 10)) + col;
-			std::pair<int,Pad> p (pid, Pad (pid, col, 7 - row, &LaunchPadX::pad_press, &LaunchPadX::pad_long_press));
+			std::pair<int,Pad> p (pid, Pad (pid, col, 7 - row, &LaunchPadX::pad_press)); // , &LaunchPadX::pad_long_press));
 			if (!pad_map.insert (p).second) abort();
 		}
 	}
@@ -607,16 +630,19 @@ LaunchPadX::handle_midi_controller_message (MIDI::Parser& parser, MIDI::EventTwo
 		return;
 	}
 
-	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("CC %1 (value %2)\n", (int) ev->controller_number, (int) ev->value));
+	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("CC %1 (value %2) layout %3 mode %4\n", (int) ev->controller_number, (int) ev->value, _current_layout, _session_mode));
 
 	if (_current_layout == SessionLayout && _session_mode == MixerMode) {
+		std::cerr << "possible fader!\n";
 		/* Trap fader move messages and act on them */
 		if (ev->controller_number >= first_fader && ev->controller_number < first_fader+8) {
+			std::cerr << "actual fader\n";
 			fader_move (ev->controller_number, ev->value);
 			return;
 		}
 	}
 
+	std::cerr << "not a fader\n";
 	PadMap::iterator p = pad_map.find (ev->controller_number);
 	if (p == pad_map.end()) {
 		return;
@@ -735,7 +761,11 @@ LaunchPadX::connect_daw_ports ()
          * newer ALSA and other platforms.
          */
 
+#ifdef LAUNCHPAD_MINI
+        std::regex rx (X_("Launchpad Mini.*(DAW|MIDI 1)"), std::regex::extended);
+#else
         std::regex rx (X_("Launchpad X.*(DAW|MIDI 1)"), std::regex::extended);
+#endif
 
         auto is_dawport = [&rx](string const &s) {
 	        std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name(s);
@@ -1595,7 +1625,7 @@ LaunchPadX::setup_faders (FaderBank bank)
 			msg.push_back (0); /* unipolar */
 			break;
 		}
-		msg.push_back (0x18+n);       /* CC number */
+		msg.push_back (first_fader+n); /* CC number */
 		msg.push_back (random() % 127); /* color */
 	}
 
