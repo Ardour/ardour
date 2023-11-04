@@ -67,10 +67,17 @@
 #define random() rand()
 #endif
 
+#ifdef LAUNCHPAD_MINI
+#define LAUNCHPAD_NAMESPACE LP_MINI
+#else
+#define LAUNCHPAD_NAMESPACE LP_X
+#endif
+
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Glib;
 using namespace ArdourSurface;
+using namespace ArdourSurface::LAUNCHPAD_NAMESPACE;
 using namespace Gtkmm2ext;
 
 #include "pbd/abstract_ui.cc" // instantiate template

@@ -25,9 +25,15 @@
 #include "control_protocol/control_protocol.h"
 #include "lpx.h"
 
+#ifdef LAUNCHPAD_MINI
+#define LAUNCHPAD_NAMESPACE LP_MINI
+#else
+#define LAUNCHPAD_NAMESPACE LP_X
+#endif
+
 using namespace ARDOUR;
 using namespace PBD;
-using namespace ArdourSurface;
+using namespace ArdourSurface::LAUNCHPAD_NAMESPACE;
 
 static ControlProtocol*
 new_lpx (Session* s)

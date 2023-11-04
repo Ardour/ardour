@@ -37,9 +37,16 @@
 
 #include "pbd/i18n.h"
 
+#ifdef LAUNCHPAD_MINI
+#define LAUNCHPAD_NAMESPACE LP_MINI
+#else
+#define LAUNCHPAD_NAMESPACE LP_X
+#endif
+
 using namespace PBD;
 using namespace ARDOUR;
 using namespace ArdourSurface;
+using namespace ArdourSurface::LAUNCHPAD_NAMESPACE;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 

@@ -56,7 +56,13 @@ namespace ARDOUR {
 	class Trigger;
 }
 
-namespace ArdourSurface {
+#ifdef LAUNCHPAD_MINI
+#define LAUNCHPAD_NAMESPACE LP_MINI
+#else
+#define LAUNCHPAD_NAMESPACE LP_X
+#endif
+
+namespace ArdourSurface { namespace LAUNCHPAD_NAMESPACE {
 
 class LPX_GUI;
 
@@ -373,6 +379,6 @@ class LaunchPadX : public MIDISurface
 };
 
 
-} /* namespace */
+} } /* namespaces */
 
 #endif /* __ardour_lpx_h__ */

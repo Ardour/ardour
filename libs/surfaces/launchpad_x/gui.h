@@ -39,7 +39,7 @@ namespace Gtk {
 
 #include "lpx.h"
 
-namespace ArdourSurface {
+namespace ArdourSurface { namespace LAUNCHPAD_NAMESPACE {
 
 class LPX_GUI : public Gtk::VBox
 {
@@ -96,6 +96,6 @@ private:
 #endif
 };
 
-}
+} } /* namespaces */
 
 #endif /* __ardour_lpx_gui_h__ */
