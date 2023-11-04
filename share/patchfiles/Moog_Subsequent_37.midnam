@@ -48,6 +48,7 @@
       <PatchBank Name="Factory Presets">
         <!-- Placeholder for future content -->
         <!-- <UsesPatchNameList Name="Factory Preset Names"/> -->
+        <PatchNameList/>
       </PatchBank>
     </ChannelNameSet>
     <ValueNameList Name="Switch">
