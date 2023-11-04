@@ -48,7 +48,7 @@
 
 using namespace Temporal;
 
-static double const lollipop_radius = 8.0;
+static double const lollipop_radius = 6.0;
 
 VelocityGhostRegion::VelocityGhostRegion (MidiRegionView& mrv, TimeAxisView& tv, TimeAxisView& source_tv, double initial_unit_pos)
 	: MidiGhostRegion (mrv, tv, source_tv, initial_unit_pos)
@@ -184,7 +184,8 @@ VelocityGhostRegion::set_size_and_position (GhostEvent& gev)
 	ArdourCanvas::Lollipop* l = dynamic_cast<ArdourCanvas::Lollipop*> (gev.item);
 	const double available_height = base_rect->y1();
 	const double actual_height = ((dragging ? gev.velocity_while_editing : gev.event->note()->velocity()) / 127.0) * available_height;
-	l->set (ArdourCanvas::Duple (gev.event->x0(), base_rect->y1() - actual_height), actual_height, lollipop_radius);
+	const double scale  = UIConfiguration::instance ().get_ui_scale ();
+	l->set (ArdourCanvas::Duple (gev.event->x0(), base_rect->y1() - actual_height), actual_height, lollipop_radius * scale);
 }
 
 void
@@ -249,13 +250,14 @@ VelocityGhostRegion::drag_lolli (ArdourCanvas::Lollipop* l, GdkEventMotion* ev)
 	MidiRegionView::Selection const & sel (mrv->selection());
 	int verbose_velocity = -1;
 	GhostEvent* primary_ghost = 0;
+	const double scale  = UIConfiguration::instance ().get_ui_scale ();
 
 	for (auto & s : sel) {
 		GhostEvent* x = find_event (s->note());
 
 		if (x) {
 			ArdourCanvas::Lollipop* lolli = dynamic_cast<ArdourCanvas::Lollipop*> (x->item);
-			lolli->set (ArdourCanvas::Duple (lolli->x(), lolli->y0() - delta), lolli->length() + delta, lollipop_radius);
+			lolli->set (ArdourCanvas::Duple (lolli->x(), lolli->y0() - delta), lolli->length() + delta, lollipop_radius * scale);
 			/* note: length is now set to the new value */
 			const int newvel = floor (127. * (l->length() / r.height()));
 			/* since we're not actually changing the note velocity
