@@ -1153,6 +1153,11 @@ Session::compute_stop_limit () const
 		return max_samplepos;
 	}
 
+	/* is no session-range is defined, allow to roll */
+	if (!_session_range_location) {
+		return max_samplepos;
+	}
+
 	return current_end_sample ();
 }
 
