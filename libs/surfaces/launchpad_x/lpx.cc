@@ -393,7 +393,7 @@ LaunchPadX::build_pad_map ()
 	for (int row = 0; row < 8; ++row) {
 		for (int col = 0; col < 8; ++col) {
 			int pid = (11 + (row * 10)) + col;
-			std::pair<int,Pad> p (pid, Pad (pid, col, 7 - row, &LaunchPadX::pad_press)); // , &LaunchPadX::pad_long_press));
+			std::pair<int,Pad> p (pid, Pad (pid, col, 7 - row, &LaunchPadX::pad_press, &LaunchPadX::pad_long_press, &LaunchPadX::pad_release)); // , &LaunchPadX::pad_long_press));
 			if (!pad_map.insert (p).second) abort();
 		}
 	}
@@ -1223,13 +1223,13 @@ void
 LaunchPadX::pad_long_press (Pad& pad)
 {
 	DEBUG_TRACE (DEBUG::Launchpad, string_compose ("pad long press on %1, %2 => %3\n", pad.x, pad.y, pad.id));
-	if (pending_mixer_op != PendingNone && pad.y == 7) {
-		/* relax */
-	} else {
-		session->unbang_trigger_at (pad.x, pad.y);
-		/* Pad was used for long press, do not invoke release action */
-		consumed.insert (pad.id);
-	}
+}
+
+void
+LaunchPadX::pad_release (Pad& pad)
+{
+        DEBUG_TRACE (DEBUG::Launchpad, string_compose ("pad release on %1, %2 => %3\n", pad.x, pad.y, pad.id));
+        session->unbang_trigger_at(pad.x, pad.y);
 }
 
 void

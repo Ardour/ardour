@@ -341,6 +341,7 @@ class LaunchPadX : public MIDISurface
 
 	void pad_press (Pad&, int velocity);
 	void pad_long_press (Pad&);
+	void pad_release (Pad&);
 
 	void trigger_property_change (PBD::PropertyChange, ARDOUR::Trigger*);
 	PBD::ScopedConnectionList trigger_connections;
