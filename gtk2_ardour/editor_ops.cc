@@ -5402,12 +5402,22 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 	std::vector<sigc::connection> cl;
 	std::shared_ptr<Playlist> playlist;
 	PlaylistSet playlists; // list of unique playlists affected by duplication
-	RegionSelection sel = regions; // clear (below) may  clear the argument list if its the current region selection
 	RegionSelection foo;
 
 	timepos_t const start_time = regions.start_time ();
 	timepos_t const end_time = regions.end_time ().increment();
 	timecnt_t const span = start_time.distance (end_time);
+
+	RegionList rl;
+	for (auto const& rs : regions) {
+		rl.push_back (rs->region ());
+
+		TimeAxisView& tv = rs->get_time_axis_view();
+		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
+		cl.push_back (rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view)));
+	}
+
+	rl.sort ([](std::shared_ptr<Region> const& a, std::shared_ptr<Region> const& b) { return a->layering_index () < b->layering_index (); });
 
 	begin_reversible_command (Operations::duplicate_region);
 
@@ -5421,9 +5431,9 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 
 		RegionList exclude;
 
-		for (RegionSelection::iterator i = sel.begin(); i != sel.end(); ++i) {
-			exclude.push_back ((*i)->region());
-			playlist = (*i)->region()->playlist();
+		for (auto const& r : rl) {
+			exclude.push_back (r);
+			playlist = r->playlist();
 			if (playlists.insert (playlist).second) {
 				/* successfully inserted into set, so it's the first time we've seen this playlist */
 				playlist->clear_changes ();
@@ -5437,13 +5447,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		}
 	}
 
-	for (RegionSelection::iterator i = sel.begin(); i != sel.end(); ++i) {
-
-		std::shared_ptr<Region> r ((*i)->region());
-
-		TimeAxisView& tv = (*i)->get_time_axis_view();
-		RouteTimeAxisView* rtv = dynamic_cast<RouteTimeAxisView*> (&tv);
-		cl.push_back (rtv->view()->RegionViewAdded.connect (sigc::mem_fun(*this, &Editor::collect_new_region_view)));
+	for (auto const& r : rl) {
 
 		/* XXX problem arew here. When duplicating audio regions, the
 		 * next one must be positioned 1 sample after the end of the
@@ -5462,7 +5466,7 @@ Editor::duplicate_some_regions (RegionSelection& regions, float times)
 		timepos_t position = end_time;
 		position += start_time.distance (r->position());
 
-		playlist = (*i)->region()->playlist();
+		playlist = r->playlist();
 
 		if (!should_ripple()) {
 			if (playlists.insert (playlist).second) {
