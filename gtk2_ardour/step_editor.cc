@@ -89,7 +89,7 @@ StepEditor::start_step_editing ()
 void
 StepEditor::resync_step_edit_position ()
 {
-	step_edit_insert_position = _editor.get_preferred_edit_position (Editing::EDIT_IGNORE_NONE, false, true);
+	step_edit_insert_position = _editor.get_preferred_edit_position (Editing::EDIT_IGNORE_NONE, false, true).beats();
 }
 
 void
