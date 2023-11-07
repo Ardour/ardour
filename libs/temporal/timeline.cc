@@ -126,7 +126,7 @@ timecnt_t::end (TimeDomain return_domain) const
 
 		} else if (_position.time_domain() == AudioTime) {
 
-			const Beats b = TempoMap::use()->quarters_at_superclock (_position.superclocks() + magnitude());
+			const Beats b = TempoMap::use()->quarters_at_superclock (_position.superclocks()) + Beats::ticks (magnitude());
 
 			if (return_domain == BeatTime) {
 				return timepos_t (b);
