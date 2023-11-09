@@ -467,6 +467,7 @@ public:
 	PluginInfo ()
 	        : multichannel_name_ambiguity (false)
 	        , plugintype_name_ambiguity (false)
+	        , internal (false)
 	        , index (0)
 	{}
 
@@ -512,8 +513,12 @@ public:
 		return n_outputs.n_audio();
 	}
 
+	/* hide from user */
+	virtual bool is_internal () const { return internal; }
+
 protected:
 	friend class PluginManager;
+	bool     internal;
 	uint32_t index; //< used for LADSPA, index in module
 };
 
