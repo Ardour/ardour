@@ -363,6 +363,10 @@ PluginSelector::show_this_plugin (const PluginInfoPtr& info, const std::string& 
 	bool maybe_show = false;
 	PluginManager::PluginStatusType status = manager.get_status (info);
 
+	if (info->is_internal ()) {
+		return false;
+	}
+
 	if (!searchstr.empty()) {
 
 		if (_search_name_checkbox->get_active()) { /* name contains */
@@ -1055,6 +1059,7 @@ PluginSelector::create_by_creator_menu (ARDOUR::PluginInfoList& all_plugs)
 		PluginManager::PluginStatusType status = manager.get_status (*i);
 		if (status == PluginManager::Hidden) continue;
 		if (status == PluginManager::Concealed) continue;
+		if ((*i)->is_internal ()) continue;
 
 		string creator = (*i)->creator;
 
@@ -1115,6 +1120,7 @@ PluginSelector::create_by_tags_menu (ARDOUR::PluginInfoList& all_plugs)
 		PluginManager::PluginStatusType status = manager.get_status (*i);
 		if (status == PluginManager::Hidden) continue;
 		if (status == PluginManager::Concealed) continue;
+		if ((*i)->is_internal ()) continue;
 
 		/* for each tag in the plugins tag list, add it to that submenu */
 		vector<string> tokens = manager.get_tags(*i);

@@ -100,6 +100,9 @@ invalid_instrument (PluginInfoPtr p) {
 	if (manager.get_status(p) == PluginManager::Concealed) {
 		return true;
 	}
+	if (p->is_internal ()) {
+		return true;
+	}
 	return !p->is_instrument();
 }
 
