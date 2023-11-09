@@ -1079,6 +1079,14 @@ PluginManager::get_ladspa_category (uint32_t plugin_id)
 void
 PluginManager::lv2_plugin (std::string const& uri, PluginScanLogEntry::PluginScanResult sr, std::string const& msg, bool reset)
 {
+	if (reset && msg.empty ()) {
+		PluginScanLog::iterator j = _plugin_scan_log.find (PSLEPtr (new PluginScanLogEntry (LV2, uri)));
+		if (j != _plugin_scan_log.end ()) {
+			_plugin_scan_log.erase (j);
+		}
+		return;
+	}
+
 	PSLEPtr psle (scan_log_entry (LV2, uri));
 	if (reset) {
 		psle->reset ();
