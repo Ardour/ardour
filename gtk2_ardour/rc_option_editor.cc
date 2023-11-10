@@ -2607,6 +2607,16 @@ RCOptionEditor::RCOptionEditor ()
 				sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_blink_alert_indicators)
 				));
 
+	BoolOption* strobe = new BoolOption (
+		"no-strobe",
+		_("Avoid strobing/blinking/flashing elements"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_no_strobe),
+		            sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_no_strobe)
+		);
+
+	Gtkmm2ext::UI::instance()->set_tip (strobe->tip_widget(), _("If enabled, disables meters in editor & mixer, running clock updates and most blinking"));
+	add_option (_("Appearance"), strobe);
+
 	add_option (_("Appearance/Recorder"), new OptionEditorHeading (_("Input Meter Layout")));
 
 	ComboOption<InputMeterLayout>* iml = new ComboOption<InputMeterLayout> (

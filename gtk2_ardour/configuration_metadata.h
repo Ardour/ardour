@@ -13,6 +13,7 @@ UIConfiguration::build_metadata ()
 	VAR_META (X_("autoscroll-editor"), _("scroll"), _("editor"),  NULL);
 	VAR_META (X_("blink-alert-indicators"), _("blink"), _("alert"), _("indicators"),  NULL);
 	VAR_META (X_("blink-rec-arm"), _("appearance"), _("blink"), _("record"), _("rec"), _("enable"), _("rec-enable"), _("record-enable"),  NULL);
+	VAR_META (X_("no-strobe"), _("appearance"), _("blink"), _("flash"), _("strobe"), NULL);
 	VAR_META (X_("boxy-buttons"), _("appearance"), _("style"), _("boxy"), _("buttons"), _("theme"),  NULL);
 	VAR_META (X_("buggy-gradients"), _("appearance"), _("bugs"), _("tweaks"), _("kwirks"),  NULL);
 	VAR_META (X_("check-announcements"), _("check"), _("announcements"), _("phone"), _("home"),  NULL);
