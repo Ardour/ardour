@@ -1439,7 +1439,7 @@ Mixer_UI::stop_updating ()
 void
 Mixer_UI::fast_update_strips ()
 {
-	if (!ARDOUR_COMMAND_LINE::no_strobe && _content.get_mapped () && _session) {
+	if (!UIConfiguration::instance().get_no_strobe() && _content.get_mapped () && _session) {
 		for (auto & s : strips) {
 			s->fast_update ();
 		}

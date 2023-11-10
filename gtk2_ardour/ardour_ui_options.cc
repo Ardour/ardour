@@ -498,6 +498,9 @@ ARDOUR_UI::parameter_changed (std::string p)
 		if (UIConfiguration::instance().get_clock_display_limit() > limit) {
 			UIConfiguration::instance().set_clock_display_limit (limit);
 		}
+	} else if (p == "no-strobe") {
+		stop_clocking ();
+		start_clocking ();
 	}
 }
 

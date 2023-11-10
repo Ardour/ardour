@@ -1203,7 +1203,7 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 			_editor_meter_peaked = false;
 		}
 
-		if (!ARDOUR_COMMAND_LINE::no_strobe) {
+		if (!UIConfiguration::instance().get_no_strobe()) {
 			const float mpeak = editor_meter->update_meters();
 			const bool peaking = mpeak > UIConfiguration::instance().get_meter_peak();
 
@@ -2184,7 +2184,7 @@ ARDOUR_UI::blink_handler (bool blink_on)
 {
 	sync_blink (blink_on);
 
-	if (ARDOUR_COMMAND_LINE::no_strobe || !UIConfiguration::instance().get_blink_alert_indicators()) {
+	if (UIConfiguration::instance().get_no_strobe() || !UIConfiguration::instance().get_blink_alert_indicators()) {
 		blink_on = true;
 	}
 	error_blink (blink_on);
@@ -2206,7 +2206,9 @@ ARDOUR_UI::update_clocks ()
 void
 ARDOUR_UI::start_clocking ()
 {
-	if (ARDOUR_COMMAND_LINE::no_strobe) {
+	std::cerr << "start clocking\n";
+
+	if (UIConfiguration::instance().get_no_strobe()) {
 		if (!_session) {
 			return;
 		}
@@ -2225,11 +2227,8 @@ ARDOUR_UI::start_clocking ()
 void
 ARDOUR_UI::stop_clocking ()
 {
-	if (ARDOUR_COMMAND_LINE::no_strobe) {
-		clock_state_connection.drop_connections ();
-	} else {
-		clock_signal_connection.disconnect ();
-	}
+	clock_state_connection.drop_connections ();
+	clock_signal_connection.disconnect ();
 }
 
 void

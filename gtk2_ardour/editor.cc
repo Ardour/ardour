@@ -6441,7 +6441,7 @@ Editor::super_rapid_screen_update ()
 	/* METERING / MIXER STRIPS */
 
 	/* update track meters, if required */
-	if (!ARDOUR_COMMAND_LINE::no_strobe && contents().get_mapped() && meters_running) {
+	if (!UIConfiguration::instance().get_no_strobe() && contents().get_mapped() && meters_running) {
 		RouteTimeAxisView* rtv;
 		for (TrackViewList::iterator i = track_views.begin(); i != track_views.end(); ++i) {
 			if ((rtv = dynamic_cast<RouteTimeAxisView*>(*i)) != 0) {
@@ -6451,7 +6451,7 @@ Editor::super_rapid_screen_update ()
 	}
 
 	/* and any current mixer strip */
-	if (!ARDOUR_COMMAND_LINE::no_strobe && current_mixer_strip) {
+	if (!UIConfiguration::instance().get_no_strobe() && current_mixer_strip) {
 		current_mixer_strip->fast_update ();
 	}
 

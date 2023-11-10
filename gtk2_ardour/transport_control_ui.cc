@@ -309,7 +309,7 @@ TransportControlUI::blink_rec_enable (bool onoff)
 	Session::RecordState const r = _session->record_status ();
 	bool const h = _session->have_rec_enabled_track ();
 
-	if (ARDOUR_COMMAND_LINE::no_strobe) {
+	if (UIConfiguration::instance().get_no_strobe()) {
 		onoff = true;
 	}
 

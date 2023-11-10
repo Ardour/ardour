@@ -54,7 +54,6 @@ std::string ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
 bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
 string ARDOUR_COMMAND_LINE::load_template;
 bool ARDOUR_COMMAND_LINE::check_announcements = true;
-bool ARDOUR_COMMAND_LINE::no_strobe = false;
 
 using namespace ARDOUR_COMMAND_LINE;
 
@@ -99,7 +98,7 @@ print_help (const char *execname)
 int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
-	const char *optstring = "aAbBc:C:dD:hHk:E:m:N:nOp:PsST:U:v";
+	const char *optstring = "aAbBc:C:dD:hHk:E:m:N:nOp:PST:U:v";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (execname == 0) {
@@ -125,7 +124,6 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "sync", 0, 0, 'S' },
 		{ "template", 1, 0, 'T' },
 		{ "no-connect-ports", 0, 0, 'P' },
-		{ "no-strobe", 0, 0, 's' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -195,10 +193,6 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		case 'p':
 			//undocumented OS X finder -psn_XXXXX argument
 			finder_invoked_ardour = true;
-			break;
-
-		case 's':
-			no_strobe = true;
 			break;
 
 		case 'S':
