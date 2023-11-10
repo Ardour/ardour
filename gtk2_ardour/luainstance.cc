@@ -1432,7 +1432,7 @@ void LuaInstance::set_session (Session* s)
 	for (LuaCallbackMap::iterator i = _callbacks.begin(); i != _callbacks.end(); ++i) {
 		i->second->set_session (s);
 	}
-	second_connection = Timers::rapid_connect (sigc::mem_fun(*this, & LuaInstance::every_second));
+	second_connection = Timers::second_connect (sigc::mem_fun(*this, & LuaInstance::every_second));
 	point_one_second_connection = Timers::rapid_connect (sigc::mem_fun(*this, & LuaInstance::every_point_one_seconds));
 	SetSession (); /* EMIT SIGNAL */
 }
