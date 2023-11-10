@@ -76,6 +76,7 @@
 #include "keyboard.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
+#include "opts.h"
 #include "patch_change_widget.h"
 #include "playlist_selector.h"
 #include "plugin_pin_dialog.h"
@@ -1393,7 +1394,7 @@ RouteUI::blink_rec_display (bool blinkOn)
 
 			case Session::Disabled:
 			case Session::Enabled:
-				if (UIConfiguration::instance().get_blink_rec_arm()) {
+				if (!ARDOUR_COMMAND_LINE::no_strobe && UIConfiguration::instance().get_blink_rec_arm()) {
 					rec_enable_button->set_active_state ( blinkOn ? Gtkmm2ext::ExplicitActive : Gtkmm2ext::Off );
 				} else {
 					rec_enable_button->set_active_state ( ImplicitActive );

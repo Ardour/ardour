@@ -25,6 +25,7 @@
 
 #include "actions.h"
 #include "ardour_ui.h"
+#include "opts.h"
 #include "timers.h"
 #include "transport_control_ui.h"
 
@@ -307,6 +308,10 @@ TransportControlUI::blink_rec_enable (bool onoff)
 
 	Session::RecordState const r = _session->record_status ();
 	bool const h = _session->have_rec_enabled_track ();
+
+	if (ARDOUR_COMMAND_LINE::no_strobe) {
+		onoff = true;
+	}
 
 	if (r == Session::Enabled || (r == Session::Recording && !h)) {
 		if (onoff) {

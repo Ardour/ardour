@@ -2184,7 +2184,7 @@ ARDOUR_UI::blink_handler (bool blink_on)
 {
 	sync_blink (blink_on);
 
-	if (!UIConfiguration::instance().get_blink_alert_indicators()) {
+	if (ARDOUR_COMMAND_LINE::no_strobe || !UIConfiguration::instance().get_blink_alert_indicators()) {
 		blink_on = true;
 	}
 	error_blink (blink_on);
