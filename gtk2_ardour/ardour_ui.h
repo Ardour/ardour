@@ -617,10 +617,6 @@ private:
 	void primary_clock_value_changed ();
 	void secondary_clock_value_changed ();
 
-	/* called by Blink signal */
-
-	void transport_rec_enable_blink (bool onoff);
-
 	/* menu bar and associated stuff */
 
 	Gtk::MenuBar* menu_bar;
