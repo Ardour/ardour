@@ -1,7 +1,7 @@
 ardour { ["type"] = "EditorAction", name = "Reverse MIDI Events",
 	license     = "MIT",
 	author      = "Nil Geisweiller",
-	description = [[Reverse MIDI events of selected MIDI regions, so that events at the end appear at the beginning and so on.  Reverse the order of MIDI regions as well, so that MIDI regions at the end appear at the beginning and so on.  Reverse individual notes as well, so the ending of a note corresponds to its beginning.  Thus the notes should rather be quantized for this effect to yeld good results.  Note that track automations are not reversed, only region automations are.]]
+	description = [[Chronologically reverse MIDI notes of selected MIDI regions.  The positions of the MIDI regions are reversed as well, meaning regions at the end appear at the beginning and so on.  Individual notes are reversed so the ending of a note corresponds to its beginning.  Thus notes should be quantized for this effect to yield good results.  Note that only MIDI notes are reversed.  Other MIDI events such as CC or SYSEX are left unchanged.]]
 }
 
 function factory () return function ()
