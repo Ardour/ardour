@@ -953,6 +953,8 @@ private:
 
 	void ask_about_scratch_deletion ();
 	bool nsm_first_session_opened;
+
+	PBD::ScopedConnectionList clock_state_connection;
 };
 
 #endif /* __ardour_gui_h__ */

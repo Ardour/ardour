@@ -2204,6 +2204,15 @@ ARDOUR_UI::update_clocks ()
 void
 ARDOUR_UI::start_clocking ()
 {
+	if (ARDOUR_COMMAND_LINE::no_strobe) {
+		if (!_session) {
+			return;
+		}
+		_session->TransportStateChange.connect (clock_state_connection, MISSING_INVALIDATOR, sigc::mem_fun (*this, &ARDOUR_UI::update_clocks), gui_context());
+		_session->Located.connect (clock_state_connection, MISSING_INVALIDATOR, sigc::mem_fun (*this, &ARDOUR_UI::update_clocks), gui_context());
+		return;
+	}
+
 	if (UIConfiguration::instance().get_super_rapid_clock_update()) {
 		clock_signal_connection = Timers::fps_connect (sigc::mem_fun(*this, &ARDOUR_UI::update_clocks));
 	} else {
@@ -2214,7 +2223,11 @@ ARDOUR_UI::start_clocking ()
 void
 ARDOUR_UI::stop_clocking ()
 {
-	clock_signal_connection.disconnect ();
+	if (ARDOUR_COMMAND_LINE::no_strobe) {
+		clock_state_connection.drop_connections ();
+	} else {
+		clock_signal_connection.disconnect ();
+	}
 }
 
 void
