@@ -77,6 +77,7 @@
 #include "mixer_ui.h"
 #include "mixer_strip.h"
 #include "monitor_section.h"
+#include "opts.h"
 #include "plugin_selector.h"
 #include "public_editor.h"
 #include "mouse_cursors.h"
@@ -1438,9 +1439,9 @@ Mixer_UI::stop_updating ()
 void
 Mixer_UI::fast_update_strips ()
 {
-	if (_content.get_mapped () && _session) {
-		for (list<MixerStrip *>::iterator i = strips.begin(); i != strips.end(); ++i) {
-			(*i)->fast_update ();
+	if (!ARDOUR_COMMAND_LINE::no_strobe && _content.get_mapped () && _session) {
+		for (auto & s : strips) {
+			s->fast_update ();
 		}
 		if (foldback_strip) {
 			foldback_strip->fast_update ();
