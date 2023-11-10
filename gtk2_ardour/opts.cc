@@ -99,7 +99,7 @@ print_help (const char *execname)
 int
 ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 {
-	const char *optstring = "aAbBc:C:dD:hHk:E:m:N:nOp:PST:U:v";
+	const char *optstring = "aAbBc:C:dD:hHk:E:m:N:nOp:PsST:U:v";
 	const char *execname = strrchr (argv[0], '/');
 
 	if (execname == 0) {
