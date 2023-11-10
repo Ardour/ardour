@@ -1203,12 +1203,14 @@ ARDOUR_UI::every_point_zero_something_seconds ()
 			_editor_meter_peaked = false;
 		}
 
-		const float mpeak = editor_meter->update_meters();
-		const bool peaking = mpeak > UIConfiguration::instance().get_meter_peak();
+		if (!ARDOUR_COMMAND_LINE::no_strobe) {
+			const float mpeak = editor_meter->update_meters();
+			const bool peaking = mpeak > UIConfiguration::instance().get_meter_peak();
 
-		if (!_editor_meter_peaked && peaking) {
-			editor_meter_peak_display.set_active_state ( Gtkmm2ext::ExplicitActive );
-			_editor_meter_peaked = true;
+			if (!_editor_meter_peaked && peaking) {
+				editor_meter_peak_display.set_active_state (Gtkmm2ext::ExplicitActive);
+				_editor_meter_peaked = true;
+			}
 		}
 	}
 }
