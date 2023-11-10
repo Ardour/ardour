@@ -40,6 +40,7 @@ extern std::string menus_file;
 extern bool        finder_invoked_ardour;
 extern std::string load_template;
 extern bool        check_announcements;
+extern bool        no_strobe;
 
 extern int32_t parse_opts (int argc, char *argv[]);
 

@@ -54,6 +54,7 @@ std::string ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
 bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
 string ARDOUR_COMMAND_LINE::load_template;
 bool ARDOUR_COMMAND_LINE::check_announcements = true;
+bool ARDOUR_COMMAND_LINE::no_strobe = false;
 
 using namespace ARDOUR_COMMAND_LINE;
 
@@ -84,6 +85,7 @@ print_help (const char *execname)
 		<< _("  -N, --new <session-name>    Create a new session from the command line\n")
 		<< _("  -O, --no-hw-optimizations   Disable h/w specific optimizations\n")
 		<< _("  -P, --no-connect-ports      Do not connect any ports at startup\n")
+		<< _("  -s, --no-strobe             Avoid \"strobe-like\" effects in GUI\n")
 		<< _("  -S, --sync                  Draw the GUI synchronously\n")
 		<< _("  -T, --template <name>       Use given template for new session\n")
 		<< _("  -v, --version               Print version and exit\n")
@@ -123,6 +125,7 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		{ "sync", 0, 0, 'S' },
 		{ "template", 1, 0, 'T' },
 		{ "no-connect-ports", 0, 0, 'P' },
+		{ "no-strobe", 0, 0, 's' },
 		{ 0, 0, 0, 0 }
 	};
 
@@ -192,6 +195,10 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 		case 'p':
 			//undocumented OS X finder -psn_XXXXX argument
 			finder_invoked_ardour = true;
+			break;
+
+		case 's':
+			no_strobe = true;
 			break;
 
 		case 'S':
