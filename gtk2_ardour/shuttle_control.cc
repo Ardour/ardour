@@ -47,6 +47,7 @@
 #include "rgb_macros.h"
 #include "shuttle_control.h"
 #include "timers.h"
+#include "ui_config.h"
 
 #include "pbd/i18n.h"
 
@@ -252,6 +253,10 @@ ShuttleControl::varispeed_button_scroll_event (GdkEventScroll* ev)
 void
 ShuttleControl::do_blink (bool onoff)
 {
+	if (UIConfiguration::instance().get_no_strobe()) {
+		onoff = true;
+	}
+
 	if (!shuttle_grabbed && _session && _session->default_play_speed () != 1.0) {
 		_vari_button.set_active (onoff);
 		if (_session->actual_speed () == 0) {
