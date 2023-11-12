@@ -150,6 +150,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, std::shared_ptr<ARDOUR::Route> rt)
 
 	/* force the track header buttons into a boxy grid-shape */
 	rec_enable_button->set_tweaks(ArdourButton::Tweaks(ArdourButton::TrackHeader | ArdourButton::ForceBoxy));
+	mute_button->set_tweaks(ArdourButton::Tweaks(ArdourButton::TrackHeader | ArdourButton::ForceBoxy));
 	monitor_disk_button->set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceBoxy));
 	monitor_input_button->set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceBoxy));
 	_playlist_button.set_tweaks(ArdourButton::Tweaks(ArdourButton::TrackHeader | ArdourButton::ForceBoxy));
@@ -157,18 +158,20 @@ TrackRecordAxis::TrackRecordAxis (Session* s, std::shared_ptr<ARDOUR::Route> rt)
 	_number_label.set_tweaks(ArdourButton::Tweaks(ArdourButton::ForceBoxy | ArdourButton::ForceFlat));
 
 	_ctrls.attach (*rec_enable_button,     1,  2, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
-	_ctrls.attach (_input_button,          2,  3, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
-	_ctrls.attach (_playlist_button,       3,  4, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
-	_ctrls.attach (_name_frame,            4,  5, 0, 1, Gtk::FILL,         Gtk::FILL,   0, 0);
-	_ctrls.attach (*monitor_input_button,  5,  6, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
-	_ctrls.attach (*monitor_disk_button,   6,  7, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
-	_ctrls.attach (*_level_meter,          7,  8, 0, 1, Gtk::SHRINK,       Gtk::SHRINK, 0, 0);
-	_ctrls.attach (_number_label,          8,  9, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
-	_ctrls.attach (_vseparator,            9, 10, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
-	_ctrls.attach (_track_summary,        10, 11, 0, 1, Gtk::EXPAND|FILL,  Gtk::FILL,   1, 0);
+	_ctrls.attach (*mute_button,           2,  3, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
+	_ctrls.attach (_input_button,          3,  4, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
+	_ctrls.attach (_playlist_button,       4,  5, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
+	_ctrls.attach (_name_frame,            5,  6, 0, 1, Gtk::FILL,         Gtk::FILL,   0, 0);
+	_ctrls.attach (*monitor_input_button,  7,  7, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
+	_ctrls.attach (*monitor_disk_button,   7,  8, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
+	_ctrls.attach (*_level_meter,          8,  9, 0, 1, Gtk::SHRINK,       Gtk::SHRINK, 0, 0);
+	_ctrls.attach (_number_label,          9, 10, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
+	_ctrls.attach (_vseparator,           10, 11, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
+	_ctrls.attach (_track_summary,        11, 12, 0, 1, Gtk::EXPAND|FILL,  Gtk::FILL,   1, 0);
 
 	set_tooltip (*mute_button, _("Mute"));
 	set_tooltip (*rec_enable_button, _("Record"));
+	set_tooltip (*mute_button, _("Mute"));
 	set_tooltip (_playlist_button, _("Playlist")); // playlist_tip ()
 
 	set_name_label ();
@@ -183,6 +186,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, std::shared_ptr<ARDOUR::Route> rt)
 	pack_start (_ctrls, false, false);
 
 	rec_enable_button->show ();
+	mute_button->show ();
 	monitor_input_button->show ();
 	monitor_disk_button->show ();
 	mute_button->show ();
