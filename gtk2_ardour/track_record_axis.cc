@@ -162,7 +162,7 @@ TrackRecordAxis::TrackRecordAxis (Session* s, std::shared_ptr<ARDOUR::Route> rt)
 	_ctrls.attach (_input_button,          3,  4, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
 	_ctrls.attach (_playlist_button,       4,  5, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
 	_ctrls.attach (_name_frame,            5,  6, 0, 1, Gtk::FILL,         Gtk::FILL,   0, 0);
-	_ctrls.attach (*monitor_input_button,  7,  7, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
+	_ctrls.attach (*monitor_input_button,  6,  7, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
 	_ctrls.attach (*monitor_disk_button,   7,  8, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
 	_ctrls.attach (*_level_meter,          8,  9, 0, 1, Gtk::SHRINK,       Gtk::SHRINK, 0, 0);
 	_ctrls.attach (_number_label,          9, 10, 0, 1, Gtk::SHRINK,       Gtk::FILL,   0, 0);
