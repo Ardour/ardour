@@ -3726,7 +3726,7 @@ Session::cleanup_sources (CleanupReport& rep)
 {
 	// FIXME: needs adaptation to midi
 
-	SourceList dead_sources;
+	std::set<std::shared_ptr<Source> > dead_sources;
 	string audio_path;
 	string midi_path;
 	vector<string> candidates;
@@ -3772,22 +3772,18 @@ Session::cleanup_sources (CleanupReport& rep)
 	rep.space = 0;
 
 	ls.acquire ();
-	for (SourceMap::iterator i = sources.begin(); i != sources.end(); ) {
-
-		SourceMap::iterator tmp;
-
-		tmp = i;
-		++tmp;
-
+	for (auto const& i : sources) {
+		std::shared_ptr<FileSource> fs = std::dynamic_pointer_cast<FileSource> (i.second);
 		/* do not bother with files that are zero size, otherwise we remove the current "nascent"
 		 * capture files.
 		 */
-
-		if (!i->second->used() && (i->second->empty())) {
-			dead_sources.push_back (i->second);
+		if (fs && fs->is_stub ()) {
+			continue;
 		}
 
-		i = tmp;
+		if (!i.second->used ()) {
+			dead_sources.insert (i.second);
+		}
 	}
 	ls.release ();
 
@@ -3877,7 +3873,7 @@ Session::cleanup_sources (CleanupReport& rep)
 				 * reference to it.
 				 */
 
-				dead_sources.push_back (i->second);
+				dead_sources.insert (i->second);
 				sources.erase (i);
 			}
 		}
@@ -3886,11 +3882,13 @@ Session::cleanup_sources (CleanupReport& rep)
 	}
 	ls.release ();
 
-	for (SourceList::iterator i = dead_sources.begin(); i != dead_sources.end(); ++i) {
+	cerr << "Dead Sources: " << dead_sources.size() << endl;
+
+	for (auto const& i : dead_sources) {
 		/* The following triggers Region::source_deleted (), which
 		 * causes regions to drop the given source */
-		(*i)->drop_references ();
-		SourceRemoved (*i); /* EMIT SIGNAL */
+		i->drop_references ();
+		SourceRemoved (i); /* EMIT SIGNAL */
 	}
 
 	/* now check each candidate source to see if it exists in the list of
