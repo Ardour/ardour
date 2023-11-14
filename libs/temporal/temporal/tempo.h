@@ -1180,6 +1180,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	int parse_tempo_state_3x (const XMLNode& node, LegacyTempoState& lts);
 	int parse_meter_state_3x (const XMLNode& node, LegacyMeterState& lts);
 	int set_state_3x (XMLNode const &);
+	TempoPoint & set_tempo (Tempo const & t, timepos_t const & time, Beats const & beats);
 
 	friend class TempoPoint;
 	friend class MeterPoint;

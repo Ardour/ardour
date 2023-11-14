@@ -1390,6 +1390,19 @@ TempoMap::set_tempo (Tempo const & t, timepos_t const & time)
 	return *ret;
 }
 
+TempoPoint &
+TempoMap::set_tempo (Tempo const & t, timepos_t const & time, Beats const & beats)
+{
+	assert (!time.is_beats());
+	BBT_Time bbt;
+
+	TempoMetric metric (metric_at (beats, false));
+	bbt = metric.bbt_at (beats);
+	TempoPoint* tp = new TempoPoint (*this, t, time.superclocks(), beats, bbt);
+	TempoPoint* ret = add_tempo (tp);
+	return *ret;
+}
+
 void
 TempoMap::core_add_point (Point* pp)
 {
