@@ -621,9 +621,9 @@ TempoPoint::quarters_at_superclock (superclock_t sc) const
 		int64_t remain = superbeats - (b * big_numerator);
 		int32_t t = PBD::muldiv_round (Temporal::ticks_per_beat, remain, big_numerator);
 
-		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%8 => \nsc %1 delta %9 = %2 secs rem = %3 rem snotes %4 sbeats = %5 => %6 : %7\n", sc, whole_seconds, remainder, supernotes, superbeats, b , t, *this, sc_delta));
-
 		const Beats ret = _quarters + Beats (b, t);
+
+		DEBUG_TRACE (DEBUG::TemporalMap, string_compose ("%8 => \nsc %1 delta %9 = %2 secs rem = %3 rem snotes %4 sbeats = %5 => %6 : %7 + %10 = %11\n", sc, whole_seconds, remainder, supernotes, superbeats, b , t, *this, sc_delta, _quarters, ret));
 
 		/* positive superclock can never generate negative beats unless
 		 * it is too large. If that happens, handle it the same way as
