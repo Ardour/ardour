@@ -4797,23 +4797,24 @@ TempoMap::set_state_3x (const XMLNode& node)
 		Tempos::iterator prev = _tempos.end();
 		for (Tempos::iterator i = _tempos.begin(); i != _tempos.end(); ++i) {
 			if (prev != _tempos.end()) {
-			MeterSection* ms;
-			MeterSection* prev_m;
-			TempoSection* ts;
-			TempoSection* prev_t;
-			if ((prev_m = dynamic_cast<MeterSection*>(*prev)) != 0 && (ms = dynamic_cast<MeterSection*>(*i)) != 0) {
-				if (prev_m->beat() == ms->beat()) {
-					error << string_compose (_("Multiple meter definitions found at %1"), prev_m->beat()) << endmsg;
-					return -1;
-				}
-			} else if ((prev_t = dynamic_cast<TempoSection*>(*prev)) != 0 && (ts = dynamic_cast<TempoSection*>(*i)) != 0) {
-				if (prev_t->pulse() == ts->pulse()) {
-					error << string_compose (_("Multiple tempo definitions found at %1"), prev_t->pulse()) << endmsg;
-					return -1;
+				MeterSection* ms;
+				MeterSection* prev_m;
+				TempoSection* ts;
+				TempoSection* prev_t;
+				if ((prev_m = dynamic_cast<MeterSection*>(*prev)) != 0 && (ms = dynamic_cast<MeterSection*>(*i)) != 0) {
+					if (prev_m->beat() == ms->beat()) {
+						error << string_compose (_("Multiple meter definitions found at %1"), prev_m->beat()) << endmsg;
+						return -1;
+					}
+				} else if ((prev_t = dynamic_cast<TempoSection*>(*prev)) != 0 && (ts = dynamic_cast<TempoSection*>(*i)) != 0) {
+					if (prev_t->pulse() == ts->pulse()) {
+						error << string_compose (_("Multiple tempo definitions found at %1"), prev_t->pulse()) << endmsg;
+						return -1;
+					}
 				}
 			}
+			prev = i;
 		}
-		prev = i;
 	}
 #endif
 	reset_starting_at (0);
