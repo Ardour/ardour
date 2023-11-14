@@ -4499,11 +4499,15 @@ TempoMap::parse_tempo_state_3x (const XMLNode& node, LegacyTempoState& lts)
 		}
 	}
 
-	/* position is the only data we extract from older XML */
-
 	if (!node.get_property ("frame", lts.sample)) {
 		error << _("Legacy tempo section XML does not have a \"frame\" node - map will be ignored") << endmsg;
 		cerr << _("Legacy tempo section XML does not have a \"frame\" node - map will be ignored") << endl;
+		return -1;
+	}
+
+	if (!node.get_property ("pulse", lts.pulses)) {
+		error << _("Legacy tempo section XML does not have a \"pulse\" node - map will be ignored") << endmsg;
+		cerr << _("Legacy tempo section XML does not have a \"pulse\" node - map will be ignored") << endl;
 		return -1;
 	}
 
@@ -4572,6 +4576,12 @@ TempoMap::parse_meter_state_3x (const XMLNode& node, LegacyMeterState& lms)
 
 	if (!node.get_property ("frame", lms.sample)) {
 		error << _("Legacy tempo section XML does not have a \"frame\" node - map will be ignored") << endmsg;
+		return -1;
+	}
+
+	if (!node.get_property ("pulse", lms.pulses)) {
+		error << _("Legacy meter section XML does not have a \"pulse\" node - map will be ignored") << endmsg;
+		cerr << _("Legacy meter section XML does not have a \"pulse\" node - map will be ignored") << endl;
 		return -1;
 	}
 
@@ -4653,7 +4663,7 @@ TempoMap::set_state_3x (const XMLNode& node)
 			Tempo t (lts.note_types_per_minute,
 			         lts.end_note_types_per_minute,
 			         lts.note_type);
-			TempoPoint* tp = new TempoPoint (*this, t, samples_to_superclock (0, TEMPORAL_SAMPLE_RATE), Beats(), BBT_Time());
+			TempoPoint* tp = new TempoPoint (*this, t, samples_to_superclock (0, TEMPORAL_SAMPLE_RATE), Beats::from_double (lts.pulses * 4.0), BBT_Time());
 
 			tp->set_continuing (lts.continuing);
 
@@ -4730,7 +4740,7 @@ TempoMap::set_state_3x (const XMLNode& node)
 			         lts.end_note_types_per_minute,
 			         lts.note_type);
 
-			set_tempo (t, timepos_t (lts.sample));
+			set_tempo (t, timepos_t (lts.sample), Beats::from_double (lts.pulses * 4.0));
 
 		} else if (child->name() == Meter::xml_node_name) {
 

@@ -1162,6 +1162,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	struct LegacyTempoState
 	{
 		samplepos_t sample;
+		double pulses;
 		double note_types_per_minute;
 		double end_note_types_per_minute;
 		double note_type;
@@ -1171,6 +1172,7 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	struct LegacyMeterState
 	{
 		samplepos_t sample;
+		double pulses;
 		BBT_Time bbt;
 		double beat;
 		double divisions_per_bar;
