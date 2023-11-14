@@ -731,6 +731,8 @@ ARDOUR_UI::startup_done ()
 	_status_bar_visibility.update ();
 
 	BootMessage (string_compose (_("%1 is ready for use"), PROGRAM_NAME));
+
+	startup_fsm->set_complete ();
 }
 
 void
