@@ -112,6 +112,16 @@ StartupFSM::~StartupFSM ()
 }
 
 void
+StartupFSM::set_complete ()
+{
+	app_quit_connection.disconnect ();
+	hide_quit_connection.disconnect ();
+
+	_state = NotWaiting;
+	PBD::stacktrace (std::cerr, 12);
+}
+
+void
 StartupFSM::dialog_hidden (Gtk::Window* /* ignored */)
 {
 	/* since this object only exists during startup, any attempt to close
