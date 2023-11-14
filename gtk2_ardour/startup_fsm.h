@@ -130,6 +130,7 @@ class StartupFSM : public sigc::trackable
 
 	sigc::connection current_dialog_connection;
 	sigc::connection app_quit_connection;
+	sigc::connection hide_quit_connection;
 
 	sigc::signal1<void,Result> _signal_response;
 
