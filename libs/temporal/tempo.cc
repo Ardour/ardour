@@ -4816,7 +4816,7 @@ TempoMap::set_state_3x (const XMLNode& node)
 		prev = i;
 	}
 #endif
-
+	reset_starting_at (0);
 	return 0;
 }
 
