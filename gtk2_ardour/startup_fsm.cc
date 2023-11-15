@@ -118,7 +118,6 @@ StartupFSM::set_complete ()
 	hide_quit_connection.disconnect ();
 
 	_state = NotWaiting;
-	PBD::stacktrace (std::cerr, 12);
 }
 
 void
