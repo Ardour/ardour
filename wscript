@@ -890,7 +890,7 @@ def options(opt):
     opt.add_option('--lv2dir', type='string', help="install destination for builtin LV2 bundles [Default: LIBDIR/lv2]")
     opt.add_option('--no-lxvst', action='store_true', default=False, dest='no_lxvst',
                     help='Compile without support for linuxVST plugins')
-    opt.add_option('--vst3', action='store_true', default=False, dest='no_vst3',
+    opt.add_option('--no-vst3', action='store_true', default=False, dest='no_vst3',
                     help='Compile without support for VST3 plugins')
     opt.add_option('--no-lrdf', action='store_true', dest='no_lrdf',
                     help='Compile without support for LRDF LADSPA data even if present')
