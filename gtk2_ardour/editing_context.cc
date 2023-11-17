@@ -63,7 +63,8 @@ static const gchar *_grid_type_strings[] = {
 };
 
 EditingContext::EditingContext ()
-	: pre_internal_grid_type (GridTypeBeat)
+	: rubberband_rect (0)
+	, pre_internal_grid_type (GridTypeBeat)
 	, pre_internal_snap_mode (SnapOff)
 	, internal_grid_type (GridTypeBeat)
 	, internal_snap_mode (SnapOff)
@@ -73,7 +74,7 @@ EditingContext::EditingContext ()
 	, _draw_velocity (DRAW_VEL_AUTO)
 	, _draw_channel (DRAW_CHAN_AUTO)
 	, _drags (new DragManager (this))
-	, rubberband_rect (0)
+	, _leftmost_sample (0)
 {
 	grid_type_strings =  I18N (_grid_type_strings);
 }
@@ -770,8 +771,7 @@ EditingContext::set_grid_to (GridType gt)
 	}
 
 	if (grid_type_changed && UIConfiguration::instance().get_show_grids_ruler()) {
-#warning paul heirarchy warning
-		// show_rulers_for_grid ();
+		show_rulers_for_grid ();
 	}
 
 	instant_save ();
@@ -779,9 +779,8 @@ EditingContext::set_grid_to (GridType gt)
 	const bool grid_is_musical = grid_musical ();
 
 	if (grid_is_musical) {
-#warning paul fix location of this in heirarchy
-		// compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
-		// update_tempo_based_rulers ();
+		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
+		update_tempo_based_rulers ();
 	} else if (current_mouse_mode () == Editing::MouseGrid) {
 		Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("MouseMode"), X_("set-mouse-mode-object"));
 		ract->set_active (true);
@@ -789,8 +788,7 @@ EditingContext::set_grid_to (GridType gt)
 
 	ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-grid"))->set_sensitive (grid_is_musical);
 
-#warning paul heirarchy warning
-	// mark_region_boundary_cache_dirty ();
+	mark_region_boundary_cache_dirty ();
 
 	redisplay_grid (false);
 
@@ -808,14 +806,11 @@ EditingContext::set_snap_mode (SnapMode mode)
 
 	_snap_mode = mode;
 
-#warning paul heirarchy warning
-#if 0
 	if (_snap_mode == SnapOff) {
 		snap_mode_button.set_active_state (Gtkmm2ext::Off);
 	} else {
 		snap_mode_button.set_active_state (Gtkmm2ext::ExplicitActive);
 	}
-#endif
 
 	instant_save ();
 }
