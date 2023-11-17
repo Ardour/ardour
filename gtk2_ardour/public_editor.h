@@ -60,7 +60,6 @@
 
 #include "widgets/tabbable.h"
 
-#include "axis_provider.h"
 #include "editing.h"
 #include "editing_context.h"
 #include "selection.h"
@@ -124,7 +123,7 @@ using ARDOUR::samplecnt_t;
  * of PublicEditor need not be recompiled if private methods or member variables
  * change.
  */
-class PublicEditor : public ArdourWidgets::Tabbable,  public EditingContext, public AxisViewProvider
+class PublicEditor : public ArdourWidgets::Tabbable,  public EditingContext
 {
 public:
 	PublicEditor (Gtk::Widget& content);
@@ -350,8 +349,6 @@ public:
 	virtual bool track_selection_change_without_scroll () const = 0;
 	virtual bool show_touched_automation () const = 0;
 
-	virtual StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const = 0;
-
 	virtual TimeAxisView* time_axis_view_from_stripable (std::shared_ptr<ARDOUR::Stripable> s) const = 0;
 
 	virtual void get_equivalent_regions (RegionView* rv, std::vector<RegionView*>&, PBD::PropertyID) const = 0;
@@ -431,7 +428,6 @@ public:
 
 	virtual void center_screen (samplepos_t) = 0;
 
-	virtual TrackViewList axis_views_from_routes (std::shared_ptr<ARDOUR::RouteList>) const = 0;
 	virtual TrackViewList const & get_track_views () const = 0;
 
 	virtual MixerStrip* get_current_mixer_strip () const = 0;
@@ -450,19 +446,11 @@ public:
 	virtual void access_action (const std::string&, const std::string&) = 0;
 	virtual void set_toggleaction (const std::string&, const std::string&, bool) = 0;
 
-	virtual EditorCursor* playhead_cursor () const = 0;
-	virtual EditorCursor* snapped_cursor () const = 0;
-
 	virtual bool get_smart_mode () const = 0;
 
 	virtual void get_pointer_position (double &, double &) const = 0;
 
 	virtual std::pair <Temporal::timepos_t, Temporal::timepos_t> session_gui_extents (bool use_extra = true) const = 0;
-
-	virtual ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool&) const = 0;
-	virtual ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const = 0;
-	virtual TempoMarker* find_marker_for_tempo (Temporal::TempoPoint const &) = 0;
-	virtual MeterMarker* find_marker_for_meter (Temporal::MeterPoint const &) = 0;
 
 	virtual void snap_to_with_modifier (Temporal::timepos_t & first,
 	                                    GdkEvent const*      ev,
@@ -474,8 +462,6 @@ public:
 	virtual void get_regions_at (RegionSelection &, Temporal::timepos_t const & where, TrackViewList const &) const = 0;
 	virtual void get_regions_after (RegionSelection&, Temporal::timepos_t const & where, const TrackViewList& ts) const = 0;
 	virtual RegionSelection get_regions_from_selection_and_mouse (Temporal::timepos_t const &) = 0;
-	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
-	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const = 0;
 
 	virtual void build_region_boundary_cache () = 0;
 	virtual void mark_region_boundary_cache_dirty () = 0;

@@ -16,7 +16,10 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <iostream>
+
 #include "pbd/error.h"
+#include "pbd/stacktrace.h"
 
 #include "ardour/rc_configuration.h"
 
@@ -26,6 +29,8 @@
 #include "editing_context.h"
 #include "editor_drag.h"
 #include "midi_region_view.h"
+#include "selection.h"
+#include "selection_memento.h"
 
 #include "pbd/i18n.h"
 
@@ -34,6 +39,7 @@ using namespace Glib;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
+using std::string;
 
 sigc::signal<void> EditingContext::DropDownKeys;
 
@@ -75,6 +81,12 @@ EditingContext::EditingContext ()
 	, _draw_channel (DRAW_CHAN_AUTO)
 	, _drags (new DragManager (this))
 	, _leftmost_sample (0)
+	, _playhead_cursor (nullptr)
+	, _snapped_cursor (nullptr)
+	, _follow_playhead (false)
+	, selection (new Selection (this, true))
+	, cut_buffer (new Selection (this, false))
+	, _selection_memento (new SelectionMemento())
 {
 	grid_type_strings =  I18N (_grid_type_strings);
 }
@@ -1082,3 +1094,76 @@ EditingContext::time_domain () const
 
 	return Temporal::BeatTime;
 }
+
+void
+EditingContext::toggle_follow_playhead ()
+{
+	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-follow-playhead"));
+	set_follow_playhead (tact->get_active());
+}
+
+/** @param yn true to follow playhead, otherwise false.
+ *  @param catch_up true to reset the editor view to show the playhead (if yn == true), otherwise false.
+ */
+void
+EditingContext::set_follow_playhead (bool yn, bool catch_up)
+{
+	if (_follow_playhead != yn) {
+		if ((_follow_playhead = yn) == true && catch_up) {
+			/* catch up */
+			reset_x_origin_to_follow_playhead ();
+		}
+		instant_save ();
+	}
+}
+
+void
+EditingContext::begin_reversible_command (string name)
+{
+	if (_session) {
+		before.push_back (&_selection_memento->get_state ());
+		_session->begin_reversible_command (name);
+	}
+}
+
+void
+EditingContext::begin_reversible_command (GQuark q)
+{
+	if (_session) {
+		before.push_back (&_selection_memento->get_state ());
+		_session->begin_reversible_command (q);
+	}
+}
+
+void
+EditingContext::abort_reversible_command ()
+{
+	if (_session) {
+		while(!before.empty()) {
+			delete before.front();
+			before.pop_front();
+		}
+		_session->abort_reversible_command ();
+	}
+}
+
+void
+EditingContext::commit_reversible_command ()
+{
+	if (_session) {
+		if (before.size() == 1) {
+			_session->add_command (new MementoCommand<SelectionMemento>(*(_selection_memento), before.front(), &_selection_memento->get_state ()));
+			begin_selection_op_history ();
+		}
+
+		if (before.empty()) {
+			PBD::stacktrace (std::cerr, 30);
+			std::cerr << "Please call begin_reversible_command() before commit_reversible_command()." << std::endl;
+		} else {
+			before.pop_back();
+		}
+
+		_session->commit_reversible_command ();
+	}
+}
+

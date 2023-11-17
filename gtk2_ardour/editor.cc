@@ -341,7 +341,6 @@ Editor::Editor ()
 	, last_event_time { 0, 0 }
 	, _dragging_playhead (false)
 	, ignore_map_change (false)
-	, _follow_playhead (true)
 	, _stationary_playhead (false)
 	, _maximised (false)
 	, grid_lines (0)
@@ -357,9 +356,6 @@ Editor::Editor ()
 	, _visible_track_count (-1)
 	,  toolbar_selection_clock_table (2,3)
 	,  automation_mode_button (_("mode"))
-	, selection (new Selection (this, true))
-	, cut_buffer (new Selection (this, false))
-	, _selection_memento (new SelectionMemento())
 	, _all_region_actions_sensitized (false)
 	, _ignore_region_action (false)
 	, _last_region_menu_was_main (false)
@@ -960,7 +956,7 @@ Editor::instant_save ()
 		return;
 	}
 
-	_session->add_instant_xml(get_state());
+	_session->add_instant_xml (get_state());
 }
 
 void
@@ -3575,56 +3571,6 @@ Editor::redo_selection_op ()
 }
 
 void
-Editor::begin_reversible_command (string name)
-{
-	if (_session) {
-		before.push_back (&_selection_memento->get_state ());
-		_session->begin_reversible_command (name);
-	}
-}
-
-void
-Editor::begin_reversible_command (GQuark q)
-{
-	if (_session) {
-		before.push_back (&_selection_memento->get_state ());
-		_session->begin_reversible_command (q);
-	}
-}
-
-void
-Editor::abort_reversible_command ()
-{
-	if (_session) {
-		while(!before.empty()) {
-			delete before.front();
-			before.pop_front();
-		}
-		_session->abort_reversible_command ();
-	}
-}
-
-void
-Editor::commit_reversible_command ()
-{
-	if (_session) {
-		if (before.size() == 1) {
-			_session->add_command (new MementoCommand<SelectionMemento>(*(_selection_memento), before.front(), &_selection_memento->get_state ()));
-			begin_selection_op_history ();
-		}
-
-		if (before.empty()) {
-			PBD::stacktrace(cerr, 30);
-			cerr << "Please call begin_reversible_command() before commit_reversible_command()." << endl;
-		} else {
-			before.pop_back();
-		}
-
-		_session->commit_reversible_command ();
-	}
-}
-
-void
 Editor::history_changed ()
 {
 	if (!_session) {
@@ -4115,28 +4061,6 @@ Editor::update_grid ()
 		maybe_draw_grid_lines ();
 	} else {
 		maybe_draw_grid_lines ();
-	}
-}
-
-void
-Editor::toggle_follow_playhead ()
-{
-	RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("toggle-follow-playhead"));
-	set_follow_playhead (tact->get_active());
-}
-
-/** @param yn true to follow playhead, otherwise false.
- *  @param catch_up true to reset the editor view to show the playhead (if yn == true), otherwise false.
- */
-void
-Editor::set_follow_playhead (bool yn, bool catch_up)
-{
-	if (_follow_playhead != yn) {
-		if ((_follow_playhead = yn) == true && catch_up) {
-			/* catch up */
-			reset_x_origin_to_follow_playhead ();
-		}
-		instant_save ();
 	}
 }
 
@@ -6759,35 +6683,6 @@ Editor::duration_to_pixels_unrounded (timecnt_t const & dur) const
 	return sample_to_pixel_unrounded (dur.samples());
 }
 
-Temporal::TimeDomain
-Editor::default_time_domain () const
-{
-	if (_session) {
-		return _session->config.get_default_time_domain();
-	}
-
-	/* Probably never reached */
-
-	if (_snap_mode == SnapOff) {
-		return AudioTime;
-	}
-
-	switch (_grid_type) {
-		case GridTypeNone:
-			/* fallthrough */
-		case GridTypeMinSec:
-			/* fallthrough */
-		case GridTypeCDFrame:
-			/* fallthrough */
-		case GridTypeTimecode:
-			/* fallthrough */
-			return AudioTime;
-		default:
-			break;
-	}
-	return BeatTime;
-}
-
 void
 Editor::start_track_drag (TimeAxisView& tav, int y, Gtk::Widget& w, bool can_change_cursor)
 {
@@ -6888,3 +6783,4 @@ Editor::track_dragging() const
 {
 	return (bool) track_drag;
 }
+
