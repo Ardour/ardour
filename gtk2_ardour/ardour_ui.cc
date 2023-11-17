@@ -255,7 +255,7 @@ libxml_generic_error_func (void* /* parsing_context*/,
 
 static void
 libxml_structured_error_func (void* /* parsing_context*/,
-                              xmlErrorPtr err)
+                              const xmlError *err)
 {
 	string msg;
 
@@ -403,7 +403,11 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	/* stop libxml from spewing to stdout/stderr */
 
 	xmlSetGenericErrorFunc (this, libxml_generic_error_func);
-	xmlSetStructuredErrorFunc (this, libxml_structured_error_func);
+
+	/* Cast to xmlStructuredErrorFunc to cope with different constness in different
+	 * versions of libxml2. */
+
+	xmlSetStructuredErrorFunc (this, (xmlStructuredErrorFunc)libxml_structured_error_func);
 
 	/* Set this up early */
 

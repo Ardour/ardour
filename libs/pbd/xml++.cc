@@ -170,7 +170,7 @@ XMLTree::write() const
 	result = xmlSaveFormatFileEnc(_filename.c_str(), doc, "UTF-8", 1);
 #ifndef NDEBUG
 	if (result == -1) {
-		xmlErrorPtr xerr = xmlGetLastError ();
+		const xmlError *xerr = xmlGetLastError ();
 		if (!xerr) {
 			std::cerr << "unknown XML error during xmlSaveFormatFileEnc()." << std::endl;
 		} else {
