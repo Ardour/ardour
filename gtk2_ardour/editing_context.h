@@ -42,12 +42,15 @@
 
 #include "widgets/ardour_dropdown.h"
 
+#include "axis_provider.h"
 #include "editing.h"
 #include "editor_items.h"
 #include "selection.h"
 
 using ARDOUR::samplepos_t;
 using ARDOUR::samplecnt_t;
+
+class XMLNode;
 
 class CursorContext;
 class DragManager;
@@ -56,8 +59,10 @@ class MidiRegionView;
 class MouseCursors;
 class VerboseCursor;
 class TrackViewList;
+class Selection;
+class SelectionMemento;
 
-class EditingContext : public ARDOUR::SessionHandlePtr
+class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 {
 public:
 	/** Context for mouse entry (stored in a stack). */
@@ -81,15 +86,24 @@ public:
 	bool preview_video_drag_active () const;
 
 	virtual void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, TrackViewList const &, Selection::Operation, bool) = 0;
+	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const = 0;
+	virtual void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const = 0;
+	virtual StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const = 0;
+	virtual TrackViewList axis_views_from_routes (std::shared_ptr<ARDOUR::RouteList>) const = 0;
 
-	virtual EditorCursor* playhead_cursor () const = 0;
-	virtual EditorCursor* snapped_cursor () const = 0;
+	virtual ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool&) const = 0;
+	virtual ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const = 0;
+	virtual TempoMarker* find_marker_for_tempo (Temporal::TempoPoint const &) = 0;
+	virtual MeterMarker* find_marker_for_meter (Temporal::MeterPoint const &) = 0;
+
+
+	EditorCursor* playhead_cursor () const { return _playhead_cursor; }
+	EditorCursor* snapped_cursor () const { return _snapped_cursor; }
 
 	virtual void maybe_autoscroll (bool, bool, bool from_headers) = 0;
 	virtual void stop_canvas_autoscroll () = 0;
 	virtual bool autoscroll_active() const = 0;
 
-	virtual void instant_save() = 0;
 	virtual void redisplay_grid (bool immediate_redraw) = 0;
 	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) = 0;
 
@@ -97,13 +111,15 @@ public:
 	 * @param yn true to follow playhead, otherwise false.
 	 * @param catch_up true to reset the editor view to show the playhead (if yn == true), otherwise false.
 	 */
-	virtual void set_follow_playhead (bool yn, bool catch_up = true) = 0;
+	void set_follow_playhead (bool yn, bool catch_up = true);
 
 	/** Toggle whether the editor is following the playhead */
-	virtual void toggle_follow_playhead () = 0;
+	void toggle_follow_playhead ();
 
 	/** @return true if the editor is following the playhead */
-	virtual bool follow_playhead () const = 0;
+	bool follow_playhead () const { return _follow_playhead; }
+
+	virtual void instant_save() = 0;
 
 	/** Get the topmost enter context for the given item type.
 	 *
@@ -119,10 +135,10 @@ public:
 	virtual void undo_selection_op () = 0;
 	virtual void redo_selection_op () = 0;
 
-	virtual void begin_reversible_command (std::string cmd_name) = 0;
-	virtual void begin_reversible_command (GQuark) = 0;
-	virtual void abort_reversible_command () = 0;
-	virtual void commit_reversible_command () = 0;
+	virtual void begin_reversible_command (std::string cmd_name);
+	virtual void begin_reversible_command (GQuark);
+	virtual void abort_reversible_command ();
+	virtual void commit_reversible_command ();
 
 	virtual void set_selected_midi_region_view (MidiRegionView&);
 
@@ -300,6 +316,23 @@ public:
 	virtual samplecnt_t current_page_samples() const = 0;
 
 	samplepos_t       _leftmost_sample;
+
+	/* playhead and edit cursor */
+
+	EditorCursor* _playhead_cursor;
+	EditorCursor* _snapped_cursor;
+
+	bool _follow_playhead;
+	virtual void reset_x_origin_to_follow_playhead () = 0;
+
+	/* selection process */
+
+	Selection* selection;
+	Selection* cut_buffer;
+	SelectionMemento* _selection_memento;
+
+	std::list<XMLNode*> before; /* used in *_reversible_command */
 };
 
 #endif /* __ardour_midi_editing_context_h__ */
+
