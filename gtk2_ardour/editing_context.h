@@ -233,6 +233,9 @@ public:
 
 	void register_midi_actions (Gtkmm2ext::Bindings*);
 
+	ArdourCanvas::Rectangle* rubberband_rect;
+
+  protected:
 	Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 
 	/* Cursor stuff.  Do not use directly, use via CursorContext. */
@@ -288,7 +291,15 @@ public:
 
 	DragManager* _drags;
 
-	ArdourCanvas::Rectangle* rubberband_rect;
+	ArdourWidgets::ArdourButton snap_mode_button;
+
+	virtual void mark_region_boundary_cache_dirty () {}
+	virtual void compute_bbt_ruler_scale (samplepos_t, samplepos_t) {}
+	virtual void update_tempo_based_rulers () {};
+	virtual void show_rulers_for_grid () {};
+	virtual samplecnt_t current_page_samples() const = 0;
+
+	samplepos_t       _leftmost_sample;
 };
 
 #endif /* __ardour_midi_editing_context_h__ */
