@@ -507,14 +507,6 @@ public:
 
 	Gdk::Cursor* get_canvas_cursor () const;
 
-	MouseCursors const* cursors () const {
-		return _cursors;
-	}
-
-	VerboseCursor* verbose_cursor () const {
-		return _verbose_cursor;
-	}
-
 	double clamp_verbose_cursor_x (double);
 	double clamp_verbose_cursor_y (double);
 
@@ -864,7 +856,6 @@ private:
 	bool within_track_canvas;
 
 	friend class VerboseCursor;
-	VerboseCursor* _verbose_cursor;
 
 	RegionPeakCursor* _region_peak_cursor;
 
@@ -2427,8 +2418,6 @@ private:
 
 	Gtk::MenuItem& action_menu_item (std::string const &);
 	void action_pre_activated (Glib::RefPtr<Gtk::Action> const &);
-
-	MouseCursors* _cursors;
 
 	void follow_mixer_selection ();
 	bool _following_mixer_selection;
