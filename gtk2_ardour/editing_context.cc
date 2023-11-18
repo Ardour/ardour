@@ -87,6 +87,8 @@ EditingContext::EditingContext ()
 	, selection (new Selection (this, true))
 	, cut_buffer (new Selection (this, false))
 	, _selection_memento (new SelectionMemento())
+	, _cursors (nullptr)
+	, _verbose_cursor (nullptr)
 {
 	grid_type_strings =  I18N (_grid_type_strings);
 }

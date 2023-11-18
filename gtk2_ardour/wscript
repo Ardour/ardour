@@ -65,6 +65,7 @@ gtk2_ardour_sources = [
         'control_point_dialog.cc',
         'control_slave_ui.cc',
         'cuebox_ui.cc',
+        'cue_editor.cc',
         'cursor_context.cc',
         'curvetest.cc',
         'debug.cc',

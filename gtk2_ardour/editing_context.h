@@ -212,8 +212,8 @@ public:
 	virtual void reset_zoom (samplecnt_t) = 0;
 	virtual void reposition_and_zoom (samplepos_t, double) = 0;
 
-	virtual Selection& get_selection() const = 0;
-	virtual Selection& get_cut_buffer () const = 0;
+	virtual Selection& get_selection() const { return *selection; }
+	virtual Selection& get_cut_buffer () const { return *cut_buffer; }
 
 	/** Set the mouse mode (gain, object, range, timefx etc.)
 	 * @param m Mouse mode (defined in editing_syms.h)
@@ -233,8 +233,12 @@ public:
 	virtual bool internal_editing() const = 0;
 
 	virtual Gdk::Cursor* get_canvas_cursor () const = 0;
-	virtual MouseCursors const* cursors () const = 0;
-	virtual VerboseCursor* verbose_cursor () const = 0;
+	virtual MouseCursors const* cursors () const {
+		return _cursors;
+	}
+	virtual VerboseCursor* verbose_cursor () const {
+		return _verbose_cursor;
+	}
 
 	virtual void set_snapped_cursor_position (Temporal::timepos_t const & pos) = 0;
 
@@ -332,6 +336,11 @@ public:
 	SelectionMemento* _selection_memento;
 
 	std::list<XMLNode*> before; /* used in *_reversible_command */
+
+	MouseCursors* _cursors;
+
+	friend class VerboseCursor;
+	VerboseCursor* _verbose_cursor;
 };
 
 #endif /* __ardour_midi_editing_context_h__ */
