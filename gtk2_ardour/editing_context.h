@@ -255,6 +255,8 @@ public:
 
 	ArdourCanvas::Rectangle* rubberband_rect;
 
+	virtual ArdourCanvas::Container* get_noscroll_group() const = 0;
+
   protected:
 	Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 
@@ -339,7 +341,6 @@ public:
 
 	MouseCursors* _cursors;
 
-	friend class VerboseCursor;
 	VerboseCursor* _verbose_cursor;
 };
 

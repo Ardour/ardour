@@ -112,7 +112,6 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (cursor_scroll_group, "canvas cursor scroll");
 	_track_canvas->add_scroller (*cg);
 
-	_verbose_cursor = new VerboseCursor (this);
 	_region_peak_cursor = new RegionPeakCursor (get_noscroll_group ());
 
 	/*a group to hold global rects like punch/loop indicators */

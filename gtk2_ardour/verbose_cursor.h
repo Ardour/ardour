@@ -23,7 +23,7 @@
 #include "ardour/types.h"
 #include "canvas/canvas.h"
 
-class Editor;
+class EditingContext;
 
 namespace ArdourCanvas {
 	class TrackingText;
@@ -32,7 +32,7 @@ namespace ArdourCanvas {
 class VerboseCursor
 {
 public:
-	VerboseCursor (Editor *);
+	VerboseCursor (EditingContext&);
 
 	ArdourCanvas::Item* canvas_item () const;
 	bool visible () const;
@@ -46,7 +46,7 @@ public:
 	void hide ();
 
 private:
-	Editor*                     _editor;
+	EditingContext&             _editor;
 	ArdourCanvas::TrackingText* _canvas_item;
 
 	void color_handler ();

@@ -855,8 +855,6 @@ private:
 
 	bool within_track_canvas;
 
-	friend class VerboseCursor;
-
 	RegionPeakCursor* _region_peak_cursor;
 
 	void parameter_changed (std::string);
