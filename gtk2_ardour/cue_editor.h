@@ -16,6 +16,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#ifndef __gtk_ardour_cue_editor_h__
+#define __gtk_ardour_cue_editor_h__
+
 #include "editing.h"
 #include "editing_context.h"
 
@@ -100,3 +103,5 @@ class CueEditor : public EditingContext
 	void reset_x_origin_to_follow_playhead ();
 
 };
+
+#endif /* __gtk_ardour_cue_editor_h__ */
