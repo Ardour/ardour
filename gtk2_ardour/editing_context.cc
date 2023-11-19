@@ -31,6 +31,7 @@
 #include "midi_region_view.h"
 #include "selection.h"
 #include "selection_memento.h"
+#include "verbose_cursor.h"
 
 #include "pbd/i18n.h"
 
@@ -91,6 +92,8 @@ EditingContext::EditingContext ()
 	, _verbose_cursor (nullptr)
 {
 	grid_type_strings =  I18N (_grid_type_strings);
+
+	_verbose_cursor = new VerboseCursor (*this);
 }
 
 EditingContext::~EditingContext()

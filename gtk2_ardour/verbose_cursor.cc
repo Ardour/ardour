@@ -30,7 +30,7 @@
 #include "canvas/tracking_text.h"
 
 #include "audio_clock.h"
-#include "editor.h"
+#include "editing_context.h"
 #include "editor_drag.h"
 #include "main_clock.h"
 #include "verbose_cursor.h"
@@ -43,10 +43,10 @@ using namespace std;
 using namespace ARDOUR;
 using namespace Temporal;
 
-VerboseCursor::VerboseCursor (Editor* editor)
+VerboseCursor::VerboseCursor (EditingContext& editor)
 	: _editor (editor)
 {
-	_canvas_item = new ArdourCanvas::TrackingText (_editor->get_noscroll_group());
+	_canvas_item = new ArdourCanvas::TrackingText (_editor.get_noscroll_group());
 	CANVAS_DEBUG_NAME (_canvas_item, "verbose canvas cursor");
 	_canvas_item->set_font_description (Pango::FontDescription (UIConfiguration::instance().get_LargerBoldFont()));
 	color_handler ();
@@ -103,7 +103,7 @@ VerboseCursor::set_time (samplepos_t sample)
 	Timecode::Time timecode;
 	Temporal::BBT_Time bbt;
 
-	if (_editor->_session == 0) {
+	if (_editor.session() == 0) {
 		return;
 	}
 
@@ -118,16 +118,16 @@ VerboseCursor::set_time (samplepos_t sample)
 		break;
 
 	case AudioClock::Timecode:
-		_editor->_session->timecode_time (sample, timecode);
+		_editor.session()->timecode_time (sample, timecode);
 		snprintf (buf, sizeof (buf), "%s", Timecode::timecode_format_time (timecode).c_str());
 		break;
 
 	case AudioClock::MinSec:
-		AudioClock::print_minsec (sample, buf, sizeof (buf), _editor->_session->sample_rate());
+		AudioClock::print_minsec (sample, buf, sizeof (buf), _editor.session()->sample_rate());
 		break;
 
 	case AudioClock::Seconds:
-		snprintf (buf, sizeof(buf), "%.1f", sample / (float)_editor->_session->sample_rate());
+		snprintf (buf, sizeof(buf), "%.1f", sample / (float)_editor.session()->sample_rate());
 		break;
 
 	default:
@@ -147,7 +147,7 @@ VerboseCursor::set_duration (samplepos_t start, samplepos_t end)
 	Temporal::BBT_Time ebbt;
 	Meter const & meter_at_start (TempoMap::use()->metric_at (timepos_t (start)).meter());
 
-	if (_editor->_session == 0) {
+	if (_editor.session() == 0) {
 		return;
 	}
 
@@ -191,16 +191,16 @@ VerboseCursor::set_duration (samplepos_t start, samplepos_t end)
 	}
 
 	case AudioClock::Timecode:
-		_editor->_session->timecode_duration (end - start, timecode);
+		_editor.session()->timecode_duration (end - start, timecode);
 		snprintf (buf, sizeof (buf), "%s", Timecode::timecode_format_time (timecode).c_str());
 		break;
 
 	case AudioClock::MinSec:
-		AudioClock::print_minsec (end - start, buf, sizeof (buf), _editor->_session->sample_rate());
+		AudioClock::print_minsec (end - start, buf, sizeof (buf), _editor.session()->sample_rate());
 		break;
 
 	case AudioClock::Seconds:
-		snprintf (buf, sizeof(buf), "%.1f", (end - start) / (float)_editor->_session->sample_rate());
+		snprintf (buf, sizeof(buf), "%.1f", (end - start) / (float)_editor.session()->sample_rate());
 		break;
 
 	default:
