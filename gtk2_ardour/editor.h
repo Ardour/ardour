@@ -219,44 +219,6 @@ public:
 	void separate_regions_using_location (ARDOUR::Location&);
 	void transition_to_rolling (bool forward);
 
-	/* NOTE: these functions assume that the "pixel" coordinate is
-	   in canvas coordinates. These coordinates already take into
-	   account any scrolling offsets.
-	*/
-
-	samplepos_t pixel_to_sample_from_event (double pixel) const {
-
-		/* pixel can be less than zero when motion events
-		   are processed. since we've already run the world->canvas
-		   affine, that means that the location *really* is "off
-		   to the right" and thus really is "before the start".
-		*/
-
-		if (pixel >= 0) {
-			return pixel * samples_per_pixel;
-		} else {
-			return 0;
-		}
-	}
-
-	samplepos_t pixel_to_sample (double pixel) const {
-		return pixel * samples_per_pixel;
-	}
-
-	double sample_to_pixel (samplepos_t sample) const {
-		return round (sample / (double) samples_per_pixel);
-	}
-
-	double sample_to_pixel_unrounded (samplepos_t sample) const {
-		return sample / (double) samples_per_pixel;
-	}
-
-	double time_to_pixel (Temporal::timepos_t const & pos) const;
-	double time_to_pixel_unrounded (Temporal::timepos_t const & pos) const;
-
-	double duration_to_pixels (Temporal::timecnt_t const & pos) const;
-	double duration_to_pixels_unrounded (Temporal::timecnt_t const & pos) const;
-
 	/* selection */
 
 	Selection& get_selection() const { return *selection; }
@@ -471,21 +433,6 @@ public:
 
 	TrackViewList axis_views_from_routes (std::shared_ptr<ARDOUR::RouteList>) const;
 
-	void snap_to (Temporal::timepos_t & first,
-	              Temporal::RoundMode    direction = Temporal::RoundNearest,
-	              ARDOUR::SnapPref     pref = ARDOUR::SnapToAny_Visual,
-	              bool                 ensure_snap = false);
-
-	void snap_to_with_modifier (Temporal::timepos_t & first,
-	                            GdkEvent const*      ev,
-	                            Temporal::RoundMode    direction = Temporal::RoundNearest,
-	                            ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
-	                            bool ensure_snap = false);
-
-	Temporal::timepos_t snap_to_bbt (Temporal::timepos_t const & start,
-	                                 Temporal::RoundMode   direction,
-	                                 ARDOUR::SnapPref    gpref);
-
 	void set_snapped_cursor_position (Temporal::timepos_t const & pos);
 
 	void begin_selection_op_history ();
@@ -620,9 +567,6 @@ private:
 	std::vector<VisualState*> visual_states;
 	void start_visual_state_op (uint32_t n);
 	void cancel_visual_state_op (uint32_t n);
-
-	samplecnt_t        samples_per_pixel;
-	Editing::ZoomFocus zoom_focus;
 
 	void set_samples_per_pixel (samplecnt_t);
 	void on_samples_per_pixel_changed ();
@@ -2332,16 +2276,6 @@ private:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
 	                                  ARDOUR::SnapPref    gpref);
-
-	Temporal::timepos_t _snap_to_bbt (Temporal::timepos_t const & start,
-	                                  Temporal::RoundMode   direction,
-	                                  ARDOUR::SnapPref    gpref,
-	                                  Editing::GridType   grid_type);
-
-	void snap_to_internal (Temporal::timepos_t& first,
-	                       Temporal::RoundMode    direction = Temporal::RoundNearest,
-	                       ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
-	                       bool                 ensure_snap = false);
 
 	void timecode_snap_to_internal (Temporal::timepos_t & first,
 	                                Temporal::RoundMode   direction = Temporal::RoundNearest,

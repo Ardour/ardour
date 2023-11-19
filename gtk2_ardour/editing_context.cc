@@ -40,6 +40,7 @@ using namespace Glib;
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace PBD;
+using namespace Temporal;
 using std::string;
 
 sigc::signal<void> EditingContext::DropDownKeys;
@@ -90,6 +91,8 @@ EditingContext::EditingContext ()
 	, _selection_memento (new SelectionMemento())
 	, _cursors (nullptr)
 	, _verbose_cursor (nullptr)
+	, samples_per_pixel (2048)
+	, zoom_focus (ZoomFocusPlayhead)
 {
 	grid_type_strings =  I18N (_grid_type_strings);
 
@@ -1170,5 +1173,285 @@ EditingContext::commit_reversible_command ()
 
 		_session->commit_reversible_command ();
 	}
+}
+
+double
+EditingContext::time_to_pixel (timepos_t const & pos) const
+{
+	return sample_to_pixel (pos.samples());
+}
+
+double
+EditingContext::time_to_pixel_unrounded (timepos_t const & pos) const
+{
+	return sample_to_pixel_unrounded (pos.samples());
+}
+
+double
+EditingContext::duration_to_pixels (timecnt_t const & dur) const
+{
+	return sample_to_pixel (dur.samples());
+}
+
+double
+EditingContext::duration_to_pixels_unrounded (timecnt_t const & dur) const
+{
+	return sample_to_pixel_unrounded (dur.samples());
+}
+
+/** Snap a position to the grid, if appropriate, taking into account current
+ *  grid settings and also the state of any snap modifier keys that may be pressed.
+ *  @param start Position to snap.
+ *  @param event Event to get current key modifier information from, or 0.
+ */
+void
+EditingContext::snap_to_with_modifier (timepos_t& start, GdkEvent const * event, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap)
+{
+	if (!_session || !event) {
+		return;
+	}
+
+	if (ArdourKeyboard::indicates_snap (event->button.state)) {
+		if (_snap_mode == SnapOff) {
+			snap_to_internal (start, direction, pref, ensure_snap);
+		}
+
+	} else {
+		if (_snap_mode != SnapOff) {
+			snap_to_internal (start, direction, pref);
+		} else if (ArdourKeyboard::indicates_snap_delta (event->button.state)) {
+			/* SnapOff, but we pressed the snap_delta modifier */
+			snap_to_internal (start, direction, pref, ensure_snap);
+		}
+	}
+}
+
+void
+EditingContext::snap_to (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap)
+{
+	if (!_session || (_snap_mode == SnapOff && !ensure_snap)) {
+		return;
+	}
+
+	snap_to_internal (start, direction, pref, ensure_snap);
+}
+
+timepos_t
+EditingContext::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref)
+{
+	return _snap_to_bbt (presnap, direction, gpref, _grid_type);
+}
+
+timepos_t
+EditingContext::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref, GridType grid_type)
+{
+	timepos_t ret(presnap);
+	TempoMap::SharedPtr tmap (TempoMap::use());
+
+	/* Snap to bar always uses bars, and ignores visual grid, so it may
+	 * sometimes snap to bars that are not visually distinguishable.
+	 *
+	 * XXX this should probably work totally different: we should get the
+	 * nearby grid and walk towards the next bar point.
+	 */
+
+	if (grid_type == GridTypeBar) {
+		TempoMetric m (tmap->metric_at (presnap));
+		BBT_Argument bbt (m.bbt_at (presnap));
+		switch (direction) {
+		case RoundDownAlways:
+			bbt = BBT_Argument (bbt.reference(), bbt.round_down_to_bar ());
+			break;
+		case RoundUpAlways:
+			bbt = BBT_Argument (bbt.reference(), bbt.round_up_to_bar ());
+			break;
+		case RoundNearest:
+			bbt = BBT_Argument (bbt.reference(), m.round_to_bar (bbt));
+			break;
+		default:
+			break;
+		}
+		return timepos_t (tmap->quarters_at (bbt));
+	}
+
+	if (gpref != SnapToGrid_Unscaled) { // use the visual grid lines which are limited by the zoom scale that the user selected
+
+		/* Determine the most obvious divisor of a beat to use
+		 * for the snap, based on the grid setting.
+		 */
+
+		int divisor;
+		switch (_grid_type) {
+			case GridTypeBeatDiv3:
+			case GridTypeBeatDiv6:
+			case GridTypeBeatDiv12:
+			case GridTypeBeatDiv24:
+				divisor = 3;
+				break;
+			case GridTypeBeatDiv5:
+			case GridTypeBeatDiv10:
+			case GridTypeBeatDiv20:
+				divisor = 5;
+				break;
+			case GridTypeBeatDiv7:
+			case GridTypeBeatDiv14:
+			case GridTypeBeatDiv28:
+				divisor = 7;
+				break;
+			case GridTypeBeat:
+				divisor = 1;
+				break;
+			case GridTypeNone:
+				return ret;
+			default:
+				divisor = 2;
+				break;
+		};
+
+		/* bbt_ruler_scale reflects the level of detail we will show
+		 * for the visual grid. Adjust the "natural" divisor to reflect
+		 * this level of detail, and snap to that.
+		 *
+		 * So, for example, if the grid is Div3, we use 3 divisions per
+		 * beat, but if the visual grid is using bbt_show_sixteenths (a
+		 * fairly high level of detail), we will snap to (2 * 3)
+		 * divisions per beat. Etc.
+		 */
+
+		BBTRulerScale scale = bbt_ruler_scale;
+		switch (scale) {
+			case bbt_show_many:
+			case bbt_show_64:
+			case bbt_show_16:
+			case bbt_show_4:
+			case bbt_show_1:
+				/* Round to Bar */
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (-1, direction));
+				break;
+			case bbt_show_quarters:
+				/* Round to Beat */
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (1, direction));
+				break;
+			case bbt_show_eighths:
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (1 * divisor, direction));
+				break;
+			case bbt_show_sixteenths:
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (2 * divisor, direction));
+				break;
+			case bbt_show_thirtyseconds:
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (4 * divisor, direction));
+				break;
+			case bbt_show_sixtyfourths:
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (8 * divisor, direction));
+				break;
+			case bbt_show_onetwentyeighths:
+				ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (16 * divisor, direction));
+				break;
+		}
+	} else {
+		/* Just use the grid as specified, without paying attention to
+		 * zoom level
+		 */
+
+		ret = timepos_t (tmap->quarters_at (presnap).round_to_subdivision (get_grid_beat_divisions(_grid_type), direction));
+	}
+
+	return ret;
+}
+
+static void
+check_best_snap (timepos_t const & presnap, timepos_t &test, timepos_t &dist, timepos_t &best)
+{
+	timepos_t diff = timepos_t (presnap.distance (test).abs ());
+	if (diff < dist) {
+		dist = diff;
+		best = test;
+	}
+
+	test = timepos_t::max (test.time_domain()); // reset this so it doesn't get accidentally reused
+}
+
+void
+EditingContext::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap)
+{
+	UIConfiguration const& uic (UIConfiguration::instance ());
+	const timepos_t presnap = start;
+
+
+	timepos_t test = timepos_t::max (start.time_domain()); // for each snap, we'll use this value
+	timepos_t dist = timepos_t::max (start.time_domain()); // this records the distance of the best snap result we've found so far
+	timepos_t best = timepos_t::max (start.time_domain()); // this records the best snap-result we've found so far
+
+	/* check Grid */
+	if ( (_grid_type != GridTypeNone) && (uic.get_snap_target () != SnapTargetOther) ) {
+		timepos_t pre (presnap);
+		timepos_t post (snap_to_grid (pre, direction, pref));
+		check_best_snap (presnap, post, dist, best);
+		if (uic.get_snap_target () == SnapTargetGrid) {
+			goto check_distance;
+		}
+	}
+
+	/* check snap-to-marker */
+	if ((pref == SnapToAny_Visual) && uic.get_snap_to_marks ()) {
+		test = snap_to_marker (presnap, direction);
+		check_best_snap (presnap, test, dist, best);
+	}
+
+	/* check snap-to-playhead */
+	if ((pref == SnapToAny_Visual) && uic.get_snap_to_playhead () && !_session->transport_rolling ()) {
+		test = timepos_t (_session->audible_sample());
+		check_best_snap (presnap, test, dist, best);
+	}
+
+	/* check snap-to-region-{start/end/sync} */
+	if ((pref == SnapToAny_Visual) && (uic.get_snap_to_region_start () || uic.get_snap_to_region_end () || uic.get_snap_to_region_sync ())) {
+
+		if (!region_boundary_cache.empty ()) {
+
+			vector<timepos_t>::iterator prev = region_boundary_cache.begin ();
+			vector<timepos_t>::iterator next = std::upper_bound (region_boundary_cache.begin (), region_boundary_cache.end (), presnap);
+			if (next != region_boundary_cache.begin ()) {
+				prev = next;
+				prev--;
+			}
+			if (next == region_boundary_cache.end ()) {
+				next--;
+			}
+
+			if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundUpAlways)) {
+				test = *next;
+			} else if ((direction == Temporal::RoundDownMaybe || direction == Temporal::RoundDownAlways)) {
+				test = *prev;
+			} else if (direction ==  0) {
+				if ((*prev).distance (presnap) < presnap.distance (*next)) {
+					test = *prev;
+				} else {
+					test = *next;
+				}
+			}
+
+		}
+
+		check_best_snap (presnap, test, dist, best);
+	}
+
+  check_distance:
+
+	if (timepos_t::max (start.time_domain()) == best) {
+		return;
+	}
+
+	/* now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
+	 * this also helps to avoid snapping to somewhere the user can't see.  (i.e.: I clicked on a region and it disappeared!!)
+	 * ToDo: Perhaps this should only occur if EditPointMouse?
+	 */
+	samplecnt_t snap_threshold_s = pixel_to_sample (uic.get_snap_threshold ());
+
+	if (!ensure_snap && ::llabs (best.distance (presnap).samples()) > snap_threshold_s) {
+		return;
+	}
+
+	start = best;
 }
 
