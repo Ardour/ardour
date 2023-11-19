@@ -38,6 +38,7 @@
 #include "automation_line.h"
 #include "control_point.h"
 #include "editor.h"
+#include "midi_cue_editor.h"
 #include "region_view.h"
 #include "ui_config.h"
 
@@ -51,43 +52,6 @@ using namespace ArdourCanvas;
 using std::max;
 using std::min;
 
-MidiClipEditor::MidiClipEditor ()
-{
-	set_background_color (UIConfiguration::instance ().color (X_("neutral:backgroundest")));
-
-	const double scale  = UIConfiguration::instance ().get_ui_scale ();
-	const double width  = 600. * scale;
-	const double height = 210. * scale;
-
-	frame = new ArdourCanvas::Rectangle (this);
-
-	ArdourCanvas::Rect r (0, 0, width, height);
-	frame->set (r);
-	frame->set_outline_all ();
-
-	frame->Event.connect (sigc::mem_fun (*this, &MidiClipEditor::event_handler));
-}
-
-MidiClipEditor::~MidiClipEditor ()
-{
-}
-
-bool
-MidiClipEditor::event_handler (GdkEvent* ev)
-{
-	switch (ev->type) {
-		case GDK_BUTTON_PRESS:
-			break;
-		case GDK_ENTER_NOTIFY:
-			break;
-		case GDK_LEAVE_NOTIFY:
-			break;
-		default:
-			break;
-	}
-
-	return false;
-}
 
 MidiClipEditorBox::MidiClipEditorBox ()
 {
@@ -95,11 +59,11 @@ MidiClipEditorBox::MidiClipEditorBox ()
 	_header_label.set_alignment (0.0, 0.5);
 	pack_start (_header_label, false, false, 6);
 
-	editor = manage (new MidiClipEditor ());
-	editor->set_size_request (600, 120);
+	editor = manage (new MidiCueEditor ());
+	editor->viewport().set_size_request (600, 120);
 
-	pack_start (*editor, true, true);
-	editor->show ();
+	pack_start (editor->viewport(), true, true);
+	editor->viewport().show ();
 }
 
 MidiClipEditorBox::~MidiClipEditorBox ()

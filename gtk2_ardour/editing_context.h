@@ -142,14 +142,44 @@ public:
 
 	virtual void set_selected_midi_region_view (MidiRegionView&);
 
-	virtual samplepos_t pixel_to_sample_from_event (double pixel) const = 0;
-	virtual samplepos_t pixel_to_sample (double pixel) const = 0;
-	virtual double sample_to_pixel (samplepos_t sample) const = 0;
-	virtual double sample_to_pixel_unrounded (samplepos_t sample) const = 0;
-	virtual double time_to_pixel (Temporal::timepos_t const & pos) const = 0;
-	virtual double time_to_pixel_unrounded (Temporal::timepos_t const & pos) const = 0;
-	virtual double duration_to_pixels (Temporal::timecnt_t const & pos) const = 0;
-	virtual double duration_to_pixels_unrounded (Temporal::timecnt_t const & pos) const = 0;
+
+	/* NOTE: these functions assume that the "pixel" coordinate is
+	   in canvas coordinates. These coordinates already take into
+	   account any scrolling offsets.
+	*/
+
+	samplepos_t pixel_to_sample_from_event (double pixel) const {
+
+		/* pixel can be less than zero when motion events
+		   are processed. since we've already run the world->canvas
+		   affine, that means that the location *really* is "off
+		   to the right" and thus really is "before the start".
+		*/
+
+		if (pixel >= 0) {
+			return pixel * samples_per_pixel;
+		} else {
+			return 0;
+		}
+	}
+
+	samplepos_t pixel_to_sample (double pixel) const {
+		return pixel * samples_per_pixel;
+	}
+
+	double sample_to_pixel (samplepos_t sample) const {
+		return round (sample / (double) samples_per_pixel);
+	}
+
+	double sample_to_pixel_unrounded (samplepos_t sample) const {
+		return sample / (double) samples_per_pixel;
+	}
+
+	double time_to_pixel (Temporal::timepos_t const & pos) const;
+	double time_to_pixel_unrounded (Temporal::timepos_t const & pos) const;
+	double duration_to_pixels (Temporal::timecnt_t const & pos) const;
+	double duration_to_pixels_unrounded (Temporal::timecnt_t const & pos) const;
+
 	/** computes the timeline sample (sample) of an event whose coordinates
 	 * are in canvas units (pixels, scroll offset included).
 	 */
@@ -190,17 +220,17 @@ public:
 	virtual void snap_to (Temporal::timepos_t & first,
 	                      Temporal::RoundMode   direction = Temporal::RoundNearest,
 	                      ARDOUR::SnapPref      pref = ARDOUR::SnapToAny_Visual,
-	                      bool                  ensure_snap = false) = 0;
+	                      bool                  ensure_snap = false);
 
 	virtual void snap_to_with_modifier (Temporal::timepos_t & first,
 	                                    GdkEvent const*       ev,
 	                                    Temporal::RoundMode   direction = Temporal::RoundNearest,
 	                                    ARDOUR::SnapPref      gpref = ARDOUR::SnapToAny_Visual,
-	                                    bool ensure_snap = false) = 0;
+	                                    bool ensure_snap = false);
 
 	virtual Temporal::timepos_t snap_to_bbt (Temporal::timepos_t const & start,
 	                                         Temporal::RoundMode   direction,
-	                                         ARDOUR::SnapPref    gpref) = 0;
+	                                         ARDOUR::SnapPref    gpref);
 
 	virtual double get_y_origin () const = 0;
 	virtual void reset_x_origin (samplepos_t) = 0;
@@ -342,7 +372,21 @@ public:
 	MouseCursors* _cursors;
 
 	VerboseCursor* _verbose_cursor;
+
+	samplecnt_t        samples_per_pixel;
+	Editing::ZoomFocus zoom_focus;
+
+	Temporal::timepos_t _snap_to_bbt (Temporal::timepos_t const & start,
+	                                  Temporal::RoundMode   direction,
+	                                  ARDOUR::SnapPref    gpref,
+	                                  Editing::GridType   grid_type);
+
+	void snap_to_internal (Temporal::timepos_t& first,
+	                       Temporal::RoundMode    direction = Temporal::RoundNearest,
+	                       ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
+	                       bool                 ensure_snap = false);
 };
+
 
 #endif /* __ardour_midi_editing_context_h__ */
 

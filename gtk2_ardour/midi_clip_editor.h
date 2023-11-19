@@ -50,16 +50,7 @@ namespace ArdourCanvas
 	class Polygon;
 }
 
-class MidiClipEditor : public ArdourCanvas::GtkCanvas
-{
-public:
-	MidiClipEditor ();
-	~MidiClipEditor ();
-
-private:
-	ArdourCanvas::Rectangle* frame;
-	bool                     event_handler (GdkEvent* ev);
-};
+class MidiCueEditor;
 
 class MidiClipEditorBox : public ClipEditorBox
 {
@@ -76,7 +67,7 @@ private:
 	Gtk::Label _header_label;
 	Gtk::Table table;
 
-	MidiClipEditor* editor;
+	MidiCueEditor* editor;
 
 	PBD::ScopedConnection state_connection;
 

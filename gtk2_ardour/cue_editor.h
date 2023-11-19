@@ -33,6 +33,8 @@ class CueEditor : public EditingContext
 	void get_regionviews_by_id (PBD::ID const id, RegionSelection & regions) const;
 	StripableTimeAxisView* get_stripable_time_axis_by_id (const PBD::ID& id) const;
 	TrackViewList axis_views_from_routes (std::shared_ptr<ARDOUR::RouteList>) const;
+	AxisView* axis_view_by_stripable (std::shared_ptr<ARDOUR::Stripable>) const { return nullptr; }
+	AxisView* axis_view_by_control (std::shared_ptr<ARDOUR::AutomationControl>) const { return nullptr; }
 
 	ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool&) const;
 	ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const;
