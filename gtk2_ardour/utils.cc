@@ -42,7 +42,6 @@
 #include <boost/algorithm/string.hpp>
 
 #include <gtk/gtkpaned.h>
-#include <gtkmm/combo.h>
 #include <gtkmm/label.h>
 #include <gtkmm/paned.h>
 #include <gtkmm/rc.h>
