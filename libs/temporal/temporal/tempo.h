@@ -781,7 +781,6 @@ class /*LIBTEMPORAL_API*/ TempoMap : public PBD::StatefulDestructible
 	LIBTEMPORAL_API bool set_ramped (TempoPoint&, bool);
 	LIBTEMPORAL_API bool set_continuing (TempoPoint&, bool);
 
-	LIBTEMPORAL_API void insert_time (timepos_t const & pos, timecnt_t const & duration);
 	LIBTEMPORAL_API bool remove_time (timepos_t const & pos, timecnt_t const & duration);
 
 	LIBTEMPORAL_API	void change_tempo (TempoPoint&, Tempo const&);

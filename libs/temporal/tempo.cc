@@ -1113,6 +1113,11 @@ TempoMap::paste (TempoMapCutBuffer const & cb, timepos_t const & position, bool 
 void
 TempoMap::shift (timepos_t const & at, timecnt_t const & by)
 {
+	if (at == std::numeric_limits<timepos_t>::min()) {
+		/* can't insert time at the front of the map: those entries are fixed */
+		return;
+	}
+
 	timecnt_t abs_by (by.abs());
 	superclock_t distance = abs_by.superclocks ();
 	superclock_t at_superclocks = abs_by.superclocks ();
@@ -3556,138 +3561,6 @@ uint32_t
 TempoMap::n_tempos () const
 {
 	return _tempos.size();
-}
-
-void
-TempoMap::insert_time (timepos_t const & pos, timecnt_t const & duration)
-{
-	TEMPO_MAP_ASSERT (!_tempos.empty());
-	TEMPO_MAP_ASSERT (!_meters.empty());
-
-	if (pos == std::numeric_limits<timepos_t>::min()) {
-		/* can't insert time at the front of the map: those entries are fixed */
-		return;
-	}
-
-	Tempos::iterator     t (_tempos.begin());
-	Meters::iterator     m (_meters.begin());
-	MusicTimes::iterator b (_bartimes.begin());
-
-	TempoPoint current_tempo = *t;
-	MeterPoint current_meter = *m;
-	MusicTimePoint current_time_point (*this, 0, Beats(), BBT_Time(), current_tempo, current_meter);
-
-	if (_bartimes.size() > 0) {
-		current_time_point = *b;
-	}
-
-	superclock_t sc;
-	Beats beats;
-	BBT_Time bbt;
-
-	/* set these to true so that we set current_* on our first pass
-	 * through the while loop(s)
-	 */
-
-	bool moved_tempo = true;
-	bool moved_meter = true;
-	bool moved_bartime = true;
-
-	switch (duration.time_domain()) {
-	case AudioTime:
-		sc = pos.superclocks();
-
-		/* handle a common case quickly */
-
-		if ((_tempos.size() < 2 || sc > _tempos.back().sclock()) &&
-		    (_meters.size() < 2 || sc > _meters.back().sclock()) &&
-		    (_bartimes.size() < 2 || (_bartimes.empty() || sc > _bartimes.back().sclock()))) {
-
-			/* only one tempo, plus one meter and zero or
-			   one bartimes, or insertion point is after last
-			   item. nothing to do here.
-			*/
-
-			return;
-		}
-
-		/* advance fundamental iterators to correct position */
-
-		while (t != _tempos.end()   && t->sclock() < sc) ++t;
-		while (m != _meters.end()   && m->sclock() < sc) ++m;
-		while (b != _bartimes.end() && b->sclock() < sc) ++b;
-
-		while (t != _tempos.end() && m != _meters.end() && b != _bartimes.end()) {
-
-			if (moved_tempo && t != _tempos.end()) {
-				current_tempo = *t;
-				moved_tempo = false;
-			}
-			if (moved_meter && m != _meters.end()) {
-				current_meter = *m;
-				moved_meter = false;
-			}
-			if (moved_bartime && b != _bartimes.end()) {
-				current_time_point = *b;
-				moved_bartime = false;
-			}
-
-			/* for each of t, m and b:
-
-			   if the point is earlier than the other two,
-			   recompute the superclock, beat and bbt
-			   positions, and reset the point.
-			*/
-
-			if (t->sclock() < m->sclock() && t->sclock() < b->sclock()) {
-
-				sc = t->sclock() + duration.superclocks();
-				beats = current_tempo.quarters_at_superclock (sc);
-				/* round tempo to beats */
-				beats = beats.round_to_beat ();
-				sc = current_tempo.superclock_at (beats);
-				bbt = current_meter.bbt_at (beats);
-
-				t->set (sc, beats, bbt);
-				++t;
-				moved_tempo = true;
-			}
-
-			if (m->sclock() < t->sclock() && m->sclock() < b->sclock()) {
-
-				sc = m->sclock() + duration.superclocks();
-				beats = current_tempo.quarters_at_superclock (sc);
-				/* round meter to bars */
-				bbt = current_meter.bbt_at (beats);
-				beats = current_meter.quarters_at (current_meter.round_to_bar(bbt));
-				/* recompute */
-				sc = current_tempo.superclock_at (beats);
-
-				m->set (sc, beats, bbt);
-				++m;
-				moved_meter = true;
-			}
-
-			if (b->sclock() < t->sclock() && b->sclock() < m->sclock()) {
-
-				sc = b->sclock() + duration.superclocks();
-				beats = current_tempo.quarters_at_superclock (sc);
-				/* round bartime to beats */
-				beats = beats.round_to_beat();
-				sc = current_tempo.superclock_at (beats);
-				bbt = current_meter.bbt_at (beats);
-
-				m->set (sc, beats, bbt);
-				++m;
-				moved_meter = true;
-			}
-
-		}
-		break;
-
-	case BeatTime:
-		break;
-	}
 }
 
 bool

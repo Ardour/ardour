@@ -8585,9 +8585,8 @@ Editor::insert_time (timepos_t const & pos, timecnt_t const & samples, InsertTim
 			in_command = true;
 		}
 		TempoMap::WritableSharedPtr tmap (TempoMap::write_copy());
-
 		XMLNode& before (tmap->get_state());
-		tmap->insert_time (pos, samples);
+		tmap->shift (pos, samples);
 		XMLNode& after (tmap->get_state());
 		_session->add_command (new Temporal::TempoCommand (_("insert time"), &before, &after));
 
