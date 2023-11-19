@@ -490,7 +490,6 @@ clearlooks_style_draw_box (DRAW_ARGS)
 	}
 	else if (DETAIL ("button") && widget && widget->parent &&
                   (GE_IS_TREE_VIEW(widget->parent) ||
-                   GE_IS_CLIST (widget->parent) ||
                    ge_object_is_a (G_OBJECT(widget->parent), "ETree"))) /* ECanvas inside ETree */
 	{
 		WidgetParameters params;
@@ -512,11 +511,6 @@ clearlooks_style_draw_box (DRAW_ARGS)
 			clearlooks_treeview_get_header_index (GTK_TREE_VIEW(widget->parent),
 										   widget, &column_index, &columns,
 										   &resizable);
-		}
-		else if (GE_IS_CLIST (widget->parent))
-		{
-			clearlooks_clist_get_header_index (GTK_CLIST(widget->parent),
-										widget, &column_index, &columns);
 		}
 
 		header.resizable = resizable;

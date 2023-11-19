@@ -60,7 +60,6 @@
 #define GE_IS_VBOX(object) ((object) && ge_object_is_a ((GObject*)(object), "GtkVBox"))
 #define GE_IS_HBOX(object) ((object) && ge_object_is_a ((GObject*)(object), "GtkHBox"))
 
-#define GE_IS_CLIST(object) ((object) && ge_object_is_a ((GObject*)(object), "GtkCList"))
 #define GE_IS_TREE_VIEW(object) ((object) && ge_object_is_a ((GObject*)(object), "GtkTreeView"))
 #define GE_IS_ENTRY(object) ((object) && ge_object_is_a ((GObject*)(object), "GtkEntry"))
 #define GE_IS_BUTTON(object) ((object) && ge_object_is_a ((GObject*)(object), "GtkButton"))
