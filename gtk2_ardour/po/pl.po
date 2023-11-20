@@ -12943,7 +12943,7 @@ msgstr "Przeszukaj wtyczki"
 #: plugin_manager_ui.cc:786
 msgid ""
 "This starts a fresh scan, dropping all cached plugin data and ignorelist. "
-"Depending on the number if plugins installed this can take a long time."
+"Depending on the number of plugins installed this can take a long time."
 msgstr ""
 "Będzie to nowe wyszukiwanie. Wszystkie dane wtyczek z pamięci podręcznej i "
 "listy wtyczek ignorowanych zostaną utracone. W zależności od liczby wtyczek "

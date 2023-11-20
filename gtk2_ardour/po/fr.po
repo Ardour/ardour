@@ -12705,7 +12705,7 @@ msgstr "Ré-analyser les greffons"
 #: plugin_manager_ui.cc:784
 msgid ""
 "This starts a fresh scan, dropping all cached plugin data and ignorelist. "
-"Depending on the number if plugins installed this can take a long time."
+"Depending on the number of plugins installed this can take a long time."
 msgstr ""
 "Cela démarre une nouvelle analyse, en supprimant toutes les données de greffons "
 "mises en cache et la liste des ignorés. Selon le nombre de greffons installés, "

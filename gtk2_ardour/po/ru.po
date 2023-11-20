@@ -12820,7 +12820,7 @@ msgstr "Просканировать заново"
 #: plugin_manager_ui.cc:786
 msgid ""
 "This starts a fresh scan, dropping all cached plugin data and ignorelist. "
-"Depending on the number if plugins installed this can take a long time."
+"Depending on the number of plugins installed this can take a long time."
 msgstr ""
 "Это запустит новое сканирование и удалит все кэшированные данные плагинов, а "
 "также список игнорируемых плагинов. Если в системе установлено много "
