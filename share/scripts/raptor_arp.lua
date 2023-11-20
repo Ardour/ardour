@@ -915,7 +915,7 @@ end
 
 function arpeggio:loop_get()
    local res = {{}, 0, 0}
-   local p, n = self.loopidx, math.max(1, math.min(#self.loop, self.loopsize))
+   local p, n = self.loopidx, math.min(#self.loop, self.loopsize)
    if p < n then
       res = self.loop[p+1]
       -- we always *read* exactly n steps in a cyclic buffer
