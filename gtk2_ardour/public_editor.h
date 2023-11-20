@@ -452,13 +452,6 @@ public:
 
 	virtual std::pair <Temporal::timepos_t, Temporal::timepos_t> session_gui_extents (bool use_extra = true) const = 0;
 
-	virtual void snap_to_with_modifier (Temporal::timepos_t & first,
-	                                    GdkEvent const*      ev,
-	                                    Temporal::RoundMode    direction = Temporal::RoundNearest,
-	                                    ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
-	                                    bool ensure_snap = false) = 0;
-	virtual Temporal::timepos_t snap_to_bbt (Temporal::timepos_t const & pos, Temporal::RoundMode, ARDOUR::SnapPref) = 0;
-
 	virtual void get_regions_at (RegionSelection &, Temporal::timepos_t const & where, TrackViewList const &) const = 0;
 	virtual void get_regions_after (RegionSelection&, Temporal::timepos_t const & where, const TrackViewList& ts) const = 0;
 	virtual RegionSelection get_regions_from_selection_and_mouse (Temporal::timepos_t const &) = 0;
