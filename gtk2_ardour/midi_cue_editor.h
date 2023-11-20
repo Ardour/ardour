@@ -43,6 +43,27 @@ class MidiCueEditor : public CueEditor
 	ArdourCanvas::Container* get_noscroll_group() const { return no_scroll_group; }
 	Gtk::Widget& viewport() { return *_canvas_viewport; }
 
+	double visible_canvas_width() const { return _visible_canvas_width; }
+	samplecnt_t current_page_samples() const;
+
+	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const {}
+
+	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) { return Temporal::Beats (1, 0); }
+	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) { return Temporal::Beats (1, 0); }
+
+	int32_t get_grid_beat_divisions (Editing::GridType gt) { return 1; }
+	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) { return 1; }
+
+  protected:
+	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
+	                                  Temporal::RoundMode   direction,
+	                                  ARDOUR::SnapPref    gpref);
+
+	void snap_to_internal (Temporal::timepos_t& first,
+	                       Temporal::RoundMode    direction = Temporal::RoundNearest,
+	                       ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
+	                       bool                 ensure_snap = false);
+
  private:
 	Gtk::Adjustment vertical_adjustment;
 	Gtk::Adjustment horizontal_adjustment;

@@ -170,47 +170,6 @@ Editor::window_event_sample (GdkEvent const * event, double* pcx, double* pcy) c
 	return pixel_to_sample (d.x);
 }
 
-timepos_t
-Editor::canvas_event_time (GdkEvent const * event, double* pcx, double* pcy) const
-{
-	timepos_t pos (canvas_event_sample (event, pcx, pcy));
-
-	if (time_domain() == Temporal::AudioTime) {
-		return pos;
-	}
-
-	return timepos_t (pos.beats());
-}
-
-samplepos_t
-Editor::canvas_event_sample (GdkEvent const * event, double* pcx, double* pcy) const
-{
-	double x;
-	double y;
-
-	/* event coordinates are already in canvas units */
-
-	if (!gdk_event_get_coords (event, &x, &y)) {
-		cerr << "!NO c COORDS for event type " << event->type << endl;
-		return 0;
-	}
-
-	if (pcx) {
-		*pcx = x;
-	}
-
-	if (pcy) {
-		*pcy = y;
-	}
-
-	/* note that pixel_to_sample_from_event() never returns less than zero, so even if the pixel
-	   position is negative (as can be the case with motion events in particular),
-	   the sample location is always positive.
-	*/
-
-	return pixel_to_sample_from_event (x);
-}
-
 void
 Editor::set_current_trimmable (std::shared_ptr<Trimmable> t)
 {

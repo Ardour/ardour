@@ -28,6 +28,7 @@
 #include "actions.h"
 #include "editing_context.h"
 #include "editor_drag.h"
+#include "keyboard.h"
 #include "midi_region_view.h"
 #include "selection.h"
 #include "selection_memento.h"
@@ -35,6 +36,7 @@
 
 #include "pbd/i18n.h"
 
+using namespace ARDOUR;
 using namespace Editing;
 using namespace Glib;
 using namespace Gtk;
@@ -93,6 +95,11 @@ EditingContext::EditingContext ()
 	, _verbose_cursor (nullptr)
 	, samples_per_pixel (2048)
 	, zoom_focus (ZoomFocusPlayhead)
+	, bbt_ruler_scale (bbt_show_many)
+	, bbt_bars (0)
+	, bbt_bar_helper_on (0)
+	, _visible_canvas_width (0)
+	, _visible_canvas_height (0)
 {
 	grid_type_strings =  I18N (_grid_type_strings);
 
@@ -1359,8 +1366,8 @@ EditingContext::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode dir
 	return ret;
 }
 
-static void
-check_best_snap (timepos_t const & presnap, timepos_t &test, timepos_t &dist, timepos_t &best)
+void
+EditingContext::check_best_snap (timepos_t const & presnap, timepos_t &test, timepos_t &dist, timepos_t &best)
 {
 	timepos_t diff = timepos_t (presnap.distance (test).abs ());
 	if (diff < dist) {
@@ -1371,87 +1378,148 @@ check_best_snap (timepos_t const & presnap, timepos_t &test, timepos_t &dist, ti
 	test = timepos_t::max (test.time_domain()); // reset this so it doesn't get accidentally reused
 }
 
-void
-EditingContext::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap)
+timepos_t
+EditingContext::canvas_event_time (GdkEvent const * event, double* pcx, double* pcy) const
 {
-	UIConfiguration const& uic (UIConfiguration::instance ());
-	const timepos_t presnap = start;
+	timepos_t pos (canvas_event_sample (event, pcx, pcy));
 
-
-	timepos_t test = timepos_t::max (start.time_domain()); // for each snap, we'll use this value
-	timepos_t dist = timepos_t::max (start.time_domain()); // this records the distance of the best snap result we've found so far
-	timepos_t best = timepos_t::max (start.time_domain()); // this records the best snap-result we've found so far
-
-	/* check Grid */
-	if ( (_grid_type != GridTypeNone) && (uic.get_snap_target () != SnapTargetOther) ) {
-		timepos_t pre (presnap);
-		timepos_t post (snap_to_grid (pre, direction, pref));
-		check_best_snap (presnap, post, dist, best);
-		if (uic.get_snap_target () == SnapTargetGrid) {
-			goto check_distance;
-		}
+	if (time_domain() == Temporal::AudioTime) {
+		return pos;
 	}
 
-	/* check snap-to-marker */
-	if ((pref == SnapToAny_Visual) && uic.get_snap_to_marks ()) {
-		test = snap_to_marker (presnap, direction);
-		check_best_snap (presnap, test, dist, best);
-	}
-
-	/* check snap-to-playhead */
-	if ((pref == SnapToAny_Visual) && uic.get_snap_to_playhead () && !_session->transport_rolling ()) {
-		test = timepos_t (_session->audible_sample());
-		check_best_snap (presnap, test, dist, best);
-	}
-
-	/* check snap-to-region-{start/end/sync} */
-	if ((pref == SnapToAny_Visual) && (uic.get_snap_to_region_start () || uic.get_snap_to_region_end () || uic.get_snap_to_region_sync ())) {
-
-		if (!region_boundary_cache.empty ()) {
-
-			vector<timepos_t>::iterator prev = region_boundary_cache.begin ();
-			vector<timepos_t>::iterator next = std::upper_bound (region_boundary_cache.begin (), region_boundary_cache.end (), presnap);
-			if (next != region_boundary_cache.begin ()) {
-				prev = next;
-				prev--;
-			}
-			if (next == region_boundary_cache.end ()) {
-				next--;
-			}
-
-			if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundUpAlways)) {
-				test = *next;
-			} else if ((direction == Temporal::RoundDownMaybe || direction == Temporal::RoundDownAlways)) {
-				test = *prev;
-			} else if (direction ==  0) {
-				if ((*prev).distance (presnap) < presnap.distance (*next)) {
-					test = *prev;
-				} else {
-					test = *next;
-				}
-			}
-
-		}
-
-		check_best_snap (presnap, test, dist, best);
-	}
-
-  check_distance:
-
-	if (timepos_t::max (start.time_domain()) == best) {
-		return;
-	}
-
-	/* now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
-	 * this also helps to avoid snapping to somewhere the user can't see.  (i.e.: I clicked on a region and it disappeared!!)
-	 * ToDo: Perhaps this should only occur if EditPointMouse?
-	 */
-	samplecnt_t snap_threshold_s = pixel_to_sample (uic.get_snap_threshold ());
-
-	if (!ensure_snap && ::llabs (best.distance (presnap).samples()) > snap_threshold_s) {
-		return;
-	}
-
-	start = best;
+	return timepos_t (pos.beats());
 }
 
+samplepos_t
+EditingContext::canvas_event_sample (GdkEvent const * event, double* pcx, double* pcy) const
+{
+	double x;
+	double y;
+
+	/* event coordinates are already in canvas units */
+
+	if (!gdk_event_get_coords (event, &x, &y)) {
+		std::cerr << "!NO c COORDS for event type " << event->type << std::endl;
+		return 0;
+	}
+
+	if (pcx) {
+		*pcx = x;
+	}
+
+	if (pcy) {
+		*pcy = y;
+	}
+
+	/* note that pixel_to_sample_from_event() never returns less than zero, so even if the pixel
+	   position is negative (as can be the case with motion events in particular),
+	   the sample location is always positive.
+	*/
+
+	return pixel_to_sample_from_event (x);
+}
+
+uint32_t
+EditingContext::count_bars (Beats const & start, Beats const & end) const
+{
+	TempoMapPoints bar_grid;
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	bar_grid.reserve (4096);
+	superclock_t s (tmap->superclock_at (start));
+	superclock_t e (tmap->superclock_at (end));
+	tmap->get_grid (bar_grid, s, e, 1);
+	return bar_grid.size();
+}
+
+void
+EditingContext::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
+{
+	if (_session == 0) {
+		return;
+	}
+
+	Temporal::BBT_Time lower_beat, upper_beat; // the beats at each end of the ruler
+	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+	Beats floor_lower_beat = std::max (Beats(), tmap->quarters_at_sample (lower)).round_down_to_beat ();
+
+	if (floor_lower_beat < Temporal::Beats()) {
+		floor_lower_beat = Temporal::Beats();
+	}
+
+	const samplepos_t beat_before_lower_pos = tmap->sample_at (floor_lower_beat);
+	const samplepos_t beat_after_upper_pos = tmap->sample_at ((std::max (Beats(), tmap->quarters_at_sample  (upper)).round_down_to_beat()) + Beats (1, 0));
+
+	lower_beat = Temporal::TempoMap::use()->bbt_at (timepos_t (beat_before_lower_pos));
+	upper_beat = Temporal::TempoMap::use()->bbt_at (timepos_t (beat_after_upper_pos));
+	uint32_t beats = 0;
+
+	bbt_bar_helper_on = false;
+	bbt_bars = 0;
+
+	bbt_ruler_scale =  bbt_show_many;
+
+	const Beats ceil_upper_beat = std::max (Beats(), tmap->quarters_at_sample (upper)).round_up_to_beat() + Beats (1, 0);
+
+	if (ceil_upper_beat == floor_lower_beat) {
+		return;
+	}
+
+	bbt_bars = count_bars (floor_lower_beat, ceil_upper_beat);
+
+	double ruler_line_granularity = UIConfiguration::instance().get_ruler_granularity ();  //in pixels
+	ruler_line_granularity = visible_canvas_width() / (ruler_line_granularity*5);  //fudge factor '5' probably related to (4+1 beats)/measure, I think
+
+	beats = (ceil_upper_beat - floor_lower_beat).get_beats();
+	double beat_density = ((beats + 1) * ((double) (upper - lower) / (double) (1 + beat_after_upper_pos - beat_before_lower_pos))) / (float)ruler_line_granularity;
+
+	/* Only show the bar helper if there aren't many bars on the screen */
+	if ((bbt_bars < 2) || (beats < 5)) {
+		bbt_bar_helper_on = true;
+	}
+
+	if (beat_density > 2048) {
+		bbt_ruler_scale = bbt_show_many;
+	} else if (beat_density > 1024) {
+		bbt_ruler_scale = bbt_show_64;
+	} else if (beat_density > 256) {
+		bbt_ruler_scale = bbt_show_16;
+	} else if (beat_density > 64) {
+		bbt_ruler_scale = bbt_show_4;
+	} else if (beat_density > 16) {
+		bbt_ruler_scale = bbt_show_1;
+	} else if (beat_density > 4) {
+		bbt_ruler_scale =  bbt_show_quarters;
+	} else  if (beat_density > 2) {
+		bbt_ruler_scale =  bbt_show_eighths;
+	} else  if (beat_density > 1) {
+		bbt_ruler_scale =  bbt_show_sixteenths;
+	} else  if (beat_density > 0.5) {
+		bbt_ruler_scale =  bbt_show_thirtyseconds;
+	} else  if (beat_density > 0.25) {
+		bbt_ruler_scale =  bbt_show_sixtyfourths;
+	} else {
+		bbt_ruler_scale =  bbt_show_onetwentyeighths;
+	}
+
+	/* Now that we know how fine a grid (Ruler) is allowable on this screen, limit it to the coarseness selected by the user */
+	/* note: GridType and RulerScale are not the same enums, so it's not a simple mathematical operation */
+	int suggested_scale = (int) bbt_ruler_scale;
+	int divs = get_grid_music_divisions(_grid_type, 0);
+	if (_grid_type == GridTypeBar) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_1);
+	} else if (_grid_type == GridTypeBeat) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_quarters);
+	}  else if ( divs < 4 ) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_eighths);
+	}  else if ( divs < 8 ) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_sixteenths);
+	} else if ( divs < 16 ) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_thirtyseconds);
+	} else if ( divs < 32 ) {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_sixtyfourths);
+	} else {
+		suggested_scale = std::min(suggested_scale, (int) bbt_show_onetwentyeighths);
+	}
+
+	bbt_ruler_scale = (EditingContext::BBTRulerScale) suggested_scale;
+}

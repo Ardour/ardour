@@ -927,27 +927,6 @@ private:
 	samplecnt_t _samples_ruler_interval;
 	void set_samples_ruler_scale (samplepos_t, samplepos_t);
 
-	enum BBTRulerScale {
-		bbt_show_many,
-		bbt_show_64,
-		bbt_show_16,
-		bbt_show_4,
-		bbt_show_1,
-		bbt_show_quarters,
-		bbt_show_eighths,
-		bbt_show_sixteenths,
-		bbt_show_thirtyseconds,
-		bbt_show_sixtyfourths,
-		bbt_show_onetwentyeighths
-	};
-
-	BBTRulerScale bbt_ruler_scale;
-	uint32_t bbt_bars;
-	uint32_t bbt_bar_helper_on;
-
-	uint32_t count_bars (Temporal::Beats const & start, Temporal::Beats const & end) const;
-	void compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper);
-
 	ArdourCanvas::Ruler* timecode_ruler;
 	ArdourCanvas::Ruler* bbt_ruler;
 	ArdourCanvas::Ruler* samples_ruler;
@@ -1063,8 +1042,6 @@ private:
 	sigc::connection _scroll_connection;
 	int _scroll_callbacks;
 
-	double _visible_canvas_width;
-	double _visible_canvas_height; ///< height of the visible area of the track canvas
 	double _full_canvas_height;    ///< full height of the canvas
 
 	bool track_canvas_map_handler (GdkEventAny*);
@@ -2114,18 +2091,6 @@ private:
 	void duplicate_regions (float times);
 
 	/** computes the timeline sample (sample) of an event whose coordinates
-	 * are in canvas units (pixels, scroll offset included).
-	 */
-	samplepos_t canvas_event_sample (GdkEvent const*, double* px = 0, double* py = 0) const;
-
-	/** computes the timeline position for an event whose coordinates
-	 * are in canvas units (pixels, scroll offset included). The time
-	 * domain used by the return value will match Editor::default_time_domain()
-	 * at the time of calling.
-	 */
-	Temporal::timepos_t canvas_event_time (GdkEvent const*, double* px = 0, double* py = 0) const;
-
-	/** computes the timeline sample (sample) of an event whose coordinates
 	 * are in window units (pixels, no scroll offset).
 	 */
 	samplepos_t window_event_sample (GdkEvent const*, double* px = 0, double* py = 0) const;
@@ -2277,12 +2242,15 @@ private:
 	                                  Temporal::RoundMode   direction,
 	                                  ARDOUR::SnapPref    gpref);
 
-	void timecode_snap_to_internal (Temporal::timepos_t & first,
-	                                Temporal::RoundMode   direction = Temporal::RoundNearest,
-	                                bool                for_mark  = false);
+	void snap_to_internal (Temporal::timepos_t & first,
+	                       Temporal::RoundMode   direction = Temporal::RoundNearest,
+	                       ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
+	                       bool                for_mark  = false);
 
 	Temporal::timepos_t snap_to_marker (Temporal::timepos_t const & presnap,
 	                                    Temporal::RoundMode direction = Temporal::RoundNearest);
+
+	double visible_canvas_width() const { return _visible_canvas_width; }
 
 	RhythmFerret* rhythm_ferret;
 

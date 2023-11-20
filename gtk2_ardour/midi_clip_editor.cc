@@ -59,7 +59,7 @@ MidiClipEditorBox::MidiClipEditorBox ()
 	_header_label.set_alignment (0.0, 0.5);
 	pack_start (_header_label, false, false, 6);
 
-	editor = manage (new MidiCueEditor ());
+	editor = new MidiCueEditor ();
 	editor->viewport().set_size_request (600, 120);
 
 	pack_start (editor->viewport(), true, true);
@@ -68,6 +68,7 @@ MidiClipEditorBox::MidiClipEditorBox ()
 
 MidiClipEditorBox::~MidiClipEditorBox ()
 {
+	delete editor;
 }
 
 void

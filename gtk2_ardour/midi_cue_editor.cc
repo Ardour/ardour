@@ -25,7 +25,9 @@
 #include "midi_cue_editor.h"
 #include "ui_config.h"
 
+using namespace ARDOUR;
 using namespace ArdourCanvas;
+using namespace Temporal;
 
 MidiCueEditor::MidiCueEditor()
 	: vertical_adjustment (0.0, 0.0, 10.0, 400.0)
@@ -88,5 +90,52 @@ MidiCueEditor::build_canvas ()
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
 	rubberband_rect->hide();
+}
+
+
+timepos_t
+MidiCueEditor::snap_to_grid (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref)
+{
+	/* BBT time only */
+	return snap_to_bbt (presnap, direction, gpref);
+}
+
+
+void
+MidiCueEditor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap)
+{
+	UIConfiguration const& uic (UIConfiguration::instance ());
+	const timepos_t presnap = start;
+
+
+	timepos_t dist = timepos_t::max (start.time_domain()); // this records the distance of the best snap result we've found so far
+	timepos_t best = timepos_t::max (start.time_domain()); // this records the best snap-result we've found so far
+
+	timepos_t pre (presnap);
+	timepos_t post (snap_to_grid (pre, direction, pref));
+
+	check_best_snap (presnap, post, dist, best);
+
+	if (timepos_t::max (start.time_domain()) == best) {
+		return;
+	}
+
+	/* now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
+	 * this also helps to avoid snapping to somewhere the user can't see.  (i.e.: I clicked on a region and it disappeared!!)
+	 * ToDo: Perhaps this should only occur if EditPointMouse?
+	 */
+	samplecnt_t snap_threshold_s = pixel_to_sample (uic.get_snap_threshold ());
+
+	if (!ensure_snap && ::llabs (best.distance (presnap).samples()) > snap_threshold_s) {
+		return;
+	}
+
+	start = best;
+}
+
+samplecnt_t
+MidiCueEditor::current_page_samples() const
+{
+	return (samplecnt_t) _visible_canvas_width* samples_per_pixel;
 }
 

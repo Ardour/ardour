@@ -278,9 +278,6 @@ Editor::Editor ()
 	, timecode_mark_modulo (0)
 	, timecode_nmarks (0)
 	, _samples_ruler_interval (0)
-	, bbt_ruler_scale (bbt_show_many)
-	, bbt_bars (0)
-	, bbt_bar_helper_on (0)
 	, timecode_ruler (0)
 	, bbt_ruler (0)
 	, samples_ruler (0)
@@ -312,8 +309,6 @@ Editor::Editor ()
 	, unused_adjustment (0.0, 0.0, 10.0, 400.0)
 	, controls_layout (unused_adjustment, vertical_adjustment)
 	, _scroll_callbacks (0)
-	, _visible_canvas_width (0)
-	, _visible_canvas_height (0)
 	, _full_canvas_height (0)
 	, edit_controls_left_menu (0)
 	, edit_controls_right_menu (0)
@@ -6510,5 +6505,89 @@ bool
 Editor::track_dragging() const
 {
 	return (bool) track_drag;
+}
+
+void
+Editor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap)
+{
+	UIConfiguration const& uic (UIConfiguration::instance ());
+	const timepos_t presnap = start;
+
+
+	timepos_t test = timepos_t::max (start.time_domain()); // for each snap, we'll use this value
+	timepos_t dist = timepos_t::max (start.time_domain()); // this records the distance of the best snap result we've found so far
+	timepos_t best = timepos_t::max (start.time_domain()); // this records the best snap-result we've found so far
+
+	/* check Grid */
+	if ( (_grid_type != GridTypeNone) && (uic.get_snap_target () != SnapTargetOther) ) {
+		timepos_t pre (presnap);
+		timepos_t post (snap_to_grid (pre, direction, pref));
+		check_best_snap (presnap, post, dist, best);
+		if (uic.get_snap_target () == SnapTargetGrid) {
+			goto check_distance;
+		}
+	}
+
+	/* check snap-to-marker */
+	if ((pref == SnapToAny_Visual) && uic.get_snap_to_marks ()) {
+		test = snap_to_marker (presnap, direction);
+		check_best_snap (presnap, test, dist, best);
+	}
+
+	/* check snap-to-playhead */
+	if ((pref == SnapToAny_Visual) && uic.get_snap_to_playhead () && !_session->transport_rolling ()) {
+		test = timepos_t (_session->audible_sample());
+		check_best_snap (presnap, test, dist, best);
+	}
+
+	/* check snap-to-region-{start/end/sync} */
+	if ((pref == SnapToAny_Visual) && (uic.get_snap_to_region_start () || uic.get_snap_to_region_end () || uic.get_snap_to_region_sync ())) {
+
+		if (!region_boundary_cache.empty ()) {
+
+			vector<timepos_t>::iterator prev = region_boundary_cache.begin ();
+			vector<timepos_t>::iterator next = std::upper_bound (region_boundary_cache.begin (), region_boundary_cache.end (), presnap);
+			if (next != region_boundary_cache.begin ()) {
+				prev = next;
+				prev--;
+			}
+			if (next == region_boundary_cache.end ()) {
+				next--;
+			}
+
+			if ((direction == Temporal::RoundUpMaybe || direction == Temporal::RoundUpAlways)) {
+				test = *next;
+			} else if ((direction == Temporal::RoundDownMaybe || direction == Temporal::RoundDownAlways)) {
+				test = *prev;
+			} else if (direction ==  0) {
+				if ((*prev).distance (presnap) < presnap.distance (*next)) {
+					test = *prev;
+				} else {
+					test = *next;
+				}
+			}
+
+		}
+
+		check_best_snap (presnap, test, dist, best);
+	}
+
+  check_distance:
+
+	if (timepos_t::max (start.time_domain()) == best) {
+		return;
+	}
+
+	/* now check "magnetic" state: is the grid within reasonable on-screen distance to trigger a snap?
+	 * this also helps to avoid snapping to somewhere the user can't see.  (i.e.: I clicked on a region and it disappeared!!)
+	 * ToDo: Perhaps this should only occur if EditPointMouse?
+	 */
+	samplecnt_t snap_threshold_s = pixel_to_sample (uic.get_snap_threshold ());
+
+	if (!ensure_snap && ::llabs (best.distance (presnap).samples()) > snap_threshold_s) {
+		return;
+	}
+
+	start = best;
 }
 

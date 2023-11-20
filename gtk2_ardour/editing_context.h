@@ -142,7 +142,6 @@ public:
 
 	virtual void set_selected_midi_region_view (MidiRegionView&);
 
-
 	/* NOTE: these functions assume that the "pixel" coordinate is
 	   in canvas coordinates. These coordinates already take into
 	   account any scrolling offsets.
@@ -180,16 +179,17 @@ public:
 	double duration_to_pixels (Temporal::timecnt_t const & pos) const;
 	double duration_to_pixels_unrounded (Temporal::timecnt_t const & pos) const;
 
-	/** computes the timeline sample (sample) of an event whose coordinates
-	 * are in canvas units (pixels, scroll offset included).
-	 */
-	virtual samplepos_t canvas_event_sample (GdkEvent const * event, double* pcx = nullptr, double* pcy = nullptr) const = 0;
 	/** computes the timeline position for an event whose coordinates
 	 * are in canvas units (pixels, scroll offset included). The time
 	 * domain used by the return value will match ::default_time_domain()
 	 * at the time of calling.
 	 */
-	virtual Temporal::timepos_t canvas_event_time (GdkEvent const*, double* px = nullptr, double* py = nullptr) const = 0;
+	Temporal::timepos_t canvas_event_time (GdkEvent const*, double* px = 0, double* py = 0) const;
+
+	/** computes the timeline sample (sample) of an event whose coordinates
+	 * are in canvas units (pixels, scroll offset included).
+	 */
+	samplepos_t canvas_event_sample (GdkEvent const * event, double* pcx = nullptr, double* pcy = nullptr) const;
 
 	virtual Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
 	virtual Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
@@ -346,7 +346,6 @@ public:
 	ArdourWidgets::ArdourButton snap_mode_button;
 
 	virtual void mark_region_boundary_cache_dirty () {}
-	virtual void compute_bbt_ruler_scale (samplepos_t, samplepos_t) {}
 	virtual void update_tempo_based_rulers () {};
 	virtual void show_rulers_for_grid () {};
 	virtual samplecnt_t current_page_samples() const = 0;
@@ -381,10 +380,41 @@ public:
 	                                  ARDOUR::SnapPref    gpref,
 	                                  Editing::GridType   grid_type);
 
-	void snap_to_internal (Temporal::timepos_t& first,
-	                       Temporal::RoundMode    direction = Temporal::RoundNearest,
-	                       ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
-	                       bool                 ensure_snap = false);
+	virtual Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
+	                                          Temporal::RoundMode   direction,
+	                                          ARDOUR::SnapPref    gpref) = 0;
+
+	virtual void snap_to_internal (Temporal::timepos_t& first,
+	                               Temporal::RoundMode    direction = Temporal::RoundNearest,
+	                               ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
+	                               bool                 ensure_snap = false) = 0;
+
+	void check_best_snap (Temporal::timepos_t const & presnap, Temporal::timepos_t &test, Temporal::timepos_t &dist, Temporal::timepos_t &best);
+	virtual double visible_canvas_width() const = 0;
+
+	enum BBTRulerScale {
+		bbt_show_many,
+		bbt_show_64,
+		bbt_show_16,
+		bbt_show_4,
+		bbt_show_1,
+		bbt_show_quarters,
+		bbt_show_eighths,
+		bbt_show_sixteenths,
+		bbt_show_thirtyseconds,
+		bbt_show_sixtyfourths,
+		bbt_show_onetwentyeighths
+	};
+
+	BBTRulerScale bbt_ruler_scale;
+	uint32_t bbt_bars;
+	uint32_t bbt_bar_helper_on;
+
+	uint32_t count_bars (Temporal::Beats const & start, Temporal::Beats const & end) const;
+	void compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper);
+
+	double _visible_canvas_width;
+	double _visible_canvas_height; ///< height of the visible area of the track canvas
 };
 
 
