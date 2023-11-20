@@ -37,7 +37,7 @@ function dsp_ioconfig ()
 end
 
 function dsp_options ()
-   return { time_info = true }
+   return { time_info = true, regular_block_length = true }
 end
 
 function dsp_params ()
