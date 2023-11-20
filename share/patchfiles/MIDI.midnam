@@ -371,16 +371,16 @@
       <Patch Number="127" Name="Gunshot" ProgramChange="127"/>
     </PatchNameList>
     <PatchNameList Name="General MIDI Drum Patches">
-      <Patch Number="1" Name="Standard Kit" ProgramChange="1"/>
-      <Patch Number="9" Name="Room Kit" ProgramChange="9"/>
-      <Patch Number="17" Name="Power Kit" ProgramChange="17"/>
-      <Patch Number="25" Name="Electronic Kit" ProgramChange="25"/>
-      <Patch Number="26" Name="TR-808 Kit" ProgramChange="26"/>
-      <Patch Number="33" Name="Jazz Kit" ProgramChange="33"/>
-      <Patch Number="41" Name="Brush Kit" ProgramChange="41"/>
-      <Patch Number="49" Name="Orchestra Kit" ProgramChange="49"/>
-      <Patch Number="57" Name="Sound FX Kit" ProgramChange="57"/>
-      <Patch Number="128" Name="CM-64/CM-32L" ProgramChange="128"/>
+      <Patch Number="0" Name="Standard Kit" ProgramChange="0"/>
+      <Patch Number="8" Name="Room Kit" ProgramChange="8"/>
+      <Patch Number="16" Name="Power Kit" ProgramChange="16"/>
+      <Patch Number="24" Name="Electronic Kit" ProgramChange="24"/>
+      <Patch Number="25" Name="TR-808 Kit" ProgramChange="25"/>
+      <Patch Number="32" Name="Jazz Kit" ProgramChange="32"/>
+      <Patch Number="40" Name="Brush Kit" ProgramChange="40"/>
+      <Patch Number="48" Name="Orchestra Kit" ProgramChange="48"/>
+      <Patch Number="56" Name="Sound FX Kit" ProgramChange="56"/>
+      <Patch Number="127" Name="CM-64/CM-32L" ProgramChange="127"/>
     </PatchNameList>
     <ControlNameList Name="Controls">
       <Control Type="7bit" Number="0" Name="Bank Select"/>
