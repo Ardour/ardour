@@ -303,7 +303,6 @@ RTMidiBuffer::track (MidiStateTracker& mst, samplepos_t start, samplepos_t end)
 			}
 		}
 
-		uint32_t size;
 		uint8_t* addr;
 
 		if (item->bytes[0]) {
@@ -313,12 +312,10 @@ RTMidiBuffer::track (MidiStateTracker& mst, samplepos_t start, samplepos_t end)
 			uint32_t offset = item->offset & ~(1<<(CHAR_BIT-1));
 			Blob* blob = reinterpret_cast<Blob*> (&_pool[offset]);
 
-			size = blob->size;
 			addr = blob->data;
 
 		} else {
 
-			size = Evoral::midi_event_size (item->bytes[1]);
 			addr = &item->bytes[1];
 
 		}
