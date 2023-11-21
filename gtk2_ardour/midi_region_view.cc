@@ -4773,3 +4773,33 @@ MidiRegionView::sync_velocity_drag (double factor)
 		s->set_velocity (factor);
 	}
 }
+
+void
+MidiRegionView::start_note_splitting ()
+{
+}
+
+void
+MidiRegionView::end_note_splitting ()
+{
+}
+
+void
+MidiRegionView::split_notes_grid ()
+{
+}
+
+void
+MidiRegionView::split_notes_more ()
+{
+}
+
+void
+MidiRegionView::split_notes_less ()
+{
+}
+
+void
+MidiRegionView::join_notes ()
+{
+}
