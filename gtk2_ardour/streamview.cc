@@ -227,14 +227,12 @@ StreamView::remove_region_view (std::weak_ptr<Region> weak_r)
 void
 StreamView::undisplay_track ()
 {
-	for (RegionViewList::iterator i = region_views.begin(); i != region_views.end() ; ) {
-		RegionViewList::iterator next = i;
-		++next;
-		delete *i;
-		i = next;
-	}
+	RegionViewList copy (region_views);
+	region_views.clear ();
 
-	region_views.clear();
+	for (auto const & rv : copy) {
+		delete rv;
+	}
 }
 
 void
