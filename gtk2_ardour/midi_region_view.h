@@ -590,6 +590,17 @@ public:
 	void model_changed ();
 
 	void sync_ghost_selection (NoteBase*);
+
+	uint32_t split_tuple;
+	bool     note_splitting;
+
+	void start_note_splitting ();
+	void end_note_splitting ();
+
+	void split_notes_grid ();
+	void split_notes_more ();
+	void split_notes_less ();
+	void join_notes ();
 };
 
 
