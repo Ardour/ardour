@@ -2223,7 +2223,7 @@ RegionMoveDrag::RegionMoveDrag (Editor* e, ArdourCanvas::Item* i, RegionView* p,
 void
 RegionMoveDrag::setup_pointer_offset ()
 {
-	_pointer_offset = timecnt_t (_last_position.distance (raw_grab_time ()), _last_position);
+	_pointer_offset = _last_position.distance (raw_grab_time ());
 }
 
 RegionInsertDrag::RegionInsertDrag (Editor* e, std::shared_ptr<Region> r, RouteTimeAxisView* v, timepos_t const& pos, Temporal::TimeDomain td)
