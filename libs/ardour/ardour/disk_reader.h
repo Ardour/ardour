@@ -103,6 +103,8 @@ public:
 
 	bool declick_in_progress () const;
 
+	void set_need_midi_catchup (bool);
+
 	/* inc/dec variants MUST be called as part of the process call tree, before any
 	 * disk readers are invoked. We use it when the session needs the
 	 * transport (and thus effective read position for DiskReaders) to keep
@@ -248,6 +250,9 @@ private:
 
 	samplepos_t last_refill_loop_start;
 	void setup_preloop_buffer ();
+
+	bool _midi_catchup;
+	bool _need_midi_catchup;
 };
 
 } // namespace ARDOUR

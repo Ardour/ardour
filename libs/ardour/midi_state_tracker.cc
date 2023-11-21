@@ -348,8 +348,6 @@ MidiStateTracker::track (const uint8_t* evbuf)
 void
 MidiStateTracker::flush (MidiBuffer& dst, samplepos_t time, bool reset)
 {
-	/* XXX implement me */
-
 	uint8_t buf[3];
 	const size_t n_channels = 16;
 	const size_t n_controls = 127;
@@ -377,6 +375,9 @@ MidiStateTracker::flush (MidiBuffer& dst, samplepos_t time, bool reset)
 				program[chn] = 0x80;
 			}
 		}
+
+		/* XXX bender */
+		/* XXX pressure */
 	}
 }
 

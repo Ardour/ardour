@@ -65,6 +65,8 @@ DiskReader::DiskReader (Session& s, Track& t, string const& str, Temporal::TimeD
 	, _declick_offs (0)
 	, _declick_enabled (false)
 	, last_refill_loop_start (0)
+	, _midi_catchup (false)
+	, _need_midi_catchup (false)
 {
 	file_sample[DataType::AUDIO] = 0;
 	file_sample[DataType::MIDI]  = 0;
@@ -1484,6 +1486,14 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 				effective_end   = min (effective_start + cnt, loop_end);
 				assert (effective_end > effective_start);
 
+
+				if (_midi_catchup && _need_midi_catchup) {
+					MidiStateTracker mst;
+					rtmb->track (mst, effective_start, effective_end);
+					mst.flush (dst, 0, false);
+					_need_midi_catchup = false;
+				}
+
 				const samplecnt_t this_read = effective_end - effective_start;
 
 				DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer LOOP read, from %1 to %2 (%3)\n", effective_start, effective_end, this_read));
@@ -1491,7 +1501,7 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 #ifndef NDEBUG
 				size_t events_read =
 #endif
-				    rtmb->read (*target, effective_start, effective_end, _tracker, offset);
+					rtmb->read (*target, effective_start, effective_end, _tracker, offset);
 
 				cnt -= this_read;
 				effective_start += this_read;
@@ -1511,6 +1521,12 @@ DiskReader::get_midi_playback (MidiBuffer& dst, samplepos_t start_sample, sample
 
 		} else {
 			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("playback buffer read, from %1 to %2 (%3)\n", start_sample, end_sample, nframes));
+			if (_midi_catchup && _need_midi_catchup) {
+				MidiStateTracker mst;
+				rtmb->track (mst, start_sample, end_sample);
+				mst.flush (dst, 0, false);
+				_need_midi_catchup = false;
+			}
 			DEBUG_RESULT (size_t, events_read, rtmb->read (*target, start_sample, end_sample, _tracker));
 			DEBUG_TRACE (DEBUG::MidiDiskIO, string_compose ("%1 MDS events read %2 range %3 .. %4\n", _name, events_read, playback_sample, playback_sample + nframes));
 		}
@@ -1956,4 +1972,10 @@ DiskReader::setup_preloop_buffer ()
 		}
 		++channel;
 	}
+}
+
+void
+DiskReader::set_need_midi_catchup (bool yn)
+{
+	_need_midi_catchup = yn;
 }

@@ -251,6 +251,88 @@ item_item_earlier (ARDOUR::RTMidiBuffer::Item const & item, ARDOUR::RTMidiBuffer
 	return item.timestamp < other.timestamp;
 }
 
+void
+RTMidiBuffer::track (MidiStateTracker& mst, samplepos_t start, samplepos_t end)
+{
+	Glib::Threads::RWLock::ReaderLock lm (_lock, Glib::Threads::TRY_LOCK);
+
+	if (!lm.locked()) {
+		return;
+	}
+
+	bool reverse;
+	Item foo;
+	Item* iend;
+	Item* item;
+	foo.timestamp = start;
+
+	if (start < end) {
+		iend = _data+_size;
+		item = lower_bound (_data, iend, foo, item_item_earlier);
+		reverse = false;
+	} else {
+		iend = _data;
+		--iend; /* yes, this is technically "illegal" but we will never indirect */
+		Item* uend = _data + _size;
+		item = upper_bound (_data, uend, foo, item_item_earlier);
+
+		if (item == uend) {
+			--item;
+		}
+
+		reverse = true;
+	}
+
+	while ((item != iend) && ((reverse && (item->timestamp > end)) || (!reverse && (item->timestamp < end)))) {
+
+		TimeType evtime = item->timestamp;
+
+		/* Adjust event times to be relative to 'start', taking
+		 * 'offset' into account.
+		 */
+
+		if (reverse) {
+			if (evtime > start) {
+				--item;
+				continue;
+			}
+		} else {
+			if (evtime < start) {
+				++item;
+				continue;
+			}
+		}
+
+		uint32_t size;
+		uint8_t* addr;
+
+		if (item->bytes[0]) {
+
+			/* more than 3 bytes ... indirect */
+
+			uint32_t offset = item->offset & ~(1<<(CHAR_BIT-1));
+			Blob* blob = reinterpret_cast<Blob*> (&_pool[offset]);
+
+			size = blob->size;
+			addr = blob->data;
+
+		} else {
+
+			size = Evoral::midi_event_size (item->bytes[1]);
+			addr = &item->bytes[1];
+
+		}
+
+		mst.track (addr);
+
+		if (reverse) {
+			--item;
+		} else {
+			++item;
+		}
+	}
+}
+
 uint32_t
 RTMidiBuffer::read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiNoteTracker& tracker, samplecnt_t offset)
 {

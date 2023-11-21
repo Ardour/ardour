@@ -37,6 +37,7 @@ namespace ARDOUR {
 
 class MidiBuffer;
 class MidiNoteTracker;
+class MidiStateTracker;
 
 /**  */
 class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
@@ -62,6 +63,7 @@ class LIBARDOUR_API RTMidiBuffer : public Evoral::EventSink<samplepos_t>
 
 	uint32_t write (TimeType time, Evoral::EventType type, uint32_t size, const uint8_t* buf);
 	uint32_t read (MidiBuffer& dst, samplepos_t start, samplepos_t end, MidiNoteTracker& tracker, samplecnt_t offset = 0);
+	void track (MidiStateTracker&, samplepos_t start, samplepos_t end);
 
 	void dump (uint32_t);
 	void reverse ();
