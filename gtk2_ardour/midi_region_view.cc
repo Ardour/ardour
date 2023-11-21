@@ -129,6 +129,8 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	, _entered_note (0)
 	, _select_all_notes_after_add (false)
 	, _mouse_changed_selection (false)
+	, split_tuple (0)
+	, note_splitting (false)
 {
 	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
 
