@@ -413,8 +413,8 @@ MixerStrip::init ()
 
 	parameter_changed (X_("mixer-element-visibility"));
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &MixerStrip::parameter_changed));
-	Config->ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
-	_session->config.ParameterChanged.connect (_config_connection, MISSING_INVALIDATOR, boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
+	 Config->ParameterChanged.connect (_config_connection, invalidator (*this), boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
+	 _session->config.ParameterChanged.connect (_config_connection, invalidator (*this), boost::bind (&MixerStrip::parameter_changed, this, _1), gui_context());
 
 	//watch for mouse enter/exit so we can do some stuff
 	signal_enter_notify_event().connect (sigc::mem_fun(*this, &MixerStrip::mixer_strip_enter_event ));
