@@ -593,6 +593,7 @@ public:
 
 	uint32_t split_tuple;
 	bool     note_splitting;
+	NoteType split_base_note;
 
 	void start_note_splitting ();
 	void end_note_splitting ();
@@ -601,6 +602,8 @@ public:
 	void split_notes_more ();
 	void split_notes_less ();
 	void join_notes ();
+
+	void add_split_notes ();
 };
 
 

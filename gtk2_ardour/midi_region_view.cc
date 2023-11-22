@@ -4787,19 +4787,101 @@ MidiRegionView::end_note_splitting ()
 void
 MidiRegionView::split_notes_grid ()
 {
+	if (_selection.empty()) {
+		return;
+	}
+
+	/* XXX need to adjust pos to be global */
+	bool success;
+	std::shared_ptr<NoteType> base ((*_selection.begin())->note());
+
+	split_base_note.set_channel (base->channel());
+	split_base_note.set_length (base->length());
+	split_base_note.set_time (base->time());
+	split_base_note.set_note (base->note());
+	split_base_note.set_velocity (base->velocity());
+	split_base_note.set_off_velocity (base->off_velocity());
+
+	Temporal::Beats grid = trackview.editor().get_grid_type_as_beats (success, timepos_t (split_base_note.time()));
+
+	if (!success) {
+		/* No grid => use quarters */
+		grid = Beats (1, 0);
+	}
+
+	split_tuple = split_base_note.length().to_ticks() / grid.to_ticks();
+
+	start_note_diff_command (_("split notes"));
+	for (auto & s : _selection) {
+		note_diff_remove_note (s);
+	}
+	add_split_notes ();
+	apply_note_diff (false);
 }
 
 void
 MidiRegionView::split_notes_more ()
 {
+	if (_selection.empty()) {
+		return;
+	}
+
+	split_tuple++;
+
+	char buf[64];
+	snprintf (buf, sizeof (buf), "Split %s into %d", split_base_note.length().str().c_str(), split_tuple);
+	show_verbose_cursor (buf, 0, 0);
+
+	start_note_diff_command (_("split notes more"));
+	for (auto & s : _selection) {
+		note_diff_remove_note (s);
+	}
+	add_split_notes ();
+	apply_note_diff (false);
 }
 
 void
 MidiRegionView::split_notes_less ()
 {
+	if (_selection.empty()) {
+		return;
+	}
+
+	if (split_tuple <= 2) {
+		return;
+	}
+
+	split_tuple--;
+
+	char buf[64];
+	snprintf (buf, sizeof (buf), "Split %s into %d", split_base_note.length().str().c_str(), split_tuple);
+	show_verbose_cursor (buf, 0, 0);
+
+	start_note_diff_command (_("split notes less"));
+	for (auto & s : _selection) {
+		note_diff_remove_note (s);
+	}
+	add_split_notes ();
+	apply_note_diff (false);
 }
 
 void
 MidiRegionView::join_notes ()
 {
+}
+
+void
+MidiRegionView::add_split_notes ()
+{
+	Beats b (split_base_note.length());
+
+	b = b / split_tuple;
+
+	Beats pos (split_base_note.time());
+
+	for (uint32_t n = 0; n < split_tuple; ++n) {
+		std::shared_ptr<NoteType> new_note (new NoteType (split_base_note.channel(), pos, b, split_base_note.note(),  split_base_note.velocity()));
+		note_diff_add_note (new_note, true, true);
+		pos += b;
+	}
 }

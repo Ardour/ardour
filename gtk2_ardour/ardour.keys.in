@@ -470,6 +470,10 @@ This mode provides many different operations on both regions and control points,
 @notes|Notes/nudge-earlier-fine|                   <@SECONDARY@>Left|Nudge Notes Earlier (fine)
 @notes|Notes/edit-channels|                                        c|Edit Note Channels
 @notes|Notes/edit-velocities|                                      v|Edit Note Velocities
+@notes|Notes/split-notes-grid|                          <@PRIMARY@>e|Split Notes By Grid
+@notes|Notes/join-notes|                                <@PRIMARY@>j|Join Notes
+@notes|Notes/split-notes-more|                         <@PRIMARY@>Up|Split Notes More Finely
+@notes|Notes/split-notes-less|                       <@PRIMARY@>Down|Split Notes Less Finely
 
 @notes|Notes/transpose-up-octave|                          <@SECONDARY@>Up|Transpose up (1 octave)
 @notes|Notes/transpose-down-octave|                      <@SECONDARY@>Down|Transpose down (1 octave)
