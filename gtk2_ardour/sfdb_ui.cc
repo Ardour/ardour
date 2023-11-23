@@ -344,11 +344,15 @@ SoundFileBox::setup_labels (const string& filename)
 			err = true;
 		}
 
-		preview_label.set_markup (_("<b>Midi File Information</b>"));
+		preview_label.set_markup (_("<b>MIDI File Information</b>"));
 
 		samplerate_value.set_text ("-");
+		samplerate_value.set_name ("NewSessionSR2Label");
+		samplerate.set_text (_("Sample Rate:"));
+		samplerate.set_name ("NewSessionSR2Label");
 		tags_entry.get_buffer()->set_text ("");
 		timecode_clock.set (timepos_t ());
+		length_clock.set_duration (timecnt_t (0));
 		tags_entry.set_sensitive (false);
 
 		if (!err) {
@@ -358,7 +362,6 @@ SoundFileBox::setup_labels (const string& filename)
 				format_text.set_text (string_compose("%1 (%2 Tracks)", smf.smf_format()==2 ? "MIDI Type 2" : "MIDI Type 1", smf.num_tracks()));
 			}
 			channels_value.set_text (ARDOUR_UI_UTILS::midi_channels_as_string (smf.used_channels()));
-			length_clock.set_duration (timecnt_t (0));
 			switch (smf.num_tempos()) {
 			case 0:
 				tempomap_value.set_text (_("No tempo data"));
@@ -379,7 +382,6 @@ SoundFileBox::setup_labels (const string& filename)
 			}
 		} else {
 			channels_value.set_text ("");
-			length_clock.set_duration (timecnt_t());
 			tempomap_value.set_text (_("No tempo data"));
 		}
 
