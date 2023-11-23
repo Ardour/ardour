@@ -591,9 +591,26 @@ public:
 
 	void sync_ghost_selection (NoteBase*);
 
+	struct SplitInfo {
+		Temporal::Beats time;
+		Temporal::Beats base_len;
+		int             note;
+		int             channel;
+		int             velocity;
+		int             off_velocity;
+
+		SplitInfo (Temporal::Beats const & t, Temporal::Beats const & l, int n, int c, int v, int ov)
+			: time (t)
+			, base_len (l)
+			, note (n)
+			, channel (c)
+			, velocity (v)
+			, off_velocity (ov) {}
+	};
+	std::vector<SplitInfo> split_info;
+
 	uint32_t split_tuple;
 	bool     note_splitting;
-	NoteType split_base_note;
 
 	void start_note_splitting ();
 	void end_note_splitting ();
