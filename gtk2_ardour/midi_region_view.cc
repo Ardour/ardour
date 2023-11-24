@@ -4894,17 +4894,26 @@ MidiRegionView::join_notes ()
 	}
 }
 
+struct NoteExtentInfo
+{
+	Temporal::Beats start;
+	Temporal::Beats end;
+	float velocity;
+	float off_velocity;
+	int cnt;
+
+	NoteExtentInfo()
+		: start (std::numeric_limits<Temporal::Beats>::max())
+		, end (Temporal::Beats())
+		, velocity (0.f)
+		, off_velocity (0.f)
+		, cnt (0) {}
+};
+
 void
 MidiRegionView::join_notes_on_channel (int chn)
 {
-	typedef std::pair<Temporal::Beats,Temporal::Beats> StartAndEnd;
-	StartAndEnd starts_and_ends[127];
-	uint32_t cnt[127];
-
-	for (size_t n = 0; n < 127; ++n) {
-		starts_and_ends[n].first = std::numeric_limits<Temporal::Beats>::max();
-		cnt[n] = 0;
-	}
+	NoteExtentInfo ninfo[127];
 
 	for (auto & s : _selection) {
 
@@ -4913,30 +4922,38 @@ MidiRegionView::join_notes_on_channel (int chn)
 		}
 
 		std::shared_ptr<NoteType> base (s->note());
-		StartAndEnd& se (starts_and_ends[base->note()]);
-		cnt[base->note()]++;
+		NoteExtentInfo& ni (ninfo[base->note()]);
+		ni.cnt++;
 
-		if (base->time() < se.first) {
-			se.first = base->time();
+		if (base->time() < ni.start) {
+			ni.start = base->time();
 		}
 
-		if (base->end_time() > se.second) {
-			se.second = base->end_time();
+		if (base->end_time() > ni.end) {
+			ni.end = base->end_time();
 		}
+
+		ni.velocity += base->velocity();
+		ni.off_velocity += base->off_velocity();
 	}
 
 	start_note_diff_command (_("join notes"));
 	for (auto & s : _selection) {
 		/* Only remove pitches that occur more than once */
-		if (cnt[s->note()->note()] > 1 && s->note()->channel() == chn) {
+		if (ninfo[s->note()->note()].cnt > 1 && s->note()->channel() == chn) {
 			note_diff_remove_note (s);
 		}
 	}
 
 	for (size_t n = 0; n < 127; ++n) {
-		if (cnt[n] > 1 && starts_and_ends[n].second != Temporal::Beats()) {
-			Temporal::Beats b = starts_and_ends[n].second - starts_and_ends[n].first;
-			std::shared_ptr<NoteType> new_note (new NoteType (chn, starts_and_ends[n].first, b, n,  64));
+
+		NoteExtentInfo& ni (ninfo[n]);
+
+		if (ni.cnt > 1 && ni.end != Temporal::Beats()) {
+
+			Temporal::Beats b = ni.end - ni.start;
+			std::shared_ptr<NoteType> new_note (new NoteType (chn, ni.start, b, n, ni.velocity / ni.cnt));
+			new_note->set_off_velocity (ni.off_velocity / ni.cnt);
 			note_diff_add_note (new_note, true, true);
 		}
 	}
