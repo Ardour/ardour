@@ -2248,6 +2248,7 @@ MidiRegionView::clear_selection ()
 {
 	clear_note_selection ();
 	_mouse_state = None;
+	end_note_splitting ();
 }
 
 void
@@ -4777,6 +4778,7 @@ MidiRegionView::sync_velocity_drag (double factor)
 void
 MidiRegionView::start_note_splitting ()
 {
+	note_splitting = true;
 	split_info.clear ();
 
 	for (auto & s : _selection) {
@@ -4789,12 +4791,15 @@ MidiRegionView::start_note_splitting ()
 		                                 base->velocity(),
 		                                 base->off_velocity()));
 	}
+
+	split_tuple = 1;
 }
 
 void
 MidiRegionView::end_note_splitting ()
 {
 	split_info.clear ();
+	note_splitting = false;
 }
 
 void
@@ -4859,7 +4864,7 @@ MidiRegionView::split_notes_less ()
 		}
 	}
 
-	if (split_tuple <= 2) {
+	if (split_tuple < 2) {
 		return;
 	}
 
@@ -4880,6 +4885,53 @@ MidiRegionView::split_notes_less ()
 void
 MidiRegionView::join_notes ()
 {
+	/* Grab the selection, split it by pitch and find the earliest and
+	 * latest contiguous segments of the same pitch
+	 */
+
+	typedef std::pair<Temporal::Beats,Temporal::Beats> StartAndEnd;
+	StartAndEnd starts_and_ends[127];
+	uint32_t cnt[127];
+
+	for (size_t n = 0; n < 127; ++n) {
+		starts_and_ends[n].first = std::numeric_limits<Temporal::Beats>::max();
+		cnt[n] = 0;
+	}
+
+	for (auto & s : _selection) {
+
+		std::shared_ptr<NoteType> base (s->note());
+		StartAndEnd& se (starts_and_ends[base->note()]);
+		cnt[base->note()]++;
+
+		if (base->time() < se.first) {
+			se.first = base->time();
+		}
+
+		if (base->end_time() > se.second) {
+			se.second = base->end_time();
+		}
+	}
+
+	start_note_diff_command (_("join notes"));
+	for (auto & s : _selection) {
+		/* Only remove pitches that occur more than once */
+		if (cnt[s->note()->note()] > 1) {
+			note_diff_remove_note (s);
+		}
+	}
+
+	for (size_t n = 0; n < 127; ++n) {
+		if (cnt[n] > 1 && starts_and_ends[n].second != Temporal::Beats()) {
+			Temporal::Beats b = starts_and_ends[n].second - starts_and_ends[n].first;
+			std::shared_ptr<NoteType> new_note (new NoteType (0, starts_and_ends[n].first, b, n,  64));
+			note_diff_add_note (new_note, true, true);
+		}
+	}
+
+	apply_note_diff (false);
+
+	end_note_splitting ();
 }
 
 void
