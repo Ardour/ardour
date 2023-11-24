@@ -201,6 +201,11 @@ EditingContext::register_midi_actions (Bindings* midi_bindings)
 	ActionManager::register_action (_midi_actions, X_("nudge-earlier"), _("Nudge Notes Earlier (grid)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::nudge_notes_earlier));
 	ActionManager::register_action (_midi_actions, X_("nudge-earlier-fine"), _("Nudge Notes Earlier (1/4 grid)"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::nudge_notes_earlier_fine));
 
+	ActionManager::register_action (_midi_actions, X_("split-notes-grid"), _("Split Selected Notes on grid boundaries"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::split_notes_grid));
+	ActionManager::register_action (_midi_actions, X_("split-notes-more"), _("Split Selected Notes into more pieces"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::split_notes_more));
+	ActionManager::register_action (_midi_actions, X_("split-notes-less"), _("Split Selected Notes into less pieces"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::split_notes_less));
+	ActionManager::register_action (_midi_actions, X_("join-notes"), _("Join Selected Notes"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::join_notes));
+
 	ActionManager::register_action (_midi_actions, X_("edit-channels"), _("Edit Note Channels"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::channel_edit));
 	ActionManager::register_action (_midi_actions, X_("edit-velocities"), _("Edit Note Velocities"), sigc::bind (sigc::mem_fun (*this, &EditingContext::midi_action), &MidiRegionView::velocity_edit));
 
