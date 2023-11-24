@@ -619,6 +619,7 @@ public:
 	void split_notes_more ();
 	void split_notes_less ();
 	void join_notes ();
+	void join_notes_on_channel (int channel);
 
 	void add_split_notes ();
 };

@@ -4889,6 +4889,14 @@ MidiRegionView::join_notes ()
 	 * latest contiguous segments of the same pitch
 	 */
 
+	for (int n = 0; n < 16; ++n) {
+		join_notes_on_channel (n);
+	}
+}
+
+void
+MidiRegionView::join_notes_on_channel (int chn)
+{
 	typedef std::pair<Temporal::Beats,Temporal::Beats> StartAndEnd;
 	StartAndEnd starts_and_ends[127];
 	uint32_t cnt[127];
@@ -4899,6 +4907,10 @@ MidiRegionView::join_notes ()
 	}
 
 	for (auto & s : _selection) {
+
+		if (s->note()->channel() != chn) {
+			continue;
+		}
 
 		std::shared_ptr<NoteType> base (s->note());
 		StartAndEnd& se (starts_and_ends[base->note()]);
@@ -4916,7 +4928,7 @@ MidiRegionView::join_notes ()
 	start_note_diff_command (_("join notes"));
 	for (auto & s : _selection) {
 		/* Only remove pitches that occur more than once */
-		if (cnt[s->note()->note()] > 1) {
+		if (cnt[s->note()->note()] > 1 && s->note()->channel() == chn) {
 			note_diff_remove_note (s);
 		}
 	}
@@ -4924,7 +4936,7 @@ MidiRegionView::join_notes ()
 	for (size_t n = 0; n < 127; ++n) {
 		if (cnt[n] > 1 && starts_and_ends[n].second != Temporal::Beats()) {
 			Temporal::Beats b = starts_and_ends[n].second - starts_and_ends[n].first;
-			std::shared_ptr<NoteType> new_note (new NoteType (0, starts_and_ends[n].first, b, n,  64));
+			std::shared_ptr<NoteType> new_note (new NoteType (chn, starts_and_ends[n].first, b, n,  64));
 			note_diff_add_note (new_note, true, true);
 		}
 	}
