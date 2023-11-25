@@ -54,6 +54,9 @@ class MidiCueEditor : public CueEditor
 	int32_t get_grid_beat_divisions (Editing::GridType gt) { return 1; }
 	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) { return 1; }
 
+	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
+	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
+
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,

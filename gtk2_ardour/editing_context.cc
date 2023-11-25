@@ -22,6 +22,7 @@
 #include "pbd/stacktrace.h"
 
 #include "ardour/rc_configuration.h"
+#include "ardour/quantize.h"
 
 #include "gtkmm2ext/bindings.h"
 
@@ -30,6 +31,7 @@
 #include "editor_drag.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
+#include "quantize_dialog.h"
 #include "selection.h"
 #include "selection_memento.h"
 #include "verbose_cursor.h"
@@ -100,10 +102,9 @@ EditingContext::EditingContext ()
 	, bbt_bar_helper_on (0)
 	, _visible_canvas_width (0)
 	, _visible_canvas_height (0)
+	, quantize_dialog (nullptr)
 {
 	grid_type_strings =  I18N (_grid_type_strings);
-
-	_verbose_cursor = new VerboseCursor (*this);
 }
 
 EditingContext::~EditingContext()
@@ -1528,3 +1529,29 @@ EditingContext::compute_bbt_ruler_scale (samplepos_t lower, samplepos_t upper)
 
 	bbt_ruler_scale = (EditingContext::BBTRulerScale) suggested_scale;
 }
+
+Quantize*
+EditingContext::get_quantize_op ()
+{
+	if (!quantize_dialog) {
+		quantize_dialog = new QuantizeDialog (*this);
+	}
+
+	quantize_dialog->present ();
+	int r = quantize_dialog->run ();
+	quantize_dialog->hide ();
+
+
+	if (r != Gtk::RESPONSE_OK) {
+		return nullptr;
+	}
+
+	return new Quantize (quantize_dialog->snap_start(),
+	                     quantize_dialog->snap_end(),
+	                     quantize_dialog->start_grid_size(),
+	                     quantize_dialog->end_grid_size(),
+	                     quantize_dialog->strength(),
+	                     quantize_dialog->swing(),
+	                     quantize_dialog->threshold());
+}
+
