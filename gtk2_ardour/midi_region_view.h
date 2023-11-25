@@ -118,6 +118,7 @@ public:
 
 	inline ARDOUR::ColorMode color_mode() const { return midi_view()->color_mode(); }
 
+	std::string get_modifier_name() const;
 	uint32_t get_fill_color() const;
 	void color_handler ();
 

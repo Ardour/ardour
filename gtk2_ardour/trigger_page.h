@@ -133,10 +133,10 @@ private:
 #if REGION_PROPERTIES_BOX_TODO
 	AudioRegionOperationsBox  _audio_ops_box;
 	AudioClipEditorBox        _audio_trim_box;
+#endif
 
 	MidiRegionOperationsBox  _midi_ops_box;
 	MidiClipEditorBox        _midi_trim_box;
-#endif
 
 	RouteProcessorSelection  _selection;
 	std::list<TriggerStrip*> _strips;

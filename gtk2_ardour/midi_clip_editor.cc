@@ -75,6 +75,7 @@ void
 MidiClipEditorBox::set_session (Session* s)
 {
 	SessionHandlePtr::set_session (s);
+	editor->set_session (s);
 }
 
 void

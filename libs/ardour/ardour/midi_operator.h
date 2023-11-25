@@ -26,6 +26,8 @@
 #include "temporal/beats.h"
 #include "evoral/Sequence.h"
 
+#include "ardour/libardour_visibility.h"
+
 namespace PBD {
 class Command;
 }

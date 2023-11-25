@@ -94,6 +94,8 @@ Editor::initialize_canvas ()
 	*/
 	no_scroll_group = new ArdourCanvas::Container (_track_canvas->root());
 
+	_verbose_cursor = new VerboseCursor (*this);
+
 	ArdourCanvas::ScrollGroup* hsg;
 	ArdourCanvas::ScrollGroup* hg;
 	ArdourCanvas::ScrollGroup* cg;

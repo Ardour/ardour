@@ -37,6 +37,7 @@
 
 #include "temporal/timeline.h"
 
+#include "ardour/midi_operator.h"
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
 
@@ -278,6 +279,8 @@ public:
 	PBD::Signal0<void> MouseModeChanged;
 
 	/* MIDI actions, proxied to selected MidiRegionView(s) */
+	ARDOUR::Quantize* get_quantize_op ();
+	virtual void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs) = 0;
 	void midi_action (void (MidiRegionView::*method)());
 	virtual std::vector<MidiRegionView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const = 0;
 
@@ -415,6 +418,8 @@ public:
 
 	double _visible_canvas_width;
 	double _visible_canvas_height; ///< height of the visible area of the track canvas
+
+	QuantizeDialog* quantize_dialog;
 };
 
 

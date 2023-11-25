@@ -1245,7 +1245,6 @@ private:
 	void normalize_region ();
 	void adjust_region_gain (bool up);
 	void reset_region_gain ();
-	ARDOUR::Quantize* get_quantize_op ();
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
 	void set_tempo_curve_range (double& max, double& min) const;
 	void quantize_region ();
@@ -2350,7 +2349,6 @@ private:
 	void update_bring_in_message (Gtk::Label* label, uint32_t n, uint32_t total, std::string name);
 	void bring_all_sources_into_session ();
 
-	QuantizeDialog* quantize_dialog;
 	MainMenuDisabler* _main_menu_disabler;
 
 	std::vector<MidiRegionView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const;

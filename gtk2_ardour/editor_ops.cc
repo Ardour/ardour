@@ -111,7 +111,6 @@
 #include "note.h"
 #include "paste_context.h"
 #include "patch_change_dialog.h"
-#include "quantize_dialog.h"
 #include "region_gain_line.h"
 #include "route_time_axis.h"
 #include "selection.h"
@@ -6334,31 +6333,6 @@ Editor::quantize_regions (const RegionSelection& rs)
 	}
 
 	delete quant;
-}
-
-Quantize*
-Editor::get_quantize_op ()
-{
-	if (!quantize_dialog) {
-		quantize_dialog = new QuantizeDialog (*this);
-	}
-
-	quantize_dialog->present ();
-	int r = quantize_dialog->run ();
-	quantize_dialog->hide ();
-
-
-	if (r != Gtk::RESPONSE_OK) {
-		return nullptr;
-	}
-
-	return new Quantize (quantize_dialog->snap_start(),
-	                     quantize_dialog->snap_end(),
-	                     quantize_dialog->start_grid_size(),
-	                     quantize_dialog->end_grid_size(),
-	                     quantize_dialog->strength(),
-	                     quantize_dialog->swing(),
-	                     quantize_dialog->threshold());
 }
 
 void

@@ -147,11 +147,13 @@ TriggerPage::TriggerPage ()
 	table->attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 	++col;
 
-#ifdef MIDI_PROPERTIES_BOX_IMPLEMENTED
 	col = 2;
 	table->attach (_midi_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
 	++col;
-#endif
+
+	col = 3;
+	table->attach (_midi_trim_box, col, col + 1, 0, 1, Gtk::EXPAND, Gtk::SHRINK);
+	++col;
 
 	_parameter_box.pack_start (*table);
 
@@ -282,6 +284,7 @@ TriggerPage::set_session (Session* s)
 	_audio_trig_box.set_session (s);
 
 	_midi_trig_box.set_session (s);
+	_midi_trim_box.set_session (s);
 
 	update_title ();
 	start_updating ();
@@ -386,6 +389,7 @@ TriggerPage::selection_changed ()
 	_audio_trig_box.hide ();
 
 	_midi_trig_box.hide ();
+	_midi_trim_box.hide ();
 
 	_parameter_box.hide ();
 
@@ -404,6 +408,9 @@ TriggerPage::selection_changed ()
 			} else {
 				_midi_trig_box.set_trigger (ref);
 				_midi_trig_box.show ();
+
+				// _midi_trim_box.set_trigger (ref);
+				_midi_trim_box.show ();
 			}
 		}
 		_parameter_box.show ();

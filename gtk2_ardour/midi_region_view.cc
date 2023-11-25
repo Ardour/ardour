@@ -326,6 +326,59 @@ MidiRegionView::connect_to_diskstream ()
 		gui_context());
 }
 
+std::string
+MidiRegionView::get_modifier_name () const
+{
+	const bool opaque = _region->opaque() || trackview.layer_display () == Stacked;
+
+	std::string mod_name;
+
+	if (_dragging) {
+		mod_name = "dragging region";
+	} else if (editing_context.internal_editing()) {
+		if (!opaque || _region->muted ()) {
+			mod_name = "editable region";
+		}
+	} else {
+		if (!opaque || _region->muted ()) {
+			mod_name = "transparent region base";
+		}
+	}
+
+	return mod_name;
+}
+
+GhostRegion*
+MidiRegionView::add_ghost (TimeAxisView& tv)
+{
+	double unit_position = editing_context.time_to_pixel (_region->position ());
+	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&tv);
+	MidiGhostRegion* ghost;
+
+	if (mtv && mtv->midi_view()) {
+		return 0;
+	} else {
+		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*>(&tv);
+		if (atv && atv->parameter() == Evoral::Parameter (MidiVelocityAutomation)) {
+			ghost = new VelocityGhostRegion (*this, tv, trackview, unit_position);
+		} else {
+			ghost = new MidiGhostRegion (*this, tv, trackview, unit_position);
+		}
+	}
+
+	ghost->set_colors ();
+	ghost->set_height ();
+	ghost->set_duration (_region->length().samples() / samples_per_pixel);
+
+	for (auto const & i : _events) {
+		ghost->add_note (i.second);
+	}
+
+	ghosts.push_back (ghost);
+	return ghost;
+}
+
+
 bool
 MidiRegionView::canvas_group_event(GdkEvent* ev)
 {
@@ -1637,36 +1690,6 @@ MidiRegionView::apply_note_range (uint8_t min, uint8_t max, bool force)
 	_current_range_max = max;
 
 	view_changed ();
-}
-
-GhostRegion*
-MidiRegionView::add_ghost (TimeAxisView& tv)
-{
-	double unit_position = editing_context.time_to_pixel (_region->position ());
-	MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&tv);
-	MidiGhostRegion* ghost;
-
-	if (mtv && mtv->midi_view()) {
-		return 0;
-	} else {
-		AutomationTimeAxisView* atv = dynamic_cast<AutomationTimeAxisView*>(&tv);
-		if (atv && atv->parameter() == Evoral::Parameter (MidiVelocityAutomation)) {
-			ghost = new VelocityGhostRegion (*this, tv, trackview, unit_position);
-		} else {
-			ghost = new MidiGhostRegion (*this, tv, trackview, unit_position);
-		}
-	}
-
-	ghost->set_colors ();
-	ghost->set_height ();
-	ghost->set_duration (_region->length().samples() / samples_per_pixel);
-
-	for (auto const & i : _events) {
-		ghost->add_note (i.second);
-	}
-
-	ghosts.push_back (ghost);
-	return ghost;
 }
 
 
@@ -3806,25 +3829,10 @@ MidiRegionView::note_mouse_position (float x_fraction, float /*y_fraction*/, boo
 	}
 }
 
+
 uint32_t
 MidiRegionView::get_fill_color() const
 {
-	const bool opaque = _region->opaque() || trackview.layer_display () == Stacked;
-
-	std::string mod_name;
-
-	if (_dragging) {
-		mod_name = "dragging region";
-	} else if (editing_context.internal_editing()) {
-		if (!opaque || _region->muted ()) {
-			mod_name = "editable region";
-		}
-	} else {
-		if (!opaque || _region->muted ()) {
-			mod_name = "transparent region base";
-		}
-	}
-
 	Gtkmm2ext::Color c;
 	if (_selected) {
 		c = UIConfiguration::instance().color ("selected region base");
@@ -3833,6 +3841,8 @@ MidiRegionView::get_fill_color() const
 	} else {
 		c = fill_color;
 	}
+
+	string mod_name = get_modifier_name();
 
 	if (mod_name.empty ()) {
 		return c;
@@ -4738,7 +4748,7 @@ MidiRegionView::quantize_selected_notes ()
 		return;
 	}
 
-	trackview.editor().apply_midi_note_edit_op (*quant, rs);
+	editing_context.apply_midi_note_edit_op (*quant, rs);
 
 	delete quant;
 }

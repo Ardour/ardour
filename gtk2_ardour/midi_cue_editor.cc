@@ -24,6 +24,7 @@
 
 #include "midi_cue_editor.h"
 #include "ui_config.h"
+#include "verbose_cursor.h"
 
 using namespace ARDOUR;
 using namespace ArdourCanvas;
@@ -34,6 +35,8 @@ MidiCueEditor::MidiCueEditor()
 	, horizontal_adjustment (0.0, 0.0, 1e16)
 {
 	build_canvas ();
+
+	_verbose_cursor = new VerboseCursor (*this);
 }
 
 MidiCueEditor::~MidiCueEditor ()
@@ -44,10 +47,10 @@ void
 MidiCueEditor::build_canvas ()
 {
 	_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
-	_canvas = _canvas_viewport->canvas ();
 
-	_canvas->set_background_color (UIConfiguration::instance().color ("arrange base"));
-	// _canvas->use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
+	_canvas = _canvas_viewport->canvas ();
+	_canvas->set_background_color (0xff00000a); // UIConfiguration::instance().color ("arrange base"));
+	dynamic_cast<ArdourCanvas::GtkCanvas*>(_canvas)->use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
 
 	/* scroll group for items that should not automatically scroll
 	 *  (e.g verbose cursor). It shares the canvas coordinate space.
@@ -139,3 +142,29 @@ MidiCueEditor::current_page_samples() const
 	return (samplecnt_t) _visible_canvas_width* samples_per_pixel;
 }
 
+void
+MidiCueEditor::apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs)
+{
+}
+
+PBD::Command*
+MidiCueEditor::apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv)
+{
+#if 0
+	Evoral::Sequence<Temporal::Beats>::Notes selected;
+	mrv.selection_as_notelist (selected, true);
+
+	if (selected.empty()) {
+		return 0;
+	}
+
+	vector<Evoral::Sequence<Temporal::Beats>::Notes> v;
+	v.push_back (selected);
+
+	timepos_t pos = mrv.midi_region()->source_position();
+
+	return op (mrv.midi_region()->model(), pos.beats(), v);
+#endif
+
+	return nullptr;
+}
