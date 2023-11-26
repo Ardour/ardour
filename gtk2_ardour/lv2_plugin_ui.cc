@@ -200,6 +200,7 @@ LV2PluginUI::on_external_ui_closed(void* controller)
 	//printf("LV2PluginUI::on_external_ui_closed\n");
 	LV2PluginUI* me = (LV2PluginUI*)controller;
 	me->_screen_update_connection.disconnect();
+	me->_message_update_connection.disconnect();
 	me->_external_ui_ptr = NULL;
 }
 
