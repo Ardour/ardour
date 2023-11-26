@@ -50,8 +50,8 @@ public:
 	void present ();
 	void maybe_show ();
 
-	bool visible() const;
-	bool fully_visible() const;
+	virtual bool visible() const;
+	virtual bool fully_visible() const;
 	const std::string& name() const { return _name; }
 	const std::string& menu_name() const { return _menu_name; }
 

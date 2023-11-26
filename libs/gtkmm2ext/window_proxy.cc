@@ -134,6 +134,8 @@ WindowProxy::toggle()
 
 		if (vistracker) {
 			vistracker->cycle_visibility ();
+		} else if (fully_visible ()) {
+			_window->hide ();
 		} else {
 			_window->present ();
 		}
