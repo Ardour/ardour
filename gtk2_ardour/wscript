@@ -172,6 +172,7 @@ gtk2_ardour_sources = [
         'midi_time_axis.cc',
         'midi_tracer.cc',
         'midi_velocity_dialog.cc',
+        'midi_view.cc',
         'midi_view_background.cc',
         'mini_timeline.cc',
         'missing_file_dialog.cc',
