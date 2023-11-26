@@ -250,7 +250,7 @@ LV2PluginUI::queue_port_update()
 void
 LV2PluginUI::output_update()
 {
-	//cout << "output_update" << endl;
+	//std::cout << "output_update" << std::endl;
 	if (_external_ui_ptr) {
 		LV2_EXTERNAL_UI_RUN(_external_ui_ptr);
 		if (_lv2->is_external_kx() && !_external_ui_ptr) {
@@ -590,7 +590,7 @@ LV2PluginUI::is_update_wanted(uint32_t /*index*/)
 bool
 LV2PluginUI::on_window_show(const std::string& title)
 {
-	//cout << "on_window_show - " << title << endl; flush(cout);
+	//std::cout << "on_window_show - " << title << std::endl;// flush(cout);
 
 	if (_lv2->is_external_ui()) {
 		if (_external_ui_ptr) {
@@ -644,4 +644,16 @@ LV2PluginUI::on_window_hide()
 	} else {
 		lv2ui_free();
 	}
+}
+
+bool
+LV2PluginUI::is_external () const
+{
+	return _lv2->is_external_ui ();
+}
+
+bool
+LV2PluginUI::is_external_visible () const
+{
+	return _external_ui_ptr != 0;
 }

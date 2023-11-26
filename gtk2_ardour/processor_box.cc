@@ -4787,12 +4787,36 @@ ProcessorWindowProxy::session_handle()
 	/* we don't care */
 	return 0;
 }
+bool
+ProcessorWindowProxy::visible () const
+{
+	PluginUIWindow* puiw = dynamic_cast<PluginUIWindow*> (_window);
+	if (puiw && puiw->pluginui().is_external ()) {
+		return puiw->pluginui().is_external_visible ();
+	}
+	return WM::ProxyBase::visible ();
+}
+
+bool
+ProcessorWindowProxy::fully_visible () const
+{
+	PluginUIWindow* puiw = dynamic_cast<PluginUIWindow*> (_window);
+	if (puiw && puiw->pluginui().is_external ()) {
+		return puiw->pluginui().is_external_visible ();
+	}
+	return WM::ProxyBase::fully_visible ();
+}
 
 XMLNode&
 ProcessorWindowProxy::get_state () const
 {
+	PluginUIWindow* puiw = dynamic_cast<PluginUIWindow*> (_window);
+
 	XMLNode *node;
 	node = &ProxyBase::get_state();
+	if (puiw && puiw->pluginui().is_external ()) {
+		node->set_property (X_("visible"), puiw->pluginui().is_external_visible ());
+	}
 	node->set_property (X_("custom-ui"), is_custom);
 	return *node;
 }
@@ -4844,7 +4868,7 @@ ProcessorWindowProxy::get (bool create)
 
 		if (_window) {
 			setup ();
-			_window->show_all ();
+			_window->show_all (); // XXX
 		}
 	}
 	return _window;

@@ -66,6 +66,9 @@ public:
 	bool start_updating(GdkEventAny*);
 	bool stop_updating(GdkEventAny*);
 
+	bool is_external () const;
+	bool is_external_visible () const;
+
 	int package (Gtk::Window&);
 	void grab_focus ();
 

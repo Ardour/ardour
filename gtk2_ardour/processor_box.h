@@ -105,6 +105,9 @@ public:
 	int set_state (const XMLNode&, int);
 	XMLNode& get_state () const;
 
+	bool visible() const;
+	bool fully_visible() const;
+
 private:
 	ProcessorBox* _processor_box;
 	std::weak_ptr<ARDOUR::Processor> _processor;

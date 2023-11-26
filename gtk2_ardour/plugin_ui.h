@@ -100,6 +100,9 @@ public:
 	virtual bool start_updating(GdkEventAny*) = 0;
 	virtual bool stop_updating(GdkEventAny*) = 0;
 
+	virtual bool is_external () const { return false; }
+	virtual bool is_external_visible () const { return false; }
+
 	virtual void activate () {}
 	virtual void deactivate () {}
 
