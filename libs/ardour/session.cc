@@ -2724,7 +2724,7 @@ Session::ensure_stripable_sort_order ()
 	for (StripableList::iterator si = sl.begin(); si != sl.end(); ++si) {
 		std::shared_ptr<Stripable> s (*si);
 		assert (!s->is_auditioner ()); // XXX remove me
-		if (s->is_monitor ()) {
+		if (s->is_monitor () || s->is_surround_master ()) {
 			continue;
 		}
 		if (order != s->presentation_info().order()) {
@@ -3519,7 +3519,7 @@ Session::add_internal_send (std::shared_ptr<Route> dest, int index, std::shared_
 void
 Session::add_internal_send (std::shared_ptr<Route> dest, std::shared_ptr<Processor> before, std::shared_ptr<Route> sender)
 {
-	if (sender->is_monitor() || sender->is_master() || sender == dest || dest->is_monitor() || dest->is_master()) {
+	if (sender->is_singleton() || sender == dest || dest->is_singleton()) {
 		return;
 	}
 
@@ -4363,7 +4363,7 @@ Session::reassign_track_numbers ()
 		assert (!(*i)->is_auditioner());
 		if (std::dynamic_pointer_cast<Track> (*i)) {
 			(*i)->set_track_number(++tn);
-		} else if (!(*i)->is_master() && !(*i)->is_monitor()) {
+		} else if (!(*i)->is_main_bus ()) {
 			(*i)->set_track_number(--bn);
 		}
 

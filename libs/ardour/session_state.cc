@@ -1118,7 +1118,7 @@ Session::export_track_state (std::shared_ptr<RouteList> rl, const string& path)
 		if ((*i)->is_auditioner()) {
 			continue;
 		}
-		if ((*i)->is_master() || (*i)->is_monitor()) {
+		if ((*i)->is_singleton()) {
 			continue;
 		}
 		child->add_child_nocopy ((*i)->get_state());

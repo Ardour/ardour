@@ -138,7 +138,7 @@ copy_session_routes (
 	/* get route state from first session */
 	std::shared_ptr<RouteList const> rl = s->get_routes ();
 	for (auto const& r : *rl) {
-		if (r->is_master () || r->is_monitor () || r->is_auditioner ()) {
+		if (r->is_singleton () || r->is_auditioner ()) {
 			continue;
 		}
 		XMLNode& state (r->get_state ());
@@ -178,7 +178,7 @@ copy_session_routes (
 	rl = s->get_routes ();
 	for (auto const& r : *rl) {
 		/* skip special busses */
-		if (r->is_master () || r->is_monitor () || r->is_auditioner ()) {
+		if (r->is_singleton () || r->is_auditioner ()) {
 			continue;
 		}
 		if (std::dynamic_pointer_cast<Track> (r)) {
@@ -204,7 +204,7 @@ copy_session_routes (
 	rl = s->get_routes ();
 	for (auto const& r : *rl) {
 		/* skip special busses */
-		if (r->is_master () || r->is_monitor () || r->is_auditioner ()) {
+		if (r->is_singleton () || r->is_auditioner ()) {
 			continue;
 		}
 		if (!std::dynamic_pointer_cast<Track> (r)) {

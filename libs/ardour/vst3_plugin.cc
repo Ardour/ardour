@@ -2649,7 +2649,7 @@ VST3PI::stripable_property_changed (PBD::PropertyChange const&)
 
 	std::string ns;
 	int order_key;
-	if (s->is_master ()) {
+	if (s->is_master () || s->is_surround_master ()) {
 		ns = _("Master");
 		order_key = 2;
 	} else if (s->is_monitor ()) {
@@ -2815,7 +2815,7 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 	if (0 == strcmp (id, ContextInfo::kIndexMode)) {
 		value = ContextInfo::kFlatIndex;
 	} else if (0 == strcmp (id, ContextInfo::kType)) {
-		if (s->is_master ()) {
+		if (s->is_singleton ()) {
 			value = ContextInfo::kOut;
 		} else if (s->presentation_info ().flags () & PresentationInfo::AudioTrack) {
 			value = ContextInfo::kTrack;
@@ -2825,7 +2825,7 @@ VST3PI::getContextInfoValue (int32& value, FIDString id)
 			value = ContextInfo::kBus;
 		}
 	} else if (0 == strcmp (id, ContextInfo::kMain)) {
-		value = s->is_master () ? 1 : 0;
+		value = s->is_singleton () ? 1 : 0;
 	} else if (0 == strcmp (id, ContextInfo::kIndex)) {
 		value = s->presentation_info ().order ();
 	} else if (0 == strcmp (id, ContextInfo::kColor)) {

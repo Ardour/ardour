@@ -141,10 +141,12 @@ Stripable::Sorter::operator() (std::shared_ptr<ARDOUR::Stripable> a, std::shared
 	int cmp_a = 0;
 	int cmp_b = 0;
 
-	if (a->is_auditioner ()) { cmp_a = -2; }
-	if (b->is_auditioner ()) { cmp_b = -2; }
-	if (a->is_monitor ())    { cmp_a = -1; }
-	if (b->is_monitor ())    { cmp_b = -1; }
+	if (a->is_auditioner ())      { cmp_a = -3; }
+	if (b->is_auditioner ())      { cmp_b = -3; }
+	if (a->is_monitor ())         { cmp_a = -2; }
+	if (b->is_monitor ())         { cmp_b = -2; }
+	if (a->is_surround_master ()) { cmp_a = -1; }
+	if (b->is_surround_master ()) { cmp_b = -1; }
 
 	/* ARDOUR-Editor: [Track|Bus|Master] (0) < VCA (3)
 	 * ARDOUR-Mixer : [Track|Bus] (0) < VCA (3) < Master (4)

@@ -107,7 +107,7 @@ InternalSend::propagate_solo ()
 		/* propagate further downstream alike Route::input_change_handler() */
 		std::shared_ptr<RouteList const> routes = _session.get_routes ();
 		for (auto const& i : *routes) {
-			if (i == _send_to || i->is_master() || i->is_monitor() || i->is_auditioner()) {
+			if (i == _send_to || i->is_singleton () || i->is_auditioner()) {
 				continue;
 			}
 			bool does_feed = _send_to->feeds (i);
@@ -247,6 +247,7 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 				}
 			}
 		}
+
 	} else if (role () == Listen) {
 		/* We're going to the monitor bus, so discard MIDI data */
 

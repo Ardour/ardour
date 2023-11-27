@@ -155,7 +155,7 @@ int
 Route::init ()
 {
 	/* default master bus to use strict i/o */
-	if (is_master() || is_monitor ()) {
+	if (is_singleton ()) {
 		_strict_io = true;
 		_meter_point = _pending_meter_point = MeterOutput;
 	}
@@ -221,7 +221,7 @@ Route::init ()
 		_amp->set_display_name (_("Monitor"));
 	}
 
-	if (!is_master() && !is_monitor() && !is_auditioner()) {
+	if (!is_singleton () && !is_auditioner ()) {
 		_delayline.reset (new DelayLine (_session, name ()));
 	}
 
@@ -5435,7 +5435,7 @@ Route::setup_invisible_processors ()
 		}
 	}
 
-	if (!is_master() && !is_monitor() && !is_auditioner()) {
+	if (!is_singleton () && !is_auditioner()) {
 		ProcessorList::iterator reader_pos = find (new_processors.begin(), new_processors.end(), _disk_reader);
 		if (reader_pos != new_processors.end()) {
 			/* insert before disk-reader */

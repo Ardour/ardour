@@ -1065,6 +1065,8 @@ OSC::routes_list (lo_message msg)
 				lo_message_add_string (reply, "MA");
 			} else if (s->is_monitor()) {
 				lo_message_add_string (reply, "MO");
+			} else if (s->is_surround_master()) {
+				lo_message_add_string (reply, "SM");
 			} else if (std::dynamic_pointer_cast<Route>(s) && !std::dynamic_pointer_cast<Track>(s)) {
 				if (!(s->presentation_info().flags() & PresentationInfo::MidiBus)) {
 					if (s->is_foldbackbus()) {

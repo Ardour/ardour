@@ -163,7 +163,7 @@ CoreSelection::select_stripable_and_maybe_group (std::shared_ptr<Stripable> s, b
 
 	/* monitor is never selectable */
 
-	if (s->is_monitor()) {
+	if (s->is_monitor() || s->is_surround_master ()) {
 		return false;
 	}
 

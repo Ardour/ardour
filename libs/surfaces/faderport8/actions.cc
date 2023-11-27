@@ -276,7 +276,7 @@ FaderPort8::button_automation (ARDOUR::AutoState as)
 	StripableList all;
 	session->get_stripables (all);
 	for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
-		if ((*i)->is_master() || (*i)->is_monitor()) {
+		if ((*i)->is_singleton ()) {
 			continue;
 		}
 		if (!(*i)->is_selected()) {
@@ -328,7 +328,7 @@ FaderPort8::button_solo_clear ()
 		StripableList all;
 		session->get_stripables (all);
 		for (StripableList::const_iterator i = all.begin(); i != all.end(); ++i) {
-			if ((*i)->is_master() || (*i)->is_auditioner() || (*i)->is_monitor()) {
+			if ((*i)->is_singleton () || (*i)->is_auditioner()) {
 				continue;
 			}
 			std::shared_ptr<SoloControl> sc = (*i)->solo_control();

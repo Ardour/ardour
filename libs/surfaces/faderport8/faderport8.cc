@@ -968,6 +968,7 @@ FaderPort8::filter_stripables (StripableList& strips) const
 
 	bool allow_master = false;
 	bool allow_monitor = false;
+	bool allow_surround = false;
 
 	switch (_ctrls.mix_mode ()) {
 		case MixAudio:
@@ -987,11 +988,13 @@ FaderPort8::filter_stripables (StripableList& strips) const
 			break;
 		case MixUser:
 			allow_master = true;
+			allow_surround = true;
 			flt = &flt_selected;
 			break;
 		case MixOutputs:
 			allow_master = true;
 			allow_monitor = true;
+			allow_surround = true;
 			flt = &flt_mains;
 			break;
 		case MixInputs:
@@ -1005,6 +1008,7 @@ FaderPort8::filter_stripables (StripableList& strips) const
 			/* fallthrough */
 		case MixAll:
 			allow_master = true;
+			allow_surround = true;
 			flt = &flt_all;
 			break;
 	}
@@ -1018,6 +1022,7 @@ FaderPort8::filter_stripables (StripableList& strips) const
 
 		if (!allow_master  && (*s)->is_master ()) { continue; }
 		if (!allow_monitor && (*s)->is_monitor ()) { continue; }
+		if (!allow_surround && (*s)->is_surround_master ()) { continue; }
 
 		if ((*flt)(*s)) {
 			strips.push_back (*s);
