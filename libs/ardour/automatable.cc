@@ -209,6 +209,18 @@ Automatable::describe_parameter (Evoral::Parameter param)
 		return _("Width");
 	} else if (param.type() == PanElevationAutomation) {
 		return _("Elevation");
+	} else if (param.type() == PanSurroundX) {
+		return _("Left/Right");
+	} else if (param.type() == PanSurroundY) {
+		return _("Front/Back");
+	} else if (param.type() == PanSurroundZ) {
+		return _("Elevation");
+	} else if (param.type() == PanSurroundSize) {
+		return _("Object Size");
+	} else if (param.type() == PanSurroundSnap) {
+		return _("Snap to Speaker");
+	} else if (param.type() == BinauralRenderMode) {
+		return _("Binaural Render mode");
 	} else if (param.type() == PhaseAutomation) {
 		return _("Polarity Invert");
 	} else if (param.type() == MidiVelocityAutomation) {

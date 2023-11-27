@@ -76,6 +76,20 @@ URIMap::URIDs::init(URIMap& uri_map)
 	auto_end           = uri_map.uri_to_id(LV2_AUTOMATE_URI__end);
 	auto_parameter     = uri_map.uri_to_id(LV2_AUTOMATE_URI__parameter);
 	auto_value         = uri_map.uri_to_id(LV2_AUTOMATE_URI__value);
+
+	surr_MetaData = uri_map.uri_to_id("urn:ardour:a-vapor#MetaData");
+	surr_Channel  = uri_map.uri_to_id("urn:ardour:a-vapor#Channel");
+	surr_PosX     = uri_map.uri_to_id("urn:ardour:a-vapor#PosX");
+	surr_PosY     = uri_map.uri_to_id("urn:ardour:a-vapor#PosY");
+	surr_PosZ     = uri_map.uri_to_id("urn:ardour:a-vapor#PosZ");
+	surr_Size     = uri_map.uri_to_id("urn:ardour:a-vapor#Size");
+	surr_Snap     = uri_map.uri_to_id("urn:ardour:a-vapor#Snap");
+
+	surr_Settings           = uri_map.uri_to_id("urn:ardour:a-vapor#Settings");
+	surr_BinauralRenderMode = uri_map.uri_to_id("urn:ardour:a-vapor#BinauralRenderMode");
+	surr_ChannelCount       = uri_map.uri_to_id("urn:ardour:a-vapor#ChannelCount");
+	surr_DownmixMode        = uri_map.uri_to_id("urn:ardour:a-vapor#DownmixMode");
+	surr_WarpMode           = uri_map.uri_to_id("urn:ardour:a-vapor#WarpMode");
 #endif
 }
 

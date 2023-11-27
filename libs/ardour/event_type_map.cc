@@ -172,6 +172,24 @@ EventTypeMap::from_symbol(const string& str) const
 		p_type = MonitoringAutomation;
 	} else if (str == "pan-lfe") {
 		p_type = PanLFEAutomation;
+	} else if (str.length() > 10 && str.substr(0, 10) == "pan-sur-x-") {
+		p_type = PanSurroundX;
+		p_id = atoi(str.c_str()+10);
+	} else if (str.length() > 10 && str.substr(0, 10) == "pan-sur-y-") {
+		p_id = atoi(str.c_str()+10);
+		p_type = PanSurroundY;
+	} else if (str.length() > 10 && str.substr(0, 10) == "pan-sur-z-") {
+		p_id = atoi(str.c_str()+10);
+		p_type = PanSurroundZ;
+	} else if (str.length() > 13 && str.substr(0, 13) == "pan-sur-size-") {
+		p_id = atoi(str.c_str()+13);
+		p_type = PanSurroundSize;
+	} else if (str.length() > 13 && str.substr(0, 13) == "pan-sur-snap-") {
+		p_id = atoi(str.c_str()+13);
+		p_type = PanSurroundSnap;
+	} else if (str.length() > 21 && str.substr(0, 21) == "binaural-render-mode-") {
+		p_type = BinauralRenderMode;
+		p_id = atoi(str.c_str()+21);
 	} else if (str.length() > 10 && str.substr(0, 10) == "parameter-") {
 		p_type = PluginAutomation;
 		p_id = atoi(str.c_str()+10);
@@ -254,6 +272,18 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		return "pan-frontback";
 	} else if (t == PanLFEAutomation) {
 		return "pan-lfe";
+	} else if (t == PanSurroundX) {
+		return std::string("pan-sur-x-") + PBD::to_string(param.id());
+	} else if (t == PanSurroundY) {
+		return std::string("pan-sur-y-") + PBD::to_string(param.id());
+	} else if (t == PanSurroundZ) {
+		return std::string("pan-sur-z-") + PBD::to_string(param.id());
+	} else if (t == PanSurroundSize) {
+		return std::string("pan-sur-size-") + PBD::to_string(param.id());
+	} else if (t == PanSurroundSnap) {
+		return std::string("pan-sur-snap-") + PBD::to_string(param.id());
+	} else if (t == BinauralRenderMode) {
+		return std::string("binaural-render-mode-") + PBD::to_string(param.id());
 	} else if (t == SoloAutomation) {
 		return "solo";
 	} else if (t == MuteAutomation) {

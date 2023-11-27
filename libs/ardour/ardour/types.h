@@ -176,6 +176,12 @@ enum AutomationType {
 	InsertReturnLevel,
 	MainOutVolume,
 	MidiVelocityAutomation,
+	PanSurroundX,
+	PanSurroundY,
+	PanSurroundZ,
+	PanSurroundSize,
+	PanSurroundSnap,
+	BinauralRenderMode,
 
 	/* used only by Controllable Descriptor to access send parameters */
 
@@ -958,7 +964,6 @@ struct ProcessedRanges {
 
 	ProcessedRanges() : start { 0, 0 }, end { 0, 0 }, cnt (0) {}
 };
-
 
 } // namespace ARDOUR
 

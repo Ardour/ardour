@@ -101,6 +101,18 @@ public:
 		uint32_t auto_end;
 		uint32_t auto_parameter;
 		uint32_t auto_value;
+		uint32_t surr_MetaData;
+		uint32_t surr_Channel;
+		uint32_t surr_PosX;
+		uint32_t surr_PosY;
+		uint32_t surr_PosZ;
+		uint32_t surr_Size;
+		uint32_t surr_Snap;
+		uint32_t surr_Settings;
+		uint32_t surr_BinauralRenderMode;
+		uint32_t surr_ChannelCount;
+		uint32_t surr_DownmixMode;
+		uint32_t surr_WarpMode;
 #endif
 	};
 

@@ -102,6 +102,31 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		upper  = 2.0f;
 		normal = 1.0f;
 		break;
+	case PanSurroundX:
+		upper  = 1.0f;
+		normal = 0.5f;
+		break;
+	case PanSurroundY:
+		upper  = 1.0f;
+		normal = 0.0f;
+		break;
+	case PanSurroundZ:
+	case PanSurroundSize:
+		upper  = 1.0f;
+		normal = 0.0f;
+		break;
+	case BinauralRenderMode:
+		enumeration = true;
+		integer_step = true;
+		upper  = 3.0f;
+		normal = 0.0f;
+		scale_points = std::shared_ptr<ScalePoints>(new ScalePoints());
+		scale_points->insert (std::make_pair (_("Mid"), 0));
+		scale_points->insert (std::make_pair (_("Off"), 1));
+		scale_points->insert (std::make_pair (_("Near"), 2));
+		scale_points->insert (std::make_pair (_("Far"), 3));
+		break;
+	case PanSurroundSnap:
 	case SoloAutomation:
 	case MuteAutomation:
 		upper  = 1.0f;

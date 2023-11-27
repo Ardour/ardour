@@ -113,24 +113,25 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 		MasterOut = 0x20,
 		MonitorOut = 0x40,
 		Auditioner = 0x80,
-#ifdef MIXBUS
-		Mixbus = 0x1000,
-#endif
 		/* These are for sharing Stripable states between the GUI and other
 		 * user interfaces/control surfaces
 		 */
 		Hidden = 0x100,
-#ifdef MIXBUS
-		MixbusEditorHidden = 0x800,
-#endif
 		/* single bit indicates that the group order is set */
 		OrderSet = 0x400,
 
+#ifdef MIXBUS
+		MixbusEditorHidden = 0x800,
+		Mixbus = 0x1000,
+#endif
 		/* bus type for monitor mixes */
 		FoldbackBus = 0x2000,
 
 		/* has TriggerBox, show on TriggerUI page */
 		TriggerTrack = 0x4000,
+
+		/* bus is the surround master */
+		SurroundMaster = 0x8000,
 
 		/* special mask to delect out "state" bits */
 #ifdef MIXBUS
@@ -139,8 +140,14 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 		StatusMask = (Hidden | TriggerTrack),
 #endif
 
+		/* dedicated [output] busses */
+		MainBus = (MasterOut|MonitorOut|FoldbackBus|SurroundMaster),
+
+		/* These can exist only once and require special attention to be removed */
+		Singleton = (MasterOut|MonitorOut|SurroundMaster),
+
 		/* special mask to delect select type bits */
-		TypeMask = (AudioBus|AudioTrack|MidiTrack|MidiBus|VCA|MasterOut|MonitorOut|Auditioner|FoldbackBus)
+		TypeMask = (AudioBus|AudioTrack|MidiTrack|MidiBus|VCA|MasterOut|MonitorOut|Auditioner|FoldbackBus|SurroundMaster)
 	};
 
 	static const Flag AllStripables; /* mask to use for any route or VCA (but not auditioner) */
@@ -178,7 +185,7 @@ class LIBARDOUR_API PresentationInfo : public PBD::Stateful
 
 	bool hidden() const { return _flags & Hidden; }
 	bool trigger_track () const { return _flags & TriggerTrack; }
-	bool special(bool with_master = true) const { return _flags & ((with_master ? MasterOut : 0)|MonitorOut|Auditioner); }
+	bool special(bool with_master = true) const { return _flags & ((with_master ? MasterOut : 0)|SurroundMaster|MonitorOut|Auditioner); }
 
 	bool flag_match (Flag f) const {
 		/* no flags, match all */

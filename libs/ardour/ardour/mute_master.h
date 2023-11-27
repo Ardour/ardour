@@ -42,10 +42,11 @@ class LIBARDOUR_API MuteMaster : public SessionHandleRef, public PBD::Stateful
 public:
 	/** deliveries to mute when the channel is "muted" */
 	enum MutePoint {
-		PreFader  = 0x1, ///< mute all pre-fader sends
-		PostFader = 0x2, ///< mute all post-fader sends
-		Listen    = 0x4, ///< mute listen out
-		Main      = 0x8  ///< mute main out
+		PreFader     = 0x1, ///< mute all pre-fader sends
+		PostFader    = 0x2, ///< mute all post-fader sends
+		Listen       = 0x4, ///< mute listen out
+		Main         = 0x8, ///< mute main out
+		SurroundSend = 0x10 ///< mute surround send (if any)
 	};
 
 	static const MutePoint AllPoints;
