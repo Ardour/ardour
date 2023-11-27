@@ -40,6 +40,7 @@
 #include "ardour/export_format_specification.h"
 #include "ardour/export_filename.h"
 #include "ardour/soundcloud_upload.h"
+#include "ardour/surround_return.h"
 #include "ardour/system_exec.h"
 #include "pbd/openuri.h"
 #include "pbd/basename.h"
@@ -227,6 +228,11 @@ ExportHandler::start_timespan ()
 	post_processing = false;
 	session.ProcessExport.connect_same_thread (process_connection, boost::bind (&ExportHandler::process, this, _1));
 	process_position = current_timespan->get_start();
+
+	if (!region_export && !current_timespan->vapor ().empty () && session.surround_master ()) {
+		session.surround_master ()->surround_return ()->setup_export (current_timespan->vapor (), current_timespan->get_start (), current_timespan->get_end ());
+	}
+
 	// TODO check if it's a RegionExport.. set flag to skip  process_without_events()
 	return session.start_audio_export (process_position, realtime, region_export);
 }
@@ -377,6 +383,10 @@ ExportHandler::start_timespan_bg (void* eh)
 void
 ExportHandler::finish_timespan ()
 {
+	if (/*!region_export &&*/ !current_timespan->vapor ().empty () && session.surround_master ()) {
+		session.surround_master ()->surround_return ()->finalize_export ();
+	}
+
 	graph_builder->get_analysis_results (export_status->result_map);
 
 	/* work-around: split-channel will produce several files

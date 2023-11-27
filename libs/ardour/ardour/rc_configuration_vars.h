@@ -134,7 +134,6 @@ CONFIG_VARIABLE (ListenPosition, listen_position, "listen-position", AfterFaderL
 CONFIG_VARIABLE (PFLPosition, pfl_position, "pfl-position", PFLFromAfterProcessors)
 CONFIG_VARIABLE (AFLPosition, afl_position, "afl-position", AFLFromAfterProcessors)
 CONFIG_VARIABLE (bool, use_monitor_bus, "use-monitor-bus", false)
-CONFIG_VARIABLE (bool, use_surround_master, "use-surround-master", false)
 
 CONFIG_VARIABLE (bool, solo_control_is_listen_control, "solo-control-is-listen-control", false)
 CONFIG_VARIABLE (bool, exclusive_solo, "exclusive-solo", false)

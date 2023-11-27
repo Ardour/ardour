@@ -95,6 +95,8 @@
 #include "ardour/session.h"
 #include "ardour/solo_control.h"
 #include "ardour/solo_isolate_control.h"
+#include "ardour/surround_return.h"
+#include "ardour/surround_send.h"
 #include "ardour/triggerbox.h"
 #include "ardour/types_convert.h"
 #include "ardour/unknown_processor.h"
@@ -143,6 +145,7 @@ Route::Route (Session& sess, string name, PresentationInfo::Flag flag, DataType 
 
 	_pending_process_reorder.store (0);
 	_pending_listen_change.store (0);
+	_pending_surround_send.store (0);
 	_pending_signals.store (0);
 }
 
@@ -214,8 +217,11 @@ Route::init ()
 	_amp->set_owner (this);
 
 	_polarity.reset (new PolarityProcessor (_session, _phase_control));
-	_polarity->activate();
 	_polarity->set_owner (this);
+
+	if (!is_surround_master ()) {
+		_polarity->activate();
+	}
 
 	if (is_monitor ()) {
 		_amp->set_display_name (_("Monitor"));
@@ -230,7 +236,9 @@ Route::init ()
 	_trim.reset (new Amp (_session, X_("Trim"), _trim_control, false));
 	_trim->set_display_to_user (false);
 
-	if (dynamic_cast<AudioTrack*>(this)) {
+	if (is_surround_master ()) {
+		_trim->deactivate ();
+	} else if (dynamic_cast<AudioTrack*>(this)) {
 		/* we can't do this in the AudioTrack's constructor
 		 * because _trim does not exit then
 		 */
@@ -286,6 +294,17 @@ Route::init ()
 		_monitor_control.reset (new MonitorProcessor (_session));
 		_monitor_control->activate ();
 	}
+
+	if (is_surround_master ()) {
+		_meter_point = _pending_meter_point = MeterPreFader;
+		_surround_return.reset (new SurroundReturn (_session));
+		_surround_return->activate ();
+		panner_shell()->set_bypassed (true);
+
+		_monitor_control.reset (new MonitorProcessor (_session));
+		_monitor_control->activate ();
+	}
+
 	if (_presentation_info.flags() & PresentationInfo::FoldbackBus) {
 		panner_shell()->select_panner_by_uri ("http://ardour.org/plugin/panner_balance");
 	}
@@ -1431,7 +1450,7 @@ Route::clear_processors (Placement p)
 bool
 Route::is_internal_processor (std::shared_ptr<Processor> p) const
 {
-	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim || p == _polarity || (_volume && p == _volume) || (_triggerbox && p == _triggerbox)) {
+	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim || p == _polarity || (_volume && p == _volume) || (_triggerbox && p == _triggerbox) || (_surround_return && p == _surround_return) || (_surround_send && p == _surround_send)) {
 		return true;
 	}
 	return false;
@@ -3174,7 +3193,7 @@ Route::set_processor_state (const XMLNode& node, int version)
 				must_configure = true;
 			}
 			_intreturn->set_state (**niter, version);
-		} else if (is_monitor() && prop->value() == "monitor") {
+		} else if ((is_monitor() || is_surround_master ()) && prop->value() == "monitor") {
 			if (!_monitor_control) {
 				_monitor_control.reset (new MonitorProcessor (_session));
 				must_configure = true;
@@ -3310,6 +3329,10 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 				send->output()->changed.connect_same_thread (*send, boost::bind (&Route::output_change_handler, this, _1, _2));
 			}
 
+		} else if (prop->value() == "sursend") {
+			_surround_send.reset (new SurroundSend (_session, _mute_master));
+			_surround_send->set_owner (this);
+			processor = _surround_send;
 		} else {
 			warning << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
 			return false;
@@ -3437,6 +3460,7 @@ Route::enable_monitor_send ()
 	/* master never sends to monitor section via the normal mechanism */
 	assert (!is_master ());
 	assert (!is_monitor ());
+	assert (!is_surround_master ());
 
 	/* make sure we have one */
 	if (!_monitor_send) {
@@ -3616,6 +3640,14 @@ Route::direct_feeds_according_to_reality (std::shared_ptr<GraphNode> node, bool*
 	}
 
 	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+
+	/* our surround send always feeds the surround master */
+	if (other->is_surround_master () && _surround_send) {
+		if (via_send_only) {
+			*via_send_only = true;
+		}
+		return true;
+	}
 
 	for (ProcessorList::iterator r = _processors.begin(); r != _processors.end(); ++r) {
 
@@ -4141,6 +4173,15 @@ Route::apply_processor_changes_rt ()
 		 */
 		update_signal_latency (true);
 	}
+
+	if (_pending_surround_send.load ()) {
+		Glib::Threads::RWLock::WriterLock pwl (_processor_lock, Glib::Threads::TRY_LOCK);
+		if (pwl.locked()) {
+			_pending_surround_send.store (0);
+			emissions |= EmitSendReturnChange;
+		}
+	}
+
 	if (emissions != 0) {
 		_pending_signals.store (emissions);
 		return true;
@@ -4163,6 +4204,9 @@ Route::emit_pending_signals ()
 	}
 	if (sig & EmitRtProcessorChange) {
 		processors_changed (RouteProcessorChange (RouteProcessorChange::RealTimeChange)); /* EMIT SIGNAL */
+	}
+	if (sig & EmitSendReturnChange) {
+		processors_changed (RouteProcessorChange (RouteProcessorChange::SendReturnChange, false)); /* EMIT SIGNAL */
 	}
 
 	/* this would be a job for the butler.
@@ -4372,6 +4416,9 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 			if (std::shared_ptr<InternalReturn> rtn = std::dynamic_pointer_cast<InternalReturn> (*i)) {
 				rtn->set_playback_offset (0);
 			}
+			if (std::shared_ptr<SurroundReturn> rtn = std::dynamic_pointer_cast<SurroundReturn> (*i)) {
+				rtn->set_playback_offset (0);
+			}
 			// TODO sidechain inputs?!
 		}
 		return 0;
@@ -4451,7 +4498,7 @@ Route::update_signal_latency (bool apply_to_delayline, bool* delayline_update_ne
 					*delayline_update_needed = true;
 				}
 			}
-		} else if (!apply_to_delayline && std::dynamic_pointer_cast<InternalReturn> (*i)) {
+		} else if (!apply_to_delayline && (std::dynamic_pointer_cast<InternalReturn> (*i) || std::dynamic_pointer_cast<SurroundReturn> (*i))) {
 			/* InternalReturn::set_playback_offset() calls set_delay_out(), requires process lock */
 			const samplecnt_t poff = _signal_latency + _output_latency;
 			if (delayline_update_needed && (*i)->playback_offset () != poff) {
@@ -5181,7 +5228,11 @@ Route::setup_invisible_processors ()
 	/* find visible processors */
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		std::shared_ptr<Send> auxsnd = std::dynamic_pointer_cast<Send> ((*i));
+		std::shared_ptr<Send> auxsnd = std::dynamic_pointer_cast<Send> (*i);
+
+		if (std::dynamic_pointer_cast<SurroundSend> (*i)) {
+			continue;
+		}
 
 #ifdef HAVE_BEATBOX
 		/* XXX temporary hack while we decide on visibility */
@@ -5214,6 +5265,11 @@ Route::setup_invisible_processors ()
 		/* add meter just before the fader */
 		assert (!_meter->display_to_user ());
 		new_processors.insert (amp, _meter);
+	}
+
+	/* SURROUND SEND */
+	if (_surround_send) {
+		new_processors.push_back (_surround_send);
 	}
 
 	/* MAIN OUTS */
@@ -5318,6 +5374,15 @@ Route::setup_invisible_processors ()
 		new_processors.push_front (_intreturn);
 	}
 
+	/* SURROUND RETURN */
+	if (_surround_return) {
+		assert (_surround_return && is_surround_master ());
+		new_processors.push_front (_monitor_control);
+
+		assert (!_surround_return->display_to_user ());
+		new_processors.push_front (_surround_return);
+	}
+
 	/* DISK READER & WRITER (for Track objects) */
 
 	if (_disk_reader || _disk_writer) {
@@ -5371,8 +5436,8 @@ Route::setup_invisible_processors ()
 		}
 	}
 
-	/* Polarity Invert (always present) */
-	if (_polarity) {
+	/* Polarity Invert */
+	if (_polarity->active ()) {
 		ProcessorList::iterator reader_pos = find (new_processors.begin(), new_processors.end(), _disk_reader);
 		ProcessorList::iterator polarity_pos;
 		if (reader_pos != new_processors.end()) {
@@ -6353,4 +6418,50 @@ Route::tempo_map_changed ()
 	if (_triggerbox) {
 		_triggerbox->tempo_map_changed ();
 	}
+}
+
+void
+Route::enable_surround_send ()
+{
+	if (is_main_bus ()) {
+		/* no surround sends for you */
+		return;
+	}
+
+	/* Caller must hold process lock */
+	assert (!AudioEngine::instance()->process_lock().trylock());
+
+	/* make sure we have one */
+	if (!_surround_send) {
+		_surround_send.reset (new SurroundSend (_session, _mute_master));
+		_surround_send->set_owner (this);
+		_surround_send->activate ();
+	}
+
+	Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+	configure_processors_unlocked (0, &lm);
+	/* We cannot emit `processors_changed` while holing the `process lock`
+	 * This can lead to deadlock in ARDOUR::Session::route_processors_changed
+	 */
+	_pending_surround_send.store (1);
+}
+
+void
+Route::remove_surround_send ()
+{
+	/* Caller must hold process lock */
+	assert (!AudioEngine::instance()->process_lock().trylock());
+
+	if (!_surround_send) {
+		return;
+	}
+
+	_surround_send.reset ();
+
+	Glib::Threads::RWLock::WriterLock lm (_processor_lock);
+	configure_processors_unlocked (0, &lm);
+	/* We cannot emit `processors_changed` while holing the `process lock`
+	 * This can lead to deadlock in ARDOUR::Session::route_processors_changed
+	 */
+	_pending_surround_send.store (1);
 }

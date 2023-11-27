@@ -46,6 +46,7 @@
 #include "ardour/plugin_insert.h"
 #include "ardour/record_enable_control.h"
 #include "ardour/session.h"
+#include "ardour/surround_pannable.h"
 #include "ardour/uri_map.h"
 #include "ardour/value_as_string.h"
 
@@ -589,6 +590,9 @@ Automatable::control_factory(const Evoral::Parameter& param)
 		control = new GainControl(_a_session, param);
 	} else if (param.type() == BusSendLevel) {
 		control = new GainControl(_a_session, param);
+	} else if (param.type() == PanSurroundX || param.type() == PanSurroundY || param.type() == PanSurroundZ || param.type() == PanSurroundSize || param.type() == PanSurroundSnap || param.type() == BinauralRenderMode) {
+		assert (0);
+		control = new SurroundControllable (_a_session, param.type(), *this);
 	} else if (param.type() == PanAzimuthAutomation || param.type() == PanWidthAutomation || param.type() == PanElevationAutomation) {
 		Pannable* pannable = dynamic_cast<Pannable*>(this);
 		if (pannable) {

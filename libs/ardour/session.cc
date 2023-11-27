@@ -86,6 +86,7 @@
 #include "ardour/graph.h"
 #include "ardour/io_plug.h"
 #include "ardour/luabindings.h"
+#include "ardour/lv2_plugin.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/scene_changer.h"
 #include "ardour/midi_patch_manager.h"
@@ -122,6 +123,7 @@
 #include "ardour/solo_isolate_control.h"
 #include "ardour/source_factory.h"
 #include "ardour/speakers.h"
+#include "ardour/surround_return.h"
 #include "ardour/tempo.h"
 #include "ardour/ticker.h"
 #include "ardour/transport_fsm.h"
@@ -785,6 +787,7 @@ Session::destroy ()
 
 	_master_out.reset ();
 	_monitor_out.reset ();
+	_surround_master.reset ();
 
 	{
 		RCUWriter<RouteList> writer (routes);
@@ -1373,6 +1376,199 @@ Session::reset_monitor_section ()
 	}
 
 	setup_route_monitor_sends (true, false);
+}
+
+void
+Session::remove_surround_master ()
+{
+	if (!_surround_master) {
+		return;
+	}
+
+	/* allow deletion when session is unloaded */
+	if (!_engine.running() && !deletion_in_progress ()) {
+		error << _("Cannot remove monitor section while the engine is offline.") << endmsg;
+		return;
+	}
+
+	/* if we are auditioning, cancel it ... this is a workaround
+	   to a problem (auditioning does not execute the process graph,
+	   which is needed to remove routes when using >1 core for processing)
+	*/
+	cancel_audition ();
+
+	if (!deletion_in_progress ()) {
+		setup_route_surround_sends (false, true);
+		_engine.monitor_port().clear_ports (true);
+	}
+
+	remove_route (_surround_master);
+	if (deletion_in_progress ()) {
+		return;
+	}
+
+	SurroundMasterAddedOrRemoved (); /* EMIT SIGNAL */
+}
+
+bool
+Session::vapor_barrier ()
+{
+#if !(defined (LV2_EXTENDED) && defined (HAVE_LV2_1_10_0))
+	return false;
+#endif
+	if (_vapor_available.has_value ()) {
+		return _vapor_available.value ();
+	}
+
+	bool ok = false;
+	bool ex = false;
+
+	if (nominal_sample_rate () == 48000 || nominal_sample_rate () == 96000) {
+		std::shared_ptr<LV2Plugin> p;
+
+		if (_surround_master) {
+			p = _surround_master->surround_return ()->surround_processor ();
+		} else {
+			PluginManager& mgr (PluginManager::instance ());
+			for (auto const& i : mgr.lv2_plugin_info ()) {
+				if ("urn:ardour:a-vapor" != i->unique_id) {
+					continue;
+				}
+				p = std::dynamic_pointer_cast<LV2Plugin> (i->load (*this));
+				break;
+			}
+		}
+		if (p) {
+			ok = true;
+			ex = p->can_export ();
+		}
+	}
+
+	_vapor_exportable = ex;
+	_vapor_available = ok;
+
+	return ok;
+}
+
+bool
+Session::vapor_export_barrier ()
+{
+#if !(defined (LV2_EXTENDED) && defined (HAVE_LV2_1_10_0))
+	return false;
+#endif
+	if (!_vapor_exportable.has_value ()) {
+		vapor_barrier ();
+	}
+	assert (_vapor_exportable.has_value ());
+	return _vapor_exportable.value ();
+}
+
+void
+Session::add_surround_master ()
+{
+	RouteList rl;
+
+	if (_surround_master) {
+		return;
+	}
+
+	if (!_engine.running()) {
+		error << _("Cannot create surround master while the engine is offline.") << endmsg;
+		return;
+	}
+
+	if (!vapor_barrier()) {
+		error << _("Some surround sound systems require a sample-rate of 48kHz or 96kHz.") << endmsg;
+		return;
+	}
+
+	std::shared_ptr<Route> r (new Route (*this, _("Surround"), PresentationInfo::SurroundMaster, DataType::AUDIO));
+
+	if (r->init ()) {
+		return;
+	}
+
+	BOOST_MARK_ROUTE(r);
+
+	try {
+		Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+		r->input()->ensure_io (ChanCount (), false, this);
+		r->output()->ensure_io (ChanCount (DataType::AUDIO, 16), false, this);
+	} catch (...) {
+		error << _("Cannot create surround master. 'Surround' Port name is not unique.") << endmsg;
+		return;
+	}
+
+	rl.push_back (r);
+	add_routes (rl, false, false, 0);
+
+	assert (_surround_master);
+
+	auto_connect_surround_master ();
+
+	/* Hold process lock while doing this so that we don't hear bits and
+	 * pieces of audio as we work on each route.
+	 */
+
+	setup_route_surround_sends (true, true);
+
+	SurroundMasterAddedOrRemoved (); /* EMIT SIGNAL */
+}
+
+void
+Session::auto_connect_surround_master ()
+{
+	/* compare to auto_connect_io */
+	vector<string> outputs;
+	_engine.get_physical_outputs (DataType::AUDIO, outputs);
+
+	std::shared_ptr<IO> io    = _surround_master->output ();
+	uint32_t            limit = io->n_ports ().n_audio ();
+
+	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+	/* connect binaural outputs, port 12, 13 */
+	for (uint32_t n = 12, p = 0; n < limit && outputs.size () > p; ++n, ++p) {
+		std::shared_ptr<AudioPort> ap = io->audio (n);
+
+		if (io->connect (ap, outputs[p], this)) {
+			error << string_compose (_("cannot connect %1 output %2 to %3"), io->name(), n, outputs[p]) << endmsg;
+			break;
+		}
+	}
+	lm.release ();
+
+	/* Mute non-surround path */
+	if (_monitor_out) {
+		_monitor_out->monitor_control ()->set_mono (true);
+	} else if (_master_out) {
+		_master_out->mute_control ()->set_value (true, PBD::Controllable::NoGroup);
+	}
+
+}
+
+void
+Session::setup_route_surround_sends (bool enable, bool need_process_lock)
+{
+	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+	if (need_process_lock) {
+		/* Hold process lock while doing this so that we don't hear bits and
+		 * pieces of audio as we work on each route.
+		 */
+		lx.acquire();
+	}
+
+	std::shared_ptr<RouteList const> rl = routes.reader ();
+	ProcessorChangeBlocker  pcb (this, false /* XXX */);
+
+	for (auto const& x : *rl) {
+		if (x->can_monitor ()) {
+			if (enable) {
+				x->enable_surround_send ();
+			} else {
+				x->remove_surround_send ();
+			}
+		}
+	}
 }
 
 int
@@ -3222,6 +3418,11 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 					(*x)->remove_monitor_send ();
 				}
 			}
+			if (_surround_master) {
+				(*x)->enable_surround_send();
+			} else {
+				(*x)->remove_surround_send();
+			}
 			/* reconnect ports using information from state */
 			for (auto const& wio : (*x)->all_inputs ()) {
 				std::shared_ptr<IO> io = wio.lock();
@@ -3339,6 +3540,10 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 				_monitor_out = r;
 			}
 
+			if (r->is_surround_master()) {
+				_surround_master = r;
+			}
+
 			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (r);
 			if (tr) {
 				tr->PlaylistChanged.connect_same_thread (*this, boost::bind (&Session::track_playlist_changed, this, std::weak_ptr<Track> (tr)));
@@ -3403,6 +3608,13 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 			if ((*x)->can_monitor ()) {
 				(*x)->enable_monitor_send ();
 			}
+		}
+	}
+
+	if (_surround_master && !loading()) {
+		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
+		for (auto & r : new_routes) {
+			r->enable_surround_send ();
 		}
 	}
 
@@ -3577,6 +3789,10 @@ Session::remove_routes (std::shared_ptr<RouteList> routes_to_remove)
 
 			if (*iter == _monitor_out) {
 				_monitor_out.reset ();
+			}
+
+			if (*iter == _surround_master) {
+				_surround_master.reset ();
 			}
 
 			// We need to disconnect the route's inputs and outputs
@@ -5678,6 +5894,26 @@ Session::next_send_id ()
 }
 
 uint32_t
+Session::next_surround_send_id ()
+{
+	/* this doesn't really loop forever. just think about it */
+
+	while (true) {
+		for (boost::dynamic_bitset<uint32_t>::size_type n = 1; n < surround_send_bitset.size(); ++n) {
+			if (!surround_send_bitset[n]) {
+				surround_send_bitset[n] = true;
+				return n;
+
+			}
+		}
+
+		/* none available, so resize and try again */
+
+		surround_send_bitset.resize (surround_send_bitset.size() + 16, false);
+	}
+}
+
+uint32_t
 Session::next_aux_send_id ()
 {
 	/* this doesn't really loop forever. just think about it */
@@ -5742,6 +5978,18 @@ Session::mark_aux_send_id (uint32_t id)
 }
 
 void
+Session::mark_surround_send_id (uint32_t id)
+{
+	if (id >= surround_send_bitset.size()) {
+		surround_send_bitset.resize (id+16, false);
+	}
+	if (surround_send_bitset[id]) {
+		warning << string_compose (_("surround send ID %1 appears to be in use already"), id) << endmsg;
+	}
+	surround_send_bitset[id] = true;
+}
+
+void
 Session::mark_return_id (uint32_t id)
 {
 	if (id >= return_bitset.size()) {
@@ -5784,6 +6032,17 @@ Session::unmark_aux_send_id (uint32_t id)
 	}
 	if (id < aux_send_bitset.size()) {
 		aux_send_bitset[id] = false;
+	}
+}
+
+void
+Session::unmark_surround_send_id (uint32_t id)
+{
+	if (deletion_in_progress ()) {
+		return;
+	}
+	if (id < surround_send_bitset.size()) {
+		surround_send_bitset[id] = false;
 	}
 }
 

@@ -986,6 +986,7 @@ public:
 	PBD::Signal0<void> IsolatedChanged;
 	PBD::Signal0<void> MonitorChanged;
 	PBD::Signal0<void> MonitorBusAddedOrRemoved;
+	PBD::Signal0<void> SurroundMasterAddedOrRemoved;
 
 	PBD::Signal0<void> session_routes_reconnected;
 
@@ -998,6 +999,7 @@ public:
 	std::shared_ptr<Route> monitor_out() const { return _monitor_out; }
 	std::shared_ptr<Route> master_out() const { return _master_out; }
 	std::shared_ptr<GainControl>  master_volume () const;
+	std::shared_ptr<Route> surround_master() const { return _surround_master; }
 
 	PresentationInfo::order_t master_order_key () const { return _master_out ? _master_out->presentation_info ().order () : -1; }
 	bool ensure_stripable_sort_order ();
@@ -1024,17 +1026,23 @@ public:
 	}
 
 	uint32_t next_send_id();
+	uint32_t next_surround_send_id();
 	uint32_t next_aux_send_id();
 	uint32_t next_return_id();
 	uint32_t next_insert_id();
 	void mark_send_id (uint32_t);
+	void mark_surround_send_id (uint32_t);
 	void mark_aux_send_id (uint32_t);
 	void mark_return_id (uint32_t);
 	void mark_insert_id (uint32_t);
 	void unmark_send_id (uint32_t);
+	void unmark_surround_send_id (uint32_t);
 	void unmark_aux_send_id (uint32_t);
 	void unmark_return_id (uint32_t);
 	void unmark_insert_id (uint32_t);
+
+	bool vapor_barrier ();
+	bool vapor_export_barrier ();
 
 	/* s/w "RAID" management */
 
@@ -1484,6 +1492,12 @@ private:
 
 	void add_monitor_section ();
 	void remove_monitor_section ();
+
+	void add_surround_master ();
+	void remove_surround_master ();
+
+	boost::optional<bool> _vapor_available;
+	boost::optional<bool> _vapor_exportable;
 
 	void update_latency (bool playback);
 	void set_owned_port_public_latency (bool playback);
@@ -2060,6 +2074,7 @@ private:
 	/* INSERT AND SEND MANAGEMENT */
 
 	boost::dynamic_bitset<uint32_t> send_bitset;
+	boost::dynamic_bitset<uint32_t> surround_send_bitset;
 	boost::dynamic_bitset<uint32_t> aux_send_bitset;
 	boost::dynamic_bitset<uint32_t> return_bitset;
 	boost::dynamic_bitset<uint32_t> insert_bitset;
@@ -2198,13 +2213,16 @@ private:
 
 	std::shared_ptr<Route> _master_out;
 	std::shared_ptr<Route> _monitor_out;
+	std::shared_ptr<Route> _surround_master;
 
 	friend class PortManager;
 	void auto_connect_master_bus ();
 	void auto_connect_monitor_bus ();
+	void auto_connect_surround_master ();
 	void auto_connect_io (std::shared_ptr<IO>);
 
 	void setup_route_monitor_sends (bool enable, bool need_process_lock);
+	void setup_route_surround_sends (bool enable, bool need_process_lock);
 
 	int find_all_sources (std::string path, std::set<std::string>& result);
 	int find_all_sources_across_snapshots (std::set<std::string>& result, bool exclude_this_snapshot);

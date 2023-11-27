@@ -97,6 +97,8 @@ class SoloIsolateControl;
 class PhaseControl;
 class MonitorControl;
 class TriggerBox;
+class SurroundReturn;
+class SurroundSend;
 
 class LIBARDOUR_API Route : public Stripable,
                             public GraphNode,
@@ -141,6 +143,8 @@ public:
 	static void set_name_in_state (XMLNode &, const std::string &);
 
 	std::shared_ptr<MonitorControl> monitoring_control() const { return _monitoring_control; }
+	std::shared_ptr<SurroundSend> surround_send() const { return _surround_send; }
+	std::shared_ptr<SurroundReturn> surround_return() const { return _surround_return; }
 
 	MonitorState monitoring_state () const;
 	virtual MonitorState get_input_monitoring_state (bool recording, bool talkback) const { return MonitoringSilence; }
@@ -183,7 +187,7 @@ public:
 	void push_solo_upstream (int32_t delta);
 	void push_solo_isolate_upstream (int32_t delta);
 	bool can_solo () const {
-		return !(is_master() || is_monitor() || is_auditioner() || is_foldbackbus());
+		return !(is_singleton() || is_auditioner() || is_foldbackbus());
 	}
 	bool is_safe () const {
 		return _solo_safe_control->get_value();
@@ -192,6 +196,7 @@ public:
 		return can_solo() || is_foldbackbus ();
 	}
 	void enable_monitor_send ();
+	void enable_surround_send ();
 
 	void set_denormal_protection (bool yn);
 	bool denormal_protection() const;
@@ -260,7 +265,11 @@ public:
 
 	std::shared_ptr<AutomationControl> automation_control_recurse (PBD::ID const & id) const;
 
-	 void automatables (PBD::ControllableSet&) const;
+	void automatables (PBD::ControllableSet&) const;
+
+	void queue_surround_processors_changed () {
+		_pending_surround_send.store (1);
+	}
 
 	/* special processors */
 
@@ -433,6 +442,7 @@ public:
 	int add_aux_send (std::shared_ptr<Route>, std::shared_ptr<Processor>);
 	int add_foldback_send (std::shared_ptr<Route>, bool post_fader);
 	void remove_monitor_send ();
+	void remove_surround_send ();
 
 	/**
 	 * return true if this route feeds the first argument directly, via
@@ -669,6 +679,8 @@ protected:
 	std::shared_ptr<BeatBox>       _beatbox;
 #endif
 	std::shared_ptr<MonitorControl>   _monitoring_control;
+	std::shared_ptr<SurroundSend>     _surround_send;
+	std::shared_ptr<SurroundReturn>   _surround_return;
 
 	DiskIOPoint _disk_io_point;
 
@@ -676,13 +688,15 @@ protected:
 		EmitNone = 0x00,
 		EmitMeterChanged = 0x01,
 		EmitMeterVisibilityChange = 0x02,
-		EmitRtProcessorChange = 0x04
+		EmitRtProcessorChange = 0x04,
+		EmitSendReturnChange = 0x08
 	};
 
-	ProcessorList     _pending_processor_order;
-	std::atomic<int> _pending_process_reorder; // atomic
-	std::atomic<int> _pending_listen_change; // atomic
-	std::atomic<int> _pending_signals; // atomic
+	ProcessorList    _pending_processor_order;
+	std::atomic<int> _pending_process_reorder;
+	std::atomic<int> _pending_listen_change;
+	std::atomic<int> _pending_surround_send;
+	std::atomic<int> _pending_signals;
 
 	MeterPoint     _meter_point;
 	MeterPoint     _pending_meter_point;
