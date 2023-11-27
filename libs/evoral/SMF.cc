@@ -534,6 +534,11 @@ SMF::round_to_file_precision (double val) const
 	return round (val * div) / div;
 }
 
+static bool invalid_char (unsigned char c)
+{
+	return !isprint (c) && c != '\n';
+}
+
 void
 SMF::track_names(vector<string>& names) const
 {
@@ -551,7 +556,9 @@ SMF::track_names(vector<string>& names) const
 			names.push_back (string());
 		} else {
 			if (trk->name) {
-				names.push_back (Glib::convert_with_fallback (trk->name, "UTF-8", "ISO-8859-1", "_"));
+				std::string name (Glib::convert_with_fallback (trk->name, "UTF-8", "ISO-8859-1", "_"));
+				name.erase (std::remove_if (name.begin(), name.end(), invalid_char), name.end());
+				names.push_back (name);
 			} else {
 				char buf[32];
 				sprintf(buf, "t%d", n+1);
@@ -578,7 +585,9 @@ SMF::instrument_names(vector<string>& names) const
 			names.push_back (string());
 		} else {
 			if (trk->instrument) {
-				names.push_back (trk->instrument);
+				std::string name (Glib::convert_with_fallback (trk->instrument, "UTF-8", "ISO-8859-1", "_"));
+				name.erase (std::remove_if (name.begin(), name.end(), invalid_char), name.end());
+				names.push_back (name);
 			} else {
 				char buf[32];
 				sprintf(buf, "i%d", n+1);
