@@ -3973,6 +3973,12 @@ LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLo
 					info->n_inputs.n_audio (), info->n_outputs.n_audio (),
 					count_midi_in, count_midi_out,
 					count_ctrl_in, count_ctrl_out), false);
+
+		if (uri == "urn:ardour:a-vapor" || uri == "urn:ardour:a-atmos") {
+			info->internal = true;
+			cb (uri, PluginScanLogEntry::OK, "", true);
+		}
+
 		plugs->push_back(info);
 	}
 

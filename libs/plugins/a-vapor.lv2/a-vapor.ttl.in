@@ -1,0 +1,859 @@
+@prefix atom:  <http://lv2plug.in/ns/ext/atom#> .
+@prefix doap:  <http://usefulinc.com/ns/doap#> .
+@prefix foaf:  <http://xmlns.com/foaf/0.1/> .
+@prefix lv2:   <http://lv2plug.in/ns/lv2core#> .
+@prefix pg:    <http://lv2plug.in/ns/ext/port-groups#> .
+@prefix rdf:   <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:  <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix rsz:   <http://lv2plug.in/ns/ext/resize-port#> .
+@prefix units: <http://lv2plug.in/ns/extensions/units#> .
+@prefix urid:  <http://lv2plug.in/ns/ext/urid#> .
+
+@prefix avapor: <urn:ardour:a-vapor> .
+
+<http://ardour.org/credits.html>
+	a foaf:Person;
+	foaf:name "Ardour Community";
+	foaf:homepage <http://ardour.org/> .
+
+avapor:SevenOneFour
+	a pg:SevenPointOneGroup, pg:OutputGroup;
+	lv2:name "7.1.4";
+	lv2:symbol "surround".
+
+avapor:FiveOne
+	a pg:FivePointOneGroup, pg:OutputGroup;
+	lv2:name "5.1";
+	lv2:symbol "loudness".
+
+avapor:Binaural
+	a pg:StereoGroup, pg:OutputGroup;
+	lv2:name "Binaural";
+	lv2:symbol "binaural".
+
+<urn:ardour:a-vapor>
+	a doap:Project, lv2:Plugin, lv2:SpatialPlugin;
+
+	doap:name "ACE Vapor";
+	rdfs:comment "AtmosPhere Dummy Processor";
+
+	doap:maintainer <http://ardour.org/credits.html>;
+	doap:license <http://usefulinc.com/doap/licenses/gpl>;
+
+	lv2:minorVersion 0;
+	lv2:microVersion 0;
+	lv2:requiredFeature urid:map;
+	lv2:optionalFeature lv2:hardRTCapable;
+	lv2:optionalFeature <http://harrisonconsoles.com/lv2/routing#connectAllOutputs>;
+
+	lv2:port
+	[
+		a atom:AtomPort, lv2:InputPort;
+		atom:bufferType atom:Sequence;
+		lv2:designation lv2:control;
+		lv2:index 0;
+		lv2:symbol "control";
+		lv2:name "Control";
+		rsz:minimumSize 4096;
+	] , [
+		a atom:AtomPort, lv2:OutputPort;
+		atom:bufferType atom:Sequence;
+		lv2:designation lv2:control;
+		lv2:index 1;
+		lv2:symbol "notify";
+		lv2:name "Notify";
+		rsz:minimumSize 4096;
+	] , [
+		a lv2:InputPort, lv2:ControlPort;
+		lv2:index 2;
+		lv2:name "Enable";
+		lv2:symbol "enable";
+		lv2:default 1;
+		lv2:minimum 0;
+		lv2:maximum 1;
+		lv2:portProperty lv2:integer, lv2:toggled;
+		lv2:designation lv2:enabled;
+	] , [
+		a lv2:ControlPort, lv2:OutputPort;
+		lv2:index 3;
+		lv2:symbol "latency";
+		lv2:name "Signal Latency";
+		lv2:minimum 0;
+		lv2:maximum 8192;
+		lv2:portProperty lv2:reportsLatency, lv2:integer;
+		units:unit units:frame;
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 4;
+		lv2:symbol "in0";
+		lv2:name "In 0";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 5;
+		lv2:symbol "in1";
+		lv2:name "In 1";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 6;
+		lv2:symbol "in2";
+		lv2:name "In 2";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 7;
+		lv2:symbol "in3";
+		lv2:name "In 3";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 8;
+		lv2:symbol "in4";
+		lv2:name "In 4";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 9;
+		lv2:symbol "in5";
+		lv2:name "In 5";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 10;
+		lv2:symbol "in6";
+		lv2:name "In 6";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 11;
+		lv2:symbol "in7";
+		lv2:name "In 7";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 12;
+		lv2:symbol "in8";
+		lv2:name "In 8";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 13;
+		lv2:symbol "in9";
+		lv2:name "In 9";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 14;
+		lv2:symbol "in10";
+		lv2:name "In 10";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 15;
+		lv2:symbol "in11";
+		lv2:name "In 11";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 16;
+		lv2:symbol "in12";
+		lv2:name "In 12";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 17;
+		lv2:symbol "in13";
+		lv2:name "In 13";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 18;
+		lv2:symbol "in14";
+		lv2:name "In 14";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 19;
+		lv2:symbol "in15";
+		lv2:name "In 15";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 20;
+		lv2:symbol "in16";
+		lv2:name "In 16";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 21;
+		lv2:symbol "in17";
+		lv2:name "In 17";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 22;
+		lv2:symbol "in18";
+		lv2:name "In 18";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 23;
+		lv2:symbol "in19";
+		lv2:name "In 19";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 24;
+		lv2:symbol "in20";
+		lv2:name "In 20";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 25;
+		lv2:symbol "in21";
+		lv2:name "In 21";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 26;
+		lv2:symbol "in22";
+		lv2:name "In 22";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 27;
+		lv2:symbol "in23";
+		lv2:name "In 23";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 28;
+		lv2:symbol "in24";
+		lv2:name "In 24";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 29;
+		lv2:symbol "in25";
+		lv2:name "In 25";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 30;
+		lv2:symbol "in26";
+		lv2:name "In 26";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 31;
+		lv2:symbol "in27";
+		lv2:name "In 27";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 32;
+		lv2:symbol "in28";
+		lv2:name "In 28";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 33;
+		lv2:symbol "in29";
+		lv2:name "In 29";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 34;
+		lv2:symbol "in30";
+		lv2:name "In 30";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 35;
+		lv2:symbol "in31";
+		lv2:name "In 31";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 36;
+		lv2:symbol "in32";
+		lv2:name "In 32";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 37;
+		lv2:symbol "in33";
+		lv2:name "In 33";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 38;
+		lv2:symbol "in34";
+		lv2:name "In 34";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 39;
+		lv2:symbol "in35";
+		lv2:name "In 35";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 40;
+		lv2:symbol "in36";
+		lv2:name "In 36";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 41;
+		lv2:symbol "in37";
+		lv2:name "In 37";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 42;
+		lv2:symbol "in38";
+		lv2:name "In 38";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 43;
+		lv2:symbol "in39";
+		lv2:name "In 39";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 44;
+		lv2:symbol "in40";
+		lv2:name "In 40";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 45;
+		lv2:symbol "in41";
+		lv2:name "In 41";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 46;
+		lv2:symbol "in42";
+		lv2:name "In 42";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 47;
+		lv2:symbol "in43";
+		lv2:name "In 43";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 48;
+		lv2:symbol "in44";
+		lv2:name "In 44";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 49;
+		lv2:symbol "in45";
+		lv2:name "In 45";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 50;
+		lv2:symbol "in46";
+		lv2:name "In 46";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 51;
+		lv2:symbol "in47";
+		lv2:name "In 47";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 52;
+		lv2:symbol "in48";
+		lv2:name "In 48";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 53;
+		lv2:symbol "in49";
+		lv2:name "In 49";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 54;
+		lv2:symbol "in50";
+		lv2:name "In 50";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 55;
+		lv2:symbol "in51";
+		lv2:name "In 51";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 56;
+		lv2:symbol "in52";
+		lv2:name "In 52";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 57;
+		lv2:symbol "in53";
+		lv2:name "In 53";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 58;
+		lv2:symbol "in54";
+		lv2:name "In 54";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 59;
+		lv2:symbol "in55";
+		lv2:name "In 55";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 60;
+		lv2:symbol "in56";
+		lv2:name "In 56";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 61;
+		lv2:symbol "in57";
+		lv2:name "In 57";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 62;
+		lv2:symbol "in58";
+		lv2:name "In 58";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 63;
+		lv2:symbol "in59";
+		lv2:name "In 59";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 64;
+		lv2:symbol "in60";
+		lv2:name "In 60";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 65;
+		lv2:symbol "in61";
+		lv2:name "In 61";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 66;
+		lv2:symbol "in62";
+		lv2:name "In 62";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 67;
+		lv2:symbol "in63";
+		lv2:name "In 63";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 68;
+		lv2:symbol "in64";
+		lv2:name "In 64";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 69;
+		lv2:symbol "in65";
+		lv2:name "In 65";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 70;
+		lv2:symbol "in66";
+		lv2:name "In 66";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 71;
+		lv2:symbol "in67";
+		lv2:name "In 67";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 72;
+		lv2:symbol "in68";
+		lv2:name "In 68";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 73;
+		lv2:symbol "in69";
+		lv2:name "In 69";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 74;
+		lv2:symbol "in70";
+		lv2:name "In 70";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 75;
+		lv2:symbol "in71";
+		lv2:name "In 71";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 76;
+		lv2:symbol "in72";
+		lv2:name "In 72";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 77;
+		lv2:symbol "in73";
+		lv2:name "In 73";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 78;
+		lv2:symbol "in74";
+		lv2:name "In 74";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 79;
+		lv2:symbol "in75";
+		lv2:name "In 75";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 80;
+		lv2:symbol "in76";
+		lv2:name "In 76";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 81;
+		lv2:symbol "in77";
+		lv2:name "In 77";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 82;
+		lv2:symbol "in78";
+		lv2:name "In 78";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 83;
+		lv2:symbol "in79";
+		lv2:name "In 79";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 84;
+		lv2:symbol "in80";
+		lv2:name "In 80";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 85;
+		lv2:symbol "in81";
+		lv2:name "In 81";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 86;
+		lv2:symbol "in82";
+		lv2:name "In 82";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 87;
+		lv2:symbol "in83";
+		lv2:name "In 83";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 88;
+		lv2:symbol "in84";
+		lv2:name "In 84";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 89;
+		lv2:symbol "in85";
+		lv2:name "In 85";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 90;
+		lv2:symbol "in86";
+		lv2:name "In 86";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 91;
+		lv2:symbol "in87";
+		lv2:name "In 87";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 92;
+		lv2:symbol "in88";
+		lv2:name "In 88";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 93;
+		lv2:symbol "in89";
+		lv2:name "In 89";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 94;
+		lv2:symbol "in90";
+		lv2:name "In 90";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 95;
+		lv2:symbol "in91";
+		lv2:name "In 91";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 96;
+		lv2:symbol "in92";
+		lv2:name "In 92";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 97;
+		lv2:symbol "in93";
+		lv2:name "In 93";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 98;
+		lv2:symbol "in94";
+		lv2:name "In 94";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 99;
+		lv2:symbol "in95";
+		lv2:name "In 95";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 100;
+		lv2:symbol "in96";
+		lv2:name "In 96";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 101;
+		lv2:symbol "in97";
+		lv2:name "In 97";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 102;
+		lv2:symbol "in98";
+		lv2:name "In 98";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 103;
+		lv2:symbol "in99";
+		lv2:name "In 99";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 104;
+		lv2:symbol "in100";
+		lv2:name "In 100";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 105;
+		lv2:symbol "in101";
+		lv2:name "In 101";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 106;
+		lv2:symbol "in102";
+		lv2:name "In 102";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 107;
+		lv2:symbol "in103";
+		lv2:name "In 103";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 108;
+		lv2:symbol "in104";
+		lv2:name "In 104";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 109;
+		lv2:symbol "in105";
+		lv2:name "In 105";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 110;
+		lv2:symbol "in106";
+		lv2:name "In 106";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 111;
+		lv2:symbol "in107";
+		lv2:name "In 107";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 112;
+		lv2:symbol "in108";
+		lv2:name "In 108";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 113;
+		lv2:symbol "in109";
+		lv2:name "In 109";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 114;
+		lv2:symbol "in110";
+		lv2:name "In 110";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 115;
+		lv2:symbol "in111";
+		lv2:name "In 111";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 116;
+		lv2:symbol "in112";
+		lv2:name "In 112";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 117;
+		lv2:symbol "in113";
+		lv2:name "In 113";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 118;
+		lv2:symbol "in114";
+		lv2:name "In 114";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 119;
+		lv2:symbol "in115";
+		lv2:name "In 115";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 120;
+		lv2:symbol "in116";
+		lv2:name "In 116";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 121;
+		lv2:symbol "in117";
+		lv2:name "In 117";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 122;
+		lv2:symbol "in118";
+		lv2:name "In 118";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 123;
+		lv2:symbol "in119";
+		lv2:name "In 119";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 124;
+		lv2:symbol "in120";
+		lv2:name "In 120";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 125;
+		lv2:symbol "in121";
+		lv2:name "In 121";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 126;
+		lv2:symbol "in122";
+		lv2:name "In 122";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 127;
+		lv2:symbol "in123";
+		lv2:name "In 123";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 128;
+		lv2:symbol "in124";
+		lv2:name "In 124";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 129;
+		lv2:symbol "in125";
+		lv2:name "In 125";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 130;
+		lv2:symbol "in126";
+		lv2:name "In 126";
+	], [
+		a lv2:AudioPort, lv2:InputPort;
+		lv2:index 131;
+		lv2:symbol "in127";
+		lv2:name "In 127";
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 132;
+		lv2:symbol "surround0";
+		lv2:name "7.1.4 Left";
+		pg:group avapor:SevenOneFour;
+		lv2:designation pg:left;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 133;
+		lv2:symbol "surround1";
+		lv2:name "7.1.4 Right";
+		pg:group avapor:SevenOneFour;
+		lv2:designation pg:right;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 134;
+		lv2:symbol "surround2";
+		lv2:name "7.1.4 Center";
+		pg:group avapor:SevenOneFour;
+		lv2:designation pg:center;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 135;
+		lv2:symbol "surround3";
+		lv2:name "7.1.4 LFE";
+		pg:group avapor:SevenOneFour;
+		lv2:designation pg:lowFrequencyEffects;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 136;
+		lv2:symbol "surround4";
+		lv2:name "7.1.4 Left Side";
+		pg:group avapor:SevenOneFour;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 137;
+		lv2:symbol "surround5";
+		lv2:name "7.1.4 Right Side";
+		pg:group avapor:SevenOneFour;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 138;
+		lv2:symbol "surround6";
+		lv2:name "7.1.4 Left Rear";
+		pg:group avapor:SevenOneFour;
+		lv2:designation pg:rearLeft;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 139;
+		lv2:symbol "surround7";
+		lv2:name "7.1.4 Right Rear";
+		pg:group avapor:SevenOneFour;
+		lv2:designation pg:rearRight;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 140;
+		lv2:symbol "surround8";
+		lv2:name "7.1.4 Left Front High";
+		pg:group avapor:SevenOneFour;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 141;
+		lv2:symbol "surround9";
+		lv2:name "7.1.4 Right Front High";
+		pg:group avapor:SevenOneFour;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 142;
+		lv2:symbol "surround10";
+		lv2:name "7.1.4 Left Rear High";
+		pg:group avapor:SevenOneFour;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 143;
+		lv2:symbol "surround11";
+		lv2:name "7.1.4 Right Rear High";
+		pg:group avapor:SevenOneFour;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 144;
+		lv2:symbol "binaural0";
+		lv2:name "Binaural Left";
+		pg:group avapor:Binaural;
+		lv2:designation pg:left;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 145;
+		lv2:symbol "binaural1";
+		lv2:name "Binaural Right";
+		pg:group avapor:Binaural;
+		lv2:designation pg:right;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 146;
+		lv2:symbol "loudness0";
+		lv2:name "Loudness Left";
+		pg:group avapor:FiveOne;
+		lv2:designation pg:left;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 147;
+		lv2:symbol "loudness1";
+		lv2:name "Loudness Right";
+		pg:group avapor:FiveOne;
+		lv2:designation pg:right;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 148;
+		lv2:symbol "loudness2";
+		lv2:name "Loudness Center";
+		pg:group avapor:FiveOne;
+		lv2:designation pg:center;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 149;
+		lv2:symbol "loudness3";
+		lv2:name "Loudness LFE";
+		pg:group avapor:FiveOne;
+		lv2:designation pg:lowFrequencyEffects;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 150;
+		lv2:symbol "loudness4";
+		lv2:name "Loudness Left Rear";
+		pg:group avapor:FiveOne;
+		lv2:designation pg:rearLeft;
+	], [
+		a lv2:AudioPort, lv2:OutputPort;
+		lv2:index 151;
+		lv2:symbol "loudness5";
+		lv2:name "Loudness Right Rear";
+		pg:group avapor:FiveOne;
+		lv2:designation pg:rearRight;
+	].

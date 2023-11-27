@@ -335,6 +335,7 @@ children = [
         'libs/plugins/a-eq.lv2',
         'libs/plugins/a-reverb.lv2',
         'libs/plugins/a-fluidsynth.lv2',
+        #'libs/plugins/a-vapor.lv2',
         # arch independent data
         'share/export',
         'share/media',
