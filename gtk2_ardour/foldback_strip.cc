@@ -1060,7 +1060,7 @@ FoldbackStrip::create_selected_sends (ARDOUR::Placement p, bool)
 	_session->get_stripables (*slist, fl);
 
 	for (StripableList::iterator i = (*slist).begin (); i != (*slist).end (); ++i) {
-		if ((*i)->is_selected () && !(*i)->is_master () && !(*i)->is_monitor ()) {
+		if ((*i)->is_selected () && !(*i)->is_main_bus ()) {
 			std::shared_ptr<Route> rt = std::dynamic_pointer_cast<Route> (*i);
 			if (rt) {
 				rt->add_foldback_send (_route, p == PostFader);

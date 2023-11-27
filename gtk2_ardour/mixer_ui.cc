@@ -1467,7 +1467,7 @@ Mixer_UI::set_all_strips_visibility (bool yn)
 				continue;
 			}
 
-			if (strip->route()->is_master() || strip->route()->is_monitor()) {
+			if (strip->route()->is_singleton()) {
 				continue;
 			}
 
@@ -1499,7 +1499,7 @@ Mixer_UI::set_all_audio_midi_visibility (int tracks, bool yn)
 				continue;
 			}
 
-			if (strip->route()->is_master() || strip->route()->is_monitor()) {
+			if (strip->route()->is_singleton()) {
 				continue;
 			}
 
@@ -1770,7 +1770,7 @@ Mixer_UI::redisplay_track_list ()
 
 		} else {
 
-			if (stripable->is_master() || stripable->is_monitor()) {
+			if (stripable->is_singleton()) {
 				/* do nothing, these cannot be hidden */
 			} else {
 				if (strip->packed()) {
@@ -2047,6 +2047,9 @@ Mixer_UI::stripable_property_changed (const PropertyChange& what_changed, std::w
 		}
 	}
 
+	if (s->is_surround_master ()) {
+		return;
+	}
 	if (s->is_master ()) {
 		return;
 	}

@@ -136,7 +136,7 @@ PortExportChannelSelector::fill_route_list ()
 	routes.sort (Stripable::Sorter ());
 
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
-		if ((*it)->is_master () || (*it)->is_monitor ()) {
+		if ((*it)->is_main_bus ()) {
 			continue;
 		}
 		if ((*it)->output()->n_ports ().n_audio () > 0) {
@@ -838,7 +838,7 @@ TrackExportChannelSelector::fill_list()
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		if (!std::dynamic_pointer_cast<Track>(*it)) {
 			// not a track, must be a bus
-			if ((*it)->is_master () || (*it)->is_monitor ()) {
+			if ((*it)->is_main_bus ()) {
 				continue;
 			}
 			if (!(*it)->active ()) {

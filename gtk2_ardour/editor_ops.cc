@@ -8299,7 +8299,7 @@ Editor::_remove_tracks ()
 		}
 		routes.push_back (rtv->route());
 
-		if (rtv->route()->is_master() || rtv->route()->is_monitor()) {
+		if (rtv->route()->is_singleton ()) {
 			special_bus = true;
 		}
 	}

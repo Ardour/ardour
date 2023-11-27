@@ -536,6 +536,9 @@ Meterbridge::add_strips (RouteList& routes)
 		if (route->is_monitor()) {
 			continue;
 		}
+		if (route->is_surround_master()) {
+			continue;
+		}
 
 		strip = new MeterStrip (_session, route);
 		strips.push_back (MeterBridgeStrip(strip));

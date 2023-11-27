@@ -2254,7 +2254,7 @@ ProcessorBox::build_possible_aux_menu ()
 		return 0;
 	}
 
-	if (_route->is_monitor () || _route->is_foldbackbus () || _route->is_master ()) {
+	if (_route->is_main_bus ()) {
 		return 0;
 	}
 
@@ -2263,11 +2263,8 @@ ProcessorBox::build_possible_aux_menu ()
 	MenuList& items = menu->items();
 
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
-		if ((*r)->is_master() || (*r)->is_monitor () || *r == _route) {
-			/* don't allow sending to master or monitor or to self */
-			continue;
-		}
-		if ((*r)->is_foldbackbus ()) {
+		if ((*r)->is_main_bus() || *r == _route) {
+			/* don't allow sending to master, monitor, folback, surround or to self */
 			continue;
 		}
 		if (_route->internal_send_for (*r)) {
@@ -2290,7 +2287,7 @@ ProcessorBox::build_possible_listener_menu ()
 		return 0;
 	}
 
-	if (_route->is_monitor () || _route->is_foldbackbus ()) {
+	if (_route->is_monitor () || _route->is_foldbackbus () || _route->is_surround_master ()) {
 		return 0;
 	}
 
@@ -2299,8 +2296,8 @@ ProcessorBox::build_possible_listener_menu ()
 	MenuList& items = menu->items();
 
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
-		if ((*r)->is_master() || (*r)->is_monitor () || *r == _route) {
-			/* don't allow sending to master or monitor or to self */
+		if ((*r)->is_singleton () || *r == _route) {
+			/* don't allow sending to master or monitor, surround or to self */
 			continue;
 		}
 		if (!(*r)->is_foldbackbus ()) {
@@ -2326,7 +2323,7 @@ ProcessorBox::build_possible_remove_listener_menu ()
 		return 0;
 	}
 
-	if (_route->is_monitor () || _route->is_foldbackbus ()) {
+	if (_route->is_monitor () || _route->is_foldbackbus () || _route->is_surround_master ()) {
 		return 0;
 	}
 
@@ -2335,7 +2332,7 @@ ProcessorBox::build_possible_remove_listener_menu ()
 	MenuList& items = menu->items();
 
 	for (RouteList::iterator r = rl->begin(); r != rl->end(); ++r) {
-		if ((*r)->is_master() || (*r)->is_monitor () || *r == _route) {
+		if ((*r)->is_singleton() || *r == _route) {
 			/* don't allow sending to master or monitor or to self */
 			continue;
 		}
@@ -2415,8 +2412,8 @@ ProcessorBox::show_processor_menu (int arg)
 		}
 	}
 
-	ActionManager::get_action (X_("ProcessorMenu"), "newinsert")->set_sensitive (!_route->is_monitor () && !_route->is_foldbackbus ());
-	ActionManager::get_action (X_("ProcessorMenu"), "newsend")->set_sensitive (!_route->is_monitor () && !_route->is_foldbackbus ());
+	ActionManager::get_action (X_("ProcessorMenu"), "newinsert")->set_sensitive (!_route->is_monitor () && !_route->is_foldbackbus () && !_route->is_surround_master ());
+	ActionManager::get_action (X_("ProcessorMenu"), "newsend")->set_sensitive (!_route->is_monitor () && !_route->is_foldbackbus () && !_route->is_surround_master ());
 
 	ProcessorEntry* single_selection = 0;
 	if (processor_display.selection().size() == 1) {

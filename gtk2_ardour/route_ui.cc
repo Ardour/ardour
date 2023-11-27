@@ -517,7 +517,7 @@ RouteUI::mute_press (GdkEventButton* ev)
 				*copy = _session->get_stripables ();
 
 				for (StripableList::iterator i = copy->begin(); i != copy->end(); ) {
-					if ((*i)->is_master() || (*i)->is_monitor()) {
+					if ((*i)->is_singleton ()) {
 						i = copy->erase (i);
 					} else {
 						++i;
@@ -1817,7 +1817,7 @@ RouteUI::set_route_active (bool a, bool apply_to_selection)
 {
 	if (apply_to_selection) {
 		ARDOUR_UI::instance()->the_editor().get_selection().tracks.foreach_route_ui (boost::bind (&RouteUI::set_route_active, _1, a, false));
-	} else if (!is_master ()
+	} else if (!is_singleton ()
 #ifdef MIXBUS
 		         && !_route->mixbus()
 #endif
@@ -1877,6 +1877,12 @@ bool
 RouteUI::is_master () const
 {
 	return _route && _route->is_master ();
+}
+
+bool
+RouteUI::is_singleton () const
+{
+	return _route && _route->is_singleton ();
 }
 
 bool

@@ -585,7 +585,7 @@ RouteListBase::add_stripables (StripableList& slist)
 			midi_trk = std::dynamic_pointer_cast<MidiTrack> (stripable);
 
 			row[_columns.is_track]    = (std::dynamic_pointer_cast<Track> (stripable) != 0);
-			row[_columns.activatable] = !stripable->is_master ();
+			row[_columns.activatable] = !stripable->is_singleton ();
 
 			if (midi_trk) {
 				row[_columns.is_input_active] = midi_trk->input_active ();

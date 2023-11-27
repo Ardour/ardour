@@ -70,7 +70,7 @@ MixerGroupTabs::compute_tabs () const
 			continue;
 		}
 
-		if (s->route()->is_master() || s->route()->is_monitor() || !s->marked_for_display()) {
+		if (s->route()->is_main_bus () || !s->marked_for_display()) {
 			continue;
 		}
 #ifdef MIXBUS
@@ -172,7 +172,7 @@ MixerGroupTabs::routes_for_tab (Tab const * t) const
 			continue;
 		}
 
-		if (s->route()->is_master() || s->route()->is_monitor() || !s->marked_for_display()) {
+		if (s->route()->is_main_bus () || !s->marked_for_display()) {
 			continue;
 		}
 

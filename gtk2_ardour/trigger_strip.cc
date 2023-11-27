@@ -262,7 +262,7 @@ TriggerStrip::build_route_ops_menu ()
 		items.push_back (SeparatorElem());
 	}
 
-	if ((!_route->is_master() || !active)
+	if ((!_route->is_singleton () || !active)
 #ifdef MIXBUS
 			&& !_route->mixbus()
 #endif
@@ -325,7 +325,7 @@ TriggerStrip::build_route_ops_menu ()
 		}
 #endif
 
-		if (!_route->is_master()) {
+		if (!_route->is_singleton ()) {
 			items.push_back (SeparatorElem());
 			items.push_back (MenuElem (_("Duplicate..."), sigc::mem_fun (*this, &RouteUI::duplicate_selected_routes)));
 			items.push_back (SeparatorElem());

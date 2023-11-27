@@ -712,7 +712,7 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 
 		/* non-master bus */
 
-		if (!_route->is_master()) {
+		if (!_route->is_main_bus ()) {
 			if (ARDOUR::Profile->get_mixbus()) {
 				rec_mon_table.attach (*show_sends_button, 0, 3, 0, 2);
 			} else {
@@ -1098,7 +1098,7 @@ MixerStrip::build_route_ops_menu ()
 			items.push_back (SeparatorElem());
 		}
 
-		if (!_route->is_master()
+		if (!_route->is_singleton ()
 #ifdef MIXBUS
 				&& !_route->mixbus()
 #endif
@@ -1118,7 +1118,7 @@ MixerStrip::build_route_ops_menu ()
 		items.push_back (SeparatorElem());
 	}
 
-	if ((!_route->is_master() || !active)
+	if ((!_route->is_singleton () || !active)
 #ifdef MIXBUS
 			&& !_route->mixbus()
 #endif
@@ -1191,7 +1191,7 @@ MixerStrip::build_route_ops_menu ()
 		}
 #endif
 
-		if (!_route->is_master()) {
+		if (!_route->is_singleton ()) {
 			items.push_back (SeparatorElem());
 			items.push_back (MenuElem (_("Duplicate..."), sigc::mem_fun (*this, &RouteUI::duplicate_selected_routes)));
 			items.push_back (SeparatorElem());

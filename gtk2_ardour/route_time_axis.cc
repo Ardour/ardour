@@ -807,7 +807,7 @@ RouteTimeAxisView::build_display_menu ()
 		r.push_back (route ());
 	}
 
-	if (!_route->is_master()) {
+	if (!_route->is_singleton ()) {
 		route_group_menu->build (r);
 		items.push_back (MenuElem (_("Group"), *route_group_menu->menu ()));
 	}
@@ -826,7 +826,7 @@ RouteTimeAxisView::build_display_menu ()
 		if (!r) {
 			continue;
 		}
-		always_active |= r->route()->is_master();
+		always_active |= r->route()->is_singleton ();
 #ifdef MIXBUS
 		always_active |= r->route()->mixbus() != 0;
 #endif
@@ -885,12 +885,14 @@ RouteTimeAxisView::build_display_menu ()
 
 	items.push_back (SeparatorElem());
 	items.push_back (MenuElem (_("Hide"), sigc::bind (sigc::mem_fun(_editor, &PublicEditor::hide_track_in_display), this, true)));
-	if (_route && !_route->is_master()) {
+
+	if (_route && !_route->is_singleton ()) {
 		items.push_back (SeparatorElem());
 		items.push_back (MenuElem (_("Duplicate..."), boost::bind (&ARDOUR_UI::start_duplicate_routes, ARDOUR_UI::instance())));
+
+		items.push_back (SeparatorElem());
+		items.push_back (MenuElem (_("Remove"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
 	}
-	items.push_back (SeparatorElem());
-	items.push_back (MenuElem (_("Remove"), sigc::mem_fun(_editor, &PublicEditor::remove_tracks)));
 }
 
 void

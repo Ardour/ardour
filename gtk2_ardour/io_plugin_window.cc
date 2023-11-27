@@ -621,7 +621,7 @@ IOPluginWindow::IOButton::button_press (GdkEventButton* ev)
 		if (_pre) {
 			/* suggest connecting output of io-plugins running before process to route inputs */
 			for (auto const& i : copy) {
-				if (i->is_foldbackbus () || i->is_monitor ()) {
+				if (i->is_foldbackbus () || i->is_monitor () || i->is_surround_master ()) {
 					continue;
 				}
 				maybe_add_bundle_to_menu (i->input ()->bundle ());

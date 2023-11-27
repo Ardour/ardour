@@ -99,10 +99,8 @@ DuplicateRouteDialog::restart (Session* s)
 
 		if (std::dynamic_pointer_cast<Track> (r)) {
 			ntracks++;
-		} else {
-			if (!r->is_master() && !r->is_monitor()) {
-				nbusses++;
-			}
+		} else if (!r->is_main_bus()) {
+			nbusses++;
 		}
 	}
 
@@ -185,7 +183,7 @@ DuplicateRouteDialog::on_response (int response)
 			continue;
 		}
 
-		if ((*s)->is_master() || (*s)->is_monitor()) {
+		if ((*s)->is_main_bus ()) {
 			/* no option to duplicate these */
 			continue;
 		}
