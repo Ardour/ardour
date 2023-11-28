@@ -75,22 +75,6 @@ using namespace PBD;
  *    - Video file import
  */
 
-#define PRINT_I(fmt, ...)                                                                                                                 \
-	{                                                                                                                                 \
-		fprintf (stderr, "[\033[1;38;5;81mi\x1B[0m] \x1b[38;5;239m%s : %s() on line %i :\x1B[0m ", __FILE__, __func__, __LINE__); \
-		fprintf (stderr, fmt, ##__VA_ARGS__);                                                                                     \
-	}
-#define PRINT_W(fmt, ...)                                                                                                          \
-	{                                                                                                                          \
-		fprintf (stderr, "[\x1B[33mw\x1B[0m] \x1b[38;5;239m%s : %s() on line %i :\x1B[0m ", __FILE__, __func__, __LINE__); \
-		fprintf (stderr, fmt, ##__VA_ARGS__);                                                                              \
-	}
-#define PRINT_E(fmt, ...)                                                                                                          \
-	{                                                                                                                          \
-		fprintf (stderr, "[\x1B[31me\x1B[0m] \x1b[38;5;239m%s : %s() on line %i :\x1B[0m ", __FILE__, __func__, __LINE__); \
-		fprintf (stderr, fmt, ##__VA_ARGS__);                                                                              \
-	}
-
 static void
 usage ();
 static void
@@ -197,7 +181,7 @@ create_new_session (string const& dir, string const& state, float samplerate, AR
 	AudioEngine* engine = AudioEngine::create ();
 
 	if (!engine->set_backend ("None (Dummy)", "Unit-Test", "")) {
-		PRINT_E ("Cannot create Audio/MIDI engine.\n");
+		PBD::error << "Cannot create Audio/MIDI engine." << endmsg;
 		return NULL;
 	}
 
@@ -205,24 +189,24 @@ create_new_session (string const& dir, string const& state, float samplerate, AR
 	// engine->set_output_channels( 32 );
 
 	if (engine->set_sample_rate (samplerate)) {
-		PRINT_E ("Cannot set session's samplerate to %lf.\n", samplerate);
+		PBD::error << string_compose ("Cannot set session's samplerate to %1.", samplerate) << endmsg;
 		return NULL;
 	}
 
 	if (engine->start () != 0) {
-		PRINT_E ("Cannot start Audio/MIDI engine.\n");
+		PBD::error << "Cannot start Audio/MIDI engine." << endmsg;
 		return NULL;
 	}
 
 	string s = Glib::build_filename (dir, state + statefile_suffix);
 
 	if (Glib::file_test (dir, Glib::FILE_TEST_EXISTS)) {
-		PRINT_E ("Session folder already exists '%s'\n", dir.c_str ());
+		PBD::error << string_compose ("Session folder already exists '%1", dir) << endmsg;
 		return NULL;
 	}
 
 	if (Glib::file_test (s, Glib::FILE_TEST_EXISTS)) {
-		PRINT_E ("Session file exists '%s'\n", s.c_str ());
+		PBD::error << string_compose ("Session file exists '%1'", s) << endmsg;
 		return NULL;
 	}
 
@@ -475,13 +459,13 @@ prepare_audio_track (aafiAudioTrack* aafTrack, Session* s)
 		wstring ws_track_name = std::wstring (aafTrack->name);
 		string  track_name    = string (ws_track_name.begin (), ws_track_name.end ());
 
-		PRINT_I ("Track number %i (%s) does not exist. Adding new track.\n", aafTrack->number, track_name.c_str ());
+		PBD::info << string_compose ("Track number %1 (%2) does not exist. Adding new track.", aafTrack->number, track_name) << endmsg;
 
 		// TODO: second argument is "output_channels". How should it be set ?
 		list<std::shared_ptr<AudioTrack>> at (s->new_audio_track (aafTrack->format, 2, 0, 1, track_name, PresentationInfo::max_order, Normal));
 
 		if (at.empty ()) {
-			PRINT_E ("Could not create new audio track.\n");
+			PBD::error << "Could not create new audio track." << endmsg;
 			::exit (EXIT_FAILURE);
 		}
 
@@ -511,33 +495,33 @@ aaf_fade_interpol_to_ardour_fade_shape (aafiInterpolation_e interpol)
 
 	switch (interpol & AAFI_INTERPOL_MASK) {
 		case AAFI_INTERPOL_NONE:
-			PRINT_W ("Fade type is set to AAFI_INTERPOL_NONE : Falling back to FadeConstantPower.");
+			PBD::warning << "Fade type is set to AAFI_INTERPOL_NONE : Falling back to FadeConstantPower." << endmsg;
 			return FadeConstantPower;
 
 		case AAFI_INTERPOL_LINEAR:
 			return FadeLinear;
 
 		case AAFI_INTERPOL_LOG:
-			PRINT_W ("Fade type is set to AAFI_INTERPOL_LOG : Falling back to FadeConstantPower.");
+			PBD::warning << "Fade type is set to AAFI_INTERPOL_LOG : Falling back to FadeConstantPower." << endmsg;
 			return FadeConstantPower;
 
 		case AAFI_INTERPOL_CONSTANT:
-			PRINT_W ("Fade type is set to AAFI_INTERPOL_CONSTANT : Falling back to FadeConstantPower.");
+			PBD::warning << "Fade type is set to AAFI_INTERPOL_CONSTANT : Falling back to FadeConstantPower." << endmsg;
 			return FadeConstantPower;
 
 		case AAFI_INTERPOL_POWER:
 			return FadeConstantPower;
 
 		case AAFI_INTERPOL_BSPLINE:
-			PRINT_W ("Fade type is set to AAFI_INTERPOL_BSPLINE : Falling back to FadeConstantPower.");
+			PBD::warning << "Fade type is set to AAFI_INTERPOL_BSPLINE : Falling back to FadeConstantPower." << endmsg;
 			return FadeConstantPower;
 
 		default:
-			PRINT_W ("Unknown fade type : Falling back to FadeConstantPower.");
+			PBD::warning << "Unknown fade type : Falling back to FadeConstantPower." << endmsg;
 			return FadeConstantPower;
 	}
 
-	PRINT_W ("Unknown fade type : Falling back to FadeConstantPower.");
+	PBD::warning << "Unknown fade type : Falling back to FadeConstantPower." << endmsg;
 	return FadeConstantPower;
 }
 
@@ -556,7 +540,7 @@ set_region_fade (aafiAudioClip* aafAudioClip, std::shared_ptr<Region> region, aa
 		if (fadein == NULL) {
 			fadein = xfade;
 		} else {
-			PRINT_W ("Clip has both fadein and crossfade : crossfade will be ignored.");
+			PBD::warning << "Clip has both fadein and crossfade : crossfade will be ignored." << endmsg;
 		}
 	}
 
@@ -635,7 +619,7 @@ set_session_timecode (Session* s, AAF_Iface* aafi)
 			break;
 
 		default:
-			PRINT_E ("Unknown AAF timecode fps : %i.\n", aafFPS);
+			PBD::error << string_compose ("Unknown AAF timecode fps : %1.", aafFPS) << endmsg;
 			return;
 	}
 
@@ -675,7 +659,7 @@ prepare_cache (AAF_Iface* aafi, string* media_cache_path)
 
 	if (mkdir ((*media_cache_path).c_str (), 0760) < 0) {
 		// if ( g_mkdir_with_parents( (*media_cache_path).c_str(), 0760 ) < 0 ) {
-		PRINT_E ("Could not create cache directory at '%s' : %s\n", (*media_cache_path).c_str (), strerror (errno));
+		PBD::error << string_compose ("Could not create cache directory at '%1' : %2", (*media_cache_path), strerror (errno)) << endmsg;
 		return -1;
 	}
 
@@ -698,17 +682,17 @@ clear_cache (AAF_Iface* aafi, string media_cache_path)
 
 		if (g_file_test (filepath, G_FILE_TEST_EXISTS)) {
 			if (remove (filepath) < 0) {
-				PRINT_E ("Failed to remove a file from cache (%s) : %s\n", filepath, strerror (errno));
+				PBD::error << string_compose ("Failed to remove a file from cache (%1) : %2", filepath, strerror (errno)) << endmsg;
 			}
 		} else {
-			PRINT_E ("Missing a file from cache (%s) : %s\n", filepath, strerror (errno));
+			PBD::error << string_compose ("Missing a file from cache (%1) : %2", filepath, strerror (errno)) << endmsg;
 		}
 
 		free (filepath);
 	}
 
 	if (rmdir (media_cache_path.c_str ()) < 0) {
-		PRINT_E ("Failed to remove cache directory (%s) : %s\n", media_cache_path.c_str (), strerror (errno));
+		PBD::error << string_compose ("Failed to remove cache directory (%1) : %2", media_cache_path, strerror (errno)) << endmsg;
 	}
 }
 
@@ -716,6 +700,7 @@ int
 main (int argc, char* argv[])
 {
 	setlocale (LC_ALL, "");
+	SessionUtils::init ();
 
 	ARDOUR::SampleFormat bitdepth       = ARDOUR::FormatInt24;
 	int                  samplesize     = 0;
@@ -785,7 +770,7 @@ main (int argc, char* argv[])
 				samplerate = atoi (optarg);
 
 				if (samplerate < 44100 || samplerate > 192000) {
-					PRINT_E ("Invalid sample rate (%s). Sample rate must be between 44100 and 192000.\n", optarg);
+					PBD::error << string_compose ("Invalid sample rate (%1). Sample rate must be between 44100 and 192000.", optarg) << endmsg;
 					::exit (EXIT_FAILURE);
 				}
 				break;
@@ -794,7 +779,7 @@ main (int argc, char* argv[])
 				samplesize = atoi (optarg);
 
 				if (samplesize != 16 && samplesize != 24 && samplesize != 32) {
-					PRINT_E ("Invalid sample size (%s). Sample size must be either 16, 24 or 32.\n", optarg);
+					PBD::error << string_compose ("Invalid sample size (%1). Sample size must be either 16, 24 or 32.", optarg) << endmsg;
 					::exit (EXIT_FAILURE);
 				}
 				break;
@@ -854,17 +839,17 @@ main (int argc, char* argv[])
 
 	// if ( template_path.empty() )
 	// {
-	// 	PRINT_E( "Missing template. Use --template parameter.\n" );
+	// 	PBD::error << "Missing template. Use --template parameter." << endmsg;
 	//   missing_param = 1;
 	// }
 
 	if (output_folder.empty ()) {
-		PRINT_E ("Missing session path. Use --session-path parameter.\n");
+		PBD::error << "Missing session path. Use --session-path parameter." << endmsg;
 		missing_param = 1;
 	}
 
 	if (aaf_file.empty ()) {
-		PRINT_E ("Missing AAF file. Use --aaf parameter.\n");
+		PBD::error << "Missing AAF file. Use --aaf parameter." << endmsg;
 		missing_param = 1;
 	}
 
@@ -897,12 +882,12 @@ main (int argc, char* argv[])
 
 	string logfile = g_build_path (G_DIR_SEPARATOR_S, output_folder.c_str (), string (string (g_basename (aaf_file.c_str ())) + ".log").c_str (), NULL);
 
-	PRINT_I ("Writting AAF log to : %s\n", logfile.c_str ());
+	PBD::info << string_compose ("Writting AAF log to : %1", logfile) << endmsg;
 
 	FILE* logfilefp = fopen (logfile.c_str (), "w");
 
 	if (logfilefp == NULL) {
-		PRINT_E ("Could not open log file '%s'\n", logfile.c_str ());
+		PBD::error << string_compose ("Could not open log file '%1'", logfile) << endmsg;
 		::exit (EXIT_FAILURE);
 	}
 
@@ -913,12 +898,12 @@ main (int argc, char* argv[])
 	}
 
 	if (aafi_load_file (aafi, aaf_file.c_str ())) {
-		PRINT_E ("Could not load AAF file.\n");
+		PBD::error << "Could not load AAF file." << endmsg;
 		::exit (EXIT_FAILURE);
 	}
 
 	if (prepare_cache (aafi, &media_cache_path)) {
-		PRINT_E ("Could not prepare media cache path.\n");
+		PBD::error << "Could not prepare media cache path." << endmsg;
 		::exit (EXIT_FAILURE);
 	}
 
@@ -941,10 +926,10 @@ main (int argc, char* argv[])
 	printf ("\n");
 
 	if (!samplerate) {
-		PRINT_I ("Using AAF file sample rate : %li Hz\n", aafi->Audio->samplerate);
+		PBD::info << string_compose ("Using AAF file sample rate : %1 Hz", aafi->Audio->samplerate) << endmsg;
 		samplerate = aafi->Audio->samplerate;
 	} else {
-		PRINT_I ("Ignoring AAF file sample rate (%li Hz), using user defined : %i Hz\n", aafi->Audio->samplerate, samplerate);
+		PBD::info << string_compose ("Ignoring AAF file sample rate (%li Hz), using user defined : %1 Hz", aafi->Audio->samplerate, samplerate) << endmsg;
 	}
 
 	aafRational_t samplerate_r;
@@ -953,10 +938,10 @@ main (int argc, char* argv[])
 	samplerate_r.denominator = 1;
 
 	if (!samplesize) {
-		PRINT_I ("Using AAF file bit depth : %i bits\n", aafi->Audio->samplesize);
+		PBD::info << string_compose ("Using AAF file bit depth : %1 bits", aafi->Audio->samplesize) << endmsg;
 		samplesize = aafi->Audio->samplesize;
 	} else {
-		PRINT_I ("Ignoring AAF file bit depth (%i bits), using user defined : %i bits\n", aafi->Audio->samplesize, samplesize);
+		PBD::info << string_compose ("Ignoring AAF file bit depth (%1 bits), using user defined : %2 bits", aafi->Audio->samplesize, samplesize) << endmsg;
 	}
 
 	switch (samplesize) {
@@ -970,14 +955,14 @@ main (int argc, char* argv[])
 			bitdepth = ARDOUR::FormatFloat;
 			break;
 		default:
-			PRINT_E ("Invalid sample size (%i). Sample size must be either 16, 24 or 32.\n", samplesize);
+			PBD::error << string_compose ("Invalid sample size (%1). Sample size must be either 16, 24 or 32.", samplesize) << endmsg;
 			::exit (EXIT_FAILURE);
 	}
 
 	if (session_name.empty () && aafi->compositionName && aafi->compositionName[0] != 0x00) {
 		wstring ws_session_name = std::wstring (aafi->compositionName);
 		session_name            = string (ws_session_name.begin (), ws_session_name.end ());
-		PRINT_I ("Using AAF composition name for Ardour session name : %ls\n", aafi->compositionName);
+		PBD::info << string_compose ("Using AAF composition name for Ardour session name : %1", aafi->compositionName) << endmsg;
 	} else if (session_name.empty () || session_name == "AAFFILE") {
 		/*
 		 * Code from gtk2_ardour/utils_videotl.cc
@@ -994,34 +979,33 @@ main (int argc, char* argv[])
 		free (bn);
 
 		if (session_name.empty ()) {
-			PRINT_I ("AAF has no composition name, using AAF file name for Ardour session name : %s\n", session_name.c_str ());
+			PBD::info << string_compose ("AAF has no composition name, using AAF file name for Ardour session name : %1", session_name) << endmsg;
 		} else {
-			PRINT_I ("Force using AAF file name for Ardour session name : %s\n", session_name.c_str ());
+			PBD::info << string_compose ("Force using AAF file name for Ardour session name : %1", session_name) << endmsg;
 		}
 	}
 
 	laaf_util_clean_filename (&session_name[0]);
 
 	if (Glib::file_test (string (output_folder + G_DIR_SEPARATOR + session_name), Glib::FILE_TEST_IS_DIR)) {
-		PRINT_E ("Session folder already exists '%s'\n", string (output_folder + G_DIR_SEPARATOR + session_name).c_str ());
+		PBD::error << string_compose ("Session folder already exists '%1'", string (output_folder + G_DIR_SEPARATOR + session_name)) << endmsg;
 		::exit (EXIT_FAILURE);
 	}
 
-	SessionUtils::init ();
 	Session* s = NULL;
 
 	try {
 		s = create_new_session (output_folder + G_DIR_SEPARATOR + session_name /*session_file*/, session_name, samplerate, bitdepth, master_bus_chn, template_path);
 	} catch (ARDOUR::SessionException& e) {
 		// cerr << "Error: " << e.what () << "\n";
-		PRINT_E ("Could not create ardour session : %s\n", e.what ());
+		PBD::error << string_compose ("Could not create ardour session : %1", e.what ()) << endmsg;
 		SessionUtils::unload_session (s);
 		SessionUtils::cleanup ();
 		aafi_release (&aafi);
 		::exit (EXIT_FAILURE);
 	} catch (...) {
 		// cerr << "Error: unknown exception.\n";
-		PRINT_E ("Could not create ardour session.\n");
+		PBD::error << "Could not create ardour session." << endmsg;
 		SessionUtils::unload_session (s);
 		SessionUtils::cleanup ();
 		aafi_release (&aafi);
@@ -1051,28 +1035,28 @@ main (int argc, char* argv[])
 
 		if (audioEssence->is_embedded) {
 			if (media_cache_path.empty ()) {
-				PRINT_E ("Could not extract audio file from AAF : media cache was not set.\n");
+				PBD::error << "Could not extract audio file from AAF : media cache was not set." << endmsg;
 				continue;
 			}
 			if (aafi_extract_audio_essence (aafi, audioEssence, media_cache_path.c_str (), NULL) < 0) {
-				PRINT_E ("Could not extract audio file '%ls' from AAF.\n", audioEssence->unique_file_name);
+				PBD::error << string_compose ("Could not extract audio file '%1' from AAF.", audioEssence->unique_file_name) << endmsg;
 				continue; // TODO or fail ?
 			}
 		} else {
 			if (!audioEssence->usable_file_path) {
-				PRINT_E ("Could not locate external audio file : '%ls'\n", audioEssence->original_file_path);
+				PBD::error << string_compose ("Could not locate external audio file: '%1'", audioEssence->original_file_path) << endmsg;
 				continue; // TODO or fail ?
 			}
 		}
 
 		if (!import_sndfile_as_region (s, audioEssence, SrcBest, pos, oneClipSources, import_status, &source_regions)) {
-			PRINT_E ("Could not import '%ls' to session.\n", audioEssence->unique_file_name);
+			PBD::error << string_compose ("Could not import '%1' to session.", audioEssence->unique_file_name) << endmsg;
 			continue; // TODO or fail ?
 		}
 
 		audioEssence->user = new SourceList (oneClipSources);
 
-		PRINT_I ("Source file '%ls' successfully imported to session.\n", audioEssence->unique_file_name);
+		PBD::info << string_compose ("Source file '%1' successfully imported to session.", audioEssence->unique_file_name) << endmsg;
 	}
 
 	oneClipSources.clear ();
@@ -1105,37 +1089,38 @@ main (int argc, char* argv[])
 			aafAudioClip = (aafiAudioClip*)aafAudioItem->data;
 
 			if (aafAudioClip->Essence == NULL) {
-				PRINT_E ("AAF clip has no essence\n");
+				PBD::error << "AAF clip has no essence" << endmsg;
 				continue;
 			}
 
 			/* converts whatever edit_rate clip is in, to samples */
 			aafPosition_t clipPos = convertEditUnit (aafAudioClip->pos, *aafAudioClip->track->edit_rate, samplerate_r);
 
-			PRINT_I ("Importing new clip %ls [%+05.1lf dB] on track %i @%s\n",
-			         aafAudioClip->Essence->unique_file_name,
-			         ((aafAudioClip->gain && aafAudioClip->gain->flags & AAFI_AUDIO_GAIN_CONSTANT) ? 20 * log10 (aafRationalToFloat (aafAudioClip->gain->value[0])) : 0),
-			         aafAudioClip->track->number,
-			         timecode_format_sampletime ((clipPos + sessionStart), samplerate, aafi->Timecode->fps, false).c_str ());
+			PBD::info << string_compose ("Importing new clip %1 [%2 dB] on track %3 @%4",
+			             aafAudioClip->Essence->unique_file_name,
+			             ((aafAudioClip->gain && aafAudioClip->gain->flags & AAFI_AUDIO_GAIN_CONSTANT) ? 20 * log10 (aafRationalToFloat (aafAudioClip->gain->value[0])) : 0),
+			             aafAudioClip->track->number,
+			             timecode_format_sampletime ((clipPos + sessionStart), samplerate, aafi->Timecode->fps, false))
+			          << endmsg;
 
 			aafiAudioEssence* audioEssence = aafAudioClip->Essence;
 
 			if (!audioEssence || !audioEssence->user) {
-				PRINT_E ("Could not create new region for clip %ls : Missing audio essence\n", aafAudioClip->Essence->unique_file_name);
+				PBD::error << string_compose ("Could not create new region for clip %1 : Missing audio essence", aafAudioClip->Essence->unique_file_name) << endmsg;
 				continue;
 			}
 
 			SourceList* oneClipSources = static_cast<SourceList*> (audioEssence->user);
 
 			if (oneClipSources->size () == 0) {
-				PRINT_E ("Could not create new region for clip %ls : Region has no source\n", aafAudioClip->Essence->unique_file_name);
+				PBD::error << string_compose ("Could not create new region for clip %1: Region has no source", aafAudioClip->Essence->unique_file_name) << endmsg;
 				continue;
 			}
 
 			std::shared_ptr<Region> region = create_region (source_regions, aafAudioClip, *oneClipSources, sessionStart, samplerate_r);
 
 			if (!region) {
-				PRINT_E ("Could not create new region for clip %ls\n", aafAudioClip->Essence->unique_file_name);
+				PBD::error << string_compose ("Could not create new region for clip %2", aafAudioClip->Essence->unique_file_name) << endmsg;
 				::exit (EXIT_FAILURE);
 			}
 
@@ -1227,7 +1212,7 @@ main (int argc, char* argv[])
 // 		char *file = locate_external_essence_file( aafi, videoClip->Essence->original_file_path, NULL );
 //
 // 		if ( file != NULL ) {
-//       PRINT_I( "Importing video : %s\n", Glib::path_get_basename(string(file)).c_str()/*fop_get_filename(file)*/ );
+//       PBD::info << string_compose ("Importing video : %1", Glib::path_get_basename(string(file))/*fop_get_filename(file)*/) << endmsg;
 //
 // 			/* get absolute video file path */
 // 			std::string absFile (PBD::canonical_path (file));
@@ -1297,10 +1282,10 @@ main (int argc, char* argv[])
 // 			// s->set_dirty();
 // 		}
 //     else {
-//       PRINT_E( "Could not locate video file : %ls\n", videoClip->Essence->original_file_path );
+//       PBD::error << string_compose ("Could not locate video file: %1", videoClip->Essence->original_file_path) << endmsg;
 //     }
 // 	}
 //   else {
-//     PRINT_E( "Could not retrieve video from AAF.\n" );
+//     PBD::error << "Could not retrieve video from AAF." << endmsg;
 //   }
 // }
