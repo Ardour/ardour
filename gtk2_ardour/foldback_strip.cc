@@ -553,6 +553,7 @@ FoldbackStrip::init ()
 FoldbackStrip::~FoldbackStrip ()
 {
 	CatchDeletion (this);
+	delete _meter;
 	clear_send_box ();
 }
 
