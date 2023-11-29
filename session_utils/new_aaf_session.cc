@@ -657,8 +657,7 @@ prepare_cache (AAF_Iface* aafi, string* media_cache_path)
 
 	*media_cache_path = testdir;
 
-	if (mkdir ((*media_cache_path).c_str (), 0760) < 0) {
-		// if ( g_mkdir_with_parents( (*media_cache_path).c_str(), 0760 ) < 0 ) {
+	if (g_mkdir_with_parents ((*media_cache_path).c_str (), 0760) < 0) {
 		PBD::error << string_compose ("Could not create cache directory at '%1' : %2", (*media_cache_path), strerror (errno)) << endmsg;
 		return -1;
 	}
