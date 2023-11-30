@@ -577,7 +577,7 @@ FFTGraph::redraw ()
 
 			mpp = maxf;
 			// Draw back to the start using the minimum value
-			for (int x = res->length () - 1; x >= 0; --x) {
+			for (int x = res->length () - 2; x >= 0; --x) {
 				mpp = std::min (mpp, res->minAt (x, _show_proportional));
 
 				if (_logScale[x] == _logScale[x + 1]) {
