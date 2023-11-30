@@ -244,7 +244,7 @@ ControlGroup::fill_from_stripable_list (StripableList& sl, Evoral::Parameter con
 		break;
 	default:
 		for (auto & s : sl) {
-			std::shared_ptr<AutomationControl> ac = s->automation_control (p, true);
+			std::shared_ptr<AutomationControl> ac = s->automation_control (p, false);
 			if (ac) {
 				add_control (ac, true);
 			}
