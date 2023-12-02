@@ -1098,12 +1098,7 @@ PulseAudioBackend::main_process_thread ()
 			if (!_port_connection_queue.empty ()) {
 				connections_changed = true;
 			}
-			while (!_port_connection_queue.empty ()) {
-				PortConnectData* c = _port_connection_queue.back ();
-				manager.connect_callback (c->a, c->b, c->c);
-				_port_connection_queue.pop_back ();
-				delete c;
-			}
+			process_connection_queue_locked (manager);
 			pthread_mutex_unlock (&_port_callback_mutex);
 		}
 		if (ports_changed) {

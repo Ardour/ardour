@@ -23,6 +23,7 @@
 #include "pbd/error.h"
 
 #include "ardour/port_engine_shared.h"
+#include "ardour/port_manager.h"
 
 #include "pbd/i18n.h"
 
@@ -826,6 +827,16 @@ PortEngineSharedImpl::update_system_port_latencies ()
 	for (std::vector<BackendPortPtr>::const_iterator it = _system_midi_out.begin (); it != _system_midi_out.end (); ++it) {
 		(*it)->update_connected_latency (false);
 	}
+}
+
+void
+PortEngineSharedImpl::process_connection_queue_locked (PortManager& mgr)
+{
+	for (auto& c : _port_connection_queue) {
+		mgr.connect_callback (c->a, c->b, c->c);
+		delete c;
+	}
+	_port_connection_queue.clear ();
 }
 
 #ifndef NDEBUG

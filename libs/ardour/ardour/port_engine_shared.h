@@ -27,7 +27,6 @@
 #include <string>
 #include <vector>
 
-
 #include "pbd/natsort.h"
 #include "pbd/rcu.h"
 
@@ -202,6 +201,8 @@ protected:
 		_port_connection_queue.push_back(new PortConnectData(a, b, conn));
 		pthread_mutex_unlock (&_port_callback_mutex);
 	}
+
+	void process_connection_queue_locked (PortManager& mgr);
 
 	void port_connect_add_remove_callback () {
 		_port_change_flag.store (1);
