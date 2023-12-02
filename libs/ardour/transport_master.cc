@@ -182,11 +182,7 @@ TransportMaster::connection_handler (std::weak_ptr<ARDOUR::Port> w0, std::string
 		 * not sufficient. But the user shouldn't do that ...
 		 */
 
-		if (yn) {
-			_connected = true;
-		} else {
-			_connected = false;
-		}
+		_connected = _port->connected ();
 
 		PropertyChanged (Properties::connected);
 	}
