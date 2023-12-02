@@ -384,22 +384,22 @@ LTC_TransportMaster::detect_ltc_fps(int frameno, bool df)
 void
 LTC_TransportMaster::process_ltc(samplepos_t const now)
 {
-	LTCFrameExt sample;
+	LTCFrameExt ltc_frame;
 	LTC_TV_STANDARD tv_standard = LTC_TV_625_50;
 
-	while (ltc_decoder_read (decoder, &sample)) {
+	while (ltc_decoder_read (decoder, &ltc_frame)) {
 
 		SMPTETimecode stime;
 
-		ltc_frame_to_time (&stime, &sample.ltc, 0);
+		ltc_frame_to_time (&stime, &ltc_frame.ltc, 0);
 		timecode.negative  = false;
 		timecode.subframes  = 0;
 
 		/* set timecode.rate and timecode.drop: */
 
-		const bool ltc_is_stationary = equal_ltc_sample_time (&prev_frame.ltc, &sample.ltc);
+		const bool ltc_is_stationary = equal_ltc_sample_time (&prev_frame.ltc, &ltc_frame.ltc);
 
-		if (detect_discontinuity (&sample, ceil(timecode.rate), !fps_detected)) {
+		if (detect_discontinuity (&ltc_frame, ceil(timecode.rate), !fps_detected)) {
 			if (frames_since_reset > 1) {
 				reset (false);
 			}
@@ -410,7 +410,7 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 			}
 		}
 
-		if (!ltc_is_stationary && detect_ltc_fps (stime.frame, (sample.ltc.dfbit) ? true : false)) {
+		if (!ltc_is_stationary && detect_ltc_fps (stime.frame, (ltc_frame.ltc.dfbit) ? true : false)) {
 			reset (true);
 			fps_detected = true;
 		}
@@ -428,20 +428,20 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 			          stime.hours,
 			          stime.mins,
 			          stime.secs,
-			          (sample.ltc.dfbit) ? '.' : ':',
+			          (ltc_frame.ltc.dfbit) ? '.' : ':',
 			          stime.frame,
-			          sample.off_start,
-			          sample.off_end,
-			          sample.reverse ? " R" : "  "
+			          ltc_frame.off_start,
+			          ltc_frame.off_end,
+			          ltc_frame.reverse ? " R" : "  "
 				);
 			DEBUG_TRACE (DEBUG::LTC, buf);
 		}
 #endif
 
-		/* when a full LTC sample is decoded, the timecode the LTC sample
+		/* when a full LTC frame is decoded, the timecode the LTC frame
 		 * is referring has just passed.
 		 * So we send the _next_ timecode which
-		 * is expected to start at the end of the current sample
+		 * is expected to start at the end of the current LTC frame
 		 */
 		int fps_i = ceil(timecode.rate);
 
@@ -461,17 +461,17 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 				break;
 		}
 
-		if (!sample.reverse) {
-			ltc_frame_increment(&sample.ltc, fps_i, tv_standard, 0);
-			ltc_frame_to_time(&stime, &sample.ltc, 0);
+		if (!ltc_frame.reverse) {
+			ltc_frame_increment(&ltc_frame.ltc, fps_i, tv_standard, 0);
+			ltc_frame_to_time(&stime, &ltc_frame.ltc, 0);
 			transport_direction = 1;
-			sample.off_start -= ltc_frame_alignment(samples_per_timecode_frame, tv_standard);
-			sample.off_end -= ltc_frame_alignment(samples_per_timecode_frame, tv_standard);
+			ltc_frame.off_start -= ltc_frame_alignment(samples_per_timecode_frame, tv_standard);
+			ltc_frame.off_end -= ltc_frame_alignment(samples_per_timecode_frame, tv_standard);
 		} else {
-			ltc_frame_decrement(&sample.ltc, fps_i, tv_standard, 0);
-			int off = sample.off_end - sample.off_start;
-			sample.off_start += off - ltc_frame_alignment(samples_per_timecode_frame, tv_standard);
-			sample.off_end += off - ltc_frame_alignment(samples_per_timecode_frame, tv_standard);
+			ltc_frame_decrement(&ltc_frame.ltc, fps_i, tv_standard, 0);
+			int off = ltc_frame.off_end - ltc_frame.off_start;
+			ltc_frame.off_start += off - ltc_frame_alignment(samples_per_timecode_frame, tv_standard);
+			ltc_frame.off_end += off - ltc_frame_alignment(samples_per_timecode_frame, tv_standard);
 			transport_direction = -1;
 		}
 
@@ -501,10 +501,10 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 		 *
 		 */
 
-		samplepos_t cur_timestamp = sample.off_end + 1;
+		samplepos_t cur_timestamp = ltc_frame.off_end + 1;
 		double ltc_speed = current.speed;
 
-		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC ltc-sample: %1 prev-ltc-sample %2  cur-timestamp: %3 last-timestamp: %4 frame-spans %5..%6\n", ltc_sample, current.position, cur_timestamp, current.timestamp, sample.off_start, sample.off_end));
+		DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC ltc-sample: %1 prev-ltc-sample %2  cur-timestamp: %3 last-timestamp: %4 frame-spans %5..%6\n", ltc_sample, current.position, cur_timestamp, current.timestamp, ltc_frame.off_start, ltc_frame.off_end));
 
 		if (cur_timestamp <= current.timestamp || current.timestamp == 0) {
 			DEBUG_TRACE (DEBUG::LTC, string_compose ("LTC speed: UNCHANGED: %1\n", current.speed));
@@ -525,7 +525,7 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 		DEBUG_TRACE (DEBUG::LTC, string_compose ("update current to %1 %2 %3\n", ltc_sample, cur_timestamp, ltc_speed));
 		current.update (ltc_sample, cur_timestamp, ltc_speed);
 
-	} /* end foreach decoded LTC sample */
+	} /* end foreach decoded LTC frame */
 }
 
 void
