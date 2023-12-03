@@ -834,7 +834,7 @@ AudioEngine::remove_session ()
 		SessionHandlePtr::set_session (0);
 	}
 
-	remove_all_ports ();
+	remove_session_ports ();
 }
 
 void

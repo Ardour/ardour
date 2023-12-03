@@ -186,7 +186,7 @@ public:
 
 	void set_port_pretty_name (std::string const&, std::string const&);
 
-	void remove_all_ports ();
+	void remove_session_ports ();
 
 	/** reset port-buffers. e.g. after freewheeling */
 	void reinit (bool with_ratio = false);

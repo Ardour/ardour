@@ -274,7 +274,7 @@ PortManager::clear_pending_port_deletions ()
 }
 
 void
-PortManager::remove_all_ports ()
+PortManager::remove_session_ports ()
 {
 	/* make sure that JACK callbacks that will be invoked as we cleanup
 	 * ports know that they have nothing to do.
@@ -282,13 +282,20 @@ PortManager::remove_all_ports ()
 
 	PBD::Unwinder<bool> uw (_port_remove_in_progress, true);
 
-	/* process lock MUST be held by caller
-	*/
+	/* process lock MUST be held by caller */
 
 	{
-		RCUWriter<Ports>         writer (_ports);
+		RCUWriter<Ports>            writer (_ports);
 		std::shared_ptr<Ports> ps = writer.get_copy ();
-		ps->clear ();
+
+		for (auto i = ps->begin (); i != ps->end (); ) {
+			std::shared_ptr<Port> port = i->second;
+			if (i->second->flags () & TransportMasterPort) {
+				++i;
+			} else {
+				i = ps->erase (i);
+			}
+		}
 	}
 
 	/* clear dead wood list in RCU */
@@ -857,7 +864,7 @@ PortManager::reestablish_ports ()
 
 	if (i != p->end ()) {
 		/* failed */
-		remove_all_ports ();
+		remove_session_ports ();
 		return -1;
 	}
 
