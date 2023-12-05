@@ -681,6 +681,9 @@ TransportMastersWidget::set_session (ARDOUR::Session* s)
 	if (_session) {
 		_session->config.ParameterChanged.connect (session_config_connection, invalidator (*this), boost::bind (&TransportMastersWidget::param_changed, this, _1), gui_context());
 		allow_master_select (!_session->config.get_external_sync());
+		rebuild ();
+	} else {
+		clear ();
 	}
 }
 
