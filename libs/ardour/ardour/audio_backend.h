@@ -365,12 +365,12 @@ public:
 	/* Returns the default sample rate that will be shown to the user when
 	 * configuration options are first presented. If the derived class
 	 * needs or wants to override this, it can. It also MUST override this
-	 * if there is any chance that an SR of 44.1kHz is not in the list
+	 * if there is any chance that an SR of 48kHz is not in the list
 	 * returned by available_sample_rates()
 	 */
 	virtual float default_sample_rate () const
 	{
-		return 44100.0;
+		return 48000.0;
 	}
 
 	/** Returns a collection of uint32 identifying buffer sizes that are
