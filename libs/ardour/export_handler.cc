@@ -295,11 +295,31 @@ ExportHandler::process_timespan (samplecnt_t samples)
 	samplecnt_t samples_to_read = 0;
 	samplepos_t const end = current_timespan->get_end();
 
+	if (process_position >= end) {
+		/* export complete, post-roll to feed and flush latent plugins
+		 * (This is mainly neede for Vapor) */
+		if (process_position + samples < end + session.worst_latency_preroll ()) {
+			process_position += samples;
+			return 0;
+		}
+
+		export_status->stop = true;
+
+		/* Start post-processing/normalizing if necessary */
+		post_processing = graph_builder->need_postprocessing ();
+		if (post_processing) {
+			export_status->total_postprocessing_cycles = graph_builder->get_postprocessing_cycle_count();
+			export_status->current_postprocessing_cycle = 0;
+		} else {
+			finish_timespan ();
+		}
+		return 1; /* trigger realtime_stop() */
+	}
+
 	bool const last_cycle = (process_position + samples >= end);
 
 	if (last_cycle) {
 		samples_to_read = end - process_position;
-		export_status->stop = true;
 	} else {
 		samples_to_read = samples;
 	}
@@ -310,18 +330,6 @@ ExportHandler::process_timespan (samplecnt_t samples)
 		process_position += ret;
 		export_status->processed_samples += ret;
 		export_status->processed_samples_current_timespan += ret;
-	}
-
-	/* Start post-processing/normalizing if necessary */
-	if (last_cycle) {
-		post_processing = graph_builder->need_postprocessing ();
-		if (post_processing) {
-			export_status->total_postprocessing_cycles = graph_builder->get_postprocessing_cycle_count();
-			export_status->current_postprocessing_cycle = 0;
-		} else {
-			finish_timespan ();
-		}
-		return 1; /* trigger realtime_stop() */
 	}
 
 	return 0;
