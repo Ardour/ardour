@@ -1131,6 +1131,10 @@ Session::compute_stop_limit () const
 		return max_samplepos;
 	}
 
+	if (_exporting) {
+		return max_samplepos;
+	}
+
 	bool const punching_in = (config.get_punch_in () && _locations->auto_punch_location());
 	bool const punching_out = (config.get_punch_out () && _locations->auto_punch_location());
 
