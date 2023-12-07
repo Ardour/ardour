@@ -333,6 +333,7 @@ public:
 	void export_range ();
 	void export_region ();
 	void quick_export ();
+	void surround_export ();
 
 	/* export for analysis only */
 	void loudness_assistant (bool);

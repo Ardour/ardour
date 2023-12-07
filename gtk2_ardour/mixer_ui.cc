@@ -826,6 +826,9 @@ Mixer_UI::remove_surround_master (SurroundStrip* strip)
 
 	RefPtr<ToggleAction> surround_action = ActionManager::get_toggle_action (X_("Mixer"), "ToggleSurroundMaster");
 	surround_action->set_active (false);
+
+	Glib::RefPtr<Action> surround_export = ActionManager::get_action (X_("Main"), X_("SurroundExport"));
+	surround_export->set_sensitive (false);
 }
 
 void
@@ -1282,9 +1285,12 @@ Mixer_UI::set_session (Session* sess)
 	update_scene_buttons();
 
 	RefPtr<ToggleAction> surround_action = ActionManager::get_toggle_action (X_("Mixer"), "ToggleSurroundMaster");
+	Glib::RefPtr<Action> surround_export = ActionManager::get_action (X_("Main"), X_("SurroundExport"));
 
 	if (!_session) {
 		surround_action->set_sensitive (false);
+		surround_export->set_sensitive (false);
+
 		PBD::Unwinder<bool> uw (ignore_plugin_reorder, true);
 		favorite_plugins_model->clear ();
 		_selection.clear ();
@@ -1300,6 +1306,7 @@ Mixer_UI::set_session (Session* sess)
 
 	surround_action->set_sensitive (_session->vapor_barrier ());
 	surround_action->set_active (nullptr != _session->surround_master());
+	surround_export->set_sensitive (_session->vapor_export_barrier () && nullptr != _session->surround_master ());
 
 #if 0
 	/* skip mapping all session-config vars, we only need one */
@@ -4408,4 +4415,7 @@ Mixer_UI::toggle_surround_master ()
 	have_sm = _session->surround_master () != nullptr;
 
 	act->set_active (have_sm);
+
+	Glib::RefPtr<Action> surround_export = ActionManager::get_action (X_("Main"), X_("SurroundExport"));
+	surround_export->set_sensitive (have_sm && _session->vapor_export_barrier ());
 }

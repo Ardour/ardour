@@ -310,6 +310,8 @@ public:
 	/** Open Simple Export Dialog */
 	virtual void quick_export () = 0;
 
+	virtual void surround_export () = 0;
+
 	virtual void loudness_assistant (bool) = 0;
 
 	virtual void register_actions () = 0;

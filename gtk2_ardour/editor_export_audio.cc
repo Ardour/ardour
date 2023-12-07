@@ -107,6 +107,17 @@ Editor::quick_export ()
 }
 
 void
+Editor::surround_export ()
+{
+	if (!_session || !_session->vapor_export_barrier ()) {
+		return;
+	}
+	SimpleExportDialog dialog (*this, true);
+	dialog.set_session (_session);
+	dialog.run();
+}
+
+void
 Editor::loudness_assistant_marker ()
 {
 	ArdourMarker* marker;

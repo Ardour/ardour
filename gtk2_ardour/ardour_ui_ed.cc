@@ -598,6 +598,9 @@ ARDOUR_UI::install_dependent_actions ()
 	act = ActionManager::register_action (main_actions, X_("QuickExport"), _("Quick Audio Export..."),  sigc::mem_fun (*editor, &PublicEditor::quick_export));
 	ActionManager::session_sensitive_actions.push_back (act);
 
+	act = ActionManager::register_action (main_actions, X_("SurroundExport"), _("Export Surround Master..."),  sigc::mem_fun (*editor, &PublicEditor::surround_export));
+	act->set_sensitive (false);
+
 	act = ActionManager::register_action (main_actions, X_("ExportAudio"), _("Export to Audio File(s)..."),  sigc::mem_fun (*editor, &PublicEditor::export_audio));
 	ActionManager::session_sensitive_actions.push_back (act);
 

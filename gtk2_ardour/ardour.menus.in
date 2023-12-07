@@ -32,6 +32,9 @@
       <menu name='Export' action='Export'>
         <menuitem action='QuickExport'/>
         <menuitem action='ExportAudio'/>
+#ifdef VAPOR
+        <menuitem action='SurroundExport'/>
+#endif
         <menuitem action='StemExport'/>
         <menuitem action='ExportVideo'/>
       </menu>

@@ -42,11 +42,12 @@ using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
-SimpleExportDialog::SimpleExportDialog (PublicEditor& editor)
+SimpleExportDialog::SimpleExportDialog (PublicEditor& editor, bool vapor_export)
 	: ARDOUR::SimpleExport ()
-	, ArdourDialog (_("Quick Audio Export"), true, false)
+	, ArdourDialog (vapor_export ? _("Surround Master Export") : _("Quick Audio Export"), true, false)
 	, _editor (editor)
 	, _eps (true)
+	, _vapor_export (vapor_export)
 {
 	if (_eps.the_combo ().get_parent ()) {
 		_eps.the_combo ().get_parent ()->remove (_eps.the_combo ());
@@ -65,7 +66,11 @@ SimpleExportDialog::SimpleExportDialog (PublicEditor& editor)
 
 	/* clang-format off */
 	t->attach (LBL ("Format preset:"),  0, 1, r, r + 1, FILL,          SHRINK, 0, 0);
-	t->attach (_eps.the_combo (),       1, 2, r, r + 1, EXPAND,        SHRINK, 0, 0);
+	if (_vapor_export) {
+		t->attach (LBL ("ADM/BWF"),       1, 2, r, r + 1, EXPAND,        SHRINK, 0, 0);
+	} else {
+		t->attach (_eps.the_combo (),     1, 2, r, r + 1, EXPAND | FILL, SHRINK, 0, 0);
+	}
 	++r;
 	t->attach (LBL ("Export range:"),   0, 1, r, r + 1, FILL,          SHRINK, 0, 0);
 	t->attach (_range_combo,            1, 2, r, r + 1, EXPAND | FILL, SHRINK, 0, 0);
@@ -146,6 +151,11 @@ SimpleExportDialog::set_session (ARDOUR::Session* s)
 
 	if (!check_outputs ()) {
 		set_error ("Error: Session has no master bus");
+		return;
+	}
+
+	if (_vapor_export && (!s->surround_master () || !s->vapor_export_barrier ())) {
+		set_error ("Error: Session has no exportable surround master.");
 		return;
 	}
 
@@ -245,8 +255,31 @@ void
 SimpleExportDialog::start_export ()
 {
 	TreeModel::iterator r = _range_combo.get_active ();
+	std::string range_name = (*r)[_range_cols.name];
 	set_range ((*r)[_range_cols.start], (*r)[_range_cols.end]);
-	SimpleExport::set_name ((*r)[_range_cols.name]);
+	SimpleExport::set_name (range_name);
+
+	if (_vapor_export) {
+		if (range_name.empty ()) {
+			range_name = SimpleExport::_session->snap_name ();
+		}
+
+		/* Ensure timespan exists, see also SimpleExport::run_export */
+		auto ts = _manager->get_timespans ();
+		assert (ts.size () == 1);
+		assert (ts.front ()->timespans->size () < 2);
+		if (ts.front ()->timespans->size () < 1) {
+			ExportTimespanPtr timespan = _handler->add_timespan ();
+			ts.front ()->timespans->push_back (timespan);
+		}
+
+		/* https://professional.dolby.com/siteassets/content-creation/dolby-atmos/dolby_atmos_renderer_guide.pdf
+		 * chapter 13.9, page 155 suggests .wav.
+		 * There may however already be a .wav file with the given name, so -adm.wav is used.
+		 */
+		std::string vapor = Glib::build_filename (SimpleExport::_session->session_directory ().export_path (), range_name + "-adm.wav");
+		_manager->get_timespans ().front ()->timespans->front ()->set_vapor (vapor);
+	}
 
 	SimpleExport::_session->add_extra_xml (get_state ());
 

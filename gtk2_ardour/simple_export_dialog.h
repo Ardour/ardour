@@ -39,7 +39,7 @@ namespace ARDOUR {
 class SimpleExportDialog : public ArdourDialog, virtual public ARDOUR::SimpleExport
 {
 public:
-	SimpleExportDialog (PublicEditor&);
+	SimpleExportDialog (PublicEditor&, bool vapor_export = false);
 
 	void set_session (ARDOUR::Session*);
 
@@ -84,6 +84,7 @@ private:
 	Gtk::ComboBoxText    _post_export_combo;
 	Gtk::Label           _error_label;
 	Gtk::ProgressBar     _progress_bar;
+	bool                 _vapor_export;
 
 	ExportRangeCols              _range_cols;
 	Glib::RefPtr<Gtk::ListStore> _range_list;
