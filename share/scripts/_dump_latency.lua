@@ -31,6 +31,13 @@ function factory () return function ()
 				proc:capture_offset(), proc:playback_offset(),
 				proc:to_send():get_delay_in(), proc:to_send():get_delay_out()
 				))
+			elseif all_procs and not proc:to_surroundsend():isnil () then
+				print (string.format (" * %-27s  L: %4d  in: %4d  out: %4d capt: %4d play %4d  DLY-SRC: %4d DLY-DST: %4d",
+				string.sub (proc:name(), 0, 27) , proc:signal_latency(),
+				proc:input_latency(), proc:output_latency(),
+				proc:capture_offset(), proc:playback_offset(),
+				proc:to_surroundsend():get_delay_in(), proc:to_surroundsend():get_delay_out()
+				))
 			elseif all_procs or not proc:to_diskioprocessor():isnil () then
 				print (string.format (" * %-27s  L: %4d  in: %4d  out: %4d capt: %4d play %4d",
 				string.sub (proc:name(), 0, 27) , proc:signal_latency(),
