@@ -110,6 +110,8 @@ private:
 	Gtkmm2ext::Color explicit_fg;
 	bool have_explicit_fg;
 
+	uint32_t outline_color;
+
 	void create_patterns();
 	void adjustment_changed ();
 	void set_adjustment_from_event (GdkEventButton *);
