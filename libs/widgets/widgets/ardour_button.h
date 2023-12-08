@@ -195,6 +195,9 @@ class LIBWIDGETS_API ArdourButton : public CairoWidget , public Gtkmm2ext::Activ
 	uint32_t led_custom_color;
 	bool     use_custom_led_color;
 
+	uint32_t outline_color;
+
+
 	cairo_pattern_t* convex_pattern;
 	cairo_pattern_t* concave_pattern;
 	cairo_pattern_t* led_inset_pattern;
