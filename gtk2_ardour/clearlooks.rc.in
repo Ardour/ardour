@@ -282,7 +282,7 @@ style "inspector_processor_list" = "processor_list"
 
 style "time_info_box"
 {
-        bg[NORMAL] = { 0.00, 0.00, 0.00 }
+        bg[NORMAL] = @darkest
 }
 
 style "status_bar_box"
