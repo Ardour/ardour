@@ -294,6 +294,8 @@ ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 	// after a stroke of 2px width results in an outline of 1px
 	cairo_stroke_preserve(cr);
 
+	void (*rounded_function)(cairo_t*, double, double, double, double, double);
+
 	if (_orien == VERT) {
 
 		if (ds > h - FADER_RESERVE - CORNER_OFFSET) {
@@ -308,8 +310,16 @@ ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 			CairoWidget::set_source_rgb_a (cr, bg_color (get_state()), 1);
 			cairo_fill (cr);
 			CairoWidget::set_source_rgb_a (cr, fg_color (get_state()), 1);
-			Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, ds + CORNER_OFFSET,
+
+			if (ds < CORNER_SIZE) {
+				rounded_function = Gtkmm2ext::rounded_rectangle;
+			} else {
+				rounded_function = Gtkmm2ext::rounded_bottom_half_rectangle;
+			}
+
+			rounded_function (cr, CORNER_OFFSET, ds + CORNER_OFFSET,
 					w - CORNER_SIZE, h - ds - CORNER_SIZE, CORNER_RADIUS);
+
 		}
 		cairo_fill (cr);
 
@@ -338,7 +348,14 @@ ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 			CairoWidget::set_source_rgb_a (cr, bg_color (get_state()), 1);
 			cairo_fill (cr);
 			CairoWidget::set_source_rgb_a (cr, fg_color (get_state()), 1);
-			Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET,
+
+			if (ds > w - CORNER_SIZE) {
+				rounded_function = Gtkmm2ext::rounded_rectangle;
+			} else {
+				rounded_function = Gtkmm2ext::rounded_left_half_rectangle;
+			}
+
+			rounded_function (cr, CORNER_OFFSET, CORNER_OFFSET,
 					ds - CORNER_SIZE, h - CORNER_SIZE, CORNER_RADIUS);
 		}
 		cairo_fill (cr);
