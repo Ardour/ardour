@@ -282,6 +282,9 @@ Editor::location_changed (Location *location)
 	if (lam->end) {
 		check_marker_label (lam->end);
 	}
+	if (location->is_section ()) {
+		update_section_rects ();
+	}
 }
 
 /** Look at a marker and check whether its label, and those of the previous and next markers,
@@ -659,13 +662,14 @@ Editor::update_section_rects ()
 
 	timepos_t start;
 	timepos_t end;
+	std::vector<Locations::LocationPair> locs;
 
 	Locations* loc = _session->locations ();
 	Location*  l   = NULL;
 	bool bright    = false;
 
 	do {
-		l = loc->next_section (l, start, end);
+		l = loc->next_section_iter (l, start, end, locs);
 		if (l) {
 			double const left  = sample_to_pixel (start.samples ());
 			double const right = sample_to_pixel (end.samples ());

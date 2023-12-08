@@ -45,6 +45,7 @@ public:
 
 private:
 	void redisplay ();
+	void location_changed (ARDOUR::Location*);
 	bool delete_selected_section ();
 	bool rename_selected_section ();
 
