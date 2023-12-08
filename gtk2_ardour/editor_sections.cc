@@ -102,7 +102,7 @@ EditorSections::set_session (Session* s)
 
 		Location::start_changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::location_changed, this, _1), gui_context ());
 		Location::end_changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::location_changed, this, _1), gui_context ());
-		Location::flags_changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::redisplay, this), gui_context ());
+		Location::flags_changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::queue_redisplay, this), gui_context ());
 		Location::name_changed.connect (_session_connections, invalidator (*this), boost::bind (&EditorSections::location_changed, this, _1), gui_context ());
 	}
 
@@ -122,8 +122,23 @@ void
 EditorSections::location_changed (ARDOUR::Location* l)
 {
 	if (l->is_section ()) {
-		redisplay ();
+		queue_redisplay ();
 	}
+}
+
+void
+EditorSections::queue_redisplay ()
+{
+	if (!_redisplay_connection.connected ()) {
+		_redisplay_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &EditorSections::idle_redisplay), Glib::PRIORITY_HIGH_IDLE+10);
+	}
+}
+
+bool
+EditorSections::idle_redisplay ()
+{
+	redisplay ();
+	return false;
 }
 
 void

@@ -45,6 +45,8 @@ public:
 
 private:
 	void redisplay ();
+	void queue_redisplay ();
+	bool idle_redisplay ();
 	void location_changed (ARDOUR::Location*);
 	bool delete_selected_section ();
 	bool rename_selected_section ();
@@ -117,6 +119,7 @@ private:
 	bool             _no_redisplay;
 	sigc::connection _scroll_timeout;
 	sigc::connection _selection_change;
+	sigc::connection _redisplay_connection;
 };
 
 #endif
