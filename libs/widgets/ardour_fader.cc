@@ -29,6 +29,7 @@
 #include "gtkmm2ext/utils.h"
 
 #include "widgets/ardour_fader.h"
+#include "widgets/ui_config.h"
 
 using namespace Gtk;
 using namespace std;
@@ -60,6 +61,7 @@ ArdourFader::ArdourFader (Gtk::Adjustment& adj, int orientation, int fader_lengt
 	, _current_parent (0)
 	, have_explicit_bg (false)
 	, have_explicit_fg (false)
+	, outline_color (0)
 {
 	_default_value = _adjustment.get_value();
 	update_unity_position ();
@@ -81,6 +83,9 @@ ArdourFader::ArdourFader (Gtk::Adjustment& adj, int orientation, int fader_lengt
 	} else {
 		CairoWidget::set_size_request(_span, _girth);
 	}
+
+	outline_color = UIConfigurationBase::instance().color ("generic button: outline");
+
 }
 
 ArdourFader::~ArdourFader ()
@@ -280,7 +285,8 @@ ArdourFader::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t
 	cairo_fill(cr);
 
 	cairo_set_line_width (cr, 2);
-	cairo_set_source_rgba (cr, 0, 0, 0, 1.0);
+	Gtkmm2ext::set_source_rgba (cr, outline_color);
+
 
 	cairo_matrix_t matrix;
 	Gtkmm2ext::rounded_rectangle (cr, CORNER_OFFSET, CORNER_OFFSET, w-CORNER_SIZE, h-CORNER_SIZE, CORNER_RADIUS);
