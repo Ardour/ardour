@@ -185,6 +185,7 @@ Location::resume_signals ()
 	for (auto const& s : _postponed_signals) {
 		actually_emit_signal (s);
 	}
+	_postponed_signals.clear ();
 }
 
 void
@@ -267,6 +268,9 @@ Location::set_time_domain (TimeDomain domain)
 void
 Location::set_name (const std::string& str)
 {
+	if (_name == str) {
+		return;
+	}
 	_name = str;
 	emit_signal (Name); /* EMIT SIGNAL*/
 }
@@ -712,6 +716,9 @@ Location::set_state (const XMLNode& node, int version)
 	   may make the value of _start illegal.
 	*/
 
+	timepos_t old_start (_start);
+	timepos_t old_end (_end);
+
 	if (!node.get_property ("start", _start)) {
 		error << _("XML node for Location has no start information") << endmsg;
 		return -1;
@@ -765,7 +772,9 @@ Location::set_state (const XMLNode& node, int version)
 		_scene_change = SceneChange::factory (*scene_child, version);
 	}
 
-	emit_signal (StartEnd); /* EMIT SIGNAL */
+	if (old_start != _start || old_end != _end) {
+		emit_signal (StartEnd); /* EMIT SIGNAL */
+	}
 
 	assert (_start.is_positive() || _start.is_zero());
 	assert (_end.is_positive() || _end.is_zero());
