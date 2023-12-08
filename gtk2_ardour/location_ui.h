@@ -202,9 +202,6 @@ private:
 	void location_remove_requested (ARDOUR::Location *);
 
 	void location_redraw_ranges ();
-	void queue_refresh_location_list ();
-	bool idle_refresh_location_list ();
-	sigc::connection _redisplay_connection;
 
 	gint do_location_remove (ARDOUR::Location *);
 
