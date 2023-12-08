@@ -91,7 +91,7 @@ Location::Location (Session& s, timepos_t const & start, timepos_t const & end, 
 	set_position_time_domain (_session.time_domain());
 }
 
-Location::Location (const Location& other)
+Location::Location (const Location& other, bool no_emit)
 	: SessionHandleRef (other._session)
 	, _name (other._name)
 	, _start (other._start)
@@ -101,8 +101,13 @@ Location::Location (const Location& other)
 	, _cue (other._cue)
 	, _signals_suspended (0)
 {
-	/* copy is not locked even if original was */
-	assert (other._signals_suspended == 0);
+	if (no_emit) {
+		/* use for temp. copies (e.g. during Drag) */
+		suspend_signals ();
+	} else {
+		/* copy is not locked even if original was */
+		assert (other._signals_suspended == 0);
+	}
 
 	_locked = false;
 
@@ -1934,7 +1939,7 @@ Locations::cut_copy_section (timepos_t const& start, timepos_t const& end, timep
 
 		} else if (op == CopyPasteSection) {
 			if (i->start() >= start && i->start() < end) {
-				Location* copy = new Location (*i);
+				Location* copy = new Location (*i, false);
 				pastebuf.push_back (copy);
 			}
 		}

@@ -135,7 +135,7 @@ LocationImporter::_prepare_move ()
 {
 	try {
 		Location const original (session, xml_location);
-		location = new Location (original); // Updates id
+		location = new Location (original, false); // Updates id
 	} catch (failed_constructor& err) {
 		throw std::runtime_error (X_("Error in session file!"));
 		return false;

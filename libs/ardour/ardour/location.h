@@ -73,7 +73,7 @@ public:
 
 	Location (Session &);
 	Location (Session &, Temporal::timepos_t const &, Temporal::timepos_t const &, const std::string &, Flags bits = Flags(0), int32_t cue_id = 0);
-	Location (const Location& other);
+	Location (Location const& other, bool no_signal);
 	Location (Session &, const XMLNode&);
 	Location* operator= (const Location& other);
 
@@ -207,6 +207,7 @@ protected:
 	void resume_signals ();
 
 private:
+	Location (Location const&); // no copy c'tor
 	void set_mark (bool yn);
 	bool set_flag_internal (bool yn, Flags flag);
 
