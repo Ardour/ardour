@@ -111,6 +111,7 @@
     <ColorAlias name="generic button: fill" alias="widget:bg"/>
     <ColorAlias name="generic button: fill active" alias="alert:red"/>
     <ColorAlias name="generic button: led active" alias="alert:blue"/>
+    <ColorAlias name="generic button: outline" alias="neutral:background"/>
     <ColorAlias name="ghost track base" alias="neutral:background2"/>
     <ColorAlias name="ghost track midi outline" alias="neutral:backgroundest"/>
     <ColorAlias name="ghost track wave" alias="neutral:background"/>
