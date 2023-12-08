@@ -352,7 +352,6 @@ LocationEditRow::set_location (Location *loc)
 	/* connect to per-location signals, since this row only cares about this location */
 
 	location->NameChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::name_changed, this), gui_context());
-	location->StartChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::start_changed, this), gui_context());
 	location->EndChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::end_changed, this), gui_context());
 	location->Changed.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::location_changed, this), gui_context());
 	location->FlagsChanged.connect (connections, invalidator (*this), boost::bind (&LocationEditRow::flags_changed, this), gui_context());
@@ -890,6 +889,20 @@ LocationUI::location_remove_requested (ARDOUR::Location *loc)
 	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &LocationUI::do_location_remove), loc));
 }
 
+void
+LocationUI::queue_refresh_location_list ()
+{
+	if (!_redisplay_connection.connected ()) {
+		_redisplay_connection = Glib::signal_idle().connect (sigc::mem_fun (*this, &LocationUI::idle_refresh_location_list), Glib::PRIORITY_HIGH_IDLE+10);
+	}
+}
+
+bool
+LocationUI::idle_refresh_location_list ()
+{
+	refresh_location_list ();
+	return false;
+}
 
 void
 LocationUI::location_redraw_ranges ()
@@ -1097,6 +1110,7 @@ LocationUI::set_session(ARDOUR::Session* s)
 		_session->locations()->added.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::location_added, this, _1), gui_context());
 		_session->locations()->removed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::location_removed, this, _1), gui_context());
 		_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::refresh_location_list, this), gui_context());
+		Location::start_changed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::queue_refresh_location_list, this), gui_context());
 
 		_clock_group->set_clock_mode (clock_mode_from_session_instant_xml ());
 	} else {
