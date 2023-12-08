@@ -96,6 +96,8 @@ private:
 	float current_user_level;
 	bool highlight;
 
+	uint32_t outline_color;
+
 	void vertical_expose (cairo_t*, cairo_rectangle_t*);
 	void vertical_size_request (GtkRequisition*);
 	void vertical_size_allocate (Gtk::Allocation&);
