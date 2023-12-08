@@ -30,6 +30,9 @@
 #include "gtkmm2ext/utils.h"
 #include "widgets/fastmeter.h"
 
+#include "widgets/ui_config.h"
+
+
 #define UINT_TO_RGB(u,r,g,b) { (*(r)) = ((u)>>16)&0xff; (*(g)) = ((u)>>8)&0xff; (*(b)) = (u)&0xff; }
 #define UINT_TO_RGBA(u,r,g,b,a) { UINT_TO_RGB(((u)>>8),r,g,b); (*(a)) = (u)&0xff; }
 
@@ -69,6 +72,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	, current_level(0)
 	, current_peak(0)
 	, highlight(false)
+	, outline_color(0)
 {
 	last_peak_rect.width = 0;
 	last_peak_rect.height = 0;
@@ -125,6 +129,8 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 
 	request_width = pixrect.width + 2;
 	request_height= pixrect.height + 2;
+
+	outline_color = UIConfigurationBase::instance().color ("generic button: outline");
 
 	clear ();
 }
@@ -561,7 +567,7 @@ FastMeter::vertical_expose (cairo_t* cr, cairo_rectangle_t* area)
 	GdkRectangle background;
 	GdkRectangle eventarea;
 
-	cairo_set_source_rgb (cr, 0, 0, 0); // black
+	Gtkmm2ext::set_source_rgba (cr, outline_color);
 	rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
 	cairo_stroke (cr);
 
@@ -634,7 +640,7 @@ FastMeter::horizontal_expose (cairo_t* cr, cairo_rectangle_t* area)
 	GdkRectangle background;
 	GdkRectangle eventarea;
 
-	cairo_set_source_rgb (cr, 0, 0, 0); // black
+	Gtkmm2ext::set_source_rgba (cr, outline_color);
 	rounded_rectangle (cr, 0, 0, pixwidth + 2, pixheight + 2, 2);
 	cairo_stroke (cr);
 
