@@ -1176,6 +1176,8 @@ private:
 		CopiedLocationMarkerInfo (ARDOUR::Location* l, ArdourMarker* m);
 	};
 
+	std::vector<ARDOUR::Location::ChangeSuspender> lcs;
+
 	typedef std::list<CopiedLocationMarkerInfo> CopiedLocationInfo;
 	CopiedLocationInfo _copied_locations;
 	ArdourCanvas::Points _points;

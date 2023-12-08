@@ -4346,7 +4346,7 @@ MarkerDrag::~MarkerDrag ()
 
 MarkerDrag::CopiedLocationMarkerInfo::CopiedLocationMarkerInfo (Location* l, ArdourMarker* m)
 {
-	location = new Location (*l);
+	location = new Location (*l, true);
 	markers.push_back (m);
 	move_both = false;
 }
@@ -4431,6 +4431,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 		if (!l) {
 			continue;
 		}
+		lcs.push_back (l);
 
 		if (l->is_mark ()) {
 			_copied_locations.push_back (CopiedLocationMarkerInfo (l, *i));
