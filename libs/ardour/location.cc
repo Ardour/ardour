@@ -1597,8 +1597,18 @@ Locations::sorted_section_locations (vector<LocationPair>& locs) const
 Location*
 Locations::next_section (Location* l, timepos_t& start, timepos_t& end) const
 {
-	vector<LocationPair> locs;
-	sorted_section_locations (locs);
+	std::vector<Locations::LocationPair> locs;
+	return next_section_iter (l, start, end, locs);
+}
+
+Location*
+Locations::next_section_iter (Location* l, timepos_t& start, timepos_t& end, vector<LocationPair>& locs) const
+{
+	if (!l) {
+		/* build cache */
+		locs.clear ();
+		sorted_section_locations (locs);
+	}
 
 	if (locs.size () < 2) {
 		return NULL;
