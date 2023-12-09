@@ -567,6 +567,10 @@ MidiStreamView::color_handler ()
 	} else {
 		canvas_rect->set_fill_color (UIConfiguration::instance().color ("midi bus base"));
 	}
+
+	for (auto & rv : region_views) {
+		rv->color_handler ();
+	}
 }
 
 void

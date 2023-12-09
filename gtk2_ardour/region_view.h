@@ -158,6 +158,8 @@ public:
 	ARDOUR::CueMarker find_model_cue_marker (ArdourMarker*);
 	void drop_cue_marker (ArdourMarker*);
 
+	virtual void color_handler() { set_colors(); }
+
 protected:
 
 	/** Allows derived types to specify their visibility requirements
@@ -189,7 +191,6 @@ protected:
 	virtual void set_sync_mark_color ();
 	virtual void reset_width_dependent_items (double pixel_width);
 
-	virtual void color_handler () {}
 	virtual void parameter_changed (std::string const&);
 
 	void maybe_raise_cue_markers ();
