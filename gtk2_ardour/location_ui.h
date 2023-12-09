@@ -203,6 +203,8 @@ private:
 
 	void location_redraw_ranges ();
 
+	void start_changed (ARDOUR::Location*);
+
 	gint do_location_remove (ARDOUR::Location *);
 
 	guint32 i_am_the_modifier;

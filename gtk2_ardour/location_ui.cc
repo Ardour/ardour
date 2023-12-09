@@ -890,7 +890,6 @@ LocationUI::location_remove_requested (ARDOUR::Location *loc)
 	Glib::signal_idle().connect (sigc::bind (sigc::mem_fun(*this, &LocationUI::do_location_remove), loc));
 }
 
-
 void
 LocationUI::location_redraw_ranges ()
 {
@@ -976,6 +975,35 @@ LocationUI::location_removed (Location* location)
 				break;
 			}
 		}
+	}
+}
+
+void
+LocationUI::start_changed (Location *location)
+{
+	Gtk::VBox& box = location->is_range_marker() ? range_rows : location_rows;
+	LocationEditRow* r = NULL;
+	for (auto const& i : box.children ()) {
+		r = dynamic_cast<LocationEditRow*> (i.get_widget());
+		if (r && r->get_location() == location) {
+			break;
+		}
+	}
+	assert (r);
+
+	int pos = 0;
+	Locations::LocationList loc = _session->locations()->list ();
+	loc.sort (LocationSortByStart ());
+	for (auto const& l : loc) {
+		if (location->is_range_marker() != l->is_range_marker()) {
+			/* Skip locations in the session list that aren't of the right type */
+			continue;
+		}
+		if (l == location) {
+			box.reorder_child (*r, pos);
+			break;
+		}
+		++pos;
 	}
 }
 
@@ -1097,6 +1125,7 @@ LocationUI::set_session(ARDOUR::Session* s)
 		_session->locations()->added.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::location_added, this, _1), gui_context());
 		_session->locations()->removed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::location_removed, this, _1), gui_context());
 		_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::refresh_location_list, this), gui_context());
+		Location::start_changed.connect (_session_connections, invalidator (*this), boost::bind (&LocationUI::start_changed, this, _1), gui_context());
 
 		_clock_group->set_clock_mode (clock_mode_from_session_instant_xml ());
 	} else {
