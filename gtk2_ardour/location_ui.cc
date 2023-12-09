@@ -930,7 +930,7 @@ LocationUI::location_added (Location* location)
 		Box_Helpers::BoxList::iterator j = children.begin ();
 		while (i != loc.end()) {
 
-			if (location->flags() != (*i)->flags()) {
+			if (location->is_range_marker() != (*i)->is_range_marker()) {
 				/* Skip locations in the session list that aren't of the right type */
 				++i;
 				continue;
