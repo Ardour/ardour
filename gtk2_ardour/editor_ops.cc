@@ -9621,7 +9621,7 @@ void gap_marker_callback_relax (timepos_t, timecnt_t)
 void
 Editor::remove_gap_marker_callback (timepos_t at, timecnt_t distance)
 {
-	_session->locations()->ripple (at, -distance, false, false);
+	_session->locations()->ripple (at, -distance, false);
 }
 
 void
@@ -9841,6 +9841,6 @@ Editor::ripple_marks (std::shared_ptr<Playlist> target_playlist, timepos_t at, t
 
 	XMLNode& before (_session->locations()->get_state());
 	/* do not move locked markers, do notify */
-	_session->locations()->ripple (at, distance, false, true);
+	_session->locations()->ripple (at, distance, false);
 	_session->add_command (new MementoCommand<Locations> (*_session->locations(), &before, &_session->locations()->get_state()));
 }
