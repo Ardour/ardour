@@ -1198,6 +1198,9 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 
 #if !(defined PLATFORM_WINDOWS || defined __APPLE__) /* Linux only */
 	_restart_component_is_synced = m->has_symbol ("yabridge_version");
+	if (_restart_component_is_synced) {
+		DEBUG_TRACE (DEBUG::VST3Config, "VST3PI detected yabridge\n");
+	}
 #endif
 
 #ifndef NDEBUG
