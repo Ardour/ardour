@@ -1277,6 +1277,8 @@ Locations::set_state (const XMLNode& node, int version)
 	/* build up a new locations list in here */
 	LocationList new_locations;
 
+	bool emit_changed = false;
+
 	{
 		std::vector<Location::ChangeSuspender> lcs;
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -1313,6 +1315,7 @@ Locations::set_state (const XMLNode& node, int version)
 					loc = new Location (_session);
 					lcs.emplace_back (std::move (loc));
 					loc->set_state (**niter, version);
+					emit_changed = true;
 				}
 
 				bool add = true;
@@ -1373,6 +1376,7 @@ Locations::set_state (const XMLNode& node, int version)
 			if (!found) {
 				delete *i;
 				locations.erase (i);
+				emit_changed = true;
 			}
 
 			i = tmp;
@@ -1387,7 +1391,9 @@ Locations::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	changed (); /* EMIT SIGNAL */
+	if (emit_changed) {
+		changed (); /* EMIT SIGNAL */
+	}
 
 	return 0;
 }
@@ -1816,12 +1822,14 @@ Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool includ
 		copy = locations;
 	}
 
+	std::vector<Location::ChangeSuspender> lcs;
 	for (LocationList::iterator i = copy.begin(); i != copy.end(); ++i) {
 
 		if ( (*i)->is_session_range() || (*i)->is_auto_punch() || (*i)->is_auto_loop()  ) {
 			continue;
 		}
 
+		lcs.emplace_back (std::move (*i));
 		bool locked = (*i)->locked();
 
 		if (locked) {
