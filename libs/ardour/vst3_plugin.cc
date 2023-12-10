@@ -1173,6 +1173,7 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 	, _block_rpc (0)
 	, _rpc_queue (RouteProcessorChange::NoProcessorChange, false)
 	, _no_kMono (false)
+	, _restart_component_is_synced (false)
 {
 	using namespace std;
 	IPluginFactory* factory = m->factory ();
@@ -1194,6 +1195,10 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 			_no_kMono = true;
 		}
 	}
+
+#if !(defined PLATFORM_WINDOWS || defined __APPLE__) /* Linux only */
+	_restart_component_is_synced = m->has_symbol ("yabridge_version");
+#endif
 
 #ifndef NDEBUG
 	if (DEBUG_ENABLED (DEBUG::VST3Config)) {
@@ -1505,7 +1510,7 @@ VST3PI::restartComponent (int32 flags)
 
 	if (flags & Vst::kReloadComponent) {
 		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
-		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state) {
+		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced) {
 			pl.acquire ();
 		} else {
 			assert (0); // a plugin should not call this while processing
@@ -1523,7 +1528,7 @@ VST3PI::restartComponent (int32 flags)
 	}
 	if (flags & Vst::kParamValuesChanged) {
 		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
-		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state) {
+		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced) {
 			pl.acquire ();
 		}
 		update_shadow_data ();
@@ -1538,7 +1543,7 @@ VST3PI::restartComponent (int32 flags)
 		 * changes are automatically picked up.
 		 */
 		Glib::Threads::Mutex::Lock pl (_process_lock, Glib::Threads::NOT_LOCK);
-		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state) {
+		if (!AudioEngine::instance ()->in_process_thread () && !_is_loading_state && !_restart_component_is_synced) {
 			/* Some plugins (e.g BlendEQ) call this from the process,
 			 * IPlugProcessor::ProcessBuffers. In that case taking the
 			 * _process_lock would deadlock.

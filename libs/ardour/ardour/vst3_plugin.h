@@ -358,6 +358,8 @@ private:
 
 	/* work around UADx plugin crash */
 	bool _no_kMono;
+	/* work around yabridge threading */
+	bool _restart_component_is_synced;
 };
 
 } // namespace Steinberg

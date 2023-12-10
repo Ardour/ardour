@@ -40,6 +40,10 @@ public:
 
 	Steinberg::IPluginFactory* factory ();
 
+	bool has_symbol (const char* name) const {
+		return NULL != fn_ptr (name);
+	}
+
 protected:
 	void release_factory ();
 
