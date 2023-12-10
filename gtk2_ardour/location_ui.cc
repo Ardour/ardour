@@ -989,7 +989,9 @@ LocationUI::start_changed (Location *location)
 			break;
 		}
 	}
-	assert (r);
+	if (!r) {
+		return;
+	}
 
 	int pos = 0;
 	Locations::LocationList loc = _session->locations()->list ();
