@@ -277,7 +277,7 @@ public:
 
 	void cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, SectionOperation const op);
 
-	void ripple (timepos_t const & at, timecnt_t const & distance, bool include_locked, bool notify);
+	void ripple (timepos_t const & at, timecnt_t const & distance, bool include_locked);
 
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);

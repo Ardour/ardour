@@ -1807,7 +1807,7 @@ Locations::range_starts_at (timepos_t const & pos, timecnt_t const & slop, bool 
 }
 
 void
-Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool include_locked, bool notify)
+Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool include_locked)
 {
 	LocationList copy;
 
@@ -1845,10 +1845,6 @@ Locations::ripple (timepos_t const & at, timecnt_t const & distance, bool includ
 		if (locked) {
 			(*i)->lock();
 		}
-	}
-
-	if (notify) {
-		changed(); /* EMIT SIGNAL */
 	}
 }
 
