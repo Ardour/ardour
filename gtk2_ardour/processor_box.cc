@@ -1961,6 +1961,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	no_processor_redisplay = false;
 
 	processor_scroller.set_policy (Gtk::POLICY_NEVER, Gtk::POLICY_AUTOMATIC);
+	processor_scroller.set_name ("ProcessorScroller");
 	processor_scroller.add (processor_display);
 	pack_start (processor_scroller, true, true);
 
