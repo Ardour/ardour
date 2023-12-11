@@ -275,9 +275,15 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ti
 
 		samplepos_t read_pos (i->range.start().samples());
 		samplecnt_t read_cnt (i->range.start().distance (i->range.end()).samples());
-		assert (start.distance (i->range.start()).samples() < scnt);
-		assert (start.distance (i->range.start()).samples() + read_cnt <= scnt);
-		samplecnt_t nread = i->region->read_at (buf + start.distance (i->range.start()).samples(), mixdown_buffer, gain_buffer, read_pos, read_cnt, chan_n);
+		samplecnt_t soffset = start.distance (i->range.start()).samples();
+
+		assert (soffset < scnt);
+
+		if (soffset + read_cnt > scnt) {
+			read_cnt = scnt - soffset;
+		}
+		assert (soffset + read_cnt <= scnt);
+		samplecnt_t nread = i->region->read_at (buf + soffset, mixdown_buffer, gain_buffer, read_pos, read_cnt, chan_n);
 		if (nread != read_cnt) {
 			std::cerr << name() << " tried to read " << read_cnt << " from " << nread << " in " << i->region->name() << " using range "
 			          << i->range.start() << " .. " << i->range.end() << " len " << i->range.length() << std::endl;
