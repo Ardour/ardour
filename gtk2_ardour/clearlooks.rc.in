@@ -967,6 +967,12 @@ style "processor_list" = "very_small_text"
 	bg[ACTIVE] = shade (1.8, @fg_selected)
 	fg[ACTIVE] = @bases
 }
+style "processor_scroller"
+{
+	bg[ACTIVE] = @bases
+	ythickness = 1
+	xthickness = 0
+}
 
 # MixerPanZone:
 #
@@ -1255,6 +1261,7 @@ widget "*LocationEditRemoveButton*" style:highest "location_row_button"
 widget "*ChannelCountSelector" style:highest "medium_bold_entry"
 widget "*RegionListWholeFile" style:highest "treeview_parent_node"
 widget "*ProcessorList*" style:highest "processor_list"
+widget "*ProcessorScroller*" style:highest "processor_scroller"
 widget "*PortMatrixLabel*" style:highest "small_text"
 widget "*MainMenuBar" style:highest "status_bar_box"
 widget "*midi device" style:highest "midi_device"
