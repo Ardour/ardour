@@ -299,7 +299,7 @@ MixerStrip::init ()
 	input_button_box.pack_start (trim_control, false, false);
 
 	global_vpacker.set_no_show_all ();
-	global_vpacker.set_border_width (1);
+	global_vpacker.set_border_width (3);
 	global_vpacker.set_spacing (0);
 
 	width_button.set_name ("mixer strip button");
