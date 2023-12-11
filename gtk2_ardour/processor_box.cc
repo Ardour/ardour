@@ -1864,7 +1864,8 @@ ProcessorEntry::PluginInlineDisplay::update_height_alloc (uint32_t inline_height
 void
 ProcessorEntry::PluginInlineDisplay::display_frame (cairo_t* cr, double w, double h)
 {
-	Gtkmm2ext::rounded_rectangle (cr, .5, -1.5, w - 1, h + 1, 7);
+	Gtkmm2ext::rounded_rectangle (cr, 1.5, -0.5, w - 3, h - 1.0, 2.5);
+
 }
 
 ProcessorEntry::LuaPluginDisplay::LuaPluginDisplay (ProcessorEntry& e, std::shared_ptr<ARDOUR::LuaProc> p, uint32_t max_height)
