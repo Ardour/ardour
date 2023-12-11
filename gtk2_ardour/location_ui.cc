@@ -1001,6 +1001,9 @@ LocationUI::start_changed (Location *location)
 			/* Skip locations in the session list that aren't of the right type */
 			continue;
 		}
+		if (location->is_auto_loop() || location-> is_auto_punch()) {
+			continue;
+		}
 		if (l == location) {
 			box.reorder_child (*r, pos);
 			break;
