@@ -897,7 +897,7 @@ style "track_name_editor" = "medium_text"
 
 style "track_separator"
 {
-	bg[NORMAL] = lighter(@background)
+	bg[NORMAL] = darker(@background)
 }
 
 # Plugin Editors
