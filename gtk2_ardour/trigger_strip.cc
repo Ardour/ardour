@@ -131,6 +131,7 @@ TriggerStrip::init ()
 	_name_button.signal_size_allocate ().connect (sigc::mem_fun (*this, &TriggerStrip::name_button_resized));
 
 	/* strip layout */
+	global_vpacker.set_border_width (2);
 	global_vpacker.set_spacing (2);
 	global_vpacker.pack_start (_name_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_trigger_display, Gtk::PACK_SHRINK);
@@ -150,11 +151,11 @@ TriggerStrip::init ()
 	/*Note: _gain_control is added in set_route */
 
 	/* top-level */
-	global_frame.add (global_vpacker);
-	global_frame.set_shadow_type (Gtk::SHADOW_IN);
-	global_frame.set_name ("BaseFrame");
+	global_stripbase.add (global_vpacker);
+	global_stripbase.set_border_width(1);
+	set_name("MixerStripFrame");
 
-	add (global_frame);
+	add (global_stripbase);
 
 	/* Signals */
 	_name_button.signal_button_press_event ().connect (sigc::mem_fun (*this, &TriggerStrip::name_button_press), false);
@@ -175,7 +176,7 @@ TriggerStrip::init ()
 
 	mute_solo_table.show ();
 	volume_table.show ();
-	global_frame.show ();
+	global_stripbase.show ();
 	global_vpacker.show ();
 	show ();
 
@@ -408,14 +409,12 @@ TriggerStrip::set_selected (bool yn)
 	AxisView::set_selected (yn);
 
 	if (selected()) {
-		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
-		global_frame.set_name ("MixerStripSelectedFrame");
+		set_name ("MixerStripSelectedFrame");
 	} else {
-		global_frame.set_shadow_type (Gtk::SHADOW_IN);
-		global_frame.set_name ("MixerStripFrame");
+		set_name ("MixerStripFrame");
 	}
 
-	global_frame.queue_draw ();
+	queue_draw ();
 }
 
 void

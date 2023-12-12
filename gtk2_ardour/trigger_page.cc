@@ -23,6 +23,7 @@
 #include <list>
 
 #include <gtkmm/label.h>
+#include <gtkmm/viewport.h>
 
 #include "pbd/properties.h"
 
@@ -169,6 +170,10 @@ TriggerPage::TriggerPage ()
 	_trigger_clip_picker.show ();
 	_no_strips.show ();
 	_sidebar_notebook.show_all ();
+
+	// remove scroller's inner shadow
+	Gtk::Viewport* pViewport = (Gtk::Viewport*) _strip_scroller.get_child();
+	pViewport->set_shadow_type(Gtk::SHADOW_NONE);
 
 	/* setup keybidings */
 	_content.set_data ("ardour-bindings", bindings);

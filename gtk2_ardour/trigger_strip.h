@@ -116,10 +116,10 @@ private:
 	PBD::ScopedConnection _panstate_connection;
 
 	/* Layout */
-	Gtk::Frame global_frame;
-	Gtk::VBox  global_vpacker;
-	Gtk::Table mute_solo_table;
-	Gtk::Table volume_table;
+	Gtk::EventBox global_stripbase;
+	Gtk::VBox     global_vpacker;
+	Gtk::Table    mute_solo_table;
+	Gtk::Table    volume_table;
 
 	/* Widgets */
 	FittedCanvasWidget _tmaster_widget;
