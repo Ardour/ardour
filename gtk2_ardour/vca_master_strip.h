@@ -65,7 +65,7 @@ private:
 	std::shared_ptr<ARDOUR::VCA> _vca;
 	GainMeter    gain_meter;
 
-	Gtk::Frame                  global_frame;
+	Gtk::EventBox               global_stripbase;
 	Gtk::VBox                   global_vpacker;
 	Gtk::HBox                   bottom_padding;
 	Gtk::HBox                   solo_mute_box;

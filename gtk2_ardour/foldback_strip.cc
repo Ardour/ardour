@@ -481,7 +481,7 @@ FoldbackStrip::init ()
 	_comment_button.set_text_ellipsize (Pango::ELLIPSIZE_END);
 	_comment_button.set_layout_ellipsize_width (PX_SCALE (_width) * PANGO_SCALE);
 
-	_global_vpacker.set_border_width (1);
+	_global_vpacker.set_border_width (2);
 	_global_vpacker.set_spacing (2);
 
 	/* Packing is from top down to the send box. The send box
@@ -524,10 +524,11 @@ FoldbackStrip::init ()
 	_global_vpacker.pack_end (_panners, Gtk::PACK_SHRINK);
 	_global_vpacker.pack_end (*_insert_box, Gtk::PACK_SHRINK);
 
-	_global_frame.add (_global_vpacker);
-	_global_frame.set_shadow_type (Gtk::SHADOW_IN);
-	_global_frame.set_name ("MixerStripFrame");
-	add (_global_frame);
+	_global_stripbase.set_border_width(1);
+	set_name("MixerStripFrame");
+
+	_global_stripbase.add (_global_vpacker);
+	add (_global_stripbase);
 
 	_number_label.signal_button_release_event().connect (sigc::mem_fun (*this, &FoldbackStrip::number_button_press), false);
 	_name_button.signal_button_press_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::name_button_button_press), false);
@@ -653,7 +654,7 @@ FoldbackStrip::set_route (std::shared_ptr<Route> rt)
 	_level_box.show ();
 	_output_button.show ();
 	_comment_button.show ();
-	_global_frame.show ();
+	_global_stripbase.show ();
 	_global_vpacker.show ();
 
 	show ();
@@ -1002,9 +1003,9 @@ FoldbackStrip::reset_strip_style ()
 {
 	bool active = _route->active ();
 	if (active) {
-		set_name ("FoldbackBusStripBase");
+		_global_stripbase.set_name ("FoldbackBusStripBase");
 	} else {
-		set_name ("AudioBusStripBaseInactive");
+		_global_stripbase.set_name ("AudioBusStripBaseInactive");
 	}
 
 	update_phase_invert_sensitivty ();

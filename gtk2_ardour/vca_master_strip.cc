@@ -124,7 +124,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	vertical_button.set_active_color (_vca->presentation_info().color ());
 	set_tooltip (vertical_button, _("Click to show assigned channels only")); /* tooltip updated dynamically */
 
-	global_vpacker.set_border_width (0);
+	global_vpacker.set_border_width (2);
 	global_vpacker.set_spacing (0);
 	gain_meter.set_spacing(4);
 
@@ -137,14 +137,15 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	global_vpacker.pack_start (gain_meter.gain_automation_state_button, false, false, 1);
 	global_vpacker.pack_start (bottom_padding, false, false, 0);
 
-	global_frame.add (global_vpacker);
-	global_frame.set_shadow_type (Gtk::SHADOW_IN);
-	global_frame.set_name ("BaseFrame");
+	global_stripbase.add (global_vpacker);
 
-	add (global_frame);
+	set_name("MixerStripFrame");
+	global_stripbase.set_border_width(1);
+
+	add (global_stripbase);
 
 	global_vpacker.show ();
-	global_frame.show ();
+	global_stripbase.show ();
 	vertical_button.show ();
 	hide_button.show ();
 	number_label.show ();
@@ -318,14 +319,12 @@ VCAMasterStrip::set_selected (bool yn)
 	AxisView::set_selected (yn);
 
 	if (_selected) {
-		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
-		global_frame.set_name ("MixerStripSelectedFrame");
+		set_name ("MixerStripSelectedFrame");
 	} else {
-		global_frame.set_shadow_type (Gtk::SHADOW_IN);
-		global_frame.set_name ("MixerStripFrame");
+		set_name ("MixerStripFrame");
 	}
 
-	global_frame.queue_draw ();
+	global_stripbase.queue_draw ();
 }
 
 bool

@@ -190,7 +190,7 @@ private:
 	Gtk::EventBox       _spacer;
 	Gtk::VBox           _send_display;
 	Gtk::ScrolledWindow _send_scroller;
-	Gtk::Frame          _global_frame;
+	Gtk::EventBox       _global_stripbase;
 	Gtk::VBox           _global_vpacker;
 	Gtk::HBox           _prev_next_box;
 	Gtk::HBox           _level_box;

@@ -996,10 +996,15 @@ style "paler_bright_when_active" = "medium_text"
 	bg[ACTIVE] = lighter(@bright_indicator)
 }
 
-style "selected_strip_frame"
+
+style "mixer_strip_frame"
 {
-	fg[NORMAL] = @bright_indicator
-	bg[NORMAL] = darker(@bright_indicator)
+	bg[NORMAL] = darker(@background)
+}
+
+style "mixer_strip_selected_frame"
+{
+	bg[NORMAL] = darker@bright_indicator
 }
 
 style "flashing_alert" = "very_small_text"
@@ -1222,8 +1227,8 @@ widget "*RegionEditorEntry" style:highest "medium_entry"
 widget "*MixerStripGainDisplay" style:highest "mixer_strip_entry"
 widget "*MixerStripPeakDisplay" style:highest "mixer_strip_entry"
 widget "*MixerStripPeakDisplayPeak" style:highest "peak_display_peaked_entry"
-widget "*MixerStripSelectedFrame" style:highest "selected_strip_frame"
-widget "*MixerStripFrame" style:highest "base_frame"
+widget "*MixerStripFrame" style:highest "mixer_strip_frame"
+widget "*MixerStripSelectedFrame" style:highest "mixer_strip_selected_frame"
 widget "*FadeCurve*" style:highest "medium_bold_entry"
 widget "*RouteParamsListDisplay" style:highest "inspector_track_list_display"
 widget "*TearOffArrow" style:highest "tearoff_arrow"

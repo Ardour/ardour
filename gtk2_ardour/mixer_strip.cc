@@ -299,7 +299,7 @@ MixerStrip::init ()
 	input_button_box.pack_start (trim_control, false, false);
 
 	global_vpacker.set_no_show_all ();
-	global_vpacker.set_border_width (3);
+	global_vpacker.set_border_width (2);
 	global_vpacker.set_spacing (0);
 
 	width_button.set_name ("mixer strip button");
@@ -361,11 +361,9 @@ MixerStrip::init ()
 	global_vpacker.pack_end (spacer, false, false);
 #endif
 
-	global_frame.add (global_vpacker);
-	global_frame.set_shadow_type (Gtk::SHADOW_IN);
-	global_frame.set_name ("BaseFrame");
+	global_stripbase.add (global_vpacker);
 
-	add (global_frame);
+	add (global_stripbase);
 
 	/* force setting of visible selected status */
 
@@ -384,11 +382,14 @@ MixerStrip::init ()
 	_width = (Width) -1;
 
 	if (is_midi_track()) {
-		set_name ("MidiTrackStripBase");
+		global_stripbase.set_name ("MidiTrackStripBase");
 	} else {
-		set_name ("AudioTrackStripBase");
+		global_stripbase.set_name ("AudioTrackStripBase");
 	}
-
+	
+	set_name("MixerStripFrame");
+	global_stripbase.set_border_width(1);
+	
 	add_events (Gdk::BUTTON_RELEASE_MASK|
 		    Gdk::ENTER_NOTIFY_MASK|
 		    Gdk::LEAVE_NOTIFY_MASK|
@@ -787,7 +788,7 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 
 	width_button.show();
 	width_hide_box.show();
-	global_frame.show();
+	global_stripbase.show();
 	global_vpacker.show();
 	mute_solo_table.show();
 	bottom_button_table.show();
@@ -1251,14 +1252,12 @@ MixerStrip::set_selected (bool yn)
 	AxisView::set_selected (yn);
 
 	if (selected()) {
-		global_frame.set_shadow_type (Gtk::SHADOW_ETCHED_OUT);
-		global_frame.set_name ("MixerStripSelectedFrame");
+		set_name ("MixerStripSelectedFrame");
 	} else {
-		global_frame.set_shadow_type (Gtk::SHADOW_IN);
-		global_frame.set_name ("MixerStripFrame");
+		set_name ("MixerStripFrame");
 	}
 
-	global_frame.queue_draw ();
+	queue_draw ();
 
 //	if (!yn)
 //		processor_box.deselect_all_processors();
@@ -1448,9 +1447,9 @@ MixerStrip::reset_strip_style ()
 
 		if (is_midi_track()) {
 			if (_route->active()) {
-				set_name ("MidiTrackStripBase");
+				global_stripbase.set_name ("MidiTrackStripBase");
 			} else {
-				set_name ("MidiTrackStripBaseInactive");
+				global_stripbase.set_name ("MidiTrackStripBaseInactive");
 			}
 			if (UIConfiguration::instance().get_use_route_color_widely()) {
 				// gpm.set_fader_bg ();
@@ -1461,9 +1460,9 @@ MixerStrip::reset_strip_style ()
 			gpm.set_fader_name ("MidiTrackFader");
 		} else if (is_audio_track()) {
 			if (_route->active()) {
-				set_name ("AudioTrackStripBase");
+				global_stripbase.set_name ("AudioTrackStripBase");
 			} else {
-				set_name ("AudioTrackStripBaseInactive");
+				global_stripbase.set_name ("AudioTrackStripBaseInactive");
 			}
 			if (UIConfiguration::instance().get_use_route_color_widely()) {
 				// gpm.set_fader_bg ();
@@ -1474,9 +1473,9 @@ MixerStrip::reset_strip_style ()
 			gpm.set_fader_name ("AudioTrackFader");
 		} else {
 			if (_route->active()) {
-				set_name ("AudioBusStripBase");
+				global_stripbase.set_name ("AudioBusStripBase");
 			} else {
-				set_name ("AudioBusStripBaseInactive");
+				global_stripbase.set_name ("AudioBusStripBaseInactive");
 			}
 
 			if (!is_master() && UIConfiguration::instance().get_use_route_color_widely()) {
