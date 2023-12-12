@@ -54,7 +54,7 @@ public:
 		if (destroy_callback) {
 			destroy_callback(data, destroy_arg);
 		} else {
-			free(data);
+			delete [] data;
 		}
 	}
 
