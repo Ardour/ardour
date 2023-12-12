@@ -138,7 +138,7 @@ void
 Pane::add_divider ()
 {
 	Divider* d = new Divider;
-	d->set_name (X_("Divider"));
+	d->set_name ("PaneDivider");
 	d->signal_button_press_event().connect (sigc::bind (sigc::mem_fun (*this, &Pane::handle_press_event), d), false);
 	d->signal_button_release_event().connect (sigc::bind (sigc::mem_fun (*this, &Pane::handle_release_event), d), false);
 	d->signal_motion_notify_event().connect (sigc::bind (sigc::mem_fun (*this, &Pane::handle_motion_event), d), false);
