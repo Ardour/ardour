@@ -717,8 +717,7 @@ Editor::update_ruler_visibility ()
 	}
 
 	ruler_separator->set_y_position ((int)(timebar_height * visible_timebars));
-
-	time_bars_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 1);
+	time_bars_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars));
 
 	/* move hv_scroll_group (trackviews) to the end of the timebars */
 
