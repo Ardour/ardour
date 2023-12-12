@@ -1004,7 +1004,7 @@ style "mixer_strip_frame"
 
 style "mixer_strip_selected_frame"
 {
-	bg[NORMAL] = darker@bright_indicator
+	bg[NORMAL] = @bright_indicator
 }
 
 style "flashing_alert" = "very_small_text"
