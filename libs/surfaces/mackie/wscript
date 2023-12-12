@@ -42,16 +42,15 @@ def build(bld):
     obj.use          = 'libardour libardour_cp libgtkmm2ext'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
 
-    if bld.is_defined('MIXBUS') or bld.is_defined('MIXBUS32C'):
-        obj = bld(features = 'cxx cxxshlib')
-        obj.source       = list(mackie_sources)
-        obj.source      += [ 'uf8_interface.cc' ]
-        obj.defines      = [ 'PACKAGE="ardour_ssl_uf8"' ]
-        obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
-        obj.defines     += [ 'UF8' ]
-        obj.includes     = [ '.' ]
-        obj.name         = 'libardour_ssl_uf8'
-        obj.target       = 'ardour_ssl_uf8'
-        obj.uselib       = 'GTKMM XML OSX'
-        obj.use          = 'libardour libardour_cp libgtkmm2ext'
-        obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+    obj = bld(features = 'cxx cxxshlib')
+    obj.source       = list(mackie_sources)
+    obj.source      += [ 'uf8_interface.cc' ]
+    obj.defines      = [ 'PACKAGE="ardour_ssl_uf8"' ]
+    obj.defines     += [ 'ARDOURSURFACE_DLL_EXPORTS' ]
+    obj.defines     += [ 'UF8' ]
+    obj.includes     = [ '.' ]
+    obj.name         = 'libardour_ssl_uf8'
+    obj.target       = 'ardour_ssl_uf8'
+    obj.uselib       = 'GTKMM XML OSX'
+    obj.use          = 'libardour libardour_cp libgtkmm2ext'
+    obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
