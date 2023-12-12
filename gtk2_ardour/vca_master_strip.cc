@@ -128,7 +128,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	global_vpacker.set_spacing (0);
 	gain_meter.set_spacing(4);
 
-	global_vpacker.pack_start (number_label, false, false, 1);
+	global_vpacker.pack_start (number_label, false, false, 0);
 	global_vpacker.pack_start (hide_button, false, false, 1);
 	global_vpacker.pack_start (vertical_button, true, true, 1);
 	global_vpacker.pack_start (solo_mute_box, false, false, 1);
