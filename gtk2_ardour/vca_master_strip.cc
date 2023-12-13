@@ -51,6 +51,8 @@ using std::string;
 
 PBD::Signal1<void,VCAMasterStrip*> VCAMasterStrip::CatchDeletion;
 
+#define PX_SCALE(px) std::max((float)px, rintf((float)px * UIConfiguration::instance().get_ui_scale()))
+
 static bool no_propagate (GdkEventButton*) { return false; }
 
 VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
@@ -91,6 +93,8 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	mute_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::mute_release), false);
 
 	hide_button.set_icon (ArdourIcon::HideEye);
+	hide_button.set_size_request (-1, PX_SCALE(19));
+	
 	set_tooltip (&hide_button, _("Hide this VCA strip"));
 
 	hide_button.signal_clicked.connect (sigc::mem_fun(*this, &VCAMasterStrip::hide_clicked));
@@ -110,6 +114,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	number_label.set_fallthrough_to_parent (true);
 	number_label.set_inactive_color (_vca->presentation_info().color ());
 	number_label.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::number_button_press), false);
+	number_label.set_size_request (-1, PX_SCALE(19));
 
 	update_bottom_padding ();
 
@@ -125,17 +130,17 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	set_tooltip (vertical_button, _("Click to show assigned channels only")); /* tooltip updated dynamically */
 
 	global_vpacker.set_border_width (2);
-	global_vpacker.set_spacing (0);
+	global_vpacker.set_spacing (2);
 	gain_meter.set_spacing(4);
 
-	global_vpacker.pack_start (number_label, false, false, 0);
-	global_vpacker.pack_start (hide_button, false, false, 1);
-	global_vpacker.pack_start (vertical_button, true, true, 1);
-	global_vpacker.pack_start (solo_mute_box, false, false, 1);
-	global_vpacker.pack_start (gain_meter, false, false, 1);
-	global_vpacker.pack_start (control_slave_ui, false, false, 1);
-	global_vpacker.pack_start (gain_meter.gain_automation_state_button, false, false, 1);
-	global_vpacker.pack_start (bottom_padding, false, false, 0);
+	global_vpacker.pack_start (number_label, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (hide_button, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (vertical_button, true, true);
+	global_vpacker.pack_start (solo_mute_box, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (gain_meter, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (control_slave_ui, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (gain_meter.gain_automation_state_button, Gtk::PACK_SHRINK);
+	global_vpacker.pack_start (bottom_padding,  Gtk::PACK_SHRINK);
 
 	global_stripbase.add (global_vpacker);
 
@@ -257,22 +262,26 @@ VCAMasterStrip::update_bottom_padding ()
 	}
 
 	int h = 0;
+	int n = 0;
 	if (viz.find ("Output") != std::string::npos) {
 		Gtk::Window window (WINDOW_TOPLEVEL);
 		window.add (output_button);
 		Gtk::Requisition requisition(output_button.size_request ());
-		h += requisition.height + 2;
+		h += requisition.height;
+		n++;
 	}
 	if (viz.find ("Comments") != std::string::npos) {
 		Gtk::Window window (WINDOW_TOPLEVEL);
 		window.add (comment_button);
 		Gtk::Requisition requisition(comment_button.size_request ());
-		h += requisition.height + 2;
+		h += requisition.height ;
+		n++;
 	}
 	if (h <= 0) {
-		bottom_padding.set_size_request (-1, 1);
+		bottom_padding.set_size_request (-1, 0);
 		bottom_padding.hide ();
 	} else {
+		h += 2 * (n - 1); // add 2px spacing per extra button (bottom_padding already adds 1 spacing)
 		bottom_padding.set_size_request (-1, h);
 		bottom_padding.show ();
 	}
