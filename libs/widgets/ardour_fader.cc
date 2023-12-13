@@ -84,7 +84,7 @@ ArdourFader::ArdourFader (Gtk::Adjustment& adj, int orientation, int fader_lengt
 		CairoWidget::set_size_request(_span, _girth);
 	}
 
-	outline_color = UIConfigurationBase::instance().color ("generic button: outline");
+	outline_color = UIConfigurationBase::instance().color ("fader outline");
 
 }
 
