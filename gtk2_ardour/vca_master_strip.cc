@@ -113,7 +113,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	number_label.set_alignment (.5, .5);
 	number_label.set_fallthrough_to_parent (true);
 	number_label.set_inactive_color (_vca->presentation_info().color ());
-	number_label.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::number_button_press), false);
+	number_label.signal_button_press_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::number_button_press), false);
 	number_label.set_size_request (-1, PX_SCALE(19));
 
 	update_bottom_padding ();
@@ -432,6 +432,11 @@ VCAMasterStrip::vertical_button_release (GdkEventButton* ev)
 bool
 VCAMasterStrip::number_button_press (GdkEventButton* ev)
 {
+	if (ev->type == GDK_2BUTTON_PRESS) {
+		start_color_edit ();
+		return true;
+	}
+
 	if (Keyboard::is_context_menu_event (ev)) {
 		if (!context_menu) {
 			build_context_menu ();
