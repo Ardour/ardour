@@ -183,6 +183,7 @@ protected:
 	std::string         infile;
 	ARDOUR::SystemExec* ffcmd;
 	double              m_fps;
+	std::string         m_fps_str;
 	double              m_aspect;
 	std::string         m_sar;
 	ARDOUR::samplecnt_t m_duration;

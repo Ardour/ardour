@@ -183,8 +183,10 @@ TranscodeFfmpeg::probe ()
 						}
 						m_codec += "(" + value + ")";
 					} else if (key == X_("r_frame_rate")) {
+						m_fps_str = value;
 						PARSE_FRACTIONAL_FPS (m_fps)
 					} else if (key == X_("avg_frame_rate") && m_fps == 0) {
+						m_fps_str = value;
 						PARSE_FRACTIONAL_FPS (m_fps)
 					} else if (key == X_("time_base")) {
 						PARSE_FRACTIONAL_FPS (timebase)
@@ -338,7 +340,7 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 		argp[a++] = SystemExec::format_key_value_parameter (it->first.c_str (), it->second.c_str ());
 	}
 
-	if (m_fps > 0) {
+	if (m_fps > 0 && !m_fps_str.empty ()) {
 		m_lead_in  = rint (m_lead_in * m_fps) / m_fps;
 		m_lead_out = rint (m_lead_out * m_fps) / m_fps;
 	}
@@ -346,12 +348,12 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 	if (m_lead_in != 0 && m_lead_out != 0) {
 		std::ostringstream osstream;
 		argp[a++] = strdup ("-vf");
-		osstream << "color=c=black:s=" << m_width << "x" << m_height << ":r=" << m_fps << ":d=" << m_lead_in;
+		osstream << "color=c=black:s=" << m_width << "x" << m_height << ":r=" << m_fps_str << ":d=" << m_lead_in;
 		if (!m_sar.empty ()) {
 			osstream << ":sar=" << m_sar;
 		}
 		osstream << " [pre]; ";
-		osstream << "color=c=black:s=" << m_width << "x" << m_height << ":r=" << m_fps << ":d=" << m_lead_out;
+		osstream << "color=c=black:s=" << m_width << "x" << m_height << ":r=" << m_fps_str << ":d=" << m_lead_out;
 		if (!m_sar.empty ()) {
 			osstream << ":sar=" << m_sar;
 		}
@@ -361,7 +363,7 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 	} else if (m_lead_in != 0) {
 		std::ostringstream osstream;
 		argp[a++] = strdup ("-vf");
-		osstream << "color=c=black:s=" << m_width << "x" << m_height << ":r=" << m_fps << ":d=" << m_lead_in;
+		osstream << "color=c=black:s=" << m_width << "x" << m_height << ":r=" << m_fps_str << ":d=" << m_lead_in;
 		if (!m_sar.empty ()) {
 			osstream << ":sar=" << m_sar;
 		}
@@ -371,7 +373,7 @@ TranscodeFfmpeg::encode (std::string outfile, std::string inf_a, std::string inf
 	} else if (m_lead_out != 0) {
 		std::ostringstream osstream;
 		argp[a++] = strdup ("-vf");
-		osstream << "color=c=black:s=" << m_width << "x" << m_height << ":r=" << m_fps << ":d=" << m_lead_out;
+		osstream << "color=c=black:s=" << m_width << "x" << m_height << ":r=" << m_fps_str << ":d=" << m_lead_out;
 		if (!m_sar.empty ()) {
 			osstream << ":sar=" << m_sar;
 		}
