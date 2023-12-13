@@ -122,7 +122,7 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 
 		// debug( "Search filepath : %s", fpath );
 
-		if (access (local_filepath, F_OK) != -1) {
+/* JE - for testing !!!! (added call to uriDecodeString() */		if (access (uriDecodeString(local_filepath, NULL), F_OK) != -1) {
 			// debug( "FOUND: %s", local_filepath );
 			retpath = local_filepath;
 			goto found;
