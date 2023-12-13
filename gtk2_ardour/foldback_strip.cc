@@ -875,6 +875,8 @@ FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 bool
 FoldbackStrip::number_button_press (GdkEventButton* ev)
 {
+	_mixer.select_none();
+	
 	if (ev->type == GDK_2BUTTON_PRESS) {
 		choose_color ();
 		return true;
