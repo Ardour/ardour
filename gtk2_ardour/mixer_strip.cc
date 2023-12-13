@@ -358,6 +358,7 @@ MixerStrip::init ()
 		scrollbar_height += 3; // track_display_frame border/shadow
 	}
 	spacer.set_size_request (-1, scrollbar_height);
+	spacer.set_name ("AudioBusStripBase");
 	global_vpacker.pack_end (spacer, false, false);
 #endif
 
