@@ -856,6 +856,8 @@ FoldbackStrip::build_route_select_menu ()
 bool
 FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 {
+	_mixer.select_none();
+
 	if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS) {
 		StripableList            slist;
 		std::shared_ptr<Route> previous = std::shared_ptr<Route> ();
