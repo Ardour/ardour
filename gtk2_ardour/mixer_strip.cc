@@ -317,7 +317,7 @@ MixerStrip::init ()
 	number_label.set_elements((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text|ArdourButton::Inactive));
 	number_label.set_no_show_all ();
 	number_label.set_name ("tracknumber label");
-	number_label.set_inactive_color (0x80808080);
+	number_label.set_fixed_colors (0x80808080, 0x80808080);
 	number_label.set_alignment (.5, .5);
 	number_label.set_fallthrough_to_parent (true);
 	number_label.set_tweaks (ArdourButton::OccasionalText);
@@ -1065,7 +1065,7 @@ MixerStrip::route_color_changed ()
 {
 	using namespace ARDOUR_UI_UTILS;
 	name_button.modify_bg (STATE_NORMAL, color());
-	number_label.set_inactive_color (gdk_color_to_rgba (color()));
+	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
 	reset_strip_style ();
 }
 
