@@ -200,6 +200,7 @@
     <ColorAlias name="meter color BBC" alias="alert:orange"/>
     <ColorAlias name="meter marker" alias="widget:orange"/>
     <ColorAlias name="meter marker music" alias="widget:orange"/>
+    <ColorAlias name="meter outline" alias="neutral:backgroundest"/>
     <ColorAlias name="meterbridge label: fill" alias="theme:bg"/>
     <ColorAlias name="meterbridge label: fill active" alias="neutral:background2"/>
     <ColorAlias name="meterbridge label: led" alias="alert:red"/>
