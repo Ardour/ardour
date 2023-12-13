@@ -783,12 +783,17 @@ ArdourButton::set_colors ()
 {
 	_update_colors = false;
 
+	std::string name = get_name();
+	bool failed = false;
+
+	outline_color = UIConfigurationBase::instance().color (string_compose ("%1: outline", name), &failed);
+	if (failed) {
+		outline_color = UIConfigurationBase::instance().color ("generic button: outline");
+	}
+
 	if (_fixed_colors_set == 0x3) {
 		return;
 	}
-
-	std::string name = get_name();
-	bool failed = false;
 
 	if (!(_fixed_colors_set & 0x1)) {
 		fill_active_color = UIConfigurationBase::instance().color (string_compose ("%1: fill active", name), &failed);
@@ -811,9 +816,6 @@ ArdourButton::set_colors ()
 	if (failed) {
 		led_active_color = UIConfigurationBase::instance().color ("generic button: led active");
 	}
-
-	outline_color = UIConfigurationBase::instance().color ("generic button: outline");
-
 
 	/* The inactive color for the LED is just a fairly dark version of the
 	 * active color.
