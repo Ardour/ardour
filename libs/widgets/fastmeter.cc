@@ -130,7 +130,7 @@ FastMeter::FastMeter (long hold, unsigned long dimen, Orientation o, int len,
 	request_width = pixrect.width + 2;
 	request_height= pixrect.height + 2;
 
-	outline_color = UIConfigurationBase::instance().color ("generic button: outline");
+	outline_color = UIConfigurationBase::instance().color ("meter outline");
 
 	clear ();
 }
