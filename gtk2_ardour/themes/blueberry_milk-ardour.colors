@@ -91,6 +91,7 @@
     <ColorAlias name="entered automation line" alias="widget:orange"/>
     <ColorAlias name="entered gain line" alias="widget:orange"/>
     <ColorAlias name="entered marker" alias="widget:orange"/>
+    <ColorAlias name="fader outline" alias="neutral:backgroundest"/>
     <ColorAlias name="feedback alert: alt active" alias="alert:ruddy"/>
     <ColorAlias name="feedback alert: fill" alias="widget:bg"/>
     <ColorAlias name="feedback alert: fill active" alias="alert:red"/>
