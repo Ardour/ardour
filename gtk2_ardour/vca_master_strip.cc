@@ -335,7 +335,7 @@ VCAMasterStrip::solo_release (GdkEventButton*)
 	   is redundant, but clear.
 	*/
 	_vca->solo_control()->set_value (_vca->solo_control()->self_soloed() ? 0.0 : 1.0, Controllable::NoGroup);
-	return true;
+	return false;
 }
 
 bool
@@ -345,7 +345,7 @@ VCAMasterStrip::mute_release (GdkEventButton*)
 	   is redundant, but clear.
 	*/
 	_vca->mute_control()->set_value (_vca->mute_control()->muted_by_self() ? 0.0 : 1.0, Controllable::NoGroup);
-	return true;
+	return false;
 }
 
 void
@@ -394,7 +394,7 @@ VCAMasterStrip::vertical_button_release (GdkEventButton* ev)
 {
 	if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
 		start_name_edit ();
-		return true;
+		return false;
 	}
 
 	if (Keyboard::is_context_menu_event (ev)) {
@@ -402,14 +402,14 @@ VCAMasterStrip::vertical_button_release (GdkEventButton* ev)
 			build_context_menu ();
 		}
 		context_menu->popup (ev->time, ev->time);
-		return true;
+		return false;
 	}
 
 	if (ev->button == 1) {
 		spill ();
 	}
 
-	return true;
+	return false;
 }
 
 bool
