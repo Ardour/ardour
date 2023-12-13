@@ -394,10 +394,10 @@ VCAMasterStrip::solo_changed ()
 bool
 VCAMasterStrip::vertical_button_press (GdkEventButton* ev)
 {
-	if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
-		start_name_edit ();
-		return false;
-	}
+	// if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
+	// 	start_name_edit ();
+	// 	return false;
+	// }
 
 	if (Keyboard::is_context_menu_event (ev)) {
 		if (!context_menu) {
