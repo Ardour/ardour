@@ -716,13 +716,13 @@ Editor::update_ruler_visibility ()
 		_selection_marker_group->hide ();
 	}
 
-	ruler_separator->set_y_position ((int)(timebar_height * visible_timebars));
-
-	time_bars_vbox.set_size_request (-1, (int)(timebar_height * visible_timebars) + 1);
+	int ruler_separator_y = std::max(1, (int)(timebar_height * visible_timebars));
+	ruler_separator->set_y_position (ruler_separator_y);
+	time_bars_vbox.set_size_request (-1, ruler_separator_y);
 
 	/* move hv_scroll_group (trackviews) to the end of the timebars */
 
-	hv_scroll_group->set_y_position ((int)(timebar_height * visible_timebars));
+	hv_scroll_group->set_y_position (ruler_separator_y);
 
 	compute_fixed_ruler_scale ();
 	update_fixed_rulers();
