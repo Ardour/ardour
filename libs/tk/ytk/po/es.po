@@ -1,0 +1,4750 @@
+# translation of gtk+.gtk-2-22.po to Español
+# Copyright © 1999-2002, 2006, 2007, 2008 Free Software Foundation, Inc.
+# This file is distributed under the same license as the gtk+ package.
+#
+# Pablo Saratxaga <srtxg@chanae.alphanet.ch>, 1998-2000.
+# José Antonio Salgueiro A. <joseantsa@eresmas.net>, 2001.
+# Carlos Perelló Marín <carlos@gnome-db.org>, 2002.
+# Germán Poo-Caamaño <gpoo@ubiobio.cl>, 2002.
+# Pablo Gonzalo del Campo <pablodc@bigfoot.com>, 2002, 2003.
+# Juan Manuel García Molina <juanma_gm@wanadoo.es>, 2003.
+# Francisco Javier F. Serrador <serrador@cvs.gnome.org>, 2003 - 2006.
+# Jorge González <jorgegonz@svn.gnome.org>, 2007, 2008, 2009, 2010.
+# Daniel Mustieles <daniel.mustieles@gmail.com>, 2011.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gtk+.gtk-2-22\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-19 21:59+0100\n"
+"PO-Revision-Date: 2011-07-13 10:46+0200\n"
+"Last-Translator: Daniel Mustieles <daniel.mustieles@gmail.com>\n"
+"Language-Team: Español <gnome-es-list@gnome.org>\n"
+"Language: es\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: gtkaboutdialog.c:245
+msgid "Could not show link"
+msgstr "No se pudo mostrar el enlace"
+
+#: gtkaboutdialog.c:399 gtkaboutdialog.c:2286
+msgid "License"
+msgstr "Licencia"
+
+#: gtkaboutdialog.c:400
+msgid "The license of the program"
+msgstr "La licencia del programa"
+
+#: gtkaboutdialog.c:646
+msgid "C_redits"
+msgstr "C_réditos"
+
+#: gtkaboutdialog.c:660
+msgid "_License"
+msgstr "_Licencia"
+
+#: gtkaboutdialog.c:966
+#, c-format
+msgid "About %s"
+msgstr "Acerca de %s"
+
+#: gtkaboutdialog.c:2209
+msgid "Credits"
+msgstr "Créditos"
+
+#: gtkaboutdialog.c:2238
+msgid "Written by"
+msgstr "Escrito por"
+
+#: gtkaboutdialog.c:2241
+msgid "Documented by"
+msgstr "Documentado por"
+
+#: gtkaboutdialog.c:2253
+msgid "Translated by"
+msgstr "Traducido por"
+
+#: gtkaboutdialog.c:2257
+msgid "Artwork by"
+msgstr "Arte por"
+
+#: gtkbuilderparser.c:343
+#, c-format
+msgid "Invalid type function on line %d: '%s'"
+msgstr "Tipo de función no válido en la línea %d: «%s»"
+
+#: gtkbuilderparser.c:407
+#, c-format
+msgid "Duplicate object ID '%s' on line %d (previously on line %d)"
+msgstr ""
+"ID «%s» de objeto duplicado en la línea %d (anteriormente en la línea %d)"
+
+#: gtkbuilderparser.c:859
+#, c-format
+msgid "Invalid root element: '%s'"
+msgstr "Nombre de elemento raíz no válido: «%s»"
+
+#: gtkbuilderparser.c:898
+#, c-format
+msgid "Unhandled tag: '%s'"
+msgstr "Etiqueta no soportada: «%s»"
+
+#: gtkcellrendereraccel.c:389 gtkcellrendereraccel.c:663
+msgid "New accelerator..."
+msgstr "Acelerador nuevo…"
+
+#: gtkcolorbutton.c:178 gtkcolorbutton.c:459
+msgid "Pick a Color"
+msgstr "Escoja un color"
+
+#: gtkcolorbutton.c:352
+msgid "Received invalid color data\n"
+msgstr "Se recibió un dato de color no válido\n"
+
+#: gtkcolorsel.c:358
+msgid ""
+"Select the color you want from the outer ring. Select the darkness or "
+"lightness of that color using the inner triangle."
+msgstr ""
+"Seleccione el color que desea desde el anillo exterior. Seleccione la "
+"oscuridad o luminosidad de ese color usando el triángulo interior."
+
+#: gtkcolorsel.c:382
+msgid ""
+"Click the eyedropper, then click a color anywhere on your screen to select "
+"that color."
+msgstr ""
+"Pulse en el gotero, luego pulse sobre cualquier color que haya en su "
+"pantalla para seleccionar ese color."
+
+#: gtkcolorsel.c:391
+msgid "_Hue:"
+msgstr "_Matiz:"
+
+#: gtkcolorsel.c:392
+msgid "Position on the color wheel."
+msgstr "Posición en la rueda de colores."
+
+#: gtkcolorsel.c:394
+msgid "_Saturation:"
+msgstr "_Saturación:"
+
+#: gtkcolorsel.c:395
+msgid "\"Deepness\" of the color."
+msgstr "Profundidad del color."
+
+#: gtkcolorsel.c:396
+msgid "_Value:"
+msgstr "_Valor:"
+
+#: gtkcolorsel.c:397
+msgid "Brightness of the color."
+msgstr "Brillo del color."
+
+#: gtkcolorsel.c:398
+msgid "_Red:"
+msgstr "_Rojo:"
+
+#: gtkcolorsel.c:399
+msgid "Amount of red light in the color."
+msgstr "Cantidad de luz roja en el color."
+
+#: gtkcolorsel.c:400
+msgid "_Green:"
+msgstr "_Verde:"
+
+#: gtkcolorsel.c:401
+msgid "Amount of green light in the color."
+msgstr "Cantidad de luz verde en el color."
+
+#: gtkcolorsel.c:402
+msgid "_Blue:"
+msgstr "_Azul:"
+
+#: gtkcolorsel.c:403
+msgid "Amount of blue light in the color."
+msgstr "Cantidad de luz azul en el color."
+
+#: gtkcolorsel.c:406
+msgid "Op_acity:"
+msgstr "_Opacidad:"
+
+#: gtkcolorsel.c:413 gtkcolorsel.c:423
+msgid "Transparency of the color."
+msgstr "Transparencia del color."
+
+#: gtkcolorsel.c:430
+msgid "Color _name:"
+msgstr "_Nombre del color:"
+
+#: gtkcolorsel.c:444
+msgid ""
+"You can enter an HTML-style hexadecimal color value, or simply a color name "
+"such as 'orange' in this entry."
+msgstr ""
+"Puede introducir en esta entrada un valor de color en estilo HTML "
+"hexadecimal, o simplemente un nombre de color como «orange»."
+
+#: gtkcolorsel.c:474
+msgid "_Palette:"
+msgstr "_Paleta:"
+
+#: gtkcolorsel.c:503
+msgid "Color Wheel"
+msgstr "Rueda de color"
+
+#: gtkcolorsel.c:962
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now. You can drag this color to a palette entry, or select this color as "
+"current by dragging it to the other color swatch alongside."
+msgstr ""
+"El color seleccionado previamente, para comparación con el color que está "
+"seleccionado ahora. Puede arrastrar este color a una entrada de paleta, o "
+"seleccionar este color como actual arrastrándolo al otro color a lo largo de "
+"la muestra."
+
+#: gtkcolorsel.c:965
+msgid ""
+"The color you've chosen. You can drag this color to a palette entry to save "
+"it for use in the future."
+msgstr ""
+"El color elegido. Puede arrastrar este color a una entrada de la paleta para "
+"guardarlo para usarlo en el futuro."
+
+#: gtkcolorsel.c:970
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now."
+msgstr ""
+"El color anteriormente seleccionado, para compararlo con el color que está "
+"seleccionando ahora"
+
+#: gtkcolorsel.c:973
+msgid "The color you've chosen."
+msgstr "El color que ha elegido."
+
+#: gtkcolorsel.c:1389
+msgid "_Save color here"
+msgstr "_Guardar color aquí"
+
+#: gtkcolorsel.c:1593
+msgid ""
+"Click this palette entry to make it the current color. To change this entry, "
+"drag a color swatch here or right-click it and select \"Save color here.\""
+msgstr ""
+"Pulse sobre esta entrada de la paleta para convertirla en el color actual. "
+"Para cambiar esta entrada, arrastre un color de muestra aquí o pulse con el "
+"botón derecho sobre éste y seleccione «Guardar color aquí»."
+
+#: gtkcolorseldialog.c:170
+msgid "Color Selection"
+msgstr "Selección de color"
+
+#: gtkentry.c:8789 gtktextview.c:8007
+msgid "Input _Methods"
+msgstr "_Métodos de entrada"
+
+#: gtkentry.c:8803 gtktextview.c:8021
+msgid "_Insert Unicode Control Character"
+msgstr "_Insertar un carácter de control Unicode"
+
+#: gtkentry.c:10177
+msgid "Caps Lock is on"
+msgstr "Bloq Mayús está activado"
+
+#: gtkfilechooserbutton.c:64
+msgid "Select a File"
+msgstr "Seleccionar un archivo"
+
+#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1851
+msgid "Desktop"
+msgstr "Escritorio"
+
+# src/file-manager/fm-icon-text-window.c:85
+#: gtkfilechooserbutton.c:66
+msgid "(None)"
+msgstr "(Ninguno)"
+
+#: gtkfilechooserbutton.c:2175
+msgid "Other..."
+msgstr "Otra…"
+
+#: gtkfilechooserdefault.c:150
+msgid "Type name of new folder"
+msgstr "Teclee el nombre de la carpeta nueva"
+
+#: gtkfilechooserdefault.c:956
+msgid "Could not retrieve information about the file"
+msgstr "No se pudo obtener la información acerca del archivo"
+
+#: gtkfilechooserdefault.c:967
+msgid "Could not add a bookmark"
+msgstr "No se pudo añadir un marcador"
+
+#: gtkfilechooserdefault.c:978
+msgid "Could not remove bookmark"
+msgstr "No se pudo quitar el marcador"
+
+#: gtkfilechooserdefault.c:989
+msgid "The folder could not be created"
+msgstr "No se pudo crear la carpeta"
+
+#: gtkfilechooserdefault.c:1002
+msgid ""
+"The folder could not be created, as a file with the same name already "
+"exists.  Try using a different name for the folder, or rename the file first."
+msgstr ""
+"No se pudo crear la carpeta, debido a que ya existe un archivo con el mismo "
+"nombre. Intenta usar un nombre distinto o renombre el archivo primero."
+
+#: gtkfilechooserdefault.c:1016
+msgid "You need to choose a valid filename."
+msgstr "Debe elegir un nombre de archivo válido."
+
+#: gtkfilechooserdefault.c:1019
+#, c-format
+msgid "Cannot create a file under %s as it is not a folder"
+msgstr "No se puede crear un archivo bajo %s ya que no es una carpeta"
+
+#: gtkfilechooserdefault.c:1031
+msgid ""
+"You may only select folders.  The item that you selected is not a folder; "
+"try using a different item."
+msgstr ""
+"Sólo puede seleccionar carpetas. El elemento que ha seleccionado no es una "
+"carpeta; intente seleccionar un elemento diferente."
+
+#: gtkfilechooserdefault.c:1041
+msgid "Invalid file name"
+msgstr "Nombre de archivo no válido"
+
+#: gtkfilechooserdefault.c:1051
+msgid "The folder contents could not be displayed"
+msgstr "No se pudo mostrar el contenido de la carpeta"
+
+#: gtkfilechooserdefault.c:1584
+#, c-format
+msgid "%1$s on %2$s"
+msgstr "%1$s en %2$s"
+
+#: gtkfilechooserdefault.c:1733
+msgid "Search"
+msgstr "Buscar"
+
+#: gtkfilechooserdefault.c:1757 gtkfilechooserdefault.c:4872
+msgid "Recently Used"
+msgstr "Usados recientemente"
+
+#: gtkfilechooserdefault.c:2387
+msgid "Select which types of files are shown"
+msgstr "Seleccione qué tipos de archivos se muestran"
+
+#: gtkfilechooserdefault.c:2746
+#, c-format
+msgid "Add the folder '%s' to the bookmarks"
+msgstr "Añadir la carpeta «%s» a los marcadores"
+
+#: gtkfilechooserdefault.c:2790
+msgid "Add the current folder to the bookmarks"
+msgstr "Añadir la carpeta actual a los marcadores"
+
+#: gtkfilechooserdefault.c:2792
+msgid "Add the selected folders to the bookmarks"
+msgstr "Añadir las carpetas seleccionadas a los marcadores"
+
+#: gtkfilechooserdefault.c:2837
+#, c-format
+msgid "Remove the bookmark '%s'"
+msgstr "Quitar el marcador «%s»"
+
+#: gtkfilechooserdefault.c:2839
+#, c-format
+msgid "Bookmark '%s' cannot be removed"
+msgstr "No se puede quitar el marcador «%s»"
+
+#: gtkfilechooserdefault.c:2846 gtkfilechooserdefault.c:3740
+msgid "Remove the selected bookmark"
+msgstr "Quitar el marcador seleccionado"
+
+#: gtkfilechooserdefault.c:3421
+msgid "Remove"
+msgstr "Quitar"
+
+#: gtkfilechooserdefault.c:3430
+msgid "Rename..."
+msgstr "Renombrar…"
+
+#: gtkfilechooserdefault.c:3597
+msgid "Places"
+msgstr "Lugares"
+
+#: gtkfilechooserdefault.c:3654
+msgid "_Places"
+msgstr "_Lugares"
+
+#: gtkfilechooserdefault.c:3728
+msgid "Add the selected folder to the Bookmarks"
+msgstr "Añade la carpeta seleccionada a los marcadores"
+
+#: gtkfilechooserdefault.c:3872
+msgid "Could not select file"
+msgstr "No se pudo seleccionar el archivo"
+
+#: gtkfilechooserdefault.c:4045
+msgid "_Add to Bookmarks"
+msgstr "_Añadir a los marcadores"
+
+#: gtkfilechooserdefault.c:4058
+msgid "Show _Hidden Files"
+msgstr "Mostrar archivos _ocultos"
+
+#: gtkfilechooserdefault.c:4065
+msgid "Show _Size Column"
+msgstr "Mostrar columna de _tamaño"
+
+#: gtkfilechooserdefault.c:4289
+msgid "Files"
+msgstr "Archivos"
+
+#: gtkfilechooserdefault.c:4340
+msgid "Name"
+msgstr "Nombre"
+
+#: gtkfilechooserdefault.c:4363
+msgid "Size"
+msgstr "Tamaño"
+
+#: gtkfilechooserdefault.c:4377
+msgid "Modified"
+msgstr "Modificado"
+
+#: gtkfilechooserdefault.c:4470
+msgid "_Name:"
+msgstr "_Nombre:"
+
+#: gtkfilechooserdefault.c:4710
+msgid "Type a file name"
+msgstr "Teclee un nombre de archivo"
+
+#: gtkfilechooserdefault.c:4757 gtkfilechooserdefault.c:4768
+msgid "Please select a folder below"
+msgstr "Seleccione una carpeta a continuación"
+
+#: gtkfilechooserdefault.c:4763
+msgid "Please type a file name"
+msgstr "Escriba un nombre de archivo"
+
+# C en conflicto con Cancelar
+#: gtkfilechooserdefault.c:4834
+msgid "Create Fo_lder"
+msgstr "Crear car_peta"
+
+#: gtkfilechooserdefault.c:4882
+msgid "Search:"
+msgstr "Buscar:"
+
+#: gtkfilechooserdefault.c:4933
+msgid "_Location:"
+msgstr "_Lugar:"
+
+# El acelerador c entra en conflicto con cancelar
+#: gtkfilechooserdefault.c:5383
+msgid "Save in _folder:"
+msgstr "_Guardar en la carpeta:"
+
+#: gtkfilechooserdefault.c:5385
+msgid "Create in _folder:"
+msgstr "Crear en la _carpeta:"
+
+#: gtkfilechooserdefault.c:6479
+#, c-format
+msgid "Could not read the contents of %s"
+msgstr "No se pudo leer el contenido de %s"
+
+#: gtkfilechooserdefault.c:6483
+msgid "Could not read the contents of the folder"
+msgstr "No se pudo leer el contenido del la carpeta"
+
+#: gtkfilechooserdefault.c:6576 gtkfilechooserdefault.c:6644
+#: gtkfilechooserdefault.c:6829
+msgid "Unknown"
+msgstr "Desconocido"
+
+#: gtkfilechooserdefault.c:6591
+msgid "%H:%M"
+msgstr "%H:%M"
+
+#: gtkfilechooserdefault.c:6593
+msgid "Yesterday at %H:%M"
+msgstr "Ayer a las %H:%M"
+
+#: gtkfilechooserdefault.c:7301
+msgid "Cannot change to folder because it is not local"
+msgstr "No se pudo cambiar a la carpeta porque no es local"
+
+#: gtkfilechooserdefault.c:7898 gtkfilechooserdefault.c:7919
+#, c-format
+msgid "Shortcut %s already exists"
+msgstr "La combinación %s ya existe"
+
+#: gtkfilechooserdefault.c:8009
+#, c-format
+msgid "Shortcut %s does not exist"
+msgstr "La combinación %s no existe"
+
+#: gtkfilechooserdefault.c:8250
+#, c-format
+msgid "A file named \"%s\" already exists.  Do you want to replace it?"
+msgstr "Ya existe un archivo llamado «%s». ¿Quiere reemplazarlo?"
+
+#: gtkfilechooserdefault.c:8253
+#, c-format
+msgid ""
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
+msgstr ""
+"El archivo ya existe en «%s». Si lo reemplaza sobreescribirá su contenido."
+
+#: gtkfilechooserdefault.c:8258
+msgid "_Replace"
+msgstr "_Reemplazar"
+
+#: gtkfilechooserdefault.c:9066
+msgid "Could not start the search process"
+msgstr "No se ha podido iniciar el proceso de búsqueda"
+
+#: gtkfilechooserdefault.c:9067
+msgid ""
+"The program was not able to create a connection to the indexer daemon.  "
+"Please make sure it is running."
+msgstr ""
+"El programa no fue capaz de crear una conexión con el demonio indexador. Por "
+"favor asegúrese de que se está ejecutando."
+
+#: gtkfilechooserdefault.c:9081
+msgid "Could not send the search request"
+msgstr "No se ha podido enviar la petición de búsqueda"
+
+#: gtkfilechooserdefault.c:9682
+#, c-format
+msgid "Could not mount %s"
+msgstr "No se pudo montar %s"
+
+#: gtkfilechoosersettings.c:515
+#, c-format
+msgid "Error creating folder '%s': %s"
+msgstr "Error al crear la carpeta «%s» : %s"
+
+#: gtkfilesystem.c:52
+msgid "File System"
+msgstr "Sistema de archivos"
+
+#: gtkfontbutton.c:144 gtkfontbutton.c:266
+msgid "Pick a Font"
+msgstr "Escoja una tipografía"
+
+#: gtkfontbutton.c:260
+msgid "Sans 12"
+msgstr "Sans 12"
+
+#: gtkfontbutton.c:785
+msgid "Font"
+msgstr "Tipografía"
+
+#: gtkfontsel.c:75
+msgid "abcdefghijk ABCDEFGHIJK"
+msgstr ""
+"El veloz murciélago hindú comía feliz cardillo y kiwi. La cigüeña tocaba el "
+"saxofón detrás del palenque de paja."
+
+#: gtkfontsel.c:343
+msgid "_Family:"
+msgstr "_Familia:"
+
+#: gtkfontsel.c:349
+msgid "_Style:"
+msgstr "_Estilo:"
+
+#: gtkfontsel.c:355
+msgid "Si_ze:"
+msgstr "_Tamaño:"
+
+#: gtkfontsel.c:532
+msgid "_Preview:"
+msgstr "_Vista previa:"
+
+#: gtkfontsel.c:1649
+msgid "Font Selection"
+msgstr "Selección de tipografías"
+
+#: gtkiconfactory.c:1354
+#, c-format
+msgid "Error loading icon: %s"
+msgstr "Ocurrió un error al cargar el icono: %s"
+
+#: gtkicontheme.c:1374
+#, c-format
+msgid ""
+"Could not find the icon '%s'. The '%s' theme\n"
+"was not found either, perhaps you need to install it.\n"
+"You can get a copy from:\n"
+"\t%s"
+msgstr ""
+"No se pudo encontrar el icono «%s». El tema «%s»\n"
+"no se encontró o quizá necesite instalarlo.\n"
+"Puede obtener una copia desde:\n"
+"\t%s"
+
+#: gtkicontheme.c:1555
+#, c-format
+msgid "Icon '%s' not present in theme"
+msgstr "El icono «%s» no está presente en el tema"
+
+#: gtkicontheme.c:3101
+msgid "Failed to load icon"
+msgstr "No se pudo cargar el icono"
+
+#: gtkimmodule.c:527
+msgid "Simple"
+msgstr "Simple"
+
+#: gtklabel.c:5696
+msgid "_Open Link"
+msgstr "_Abrir enlace"
+
+#: gtklabel.c:5708
+msgid "Copy _Link Address"
+msgstr "Copiar la dirección del _enlace"
+
+#: gtklinkbutton.c:428
+msgid "Copy URL"
+msgstr "Copiar URL"
+
+#: gtklinkbutton.c:586
+msgid "Invalid URI"
+msgstr "URI inválida"
+
+#: gtkmain.c:454
+msgid "Load additional GTK+ modules"
+msgstr "Cargar módulos adicionales GTK+"
+
+#: gtkmain.c:455
+msgid "MODULES"
+msgstr "MÓDULOS"
+
+#: gtkmain.c:457
+msgid "Make all warnings fatal"
+msgstr "Hacer todas las advertencias fatales"
+
+#: gtkmain.c:460
+msgid "GTK+ debugging flags to set"
+msgstr "Opciones de depuración GTK+ que activar"
+
+#: gtkmain.c:461 gtkmain.c:464
+msgid "FLAGS"
+msgstr "OPCIONES"
+
+#: gtkmain.c:463
+msgid "GTK+ debugging flags to unset"
+msgstr "Opciones de depuración GTK+ que desactivar"
+
+#: gtkmain.c:755
+msgid "default:LTR"
+msgstr "default:LTR"
+
+#: gtkmain.c:820
+#, c-format
+msgid "Cannot open display: %s"
+msgstr "No se puede abrir el visor: %s"
+
+#: gtkmain.c:857
+msgid "GTK+ Options"
+msgstr "Opciones GTK+"
+
+#: gtkmain.c:857
+msgid "Show GTK+ Options"
+msgstr "Mostrar opciones GTK+"
+
+#: gtkmountoperation.c:494
+msgid "Co_nnect"
+msgstr "Co_nectar"
+
+#: gtkmountoperation.c:561
+msgid "Connect _anonymously"
+msgstr "Conectar de forma _anónima"
+
+#: gtkmountoperation.c:570
+msgid "Connect as u_ser:"
+msgstr "Conectar como u_suario:"
+
+#: gtkmountoperation.c:608
+msgid "_Username:"
+msgstr "_Usuario:"
+
+#: gtkmountoperation.c:613
+msgid "_Domain:"
+msgstr "_Dominio:"
+
+#: gtkmountoperation.c:619
+msgid "_Password:"
+msgstr "_Contraseña:"
+
+#: gtkmountoperation.c:637
+msgid "Forget password _immediately"
+msgstr "Olvidar contraseña _inmediatamente"
+
+#: gtkmountoperation.c:647
+msgid "Remember password until you _logout"
+msgstr "Recordar la contraseña hasta _salir de la sesión"
+
+#: gtkmountoperation.c:657
+msgid "Remember _forever"
+msgstr "_Recordar para siempre"
+
+#: gtkmountoperation.c:886
+#, c-format
+msgid "Unknown Application (PID %d)"
+msgstr "Aplicación desconocida (PID %d)"
+
+#: gtkmountoperation.c:1069
+msgid "Unable to end process"
+msgstr "No se pudo finalizar el proceso"
+
+#: gtkmountoperation.c:1106
+msgid "_End Process"
+msgstr "_Finalizar proceso"
+
+#: gtknotebook.c:4745 gtknotebook.c:7351
+#, c-format
+msgid "Page %u"
+msgstr "Página %u"
+
+#: gtkpathbar.c:151
+msgid "Up Path"
+msgstr "Ruta superior"
+
+#: gtkpathbar.c:153
+msgid "Down Path"
+msgstr "Ruta inferior"
+
+#: gtkpathbar.c:1467
+msgid "File System Root"
+msgstr "Sistema de archivos raíz"
+
+#: gtkrc.c:2906
+#, c-format
+msgid "Unable to find include file: \"%s\""
+msgstr "No se ha podido encontrar el archivo «include»: «%s»"
+
+#: gtkrc.c:3536 gtkrc.c:3539
+#, c-format
+msgid "Unable to locate image file in pixmap_path: \"%s\""
+msgstr "Imposible encontrar un archivo imagen en pixmap_path: «%s»"
+
+#: gtkrecentaction.c:154 gtkrecentaction.c:162 gtkrecentchoosermenu.c:588
+#: gtkrecentchoosermenu.c:596
+#, c-format
+msgid "This function is not implemented for widgets of class '%s'"
+msgstr "Esta función no está implementada para los widgets de la clase «%s»"
+
+#: gtkrecentchooserdefault.c:481
+msgid "Select which type of documents are shown"
+msgstr "Seleccione qué tipos de documentos se muestran"
+
+#: gtkrecentchooserdefault.c:1135 gtkrecentchooserdefault.c:1172
+#, c-format
+msgid "No item for URI '%s' found"
+msgstr "No se encontró ningún elementos para la URI «%s»"
+
+#: gtkrecentchooserdefault.c:1299
+msgid "Untitled filter"
+msgstr "Filtro sin título"
+
+#: gtkrecentchooserdefault.c:1652
+msgid "Could not remove item"
+msgstr "No se pudo quitar el elemento"
+
+#: gtkrecentchooserdefault.c:1696
+msgid "Could not clear list"
+msgstr "No se pudo limpiar la lista"
+
+#: gtkrecentchooserdefault.c:1780
+msgid "Copy _Location"
+msgstr "Copiar _lugar"
+
+#: gtkrecentchooserdefault.c:1793
+msgid "_Remove From List"
+msgstr "_Quitar de la lista"
+
+#: gtkrecentchooserdefault.c:1802
+msgid "_Clear List"
+msgstr "_Limpiar lista"
+
+#: gtkrecentchooserdefault.c:1816
+msgid "Show _Private Resources"
+msgstr "Mostrar recursos _privados"
+
+#: gtkrecentchoosermenu.c:342
+msgid "No items found"
+msgstr "No se encontró ningún elemento"
+
+#: gtkrecentchoosermenu.c:508 gtkrecentchoosermenu.c:564
+#, c-format
+msgid "No recently used resource found with URI `%s'"
+msgstr "No se encontró un recurso usado recientemente con la URI «%s»"
+
+#: gtkrecentchoosermenu.c:774
+#, c-format
+msgid "Open '%s'"
+msgstr "Abrir «%s»"
+
+#: gtkrecentchoosermenu.c:804
+msgid "Unknown item"
+msgstr "Elemento desconocido"
+
+#: gtkrecentmanager.c:1182 gtkrecentmanager.c:1195 gtkrecentmanager.c:1332
+#: gtkrecentmanager.c:1342 gtkrecentmanager.c:1395 gtkrecentmanager.c:1404
+#: gtkrecentmanager.c:1419
+#, c-format
+msgid "Unable to find an item with URI '%s'"
+msgstr "No se ha podido encontrar un elemento con el URI «%s»"
+
+#: gtkspinner.c:459
+msgid "Provides visual indication of progress"
+msgstr "Proporciona una indicación visual del progreso"
+
+#: gtktextbufferrichtext.c:652
+#, c-format
+msgid "Unknown error when trying to deserialize %s"
+msgstr "Error desconocido al intentar deserializar %s"
+
+#: gtktextbufferrichtext.c:711
+#, c-format
+msgid "No deserialize function found for format %s"
+msgstr "No se encontró función de deserialización para el formato %s"
+
+#: gtktextbufferserialize.c:797 gtktextbufferserialize.c:823
+#, c-format
+msgid "Both \"id\" and \"name\" were found on the <%s> element"
+msgstr "Se encontraron tanto \"id\" como \"name\" en el elemento <%s>"
+
+#: gtktextbufferserialize.c:807 gtktextbufferserialize.c:833
+#, c-format
+msgid "The attribute \"%s\" was found twice on the <%s> element"
+msgstr "Se encontró el atributo \"%s\" dos veces en el elemento <%s>"
+
+#: gtktextbufferserialize.c:847
+#, c-format
+msgid "<%s> element has invalid ID \"%s\""
+msgstr "El elemento <%s> tiene el ID inválido «%s»"
+
+#: gtktextbufferserialize.c:857
+#, c-format
+msgid "<%s> element has neither a \"name\" nor an \"id\" attribute"
+msgstr ""
+"El elemento <%s> no tiene ni un elemento \"name\" ni un elemento \"id\""
+
+#: gtktextbufferserialize.c:944
+#, c-format
+msgid "Attribute \"%s\" repeated twice on the same <%s> element"
+msgstr "El atributo \"%s\" se repite dos veces en el mismo elemento <%s>"
+
+#: gtktextbufferserialize.c:962 gtktextbufferserialize.c:987
+#, c-format
+msgid "Attribute \"%s\" is invalid on <%s> element in this context"
+msgstr "El atributo \"%s\" es inválido en el elemento <%s> en este contexto"
+
+#: gtktextbufferserialize.c:1023
+#, c-format
+msgid "Tag \"%s\" has not been defined."
+msgstr "La etiqueta «%s» no ha sido definida."
+
+#: gtktextbufferserialize.c:1035
+msgid "Anonymous tag found and tags can not be created."
+msgstr "Se encontró una etiqueta anónima y las etiquetas no se pueden crear."
+
+#: gtktextbufferserialize.c:1046
+#, c-format
+msgid "Tag \"%s\" does not exist in buffer and tags can not be created."
+msgstr ""
+"La etiqueta «%s» no existe en el búfer y las etiquetas no se pueden crear."
+
+#: gtktextbufferserialize.c:1145 gtktextbufferserialize.c:1220
+#: gtktextbufferserialize.c:1321 gtktextbufferserialize.c:1395
+#, c-format
+msgid "Element <%s> is not allowed below <%s>"
+msgstr "El elemento <%s» no se permite debajo de <%s>"
+
+#: gtktextbufferserialize.c:1176
+#, c-format
+msgid "\"%s\" is not a valid attribute type"
+msgstr "«%s» no es un tipo de atributo válido"
+
+#: gtktextbufferserialize.c:1184
+#, c-format
+msgid "\"%s\" is not a valid attribute name"
+msgstr "«%s» no es un nombre de atributo válido"
+
+#: gtktextbufferserialize.c:1194
+#, c-format
+msgid ""
+"\"%s\" could not be converted to a value of type \"%s\" for attribute \"%s\""
+msgstr ""
+"\"%s\" no se pudo convertir a un valor de tipo \"%s\"para el atributo \"%s\""
+
+#: gtktextbufferserialize.c:1203
+#, c-format
+msgid "\"%s\" is not a valid value for attribute \"%s\""
+msgstr "\"%s\" no es un valor válido para el atributo \"%s\""
+
+#: gtktextbufferserialize.c:1286
+#, c-format
+msgid "Tag \"%s\" already defined"
+msgstr "La etiqueta \"%s\" ya está definida"
+
+#: gtktextbufferserialize.c:1297
+#, c-format
+msgid "Tag \"%s\" has invalid priority \"%s\""
+msgstr "La etiqueta \"%s\" tiene prioridad \"%s\" inválida"
+
+#: gtktextbufferserialize.c:1350
+#, c-format
+msgid "Outermost element in text must be <text_view_markup> not <%s>"
+msgstr ""
+"El elemento más externo en el texto debe ser <text_view_markup> no <%s>"
+
+#: gtktextbufferserialize.c:1359 gtktextbufferserialize.c:1375
+#, c-format
+msgid "A <%s> element has already been specified"
+msgstr "Ya se ha especificado un elemento <%s>"
+
+#: gtktextbufferserialize.c:1381
+msgid "A <text> element can't occur before a <tags> element"
+msgstr "Un elemento <text> no puede estar antes de un elemento <tags>"
+
+#: gtktextbufferserialize.c:1780
+msgid "Serialized data is malformed"
+msgstr "Los datos serializados están mal formados"
+
+#: gtktextbufferserialize.c:1858
+msgid ""
+"Serialized data is malformed. First section isn't GTKTEXTBUFFERCONTENTS-0001"
+msgstr ""
+"Los datos serializados están mal formados. La primera sección no es "
+"GTKTEXTBUFFERCONTENTS-0001"
+
+#: gtktextutil.c:61
+msgid "LRM _Left-to-right mark"
+msgstr "Marca de _izquierda-a-derecha [LRM]"
+
+#: gtktextutil.c:62
+msgid "RLM _Right-to-left mark"
+msgstr "Marca de _derecha-a-izquierda [RLM]"
+
+#: gtktextutil.c:63
+msgid "LRE Left-to-right _embedding"
+msgstr "In_crustamiento de izquierda-a-derecha [LRE]"
+
+#: gtktextutil.c:64
+msgid "RLE Right-to-left e_mbedding"
+msgstr "Inc_rustamiento de derecha-a-izquierda [RLE]"
+
+#: gtktextutil.c:65
+msgid "LRO Left-to-right _override"
+msgstr "_Sobreescritura de izquierda-a-derecha [LRO]"
+
+#: gtktextutil.c:66
+msgid "RLO Right-to-left o_verride"
+msgstr "Pre_valencia de derecha-a-izquierda [RLO]"
+
+#: gtktextutil.c:67
+msgid "PDF _Pop directional formatting"
+msgstr "Formateo d_ireccional emergente [PDF]"
+
+#: gtktextutil.c:68
+msgid "ZWS _Zero width space"
+msgstr "Espacio de ancho _cero [ZWS]"
+
+#: gtktextutil.c:69
+msgid "ZWJ Zero width _joiner"
+msgstr "En_samblador de ancho cero [ZWJ]"
+
+#: gtktextutil.c:70
+msgid "ZWNJ Zero width _non-joiner"
+msgstr "_No ensamblador de ancho cero [ZWNJ]"
+
+#: gtkthemes.c:71
+#, c-format
+msgid "Unable to locate theme engine in module_path: \"%s\","
+msgstr "Imposible encontrar el motor de temas en la ruta al _modulo: «%s»,"
+
+#: gtkuimanager.c:1505
+#, c-format
+msgid "Unexpected start tag '%s' on line %d char %d"
+msgstr "Etiqueta de inicio «%s» inesperada en la línea %d, carácter %d"
+
+#: gtkuimanager.c:1595
+#, c-format
+msgid "Unexpected character data on line %d char %d"
+msgstr "Dato carácter inesperado en la línea %d, carácter %d"
+
+#: gtkuimanager.c:2427
+msgid "Empty"
+msgstr "Vacío"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-debug"
+#~ msgstr "Error al analizar la opción --gdk-debug"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-no-debug"
+#~ msgstr "Error al analizar la opción --gdk-no-debug"
+
+#~ msgid "Program class as used by the window manager"
+#~ msgstr "Clase del programa tal como la usa el gestor de ventanas"
+
+#~ msgid "CLASS"
+#~ msgstr "CLASE"
+
+#~ msgid "Program name as used by the window manager"
+#~ msgstr "Nombre del programa tal como lo usa el gestor de ventanas"
+
+#~ msgid "NAME"
+#~ msgstr "NOMBRE"
+
+#~ msgid "X display to use"
+#~ msgstr "Visor [display] X que usar"
+
+#~ msgid "DISPLAY"
+#~ msgstr "VISOR"
+
+#~ msgid "X screen to use"
+#~ msgstr "Pantalla [screen] X que usar"
+
+#~ msgid "SCREEN"
+#~ msgstr "PANTALLA"
+
+#~ msgid "GDK debugging flags to set"
+#~ msgstr "Opciones de depuración de GDK que activar"
+
+#~ msgid "GDK debugging flags to unset"
+#~ msgstr "Opciones de depuración de GDK que desactivar"
+
+#~ msgctxt "keyboard label"
+#~ msgid "BackSpace"
+#~ msgstr "Retroceso"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Tab"
+#~ msgstr "Tab"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Return"
+#~ msgstr "Intro"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Pause"
+#~ msgstr "Pausa"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Scroll_Lock"
+#~ msgstr "Bloq Despl"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Sys_Req"
+#~ msgstr "_PetSis"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Escape"
+#~ msgstr "Escape"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Multi_key"
+#~ msgstr "MultiKey"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Home"
+#~ msgstr "Inicio"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Left"
+#~ msgstr "Izquierda"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Up"
+#~ msgstr "Arriba"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Right"
+#~ msgstr "Derecha"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Down"
+#~ msgstr "Abajo"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Up"
+#~ msgstr "Re Pág"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Down"
+#~ msgstr "Av Pág"
+
+#~ msgctxt "keyboard label"
+#~ msgid "End"
+#~ msgstr "Fin"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Begin"
+#~ msgstr "Inicio"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Print"
+#~ msgstr "Imprimir"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Insert"
+#~ msgstr "Insertar"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Num_Lock"
+#~ msgstr "Bloq Num"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Space"
+#~ msgstr "TN Espacio"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Tab"
+#~ msgstr "TN Tabulador"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Enter"
+#~ msgstr "TN Intro"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Home"
+#~ msgstr "TN Inicio"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Left"
+#~ msgstr "TN ←"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Up"
+#~ msgstr "TN ↑"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Right"
+#~ msgstr "TN →"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Down"
+#~ msgstr "TN ↓"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Up"
+#~ msgstr "TN Re Pág"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Prior"
+#~ msgstr "TN Anterior"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Down"
+#~ msgstr "TN Av Pág"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Next"
+#~ msgstr "TN Siguiente"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_End"
+#~ msgstr "TN Fin"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Begin"
+#~ msgstr "TN Inicio"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Insert"
+#~ msgstr "TN Ins"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Delete"
+#~ msgstr "TN Supr"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Delete"
+#~ msgstr "Supr"
+
+#~ msgid "Don't batch GDI requests"
+#~ msgstr "No poner en lotes las solicitudes GDI"
+
+#~ msgid "Don't use the Wintab API for tablet support"
+#~ msgstr "No usar el API Wintab para el soporte de tablas digitalizadoras"
+
+#~ msgid "Same as --no-wintab"
+#~ msgstr "Lo mismo que --no-wintab"
+
+#~ msgid "Do use the Wintab API [default]"
+#~ msgstr "No usar el API Wintab [predeterminado]"
+
+#~ msgid "Size of the palette in 8 bit mode"
+#~ msgstr "Tamaño de la paleta en modo 8 bits"
+
+#~ msgid "COLORS"
+#~ msgstr "COLORES"
+
+#~ msgid "Make X calls synchronous"
+#~ msgstr "Hacer llamadas a X síncronas"
+
+#, c-format
+#~ msgid "Starting %s"
+#~ msgstr "Iniciando %s"
+
+#, c-format
+#~ msgid "Opening %s"
+#~ msgstr "Abriendo %s"
+
+#, c-format
+#~ msgid "Opening %d Item"
+#~ msgid_plural "Opening %d Items"
+#~ msgstr[0] "Aberiendo %d elemento"
+#~ msgstr[1] "Abriendo %d elementos"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Shift"
+#~ msgstr "Mayús"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Ctrl"
+#~ msgstr "Ctrl"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Alt"
+#~ msgstr "Alt"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Super"
+#~ msgstr "Super"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Hyper"
+#~ msgstr "Hyper"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Meta"
+#~ msgstr "Meta"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Space"
+#~ msgstr "Espacio"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Backslash"
+#~ msgstr "Contrabarra"
+
+#~ msgid "calendar:MY"
+#~ msgstr "calendar:MY"
+
+#~ msgid "calendar:week_start:0"
+#~ msgstr "calendar:week_start:1"
+
+#~ msgctxt "year measurement template"
+#~ msgid "2000"
+#~ msgstr "2000"
+
+#, c-format
+#~ msgctxt "calendar:day:digits"
+#~ msgid "%d"
+#~ msgstr "%d"
+
+#, c-format
+#~ msgctxt "calendar:week:digits"
+#~ msgid "%d"
+#~ msgstr "%Id"
+
+#~ msgctxt "calendar year format"
+#~ msgid "%Y"
+#~ msgstr "%Y"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Disabled"
+#~ msgstr "Desactivado"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Invalid"
+#~ msgstr "No válido"
+
+#, c-format
+#~ msgctxt "progress bar label"
+#~ msgid "%d %%"
+#~ msgstr "%d %%"
+
+#~ msgid "default:mm"
+#~ msgstr "default:mm"
+
+#~ msgid "Manage Custom Sizes"
+#~ msgstr "Gestionar tamaños personalizados"
+
+#~ msgid "inch"
+#~ msgstr "pulgadas"
+
+#~ msgid "mm"
+#~ msgstr "mm"
+
+#~ msgid "Margins from Printer..."
+#~ msgstr "Márgenes de la impresora…"
+
+#, c-format
+#~ msgid "Custom Size %d"
+#~ msgstr "Tamaño personalizado %d"
+
+#~ msgid "_Width:"
+#~ msgstr "A_nchura:"
+
+#~ msgid "_Height:"
+#~ msgstr "A_ltura:"
+
+#~ msgid "Paper Size"
+#~ msgstr "Tamaño del papel"
+
+#~ msgid "_Top:"
+#~ msgstr "_Superior:"
+
+#~ msgid "_Bottom:"
+#~ msgstr "In_ferior:"
+
+#~ msgid "_Left:"
+#~ msgstr "_Izquierdo:"
+
+#~ msgid "_Right:"
+#~ msgstr "_Derecho:"
+
+#~ msgid "Paper Margins"
+#~ msgstr "Márgenes del papel"
+
+#, c-format
+#~ msgid "Invalid path"
+#~ msgstr "Ruta no válida"
+
+#~ msgid "No match"
+#~ msgstr "No hay coincidencias"
+
+#~ msgid "Sole completion"
+#~ msgstr "Completado único"
+
+#~ msgid "Complete, but not unique"
+#~ msgstr "Completado, pero no único"
+
+#~ msgid "Completing..."
+#~ msgstr "Completando…"
+
+#~ msgid "Only local files may be selected"
+#~ msgstr "Sólo se pueden seleccionar archivos locales"
+
+#~ msgid "Incomplete hostname; end it with '/'"
+#~ msgstr "Nombre de equipo incompleto; termínelo con «/»"
+
+#~ msgid "Path does not exist"
+#~ msgstr "La ruta no existe"
+
+#~ msgid "Folders"
+#~ msgstr "Carpetas"
+
+#~ msgid "Fol_ders"
+#~ msgstr "_Carpetas"
+
+#~ msgid "_Files"
+#~ msgstr "_Archivos"
+
+#, c-format
+#~ msgid "Folder unreadable: %s"
+#~ msgstr "Carpeta ilegible: %s"
+
+#, c-format
+#~ msgid ""
+#~ "The file \"%s\" resides on another machine (called %s) and may not be "
+#~ "available to this program.\n"
+#~ "Are you sure that you want to select it?"
+#~ msgstr ""
+#~ "El archivo «%s» reside en otra máquina (llamada %s) y podría no estar "
+#~ "disponible para este programa.\n"
+#~ "¿Está seguro que desea seleccionarlo?"
+
+#~ msgid "_New Folder"
+#~ msgstr "Carpeta _nueva"
+
+#~ msgid "De_lete File"
+#~ msgstr "_Eliminar archivo"
+
+#~ msgid "_Rename File"
+#~ msgstr "_Renombrar archivo"
+
+#, c-format
+#~ msgid ""
+#~ "The folder name \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr ""
+#~ "El nombre de la carpeta «%s» contiene símbolos que no están permitidos en "
+#~ "los nombres de archivos"
+
+#~ msgid "New Folder"
+#~ msgstr "Carpeta nueva"
+
+#~ msgid "_Folder name:"
+#~ msgstr "_Nombre de la carpeta:"
+
+#~ msgid "C_reate"
+#~ msgstr "C_rear"
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr ""
+#~ "El nombre «%s» contiene símbolos que no están permitidos en nombres de "
+#~ "archivos"
+
+#, c-format
+#~ msgid "Error deleting file '%s': %s"
+#~ msgstr "Error al borrar el archivo «%s»: %s"
+
+#, c-format
+#~ msgid "Really delete file \"%s\"?"
+#~ msgstr "¿Realmente desea borrar el archivo «%s»?"
+
+#~ msgid "Delete File"
+#~ msgstr "Borrar archivo"
+
+#, c-format
+#~ msgid "Error renaming file to \"%s\": %s"
+#~ msgstr "Error al renombrar el archivo a «%s»: %s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\": %s"
+#~ msgstr "Error al renombrar el archivo «%s»: %s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\" to \"%s\": %s"
+#~ msgstr "Error al renombrar el archivo «%s» como «%s»: %s"
+
+#~ msgid "Rename File"
+#~ msgstr "Renombrar archivo"
+
+#, c-format
+#~ msgid "Rename file \"%s\" to:"
+#~ msgstr "Renombrar archivo «%s» a:"
+
+#~ msgid "_Rename"
+#~ msgstr "_Renombrar"
+
+#~ msgid "_Selection: "
+#~ msgstr "_Selección: "
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" couldn't be converted to UTF-8. (try setting the "
+#~ "environment variable G_FILENAME_ENCODING): %s"
+#~ msgstr ""
+#~ "El nombre de archivo «%s» no ha podido ser convertido a UTF-8. (intente "
+#~ "definir la variable de entorno G_FILENAME_ENCODING): %s"
+
+#~ msgid "Invalid UTF-8"
+#~ msgstr "UTF-8 inválido"
+
+#~ msgid "Name too long"
+#~ msgstr "El nombre es demasiado largo"
+
+#~ msgid "Couldn't convert filename"
+#~ msgstr "No se ha podido convertir el nombre del archivo"
+
+#~ msgid "Gamma"
+#~ msgstr "Gamma"
+
+#~ msgid "_Gamma value"
+#~ msgstr "Valor _gamma"
+
+#~ msgctxt "input method menu"
+#~ msgid "System"
+#~ msgstr "Sistema"
+
+# src/file-manager/fm-icon-text-window.c:85
+#~ msgctxt "input method menu"
+#~ msgid "None"
+#~ msgstr "Ninguno"
+
+#, c-format
+#~ msgctxt "input method menu"
+#~ msgid "System (%s)"
+#~ msgstr "Sistema (%s)"
+
+#~ msgid "Input"
+#~ msgstr "Entrada"
+
+#~ msgid "No extended input devices"
+#~ msgstr "Sin dispositivos extendidos de entrada"
+
+#~ msgid "_Device:"
+#~ msgstr "_Dispositivo:"
+
+#~ msgid "Disabled"
+#~ msgstr "Desactivado"
+
+#~ msgid "Screen"
+#~ msgstr "Pantalla"
+
+#~ msgid "Window"
+#~ msgstr "Ventana"
+
+#~ msgid "_Mode:"
+#~ msgstr "_Modo:"
+
+#~ msgid "Axes"
+#~ msgstr "Ejes"
+
+#~ msgid "Keys"
+#~ msgstr "Teclas"
+
+#~ msgid "_X:"
+#~ msgstr "_X:"
+
+#~ msgid "_Y:"
+#~ msgstr "_Y:"
+
+#~ msgid "_Pressure:"
+#~ msgstr "_Presión:"
+
+#~ msgid "X _tilt:"
+#~ msgstr "_Inclinación X:"
+
+#~ msgid "Y t_ilt:"
+#~ msgstr "I_nclinación Y:"
+
+#~ msgid "_Wheel:"
+#~ msgstr "_Rueda:"
+
+# src/file-manager/fm-icon-text-window.c:85
+#~ msgid "none"
+#~ msgstr "ninguno"
+
+#~ msgid "(disabled)"
+#~ msgstr "(desactivado)"
+
+#~ msgid "(unknown)"
+#~ msgstr "(desconocido)"
+
+#~ msgid "Cl_ear"
+#~ msgstr "_Limpiar"
+
+#, c-format
+#~ msgid "Cannot kill process with PID %d. Operation is not implemented."
+#~ msgstr ""
+#~ "No se puede matar el proceso con PID %d. La operación no está "
+#~ "implementada."
+
+#~ msgid "Terminal Pager"
+#~ msgstr "Paginador del terminal («less»)"
+
+#~ msgid "Top Command"
+#~ msgstr "Comando top"
+
+#~ msgid "Bourne Again Shell"
+#~ msgstr "Shell Bourne Again"
+
+#~ msgid "Bourne Shell"
+#~ msgstr "Shell Bourne"
+
+#~ msgid "Z Shell"
+#~ msgstr "Shell Z"
+
+#, c-format
+#~ msgid "Cannot end process with PID %d: %s"
+#~ msgstr "No se puede finalizar el proceso con PID %d: %s"
+
+#~ msgid "Not a valid page setup file"
+#~ msgstr "No es un archivo válido de configuración de página"
+
+#~ msgid "Any Printer"
+#~ msgstr "Cualquier impresora"
+
+#~ msgid "For portable documents"
+#~ msgstr "Para documentos portables"
+
+#, c-format
+#~ msgid ""
+#~ "Margins:\n"
+#~ " Left: %s %s\n"
+#~ " Right: %s %s\n"
+#~ " Top: %s %s\n"
+#~ " Bottom: %s %s"
+#~ msgstr ""
+#~ "Márgenes:\n"
+#~ " Izquierdo: %s %s\n"
+#~ " Derecho: %s %s\n"
+#~ " Superior: %s %s\n"
+#~ " Inferior: %s %s"
+
+#~ msgid "Manage Custom Sizes..."
+#~ msgstr "Gestión de tamaños personalizados…"
+
+#~ msgid "_Format for:"
+#~ msgstr "_Formato para:"
+
+#~ msgid "_Paper size:"
+#~ msgstr "Tamaño del _papel:"
+
+#~ msgid "_Orientation:"
+#~ msgstr "_Orientación:"
+
+#~ msgid "Page Setup"
+#~ msgstr "Configuración de página"
+
+#~ msgid "Authentication"
+#~ msgstr "Autenticación"
+
+#~ msgid "Not available"
+#~ msgstr "No disponible"
+
+#~ msgid "_Save in folder:"
+#~ msgstr "_Guardar en la carpeta:"
+
+#, c-format
+#~ msgid "%s job #%d"
+#~ msgstr "%s tarea #%d"
+
+#~ msgctxt "print operation status"
+#~ msgid "Initial state"
+#~ msgstr "Estado inicial"
+
+#~ msgctxt "print operation status"
+#~ msgid "Preparing to print"
+#~ msgstr "Preparándose para imprimir"
+
+#~ msgctxt "print operation status"
+#~ msgid "Generating data"
+#~ msgstr "Generando datos"
+
+#~ msgctxt "print operation status"
+#~ msgid "Sending data"
+#~ msgstr "Enviando datos"
+
+#~ msgctxt "print operation status"
+#~ msgid "Waiting"
+#~ msgstr "Esperando"
+
+#~ msgctxt "print operation status"
+#~ msgid "Blocking on issue"
+#~ msgstr "Bloqueado en una hoja"
+
+#~ msgctxt "print operation status"
+#~ msgid "Printing"
+#~ msgstr "Imprimiendo"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished"
+#~ msgstr "Terminando"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished with error"
+#~ msgstr "Terminado con error"
+
+#, c-format
+#~ msgid "Preparing %d"
+#~ msgstr "Preparando %d"
+
+#~ msgid "Preparing"
+#~ msgstr "Preparando"
+
+#, c-format
+#~ msgid "Printing %d"
+#~ msgstr "Imprimiendo %d"
+
+#~ msgid "Error creating print preview"
+#~ msgstr "Error al crear la vista previa de impresión"
+
+#~ msgid ""
+#~ "The most probable reason is that a temporary file could not be created."
+#~ msgstr ""
+#~ "La razón más probable es que no se pudiera crear un archivo temporal."
+
+#~ msgid "Error launching preview"
+#~ msgstr "Error al lanzar la vista previa"
+
+#~ msgid "Error printing"
+#~ msgstr "Error en la impresión"
+
+#~ msgid "Application"
+#~ msgstr "Aplicación"
+
+#~ msgid "Printer offline"
+#~ msgstr "Impresora desconectada"
+
+#~ msgid "Out of paper"
+#~ msgstr "Papel agotado"
+
+#~ msgid "Paused"
+#~ msgstr "Pausada"
+
+#~ msgid "Need user intervention"
+#~ msgstr "Necesita intervención del usuario"
+
+#~ msgid "Custom size"
+#~ msgstr "Tamaño personalizado"
+
+#~ msgid "No printer found"
+#~ msgstr "No se encontró ninguna impresora"
+
+#~ msgid "Invalid argument to CreateDC"
+#~ msgstr "Argumento invalido para CreateDC"
+
+#~ msgid "Error from StartDoc"
+#~ msgstr "Error desde StartDoc"
+
+#~ msgid "Not enough free memory"
+#~ msgstr "No hay memoria suficiente"
+
+#~ msgid "Invalid argument to PrintDlgEx"
+#~ msgstr "Argumento invalido para PrintDlgEx"
+
+#~ msgid "Invalid pointer to PrintDlgEx"
+#~ msgstr "Puntero inválido a PrintDlgEx"
+
+#~ msgid "Invalid handle to PrintDlgEx"
+#~ msgstr "Manipulador inválido a PrintDlgEx"
+
+#~ msgid "Unspecified error"
+#~ msgstr "Error no especificado"
+
+#~ msgid "Getting printer information failed"
+#~ msgstr "Falló la obtención de la información de la impresora"
+
+#~ msgid "Getting printer information..."
+#~ msgstr "Obteniendo la información de la impresora…"
+
+#~ msgid "Printer"
+#~ msgstr "Impresora"
+
+#~ msgid "Location"
+#~ msgstr "Lugar"
+
+#~ msgid "Status"
+#~ msgstr "Estado"
+
+#~ msgid "Range"
+#~ msgstr "Rango"
+
+#~ msgid "_All Pages"
+#~ msgstr "_Todas las páginas"
+
+#~ msgid "C_urrent Page"
+#~ msgstr "Página a_ctual"
+
+#~ msgid "Se_lection"
+#~ msgstr "Se_lección"
+
+#~ msgid "Pag_es:"
+#~ msgstr "Págin_as:"
+
+#~ msgid ""
+#~ "Specify one or more page ranges,\n"
+#~ " e.g. 1-3,7,11"
+#~ msgstr ""
+#~ "Especifique uno o más rangos de páginas,\n"
+#~ "ej. 1-3,7,11"
+
+#~ msgid "Pages"
+#~ msgstr "Páginas"
+
+#~ msgid "Copies"
+#~ msgstr "Copias"
+
+#~ msgid "Copie_s:"
+#~ msgstr "_Copias:"
+
+#~ msgid "C_ollate"
+#~ msgstr "_Intercalar"
+
+#~ msgid "_Reverse"
+#~ msgstr "In_vertir"
+
+#~ msgid "General"
+#~ msgstr "General"
+
+#~ msgid "Left to right, top to bottom"
+#~ msgstr "De izquierda a derecha, de arriba a abajo"
+
+#~ msgid "Left to right, bottom to top"
+#~ msgstr "De izquierda a derecha, de abajo a arriba"
+
+#~ msgid "Right to left, top to bottom"
+#~ msgstr "De derecha a izquierda, de arriba a abajo"
+
+#~ msgid "Right to left, bottom to top"
+#~ msgstr "De derecha a izquierda, de abajo a arriba"
+
+#~ msgid "Top to bottom, left to right"
+#~ msgstr "De arriba a abajo, de izquierda a derecha"
+
+#~ msgid "Top to bottom, right to left"
+#~ msgstr "De arriba a abajo, de derecha a izquierda"
+
+#~ msgid "Bottom to top, left to right"
+#~ msgstr "De abajo a arriba, de izquierda a derecha"
+
+#~ msgid "Bottom to top, right to left"
+#~ msgstr "De abajo a arriba, de derecha a izquierda"
+
+#~ msgid "Page Ordering"
+#~ msgstr "Orden de las hojas"
+
+#~ msgid "Left to right"
+#~ msgstr "Izquierda a derecha"
+
+#~ msgid "Right to left"
+#~ msgstr "Derecha a izquierda"
+
+#~ msgid "Top to bottom"
+#~ msgstr "De arriba a abajo"
+
+#~ msgid "Bottom to top"
+#~ msgstr "De abajo a arriba"
+
+#~ msgid "Layout"
+#~ msgstr "Disposición"
+
+#~ msgid "T_wo-sided:"
+#~ msgstr "Por las _dos caras:"
+
+#~ msgid "Pages per _side:"
+#~ msgstr "Páginas por _hoja:"
+
+#~ msgid "Page or_dering:"
+#~ msgstr "Or_den de páginas:"
+
+#~ msgid "_Only print:"
+#~ msgstr "_Sólo imprimir:"
+
+#~ msgid "All sheets"
+#~ msgstr "Todas las hojas"
+
+#~ msgid "Even sheets"
+#~ msgstr "Hojas pares"
+
+#~ msgid "Odd sheets"
+#~ msgstr "Hojas impares"
+
+#~ msgid "Sc_ale:"
+#~ msgstr "_Escala:"
+
+#~ msgid "Paper"
+#~ msgstr "Papel"
+
+#~ msgid "Paper _type:"
+#~ msgstr "_Tipo de papel:"
+
+#~ msgid "Paper _source:"
+#~ msgstr "_Fuente del papel:"
+
+#~ msgid "Output t_ray:"
+#~ msgstr "_Bandeja de salida:"
+
+#~ msgid "Or_ientation:"
+#~ msgstr "Or_ientación:"
+
+#~ msgid "Portrait"
+#~ msgstr "Retrato"
+
+#~ msgid "Landscape"
+#~ msgstr "Paisaje"
+
+#~ msgid "Reverse portrait"
+#~ msgstr "Retrato invertido"
+
+#~ msgid "Reverse landscape"
+#~ msgstr "Paisaje invertido"
+
+#~ msgid "Job Details"
+#~ msgstr "Detalles de la tarea"
+
+#~ msgid "Pri_ority:"
+#~ msgstr "_Prioridad:"
+
+#~ msgid "_Billing info:"
+#~ msgstr "Info de _facturación:"
+
+#~ msgid "Print Document"
+#~ msgstr "Imprimir documento"
+
+#~ msgid "_Now"
+#~ msgstr "_Ahora"
+
+#~ msgid "A_t:"
+#~ msgstr "_En:"
+
+#~ msgid ""
+#~ "Specify the time of print,\n"
+#~ " e.g. 15:30, 2:35 pm, 14:15:20, 11:46:30 am, 4 pm"
+#~ msgstr ""
+#~ "Especifique la hora de impresión,\n"
+#~ "ej. 15:30, 2:35 pm, 14:15:20, 11:46:30 am, 4 pm"
+
+#~ msgid "Time of print"
+#~ msgstr "Hora de la impresión"
+
+#~ msgid "On _hold"
+#~ msgstr "En _espera"
+
+#~ msgid "Hold the job until it is explicitly released"
+#~ msgstr "Retener el trabajo hasta que se libere explícitamente"
+
+#~ msgid "Add Cover Page"
+#~ msgstr "Añadir página de cubierta"
+
+#~ msgid "Be_fore:"
+#~ msgstr "An_tes:"
+
+#~ msgid "_After:"
+#~ msgstr "_Después:"
+
+#~ msgid "Job"
+#~ msgstr "Tarea"
+
+#~ msgid "Advanced"
+#~ msgstr "Avanzado"
+
+#~ msgid "Image Quality"
+#~ msgstr "Calidad de imagen"
+
+#~ msgid "Color"
+#~ msgstr "Color"
+
+#~ msgid "Finishing"
+#~ msgstr "Terminando"
+
+#~ msgid "Some of the settings in the dialog conflict"
+#~ msgstr "Algunos de los ajustes del diálogo están en conflicto"
+
+#~ msgid "Print"
+#~ msgstr "Imprimir"
+
+#, c-format
+#~ msgctxt "recent menu label"
+#~ msgid "_%d. %s"
+#~ msgstr "_%d. %s"
+
+#, c-format
+#~ msgctxt "recent menu label"
+#~ msgid "%d. %s"
+#~ msgstr "%d. %s"
+
+#~ msgctxt "throbbing progress animation widget"
+#~ msgid "Spinner"
+#~ msgstr "Marcador incrementable"
+
+#~ msgctxt "Stock label"
+#~ msgid "Information"
+#~ msgstr "Información"
+
+#~ msgctxt "Stock label"
+#~ msgid "Warning"
+#~ msgstr "Advertencia"
+
+#~ msgctxt "Stock label"
+#~ msgid "Error"
+#~ msgstr "Error"
+
+#~ msgctxt "Stock label"
+#~ msgid "Question"
+#~ msgstr "Pregunta"
+
+#~ msgctxt "Stock label"
+#~ msgid "_About"
+#~ msgstr "Acerca _de"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Add"
+#~ msgstr "_Añadir"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Apply"
+#~ msgstr "_Aplicar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Bold"
+#~ msgstr "_Negrita"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Cancel"
+#~ msgstr "_Cancelar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_CD-Rom"
+#~ msgstr "_CD-Rom"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Clear"
+#~ msgstr "_Limpiar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Close"
+#~ msgstr "_Cerrar"
+
+#~ msgctxt "Stock label"
+#~ msgid "C_onnect"
+#~ msgstr "_Conectar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Convert"
+#~ msgstr "_Convertir"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Copy"
+#~ msgstr "_Copiar"
+
+#~ msgctxt "Stock label"
+#~ msgid "Cu_t"
+#~ msgstr "Cor_tar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Delete"
+#~ msgstr "_Eliminar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Discard"
+#~ msgstr "_Descartar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Disconnect"
+#~ msgstr "_Desconectar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Execute"
+#~ msgstr "_Ejecutar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Edit"
+#~ msgstr "_Editar"
+
+# src/nautilus-first-time-druid.c:290
+#~ msgctxt "Stock label"
+#~ msgid "_Find"
+#~ msgstr "_Buscar"
+
+#~ msgctxt "Stock label"
+#~ msgid "Find and _Replace"
+#~ msgstr "Buscar y _reemplazar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Floppy"
+#~ msgstr "_Disquete"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fullscreen"
+#~ msgstr "Pantalla _completa"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Leave Fullscreen"
+#~ msgstr "_Salir de pantalla completa"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Bottom"
+#~ msgstr "_Inferior"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_First"
+#~ msgstr "_Primero"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Last"
+#~ msgstr "_Último"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Top"
+#~ msgstr "_Superior"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Back"
+#~ msgstr "A_trás"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Down"
+#~ msgstr "_Bajar"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Forward"
+#~ msgstr "A_delante"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Up"
+#~ msgstr "_Subir"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Harddisk"
+#~ msgstr "_Disco duro"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Help"
+#~ msgstr "Ay_uda"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Home"
+#~ msgstr "_Inicio"
+
+#~ msgctxt "Stock label"
+#~ msgid "Increase Indent"
+#~ msgstr "Aumentar sangría"
+
+#~ msgctxt "Stock label"
+#~ msgid "Decrease Indent"
+#~ msgstr "Disminuir sangría"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Index"
+#~ msgstr "_Ind_ice"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Information"
+#~ msgstr "_Información"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Italic"
+#~ msgstr "_Cursiva"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Jump to"
+#~ msgstr "_Ir a"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Center"
+#~ msgstr "_Centro"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fill"
+#~ msgstr "_Rellenar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Left"
+#~ msgstr "_Izquierda"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Right"
+#~ msgstr "_Derecha"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Forward"
+#~ msgstr "A_delante"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Next"
+#~ msgstr "_Siguiente"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "P_ause"
+#~ msgstr "_Pausa"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Play"
+#~ msgstr "_Reproducir"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "Pre_vious"
+#~ msgstr "_Anterior"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Record"
+#~ msgstr "_Grabar"
+
+# src/nautilus-first-time-druid.c:290
+#~ msgctxt "Stock label, media"
+#~ msgid "R_ewind"
+#~ msgstr "_Rebobinar"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Stop"
+#~ msgstr "_Detener"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Network"
+#~ msgstr "_Red"
+
+#~ msgctxt "Stock label"
+#~ msgid "_New"
+#~ msgstr "_Nuevo"
+
+#~ msgctxt "Stock label"
+#~ msgid "_No"
+#~ msgstr "_No"
+
+#~ msgctxt "Stock label"
+#~ msgid "_OK"
+#~ msgstr "_Aceptar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Open"
+#~ msgstr "_Abrir"
+
+#~ msgctxt "Stock label"
+#~ msgid "Landscape"
+#~ msgstr "Apaisado"
+
+#~ msgctxt "Stock label"
+#~ msgid "Portrait"
+#~ msgstr "Vertical"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse landscape"
+#~ msgstr "Apaisado invertido"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse portrait"
+#~ msgstr "Vertical invertido"
+
+#~ msgctxt "Stock label"
+#~ msgid "Page Set_up"
+#~ msgstr "Config_uración de página"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Paste"
+#~ msgstr "_Pegar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Preferences"
+#~ msgstr "Prefere_ncias"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Print"
+#~ msgstr "_Imprimir"
+
+#~ msgctxt "Stock label"
+#~ msgid "Print Pre_view"
+#~ msgstr "_Vista previa de impresión"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Properties"
+#~ msgstr "_Propiedades"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Quit"
+#~ msgstr "_Salir"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Redo"
+#~ msgstr "_Rehacer"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Refresh"
+#~ msgstr "_Actualizar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Remove"
+#~ msgstr "_Quitar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Revert"
+#~ msgstr "_Revertir"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Save"
+#~ msgstr "_Guardar"
+
+#~ msgctxt "Stock label"
+#~ msgid "Save _As"
+#~ msgstr "Guardar co_mo"
+
+#~ msgctxt "Stock label"
+#~ msgid "Select _All"
+#~ msgstr "Seleccionar _todo"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Color"
+#~ msgstr "_Color"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Font"
+#~ msgstr "_Tipografía"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Ascending"
+#~ msgstr "_Ascendente"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Descending"
+#~ msgstr "_Descendente"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Spell Check"
+#~ msgstr "Comprobar _ortografía"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Stop"
+#~ msgstr "_Detener"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Strikethrough"
+#~ msgstr "_Tachar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undelete"
+#~ msgstr "_Recuperar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Underline"
+#~ msgstr "_Subrayar"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undo"
+#~ msgstr "_Deshacer"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Yes"
+#~ msgstr "_Sí"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Normal Size"
+#~ msgstr "Tamaño _normal"
+
+#~ msgctxt "Stock label"
+#~ msgid "Best _Fit"
+#~ msgstr "Ajuste _óptimo"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _In"
+#~ msgstr "_Ampliar"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _Out"
+#~ msgstr "_Reducir"
+
+#~ msgid "--- No Tip ---"
+#~ msgstr "-- Sin consejo --"
+
+#~ msgid "Volume"
+#~ msgstr "Volumen"
+
+#~ msgid "Turns volume down or up"
+#~ msgstr "Sube o baja el volumen"
+
+#~ msgid "Adjusts the volume"
+#~ msgstr "Ajusta el volumen"
+
+#~ msgid "Volume Down"
+#~ msgstr "Bajar volumen"
+
+#~ msgid "Decreases the volume"
+#~ msgstr "Disminuye el volumen"
+
+#~ msgid "Volume Up"
+#~ msgstr "Subir volumen"
+
+#~ msgid "Increases the volume"
+#~ msgstr "Aumenta el volumen"
+
+#~ msgid "Muted"
+#~ msgstr "Silenciado"
+
+#~ msgid "Full Volume"
+#~ msgstr "Volumen total"
+
+#, c-format
+#~ msgctxt "volume percentage"
+#~ msgid "%d %%"
+#~ msgstr "%d %%"
+
+#~ msgctxt "paper size"
+#~ msgid "asme_f"
+#~ msgstr "asme_f"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x2"
+#~ msgstr "A0x2"
+
+#~ msgctxt "paper size"
+#~ msgid "A0"
+#~ msgstr "A0"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x3"
+#~ msgstr "A0x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1"
+#~ msgstr "A1"
+
+#~ msgctxt "paper size"
+#~ msgid "A10"
+#~ msgstr "A10"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x3"
+#~ msgstr "A1x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x4"
+#~ msgstr "A1x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2"
+#~ msgstr "A2"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x3"
+#~ msgstr "A2x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x4"
+#~ msgstr "A2x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x5"
+#~ msgstr "A2x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3"
+#~ msgstr "A3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3 Extra"
+#~ msgstr "A3 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x3"
+#~ msgstr "A3x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x4"
+#~ msgstr "A3x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x5"
+#~ msgstr "A3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x6"
+#~ msgstr "A3x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x7"
+#~ msgstr "A3x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4"
+#~ msgstr "A4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Extra"
+#~ msgstr "A4 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Tab"
+#~ msgstr "A4 Tab"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x3"
+#~ msgstr "A4x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x4"
+#~ msgstr "A4x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x5"
+#~ msgstr "A4x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x6"
+#~ msgstr "A4x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x7"
+#~ msgstr "A4x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x8"
+#~ msgstr "A4x8"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x9"
+#~ msgstr "A4x9"
+
+#~ msgctxt "paper size"
+#~ msgid "A5"
+#~ msgstr "A5"
+
+#~ msgctxt "paper size"
+#~ msgid "A5 Extra"
+#~ msgstr "A5 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A6"
+#~ msgstr "A6"
+
+#~ msgctxt "paper size"
+#~ msgid "A7"
+#~ msgstr "A7"
+
+#~ msgctxt "paper size"
+#~ msgid "A8"
+#~ msgstr "A8"
+
+#~ msgctxt "paper size"
+#~ msgid "A9"
+#~ msgstr "A9"
+
+#~ msgctxt "paper size"
+#~ msgid "B0"
+#~ msgstr "B0"
+
+#~ msgctxt "paper size"
+#~ msgid "B1"
+#~ msgstr "B1"
+
+#~ msgctxt "paper size"
+#~ msgid "B10"
+#~ msgstr "B10"
+
+#~ msgctxt "paper size"
+#~ msgid "B2"
+#~ msgstr "B2"
+
+#~ msgctxt "paper size"
+#~ msgid "B3"
+#~ msgstr "B3"
+
+#~ msgctxt "paper size"
+#~ msgid "B4"
+#~ msgstr "B4"
+
+#~ msgctxt "paper size"
+#~ msgid "B5"
+#~ msgstr "B5"
+
+#~ msgctxt "paper size"
+#~ msgid "B5 Extra"
+#~ msgstr "B5 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "B6"
+#~ msgstr "B6"
+
+#~ msgctxt "paper size"
+#~ msgid "B6/C4"
+#~ msgstr "B6/C4"
+
+#~ msgctxt "paper size"
+#~ msgid "B7"
+#~ msgstr "B7"
+
+#~ msgctxt "paper size"
+#~ msgid "B8"
+#~ msgstr "B8"
+
+#~ msgctxt "paper size"
+#~ msgid "B9"
+#~ msgstr "B9"
+
+#~ msgctxt "paper size"
+#~ msgid "C0"
+#~ msgstr "C0"
+
+#~ msgctxt "paper size"
+#~ msgid "C1"
+#~ msgstr "C1"
+
+#~ msgctxt "paper size"
+#~ msgid "C10"
+#~ msgstr "C10"
+
+#~ msgctxt "paper size"
+#~ msgid "C2"
+#~ msgstr "C2"
+
+#~ msgctxt "paper size"
+#~ msgid "C3"
+#~ msgstr "C3"
+
+#~ msgctxt "paper size"
+#~ msgid "C4"
+#~ msgstr "C4"
+
+#~ msgctxt "paper size"
+#~ msgid "C5"
+#~ msgstr "C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C6"
+#~ msgstr "C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C6/C5"
+#~ msgstr "C6/C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C7"
+#~ msgstr "C7"
+
+#~ msgctxt "paper size"
+#~ msgid "C7/C6"
+#~ msgstr "C7/C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C8"
+#~ msgstr "C8"
+
+#~ msgctxt "paper size"
+#~ msgid "C9"
+#~ msgstr "C9"
+
+#~ msgctxt "paper size"
+#~ msgid "DL Envelope"
+#~ msgstr "Sobre DL"
+
+#~ msgctxt "paper size"
+#~ msgid "RA0"
+#~ msgstr "RA0"
+
+#~ msgctxt "paper size"
+#~ msgid "RA1"
+#~ msgstr "RA1"
+
+#~ msgctxt "paper size"
+#~ msgid "RA2"
+#~ msgstr "RA2"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA0"
+#~ msgstr "SRA0"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA1"
+#~ msgstr "SRA1"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA2"
+#~ msgstr "SRA2"
+
+#~ msgctxt "paper size"
+#~ msgid "JB0"
+#~ msgstr "JB0"
+
+#~ msgctxt "paper size"
+#~ msgid "JB1"
+#~ msgstr "JB1"
+
+#~ msgctxt "paper size"
+#~ msgid "JB10"
+#~ msgstr "JB10"
+
+#~ msgctxt "paper size"
+#~ msgid "JB2"
+#~ msgstr "JB2"
+
+#~ msgctxt "paper size"
+#~ msgid "JB3"
+#~ msgstr "JB3"
+
+#~ msgctxt "paper size"
+#~ msgid "JB4"
+#~ msgstr "JB4"
+
+#~ msgctxt "paper size"
+#~ msgid "JB5"
+#~ msgstr "JB5"
+
+#~ msgctxt "paper size"
+#~ msgid "JB6"
+#~ msgstr "JB6"
+
+#~ msgctxt "paper size"
+#~ msgid "JB7"
+#~ msgstr "JB7"
+
+#~ msgctxt "paper size"
+#~ msgid "JB8"
+#~ msgstr "JB8"
+
+#~ msgctxt "paper size"
+#~ msgid "JB9"
+#~ msgstr "JB9"
+
+#~ msgctxt "paper size"
+#~ msgid "jis exec"
+#~ msgstr "jis exec"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 2 Envelope"
+#~ msgstr "Sobre Choukei 2"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 3 Envelope"
+#~ msgstr "Sobre Choukei 3"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 4 Envelope"
+#~ msgstr "Sobre Choukei 4"
+
+#~ msgctxt "paper size"
+#~ msgid "hagaki (postcard)"
+#~ msgstr "Hagaki (postal)"
+
+#~ msgctxt "paper size"
+#~ msgid "kahu Envelope"
+#~ msgstr "Sobre Kahu"
+
+#~ msgctxt "paper size"
+#~ msgid "kaku2 Envelope"
+#~ msgstr "Sobre Kaku2"
+
+#~ msgctxt "paper size"
+#~ msgid "oufuku (reply postcard)"
+#~ msgstr "Oufuku (postal de respuesta)"
+
+#~ msgctxt "paper size"
+#~ msgid "you4 Envelope"
+#~ msgstr "Sobre You4"
+
+#~ msgctxt "paper size"
+#~ msgid "10x11"
+#~ msgstr " "
+
+#~ msgctxt "paper size"
+#~ msgid "10x13"
+#~ msgstr "10x13"
+
+#~ msgctxt "paper size"
+#~ msgid "10x14"
+#~ msgstr "10x14"
+
+#~ msgctxt "paper size"
+#~ msgid "10x15"
+#~ msgstr "10x15"
+
+#~ msgctxt "paper size"
+#~ msgid "11x12"
+#~ msgstr "11x12"
+
+#~ msgctxt "paper size"
+#~ msgid "11x15"
+#~ msgstr "11x15"
+
+#~ msgctxt "paper size"
+#~ msgid "12x19"
+#~ msgstr "12x19"
+
+#~ msgctxt "paper size"
+#~ msgid "5x7"
+#~ msgstr "5x7"
+
+#~ msgctxt "paper size"
+#~ msgid "6x9 Envelope"
+#~ msgstr "Sobre 6x9"
+
+#~ msgctxt "paper size"
+#~ msgid "7x9 Envelope"
+#~ msgstr "Sobre 7x9"
+
+#~ msgctxt "paper size"
+#~ msgid "9x11 Envelope"
+#~ msgstr "Sobre 9x11"
+
+#~ msgctxt "paper size"
+#~ msgid "a2 Envelope"
+#~ msgstr "Sobre A2"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch A"
+#~ msgstr "Arch A"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch B"
+#~ msgstr "Arch B"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch C"
+#~ msgstr "Arch C"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch D"
+#~ msgstr "Arch D"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch E"
+#~ msgstr "Arch E"
+
+#~ msgctxt "paper size"
+#~ msgid "b-plus"
+#~ msgstr "b-plus"
+
+#~ msgctxt "paper size"
+#~ msgid "c"
+#~ msgstr "c"
+
+#~ msgctxt "paper size"
+#~ msgid "c5 Envelope"
+#~ msgstr "Sobre c5"
+
+#~ msgctxt "paper size"
+#~ msgid "d"
+#~ msgstr "d"
+
+#~ msgctxt "paper size"
+#~ msgid "e"
+#~ msgstr "e"
+
+#~ msgctxt "paper size"
+#~ msgid "edp"
+#~ msgstr "edp"
+
+#~ msgctxt "paper size"
+#~ msgid "European edp"
+#~ msgstr "edp europeo"
+
+#~ msgctxt "paper size"
+#~ msgid "Executive"
+#~ msgstr "Ejecutivo"
+
+#~ msgctxt "paper size"
+#~ msgid "f"
+#~ msgstr "f"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold European"
+#~ msgstr "FanFold europeo"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold US"
+#~ msgstr "FanFold EE. UU."
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold German Legal"
+#~ msgstr "FanFold alemán legal"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Legal"
+#~ msgstr "Legal gubernamental"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Letter"
+#~ msgstr "Carta oficial"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 3x5"
+#~ msgstr "Index 3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 (postcard)"
+#~ msgstr "Index 4x6 (postal)"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 ext"
+#~ msgstr "Index 4x6 ext"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 5x8"
+#~ msgstr "Index 5x8"
+
+#~ msgctxt "paper size"
+#~ msgid "Invoice"
+#~ msgstr "Invoice"
+
+#~ msgctxt "paper size"
+#~ msgid "Tabloid"
+#~ msgstr "Tabloide"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal"
+#~ msgstr "US Legal"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal Extra"
+#~ msgstr "US Legal Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter"
+#~ msgstr "US Letter"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Extra"
+#~ msgstr "US Letter Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Plus"
+#~ msgstr "US Letter Plus"
+
+#~ msgctxt "paper size"
+#~ msgid "Monarch Envelope"
+#~ msgstr "Sobre Monarch"
+
+#~ msgctxt "paper size"
+#~ msgid "#10 Envelope"
+#~ msgstr "Sobre nº10"
+
+#~ msgctxt "paper size"
+#~ msgid "#11 Envelope"
+#~ msgstr "Sobre nº11"
+
+#~ msgctxt "paper size"
+#~ msgid "#12 Envelope"
+#~ msgstr "Sobre nº12"
+
+#~ msgctxt "paper size"
+#~ msgid "#14 Envelope"
+#~ msgstr "Sobre nº14"
+
+#~ msgctxt "paper size"
+#~ msgid "#9 Envelope"
+#~ msgstr "Sobre nº9"
+
+#~ msgctxt "paper size"
+#~ msgid "Personal Envelope"
+#~ msgstr "Sobre personal"
+
+#~ msgctxt "paper size"
+#~ msgid "Quarto"
+#~ msgstr "Quarto"
+
+#~ msgctxt "paper size"
+#~ msgid "Super A"
+#~ msgstr "Super A"
+
+#~ msgctxt "paper size"
+#~ msgid "Super B"
+#~ msgstr "Super B"
+
+#~ msgctxt "paper size"
+#~ msgid "Wide Format"
+#~ msgstr "Formato ancho"
+
+#~ msgctxt "paper size"
+#~ msgid "Dai-pa-kai"
+#~ msgstr "Dai-pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio"
+#~ msgstr "Folio"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio sp"
+#~ msgstr "Folio sp"
+
+#~ msgctxt "paper size"
+#~ msgid "Invite Envelope"
+#~ msgstr "Sobre de invitación"
+
+#~ msgctxt "paper size"
+#~ msgid "Italian Envelope"
+#~ msgstr "Sobre italiano"
+
+#~ msgctxt "paper size"
+#~ msgid "juuro-ku-kai"
+#~ msgstr "juuro-ku-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "pa-kai"
+#~ msgstr "pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Postfix Envelope"
+#~ msgstr "Sobre Postfix"
+
+#~ msgctxt "paper size"
+#~ msgid "Small Photo"
+#~ msgstr "Foto pequeña"
+
+#~ msgctxt "paper size"
+#~ msgid "prc1 Envelope"
+#~ msgstr "Sobre prc1"
+
+#~ msgctxt "paper size"
+#~ msgid "prc10 Envelope"
+#~ msgstr "Sobre prc10"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 16k"
+#~ msgstr "prc 16k"
+
+#~ msgctxt "paper size"
+#~ msgid "prc2 Envelope"
+#~ msgstr "Sobre prc2"
+
+#~ msgctxt "paper size"
+#~ msgid "prc3 Envelope"
+#~ msgstr "Sobre prc3"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 32k"
+#~ msgstr "prc 32k"
+
+#~ msgctxt "paper size"
+#~ msgid "prc4 Envelope"
+#~ msgstr "Sobre prc4"
+
+#~ msgctxt "paper size"
+#~ msgid "prc5 Envelope"
+#~ msgstr "Sobre prc5"
+
+#~ msgctxt "paper size"
+#~ msgid "prc6 Envelope"
+#~ msgstr "Sobre prc6"
+
+#~ msgctxt "paper size"
+#~ msgid "prc7 Envelope"
+#~ msgstr "Sobre prc7"
+
+#~ msgctxt "paper size"
+#~ msgid "prc8 Envelope"
+#~ msgstr "Sobre prc8"
+
+#~ msgctxt "paper size"
+#~ msgid "prc9 Envelope"
+#~ msgstr "Sobre prc9"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 16k"
+#~ msgstr "ROC 16k"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 8k"
+#~ msgstr "ROC 8k"
+
+#, c-format
+#~ msgid "different idatas found for symlinked '%s' and '%s'\n"
+#~ msgstr ""
+#~ "se encontraron diferentes idatas para el «%s» enlazado simbólicamente y "
+#~ "«%s»\n"
+
+#, c-format
+#~ msgid "Failed to write header\n"
+#~ msgstr "No se ha podido escribir la cabecera\n"
+
+#, c-format
+#~ msgid "Failed to write hash table\n"
+#~ msgstr "No se ha podido escribir la tabla hash\n"
+
+#, c-format
+#~ msgid "Failed to write folder index\n"
+#~ msgstr "No se ha podido escribir el índice de la carpeta\n"
+
+#, c-format
+#~ msgid "Failed to rewrite header\n"
+#~ msgstr "No se ha podido reescribir la cabecera\n"
+
+#, c-format
+#~ msgid "Failed to open file %s : %s\n"
+#~ msgstr "No se ha podido abrir el archivo «%s»: %s\n"
+
+#, c-format
+#~ msgid "Failed to write cache file: %s\n"
+#~ msgstr "No se ha podido escribir el archivo de caché: %s\n"
+
+#, c-format
+#~ msgid "The generated cache was invalid.\n"
+#~ msgstr "La caché generada no es válida.\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s, removing %s then.\n"
+#~ msgstr "No se pudo renombrar %s a %s: %s, eliminando %s entonces.\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s\n"
+#~ msgstr "No se pudo renombrar %s a %s: %s\n"
+
+#, c-format
+#~ msgid "Could not rename %s back to %s: %s.\n"
+#~ msgstr "No se pudo renombrar %s de nuevo a %s: %s.\n"
+
+#, c-format
+#~ msgid "Cache file created successfully.\n"
+#~ msgstr "Archivo de caché creado con éxito.\n"
+
+#~ msgid "Overwrite an existing cache, even if up to date"
+#~ msgstr "Sobreescribir un caché existente, incluso si está actualizado"
+
+#~ msgid "Don't check for the existence of index.theme"
+#~ msgstr "No comprobar la existencia de index.theme"
+
+#~ msgid "Don't include image data in the cache"
+#~ msgstr "No incluir los datos de la imagen en el caché"
+
+#~ msgid "Output a C header file"
+#~ msgstr "Sacar un archivo de cabecera C"
+
+#~ msgid "Turn off verbose output"
+#~ msgstr "Desactivar la salida prolija"
+
+#~ msgid "Validate existing icon cache"
+#~ msgstr "Validar la caché de iconos existente"
+
+#, c-format
+#~ msgid "File not found: %s\n"
+#~ msgstr "Archivo no encontrado: %s\n"
+
+#, c-format
+#~ msgid "Not a valid icon cache: %s\n"
+#~ msgstr "No es una caché de iconos válida: %s\n"
+
+#, c-format
+#~ msgid "No theme index file.\n"
+#~ msgstr "No existe el archivo índice del tema.\n"
+
+#, c-format
+#~ msgid ""
+#~ "No theme index file in '%s'.\n"
+#~ "If you really want to create an icon cache here, use --ignore-theme-"
+#~ "index.\n"
+#~ msgstr ""
+#~ "No hay archivo de índice del tema en «%s».\n"
+#~ "Si realmente quiere crear un caché de iconos aquí, use --ignore-theme-"
+#~ "index.\n"
+
+#~ msgid "Amharic (EZ+)"
+#~ msgstr "Amhárico (EZ+)"
+
+#~ msgid "Cedilla"
+#~ msgstr "Cedilla"
+
+#~ msgid "Cyrillic (Transliterated)"
+#~ msgstr "Cirílico (Transliterado)"
+
+#~ msgid "Inuktitut (Transliterated)"
+#~ msgstr "Inuktitut (Transliterado)"
+
+#~ msgid "IPA"
+#~ msgstr "IPA"
+
+#~ msgid "Multipress"
+#~ msgstr "Pulsación múltiple"
+
+#~ msgid "Thai-Lao"
+#~ msgstr "Thai-Lao"
+
+#~ msgid "Tigrigna-Eritrean (EZ+)"
+#~ msgstr "Tigrigna-Eritreo (EZ+)"
+
+#~ msgid "Tigrigna-Ethiopian (EZ+)"
+#~ msgstr "Tigrigna-Etíope (EZ+)"
+
+#~ msgid "Vietnamese (VIQR)"
+#~ msgstr "Vietnamita (VIQR)"
+
+#~ msgid "X Input Method"
+#~ msgstr "Método de entrada X"
+
+#~ msgid "Username:"
+#~ msgstr "Nombre de usuario:"
+
+#~ msgid "Password:"
+#~ msgstr "Contraseña:"
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s' on printer %s"
+#~ msgstr ""
+#~ "Se necesita autenticación para imprimir el documento «%s» en la impresora "
+#~ "%s"
+
+#, c-format
+#~ msgid "Authentication is required to print a document on %s"
+#~ msgstr "Se necesita autenticación para imprimir el documento en %s"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of job '%s'"
+#~ msgstr ""
+#~ "Se necesita autenticación para obtener los atributos del trabajo «%s»"
+
+#~ msgid "Authentication is required to get attributes of a job"
+#~ msgstr "Se necesita autenticación para obtener los atributos de un trabajo"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of printer %s"
+#~ msgstr ""
+#~ "Se necesita autenticación para obtener los atributos de la impresora %s"
+
+#~ msgid "Authentication is required to get attributes of a printer"
+#~ msgstr ""
+#~ "Se necesita autenticación para obtener los atributos de una impresora"
+
+#, c-format
+#~ msgid "Authentication is required to get default printer of %s"
+#~ msgstr ""
+#~ "Se necesita autenticación para obtener la impresora predeterminada de %s"
+
+#, c-format
+#~ msgid "Authentication is required to get printers from %s"
+#~ msgstr "Se necesita autenticación para obtener las impresoras de %s"
+
+#, c-format
+#~ msgid "Authentication is required to get a file from %s"
+#~ msgstr "Se necesita autenticación para obtener un archivo de %s"
+
+#, c-format
+#~ msgid "Authentication is required on %s"
+#~ msgstr "Se necesita autenticación en %s"
+
+#~ msgid "Domain:"
+#~ msgstr "Dominio:"
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s'"
+#~ msgstr "Se necesita autenticación para imprimir el documento «%s»"
+
+#, c-format
+#~ msgid "Authentication is required to print this document on printer %s"
+#~ msgstr ""
+#~ "Se necesita autenticación para imprimir este documento en la impresora %s"
+
+#~ msgid "Authentication is required to print this document"
+#~ msgstr "Se necesita autenticación para imprimir este documento"
+
+#, c-format
+#~ msgid "Printer '%s' is low on toner."
+#~ msgstr "A la impresora «%s» le queda poco tóner."
+
+#, c-format
+#~ msgid "Printer '%s' has no toner left."
+#~ msgstr "A la impresora «%s» no le queda tóner."
+
+#, c-format
+#~ msgid "Printer '%s' is low on developer."
+#~ msgstr "A la impresora «%s» le queda poco revelador."
+
+#, c-format
+#~ msgid "Printer '%s' is out of developer."
+#~ msgstr "A la impresora «%s» no le queda revelador."
+
+#, c-format
+#~ msgid "Printer '%s' is low on at least one marker supply."
+#~ msgstr "A la impresora «%s» le queda poco de, al menos, un cartucho."
+
+#, c-format
+#~ msgid "Printer '%s' is out of at least one marker supply."
+#~ msgstr "A la impresora «%s» no le queda, al menos, un cartucho."
+
+#, c-format
+#~ msgid "The cover is open on printer '%s'."
+#~ msgstr "La tapa de la impresora «%s» está abierta."
+
+#, c-format
+#~ msgid "The door is open on printer '%s'."
+#~ msgstr "La puerta de la impresora «%s» está abierta."
+
+#, c-format
+#~ msgid "Printer '%s' is low on paper."
+#~ msgstr "La impresora «%s» tiene poco papel."
+
+#, c-format
+#~ msgid "Printer '%s' is out of paper."
+#~ msgstr "La impresora «%s» no tiene papel."
+
+#, c-format
+#~ msgid "Printer '%s' is currently offline."
+#~ msgstr "La impresora «%s» está actualmente desconectada."
+
+#, c-format
+#~ msgid "There is a problem on printer '%s'."
+#~ msgstr "Existe un problema con la impresora «%s»."
+
+#~ msgid "Paused ; Rejecting Jobs"
+#~ msgstr "Pausado; rechazando trabajos"
+
+#~ msgid "Rejecting Jobs"
+#~ msgstr "Rechazando trabajos"
+
+#~ msgid "Two Sided"
+#~ msgstr "Dos caras"
+
+#~ msgid "Paper Type"
+#~ msgstr "Tipo de papel"
+
+#~ msgid "Paper Source"
+#~ msgstr "Fuente de papel"
+
+#~ msgid "Output Tray"
+#~ msgstr "Bandeja de salida"
+
+#~ msgid "Resolution"
+#~ msgstr "Resolución"
+
+#~ msgid "GhostScript pre-filtering"
+#~ msgstr "Prefiltrado GhostScript"
+
+#~ msgid "One Sided"
+#~ msgstr "Una cara"
+
+#~ msgid "Long Edge (Standard)"
+#~ msgstr "Margen largo (estándar)"
+
+#~ msgid "Short Edge (Flip)"
+#~ msgstr "Margen corto (girar)"
+
+#~ msgid "Auto Select"
+#~ msgstr "Autoseleccionar"
+
+#~ msgid "Printer Default"
+#~ msgstr "Predeterminado de la impresora"
+
+#~ msgid "Embed GhostScript fonts only"
+#~ msgstr "Sólo empotrar tipografías GhostScript"
+
+#~ msgid "Convert to PS level 1"
+#~ msgstr "Convertir a PS de nivel 1"
+
+#~ msgid "Convert to PS level 2"
+#~ msgstr "Convertir a PS de nivel 2"
+
+#~ msgid "No pre-filtering"
+#~ msgstr "Sin prefiltrado"
+
+#~ msgid "Miscellaneous"
+#~ msgstr "Miscelánea"
+
+#~ msgid "Urgent"
+#~ msgstr "Urgente"
+
+#~ msgid "High"
+#~ msgstr "Alta"
+
+#~ msgid "Medium"
+#~ msgstr "Media"
+
+#~ msgid "Low"
+#~ msgstr "Baja"
+
+#~ msgid "Pages per Sheet"
+#~ msgstr "Páginas por hoja"
+
+#~ msgid "Job Priority"
+#~ msgstr "Prioridad del trabajo"
+
+#~ msgid "Billing Info"
+#~ msgstr "Información de facturación"
+
+# src/file-manager/fm-icon-text-window.c:85
+#~ msgid "None"
+#~ msgstr "Ninguna"
+
+#~ msgid "Classified"
+#~ msgstr "Clasificado"
+
+#~ msgid "Confidential"
+#~ msgstr "Confidencial"
+
+#~ msgid "Secret"
+#~ msgstr "Secreto"
+
+#~ msgid "Standard"
+#~ msgstr "Estándar"
+
+#~ msgid "Top Secret"
+#~ msgstr "Alto secreto"
+
+#~ msgid "Unclassified"
+#~ msgstr "Desclasificado"
+
+#~ msgid "Before"
+#~ msgstr "Antes"
+
+#~ msgid "After"
+#~ msgstr "Después"
+
+#~ msgid "Print at"
+#~ msgstr "Imprimir en"
+
+#~ msgid "Print at time"
+#~ msgstr "Imprimir a la hora"
+
+#, c-format
+#~ msgid "Custom %sx%s"
+#~ msgstr "Personalizado %sx%s"
+
+#, c-format
+#~ msgid "output.%s"
+#~ msgstr "salida.%s"
+
+#~ msgid "Print to File"
+#~ msgstr "Imprimir a un archivo"
+
+#~ msgid "PDF"
+#~ msgstr "PDF"
+
+#~ msgid "Postscript"
+#~ msgstr "Postscript"
+
+#~ msgid "SVG"
+#~ msgstr "SVG"
+
+#~ msgid "Pages per _sheet:"
+#~ msgstr "Páginas por _hoja:"
+
+#~ msgid "File"
+#~ msgstr "Archivo"
+
+#~ msgid "_Output format"
+#~ msgstr "Formato de _salida"
+
+#~ msgid "Print to LPR"
+#~ msgstr "Imprimir a LPR"
+
+#~ msgid "Pages Per Sheet"
+#~ msgstr "Páginas por hoja"
+
+#~ msgid "Command Line"
+#~ msgstr "Línea de comandos"
+
+#~ msgid "printer offline"
+#~ msgstr "impresora desconectada"
+
+#~ msgid "ready to print"
+#~ msgstr "preparada para imprimir"
+
+#~ msgid "processing job"
+#~ msgstr "procesando trabajo"
+
+#~ msgid "paused"
+#~ msgstr "pausada"
+
+#~ msgid "unknown"
+#~ msgstr "desconocido"
+
+#, c-format
+#~ msgid "test-output.%s"
+#~ msgstr "salida-de-prueba.%s"
+
+#~ msgid "Print to Test Printer"
+#~ msgstr "Imprimir a la impresora de prueba"
+
+#, c-format
+#~ msgid "Could not get information for file '%s': %s"
+#~ msgstr "No se ha podido obtener información para el archivo «%s» : %s"
+
+#, c-format
+#~ msgid "Failed to open file '%s': %s"
+#~ msgstr "No se ha podido abrir el archivo «%s»: %s"
+
+#, c-format
+#~ msgid ""
+#~ "Failed to load image '%s': reason not known, probably a corrupt image file"
+#~ msgstr ""
+#~ "No se ha podido cargar la imagen «%s»: el motivo es desconocido, "
+#~ "probablemente el archivo gráfico esté corrupto"
+
+#~ msgid "_Add"
+#~ msgstr "_Añadir"
+
+#~ msgid "_Remove"
+#~ msgstr "_Quitar"
+
+#~ msgid "_Browse for other folders"
+#~ msgstr "_Buscar otras carpetas"
+
+#~ msgid "Gdk debugging flags to set"
+#~ msgstr "Opciones de depuración Gdk que establecer"
+
+#~ msgid "Gdk debugging flags to unset"
+#~ msgstr "Opciones de depuración Gdk que quitar"
+
+#~ msgid "Image file '%s' contains no data"
+#~ msgstr "El archivo de imagen «%s» no contiene datos"
+
+#~ msgid ""
+#~ "Failed to load animation '%s': reason not known, probably a corrupt "
+#~ "animation file"
+#~ msgstr ""
+#~ "No se ha podido cargar la animación «%s»: el motivo es desconocido, "
+#~ "probablemente el archivo de la animación esté corrupto"
+
+#~ msgid "Unable to load image-loading module: %s: %s"
+#~ msgstr "No se ha podido cargar el módulo de carga de imágenes: %s: %s"
+
+#~ msgid ""
+#~ "Image-loading module %s does not export the proper interface; perhaps "
+#~ "it's from a different GTK version?"
+#~ msgstr ""
+#~ "El módulo de carga de imágenes %s no exporta el interfaz adecuado; ¿puede "
+#~ "que sea de una versión de GTK diferente?"
+
+#~ msgid "Image type '%s' is not supported"
+#~ msgstr "El tipo de imagen «%s» no está soportado"
+
+#~ msgid "Couldn't recognize the image file format for file '%s'"
+#~ msgstr "No se ha podido reconocer el formato de imagen del archivo «%s»"
+
+#~ msgid "Unrecognized image file format"
+#~ msgstr "No se ha reconocido el formato de imagen del archivo"
+
+#~ msgid "Failed to load image '%s': %s"
+#~ msgstr "No se ha podido cargar la imagen «%s»: %s"
+
+#~ msgid "Error writing to image file: %s"
+#~ msgstr "Error al escribir en el archivo imagen: %s"
+
+#~ msgid ""
+#~ "This build of gdk-pixbuf does not support saving the image format: %s"
+#~ msgstr ""
+#~ "Esta compilación de gdk-pixbuf no soporta el guardar imágenes con el "
+#~ "formato: %s"
+
+#~ msgid "Insufficient memory to save image to callback"
+#~ msgstr ""
+#~ "No hay memoria suficiente para guardar la imagen a la que retrollamar"
+
+#~ msgid "Failed to open temporary file"
+#~ msgstr "No se ha podido abrir el archivo temporal"
+
+#~ msgid "Failed to read from temporary file"
+#~ msgstr "No se ha podido leer del archivo temporal"
+
+#~ msgid "Failed to open '%s' for writing: %s"
+#~ msgstr "No se ha podido abrir «%s» para escritura: %s"
+
+#~ msgid ""
+#~ "Failed to close '%s' while writing image, all data may not have been "
+#~ "saved: %s"
+#~ msgstr ""
+#~ "No se ha podido cerrar «%s» mientras se escribía la imagen, puede que no "
+#~ "se hayan guardado todos los datos: %s"
+
+#~ msgid "Insufficient memory to save image into a buffer"
+#~ msgstr "No hay memoria suficiente para guardar la imagen en un búfer"
+
+#~ msgid "Error writing to image stream"
+#~ msgstr "Error al escribir en el flujo de la imagen"
+
+#~ msgid ""
+#~ "Internal error: Image loader module '%s' failed to complete an operation, "
+#~ "but didn't give a reason for the failure"
+#~ msgstr ""
+#~ "Error interno: El módulo de carga de imágenes «%s» ha fallado al "
+#~ "completar una operación, pero no ha dado ninguna razón del fallo"
+
+#~ msgid "Incremental loading of image type '%s' is not supported"
+#~ msgstr ""
+#~ "No hay soporte para la carga incremental de las imágenes del tipo «%s»"
+
+#~ msgid "Image header corrupt"
+#~ msgstr "La cabecera de la imagen está corrupta"
+
+#~ msgid "Image format unknown"
+#~ msgstr "El formato de la imagen es desconocido"
+
+#~ msgid "Image pixel data corrupt"
+#~ msgstr "Los datos del píxel de la imagen están corrompidos"
+
+#, fuzzy
+#~ msgid "failed to allocate image buffer of %u byte"
+#~ msgid_plural "failed to allocate image buffer of %u bytes"
+#~ msgstr[0] "Falló al asignar %d bytes para el búfer de lectura"
+#~ msgstr[1] "Falló al asignar %d bytes para el búfer de lectura"
+
+#~ msgid "Unexpected icon chunk in animation"
+#~ msgstr "Porción de icono inesperada en la animación"
+
+#~ msgid "Unsupported animation type"
+#~ msgstr "Tipo de animación no soportado"
+
+#~ msgid "Invalid header in animation"
+#~ msgstr "Cabecera inválida en la animación"
+
+#~ msgid "Not enough memory to load animation"
+#~ msgstr "No hay memoria suficiente para cargar la animación"
+
+#~ msgid "Malformed chunk in animation"
+#~ msgstr "Porción malformada en la animación"
+
+#~ msgid "The ANI image format"
+#~ msgstr "El formato de imagen ANI"
+
+#~ msgid "BMP image has bogus header data"
+#~ msgstr "La imagen BMP tiene datos de cabecera erróneos"
+
+#~ msgid "Not enough memory to load bitmap image"
+#~ msgstr "No hay memoria suficiente para cargar el mapa de bits"
+
+#~ msgid "BMP image has unsupported header size"
+#~ msgstr "La imagen BMP tiene un tamaño de cabecera no soportado"
+
+#~ msgid "Topdown BMP images cannot be compressed"
+#~ msgstr "Las imágenes BMP «Topdown» no se pueden comprimir"
+
+#~ msgid "Premature end-of-file encountered"
+#~ msgstr "Se ha encontrado un final de archivo antes de lo esperado"
+
+#~ msgid "Couldn't allocate memory for saving BMP file"
+#~ msgstr "No se pudo asignar memoria para guardar el archivo BMP"
+
+#~ msgid "Couldn't write to BMP file"
+#~ msgstr "No se ha podido escribir en el archivo BMP"
+
+#~ msgid "The BMP image format"
+#~ msgstr "El formato de imagen BMP"
+
+#~ msgid "Failure reading GIF: %s"
+#~ msgstr "Se produjo un fallo durante la lectura del GIF: %s"
+
+#~ msgid "GIF file was missing some data (perhaps it was truncated somehow?)"
+#~ msgstr ""
+#~ "Al archivo GIF le faltan algunos de datos (¿quizás se ha truncado en "
+#~ "algún momento?)"
+
+#~ msgid "Internal error in the GIF loader (%s)"
+#~ msgstr "Error interno en el cargador de GIF (%s)"
+
+#~ msgid "Stack overflow"
+#~ msgstr "Desbordamiento de pila"
+
+#~ msgid "GIF image loader cannot understand this image."
+#~ msgstr "El cargador de imágenes GIF no puede entender esta imagen."
+
+#~ msgid "Bad code encountered"
+#~ msgstr "Se ha encontrado un código incorrecto"
+
+#~ msgid "Circular table entry in GIF file"
+#~ msgstr "Entrada de tabla circular en el archivo GIF"
+
+#~ msgid "Not enough memory to load GIF file"
+#~ msgstr "No hay memoria suficiente para cargar el archivo GIF"
+
+#~ msgid "Not enough memory to composite a frame in GIF file"
+#~ msgstr ""
+#~ "No hay memoria suficiente para componer un fotograma en el archivo GIF"
+
+#~ msgid "GIF image is corrupt (incorrect LZW compression)"
+#~ msgstr "La imagen GIF está corrupta (la compresión LZW es incorrecta)"
+
+#~ msgid "File does not appear to be a GIF file"
+#~ msgstr "El archivo no parece ser un archivo GIF"
+
+#~ msgid "Version %s of the GIF file format is not supported"
+#~ msgstr "La versión %s del formato de archivo GIF no está soportada"
+
+#~ msgid ""
+#~ "GIF image has no global colormap, and a frame inside it has no local "
+#~ "colormap."
+#~ msgstr ""
+#~ "La imagen GIF no tiene un mapa de colores global, y un marco interno no "
+#~ "tiene un mapa de color local."
+
+#~ msgid "GIF image was truncated or incomplete."
+#~ msgstr "La imagen GIF fue truncada o incompleta."
+
+#~ msgid "The GIF image format"
+#~ msgstr "El formato de imagen GIF"
+
+#~ msgid "Invalid header in icon"
+#~ msgstr "La cabecera del icono no es válida"
+
+#~ msgid "Not enough memory to load icon"
+#~ msgstr "No hay memoria suficiente para cargar el icono"
+
+#~ msgid "Icon has zero width"
+#~ msgstr "La anchura del icono es cero"
+
+#~ msgid "Icon has zero height"
+#~ msgstr "La altura del icono es cero"
+
+#~ msgid "Compressed icons are not supported"
+#~ msgstr "Los iconos comprimidos no están soportados"
+
+#~ msgid "Unsupported icon type"
+#~ msgstr "Tipo de icono no soportado"
+
+#~ msgid "Not enough memory to load ICO file"
+#~ msgstr "No hay memoria suficiente para cargar el archivo ICO"
+
+#~ msgid "Image too large to be saved as ICO"
+#~ msgstr "Imagen demasiado grande para guardarse como ICO"
+
+#~ msgid "Cursor hotspot outside image"
+#~ msgstr "El punto caliente del cursor está fuera de la imagen"
+
+#~ msgid "Unsupported depth for ICO file: %d"
+#~ msgstr "Profundidad no soportada para el archivo ICO: %d"
+
+#~ msgid "The ICO image format"
+#~ msgstr "El formato de imagen ICO"
+
+#~ msgid "Error reading ICNS image: %s"
+#~ msgstr "Error al leer la imagen ICNS: %s"
+
+#~ msgid "Could not decode ICNS file"
+#~ msgstr "No se pudo decodificar el archivo ICNS"
+
+#~ msgid "The ICNS image format"
+#~ msgstr "El formato de imagen ICNS"
+
+#~ msgid "Couldn't allocate memory for stream"
+#~ msgstr "No se pudo asignar memoria para el flujo"
+
+#~ msgid "Couldn't decode image"
+#~ msgstr "No se pudo decodificar la imagen"
+
+#~ msgid "Transformed JPEG2000 has zero width or height"
+#~ msgstr "El JPEG 2000 transformado tiene anchura o altura cero"
+
+#~ msgid "Image type currently not supported"
+#~ msgstr "Actualmente no se soporta el tipo de imagen"
+
+#~ msgid "Couldn't allocate memory for color profile"
+#~ msgstr "No se pudo asignar memoria para el perfil de color"
+
+#~ msgid "Insufficient memory to open JPEG 2000 file"
+#~ msgstr "No hay memoria suficiente para abrir el archivo JPEG 2000"
+
+#~ msgid "Couldn't allocate memory to buffer image data"
+#~ msgstr "No se pudo asignar memoria para almacenar los datos de la imagen"
+
+#~ msgid "The JPEG 2000 image format"
+#~ msgstr "El formato de imagen JPEG 2000"
+
+#~ msgid "Error interpreting JPEG image file (%s)"
+#~ msgstr "Error al interpretar el archivo gráfico JPEG (%s)"
+
+#~ msgid ""
+#~ "Insufficient memory to load image, try exiting some applications to free "
+#~ "memory"
+#~ msgstr ""
+#~ "No hay memoria suficiente para cargar la imagen, intente salir de algunas "
+#~ "aplicaciones para liberar memoria"
+
+#~ msgid "Unsupported JPEG color space (%s)"
+#~ msgstr "Espacio de color JPEG no soportado (%s)"
+
+#~ msgid "Couldn't allocate memory for loading JPEG file"
+#~ msgstr "No se puede asignar memoria para cargar el archivo JPG"
+
+#~ msgid "Transformed JPEG has zero width or height."
+#~ msgstr "El JPEG transformado tiene anchura o altura cero."
+
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%s' could not be "
+#~ "parsed."
+#~ msgstr ""
+#~ "La calidad de un JPEG debe ser un valor entre 0 y 100; el valor «%s» no "
+#~ "se puede interpretar."
+
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%d' is not allowed."
+#~ msgstr ""
+#~ "La calidad JPEG debe ser un valor entre 0 y 100; el valor «%d» no está "
+#~ "permitido."
+
+#~ msgid "The JPEG image format"
+#~ msgstr "El formato de imagen JPEG"
+
+#~ msgid "Couldn't allocate memory for header"
+#~ msgstr "No se puede asignar memoria para la cabecera"
+
+#~ msgid "Couldn't allocate memory for context buffer"
+#~ msgstr "No se puede asignar memoria para el búfer del contexto"
+
+#~ msgid "Image has invalid width and/or height"
+#~ msgstr "La imagen tiene una anchura y/o altura inválida"
+
+#~ msgid "Image has unsupported bpp"
+#~ msgstr "La imagen tiene un bpp no soportado"
+
+#~ msgid "Image has unsupported number of %d-bit planes"
+#~ msgstr "La imagen tiene un número no soportado de planos %d-bit"
+
+#~ msgid "Couldn't create new pixbuf"
+#~ msgstr "No se puede crear un búfer de píxeles nuevo"
+
+#~ msgid "Couldn't allocate memory for line data"
+#~ msgstr "No se puede asignar memoria para los datos de línea"
+
+#~ msgid "Couldn't allocate memory for paletted data"
+#~ msgstr "No se puede asignar memoria para los datos de paleta"
+
+#~ msgid "Didn't get all lines of PCX image"
+#~ msgstr "No se obtuvieron todas las líneas de la imagen PCX"
+
+#~ msgid "No palette found at end of PCX data"
+#~ msgstr "No se encontró una paleta al final de los datos PCX"
+
+#~ msgid "The PCX image format"
+#~ msgstr "El formato de imagen PCX"
+
+#~ msgid "Bits per channel of PNG image is invalid."
+#~ msgstr "Los bits por canal de la imagen PNG son inválidos."
+
+#~ msgid "Transformed PNG has zero width or height."
+#~ msgstr "El PNG transformado tiene anchura o altura cero."
+
+#~ msgid "Bits per channel of transformed PNG is not 8."
+#~ msgstr "Los bits por canal del PNG transformado no son 8."
+
+#~ msgid "Transformed PNG not RGB or RGBA."
+#~ msgstr "El PNG transformado no es RGB o RGBA."
+
+#~ msgid "Transformed PNG has unsupported number of channels, must be 3 or 4."
+#~ msgstr ""
+#~ "El PNG transformado posee un número de canales no soportados, deben ser 3 "
+#~ "o 4."
+
+#~ msgid "Fatal error in PNG image file: %s"
+#~ msgstr "Error fatal en el archivo gráfico PNG: %s"
+
+#~ msgid "Insufficient memory to load PNG file"
+#~ msgstr "No hay memoria suficiente para cargar el archivo PNG"
+
+#~ msgid ""
+#~ "Insufficient memory to store a %ld by %ld image; try exiting some "
+#~ "applications to reduce memory usage"
+#~ msgstr ""
+#~ "No hay memoria suficiente para almacenar una imagen de %ld por %ld; "
+#~ "intente cerrar algunas aplicaciones para reducir la utilización de memoria"
+
+#~ msgid "Fatal error reading PNG image file"
+#~ msgstr "Error fatal leyendo el archivo gráfico PNG"
+
+#~ msgid "Fatal error reading PNG image file: %s"
+#~ msgstr "Error fatal leyendo el archivo gráfico PNG: %s"
+
+#~ msgid ""
+#~ "Keys for PNG text chunks must have at least 1 and at most 79 characters."
+#~ msgstr ""
+#~ "Las claves para las porciones de texto PNG deben tener al menos entre 1 y "
+#~ "un máximo de 79 caracteres."
+
+#~ msgid "Keys for PNG text chunks must be ASCII characters."
+#~ msgstr ""
+#~ "Las claves para las porciones de texto PNG deben ser caracteres ASCII."
+
+#~ msgid "Color profile has invalid length %d."
+#~ msgstr "El perfil de color tiene una longitud %d no válida."
+
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%s' could "
+#~ "not be parsed."
+#~ msgstr ""
+#~ "El nivel de compresión PNG debe ser un valor entre 0 y 9; el valor «%s» "
+#~ "no se puede interpretar."
+
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%d' is not "
+#~ "allowed."
+#~ msgstr ""
+#~ "El nivel de compresión PNG debe ser un valor entre 0 y 9; el valor «%d» "
+#~ "no está permitido."
+
+#~ msgid ""
+#~ "Value for PNG text chunk %s cannot be converted to ISO-8859-1 encoding."
+#~ msgstr ""
+#~ "El valor la porción de texto PNG %s no puede convertirse a la "
+#~ "codificación ISO-8859-1."
+
+#~ msgid "The PNG image format"
+#~ msgstr "El formato de imagen PNG"
+
+#~ msgid "PNM loader expected to find an integer, but didn't"
+#~ msgstr "El cargador PNM esperaba encontrar un entero, pero no lo encontró"
+
+#~ msgid "PNM file has an incorrect initial byte"
+#~ msgstr "El archivo PNM tiene un byte inicial incorrecto"
+
+#~ msgid "PNM file is not in a recognized PNM subformat"
+#~ msgstr "El archivo PNM no está en un subformato PNM reconocido"
+
+#~ msgid "PNM file has an image width of 0"
+#~ msgstr "El archivo PNM tiene un ancho de imagen de 0"
+
+#~ msgid "PNM file has an image height of 0"
+#~ msgstr "El archivo PNM tiene un alto de imagen de 0"
+
+#~ msgid "Maximum color value in PNM file is 0"
+#~ msgstr "El valor máximo de color en el archivo PNM es 0"
+
+#~ msgid "Maximum color value in PNM file is too large"
+#~ msgstr "El valor máximo de color en el archivo PNM es demasiado grande"
+
+#~ msgid "Raw PNM image type is invalid"
+#~ msgstr "El tipo de imagen PNM en bruto no es válido"
+
+#~ msgid "PNM image loader does not support this PNM subformat"
+#~ msgstr "El cargador de imágenes PNM no permite este subformato PNM"
+
+#~ msgid "Raw PNM formats require exactly one whitespace before sample data"
+#~ msgstr ""
+#~ "Los formatos PNM en bruto requieren exactamente un espacio en blanco "
+#~ "antes de los datos"
+
+#~ msgid "Cannot allocate memory for loading PNM image"
+#~ msgstr "No se puede asignar memoria para cargar la imagen PNM"
+
+#~ msgid "Insufficient memory to load PNM context struct"
+#~ msgstr ""
+#~ "No hay memoria suficiente para cargar la estructura de contexto del PNM"
+
+#~ msgid "Unexpected end of PNM image data"
+#~ msgstr "Final no esperado de los datos de la imagen PNM"
+
+#~ msgid "Insufficient memory to load PNM file"
+#~ msgstr "No hay memoria suficiente para cargar el archivo PNM"
+
+#~ msgid "The PNM/PBM/PGM/PPM image format family"
+#~ msgstr "La familia de formatos de imágenes PNM/PBM/PGM/PPM"
+
+#~ msgid "Input file descriptor is NULL."
+#~ msgstr "El descriptor de entrada del archivo está vacío (NULL)."
+
+#~ msgid "Failed to read QTIF header"
+#~ msgstr "Falló al leer la cabecera QTIF"
+
+#~ msgid "QTIF atom size too large (%d bytes)"
+#~ msgstr "El tamaño de QTIF atom es demasiado grande (%d bytes)"
+
+#~ msgid "Failed to allocate %d bytes for file read buffer"
+#~ msgstr "Falló al asignar %d bytes para el búfer de lectura"
+
+#~ msgid "File error when reading QTIF atom: %s"
+#~ msgstr "Error de archivo al leer el QTIF atom: %s"
+
+#~ msgid "Failed to skip the next %d bytes with seek()."
+#~ msgstr "Falló al saltar a los siguientes %d bytes con la búsqueda."
+
+#~ msgid "Failed to allocate QTIF context structure."
+#~ msgstr "Falló al reservar la estructura de contexto de QTIF."
+
+#~ msgid "Failed to create GdkPixbufLoader object."
+#~ msgstr "Falló al crear el objeto GdkPixbufLoader."
+
+#~ msgid "Failed to find an image data atom."
+#~ msgstr "Falló al buscar datos atom de la imagen."
+
+#~ msgid "The QTIF image format"
+#~ msgstr "El formato de imagen QTIF"
+
+#~ msgid "RAS image has bogus header data"
+#~ msgstr "La imagen RAS posee datos de cabecera erróneos"
+
+#~ msgid "RAS image has unknown type"
+#~ msgstr "La imagen RAS posee un tipo desconocido"
+
+#~ msgid "unsupported RAS image variation"
+#~ msgstr "variación de imagen RAS no soportada"
+
+#~ msgid "Not enough memory to load RAS image"
+#~ msgstr "No hay memoria suficiente para cargar la imagen RAS"
+
+#~ msgid "The Sun raster image format"
+#~ msgstr "El formato de imagen Sun raster"
+
+#~ msgid "Cannot allocate memory for IOBuffer struct"
+#~ msgstr "No se puede asignar memoria para la estructura IOBuffer"
+
+#~ msgid "Cannot allocate memory for IOBuffer data"
+#~ msgstr "No se puede asignar memoria para los datos de IOBuffer"
+
+#~ msgid "Cannot realloc IOBuffer data"
+#~ msgstr "No se puede volver a reservar memoria para los datos de IOBuffer"
+
+#~ msgid "Cannot allocate temporary IOBuffer data"
+#~ msgstr "No se pueden asignar los datos temporales de IOBuffer"
+
+#~ msgid "Cannot allocate new pixbuf"
+#~ msgstr "No se puede asignar un nuevo pixbuf"
+
+#~ msgid "Image is corrupted or truncated"
+#~ msgstr "La imagen está corrupta o truncada"
+
+#~ msgid "Cannot allocate colormap structure"
+#~ msgstr "No se puede asignar la estructura del mapa de colores"
+
+#~ msgid "Cannot allocate colormap entries"
+#~ msgstr "No se puede asignar las entradas del mapa de colores"
+
+#~ msgid "Unexpected bitdepth for colormap entries"
+#~ msgstr "Profundidad de color inesperada para las entradas del mapa de color"
+
+#~ msgid "Cannot allocate TGA header memory"
+#~ msgstr "No se puede asignar memoria para la cabecera TGA"
+
+#~ msgid "TGA image has invalid dimensions"
+#~ msgstr "La imagen TGA tiene dimensiones inválidas"
+
+#~ msgid "TGA image type not supported"
+#~ msgstr "El tipo de imagen TGA no está soportado"
+
+#~ msgid "Cannot allocate memory for TGA context struct"
+#~ msgstr "No se puede asignar memoria para la estructura «context» de TGA"
+
+#~ msgid "Excess data in file"
+#~ msgstr "Exceso de datos en el archivo"
+
+#~ msgid "The Targa image format"
+#~ msgstr "El formato de imagen Targa"
+
+#~ msgid "Could not get image width (bad TIFF file)"
+#~ msgstr ""
+#~ "No se ha podido obtener el ancho de la imagen (archivo TIFF incorrecto)"
+
+#~ msgid "Could not get image height (bad TIFF file)"
+#~ msgstr "No se puede obtener el alto de la imagen (archivo TIFF incorrecto)"
+
+#~ msgid "Width or height of TIFF image is zero"
+#~ msgstr "El ancho o alto de la imagen TIFF es cero"
+
+#~ msgid "Dimensions of TIFF image too large"
+#~ msgstr "Las dimensiones de la imagen TIFF son demasiado grandes"
+
+#~ msgid "Insufficient memory to open TIFF file"
+#~ msgstr "No hay memoria suficiente para abrir el archivo TIFF"
+
+#~ msgid "Failed to load RGB data from TIFF file"
+#~ msgstr "No se ha podido cargar los datos RGB desde el archivo TIFF"
+
+#~ msgid "Failed to open TIFF image"
+#~ msgstr "No se ha podido abrir la imagen TIFF"
+
+#~ msgid "TIFFClose operation failed"
+#~ msgstr "La operación TIFFClose falló"
+
+#~ msgid "Failed to load TIFF image"
+#~ msgstr "No se ha podido cargar la imagen TIFF"
+
+#~ msgid "Failed to save TIFF image"
+#~ msgstr "No se ha podido guardar la imagen TIFF"
+
+#~ msgid "TIFF compression doesn't refer to a valid codec."
+#~ msgstr "La compresión TIFF no referencia un códec válido."
+
+#~ msgid "Failed to write TIFF data"
+#~ msgstr "No se han podido escribir los datos TIFF"
+
+#~ msgid "Couldn't write to TIFF file"
+#~ msgstr "No se ha podido escribir en el archivo TIFF"
+
+#~ msgid "The TIFF image format"
+#~ msgstr "El formato de imagen TIFF"
+
+#~ msgid "Image has zero width"
+#~ msgstr "La imagen tiene ancho cero"
+
+#~ msgid "Image has zero height"
+#~ msgstr "La imagen tiene alto cero"
+
+#~ msgid "Not enough memory to load image"
+#~ msgstr "No hay memoria suficiente para cargar la imagen"
+
+#~ msgid "Couldn't save the rest"
+#~ msgstr "No se ha podido guardar el resto"
+
+#~ msgid "The WBMP image format"
+#~ msgstr "El formato de imagen WBMP"
+
+#~ msgid "Invalid XBM file"
+#~ msgstr "El archivo XBM no es válido"
+
+#~ msgid "Insufficient memory to load XBM image file"
+#~ msgstr "No hay memoria suficiente para cargar el archivo gráfico XBM"
+
+#~ msgid "Failed to write to temporary file when loading XBM image"
+#~ msgstr ""
+#~ "No se ha podido escribir en el archivo temporal cuando se cargaba la "
+#~ "imagen XBM"
+
+#~ msgid "The XBM image format"
+#~ msgstr "El formato de imagen XBM"
+
+#~ msgid "No XPM header found"
+#~ msgstr "No se ha encontrado la cabecera XPM"
+
+#~ msgid "Invalid XPM header"
+#~ msgstr "Cabecera XPM inválida"
+
+#~ msgid "XPM file has image width <= 0"
+#~ msgstr "El archivo XPM tiene un ancho de imagen <= 0"
+
+#~ msgid "XPM file has image height <= 0"
+#~ msgstr "El archivo XPM tienen un alto de imagen <= 0"
+
+#~ msgid "XPM has invalid number of chars per pixel"
+#~ msgstr "El XPM tiene un número inválido de caracteres por píxel"
+
+#~ msgid "XPM file has invalid number of colors"
+#~ msgstr "El archivo XPM tienen un número inválido de colores"
+
+#~ msgid "Cannot allocate memory for loading XPM image"
+#~ msgstr "No se puede asignar memoria para cargar la imagen XPM"
+
+#~ msgid "Cannot read XPM colormap"
+#~ msgstr "No se puede leer el mapa de color de XPM"
+
+#~ msgid "Failed to write to temporary file when loading XPM image"
+#~ msgstr ""
+#~ "No se ha podido escribir en el archivo temporal al cargar la imagen XPM"
+
+#~ msgid "The XPM image format"
+#~ msgstr "El formato de imagen XPM"
+
+#~ msgid "The EMF image format"
+#~ msgstr "El formato de imagen EMF"
+
+#~ msgid "Could not allocate memory: %s"
+#~ msgstr "No se pudo asignar memoria: %s"
+
+#~ msgid "Could not create stream: %s"
+#~ msgstr "No se pudo crear el flujo: %s"
+
+#~ msgid "Could not seek stream: %s"
+#~ msgstr "No se pudo buscar el flujo: %s"
+
+#~ msgid "Could not read from stream: %s"
+#~ msgstr "No se pudo leer del flujo: %s"
+
+#~ msgid "Couldn't load bitmap"
+#~ msgstr "No se pudo cargar el mapa de bits"
+
+#~ msgid "Couldn't load metafile"
+#~ msgstr "No se pudo cargar el meta archivo"
+
+#~ msgid "Unsupported image format for GDI+"
+#~ msgstr "Formato de imagen no soportado para GDI+"
+
+#~ msgid "Couldn't save"
+#~ msgstr "No se pudo guardar"
+
+#~ msgid "The WMF image format"
+#~ msgstr "El formato de imagen WMF"
+
+#~ msgid "Printer '%s' may not be connected."
+#~ msgstr "La impresora «%s» parece no estar conectada."
+
+#~ msgid "Color profile has invalid length '%"
+#~ msgstr "El perfil de color tiene una longitud '% no válida"
+
+#~ msgid "(Empty)"
+#~ msgstr "(Vacío)"
+
+#~ msgid "<b>_Search:</b>"
+#~ msgstr "<b>_Buscar:</b>"
+
+#~ msgid "<b>Recently Used</b>"
+#~ msgstr "<b>Usados recientemente</b>"
+
+#~ msgid "directfb arg"
+#~ msgstr "arg directfb"
+
+#~ msgid "sdl|system"
+#~ msgstr "sistema"
+
+#~ msgid ""
+#~ "You have the Caps Lock key on\n"
+#~ "and an active input method"
+#~ msgstr ""
+#~ "Tiene la tecla Bloq Mayús activada\n"
+#~ "y un método de entrada activo"
+
+#~ msgid "You have the Caps Lock key on"
+#~ msgstr "Tiene la tecla Bloq Mayús activada"
+
+#~ msgid "You have an active input method"
+#~ msgstr "Tiene un método de entrada activo"
+
+#~ msgid "keyboard label|BackSpace"
+#~ msgstr "Retroceso"
+
+#~ msgid "keyboard label|Tab"
+#~ msgstr "Tabulador"
+
+#~ msgid "keyboard label|Return"
+#~ msgstr "Retorno"
+
+#~ msgid "keyboard label|Pause"
+#~ msgstr "Pausa"
+
+#~ msgid "keyboard label|Scroll_Lock"
+#~ msgstr "BloqDespl"
+
+#~ msgid "keyboard label|Sys_Req"
+#~ msgstr "PetSis"
+
+#~ msgid "keyboard label|Escape"
+#~ msgstr "Esc"
+
+#~ msgid "keyboard label|Multi_key"
+#~ msgstr "MultiKey"
+
+#~ msgid "keyboard label|Home"
+#~ msgstr "Inicio"
+
+#~ msgid "keyboard label|Left"
+#~ msgstr "TN ←"
+
+#~ msgid "keyboard label|Up"
+#~ msgstr "TN ↑"
+
+#~ msgid "keyboard label|Right"
+#~ msgstr "TN →"
+
+#~ msgid "keyboard label|Down"
+#~ msgstr "TN ↓"
+
+#~ msgid "keyboard label|Page_Up"
+#~ msgstr "RePág"
+
+#~ msgid "keyboard label|Page_Down"
+#~ msgstr "AvPág"
+
+#~ msgid "keyboard label|End"
+#~ msgstr "Fin"
+
+#~ msgid "keyboard label|Begin"
+#~ msgstr "Inicio"
+
+#~ msgid "keyboard label|Print"
+#~ msgstr "ImprPant"
+
+#~ msgid "keyboard label|Insert"
+#~ msgstr "Insert"
+
+#~ msgid "keyboard label|Num_Lock"
+#~ msgstr "BloqNum"
+
+#~ msgid "keyboard label|KP_Space"
+#~ msgstr "TN Espacio"
+
+#~ msgid "keyboard label|KP_Tab"
+#~ msgstr "TN Tabulador"
+
+#~ msgid "keyboard label|KP_Enter"
+#~ msgstr "TN Intro"
+
+#~ msgid "keyboard label|KP_Home"
+#~ msgstr "TN Inicio"
+
+#~ msgid "keyboard label|KP_Left"
+#~ msgstr "TN ←"
+
+#~ msgid "keyboard label|KP_Up"
+#~ msgstr "TN ↑"
+
+#~ msgid "keyboard label|KP_Right"
+#~ msgstr "TN →"
+
+#~ msgid "keyboard label|KP_Down"
+#~ msgstr "TN ↓"
+
+#~ msgid "keyboard label|KP_Page_Up"
+#~ msgstr "TN RePág"
+
+#~ msgid "keyboard label|KP_Prior"
+#~ msgstr "TN Anterior"
+
+#~ msgid "keyboard label|KP_Next"
+#~ msgstr "TN Siguiente"
+
+#~ msgid "keyboard label|KP_End"
+#~ msgstr "TN Fin"
+
+#~ msgid "keyboard label|KP_Begin"
+#~ msgstr "TN Inicio"
+
+#~ msgid "keyboard label|KP_Insert"
+#~ msgstr "TN Ins"
+
+#~ msgid "keyboard label|KP_Delete"
+#~ msgstr "TN Supr"
+
+#~ msgid "keyboard label|Delete"
+#~ msgstr "Supr"
+
+#~ msgid "keyboard label|Shift"
+#~ msgstr "Mayús."
+
+#~ msgid "keyboard label|Ctrl"
+#~ msgstr "Ctrl"
+
+#~ msgid "keyboard label|Alt"
+#~ msgstr "Alt"
+
+#~ msgid "keyboard label|Super"
+#~ msgstr "Super"
+
+#~ msgid "keyboard label|Hyper"
+#~ msgstr "Hiper"
+
+#~ msgid "keyboard label|Meta"
+#~ msgstr "Meta"
+
+#~ msgid "keyboard label|Space"
+#~ msgstr "Espacio"
+
+#~ msgid "keyboard label|Backslash"
+#~ msgstr "Contrabarra"
+
+#~ msgid "year measurement template|2000"
+#~ msgstr "2000"
+
+#~ msgid "calendar:day:digits|%d"
+#~ msgstr "%d"
+
+#~ msgid "calendar:week:digits|%d"
+#~ msgstr "%d"
+
+#~ msgid "calendar year format|%Y"
+#~ msgstr "%Y"
+
+#~ msgid "Accelerator|Disabled"
+#~ msgstr "Desactivado"
+
+#~ msgid "progress bar label|%d %%"
+#~ msgstr "%d %%"
+
+#~ msgid "input method menu|System"
+#~ msgstr "Sistema"
+
+#~ msgid "input method menu|System (%s)"
+#~ msgstr "Sistema (%s)"
+
+#~ msgid "print operation status|Initial state"
+#~ msgstr "Estado inicial"
+
+#~ msgid "print operation status|Preparing to print"
+#~ msgstr "Preparado para imprimir"
+
+#~ msgid "print operation status|Generating data"
+#~ msgstr "Generando datos"
+
+#~ msgid "print operation status|Sending data"
+#~ msgstr "Enviando datos"
+
+#~ msgid "print operation status|Waiting"
+#~ msgstr "Esperando"
+
+#~ msgid "print operation status|Blocking on issue"
+#~ msgstr "Bloqueado en una hoja"
+
+#~ msgid "print operation status|Printing"
+#~ msgstr "Imprimiendo"
+
+#~ msgid "print operation status|Finished"
+#~ msgstr "Terminado"
+
+#~ msgid "recent menu label|_%d. %s"
+#~ msgstr "_%d. %s"
+
+#~ msgid "recent menu label|%d. %s"
+#~ msgstr "%d. %s"
+
+#~ msgid "Navigation|_Bottom"
+#~ msgstr "_Fondo"
+
+#~ msgid "Navigation|_First"
+#~ msgstr "_Primero"
+
+#~ msgid "Navigation|_Last"
+#~ msgstr "Ú_ltimo"
+
+#~ msgid "Navigation|_Top"
+#~ msgstr "_Cima"
+
+#~ msgid "Navigation|_Back"
+#~ msgstr "A_trás"
+
+#~ msgid "Navigation|_Down"
+#~ msgstr "_Bajar"
+
+#~ msgid "Navigation|_Forward"
+#~ msgstr "A_delante"
+
+#~ msgid "Navigation|_Up"
+#~ msgstr "_Subir"
+
+#~ msgid "Justify|_Center"
+#~ msgstr "_Centrar"
+
+#~ msgid "Justify|_Fill"
+#~ msgstr "_Rellenar"
+
+#~ msgid "Justify|_Left"
+#~ msgstr "_Izquierda"
+
+#~ msgid "Justify|_Right"
+#~ msgstr "_Derecha"
+
+#~ msgid "Media|_Next"
+#~ msgstr "_Siguiente"
+
+#~ msgid "Media|P_ause"
+#~ msgstr "_Pausa"
+
+#~ msgid "Media|_Play"
+#~ msgstr "_Reproducir"
+
+#~ msgid "Media|_Stop"
+#~ msgstr "_Detener"
+
+#~ msgid "volume percentage|%d %%"
+#~ msgstr "%d %%"
+
+#~ msgid "paper size|asme_f"
+#~ msgstr "asme_f"
+
+#~ msgid "paper size|A0x2"
+#~ msgstr "A0x2"
+
+#~ msgid "paper size|A0"
+#~ msgstr "A0"
+
+#~ msgid "paper size|A0x3"
+#~ msgstr "A0x3"
+
+#~ msgid "paper size|A1"
+#~ msgstr "A1"
+
+#~ msgid "paper size|A10"
+#~ msgstr "A10"
+
+#~ msgid "paper size|A1x3"
+#~ msgstr "A1x3"
+
+#~ msgid "paper size|A1x4"
+#~ msgstr "A1x4"
+
+#~ msgid "paper size|A2"
+#~ msgstr "A2"
+
+#~ msgid "paper size|A2x3"
+#~ msgstr "A2x3"
+
+#~ msgid "paper size|A2x4"
+#~ msgstr "A2x4"
+
+#~ msgid "paper size|A2x5"
+#~ msgstr "A2x5"
+
+#~ msgid "paper size|A3"
+#~ msgstr "A3"
+
+#~ msgid "paper size|A3 Extra"
+#~ msgstr "A3 Extra"
+
+#~ msgid "paper size|A3x3"
+#~ msgstr "A3x3"
+
+#~ msgid "paper size|A3x4"
+#~ msgstr "A3x4"
+
+#~ msgid "paper size|A3x5"
+#~ msgstr "A3x5"
+
+#~ msgid "paper size|A3x6"
+#~ msgstr "A3x6"
+
+#~ msgid "paper size|A3x7"
+#~ msgstr "A3x7"
+
+#~ msgid "paper size|A4"
+#~ msgstr "A4"
+
+#~ msgid "paper size|A4 Extra"
+#~ msgstr "A4 Extra"
+
+#~ msgid "paper size|A4 Tab"
+#~ msgstr "A4 Tab"
+
+#~ msgid "paper size|A4x3"
+#~ msgstr "A4x3"
+
+#~ msgid "paper size|A4x4"
+#~ msgstr "A4x4"
+
+#~ msgid "paper size|A4x5"
+#~ msgstr "A4x5"
+
+#~ msgid "paper size|A4x6"
+#~ msgstr "A4x6"
+
+#~ msgid "paper size|A4x7"
+#~ msgstr "A4x7"
+
+#~ msgid "paper size|A4x8"
+#~ msgstr "A4x8"
+
+#~ msgid "paper size|A4x9"
+#~ msgstr "A4x9"
+
+#~ msgid "paper size|A5"
+#~ msgstr "A5"
+
+#~ msgid "paper size|A5 Extra"
+#~ msgstr "A5 Extra"
+
+#~ msgid "paper size|A6"
+#~ msgstr "A6"
+
+#~ msgid "paper size|A7"
+#~ msgstr "A7"
+
+#~ msgid "paper size|A8"
+#~ msgstr "A8"
+
+#~ msgid "paper size|A9"
+#~ msgstr "A9"
+
+#~ msgid "paper size|B0"
+#~ msgstr "B0"
+
+#~ msgid "paper size|B1"
+#~ msgstr "B1"
+
+#~ msgid "paper size|B10"
+#~ msgstr "B10"
+
+#~ msgid "paper size|B2"
+#~ msgstr "B2"
+
+#~ msgid "paper size|B3"
+#~ msgstr "B3"
+
+#~ msgid "paper size|B4"
+#~ msgstr "B4"
+
+#~ msgid "paper size|B5"
+#~ msgstr "B5"
+
+#~ msgid "paper size|B5 Extra"
+#~ msgstr "B5 Extra"
+
+#~ msgid "paper size|B6"
+#~ msgstr "B6"
+
+#~ msgid "paper size|B6/C4"
+#~ msgstr "B6/C4"
+
+#~ msgid "paper size|B7"
+#~ msgstr "B7"
+
+#~ msgid "paper size|B8"
+#~ msgstr "B8"
+
+#~ msgid "paper size|B9"
+#~ msgstr "B9"
+
+#~ msgid "paper size|C0"
+#~ msgstr "C0"
+
+#~ msgid "paper size|C1"
+#~ msgstr "C1"
+
+#~ msgid "paper size|C10"
+#~ msgstr "C10"
+
+#~ msgid "paper size|C2"
+#~ msgstr "C2"
+
+#~ msgid "paper size|C3"
+#~ msgstr "C3"
+
+#~ msgid "paper size|C4"
+#~ msgstr "C4"
+
+#~ msgid "paper size|C5"
+#~ msgstr "C5"
+
+#~ msgid "paper size|C6"
+#~ msgstr "C6"
+
+#~ msgid "paper size|C6/C5"
+#~ msgstr "C6/C5"
+
+#~ msgid "paper size|C7"
+#~ msgstr "C7"
+
+#~ msgid "paper size|C7/C6"
+#~ msgstr "C7/C6"
+
+#~ msgid "paper size|C8"
+#~ msgstr "C8"
+
+#~ msgid "paper size|C9"
+#~ msgstr "C9"
+
+#~ msgid "paper size|RA0"
+#~ msgstr "RA0"
+
+#~ msgid "paper size|RA1"
+#~ msgstr "RA1"
+
+#~ msgid "paper size|RA2"
+#~ msgstr "RA2"
+
+#~ msgid "paper size|SRA0"
+#~ msgstr "SRA0"
+
+#~ msgid "paper size|SRA1"
+#~ msgstr "SRA1"
+
+#~ msgid "paper size|SRA2"
+#~ msgstr "SRA2"
+
+#~ msgid "paper size|JB0"
+#~ msgstr "JB0"
+
+#~ msgid "paper size|JB1"
+#~ msgstr "JB1"
+
+#~ msgid "paper size|JB10"
+#~ msgstr "JB10"
+
+#~ msgid "paper size|JB2"
+#~ msgstr "JB2"
+
+#~ msgid "paper size|JB3"
+#~ msgstr "JB3"
+
+#~ msgid "paper size|JB4"
+#~ msgstr "JB4"
+
+#~ msgid "paper size|JB5"
+#~ msgstr "JB5"
+
+#~ msgid "paper size|JB6"
+#~ msgstr "JB6"
+
+#~ msgid "paper size|JB7"
+#~ msgstr "JB7"
+
+#~ msgid "paper size|JB8"
+#~ msgstr "JB8"
+
+#~ msgid "paper size|JB9"
+#~ msgstr "JB9"
+
+#~ msgid "paper size|jis exec"
+#~ msgstr "jis exec"
+
+#~ msgid "paper size|10x11"
+#~ msgstr "10x11"
+
+#~ msgid "paper size|10x13"
+#~ msgstr "10x13"
+
+#~ msgid "paper size|10x14"
+#~ msgstr "10x14"
+
+#~ msgid "paper size|10x15"
+#~ msgstr "10x15"
+
+#~ msgid "paper size|11x12"
+#~ msgstr "11x12"
+
+#~ msgid "paper size|11x15"
+#~ msgstr "11x15"
+
+#~ msgid "paper size|12x19"
+#~ msgstr "12x19"
+
+#~ msgid "paper size|5x7"
+#~ msgstr "5x7"
+
+#~ msgid "paper size|Arch A"
+#~ msgstr "Arch A"
+
+#~ msgid "paper size|Arch B"
+#~ msgstr "Arch B"
+
+#~ msgid "paper size|Arch C"
+#~ msgstr "Arch C"
+
+#~ msgid "paper size|Arch D"
+#~ msgstr "Arch D"
+
+#~ msgid "paper size|Arch E"
+#~ msgstr "Arch E"
+
+#~ msgid "paper size|b-plus"
+#~ msgstr "b-plus"
+
+#~ msgid "paper size|c"
+#~ msgstr "c"
+
+#~ msgid "paper size|d"
+#~ msgstr "d"
+
+#~ msgid "paper size|e"
+#~ msgstr "e"
+
+#~ msgid "paper size|edp"
+#~ msgstr "edp"
+
+#~ msgid "paper size|Executive"
+#~ msgstr "Ejecutivo"
+
+#~ msgid "paper size|f"
+#~ msgstr "f"
+
+#~ msgid "paper size|Index 3x5"
+#~ msgstr "Index 3x5"
+
+#~ msgid "paper size|Index 5x8"
+#~ msgstr "Index 5x8"
+
+#~ msgid "paper size|Invoice"
+#~ msgstr "Invoice"
+
+#~ msgid "paper size|Tabloid"
+#~ msgstr "Tabloide"
+
+#~ msgid "paper size|US Legal"
+#~ msgstr "US Legal"
+
+#~ msgid "paper size|Quarto"
+#~ msgstr "Quarto"
+
+#~ msgid "paper size|Super A"
+#~ msgstr "Super A"
+
+#~ msgid "paper size|Super B"
+#~ msgstr "Super B"
+
+#~ msgid "paper size|Folio"
+#~ msgstr "Folio"
+
+#~ msgid "paper size|Folio sp"
+#~ msgstr "Folio sp"
+
+#~ msgid "paper size|pa-kai"
+#~ msgstr "pa-kai"
+
+#~ msgid "paper size|prc 16k"
+#~ msgstr "prc 16k"
+
+#~ msgid "paper size|prc 32k"
+#~ msgstr "prc32k"
+
+#~ msgid "paper size|prc5 Envelope"
+#~ msgstr "Sobre prc5"
+
+#~ msgid "paper size|ROC 16k"
+#~ msgstr "ROC 16k"
+
+#~ msgid "paper size|ROC 8k"
+#~ msgstr "ROC 8k"
+
+#~ msgid "Couldn't create pixbuf"
+#~ msgstr "No se pudo crear el búfer de píxeles"
+
+#~ msgid "%.1f KB"
+#~ msgstr "%.1f Kib"
+
+#~ msgid "%.1f MB"
+#~ msgstr "%.1f Mib"
+
+#~ msgid "%.1f GB"
+#~ msgstr "%.1f Gib"
+
+#~ msgid "Arrow spacing"
+#~ msgstr "Espaciado de las flechas"
+
+#~ msgid "Scroll arrow spacing"
+#~ msgstr "Espaciado de las flechas de desplazamiento"
+
+#~ msgid "Group"
+#~ msgstr "Grupo"
+
+#~ msgid "The radio tool button whose group this button belongs to."
+#~ msgstr "La herramienta de botón de radio a cuyo grupo pertenece este botón."

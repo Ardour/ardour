@@ -40,7 +40,10 @@ def build(bld):
     obj.uselib       += ' FFTW3F LO TAGLIB LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
 
     if bld.is_defined('HAVE_SUIL'):
-        obj.uselib += ' SUIL'
+        if bld.is_defined('YTK'):
+            obj.use += [ 'libsuil' ]
+        else:
+            obj.uselib += ' SUIL'
 
     if bld.is_defined('HAVE_USB'):
         obj.uselib += ' USB'

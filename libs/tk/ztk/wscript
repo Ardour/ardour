@@ -1,0 +1,78 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import sys
+
+# Version of this package (even if built as a child)
+MAJOR = '2'
+MINOR = '14'
+MICRO = '0'
+LIBZTK_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
+
+I18N_PACKAGE = 'libztk'
+
+libztk_sources = [
+    'atk-enum-types.c',
+    'atkaction.c',
+    'atkcomponent.c',
+    'atkdocument.c',
+    'atkeditabletext.c',
+    'atkgobjectaccessible.c',
+    'atkhyperlink.c',
+    'atkhyperlinkimpl.c',
+    'atkhypertext.c',
+    'atkimage.c',
+    'atkmisc.c',
+    'atknoopobject.c',
+    'atknoopobjectfactory.c',
+    'atkobject.c',
+    'atkobjectfactory.c',
+    'atkplug.c',
+    'atkprivate.c',
+    'atkrange.c',
+    'atkregistry.c',
+    'atkrelation.c',
+    'atkrelationset.c',
+    'atkselection.c',
+    'atksocket.c',
+    'atkstate.c',
+    'atkstateset.c',
+    'atkstreamablecontent.c',
+    'atktable.c',
+    'atktablecell.c',
+    'atktext.c',
+    'atkutil.c',
+    'atkvalue.c',
+    'atkversion.c',
+    'atkwindow.c',
+]
+
+def options(opt):
+    pass
+
+def configure(conf):
+    if conf.is_defined('YTK'):
+        autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
+        autowaf.check_pkg(conf, 'gobject-2.0', uselib_store='GOBJECT', mandatory=True)
+
+def build(bld):
+    if not bld.is_defined('YTK'):
+        return
+
+    obj = bld.shlib(features = 'c cshlib', source = libztk_sources)
+    obj.cflags          = [ bld.env['compiler_flags_dict']['pic'] ]
+    obj.export_includes = ['ztk']
+    obj.includes        = ['.', '..', 'ztk', 'ztk/atk']
+    obj.name            = 'libztk'
+    obj.target          = 'ztk'
+    obj.use             = 'libztk-pixbuf'
+    obj.uselib          = 'GLIB GOBJECT'
+    obj.defines         = [ 'HAVE_CONFIG_H', '_LARGEFILE64_SOURCE', '_REENTRANT', 'G_LOG_DOMAIN="Gdk"', 'ATK_COMPILATION', '_FILE_OFFSET_BITS=64',
+                            'G_DISABLE_SINGLE_INCLUDES', 'ATK_DISABLE_SINGLE_INCLUDES', 'G_DISABLE_DEPRECATED', 'ATK_DISABLE_DEPRECATED',
+                            'ATK_LOCALEDIR=""'
+                          ]
+    obj.vnum            = LIBZTK_VERSION
+    obj.install_path    = bld.env['LIBDIR']
+
+    if sys.platform == 'darwin':
+        obj.uselib += ' OSX' # -framework Cocoa -framework CoreFoundation -framework ApplicationServices
+

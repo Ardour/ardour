@@ -65,10 +65,15 @@ def build(bld):
 
     obj.export_includes = ['.']
     obj.includes = ['.'] + bld.env['INCLUDES_GLIB']
-    obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST XML OSX'
+    obj.uselib       = 'SIGCPP CAIROMM BOOST XML OSX'
     obj.use          = [ 'libpbd', 'libgtkmm2ext' ]
     obj.name         = 'libwidgets'
     obj.target       = 'widgets'
     obj.vnum         = WIDGETS_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines      += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+    if bld.is_defined('YTK'):
+        obj.use += [ 'libytkmm' ]
+        obj.uselib += ' GLIBMM GIOMM PANGOMM'
+    else:
+        obj.uselib += ' GTKMM'

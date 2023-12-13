@@ -36,6 +36,11 @@ def build(bld):
     obj.includes     = ['.', '..', './push2']
     obj.name         = 'libardour_push2'
     obj.target       = 'ardour_push2'
-    obj.uselib       = 'CAIROMM PANGOMM USB GTKMM SIGCPP XML OSX'
+    obj.uselib       = 'CAIROMM PANGOMM USB SIGCPP XML OSX'
     obj.use          = 'libardour libardour_cp libardour_midisurface libgtkmm2ext libpbd libevoral libcanvas libtemporal'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+    if bld.is_defined('YTK'):
+        obj.use    += ' libytkmm'
+        obj.uselib += ' GLIBMM GIOMM'
+    else:
+        obj.uselib += ' GTKMM'

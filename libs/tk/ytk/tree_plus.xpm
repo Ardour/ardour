@@ -1,0 +1,18 @@
+/* XPM */
+static const char *const tree_plus[] = {
+/* width height num_colors chars_per_pixel */
+"     9     9        2            1",
+/* colors */
+". c #000000",
+"# c #f8fcf8",
+/* pixels */
+".........",
+".#######.",
+".###.###.",
+".###.###.",
+".#.....#.",
+".###.###.",
+".###.###.",
+".#######.",
+"........."
+};

@@ -1,0 +1,4 @@
+#define line_wrap_width 6
+#define line_wrap_height 9
+static const unsigned char line_wrap_bits[] = {
+  0x1e, 0x3e, 0x30, 0x30, 0x39, 0x1f, 0x0f, 0x0f, 0x1f, };

@@ -247,7 +247,7 @@ if test x$WITH_NLS != x ; then
 	echo "I hope you remembered to run waf i18n"
 	LINGUAS=
 
-	for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext ; do
+	for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext lib/tk/ytk  ; do
 		files=`find ../../$pkg -name "*.mo"`
 
 		#
@@ -391,7 +391,9 @@ cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.dylib $Frameworks
 cp $BUILD_ROOT/libs/vamp-pyin/libardourvamppyin.dylib $Frameworks
 
 # Suil modules (new dir 'build-stack')
-if test -d $GTKSTACK_ROOT/lib/suil-0/ ; then
+if test -d $BUILD_ROOT/libs/tk/suil/ ; then
+	cp $BUILD_ROOT/libs/tk/suil/libsuil_cocoa_in_gtk2 $Frameworks
+elif test -d $GTKSTACK_ROOT/lib/suil-0/ ; then
 	cp $GTKSTACK_ROOT/lib/suil-0/lib* $Frameworks
 fi
 

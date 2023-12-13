@@ -1,0 +1,329 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import os
+import sys
+
+# Version of this package (even if built as a child)
+MAJOR = '2'
+MINOR = '24'
+MICRO = '23'
+LIBYDK_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
+
+I18N_PACKAGE = 'libytk'
+
+libytk_sources = [
+    'fnmatch.c',
+    'gtkaboutdialog.c',
+    'gtkaccelgroup.c',
+    'gtkaccellabel.c',
+    'gtkaccelmap.c',
+    'gtkaccessible.c',
+    'gtkaction.c',
+    'gtkactiongroup.c',
+    'gtkactivatable.c',
+    'gtkadjustment.c',
+    'gtkaliasdef.c',
+    'gtkalignment.c',
+    'gtkarrow.c',
+    'gtkaspectframe.c',
+    'gtkassistant.c',
+    'gtkbbox.c',
+    'gtkbin.c',
+    'gtkbindings.c',
+    'gtkbox.c',
+    'gtkbuildable.c',
+    'gtkbuilder.c',
+    'gtkbuilderparser.c',
+    'gtkbutton.c',
+    'gtkcelleditable.c',
+    'gtkcelllayout.c',
+    'gtkcellrenderer.c',
+    'gtkcellrendereraccel.c',
+    'gtkcellrenderercombo.c',
+    'gtkcellrendererpixbuf.c',
+    'gtkcellrendererprogress.c',
+    'gtkcellrendererspin.c',
+    'gtkcellrendererspinner.c',
+    'gtkcellrenderertext.c',
+    'gtkcellrenderertoggle.c',
+    'gtkcellview.c',
+    'gtkcheckbutton.c',
+    'gtkcheckmenuitem.c',
+    'gtkcolorbutton.c',
+    'gtkcolorsel.c',
+    'gtkcolorseldialog.c',
+    'gtkcombobox.c',
+    'gtkcomboboxentry.c',
+    'gtkcomboboxtext.c',
+    'gtkcontainer.c',
+    'gtkdialog.c',
+    'gtkdrawingarea.c',
+    'gtkeditable.c',
+    'gtkentry.c',
+    'gtkentrybuffer.c',
+    'gtkentrycompletion.c',
+    'gtkeventbox.c',
+    'gtkexpander.c',
+    'gtkfilechooser.c',
+    'gtkfilechooserbutton.c',
+    'gtkfilechooserdefault.c',
+    'gtkfilechooserdialog.c',
+    'gtkfilechooserembed.c',
+    'gtkfilechooserentry.c',
+    'gtkfilechoosersettings.c',
+    'gtkfilechooserutils.c',
+    'gtkfilechooserwidget.c',
+    'gtkfilefilter.c',
+    'gtkfilesystem.c',
+    'gtkfilesystemmodel.c',
+    'gtkfixed.c',
+    'gtkfontbutton.c',
+    'gtkfontsel.c',
+    'gtkframe.c',
+    'gtkgc.c',
+    'gtkhandlebox.c',
+    'gtkhbbox.c',
+    'gtkhbox.c',
+    'gtkhpaned.c',
+    'gtkhruler.c',
+    'gtkhscale.c',
+    'gtkhscrollbar.c',
+    'gtkhseparator.c',
+    'gtkhsv.c',
+    'gtkiconcache.c',
+    'gtkiconcachevalidator.c',
+    'gtkiconfactory.c',
+    'gtkicontheme.c',
+    'gtkiconview.c',
+    'gtkimage.c',
+    'gtkimagemenuitem.c',
+    'gtkimcontext.c',
+    'gtkimcontextsimple.c',
+    'gtkimmodule.c',
+    'gtkimmulticontext.c',
+    'gtkinfobar.c',
+    'gtkinvisible.c',
+    'gtkitem.c',
+    'gtkkeyhash.c',
+    'gtklabel.c',
+    'gtklayout.c',
+    'gtklinkbutton.c',
+    'gtkliststore.c',
+    'gtkmain.c',
+    'gtkmarshal.c',
+    'gtkmarshalers.c',
+    'gtkmenu.c',
+    'gtkmenubar.c',
+    'gtkmenuitem.c',
+    'gtkmenushell.c',
+    'gtkmenutoolbutton.c',
+    'gtkmessagedialog.c',
+    'gtkmisc.c',
+    'gtkmnemonichash.c',
+    'gtkmodules.c',
+    'gtkmountoperation.c',
+    'gtknotebook.c',
+    'gtkobject.c',
+    'gtkoffscreenwindow.c',
+    'gtkoptionmenu.c',
+    'gtkorientable.c',
+    'gtkpaned.c',
+    'gtkpango.c',
+    'gtkpathbar.c',
+    'gtkplug.c',
+    'gtkprogress.c',
+    'gtkprogressbar.c',
+    'gtkquery.c',
+    'gtkradioaction.c',
+    'gtkradiobutton.c',
+    'gtkradiomenuitem.c',
+    'gtkradiotoolbutton.c',
+    'gtkrange.c',
+    'gtkrbtree.c',
+    'gtkrc.c',
+    'gtkrecentaction.c',
+    'gtkrecentchooser.c',
+    'gtkrecentchooserdefault.c',
+    'gtkrecentchooserdialog.c',
+    'gtkrecentchoosermenu.c',
+    'gtkrecentchooserutils.c',
+    'gtkrecentchooserwidget.c',
+    'gtkrecentfilter.c',
+    'gtkrecentmanager.c',
+    'gtkruler.c',
+    'gtkscale.c',
+    'gtkscalebutton.c',
+    'gtkscrollbar.c',
+    'gtkscrolledwindow.c',
+    'gtksearchengine.c',
+    'gtksearchenginesimple.c',
+    'gtkselection.c',
+    'gtkseparator.c',
+    'gtkseparatormenuitem.c',
+    'gtkseparatortoolitem.c',
+    'gtksettings.c',
+    'gtkshow.c',
+    'gtksizegroup.c',
+    'gtksocket.c',
+    'gtkspinbutton.c',
+    'gtkspinner.c',
+    'gtkstatusbar.c',
+    'gtkstock.c',
+    'gtkstyle.c',
+    'gtktable.c',
+    'gtktearoffmenuitem.c',
+    'gtktextbtree.c',
+    'gtktextbuffer.c',
+    'gtktextbufferrichtext.c',
+    'gtktextbufferserialize.c',
+    'gtktextchild.c',
+    'gtktextdisplay.c',
+    'gtktextiter.c',
+    'gtktextlayout.c',
+    'gtktextmark.c',
+    'gtktextsegment.c',
+    'gtktexttag.c',
+    'gtktexttagtable.c',
+    'gtktexttypes.c',
+    'gtktextutil.c',
+    'gtktextview.c',
+    'gtkthemes.c',
+    'gtktoggleaction.c',
+    'gtktogglebutton.c',
+    'gtktoggletoolbutton.c',
+    'gtktoolbar.c',
+    'gtktoolbutton.c',
+    'gtktoolitem.c',
+    'gtktoolitemgroup.c',
+    'gtktoolpalette.c',
+    'gtktoolshell.c',
+    'gtktooltip.c',
+    'gtktooltips.c',
+    'gtktreedatalist.c',
+    'gtktreednd.c',
+    'gtktreemodel.c',
+    'gtktreemodelfilter.c',
+    'gtktreemodelsort.c',
+    'gtktreeselection.c',
+    'gtktreesortable.c',
+    'gtktreestore.c',
+    'gtktreeview.c',
+    'gtktreeviewcolumn.c',
+    'gtktypebuiltins.c',
+    'gtktypeutils.c',
+    'gtkuimanager.c',
+    'gtkvbbox.c',
+    'gtkvbox.c',
+    'gtkviewport.c',
+    'gtkvpaned.c',
+    'gtkvruler.c',
+    'gtkvscale.c',
+    'gtkvscrollbar.c',
+    'gtkvseparator.c',
+    'gtkwidget.c',
+    'gtkwindow-decorate.c',
+    'gtkwindow.c',
+]
+
+libytk_x11_sources = [
+    'gtkclipboard.c',
+    'gtkdnd.c',
+    'gtkmountoperation-x11.c',
+    'gtkplug-x11.c',
+    'gtkrelocation.c',
+    'gtksocket-x11.c',
+    'gtkxembed.c',
+]
+
+libytk_quartz_sources = [
+    'gtkclipboard-quartz.c',
+    'gtkdnd-quartz.c',
+    'gtkmountoperation-stub.c',
+    'gtkplug-stub.c',
+    'gtkquartz.c',
+    'gtkrelocation.c',
+    'gtksearchenginequartz.c',
+    'gtksocket-stub.c',
+]
+
+libytk_win32_sources = [
+    'gtkclipboard.c',
+    'gtkdnd.c',
+    'gtkplug-win32.c',
+    'gtksocket-win32.c',
+    'gtkwin32embed.c',
+    'gtkwin32embedwidget.c',
+    'gtkmountoperation-stub.c',
+]
+
+def options(opt):
+    pass
+
+def configure(conf):
+    if conf.is_defined('YTK'):
+        autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
+        autowaf.check_pkg(conf, 'pango', uselib_store='PANGO', atleast_version='1.20', mandatory=True)
+        autowaf.check_pkg(conf, 'cairo', uselib_store='CAIRO', atleast_version='1.12', mandatory=True)
+        autowaf.check_pkg(conf, 'pangocairo', uselib_store='PANGOCAIRO', mandatory=True)
+        autowaf.check_pkg(conf, 'gmodule-2.0', uselib_store='GMODULE', mandatory=True)
+        if conf.env['build_target'] != 'mingw' and sys.platform != 'darwin': # Linux
+            autowaf.check_pkg(conf, 'x11', uselib_store='X11', system=True, mandatory=True)
+            autowaf.check_pkg(conf, 'xext', uselib_store='XEXT', system=True, mandatory=True)
+
+def build(bld):
+    if not bld.is_defined('YTK'):
+        return
+
+    obj = bld.shlib(features = 'c cshlib')
+    obj.cflags          = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
+    obj.export_includes = ['ytk']
+    obj.includes        = ['.', '..', 'ytk', 'ytk/gtk']
+    obj.name            = 'libytk'
+    obj.target          = 'ytk'
+    obj.use             = [ 'libztk', 'libydk-pixbuf', 'libydk' ]
+    obj.uselib          = 'GLIB GIO PANGO CAIRO PANGOCAIRO GMODULE'
+    obj.defines         = [ 'HAVE_CONFIG_H', '_LARGEFILE64_SOURCE', '_REENTRANT', 'G_LOG_DOMAIN="Gtk"', 'GTK_COMPILATION', '_FILE_OFFSET_BITS=64', 'GTK_DISABLE_DEPRECATED', 'G_DISABLE_CAST_CHECKS',
+                            'G_DISABLE_SINGLE_INCLUDES', 'DATK_DISABLE_SINGLE_INCLUDES', 'GDK_PIXBUF_DISABLE_SINGLE_INCLUDES', 'GTK_DISABLE_SINGLE_INCLUDES', 'GDK_PIXBUF_DISABLE_DEPRECATED',
+                            'GTK_PRINT_BACKENDS="file,lpr"', 'GTK_PRINT_BACKEND_ENABLE_UNSUPPORTED', 'GTK_PRINT_PREVIEW_COMMAND=""',
+                            'GTK_VERSION="2.24.23"', 'GTK_BINARY_VERSION="2.10.0"', 'GTK_HOST="ardour"',
+                            'PACKAGE="' + I18N_PACKAGE + '"',
+                            'GETTEXT_PACKAGE="' + I18N_PACKAGE + '"',
+                            'GTK_DATA_PREFIX="' + bld.env['PREFIX'] + '"', 
+                            'GTK_SYSCONFDIR="' + bld.env['SYSCONFDIR'] + '"', 
+                            'GTK_DATA_DIR="' + bld.env['DATADIR'] + '"', 
+                            'GTK_LIBDIR="' + bld.env['LIBDIR'] + '"',
+                          ]
+    obj.vnum            = LIBYDK_VERSION
+    obj.install_path    = bld.env['LIBDIR']
+
+    if sys.platform == 'darwin':
+        obj.source   = libytk_sources +  libytk_quartz_sources
+        obj.cflags   += ['-xobjective-c']
+        obj.uselib   += ' OSX' #  -framework Cocoa -framework CoreFoundation -framework ApplicationServices
+    elif bld.env['build_target'] == 'mingw':
+        obj.source   = libytk_sources +  libytk_win32_sources
+        obj.defines += [ 'INSIDE_GTK_WIN32', 'DLL_EXPORT', 'PIC' ]
+        obj.ldflags  = '-limm32 -lole32 -lgdi32 -lcomdlg32 -lwinspool -lcomctl32 -luuid'
+        obj.linkflags = ['-Wl,--export-all-symbols']
+    else:
+        obj.source    = libytk_sources +  libytk_x11_sources
+        obj.uselib   += ' X11 XEXT'
+
+    # i18n
+    if bld.is_defined('ENABLE_NLS'):
+        mo_files = bld.path.ant_glob('po/*.mo')
+        for mo in mo_files:
+            lang = os.path.basename(mo.srcpath()).replace('.mo', '')
+            bld.install_as(os.path.join(bld.env['LOCALEDIR'], lang, 'LC_MESSAGES', I18N_PACKAGE + bld.env['MAJOR'] + '.mo'),
+                           mo)
+def i18n(bld):
+    autowaf.build_i18n(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
+
+def i18n_pot(bld):
+    autowaf.build_i18n(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
+
+def i18n_po(bld):
+    autowaf.build_i18n_po(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)
+
+def i18n_mo(bld):
+    autowaf.build_i18n_mo(bld, '.', 'libs/tk/ytk', I18N_PACKAGE + bld.env['MAJOR'], libytk_sources)

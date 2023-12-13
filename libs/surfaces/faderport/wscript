@@ -20,6 +20,11 @@ def build(bld):
     obj.includes     = [ '.', './faderport']
     obj.name         = 'libardour_faderport'
     obj.target       = 'ardour_faderport'
-    obj.uselib       = 'GTKMM GTK GDK XML OSX'
+    obj.uselib       = 'XML OSX PANGOMM'
     obj.use          = 'libardour libardour_cp libardour_midisurface libgtkmm2ext libpbd'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+    if bld.is_defined('YTK'):
+        obj.use    += ' libytkmm'
+        obj.uselib += ' GLIBMM GIOMM'
+    else:
+        obj.uselib += ' GTKMM'

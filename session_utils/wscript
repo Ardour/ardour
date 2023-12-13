@@ -51,7 +51,10 @@ def build_ardour_util(bld, util):
             obj.use.extend (['libaaf'])
 
     if bld.is_defined('HAVE_SUIL'):
-        obj.uselib += ' SUIL'
+        if bld.is_defined('YTK'):
+            obj.use += [ 'libsuil' ]
+        else:
+            obj.uselib += ' SUIL'
 
     if bld.is_defined('HAVE_USB'):
         obj.uselib += ' USB'

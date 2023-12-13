@@ -35,6 +35,11 @@ def build(bld):
     obj.includes     = [ '.' ]
     obj.name         = 'libardour_us2400'
     obj.target       = 'ardour_us2400'
-    obj.uselib       = 'GTKMM XML OSX'
+    obj.uselib       = 'XML OSX PANGOMM'
     obj.use          = 'libardour libardour_cp libgtkmm2ext'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+    if bld.is_defined('YTK'):
+        obj.use    += ' libytkmm'
+        obj.uselib += ' GLIBMM GIOMM'
+    else:
+        obj.uselib += ' GTKMM'

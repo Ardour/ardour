@@ -20,6 +20,11 @@ def build(bld):
     obj.includes     = [ '.', './cc121']
     obj.name         = 'libardour_cc121'
     obj.target       = 'ardour_cc121'
-    obj.uselib       = 'GTKMM GTK GDK XML OSX'
+    obj.uselib       = 'XML OSX'
     obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+    if bld.is_defined('YTK'):
+        obj.use    += ' libytkmm'
+        obj.uselib += ' GLIBMM GIOMM PANGOMM'
+    else:
+        obj.uselib += ' GTKMM'

@@ -1,0 +1,4124 @@
+# Greek translation of GTK+ UI Translations
+# Copyright (C) 1999 - 2009 Free Software Foundation, Inc.
+#
+# kostas: 04Sep2003, one more update
+# nikos: 04Sep2003, review (more is needed)
+# nikosK: 06Sep2003, One more review
+# ta panta rei: 08Sep2003, one more review
+# Nikos: 26Jan2004 fixes 390 messages
+# kostas: 29Jan2004 updates 403 messages
+# kostas: 25Apr2004 update
+# ta panta rei <ta_panta_rei@flashmail.con>
+# spyros: initial translation, 1999.
+# simos: 186 messages, 20Apr2002, first log entry.
+# simos: 214 messages, 16Aug2002, updated and converted to UTF-8.
+# kostas: 981 messages, 16Oct2002, almost completed translation.
+# kostas: 1018 messages, 06Nov2002, completed translation.
+# kostas: 1127 messages, 03Dec2002, updated translation for Gnome 2.1x.
+# kostas:02Nov2003,1288 messages update for Gnome 2.6.
+# kostas:22Nov2003,1342 messages.
+# Spiros Papadimitriou <spapadim+@cs.cmu.edu>, 1999.
+# Simos Xenitellis <simos@hellug.gr>, 1999, 2001, 2002.
+# Nikos Charonitakis <nikox@gmail.com>, 2003, 2004, 2005, 2006, 2008.
+# Nikos Kannelopoulos <nkan@panafonet.gr>, 2003.
+# Kostas Papadimas <pkst@gnome.org>, 2002, 2003, 2004, 2005, 2006, 2007.
+# Simos Xenitellis <simos@gnome.org>, 2006.
+# Jennie Petoumenou <epetoumenou@gmail.com>, 2009.
+# Simos Xenitellis <simos@gnome.org>, 2009.
+# Jennie Petoumenou <epetoumenou@gmail.com>, 2010.
+msgid ""
+msgstr ""
+"Project-Id-Version: gtk+ 2.20.1.1\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-19 21:59+0100\n"
+"PO-Revision-Date: 2010-09-20 10:57+0200\n"
+"Last-Translator: Bakaoukas Nikolaos <nikolaos.x1@gmail.com>\n"
+"Language-Team: Greek <team@gnome.gr>\n"
+"Language: el\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: gtkaboutdialog.c:245
+msgid "Could not show link"
+msgstr "Αδυναμία προβολής συνδέσμου"
+
+#: gtkaboutdialog.c:399 gtkaboutdialog.c:2286
+msgid "License"
+msgstr "Άδεια χρήσης"
+
+#: gtkaboutdialog.c:400
+msgid "The license of the program"
+msgstr "Η άδεια χρήσης του προγράμματος"
+
+#: gtkaboutdialog.c:646
+msgid "C_redits"
+msgstr "Μ_νεία"
+
+#: gtkaboutdialog.c:660
+msgid "_License"
+msgstr "Ά_δεια χρήσης"
+
+#: gtkaboutdialog.c:966
+#, c-format
+msgid "About %s"
+msgstr "Περί %s"
+
+#: gtkaboutdialog.c:2209
+msgid "Credits"
+msgstr "Μνεία"
+
+#: gtkaboutdialog.c:2238
+msgid "Written by"
+msgstr "Γράφτηκε από"
+
+#: gtkaboutdialog.c:2241
+msgid "Documented by"
+msgstr "Τεκμηρίωση από"
+
+#: gtkaboutdialog.c:2253
+msgid "Translated by"
+msgstr "Μετάφραση από"
+
+#: gtkaboutdialog.c:2257
+msgid "Artwork by"
+msgstr "Γραφικά από"
+
+#: gtkbuilderparser.c:343
+#, c-format
+msgid "Invalid type function on line %d: '%s'"
+msgstr "Μη έγκυρος τύπος συνάρτησης στη γραμμή %d: '%s'"
+
+#: gtkbuilderparser.c:407
+#, c-format
+msgid "Duplicate object ID '%s' on line %d (previously on line %d)"
+msgstr ""
+"Διπλή εμφάνιση ταυτότητας του αντικειμένου '%s' στη γραμμή %d (προηγουμένως "
+"στη γραμμή %d)"
+
+#: gtkbuilderparser.c:859
+#, c-format
+msgid "Invalid root element: '%s'"
+msgstr "Μη έγκυρο ριζικό στοιχείο: '%s'"
+
+#: gtkbuilderparser.c:898
+#, c-format
+msgid "Unhandled tag: '%s'"
+msgstr "Μη υποστηριζόμενη ετικέτα: '%s'"
+
+#: gtkcellrendereraccel.c:389 gtkcellrendereraccel.c:663
+msgid "New accelerator..."
+msgstr "Νέα συντόμευση..."
+
+#: gtkcolorbutton.c:178 gtkcolorbutton.c:459
+msgid "Pick a Color"
+msgstr "Επιλογή χρώματος"
+
+#: gtkcolorbutton.c:352
+msgid "Received invalid color data\n"
+msgstr "Ελήφθησαν μη έγκυρα δεδομένα χρώματος\n"
+
+#: gtkcolorsel.c:358
+msgid ""
+"Select the color you want from the outer ring. Select the darkness or "
+"lightness of that color using the inner triangle."
+msgstr ""
+"Επιλέξτε το χρώμα που επιθυμείτε από τον εξωτερικό δακτύλιο. Επιλέξτε τη "
+"διαβάθμιση φωτεινότητας του χρώματος από το εσωτερικό τρίγωνο."
+
+#: gtkcolorsel.c:382
+msgid ""
+"Click the eyedropper, then click a color anywhere on your screen to select "
+"that color."
+msgstr ""
+"Πατήστε το σταγονόμετρο, και μετά κάντε κλικ πάνω σε ένα χρώμα οπουδήποτε "
+"στην οθόνη, για να επιλέξετε αυτό το χρώμα."
+
+#: gtkcolorsel.c:391
+msgid "_Hue:"
+msgstr "Απόχ_ρωση:"
+
+#: gtkcolorsel.c:392
+msgid "Position on the color wheel."
+msgstr "Θέση στο χρωματικό τροχό."
+
+#: gtkcolorsel.c:394
+msgid "_Saturation:"
+msgstr "Κ_ορεσμός:"
+
+#: gtkcolorsel.c:395
+msgid "\"Deepness\" of the color."
+msgstr "\"Βάθος\" του χρώματος."
+
+#: gtkcolorsel.c:396
+msgid "_Value:"
+msgstr "_Τιμή:"
+
+#: gtkcolorsel.c:397
+msgid "Brightness of the color."
+msgstr "Φωτεινότητα του χρώματος."
+
+#: gtkcolorsel.c:398
+msgid "_Red:"
+msgstr "_Κόκκινο:"
+
+#: gtkcolorsel.c:399
+msgid "Amount of red light in the color."
+msgstr "Ποσότητα κόκκινου φωτός στο χρώμα."
+
+#: gtkcolorsel.c:400
+msgid "_Green:"
+msgstr "_Πράσινο:"
+
+#: gtkcolorsel.c:401
+msgid "Amount of green light in the color."
+msgstr "Ποσότητα πράσινου φωτός στο χρώμα."
+
+#: gtkcolorsel.c:402
+msgid "_Blue:"
+msgstr "_Μπλε:"
+
+#: gtkcolorsel.c:403
+msgid "Amount of blue light in the color."
+msgstr "Ποσότητα μπλε φωτός στο χρώμα."
+
+#: gtkcolorsel.c:406
+msgid "Op_acity:"
+msgstr "Α_διαφάνεια:"
+
+#: gtkcolorsel.c:413 gtkcolorsel.c:423
+msgid "Transparency of the color."
+msgstr "Διαφάνεια του χρώματος."
+
+#: gtkcolorsel.c:430
+msgid "Color _name:"
+msgstr "Όνομα _χρώματος:"
+
+#: gtkcolorsel.c:444
+msgid ""
+"You can enter an HTML-style hexadecimal color value, or simply a color name "
+"such as 'orange' in this entry."
+msgstr ""
+"Εδώ μπορείτε να εισάγετε δεκαεξαδική τιμή τύπου HTML ή απλά ένα όνομα "
+"χρώματος, όπως 'orange'."
+
+#: gtkcolorsel.c:474
+msgid "_Palette:"
+msgstr "Πα_λέτα:"
+
+#: gtkcolorsel.c:503
+msgid "Color Wheel"
+msgstr "Χρωματικός τροχός"
+
+#: gtkcolorsel.c:962
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now. You can drag this color to a palette entry, or select this color as "
+"current by dragging it to the other color swatch alongside."
+msgstr ""
+"Το προηγούμενο χρώμα, συγκρινόμενο με το νέο χρώμα που επιλέγετε τώρα. "
+"Μπορείτε να το σύρετε σε μια θέση της παλέτας για να το αποθηκεύσετε, ή να "
+"το σύρετε πάνω στο διπλανό χρώμα για να το επαναφέρετε ως τρέχον."
+
+#: gtkcolorsel.c:965
+msgid ""
+"The color you've chosen. You can drag this color to a palette entry to save "
+"it for use in the future."
+msgstr ""
+"Το χρώμα που επιλέξατε. Μπορείτε να σύρετε το χρώμα σε μια θέση της παλέτας "
+"για να το αποθηκεύσετε και να το χρησιμοποιείτε στο μέλλον."
+
+#: gtkcolorsel.c:970
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now."
+msgstr "Το προηγούμενο χρώμα, συγκρινόμενο με το νέο χρώμα που επιλέγετε τώρα."
+
+#: gtkcolorsel.c:973
+msgid "The color you've chosen."
+msgstr "Το χρώμα που επιλέξατε."
+
+#: gtkcolorsel.c:1389
+msgid "_Save color here"
+msgstr "_Αποθήκευση χρώματος εδώ"
+
+#: gtkcolorsel.c:1593
+msgid ""
+"Click this palette entry to make it the current color. To change this entry, "
+"drag a color swatch here or right-click it and select \"Save color here.\""
+msgstr ""
+"Κάντε κλικ σε αυτό το χρώμα της παλέτας για να το επιλέξετε ως τρέχον. Για "
+"να το αλλάξετε, σύρετε ένα νέο χρώμα στη θέση αυτή, ή κάντε δεξί κλικ και "
+"επιλέξτε \"Αποθήκευση χρώματος εδώ.\""
+
+#: gtkcolorseldialog.c:170
+msgid "Color Selection"
+msgstr "Επιλογή χρωμάτων"
+
+#: gtkentry.c:8789 gtktextview.c:8007
+msgid "Input _Methods"
+msgstr "_Μέθοδοι εισαγωγής"
+
+#: gtkentry.c:8803 gtktextview.c:8021
+msgid "_Insert Unicode Control Character"
+msgstr "_Εισαγωγή χαρακτήρα ελέγχου Unicode"
+
+#: gtkentry.c:10177
+msgid "Caps Lock is on"
+msgstr "Είναι πατημένο το Caps Lock"
+
+#: gtkfilechooserbutton.c:64
+msgid "Select a File"
+msgstr ""
+
+#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1851
+msgid "Desktop"
+msgstr "Επιφάνεια εργασίας"
+
+#: gtkfilechooserbutton.c:66
+msgid "(None)"
+msgstr "(Κανένα)"
+
+#: gtkfilechooserbutton.c:2175
+msgid "Other..."
+msgstr "Άλλο…"
+
+#: gtkfilechooserdefault.c:150
+msgid "Type name of new folder"
+msgstr "Πληκτρολογήστε το όνομα του νέου φακέλου"
+
+#: gtkfilechooserdefault.c:956
+msgid "Could not retrieve information about the file"
+msgstr "Αδυναμία ανάκτησης πληροφοριών για το αρχείο"
+
+#: gtkfilechooserdefault.c:967
+msgid "Could not add a bookmark"
+msgstr "Αδυναμία προσθήκης σελιδοδείκτη"
+
+#: gtkfilechooserdefault.c:978
+msgid "Could not remove bookmark"
+msgstr "Αδυναμία αφαίρεσης σελιδοδείκτη"
+
+#: gtkfilechooserdefault.c:989
+msgid "The folder could not be created"
+msgstr "Αδυναμία δημιουργίας φακέλου"
+
+#: gtkfilechooserdefault.c:1002
+msgid ""
+"The folder could not be created, as a file with the same name already "
+"exists.  Try using a different name for the folder, or rename the file first."
+msgstr ""
+"Δεν ήταν δυνατή η δημιουργία του φακέλου, επειδή υπάρχει ήδη αρχείο με αυτό "
+"το όνομα. Χρησιμοποιήστε διαφορετικό όνομα για το φάκελο, ή μετονομάστε "
+"πρώτα το αρχείο."
+
+#: gtkfilechooserdefault.c:1016
+msgid "You need to choose a valid filename."
+msgstr ""
+
+#: gtkfilechooserdefault.c:1019
+#, c-format
+msgid "Cannot create a file under %s as it is not a folder"
+msgstr ""
+
+#: gtkfilechooserdefault.c:1031
+msgid ""
+"You may only select folders.  The item that you selected is not a folder; "
+"try using a different item."
+msgstr ""
+
+#: gtkfilechooserdefault.c:1041
+msgid "Invalid file name"
+msgstr "Μη έγκυρο όνομα αρχείου"
+
+#: gtkfilechooserdefault.c:1051
+msgid "The folder contents could not be displayed"
+msgstr "Αδυναμία προβολής των περιεχομένων του φακέλου"
+
+#: gtkfilechooserdefault.c:1584
+#, c-format
+msgid "%1$s on %2$s"
+msgstr "%1$s στο %2$s"
+
+#: gtkfilechooserdefault.c:1733
+msgid "Search"
+msgstr "Αναζήτηση"
+
+#: gtkfilechooserdefault.c:1757 gtkfilechooserdefault.c:4872
+msgid "Recently Used"
+msgstr "Πρόσφατα"
+
+#: gtkfilechooserdefault.c:2387
+msgid "Select which types of files are shown"
+msgstr "Επιλέξτε τους τύπους αρχείων που θα προβάλλονται"
+
+#: gtkfilechooserdefault.c:2746
+#, c-format
+msgid "Add the folder '%s' to the bookmarks"
+msgstr "Προσθήκη του φακέλου '%s' στους σελιδοδείκτες"
+
+#: gtkfilechooserdefault.c:2790
+msgid "Add the current folder to the bookmarks"
+msgstr "Προσθήκη του τρέχοντος φακέλου στους σελιδοδείκτες"
+
+#: gtkfilechooserdefault.c:2792
+msgid "Add the selected folders to the bookmarks"
+msgstr "Προσθήκη των επιλεγμένων φακέλων στους σελιδοδείκτες"
+
+#: gtkfilechooserdefault.c:2837
+#, c-format
+msgid "Remove the bookmark '%s'"
+msgstr "Αφαίρεση του σελιδοδείκτη '%s'"
+
+#: gtkfilechooserdefault.c:2839
+#, c-format
+msgid "Bookmark '%s' cannot be removed"
+msgstr "Αδυναμία απομάκρυνσης σελιδοδείκτη '%s'"
+
+#: gtkfilechooserdefault.c:2846 gtkfilechooserdefault.c:3740
+msgid "Remove the selected bookmark"
+msgstr "Αφαίρεση του επιλεγμένου σελιδοδείκτη"
+
+#: gtkfilechooserdefault.c:3421
+msgid "Remove"
+msgstr "Αφαίρεση"
+
+#: gtkfilechooserdefault.c:3430
+msgid "Rename..."
+msgstr "Μετονομασία..."
+
+#: gtkfilechooserdefault.c:3597
+msgid "Places"
+msgstr "Τοποθεσίες"
+
+#: gtkfilechooserdefault.c:3654
+msgid "_Places"
+msgstr "_Τοποθεσίες"
+
+#: gtkfilechooserdefault.c:3728
+msgid "Add the selected folder to the Bookmarks"
+msgstr "Προσθήκη του επιλεγμένου φακέλου στους σελιδοδείκτες"
+
+#: gtkfilechooserdefault.c:3872
+msgid "Could not select file"
+msgstr "Αδυναμία επιλογής αρχείου"
+
+#: gtkfilechooserdefault.c:4045
+msgid "_Add to Bookmarks"
+msgstr "Προσ_θήκη στους σελιδοδείκτες"
+
+#: gtkfilechooserdefault.c:4058
+msgid "Show _Hidden Files"
+msgstr "Προβολή _κρυφών αρχείων"
+
+#: gtkfilechooserdefault.c:4065
+msgid "Show _Size Column"
+msgstr "Προβολή στήλης _μεγέθους"
+
+#: gtkfilechooserdefault.c:4289
+msgid "Files"
+msgstr "Αρχεία"
+
+#: gtkfilechooserdefault.c:4340
+msgid "Name"
+msgstr "Όνομα"
+
+#: gtkfilechooserdefault.c:4363
+msgid "Size"
+msgstr "Μέγεθος"
+
+#: gtkfilechooserdefault.c:4377
+msgid "Modified"
+msgstr "Τροποποιήθηκε"
+
+#: gtkfilechooserdefault.c:4470
+msgid "_Name:"
+msgstr "Όν_ομα:"
+
+#: gtkfilechooserdefault.c:4710
+msgid "Type a file name"
+msgstr "Εισάγετε όνομα αρχείου"
+
+#: gtkfilechooserdefault.c:4757 gtkfilechooserdefault.c:4768
+msgid "Please select a folder below"
+msgstr ""
+
+#: gtkfilechooserdefault.c:4763
+msgid "Please type a file name"
+msgstr ""
+
+#: gtkfilechooserdefault.c:4834
+msgid "Create Fo_lder"
+msgstr "Δημιουργία φα_κέλου"
+
+#: gtkfilechooserdefault.c:4882
+msgid "Search:"
+msgstr "Αναζήτηση:"
+
+#: gtkfilechooserdefault.c:4933
+msgid "_Location:"
+msgstr "_Τοποθεσία:"
+
+#: gtkfilechooserdefault.c:5383
+msgid "Save in _folder:"
+msgstr "Αποθήκευση στο _φάκελο:"
+
+#: gtkfilechooserdefault.c:5385
+msgid "Create in _folder:"
+msgstr "Δημιουργία μέσα στο _φάκελο:"
+
+#: gtkfilechooserdefault.c:6479
+#, c-format
+msgid "Could not read the contents of %s"
+msgstr "Αδυναμία ανάγνωσης των περιεχομένων του %s"
+
+#: gtkfilechooserdefault.c:6483
+msgid "Could not read the contents of the folder"
+msgstr "Αδυναμία ανάγνωσης των περιεχομένων του φακέλου"
+
+#: gtkfilechooserdefault.c:6576 gtkfilechooserdefault.c:6644
+#: gtkfilechooserdefault.c:6829
+msgid "Unknown"
+msgstr "Άγνωστο"
+
+#: gtkfilechooserdefault.c:6591
+msgid "%H:%M"
+msgstr "%H:%M"
+
+#: gtkfilechooserdefault.c:6593
+msgid "Yesterday at %H:%M"
+msgstr "Χθες, στις %H:%M"
+
+#: gtkfilechooserdefault.c:7301
+msgid "Cannot change to folder because it is not local"
+msgstr "Αποτυχία μετάβασης στο φάκελο, γιατί δεν είναι τοπικός"
+
+#: gtkfilechooserdefault.c:7898 gtkfilechooserdefault.c:7919
+#, c-format
+msgid "Shortcut %s already exists"
+msgstr "Υπάρχει ήδη συντόμευση %s"
+
+#: gtkfilechooserdefault.c:8009
+#, c-format
+msgid "Shortcut %s does not exist"
+msgstr "Δεν υπάρχει συντόμευση %s"
+
+#: gtkfilechooserdefault.c:8250
+#, c-format
+msgid "A file named \"%s\" already exists.  Do you want to replace it?"
+msgstr "Υπάρχει ήδη αρχείο με το όνομα \"%s\". Θέλετε να αντικασταθεί;"
+
+#: gtkfilechooserdefault.c:8253
+#, c-format
+msgid ""
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
+msgstr ""
+"Το αρχείο υπάρχει ήδη στο \"%s\". Η αντικατάσταση του θα αντικαταστήσει και "
+"τα περιεχόμενα του."
+
+#: gtkfilechooserdefault.c:8258
+msgid "_Replace"
+msgstr "_Αντικατάσταση"
+
+#: gtkfilechooserdefault.c:9066
+msgid "Could not start the search process"
+msgstr "Αποτυχία εκκίνησης της διεργασίας αναζήτησης"
+
+#: gtkfilechooserdefault.c:9067
+msgid ""
+"The program was not able to create a connection to the indexer daemon.  "
+"Please make sure it is running."
+msgstr ""
+"Το πρόγραμμα δεν κατάφερε να συνδεθεί με την υπηρεσία δημιουργίας "
+"ευρετηρίων. Βεβαιωθείτε ότι η υπηρεσία εκτελείται."
+
+#: gtkfilechooserdefault.c:9081
+msgid "Could not send the search request"
+msgstr "Αδυναμία αποστολής του αιτήματος αναζήτησης"
+
+#: gtkfilechooserdefault.c:9682
+#, c-format
+msgid "Could not mount %s"
+msgstr "Αδυναμία προσάρτησης του %s"
+
+#: gtkfilechoosersettings.c:515
+#, c-format
+msgid "Error creating folder '%s': %s"
+msgstr "Σφάλμα κατά τη δημιουργία του φακέλου '%s': %s"
+
+#: gtkfilesystem.c:52
+msgid "File System"
+msgstr "Σύστημα αρχείων"
+
+#: gtkfontbutton.c:144 gtkfontbutton.c:266
+msgid "Pick a Font"
+msgstr "Επιλογή γραμματοσειράς"
+
+#: gtkfontbutton.c:260
+msgid "Sans 12"
+msgstr "Sans 12"
+
+#: gtkfontbutton.c:785
+msgid "Font"
+msgstr "Γραμματοσειρά"
+
+#: gtkfontsel.c:75
+msgid "abcdefghijk ABCDEFGHIJK"
+msgstr "αβγδέ abcde ΆΒΓΔΕ ABCDE"
+
+#: gtkfontsel.c:343
+msgid "_Family:"
+msgstr "_Οικογένεια:"
+
+#: gtkfontsel.c:349
+msgid "_Style:"
+msgstr "_Στυλ:"
+
+#: gtkfontsel.c:355
+msgid "Si_ze:"
+msgstr "Μέ_γεθος:"
+
+#: gtkfontsel.c:532
+msgid "_Preview:"
+msgstr "_Προεπισκόπηση:"
+
+#: gtkfontsel.c:1649
+msgid "Font Selection"
+msgstr "Επιλογή γραμματοσειράς"
+
+#: gtkiconfactory.c:1354
+#, c-format
+msgid "Error loading icon: %s"
+msgstr "Σφάλμα φόρτωσης εικονιδίου: %s"
+
+#: gtkicontheme.c:1374
+#, c-format
+msgid ""
+"Could not find the icon '%s'. The '%s' theme\n"
+"was not found either, perhaps you need to install it.\n"
+"You can get a copy from:\n"
+"\t%s"
+msgstr ""
+"Δε βρέθηκε το εικονίδιο '%s'.Το θέμα '%s'\n"
+"επίσης δε βρέθηκε. Ίσως πρέπει να το εγκαταστήσετε.\n"
+"Μπορείτε να το βρείτε στο:\n"
+"\t%s"
+
+#: gtkicontheme.c:1555
+#, c-format
+msgid "Icon '%s' not present in theme"
+msgstr "Το εικονίδιο '%s' δεν περιέχεται στο θέμα"
+
+#: gtkicontheme.c:3101
+msgid "Failed to load icon"
+msgstr "Αποτυχία φόρτωσης εικονιδίου"
+
+#: gtkimmodule.c:527
+msgid "Simple"
+msgstr "Απλό"
+
+#: gtklabel.c:5696
+msgid "_Open Link"
+msgstr "Άν_οιγμα συνδέσμου"
+
+#: gtklabel.c:5708
+msgid "Copy _Link Address"
+msgstr "Αντιγραφή διεύθυνσης _συνδέσμου"
+
+#: gtklinkbutton.c:428
+msgid "Copy URL"
+msgstr "Αντιγραφή URL"
+
+#: gtklinkbutton.c:586
+msgid "Invalid URI"
+msgstr "Μη έγκυρο URI"
+
+#: gtkmain.c:454
+msgid "Load additional GTK+ modules"
+msgstr "Φόρτωση πρόσθετων αρθρωμάτων GTK+"
+
+#: gtkmain.c:455
+msgid "MODULES"
+msgstr "ΑΡΘΡΩΜΑΤΑ"
+
+#: gtkmain.c:457
+msgid "Make all warnings fatal"
+msgstr "Να είναι όλες οι προειδοποιήσεις μοιραίες"
+
+#: gtkmain.c:460
+msgid "GTK+ debugging flags to set"
+msgstr "Σημαίες αποσφαλμάτωσης του GTK+ που θα ενεργοποιηθούν"
+
+#: gtkmain.c:461 gtkmain.c:464
+msgid "FLAGS"
+msgstr "ΣΗΜΑΙΕΣ"
+
+#: gtkmain.c:463
+msgid "GTK+ debugging flags to unset"
+msgstr "Σημαίες αποσφαλμάτωσης του GTK+ που θα απενεργοποιηθούν"
+
+#: gtkmain.c:755
+msgid "default:LTR"
+msgstr "default:LTR"
+
+#: gtkmain.c:820
+#, c-format
+msgid "Cannot open display: %s"
+msgstr "Αδυναμία ανοίγματος της οθόνης: %s"
+
+#: gtkmain.c:857
+msgid "GTK+ Options"
+msgstr "Επιλογές GTK+"
+
+#: gtkmain.c:857
+msgid "Show GTK+ Options"
+msgstr "Εμφάνιση επιλογών GTK+"
+
+#: gtkmountoperation.c:494
+msgid "Co_nnect"
+msgstr "_Σύνδεση"
+
+#: gtkmountoperation.c:561
+msgid "Connect _anonymously"
+msgstr "Σύνδεση _ανώνυμα"
+
+#: gtkmountoperation.c:570
+msgid "Connect as u_ser:"
+msgstr "Σύνδεση ως _χρήστης:"
+
+#: gtkmountoperation.c:608
+msgid "_Username:"
+msgstr "Όν_ομα χρήστη:"
+
+#: gtkmountoperation.c:613
+msgid "_Domain:"
+msgstr "_Τομέας:"
+
+#: gtkmountoperation.c:619
+msgid "_Password:"
+msgstr "Σ_υνθηματικό:"
+
+#: gtkmountoperation.c:637
+msgid "Forget password _immediately"
+msgstr "Όχ_ι απομνημόνευση του συνθηματικού"
+
+#: gtkmountoperation.c:647
+msgid "Remember password until you _logout"
+msgstr "Α_πομνημόνευση συνθηματικού μέχρι την αποσύνδεση"
+
+#: gtkmountoperation.c:657
+msgid "Remember _forever"
+msgstr "_Μόνιμη απομνημόνευση συνθηματικού"
+
+#: gtkmountoperation.c:886
+#, c-format
+msgid "Unknown Application (PID %d)"
+msgstr "Άγνωστη εφαρμογή (PID %d)"
+
+#: gtkmountoperation.c:1069
+msgid "Unable to end process"
+msgstr "Αδυναμία τερματισμού διεργασίας"
+
+#: gtkmountoperation.c:1106
+msgid "_End Process"
+msgstr "_Τερματισμός διεργασίας"
+
+#: gtknotebook.c:4745 gtknotebook.c:7351
+#, c-format
+msgid "Page %u"
+msgstr "Σελίδα %u"
+
+#: gtkpathbar.c:151
+msgid "Up Path"
+msgstr "Διαδρομή πάνω"
+
+#: gtkpathbar.c:153
+msgid "Down Path"
+msgstr "Διαδρομή κάτω"
+
+#: gtkpathbar.c:1467
+msgid "File System Root"
+msgstr "Ρίζα συστήματος αρχείων"
+
+#: gtkrc.c:2906
+#, c-format
+msgid "Unable to find include file: \"%s\""
+msgstr "Δε βρέθηκε το αρχείο include : \"%s\""
+
+#: gtkrc.c:3536 gtkrc.c:3539
+#, c-format
+msgid "Unable to locate image file in pixmap_path: \"%s\""
+msgstr "Δε βρέθηκε το αρχείο εικόνας στη διαδρομή_pixmap: \"%s\""
+
+#: gtkrecentaction.c:154 gtkrecentaction.c:162 gtkrecentchoosermenu.c:588
+#: gtkrecentchoosermenu.c:596
+#, c-format
+msgid "This function is not implemented for widgets of class '%s'"
+msgstr ""
+"Αυτή η λειτουργία δεν υποστηρίζεται για γραφικά συστατικά της κλάσης '%s'"
+
+#: gtkrecentchooserdefault.c:481
+msgid "Select which type of documents are shown"
+msgstr "Επιλέξτε τον τύπο εγγράφων που θα προβάλλονται"
+
+#: gtkrecentchooserdefault.c:1135 gtkrecentchooserdefault.c:1172
+#, c-format
+msgid "No item for URI '%s' found"
+msgstr "Δε βρέθηκε καταχώρηση για το URI '%s'"
+
+#: gtkrecentchooserdefault.c:1299
+msgid "Untitled filter"
+msgstr "Ανώνυμο φίλτρο"
+
+#: gtkrecentchooserdefault.c:1652
+msgid "Could not remove item"
+msgstr "Αδυναμία αφαίρεσης καταχώρησης"
+
+#: gtkrecentchooserdefault.c:1696
+msgid "Could not clear list"
+msgstr "Αδυναμία εκκαθάρισης λίστας"
+
+#: gtkrecentchooserdefault.c:1780
+msgid "Copy _Location"
+msgstr "Αντιγραφή _τοποθεσίας"
+
+#: gtkrecentchooserdefault.c:1793
+msgid "_Remove From List"
+msgstr "Απο_μάκρυνση από τη λίστα"
+
+#: gtkrecentchooserdefault.c:1802
+msgid "_Clear List"
+msgstr "_Εκκαθάριση λίστας"
+
+#: gtkrecentchooserdefault.c:1816
+msgid "Show _Private Resources"
+msgstr "Προβολή ι_διωτικών πόρων"
+
+#: gtkrecentchoosermenu.c:342
+msgid "No items found"
+msgstr "Δε βρέθηκαν καταχωρήσεις"
+
+#: gtkrecentchoosermenu.c:508 gtkrecentchoosermenu.c:564
+#, c-format
+msgid "No recently used resource found with URI `%s'"
+msgstr "Δε βρέθηκε πρόσφατα χρησιμοποιημένη καταχώρηση με URI `%s'"
+
+#: gtkrecentchoosermenu.c:774
+#, c-format
+msgid "Open '%s'"
+msgstr "Άνοιγμα '%s'"
+
+#: gtkrecentchoosermenu.c:804
+msgid "Unknown item"
+msgstr "Άγνωστη καταχώρηση"
+
+#: gtkrecentmanager.c:1182 gtkrecentmanager.c:1195 gtkrecentmanager.c:1332
+#: gtkrecentmanager.c:1342 gtkrecentmanager.c:1395 gtkrecentmanager.c:1404
+#: gtkrecentmanager.c:1419
+#, c-format
+msgid "Unable to find an item with URI '%s'"
+msgstr "Αδυναμία εύρεσης καταχώρησης με URI '%s'"
+
+#: gtkspinner.c:459
+msgid "Provides visual indication of progress"
+msgstr "Παρέχει οπτική ένδειξη της προόδου"
+
+#: gtktextbufferrichtext.c:652
+#, c-format
+msgid "Unknown error when trying to deserialize %s"
+msgstr "Άγνωστο σφάλμα κατά την προσπάθεια deserialize του %s"
+
+#: gtktextbufferrichtext.c:711
+#, c-format
+msgid "No deserialize function found for format %s"
+msgstr "Δε βρέθηκε συνάρτηση deserialize για τον τύπο %s"
+
+#: gtktextbufferserialize.c:797 gtktextbufferserialize.c:823
+#, c-format
+msgid "Both \"id\" and \"name\" were found on the <%s> element"
+msgstr "Τόσο το \"id\" όσο και το \"name\" βρέθηκαν στο στοιχείο <%s>"
+
+#: gtktextbufferserialize.c:807 gtktextbufferserialize.c:833
+#, c-format
+msgid "The attribute \"%s\" was found twice on the <%s> element"
+msgstr "Το γνώρισμα \"%s\" βρέθηκε δύο φορές στο στοιχείο <%s>"
+
+#: gtktextbufferserialize.c:847
+#, c-format
+msgid "<%s> element has invalid ID \"%s\""
+msgstr "Το στοιχείο <%s> έχει μη έγκυρη ταυτότητα \"%s\""
+
+#: gtktextbufferserialize.c:857
+#, c-format
+msgid "<%s> element has neither a \"name\" nor an \"id\" attribute"
+msgstr "Το στοιχείο <%s> δεν διαθέτει γνώρισμα \"name\" ή \"id\""
+
+#: gtktextbufferserialize.c:944
+#, c-format
+msgid "Attribute \"%s\" repeated twice on the same <%s> element"
+msgstr "Το γνώρισμα \"%s\" επαναλαμβάνεται δύο φορές στο ίδιο στοιχείο <%s>"
+
+#: gtktextbufferserialize.c:962 gtktextbufferserialize.c:987
+#, c-format
+msgid "Attribute \"%s\" is invalid on <%s> element in this context"
+msgstr ""
+"Το γνώρισμα \"%s\" δεν είναι έγκυρο για το στοιχείο <%s> σε αυτήν την "
+"περίπτωση"
+
+#: gtktextbufferserialize.c:1023
+#, c-format
+msgid "Tag \"%s\" has not been defined."
+msgstr "Η ετικέτα \"%s\" δεν έχει οριστεί."
+
+#: gtktextbufferserialize.c:1035
+msgid "Anonymous tag found and tags can not be created."
+msgstr "Βρέθηκε ανώνυμη ετικέτα και δεν μπορούν να δημιουργηθούν ετικέτες."
+
+#: gtktextbufferserialize.c:1046
+#, c-format
+msgid "Tag \"%s\" does not exist in buffer and tags can not be created."
+msgstr ""
+"Η ετικέτα \"%s\" δεν υπάρχει στην ενδιάμεση μνήμη και δεν μπορούν να "
+"δημιουργηθούν ετικέτες."
+
+#: gtktextbufferserialize.c:1145 gtktextbufferserialize.c:1220
+#: gtktextbufferserialize.c:1321 gtktextbufferserialize.c:1395
+#, c-format
+msgid "Element <%s> is not allowed below <%s>"
+msgstr "Το στοιχείο <%s> δεν επιτρέπεται κάτω από το <%s>"
+
+#: gtktextbufferserialize.c:1176
+#, c-format
+msgid "\"%s\" is not a valid attribute type"
+msgstr "Το \"%s\" δεν είναι έγκυρος τύπος γνωρίσματος"
+
+#: gtktextbufferserialize.c:1184
+#, c-format
+msgid "\"%s\" is not a valid attribute name"
+msgstr "Το \"%s\" δεν είναι έγκυρο όνομα γνωρίσματος"
+
+#: gtktextbufferserialize.c:1194
+#, c-format
+msgid ""
+"\"%s\" could not be converted to a value of type \"%s\" for attribute \"%s\""
+msgstr ""
+"Το \"%s\" δεν μπορεί να μετατραπεί σε τιμή του τύπου \"%s\" για το γνώρισμα "
+"\"%s\""
+
+#: gtktextbufferserialize.c:1203
+#, c-format
+msgid "\"%s\" is not a valid value for attribute \"%s\""
+msgstr "Το \"%s\" δεν είναι έγκυρη τιμή για το γνώρισμα \"%s\""
+
+#: gtktextbufferserialize.c:1286
+#, c-format
+msgid "Tag \"%s\" already defined"
+msgstr "Η ετικέτα \"%s\" έχει ήδη οριστεί"
+
+#: gtktextbufferserialize.c:1297
+#, c-format
+msgid "Tag \"%s\" has invalid priority \"%s\""
+msgstr "Η ετικέτα \"%s\" έχει μη έγκυρη προτεραιότητα \"%s\""
+
+#: gtktextbufferserialize.c:1350
+#, c-format
+msgid "Outermost element in text must be <text_view_markup> not <%s>"
+msgstr ""
+"Το εξωτερικό στοιχείο στο κείμενο θα πρέπει να είναι το <text_view_markup> "
+"και όχι το <%s>"
+
+#: gtktextbufferserialize.c:1359 gtktextbufferserialize.c:1375
+#, c-format
+msgid "A <%s> element has already been specified"
+msgstr "Ένα στοιχείο <%s> έχει ήδη καθοριστεί"
+
+#: gtktextbufferserialize.c:1381
+msgid "A <text> element can't occur before a <tags> element"
+msgstr "Το στοιχείο <text> δεν μπορεί να εμφανίζεται πριν από στοιχείο <tags>"
+
+#: gtktextbufferserialize.c:1780
+msgid "Serialized data is malformed"
+msgstr "Τα serialized δεδομένα δεν έχουν τη σωστή μορφή"
+
+#: gtktextbufferserialize.c:1858
+msgid ""
+"Serialized data is malformed. First section isn't GTKTEXTBUFFERCONTENTS-0001"
+msgstr ""
+"Τα serialized δεδομένα δεν έχουν τη σωστή μορφή. Η πρώτη ενότητα δεν είναι "
+"GTKTEXTBUFFERCONTENTS-0001"
+
+#: gtktextutil.c:61
+msgid "LRM _Left-to-right mark"
+msgstr "_LRM Σημείο αριστερά προς δεξιά"
+
+#: gtktextutil.c:62
+msgid "RLM _Right-to-left mark"
+msgstr "_RLM Σημείο δεξιά προς αριστερά"
+
+#: gtktextutil.c:63
+msgid "LRE Left-to-right _embedding"
+msgstr "LRE _Ενσωμάτωση αριστερά προς δεξιά"
+
+#: gtktextutil.c:64
+msgid "RLE Right-to-left e_mbedding"
+msgstr "RLE Ενσω_μάτωση δεξιά προς αριστερά"
+
+#: gtktextutil.c:65
+msgid "LRO Left-to-right _override"
+msgstr "LRO _Αναγκαστικά αριστερά προς δεξιά"
+
+#: gtktextutil.c:66
+msgid "RLO Right-to-left o_verride"
+msgstr "RLO Αναγκαστι_κά δεξιά προς αριστερά"
+
+#: gtktextutil.c:67
+msgid "PDF _Pop directional formatting"
+msgstr "_PDF Αναίρεση τελευταίας ρύθμισης κατεύθυνσης"
+
+#: gtktextutil.c:68
+msgid "ZWS _Zero width space"
+msgstr "_ZWS Διάστημα μηδενικού πλάτους"
+
+#: gtktextutil.c:69
+msgid "ZWJ Zero width _joiner"
+msgstr "ZW_J Συνδετικό μηδενικού πλάτους"
+
+#: gtktextutil.c:70
+msgid "ZWNJ Zero width _non-joiner"
+msgstr "ZW_NJ Μη συνδετικό μηδενικού πλάτους"
+
+#: gtkthemes.c:71
+#, c-format
+msgid "Unable to locate theme engine in module_path: \"%s\","
+msgstr "Αδυναμία εντοπισμού μηχανής θεμάτων στη διαδρομή_αρθρώματος: \"%s\","
+
+#: gtkuimanager.c:1505
+#, c-format
+msgid "Unexpected start tag '%s' on line %d char %d"
+msgstr "Μη αναμενόμενη ετικέτα εκκίνησης '%s' στη γραμμή %d χαρ. %d"
+
+#: gtkuimanager.c:1595
+#, c-format
+msgid "Unexpected character data on line %d char %d"
+msgstr "Μη αναμενόμενα δεδομένα χαρακτήρων στη γραμμή %d χαρ. %d"
+
+#: gtkuimanager.c:2427
+msgid "Empty"
+msgstr "Κενό"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-debug"
+#~ msgstr "Σφάλμα κατά την ανάλυση της επιλογής --gdk-debug"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-no-debug"
+#~ msgstr "Σφάλμα κατά την ανάλυση της επιλογής --gdk-no-debug"
+
+#~ msgid "Program class as used by the window manager"
+#~ msgstr ""
+#~ "Κλάση προγράμματος, όπως χρησιμοποιείται από τον διαχειριστή παραθύρων"
+
+#~ msgid "CLASS"
+#~ msgstr "ΚΛΑΣΗ"
+
+#~ msgid "Program name as used by the window manager"
+#~ msgstr ""
+#~ "Όνομα προγράμματος, όπως χρησιμοποιείται από το διαχειριστή παραθύρων"
+
+#~ msgid "NAME"
+#~ msgstr "ΟΝΟΜΑ"
+
+#~ msgid "X display to use"
+#~ msgstr "Επιφάνεια προβολής X που θα χρησιμοποιηθεί"
+
+#~ msgid "DISPLAY"
+#~ msgstr "ΕΠΙΦΑΝΕΙΑ_ΠΡΟΒΟΛΗΣ"
+
+#~ msgid "X screen to use"
+#~ msgstr "Οθόνη X που θα χρησιμοποιηθεί"
+
+#~ msgid "SCREEN"
+#~ msgstr "ΟΘΟΝΗ"
+
+#~ msgid "GDK debugging flags to set"
+#~ msgstr "Σημαίες αποσφαλμάτωσης του GTK που θα ενεργοποιηθούν"
+
+#~ msgid "GDK debugging flags to unset"
+#~ msgstr "Σημαίες αποσφαλμάτωσης του GTK που θα απενεργοποιηθούν"
+
+#~ msgctxt "keyboard label"
+#~ msgid "BackSpace"
+#~ msgstr "BackSpace"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Tab"
+#~ msgstr "Tab"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Return"
+#~ msgstr "Return"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Pause"
+#~ msgstr "Pause"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Scroll_Lock"
+#~ msgstr "Scroll_Lock"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Sys_Req"
+#~ msgstr "Sys_Req"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Escape"
+#~ msgstr "Escape"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Multi_key"
+#~ msgstr "Multi_key"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Home"
+#~ msgstr "Home"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Left"
+#~ msgstr "Αριστερά"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Up"
+#~ msgstr "Πάνω"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Right"
+#~ msgstr "Δεξιά"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Down"
+#~ msgstr "Κάτω"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Up"
+#~ msgstr "Page_Up"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Down"
+#~ msgstr "Page_Down"
+
+#~ msgctxt "keyboard label"
+#~ msgid "End"
+#~ msgstr "End"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Begin"
+#~ msgstr "Begin"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Print"
+#~ msgstr "Print"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Insert"
+#~ msgstr "Insert"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Num_Lock"
+#~ msgstr "Num_Lock"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Space"
+#~ msgstr "KP_Space"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Tab"
+#~ msgstr "KP_Tab"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Enter"
+#~ msgstr "KP_Enter"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Home"
+#~ msgstr "KP_Home"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Left"
+#~ msgstr "KP_Left"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Up"
+#~ msgstr "KP_Up"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Right"
+#~ msgstr "KP_Right"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Down"
+#~ msgstr "KP_Down"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Up"
+#~ msgstr "KP_Page_Up"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Prior"
+#~ msgstr "KP_Prior"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Down"
+#~ msgstr "KP_Page_Down"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Next"
+#~ msgstr "KP_Next"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_End"
+#~ msgstr "KP_End"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Begin"
+#~ msgstr "KP_Begin"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Insert"
+#~ msgstr "KP_Insert"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Delete"
+#~ msgstr "KP_Delete"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Delete"
+#~ msgstr "Delete"
+
+#~ msgid "Don't batch GDI requests"
+#~ msgstr "Να μην ομαδοποιούνται τα αιτήματα του GDI"
+
+#~ msgid "Don't use the Wintab API for tablet support"
+#~ msgstr "Να μη χρησιμοποιείται το Wintab API για την υποστήριξη tablet"
+
+#~ msgid "Same as --no-wintab"
+#~ msgstr "Το ίδιο με το --no-wintab"
+
+#~ msgid "Do use the Wintab API [default]"
+#~ msgstr "Να χρησιμοποιείται το Wintab API [προεπιλογή]"
+
+#~ msgid "Size of the palette in 8 bit mode"
+#~ msgstr "Μέγεθος της παλέτας σε λειτουργία 8 bit"
+
+#~ msgid "COLORS"
+#~ msgstr "ΧΡΩΜΑΤΑ"
+
+#~ msgid "Make X calls synchronous"
+#~ msgstr "Να είναι σύγχρονες οι κλήσεις X"
+
+#, c-format
+#~ msgid "Starting %s"
+#~ msgstr "Εκκίνηση %s"
+
+#, c-format
+#~ msgid "Opening %s"
+#~ msgstr "Άνοιγμα %s"
+
+#, c-format
+#~ msgid "Opening %d Item"
+#~ msgid_plural "Opening %d Items"
+#~ msgstr[0] "Άνοιγμα %d αρχείου"
+#~ msgstr[1] "Άνοιγμα %d αρχείων"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Shift"
+#~ msgstr "Shift"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Ctrl"
+#~ msgstr "Ctrl"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Alt"
+#~ msgstr "Alt"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Super"
+#~ msgstr "Super"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Hyper"
+#~ msgstr "Hyper"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Meta"
+#~ msgstr "Meta"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Space"
+#~ msgstr "Διάστημα"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Backslash"
+#~ msgstr "Ανάποδη κάθετος"
+
+#~ msgid "calendar:MY"
+#~ msgstr "calendar:MY"
+
+#~ msgid "calendar:week_start:0"
+#~ msgstr "calendar:week_start:1"
+
+#~ msgctxt "year measurement template"
+#~ msgid "2000"
+#~ msgstr "2000"
+
+#, c-format
+#~ msgctxt "calendar:day:digits"
+#~ msgid "%d"
+#~ msgstr "%d"
+
+#, c-format
+#~ msgctxt "calendar:week:digits"
+#~ msgid "%d"
+#~ msgstr "%d"
+
+#~ msgctxt "calendar year format"
+#~ msgid "%Y"
+#~ msgstr "%Y"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Disabled"
+#~ msgstr "Ανενεργό"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Invalid"
+#~ msgstr "Μη έγκυρο"
+
+#, c-format
+#~ msgctxt "progress bar label"
+#~ msgid "%d %%"
+#~ msgstr "%d %%"
+
+#~ msgid "default:mm"
+#~ msgstr "default:mm"
+
+#~ msgid "Manage Custom Sizes"
+#~ msgstr "Διαχείριση προσαρμοσμένων μεγεθών"
+
+#~ msgid "inch"
+#~ msgstr "inch"
+
+#~ msgid "mm"
+#~ msgstr "mm"
+
+#~ msgid "Margins from Printer..."
+#~ msgstr "Περιθώρια εκτυπωτή…"
+
+#, c-format
+#~ msgid "Custom Size %d"
+#~ msgstr "Προσαρμοσμένο μέγεθος %d"
+
+#~ msgid "_Width:"
+#~ msgstr "_Πλάτος:"
+
+#~ msgid "_Height:"
+#~ msgstr "Ύ_ψος:"
+
+#~ msgid "Paper Size"
+#~ msgstr "Μέγεθος χαρτιού"
+
+#~ msgid "_Top:"
+#~ msgstr "_Πάνω:"
+
+#~ msgid "_Bottom:"
+#~ msgstr "_Κάτω:"
+
+#~ msgid "_Left:"
+#~ msgstr "_Αριστερά:"
+
+#~ msgid "_Right:"
+#~ msgstr "_Δεξιά:"
+
+#~ msgid "Paper Margins"
+#~ msgstr "Περιθώρια χαρτιού"
+
+#~ msgid "Select A File"
+#~ msgstr "Επιλογή αρχείου"
+
+#~ msgid "_Add"
+#~ msgstr "Προσ_θήκη"
+
+#~ msgid "_Remove"
+#~ msgstr "Α_φαίρεση"
+
+#~ msgid "_Browse for other folders"
+#~ msgstr "Πε_ριήγηση σε άλλους φακέλους"
+
+#~ msgid "Invalid path"
+#~ msgstr "Μη έγκυρη διαδρομή"
+
+#~ msgid "No match"
+#~ msgstr "Δε βρέθηκε"
+
+#~ msgid "Sole completion"
+#~ msgstr "Μοναδική αντιστοιχία"
+
+#~ msgid "Complete, but not unique"
+#~ msgstr "Μη μοναδική αντιστοιχία"
+
+#~ msgid "Completing..."
+#~ msgstr "Αντιστοίχιση..."
+
+#~ msgid "Only local files may be selected"
+#~ msgstr "Επιτρέπεται να επιλέγετε μόνο τοπικά αρχεία"
+
+#~ msgid "Incomplete hostname; end it with '/'"
+#~ msgstr "Ημιτελές όνομα. Προσθέστε '/' στο τέλος"
+
+#~ msgid "Path does not exist"
+#~ msgstr "Δεν υπάρχει η διαδρομή"
+
+#~ msgid "Folders"
+#~ msgstr "Φάκελοι"
+
+#~ msgid "Fol_ders"
+#~ msgstr "Φάκ_ελοι"
+
+#~ msgid "_Files"
+#~ msgstr "_Αρχεία"
+
+#, c-format
+#~ msgid "Folder unreadable: %s"
+#~ msgstr "Αδυναμία ανάγνωσης φακέλου: %s"
+
+#, c-format
+#~ msgid ""
+#~ "The file \"%s\" resides on another machine (called %s) and may not be "
+#~ "available to this program.\n"
+#~ "Are you sure that you want to select it?"
+#~ msgstr ""
+#~ "Το αρχείο \"%s\" βρίσκεται σε άλλο υπολογιστή (που ονομάζεται %s) και "
+#~ "μπορεί να μην είναι διαθέσιμο για αυτό το πρόγραμμα.\n"
+#~ "Είστε βέβαιοι ότι θέλετε να το επιλέξετε;"
+
+#~ msgid "_New Folder"
+#~ msgstr "_Νέος φάκελος"
+
+#~ msgid "De_lete File"
+#~ msgstr "Δια_γραφή αρχείου"
+
+#~ msgid "_Rename File"
+#~ msgstr "_Μετονομασία αρχείου"
+
+#, c-format
+#~ msgid ""
+#~ "The folder name \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr "Το όνομα φακέλου \"%s\" περιέχει σύμβολα που δεν επιτρέπονται"
+
+#~ msgid "New Folder"
+#~ msgstr "Νέος φάκελος"
+
+#~ msgid "_Folder name:"
+#~ msgstr "Όνομα _φακέλου:"
+
+#~ msgid "C_reate"
+#~ msgstr "Δη_μιουργία"
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr "Το όνομα αρχείου \"%s\" περιέχει σύμβολα που δεν επιτρέπονται"
+
+#, c-format
+#~ msgid "Error deleting file '%s': %s"
+#~ msgstr "Σφάλμα κατά τη διαγραφή του αρχείου '%s': %s"
+
+#, c-format
+#~ msgid "Really delete file \"%s\"?"
+#~ msgstr "Σίγουρα θέλετε να διαγραφεί το αρχείο \"%s\";"
+
+#~ msgid "Delete File"
+#~ msgstr "Διαγραφή αρχείου"
+
+#, c-format
+#~ msgid "Error renaming file to \"%s\": %s"
+#~ msgstr "Σφάλμα κατά τη μετονομασία του αρχείου σε \"%s\": %s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\": %s"
+#~ msgstr "Σφάλμα κατά τη μετονομασία του αρχείου \"%s\": %s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\" to \"%s\": %s"
+#~ msgstr "Σφάλμα κατά τη μετονομασία του αρχείου \"%s\" σε \"%s\": %s"
+
+#~ msgid "Rename File"
+#~ msgstr "Μετονομασία αρχείου"
+
+#, c-format
+#~ msgid "Rename file \"%s\" to:"
+#~ msgstr "Μετονομασία του αρχείου \"%s\" σε:"
+
+#~ msgid "_Rename"
+#~ msgstr "_Μετονομασία"
+
+#~ msgid "_Selection: "
+#~ msgstr "_Επιλογή: "
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" couldn't be converted to UTF-8. (try setting the "
+#~ "environment variable G_FILENAME_ENCODING): %s"
+#~ msgstr ""
+#~ "Δεν ήταν δυνατή η μετατροπή σε UTF-8 του ονόματος του αρχείου \"%s\". "
+#~ "(Δοκιμάστε να ρυθμίσετε τη μεταβλητή του περιβάλλοντος "
+#~ "G_FILENAME_ENCODING): %s"
+
+#~ msgid "Invalid UTF-8"
+#~ msgstr "Μη έγκυρη UTF-8"
+
+#~ msgid "Name too long"
+#~ msgstr "Υπερβολικά μεγάλο όνομα"
+
+#~ msgid "Couldn't convert filename"
+#~ msgstr "Αδυναμία μετατροπής ονόματος αρχείου"
+
+#~ msgid "Gamma"
+#~ msgstr "Γάμμα"
+
+#~ msgid "_Gamma value"
+#~ msgstr "Τιμή _γάμμα"
+
+#~ msgctxt "input method menu"
+#~ msgid "System"
+#~ msgstr "Σύστημα"
+
+#~ msgctxt "input method menu"
+#~ msgid "None"
+#~ msgstr "Κανένα"
+
+#, c-format
+#~ msgctxt "input method menu"
+#~ msgid "System (%s)"
+#~ msgstr "Σύστημα (%s)"
+
+#~ msgid "Input"
+#~ msgstr "Είσοδος"
+
+#~ msgid "No extended input devices"
+#~ msgstr "Δεν υπάρχουν εκτεταμένες συσκευές εισόδου"
+
+#~ msgid "_Device:"
+#~ msgstr "_Συσκευή:"
+
+#~ msgid "Disabled"
+#~ msgstr "Ανενεργό"
+
+#~ msgid "Screen"
+#~ msgstr "Οθόνη"
+
+#~ msgid "Window"
+#~ msgstr "Παράθυρο"
+
+#~ msgid "_Mode:"
+#~ msgstr "Λειτου_ργία:"
+
+#~ msgid "Axes"
+#~ msgstr "Άξονες"
+
+#~ msgid "Keys"
+#~ msgstr "Πλήκτρα"
+
+#~ msgid "_X:"
+#~ msgstr "_X:"
+
+#~ msgid "_Y:"
+#~ msgstr "_Y:"
+
+#~ msgid "_Pressure:"
+#~ msgstr "_Πίεση:"
+
+#~ msgid "X _tilt:"
+#~ msgstr "_Κλίση Χ:"
+
+#~ msgid "Y t_ilt:"
+#~ msgstr "Κ_λίση Υ:"
+
+#~ msgid "_Wheel:"
+#~ msgstr "_Τροχός:"
+
+#~ msgid "none"
+#~ msgstr "κανένα"
+
+#~ msgid "(disabled)"
+#~ msgstr "(ανενεργό)"
+
+#~ msgid "(unknown)"
+#~ msgstr "(άγνωστο)"
+
+#~ msgid "Cl_ear"
+#~ msgstr "Ε_κκαθάριση"
+
+#, c-format
+#~ msgid "Cannot kill process with PID %d. Operation is not implemented."
+#~ msgstr ""
+#~ "Αδυναμία βίαιου τερματισμού διεργασίας με PID %d.  Η λειτουργία δεν έχει "
+#~ "υλοποιηθεί."
+
+#~ msgid "Terminal Pager"
+#~ msgstr "Terminal Pager"
+
+#~ msgid "Top Command"
+#~ msgstr "Εντολή Top"
+
+#~ msgid "Bourne Again Shell"
+#~ msgstr "Bourne Again Shell"
+
+#~ msgid "Bourne Shell"
+#~ msgstr "Bourne Shell"
+
+#~ msgid "Z Shell"
+#~ msgstr "Z Shell"
+
+#, c-format
+#~ msgid "Cannot end process with PID %d: %s"
+#~ msgstr "Αδυναμία τερματισμού διεργασίας με PID %d: %s"
+
+#~ msgid "Not a valid page setup file"
+#~ msgstr "Μη έγκυρο αρχείο διαμόρφωσης σελίδας"
+
+#~ msgid "Any Printer"
+#~ msgstr "Οποιοσδήποτε εκτυπωτής"
+
+#~ msgid "For portable documents"
+#~ msgstr "Για φορητά έγγραφα"
+
+#, c-format
+#~ msgid ""
+#~ "Margins:\n"
+#~ " Left: %s %s\n"
+#~ " Right: %s %s\n"
+#~ " Top: %s %s\n"
+#~ " Bottom: %s %s"
+#~ msgstr ""
+#~ "Περιθώρια:\n"
+#~ " Αριστερό: %s %s\n"
+#~ " Δεξιό: %s %s\n"
+#~ " Πάνω: %s %s\n"
+#~ " Κάτω: %s %s"
+
+#~ msgid "Manage Custom Sizes..."
+#~ msgstr "Διαχείριση προσαρμοσμένων μεγεθών..."
+
+#~ msgid "_Format for:"
+#~ msgstr "_Μορφοποίηση για:"
+
+#~ msgid "_Paper size:"
+#~ msgstr "Μέγε_θος χαρτιού:"
+
+#~ msgid "_Orientation:"
+#~ msgstr "_Προσανατολισμός:"
+
+#~ msgid "Page Setup"
+#~ msgstr "Μορφοποίηση σελίδας"
+
+#~ msgid "Authentication"
+#~ msgstr "Πιστοποίηση"
+
+#~ msgid "Not available"
+#~ msgstr "Μη διαθέσιμο"
+
+#~ msgid "_Save in folder:"
+#~ msgstr "Αποθήκευ_ση στο φάκελο:"
+
+#, c-format
+#~ msgid "%s job #%d"
+#~ msgstr "%s εκτύπωση #%d"
+
+#~ msgctxt "print operation status"
+#~ msgid "Initial state"
+#~ msgstr "Αρχική κατάσταση"
+
+#~ msgctxt "print operation status"
+#~ msgid "Preparing to print"
+#~ msgstr "Προετοιμασία εκτύπωσης"
+
+#~ msgctxt "print operation status"
+#~ msgid "Generating data"
+#~ msgstr "Παραγωγή δεδομένων"
+
+#~ msgctxt "print operation status"
+#~ msgid "Sending data"
+#~ msgstr "Αποστολή δεδομένων"
+
+#~ msgctxt "print operation status"
+#~ msgid "Waiting"
+#~ msgstr "Αναμονή"
+
+#~ msgctxt "print operation status"
+#~ msgid "Blocking on issue"
+#~ msgstr "Διακοπή λόγω προβλήματος"
+
+#~ msgctxt "print operation status"
+#~ msgid "Printing"
+#~ msgstr "Εκτύπωση"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished"
+#~ msgstr "Ολοκληρώθηκε"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished with error"
+#~ msgstr "Ολοκληρώθηκε με σφάλμα"
+
+#, c-format
+#~ msgid "Preparing %d"
+#~ msgstr "Προετοιμασία %d"
+
+#~ msgid "Preparing"
+#~ msgstr "Προετοιμασία"
+
+#, c-format
+#~ msgid "Printing %d"
+#~ msgstr "Εκτύπωση %d"
+
+#~ msgid "Error creating print preview"
+#~ msgstr "Σφάλμα κατά την παραγωγή της προεπισκόπησης"
+
+#~ msgid ""
+#~ "The most probable reason is that a temporary file could not be created."
+#~ msgstr "Η πιθανότερη αιτία είναι η αδυναμία δημιουργίας προσωρινού αρχείου."
+
+#~ msgid "Error launching preview"
+#~ msgstr "Σφάλμα κατά την εκκίνηση της προεπισκόπησης"
+
+#~ msgid "Error printing"
+#~ msgstr "Σφάλμα κατά την εκτύπωση"
+
+#~ msgid "Application"
+#~ msgstr "Εφαρμογή"
+
+#~ msgid "Printer offline"
+#~ msgstr "Εκτυπωτής αποσυνδεδεμένος"
+
+#~ msgid "Out of paper"
+#~ msgstr "Τελείωσε το χαρτί"
+
+#~ msgid "Paused"
+#~ msgstr "Παύθηκε"
+
+#~ msgid "Need user intervention"
+#~ msgstr "Απαιτείται παρέμβαση του χρήστη"
+
+#~ msgid "Custom size"
+#~ msgstr "Προσαρμοσμένο μέγεθος"
+
+#~ msgid "No printer found"
+#~ msgstr "Δε βρέθηκε εκτυπωτής"
+
+#~ msgid "Invalid argument to CreateDC"
+#~ msgstr "Μη έγκυρο όρισμα στο CreateDC"
+
+#~ msgid "Error from StartDoc"
+#~ msgstr "Σφάλμα του StartDoc"
+
+#~ msgid "Not enough free memory"
+#~ msgstr "Ανεπάρκεια μνήμης"
+
+#~ msgid "Invalid argument to PrintDlgEx"
+#~ msgstr "Μη έγκυρο όρισμα στο PrintDlgEx"
+
+#~ msgid "Invalid pointer to PrintDlgEx"
+#~ msgstr "Μη έγκυρος δείκτης για το PrintDlgEx"
+
+#~ msgid "Invalid handle to PrintDlgEx"
+#~ msgstr "Μη έγκυρος χειριστής για το PrintDlgEx"
+
+#~ msgid "Unspecified error"
+#~ msgstr "Ακαθόριστο σφάλμα"
+
+#~ msgid "Getting printer information failed"
+#~ msgstr "Αποτυχία λήψης πληροφοριών εκτυπωτή"
+
+#~ msgid "Getting printer information..."
+#~ msgstr "Γίνεται λήψη πληροφοριών εκτυπωτή..."
+
+#~ msgid "Printer"
+#~ msgstr "Εκτυπωτής"
+
+#~ msgid "Location"
+#~ msgstr "Τοποθεσία"
+
+#~ msgid "Status"
+#~ msgstr "Κατάσταση"
+
+#~ msgid "Range"
+#~ msgstr "Εύρος"
+
+#~ msgid "_All Pages"
+#~ msgstr "Ό_λες οι σελίδες"
+
+#~ msgid "C_urrent Page"
+#~ msgstr "_Τρέχουσα σελίδα"
+
+#~ msgid "Se_lection"
+#~ msgstr "_Επιλογή"
+
+#~ msgid "Pag_es:"
+#~ msgstr "_Σελίδες:"
+
+#~ msgid ""
+#~ "Specify one or more page ranges,\n"
+#~ " e.g. 1-3,7,11"
+#~ msgstr ""
+#~ "Μια ή περισσότερες σειρές επιλεγμένων σελίδων,\n"
+#~ " π.χ. 1-3,7,11"
+
+#~ msgid "Pages"
+#~ msgstr "Σελίδες"
+
+#~ msgid "Copies"
+#~ msgstr "Αντίγραφα"
+
+#~ msgid "Copie_s:"
+#~ msgstr "Αντί_γραφα:"
+
+#~ msgid "C_ollate"
+#~ msgstr "Συ_ρραφή"
+
+#~ msgid "_Reverse"
+#~ msgstr "Αντίστρο_φη σειρά"
+
+#~ msgid "General"
+#~ msgstr "Γενικά"
+
+#~ msgid "Left to right, top to bottom"
+#~ msgstr "Από αριστερά προς δεξιά, από πάνω προς τα κάτω"
+
+#~ msgid "Left to right, bottom to top"
+#~ msgstr "Από αριστερά προς δεξιά, από κάτω προς τα πάνω"
+
+#~ msgid "Right to left, top to bottom"
+#~ msgstr "Από δεξιά προς αριστερά, από πάνω προς τα κάτω"
+
+#~ msgid "Right to left, bottom to top"
+#~ msgstr "Από δεξιά προς αριστερά, από κάτω προς τα πάνω"
+
+#~ msgid "Top to bottom, left to right"
+#~ msgstr "Από πάνω προς τα κάτω, από αριστερά προς δεξιά"
+
+#~ msgid "Top to bottom, right to left"
+#~ msgstr "Από πάνω προς τα κάτω, από δεξιά προς αριστερά"
+
+#~ msgid "Bottom to top, left to right"
+#~ msgstr "Από κάτω προς τα πάνω, από αριστερά προς δεξιά"
+
+#~ msgid "Bottom to top, right to left"
+#~ msgstr "Από κάτω προς τα πάνω, από δεξιά προς αριστερά"
+
+#~ msgid "Page Ordering"
+#~ msgstr "Σειρά σελίδων"
+
+#~ msgid "Left to right"
+#~ msgstr "Από αριστερά προς δεξιά"
+
+#~ msgid "Right to left"
+#~ msgstr "Από δεξιά προς αριστερά"
+
+#~ msgid "Top to bottom"
+#~ msgstr "Από πάνω προς τα κάτω"
+
+#~ msgid "Bottom to top"
+#~ msgstr "Από κάτω προς τα πάνω"
+
+#~ msgid "Layout"
+#~ msgstr "Διάταξη"
+
+#~ msgid "T_wo-sided:"
+#~ msgstr "_Διπλής όψης:"
+
+#~ msgid "Pages per _side:"
+#~ msgstr "Σελίδες ανά _φύλλο:"
+
+#~ msgid "Page or_dering:"
+#~ msgstr "_Σειρά σελίδων:"
+
+#~ msgid "_Only print:"
+#~ msgstr "Εκτύπωση _μόνο για:"
+
+#~ msgid "All sheets"
+#~ msgstr "Όλες τις σελίδες"
+
+#~ msgid "Even sheets"
+#~ msgstr "Ζυγές σελίδες"
+
+#~ msgid "Odd sheets"
+#~ msgstr "Μονές σελίδες"
+
+#~ msgid "Sc_ale:"
+#~ msgstr "Κλί_μακα:"
+
+#~ msgid "Paper"
+#~ msgstr "Χαρτί"
+
+#~ msgid "Paper _type:"
+#~ msgstr "_Τύπος χαρτιού:"
+
+#~ msgid "Paper _source:"
+#~ msgstr "_Πηγή χαρτιού:"
+
+#~ msgid "Output t_ray:"
+#~ msgstr "Συρτάρι ε_ξόδου:"
+
+#~ msgid "Or_ientation:"
+#~ msgstr "_Προσανατολισμός"
+
+#~ msgid "Portrait"
+#~ msgstr "Πορτραίτο"
+
+#~ msgid "Landscape"
+#~ msgstr "Τοπίο"
+
+#~ msgid "Reverse portrait"
+#~ msgstr "Ανάποδο πορτραίτο"
+
+#~ msgid "Reverse landscape"
+#~ msgstr "Ανάποδο τοπίο"
+
+#~ msgid "Job Details"
+#~ msgstr "Λεπτομέρειες εκτύπωσης"
+
+#~ msgid "Pri_ority:"
+#~ msgstr "Πρ_οτεραιότητα:"
+
+#~ msgid "_Billing info:"
+#~ msgstr "Πληροφορίες τιμο_λόγησης:"
+
+#~ msgid "Print Document"
+#~ msgstr "Εκτύπωση εγγράφου"
+
+#~ msgid "_Now"
+#~ msgstr "_Τώρα"
+
+#~ msgid "A_t:"
+#~ msgstr "_Στις:"
+
+#~ msgid ""
+#~ "Specify the time of print,\n"
+#~ " e.g. 15:30, 2:35 pm, 14:15:20, 11:46:30 am, 4 pm"
+#~ msgstr ""
+#~ "Προσδιορίστε πότε θα γίνει η εκτύπωση,\n"
+#~ "π.χ. 15:30, 2:35 μμ, 14:15:20, 11:46:30 πμ, 4 μμ"
+
+#~ msgid "Time of print"
+#~ msgstr "Ώρα εκτύπωσης"
+
+#~ msgid "On _hold"
+#~ msgstr "Σε α_ναμονή"
+
+#~ msgid "Hold the job until it is explicitly released"
+#~ msgstr "Η εργασία τίθεται σε αναμονή μέχρι να ζητηθεί ρητά η εκτύπωση"
+
+#~ msgid "Add Cover Page"
+#~ msgstr "Προσθήκη εξωφύλλου"
+
+#~ msgid "Be_fore:"
+#~ msgstr "Π_ριν:"
+
+#~ msgid "_After:"
+#~ msgstr "_Μετά:"
+
+#~ msgid "Job"
+#~ msgstr "Εκτύπωση"
+
+#~ msgid "Advanced"
+#~ msgstr "Για προχωρημένους"
+
+#~ msgid "Image Quality"
+#~ msgstr "Ποιότητα εικόνας"
+
+#~ msgid "Color"
+#~ msgstr "Χρώμα"
+
+#~ msgid "Finishing"
+#~ msgstr "Ολοκληρώνεται"
+
+#~ msgid "Some of the settings in the dialog conflict"
+#~ msgstr "Μερικές ρυθμίσεις του διαλόγου συγκρούονται μεταξύ τους"
+
+#~ msgid "Print"
+#~ msgstr "Εκτύπωση"
+
+#, c-format
+#~ msgctxt "recent menu label"
+#~ msgid "_%d. %s"
+#~ msgstr "_%d. %s"
+
+#, c-format
+#~ msgctxt "recent menu label"
+#~ msgid "%d. %s"
+#~ msgstr "%d. %s"
+
+#~ msgctxt "throbbing progress animation widget"
+#~ msgid "Spinner"
+#~ msgstr "Κινούμενη εικόνα"
+
+#~ msgctxt "Stock label"
+#~ msgid "Information"
+#~ msgstr "Πληροφορίες"
+
+#~ msgctxt "Stock label"
+#~ msgid "Warning"
+#~ msgstr "Προειδοποίηση"
+
+#~ msgctxt "Stock label"
+#~ msgid "Error"
+#~ msgstr "Σφάλμα"
+
+#~ msgctxt "Stock label"
+#~ msgid "Question"
+#~ msgstr "Ερώτηση"
+
+#~ msgctxt "Stock label"
+#~ msgid "_About"
+#~ msgstr "Π_ερί"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Add"
+#~ msgstr "_Προσθήκη"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Apply"
+#~ msgstr "_Εφαρμογή"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Bold"
+#~ msgstr "Έν_τονα"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Cancel"
+#~ msgstr "_Ακύρωση"
+
+#~ msgctxt "Stock label"
+#~ msgid "_CD-Rom"
+#~ msgstr "_CD-Rom"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Clear"
+#~ msgstr "_Εκκαθάριση"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Close"
+#~ msgstr "_Κλείσιμο"
+
+#~ msgctxt "Stock label"
+#~ msgid "C_onnect"
+#~ msgstr "_Σύνδεση"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Convert"
+#~ msgstr "_Μετατροπή"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Copy"
+#~ msgstr "_Αντιγραφή"
+
+#~ msgctxt "Stock label"
+#~ msgid "Cu_t"
+#~ msgstr "Αποκο_πή"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Delete"
+#~ msgstr "_Διαγραφή"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Discard"
+#~ msgstr "Από_ρριψη"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Disconnect"
+#~ msgstr "Απο_σύνδεση"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Execute"
+#~ msgstr "_Εκτέλεση"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Edit"
+#~ msgstr "_Επεξεργασία"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Find"
+#~ msgstr "_Εύρεση"
+
+#~ msgctxt "Stock label"
+#~ msgid "Find and _Replace"
+#~ msgstr "Εύρεση και _αντικατάσταση"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Floppy"
+#~ msgstr "_Δισκέτα"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fullscreen"
+#~ msgstr "_Πλήρης Οθόνη"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Leave Fullscreen"
+#~ msgstr "Έξ_οδος από πλήρη οθόνη"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Bottom"
+#~ msgstr "Τέ_λος"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_First"
+#~ msgstr "_Πρώτη"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Last"
+#~ msgstr "_Τελευταία"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Top"
+#~ msgstr "Αρ_χή"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Back"
+#~ msgstr "Πί_σω"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Down"
+#~ msgstr "_Κάτω"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Forward"
+#~ msgstr "_Μπροστά"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Up"
+#~ msgstr "Πά_νω"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Harddisk"
+#~ msgstr "_Σκληρός δίσκος"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Help"
+#~ msgstr "_Βοήθεια"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Home"
+#~ msgstr "_Αρχική"
+
+#~ msgctxt "Stock label"
+#~ msgid "Increase Indent"
+#~ msgstr "Αύξηση εσοχής"
+
+#~ msgctxt "Stock label"
+#~ msgid "Decrease Indent"
+#~ msgstr "Μείωση εσοχής"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Index"
+#~ msgstr "Ε_υρετήριο"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Information"
+#~ msgstr "_Πληροφορίες"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Italic"
+#~ msgstr "_Πλάγια"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Jump to"
+#~ msgstr "_Μετάβαση σε"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Center"
+#~ msgstr "_Κέντρο"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fill"
+#~ msgstr "_Πλήρης κάλυψη"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Left"
+#~ msgstr "_Αριστερά"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Right"
+#~ msgstr "_Δεξιά"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Forward"
+#~ msgstr "_Μπροστά"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Next"
+#~ msgstr "Ε_πόμενο"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "P_ause"
+#~ msgstr "Παύ_ση"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Play"
+#~ msgstr "Αναπαραγω_γή"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "Pre_vious"
+#~ msgstr "Πρ_οηγούμενο"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Record"
+#~ msgstr "Ε_γγραφή"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "R_ewind"
+#~ msgstr "_Πίσω"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Stop"
+#~ msgstr "_Διακοπή"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Network"
+#~ msgstr "_Δίκτυο"
+
+#~ msgctxt "Stock label"
+#~ msgid "_New"
+#~ msgstr "_Νέο"
+
+#~ msgctxt "Stock label"
+#~ msgid "_No"
+#~ msgstr "Ό_χι"
+
+#~ msgctxt "Stock label"
+#~ msgid "_OK"
+#~ msgstr "_Εντάξει"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Open"
+#~ msgstr "Άν_οιγμα"
+
+#~ msgctxt "Stock label"
+#~ msgid "Landscape"
+#~ msgstr "Τοπίο"
+
+#~ msgctxt "Stock label"
+#~ msgid "Portrait"
+#~ msgstr "Πορτρέτο"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse landscape"
+#~ msgstr "Ανάποδο τοπίο"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse portrait"
+#~ msgstr "Ανάποδο πορτρέτο"
+
+#~ msgctxt "Stock label"
+#~ msgid "Page Set_up"
+#~ msgstr "_Διαμόρφωση σελίδας"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Paste"
+#~ msgstr "_Επικόλληση"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Preferences"
+#~ msgstr "_Προτιμήσεις"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Print"
+#~ msgstr "_Εκτύπωση"
+
+#~ msgctxt "Stock label"
+#~ msgid "Print Pre_view"
+#~ msgstr "Προε_πισκόπηση εκτύπωσης"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Properties"
+#~ msgstr "_Ιδιότητες"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Quit"
+#~ msgstr "Έ_ξοδος"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Redo"
+#~ msgstr "_Ακύρωση αναίρεσης"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Refresh"
+#~ msgstr "_Ανανέωση"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Remove"
+#~ msgstr "_Αφαίρεση"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Revert"
+#~ msgstr "_Επαναφορά"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Save"
+#~ msgstr "_Αποθήκευση"
+
+#~ msgctxt "Stock label"
+#~ msgid "Save _As"
+#~ msgstr "Αποθήκευση _ως"
+
+#~ msgctxt "Stock label"
+#~ msgid "Select _All"
+#~ msgstr "Επιλογή ό_λων"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Color"
+#~ msgstr "_Χρώμα"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Font"
+#~ msgstr "_Γραμματοσειρά"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Ascending"
+#~ msgstr "_Αύξουσα"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Descending"
+#~ msgstr "_Φθίνουσα"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Spell Check"
+#~ msgstr "_Ορθογραφικός έλεγχος"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Stop"
+#~ msgstr "_Διακοπή"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Strikethrough"
+#~ msgstr "_Διακριτή διαγραφή"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undelete"
+#~ msgstr "_Ακύρωση διαγραφής"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Underline"
+#~ msgstr "_Υπογράμμιση"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undo"
+#~ msgstr "_Αναίρεση"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Yes"
+#~ msgstr "_Ναι"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Normal Size"
+#~ msgstr "Κανο_νικό μέγεθος"
+
+#~ msgctxt "Stock label"
+#~ msgid "Best _Fit"
+#~ msgstr "Καλύτερο ταί_ριασμα"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _In"
+#~ msgstr "Μεγέ_θυνση"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _Out"
+#~ msgstr "Σμίκρ_υνση"
+
+#~ msgid "--- No Tip ---"
+#~ msgstr "--- Δεν υπάρχει συμβουλή ---"
+
+#~ msgid "Volume"
+#~ msgstr "Ένταση ήχου"
+
+#~ msgid "Turns volume down or up"
+#~ msgstr "Αυξομειώνει την ένταση του ήχου"
+
+#~ msgid "Adjusts the volume"
+#~ msgstr "Ρυθμίζει την ένταση του ήχου"
+
+#~ msgid "Volume Down"
+#~ msgstr "Μείωση έντασης"
+
+#~ msgid "Decreases the volume"
+#~ msgstr "Μειώνει την ένταση του ήχου"
+
+#~ msgid "Volume Up"
+#~ msgstr "Αύξηση έντασης"
+
+#~ msgid "Increases the volume"
+#~ msgstr "Αυξάνει την ένταση του ήχου"
+
+#~ msgid "Muted"
+#~ msgstr "Σίγαση"
+
+#~ msgid "Full Volume"
+#~ msgstr "Μέγιστη ένταση"
+
+#, c-format
+#~ msgctxt "volume percentage"
+#~ msgid "%d %%"
+#~ msgstr "%d %%"
+
+#~ msgctxt "paper size"
+#~ msgid "asme_f"
+#~ msgstr "asme_f"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x2"
+#~ msgstr "A0x2"
+
+#~ msgctxt "paper size"
+#~ msgid "A0"
+#~ msgstr "A0"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x3"
+#~ msgstr "A0x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1"
+#~ msgstr "A1"
+
+#~ msgctxt "paper size"
+#~ msgid "A10"
+#~ msgstr "A10"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x3"
+#~ msgstr "A1x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x4"
+#~ msgstr "A1x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2"
+#~ msgstr "A2"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x3"
+#~ msgstr "A2x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x4"
+#~ msgstr "A2x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x5"
+#~ msgstr "A2x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3"
+#~ msgstr "A3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3 Extra"
+#~ msgstr "A3 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x3"
+#~ msgstr "A3x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x4"
+#~ msgstr "A3x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x5"
+#~ msgstr "A3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x6"
+#~ msgstr "A3x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x7"
+#~ msgstr "A3x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4"
+#~ msgstr "A4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Extra"
+#~ msgstr "A4 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Tab"
+#~ msgstr "A4 Tab"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x3"
+#~ msgstr "A4x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x4"
+#~ msgstr "A4x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x5"
+#~ msgstr "A4x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x6"
+#~ msgstr "A4x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x7"
+#~ msgstr "A4x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x8"
+#~ msgstr "A4x8"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x9"
+#~ msgstr "A4x9"
+
+#~ msgctxt "paper size"
+#~ msgid "A5"
+#~ msgstr "A5"
+
+#~ msgctxt "paper size"
+#~ msgid "A5 Extra"
+#~ msgstr "A5 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A6"
+#~ msgstr "A6"
+
+#~ msgctxt "paper size"
+#~ msgid "A7"
+#~ msgstr "A7"
+
+#~ msgctxt "paper size"
+#~ msgid "A8"
+#~ msgstr "A8"
+
+#~ msgctxt "paper size"
+#~ msgid "A9"
+#~ msgstr "A9"
+
+#~ msgctxt "paper size"
+#~ msgid "B0"
+#~ msgstr "B0"
+
+#~ msgctxt "paper size"
+#~ msgid "B1"
+#~ msgstr "B1"
+
+#~ msgctxt "paper size"
+#~ msgid "B10"
+#~ msgstr "B10"
+
+#~ msgctxt "paper size"
+#~ msgid "B2"
+#~ msgstr "B2"
+
+#~ msgctxt "paper size"
+#~ msgid "B3"
+#~ msgstr "B3"
+
+#~ msgctxt "paper size"
+#~ msgid "B4"
+#~ msgstr "B4"
+
+#~ msgctxt "paper size"
+#~ msgid "B5"
+#~ msgstr "B5δ"
+
+#~ msgctxt "paper size"
+#~ msgid "B5 Extra"
+#~ msgstr "B5 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "B6"
+#~ msgstr "B6"
+
+#~ msgctxt "paper size"
+#~ msgid "B6/C4"
+#~ msgstr "B6/C4"
+
+#~ msgctxt "paper size"
+#~ msgid "B7"
+#~ msgstr "B7"
+
+#~ msgctxt "paper size"
+#~ msgid "B8"
+#~ msgstr "B8"
+
+#~ msgctxt "paper size"
+#~ msgid "B9"
+#~ msgstr "B9"
+
+#~ msgctxt "paper size"
+#~ msgid "C0"
+#~ msgstr "C0"
+
+#~ msgctxt "paper size"
+#~ msgid "C1"
+#~ msgstr "C1"
+
+#~ msgctxt "paper size"
+#~ msgid "C10"
+#~ msgstr "C10"
+
+#~ msgctxt "paper size"
+#~ msgid "C2"
+#~ msgstr "C2"
+
+#~ msgctxt "paper size"
+#~ msgid "C3"
+#~ msgstr "C3"
+
+#~ msgctxt "paper size"
+#~ msgid "C4"
+#~ msgstr "C4"
+
+#~ msgctxt "paper size"
+#~ msgid "C5"
+#~ msgstr "C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C6"
+#~ msgstr "C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C6/C5"
+#~ msgstr "C6/C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C7"
+#~ msgstr "C7"
+
+#~ msgctxt "paper size"
+#~ msgid "C7/C6"
+#~ msgstr "C7/C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C8"
+#~ msgstr "C8"
+
+#~ msgctxt "paper size"
+#~ msgid "C9"
+#~ msgstr "C9"
+
+#~ msgctxt "paper size"
+#~ msgid "DL Envelope"
+#~ msgstr "Φάκελος DL"
+
+#~ msgctxt "paper size"
+#~ msgid "RA0"
+#~ msgstr "RA0"
+
+#~ msgctxt "paper size"
+#~ msgid "RA1"
+#~ msgstr "RA1"
+
+#~ msgctxt "paper size"
+#~ msgid "RA2"
+#~ msgstr "RA2"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA0"
+#~ msgstr "SRA0"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA1"
+#~ msgstr "SRA1"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA2"
+#~ msgstr "SRA2"
+
+#~ msgctxt "paper size"
+#~ msgid "JB0"
+#~ msgstr "JB0"
+
+#~ msgctxt "paper size"
+#~ msgid "JB1"
+#~ msgstr "JB1"
+
+#~ msgctxt "paper size"
+#~ msgid "JB10"
+#~ msgstr "JB10"
+
+#~ msgctxt "paper size"
+#~ msgid "JB2"
+#~ msgstr "JB2"
+
+#~ msgctxt "paper size"
+#~ msgid "JB3"
+#~ msgstr "JB3"
+
+#~ msgctxt "paper size"
+#~ msgid "JB4"
+#~ msgstr "JB4"
+
+#~ msgctxt "paper size"
+#~ msgid "JB5"
+#~ msgstr "JB5"
+
+#~ msgctxt "paper size"
+#~ msgid "JB6"
+#~ msgstr "JB6"
+
+#~ msgctxt "paper size"
+#~ msgid "JB7"
+#~ msgstr "JB7"
+
+#~ msgctxt "paper size"
+#~ msgid "JB8"
+#~ msgstr "JB8"
+
+#~ msgctxt "paper size"
+#~ msgid "JB9"
+#~ msgstr "JB9"
+
+#~ msgctxt "paper size"
+#~ msgid "jis exec"
+#~ msgstr "jis exec"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 2 Envelope"
+#~ msgstr "Φάκελος Choukei 2"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 3 Envelope"
+#~ msgstr "Φάκελος Choukei 3"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 4 Envelope"
+#~ msgstr "Φάκελος Choukei 4"
+
+#~ msgctxt "paper size"
+#~ msgid "hagaki (postcard)"
+#~ msgstr "hagaki (καρτ-ποστάλ)"
+
+#~ msgctxt "paper size"
+#~ msgid "kahu Envelope"
+#~ msgstr "Φάκελος kahu"
+
+#~ msgctxt "paper size"
+#~ msgid "kaku2 Envelope"
+#~ msgstr "Φάκελος kaku2"
+
+#~ msgctxt "paper size"
+#~ msgid "oufuku (reply postcard)"
+#~ msgstr "oufuku (καρτ-ποστάλ απάντησης)"
+
+#~ msgctxt "paper size"
+#~ msgid "you4 Envelope"
+#~ msgstr "Φάκελος you4"
+
+#~ msgctxt "paper size"
+#~ msgid "10x11"
+#~ msgstr "10x11"
+
+#~ msgctxt "paper size"
+#~ msgid "10x13"
+#~ msgstr "10x13"
+
+#~ msgctxt "paper size"
+#~ msgid "10x14"
+#~ msgstr "10x14"
+
+#~ msgctxt "paper size"
+#~ msgid "10x15"
+#~ msgstr "10x15"
+
+#~ msgctxt "paper size"
+#~ msgid "11x12"
+#~ msgstr "11x12"
+
+#~ msgctxt "paper size"
+#~ msgid "11x15"
+#~ msgstr "11x15"
+
+#~ msgctxt "paper size"
+#~ msgid "12x19"
+#~ msgstr "12x19"
+
+#~ msgctxt "paper size"
+#~ msgid "5x7"
+#~ msgstr "5x7"
+
+#~ msgctxt "paper size"
+#~ msgid "6x9 Envelope"
+#~ msgstr "Φάκελος 6x9"
+
+#~ msgctxt "paper size"
+#~ msgid "7x9 Envelope"
+#~ msgstr "Φάκελος 7x9"
+
+#~ msgctxt "paper size"
+#~ msgid "9x11 Envelope"
+#~ msgstr "Φάκελος 9x11"
+
+#~ msgctxt "paper size"
+#~ msgid "a2 Envelope"
+#~ msgstr "Φάκελος a2"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch A"
+#~ msgstr "Arch A"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch B"
+#~ msgstr "Arch B"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch C"
+#~ msgstr "Arch C"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch D"
+#~ msgstr "Arch D"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch E"
+#~ msgstr "Arch E"
+
+#~ msgctxt "paper size"
+#~ msgid "b-plus"
+#~ msgstr "b-plus"
+
+#~ msgctxt "paper size"
+#~ msgid "c"
+#~ msgstr "c"
+
+#~ msgctxt "paper size"
+#~ msgid "c5 Envelope"
+#~ msgstr "Φάκελος c5"
+
+#~ msgctxt "paper size"
+#~ msgid "d"
+#~ msgstr "d"
+
+#~ msgctxt "paper size"
+#~ msgid "e"
+#~ msgstr "e"
+
+#~ msgctxt "paper size"
+#~ msgid "edp"
+#~ msgstr "edp"
+
+#~ msgctxt "paper size"
+#~ msgid "European edp"
+#~ msgstr "Ευρωπαϊκό edp"
+
+#~ msgctxt "paper size"
+#~ msgid "Executive"
+#~ msgstr "Executive"
+
+#~ msgctxt "paper size"
+#~ msgid "f"
+#~ msgstr "f"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold European"
+#~ msgstr "FanFold Ευρωπαϊκό"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold US"
+#~ msgstr "FanFold US"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold German Legal"
+#~ msgstr "FanFold Legal Γερμανικό"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Legal"
+#~ msgstr "Government Legal"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Letter"
+#~ msgstr "Government Letter"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 3x5"
+#~ msgstr "Index 3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 (postcard)"
+#~ msgstr "Index 4x6 (καρτ-ποστάλ)"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 ext"
+#~ msgstr "Index 4x6 ext"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 5x8"
+#~ msgstr "Index 5x8"
+
+#~ msgctxt "paper size"
+#~ msgid "Invoice"
+#~ msgstr "Τιμολόγιο"
+
+#~ msgctxt "paper size"
+#~ msgid "Tabloid"
+#~ msgstr "Tabloid"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal"
+#~ msgstr "US Legal"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal Extra"
+#~ msgstr "US Legal Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter"
+#~ msgstr "US Letter"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Extra"
+#~ msgstr "US Letter Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Plus"
+#~ msgstr "US Letter Plus"
+
+#~ msgctxt "paper size"
+#~ msgid "Monarch Envelope"
+#~ msgstr "Φάκελος Monarch"
+
+#~ msgctxt "paper size"
+#~ msgid "#10 Envelope"
+#~ msgstr "Φάκελος #10"
+
+#~ msgctxt "paper size"
+#~ msgid "#11 Envelope"
+#~ msgstr "Φάκελος #11"
+
+#~ msgctxt "paper size"
+#~ msgid "#12 Envelope"
+#~ msgstr "Φάκελος #12"
+
+#~ msgctxt "paper size"
+#~ msgid "#14 Envelope"
+#~ msgstr "Φάκελος #14"
+
+#~ msgctxt "paper size"
+#~ msgid "#9 Envelope"
+#~ msgstr "Φάκελος #9"
+
+#~ msgctxt "paper size"
+#~ msgid "Personal Envelope"
+#~ msgstr "Προσωπικός φάκελος"
+
+#~ msgctxt "paper size"
+#~ msgid "Quarto"
+#~ msgstr "Quarto (οκτασέλιδο)"
+
+#~ msgctxt "paper size"
+#~ msgid "Super A"
+#~ msgstr "Super A"
+
+#~ msgctxt "paper size"
+#~ msgid "Super B"
+#~ msgstr "Super B"
+
+#~ msgctxt "paper size"
+#~ msgid "Wide Format"
+#~ msgstr "Πλατιά μορφή"
+
+#~ msgctxt "paper size"
+#~ msgid "Dai-pa-kai"
+#~ msgstr "Dai-pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio"
+#~ msgstr "Folio (τετρασέλιδο)"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio sp"
+#~ msgstr "Folio sp"
+
+#~ msgctxt "paper size"
+#~ msgid "Invite Envelope"
+#~ msgstr "Φάκελος προσκλητηρίου"
+
+#~ msgctxt "paper size"
+#~ msgid "Italian Envelope"
+#~ msgstr "Ιταλικός φάκελος"
+
+#~ msgctxt "paper size"
+#~ msgid "juuro-ku-kai"
+#~ msgstr "juuro-ku-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "pa-kai"
+#~ msgstr "pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Postfix Envelope"
+#~ msgstr "Φάκελος Postfix"
+
+#~ msgctxt "paper size"
+#~ msgid "Small Photo"
+#~ msgstr "Μικρή φωτογραφία"
+
+#~ msgctxt "paper size"
+#~ msgid "prc1 Envelope"
+#~ msgstr "Φάκελος prc1"
+
+#~ msgctxt "paper size"
+#~ msgid "prc10 Envelope"
+#~ msgstr "Φάκελος prc10"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 16k"
+#~ msgstr "prc 16k"
+
+#~ msgctxt "paper size"
+#~ msgid "prc2 Envelope"
+#~ msgstr "Φάκελος prc2"
+
+#~ msgctxt "paper size"
+#~ msgid "prc3 Envelope"
+#~ msgstr "Φάκελος prc3"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 32k"
+#~ msgstr "prc 32k"
+
+#~ msgctxt "paper size"
+#~ msgid "prc4 Envelope"
+#~ msgstr "Φάκελος prc4"
+
+#~ msgctxt "paper size"
+#~ msgid "prc5 Envelope"
+#~ msgstr "Φάκελος prc5"
+
+#~ msgctxt "paper size"
+#~ msgid "prc6 Envelope"
+#~ msgstr "Φάκελος prc6"
+
+#~ msgctxt "paper size"
+#~ msgid "prc7 Envelope"
+#~ msgstr "Φάκελος prc7"
+
+#~ msgctxt "paper size"
+#~ msgid "prc8 Envelope"
+#~ msgstr "Φάκελος prc8"
+
+#~ msgctxt "paper size"
+#~ msgid "prc9 Envelope"
+#~ msgstr "Φάκελος prc9"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 16k"
+#~ msgstr "ROC 16k"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 8k"
+#~ msgstr "ROC 8k"
+
+#, c-format
+#~ msgid "different idatas found for symlinked '%s' and '%s'\n"
+#~ msgstr ""
+#~ "βρέθηκαν διαφορετικά idatas για τα συνδεδεμένα με συμβολικό σύνδεσμο '%s' "
+#~ "και '%s'\n"
+
+#, c-format
+#~ msgid "Failed to write header\n"
+#~ msgstr "Αποτυχία εγγραφής κεφαλίδας\n"
+
+#, c-format
+#~ msgid "Failed to write hash table\n"
+#~ msgstr "Αποτυχία εγγραφής πίνακα hash\n"
+
+#, c-format
+#~ msgid "Failed to write folder index\n"
+#~ msgstr "Αποτυχία εγγραφής ευρετηρίου φακέλου\n"
+
+#, c-format
+#~ msgid "Failed to rewrite header\n"
+#~ msgstr "Αποτυχία επανεγγραφής κεφαλίδας\n"
+
+#, c-format
+#~ msgid "Failed to open file %s : %s\n"
+#~ msgstr "Αποτυχία ανοίγματος αρχείου %s : %s\n"
+
+#, c-format
+#~ msgid "Failed to write cache file: %s\n"
+#~ msgstr "Αποτυχία εγγραφής αρχείου λανθάνουσας μνήμης: %s\n"
+
+#, c-format
+#~ msgid "The generated cache was invalid.\n"
+#~ msgstr "Η δημιουργηθείσα λανθάνουσα μνήμη δεν ήταν έγκυρη.\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s, removing %s then.\n"
+#~ msgstr "Αδυναμία μετονομασίας του %s σε %s: %s. Άρα, αφαιρείται το %s.\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s\n"
+#~ msgstr "Αδυναμία μετονομασίας του %s σε %s: %s\n"
+
+#, c-format
+#~ msgid "Could not rename %s back to %s: %s.\n"
+#~ msgstr "Αδυναμία μετονομασίας του %s πάλι σε %s: %s.\n"
+
+#, c-format
+#~ msgid "Cache file created successfully.\n"
+#~ msgstr "Επιτυχής δημιουργία αρχείου λανθάνουσας μνήμης.\n"
+
+#~ msgid "Overwrite an existing cache, even if up to date"
+#~ msgstr ""
+#~ "Αντικατάσταση υπάρχουσας λανθάνουσας μνήμης, ακόμη κι αν είναι ενημερωμένη"
+
+#~ msgid "Don't check for the existence of index.theme"
+#~ msgstr "Να μη γίνεται έλεγχος για την ύπαρξη του index.theme"
+
+#~ msgid "Don't include image data in the cache"
+#~ msgstr "Να μη συμπεριλαμβάνονται δεδομένα εικόνων στη λανθάνουσα μνήμη"
+
+#~ msgid "Output a C header file"
+#~ msgstr "Έξοδος σε αρχείο C header"
+
+#~ msgid "Turn off verbose output"
+#~ msgstr "Απενεργοποίηση αναλυτικής εξόδου μηνυμάτων"
+
+#~ msgid "Validate existing icon cache"
+#~ msgstr "Επαλήθευση υπάρχουσας λανθάνουσας μνήμης εικονιδίων"
+
+#, c-format
+#~ msgid "File not found: %s\n"
+#~ msgstr "Δε βρέθηκε το αρχείο: %s\n"
+
+#, c-format
+#~ msgid "Not a valid icon cache: %s\n"
+#~ msgstr "Δεν είναι έγκυρη λανθάνουσα μνήμη εικονιδίων: %s\n"
+
+#, c-format
+#~ msgid "No theme index file.\n"
+#~ msgstr "Δε βρέθηκε αρχείο ευρετηρίου θέματος.\n"
+
+#, c-format
+#~ msgid ""
+#~ "No theme index file in '%s'.\n"
+#~ "If you really want to create an icon cache here, use --ignore-theme-"
+#~ "index.\n"
+#~ msgstr ""
+#~ "Δε βρέθηκε αρχείο ευρετηρίου θέματος στο '%s'.\n"
+#~ "Αν επιμένετε να δημιουργήσετε εδώ λανθάνουσα μνήμη εικονιδίων, "
+#~ "χρησιμοποιήστε το --ignore-theme-index.\n"
+
+#~ msgid "Amharic (EZ+)"
+#~ msgstr "Αμχαρικά (EZ+)"
+
+#~ msgid "Cedilla"
+#~ msgstr "Σεντίγ"
+
+#~ msgid "Cyrillic (Transliterated)"
+#~ msgstr "Κυριλλικά (μεταγραμμένα)"
+
+#~ msgid "Inuktitut (Transliterated)"
+#~ msgstr "Inuktitut (μεταγραμμένα)"
+
+#~ msgid "IPA"
+#~ msgstr "IPA (Διεθνές Φωνητικό Αλφάβητο)"
+
+#~ msgid "Multipress"
+#~ msgstr "Multipress (Πολλαπλών χτυπημάτων)"
+
+#~ msgid "Thai-Lao"
+#~ msgstr "Ταϋλανδέζικα-Λαοτιανά"
+
+#~ msgid "Tigrigna-Eritrean (EZ+)"
+#~ msgstr "Tigrigna Ερυθραίας (EZ+)"
+
+#~ msgid "Tigrigna-Ethiopian (EZ+)"
+#~ msgstr "Tigrigna Αιθιοπίας (EZ+)"
+
+#~ msgid "Vietnamese (VIQR)"
+#~ msgstr "Βιετναμέζικα (VIQR)"
+
+#~ msgid "X Input Method"
+#~ msgstr "Μέθοδος Eισαγωγής Χ"
+
+#~ msgid "Username:"
+#~ msgstr "Όνομα χρήστη:"
+
+#~ msgid "Password:"
+#~ msgstr "Συνθηματικό:"
+
+#, c-format
+#~ msgid "Authentication is required to get a file from %s"
+#~ msgstr "Απαιτείται πιστοποίηση για τη λήψη ενός αρχείου από το %s"
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s' on printer %s"
+#~ msgstr ""
+#~ "Απαιτείται πιστοποίηση για την εκτύπωση του εγγράφου '%s' στον εκτυπωτή %s"
+
+#, c-format
+#~ msgid "Authentication is required to print a document on %s"
+#~ msgstr "Απαιτείται πιστοποίηση για την εκτύπωση ενός εγγράφου στο %s"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of job '%s'"
+#~ msgstr "Απαιτείται πιστοποίηση για τη λήψη των ιδιοτήτων της εργασίας '%s'"
+
+#~ msgid "Authentication is required to get attributes of a job"
+#~ msgstr "Απαιτείται πιστοποίηση για τη λήψη των ιδιοτήτων μιας εργασίας"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of printer %s"
+#~ msgstr "Απαιτείται πιστοποίηση για τη λήψη των ιδιοτήτων του εκτυπωτή %s"
+
+#~ msgid "Authentication is required to get attributes of a printer"
+#~ msgstr "Απαιτείται πιστοποίηση για τη λήψη των ιδιοτήτων ενός εκτυπωτή"
+
+#, c-format
+#~ msgid "Authentication is required to get default printer of %s"
+#~ msgstr ""
+#~ "Απαιτείται πιστοποίηση για τη λήψη του προεπιλεγμένου εκτυπωτή του %s"
+
+#, c-format
+#~ msgid "Authentication is required to get printers from %s"
+#~ msgstr "Απαιτείται πιστοποίηση για τη λήψη των εκτυπωτών από το %s"
+
+#, c-format
+#~ msgid "Authentication is required on %s"
+#~ msgstr "Απαιτείται πιστοποίηση στο %s"
+
+#~ msgid "Domain:"
+#~ msgstr "Τομέας:"
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s'"
+#~ msgstr "Απαιτείται πιστοποίηση για την εκτύπωση του εγγράφου «%s»"
+
+#, c-format
+#~ msgid "Authentication is required to print this document on printer %s"
+#~ msgstr ""
+#~ "Απαιτείται πιστοποίηση για την εκτύπωση του εγγράφου στον εκτυπωτή %s"
+
+#~ msgid "Authentication is required to print this document"
+#~ msgstr "Απαιτείται πιστοποίηση για την εκτύπωση του εγγράφου"
+
+#, c-format
+#~ msgid "Printer '%s' is low on toner."
+#~ msgstr "Τελειώνει το toner στον εκτυπωτή '%s'."
+
+#, c-format
+#~ msgid "Printer '%s' has no toner left."
+#~ msgstr "Τελείωσε το toner στον εκτυπωτή '%s'."
+
+#, c-format
+#~ msgid "Printer '%s' is low on developer."
+#~ msgstr "Τελειώνει το developer στον εκτυπωτή '%s'."
+
+#, c-format
+#~ msgid "Printer '%s' is out of developer."
+#~ msgstr "Τελείωσε το developer στον εκτυπωτή '%s'."
+
+#, c-format
+#~ msgid "Printer '%s' is low on at least one marker supply."
+#~ msgstr ""
+#~ "Τελειώνει τουλάχιστον ένα δοχείο έγχρωμου μελανιού στον εκτυπωτή '%s'."
+
+#, c-format
+#~ msgid "Printer '%s' is out of at least one marker supply."
+#~ msgstr ""
+#~ "Τελείωσε τουλάχιστον ένα δοχείο έγχρωμου μελανιού στον εκτυπωτή '%s'."
+
+#, c-format
+#~ msgid "The cover is open on printer '%s'."
+#~ msgstr "Είναι ανοιχτό το κάλυμμα του εκτυπωτή '%s'."
+
+#, c-format
+#~ msgid "The door is open on printer '%s'."
+#~ msgstr "Είναι ανοιχτό το πορτάκι του εκτυπωτή '%s'."
+
+#, c-format
+#~ msgid "Printer '%s' is low on paper."
+#~ msgstr "Τελειώνει το χαρτί στον εκτυπωτή '%s'."
+
+#, c-format
+#~ msgid "Printer '%s' is out of paper."
+#~ msgstr "Τελείωσε το χαρτί στον εκτυπωτή '%s'."
+
+#, c-format
+#~ msgid "Printer '%s' is currently offline."
+#~ msgstr "Ο εκτυπωτής '%s' είναι προς το παρόν αποσυνδεδεμένος."
+
+#, c-format
+#~ msgid "There is a problem on printer '%s'."
+#~ msgstr "Υπάρχει πρόβλημα στον εκτυπωτή '%s'."
+
+#~ msgid "Paused ; Rejecting Jobs"
+#~ msgstr "Σε παύση· δε γίνονται δεκτές εκτυπώσεις"
+
+#~ msgid "Rejecting Jobs"
+#~ msgstr "Δε γίνονται δεκτές εκτυπώσεις"
+
+#~ msgid "Two Sided"
+#~ msgstr "Διπλής όψης"
+
+#~ msgid "Paper Type"
+#~ msgstr "Τύπος χαρτιού"
+
+#~ msgid "Paper Source"
+#~ msgstr "Πηγή χαρτιού"
+
+#~ msgid "Output Tray"
+#~ msgstr "Συρτάρι εξόδου"
+
+#~ msgid "Resolution"
+#~ msgstr "Ανάλυση"
+
+#~ msgid "GhostScript pre-filtering"
+#~ msgstr "GhostScript pre-filtering"
+
+#~ msgid "One Sided"
+#~ msgstr "Μονής όψης"
+
+#~ msgid "Long Edge (Standard)"
+#~ msgstr "Μακρύ άκρο (κανονικό)"
+
+#~ msgid "Short Edge (Flip)"
+#~ msgstr "Βραχύ άκρο (αναστροφή)"
+
+#~ msgid "Auto Select"
+#~ msgstr "Αυτόματη επιλογή"
+
+#~ msgid "Printer Default"
+#~ msgstr "Προεπιλογή εκτυπωτή"
+
+#~ msgid "Embed GhostScript fonts only"
+#~ msgstr "Ενσωμάτωση μόνο των γραμματοσειρών GhostScript"
+
+#~ msgid "Convert to PS level 1"
+#~ msgstr "Μετατροπή σε PS επιπέδου 1"
+
+#~ msgid "Convert to PS level 2"
+#~ msgstr "Μετατροπή σε PS επιπέδου 2"
+
+#~ msgid "No pre-filtering"
+#~ msgstr "Χωρίς pre-filtering"
+
+#~ msgid "Miscellaneous"
+#~ msgstr "Διάφορα"
+
+#~ msgid "Urgent"
+#~ msgstr "Επείγον"
+
+#~ msgid "High"
+#~ msgstr "Υψηλή"
+
+#~ msgid "Medium"
+#~ msgstr "Μεσαία"
+
+#~ msgid "Low"
+#~ msgstr "Χαμηλή"
+
+#~ msgid "Pages per Sheet"
+#~ msgstr "Σελίδες ανά φύλλο"
+
+#~ msgid "Job Priority"
+#~ msgstr "Προτεραιότητα"
+
+#~ msgid "Billing Info"
+#~ msgstr "Πληροφορίες τιμολόγησης"
+
+#~ msgid "None"
+#~ msgstr "Κανένα"
+
+#~ msgid "Classified"
+#~ msgstr "Διαβαθμισμένο"
+
+#~ msgid "Confidential"
+#~ msgstr "Εμπιστευτικό"
+
+#~ msgid "Secret"
+#~ msgstr "Απόρρητο"
+
+#~ msgid "Standard"
+#~ msgstr "Κανονικό"
+
+#~ msgid "Top Secret"
+#~ msgstr "Άκρως απόρρητο"
+
+#~ msgid "Unclassified"
+#~ msgstr "Αδιαβάθμητο"
+
+#~ msgid "Before"
+#~ msgstr "Πριν"
+
+#~ msgid "After"
+#~ msgstr "Μετά"
+
+#~ msgid "Print at"
+#~ msgstr "Ώρα εκτύπωσης"
+
+#~ msgid "Print at time"
+#~ msgstr "Ώρα εκτύπωσης"
+
+#, c-format
+#~ msgid "Custom %sx%s"
+#~ msgstr "Προσαρμοσμένο %sx%s"
+
+#, c-format
+#~ msgid "output.%s"
+#~ msgstr "αποτέλεσμα.%s"
+
+#~ msgid "Print to File"
+#~ msgstr "Εκτύπωση σε αρχείο"
+
+#~ msgid "PDF"
+#~ msgstr "PDF"
+
+#~ msgid "Postscript"
+#~ msgstr "Postscript"
+
+#~ msgid "SVG"
+#~ msgstr "SVG"
+
+#~ msgid "Pages per _sheet:"
+#~ msgstr "Σελίδες ανά _φύλλο"
+
+#~ msgid "File"
+#~ msgstr "Αρχείο"
+
+#~ msgid "_Output format"
+#~ msgstr "Μ_ορφή αποτελέσματος"
+
+#~ msgid "Print to LPR"
+#~ msgstr "Εκτύπωση σε LPR"
+
+#~ msgid "Pages Per Sheet"
+#~ msgstr "Σελίδες ανά φύλλο"
+
+#~ msgid "Command Line"
+#~ msgstr "Γραμμή εντολών"
+
+#~ msgid "printer offline"
+#~ msgstr "εκτυπωτής αποσυνδεδεμένος"
+
+#~ msgid "ready to print"
+#~ msgstr "έτοιμος για εκτύπωση"
+
+#~ msgid "processing job"
+#~ msgstr "προετοιμασία εργασίας"
+
+#~ msgid "paused"
+#~ msgstr "παύθηκε"
+
+#~ msgid "unknown"
+#~ msgstr "άγνωστο"
+
+#, c-format
+#~ msgid "test-output.%s"
+#~ msgstr "δοκιμαστικό.%s"
+
+#~ msgid "Print to Test Printer"
+#~ msgstr "Εκτύπωση σε δοκιμαστικό εκτυπωτή"
+
+#, c-format
+#~ msgid "Could not get information for file '%s': %s"
+#~ msgstr "Αδυναμία λήψης πληροφοριών για το αρχείο '%s': %s"
+
+#, c-format
+#~ msgid "Failed to open file '%s': %s"
+#~ msgstr "Αποτυχία ανοίγματος αρχείου '%s': %s"
+
+#, c-format
+#~ msgid ""
+#~ "Failed to load image '%s': reason not known, probably a corrupt image file"
+#~ msgstr ""
+#~ "Αποτυχία φόρτωσης εικόνας '%s': Άγνωστη αιτία, πιθανόν πρόκειται για "
+#~ "κατεστραμμένο αρχείο εικόνας"
+
+#~ msgid "Gdk debugging flags to set"
+#~ msgstr "Σημαίες αποσφαλμάτωσης του Gdk που θα επιλεχθούν"
+
+#~ msgid "Gdk debugging flags to unset"
+#~ msgstr "Σημαίες αποσφαλμάτωσης του Gdk που θα αποεπιλεχθούν"
+
+#~ msgid "Image file '%s' contains no data"
+#~ msgstr "Το αρχείο εικόνας '%s' δεν περιέχει δεδομένα"
+
+#~ msgid ""
+#~ "Failed to load animation '%s': reason not known, probably a corrupt "
+#~ "animation file"
+#~ msgstr ""
+#~ "Αποτυχία φόρτωσης κινούμενης εικόνας '%s': Άγνωστη αιτία, πιθανόν "
+#~ "πρόκειται για κατεστραμμένο αρχείο"
+
+#~ msgid "Unable to load image-loading module: %s: %s"
+#~ msgstr "Αποτυχία φόρτωσης αρθρώματος φόρτωσης εικόνων: %s: %s"
+
+#~ msgid ""
+#~ "Image-loading module %s does not export the proper interface; perhaps "
+#~ "it's from a different GTK version?"
+#~ msgstr ""
+#~ "Το άρθρωμα φόρτωσης εικόνων %s δεν εξάγει την κατάλληλη διεπαφή. Μήπως "
+#~ "προέρχεται από διαφορετική έκδοση του GTK;"
+
+#~ msgid "Image type '%s' is not supported"
+#~ msgstr "Ο τύπος εικόνας '%s' δεν υποστηρίζεται"
+
+#~ msgid "Couldn't recognize the image file format for file '%s'"
+#~ msgstr "Αδυναμία αναγνώρισης του τύπου αρχείου εικόνας για το αρχείο '%s'"
+
+#~ msgid "Unrecognized image file format"
+#~ msgstr "Άγνωστος τύπος αρχείου εικόνας"
+
+#~ msgid "Failed to load image '%s': %s"
+#~ msgstr "Αποτυχία φόρτωσης εικόνας '%s': %s"
+
+#~ msgid "Error writing to image file: %s"
+#~ msgstr "Σφάλμα κατά την εγγραφή στο αρχείο εικόνας: %s"
+
+#~ msgid ""
+#~ "This build of gdk-pixbuf does not support saving the image format: %s"
+#~ msgstr ""
+#~ "Αυτή η έκδοση του gdk-pixbuf δεν υποστηρίζει αποθήκευση του τύπου "
+#~ "εικόνας : %s"
+
+#~ msgid "Insufficient memory to save image to callback"
+#~ msgstr "Ανεπάρκεια μνήμης για την αποθήκευση της εικόνας στο callback"
+
+#~ msgid "Failed to open temporary file"
+#~ msgstr "Αποτυχία ανοίγματος προσωρινού αρχείου"
+
+#~ msgid "Failed to read from temporary file"
+#~ msgstr "Αποτυχία ανάγνωσης από το προσωρινό αρχείο"
+
+#~ msgid "Failed to open '%s' for writing: %s"
+#~ msgstr "Αποτυχία ανοίγματος του '%s' για εγγραφή: %s"
+
+#~ msgid ""
+#~ "Failed to close '%s' while writing image, all data may not have been "
+#~ "saved: %s"
+#~ msgstr ""
+#~ "Αποτυχία κλεισίματος του '%s' κατά την εγγραφή της εικόνας. Μπορεί να μην "
+#~ "έχουν αποθηκευτεί όλα τα δεδομένα: %s"
+
+#~ msgid "Insufficient memory to save image into a buffer"
+#~ msgstr "Ανεπάρκεια μνήμης για την αποθήκευση της εικόνας σε ενδιάμεση μνήμη"
+
+#~ msgid "Error writing to image stream"
+#~ msgstr "Σφάλμα κατά την εγγραφή στη ροή της εικόνας"
+
+#~ msgid ""
+#~ "Internal error: Image loader module '%s' failed to complete an operation, "
+#~ "but didn't give a reason for the failure"
+#~ msgstr ""
+#~ "Εσωτερικό σφάλμα: Το άρθρωμα φόρτωσης εικόνων '%s' απέτυχε να ολοκληρώσει "
+#~ "μια ενέργεια, αλλά δεν εξήγησε το λόγο της αποτυχίας"
+
+#~ msgid "Incremental loading of image type '%s' is not supported"
+#~ msgstr "Δεν υποστηρίζεται η σταδιακή φόρτωση για τον τύπο εικόνας '%s'"
+
+#~ msgid "Image header corrupt"
+#~ msgstr "Κατεστραμμένη κεφαλίδα εικόνας"
+
+#~ msgid "Image format unknown"
+#~ msgstr "Άγνωστος τύπος εικόνας"
+
+#~ msgid "Image pixel data corrupt"
+#~ msgstr "Κατεστραμμένα δεδομένα εικονοστοιχείων εικόνας"
+
+#~ msgid "failed to allocate image buffer of %u byte"
+#~ msgid_plural "failed to allocate image buffer of %u bytes"
+#~ msgstr[0] "Αποτυχία διάθεσης %u byte ως ενδιάμεσης μνήμης εικόνας"
+#~ msgstr[1] "Αποτυχία διάθεσης %u bytes ως ενδιάμεσης μνήμης εικόνας"
+
+#~ msgid "Unexpected icon chunk in animation"
+#~ msgstr "Μη αναμενόμενο κομμάτι εικονιδίου στην κινούμενη εικόνα"
+
+#~ msgid "Unsupported animation type"
+#~ msgstr "Μη υποστηριζόμενος τύπος κινούμενης εικόνας"
+
+#~ msgid "Invalid header in animation"
+#~ msgstr "Μη έγκυρη κεφαλίδα στην κινούμενη εικόνα"
+
+#~ msgid "Not enough memory to load animation"
+#~ msgstr "Ανεπάρκεια μνήμης για τη φόρτωση της κινούμενης εικόνας"
+
+#~ msgid "Malformed chunk in animation"
+#~ msgstr "Η κινούμενη εικόνα περιέχει κομμάτι εσφαλμένης μορφής"
+
+#~ msgid "The ANI image format"
+#~ msgstr "Ο τύπος εικόνας ΑΝΙ"
+
+#~ msgid "BMP image has bogus header data"
+#~ msgstr "Η εικόνα BMP περιέχει εσφαλμένα δεδομένα κεφαλίδας"
+
+#~ msgid "Not enough memory to load bitmap image"
+#~ msgstr "Ανεπάρκεια μνήμης για τη φόρτωση της εικόνας bitmap"
+
+#~ msgid "BMP image has unsupported header size"
+#~ msgstr "Δεν υποστηρίζεται αυτό το μέγεθος κεφαλίδας εικόνας BMP"
+
+#~ msgid "Topdown BMP images cannot be compressed"
+#~ msgstr "Δεν είναι δυνατή η συμπίεση εικόνων Topdown BMP"
+
+#~ msgid "Premature end-of-file encountered"
+#~ msgstr "Εντοπίστηκε πρόωρος τερματισμός αρχείου"
+
+#~ msgid "Couldn't allocate memory for saving BMP file"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για την αποθήκευση του αρχείου BMP"
+
+#~ msgid "Couldn't write to BMP file"
+#~ msgstr "Αδυναμία εγγραφής στο αρχείο BMP"
+
+#~ msgid "The BMP image format"
+#~ msgstr "Ο τύπος εικόνας BMP"
+
+#~ msgid "Failure reading GIF: %s"
+#~ msgstr "Αποτυχία ανάγνωσης GIF: %s"
+
+#~ msgid "GIF file was missing some data (perhaps it was truncated somehow?)"
+#~ msgstr ""
+#~ "Λείπουν κάποια δεδομένα από το αρχείο GIF (μήπως αποκόπηκαν με κάποιο "
+#~ "τρόπο;)"
+
+#~ msgid "Internal error in the GIF loader (%s)"
+#~ msgstr "Εσωτερικό σφάλμα στην εφαρμογή φόρτωσης εικόνων GIF (%s)"
+
+#~ msgid "Stack overflow"
+#~ msgstr "Υπερχείλιση στοίβας"
+
+#~ msgid "GIF image loader cannot understand this image."
+#~ msgstr ""
+#~ "Η εφαρμογή φόρτωσης εικόνων GIF δεν μπορεί να αναγνωρίσει την εικόνα."
+
+#~ msgid "Bad code encountered"
+#~ msgstr "Εντοπίστηκε εσφαλμένος κώδικας"
+
+#~ msgid "Circular table entry in GIF file"
+#~ msgstr "Κυκλική εγγραφή πίνακα στο αρχείο GIF"
+
+#~ msgid "Not enough memory to load GIF file"
+#~ msgstr "Ανεπάρκεια μνήμης για τη φόρτωση του αρχείου GIF"
+
+#~ msgid "Not enough memory to composite a frame in GIF file"
+#~ msgstr "Ανεπάρκεια μνήμης για τη σύνθεση πλαισίου στο αρχείο GIF"
+
+#~ msgid "GIF image is corrupt (incorrect LZW compression)"
+#~ msgstr "Η εικόνα GIF είναι κατεστραμμένη (εσφαλμένη συμπίεση LZW)"
+
+#~ msgid "File does not appear to be a GIF file"
+#~ msgstr "Το αρχείο δε φαίνεται να είναι αρχείο GIF"
+
+#~ msgid "Version %s of the GIF file format is not supported"
+#~ msgstr "Η έκδοση %s του τύπου αρχείων GIF δεν υποστηρίζεται"
+
+#~ msgid ""
+#~ "GIF image has no global colormap, and a frame inside it has no local "
+#~ "colormap."
+#~ msgstr ""
+#~ "Η εικόνα GIF δεν περιέχει γενικό χάρτη χρωμάτων, ενώ ένα εσωτερικό "
+#~ "πλαίσιο δεν περιέχει τοπικό χάρτη χρωμάτων."
+
+#~ msgid "GIF image was truncated or incomplete."
+#~ msgstr ""
+#~ "Η εικόνα GIF είτε ήταν ημιτελής είτε είχε αποκοπεί κάποιο κομμάτι της."
+
+#~ msgid "The GIF image format"
+#~ msgstr "Ο τύπος εικόνας GIF"
+
+#~ msgid "Invalid header in icon"
+#~ msgstr "Μη έγκυρη κεφαλίδα στο εικονίδιο"
+
+#~ msgid "Not enough memory to load icon"
+#~ msgstr "Ανεπάρκεια μνήμης για τη φόρτωση του εικονιδίου"
+
+#~ msgid "Icon has zero width"
+#~ msgstr "Το εικονίδιο έχει μηδενικό πλάτος"
+
+#~ msgid "Icon has zero height"
+#~ msgstr "Το εικονίδιο έχει μηδενικό ύψος"
+
+#~ msgid "Compressed icons are not supported"
+#~ msgstr "Δεν υποστηρίζονται συμπιεσμένα εικονίδια"
+
+#~ msgid "Unsupported icon type"
+#~ msgstr "Μη υποστηριζόμενος τύπος εικονιδίου"
+
+#~ msgid "Not enough memory to load ICO file"
+#~ msgstr "Ανεπάρκεια μνήμης για τη φόρτωση του αρχείου ICO"
+
+#~ msgid "Image too large to be saved as ICO"
+#~ msgstr "Η εικόνα είναι πολύ μεγάλη για να αποθηκευτεί ως ICO"
+
+#~ msgid "Cursor hotspot outside image"
+#~ msgstr "Το επίκεντρο του δρομέα βρίσκεται έξω από την εικόνα"
+
+#~ msgid "Unsupported depth for ICO file: %d"
+#~ msgstr "Μη υποστηριζόμενο βάθος στο αρχείο ICO: %d"
+
+#~ msgid "The ICO image format"
+#~ msgstr "Ο τύπος εικόνας ICO"
+
+#~ msgid "Error reading ICNS image: %s"
+#~ msgstr "Σφάλμα κατά την ανάγνωση της εικόνας ICNS: %s"
+
+#~ msgid "Could not decode ICNS file"
+#~ msgstr "Αδυναμία αποκωδικοποίησης του αρχείου ICNS"
+
+#~ msgid "The ICNS image format"
+#~ msgstr "Ο τύπος εικόνας ICNS"
+
+#~ msgid "Couldn't allocate memory for stream"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για τη ροή"
+
+#~ msgid "Couldn't decode image"
+#~ msgstr "Αδυναμία αποκωδικοποίησης της εικόνας"
+
+#~ msgid "Transformed JPEG2000 has zero width or height"
+#~ msgstr "Το μετασχηματισμένο JPEG 2000 έχει μηδενικό ύψος ή πλάτος."
+
+#~ msgid "Image type currently not supported"
+#~ msgstr "Αυτός ο τύπος εικόνας δεν υποστηρίζεται προς το παρόν"
+
+#~ msgid "Couldn't allocate memory for color profile"
+#~ msgstr "Αδυναμία διάθεση μνήμης για το προφίλ χρωμάτων"
+
+#~ msgid "Insufficient memory to open JPEG 2000 file"
+#~ msgstr "Ανεπάρκεια μνήμης για το άνοιγμα του αρχείου JPEG 2000"
+
+#~ msgid "Couldn't allocate memory to buffer image data"
+#~ msgstr ""
+#~ "Αδυναμία διάθεσης μνήμης για την αποθήκευση των δεδομένων της εικόνας "
+#~ "στην ενδιάμεση μνήμη"
+
+#~ msgid "The JPEG 2000 image format"
+#~ msgstr "Ο τύπος εικόνας JPEG 2000"
+
+#~ msgid "Error interpreting JPEG image file (%s)"
+#~ msgstr "Σφάλμα κατά την ερμηνεία του αρχείου εικόνας JPEG (%s)"
+
+#~ msgid ""
+#~ "Insufficient memory to load image, try exiting some applications to free "
+#~ "memory"
+#~ msgstr ""
+#~ "Ανεπάρκεια μνήμης για τη φόρτωση της εικόνας. Δοκιμάστε να τερματίσετε "
+#~ "ορισμένες εφαρμογές για να απελευθερώσετε μνήμη"
+
+#~ msgid "Unsupported JPEG color space (%s)"
+#~ msgstr "Μη υποστηριζόμενο εύρος χρωμάτων JPEG (%s)"
+
+#~ msgid "Couldn't allocate memory for loading JPEG file"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για τη φόρτωση του αρχείου JPEG"
+
+#~ msgid "Transformed JPEG has zero width or height."
+#~ msgstr "Το μετασχηματισμένο JPEG έχει μηδενικό ύψος ή πλάτος."
+
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%s' could not be "
+#~ "parsed."
+#~ msgstr ""
+#~ "Η ποιότητα του JPEG πρέπει να έχει τιμή μεταξύ 0 και 100. Η τιμή '%s' δεν "
+#~ "μπορεί να ερμηνευθεί."
+
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%d' is not allowed."
+#~ msgstr ""
+#~ "Η ποιότητα του JPEG πρέπει να έχει τιμή μεταξύ 0 και 100. Η τιμή '%d' δεν "
+#~ "επιτρέπεται."
+
+#~ msgid "The JPEG image format"
+#~ msgstr "Ο τύπος εικόνας JPEG"
+
+#~ msgid "Couldn't allocate memory for header"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για την κεφαλίδα"
+
+#~ msgid "Couldn't allocate memory for context buffer"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για τη σχετική ενδιάμεση μνήμη"
+
+#~ msgid "Image has invalid width and/or height"
+#~ msgstr "Μη έγκυρο ύψος ή/και πλάτος εικόνας"
+
+#~ msgid "Image has unsupported bpp"
+#~ msgstr "Εικόνα με μη υποστηριζόμενο bpp"
+
+#~ msgid "Image has unsupported number of %d-bit planes"
+#~ msgstr "Εικόνα με μη υποστηριζόμενο αριθμό επιφανειών %d-bit"
+
+#~ msgid "Couldn't create new pixbuf"
+#~ msgstr "Αδυναμία δημιουργίας νέου pixbuf"
+
+#~ msgid "Couldn't allocate memory for line data"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για τα δεδομένα των γραμμών"
+
+#~ msgid "Couldn't allocate memory for paletted data"
+#~ msgstr "Δεν είναι δυνατή η διάθεση μνήμης για τα δεδομένα σε παλέτα"
+
+#~ msgid "Didn't get all lines of PCX image"
+#~ msgstr "Αδυναμία λήψης όλων των γραμμών της εικόνας PCX"
+
+#~ msgid "No palette found at end of PCX data"
+#~ msgstr "Δε βρέθηκε παλέτα στο τέλος των δεδομένων PCX"
+
+#~ msgid "The PCX image format"
+#~ msgstr "Ο τύπος εικόνας PCX"
+
+#~ msgid "Bits per channel of PNG image is invalid."
+#~ msgstr "Μη έγκυρος αριθμός bits ανά κανάλι στην εικόνα PNG."
+
+#~ msgid "Transformed PNG has zero width or height."
+#~ msgstr "Το μετασχηματισμένο PNG έχει μηδενικό ύψος ή πλάτος."
+
+#~ msgid "Bits per channel of transformed PNG is not 8."
+#~ msgstr "Τα bits ανά κανάλι του μετασχηματισμένου PNG δεν είναι 8."
+
+#~ msgid "Transformed PNG not RGB or RGBA."
+#~ msgstr "Το μετασχηματισμένο PNG δεν είναι RGB ή RGBA."
+
+#~ msgid "Transformed PNG has unsupported number of channels, must be 3 or 4."
+#~ msgstr ""
+#~ "Το μετασχηματισμένο PNG περιέχει μη υποστηριζόμενο αριθμό καναλιών· θα "
+#~ "έπρεπε να είναι 3 ή 4."
+
+#~ msgid "Fatal error in PNG image file: %s"
+#~ msgstr "Μοιραίο σφάλμα στο αρχείο εικόνας PNG: %s"
+
+#~ msgid "Insufficient memory to load PNG file"
+#~ msgstr "Ανεπάρκεια μνήμης για τη φόρτωση του αρχείου PNG"
+
+#~ msgid ""
+#~ "Insufficient memory to store a %ld by %ld image; try exiting some "
+#~ "applications to reduce memory usage"
+#~ msgstr ""
+#~ "Ανεπάρκεια μνήμης για την αποθήκευση εικόνας %ld επί %ld. Δοκιμάστε να "
+#~ "τερματίσετε μερικές εφαρμογές για να απελευθερώσετε μνήμη"
+
+#~ msgid "Fatal error reading PNG image file"
+#~ msgstr "Μοιραίο σφάλμα κατά την ανάγνωση του αρχείου εικόνας PNG"
+
+#~ msgid "Fatal error reading PNG image file: %s"
+#~ msgstr "Μοιραίο σφάλμα κατά την ανάγνωση του αρχείου εικόνας PNG: %s"
+
+#~ msgid ""
+#~ "Keys for PNG text chunks must have at least 1 and at most 79 characters."
+#~ msgstr ""
+#~ "Τα κλειδιά για τα κομμάτια κειμένου του PNG θα πρέπει να περιέχουν "
+#~ "τουλάχιστον 1 και όχι περισσότερους από 79 χαρακτήρες."
+
+#~ msgid "Keys for PNG text chunks must be ASCII characters."
+#~ msgstr ""
+#~ "Τα κλειδιά για τα κομμάτια κειμένου του PNG θα πρέπει να απαρτίζονται από "
+#~ "χαρακτήρες ASCII."
+
+#~ msgid "Color profile has invalid length %d."
+#~ msgstr "Το προφίλ χρωμάτων έχει μη έγκυρο μήκος %d."
+
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%s' could "
+#~ "not be parsed."
+#~ msgstr ""
+#~ "Η ποιότητα συμπίεσης του PNG πρέπει να έχει τιμή μεταξύ 0 και 9. Η τιμή "
+#~ "'%s' δεν μπορεί να ερμηνευτεί."
+
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%d' is not "
+#~ "allowed."
+#~ msgstr ""
+#~ "Η ποιότητα συμπίεσης του PNG πρέπει να έχει τιμή μεταξύ 0 και 9. Η τιμή "
+#~ "'%d' δεν επιτρέπεται."
+
+#~ msgid ""
+#~ "Value for PNG text chunk %s cannot be converted to ISO-8859-1 encoding."
+#~ msgstr ""
+#~ "Η τιμή του κομματιού κειμένου του PNG %s δεν μπορεί να μετατραπεί σε "
+#~ "κωδικοποίηση ISO-8859-1."
+
+#~ msgid "The PNG image format"
+#~ msgstr "O τύπος εικόνας PNG"
+
+#~ msgid "PNM loader expected to find an integer, but didn't"
+#~ msgstr ""
+#~ "Η εφαρμογή φόρτωσης εικόνων PNM ανέμενε ακέραιο αριθμό, αλλά δεν τον βρήκε"
+
+#~ msgid "PNM file has an incorrect initial byte"
+#~ msgstr "Το αρχείο PNM περιέχει εσφαλμένο αρχικό byte"
+
+#~ msgid "PNM file is not in a recognized PNM subformat"
+#~ msgstr "Ο τύπος του αρχείου PNM δεν είναι αναγνωρίσιμος τύπος PNM"
+
+#~ msgid "PNM file has an image width of 0"
+#~ msgstr "Το πλάτος εικόνας του αρχείου PNM είναι 0"
+
+#~ msgid "PNM file has an image height of 0"
+#~ msgstr "Το ύψος εικόνας του αρχείου PNM είναι 0"
+
+#~ msgid "Maximum color value in PNM file is 0"
+#~ msgstr "Η μέγιστη τιμή χρώματος στο αρχείο PNM είναι 0"
+
+#~ msgid "Maximum color value in PNM file is too large"
+#~ msgstr "Η μέγιστη τιμή χρώματος στο αρχείο PNM είναι πολύ μεγάλη"
+
+#~ msgid "Raw PNM image type is invalid"
+#~ msgstr "Μη έγκυρος τύπος ακατέργαστης εικόνας PNM"
+
+#~ msgid "PNM image loader does not support this PNM subformat"
+#~ msgstr "Η εφαρμογή φόρτωσης εικόνων PNM δεν υποστηρίζει αυτόν τον τύπο PNM"
+
+#~ msgid "Raw PNM formats require exactly one whitespace before sample data"
+#~ msgstr ""
+#~ "Οι ακατέργαστοι τύποι PNM πρέπει να περιέχουν ακριβώς ένα κενό διάστημα "
+#~ "πριν από τα δεδομένα του δείγματος"
+
+#~ msgid "Cannot allocate memory for loading PNM image"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για τη φόρτωση της εικόνας PNM"
+
+#~ msgid "Insufficient memory to load PNM context struct"
+#~ msgstr "Ανεπάρκεια μνήμης για τη φόρτωση της δομής περιεχομένων του PNΜ"
+
+#~ msgid "Unexpected end of PNM image data"
+#~ msgstr "Μη αναμενόμενος τερματισμός των δεδομένων της εικόνας PNM"
+
+#~ msgid "Insufficient memory to load PNM file"
+#~ msgstr "Ανεπάρκεια μνήμης για τη φόρτωση του αρχείου PNM"
+
+#~ msgid "The PNM/PBM/PGM/PPM image format family"
+#~ msgstr "Η οικογένεια τύπων εικόνας PNM/PBM/PGM/PPM"
+
+#~ msgid "Input file descriptor is NULL."
+#~ msgstr "Ο περιγραφέας του αρχείου εισόδου είναι NULL."
+
+#~ msgid "Failed to read QTIF header"
+#~ msgstr "Αποτυχία ανάγνωσης κεφαλίδας QTIF"
+
+#~ msgid "QTIF atom size too large (%d bytes)"
+#~ msgstr "Το άτομο QTIF είναι πολύ μεγάλο (%d byte)"
+
+#~ msgid "Failed to allocate %d bytes for file read buffer"
+#~ msgstr "Αποτυχία διάθεσης %d byte ως ενδιάμεσης μνήμης ανάγνωσης αρχείων"
+
+#~ msgid "File error when reading QTIF atom: %s"
+#~ msgstr "Αποτυχία αρχείου κατά την ανάγνωση του ατόμου QTIF: %s"
+
+#~ msgid "Failed to skip the next %d bytes with seek()."
+#~ msgstr "Αποτυχία υπερπήδησης των επόμενων %d byte με χρήση του seek()."
+
+#~ msgid "Failed to allocate QTIF context structure."
+#~ msgstr "Αδυναμία διάθεσης μνήμης για τη δομή περιεχομένων του QTIF."
+
+#~ msgid "Failed to create GdkPixbufLoader object."
+#~ msgstr "Αποτυχία δημιουργίας αντικειμένου GdkPixbufLoader."
+
+#~ msgid "Failed to find an image data atom."
+#~ msgstr "Αποτυχία εύρεσης ατόμου δεδομένων εικόνας."
+
+#~ msgid "The QTIF image format"
+#~ msgstr "Ο τύπος εικόνας QTIF"
+
+#~ msgid "RAS image has bogus header data"
+#~ msgstr "Η εικόνα RAS περιέχει εσφαλμένα δεδομένα κεφαλίδας"
+
+#~ msgid "RAS image has unknown type"
+#~ msgstr "Άγνωστος τύπος εικόνας RAS"
+
+#~ msgid "unsupported RAS image variation"
+#~ msgstr "μη υποστηριζόμενη παραλλαγή εικόνας RAS"
+
+#~ msgid "Not enough memory to load RAS image"
+#~ msgstr "Ανεπάρκεια μνήμης για τη φόρτωση της εικόνας RAS"
+
+#~ msgid "The Sun raster image format"
+#~ msgstr "Ο τύπος εικόνας Sun raster"
+
+#~ msgid "Cannot allocate memory for IOBuffer struct"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για τη δομή του IOBuffer"
+
+#~ msgid "Cannot allocate memory for IOBuffer data"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για τα δεδομένα του IOBuffer"
+
+#~ msgid "Cannot realloc IOBuffer data"
+#~ msgstr "Αδυναμία αλλαγής της διάθεσης μνήμης για το IOBuffer"
+
+#~ msgid "Cannot allocate temporary IOBuffer data"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για τα προσωρινά δεδομένα του IOBuffer"
+
+#~ msgid "Cannot allocate new pixbuf"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για το νέο pixbuf"
+
+#~ msgid "Image is corrupted or truncated"
+#~ msgstr "Η εικόνα είναι κατεστραμμένη ή έχει αποκοπεί κάποιο κομμάτι της"
+
+#~ msgid "Cannot allocate colormap structure"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για τη δομή του χάρτη χρωμάτων"
+
+#~ msgid "Cannot allocate colormap entries"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για τις εγγραφές του χάρτη χρωμάτων"
+
+#~ msgid "Unexpected bitdepth for colormap entries"
+#~ msgstr "Μη αναμενόμενο βάθος χρωμάτων στις εγγραφές του χάρτη χρωμάτων"
+
+#~ msgid "Cannot allocate TGA header memory"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για την κεφαλίδα του TGA"
+
+#~ msgid "TGA image has invalid dimensions"
+#~ msgstr "Η εικόνα TGA δεν έχει έγκυρες διαστάσεις"
+
+#~ msgid "TGA image type not supported"
+#~ msgstr "Ο τύπος εικόνας TGA δεν υποστηρίζεται"
+
+#~ msgid "Cannot allocate memory for TGA context struct"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για τη δομή περιεχομένων του TGA"
+
+#~ msgid "Excess data in file"
+#~ msgstr "Περίσσεια δεδομένων στο αρχείο"
+
+#~ msgid "The Targa image format"
+#~ msgstr "Ο τύπος εικόνας Targa"
+
+#~ msgid "Could not get image width (bad TIFF file)"
+#~ msgstr "Αδυναμία λήψης του πλάτους της εικόνας (εσφαλμένο αρχείο TIFF)"
+
+#~ msgid "Could not get image height (bad TIFF file)"
+#~ msgstr "Αδυναμία λήψης του ύψους της εικόνας (εσφαλμένο αρχείο TIFF)"
+
+#~ msgid "Width or height of TIFF image is zero"
+#~ msgstr "Το ύψος ή το πλάτος της εικόνας TIFF είναι μηδενικό"
+
+#~ msgid "Dimensions of TIFF image too large"
+#~ msgstr "Οι διαστάσεις της εικόνας TIFF είναι πολύ μεγάλες"
+
+#~ msgid "Insufficient memory to open TIFF file"
+#~ msgstr "Ανεπάρκεια μνήμης για το άνοιγμα του αρχείου TIFF"
+
+#~ msgid "Failed to load RGB data from TIFF file"
+#~ msgstr "Αποτυχία φόρτωσης των δεδομένων RGB από το αρχείο TIFF"
+
+#~ msgid "Failed to open TIFF image"
+#~ msgstr "Αποτυχία ανοίγματος της εικόνας TIFF"
+
+#~ msgid "TIFFClose operation failed"
+#~ msgstr "Αποτυχία ενέργειας TIFFClose"
+
+#~ msgid "Failed to load TIFF image"
+#~ msgstr "Αποτυχία φόρτωσης της εικόνας TIFF"
+
+#~ msgid "Failed to save TIFF image"
+#~ msgstr "Αποτυχία αποθήκευσης της εικόνας TIFF"
+
+#~ msgid "TIFF compression doesn't refer to a valid codec."
+#~ msgstr "Η συμπίεση TIFF δεν αναφέρεται σε έγκυρο codec."
+
+#~ msgid "Failed to write TIFF data"
+#~ msgstr "Αποτυχία εγγραφής των δεδομένων TIFF"
+
+#~ msgid "Couldn't write to TIFF file"
+#~ msgstr "Αδυναμία εγγραφής στο αρχείο TIFF"
+
+#~ msgid "The TIFF image format"
+#~ msgstr "Ο τύπος εικόνας TIFF"
+
+#~ msgid "Image has zero width"
+#~ msgstr "Η εικόνα έχει μηδενικό πλάτος"
+
+#~ msgid "Image has zero height"
+#~ msgstr "Η εικόνα έχει μηδενικό ύψος"
+
+#~ msgid "Not enough memory to load image"
+#~ msgstr "Ανεπάρκεια μνήμης για τη φόρτωση της εικόνας"
+
+#~ msgid "Couldn't save the rest"
+#~ msgstr "Αποτυχία αποθήκευσης των υπολοίπων"
+
+#~ msgid "The WBMP image format"
+#~ msgstr "Ο τύπος εικόνας WBMP"
+
+#~ msgid "Invalid XBM file"
+#~ msgstr "Μη έγκυρο αρχείο XBM"
+
+#~ msgid "Insufficient memory to load XBM image file"
+#~ msgstr "Ανεπάρκεια μνήμης για τη φόρτωση του αρχείου εικόνας XBM"
+
+#~ msgid "Failed to write to temporary file when loading XBM image"
+#~ msgstr ""
+#~ "Αποτυχία εγγραφής σε προσωρινό αρχείο κατά τη φόρτωση της εικόνας XBM"
+
+#~ msgid "The XBM image format"
+#~ msgstr "Ο τύπος εικόνας XBM"
+
+#~ msgid "No XPM header found"
+#~ msgstr "Δε βρέθηκε κεφαλίδα XBM"
+
+#~ msgid "Invalid XPM header"
+#~ msgstr "Μη έγκυρη κεφαλίδα XBM"
+
+#~ msgid "XPM file has image width <= 0"
+#~ msgstr "Το αρχείο XPM έχει πλάτος εικόνας <= 0"
+
+#~ msgid "XPM file has image height <= 0"
+#~ msgstr "Το αρχείο XPM έχει ύψος εικόνας <= 0"
+
+#~ msgid "XPM has invalid number of chars per pixel"
+#~ msgstr ""
+#~ "Το αρχείο XPM περιέχει μη έγκυρο αριθμό χαρακτήρων ανά εικονοστοιχείο"
+
+#~ msgid "XPM file has invalid number of colors"
+#~ msgstr "Το αρχείο XPM περιέχει μη έγκυρο αριθμό χρωμάτων"
+
+#~ msgid "Cannot allocate memory for loading XPM image"
+#~ msgstr "Αδυναμία διάθεσης μνήμης για τη φόρτωση της εικόνας XPM"
+
+#~ msgid "Cannot read XPM colormap"
+#~ msgstr "Αδυναμία ανάγνωσης του χάρτη χρωμάτων XPM"
+
+#~ msgid "Failed to write to temporary file when loading XPM image"
+#~ msgstr ""
+#~ "Αποτυχία εγγραφής σε προσωρινό αρχείο κατά τη φόρτωση της εικόνας XPM"
+
+#~ msgid "The XPM image format"
+#~ msgstr "Ο τύπος εικόνας XPM"
+
+#~ msgid "The EMF image format"
+#~ msgstr "Ο τύπος εικόνας EMF"
+
+#~ msgid "Could not allocate memory: %s"
+#~ msgstr "Αδυναμία διάθεσης μνήμης: %s"
+
+#~ msgid "Could not create stream: %s"
+#~ msgstr "Αδυναμία δημιουργίας ροής: %s"
+
+#~ msgid "Could not seek stream: %s"
+#~ msgstr "Αδυναμία αναζήτησης μέσα στη ροή: %s"
+
+#~ msgid "Could not read from stream: %s"
+#~ msgstr "Αδυναμία ανάγνωσης από τη ροή: %s"
+
+#~ msgid "Couldn't load bitmap"
+#~ msgstr "Αδυναμία φόρτωσης του bitmap"
+
+#~ msgid "Couldn't load metafile"
+#~ msgstr "Αδυναμία φόρτωσης του αρχείου μεταδεδομένων"
+
+#~ msgid "Unsupported image format for GDI+"
+#~ msgstr "Μη υποστηριζόμενος τύπος εικόνας για το GDI+"
+
+#~ msgid "Couldn't save"
+#~ msgstr "Αποτυχία αποθήκευσης"
+
+#~ msgid "The WMF image format"
+#~ msgstr "Ο τύπος εικόνας WMF"
+
+#~ msgid "Printer '%s' may not be connected."
+#~ msgstr "Ο εκτυπωτής '%s' μπορεί να μην είναι συνδεδεμένος."
+
+#~ msgid "(Empty)"
+#~ msgstr "(Κενό)"
+
+#~ msgid "At"
+#~ msgstr "Σε"

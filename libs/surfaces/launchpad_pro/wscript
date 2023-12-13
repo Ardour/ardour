@@ -22,9 +22,11 @@ def build(bld):
     obj.includes     = ['.', '..', './launchpad_pro']
     obj.name         = 'libardour_launchpad_pro'
     obj.target       = 'ardour_launchpad_pro'
-    obj.uselib       = 'CAIROMM PANGOMM USB GTKMM SIGCPP XML OSX'
+    obj.uselib       = 'CAIROMM PANGOMM USB SIGCPP XML OSX'
     obj.use          = 'libardour libardour_cp libardour_midisurface libgtkmm2ext libpbd libevoral libcanvas libtemporal'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
-
-def shutdown():
-    autowaf.shutdown()
+    if bld.is_defined('YTK'):
+        obj.use    += ' libytkmm'
+        obj.uselib += ' GLIBMM GIOMM'
+    else:
+        obj.uselib += ' GTKMM'

@@ -1,0 +1,4035 @@
+# gtk+ package simplified Chinese translation file.
+# Copyright (C) 2000, 2001, 2003, 2004, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+# 辛立仁 <hsin@med.cgu.edu.tw>, 2000.
+# Chih-Wei Huang <cwhuang@linux.org.tw>, 2000.
+# Abel Cheung <maddog@linux.org.hk>, 2001.
+# He Qiangqiang <carton@263.net>, 2001.
+# Funda Wang <fundawang@linux.net.cn>, 2003,2004
+# Yang Zhang <zyangmath@gmail.com>, 2007.
+# Deng Xiyue <manphiz@gmail.com>, 2008,2009.
+# Funda Wang <fundawang@gmail.com>, 2008,2009.
+# Dean Lee <xslidian@gmail.com>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gtk+\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-19 21:59+0100\n"
+"PO-Revision-Date: 2010-09-16 15:45+0000\n"
+"Last-Translator: Aron Xu <happyaron.xu@gmail.com>\n"
+"Language-Team: Chinese (simplified) <i18n-zh@googlegroups.com>\n"
+"Language: zh_CN\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: gtkaboutdialog.c:245
+msgid "Could not show link"
+msgstr "无法显示链接"
+
+#: gtkaboutdialog.c:399 gtkaboutdialog.c:2286
+msgid "License"
+msgstr "许可"
+
+#: gtkaboutdialog.c:400
+msgid "The license of the program"
+msgstr "程序的许可协议"
+
+#: gtkaboutdialog.c:646
+msgid "C_redits"
+msgstr "致谢(_R)"
+
+#: gtkaboutdialog.c:660
+msgid "_License"
+msgstr "许可(_L)"
+
+#: gtkaboutdialog.c:966
+#, c-format
+msgid "About %s"
+msgstr "关于 %s"
+
+#: gtkaboutdialog.c:2209
+msgid "Credits"
+msgstr "致谢"
+
+#: gtkaboutdialog.c:2238
+msgid "Written by"
+msgstr "编写者"
+
+#: gtkaboutdialog.c:2241
+msgid "Documented by"
+msgstr "文档撰写者"
+
+#: gtkaboutdialog.c:2253
+msgid "Translated by"
+msgstr "翻译者"
+
+#: gtkaboutdialog.c:2257
+msgid "Artwork by"
+msgstr "美工"
+
+#: gtkbuilderparser.c:343
+#, c-format
+msgid "Invalid type function on line %d: '%s'"
+msgstr "无效的类型函数出现于第 %d 行：“%s”"
+
+#: gtkbuilderparser.c:407
+#, c-format
+msgid "Duplicate object ID '%s' on line %d (previously on line %d)"
+msgstr "重复的对象 ID“%s”出现在第 %d 行 (之前出现在第 %d 行)"
+
+#: gtkbuilderparser.c:859
+#, c-format
+msgid "Invalid root element: '%s'"
+msgstr "无效的根元素：“%s”"
+
+#: gtkbuilderparser.c:898
+#, c-format
+msgid "Unhandled tag: '%s'"
+msgstr "未处理的标记：“%s”"
+
+#: gtkcellrendereraccel.c:389 gtkcellrendereraccel.c:663
+msgid "New accelerator..."
+msgstr "新建加速键..."
+
+#: gtkcolorbutton.c:178 gtkcolorbutton.c:459
+msgid "Pick a Color"
+msgstr "拾取颜色"
+
+#: gtkcolorbutton.c:352
+msgid "Received invalid color data\n"
+msgstr "收到了无效的颜色数据\n"
+
+#: gtkcolorsel.c:358
+msgid ""
+"Select the color you want from the outer ring. Select the darkness or "
+"lightness of that color using the inner triangle."
+msgstr "在外围环中选择您要的颜色。在内部三角形中选择该颜色的明暗度。"
+
+#: gtkcolorsel.c:382
+msgid ""
+"Click the eyedropper, then click a color anywhere on your screen to select "
+"that color."
+msgstr "单击滴管，然后点屏幕任何一处来选取该位置的颜色。"
+
+#: gtkcolorsel.c:391
+msgid "_Hue:"
+msgstr "色调(_H)："
+
+#: gtkcolorsel.c:392
+msgid "Position on the color wheel."
+msgstr "在色相环中的位置。"
+
+#: gtkcolorsel.c:394
+msgid "_Saturation:"
+msgstr "饱和度(_S)："
+
+#: gtkcolorsel.c:395
+msgid "\"Deepness\" of the color."
+msgstr "颜色的“深度”。"
+
+#: gtkcolorsel.c:396
+msgid "_Value:"
+msgstr "值(_V)："
+
+#: gtkcolorsel.c:397
+msgid "Brightness of the color."
+msgstr "颜色的亮度。"
+
+#: gtkcolorsel.c:398
+msgid "_Red:"
+msgstr "红(_R)："
+
+#: gtkcolorsel.c:399
+msgid "Amount of red light in the color."
+msgstr "颜色中的红色分量。"
+
+#: gtkcolorsel.c:400
+msgid "_Green:"
+msgstr "绿(_G)："
+
+#: gtkcolorsel.c:401
+msgid "Amount of green light in the color."
+msgstr "颜色中的绿色分量。"
+
+#: gtkcolorsel.c:402
+msgid "_Blue:"
+msgstr "蓝(_B)："
+
+#: gtkcolorsel.c:403
+msgid "Amount of blue light in the color."
+msgstr "颜色中的蓝色分量。"
+
+#: gtkcolorsel.c:406
+msgid "Op_acity:"
+msgstr "透明度(_A)："
+
+#: gtkcolorsel.c:413 gtkcolorsel.c:423
+msgid "Transparency of the color."
+msgstr "颜色的透明度。"
+
+#: gtkcolorsel.c:430
+msgid "Color _name:"
+msgstr "颜色名称(_N)："
+
+#: gtkcolorsel.c:444
+msgid ""
+"You can enter an HTML-style hexadecimal color value, or simply a color name "
+"such as 'orange' in this entry."
+msgstr ""
+"您可以在此栏输入 HTML 风格的十六进制颜色值，或是像“orange”这样的颜色名称。"
+
+#: gtkcolorsel.c:474
+msgid "_Palette:"
+msgstr "调色板(_P)："
+
+#: gtkcolorsel.c:503
+msgid "Color Wheel"
+msgstr "色相环"
+
+#: gtkcolorsel.c:962
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now. You can drag this color to a palette entry, or select this color as "
+"current by dragging it to the other color swatch alongside."
+msgstr ""
+"先前选中的颜色，相对于您正选中的颜色。您可以拖动此颜色到调色板，或拖动此颜色"
+"到下一个颜色样品格内以作为当前选中颜色。"
+
+#: gtkcolorsel.c:965
+msgid ""
+"The color you've chosen. You can drag this color to a palette entry to save "
+"it for use in the future."
+msgstr "您选择的颜色。您可以拖动此颜色到调色板并将之保存供以后使用。"
+
+#: gtkcolorsel.c:970
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now."
+msgstr "之前选择的颜色，用来与您正在选的颜色作比对。"
+
+#: gtkcolorsel.c:973
+msgid "The color you've chosen."
+msgstr "您所选择的颜色。"
+
+#: gtkcolorsel.c:1389
+msgid "_Save color here"
+msgstr "在此保存颜色(_S)"
+
+#: gtkcolorsel.c:1593
+msgid ""
+"Click this palette entry to make it the current color. To change this entry, "
+"drag a color swatch here or right-click it and select \"Save color here.\""
+msgstr ""
+"单击此调色板项可以将其变为当前颜色。要更改此项，请将颜色拖曳到此处，或者用鼠"
+"标右键单击之，然后选择“在此保存颜色”。"
+
+#: gtkcolorseldialog.c:170
+msgid "Color Selection"
+msgstr "颜色选择"
+
+#: gtkentry.c:8789 gtktextview.c:8007
+msgid "Input _Methods"
+msgstr "输入法(_M)"
+
+#: gtkentry.c:8803 gtktextview.c:8021
+msgid "_Insert Unicode Control Character"
+msgstr "插入 Unicode 控制字符(_I)"
+
+#: gtkentry.c:10177
+msgid "Caps Lock is on"
+msgstr "大写锁已打开"
+
+#: gtkfilechooserbutton.c:64
+#, fuzzy
+msgid "Select a File"
+msgstr "选择文件"
+
+#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1851
+msgid "Desktop"
+msgstr "桌面"
+
+#: gtkfilechooserbutton.c:66
+msgid "(None)"
+msgstr "(无)"
+
+#: gtkfilechooserbutton.c:2175
+msgid "Other..."
+msgstr "其它..."
+
+#: gtkfilechooserdefault.c:150
+msgid "Type name of new folder"
+msgstr "输入新建文件夹的名称"
+
+#: gtkfilechooserdefault.c:956
+msgid "Could not retrieve information about the file"
+msgstr "无法获取关于文件的信息"
+
+#: gtkfilechooserdefault.c:967
+msgid "Could not add a bookmark"
+msgstr "无法添加书签"
+
+#: gtkfilechooserdefault.c:978
+msgid "Could not remove bookmark"
+msgstr "无法删除书签"
+
+#: gtkfilechooserdefault.c:989
+msgid "The folder could not be created"
+msgstr "无法创建文件夹"
+
+#: gtkfilechooserdefault.c:1002
+msgid ""
+"The folder could not be created, as a file with the same name already "
+"exists.  Try using a different name for the folder, or rename the file first."
+msgstr ""
+"无法创建文件夹，因为已经存在同名文件。请试着为文件夹使用不同的名称，或者先重"
+"命名文件。"
+
+#: gtkfilechooserdefault.c:1016
+msgid "You need to choose a valid filename."
+msgstr ""
+
+#: gtkfilechooserdefault.c:1019
+#, c-format
+msgid "Cannot create a file under %s as it is not a folder"
+msgstr ""
+
+#: gtkfilechooserdefault.c:1031
+msgid ""
+"You may only select folders.  The item that you selected is not a folder; "
+"try using a different item."
+msgstr ""
+
+#: gtkfilechooserdefault.c:1041
+msgid "Invalid file name"
+msgstr "无效的文件名"
+
+#: gtkfilechooserdefault.c:1051
+msgid "The folder contents could not be displayed"
+msgstr "无法显示文件夹内容"
+
+#: gtkfilechooserdefault.c:1584
+#, c-format
+msgid "%1$s on %2$s"
+msgstr "%2$s 上的 %1$s"
+
+#: gtkfilechooserdefault.c:1733
+msgid "Search"
+msgstr "搜索"
+
+#: gtkfilechooserdefault.c:1757 gtkfilechooserdefault.c:4872
+msgid "Recently Used"
+msgstr "最近使用的"
+
+#: gtkfilechooserdefault.c:2387
+msgid "Select which types of files are shown"
+msgstr "选择要显示的文件类型"
+
+#: gtkfilechooserdefault.c:2746
+#, c-format
+msgid "Add the folder '%s' to the bookmarks"
+msgstr "将文件夹“%s”添加到书签"
+
+#: gtkfilechooserdefault.c:2790
+msgid "Add the current folder to the bookmarks"
+msgstr "将当前文件夹添加到书签"
+
+#: gtkfilechooserdefault.c:2792
+msgid "Add the selected folders to the bookmarks"
+msgstr "将选中文件夹添加到书签"
+
+#: gtkfilechooserdefault.c:2837
+#, c-format
+msgid "Remove the bookmark '%s'"
+msgstr "删除书签“%s”"
+
+#: gtkfilechooserdefault.c:2839
+#, c-format
+msgid "Bookmark '%s' cannot be removed"
+msgstr "无法删除书签“%s”"
+
+#: gtkfilechooserdefault.c:2846 gtkfilechooserdefault.c:3740
+msgid "Remove the selected bookmark"
+msgstr "删除选中的书签"
+
+#: gtkfilechooserdefault.c:3421
+msgid "Remove"
+msgstr "删除"
+
+#: gtkfilechooserdefault.c:3430
+msgid "Rename..."
+msgstr "重命名..."
+
+#: gtkfilechooserdefault.c:3597
+msgid "Places"
+msgstr "位置"
+
+#: gtkfilechooserdefault.c:3654
+msgid "_Places"
+msgstr "位置(_R)"
+
+#: gtkfilechooserdefault.c:3728
+msgid "Add the selected folder to the Bookmarks"
+msgstr "将选中的文件夹添加到书签"
+
+#: gtkfilechooserdefault.c:3872
+msgid "Could not select file"
+msgstr "无法选择文件"
+
+#: gtkfilechooserdefault.c:4045
+msgid "_Add to Bookmarks"
+msgstr "添加到书签(_A)"
+
+#: gtkfilechooserdefault.c:4058
+msgid "Show _Hidden Files"
+msgstr "显示隐藏文件(_H)"
+
+#: gtkfilechooserdefault.c:4065
+msgid "Show _Size Column"
+msgstr "显示大小列(_S)"
+
+#: gtkfilechooserdefault.c:4289
+msgid "Files"
+msgstr "文件"
+
+#: gtkfilechooserdefault.c:4340
+msgid "Name"
+msgstr "名称"
+
+#: gtkfilechooserdefault.c:4363
+msgid "Size"
+msgstr "大小"
+
+#: gtkfilechooserdefault.c:4377
+msgid "Modified"
+msgstr "修改日期"
+
+#: gtkfilechooserdefault.c:4470
+msgid "_Name:"
+msgstr "名称(_N)："
+
+#: gtkfilechooserdefault.c:4710
+msgid "Type a file name"
+msgstr "输入文件名"
+
+#: gtkfilechooserdefault.c:4757 gtkfilechooserdefault.c:4768
+msgid "Please select a folder below"
+msgstr ""
+
+#: gtkfilechooserdefault.c:4763
+#, fuzzy
+msgid "Please type a file name"
+msgstr "输入文件名"
+
+#: gtkfilechooserdefault.c:4834
+msgid "Create Fo_lder"
+msgstr "创建文件夹(_L)"
+
+#: gtkfilechooserdefault.c:4882
+msgid "Search:"
+msgstr "搜索："
+
+#: gtkfilechooserdefault.c:4933
+msgid "_Location:"
+msgstr "位置(_L)："
+
+#: gtkfilechooserdefault.c:5383
+msgid "Save in _folder:"
+msgstr "保存于文件夹(_F)："
+
+#: gtkfilechooserdefault.c:5385
+msgid "Create in _folder:"
+msgstr "创建于文件夹(_F)："
+
+#: gtkfilechooserdefault.c:6479
+#, c-format
+msgid "Could not read the contents of %s"
+msgstr "无法读取 %s 的内容"
+
+#: gtkfilechooserdefault.c:6483
+msgid "Could not read the contents of the folder"
+msgstr "无法读取文件夹内容"
+
+#: gtkfilechooserdefault.c:6576 gtkfilechooserdefault.c:6644
+#: gtkfilechooserdefault.c:6829
+msgid "Unknown"
+msgstr "未知"
+
+#: gtkfilechooserdefault.c:6591
+msgid "%H:%M"
+msgstr "%H:%M"
+
+#: gtkfilechooserdefault.c:6593
+msgid "Yesterday at %H:%M"
+msgstr "昨天于 %H:%M"
+
+#: gtkfilechooserdefault.c:7301
+msgid "Cannot change to folder because it is not local"
+msgstr "无法更改为文件夹，因为该文件夹并非本地"
+
+#: gtkfilechooserdefault.c:7898 gtkfilechooserdefault.c:7919
+#, c-format
+msgid "Shortcut %s already exists"
+msgstr "快捷方式 %s 已经存在"
+
+#: gtkfilechooserdefault.c:8009
+#, c-format
+msgid "Shortcut %s does not exist"
+msgstr "快捷方式 %s 不存在"
+
+#: gtkfilechooserdefault.c:8250
+#, c-format
+msgid "A file named \"%s\" already exists.  Do you want to replace it?"
+msgstr "已经存在名为“%s”的文件。您是否想要替换？"
+
+#: gtkfilechooserdefault.c:8253
+#, c-format
+msgid ""
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
+msgstr "文件已经在“%s”中存在了。替换该文件将覆盖其中的内容。"
+
+#: gtkfilechooserdefault.c:8258
+msgid "_Replace"
+msgstr "替换(_R)"
+
+#: gtkfilechooserdefault.c:9066
+msgid "Could not start the search process"
+msgstr "无法开启搜索进程"
+
+#: gtkfilechooserdefault.c:9067
+msgid ""
+"The program was not able to create a connection to the indexer daemon.  "
+"Please make sure it is running."
+msgstr "程序无法连接到索引守护进程。请确保它在运行。"
+
+#: gtkfilechooserdefault.c:9081
+msgid "Could not send the search request"
+msgstr "无法发送搜索请求"
+
+#: gtkfilechooserdefault.c:9682
+#, c-format
+msgid "Could not mount %s"
+msgstr "无法挂载 %s"
+
+#: gtkfilechoosersettings.c:515
+#, c-format
+msgid "Error creating folder '%s': %s"
+msgstr "创建目录“%s”时出错：%s"
+
+#: gtkfilesystem.c:52
+msgid "File System"
+msgstr "文件系统"
+
+#: gtkfontbutton.c:144 gtkfontbutton.c:266
+msgid "Pick a Font"
+msgstr "拾取字体"
+
+#: gtkfontbutton.c:260
+msgid "Sans 12"
+msgstr "Sans 12"
+
+#: gtkfontbutton.c:785
+msgid "Font"
+msgstr "字体"
+
+#: gtkfontsel.c:75
+msgid "abcdefghijk ABCDEFGHIJK"
+msgstr "GNOME 字体测试"
+
+#: gtkfontsel.c:343
+msgid "_Family:"
+msgstr "字体族(_F)："
+
+#: gtkfontsel.c:349
+msgid "_Style:"
+msgstr "样式(_S)："
+
+#: gtkfontsel.c:355
+msgid "Si_ze:"
+msgstr "大小(_Z)："
+
+#: gtkfontsel.c:532
+msgid "_Preview:"
+msgstr "预览(_P)："
+
+#: gtkfontsel.c:1649
+msgid "Font Selection"
+msgstr "字体选择"
+
+#: gtkiconfactory.c:1354
+#, c-format
+msgid "Error loading icon: %s"
+msgstr "载入图标时出错：%s"
+
+#: gtkicontheme.c:1374
+#, c-format
+msgid ""
+"Could not find the icon '%s'. The '%s' theme\n"
+"was not found either, perhaps you need to install it.\n"
+"You can get a copy from:\n"
+"\t%s"
+msgstr ""
+"找不到图标“%s”。“%s”主题也没有找到，可能您需要先安装它。\n"
+"您可以从下面的位置获得一个副本：\n"
+"\t%s"
+
+#: gtkicontheme.c:1555
+#, c-format
+msgid "Icon '%s' not present in theme"
+msgstr "图标“%s”未出现在主题中"
+
+#: gtkicontheme.c:3101
+msgid "Failed to load icon"
+msgstr "载入图标失败"
+
+#: gtkimmodule.c:527
+msgid "Simple"
+msgstr "简单"
+
+#: gtklabel.c:5696
+msgid "_Open Link"
+msgstr "打开链接(_O)"
+
+#: gtklabel.c:5708
+msgid "Copy _Link Address"
+msgstr "复制链接地址(_L)"
+
+#: gtklinkbutton.c:428
+msgid "Copy URL"
+msgstr "复制 URL"
+
+#: gtklinkbutton.c:586
+msgid "Invalid URI"
+msgstr "无效的 URI"
+
+#: gtkmain.c:454
+msgid "Load additional GTK+ modules"
+msgstr "装入额外的 GTK+ 模块"
+
+#: gtkmain.c:455
+msgid "MODULES"
+msgstr "模块"
+
+#: gtkmain.c:457
+msgid "Make all warnings fatal"
+msgstr "将警告变为严重"
+
+#: gtkmain.c:460
+msgid "GTK+ debugging flags to set"
+msgstr "要设置的 GTK+ 调试标志"
+
+#: gtkmain.c:461 gtkmain.c:464
+msgid "FLAGS"
+msgstr "标志"
+
+#: gtkmain.c:463
+msgid "GTK+ debugging flags to unset"
+msgstr "要取消的 GTK+ 调试标志"
+
+#: gtkmain.c:755
+msgid "default:LTR"
+msgstr "default:LTR"
+
+#: gtkmain.c:820
+#, c-format
+msgid "Cannot open display: %s"
+msgstr "无法打开显示：%s"
+
+#: gtkmain.c:857
+msgid "GTK+ Options"
+msgstr "GTK+ 选项"
+
+#: gtkmain.c:857
+msgid "Show GTK+ Options"
+msgstr "显示 GTK+ 选项"
+
+#: gtkmountoperation.c:494
+msgid "Co_nnect"
+msgstr "连接(_N)"
+
+#: gtkmountoperation.c:561
+msgid "Connect _anonymously"
+msgstr "匿名连接(_A)"
+
+#: gtkmountoperation.c:570
+msgid "Connect as u_ser:"
+msgstr "连接为用户(_S)："
+
+#: gtkmountoperation.c:608
+msgid "_Username:"
+msgstr "用户名(_U)："
+
+#: gtkmountoperation.c:613
+msgid "_Domain:"
+msgstr "域(_D)："
+
+#: gtkmountoperation.c:619
+msgid "_Password:"
+msgstr "密码(_P)："
+
+#: gtkmountoperation.c:637
+msgid "Forget password _immediately"
+msgstr "立即忘记密码(_I)"
+
+#: gtkmountoperation.c:647
+msgid "Remember password until you _logout"
+msgstr "记到注销之前(_L)"
+
+#: gtkmountoperation.c:657
+msgid "Remember _forever"
+msgstr "永远记住(_F)"
+
+#: gtkmountoperation.c:886
+#, c-format
+msgid "Unknown Application (PID %d)"
+msgstr "未知应用程序(pid %d)"
+
+#: gtkmountoperation.c:1069
+msgid "Unable to end process"
+msgstr "无法结束进程"
+
+#: gtkmountoperation.c:1106
+msgid "_End Process"
+msgstr "结束进程(_E)"
+
+#: gtknotebook.c:4745 gtknotebook.c:7351
+#, c-format
+msgid "Page %u"
+msgstr "第 %u 页"
+
+#: gtkpathbar.c:151
+msgid "Up Path"
+msgstr "上一层路径"
+
+#: gtkpathbar.c:153
+msgid "Down Path"
+msgstr "下一层路径"
+
+#: gtkpathbar.c:1467
+msgid "File System Root"
+msgstr "根文件系统"
+
+#: gtkrc.c:2906
+#, c-format
+msgid "Unable to find include file: \"%s\""
+msgstr "找不到包含文件：“%s”"
+
+#: gtkrc.c:3536 gtkrc.c:3539
+#, c-format
+msgid "Unable to locate image file in pixmap_path: \"%s\""
+msgstr "无法在像素图路径中找到图像文件：“%s”"
+
+#: gtkrecentaction.c:154 gtkrecentaction.c:162 gtkrecentchoosermenu.c:588
+#: gtkrecentchoosermenu.c:596
+#, c-format
+msgid "This function is not implemented for widgets of class '%s'"
+msgstr "此函数尚未在“%s”类的部件上实现"
+
+#: gtkrecentchooserdefault.c:481
+msgid "Select which type of documents are shown"
+msgstr "选择要显示的文档类型"
+
+#: gtkrecentchooserdefault.c:1135 gtkrecentchooserdefault.c:1172
+#, c-format
+msgid "No item for URI '%s' found"
+msgstr "URI“%s”未找到项目"
+
+#: gtkrecentchooserdefault.c:1299
+msgid "Untitled filter"
+msgstr "无标题过滤器"
+
+#: gtkrecentchooserdefault.c:1652
+msgid "Could not remove item"
+msgstr "无法删除项目"
+
+#: gtkrecentchooserdefault.c:1696
+msgid "Could not clear list"
+msgstr "无法清除列表"
+
+#: gtkrecentchooserdefault.c:1780
+msgid "Copy _Location"
+msgstr "复制位置(_L)"
+
+#: gtkrecentchooserdefault.c:1793
+msgid "_Remove From List"
+msgstr "从列表中删除(_R)"
+
+#: gtkrecentchooserdefault.c:1802
+msgid "_Clear List"
+msgstr "清除列表(_C)"
+
+#: gtkrecentchooserdefault.c:1816
+msgid "Show _Private Resources"
+msgstr "显示私有资源(_P)"
+
+#: gtkrecentchoosermenu.c:342
+msgid "No items found"
+msgstr "未找到项目"
+
+#: gtkrecentchoosermenu.c:508 gtkrecentchoosermenu.c:564
+#, c-format
+msgid "No recently used resource found with URI `%s'"
+msgstr "最近使用过的资源中没有找到 URI“%s”"
+
+#: gtkrecentchoosermenu.c:774
+#, c-format
+msgid "Open '%s'"
+msgstr "打开“%s”"
+
+#: gtkrecentchoosermenu.c:804
+msgid "Unknown item"
+msgstr "未知项"
+
+#: gtkrecentmanager.c:1182 gtkrecentmanager.c:1195 gtkrecentmanager.c:1332
+#: gtkrecentmanager.c:1342 gtkrecentmanager.c:1395 gtkrecentmanager.c:1404
+#: gtkrecentmanager.c:1419
+#, c-format
+msgid "Unable to find an item with URI '%s'"
+msgstr "找不到 URI 为“%s”的一项"
+
+#: gtkspinner.c:459
+msgid "Provides visual indication of progress"
+msgstr "提供进度的视觉表示"
+
+#: gtktextbufferrichtext.c:652
+#, c-format
+msgid "Unknown error when trying to deserialize %s"
+msgstr "试图反序列化 %s 时发生未知错误"
+
+#: gtktextbufferrichtext.c:711
+#, c-format
+msgid "No deserialize function found for format %s"
+msgstr "格式 %s 未找到反序列化函数"
+
+#: gtktextbufferserialize.c:797 gtktextbufferserialize.c:823
+#, c-format
+msgid "Both \"id\" and \"name\" were found on the <%s> element"
+msgstr "<%s> 元素同时找到了“id”和“name”"
+
+#: gtktextbufferserialize.c:807 gtktextbufferserialize.c:833
+#, c-format
+msgid "The attribute \"%s\" was found twice on the <%s> element"
+msgstr "<%s> 元素找到了两次“%s”属性"
+
+#: gtktextbufferserialize.c:847
+#, c-format
+msgid "<%s> element has invalid ID \"%s\""
+msgstr "<%s> 元素的 id“%s”无效"
+
+#: gtktextbufferserialize.c:857
+#, c-format
+msgid "<%s> element has neither a \"name\" nor an \"id\" attribute"
+msgstr "<%s> 元素既没有“name”也没有“id”属性"
+
+#: gtktextbufferserialize.c:944
+#, c-format
+msgid "Attribute \"%s\" repeated twice on the same <%s> element"
+msgstr "在同一个 <%2$s> 元素中重复了两次“%1$s”属性"
+
+#: gtktextbufferserialize.c:962 gtktextbufferserialize.c:987
+#, c-format
+msgid "Attribute \"%s\" is invalid on <%s> element in this context"
+msgstr "此上下文中 <%2$s> 元素的属性“%1$s”非法"
+
+#: gtktextbufferserialize.c:1023
+#, c-format
+msgid "Tag \"%s\" has not been defined."
+msgstr "标签“%s”未定义。"
+
+#: gtktextbufferserialize.c:1035
+msgid "Anonymous tag found and tags can not be created."
+msgstr "发现匿名标签，不能创建标签。"
+
+#: gtktextbufferserialize.c:1046
+#, c-format
+msgid "Tag \"%s\" does not exist in buffer and tags can not be created."
+msgstr "标签“%s”不存在于缓存中，不能创建标签。"
+
+#: gtktextbufferserialize.c:1145 gtktextbufferserialize.c:1220
+#: gtktextbufferserialize.c:1321 gtktextbufferserialize.c:1395
+#, c-format
+msgid "Element <%s> is not allowed below <%s>"
+msgstr "元素 <%s> 不允许位于 <%s> 下方"
+
+#: gtktextbufferserialize.c:1176
+#, c-format
+msgid "\"%s\" is not a valid attribute type"
+msgstr "“%s”不是合法的属性类型"
+
+#: gtktextbufferserialize.c:1184
+#, c-format
+msgid "\"%s\" is not a valid attribute name"
+msgstr "“%s”不是合法的属性名称"
+
+#: gtktextbufferserialize.c:1194
+#, c-format
+msgid ""
+"\"%s\" could not be converted to a value of type \"%s\" for attribute \"%s\""
+msgstr "“%s”不能被转换为“%s”类型的值，此值用于属性“%s”"
+
+#: gtktextbufferserialize.c:1203
+#, c-format
+msgid "\"%s\" is not a valid value for attribute \"%s\""
+msgstr "“%s”不是属性“%s”的合法的值"
+
+#: gtktextbufferserialize.c:1286
+#, c-format
+msgid "Tag \"%s\" already defined"
+msgstr "标签“%s”已经定义"
+
+#: gtktextbufferserialize.c:1297
+#, c-format
+msgid "Tag \"%s\" has invalid priority \"%s\""
+msgstr "标签“%s”的优先级“%s”非法"
+
+#: gtktextbufferserialize.c:1350
+#, c-format
+msgid "Outermost element in text must be <text_view_markup> not <%s>"
+msgstr "文本最外层元素应当为 <text_view_markup> 而不是 <%s>"
+
+#: gtktextbufferserialize.c:1359 gtktextbufferserialize.c:1375
+#, c-format
+msgid "A <%s> element has already been specified"
+msgstr "已经指定了 <%s> 元素"
+
+#: gtktextbufferserialize.c:1381
+msgid "A <text> element can't occur before a <tags> element"
+msgstr "<text> 元素不能出现在 <tags> 元素之前"
+
+#: gtktextbufferserialize.c:1780
+msgid "Serialized data is malformed"
+msgstr "序列化数据格式不对"
+
+#: gtktextbufferserialize.c:1858
+msgid ""
+"Serialized data is malformed. First section isn't GTKTEXTBUFFERCONTENTS-0001"
+msgstr "序列化数据格式不对。第一节应该是 GTKTEXTBUFFERCONTENTS-0001"
+
+#: gtktextutil.c:61
+msgid "LRM _Left-to-right mark"
+msgstr "LRM 从左至右记号(_L)"
+
+#: gtktextutil.c:62
+msgid "RLM _Right-to-left mark"
+msgstr "RLM 从右至左记号(_R)"
+
+#: gtktextutil.c:63
+msgid "LRE Left-to-right _embedding"
+msgstr "LRE 从左至右嵌入(_E)"
+
+#: gtktextutil.c:64
+msgid "RLE Right-to-left e_mbedding"
+msgstr "RLE 从右至左嵌入(_M)"
+
+#: gtktextutil.c:65
+msgid "LRO Left-to-right _override"
+msgstr "LRO 从左至右覆盖(_O)"
+
+#: gtktextutil.c:66
+msgid "RLO Right-to-left o_verride"
+msgstr "RLO 从右至左覆盖(_V)"
+
+#: gtktextutil.c:67
+msgid "PDF _Pop directional formatting"
+msgstr "PDF 弹出方向格式化(_P)"
+
+#: gtktextutil.c:68
+msgid "ZWS _Zero width space"
+msgstr "ZWS 零宽度空格(_Z)"
+
+#: gtktextutil.c:69
+msgid "ZWJ Zero width _joiner"
+msgstr "ZWJ 零宽度接合(_J)"
+
+#: gtktextutil.c:70
+msgid "ZWNJ Zero width _non-joiner"
+msgstr "ZWNJ 零宽度非接合(_N)"
+
+#: gtkthemes.c:71
+#, c-format
+msgid "Unable to locate theme engine in module_path: \"%s\","
+msgstr "无法在模块路径中找到主题引擎：“%s”，"
+
+#: gtkuimanager.c:1505
+#, c-format
+msgid "Unexpected start tag '%s' on line %d char %d"
+msgstr "在第%2$d行第%3$d个字符处有未预期的开始标签“%1$s”"
+
+#: gtkuimanager.c:1595
+#, c-format
+msgid "Unexpected character data on line %d char %d"
+msgstr "在第%d行第%d个字符处有未预期的字符"
+
+#: gtkuimanager.c:2427
+msgid "Empty"
+msgstr "空"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-debug"
+#~ msgstr "解析选项 --gdk-debug 出错"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-no-debug"
+#~ msgstr "解析选项 --gdk-no-debug 出错"
+
+#~ msgid "Program class as used by the window manager"
+#~ msgstr "窗口管理器所使用的程序类"
+
+#~ msgid "CLASS"
+#~ msgstr "类"
+
+#~ msgid "Program name as used by the window manager"
+#~ msgstr "窗口管理器所使用的程序名"
+
+#~ msgid "NAME"
+#~ msgstr "名称"
+
+#~ msgid "X display to use"
+#~ msgstr "要使用的 X 显示"
+
+#~ msgid "DISPLAY"
+#~ msgstr "显示"
+
+#~ msgid "X screen to use"
+#~ msgstr "要使用的 X 屏幕"
+
+#~ msgid "SCREEN"
+#~ msgstr "屏幕"
+
+#~ msgid "GDK debugging flags to set"
+#~ msgstr "要设置的 GDK 调试标志"
+
+#~ msgid "GDK debugging flags to unset"
+#~ msgstr "要取消的 GDK 调试标志"
+
+#~ msgctxt "keyboard label"
+#~ msgid "BackSpace"
+#~ msgstr "退格"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Tab"
+#~ msgstr "制表"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Return"
+#~ msgstr "回车"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Pause"
+#~ msgstr "暂停"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Scroll_Lock"
+#~ msgstr "滚动锁"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Sys_Req"
+#~ msgstr "系统请求"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Escape"
+#~ msgstr "退出"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Multi_key"
+#~ msgstr "Multi_key"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Home"
+#~ msgstr "Home"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Left"
+#~ msgstr "左"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Up"
+#~ msgstr "上"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Right"
+#~ msgstr "右"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Down"
+#~ msgstr "下"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Up"
+#~ msgstr "向上翻页"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Down"
+#~ msgstr "向下翻页"
+
+#~ msgctxt "keyboard label"
+#~ msgid "End"
+#~ msgstr "End"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Begin"
+#~ msgstr "Begin"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Print"
+#~ msgstr "打印"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Insert"
+#~ msgstr "插入"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Num_Lock"
+#~ msgstr "数字锁"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Space"
+#~ msgstr "KP_Space"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Tab"
+#~ msgstr "KP_Tab"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Enter"
+#~ msgstr "KP_Enter"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Home"
+#~ msgstr "KP_Home"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Left"
+#~ msgstr "KP_Left"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Up"
+#~ msgstr "KP_Left"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Right"
+#~ msgstr "KP_Right"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Down"
+#~ msgstr "KP_Down"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Up"
+#~ msgstr "KP_PageUp"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Prior"
+#~ msgstr "KP_Prior"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Down"
+#~ msgstr "KP_PageDown"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Next"
+#~ msgstr "KP_Next"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_End"
+#~ msgstr "KP_End"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Begin"
+#~ msgstr "KP_Begin"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Insert"
+#~ msgstr "KP_Insert"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Delete"
+#~ msgstr "KP_Delete"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Delete"
+#~ msgstr "Delete"
+
+#~ msgid "Don't batch GDI requests"
+#~ msgstr "不对 GDI 请求批处理"
+
+#~ msgid "Don't use the Wintab API for tablet support"
+#~ msgstr "不使用 Wintab API 来支持 tablet"
+
+#~ msgid "Same as --no-wintab"
+#~ msgstr "与 --no-wintab 相同"
+
+#~ msgid "Do use the Wintab API [default]"
+#~ msgstr "使用 Wintab API [默认]"
+
+#~ msgid "Size of the palette in 8 bit mode"
+#~ msgstr "8 位模式调色板大小"
+
+#~ msgid "COLORS"
+#~ msgstr "颜色"
+
+#~ msgid "Make X calls synchronous"
+#~ msgstr "同步调用 X"
+
+#, c-format
+#~ msgid "Starting %s"
+#~ msgstr "正在启动 %s"
+
+#, c-format
+#~ msgid "Opening %s"
+#~ msgstr "打开 %s"
+
+#, c-format
+#~ msgid "Opening %d Item"
+#~ msgid_plural "Opening %d Items"
+#~ msgstr[0] "打开 %d 项"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Shift"
+#~ msgstr "Shift"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Ctrl"
+#~ msgstr "Ctrl"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Alt"
+#~ msgstr "Alt"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Super"
+#~ msgstr "Super"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Hyper"
+#~ msgstr "Hyper"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Meta"
+#~ msgstr "Meta"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Space"
+#~ msgstr "Space"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Backslash"
+#~ msgstr "\\"
+
+#~ msgid "calendar:MY"
+#~ msgstr "calendar:YM"
+
+#~ msgid "calendar:week_start:0"
+#~ msgstr "calendar:week_start:1"
+
+#~ msgctxt "year measurement template"
+#~ msgid "2000"
+#~ msgstr "2000"
+
+#, c-format
+#~ msgctxt "calendar:day:digits"
+#~ msgid "%d"
+#~ msgstr "%d"
+
+#, c-format
+#~ msgctxt "calendar:week:digits"
+#~ msgid "%d"
+#~ msgstr "%d"
+
+#~ msgctxt "calendar year format"
+#~ msgid "%Y"
+#~ msgstr "%Y"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Disabled"
+#~ msgstr "禁用"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Invalid"
+#~ msgstr "无效的"
+
+#, c-format
+#~ msgctxt "progress bar label"
+#~ msgid "%d %%"
+#~ msgstr "%d %%"
+
+#~ msgid "default:mm"
+#~ msgstr "default:mm"
+
+#~ msgid "Manage Custom Sizes"
+#~ msgstr "管理自定义大小"
+
+#~ msgid "inch"
+#~ msgstr "英寸"
+
+#~ msgid "mm"
+#~ msgstr "毫米"
+
+#~ msgid "Margins from Printer..."
+#~ msgstr "打印机边距..."
+
+#, c-format
+#~ msgid "Custom Size %d"
+#~ msgstr "自定义大小 %d"
+
+#~ msgid "_Width:"
+#~ msgstr "宽度(_W)："
+
+#~ msgid "_Height:"
+#~ msgstr "高度(_H)："
+
+#~ msgid "Paper Size"
+#~ msgstr "纸张大小"
+
+#~ msgid "_Top:"
+#~ msgstr "上(_T)："
+
+#~ msgid "_Bottom:"
+#~ msgstr "下(_B)："
+
+#~ msgid "_Left:"
+#~ msgstr "左(_L)："
+
+#~ msgid "_Right:"
+#~ msgstr "右(_R)："
+
+#~ msgid "Paper Margins"
+#~ msgstr "纸张边距"
+
+#, c-format
+#~ msgid "Invalid path"
+#~ msgstr "无效的路径"
+
+#~ msgid "No match"
+#~ msgstr "未找到匹配"
+
+#~ msgid "Sole completion"
+#~ msgstr "唯一补全"
+
+#~ msgid "Complete, but not unique"
+#~ msgstr "进行补全，但不唯一"
+
+#~ msgid "Completing..."
+#~ msgstr "正在补全..."
+
+#~ msgid "Only local files may be selected"
+#~ msgstr "只能选择本地文件"
+
+#~ msgid "Incomplete hostname; end it with '/'"
+#~ msgstr "主机名不完整；请在其末尾加上“/”"
+
+#~ msgid "Path does not exist"
+#~ msgstr "路径不存在"
+
+#~ msgid "Folders"
+#~ msgstr "文件夹"
+
+#~ msgid "Fol_ders"
+#~ msgstr "文件夹(_D)"
+
+#~ msgid "_Files"
+#~ msgstr "文件(_F)"
+
+#, c-format
+#~ msgid "Folder unreadable: %s"
+#~ msgstr "文件夹不可读：%s"
+
+#, c-format
+#~ msgid ""
+#~ "The file \"%s\" resides on another machine (called %s) and may not be "
+#~ "available to this program.\n"
+#~ "Are you sure that you want to select it?"
+#~ msgstr ""
+#~ "文件“%s”位于另一台(名为 %s)机器上，可能无法被本程序访问。\n"
+#~ "您确定要选择它吗？"
+
+#~ msgid "_New Folder"
+#~ msgstr "新建文件夹(_N)"
+
+#~ msgid "De_lete File"
+#~ msgstr "删除文件(_L)"
+
+#~ msgid "_Rename File"
+#~ msgstr "重命名文件(_R)"
+
+#, c-format
+#~ msgid ""
+#~ "The folder name \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr "文件夹名称“%s”含有不允许存在于文件名中的符号"
+
+#~ msgid "New Folder"
+#~ msgstr "新建文件夹"
+
+#~ msgid "_Folder name:"
+#~ msgstr "文件夹名称(_F)："
+
+#~ msgid "C_reate"
+#~ msgstr "创建(_R)"
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr "文件名“%s”中含有不允许存在于文件名中的符号"
+
+#, c-format
+#~ msgid "Error deleting file '%s': %s"
+#~ msgstr "删除文件“%s”时出错：%s"
+
+#, c-format
+#~ msgid "Really delete file \"%s\"?"
+#~ msgstr "真的要删除文件“%s”吗？"
+
+#~ msgid "Delete File"
+#~ msgstr "删除文件"
+
+#, c-format
+#~ msgid "Error renaming file to \"%s\": %s"
+#~ msgstr "将文件重命名为“%s”时出错：%s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\": %s"
+#~ msgstr "重命名文件“%s”时出错：%s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\" to \"%s\": %s"
+#~ msgstr "将文件“%s”重命名为“%s”时出错：%s"
+
+#~ msgid "Rename File"
+#~ msgstr "重命名文件"
+
+#, c-format
+#~ msgid "Rename file \"%s\" to:"
+#~ msgstr "将文件“%s”重命名为："
+
+#~ msgid "_Rename"
+#~ msgstr "重命名(_R)"
+
+#~ msgid "_Selection: "
+#~ msgstr "选择(_S)："
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" couldn't be converted to UTF-8. (try setting the "
+#~ "environment variable G_FILENAME_ENCODING): %s"
+#~ msgstr ""
+#~ "文件名“%s”无法转换为 UTF-8。(请尝试设置环境变量 G_FILENAME_ENCODING)：%s"
+
+#~ msgid "Invalid UTF-8"
+#~ msgstr "无效的 UTF-8"
+
+#~ msgid "Name too long"
+#~ msgstr "名称太长"
+
+#~ msgid "Couldn't convert filename"
+#~ msgstr "无法转换文件名"
+
+#~ msgid "Gamma"
+#~ msgstr "Gamma"
+
+#~ msgid "_Gamma value"
+#~ msgstr "Gamma 值(_G)"
+
+#~ msgctxt "input method menu"
+#~ msgid "System"
+#~ msgstr "系统"
+
+#~ msgctxt "input method menu"
+#~ msgid "None"
+#~ msgstr "无"
+
+#, c-format
+#~ msgctxt "input method menu"
+#~ msgid "System (%s)"
+#~ msgstr "系统(%s)"
+
+#~ msgid "Input"
+#~ msgstr "输入"
+
+#~ msgid "No extended input devices"
+#~ msgstr "没有扩展的输入设备"
+
+#~ msgid "_Device:"
+#~ msgstr "设备(_D)："
+
+#~ msgid "Disabled"
+#~ msgstr "禁用"
+
+#~ msgid "Screen"
+#~ msgstr "屏幕"
+
+#~ msgid "Window"
+#~ msgstr "窗口"
+
+#~ msgid "_Mode:"
+#~ msgstr "模式(_M)："
+
+#~ msgid "Axes"
+#~ msgstr "轴"
+
+#~ msgid "Keys"
+#~ msgstr "按键"
+
+#~ msgid "_X:"
+#~ msgstr "_X："
+
+#~ msgid "_Y:"
+#~ msgstr "_Y："
+
+#~ msgid "_Pressure:"
+#~ msgstr "力度(_P)："
+
+#~ msgid "X _tilt:"
+#~ msgstr "X 倾斜(_T)："
+
+#~ msgid "Y t_ilt:"
+#~ msgstr "Y 倾斜(_I)："
+
+#~ msgid "_Wheel:"
+#~ msgstr "滚轮(_W)："
+
+#~ msgid "none"
+#~ msgstr "无"
+
+#~ msgid "(disabled)"
+#~ msgstr "(禁用)"
+
+#~ msgid "(unknown)"
+#~ msgstr "(未知)"
+
+#~ msgid "Cl_ear"
+#~ msgstr "清除(_E)"
+
+#, c-format
+#~ msgid "Cannot kill process with PID %d. Operation is not implemented."
+#~ msgstr "不能终止 pid 为 %d 的进程。操作未能执行。"
+
+#~ msgid "Terminal Pager"
+#~ msgstr "终端阅读器"
+
+#~ msgid "Top Command"
+#~ msgstr "top 命令"
+
+#~ msgid "Bourne Again Shell"
+#~ msgstr "Bourne Again Shell (bash)"
+
+#~ msgid "Bourne Shell"
+#~ msgstr "Bourne Shell"
+
+#~ msgid "Z Shell"
+#~ msgstr "Z Shell (zsh)"
+
+#, c-format
+#~ msgid "Cannot end process with PID %d: %s"
+#~ msgstr "无法结束 PID 为 %d 的进程：%s"
+
+#~ msgid "Not a valid page setup file"
+#~ msgstr "非法的页面设置文件"
+
+#~ msgid "Any Printer"
+#~ msgstr "任意打印机"
+
+#~ msgid "For portable documents"
+#~ msgstr "用于便携文档"
+
+#, c-format
+#~ msgid ""
+#~ "Margins:\n"
+#~ " Left: %s %s\n"
+#~ " Right: %s %s\n"
+#~ " Top: %s %s\n"
+#~ " Bottom: %s %s"
+#~ msgstr ""
+#~ "边距：\n"
+#~ " 左：%s %s\n"
+#~ " 右：%s %s\n"
+#~ " 上：%s %s\n"
+#~ " 下：%s %s"
+
+#~ msgid "Manage Custom Sizes..."
+#~ msgstr "管理自定义大小..."
+
+#~ msgid "_Format for:"
+#~ msgstr "格式(_F)："
+
+#~ msgid "_Paper size:"
+#~ msgstr "纸张大小(_P)："
+
+#~ msgid "_Orientation:"
+#~ msgstr "方向(_O)："
+
+#~ msgid "Page Setup"
+#~ msgstr "页面设置"
+
+#~ msgid "Authentication"
+#~ msgstr "认证"
+
+#~ msgid "Not available"
+#~ msgstr "不可用"
+
+#~ msgid "_Save in folder:"
+#~ msgstr "保存于文件夹(_S)："
+
+#, c-format
+#~ msgid "%s job #%d"
+#~ msgstr "%s 的打印作业 #%d"
+
+#~ msgctxt "print operation status"
+#~ msgid "Initial state"
+#~ msgstr "初始状态"
+
+#~ msgctxt "print operation status"
+#~ msgid "Preparing to print"
+#~ msgstr "准备打印"
+
+#~ msgctxt "print operation status"
+#~ msgid "Generating data"
+#~ msgstr "生成数据"
+
+#~ msgctxt "print operation status"
+#~ msgid "Sending data"
+#~ msgstr "发送数据"
+
+#~ msgctxt "print operation status"
+#~ msgid "Waiting"
+#~ msgstr "等候"
+
+#~ msgctxt "print operation status"
+#~ msgid "Blocking on issue"
+#~ msgstr "塞纸"
+
+#~ msgctxt "print operation status"
+#~ msgid "Printing"
+#~ msgstr "打印"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished"
+#~ msgstr "完成"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished with error"
+#~ msgstr "有错误完成"
+
+#, c-format
+#~ msgid "Preparing %d"
+#~ msgstr "正在准备 %d"
+
+#~ msgid "Preparing"
+#~ msgstr "正在准备"
+
+#, c-format
+#~ msgid "Printing %d"
+#~ msgstr "正在打印 %d"
+
+#~ msgid "Error creating print preview"
+#~ msgstr "创建打印预览时出错"
+
+#~ msgid ""
+#~ "The most probable reason is that a temporary file could not be created."
+#~ msgstr "最可能的原因是无法创建临时文件。"
+
+#~ msgid "Error launching preview"
+#~ msgstr "调用预览出错"
+
+#~ msgid "Error printing"
+#~ msgstr "打印出错"
+
+#~ msgid "Application"
+#~ msgstr "应用程序"
+
+#~ msgid "Printer offline"
+#~ msgstr "打印机脱机"
+
+#~ msgid "Out of paper"
+#~ msgstr "缺纸"
+
+#~ msgid "Paused"
+#~ msgstr "已暂停"
+
+#~ msgid "Need user intervention"
+#~ msgstr "需要用户干预"
+
+#~ msgid "Custom size"
+#~ msgstr "自定义大小"
+
+#~ msgid "No printer found"
+#~ msgstr "未找到打印机"
+
+#~ msgid "Invalid argument to CreateDC"
+#~ msgstr "CreateDC 的参数无效"
+
+#~ msgid "Error from StartDoc"
+#~ msgstr "从 StartDoc 出错"
+
+#~ msgid "Not enough free memory"
+#~ msgstr "内存不足"
+
+#~ msgid "Invalid argument to PrintDlgEx"
+#~ msgstr "PrintDlgEx 的参数无效"
+
+#~ msgid "Invalid pointer to PrintDlgEx"
+#~ msgstr "PrintDlgEx 的指针无效"
+
+#~ msgid "Invalid handle to PrintDlgEx"
+#~ msgstr "PrintDlgEx 的句柄无效"
+
+#~ msgid "Unspecified error"
+#~ msgstr "未指定错误"
+
+#~ msgid "Getting printer information failed"
+#~ msgstr "获取打印机信息失败"
+
+#~ msgid "Getting printer information..."
+#~ msgstr "正在获取打印机信息..."
+
+#~ msgid "Printer"
+#~ msgstr "打印机"
+
+#~ msgid "Location"
+#~ msgstr "位置"
+
+#~ msgid "Status"
+#~ msgstr "状态"
+
+#~ msgid "Range"
+#~ msgstr "范围"
+
+#~ msgid "_All Pages"
+#~ msgstr "所有页面(_A)"
+
+#~ msgid "C_urrent Page"
+#~ msgstr "当前页(_U)"
+
+#~ msgid "Se_lection"
+#~ msgstr "选择(_S)："
+
+#~ msgid "Pag_es:"
+#~ msgstr "页面(_E)："
+
+#~ msgid ""
+#~ "Specify one or more page ranges,\n"
+#~ " e.g. 1-3,7,11"
+#~ msgstr ""
+#~ "指定一个或多个页面范围，\n"
+#~ "如：1-3,7,11"
+
+#~ msgid "Pages"
+#~ msgstr "页面"
+
+#~ msgid "Copies"
+#~ msgstr "副本"
+
+#~ msgid "Copie_s:"
+#~ msgstr "副本数(_S)："
+
+#~ msgid "C_ollate"
+#~ msgstr "逐份(_O)"
+
+#~ msgid "_Reverse"
+#~ msgstr "逆序(_R)"
+
+#~ msgid "General"
+#~ msgstr "常规"
+
+#~ msgid "Left to right, top to bottom"
+#~ msgstr "从左到右，从上到下"
+
+#~ msgid "Left to right, bottom to top"
+#~ msgstr "从左到右，从下到上"
+
+#~ msgid "Right to left, top to bottom"
+#~ msgstr "从右到左，从上到下"
+
+#~ msgid "Right to left, bottom to top"
+#~ msgstr "从右到左，从下到上"
+
+#~ msgid "Top to bottom, left to right"
+#~ msgstr "从上到下，从左到右"
+
+#~ msgid "Top to bottom, right to left"
+#~ msgstr "从上到下，从右到左"
+
+#~ msgid "Bottom to top, left to right"
+#~ msgstr "从下到上，从左到右"
+
+#~ msgid "Bottom to top, right to left"
+#~ msgstr "从下到上，从右到左"
+
+#~ msgid "Page Ordering"
+#~ msgstr "页面顺序"
+
+#~ msgid "Left to right"
+#~ msgstr "从左至右"
+
+#~ msgid "Right to left"
+#~ msgstr "从右至左"
+
+#~ msgid "Top to bottom"
+#~ msgstr "自顶到底"
+
+#~ msgid "Bottom to top"
+#~ msgstr "自底至顶"
+
+#~ msgid "Layout"
+#~ msgstr "布局"
+
+#~ msgid "T_wo-sided:"
+#~ msgstr "双面(_W)："
+
+#~ msgid "Pages per _side:"
+#~ msgstr "每面页数(_S)："
+
+#~ msgid "Page or_dering:"
+#~ msgstr "页面顺序(_D)："
+
+#~ msgid "_Only print:"
+#~ msgstr "打印(_O)："
+
+#~ msgid "All sheets"
+#~ msgstr "全面页面"
+
+#~ msgid "Even sheets"
+#~ msgstr "偶数页"
+
+#~ msgid "Odd sheets"
+#~ msgstr "奇数页"
+
+#~ msgid "Sc_ale:"
+#~ msgstr "缩放(_A)："
+
+#~ msgid "Paper"
+#~ msgstr "纸张"
+
+#~ msgid "Paper _type:"
+#~ msgstr "纸张类型(_T)："
+
+#~ msgid "Paper _source:"
+#~ msgstr "纸张来源(_S)："
+
+#~ msgid "Output t_ray:"
+#~ msgstr "出纸器(_R)："
+
+#~ msgid "Or_ientation:"
+#~ msgstr "方向(_I)："
+
+#~ msgid "Portrait"
+#~ msgstr "纵向"
+
+#~ msgid "Landscape"
+#~ msgstr "横向"
+
+#~ msgid "Reverse portrait"
+#~ msgstr "纵向翻转"
+
+#~ msgid "Reverse landscape"
+#~ msgstr "横向翻转"
+
+#~ msgid "Job Details"
+#~ msgstr "任务细节"
+
+#~ msgid "Pri_ority:"
+#~ msgstr "优先级(_O)："
+
+#~ msgid "_Billing info:"
+#~ msgstr "计费信息(_B)："
+
+#~ msgid "Print Document"
+#~ msgstr "打印文档"
+
+#~ msgid "_Now"
+#~ msgstr "立即(_N)"
+
+#~ msgid "A_t:"
+#~ msgstr "于(_T)："
+
+#~ msgid ""
+#~ "Specify the time of print,\n"
+#~ " e.g. 15:30, 2:35 pm, 14:15:20, 11:46:30 am, 4 pm"
+#~ msgstr ""
+#~ "指定打印时间，\n"
+#~ "例如 15:30, 2:35 pm, 14:15:20, 11:46:30 am, 4 pm"
+
+#~ msgid "Time of print"
+#~ msgstr "打印时间"
+
+#~ msgid "On _hold"
+#~ msgstr "等待(_H)"
+
+#~ msgid "Hold the job until it is explicitly released"
+#~ msgstr "保持任务直到其被显式释放"
+
+#~ msgid "Add Cover Page"
+#~ msgstr "添加封面页"
+
+#~ msgid "Be_fore:"
+#~ msgstr "封面(_F)："
+
+#~ msgid "_After:"
+#~ msgstr "封底(_A)："
+
+#~ msgid "Job"
+#~ msgstr "任务"
+
+#~ msgid "Advanced"
+#~ msgstr "高级"
+
+#~ msgid "Image Quality"
+#~ msgstr "图像质量"
+
+#~ msgid "Color"
+#~ msgstr "颜色"
+
+#~ msgid "Finishing"
+#~ msgstr "完成"
+
+#~ msgid "Some of the settings in the dialog conflict"
+#~ msgstr "对话框中的某些设置冲突"
+
+#~ msgid "Print"
+#~ msgstr "打印"
+
+#, c-format
+#~ msgctxt "recent menu label"
+#~ msgid "_%d. %s"
+#~ msgstr "_%d. %s"
+
+#, c-format
+#~ msgctxt "recent menu label"
+#~ msgid "%d. %s"
+#~ msgstr "%d. %s"
+
+#~ msgctxt "throbbing progress animation widget"
+#~ msgid "Spinner"
+#~ msgstr "自旋动画(Spinner)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Information"
+#~ msgstr "信息"
+
+#~ msgctxt "Stock label"
+#~ msgid "Warning"
+#~ msgstr "警告"
+
+#~ msgctxt "Stock label"
+#~ msgid "Error"
+#~ msgstr "错误"
+
+#~ msgctxt "Stock label"
+#~ msgid "Question"
+#~ msgstr "问题"
+
+#~ msgctxt "Stock label"
+#~ msgid "_About"
+#~ msgstr "关于(_A)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Add"
+#~ msgstr "添加(_A)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Apply"
+#~ msgstr "应用(_A)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Bold"
+#~ msgstr "粗体(_B)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Cancel"
+#~ msgstr "取消(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_CD-Rom"
+#~ msgstr "_CD-ROM"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Clear"
+#~ msgstr "清除(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Close"
+#~ msgstr "关闭(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "C_onnect"
+#~ msgstr "连接(_O)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Convert"
+#~ msgstr "转换(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Copy"
+#~ msgstr "复制(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Cu_t"
+#~ msgstr "剪切(_T)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Delete"
+#~ msgstr "删除(_D)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Discard"
+#~ msgstr "放弃(_D)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Disconnect"
+#~ msgstr "断开连接(_D)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Execute"
+#~ msgstr "执行(_E)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Edit"
+#~ msgstr "编辑(_E)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Find"
+#~ msgstr "查找(_F)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Find and _Replace"
+#~ msgstr "查找并替换(_R)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Floppy"
+#~ msgstr "软盘(_F)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fullscreen"
+#~ msgstr "全屏(_F)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Leave Fullscreen"
+#~ msgstr "离开全屏(_L)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Bottom"
+#~ msgstr "到底部(_B)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_First"
+#~ msgstr "到第一页(_F)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Last"
+#~ msgstr "到最后一页(_L)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Top"
+#~ msgstr "到顶部(_T)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Back"
+#~ msgstr "后退(_B)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Down"
+#~ msgstr "向下(_D)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Forward"
+#~ msgstr "前进(_F)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Up"
+#~ msgstr "向上(_U)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Harddisk"
+#~ msgstr "硬盘(_H)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Help"
+#~ msgstr "帮助(_H)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Home"
+#~ msgstr "主文件夹(_H)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Increase Indent"
+#~ msgstr "增加缩进"
+
+#~ msgctxt "Stock label"
+#~ msgid "Decrease Indent"
+#~ msgstr "减少缩进"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Index"
+#~ msgstr "索引(_I)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Information"
+#~ msgstr "信息(_I)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Italic"
+#~ msgstr "斜体(_I)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Jump to"
+#~ msgstr "跳至(_J)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Center"
+#~ msgstr "居中(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fill"
+#~ msgstr "两端对齐(_F)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Left"
+#~ msgstr "左对齐(_L)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Right"
+#~ msgstr "右对齐(_R)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Forward"
+#~ msgstr "前进(_F)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Next"
+#~ msgstr "下首(_N)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "P_ause"
+#~ msgstr "暂停(_A)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Play"
+#~ msgstr "播放(_P)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "Pre_vious"
+#~ msgstr "上首(_V)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Record"
+#~ msgstr "录制(_R)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "R_ewind"
+#~ msgstr "快退(_E)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Stop"
+#~ msgstr "停止(_S)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Network"
+#~ msgstr "网络(_N)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_New"
+#~ msgstr "新建(_N)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_No"
+#~ msgstr "否(_N)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_OK"
+#~ msgstr "确定(_O)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Open"
+#~ msgstr "打开(_O)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Landscape"
+#~ msgstr "横向"
+
+#~ msgctxt "Stock label"
+#~ msgid "Portrait"
+#~ msgstr "纵向"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse landscape"
+#~ msgstr "横向翻转"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse portrait"
+#~ msgstr "纵向翻转"
+
+#~ msgctxt "Stock label"
+#~ msgid "Page Set_up"
+#~ msgstr "页面设置(_U)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Paste"
+#~ msgstr "粘贴(_P)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Preferences"
+#~ msgstr "首选项(_P)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Print"
+#~ msgstr "打印(_P)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Print Pre_view"
+#~ msgstr "打印预览(_V)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Properties"
+#~ msgstr "属性(_P)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Quit"
+#~ msgstr "退出(_Q)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Redo"
+#~ msgstr "重做(_R)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Refresh"
+#~ msgstr "刷新(_R)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Remove"
+#~ msgstr "删除(_R)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Revert"
+#~ msgstr "还原(_R)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Save"
+#~ msgstr "保存(_S)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Save _As"
+#~ msgstr "另存为(_A)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Select _All"
+#~ msgstr "全选(_A)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Color"
+#~ msgstr "颜色(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Font"
+#~ msgstr "字体(_F)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Ascending"
+#~ msgstr "升序(_A)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Descending"
+#~ msgstr "降序(_D)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Spell Check"
+#~ msgstr "拼写检查(_S)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Stop"
+#~ msgstr "停止(_S)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Strikethrough"
+#~ msgstr "删除线(_S)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undelete"
+#~ msgstr "取消删除(_U)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Underline"
+#~ msgstr "下划线(_U)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undo"
+#~ msgstr "撤消(_U)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Yes"
+#~ msgstr "是(_Y)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Normal Size"
+#~ msgstr "普通大小(_N)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Best _Fit"
+#~ msgstr "最适合(_F)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _In"
+#~ msgstr "放大(_I)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _Out"
+#~ msgstr "缩小(_O)"
+
+#~ msgid "--- No Tip ---"
+#~ msgstr "--- 无提示 ---"
+
+#~ msgid "Volume"
+#~ msgstr "卷"
+
+#~ msgid "Turns volume down or up"
+#~ msgstr "打开或关闭音量"
+
+#~ msgid "Adjusts the volume"
+#~ msgstr "调整音量"
+
+#~ msgid "Volume Down"
+#~ msgstr "降低音量"
+
+#~ msgid "Decreases the volume"
+#~ msgstr "减少音量"
+
+#~ msgid "Volume Up"
+#~ msgstr "提高音量"
+
+#~ msgid "Increases the volume"
+#~ msgstr "增加音量"
+
+#~ msgid "Muted"
+#~ msgstr "静音"
+
+#~ msgid "Full Volume"
+#~ msgstr "最大音量"
+
+#, c-format
+#~ msgctxt "volume percentage"
+#~ msgid "%d %%"
+#~ msgstr "%d %%"
+
+#~ msgctxt "paper size"
+#~ msgid "asme_f"
+#~ msgstr "asme_f"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x2"
+#~ msgstr "A0x2"
+
+#~ msgctxt "paper size"
+#~ msgid "A0"
+#~ msgstr "A0"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x3"
+#~ msgstr "A0x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1"
+#~ msgstr "A1"
+
+#~ msgctxt "paper size"
+#~ msgid "A10"
+#~ msgstr "A10"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x3"
+#~ msgstr "A1x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x4"
+#~ msgstr "A1x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2"
+#~ msgstr "A2"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x3"
+#~ msgstr "A2x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x4"
+#~ msgstr "A2x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x5"
+#~ msgstr "A2x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3"
+#~ msgstr "A3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3 Extra"
+#~ msgstr "A3 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x3"
+#~ msgstr "A3x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x4"
+#~ msgstr "A3x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x5"
+#~ msgstr "A3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x6"
+#~ msgstr "A3x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x7"
+#~ msgstr "A3x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4"
+#~ msgstr "A4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Extra"
+#~ msgstr "A4 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Tab"
+#~ msgstr "A4 Tab"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x3"
+#~ msgstr "A4x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x4"
+#~ msgstr "A4x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x5"
+#~ msgstr "A4x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x6"
+#~ msgstr "A4x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x7"
+#~ msgstr "A4x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x8"
+#~ msgstr "A4x8"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x9"
+#~ msgstr "A4x9"
+
+#~ msgctxt "paper size"
+#~ msgid "A5"
+#~ msgstr "A5"
+
+#~ msgctxt "paper size"
+#~ msgid "A5 Extra"
+#~ msgstr "A5 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A6"
+#~ msgstr "A6"
+
+#~ msgctxt "paper size"
+#~ msgid "A7"
+#~ msgstr "A7"
+
+#~ msgctxt "paper size"
+#~ msgid "A8"
+#~ msgstr "A8"
+
+#~ msgctxt "paper size"
+#~ msgid "A9"
+#~ msgstr "A9"
+
+#~ msgctxt "paper size"
+#~ msgid "B0"
+#~ msgstr "B0"
+
+#~ msgctxt "paper size"
+#~ msgid "B1"
+#~ msgstr "B1"
+
+#~ msgctxt "paper size"
+#~ msgid "B10"
+#~ msgstr "B10"
+
+#~ msgctxt "paper size"
+#~ msgid "B2"
+#~ msgstr "B2"
+
+#~ msgctxt "paper size"
+#~ msgid "B3"
+#~ msgstr "B3"
+
+#~ msgctxt "paper size"
+#~ msgid "B4"
+#~ msgstr "B4"
+
+#~ msgctxt "paper size"
+#~ msgid "B5"
+#~ msgstr "B5"
+
+#~ msgctxt "paper size"
+#~ msgid "B5 Extra"
+#~ msgstr "B5 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "B6"
+#~ msgstr "B6"
+
+#~ msgctxt "paper size"
+#~ msgid "B6/C4"
+#~ msgstr "B6/C4"
+
+#~ msgctxt "paper size"
+#~ msgid "B7"
+#~ msgstr "B7"
+
+#~ msgctxt "paper size"
+#~ msgid "B8"
+#~ msgstr "B8"
+
+#~ msgctxt "paper size"
+#~ msgid "B9"
+#~ msgstr "B9"
+
+#~ msgctxt "paper size"
+#~ msgid "C0"
+#~ msgstr "C0"
+
+#~ msgctxt "paper size"
+#~ msgid "C1"
+#~ msgstr "C1"
+
+#~ msgctxt "paper size"
+#~ msgid "C10"
+#~ msgstr "C10"
+
+#~ msgctxt "paper size"
+#~ msgid "C2"
+#~ msgstr "C2"
+
+#~ msgctxt "paper size"
+#~ msgid "C3"
+#~ msgstr "C3"
+
+#~ msgctxt "paper size"
+#~ msgid "C4"
+#~ msgstr "C4"
+
+#~ msgctxt "paper size"
+#~ msgid "C5"
+#~ msgstr "C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C6"
+#~ msgstr "C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C6/C5"
+#~ msgstr "C6/C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C7"
+#~ msgstr "C7"
+
+#~ msgctxt "paper size"
+#~ msgid "C7/C6"
+#~ msgstr "C7/C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C8"
+#~ msgstr "C8"
+
+#~ msgctxt "paper size"
+#~ msgid "C9"
+#~ msgstr "C9"
+
+#~ msgctxt "paper size"
+#~ msgid "DL Envelope"
+#~ msgstr "DL 信封"
+
+#~ msgctxt "paper size"
+#~ msgid "RA0"
+#~ msgstr "RA0"
+
+#~ msgctxt "paper size"
+#~ msgid "RA1"
+#~ msgstr "RA1"
+
+#~ msgctxt "paper size"
+#~ msgid "RA2"
+#~ msgstr "RA2"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA0"
+#~ msgstr "SRA0"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA1"
+#~ msgstr "SRA1"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA2"
+#~ msgstr "SRA2"
+
+#~ msgctxt "paper size"
+#~ msgid "JB0"
+#~ msgstr "JB0"
+
+#~ msgctxt "paper size"
+#~ msgid "JB1"
+#~ msgstr "JB1"
+
+#~ msgctxt "paper size"
+#~ msgid "JB10"
+#~ msgstr "JB10"
+
+#~ msgctxt "paper size"
+#~ msgid "JB2"
+#~ msgstr "JB2"
+
+#~ msgctxt "paper size"
+#~ msgid "JB3"
+#~ msgstr "JB3"
+
+#~ msgctxt "paper size"
+#~ msgid "JB4"
+#~ msgstr "JB4"
+
+#~ msgctxt "paper size"
+#~ msgid "JB5"
+#~ msgstr "JB5"
+
+#~ msgctxt "paper size"
+#~ msgid "JB6"
+#~ msgstr "JB6"
+
+#~ msgctxt "paper size"
+#~ msgid "JB7"
+#~ msgstr "JB7"
+
+#~ msgctxt "paper size"
+#~ msgid "JB8"
+#~ msgstr "JB8"
+
+#~ msgctxt "paper size"
+#~ msgid "JB9"
+#~ msgstr "JB9"
+
+#~ msgctxt "paper size"
+#~ msgid "jis exec"
+#~ msgstr "jis exec"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 2 Envelope"
+#~ msgstr "Choukei 2 信封"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 3 Envelope"
+#~ msgstr "Choukei 3 信封"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 4 Envelope"
+#~ msgstr "Choukei 4 信封"
+
+#~ msgctxt "paper size"
+#~ msgid "hagaki (postcard)"
+#~ msgstr "hagaki (明信片)"
+
+#~ msgctxt "paper size"
+#~ msgid "kahu Envelope"
+#~ msgstr "kahu 信封"
+
+#~ msgctxt "paper size"
+#~ msgid "kaku2 Envelope"
+#~ msgstr "kaku2 信封"
+
+#~ msgctxt "paper size"
+#~ msgid "oufuku (reply postcard)"
+#~ msgstr "oufuku (明信片回复)"
+
+#~ msgctxt "paper size"
+#~ msgid "you4 Envelope"
+#~ msgstr "you4 信封"
+
+#~ msgctxt "paper size"
+#~ msgid "10x11"
+#~ msgstr "10x11"
+
+#~ msgctxt "paper size"
+#~ msgid "10x13"
+#~ msgstr "10x13"
+
+#~ msgctxt "paper size"
+#~ msgid "10x14"
+#~ msgstr "10x14"
+
+#~ msgctxt "paper size"
+#~ msgid "10x15"
+#~ msgstr "10x15"
+
+#~ msgctxt "paper size"
+#~ msgid "11x12"
+#~ msgstr "11x12"
+
+#~ msgctxt "paper size"
+#~ msgid "11x15"
+#~ msgstr "11x15"
+
+#~ msgctxt "paper size"
+#~ msgid "12x19"
+#~ msgstr "12x19"
+
+#~ msgctxt "paper size"
+#~ msgid "5x7"
+#~ msgstr "5x7"
+
+#~ msgctxt "paper size"
+#~ msgid "6x9 Envelope"
+#~ msgstr "6x9 英寸信封"
+
+#~ msgctxt "paper size"
+#~ msgid "7x9 Envelope"
+#~ msgstr "7x9 英寸信封"
+
+#~ msgctxt "paper size"
+#~ msgid "9x11 Envelope"
+#~ msgstr "9x11 英寸信封"
+
+#~ msgctxt "paper size"
+#~ msgid "a2 Envelope"
+#~ msgstr "a2 信封"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch A"
+#~ msgstr "Arch A"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch B"
+#~ msgstr "Arch B"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch C"
+#~ msgstr "Arch C"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch D"
+#~ msgstr "Arch D"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch E"
+#~ msgstr "Arch E"
+
+#~ msgctxt "paper size"
+#~ msgid "b-plus"
+#~ msgstr "b-plus"
+
+#~ msgctxt "paper size"
+#~ msgid "c"
+#~ msgstr "c"
+
+#~ msgctxt "paper size"
+#~ msgid "c5 Envelope"
+#~ msgstr "c5 信封"
+
+#~ msgctxt "paper size"
+#~ msgid "d"
+#~ msgstr "d"
+
+#~ msgctxt "paper size"
+#~ msgid "e"
+#~ msgstr "e"
+
+#~ msgctxt "paper size"
+#~ msgid "edp"
+#~ msgstr "edp"
+
+#~ msgctxt "paper size"
+#~ msgid "European edp"
+#~ msgstr "European edp"
+
+#~ msgctxt "paper size"
+#~ msgid "Executive"
+#~ msgstr "Executive"
+
+#~ msgctxt "paper size"
+#~ msgid "f"
+#~ msgstr "f"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold European"
+#~ msgstr "FanFold European"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold US"
+#~ msgstr "FanFold US"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold German Legal"
+#~ msgstr "FanFold German Legal"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Legal"
+#~ msgstr "Government Legal"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Letter"
+#~ msgstr "Government Letter"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 3x5"
+#~ msgstr "Index 3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 (postcard)"
+#~ msgstr "Index 4x6 (明信片)"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 ext"
+#~ msgstr "Index 4x6 ext"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 5x8"
+#~ msgstr "Index 5x8"
+
+#~ msgctxt "paper size"
+#~ msgid "Invoice"
+#~ msgstr "Invoice"
+
+#~ msgctxt "paper size"
+#~ msgid "Tabloid"
+#~ msgstr "Tabloid"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal"
+#~ msgstr "US Legal"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal Extra"
+#~ msgstr "US Legal Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter"
+#~ msgstr "US Letter"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Extra"
+#~ msgstr "US Letter Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Plus"
+#~ msgstr "US Letter Plus"
+
+#~ msgctxt "paper size"
+#~ msgid "Monarch Envelope"
+#~ msgstr "Monarch Envelope"
+
+#~ msgctxt "paper size"
+#~ msgid "#10 Envelope"
+#~ msgstr "10 号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "#11 Envelope"
+#~ msgstr "11 号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "#12 Envelope"
+#~ msgstr "12 号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "#14 Envelope"
+#~ msgstr "14 号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "#9 Envelope"
+#~ msgstr "9 号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "Personal Envelope"
+#~ msgstr "个人信封"
+
+#~ msgctxt "paper size"
+#~ msgid "Quarto"
+#~ msgstr "Quarto"
+
+#~ msgctxt "paper size"
+#~ msgid "Super A"
+#~ msgstr "Super A"
+
+#~ msgctxt "paper size"
+#~ msgid "Super B"
+#~ msgstr "Super B"
+
+#~ msgctxt "paper size"
+#~ msgid "Wide Format"
+#~ msgstr "宽格式"
+
+#~ msgctxt "paper size"
+#~ msgid "Dai-pa-kai"
+#~ msgstr "Dai-pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio"
+#~ msgstr "Folio"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio sp"
+#~ msgstr "Folio sp"
+
+#~ msgctxt "paper size"
+#~ msgid "Invite Envelope"
+#~ msgstr "Invite Envelope"
+
+#~ msgctxt "paper size"
+#~ msgid "Italian Envelope"
+#~ msgstr "意大利信封"
+
+#~ msgctxt "paper size"
+#~ msgid "juuro-ku-kai"
+#~ msgstr "juuro-ku-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "pa-kai"
+#~ msgstr "pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Postfix Envelope"
+#~ msgstr "Postfix 信封"
+
+#~ msgctxt "paper size"
+#~ msgid "Small Photo"
+#~ msgstr "小照片"
+
+#~ msgctxt "paper size"
+#~ msgid "prc1 Envelope"
+#~ msgstr "中国一号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "prc10 Envelope"
+#~ msgstr "中国十号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 16k"
+#~ msgstr "十六开"
+
+#~ msgctxt "paper size"
+#~ msgid "prc2 Envelope"
+#~ msgstr "中国二号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "prc3 Envelope"
+#~ msgstr "中国三号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 32k"
+#~ msgstr "三十二开"
+
+#~ msgctxt "paper size"
+#~ msgid "prc4 Envelope"
+#~ msgstr "中国四号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "prc5 Envelope"
+#~ msgstr "中国五号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "prc6 Envelope"
+#~ msgstr "中国六号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "prc7 Envelope"
+#~ msgstr "中国七号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "prc8 Envelope"
+#~ msgstr "中国八号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "prc9 Envelope"
+#~ msgstr "中国九号信封"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 16k"
+#~ msgstr "十六开"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 8k"
+#~ msgstr "八开"
+
+#, c-format
+#~ msgid "different idatas found for symlinked '%s' and '%s'\n"
+#~ msgstr "符号链接“%s”和“%s”所用的 idatas 不同\n"
+
+#, c-format
+#~ msgid "Failed to write header\n"
+#~ msgstr "写入头失败\n"
+
+#, c-format
+#~ msgid "Failed to write hash table\n"
+#~ msgstr "写入哈希表失败\n"
+
+#, c-format
+#~ msgid "Failed to write folder index\n"
+#~ msgstr "写入目录索引失败\n"
+
+#, c-format
+#~ msgid "Failed to rewrite header\n"
+#~ msgstr "重写头失败\n"
+
+#, c-format
+#~ msgid "Failed to open file %s : %s\n"
+#~ msgstr "打开文件 %s 失败：%s\n"
+
+#, c-format
+#~ msgid "Failed to write cache file: %s\n"
+#~ msgstr "写入缓存文件失败：%s\n"
+
+#, c-format
+#~ msgid "The generated cache was invalid.\n"
+#~ msgstr "生成的缓存非法。\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s, removing %s then.\n"
+#~ msgstr "无法将 %s 重命名为 %s：%s，请删除 %s。\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s\n"
+#~ msgstr "无法将 %s 重命名为 %s：%s\n"
+
+#, c-format
+#~ msgid "Could not rename %s back to %s: %s.\n"
+#~ msgstr "无法将 %s 重命名回 %s：%s\n"
+
+#, c-format
+#~ msgid "Cache file created successfully.\n"
+#~ msgstr "缓存文件创建成功。\n"
+
+#~ msgid "Overwrite an existing cache, even if up to date"
+#~ msgstr "覆盖已有缓存，即使它已是最新"
+
+#~ msgid "Don't check for the existence of index.theme"
+#~ msgstr "不检查已有的 index.theme"
+
+#~ msgid "Don't include image data in the cache"
+#~ msgstr "不再缓存中包含图像数据"
+
+#~ msgid "Output a C header file"
+#~ msgstr "输出 C 头文件"
+
+#~ msgid "Turn off verbose output"
+#~ msgstr "关闭详细输出"
+
+#~ msgid "Validate existing icon cache"
+#~ msgstr "验证已有的图标缓存"
+
+#, c-format
+#~ msgid "File not found: %s\n"
+#~ msgstr "文件未找到：%s\n"
+
+#, c-format
+#~ msgid "Not a valid icon cache: %s\n"
+#~ msgstr "非法图标缓存：%s\n"
+
+#, c-format
+#~ msgid "No theme index file.\n"
+#~ msgstr "无主题索引文件。\n"
+
+#, c-format
+#~ msgid ""
+#~ "No theme index file in '%s'.\n"
+#~ "If you really want to create an icon cache here, use --ignore-theme-"
+#~ "index.\n"
+#~ msgstr ""
+#~ "“%s”中没有主题索引文件。\n"
+#~ "如果您真的想要在此创建图标缓存，请使用 --ignore-theme-index。\n"
+
+#~ msgid "Amharic (EZ+)"
+#~ msgstr "阿姆哈拉语(EZ+)"
+
+#~ msgid "Cedilla"
+#~ msgstr "变音符"
+
+#~ msgid "Cyrillic (Transliterated)"
+#~ msgstr "西里尔语(音译)"
+
+#~ msgid "Inuktitut (Transliterated)"
+#~ msgstr "因纽特语(音译)"
+
+#~ msgid "IPA"
+#~ msgstr "IPA"
+
+#~ msgid "Multipress"
+#~ msgstr "Multipress"
+
+#~ msgid "Thai-Lao"
+#~ msgstr "泰国-老挝"
+
+#~ msgid "Tigrigna-Eritrean (EZ+)"
+#~ msgstr "厄立特里亚提格里尼亚语(EZ+)"
+
+#~ msgid "Tigrigna-Ethiopian (EZ+)"
+#~ msgstr "埃塞俄比亚提格里尼亚语(EZ+)"
+
+#~ msgid "Vietnamese (VIQR)"
+#~ msgstr "越南语(VIQR)"
+
+#~ msgid "X Input Method"
+#~ msgstr "X 输入法"
+
+#~ msgid "Username:"
+#~ msgstr "用户名："
+
+#~ msgid "Password:"
+#~ msgstr "密码："
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s' on printer %s"
+#~ msgstr "打印文档“%s”到打印机 %s 需要认证"
+
+#, c-format
+#~ msgid "Authentication is required to print a document on %s"
+#~ msgstr "在 %s 打印一个文档需要认证"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of job '%s'"
+#~ msgstr "获取任务 “%s” 的属性需要认证"
+
+#~ msgid "Authentication is required to get attributes of a job"
+#~ msgstr "获取一个任务的属性需要认证"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of printer %s"
+#~ msgstr "获取打印机 “%s” 的属性需要认证"
+
+#~ msgid "Authentication is required to get attributes of a printer"
+#~ msgstr "获取一个打印机的属性需要认证"
+
+#, c-format
+#~ msgid "Authentication is required to get default printer of %s"
+#~ msgstr "获取 “%s” 的缺省打印机需要认证"
+
+#, c-format
+#~ msgid "Authentication is required to get printers from %s"
+#~ msgstr "从 “%s” 获取打印机需要认证"
+
+#, c-format
+#~ msgid "Authentication is required to get a file from %s"
+#~ msgstr "从 %s 获取一个文件需要认证"
+
+#, c-format
+#~ msgid "Authentication is required on %s"
+#~ msgstr "在 %s 需要认证"
+
+#~ msgid "Domain:"
+#~ msgstr "域："
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s'"
+#~ msgstr "打印文档“%s”需要认证"
+
+#, c-format
+#~ msgid "Authentication is required to print this document on printer %s"
+#~ msgstr "在打印机 %s 打印此文档需要认证"
+
+#~ msgid "Authentication is required to print this document"
+#~ msgstr "打印此文档需要认证"
+
+#, c-format
+#~ msgid "Printer '%s' is low on toner."
+#~ msgstr "打印机“%s”墨量低。"
+
+#, c-format
+#~ msgid "Printer '%s' has no toner left."
+#~ msgstr "打印机“%s”墨用完了"
+
+#, c-format
+#~ msgid "Printer '%s' is low on developer."
+#~ msgstr "打印机“%s”显影剂量低"
+
+#, c-format
+#~ msgid "Printer '%s' is out of developer."
+#~ msgstr "打印机“%s”显影剂用完了"
+
+#, c-format
+#~ msgid "Printer '%s' is low on at least one marker supply."
+#~ msgstr "打印机“%s”至少有一个彩色墨量低"
+
+#, c-format
+#~ msgid "Printer '%s' is out of at least one marker supply."
+#~ msgstr "打印机“%s”至少有一种彩色墨用完了"
+
+#, c-format
+#~ msgid "The cover is open on printer '%s'."
+#~ msgstr "打印机“%s”的盖子未关。"
+
+#, c-format
+#~ msgid "The door is open on printer '%s'."
+#~ msgstr "打印机“%s”的盖子被打开了。"
+
+#, c-format
+#~ msgid "Printer '%s' is low on paper."
+#~ msgstr "打印机“%s”纸快用完了。"
+
+#, c-format
+#~ msgid "Printer '%s' is out of paper."
+#~ msgstr "打印机“%s”缺纸。"
+
+#, c-format
+#~ msgid "Printer '%s' is currently offline."
+#~ msgstr "打印机“%s”目前脱机。"
+
+#, c-format
+#~ msgid "There is a problem on printer '%s'."
+#~ msgstr "打印机“%s”可能有问题。"
+
+#~ msgid "Paused ; Rejecting Jobs"
+#~ msgstr "暂停；拒绝任务"
+
+#~ msgid "Rejecting Jobs"
+#~ msgstr "拒绝任务"
+
+#~ msgid "Two Sided"
+#~ msgstr "双面"
+
+#~ msgid "Paper Type"
+#~ msgstr "纸张类型"
+
+#~ msgid "Paper Source"
+#~ msgstr "纸张来源"
+
+#~ msgid "Output Tray"
+#~ msgstr "出纸器"
+
+#~ msgid "Resolution"
+#~ msgstr "解决方案"
+
+#~ msgid "GhostScript pre-filtering"
+#~ msgstr "GhostScript 预过滤"
+
+#~ msgid "One Sided"
+#~ msgstr "单面"
+
+#~ msgid "Long Edge (Standard)"
+#~ msgstr "长边(标准)"
+
+#~ msgid "Short Edge (Flip)"
+#~ msgstr "短边(翻转)"
+
+#~ msgid "Auto Select"
+#~ msgstr "自动选择"
+
+#~ msgid "Printer Default"
+#~ msgstr "打印机默认"
+
+#~ msgid "Embed GhostScript fonts only"
+#~ msgstr "只嵌入 GhostScript 字体"
+
+#~ msgid "Convert to PS level 1"
+#~ msgstr "转换到 PS 1级"
+
+#~ msgid "Convert to PS level 2"
+#~ msgstr "转换到 PS 2级"
+
+#~ msgid "No pre-filtering"
+#~ msgstr "无预过滤"
+
+#~ msgid "Miscellaneous"
+#~ msgstr "杂项"
+
+#~ msgid "Urgent"
+#~ msgstr "紧急"
+
+#~ msgid "High"
+#~ msgstr "高"
+
+#~ msgid "Medium"
+#~ msgstr "中"
+
+#~ msgid "Low"
+#~ msgstr "低"
+
+#~ msgid "Pages per Sheet"
+#~ msgstr "每张页数"
+
+#~ msgid "Job Priority"
+#~ msgstr "任务优先级"
+
+#~ msgid "Billing Info"
+#~ msgstr "计费信息"
+
+#~ msgid "None"
+#~ msgstr "无"
+
+#~ msgid "Classified"
+#~ msgstr "已分类"
+
+#~ msgid "Confidential"
+#~ msgstr "机密"
+
+#~ msgid "Secret"
+#~ msgstr "秘密"
+
+#~ msgid "Standard"
+#~ msgstr "标准"
+
+#~ msgid "Top Secret"
+#~ msgstr "绝密"
+
+#~ msgid "Unclassified"
+#~ msgstr "未分类"
+
+#~ msgid "Before"
+#~ msgstr "封面"
+
+#~ msgid "After"
+#~ msgstr "封底"
+
+#~ msgid "Print at"
+#~ msgstr "打印于"
+
+#~ msgid "Print at time"
+#~ msgstr "在指定时间打印"
+
+#, c-format
+#~ msgid "Custom %sx%s"
+#~ msgstr "自定义 %sx%s"
+
+#, c-format
+#~ msgid "output.%s"
+#~ msgstr "output.%s"
+
+#~ msgid "Print to File"
+#~ msgstr "打印到文件"
+
+#~ msgid "PDF"
+#~ msgstr "PDF"
+
+#~ msgid "Postscript"
+#~ msgstr "Postscript"
+
+#~ msgid "SVG"
+#~ msgstr "SVG"
+
+#~ msgid "Pages per _sheet:"
+#~ msgstr "每张页数(_S)："
+
+#~ msgid "File"
+#~ msgstr "文件"
+
+#~ msgid "_Output format"
+#~ msgstr "输出格式(_O)"
+
+#~ msgid "Print to LPR"
+#~ msgstr "打印到 LPR"
+
+#~ msgid "Pages Per Sheet"
+#~ msgstr "每张页数"
+
+#~ msgid "Command Line"
+#~ msgstr "命令行"
+
+#~ msgid "printer offline"
+#~ msgstr "打印机脱机"
+
+#~ msgid "ready to print"
+#~ msgstr "准备打印"
+
+#~ msgid "processing job"
+#~ msgstr "正在处理任务"
+
+#~ msgid "paused"
+#~ msgstr "已暂停"
+
+#~ msgid "unknown"
+#~ msgstr "未知的"
+
+#, c-format
+#~ msgid "test-output.%s"
+#~ msgstr "test-output.%s"
+
+#~ msgid "Print to Test Printer"
+#~ msgstr "打印到测试打印机"
+
+#, c-format
+#~ msgid "Could not get information for file '%s': %s"
+#~ msgstr "无法获得文件“%s”的信息：%s"
+
+#, c-format
+#~ msgid "Failed to open file '%s': %s"
+#~ msgstr "打开文件“%s”失败：%s"
+
+#, c-format
+#~ msgid ""
+#~ "Failed to load image '%s': reason not known, probably a corrupt image file"
+#~ msgstr "载入图像“%s”失败：原因未知，可能是图像文件已损坏"
+
+#~ msgid "_Add"
+#~ msgstr "添加(_A)"
+
+#~ msgid "_Remove"
+#~ msgstr "删除(_R)"
+
+#~ msgid "_Browse for other folders"
+#~ msgstr "浏览其它文件夹(_B)"
+
+#~ msgid "Gdk debugging flags to set"
+#~ msgstr "要设置的 Gdk 调试标志"
+
+#~ msgid "Gdk debugging flags to unset"
+#~ msgstr "要取消的 Gdk 调试标志"
+
+#~ msgid "Image file '%s' contains no data"
+#~ msgstr "图像文件“%s”没有内容"
+
+#~ msgid ""
+#~ "Failed to load animation '%s': reason not known, probably a corrupt "
+#~ "animation file"
+#~ msgstr "载入动画“%s”失败：原因未知，可能是动画文件已损坏"
+
+#~ msgid "Unable to load image-loading module: %s: %s"
+#~ msgstr "加载用来载入图像的模块失败：%s：%s"
+
+#~ msgid ""
+#~ "Image-loading module %s does not export the proper interface; perhaps "
+#~ "it's from a different GTK version?"
+#~ msgstr "图像载入模块 %s 没有导出正确的接口；它是否属于另一个 GTK 版本？"
+
+#~ msgid "Image type '%s' is not supported"
+#~ msgstr "不支持图像类型“%s”"
+
+#~ msgid "Couldn't recognize the image file format for file '%s'"
+#~ msgstr "识别文件“%s”的图像文件格式失败"
+
+#~ msgid "Unrecognized image file format"
+#~ msgstr "无法识别的图像文件格式"
+
+#~ msgid "Failed to load image '%s': %s"
+#~ msgstr "载入图像“%s”失败：%s"
+
+#~ msgid "Error writing to image file: %s"
+#~ msgstr "写入图像文件时出错：%s"
+
+#~ msgid ""
+#~ "This build of gdk-pixbuf does not support saving the image format: %s"
+#~ msgstr "此 gdk-pixbuf 不支持要保存的图像格式：%s"
+
+#~ msgid "Insufficient memory to save image to callback"
+#~ msgstr "内存不足以保存回调的图像"
+
+#~ msgid "Failed to open temporary file"
+#~ msgstr "打开临时文件失败"
+
+#~ msgid "Failed to read from temporary file"
+#~ msgstr "从临时文件读取失败"
+
+#~ msgid "Failed to open '%s' for writing: %s"
+#~ msgstr "打开“%s”进行写入失败：%s"
+
+#~ msgid ""
+#~ "Failed to close '%s' while writing image, all data may not have been "
+#~ "saved: %s"
+#~ msgstr "写入图像时无法关闭“%s”，可能没有保存数据：%s"
+
+#~ msgid "Insufficient memory to save image into a buffer"
+#~ msgstr "内存不足以将图像保存至缓冲区"
+
+#~ msgid "Error writing to image stream"
+#~ msgstr "写入图像流时出错"
+
+#~ msgid ""
+#~ "Internal error: Image loader module '%s' failed to complete an operation, "
+#~ "but didn't give a reason for the failure"
+#~ msgstr "内部错误：图像载入模块“%s”完成某操作失败，但没有给出任何原因"
+
+#~ msgid "Incremental loading of image type '%s' is not supported"
+#~ msgstr "图像类型“%s”不支持渐进式载入"
+
+#~ msgid "Image header corrupt"
+#~ msgstr "图像头损坏"
+
+#~ msgid "Image format unknown"
+#~ msgstr "图像格式未知"
+
+#~ msgid "Image pixel data corrupt"
+#~ msgstr "图像像素数据损坏"
+
+#~ msgid "failed to allocate image buffer of %u byte"
+#~ msgid_plural "failed to allocate image buffer of %u bytes"
+#~ msgstr[0] "分配 %u 字节的图像缓冲区失败"
+
+#~ msgid "Unexpected icon chunk in animation"
+#~ msgstr "动画中有未预期的图标块"
+
+#~ msgid "Unsupported animation type"
+#~ msgstr "不支持的动画类型"
+
+#~ msgid "Invalid header in animation"
+#~ msgstr "动画头无效"
+
+#~ msgid "Not enough memory to load animation"
+#~ msgstr "内存不足以载入动画"
+
+#~ msgid "Malformed chunk in animation"
+#~ msgstr "动画中的块格式错误"
+
+#~ msgid "The ANI image format"
+#~ msgstr "ANI 图像格式"
+
+#~ msgid "BMP image has bogus header data"
+#~ msgstr "BMP 图像有伪造的头数据"
+
+#~ msgid "Not enough memory to load bitmap image"
+#~ msgstr "内存不足以载入位图图像"
+
+#~ msgid "BMP image has unsupported header size"
+#~ msgstr "不支持的 BMP 图像头大小"
+
+#~ msgid "Topdown BMP images cannot be compressed"
+#~ msgstr "无法压缩自上而下的 BMP 图像"
+
+#~ msgid "Premature end-of-file encountered"
+#~ msgstr "文件过早结束"
+
+#~ msgid "Couldn't allocate memory for saving BMP file"
+#~ msgstr "无法分配内存来保存 BMP 文件"
+
+#~ msgid "Couldn't write to BMP file"
+#~ msgstr "无法写入 BMP 文件"
+
+#~ msgid "The BMP image format"
+#~ msgstr "BMP 图像格式"
+
+#~ msgid "Failure reading GIF: %s"
+#~ msgstr "读入 GIF 失败：%s"
+
+#~ msgid "GIF file was missing some data (perhaps it was truncated somehow?)"
+#~ msgstr "GIF 文件缺少了某些数据(可能文件被截短了？)"
+
+#~ msgid "Internal error in the GIF loader (%s)"
+#~ msgstr "GIF 文件载入模块产生内部程序错误(%s)"
+
+#~ msgid "Stack overflow"
+#~ msgstr "栈溢出"
+
+#~ msgid "GIF image loader cannot understand this image."
+#~ msgstr "GIF 文件载入模块无法分析此图像。"
+
+#~ msgid "Bad code encountered"
+#~ msgstr "遇到了错误的代码"
+
+#~ msgid "Circular table entry in GIF file"
+#~ msgstr "GIF 文件中的表项循环"
+
+#~ msgid "Not enough memory to load GIF file"
+#~ msgstr "内存不足以载入 GIF 文件"
+
+#~ msgid "Not enough memory to composite a frame in GIF file"
+#~ msgstr "内存不足以构建 GIF 文件中的一帧"
+
+#~ msgid "GIF image is corrupt (incorrect LZW compression)"
+#~ msgstr "GIF 图像已损坏(不正确的 LZW 压缩数据)"
+
+#~ msgid "File does not appear to be a GIF file"
+#~ msgstr "文件好像不是 GIF 文件"
+
+#~ msgid "Version %s of the GIF file format is not supported"
+#~ msgstr "不支持 %s 版本的 GIF 文件格式"
+
+#~ msgid ""
+#~ "GIF image has no global colormap, and a frame inside it has no local "
+#~ "colormap."
+#~ msgstr "GIF 图像没有全局色彩表，它其中的一帧也没有局部色彩表。"
+
+#~ msgid "GIF image was truncated or incomplete."
+#~ msgstr "GIF 文件被截断或是不完整。"
+
+#~ msgid "The GIF image format"
+#~ msgstr "GIF 图像格式"
+
+#~ msgid "Invalid header in icon"
+#~ msgstr "图标头无效"
+
+#~ msgid "Not enough memory to load icon"
+#~ msgstr "内存不足以载入图标"
+
+#~ msgid "Icon has zero width"
+#~ msgstr "图标宽度为零"
+
+#~ msgid "Icon has zero height"
+#~ msgstr "图标高度为零"
+
+#~ msgid "Compressed icons are not supported"
+#~ msgstr "不支持压缩图标"
+
+#~ msgid "Unsupported icon type"
+#~ msgstr "不支持的图标类型"
+
+#~ msgid "Not enough memory to load ICO file"
+#~ msgstr "内存不足以载入 ICO 文件"
+
+#~ msgid "Image too large to be saved as ICO"
+#~ msgstr "图像太大，无法另存为 ICO"
+
+#~ msgid "Cursor hotspot outside image"
+#~ msgstr "光标热点位于图像外"
+
+#~ msgid "Unsupported depth for ICO file: %d"
+#~ msgstr "不支持的 ICO 文件深度：%d"
+
+#~ msgid "The ICO image format"
+#~ msgstr "ICO 图像格式"
+
+#~ msgid "Error reading ICNS image: %s"
+#~ msgstr "读入 ICNS 图像文件时发生错误：%s"
+
+#~ msgid "Could not decode ICNS file"
+#~ msgstr "无法解码 ICNS 文件"
+
+#~ msgid "The ICNS image format"
+#~ msgstr "ICNS 图像格式"
+
+#~ msgid "Couldn't allocate memory for stream"
+#~ msgstr "无法为流分配内存"
+
+#~ msgid "Couldn't decode image"
+#~ msgstr "无法解码图像"
+
+#~ msgid "Transformed JPEG2000 has zero width or height"
+#~ msgstr "已转换的 JPEG2000 的宽度或高度为零"
+
+#~ msgid "Image type currently not supported"
+#~ msgstr "目前不支持该图像类型"
+
+#~ msgid "Couldn't allocate memory for color profile"
+#~ msgstr "无法为色彩配置分配内存"
+
+#~ msgid "Insufficient memory to open JPEG 2000 file"
+#~ msgstr "内存不足以打开 JPEG 2000 文件"
+
+#~ msgid "Couldn't allocate memory to buffer image data"
+#~ msgstr "无法为缓冲图像数据分配内存"
+
+#~ msgid "The JPEG 2000 image format"
+#~ msgstr "JPEG 2000 图像格式"
+
+#~ msgid "Error interpreting JPEG image file (%s)"
+#~ msgstr "分析 JPEG 图像文件时出错(%s)"
+
+#~ msgid ""
+#~ "Insufficient memory to load image, try exiting some applications to free "
+#~ "memory"
+#~ msgstr "内存不足以载入图像，试试关闭其它应用程序来释放内存"
+
+#~ msgid "Unsupported JPEG color space (%s)"
+#~ msgstr "不支持的 JPEG 色彩空间(%s)"
+
+#~ msgid "Couldn't allocate memory for loading JPEG file"
+#~ msgstr "无法分配内存来载入 JPEG 文件"
+
+#~ msgid "Transformed JPEG has zero width or height."
+#~ msgstr "变形 JPEG 宽度或高度为零。"
+
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%s' could not be "
+#~ "parsed."
+#~ msgstr "JPEG 质量一定要在 0 至 100 之间；无法解析数值“%s”。"
+
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%d' is not allowed."
+#~ msgstr "JPEG 质量一定要在 0 至 100 之间；不允许使用数值“%d”。"
+
+#~ msgid "The JPEG image format"
+#~ msgstr "JPEG 图像格式"
+
+#~ msgid "Couldn't allocate memory for header"
+#~ msgstr "无法为头分配内存"
+
+#~ msgid "Couldn't allocate memory for context buffer"
+#~ msgstr "无法为上下文缓冲区分配内存"
+
+#~ msgid "Image has invalid width and/or height"
+#~ msgstr "图像的宽度和/或高度无效"
+
+#~ msgid "Image has unsupported bpp"
+#~ msgstr "图像有不支持的 bpp"
+
+#~ msgid "Image has unsupported number of %d-bit planes"
+#~ msgstr "图像有不支持的 %d 位色盘"
+
+#~ msgid "Couldn't create new pixbuf"
+#~ msgstr "无法创建新像素缓冲"
+
+#~ msgid "Couldn't allocate memory for line data"
+#~ msgstr "无法为线形数据分配内存"
+
+#~ msgid "Couldn't allocate memory for paletted data"
+#~ msgstr "无法为调色板数据分配内存"
+
+#~ msgid "Didn't get all lines of PCX image"
+#~ msgstr "未获得 PCX 图像的全部线形"
+
+#~ msgid "No palette found at end of PCX data"
+#~ msgstr "在 PCX 数据结尾未发现调色板"
+
+#~ msgid "The PCX image format"
+#~ msgstr "PCX 图像格式"
+
+#~ msgid "Bits per channel of PNG image is invalid."
+#~ msgstr "PNG 图像的每通道位数无效。"
+
+#~ msgid "Transformed PNG has zero width or height."
+#~ msgstr "变形 PNG 宽度或高度为零。"
+
+#~ msgid "Bits per channel of transformed PNG is not 8."
+#~ msgstr "变形 PNG 每通道位数不是 8。"
+
+#~ msgid "Transformed PNG not RGB or RGBA."
+#~ msgstr "变形 PNG 不是 RGB 或 RGBA。"
+
+#~ msgid "Transformed PNG has unsupported number of channels, must be 3 or 4."
+#~ msgstr "变形 PNG 含有不支持的通道数，必须是 3 或 4。"
+
+#~ msgid "Fatal error in PNG image file: %s"
+#~ msgstr "PNG 图像文件里有严重错误：%s"
+
+#~ msgid "Insufficient memory to load PNG file"
+#~ msgstr "内存不足以载入 PNG 文件"
+
+#~ msgid ""
+#~ "Insufficient memory to store a %ld by %ld image; try exiting some "
+#~ "applications to reduce memory usage"
+#~ msgstr ""
+#~ "内存不足以载入大小为 %ld x %ld 的图像；试试关闭其它应用程序以减少内存使用"
+#~ "量"
+
+#~ msgid "Fatal error reading PNG image file"
+#~ msgstr "读入 PNG 图像文件时发生严重错误"
+
+#~ msgid "Fatal error reading PNG image file: %s"
+#~ msgstr "读入 PNG 图像文件时发生严重错误：%s"
+
+#~ msgid ""
+#~ "Keys for PNG text chunks must have at least 1 and at most 79 characters."
+#~ msgstr "PNG 文本块的关键字必须至少有 1 个字符，最多有 79 个字符。"
+
+#~ msgid "Keys for PNG text chunks must be ASCII characters."
+#~ msgstr "PNG 文本块的关键字必须是 ASCII 字符。"
+
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%s' could "
+#~ "not be parsed."
+#~ msgstr "PNG 压缩级别一定要在 0 至 9 之间；无法解析数值“%s”。"
+
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%d' is not "
+#~ "allowed."
+#~ msgstr "PNG 压缩级别一定要在 0 至 9 之间；不允许使用数值“%d”。"
+
+#~ msgid ""
+#~ "Value for PNG text chunk %s cannot be converted to ISO-8859-1 encoding."
+#~ msgstr "PNG 文本块 %s 的值无法转换为 ISO-8859-1 编码。"
+
+#~ msgid "The PNG image format"
+#~ msgstr "PNG 图像格式"
+
+#~ msgid "PNM loader expected to find an integer, but didn't"
+#~ msgstr "PNM 载入模块找不到要找的整数"
+
+#~ msgid "PNM file has an incorrect initial byte"
+#~ msgstr "PNM 文件的第一个字节不正确"
+
+#~ msgid "PNM file is not in a recognized PNM subformat"
+#~ msgstr "PNG 文件不是以可识别的 PNM 副格式存储的"
+
+#~ msgid "PNM file has an image width of 0"
+#~ msgstr "PNM 文件的图像宽度为 0"
+
+#~ msgid "PNM file has an image height of 0"
+#~ msgstr "PNM 文件的图像高度为 0"
+
+#~ msgid "Maximum color value in PNM file is 0"
+#~ msgstr "PNM 文件中最大可用颜色数为 0"
+
+#~ msgid "Maximum color value in PNM file is too large"
+#~ msgstr "PNM 文件中最大可用颜色数过大"
+
+#~ msgid "Raw PNM image type is invalid"
+#~ msgstr "原始 PNM 图像类型无效"
+
+#~ msgid "PNM image loader does not support this PNM subformat"
+#~ msgstr "PNM 载入程序不支持这种 PNM 副格式"
+
+#~ msgid "Raw PNM formats require exactly one whitespace before sample data"
+#~ msgstr "原始 PNM 格式在样本数据前精确需要一个空格"
+
+#~ msgid "Cannot allocate memory for loading PNM image"
+#~ msgstr "无法分配内存来载入 PNM 图像"
+
+#~ msgid "Insufficient memory to load PNM context struct"
+#~ msgstr "内存不足以载入 PNM 的上下文结构"
+
+#~ msgid "Unexpected end of PNM image data"
+#~ msgstr "PNM 图像数据过早结束"
+
+#~ msgid "Insufficient memory to load PNM file"
+#~ msgstr "内存不足以载入 PNM 文件"
+
+#~ msgid "The PNM/PBM/PGM/PPM image format family"
+#~ msgstr "PNM/PBM/PGM/PPM 图像格式族"
+
+#, fuzzy
+#~ msgid "Failed to read QTIF header"
+#~ msgstr "写入头失败\n"
+
+#, fuzzy
+#~ msgid "Failed to allocate %d bytes for file read buffer"
+#~ msgstr "分配 %u 字节的图像缓冲区失败"
+
+#, fuzzy
+#~ msgid "File error when reading QTIF atom: %s"
+#~ msgstr "读入 GIF 失败：%s"
+
+#, fuzzy
+#~ msgid "Failed to allocate QTIF context structure."
+#~ msgstr "无法为 TGA 上下文结构分配内存"
+
+#, fuzzy
+#~ msgid "Failed to create GdkPixbufLoader object."
+#~ msgstr "写入目录索引失败\n"
+
+#, fuzzy
+#~ msgid "Failed to find an image data atom."
+#~ msgstr "打开 TIFF 图像失败"
+
+#, fuzzy
+#~ msgid "The QTIF image format"
+#~ msgstr "TIFF 图像格式"
+
+#~ msgid "RAS image has bogus header data"
+#~ msgstr "RAS 图像有伪造的头数据"
+
+#~ msgid "RAS image has unknown type"
+#~ msgstr "RAS 图像类型未知"
+
+#~ msgid "unsupported RAS image variation"
+#~ msgstr "不支持的 RAS 图像变种"
+
+#~ msgid "Not enough memory to load RAS image"
+#~ msgstr "内存不足以载入 RAS 图像"
+
+#~ msgid "The Sun raster image format"
+#~ msgstr "Sun 光栅图像格式"
+
+#~ msgid "Cannot allocate memory for IOBuffer struct"
+#~ msgstr "无法为 IOBuffer 结构分配内存"
+
+#~ msgid "Cannot allocate memory for IOBuffer data"
+#~ msgstr "无法为 IOBuffer 数据分配内存"
+
+#~ msgid "Cannot realloc IOBuffer data"
+#~ msgstr "无法重新分配 IOBuffer 数据"
+
+#~ msgid "Cannot allocate temporary IOBuffer data"
+#~ msgstr "无法为临时 IOBuffer 数据分配内存"
+
+#~ msgid "Cannot allocate new pixbuf"
+#~ msgstr "无法分配新像素缓冲"
+
+#, fuzzy
+#~ msgid "Image is corrupted or truncated"
+#~ msgstr "GIF 文件被截断或是不完整。"
+
+#~ msgid "Cannot allocate colormap structure"
+#~ msgstr "无法分配色彩表结构"
+
+#~ msgid "Cannot allocate colormap entries"
+#~ msgstr "无法分配色彩表项"
+
+#~ msgid "Unexpected bitdepth for colormap entries"
+#~ msgstr "未预期的色彩表项位深"
+
+#~ msgid "Cannot allocate TGA header memory"
+#~ msgstr "无法分配 TGA 头内存"
+
+#~ msgid "TGA image has invalid dimensions"
+#~ msgstr "TGA 图像尺寸无效"
+
+#~ msgid "TGA image type not supported"
+#~ msgstr "不支持 TGA 图像类型"
+
+#~ msgid "Cannot allocate memory for TGA context struct"
+#~ msgstr "无法为 TGA 上下文结构分配内存"
+
+#~ msgid "Excess data in file"
+#~ msgstr "文件中的数据超额"
+
+#~ msgid "The Targa image format"
+#~ msgstr "Targa 图像格式"
+
+#~ msgid "Could not get image width (bad TIFF file)"
+#~ msgstr "无法取得图像宽度(TIFF 文件损坏)"
+
+#~ msgid "Could not get image height (bad TIFF file)"
+#~ msgstr "无法取得图像高度(TIFF 文件损坏)"
+
+#~ msgid "Width or height of TIFF image is zero"
+#~ msgstr "TIFF 图像的宽度或高度为零"
+
+#~ msgid "Dimensions of TIFF image too large"
+#~ msgstr "TIFF 图像的尺寸太大"
+
+#~ msgid "Insufficient memory to open TIFF file"
+#~ msgstr "内存不足以打开 TIFF 文件"
+
+#~ msgid "Failed to load RGB data from TIFF file"
+#~ msgstr "载入 TIFF 文件里的 RGB 数据失败"
+
+#~ msgid "Failed to open TIFF image"
+#~ msgstr "打开 TIFF 图像失败"
+
+#~ msgid "TIFFClose operation failed"
+#~ msgstr "TIFFClose 操作失败"
+
+#~ msgid "Failed to load TIFF image"
+#~ msgstr "载入 TIFF 图像失败"
+
+#~ msgid "Failed to save TIFF image"
+#~ msgstr "保存 TIFF 图像失败"
+
+#~ msgid "Failed to write TIFF data"
+#~ msgstr "写入 TIFF 图像失败"
+
+#~ msgid "Couldn't write to TIFF file"
+#~ msgstr "无法写入 TIFF 文件"
+
+#~ msgid "The TIFF image format"
+#~ msgstr "TIFF 图像格式"
+
+#~ msgid "Image has zero width"
+#~ msgstr "图像宽度为零"
+
+#~ msgid "Image has zero height"
+#~ msgstr "图像高度为零"
+
+#~ msgid "Not enough memory to load image"
+#~ msgstr "内存不足以载入图像"
+
+#~ msgid "Couldn't save the rest"
+#~ msgstr "无法保存剩余部分"
+
+#~ msgid "The WBMP image format"
+#~ msgstr "WBMP 图像格式"
+
+#~ msgid "Invalid XBM file"
+#~ msgstr "XBM 文件无效"
+
+#~ msgid "Insufficient memory to load XBM image file"
+#~ msgstr "内存不足以载入 XBM 图像文件"
+
+#~ msgid "Failed to write to temporary file when loading XBM image"
+#~ msgstr "载入 XBM 图像时无法写入临时文件"
+
+#~ msgid "The XBM image format"
+#~ msgstr "XBM 图像格式"
+
+#~ msgid "No XPM header found"
+#~ msgstr "找不到 XPM 头"
+
+#~ msgid "Invalid XPM header"
+#~ msgstr "无效的 XBM 头"
+
+#~ msgid "XPM file has image width <= 0"
+#~ msgstr "XPM 文件图像宽度 <= 0"
+
+#~ msgid "XPM file has image height <= 0"
+#~ msgstr "XPM 文件图像高度 <= 0"
+
+#~ msgid "XPM has invalid number of chars per pixel"
+#~ msgstr "XPM 每个像素占用的字节数目无效"
+
+#~ msgid "XPM file has invalid number of colors"
+#~ msgstr "XPM 文件图像颜色数目不正确"
+
+#~ msgid "Cannot allocate memory for loading XPM image"
+#~ msgstr "无法分配内存来载入 XPM 图像"
+
+#~ msgid "Cannot read XPM colormap"
+#~ msgstr "无法读入 XPM 色彩表"
+
+#~ msgid "Failed to write to temporary file when loading XPM image"
+#~ msgstr "载入 XPM 图像时写入临时文件失败"
+
+#~ msgid "The XPM image format"
+#~ msgstr "XPM 图像格式"
+
+#~ msgid "The EMF image format"
+#~ msgstr "EMF 图像格式"
+
+#~ msgid "Could not allocate memory: %s"
+#~ msgstr "无法分配内存：%s"
+
+#~ msgid "Could not create stream: %s"
+#~ msgstr "无法创建流：%s"
+
+#~ msgid "Could not seek stream: %s"
+#~ msgstr "无法搜索流：%s"
+
+#~ msgid "Could not read from stream: %s"
+#~ msgstr "无法从流中读取：%s"
+
+#~ msgid "Couldn't load bitmap"
+#~ msgstr "无法装入位图"
+
+#~ msgid "Couldn't load metafile"
+#~ msgstr "无法装入元文件"
+
+#~ msgid "Unsupported image format for GDI+"
+#~ msgstr "不支持的 GDI+ 图像格式"
+
+#~ msgid "Couldn't save"
+#~ msgstr "无法保存"
+
+#~ msgid "The WMF image format"
+#~ msgstr "WMF 图像格式"
+
+#~ msgid "Printer '%s' may not be connected."
+#~ msgstr "打印机“%s”可能无法连接。"
+
+#~ msgid "(Empty)"
+#~ msgstr "(空)"
+
+#, fuzzy
+#~ msgid "<b>_Search:</b>"
+#~ msgstr "搜索(_S)："
+
+#, fuzzy
+#~ msgid "<b>Recently Used</b>"
+#~ msgstr "最近使用的"
+
+#~ msgid "directfb arg"
+#~ msgstr "directfb 参数"
+
+#~ msgid "sdl|system"
+#~ msgstr "系统"
+
+#~ msgid ""
+#~ "You have the Caps Lock key on\n"
+#~ "and an active input method"
+#~ msgstr ""
+#~ "您开启了 Caps Lock 键\n"
+#~ "并激活了输入法"
+
+#~ msgid "You have the Caps Lock key on"
+#~ msgstr "您开启了 Caps Lock 键"
+
+#~ msgid "You have an active input method"
+#~ msgstr "您有活动的输入法"

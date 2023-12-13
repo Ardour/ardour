@@ -51,8 +51,9 @@ def options(opt):
     pass
 
 def configure(conf):
-    autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM', atleast_version='2.8')
-    autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.12.1')
+    if not conf.is_defined('YTK'):
+        autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM', atleast_version='2.8')
+        autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.12.1')
 
 def build(bld):
     # operate on copy to avoid adding sources twice
@@ -71,7 +72,7 @@ def build(bld):
     obj.includes     = ['.']
     obj.name         = 'libgtkmm2ext'
     obj.target       = 'gtkmm2ext'
-    obj.uselib       = 'GTKMM GTK XML'
+    obj.uselib       = 'XML CAIROMM PANGOMM'
     obj.use          = [ 'libpbd' ]
     obj.vnum         = GTKMM2EXT_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
@@ -79,6 +80,11 @@ def build(bld):
                     'PACKAGE="' + I18N_PACKAGE + '"',
                     'LOCALEDIR="' + os.path.join(
                             os.path.normpath(bld.env['DATADIR']), 'locale') + '"']
+    if bld.is_defined('YTK'):
+        obj.use    += [ 'libydk', 'libydkmm', 'libytkmm' ]
+        obj.uselib += ' GLIBMM GIOMM'
+    else:
+        obj.uselib += ' GTKMM GTK'
     if sys.platform == 'darwin':
         obj.source += ['gtkapplication_quartz.mm', 'nsglview.mm']
         obj.uselib += ' OSX'

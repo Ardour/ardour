@@ -1,0 +1,355 @@
+General ideas of Pixops
+=======================
+
+ - Gain speed by special-casing the common case, and using
+   generic code to handle the uncommon case.
+
+ - Most of the time in scaling an image is in the center;
+   however code that can handle edges properly is slow
+   because it needs to deal with the possibility of running
+   off the edge. So make the fast case code only handle
+   the centers, and use generic, slow, code for the edges,
+
+Structure of Pixops
+===================
+
+The code of pixops can roughly be grouped into four parts:
+
+ - Filter computation functions
+
+ - Functions for scaling or compositing lines and pixels
+   using precomputed filters
+
+ - pixops process, the central driver that iterates through
+   the image calling pixel or line functions as necessary
+   
+ - Wrapper functions (pixops_scale/composite/composite_color)
+   that compute the filter, chooses the line and pixel functions
+   and then call pixops_processs with the filter, line,
+   and pixel functions.
+
+
+pixops process is a pretty scary looking function:
+
+static void
+pixops_process (guchar         *dest_buf,
+		int             render_x0,
+		int             render_y0,
+		int             render_x1,
+		int             render_y1,
+		int             dest_rowstride,
+		int             dest_channels,
+		gboolean        dest_has_alpha,
+		const guchar   *src_buf,
+		int             src_width,
+		int             src_height,
+		int             src_rowstride,
+		int             src_channels,
+		gboolean        src_has_alpha,
+		double          scale_x,
+		double          scale_y,
+		int             check_x,
+		int             check_y,
+		int             check_size,
+		guint32         color1,
+		guint32         color2,
+		PixopsFilter   *filter,
+		PixopsLineFunc  line_func,
+		PixopsPixelFunc pixel_func)
+
+(Some of the arguments should be moved into structures. It's basically
+"all the arguments to pixops_composite_color plus three more") The
+arguments can be divided up into:
+
+
+Information about the destination buffer
+
+   guchar *dest_buf, int dest_rowstride, int dest_channels, gboolean dest_has_alpha,
+
+Information about the source buffer
+
+   guchar *src_buf,  int src_rowstride,  int src_channels,  gboolean src_has_alpha,
+   int src_width, int src_height,
+
+Information on how to scale the source buf and the region of the scaled source
+to render onto the destination buffer
+
+   int render_x0, int render_y0, int render_x1, int render_y1
+   double scale_x, double scale_y
+
+Information about a constant color or check pattern onto which to to composite
+
+   int check_x,	int check_y, int check_size, guint32 color1, guint32 color2
+
+Information precomputed to use during the scale operation
+
+   PixopsFilter *filter, PixopsLineFunc line_func, OixopsPixelFunc pixel_func
+
+
+Filter computation
+==================
+
+The PixopsFilter structure looks like:
+
+struct _PixopsFilter
+{
+  int *weights;
+  int n_x;
+  int n_y;
+  double x_offset;
+  double y_offset;
+}; 
+
+
+'weights' is an array of size:
+
+ weights[SUBSAMPLE][SUBSAMPLE][n_x][n_y]
+
+SUBSAMPLE is a constant - currently 16 in pixops.c.
+
+
+In order to compute a scaled destination pixel we convolve
+an array of n_x by n_y source pixels with one of
+the SUBSAMPLE * SUBSAMPLE filter matrices stored
+in weights. The choice of filter matrix is determined
+by the fractional part of the source location.
+
+To compute dest[i,j] we do the following:
+
+ x = i * scale_x + x_offset;
+ y = i * scale_x + y_offset;
+ x_int = floor(x)
+ y_int = floor(y)
+
+ C = weights[SUBSAMPLE*(x - x_int)][SUBSAMPLE*(y - y_int)]
+ total  = sum[l=0..n_x-1, j=0..n_y-1] (C[l,m] * src[x_int + l, x_int + m])
+
+The filter weights are integers scaled so that the total of the
+weights in the weights array is equal to 65536.
+
+When the source does not have alpha, we simply compute each channel
+as above, so total is in the range [0,255*65536]
+
+ dest = src / 65536
+
+When the source does have alpha, then we need to compute using
+"pre-multiplied alpha":
+
+ a_total = sum (C[l,m] * src_a[x_int + l, x_int + m])
+ c_total = sum (C[l,m] * src_a[x_int + l, x_int + m] * src_c[x_int + l, x_int + m])
+ 
+This gives us a result for c_total in the range of [0,255*a_total]
+ 
+ c_dest = c_total / a_total
+ 
+
+Mathematical aside:
+
+The process of producing a destination filter consists
+of:
+
+ - Producing a continuous approximation to the source
+   image via interpolation. 
+
+ - Sampling that continuous approximation with filter.
+
+This is representable as:
+
+ S(x,y) = sum[i=-inf,inf; j=-inf,inf] A(frac(x),frac(y))[i,j] * S[floor(x)+i,floor(y)+j]
+
+ D[i,j] = Integral(s=-inf,inf; t=-inf,inf) B(i+x,j+y) S((i+x)/scale_x,(i+y)/scale_y)
+ 
+By reordering the sums and integrals, you get something of the form:
+
+ D[i,j] = sum[l=-inf,inf; m=-inf;inf] C[l,m] S[i+l,j+l]
+
+The arrays in weights are the C[l,m] above, and are thus
+determined by the interpolating algorithm in use and the
+sampling filter:
+
+                                       INTERPOLATE       SAMPLE
+ ART_FILTER_NEAREST                nearest neighbour     point
+ ART_FILTER_TILES                  nearest neighbour      box
+ ART_FILTER_BILINEAR (scale < 1)   nearest neighbour      box   (scale < 1)
+ ART_FILTER_BILINEAR (scale > 1)       bilinear           point  (scale > 1)
+ ART_FILTER_HYPER                      bilinear           box
+ 
+
+Pixel Functions
+===============
+
+typedef void (*PixopsPixelFunc) (guchar *dest, int dest_x, int dest_channels, int dest_has_alpha,
+				 int src_has_alpha, 
+                                 int check_size, guint32 color1, guint32 color2,
+				 int r, int g, int b, int a);
+
+The arguments here are:
+
+ dest: location to store the output pixel
+ dest_x: x coordinate of destination (for handling checks)
+ dest_has_alpha, dest_channels: Information about the destination pixbuf
+ src_has_alpha: Information about the source pixbuf
+
+ check_size, color1, color2: Information for color background for composite_color variant
+ 
+ r,g,b,a - scaled red, green, blue and alpha
+
+r,g,b are premultiplied alpha.
+
+ a is in [0,65536*255]
+ r is in [0,255*a]
+ g is in [0,255*a]
+ b is in [0,255*a]
+
+If src_has_alpha is false, then a will be 65536*255, allowing optimization.
+
+
+Line functions
+==============
+
+typedef guchar *(*PixopsLineFunc) (int *weights, int n_x, int n_y,
+				   guchar *dest, int dest_x, guchar *dest_end, int dest_channels, int dest_has_alpha,
+				   guchar **src, int src_channels, gboolean src_has_alpha,
+				   int x_init, int x_step, int src_width,
+				   int check_size, guint32 color1, guint32 color2);
+
+The argumets are:
+
+ weights, n_x, n_y
+
+   Filter weights for this row - dimensions weights[SUBSAMPLE][n_x][n_y]
+
+ dest, dest_x, dest_end, dest_channels, dest_has_alpha
+
+   The destination buffer, function will start writing into *dest and
+   increment by dest_channels, until dest == dest_end. Reading from
+   src for these pixels is guaranteed not to go outside of the 
+   bufer bounds
+
+ src, src_channels, src_has_alpha
+ 
+   src[n_y] - an array of pointers to the start of the source rows
+   for each filter coordinate.
+
+ x_init, x_step
+
+   Information about x positions in source image.
+
+ src_width - unused
+
+ check_size, color1, color2: Information for color background for composite_color variant
+
+ The total for the destination pixel at dest + i is given by
+
+   SUM (l=0..n_x - 1, m=0..n_y - 1) 
+     src[m][(x_init + i * x_step)>> SCALE_SHIFT + l] * weights[m][l]
+
+
+Algorithms for compositing
+==========================
+
+Compositing alpha on non alpha:
+
+ R = As * Rs + (1 - As) * Rd
+ G = As * Gs + (1 - As) * Gd
+ B = As * Bs + (1 - As) * Bd
+
+This can be regrouped as:
+
+ Cd + Cs * (Cs - Rd)
+
+Compositing alpha on alpha:
+
+ A = As + (1 - As) * Ad
+ R = (As * Rs + (1 - As) * Rd * Ad)  / A
+ G = (As * Gs + (1 - As) * Gd * Ad)  / A
+ B = (As * Bs + (1 - As) * Bd * Ad)  / A
+
+The way to think of this is in terms of the "area":
+
+The final pixel is composed of area As of the source pixel
+and (1 - As) * Ad of the target pixel. So the final pixel
+is a weighted average with those weights.
+
+Note that the weights do not add up to one - hence the
+non-constant division.
+
+
+Integer tricks for compositing
+==============================
+
+
+
+MMX Code
+========
+
+Line functions are provided in MMX functionsfor a few special 
+cases:
+
+ n_x = n_y = 2
+
+   src_channels = 3 dest_channels = 3    op = scale
+   src_channels = 4 with alpha dest_channels = 4 no alpha  op = composite
+   src_channels = 4 with alpha dest_channels = 4 no alpha  op = composite_color
+
+For the case n_x = n_y = 2 - primarily hit when scaling up with bilinear
+scaling, we can take advantage of the fact that multiple destination
+pixels will be composed from the same source pixels.
+
+That is a destination pixel is a linear combination of the source
+pixels around it:
+
+
+  S0                     S1
+
+
+
+
+
+       D  D' D'' ...
+
+
+
+
+  S2                     S3
+
+Each mmx register is 64 bits wide, so we can unpack a source pixel
+into the low 8 bits of 4 16 bit words, and store it into a mmx 
+register.
+
+For each destination pixel, we first make sure that we have pixels S0
+... S3 loaded into registers mm0 ...mm3. (This will often involve not
+doing anything or moving mm1 and mm3 into mm0 and mm1 then reloading
+mm1 and mm3 with new values).
+
+Then we load up the appropriate weights for the 4 corner pixels
+based on the offsets of the destination pixel within the source
+pixels.
+
+We have preexpanded the weights to 64 bits wide and truncated the
+range to 8 bits, so an original filter value of 
+
+ 0x5321 would be expanded to
+
+ 0x0053005300530053
+
+For source buffers without alpha, we simply do a multiply-add
+of the weights, giving us a 16 bit quantity for the result
+that we shift left by 8 and store in the destination buffer.
+
+When the source buffer has alpha, then things become more
+complicated - when we load up mm0 and mm3, we premultiply
+the alpha, so they contain:
+
+ (a*ff >> 8) (r*a >> 8) (g*a >> 8) (b*a >> a)
+
+Then when we multiply by the weights, and add we end up
+with premultiplied r,g,b,a in the range of 0 .. 0xff * 0ff,
+call them A,R,G,B
+
+We then need to composite with the dest pixels - which 
+we do by:
+
+ r_dest = (R + ((0xff * 0xff - A) >> 8) * r_dest) >> 8
+
+(0xff * 0xff) 

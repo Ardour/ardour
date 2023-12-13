@@ -24,6 +24,11 @@ def build(bld):
     obj.includes     = [ '.', './generic_midi']
     obj.name         = 'libardour_generic_midi'
     obj.target       = 'ardour_generic_midi'
-    obj.uselib       = 'GTKMM GTK GDK XML OSX'
+    obj.uselib       = 'XML OSX'
     obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+    if bld.is_defined('YTK'):
+        obj.use    += ' libytkmm'
+        obj.uselib += ' GLIBMM GIOMM PANGOMM'
+    else:
+        obj.uselib += ' GTKMM'

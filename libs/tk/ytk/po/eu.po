@@ -1,0 +1,4059 @@
+# translation of gtk_new_eu.po to Basque
+# Joseba Bidaurrazaga van Dierdonck <gcpbivaj@lg.ehu.es>, 1999-2000.
+# Hizkuntza Politikarako Sailburuordetza <hizpol@ej-gv.es>, 2004.
+# Iñaki Larrañaga Murgoitio <dooteo@euskalgnu.org>, 2004, 2005, 2006, 2008, 2009, 2010.
+# Iñaki Larrañaga Murgoitio <dooteo@zundan.com>, 2007.
+# Copyright (C) 1999, 2004, 2005, 2006, 2007, 2008, 2009, 2010 Free Software Foundation, Inc.
+msgid ""
+msgstr ""
+"Project-Id-Version: gtk_new_eu\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-19 21:59+0100\n"
+"PO-Revision-Date: 2010-09-08 12:12+0200\n"
+"Last-Translator: Iñaki Larrañaga Murgoitio <dooteo@euskalgnu.org>\n"
+"Language-Team: Basque <itzulpena@euskalgnu.org>\n"
+"Language: eu\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: KBabel 1.11.4\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+
+#: gtkaboutdialog.c:245
+msgid "Could not show link"
+msgstr "Ezin izan da esteka erakutsi"
+
+#: gtkaboutdialog.c:399 gtkaboutdialog.c:2286
+msgid "License"
+msgstr "Lizentzia"
+
+#: gtkaboutdialog.c:400
+msgid "The license of the program"
+msgstr "Programaren lizentzia"
+
+#: gtkaboutdialog.c:646
+msgid "C_redits"
+msgstr "K_redituak"
+
+#: gtkaboutdialog.c:660
+msgid "_License"
+msgstr "_Lizentzia"
+
+#: gtkaboutdialog.c:966
+#, c-format
+msgid "About %s"
+msgstr "%s buruz"
+
+#: gtkaboutdialog.c:2209
+msgid "Credits"
+msgstr "Kredituak"
+
+#: gtkaboutdialog.c:2238
+msgid "Written by"
+msgstr "Garapena"
+
+#: gtkaboutdialog.c:2241
+msgid "Documented by"
+msgstr "Dokumentazioa"
+
+#: gtkaboutdialog.c:2253
+msgid "Translated by"
+msgstr "Itzulpena"
+
+#: gtkaboutdialog.c:2257
+msgid "Artwork by"
+msgstr "Marrazki lanak"
+
+#: gtkbuilderparser.c:343
+#, c-format
+msgid "Invalid type function on line %d: '%s'"
+msgstr "Funtzio mota baliogabea %d lerroan: '%s'"
+
+#: gtkbuilderparser.c:407
+#, c-format
+msgid "Duplicate object ID '%s' on line %d (previously on line %d)"
+msgstr "Bikoiztutako '%s' ID objektua %d. lerroan (aurrez %d. lerroan)"
+
+#: gtkbuilderparser.c:859
+#, c-format
+msgid "Invalid root element: '%s'"
+msgstr "Erroko elementu baliogabea: %s"
+
+#: gtkbuilderparser.c:898
+#, c-format
+msgid "Unhandled tag: '%s'"
+msgstr "Kudeatu gabeko etiketa: '%s'"
+
+#: gtkcellrendereraccel.c:389 gtkcellrendereraccel.c:663
+msgid "New accelerator..."
+msgstr "Bizkortzaile berria..."
+
+#: gtkcolorbutton.c:178 gtkcolorbutton.c:459
+msgid "Pick a Color"
+msgstr "Hautatu kolorea"
+
+#: gtkcolorbutton.c:352
+msgid "Received invalid color data\n"
+msgstr "Kolore datu baliogabea jaso da\n"
+
+#: gtkcolorsel.c:358
+msgid ""
+"Select the color you want from the outer ring. Select the darkness or "
+"lightness of that color using the inner triangle."
+msgstr ""
+"Hautatu nahi duzun kolorea kanpoko biribiletik. Hautatu kolore horren "
+"iluntasuna edo argitasuna barruko triangelua erabiliz"
+
+#: gtkcolorsel.c:382
+msgid ""
+"Click the eyedropper, then click a color anywhere on your screen to select "
+"that color."
+msgstr ""
+"Egin klik tanta-kontagailuan, eta egin klik zure pantailako edozein "
+"koloretan kolore hori hautatzeko."
+
+#: gtkcolorsel.c:391
+msgid "_Hue:"
+msgstr "_Ñabardura:"
+
+#: gtkcolorsel.c:392
+msgid "Position on the color wheel."
+msgstr "Kolore-gurpileko kokalekua."
+
+#: gtkcolorsel.c:394
+msgid "_Saturation:"
+msgstr "_Saturazioa:"
+
+#: gtkcolorsel.c:395
+msgid "\"Deepness\" of the color."
+msgstr "Kolorearen \"intentsitatea\"."
+
+#: gtkcolorsel.c:396
+msgid "_Value:"
+msgstr "_Balioa:"
+
+#: gtkcolorsel.c:397
+msgid "Brightness of the color."
+msgstr "Kolorearen distira."
+
+#: gtkcolorsel.c:398
+msgid "_Red:"
+msgstr "_Gorria:"
+
+#: gtkcolorsel.c:399
+msgid "Amount of red light in the color."
+msgstr "Argi gorriaren kantitatea kolorean."
+
+#: gtkcolorsel.c:400
+msgid "_Green:"
+msgstr "Be_rdea:"
+
+#: gtkcolorsel.c:401
+msgid "Amount of green light in the color."
+msgstr "Argi berdearen kantitatea kolorean."
+
+#: gtkcolorsel.c:402
+msgid "_Blue:"
+msgstr "_Urdina:"
+
+#: gtkcolorsel.c:403
+msgid "Amount of blue light in the color."
+msgstr "Argi urdinaren kantitatea kolorean."
+
+#: gtkcolorsel.c:406
+msgid "Op_acity:"
+msgstr "_Opakutasuna:"
+
+#: gtkcolorsel.c:413 gtkcolorsel.c:423
+msgid "Transparency of the color."
+msgstr "Kolorearen gardentasuna."
+
+#: gtkcolorsel.c:430
+msgid "Color _name:"
+msgstr "Kolorearen i_zena:"
+
+#: gtkcolorsel.c:444
+msgid ""
+"You can enter an HTML-style hexadecimal color value, or simply a color name "
+"such as 'orange' in this entry."
+msgstr ""
+"HTML estiloko kolore-balio hamaseitarra sar dezakezu edo bestela kolore  "
+"baten izena, adibidez 'laranja', sarrera honetan."
+
+#: gtkcolorsel.c:474
+msgid "_Palette:"
+msgstr "_Paleta:"
+
+#: gtkcolorsel.c:503
+msgid "Color Wheel"
+msgstr "Kolore-gurpila"
+
+#: gtkcolorsel.c:962
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now. You can drag this color to a palette entry, or select this color as "
+"current by dragging it to the other color swatch alongside."
+msgstr ""
+"Aurrez hautatutako kolorea orain hautatzen ari zaren kolorearekin "
+"konparatzeko. Kolore hori paleta-sarrerara arrasta dezakezu edo kolore hori "
+"uneko kolore gisa hauta dezakezu, koloreen ondoko lagin-multzora arrastatuz."
+
+#: gtkcolorsel.c:965
+msgid ""
+"The color you've chosen. You can drag this color to a palette entry to save "
+"it for use in the future."
+msgstr ""
+"Hautatu duzun kolorea. Kolore hori paleta-sarrerara arrasta dezakezu eta han "
+"gorde aurrerago erabiltzeko."
+
+#: gtkcolorsel.c:970
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now."
+msgstr ""
+"Aurrez hautatutako kolorea, orain hautatzen ari zaren kolorearekin "
+"konparatzeko."
+
+#: gtkcolorsel.c:973
+msgid "The color you've chosen."
+msgstr "Aukeratu duzun kolorea."
+
+#: gtkcolorsel.c:1389
+msgid "_Save color here"
+msgstr "_Gorde kolorea hemen"
+
+#: gtkcolorsel.c:1593
+msgid ""
+"Click this palette entry to make it the current color. To change this entry, "
+"drag a color swatch here or right-click it and select \"Save color here.\""
+msgstr ""
+"Egin klik paleta-sarrera honetan uneko kolore bihurtzeko. Sarrera hori "
+"aldatzeko, arrastatu koloreen lagin-multzoa hona edo egin klik eskuineko "
+"botoiarekin eta hautatu \"Gorde kolorea hemen.\""
+
+#: gtkcolorseldialog.c:170
+msgid "Color Selection"
+msgstr "Kolore-hautapena"
+
+#: gtkentry.c:8789 gtktextview.c:8007
+msgid "Input _Methods"
+msgstr "Sartzeko _metodoak"
+
+#: gtkentry.c:8803 gtktextview.c:8021
+msgid "_Insert Unicode Control Character"
+msgstr "_Txertatu Unicode kontrol-karakterea"
+
+#: gtkentry.c:10177
+msgid "Caps Lock is on"
+msgstr "Blok.maius. aktibatuta dago"
+
+#: gtkfilechooserbutton.c:64
+msgid "Select a File"
+msgstr ""
+
+#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1851
+msgid "Desktop"
+msgstr "Mahaigaina"
+
+#: gtkfilechooserbutton.c:66
+msgid "(None)"
+msgstr "(bat ere ez)"
+
+#: gtkfilechooserbutton.c:2175
+msgid "Other..."
+msgstr "Besterik..."
+
+#: gtkfilechooserdefault.c:150
+msgid "Type name of new folder"
+msgstr "Idatzi karpeta berriaren izena"
+
+#: gtkfilechooserdefault.c:956
+msgid "Could not retrieve information about the file"
+msgstr "Ezin da fitxategiari buruzko informaziorik lortu"
+
+#: gtkfilechooserdefault.c:967
+msgid "Could not add a bookmark"
+msgstr "Ezin da laster-marka gehitu"
+
+#: gtkfilechooserdefault.c:978
+msgid "Could not remove bookmark"
+msgstr "Ezin izan da laster-marka ezabatu"
+
+#: gtkfilechooserdefault.c:989
+msgid "The folder could not be created"
+msgstr "Ezin izan da karpeta sortu"
+
+#: gtkfilechooserdefault.c:1002
+msgid ""
+"The folder could not be created, as a file with the same name already "
+"exists.  Try using a different name for the folder, or rename the file first."
+msgstr ""
+"Karpeta ezin izan da sortu, izen bereko beste fitxategia badago lehendik. "
+"Saiatu karpeta beste izen batekin sortzen, edo aldatu fitxategiaren izena "
+"lehenbizi."
+
+#: gtkfilechooserdefault.c:1016
+msgid "You need to choose a valid filename."
+msgstr ""
+
+#: gtkfilechooserdefault.c:1019
+#, c-format
+msgid "Cannot create a file under %s as it is not a folder"
+msgstr ""
+
+#: gtkfilechooserdefault.c:1031
+msgid ""
+"You may only select folders.  The item that you selected is not a folder; "
+"try using a different item."
+msgstr ""
+
+#: gtkfilechooserdefault.c:1041
+msgid "Invalid file name"
+msgstr "Fitxategi-izen baliogabea"
+
+#: gtkfilechooserdefault.c:1051
+msgid "The folder contents could not be displayed"
+msgstr "Karpetaren edukia ezin izan da bistaratu"
+
+#: gtkfilechooserdefault.c:1584
+#, c-format
+msgid "%1$s on %2$s"
+msgstr "%1$s, %2$s"
+
+#: gtkfilechooserdefault.c:1733
+msgid "Search"
+msgstr "Bilatu"
+
+#: gtkfilechooserdefault.c:1757 gtkfilechooserdefault.c:4872
+msgid "Recently Used"
+msgstr "Duela gutxi erabilita"
+
+#: gtkfilechooserdefault.c:2387
+msgid "Select which types of files are shown"
+msgstr "Hautatu erakutsiko diren fitxategi motak"
+
+#: gtkfilechooserdefault.c:2746
+#, c-format
+msgid "Add the folder '%s' to the bookmarks"
+msgstr "Gehitu '%s' karpeta laster-markei"
+
+#: gtkfilechooserdefault.c:2790
+msgid "Add the current folder to the bookmarks"
+msgstr "Gehitu uneko karpeta laster-markei"
+
+#: gtkfilechooserdefault.c:2792
+msgid "Add the selected folders to the bookmarks"
+msgstr "Gehitu hautatutako karpetak laster-markei"
+
+#: gtkfilechooserdefault.c:2837
+#, c-format
+msgid "Remove the bookmark '%s'"
+msgstr "Kendu '%s' laster-marka"
+
+#: gtkfilechooserdefault.c:2839
+#, c-format
+msgid "Bookmark '%s' cannot be removed"
+msgstr "'%s' laster-marka ezin da kendu"
+
+#: gtkfilechooserdefault.c:2846 gtkfilechooserdefault.c:3740
+msgid "Remove the selected bookmark"
+msgstr "Kendu hautatutako laster-marka"
+
+#: gtkfilechooserdefault.c:3421
+msgid "Remove"
+msgstr "Kendu"
+
+#: gtkfilechooserdefault.c:3430
+msgid "Rename..."
+msgstr "Izena aldatu..."
+
+#: gtkfilechooserdefault.c:3597
+msgid "Places"
+msgstr "Lekuak"
+
+#: gtkfilechooserdefault.c:3654
+msgid "_Places"
+msgstr "_Lekuak"
+
+#: gtkfilechooserdefault.c:3728
+msgid "Add the selected folder to the Bookmarks"
+msgstr "Gehitu hautatutako karpetak laster-markei"
+
+#: gtkfilechooserdefault.c:3872
+msgid "Could not select file"
+msgstr "Ezin izan da fitxategia hautatu"
+
+#: gtkfilechooserdefault.c:4045
+msgid "_Add to Bookmarks"
+msgstr "_Gehitu laster-markei"
+
+#: gtkfilechooserdefault.c:4058
+msgid "Show _Hidden Files"
+msgstr "Erakutsi fitxategi _ezkutuak"
+
+#: gtkfilechooserdefault.c:4065
+msgid "Show _Size Column"
+msgstr "Erakutsi zutabearen _tamaina"
+
+#: gtkfilechooserdefault.c:4289
+msgid "Files"
+msgstr "Fitxategiak"
+
+#: gtkfilechooserdefault.c:4340
+msgid "Name"
+msgstr "Izena"
+
+#: gtkfilechooserdefault.c:4363
+msgid "Size"
+msgstr "Tamaina"
+
+#: gtkfilechooserdefault.c:4377
+msgid "Modified"
+msgstr "Aldatua"
+
+#: gtkfilechooserdefault.c:4470
+msgid "_Name:"
+msgstr "_Izena:"
+
+#: gtkfilechooserdefault.c:4710
+msgid "Type a file name"
+msgstr "Idatzi fitxategi-izena"
+
+#: gtkfilechooserdefault.c:4757 gtkfilechooserdefault.c:4768
+msgid "Please select a folder below"
+msgstr ""
+
+#: gtkfilechooserdefault.c:4763
+msgid "Please type a file name"
+msgstr ""
+
+#: gtkfilechooserdefault.c:4834
+msgid "Create Fo_lder"
+msgstr "Sortu karpeta"
+
+#: gtkfilechooserdefault.c:4882
+msgid "Search:"
+msgstr "Bilatu:"
+
+#: gtkfilechooserdefault.c:4933
+msgid "_Location:"
+msgstr "_Kokalekua:"
+
+#: gtkfilechooserdefault.c:5383
+msgid "Save in _folder:"
+msgstr "Gorde _karpetan:"
+
+#: gtkfilechooserdefault.c:5385
+msgid "Create in _folder:"
+msgstr "Sortu _karpetan:"
+
+#: gtkfilechooserdefault.c:6479
+#, c-format
+msgid "Could not read the contents of %s"
+msgstr "Ezin izan da %s(r)en edukia irakurri"
+
+#: gtkfilechooserdefault.c:6483
+msgid "Could not read the contents of the folder"
+msgstr "Ezin izan da karpetaren edukia irakurri"
+
+#: gtkfilechooserdefault.c:6576 gtkfilechooserdefault.c:6644
+#: gtkfilechooserdefault.c:6829
+msgid "Unknown"
+msgstr "Ezezaguna"
+
+#: gtkfilechooserdefault.c:6591
+msgid "%H:%M"
+msgstr "%H:%M"
+
+#: gtkfilechooserdefault.c:6593
+msgid "Yesterday at %H:%M"
+msgstr "Atzo %H:%M orduan"
+
+#: gtkfilechooserdefault.c:7301
+msgid "Cannot change to folder because it is not local"
+msgstr "Ezin aldatu karpetara, lokala ez delako."
+
+#: gtkfilechooserdefault.c:7898 gtkfilechooserdefault.c:7919
+#, c-format
+msgid "Shortcut %s already exists"
+msgstr "%s lasterbidea badago lehendik ere"
+
+#: gtkfilechooserdefault.c:8009
+#, c-format
+msgid "Shortcut %s does not exist"
+msgstr "%s lasterbidea ez da existitzen"
+
+#: gtkfilechooserdefault.c:8250
+#, c-format
+msgid "A file named \"%s\" already exists.  Do you want to replace it?"
+msgstr " \"%s\" izeneko fitxategia badago lehendik. Ordeztea nahi duzu?"
+
+#: gtkfilechooserdefault.c:8253
+#, c-format
+msgid ""
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
+msgstr ""
+"\"%s\"(e)n badago fitxategia lehendik. Hau ordeztean bere eduki guztia "
+"gainidatziko da."
+
+#: gtkfilechooserdefault.c:8258
+msgid "_Replace"
+msgstr "_Ordeztu"
+
+#: gtkfilechooserdefault.c:9066
+msgid "Could not start the search process"
+msgstr "Ezin izan da bilaketako prozesua abiarazi"
+
+#: gtkfilechooserdefault.c:9067
+msgid ""
+"The program was not able to create a connection to the indexer daemon.  "
+"Please make sure it is running."
+msgstr ""
+"Programak ezin izan du indexatzaileren daemon-arekin konexiorik sortu. "
+"Ziurtatu exekutatzen ari dela."
+
+#: gtkfilechooserdefault.c:9081
+msgid "Could not send the search request"
+msgstr "Ezin izan da bilaketako eskaera bidali"
+
+#: gtkfilechooserdefault.c:9682
+#, c-format
+msgid "Could not mount %s"
+msgstr "Ezin da %s muntatu"
+
+#: gtkfilechoosersettings.c:515
+#, c-format
+msgid "Error creating folder '%s': %s"
+msgstr "Errorea '%s' karpeta sortzean: %s"
+
+#: gtkfilesystem.c:52
+msgid "File System"
+msgstr "Fitxategi-sistema"
+
+#: gtkfontbutton.c:144 gtkfontbutton.c:266
+msgid "Pick a Font"
+msgstr "Hautatu letra-tipoa"
+
+#: gtkfontbutton.c:260
+msgid "Sans 12"
+msgstr "Sans 12"
+
+#: gtkfontbutton.c:785
+msgid "Font"
+msgstr "Letra-tipoa"
+
+#: gtkfontsel.c:75
+msgid "abcdefghijk ABCDEFGHIJK"
+msgstr "abcdefghijk ABCDEFGHIJK"
+
+#: gtkfontsel.c:343
+msgid "_Family:"
+msgstr "_Familia:"
+
+#: gtkfontsel.c:349
+msgid "_Style:"
+msgstr "_Estiloa:"
+
+#: gtkfontsel.c:355
+msgid "Si_ze:"
+msgstr "Ta_maina:"
+
+#: gtkfontsel.c:532
+msgid "_Preview:"
+msgstr "_Aurrebista:"
+
+#: gtkfontsel.c:1649
+msgid "Font Selection"
+msgstr "Letra-tipoaren hautapena"
+
+#: gtkiconfactory.c:1354
+#, c-format
+msgid "Error loading icon: %s"
+msgstr "Errorea ikonoa kargatzean: %s"
+
+#: gtkicontheme.c:1374
+#, c-format
+msgid ""
+"Could not find the icon '%s'. The '%s' theme\n"
+"was not found either, perhaps you need to install it.\n"
+"You can get a copy from:\n"
+"\t%s"
+msgstr ""
+"Ezin izan da '%s' ikonoa aurkitu. '%s' gaia\n"
+"ere ez da aurkitu, agian instalatu beharko duzu.\n"
+"Kopia bat hemen lor dezakezu:\n"
+"\t%s"
+
+#: gtkicontheme.c:1555
+#, c-format
+msgid "Icon '%s' not present in theme"
+msgstr "'%s' ikonoa ez dago gaian"
+
+#: gtkicontheme.c:3101
+msgid "Failed to load icon"
+msgstr "Huts egin du ikonoa kargatzean"
+
+#: gtkimmodule.c:527
+msgid "Simple"
+msgstr "Bakuna"
+
+#: gtklabel.c:5696
+msgid "_Open Link"
+msgstr "_Ireki esteka"
+
+#: gtklabel.c:5708
+msgid "Copy _Link Address"
+msgstr "Kopiatu _estekaren helbidea"
+
+#: gtklinkbutton.c:428
+msgid "Copy URL"
+msgstr "Kopiatu URLa"
+
+#: gtklinkbutton.c:586
+msgid "Invalid URI"
+msgstr "URI baliogabea"
+
+#: gtkmain.c:454
+msgid "Load additional GTK+ modules"
+msgstr "Kargatu GTK+ modulu gehigarriak"
+
+#: gtkmain.c:455
+msgid "MODULES"
+msgstr "MODULUAK"
+
+#: gtkmain.c:457
+msgid "Make all warnings fatal"
+msgstr "Bihurtu abisu guztiak errore larri"
+
+#: gtkmain.c:460
+msgid "GTK+ debugging flags to set"
+msgstr "Ezarri beharreko Gtk+ arazketa-banderak"
+
+#: gtkmain.c:461 gtkmain.c:464
+msgid "FLAGS"
+msgstr "BANDERAK"
+
+#: gtkmain.c:463
+msgid "GTK+ debugging flags to unset"
+msgstr "Ezarpenetik kendu beharreko Gtk+ arazketa-banderak"
+
+#: gtkmain.c:755
+msgid "default:LTR"
+msgstr "default:LTR"
+
+#: gtkmain.c:820
+#, c-format
+msgid "Cannot open display: %s"
+msgstr "Ezin da pantaila ireki: %s"
+
+#: gtkmain.c:857
+msgid "GTK+ Options"
+msgstr "GTK+ aukerak"
+
+#: gtkmain.c:857
+msgid "Show GTK+ Options"
+msgstr "Erakutsi GTK+ aukerak"
+
+#: gtkmountoperation.c:494
+msgid "Co_nnect"
+msgstr "_Konektatu"
+
+#: gtkmountoperation.c:561
+msgid "Connect _anonymously"
+msgstr "Konektatu _anonimoki"
+
+#: gtkmountoperation.c:570
+msgid "Connect as u_ser:"
+msgstr "Konektatu _erabiltzaile gisa:"
+
+#: gtkmountoperation.c:608
+msgid "_Username:"
+msgstr "_Erabiltzaile-izena:"
+
+#: gtkmountoperation.c:613
+msgid "_Domain:"
+msgstr "_Domeinua:"
+
+#: gtkmountoperation.c:619
+msgid "_Password:"
+msgstr "_Pasahitza:"
+
+#: gtkmountoperation.c:637
+msgid "Forget password _immediately"
+msgstr "Ahaztu pasahitza _berehala"
+
+#: gtkmountoperation.c:647
+msgid "Remember password until you _logout"
+msgstr "Gogoratu pasahitza saioa _amaitu arte"
+
+#: gtkmountoperation.c:657
+msgid "Remember _forever"
+msgstr "_Gogoratu beti"
+
+#: gtkmountoperation.c:886
+#, c-format
+msgid "Unknown Application (PID %d)"
+msgstr "Aplikazio ezezaguna (PIDa: %d)"
+
+#: gtkmountoperation.c:1069
+msgid "Unable to end process"
+msgstr "Ezin da prozesua amaitu"
+
+#: gtkmountoperation.c:1106
+msgid "_End Process"
+msgstr "_Amaitu prozesua"
+
+#: gtknotebook.c:4745 gtknotebook.c:7351
+#, c-format
+msgid "Page %u"
+msgstr "%u. orrialdea"
+
+#: gtkpathbar.c:151
+msgid "Up Path"
+msgstr "Goiko bidea"
+
+#: gtkpathbar.c:153
+msgid "Down Path"
+msgstr "Azpiko bidea"
+
+#: gtkpathbar.c:1467
+msgid "File System Root"
+msgstr "Erroko fitxategi-sistema"
+
+#: gtkrc.c:2906
+#, c-format
+msgid "Unable to find include file: \"%s\""
+msgstr "Ezin izan da include fitxategi hau aurkitu: \"%s\" "
+
+#: gtkrc.c:3536 gtkrc.c:3539
+#, c-format
+msgid "Unable to locate image file in pixmap_path: \"%s\""
+msgstr "Ezin izan da irudi-fitxategia pixmap_path-en aurkitu: \"%s\""
+
+#: gtkrecentaction.c:154 gtkrecentaction.c:162 gtkrecentchoosermenu.c:588
+#: gtkrecentchoosermenu.c:596
+#, c-format
+msgid "This function is not implemented for widgets of class '%s'"
+msgstr "'%s' klasearen trepeten funtzioa oraindik garatu gabe dago"
+
+#: gtkrecentchooserdefault.c:481
+msgid "Select which type of documents are shown"
+msgstr "Hautatu erakutsiko diren fitxategi motak"
+
+#: gtkrecentchooserdefault.c:1135 gtkrecentchooserdefault.c:1172
+#, c-format
+msgid "No item for URI '%s' found"
+msgstr "Ez da'%s' URIaren elementua aurkitu"
+
+#: gtkrecentchooserdefault.c:1299
+msgid "Untitled filter"
+msgstr "Izenik gabeko iragazkia"
+
+#: gtkrecentchooserdefault.c:1652
+msgid "Could not remove item"
+msgstr "Ezin da elementua kendu"
+
+#: gtkrecentchooserdefault.c:1696
+msgid "Could not clear list"
+msgstr "Ezin da zerrenda garbitu"
+
+#: gtkrecentchooserdefault.c:1780
+msgid "Copy _Location"
+msgstr "Kopiatu _helbidea"
+
+#: gtkrecentchooserdefault.c:1793
+msgid "_Remove From List"
+msgstr "_Kendu zerrendatik"
+
+#: gtkrecentchooserdefault.c:1802
+msgid "_Clear List"
+msgstr "_Garbitu zerrenda"
+
+#: gtkrecentchooserdefault.c:1816
+msgid "Show _Private Resources"
+msgstr "Erakutsi baliabide _pribatuak"
+
+#: gtkrecentchoosermenu.c:342
+msgid "No items found"
+msgstr "Ez da elementurik aurkitu"
+
+#: gtkrecentchoosermenu.c:508 gtkrecentchoosermenu.c:564
+#, c-format
+msgid "No recently used resource found with URI `%s'"
+msgstr "Ez da duela gutxi erabilitako '%s' URIaren baliabiderik aurkitu"
+
+#: gtkrecentchoosermenu.c:774
+#, c-format
+msgid "Open '%s'"
+msgstr "Ireki '%s'"
+
+#: gtkrecentchoosermenu.c:804
+msgid "Unknown item"
+msgstr "Elementu ezezaguna"
+
+#: gtkrecentmanager.c:1182 gtkrecentmanager.c:1195 gtkrecentmanager.c:1332
+#: gtkrecentmanager.c:1342 gtkrecentmanager.c:1395 gtkrecentmanager.c:1404
+#: gtkrecentmanager.c:1419
+#, c-format
+msgid "Unable to find an item with URI '%s'"
+msgstr "Ezin izan da '%s' URIa duen elementua aurkitu"
+
+#: gtkspinner.c:459
+msgid "Provides visual indication of progress"
+msgstr "Aurrerapenaren adierazle bisuala eskaintzen du"
+
+#: gtktextbufferrichtext.c:652
+#, c-format
+msgid "Unknown error when trying to deserialize %s"
+msgstr "Errore ezezaguna %s serietik kentzen saiatzean"
+
+#: gtktextbufferrichtext.c:711
+#, c-format
+msgid "No deserialize function found for format %s"
+msgstr "Ez da %s formatuaren serietik kentzeko funtziorik aurkitu"
+
+#: gtktextbufferserialize.c:797 gtktextbufferserialize.c:823
+#, c-format
+msgid "Both \"id\" and \"name\" were found on the <%s> element"
+msgstr "Bai \"id\" bai \"name\" aurkitu dira <%s> elementuan"
+
+#: gtktextbufferserialize.c:807 gtktextbufferserialize.c:833
+#, c-format
+msgid "The attribute \"%s\" was found twice on the <%s> element"
+msgstr "\"%s\" atributua birritan aurkitu da <%s> elementuan"
+
+#: gtktextbufferserialize.c:847
+#, c-format
+msgid "<%s> element has invalid ID \"%s\""
+msgstr "<%s> elementuak \"%s\" ID baliogabea du"
+
+#: gtktextbufferserialize.c:857
+#, c-format
+msgid "<%s> element has neither a \"name\" nor an \"id\" attribute"
+msgstr "<%s> elementuak ez du \"name\" ez \"id\" elementurik"
+
+#: gtktextbufferserialize.c:944
+#, c-format
+msgid "Attribute \"%s\" repeated twice on the same <%s> element"
+msgstr "\"%s\" atributua birritan errepikatuta <%s> elementu berean"
+
+#: gtktextbufferserialize.c:962 gtktextbufferserialize.c:987
+#, c-format
+msgid "Attribute \"%s\" is invalid on <%s> element in this context"
+msgstr "\"%s\" atributua ez da baliozkoa <%s> elementuan testuinguru honetan"
+
+#: gtktextbufferserialize.c:1023
+#, c-format
+msgid "Tag \"%s\" has not been defined."
+msgstr "\"%s\" etiketa ez da definitu."
+
+#: gtktextbufferserialize.c:1035
+msgid "Anonymous tag found and tags can not be created."
+msgstr "Etiketa anonimoa aurkitu da eta etiketak ezin dira sortu."
+
+#: gtktextbufferserialize.c:1046
+#, c-format
+msgid "Tag \"%s\" does not exist in buffer and tags can not be created."
+msgstr ""
+"\"%s\" etiketa ez da existitzen bufferrean eta etiketak ezin dira sortu."
+
+#: gtktextbufferserialize.c:1145 gtktextbufferserialize.c:1220
+#: gtktextbufferserialize.c:1321 gtktextbufferserialize.c:1395
+#, c-format
+msgid "Element <%s> is not allowed below <%s>"
+msgstr "Ez da onartzen <%s> elementua <%s>(r)en azpian jartzea"
+
+#: gtktextbufferserialize.c:1176
+#, c-format
+msgid "\"%s\" is not a valid attribute type"
+msgstr "\"%s\" ez da baliozko atributu-mota"
+
+#: gtktextbufferserialize.c:1184
+#, c-format
+msgid "\"%s\" is not a valid attribute name"
+msgstr "\"%s\" ez da baliozko atributu-izena"
+
+#: gtktextbufferserialize.c:1194
+#, c-format
+msgid ""
+"\"%s\" could not be converted to a value of type \"%s\" for attribute \"%s\""
+msgstr "Ezin izan da \"%s\" bihurtu \"%s\" atributuaren \"%s\" motara"
+
+#: gtktextbufferserialize.c:1203
+#, c-format
+msgid "\"%s\" is not a valid value for attribute \"%s\""
+msgstr "\"%s\" ez da \"%s\" atributuaren baliozko balioa"
+
+#: gtktextbufferserialize.c:1286
+#, c-format
+msgid "Tag \"%s\" already defined"
+msgstr "\"%s\" etiketa lehendik definituta dago"
+
+#: gtktextbufferserialize.c:1297
+#, c-format
+msgid "Tag \"%s\" has invalid priority \"%s\""
+msgstr "\"%s\" etiketak \"%s\" lehentasun baliogabea du"
+
+#: gtktextbufferserialize.c:1350
+#, c-format
+msgid "Outermost element in text must be <text_view_markup> not <%s>"
+msgstr "Testuko elementu kanpokoena <text_view_markup> izen behar du, ez <%s>"
+
+#: gtktextbufferserialize.c:1359 gtktextbufferserialize.c:1375
+#, c-format
+msgid "A <%s> element has already been specified"
+msgstr "<%s> elementua jadanik zehaztuta dago"
+
+#: gtktextbufferserialize.c:1381
+msgid "A <text> element can't occur before a <tags> element"
+msgstr "<text> elementua ezin da <tags> baino lehenago agertu"
+
+#: gtktextbufferserialize.c:1780
+msgid "Serialized data is malformed"
+msgstr "Serieko datuak formatu okerra du"
+
+#: gtktextbufferserialize.c:1858
+msgid ""
+"Serialized data is malformed. First section isn't GTKTEXTBUFFERCONTENTS-0001"
+msgstr ""
+"Serieko datuak formatu okerra du. Aurreneko atala ez da "
+"GTKTEXTBUFFERCONTENTS-0001"
+
+#: gtktextutil.c:61
+msgid "LRM _Left-to-right mark"
+msgstr "LRM _Ezkerretik_eskuinera marka"
+
+#: gtktextutil.c:62
+msgid "RLM _Right-to-left mark"
+msgstr "RLM E_skuinetik_ezkerrera marka"
+
+#: gtktextutil.c:63
+msgid "LRE Left-to-right _embedding"
+msgstr "LRE Ezkerretik_eskuinera ka_psulatzea"
+
+#: gtktextutil.c:64
+msgid "RLE Right-to-left e_mbedding"
+msgstr "RLE Eskuinetik_ezkerrera _kapsulatzea"
+
+#: gtktextutil.c:65
+msgid "LRO Left-to-right _override"
+msgstr "LRO Ezkerretik_eskuinera _gainidaztea"
+
+#: gtktextutil.c:66
+msgid "RLO Right-to-left o_verride"
+msgstr "RLO Eskuinetik_ezkerrera gai_nidaztea"
+
+#: gtktextutil.c:67
+msgid "PDF _Pop directional formatting"
+msgstr "PDF _Formateatze direkzionala agertzea"
+
+#: gtktextutil.c:68
+msgid "ZWS _Zero width space"
+msgstr "ZWS _Zero zabaleraren tartea"
+
+#: gtktextutil.c:69
+msgid "ZWJ Zero width _joiner"
+msgstr "ZWJ Zero zabaleraren _mihiztatzailea"
+
+#: gtktextutil.c:70
+msgid "ZWNJ Zero width _non-joiner"
+msgstr "ZWNJ Zero zabaleraren ez-mihiztatzailea"
+
+#: gtkthemes.c:71
+#, c-format
+msgid "Unable to locate theme engine in module_path: \"%s\","
+msgstr "Ezin izan da gaiaren gailua lokalizatu module_path-en: \"%s\","
+
+#: gtkuimanager.c:1505
+#, c-format
+msgid "Unexpected start tag '%s' on line %d char %d"
+msgstr "Uste gabeko '%s' hasierako etiketa %d lerroan, %d karakterea"
+
+#: gtkuimanager.c:1595
+#, c-format
+msgid "Unexpected character data on line %d char %d"
+msgstr "Uste gabeko datu-karakterea %d lerroan, %d karakterea"
+
+#: gtkuimanager.c:2427
+msgid "Empty"
+msgstr "Hutsik"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-debug"
+#~ msgstr "Errorea --gdk-debug aukera analizatzean"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-no-debug"
+#~ msgstr "Errorea --gdk-no-debug aukera analizatzean"
+
+#~ msgid "Program class as used by the window manager"
+#~ msgstr "Programa-klasea, leiho kudeatzaileak erabiltzen duen bezala"
+
+#~ msgid "CLASS"
+#~ msgstr "KLASEA"
+
+#~ msgid "Program name as used by the window manager"
+#~ msgstr "Programa-izena, leiho kudeatzaileak erabiltzen duen bezala"
+
+#~ msgid "NAME"
+#~ msgstr "IZENA"
+
+#~ msgid "X display to use"
+#~ msgstr "Erabili beharreko X bistaratzea"
+
+#~ msgid "DISPLAY"
+#~ msgstr "BISTARATZEA"
+
+#~ msgid "X screen to use"
+#~ msgstr "Erabili beharreko X pantaila"
+
+#~ msgid "SCREEN"
+#~ msgstr "PANTAILA"
+
+#~ msgid "GDK debugging flags to set"
+#~ msgstr "Ezarri beharreko GDK arazketa-banderak"
+
+#~ msgid "GDK debugging flags to unset"
+#~ msgstr "Ezarpenetik kendu beharreko GDK arazketa-banderak"
+
+#~ msgid "Don't batch GDI requests"
+#~ msgstr "Ez jarri GDI eskaerak batch gisa"
+
+#~ msgid "Don't use the Wintab API for tablet support"
+#~ msgstr "Ez erabili Wintab APIa taulak onartzeko"
+
+#~ msgid "Same as --no-wintab"
+#~ msgstr "'--no-wintab' bezala ere"
+
+#~ msgid "Do use the Wintab API [default]"
+#~ msgstr "Erabili Wintab APIa [lehenetsia]"
+
+#~ msgid "Size of the palette in 8 bit mode"
+#~ msgstr "8-bit motako paletaren tamaina"
+
+#~ msgid "COLORS"
+#~ msgstr "KOLOREAK"
+
+#~ msgid "Make X calls synchronous"
+#~ msgstr "Bihurtu X dei sinkroniko"
+
+#, c-format
+#~ msgid "Starting %s"
+#~ msgstr "'%s' hasieratzen"
+
+#, c-format
+#~ msgid "Opening %s"
+#~ msgstr "'%s' irekitzen"
+
+#~ msgid "calendar:MY"
+#~ msgstr "calendar:YM"
+
+#~ msgid "calendar:week_start:0"
+#~ msgstr "calendar:week_start:1"
+
+#~ msgid "default:mm"
+#~ msgstr "default:mm"
+
+#~ msgid "Manage Custom Sizes"
+#~ msgstr "Kudeatu tamaina pertsonalak"
+
+#~ msgid "inch"
+#~ msgstr "hazbete"
+
+#~ msgid "mm"
+#~ msgstr "mm"
+
+#~ msgid "Margins from Printer..."
+#~ msgstr "Marjinak inprimagailutik..."
+
+#, c-format
+#~ msgid "Custom Size %d"
+#~ msgstr "%d tamaina pertsonalizatua"
+
+#~ msgid "_Width:"
+#~ msgstr "_Zabalera:"
+
+#~ msgid "_Height:"
+#~ msgstr "_Altuera:"
+
+#~ msgid "Paper Size"
+#~ msgstr "Paper-tamaina"
+
+#~ msgid "_Top:"
+#~ msgstr "_Goian:"
+
+#~ msgid "_Bottom:"
+#~ msgstr "_Behean:"
+
+#~ msgid "_Left:"
+#~ msgstr "E_zkerrean:"
+
+#~ msgid "_Right:"
+#~ msgstr "E_skuinean:"
+
+#~ msgid "Paper Margins"
+#~ msgstr "Paper-marjinak"
+
+#~ msgid "Select A File"
+#~ msgstr "Hautatu fitxategia"
+
+#~ msgid "_Add"
+#~ msgstr "_Gehitu"
+
+#~ msgid "_Remove"
+#~ msgstr "_Kendu"
+
+#~ msgid "_Browse for other folders"
+#~ msgstr "_Arakatu beste karpetak"
+
+#~ msgid "Invalid path"
+#~ msgstr "Bide-izen baliogabea"
+
+#~ msgid "No match"
+#~ msgstr "Ez dago bat datorrenik"
+
+#~ msgid "Sole completion"
+#~ msgstr "Osaketa bakarra"
+
+#~ msgid "Complete, but not unique"
+#~ msgstr "Osaketa, baina ez bakarra"
+
+#~ msgid "Completing..."
+#~ msgstr "Osaketa lantzen..."
+
+#~ msgid "Only local files may be selected"
+#~ msgstr "Fitxategi lokalak soilik hauta daitezke"
+
+#~ msgid "Incomplete hostname; end it with '/'"
+#~ msgstr "Ostalari-izena osatu gabea: amaitu '/'-rekin"
+
+#~ msgid "Path does not exist"
+#~ msgstr "Bide-izena ez da existitzen"
+
+#~ msgid "Folders"
+#~ msgstr "Karpetak"
+
+#~ msgid "Fol_ders"
+#~ msgstr "Kar_petak"
+
+#~ msgid "_Files"
+#~ msgstr "_Fitxategiak"
+
+#, c-format
+#~ msgid "Folder unreadable: %s"
+#~ msgstr "Karpeta ezin da irakurri: %s"
+
+#, c-format
+#~ msgid ""
+#~ "The file \"%s\" resides on another machine (called %s) and may not be "
+#~ "available to this program.\n"
+#~ "Are you sure that you want to select it?"
+#~ msgstr ""
+#~ "\"%s\" fitxategia beste makina batean dago (%s izenekoan) eta beharbada "
+#~ "ez dago programa honetarako erabilgarri.\n"
+#~ "Ziur zaude hautatu nahi duzula?"
+
+#~ msgid "_New Folder"
+#~ msgstr "Kar_peta berria"
+
+#~ msgid "De_lete File"
+#~ msgstr "E_zabatu fitxategia"
+
+#~ msgid "_Rename File"
+#~ msgstr "_Aldatu fitxategi-izena"
+
+#, c-format
+#~ msgid ""
+#~ "The folder name \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr ""
+#~ "\"%s\" izeneko karpetak fitxategi-izenetan onartzen ez diren ikurrak ditu"
+
+#~ msgid "New Folder"
+#~ msgstr "Karpeta berria"
+
+#~ msgid "_Folder name:"
+#~ msgstr "_Karpeta-izena:"
+
+#~ msgid "C_reate"
+#~ msgstr "S_ortu"
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr ""
+#~ "\"%s\" fitxategi-izenak fitxategi-izenetan onartzen ez diren ikurrak ditu"
+
+#, c-format
+#~ msgid "Error deleting file '%s': %s"
+#~ msgstr "Errorea '%s' fitxategia ezabatzean: %s"
+
+#, c-format
+#~ msgid "Really delete file \"%s\"?"
+#~ msgstr "Benetan \"%s\" fitxategia ezabatu?"
+
+#~ msgid "Delete File"
+#~ msgstr "Ezabatu fitxategia"
+
+#, c-format
+#~ msgid "Error renaming file to \"%s\": %s"
+#~ msgstr "Errorea \"%s\" karpetari izena aldatzean: %s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\": %s"
+#~ msgstr "Errorea \"%s\" fitxategiari izena aldatzean: %s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\" to \"%s\": %s"
+#~ msgstr "Errorea fitxategiari \"%s\" izenaren ordez \"%s\" ipintzean: %s"
+
+#~ msgid "Rename File"
+#~ msgstr "Aldatu fitxategi-izena"
+
+#, c-format
+#~ msgid "Rename file \"%s\" to:"
+#~ msgstr "Fitxategiari \"%s\" izena ipini honen ordez:"
+
+#~ msgid "_Rename"
+#~ msgstr "I_zena aldatu"
+
+#~ msgid "_Selection: "
+#~ msgstr "_Hautapena: "
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" couldn't be converted to UTF-8. (try setting the "
+#~ "environment variable G_FILENAME_ENCODING): %s"
+#~ msgstr ""
+#~ "\"%s\" fitxategi-izena ezin izan da UTF-8 bihurtu (saiatu "
+#~ "G_FILENAME_ENCODING ingurune-aldagaia ezartzen): %s"
+
+#~ msgid "Invalid UTF-8"
+#~ msgstr "Utf-8 baliogabea"
+
+#~ msgid "Name too long"
+#~ msgstr "Izena luzeegia da"
+
+#~ msgid "Couldn't convert filename"
+#~ msgstr "Ezin izan da fitxategi-izena bihurtu"
+
+#~ msgid "Gamma"
+#~ msgstr "Gamma"
+
+#~ msgid "_Gamma value"
+#~ msgstr "_Gamma-balioa"
+
+#~ msgid "Input"
+#~ msgstr "Sarrera"
+
+#~ msgid "No extended input devices"
+#~ msgstr "Ez dago sarrerako gailu hedaturik"
+
+#~ msgid "_Device:"
+#~ msgstr "_Gailua:"
+
+#~ msgid "Disabled"
+#~ msgstr "Desgaituta"
+
+#~ msgid "Screen"
+#~ msgstr "Pantaila"
+
+#~ msgid "Window"
+#~ msgstr "Leihoa"
+
+#~ msgid "_Mode:"
+#~ msgstr "_Modua:"
+
+#~ msgid "Axes"
+#~ msgstr "Ardatzak"
+
+#~ msgid "Keys"
+#~ msgstr "Gakoak"
+
+#~ msgid "_X:"
+#~ msgstr "_X:"
+
+#~ msgid "_Y:"
+#~ msgstr "_Y:"
+
+#~ msgid "_Pressure:"
+#~ msgstr "_Presioa:"
+
+#~ msgid "X _tilt:"
+#~ msgstr "X _okerdura:"
+
+#~ msgid "Y t_ilt:"
+#~ msgstr "Y o_kerdura:"
+
+#~ msgid "_Wheel:"
+#~ msgstr "_Gurpila:"
+
+#~ msgid "none"
+#~ msgstr "bat ere ez"
+
+#~ msgid "(disabled)"
+#~ msgstr "(desgaituta)"
+
+#~ msgid "(unknown)"
+#~ msgstr "(ezezaguna)"
+
+#~ msgid "Cl_ear"
+#~ msgstr "_Garbitu"
+
+#, c-format
+#~ msgid "Cannot kill process with PID %d. Operation is not implemented."
+#~ msgstr "Ezin da %d PID prozesua hil. Eragiketa ez dago inplementatuta."
+
+#~ msgid "Terminal Pager"
+#~ msgstr "Terminaleko orrikatzailea"
+
+#~ msgid "Top Command"
+#~ msgstr "Top komandoa"
+
+#~ msgid "Bourne Again Shell"
+#~ msgstr "Bourne Again Shell"
+
+#~ msgid "Bourne Shell"
+#~ msgstr "Bourne Shell"
+
+#~ msgid "Z Shell"
+#~ msgstr "Z Shell"
+
+#, c-format
+#~ msgid "Cannot end process with PID %d: %s"
+#~ msgstr "Ezin da %d PID prozesua amaitu: %s"
+
+#~ msgid "Not a valid page setup file"
+#~ msgstr "Ez da orria konfiguratzeko baliozko fitxategia"
+
+#~ msgid "Any Printer"
+#~ msgstr "Edozein inprimagailu"
+
+#~ msgid "For portable documents"
+#~ msgstr "Dokumentu eramangarrientzako"
+
+#, c-format
+#~ msgid ""
+#~ "Margins:\n"
+#~ " Left: %s %s\n"
+#~ " Right: %s %s\n"
+#~ " Top: %s %s\n"
+#~ " Bottom: %s %s"
+#~ msgstr ""
+#~ "Marjinak\n"
+#~ " Ezkerrean: %s %s\n"
+#~ " Eskuinean: %s %s\n"
+#~ " Goian: %s %s\n"
+#~ " Behean: %s %s"
+
+#~ msgid "Manage Custom Sizes..."
+#~ msgstr "Kudeatu tamaina pertsonalizatuak..."
+
+#~ msgid "_Format for:"
+#~ msgstr "_Formatua:"
+
+#~ msgid "_Paper size:"
+#~ msgstr "_Paper-tamaina:"
+
+#~ msgid "_Orientation:"
+#~ msgstr "_Orientazioa:"
+
+#~ msgid "Page Setup"
+#~ msgstr "Prestatu orrialdea"
+
+#~ msgid "Authentication"
+#~ msgstr "Autentifikazioa"
+
+#~ msgid "Not available"
+#~ msgstr "Ez dago erabilgarri"
+
+#~ msgid "_Save in folder:"
+#~ msgstr "Gorde _karpetan:"
+
+#, c-format
+#~ msgid "%s job #%d"
+#~ msgstr "%s ataza (%d)"
+
+#, c-format
+#~ msgid "Preparing %d"
+#~ msgstr "%d prestatzen"
+
+#~ msgid "Preparing"
+#~ msgstr "Prestatzen"
+
+#, c-format
+#~ msgid "Printing %d"
+#~ msgstr "%d inprimatzen"
+
+#~ msgid "Error creating print preview"
+#~ msgstr "Errorea inprimatzeko aurrebista sortzean"
+
+#~ msgid ""
+#~ "The most probable reason is that a temporary file could not be created."
+#~ msgstr "Baliteke aldi baterako fitxategia ezin sortu izatea."
+
+#~ msgid "Error launching preview"
+#~ msgstr "Errorea aurrebista abiaraztean"
+
+#~ msgid "Error printing"
+#~ msgstr "Errorea inprimatzean"
+
+#~ msgid "Application"
+#~ msgstr "Aplikazioa"
+
+#~ msgid "Printer offline"
+#~ msgstr "Inprimagailua lineaz kanpo"
+
+#~ msgid "Out of paper"
+#~ msgstr "Paperik ez"
+
+#~ msgid "Paused"
+#~ msgstr "Pausarazita"
+
+#~ msgid "Need user intervention"
+#~ msgstr "Erabiltzailearen laguntza behar da"
+
+#~ msgid "Custom size"
+#~ msgstr "Tamaina pertsonalizatua"
+
+#~ msgid "No printer found"
+#~ msgstr "Ez da inprimagailurik aurkitu"
+
+#~ msgid "Invalid argument to CreateDC"
+#~ msgstr "CreateDC-ren baliogabeko argumentua"
+
+#~ msgid "Error from StartDoc"
+#~ msgstr "Errorea StartDoc-etik"
+
+#~ msgid "Not enough free memory"
+#~ msgstr "Ez dago nahikoa memoria"
+
+#~ msgid "Invalid argument to PrintDlgEx"
+#~ msgstr "PrintDlgEx-en baliogabeko argumentua"
+
+#~ msgid "Invalid pointer to PrintDlgEx"
+#~ msgstr "PrintDlgEx-en baliogabeko erakuslea"
+
+#~ msgid "Invalid handle to PrintDlgEx"
+#~ msgstr "PrintDlgEx-en baliogabeko kudeatzailea"
+
+#~ msgid "Unspecified error"
+#~ msgstr "Zehaztugabeko errorea"
+
+#~ msgid "Getting printer information failed"
+#~ msgstr "Huts egin du inprimagailuaren informazioa lortzean"
+
+#~ msgid "Getting printer information..."
+#~ msgstr "Inprimagailuaren informazioa lortzen..."
+
+#~ msgid "Printer"
+#~ msgstr "Inprimagailua"
+
+#~ msgid "Location"
+#~ msgstr "Kokalekua"
+
+#~ msgid "Status"
+#~ msgstr "Egoera"
+
+#~ msgid "Range"
+#~ msgstr "Barrutia"
+
+#~ msgid "_All Pages"
+#~ msgstr "Orrialde _guztiak"
+
+#~ msgid "C_urrent Page"
+#~ msgstr "_Uneko orrialdea"
+
+#~ msgid "Se_lection"
+#~ msgstr "_Hautapena"
+
+#~ msgid "Pag_es:"
+#~ msgstr "_Orrialdeak:"
+
+#~ msgid ""
+#~ "Specify one or more page ranges,\n"
+#~ " e.g. 1-3,7,11"
+#~ msgstr ""
+#~ "Zehaztu orrialdeen barruti bat edo gehiago,\n"
+#~ "adib. 1-3,7,11"
+
+#~ msgid "Pages"
+#~ msgstr "Orrialdeak"
+
+#~ msgid "Copies"
+#~ msgstr "Kopiak"
+
+#~ msgid "Copie_s:"
+#~ msgstr "_Kopiak:"
+
+#~ msgid "C_ollate"
+#~ msgstr "_Alderatu"
+
+#~ msgid "_Reverse"
+#~ msgstr "_Alderantzikatu"
+
+#~ msgid "General"
+#~ msgstr "Orokorra"
+
+#~ msgid "Left to right, top to bottom"
+#~ msgstr "Ezkerretik eskuinera, goitik behera"
+
+#~ msgid "Left to right, bottom to top"
+#~ msgstr "Ezkerretik eskuinera, behetik gora"
+
+#~ msgid "Right to left, top to bottom"
+#~ msgstr "Eskuinetik ezkerrera, goitik behera"
+
+#~ msgid "Right to left, bottom to top"
+#~ msgstr "Eskuinetik ezkerrera, behetik gora"
+
+#~ msgid "Top to bottom, left to right"
+#~ msgstr "Goitik behera, ezkerretik eskuinera"
+
+#~ msgid "Top to bottom, right to left"
+#~ msgstr "Goitik behera, eskuinetik ezkerrera"
+
+#~ msgid "Bottom to top, left to right"
+#~ msgstr "Behetik gora, ezkerretik eskuinera"
+
+#~ msgid "Bottom to top, right to left"
+#~ msgstr "Behetik gora, eskuinetik ezkerrera"
+
+#~ msgid "Page Ordering"
+#~ msgstr "Orrialdeak ordenatzea"
+
+#~ msgid "Left to right"
+#~ msgstr "Ezkerretik eskuinera"
+
+#~ msgid "Right to left"
+#~ msgstr "Eskuinetik ezkerrera"
+
+#~ msgid "Top to bottom"
+#~ msgstr "Goitik behera"
+
+#~ msgid "Bottom to top"
+#~ msgstr "Behetik gora"
+
+#~ msgid "Layout"
+#~ msgstr "Diseinua"
+
+#~ msgid "T_wo-sided:"
+#~ msgstr "_Bi aldetatik:"
+
+#~ msgid "Pages per _side:"
+#~ msgstr "Orrialdeak _aldeko:"
+
+#~ msgid "Page or_dering:"
+#~ msgstr "Orrialdeen _ordena:"
+
+#~ msgid "_Only print:"
+#~ msgstr "Inprimatu _soilik:"
+
+#~ msgid "All sheets"
+#~ msgstr "Orri guztiak"
+
+#~ msgid "Even sheets"
+#~ msgstr "Orri bikoitiak"
+
+#~ msgid "Odd sheets"
+#~ msgstr "Orri bakoitiak"
+
+#~ msgid "Sc_ale:"
+#~ msgstr "E_skala:"
+
+#~ msgid "Paper"
+#~ msgstr "Papera"
+
+#~ msgid "Paper _type:"
+#~ msgstr "Paper-_mota:"
+
+#~ msgid "Paper _source:"
+#~ msgstr "Paper-iturria:"
+
+#~ msgid "Output t_ray:"
+#~ msgstr "Irteerako _erretilua:"
+
+#~ msgid "Or_ientation:"
+#~ msgstr "_Orientazioa:"
+
+#~ msgid "Portrait"
+#~ msgstr "Bertikala"
+
+#~ msgid "Landscape"
+#~ msgstr "Horizontala"
+
+#~ msgid "Reverse portrait"
+#~ msgstr "Alderantzizko bertikala"
+
+#~ msgid "Reverse landscape"
+#~ msgstr "Alderantzizko horizontala"
+
+#~ msgid "Job Details"
+#~ msgstr "Lanaren xehetasunak"
+
+#~ msgid "Pri_ority:"
+#~ msgstr "_Lehentasuna:"
+
+#~ msgid "_Billing info:"
+#~ msgstr "_Fakturaren datuak:"
+
+#~ msgid "Print Document"
+#~ msgstr "Inprimatu dokumentua"
+
+#~ msgid "_Now"
+#~ msgstr "_Orain"
+
+#~ msgid "A_t:"
+#~ msgstr "_Noiz:"
+
+#~ msgid ""
+#~ "Specify the time of print,\n"
+#~ " e.g. 15:30, 2:35 pm, 14:15:20, 11:46:30 am, 4 pm"
+#~ msgstr ""
+#~ "Zehaztu inprimatze-ordua,\n"
+#~ "adib. 15:30, 2:35 pm, 14:15:20, 11:46:30 am, 4 pm"
+
+#~ msgid "Time of print"
+#~ msgstr "Inprimatze-ordua"
+
+#~ msgid "On _hold"
+#~ msgstr "_Itxaron"
+
+#~ msgid "Hold the job until it is explicitly released"
+#~ msgstr "Mantendu lana esplizitoki askatu arte"
+
+#~ msgid "Add Cover Page"
+#~ msgstr "Gehitu gainazaleko orria"
+
+#~ msgid "Be_fore:"
+#~ msgstr "_Aurretik:"
+
+#~ msgid "_After:"
+#~ msgstr "_Ondoren:"
+
+#~ msgid "Job"
+#~ msgstr "Lana"
+
+#~ msgid "Advanced"
+#~ msgstr "Aurreratua"
+
+#~ msgid "Image Quality"
+#~ msgstr "Irudiaren kalitatea"
+
+#~ msgid "Color"
+#~ msgstr "Kolorea"
+
+#~ msgid "Finishing"
+#~ msgstr "Amaitzen"
+
+#~ msgid "Some of the settings in the dialog conflict"
+#~ msgstr "Elkarrizketa-koadroko ezarpen batzuk gatazkan daude"
+
+#~ msgid "Print"
+#~ msgstr "Inprimatu"
+
+#~ msgid "--- No Tip ---"
+#~ msgstr "--- Iradokizunik ez ---"
+
+#~ msgid "Volume"
+#~ msgstr "Bolumena"
+
+#~ msgid "Turns volume down or up"
+#~ msgstr "Bolumena igo edo jaisten du"
+
+#~ msgid "Adjusts the volume"
+#~ msgstr "Bolumena doitzen du"
+
+#~ msgid "Volume Down"
+#~ msgstr "Jaitsi bolumena"
+
+#~ msgid "Decreases the volume"
+#~ msgstr "Bolumena gutxiagotzen du"
+
+#~ msgid "Volume Up"
+#~ msgstr "Igo bolumena"
+
+#~ msgid "Increases the volume"
+#~ msgstr "Bolumena handiagotzen du"
+
+#~ msgid "Muted"
+#~ msgstr "Mutututa"
+
+#~ msgid "Full Volume"
+#~ msgstr "Bolumen osoa"
+
+#, c-format
+#~ msgid "different idatas found for symlinked '%s' and '%s'\n"
+#~ msgstr "'%s' eta '%s' esteken 'idata' ezberdinak aurkitu dira\n"
+
+#, c-format
+#~ msgid "Failed to write header\n"
+#~ msgstr "Huts egin du goiburukoa idaztean\n"
+
+#, c-format
+#~ msgid "Failed to write hash table\n"
+#~ msgstr "Huts egin du 'hash' taula idaztean\n"
+
+#, c-format
+#~ msgid "Failed to write folder index\n"
+#~ msgstr "Huts egin du karpetaren indizea idaztean\n"
+
+#, c-format
+#~ msgid "Failed to rewrite header\n"
+#~ msgstr "Huts egin du goiburukoa berridaztean\n"
+
+#, c-format
+#~ msgid "Failed to open file %s : %s\n"
+#~ msgstr "Huts egin du '%s' fitxategia irekitzean: %s\n"
+
+#, c-format
+#~ msgid "Failed to write cache file: %s\n"
+#~ msgstr "Ezin izan da cache fitxategian idatzi: %s\n"
+
+#, c-format
+#~ msgid "The generated cache was invalid.\n"
+#~ msgstr "Sortutako cache-a baliogabea da.\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s, removing %s then.\n"
+#~ msgstr "%s ezin izan da %s izenagatik aldatu: %s, %s kentzen orduan.\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s\n"
+#~ msgstr "%s ezin izan da %s izenagatik aldatu: %s\n"
+
+#, c-format
+#~ msgid "Could not rename %s back to %s: %s.\n"
+#~ msgstr "%s ezin izan da jatorriko %s izenera aldatu: %s\n"
+
+#, c-format
+#~ msgid "Cache file created successfully.\n"
+#~ msgstr "Cache fitxategia ongi sortu da.\n"
+
+#~ msgid "Overwrite an existing cache, even if up to date"
+#~ msgstr "Gainidatzi existitzen den cache-a, nahiz eta eguneratuta egon"
+
+#~ msgid "Don't check for the existence of index.theme"
+#~ msgstr "Ez egiaztatu index.theme dagoen edo ez"
+
+#~ msgid "Don't include image data in the cache"
+#~ msgstr "Ez txertatu irudiaren daturik cache-an"
+
+#~ msgid "Output a C header file"
+#~ msgstr "Kanporatu C goiburuko fitxategia"
+
+#~ msgid "Turn off verbose output"
+#~ msgstr "Desaktibatu hitzez hitzeko irteera"
+
+#~ msgid "Validate existing icon cache"
+#~ msgstr "Balidatu ikonoen cache-a"
+
+#, c-format
+#~ msgid "File not found: %s\n"
+#~ msgstr "Ezin da fitxategia aurkitu: %s\n"
+
+#, c-format
+#~ msgid "Not a valid icon cache: %s\n"
+#~ msgstr "Ez da baliozko ikonoen cache-a: %s\n"
+
+#, c-format
+#~ msgid "No theme index file.\n"
+#~ msgstr "Ez dago gaiaren indize-fitxategirik.\n"
+
+#, c-format
+#~ msgid ""
+#~ "No theme index file in '%s'.\n"
+#~ "If you really want to create an icon cache here, use --ignore-theme-"
+#~ "index.\n"
+#~ msgstr ""
+#~ "Ez dago gaiaren indize fitxategirik '%s'(e)n.\n"
+#~ "Ikono-cache bat sortzea nahi baduzu erabili --ignore-theme-index.\n"
+
+#~ msgid "Amharic (EZ+)"
+#~ msgstr "Amharic (EZ+)"
+
+#~ msgid "Cedilla"
+#~ msgstr "Ze hautsia"
+
+#~ msgid "Cyrillic (Transliterated)"
+#~ msgstr "Zirilikoa (Transliteratua)"
+
+#~ msgid "Inuktitut (Transliterated)"
+#~ msgstr "Inukitut (Transliteratua)"
+
+#~ msgid "IPA"
+#~ msgstr "IPA"
+
+#~ msgid "Multipress"
+#~ msgstr "Hainbat pultsazio"
+
+#~ msgid "Thai-Lao"
+#~ msgstr "Thailandiera-Laosera"
+
+#~ msgid "Tigrigna-Eritrean (EZ+)"
+#~ msgstr "Tigrigna-Eritrearra (EZ+)"
+
+#~ msgid "Tigrigna-Ethiopian (EZ+)"
+#~ msgstr "Tigrigna-Etiopiarra (EZ+)"
+
+#~ msgid "Vietnamese (VIQR)"
+#~ msgstr "Vietnamdarra (VIQR)"
+
+#~ msgid "X Input Method"
+#~ msgstr "X sarrera-metodoa"
+
+#~ msgid "Username:"
+#~ msgstr "Erabiltzaile-izena:"
+
+#~ msgid "Password:"
+#~ msgstr "Pasahitza:"
+
+#, c-format
+#~ msgid "Authentication is required to get a file from %s"
+#~ msgstr "Autentifikazioa behar da fitxategia %s(e)tik lortzeko"
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s' on printer %s"
+#~ msgstr ""
+#~ "Autentifikazioa behar da '%s' dokumentua '%s' inprimagailuan inprimatzeko"
+
+#, c-format
+#~ msgid "Authentication is required to print a document on %s"
+#~ msgstr "Autentifikazioa behar da dokumentu bat '%s'(e)n inprimatzeko"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of job '%s'"
+#~ msgstr "Autentifikazioa behar da '%s' lanaren atributuak lortzeko"
+
+#~ msgid "Authentication is required to get attributes of a job"
+#~ msgstr "Autentifikazioa behar da lan baten atributuak lortzeko"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of printer %s"
+#~ msgstr "Autentifikazioa behar da '%s' inprimagailuaren atributuak lortzeko"
+
+#~ msgid "Authentication is required to get attributes of a printer"
+#~ msgstr "Autentifikazioa behar da inprimagailu baten atributuak lortzeko"
+
+#, c-format
+#~ msgid "Authentication is required to get default printer of %s"
+#~ msgstr "Autentifikazioa behar da %s(r)en inprimagailu lehenetsia lortzeko"
+
+#, c-format
+#~ msgid "Authentication is required to get printers from %s"
+#~ msgstr "Autentifikazioa behar da %s(e)tik inprimagailuak lortzeko"
+
+#, c-format
+#~ msgid "Authentication is required on %s"
+#~ msgstr "Autentifikazioa behar da %s(e)n"
+
+#~ msgid "Domain:"
+#~ msgstr "Domeinua:"
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s'"
+#~ msgstr "Autentifikazioa behar da '%s' dokumentua inprimatzeko"
+
+#, c-format
+#~ msgid "Authentication is required to print this document on printer %s"
+#~ msgstr ""
+#~ "Autentifikazioa behar da dokumentu hau '%s' inprimagailuan inprimatzeko"
+
+#~ msgid "Authentication is required to print this document"
+#~ msgstr "Autentifikazioa behar da dokumentu hau inprimatzeko"
+
+#, c-format
+#~ msgid "Printer '%s' is low on toner."
+#~ msgstr "'%s' inprimagailuak toner baxua du."
+
+#, c-format
+#~ msgid "Printer '%s' has no toner left."
+#~ msgstr "'%s' inprimagailuak ez du tonerrik."
+
+#, c-format
+#~ msgid "Printer '%s' is low on developer."
+#~ msgstr "'%s' inprimagailuak errebelatzaile baxua du."
+
+#, c-format
+#~ msgid "Printer '%s' is out of developer."
+#~ msgstr "'%s' inprimagailuak ez du errebelatzailerik."
+
+#, c-format
+#~ msgid "Printer '%s' is low on at least one marker supply."
+#~ msgstr "'%s' inprimagailuak gutxienez tinta-kartutxo bat baxua du."
+
+#, c-format
+#~ msgid "Printer '%s' is out of at least one marker supply."
+#~ msgstr "'%s' inprimagailuak gutxienez tinta-kartutxo bat gabe dago."
+
+#, c-format
+#~ msgid "The cover is open on printer '%s'."
+#~ msgstr "'%s' inprimagailuaren estalkia irekita dago."
+
+#, c-format
+#~ msgid "The door is open on printer '%s'."
+#~ msgstr "'%s' inprimagailuaren atea irekita dago."
+
+#, c-format
+#~ msgid "Printer '%s' is low on paper."
+#~ msgstr "'%s' inprimagailuak paper gutxi du."
+
+#, c-format
+#~ msgid "Printer '%s' is out of paper."
+#~ msgstr "'%s' inprimagailuak ez du paperik."
+
+#, c-format
+#~ msgid "Printer '%s' is currently offline."
+#~ msgstr "'%s' inprimagailua lineaz kanpo dago."
+
+#, c-format
+#~ msgid "There is a problem on printer '%s'."
+#~ msgstr "Arazoa dago '%s' inprimagailuarekin."
+
+#~ msgid "Paused ; Rejecting Jobs"
+#~ msgstr "Pausarazita; Lanak baztertzen"
+
+#~ msgid "Rejecting Jobs"
+#~ msgstr "Lanak baztertzen"
+
+#~ msgid "Two Sided"
+#~ msgstr "Bi aldetatik"
+
+#~ msgid "Paper Type"
+#~ msgstr "Paper-mota"
+
+#~ msgid "Paper Source"
+#~ msgstr "Paper-iturria"
+
+#~ msgid "Output Tray"
+#~ msgstr "Irteerako erretilua"
+
+#~ msgid "Resolution"
+#~ msgstr "Bereizmena"
+
+#~ msgid "GhostScript pre-filtering"
+#~ msgstr "GhostScript aurre-iragazketa"
+
+#~ msgid "One Sided"
+#~ msgstr "Alde batetik"
+
+#~ msgid "Long Edge (Standard)"
+#~ msgstr "Marjina luzea (estandarra)"
+
+#~ msgid "Short Edge (Flip)"
+#~ msgstr "Marjina laburra (iraulia)"
+
+#~ msgid "Auto Select"
+#~ msgstr "Hautapen automatikoa"
+
+#~ msgid "Printer Default"
+#~ msgstr "Inprimagailu lehenetsia"
+
+#~ msgid "Embed GhostScript fonts only"
+#~ msgstr "Kapsulatutako GhostScript letra-tipoak soilik"
+
+#~ msgid "Convert to PS level 1"
+#~ msgstr "Bihurtu PS 1. mailara"
+
+#~ msgid "Convert to PS level 2"
+#~ msgstr "Bihurtu PS 2. mailara"
+
+#~ msgid "No pre-filtering"
+#~ msgstr "Aurre-iragazketarik gabe"
+
+#~ msgid "Miscellaneous"
+#~ msgstr "Hainbat"
+
+#~ msgid "Urgent"
+#~ msgstr "Presazkoa"
+
+#~ msgid "High"
+#~ msgstr "Altua"
+
+#~ msgid "Medium"
+#~ msgstr "Tartekoa"
+
+#~ msgid "Low"
+#~ msgstr "Baxua"
+
+#~ msgid "Pages per Sheet"
+#~ msgstr "Orrialde orriko"
+
+#~ msgid "Job Priority"
+#~ msgstr "Lanaren lehentasuna"
+
+#~ msgid "Billing Info"
+#~ msgstr "Fakturaren datuak"
+
+#~ msgid "None"
+#~ msgstr "Bat ere ez"
+
+#~ msgid "Classified"
+#~ msgstr "Klasifikatuta"
+
+#~ msgid "Confidential"
+#~ msgstr "Konfidentziala"
+
+#~ msgid "Secret"
+#~ msgstr "Ezkutukoa"
+
+#~ msgid "Standard"
+#~ msgstr "Estandarra"
+
+#~ msgid "Top Secret"
+#~ msgstr "Ezkutu gorenekoa"
+
+#~ msgid "Unclassified"
+#~ msgstr "Sailkatu gabe"
+
+#~ msgid "Before"
+#~ msgstr "Aurretik"
+
+#~ msgid "After"
+#~ msgstr "Ondoren"
+
+#~ msgid "Print at"
+#~ msgstr "Noiz inprimatu"
+
+#~ msgid "Print at time"
+#~ msgstr "Noiz inprimatu"
+
+#, c-format
+#~ msgid "Custom %sx%s"
+#~ msgstr "%sx%s pertsonalizatua"
+
+#, c-format
+#~ msgid "output.%s"
+#~ msgstr "irteera.%s"
+
+#~ msgid "Print to File"
+#~ msgstr "Inprimatu fitxategian"
+
+#~ msgid "PDF"
+#~ msgstr "PDF"
+
+#~ msgid "Postscript"
+#~ msgstr "Postscript"
+
+#~ msgid "SVG"
+#~ msgstr "SVG"
+
+#~ msgid "Pages per _sheet:"
+#~ msgstr "Orrialdeak _orriko:"
+
+#~ msgid "File"
+#~ msgstr "Fitxategia"
+
+#~ msgid "_Output format"
+#~ msgstr "_Irteerako formatua"
+
+#~ msgid "Print to LPR"
+#~ msgstr "Inprimatu LPRen"
+
+#~ msgid "Pages Per Sheet"
+#~ msgstr "Orrialde orriko"
+
+#~ msgid "Command Line"
+#~ msgstr "Komando-lerroa"
+
+#~ msgid "printer offline"
+#~ msgstr "inprimagailua lineaz kanpo"
+
+#~ msgid "ready to print"
+#~ msgstr "inprimatzeko prest"
+
+#~ msgid "processing job"
+#~ msgstr "lana prozesatzen"
+
+#~ msgid "paused"
+#~ msgstr "pausarazita"
+
+#~ msgid "unknown"
+#~ msgstr "ezezaguna"
+
+#, c-format
+#~ msgid "test-output.%s"
+#~ msgstr "irteerako-proba.%s"
+
+#~ msgid "Print to Test Printer"
+#~ msgstr "Inprimatu probako inprimagailuan"
+
+#, c-format
+#~ msgid "Could not get information for file '%s': %s"
+#~ msgstr "Ezin izan da %s fitxategirako informaziorik lortu: %s"
+
+#, c-format
+#~ msgid "Failed to open file '%s': %s"
+#~ msgstr "Ezin izan da '%s' fitxategia ireki: %s"
+
+#, c-format
+#~ msgid ""
+#~ "Failed to load image '%s': reason not known, probably a corrupt image file"
+#~ msgstr ""
+#~ "Ezin izan da '%s' irudia kargatu: arrazoia ez dakigu, beharbada "
+#~ "hondatutako irudi-fitxategia izango da"
+
+#~ msgid "Gdk debugging flags to set"
+#~ msgstr "Ezarri beharreko Gdk arazketa-banderak"
+
+#~ msgid "Gdk debugging flags to unset"
+#~ msgstr "Ezarpenetik kendu beharreko Gdk arazketa-banderak"
+
+#~ msgctxt "keyboard label"
+#~ msgid "BackSpace"
+#~ msgstr "Atzera-tekla"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Tab"
+#~ msgstr "Tabulazioa"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Return"
+#~ msgstr "Itzuli"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Pause"
+#~ msgstr "Pausatu"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Scroll_Lock"
+#~ msgstr "Blok. _Korr."
+
+#~ msgctxt "keyboard label"
+#~ msgid "Sys_Req"
+#~ msgstr "Sist. _Esk."
+
+#~ msgctxt "keyboard label"
+#~ msgid "Escape"
+#~ msgstr "Ihes"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Multi_key"
+#~ msgstr "Hainbat _tekla"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Home"
+#~ msgstr "Hasiera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Left"
+#~ msgstr "Ezkerrera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Up"
+#~ msgstr "Gora"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Right"
+#~ msgstr "Eskuinera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Down"
+#~ msgstr "Behera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Up"
+#~ msgstr "Orri-_gora"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Down"
+#~ msgstr "Orri-_behera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "End"
+#~ msgstr "Amaiera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Begin"
+#~ msgstr "Hasiera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Print"
+#~ msgstr "Inprimatu"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Insert"
+#~ msgstr "Txertatu"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Num_Lock"
+#~ msgstr "_Blok. zenb."
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Space"
+#~ msgstr "TNum. _Zuriunea"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Tab"
+#~ msgstr "TNum. _Tabulazioa"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Enter"
+#~ msgstr "TNum. _Sartu"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Home"
+#~ msgstr "TNum. _Hasiera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Left"
+#~ msgstr "TNum. E_zkerrera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Up"
+#~ msgstr "TNum. _Gora"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Right"
+#~ msgstr "TNum. E_skuinera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Down"
+#~ msgstr "TNum. _Behera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Up"
+#~ msgstr "TNum. Orri-_gora"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Prior"
+#~ msgstr "TNum. _Aurrekoa"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Down"
+#~ msgstr "TNum. Orri-_behera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Next"
+#~ msgstr "TNum. H_urrengoa"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_End"
+#~ msgstr "TNum. _Amaiera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Begin"
+#~ msgstr "TNum. _Hasiera"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Insert"
+#~ msgstr "TNum. _Txertatu"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Delete"
+#~ msgstr "TNum. _Ezabatu"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Delete"
+#~ msgstr "Ezabatu"
+
+#~ msgid "Image file '%s' contains no data"
+#~ msgstr "'%s' irudi-fitxategiak ez du daturik"
+
+#~ msgid ""
+#~ "Failed to load animation '%s': reason not known, probably a corrupt "
+#~ "animation file"
+#~ msgstr ""
+#~ "Ezin izan da '%s' animazioa kargatu: arrazoia ez dakigu, beharbada "
+#~ "hondatutako animazio-fitxategia izango da"
+
+#~ msgid "Unable to load image-loading module: %s: %s"
+#~ msgstr "Ezin da irudiak kargatzeko modulua kargatu: %s: %s"
+
+#~ msgid ""
+#~ "Image-loading module %s does not export the proper interface; perhaps "
+#~ "it's from a different GTK version?"
+#~ msgstr ""
+#~ "%s irudiak kargatzeko moduluak ez du interfaze egokia esportatzen; agian "
+#~ "beste GTK bertsio batekoa da?"
+
+#~ msgid "Image type '%s' is not supported"
+#~ msgstr "'%s' motako irudia ez dira onartzen"
+
+#~ msgid "Couldn't recognize the image file format for file '%s'"
+#~ msgstr ""
+#~ "Ezin izan da ezagutu '%s' fitxategiaren irudi-fitxategiaren formatua "
+
+#~ msgid "Unrecognized image file format"
+#~ msgstr "Irudi-fitxategiaren formatu ezezaguna"
+
+#~ msgid "Failed to load image '%s': %s"
+#~ msgstr "Ezin izan da `%s' irudia kargatu: %s"
+
+#~ msgid "Error writing to image file: %s"
+#~ msgstr "Errorea irudi-fitxategia idaztean: %s"
+
+#~ msgid ""
+#~ "This build of gdk-pixbuf does not support saving the image format: %s"
+#~ msgstr ""
+#~ "gdk-pixbuf-en bertsio honek ez du irudi-formatu hau gordetzea onartzen: %s"
+
+#~ msgid "Insufficient memory to save image to callback"
+#~ msgstr "Ez dago irudi-fitxategia atzeradeian gordetzeko behar adina memoria"
+
+#~ msgid "Failed to open temporary file"
+#~ msgstr "Huts egin du aldi baterako fitxategia irekitzean"
+
+#~ msgid "Failed to read from temporary file"
+#~ msgstr "Huts egin du aldi baterako fitxategitik irakurtzean"
+
+#~ msgid "Failed to open '%s' for writing: %s"
+#~ msgstr "Ezin izan da `%s' ireki idazteko: %s"
+
+#~ msgid ""
+#~ "Failed to close '%s' while writing image, all data may not have been "
+#~ "saved: %s"
+#~ msgstr ""
+#~ "Ezin izan da '%s' itxi irudia idatzi bitartean, baliteke datu guztiak ez "
+#~ "gorde izana: %s"
+
+#~ msgid "Insufficient memory to save image into a buffer"
+#~ msgstr "Ez dago irudi-fitxategia bufferrean gordetzeko behar adina memoria"
+
+#~ msgid "Error writing to image stream"
+#~ msgstr "Errorea irudi-korrontean idaztean"
+
+#~ msgid ""
+#~ "Internal error: Image loader module '%s' failed to complete an operation, "
+#~ "but didn't give a reason for the failure"
+#~ msgstr ""
+#~ "Barne-errorea: '%s' irudi kargatzailearen moduluak ezin izan du eragiketa "
+#~ "burutu, baina ez du hutsegitearen arrazoirik eman"
+
+#~ msgid "Incremental loading of image type '%s' is not supported"
+#~ msgstr "'%s' motako irudien kargatze inkrementala ez da onartzen"
+
+#~ msgid "Image header corrupt"
+#~ msgstr "Irudi-goiburua hondatuta"
+
+#~ msgid "Image format unknown"
+#~ msgstr "Irudi-formatu ezezaguna"
+
+#~ msgid "Image pixel data corrupt"
+#~ msgstr "Irudiko pixelen datuak hondatuta"
+
+#~ msgid "failed to allocate image buffer of %u byte"
+#~ msgid_plural "failed to allocate image buffer of %u bytes"
+#~ msgstr[0] "huts egin du irudiaren bufferra byte %u-ekin esleitzean"
+#~ msgstr[1] "huts egin du irudiaren bufferra %u byte-rekin esleitzean"
+
+#~ msgid "Unexpected icon chunk in animation"
+#~ msgstr "Ustekabeko ikono-zatia animazioan"
+
+#~ msgid "Unsupported animation type"
+#~ msgstr "Onartzen ez den animazio-mota"
+
+#~ msgid "Invalid header in animation"
+#~ msgstr "Goiburu baliogabea animazioan"
+
+#~ msgid "Not enough memory to load animation"
+#~ msgstr "Ez dago animazioa kargatzeko adina memoria"
+
+#~ msgid "Malformed chunk in animation"
+#~ msgstr "Gaizki osatutako zatia animazioan"
+
+#~ msgid "The ANI image format"
+#~ msgstr "ANI irudi-formatua"
+
+#~ msgid "BMP image has bogus header data"
+#~ msgstr "BMP irudiak goiburu-datu akastunak ditu"
+
+#~ msgid "Not enough memory to load bitmap image"
+#~ msgstr "Ez dago bit-mapen irudia kargatzeko adina memoria"
+
+#~ msgid "BMP image has unsupported header size"
+#~ msgstr "BMP irudiaren goiburu-tamaina ez da onartzen"
+
+#~ msgid "Topdown BMP images cannot be compressed"
+#~ msgstr "BMP 'Topdown' irudiak ezin dira konprimatu"
+
+#~ msgid "Premature end-of-file encountered"
+#~ msgstr "Fitxategiaren amaiera uste baino lehen aurkitu da"
+
+#~ msgid "Couldn't allocate memory for saving BMP file"
+#~ msgstr "Ezin izan da BMP fitxategia gordetzeko memoria esleitu"
+
+#~ msgid "Couldn't write to BMP file"
+#~ msgstr "Ezin izan da BMP fitxategia idatzi"
+
+#~ msgid "The BMP image format"
+#~ msgstr "BMP irudi-formatua"
+
+#~ msgid "Failure reading GIF: %s"
+#~ msgstr "Ezin izan da GIF irakurri: %s"
+
+#~ msgid "GIF file was missing some data (perhaps it was truncated somehow?)"
+#~ msgstr ""
+#~ "GIF fitxategian datu batzuk falta dira (agian nolabait trunkatuta zegoen?)"
+
+#~ msgid "Internal error in the GIF loader (%s)"
+#~ msgstr "Barne-errorea GIF kargatzailean (%s)"
+
+#~ msgid "Stack overflow"
+#~ msgstr "Pila-gainezkatzea"
+
+#~ msgid "GIF image loader cannot understand this image."
+#~ msgstr "GIF irudi kargatzaileak ezin du irudi hau ulertu."
+
+#~ msgid "Bad code encountered"
+#~ msgstr "Kode okerra aurkitu da"
+
+#~ msgid "Circular table entry in GIF file"
+#~ msgstr "Taula-sarrera zirkularra GIF fitxategian"
+
+#~ msgid "Not enough memory to load GIF file"
+#~ msgstr "Ez dago GIF fitxategia kargatzeko adina memoria"
+
+#~ msgid "Not enough memory to composite a frame in GIF file"
+#~ msgstr "Ez dago GIF fitxategian markoa konposatzeko adina memoria"
+
+#~ msgid "GIF image is corrupt (incorrect LZW compression)"
+#~ msgstr "GIF irudia hondatuta dago (LZW konpresio okerra)"
+
+#~ msgid "File does not appear to be a GIF file"
+#~ msgstr "Fitxategiak ez dirudi GIF fitxategia"
+
+#~ msgid "Version %s of the GIF file format is not supported"
+#~ msgstr "GIF fitxategi-formatuaren %s bertsioa ez da onartzen"
+
+#~ msgid ""
+#~ "GIF image has no global colormap, and a frame inside it has no local "
+#~ "colormap."
+#~ msgstr ""
+#~ "GIF irudiak ez du kolore-mapa orokorrik, eta bere barruko markoak ez du "
+#~ "kolore-mapa lokalik."
+
+#~ msgid "GIF image was truncated or incomplete."
+#~ msgstr "GIF irudia trunkatuta edo osatu gabe zegoen."
+
+#~ msgid "The GIF image format"
+#~ msgstr "GIF irudi-formatua"
+
+#~ msgid "Invalid header in icon"
+#~ msgstr "Goiburu baliogabea ikonoan"
+
+#~ msgid "Not enough memory to load icon"
+#~ msgstr "Ez dago ikonoa kargatzeko adina memoria"
+
+#~ msgid "Icon has zero width"
+#~ msgstr "Ikonoaren zabalera zero da"
+
+#~ msgid "Icon has zero height"
+#~ msgstr "Ikonoaren altuera zero da"
+
+#~ msgid "Compressed icons are not supported"
+#~ msgstr "Konprimitutako ikonoak ez dira onartzen"
+
+#~ msgid "Unsupported icon type"
+#~ msgstr "Onartzen ez den ikono-mota"
+
+#~ msgid "Not enough memory to load ICO file"
+#~ msgstr "Ez dago ICO fitxategia kargatzeko adina memoria"
+
+#~ msgid "Image too large to be saved as ICO"
+#~ msgstr "Irudia handiegia da ICO gisa gordetzeko"
+
+#~ msgid "Cursor hotspot outside image"
+#~ msgstr "Kurtsorearen puntu-beroa iruditik kanpo"
+
+#~ msgid "Unsupported depth for ICO file: %d"
+#~ msgstr "ICO fitxategiko kolore-sakonera ez da onartzen: %d"
+
+#~ msgid "The ICO image format"
+#~ msgstr "ICO irudi-formatua"
+
+#~ msgid "Error reading ICNS image: %s"
+#~ msgstr "Errorea ICNS irudia irakurtzean: %s"
+
+#~ msgid "Could not decode ICNS file"
+#~ msgstr "Ezin izan da ICNS fitxategia deskodetu"
+
+#~ msgid "The ICNS image format"
+#~ msgstr "ICNS irudi-formatua"
+
+#~ msgid "Couldn't allocate memory for stream"
+#~ msgstr "Ezin izan da korronterako memoria esleitu"
+
+#~ msgid "Couldn't decode image"
+#~ msgstr "Ezin izan da irudia deskodetu"
+
+#~ msgid "Transformed JPEG2000 has zero width or height"
+#~ msgstr "Bihurtutako JPEG2000ren zabalera edo altuera zero da."
+
+#~ msgid "Image type currently not supported"
+#~ msgstr "Irudi mota ez da onartzen"
+
+#~ msgid "Couldn't allocate memory for color profile"
+#~ msgstr "Ezin izan da kolore-profilarentzako memoria esleitu"
+
+#~ msgid "Insufficient memory to open JPEG 2000 file"
+#~ msgstr "Ez dago JPEG 2000 fitxategia irekitzeko behar adina memoria"
+
+#~ msgid "Couldn't allocate memory to buffer image data"
+#~ msgstr "Ezin izan da irudiaren datuen bufferrerako memoriarik esleitu"
+
+#~ msgid "The JPEG 2000 image format"
+#~ msgstr "JPEG 2000 irudi-formatua"
+
+#~ msgid "Error interpreting JPEG image file (%s)"
+#~ msgstr "Errorea JPEG irudi-fitxategia (%s) interpretatzen "
+
+#~ msgid ""
+#~ "Insufficient memory to load image, try exiting some applications to free "
+#~ "memory"
+#~ msgstr ""
+#~ "Ez dago nahikoa memoria irudia kargatzeko, saiatu aplikazio batzuetatik "
+#~ "irteten memoria libratzeko"
+
+#~ msgid "Unsupported JPEG color space (%s)"
+#~ msgstr "Onartzen ez den JPEGren kolore-area (%s)"
+
+#~ msgid "Couldn't allocate memory for loading JPEG file"
+#~ msgstr "Ezin izan da JPEG fitxategia kargatzeko memoria esleitu"
+
+#~ msgid "Transformed JPEG has zero width or height."
+#~ msgstr "Bihurtutako JPEGren zabalera edo altuera zero da."
+
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%s' could not be "
+#~ "parsed."
+#~ msgstr ""
+#~ "JPEG kalitatearen balioak 0 eta 100 artean egon behar du; '%s' balioa "
+#~ "ezin izan da analizatu."
+
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%d' is not allowed."
+#~ msgstr ""
+#~ "JPEG kalitatearen balioak 0 eta 100 artean egon behar du; '%d' balioa ez "
+#~ "da onartzen."
+
+#~ msgid "The JPEG image format"
+#~ msgstr "JPEG irudi-formatua"
+
+#~ msgid "Couldn't allocate memory for header"
+#~ msgstr "Ezin da goibururako memoria esleitu"
+
+#~ msgid "Couldn't allocate memory for context buffer"
+#~ msgstr "Ezin da testuinguru-bufferrerako memoria esleitu"
+
+#~ msgid "Image has invalid width and/or height"
+#~ msgstr "Irudiak altuera edota zabalera baliogabea du"
+
+#~ msgid "Image has unsupported bpp"
+#~ msgstr "Irudiak onartzen ez den bpp du"
+
+#~ msgid "Image has unsupported number of %d-bit planes"
+#~ msgstr "Irudiak onartu gabeko %d bit plano kopurua du"
+
+#~ msgid "Couldn't create new pixbuf"
+#~ msgstr "Ezin da pixbuf berria sortu"
+
+#~ msgid "Couldn't allocate memory for line data"
+#~ msgstr "Ezin da lerroko datuentzako memoriarik esleitu"
+
+#~ msgid "Couldn't allocate memory for paletted data"
+#~ msgstr "Ezin da paletako datuentzako memoriarik esleitu"
+
+#~ msgid "Didn't get all lines of PCX image"
+#~ msgstr "Ez dira PCX irudiko marra guztiak lortu"
+
+#~ msgid "No palette found at end of PCX data"
+#~ msgstr "PCX datuen amaieran ez da paletarik aurkitu"
+
+#~ msgid "The PCX image format"
+#~ msgstr "PCX irudi-formatua"
+
+#~ msgid "Bits per channel of PNG image is invalid."
+#~ msgstr "PNG irudiaren kanal bakoitzeko bitak baliogabeak dira."
+
+#~ msgid "Transformed PNG has zero width or height."
+#~ msgstr "Bihurtutako PNGren zabalera edo altuera zero da."
+
+#~ msgid "Bits per channel of transformed PNG is not 8."
+#~ msgstr "Bihurtutako PNGren kanal bakoitzeko bitak ez dira 8."
+
+#~ msgid "Transformed PNG not RGB or RGBA."
+#~ msgstr "Bihurtutako PNG ez da RGB edo RGBA."
+
+#~ msgid "Transformed PNG has unsupported number of channels, must be 3 or 4."
+#~ msgstr ""
+#~ "Bihurtutako PNGk duen kanal-kopurua ez da onartzen; 3 edo 4 izan behar "
+#~ "ditu."
+
+#~ msgid "Fatal error in PNG image file: %s"
+#~ msgstr "Errore larria PNG irudi-fitxategian: %s"
+
+#~ msgid "Insufficient memory to load PNG file"
+#~ msgstr "Ez dago PNG fitxategia kargatzeko adina memoria"
+
+#~ msgid ""
+#~ "Insufficient memory to store a %ld by %ld image; try exiting some "
+#~ "applications to reduce memory usage"
+#~ msgstr ""
+#~ "Ez dago $2%ld irudiak $1%ld bat gordetzeko adina memoria; saiatu "
+#~ "aplikazio batzuetatik irteten memoria-erabilera murrizteko"
+
+#~ msgid "Fatal error reading PNG image file"
+#~ msgstr "Errore larria PNG irudi-fitxategia irakurtzean"
+
+#~ msgid "Fatal error reading PNG image file: %s"
+#~ msgstr "Errore larria PNG irudi-fitxategia irakurtzean: %s"
+
+#~ msgid ""
+#~ "Keys for PNG text chunks must have at least 1 and at most 79 characters."
+#~ msgstr ""
+#~ "PNGren testu-zatiek gutxienez karaktere 1 eta gehienez 79 eduki behar "
+#~ "dituzte."
+
+#~ msgid "Keys for PNG text chunks must be ASCII characters."
+#~ msgstr "PNGren testu-zatien gakoek ASCII karaktereak izan behar dute."
+
+#~ msgid "Color profile has invalid length %d."
+#~ msgstr "Kolore-profilak luzera baliogabea du: %d."
+
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%s' could "
+#~ "not be parsed."
+#~ msgstr ""
+#~ "PNG konpresioaren balioak 0 eta 9 artean egon behar du; '%s' balioa ezin "
+#~ "izan da analizatu."
+
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%d' is not "
+#~ "allowed."
+#~ msgstr ""
+#~ "PNG konpresioaren balioak 0 eta 9 artean egon behar du; '%d' balioa ez da "
+#~ "onartzen."
+
+#~ msgid ""
+#~ "Value for PNG text chunk %s cannot be converted to ISO-8859-1 encoding."
+#~ msgstr ""
+#~ "PNGren %s testu-zatiaren balioa ezin da ISO-8859-1 kodeketara bihurtu."
+
+#~ msgid "The PNG image format"
+#~ msgstr "PNG irudi-formatua"
+
+#~ msgid "PNM loader expected to find an integer, but didn't"
+#~ msgstr "PNM kargatzaileak osokoa aurkitzea espero zuen, baina ez du aurkitu"
+
+#~ msgid "PNM file has an incorrect initial byte"
+#~ msgstr "PNM fitxategiak hasierako byte okerra du"
+
+#~ msgid "PNM file is not in a recognized PNM subformat"
+#~ msgstr "PNM fitxategiak ez du PNM azpiformatu ezaguna"
+
+#~ msgid "PNM file has an image width of 0"
+#~ msgstr "PNM fitxategiaren irudi-zabalera 0 da"
+
+#~ msgid "PNM file has an image height of 0"
+#~ msgstr "PNM fitxategiaren irudi-altuera 0 da"
+
+#~ msgid "Maximum color value in PNM file is 0"
+#~ msgstr "PNM fitxategian kolorearen gehienezko balioa 0 da"
+
+#~ msgid "Maximum color value in PNM file is too large"
+#~ msgstr "PNM fitxategiko kolorearen gehienezko balioa handiegia da"
+
+#~ msgid "Raw PNM image type is invalid"
+#~ msgstr "PNM irudi-mota gordina baliogabea da"
+
+#~ msgid "PNM image loader does not support this PNM subformat"
+#~ msgstr "PNM irudi kargatzaileak ez du PNM azpiformatu hau onartzen"
+
+#~ msgid "Raw PNM formats require exactly one whitespace before sample data"
+#~ msgstr ""
+#~ "PNM formatu gordinek zuriune bat behar dute lagin-informazioaren aurretik"
+
+#~ msgid "Cannot allocate memory for loading PNM image"
+#~ msgstr "Ezin da PNM irudia kargatzeko memoria esleitu"
+
+#~ msgid "Insufficient memory to load PNM context struct"
+#~ msgstr "Ez dago PNM testuinguru-egitura kargatzeko adina memoria"
+
+#~ msgid "Unexpected end of PNM image data"
+#~ msgstr "PNM irudi-datuen ustekabeko amaiera"
+
+#~ msgid "Insufficient memory to load PNM file"
+#~ msgstr "Ez dago PNM fitxategia kargatzeko behar adina memoria"
+
+#~ msgid "The PNM/PBM/PGM/PPM image format family"
+#~ msgstr "PNM/PBM/PGM/PPM irudi-formatuen familia"
+
+#~ msgid "Input file descriptor is NULL."
+#~ msgstr "Sarrerako fitxategiaren deskriptorea NULL da."
+
+#~ msgid "Failed to read QTIF header"
+#~ msgstr "Huts egin du QTIF goiburukoa irakurtzean"
+
+#~ msgid "QTIF atom size too large (%d bytes)"
+#~ msgstr "QTIF elementuaren tamaina handiegia da (%d byte)"
+
+#~ msgid "Failed to allocate %d bytes for file read buffer"
+#~ msgstr ""
+#~ "Huts egin du %d byte esleitzean fitxategia irakurtzeko bufferrarentzako"
+
+#~ msgid "File error when reading QTIF atom: %s"
+#~ msgstr "Fitxategiaren errorea QTIF elementua irakurtzean: %s"
+
+#~ msgid "Failed to skip the next %d bytes with seek()."
+#~ msgstr "Huts egin du hurrengo %d byte saltatzean seek() funtzioarekin."
+
+#~ msgid "Failed to allocate QTIF context structure."
+#~ msgstr "Huts egin du QTIFen testuinguru-egitura esleitzean."
+
+#~ msgid "Failed to create GdkPixbufLoader object."
+#~ msgstr "Huts egin du GdkPixbufLoader objektua sortzean."
+
+#~ msgid "Failed to find an image data atom."
+#~ msgstr "Huts egin du irudiaren datuen elementu bat bilatzean."
+
+#~ msgid "The QTIF image format"
+#~ msgstr "QTIF irudi-formatua"
+
+#~ msgid "RAS image has bogus header data"
+#~ msgstr "RAS irudiak goiburu-datu akastunak ditu"
+
+#~ msgid "RAS image has unknown type"
+#~ msgstr "RAS irudiak mota ezezaguna du"
+
+#~ msgid "unsupported RAS image variation"
+#~ msgstr "onartzen ez den RAS irudi-aldaera"
+
+#~ msgid "Not enough memory to load RAS image"
+#~ msgstr "Ez dago RAS irudia kargatzeko behar adina memoria"
+
+#~ msgid "The Sun raster image format"
+#~ msgstr "Sun bilbe-irudiaren formatua"
+
+#~ msgid "Cannot allocate memory for IOBuffer struct"
+#~ msgstr "Ezin zaio IOBuffer-en egiturari memoria esleitu"
+
+#~ msgid "Cannot allocate memory for IOBuffer data"
+#~ msgstr "Ezin zaie IOBuffer-en datuei memoria esleitu"
+
+#~ msgid "Cannot realloc IOBuffer data"
+#~ msgstr "Ezin dira IOBuffer-en datuak berriro esleitu"
+
+#~ msgid "Cannot allocate temporary IOBuffer data"
+#~ msgstr "Ezin dira IOBuffer-en aldi baterako datuak esleitu"
+
+#~ msgid "Cannot allocate new pixbuf"
+#~ msgstr "Ezin da pixbuf berria esleitu"
+
+#~ msgid "Image is corrupted or truncated"
+#~ msgstr "Irudia trunkatuta edo hondatuta dago"
+
+#~ msgid "Cannot allocate colormap structure"
+#~ msgstr "Ezin da kolore-maparen egitura esleitu"
+
+#~ msgid "Cannot allocate colormap entries"
+#~ msgstr "Ezin dira kolore-maparen sarrerak esleitu"
+
+#~ msgid "Unexpected bitdepth for colormap entries"
+#~ msgstr "Kolore-maparen sarreren ustekabeko bit-sakonera"
+
+#~ msgid "Cannot allocate TGA header memory"
+#~ msgstr "Ezin da TGAren goiburu-memoria esleitu"
+
+#~ msgid "TGA image has invalid dimensions"
+#~ msgstr "TGA irudiak tamaina baliogabeak ditu"
+
+#~ msgid "TGA image type not supported"
+#~ msgstr "TGA irudi-mota ez da onartzen"
+
+#~ msgid "Cannot allocate memory for TGA context struct"
+#~ msgstr "Ezin da TGAren testuinguru-egiturarako memoria esleitu"
+
+#~ msgid "Excess data in file"
+#~ msgstr "Fitxategian datu gehiegi daude"
+
+#~ msgid "The Targa image format"
+#~ msgstr "Targa irudi-formatua"
+
+#~ msgid "Could not get image width (bad TIFF file)"
+#~ msgstr "Ezin izan da irudiaren zabalera lortu (TIFF fitxategi hondatua)"
+
+#~ msgid "Could not get image height (bad TIFF file)"
+#~ msgstr "Ezin izan da irudiaren altuera lortu (TIFF fitxategi hondatua)"
+
+#~ msgid "Width or height of TIFF image is zero"
+#~ msgstr "TIFF irudiaren zabalera edo altuera zero da"
+
+#~ msgid "Dimensions of TIFF image too large"
+#~ msgstr "TIFF irudiaren neurriak handiegiak dira"
+
+#~ msgid "Insufficient memory to open TIFF file"
+#~ msgstr "Ez dago TIFF fitxategia irekitzeko behar adina memoria"
+
+#~ msgid "Failed to load RGB data from TIFF file"
+#~ msgstr "Ezin izan dira RGB datuak kargatu TIFF fitxategitik"
+
+#~ msgid "Failed to open TIFF image"
+#~ msgstr "Ezin izan da TIFF irudia ireki"
+
+#~ msgid "TIFFClose operation failed"
+#~ msgstr "TIFFClose eragiketak huts egin du"
+
+#~ msgid "Failed to load TIFF image"
+#~ msgstr "Ezin izan da TIFF irudia kargatu"
+
+#~ msgid "Failed to save TIFF image"
+#~ msgstr "Ezin izan da TIFF irudia gorde"
+
+#~ msgid "TIFF compression doesn't refer to a valid codec."
+#~ msgstr "TIFF konpresioak ez du baliozko koderik adierazten."
+
+#~ msgid "Failed to write TIFF data"
+#~ msgstr "Ezin izan da TIFF irudia idatzi"
+
+#~ msgid "Couldn't write to TIFF file"
+#~ msgstr "Ezin izan da TIFF fitxategian idatzi"
+
+#~ msgid "The TIFF image format"
+#~ msgstr "TIFF irudi-formatua"
+
+#~ msgid "Image has zero width"
+#~ msgstr "Irudiaren zabalera zero da"
+
+#~ msgid "Image has zero height"
+#~ msgstr "Irudiaren altuera zero da"
+
+#~ msgid "Not enough memory to load image"
+#~ msgstr "Ez dago irudia kargatzeko behar adina memoria"
+
+#~ msgid "Couldn't save the rest"
+#~ msgstr "Ezin izan da gainerakoa gorde"
+
+#~ msgid "The WBMP image format"
+#~ msgstr "WBMP irudi-formatua"
+
+#~ msgid "Invalid XBM file"
+#~ msgstr "XBM fitxategi baliogabea"
+
+#~ msgid "Insufficient memory to load XBM image file"
+#~ msgstr "Ez dago XBM irudi-fitxategia kargatzeko behar adina memoria"
+
+#~ msgid "Failed to write to temporary file when loading XBM image"
+#~ msgstr "Ezin izan da aldi baterako fitxategian idatzi XBM irudia kargatzean"
+
+#~ msgid "The XBM image format"
+#~ msgstr "XBM irudi-formatua"
+
+#~ msgid "No XPM header found"
+#~ msgstr "Ez da XPM goibururik aurkitu"
+
+#~ msgid "Invalid XPM header"
+#~ msgstr "XPM goiburu baliogabea"
+
+#~ msgid "XPM file has image width <= 0"
+#~ msgstr "XPM fitxategiaren irudi-zabalera <= 0 da"
+
+#~ msgid "XPM file has image height <= 0"
+#~ msgstr "XPM fitxategiaren irudi-altuera <= 0 da"
+
+#~ msgid "XPM has invalid number of chars per pixel"
+#~ msgstr "XPMk pixel bakoitzeko karaktere-kopuru baliogabea du"
+
+#~ msgid "XPM file has invalid number of colors"
+#~ msgstr "XPM fitxategiak kolore-kopuru baliogabea du"
+
+#~ msgid "Cannot allocate memory for loading XPM image"
+#~ msgstr "Ezin da XPM irudia kargatzeko memoria esleitu"
+
+#~ msgid "Cannot read XPM colormap"
+#~ msgstr "Ezin da XPMren kolore-mapa irakurri"
+
+#~ msgid "Failed to write to temporary file when loading XPM image"
+#~ msgstr "Ezin izan da aldi baterako fitxategian idatzi XPM irudia kargatzean"
+
+#~ msgid "The XPM image format"
+#~ msgstr "XPM irudi-formatua"
+
+#~ msgid "The EMF image format"
+#~ msgstr "EMF irudi-formatua"
+
+#~ msgid "Could not allocate memory: %s"
+#~ msgstr "Ezin izan da memoria esleitu: %s"
+
+#~ msgid "Could not create stream: %s"
+#~ msgstr "Ezin izan da korrontea sortu: %s"
+
+#~ msgid "Could not seek stream: %s"
+#~ msgstr "Ezin izan da korrontea bilatu: %s"
+
+#~ msgid "Could not read from stream: %s"
+#~ msgstr "Ezin izan da korrontearentzako irakurri: %s"
+
+#~ msgid "Couldn't load bitmap"
+#~ msgstr "Ezin izan da bit-mapa kargatu"
+
+#~ msgid "Couldn't load metafile"
+#~ msgstr "Ezin izan da metafitxategia kargatu"
+
+#~ msgid "Unsupported image format for GDI+"
+#~ msgstr "Onartu gabeko irudi-formatua GDI+entzako"
+
+#~ msgid "Couldn't save"
+#~ msgstr "Ezin izan da gorde"
+
+#~ msgid "The WMF image format"
+#~ msgstr "WMF irudi-formatua"
+
+#~ msgid "Opening %d Item"
+#~ msgid_plural "Opening %d Items"
+#~ msgstr[0] "Elementu %d irekitzen"
+#~ msgstr[1] "%d elementu irekitzen"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Shift"
+#~ msgstr "Maius"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Ctrl"
+#~ msgstr "Ktrl"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Alt"
+#~ msgstr "Alt"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Super"
+#~ msgstr "Super"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Hyper"
+#~ msgstr "Hiper"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Meta"
+#~ msgstr "Meta"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Space"
+#~ msgstr "Zuriunea"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Backslash"
+#~ msgstr "Alderantzizko barra"
+
+#~ msgctxt "year measurement template"
+#~ msgid "2000"
+#~ msgstr "2000"
+
+#~ msgctxt "calendar:day:digits"
+#~ msgid "%d"
+#~ msgstr "%d"
+
+#~ msgctxt "calendar:week:digits"
+#~ msgid "%d"
+#~ msgstr "%d"
+
+#~ msgctxt "calendar year format"
+#~ msgid "%Y"
+#~ msgstr "%Y"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Disabled"
+#~ msgstr "Desgaituta"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Invalid"
+#~ msgstr "Baliogabea"
+
+#~ msgctxt "progress bar label"
+#~ msgid "%d %%"
+#~ msgstr "%% %d"
+
+#~ msgctxt "input method menu"
+#~ msgid "System"
+#~ msgstr "Sistema"
+
+#~ msgctxt "input method menu"
+#~ msgid "None"
+#~ msgstr "Bat ere ez"
+
+#~ msgctxt "input method menu"
+#~ msgid "System (%s)"
+#~ msgstr "Sistema (%s)"
+
+#~ msgctxt "print operation status"
+#~ msgid "Initial state"
+#~ msgstr "Hasierako egoera"
+
+#~ msgctxt "print operation status"
+#~ msgid "Preparing to print"
+#~ msgstr "inprimatzeko prestatzen"
+
+#~ msgctxt "print operation status"
+#~ msgid "Generating data"
+#~ msgstr "Datuak sortzen"
+
+#~ msgctxt "print operation status"
+#~ msgid "Sending data"
+#~ msgstr "Datuak bidaltzen"
+
+#~ msgctxt "print operation status"
+#~ msgid "Waiting"
+#~ msgstr "Zain"
+
+#~ msgctxt "print operation status"
+#~ msgid "Blocking on issue"
+#~ msgstr "Jaulkipenean blokeatuta"
+
+#~ msgctxt "print operation status"
+#~ msgid "Printing"
+#~ msgstr "Inprimatzen"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished"
+#~ msgstr "Amaituta"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished with error"
+#~ msgstr "Errorearekin amaituta"
+
+#~ msgctxt "recent menu label"
+#~ msgid "_%d. %s"
+#~ msgstr "_%d. %s"
+
+#~ msgctxt "recent menu label"
+#~ msgid "%d. %s"
+#~ msgstr "%d. %s"
+
+#~ msgctxt "throbbing progress animation widget"
+#~ msgid "Spinner"
+#~ msgstr "Birakaria"
+
+#~ msgctxt "Stock label"
+#~ msgid "Information"
+#~ msgstr "Informazioa"
+
+#~ msgctxt "Stock label"
+#~ msgid "Warning"
+#~ msgstr "Abisua"
+
+#~ msgctxt "Stock label"
+#~ msgid "Error"
+#~ msgstr "Errorea"
+
+#~ msgctxt "Stock label"
+#~ msgid "Question"
+#~ msgstr "Galdera"
+
+#~ msgctxt "Stock label"
+#~ msgid "_About"
+#~ msgstr "Honi _buruz"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Add"
+#~ msgstr "_Gehitu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Apply"
+#~ msgstr "_Aplikatu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Bold"
+#~ msgstr "_Lodia"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Cancel"
+#~ msgstr "_Utzi"
+
+#~ msgctxt "Stock label"
+#~ msgid "_CD-Rom"
+#~ msgstr "_CD-ROMa"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Clear"
+#~ msgstr "_Garbitu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Close"
+#~ msgstr "It_xi"
+
+#~ msgctxt "Stock label"
+#~ msgid "C_onnect"
+#~ msgstr "_Konektatu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Convert"
+#~ msgstr "_Bihurtu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Copy"
+#~ msgstr "_Kopiatu"
+
+#~ msgctxt "Stock label"
+#~ msgid "Cu_t"
+#~ msgstr "_Ebaki"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Delete"
+#~ msgstr "_Ezabatu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Discard"
+#~ msgstr "_Baztertu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Disconnect"
+#~ msgstr "_Deskonektatu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Execute"
+#~ msgstr "_Exekutatu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Edit"
+#~ msgstr "_Editatu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Find"
+#~ msgstr "_Bilatu"
+
+#~ msgctxt "Stock label"
+#~ msgid "Find and _Replace"
+#~ msgstr "Bilatu eta _ordeztu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Floppy"
+#~ msgstr "_Disketea"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fullscreen"
+#~ msgstr "_Pantaila osoa"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Leave Fullscreen"
+#~ msgstr "_Irten pantaila osotik"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Bottom"
+#~ msgstr "_Behean"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_First"
+#~ msgstr "_Aurrenekora"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Last"
+#~ msgstr "_Azkenera"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Top"
+#~ msgstr "_Goian"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Back"
+#~ msgstr "_Atzera"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Down"
+#~ msgstr "_Behera"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Forward"
+#~ msgstr "A_urrera"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Up"
+#~ msgstr "_Gora"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Harddisk"
+#~ msgstr "_Disko gogorra"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Help"
+#~ msgstr "_Laguntza"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Home"
+#~ msgstr "_Karpeta nagusia"
+
+#~ msgctxt "Stock label"
+#~ msgid "Increase Indent"
+#~ msgstr "Handitu koska"
+
+#~ msgctxt "Stock label"
+#~ msgid "Decrease Indent"
+#~ msgstr "Txikitu koska"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Index"
+#~ msgstr "_Indizea"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Information"
+#~ msgstr "_Informazioa"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Italic"
+#~ msgstr "_Etzana"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Jump to"
+#~ msgstr "_Jauzi hona"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Center"
+#~ msgstr "_Zentratuta"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fill"
+#~ msgstr "_Bete"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Left"
+#~ msgstr "E_zkerrean"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Right"
+#~ msgstr "E_skuinean"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Forward"
+#~ msgstr "A_urrera"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Next"
+#~ msgstr "_Hurrengoa"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "P_ause"
+#~ msgstr "_Pausatu"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Play"
+#~ msgstr "_Erreproduzitu"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "Pre_vious"
+#~ msgstr "_Aurrekoa"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Record"
+#~ msgstr "_Grabatu"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "R_ewind"
+#~ msgstr "_Birbobinatu"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Stop"
+#~ msgstr "_Gelditu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Network"
+#~ msgstr "_Sarea"
+
+#~ msgctxt "Stock label"
+#~ msgid "_New"
+#~ msgstr "_Berria"
+
+#~ msgctxt "Stock label"
+#~ msgid "_No"
+#~ msgstr "_Ez"
+
+#~ msgctxt "Stock label"
+#~ msgid "_OK"
+#~ msgstr "_Ados"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Open"
+#~ msgstr "_Ireki"
+
+#~ msgctxt "Stock label"
+#~ msgid "Landscape"
+#~ msgstr "Horizontala"
+
+#~ msgctxt "Stock label"
+#~ msgid "Portrait"
+#~ msgstr "Bertikala"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse landscape"
+#~ msgstr "Alderantzizko horizontala"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse portrait"
+#~ msgstr "Alderantzizko bertikala"
+
+#~ msgctxt "Stock label"
+#~ msgid "Page Set_up"
+#~ msgstr "Prestatu _orrialdea"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Paste"
+#~ msgstr "_Itsatsi"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Preferences"
+#~ msgstr "_Hobespenak"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Print"
+#~ msgstr "I_nprimatu"
+
+#~ msgctxt "Stock label"
+#~ msgid "Print Pre_view"
+#~ msgstr "Inprimatzeko _aurrebista"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Properties"
+#~ msgstr "_Propietateak"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Quit"
+#~ msgstr "Irte_n"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Redo"
+#~ msgstr "_Berregin"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Refresh"
+#~ msgstr "_Freskatu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Remove"
+#~ msgstr "_Kendu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Revert"
+#~ msgstr "_Leheneratu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Save"
+#~ msgstr "_Gorde"
+
+#~ msgctxt "Stock label"
+#~ msgid "Save _As"
+#~ msgstr "Gorde _honela"
+
+#~ msgctxt "Stock label"
+#~ msgid "Select _All"
+#~ msgstr "Hautatu _denak"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Color"
+#~ msgstr "_Kolorea"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Font"
+#~ msgstr "_Letra-tipoa"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Ascending"
+#~ msgstr "Go_rantz"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Descending"
+#~ msgstr "Be_herantz"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Spell Check"
+#~ msgstr "Ortogra_fia-egiaztapena"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Stop"
+#~ msgstr "_Gelditu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Strikethrough"
+#~ msgstr "_Marratua"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undelete"
+#~ msgstr "_Desezabatu"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Underline"
+#~ msgstr "_Azpimarratua"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undo"
+#~ msgstr "_Desegin"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Yes"
+#~ msgstr "_Bai"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Normal Size"
+#~ msgstr "Tamaina _normala"
+
+#~ msgctxt "Stock label"
+#~ msgid "Best _Fit"
+#~ msgstr "_Egokiena"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _In"
+#~ msgstr "_Zooma handiagotu"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _Out"
+#~ msgstr "Zooma _txikiagotu"
+
+#~ msgctxt "volume percentage"
+#~ msgid "%d %%"
+#~ msgstr "%% %d"
+
+#~ msgctxt "paper size"
+#~ msgid "asme_f"
+#~ msgstr "asme_f"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x2"
+#~ msgstr "A0x2"
+
+#~ msgctxt "paper size"
+#~ msgid "A0"
+#~ msgstr "A0"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x3"
+#~ msgstr "A0x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1"
+#~ msgstr "A1"
+
+#~ msgctxt "paper size"
+#~ msgid "A10"
+#~ msgstr "A10"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x3"
+#~ msgstr "A1x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x4"
+#~ msgstr "A1x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2"
+#~ msgstr "A2"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x3"
+#~ msgstr "A2x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x4"
+#~ msgstr "A2x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x5"
+#~ msgstr "A2x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3"
+#~ msgstr "A3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3 Extra"
+#~ msgstr "A3 estra"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x3"
+#~ msgstr "A3x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x4"
+#~ msgstr "A3x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x5"
+#~ msgstr "A3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x6"
+#~ msgstr "A3x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x7"
+#~ msgstr "A3x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4"
+#~ msgstr "A4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Extra"
+#~ msgstr "A4 estra"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Tab"
+#~ msgstr "A4 fitxa"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x3"
+#~ msgstr "A4x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x4"
+#~ msgstr "A4x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x5"
+#~ msgstr "A4x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x6"
+#~ msgstr "A4x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x7"
+#~ msgstr "A4x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x8"
+#~ msgstr "A4x8"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x9"
+#~ msgstr "A4x9"
+
+#~ msgctxt "paper size"
+#~ msgid "A5"
+#~ msgstr "A5"
+
+#~ msgctxt "paper size"
+#~ msgid "A5 Extra"
+#~ msgstr "A5 estra"
+
+#~ msgctxt "paper size"
+#~ msgid "A6"
+#~ msgstr "A6"
+
+#~ msgctxt "paper size"
+#~ msgid "A7"
+#~ msgstr "A7"
+
+#~ msgctxt "paper size"
+#~ msgid "A8"
+#~ msgstr "A8"
+
+#~ msgctxt "paper size"
+#~ msgid "A9"
+#~ msgstr "A9"
+
+#~ msgctxt "paper size"
+#~ msgid "B0"
+#~ msgstr "B0"
+
+#~ msgctxt "paper size"
+#~ msgid "B1"
+#~ msgstr "B1"
+
+#~ msgctxt "paper size"
+#~ msgid "B10"
+#~ msgstr "B10"
+
+#~ msgctxt "paper size"
+#~ msgid "B2"
+#~ msgstr "B2"
+
+#~ msgctxt "paper size"
+#~ msgid "B3"
+#~ msgstr "B3"
+
+#~ msgctxt "paper size"
+#~ msgid "B4"
+#~ msgstr "B4"
+
+#~ msgctxt "paper size"
+#~ msgid "B5"
+#~ msgstr "B5"
+
+#~ msgctxt "paper size"
+#~ msgid "B5 Extra"
+#~ msgstr "B5 estra"
+
+#~ msgctxt "paper size"
+#~ msgid "B6"
+#~ msgstr "B6"
+
+#~ msgctxt "paper size"
+#~ msgid "B6/C4"
+#~ msgstr "B6/C4"
+
+#~ msgctxt "paper size"
+#~ msgid "B7"
+#~ msgstr "B7"
+
+#~ msgctxt "paper size"
+#~ msgid "B8"
+#~ msgstr "B8"
+
+#~ msgctxt "paper size"
+#~ msgid "B9"
+#~ msgstr "B9"
+
+#~ msgctxt "paper size"
+#~ msgid "C0"
+#~ msgstr "C0"
+
+#~ msgctxt "paper size"
+#~ msgid "C1"
+#~ msgstr "C1"
+
+#~ msgctxt "paper size"
+#~ msgid "C10"
+#~ msgstr "C10"
+
+#~ msgctxt "paper size"
+#~ msgid "C2"
+#~ msgstr "C2"
+
+#~ msgctxt "paper size"
+#~ msgid "C3"
+#~ msgstr "C3"
+
+#~ msgctxt "paper size"
+#~ msgid "C4"
+#~ msgstr "C4"
+
+#~ msgctxt "paper size"
+#~ msgid "C5"
+#~ msgstr "C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C6"
+#~ msgstr "C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C6/C5"
+#~ msgstr "C6/C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C7"
+#~ msgstr "C7"
+
+#~ msgctxt "paper size"
+#~ msgid "C7/C6"
+#~ msgstr "C7/C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C8"
+#~ msgstr "C8"
+
+#~ msgctxt "paper size"
+#~ msgid "C9"
+#~ msgstr "C9"
+
+#~ msgctxt "paper size"
+#~ msgid "DL Envelope"
+#~ msgstr "DL gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "RA0"
+#~ msgstr "RA0"
+
+#~ msgctxt "paper size"
+#~ msgid "RA1"
+#~ msgstr "RA1"
+
+#~ msgctxt "paper size"
+#~ msgid "RA2"
+#~ msgstr "RA2"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA0"
+#~ msgstr "SRA0"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA1"
+#~ msgstr "SRA1"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA2"
+#~ msgstr "SRA2"
+
+#~ msgctxt "paper size"
+#~ msgid "JB0"
+#~ msgstr "JB0"
+
+#~ msgctxt "paper size"
+#~ msgid "JB1"
+#~ msgstr "JB1"
+
+#~ msgctxt "paper size"
+#~ msgid "JB10"
+#~ msgstr "JB10"
+
+#~ msgctxt "paper size"
+#~ msgid "JB2"
+#~ msgstr "JB2"
+
+#~ msgctxt "paper size"
+#~ msgid "JB3"
+#~ msgstr "JB3"
+
+#~ msgctxt "paper size"
+#~ msgid "JB4"
+#~ msgstr "JB4"
+
+#~ msgctxt "paper size"
+#~ msgid "JB5"
+#~ msgstr "JB5"
+
+#~ msgctxt "paper size"
+#~ msgid "JB6"
+#~ msgstr "JB6"
+
+#~ msgctxt "paper size"
+#~ msgid "JB7"
+#~ msgstr "JB7"
+
+#~ msgctxt "paper size"
+#~ msgid "JB8"
+#~ msgstr "JB8"
+
+#~ msgctxt "paper size"
+#~ msgid "JB9"
+#~ msgstr "JB9"
+
+#~ msgctxt "paper size"
+#~ msgid "jis exec"
+#~ msgstr "jis exec"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 2 Envelope"
+#~ msgstr "Choukei 2 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 3 Envelope"
+#~ msgstr "Choukei 3 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 4 Envelope"
+#~ msgstr "Choukei 4 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "hagaki (postcard)"
+#~ msgstr "hagaki (posta-txartela)"
+
+#~ msgctxt "paper size"
+#~ msgid "kahu Envelope"
+#~ msgstr "Kahu gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "kaku2 Envelope"
+#~ msgstr "Kaku2 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "oufuku (reply postcard)"
+#~ msgstr "oufuku (erantzuteko posta-txartela)"
+
+#~ msgctxt "paper size"
+#~ msgid "you4 Envelope"
+#~ msgstr "you4 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "10x11"
+#~ msgstr "10x11"
+
+#~ msgctxt "paper size"
+#~ msgid "10x13"
+#~ msgstr "10x13"
+
+#~ msgctxt "paper size"
+#~ msgid "10x14"
+#~ msgstr "10x14"
+
+#~ msgctxt "paper size"
+#~ msgid "10x15"
+#~ msgstr "10x15"
+
+#~ msgctxt "paper size"
+#~ msgid "11x12"
+#~ msgstr "11x12"
+
+#~ msgctxt "paper size"
+#~ msgid "11x15"
+#~ msgstr "11x15"
+
+#~ msgctxt "paper size"
+#~ msgid "12x19"
+#~ msgstr "12x19"
+
+#~ msgctxt "paper size"
+#~ msgid "5x7"
+#~ msgstr "5x7"
+
+#~ msgctxt "paper size"
+#~ msgid "6x9 Envelope"
+#~ msgstr "6x9 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "7x9 Envelope"
+#~ msgstr "7x9 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "9x11 Envelope"
+#~ msgstr "9x11 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "a2 Envelope"
+#~ msgstr "a2 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch A"
+#~ msgstr "Arch A"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch B"
+#~ msgstr "Arch B"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch C"
+#~ msgstr "Arch C"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch D"
+#~ msgstr "Arch D"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch E"
+#~ msgstr "Arch E"
+
+#~ msgctxt "paper size"
+#~ msgid "b-plus"
+#~ msgstr "b-plus"
+
+#~ msgctxt "paper size"
+#~ msgid "c"
+#~ msgstr "c"
+
+#~ msgctxt "paper size"
+#~ msgid "c5 Envelope"
+#~ msgstr "c5 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "d"
+#~ msgstr "d"
+
+#~ msgctxt "paper size"
+#~ msgid "e"
+#~ msgstr "e"
+
+#~ msgctxt "paper size"
+#~ msgid "edp"
+#~ msgstr "edp"
+
+#~ msgctxt "paper size"
+#~ msgid "European edp"
+#~ msgstr "Europako edp"
+
+#~ msgctxt "paper size"
+#~ msgid "Executive"
+#~ msgstr "Exekutiboa"
+
+#~ msgctxt "paper size"
+#~ msgid "f"
+#~ msgstr "f"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold European"
+#~ msgstr "Europako FanFold"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold US"
+#~ msgstr "AEBko FanFold"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold German Legal"
+#~ msgstr "Alemaniako FanFold legala"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Legal"
+#~ msgstr "Gobernuaren legala"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Letter"
+#~ msgstr "Gobernuaren gutuna"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 3x5"
+#~ msgstr "Indizea 3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 (postcard)"
+#~ msgstr "Indizea 4x6 (posta-txartela)"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 ext"
+#~ msgstr "Indizea 4x6 est."
+
+#~ msgctxt "paper size"
+#~ msgid "Index 5x8"
+#~ msgstr "Indizea 5x8"
+
+#~ msgctxt "paper size"
+#~ msgid "Invoice"
+#~ msgstr "Faktura"
+
+#~ msgctxt "paper size"
+#~ msgid "Tabloid"
+#~ msgstr "Tabloidea"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal"
+#~ msgstr "US legala"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal Extra"
+#~ msgstr "US legala estra"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter"
+#~ msgstr "US gutuna"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Extra"
+#~ msgstr "US gutuna estra"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Plus"
+#~ msgstr "US gutuna plus"
+
+#~ msgctxt "paper size"
+#~ msgid "Monarch Envelope"
+#~ msgstr "Monarka gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "#10 Envelope"
+#~ msgstr "#10 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "#11 Envelope"
+#~ msgstr "#11 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "#12 Envelope"
+#~ msgstr "#12 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "#14 Envelope"
+#~ msgstr "#14 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "#9 Envelope"
+#~ msgstr "#9 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "Personal Envelope"
+#~ msgstr "Gutun-azal pertsonala"
+
+#~ msgctxt "paper size"
+#~ msgid "Quarto"
+#~ msgstr "Laurdena"
+
+#~ msgctxt "paper size"
+#~ msgid "Super A"
+#~ msgstr "Super A"
+
+#~ msgctxt "paper size"
+#~ msgid "Super B"
+#~ msgstr "Super B"
+
+#~ msgctxt "paper size"
+#~ msgid "Wide Format"
+#~ msgstr "Formatu zabala"
+
+#~ msgctxt "paper size"
+#~ msgid "Dai-pa-kai"
+#~ msgstr "Dai-pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio"
+#~ msgstr "Folioa"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio sp"
+#~ msgstr "Folioa sp"
+
+#~ msgctxt "paper size"
+#~ msgid "Invite Envelope"
+#~ msgstr "Gonbidapen gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "Italian Envelope"
+#~ msgstr "Italiako gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "juuro-ku-kai"
+#~ msgstr "juuro-ku-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "pa-kai"
+#~ msgstr "pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Postfix Envelope"
+#~ msgstr "Postfix gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "Small Photo"
+#~ msgstr "Argazki txikia"
+
+#~ msgctxt "paper size"
+#~ msgid "prc1 Envelope"
+#~ msgstr "prc1 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "prc10 Envelope"
+#~ msgstr "prc10 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 16k"
+#~ msgstr "prc 16k"
+
+#~ msgctxt "paper size"
+#~ msgid "prc2 Envelope"
+#~ msgstr "prc2 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "prc3 Envelope"
+#~ msgstr "prc3 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 32k"
+#~ msgstr "prc 32k"
+
+#~ msgctxt "paper size"
+#~ msgid "prc4 Envelope"
+#~ msgstr "prc4 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "prc5 Envelope"
+#~ msgstr "prc5 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "prc6 Envelope"
+#~ msgstr "prc6 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "prc7 Envelope"
+#~ msgstr "prc7 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "prc8 Envelope"
+#~ msgstr "prc8 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "prc9 Envelope"
+#~ msgstr "prc9 gutun-azala"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 16k"
+#~ msgstr "ROC 16k"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 8k"
+#~ msgstr "ROC 8k"
+
+#~ msgid "Printer '%s' may not be connected."
+#~ msgstr "'%s' inprimagailua ez dirudi konektatuta dagoenik."

@@ -281,7 +281,7 @@ if test x$WITH_NLS != x ; then
 	echo "I hope you remembered to run scons msgupdate!"
 	LINGUAS=
 
-        for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext ; do
+        for pkg in gtk2_ardour libs/ardour libs/gtkmm2ext libs/tk/ytk ; do
 	    files=`find ../../$pkg -name "*.mo"`
 
             #
@@ -428,8 +428,10 @@ cp $BUILD_ROOT/libs/vamp-plugins/libardourvampplugins.so $Libraries
 cp $BUILD_ROOT/libs/vamp-pyin/libardourvamppyin.so $Libraries
 
 # Suil modules (new dir 'build-stack')
-if test -d $GTKSTACK_ROOT/lib/suil-0/ ; then
-    cp $GTKSTACK_ROOT/lib/suil-0/lib* $Libraries
+if test -d $BUILD_ROOT/libs/tk/suil/ ; then
+	cp $BUILD_ROOT/libs/tk/suil/libsuil_*_in_gtk2.so $Libraries
+elif test -d $GTKSTACK_ROOT/lib/suil-0/ ; then
+	cp $GTKSTACK_ROOT/lib/suil-0/lib* $Libraries
 fi
 
 # VST scanner app (both LXVST as well as WIN-VST, 2in1)
@@ -507,7 +509,7 @@ cp $BUILD_ROOT/libs/ardour-avahi $APPLIB/ardour-avahi
 chmod +x $APPLIB/ardour-avahi
 
 OURLIBDIR=$BUILD_ROOT/libs
-OURLIBS=$OURLIBDIR/ctrl-interface/midi_surface:$OURLIBDIR/ctrl-interface/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/glibmm2:$OURLIBDIR/canvas:$OURLIBDIR/widgets:$OURLIBDIR/waveview:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/temporal:$OURLIBDIR/libltc:$OURLIBDIR/qm-dsp:$OURLIBDIR/ardouralsautil:$OURLIBDIR/ptformat:$OURLIBDIR/aaf:$BUILD_ROOT/gtk2_ardour
+OURLIBS=$OURLIBDIR/tk/ydk-pixbuf:$OURLIBDIR/tk/ztk:$OURLIBDIR/tk/ydk:$OURLIBDIR/tk/ytk:$OURLIBDIR/tk/suil:$OURLIBDIR/tk/ztkmm:$OURLIBDIR/tk/ydkmm:$OURLIBDIR/tk/ytkmm:$OURLIBDIR/ctrl-interface/midi_surface:$OURLIBDIR/ctrl-interface/control_protocol:$OURLIBDIR/ardour:$OURLIBDIR/midi++2:$OURLIBDIR/pbd:$OURLIBDIR/gtkmm2ext:$OURLIBDIR/glibmm2:$OURLIBDIR/canvas:$OURLIBDIR/widgets:$OURLIBDIR/waveview:$OURLIBDIR/evoral:$OURLIBDIR/evoral/src/libsmf:$OURLIBDIR/audiographer:$OURLIBDIR/temporal:$OURLIBDIR/libltc:$OURLIBDIR/qm-dsp:$OURLIBDIR/ardouralsautil:$OURLIBDIR/ptformat:$OURLIBDIR/aaf:$BUILD_ROOT/gtk2_ardour
 
 echo $OURLIBS${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 

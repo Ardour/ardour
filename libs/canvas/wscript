@@ -76,13 +76,19 @@ def build(bld):
 
     obj.export_includes = ['.']
     obj.includes     = ['.']
-    obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST XML OSX'
+    obj.uselib       = 'SIGCPP CAIROMM PANGOMM BOOST XML OSX'
     obj.use          = [ 'libpbd', 'libgtkmm2ext' ]
     obj.name         = 'libcanvas'
     obj.target       = 'canvas'
     obj.vnum         = CANVAS_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines      += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+
+    if bld.is_defined('YTK'):
+        obj.use    += [ 'libytkmm' ]
+        obj.uselib += ' GLIBMM GIOMM'
+    else:
+        obj.uselib += ' GTKMM'
 
     # canvas unit-tests are outdated
     if False and bld.env['BUILD_TESTS'] and bld.is_defined('HAVE_CPPUNIT'):

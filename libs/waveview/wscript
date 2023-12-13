@@ -40,10 +40,16 @@ def build(bld):
 
     obj.export_includes = ['.']
     obj.includes     = ['.']
-    obj.uselib       = 'SIGCPP CAIROMM GTKMM BOOST XML TEMPORAL'
+    obj.uselib       = 'SIGCPP PANGOMM CAIROMM BOOST XML TEMPORAL'
     obj.use          = [ 'libpbd', 'libcanvas', 'libardour', 'libgtkmm2ext', 'libtemporal' ]
     obj.name         = 'libwaveview'
     obj.target       = 'waveview'
     obj.vnum         = WAVEVIEW_LIB_VERSION
     obj.install_path = bld.env['LIBDIR']
     obj.defines      += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+
+    if bld.is_defined('YTK'):
+        obj.use    += [ 'libytkmm' ]
+        obj.uselib += ' GLIBMM GIOMM'
+    else:
+        obj.uselib += ' GTKMM'

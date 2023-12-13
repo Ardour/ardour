@@ -1,0 +1,4 @@
+#define line_arrow_width 6
+#define line_arrow_height 9
+static const unsigned char line_arrow_bits[] = {
+   0x00, 0x00, 0x04, 0x0c, 0x18, 0x3f, 0x18, 0x0c, 0x04};

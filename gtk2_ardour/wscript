@@ -445,14 +445,14 @@ def configure(conf):
                       atleast_version='1.2.1')
     autowaf.check_pkg(conf, 'gthread-2.0', uselib_store='GTHREAD',
                       atleast_version='2.10.1')
-    autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK',
-                      atleast_version='2.18')
-    autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM',
-                      atleast_version='2.18')
     autowaf.check_pkg(conf, 'ogg', uselib_store='OGG', atleast_version='1.1.2')
     autowaf.check_pkg(conf, 'x11', uselib_store='X11', atleast_version='1.1', mandatory=False)
     autowaf.check_pkg(conf, 'pangoft2', uselib_store='PANGOFT2', atleast_version='1.36.8', mandatory=False)
     autowaf.check_pkg(conf, 'fontconfig', uselib_store='FONTCONFIG')
+
+    if not conf.is_defined('YTK'):
+        autowaf.check_pkg(conf, 'gtk+-2.0', uselib_store='GTK', atleast_version='2.18')
+        autowaf.check_pkg(conf, 'gtkmm-2.4', uselib_store='GTKMM', atleast_version='2.18', mandatory=True)
 
     if conf.env.CC_NAME == 'gcc' and Options.options.strict:
         conf.define('GLIB_DISABLE_DEPRECATION_WARNINGS', 1)
@@ -516,14 +516,22 @@ def build(bld):
                 'LOCALEDIR="' + os.path.normpath(bld.env['LOCALEDIR']) + '"',
                 ]
         obj.linkflags = ''
-        obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
+        obj.uselib       = 'UUID FLAC FONTCONFIG GTHREAD GTK OGG PANGOMM CURL DL CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
         obj.source += [ 'luadoc.cc', 'bundle_env_linux.cc' ]
         obj.use += [ 'X11' ]
+        if bld.is_defined('YTK'):
+            obj.use    += [ 'libytk', 'libytkmm' ]
+            obj.uselib += ' GLIBMM GIOMM PANGOMM PANGOFT2 LIBPNG'
+        else:
+            obj.uselib += ' GTKMM'
         if bld.is_defined('HAVE_USB'):
             obj.uselib += ' USB'
         if bld.is_defined('HAVE_SUIL'):
             obj.source += [ 'lv2_plugin_ui.cc' ]
-            obj.use += [ 'SUIL' ]
+            if bld.is_defined('YTK'):
+                obj.use += [ 'libsuil' ]
+            else:
+                obj.uselib += ' SUIL'
         if bld.is_defined('LXVST_SUPPORT'):
             obj.source += [ 'vst_plugin_ui.cc' ]
             obj.source += [ 'linux_vst_gui_support.cc', 'lxvst_plugin_ui.cc' ]
@@ -605,8 +613,13 @@ def build(bld):
         ]
     obj.install_path = bld.env['DLLDIR']
     obj.linkflags    = ''
-    obj.uselib       = 'UUID FLAC FONTCONFIG GLIBMM GTHREAD GTK OGG CURL DL GTKMM CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
+    obj.uselib       = 'UUID FLAC FONTCONFIG GTHREAD OGG PANGOMM CURL DL CANVAS FFTW3F LO TAGLIB XML LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
 
+    if bld.is_defined('YTK'):
+        obj.use    += [ 'libytk', 'libytkmm' ]
+        obj.uselib += ' GLIBMM GIOMM PANGOFT2 LIBPNG'
+    else:
+        obj.uselib += ' GTKMM GTK'
     if bld.is_defined('HAVE_USB'):
         obj.uselib += ' USB'
     if sys.platform == 'darwin':

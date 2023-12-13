@@ -1,0 +1,4984 @@
+# Catalan translation of GTK+.
+# Copyright © 1999, 2000, 2001, 2002, 2003, 2004, 2005, 2006
+#    Free Software Foundation, Inc.
+# Ivan Vilata i Balaguer <ivan@selidor.net>, 1999, 2000.
+# Softcatala <gnome@softcatala.net>, 2000, 2001, 2002.
+# Jordi Mallach <jordi@sindominio.net>, 2002, 2003, 2004, 2005, 2006.
+# Mireia Farrús <mifarrus@hotmail.com>, 2003.
+# Josep Puigdemont <josep.puigdemont@gmail.com>, 2005, 2006.
+# David Planella <david.planella@gmail.com>, 2008, 2009, 2010.
+#
+# Recull de termes
+#
+# Trough      - regata. Es refereix a la barra d'una barra de desplaçament,
+#               sobre la qual llisca. Una altra alternativa seria «pista» o
+#               «carril».
+# Thumb       - lliscador. Es refereix al control que s'arrossega o es fa
+#               lliscar al llarg de la regata de la barra de desplaçament.
+# Scroll box  - lliscador. El mateix que «thumb»
+# Stepper     - desplaçador. Cadascuna de les fletxes dels extrems de la barra
+#               de desplaçament. Fent-hi clic es desplaça el lliscador.
+# Scale thumb - lliscador d'escalat. «A scale consists of a track with a thumb,
+#               much like a scrollbar.
+#               It is used to select a value in a given range. The user may drag
+#               the thumb across the scale track to adjust the value» .
+#               Vegeu http://wiki.mozilla.org/XUL:Slider_Tag
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gtk+ 2.8.2\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-19 21:59+0100\n"
+"PO-Revision-Date: 2010-04-02 18:26+0200\n"
+"Last-Translator: David Planella <david.planella@gmail.com>\n"
+"Language-Team: Catalan <tradgnome@softcatala.org>\n"
+"Language: ca\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=n!=1;\n"
+
+#: gtkaboutdialog.c:245
+msgid "Could not show link"
+msgstr "No s'ha pogut mostrar l'enllaç"
+
+#: gtkaboutdialog.c:399 gtkaboutdialog.c:2286
+msgid "License"
+msgstr "Llicència"
+
+#: gtkaboutdialog.c:400
+msgid "The license of the program"
+msgstr "La llicència del programa"
+
+#: gtkaboutdialog.c:646
+msgid "C_redits"
+msgstr "C_rèdits"
+
+#: gtkaboutdialog.c:660
+msgid "_License"
+msgstr "_Llicència"
+
+#: gtkaboutdialog.c:966
+#, c-format
+msgid "About %s"
+msgstr "Quant a %s"
+
+#: gtkaboutdialog.c:2209
+msgid "Credits"
+msgstr "Crèdits"
+
+#: gtkaboutdialog.c:2238
+msgid "Written by"
+msgstr "Escrit per"
+
+#: gtkaboutdialog.c:2241
+msgid "Documented by"
+msgstr "Documentat per"
+
+#: gtkaboutdialog.c:2253
+msgid "Translated by"
+msgstr "Traduït per"
+
+#: gtkaboutdialog.c:2257
+msgid "Artwork by"
+msgstr "Art per"
+
+#: gtkbuilderparser.c:343
+#, c-format
+msgid "Invalid type function on line %d: '%s'"
+msgstr "Funció de tipus no vàlida a la línia %d: «%s»"
+
+#: gtkbuilderparser.c:407
+#, c-format
+msgid "Duplicate object ID '%s' on line %d (previously on line %d)"
+msgstr ""
+
+#: gtkbuilderparser.c:859
+#, c-format
+msgid "Invalid root element: '%s'"
+msgstr "El nom de l'element arrel no és vàlid: «%s»"
+
+#: gtkbuilderparser.c:898
+#, c-format
+msgid "Unhandled tag: '%s'"
+msgstr "L'etiqueta no està gestionada: «%s»"
+
+#: gtkcellrendereraccel.c:389 gtkcellrendereraccel.c:663
+msgid "New accelerator..."
+msgstr "Accelerador nou..."
+
+#: gtkcolorbutton.c:178 gtkcolorbutton.c:459
+msgid "Pick a Color"
+msgstr "Trieu un color"
+
+#: gtkcolorbutton.c:352
+msgid "Received invalid color data\n"
+msgstr "S'han rebut dades de color no vàlides\n"
+
+#: gtkcolorsel.c:358
+msgid ""
+"Select the color you want from the outer ring. Select the darkness or "
+"lightness of that color using the inner triangle."
+msgstr ""
+"Seleccioneu el color que vulgueu de l'anell extern. Seleccioneu la foscor o "
+"la claror del color utilitzant el triangle intern."
+
+#: gtkcolorsel.c:382
+msgid ""
+"Click the eyedropper, then click a color anywhere on your screen to select "
+"that color."
+msgstr ""
+"Feu clic al selector de color, llavors feu clic on vulgueu de la vostra "
+"pantalla per seleccionar el seu color."
+
+#: gtkcolorsel.c:391
+msgid "_Hue:"
+msgstr "_Matís:"
+
+#: gtkcolorsel.c:392
+msgid "Position on the color wheel."
+msgstr "Posició a la roda de colors."
+
+#: gtkcolorsel.c:394
+msgid "_Saturation:"
+msgstr "_Saturació:"
+
+#: gtkcolorsel.c:395
+msgid "\"Deepness\" of the color."
+msgstr "«Profunditat» del color."
+
+#: gtkcolorsel.c:396
+msgid "_Value:"
+msgstr "_Valor:"
+
+#: gtkcolorsel.c:397
+msgid "Brightness of the color."
+msgstr "Brillantor del color."
+
+#: gtkcolorsel.c:398
+msgid "_Red:"
+msgstr "_Vermell:"
+
+#: gtkcolorsel.c:399
+msgid "Amount of red light in the color."
+msgstr "Quantitat de llum vermella en el color."
+
+#: gtkcolorsel.c:400
+msgid "_Green:"
+msgstr "_Verd:"
+
+#: gtkcolorsel.c:401
+msgid "Amount of green light in the color."
+msgstr "Quantitat de llum verda en el color."
+
+#: gtkcolorsel.c:402
+msgid "_Blue:"
+msgstr "_Blau:"
+
+#: gtkcolorsel.c:403
+msgid "Amount of blue light in the color."
+msgstr "Quantitat de llum blava en el color."
+
+#: gtkcolorsel.c:406
+msgid "Op_acity:"
+msgstr "Op_acitat:"
+
+#: gtkcolorsel.c:413 gtkcolorsel.c:423
+msgid "Transparency of the color."
+msgstr "Transparència del color."
+
+#: gtkcolorsel.c:430
+msgid "Color _name:"
+msgstr "_Nom del color:"
+
+#: gtkcolorsel.c:444
+msgid ""
+"You can enter an HTML-style hexadecimal color value, or simply a color name "
+"such as 'orange' in this entry."
+msgstr ""
+"Podeu introduir un valor de color hexadecimal a l'estil HTML, o simplement "
+"el nom d'un color (com ara «orange»)."
+
+#: gtkcolorsel.c:474
+msgid "_Palette:"
+msgstr "_Paleta:"
+
+#: gtkcolorsel.c:503
+msgid "Color Wheel"
+msgstr "Roda de colors"
+
+#: gtkcolorsel.c:962
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now. You can drag this color to a palette entry, or select this color as "
+"current by dragging it to the other color swatch alongside."
+msgstr ""
+"El color seleccionat prèviament, per comparar-lo amb el que esteu "
+"seleccionant. Podeu arrossegar aquest color a l'entrada de paleta, o "
+"seleccionar-lo com a actual per portar-lo a l'altra banda de la gamma de "
+"colors."
+
+#: gtkcolorsel.c:965
+msgid ""
+"The color you've chosen. You can drag this color to a palette entry to save "
+"it for use in the future."
+msgstr ""
+"El color que heu escollit. Podeu arrossegar aquest color cap a una paleta i "
+"desar-lo per utilitzar-lo més endavant."
+
+#: gtkcolorsel.c:970
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now."
+msgstr ""
+"El color seleccionat anteriorment, en comparació amb el color que esteu "
+"seleccionant."
+
+#: gtkcolorsel.c:973
+msgid "The color you've chosen."
+msgstr "El color que heu triat."
+
+#: gtkcolorsel.c:1389
+msgid "_Save color here"
+msgstr "_Desa el color aquí"
+
+#: gtkcolorsel.c:1593
+msgid ""
+"Click this palette entry to make it the current color. To change this entry, "
+"drag a color swatch here or right-click it and select \"Save color here.\""
+msgstr ""
+"Feu clic a aquesta entrada de paleta per fer que sigui el color actual. per "
+"canviar aquesta entrada, arrossegueu una gamma de colors aquí o feu-hi clic "
+"amb el botó dret i seleccioneu «Desa el color aquí»."
+
+#: gtkcolorseldialog.c:170
+msgid "Color Selection"
+msgstr "Selecció de color"
+
+#: gtkentry.c:8789 gtktextview.c:8007
+msgid "Input _Methods"
+msgstr "_Mètodes d'entrada"
+
+#: gtkentry.c:8803 gtktextview.c:8021
+msgid "_Insert Unicode Control Character"
+msgstr "_Insereix caràcters de control Unicode"
+
+#: gtkentry.c:10177
+msgid "Caps Lock is on"
+msgstr "La fixació de majúscules està activada"
+
+#: gtkfilechooserbutton.c:64
+msgid "Select a File"
+msgstr ""
+
+#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1851
+msgid "Desktop"
+msgstr "Escriptori"
+
+#: gtkfilechooserbutton.c:66
+msgid "(None)"
+msgstr "(Cap)"
+
+#: gtkfilechooserbutton.c:2175
+msgid "Other..."
+msgstr "Altre..."
+
+#: gtkfilechooserdefault.c:150
+msgid "Type name of new folder"
+msgstr "Escriviu el nom de la carpeta nova"
+
+#: gtkfilechooserdefault.c:956
+msgid "Could not retrieve information about the file"
+msgstr "No s'ha pogut obtenir informació sobre el fitxer"
+
+#: gtkfilechooserdefault.c:967
+msgid "Could not add a bookmark"
+msgstr "No s'ha pogut afegir una adreça d'interès"
+
+#: gtkfilechooserdefault.c:978
+msgid "Could not remove bookmark"
+msgstr "No s'ha pogut suprimir l'adreça d'interès"
+
+#: gtkfilechooserdefault.c:989
+msgid "The folder could not be created"
+msgstr "No s'ha pogut crear la carpeta"
+
+#: gtkfilechooserdefault.c:1002
+msgid ""
+"The folder could not be created, as a file with the same name already "
+"exists.  Try using a different name for the folder, or rename the file first."
+msgstr ""
+"No s'ha pogut crear la carpeta, perquè ja existeix un fitxer amb el mateix "
+"nom. Proveu utilitzant un nom diferent per a la carpeta, o canvieu el nom "
+"del fitxer abans."
+
+#: gtkfilechooserdefault.c:1016
+msgid "You need to choose a valid filename."
+msgstr ""
+
+#: gtkfilechooserdefault.c:1019
+#, c-format
+msgid "Cannot create a file under %s as it is not a folder"
+msgstr ""
+
+#: gtkfilechooserdefault.c:1031
+msgid ""
+"You may only select folders.  The item that you selected is not a folder; "
+"try using a different item."
+msgstr ""
+
+#: gtkfilechooserdefault.c:1041
+msgid "Invalid file name"
+msgstr "El nom del fitxer no és vàlid"
+
+#: gtkfilechooserdefault.c:1051
+msgid "The folder contents could not be displayed"
+msgstr "No s'ha pogut mostrar el contingut de la carpeta"
+
+#: gtkfilechooserdefault.c:1584
+#, c-format
+msgid "%1$s on %2$s"
+msgstr "%1$s a %2$s"
+
+#: gtkfilechooserdefault.c:1733
+msgid "Search"
+msgstr "Cerca"
+
+#: gtkfilechooserdefault.c:1757 gtkfilechooserdefault.c:4872
+msgid "Recently Used"
+msgstr "Utilitzats recentment"
+
+#: gtkfilechooserdefault.c:2387
+msgid "Select which types of files are shown"
+msgstr "Seleccioneu quins tipus de fitxers es mostren"
+
+#: gtkfilechooserdefault.c:2746
+#, c-format
+msgid "Add the folder '%s' to the bookmarks"
+msgstr "Afegeix la carpeta «%s» a les adreces d'interès"
+
+#: gtkfilechooserdefault.c:2790
+msgid "Add the current folder to the bookmarks"
+msgstr "Afegeix la carpeta actual a les adreces d'interès"
+
+#: gtkfilechooserdefault.c:2792
+msgid "Add the selected folders to the bookmarks"
+msgstr "Afegeix les carpetes seleccionades a les adreces d'interès"
+
+#: gtkfilechooserdefault.c:2837
+#, c-format
+msgid "Remove the bookmark '%s'"
+msgstr "Suprimeix l'adreça d'interès «%s»"
+
+#: gtkfilechooserdefault.c:2839
+#, c-format
+msgid "Bookmark '%s' cannot be removed"
+msgstr "No es pot suprimir l'adreça d'interès «%s»"
+
+#: gtkfilechooserdefault.c:2846 gtkfilechooserdefault.c:3740
+msgid "Remove the selected bookmark"
+msgstr "Suprimeix les adreces d'interès seleccionades"
+
+#: gtkfilechooserdefault.c:3421
+msgid "Remove"
+msgstr "Suprimeix"
+
+#: gtkfilechooserdefault.c:3430
+msgid "Rename..."
+msgstr "Canvia el nom..."
+
+#: gtkfilechooserdefault.c:3597
+msgid "Places"
+msgstr "Llocs"
+
+#: gtkfilechooserdefault.c:3654
+msgid "_Places"
+msgstr "_Llocs"
+
+#: gtkfilechooserdefault.c:3728
+msgid "Add the selected folder to the Bookmarks"
+msgstr "Afegeix la carpeta seleccionada a les adreces d'interès"
+
+#: gtkfilechooserdefault.c:3872
+msgid "Could not select file"
+msgstr "No s'ha pogut seleccionar el fitxer"
+
+#: gtkfilechooserdefault.c:4045
+msgid "_Add to Bookmarks"
+msgstr "_Afegeix a les adreces d'interès"
+
+#: gtkfilechooserdefault.c:4058
+msgid "Show _Hidden Files"
+msgstr "Mostra els fitxers _ocults"
+
+#: gtkfilechooserdefault.c:4065
+msgid "Show _Size Column"
+msgstr "Mostra la columna de la _mida"
+
+#: gtkfilechooserdefault.c:4289
+msgid "Files"
+msgstr "Fitxers"
+
+#: gtkfilechooserdefault.c:4340
+msgid "Name"
+msgstr "Nom"
+
+#: gtkfilechooserdefault.c:4363
+msgid "Size"
+msgstr "Mida"
+
+#: gtkfilechooserdefault.c:4377
+msgid "Modified"
+msgstr "Modificat"
+
+#: gtkfilechooserdefault.c:4470
+msgid "_Name:"
+msgstr "_Nom:"
+
+#: gtkfilechooserdefault.c:4710
+msgid "Type a file name"
+msgstr "Escriviu un nom de fitxer"
+
+#: gtkfilechooserdefault.c:4757 gtkfilechooserdefault.c:4768
+msgid "Please select a folder below"
+msgstr ""
+
+#: gtkfilechooserdefault.c:4763
+msgid "Please type a file name"
+msgstr ""
+
+#: gtkfilechooserdefault.c:4834
+msgid "Create Fo_lder"
+msgstr "Crea una ca_rpeta"
+
+#: gtkfilechooserdefault.c:4882
+msgid "Search:"
+msgstr "Cerca:"
+
+#: gtkfilechooserdefault.c:4933
+msgid "_Location:"
+msgstr "_Ubicació:"
+
+#: gtkfilechooserdefault.c:5383
+msgid "Save in _folder:"
+msgstr "De_sa en la carpeta:"
+
+#: gtkfilechooserdefault.c:5385
+msgid "Create in _folder:"
+msgstr "Crea en la _carpeta:"
+
+#: gtkfilechooserdefault.c:6479
+#, c-format
+msgid "Could not read the contents of %s"
+msgstr "No s'ha pogut llegir el contingut de %s"
+
+#: gtkfilechooserdefault.c:6483
+msgid "Could not read the contents of the folder"
+msgstr "No s'ha pogut llegir el contingut de la carpeta"
+
+#: gtkfilechooserdefault.c:6576 gtkfilechooserdefault.c:6644
+#: gtkfilechooserdefault.c:6829
+msgid "Unknown"
+msgstr "Desconegut"
+
+#: gtkfilechooserdefault.c:6591
+msgid "%H:%M"
+msgstr "%H:%M"
+
+#: gtkfilechooserdefault.c:6593
+msgid "Yesterday at %H:%M"
+msgstr "Ahir a les %H:%M"
+
+#: gtkfilechooserdefault.c:7301
+msgid "Cannot change to folder because it is not local"
+msgstr "No es pot canviar a la carpeta perquè no és local"
+
+#: gtkfilechooserdefault.c:7898 gtkfilechooserdefault.c:7919
+#, c-format
+msgid "Shortcut %s already exists"
+msgstr "La drecera %s ja existeix"
+
+#: gtkfilechooserdefault.c:8009
+#, c-format
+msgid "Shortcut %s does not exist"
+msgstr "La drecera %s no existeix"
+
+#: gtkfilechooserdefault.c:8250
+#, c-format
+msgid "A file named \"%s\" already exists.  Do you want to replace it?"
+msgstr "Ja existeix un fitxer amb el nom «%s». Voleu reemplaçar-ho?"
+
+#: gtkfilechooserdefault.c:8253
+#, c-format
+msgid ""
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
+msgstr ""
+"El fitxer ja existeix a «%s». Si ho reemplaceu sobreescriureu el seu "
+"contingut."
+
+#: gtkfilechooserdefault.c:8258
+msgid "_Replace"
+msgstr "_Reemplaça"
+
+#: gtkfilechooserdefault.c:9066
+msgid "Could not start the search process"
+msgstr "No s'ha pogut iniciar el procés de cerca"
+
+#: gtkfilechooserdefault.c:9067
+msgid ""
+"The program was not able to create a connection to the indexer daemon.  "
+"Please make sure it is running."
+msgstr ""
+"El programa no ha pogut crear cap connexió al dimoni d'indexació. Assegureu-"
+"vos que s'està executant."
+
+#: gtkfilechooserdefault.c:9081
+msgid "Could not send the search request"
+msgstr "No s'ha pogut enviar la sol·licitud de cerca"
+
+#: gtkfilechooserdefault.c:9682
+#, c-format
+msgid "Could not mount %s"
+msgstr "No s'ha pogut muntar %s"
+
+#: gtkfilechoosersettings.c:515
+#, c-format
+msgid "Error creating folder '%s': %s"
+msgstr "S'ha produït un error en crear la carpeta «%s»: %s"
+
+#: gtkfilesystem.c:52
+msgid "File System"
+msgstr "Sistema de fitxers"
+
+#: gtkfontbutton.c:144 gtkfontbutton.c:266
+msgid "Pick a Font"
+msgstr "Trieu un tipus de lletra"
+
+#: gtkfontbutton.c:260
+msgid "Sans 12"
+msgstr "Sans 12"
+
+#: gtkfontbutton.c:785
+msgid "Font"
+msgstr "Tipus de lletra"
+
+#: gtkfontsel.c:75
+msgid "abcdefghijk ABCDEFGHIJK"
+msgstr "abcçdefghijk ABCÇDEFGHIJK"
+
+#: gtkfontsel.c:343
+msgid "_Family:"
+msgstr "_Família:"
+
+#: gtkfontsel.c:349
+msgid "_Style:"
+msgstr "E_stil:"
+
+#: gtkfontsel.c:355
+msgid "Si_ze:"
+msgstr "_Mida:"
+
+#: gtkfontsel.c:532
+msgid "_Preview:"
+msgstr "_Previsualització:"
+
+#: gtkfontsel.c:1649
+msgid "Font Selection"
+msgstr "Selecció del tipus de lletra"
+
+#: gtkiconfactory.c:1354
+#, c-format
+msgid "Error loading icon: %s"
+msgstr "S'ha produït un error en carregar la icona: %s"
+
+#: gtkicontheme.c:1374
+#, c-format
+msgid ""
+"Could not find the icon '%s'. The '%s' theme\n"
+"was not found either, perhaps you need to install it.\n"
+"You can get a copy from:\n"
+"\t%s"
+msgstr ""
+"No s'ha pogut trobar la icona «%s». El tema «%s» tampoc s'ha trobat,\n"
+"és possible que necessiteu instal·lar-lo.\n"
+"Podeu obtenir-ne una còpia de:\n"
+"\t%s"
+
+#: gtkicontheme.c:1555
+#, c-format
+msgid "Icon '%s' not present in theme"
+msgstr "La icona «%s» no es troba al tema"
+
+#: gtkicontheme.c:3101
+msgid "Failed to load icon"
+msgstr "No s'ha pogut carregar la icona"
+
+#: gtkimmodule.c:527
+msgid "Simple"
+msgstr "Simple"
+
+#: gtklabel.c:5696
+msgid "_Open Link"
+msgstr "Obre l'_enllaç"
+
+#: gtklabel.c:5708
+msgid "Copy _Link Address"
+msgstr "Copia l'adreça de l'en_llaç"
+
+#: gtklinkbutton.c:428
+msgid "Copy URL"
+msgstr "Copia l'URL"
+
+#: gtklinkbutton.c:586
+msgid "Invalid URI"
+msgstr "URI no vàlid"
+
+#: gtkmain.c:454
+msgid "Load additional GTK+ modules"
+msgstr "Carrega mòduls del GTK+ addicionals"
+
+#: gtkmain.c:455
+msgid "MODULES"
+msgstr "MÒDULS"
+
+#: gtkmain.c:457
+msgid "Make all warnings fatal"
+msgstr "Considera tots els avisos com a greus"
+
+#: gtkmain.c:460
+msgid "GTK+ debugging flags to set"
+msgstr "Senyaladors de depuració de GTK+ a habilitar"
+
+#: gtkmain.c:461 gtkmain.c:464
+msgid "FLAGS"
+msgstr "SENYALADORS"
+
+#: gtkmain.c:463
+msgid "GTK+ debugging flags to unset"
+msgstr "Senyaladors de depuració de GTK+ a inhabilitar"
+
+# Premi a qui va ficar "Per defecte:LTR. M'ha costat
+# trobar en quin mòdul estava l'error. jm
+#: gtkmain.c:755
+msgid "default:LTR"
+msgstr "default:LTR"
+
+#: gtkmain.c:820
+#, c-format
+msgid "Cannot open display: %s"
+msgstr "No es pot obrir la pantalla: %s"
+
+#: gtkmain.c:857
+msgid "GTK+ Options"
+msgstr "Opcions del GTK+"
+
+#: gtkmain.c:857
+msgid "Show GTK+ Options"
+msgstr "Mostra les opcions del GTK+"
+
+#: gtkmountoperation.c:494
+msgid "Co_nnect"
+msgstr "C_onnecta"
+
+#: gtkmountoperation.c:561
+msgid "Connect _anonymously"
+msgstr "Connecta't _anònimament"
+
+#: gtkmountoperation.c:570
+msgid "Connect as u_ser:"
+msgstr "Connecta't com a u_suari:"
+
+#: gtkmountoperation.c:608
+msgid "_Username:"
+msgstr "_Nom d'usuari:"
+
+#: gtkmountoperation.c:613
+msgid "_Domain:"
+msgstr "_Domini:"
+
+#: gtkmountoperation.c:619
+msgid "_Password:"
+msgstr "Contrasen_ya:"
+
+#: gtkmountoperation.c:637
+msgid "Forget password _immediately"
+msgstr "Oblida la _contrasenya immediatament"
+
+#: gtkmountoperation.c:647
+msgid "Remember password until you _logout"
+msgstr "Recorda la contrasenya _fins que surti"
+
+#: gtkmountoperation.c:657
+msgid "Remember _forever"
+msgstr "Recorda-la per se_mpre"
+
+#: gtkmountoperation.c:886
+#, c-format
+msgid "Unknown Application (PID %d)"
+msgstr ""
+
+#: gtkmountoperation.c:1069
+msgid "Unable to end process"
+msgstr "No es pot finalitzar el procés"
+
+#: gtkmountoperation.c:1106
+msgid "_End Process"
+msgstr "_Finalitza el procés"
+
+#: gtknotebook.c:4745 gtknotebook.c:7351
+#, c-format
+msgid "Page %u"
+msgstr "Pàgina %u"
+
+# FIXME
+#: gtkpathbar.c:151
+msgid "Up Path"
+msgstr "Amunt"
+
+# FIXME
+#: gtkpathbar.c:153
+msgid "Down Path"
+msgstr "Avall"
+
+#: gtkpathbar.c:1467
+msgid "File System Root"
+msgstr "Arrel del sistema de fitxers"
+
+#: gtkrc.c:2906
+#, c-format
+msgid "Unable to find include file: \"%s\""
+msgstr "No s'ha pogut trobar el fitxer per a incloure: «%s»"
+
+#: gtkrc.c:3536 gtkrc.c:3539
+#, c-format
+msgid "Unable to locate image file in pixmap_path: \"%s\""
+msgstr "No s'ha trobat un fitxer d'imatge al pixmap_path: «%s»"
+
+#: gtkrecentaction.c:154 gtkrecentaction.c:162 gtkrecentchoosermenu.c:588
+#: gtkrecentchoosermenu.c:596
+#, c-format
+msgid "This function is not implemented for widgets of class '%s'"
+msgstr "Aquesta funció no està implementada per a ginys de la classe «%s»"
+
+#: gtkrecentchooserdefault.c:481
+msgid "Select which type of documents are shown"
+msgstr "Seleccioneu quins tipus de documents s'han de mostrar"
+
+#: gtkrecentchooserdefault.c:1135 gtkrecentchooserdefault.c:1172
+#, c-format
+msgid "No item for URI '%s' found"
+msgstr "No s'ha trobat cap element per a l'URI «%s»"
+
+#: gtkrecentchooserdefault.c:1299
+msgid "Untitled filter"
+msgstr "Filtre sense títol"
+
+#: gtkrecentchooserdefault.c:1652
+msgid "Could not remove item"
+msgstr "No s'ha pogut suprimir l'element"
+
+#: gtkrecentchooserdefault.c:1696
+msgid "Could not clear list"
+msgstr "No s'ha pogut netejar la llista"
+
+#: gtkrecentchooserdefault.c:1780
+msgid "Copy _Location"
+msgstr "Copia la _ubicació"
+
+#: gtkrecentchooserdefault.c:1793
+msgid "_Remove From List"
+msgstr "Sup_rimeix de la llista"
+
+#: gtkrecentchooserdefault.c:1802
+msgid "_Clear List"
+msgstr "_Neteja la llista"
+
+#: gtkrecentchooserdefault.c:1816
+msgid "Show _Private Resources"
+msgstr "Mostra els recursos _privats"
+
+#: gtkrecentchoosermenu.c:342
+msgid "No items found"
+msgstr "No s'ha trobat cap element"
+
+#: gtkrecentchoosermenu.c:508 gtkrecentchoosermenu.c:564
+#, c-format
+msgid "No recently used resource found with URI `%s'"
+msgstr "No hi ha cap recurs emprat recentment amb l'URI «%s»"
+
+#: gtkrecentchoosermenu.c:774
+#, c-format
+msgid "Open '%s'"
+msgstr "Obre «%s»"
+
+#: gtkrecentchoosermenu.c:804
+msgid "Unknown item"
+msgstr "Element desconegut"
+
+#: gtkrecentmanager.c:1182 gtkrecentmanager.c:1195 gtkrecentmanager.c:1332
+#: gtkrecentmanager.c:1342 gtkrecentmanager.c:1395 gtkrecentmanager.c:1404
+#: gtkrecentmanager.c:1419
+#, c-format
+msgid "Unable to find an item with URI '%s'"
+msgstr "No s'ha pogut trobar cap element amb l'URI «%s»"
+
+#: gtkspinner.c:459
+msgid "Provides visual indication of progress"
+msgstr "Proporciona una indicació visual del progrés"
+
+# FIXME
+#: gtktextbufferrichtext.c:652
+#, c-format
+msgid "Unknown error when trying to deserialize %s"
+msgstr "S'ha produït un error en intentar deserialitzar %s"
+
+# FIXME
+#: gtktextbufferrichtext.c:711
+#, c-format
+msgid "No deserialize function found for format %s"
+msgstr "No s'ha trobat cap funció per deserialitzar el format %s"
+
+#: gtktextbufferserialize.c:797 gtktextbufferserialize.c:823
+#, c-format
+msgid "Both \"id\" and \"name\" were found on the <%s> element"
+msgstr "S'ha trobat «id» i «name» a l'element <%s>"
+
+#: gtktextbufferserialize.c:807 gtktextbufferserialize.c:833
+#, c-format
+msgid "The attribute \"%s\" was found twice on the <%s> element"
+msgstr "S'ha trobat dues vegades l'atribut «%s» a l'element <%s>"
+
+#: gtktextbufferserialize.c:847
+#, c-format
+msgid "<%s> element has invalid ID \"%s\""
+msgstr ""
+
+#: gtktextbufferserialize.c:857
+#, c-format
+msgid "<%s> element has neither a \"name\" nor an \"id\" attribute"
+msgstr "L'element <%s> no té ni l'atribut «name» ni el «id»"
+
+#: gtktextbufferserialize.c:944
+#, c-format
+msgid "Attribute \"%s\" repeated twice on the same <%s> element"
+msgstr "L'atribut «%s» està repetit dues vegades en el mateix element <%s>"
+
+#: gtktextbufferserialize.c:962 gtktextbufferserialize.c:987
+#, c-format
+msgid "Attribute \"%s\" is invalid on <%s> element in this context"
+msgstr "L'atribut «%s» no és vàlid per a l'element <%s> en aquest context"
+
+#: gtktextbufferserialize.c:1023
+#, c-format
+msgid "Tag \"%s\" has not been defined."
+msgstr "L'etiqueta «%s» no ha estat definida."
+
+#: gtktextbufferserialize.c:1035
+msgid "Anonymous tag found and tags can not be created."
+msgstr "S'han trobat etiquetes anònimes, i no se n'han pogut crear."
+
+#: gtktextbufferserialize.c:1046
+#, c-format
+msgid "Tag \"%s\" does not exist in buffer and tags can not be created."
+msgstr ""
+"L'etiqueta «%s» no existeix a la memòria intermèdia, i no se'n poden crear."
+
+#: gtktextbufferserialize.c:1145 gtktextbufferserialize.c:1220
+#: gtktextbufferserialize.c:1321 gtktextbufferserialize.c:1395
+#, c-format
+msgid "Element <%s> is not allowed below <%s>"
+msgstr "No es permet l'element <%s> per sota de <%s>"
+
+#: gtktextbufferserialize.c:1176
+#, c-format
+msgid "\"%s\" is not a valid attribute type"
+msgstr "«%s» no és un tipus d'atribut vàlid"
+
+#: gtktextbufferserialize.c:1184
+#, c-format
+msgid "\"%s\" is not a valid attribute name"
+msgstr "«%s» no és un nom d'atribut vàlid"
+
+#: gtktextbufferserialize.c:1194
+#, c-format
+msgid ""
+"\"%s\" could not be converted to a value of type \"%s\" for attribute \"%s\""
+msgstr ""
+"No s'ha pogut convertir «%s» a un valor de tipus «%s» per a l'atribut «%s»"
+
+#: gtktextbufferserialize.c:1203
+#, c-format
+msgid "\"%s\" is not a valid value for attribute \"%s\""
+msgstr "«%s» no és un valor vàlid per a l'atribut «%s»"
+
+#: gtktextbufferserialize.c:1286
+#, c-format
+msgid "Tag \"%s\" already defined"
+msgstr "L'etiqueta «%s» ja està definida"
+
+#: gtktextbufferserialize.c:1297
+#, c-format
+msgid "Tag \"%s\" has invalid priority \"%s\""
+msgstr "L'etiqueta «%s» té una prioritat («%s») no vàlida"
+
+#: gtktextbufferserialize.c:1350
+#, c-format
+msgid "Outermost element in text must be <text_view_markup> not <%s>"
+msgstr ""
+"L'element de més enfora del text ha de ser <text_view_markup> i no pas <%s>"
+
+#: gtktextbufferserialize.c:1359 gtktextbufferserialize.c:1375
+#, c-format
+msgid "A <%s> element has already been specified"
+msgstr "Ja s'ha especificat un element <%s>"
+
+#: gtktextbufferserialize.c:1381
+msgid "A <text> element can't occur before a <tags> element"
+msgstr "No pot haver-hi un element <text> abans d'un de <tags>"
+
+#: gtktextbufferserialize.c:1780
+msgid "Serialized data is malformed"
+msgstr "Les dades en sèrie estan mal formades"
+
+#: gtktextbufferserialize.c:1858
+msgid ""
+"Serialized data is malformed. First section isn't GTKTEXTBUFFERCONTENTS-0001"
+msgstr ""
+"Les dades en sèrie estan mal formades. La primera secció no és "
+"GTKTEXTBUFFERCONTENTS-0001"
+
+#: gtktextutil.c:61
+msgid "LRM _Left-to-right mark"
+msgstr "Marca _esquerra-a-dreta LRM"
+
+#: gtktextutil.c:62
+msgid "RLM _Right-to-left mark"
+msgstr "Marca _dreta-a-esquerra RLM"
+
+#: gtktextutil.c:63
+msgid "LRE Left-to-right _embedding"
+msgstr "_Incrustació esquerra-a-dreta LRE"
+
+#: gtktextutil.c:64
+msgid "RLE Right-to-left e_mbedding"
+msgstr "I_ncrustació dreta-a-esquerra RLE"
+
+#: gtktextutil.c:65
+msgid "LRO Left-to-right _override"
+msgstr "_Substitució esquerra-a-dreta LRO"
+
+#: gtktextutil.c:66
+msgid "RLO Right-to-left o_verride"
+msgstr "S_ubstitució dreta-a-esquerra RLO"
+
+#: gtktextutil.c:67
+msgid "PDF _Pop directional formatting"
+msgstr "_Format direccional pop PDF"
+
+#: gtktextutil.c:68
+msgid "ZWS _Zero width space"
+msgstr "Espai d'amplada _zero ZWS"
+
+#: gtktextutil.c:69
+msgid "ZWJ Zero width _joiner"
+msgstr "En_samblador d'amplada zero ZWJ"
+
+#: gtktextutil.c:70
+msgid "ZWNJ Zero width _non-joiner"
+msgstr "_No-ensamblador d'amplada zero ZWNJ"
+
+#: gtkthemes.c:71
+#, c-format
+msgid "Unable to locate theme engine in module_path: \"%s\","
+msgstr "No s'ha trobat el motor de tema al module_path: «%s»,"
+
+#: gtkuimanager.c:1505
+#, c-format
+msgid "Unexpected start tag '%s' on line %d char %d"
+msgstr ""
+"S'ha trobat una etiqueta d'inici «%s» inesperada a la línia %d, caràcter %d"
+
+#: gtkuimanager.c:1595
+#, c-format
+msgid "Unexpected character data on line %d char %d"
+msgstr "S'han trobat dades de caràcter inesperades a la línia %d, caràcter %d"
+
+#: gtkuimanager.c:2427
+msgid "Empty"
+msgstr "Buit"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-debug"
+#~ msgstr "S'ha produït un error en analitzar l'opció --gdk-debug"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-no-debug"
+#~ msgstr "S'ha produït un error en analitzar l'opció --gdk-no-debug"
+
+#~ msgid "Program class as used by the window manager"
+#~ msgstr "Classe del programa tal com l'utilitza el gestor de finestres"
+
+#~ msgid "CLASS"
+#~ msgstr "CLASSE"
+
+#~ msgid "Program name as used by the window manager"
+#~ msgstr "El nom del programa tal com l'utilitza el gestor de finestres"
+
+#~ msgid "NAME"
+#~ msgstr "NOM"
+
+#~ msgid "X display to use"
+#~ msgstr "Visualització X a utilitzar"
+
+#~ msgid "DISPLAY"
+#~ msgstr "VISUALITZACIÓ"
+
+#~ msgid "X screen to use"
+#~ msgstr "Pantalla X a utilitzar"
+
+#~ msgid "SCREEN"
+#~ msgstr "PANTALLA"
+
+#~ msgid "Gdk debugging flags to set"
+#~ msgstr "Senyaladors de depuració del Gdk a habilitar"
+
+#~ msgid "Gdk debugging flags to unset"
+#~ msgstr "Senyaladors de depuració del Gdk a inhabilitar"
+
+#~ msgctxt "keyboard label"
+#~ msgid "BackSpace"
+#~ msgstr "Retrocés"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Tab"
+#~ msgstr "Tabulador"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Return"
+#~ msgstr "Retorn"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Pause"
+#~ msgstr "Pausa"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Scroll_Lock"
+#~ msgstr "Bloc_Despl"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Sys_Req"
+#~ msgstr "Pet_Sis"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Escape"
+#~ msgstr "Esc"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Multi_key"
+#~ msgstr "Tecla_multi"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Home"
+#~ msgstr "Inici"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Left"
+#~ msgstr "Esquerra"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Up"
+#~ msgstr "Amunt"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Right"
+#~ msgstr "Dreta"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Down"
+#~ msgstr "Avall"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Up"
+#~ msgstr "Re_Pàg"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Down"
+#~ msgstr "Av_Pàg"
+
+#~ msgctxt "keyboard label"
+#~ msgid "End"
+#~ msgstr "Fi"
+
+# FIXME És la mateixa traducció que «Home», però no tinc cap teclat
+# amb aquesta tecla per a comprovar-ho (dpm)
+#~ msgctxt "keyboard label"
+#~ msgid "Begin"
+#~ msgstr "Inici"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Print"
+#~ msgstr "Impr_Pant"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Insert"
+#~ msgstr "Insert"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Num_Lock"
+#~ msgstr "Bloc_Núm"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Space"
+#~ msgstr "TN_Espai"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Tab"
+#~ msgstr "TN_Tabulador"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Enter"
+#~ msgstr "TN_Retorn"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Home"
+#~ msgstr "TN_Inici"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Left"
+#~ msgstr "TN_Esquerra"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Up"
+#~ msgstr "TN_Amunt"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Right"
+#~ msgstr "TN_Dreta"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Down"
+#~ msgstr "TN_Avall"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Up"
+#~ msgstr "TN_Re_Pàg"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Prior"
+#~ msgstr "TN_Anterior"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Down"
+#~ msgstr "TN_Av_Pàg"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Next"
+#~ msgstr "TN_Següent"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_End"
+#~ msgstr "TN_Fi"
+
+# FIXME És la mateixa traducció que «Home», però no tinc cap teclat
+# amb aquesta tecla per a comprovar-ho (dpm)
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Begin"
+#~ msgstr "TN_Inici"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Insert"
+#~ msgstr "TN_Ins"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Delete"
+#~ msgstr "TN_Supr"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Delete"
+#~ msgstr "Supr"
+
+#, c-format
+#~ msgid "Failed to open file '%s': %s"
+#~ msgstr "No s'ha pogut obrir el fitxer «%s»: %s"
+
+#, c-format
+#~ msgid "Image file '%s' contains no data"
+#~ msgstr "El fitxer gràfic «%s» no conté dades"
+
+#, c-format
+#~ msgid ""
+#~ "Failed to load image '%s': reason not known, probably a corrupt image file"
+#~ msgstr ""
+#~ "No es pot carregar la imatge «%s»: se'n desconeix el motiu; probablement "
+#~ "es tracta d'un fitxer d'imatge malmès"
+
+#, c-format
+#~ msgid ""
+#~ "Failed to load animation '%s': reason not known, probably a corrupt "
+#~ "animation file"
+#~ msgstr ""
+#~ "No es pot carregar l'animació «%s»: se'n desconeix el motiu; probablement "
+#~ "es tracta d'un fitxer d'animació malmès"
+
+#, c-format
+#~ msgid "Unable to load image-loading module: %s: %s"
+#~ msgstr "No és possible carregar el mòdul per a la càrrega d'imatges: %s: %s"
+
+#, c-format
+#~ msgid ""
+#~ "Image-loading module %s does not export the proper interface; perhaps "
+#~ "it's from a different GTK version?"
+#~ msgstr ""
+#~ "El mòdul %s per carregar imatges no exporta la interfície adequada; "
+#~ "potser és d'una versió GTK diferent"
+
+#, c-format
+#~ msgid "Image type '%s' is not supported"
+#~ msgstr "El tipus d'imatge «%s» no està implementat"
+
+#, c-format
+#~ msgid "Couldn't recognize the image file format for file '%s'"
+#~ msgstr "No s'ha pogut reconèixer el format gràfic del fitxer «%s»"
+
+#~ msgid "Unrecognized image file format"
+#~ msgstr "No es coneix el format del fitxer gràfic"
+
+#, c-format
+#~ msgid "Failed to load image '%s': %s"
+#~ msgstr "No s'ha pogut carregar la imatge «%s»: %s"
+
+#, c-format
+#~ msgid "Error writing to image file: %s"
+#~ msgstr "S'ha produït un error en escriure al fitxer d'imatge: %s"
+
+#, c-format
+#~ msgid ""
+#~ "This build of gdk-pixbuf does not support saving the image format: %s"
+#~ msgstr ""
+#~ "Aquest muntatge de gdk-pixbuf no permet desar el format d'imatge: %s"
+
+#~ msgid "Insufficient memory to save image to callback"
+#~ msgstr "No hi ha memòria suficient per desar la imatge a la crida de retorn"
+
+#~ msgid "Failed to open temporary file"
+#~ msgstr "No s'ha pogut obrir el fitxer temporal"
+
+#~ msgid "Failed to read from temporary file"
+#~ msgstr "No s'ha pogut llegir el fitxer temporal"
+
+#, c-format
+#~ msgid "Failed to open '%s' for writing: %s"
+#~ msgstr "No s'ha pogut obrir «%s» per a l'escriptura: %s"
+
+#, c-format
+#~ msgid ""
+#~ "Failed to close '%s' while writing image, all data may not have been "
+#~ "saved: %s"
+#~ msgstr ""
+#~ "No s'ha pogut desar «%s» en escriure la imatge, és probable que no "
+#~ "s'hagin desat totes les dades: %s"
+
+#~ msgid "Insufficient memory to save image into a buffer"
+#~ msgstr ""
+#~ "No hi ha memòria suficient per desar la imatge en una memòria intermèdia"
+
+#~ msgid "Error writing to image stream"
+#~ msgstr "S'ha produït un error en escriure al flux d'imatge"
+
+#, c-format
+#~ msgid ""
+#~ "Internal error: Image loader module '%s' failed to complete an operation, "
+#~ "but didn't give a reason for the failure"
+#~ msgstr ""
+#~ "Error intern: El carregador d'imatge «%s» no ha pogut acabar una "
+#~ "operació, però no ha donat cap raó per a la fallada"
+
+#, c-format
+#~ msgid "Incremental loading of image type '%s' is not supported"
+#~ msgstr "No està implementada la càrrega incremental del tipus d'imatge «%s»"
+
+#~ msgid "Image header corrupt"
+#~ msgstr "La capçalera de la imatge està malmesa"
+
+#~ msgid "Image format unknown"
+#~ msgstr "El format de la imatge és desconegut"
+
+#~ msgid "Image pixel data corrupt"
+#~ msgstr "Les dades de píxels de la imatge estan malmeses"
+
+#, c-format
+#~ msgid "failed to allocate image buffer of %u byte"
+#~ msgid_plural "failed to allocate image buffer of %u bytes"
+#~ msgstr[0] ""
+#~ "no s'ha pogut assignar una memòria intermèdia d'imatge de %u byte"
+#~ msgstr[1] ""
+#~ "no s'ha pogut assignar una memòria intermèdia d'imatge de %u bytes"
+
+#~ msgid "Unexpected icon chunk in animation"
+#~ msgstr "Bloc d'icona inesperat en l'animació"
+
+#~ msgid "Unsupported animation type"
+#~ msgstr "Tipus d'animació no implementada"
+
+#~ msgid "Invalid header in animation"
+#~ msgstr "La capçalera de l'animació no és vàlida"
+
+#~ msgid "Not enough memory to load animation"
+#~ msgstr "No hi ha memòria suficient per carregar l'animació"
+
+#~ msgid "Malformed chunk in animation"
+#~ msgstr "Bloc erroni en l'animació"
+
+#~ msgid "The ANI image format"
+#~ msgstr "El format d'imatge ANI"
+
+#~ msgid "BMP image has bogus header data"
+#~ msgstr "La imatge BMP conté dades de capçalera errònies"
+
+#~ msgid "Not enough memory to load bitmap image"
+#~ msgstr "No hi ha memòria suficient per carregar la imatge de mapa de bits"
+
+#~ msgid "BMP image has unsupported header size"
+#~ msgstr "La imatge BMP té una mida de capçalera no suportada"
+
+# Topdown és un BMP amb la primera "scanline" al principi del fitxer. jm
+#~ msgid "Topdown BMP images cannot be compressed"
+#~ msgstr "No es poden comprimir les imatges BMP «topdown»"
+
+#~ msgid "Premature end-of-file encountered"
+#~ msgstr "S'ha trobat un final de fitxer abans d'hora"
+
+#~ msgid "Couldn't allocate memory for saving BMP file"
+#~ msgstr "No s'ha pogut obtenir memòria per desar el fitxer BMP"
+
+#~ msgid "Couldn't write to BMP file"
+#~ msgstr "No s'ha pogut escriure al fitxer BMP"
+
+#~ msgid "The BMP image format"
+#~ msgstr "El format d'imatge BMP"
+
+#, c-format
+#~ msgid "Failure reading GIF: %s"
+#~ msgstr "No s'ha pogut llegir el GIF: %s"
+
+#~ msgid "GIF file was missing some data (perhaps it was truncated somehow?)"
+#~ msgstr ""
+#~ "Al fitxer GIF li falten algunes dades (potser s'han truncat d'alguna "
+#~ "manera)"
+
+#, c-format
+#~ msgid "Internal error in the GIF loader (%s)"
+#~ msgstr "Error intern en el carregador de GIF (%s)"
+
+#~ msgid "Stack overflow"
+#~ msgstr "Sobreeiximent de la pila"
+
+#~ msgid "GIF image loader cannot understand this image."
+#~ msgstr "El carregador d'imatges GIF no entén aquesta imatge."
+
+#~ msgid "Bad code encountered"
+#~ msgstr "S'ha trobat un codi incorrecte"
+
+#~ msgid "Circular table entry in GIF file"
+#~ msgstr "Entrada de taula circular al fitxer GIF"
+
+#~ msgid "Not enough memory to load GIF file"
+#~ msgstr "No hi ha memòria suficient per carregar el fitxer GIF"
+
+#~ msgid "Not enough memory to composite a frame in GIF file"
+#~ msgstr "No hi ha memòria suficient per compondre un marc al fitxer GIF"
+
+#~ msgid "GIF image is corrupt (incorrect LZW compression)"
+#~ msgstr "La imatge GIF és corrupta (la compressió LZW és incorrecte)"
+
+#~ msgid "File does not appear to be a GIF file"
+#~ msgstr "El fitxer no sembla ser un fitxer GIF"
+
+#, c-format
+#~ msgid "Version %s of the GIF file format is not supported"
+#~ msgstr "No s'ha implementat la versió %s del format del fitxer GIF"
+
+#~ msgid ""
+#~ "GIF image has no global colormap, and a frame inside it has no local "
+#~ "colormap."
+#~ msgstr ""
+#~ "La imatge GIF no té mapa de color global, i un marc de dins no té mapa de "
+#~ "color local."
+
+#~ msgid "GIF image was truncated or incomplete."
+#~ msgstr "Imatge GIF truncada o incompleta."
+
+#~ msgid "The GIF image format"
+#~ msgstr "El format d'imatge GIF"
+
+#~ msgid "Invalid header in icon"
+#~ msgstr "La capçalera de la icona no és vàlida"
+
+#~ msgid "Not enough memory to load icon"
+#~ msgstr "No hi ha memòria suficient per carregar la icona"
+
+#~ msgid "Icon has zero width"
+#~ msgstr "L'amplada de la icona és zero"
+
+#~ msgid "Icon has zero height"
+#~ msgstr "L'alçada de la icona és zero"
+
+#~ msgid "Compressed icons are not supported"
+#~ msgstr "Les icones comprimides no estan implementades"
+
+#~ msgid "Unsupported icon type"
+#~ msgstr "Tipus d'icona no implementada"
+
+#~ msgid "Not enough memory to load ICO file"
+#~ msgstr "No hi ha memòria suficient per carregar el fitxer ICO"
+
+#~ msgid "Image too large to be saved as ICO"
+#~ msgstr "La imatge és massa gran per desar-la com a ICO"
+
+#~ msgid "Cursor hotspot outside image"
+#~ msgstr "Lloc calent del cursor fora de la imatge"
+
+#, c-format
+#~ msgid "Unsupported depth for ICO file: %d"
+#~ msgstr "No se suporta la profunditat per al fitxer ICO: %d"
+
+#~ msgid "The ICO image format"
+#~ msgstr "El format d'imatge ICO"
+
+#, c-format
+#~ msgid "Error reading ICNS image: %s"
+#~ msgstr "S'ha produït un error en llegir la imatge ICNS: %s"
+
+#~ msgid "Could not decode ICNS file"
+#~ msgstr "No s'ha pogut descodificar el fitxer ICNS"
+
+#~ msgid "The ICNS image format"
+#~ msgstr "El format d'imatge ICNS"
+
+#~ msgid "Couldn't allocate memory for stream"
+#~ msgstr "No s'ha pogut assignar memòria per al flux"
+
+#~ msgid "Couldn't decode image"
+#~ msgstr "No s'ha pogut descodificar la imatge"
+
+#~ msgid "Transformed JPEG2000 has zero width or height"
+#~ msgstr "El JPEG 2000 transformat té amplada o alçada zero"
+
+#~ msgid "Image type currently not supported"
+#~ msgstr "El tipus d'imatge no està implementat actualment"
+
+#~ msgid "Couldn't allocate memory for color profile"
+#~ msgstr "No s'ha pogut assignar memòria per al perfil de color"
+
+#~ msgid "Insufficient memory to open JPEG 2000 file"
+#~ msgstr "No hi ha memòria suficient per obrir el fitxer JPEG 2000"
+
+#~ msgid "Couldn't allocate memory to buffer image data"
+#~ msgstr ""
+#~ "No s'ha pogut assignar memòria per ubicar les dades d'imatge a la memòria "
+#~ "intermèdia"
+
+#~ msgid "The JPEG 2000 image format"
+#~ msgstr "El format d'imatge JPEG 2000"
+
+#, c-format
+#~ msgid "Error interpreting JPEG image file (%s)"
+#~ msgstr "S'ha produït un error en interpretar el fitxer gràfic JPEG (%s)"
+
+#~ msgid ""
+#~ "Insufficient memory to load image, try exiting some applications to free "
+#~ "memory"
+#~ msgstr ""
+#~ "La memòria per carregar la imatge és insuficient, proveu de sortir "
+#~ "d'algunes aplicacions per alliberar memòria"
+
+#, c-format
+#~ msgid "Unsupported JPEG color space (%s)"
+#~ msgstr "Espai de color JPEG no implementat (%s)"
+
+#~ msgid "Couldn't allocate memory for loading JPEG file"
+#~ msgstr "No es pot obtenir memòria per carregar el fitxer JPEG"
+
+#~ msgid "Transformed JPEG has zero width or height."
+#~ msgstr "El JPEG transformat té amplada o alçada zero."
+
+#, c-format
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%s' could not be "
+#~ "parsed."
+#~ msgstr ""
+#~ "La qualitat de JPEG ha de ser un valor entre 0 i 100; el valor «%s» no es "
+#~ "pot analitzar."
+
+#, c-format
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%d' is not allowed."
+#~ msgstr ""
+#~ "La qualitat JPEG ha de ser un valor entre 0 i 100; el valor «%d» no és "
+#~ "permès."
+
+#~ msgid "The JPEG image format"
+#~ msgstr "El format d'imatge JPEG"
+
+#~ msgid "Couldn't allocate memory for header"
+#~ msgstr "No es pot obtenir memòria per a la capçalera"
+
+#~ msgid "Couldn't allocate memory for context buffer"
+#~ msgstr ""
+#~ "No s'ha pogut assignar memòria per al context de la memòria intermèdia"
+
+#~ msgid "Image has invalid width and/or height"
+#~ msgstr "La imatge té una amplada i/o alçada no vàlida"
+
+#~ msgid "Image has unsupported bpp"
+#~ msgstr "La imatge té uns bpp no suportats"
+
+#, c-format
+#~ msgid "Image has unsupported number of %d-bit planes"
+#~ msgstr "La imatge té un nombre de plànols de %d bits no compatible"
+
+#~ msgid "Couldn't create new pixbuf"
+#~ msgstr "No s'ha pogut crear una memòria intermèdia de píxels nova"
+
+#~ msgid "Couldn't allocate memory for line data"
+#~ msgstr "No s'ha pogut assignar memòria per a les dades de la línia"
+
+#~ msgid "Couldn't allocate memory for paletted data"
+#~ msgstr "No s'ha pogut assignar memòria per a les dades de la paleta"
+
+#~ msgid "Didn't get all lines of PCX image"
+#~ msgstr "No s'han obtingut totes les línies de la imatge PCX"
+
+#~ msgid "No palette found at end of PCX data"
+#~ msgstr "No s'ha trobat cap paleta al final de les dades PCX"
+
+#~ msgid "The PCX image format"
+#~ msgstr "El format d'imatge PCX"
+
+#~ msgid "Bits per channel of PNG image is invalid."
+#~ msgstr "Els bits per canal de la imatge PNG no són vàlids."
+
+#~ msgid "Transformed PNG has zero width or height."
+#~ msgstr "El PNG transformat té amplada o alçada zero."
+
+#~ msgid "Bits per channel of transformed PNG is not 8."
+#~ msgstr "Els bits per canal del PNG transformat no són 8."
+
+#~ msgid "Transformed PNG not RGB or RGBA."
+#~ msgstr "El PNG transformat no és RGB o RGBA."
+
+#~ msgid "Transformed PNG has unsupported number of channels, must be 3 or 4."
+#~ msgstr ""
+#~ "El PNG transformat té un nombre no implementat de canals, ha de ser 3 o 4."
+
+#, c-format
+#~ msgid "Fatal error in PNG image file: %s"
+#~ msgstr "Error fatal al fitxer d'imatge PNG: %s"
+
+#~ msgid "Insufficient memory to load PNG file"
+#~ msgstr "No hi ha memòria suficient per carregar el fitxer PNG"
+
+#, c-format
+#~ msgid ""
+#~ "Insufficient memory to store a %ld by %ld image; try exiting some "
+#~ "applications to reduce memory usage"
+#~ msgstr ""
+#~ "Memòria insuficient per emmagatzemar una imatge de %ld per %ld; proveu de "
+#~ "sortir d'algunes aplicacions per reduir l'ús de memòria"
+
+#~ msgid "Fatal error reading PNG image file"
+#~ msgstr "Error fatal en llegir el fitxer gràfic PNG"
+
+#, c-format
+#~ msgid "Fatal error reading PNG image file: %s"
+#~ msgstr "Error fatal en llegir el fitxer gràfic PNG: %s"
+
+#~ msgid ""
+#~ "Keys for PNG text chunks must have at least 1 and at most 79 characters."
+#~ msgstr ""
+#~ "Les claus per als blocs text de PNG han de tenir entre 1 i 79 caràcters."
+
+#~ msgid "Keys for PNG text chunks must be ASCII characters."
+#~ msgstr "Les claus per als blocs text de PNG han de ser caràcters ASCII."
+
+#, c-format
+#~ msgid "Color profile has invalid length %d."
+#~ msgstr "El perfil de color té una llargada no vàlida (%d)."
+
+#, c-format
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%s' could "
+#~ "not be parsed."
+#~ msgstr ""
+#~ "El nivell de compressió de PNG ha de ser un valor entre 0 i 9; el valor "
+#~ "«%s» no es pot analitzar."
+
+#, c-format
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%d' is not "
+#~ "allowed."
+#~ msgstr ""
+#~ "El nivell de compressió de PNG ha de ser un valor entre 0 i 9; el valor "
+#~ "«%d» no és permès."
+
+#, c-format
+#~ msgid ""
+#~ "Value for PNG text chunk %s cannot be converted to ISO-8859-1 encoding."
+#~ msgstr ""
+#~ "El valor per al fragment de text PNG %s no es pot convertir a la "
+#~ "codificació ISO-8859-1."
+
+#~ msgid "The PNG image format"
+#~ msgstr "El format d'imatge PNG"
+
+#~ msgid "PNM loader expected to find an integer, but didn't"
+#~ msgstr "El carregador PNM esperava trobar un enter, però no l'ha trobat"
+
+#~ msgid "PNM file has an incorrect initial byte"
+#~ msgstr "El fitxer PNM té un byte inicial incorrecte"
+
+#~ msgid "PNM file is not in a recognized PNM subformat"
+#~ msgstr "El fitxer PNM no és en un subformat reconegut"
+
+#~ msgid "PNM file has an image width of 0"
+#~ msgstr "El fitxer PNM té una amplada d'imatge de 0"
+
+#~ msgid "PNM file has an image height of 0"
+#~ msgstr "El fitxer PNM té una alçada d'imatge zero"
+
+#~ msgid "Maximum color value in PNM file is 0"
+#~ msgstr "El valor màxim de color al fitxer PNM és zero"
+
+#~ msgid "Maximum color value in PNM file is too large"
+#~ msgstr "El valor màxim de color al fitxer PNM és massa alt"
+
+#~ msgid "Raw PNM image type is invalid"
+#~ msgstr "El tipus d'imatge PNM en brut no és vàlid"
+
+#~ msgid "PNM image loader does not support this PNM subformat"
+#~ msgstr "El carregador d'imatges PNM no permet aquest subformat PNM"
+
+#~ msgid "Raw PNM formats require exactly one whitespace before sample data"
+#~ msgstr ""
+#~ "Els formats PNM en brut requereixen exactament un espai en blanc abans de "
+#~ "les dades de mostra"
+
+#~ msgid "Cannot allocate memory for loading PNM image"
+#~ msgstr "No es pot obtenir memòria per carregar la imatge PNM"
+
+#~ msgid "Insufficient memory to load PNM context struct"
+#~ msgstr "No hi ha memòria suficient per carregar l'estructura de context PNM"
+
+#~ msgid "Unexpected end of PNM image data"
+#~ msgstr "Final inesperat de les dades de la imatge PNM"
+
+#~ msgid "Insufficient memory to load PNM file"
+#~ msgstr "No hi ha memòria suficient per carregar el fitxer PNM"
+
+#~ msgid "The PNM/PBM/PGM/PPM image format family"
+#~ msgstr "La família de format d'imatge PNM/PBM/PGM/PPM"
+
+#~ msgid "Input file descriptor is NULL."
+#~ msgstr "El descriptor del fitxer d'entrada és NULL."
+
+#~ msgid "Failed to read QTIF header"
+#~ msgstr "Ha fallat la lectura de la capçalera QTIF"
+
+#, c-format
+#~ msgid "QTIF atom size too large (%d bytes)"
+#~ msgstr "La mida de l'àtom QTIF és massa gran (%d bytes)"
+
+#, c-format
+#~ msgid "Failed to allocate %d bytes for file read buffer"
+#~ msgstr ""
+#~ "No s'han pogut assignar %d bytes per a la memòria intermèdia del fitxer "
+#~ "de lectura"
+
+#, c-format
+#~ msgid "File error when reading QTIF atom: %s"
+#~ msgstr "S'ha produït un error de fitxer en llegir l'àtom QTIF: %s"
+
+#, c-format
+#~ msgid "Failed to skip the next %d bytes with seek()."
+#~ msgstr "No s'han pogut ometre els següents %d bytes amb la crida seek()."
+
+#~ msgid "Failed to allocate QTIF context structure."
+#~ msgstr "No s'ha pogut obtenir memòria per al context de l'estructura QTIF."
+
+#~ msgid "Failed to create GdkPixbufLoader object."
+#~ msgstr "No s'ha pogut crear l'objecte GdkPixbufLoader."
+
+#~ msgid "Failed to find an image data atom."
+#~ msgstr "No s'ha trobat un àtom de dades d'imatge."
+
+#~ msgid "The QTIF image format"
+#~ msgstr "El format d'imatge QTIF"
+
+#~ msgid "RAS image has bogus header data"
+#~ msgstr "La imatge RAS té dades de capçalera erronis"
+
+#~ msgid "RAS image has unknown type"
+#~ msgstr "La imatge RAS és de tipus desconegut"
+
+#~ msgid "unsupported RAS image variation"
+#~ msgstr "Variació d'imatge RAS no implementada"
+
+#~ msgid "Not enough memory to load RAS image"
+#~ msgstr "No hi ha memòria suficient per carregar la imatge RAS"
+
+#~ msgid "The Sun raster image format"
+#~ msgstr "El format d'imatge Sun raster"
+
+#~ msgid "Cannot allocate memory for IOBuffer struct"
+#~ msgstr "No es pot obtenir memòria per a l'estructura IOBuffer"
+
+#~ msgid "Cannot allocate memory for IOBuffer data"
+#~ msgstr "No es pot obtenir memòria per les dades de l'IOBuffer"
+
+#~ msgid "Cannot realloc IOBuffer data"
+#~ msgstr "No es pot reallotjar memòria per les dades de l'IOBuffer"
+
+#~ msgid "Cannot allocate temporary IOBuffer data"
+#~ msgstr "No es poden assignar les dades temporals de l'IOBuffer"
+
+#~ msgid "Cannot allocate new pixbuf"
+#~ msgstr "No es pot allotjar un nou pixbuf"
+
+#~ msgid "Image is corrupted or truncated"
+#~ msgstr "La imatge està malmesa o truncada"
+
+#~ msgid "Cannot allocate colormap structure"
+#~ msgstr "No es pot assignar l'estructura del mapa de colors"
+
+#~ msgid "Cannot allocate colormap entries"
+#~ msgstr "No es poden assignar les entrades del mapa de colors"
+
+#~ msgid "Unexpected bitdepth for colormap entries"
+#~ msgstr "Profunditat de bit inesperada per a les entrades del mapa de color"
+
+#~ msgid "Cannot allocate TGA header memory"
+#~ msgstr "No es pot obtenir memòria per les capçaleres TGA"
+
+#~ msgid "TGA image has invalid dimensions"
+#~ msgstr "La imatge TGA té unes dimensions no vàlides"
+
+#~ msgid "TGA image type not supported"
+#~ msgstr "El tipus d'imatge TGA no està permès"
+
+#~ msgid "Cannot allocate memory for TGA context struct"
+#~ msgstr "No es pot obtenir memòria per al context de l'estructura TGA"
+
+#~ msgid "Excess data in file"
+#~ msgstr "Excés de dades al fitxer"
+
+#~ msgid "The Targa image format"
+#~ msgstr "El format d'imatge Targa"
+
+#~ msgid "Could not get image width (bad TIFF file)"
+#~ msgstr "No es pot obtenir l'amplada de la imatge (fitxer TIFF incorrecte)"
+
+#~ msgid "Could not get image height (bad TIFF file)"
+#~ msgstr "No es pot obtenir l'alçada de la imatge (fitxer TIFF incorrecte)"
+
+#~ msgid "Width or height of TIFF image is zero"
+#~ msgstr "L'amplada o l'alçada de la imatge TIFF és zero"
+
+#~ msgid "Dimensions of TIFF image too large"
+#~ msgstr "Les dimensions de la imatge TIFF són massa grans"
+
+#~ msgid "Insufficient memory to open TIFF file"
+#~ msgstr "No hi ha memòria suficient per obrir el fitxer TIFF"
+
+#~ msgid "Failed to load RGB data from TIFF file"
+#~ msgstr "No s'han pogut carregar les dades RGB des del fitxer TIFF"
+
+#~ msgid "Failed to open TIFF image"
+#~ msgstr "No s'ha pogut obrir la imatge TIFF"
+
+#~ msgid "TIFFClose operation failed"
+#~ msgstr "L'operació TIFFClose ha fallat"
+
+#~ msgid "Failed to load TIFF image"
+#~ msgstr "No s'ha pogut carregar la imatge TIFF"
+
+#~ msgid "Failed to save TIFF image"
+#~ msgstr "No s'ha pogut desar la imatge TIFF"
+
+#~ msgid "TIFF compression doesn't refer to a valid codec."
+#~ msgstr "La compressió TIFF no es refereix a un còdec vàlid."
+
+#~ msgid "Failed to write TIFF data"
+#~ msgstr "No s'han pogut escriure dades TIFF"
+
+#~ msgid "Couldn't write to TIFF file"
+#~ msgstr "No s'ha pogut escriure al fitxer TIFF"
+
+#~ msgid "The TIFF image format"
+#~ msgstr "El format d'imatge TIFF"
+
+#~ msgid "Image has zero width"
+#~ msgstr "La imatge té una amplada zero"
+
+#~ msgid "Image has zero height"
+#~ msgstr "La imatge té una alçada zero"
+
+#~ msgid "Not enough memory to load image"
+#~ msgstr "No hi ha memòria suficient per carregar la imatge"
+
+#~ msgid "Couldn't save the rest"
+#~ msgstr "No s'ha pogut desar la resta"
+
+#~ msgid "The WBMP image format"
+#~ msgstr "El format d'imatge WBMP"
+
+#~ msgid "Invalid XBM file"
+#~ msgstr "El fitxer XBM no és vàlid"
+
+#~ msgid "Insufficient memory to load XBM image file"
+#~ msgstr "No hi ha memòria suficient per carregar el fitxer gràfic XBM"
+
+#~ msgid "Failed to write to temporary file when loading XBM image"
+#~ msgstr "No s'ha pogut escriure al fitxer temporal en carregar la imatge XBM"
+
+#~ msgid "The XBM image format"
+#~ msgstr "El format d'imatge XBM"
+
+#~ msgid "No XPM header found"
+#~ msgstr "No s'ha trobat la capçalera XPM"
+
+#~ msgid "Invalid XPM header"
+#~ msgstr "La capçalera XPM no és vàlida"
+
+#~ msgid "XPM file has image width <= 0"
+#~ msgstr "El fitxer XPM té una amplada d'imatge menor o igual que 0"
+
+#~ msgid "XPM file has image height <= 0"
+#~ msgstr "El fitxer XPM té una alçada d'imatge menor o igual que 0"
+
+#~ msgid "XPM has invalid number of chars per pixel"
+#~ msgstr "XPM té un nombre de caràcters per píxel no vàlid"
+
+#~ msgid "XPM file has invalid number of colors"
+#~ msgstr "El fitxer XPM té un nombre de colors no vàlid"
+
+#~ msgid "Cannot allocate memory for loading XPM image"
+#~ msgstr "No es pot obtenir memòria per carregar la imatge XPM"
+
+#~ msgid "Cannot read XPM colormap"
+#~ msgstr "No es pot llegir el mapa de color d'XPM"
+
+#~ msgid "Failed to write to temporary file when loading XPM image"
+#~ msgstr "No s'ha pogut escriure al fitxer temporal en carregar la imatge XPM"
+
+#~ msgid "The XPM image format"
+#~ msgstr "El format d'imatge XPM"
+
+#~ msgid "The EMF image format"
+#~ msgstr "El format d'imatge EMF"
+
+#, c-format
+#~ msgid "Could not allocate memory: %s"
+#~ msgstr "No s'ha pogut assignar memòria: %s"
+
+#, c-format
+#~ msgid "Could not create stream: %s"
+#~ msgstr "No s'ha pogut crear el flux: %s"
+
+#, c-format
+#~ msgid "Could not seek stream: %s"
+#~ msgstr "No s'ha pogut cercar en el flux: %s"
+
+#, c-format
+#~ msgid "Could not read from stream: %s"
+#~ msgstr "No s'ha pogut llegir el flux: %s"
+
+#~ msgid "Couldn't load bitmap"
+#~ msgstr "No s'ha pogut carregar el mapa de bits"
+
+#~ msgid "Couldn't load metafile"
+#~ msgstr "No s'ha pogut carregar el metafitxer"
+
+#~ msgid "Unsupported image format for GDI+"
+#~ msgstr "El GDI+ no funciona amb aquest format d'imatge"
+
+#~ msgid "Couldn't save"
+#~ msgstr "No s'ha pogut desar"
+
+#~ msgid "The WMF image format"
+#~ msgstr "El format d'imatge WMF"
+
+#~ msgid "Don't batch GDI requests"
+#~ msgstr "No processis en lot les peticions del GDI"
+
+#~ msgid "Don't use the Wintab API for tablet support"
+#~ msgstr "No utilitzis l'API Wintab per al suport de tablet"
+
+#~ msgid "Same as --no-wintab"
+#~ msgstr "El mateix que --no-wintab"
+
+#~ msgid "Do use the Wintab API [default]"
+#~ msgstr "Utilitza l'API Wintab [per defecte]"
+
+#~ msgid "Size of the palette in 8 bit mode"
+#~ msgstr "Mida de la paleta al mode 8 bits"
+
+#~ msgid "COLORS"
+#~ msgstr "COLORS"
+
+#~ msgid "Make X calls synchronous"
+#~ msgstr "Fes les crides a X sincronitzades"
+
+#, c-format
+#~ msgid "Starting %s"
+#~ msgstr "S'està iniciant %s"
+
+#, c-format
+#~ msgid "Opening %s"
+#~ msgstr "S'està obrint %s"
+
+#, c-format
+#~ msgid "Opening %d Item"
+#~ msgid_plural "Opening %d Items"
+#~ msgstr[0] "S'està obrint %d element"
+#~ msgstr[1] "S'estan obrint %d elements"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Shift"
+#~ msgstr "Majús"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Ctrl"
+#~ msgstr "Ctrl"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Alt"
+#~ msgstr "Alt"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Super"
+#~ msgstr "Súper"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Hyper"
+#~ msgstr "Híper"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Meta"
+#~ msgstr "Meta"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Space"
+#~ msgstr "Espai"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Backslash"
+#~ msgstr "Barra inversa"
+
+#, c-format
+#~ msgid "Duplicate object id '%s' on line %d (previously on line %d)"
+#~ msgstr ""
+#~ "Identificador d'objecte duplicat «%s» a la línia %d (anteriorment a la "
+#~ "línia %d)"
+
+#~ msgid "calendar:MY"
+#~ msgstr "calendar:MY"
+
+#~ msgid "calendar:week_start:0"
+#~ msgstr "calendar:week_start:1"
+
+#~ msgctxt "year measurement template"
+#~ msgid "2000"
+#~ msgstr "2000"
+
+#, c-format
+#~ msgctxt "calendar:day:digits"
+#~ msgid "%d"
+#~ msgstr "%d"
+
+#, c-format
+#~ msgctxt "calendar:week:digits"
+#~ msgid "%d"
+#~ msgstr "%d"
+
+#~ msgctxt "calendar year format"
+#~ msgid "%Y"
+#~ msgstr "%Y"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Disabled"
+#~ msgstr "Inhabilitat"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Invalid"
+#~ msgstr "No vàlid"
+
+#, c-format
+#~ msgctxt "progress bar label"
+#~ msgid "%d %%"
+#~ msgstr "%d %%"
+
+# Premi a qui va ficar "Per defecte:LTR. M'ha costat
+# trobar en quin mòdul estava l'error. jm
+#~ msgid "default:mm"
+#~ msgstr "default:mm"
+
+#~ msgid "Manage Custom Sizes"
+#~ msgstr "Gestioneu mides personalitzades"
+
+#~ msgid "inch"
+#~ msgstr "inch"
+
+#~ msgid "mm"
+#~ msgstr "mm"
+
+#~ msgid "Margins from Printer..."
+#~ msgstr "Marges de la impressora..."
+
+#, c-format
+#~ msgid "Custom Size %d"
+#~ msgstr "Mida personalitzada %d"
+
+#~ msgid "_Width:"
+#~ msgstr "_Amplada:"
+
+#~ msgid "_Height:"
+#~ msgstr "_Alçada:"
+
+#~ msgid "Paper Size"
+#~ msgstr "Mida del paper"
+
+#~ msgid "_Top:"
+#~ msgstr "_Superior:"
+
+#~ msgid "_Bottom:"
+#~ msgstr "_Inferior:"
+
+#~ msgid "_Left:"
+#~ msgstr "_Esquerre:"
+
+#~ msgid "_Right:"
+#~ msgstr "_Dret:"
+
+#~ msgid "Paper Margins"
+#~ msgstr "Marges del paper"
+
+#~ msgid "Select A File"
+#~ msgstr "Seleccioneu un fitxer"
+
+#~ msgid "_Add"
+#~ msgstr "_Afegeix"
+
+#~ msgid "_Remove"
+#~ msgstr "_Suprimeix"
+
+#~ msgid "_Browse for other folders"
+#~ msgstr "Na_vega per altres carpetes"
+
+#~ msgid "Invalid path"
+#~ msgstr "Camí no vàlid"
+
+#~ msgid "No match"
+#~ msgstr "No hi ha cap coincidència"
+
+#~ msgid "Sole completion"
+#~ msgstr "Compleció única"
+
+#~ msgid "Complete, but not unique"
+#~ msgstr "Complet, però no és únic"
+
+#~ msgid "Completing..."
+#~ msgstr "S'està completant..."
+
+#~ msgid "Only local files may be selected"
+#~ msgstr "Només es poden seleccionar fitxers locals"
+
+#~ msgid "Incomplete hostname; end it with '/'"
+#~ msgstr "El nom d'ordinador no és complet; ha de finalitzar amb «/»"
+
+#~ msgid "Path does not exist"
+#~ msgstr "No existeix el camí"
+
+#~ msgid "Folders"
+#~ msgstr "Carpetes"
+
+#~ msgid "Fol_ders"
+#~ msgstr "_Carpetes"
+
+#~ msgid "_Files"
+#~ msgstr "_Fitxers"
+
+#, c-format
+#~ msgid "Folder unreadable: %s"
+#~ msgstr "No es pot llegir la carpeta: %s"
+
+#, c-format
+#~ msgid ""
+#~ "The file \"%s\" resides on another machine (called %s) and may not be "
+#~ "available to this program.\n"
+#~ "Are you sure that you want to select it?"
+#~ msgstr ""
+#~ "El fitxer «%s» es troba en una altra màquina (anomenada %s) i pot ser que "
+#~ "no estigui disponible per a aquest programa.\n"
+#~ "Esteu segur que voleu seleccionar-lo?"
+
+#~ msgid "_New Folder"
+#~ msgstr "Carpeta _nova"
+
+#~ msgid "De_lete File"
+#~ msgstr "Suprimeix e_l fitxer"
+
+#~ msgid "_Rename File"
+#~ msgstr "_Canvia el nom del fitxer"
+
+#, c-format
+#~ msgid ""
+#~ "The folder name \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr ""
+#~ "El nom de la carpeta «%s» conté símbols que no estan permesos als noms de "
+#~ "fitxer"
+
+#~ msgid "New Folder"
+#~ msgstr "Carpeta nova"
+
+#~ msgid "_Folder name:"
+#~ msgstr "Nom de la _carpeta:"
+
+#~ msgid "C_reate"
+#~ msgstr "C_rea"
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr ""
+#~ "El nom del fitxer «%s» conté símbols que no estan permesos als noms de "
+#~ "fitxer"
+
+#, c-format
+#~ msgid "Error deleting file '%s': %s"
+#~ msgstr "S'ha produït un error en suprimir el fitxer «%s»: %s"
+
+#, c-format
+#~ msgid "Really delete file \"%s\"?"
+#~ msgstr "Esteu segur de voler suprimir el fitxer «%s»?"
+
+#~ msgid "Delete File"
+#~ msgstr "Suprimeix el fitxer"
+
+#, c-format
+#~ msgid "Error renaming file to \"%s\": %s"
+#~ msgstr "S'ha produït un error en canviar el nom del fitxer a «%s»: %s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\": %s"
+#~ msgstr "S'ha produït un error en canviar el nom del fitxer «%s»: %s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\" to \"%s\": %s"
+#~ msgstr "S'ha produït un error en canviar el nom del fitxer «%s» a «%s»: %s"
+
+#~ msgid "Rename File"
+#~ msgstr "Canvia el nom del fitxer"
+
+#, c-format
+#~ msgid "Rename file \"%s\" to:"
+#~ msgstr "Canvia el nom del fitxer «%s» a:"
+
+#~ msgid "_Rename"
+#~ msgstr "_Canvia el nom"
+
+#~ msgid "_Selection: "
+#~ msgstr "_Selecció: "
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" couldn't be converted to UTF-8. (try setting the "
+#~ "environment variable G_FILENAME_ENCODING): %s"
+#~ msgstr ""
+#~ "No s'ha pogut convertir el nom de fitxer «%s» a UTF-8. (Proveu d'establir "
+#~ "la variable d'entorn G_FILENAME_ENCODING): %s"
+
+#~ msgid "Invalid UTF-8"
+#~ msgstr "UTF-8 no vàlid"
+
+#~ msgid "Name too long"
+#~ msgstr "El nom és massa llarg"
+
+#~ msgid "Couldn't convert filename"
+#~ msgstr "No s'ha pogut convertir el nom del fitxer"
+
+#~ msgid "Gamma"
+#~ msgstr "Gamma"
+
+#~ msgid "_Gamma value"
+#~ msgstr "Valor de la _gamma"
+
+#~ msgctxt "input method menu"
+#~ msgid "System"
+#~ msgstr "Sistema"
+
+#~ msgctxt "input method menu"
+#~ msgid "None"
+#~ msgstr "Cap"
+
+#, c-format
+#~ msgctxt "input method menu"
+#~ msgid "System (%s)"
+#~ msgstr "Sistema (%s)"
+
+#~ msgid "Input"
+#~ msgstr "Entrada"
+
+#~ msgid "No extended input devices"
+#~ msgstr "No hi ha cap dispositiu d'entrada ampliat"
+
+#~ msgid "_Device:"
+#~ msgstr "_Dispositiu:"
+
+#~ msgid "Disabled"
+#~ msgstr "Desactivat"
+
+#~ msgid "Screen"
+#~ msgstr "Pantalla"
+
+#~ msgid "Window"
+#~ msgstr "Finestra"
+
+#~ msgid "_Mode:"
+#~ msgstr "_Mode:"
+
+#~ msgid "Axes"
+#~ msgstr "Eixos"
+
+#~ msgid "Keys"
+#~ msgstr "Tecles"
+
+#~ msgid "_X:"
+#~ msgstr "_X:"
+
+#~ msgid "_Y:"
+#~ msgstr "_Y:"
+
+#~ msgid "_Pressure:"
+#~ msgstr "_Pressió:"
+
+#~ msgid "X _tilt:"
+#~ msgstr "_Inclinació en X:"
+
+#~ msgid "Y t_ilt:"
+#~ msgstr "I_nclinació en Y:"
+
+#~ msgid "_Wheel:"
+#~ msgstr "_Roda:"
+
+#~ msgid "none"
+#~ msgstr "cap"
+
+#~ msgid "(disabled)"
+#~ msgstr "(desactivat)"
+
+#~ msgid "(unknown)"
+#~ msgstr "(desconegut)"
+
+#~ msgid "Cl_ear"
+#~ msgstr "_Neteja"
+
+#, c-format
+#~ msgid "Unknown Application (pid %d)"
+#~ msgstr "Aplicació desconeguda (PID %d)"
+
+#, c-format
+#~ msgid "Cannot kill process with pid %d. Operation is not implemented."
+#~ msgstr ""
+#~ "No es pot matar el procés amb el PID %d. L'operació no està implementada."
+
+#~ msgid "Terminal Pager"
+#~ msgstr "Paginador del terminal"
+
+#~ msgid "Top Command"
+#~ msgstr "Ordre «top»"
+
+#~ msgid "Bourne Again Shell"
+#~ msgstr "Intèrpret d'ordres «Bourne Again»"
+
+#~ msgid "Bourne Shell"
+#~ msgstr "Intèrpret d'ordres «Bourne»"
+
+#~ msgid "Z Shell"
+#~ msgstr "Intèrpret d'ordres «Z»"
+
+#, c-format
+#~ msgid "Cannot end process with pid %d: %s"
+#~ msgstr "No es pot finalitzar el procés amb el PID %d: %s"
+
+#~ msgid "Not a valid page setup file"
+#~ msgstr "No és un fitxer de configuració de pàgina vàlid"
+
+#~ msgid "Any Printer"
+#~ msgstr "Qualsevol impressora"
+
+#~ msgid "For portable documents"
+#~ msgstr "Per a documents portables"
+
+#, c-format
+#~ msgid ""
+#~ "Margins:\n"
+#~ " Left: %s %s\n"
+#~ " Right: %s %s\n"
+#~ " Top: %s %s\n"
+#~ " Bottom: %s %s"
+#~ msgstr ""
+#~ "Marges:\n"
+#~ " Esquerre: %s %s\n"
+#~ " Dret: %s %s\n"
+#~ " Superior: %s %s\n"
+#~ " Inferior: %s %s"
+
+#~ msgid "Manage Custom Sizes..."
+#~ msgstr "Gestiona mides personalitzades..."
+
+#~ msgid "_Format for:"
+#~ msgstr "_Format per a:"
+
+#~ msgid "_Paper size:"
+#~ msgstr "Mida del _paper:"
+
+#~ msgid "_Orientation:"
+#~ msgstr "_Orientació:"
+
+#~ msgid "Page Setup"
+#~ msgstr "Configuració de la pàgina"
+
+#~ msgid "Authentication"
+#~ msgstr "Autenticació"
+
+#~ msgid "Not available"
+#~ msgstr "No està disponible"
+
+#~ msgid "_Save in folder:"
+#~ msgstr "De_sa a la carpeta:"
+
+#, c-format
+#~ msgid "%s job #%d"
+#~ msgstr "%s treball #%d"
+
+#~ msgctxt "print operation status"
+#~ msgid "Initial state"
+#~ msgstr "Estat inicial"
+
+#~ msgctxt "print operation status"
+#~ msgid "Preparing to print"
+#~ msgstr "S'està preparant per imprimir"
+
+#~ msgctxt "print operation status"
+#~ msgid "Generating data"
+#~ msgstr "S'estan generant les dades"
+
+#~ msgctxt "print operation status"
+#~ msgid "Sending data"
+#~ msgstr "S'estan enviant les dades"
+
+#~ msgctxt "print operation status"
+#~ msgid "Waiting"
+#~ msgstr "S'està esperant"
+
+#~ msgctxt "print operation status"
+#~ msgid "Blocking on issue"
+#~ msgstr "Bloquejat degut a un problema"
+
+#~ msgctxt "print operation status"
+#~ msgid "Printing"
+#~ msgstr "S'està imprimint"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished"
+#~ msgstr "S'ha finalitzat"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished with error"
+#~ msgstr "S'ha finalitzat amb error"
+
+#, c-format
+#~ msgid "Preparing %d"
+#~ msgstr "S'està preparant %d"
+
+#, c-format
+#~ msgid "Preparing"
+#~ msgstr "S'està preparant"
+
+#, c-format
+#~ msgid "Printing %d"
+#~ msgstr "S'està imprimint %d"
+
+#, c-format
+#~ msgid "Error creating print preview"
+#~ msgstr "S'ha produït un error en crear la previsualització d'impressió"
+
+#, c-format
+#~ msgid ""
+#~ "The most probable reason is that a temporary file could not be created."
+#~ msgstr ""
+#~ "El motiu més probable és perquè no s'ha pogut crear un fitxer temporal."
+
+#, c-format
+#~ msgid "Error launching preview"
+#~ msgstr "S'ha produït un error en llançar la previsualització"
+
+#, c-format
+#~ msgid "Error printing"
+#~ msgstr "S'ha produït un error en imprimir"
+
+#~ msgid "Application"
+#~ msgstr "Aplicació"
+
+# Connectada? (josep)
+#~ msgid "Printer offline"
+#~ msgstr "La impressora no està en línia"
+
+#~ msgid "Out of paper"
+#~ msgstr "No hi ha paper"
+
+#~ msgid "Paused"
+#~ msgstr "En pausa"
+
+#~ msgid "Need user intervention"
+#~ msgstr "Cal la intervenció de l'usuari"
+
+#~ msgid "Custom size"
+#~ msgstr "Mida personalitzada"
+
+#~ msgid "No printer found"
+#~ msgstr "No s'ha trobat cap impressora"
+
+#~ msgid "Invalid argument to CreateDC"
+#~ msgstr "Argument no vàlid per a la funció CreateDC"
+
+#~ msgid "Error from StartDoc"
+#~ msgstr "Error de StartDoc"
+
+#~ msgid "Not enough free memory"
+#~ msgstr "No hi ha prou memòria"
+
+#~ msgid "Invalid argument to PrintDlgEx"
+#~ msgstr "Argument no vàlid a PrintDlgEx"
+
+#~ msgid "Invalid pointer to PrintDlgEx"
+#~ msgstr "Punter no vàlid a PrintDlgEx"
+
+#~ msgid "Invalid handle to PrintDlgEx"
+#~ msgstr "Gestor no vàlid a PrintDlgEx"
+
+#~ msgid "Unspecified error"
+#~ msgstr "Error no especificat"
+
+#~ msgid "Getting printer information failed"
+#~ msgstr "Ha fallat l'obtenció d'informació de la impressora"
+
+#~ msgid "Getting printer information..."
+#~ msgstr "S'està obtenint informació de la impressora..."
+
+#~ msgid "Printer"
+#~ msgstr "Impressora"
+
+#~ msgid "Location"
+#~ msgstr "Ubicació"
+
+#~ msgid "Status"
+#~ msgstr "Estat"
+
+#~ msgid "Range"
+#~ msgstr "Rang"
+
+#~ msgid "_All Pages"
+#~ msgstr "T_otes les pàgines"
+
+#~ msgid "C_urrent Page"
+#~ msgstr "Pàgina act_ual"
+
+#~ msgid "Se_lection"
+#~ msgstr "_Selecció"
+
+#~ msgid "Pag_es:"
+#~ msgstr "Pà_gines:"
+
+#~ msgid ""
+#~ "Specify one or more page ranges,\n"
+#~ " e.g. 1-3,7,11"
+#~ msgstr ""
+#~ "Especifiqueu un o més rangs de pàgines,\n"
+#~ "p.ex. 1-3,7,11"
+
+#~ msgid "Pages"
+#~ msgstr "Pàgines"
+
+#~ msgid "Copies"
+#~ msgstr "Còpies"
+
+#~ msgid "Copie_s:"
+#~ msgstr "Còpie_s:"
+
+#~ msgid "C_ollate"
+#~ msgstr "C_ompagina"
+
+#~ msgid "_Reverse"
+#~ msgstr "Inve_rteix"
+
+#~ msgid "General"
+#~ msgstr "General"
+
+#~ msgid "Left to right, top to bottom"
+#~ msgstr "D'esquerra a dreta, de dalt a baix"
+
+#~ msgid "Left to right, bottom to top"
+#~ msgstr "D'esquerra a dreta, de baix a dalt"
+
+#~ msgid "Right to left, top to bottom"
+#~ msgstr "De dreta a esquerra, de dalt a baix"
+
+#~ msgid "Right to left, bottom to top"
+#~ msgstr "De dreta a esquerra, de baix a dalt"
+
+#~ msgid "Top to bottom, left to right"
+#~ msgstr "De dalt a baix, d'esquerra a dreta"
+
+#~ msgid "Top to bottom, right to left"
+#~ msgstr "De dalt a baix, de dreta a esquerra"
+
+#~ msgid "Bottom to top, left to right"
+#~ msgstr "De baix a dalt, d'esquerra a dreta"
+
+#~ msgid "Bottom to top, right to left"
+#~ msgstr "De baix a dalt, de dreta a esquerra"
+
+#~ msgid "Page Ordering"
+#~ msgstr "Ordenació de les pàgines"
+
+#~ msgid "Left to right"
+#~ msgstr "D'esquerra a dreta"
+
+#~ msgid "Right to left"
+#~ msgstr "De dreta a esquerra"
+
+#~ msgid "Top to bottom"
+#~ msgstr "De dalt a baix"
+
+#~ msgid "Bottom to top"
+#~ msgstr "De baix a dalt"
+
+#~ msgid "Layout"
+#~ msgstr "Disposició"
+
+#~ msgid "T_wo-sided:"
+#~ msgstr "_Doble cara:"
+
+#~ msgid "Pages per _side:"
+#~ msgstr "Pàgines per _cara:"
+
+#~ msgid "Page or_dering:"
+#~ msgstr "Or_denació de les pàgines:"
+
+#~ msgid "_Only print:"
+#~ msgstr "N_omés imprimeix:"
+
+#~ msgid "All sheets"
+#~ msgstr "Tots els fulls"
+
+#~ msgid "Even sheets"
+#~ msgstr "Fulls parells"
+
+#~ msgid "Odd sheets"
+#~ msgstr "Fulls senars"
+
+#~ msgid "Sc_ale:"
+#~ msgstr "Esc_ala:"
+
+#~ msgid "Paper"
+#~ msgstr "Paper"
+
+#~ msgid "Paper _type:"
+#~ msgstr "_Tipus de paper:"
+
+#~ msgid "Paper _source:"
+#~ msgstr "Font del pape_r:"
+
+#~ msgid "Output t_ray:"
+#~ msgstr "Safata de so_rtida:"
+
+#~ msgid "Or_ientation:"
+#~ msgstr "_Orientació:"
+
+#~ msgid "Portrait"
+#~ msgstr "Vertical"
+
+#~ msgid "Landscape"
+#~ msgstr "Apaïsat"
+
+#~ msgid "Reverse portrait"
+#~ msgstr "Vertical del revés"
+
+#~ msgid "Reverse landscape"
+#~ msgstr "Apaïsat del revés"
+
+#~ msgid "Job Details"
+#~ msgstr "Detalls del treball"
+
+#~ msgid "Pri_ority:"
+#~ msgstr "Pri_oritat:"
+
+#~ msgid "_Billing info:"
+#~ msgstr "Informació de _facturació:"
+
+#~ msgid "Print Document"
+#~ msgstr "Imprimeix el document"
+
+#~ msgid "_Now"
+#~ msgstr "A_ra"
+
+#~ msgid "A_t:"
+#~ msgstr "_a:"
+
+#~ msgid ""
+#~ "Specify the time of print,\n"
+#~ " e.g. 15:30, 2:35 pm, 14:15:20, 11:46:30 am, 4 pm"
+#~ msgstr ""
+#~ "Especifiqueu l'hora d'impressió,\n"
+#~ " p.ex. 15:30, 2:35 PM, 14:15:20, 11:46:30 AM, 4 PM"
+
+#~ msgid "Time of print"
+#~ msgstr "Hora d'impressió"
+
+#~ msgid "On _hold"
+#~ msgstr "En es_pera"
+
+#~ msgid "Hold the job until it is explicitly released"
+#~ msgstr ""
+#~ "Mantingues la tasca en espera fins que no s'hagi alliberat de manera "
+#~ "explícita"
+
+#~ msgid "Add Cover Page"
+#~ msgstr "Afegeix pàgina de coberta"
+
+# Possiblement sigui "abans de" (josep)
+#~ msgid "Be_fore:"
+#~ msgstr "A_bans:"
+
+# Possiblement "després de" (josep)
+#~ msgid "_After:"
+#~ msgstr "_Després:"
+
+#~ msgid "Job"
+#~ msgstr "Treball"
+
+#~ msgid "Advanced"
+#~ msgstr "Avançat"
+
+#~ msgid "Image Quality"
+#~ msgstr "Qualitat de la imatge"
+
+#~ msgid "Color"
+#~ msgstr "Color"
+
+#~ msgid "Finishing"
+#~ msgstr "Acabaments"
+
+#~ msgid "Some of the settings in the dialog conflict"
+#~ msgstr "Alguns paràmetres del diàleg estan en conflicte"
+
+#~ msgid "Print"
+#~ msgstr "Imprimeix"
+
+#, c-format
+#~ msgctxt "recent menu label"
+#~ msgid "_%d. %s"
+#~ msgstr "_%d. %s"
+
+#, c-format
+#~ msgctxt "recent menu label"
+#~ msgid "%d. %s"
+#~ msgstr "%d. (%s)"
+
+#~ msgctxt "throbbing progress animation widget"
+#~ msgid "Spinner"
+#~ msgstr "Indicador de progrés"
+
+#~ msgctxt "Stock label"
+#~ msgid "Information"
+#~ msgstr "Informació"
+
+#~ msgctxt "Stock label"
+#~ msgid "Warning"
+#~ msgstr "Avís"
+
+#~ msgctxt "Stock label"
+#~ msgid "Error"
+#~ msgstr "Error"
+
+#~ msgctxt "Stock label"
+#~ msgid "Question"
+#~ msgstr "Pregunta"
+
+#~ msgctxt "Stock label"
+#~ msgid "_About"
+#~ msgstr "_Quant a"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Add"
+#~ msgstr "_Afegeix"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Apply"
+#~ msgstr "_Aplica"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Bold"
+#~ msgstr "_Negreta"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Cancel"
+#~ msgstr "_Cancel·la"
+
+#~ msgctxt "Stock label"
+#~ msgid "_CD-Rom"
+#~ msgstr "_CD-ROM"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Clear"
+#~ msgstr "_Neteja"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Close"
+#~ msgstr "_Tanca"
+
+#~ msgctxt "Stock label"
+#~ msgid "C_onnect"
+#~ msgstr "C_onnecta"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Convert"
+#~ msgstr "_Converteix"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Copy"
+#~ msgstr "_Copia"
+
+#~ msgctxt "Stock label"
+#~ msgid "Cu_t"
+#~ msgstr "Re_talla"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Delete"
+#~ msgstr "_Suprimeix"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Discard"
+#~ msgstr "_Descarta"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Disconnect"
+#~ msgstr "_Desconnecta"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Execute"
+#~ msgstr "_Executa"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Edit"
+#~ msgstr "_Edita"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Find"
+#~ msgstr "_Cerca"
+
+#~ msgctxt "Stock label"
+#~ msgid "Find and _Replace"
+#~ msgstr "Cerca i _reemplaça"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Floppy"
+#~ msgstr "_Disquet"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fullscreen"
+#~ msgstr "_Pantalla completa"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Leave Fullscreen"
+#~ msgstr "_Surt de la pantalla completa"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Bottom"
+#~ msgstr "_Inferior"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_First"
+#~ msgstr "_Primer"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Last"
+#~ msgstr "Ú_ltim"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Top"
+#~ msgstr "_Superior"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Back"
+#~ msgstr "_Enrere"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Down"
+#~ msgstr "A_vall"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Forward"
+#~ msgstr "E_ndavant"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Up"
+#~ msgstr "A_munt"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Harddisk"
+#~ msgstr "_Disc dur"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Help"
+#~ msgstr "A_juda"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Home"
+#~ msgstr "_Inici"
+
+#~ msgctxt "Stock label"
+#~ msgid "Increase Indent"
+#~ msgstr "Augmenta el sagnat"
+
+#~ msgctxt "Stock label"
+#~ msgid "Decrease Indent"
+#~ msgstr "Disminueix el sagnat"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Index"
+#~ msgstr "Índe_x"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Information"
+#~ msgstr "_Informació"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Italic"
+#~ msgstr "Curs_iva"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Jump to"
+#~ msgstr "_Vés a"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Center"
+#~ msgstr "_Centrat"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fill"
+#~ msgstr "_Justificat"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Left"
+#~ msgstr "_Esquerra"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Right"
+#~ msgstr "_Dreta"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Forward"
+#~ msgstr "E_ndavant"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Next"
+#~ msgstr "_Següent"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "P_ause"
+#~ msgstr "En _pausa"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Play"
+#~ msgstr "_Reprodueix"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "Pre_vious"
+#~ msgstr "An_terior"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Record"
+#~ msgstr "En_registra"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "R_ewind"
+#~ msgstr "R_ebobina"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Stop"
+#~ msgstr "_Atura"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Network"
+#~ msgstr "_Xarxa"
+
+#~ msgctxt "Stock label"
+#~ msgid "_New"
+#~ msgstr "_Nou"
+
+#~ msgctxt "Stock label"
+#~ msgid "_No"
+#~ msgstr "_No"
+
+#~ msgctxt "Stock label"
+#~ msgid "_OK"
+#~ msgstr "_D'acord"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Open"
+#~ msgstr "_Obre"
+
+#~ msgctxt "Stock label"
+#~ msgid "Landscape"
+#~ msgstr "Apaïsat"
+
+#~ msgctxt "Stock label"
+#~ msgid "Portrait"
+#~ msgstr "Vertical"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse landscape"
+#~ msgstr "Apaïsat del revés"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse portrait"
+#~ msgstr "Vertical del revés"
+
+#~ msgctxt "Stock label"
+#~ msgid "Page Set_up"
+#~ msgstr "Confi_guració de la pàgina"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Paste"
+#~ msgstr "_Enganxa"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Preferences"
+#~ msgstr "_Preferències"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Print"
+#~ msgstr "_Imprimeix"
+
+#~ msgctxt "Stock label"
+#~ msgid "Print Pre_view"
+#~ msgstr "Pre_visualització de la impressió"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Properties"
+#~ msgstr "_Propietats"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Quit"
+#~ msgstr "_Surt"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Redo"
+#~ msgstr "_Refés"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Refresh"
+#~ msgstr "_Actualitza"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Remove"
+#~ msgstr "_Suprimeix"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Revert"
+#~ msgstr "_Restaura"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Save"
+#~ msgstr "_Desa"
+
+#~ msgctxt "Stock label"
+#~ msgid "Save _As"
+#~ msgstr "_Anomena i desa"
+
+#~ msgctxt "Stock label"
+#~ msgid "Select _All"
+#~ msgstr "Seleccion_a-ho tot"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Color"
+#~ msgstr "_Color"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Font"
+#~ msgstr "_Tipus de lletra"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Ascending"
+#~ msgstr "_Ascendent"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Descending"
+#~ msgstr "_Descendent"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Spell Check"
+#~ msgstr "_Verifica l'ortografia"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Stop"
+#~ msgstr "_Atura"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Strikethrough"
+#~ msgstr "_Barrat"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undelete"
+#~ msgstr "Rec_upera"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Underline"
+#~ msgstr "S_ubratlla"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undo"
+#~ msgstr "_Desfés"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Yes"
+#~ msgstr "_Sí"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Normal Size"
+#~ msgstr "Mida _normal"
+
+#~ msgctxt "Stock label"
+#~ msgid "Best _Fit"
+#~ msgstr "Millor a_just"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _In"
+#~ msgstr "_Amplia"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _Out"
+#~ msgstr "_Redueix"
+
+#, c-format
+#~ msgid "<%s> element has invalid id \"%s\""
+#~ msgstr "L'element <%s> té un id no vàlid «%s»"
+
+#~ msgid "--- No Tip ---"
+#~ msgstr "-- Cap consell --"
+
+#~ msgid "Volume"
+#~ msgstr "Volum"
+
+#~ msgid "Turns volume down or up"
+#~ msgstr "Apuja o abaixa el volum"
+
+#~ msgid "Adjusts the volume"
+#~ msgstr "Ajusta el volum"
+
+#~ msgid "Volume Down"
+#~ msgstr "Abaixa el volum"
+
+#~ msgid "Decreases the volume"
+#~ msgstr "Disminueix el volum"
+
+#~ msgid "Volume Up"
+#~ msgstr "Apuja el volum"
+
+#~ msgid "Increases the volume"
+#~ msgstr "Incrementa el volum"
+
+#~ msgid "Muted"
+#~ msgstr "Silencia"
+
+#~ msgid "Full Volume"
+#~ msgstr "Volum al màxim"
+
+#, c-format
+#~ msgctxt "volume percentage"
+#~ msgid "%d %%"
+#~ msgstr "%d %%"
+
+#~ msgctxt "paper size"
+#~ msgid "asme_f"
+#~ msgstr "ASME_F"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x2"
+#~ msgstr "A0x2"
+
+#~ msgctxt "paper size"
+#~ msgid "A0"
+#~ msgstr "A0"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x3"
+#~ msgstr "A0x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1"
+#~ msgstr "A1"
+
+#~ msgctxt "paper size"
+#~ msgid "A10"
+#~ msgstr "A10"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x3"
+#~ msgstr "A1x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x4"
+#~ msgstr "A1x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2"
+#~ msgstr "A2"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x3"
+#~ msgstr "A2x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x4"
+#~ msgstr "A2x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x5"
+#~ msgstr "A2x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3"
+#~ msgstr "A3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3 Extra"
+#~ msgstr "A3 extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x3"
+#~ msgstr "A3x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x4"
+#~ msgstr "A3x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x5"
+#~ msgstr "A3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x6"
+#~ msgstr "A3x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x7"
+#~ msgstr "A3x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4"
+#~ msgstr "A4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Extra"
+#~ msgstr "A4 extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Tab"
+#~ msgstr "A4 tabloide"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x3"
+#~ msgstr "A4x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x4"
+#~ msgstr "A4x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x5"
+#~ msgstr "A4x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x6"
+#~ msgstr "A4x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x7"
+#~ msgstr "A4x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x8"
+#~ msgstr "A4x8"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x9"
+#~ msgstr "A4x9"
+
+#~ msgctxt "paper size"
+#~ msgid "A5"
+#~ msgstr "A5"
+
+#~ msgctxt "paper size"
+#~ msgid "A5 Extra"
+#~ msgstr "A5 extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A6"
+#~ msgstr "A6"
+
+#~ msgctxt "paper size"
+#~ msgid "A7"
+#~ msgstr "A7"
+
+#~ msgctxt "paper size"
+#~ msgid "A8"
+#~ msgstr "A8"
+
+#~ msgctxt "paper size"
+#~ msgid "A9"
+#~ msgstr "A9"
+
+#~ msgctxt "paper size"
+#~ msgid "B0"
+#~ msgstr "B0"
+
+#~ msgctxt "paper size"
+#~ msgid "B1"
+#~ msgstr "B1"
+
+#~ msgctxt "paper size"
+#~ msgid "B10"
+#~ msgstr "B10"
+
+#~ msgctxt "paper size"
+#~ msgid "B2"
+#~ msgstr "B2"
+
+#~ msgctxt "paper size"
+#~ msgid "B3"
+#~ msgstr "B3"
+
+#~ msgctxt "paper size"
+#~ msgid "B4"
+#~ msgstr "B4"
+
+#~ msgctxt "paper size"
+#~ msgid "B5"
+#~ msgstr "B5"
+
+#~ msgctxt "paper size"
+#~ msgid "B5 Extra"
+#~ msgstr "B5 extra"
+
+#~ msgctxt "paper size"
+#~ msgid "B6"
+#~ msgstr "B6"
+
+#~ msgctxt "paper size"
+#~ msgid "B6/C4"
+#~ msgstr "B6/C4"
+
+#~ msgctxt "paper size"
+#~ msgid "B7"
+#~ msgstr "B7"
+
+#~ msgctxt "paper size"
+#~ msgid "B8"
+#~ msgstr "B8"
+
+#~ msgctxt "paper size"
+#~ msgid "B9"
+#~ msgstr "B9"
+
+#~ msgctxt "paper size"
+#~ msgid "C0"
+#~ msgstr "C0"
+
+#~ msgctxt "paper size"
+#~ msgid "C1"
+#~ msgstr "C1"
+
+#~ msgctxt "paper size"
+#~ msgid "C10"
+#~ msgstr "C10"
+
+#~ msgctxt "paper size"
+#~ msgid "C2"
+#~ msgstr "C2"
+
+#~ msgctxt "paper size"
+#~ msgid "C3"
+#~ msgstr "C3"
+
+#~ msgctxt "paper size"
+#~ msgid "C4"
+#~ msgstr "C4"
+
+#~ msgctxt "paper size"
+#~ msgid "C5"
+#~ msgstr "C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C6"
+#~ msgstr "C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C6/C5"
+#~ msgstr "C6/C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C7"
+#~ msgstr "C7"
+
+#~ msgctxt "paper size"
+#~ msgid "C7/C6"
+#~ msgstr "C7/C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C8"
+#~ msgstr "C8"
+
+#~ msgctxt "paper size"
+#~ msgid "C9"
+#~ msgstr "C9"
+
+#~ msgctxt "paper size"
+#~ msgid "DL Envelope"
+#~ msgstr "Sobre DL"
+
+#~ msgctxt "paper size"
+#~ msgid "RA0"
+#~ msgstr "RA0"
+
+#~ msgctxt "paper size"
+#~ msgid "RA1"
+#~ msgstr "RA1"
+
+#~ msgctxt "paper size"
+#~ msgid "RA2"
+#~ msgstr "RA2"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA0"
+#~ msgstr "SRA0"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA1"
+#~ msgstr "SRA1"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA2"
+#~ msgstr "SRA2"
+
+#~ msgctxt "paper size"
+#~ msgid "JB0"
+#~ msgstr "JB0"
+
+#~ msgctxt "paper size"
+#~ msgid "JB1"
+#~ msgstr "JB1"
+
+#~ msgctxt "paper size"
+#~ msgid "JB10"
+#~ msgstr "JB10"
+
+#~ msgctxt "paper size"
+#~ msgid "JB2"
+#~ msgstr "JB2"
+
+#~ msgctxt "paper size"
+#~ msgid "JB3"
+#~ msgstr "JB3"
+
+#~ msgctxt "paper size"
+#~ msgid "JB4"
+#~ msgstr "JB4"
+
+#~ msgctxt "paper size"
+#~ msgid "JB5"
+#~ msgstr "JB5"
+
+#~ msgctxt "paper size"
+#~ msgid "JB6"
+#~ msgstr "JB6"
+
+#~ msgctxt "paper size"
+#~ msgid "JB7"
+#~ msgstr "JB7"
+
+#~ msgctxt "paper size"
+#~ msgid "JB8"
+#~ msgstr "JB8"
+
+#~ msgctxt "paper size"
+#~ msgid "JB9"
+#~ msgstr "JB9"
+
+#~ msgctxt "paper size"
+#~ msgid "jis exec"
+#~ msgstr "JIS executiu"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 2 Envelope"
+#~ msgstr "Sobre Choukei 2"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 3 Envelope"
+#~ msgstr "Sobre Choukei 3"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 4 Envelope"
+#~ msgstr "Sobre Choukei 4"
+
+#~ msgctxt "paper size"
+#~ msgid "hagaki (postcard)"
+#~ msgstr "Hagaki (postal)"
+
+#~ msgctxt "paper size"
+#~ msgid "kahu Envelope"
+#~ msgstr "Sobre kahu"
+
+#~ msgctxt "paper size"
+#~ msgid "kaku2 Envelope"
+#~ msgstr "Sobre kaku2"
+
+# FIXME
+#~ msgctxt "paper size"
+#~ msgid "oufuku (reply postcard)"
+#~ msgstr "Oufuku (postal de resposta)"
+
+#~ msgctxt "paper size"
+#~ msgid "you4 Envelope"
+#~ msgstr "Sobre you4"
+
+#~ msgctxt "paper size"
+#~ msgid "10x11"
+#~ msgstr "10x11"
+
+#~ msgctxt "paper size"
+#~ msgid "10x13"
+#~ msgstr "10x13"
+
+#~ msgctxt "paper size"
+#~ msgid "10x14"
+#~ msgstr "10x14"
+
+#~ msgctxt "paper size"
+#~ msgid "10x15"
+#~ msgstr "10x15"
+
+#~ msgctxt "paper size"
+#~ msgid "11x12"
+#~ msgstr "11x12"
+
+#~ msgctxt "paper size"
+#~ msgid "11x15"
+#~ msgstr "11x15"
+
+#~ msgctxt "paper size"
+#~ msgid "12x19"
+#~ msgstr "12x19"
+
+#~ msgctxt "paper size"
+#~ msgid "5x7"
+#~ msgstr "5x7"
+
+#~ msgctxt "paper size"
+#~ msgid "6x9 Envelope"
+#~ msgstr "Sobre 6x9"
+
+#~ msgctxt "paper size"
+#~ msgid "7x9 Envelope"
+#~ msgstr "Sobre 7x9"
+
+#~ msgctxt "paper size"
+#~ msgid "9x11 Envelope"
+#~ msgstr "Sobre 9x11"
+
+#~ msgctxt "paper size"
+#~ msgid "a2 Envelope"
+#~ msgstr "Sobre A2"
+
+# Mides per a l'arquitectura (dpm)
+#~ msgctxt "paper size"
+#~ msgid "Arch A"
+#~ msgstr "Arch A"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch B"
+#~ msgstr "Arch B"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch C"
+#~ msgstr "Arch C"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch D"
+#~ msgstr "Arch D"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch E"
+#~ msgstr "Arch E"
+
+#~ msgctxt "paper size"
+#~ msgid "b-plus"
+#~ msgstr "B plus"
+
+#~ msgctxt "paper size"
+#~ msgid "c"
+#~ msgstr "C"
+
+#~ msgctxt "paper size"
+#~ msgid "c5 Envelope"
+#~ msgstr "Sobre C5"
+
+#~ msgctxt "paper size"
+#~ msgid "d"
+#~ msgstr "D"
+
+#~ msgctxt "paper size"
+#~ msgid "e"
+#~ msgstr "E"
+
+#~ msgctxt "paper size"
+#~ msgid "edp"
+#~ msgstr "EDP"
+
+#~ msgctxt "paper size"
+#~ msgid "European edp"
+#~ msgstr "EDP europeu"
+
+#~ msgctxt "paper size"
+#~ msgid "Executive"
+#~ msgstr "Executiu"
+
+#~ msgctxt "paper size"
+#~ msgid "f"
+#~ msgstr "F"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold European"
+#~ msgstr "Paper continu europeu"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold US"
+#~ msgstr "Paper continu americà"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold German Legal"
+#~ msgstr "Paper continu alemany legal"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Legal"
+#~ msgstr "Legal govern"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Letter"
+#~ msgstr "Carta governamental"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 3x5"
+#~ msgstr "Índex 3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 (postcard)"
+#~ msgstr "Índex 4x6 (postal)"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 ext"
+#~ msgstr "Índex 4x6 ext"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 5x8"
+#~ msgstr "Índex 5x8"
+
+#~ msgctxt "paper size"
+#~ msgid "Invoice"
+#~ msgstr "Factura"
+
+#~ msgctxt "paper size"
+#~ msgid "Tabloid"
+#~ msgstr "Tabloide"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal"
+#~ msgstr "Legal americà"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal Extra"
+#~ msgstr "Legal americà extra"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter"
+#~ msgstr "Carta americana"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Extra"
+#~ msgstr "Carta americana extra"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Plus"
+#~ msgstr "Carta americana plus"
+
+#~ msgctxt "paper size"
+#~ msgid "Monarch Envelope"
+#~ msgstr "Sobre Monarch"
+
+#~ msgctxt "paper size"
+#~ msgid "#10 Envelope"
+#~ msgstr "Sobre del núm. 10"
+
+#~ msgctxt "paper size"
+#~ msgid "#11 Envelope"
+#~ msgstr "Sobre del núm. 11"
+
+#~ msgctxt "paper size"
+#~ msgid "#12 Envelope"
+#~ msgstr "Sobre del núm. 12"
+
+#~ msgctxt "paper size"
+#~ msgid "#14 Envelope"
+#~ msgstr "Sobre del núm. 14"
+
+#~ msgctxt "paper size"
+#~ msgid "#9 Envelope"
+#~ msgstr "Sobre del núm. 9"
+
+#~ msgctxt "paper size"
+#~ msgid "Personal Envelope"
+#~ msgstr "Sobre personal"
+
+#~ msgctxt "paper size"
+#~ msgid "Quarto"
+#~ msgstr "Quartilla"
+
+#~ msgctxt "paper size"
+#~ msgid "Super A"
+#~ msgstr "Súper A"
+
+#~ msgctxt "paper size"
+#~ msgid "Super B"
+#~ msgstr "Súper B"
+
+#~ msgctxt "paper size"
+#~ msgid "Wide Format"
+#~ msgstr "Format ample"
+
+#~ msgctxt "paper size"
+#~ msgid "Dai-pa-kai"
+#~ msgstr "Dai-pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio"
+#~ msgstr "Foli"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio sp"
+#~ msgstr "Foli sp"
+
+#~ msgctxt "paper size"
+#~ msgid "Invite Envelope"
+#~ msgstr "Sobre d'invitació"
+
+#~ msgctxt "paper size"
+#~ msgid "Italian Envelope"
+#~ msgstr "Sobre italià"
+
+#~ msgctxt "paper size"
+#~ msgid "juuro-ku-kai"
+#~ msgstr "Juuro-ku-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "pa-kai"
+#~ msgstr "Pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Postfix Envelope"
+#~ msgstr "Sobre Postfix"
+
+#~ msgctxt "paper size"
+#~ msgid "Small Photo"
+#~ msgstr "Foto petita"
+
+#~ msgctxt "paper size"
+#~ msgid "prc1 Envelope"
+#~ msgstr "Sobre prc1"
+
+#~ msgctxt "paper size"
+#~ msgid "prc10 Envelope"
+#~ msgstr "Sobre prc10"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 16k"
+#~ msgstr "prc 16k"
+
+#~ msgctxt "paper size"
+#~ msgid "prc2 Envelope"
+#~ msgstr "Sobre prc2"
+
+#~ msgctxt "paper size"
+#~ msgid "prc3 Envelope"
+#~ msgstr "Sobre prc3"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 32k"
+#~ msgstr "prc 32k"
+
+#~ msgctxt "paper size"
+#~ msgid "prc4 Envelope"
+#~ msgstr "Sobre prc4"
+
+#~ msgctxt "paper size"
+#~ msgid "prc5 Envelope"
+#~ msgstr "Sobre c5"
+
+#~ msgctxt "paper size"
+#~ msgid "prc6 Envelope"
+#~ msgstr "Sobre prc6"
+
+#~ msgctxt "paper size"
+#~ msgid "prc7 Envelope"
+#~ msgstr "Sobre prc7"
+
+#~ msgctxt "paper size"
+#~ msgid "prc8 Envelope"
+#~ msgstr "Sobre prc8"
+
+#~ msgctxt "paper size"
+#~ msgid "prc9 Envelope"
+#~ msgstr "Sobre prc9"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 16k"
+#~ msgstr "ROC 16k"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 8k"
+#~ msgstr "ROC 8k"
+
+#, c-format
+#~ msgid "different idatas found for symlinked '%s' and '%s'\n"
+#~ msgstr ""
+#~ "s'han trobat diferents idatas per als enllaços simbòlics «%s» i «%s»\n"
+
+#, c-format
+#~ msgid "Failed to write header\n"
+#~ msgstr "No s'ha pogut escriure la capçalera\n"
+
+# FIXME
+#, c-format
+#~ msgid "Failed to write hash table\n"
+#~ msgstr "No s'ha pogut escriure la taula de resum\n"
+
+#, c-format
+#~ msgid "Failed to write folder index\n"
+#~ msgstr "No s'ha pogut escriure l'índex de la carpeta\n"
+
+#, c-format
+#~ msgid "Failed to rewrite header\n"
+#~ msgstr "No s'ha pogut reescriure la capçalera\n"
+
+#, c-format
+#~ msgid "Failed to open file %s : %s\n"
+#~ msgstr "No s'ha pogut obrir el fitxer %s: %s\n"
+
+#, c-format
+#~ msgid "Failed to write cache file: %s\n"
+#~ msgstr "No s'ha pogut escriure el fitxer de memòria cau: %s\n"
+
+#, c-format
+#~ msgid "The generated cache was invalid.\n"
+#~ msgstr "La memòria cau generada no era vàlida.\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s, removing %s then.\n"
+#~ msgstr "No s'ha pogut canviar el nom de %s a %s: %s, se suprimirà %s.\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s\n"
+#~ msgstr "No s'ha pogut canviar el nom de %s a %s: %s\n"
+
+#, c-format
+#~ msgid "Could not rename %s back to %s: %s.\n"
+#~ msgstr "No s'ha pogut tornar a anomenar %s a %s: %s.\n"
+
+#, c-format
+#~ msgid "Cache file created successfully.\n"
+#~ msgstr "S'ha creat el fitxer de memòria cau amb èxit.\n"
+
+#~ msgid "Overwrite an existing cache, even if up to date"
+#~ msgstr "Sobreescriu una memòria cau existent, encara que estigui al dia"
+
+#~ msgid "Don't check for the existence of index.theme"
+#~ msgstr "No comprovis l'existència d'index.theme"
+
+#~ msgid "Don't include image data in the cache"
+#~ msgstr "No incloguis dades d'imatges a la memòria cau"
+
+#~ msgid "Output a C header file"
+#~ msgstr "Produeix un fitxer de capçalera C"
+
+#~ msgid "Turn off verbose output"
+#~ msgstr "Desactiva la sortida detallada"
+
+#~ msgid "Validate existing icon cache"
+#~ msgstr "Valida la memòria cau d'icones existent"
+
+#, c-format
+#~ msgid "File not found: %s\n"
+#~ msgstr "No s'ha trobat el fitxer: %s\n"
+
+#, c-format
+#~ msgid "Not a valid icon cache: %s\n"
+#~ msgstr "No és una memòria cau d'icones vàlida: %s\n"
+
+#, c-format
+#~ msgid "No theme index file.\n"
+#~ msgstr "No hi ha cap fitxer d'índex de tema.\n"
+
+#, c-format
+#~ msgid ""
+#~ "No theme index file in '%s'.\n"
+#~ "If you really want to create an icon cache here, use --ignore-theme-"
+#~ "index.\n"
+#~ msgstr ""
+#~ "No hi ha el fitxer index de tema a «%s».\n"
+#~ "Si realment voleu crear una memòria cau d'icones aquí, utilitzeu --ignore-"
+#~ "theme-index.\n"
+
+#~ msgid "Amharic (EZ+)"
+#~ msgstr "Amhàric (EZ+)"
+
+# FIXME
+#~ msgid "Cedilla"
+#~ msgstr "Cedilla"
+
+#~ msgid "Cyrillic (Transliterated)"
+#~ msgstr "Ciríl·lic (Transliterat)"
+
+#~ msgid "Inuktitut (Transliterated)"
+#~ msgstr "Inuktitut (Transliterat)"
+
+#~ msgid "IPA"
+#~ msgstr "IPA"
+
+#~ msgid "Multipress"
+#~ msgstr "Multipress"
+
+#~ msgid "Thai-Lao"
+#~ msgstr "Thai-Lao"
+
+#~ msgid "Tigrigna-Eritrean (EZ+)"
+#~ msgstr "Tigrigna-Eritreà (EZ+)"
+
+#~ msgid "Tigrigna-Ethiopian (EZ+)"
+#~ msgstr "Tigrigna-Etíop (EZ+)"
+
+#~ msgid "Vietnamese (VIQR)"
+#~ msgstr "Vietnamita (VIQR)"
+
+#~ msgid "X Input Method"
+#~ msgstr "Mètode d'entrada d'X"
+
+#~ msgid "Username:"
+#~ msgstr "Nom d'usuari:"
+
+#~ msgid "Password:"
+#~ msgstr "Contrasenya:"
+
+#, c-format
+#~ msgid "Authentication is required to get a file from %s"
+#~ msgstr "Cal autenticació per obtenir un fitxer de %s"
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s' on printer %s"
+#~ msgstr "Cal autenticació per imprimir el document «%s» a la impressora %s"
+
+#, c-format
+#~ msgid "Authentication is required to print a document on %s"
+#~ msgstr "Cal autenticació per imprimir un document a %s"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of job '%s'"
+#~ msgstr "Cal autenticació per obtenir els atributs de la tasca «%s»"
+
+#~ msgid "Authentication is required to get attributes of a job"
+#~ msgstr "Cal autenticació per obtenir els atributs d'una tasca"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of printer %s"
+#~ msgstr "Cal autenticació per obtenir els atributs de la impressora %s"
+
+#~ msgid "Authentication is required to get attributes of a printer"
+#~ msgstr "Cal autenticació per obtenir els atributs d'una impressora"
+
+#, c-format
+#~ msgid "Authentication is required to get default printer of %s"
+#~ msgstr "Cal autenticació per obtenir la impressora predeterminada de %s"
+
+#, c-format
+#~ msgid "Authentication is required to get printers from %s"
+#~ msgstr "Cal autenticació per obtenir les impressores de %s"
+
+#, c-format
+#~ msgid "Authentication is required on %s"
+#~ msgstr "Cal autenticació a %s"
+
+#~ msgid "Domain:"
+#~ msgstr "Domini:"
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s'"
+#~ msgstr "Cal autenticar-se per imprimir un document a «%s»"
+
+#, c-format
+#~ msgid "Authentication is required to print this document on printer %s"
+#~ msgstr "Cal autenticar-se per imprimir aquest document a la impressora «%s»"
+
+#~ msgid "Authentication is required to print this document"
+#~ msgstr "Cal autenticar-se per imprimir aquest document"
+
+#, c-format
+#~ msgid "Printer '%s' is low on toner."
+#~ msgstr "El nivell del tòner de la impressora «%s» és baix."
+
+#, c-format
+#~ msgid "Printer '%s' has no toner left."
+#~ msgstr "No li queda tòner a la impressora «%s»."
+
+#, c-format
+#~ msgid "Printer '%s' is low on developer."
+#~ msgstr "El nivell del revelador de la impressora «%s» és baix."
+
+#, c-format
+#~ msgid "Printer '%s' is out of developer."
+#~ msgstr "No li queda revelador a la impressora «%s»."
+
+#, c-format
+#~ msgid "Printer '%s' is low on at least one marker supply."
+#~ msgstr ""
+#~ "El nivell d'almenys un dels contenidors de color de la impressora «%s» és "
+#~ "baix."
+
+#, c-format
+#~ msgid "Printer '%s' is out of at least one marker supply."
+#~ msgstr ""
+#~ "No li queda tinta a almenys un dels contenidors de color a la impressora "
+#~ "«%s»."
+
+#, c-format
+#~ msgid "The cover is open on printer '%s'."
+#~ msgstr "La tapa de la impressora «%s» està oberta."
+
+#, c-format
+#~ msgid "The door is open on printer '%s'."
+#~ msgstr "La porta de la impressora «%s» està oberta."
+
+#, c-format
+#~ msgid "Printer '%s' is low on paper."
+#~ msgstr "El nivell del paper de la impressora «%s» és baix."
+
+#, c-format
+#~ msgid "Printer '%s' is out of paper."
+#~ msgstr "No li queda paper a la impressora «%s»."
+
+#, c-format
+#~ msgid "Printer '%s' is currently off-line."
+#~ msgstr "La impressora «%s» actualment no està en línia."
+
+#, c-format
+#~ msgid "Printer '%s' may not be connected."
+#~ msgstr "Pot ser que la impressora «%s» no estigui connectada."
+
+#, c-format
+#~ msgid "There is a problem on printer '%s'."
+#~ msgstr "Hi ha un problema a la impressora «%s»."
+
+#~ msgid "Paused ; Rejecting Jobs"
+#~ msgstr "En pausa; refusa les tasques"
+
+#~ msgid "Rejecting Jobs"
+#~ msgstr "Refusa les tasques"
+
+#~ msgid "Two Sided"
+#~ msgstr "Doble cara"
+
+#~ msgid "Paper Type"
+#~ msgstr "Tipus de paper"
+
+#~ msgid "Paper Source"
+#~ msgstr "Font del paper"
+
+#~ msgid "Output Tray"
+#~ msgstr "Safata de sortida"
+
+#~ msgid "Resolution"
+#~ msgstr "Resolució"
+
+#~ msgid "GhostScript pre-filtering"
+#~ msgstr "Filtrat previ del GhostScript"
+
+#~ msgid "One Sided"
+#~ msgstr "Una cara"
+
+#~ msgid "Long Edge (Standard)"
+#~ msgstr "Cantó llarg (estàndard)"
+
+#~ msgid "Short Edge (Flip)"
+#~ msgstr "Cantó curt (capgirat)"
+
+#~ msgid "Auto Select"
+#~ msgstr "Selecció automàtica"
+
+#~ msgid "Printer Default"
+#~ msgstr "Predeterminat de la impressora"
+
+#~ msgid "Embed GhostScript fonts only"
+#~ msgstr "Incrusta només els tipus de lletra GhostScript"
+
+#~ msgid "Convert to PS level 1"
+#~ msgstr "Converteix a PS, nivell 1"
+
+#~ msgid "Convert to PS level 2"
+#~ msgstr "Converteix a PS, nivell 2"
+
+#~ msgid "No pre-filtering"
+#~ msgstr "Sense filtratge previ"
+
+#~ msgid "Miscellaneous"
+#~ msgstr "Miscel·lània"
+
+#~ msgid "Urgent"
+#~ msgstr "Urgent"
+
+#~ msgid "High"
+#~ msgstr "Alta"
+
+#~ msgid "Medium"
+#~ msgstr "Mitjana"
+
+#~ msgid "Low"
+#~ msgstr "Baixa"
+
+#~ msgid "Pages per Sheet"
+#~ msgstr "Pàgines per full"
+
+#~ msgid "Job Priority"
+#~ msgstr "Prioritat de la tasca"
+
+#~ msgid "Billing Info"
+#~ msgstr "Informació de facturació"
+
+#~ msgid "None"
+#~ msgstr "Cap"
+
+#~ msgid "Classified"
+#~ msgstr "Classificat"
+
+#~ msgid "Confidential"
+#~ msgstr "Confidencial"
+
+#~ msgid "Secret"
+#~ msgstr "Secret"
+
+#~ msgid "Standard"
+#~ msgstr "Estàndard"
+
+#~ msgid "Top Secret"
+#~ msgstr "Alt secret"
+
+#~ msgid "Unclassified"
+#~ msgstr "Desclassificat"
+
+# Possiblement sigui "abans de" (josep)
+#~ msgid "Before"
+#~ msgstr "Abans"
+
+# Possiblement "després de" (josep)
+#~ msgid "After"
+#~ msgstr "Després"
+
+#~ msgid "Print at"
+#~ msgstr "Imprimeix"
+
+# FIXME: s'ha de mirar que no sigui massa llarg
+#~ msgid "Print at time"
+#~ msgstr "Imprimeix a una hora o data determinada"
+
+#, c-format
+#~ msgid "Custom %sx%s"
+#~ msgstr "Personalitzat %sx%s"
+
+#, c-format
+#~ msgid "output.%s"
+#~ msgstr "sortida %s"
+
+#~ msgid "Print to File"
+#~ msgstr "Imprimeix a un fitxer"
+
+#~ msgid "PDF"
+#~ msgstr "PDF"
+
+#~ msgid "Postscript"
+#~ msgstr "Postscript"
+
+#~ msgid "SVG"
+#~ msgstr "SVG"
+
+#~ msgid "Pages per _sheet:"
+#~ msgstr "Pàgines per _full:"
+
+#~ msgid "File"
+#~ msgstr "Fitxer"
+
+#~ msgid "_Output format"
+#~ msgstr "F_ormat de sortida"
+
+# FIXME
+#~ msgid "Print to LPR"
+#~ msgstr "Imprimeix a LPR"
+
+#~ msgid "Pages Per Sheet"
+#~ msgstr "Pàgines per full"
+
+#~ msgid "Command Line"
+#~ msgstr "Línia d'ordres"
+
+# Connectada? (josep)
+#~ msgid "printer offline"
+#~ msgstr "la impressora no està en línia"
+
+#~ msgid "ready to print"
+#~ msgstr "a punt per imprimir"
+
+#~ msgid "processing job"
+#~ msgstr "s'està processant la tasca"
+
+#~ msgid "paused"
+#~ msgstr "en pausa"
+
+#~ msgid "unknown"
+#~ msgstr "desconegut"
+
+#, c-format
+#~ msgid "test-output.%s"
+#~ msgstr "prova-de-sortida.%s"
+
+#~ msgid "Print to Test Printer"
+#~ msgstr "Imprimiu per provar la impressora"
+
+#, c-format
+#~ msgid "Could not get information for file '%s': %s"
+#~ msgstr "No s'ha pogut obtenir informació per al fitxer «%s»: %s"
+
+#~ msgid "(Empty)"
+#~ msgstr "(Buit)"
+
+#, fuzzy
+#~ msgid "<b>_Search:</b>"
+#~ msgstr "_Cerca:"
+
+#, fuzzy
+#~ msgid "<b>Recently Used</b>"
+#~ msgstr "Utilitzats recentment"
+
+#~ msgid "directfb arg"
+#~ msgstr "argument directfb"
+
+#~ msgid "sdl|system"
+#~ msgstr "sistema"
+
+#~ msgid "keyboard label|BackSpace"
+#~ msgstr "Retrocés"
+
+#~ msgid "keyboard label|Tab"
+#~ msgstr "Tab"
+
+#~ msgid "keyboard label|Return"
+#~ msgstr "Retorn"
+
+#~ msgid "keyboard label|Pause"
+#~ msgstr "Pausa"
+
+#~ msgid "keyboard label|Scroll_Lock"
+#~ msgstr "Bloq_Despl"
+
+#~ msgid "keyboard label|Sys_Req"
+#~ msgstr "Sys_Req"
+
+#~ msgid "keyboard label|Escape"
+#~ msgstr "Esc"
+
+#~ msgid "keyboard label|Multi_key"
+#~ msgstr "Multi_tecla"
+
+#~ msgid "keyboard label|Home"
+#~ msgstr "Inici"
+
+#~ msgid "keyboard label|Left"
+#~ msgstr "Esquerra"
+
+#~ msgid "keyboard label|Up"
+#~ msgstr "Amunt"
+
+#~ msgid "keyboard label|Right"
+#~ msgstr "Dreta"
+
+#~ msgid "keyboard label|Down"
+#~ msgstr "Avall"
+
+#~ msgid "keyboard label|Page_Up"
+#~ msgstr "Re_Pàg"
+
+#~ msgid "keyboard label|Page_Down"
+#~ msgstr "Av_Pàg"
+
+#~ msgid "keyboard label|End"
+#~ msgstr "Fi"
+
+#~ msgid "keyboard label|Begin"
+#~ msgstr "Inici"
+
+#~ msgid "keyboard label|Print"
+#~ msgstr "Imprimeix"
+
+#~ msgid "keyboard label|Insert"
+#~ msgstr "Insereix"
+
+#~ msgid "keyboard label|Num_Lock"
+#~ msgstr "Bloq_Núm"
+
+#~ msgid "keyboard label|KP_Space"
+#~ msgstr "KP_Espai"
+
+#~ msgid "keyboard label|KP_Tab"
+#~ msgstr "KP_Tab"
+
+#~ msgid "keyboard label|KP_Enter"
+#~ msgstr "KP_Retorn"
+
+#~ msgid "keyboard label|KP_Home"
+#~ msgstr "KP_Inici"
+
+#~ msgid "keyboard label|KP_Left"
+#~ msgstr "KP_Esquerra"
+
+#~ msgid "keyboard label|KP_Up"
+#~ msgstr "KP_Amunt"
+
+#~ msgid "keyboard label|KP_Right"
+#~ msgstr "KP_Dreta"
+
+#~ msgid "keyboard label|KP_Down"
+#~ msgstr "KP_Avall"
+
+#~ msgid "keyboard label|KP_Page_Up"
+#~ msgstr "KP_Re_Pàg"
+
+#~ msgid "keyboard label|KP_Prior"
+#~ msgstr "KP_Anterior"
+
+#~ msgid "keyboard label|KP_Next"
+#~ msgstr "KP_Següent"
+
+#~ msgid "keyboard label|KP_End"
+#~ msgstr "KP_Fi"
+
+#~ msgid "keyboard label|KP_Begin"
+#~ msgstr "KP_Inici"
+
+#~ msgid "keyboard label|KP_Insert"
+#~ msgstr "KP_Insereix"
+
+#~ msgid "keyboard label|KP_Delete"
+#~ msgstr "KP_Supr"
+
+#~ msgid "keyboard label|Delete"
+#~ msgstr "Supr"
+
+#~ msgid "keyboard label|Shift"
+#~ msgstr "Maj"
+
+#~ msgid "keyboard label|Ctrl"
+#~ msgstr "Control"
+
+#~ msgid "keyboard label|Alt"
+#~ msgstr "Alt"
+
+#~ msgid "keyboard label|Super"
+#~ msgstr "Súper"
+
+#~ msgid "keyboard label|Hyper"
+#~ msgstr "Hiper"
+
+#~ msgid "keyboard label|Meta"
+#~ msgstr "Meta"
+
+#~ msgid "keyboard label|Space"
+#~ msgstr "Espai"
+
+#~ msgid "keyboard label|Backslash"
+#~ msgstr "Barra_invertida"
+
+#~ msgid "year measurement template|2000"
+#~ msgstr "2000"
+
+#~ msgid "calendar:day:digits|%d"
+#~ msgstr "%d"
+
+#~ msgid "calendar:week:digits|%d"
+#~ msgstr "%d"
+
+#~ msgid "calendar year format|%Y"
+#~ msgstr "%Y"
+
+#~ msgid "Accelerator|Disabled"
+#~ msgstr "Inhabilitat"
+
+#~ msgid "Icon not present in theme"
+#~ msgstr "La icona no es troba al tema"
+
+#~ msgid "progress bar label|%d %%"
+#~ msgstr "%d %%"
+
+#~ msgid "input method menu|System"
+#~ msgstr "Sistema"
+
+#~ msgid "input method menu|System (%s)"
+#~ msgstr "Sistema (%s)"
+
+#~ msgid "print operation status|Initial state"
+#~ msgstr "Estat inicial"
+
+#~ msgid "print operation status|Preparing to print"
+#~ msgstr "Preparant per a imprimir"
+
+#~ msgid "print operation status|Generating data"
+#~ msgstr "Generant les dades"
+
+#~ msgid "print operation status|Sending data"
+#~ msgstr "Enviant les dades"
+
+#~ msgid "print operation status|Waiting"
+#~ msgstr "Esperant"
+
+#~ msgid "print operation status|Blocking on issue"
+#~ msgstr "Blocat en un problema"
+
+#~ msgid "print operation status|Printing"
+#~ msgstr "Imprimint"
+
+#~ msgid "print operation status|Finished"
+#~ msgstr "Finalitzat"
+
+#~ msgid "recent menu label|_%d. %s"
+#~ msgstr "_%d. %s"
+
+#~ msgid "recent menu label|%d. %s"
+#~ msgstr "%d. %s"
+
+#~ msgid "Navigation|_Bottom"
+#~ msgstr "_Inferior"
+
+#~ msgid "Navigation|_First"
+#~ msgstr "_Primer"
+
+#~ msgid "Navigation|_Last"
+#~ msgstr "_Últim"
+
+#~ msgid "Navigation|_Top"
+#~ msgstr "_Superior"
+
+#~ msgid "Navigation|_Back"
+#~ msgstr "_Endarrere"
+
+#~ msgid "Navigation|_Down"
+#~ msgstr "_Avall"
+
+#~ msgid "Navigation|_Forward"
+#~ msgstr "E_ndavant"
+
+#~ msgid "Navigation|_Up"
+#~ msgstr "A_munt"
+
+#~ msgid "Justify|_Center"
+#~ msgstr "_Centra"
+
+#~ msgid "Justify|_Fill"
+#~ msgstr "Em_plena"
+
+#~ msgid "Justify|_Left"
+#~ msgstr "_Esquerra"
+
+#~ msgid "Justify|_Right"
+#~ msgstr "_Dreta"
+
+#~ msgid "Media|_Next"
+#~ msgstr "_Següent"
+
+#~ msgid "Media|P_ause"
+#~ msgstr "P_ausa"
+
+#~ msgid "Media|_Play"
+#~ msgstr "Re_produeix"
+
+#~ msgid "Media|_Stop"
+#~ msgstr "_Atura"
+
+#~ msgid "volume percentage|%d %%"
+#~ msgstr "%d %%"
+
+#~ msgid "paper size|asme_f"
+#~ msgstr "asme_f"
+
+#~ msgid "paper size|A0x2"
+#~ msgstr "A0x2"
+
+#~ msgid "paper size|A0"
+#~ msgstr "A0"
+
+#~ msgid "paper size|A0x3"
+#~ msgstr "A0x3"
+
+#~ msgid "paper size|A1"
+#~ msgstr "A1"
+
+#~ msgid "paper size|A10"
+#~ msgstr "A10"
+
+#~ msgid "paper size|A1x3"
+#~ msgstr "A1x3"
+
+#~ msgid "paper size|A1x4"
+#~ msgstr "A1x4"
+
+#~ msgid "paper size|A2"
+#~ msgstr "A2"
+
+#~ msgid "paper size|A2x3"
+#~ msgstr "A2x3"
+
+#~ msgid "paper size|A2x4"
+#~ msgstr "A2x4"
+
+#~ msgid "paper size|A2x5"
+#~ msgstr "A2x5"
+
+#~ msgid "paper size|A3"
+#~ msgstr "A3"
+
+#~ msgid "paper size|A3 Extra"
+#~ msgstr "A3 extra"
+
+#~ msgid "paper size|A3x3"
+#~ msgstr "A3x3"
+
+#~ msgid "paper size|A3x4"
+#~ msgstr "A3x4"
+
+#~ msgid "paper size|A3x5"
+#~ msgstr "A3x5"
+
+#~ msgid "paper size|A3x6"
+#~ msgstr "A3x6"
+
+#~ msgid "paper size|A3x7"
+#~ msgstr "A3x7"
+
+#~ msgid "paper size|A4"
+#~ msgstr "A4"
+
+#~ msgid "paper size|A4 Extra"
+#~ msgstr "A4 extra"
+
+#~ msgid "paper size|A4 Tab"
+#~ msgstr "A4 tab"
+
+#~ msgid "paper size|A4x3"
+#~ msgstr "A4x3"
+
+#~ msgid "paper size|A4x4"
+#~ msgstr "A4x4"
+
+#~ msgid "paper size|A4x5"
+#~ msgstr "A4x5"
+
+#~ msgid "paper size|A4x6"
+#~ msgstr "A4x6"
+
+#~ msgid "paper size|A4x7"
+#~ msgstr "A4x7"
+
+#~ msgid "paper size|A4x8"
+#~ msgstr "A4x8"
+
+#~ msgid "paper size|A4x9"
+#~ msgstr "A4x9"
+
+#~ msgid "paper size|A5"
+#~ msgstr "A5"
+
+#~ msgid "paper size|A5 Extra"
+#~ msgstr "A5 extra"
+
+#~ msgid "paper size|A6"
+#~ msgstr "A6"
+
+#~ msgid "paper size|A7"
+#~ msgstr "A7"
+
+#~ msgid "paper size|A8"
+#~ msgstr "A8"
+
+#~ msgid "paper size|A9"
+#~ msgstr "A9"
+
+#~ msgid "paper size|B0"
+#~ msgstr "B0"
+
+#~ msgid "paper size|B1"
+#~ msgstr "B1"
+
+#~ msgid "paper size|B10"
+#~ msgstr "B10"
+
+#~ msgid "paper size|B2"
+#~ msgstr "B2"
+
+#~ msgid "paper size|B3"
+#~ msgstr "B3"
+
+#~ msgid "paper size|B4"
+#~ msgstr "B4"
+
+#~ msgid "paper size|B5"
+#~ msgstr "B5"
+
+#~ msgid "paper size|B5 Extra"
+#~ msgstr "B5 extra"
+
+#~ msgid "paper size|B6"
+#~ msgstr "B6"
+
+#~ msgid "paper size|B6/C4"
+#~ msgstr "B6/C4"
+
+#~ msgid "paper size|B7"
+#~ msgstr "B7"
+
+#~ msgid "paper size|B8"
+#~ msgstr "B8"
+
+#~ msgid "paper size|B9"
+#~ msgstr "B9"
+
+#~ msgid "paper size|C0"
+#~ msgstr "C0"
+
+#~ msgid "paper size|C1"
+#~ msgstr "C1"
+
+#~ msgid "paper size|C10"
+#~ msgstr "C10"
+
+#~ msgid "paper size|C2"
+#~ msgstr "C2"
+
+#~ msgid "paper size|C3"
+#~ msgstr "C3"
+
+#~ msgid "paper size|C4"
+#~ msgstr "C4"
+
+#~ msgid "paper size|C5"
+#~ msgstr "C5"
+
+#~ msgid "paper size|C6"
+#~ msgstr "C6"
+
+#~ msgid "paper size|C6/C5"
+#~ msgstr "C6/C5"
+
+#~ msgid "paper size|C7"
+#~ msgstr "C7"
+
+#~ msgid "paper size|C7/C6"
+#~ msgstr "C7/C6"
+
+#~ msgid "paper size|C8"
+#~ msgstr "C8"
+
+#~ msgid "paper size|C9"
+#~ msgstr "C9"
+
+#~ msgid "paper size|RA0"
+#~ msgstr "RA0"
+
+#~ msgid "paper size|RA1"
+#~ msgstr "RA1"
+
+#~ msgid "paper size|RA2"
+#~ msgstr "RA2"
+
+#~ msgid "paper size|SRA0"
+#~ msgstr "SRA0"
+
+#~ msgid "paper size|SRA1"
+#~ msgstr "SRA1"
+
+#~ msgid "paper size|SRA2"
+#~ msgstr "SRA2"
+
+#~ msgid "paper size|JB0"
+#~ msgstr "JB0"
+
+#~ msgid "paper size|JB1"
+#~ msgstr "JB1"
+
+#~ msgid "paper size|JB10"
+#~ msgstr "JB10"
+
+#~ msgid "paper size|JB2"
+#~ msgstr "JB2"
+
+#~ msgid "paper size|JB3"
+#~ msgstr "JB3"
+
+#~ msgid "paper size|JB4"
+#~ msgstr "JB4"
+
+#~ msgid "paper size|JB5"
+#~ msgstr "JB5"
+
+#~ msgid "paper size|JB6"
+#~ msgstr "JB6"
+
+#~ msgid "paper size|JB7"
+#~ msgstr "JB7"
+
+#~ msgid "paper size|JB8"
+#~ msgstr "JB8"
+
+#~ msgid "paper size|JB9"
+#~ msgstr "JB9"
+
+#~ msgid "paper size|jis exec"
+#~ msgstr "jis exec"
+
+#~ msgid "paper size|10x11"
+#~ msgstr "10x11"
+
+#~ msgid "paper size|10x13"
+#~ msgstr "10x13"
+
+#~ msgid "paper size|10x14"
+#~ msgstr "10x14"
+
+#~ msgid "paper size|10x15"
+#~ msgstr "10x15"
+
+#~ msgid "paper size|11x12"
+#~ msgstr "11x12"
+
+#~ msgid "paper size|11x15"
+#~ msgstr "11x15"
+
+#~ msgid "paper size|12x19"
+#~ msgstr "12x19"
+
+#~ msgid "paper size|5x7"
+#~ msgstr "5x7"
+
+#~ msgid "paper size|Arch A"
+#~ msgstr "Arch A"
+
+#~ msgid "paper size|Arch B"
+#~ msgstr "Arch B"
+
+#~ msgid "paper size|Arch C"
+#~ msgstr "Arch C"
+
+#~ msgid "paper size|Arch D"
+#~ msgstr "Arch D"
+
+#~ msgid "paper size|Arch E"
+#~ msgstr "Arch E"
+
+#~ msgid "paper size|b-plus"
+#~ msgstr "b-plus"
+
+#~ msgid "paper size|c"
+#~ msgstr "c"
+
+#~ msgid "paper size|d"
+#~ msgstr "d"
+
+#~ msgid "paper size|e"
+#~ msgstr "e"
+
+#~ msgid "paper size|edp"
+#~ msgstr "edp"
+
+#~ msgid "paper size|Executive"
+#~ msgstr "Executiu"
+
+#~ msgid "paper size|f"
+#~ msgstr "f"
+
+# FIXME
+#~ msgid "paper size|Index 3x5"
+#~ msgstr "Índex 3x5"
+
+#~ msgid "paper size|Index 5x8"
+#~ msgstr "Índex 5x8"
+
+#~ msgid "paper size|Invoice"
+#~ msgstr "Factura"
+
+#~ msgid "paper size|Tabloid"
+#~ msgstr "Tabloide"
+
+#~ msgid "paper size|US Legal"
+#~ msgstr "US Legal"
+
+#~ msgid "paper size|Quarto"
+#~ msgstr "En quart"
+
+#~ msgid "paper size|Super A"
+#~ msgstr "Súper A"
+
+#~ msgid "paper size|Super B"
+#~ msgstr "Súper B"
+
+#~ msgid "paper size|Folio"
+#~ msgstr "Foli"
+
+#~ msgid "paper size|Folio sp"
+#~ msgstr "Foli sp"
+
+#~ msgid "paper size|pa-kai"
+#~ msgstr "pa-kai"
+
+#~ msgid "paper size|prc 16k"
+#~ msgstr "prc 16k"
+
+#~ msgid "paper size|prc 32k"
+#~ msgstr "prc 32k"
+
+#~ msgid "paper size|prc5 Envelope"
+#~ msgstr "Sobre prc5"
+
+#~ msgid "paper size|ROC 16k"
+#~ msgstr "ROC 16k"
+
+#~ msgid "paper size|ROC 8k"
+#~ msgstr "ROC 8k"
+
+#~ msgid "Couldn't create pixbuf"
+#~ msgstr "No s'ha pogut crear la memòria intermèdia de píxels"
+
+#~ msgid "%.1f KB"
+#~ msgstr "%.1f KB"
+
+#~ msgid "%.1f MB"
+#~ msgstr "%.1f MB"
+
+#~ msgid "%.1f GB"
+#~ msgstr "%.1f GB"
+
+#~ msgid "URI"
+#~ msgstr "URI"
+
+#~ msgid "The URI bound to this button"
+#~ msgstr "La URI vinculada a aquest botó"
+
+#~ msgid "Arrow spacing"
+#~ msgstr "Espaiat de les fletxes"
+
+#~ msgid "Scroll arrow spacing"
+#~ msgstr "Espaiat de les fletxes de desplaçament"
+
+#~ msgid "Group"
+#~ msgstr "Grup"
+
+#~ msgid "The radio tool button whose group this button belongs to."
+#~ msgstr "El botó d'eina de ràdio al qual pertany aquest grup."
+
+#~ msgid "Invalid filename: %s"
+#~ msgstr "El nom del fitxer no és vàlid: %s"
+
+#~ msgid ""
+#~ "Could not add a bookmark for '%s' because it is an invalid path name."
+#~ msgstr ""
+#~ "No s'ha pogut afegir una adreça d'interès per a «%s» perquè és un nom de "
+#~ "camí invàlid."
+
+#~ msgid "Could not select file '%s' because it is an invalid path name."
+#~ msgstr ""
+#~ "No s'ha pogut seleccionar el fitxer «%s» perquè és un nom de camí invàlid."
+
+#~ msgid "%d byte"
+#~ msgid_plural "%d bytes"
+#~ msgstr[0] "%d octet"
+#~ msgstr[1] "%d octets"
+
+#~ msgid "Could not get a stock icon for %s\n"
+#~ msgstr "No s'ha pogut obtenir una icona d'estoc per a %s\n"
+
+#~ msgid "Error getting information for '%s': %s"
+#~ msgstr "S'ha produït un error en obtenir informació per a «%s»: %s"
+
+#~ msgid "This file system does not support mounting"
+#~ msgstr "Aquest sistema de fitxers no permet ser muntat"
+
+#~ msgid ""
+#~ "The name \"%s\" is not valid because it contains the character \"%s\". "
+#~ "Please use a different name."
+#~ msgstr ""
+#~ "El nom «%s» no és vàlid perquè conté el caràcter «%s». Utilitzeu un nom "
+#~ "diferent."
+
+#~ msgid "Bookmark saving failed: %s"
+#~ msgstr "S'ha produït un error en desar l'adreça d'interès: %s"
+
+#~ msgid "'%s' already exists in the bookmarks list"
+#~ msgstr "«%s» ja existeix a la llista d'adreces d'interès"
+
+#~ msgid "'%s' does not exist in the bookmarks list"
+#~ msgstr "«%s» no existeix a la llista d'adreces d'interès"
+
+#~ msgid "Path is not a folder: '%s'"
+#~ msgstr "El camí no és una carpeta: '%s'"
+
+#~ msgid "Network Drive (%s)"
+#~ msgstr "Unitat de xarxa (%s)"
+
+#~ msgid "Unknown attribute '%s' on line %d char %d"
+#~ msgstr "No es coneix l'atribut «%s» a la línia %d, caràcter %d"
+
+#~ msgid "Today at %H:%M"
+#~ msgstr "Avui a les %H:%M"
+
+#~ msgid "Default"
+#~ msgstr "Predeterminat"
+
+#~ msgid "_All"
+#~ msgstr "_Totes"
+
+#~ msgid "Today"
+#~ msgstr "Avui"
+
+#~ msgid "Line %d, column %d: missing attribute \"%s\""
+#~ msgstr "Línia %d, columna %d: manca l'atribut «%s»"
+
+#~ msgid "Line %d, column %d: unexpected element \"%s\""
+#~ msgstr "Línia %d, columna %d: no s'esperava l'element «%s»"
+
+#~ msgid ""
+#~ "Line %d, column %d: expected end of element \"%s\", but found end for "
+#~ "element \"%s\" instead"
+#~ msgstr ""
+#~ "Línia %d, columna %d: s'esperava el final de l'element «%s», però s'ha "
+#~ "trobat el de l'element «%s»"
+
+#~ msgid ""
+#~ "Line %d, column %d: expected \"%s\" at the toplevel, but found \"%s\" "
+#~ "instead"
+#~ msgstr ""
+#~ "Línia %d, columna %d: s'esperava «%s» al nivell superior, però s'hi ha "
+#~ "trobat «%s»"
+
+#~ msgid ""
+#~ "Line %d, column %d: expected \"%s\" or \"%s\", but found \"%s\" instead"
+#~ msgstr ""
+#~ "Línia %d, columna %d: s'esperava «%s» o bé «%s», però s'ha trobat «%s»"
+
+#~ msgid "Error creating directory '%s': %s"
+#~ msgstr "S'ha produït un error en crear el directori «%s»: %s"
+
+#~ msgid "Thai (Broken)"
+#~ msgstr "Thai (Trencat)"
+
+#~ msgid "PNM image format is invalid"
+#~ msgstr "El format d'imatge PNM no és vàlid"
+
+#~ msgid ""
+#~ "Error creating folder \"%s\": %s\n"
+#~ "%s"
+#~ msgstr ""
+#~ "S'ha produït un error en crear la carpeta \"%s\": %s\n"
+#~ "%s"
+
+#~ msgid "You probably used symbols not allowed in filenames."
+#~ msgstr ""
+#~ "Probablement heu utilitzat símbols no permesos per a noms de fitxer."
+
+#~ msgid ""
+#~ "Error deleting file \"%s\": %s\n"
+#~ "%s"
+#~ msgstr ""
+#~ "S'ha produït un error en suprimir el fitxer \"%s\": %s\n"
+#~ "%s"
+
+#~ msgid "It probably contains symbols not allowed in filenames."
+#~ msgstr "Probablement conté símbols no permesos per a noms de fitxer"
+
+#~ msgid ""
+#~ "The file name \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr ""
+#~ "El nom del fitxer \"%s\" conté símbols que no estan permesos als noms de "
+#~ "fitxer"
+
+#~ msgid "Error getting information for '/': %s"
+#~ msgstr "S'ha produït un error en obtenir informació per a «/»: %s"
+
+#~ msgid "Select All"
+#~ msgstr "Selecciona-ho tot"
+
+#~ msgid "shortcut %s already exists"
+#~ msgstr "La drecera %s ja existeix"
+
+#~ msgid "Cannot handle PNM files with maximum color values greater than 255"
+#~ msgstr ""
+#~ "No es poden gestionar fitxers PNM amb valors de color màxims més grans de "
+#~ "255"
+
+#~ msgid "Could not get information about '%s': %s"
+#~ msgstr "No s'ha pogut obtenir informació sobre «%s»: %s"
+
+#~ msgid "Shortcuts"
+#~ msgstr "Dreceres"
+
+#~ msgid "Folder"
+#~ msgstr "Carpeta"
+
+#~ msgid "Cannot change folder"
+#~ msgstr "No es pot canviar de carpeta"
+
+#~ msgid "The folder you specified is an invalid path."
+#~ msgstr "La carpeta que heu especificat és un camí invàlid."
+
+#~ msgid "Could not build file name from '%s' and '%s'"
+#~ msgstr "No s'ha pogut construir el nom del fitxer des de «%s» i «%s»"
+
+#~ msgid "Save in Location"
+#~ msgstr "Desa en una ubicació"
+
+#~ msgid "X"
+#~ msgstr "X"
+
+#~ msgid "clear"
+#~ msgstr "neteja"

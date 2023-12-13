@@ -25,9 +25,14 @@ def build(bld):
     obj.includes     = [ '.' ]
     obj.name         = 'libardour_faderport8'
     obj.target       = 'ardour_faderport8'
-    obj.uselib       = 'GTKMM GTK GDK XML OSX'
+    obj.uselib       = 'XML OSX CAIROMM PANGOMM'
     obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+    if bld.is_defined('YTK'):
+        obj.use    += ' libytkmm'
+        obj.uselib += ' GLIBMM GIOMM'
+    else:
+        obj.uselib += ' GTKMM'
 
     obj = bld(features = 'cxx cxxshlib')
     obj.source       = list(fp8_16_sources)
@@ -38,9 +43,14 @@ def build(bld):
     obj.includes     = [ '.' ]
     obj.name         = 'libardour_faderport16'
     obj.target       = 'ardour_faderport16'
-    obj.uselib       = 'GTKMM GTK GDK XML OSX'
+    obj.uselib       = 'XML OSX CAIROMM PANGOMM'
     obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+    if bld.is_defined('YTK'):
+        obj.use    += ' libytkmm'
+        obj.uselib += ' GLIBMM GIOMM'
+    else:
+        obj.uselib += ' GTKMM'
 
     obj = bld(features = 'cxx cxxshlib')
     obj.source       = list(fp8_16_sources)
@@ -51,6 +61,11 @@ def build(bld):
     obj.includes     = [ '.' ]
     obj.name         = 'libardour_faderport2'
     obj.target       = 'ardour_faderport2'
-    obj.uselib       = 'GTKMM GTK GDK XML OSX'
+    obj.uselib       = 'XML OSX CAIROMM PANGOMM'
     obj.use          = 'libardour libardour_cp libgtkmm2ext libpbd'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
+    if bld.is_defined('YTK'):
+        obj.use    += ' libytkmm'
+        obj.uselib += ' GLIBMM GIOMM'
+    else:
+        obj.uselib += ' GTKMM'

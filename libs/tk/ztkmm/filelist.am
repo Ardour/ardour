@@ -1,0 +1,9 @@
+## This file is part of atkmm.
+
+atkmm_files_built_cc = $(atkmm_files_hg:.hg=.cc) wrap_init.cc
+atkmm_files_built_h  = $(atkmm_files_hg:.hg=.h)
+atkmm_files_built_ph = $(patsubst %.hg,private/%_p.h,$(atkmm_files_hg))
+
+atkmm_files_extra_cc = init.cc
+atkmm_files_extra_h  = init.h wrap_init.h
+atkmm_files_extra_ph =

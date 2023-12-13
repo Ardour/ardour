@@ -1,0 +1,209 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import sys
+
+# Version of this package (even if built as a child)
+MAJOR = '2'
+MINOR = '24'
+MICRO = '23'
+LIBYDK_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
+
+I18N_PACKAGE = 'libydk'
+
+libydk_sources = [
+    'gdk.c',
+    'gdkaliasdef.c',
+    'gdkapplaunchcontext.c',
+    'gdkcairo.c',
+    'gdkcolor.c',
+    'gdkcursor.c',
+    'gdkdisplay.c',
+    'gdkdisplaymanager.c',
+    'gdkdnd.c',
+    'gdkdraw.c',
+    'gdkenumtypes.c',
+    'gdkevents.c',
+    'gdkfont.c',
+    'gdkgc.c',
+    'gdkglobals.c',
+    'gdkimage.c',
+    #'gdkkeynames.c',
+    'gdkkeys.c',
+    'gdkkeyuni.c',
+    'gdkmarshalers.c',
+    'gdkoffscreenwindow.c',
+    'gdkpango.c',
+    'gdkpixbuf-drawable.c',
+    'gdkpixbuf-render.c',
+    'gdkpixmap.c',
+    'gdkpolyreg-generic.c',
+    'gdkrectangle.c',
+    'gdkregion-generic.c',
+    'gdkrgb.c',
+    'gdkscreen.c',
+    'gdkselection.c',
+    'gdkvisual.c',
+    'gdkwindow.c',
+    'gdkwindowimpl.c',
+]
+
+libydk_quartz_sources = [
+    'gdkkeynames.c',
+    'quartz/GdkQuartzView.c',
+    'quartz/GdkQuartzWindow.c',
+    'quartz/gdkapplaunchcontext-quartz.c',
+    'quartz/gdkcolor-quartz.c',
+    'quartz/gdkcursor-quartz.c',
+    'quartz/gdkdisplay-quartz.c',
+    'quartz/gdkdnd-quartz.c',
+    'quartz/gdkdrawable-quartz.c',
+    'quartz/gdkeventloop-quartz.c',
+    'quartz/gdkevents-quartz.c',
+    'quartz/gdkfont-quartz.c',
+    'quartz/gdkgc-quartz.c',
+    'quartz/gdkgeometry-quartz.c',
+    'quartz/gdkglobals-quartz.c',
+    'quartz/gdkim-quartz.c',
+    'quartz/gdkimage-quartz.c',
+    'quartz/gdkinput.c',
+    'quartz/gdkkeys-quartz.c',
+    'quartz/gdkmain-quartz.c',
+    'quartz/gdkpixmap-quartz.c',
+    'quartz/gdkproperty-quartz.c',
+    'quartz/gdkscreen-quartz.c',
+    'quartz/gdkselection-quartz.c',
+    'quartz/gdkspawn-quartz.c',
+    #'quartz/gdktestutils-quartz.c',
+    'quartz/gdkvisual-quartz.c',
+    'quartz/gdkwindow-quartz.c',
+]
+
+libydk_x11_sources = [
+    #'x11/checksettings.c',
+    'x11/gdkapplaunchcontext-x11.c',
+    'x11/gdkasync.c',
+    'x11/gdkcolor-x11.c',
+    'x11/gdkcursor-x11.c',
+    'x11/gdkdisplay-x11.c',
+    'x11/gdkdnd-x11.c',
+    'x11/gdkdrawable-x11.c',
+    'x11/gdkevents-x11.c',
+    'x11/gdkfont-x11.c',
+    'x11/gdkgc-x11.c',
+    'x11/gdkgeometry-x11.c',
+    'x11/gdkglobals-x11.c',
+    'x11/gdkim-x11.c',
+    'x11/gdkimage-x11.c',
+    'x11/gdkinput-none.c',
+    #'x11/gdkinput-x11.c',
+    #'x11/gdkinput-xfree.c',
+    'x11/gdkinput.c',
+    'x11/gdkkeys-x11.c',
+    'x11/gdkmain-x11.c',
+    'x11/gdkpixmap-x11.c',
+    'x11/gdkproperty-x11.c',
+    'x11/gdkscreen-x11.c',
+    'x11/gdkselection-x11.c',
+    #'x11/gdksettings.c',
+    'x11/gdkspawn-x11.c',
+    #'x11/gdktestutils-x11.c',
+    'x11/gdkvisual-x11.c',
+    'x11/gdkwindow-x11.c',
+    'x11/gdkxftdefaults.c',
+    'x11/gdkxid.c',
+    'x11/xsettings-client.c',
+    'x11/xsettings-common.c',
+]
+
+libydk_win32_sources = [
+    'gdkkeynames.c',
+    'win32/bdfcursor.c',
+    'win32/gdkapplaunchcontext-win32.c',
+    'win32/gdkcolor-win32.c',
+    'win32/gdkcursor-win32.c',
+    'win32/gdkdisplay-win32.c',
+    'win32/gdkdnd-win32.c',
+    'win32/gdkdrawable-win32.c',
+    'win32/gdkevents-win32.c',
+    'win32/gdkfont-win32.c',
+    'win32/gdkgc-win32.c',
+    'win32/gdkgeometry-win32.c',
+    'win32/gdkglobals-win32.c',
+    'win32/gdkim-win32.c',
+    'win32/gdkimage-win32.c',
+    'win32/gdkinput-win32.c',
+    'win32/gdkinput.c',
+    'win32/gdkkeys-win32.c',
+    'win32/gdkmain-win32.c',
+    'win32/gdkpixmap-win32.c',
+    'win32/gdkproperty-win32.c',
+    'win32/gdkscreen-win32.c',
+    'win32/gdkselection-win32.c',
+    'win32/gdkspawn-win32.c',
+    #'win32/gdktestutils-win32.c',
+    'win32/gdkvisual-win32.c',
+    'win32/gdkwin32id.c',
+    'win32/gdkwindow-win32.c',
+]
+
+def options(opt):
+    pass
+
+def configure(conf):
+    if conf.is_defined('YTK'):
+        autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
+        autowaf.check_pkg(conf, 'pango', uselib_store='PANGO', atleast_version='1.20', mandatory=True)
+        autowaf.check_pkg(conf, 'cairo', uselib_store='CAIRO', atleast_version='1.12', mandatory=True)
+        autowaf.check_pkg(conf, 'pangocairo', uselib_store='PANGOCAIRO', mandatory=True)
+        if conf.env['build_target'] == 'mingw':
+            autowaf.check_pkg(conf, 'gio-windows-2.0', uselib_store='GIO-WINDOWS', mandatory=True)
+        elif sys.platform != 'darwin':
+            autowaf.check_pkg(conf, 'gio-unix-2.0', uselib_store='GIO-UNIX', mandatory=True)
+            autowaf.check_pkg(conf, 'xrandr', uselib_store='RANDR', mandatory=False, atleast_version='1.2.99')
+            autowaf.check_pkg(conf, 'xrandr', uselib_store='RANDR15', mandatory=False, atleast_version='1.5.0')
+            conf.check_cc(header_name='X11/extensions/Xinerama.h',
+                          lib='Xinerama', uselib_store="XINERAMA", define_name='HAVE_XFREE_XINERAMA',
+                          execute = False, mandatory=False)
+
+def build(bld):
+    if not bld.is_defined('YTK'):
+        return
+
+    obj = bld.shlib(features = 'c cshlib')
+    obj.cflags          = [ bld.env['compiler_flags_dict']['pic'], '-w' ]
+    obj.export_includes = ['ydk']
+    obj.includes        = ['.', '..', 'ydk', 'ydk/gdk']
+    obj.name            = 'libydk'
+    obj.target          = 'ydk'
+    obj.use             = [ 'libztk', 'libydk-pixbuf' ]
+    obj.uselib          = 'GLIB PANGO CAIRO PANGOCAIRO'
+    obj.defines         = [ 'HAVE_CONFIG_H', '_LARGEFILE64_SOURCE', '_REENTRANT', 'G_LOG_DOMAIN="Gdk"', 'GDK_COMPILATION', '_FILE_OFFSET_BITS=64',
+                            'GDK_PIXBUF_DISABLE_DEPRECATED', 'G_DISABLE_CAST_CHECKS',
+                            'G_DISABLE_SINGLE_INCLUDES', 'ATK_DISABLE_SINGLE_INCLUDES', 'GDK_PIXBUF_DISABLE_SINGLE_INCLUDES']
+    obj.vnum            = LIBYDK_VERSION
+    obj.install_path    = bld.env['LIBDIR']
+
+    if sys.platform == 'darwin':
+        obj.source   = libydk_sources + libydk_quartz_sources
+        obj.cflags   += ['-xobjective-c']
+        obj.uselib   += ' OSX' # -framework Cocoa -framework CoreFoundation -framework ApplicationServices
+        obj.includes += ['ydk/quartz', 'ydk/quartz/gdk', 'ydk/gdk/quartz']
+        obj.export_includes += ['ydk/gdk']
+        obj.export_includes += ['ydk/quartz']
+    elif bld.env['build_target'] == 'mingw':
+        obj.source   = libydk_sources + libydk_win32_sources
+        obj.cflags   += ['-mms-bitfields', '-Wl,--export-all-symbols']
+        obj.uselib   += ' GIO-WINDOWS'
+        obj.defines         += [ 'INSIDE_GDK_WIN32', 'DLL_EXPORT', 'PIC' ]
+        obj.includes        += ['ydk/win32/gdk', 'ydk/win32']
+        obj.export_includes += ['ydk/gdk']
+        obj.export_includes += ['ydk/win32']
+        obj.linkflags = ['-Wl,--export-all-symbols']
+        obj.ldflags          = '-limm32 -lole32 -lgdi32 -lcomdlg32 -lwinspool -lcomctl32 -luuid'
+    else:
+        obj.source    = libydk_sources + libydk_x11_sources
+        obj.uselib   += ' GIO-UNIX X11 XEXT XINERAMA RANDR'
+        obj.includes        += ['ydk/x11/gdk', 'ydk/gdk/x11']
+        obj.export_includes += ['ydk/gdk']
+        obj.export_includes += ['ydk/x11']
+

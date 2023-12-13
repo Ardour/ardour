@@ -1,0 +1,65 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import sys
+
+# Version of this package (even if built as a child)
+MAJOR = '2'
+MINOR = '31'
+MICRO = '1'
+LIBYDKPIXBUF_VERSION = "%s.%s.%s" % (MAJOR, MINOR, MICRO)
+
+I18N_PACKAGE = 'libydk-pixbuf'
+
+libydkpixbuf_sources = [
+    'gdk-pixbuf-animation.c',
+    'gdk-pixbuf-data.c',
+    'gdk-pixbuf-enum-types.c',
+    'gdk-pixbuf-io.c',
+    'gdk-pixbuf-loader.c',
+    'gdk-pixbuf-scale.c',
+    'gdk-pixbuf-scaled-anim.c',
+    'gdk-pixbuf-simple-anim.c',
+    'gdk-pixbuf-util.c',
+    'gdk-pixbuf.c',
+    'gdk-pixdata.c',
+    'io-pixdata.c',
+    'io-png.c',
+    'io-xbm.c',
+    'io-xpm.c',
+    'pixops/pixops.c'
+]
+
+def options(opt):
+    pass
+
+def configure(conf):
+    if conf.is_defined('YTK'):
+        autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
+        autowaf.check_pkg(conf, 'gio-2.0', uselib_store='GIO', atleast_version='2.2', mandatory=True)
+        autowaf.check_pkg(conf, 'gobject-2.0', uselib_store='GOBJECT', mandatory=True)
+        autowaf.check_pkg(conf, 'libpng', uselib_store='LIBPNG', mandatory=True)
+
+def build(bld):
+    if not bld.is_defined('YTK'):
+        return
+
+    obj = bld.shlib(features = 'c cshlib', source=libydkpixbuf_sources)
+    obj.cflags          = [ bld.env['compiler_flags_dict']['pic'] ]
+    obj.export_includes = ['ydk-pixbuf']
+    obj.includes        = ['.', 'ydk-pixbuf', 'ydk-pixbuf/gdk-pixbuf']
+    obj.name            = 'libydk-pixbuf'
+    obj.target          = 'ydk-pixbuf'
+    obj.use             = ''
+    obj.uselib          = 'GLIB GIO GOBJECT LIBPNG'
+    obj.defines         = [ 'HAVE_CONFIG_H', '_LARGEFILE64_SOURCE', '_REENTRANT', 'G_LOG_DOMAIN="GdkPixbuf"', 'DGDK_PIXBUF_COMPILATION', '_FILE_OFFSET_BITS=64',
+                            'GDK_PIXBUF_ENABLE_BACKEND', 'G_DISABLE_SINGLE_INCLUDES',
+                            'INCLUDE_png', 'INCLUDE_xbm', 'INCLUDE_xpm',
+                            'PACKAGE="' + I18N_PACKAGE + '"', 'GDK_PIXBUF_LOCALEDIR=""'
+
+                           ]
+    obj.vnum            = LIBYDKPIXBUF_VERSION
+    obj.install_path    = bld.env['LIBDIR']
+
+    if sys.platform == 'darwin':
+        obj.uselib     += ' OSX'
+        obj.ldflags     = ' -lintl'

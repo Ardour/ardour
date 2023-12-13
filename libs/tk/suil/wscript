@@ -1,0 +1,83 @@
+#!/usr/bin/env python
+from waflib.extras import autowaf as autowaf
+import sys
+
+SUIL_VERSION = '0.10.8'
+
+def options(ctx):
+    pass
+
+def configure(conf):
+    if not conf.is_defined('YTK'):
+        return
+
+    autowaf.check_pkg(conf, 'glib-2.0', uselib_store='GLIB', atleast_version='2.28', mandatory=True)
+    autowaf.check_pkg(conf, 'lv2', uselib_store='LV2_1_16_0', atleast_version='1.16.0', mandatory=False)
+    if conf.env['build_target'] != 'mingw' and sys.platform != 'darwin': # Linux
+        autowaf.check_pkg(conf, 'x11', uselib_store='X11', system=True, mandatory=True)
+
+def build(bld):
+    if not bld.is_defined('YTK') or not bld.is_defined('HAVE_LV2_1_16_0'):
+        return
+
+    module_dir = bld.env['LIBDIR']
+    cflags     = [ bld.env['compiler_flags_dict']['pic'], bld.env['compiler_flags_dict']['c99'] ]
+    defines    = [ 'SUIL_DIR_SEP="/"', 'SUIL_MODULE_DIR="' + module_dir +'"', 'SUIL_SHARED', 'SUIL_INTERNAL']
+
+    if sys.platform == 'darwin':
+        cflags  += ['-fvisibility=hidden']
+        defines += ['SUIL_WITH_COCOA_IN_GTK2', 'SUIL_MODULE_PREFIX="lib"', 'SUIL_MODULE_EXT=".dylib"']
+    elif bld.env['build_target'] == 'mingw':
+        defines += ['SUIL_WITH_WIN_IN_GTK2', 'SUIL_MODULE_PREFIX=""', 'SUIL_MODULE_EXT=".dll"']
+    else:
+        defines += ['SUIL_WITH_X11_IN_GTK2', 'SUIL_MODULE_PREFIX="lib"', 'SUIL_MODULE_EXT=".so"']
+        cflags += ['-fvisibility=hidden']
+
+    obj = bld.shlib (features = 'c cshlib')
+    obj.cflags          = cflags
+    obj.includes        = ['.']
+    obj.export_includes = ['.']
+    obj.source          = 'host.c instance.c'
+    obj.target          = 'suil'
+    obj.name            = 'libsuil'
+    obj.vnum            = SUIL_VERSION
+    obj.uselib          = [ 'LV2' ]
+    obj.defines         = defines
+    obj.install_path    = module_dir
+
+    if sys.platform == 'darwin':
+        obj.uselib  += ['DL']
+
+        bld(features     = 'cxx cshlib',
+            source       = 'cocoa_in_gtk2.mm',
+            target       = 'suil_cocoa_in_gtk2',
+            includes     = ['.'],
+            defines      = defines,
+            install_path = module_dir,
+            cflags       = cflags,
+            use          = [ 'libydk', 'libytk' ],
+            uselib       = 'LV2 DL GLIB PANGOCAIRO',
+            linkflags    = ['-framework', 'Cocoa'])
+
+    elif bld.env['build_target'] == 'mingw':
+        bld(features     = 'cxx cxxshlib',
+            source       = 'win_in_gtk2.cpp',
+            target       = 'suil_win_in_gtk2',
+            includes     = ['.'],
+            defines      = defines,
+            install_path = module_dir,
+            cflags       = cflags,
+            use          = 'libytk',
+            uselib       = 'GTK2 LV2 GLIB PANGOCAIRO')
+    else:
+        obj.uselib  += ['DL']
+        bld(features     = 'c cshlib',
+            source       = 'x11_in_gtk2.c',
+            target       = 'suil_x11_in_gtk2',
+            includes     = ['.'],
+            defines      = defines,
+            install_path = module_dir,
+            cflags       = cflags,
+            use          = 'libytk',
+            uselib       = 'X11 LV2 DL GLIB PANGOCAIRO',
+            linkflags    = '-Wl,-z,nodelete')

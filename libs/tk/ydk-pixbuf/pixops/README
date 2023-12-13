@@ -1,0 +1,163 @@
+The code in this directory implements optimized, filtered scaling
+for pixmap data. 
+
+This code is copyright Red Hat, Inc, 2000 and licensed under the terms
+of the GNU Lesser General Public License (LGPL).
+
+(If you want to use it in a project where that license is not
+appropriate, please contact me, and most likely something can be
+worked out.)
+
+Owen Taylor <otaylor@redhat.com>
+
+PRINCIPLES
+==========
+
+The general principle of this code is that it first computes a filter
+matrix for the given filtering mode, and then calls a general driver
+routine, passing in functions to composite pixels and lines.
+
+(The pixel functions are used for handling edge cases, and the line
+functions are simply used for the middle parts of the image.)
+
+The system is designed so that the line functions can be simple, 
+don't have to worry about special cases, can be selected to
+be specific to the particular formats involved. This allows them
+to be hyper-optimized. Since most of the compution time is 
+spent in these functions, this results in an overall fast design.
+
+MMX assembly code for Intel (and compatible) processors is included
+for a number of the most common special cases:
+
+ scaling from RGB to RGB
+ compositing from RGBA to RGBx
+ compositing against a color from RGBA and storing in a RGBx buffer
+
+Alpha compositing 8 bit RGBAa onto RGB is defined in terms of
+rounding the exact result (real values in [0,1]):
+
+ cc = ca * aa + (1 - aa) * Cb
+
+ Cc = ROUND [255. * (Ca/255. * Aa/255. + (1 - Aa/255.) * Cb/255.)]
+
+ROUND(i / 255.) can be computed exactly for i in [0,255*255] as:
+
+ t = i + 0x80; result = (t + (t >> 8)) >> 8;  [ call this as To8(i) ]
+
+So, 
+  
+ t = Ca * Aa + (255 - Aa) * Cb + 0x80;
+ Cc = (t + (t >> 8)) >> 8;
+
+Alpha compositing 8 bit RaGaBaAa onto RbGbBbAa is a little harder, for
+non-premultiplied alpha. The premultiplied result is simple:
+
+ ac = aa + (1 - aa) * ab
+ cc = ca + (1 - aa) * cb
+
+Which can be computed in integers terms as:
+
+ Cc = Ca + To8 ((255 - Aa) * Cb)
+ Ac = Aa + To8 ((255 - Aa) * Ab)
+
+For non-premultiplied alpha, we need divide the color components by 
+the alpha:
+
+       +- (ca * aa + (1 - aa) * ab * cb)) / ac; aa != 0
+  cc = |
+       +- cb; aa == 0
+
+To calculate this as in integer, we note the alternate form:
+
+ cc = cb + aa * (ca - cb) / ac
+
+[ 'cc = ca + (ac - aa) * (cb - ca) / ac' can also be useful numerically,
+  but isn't important here ]
+
+We can express this as integers as:
+
+ Ac_tmp = Aa * 255 + (255 - Aa) * Ab;
+ 
+      +- Cb + (255 * Aa * (Ca - Cb) + Ac_tmp / 2) / Ac_tmp ; Ca > Cb
+ Cc = | 
+      +- Cb - (255 * Aa * (Cb - Ca) + Ac_tmp / 2) / Ac_tmp ; ca <= Cb
+
+Or, playing bit tricks to avoid the conditional
+
+ Cc = Cb + (255 * Aa * (Ca - Cb) + (((Ca - Cb) >> 8) ^ (Ac_tmp / 2)) ) / Ac_tmp
+
+TODO
+====
+
+* ART_FILTER_HYPER is not correctly implemented. It is currently
+  implemented as a filter that is derived by doing linear interpolation
+  on the source image and then averaging that with a box filter.
+
+  It should be defined as followed (see art_filterlevel.h)
+
+   "HYPER is the highest quality reconstruction function. It is derived
+    from the hyperbolic filters in Wolberg's "Digital Image Warping,"
+    and is formally defined as the hyperbolic-filter sampling the ideal
+    hyperbolic-filter interpolated image (the filter is designed to be
+    idempotent for 1:1 pixel mapping). It is the slowest and highest
+    quality."
+
+  The current HYPER is probably as slow, but lower quality. Also, there
+  are some subtle errors in the calculation current HYPER that show up as dark
+  stripes if you scale a constant-color image.
+
+* There are some roundoff errors in the compositing routines. 
+  the _nearest() variants do it right, most of the other code 
+  is wrong to some degree or another.
+
+  For instance, in composite_line_22_4a4(), we have:
+
+    dest[0] = ((0xff0000 - a) * dest[0] + r) >> 24;
+
+   if a is 0 (implies r == 0), then we have:
+
+    (0xff0000 * dest[0]) >> 24
+
+   which gives results which are 1 to low:
+
+       255 => 254,   1 => 0.
+
+   So, this should be something like:
+
+     ((0xff0000 - a) * dest[0] + r + 0xffffff) >> 24;
+
+   (Not checked, caveat emptor)
+
+   An alternatve formulation of this as:
+
+     dest[0] + (r - a * dest[0] + 0xffffff) >> 24
+
+   may be better numerically, but would need consideration for overflow.
+
+* The generic functions could be sped up considerably by
+  switching around conditionals and inner loops in various
+  places.
+
+* Right now, in several of the most common cases, there are
+  optimized mmx routines, but no optimized C routines.
+
+  For instance, there is a 
+
+    pixops_composite_line_22_4a4_mmx()
+
+  But no 
+  
+    pixops_composite_line_22_4a4()
+
+  Also, it may be desirable to include a few more special cases - in particular:
+
+    pixops_composite_line_22_4a3()
+
+  May be desirable.
+
+* Scaling down images by large scale factors is _slow_ since huge filter
+  matrixes are computed. (e.g., to scale down by a factor of 100, we compute
+  101x101 filter matrixes. At some point, it would be more efficent to
+  switch over to subsampling when scaling down - one should never need a filter
+  matrix bigger than 16x16. 
+

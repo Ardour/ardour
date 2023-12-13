@@ -311,6 +311,15 @@ children = [
         'libs/vamp-plugins',
         'libs/vamp-pyin',
         'libs/aaf',
+        # ytk/
+        'libs/tk/ztk',
+        'libs/tk/ydk-pixbuf',
+        'libs/tk/ydk',
+        'libs/tk/ytk',
+        'libs/tk/ztkmm',
+        'libs/tk/ydkmm',
+        'libs/tk/ytkmm',
+        'libs/tk/suil',
         # core ardour libraries
         'libs/pbd',
         'libs/lua',
@@ -362,6 +371,7 @@ i18n_children = [
         'gtk2_ardour',
         'libs/ardour',
         'libs/gtkmm2ext',
+        'libs/tk/ytk',
 ]
 
 def set_compiler_flags (conf,opt):
@@ -957,6 +967,8 @@ def options(opt):
                     help='Disable threaded waveview rendering')
     opt.add_option('--no-futex-semaphore', action='store_true', default=False, dest='no_futex_semaphore',
                     help='Disable use of futex for semaphores (Linux only)')
+    opt.add_option('--no-ytk', action='store_true', default=False, dest='no_ytk',
+                   help='Use system-wide GTK instead of Ardour YTK')
     opt.add_option(
         '--qm-dsp-include', type='string', action='store',
         dest='qm_dsp_include', default='/usr/include/qm-dsp',
@@ -1142,6 +1154,12 @@ def configure(conf):
 
     if Options.options.internal_shared_libs:
         conf.define('INTERNAL_SHARED_LIBS', 1)
+
+    if not Options.options.no_ytk:
+        conf.define('YTK', 1)
+        conf.define('HAVE_SUIL', 1)
+    else:
+        autowaf.check_pkg(conf, 'suil-0', uselib_store='SUIL', atleast_version='0.6.0', mandatory=False)
 
     if Options.options.use_external_libs:
         conf.define('USE_EXTERNAL_LIBS', 1)
@@ -1522,6 +1540,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Install prefix',        conf.env['PREFIX'])
     write_config_text('Strict compiler flags', conf.env['STRICT'])
     write_config_text('Internal Shared Libraries', conf.is_defined('INTERNAL_SHARED_LIBS'))
+    write_config_text('Use YTK instead of GTK',    conf.is_defined('YTK'))
     write_config_text('Use External Libraries', conf.is_defined('USE_EXTERNAL_LIBS'))
     write_config_text('Library exports hidden', conf.is_defined('EXPORT_VISIBILITY_HIDDEN'))
     write_config_text('Free/Demo copy',        conf.is_defined('FREEBIE'))
@@ -1615,6 +1634,9 @@ def build(bld):
     bld.path.find_dir ('libs/gtkmm2ext/gtkmm2ext')
     bld.path.find_dir ('libs/ardour/ardour')
     bld.path.find_dir ('libs/pbd/pbd')
+
+    #if bld.is_defined('YTK'):
+    #    bld.path.find_dir ('libs/tk/ztkmm')
 
     # set up target directories
     lwrcase_dirname = 'ardour' + bld.env['MAJOR']

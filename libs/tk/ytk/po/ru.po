@@ -1,0 +1,4162 @@
+# translation of gtk+-master-po-ru-9735.merged.po to Russian
+# Russian translation of gtk+
+# Copyright (C) 1999-2009, 2010 Free Software Foundation, Inc.
+#
+#
+#
+# Sergey Panov <sipan@mit.edu>, 1999.
+# Valek Filippov <frob@df.ru>, 2000-2002.
+# Dmitry Mastrukov <dmitry@taurussoft.org>, 2002-2004.
+# Sun G11n <gnome_int_l10n@ireland.sun.com>, 2002.
+# Andrew W. Nosenko <awn@bcs.zp.ua>, 2003.
+# Leonid Kanter <leon@asplinux.ru>, 2004-2006.
+# Alexander Sigachov <alexander.sigachov@gmail.com>, 2006.
+# Vasiliy Faronov <qvvx@yandex.ru>, 2007.
+# Anton Shestakov <engored@ya.ru>, 2008.
+# Lebedev Roman <roman@lebedev.com>, 2009.
+# Yuri Kozlov <yuray@komyakino.ru>, 2010.
+msgid ""
+msgstr ""
+"Project-Id-Version: gtk+.master\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-19 21:59+0100\n"
+"PO-Revision-Date: 2010-02-24 21:20+0300\n"
+"Last-Translator: Yuri Kozlov <yuray@komyakino.ru>\n"
+"Language-Team: Russian <debian-l10n-russian@lists.debian.org>\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms:  nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2);\n"
+"X-Generator: KBabel 1.11.4\n"
+
+#: gtkaboutdialog.c:245
+msgid "Could not show link"
+msgstr "Не удалось показать ссылку"
+
+#: gtkaboutdialog.c:399 gtkaboutdialog.c:2286
+msgid "License"
+msgstr "Лицензия"
+
+#: gtkaboutdialog.c:400
+msgid "The license of the program"
+msgstr "Лицензия программы"
+
+#: gtkaboutdialog.c:646
+msgid "C_redits"
+msgstr "_Благодарности"
+
+#: gtkaboutdialog.c:660
+msgid "_License"
+msgstr "_Лицензия"
+
+#: gtkaboutdialog.c:966
+#, c-format
+msgid "About %s"
+msgstr "О программе %s"
+
+#: gtkaboutdialog.c:2209
+msgid "Credits"
+msgstr "Благодарности"
+
+#: gtkaboutdialog.c:2238
+msgid "Written by"
+msgstr "Авторы"
+
+#: gtkaboutdialog.c:2241
+msgid "Documented by"
+msgstr "Документация"
+
+#: gtkaboutdialog.c:2253
+msgid "Translated by"
+msgstr "Перевод"
+
+#: gtkaboutdialog.c:2257
+msgid "Artwork by"
+msgstr "Графический дизайн"
+
+#: gtkbuilderparser.c:343
+#, c-format
+msgid "Invalid type function on line %d: '%s'"
+msgstr "Недопустимый тип функции в строке %d: «%s»"
+
+#: gtkbuilderparser.c:407
+#, c-format
+msgid "Duplicate object ID '%s' on line %d (previously on line %d)"
+msgstr ""
+
+#: gtkbuilderparser.c:859
+#, c-format
+msgid "Invalid root element: '%s'"
+msgstr "Некорректный корневой элемент «%s»"
+
+#: gtkbuilderparser.c:898
+#, c-format
+msgid "Unhandled tag: '%s'"
+msgstr "Необработанный тег «%s»"
+
+#: gtkcellrendereraccel.c:389 gtkcellrendereraccel.c:663
+msgid "New accelerator..."
+msgstr "Новая комбинация клавиш..."
+
+#: gtkcolorbutton.c:178 gtkcolorbutton.c:459
+msgid "Pick a Color"
+msgstr "Выберите цвет"
+
+#: gtkcolorbutton.c:352
+msgid "Received invalid color data\n"
+msgstr "Получены недопустимые данные цвета\n"
+
+#: gtkcolorsel.c:358
+msgid ""
+"Select the color you want from the outer ring. Select the darkness or "
+"lightness of that color using the inner triangle."
+msgstr ""
+"Выберите желаемый цвет на внешнем круге. Выберите более тёмный или более "
+"светлый оттенок, используя внутренний треугольник."
+
+#: gtkcolorsel.c:382
+msgid ""
+"Click the eyedropper, then click a color anywhere on your screen to select "
+"that color."
+msgstr ""
+"Щелкните на пипетке, затем щёлкните на цвете в любом месте экрана, чтобы "
+"выбрать этот цвет."
+
+#: gtkcolorsel.c:391
+msgid "_Hue:"
+msgstr "То_н:"
+
+#: gtkcolorsel.c:392
+msgid "Position on the color wheel."
+msgstr "Положение цветового круга."
+
+#: gtkcolorsel.c:394
+msgid "_Saturation:"
+msgstr "Нас_ыщенность:"
+
+#: gtkcolorsel.c:395
+msgid "\"Deepness\" of the color."
+msgstr "«Глубина» цвета."
+
+#: gtkcolorsel.c:396
+msgid "_Value:"
+msgstr "Зна_чение:"
+
+#: gtkcolorsel.c:397
+msgid "Brightness of the color."
+msgstr "Яркость цвета."
+
+#: gtkcolorsel.c:398
+msgid "_Red:"
+msgstr "_Красный:"
+
+#: gtkcolorsel.c:399
+msgid "Amount of red light in the color."
+msgstr "Количество красного оттенка в цвете."
+
+#: gtkcolorsel.c:400
+msgid "_Green:"
+msgstr "_Зелёный:"
+
+#: gtkcolorsel.c:401
+msgid "Amount of green light in the color."
+msgstr "Количество зелёного оттенка в цвете."
+
+#: gtkcolorsel.c:402
+msgid "_Blue:"
+msgstr "С_иний:"
+
+#: gtkcolorsel.c:403
+msgid "Amount of blue light in the color."
+msgstr "Количество синего оттенка в цвете."
+
+#: gtkcolorsel.c:406
+msgid "Op_acity:"
+msgstr "Не_прозрачность:"
+
+#: gtkcolorsel.c:413 gtkcolorsel.c:423
+msgid "Transparency of the color."
+msgstr "Прозрачность цвета."
+
+#: gtkcolorsel.c:430
+msgid "Color _name:"
+msgstr "Наи_менование цвета:"
+
+#: gtkcolorsel.c:444
+msgid ""
+"You can enter an HTML-style hexadecimal color value, or simply a color name "
+"such as 'orange' in this entry."
+msgstr ""
+"Вы можете ввести в этой строке или шестнадцатеричное значение цвета (в стиле "
+"HTML), или название цвета, например, «orange»."
+
+#: gtkcolorsel.c:474
+msgid "_Palette:"
+msgstr "Па_литра:"
+
+#: gtkcolorsel.c:503
+msgid "Color Wheel"
+msgstr "Цветовой круг"
+
+#: gtkcolorsel.c:962
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now. You can drag this color to a palette entry, or select this color as "
+"current by dragging it to the other color swatch alongside."
+msgstr ""
+"Ранее выбранный цвет для сравнения с выбираемым цветом. Вы можете перетащить "
+"этот цвет в палитру или сделать его текущим, перетащив на другой образец "
+"цвета сбоку."
+
+#: gtkcolorsel.c:965
+msgid ""
+"The color you've chosen. You can drag this color to a palette entry to save "
+"it for use in the future."
+msgstr ""
+"Цвет, который вы выбрали. Вы можете перетащить его в палитру, чтобы "
+"сохранить для последующего использования."
+
+#: gtkcolorsel.c:970
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now."
+msgstr "Выбранный ранее цвет для сравнения с цветом, выбранным сейчас."
+
+#: gtkcolorsel.c:973
+msgid "The color you've chosen."
+msgstr "Выбранный вами цвет."
+
+#: gtkcolorsel.c:1389
+msgid "_Save color here"
+msgstr "Со_хранить цвет здесь"
+
+#: gtkcolorsel.c:1593
+msgid ""
+"Click this palette entry to make it the current color. To change this entry, "
+"drag a color swatch here or right-click it and select \"Save color here.\""
+msgstr ""
+"Щёлкните по элементу в палитре, чтобы сделать его текущим цветом. Чтобы "
+"изменить этот элемент, перетащите сюда образец цвета или щёлкните правой "
+"клавишей и выберите «Сохранить цвет здесь»"
+
+#: gtkcolorseldialog.c:170
+msgid "Color Selection"
+msgstr "Выбор цвета"
+
+#: gtkentry.c:8789 gtktextview.c:8007
+msgid "Input _Methods"
+msgstr "_Методы ввода"
+
+# длинный перевод слишком сильно растягивает контекстное меню
+#: gtkentry.c:8803 gtktextview.c:8021
+msgid "_Insert Unicode Control Character"
+msgstr "Вст_авить управляющий символ Юникод"
+
+#: gtkentry.c:10177
+msgid "Caps Lock is on"
+msgstr "Включён ввод в верхнем регистре"
+
+#: gtkfilechooserbutton.c:64
+msgid "Select a File"
+msgstr ""
+
+#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1851
+msgid "Desktop"
+msgstr "Рабочий стол"
+
+#: gtkfilechooserbutton.c:66
+msgid "(None)"
+msgstr "(Нет)"
+
+#: gtkfilechooserbutton.c:2175
+msgid "Other..."
+msgstr "Другой..."
+
+#: gtkfilechooserdefault.c:150
+msgid "Type name of new folder"
+msgstr "Введите имя новой папки"
+
+#: gtkfilechooserdefault.c:956
+msgid "Could not retrieve information about the file"
+msgstr "Не удалось получить информацию о файле"
+
+#: gtkfilechooserdefault.c:967
+msgid "Could not add a bookmark"
+msgstr "Не удалось добавить закладку"
+
+#: gtkfilechooserdefault.c:978
+msgid "Could not remove bookmark"
+msgstr "Не удалось удалить закладку"
+
+#: gtkfilechooserdefault.c:989
+msgid "The folder could not be created"
+msgstr "Не удалось создать папку"
+
+#: gtkfilechooserdefault.c:1002
+msgid ""
+"The folder could not be created, as a file with the same name already "
+"exists.  Try using a different name for the folder, or rename the file first."
+msgstr ""
+"Папка не может быть создана, так как файл с таким именем уже существует.  "
+"Выберите другое имя для папки, или переименуйте файл."
+
+#: gtkfilechooserdefault.c:1016
+msgid "You need to choose a valid filename."
+msgstr ""
+
+#: gtkfilechooserdefault.c:1019
+#, c-format
+msgid "Cannot create a file under %s as it is not a folder"
+msgstr ""
+
+#: gtkfilechooserdefault.c:1031
+msgid ""
+"You may only select folders.  The item that you selected is not a folder; "
+"try using a different item."
+msgstr ""
+
+#: gtkfilechooserdefault.c:1041
+msgid "Invalid file name"
+msgstr "Недопустимое имя файла"
+
+#: gtkfilechooserdefault.c:1051
+msgid "The folder contents could not be displayed"
+msgstr "Не удалось отобразить содержимое папки"
+
+#: gtkfilechooserdefault.c:1584
+#, c-format
+msgid "%1$s on %2$s"
+msgstr "%1$s на %2$s"
+
+#: gtkfilechooserdefault.c:1733
+msgid "Search"
+msgstr "Поиск"
+
+#: gtkfilechooserdefault.c:1757 gtkfilechooserdefault.c:4872
+msgid "Recently Used"
+msgstr "Недавние документы"
+
+#: gtkfilechooserdefault.c:2387
+msgid "Select which types of files are shown"
+msgstr "Выбрать отображаемые типы файлов"
+
+#: gtkfilechooserdefault.c:2746
+#, c-format
+msgid "Add the folder '%s' to the bookmarks"
+msgstr "Создать закладку для папки «%s»"
+
+#: gtkfilechooserdefault.c:2790
+msgid "Add the current folder to the bookmarks"
+msgstr "Создать закладку для текущей папки"
+
+#: gtkfilechooserdefault.c:2792
+msgid "Add the selected folders to the bookmarks"
+msgstr "Создать закладки для выделенных папок"
+
+#: gtkfilechooserdefault.c:2837
+#, c-format
+msgid "Remove the bookmark '%s'"
+msgstr "Удалить закладку «%s»"
+
+#: gtkfilechooserdefault.c:2839
+#, c-format
+msgid "Bookmark '%s' cannot be removed"
+msgstr "Закладка '%s' не может быть удалена"
+
+#: gtkfilechooserdefault.c:2846 gtkfilechooserdefault.c:3740
+msgid "Remove the selected bookmark"
+msgstr "Удалить выделенную закладку"
+
+#: gtkfilechooserdefault.c:3421
+msgid "Remove"
+msgstr "Удалить"
+
+#: gtkfilechooserdefault.c:3430
+msgid "Rename..."
+msgstr "Переименовать..."
+
+#: gtkfilechooserdefault.c:3597
+msgid "Places"
+msgstr "Места"
+
+#: gtkfilechooserdefault.c:3654
+msgid "_Places"
+msgstr "_Места"
+
+#: gtkfilechooserdefault.c:3728
+msgid "Add the selected folder to the Bookmarks"
+msgstr "Создать закладку для выделенной папки"
+
+#: gtkfilechooserdefault.c:3872
+msgid "Could not select file"
+msgstr "Не удалось выделить файл"
+
+#: gtkfilechooserdefault.c:4045
+msgid "_Add to Bookmarks"
+msgstr "_Добавить в закладки"
+
+#: gtkfilechooserdefault.c:4058
+msgid "Show _Hidden Files"
+msgstr "Показывать _скрытые файлы"
+
+#: gtkfilechooserdefault.c:4065
+msgid "Show _Size Column"
+msgstr "Показывать _размер"
+
+#: gtkfilechooserdefault.c:4289
+msgid "Files"
+msgstr "Файлы"
+
+#: gtkfilechooserdefault.c:4340
+msgid "Name"
+msgstr "Имя"
+
+#: gtkfilechooserdefault.c:4363
+msgid "Size"
+msgstr "Размер"
+
+#: gtkfilechooserdefault.c:4377
+msgid "Modified"
+msgstr "Изменён"
+
+#: gtkfilechooserdefault.c:4470
+msgid "_Name:"
+msgstr "_Имя:"
+
+#: gtkfilechooserdefault.c:4710
+msgid "Type a file name"
+msgstr "Введите имя файла"
+
+#: gtkfilechooserdefault.c:4757 gtkfilechooserdefault.c:4768
+msgid "Please select a folder below"
+msgstr ""
+
+#: gtkfilechooserdefault.c:4763
+msgid "Please type a file name"
+msgstr ""
+
+#: gtkfilechooserdefault.c:4834
+msgid "Create Fo_lder"
+msgstr "Создать п_апку"
+
+#: gtkfilechooserdefault.c:4882
+msgid "Search:"
+msgstr "Поиск:"
+
+#: gtkfilechooserdefault.c:4933
+msgid "_Location:"
+msgstr "_Расположение:"
+
+#: gtkfilechooserdefault.c:5383
+msgid "Save in _folder:"
+msgstr "Сохранить в _папке"
+
+#: gtkfilechooserdefault.c:5385
+msgid "Create in _folder:"
+msgstr "Создать в _папке:"
+
+#: gtkfilechooserdefault.c:6479
+#, c-format
+msgid "Could not read the contents of %s"
+msgstr "Не удалось прочитать содержимое %s"
+
+#: gtkfilechooserdefault.c:6483
+msgid "Could not read the contents of the folder"
+msgstr "Не удалось прочитать содержимое папки"
+
+#: gtkfilechooserdefault.c:6576 gtkfilechooserdefault.c:6644
+#: gtkfilechooserdefault.c:6829
+msgid "Unknown"
+msgstr "Неизвестен"
+
+#: gtkfilechooserdefault.c:6591
+msgid "%H:%M"
+msgstr "%H:%M"
+
+#: gtkfilechooserdefault.c:6593
+msgid "Yesterday at %H:%M"
+msgstr "Вчера в %H:%M"
+
+#: gtkfilechooserdefault.c:7301
+msgid "Cannot change to folder because it is not local"
+msgstr "Не удалось перейти в папку, так как она не является локальной"
+
+#: gtkfilechooserdefault.c:7898 gtkfilechooserdefault.c:7919
+#, c-format
+msgid "Shortcut %s already exists"
+msgstr "Комбинация %s уже существует"
+
+#: gtkfilechooserdefault.c:8009
+#, c-format
+msgid "Shortcut %s does not exist"
+msgstr "Комбинация %s не существует"
+
+#: gtkfilechooserdefault.c:8250
+#, c-format
+msgid "A file named \"%s\" already exists.  Do you want to replace it?"
+msgstr "Файл с именем «%s» уже существует. Заменить его?"
+
+#: gtkfilechooserdefault.c:8253
+#, c-format
+msgid ""
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
+msgstr ""
+"Файл уже существует в «%s». Его замена приведёт к перезаписи содержимого."
+
+#: gtkfilechooserdefault.c:8258
+msgid "_Replace"
+msgstr "_Заменить"
+
+#: gtkfilechooserdefault.c:9066
+msgid "Could not start the search process"
+msgstr "Не удалось начать поиск"
+
+#: gtkfilechooserdefault.c:9067
+msgid ""
+"The program was not able to create a connection to the indexer daemon.  "
+"Please make sure it is running."
+msgstr ""
+"Не удалось соединиться с сервисом индексированного поиска. Проверьте, что "
+"сервис запущен."
+
+#: gtkfilechooserdefault.c:9081
+msgid "Could not send the search request"
+msgstr "Не удалось послать запрос на поиск"
+
+#: gtkfilechooserdefault.c:9682
+#, c-format
+msgid "Could not mount %s"
+msgstr "Не удалось подключить %s"
+
+#: gtkfilechoosersettings.c:515
+#, c-format
+msgid "Error creating folder '%s': %s"
+msgstr "Не удалось создать папку «%s»: %s"
+
+#: gtkfilesystem.c:52
+msgid "File System"
+msgstr "Файловая система"
+
+#: gtkfontbutton.c:144 gtkfontbutton.c:266
+msgid "Pick a Font"
+msgstr "Выберите шрифт"
+
+#: gtkfontbutton.c:260
+msgid "Sans 12"
+msgstr "Sans 12"
+
+#: gtkfontbutton.c:785
+msgid "Font"
+msgstr "Шрифт"
+
+#: gtkfontsel.c:75
+msgid "abcdefghijk ABCDEFGHIJK"
+msgstr "абвгде АБВГДЕ abcde ABCDE"
+
+#: gtkfontsel.c:343
+msgid "_Family:"
+msgstr "_Семейство:"
+
+#: gtkfontsel.c:349
+msgid "_Style:"
+msgstr "_Начертание:"
+
+#: gtkfontsel.c:355
+msgid "Si_ze:"
+msgstr "_Размер:"
+
+#: gtkfontsel.c:532
+msgid "_Preview:"
+msgstr "Образе_ц:"
+
+#: gtkfontsel.c:1649
+msgid "Font Selection"
+msgstr "Выбор шрифта"
+
+#: gtkiconfactory.c:1354
+#, c-format
+msgid "Error loading icon: %s"
+msgstr "Не удалось загрузить значок: %s"
+
+#: gtkicontheme.c:1374
+#, c-format
+msgid ""
+"Could not find the icon '%s'. The '%s' theme\n"
+"was not found either, perhaps you need to install it.\n"
+"You can get a copy from:\n"
+"\t%s"
+msgstr ""
+"Не удалось найти значок «%s». Тема «%s» также\n"
+"не была найдена, возможно, её требуется установить.\n"
+"Загрузить тему можно с\n"
+"\t%s"
+
+#: gtkicontheme.c:1555
+#, c-format
+msgid "Icon '%s' not present in theme"
+msgstr "Значок «%s» не присутствует в теме"
+
+#: gtkicontheme.c:3101
+msgid "Failed to load icon"
+msgstr "Не удалось загрузить значок"
+
+#: gtkimmodule.c:527
+msgid "Simple"
+msgstr "Простой"
+
+#: gtklabel.c:5696
+msgid "_Open Link"
+msgstr "_Открыть ссылку"
+
+#: gtklabel.c:5708
+msgid "Copy _Link Address"
+msgstr "_Скопировать адрес ссылки"
+
+#: gtklinkbutton.c:428
+msgid "Copy URL"
+msgstr "Копировать URL"
+
+#: gtklinkbutton.c:586
+msgid "Invalid URI"
+msgstr "Неверный URI"
+
+#: gtkmain.c:454
+msgid "Load additional GTK+ modules"
+msgstr "Загрузить дополнительные модули GTK+"
+
+#: gtkmain.c:455
+msgid "MODULES"
+msgstr "МОДУЛИ"
+
+#: gtkmain.c:457
+msgid "Make all warnings fatal"
+msgstr "Сделать все предупреждения фатальными"
+
+#: gtkmain.c:460
+msgid "GTK+ debugging flags to set"
+msgstr "Установить указанные отладочные флаги GTK+"
+
+#: gtkmain.c:461 gtkmain.c:464
+msgid "FLAGS"
+msgstr "ФЛАГИ"
+
+#: gtkmain.c:463
+msgid "GTK+ debugging flags to unset"
+msgstr "Сбросить указанные отладочные флаги GTK+"
+
+#: gtkmain.c:755
+msgid "default:LTR"
+msgstr "default:LTR"
+
+#: gtkmain.c:820
+#, c-format
+msgid "Cannot open display: %s"
+msgstr "Не удалось открыть дисплей: %s"
+
+#: gtkmain.c:857
+msgid "GTK+ Options"
+msgstr "Параметры GTK+"
+
+#: gtkmain.c:857
+msgid "Show GTK+ Options"
+msgstr "Показать параметры GTK+"
+
+#: gtkmountoperation.c:494
+msgid "Co_nnect"
+msgstr "_Подключиться"
+
+#: gtkmountoperation.c:561
+msgid "Connect _anonymously"
+msgstr "Подключиться _анонимно"
+
+#: gtkmountoperation.c:570
+msgid "Connect as u_ser:"
+msgstr "Подключиться _как:"
+
+#: gtkmountoperation.c:608
+msgid "_Username:"
+msgstr "_Имя пользователя:"
+
+#: gtkmountoperation.c:613
+msgid "_Domain:"
+msgstr "_Домен:"
+
+#: gtkmountoperation.c:619
+msgid "_Password:"
+msgstr "_Пароль:"
+
+#: gtkmountoperation.c:637
+msgid "Forget password _immediately"
+msgstr "_Забыть пароль немедленно"
+
+#: gtkmountoperation.c:647
+msgid "Remember password until you _logout"
+msgstr "Запомнить пароль _до выхода из сеанса"
+
+#: gtkmountoperation.c:657
+msgid "Remember _forever"
+msgstr "Запомнить _навсегда"
+
+#: gtkmountoperation.c:886
+#, c-format
+msgid "Unknown Application (PID %d)"
+msgstr ""
+
+#: gtkmountoperation.c:1069
+msgid "Unable to end process"
+msgstr "Не удается завершить процесс"
+
+#: gtkmountoperation.c:1106
+msgid "_End Process"
+msgstr "_Завершить процесс"
+
+#: gtknotebook.c:4745 gtknotebook.c:7351
+#, c-format
+msgid "Page %u"
+msgstr "Страница %u"
+
+#: gtkpathbar.c:151
+msgid "Up Path"
+msgstr "Вверх по дереву"
+
+#: gtkpathbar.c:153
+msgid "Down Path"
+msgstr "Вниз по дереву"
+
+#: gtkpathbar.c:1467
+msgid "File System Root"
+msgstr "Корень файловой системы"
+
+#: gtkrc.c:2906
+#, c-format
+msgid "Unable to find include file: \"%s\""
+msgstr "Не удалось найти подключаемый файл: «%s»"
+
+#: gtkrc.c:3536 gtkrc.c:3539
+#, c-format
+msgid "Unable to locate image file in pixmap_path: \"%s\""
+msgstr "Файл с изображением не найден в pixmap_path: «%s»"
+
+#: gtkrecentaction.c:154 gtkrecentaction.c:162 gtkrecentchoosermenu.c:588
+#: gtkrecentchoosermenu.c:596
+#, c-format
+msgid "This function is not implemented for widgets of class '%s'"
+msgstr "Эта функция не реализована для виджета класса «%s»"
+
+#: gtkrecentchooserdefault.c:481
+msgid "Select which type of documents are shown"
+msgstr "Выберите типы отображаемых документов"
+
+#: gtkrecentchooserdefault.c:1135 gtkrecentchooserdefault.c:1172
+#, c-format
+msgid "No item for URI '%s' found"
+msgstr "Не найден элемент для URI «%s»"
+
+#: gtkrecentchooserdefault.c:1299
+msgid "Untitled filter"
+msgstr "Неозаглавленный фильтр"
+
+#: gtkrecentchooserdefault.c:1652
+msgid "Could not remove item"
+msgstr "Не удалось удалить элемент"
+
+#: gtkrecentchooserdefault.c:1696
+msgid "Could not clear list"
+msgstr "Не удалось очистить список"
+
+#: gtkrecentchooserdefault.c:1780
+msgid "Copy _Location"
+msgstr "Копировать _адрес"
+
+#: gtkrecentchooserdefault.c:1793
+msgid "_Remove From List"
+msgstr "_Удалить из списка"
+
+#: gtkrecentchooserdefault.c:1802
+msgid "_Clear List"
+msgstr "О_чистить список"
+
+#: gtkrecentchooserdefault.c:1816
+msgid "Show _Private Resources"
+msgstr "_Показать личные ресурсы"
+
+#: gtkrecentchoosermenu.c:342
+msgid "No items found"
+msgstr "Нет элементов"
+
+#: gtkrecentchoosermenu.c:508 gtkrecentchoosermenu.c:564
+#, c-format
+msgid "No recently used resource found with URI `%s'"
+msgstr "Недавно использовавшийся ресурс не найден по URI «%s»"
+
+#: gtkrecentchoosermenu.c:774
+#, c-format
+msgid "Open '%s'"
+msgstr "Открыть «%s»"
+
+#: gtkrecentchoosermenu.c:804
+msgid "Unknown item"
+msgstr "Неизвестный элемент"
+
+#: gtkrecentmanager.c:1182 gtkrecentmanager.c:1195 gtkrecentmanager.c:1332
+#: gtkrecentmanager.c:1342 gtkrecentmanager.c:1395 gtkrecentmanager.c:1404
+#: gtkrecentmanager.c:1419
+#, c-format
+msgid "Unable to find an item with URI '%s'"
+msgstr "Не удалось найти элемент с URI «%s»"
+
+#: gtkspinner.c:459
+msgid "Provides visual indication of progress"
+msgstr "Наглядно отображает ход работы"
+
+#: gtktextbufferrichtext.c:652
+#, c-format
+msgid "Unknown error when trying to deserialize %s"
+msgstr "Неизвестная ошибка при попытке десериализации %s"
+
+#: gtktextbufferrichtext.c:711
+#, c-format
+msgid "No deserialize function found for format %s"
+msgstr "Не найдена функция десериализации для формата %s"
+
+#: gtktextbufferserialize.c:797 gtktextbufferserialize.c:823
+#, c-format
+msgid "Both \"id\" and \"name\" were found on the <%s> element"
+msgstr "В элементе <%s> присутствует как «id», так и «name»"
+
+#: gtktextbufferserialize.c:807 gtktextbufferserialize.c:833
+#, c-format
+msgid "The attribute \"%s\" was found twice on the <%s> element"
+msgstr "Атрибут «%s» был дважды найден в элементе <%s>"
+
+#: gtktextbufferserialize.c:847
+#, c-format
+msgid "<%s> element has invalid ID \"%s\""
+msgstr ""
+
+#: gtktextbufferserialize.c:857
+#, c-format
+msgid "<%s> element has neither a \"name\" nor an \"id\" attribute"
+msgstr "Элемент <%s> не имеет ни атрибута «name», ни «id»"
+
+#: gtktextbufferserialize.c:944
+#, c-format
+msgid "Attribute \"%s\" repeated twice on the same <%s> element"
+msgstr "Атрибут «%s» дважды повторяется в одном элементе <%s>"
+
+#: gtktextbufferserialize.c:962 gtktextbufferserialize.c:987
+#, c-format
+msgid "Attribute \"%s\" is invalid on <%s> element in this context"
+msgstr "Атрибут «%s» ошибочен в элементе <%s> в этом контексте"
+
+#: gtktextbufferserialize.c:1023
+#, c-format
+msgid "Tag \"%s\" has not been defined."
+msgstr "Тег «%s» не был определён."
+
+#: gtktextbufferserialize.c:1035
+msgid "Anonymous tag found and tags can not be created."
+msgstr "Найден анонимный тег, невозможно создать теги."
+
+#: gtktextbufferserialize.c:1046
+#, c-format
+msgid "Tag \"%s\" does not exist in buffer and tags can not be created."
+msgstr "Тега «%s» не существует в буфере, тег не может быть создан."
+
+#: gtktextbufferserialize.c:1145 gtktextbufferserialize.c:1220
+#: gtktextbufferserialize.c:1321 gtktextbufferserialize.c:1395
+#, c-format
+msgid "Element <%s> is not allowed below <%s>"
+msgstr "Элемент <%s> не может быть размещён перед <%s>"
+
+#: gtktextbufferserialize.c:1176
+#, c-format
+msgid "\"%s\" is not a valid attribute type"
+msgstr "«%s» не является допустимым типом атрибута"
+
+#: gtktextbufferserialize.c:1184
+#, c-format
+msgid "\"%s\" is not a valid attribute name"
+msgstr "«%s» не является допустимым именем атрибута"
+
+#: gtktextbufferserialize.c:1194
+#, c-format
+msgid ""
+"\"%s\" could not be converted to a value of type \"%s\" for attribute \"%s\""
+msgstr ""
+"«%s» не может быть преобразовано к значению типа «%s» для атрибута «%s»"
+
+#: gtktextbufferserialize.c:1203
+#, c-format
+msgid "\"%s\" is not a valid value for attribute \"%s\""
+msgstr "«%s» не является допустимым значением атрибута «%s»"
+
+#: gtktextbufferserialize.c:1286
+#, c-format
+msgid "Tag \"%s\" already defined"
+msgstr "Тег «%s» уже определён"
+
+#: gtktextbufferserialize.c:1297
+#, c-format
+msgid "Tag \"%s\" has invalid priority \"%s\""
+msgstr "Тег «%s» имеет ошибочный приоритет «%s»"
+
+#: gtktextbufferserialize.c:1350
+#, c-format
+msgid "Outermost element in text must be <text_view_markup> not <%s>"
+msgstr ""
+"Наиболее удалённым элементом в тексте должен быть <text_view_markup>, а не <"
+"%s>"
+
+#: gtktextbufferserialize.c:1359 gtktextbufferserialize.c:1375
+#, c-format
+msgid "A <%s> element has already been specified"
+msgstr "Элемент <%s> уже был определён"
+
+#: gtktextbufferserialize.c:1381
+msgid "A <text> element can't occur before a <tags> element"
+msgstr "Элемент <text> не может быть расположен до элемента <tags>"
+
+#: gtktextbufferserialize.c:1780
+msgid "Serialized data is malformed"
+msgstr "Сериализованные данные неправильно сформированы"
+
+#: gtktextbufferserialize.c:1858
+msgid ""
+"Serialized data is malformed. First section isn't GTKTEXTBUFFERCONTENTS-0001"
+msgstr ""
+"Сериализованные данные неправильно сформированы. Первым разделом является не "
+"GTKTEXTBUFFERCONTENTS-0001"
+
+#: gtktextutil.c:61
+msgid "LRM _Left-to-right mark"
+msgstr "LRM Метка с_лева направо"
+
+#: gtktextutil.c:62
+msgid "RLM _Right-to-left mark"
+msgstr "RLM Метка с_права налево"
+
+#: gtktextutil.c:63
+msgid "LRE Left-to-right _embedding"
+msgstr "LRE Вс_тавка слева направо"
+
+#: gtktextutil.c:64
+msgid "RLE Right-to-left e_mbedding"
+msgstr "RLE Вст_авка справа налево"
+
+#: gtktextutil.c:65
+msgid "LRO Left-to-right _override"
+msgstr "LRO П_ерекрывание слева направо"
+
+#: gtktextutil.c:66
+msgid "RLO Right-to-left o_verride"
+msgstr "RLO Пере_крывание справа налево"
+
+#: gtktextutil.c:67
+msgid "PDF _Pop directional formatting"
+msgstr "PDF _Расположение по вертикали"
+
+#: gtktextutil.c:68
+msgid "ZWS _Zero width space"
+msgstr "ZWS _Нулевой пробел"
+
+#: gtktextutil.c:69
+msgid "ZWJ Zero width _joiner"
+msgstr "ZWJ Нулевой о_бъединитель"
+
+#: gtktextutil.c:70
+msgid "ZWNJ Zero width _non-joiner"
+msgstr "ZWNJ Нулевой ра_зъединитель"
+
+#: gtkthemes.c:71
+#, c-format
+msgid "Unable to locate theme engine in module_path: \"%s\","
+msgstr "Загружаемый модуль тем не найден в module_path: «%s»,"
+
+#: gtkuimanager.c:1505
+#, c-format
+msgid "Unexpected start tag '%s' on line %d char %d"
+msgstr "Начальный тег «%s» является непредвиденным (строка %d, символ %d)"
+
+#: gtkuimanager.c:1595
+#, c-format
+msgid "Unexpected character data on line %d char %d"
+msgstr "Непредвиденные символьные данные (строка %d, символ %d)"
+
+#: gtkuimanager.c:2427
+msgid "Empty"
+msgstr "Пусто"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-debug"
+#~ msgstr "Не удалось разобрать --gdk-debug"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-no-debug"
+#~ msgstr "Не удалось разобрать --gdk-no-debug"
+
+#~ msgid "Program class as used by the window manager"
+#~ msgstr "Класс программы, используемый менеджером окон"
+
+#~ msgid "CLASS"
+#~ msgstr "КЛАСС"
+
+#~ msgid "Program name as used by the window manager"
+#~ msgstr "Имя программы, используемое менеджером окон"
+
+#~ msgid "NAME"
+#~ msgstr "ИМЯ"
+
+#~ msgid "X display to use"
+#~ msgstr "Используемый X-дисплей"
+
+#~ msgid "DISPLAY"
+#~ msgstr "ДИСПЛЕЙ"
+
+#~ msgid "X screen to use"
+#~ msgstr "Используемый X-экран"
+
+#~ msgid "SCREEN"
+#~ msgstr "ЭКРАН"
+
+#~ msgid "Gdk debugging flags to set"
+#~ msgstr "Установить указанные отладочные флаги Gdk"
+
+#~ msgid "Gdk debugging flags to unset"
+#~ msgstr "Сбросить указанные отладочные флаги Gdk"
+
+#~ msgctxt "keyboard label"
+#~ msgid "BackSpace"
+#~ msgstr "BackSpace"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Tab"
+#~ msgstr "Tab"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Return"
+#~ msgstr "Return"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Pause"
+#~ msgstr "Pause"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Scroll_Lock"
+#~ msgstr "Scroll_Lock"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Sys_Req"
+#~ msgstr "Sys_Req"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Escape"
+#~ msgstr "Escape"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Multi_key"
+#~ msgstr "Multi_key"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Home"
+#~ msgstr "Home"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Left"
+#~ msgstr "Влево"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Up"
+#~ msgstr "Вверх"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Right"
+#~ msgstr "Вправо"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Down"
+#~ msgstr "Вниз"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Up"
+#~ msgstr "Page_Up"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Down"
+#~ msgstr "Page_Down"
+
+#~ msgctxt "keyboard label"
+#~ msgid "End"
+#~ msgstr "End"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Begin"
+#~ msgstr "Begin"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Print"
+#~ msgstr "Print"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Insert"
+#~ msgstr "Insert"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Num_Lock"
+#~ msgstr "Num_Lock"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Space"
+#~ msgstr "KP_Space"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Tab"
+#~ msgstr "KP_Tab"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Enter"
+#~ msgstr "KP_Enter"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Home"
+#~ msgstr "KP_Home"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Left"
+#~ msgstr "KP_Left"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Up"
+#~ msgstr "KP_Up"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Right"
+#~ msgstr "KP_Right"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Down"
+#~ msgstr "KP_Down"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Up"
+#~ msgstr "KP_Page_Up"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Prior"
+#~ msgstr "KP_Prior"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Down"
+#~ msgstr "KP_Page_Down"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Next"
+#~ msgstr "KP_Next"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_End"
+#~ msgstr "KP_End"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Begin"
+#~ msgstr "KP_Begin"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Insert"
+#~ msgstr "KP_Insert"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Delete"
+#~ msgstr "KP_Delete"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Delete"
+#~ msgstr "Delete"
+
+#, c-format
+#~ msgid "Failed to open file '%s': %s"
+#~ msgstr "Не удалось открыть файл «%s»: %s"
+
+#, c-format
+#~ msgid "Image file '%s' contains no data"
+#~ msgstr "Файл изображения «%s» не содержит данных"
+
+#, c-format
+#~ msgid ""
+#~ "Failed to load image '%s': reason not known, probably a corrupt image file"
+#~ msgstr ""
+#~ "Не удалось загрузить изображение «%s»: причина неизвестна, возможно, файл "
+#~ "изображения повреждён"
+
+#, c-format
+#~ msgid ""
+#~ "Failed to load animation '%s': reason not known, probably a corrupt "
+#~ "animation file"
+#~ msgstr ""
+#~ "Не удалось загрузить анимацию «%s»: причина неизвестна, возможно, файл "
+#~ "анимации повреждён"
+
+#, c-format
+#~ msgid "Unable to load image-loading module: %s: %s"
+#~ msgstr "Не удалось загрузить модуль загрузки изображений: %s: %s"
+
+#, c-format
+#~ msgid ""
+#~ "Image-loading module %s does not export the proper interface; perhaps "
+#~ "it's from a different GTK version?"
+#~ msgstr ""
+#~ "Модуль загрузки изображений «%s» не предоставляет соответствующий "
+#~ "интерфейс; может быть, модуль остался от предыдущей версии пакета GTK?"
+
+#, c-format
+#~ msgid "Image type '%s' is not supported"
+#~ msgstr "Тип изображения «%s» не поддерживается"
+
+#, c-format
+#~ msgid "Couldn't recognize the image file format for file '%s'"
+#~ msgstr "Не удалось распознать формат изображения для файла «%s»"
+
+#~ msgid "Unrecognized image file format"
+#~ msgstr "Формат файла изображения не распознан"
+
+#, c-format
+#~ msgid "Failed to load image '%s': %s"
+#~ msgstr "Не удалось загрузить изображение «%s»: %s"
+
+#, c-format
+#~ msgid "Error writing to image file: %s"
+#~ msgstr "Не удалось записать изображение: %s"
+
+#, c-format
+#~ msgid ""
+#~ "This build of gdk-pixbuf does not support saving the image format: %s"
+#~ msgstr ""
+#~ "Эта сборка подсистемы «gdk-pixbuf» не поддерживает сохранение изображений "
+#~ "в таком формате: %s"
+
+#~ msgid "Insufficient memory to save image to callback"
+#~ msgstr "Недостаточно памяти для сохранения файла изображения"
+
+#~ msgid "Failed to open temporary file"
+#~ msgstr "Не удалось открыть временный файл"
+
+#~ msgid "Failed to read from temporary file"
+#~ msgstr "Не удалось прочитать из временного файла"
+
+#, c-format
+#~ msgid "Failed to open '%s' for writing: %s"
+#~ msgstr "Не удалось открыть файл «%s» для записи: %s"
+
+#, c-format
+#~ msgid ""
+#~ "Failed to close '%s' while writing image, all data may not have been "
+#~ "saved: %s"
+#~ msgstr ""
+#~ "Не удалось закрыть файл «%s» во время записи изображения, не все данные "
+#~ "могли быть сохранены: %s"
+
+#~ msgid "Insufficient memory to save image into a buffer"
+#~ msgstr "Недостаточно памяти для сохранения изображения в буфер"
+
+#~ msgid "Error writing to image stream"
+#~ msgstr "Не удалось записать в поток изображения"
+
+#, c-format
+#~ msgid ""
+#~ "Internal error: Image loader module '%s' failed to complete an operation, "
+#~ "but didn't give a reason for the failure"
+#~ msgstr ""
+#~ "Произошла внутренняя ошибка: Модуль загрузки изображений «%s» не завершил "
+#~ "загрузку, но не сообщил причину сбоя"
+
+#, c-format
+#~ msgid "Incremental loading of image type '%s' is not supported"
+#~ msgstr "Пошаговая загрузка изображения формата «%s» не поддерживается"
+
+#~ msgid "Image header corrupt"
+#~ msgstr "Заголовок изображения повреждён"
+
+#~ msgid "Image format unknown"
+#~ msgstr "Формат изображения неизвестен"
+
+#~ msgid "Image pixel data corrupt"
+#~ msgstr "Пиксельные данные изображения повреждены"
+
+#, fuzzy, c-format
+#~ msgid "failed to allocate image buffer of %u byte"
+#~ msgid_plural "failed to allocate image buffer of %u bytes"
+#~ msgstr[0] ""
+#~ "Не удалось выделить память в размере %d байта для буфера чтения файла"
+#~ msgstr[1] ""
+#~ "Не удалось выделить память в размере %d байта для буфера чтения файла"
+#~ msgstr[2] ""
+#~ "Не удалось выделить память в размере %d байта для буфера чтения файла"
+
+#~ msgid "Unexpected icon chunk in animation"
+#~ msgstr "Непредвиденная последовательность кадров обнаружена в анимации"
+
+#~ msgid "Unsupported animation type"
+#~ msgstr "Данный тип анимации не поддерживается"
+
+#~ msgid "Invalid header in animation"
+#~ msgstr "Заголовок анимации недопустим"
+
+#~ msgid "Not enough memory to load animation"
+#~ msgstr "Недостаточно памяти для загрузки анимации"
+
+#~ msgid "Malformed chunk in animation"
+#~ msgstr "Данная последовательность кадров в анимации неверна"
+
+#~ msgid "The ANI image format"
+#~ msgstr "Формат изображений ANI"
+
+#~ msgid "BMP image has bogus header data"
+#~ msgstr "Изображение формата BMP имеет неправильные данные в заголовке"
+
+#~ msgid "Not enough memory to load bitmap image"
+#~ msgstr "Недостаточно памяти для загрузки изображения"
+
+#~ msgid "BMP image has unsupported header size"
+#~ msgstr "Изображение формата BMP имеет неподдерживаемый размер заголовка"
+
+#~ msgid "Topdown BMP images cannot be compressed"
+#~ msgstr "Перевёрнутые BMP-изображения не могут быть сжаты"
+
+#~ msgid "Premature end-of-file encountered"
+#~ msgstr "Преждевременно обнаружен конец файла"
+
+#~ msgid "Couldn't allocate memory for saving BMP file"
+#~ msgstr "Не удалось выделить память для сохранения файла BMP"
+
+#~ msgid "Couldn't write to BMP file"
+#~ msgstr "Не удалось записать в файл BMP"
+
+#~ msgid "The BMP image format"
+#~ msgstr "Формат изображений BMP"
+
+#, c-format
+#~ msgid "Failure reading GIF: %s"
+#~ msgstr "Не удалось прочитать файл формата GIF: %s"
+
+#~ msgid "GIF file was missing some data (perhaps it was truncated somehow?)"
+#~ msgstr ""
+#~ "Файл формата GIF не содержал некоторые данные (возможно был обрезан?)"
+
+#, c-format
+#~ msgid "Internal error in the GIF loader (%s)"
+#~ msgstr ""
+#~ "Произошла внутренняя ошибка в загрузчике изображений формата GIF (%s)"
+
+#~ msgid "Stack overflow"
+#~ msgstr "Переполнение стека"
+
+#~ msgid "GIF image loader cannot understand this image."
+#~ msgstr "Загрузчик изображений GIF не может понять это изображение."
+
+#~ msgid "Bad code encountered"
+#~ msgstr "Обнаружен неправильный код"
+
+#~ msgid "Circular table entry in GIF file"
+#~ msgstr "Круговая табличная запись обнаружена в файле формата GIF"
+
+#~ msgid "Not enough memory to load GIF file"
+#~ msgstr "Недостаточно памяти для загрузки файла формата GIF"
+
+#~ msgid "Not enough memory to composite a frame in GIF file"
+#~ msgstr "Недостаточно памяти для создания кадра в файле GIF"
+
+#~ msgid "GIF image is corrupt (incorrect LZW compression)"
+#~ msgstr ""
+#~ "Изображение формата GIF повреждено (неправильное сжатие алгоритмом LZW)"
+
+#~ msgid "File does not appear to be a GIF file"
+#~ msgstr "Вероятно, файл не является файлом формата GIF"
+
+#, c-format
+#~ msgid "Version %s of the GIF file format is not supported"
+#~ msgstr "Файлы формата GIF версии %s не поддерживаются"
+
+#~ msgid ""
+#~ "GIF image has no global colormap, and a frame inside it has no local "
+#~ "colormap."
+#~ msgstr ""
+#~ "Изображение формата GIF не имеет глобальной карты цветов, и кадр внутри "
+#~ "него не имеет локальной карты цветов."
+
+#~ msgid "GIF image was truncated or incomplete."
+#~ msgstr "Изображение формата GIF было обрезано или не завершено."
+
+#~ msgid "The GIF image format"
+#~ msgstr "Формат изображений GIF"
+
+#~ msgid "Invalid header in icon"
+#~ msgstr "Недопустимый заголовок значка"
+
+#~ msgid "Not enough memory to load icon"
+#~ msgstr "Недостаточно памяти для загрузки значка"
+
+#~ msgid "Icon has zero width"
+#~ msgstr "Ширина значка равна нулю"
+
+#~ msgid "Icon has zero height"
+#~ msgstr "Высота значка равна нулю"
+
+#~ msgid "Compressed icons are not supported"
+#~ msgstr "Сжатые значки не поддерживаются"
+
+#~ msgid "Unsupported icon type"
+#~ msgstr "Данный тип значка не поддерживается"
+
+#~ msgid "Not enough memory to load ICO file"
+#~ msgstr "Недостаточно памяти для загрузки файла формата ICO"
+
+#~ msgid "Image too large to be saved as ICO"
+#~ msgstr "Изображение слишком велико для сохранения в формате ICO"
+
+#~ msgid "Cursor hotspot outside image"
+#~ msgstr "Активирующая область определена за границами изображения"
+
+#, c-format
+#~ msgid "Unsupported depth for ICO file: %d"
+#~ msgstr "Глубина цвета %d для файла формата ICO не поддерживается"
+
+#~ msgid "The ICO image format"
+#~ msgstr "Формат изображений ICO"
+
+#, c-format
+#~ msgid "Error reading ICNS image: %s"
+#~ msgstr "При чтении изображения ICNS произошла ошибка: %s"
+
+#~ msgid "Could not decode ICNS file"
+#~ msgstr "Не удалось декодировать файл ICNS"
+
+#~ msgid "The ICNS image format"
+#~ msgstr "Формат изображений ICNS"
+
+#~ msgid "Couldn't allocate memory for stream"
+#~ msgstr "Не удалось выделить память для потока"
+
+#~ msgid "Couldn't decode image"
+#~ msgstr "Не удалось декодировать изображение"
+
+#~ msgid "Transformed JPEG2000 has zero width or height"
+#~ msgstr ""
+#~ "Преобразованное изображение формата JPEG2000 имеет нулевую ширину или "
+#~ "высоту"
+
+#~ msgid "Image type currently not supported"
+#~ msgstr "Тип изображения не поддерживается в данной версии"
+
+#~ msgid "Couldn't allocate memory for color profile"
+#~ msgstr "Не удалось выделить память для цветового профиля"
+
+#~ msgid "Insufficient memory to open JPEG 2000 file"
+#~ msgstr "Недостаточно памяти для открытия файла формата JPEG 2000"
+
+#~ msgid "Couldn't allocate memory to buffer image data"
+#~ msgstr "Не удалось выделить память для буфера данных изображения"
+
+#~ msgid "The JPEG 2000 image format"
+#~ msgstr "Формат изображений JPEG 2000"
+
+#, c-format
+#~ msgid "Error interpreting JPEG image file (%s)"
+#~ msgstr "Произошла ошибка интерпретации файла изображения формата JPEG (%s)"
+
+#~ msgid ""
+#~ "Insufficient memory to load image, try exiting some applications to free "
+#~ "memory"
+#~ msgstr ""
+#~ "Недостаточно памяти для загрузки изображения; попытайтесь закрыть "
+#~ "некоторые приложения, чтобы освободить память"
+
+#, c-format
+#~ msgid "Unsupported JPEG color space (%s)"
+#~ msgstr "Цветовое пространство (%s) формата JPEG не поддерживается"
+
+#~ msgid "Couldn't allocate memory for loading JPEG file"
+#~ msgstr "Не удалось выделить память для загрузки файла формата JPEG"
+
+#~ msgid "Transformed JPEG has zero width or height."
+#~ msgstr ""
+#~ "Преобразованное изображение формата JPEG имеет нулевую ширину или высоту"
+
+#, c-format
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%s' could not be "
+#~ "parsed."
+#~ msgstr ""
+#~ "Качество формата JPEG должно быть между 0 и 100; значение «%s» не может "
+#~ "быть обработано."
+
+#, c-format
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%d' is not allowed."
+#~ msgstr ""
+#~ "Качество формата JPEG должно быть между 0 и 100; значение «%d» "
+#~ "недопустимо."
+
+#~ msgid "The JPEG image format"
+#~ msgstr "Формат изображений JPEG"
+
+#~ msgid "Couldn't allocate memory for header"
+#~ msgstr "Не удалось выделить память для заголовка"
+
+#~ msgid "Couldn't allocate memory for context buffer"
+#~ msgstr "Не удалось выделить память для буфера контекста"
+
+#~ msgid "Image has invalid width and/or height"
+#~ msgstr "Изображение имеет нулевую ширину и (или) высоту"
+
+#~ msgid "Image has unsupported bpp"
+#~ msgstr "Изображение имеет неподдерживаемое число бит на пиксель"
+
+#, c-format
+#~ msgid "Image has unsupported number of %d-bit planes"
+#~ msgstr ""
+#~ "Изображение имеет неподдерживаемое число многобитовых (%d) плоскостей"
+
+#~ msgid "Couldn't create new pixbuf"
+#~ msgstr "Не удалось создать новую структуру pixbuf"
+
+#~ msgid "Couldn't allocate memory for line data"
+#~ msgstr "Не удалось выделить память для данных строки"
+
+#~ msgid "Couldn't allocate memory for paletted data"
+#~ msgstr "Не удалось выделить память для данных палитры"
+
+#~ msgid "Didn't get all lines of PCX image"
+#~ msgstr "Не получены все строки изображения формата PCX"
+
+#~ msgid "No palette found at end of PCX data"
+#~ msgstr "Палитра не найдена в конце данных формата PCX"
+
+#~ msgid "The PCX image format"
+#~ msgstr "Формат изображений PCX"
+
+#~ msgid "Bits per channel of PNG image is invalid."
+#~ msgstr "Значение числа бит на канал для изображения формата PNG недопустимо"
+
+#~ msgid "Transformed PNG has zero width or height."
+#~ msgstr ""
+#~ "Преобразованное изображение формата PNG имеет нулевую ширину или высоту"
+
+#~ msgid "Bits per channel of transformed PNG is not 8."
+#~ msgstr ""
+#~ "Значение числа бит на канал преобразованного изображения формата PNG не "
+#~ "равняется 8."
+
+#~ msgid "Transformed PNG not RGB or RGBA."
+#~ msgstr "Преобразованное изображение формата PNG не имеет тип RGB или RGBA"
+
+#~ msgid "Transformed PNG has unsupported number of channels, must be 3 or 4."
+#~ msgstr ""
+#~ "Преобразованное изображение формата PNG имеет неподдерживаемое число "
+#~ "каналов, это число должно быть 3 или 4"
+
+#, c-format
+#~ msgid "Fatal error in PNG image file: %s"
+#~ msgstr "Произошла фатальная ошибка в файле изображения формата PNG: %s"
+
+#~ msgid "Insufficient memory to load PNG file"
+#~ msgstr "Недостаточно памяти для загрузки файла формата PNG"
+
+#, c-format
+#~ msgid ""
+#~ "Insufficient memory to store a %ld by %ld image; try exiting some "
+#~ "applications to reduce memory usage"
+#~ msgstr ""
+#~ "Недостаточно памяти для хранения %ld из %ld изображений; попробуйте "
+#~ "закрыть некоторые приложения, чтобы уменьшить количество используемой "
+#~ "памяти"
+
+#~ msgid "Fatal error reading PNG image file"
+#~ msgstr "Произошла фатальная ошибка при чтении файла изображения формата PNG"
+
+#, c-format
+#~ msgid "Fatal error reading PNG image file: %s"
+#~ msgstr ""
+#~ "Произошла фатальная ошибка при чтении файла изображения формата PNG: %s"
+
+#~ msgid ""
+#~ "Keys for PNG text chunks must have at least 1 and at most 79 characters."
+#~ msgstr ""
+#~ "Ключи для блоков текста в изображении формата PNG должны содержать не "
+#~ "менее 1 и не более 79 символов."
+
+#~ msgid "Keys for PNG text chunks must be ASCII characters."
+#~ msgstr ""
+#~ "Ключи для блоков текста в изображении формата PNG должны быть символами "
+#~ "набора ASCII."
+
+#, c-format
+#~ msgid "Color profile has invalid length %d."
+#~ msgstr "Неправильный размер (%d) цветового профиля."
+
+#, c-format
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%s' could "
+#~ "not be parsed."
+#~ msgstr ""
+#~ "Степень сжатия PNG может быть величиной между 0 и 9, значение «%s» не "
+#~ "может быть обработано."
+
+#, c-format
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%d' is not "
+#~ "allowed."
+#~ msgstr ""
+#~ "Степень сжатия PNG может быть величиной между 0 и 9, значение «%d» не "
+#~ "допускается."
+
+#, c-format
+#~ msgid ""
+#~ "Value for PNG text chunk %s cannot be converted to ISO-8859-1 encoding."
+#~ msgstr ""
+#~ "Значение для блока текста %s не может быть преобразовано в кодировку "
+#~ "ISO-8859-1."
+
+#~ msgid "The PNG image format"
+#~ msgstr "Формат изображений PNG"
+
+#~ msgid "PNM loader expected to find an integer, but didn't"
+#~ msgstr ""
+#~ "Загрузчик изображений формата PNM ожидал найти целое число, но не нашёл "
+#~ "его"
+
+#~ msgid "PNM file has an incorrect initial byte"
+#~ msgstr "Файл формата PNM имеет неправильный начальный байт"
+
+#~ msgid "PNM file is not in a recognized PNM subformat"
+#~ msgstr "Файл формата PNM имеет нераспознаваемый субформат PNM"
+
+#~ msgid "PNM file has an image width of 0"
+#~ msgstr "Файл формата PNM имеет нулевую ширину изображения"
+
+#~ msgid "PNM file has an image height of 0"
+#~ msgstr "Файл формата PNM имеет нулевую высоту изображения"
+
+#~ msgid "Maximum color value in PNM file is 0"
+#~ msgstr "Максимальное значение цвета в файле формата PNM равняется 0"
+
+#~ msgid "Maximum color value in PNM file is too large"
+#~ msgstr "Максимальное значение цвета в файле формата PNM слишком велико"
+
+#~ msgid "Raw PNM image type is invalid"
+#~ msgstr "Данный тип изображения формата PNM недопустим"
+
+#~ msgid "PNM image loader does not support this PNM subformat"
+#~ msgstr ""
+#~ "Загрузчик изображений формата PNM не поддерживает этот субформат PNM"
+
+#~ msgid "Raw PNM formats require exactly one whitespace before sample data"
+#~ msgstr "Формат PNM требует ровно одного пробела перед данными семпла"
+
+#~ msgid "Cannot allocate memory for loading PNM image"
+#~ msgstr "Не удалось выделить память для загрузки файла изображения PNM"
+
+#~ msgid "Insufficient memory to load PNM context struct"
+#~ msgstr "Недостаточно памяти для загрузки структуры формата PNM"
+
+#~ msgid "Unexpected end of PNM image data"
+#~ msgstr "Непредвиденный конец данных обнаружен в изображении формата PNM"
+
+#~ msgid "Insufficient memory to load PNM file"
+#~ msgstr "Недостаточно памяти для загрузки файла формата PNM"
+
+#~ msgid "The PNM/PBM/PGM/PPM image format family"
+#~ msgstr "Семейство форматов изображений PNM/PBM/PGM/PPM"
+
+#~ msgid "Input file descriptor is NULL."
+#~ msgstr "Файловый дескриптор ввода равен NULL."
+
+#~ msgid "Failed to read QTIF header"
+#~ msgstr "Не удалось прочитать заголовок QTIF"
+
+#, c-format
+#~ msgid "QTIF atom size too large (%d bytes)"
+#~ msgstr "Слишком большой размер атома QTIF (%d байт)"
+
+#, c-format
+#~ msgid "Failed to allocate %d bytes for file read buffer"
+#~ msgstr ""
+#~ "Не удалось выделить память в размере %d байта для буфера чтения файла"
+
+#, c-format
+#~ msgid "File error when reading QTIF atom: %s"
+#~ msgstr "Файловая ошибка при чтении атома QTIF: %s"
+
+#, c-format
+#~ msgid "Failed to skip the next %d bytes with seek()."
+#~ msgstr "Не удалось переместиться на следующие %d байт с помощью seek()."
+
+#~ msgid "Failed to allocate QTIF context structure."
+#~ msgstr "Не удалось выделить память для структуры контекста QTIF."
+
+#~ msgid "Failed to create GdkPixbufLoader object."
+#~ msgstr "Не удалось создать объект GdkPixbufLoader."
+
+#~ msgid "Failed to find an image data atom."
+#~ msgstr "Не удалось найти атом данных изображения."
+
+#~ msgid "The QTIF image format"
+#~ msgstr "Формат изображений QTIF"
+
+#~ msgid "RAS image has bogus header data"
+#~ msgstr "Заголовок изображения формата RAS содержит неправильные данные"
+
+#~ msgid "RAS image has unknown type"
+#~ msgstr "Тип изображения формата RAS неизвестен"
+
+#~ msgid "unsupported RAS image variation"
+#~ msgstr "данная разновидность изображения формата RAS не поддерживается"
+
+#~ msgid "Not enough memory to load RAS image"
+#~ msgstr "Недостаточно памяти для загрузки изображения формата RAS"
+
+#~ msgid "The Sun raster image format"
+#~ msgstr "Формат растровых изображений компании Sun"
+
+#~ msgid "Cannot allocate memory for IOBuffer struct"
+#~ msgstr "Не удалось выделить память для структуры IOBuffer"
+
+#~ msgid "Cannot allocate memory for IOBuffer data"
+#~ msgstr "Не удалось выделить память для данных структуры IOBuffer"
+
+#~ msgid "Cannot realloc IOBuffer data"
+#~ msgstr "Не удалось перераспределить память для данных структуры IOBuffer"
+
+#~ msgid "Cannot allocate temporary IOBuffer data"
+#~ msgstr "Не удалось выделить временные данные структуры IOBuffer"
+
+#~ msgid "Cannot allocate new pixbuf"
+#~ msgstr "Не удалось выделить память для новой структуры pixbuf"
+
+#~ msgid "Image is corrupted or truncated"
+#~ msgstr "Изображение повреждено или обрезано"
+
+#~ msgid "Cannot allocate colormap structure"
+#~ msgstr "Не удалось выделить память для структуры карты цветов"
+
+#~ msgid "Cannot allocate colormap entries"
+#~ msgstr "Не удалось выделить память для элементов карты цветов"
+
+#~ msgid "Unexpected bitdepth for colormap entries"
+#~ msgstr "Непредвиденная глубина цвета обнаружена для элемента карты цветов"
+
+#~ msgid "Cannot allocate TGA header memory"
+#~ msgstr "Не удалось выделить память для заголовка формата TGA"
+
+#~ msgid "TGA image has invalid dimensions"
+#~ msgstr "Изображение TGA имеет недопустимые размеры"
+
+#~ msgid "TGA image type not supported"
+#~ msgstr "Неподдерживаемый тип изображения TGA"
+
+#~ msgid "Cannot allocate memory for TGA context struct"
+#~ msgstr "Не удалось выделить память для структуры содержания формата TGA"
+
+#~ msgid "Excess data in file"
+#~ msgstr "Данные в файле избыточны"
+
+#~ msgid "The Targa image format"
+#~ msgstr "Формат изображений Targa"
+
+#~ msgid "Could not get image width (bad TIFF file)"
+#~ msgstr ""
+#~ "Не удалось определить ширину изображения (испорченный файл формата TIFF)"
+
+#~ msgid "Could not get image height (bad TIFF file)"
+#~ msgstr ""
+#~ "Не удалось определить высоту изображения (испорченный файл формата TIFF)"
+
+#~ msgid "Width or height of TIFF image is zero"
+#~ msgstr "Ширина или высота изображения формата TIFF равна 0"
+
+#~ msgid "Dimensions of TIFF image too large"
+#~ msgstr "Изображение формата TIFF слишком большое"
+
+#~ msgid "Insufficient memory to open TIFF file"
+#~ msgstr "Недостаточно памяти для открытия файла формата TIFF"
+
+#~ msgid "Failed to load RGB data from TIFF file"
+#~ msgstr "Не удалось прочитать данные RGB из файла формата TIFF"
+
+#~ msgid "Failed to open TIFF image"
+#~ msgstr "Не удалось открыть изображение формата TIFF"
+
+#~ msgid "TIFFClose operation failed"
+#~ msgstr "Произошёл сбой в функции TIFFClose"
+
+#~ msgid "Failed to load TIFF image"
+#~ msgstr "Произошёл сбой при загрузке изображения формата TIFF"
+
+#~ msgid "Failed to save TIFF image"
+#~ msgstr "Сбой сохранения изображения TIFF"
+
+#~ msgid "TIFF compression doesn't refer to a valid codec."
+#~ msgstr "Сжатие TIFF не указывает на правильный кодировщик."
+
+#~ msgid "Failed to write TIFF data"
+#~ msgstr "Сбой записи данных TIFF"
+
+#~ msgid "Couldn't write to TIFF file"
+#~ msgstr "Не удалось записать в файл TIFF"
+
+#~ msgid "The TIFF image format"
+#~ msgstr "Формат изображений TIFF"
+
+#~ msgid "Image has zero width"
+#~ msgstr "Изображение имеет нулевую ширину"
+
+#~ msgid "Image has zero height"
+#~ msgstr "Изображение имеет нулевую высоту"
+
+#~ msgid "Not enough memory to load image"
+#~ msgstr "Недостаточно памяти для загрузки изображения"
+
+#~ msgid "Couldn't save the rest"
+#~ msgstr "Не удалось сохранить оставшуюся часть"
+
+#~ msgid "The WBMP image format"
+#~ msgstr "Формат изображений WBMP"
+
+#~ msgid "Invalid XBM file"
+#~ msgstr "Файл формата XBM недопустим"
+
+#~ msgid "Insufficient memory to load XBM image file"
+#~ msgstr "Недостаточно памяти для загрузки файла изображения формата XBM"
+
+#~ msgid "Failed to write to temporary file when loading XBM image"
+#~ msgstr ""
+#~ "Не удалось записать во временный файл во время загрузки изображения "
+#~ "формата XBM"
+
+#~ msgid "The XBM image format"
+#~ msgstr "Формат изображений XBM"
+
+#~ msgid "No XPM header found"
+#~ msgstr "Заголовок XPM не найден"
+
+#~ msgid "Invalid XPM header"
+#~ msgstr "Недопустимый заголовок XPM"
+
+#~ msgid "XPM file has image width <= 0"
+#~ msgstr "Ширина изображения в файле формата XPM меньше или равна 0"
+
+#~ msgid "XPM file has image height <= 0"
+#~ msgstr "Высота изображения в файле формата XPM меньше или равна 0"
+
+#~ msgid "XPM has invalid number of chars per pixel"
+#~ msgstr "XPM имеет недопустимое число символов на пиксель"
+
+#~ msgid "XPM file has invalid number of colors"
+#~ msgstr "Файл формата XPM имеет недопустимое число цветов"
+
+#~ msgid "Cannot allocate memory for loading XPM image"
+#~ msgstr "Не удалось выделить память для загрузки изображения XPM"
+
+#~ msgid "Cannot read XPM colormap"
+#~ msgstr "Не удалось прочитать цветовую карту XPM"
+
+#~ msgid "Failed to write to temporary file when loading XPM image"
+#~ msgstr "Cбой при записи временного файла во время загрузки изображения XPM"
+
+#~ msgid "The XPM image format"
+#~ msgstr "Формат изображения XPM"
+
+#~ msgid "The EMF image format"
+#~ msgstr "Формат изображений EMF"
+
+#, c-format
+#~ msgid "Could not allocate memory: %s"
+#~ msgstr "Не удалось выделить память: %s"
+
+#, c-format
+#~ msgid "Could not create stream: %s"
+#~ msgstr "Не удалось создать поток: %s"
+
+#, c-format
+#~ msgid "Could not seek stream: %s"
+#~ msgstr "Не удалось сменить позицию в потоке: %s"
+
+#, c-format
+#~ msgid "Could not read from stream: %s"
+#~ msgstr "Не удалось прочитать из потока: %s"
+
+#~ msgid "Couldn't load bitmap"
+#~ msgstr "Не удалось загрузить растровое изображение"
+
+#~ msgid "Couldn't load metafile"
+#~ msgstr "Не удалось загрузить метафайл"
+
+#~ msgid "Unsupported image format for GDI+"
+#~ msgstr "Данный формат изображений не поддерживается для GDI+"
+
+#~ msgid "Couldn't save"
+#~ msgstr "Не удалось сохранить"
+
+#~ msgid "The WMF image format"
+#~ msgstr "Формат изображений WMF"
+
+#~ msgid "Don't batch GDI requests"
+#~ msgstr "Не объединять запросы GDI"
+
+#~ msgid "Don't use the Wintab API for tablet support"
+#~ msgstr "Не использовать Wintab API для поддержки планшета"
+
+#~ msgid "Same as --no-wintab"
+#~ msgstr "То же, что и --no-wintab"
+
+#~ msgid "Do use the Wintab API [default]"
+#~ msgstr "Не использовать Wintab API [по умолчанию]"
+
+#~ msgid "Size of the palette in 8 bit mode"
+#~ msgstr "Размер палитры в 8-битном режиме"
+
+#~ msgid "COLORS"
+#~ msgstr "КОЛИЧЕСТВО_ЦВЕТОВ"
+
+#~ msgid "Make X calls synchronous"
+#~ msgstr "Включить синхронные вызовы X"
+
+#, c-format
+#~ msgid "Starting %s"
+#~ msgstr "Запускается %s"
+
+#, c-format
+#~ msgid "Opening %s"
+#~ msgstr "Открывается %s"
+
+#, fuzzy, c-format
+#~ msgid "Opening %d Item"
+#~ msgid_plural "Opening %d Items"
+#~ msgstr[0] "Открывается %s"
+#~ msgstr[1] "Открывается %s"
+#~ msgstr[2] "Открывается %s"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Shift"
+#~ msgstr "Shift"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Ctrl"
+#~ msgstr "Ctrl"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Alt"
+#~ msgstr "Alt"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Super"
+#~ msgstr "Super"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Hyper"
+#~ msgstr "Hyper"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Meta"
+#~ msgstr "Meta"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Space"
+#~ msgstr "Пробел"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Backslash"
+#~ msgstr "Backslash"
+
+#, c-format
+#~ msgid "Duplicate object id '%s' on line %d (previously on line %d)"
+#~ msgstr ""
+#~ "Повторяющийся идентификатор объекта «%s» в строке %d (ранее в строке %d)"
+
+#~ msgid "calendar:MY"
+#~ msgstr "calendar:MY"
+
+#~ msgid "calendar:week_start:0"
+#~ msgstr "calendar:week_start:1"
+
+#~ msgctxt "year measurement template"
+#~ msgid "2000"
+#~ msgstr "2000"
+
+#, c-format
+#~ msgctxt "calendar:day:digits"
+#~ msgid "%d"
+#~ msgstr "%d"
+
+#, c-format
+#~ msgctxt "calendar:week:digits"
+#~ msgid "%d"
+#~ msgstr "%d"
+
+#~ msgctxt "calendar year format"
+#~ msgid "%Y"
+#~ msgstr "%Y"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Disabled"
+#~ msgstr "Выключен"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Invalid"
+#~ msgstr "Неверный"
+
+#, c-format
+#~ msgctxt "progress bar label"
+#~ msgid "%d %%"
+#~ msgstr "%d %%"
+
+#~ msgid "default:mm"
+#~ msgstr "default:mm"
+
+#~ msgid "Manage Custom Sizes"
+#~ msgstr "Управление пользовательскими размерами"
+
+#~ msgid "inch"
+#~ msgstr "дюймы"
+
+#~ msgid "mm"
+#~ msgstr "мм"
+
+#~ msgid "Margins from Printer..."
+#~ msgstr "Поля из принтера..."
+
+#, c-format
+#~ msgid "Custom Size %d"
+#~ msgstr "Пользовательский размер %d"
+
+#~ msgid "_Width:"
+#~ msgstr "_Ширина:"
+
+#~ msgid "_Height:"
+#~ msgstr "_Высота:"
+
+#~ msgid "Paper Size"
+#~ msgstr "Размер бумаги"
+
+#~ msgid "_Top:"
+#~ msgstr "_Верхнее:"
+
+#~ msgid "_Bottom:"
+#~ msgstr "_Нижнее:"
+
+#~ msgid "_Left:"
+#~ msgstr "_Левое:"
+
+#~ msgid "_Right:"
+#~ msgstr "_Правое:"
+
+#~ msgid "Paper Margins"
+#~ msgstr "Поля страницы"
+
+#~ msgid "Select A File"
+#~ msgstr "Выберите файл"
+
+#~ msgid "_Add"
+#~ msgstr "_Добавить"
+
+#~ msgid "_Remove"
+#~ msgstr "_Удалить"
+
+#~ msgid "_Browse for other folders"
+#~ msgstr "П_росмотреть другие папки"
+
+#~ msgid "Invalid path"
+#~ msgstr "Неверный путь"
+
+#~ msgid "No match"
+#~ msgstr "Нет совпадений"
+
+#~ msgid "Sole completion"
+#~ msgstr "Единственное совпадение"
+
+#~ msgid "Complete, but not unique"
+#~ msgstr "Подходящее, но не уникальное"
+
+#~ msgid "Completing..."
+#~ msgstr "Поиск совпадений..."
+
+#~ msgid "Only local files may be selected"
+#~ msgstr "Поддерживаются только локальные файлы"
+
+#~ msgid "Incomplete hostname; end it with '/'"
+#~ msgstr "Незавершённое имя узла, наберите «/»"
+
+#~ msgid "Path does not exist"
+#~ msgstr "Путь не существует"
+
+#~ msgid "Folders"
+#~ msgstr "Папки"
+
+#~ msgid "Fol_ders"
+#~ msgstr "Пап_ки"
+
+#~ msgid "_Files"
+#~ msgstr "_Файлы"
+
+#, c-format
+#~ msgid "Folder unreadable: %s"
+#~ msgstr "Невозможно прочесть папку: %s"
+
+#, c-format
+#~ msgid ""
+#~ "The file \"%s\" resides on another machine (called %s) and may not be "
+#~ "available to this program.\n"
+#~ "Are you sure that you want to select it?"
+#~ msgstr ""
+#~ "Файл «%s» размещён на другой машине (с именем «%s») и может быть "
+#~ "недоступен этой программе.\n"
+#~ "Хотите выбрать именно его?"
+
+#~ msgid "_New Folder"
+#~ msgstr "_Создать папку"
+
+#~ msgid "De_lete File"
+#~ msgstr "_Удалить файл"
+
+#~ msgid "_Rename File"
+#~ msgstr "Пе_реименовать файл"
+
+#, c-format
+#~ msgid ""
+#~ "The folder name \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr "Имя папки «%s» содержит символы, недопустимые в именах файлов"
+
+#~ msgid "New Folder"
+#~ msgstr "Создать папку"
+
+#~ msgid "_Folder name:"
+#~ msgstr "Имя _папки:"
+
+#~ msgid "C_reate"
+#~ msgstr "Со_здать"
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr "Имя файла «%s» содержит символы, недопустимые в именах файлов"
+
+#, c-format
+#~ msgid "Error deleting file '%s': %s"
+#~ msgstr "Не удалось удалить файл «%s»: %s"
+
+#, c-format
+#~ msgid "Really delete file \"%s\"?"
+#~ msgstr "Действительно удалить файл «%s»?"
+
+#~ msgid "Delete File"
+#~ msgstr "Удалить файл"
+
+#, c-format
+#~ msgid "Error renaming file to \"%s\": %s"
+#~ msgstr "Не удалось переименовать файл в «%s»: %s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\": %s"
+#~ msgstr "Не удалось переименовать файл «%s»: %s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\" to \"%s\": %s"
+#~ msgstr "Не удалось переименовать файл «%s» в «%s»: %s"
+
+#~ msgid "Rename File"
+#~ msgstr "Переименовать файл"
+
+#, c-format
+#~ msgid "Rename file \"%s\" to:"
+#~ msgstr "Переименовать файл «%s» в:"
+
+#~ msgid "_Rename"
+#~ msgstr "_Переименовать"
+
+#~ msgid "_Selection: "
+#~ msgstr "_Выбор: "
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" couldn't be converted to UTF-8. (try setting the "
+#~ "environment variable G_FILENAME_ENCODING): %s"
+#~ msgstr ""
+#~ "Имя файла «%s» не удалось преобразовать в кодировку UTF-8 (попробуйте "
+#~ "задать переменную среды G_FILENAME_ENCODING): %s"
+
+#~ msgid "Invalid UTF-8"
+#~ msgstr "Недопустимая последовательность UTF-8"
+
+#~ msgid "Name too long"
+#~ msgstr "Слишком длинное имя"
+
+#~ msgid "Couldn't convert filename"
+#~ msgstr "Не удалось преобразовать имя файла"
+
+#~ msgid "Gamma"
+#~ msgstr "Гамма"
+
+#~ msgid "_Gamma value"
+#~ msgstr "Значение _гаммы"
+
+#~ msgctxt "input method menu"
+#~ msgid "System"
+#~ msgstr "Системный"
+
+#~ msgctxt "input method menu"
+#~ msgid "None"
+#~ msgstr "Нет"
+
+#, c-format
+#~ msgctxt "input method menu"
+#~ msgid "System (%s)"
+#~ msgstr "Системный (%s)"
+
+#~ msgid "Input"
+#~ msgstr "Ввод"
+
+#~ msgid "No extended input devices"
+#~ msgstr "Расширенные устройства ввода отсутствуют"
+
+#~ msgid "_Device:"
+#~ msgstr "_Устройство:"
+
+#~ msgid "Disabled"
+#~ msgstr "Выключен"
+
+#~ msgid "Screen"
+#~ msgstr "Экран"
+
+#~ msgid "Window"
+#~ msgstr "Окно"
+
+#~ msgid "_Mode:"
+#~ msgstr "_Режим:"
+
+#~ msgid "Axes"
+#~ msgstr "Оси"
+
+#~ msgid "Keys"
+#~ msgstr "Клавиши"
+
+#~ msgid "_X:"
+#~ msgstr "_X:"
+
+#~ msgid "_Y:"
+#~ msgstr "_Y:"
+
+#~ msgid "_Pressure:"
+#~ msgstr "_Нажим:"
+
+#~ msgid "X _tilt:"
+#~ msgstr "Н_аклон по X:"
+
+#~ msgid "Y t_ilt:"
+#~ msgstr "На_клон по Y:"
+
+#~ msgid "_Wheel:"
+#~ msgstr "_Колесо:"
+
+#~ msgid "none"
+#~ msgstr "нет"
+
+#~ msgid "(disabled)"
+#~ msgstr "(выключен)"
+
+#~ msgid "(unknown)"
+#~ msgstr "(неизвестен)"
+
+#~ msgid "Cl_ear"
+#~ msgstr "О_чистить"
+
+#, c-format
+#~ msgid "Unknown Application (pid %d)"
+#~ msgstr "Неизвестное приложение (pid %d)"
+
+#, c-format
+#~ msgid "Cannot kill process with pid %d. Operation is not implemented."
+#~ msgstr "Не удается убить процесс (pid %d). Операция не выполнена."
+
+#~ msgid "Terminal Pager"
+#~ msgstr "Терминальный пейджер"
+
+#~ msgid "Top Command"
+#~ msgstr "Команда top"
+
+#~ msgid "Bourne Again Shell"
+#~ msgstr "Bourne Again Shell"
+
+#~ msgid "Bourne Shell"
+#~ msgstr "Bourne Shell"
+
+#~ msgid "Z Shell"
+#~ msgstr "Z Shell"
+
+#, c-format
+#~ msgid "Cannot end process with pid %d: %s"
+#~ msgstr "Не удается завершить процесс pid %d: %s"
+
+#~ msgid "Not a valid page setup file"
+#~ msgstr "Некорректный файл настройки печати"
+
+#~ msgid "Any Printer"
+#~ msgstr "Любой принтер"
+
+#~ msgid "For portable documents"
+#~ msgstr "Для переносимых документов"
+
+#, c-format
+#~ msgid ""
+#~ "Margins:\n"
+#~ " Left: %s %s\n"
+#~ " Right: %s %s\n"
+#~ " Top: %s %s\n"
+#~ " Bottom: %s %s"
+#~ msgstr ""
+#~ "Поля:\n"
+#~ " левое: %s %s\n"
+#~ " правое: %s %s\n"
+#~ " верхнее: %s %s\n"
+#~ " нижнее: %s %s"
+
+#~ msgid "Manage Custom Sizes..."
+#~ msgstr "Управление пользовательскими размерами..."
+
+#~ msgid "_Format for:"
+#~ msgstr "_Формат для:"
+
+#~ msgid "_Paper size:"
+#~ msgstr "_Размер бумаги:"
+
+#~ msgid "_Orientation:"
+#~ msgstr "_Расположение:"
+
+#~ msgid "Page Setup"
+#~ msgstr "Параметры страницы"
+
+#~ msgid "Authentication"
+#~ msgstr "Проверка доступа"
+
+#~ msgid "Not available"
+#~ msgstr "Недоступно"
+
+#~ msgid "_Save in folder:"
+#~ msgstr "_Сохранить в папке:"
+
+#, c-format
+#~ msgid "%s job #%d"
+#~ msgstr "%s задание №%d"
+
+#~ msgctxt "print operation status"
+#~ msgid "Initial state"
+#~ msgstr "Начальное состояние"
+
+#~ msgctxt "print operation status"
+#~ msgid "Preparing to print"
+#~ msgstr "Подготовка к печати"
+
+#~ msgctxt "print operation status"
+#~ msgid "Generating data"
+#~ msgstr "Вывод данных"
+
+#~ msgctxt "print operation status"
+#~ msgid "Sending data"
+#~ msgstr "Отправка данных"
+
+#~ msgctxt "print operation status"
+#~ msgid "Waiting"
+#~ msgstr "Ожидание"
+
+#~ msgctxt "print operation status"
+#~ msgid "Blocking on issue"
+#~ msgstr "Остановлено из-за ошибки"
+
+#~ msgctxt "print operation status"
+#~ msgid "Printing"
+#~ msgstr "Печать"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished"
+#~ msgstr "Завершено"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished with error"
+#~ msgstr "Завершено с ошибкой"
+
+#, c-format
+#~ msgid "Preparing %d"
+#~ msgstr "Подготовка %d"
+
+#, c-format
+#~ msgid "Preparing"
+#~ msgstr "Подготовка"
+
+#, c-format
+#~ msgid "Printing %d"
+#~ msgstr "Печать %d"
+
+#, c-format
+#~ msgid "Error creating print preview"
+#~ msgstr "Не удалось создать предварительный просмотр"
+
+#, c-format
+#~ msgid ""
+#~ "The most probable reason is that a temporary file could not be created."
+#~ msgstr "Наиболее вероятная причина: не удалось создать временный файл."
+
+#, c-format
+#~ msgid "Error launching preview"
+#~ msgstr "Ошибка предварительного просмотра"
+
+#, c-format
+#~ msgid "Error printing"
+#~ msgstr "Ошибка печати"
+
+#~ msgid "Application"
+#~ msgstr "Приложение"
+
+#~ msgid "Printer offline"
+#~ msgstr "Принтер отключён"
+
+#~ msgid "Out of paper"
+#~ msgstr "Нет бумаги"
+
+#~ msgid "Paused"
+#~ msgstr "Приостановлено"
+
+#~ msgid "Need user intervention"
+#~ msgstr "Необходимо вмешательство пользователя"
+
+#~ msgid "Custom size"
+#~ msgstr "Пользовательский размер"
+
+#~ msgid "No printer found"
+#~ msgstr "Принтеры не найдены"
+
+#~ msgid "Invalid argument to CreateDC"
+#~ msgstr "Неверный аргумент для CreateDC"
+
+#~ msgid "Error from StartDoc"
+#~ msgstr "Ошибка от StartDoc"
+
+#~ msgid "Not enough free memory"
+#~ msgstr "Недостаточно свободной памяти"
+
+#~ msgid "Invalid argument to PrintDlgEx"
+#~ msgstr "Неверный аргумент для PrintDlgEx"
+
+#~ msgid "Invalid pointer to PrintDlgEx"
+#~ msgstr "Неверный указатель на PrintDlgEx"
+
+#~ msgid "Invalid handle to PrintDlgEx"
+#~ msgstr "Ошибочный дескриптор PrintDlgEx"
+
+#~ msgid "Unspecified error"
+#~ msgstr "Неуказанная ошибка"
+
+#~ msgid "Getting printer information failed"
+#~ msgstr "Не удалось получить информацию о принтере"
+
+#~ msgid "Getting printer information..."
+#~ msgstr "Получение информации о принтере..."
+
+#~ msgid "Printer"
+#~ msgstr "Принтер"
+
+#~ msgid "Location"
+#~ msgstr "Расположение"
+
+#~ msgid "Status"
+#~ msgstr "Состояние"
+
+#~ msgid "Range"
+#~ msgstr "Диапазон"
+
+#~ msgid "_All Pages"
+#~ msgstr "_Все страницы"
+
+#~ msgid "C_urrent Page"
+#~ msgstr "_Текущую страницу"
+
+#~ msgid "Se_lection"
+#~ msgstr "_Выбор"
+
+#~ msgid "Pag_es:"
+#~ msgstr "Страни_цы:"
+
+#~ msgid ""
+#~ "Specify one or more page ranges,\n"
+#~ " e.g. 1-3,7,11"
+#~ msgstr ""
+#~ "Введите один или несколько диапазонов страниц,\n"
+#~ "например, 1-3,7,11"
+
+#~ msgid "Pages"
+#~ msgstr "Страницы"
+
+#~ msgid "Copies"
+#~ msgstr "Копии"
+
+#~ msgid "Copie_s:"
+#~ msgstr "_Копий:"
+
+#~ msgid "C_ollate"
+#~ msgstr "_Упорядочить"
+
+#~ msgid "_Reverse"
+#~ msgstr "_Наоборот"
+
+#~ msgid "General"
+#~ msgstr "Общие"
+
+#~ msgid "Left to right, top to bottom"
+#~ msgstr "Слева направо, сверху вниз"
+
+#~ msgid "Left to right, bottom to top"
+#~ msgstr "Слева направо, снизу вверх"
+
+#~ msgid "Right to left, top to bottom"
+#~ msgstr "Справа налево, сверху вниз"
+
+#~ msgid "Right to left, bottom to top"
+#~ msgstr "Справа налево, снизу вверх"
+
+#~ msgid "Top to bottom, left to right"
+#~ msgstr "Сверху вниз, слева направо"
+
+#~ msgid "Top to bottom, right to left"
+#~ msgstr "Сверху вниз, справа налево"
+
+#~ msgid "Bottom to top, left to right"
+#~ msgstr "Снизу вверх, слева направо"
+
+#~ msgid "Bottom to top, right to left"
+#~ msgstr "Снизу вверх, справа налево"
+
+#~ msgid "Page Ordering"
+#~ msgstr "Порядок страниц"
+
+#~ msgid "Left to right"
+#~ msgstr "Слева направо"
+
+#~ msgid "Right to left"
+#~ msgstr "Справа налево"
+
+#~ msgid "Top to bottom"
+#~ msgstr "Сверху вниз"
+
+#~ msgid "Bottom to top"
+#~ msgstr "Снизу вверх"
+
+#~ msgid "Layout"
+#~ msgstr "Размещение"
+
+#~ msgid "T_wo-sided:"
+#~ msgstr "Двухсторонняя:"
+
+#~ msgid "Pages per _side:"
+#~ msgstr "Страниц на _сторону:"
+
+#~ msgid "Page or_dering:"
+#~ msgstr "Порядок ст_раниц:"
+
+#~ msgid "_Only print:"
+#~ msgstr "Печатать т_олько:"
+
+#~ msgid "All sheets"
+#~ msgstr "Все листы"
+
+#~ msgid "Even sheets"
+#~ msgstr "Чётные листы"
+
+#~ msgid "Odd sheets"
+#~ msgstr "Нечётные листы"
+
+#~ msgid "Sc_ale:"
+#~ msgstr "_Масштаб:"
+
+#~ msgid "Paper"
+#~ msgstr "Бумага"
+
+#~ msgid "Paper _type:"
+#~ msgstr "_Тип бумаги:"
+
+#~ msgid "Paper _source:"
+#~ msgstr "_Источник бумаги:"
+
+#~ msgid "Output t_ray:"
+#~ msgstr "Выходной лоток:"
+
+#~ msgid "Or_ientation:"
+#~ msgstr "_Ориентация:"
+
+#~ msgid "Portrait"
+#~ msgstr "Портретная"
+
+#~ msgid "Landscape"
+#~ msgstr "Ландшафтная"
+
+#~ msgid "Reverse portrait"
+#~ msgstr "Портретная развернутая"
+
+#~ msgid "Reverse landscape"
+#~ msgstr "Пейзажная обратная"
+
+#~ msgid "Job Details"
+#~ msgstr "Сведения о задании"
+
+#~ msgid "Pri_ority:"
+#~ msgstr "При_оритет:"
+
+#~ msgid "_Billing info:"
+#~ msgstr "_Расположение:"
+
+#~ msgid "Print Document"
+#~ msgstr "Печатать документ"
+
+#~ msgid "_Now"
+#~ msgstr "_Сейчас"
+
+#~ msgid "A_t:"
+#~ msgstr "_В:"
+
+#~ msgid ""
+#~ "Specify the time of print,\n"
+#~ " e.g. 15:30, 2:35 pm, 14:15:20, 11:46:30 am, 4 pm"
+#~ msgstr ""
+#~ "Задайте время печати,\n"
+#~ " например, 15:30, 14:15:20, 7:20"
+
+#~ msgid "Time of print"
+#~ msgstr "Время печати"
+
+#~ msgid "On _hold"
+#~ msgstr "О_жидание"
+
+#~ msgid "Hold the job until it is explicitly released"
+#~ msgstr "Задержать задание до дополнительной команды"
+
+#~ msgid "Add Cover Page"
+#~ msgstr "Добавить титульный лист"
+
+#~ msgid "Be_fore:"
+#~ msgstr "_До:"
+
+#~ msgid "_After:"
+#~ msgstr "_После:"
+
+#~ msgid "Job"
+#~ msgstr "Задание"
+
+#~ msgid "Advanced"
+#~ msgstr "Дополнительно"
+
+#~ msgid "Image Quality"
+#~ msgstr "Качество изображения"
+
+#~ msgid "Color"
+#~ msgstr "Цвет"
+
+#~ msgid "Finishing"
+#~ msgstr "Завершение"
+
+#~ msgid "Some of the settings in the dialog conflict"
+#~ msgstr "Некоторые параметры в диалоге конфликтуют"
+
+#~ msgid "Print"
+#~ msgstr "Печать"
+
+#, c-format
+#~ msgctxt "recent menu label"
+#~ msgid "_%d. %s"
+#~ msgstr "_%d. %s"
+
+#, c-format
+#~ msgctxt "recent menu label"
+#~ msgid "%d. %s"
+#~ msgstr "%d. %s"
+
+#~ msgctxt "throbbing progress animation widget"
+#~ msgid "Spinner"
+#~ msgstr "Вертушка"
+
+#~ msgctxt "Stock label"
+#~ msgid "Information"
+#~ msgstr "Информация"
+
+#~ msgctxt "Stock label"
+#~ msgid "Warning"
+#~ msgstr "Предупреждение"
+
+#~ msgctxt "Stock label"
+#~ msgid "Error"
+#~ msgstr "Ошибка"
+
+#~ msgctxt "Stock label"
+#~ msgid "Question"
+#~ msgstr "Вопрос"
+
+#~ msgctxt "Stock label"
+#~ msgid "_About"
+#~ msgstr "_О программе"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Add"
+#~ msgstr "_Добавить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Apply"
+#~ msgstr "_Применить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Bold"
+#~ msgstr "Полу_жирный"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Cancel"
+#~ msgstr "О_тменить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_CD-Rom"
+#~ msgstr "_Компакт-диск"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Clear"
+#~ msgstr "О_чистить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Close"
+#~ msgstr "_Закрыть"
+
+#~ msgctxt "Stock label"
+#~ msgid "C_onnect"
+#~ msgstr "П_одключиться"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Convert"
+#~ msgstr "П_реобразовать"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Copy"
+#~ msgstr "_Копировать"
+
+#~ msgctxt "Stock label"
+#~ msgid "Cu_t"
+#~ msgstr "_Вырезать"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Delete"
+#~ msgstr "_Удалить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Discard"
+#~ msgstr "От_бросить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Disconnect"
+#~ msgstr "_Отключиться"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Execute"
+#~ msgstr "_Выполнить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Edit"
+#~ msgstr "_Изменить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Find"
+#~ msgstr "_Найти"
+
+#~ msgctxt "Stock label"
+#~ msgid "Find and _Replace"
+#~ msgstr "Найти и _заменить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Floppy"
+#~ msgstr "_Дискета"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fullscreen"
+#~ msgstr "_Во весь экран"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Leave Fullscreen"
+#~ msgstr "П_окинуть полноэкранный режим"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Bottom"
+#~ msgstr "К ни_зу"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_First"
+#~ msgstr "В н_ачало"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Last"
+#~ msgstr "В _конец"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Top"
+#~ msgstr "К _верху"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Back"
+#~ msgstr "На_зад"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Down"
+#~ msgstr "В_низ"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Forward"
+#~ msgstr "_Вперёд"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Up"
+#~ msgstr "Вв_ерх"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Harddisk"
+#~ msgstr "_Жёсткий диск"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Help"
+#~ msgstr "_Справка"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Home"
+#~ msgstr "_Домой"
+
+#~ msgctxt "Stock label"
+#~ msgid "Increase Indent"
+#~ msgstr "Увеличить отступ"
+
+#~ msgctxt "Stock label"
+#~ msgid "Decrease Indent"
+#~ msgstr "Уменьшить отступ"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Index"
+#~ msgstr "_Индекс"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Information"
+#~ msgstr "_Информация"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Italic"
+#~ msgstr "_Курсив"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Jump to"
+#~ msgstr "Перейти _к"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Center"
+#~ msgstr "По _центру"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fill"
+#~ msgstr "По _ширине"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Left"
+#~ msgstr "По _левому краю"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Right"
+#~ msgstr "По _правому краю"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Forward"
+#~ msgstr "_Вперёд"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Next"
+#~ msgstr "_Следующая"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "P_ause"
+#~ msgstr "_Приостановить"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Play"
+#~ msgstr "_Воспроизвести"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "Pre_vious"
+#~ msgstr "П_редыдущая"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Record"
+#~ msgstr "_Записать"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "R_ewind"
+#~ msgstr "_Назад"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Stop"
+#~ msgstr "_Остановить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Network"
+#~ msgstr "_Сеть"
+
+#~ msgctxt "Stock label"
+#~ msgid "_New"
+#~ msgstr "_Создать"
+
+#~ msgctxt "Stock label"
+#~ msgid "_No"
+#~ msgstr "_Нет"
+
+#~ msgctxt "Stock label"
+#~ msgid "_OK"
+#~ msgstr "_OK"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Open"
+#~ msgstr "_Открыть"
+
+#~ msgctxt "Stock label"
+#~ msgid "Landscape"
+#~ msgstr "Пейзаж"
+
+#~ msgctxt "Stock label"
+#~ msgid "Portrait"
+#~ msgstr "Портрет"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse landscape"
+#~ msgstr "Обратный пейзаж"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse portrait"
+#~ msgstr "Обратный портрет"
+
+#~ msgctxt "Stock label"
+#~ msgid "Page Set_up"
+#~ msgstr "Параметры стран_ицы"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Paste"
+#~ msgstr "Вст_авить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Preferences"
+#~ msgstr "_Параметры"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Print"
+#~ msgstr "Пе_чать"
+
+#~ msgctxt "Stock label"
+#~ msgid "Print Pre_view"
+#~ msgstr "Пред_варительный просмотр"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Properties"
+#~ msgstr "_Свойства"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Quit"
+#~ msgstr "В_ыход"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Redo"
+#~ msgstr "Ве_рнуть"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Refresh"
+#~ msgstr "Об_новить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Remove"
+#~ msgstr "_Удалить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Revert"
+#~ msgstr "_Восстановить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Save"
+#~ msgstr "Со_хранить"
+
+#~ msgctxt "Stock label"
+#~ msgid "Save _As"
+#~ msgstr "Сохранить _как"
+
+#~ msgctxt "Stock label"
+#~ msgid "Select _All"
+#~ msgstr "Выделить вс_ё"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Color"
+#~ msgstr "_Цвет"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Font"
+#~ msgstr "_Шрифт"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Ascending"
+#~ msgstr "По воз_растанию"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Descending"
+#~ msgstr "По _убыванию"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Spell Check"
+#~ msgstr "Проверить право_писание"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Stop"
+#~ msgstr "_Остановить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Strikethrough"
+#~ msgstr "Пере_чёркивание"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undelete"
+#~ msgstr "Вос_становить удалённое"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Underline"
+#~ msgstr "По_дчёркивание"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undo"
+#~ msgstr "_Отменить"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Yes"
+#~ msgstr "_Да"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Normal Size"
+#~ msgstr "В обы_чном размере"
+
+#~ msgctxt "Stock label"
+#~ msgid "Best _Fit"
+#~ msgstr "Наилучшее _заполнение"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _In"
+#~ msgstr "У_величить"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _Out"
+#~ msgstr "У_меньшить"
+
+#, c-format
+#~ msgid "<%s> element has invalid id \"%s\""
+#~ msgstr "Элемент <%s> имеет ошибочный идентификатор «%s»"
+
+#~ msgid "--- No Tip ---"
+#~ msgstr "--- Нет подсказки ---"
+
+#~ msgid "Volume"
+#~ msgstr "Громкость"
+
+#~ msgid "Turns volume down or up"
+#~ msgstr "Повышает или понижает громкость"
+
+#~ msgid "Adjusts the volume"
+#~ msgstr "Регулирует громкость"
+
+#~ msgid "Volume Down"
+#~ msgstr "Тише"
+
+#~ msgid "Decreases the volume"
+#~ msgstr "Понижает громкость"
+
+#~ msgid "Volume Up"
+#~ msgstr "Громче"
+
+#~ msgid "Increases the volume"
+#~ msgstr "Повышает громкость"
+
+#~ msgid "Muted"
+#~ msgstr "Приглушить"
+
+#~ msgid "Full Volume"
+#~ msgstr "Полная громкость"
+
+#, c-format
+#~ msgctxt "volume percentage"
+#~ msgid "%d %%"
+#~ msgstr "%d %%"
+
+#~ msgctxt "paper size"
+#~ msgid "asme_f"
+#~ msgstr "asme_f"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x2"
+#~ msgstr "A0x2"
+
+#~ msgctxt "paper size"
+#~ msgid "A0"
+#~ msgstr "A0"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x3"
+#~ msgstr "A0x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1"
+#~ msgstr "A1"
+
+#~ msgctxt "paper size"
+#~ msgid "A10"
+#~ msgstr "A10"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x3"
+#~ msgstr "A1x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x4"
+#~ msgstr "A1x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2"
+#~ msgstr "A2"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x3"
+#~ msgstr "A2x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x4"
+#~ msgstr "A2x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x5"
+#~ msgstr "A2x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3"
+#~ msgstr "A3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3 Extra"
+#~ msgstr "A3 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x3"
+#~ msgstr "A3x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x4"
+#~ msgstr "A3x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x5"
+#~ msgstr "A3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x6"
+#~ msgstr "A3x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x7"
+#~ msgstr "A3x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4"
+#~ msgstr "A4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Extra"
+#~ msgstr "A4 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Tab"
+#~ msgstr "A4 Tab"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x3"
+#~ msgstr "A4x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x4"
+#~ msgstr "A4x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x5"
+#~ msgstr "A4x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x6"
+#~ msgstr "A4x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x7"
+#~ msgstr "A4x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x8"
+#~ msgstr "A4x8"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x9"
+#~ msgstr "A4x9"
+
+#~ msgctxt "paper size"
+#~ msgid "A5"
+#~ msgstr "A5"
+
+#~ msgctxt "paper size"
+#~ msgid "A5 Extra"
+#~ msgstr "A5 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "A6"
+#~ msgstr "A6"
+
+#~ msgctxt "paper size"
+#~ msgid "A7"
+#~ msgstr "A7"
+
+#~ msgctxt "paper size"
+#~ msgid "A8"
+#~ msgstr "A8"
+
+#~ msgctxt "paper size"
+#~ msgid "A9"
+#~ msgstr "A9"
+
+#~ msgctxt "paper size"
+#~ msgid "B0"
+#~ msgstr "B0"
+
+#~ msgctxt "paper size"
+#~ msgid "B1"
+#~ msgstr "B1"
+
+#~ msgctxt "paper size"
+#~ msgid "B10"
+#~ msgstr "B10"
+
+#~ msgctxt "paper size"
+#~ msgid "B2"
+#~ msgstr "B2"
+
+#~ msgctxt "paper size"
+#~ msgid "B3"
+#~ msgstr "B3"
+
+#~ msgctxt "paper size"
+#~ msgid "B4"
+#~ msgstr "B4"
+
+#~ msgctxt "paper size"
+#~ msgid "B5"
+#~ msgstr "B5"
+
+#~ msgctxt "paper size"
+#~ msgid "B5 Extra"
+#~ msgstr "B5 Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "B6"
+#~ msgstr "B6"
+
+#~ msgctxt "paper size"
+#~ msgid "B6/C4"
+#~ msgstr "B6/C4"
+
+#~ msgctxt "paper size"
+#~ msgid "B7"
+#~ msgstr "B7"
+
+#~ msgctxt "paper size"
+#~ msgid "B8"
+#~ msgstr "B8"
+
+#~ msgctxt "paper size"
+#~ msgid "B9"
+#~ msgstr "B9"
+
+#~ msgctxt "paper size"
+#~ msgid "C0"
+#~ msgstr "C0"
+
+#~ msgctxt "paper size"
+#~ msgid "C1"
+#~ msgstr "C1"
+
+#~ msgctxt "paper size"
+#~ msgid "C10"
+#~ msgstr "C10"
+
+#~ msgctxt "paper size"
+#~ msgid "C2"
+#~ msgstr "C2"
+
+#~ msgctxt "paper size"
+#~ msgid "C3"
+#~ msgstr "C3"
+
+#~ msgctxt "paper size"
+#~ msgid "C4"
+#~ msgstr "C4"
+
+#~ msgctxt "paper size"
+#~ msgid "C5"
+#~ msgstr "C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C6"
+#~ msgstr "C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C6/C5"
+#~ msgstr "C6/C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C7"
+#~ msgstr "C7"
+
+#~ msgctxt "paper size"
+#~ msgid "C7/C6"
+#~ msgstr "C7/C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C8"
+#~ msgstr "C8"
+
+#~ msgctxt "paper size"
+#~ msgid "C9"
+#~ msgstr "C9"
+
+#~ msgctxt "paper size"
+#~ msgid "DL Envelope"
+#~ msgstr "Конверт DL"
+
+#~ msgctxt "paper size"
+#~ msgid "RA0"
+#~ msgstr "RA0"
+
+#~ msgctxt "paper size"
+#~ msgid "RA1"
+#~ msgstr "RA1"
+
+#~ msgctxt "paper size"
+#~ msgid "RA2"
+#~ msgstr "RA2"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA0"
+#~ msgstr "SRA0"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA1"
+#~ msgstr "SRA1"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA2"
+#~ msgstr "SRA2"
+
+#~ msgctxt "paper size"
+#~ msgid "JB0"
+#~ msgstr "JB0"
+
+#~ msgctxt "paper size"
+#~ msgid "JB1"
+#~ msgstr "JB1"
+
+#~ msgctxt "paper size"
+#~ msgid "JB10"
+#~ msgstr "JB10"
+
+#~ msgctxt "paper size"
+#~ msgid "JB2"
+#~ msgstr "JB2"
+
+#~ msgctxt "paper size"
+#~ msgid "JB3"
+#~ msgstr "JB3"
+
+#~ msgctxt "paper size"
+#~ msgid "JB4"
+#~ msgstr "JB4"
+
+#~ msgctxt "paper size"
+#~ msgid "JB5"
+#~ msgstr "JB5"
+
+#~ msgctxt "paper size"
+#~ msgid "JB6"
+#~ msgstr "JB6"
+
+#~ msgctxt "paper size"
+#~ msgid "JB7"
+#~ msgstr "JB7"
+
+#~ msgctxt "paper size"
+#~ msgid "JB8"
+#~ msgstr "JB8"
+
+#~ msgctxt "paper size"
+#~ msgid "JB9"
+#~ msgstr "JB9"
+
+#~ msgctxt "paper size"
+#~ msgid "jis exec"
+#~ msgstr "jis exec"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 2 Envelope"
+#~ msgstr "Конверт Choukei 2"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 3 Envelope"
+#~ msgstr "Конверт Choukei 3"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 4 Envelope"
+#~ msgstr "Конверт Choukei 4"
+
+#~ msgctxt "paper size"
+#~ msgid "hagaki (postcard)"
+#~ msgstr "hagaki (открытка)"
+
+#~ msgctxt "paper size"
+#~ msgid "kahu Envelope"
+#~ msgstr "Конверт hahu"
+
+#~ msgctxt "paper size"
+#~ msgid "kaku2 Envelope"
+#~ msgstr "Конверт kaku2"
+
+#~ msgctxt "paper size"
+#~ msgid "oufuku (reply postcard)"
+#~ msgstr "oufuku (ответная открытка)"
+
+#~ msgctxt "paper size"
+#~ msgid "you4 Envelope"
+#~ msgstr "Конверт you4"
+
+#~ msgctxt "paper size"
+#~ msgid "10x11"
+#~ msgstr "10x11"
+
+#~ msgctxt "paper size"
+#~ msgid "10x13"
+#~ msgstr "10x13"
+
+#~ msgctxt "paper size"
+#~ msgid "10x14"
+#~ msgstr "10x14"
+
+#~ msgctxt "paper size"
+#~ msgid "10x15"
+#~ msgstr "10x15"
+
+#~ msgctxt "paper size"
+#~ msgid "11x12"
+#~ msgstr "11x12"
+
+#~ msgctxt "paper size"
+#~ msgid "11x15"
+#~ msgstr "11x15"
+
+#~ msgctxt "paper size"
+#~ msgid "12x19"
+#~ msgstr "12x19"
+
+#~ msgctxt "paper size"
+#~ msgid "5x7"
+#~ msgstr "5x7"
+
+#~ msgctxt "paper size"
+#~ msgid "6x9 Envelope"
+#~ msgstr "Конверт 6x9"
+
+#~ msgctxt "paper size"
+#~ msgid "7x9 Envelope"
+#~ msgstr "Конверт 7x9"
+
+#~ msgctxt "paper size"
+#~ msgid "9x11 Envelope"
+#~ msgstr "Конверт 9x11"
+
+#~ msgctxt "paper size"
+#~ msgid "a2 Envelope"
+#~ msgstr "Конверт a2"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch A"
+#~ msgstr "Arch A"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch B"
+#~ msgstr "Arch B"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch C"
+#~ msgstr "Arch C"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch D"
+#~ msgstr "Arch D"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch E"
+#~ msgstr "Arch E"
+
+#~ msgctxt "paper size"
+#~ msgid "b-plus"
+#~ msgstr "b-plus"
+
+#~ msgctxt "paper size"
+#~ msgid "c"
+#~ msgstr "c"
+
+#~ msgctxt "paper size"
+#~ msgid "c5 Envelope"
+#~ msgstr "Конверт c5"
+
+#~ msgctxt "paper size"
+#~ msgid "d"
+#~ msgstr "d"
+
+#~ msgctxt "paper size"
+#~ msgid "e"
+#~ msgstr "e"
+
+#~ msgctxt "paper size"
+#~ msgid "edp"
+#~ msgstr "edp"
+
+#~ msgctxt "paper size"
+#~ msgid "European edp"
+#~ msgstr "Европейский edp"
+
+#~ msgctxt "paper size"
+#~ msgid "Executive"
+#~ msgstr "Executive"
+
+#~ msgctxt "paper size"
+#~ msgid "f"
+#~ msgstr "f"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold European"
+#~ msgstr "FanFold европейский"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold US"
+#~ msgstr "FanFold US"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold German Legal"
+#~ msgstr "FanFold German Legal"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Legal"
+#~ msgstr "Government Legal"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Letter"
+#~ msgstr "Government Letter"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 3x5"
+#~ msgstr "Index 3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 (postcard)"
+#~ msgstr "Index 4x6 (открытка)"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 ext"
+#~ msgstr "Index 4x6 ext"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 5x8"
+#~ msgstr "Index 5x8"
+
+#~ msgctxt "paper size"
+#~ msgid "Invoice"
+#~ msgstr "Invoice"
+
+#~ msgctxt "paper size"
+#~ msgid "Tabloid"
+#~ msgstr "Tabloid"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal"
+#~ msgstr "US Legal"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal Extra"
+#~ msgstr "US Legal Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter"
+#~ msgstr "US Letter"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Extra"
+#~ msgstr "US Letter Extra"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Plus"
+#~ msgstr "US Letter Plus"
+
+#~ msgctxt "paper size"
+#~ msgid "Monarch Envelope"
+#~ msgstr "Конверт «Monarch»"
+
+#~ msgctxt "paper size"
+#~ msgid "#10 Envelope"
+#~ msgstr "Конверт №10"
+
+#~ msgctxt "paper size"
+#~ msgid "#11 Envelope"
+#~ msgstr "Конверт №11"
+
+#~ msgctxt "paper size"
+#~ msgid "#12 Envelope"
+#~ msgstr "Конверт №12"
+
+#~ msgctxt "paper size"
+#~ msgid "#14 Envelope"
+#~ msgstr "Конверт №14"
+
+#~ msgctxt "paper size"
+#~ msgid "#9 Envelope"
+#~ msgstr "Конверт №9"
+
+#~ msgctxt "paper size"
+#~ msgid "Personal Envelope"
+#~ msgstr "Персональный конверт"
+
+#~ msgctxt "paper size"
+#~ msgid "Quarto"
+#~ msgstr "Quarto"
+
+#~ msgctxt "paper size"
+#~ msgid "Super A"
+#~ msgstr "Super A"
+
+#~ msgctxt "paper size"
+#~ msgid "Super B"
+#~ msgstr "Super B"
+
+#~ msgctxt "paper size"
+#~ msgid "Wide Format"
+#~ msgstr "Широкий формат"
+
+#~ msgctxt "paper size"
+#~ msgid "Dai-pa-kai"
+#~ msgstr "Dai-pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio"
+#~ msgstr "Folio"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio sp"
+#~ msgstr "Folio sp"
+
+#~ msgctxt "paper size"
+#~ msgid "Invite Envelope"
+#~ msgstr "Конверт «Invite»"
+
+#~ msgctxt "paper size"
+#~ msgid "Italian Envelope"
+#~ msgstr "Итальянский конверт"
+
+#~ msgctxt "paper size"
+#~ msgid "juuro-ku-kai"
+#~ msgstr "juuro-ku-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "pa-kai"
+#~ msgstr "pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Postfix Envelope"
+#~ msgstr "Конверт «Postfix»"
+
+#~ msgctxt "paper size"
+#~ msgid "Small Photo"
+#~ msgstr "Маленькое фото"
+
+#~ msgctxt "paper size"
+#~ msgid "prc1 Envelope"
+#~ msgstr "Конверт prc1"
+
+#~ msgctxt "paper size"
+#~ msgid "prc10 Envelope"
+#~ msgstr "Конверт prc10"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 16k"
+#~ msgstr "prc 16k"
+
+#~ msgctxt "paper size"
+#~ msgid "prc2 Envelope"
+#~ msgstr "Конверт prc2"
+
+#~ msgctxt "paper size"
+#~ msgid "prc3 Envelope"
+#~ msgstr "prc3"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 32k"
+#~ msgstr "prc 32k"
+
+#~ msgctxt "paper size"
+#~ msgid "prc4 Envelope"
+#~ msgstr "Конверт prc4"
+
+#~ msgctxt "paper size"
+#~ msgid "prc5 Envelope"
+#~ msgstr "Конверт prc5"
+
+#~ msgctxt "paper size"
+#~ msgid "prc6 Envelope"
+#~ msgstr "Конверт prc6"
+
+#~ msgctxt "paper size"
+#~ msgid "prc7 Envelope"
+#~ msgstr "Конверт prc7"
+
+#~ msgctxt "paper size"
+#~ msgid "prc8 Envelope"
+#~ msgstr "Конверт prc8"
+
+#~ msgctxt "paper size"
+#~ msgid "prc9 Envelope"
+#~ msgstr "Конверт prc9"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 16k"
+#~ msgstr "ROC 16k"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 8k"
+#~ msgstr "ROC 8k"
+
+#, c-format
+#~ msgid "different idatas found for symlinked '%s' and '%s'\n"
+#~ msgstr "различные идентификаторы найдены в связанных ссылкой '%s' и '%s'\n"
+
+#, c-format
+#~ msgid "Failed to write header\n"
+#~ msgstr "Сбой при записи заголовка\n"
+
+#, c-format
+#~ msgid "Failed to write hash table\n"
+#~ msgstr "Сбой при записи хеш-таблицы\n"
+
+#, c-format
+#~ msgid "Failed to write folder index\n"
+#~ msgstr "Сбой при записи индекса папки\n"
+
+#, c-format
+#~ msgid "Failed to rewrite header\n"
+#~ msgstr "Сбой при перезаписи заголовка\n"
+
+#, c-format
+#~ msgid "Failed to open file %s : %s\n"
+#~ msgstr "Не удалось открыть файл %s : %s\n"
+
+#, c-format
+#~ msgid "Failed to write cache file: %s\n"
+#~ msgstr "Сбой при открытии кеш-файла: %s\n"
+
+#, c-format
+#~ msgid "The generated cache was invalid.\n"
+#~ msgstr "Созданный кеш содержит ошибки.\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s, removing %s then.\n"
+#~ msgstr "Не удалось переименовать %s в %s: %s, удаляя затем %s.\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s\n"
+#~ msgstr "Не удалось переименовать %s в %s: %s\n"
+
+#, c-format
+#~ msgid "Could not rename %s back to %s: %s.\n"
+#~ msgstr "Не удалось переименовать %s обратно в  %s: %s\n"
+
+#, c-format
+#~ msgid "Cache file created successfully.\n"
+#~ msgstr "Кеш-файл успешно создан.\n"
+
+#~ msgid "Overwrite an existing cache, even if up to date"
+#~ msgstr "Перезаписать существующий кеш-файл, даже если он обновлён"
+
+#~ msgid "Don't check for the existence of index.theme"
+#~ msgstr "Не проверять существование файла index.theme"
+
+#~ msgid "Don't include image data in the cache"
+#~ msgstr "Не включать изображения в кеш"
+
+#~ msgid "Output a C header file"
+#~ msgstr "Выдавать заголовочный файл C"
+
+#~ msgid "Turn off verbose output"
+#~ msgstr "Выключить расширенный вывод"
+
+#~ msgid "Validate existing icon cache"
+#~ msgstr "Проверить текущий кеш значков"
+
+#, c-format
+#~ msgid "File not found: %s\n"
+#~ msgstr "Файл не найден: %s\n"
+
+#, c-format
+#~ msgid "Not a valid icon cache: %s\n"
+#~ msgstr "Некорректный кеш значков: %s\n"
+
+#, c-format
+#~ msgid "No theme index file.\n"
+#~ msgstr "Нет файла с индексом темы.\n"
+
+#, c-format
+#~ msgid ""
+#~ "No theme index file in '%s'.\n"
+#~ "If you really want to create an icon cache here, use --ignore-theme-"
+#~ "index.\n"
+#~ msgstr ""
+#~ "Нет индексного файла темы в «%s».\n"
+#~ "Если Вы действительно хотите создать здесь кеш значков, используйте --"
+#~ "ignore-theme-index.\n"
+
+#~ msgid "Amharic (EZ+)"
+#~ msgstr "Амхарский (EZ+)"
+
+#~ msgid "Cedilla"
+#~ msgstr "Седиль"
+
+#~ msgid "Cyrillic (Transliterated)"
+#~ msgstr "Кириллица (транслитерация)"
+
+#~ msgid "Inuktitut (Transliterated)"
+#~ msgstr "Инуктитут (транслитерация)"
+
+#~ msgid "IPA"
+#~ msgstr "МФА (IPA)"
+
+#~ msgid "Multipress"
+#~ msgstr "Мультипресс"
+
+#~ msgid "Thai-Lao"
+#~ msgstr "Тайская-Лаос"
+
+#~ msgid "Tigrigna-Eritrean (EZ+)"
+#~ msgstr "Тигринья-Эритрея (EZ+)"
+
+#~ msgid "Tigrigna-Ethiopian (EZ+)"
+#~ msgstr "Тигринья-Эфиопия (EZ+)"
+
+#~ msgid "Vietnamese (VIQR)"
+#~ msgstr "Вьетнамский (VIQR)"
+
+#~ msgid "X Input Method"
+#~ msgstr "Метод X Input"
+
+#~ msgid "Username:"
+#~ msgstr "Имя пользователя:"
+
+#~ msgid "Password:"
+#~ msgstr "Пароль:"
+
+#, c-format
+#~ msgid "Authentication is required to get a file from %s"
+#~ msgstr "Для получения файла из %s требуется проверить права доступа"
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s' on printer %s"
+#~ msgstr ""
+#~ "Для печати документа %s на принтере %s требуется проверить права доступа"
+
+#, c-format
+#~ msgid "Authentication is required to print a document on %s"
+#~ msgstr ""
+#~ "Для печати документа на принтере %s требуется проверить права доступа"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of job '%s'"
+#~ msgstr ""
+#~ "Для получения параметров задания %s требуется проверить права доступа"
+
+#~ msgid "Authentication is required to get attributes of a job"
+#~ msgstr "Для получения параметров задания требуется проверить права доступа"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of printer %s"
+#~ msgstr ""
+#~ "Для получения параметров принтера %s требуется проверить права доступа"
+
+#~ msgid "Authentication is required to get attributes of a printer"
+#~ msgstr "Для получения параметров принтера требуется проверить права доступа"
+
+#, c-format
+#~ msgid "Authentication is required to get default printer of %s"
+#~ msgstr ""
+#~ "Для получения принтера по умолчанию на %s требуется проверить права "
+#~ "доступа"
+
+#, c-format
+#~ msgid "Authentication is required to get printers from %s"
+#~ msgstr ""
+#~ "Для получения списка принтеров от %s требуется проверить права доступа"
+
+#, c-format
+#~ msgid "Authentication is required on %s"
+#~ msgstr "Для доступа к %s нужно ввести пароль"
+
+#~ msgid "Domain:"
+#~ msgstr "Домен:"
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s'"
+#~ msgstr ""
+#~ "Для печати документа на принтере '%s' требуется проверить права доступа"
+
+#, c-format
+#~ msgid "Authentication is required to print this document on printer %s"
+#~ msgstr ""
+#~ "Для печати документа на принтере %s требуется проверить права доступа"
+
+#~ msgid "Authentication is required to print this document"
+#~ msgstr ""
+#~ "Для печати этого документа на принтере требуется проверить права доступа"
+
+#, c-format
+#~ msgid "Printer '%s' is low on toner."
+#~ msgstr "В принтере «%s» кончается тонер."
+
+#, c-format
+#~ msgid "Printer '%s' has no toner left."
+#~ msgstr "В принтере «%s» кончился тонер."
+
+#, c-format
+#~ msgid "Printer '%s' is low on developer."
+#~ msgstr "В принтере «%s» кончается проявитель."
+
+#, c-format
+#~ msgid "Printer '%s' is out of developer."
+#~ msgstr "В принтере «%s» кончился проявитель."
+
+#, c-format
+#~ msgid "Printer '%s' is low on at least one marker supply."
+#~ msgstr "В принтере «%s» кончается один из тонеров."
+
+#, c-format
+#~ msgid "Printer '%s' is out of at least one marker supply."
+#~ msgstr "В принтере «%s» кончился один из тонеров."
+
+#, c-format
+#~ msgid "The cover is open on printer '%s'."
+#~ msgstr "В принтере «%s» открыта крышка."
+
+#, c-format
+#~ msgid "The door is open on printer '%s'."
+#~ msgstr "В принтере «%s» открыта дверца."
+
+#, c-format
+#~ msgid "Printer '%s' is low on paper."
+#~ msgstr "В принтере «%s» кончается бумага."
+
+#, c-format
+#~ msgid "Printer '%s' is out of paper."
+#~ msgstr "В принтере «%s» кончилась бумага."
+
+#, c-format
+#~ msgid "Printer '%s' is currently off-line."
+#~ msgstr "Принтер «%s» в данный момент отключён."
+
+#, c-format
+#~ msgid "Printer '%s' may not be connected."
+#~ msgstr "Возможно, принтер «%s» не подключён."
+
+#, c-format
+#~ msgid "There is a problem on printer '%s'."
+#~ msgstr "Проблема с принтером «%s»."
+
+#~ msgid "Paused ; Rejecting Jobs"
+#~ msgstr "Приостановлено ; отмена заданий"
+
+#~ msgid "Rejecting Jobs"
+#~ msgstr "Отмена заданий"
+
+#~ msgid "Two Sided"
+#~ msgstr "С двух сторон"
+
+#~ msgid "Paper Type"
+#~ msgstr "Тип бумаги"
+
+#~ msgid "Paper Source"
+#~ msgstr "Источник бумаги"
+
+#~ msgid "Output Tray"
+#~ msgstr "Лоток вывода"
+
+#~ msgid "Resolution"
+#~ msgstr "Разрешение"
+
+#~ msgid "GhostScript pre-filtering"
+#~ msgstr "Фильтрация GhostScript"
+
+#~ msgid "One Sided"
+#~ msgstr "С одной стороны"
+
+#~ msgid "Long Edge (Standard)"
+#~ msgstr "По длинной стороне"
+
+#~ msgid "Short Edge (Flip)"
+#~ msgstr "По короткой стороне"
+
+#~ msgid "Auto Select"
+#~ msgstr "Автовыбор"
+
+#~ msgid "Printer Default"
+#~ msgstr "Умолчания принтера"
+
+#~ msgid "Embed GhostScript fonts only"
+#~ msgstr "Встраивать только шрифты GhostScript"
+
+#~ msgid "Convert to PS level 1"
+#~ msgstr "Преобразовать в формат PS уровень 1"
+
+#~ msgid "Convert to PS level 2"
+#~ msgstr "Преобразовать в формат PS уровень 2"
+
+#~ msgid "No pre-filtering"
+#~ msgstr "Не фильтровать перед печатью"
+
+#~ msgid "Miscellaneous"
+#~ msgstr "Дополнительно"
+
+#~ msgid "Urgent"
+#~ msgstr "Срочно"
+
+#~ msgid "High"
+#~ msgstr "Высокий"
+
+#~ msgid "Medium"
+#~ msgstr "Средний"
+
+#~ msgid "Low"
+#~ msgstr "Низкий"
+
+#~ msgid "Pages per Sheet"
+#~ msgstr "Страниц на лист"
+
+#~ msgid "Job Priority"
+#~ msgstr "Приоритет"
+
+#~ msgid "Billing Info"
+#~ msgstr "Расположение"
+
+#~ msgid "None"
+#~ msgstr "Нет"
+
+#~ msgid "Classified"
+#~ msgstr "Классифицировано"
+
+#~ msgid "Confidential"
+#~ msgstr "Конфиденциально"
+
+#~ msgid "Secret"
+#~ msgstr "Секретно"
+
+#~ msgid "Standard"
+#~ msgstr "Стандарт"
+
+#~ msgid "Top Secret"
+#~ msgstr "Совершенно секретно"
+
+#~ msgid "Unclassified"
+#~ msgstr "Не классифицировано"
+
+#~ msgid "Before"
+#~ msgstr "До"
+
+#~ msgid "After"
+#~ msgstr "После"
+
+#~ msgid "Print at"
+#~ msgstr "Время"
+
+#~ msgid "Print at time"
+#~ msgstr "Время начала печати"
+
+#, c-format
+#~ msgid "Custom %sx%s"
+#~ msgstr "Особый %sx%s"
+
+#, c-format
+#~ msgid "output.%s"
+#~ msgstr "безымянный.%s"
+
+#~ msgid "Print to File"
+#~ msgstr "Печатать в файл"
+
+#~ msgid "PDF"
+#~ msgstr "PDF"
+
+#~ msgid "Postscript"
+#~ msgstr "Postscript"
+
+#~ msgid "SVG"
+#~ msgstr "SVG"
+
+#~ msgid "Pages per _sheet:"
+#~ msgstr "Страниц на _лист:"
+
+#~ msgid "File"
+#~ msgstr "Файл"
+
+#~ msgid "_Output format"
+#~ msgstr "Формат _вывода"
+
+#~ msgid "Print to LPR"
+#~ msgstr "Печатать на LPR"
+
+#~ msgid "Pages Per Sheet"
+#~ msgstr "Страниц на лист"
+
+#~ msgid "Command Line"
+#~ msgstr "Командная строка"
+
+#~ msgid "printer offline"
+#~ msgstr "Принтер недоступен"
+
+#~ msgid "ready to print"
+#~ msgstr "Готов к печати"
+
+#~ msgid "processing job"
+#~ msgstr "обработка печати"
+
+#~ msgid "paused"
+#~ msgstr "приостановлено"
+
+#~ msgid "unknown"
+#~ msgstr "неизвестен"
+
+#, c-format
+#~ msgid "test-output.%s"
+#~ msgstr "тест-печати.%s"
+
+#~ msgid "Print to Test Printer"
+#~ msgstr "Печатать на тестовый принтер"
+
+#, c-format
+#~ msgid "Could not get information for file '%s': %s"
+#~ msgstr "Не удалось получить информацию о файле «%s»: %s"

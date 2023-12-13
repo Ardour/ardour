@@ -1,0 +1,4078 @@
+# gtk+ ja.po.
+# Copyright (C) 1998,2000-2010 Free Software Foundation, Inc.
+# Yasuhiro SHIRASAKI <yasuhiro@awa.tohoku.ac.jp>, 1998.
+# Yukihiro Nakai <nakai@gnome.gr.jp>, 2000-2001.
+# Takayuki KUSANO <AE5T-KSN@asahi-net.or.jp>, 2002, 2009-2010.
+# Akira TAGOH <tagoh@gnome.gr.jp>, 2002.
+# Takeshi AIHANA <takeshi.aihana@gmail.com>, 2003-2009.
+# KAMAGASAKO Masatoshi <emerald@gnome.gr.jp>, 2003.
+# Satoru SATOh <ss@gnome.gr.jp>, 2006.
+# Nishibori Kiyotaka <ml.nishibori.kiyotaka@gmail.com>, 2009-2010, 2016.
+# Masato Hashimoto <cabezon.hashimoto@gmail.com>, 2010.
+# IWAI, Masaharu <iwaim.sub@gmail.com>, 2010.
+#
+msgid ""
+msgstr ""
+"Project-Id-Version: gtk+ gtk-2-24\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2023-11-19 22:01+0100\n"
+"PO-Revision-Date: 2016-01-11 15:17+0900\n"
+"Last-Translator: Kiyotaka NISHIBORI <ml.nishibori.kiyotaka@gmail.com>\n"
+"Language-Team: Japanese <gnome-translation@gnome.gr.jp>\n"
+"Language: ja\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: gtkaboutdialog.c:245
+msgid "Could not show link"
+msgstr "リンクを表示できませんでした"
+
+#: gtkaboutdialog.c:399 gtkaboutdialog.c:2286
+msgid "License"
+msgstr "ライセンス"
+
+#: gtkaboutdialog.c:400
+msgid "The license of the program"
+msgstr "プログラムのライセンス"
+
+#: gtkaboutdialog.c:646
+msgid "C_redits"
+msgstr "クレジット(_R)"
+
+#: gtkaboutdialog.c:660
+msgid "_License"
+msgstr "ライセンス(_L)"
+
+#: gtkaboutdialog.c:966
+#, c-format
+msgid "About %s"
+msgstr "%s について"
+
+#: gtkaboutdialog.c:2209
+msgid "Credits"
+msgstr "クレジット"
+
+#: gtkaboutdialog.c:2238
+msgid "Written by"
+msgstr "開発担当"
+
+#: gtkaboutdialog.c:2241
+msgid "Documented by"
+msgstr "ドキュメント担当"
+
+#: gtkaboutdialog.c:2253
+msgid "Translated by"
+msgstr "翻訳担当"
+
+#: gtkaboutdialog.c:2257
+msgid "Artwork by"
+msgstr "アートワーク担当"
+
+#: gtkbuilderparser.c:343
+#, c-format
+msgid "Invalid type function on line %d: '%s'"
+msgstr "%d行目に無効な型関数: '%s'"
+
+#: gtkbuilderparser.c:407
+#, c-format
+msgid "Duplicate object ID '%s' on line %d (previously on line %d)"
+msgstr "オブジェクト ID '%s' が %d行目で重複しています (前は%d行目)"
+
+#: gtkbuilderparser.c:859
+#, c-format
+msgid "Invalid root element: '%s'"
+msgstr "root 要素が間違っています: '%s'"
+
+#: gtkbuilderparser.c:898
+#, c-format
+msgid "Unhandled tag: '%s'"
+msgstr "扱えないタグ: '%s'"
+
+#: gtkcellrendereraccel.c:389 gtkcellrendereraccel.c:663
+msgid "New accelerator..."
+msgstr "新しいアクセラレータ..."
+
+#: gtkcolorbutton.c:178 gtkcolorbutton.c:459
+msgid "Pick a Color"
+msgstr "色の選択"
+
+#: gtkcolorbutton.c:352
+msgid "Received invalid color data\n"
+msgstr "受け取った無効な色のデータ\n"
+
+#: gtkcolorsel.c:358
+msgid ""
+"Select the color you want from the outer ring. Select the darkness or "
+"lightness of that color using the inner triangle."
+msgstr ""
+"外側の輪から希望する色を、内側の三角で色の暗さ・明るさをそれぞれ選択してくだ"
+"さい"
+
+#: gtkcolorsel.c:382
+msgid ""
+"Click the eyedropper, then click a color anywhere on your screen to select "
+"that color."
+msgstr ""
+"スポイトをクリックして、画面上の好きな場所をクリックして色を選択してください"
+
+#: gtkcolorsel.c:391
+msgid "_Hue:"
+msgstr "色相(_H):"
+
+#: gtkcolorsel.c:392
+msgid "Position on the color wheel."
+msgstr "色の輪における位置です"
+
+#: gtkcolorsel.c:394
+msgid "_Saturation:"
+msgstr "彩度(_S):"
+
+#: gtkcolorsel.c:395
+msgid "\"Deepness\" of the color."
+msgstr "色の \"深さ\" です"
+
+#: gtkcolorsel.c:396
+msgid "_Value:"
+msgstr "明度(_V):"
+
+#: gtkcolorsel.c:397
+msgid "Brightness of the color."
+msgstr "色の明るさです"
+
+#: gtkcolorsel.c:398
+msgid "_Red:"
+msgstr "赤(_R):"
+
+#: gtkcolorsel.c:399
+msgid "Amount of red light in the color."
+msgstr "選択した色の赤成分の量です"
+
+#: gtkcolorsel.c:400
+msgid "_Green:"
+msgstr "緑(_G):"
+
+#: gtkcolorsel.c:401
+msgid "Amount of green light in the color."
+msgstr "選択した色の緑成分の量です"
+
+#: gtkcolorsel.c:402
+msgid "_Blue:"
+msgstr "青(_B):"
+
+#: gtkcolorsel.c:403
+msgid "Amount of blue light in the color."
+msgstr "選択した色の青成分の量です"
+
+#: gtkcolorsel.c:406
+msgid "Op_acity:"
+msgstr "不透明度(_A):"
+
+#: gtkcolorsel.c:413 gtkcolorsel.c:423
+msgid "Transparency of the color."
+msgstr "色の透明度です"
+
+#: gtkcolorsel.c:430
+msgid "Color _name:"
+msgstr "色の名称(_N):"
+
+#: gtkcolorsel.c:444
+msgid ""
+"You can enter an HTML-style hexadecimal color value, or simply a color name "
+"such as 'orange' in this entry."
+msgstr ""
+"このエントリに HTML 形式で 16進数の値、または色の名前 (例: 'orange') を入力で"
+"きます"
+
+#: gtkcolorsel.c:474
+msgid "_Palette:"
+msgstr "パレット(_P):"
+
+#: gtkcolorsel.c:503
+msgid "Color Wheel"
+msgstr "色ホイール"
+
+#: gtkcolorsel.c:962
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now. You can drag this color to a palette entry, or select this color as "
+"current by dragging it to the other color swatch alongside."
+msgstr ""
+"既に選択している色で、現在選択している色と比較するために表示しています。この"
+"色をパレットのエントリにドラッグしたり、他の見本の横にドラッグして現在の色と"
+"して選択できます"
+
+#: gtkcolorsel.c:965
+msgid ""
+"The color you've chosen. You can drag this color to a palette entry to save "
+"it for use in the future."
+msgstr ""
+"選択した色で、この色を将来使用する色として保存するためパレットのエントリにド"
+"ラッグできます"
+
+#: gtkcolorsel.c:970
+msgid ""
+"The previously-selected color, for comparison to the color you're selecting "
+"now."
+msgstr "前に選択した色です。今選択している色との比較です。"
+
+#: gtkcolorsel.c:973
+msgid "The color you've chosen."
+msgstr "選択した色です。"
+
+#: gtkcolorsel.c:1389
+msgid "_Save color here"
+msgstr "ここに色を保存する(_S)"
+
+#: gtkcolorsel.c:1593
+msgid ""
+"Click this palette entry to make it the current color. To change this entry, "
+"drag a color swatch here or right-click it and select \"Save color here.\""
+msgstr ""
+"現在の色に指定する場合はこのパレットのエントリをクリックしてください。このエ"
+"ントリを変更する場合は、色の見本をここにドラッグするか、右クリックして \"色を"
+"ここに保存\" を選択してください"
+
+#: gtkcolorseldialog.c:170
+msgid "Color Selection"
+msgstr "色の選択"
+
+#: gtkentry.c:8789 gtktextview.c:8007
+msgid "Input _Methods"
+msgstr "入力メソッド(_M)"
+
+#: gtkentry.c:8803 gtktextview.c:8021
+msgid "_Insert Unicode Control Character"
+msgstr "Unicode 制御文字の挿入(_I)"
+
+#: gtkentry.c:10177
+msgid "Caps Lock is on"
+msgstr "Caps Lock が ON です"
+
+#: gtkfilechooserbutton.c:64
+#, fuzzy
+msgid "Select a File"
+msgstr "ファイルの選択"
+
+#: gtkfilechooserbutton.c:65 gtkfilechooserdefault.c:1851
+msgid "Desktop"
+msgstr "デスクトップ"
+
+#: gtkfilechooserbutton.c:66
+msgid "(None)"
+msgstr "(なし)"
+
+#: gtkfilechooserbutton.c:2175
+msgid "Other..."
+msgstr "その他..."
+
+#: gtkfilechooserdefault.c:150
+msgid "Type name of new folder"
+msgstr "新しいフォルダの種類"
+
+#: gtkfilechooserdefault.c:956
+msgid "Could not retrieve information about the file"
+msgstr "ファイルに関する情報を取得できませんでした"
+
+#: gtkfilechooserdefault.c:967
+msgid "Could not add a bookmark"
+msgstr "ブックマークを追加できませんでした"
+
+#: gtkfilechooserdefault.c:978
+msgid "Could not remove bookmark"
+msgstr "ブックマークを削除できませんでした"
+
+#: gtkfilechooserdefault.c:989
+msgid "The folder could not be created"
+msgstr "フォルダを生成できませんでした"
+
+#: gtkfilechooserdefault.c:1002
+msgid ""
+"The folder could not be created, as a file with the same name already "
+"exists.  Try using a different name for the folder, or rename the file first."
+msgstr ""
+"同名のフォルダが既に存在しているので、そのフォルダを生成できませんでした。別"
+"の名前にするか、ファイル名を変更するなどして、もう一度実行してください。"
+
+#: gtkfilechooserdefault.c:1016
+msgid "You need to choose a valid filename."
+msgstr ""
+
+#: gtkfilechooserdefault.c:1019
+#, c-format
+msgid "Cannot create a file under %s as it is not a folder"
+msgstr ""
+
+#: gtkfilechooserdefault.c:1031
+msgid ""
+"You may only select folders.  The item that you selected is not a folder; "
+"try using a different item."
+msgstr ""
+
+#: gtkfilechooserdefault.c:1041
+msgid "Invalid file name"
+msgstr "無効なファイル名です"
+
+#: gtkfilechooserdefault.c:1051
+msgid "The folder contents could not be displayed"
+msgstr "フォルダの内容を表示できませんでした"
+
+#: gtkfilechooserdefault.c:1584
+#, c-format
+msgid "%1$s on %2$s"
+msgstr "%2$s:%1$s"
+
+#: gtkfilechooserdefault.c:1733
+msgid "Search"
+msgstr "検索"
+
+#: gtkfilechooserdefault.c:1757 gtkfilechooserdefault.c:4872
+msgid "Recently Used"
+msgstr "最近開いたファイル"
+
+#: gtkfilechooserdefault.c:2387
+msgid "Select which types of files are shown"
+msgstr "表示するファイルの種類を選択してください"
+
+#: gtkfilechooserdefault.c:2746
+#, c-format
+msgid "Add the folder '%s' to the bookmarks"
+msgstr "'%s' というフォルダをブックマークへ追加します"
+
+#: gtkfilechooserdefault.c:2790
+msgid "Add the current folder to the bookmarks"
+msgstr "このフォルダをブックマークへ追加します"
+
+#: gtkfilechooserdefault.c:2792
+msgid "Add the selected folders to the bookmarks"
+msgstr "指定したフォルダをブックマークへ追加します"
+
+#: gtkfilechooserdefault.c:2837
+#, c-format
+msgid "Remove the bookmark '%s'"
+msgstr "'%s' というブックマークを削除します"
+
+#: gtkfilechooserdefault.c:2839
+#, c-format
+msgid "Bookmark '%s' cannot be removed"
+msgstr "ブックマーク '%s'を削除できません"
+
+#: gtkfilechooserdefault.c:2846 gtkfilechooserdefault.c:3740
+msgid "Remove the selected bookmark"
+msgstr "指定したブックマークを削除します"
+
+#: gtkfilechooserdefault.c:3421
+msgid "Remove"
+msgstr "削除"
+
+#: gtkfilechooserdefault.c:3430
+msgid "Rename..."
+msgstr "ファイル名の変更..."
+
+#: gtkfilechooserdefault.c:3597
+msgid "Places"
+msgstr "場所"
+
+#: gtkfilechooserdefault.c:3654
+msgid "_Places"
+msgstr "場所(_P)"
+
+#: gtkfilechooserdefault.c:3728
+msgid "Add the selected folder to the Bookmarks"
+msgstr "指定したフォルダをブックマークへ追加します"
+
+#: gtkfilechooserdefault.c:3872
+msgid "Could not select file"
+msgstr "ファイルを選択できませんでした"
+
+#: gtkfilechooserdefault.c:4045
+msgid "_Add to Bookmarks"
+msgstr "ブックマークへ追加(_A)"
+
+#: gtkfilechooserdefault.c:4058
+msgid "Show _Hidden Files"
+msgstr "隠しファイルを表示する(_H)"
+
+#: gtkfilechooserdefault.c:4065
+msgid "Show _Size Column"
+msgstr "サイズを表示する(_S)"
+
+#: gtkfilechooserdefault.c:4289
+msgid "Files"
+msgstr "ファイル"
+
+#: gtkfilechooserdefault.c:4340
+msgid "Name"
+msgstr "名前"
+
+#: gtkfilechooserdefault.c:4363
+msgid "Size"
+msgstr "サイズ"
+
+#: gtkfilechooserdefault.c:4377
+msgid "Modified"
+msgstr "最終変更日"
+
+#: gtkfilechooserdefault.c:4470
+msgid "_Name:"
+msgstr "名前(_N):"
+
+#: gtkfilechooserdefault.c:4710
+msgid "Type a file name"
+msgstr "ファイル名を入力してください"
+
+#: gtkfilechooserdefault.c:4757 gtkfilechooserdefault.c:4768
+msgid "Please select a folder below"
+msgstr ""
+
+#: gtkfilechooserdefault.c:4763
+#, fuzzy
+msgid "Please type a file name"
+msgstr "ファイル名を入力してください"
+
+#: gtkfilechooserdefault.c:4834
+msgid "Create Fo_lder"
+msgstr "フォルダの作成(_L)"
+
+#: gtkfilechooserdefault.c:4882
+msgid "Search:"
+msgstr "検索:"
+
+#: gtkfilechooserdefault.c:4933
+msgid "_Location:"
+msgstr "場所(_L):"
+
+#: gtkfilechooserdefault.c:5383
+msgid "Save in _folder:"
+msgstr "フォルダの中に保存(_F):"
+
+#: gtkfilechooserdefault.c:5385
+msgid "Create in _folder:"
+msgstr "フォルダの中に作成(_F):"
+
+#: gtkfilechooserdefault.c:6479
+#, c-format
+msgid "Could not read the contents of %s"
+msgstr "%s の内容を読み込めませんでした"
+
+#: gtkfilechooserdefault.c:6483
+msgid "Could not read the contents of the folder"
+msgstr "フォルダの内容を読み込めませんでした"
+
+#: gtkfilechooserdefault.c:6576 gtkfilechooserdefault.c:6644
+#: gtkfilechooserdefault.c:6829
+msgid "Unknown"
+msgstr "不明"
+
+#: gtkfilechooserdefault.c:6591
+msgid "%H:%M"
+msgstr "%H:%M"
+
+#: gtkfilechooserdefault.c:6593
+msgid "Yesterday at %H:%M"
+msgstr "昨日の %H:%M"
+
+#: gtkfilechooserdefault.c:7301
+msgid "Cannot change to folder because it is not local"
+msgstr "ローカルではないので、フォルダを変更できません"
+
+#: gtkfilechooserdefault.c:7898 gtkfilechooserdefault.c:7919
+#, c-format
+msgid "Shortcut %s already exists"
+msgstr "ショートカット %s は既にあります"
+
+#: gtkfilechooserdefault.c:8009
+#, c-format
+msgid "Shortcut %s does not exist"
+msgstr "ショートカット %s はありません"
+
+#: gtkfilechooserdefault.c:8250
+#, c-format
+msgid "A file named \"%s\" already exists.  Do you want to replace it?"
+msgstr "\"%s\" というファイルは既に存在します。上書きしてもよろしいですか?"
+
+#: gtkfilechooserdefault.c:8253
+#, c-format
+msgid ""
+"The file already exists in \"%s\".  Replacing it will overwrite its contents."
+msgstr "\"%s\" にファイルが既に存在しています。すべての内容を上書きします。"
+
+#: gtkfilechooserdefault.c:8258
+msgid "_Replace"
+msgstr "置き換える(_R)"
+
+#: gtkfilechooserdefault.c:9066
+msgid "Could not start the search process"
+msgstr "検索処理を開始できませんでした"
+
+#: gtkfilechooserdefault.c:9067
+msgid ""
+"The program was not able to create a connection to the indexer daemon.  "
+"Please make sure it is running."
+msgstr ""
+"検索用のインデックスを生成するデーモンに接続できませんでした。デーモンが実行"
+"中か確認してください。"
+
+#: gtkfilechooserdefault.c:9081
+msgid "Could not send the search request"
+msgstr "検索結果をプログラム側に送信できませんでした"
+
+#: gtkfilechooserdefault.c:9682
+#, c-format
+msgid "Could not mount %s"
+msgstr "%s をマウントできませんでした"
+
+#: gtkfilechoosersettings.c:515
+#, c-format
+msgid "Error creating folder '%s': %s"
+msgstr "フォルダ '%s' を作成する際にエラー: %s"
+
+#: gtkfilesystem.c:52
+msgid "File System"
+msgstr "ファイル・システム"
+
+#: gtkfontbutton.c:144 gtkfontbutton.c:266
+msgid "Pick a Font"
+msgstr "フォントの選択"
+
+#: gtkfontbutton.c:260
+msgid "Sans 12"
+msgstr "Sans 12"
+
+#: gtkfontbutton.c:785
+msgid "Font"
+msgstr "フォント"
+
+#: gtkfontsel.c:75
+msgid "abcdefghijk ABCDEFGHIJK"
+msgstr "abcdefghijk ABCDEFGHIJK これはテストです"
+
+#: gtkfontsel.c:343
+msgid "_Family:"
+msgstr "ファミリ(_F):"
+
+#: gtkfontsel.c:349
+msgid "_Style:"
+msgstr "スタイル(_S):"
+
+#: gtkfontsel.c:355
+msgid "Si_ze:"
+msgstr "サイズ(_Z):"
+
+#: gtkfontsel.c:532
+msgid "_Preview:"
+msgstr "プレビュー(_P):"
+
+#: gtkfontsel.c:1649
+msgid "Font Selection"
+msgstr "フォントの選択"
+
+#: gtkiconfactory.c:1354
+#, c-format
+msgid "Error loading icon: %s"
+msgstr "アイコンの読み込みでエラー: %s"
+
+#: gtkicontheme.c:1374
+#, c-format
+msgid ""
+"Could not find the icon '%s'. The '%s' theme\n"
+"was not found either, perhaps you need to install it.\n"
+"You can get a copy from:\n"
+"\t%s"
+msgstr ""
+"アイコン '%s' が見つかりませんでした。テーマ '%s' も\n"
+"見つからないので、インストールする必要があります。\n"
+"次からコピーを取得できます:\n"
+"\t%s"
+
+#: gtkicontheme.c:1555
+#, c-format
+msgid "Icon '%s' not present in theme"
+msgstr "テーマの中にアイコン '%s' はありません"
+
+#: gtkicontheme.c:3101
+msgid "Failed to load icon"
+msgstr "アイコンの読み込みに失敗しました"
+
+#: gtkimmodule.c:527
+msgid "Simple"
+msgstr "シンプル"
+
+#: gtklabel.c:5696
+msgid "_Open Link"
+msgstr "リンクを開く(_O)"
+
+#: gtklabel.c:5708
+msgid "Copy _Link Address"
+msgstr "リンクのアドレスをコピー(_L)"
+
+#: gtklinkbutton.c:428
+msgid "Copy URL"
+msgstr "URL のコピー"
+
+#: gtklinkbutton.c:586
+msgid "Invalid URI"
+msgstr "URI が間違っています"
+
+#: gtkmain.c:454
+msgid "Load additional GTK+ modules"
+msgstr "追加で読み込む GTK+ モジュールを指定する"
+
+#: gtkmain.c:455
+msgid "MODULES"
+msgstr "MODULES"
+
+#: gtkmain.c:457
+msgid "Make all warnings fatal"
+msgstr "警告をすべて致命的と見なす"
+
+#: gtkmain.c:460
+msgid "GTK+ debugging flags to set"
+msgstr "有効にする GTK+ のデバッグ・フラグを指定する"
+
+#: gtkmain.c:461 gtkmain.c:464
+msgid "FLAGS"
+msgstr "FLAGS"
+
+#: gtkmain.c:463
+msgid "GTK+ debugging flags to unset"
+msgstr "無効にする GTK+ のデバッグ・フラグを指定する"
+
+#: gtkmain.c:755
+msgid "default:LTR"
+msgstr "default:LTR"
+
+#: gtkmain.c:820
+#, c-format
+msgid "Cannot open display: %s"
+msgstr "ディスプレイをオープンできません: %s"
+
+#: gtkmain.c:857
+msgid "GTK+ Options"
+msgstr "GTK+ のオプション"
+
+#: gtkmain.c:857
+msgid "Show GTK+ Options"
+msgstr "GTK+ のオプションを表示する"
+
+#: gtkmountoperation.c:494
+msgid "Co_nnect"
+msgstr "接続する(_N)"
+
+#: gtkmountoperation.c:561
+msgid "Connect _anonymously"
+msgstr "匿名で接続する(_A)"
+
+#: gtkmountoperation.c:570
+msgid "Connect as u_ser:"
+msgstr "ユーザを指定する(_S):"
+
+#: gtkmountoperation.c:608
+msgid "_Username:"
+msgstr "ユーザ名(_U):"
+
+#: gtkmountoperation.c:613
+msgid "_Domain:"
+msgstr "ドメイン(_D):"
+
+#: gtkmountoperation.c:619
+msgid "_Password:"
+msgstr "パスワード(_P):"
+
+#: gtkmountoperation.c:637
+msgid "Forget password _immediately"
+msgstr "今すぐパスワードを破棄する(_I)"
+
+#: gtkmountoperation.c:647
+msgid "Remember password until you _logout"
+msgstr "ログアウトするまでパスワードを記憶する(_L)"
+
+#: gtkmountoperation.c:657
+msgid "Remember _forever"
+msgstr "期限なしで記憶する(_F)"
+
+#: gtkmountoperation.c:886
+#, c-format
+msgid "Unknown Application (PID %d)"
+msgstr "不明なアプリケーション (PID %d)"
+
+#: gtkmountoperation.c:1069
+msgid "Unable to end process"
+msgstr "プロセスを終了できません"
+
+#: gtkmountoperation.c:1106
+msgid "_End Process"
+msgstr "プロセスを終了(_E)"
+
+#: gtknotebook.c:4745 gtknotebook.c:7351
+#, c-format
+msgid "Page %u"
+msgstr "%u ページ"
+
+#: gtkpathbar.c:151
+msgid "Up Path"
+msgstr "上のパス"
+
+#: gtkpathbar.c:153
+msgid "Down Path"
+msgstr "下のパス"
+
+#: gtkpathbar.c:1467
+msgid "File System Root"
+msgstr "ファイル・システムのルート"
+
+#: gtkrc.c:2906
+#, c-format
+msgid "Unable to find include file: \"%s\""
+msgstr "インクルードファイルが見つかりません: \"%s\""
+
+#: gtkrc.c:3536 gtkrc.c:3539
+#, c-format
+msgid "Unable to locate image file in pixmap_path: \"%s\""
+msgstr "pixmap_path に画像ファイルが見つかりません: \"%s\""
+
+#: gtkrecentaction.c:154 gtkrecentaction.c:162 gtkrecentchoosermenu.c:588
+#: gtkrecentchoosermenu.c:596
+#, c-format
+msgid "This function is not implemented for widgets of class '%s'"
+msgstr "この関数は '%s' クラスのウィジットでは実装されていません"
+
+#: gtkrecentchooserdefault.c:481
+msgid "Select which type of documents are shown"
+msgstr "表示するファイルの種類を選択してください"
+
+#: gtkrecentchooserdefault.c:1135 gtkrecentchooserdefault.c:1172
+#, c-format
+msgid "No item for URI '%s' found"
+msgstr "URI '%s' のアイテムはありません"
+
+#: gtkrecentchooserdefault.c:1299
+msgid "Untitled filter"
+msgstr "タイトルなしのフィルタ"
+
+#: gtkrecentchooserdefault.c:1652
+msgid "Could not remove item"
+msgstr "アイテムを削除できませんでした"
+
+#: gtkrecentchooserdefault.c:1696
+msgid "Could not clear list"
+msgstr "一覧をクリアできませんでした"
+
+#: gtkrecentchooserdefault.c:1780
+msgid "Copy _Location"
+msgstr "場所のコピー(_L)"
+
+#: gtkrecentchooserdefault.c:1793
+msgid "_Remove From List"
+msgstr "一覧から削除する(_R)"
+
+#: gtkrecentchooserdefault.c:1802
+msgid "_Clear List"
+msgstr "一覧のクリア(_C)"
+
+#: gtkrecentchooserdefault.c:1816
+msgid "Show _Private Resources"
+msgstr "個人的なリソースを表示する(_P)"
+
+#: gtkrecentchoosermenu.c:342
+msgid "No items found"
+msgstr "(該当なし)"
+
+#: gtkrecentchoosermenu.c:508 gtkrecentchoosermenu.c:564
+#, c-format
+msgid "No recently used resource found with URI `%s'"
+msgstr "URI '%s' に関連する最近使用したリソースはありません"
+
+#: gtkrecentchoosermenu.c:774
+#, c-format
+msgid "Open '%s'"
+msgstr "'%s' を開きます"
+
+#: gtkrecentchoosermenu.c:804
+msgid "Unknown item"
+msgstr "不明なアイテム"
+
+#: gtkrecentmanager.c:1182 gtkrecentmanager.c:1195 gtkrecentmanager.c:1332
+#: gtkrecentmanager.c:1342 gtkrecentmanager.c:1395 gtkrecentmanager.c:1404
+#: gtkrecentmanager.c:1419
+#, c-format
+msgid "Unable to find an item with URI '%s'"
+msgstr "URI '%s' のアイテムが見つかりません"
+
+#: gtkspinner.c:459
+msgid "Provides visual indication of progress"
+msgstr "進行している様子を視覚的に表します"
+
+#: gtktextbufferrichtext.c:652
+#, c-format
+msgid "Unknown error when trying to deserialize %s"
+msgstr "%s をデシリアライズする際に原因不明のエラー"
+
+#: gtktextbufferrichtext.c:711
+#, c-format
+msgid "No deserialize function found for format %s"
+msgstr "%s 形式をデシリアライズする関数がありません"
+
+#: gtktextbufferserialize.c:797 gtktextbufferserialize.c:823
+#, c-format
+msgid "Both \"id\" and \"name\" were found on the <%s> element"
+msgstr "\"id\" と \"name\" の両方が要素 <%s> 上にありました"
+
+#: gtktextbufferserialize.c:807 gtktextbufferserialize.c:833
+#, c-format
+msgid "The attribute \"%s\" was found twice on the <%s> element"
+msgstr "属性 \"%s\" が要素 <%s> 上に二つありました"
+
+#: gtktextbufferserialize.c:847
+#, c-format
+msgid "<%s> element has invalid ID \"%s\""
+msgstr "要素 <%s> の ID \"%s\" が間違っています"
+
+#: gtktextbufferserialize.c:857
+#, c-format
+msgid "<%s> element has neither a \"name\" nor an \"id\" attribute"
+msgstr "要素 <%s> には \"name\" や \"id\" といった属性はありません"
+
+#: gtktextbufferserialize.c:944
+#, c-format
+msgid "Attribute \"%s\" repeated twice on the same <%s> element"
+msgstr "属性 \"%s\" が同じ要素 <%s> 上に二回出現しました"
+
+#: gtktextbufferserialize.c:962 gtktextbufferserialize.c:987
+#, c-format
+msgid "Attribute \"%s\" is invalid on <%s> element in this context"
+msgstr "このコンテキストの中にある要素 <%2$s> の属性 \"%1$s\" が間違っています"
+
+#: gtktextbufferserialize.c:1023
+#, c-format
+msgid "Tag \"%s\" has not been defined."
+msgstr "タグ \"%s\" が定義されていません"
+
+#: gtktextbufferserialize.c:1035
+msgid "Anonymous tag found and tags can not be created."
+msgstr "匿名のタグがあるので、タグを生成できません"
+
+#: gtktextbufferserialize.c:1046
+#, c-format
+msgid "Tag \"%s\" does not exist in buffer and tags can not be created."
+msgstr "タグ \"%s\" がバッファに存在しないので、タグを生成できません"
+
+#: gtktextbufferserialize.c:1145 gtktextbufferserialize.c:1220
+#: gtktextbufferserialize.c:1321 gtktextbufferserialize.c:1395
+#, c-format
+msgid "Element <%s> is not allowed below <%s>"
+msgstr "要素 <%s> は <%s> の下で定義できません"
+
+#: gtktextbufferserialize.c:1176
+#, c-format
+msgid "\"%s\" is not a valid attribute type"
+msgstr "\"%s\" は属性の種類として妥当ではありません"
+
+#: gtktextbufferserialize.c:1184
+#, c-format
+msgid "\"%s\" is not a valid attribute name"
+msgstr "\"%s\" は属性名としては妥当ではありません"
+
+#: gtktextbufferserialize.c:1194
+#, c-format
+msgid ""
+"\"%s\" could not be converted to a value of type \"%s\" for attribute \"%s\""
+msgstr "\"%s\" を \"%s\" (属性は \"%s\") という種類の値に変換できませんでした"
+
+#: gtktextbufferserialize.c:1203
+#, c-format
+msgid "\"%s\" is not a valid value for attribute \"%s\""
+msgstr "\"%s\" は属性 \"%s\" に対して妥当な値ではありません"
+
+#: gtktextbufferserialize.c:1286
+#, c-format
+msgid "Tag \"%s\" already defined"
+msgstr "タグ \"%s\" は既に定義されています"
+
+#: gtktextbufferserialize.c:1297
+#, c-format
+msgid "Tag \"%s\" has invalid priority \"%s\""
+msgstr "タグ \"%s\" の優先度 \"%s\" が間違っています"
+
+#: gtktextbufferserialize.c:1350
+#, c-format
+msgid "Outermost element in text must be <text_view_markup> not <%s>"
+msgstr ""
+"テキストの中にある一番外側の要素は <%s> ではなく <text_view_markup> にしてく"
+"ださい"
+
+#: gtktextbufferserialize.c:1359 gtktextbufferserialize.c:1375
+#, c-format
+msgid "A <%s> element has already been specified"
+msgstr "要素 <%s> は既に指定されています"
+
+#: gtktextbufferserialize.c:1381
+msgid "A <text> element can't occur before a <tags> element"
+msgstr "要素 <text> は要素 <tag> の前に記述できません"
+
+#: gtktextbufferserialize.c:1780
+msgid "Serialized data is malformed"
+msgstr "シリアライズしたデータが壊れています"
+
+#: gtktextbufferserialize.c:1858
+msgid ""
+"Serialized data is malformed. First section isn't GTKTEXTBUFFERCONTENTS-0001"
+msgstr ""
+"シリアライズしたデータが壊れています (セクションの先頭が "
+"GTKTEXTBUFFERCONTENTS-0001 でない)"
+
+#: gtktextutil.c:61
+msgid "LRM _Left-to-right mark"
+msgstr "LRM 左→右 Mark(_L)"
+
+#: gtktextutil.c:62
+msgid "RLM _Right-to-left mark"
+msgstr "RLM 右→左 Mark(_R)"
+
+#: gtktextutil.c:63
+msgid "LRE Left-to-right _embedding"
+msgstr "LRE 左→右 Embedding(_E)"
+
+#: gtktextutil.c:64
+msgid "RLE Right-to-left e_mbedding"
+msgstr "RLE 右→左 Embedding(_M)"
+
+#: gtktextutil.c:65
+msgid "LRO Left-to-right _override"
+msgstr "LRO 左→右 Override(_O)"
+
+#: gtktextutil.c:66
+msgid "RLO Right-to-left o_verride"
+msgstr "RLO 右→左 Override(_V)"
+
+#: gtktextutil.c:67
+msgid "PDF _Pop directional formatting"
+msgstr "PDF POP Directional Formatting(_P)"
+
+#: gtktextutil.c:68
+msgid "ZWS _Zero width space"
+msgstr "ZWS Zero Width Space(_Z)"
+
+#: gtktextutil.c:69
+msgid "ZWJ Zero width _joiner"
+msgstr "ZWJ Zero Width Joiner(_J)"
+
+#: gtktextutil.c:70
+msgid "ZWNJ Zero width _non-joiner"
+msgstr "ZWNJ Zero Width Non-Joiner(_N)"
+
+#: gtkthemes.c:71
+#, c-format
+msgid "Unable to locate theme engine in module_path: \"%s\","
+msgstr "module_path にはテーマ・エンジンがありません: \"%s\","
+
+#: gtkuimanager.c:1505
+#, c-format
+msgid "Unexpected start tag '%s' on line %d char %d"
+msgstr "%2$d 行目 %3$d 文字目の予想外の開始タグ '%1$s'"
+
+#: gtkuimanager.c:1595
+#, c-format
+msgid "Unexpected character data on line %d char %d"
+msgstr "%d 行の %d 文字目の文字データは予想外です"
+
+#: gtkuimanager.c:2427
+msgid "Empty"
+msgstr "空"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-debug"
+#~ msgstr "--gdk-debug オプションの解析エラーです"
+
+#, c-format
+#~ msgid "Error parsing option --gdk-no-debug"
+#~ msgstr "--gdk-no-debug オプションの解析エラーです"
+
+#~ msgid "Program class as used by the window manager"
+#~ msgstr "ウィンドウ・マネージャで利用するプログラムのクラスを指定する"
+
+#~ msgid "CLASS"
+#~ msgstr "CLASS"
+
+#~ msgid "Program name as used by the window manager"
+#~ msgstr "ウィンドウ・マネージャで利用するプログラムの名前を指定する"
+
+#~ msgid "NAME"
+#~ msgstr "NAME"
+
+# 'X' という1文字は X-Window で固有名詞のため大文字のXで表示する
+#~ msgid "X display to use"
+#~ msgstr "使用するXのディスプレイを指定する"
+
+#~ msgid "DISPLAY"
+#~ msgstr "DISPLAY"
+
+# 'X' という1文字は X-Window で固有名詞のため大文字のXで表示する
+#~ msgid "X screen to use"
+#~ msgstr "使用するXのスクリーンを指定する"
+
+#~ msgid "SCREEN"
+#~ msgstr "SCREEN"
+
+#~ msgid "GDK debugging flags to set"
+#~ msgstr "有効にする GDK のデバッグ・フラグを指定する"
+
+#~ msgid "GDK debugging flags to unset"
+#~ msgstr "無効にする GDK のデバッグ・フラグを指定する"
+
+#~ msgctxt "keyboard label"
+#~ msgid "BackSpace"
+#~ msgstr "BackSpace"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Tab"
+#~ msgstr "Tab"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Return"
+#~ msgstr "Return"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Pause"
+#~ msgstr "Pause"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Scroll_Lock"
+#~ msgstr "Scroll_Lock"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Sys_Req"
+#~ msgstr "Sys_Req"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Escape"
+#~ msgstr "Esc"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Multi_key"
+#~ msgstr "Multi_key"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Home"
+#~ msgstr "Home"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Left"
+#~ msgstr "Left"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Up"
+#~ msgstr "Up"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Right"
+#~ msgstr "Right"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Down"
+#~ msgstr "Down"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Up"
+#~ msgstr "Page_Up"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Page_Down"
+#~ msgstr "Page_Down"
+
+#~ msgctxt "keyboard label"
+#~ msgid "End"
+#~ msgstr "End"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Begin"
+#~ msgstr "Begin"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Print"
+#~ msgstr "Print"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Insert"
+#~ msgstr "Insert"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Num_Lock"
+#~ msgstr "Num_Lock"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Space"
+#~ msgstr "KP_Space"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Tab"
+#~ msgstr "KP_Tab"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Enter"
+#~ msgstr "KP_Enter"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Home"
+#~ msgstr "KP_Home"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Left"
+#~ msgstr "KP_Left"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Up"
+#~ msgstr "KP_Up"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Right"
+#~ msgstr "KP_Right"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Down"
+#~ msgstr "KP_Down"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Up"
+#~ msgstr "KP_Page_Up"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Prior"
+#~ msgstr "KP_Prior"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Page_Down"
+#~ msgstr "KP_Page_Down"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Next"
+#~ msgstr "KP_Next"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_End"
+#~ msgstr "KP_End"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Begin"
+#~ msgstr "KP_Begin"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Insert"
+#~ msgstr "KP_Insert"
+
+#~ msgctxt "keyboard label"
+#~ msgid "KP_Delete"
+#~ msgstr "KP_Delete"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Delete"
+#~ msgstr "Delete"
+
+#~ msgid "Don't batch GDI requests"
+#~ msgstr "GDI のリクエストをまとめない"
+
+#~ msgid "Don't use the Wintab API for tablet support"
+#~ msgstr "タブレットのサポートで Wintab API を使用しない"
+
+#~ msgid "Same as --no-wintab"
+#~ msgstr "オプション --no-wintab と同じ"
+
+#~ msgid "Do use the Wintab API [default]"
+#~ msgstr "Wintab API を使用しない [デフォルト]"
+
+#~ msgid "Size of the palette in 8 bit mode"
+#~ msgstr "8-ビット・モードでのパレット・サイズを指定する"
+
+#~ msgid "COLORS"
+#~ msgstr "COLORS"
+
+#~ msgid "Make X calls synchronous"
+#~ msgstr "Xの呼び出しと同期する"
+
+#, c-format
+#~ msgid "Starting %s"
+#~ msgstr "%s の起動中です"
+
+#, c-format
+#~ msgid "Opening %s"
+#~ msgstr "%s を開いています"
+
+#, c-format
+#~ msgid "Opening %d Item"
+#~ msgid_plural "Opening %d Items"
+#~ msgstr[0] "%d 個のアイテムを開いています"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Shift"
+#~ msgstr "Shift"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Ctrl"
+#~ msgstr "Ctrl"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Alt"
+#~ msgstr "Alt"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Super"
+#~ msgstr "Super"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Hyper"
+#~ msgstr "Hyper"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Meta"
+#~ msgstr "Meta"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Space"
+#~ msgstr "Space"
+
+#~ msgctxt "keyboard label"
+#~ msgid "Backslash"
+#~ msgstr "\\"
+
+#~ msgid "calendar:MY"
+#~ msgstr "calendar:YM"
+
+#~ msgid "calendar:week_start:0"
+#~ msgstr "calendar:week_start:0"
+
+#~ msgctxt "year measurement template"
+#~ msgid "2000"
+#~ msgstr "2000"
+
+#, c-format
+#~ msgctxt "calendar:day:digits"
+#~ msgid "%d"
+#~ msgstr "%d"
+
+#, c-format
+#~ msgctxt "calendar:week:digits"
+#~ msgid "%d"
+#~ msgstr "%d"
+
+#~ msgctxt "calendar year format"
+#~ msgid "%Y"
+#~ msgstr "%Y"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Disabled"
+#~ msgstr "無効"
+
+#~ msgctxt "Accelerator"
+#~ msgid "Invalid"
+#~ msgstr "無効"
+
+#, c-format
+#~ msgctxt "progress bar label"
+#~ msgid "%d %%"
+#~ msgstr "%d %%"
+
+#~ msgid "default:mm"
+#~ msgstr "default:mm"
+
+#~ msgid "Manage Custom Sizes"
+#~ msgstr "その他のサイズの管理"
+
+#~ msgid "inch"
+#~ msgstr "インチ"
+
+#~ msgid "mm"
+#~ msgstr "ミリ"
+
+#~ msgid "Margins from Printer..."
+#~ msgstr "プリンタのマージン..."
+
+#, c-format
+#~ msgid "Custom Size %d"
+#~ msgstr "その他のサイズ %d"
+
+#~ msgid "_Width:"
+#~ msgstr "幅(_W):"
+
+#~ msgid "_Height:"
+#~ msgstr "高さ(_H):"
+
+#~ msgid "Paper Size"
+#~ msgstr "用紙サイズ"
+
+#~ msgid "_Top:"
+#~ msgstr "上側(_T):"
+
+#~ msgid "_Bottom:"
+#~ msgstr "下側(_B):"
+
+#~ msgid "_Left:"
+#~ msgstr "左側(_L):"
+
+#~ msgid "_Right:"
+#~ msgstr "右側(_R):"
+
+#~ msgid "Paper Margins"
+#~ msgstr "用紙のマージン"
+
+#, c-format
+#~ msgid "Invalid path"
+#~ msgstr "パスが間違っています"
+
+#~ msgid "No match"
+#~ msgstr "該当するものはありません"
+
+#~ msgid "Sole completion"
+#~ msgstr "一つだけ該当するものがあります"
+
+#~ msgid "Complete, but not unique"
+#~ msgstr "該当するものがありますが、これ以上の補完は不可です"
+
+#~ msgid "Completing..."
+#~ msgstr "ファイル名の補完中..."
+
+#~ msgid "Only local files may be selected"
+#~ msgstr "指定できるのはローカルにあるファイルだけです"
+
+#~ msgid "Incomplete hostname; end it with '/'"
+#~ msgstr "ホスト名が不完全です ('/' で終わっていません)"
+
+#~ msgid "Path does not exist"
+#~ msgstr "パスがありません"
+
+#~ msgid "Folders"
+#~ msgstr "フォルダ"
+
+#~ msgid "Fol_ders"
+#~ msgstr "フォルダ(_D)"
+
+#~ msgid "_Files"
+#~ msgstr "ファイル(_F)"
+
+#, c-format
+#~ msgid "Folder unreadable: %s"
+#~ msgstr "読み込み不可のフォルダ: %s"
+
+#, c-format
+#~ msgid ""
+#~ "The file \"%s\" resides on another machine (called %s) and may not be "
+#~ "available to this program.\n"
+#~ "Are you sure that you want to select it?"
+#~ msgstr ""
+#~ "ファイル \"%s\" は他のマシン %s にあるため、このプログラムでは利用できませ"
+#~ "ん。\n"
+#~ "本当に選択しますか?"
+
+#~ msgid "_New Folder"
+#~ msgstr "新しいフォルダ(_N)"
+
+#~ msgid "De_lete File"
+#~ msgstr "ファイルの削除(_L)"
+
+#~ msgid "_Rename File"
+#~ msgstr "ファイル名の変更(_R)"
+
+#, c-format
+#~ msgid ""
+#~ "The folder name \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr ""
+#~ "フォルダ名 \"%s\" にファイル名として利用できない文字が含まれています"
+
+#~ msgid "New Folder"
+#~ msgstr "新しいフォルダ"
+
+#~ msgid "_Folder name:"
+#~ msgstr "フォルダ名(_F):"
+
+#~ msgid "C_reate"
+#~ msgstr "作成(_R)"
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" contains symbols that are not allowed in filenames"
+#~ msgstr ""
+#~ "ファイル名 \"%s\" にファイル名として利用できない文字が含まれています"
+
+#, c-format
+#~ msgid "Error deleting file '%s': %s"
+#~ msgstr "ファイル '%s' の削除中にエラー: %s"
+
+#, c-format
+#~ msgid "Really delete file \"%s\"?"
+#~ msgstr "本当にファイル \"%s\" を削除しますか?"
+
+#~ msgid "Delete File"
+#~ msgstr "ファイルの削除"
+
+#, c-format
+#~ msgid "Error renaming file to \"%s\": %s"
+#~ msgstr "ファイル名を \"%s\" へ変更する際にエラー: %s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\": %s"
+#~ msgstr "ファイル名 \"%s\" を変更する際にエラー: %s"
+
+#, c-format
+#~ msgid "Error renaming file \"%s\" to \"%s\": %s"
+#~ msgstr "ファイル名 \"%s\" を \"%s\" に変更する際にエラー: %s"
+
+#~ msgid "Rename File"
+#~ msgstr "ファイル名の変更"
+
+#, c-format
+#~ msgid "Rename file \"%s\" to:"
+#~ msgstr "ファイル '%s' の名前の変更:"
+
+#~ msgid "_Rename"
+#~ msgstr "ファイル名の変更(_R)"
+
+#~ msgid "_Selection: "
+#~ msgstr "選択(_S): "
+
+#, c-format
+#~ msgid ""
+#~ "The filename \"%s\" couldn't be converted to UTF-8. (try setting the "
+#~ "environment variable G_FILENAME_ENCODING): %s"
+#~ msgstr ""
+#~ "ファイル名 \"%s\" を UTF-8 に変換できませんでした (環境変数 "
+#~ "$G_FILENAME_ENCODING を設定してみてください): %s"
+
+#~ msgid "Invalid UTF-8"
+#~ msgstr "無効な UTF-8 コードです"
+
+#~ msgid "Name too long"
+#~ msgstr "名前が長すぎます"
+
+#~ msgid "Couldn't convert filename"
+#~ msgstr "ファイル名を変換できませんでした"
+
+#~ msgid "Gamma"
+#~ msgstr "ガンマ"
+
+#~ msgid "_Gamma value"
+#~ msgstr "ガンマ値(_G)"
+
+#~ msgctxt "input method menu"
+#~ msgid "System"
+#~ msgstr "システム"
+
+#~ msgctxt "input method menu"
+#~ msgid "None"
+#~ msgstr "なし"
+
+#, c-format
+#~ msgctxt "input method menu"
+#~ msgid "System (%s)"
+#~ msgstr "システム (%s)"
+
+#~ msgid "Input"
+#~ msgstr "入力"
+
+#~ msgid "No extended input devices"
+#~ msgstr "追加の入力デバイスが見つかりませんでした"
+
+#~ msgid "_Device:"
+#~ msgstr "デバイス(_D):"
+
+#~ msgid "Disabled"
+#~ msgstr "無効"
+
+#~ msgid "Screen"
+#~ msgstr "画面"
+
+#~ msgid "Window"
+#~ msgstr "ウィンドウ"
+
+#~ msgid "_Mode:"
+#~ msgstr "モード(_M):"
+
+#~ msgid "Axes"
+#~ msgstr "軸"
+
+#~ msgid "Keys"
+#~ msgstr "キー"
+
+#~ msgid "_X:"
+#~ msgstr "X(_X):"
+
+#~ msgid "_Y:"
+#~ msgstr "Y(_Y):"
+
+#~ msgid "_Pressure:"
+#~ msgstr "圧力(_P):"
+
+#~ msgid "X _tilt:"
+#~ msgstr "X軸の傾き(_T):"
+
+#~ msgid "Y t_ilt:"
+#~ msgstr "Y軸の傾き(_I):"
+
+#~ msgid "_Wheel:"
+#~ msgstr "ホイール(_W):"
+
+#~ msgid "none"
+#~ msgstr "無し"
+
+#~ msgid "(disabled)"
+#~ msgstr "(無効)"
+
+#~ msgid "(unknown)"
+#~ msgstr "(不明)"
+
+#~ msgid "Cl_ear"
+#~ msgstr "クリア(_E)"
+
+#, c-format
+#~ msgid "Cannot kill process with PID %d. Operation is not implemented."
+#~ msgstr "PID %d のプロセスを kill できません。操作が実装されていません。"
+
+#~ msgid "Terminal Pager"
+#~ msgstr "端末ページャ"
+
+#~ msgid "Top Command"
+#~ msgstr "top コマンド"
+
+#~ msgid "Bourne Again Shell"
+#~ msgstr "bash"
+
+#~ msgid "Bourne Shell"
+#~ msgstr "sh"
+
+#~ msgid "Z Shell"
+#~ msgstr "zsh"
+
+#, c-format
+#~ msgid "Cannot end process with PID %d: %s"
+#~ msgstr "PID %d のプロセスを終了できません: %s"
+
+#~ msgid "Not a valid page setup file"
+#~ msgstr "妥当なページ設定のファイルではありません"
+
+#~ msgid "Any Printer"
+#~ msgstr "任意のプリンタ"
+
+#~ msgid "For portable documents"
+#~ msgstr "ポータブルなドキュメント用"
+
+#, c-format
+#~ msgid ""
+#~ "Margins:\n"
+#~ " Left: %s %s\n"
+#~ " Right: %s %s\n"
+#~ " Top: %s %s\n"
+#~ " Bottom: %s %s"
+#~ msgstr ""
+#~ "マージン:\n"
+#~ " 左側: %s %s\n"
+#~ " 右側: %s %s\n"
+#~ " 上側: %s %s\n"
+#~ " 下側: %s %s"
+
+#~ msgid "Manage Custom Sizes..."
+#~ msgstr "その他のサイズ..."
+
+#~ msgid "_Format for:"
+#~ msgstr "フォーマット(_F):"
+
+#~ msgid "_Paper size:"
+#~ msgstr "用紙サイズ(_P):"
+
+#~ msgid "_Orientation:"
+#~ msgstr "用紙の向き(_O):"
+
+#~ msgid "Page Setup"
+#~ msgstr "ページの設定"
+
+#~ msgid "Authentication"
+#~ msgstr "認証"
+
+#~ msgid "Not available"
+#~ msgstr "利用できません"
+
+#~ msgid "_Save in folder:"
+#~ msgstr "フォルダの中に保存(_S):"
+
+#, c-format
+#~ msgid "%s job #%d"
+#~ msgstr "%s (印刷ジョブの番号 #%d)"
+
+#~ msgctxt "print operation status"
+#~ msgid "Initial state"
+#~ msgstr "初期状態"
+
+#~ msgctxt "print operation status"
+#~ msgid "Preparing to print"
+#~ msgstr "プリンタの準備中"
+
+#~ msgctxt "print operation status"
+#~ msgid "Generating data"
+#~ msgstr "データの生成中"
+
+#~ msgctxt "print operation status"
+#~ msgid "Sending data"
+#~ msgstr "データの送信中"
+
+#~ msgctxt "print operation status"
+#~ msgid "Waiting"
+#~ msgstr "待機中"
+
+#~ msgctxt "print operation status"
+#~ msgid "Blocking on issue"
+#~ msgstr "障害の発生中"
+
+#~ msgctxt "print operation status"
+#~ msgid "Printing"
+#~ msgstr "印刷中"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished"
+#~ msgstr "完了"
+
+#~ msgctxt "print operation status"
+#~ msgid "Finished with error"
+#~ msgstr "完了 (エラー有り)"
+
+#, c-format
+#~ msgid "Preparing %d"
+#~ msgstr "%d の準備中です"
+
+#~ msgid "Preparing"
+#~ msgstr "準備中"
+
+#, c-format
+#~ msgid "Printing %d"
+#~ msgstr "%d の印刷中です"
+
+#~ msgid "Error creating print preview"
+#~ msgstr "プレビューを生成する際にエラー"
+
+#~ msgid ""
+#~ "The most probable reason is that a temporary file could not be created."
+#~ msgstr "作業用のファイルを生成できないことが一番考えられそうな原因です。"
+
+#~ msgid "Error launching preview"
+#~ msgstr "プレビューを起動する際にエラー"
+
+#~ msgid "Error printing"
+#~ msgstr "印刷エラー"
+
+#~ msgid "Application"
+#~ msgstr "アプリケーション"
+
+#~ msgid "Printer offline"
+#~ msgstr "プリンタはオフラインです"
+
+#~ msgid "Out of paper"
+#~ msgstr "用紙の範囲外"
+
+#~ msgid "Paused"
+#~ msgstr "一時停止"
+
+#~ msgid "Need user intervention"
+#~ msgstr "ユーザの操作が必要です"
+
+#~ msgid "Custom size"
+#~ msgstr "その他のサイズ"
+
+#~ msgid "No printer found"
+#~ msgstr "プリンタが見つかりません"
+
+#~ msgid "Invalid argument to CreateDC"
+#~ msgstr "CreateDC() の引数が無効です"
+
+#~ msgid "Error from StartDoc"
+#~ msgstr "StartDoc() でエラー"
+
+#~ msgid "Not enough free memory"
+#~ msgstr "メモリが足りません"
+
+#~ msgid "Invalid argument to PrintDlgEx"
+#~ msgstr "PrintDlgEx() の引数が無効です"
+
+#~ msgid "Invalid pointer to PrintDlgEx"
+#~ msgstr "PrintDlgEx() を指すポインタが無効です"
+
+#~ msgid "Invalid handle to PrintDlgEx"
+#~ msgstr "PrintDlgEx() のハンドラが無効です"
+
+#~ msgid "Unspecified error"
+#~ msgstr "原因不明のエラー"
+
+#~ msgid "Getting printer information failed"
+#~ msgstr "プリンタの情報の取得に失敗しました。"
+
+#~ msgid "Getting printer information..."
+#~ msgstr "プリンタの情報を取得中..."
+
+#~ msgid "Printer"
+#~ msgstr "プリンタ"
+
+#~ msgid "Location"
+#~ msgstr "場所"
+
+#~ msgid "Status"
+#~ msgstr "状態"
+
+#~ msgid "Range"
+#~ msgstr "範囲"
+
+#~ msgid "_All Pages"
+#~ msgstr "すべてのページ(_A)"
+
+#~ msgid "C_urrent Page"
+#~ msgstr "現在のページだけ(_U)"
+
+#~ msgid "Se_lection"
+#~ msgstr "選択(_L)"
+
+#~ msgid "Pag_es:"
+#~ msgstr "ページ(_E):"
+
+#~ msgid ""
+#~ "Specify one or more page ranges,\n"
+#~ " e.g. 1-3,7,11"
+#~ msgstr ""
+#~ "1ページ以上の範囲を指定してください;\n"
+#~ "例: 1-3,7,11"
+
+#~ msgid "Pages"
+#~ msgstr "ページ"
+
+#~ msgid "Copies"
+#~ msgstr "コピー"
+
+#~ msgid "Copie_s:"
+#~ msgstr "コピーの数(_S):"
+
+#~ msgid "C_ollate"
+#~ msgstr "ページを揃える(_O)"
+
+#~ msgid "_Reverse"
+#~ msgstr "ページを逆順にする(_R)"
+
+#~ msgid "General"
+#~ msgstr "全般"
+
+#~ msgid "Left to right, top to bottom"
+#~ msgstr "左から右へ、上から下へ"
+
+#~ msgid "Left to right, bottom to top"
+#~ msgstr "左から右へ、下から上へ"
+
+#~ msgid "Right to left, top to bottom"
+#~ msgstr "右から左へ、上から下へ"
+
+#~ msgid "Right to left, bottom to top"
+#~ msgstr "右から左へ、下から上へ"
+
+#~ msgid "Top to bottom, left to right"
+#~ msgstr "上から下へ、左から右へ"
+
+#~ msgid "Top to bottom, right to left"
+#~ msgstr "上から下へ、右から左へ"
+
+#~ msgid "Bottom to top, left to right"
+#~ msgstr "下から上へ、左から右へ"
+
+#~ msgid "Bottom to top, right to left"
+#~ msgstr "下から上へ、右から左へ"
+
+#~ msgid "Page Ordering"
+#~ msgstr "ページの順番"
+
+#~ msgid "Left to right"
+#~ msgstr "左から右へ"
+
+#~ msgid "Right to left"
+#~ msgstr "右から左へ"
+
+#~ msgid "Top to bottom"
+#~ msgstr "上から下へ"
+
+#~ msgid "Bottom to top"
+#~ msgstr "下から上へ"
+
+#~ msgid "Layout"
+#~ msgstr "レイアウト"
+
+#~ msgid "T_wo-sided:"
+#~ msgstr "両面印刷(_W):"
+
+#~ msgid "Pages per _side:"
+#~ msgstr "段組み印刷(_S):"
+
+#~ msgid "Page or_dering:"
+#~ msgstr "ページの順番(_D):"
+
+#~ msgid "_Only print:"
+#~ msgstr "印刷の対象(_O):"
+
+#~ msgid "All sheets"
+#~ msgstr "すべてのページ"
+
+#~ msgid "Even sheets"
+#~ msgstr "偶数ページ"
+
+#~ msgid "Odd sheets"
+#~ msgstr "奇数ページ"
+
+#~ msgid "Sc_ale:"
+#~ msgstr "拡大/縮小(_A):"
+
+#~ msgid "Paper"
+#~ msgstr "用紙"
+
+#~ msgid "Paper _type:"
+#~ msgstr "種類(_T):"
+
+#~ msgid "Paper _source:"
+#~ msgstr "用紙のソース(_S):"
+
+#~ msgid "Output t_ray:"
+#~ msgstr "出力先のトレイ(_R):"
+
+#~ msgid "Or_ientation:"
+#~ msgstr "用紙の向き(_I):"
+
+#~ msgid "Portrait"
+#~ msgstr "縦方向"
+
+#~ msgid "Landscape"
+#~ msgstr "横方向"
+
+#~ msgid "Reverse portrait"
+#~ msgstr "縦方向(逆向き)"
+
+#~ msgid "Reverse landscape"
+#~ msgstr "横方向(逆向き)"
+
+#~ msgid "Job Details"
+#~ msgstr "印刷ジョブの詳細"
+
+#~ msgid "Pri_ority:"
+#~ msgstr "優先順位(_O):"
+
+#~ msgid "_Billing info:"
+#~ msgstr "サマリ情報(_B):"
+
+#~ msgid "Print Document"
+#~ msgstr "ドキュメントの印刷"
+
+#~ msgid "_Now"
+#~ msgstr "今すぐ印刷する(_N)"
+
+#~ msgid "A_t:"
+#~ msgstr "時間を指定する(_T):"
+
+#~ msgid ""
+#~ "Specify the time of print,\n"
+#~ " e.g. 15:30, 2:35 pm, 14:15:20, 11:46:30 am, 4 pm"
+#~ msgstr ""
+#~ "印刷する時間を指定してください:\n"
+#~ " (例) 15:30、午後 2:35、14:15:20, 午前 11:46:30 am、午後 4"
+
+#~ msgid "Time of print"
+#~ msgstr "プリント時間"
+
+#~ msgid "On _hold"
+#~ msgstr "保留する(_H)"
+
+#~ msgid "Hold the job until it is explicitly released"
+#~ msgstr "印刷ジョブが完全に解放されるまで保留しておきます"
+
+#~ msgid "Add Cover Page"
+#~ msgstr "裏表紙の追加"
+
+#~ msgid "Be_fore:"
+#~ msgstr "前(_F):"
+
+#~ msgid "_After:"
+#~ msgstr "後(_A):"
+
+#~ msgid "Job"
+#~ msgstr "印刷ジョブ"
+
+#~ msgid "Advanced"
+#~ msgstr "拡張"
+
+#~ msgid "Image Quality"
+#~ msgstr "画像の品質"
+
+#~ msgid "Color"
+#~ msgstr "色"
+
+#~ msgid "Finishing"
+#~ msgstr "完了"
+
+#~ msgid "Some of the settings in the dialog conflict"
+#~ msgstr "ダイアログのいくつかの設定が重複しています"
+
+#~ msgid "Print"
+#~ msgstr "印刷"
+
+#, c-format
+#~ msgctxt "recent menu label"
+#~ msgid "_%d. %s"
+#~ msgstr "_%d: %s"
+
+#, c-format
+#~ msgctxt "recent menu label"
+#~ msgid "%d. %s"
+#~ msgstr "%d: %s"
+
+#~ msgctxt "throbbing progress animation widget"
+#~ msgid "Spinner"
+#~ msgstr "スピナー"
+
+#~ msgctxt "Stock label"
+#~ msgid "Information"
+#~ msgstr "情報"
+
+#~ msgctxt "Stock label"
+#~ msgid "Warning"
+#~ msgstr "警告"
+
+#~ msgctxt "Stock label"
+#~ msgid "Error"
+#~ msgstr "エラー"
+
+#~ msgctxt "Stock label"
+#~ msgid "Question"
+#~ msgstr "質問"
+
+#~ msgctxt "Stock label"
+#~ msgid "_About"
+#~ msgstr "情報(_A)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Add"
+#~ msgstr "追加(_A)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Apply"
+#~ msgstr "適用(_A)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Bold"
+#~ msgstr "太字(_B)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Cancel"
+#~ msgstr "キャンセル(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_CD-Rom"
+#~ msgstr "CD-ROM(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Clear"
+#~ msgstr "クリア(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Close"
+#~ msgstr "閉じる(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "C_onnect"
+#~ msgstr "接続(_O)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Convert"
+#~ msgstr "変換(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Copy"
+#~ msgstr "コピー(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Cu_t"
+#~ msgstr "切り取り(_T)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Delete"
+#~ msgstr "削除(_D)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Discard"
+#~ msgstr "無効(_D)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Disconnect"
+#~ msgstr "切断(_D)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Execute"
+#~ msgstr "実行(_E)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Edit"
+#~ msgstr "編集(_E)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Find"
+#~ msgstr "検索(_F)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Find and _Replace"
+#~ msgstr "検索して置換(_R)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Floppy"
+#~ msgstr "フロッピー(_F)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fullscreen"
+#~ msgstr "フルスクリーン(_F)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Leave Fullscreen"
+#~ msgstr "フルスクリーンの解除(_L)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Bottom"
+#~ msgstr "最後(_B)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_First"
+#~ msgstr "先頭(_F)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Last"
+#~ msgstr "最後(_L)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Top"
+#~ msgstr "先頭(_T)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Back"
+#~ msgstr "戻る(_B)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Down"
+#~ msgstr "下へ(_D)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Forward"
+#~ msgstr "進む(_F)"
+
+#~ msgctxt "Stock label, navigation"
+#~ msgid "_Up"
+#~ msgstr "上へ(_U)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Harddisk"
+#~ msgstr "ハードディスク(_H)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Help"
+#~ msgstr "ヘルプ(_H)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Home"
+#~ msgstr "ホーム(_H)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Increase Indent"
+#~ msgstr "インデントを増やす"
+
+#~ msgctxt "Stock label"
+#~ msgid "Decrease Indent"
+#~ msgstr "インデントを減らす"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Index"
+#~ msgstr "インデックス(_I)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Information"
+#~ msgstr "情報(_I)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Italic"
+#~ msgstr "斜体(_I)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Jump to"
+#~ msgstr "移動(_J)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Center"
+#~ msgstr "中央寄せ(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Fill"
+#~ msgstr "埋める(_F)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Left"
+#~ msgstr "左寄せ(_L)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Right"
+#~ msgstr "右寄せ(_R)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Forward"
+#~ msgstr "早送り(_F)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Next"
+#~ msgstr "次(_N)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "P_ause"
+#~ msgstr "一時停止(_A)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Play"
+#~ msgstr "再生(_P)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "Pre_vious"
+#~ msgstr "前(_V)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Record"
+#~ msgstr "録音(_R)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "R_ewind"
+#~ msgstr "巻き戻し(_E)"
+
+#~ msgctxt "Stock label, media"
+#~ msgid "_Stop"
+#~ msgstr "停止(_S)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Network"
+#~ msgstr "ネットワーク(_N)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_New"
+#~ msgstr "新規(_N)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_No"
+#~ msgstr "いいえ(_N)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_OK"
+#~ msgstr "OK(_O)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Open"
+#~ msgstr "開く(_O)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Landscape"
+#~ msgstr "横置き"
+
+#~ msgctxt "Stock label"
+#~ msgid "Portrait"
+#~ msgstr "縦置き"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse landscape"
+#~ msgstr "横置きの逆"
+
+#~ msgctxt "Stock label"
+#~ msgid "Reverse portrait"
+#~ msgstr "縦置きの逆"
+
+#~ msgctxt "Stock label"
+#~ msgid "Page Set_up"
+#~ msgstr "ページの設定(_U)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Paste"
+#~ msgstr "貼り付け(_P)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Preferences"
+#~ msgstr "設定(_P)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Print"
+#~ msgstr "印刷(_P)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Print Pre_view"
+#~ msgstr "印刷プレビュー(_V)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Properties"
+#~ msgstr "プロパティ(_P)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Quit"
+#~ msgstr "終了(_Q)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Redo"
+#~ msgstr "やり直す(_R)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Refresh"
+#~ msgstr "更新(_R)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Remove"
+#~ msgstr "削除(_R)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Revert"
+#~ msgstr "元に戻す(_R)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Save"
+#~ msgstr "保存(_S)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Save _As"
+#~ msgstr "別名で保存(_A)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Select _All"
+#~ msgstr "すべて選択(_A)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Color"
+#~ msgstr "色(_C)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Font"
+#~ msgstr "フォント(_F)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Ascending"
+#~ msgstr "昇順(_A)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Descending"
+#~ msgstr "降順(_D)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Spell Check"
+#~ msgstr "スペル・チェック(_S)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Stop"
+#~ msgstr "停止(_S)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Strikethrough"
+#~ msgstr "打ち消し線(_S)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undelete"
+#~ msgstr "削除の取り消し(_U)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Underline"
+#~ msgstr "下線(_U)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Undo"
+#~ msgstr "元に戻す(_U)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Yes"
+#~ msgstr "はい(_Y)"
+
+#~ msgctxt "Stock label"
+#~ msgid "_Normal Size"
+#~ msgstr "標準サイズ(_N)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Best _Fit"
+#~ msgstr "フィットさせる(_F)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _In"
+#~ msgstr "拡大(_I)"
+
+#~ msgctxt "Stock label"
+#~ msgid "Zoom _Out"
+#~ msgstr "縮小(_O)"
+
+#~ msgid "--- No Tip ---"
+#~ msgstr "--- Tip なし ---"
+
+#~ msgid "Volume"
+#~ msgstr "音量"
+
+#~ msgid "Turns volume down or up"
+#~ msgstr "音量を上げたり下げたりします"
+
+#~ msgid "Adjusts the volume"
+#~ msgstr "音量を調整します"
+
+#~ msgid "Volume Down"
+#~ msgstr "音量を下げます"
+
+#~ msgid "Decreases the volume"
+#~ msgstr "音量を下げます"
+
+#~ msgid "Volume Up"
+#~ msgstr "音量を上げます"
+
+#~ msgid "Increases the volume"
+#~ msgstr "音量を上げます"
+
+#~ msgid "Muted"
+#~ msgstr "ミュート"
+
+#~ msgid "Full Volume"
+#~ msgstr "フル音量"
+
+#, c-format
+#~ msgctxt "volume percentage"
+#~ msgid "%d %%"
+#~ msgstr "%d %%"
+
+#~ msgctxt "paper size"
+#~ msgid "asme_f"
+#~ msgstr "paper size|asme_f"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x2"
+#~ msgstr "A0x2"
+
+#~ msgctxt "paper size"
+#~ msgid "A0"
+#~ msgstr "A0"
+
+#~ msgctxt "paper size"
+#~ msgid "A0x3"
+#~ msgstr "A0x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1"
+#~ msgstr "A1"
+
+#~ msgctxt "paper size"
+#~ msgid "A10"
+#~ msgstr "A10"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x3"
+#~ msgstr "paper size|A1x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A1x4"
+#~ msgstr "A1x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2"
+#~ msgstr "A2"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x3"
+#~ msgstr "A2x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x4"
+#~ msgstr "A2x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A2x5"
+#~ msgstr "A2x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3"
+#~ msgstr "A3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3 Extra"
+#~ msgstr "A3 エキストラ"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x3"
+#~ msgstr "A3x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x4"
+#~ msgstr "A3x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x5"
+#~ msgstr "A3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x6"
+#~ msgstr "A3x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A3x7"
+#~ msgstr "A3x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4"
+#~ msgstr "A4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Extra"
+#~ msgstr "A4 エキストラ"
+
+#~ msgctxt "paper size"
+#~ msgid "A4 Tab"
+#~ msgstr "A4 タブ"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x3"
+#~ msgstr "A4x3"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x4"
+#~ msgstr "A4x4"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x5"
+#~ msgstr "A4x5"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x6"
+#~ msgstr "A4x6"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x7"
+#~ msgstr "A4x7"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x8"
+#~ msgstr "A4x8"
+
+#~ msgctxt "paper size"
+#~ msgid "A4x9"
+#~ msgstr "A4x9"
+
+#~ msgctxt "paper size"
+#~ msgid "A5"
+#~ msgstr "A5"
+
+#~ msgctxt "paper size"
+#~ msgid "A5 Extra"
+#~ msgstr "A5 エキストラ"
+
+#~ msgctxt "paper size"
+#~ msgid "A6"
+#~ msgstr "A6"
+
+#~ msgctxt "paper size"
+#~ msgid "A7"
+#~ msgstr "A7"
+
+#~ msgctxt "paper size"
+#~ msgid "A8"
+#~ msgstr "A8"
+
+#~ msgctxt "paper size"
+#~ msgid "A9"
+#~ msgstr "A9"
+
+#~ msgctxt "paper size"
+#~ msgid "B0"
+#~ msgstr "ISO B0"
+
+#~ msgctxt "paper size"
+#~ msgid "B1"
+#~ msgstr "ISO B1"
+
+#~ msgctxt "paper size"
+#~ msgid "B10"
+#~ msgstr "ISO B10"
+
+#~ msgctxt "paper size"
+#~ msgid "B2"
+#~ msgstr "ISO B2"
+
+#~ msgctxt "paper size"
+#~ msgid "B3"
+#~ msgstr "ISO B3"
+
+#~ msgctxt "paper size"
+#~ msgid "B4"
+#~ msgstr "ISO B4"
+
+#~ msgctxt "paper size"
+#~ msgid "B5"
+#~ msgstr "ISO B5"
+
+#~ msgctxt "paper size"
+#~ msgid "B5 Extra"
+#~ msgstr "ISO B5 エキストラ"
+
+#~ msgctxt "paper size"
+#~ msgid "B6"
+#~ msgstr "ISO B6"
+
+#~ msgctxt "paper size"
+#~ msgid "B6/C4"
+#~ msgstr "ISO B6/C4"
+
+#~ msgctxt "paper size"
+#~ msgid "B7"
+#~ msgstr "ISO B7"
+
+#~ msgctxt "paper size"
+#~ msgid "B8"
+#~ msgstr "ISO B8"
+
+#~ msgctxt "paper size"
+#~ msgid "B9"
+#~ msgstr "ISO B9"
+
+#~ msgctxt "paper size"
+#~ msgid "C0"
+#~ msgstr "C0"
+
+#~ msgctxt "paper size"
+#~ msgid "C1"
+#~ msgstr "C1"
+
+#~ msgctxt "paper size"
+#~ msgid "C10"
+#~ msgstr "C10"
+
+#~ msgctxt "paper size"
+#~ msgid "C2"
+#~ msgstr "C2"
+
+#~ msgctxt "paper size"
+#~ msgid "C3"
+#~ msgstr "C3"
+
+#~ msgctxt "paper size"
+#~ msgid "C4"
+#~ msgstr "C4"
+
+#~ msgctxt "paper size"
+#~ msgid "C5"
+#~ msgstr "C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C6"
+#~ msgstr "C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C6/C5"
+#~ msgstr "C6/C5"
+
+#~ msgctxt "paper size"
+#~ msgid "C7"
+#~ msgstr "C7"
+
+#~ msgctxt "paper size"
+#~ msgid "C7/C6"
+#~ msgstr "C7/C6"
+
+#~ msgctxt "paper size"
+#~ msgid "C8"
+#~ msgstr "C8"
+
+#~ msgctxt "paper size"
+#~ msgid "C9"
+#~ msgstr "C9"
+
+#~ msgctxt "paper size"
+#~ msgid "DL Envelope"
+#~ msgstr "DL 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "RA0"
+#~ msgstr "RA0"
+
+#~ msgctxt "paper size"
+#~ msgid "RA1"
+#~ msgstr "RA1"
+
+#~ msgctxt "paper size"
+#~ msgid "RA2"
+#~ msgstr "RA2"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA0"
+#~ msgstr "SRA0"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA1"
+#~ msgstr "SRA1"
+
+#~ msgctxt "paper size"
+#~ msgid "SRA2"
+#~ msgstr "SRA2"
+
+#~ msgctxt "paper size"
+#~ msgid "JB0"
+#~ msgstr "B0 (JIS)"
+
+#~ msgctxt "paper size"
+#~ msgid "JB1"
+#~ msgstr "B1 (JIS)"
+
+#~ msgctxt "paper size"
+#~ msgid "JB10"
+#~ msgstr "B10 (JIS)"
+
+#~ msgctxt "paper size"
+#~ msgid "JB2"
+#~ msgstr "B2 (JIS)"
+
+#~ msgctxt "paper size"
+#~ msgid "JB3"
+#~ msgstr "B3 (JIS)"
+
+#~ msgctxt "paper size"
+#~ msgid "JB4"
+#~ msgstr "B4 (JIS)"
+
+#~ msgctxt "paper size"
+#~ msgid "JB5"
+#~ msgstr "B5 (JIS)"
+
+#~ msgctxt "paper size"
+#~ msgid "JB6"
+#~ msgstr "B6 (JIS)"
+
+#~ msgctxt "paper size"
+#~ msgid "JB7"
+#~ msgstr "B7 (JIS)"
+
+#~ msgctxt "paper size"
+#~ msgid "JB8"
+#~ msgstr "B8 (JIS)"
+
+#~ msgctxt "paper size"
+#~ msgid "JB9"
+#~ msgstr "B9 (JIS)"
+
+#~ msgctxt "paper size"
+#~ msgid "jis exec"
+#~ msgstr "JIS エグゼクティブ"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 2 Envelope"
+#~ msgstr "長形2号"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 3 Envelope"
+#~ msgstr "長形3号"
+
+#~ msgctxt "paper size"
+#~ msgid "Choukei 4 Envelope"
+#~ msgstr "長形4号"
+
+#~ msgctxt "paper size"
+#~ msgid "hagaki (postcard)"
+#~ msgstr "ハガキ"
+
+#~ msgctxt "paper size"
+#~ msgid "kahu Envelope"
+#~ msgstr "角形"
+
+#~ msgctxt "paper size"
+#~ msgid "kaku2 Envelope"
+#~ msgstr "角形2号"
+
+#~ msgctxt "paper size"
+#~ msgid "oufuku (reply postcard)"
+#~ msgstr "往復ハガキ"
+
+#~ msgctxt "paper size"
+#~ msgid "you4 Envelope"
+#~ msgstr "洋形4号"
+
+#~ msgctxt "paper size"
+#~ msgid "10x11"
+#~ msgstr "10x11"
+
+#~ msgctxt "paper size"
+#~ msgid "10x13"
+#~ msgstr "10x13"
+
+#~ msgctxt "paper size"
+#~ msgid "10x14"
+#~ msgstr "10x14"
+
+#~ msgctxt "paper size"
+#~ msgid "10x15"
+#~ msgstr "10x15"
+
+#~ msgctxt "paper size"
+#~ msgid "11x12"
+#~ msgstr "11x12"
+
+#~ msgctxt "paper size"
+#~ msgid "11x15"
+#~ msgstr "11x15"
+
+#~ msgctxt "paper size"
+#~ msgid "12x19"
+#~ msgstr "12x19"
+
+#~ msgctxt "paper size"
+#~ msgid "5x7"
+#~ msgstr "5x7"
+
+#~ msgctxt "paper size"
+#~ msgid "6x9 Envelope"
+#~ msgstr "6x9 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "7x9 Envelope"
+#~ msgstr "7x9 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "9x11 Envelope"
+#~ msgstr "9x11 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "a2 Envelope"
+#~ msgstr "a2 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch A"
+#~ msgstr "Arch A"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch B"
+#~ msgstr "Arch B"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch C"
+#~ msgstr "Arch C"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch D"
+#~ msgstr "Arch D"
+
+#~ msgctxt "paper size"
+#~ msgid "Arch E"
+#~ msgstr "Arch E"
+
+#~ msgctxt "paper size"
+#~ msgid "b-plus"
+#~ msgstr "b-plus"
+
+#~ msgctxt "paper size"
+#~ msgid "c"
+#~ msgstr "c"
+
+#~ msgctxt "paper size"
+#~ msgid "c5 Envelope"
+#~ msgstr "c5 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "d"
+#~ msgstr "d"
+
+#~ msgctxt "paper size"
+#~ msgid "e"
+#~ msgstr "e"
+
+#~ msgctxt "paper size"
+#~ msgid "edp"
+#~ msgstr "edp"
+
+#~ msgctxt "paper size"
+#~ msgid "European edp"
+#~ msgstr "欧風 edp"
+
+#~ msgctxt "paper size"
+#~ msgid "Executive"
+#~ msgstr "エグゼクティブ"
+
+#~ msgctxt "paper size"
+#~ msgid "f"
+#~ msgstr "f"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold European"
+#~ msgstr "FanFold 欧風式"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold US"
+#~ msgstr "FanFold US 式"
+
+#~ msgctxt "paper size"
+#~ msgid "FanFold German Legal"
+#~ msgstr "FanFold ドイツ式リーガル"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Legal"
+#~ msgstr "官製リーガル"
+
+#~ msgctxt "paper size"
+#~ msgid "Government Letter"
+#~ msgstr "官製レター"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 3x5"
+#~ msgstr "インデックス 3x5"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 (postcard)"
+#~ msgstr "インデックス 4x6 (ハガキ)"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 4x6 ext"
+#~ msgstr "インデックス 4x6 ext"
+
+#~ msgctxt "paper size"
+#~ msgid "Index 5x8"
+#~ msgstr "インデックス 5x8"
+
+#~ msgctxt "paper size"
+#~ msgid "Invoice"
+#~ msgstr "請求書"
+
+#~ msgctxt "paper size"
+#~ msgid "Tabloid"
+#~ msgstr "タブロイド"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal"
+#~ msgstr "US リーガル"
+
+#~ msgctxt "paper size"
+#~ msgid "US Legal Extra"
+#~ msgstr "US リーガル・エキストラ"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter"
+#~ msgstr "US レター"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Extra"
+#~ msgstr "US レター・エキストラ"
+
+#~ msgctxt "paper size"
+#~ msgid "US Letter Plus"
+#~ msgstr "US レター・プラス"
+
+#~ msgctxt "paper size"
+#~ msgid "Monarch Envelope"
+#~ msgstr "Monarch 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "#10 Envelope"
+#~ msgstr "#10 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "#11 Envelope"
+#~ msgstr "#11 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "#12 Envelope"
+#~ msgstr "#12 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "#14 Envelope"
+#~ msgstr "#14 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "#9 Envelope"
+#~ msgstr "#9 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "Personal Envelope"
+#~ msgstr "手作りの封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "Quarto"
+#~ msgstr "四つ折り"
+
+#~ msgctxt "paper size"
+#~ msgid "Super A"
+#~ msgstr "スーパー A"
+
+#~ msgctxt "paper size"
+#~ msgid "Super B"
+#~ msgstr "スーパー B"
+
+#~ msgctxt "paper size"
+#~ msgid "Wide Format"
+#~ msgstr "幅広い形式"
+
+#~ msgctxt "paper size"
+#~ msgid "Dai-pa-kai"
+#~ msgstr "Dai-pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio"
+#~ msgstr "Folio"
+
+#~ msgctxt "paper size"
+#~ msgid "Folio sp"
+#~ msgstr "Folio sp"
+
+#~ msgctxt "paper size"
+#~ msgid "Invite Envelope"
+#~ msgstr "招待状の封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "Italian Envelope"
+#~ msgstr "イタリア式の封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "juuro-ku-kai"
+#~ msgstr "juuro-ku-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "pa-kai"
+#~ msgstr "pa-kai"
+
+#~ msgctxt "paper size"
+#~ msgid "Postfix Envelope"
+#~ msgstr "Postfix 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "Small Photo"
+#~ msgstr "小さな写真"
+
+#~ msgctxt "paper size"
+#~ msgid "prc1 Envelope"
+#~ msgstr "prc1 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "prc10 Envelope"
+#~ msgstr "prc10 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 16k"
+#~ msgstr "prc 16k"
+
+#~ msgctxt "paper size"
+#~ msgid "prc2 Envelope"
+#~ msgstr "prc2 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "prc3 Envelope"
+#~ msgstr "prc3 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "prc 32k"
+#~ msgstr "prc 32k"
+
+#~ msgctxt "paper size"
+#~ msgid "prc4 Envelope"
+#~ msgstr "prc4 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "prc5 Envelope"
+#~ msgstr "prc5 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "prc6 Envelope"
+#~ msgstr "prc6 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "prc7 Envelope"
+#~ msgstr "prc7 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "prc8 Envelope"
+#~ msgstr "prc8 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "prc9 Envelope"
+#~ msgstr "prc9 封筒"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 16k"
+#~ msgstr "ROC 16k"
+
+#~ msgctxt "paper size"
+#~ msgid "ROC 8k"
+#~ msgstr "ROC 8k"
+
+#, c-format
+#~ msgid "different idatas found for symlinked '%s' and '%s'\n"
+#~ msgstr "シンボリックリンクの '%s' と '%s' で別の idata が見つかりました\n"
+
+#, c-format
+#~ msgid "Failed to write header\n"
+#~ msgstr "ヘッダの書き込みに失敗しました\n"
+
+#, c-format
+#~ msgid "Failed to write hash table\n"
+#~ msgstr "ハッシュ・テーブルの書き込みに失敗しました\n"
+
+#, c-format
+#~ msgid "Failed to write folder index\n"
+#~ msgstr "フォルダ・インデックスの書き込みに失敗しました\n"
+
+#, c-format
+#~ msgid "Failed to rewrite header\n"
+#~ msgstr "ヘッダの再書き込みに失敗しました\n"
+
+#, c-format
+#~ msgid "Failed to open file %s : %s\n"
+#~ msgstr "%s というファイルのオープンに失敗しました: %s\n"
+
+#, c-format
+#~ msgid "Failed to write cache file: %s\n"
+#~ msgstr "キャッシュ・ファイルの書き込みに失敗しました: %s\n"
+
+#, c-format
+#~ msgid "The generated cache was invalid.\n"
+#~ msgstr "生成したキャッシュは正しくありません\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s, removing %s then.\n"
+#~ msgstr ""
+#~ "%s の名前を %s に変更できませんでした: %s (その後に %s を削除します)\n"
+
+#, c-format
+#~ msgid "Could not rename %s to %s: %s\n"
+#~ msgstr "%s の名前を %s に変更できませんでした: %s\n"
+
+#, c-format
+#~ msgid "Could not rename %s back to %s: %s.\n"
+#~ msgstr "%s の名前を %s に戻せませんでした: %s\n"
+
+#, c-format
+#~ msgid "Cache file created successfully.\n"
+#~ msgstr "キャッシュ・ファイルの生成が完了しました\n"
+
+#~ msgid "Overwrite an existing cache, even if up to date"
+#~ msgstr "既存のキャッシュを上書きする (最新の状態でも)"
+
+#~ msgid "Don't check for the existence of index.theme"
+#~ msgstr "index.theme ファイルの有無を確認しない"
+
+#~ msgid "Don't include image data in the cache"
+#~ msgstr "キャッシュに画像データを含めない"
+
+#, fuzzy
+#~| msgid "Don't include image data in the cache"
+#~ msgid "Include image data in the cache"
+#~ msgstr "キャッシュに画像データを含めない"
+
+#~ msgid "Output a C header file"
+#~ msgstr "C言語のヘッダ・ファイルを出力する"
+
+#~ msgid "Turn off verbose output"
+#~ msgstr "詳細な出力を無効にする"
+
+#~ msgid "Validate existing icon cache"
+#~ msgstr "既存のアイコン・キャッシュを検証する"
+
+#, c-format
+#~ msgid "File not found: %s\n"
+#~ msgstr "ファイルが見つかりませんでした: %s\n"
+
+#, c-format
+#~ msgid "Not a valid icon cache: %s\n"
+#~ msgstr "妥当なアイコン・キャッシュではありません: %s\n"
+
+#, c-format
+#~ msgid "No theme index file.\n"
+#~ msgstr "テーマの index ファイルがありません。\n"
+
+#, c-format
+#~ msgid ""
+#~ "No theme index file in '%s'.\n"
+#~ "If you really want to create an icon cache here, use --ignore-theme-"
+#~ "index.\n"
+#~ msgstr ""
+#~ "'%s' には index.theme ファイルがありません\n"
+#~ "強制的にアイコンのキャッシュを生成する場合は --ignore-theme-index オプショ"
+#~ "ンを追加してください\n"
+
+#~ msgid "Amharic (EZ+)"
+#~ msgstr "アムハラ語 (EZ+)"
+
+# フランス語などで c の下に付けられる 'ひげ' のような符号
+#~ msgid "Cedilla"
+#~ msgstr "セディーユ"
+
+#~ msgid "Cyrillic (Transliterated)"
+#~ msgstr "キリル文字 (翻字)"
+
+#~ msgid "Inuktitut (Transliterated)"
+#~ msgstr "イヌクティトゥト語 (翻字)"
+
+#~ msgid "IPA"
+#~ msgstr "IPA (国際発音記号)"
+
+#~ msgid "Multipress"
+#~ msgstr "マルチプレス"
+
+#~ msgid "Thai-Lao"
+#~ msgstr "タイ/ラオス語"
+
+#~ msgid "Tigrigna-Eritrean (EZ+)"
+#~ msgstr "ティグリグナ・エリトリア語 (EZ+)"
+
+#~ msgid "Tigrigna-Ethiopian (EZ+)"
+#~ msgstr "ティグリグナ・エチオピア語 (EZ+)"
+
+#~ msgid "Vietnamese (VIQR)"
+#~ msgstr "ベトナム語 (VIQR)"
+
+#~ msgid "X Input Method"
+#~ msgstr "Xの入力メソッド"
+
+#~ msgid "Username:"
+#~ msgstr "ユーザ名:"
+
+#~ msgid "Password:"
+#~ msgstr "パスワード:"
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s' on printer %s"
+#~ msgstr "文書 '%s' をプリンタ '%s' で印刷するには認証が必要"
+
+#, c-format
+#~ msgid "Authentication is required to print a document on %s"
+#~ msgstr "文書を %s で印刷するには認証が必要"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of job '%s'"
+#~ msgstr "ジョブ '%s' の属性を取得するには認証が必要"
+
+#~ msgid "Authentication is required to get attributes of a job"
+#~ msgstr "ジョブの属性を取得するには認証が必要"
+
+#, c-format
+#~ msgid "Authentication is required to get attributes of printer %s"
+#~ msgstr "プリンタ %s の属性を取得するには認証が必要"
+
+#~ msgid "Authentication is required to get attributes of a printer"
+#~ msgstr "プリンタの属性を取得するには認証が必要"
+
+#, c-format
+#~ msgid "Authentication is required to get default printer of %s"
+#~ msgstr "%s のデフォルトのプリンタを取得するには認証が必要"
+
+#, c-format
+#~ msgid "Authentication is required to get printers from %s"
+#~ msgstr "%s からプリンタを取得するには認証が必要"
+
+#, c-format
+#~ msgid "Authentication is required to get a file from %s"
+#~ msgstr "%s からファイルを取得するには認証が必要"
+
+#, c-format
+#~ msgid "Authentication is required on %s"
+#~ msgstr "%s には認証が必要"
+
+#~ msgid "Domain:"
+#~ msgstr "ドメイン:"
+
+#, c-format
+#~ msgid "Authentication is required to print document '%s'"
+#~ msgstr "文書 '%s' を印刷するには認証が必要"
+
+#, c-format
+#~ msgid "Authentication is required to print this document on printer %s"
+#~ msgstr "この文書をプリンタ '%s' で印刷するには認証が必要"
+
+#~ msgid "Authentication is required to print this document"
+#~ msgstr "この文書を印刷するには認証が必要"
+
+#, c-format
+#~ msgid "Printer '%s' is low on toner."
+#~ msgstr "プリンタ '%s' のトナーが少なくなっています。"
+
+#, c-format
+#~ msgid "Printer '%s' has no toner left."
+#~ msgstr "プリンタ '%s' のトナーがなくなりました。"
+
+#, c-format
+#~ msgid "Printer '%s' is low on developer."
+#~ msgstr "プリンタ '%s' のフォト開発用コンテキストが少なくなっています。"
+
+#, c-format
+#~ msgid "Printer '%s' is out of developer."
+#~ msgstr "プリンタ '%s' のフォト開発用コンテキストがなくなりました。"
+
+#, c-format
+#~ msgid "Printer '%s' is low on at least one marker supply."
+#~ msgstr ""
+#~ "プリンタ '%s' にセットされているカートリッジのうち少なくとも1本のインクが"
+#~ "少なくなっています。"
+
+#, c-format
+#~ msgid "Printer '%s' is out of at least one marker supply."
+#~ msgstr ""
+#~ "プリンタ '%s' にセットされているカートリッジのうち少なくとも1本のインクが"
+#~ "なくなりました。"
+
+#, c-format
+#~ msgid "The cover is open on printer '%s'."
+#~ msgstr "プリンタ '%s' のカバーが開いています。"
+
+#, c-format
+#~ msgid "The door is open on printer '%s'."
+#~ msgstr "プリンタ '%s' のドアが開いています。"
+
+#, c-format
+#~ msgid "Printer '%s' is low on paper."
+#~ msgstr "プリンタ '%s' の用紙が少なくなっています。"
+
+#, c-format
+#~ msgid "Printer '%s' is out of paper."
+#~ msgstr "プリンタ '%s' の用紙がなくなりました。"
+
+#, c-format
+#~ msgid "Printer '%s' is currently offline."
+#~ msgstr "プリンタ '%s' は現在オフラインです。"
+
+#, c-format
+#~ msgid "There is a problem on printer '%s'."
+#~ msgstr "プリンタ '%s' で問題が発生しました。"
+
+#, fuzzy
+#~| msgid "Paused ; Rejecting Jobs"
+#~ msgid "Paused; Rejecting Jobs"
+#~ msgstr "一時停止中 (印刷ジョブを破棄しています)"
+
+#~ msgid "Rejecting Jobs"
+#~ msgstr "印刷ジョブを破棄しています"
+
+#~ msgid "Two Sided"
+#~ msgstr "両面印刷"
+
+#~ msgid "Paper Type"
+#~ msgstr "用紙の種類"
+
+#~ msgid "Paper Source"
+#~ msgstr "用紙のソース"
+
+#~ msgid "Output Tray"
+#~ msgstr "出力トレイ"
+
+#~ msgid "Resolution"
+#~ msgstr "解像度"
+
+#~ msgid "GhostScript pre-filtering"
+#~ msgstr "GhostScript のフィルタリング (前処理)"
+
+#~ msgid "One Sided"
+#~ msgstr "片面印刷"
+
+#~ msgid "Long Edge (Standard)"
+#~ msgstr "長辺 (標準)"
+
+#~ msgid "Short Edge (Flip)"
+#~ msgstr "短辺 (折り返し)"
+
+#~ msgid "Auto Select"
+#~ msgstr "自動選択"
+
+#~ msgid "Printer Default"
+#~ msgstr "プリンタのデフォルト"
+
+#~ msgid "Embed GhostScript fonts only"
+#~ msgstr "埋め込みの GhostScript のフォントだけ"
+
+#~ msgid "Convert to PS level 1"
+#~ msgstr "PS のレベル1に変換する"
+
+#~ msgid "Convert to PS level 2"
+#~ msgstr "PS のレベル2に変換する"
+
+#~ msgid "No pre-filtering"
+#~ msgstr "フィルタリング (前処理) はありません"
+
+#~ msgid "Miscellaneous"
+#~ msgstr "その他"
+
+#~ msgid "Urgent"
+#~ msgstr "緊急"
+
+#~ msgid "High"
+#~ msgstr "高い"
+
+#~ msgid "Medium"
+#~ msgstr "普通"
+
+#~ msgid "Low"
+#~ msgstr "低い"
+
+#~ msgid "Pages per Sheet"
+#~ msgstr "ページ数/用紙"
+
+#~ msgid "Job Priority"
+#~ msgstr "印刷ジョブの優先順位"
+
+#~ msgid "Billing Info"
+#~ msgstr "サマリ情報"
+
+#~ msgid "None"
+#~ msgstr "なし"
+
+#~ msgid "Classified"
+#~ msgstr "機密"
+
+#~ msgid "Confidential"
+#~ msgstr "極秘"
+
+#~ msgid "Secret"
+#~ msgstr "秘密"
+
+#~ msgid "Standard"
+#~ msgstr "標準"
+
+#~ msgid "Top Secret"
+#~ msgstr "トップ・シークレット"
+
+#~ msgid "Unclassified"
+#~ msgstr "機密ではない"
+
+#~ msgid "Before"
+#~ msgstr "前"
+
+#~ msgid "After"
+#~ msgstr "後"
+
+#~ msgid "Print at"
+#~ msgstr "印刷先"
+
+#~ msgid "Print at time"
+#~ msgstr "一度に印刷する"
+
+#, c-format
+#~ msgid "Custom %sx%s"
+#~ msgstr "カスタム %sx%s"
+
+#, c-format
+#~ msgid "output.%s"
+#~ msgstr "output.%s"
+
+#~ msgid "Print to File"
+#~ msgstr "ファイルに出力する"
+
+#~ msgid "PDF"
+#~ msgstr "PDF"
+
+#~ msgid "Postscript"
+#~ msgstr "Postscript"
+
+#~ msgid "SVG"
+#~ msgstr "SVG"
+
+#~ msgid "Pages per _sheet:"
+#~ msgstr "段組み印刷(_S):"
+
+#~ msgid "File"
+#~ msgstr "ファイル"
+
+#~ msgid "_Output format"
+#~ msgstr "出力の形式(_O)"
+
+#~ msgid "Print to LPR"
+#~ msgstr "LPR に印刷する"
+
+#~ msgid "Pages Per Sheet"
+#~ msgstr "段組印刷"
+
+#~ msgid "Command Line"
+#~ msgstr "コマンドライン"
+
+#~ msgid "printer offline"
+#~ msgstr "プリンタはオフライン"
+
+#~ msgid "ready to print"
+#~ msgstr "印刷可能"
+
+#~ msgid "processing job"
+#~ msgstr "ジョブを処理中"
+
+#~ msgid "paused"
+#~ msgstr "一時停止"
+
+#~ msgid "unknown"
+#~ msgstr "不明"
+
+#, c-format
+#~ msgid "test-output.%s"
+#~ msgstr "test-output.%s"
+
+#~ msgid "Print to Test Printer"
+#~ msgstr "テスト用プリンタに印刷する"
+
+#, c-format
+#~ msgid "Could not get information for file '%s': %s"
+#~ msgstr "'%s' というファイルの情報を取得できませんでした: %s"
+
+#, c-format
+#~ msgid "Failed to open file '%s': %s"
+#~ msgstr "ファイル '%s' のオープンに失敗しました: %s"
+
+#, c-format
+#~ msgid ""
+#~ "Failed to load image '%s': reason not known, probably a corrupt image file"
+#~ msgstr ""
+#~ "画像 '%s' の読み込みに失敗しました: 理由は不明ですが、おそらく画像ファイル"
+#~ "が壊れていると思われます"
+
+#~ msgid "_Add"
+#~ msgstr "追加(_A)"
+
+#~ msgid "_Remove"
+#~ msgstr "削除(_R)"
+
+#~ msgid "_Browse for other folders"
+#~ msgstr "他のフォルダ(_B)"
+
+#~ msgid "Gdk debugging flags to set"
+#~ msgstr "有効にする GDK のデバッグ・フラグを指定する"
+
+#~ msgid "Gdk debugging flags to unset"
+#~ msgstr "無効にする GDK のデバッグ・フラグを指定する"
+
+#~ msgid "Image file '%s' contains no data"
+#~ msgstr "画像ファイル '%s' にはデータがありません"
+
+#~ msgid ""
+#~ "Failed to load animation '%s': reason not known, probably a corrupt "
+#~ "animation file"
+#~ msgstr ""
+#~ "アニメーション '%s' の読み込みに失敗しました: 理由は不明ですが、おそらくア"
+#~ "ニメーションファイルが壊れていると思われます"
+
+#~ msgid "Unable to load image-loading module: %s: %s"
+#~ msgstr "画像ロード・モジュールを読み込めません: %s: %s"
+
+#~ msgid ""
+#~ "Image-loading module %s does not export the proper interface; perhaps "
+#~ "it's from a different GTK version?"
+#~ msgstr ""
+#~ "画像ロード・モジュール %s は正しいインターフェースをエクスポートしていませ"
+#~ "ん。GTK+ の別のバージョンのモジュールかも?"
+
+#~ msgid "Image type '%s' is not supported"
+#~ msgstr "画像の種類 '%s' はサポートされていません"
+
+#~ msgid "Couldn't recognize the image file format for file '%s'"
+#~ msgstr "ファイル '%s' の画像ファイルの形式を認識できませんでした"
+
+#~ msgid "Unrecognized image file format"
+#~ msgstr "認識できない画像ファイルの形式"
+
+#~ msgid "Failed to load image '%s': %s"
+#~ msgstr "画像 '%s' の読み込みに失敗しました: %s"
+
+#~ msgid "Error writing to image file: %s"
+#~ msgstr "画像ファイルの書き込みでエラー: %s"
+
+#~ msgid ""
+#~ "This build of gdk-pixbuf does not support saving the image format: %s"
+#~ msgstr ""
+#~ "お使いの gdk-pixbuf は画像ファイルの形式 %s の保存をサポートしていません"
+
+#~ msgid "Insufficient memory to save image to callback"
+#~ msgstr "画像をコールバックへ保存するために必要なメモリが足りません"
+
+#~ msgid "Failed to open temporary file"
+#~ msgstr "作業用ファイルのオープンに失敗しました"
+
+#~ msgid "Failed to read from temporary file"
+#~ msgstr "作業用ファイルからの読み込みに失敗しました"
+
+#~ msgid "Failed to open '%s' for writing: %s"
+#~ msgstr "書き込みモードで '%s' のオープンに失敗しました: %s"
+
+#~ msgid ""
+#~ "Failed to close '%s' while writing image, all data may not have been "
+#~ "saved: %s"
+#~ msgstr ""
+#~ "画像を書き込む際に '%s' を閉じることができなかったため、すべてのデータが保"
+#~ "存されていないかもしれません: %s"
+
+#~ msgid "Insufficient memory to save image into a buffer"
+#~ msgstr "画像をバッファへ保存するために必要なメモリが足りません"
+
+#~ msgid "Error writing to image stream"
+#~ msgstr "画像ストリームへ書き込む際にエラー"
+
+#~ msgid ""
+#~ "Internal error: Image loader module '%s' failed to complete an operation, "
+#~ "but didn't give a reason for the failure"
+#~ msgstr ""
+#~ "内部エラー: 画像ロード・モジュール '%s' の処理に失敗しましたが、その原因を"
+#~ "取得できませんでした"
+
+#~ msgid "Incremental loading of image type '%s' is not supported"
+#~ msgstr "画像の種類 '%s' のインクリメンタル・ロードはサポートされていません"
+
+#~ msgid "Image header corrupt"
+#~ msgstr "画像ヘッダが壊れています"
+
+#~ msgid "Image format unknown"
+#~ msgstr "画像形式が不明です"
+
+#~ msgid "Image pixel data corrupt"
+#~ msgstr "画像のピクセルデータが壊れています"
+
+#~ msgid "failed to allocate image buffer of %u byte"
+#~ msgid_plural "failed to allocate image buffer of %u bytes"
+#~ msgstr[0] "%uバイトの画像バッファの確保に失敗しました"
+
+#~ msgid "Unexpected icon chunk in animation"
+#~ msgstr "アニメーションに予期しないアイコン・チャンクがあります"
+
+#~ msgid "Unsupported animation type"
+#~ msgstr "サポートされていないアニメーションの種類です"
+
+#~ msgid "Invalid header in animation"
+#~ msgstr "アニメーションのヘッダがおかしいです"
+
+#~ msgid "Not enough memory to load animation"
+#~ msgstr "アニメーションを読み込むためのメモリが足りません"
+
+#~ msgid "Malformed chunk in animation"
+#~ msgstr "アニメーションに異常なチャンクがあります"
+
+#~ msgid "The ANI image format"
+#~ msgstr "ANI 画像形式"
+
+#~ msgid "BMP image has bogus header data"
+#~ msgstr "BMP 画像のヘッダのデータがおかしいです"
+
+#~ msgid "Not enough memory to load bitmap image"
+#~ msgstr "BMP 画像を読み込むために必要なメモリが足りません"
+
+#~ msgid "BMP image has unsupported header size"
+#~ msgstr "サポートしていない BMP 画像のヘッダ・サイズです"
+
+#~ msgid "Topdown BMP images cannot be compressed"
+#~ msgstr "全体を覆う BMP 画像は圧縮できません"
+
+#~ msgid "Premature end-of-file encountered"
+#~ msgstr "ファイルの終わりが早すぎます"
+
+#~ msgid "Couldn't allocate memory for saving BMP file"
+#~ msgstr "BMP 画像を読み込むためのメモリを確保できませんでした"
+
+#~ msgid "Couldn't write to BMP file"
+#~ msgstr "BMP ファイル名に書き込めませんでした"
+
+#~ msgid "The BMP image format"
+#~ msgstr "BMP 画像形式"
+
+#~ msgid "Failure reading GIF: %s"
+#~ msgstr "GIF 画像の読み込みに失敗: %s"
+
+#~ msgid "GIF file was missing some data (perhaps it was truncated somehow?)"
+#~ msgstr ""
+#~ "GIF ファイルに何か足りないデータがあります (理由は不明ですが切りつめられた"
+#~ "かも?)"
+
+#~ msgid "Internal error in the GIF loader (%s)"
+#~ msgstr "GIF ローダの内部エラー (%s)"
+
+#~ msgid "Stack overflow"
+#~ msgstr "スタックあふれ"
+
+#~ msgid "GIF image loader cannot understand this image."
+#~ msgstr "(GIF 画像ローダ) この画像を理解できません"
+
+#~ msgid "Bad code encountered"
+#~ msgstr "おかしなコードに出会いました"
+
+#~ msgid "Circular table entry in GIF file"
+#~ msgstr "GIF ファイルのテーブル・エントリが循環しています"
+
+#~ msgid "Not enough memory to load GIF file"
+#~ msgstr "GIF 画像を読み込むために必要なメモリが足りません"
+
+#~ msgid "Not enough memory to composite a frame in GIF file"
+#~ msgstr "GIF 画像でフレームを結合するために必要なメモリが足りません"
+
+#~ msgid "GIF image is corrupt (incorrect LZW compression)"
+#~ msgstr "GIF 画像が壊れています (おかしな LZW 圧縮です)"
+
+#~ msgid "File does not appear to be a GIF file"
+#~ msgstr "ファイルは GIF ファイルではないようです"
+
+#~ msgid "Version %s of the GIF file format is not supported"
+#~ msgstr "バージョン %s の GIF ファイル形式はサポートしていません"
+
+#~ msgid ""
+#~ "GIF image has no global colormap, and a frame inside it has no local "
+#~ "colormap."
+#~ msgstr ""
+#~ "GIF 画像にグローバルなカラーマップがありません。そしてフレームにローカルな"
+#~ "カラーマップがありません"
+
+#~ msgid "GIF image was truncated or incomplete."
+#~ msgstr "GIF 画像は切りつめられたか、不完全になっています"
+
+#~ msgid "The GIF image format"
+#~ msgstr "GIF 画像形式"
+
+#~ msgid "Invalid header in icon"
+#~ msgstr "アイコンのヘッダがおかしいです"
+
+#~ msgid "Not enough memory to load icon"
+#~ msgstr "アイコンを読み込むために必要なメモリが足りません"
+
+#~ msgid "Icon has zero width"
+#~ msgstr "アイコンの幅が 0 です"
+
+#~ msgid "Icon has zero height"
+#~ msgstr "アイコンの高さが 0 です"
+
+#~ msgid "Compressed icons are not supported"
+#~ msgstr "圧縮アイコンはサポートされていません"
+
+#~ msgid "Unsupported icon type"
+#~ msgstr "サポートしていない種類のアイコンです"
+
+#~ msgid "Not enough memory to load ICO file"
+#~ msgstr "アイコン・ファイルを読み込むために必要なメモリが足りません"
+
+#~ msgid "Image too large to be saved as ICO"
+#~ msgstr "アイコンとして保存するには画像が大きすぎます"
+
+#~ msgid "Cursor hotspot outside image"
+#~ msgstr "カーソルのホットスポットより外側の画像です"
+
+#~ msgid "Unsupported depth for ICO file: %d"
+#~ msgstr "アイコン・ファイルとしてサポートされない色深度です: %d"
+
+#~ msgid "The ICO image format"
+#~ msgstr "ICO 画像形式"
+
+#~ msgid "Error reading ICNS image: %s"
+#~ msgstr "ICNS 画像を読み込む際にエラー: %s"
+
+#~ msgid "Could not decode ICNS file"
+#~ msgstr "ICNS ファイルをデコードできませんでした"
+
+#~ msgid "The ICNS image format"
+#~ msgstr "ICNS 画像形式"
+
+#~ msgid "Couldn't allocate memory for stream"
+#~ msgstr "ストリームのメモリを確保できませんでした"
+
+#~ msgid "Couldn't decode image"
+#~ msgstr "画像をデコードできませんでした"
+
+#~ msgid "Transformed JPEG2000 has zero width or height"
+#~ msgstr "変換した JPEG2000 の幅または高さが 0 です"
+
+#~ msgid "Image type currently not supported"
+#~ msgstr "画像の種類はサポートされていません"
+
+#~ msgid "Couldn't allocate memory for color profile"
+#~ msgstr "色のプロファイルで使用するメモリを確保できませんでした"
+
+#~ msgid "Insufficient memory to open JPEG 2000 file"
+#~ msgstr "JPEG 2000 のファイルをオープンするために必要なメモリが足りません"
+
+#~ msgid "Couldn't allocate memory to buffer image data"
+#~ msgstr "画像データを格納するためのメモリを確保できませんでした"
+
+#~ msgid "The JPEG 2000 image format"
+#~ msgstr "JPEG 2000 画像形式"
+
+#~ msgid "Error interpreting JPEG image file (%s)"
+#~ msgstr "JPEG 画像ファイル (%s) の解釈でエラー"
+
+#~ msgid ""
+#~ "Insufficient memory to load image, try exiting some applications to free "
+#~ "memory"
+#~ msgstr ""
+#~ "画像の読み込みに必要なメモリがありません。アプリケーションをいくつか終了し"
+#~ "てメモリを解放してください"
+
+#~ msgid "Unsupported JPEG color space (%s)"
+#~ msgstr "サポートしていない JPEG のカラー・スペースです (%s)"
+
+#~ msgid "Couldn't allocate memory for loading JPEG file"
+#~ msgstr "JPEG 画像を読み込むためのメモリを確保できませんでした"
+
+#~ msgid "Transformed JPEG has zero width or height."
+#~ msgstr "変換した JPEG の幅または高さが 0 です"
+
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%s' could not be "
+#~ "parsed."
+#~ msgstr ""
+#~ "JPEG の \"クオリティ\" は 0〜100 の値にしてください。値 '%s' を解析できま"
+#~ "せんでした"
+
+#~ msgid ""
+#~ "JPEG quality must be a value between 0 and 100; value '%d' is not allowed."
+#~ msgstr ""
+#~ "JPEG の \"クオリティ\" は 0〜100 の値にしてください。値 '%d' は確保されま"
+#~ "せん"
+
+#~ msgid "The JPEG image format"
+#~ msgstr "JPEG 画像形式"
+
+#~ msgid "Couldn't allocate memory for header"
+#~ msgstr "ヘッダのメモリを確保できませんでした"
+
+#~ msgid "Couldn't allocate memory for context buffer"
+#~ msgstr "コンテキスト・バッファ用のメモリを確保できませんでした"
+
+#~ msgid "Image has invalid width and/or height"
+#~ msgstr "画像の幅と/または高さが無効です"
+
+#~ msgid "Image has unsupported bpp"
+#~ msgstr "サポートしていない bpp を保持しています"
+
+#~ msgid "Image has unsupported number of %d-bit planes"
+#~ msgstr "サポートしていない数の %d ビット・プレーンを保持しています"
+
+#~ msgid "Couldn't create new pixbuf"
+#~ msgstr "新しい pixbuf を生成できませんでした"
+
+#~ msgid "Couldn't allocate memory for line data"
+#~ msgstr "行のデータ用のメモリを確保できませんでした"
+
+#~ msgid "Couldn't allocate memory for paletted data"
+#~ msgstr "パレット・データ用のメモリを確保できませんでした"
+
+#~ msgid "Didn't get all lines of PCX image"
+#~ msgstr "PCX 画像のすべての行を取得できません"
+
+#~ msgid "No palette found at end of PCX data"
+#~ msgstr "PCX データ末尾のパレットが見つかりません"
+
+#~ msgid "The PCX image format"
+#~ msgstr "PCX 画像形式"
+
+#~ msgid "Bits per channel of PNG image is invalid."
+#~ msgstr "PNG 画像のチャンネル毎のビット数がおかしいです"
+
+#~ msgid "Transformed PNG has zero width or height."
+#~ msgstr "変換した PNG の幅または高さが 0 です"
+
+#~ msgid "Bits per channel of transformed PNG is not 8."
+#~ msgstr "変換した PNG のチャンネル毎のビット数が 8 ではありません"
+
+#~ msgid "Transformed PNG not RGB or RGBA."
+#~ msgstr "変換した PNG は RGB でも RGBA でもありません"
+
+#~ msgid "Transformed PNG has unsupported number of channels, must be 3 or 4."
+#~ msgstr ""
+#~ "変換した PNG のチャンネル数がサポートされているものではありません。3 また"
+#~ "は 4 にしてください"
+
+#~ msgid "Fatal error in PNG image file: %s"
+#~ msgstr "PNG 画像ファイルに致命的なエラー: %s"
+
+#~ msgid "Insufficient memory to load PNG file"
+#~ msgstr "PNG 画像を読み込むために必要なメモリが足りません"
+
+#~ msgid ""
+#~ "Insufficient memory to store a %ld by %ld image; try exiting some "
+#~ "applications to reduce memory usage"
+#~ msgstr ""
+#~ "%ldx%ld の画像を保存するために必要なメモリが足りません。アプリケーションを"
+#~ "いくつか終了してメモリの使用量を減らしてください"
+
+#~ msgid "Fatal error reading PNG image file"
+#~ msgstr "PNG 画像ファイルの読み込みで致命的なエラー"
+
+#~ msgid "Fatal error reading PNG image file: %s"
+#~ msgstr "PNG 画像ファイルの読み込みで致命的なエラー: %s"
+
+#~ msgid ""
+#~ "Keys for PNG text chunks must have at least 1 and at most 79 characters."
+#~ msgstr "PNG のテキスト・チャンクのキーは 1〜79 文字にしてください"
+
+#~ msgid "Keys for PNG text chunks must be ASCII characters."
+#~ msgstr "PNG のテキスト・チャンクのキーは ASCII 文字にしてください"
+
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%s' could "
+#~ "not be parsed."
+#~ msgstr ""
+#~ "PNG の圧縮レベルは 0〜9 の値にしてください。値 '%s' を解析できませんでした"
+
+#~ msgid ""
+#~ "PNG compression level must be a value between 0 and 9; value '%d' is not "
+#~ "allowed."
+#~ msgstr ""
+#~ "PNG の圧縮レベルは 0〜9 の値にしてください。値 '%d' は確保されません"
+
+#~ msgid ""
+#~ "Value for PNG text chunk %s cannot be converted to ISO-8859-1 encoding."
+#~ msgstr ""
+#~ "PNG のテキスト・チャンク %s の値を ISO-8859-1 エンコーディングに変換できま"
+#~ "せん"
+
+#~ msgid "The PNG image format"
+#~ msgstr "PNG 画像形式"
+
+#~ msgid "PNM loader expected to find an integer, but didn't"
+#~ msgstr "PNM ローダは整数を期待していたのですが、整数ではありませんでした"
+
+#~ msgid "PNM file has an incorrect initial byte"
+#~ msgstr "PNM ファイルの最初のバイトが正しくありません"
+
+#~ msgid "PNM file is not in a recognized PNM subformat"
+#~ msgstr "PNM ファイルが認識可能な PNM サブ形式ではありません"
+
+#~ msgid "PNM file has an image width of 0"
+#~ msgstr "PNM ファイルの画像の幅が 0 です"
+
+#~ msgid "PNM file has an image height of 0"
+#~ msgstr "PNM ファイルの画像の高さが 0 です"
+
+#~ msgid "Maximum color value in PNM file is 0"
+#~ msgstr "PNM ファイルの色の最大値が 0 です"
+
+#~ msgid "Maximum color value in PNM file is too large"
+#~ msgstr "PNM ファイルの色の最大値が大きすぎます"
+
+#~ msgid "Raw PNM image type is invalid"
+#~ msgstr "ロー PNM 画像の形式がおかしいです"
+
+#~ msgid "PNM image loader does not support this PNM subformat"
+#~ msgstr "PNM 画像ローダはこの PNM サブ形式をサポートしていません"
+
+#~ msgid "Raw PNM formats require exactly one whitespace before sample data"
+#~ msgstr "ロー PNM 形式ではサンプルデータの前に空白文字が 1 つだけ必要です"
+
+#~ msgid "Cannot allocate memory for loading PNM image"
+#~ msgstr "PNM 画像を読み込むためのメモリを確保できません"
+
+#~ msgid "Insufficient memory to load PNM context struct"
+#~ msgstr "PNM コンテキスト構造を読み込むために必要なメモリが足りません"
+
+#~ msgid "Unexpected end of PNM image data"
+#~ msgstr "PNM 画像データが予期せずに終わっています"
+
+#~ msgid "Insufficient memory to load PNM file"
+#~ msgstr "PNM ファイルを読み込むために必要なメモリが足りません"
+
+#~ msgid "The PNM/PBM/PGM/PPM image format family"
+#~ msgstr "PNM/PBM/PGM/PPM 画像形式ファミリ"
+
+#, fuzzy
+#~ msgid "Failed to read QTIF header"
+#~ msgstr "ヘッダの書き込みに失敗しました\n"
+
+#, fuzzy
+#~ msgid "Failed to allocate %d bytes for file read buffer"
+#~ msgstr "%uバイトの画像バッファの確保に失敗しました"
+
+#, fuzzy
+#~ msgid "File error when reading QTIF atom: %s"
+#~ msgstr "GIF 画像の読み込みに失敗: %s"
+
+#, fuzzy
+#~ msgid "Failed to allocate QTIF context structure."
+#~ msgstr "TGA コンテキスト構造体用のメモリを確保できません"
+
+#, fuzzy
+#~ msgid "Failed to create GdkPixbufLoader object."
+#~ msgstr "フォルダ・インデックスの書き込みに失敗しました\n"
+
+#, fuzzy
+#~ msgid "Failed to find an image data atom."
+#~ msgstr "TIFF 画像のオープンに失敗しました"
+
+#, fuzzy
+#~ msgid "The QTIF image format"
+#~ msgstr "TIFF 画像形式"
+
+#~ msgid "RAS image has bogus header data"
+#~ msgstr "RAS 画像のヘッダのデータがおかしいです"
+
+#~ msgid "RAS image has unknown type"
+#~ msgstr "不明な種類の RAS 画像です"
+
+#~ msgid "unsupported RAS image variation"
+#~ msgstr "サポートしていない RAS 画像の一種です"
+
+#~ msgid "Not enough memory to load RAS image"
+#~ msgstr "RAS 画像を読み込むために必要なメモリが足りません"
+
+#~ msgid "The Sun raster image format"
+#~ msgstr "Sun ラスタ画像形式"
+
+#~ msgid "Cannot allocate memory for IOBuffer struct"
+#~ msgstr "IOBuffer 構造体のメモリを確保できません"
+
+#~ msgid "Cannot allocate memory for IOBuffer data"
+#~ msgstr "IOBuffer データのメモリを確保できません"
+
+#~ msgid "Cannot realloc IOBuffer data"
+#~ msgstr "IOBuffer データのメモリを再確保できません"
+
+#~ msgid "Cannot allocate temporary IOBuffer data"
+#~ msgstr "一時的な IOBuffer データのメモリを確保できません"
+
+#~ msgid "Cannot allocate new pixbuf"
+#~ msgstr "新しい pixbuf を確保できません"
+
+#~ msgid "Image is corrupted or truncated"
+#~ msgstr "画像は切りつめられたか、不完全になっています"
+
+#~ msgid "Cannot allocate colormap structure"
+#~ msgstr "カラーマップ構造体を確保できません"
+
+#~ msgid "Cannot allocate colormap entries"
+#~ msgstr "カラーマップのエントリを確保できません"
+
+#~ msgid "Unexpected bitdepth for colormap entries"
+#~ msgstr "カラーマップのエントリの bitdepth が予期しないものです"
+
+#~ msgid "Cannot allocate TGA header memory"
+#~ msgstr "TGA ヘッダのメモリを確保できません"
+
+#~ msgid "TGA image has invalid dimensions"
+#~ msgstr "TGA 画像の次元がおかしいです"
+
+#~ msgid "TGA image type not supported"
+#~ msgstr "TGA 画像はサポートしていません"
+
+#~ msgid "Cannot allocate memory for TGA context struct"
+#~ msgstr "TGA コンテキスト構造体用のメモリを確保できません"
+
+#~ msgid "Excess data in file"
+#~ msgstr "ファイルのデータが多すぎます"
+
+#~ msgid "The Targa image format"
+#~ msgstr "Targa 画像形式"
+
+#~ msgid "Could not get image width (bad TIFF file)"
+#~ msgstr "画像の幅を取得できません (おかしな TIFF ファイル)"
+
+#~ msgid "Could not get image height (bad TIFF file)"
+#~ msgstr "画像の高さを取得できません (おかしな TIFF ファイル)"
+
+#~ msgid "Width or height of TIFF image is zero"
+#~ msgstr "TIFF 画像の幅か高さが 0 です"
+
+#~ msgid "Dimensions of TIFF image too large"
+#~ msgstr "TIFF 画像の次元が大きすぎます"
+
+#~ msgid "Insufficient memory to open TIFF file"
+#~ msgstr "TIFF ファイルをオープンするために必要なメモリが足りません"
+
+#~ msgid "Failed to load RGB data from TIFF file"
+#~ msgstr "TIFF ファイルから RGB データの読み込むに失敗しました"
+
+#~ msgid "Failed to open TIFF image"
+#~ msgstr "TIFF 画像のオープンに失敗しました"
+
+#~ msgid "TIFFClose operation failed"
+#~ msgstr "TIFFClose 操作に失敗しました"
+
+#~ msgid "Failed to load TIFF image"
+#~ msgstr "TIFF 画像を読み込むのに失敗しました"
+
+#~ msgid "Failed to save TIFF image"
+#~ msgstr "TIFF 画像の保存に失敗しました"
+
+#~ msgid "Failed to write TIFF data"
+#~ msgstr "TIFF データの書き込みに失敗しました"
+
+#~ msgid "Couldn't write to TIFF file"
+#~ msgstr "TIFF ファイルに書き込めませんでした"
+
+#~ msgid "The TIFF image format"
+#~ msgstr "TIFF 画像形式"
+
+#~ msgid "Image has zero width"
+#~ msgstr "画像の幅が 0 です"
+
+#~ msgid "Image has zero height"
+#~ msgstr "画像の高さが 0 です"
+
+#~ msgid "Not enough memory to load image"
+#~ msgstr "画像を読み込むために必要なメモリが足りません"
+
+#~ msgid "Couldn't save the rest"
+#~ msgstr "残りのデータを保存できませんでした"
+
+#~ msgid "The WBMP image format"
+#~ msgstr "WBMP 画像形式"
+
+#~ msgid "Invalid XBM file"
+#~ msgstr "おかしな XBM 形式です"
+
+#~ msgid "Insufficient memory to load XBM image file"
+#~ msgstr "XBM 画像を読み込むために必要なメモリが足りません"
+
+#~ msgid "Failed to write to temporary file when loading XBM image"
+#~ msgstr "XBM 画像を読み込む際に一時ファイルへの書き込みに失敗しました"
+
+#~ msgid "The XBM image format"
+#~ msgstr "XBM 画像形式"
+
+#~ msgid "No XPM header found"
+#~ msgstr "XPM ヘッダが見つかりませんでした"
+
+#~ msgid "Invalid XPM header"
+#~ msgstr "おかしな XPM ヘッダです"
+
+#~ msgid "XPM file has image width <= 0"
+#~ msgstr "XPM ファイルの画像の幅が 0 以下です"
+
+#~ msgid "XPM file has image height <= 0"
+#~ msgstr "XPM ファイルの画像の高さが 0 以下です"
+
+#~ msgid "XPM has invalid number of chars per pixel"
+#~ msgstr "XPM のピクセル当たりの文字数がおかしいです"
+
+#~ msgid "XPM file has invalid number of colors"
+#~ msgstr "XPM ファイルの色の数がおかしいです"
+
+#~ msgid "Cannot allocate memory for loading XPM image"
+#~ msgstr "XPM 画像を読み込むためのメモリを確保できません"
+
+#~ msgid "Cannot read XPM colormap"
+#~ msgstr "XPM のカラーマップを読み込めません"
+
+#~ msgid "Failed to write to temporary file when loading XPM image"
+#~ msgstr "XPM 画像を読み込む際に一時ファイルへの書き込みに失敗しました"
+
+#~ msgid "The XPM image format"
+#~ msgstr "XPM 画像形式"
+
+#~ msgid "The EMF image format"
+#~ msgstr "EMF 画像形式"
+
+#~ msgid "Could not allocate memory: %s"
+#~ msgstr "メモリを確保できませんでした: %s"
+
+#~ msgid "Could not create stream: %s"
+#~ msgstr "ストリームを生成できませんでした: %s"
+
+#~ msgid "Could not seek stream: %s"
+#~ msgstr "ストリームの中を検索できませんでした: %s"
+
+#~ msgid "Could not read from stream: %s"
+#~ msgstr "ストリームから読み込めませんでした: %s"
+
+#~ msgid "Couldn't load bitmap"
+#~ msgstr "BMP 画像を読み込めませんでした"
+
+#~ msgid "Couldn't load metafile"
+#~ msgstr "メタ・ファイルを読み込めませんでした"
+
+#~ msgid "Unsupported image format for GDI+"
+#~ msgstr "GDI+ ではサポートしていない画像です"
+
+#~ msgid "Couldn't save"
+#~ msgstr "保存できませんでした"
+
+#~ msgid "The WMF image format"
+#~ msgstr "WMF 画像形式"
+
+#~ msgid "Printer '%s' may not be connected."
+#~ msgstr "プリンタ '%s' が接続されていないようです。"
+
+#~ msgid "(Empty)"
+#~ msgstr "(空)"
+
+#, fuzzy
+#~ msgid "<b>_Search:</b>"
+#~ msgstr "検索(_S):"
+
+#, fuzzy
+#~ msgid "<b>Recently Used</b>"
+#~ msgstr "最近開いたファイル"

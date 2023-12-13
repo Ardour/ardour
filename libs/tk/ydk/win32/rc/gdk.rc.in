@@ -1,0 +1,32 @@
+#include <winver.h>
+
+GTK_ICON		ICON			"@srcdir@/gtk.ico"
+
+VS_VERSION_INFO VERSIONINFO
+  FILEVERSION @GTK_MAJOR_VERSION@,@GTK_MINOR_VERSION@,@GTK_MICRO_VERSION@,0
+  PRODUCTVERSION @GTK_MAJOR_VERSION@,@GTK_MINOR_VERSION@,@GTK_MICRO_VERSION@,0
+  FILEFLAGSMASK 0
+  FILEFLAGS 0
+  FILEOS VOS__WINDOWS32
+  FILETYPE VFT_DLL
+  FILESUBTYPE VFT2_UNKNOWN
+  BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+      BLOCK "040904B0"
+      BEGIN
+	VALUE "CompanyName", "The GTK developer community"
+	VALUE "FileDescription", "GIMP Drawing Kit"
+	VALUE "FileVersion", "@GTK_VERSION@.0"
+	VALUE "InternalName", "libgdk-win32-@GTK_API_VERSION@-@LT_CURRENT_MINUS_AGE@"
+	VALUE "LegalCopyright", "Copyright © 1995-1997 Peter Mattis, Spencer Kimball and Josh MacDonald. Modified by the GTK+ Team and others 1997-2005."
+	VALUE "OriginalFilename", "libgdk-win32-@GTK_API_VERSION@-@LT_CURRENT_MINUS_AGE@.dll"
+	VALUE "ProductName", "GTK+"
+	VALUE "ProductVersion", "@GTK_VERSION@"
+      END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+      VALUE "Translation", 0x409, 1200
+    END
+  END

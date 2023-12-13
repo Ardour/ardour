@@ -134,6 +134,7 @@ mkdir -p $ALIBDIR/panners
 mkdir -p $ALIBDIR/vamp
 mkdir -p $ALIBDIR/suil
 
+# cp $PREFIX/lib/ardour*/*-*.dll $DESTDIR/bin/
 cp build/libs/gtkmm2ext/gtkmm2ext-*.dll $DESTDIR/bin/
 cp build/libs/midi++2/midipp-*.dll $DESTDIR/bin/
 cp build/libs/evoral/evoral-*.dll $DESTDIR/bin/
@@ -144,6 +145,14 @@ cp build/libs/canvas/canvas-*.dll $DESTDIR/bin/
 cp build/libs/widgets/widgets-*.dll $DESTDIR/bin/
 cp build/libs/waveview/waveview-*.dll $DESTDIR/bin/
 cp build/libs/pbd/pbd-*.dll $DESTDIR/bin/
+cp build/libs/tk/ztk/ztk-*.dll $DESTDIR/bin/ || true
+cp build/libs/tk/ydk/ydk-*.dll $DESTDIR/bin/ || true
+cp build/libs/tk/ytk/ytk-*.dll $DESTDIR/bin/ || true
+cp build/libs/tk/ytkmm/ytkmm-*.dll $DESTDIR/bin/ || true
+cp build/libs/tk/ydkmm/ydkmm-*.dll $DESTDIR/bin/ || true
+cp build/libs/tk/ztkmm/ztkmm-*.dll $DESTDIR/bin/ || true
+cp build/libs/tk/ydk-pixbuf/ydk-pixbuf-*.dll $DESTDIR/bin/ || true
+cp build/libs/tk/suil/suil-*.dll $DESTDIR/bin/ || true
 cp build/libs/ctrl-interface/midi_surface/ardour*.dll $DESTDIR/bin/
 cp build/libs/ctrl-interface/control_protocol/ardour*.dll $DESTDIR/bin/
 cp build/libs/ptformat/ptformat-*.dll $DESTDIR/bin/
@@ -179,7 +188,12 @@ cp `find build/libs/panners/ -iname "*.dll"` $ALIBDIR/panners/
 cp -r build/libs/LV2 $ALIBDIR/
 cp -r build/libs/vamp-plugins/*ardourvampplugins*.dll $ALIBDIR/vamp/libardourvampplugins.dll
 cp -r build/libs/vamp-pyin/*ardourvamppyin*.dll $ALIBDIR/vamp/libardourvamppyin.dll
-cp $PREFIX/lib/suil-*/*.dll $ALIBDIR/suil/ || true
+
+if test -d build/libs/tk/suil/; then
+	cp build/libs/tk/suil/suil_win_in_gtk2.dll $ALIBDIR/suil/
+else
+	cp $PREFIX/lib/suil-*/*.dll $ALIBDIR/suil/ || true
+fi
 
 # lv2 core, classifications
 for file in $PREFIX/lib/lv2/*.lv2; do

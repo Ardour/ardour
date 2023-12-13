@@ -22,9 +22,11 @@ def build(bld):
     obj.includes     = [ '.', './console1']
     obj.name         = 'libardour_console1'
     obj.target       = 'ardour_console1'
-    obj.uselib       = 'GTKMM SIGCPP XML OSX'
+    obj.uselib       = 'SIGCPP XML OSX'
     obj.use          = 'libardour libardour_cp libardour_midisurface libgtkmm2ext libpbd libevoral libtemporal'
     obj.install_path = os.path.join(bld.env['LIBDIR'], 'surfaces')
-
-def shutdown():
-    autowaf.shutdown()
+    if bld.is_defined('YTK'):
+        obj.use    += ' libytkmm'
+        obj.uselib += ' GLIBMM GIOMM PANGOMM'
+    else:
+        obj.uselib += ' GTKMM'
