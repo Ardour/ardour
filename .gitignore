@@ -44,6 +44,7 @@ tags
 .waf3-*
 .lock-waf*
 /build/
+/.cache
 /doc/html/
 /doc/latex/
 /doc/ardourapi.json.gz
