@@ -95,6 +95,7 @@ private:
 	void unassign ();
 	void start_name_edit ();
 	void finish_name_edit (std::string, int);
+	bool vertical_button_press (GdkEventButton*);
 	bool vertical_button_release (GdkEventButton*);
 	bool number_button_press (GdkEventButton*);
 	void vca_property_changed (PBD::PropertyChange const & what_changed);
