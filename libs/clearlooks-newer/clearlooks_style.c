@@ -55,6 +55,26 @@
 static ClearlooksStyleClass *clearlooks_style_class;
 static GtkStyleClass *clearlooks_parent_class;
 
+static GtkShadowType
+clearlooks_get_scrollbar_shadow_type(GtkWidget *widget)
+{
+	// Attempt to find out what's the scroller container shadow type
+	// only works if the shadow is drawn by said container (not by an ancestor)
+	// We'll use this information to adjust how scrollbars are drawn and avoid
+	// conflicts between shadows and scrollbar outlines 
+	GtkWidget *container = widget->parent;
+	if (GTK_IS_SCROLLED_WINDOW(container)) {
+		return gtk_scrolled_window_get_shadow_type (container);
+	}
+
+	container = gtk_bin_get_child((GtkBin *)container);
+	if (GTK_IS_VIEWPORT(container)) {
+		return gtk_viewport_get_shadow_type (container);
+	}
+
+	return GTK_SHADOW_NONE;
+}
+
 static void
 clearlooks_set_widget_parameters (GtkWidget            *widget,
                                   const GtkStyle       *style,
@@ -663,15 +683,18 @@ clearlooks_style_draw_box (DRAW_ARGS)
 		if (GE_IS_RANGE (widget))
 			scrollbar.horizontal = GTK_RANGE (widget)->orientation == GTK_ORIENTATION_HORIZONTAL;
 
-		if (scrollbar.horizontal)
-		{
-			x += 2;
-			width -= 4;
-		}
-		else
-		{
-			y += 2;
-			height -= 4;
+		// If the container has a shadow, merge the gauge's border with the shadow
+		if (clearlooks_get_scrollbar_shadow_type(widget) != GTK_SHADOW_NONE) {
+			if (scrollbar.horizontal)
+			{
+				x -= 1;
+				width += 2;
+			}
+			else
+			{
+				y -= 1;
+				height += 2;
+			}
 		}
 
 		STYLE_FUNCTION(draw_scrollbar_trough) (cr, colors, &params, &scrollbar,
@@ -945,6 +968,21 @@ clearlooks_style_draw_slider (DRAW_ARGS, GtkOrientation orientation)
 		if ((clearlooks_style->style == CL_STYLE_GLOSSY || clearlooks_style->style == CL_STYLE_GUMMY)
 			&& !scrollbar.has_color)
 			scrollbar.color = colors->bg[0];
+
+		// Prevent the scrollbar slider from being cut by 1px when scroll is at max or min
+		// unless the container has a shadow in which case it will fill that 1px gap
+		if (clearlooks_get_scrollbar_shadow_type(widget) == GTK_SHADOW_NONE) {
+			if (scrollbar.horizontal)
+			{
+				x += 1;
+				width -= 2;
+			}
+			else
+			{
+				y += 1;
+				height -= 2;
+			}
+		}
 
 		STYLE_FUNCTION(draw_scrollbar_slider) (cr, colors, &params, &scrollbar,
 		                                       x, y, width, height);
