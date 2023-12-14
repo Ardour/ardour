@@ -234,7 +234,6 @@ private:
 
 	void scroller_drag_data_received (const Glib::RefPtr<Gdk::DragContext>&, int, int, const Gtk::SelectionData&, guint, guint);
 	bool strip_scroller_button_event (GdkEventButton*);
-	bool masters_scroller_button_release (GdkEventButton*);
 	void scroll_left ();
 	void scroll_right ();
 	void vca_scroll_left ();
