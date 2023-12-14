@@ -343,7 +343,7 @@ Mixer_UI::Mixer_UI ()
 	_mixer_scene_frame.add(_mixer_scene_vbox);
 	list_vpacker.pack_start (_mixer_scene_frame, false, false);
 
-	vca_label_bar.set_size_request (-1, PX_SCALE(16)); /* must match height in GroupTabs::set_size_request()  + 1 border px*/
+	vca_label_bar.set_size_request (-1, PX_SCALE(16) + 1); /* must match height in GroupTabs::set_size_request()  + 1 border px*/
 	vca_vpacker.pack_start (vca_label_bar, false, false);
 	vca_label_bar.set_name("VCALabelBar");
 

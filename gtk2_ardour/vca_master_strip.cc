@@ -130,7 +130,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	set_tooltip (vertical_button, _("Click to show assigned channels only")); /* tooltip updated dynamically */
 
 	global_vpacker.set_border_width (0);
-	global_vpacker.set_spacing (0);
+	global_vpacker.set_spacing (2);
 	gain_meter.set_spacing(4);
 
 	global_vpacker.pack_start (number_label, Gtk::PACK_SHRINK);
