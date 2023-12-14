@@ -129,7 +129,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	vertical_button.set_active_color (_vca->presentation_info().color ());
 	set_tooltip (vertical_button, _("Click to show assigned channels only")); /* tooltip updated dynamically */
 
-	global_vpacker.set_border_width (0);
+	global_vpacker.set_border_width (1);
 	global_vpacker.set_spacing (2);
 	gain_meter.set_spacing(4);
 
