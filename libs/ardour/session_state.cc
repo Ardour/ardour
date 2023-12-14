@@ -381,6 +381,9 @@ Session::post_engine_init ()
 	} catch (AudioEngine::PortRegistrationFailure& err) {
 		error << err.what() << endmsg;
 		return -5;
+	} catch (ProcessorException const & e) {
+		error << e.what() << endmsg;
+		return -8;
 	} catch (std::exception const & e) {
 		error << _("Unexpected exception during session setup: ") << e.what() << endmsg;
 		return -6;

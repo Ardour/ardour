@@ -45,6 +45,18 @@ namespace ARDOUR {
 class Location;
 class Session;
 
+class LIBARDOUR_API ProcessorException: public std::exception
+{
+public:
+	explicit ProcessorException (const std::string msg) : _message(msg) {}
+	virtual ~ProcessorException () throw() {}
+
+	virtual const char* what() const throw() { return _message.c_str(); }
+
+private:
+	std::string _message;
+};
+
 /** A mixer strip element - plugin, send, meter, etc */
 class LIBARDOUR_API Processor : public SessionObject, public Automatable, public Latent
 {

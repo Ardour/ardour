@@ -461,6 +461,9 @@ Session::Session (AudioEngine &eng,
 			case -6:
 				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Audio/MIDI Engine is not running or sample-rate mismatches.")));
 				break;
+			case -8:
+				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Required Plugin/Processor is missing.")));
+				break;
 			default:
 				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Unexpected exception during session setup, possibly invalid audio/midi engine parameters. Please see stdout/stderr for details")));
 				break;
