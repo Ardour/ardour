@@ -998,8 +998,7 @@ style "paler_bright_when_active" = "medium_text"
 
 style "selected_strip_frame"
 {
-	fg[NORMAL] = @bright_indicator
-	bg[NORMAL] = darker(@bright_indicator)
+	bg[NORMAL] = @bright_indicator
 }
 
 style "flashing_alert" = "very_small_text"

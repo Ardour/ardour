@@ -199,18 +199,27 @@ clearlooks_style_draw_shadow (DRAW_ARGS)
 	}
 	else if (DETAIL ("frame"))
 	{
-		WidgetParameters params;
-		FrameParameters  frame;
-		frame.shadow  = shadow_type;
-		frame.gap_x   = -1;                 /* No gap will be drawn */
-		frame.border  = &colors->shade[4];
+		// WidgetParameters params;
+		// FrameParameters  frame;
+		// frame.shadow  = shadow_type;
+		// frame.gap_x   = -1;                 /* No gap will be drawn */
+		// frame.border  = &colors->shade[4];
 
-		clearlooks_set_widget_parameters (widget, style, state_type, &params);
-		params.corners = CR_CORNER_NONE;
+		// clearlooks_set_widget_parameters (widget, style, state_type, &params);
+		// params.corners = CR_CORNER_NONE;
 
-		if (widget && !g_str_equal ("XfcePanelWindow", gtk_widget_get_name (gtk_widget_get_toplevel (widget))))
-			STYLE_FUNCTION(draw_frame) (cr, colors, &params, &frame,
-			                       x, y, width, height);
+		// if (widget && !g_str_equal ("XfcePanelWindow", gtk_widget_get_name (gtk_widget_get_toplevel (widget))))
+		// 	STYLE_FUNCTION(draw_frame) (cr, colors, &params, &frame,
+		// 	                       x, y, width, height);
+
+		// Draw a solid 1px inner border instead of a 2px beveled shadow
+		if (shadow_type != GTK_SHADOW_NONE) {
+			CairoColor *border = (CairoColor*)&colors->shade[4];
+			cairo_rectangle (cr, x+0.5, y+0.5, width-1, height-1);
+			ge_cairo_set_color (cr, border);
+			cairo_set_line_width (cr, 1);
+			cairo_stroke (cr);
+		}
 	}
 	else if (DETAIL ("scrolled_window") || DETAIL ("viewport") || detail == NULL)
 	{
