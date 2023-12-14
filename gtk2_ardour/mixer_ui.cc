@@ -414,6 +414,12 @@ Mixer_UI::Mixer_UI ()
 	group_display.show();
 	favorite_plugins_display.show();
 
+	// Remove strip scrollers shadow
+	Gtk::Viewport* pViewport = (Gtk::Viewport*) scroller.get_child();
+	pViewport->set_shadow_type(Gtk::SHADOW_NONE);
+	pViewport = (Gtk::Viewport*) vca_scroller.get_child();
+	pViewport->set_shadow_type(Gtk::SHADOW_NONE);
+
 	XMLNode* mnode = ARDOUR_UI::instance()->tearoff_settings (X_("monitor-section"));
 	if (mnode) {
 		_monitor_section.tearoff().set_state (*mnode);
