@@ -180,6 +180,7 @@ PluginInsert::set_count (uint32_t num)
 			add_plugin (p);
 
 			if (require_state) {
+				_plugins[0]->set_insert_id (this->id ());
 				XMLNode& state = _plugins[0]->get_state ();
 				p->set_state (state, Stateful::current_state_version);
 				delete &state;
