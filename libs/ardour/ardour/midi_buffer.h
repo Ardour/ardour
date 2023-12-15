@@ -153,9 +153,15 @@ public:
 
 		size_t total_data_deleted = align32 (sizeof(TimeType) + sizeof (Evoral::EventType) + event_size);
 
-		if (i.offset + total_data_deleted >= _size) {
+		if (total_data_deleted >= _size) {
 			_size = 0;
 			_silent = true;
+			return end();
+		}
+
+		if (i.offset + total_data_deleted >= _size) {
+			assert (_size > total_data_deleted);
+			_size -= total_data_deleted;
 			return end();
 		}
 
