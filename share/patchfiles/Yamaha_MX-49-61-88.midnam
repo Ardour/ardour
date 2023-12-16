@@ -44,12 +44,27 @@
         <AvailableChannel Channel="15" Available="true"/>
         <AvailableChannel Channel="16" Available="true"/>
       </AvailableForChannels>
+      <UsesControlNameList Name="Controls"/>
+      <PatchBank Name="Performance">
+        <MIDICommands>
+          <ControlChange Control="0" Value="63"/>
+          <ControlChange Control="32" Value="80"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="Performance"/>
+      </PatchBank>
       <PatchBank Name="GM">
         <MIDICommands>
           <ControlChange Control="0" Value="0"/>
           <ControlChange Control="32" Value="0"/>
         </MIDICommands>
         <UsesPatchNameList Name="GM"/>
+      </PatchBank>
+      <PatchBank Name="GM Drum">
+        <MIDICommands>
+          <ControlChange Control="0" Value="127"/>
+          <ControlChange Control="32" Value="0"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="GM Drum"/>
       </PatchBank>
       <PatchBank Name="Preset 1">
         <MIDICommands>
@@ -114,19 +129,19 @@
         </MIDICommands>
         <UsesPatchNameList Name="USER"/>
       </PatchBank>
-      <PatchBank Name="GM Drums">
-        <MIDICommands>
-          <ControlChange Control="0" Value="127"/>
-          <ControlChange Control="32" Value="0"/>
-        </MIDICommands>
-        <UsesPatchNameList Name="GM Drums"/>
-      </PatchBank>
-      <PatchBank Name="XS Drums">
+      <PatchBank Name="Drum">
         <MIDICommands>
           <ControlChange Control="0" Value="63"/>
           <ControlChange Control="32" Value="32"/>
         </MIDICommands>
-        <UsesPatchNameList Name="XS Drums"/>
+        <UsesPatchNameList Name="Drum"/>
+      </PatchBank>
+      <PatchBank Name="User Drum">
+        <MIDICommands>
+          <ControlChange Control="0" Value="63"/>
+          <ControlChange Control="32" Value="40"/>
+        </MIDICommands>
+        <UsesPatchNameList Name="User Drum"/>
       </PatchBank>
     </ChannelNameSet>
     <PatchNameList Name="GM">
@@ -259,7 +274,7 @@
       <Patch Number="127" Name="[SFX|Natur] Applause" ProgramChange="126"/>
       <Patch Number="128" Name="[SFX|Natur] Gunshot" ProgramChange="127"/>
     </PatchNameList>
-    <PatchNameList Name="GM Drums">
+    <PatchNameList Name="GM Drum">
       <Patch Number="001" Name="Stereo GM Kit" ProgramChange="0"/>
     </PatchNameList>
     <PatchNameList Name="PRE0">
@@ -1257,12 +1272,136 @@
       <Patch Number="082" Name="[SFX|Arp] 8Z Dub Element" ProgramChange="81"/>
     </PatchNameList>
     <PatchNameList Name="USER">
-      <Patch Number="001" Name="User 1" ProgramChange="0"/>
-      <Patch Number="002" Name="User 2" ProgramChange="1"/>
-      <Patch Number="003" Name="User 3" ProgramChange="2"/>
-      <Patch Number="003" Name="User 4" ProgramChange="3"/>
+      <Patch Number="001" Name="User Voice 1" ProgramChange="0"/>
+      <Patch Number="002" Name="User Voice 2" ProgramChange="1"/>
+      <Patch Number="003" Name="User Voice 3" ProgramChange="2"/>
+      <Patch Number="004" Name="User Voice 4" ProgramChange="3"/>
+      <Patch Number="005" Name="User Voice 5" ProgramChange="4"/>
+      <Patch Number="006" Name="User Voice 6" ProgramChange="5"/>
+      <Patch Number="007" Name="User Voice 7" ProgramChange="6"/>
+      <Patch Number="008" Name="User Voice 8" ProgramChange="7"/>
+      <Patch Number="009" Name="User Voice 9" ProgramChange="8"/>
+      <Patch Number="010" Name="User Voice 10" ProgramChange="9"/>
+      <Patch Number="011" Name="User Voice 11" ProgramChange="10"/>
+      <Patch Number="012" Name="User Voice 12" ProgramChange="11"/>
+      <Patch Number="013" Name="User Voice 13" ProgramChange="12"/>
+      <Patch Number="014" Name="User Voice 14" ProgramChange="13"/>
+      <Patch Number="015" Name="User Voice 15" ProgramChange="14"/>
+      <Patch Number="016" Name="User Voice 16" ProgramChange="15"/>
+      <Patch Number="017" Name="User Voice 17" ProgramChange="16"/>
+      <Patch Number="018" Name="User Voice 18" ProgramChange="17"/>
+      <Patch Number="019" Name="User Voice 19" ProgramChange="18"/>
+      <Patch Number="020" Name="User Voice 20" ProgramChange="19"/>
+      <Patch Number="021" Name="User Voice 21" ProgramChange="20"/>
+      <Patch Number="022" Name="User Voice 22" ProgramChange="21"/>
+      <Patch Number="023" Name="User Voice 23" ProgramChange="22"/>
+      <Patch Number="024" Name="User Voice 24" ProgramChange="23"/>
+      <Patch Number="025" Name="User Voice 25" ProgramChange="24"/>
+      <Patch Number="026" Name="User Voice 26" ProgramChange="25"/>
+      <Patch Number="027" Name="User Voice 27" ProgramChange="26"/>
+      <Patch Number="028" Name="User Voice 28" ProgramChange="27"/>
+      <Patch Number="029" Name="User Voice 29" ProgramChange="28"/>
+      <Patch Number="030" Name="User Voice 30" ProgramChange="29"/>
+      <Patch Number="031" Name="User Voice 31" ProgramChange="30"/>
+      <Patch Number="032" Name="User Voice 32" ProgramChange="31"/>
+      <Patch Number="033" Name="User Voice 33" ProgramChange="32"/>
+      <Patch Number="034" Name="User Voice 34" ProgramChange="33"/>
+      <Patch Number="035" Name="User Voice 35" ProgramChange="34"/>
+      <Patch Number="036" Name="User Voice 36" ProgramChange="35"/>
+      <Patch Number="037" Name="User Voice 37" ProgramChange="36"/>
+      <Patch Number="038" Name="User Voice 38" ProgramChange="37"/>
+      <Patch Number="039" Name="User Voice 39" ProgramChange="38"/>
+      <Patch Number="040" Name="User Voice 40" ProgramChange="39"/>
+      <Patch Number="041" Name="User Voice 41" ProgramChange="40"/>
+      <Patch Number="042" Name="User Voice 42" ProgramChange="41"/>
+      <Patch Number="043" Name="User Voice 43" ProgramChange="42"/>
+      <Patch Number="044" Name="User Voice 44" ProgramChange="43"/>
+      <Patch Number="045" Name="User Voice 45" ProgramChange="44"/>
+      <Patch Number="046" Name="User Voice 46" ProgramChange="45"/>
+      <Patch Number="047" Name="User Voice 47" ProgramChange="46"/>
+      <Patch Number="048" Name="User Voice 48" ProgramChange="47"/>
+      <Patch Number="049" Name="User Voice 49" ProgramChange="48"/>
+      <Patch Number="050" Name="User Voice 50" ProgramChange="49"/>
+      <Patch Number="051" Name="User Voice 51" ProgramChange="50"/>
+      <Patch Number="052" Name="User Voice 52" ProgramChange="51"/>
+      <Patch Number="053" Name="User Voice 53" ProgramChange="52"/>
+      <Patch Number="054" Name="User Voice 54" ProgramChange="53"/>
+      <Patch Number="055" Name="User Voice 55" ProgramChange="54"/>
+      <Patch Number="056" Name="User Voice 56" ProgramChange="55"/>
+      <Patch Number="057" Name="User Voice 57" ProgramChange="56"/>
+      <Patch Number="058" Name="User Voice 58" ProgramChange="57"/>
+      <Patch Number="059" Name="User Voice 59" ProgramChange="58"/>
+      <Patch Number="060" Name="User Voice 60" ProgramChange="59"/>
+      <Patch Number="061" Name="User Voice 61" ProgramChange="60"/>
+      <Patch Number="062" Name="User Voice 62" ProgramChange="61"/>
+      <Patch Number="063" Name="User Voice 63" ProgramChange="62"/>
+      <Patch Number="064" Name="User Voice 64" ProgramChange="63"/>
+      <Patch Number="065" Name="User Voice 65" ProgramChange="64"/>
+      <Patch Number="066" Name="User Voice 66" ProgramChange="65"/>
+      <Patch Number="067" Name="User Voice 67" ProgramChange="66"/>
+      <Patch Number="068" Name="User Voice 68" ProgramChange="67"/>
+      <Patch Number="069" Name="User Voice 69" ProgramChange="68"/>
+      <Patch Number="070" Name="User Voice 70" ProgramChange="69"/>
+      <Patch Number="071" Name="User Voice 71" ProgramChange="70"/>
+      <Patch Number="072" Name="User Voice 72" ProgramChange="71"/>
+      <Patch Number="073" Name="User Voice 73" ProgramChange="72"/>
+      <Patch Number="074" Name="User Voice 74" ProgramChange="73"/>
+      <Patch Number="075" Name="User Voice 75" ProgramChange="74"/>
+      <Patch Number="076" Name="User Voice 76" ProgramChange="75"/>
+      <Patch Number="077" Name="User Voice 77" ProgramChange="76"/>
+      <Patch Number="078" Name="User Voice 78" ProgramChange="77"/>
+      <Patch Number="079" Name="User Voice 79" ProgramChange="78"/>
+      <Patch Number="080" Name="User Voice 80" ProgramChange="79"/>
+      <Patch Number="081" Name="User Voice 81" ProgramChange="80"/>
+      <Patch Number="082" Name="User Voice 82" ProgramChange="81"/>
+      <Patch Number="083" Name="User Voice 83" ProgramChange="82"/>
+      <Patch Number="084" Name="User Voice 84" ProgramChange="83"/>
+      <Patch Number="085" Name="User Voice 85" ProgramChange="84"/>
+      <Patch Number="086" Name="User Voice 86" ProgramChange="85"/>
+      <Patch Number="087" Name="User Voice 87" ProgramChange="86"/>
+      <Patch Number="088" Name="User Voice 88" ProgramChange="87"/>
+      <Patch Number="089" Name="User Voice 89" ProgramChange="88"/>
+      <Patch Number="090" Name="User Voice 90" ProgramChange="89"/>
+      <Patch Number="091" Name="User Voice 91" ProgramChange="90"/>
+      <Patch Number="092" Name="User Voice 92" ProgramChange="91"/>
+      <Patch Number="093" Name="User Voice 93" ProgramChange="92"/>
+      <Patch Number="094" Name="User Voice 94" ProgramChange="93"/>
+      <Patch Number="095" Name="User Voice 95" ProgramChange="94"/>
+      <Patch Number="096" Name="User Voice 96" ProgramChange="95"/>
+      <Patch Number="097" Name="User Voice 97" ProgramChange="96"/>
+      <Patch Number="098" Name="User Voice 98" ProgramChange="97"/>
+      <Patch Number="099" Name="User Voice 99" ProgramChange="98"/>
+      <Patch Number="100" Name="User Voice 100" ProgramChange="99"/>
+      <Patch Number="101" Name="User Voice 101" ProgramChange="100"/>
+      <Patch Number="102" Name="User Voice 102" ProgramChange="101"/>
+      <Patch Number="103" Name="User Voice 103" ProgramChange="102"/>
+      <Patch Number="104" Name="User Voice 104" ProgramChange="103"/>
+      <Patch Number="105" Name="User Voice 105" ProgramChange="104"/>
+      <Patch Number="106" Name="User Voice 106" ProgramChange="105"/>
+      <Patch Number="107" Name="User Voice 107" ProgramChange="106"/>
+      <Patch Number="108" Name="User Voice 108" ProgramChange="107"/>
+      <Patch Number="109" Name="User Voice 109" ProgramChange="108"/>
+      <Patch Number="110" Name="User Voice 110" ProgramChange="109"/>
+      <Patch Number="111" Name="User Voice 111" ProgramChange="110"/>
+      <Patch Number="112" Name="User Voice 112" ProgramChange="111"/>
+      <Patch Number="113" Name="User Voice 113" ProgramChange="112"/>
+      <Patch Number="114" Name="User Voice 114" ProgramChange="113"/>
+      <Patch Number="115" Name="User Voice 115" ProgramChange="114"/>
+      <Patch Number="116" Name="User Voice 116" ProgramChange="115"/>
+      <Patch Number="117" Name="User Voice 117" ProgramChange="116"/>
+      <Patch Number="118" Name="User Voice 118" ProgramChange="117"/>
+      <Patch Number="119" Name="User Voice 119" ProgramChange="118"/>
+      <Patch Number="120" Name="User Voice 120" ProgramChange="119"/>
+      <Patch Number="121" Name="User Voice 121" ProgramChange="120"/>
+      <Patch Number="122" Name="User Voice 122" ProgramChange="121"/>
+      <Patch Number="123" Name="User Voice 123" ProgramChange="122"/>
+      <Patch Number="124" Name="User Voice 124" ProgramChange="123"/>
+      <Patch Number="125" Name="User Voice 125" ProgramChange="124"/>
+      <Patch Number="126" Name="User Voice 126" ProgramChange="125"/>
+      <Patch Number="127" Name="User Voice 127" ProgramChange="126"/>
+      <Patch Number="128" Name="User Voice 128" ProgramChange="127"/>
     </PatchNameList>
-    <PatchNameList Name="XS Drums">
+    <PatchNameList Name="Drum">
       <Patch Number="001" Name="Power Standard Kit 1" ProgramChange="0"/>
       <Patch Number="002" Name="Power Standard Kit 2" ProgramChange="1"/>
       <Patch Number="003" Name="Hyper Standard Kit" ProgramChange="2"/>
@@ -1318,11 +1457,294 @@
       <Patch Number="053" Name="Scratches" ProgramChange="52"/>
       <Patch Number="054" Name="Dance Kicks" ProgramChange="53"/>
       <Patch Number="055" Name="Arabic Mixed Kit" ProgramChange="54"/>
-      <Patch Number="056" Name="Belly Dance Kitt" ProgramChange="55"/>
+      <Patch Number="056" Name="Belly Kit" ProgramChange="55"/>
       <Patch Number="057" Name="Dance Snares" ProgramChange="56"/>
       <Patch Number="058" Name="Special SFXs" ProgramChange="57"/>
       <Patch Number="059" Name="Synthetic Kit" ProgramChange="58"/>
       <Patch Number="060" Name="SFX Kit" ProgramChange="59"/>
     </PatchNameList>
+    <PatchNameList Name="User Drum">
+      <Patch Number="001" Name="User Kit 1" ProgramChange="0"/>
+      <Patch Number="002" Name="User Kit 2" ProgramChange="1"/>
+      <Patch Number="003" Name="User Kit 3" ProgramChange="2"/>
+      <Patch Number="004" Name="User Kit 4" ProgramChange="3"/>
+      <Patch Number="005" Name="User Kit 5" ProgramChange="4"/>
+      <Patch Number="006" Name="User Kit 6" ProgramChange="5"/>
+      <Patch Number="007" Name="User Kit 7" ProgramChange="6"/>
+      <Patch Number="008" Name="User Kit 8" ProgramChange="7"/>
+    </PatchNameList>
+    <PatchNameList Name="Performance">
+      <Patch Number="001" Name="[001] MXCategory" ProgramChange="0"/>
+      <Patch Number="002" Name="[002] Sirius" ProgramChange="1"/>
+      <Patch Number="003" Name="[003] XXX Rock" ProgramChange="2"/>
+      <Patch Number="004" Name="[004] Baked XxX" ProgramChange="3"/>
+      <Patch Number="005" Name="[005] TranceGate" ProgramChange="4"/>
+      <Patch Number="006" Name="[006] EastSlider" ProgramChange="5"/>
+      <Patch Number="007" Name="[007] Funk It !" ProgramChange="6"/>
+      <Patch Number="008" Name="[008] Jam Hood" ProgramChange="7"/>
+      <Patch Number="009" Name="[009] @ Night" ProgramChange="8"/>
+      <Patch Number="010" Name="[010] BellyDance" ProgramChange="9"/>
+      <Patch Number="011" Name="[011] Rock'n Syn" ProgramChange="10"/>
+      <Patch Number="012" Name="[012] DP Show" ProgramChange="11"/>
+      <Patch Number="013" Name="[013] Paris MX" ProgramChange="12"/>
+      <Patch Number="014" Name="[014] Born Remix" ProgramChange="13"/>
+      <Patch Number="015" Name="[015] TrancyPizz" ProgramChange="14"/>
+      <Patch Number="016" Name="[016] PsyTrncMW" ProgramChange="15"/>
+      <Patch Number="017" Name="[017] Ana Warm" ProgramChange="16"/>
+      <Patch Number="018" Name="[018] Wobbling" ProgramChange="17"/>
+      <Patch Number="019" Name="[019] Montuno" ProgramChange="18"/>
+      <Patch Number="020" Name="[020] Bug Breath" ProgramChange="19"/>
+      <Patch Number="021" Name="[021] Yah-Yo-Jah" ProgramChange="20"/>
+      <Patch Number="022" Name="[022] PlanetRock" ProgramChange="21"/>
+      <Patch Number="023" Name="[023] Dreamer" ProgramChange="22"/>
+      <Patch Number="024" Name="[024] Coriander" ProgramChange="23"/>
+      <Patch Number="025" Name="[025] DarkAfrica" ProgramChange="24"/>
+      <Patch Number="026" Name="[026] Dirty Subs" ProgramChange="25"/>
+      <Patch Number="027" Name="[027] I Wub You" ProgramChange="26"/>
+      <Patch Number="028" Name="[028] OverTheSea" ProgramChange="27"/>
+      <Patch Number="029" Name="[029] Jack'sBack" ProgramChange="28"/>
+      <Patch Number="030" Name="[030] Arp Spider" ProgramChange="29"/>
+      <Patch Number="031" Name="[031] LectroBeat" ProgramChange="30"/>
+      <Patch Number="032" Name="[032] Mo'Flute-S" ProgramChange="31"/>
+      <Patch Number="033" Name="[033] Solo Synth" ProgramChange="32"/>
+      <Patch Number="034" Name="[034] Snowflakes" ProgramChange="33"/>
+      <Patch Number="035" Name="[035] Rip Bell" ProgramChange="34"/>
+      <Patch Number="036" Name="[036] J-Otaku" ProgramChange="35"/>
+      <Patch Number="037" Name="[037] US Rock" ProgramChange="36"/>
+      <Patch Number="038" Name="[038] Remainder" ProgramChange="37"/>
+      <Patch Number="039" Name="[039] CuriousBot" ProgramChange="38"/>
+      <Patch Number="040" Name="[040] Ivory Tale" ProgramChange="39"/>
+      <Patch Number="041" Name="[041] Slow Roll" ProgramChange="40"/>
+      <Patch Number="042" Name="[042] Surfer Joe" ProgramChange="41"/>
+      <Patch Number="043" Name="[043] EthnoDance" ProgramChange="42"/>
+      <Patch Number="044" Name="[044] The Grid" ProgramChange="43"/>
+      <Patch Number="045" Name="[045] RotaryWind" ProgramChange="44"/>
+      <Patch Number="046" Name="[046] Practise X" ProgramChange="45"/>
+      <Patch Number="047" Name="[047] Contempl8" ProgramChange="46"/>
+      <Patch Number="048" Name="[048] FloorPumpr" ProgramChange="47"/>
+      <Patch Number="049" Name="[049] Last Train" ProgramChange="48"/>
+      <Patch Number="050" Name="[050] Cultural" ProgramChange="49"/>
+      <Patch Number="051" Name="[051] Moon Club" ProgramChange="50"/>
+      <Patch Number="052" Name="[052] Submarine" ProgramChange="51"/>
+      <Patch Number="053" Name="[053] Cali Girls" ProgramChange="52"/>
+      <Patch Number="054" Name="[054] LastResort" ProgramChange="53"/>
+      <Patch Number="055" Name="[055] Psy Step" ProgramChange="54"/>
+      <Patch Number="056" Name="[056] Under Rule" ProgramChange="55"/>
+      <Patch Number="057" Name="[057] Dubbin" ProgramChange="56"/>
+      <Patch Number="058" Name="[058] Paris Nite" ProgramChange="57"/>
+      <Patch Number="059" Name="[059] Cyclone " ProgramChange="58"/>
+      <Patch Number="060" Name="[060] The Return" ProgramChange="59"/>
+      <Patch Number="061" Name="[061] Hydrogen" ProgramChange="60"/>
+      <Patch Number="062" Name="[062] Neonlight" ProgramChange="61"/>
+      <Patch Number="063" Name="[063] Tronology" ProgramChange="62"/>
+      <Patch Number="064" Name="[064] Tony Time" ProgramChange="63"/>
+      <Patch Number="065" Name="[065] CntryRockr" ProgramChange="64"/>
+      <Patch Number="066" Name="[066] Cassette D" ProgramChange="65"/>
+      <Patch Number="067" Name="[067] Circusy" ProgramChange="66"/>
+      <Patch Number="068" Name="[068] Writer2013" ProgramChange="67"/>
+      <Patch Number="069" Name="[069] Chill4You" ProgramChange="68"/>
+      <Patch Number="070" Name="[070] SciFiMoov" ProgramChange="69"/>
+      <Patch Number="071" Name="[071] Break Bott" ProgramChange="70"/>
+      <Patch Number="072" Name="[072] DontUcare?" ProgramChange="71"/>
+      <Patch Number="073" Name="[073] Bubble Dub" ProgramChange="72"/>
+      <Patch Number="074" Name="[074] Contrasts" ProgramChange="73"/>
+      <Patch Number="075" Name="[075] Breakfast3" ProgramChange="74"/>
+      <Patch Number="076" Name="[076] Summit" ProgramChange="75"/>
+      <Patch Number="077" Name="[077] BIGolHousE" ProgramChange="76"/>
+      <Patch Number="078" Name="[078] Mars Dawn" ProgramChange="77"/>
+      <Patch Number="079" Name="[079] AcientBeat" ProgramChange="78"/>
+      <Patch Number="080" Name="[080] US Beauty" ProgramChange="79"/>
+      <Patch Number="081" Name="[081] Air Pocket" ProgramChange="80"/>
+      <Patch Number="082" Name="[082] DestructMe" ProgramChange="81"/>
+      <Patch Number="083" Name="[083] ChartBustr" ProgramChange="82"/>
+      <Patch Number="084" Name="[084] Funkey" ProgramChange="83"/>
+      <Patch Number="085" Name="[085] Mean Step" ProgramChange="84"/>
+      <Patch Number="086" Name="[086] Piano&amp;Pad" ProgramChange="85"/>
+      <Patch Number="087" Name="[087] LiquidTine" ProgramChange="86"/>
+      <Patch Number="088" Name="[088] DownWiDat" ProgramChange="87"/>
+      <Patch Number="089" Name="[089] TheLastDay" ProgramChange="88"/>
+      <Patch Number="090" Name="[090] Ripper" ProgramChange="89"/>
+      <Patch Number="091" Name="[091] Rag-Time" ProgramChange="90"/>
+      <Patch Number="092" Name="[092] Pandora" ProgramChange="91"/>
+      <Patch Number="093" Name="[093] Compu-ta" ProgramChange="92"/>
+      <Patch Number="094" Name="[094] Temptation" ProgramChange="93"/>
+      <Patch Number="095" Name="[095] SciFy Eye" ProgramChange="94"/>
+      <Patch Number="096" Name="[096] Irie Flex" ProgramChange="95"/>
+      <Patch Number="097" Name="[097] 80s stuff" ProgramChange="96"/>
+      <Patch Number="098" Name="[098] Amazon" ProgramChange="97"/>
+      <Patch Number="099" Name="[099] RudeAwake!" ProgramChange="98"/>
+      <Patch Number="100" Name="[100] Drivin'" ProgramChange="99"/>
+      <Patch Number="101" Name="[101] Big Drop" ProgramChange="100"/>
+      <Patch Number="102" Name="[102] Metal Game" ProgramChange="101"/>
+      <Patch Number="103" Name="[103] Mince" ProgramChange="102"/>
+      <Patch Number="104" Name="[104] Suspense" ProgramChange="103"/>
+      <Patch Number="105" Name="[105] DistoDream" ProgramChange="104"/>
+      <Patch Number="106" Name="[106] Bangerang" ProgramChange="105"/>
+      <Patch Number="107" Name="[107] SeaFactory" ProgramChange="106"/>
+      <Patch Number="108" Name="[108] Cosmetic" ProgramChange="107"/>
+      <Patch Number="109" Name="[109] 9o9Swinger" ProgramChange="108"/>
+      <Patch Number="110" Name="[110] Naybahood" ProgramChange="109"/>
+      <Patch Number="111" Name="[111] Rising Sun" ProgramChange="110"/>
+      <Patch Number="112" Name="[112] Chip Tunez" ProgramChange="111"/>
+      <Patch Number="113" Name="[113] Mono Drop" ProgramChange="112"/>
+      <Patch Number="114" Name="[114] Galaxies" ProgramChange="113"/>
+      <Patch Number="115" Name="[115] Rezo Dance" ProgramChange="114"/>
+      <Patch Number="116" Name="[116] AgroBuildu" ProgramChange="115"/>
+      <Patch Number="117" Name="[117] Mural" ProgramChange="116"/>
+      <Patch Number="118" Name="[118] Twinkle" ProgramChange="117"/>
+      <Patch Number="119" Name="[119] Contact" ProgramChange="118"/>
+      <Patch Number="120" Name="[120] Fallin'Luv" ProgramChange="119"/>
+      <Patch Number="121" Name="[121] Onesy" ProgramChange="120"/>
+      <Patch Number="122" Name="[122] Klickaa" ProgramChange="121"/>
+      <Patch Number="123" Name="[123] Rag Machin" ProgramChange="122"/>
+      <Patch Number="124" Name="[124] The Champ" ProgramChange="123"/>
+      <Patch Number="125" Name="[125] RoughNRug" ProgramChange="124"/>
+      <Patch Number="126" Name="[126] Wasteland" ProgramChange="125"/>
+      <Patch Number="127" Name="[127] Cascade" ProgramChange="126"/>
+      <Patch Number="128" Name="[128] No Gravity" ProgramChange="127"/>
+    </PatchNameList>
+
+    <!-- CCs are usually transmitted and received; exceptions noted. -->
+    <ControlNameList Name="Controls">
+      <Control Type="7bit" Number="0" Name="Bank Select MSB"/>
+      <Control Type="7bit" Number="1" Name="Modulation"/>
+      <!-- 5 is receive only -->
+      <Control Type="7bit" Number="5" Name="Portamento Time"/>
+      <Control Type="7bit" Number="6" Name="Data Entry MSB"/>
+      <Control Type="7bit" Number="7" Name="Volume"/>
+      <Control Type="7bit" Number="10" Name="Pan"/>
+      <Control Type="7bit" Number="11" Name="Expression"/>
+      <!-- 16 is default; "Assign 1" knob may be assigned to 1-95 -->
+      <Control Type="7bit" Number="16" Name="Assign 1"/>
+      <!-- 17 is default; "Assign 2" knob may be assigned to 1-95 -->
+      <Control Type="7bit" Number="17" Name="Assign 2"/>
+      <Control Type="7bit" Number="32" Name="Bank Select LSB"/>
+      <Control Type="7bit" Number="38" Name="Data Entry LSB"/>
+      <Control Type="7bit" Number="64" Name="Sustain Pedal"/>
+      <!-- 65 is receive only -->
+      <Control Type="7bit" Number="65" Name="Portamento"/>
+      <!-- 66 is receive only -->
+      <Control Type="7bit" Number="66" Name="Sostenuto"/>
+      <!-- Setting the below values add to or subtract from the center value, 64. They
+	   are offset parameters that are added to or subtracted from the Voice's value. -->
+      <Control Type="7bit" Number="31" Name="Sustain"/>
+      <Control Type="7bit" Number="71" Name="Resonance"/>
+      <Control Type="7bit" Number="72" Name="Release"/>
+      <Control Type="7bit" Number="73" Name="Attack"/>
+      <Control Type="7bit" Number="74" Name="Cutoff"/>
+      <Control Type="7bit" Number="75" Name="Decay"/>
+      <!-- Reverb and Chorus Send values are set directly -->
+      <Control Type="7bit" Number="91" Name="Reverb"/>
+      <Control Type="7bit" Number="93" Name="Chorus"/>
+      <!-- RPNs can be used to set Pitch Bend Sensitivity, Fine Tune, and Coarse Tune.
+           NRPNs have no applicable parameters for MX models. This section receive only -->
+      <Control Type="7bit" Number="96" Name="Data Increment"/>
+      <Control Type="7bit" Number="97" Name="Data Decrement"/>
+      <Control Type="7bit" Number="98" Name="Non-Registered Parameter Number LSB"/>
+      <Control Type="7bit" Number="99" Name="Non-Registered Parameter Number MSB"/>
+      <Control Type="7bit" Number="100" Name="Registered Parameter Number LSB"/>
+      <Control Type="7bit" Number="101" Name="Registered Parameter Number MSB"/>
+      <!-- Control messages. Receive only -->
+      <Control Type="7bit" Number="120" Name="All Sound Off"/>
+      <Control Type="7bit" Number="121" Name="Reset All Controllers"/>
+      <Control Type="7bit" Number="123" Name="All Notes Off"/>
+      <Control Type="7bit" Number="124" Name="Omni Mode Off"/>
+      <Control Type="7bit" Number="125" Name="Omni Mode On"/>
+      <Control Type="7bit" Number="126" Name="Mono"/>
+      <Control Type="7bit" Number="127" Name="Poly"/>
+      <Control Type="7bit" Number="2" Name="Assignable"/>
+      <Control Type="7bit" Number="3" Name="Assignable"/>
+      <Control Type="7bit" Number="4" Name="Assignable"/>
+      <Control Type="7bit" Number="8" Name="Assignable"/>
+      <Control Type="7bit" Number="9" Name="Assignable"/>
+      <Control Type="7bit" Number="12" Name="Assignable"/>
+      <Control Type="7bit" Number="13" Name="Assignable"/>
+      <Control Type="7bit" Number="14" Name="Assignable"/>
+      <Control Type="7bit" Number="15" Name="Assignable"/>
+      <Control Type="7bit" Number="18" Name="Assignable"/>
+      <Control Type="7bit" Number="19" Name="Assignable"/>
+      <Control Type="7bit" Number="20" Name="Assignable"/>
+      <Control Type="7bit" Number="21" Name="Assignable"/>
+      <Control Type="7bit" Number="22" Name="Assignable"/>
+      <Control Type="7bit" Number="23" Name="Assignable"/>
+      <Control Type="7bit" Number="24" Name="Assignable"/>
+      <Control Type="7bit" Number="25" Name="Assignable"/>
+      <Control Type="7bit" Number="26" Name="Assignable"/>
+      <Control Type="7bit" Number="27" Name="Assignable"/>
+      <Control Type="7bit" Number="28" Name="Assignable"/>
+      <Control Type="7bit" Number="29" Name="Assignable"/>
+      <Control Type="7bit" Number="30" Name="Assignable"/>
+      <Control Type="7bit" Number="33" Name="Assignable"/>
+      <Control Type="7bit" Number="34" Name="Assignable"/>
+      <Control Type="7bit" Number="35" Name="Assignable"/>
+      <Control Type="7bit" Number="36" Name="Assignable"/>
+      <Control Type="7bit" Number="37" Name="Assignable"/>
+      <Control Type="7bit" Number="39" Name="Assignable"/>
+      <Control Type="7bit" Number="40" Name="Assignable"/>
+      <Control Type="7bit" Number="41" Name="Assignable"/>
+      <Control Type="7bit" Number="42" Name="Assignable"/>
+      <Control Type="7bit" Number="43" Name="Assignable"/>
+      <Control Type="7bit" Number="44" Name="Assignable"/>
+      <Control Type="7bit" Number="45" Name="Assignable"/>
+      <Control Type="7bit" Number="46" Name="Assignable"/>
+      <Control Type="7bit" Number="47" Name="Assignable"/>
+      <Control Type="7bit" Number="48" Name="Assignable"/>
+      <Control Type="7bit" Number="49" Name="Assignable"/>
+      <Control Type="7bit" Number="50" Name="Assignable"/>
+      <Control Type="7bit" Number="51" Name="Assignable"/>
+      <Control Type="7bit" Number="52" Name="Assignable"/>
+      <Control Type="7bit" Number="53" Name="Assignable"/>
+      <Control Type="7bit" Number="54" Name="Assignable"/>
+      <Control Type="7bit" Number="55" Name="Assignable"/>
+      <Control Type="7bit" Number="56" Name="Assignable"/>
+      <Control Type="7bit" Number="57" Name="Assignable"/>
+      <Control Type="7bit" Number="58" Name="Assignable"/>
+      <Control Type="7bit" Number="59" Name="Assignable"/>
+      <Control Type="7bit" Number="60" Name="Assignable"/>
+      <Control Type="7bit" Number="61" Name="Assignable"/>
+      <Control Type="7bit" Number="62" Name="Assignable"/>
+      <Control Type="7bit" Number="63" Name="Assignable"/>
+      <Control Type="7bit" Number="67" Name="Assignable"/>
+      <Control Type="7bit" Number="68" Name="Assignable"/>
+      <Control Type="7bit" Number="69" Name="Assignable"/>
+      <Control Type="7bit" Number="70" Name="Assignable"/>
+      <Control Type="7bit" Number="76" Name="Assignable"/>
+      <Control Type="7bit" Number="77" Name="Assignable"/>
+      <Control Type="7bit" Number="78" Name="Assignable"/>
+      <Control Type="7bit" Number="79" Name="Assignable"/>
+      <Control Type="7bit" Number="80" Name="Assignable"/>
+      <Control Type="7bit" Number="81" Name="Assignable"/>
+      <Control Type="7bit" Number="82" Name="Assignable"/>
+      <Control Type="7bit" Number="83" Name="Assignable"/>
+      <Control Type="7bit" Number="84" Name="Assignable"/>
+      <Control Type="7bit" Number="85" Name="Assignable"/>
+      <Control Type="7bit" Number="86" Name="Assignable"/>
+      <Control Type="7bit" Number="87" Name="Assignable"/>
+      <Control Type="7bit" Number="88" Name="Assignable"/>
+      <Control Type="7bit" Number="89" Name="Assignable"/>
+      <Control Type="7bit" Number="90" Name="Assignable"/>
+      <Control Type="7bit" Number="92" Name="Assignable"/>
+      <Control Type="7bit" Number="94" Name="Assignable"/>
+      <Control Type="7bit" Number="95" Name="Assignable"/>
+      <Control Type="7bit" Number="102" Name="Unsupported"/>
+      <Control Type="7bit" Number="103" Name="Unsupported"/>
+      <Control Type="7bit" Number="104" Name="Unsupported"/>
+      <Control Type="7bit" Number="105" Name="Unsupported"/>
+      <Control Type="7bit" Number="106" Name="Unsupported"/>
+      <Control Type="7bit" Number="107" Name="Unsupported"/>
+      <Control Type="7bit" Number="108" Name="Unsupported"/>
+      <Control Type="7bit" Number="109" Name="Unsupported"/>
+      <Control Type="7bit" Number="110" Name="Unsupported"/>
+      <Control Type="7bit" Number="111" Name="Unsupported"/>
+      <Control Type="7bit" Number="112" Name="Unsupported"/>
+      <Control Type="7bit" Number="113" Name="Unsupported"/>
+      <Control Type="7bit" Number="114" Name="Unsupported"/>
+      <Control Type="7bit" Number="115" Name="Unsupported"/>
+      <Control Type="7bit" Number="116" Name="Unsupported"/>
+      <Control Type="7bit" Number="117" Name="Unsupported"/>
+      <Control Type="7bit" Number="118" Name="Unsupported"/>
+      <Control Type="7bit" Number="119" Name="Unsupported"/>
+      <Control Type="7bit" Number="122" Name="Unsupported"/>
+    </ControlNameList>
   </MasterDeviceNames>
 </MIDINameDocument>
