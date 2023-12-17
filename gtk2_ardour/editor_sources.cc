@@ -181,7 +181,7 @@ EditorSources::remove_selected_sources ()
 
 	prompt = _("Do you want to remove the selected Sources?"
 	           "\nThis operation cannot be undone."
-	           "\nThe source files will not actually be deleted until you execute Session->Cleanup.");
+	           "\nThe source files will not actually be deleted until you execute Session -> Cleanup.");
 
 	choices.push_back (_("No, do nothing."));
 	choices.push_back (_("Only remove the Regions that use these Sources."));

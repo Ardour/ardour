@@ -4331,7 +4331,7 @@ These settings will only take effect after %1 is restarted.\n\
 		     );
 	add_option (_("Monitoring"), bo);
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
-			string_compose (_("<b>When enabled</b>, and Transport->Auto-Input is enabled, %1 will always monitor audio inputs when transport is stopped, even if tracks aren't armed."),
+			string_compose (_("<b>When enabled</b>, and Transport -> Auto-Input is enabled, %1 will always monitor audio inputs when transport is stopped, even if tracks aren't armed."),
 					PROGRAM_NAME));
 
 	add_option (_("Monitoring"), new OptionEditorHeading (_("Solo")));

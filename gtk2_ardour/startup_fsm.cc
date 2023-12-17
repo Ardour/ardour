@@ -989,7 +989,7 @@ release software. So, a few guidelines:\n\
    There is no bug triaging before the initial development concludes and\n\
    reporting issue for incomplete, ongoing work-in-progress is mostly useless.\n\
 5) Please <b>DO</b> join us on IRC for real time discussions about %1 %2. You\n\
-   can get there directly from within the program via the Help->Chat menu option.\n\
+   can get there directly from within the program via the Help -> Chat menu option.\n\
 6) Please <b>DO</b> submit patches for issues after discussing them on IRC.\n\
 \n\
 Full information on all the above can be found on the support page at\n\
