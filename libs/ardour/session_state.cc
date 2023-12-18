@@ -2832,7 +2832,7 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 
 	if ((prop = node.property (X_("source-0"))) == 0) {
 		if ((prop = node.property ("source")) == 0) {
-			error << _("Session: XMLNode describing a AudioRegion is incomplete (no source)") << endmsg;
+			error << _("Session: XMLNode describing an AudioRegion is incomplete (no source)") << endmsg;
 			return std::shared_ptr<AudioRegion>();
 		}
 	}
@@ -2840,13 +2840,13 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 	PBD::ID s_id (prop->value());
 
 	if ((source = source_by_id (s_id)) == 0) {
-		error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), s_id) << endmsg;
+		error << string_compose(_("Session: XMLNode describing an AudioRegion references an unknown source id =%1"), s_id) << endmsg;
 		return std::shared_ptr<AudioRegion>();
 	}
 
 	as = std::dynamic_pointer_cast<AudioSource>(source);
 	if (!as) {
-		error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), s_id) << endmsg;
+		error << string_compose(_("Session: XMLNode describing an AudioRegion references a non-audio source id =%1"), s_id) << endmsg;
 		return std::shared_ptr<AudioRegion>();
 	}
 
@@ -2861,13 +2861,13 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 			PBD::ID id2 (prop->value());
 
 			if ((source = source_by_id (id2)) == 0) {
-				error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), id2) << endmsg;
+				error << string_compose(_("Session: XMLNode describing an AudioRegion references an unknown source id =%1"), id2) << endmsg;
 				return std::shared_ptr<AudioRegion>();
 			}
 
 			as = std::dynamic_pointer_cast<AudioSource>(source);
 			if (!as) {
-				error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), id2) << endmsg;
+				error << string_compose(_("Session: XMLNode describing an AudioRegion references a non-audio source id =%1"), id2) << endmsg;
 				return std::shared_ptr<AudioRegion>();
 			}
 			sources.push_back (as);
@@ -2881,13 +2881,13 @@ Session::XMLAudioRegionFactory (const XMLNode& node, bool /*full*/)
 			PBD::ID id2 (prop->value());
 
 			if ((source = source_by_id (id2)) == 0) {
-				error << string_compose(_("Session: XMLNode describing a AudioRegion references an unknown source id =%1"), id2) << endmsg;
+				error << string_compose(_("Session: XMLNode describing an AudioRegion references an unknown source id =%1"), id2) << endmsg;
 				return std::shared_ptr<AudioRegion>();
 			}
 
 			as = std::dynamic_pointer_cast<AudioSource>(source);
 			if (!as) {
-				error << string_compose(_("Session: XMLNode describing a AudioRegion references a non-audio source id =%1"), id2) << endmsg;
+				error << string_compose(_("Session: XMLNode describing an AudioRegion references a non-audio source id =%1"), id2) << endmsg;
 				return std::shared_ptr<AudioRegion>();
 			}
 			master_sources.push_back (as);

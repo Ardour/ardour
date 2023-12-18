@@ -169,7 +169,7 @@ SessionDirectory::sources_root () const
 		}
 		else if (entries.size() > 1) {
 			PBD::open_folder (sources_root_path);
-			PBD::fatal << string_compose (_("The session's interchange dir is tainted.\nThere is more than one folder in '%1'.\nPlease remove extra subdirs to reduce possible filename ambiguties."), sources_root_path) << endmsg;
+			PBD::fatal << string_compose (_("The session's interchange dir is tainted.\nThere is more than one folder in '%1'.\nPlease remove extra subdirs to reduce possible filename ambiguities."), sources_root_path) << endmsg;
 			assert (0); // not reached
 		}
 	} catch (Glib::FileError const&) {

@@ -158,7 +158,7 @@ Plugin::save_preset (string name)
 {
 	Plugin::PresetRecord const* p = preset_by_label (name);
 	if (p && !p->user) {
-		PBD::error << _("A factory presets with given name already exists.") << endmsg;
+		PBD::error << _("A factory preset with given name already exists.") << endmsg;
 		return Plugin::PresetRecord ();
 	}
 

@@ -761,7 +761,7 @@ Track::find_and_use_playlist (DataType dt, PBD::ID const & id)
 	}
 
 	if (!playlist) {
-		error << string_compose(_("DiskIOProcessor: \"%1\" isn't an playlist"), id.to_s()) << endmsg;
+		error << string_compose(_("DiskIOProcessor: \"%1\" isn't a playlist"), id.to_s()) << endmsg;
 		return -1;
 	}
 

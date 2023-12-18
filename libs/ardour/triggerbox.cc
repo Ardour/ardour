@@ -161,13 +161,13 @@ ARDOUR::cue_marker_name (int32_t index)
 	case 8: return string (_("I"));
 	case 9: return string (_("J"));
 	case 10: return string (_("K"));
-	case 11: return string (_("L"));
+	case 11: return string (_("L")); // "L" isn't translatable here -do we need a context?
 	case 12: return string (_("M"));
 	case 13: return string (_("N"));
 	case 14: return string (_("O"));
 	case 15: return string (_("P"));
 	case 16: return string (_("Q"));
-	case 17: return string (_("R"));
+	case 17: return string (_("R")); // "R" isn't translatable here -do we need a context?
 	case 18: return string (_("S"));
 	case 19: return string (_("T"));
 	case 20: return string (_("U"));
