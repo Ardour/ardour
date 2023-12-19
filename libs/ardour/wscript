@@ -122,6 +122,7 @@ libardour_sources = [
         'lua_api.cc',
         'luaproc.cc',
         'luascripting.cc',
+        'lufs_meter.cc',
         'meter.cc',
         'midi_automation_list_binder.cc',
         'midi_buffer.cc',
