@@ -37,11 +37,21 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
+    if "dummy" not in conf.env["BACKENDS"]:
+        print(
+            "libaaf is needed by session_utils/new-aaf-session which depends on the dummy backend."
+        )
+        autowaf.display_msg(conf, "build/use libaaf", "no")
+        return
+
+    autowaf.display_msg(conf, "build/use libaaf", "yes")
+
     if conf.is_defined('USE_EXTERNAL_LIBS'):
         autowaf.check_pkg(conf, 'aaf', uselib_store='LIBAAF', mandatory=True)
 
+
 def build(bld):
-    if bld.is_defined('USE_EXTERNAL_LIBS'):
+    if "dummy" not in conf.env["BACKENDS"] or bld.is_defined('USE_EXTERNAL_LIBS'):
         return
 
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):
