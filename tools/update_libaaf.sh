@@ -1,5 +1,7 @@
 #!/bin/sh
 
+LOCAL_AAF_PROJECT="$1"
+
 if ! test -f wscript || ! test -d gtk2_ardour; then
 	echo "This script needs to run from ardour's top-level src tree"
 	exit 1
@@ -14,23 +16,34 @@ ASRC=`pwd`
 set -e
 mkdir -p "$ASRC/libs/aaf/aaf"
 
-TMP=`mktemp -d`
-test -d "$TMP"
-echo $TMP
+if [ -z "${LOCAL_AAF_PROJECT}" ]; then
+	# Using git repos
+	TMP=`mktemp -d`
+	test -d "$TMP"
+	echo $TMP
 
-trap "rm -rf $TMP" EXIT
+	trap "rm -rf $TMP" EXIT
 
-cd $TMP
-git clone https://github.com/agfline/LibAAF.git aaf
+	cd $TMP
+	git clone https://github.com/agfline/LibAAF.git aaf
 
-cd aaf
-git describe --tags
-LIBAAF_VERSION=$(git describe --tags --dirty --match "v*")
-cd $TMP
+	cd aaf
+	git describe --tags
+	LIBAAF_VERSION=$(git describe --tags --dirty --match "v*")
+	cd $TMP
 
-AAF=aaf/
+	AAF=aaf/
+	RSYNC_OPT="-auc --info=progress2"
+else
+	# Using local project
+	LIBAAF_VERSION="v0-local"
+	cd "${LOCAL_AAF_PROJECT}"
+	echo $PWD
+	AAF="./"
+	RSYNC_OPT="-ac --info=progress2"
+fi
 
-rsync -auc --info=progress2 \
+rsync $RSYNC_OPT \
   ${AAF}src/LibCFB/LibCFB.c \
   ${AAF}src/LibCFB/CFBDump.c \
   ${AAF}src/AAFCore/AAFCore.c \
