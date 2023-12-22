@@ -637,7 +637,7 @@ prepare_cache (AAF_Iface* aafi, string* media_cache_path)
 	const char* tmppath = g_get_tmp_dir ();
 
 	if (!aafi->compositionName || aafi->compositionName[0] == 0x00) {
-		*media_cache_path = g_build_path (G_DIR_SEPARATOR_S, tmppath, g_basename (aafi->aafd->cfbd->file), NULL); //+ string(DIR_SEP_STR);
+		*media_cache_path = g_build_path (G_DIR_SEPARATOR_S, tmppath, g_path_get_basename (aafi->aafd->cfbd->file), NULL); //+ string(DIR_SEP_STR);
 	} else {
 		int   compoNameLen = wcslen (aafi->compositionName) + 1;
 		char* compoName    = (char*)malloc (compoNameLen);
@@ -879,7 +879,7 @@ main (int argc, char* argv[])
 	 * using a file pointer avoids the need to reimplement debug_callback()
 	 */
 
-	string logfile = g_build_path (G_DIR_SEPARATOR_S, output_folder.c_str (), string (string (g_basename (aaf_file.c_str ())) + ".log").c_str (), NULL);
+	string logfile = g_build_path (G_DIR_SEPARATOR_S, output_folder.c_str (), string (string (g_path_get_basename (aaf_file.c_str ())) + ".log").c_str (), NULL);
 
 	PBD::info << string_compose ("Writting AAF log to : %1", logfile) << endmsg;
 
