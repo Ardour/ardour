@@ -42,262 +42,300 @@
 #define PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_KO_LEN 11   // +1
 
 /* English : "Fade "	(Same as JA and DE)	 */
-static const wchar_t PROTOOLS_CLIP_NAME_FADE_EN[] = L"\x0046\x0061\x0064\x0065\x0020\x0000";
+static const wchar_t PROTOOLS_CLIP_NAME_FADE_EN[] =
+    L"\x0046\x0061\x0064\x0065\x0020\x0000";
 /* German : "Fade "	(Same as JA and EN)	 */
-// static const wchar_t PROTOOLS_CLIP_NAME_FADE_DE[] = L"\x0046\x0061\x0064\x0065\x0020\x0000";
+// static const wchar_t PROTOOLS_CLIP_NAME_FADE_DE[] =
+// L"\x0046\x0061\x0064\x0065\x0020\x0000";
 /* Japanese : "Fade "	(Same as EN and DE)	 */
-// static const wchar_t PROTOOLS_CLIP_NAME_FADE_JA[] = L"\x0046\x0061\x0064\x0065\x0020\x0000";
+// static const wchar_t PROTOOLS_CLIP_NAME_FADE_JA[] =
+// L"\x0046\x0061\x0064\x0065\x0020\x0000";
 /* French : "Fondu "	*/
-static const wchar_t PROTOOLS_CLIP_NAME_FADE_FR[] = L"\x0046\x006f\x006e\x0064\x0075\x0020\x0000";
+static const wchar_t PROTOOLS_CLIP_NAME_FADE_FR[] =
+    L"\x0046\x006f\x006e\x0064\x0075\x0020\x0000";
 /* Spanish : "Fundido"	*/
-static const wchar_t PROTOOLS_CLIP_NAME_FADE_ES[] = L"\x0046\x0075\x006e\x0064\x0069\x0064\x006f\x0020\x0000";
+static const wchar_t PROTOOLS_CLIP_NAME_FADE_ES[] =
+    L"\x0046\x0075\x006e\x0064\x0069\x0064\x006f\x0020\x0000";
 /* Chinese (S) : "淡变 " */
-static const wchar_t PROTOOLS_CLIP_NAME_FADE_ZH_CN[] = L"\x6de1\x53d8\x0020\x0000";
+static const wchar_t PROTOOLS_CLIP_NAME_FADE_ZH_CN[] =
+    L"\x6de1\x53d8\x0020\x0000";
 /* Chinese (T) : "淡變 " */
-static const wchar_t PROTOOLS_CLIP_NAME_FADE_ZH_TW[] = L"\x6de1\x8b8a\x0020\x0000";
+static const wchar_t PROTOOLS_CLIP_NAME_FADE_ZH_TW[] =
+    L"\x6de1\x8b8a\x0020\x0000";
 /* Korean : "페이드"	*/
 static const wchar_t PROTOOLS_CLIP_NAME_FADE_KO[] = L"\xd398\xc774\xb4dc\x0000";
 
 /* English : "Sample accurate edit"	*/
-static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_EN[] = L"\x0053\x0061\x006d\x0070\x006c\x0065\x0020\x0061\x0063\x0063\x0075\x0072\x0061\x0074\x0065\x0020\x0065\x0064\x0069\x0074\x0000";
+static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_EN[] =
+    L"\x0053\x0061\x006d\x0070\x006c\x0065\x0020\x0061\x0063\x0063\x0075\x0072"
+    L"\x0061\x0074\x0065\x0020\x0065\x0064\x0069\x0074\x0000";
 /* German : "Samplegenaue Bearbeitung"	*/
-static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_DE[] = L"\x0053\x0061\x006d\x0070\x006c\x0065\x0067\x0065\x006e\x0061\x0075\x0065\x0020\x0042\x0065\x0061\x0072\x0062\x0065\x0069\x0074\x0075\x006e\x0067\x0000";
+static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_DE[] =
+    L"\x0053\x0061\x006d\x0070\x006c\x0065\x0067\x0065\x006e\x0061\x0075\x0065"
+    L"\x0020\x0042\x0065\x0061\x0072\x0062\x0065\x0069\x0074\x0075\x006e\x0067"
+    L"\x0000";
 /* Spanish : "Edición con precisión de muestra"	*/
-static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ES[] = L"\x0045\x0064\x0069\x0063\x0069\x00f3\x006e\x0020\x0063\x006f\x006e\x0020\x0070\x0072\x0065\x0063\x0069\x0073\x0069\x00f3\x006e\x0020\x0064\x0065\x0020\x006d\x0075\x0065\x0073\x0074\x0072\x0061\x0000";
+static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ES[] =
+    L"\x0045\x0064\x0069\x0063\x0069\x00f3\x006e\x0020\x0063\x006f\x006e\x0020"
+    L"\x0070\x0072\x0065\x0063\x0069\x0073\x0069\x00f3\x006e\x0020\x0064\x0065"
+    L"\x0020\x006d\x0075\x0065\x0073\x0074\x0072\x0061\x0000";
 /* French : "Modification à l'échantillon près"	*/
-static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_FR[] = L"\x004d\x006f\x0064\x0069\x0066\x0069\x0063\x0061\x0074\x0069\x006f\x006e\x0020\x00e0\x0020\x006c\x0027\x00e9\x0063\x0068\x0061\x006e\x0074\x0069\x006c\x006c\x006f\x006e\x0020\x0070\x0072\x00e8\x0073\x0000";
+static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_FR[] =
+    L"\x004d\x006f\x0064\x0069\x0066\x0069\x0063\x0061\x0074\x0069\x006f\x006e"
+    L"\x0020\x00e0\x0020\x006c\x0027\x00e9\x0063\x0068\x0061\x006e\x0074\x0069"
+    L"\x006c\x006c\x006f\x006e\x0020\x0070\x0072\x00e8\x0073\x0000";
 /* Japanese : "サンプル精度編集"	*/
-static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_JA[] = L"\x30b5\x30f3\x30d7\x30eb\x7cbe\x5ea6\x7de8\x96c6\x0000";
+static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_JA[] =
+    L"\x30b5\x30f3\x30d7\x30eb\x7cbe\x5ea6\x7de8\x96c6\x0000";
 /* Chinese (S) : "精确采样编辑"	*/
-static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ZH_CN[] = L"\x7cbe\x786e\x91c7\x6837\x7f16\x8f91\x0000";
+static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ZH_CN[] =
+    L"\x7cbe\x786e\x91c7\x6837\x7f16\x8f91\x0000";
 /* Chinese (T) : "精確取樣編輯"	*/
-static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ZH_TW[] = L"\x7cbe\x78ba\x53d6\x6a23\x7de8\x8f2f\x0000";
+static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ZH_TW[] =
+    L"\x7cbe\x78ba\x53d6\x6a23\x7de8\x8f2f\x0000";
 /* Korean : "샘플 단위 정밀 편집"	*/
-static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_KO[] = L"\xc0d8\xd50c\x0020\xb2e8\xc704\x0020\xc815\xbc00\x0020\xd3b8\xc9d1\x0000";
+static const wchar_t PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_KO[] =
+    L"\xc0d8\xd50c\x0020\xb2e8\xc704\x0020\xc815\xbc00\x0020\xd3b8\xc9d1\x0000";
 
-static int
-is_rendered_fade (const wchar_t* clipName);
-static int
-is_sample_accurate_edit (const wchar_t* clipName);
-static int
-replace_clipfade_with_fade (AAF_Iface* aafi, aafiTimelineItem* Item);
+static int is_rendered_fade(const wchar_t *clipName);
+static int is_sample_accurate_edit(const wchar_t *clipName);
+static int replace_clipfade_with_fade(AAF_Iface *aafi, aafiTimelineItem *Item);
 
-int
-protools_AAF (struct AAF_Iface* aafi)
-{
-	int probe = 0;
+int protools_AAF(struct AAF_Iface *aafi) {
+  int probe = 0;
 
-	/* TODO: CompanyName is "Digidesign, Inc." in ProTools 10.3.10.613 AAF, but what about since ? */
+  /* TODO: CompanyName is "Digidesign, Inc." in ProTools 10.3.10.613 AAF, but
+   * what about since ? */
 
-	// if ( aafi->aafd->Identification.CompanyName && wcscmp( aafi->aafd->Identification.CompanyName, L"Digidesign, Inc." ) == 0 ) {
-	//   probe++;
-	// }
+  // if ( aafi->aafd->Identification.CompanyName && wcscmp(
+  // aafi->aafd->Identification.CompanyName, L"Digidesign, Inc." ) == 0 ) {
+  //   probe++;
+  // }
 
-	if (aafi->aafd->Identification.ProductName && wcscmp (aafi->aafd->Identification.ProductName, L"ProTools") == 0) {
-		probe++;
-	}
+  if (aafi->aafd->Identification.ProductName &&
+      wcscmp(aafi->aafd->Identification.ProductName, L"ProTools") == 0) {
+    probe++;
+  }
 
-	if (probe == 1) {
-		return 1;
-	}
+  if (probe == 1) {
+    return 1;
+  }
 
-	return 0;
+  return 0;
 }
 
-static int
-is_rendered_fade (const wchar_t* clipName)
-{
-	return (memcmp (clipName, PROTOOLS_CLIP_NAME_FADE_EN, PROTOOLS_CLIP_NAME_FADE_EN_LEN) == 0) ||
-	       (memcmp (clipName, PROTOOLS_CLIP_NAME_FADE_ES, PROTOOLS_CLIP_NAME_FADE_ES_LEN) == 0) ||
-	       (memcmp (clipName, PROTOOLS_CLIP_NAME_FADE_FR, PROTOOLS_CLIP_NAME_FADE_FR_LEN) == 0) ||
-	       (memcmp (clipName, PROTOOLS_CLIP_NAME_FADE_ZH_CN, PROTOOLS_CLIP_NAME_FADE_ZH_CN_LEN) == 0) ||
-	       (memcmp (clipName, PROTOOLS_CLIP_NAME_FADE_ZH_TW, PROTOOLS_CLIP_NAME_FADE_ZH_TW_LEN) == 0) ||
-	       (memcmp (clipName, PROTOOLS_CLIP_NAME_FADE_KO, PROTOOLS_CLIP_NAME_FADE_KO_LEN) == 0);
+static int is_rendered_fade(const wchar_t *clipName) {
+
+  return (memcmp(clipName, PROTOOLS_CLIP_NAME_FADE_EN,
+                 PROTOOLS_CLIP_NAME_FADE_EN_LEN) == 0) ||
+         (memcmp(clipName, PROTOOLS_CLIP_NAME_FADE_ES,
+                 PROTOOLS_CLIP_NAME_FADE_ES_LEN) == 0) ||
+         (memcmp(clipName, PROTOOLS_CLIP_NAME_FADE_FR,
+                 PROTOOLS_CLIP_NAME_FADE_FR_LEN) == 0) ||
+         (memcmp(clipName, PROTOOLS_CLIP_NAME_FADE_ZH_CN,
+                 PROTOOLS_CLIP_NAME_FADE_ZH_CN_LEN) == 0) ||
+         (memcmp(clipName, PROTOOLS_CLIP_NAME_FADE_ZH_TW,
+                 PROTOOLS_CLIP_NAME_FADE_ZH_TW_LEN) == 0) ||
+         (memcmp(clipName, PROTOOLS_CLIP_NAME_FADE_KO,
+                 PROTOOLS_CLIP_NAME_FADE_KO_LEN) == 0);
 }
 
-static int
-is_sample_accurate_edit (const wchar_t* clipName)
-{
-	return (memcmp (clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_EN, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_EN_LEN) == 0) ||
-	       (memcmp (clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_DE, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_DE_LEN) == 0) ||
-	       (memcmp (clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ES, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ES_LEN) == 0) ||
-	       (memcmp (clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_FR, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_FR_LEN) == 0) ||
-	       (memcmp (clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_JA, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_JA_LEN) == 0) ||
-	       (memcmp (clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ZH_CN, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ZH_CN_LEN) == 0) ||
-	       (memcmp (clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ZH_TW, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ZH_TW_LEN) == 0) ||
-	       (memcmp (clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_KO, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_KO_LEN) == 0);
+static int is_sample_accurate_edit(const wchar_t *clipName) {
+
+  return (memcmp(clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_EN,
+                 PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_EN_LEN) == 0) ||
+         (memcmp(clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_DE,
+                 PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_DE_LEN) == 0) ||
+         (memcmp(clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ES,
+                 PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ES_LEN) == 0) ||
+         (memcmp(clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_FR,
+                 PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_FR_LEN) == 0) ||
+         (memcmp(clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_JA,
+                 PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_JA_LEN) == 0) ||
+         (memcmp(clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ZH_CN,
+                 PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ZH_CN_LEN) == 0) ||
+         (memcmp(clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ZH_TW,
+                 PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_ZH_TW_LEN) == 0) ||
+         (memcmp(clipName, PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_KO,
+                 PROTOOLS_CLIP_NAME_SAMPLE_ACCURATE_EDIT_KO_LEN) == 0);
 }
 
-static int
-replace_clipfade_with_fade (AAF_Iface* aafi, aafiTimelineItem* Item)
-{
-	if (Item->type != AAFI_AUDIO_CLIP) {
-		return -1;
-	}
+static int replace_clipfade_with_fade(AAF_Iface *aafi, aafiTimelineItem *Item) {
 
-	aafiAudioClip* audioClip = (aafiAudioClip*)Item->data;
+  if (Item->type != AAFI_AUDIO_CLIP) {
+    return -1;
+  }
 
-	aafPosition_t currentpos = audioClip->pos;
-	aafPosition_t currentlen = audioClip->len;
+  aafiAudioClip *audioClip = (aafiAudioClip *)Item->data;
 
-	aafiTimelineItem* transItem = calloc (sizeof (aafiTimelineItem) + sizeof (aafiTransition), sizeof (char));
+  aafPosition_t currentpos = audioClip->pos;
+  aafPosition_t currentlen = audioClip->len;
 
-	memset (transItem, 0x00, sizeof (aafiTimelineItem) + sizeof (aafiTransition));
+  aafiTimelineItem *transItem =
+      calloc(sizeof(aafiTimelineItem) + sizeof(aafiTransition), sizeof(char));
 
-	transItem->type = AAFI_TRANS;
-	transItem->next = NULL;
-	transItem->prev = NULL;
+  memset(transItem, 0x00, sizeof(aafiTimelineItem) + sizeof(aafiTransition));
 
-	transItem->data = calloc (sizeof (aafiTransition), sizeof (char));
+  transItem->type = AAFI_TRANS;
+  transItem->next = NULL;
+  transItem->prev = NULL;
 
-	aafiTransition* trans = transItem->data;
+  transItem->data = calloc(sizeof(aafiTransition), sizeof(char));
 
-	trans->len   = audioClip->len;
-	trans->flags = AAFI_INTERPOL_NONE;
+  aafiTransition *trans = transItem->data;
 
-	// debug( "%ls", audioClip->Essence->unique_file_name );
+  trans->len = audioClip->len;
+  trans->flags = AAFI_INTERPOL_NONE;
 
-	aafiAudioClip* prevClip = NULL;
-	aafiAudioClip* nextClip = NULL;
+  // debug( "%ls", audioClip->Essence->unique_file_name );
 
-	if (Item->prev != NULL) {
-		if (Item->prev->type == AAFI_AUDIO_CLIP) {
-			prevClip = (aafiAudioClip*)Item->prev->data;
+  aafiAudioClip *prevClip = NULL;
+  aafiAudioClip *nextClip = NULL;
 
-			// debug( "PREVIOUS POS %lu", prevClip->pos + prevClip->len );
-			// debug( "CURENT   POS %lu", currentpos );
+  if (Item->prev != NULL) {
+    if (Item->prev->type == AAFI_AUDIO_CLIP) {
+      prevClip = (aafiAudioClip *)Item->prev->data;
 
-			if (prevClip->pos + prevClip->len < currentpos - 1) {
-				prevClip = NULL;
-			}
-		}
-	}
+      // debug( "PREVIOUS POS %lu", prevClip->pos + prevClip->len );
+      // debug( "CURENT   POS %lu", currentpos );
 
-	if (Item->next != NULL) {
-		if (Item->next->type == AAFI_AUDIO_CLIP) {
-			nextClip = (aafiAudioClip*)Item->next->data;
+      if (prevClip->pos + prevClip->len < currentpos - 1) {
+        prevClip = NULL;
+      }
+    }
+  }
 
-			if (is_sample_accurate_edit (nextClip->Essence->file_name)) {
-				if (Item->next->next != NULL) {
-					nextClip = (aafiAudioClip*)Item->next->next->data;
+  if (Item->next != NULL) {
+    if (Item->next->type == AAFI_AUDIO_CLIP) {
+      nextClip = (aafiAudioClip *)Item->next->data;
 
-					// debug( "NEXT   POS %lu", nextClip->pos );
-					// debug( "CURENT POS %lu", currentpos + currentlen );
+      if (is_sample_accurate_edit(nextClip->Essence->file_name)) {
+        if (Item->next->next != NULL) {
+          nextClip = (aafiAudioClip *)Item->next->next->data;
 
-					if (nextClip->pos != currentpos + currentlen + 1) {
-						nextClip = NULL;
-					}
-				} else {
-					nextClip = NULL;
-				}
-			} else {
-				// nextClip = (aafiAudioClip*)Item->next->data;
+          // debug( "NEXT   POS %lu", nextClip->pos );
+          // debug( "CURENT POS %lu", currentpos + currentlen );
 
-				// debug( "NEXT   POS %lu", nextClip->pos );
-				// debug( "CURENT POS %lu", currentpos + currentlen );
+          if (nextClip->pos != currentpos + currentlen + 1) {
+            nextClip = NULL;
+          }
+        } else {
+          nextClip = NULL;
+        }
+      } else {
+        // nextClip = (aafiAudioClip*)Item->next->data;
 
-				if (nextClip->pos != currentpos + currentlen) {
-					nextClip = NULL;
-				}
-			}
-		}
-	}
+        // debug( "NEXT   POS %lu", nextClip->pos );
+        // debug( "CURENT POS %lu", currentpos + currentlen );
 
-	trans->time_a  = calloc (2, sizeof (aafRational_t));
-	trans->value_a = calloc (2, sizeof (aafRational_t));
+        if (nextClip->pos != currentpos + currentlen) {
+          nextClip = NULL;
+        }
+      }
+    }
+  }
 
-	trans->time_a[0].numerator   = 0;
-	trans->time_a[0].denominator = 0;
-	trans->time_a[1].numerator   = 1;
-	trans->time_a[1].denominator = 1;
+  trans->time_a = calloc(2, sizeof(aafRational_t));
+  trans->value_a = calloc(2, sizeof(aafRational_t));
 
-	if (prevClip && nextClip) {
-		// debug( ":: XFADE" );
-		trans->flags |= AAFI_TRANS_XFADE;
+  trans->time_a[0].numerator = 0;
+  trans->time_a[0].denominator = 0;
+  trans->time_a[1].numerator = 1;
+  trans->time_a[1].denominator = 1;
 
-		trans->value_a[0].numerator   = 0;
-		trans->value_a[0].denominator = 0;
-		trans->value_a[1].numerator   = 1;
-		trans->value_a[1].denominator = 1;
-	} else if (prevClip) {
-		// debug( ":: FADE OUT" );
-		trans->flags |= AAFI_TRANS_FADE_OUT;
+  if (prevClip && nextClip) {
+    // debug( ":: XFADE" );
+    trans->flags |= AAFI_TRANS_XFADE;
 
-		trans->value_a[0].numerator   = 1;
-		trans->value_a[0].denominator = 1;
-		trans->value_a[1].numerator   = 0;
-		trans->value_a[1].denominator = 0;
-	} else if (nextClip) {
-		// debug( ":: FADE IN" );
-		trans->flags |= AAFI_TRANS_FADE_IN;
+    trans->value_a[0].numerator = 0;
+    trans->value_a[0].denominator = 0;
+    trans->value_a[1].numerator = 1;
+    trans->value_a[1].denominator = 1;
+  } else if (prevClip) {
+    // debug( ":: FADE OUT" );
+    trans->flags |= AAFI_TRANS_FADE_OUT;
 
-		trans->value_a[0].numerator   = 0;
-		trans->value_a[0].denominator = 0;
-		trans->value_a[1].numerator   = 1;
-		trans->value_a[1].denominator = 1;
-	}
+    trans->value_a[0].numerator = 1;
+    trans->value_a[0].denominator = 1;
+    trans->value_a[1].numerator = 0;
+    trans->value_a[1].denominator = 0;
+  } else if (nextClip) {
+    // debug( ":: FADE IN" );
+    trans->flags |= AAFI_TRANS_FADE_IN;
 
-	if (Item->prev) {
-		Item->prev->next = transItem;
-		transItem->prev  = Item->prev;
-	} else {
-		aafiAudioTrack* audioTrack = NULL;
+    trans->value_a[0].numerator = 0;
+    trans->value_a[0].denominator = 0;
+    trans->value_a[1].numerator = 1;
+    trans->value_a[1].denominator = 1;
+  }
 
-		foreach_audioTrack (audioTrack, aafi)
-		{
-			if (audioTrack->Items == Item) {
-				audioTrack->Items = transItem;
-			}
-		}
+  if (Item->prev) {
+    Item->prev->next = transItem;
+    transItem->prev = Item->prev;
+  } else {
+    aafiAudioTrack *audioTrack = NULL;
 
-		transItem->prev = NULL;
-	}
+    foreach_audioTrack(audioTrack, aafi) {
 
-	if (Item->next) {
-		Item->next->prev = transItem;
-	}
+      if (audioTrack->Items == Item) {
+        audioTrack->Items = transItem;
+      }
+    }
 
-	transItem->next = Item->next;
+    transItem->prev = NULL;
+  }
 
-	aafi_freeTimelineItem (&Item);
+  if (Item->next) {
+    Item->next->prev = transItem;
+  }
 
-	return 0;
+  transItem->next = Item->next;
+
+  aafi_freeTimelineItem(&Item);
+
+  return 0;
 }
 
-int
-protools_post_processing (AAF_Iface* aafi /*, enum protools_options flags*/)
-{
-	aafiAudioTrack* audioTrack = NULL;
+int protools_post_processing(
+    AAF_Iface *aafi /*, enum protools_options flags*/) {
 
-	foreach_audioTrack (audioTrack, aafi)
-	{
-		aafiTimelineItem* audioItem = audioTrack->Items;
+  aafiAudioTrack *audioTrack = NULL;
 
-		while (audioItem != NULL) {
-			if (audioItem->type != AAFI_AUDIO_CLIP) {
-				audioItem = audioItem->next;
-				continue;
-			}
+  foreach_audioTrack(audioTrack, aafi) {
 
-			aafiAudioClip* audioClip = (aafiAudioClip*)audioItem->data;
+    aafiTimelineItem *audioItem = audioTrack->Items;
 
-			wchar_t* clipName = audioClip->Essence->file_name;
+    while (audioItem != NULL) {
 
-			if ((aafi->ctx.options.protools & PROTOOLS_REPLACE_CLIP_FADES) && is_rendered_fade (clipName)) {
-				replace_clipfade_with_fade (aafi, audioItem);
+      if (audioItem->type != AAFI_AUDIO_CLIP) {
+        audioItem = audioItem->next;
+        continue;
+      }
 
-				audioItem = audioTrack->Items;
-				continue;
-			} else if ((aafi->ctx.options.protools & PROTOOLS_REMOVE_SAMPLE_ACCURATE_EDIT) && is_sample_accurate_edit (clipName)) {
-				aafi_removeTimelineItem (aafi, audioItem);
+      aafiAudioClip *audioClip = (aafiAudioClip *)audioItem->data;
 
-				audioItem = audioTrack->Items;
-				continue;
-			}
+      wchar_t *clipName = audioClip->Essence->file_name;
 
-			audioItem = audioItem->next;
-		}
-	}
+      if ((aafi->ctx.options.protools & PROTOOLS_REPLACE_CLIP_FADES) &&
+          is_rendered_fade(clipName)) {
 
-	return 0;
+        replace_clipfade_with_fade(aafi, audioItem);
+
+        audioItem = audioTrack->Items;
+        continue;
+      } else if ((aafi->ctx.options.protools &
+                  PROTOOLS_REMOVE_SAMPLE_ACCURATE_EDIT) &&
+                 is_sample_accurate_edit(clipName)) {
+
+        aafi_removeTimelineItem(aafi, audioItem);
+
+        audioItem = audioTrack->Items;
+        continue;
+      }
+
+      audioItem = audioItem->next;
+    }
+  }
+
+  return 0;
 }

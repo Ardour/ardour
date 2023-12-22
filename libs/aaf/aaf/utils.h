@@ -32,59 +32,58 @@ extern "C" {
 #define DIR_SEP '\\'
 #define DIR_SEP_STR "\\"
 /*
-	 * swprintf() specific string format identifiers
-	 * https://learn.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions?view=msvc-170#type
-	 */
+ * swprintf() specific string format identifiers
+ * https://learn.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions?view=msvc-170#type
+ */
 #define WPRIs L"S"  // char*
 #define WPRIws L"s" // wchar_t*
 #else
 #define DIR_SEP '/'
 #define DIR_SEP_STR "/"
 /*
-	 * swprintf() specific string format identifiers
-	 * https://learn.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions?view=msvc-170#type
-	 */
+ * swprintf() specific string format identifiers
+ * https://learn.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions?view=msvc-170#type
+ */
 #define WPRIs L"s"   // char*
 #define WPRIws L"ls" // wchar_t*
 #endif
 
-#define IS_DIR_SEP(c) \
-	((((c) == DIR_SEP) || ((c) == '/')))
+#define IS_DIR_SEP(c) ((((c) == DIR_SEP) || ((c) == '/')))
 
-#define ANSI_COLOR_RED "\033[38;5;124m" //"\x1b[31m"
-#define ANSI_COLOR_GREEN "\x1b[92m"
-#define ANSI_COLOR_YELLOW "\x1b[33m" //"\x1b[93m"
-#define ANSI_COLOR_ORANGE "\033[38;5;130m"
-#define ANSI_COLOR_BLUE "\x1b[34m"
-#define ANSI_COLOR_MAGENTA "\x1b[35m"
-#define ANSI_COLOR_CYAN "\033[38;5;81m" //"\x1b[36m"
-#define ANSI_COLOR_DARKGREY "\x1b[38;5;242m"
-#define ANSI_COLOR_BOLD "\x1b[1m"
-#define ANSI_COLOR_RESET "\x1b[0m"
+#define ANSI_COLOR_RED(dbg)                                                    \
+  (((dbg)->ansicolor) ? "\033[38;5;124m" : "") //"\x1b[31m"
+#define ANSI_COLOR_GREEN(dbg) (((dbg)->ansicolor) ? "\x1b[92m" : "")
+#define ANSI_COLOR_YELLOW(dbg)                                                 \
+  (((dbg)->ansicolor) ? "\x1b[33m" : "") //"\x1b[93m"
+#define ANSI_COLOR_ORANGE(dbg) (((dbg)->ansicolor) ? "\033[38;5;130m" : "")
+#define ANSI_COLOR_BLUE(dbg) (((dbg)->ansicolor) ? "\x1b[34m" : "")
+#define ANSI_COLOR_MAGENTA(dbg) (((dbg)->ansicolor) ? "\x1b[35m" : "")
+#define ANSI_COLOR_CYAN(dbg)                                                   \
+  (((dbg)->ansicolor) ? "\033[38;5;81m" : "") //"\x1b[36m"
+#define ANSI_COLOR_DARKGREY(dbg) (((dbg)->ansicolor) ? "\x1b[38;5;242m" : "")
+#define ANSI_COLOR_BOLD(dbg) (((dbg)->ansicolor) ? "\x1b[1m" : "")
+#define ANSI_COLOR_RESET(dbg) (((dbg)->ansicolor) ? "\x1b[0m" : "")
 
-int
-laaf_util_wstr_contains_nonlatin (const wchar_t* str);
+int laaf_util_wstr_contains_nonlatin(const wchar_t *str);
 
-char*
-laaf_util_clean_filename (char* filename);
+char *laaf_util_clean_filename(char *filename);
 
-const char*
-laaf_util_fop_get_file (const char* filepath);
+const char *laaf_util_fop_get_file(const char *filepath);
 
-char*
-laaf_util_build_path (const char* sep, const char* first, ...);
+int laaf_util_fop_is_wstr_fileext(const wchar_t *filepath, const wchar_t *ext);
 
-int
-laaf_util_snprintf_realloc (char** str, int* size, size_t offset, const char* format, ...);
+char *laaf_util_build_path(const char *sep, const char *first, ...);
 
-int
-laaf_util_vsnprintf_realloc (char** str, int* size, int offset, const char* fmt, va_list* args);
+int laaf_util_snprintf_realloc(char **str, int *size, size_t offset,
+                               const char *format, ...);
 
-char*
-laaf_util_c99strdup (const char* src);
+int laaf_util_vsnprintf_realloc(char **str, int *size, int offset,
+                                const char *fmt, va_list *args);
 
-int
-laaf_util_dump_hex (const unsigned char* stream, size_t stream_sz, char** buf, int* bufsz, int offset);
+char *laaf_util_c99strdup(const char *src);
+
+int laaf_util_dump_hex(const unsigned char *stream, size_t stream_sz,
+                       char **buf, int *bufsz, int offset);
 
 #ifdef __cplusplus
 }

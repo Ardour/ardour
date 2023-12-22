@@ -76,11 +76,11 @@ rsync -auc --info=progress2 \
 	${AAF}include/libaaf/AAFDump.h \
 	${AAF}include/libaaf/AAFTypes.h \
 	${AAF}include/libaaf/LibCFB.h \
+	${AAF}include/libaaf/utils.h \
 	\
   ${AAF}src/AAFCore/AAFClass.h \
   ${AAF}src/AAFIface/RIFFParser.h \
   ${AAF}src/AAFIface/URIParser.h \
-  ${AAF}src/common/utils.h \
 	\
 	${AAF}include/libaaf/AAFDefs \
 	\

@@ -27,116 +27,103 @@
 
 enum uri_option {
 
-	URI_OPT_NONE = 0,
+  URI_OPT_NONE = 0,
 
-	URI_OPT_IGNORE_USERPASS = (1 << 0),
-	URI_OPT_IGNORE_QUERY    = (1 << 1),
-	URI_OPT_IGNORE_FRAGMENT = (1 << 2),
+  URI_OPT_IGNORE_USERPASS = (1 << 0),
+  URI_OPT_IGNORE_QUERY = (1 << 1),
+  URI_OPT_IGNORE_FRAGMENT = (1 << 2),
 
-	URI_OPT_DECODE_HOSTNAME = (1 << 3),
-	URI_OPT_DECODE_USERINFO = (1 << 4),
-	URI_OPT_DECODE_USERPASS = (1 << 5),
-	URI_OPT_DECODE_PATH     = (1 << 6),
-	URI_OPT_DECODE_QUERY    = (1 << 7),
-	URI_OPT_DECODE_FRAGMENT = (1 << 8)
+  URI_OPT_DECODE_HOSTNAME = (1 << 3),
+  URI_OPT_DECODE_USERINFO = (1 << 4),
+  URI_OPT_DECODE_USERPASS = (1 << 5),
+  URI_OPT_DECODE_PATH = (1 << 6),
+  URI_OPT_DECODE_QUERY = (1 << 7),
+  URI_OPT_DECODE_FRAGMENT = (1 << 8)
 };
 
-#define URI_OPT_DECODE_ALL (  \
-    URI_OPT_DECODE_HOSTNAME | \
-    URI_OPT_DECODE_USERINFO | \
-    URI_OPT_DECODE_USERPASS | \
-    URI_OPT_DECODE_PATH |     \
-    URI_OPT_DECODE_QUERY |    \
-    URI_OPT_DECODE_FRAGMENT)
+#define URI_OPT_DECODE_ALL                                                     \
+  (URI_OPT_DECODE_HOSTNAME | URI_OPT_DECODE_USERINFO |                         \
+   URI_OPT_DECODE_USERPASS | URI_OPT_DECODE_PATH | URI_OPT_DECODE_QUERY |      \
+   URI_OPT_DECODE_FRAGMENT)
 
 enum uri_type {
 
-	URI_T_GUESSED_OS_LINUX   = (1 << 0),
-	URI_T_GUESSED_OS_APPLE   = (1 << 1),
-	URI_T_GUESSED_OS_WINDOWS = (1 << 2),
+  URI_T_GUESSED_OS_LINUX = (1 << 0),
+  URI_T_GUESSED_OS_APPLE = (1 << 1),
+  URI_T_GUESSED_OS_WINDOWS = (1 << 2),
 
-	URI_T_HOST_EMPTY   = (1 << 3),
-	URI_T_HOST_IPV4    = (1 << 4),
-	URI_T_HOST_IPV6    = (1 << 5),
-	URI_T_HOST_REGNAME = (1 << 6),
+  URI_T_HOST_EMPTY = (1 << 3),
+  URI_T_HOST_IPV4 = (1 << 4),
+  URI_T_HOST_IPV6 = (1 << 5),
+  URI_T_HOST_REGNAME = (1 << 6),
 
-	URI_T_LOCALHOST = (1 << 7),
+  URI_T_LOCALHOST = (1 << 7),
 };
 
-#define URI_T_GUESSED_OS_MASK ( \
-    URI_T_GUESSED_OS_LINUX |    \
-    URI_T_GUESSED_OS_APPLE |    \
-    URI_T_GUESSED_OS_WINDOWS)
+#define URI_T_GUESSED_OS_MASK                                                  \
+  (URI_T_GUESSED_OS_LINUX | URI_T_GUESSED_OS_APPLE | URI_T_GUESSED_OS_WINDOWS)
 
-#define URI_T_HOST_MASK ( \
-    URI_T_HOST_EMPTY |    \
-    URI_T_HOST_IPV4 |     \
-    URI_T_HOST_IPV6 |     \
-    URI_T_HOST_REGNAME)
+#define URI_T_HOST_MASK                                                        \
+  (URI_T_HOST_EMPTY | URI_T_HOST_IPV4 | URI_T_HOST_IPV6 | URI_T_HOST_REGNAME)
 
 enum uri_scheme_type {
 
-	URI_SCHEME_T_UNKNOWN = 0,
-	URI_SCHEME_T_AFP,
-	URI_SCHEME_T_CIFS,
-	URI_SCHEME_T_DATA,
-	URI_SCHEME_T_DNS,
-	URI_SCHEME_T_FILE,
-	URI_SCHEME_T_FTP,
-	URI_SCHEME_T_HTTP,
-	URI_SCHEME_T_HTTPS,
-	URI_SCHEME_T_IMAP,
-	URI_SCHEME_T_IRC,
-	URI_SCHEME_T_MAILTO,
-	URI_SCHEME_T_NFS,
-	URI_SCHEME_T_POP,
-	URI_SCHEME_T_RTSP,
-	URI_SCHEME_T_SFTP,
-	URI_SCHEME_T_SIP,
-	URI_SCHEME_T_SMB,
-	URI_SCHEME_T_SSH,
-	URI_SCHEME_T_TEL,
-	URI_SCHEME_T_TELNET,
+  URI_SCHEME_T_UNKNOWN = 0,
+  URI_SCHEME_T_AFP,
+  URI_SCHEME_T_CIFS,
+  URI_SCHEME_T_DATA,
+  URI_SCHEME_T_DNS,
+  URI_SCHEME_T_FILE,
+  URI_SCHEME_T_FTP,
+  URI_SCHEME_T_HTTP,
+  URI_SCHEME_T_HTTPS,
+  URI_SCHEME_T_IMAP,
+  URI_SCHEME_T_IRC,
+  URI_SCHEME_T_MAILTO,
+  URI_SCHEME_T_NFS,
+  URI_SCHEME_T_POP,
+  URI_SCHEME_T_RTSP,
+  URI_SCHEME_T_SFTP,
+  URI_SCHEME_T_SIP,
+  URI_SCHEME_T_SMB,
+  URI_SCHEME_T_SSH,
+  URI_SCHEME_T_TEL,
+  URI_SCHEME_T_TELNET,
 };
 
 struct uri {
-	char* scheme;
-	char* authority;
-	char* userinfo;
-	char* user;
-	char* pass;
-	char* host;
-	int   port;
-	char* path;
-	char* query;
-	char* fragment;
 
-	enum uri_scheme_type scheme_t;
+  char *scheme;
+  char *authority;
+  char *userinfo;
+  char *user;
+  char *pass;
+  char *host;
+  int port;
+  char *path;
+  char *query;
+  char *fragment;
 
-	enum uri_option opts;
-	enum uri_type   flags;
+  enum uri_scheme_type scheme_t;
+
+  enum uri_option opts;
+  enum uri_type flags;
 };
 
-struct uri*
-uriParse (const char*, enum uri_option, struct dbg* dbg);
+struct uri *uriParse(const char *, enum uri_option, struct dbg *dbg);
 
-void
-uriFree (struct uri*);
+void uriFree(struct uri *);
 
 /*
  * if dst is NULL of equals src, then encoded source string will be overwritten
  * by decoded string.
  */
-char*
-uriDecodeString (char* src, char* dst);
+char *uriDecodeString(char *src, char *dst);
 
-char*
-uriDecodeWString (wchar_t* src, wchar_t* dst);
+char *uriDecodeWString(wchar_t *src, wchar_t *dst);
 
-int
-uriIsIPv4 (const char* s, int size, char** err);
+int uriIsIPv4(const char *s, int size, char **err);
 
-int
-uriIsIPv6 (const char* s, int size, char** err);
+int uriIsIPv6(const char *s, int size, char **err);
 
 #endif // ! URI_PARSER_H

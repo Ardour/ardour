@@ -37,68 +37,66 @@
 #include "aaf/AAFIface.h"
 
 enum trace_dump_state {
-	TD_OK = 0,
-	TD_INFO,
-	TD_WARNING,
-	TD_ERROR,
-	TD_NOT_SUPPORTED
+  TD_OK = 0,
+  TD_INFO,
+  TD_WARNING,
+  TD_ERROR,
+  TD_NOT_SUPPORTED
 };
 
 typedef struct trace_dump {
-	int  fn;  // line number of current __td
-	int  pfn; // line number of previous __td
-	int  lv;  // current level
-	int* ll;  // level loop : each entry correspond to a level and tell if there is more to print
-	int  eob; // end of branch
-	int  hc;  // have children
-	int  sub;
+  int fn;  // line number of current __td
+  int pfn; // line number of previous __td
+  int lv;  // current level
+  int *ll; // level loop : each entry correspond to a level and tell if there is
+           // more to print
+  int eob; // end of branch
+  int hc;  // have children
+  int sub;
 } td;
 
-#define __td_set(__td, __ptd, offset)                           \
-	__td.fn          = __LINE__;                            \
-	__td.pfn         = __ptd->fn;                           \
-	__td.lv          = __ptd->lv + offset;                  \
-	__td.ll          = __ptd->ll;                           \
-	__td.ll[__td.lv] = (offset > 0) ? 0 : __td.ll[__td.lv]; \
-	__td.eob         = 0;                                   \
-	__td.hc          = 0;                                   \
-	__td.sub         = 0;
+#define __td_set(__td, __ptd, offset)                                          \
+  __td.fn = __LINE__;                                                          \
+  __td.pfn = __ptd->fn;                                                        \
+  __td.lv = __ptd->lv + offset;                                                \
+  __td.ll = __ptd->ll;                                                         \
+  __td.ll[__td.lv] = (offset > 0) ? 0 : __td.ll[__td.lv];                      \
+  __td.eob = 0;                                                                \
+  __td.hc = 0;                                                                 \
+  __td.sub = 0;
 
-#define DUMP_OBJ(aafi, Obj, __td) \
-	aafi_dump_obj (aafi, Obj, __td, TD_OK, __LINE__, "");
+#define DUMP_OBJ(aafi, Obj, __td)                                              \
+  aafi_dump_obj(aafi, Obj, __td, TD_OK, __LINE__, "");
 
-#define DUMP_OBJ_INFO(aafi, Obj, __td, ...) \
-	aafi_dump_obj (aafi, Obj, __td, TD_OK, __LINE__, __VA_ARGS__);
+#define DUMP_OBJ_INFO(aafi, Obj, __td, ...)                                    \
+  aafi_dump_obj(aafi, Obj, __td, TD_OK, __LINE__, __VA_ARGS__);
 
-#define DUMP_OBJ_WARNING(aafi, Obj, __td, ...) \
-	aafi_dump_obj (aafi, Obj, __td, TD_WARNING, __LINE__, __VA_ARGS__);
+#define DUMP_OBJ_WARNING(aafi, Obj, __td, ...)                                 \
+  aafi_dump_obj(aafi, Obj, __td, TD_WARNING, __LINE__, __VA_ARGS__);
 
-#define DUMP_OBJ_ERROR(aafi, Obj, __td, ...) \
-	(__td)->eob = 1;                     \
-	aafi_dump_obj (aafi, Obj, __td, TD_ERROR, __LINE__, __VA_ARGS__);
+#define DUMP_OBJ_ERROR(aafi, Obj, __td, ...)                                   \
+  (__td)->eob = 1;                                                             \
+  aafi_dump_obj(aafi, Obj, __td, TD_ERROR, __LINE__, __VA_ARGS__);
 
-#define DUMP_OBJ_NO_SUPPORT(aafi, Obj, __td) \
-	(__td)->eob = 1;                     \
-	aafi_dump_obj_no_support (aafi, Obj, __td, __LINE__);
+#define DUMP_OBJ_NO_SUPPORT(aafi, Obj, __td)                                   \
+  (__td)->eob = 1;                                                             \
+  aafi_dump_obj_no_support(aafi, Obj, __td, __LINE__);
 
-int
-aafi_retrieveData (AAF_Iface* aafi);
+int aafi_retrieveData(AAF_Iface *aafi);
 
 /*
  * The following functions are declared beyond AAFIparser.c scope,
  * so they are accessible to vendor-specific files (Resolve.c, ProTools.c, etc.)
  */
 
-void
-aafi_dump_obj (AAF_Iface* aafi, aafObject* Obj, struct trace_dump* __td, int state, int line, const char* fmt, ...);
+void aafi_dump_obj(AAF_Iface *aafi, aafObject *Obj, struct trace_dump *__td,
+                   int state, int line, const char *fmt, ...);
 
-void
-aafi_dump_obj_no_support (AAF_Iface* aafi, aafObject* Obj, struct trace_dump* __td, int line);
+void aafi_dump_obj_no_support(AAF_Iface *aafi, aafObject *Obj,
+                              struct trace_dump *__td, int line);
 
-void
-aafi_trace_obj (AAF_Iface* aafi, aafObject* Obj, const char* color);
+void aafi_trace_obj(AAF_Iface *aafi, aafObject *Obj, const char *color);
 
-int
-aafi_parse_Segment (AAF_Iface* aafi, aafObject* Segment, td* __ptd);
+int aafi_parse_Segment(AAF_Iface *aafi, aafObject *Segment, td *__ptd);
 
 #endif // !__AAFIParser_h__

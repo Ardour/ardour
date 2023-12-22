@@ -28,237 +28,258 @@
 #include "aaf/AAFClass.h"
 #include "aaf/utils.h"
 
-void
-aaf_dump_Header (AAF_Data* aafd)
-{
-	int         offset = 0;
-	struct dbg* dbg    = aafd->dbg;
+void aaf_dump_Header(AAF_Data *aafd) {
+  struct dbg *dbg = aafd->dbg;
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " ByteOrder            : %ls (0x%04x)\n", aaft_ByteOrderToText (aafd->Header.ByteOrder), aafd->Header.ByteOrder);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " LastModified         : %ls\n", aaft_TimestampToText (aafd->Header.LastModified));
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " AAF ObjSpec Version  : %ls\n", aaft_VersionToText (aafd->Header.Version));
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " ObjectModel Version  : %u\n", aafd->Header.ObjectModelVersion);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " Operational Pattern  : %ls\n", aaft_OPDefToText (aafd->Header.OperationalPattern));
+  DBG_BUFFER_WRITE(dbg, " ByteOrder            : %ls (0x%04x)\n",
+                   aaft_ByteOrderToText(aafd->Header.ByteOrder),
+                   aafd->Header.ByteOrder);
+  DBG_BUFFER_WRITE(dbg, " LastModified         : %ls\n",
+                   aaft_TimestampToText(aafd->Header.LastModified));
+  DBG_BUFFER_WRITE(dbg, " AAF ObjSpec Version  : %ls\n",
+                   aaft_VersionToText(aafd->Header.Version));
+  DBG_BUFFER_WRITE(dbg, " ObjectModel Version  : %u\n",
+                   aafd->Header.ObjectModelVersion);
+  DBG_BUFFER_WRITE(dbg, " Operational Pattern  : %ls\n",
+                   aaft_OPDefToText(aafd->Header.OperationalPattern));
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n\n");
+  DBG_BUFFER_WRITE(dbg, "\n\n");
 
-	dbg->debug_callback (dbg, (void*)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
+  dbg->debug_callback(dbg, (void *)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0,
+                      dbg->_dbg_msg, dbg->user);
 }
 
-void
-aaf_dump_Identification (AAF_Data* aafd)
-{
-	int         offset = 0;
-	struct dbg* dbg    = aafd->dbg;
+void aaf_dump_Identification(AAF_Data *aafd) {
+  struct dbg *dbg = aafd->dbg;
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " CompanyName          : %ls\n", (aafd->Identification.CompanyName) ? aafd->Identification.CompanyName : L"n/a");
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " ProductName          : %ls\n", (aafd->Identification.ProductName) ? aafd->Identification.ProductName : L"n/a");
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " ProductVersion       : %ls\n", aaft_ProductVersionToText (aafd->Identification.ProductVersion));
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " ProductVersionString : %ls\n", (aafd->Identification.ProductVersionString) ? aafd->Identification.ProductVersionString : L"n/a");
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " ProductID            : %ls\n", AUIDToText (aafd->Identification.ProductID));
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " Date                 : %ls\n", aaft_TimestampToText (aafd->Identification.Date));
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " ToolkitVersion       : %ls\n", aaft_ProductVersionToText (aafd->Identification.ToolkitVersion));
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " Platform             : %ls\n", (aafd->Identification.Platform) ? aafd->Identification.Platform : L"n/a");
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " GenerationAUID       : %ls\n", AUIDToText (aafd->Identification.GenerationAUID));
+  DBG_BUFFER_WRITE(dbg, " CompanyName          : %ls\n",
+                   (aafd->Identification.CompanyName)
+                       ? aafd->Identification.CompanyName
+                       : L"n/a");
+  DBG_BUFFER_WRITE(dbg, " ProductName          : %ls\n",
+                   (aafd->Identification.ProductName)
+                       ? aafd->Identification.ProductName
+                       : L"n/a");
+  DBG_BUFFER_WRITE(
+      dbg, " ProductVersion       : %ls\n",
+      aaft_ProductVersionToText(aafd->Identification.ProductVersion));
+  DBG_BUFFER_WRITE(dbg, " ProductVersionString : %ls\n",
+                   (aafd->Identification.ProductVersionString)
+                       ? aafd->Identification.ProductVersionString
+                       : L"n/a");
+  DBG_BUFFER_WRITE(dbg, " ProductID            : %ls\n",
+                   AUIDToText(aafd->Identification.ProductID));
+  DBG_BUFFER_WRITE(dbg, " Date                 : %ls\n",
+                   aaft_TimestampToText(aafd->Identification.Date));
+  DBG_BUFFER_WRITE(
+      dbg, " ToolkitVersion       : %ls\n",
+      aaft_ProductVersionToText(aafd->Identification.ToolkitVersion));
+  DBG_BUFFER_WRITE(
+      dbg, " Platform             : %ls\n",
+      (aafd->Identification.Platform) ? aafd->Identification.Platform : L"n/a");
+  DBG_BUFFER_WRITE(dbg, " GenerationAUID       : %ls\n",
+                   AUIDToText(aafd->Identification.GenerationAUID));
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n\n");
+  DBG_BUFFER_WRITE(dbg, "\n\n");
 
-	dbg->debug_callback (dbg, (void*)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
+  dbg->debug_callback(dbg, (void *)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0,
+                      dbg->_dbg_msg, dbg->user);
 }
 
-void
-aaf_dump_ObjectProperty (AAF_Data* aafd, aafProperty* Prop)
-{
-	int         offset = 0;
-	struct dbg* dbg    = aafd->dbg;
+void aaf_dump_ObjectProperty(AAF_Data *aafd, aafProperty *Prop) {
+  struct dbg *dbg = aafd->dbg;
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " :.: (0x%04x) %ls (%ls)\n", Prop->pid, aaft_PIDToText (aafd, Prop->pid), aaft_StoredFormToText (Prop->sf) /*AUIDToText( &Prop->def->type ),*/ /*aaft_TypeIDToText( &(Prop->def->type) )*/);
+  if (Prop->def->meta) {
+    DBG_BUFFER_WRITE(
+        dbg, " :.: %s(0x%04x) %ls%s (%ls)\n", ANSI_COLOR_YELLOW(dbg), Prop->pid,
+        aaft_PIDToText(aafd, Prop->pid), ANSI_COLOR_RESET(dbg),
+        aaft_StoredFormToText(Prop->sf) /*AUIDToText( &Prop->def->type ),*/
+        /*aaft_TypeIDToText( &(Prop->def->type) )*/);
+  } else {
+    DBG_BUFFER_WRITE(
+        dbg, " :.: (0x%04x) %ls (%ls)\n", Prop->pid,
+        aaft_PIDToText(aafd, Prop->pid),
+        aaft_StoredFormToText(Prop->sf) /*AUIDToText( &Prop->def->type ),*/
+        /*aaft_TypeIDToText( &(Prop->def->type) )*/);
+  }
 
-	// WARNING : Wont print strong references (set/vector) corectly.
-	offset += laaf_util_dump_hex (Prop->val, Prop->len, &aafd->dbg->_dbg_msg, &aafd->dbg->_dbg_msg_size, offset);
+  // WARNING : Wont print strong references (set/vector) corectly.
+  aafd->dbg->_dbg_msg_pos +=
+      laaf_util_dump_hex(Prop->val, Prop->len, &aafd->dbg->_dbg_msg,
+                         &aafd->dbg->_dbg_msg_size, aafd->dbg->_dbg_msg_pos);
 
-	dbg->debug_callback (dbg, (void*)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
+  dbg->debug_callback(dbg, (void *)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0,
+                      dbg->_dbg_msg, dbg->user);
 }
 
-void
-aaf_dump_ObjectProperties (AAF_Data* aafd, aafObject* Obj)
-{
-	/*
-	 *  List the properties once they have been parsed and interpreted by AAFCore.
-	 */
+void aaf_dump_ObjectProperties(AAF_Data *aafd, aafObject *Obj) {
+  /*
+   *  List the properties once they have been parsed and interpreted by AAFCore.
+   */
 
-	// int offset = 0;
-	// struct dbg *dbg = aafd->dbg;
+  aafProperty *Prop = NULL;
 
-	aafProperty* Prop = NULL;
-
-	for (Prop = Obj->Properties; Prop != NULL; Prop = Prop->next) {
-		aaf_dump_ObjectProperty (aafd, Prop);
-		// offset += laaf_util_snprintf_realloc( &dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " :.: (0x%04x) %ls (%ls)\n", Prop->pid, aaft_PIDToText( aafd, Prop->pid ), aaft_StoredFormToText( Prop->sf ) /*AUIDToText( &Prop->def->type ),*/ /*aaft_TypeIDToText( &(Prop->def->type) )*/ );
-		//
-		// // WARNING : Wont print strong references (set/vector) corectly.
-		// laaf_util_dump_hex( Prop->val, Prop->len );
-	}
+  for (Prop = Obj->Properties; Prop != NULL; Prop = Prop->next) {
+    aaf_dump_ObjectProperty(aafd, Prop);
+  }
 }
 
-void
-aaf_dump_rawProperties (AAF_Data* aafd, aafByte_t* propStream)
-{
-	int         offset = 0;
-	struct dbg* dbg    = aafd->dbg;
+void aaf_dump_rawProperties(AAF_Data *aafd, aafByte_t *propStream) {
+  struct dbg *dbg = aafd->dbg;
 
-	if (propStream == NULL) {
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset,
-		                                      " ## Property_Header____________________________________________________\n\n"
-		                                      " aafPropertyIndexHeader_t is NULL\n"
-		                                      " ======================================================================\n\n");
-		return;
-	}
+  if (propStream == NULL) {
+    DBG_BUFFER_WRITE(dbg, " ## "
+                          "Property_Header_____________________________________"
+                          "_______________\n\n"
+                          " aafPropertyIndexHeader_t is NULL\n"
+                          " ==================================================="
+                          "===================\n\n");
+    return;
+  }
 
-	aafPropertyIndexHeader_t Header;
-	aafPropertyIndexEntry_t  Prop;
-	aafByte_t*               value = NULL;
+  aafPropertyIndexHeader_t Header;
+  aafPropertyIndexEntry_t Prop;
+  aafByte_t *value = NULL;
 
-	memcpy (&Header, propStream, sizeof (aafPropertyIndexHeader_t));
+  memcpy(&Header, propStream, sizeof(aafPropertyIndexHeader_t));
 
-	uint32_t i           = 0;
-	uint32_t valueOffset = 0;
+  uint32_t i = 0;
+  uint32_t valueOffset = 0;
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset,
-	                                      " ## Property_Header____________________________________________________\n\n"
-	                                      " _byteOrder     : 0x%02x\n"
-	                                      " _formatVersion : 0x%02x\n"
-	                                      " _entryCount    : %u\n\n"
-	                                      " ======================================================================\n\n",
-	                                      Header._byteOrder,
-	                                      Header._formatVersion,
-	                                      Header._entryCount);
+  DBG_BUFFER_WRITE(
+      dbg,
+      " ## "
+      "Property_Header____________________________________________________\n\n"
+      " _byteOrder     : 0x%02x\n"
+      " _formatVersion : 0x%02x\n"
+      " _entryCount    : %u\n\n"
+      " ======================================================================"
+      "\n\n",
+      Header._byteOrder, Header._formatVersion, Header._entryCount);
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n\n");
+  DBG_BUFFER_WRITE(dbg, "\n\n");
 
-	/*
-	 * Since the following for-loop macro is not intended to be user
-	 * accessible, it has been defined as a local macro in AAFCore.c.
-	 */
+  /*
+   * Since the following for-loop macro is not intended to be user
+   * accessible, it has been defined as a local macro in AAFCore.c.
+   */
 
-	// foreachPropertyEntry( Header, Prop, value, i )
-	for (valueOffset = sizeof (aafPropertyIndexHeader_t) + (Header._entryCount * sizeof (aafPropertyIndexEntry_t)),
-	    i            = 0;
-	     i < Header._entryCount &&
-	     memcpy (&Prop, (propStream + ((sizeof (aafPropertyIndexHeader_t)) + (sizeof (aafPropertyIndexEntry_t) * i))), sizeof (aafPropertyIndexEntry_t)) &&
-	     (value = propStream + valueOffset);
-	     valueOffset += Prop._length,
-	    i++) {
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset,
-		                                      " #%u Property_Entry_____________________________________________________\n"
-		                                      " _pid        : 0x%04x (%ls)\n"
-		                                      " _storedForm : %ls\n"
-		                                      " _length     : %u bytes\n",
-		                                      i,
-		                                      Prop._pid, aaft_PIDToText (aafd, Prop._pid),
-		                                      aaft_StoredFormToText (Prop._storedForm),
-		                                      Prop._length);
+  // foreachPropertyEntry( Header, Prop, value, i )
+  for (valueOffset = sizeof(aafPropertyIndexHeader_t) +
+                     (Header._entryCount * sizeof(aafPropertyIndexEntry_t)),
+      i = 0;
+       i < Header._entryCount &&
+       memcpy(&Prop,
+              (propStream + ((sizeof(aafPropertyIndexHeader_t)) +
+                             (sizeof(aafPropertyIndexEntry_t) * i))),
+              sizeof(aafPropertyIndexEntry_t)) &&
+       (value = propStream + valueOffset);
+       valueOffset += Prop._length, i++) {
 
-		offset += laaf_util_dump_hex (value, Prop._length, &aafd->dbg->_dbg_msg, &aafd->dbg->_dbg_msg_size, offset);
+    DBG_BUFFER_WRITE(
+        dbg,
+        " #%u "
+        "Property_Entry_____________________________________________________\n"
+        " _pid        : 0x%04x (%ls)\n"
+        " _storedForm : %ls\n"
+        " _length     : %u bytes\n",
+        i, Prop._pid, aaft_PIDToText(aafd, Prop._pid),
+        aaft_StoredFormToText(Prop._storedForm), Prop._length);
 
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n\n");
-	}
+    aafd->dbg->_dbg_msg_pos +=
+        laaf_util_dump_hex(value, Prop._length, &aafd->dbg->_dbg_msg,
+                           &aafd->dbg->_dbg_msg_size, aafd->dbg->_dbg_msg_pos);
 
-	dbg->debug_callback (dbg, (void*)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
+    DBG_BUFFER_WRITE(dbg, "\n");
+  }
+
+  dbg->debug_callback(dbg, (void *)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0,
+                      dbg->_dbg_msg, dbg->user);
 }
 
-void
-aaf_dump_nodeStreamProperties (AAF_Data* aafd, cfbNode* node)
-{
-	/*
-	 *  List the raw properties directly from a CFB Node's stream.
-	 */
+void aaf_dump_nodeStreamProperties(AAF_Data *aafd, cfbNode *node) {
+  /*
+   *  List the raw properties directly from a CFB Node's stream.
+   */
 
-	aafByte_t* propStream = NULL;
+  aafByte_t *propStream = NULL;
 
-	cfb_getStream (aafd->cfbd, node, &propStream, NULL);
+  cfb_getStream(aafd->cfbd, node, &propStream, NULL);
 
-	aaf_dump_rawProperties (aafd, propStream);
+  aaf_dump_rawProperties(aafd, propStream);
 
-	free (propStream);
+  free(propStream);
 }
 
-void
-aaf_dump_MetaDictionary (AAF_Data* aafd)
-{
-	/*
-	 *  NOTE Only dumps the "custom" classes/properties, since those are the only
-	 *  ones we register when parsing. That is, all standard classes/properties
-	 *  wont be printed out.
-	 */
+void aaf_dump_MetaDictionary(AAF_Data *aafd) {
+  /*
+   *  NOTE Only dumps the "custom" classes/properties, since those are the only
+   *  ones we register when parsing. That is, all standard classes/properties
+   *  wont be printed out.
+   */
 
-	int         offset = 0;
-	struct dbg* dbg    = aafd->dbg;
+  struct dbg *dbg = aafd->dbg;
 
-	aafClass* Class = NULL;
+  aafClass *Class = NULL;
 
-	foreachClass (Class, aafd->Classes)
-	{
-		int print = 0;
+  foreachClass(Class, aafd->Classes) {
 
-		aafPropertyDef* PDef = NULL;
+    int print = 0;
 
-		foreachPropertyDefinition (PDef, Class->Properties)
-		{
-			if (Class->meta) {
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, ANSI_COLOR_YELLOW "%ls::%ls (0x%04x)\n" ANSI_COLOR_RESET,
-				                                      Class->name,
-				                                      PDef->name,
-				                                      PDef->pid);
+    aafPropertyDef *PDef = NULL;
 
-				print++;
-			} else if (PDef->meta) {
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%ls::" ANSI_COLOR_YELLOW "%ls (0x%04x)\n" ANSI_COLOR_RESET,
-				                                      aaft_ClassIDToText (aafd, Class->ID),
-				                                      PDef->name,
-				                                      PDef->pid);
+    foreachPropertyDefinition(PDef, Class->Properties) {
+      if (Class->meta) {
+        DBG_BUFFER_WRITE(dbg, "%s%ls::%ls (0x%04x)%s\n", ANSI_COLOR_YELLOW(dbg),
+                         Class->name, PDef->name, PDef->pid,
+                         ANSI_COLOR_RESET(dbg));
 
-				print++;
-			}
-		}
+        print++;
+      } else if (PDef->meta) {
+        DBG_BUFFER_WRITE(dbg, "%ls::%s%ls (0x%04x)%s\n",
+                         aaft_ClassIDToText(aafd, Class->ID),
+                         ANSI_COLOR_YELLOW(dbg), PDef->name, PDef->pid,
+                         ANSI_COLOR_RESET(dbg));
 
-		if (print)
-			offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n");
+        print++;
+      }
+    }
 
-		print = 1;
-	}
+    if (print) {
+      DBG_BUFFER_WRITE(dbg, "\n");
+    }
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n\n");
+    print = 1;
+  }
 
-	dbg->debug_callback (dbg, (void*)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
+  DBG_BUFFER_WRITE(dbg, "\n\n");
+
+  dbg->debug_callback(dbg, (void *)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0,
+                      dbg->_dbg_msg, dbg->user);
 }
 
-void
-aaf_dump_Classes (AAF_Data* aafd)
-{
-	int         offset = 0;
-	struct dbg* dbg    = aafd->dbg;
+void aaf_dump_Classes(AAF_Data *aafd) {
+  struct dbg *dbg = aafd->dbg;
 
-	aafClass* ConcreteClass = NULL;
-	aafClass* Class         = NULL;
+  aafClass *ConcreteClass = NULL;
+  aafClass *Class = NULL;
 
-	foreachClass (ConcreteClass, aafd->Classes)
-	{
-		foreachClassInheritance (Class, ConcreteClass)
-		{
-			offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s%ls%s",
-			                                      (Class->meta) ? ANSI_COLOR_YELLOW : "",
-			                                      aaft_ClassIDToText (aafd, Class->ID),
-			                                      (Class->meta) ? ANSI_COLOR_RESET : "");
+  foreachClass(ConcreteClass, aafd->Classes) {
+    foreachClassInheritance(Class, ConcreteClass) {
+      DBG_BUFFER_WRITE(dbg, "%s%ls%s",
+                       (Class->meta) ? ANSI_COLOR_YELLOW(dbg) : "",
+                       aaft_ClassIDToText(aafd, Class->ID),
+                       (Class->meta) ? ANSI_COLOR_RESET(dbg) : "");
 
-			if (Class->Parent != NULL)
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " > ");
-		}
+      if (Class->Parent != NULL)
+        DBG_BUFFER_WRITE(dbg, " > ");
+    }
 
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n");
-	}
+    DBG_BUFFER_WRITE(dbg, "\n");
+  }
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n\n");
+  DBG_BUFFER_WRITE(dbg, "\n\n");
 
-	dbg->debug_callback (dbg, (void*)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
+  dbg->debug_callback(dbg, (void *)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0,
+                      dbg->_dbg_msg, dbg->user);
 }
