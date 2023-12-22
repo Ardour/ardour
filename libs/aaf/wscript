@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 from waflib.extras import autowaf as autowaf
-import os
 
 # Version of this package (even if built as a child)
 LIBAAF_VERSION = '0.0.0'
@@ -16,21 +15,21 @@ top = '.'
 out = 'build'
 
 libaaf_sources = [
-	'AAFClass.c',
-	'AAFCore.c',
-	'AAFDump.c',
-	'AAFIAudioFiles.c',
-	'AAFIface.c',
-	'AAFIParser.c',
-	'AAFToText.c',
-	'CFBDump.c',
-	'LibCFB.c',
-	'ProTools.c',
-	'Resolve.c',
-	'RIFFParser.c',
-	'URIParser.c',
-	'utils.c',
-	'debug.c',
+   "src/common/utils.c",
+   "src/debug.c",
+   "src/AAFIface/ProTools.c",
+   "src/AAFIface/AAFIface.c",
+   "src/AAFIface/RIFFParser.c",
+   "src/AAFIface/AAFIParser.c",
+   "src/AAFIface/URIParser.c",
+   "src/AAFIface/AAFIAudioFiles.c",
+   "src/AAFIface/Resolve.c",
+   "src/LibCFB/LibCFB.c",
+   "src/LibCFB/CFBDump.c",
+   "src/AAFCore/AAFCore.c",
+   "src/AAFCore/AAFClass.c",
+   "src/AAFCore/AAFDump.c",
+   "src/AAFCore/AAFToText.c",
 ]
 
 def options(opt):
@@ -52,8 +51,8 @@ def build(bld):
         obj.cflags       = [ bld.env['compiler_flags_dict']['pic'] ]
         obj.defines      = []
 
-    obj.export_includes  = ['.']
-    obj.includes         = ['.']
+    obj.export_includes  = ['./include']
+    obj.includes         = ['./include']
     obj.name             = 'libaaf'
     obj.target           = 'aaf'
     #obj.uselib          = 'GLIB'

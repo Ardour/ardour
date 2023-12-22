@@ -46,8 +46,8 @@
 #include "common.h"
 #include "pbd/file_utils.h"
 
-#include "aaf/libaaf.h"
-#include "aaf/utils.h"
+#include "libaaf.h"
+#include "libaaf/utils.h"
 
 using namespace std;
 using namespace ARDOUR;
@@ -890,10 +890,10 @@ main (int argc, char* argv[])
 		::exit (EXIT_FAILURE);
 	}
 
-	aafi_set_debug (aafi, VERB_DEBUG, logfilefp, NULL, NULL);
+	aafi_set_debug (aafi, VERB_DEBUG, TRUE, logfilefp, NULL, NULL);
 
 	if (!media_location_path.empty ()) {
-		aafi_set_media_location (aafi, media_location_path.c_str ());
+		aafi_set_option_str (aafi, "media_location", media_location_path.c_str ());
 	}
 
 	if (aafi_load_file (aafi, aaf_file.c_str ())) {
