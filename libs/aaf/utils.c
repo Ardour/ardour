@@ -96,6 +96,42 @@ laaf_util_fop_get_file (const char* filepath)
 	return (IS_DIR_SEP (*end)) ? end + 1 : end;
 }
 
+int
+laaf_util_fop_is_wstr_fileext (const wchar_t* filepath, const wchar_t* ext)
+{
+	if (filepath == NULL) {
+		return 0;
+	}
+
+	const wchar_t* end    = filepath + wcslen (filepath);
+	size_t         extlen = 0;
+
+	while (end > filepath && (*end) != '.') {
+		--end;
+		extlen++;
+	}
+
+	if ((*end) == '.') {
+		end++;
+		extlen--;
+	}
+
+	if (extlen != wcslen (ext)) {
+		return 0;
+	}
+
+	// printf(" end: %ls    ext: %ls\n", end, ext );
+
+	for (size_t i = 0; i < extlen; i++) {
+		// printf("end: %c  !=  %c\n", *(end+i), *(ext+i));
+		if (tolower (*(end + i)) != tolower (*(ext + i))) {
+			return 0;
+		}
+	}
+
+	return 1;
+}
+
 char*
 laaf_util_build_path (const char* sep, const char* first, ...)
 {

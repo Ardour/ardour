@@ -202,7 +202,6 @@ xplore_StrongObjectReferenceVector (AAF_Iface* aafi, aafObject* ObjCollection, t
 	aaf_foreach_ObjectInSet (&Obj, ObjCollection, NULL)
 	{
 		// aaf_dump_ObjectProperties( aafi->aafd, ObjCollection );
-		int offset = 0;
 		/* TODO implement retrieve_TaggedValue() */
 
 		if (aaf_get_property (Obj, PID_TaggedValue_Name) &&
@@ -212,13 +211,13 @@ xplore_StrongObjectReferenceVector (AAF_Iface* aafi, aafObject* ObjCollection, t
 
 			if (aafUIDCmp (&indirect->TypeDef, &AAFTypeID_Int32)) {
 				int32_t* indirectValue = aaf_get_indirectValue (aafi->aafd, indirect, &AAFTypeID_Int32);
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "Tagged     |     Name: %ls%*s      Value (%ls)  : %i\n", name, 56 - (int)wcslen (name), " ", aaft_TypeIDToText (&indirect->TypeDef), *indirectValue);
+				DBG_BUFFER_WRITE (dbg, "Tagged     |     Name: %ls%*s      Value (%ls)  : %i\n", name, 56 - (int)wcslen (name), " ", aaft_TypeIDToText (&indirect->TypeDef), *indirectValue);
 			} else if (aafUIDCmp (&indirect->TypeDef, &AAFTypeID_String)) {
 				wchar_t* indirectValue = aaf_get_indirectValue (aafi->aafd, indirect, &AAFTypeID_String);
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "Tagged     |     Name: %ls%*s      Value (%ls) : %ls\n", name, 56 - (int)wcslen (name), " ", aaft_TypeIDToText (&indirect->TypeDef), indirectValue);
+				DBG_BUFFER_WRITE (dbg, "Tagged     |     Name: %ls%*s      Value (%ls) : %ls\n", name, 56 - (int)wcslen (name), " ", aaft_TypeIDToText (&indirect->TypeDef), indirectValue);
 				free (indirectValue);
 			} else {
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "Tagged     |     Name: %ls%*s      Value (%s%ls%s) : %sUNKNOWN_TYPE%s\n", name, 56 - (int)wcslen (name), " ", ANSI_COLOR_RED, aaft_TypeIDToText (&indirect->TypeDef), ANSI_COLOR_RESET, ANSI_COLOR_RED, ANSI_COLOR_RESET);
+				DBG_BUFFER_WRITE (dbg, "Tagged     |     Name: %ls%*s      Value (%s%ls%s) : %sUNKNOWN_TYPE%s\n", name, 56 - (int)wcslen (name), " ", ANSI_COLOR_RED (dbg), aaft_TypeIDToText (&indirect->TypeDef), ANSI_COLOR_RESET (dbg), ANSI_COLOR_RED (dbg), ANSI_COLOR_RESET (dbg));
 			}
 
 			dbg->debug_callback (dbg, (void*)aafi, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
@@ -226,8 +225,6 @@ xplore_StrongObjectReferenceVector (AAF_Iface* aafi, aafObject* ObjCollection, t
 			free (name);
 		} else {
 			dbg->debug_callback (dbg, (void*)aafi, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
-
-			offset = 0;
 			aaf_dump_ObjectProperties (aafi->aafd, Obj);
 		}
 	}
@@ -240,30 +237,29 @@ aafi_dump_obj (AAF_Iface* aafi, aafObject* Obj, struct trace_dump* __td, int sta
 		return;
 
 	/* Print caller line number */
-	struct dbg* dbg    = aafi->dbg;
-	int         offset = 0;
+	struct dbg* dbg = aafi->dbg;
 
 	if (Obj) {
 		switch (state) {
 			case TD_ERROR:
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s", ANSI_COLOR_RED);
+				DBG_BUFFER_WRITE (dbg, "%serr %s%ls %s", ANSI_COLOR_RED (dbg), ANSI_COLOR_DARKGREY (dbg), L"\u2502", ANSI_COLOR_RED (dbg));
 				break;
 			case TD_WARNING:
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s", ANSI_COLOR_YELLOW);
+				DBG_BUFFER_WRITE (dbg, "%swrn %s%ls %s", ANSI_COLOR_YELLOW (dbg), ANSI_COLOR_DARKGREY (dbg), L"\u2502", ANSI_COLOR_YELLOW (dbg));
 				break;
 			case TD_NOT_SUPPORTED:
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s", ANSI_COLOR_ORANGE);
+				DBG_BUFFER_WRITE (dbg, "%suns %s%ls %s", ANSI_COLOR_ORANGE (dbg), ANSI_COLOR_DARKGREY (dbg), L"\u2502", ANSI_COLOR_ORANGE (dbg));
 				break;
 			default:
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s", ANSI_COLOR_DARKGREY);
+				DBG_BUFFER_WRITE (dbg, "    %s%ls ", ANSI_COLOR_DARKGREY (dbg), L"\u2502");
 				break;
 		}
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%05i", line);
+		DBG_BUFFER_WRITE (dbg, "%05i", line);
 	} else {
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "     ");
+		DBG_BUFFER_WRITE (dbg, "    %s%ls%s      ", ANSI_COLOR_DARKGREY (dbg), L"\u2502", ANSI_COLOR_RESET (dbg));
 	}
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s%ls%s", ANSI_COLOR_DARKGREY, L"\u2502", ANSI_COLOR_RESET); // │
+	DBG_BUFFER_WRITE (dbg, "%s%ls%s", ANSI_COLOR_DARKGREY (dbg), L"\u2502", ANSI_COLOR_RESET (dbg)); // │
 
 	/* Print padding and vertical lines */
 
@@ -276,17 +272,17 @@ aafi_dump_obj (AAF_Iface* aafi, aafObject* Obj, struct trace_dump* __td, int sta
 
 				if (i + 1 == __td->lv) {
 					if (Obj) {
-						offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%ls", L"\u251c\u2500\u2500\u25fb "); // ├──◻
+						DBG_BUFFER_WRITE (dbg, "%ls", L"\u251c\u2500\u2500\u25fb "); // ├──◻
 					} else {
-						offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%ls", L"\u2502    "); // │
+						DBG_BUFFER_WRITE (dbg, "%ls", L"\u2502    "); // │
 					}
 				} else {
-					offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%ls", L"\u2502    "); // │
+					DBG_BUFFER_WRITE (dbg, "%ls", L"\u2502    "); // │
 				}
 			} else if (i + 1 == __td->lv && Obj) {
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%ls", L"\u2514\u2500\u2500\u25fb "); // └──◻
+				DBG_BUFFER_WRITE (dbg, "%ls", L"\u2514\u2500\u2500\u25fb "); // └──◻
 			} else {
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "     ");
+				DBG_BUFFER_WRITE (dbg, "     ");
 			}
 		}
 	}
@@ -294,27 +290,28 @@ aafi_dump_obj (AAF_Iface* aafi, aafObject* Obj, struct trace_dump* __td, int sta
 	if (Obj) {
 		switch (state) {
 			case TD_ERROR:
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s", ANSI_COLOR_RED);
+				DBG_BUFFER_WRITE (dbg, "%s", ANSI_COLOR_RED (dbg));
 				break;
 			case TD_WARNING:
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s", ANSI_COLOR_YELLOW);
+				DBG_BUFFER_WRITE (dbg, "%s", ANSI_COLOR_YELLOW (dbg));
 				break;
 			case TD_NOT_SUPPORTED:
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s", ANSI_COLOR_ORANGE);
+				DBG_BUFFER_WRITE (dbg, "%s", ANSI_COLOR_ORANGE (dbg));
 				break;
 			case TD_INFO:
 			case TD_OK:
-				if (__td->sub)
-					offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s", ANSI_COLOR_DARKGREY);
-				else
-					offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s", ANSI_COLOR_CYAN);
+				if (__td->sub) {
+					DBG_BUFFER_WRITE (dbg, "%s", ANSI_COLOR_DARKGREY (dbg));
+				} else {
+					DBG_BUFFER_WRITE (dbg, "%s", ANSI_COLOR_CYAN (dbg));
+				}
 
 				break;
 		}
 
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%ls ", aaft_ClassIDToText (aafi->aafd, Obj->Class->ID));
+		DBG_BUFFER_WRITE (dbg, "%ls ", aaft_ClassIDToText (aafi->aafd, Obj->Class->ID));
 
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s", ANSI_COLOR_RESET);
+		DBG_BUFFER_WRITE (dbg, "%s", ANSI_COLOR_RESET (dbg));
 
 		if (aafUIDCmp (Obj->Class->ID, &AAFClassID_TimelineMobSlot) &&
 		    aafUIDCmp (Obj->Parent->Class->ID, &AAFClassID_CompositionMob)) {
@@ -324,17 +321,17 @@ aafi_dump_obj (AAF_Iface* aafi, aafObject* Obj, struct trace_dump* __td, int sta
 			uint32_t*  slotID         = aaf_get_propertyValue (Obj, PID_MobSlot_SlotID, &AAFTypeID_UInt32);
 			uint32_t*  trackNo        = aaf_get_propertyValue (Obj, PID_MobSlot_PhysicalTrackNumber, &AAFTypeID_UInt32);
 
-			offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "[slot:%s%i%s track:%s%i%s] (DataDef : %s%ls%s) %s%ls ",
-			                                      ANSI_COLOR_BOLD,
-			                                      (slotID) ? (int)(*slotID) : -1,
-			                                      ANSI_COLOR_RESET,
-			                                      ANSI_COLOR_BOLD,
-			                                      (trackNo) ? (int)(*trackNo) : -1,
-			                                      ANSI_COLOR_RESET,
-			                                      ANSI_COLOR_DARKGREY,
-			                                      aaft_DataDefToText (aafi->aafd, DataDefinition),
-			                                      ANSI_COLOR_RESET,
-			                                      (name[0] != 0x00) ? ": " : "", (name) ? name : L"");
+			DBG_BUFFER_WRITE (dbg, "[slot:%s%i%s track:%s%i%s] (DataDef : %s%ls%s) %s%ls ",
+			                  ANSI_COLOR_BOLD (dbg),
+			                  (slotID) ? (int)(*slotID) : -1,
+			                  ANSI_COLOR_RESET (dbg),
+			                  ANSI_COLOR_BOLD (dbg),
+			                  (trackNo) ? (int)(*trackNo) : -1,
+			                  ANSI_COLOR_RESET (dbg),
+			                  ANSI_COLOR_DARKGREY (dbg),
+			                  aaft_DataDefToText (aafi->aafd, DataDefinition),
+			                  ANSI_COLOR_RESET (dbg),
+			                  (name[0] != 0x00) ? ": " : "", (name) ? name : L"");
 
 			free (name);
 		} else if (aafUIDCmp (Obj->Class->ID, &AAFClassID_CompositionMob) ||
@@ -343,20 +340,20 @@ aafi_dump_obj (AAF_Iface* aafi, aafObject* Obj, struct trace_dump* __td, int sta
 			aafUID_t* usageCode = aaf_get_propertyValue (Obj, PID_Mob_UsageCode, &AAFTypeID_UsageType);
 			wchar_t*  name      = aaf_get_propertyValue (Obj, PID_Mob_Name, &AAFTypeID_String);
 
-			offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "(UsageCode: %s%ls%s) %s%ls",
-			                                      ANSI_COLOR_DARKGREY,
-			                                      aaft_UsageCodeToText (usageCode),
-			                                      ANSI_COLOR_RESET,
-			                                      (name && name[0] != 0x00) ? ": " : "", (name) ? name : L"");
+			DBG_BUFFER_WRITE (dbg, "(UsageCode: %s%ls%s) %s%ls",
+			                  ANSI_COLOR_DARKGREY (dbg),
+			                  aaft_UsageCodeToText (usageCode),
+			                  ANSI_COLOR_RESET (dbg),
+			                  (name && name[0] != 0x00) ? ": " : "", (name) ? name : L"");
 
 			free (name);
 		} else if (aafUIDCmp (Obj->Class->ID, &AAFClassID_OperationGroup)) {
 			aafUID_t* OperationIdentification = get_OperationGroup_OperationIdentification (aafi, Obj);
 
-			offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "(OpIdent: %s%ls%s) ",
-			                                      ANSI_COLOR_DARKGREY,
-			                                      aaft_OperationDefToText (aafi->aafd, OperationIdentification),
-			                                      ANSI_COLOR_RESET);
+			DBG_BUFFER_WRITE (dbg, "(OpIdent: %s%ls%s) ",
+			                  ANSI_COLOR_DARKGREY (dbg),
+			                  aaft_OperationDefToText (aafi->aafd, OperationIdentification),
+			                  ANSI_COLOR_RESET (dbg));
 		}
 		// else if ( aafUIDCmp( Obj->Class->ID, &AAFClassID_TapeDescriptor ) ||
 		//           aafUIDCmp( Obj->Class->ID, &AAFClassID_FilmDescriptor ) ||
@@ -370,19 +367,19 @@ aafi_dump_obj (AAF_Iface* aafi, aafObject* Obj, struct trace_dump* __td, int sta
 		//           aafUIDCmp( Obj->Class->ID, &AAFClassID_AIFCDescriptor ) )
 		// {
 		// 	aafUID_t *ContainerFormat = get_FileDescriptor_ContainerFormat( aafi, Obj );
-		// 	offset += laaf_util_snprintf_realloc( &dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "(ContainerIdent : \x1b[38;5;242m%ls\x1b[0m)", aaft_ContainerToText(ContainerFormat) );
+		// 	DBG_BUFFER_WRITE( dbg, "(ContainerIdent : \x1b[38;5;242m%ls\x1b[0m)", aaft_ContainerToText(ContainerFormat) );
 		// }
 
 		if (state == TD_ERROR) {
-			offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, ": %s", ANSI_COLOR_RED);
+			DBG_BUFFER_WRITE (dbg, ": %s", ANSI_COLOR_RED (dbg));
 		} else if (state == TD_INFO) {
-			offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, ": %s", ANSI_COLOR_CYAN);
+			DBG_BUFFER_WRITE (dbg, ": %s", ANSI_COLOR_CYAN (dbg));
 		}
 
 		va_list args;
 		va_start (args, fmt);
 
-		offset += laaf_util_vsnprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, fmt, &args);
+		dbg->_dbg_msg_pos += laaf_util_vsnprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, dbg->_dbg_msg_pos, fmt, &args);
 
 		va_end (args);
 		// va_list args;
@@ -413,63 +410,79 @@ aafi_dump_obj (AAF_Iface* aafi, aafObject* Obj, struct trace_dump* __td, int sta
 		// va_end( args );
 
 		if (state == TD_ERROR || state == TD_INFO) {
-			offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, ".");
+			DBG_BUFFER_WRITE (dbg, ".");
 		}
 
-		if (state == TD_NOT_SUPPORTED || (aafi->ctx.options.trace_class && wcscmp (aaft_ClassIDToText (aafi->aafd, Obj->Class->ID), aafi->ctx.options.trace_class) == 0)) {
-			offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n%s", (state == TD_NOT_SUPPORTED) ? ANSI_COLOR_ORANGE : "");
-
-			// offset += laaf_util_snprintf_realloc( &dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "CFB Object Dump : %ls\n", aaf_get_ObjectPath( Obj ) );
-			// offset += laaf_util_snprintf_realloc( &dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "=================\n" );
-			// cfb_dump_node( aafi->aafd->cfbd, Obj->Node, 1 );
-
-			offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "Properties Dump (%ls)\n", aaf_get_ObjectPath (Obj));
-			offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "===============\n\n");
-			// aaf_dump_nodeStreamProperties( aafi->aafd, Obj->Node );
-
-			// dbg->debug_callback( dbg, (void*)aafi, DEBUG_SRC_ID_TRACE, 0, "", "", 0, dbg->_dbg_msg, dbg->user );
-			//
-			// offset = 0;
-			// aaf_dump_ObjectProperties( aafi->aafd, Obj );
-		} else {
+		if (!aafi->ctx.options.dump_class_aaf_properties) {
 			aafProperty* Prop            = NULL;
 			int          hasUnknownProps = 0;
 
 			for (Prop = Obj->Properties; Prop != NULL; Prop = Prop->next) {
 				if (Prop->def->meta) {
-					// offset += laaf_util_snprintf_realloc( &dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n");
+					// DBG_BUFFER_WRITE( dbg, "\n");
 
 					if (aafi->ctx.options.trace_meta) {
 						// aaf_dump_ObjectProperties( aafi->aafd, Obj );
 
 						// if ( Prop->pid == 0xffca ) {
 						if (Prop->sf == SF_STRONG_OBJECT_REFERENCE_VECTOR) {
-							offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n");
-							offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " >>> (0x%04x) %ls (%ls)\n", Prop->pid, aaft_PIDToText (aafi->aafd, Prop->pid), aaft_StoredFormToText (Prop->sf) /*AUIDToText( &Prop->def->type ),*/ /*aaft_TypeIDToText( &(Prop->def->type) )*/);
+							DBG_BUFFER_WRITE (dbg, "\n");
+							DBG_BUFFER_WRITE (dbg, " >>> (0x%04x) %ls (%ls)\n", Prop->pid, aaft_PIDToText (aafi->aafd, Prop->pid), aaft_StoredFormToText (Prop->sf) /*AUIDToText( &Prop->def->type ),*/ /*aaft_TypeIDToText( &(Prop->def->type) )*/);
 							void* propValue = aaf_get_propertyValue (Obj, Prop->pid, &AAFUID_NULL);
 							xplore_StrongObjectReferenceVector (aafi, propValue, __td);
 
 							// DUMP_OBJ_NO_SUPPORT( aafi, propValue, __td );
 						} else {
-							offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n");
+							DBG_BUFFER_WRITE (dbg, "\n");
 							aaf_dump_ObjectProperty (aafi->aafd, Prop);
 						}
 					} else {
-						offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s%s %ls[0x%04x]", ANSI_COLOR_RESET, (!hasUnknownProps) ? "  (MetaProps:" : "", aaft_PIDToText (aafi->aafd, Prop->pid), Prop->pid);
+						DBG_BUFFER_WRITE (dbg, "%s%s %ls[0x%04x]", ANSI_COLOR_RESET (dbg), (!hasUnknownProps) ? "  (MetaProps:" : "", aaft_PIDToText (aafi->aafd, Prop->pid), Prop->pid);
 						// laaf_util_dump_hex( Prop->val, Prop->len );
 						hasUnknownProps++;
 					}
 				}
 			}
 			if (aafi->ctx.options.trace_meta == 0 && hasUnknownProps) {
-				offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, ")");
+				DBG_BUFFER_WRITE (dbg, ")");
 			}
 		}
 
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%s", ANSI_COLOR_RESET);
+		if (aafi->ctx.options.dump_class_raw_properties && wcscmp (aaft_ClassIDToText (aafi->aafd, Obj->Class->ID), aafi->ctx.options.dump_class_raw_properties) == 0) {
+			DBG_BUFFER_WRITE (dbg, "\n\n");
+			DBG_BUFFER_WRITE (dbg, "======================================================================\n");
+			DBG_BUFFER_WRITE (dbg, "                     CFB Object Properties Dump\n");
+			DBG_BUFFER_WRITE (dbg, "======================================================================\n");
+			DBG_BUFFER_WRITE (dbg, "%s", ANSI_COLOR_DARKGREY (dbg));
+			DBG_BUFFER_WRITE (dbg, "%ls\n", aaft_ClassIDToText (aafi->aafd, Obj->Class->ID));
+			DBG_BUFFER_WRITE (dbg, "%ls/properties\n", aaf_get_ObjectPath (Obj));
+			DBG_BUFFER_WRITE (dbg, "%s\n\n", ANSI_COLOR_RESET (dbg));
+
+			// cfb_dump_node( aafi->aafd->cfbd, cfb_getChildNode( aafi->aafd->cfbd, L"properties", Obj->Node ), 1 );
+			aaf_dump_nodeStreamProperties (aafi->aafd, cfb_getChildNode (aafi->aafd->cfbd, L"properties", Obj->Node));
+
+			DBG_BUFFER_WRITE (dbg, "\n");
+		}
+
+		if (aafi->ctx.options.dump_class_aaf_properties && wcscmp (aaft_ClassIDToText (aafi->aafd, Obj->Class->ID), aafi->ctx.options.dump_class_aaf_properties) == 0) {
+			DBG_BUFFER_WRITE (dbg, "\n\n");
+			DBG_BUFFER_WRITE (dbg, "======================================================================\n");
+			DBG_BUFFER_WRITE (dbg, "                         AAF Properties Dump\n");
+			DBG_BUFFER_WRITE (dbg, "======================================================================\n");
+			DBG_BUFFER_WRITE (dbg, "%s", ANSI_COLOR_DARKGREY (dbg));
+			DBG_BUFFER_WRITE (dbg, "%ls\n", aaft_ClassIDToText (aafi->aafd, Obj->Class->ID));
+			DBG_BUFFER_WRITE (dbg, "%ls/properties\n", aaf_get_ObjectPath (Obj));
+			DBG_BUFFER_WRITE (dbg, "%s\n\n", ANSI_COLOR_RESET (dbg));
+
+			aaf_dump_ObjectProperties (aafi->aafd, Obj);
+
+			DBG_BUFFER_WRITE (dbg, "\n");
+		}
+
+		DBG_BUFFER_WRITE (dbg, "%s", ANSI_COLOR_RESET (dbg));
 	}
 
-	// offset += laaf_util_snprintf_realloc( &dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n" );
+	// DBG_BUFFER_WRITE( dbg, "\n" );
 
 	dbg->debug_callback (dbg, (void*)aafi, DEBUG_SRC_ID_TRACE, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
 
@@ -997,29 +1010,45 @@ parse_DigitalImageDescriptor (AAF_Iface* aafi, aafObject* DIDescriptor, td* __pt
 		return -1;
 	}
 
+	/*
+	 * « Informative note: In the case of picture essence, the Sample Rate is usually the frame rate. The value should be
+	 * numerically exact, for example {25,1} or {30000, 1001}. »
+	 *
+	 * « Informative note: Care should be taken if a sample rate of {2997,100} is encountered, since this may have been intended
+	 * as a (mistaken) approximation to the exact value. »
+	 */
+
 	aafRational_t* framerate = aaf_get_propertyValue (DIDescriptor, PID_FileDescriptor_SampleRate, &AAFTypeID_Rational);
 
-	if (framerate == NULL) {
-		DUMP_OBJ_ERROR (aafi, DIDescriptor, &__td, "Missing PID_FileDescriptor_SampleRate");
+	if (framerate == NULL) { /* REQ */
+		DUMP_OBJ_ERROR (aafi, DIDescriptor, &__td, "Missing PID_FileDescriptor_SampleRate (framerate)");
 		return -1;
 	}
 
 	videoEssence->framerate = framerate;
 
+	debug ("Video framerate : %i/%i", framerate->numerator, framerate->denominator);
+
+	/*
+	 * All mandatory properties below are treated as optional, because we assume that
+	 * video will be an external file so we are not using those, and because some AAF
+	 * implementations does not even set those mandatory properties (eg. Davinci Resolve).
+	 *
+	 * TODO: parse PID_FileDescriptor_Length ?
+	 */
+
 	uint32_t* storedHeight = aaf_get_propertyValue (DIDescriptor, PID_DigitalImageDescriptor_StoredHeight, &AAFTypeID_UInt32);
 
-	if (storedHeight == NULL) {
-		DUMP_OBJ_ERROR (aafi, DIDescriptor, &__td, "Missing PID_DigitalImageDescriptor_StoredHeight");
-		return -1;
+	if (storedHeight == NULL) { /* REQ */
+		DUMP_OBJ_WARNING (aafi, DIDescriptor, &__td, "Missing PID_DigitalImageDescriptor_StoredHeight");
 	}
 
 	// debug( "storedHeight : %u", *storedHeight );
 
 	uint32_t* storedWidth = aaf_get_propertyValue (DIDescriptor, PID_DigitalImageDescriptor_StoredWidth, &AAFTypeID_UInt32);
 
-	if (storedWidth == NULL) {
-		DUMP_OBJ_ERROR (aafi, DIDescriptor, &__td, "Missing PID_DigitalImageDescriptor_StoredWidth");
-		return -1;
+	if (storedWidth == NULL) { /* REQ */
+		DUMP_OBJ_WARNING (aafi, DIDescriptor, &__td, "Missing PID_DigitalImageDescriptor_StoredWidth");
 	}
 
 	// debug( "storedWidth : %u", *storedWidth );
@@ -1027,8 +1056,7 @@ parse_DigitalImageDescriptor (AAF_Iface* aafi, aafObject* DIDescriptor, td* __pt
 	uint32_t* displayHeight = aaf_get_propertyValue (DIDescriptor, PID_DigitalImageDescriptor_DisplayHeight, &AAFTypeID_UInt32);
 
 	if (displayHeight == NULL) {
-		DUMP_OBJ_ERROR (aafi, DIDescriptor, &__td, "Missing PID_DigitalImageDescriptor_DisplayHeight");
-		return -1;
+		DUMP_OBJ_WARNING (aafi, DIDescriptor, &__td, "Missing PID_DigitalImageDescriptor_DisplayHeight");
 	}
 
 	// debug( "displayHeight : %u", *displayHeight );
@@ -1036,17 +1064,15 @@ parse_DigitalImageDescriptor (AAF_Iface* aafi, aafObject* DIDescriptor, td* __pt
 	uint32_t* displayWidth = aaf_get_propertyValue (DIDescriptor, PID_DigitalImageDescriptor_DisplayWidth, &AAFTypeID_UInt32);
 
 	if (displayWidth == NULL) {
-		DUMP_OBJ_ERROR (aafi, DIDescriptor, &__td, "Missing PID_DigitalImageDescriptor_DisplayWidth");
-		return -1;
+		DUMP_OBJ_WARNING (aafi, DIDescriptor, &__td, "Missing PID_DigitalImageDescriptor_DisplayWidth");
 	}
 
 	// debug( "displayWidth : %u", *displayWidth );
 
 	aafRational_t* imageAspectRatio = aaf_get_propertyValue (DIDescriptor, PID_DigitalImageDescriptor_ImageAspectRatio, &AAFTypeID_Rational);
 
-	if (imageAspectRatio == NULL) {
-		DUMP_OBJ_ERROR (aafi, DIDescriptor, &__td, "Missing PID_DigitalImageDescriptor_ImageAspectRatio");
-		return -1;
+	if (imageAspectRatio == NULL) { /* REQ */
+		DUMP_OBJ_WARNING (aafi, DIDescriptor, &__td, "Missing PID_DigitalImageDescriptor_ImageAspectRatio");
 	}
 
 	// debug( "imageAspectRatio : %i/%i", imageAspectRatio->numerator, imageAspectRatio->denominator );
@@ -2550,6 +2576,17 @@ POS NOT UPDATED HERE ------------------> └──◻ AAFClassID_SourceClip
 
 		} else if (aafUIDCmp (DataDefinition, &AAFDataDef_Picture) ||
 		           aafUIDCmp (DataDefinition, &AAFDataDef_LegacyPicture)) {
+			/*
+			 * │ 04382│├──◻ AAFClassID_TimelineMobSlot [slot:2 track:1] (DataDef : AAFDataDef_Picture)
+			 * │ 01939││    └──◻ AAFClassID_Sequence
+			 * │ 03007││         └──◻ AAFClassID_SourceClip
+			 */
+
+			/*
+			 * │ 04390│└──◻ AAFClassID_TimelineMobSlot [slot:8 track:1] (DataDef : AAFDataDef_LegacyPicture) : Video Mixdown
+			 * │ 03007│     └──◻ AAFClassID_SourceClip
+			 */
+
 			if (aafi->Video->Tracks->Items) {
 				DUMP_OBJ_ERROR (aafi, SourceClip, &__td, "Current implementation supports only one video clip");
 				return -1;
@@ -2616,6 +2653,11 @@ POS NOT UPDATED HERE ------------------> └──◻ AAFClassID_SourceClip
 				parse_MobSlot (aafi, refMobSlot, &__td);
 
 				// memcpy( &(aafi->ctx), &ctxBackup, sizeof(struct aafiContext) );
+
+			} else {
+				DUMP_OBJ_ERROR (aafi, SourceClip, &__td, "RefMob isn't MasterMob : %ls", aaft_ClassIDToText (aafi->aafd, refMob->Class->ID));
+				// parse_CompositionMob( )
+				return -1;
 			}
 		}
 	}
@@ -2740,6 +2782,23 @@ POS NOT UPDATED HERE ------------------> └──◻ AAFClassID_SourceClip
 
 		} else if (aafUIDCmp (DataDefinition, &AAFDataDef_Picture) ||
 		           aafUIDCmp (DataDefinition, &AAFDataDef_LegacyPicture)) {
+			/*
+			 * │ 04382│├──◻ AAFClassID_TimelineMobSlot [slot:2 track:1] (DataDef : AAFDataDef_Picture)
+			 * │ 01939││    └──◻ AAFClassID_Sequence
+			 * │ 03007││         └──◻ AAFClassID_SourceClip
+			 * │ 03012││              └──◻ AAFClassID_MasterMob (UsageCode: n/a) : sample@29
+			 * │ 04402││                   └──◻ AAFClassID_TimelineMobSlot
+			 * │ 03234││                        └──◻ AAFClassID_SourceClip
+			 */
+
+			/*
+			 * │ 04390│└──◻ AAFClassID_TimelineMobSlot [slot:8 track:1] (DataDef : AAFDataDef_LegacyPicture) : Video Mixdown
+			 * │ 03007│     └──◻ AAFClassID_SourceClip
+			 * │ 03012│          └──◻ AAFClassID_MasterMob (UsageCode: n/a) : 2975854  -  PREPARATIFS DISPOSITIF 2 30.Exported.01,Video Mixdown,5  (MetaProps: ConvertFrameRate[0xfff8])
+			 * │ 04410│               └──◻ AAFClassID_TimelineMobSlot
+			 * │ 03242│                    └──◻ AAFClassID_SourceClip
+			 */
+
 			/* Check if this Essence has already been retrieved */
 
 			// int slotID = MobSlot->Entry->_localKey;
@@ -2760,6 +2819,8 @@ POS NOT UPDATED HERE ------------------> └──◻ AAFClassID_SourceClip
 				if (aafMobIDCmp (videoEssence->sourceMobID, sourceID) && videoEssence->sourceMobSlotID == (unsigned)*SourceMobSlotID) {
 					/* Essence already retrieved */
 					aafi->ctx.current_video_clip->Essence = videoEssence;
+					__td.eob                              = 1;
+					DUMP_OBJ_INFO (aafi, SourceClip, &__td, "Essence already parsed: Linking with %ls", videoEssence->file_name);
 					return 0;
 				}
 			}
@@ -2775,6 +2836,10 @@ POS NOT UPDATED HERE ------------------> └──◻ AAFClassID_SourceClip
 
 			videoEssence->file_name = aaf_get_propertyValue (ParentMob, PID_Mob_Name, &AAFTypeID_String);
 
+			if (videoEssence->file_name == NULL) {
+				debug ("Missing MasterMob::PID_Mob_Name (essence file name)");
+			}
+
 			/*
 			 * p.49 : To create a SourceReference that refers to a MobSlot within
 			 * the same Mob as the SourceReference, omit the SourceID property.
@@ -2788,8 +2853,6 @@ POS NOT UPDATED HERE ------------------> └──◻ AAFClassID_SourceClip
 			// 	warning( "Could not retrieve SourceReference::SourceID, retrieving from parent Mob." );
 			// }
 
-			aafi->ctx.current_video_essence = videoEssence;
-
 			DUMP_OBJ (aafi, SourceClip, &__td);
 
 			aafObject* SourceMob = aaf_get_MobByID (aafi->aafd->Mobs, videoEssence->sourceMobID);
@@ -2801,15 +2864,21 @@ POS NOT UPDATED HERE ------------------> └──◻ AAFClassID_SourceClip
 
 			videoEssence->SourceMob = SourceMob;
 
+			aafObject* EssenceData = get_EssenceData_By_MobID (aafi, videoEssence->sourceMobID);
+
+			if (EssenceData)
+				__td.ll[__td.lv] = 2;
+
+			aafi->ctx.current_video_essence = videoEssence;
+
 			parse_SourceMob (aafi, SourceMob, &__td);
 
-			aafObject* EssenceData = get_EssenceData_By_MobID (aafi, videoEssence->sourceMobID);
+			__td.ll[__td.lv] = 0;
 
 			if (EssenceData == NULL) {
 				/*
 				 * It means essence is not embedded.
 				 */
-
 				// return -1;
 			} else {
 				parse_EssenceData (aafi, EssenceData, &__td);
@@ -4089,8 +4158,10 @@ aafi_retrieveData (AAF_Iface* aafi)
 
 	foreachEssence (audioEssence, aafi->Audio->Essences)
 	{
-		/* TODO: rename (not only summary, can be external file too) */
-		aafi_parse_audio_summary (aafi, audioEssence);
+		if (audioEssence->type != AAFI_ESSENCE_TYPE_PCM) {
+			/* TODO: rename (not only summary, can be external file too) */
+			aafi_parse_audio_summary (aafi, audioEssence);
+		}
 
 		/* TODO : check samplerate / samplesize proportions accross essences, and choose the most used values as composition values */
 		if (aafi->Audio->samplerate == 0 || aafi->Audio->samplerate == audioEssence->samplerate) {
@@ -4104,6 +4175,42 @@ aafi_retrieveData (AAF_Iface* aafi)
 		} else {
 			// warning( "audioEssence '%ls' has different samplesize : %i", audioEssence->file_name, audioEssence->samplesize );
 		}
+	}
+
+	aafiVideoEssence* videoEssence = NULL;
+
+	foreachEssence (videoEssence, aafi->Video->Essences)
+	{
+		if (videoEssence->original_file_path == NULL) {
+			continue;
+		}
+
+		char* externalFilePath = aafi_locate_external_essence_file (aafi, videoEssence->original_file_path, aafi->ctx.options.media_location);
+
+		if (externalFilePath == NULL) {
+			error ("Could not locate external audio essence file '%ls'", videoEssence->original_file_path);
+			continue;
+		}
+
+		videoEssence->usable_file_path = malloc ((strlen (externalFilePath) + 1) * sizeof (wchar_t));
+
+		if (videoEssence->usable_file_path == NULL) {
+			error ("Could not allocate memory : %s", strerror (errno));
+			free (externalFilePath);
+			continue;
+		}
+
+		int rc = swprintf (videoEssence->usable_file_path, strlen (externalFilePath) + 1, L"%" WPRIs, externalFilePath);
+
+		if (rc < 0) {
+			error ("Failed setting usable_file_path");
+			free (externalFilePath);
+			free (videoEssence->usable_file_path);
+			videoEssence->usable_file_path = NULL;
+			continue;
+		}
+
+		free (externalFilePath);
 	}
 
 	aafiAudioTrack* audioTrack = NULL;

@@ -16,6 +16,7 @@ laaf_new_debug (void)
 
 	dbg->debug_callback = &laaf_debug_callback;
 	dbg->fp             = stdout;
+	dbg->ansicolor      = 0;
 
 	return dbg;
 }
@@ -42,6 +43,7 @@ laaf_debug_callback (struct dbg* dbg, void* ctxdata, int libid, int type, const 
 	const char* color   = "";
 
 	if (dbg->fp == NULL) {
+		DBG_BUFFER_RESET (dbg);
 		return;
 	}
 
@@ -70,24 +72,26 @@ laaf_debug_callback (struct dbg* dbg, void* ctxdata, int libid, int type, const 
 	switch (type) {
 		case VERB_ERROR:
 			typestr = " error ";
-			color   = ANSI_COLOR_RED;
+			color   = ANSI_COLOR_RED (dbg);
 			break;
 		case VERB_WARNING:
 			typestr = "warning";
-			color   = ANSI_COLOR_YELLOW;
+			color   = ANSI_COLOR_YELLOW (dbg);
 			break;
 		case VERB_DEBUG:
 			typestr = " debug ";
-			color   = ANSI_COLOR_DARKGREY;
+			color   = ANSI_COLOR_DARKGREY (dbg);
 			break;
 	}
 
 	if (libid != DEBUG_SRC_ID_TRACE && libid != DEBUG_SRC_ID_DUMP) {
-		fprintf (dbg->fp, "[%s%s%s] ", color, typestr, ANSI_COLOR_RESET);
-		fprintf (dbg->fp, "%s%s:%i in %s()%s : ", ANSI_COLOR_DARKGREY, srcfile, lineno, srcfunc, ANSI_COLOR_RESET);
+		fprintf (dbg->fp, "[%s%s%s] ", color, typestr, ANSI_COLOR_RESET (dbg));
+		fprintf (dbg->fp, "%s%s:%i in %s()%s : ", ANSI_COLOR_DARKGREY (dbg), srcfile, lineno, srcfunc, ANSI_COLOR_RESET (dbg));
 	}
 
 	fprintf (dbg->fp, "%s\n", msg);
+
+	DBG_BUFFER_RESET (dbg);
 
 	/* avoids -Wunused-parameter -Wunused-but-set-variable */
 	(void)aafi;

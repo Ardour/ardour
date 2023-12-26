@@ -1939,9 +1939,9 @@ aaft_PIDToText (AAF_Data* aafd, aafPID_t pid)
 		{
 			if (PDef->pid == pid) {
 				swprintf (PIDText, 1024, L"%" WPRIs L"%" WPRIws L"%" WPRIs,
-				          (PDef->meta) ? ANSI_COLOR_YELLOW : "",
+				          (PDef->meta) ? ANSI_COLOR_YELLOW (aafd->dbg) : "",
 				          PDef->name,
-				          (PDef->meta) ? ANSI_COLOR_RESET : "");
+				          (PDef->meta) ? ANSI_COLOR_RESET (aafd->dbg) : "");
 				return PIDText;
 			}
 		}
@@ -2175,9 +2175,9 @@ aaft_ClassIDToText (AAF_Data* aafd, const aafUID_t* auid)
 	{
 		if (aafUIDCmp (Class->ID, auid)) {
 			swprintf (ClassIDText, 1024, L"%" WPRIs L"%" WPRIws L"%" WPRIs,
-			          (Class->meta) ? ANSI_COLOR_YELLOW : "",
+			          (Class->meta) ? ANSI_COLOR_YELLOW (aafd->dbg) : "",
 			          Class->name,
-			          (Class->meta) ? ANSI_COLOR_RESET : "");
+			          (Class->meta) ? ANSI_COLOR_RESET (aafd->dbg) : "");
 			return ClassIDText;
 		}
 	}

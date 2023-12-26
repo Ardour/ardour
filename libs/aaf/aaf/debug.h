@@ -26,6 +26,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "aaf/utils.h"
+
 #define __FILENAME__ (strrchr (__FILE__, '/') ? strrchr (__FILE__, '/') + 1 : __FILE__)
 
 enum debug_source_id {
@@ -49,9 +51,14 @@ struct dbg {
 
 	FILE*            fp;
 	verbosityLevel_e verb;
+	int              ansicolor;
 
 	char* _dbg_msg;
 	int   _dbg_msg_size;
+	int   _dbg_msg_pos;
+
+	char* _dbg_msg_tmp;
+	int   _dbg_msg_pos_tmp;
 
 	void* user;
 };
@@ -62,6 +69,10 @@ struct dbg {
 		const char* dbgfunc = __func__;                                                                                                    \
 		int         dbgline = __LINE__;                                                                                                    \
 		if (dbg && dbg->verb >= type && dbg->debug_callback) {                                                                             \
+			if (dbg->_dbg_msg_pos) {                                                                                                   \
+				dbg->_dbg_msg_pos_tmp = dbg->_dbg_msg_pos;                                                                         \
+				dbg->_dbg_msg_tmp     = laaf_util_c99strdup (dbg->_dbg_msg);                                                       \
+			}                                                                                                                          \
 			int msgsize = snprintf (NULL, 0, __VA_ARGS__) + 1;                                                                         \
 			if (msgsize >= dbg->_dbg_msg_size) {                                                                                       \
 				char* msgtmp = realloc (dbg->_dbg_msg, msgsize);                                                                   \
@@ -71,14 +82,27 @@ struct dbg {
 					snprintf (dbg->_dbg_msg, dbg->_dbg_msg_size, __VA_ARGS__);                                                 \
 					dbg->debug_callback (dbg, (void*)ctxdata, lib, type, dbgfile, dbgfunc, dbgline, dbg->_dbg_msg, dbg->user); \
 				} else {                                                                                                           \
-					/* Should we print error to stderr ? */                                                                    \
+					/* realloc() error */                                                                                      \
 				}                                                                                                                  \
 			} else {                                                                                                                   \
 				snprintf (dbg->_dbg_msg, dbg->_dbg_msg_size, __VA_ARGS__);                                                         \
 				dbg->debug_callback (dbg, (void*)ctxdata, lib, type, dbgfile, dbgfunc, dbgline, dbg->_dbg_msg, dbg->user);         \
 			}                                                                                                                          \
+			if (dbg->_dbg_msg_pos_tmp) {                                                                                               \
+				dbg->_dbg_msg_pos = dbg->_dbg_msg_pos_tmp;                                                                         \
+				strcpy (dbg->_dbg_msg, dbg->_dbg_msg_tmp);                                                                         \
+				free (dbg->_dbg_msg_tmp);                                                                                          \
+				dbg->_dbg_msg_tmp     = NULL;                                                                                      \
+				dbg->_dbg_msg_pos_tmp = 0;                                                                                         \
+			}                                                                                                                          \
 		}                                                                                                                                  \
 	}
+
+#define DBG_BUFFER_WRITE(dbg, ...) \
+	dbg->_dbg_msg_pos += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, dbg->_dbg_msg_pos, __VA_ARGS__);
+
+#define DBG_BUFFER_RESET(dbg) \
+	dbg->_dbg_msg_pos = 0;
 
 struct dbg*
 laaf_new_debug (void);

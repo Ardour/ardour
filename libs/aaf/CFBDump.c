@@ -51,49 +51,50 @@ cfb_dump_node (CFB_Data* cfbd, cfbNode* node, int print_stream)
 
 	cfb_w16towchar (nodeName, node->_ab, node->_cb);
 
-	int         offset = 0;
-	struct dbg* dbg    = cfbd->dbg;
+	struct dbg* dbg = cfbd->dbg;
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n");
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _ab          : %ls\n", nodeName);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _cb          : %u\n", node->_cb);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _mse         : %s\n",
-	                                      node->_mse == 0 ? "STGTY_INVALID" : node->_mse == 1 ? "STGTY_STORAGE"
-	                                                                      : node->_mse == 2   ? "STGTY_STREAM"
-	                                                                      : node->_mse == 3   ? "STGTY_LOCKBYTES"
-	                                                                      : node->_mse == 4   ? "STGTY_PROPERTY"
-	                                                                      : node->_mse == 5   ? "STGTY_ROOT"
-	                                                                                          : "");
+	DBG_BUFFER_WRITE (dbg, "\n");
+	DBG_BUFFER_WRITE (dbg, " _ab          : %ls\n", nodeName);
+	DBG_BUFFER_WRITE (dbg, " _cb          : %u\n", node->_cb);
+	DBG_BUFFER_WRITE (dbg, " _mse         : %s\n",
+	                  node->_mse == 0 ? "STGTY_INVALID" : node->_mse == 1 ? "STGTY_STORAGE"
+	                                                  : node->_mse == 2   ? "STGTY_STREAM"
+	                                                  : node->_mse == 3   ? "STGTY_LOCKBYTES"
+	                                                  : node->_mse == 4   ? "STGTY_PROPERTY"
+	                                                  : node->_mse == 5   ? "STGTY_ROOT"
+	                                                                      : "");
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _bflags      : %s\n", node->_bflags == 1 ? "BLACK" : "RED");
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _sidLeftSib  : 0x%08x\n", node->_sidLeftSib);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _sidRightSib : 0x%08x\n", node->_sidRightSib);
+	DBG_BUFFER_WRITE (dbg, " _bflags      : %s\n", node->_bflags == 1 ? "BLACK" : "RED");
+	DBG_BUFFER_WRITE (dbg, " _sidLeftSib  : 0x%08x\n", node->_sidLeftSib);
+	DBG_BUFFER_WRITE (dbg, " _sidRightSib : 0x%08x\n", node->_sidRightSib);
 
 	if (node->_mse == STGTY_STORAGE ||
 	    node->_mse == STGTY_ROOT) {
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _sidChild    : 0x%08x\n", node->_sidChild);
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _clsid       : %ls\n", cfb_CLSIDToText (&(node->_clsId)));
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _dwUserFlags : 0x%08x (%d)\n", node->_dwUserFlags, node->_dwUserFlags);
+		DBG_BUFFER_WRITE (dbg, " _sidChild    : 0x%08x\n", node->_sidChild);
+		DBG_BUFFER_WRITE (dbg, " _clsid       : %ls\n", cfb_CLSIDToText (&(node->_clsId)));
+		DBG_BUFFER_WRITE (dbg, " _dwUserFlags : 0x%08x (%d)\n", node->_dwUserFlags, node->_dwUserFlags);
 	}
 
 	if (node->_mse == STGTY_INVALID) {
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _time  (cre) : 0x%08x%08x\n",
-		                                      node->_time[0].dwHighDateTime,
-		                                      node->_time[0].dwLowDateTime);
+		DBG_BUFFER_WRITE (dbg, " _time  (cre) : 0x%08x%08x\n",
+		                  node->_time[0].dwHighDateTime,
+		                  node->_time[0].dwLowDateTime);
 
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _      (mod) : 0x%08x%08x\n",
-		                                      node->_time[1].dwHighDateTime,
-		                                      node->_time[1].dwLowDateTime);
+		DBG_BUFFER_WRITE (dbg, " _      (mod) : 0x%08x%08x\n",
+		                  node->_time[1].dwHighDateTime,
+		                  node->_time[1].dwLowDateTime);
 	}
 
 	if (node->_mse == STGTY_STREAM ||
 	    node->_mse == STGTY_ROOT) {
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _sectStart   : 0x%08x (%d)\n", node->_sectStart, node->_sectStart);
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _ulSizeLow   : 0x%08x (%d)\n", node->_ulSizeLow, node->_ulSizeLow);
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " _ulSizeHigh  : 0x%08x (%d)\n", node->_ulSizeHigh, node->_ulSizeHigh);
+		DBG_BUFFER_WRITE (dbg, " _sectStart   : 0x%08x (%d)\n", node->_sectStart, node->_sectStart);
+		DBG_BUFFER_WRITE (dbg, " _ulSizeLow   : 0x%08x (%d)\n", node->_ulSizeLow, node->_ulSizeLow);
+		DBG_BUFFER_WRITE (dbg, " _ulSizeHigh  : 0x%08x (%d)\n", node->_ulSizeHigh, node->_ulSizeHigh);
 	}
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n\n");
+	DBG_BUFFER_WRITE (dbg, "\n\n");
+
+	dbg->debug_callback (dbg, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
 
 	if (print_stream == 1) {
 		cfb_dump_nodeStream (cfbd, node);
@@ -110,17 +111,14 @@ cfb_dump_nodePath (CFB_Data* cfbd, const wchar_t* path, int print_stream)
 		return;
 	}
 
-	int         offset = 0;
-	struct dbg* dbg    = cfbd->dbg;
-
 	cfb_dump_node (cfbd, node, print_stream);
-
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n\n");
 }
 
 void
 cfb_dump_nodeStream (CFB_Data* cfbd, cfbNode* node)
 {
+	struct dbg* dbg = cfbd->dbg;
+
 	unsigned char* stream    = NULL;
 	uint64_t       stream_sz = 0;
 
@@ -130,7 +128,9 @@ cfb_dump_nodeStream (CFB_Data* cfbd, cfbNode* node)
 		return;
 	}
 
-	laaf_util_dump_hex (stream, stream_sz, &cfbd->dbg->_dbg_msg, &cfbd->dbg->_dbg_msg_size, 0);
+	laaf_util_dump_hex (stream, stream_sz, &dbg->_dbg_msg, &dbg->_dbg_msg_size, dbg->_dbg_msg_pos);
+
+	dbg->debug_callback (dbg, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
 
 	free (stream);
 }
@@ -138,6 +138,8 @@ cfb_dump_nodeStream (CFB_Data* cfbd, cfbNode* node)
 void
 cfb_dump_nodePathStream (CFB_Data* cfbd, const wchar_t* path)
 {
+	struct dbg* dbg = cfbd->dbg;
+
 	cfbNode* node = cfb_getNodeByPath (cfbd, path, 0);
 
 	if (node == NULL) {
@@ -150,7 +152,9 @@ cfb_dump_nodePathStream (CFB_Data* cfbd, const wchar_t* path)
 
 	cfb_getStream (cfbd, node, &stream, &stream_sz);
 
-	laaf_util_dump_hex (stream, stream_sz, &cfbd->dbg->_dbg_msg, &cfbd->dbg->_dbg_msg_size, 0);
+	laaf_util_dump_hex (stream, stream_sz, &dbg->_dbg_msg, &dbg->_dbg_msg_size, dbg->_dbg_msg_pos);
+
+	dbg->debug_callback (dbg, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
 
 	free (stream);
 }
@@ -158,6 +162,8 @@ cfb_dump_nodePathStream (CFB_Data* cfbd, const wchar_t* path)
 void
 cfb_dump_nodePaths (CFB_Data* cfbd, uint32_t prevPath, char* strArray[], uint32_t* str_i, cfbNode* node)
 {
+	struct dbg* dbg = cfbd->dbg;
+
 	if (node == NULL) {
 		/* the begining of the first function call. */
 		node     = &cfbd->nodes[0];
@@ -195,152 +201,155 @@ cfb_dump_nodePaths (CFB_Data* cfbd, uint32_t prevPath, char* strArray[], uint32_
 
 	/* the end of the first function call, recursion is over. */
 	if (node == &cfbd->nodes[0]) {
-		int         offset = 0;
-		struct dbg* dbg    = cfbd->dbg;
-
 		/* commented out because output is proper this way... why did we call qsort() in the first place ?! */
 		// qsort( strArray, *str_i, sizeof(char*), compareStrings );
 
 		for (uint32_t i = 0; i < cfbd->nodes_cnt && strArray[i] != NULL; i++) {
-			offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "%05i : %s\n", i, strArray[i]);
+			DBG_BUFFER_WRITE (dbg, "%05i : %s\n", i, strArray[i]);
 			free (strArray[i]);
 		}
 
 		free (strArray);
 
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n\n");
+		DBG_BUFFER_WRITE (dbg, "\n\n");
+
+		dbg->debug_callback (dbg, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
 	}
 }
 
 void
 cfb_dump_header (CFB_Data* cfbd)
 {
+	struct dbg* dbg = cfbd->dbg;
+
 	cfbHeader* cfbh = cfbd->hdr;
 
-	int         offset = 0;
-	struct dbg* dbg    = cfbd->dbg;
+	DBG_BUFFER_WRITE (dbg, "_abSig              : 0x%08" PRIx64 "\n", cfbh->_abSig);
+	DBG_BUFFER_WRITE (dbg, "_clsId              : %ls\n", cfb_CLSIDToText (&(cfbh->_clsid)));
+	DBG_BUFFER_WRITE (dbg, " version            : %u.%u ( 0x%04x 0x%04x )\n",
+	                  cfbh->_uMinorVersion, cfbh->_uDllVersion,
+	                  cfbh->_uMinorVersion, cfbh->_uDllVersion);
+	DBG_BUFFER_WRITE (dbg, "_uByteOrder         : %s ( 0x%04x )\n",
+	                  cfbh->_uByteOrder == 0xFFFE ? "little-endian" : cfbh->_uByteOrder == 0xFEFF ? "big-endian"
+	                                                                                              : "?",
+	                  cfbh->_uByteOrder);
+	DBG_BUFFER_WRITE (dbg, "_uSectorShift       : %u (%u bytes sectors)\n",
+	                  cfbh->_uSectorShift,
+	                  1 << cfbh->_uSectorShift);
+	DBG_BUFFER_WRITE (dbg, "_uMiniSectorShift   : %u (%u bytes mini-sectors)\n",
+	                  cfbh->_uMiniSectorShift,
+	                  1 << cfbh->_uMiniSectorShift);
+	DBG_BUFFER_WRITE (dbg, "_usReserved0        : 0x%02x\n", cfbh->_usReserved);
+	DBG_BUFFER_WRITE (dbg, "_ulReserved1        : 0x%04x\n", cfbh->_ulReserved1);
+	DBG_BUFFER_WRITE (dbg, "_csectDir           : %u\n", cfbh->_csectDir);
+	DBG_BUFFER_WRITE (dbg, "_csectFat           : %u\n", cfbh->_csectFat);
+	DBG_BUFFER_WRITE (dbg, "_sectDirStart       : %u\n", cfbh->_sectDirStart);
+	DBG_BUFFER_WRITE (dbg, "_signature          : %u\n", cfbh->_signature);
+	DBG_BUFFER_WRITE (dbg, "_ulMiniSectorCutoff : %u\n", cfbh->_ulMiniSectorCutoff);
+	DBG_BUFFER_WRITE (dbg, "_sectMiniFatStart   : %u\n", cfbh->_sectMiniFatStart);
+	DBG_BUFFER_WRITE (dbg, "_csectMiniFat       : %u\n", cfbh->_csectMiniFat);
+	DBG_BUFFER_WRITE (dbg, "_sectDifStart       : %u\n", cfbh->_sectDifStart);
+	DBG_BUFFER_WRITE (dbg, "_csectDif           : %u\n", cfbh->_csectDif);
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_abSig              : 0x%08" PRIx64 "\n", cfbh->_abSig);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_clsId              : %ls\n", cfb_CLSIDToText (&(cfbh->_clsid)));
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " version            : %u.%u ( 0x%04x 0x%04x )\n",
-	                                      cfbh->_uMinorVersion, cfbh->_uDllVersion,
-	                                      cfbh->_uMinorVersion, cfbh->_uDllVersion);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_uByteOrder         : %s ( 0x%04x )\n",
-	                                      cfbh->_uByteOrder == 0xFFFE ? "little-endian" : cfbh->_uByteOrder == 0xFEFF ? "big-endian"
-	                                                                                                                  : "?",
-	                                      cfbh->_uByteOrder);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_uSectorShift       : %u (%u bytes sectors)\n",
-	                                      cfbh->_uSectorShift,
-	                                      1 << cfbh->_uSectorShift);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_uMiniSectorShift   : %u (%u bytes mini-sectors)\n",
-	                                      cfbh->_uMiniSectorShift,
-	                                      1 << cfbh->_uMiniSectorShift);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_usReserved0        : 0x%02x\n", cfbh->_usReserved);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_ulReserved1        : 0x%04x\n", cfbh->_ulReserved1);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_csectDir           : %u\n", cfbh->_csectDir);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_csectFat           : %u\n", cfbh->_csectFat);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_sectDirStart       : %u\n", cfbh->_sectDirStart);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_signature          : %u\n", cfbh->_signature);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_ulMiniSectorCutoff : %u\n", cfbh->_ulMiniSectorCutoff);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_sectMiniFatStart   : %u\n", cfbh->_sectMiniFatStart);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_csectMiniFat       : %u\n", cfbh->_csectMiniFat);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_sectDifStart       : %u\n", cfbh->_sectDifStart);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_csectDif           : %u\n", cfbh->_csectDif);
+	DBG_BUFFER_WRITE (dbg, "\n");
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n");
+	dbg->debug_callback (dbg, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
 }
 
 void
 cfb_dump_FAT (CFB_Data* cfbd)
 {
-	int         offset = 0;
-	struct dbg* dbg    = cfbd->dbg;
+	struct dbg* dbg = cfbd->dbg;
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_CFB_FAT_______________________________________________________________________________________\n\n");
+	DBG_BUFFER_WRITE (dbg, "_CFB_FAT_______________________________________________________________________________________\n\n");
 
 	uint32_t i = 0;
 
 	for (i = 0; i < cfbd->fat_sz; i++) {
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " SECT[%u] : 0x%08x %s\n",
-		                                      i,
-		                                      cfbd->fat[i],
-		                                      (cfbd->fat[i] == CFB_MAX_REG_SECT) ? "(CFB_MAX_REG_SECT)" : (cfbd->fat[i] == CFB_DIFAT_SECT) ? "(CFB_DIFAT_SECT)"
-		                                                                                              : (cfbd->fat[i] == CFB_FAT_SECT)     ? "(CFB_FAT_SECT)"
-		                                                                                              : (cfbd->fat[i] == CFB_END_OF_CHAIN) ? "(CFB_END_OF_CHAIN)"
-		                                                                                              : (cfbd->fat[i] == CFB_FREE_SECT)    ? "(CFB_FREE_SECT)"
-		                                                                                                                                   : "");
+		DBG_BUFFER_WRITE (dbg, " SECT[%u] : 0x%08x %s\n",
+		                  i,
+		                  cfbd->fat[i],
+		                  (cfbd->fat[i] == CFB_MAX_REG_SECT) ? "(CFB_MAX_REG_SECT)" : (cfbd->fat[i] == CFB_DIFAT_SECT) ? "(CFB_DIFAT_SECT)"
+		                                                                          : (cfbd->fat[i] == CFB_FAT_SECT)     ? "(CFB_FAT_SECT)"
+		                                                                          : (cfbd->fat[i] == CFB_END_OF_CHAIN) ? "(CFB_END_OF_CHAIN)"
+		                                                                          : (cfbd->fat[i] == CFB_FREE_SECT)    ? "(CFB_FREE_SECT)"
+		                                                                                                               : "");
 	}
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n");
+	DBG_BUFFER_WRITE (dbg, "\n");
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " End of FAT.\n\n");
+	DBG_BUFFER_WRITE (dbg, " End of FAT.\n\n");
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " Total FAT entries   : %u\n", cfbd->fat_sz);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " Count of FAT sector : %u\n", cfbd->hdr->_csectFat);
+	DBG_BUFFER_WRITE (dbg, " Total FAT entries   : %u\n", cfbd->fat_sz);
+	DBG_BUFFER_WRITE (dbg, " Count of FAT sector : %u\n", cfbd->hdr->_csectFat);
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n\n");
+	DBG_BUFFER_WRITE (dbg, "\n\n");
+
+	dbg->debug_callback (dbg, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
 }
 
 void
 cfb_dump_MiniFAT (CFB_Data* cfbd)
 {
-	int         offset = 0;
-	struct dbg* dbg    = cfbd->dbg;
+	struct dbg* dbg = cfbd->dbg;
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_CFB_MiniFAT___________________________________________________________________________________\n\n");
+	DBG_BUFFER_WRITE (dbg, "_CFB_MiniFAT___________________________________________________________________________________\n\n");
 
 	uint32_t i = 0;
 
 	for (i = 0; i < cfbd->miniFat_sz; i++) {
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " SECT[%u] : 0x%08x %s\n",
-		                                      i,
-		                                      cfbd->miniFat[i],
-		                                      (cfbd->miniFat[i] == CFB_MAX_REG_SECT) ? "(CFB_MAX_REG_SECT)" : (cfbd->miniFat[i] == CFB_DIFAT_SECT) ? "(CFB_DIFAT_SECT)"
-		                                                                                                  : (cfbd->miniFat[i] == CFB_FAT_SECT)     ? "(CFB_FAT_SECT)"
-		                                                                                                  : (cfbd->miniFat[i] == CFB_END_OF_CHAIN) ? "(CFB_END_OF_CHAIN)"
-		                                                                                                  : (cfbd->miniFat[i] == CFB_FREE_SECT)    ? "(CFB_FREE_SECT)"
-		                                                                                                                                           : "");
+		DBG_BUFFER_WRITE (dbg, " SECT[%u] : 0x%08x %s\n",
+		                  i,
+		                  cfbd->miniFat[i],
+		                  (cfbd->miniFat[i] == CFB_MAX_REG_SECT) ? "(CFB_MAX_REG_SECT)" : (cfbd->miniFat[i] == CFB_DIFAT_SECT) ? "(CFB_DIFAT_SECT)"
+		                                                                              : (cfbd->miniFat[i] == CFB_FAT_SECT)     ? "(CFB_FAT_SECT)"
+		                                                                              : (cfbd->miniFat[i] == CFB_END_OF_CHAIN) ? "(CFB_END_OF_CHAIN)"
+		                                                                              : (cfbd->miniFat[i] == CFB_FREE_SECT)    ? "(CFB_FREE_SECT)"
+		                                                                                                                       : "");
 	}
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n");
+	DBG_BUFFER_WRITE (dbg, "\n");
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " End of MiniFAT.\n\n");
+	DBG_BUFFER_WRITE (dbg, " End of MiniFAT.\n\n");
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " Total MiniFAT entries   : %u\n", cfbd->miniFat_sz);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " First MiniFAT sector ID : %u\n", cfbd->hdr->_sectMiniFatStart);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " Count of MiniFAT sector : %u\n", cfbd->hdr->_csectMiniFat);
+	DBG_BUFFER_WRITE (dbg, " Total MiniFAT entries   : %u\n", cfbd->miniFat_sz);
+	DBG_BUFFER_WRITE (dbg, " First MiniFAT sector ID : %u\n", cfbd->hdr->_sectMiniFatStart);
+	DBG_BUFFER_WRITE (dbg, " Count of MiniFAT sector : %u\n", cfbd->hdr->_csectMiniFat);
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n\n");
+	DBG_BUFFER_WRITE (dbg, "\n\n");
+
+	dbg->debug_callback (dbg, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
 }
 
 void
 cfb_dump_DiFAT (CFB_Data* cfbd)
 {
-	int         offset = 0;
-	struct dbg* dbg    = cfbd->dbg;
+	struct dbg* dbg = cfbd->dbg;
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "_CFB_DiFAT_____________________________________________________________________________________\n\n");
+	DBG_BUFFER_WRITE (dbg, "_CFB_DiFAT_____________________________________________________________________________________\n\n");
 
 	uint32_t i = 0;
 
 	for (i = 0; i < cfbd->DiFAT_sz; i++) {
-		offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " SECT[%u] : 0x%08x %s\n",
-		                                      i,
-		                                      cfbd->DiFAT[i],
-		                                      (cfbd->DiFAT[i] == CFB_MAX_REG_SECT) ? "(CFB_MAX_REG_SECT)" : (cfbd->DiFAT[i] == CFB_DIFAT_SECT) ? "(CFB_DIFAT_SECT)"
-		                                                                                                : (cfbd->DiFAT[i] == CFB_FAT_SECT)     ? "(CFB_FAT_SECT)"
-		                                                                                                : (cfbd->DiFAT[i] == CFB_END_OF_CHAIN) ? "(CFB_END_OF_CHAIN)"
-		                                                                                                : (cfbd->DiFAT[i] == CFB_FREE_SECT)    ? "(CFB_FREE_SECT)"
-		                                                                                                                                       : "");
+		DBG_BUFFER_WRITE (dbg, " SECT[%u] : 0x%08x %s\n",
+		                  i,
+		                  cfbd->DiFAT[i],
+		                  (cfbd->DiFAT[i] == CFB_MAX_REG_SECT) ? "(CFB_MAX_REG_SECT)" : (cfbd->DiFAT[i] == CFB_DIFAT_SECT) ? "(CFB_DIFAT_SECT)"
+		                                                                            : (cfbd->DiFAT[i] == CFB_FAT_SECT)     ? "(CFB_FAT_SECT)"
+		                                                                            : (cfbd->DiFAT[i] == CFB_END_OF_CHAIN) ? "(CFB_END_OF_CHAIN)"
+		                                                                            : (cfbd->DiFAT[i] == CFB_FREE_SECT)    ? "(CFB_FREE_SECT)"
+		                                                                                                                   : "");
 	}
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n");
+	DBG_BUFFER_WRITE (dbg, "\n");
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " End of DiFAT.\n\n");
+	DBG_BUFFER_WRITE (dbg, " End of DiFAT.\n\n");
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " Total DiFAT entries   : %u\n", cfbd->DiFAT_sz);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " First DiFAT sector ID : %u\n", cfbd->hdr->_sectDifStart);
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, " Count of DiFAT sector : Header + %u\n", cfbd->hdr->_csectDif);
+	DBG_BUFFER_WRITE (dbg, " Total DiFAT entries   : %u\n", cfbd->DiFAT_sz);
+	DBG_BUFFER_WRITE (dbg, " First DiFAT sector ID : %u\n", cfbd->hdr->_sectDifStart);
+	DBG_BUFFER_WRITE (dbg, " Count of DiFAT sector : Header + %u\n", cfbd->hdr->_csectDif);
 
-	offset += laaf_util_snprintf_realloc (&dbg->_dbg_msg, &dbg->_dbg_msg_size, offset, "\n\n");
+	DBG_BUFFER_WRITE (dbg, "\n\n");
+
+	dbg->debug_callback (dbg, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
 }

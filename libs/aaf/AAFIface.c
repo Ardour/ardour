@@ -119,22 +119,11 @@ aafi_alloc (AAF_Data* aafd)
 }
 
 void
-aafi_enable_windows_VT100_output (void)
+aafi_set_debug (AAF_Iface* aafi, verbosityLevel_e v, int ansicolor, FILE* fp, void (*callback) (struct dbg* dbg, void* ctxdata, int lib, int type, const char* srcfile, const char* srcfunc, int lineno, const char* msg, void* user), void* user)
 {
-#ifdef _WIN32
-	/* enables ANSI colors and unicode chars */
-	HANDLE hOut   = GetStdHandle (STD_OUTPUT_HANDLE);
-	DWORD  dwMode = 0;
-	GetConsoleMode (hOut, &dwMode);
-	SetConsoleMode (hOut, (dwMode | ENABLE_VIRTUAL_TERMINAL_PROCESSING));
-#endif
-}
-
-void
-aafi_set_debug (AAF_Iface* aafi, verbosityLevel_e v, FILE* fp, void (*callback) (struct dbg* dbg, void* ctxdata, int lib, int type, const char* srcfile, const char* srcfunc, int lineno, const char* msg, void* user), void* user)
-{
-	aafi->dbg->verb = v;
-	aafi->dbg->fp   = fp;
+	aafi->dbg->verb      = v;
+	aafi->dbg->ansicolor = ansicolor;
+	aafi->dbg->fp        = fp;
 
 	if (callback) {
 		aafi->dbg->debug_callback = callback;
@@ -146,34 +135,78 @@ aafi_set_debug (AAF_Iface* aafi, verbosityLevel_e v, FILE* fp, void (*callback) 
 }
 
 int
-aafi_set_media_location (AAF_Iface* aafi, const char* path)
+aafi_set_option_int (AAF_Iface* aafi, const char* optname, int val)
 {
-	if (aafi->ctx.options.media_location) {
-		free (aafi->ctx.options.media_location);
+	if (strcmp (optname, "trace") == 0) {
+		aafi->ctx.options.trace = val;
+		return 0;
+	} else if (strcmp (optname, "trace_meta") == 0) {
+		aafi->ctx.options.trace_meta = val;
+		return 0;
+	} else if (strcmp (optname, "forbid_nonlatin_filenames") == 0) {
+		aafi->ctx.options.forbid_nonlatin_filenames = val;
+		return 0;
+	} else if (strcmp (optname, "protools") == 0) {
+		aafi->ctx.options.protools = val;
+		return 0;
+	} else if (strcmp (optname, "resolve") == 0) {
+		aafi->ctx.options.resolve = val;
+		return 0;
 	}
 
-	aafi->ctx.options.media_location = (path) ? laaf_util_c99strdup (path) : NULL;
-
-	return 0;
+	return 1;
 }
 
 int
-aafi_set_trace_class (AAF_Iface* aafi, const char* className)
+aafi_set_option_str (AAF_Iface* aafi, const char* optname, const char* val)
 {
-	if (aafi->ctx.options.trace_class) {
-		free (aafi->ctx.options.trace_class);
-		aafi->ctx.options.trace_class = NULL;
+	if (strcmp (optname, "media_location") == 0) {
+		if (aafi->ctx.options.media_location) {
+			free (aafi->ctx.options.media_location);
+		}
+
+		aafi->ctx.options.media_location = (val) ? laaf_util_c99strdup (val) : NULL;
+
+		return 0;
+	} else if (strcmp (optname, "dump_class_aaf_properties") == 0) {
+		if (aafi->ctx.options.dump_class_aaf_properties) {
+			free (aafi->ctx.options.dump_class_aaf_properties);
+			aafi->ctx.options.dump_class_aaf_properties = NULL;
+		}
+
+		if (val == NULL)
+			return 0;
+
+		aafi->ctx.options.dump_class_aaf_properties = malloc ((strlen (val) + 1) * sizeof (wchar_t));
+
+		if (aafi->ctx.options.dump_class_aaf_properties == NULL) {
+			return -1;
+		}
+
+		swprintf (aafi->ctx.options.dump_class_aaf_properties, strlen (val) + 1, L"%" WPRIs, val);
+
+		return 0;
+	} else if (strcmp (optname, "dump_class_raw_properties") == 0) {
+		if (aafi->ctx.options.dump_class_raw_properties) {
+			free (aafi->ctx.options.dump_class_raw_properties);
+			aafi->ctx.options.dump_class_raw_properties = NULL;
+		}
+
+		if (val == NULL)
+			return 0;
+
+		aafi->ctx.options.dump_class_raw_properties = malloc ((strlen (val) + 1) * sizeof (wchar_t));
+
+		if (aafi->ctx.options.dump_class_raw_properties == NULL) {
+			return -1;
+		}
+
+		swprintf (aafi->ctx.options.dump_class_raw_properties, strlen (val) + 1, L"%" WPRIs, val);
+
+		return 0;
 	}
 
-	aafi->ctx.options.trace_class = malloc ((strlen (className) + 1) * sizeof (wchar_t));
-
-	if (aafi->ctx.options.trace_class == NULL) {
-		return -1;
-	}
-
-	swprintf (aafi->ctx.options.trace_class, strlen (className) + 1, L"%" WPRIs, className);
-
-	return 0;
+	return 1;
 }
 
 void
@@ -220,8 +253,12 @@ aafi_release (AAF_Iface** aafi)
 		aafi_freeMarkers (&(*aafi)->Markers);
 	}
 
-	if ((*aafi)->ctx.options.trace_class) {
-		free ((*aafi)->ctx.options.trace_class);
+	if ((*aafi)->ctx.options.dump_class_aaf_properties) {
+		free ((*aafi)->ctx.options.dump_class_aaf_properties);
+	}
+
+	if ((*aafi)->ctx.options.dump_class_raw_properties) {
+		free ((*aafi)->ctx.options.dump_class_raw_properties);
 	}
 
 	if ((*aafi)->ctx.options.media_location) {
@@ -297,7 +334,7 @@ aafi_get_xfade (aafiTimelineItem* audioItem)
 }
 
 aafiMarker*
-aafi_newMarker (AAF_Iface* aafi, aafRational_t* editRate, aafPosition_t start, aafPosition_t length, wchar_t* name, wchar_t* comment, uint16_t*(RVBColor[3]))
+aafi_newMarker (AAF_Iface* aafi, aafRational_t* editRate, aafPosition_t start, aafPosition_t length, wchar_t* name, wchar_t* comment, uint16_t*(RGBColor[3]))
 {
 	aafiMarker* marker = malloc (sizeof (aafiMarker));
 
@@ -311,10 +348,10 @@ aafi_newMarker (AAF_Iface* aafi, aafRational_t* editRate, aafPosition_t start, a
 	marker->prev = NULL;
 	marker->next = NULL;
 
-	if (RVBColor) {
-		marker->RVBColor[0] = (*RVBColor)[0];
-		marker->RVBColor[1] = (*RVBColor)[1];
-		marker->RVBColor[2] = (*RVBColor)[2];
+	if (RGBColor) {
+		marker->RGBColor[0] = (*RGBColor)[0];
+		marker->RGBColor[1] = (*RGBColor)[1];
+		marker->RGBColor[2] = (*RGBColor)[2];
 	}
 
 	if (aafi->Markers != NULL) {

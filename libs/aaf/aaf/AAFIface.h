@@ -616,7 +616,7 @@ typedef struct aafiMarker {
 
 	wchar_t* name;
 	wchar_t* comment;
-	uint16_t RVBColor[3];
+	uint16_t RGBColor[3];
 
 	struct aafiMarker* prev;
 	struct aafiMarker* next;
@@ -681,12 +681,12 @@ typedef struct aafiContext {
 	int is_inside_derivation_chain;
 
 	struct options {
-		verbosityLevel_e verb;
-		int              trace;
-		int              trace_meta;
-		wchar_t*         trace_class;
-		char*            media_location;
-		char             forbid_nonlatin_filenames;
+		int      trace;
+		int      trace_meta;
+		wchar_t* dump_class_aaf_properties;
+		wchar_t* dump_class_raw_properties;
+		char*    media_location;
+		char     forbid_nonlatin_filenames;
 		/* vendor specific */
 		uint32_t resolve;
 		uint32_t protools;
@@ -765,19 +765,15 @@ typedef struct AAF_Iface {
 	(int64_t) (val * (samplerate * (1 / aafRationalToFloat ((*edit_rate)))))
 
 void
-aafi_enable_windows_VT100_output (void);
+aafi_set_debug (AAF_Iface* aafi, verbosityLevel_e v, int ansicolor, FILE* fp, void (*callback) (struct dbg* dbg, void* ctxdata, int lib, int type, const char* srcfile, const char* srcfunc, int lineno, const char* msg, void* user), void* user);
 
-void
-aafi_set_debug (AAF_Iface* aafi, verbosityLevel_e v, FILE* fp, void (*callback) (struct dbg* dbg, void* ctxdata, int lib, int type, const char* srcfile, const char* srcfunc, int lineno, const char* msg, void* user), void* user);
+int
+aafi_set_option_int (AAF_Iface* aafi, const char* optname, int val);
+int
+aafi_set_option_str (AAF_Iface* aafi, const char* optname, const char* val);
 
 AAF_Iface*
 aafi_alloc (AAF_Data* aafd);
-
-int
-aafi_set_media_location (AAF_Iface* aafi, const char* path);
-
-int
-aafi_set_trace_class (AAF_Iface* aafi, const char* className);
 
 void
 aafi_release (AAF_Iface** aafi);
@@ -795,7 +791,7 @@ aafiTransition*
 aafi_get_xfade (aafiTimelineItem* audioItem);
 
 aafiMarker*
-aafi_newMarker (AAF_Iface* aafi, aafRational_t* editRate, aafPosition_t start, aafPosition_t length, wchar_t* name, wchar_t* comment, uint16_t* RVBColor[3]);
+aafi_newMarker (AAF_Iface* aafi, aafRational_t* editRate, aafPosition_t start, aafPosition_t length, wchar_t* name, wchar_t* comment, uint16_t* RGBColor[3]);
 
 void
 aafi_freeMarkers (aafiMarker** aafi);

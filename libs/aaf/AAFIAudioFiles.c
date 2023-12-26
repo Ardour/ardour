@@ -112,17 +112,79 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 
 	// debug( "Original URI filepath : %s", uri_filepath );
 
+	uri = uriParse (uri_filepath, URI_OPT_DECODE_ALL, aafi->dbg);
+
+	if (uri == NULL) {
+		error ("Could not parse URI");
+		goto err;
+	}
+
+	if (uri->path == NULL) {
+		error ("Could not retrieve <path> out of URI");
+		goto err;
+	}
+
+	// debug( "Decoded URI's filepath : %s", uri->path );
+
+	/* extract relative path to essence file : "<firstparent>/<essence.file>" */
+
+	char* relativeEssencePath = NULL;
+	char* p                   = uri->path + strlen (uri->path);
+
+	int sepcount = 0;
+
+	while (p > uri->path) {
+		if (*p == '/') { /* parsing URI, so will always be '/' as separator character */
+			sepcount++;
+			if (sepcount == 2) {
+				relativeEssencePath = (p + 1);
+				break;
+			}
+		}
+		p--;
+	}
+
+	const char* essenceFileName = laaf_util_fop_get_file (uri->path);
+
+	// debug( "Essence filename : %s", essenceFileName );
+
 	if (search_location) {
-		local_filepath = laaf_util_build_path (DIR_SEP_STR, search_location, laaf_util_fop_get_file (uri_filepath), NULL);
+		/*
+		 * "<search_location>/<essence.file>"
+		 */
+
+		local_filepath = laaf_util_build_path (DIR_SEP_STR, search_location, essenceFileName, NULL);
 
 		if (local_filepath == NULL) {
 			error ("Could not build search filepath");
 			goto err;
 		}
 
-		// debug( "Search filepath : %s", fpath );
+		// debug( "Search filepath : %s", local_filepath );
 
-/* JE - for testing !!!! (added call to uriDecodeString() */		if (access (uriDecodeString(local_filepath, NULL), F_OK) != -1) {
+		if (access (local_filepath, F_OK) != -1) {
+			// debug( "FOUND: %s", local_filepath );
+			retpath = local_filepath;
+			goto found;
+		}
+
+		free (local_filepath);
+		local_filepath = NULL;
+
+		/*
+		 * "<search_location>/<firstparentInOriginalEssencePath>/<essence.file>"
+		 */
+
+		local_filepath = laaf_util_build_path (DIR_SEP_STR, search_location, relativeEssencePath, NULL);
+
+		if (local_filepath == NULL) {
+			error ("Could not build search filepath");
+			goto err;
+		}
+
+		// debug( "Search filepath : %s", local_filepath );
+
+		if (access (local_filepath, F_OK) != -1) {
 			// debug( "FOUND: %s", local_filepath );
 			retpath = local_filepath;
 			goto found;
@@ -142,22 +204,8 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 
 	/* Try <path> part of URI */
 
-	uri = uriParse (uri_filepath, URI_OPT_DECODE_ALL, aafi->dbg);
-
-	if (uri == NULL) {
-		error ("Could not parse URI");
-		goto err;
-	}
-
-	if (uri->path == NULL) {
-		error ("Could not retrieve <path> out of URI");
-		goto err;
-	}
-
-	// debug( "URI's filepath : %s", uri->path );
-
 	if (access (uri->path, F_OK) != -1) {
-		// debug( "FOUND: %s", path );
+		// debug( "FOUND: %s", uri->path );
 		retpath = uri->path;
 		goto found;
 	}
@@ -183,24 +231,6 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 	 *    = /home/user/AudioFiles/essence.file
 	 */
 
-	/* extract relative path to essence file : "<firstparent>/<essence.file>" */
-
-	char* relativeEssencePath = NULL;
-	char* p                   = uri->path + strlen (uri->path);
-
-	int sepcount = 0;
-
-	while (p > uri->path) {
-		if (*p == '/') { /* parsing URI, so will always be '/' as separator character */
-			sepcount++;
-			if (sepcount == 2) {
-				relativeEssencePath = (p + 1);
-				break;
-			}
-		}
-		p--;
-	}
-
 	/* extract path to AAF file */
 
 	aaf_path = laaf_util_c99strdup (aafi->aafd->cfbd->file);
@@ -220,6 +250,32 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 		p--;
 	}
 
+	/*
+	 * "<localPathToAAFfile>/<essence.file>"
+	 */
+
+	local_filepath = laaf_util_build_path (DIR_SEP_STR, aaf_path, essenceFileName, NULL);
+
+	if (local_filepath == NULL) {
+		error ("Could not build filepath");
+		goto err;
+	}
+
+	// debug( "AAF relative filepath : %s", local_filepath );
+
+	if (access (local_filepath, F_OK) != -1) {
+		// debug( "FOUND: %s", filepath );
+		retpath = local_filepath;
+		goto found;
+	}
+
+	free (local_filepath);
+	local_filepath = NULL;
+
+	/*
+	 * "<localPathToAAFfile>/<firstparentInOriginalEssencePath>/<essence.file>"
+	 */
+
 	local_filepath = laaf_util_build_path (DIR_SEP_STR, aaf_path, relativeEssencePath, NULL);
 
 	if (local_filepath == NULL) {
@@ -234,6 +290,9 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 		retpath = local_filepath;
 		goto found;
 	}
+
+	free (local_filepath);
+	local_filepath = NULL;
 
 	// debug("File not found");
 
@@ -426,7 +485,7 @@ aafi_parse_audio_summary (AAF_Iface* aafi, aafiAudioEssence* audioEssence)
 
 	if (audioEssence->is_embedded) {
 		if (audioEssence->summary == NULL) {
-			warning ("TODO: Audio essence has no summary. Should try essence data stream ?");
+			warning ("TODO: Audio essence has no summary. TODO: Should try essence data stream ?");
 			goto err;
 		}
 
@@ -449,6 +508,11 @@ aafi_parse_audio_summary (AAF_Iface* aafi, aafiAudioEssence* audioEssence)
 			warning ("TODO: Could not parse embedded essence summary. Should try essence data stream ?");
 			goto err;
 		}
+
+		audioEssence->channels   = RIFFAudioFile.channels;
+		audioEssence->samplerate = RIFFAudioFile.sampleRate;
+		audioEssence->samplesize = RIFFAudioFile.sampleSize;
+		audioEssence->length     = RIFFAudioFile.duration;
 	} else {
 		/* TODO: can external essence have audioEssence->summary too ? If mp3 (Resolve 18.5.aaf) ? */
 
@@ -473,25 +537,31 @@ aafi_parse_audio_summary (AAF_Iface* aafi, aafiAudioEssence* audioEssence)
 			goto err;
 		}
 
-		fp = fopen (externalFilePath, "rb");
+		if (laaf_util_fop_is_wstr_fileext (audioEssence->original_file_path, L"wav") ||
+		    laaf_util_fop_is_wstr_fileext (audioEssence->original_file_path, L"wave") ||
+		    laaf_util_fop_is_wstr_fileext (audioEssence->original_file_path, L"aif") ||
+		    laaf_util_fop_is_wstr_fileext (audioEssence->original_file_path, L"aiff") ||
+		    laaf_util_fop_is_wstr_fileext (audioEssence->original_file_path, L"aifc")) {
+			fp = fopen (externalFilePath, "rb");
 
-		if (fp == NULL) {
-			error ("Could not open external audio essence file for reading : %s", externalFilePath);
-			goto err;
-		}
+			if (fp == NULL) {
+				error ("Could not open external audio essence file for reading : %s", externalFilePath);
+				goto err;
+			}
 
-		rc = riff_parseAudioFile (&RIFFAudioFile, RIFF_PARSE_ONLY_HEADER, &externalAudioDataReaderCallback, fp, externalFilePath, aafi, aafi->dbg);
+			rc = riff_parseAudioFile (&RIFFAudioFile, RIFF_PARSE_ONLY_HEADER, &externalAudioDataReaderCallback, fp, externalFilePath, aafi, aafi->dbg);
 
-		if (rc < 0) {
-			error ("TODO IF MP3 ? Failed parsing external essence file : %s", externalFilePath);
-			goto err;
+			if (rc < 0) {
+				error ("Failed parsing external audio essence file : %s", externalFilePath);
+				goto err;
+			}
+
+			audioEssence->channels   = RIFFAudioFile.channels;
+			audioEssence->samplerate = RIFFAudioFile.sampleRate;
+			audioEssence->samplesize = RIFFAudioFile.sampleSize;
+			audioEssence->length     = RIFFAudioFile.duration;
 		}
 	}
-
-	audioEssence->channels   = RIFFAudioFile.channels;
-	audioEssence->samplerate = RIFFAudioFile.sampleRate;
-	audioEssence->samplesize = RIFFAudioFile.sampleSize;
-	audioEssence->length     = RIFFAudioFile.duration;
 
 	rc = 0;
 	goto end;

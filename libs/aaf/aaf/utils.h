@@ -51,16 +51,16 @@ extern "C" {
 #define IS_DIR_SEP(c) \
 	((((c) == DIR_SEP) || ((c) == '/')))
 
-#define ANSI_COLOR_RED "\033[38;5;124m" //"\x1b[31m"
-#define ANSI_COLOR_GREEN "\x1b[92m"
-#define ANSI_COLOR_YELLOW "\x1b[33m" //"\x1b[93m"
-#define ANSI_COLOR_ORANGE "\033[38;5;130m"
-#define ANSI_COLOR_BLUE "\x1b[34m"
-#define ANSI_COLOR_MAGENTA "\x1b[35m"
-#define ANSI_COLOR_CYAN "\033[38;5;81m" //"\x1b[36m"
-#define ANSI_COLOR_DARKGREY "\x1b[38;5;242m"
-#define ANSI_COLOR_BOLD "\x1b[1m"
-#define ANSI_COLOR_RESET "\x1b[0m"
+#define ANSI_COLOR_RED(dbg) (((dbg)->ansicolor) ? "\033[38;5;124m" : "") //"\x1b[31m"
+#define ANSI_COLOR_GREEN(dbg) (((dbg)->ansicolor) ? "\x1b[92m" : "")
+#define ANSI_COLOR_YELLOW(dbg) (((dbg)->ansicolor) ? "\x1b[33m" : "") //"\x1b[93m"
+#define ANSI_COLOR_ORANGE(dbg) (((dbg)->ansicolor) ? "\033[38;5;130m" : "")
+#define ANSI_COLOR_BLUE(dbg) (((dbg)->ansicolor) ? "\x1b[34m" : "")
+#define ANSI_COLOR_MAGENTA(dbg) (((dbg)->ansicolor) ? "\x1b[35m" : "")
+#define ANSI_COLOR_CYAN(dbg) (((dbg)->ansicolor) ? "\033[38;5;81m" : "") //"\x1b[36m"
+#define ANSI_COLOR_DARKGREY(dbg) (((dbg)->ansicolor) ? "\x1b[38;5;242m" : "")
+#define ANSI_COLOR_BOLD(dbg) (((dbg)->ansicolor) ? "\x1b[1m" : "")
+#define ANSI_COLOR_RESET(dbg) (((dbg)->ansicolor) ? "\x1b[0m" : "")
 
 int
 laaf_util_wstr_contains_nonlatin (const wchar_t* str);
@@ -70,6 +70,9 @@ laaf_util_clean_filename (char* filename);
 
 const char*
 laaf_util_fop_get_file (const char* filepath);
+
+int
+laaf_util_fop_is_wstr_fileext (const wchar_t* filepath, const wchar_t* ext);
 
 char*
 laaf_util_build_path (const char* sep, const char* first, ...);
