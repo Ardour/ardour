@@ -26,7 +26,7 @@
 namespace PBD {
 
 /** Base class for objects with saveable and undoable state with destruction notification */
-class LIBPBD_API StatefulDestructible : public Stateful, virtual public Destructible
+class LIBPBD_API StatefulDestructible : virtual public Stateful, virtual public Destructible
 {
 };
 
