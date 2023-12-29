@@ -1555,8 +1555,7 @@ MidiRegionView::display_sysexes()
 		std::shared_ptr<SysEx> sysex = find_canvas_sys_ex (sysex_ptr);
 
 		if (!sysex) {
-			sysex = std::shared_ptr<SysEx>(
-				new SysEx (*this, group, text, height, x, 1.0, sysex_ptr));
+			sysex = std::shared_ptr<SysEx>(new SysEx (_note_group, text, height, x, 1.0, sysex_ptr));
 			_sys_exes.insert (make_pair (sysex_ptr, sysex));
 		} else {
 			sysex->set_height (height);
