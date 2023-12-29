@@ -27,7 +27,6 @@ class SysEx
 {
 public:
 	SysEx (
-		MidiRegionView&             region,
 		ArdourCanvas::Container*    parent,
 		std::string&                text,
 		double                      height,

@@ -30,7 +30,6 @@
 using namespace std;
 
 SysEx::SysEx (
-	MidiRegionView&             region,
 	ArdourCanvas::Container*    parent,
 	string&                     text,
 	double                      height,
