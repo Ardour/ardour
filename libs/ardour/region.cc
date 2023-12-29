@@ -232,8 +232,6 @@ Region::register_properties ()
 	, _left_of_split (Properties::left_of_split, false) \
 	, _right_of_split (Properties::right_of_split, false) \
 	, _valid_transients (Properties::valid_transients, false) \
-	, _start (Properties::start, (s)) \
-	, _length (Properties::length, (l)) \
 	, _sync_position (Properties::sync_position, (s)) \
 	, _transient_user_start (0) \
 	, _transient_analysis_start (0) \
@@ -263,8 +261,6 @@ Region::register_properties ()
 	, _left_of_split (Properties::left_of_split, other->_left_of_split) \
 	, _right_of_split (Properties::right_of_split, other->_right_of_split) \
 	, _valid_transients (Properties::valid_transients, other->_valid_transients) \
-	, _start(Properties::start, other->_start) \
-	, _length(Properties::length, other->_length) \
 	, _sync_position(Properties::sync_position, other->_sync_position) \
 	, _user_transients (other->_user_transients) \
 	, _transient_user_start (other->_transient_user_start) \
@@ -294,11 +290,11 @@ Region::register_properties ()
 /* derived-from-derived constructor (no sources in constructor) */
 Region::Region (Session& s, timepos_t const & start, timecnt_t const & length, const string& name, DataType type)
 	: SessionObject(s, name)
+	, Slice (start, length)
 	, _type (type)
 	, _fx_latency (0)
 	, _fx_tail (0)
 	, REGION_DEFAULT_STATE (start,length)
-	, _last_length (length)
 	, _first_edit (EditChangesNothing)
 	, _layer (0)
 	, _changemap (0)
@@ -311,12 +307,13 @@ Region::Region (Session& s, timepos_t const & start, timecnt_t const & length, c
 /** Basic Region constructor (many sources) */
 Region::Region (const SourceList& srcs)
 	: SessionObject(srcs.front()->session(), "toBeRenamed")
+	, Slice (_type == DataType::MIDI ? timepos_t (Temporal::Beats()) : timepos_t::from_superclock (0),
+	         _type == DataType::MIDI ? timecnt_t (Temporal::Beats()) : timecnt_t::from_superclock (0))
 	, _type (srcs.front()->type())
 	, _fx_latency (0)
 	, _fx_tail (0)
 	, REGION_DEFAULT_STATE(_type == DataType::MIDI ? timepos_t (Temporal::Beats()) : timepos_t::from_superclock (0),
 	                       _type == DataType::MIDI ? timecnt_t (Temporal::Beats()) : timecnt_t::from_superclock (0))
-	, _last_length (_type == DataType::MIDI ? timecnt_t (Temporal::Beats()) : timecnt_t::from_superclock (0))
 	, _first_edit (EditChangesNothing)
 	, _layer (0)
 	, _changemap (0)
@@ -332,11 +329,11 @@ Region::Region (const SourceList& srcs)
 /** Create a new Region from an existing one */
 Region::Region (std::shared_ptr<const Region> other)
 	: SessionObject(other->session(), other->name())
+	, Slice (*other.get())
 	, _type (other->data_type())
 	, _fx_latency (0)
 	, _fx_tail (0)
 	, REGION_COPY_STATE (other)
-	, _last_length (other->_last_length)
 	, _first_edit (EditChangesNothing)
 	, _layer (other->_layer)
 	, _changemap (other->_changemap)
@@ -392,11 +389,11 @@ Region::Region (std::shared_ptr<const Region> other)
  */
 Region::Region (std::shared_ptr<const Region> other, timecnt_t const & offset)
 	: SessionObject(other->session(), other->name())
+	, Slice (*other.get())
 	, _type (other->data_type())
 	, _fx_latency (0)
 	, _fx_tail (0)
 	, REGION_COPY_STATE (other)
-	, _last_length (other->_last_length)
 	, _first_edit (EditChangesNothing)
 	, _layer (other->_layer)
 	, _changemap (other->_changemap)
@@ -439,11 +436,11 @@ Region::Region (std::shared_ptr<const Region> other, timecnt_t const & offset)
 /** Create a copy of @p other but with different sources. Used by filters */
 Region::Region (std::shared_ptr<const Region> other, const SourceList& srcs)
 	: SessionObject (other->session(), other->name())
+	, Slice (*other.get())
 	, _type (srcs.front()->type())
 	, _fx_latency (0)
 	, _fx_tail (0)
 	, REGION_COPY_STATE (other)
-	, _last_length (other->_last_length)
 	, _first_edit (EditChangesID)
 	, _layer (other->_layer)
 	, _changemap (other->_changemap)
@@ -592,6 +589,12 @@ void
 Region::maybe_uncopy ()
 {
 	/* this does nothing but marked a semantic moment once upon a time */
+}
+
+void
+Region::set_start_internal (timepos_t const & s)
+{
+	_start = s;
 }
 
 void
@@ -2208,22 +2211,6 @@ Region::is_compound () const
 	return max_source_level() > 0;
 }
 
-void
-Region::set_start_internal (timepos_t const & s)
-{
-	_start = s;
-}
-
-timepos_t
-Region::earliest_possible_position () const
-{
-	if (start() > timecnt_t (position(), timepos_t())) {
-		return timepos_t::from_superclock (0);
-	} else {
-		return source_position();
-	}
-}
-
 samplecnt_t
 Region::latest_possible_sample () const
 {
@@ -2241,108 +2228,6 @@ Region::latest_possible_sample () const
 	 */
 
 	return (position() + minlen).samples() - 1;
-}
-
-Temporal::TimeDomain
-Region::position_time_domain() const
-{
-	return position().time_domain();
-}
-
-timepos_t
-Region::end() const
-{
-	/* one day we might want to enforce _position, _start and _length (or
-	   some combination thereof) all being in the same time domain.
-	*/
-	return _length.val().end();
-}
-
-timepos_t
-Region::source_position () const
-{
-	/* this is the position of the start of the source, in absolute time */
-	return position().earlier (_start.val());
-}
-
-Temporal::Beats
-Region::region_distance_to_region_beats (timecnt_t const & region_relative_offset) const
-{
-	return timecnt_t (region_relative_offset, position()).beats ();
-}
-
-Temporal::Beats
-Region::source_beats_to_absolute_beats (Temporal::Beats beats) const
-{
-	/* since the return type must be beats, force source_position() to
-	   beats before adding, rather than after.
-	*/
-	return source_position().beats() + beats;
-}
-
-Temporal::Beats
-Region::absolute_time_to_region_beats(timepos_t const & b) const
-{
-	 return (position().distance (b)).beats () + start().beats();
-}
-
-Temporal::timepos_t
-Region::absolute_time_to_region_time (timepos_t const & t) const
-{
-	return start() + position().distance (t);
-}
-
-Temporal::timepos_t
-Region::region_beats_to_absolute_time (Temporal::Beats beats) const
-{
-	return position() + timepos_t (beats);
-}
-
-Temporal::timepos_t
-Region::source_beats_to_absolute_time (Temporal::Beats beats) const
-{
-	/* return the time corresponding to `beats' relative to the start of
-	   the source. The start of the source is an implied position given by
-	   region->position - region->start aka ::source_position()
-	*/
-	return source_position() + timepos_t (beats);
-}
-
-/** Calculate  (time - source_position) in Beats
- *
- * Measure the distance between the absolute time and the position of
- * the source start, in beats. The result is positive if time is later
- * than source position.
- *
- * @param p is an absolute time
- * @returns time offset from p to the region's source position as the origin in Beat units
- */
-Temporal::Beats
-Region::absolute_time_to_source_beats(timepos_t const& p) const
-{
-	return source_position().distance (p).beats();
-}
-
-/** Calculate (pos - source-position)
- *
- * @param p is an absolute time
- * @returns time offset from p to the region's source position as the origin.
- */
-timecnt_t
-Region::source_relative_position (timepos_t const & p) const
-{
-	return source_position().distance (p);
-}
-
-/** Calculate (p - region-position)
- *
- * @param p is an absolute time
- * @returns the time offset using the region (timeline) position as origin
- */
-timecnt_t
-Region::region_relative_position (timepos_t const & p) const
-{
-	return position().distance (p);
 }
 
 Temporal::TimeDomain

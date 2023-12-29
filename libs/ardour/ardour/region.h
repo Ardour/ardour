@@ -39,6 +39,7 @@
 #include "ardour/movable.h"
 #include "ardour/readable.h"
 #include "ardour/session_object.h"
+#include "ardour/slice.h"
 #include "ardour/trimmable.h"
 #include "ardour/types_convert.h"
 
@@ -65,8 +66,6 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              hidden;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              position_locked;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              valid_transients; // used for signal only
-	LIBARDOUR_API extern PBD::PropertyDescriptor<timepos_t>         start;
-	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         length;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timepos_t>         sync_position;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<layer_t>           layer;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timepos_t>         ancestral_start;
@@ -102,6 +101,7 @@ enum LIBARDOUR_API RegionOperationFlag {
 class LIBARDOUR_API Region
 	: public SessionObject
 	, public std::enable_shared_from_this<Region>
+	, public Slice
 	, public Trimmable
 	, public Movable
 	, public Temporal::TimeDomainSwapper
@@ -130,40 +130,12 @@ public:
 	void start_domain_bounce (Temporal::DomainBounceInfo&);
 	void finish_domain_bounce (Temporal::DomainBounceInfo&);
 
-	/** How the region parameters play together:
-	 *
-	 * POSITION: first sample of the region along the timeline
-	 * START:    first sample of the region within its source(s)
-	 * LENGTH:   number of samples the region represents
-	 */
-
-	timepos_t position ()  const { return _length.val().position(); }
-	timepos_t start ()     const { return _start.val(); }
-	timecnt_t length ()    const { return _length.val(); }
-	timepos_t end()        const;
-	timepos_t nt_last()    const { return end().decrement(); }
-
-	virtual timecnt_t tail () const { return timecnt_t (0); }
-
-	timepos_t source_position () const;
-	timecnt_t source_relative_position (Temporal::timepos_t const &) const;
-	timecnt_t region_relative_position (Temporal::timepos_t const &) const;
-
-	samplepos_t position_sample ()  const { return position().samples(); }
-	samplecnt_t start_sample ()     const { return _start.val().samples(); }
-	samplecnt_t length_samples ()   const { return _length.val().samples(); }
-
 	layer_t    layer ()     const { return _layer; }
 
 	void set_selected_for_solo(bool yn);
 
 	timepos_t source_length (uint32_t n) const;
 	uint32_t   max_source_level () const;
-
-	/* these two are valid ONLY during a StateChanged signal handler */
-
-	timepos_t last_position () const { return _last_length.position(); }
-	timecnt_t last_length ()   const { return _last_length; }
 
 	samplecnt_t ancestral_start_sample ()  const { return _ancestral_start.val().samples(); }
 	samplecnt_t ancestral_length_samples () const { return _ancestral_length.val().samples(); }
@@ -238,32 +210,7 @@ public:
 	timepos_t sync_position () const;
 
 	timepos_t adjust_to_sync (timepos_t const &) const;
-
-	/* first_sample() is an alias; last_sample() just hides some math */
-
-	samplepos_t first_sample () const { return position().samples(); }
-	samplepos_t last_sample ()  const { return first_sample() + length_samples() - 1; }
-
-	/** Return the earliest possible value of _position given the
-	 *  value of _start within the region's sources
-	 */
-	timepos_t earliest_possible_position () const;
-	/** Return the last possible value of _last_sample given the
-	 *  value of _startin the regions's sources
-	 */
 	samplepos_t latest_possible_sample () const;
-
-	Temporal::TimeRange last_range () const {
-		return Temporal::TimeRange (last_position(), last_position() + _last_length);
-	}
-
-	Temporal::TimeRange range_samples () const {
-		return Temporal::TimeRange (timepos_t (first_sample()), timepos_t (first_sample() + length_samples()));
-	}
-
-	Temporal::TimeRange range () const {
-		return Temporal::TimeRange (position(), position() + length());
-	}
 
 	bool hidden ()           const { return _hidden; }
 	bool muted ()            const { return _muted; }
@@ -281,7 +228,6 @@ public:
 
 	Trimmable::CanTrim can_trim () const;
 
-	Temporal::TimeDomain position_time_domain () const;
 	void set_position_time_domain (Temporal::TimeDomain ps);
 	void recompute_position_from_time_domain ();
 
@@ -316,7 +262,6 @@ public:
 	void deep_sources (std::set<std::shared_ptr<Source> >&) const;
 
 	std::string source_string () const;
-
 
 	/* EDITING OPERATIONS */
 
@@ -365,34 +310,6 @@ public:
 	void modify_front_unchecked (timepos_t const & new_position, bool reset_fade);
 	void modify_end_unchecked (timepos_t const & new_position, bool reset_fade);
 
-	Temporal::timepos_t region_beats_to_absolute_time(Temporal::Beats beats) const;
-	/** Convert a timestamp in beats into timepos_t (both relative to region position) */
-	Temporal::timepos_t region_beats_to_region_time (Temporal::Beats beats) const {
-		return timepos_t (position().distance (region_beats_to_absolute_time (beats)));
-	}
-	/** Convert a timestamp in beats relative to region position into beats relative to source start */
-	Temporal::Beats region_beats_to_source_beats (Temporal::Beats beats) const {
-		return position().distance (region_beats_to_absolute_time (beats)).beats ();
-	}
-	/** Convert a distance within a region to beats relative to region position */
-	Temporal::Beats region_distance_to_region_beats (Temporal::timecnt_t const &) const;
-
-	/** Convert a timestamp in beats measured from source start into absolute beats */
-	Temporal::Beats source_beats_to_absolute_beats(Temporal::Beats beats) const;
-
-	/** Convert a timestamp in beats measured from source start into absolute samples */
-	Temporal::timepos_t source_beats_to_absolute_time(Temporal::Beats beats) const;
-
-	/** Convert a timestamp in beats measured from source start into region-relative samples */
-	Temporal::timepos_t source_beats_to_region_time(Temporal::Beats beats) const {
-		return timepos_t (position().distance (source_beats_to_absolute_time (beats)));
-	}
-	/** Convert a timestamp in absolute time to beats measured from source start*/
-	Temporal::Beats absolute_time_to_source_beats(Temporal::timepos_t const &) const;
-
-	Temporal::Beats absolute_time_to_region_beats (Temporal::timepos_t const &) const;
-
-	Temporal::timepos_t absolute_time_to_region_time (Temporal::timepos_t const &) const;
 
 	int apply (Filter &, PBD::Progress* progress = 0);
 
@@ -592,8 +509,6 @@ protected:
 	PBD::Property<bool>      _left_of_split;
 	PBD::Property<bool>      _right_of_split;
 	PBD::Property<bool>      _valid_transients;
-	PBD::Property<timepos_t> _start;
-	PBD::Property<timecnt_t> _length;
 	/** Sync position relative to the start of our file */
 	PBD::Property<timepos_t> _sync_position;
 
@@ -651,7 +566,6 @@ private:
 	PBD::Property<uint64_t>    _reg_group;
 	PBD::Property<bool>        _contents; // type is irrelevant
 
-	timecnt_t             _last_length;
 	mutable RegionEditState _first_edit;
 	layer_t                 _layer;
 
