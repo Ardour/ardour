@@ -326,6 +326,10 @@ Automatable::get_automation_xml_state () const
 	}
 
 	for (Controls::const_iterator li = controls().begin(); li != controls().end(); ++li) {
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl>(li->second);
+		if (ac && (ac->flags() & Controllable::NotAutomatable)) {
+			continue;
+		}
 		std::shared_ptr<AutomationList> l = std::dynamic_pointer_cast<AutomationList>(li->second->list());
 		if (l) {
 			node->add_child_nocopy (l->get_state ());
