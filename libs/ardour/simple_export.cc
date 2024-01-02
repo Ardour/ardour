@@ -19,6 +19,7 @@
 #include <glibmm.h>
 
 #include "ardour/export_channel_configuration.h"
+#include "ardour/export_format_specification.h"
 #include "ardour/export_filename.h"
 #include "ardour/export_preset.h"
 #include "ardour/export_profile_manager.h"
@@ -189,11 +190,20 @@ SimpleExport::run_export ()
 	assert (!fns.empty ());
 
 	auto fms = _manager->get_formats ();
-	for (auto const& fm : fms) {
-		for (auto const& fn : fns) {
-			fn->filename->set_folder (_folder);
-			fn->filename->set_timespan (ts.front ()->timespans->front ());
-			info << string_compose (_("Exporting: '%1'"), fn->filename->get_path (fm->format)) << endmsg;
+	if (ts.front ()->timespans->front ()->vapor().empty ()) {
+		for (auto const& fm : fms) {
+			for (auto const& fn : fns) {
+				fn->filename->set_folder (_folder);
+				fn->filename->set_timespan (ts.front ()->timespans->front ());
+				info << string_compose (_("Exporting: '%1'"), fn->filename->get_path (fm->format)) << endmsg;
+			}
+		}
+	} else {
+		for (auto const& fm : fms) {
+			std::shared_ptr<ExportFormatSpecification> fmp = fm->format;
+			fmp->set_format_id (ExportFormatBase::F_None);
+			fmp->set_type (ExportFormatBase::T_None);
+			fmp->set_analyse (false);
 		}
 	}
 

@@ -276,6 +276,11 @@ ExportGraphBuilder::add_config (FileSpec const & config, bool rt)
 
 	_realtime = rt;
 
+	if (!timespan->vapor().empty()) {
+		/* plugin export needs no actual channels */
+		return;
+	}
+
 	/* If the sample rate is "session rate", change it to the real value.
 	 * However, we need to copy it to not change the config which is saved...
 	 */
@@ -609,7 +614,7 @@ ExportGraphBuilder::SFC::SFC (ExportGraphBuilder &parent, FileSpec const & new_c
 
 	if (config.format->format_id() == ExportFormatBase::F_None) {
 		/* do not encode result, stop after chunker/analyzer */
-		assert (_analyse);
+		assert (_analyse || !parent.timespan->vapor().empty());
 		return;
 	}
 

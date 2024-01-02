@@ -90,6 +90,8 @@ URIMap::URIDs::init(URIMap& uri_map)
 	surr_ChannelCount       = uri_map.uri_to_id("urn:ardour:a-vapor#ChannelCount");
 	surr_DownmixMode        = uri_map.uri_to_id("urn:ardour:a-vapor#DownmixMode");
 	surr_WarpMode           = uri_map.uri_to_id("urn:ardour:a-vapor#WarpMode");
+	surr_ExportStart        = uri_map.uri_to_id("urn:ardour:a-vapor#ExportStart");
+	surr_ExportStop         = uri_map.uri_to_id("urn:ardour:a-vapor#ExportStop");
 #endif
 }
 

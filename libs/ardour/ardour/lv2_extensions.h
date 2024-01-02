@@ -19,8 +19,10 @@
 
 #ifdef HAVE_LV2_1_18_6
 #include <lv2/core/lv2.h>
+#include <lv2/options/options.h>
 #else
 #include <lv2/lv2plug.in/ns/lv2core/lv2.h>
+#include <lv2/lv2plug.in/ns/ext/options/options.h>
 #endif
 
 /**
@@ -279,6 +281,31 @@ typedef struct {
 	/** Info from plugin's run(), notify host that bank/program changed */
 	void (*notify)(LV2_BankPatch_Handle handle, uint8_t channel, uint32_t bank, uint8_t pgm);
 } LV2_BankPatch;
+
+/**
+   @}
+*/
+
+/**
+   @defgroup lv2 export Extension
+
+	 Notify plugin to write data to disk
+
+   @{
+*/
+
+
+#define LV2_EXPORT_URI "http://ardour.org/lv2/export"
+#define LV2_EXPORT_PREFIX LV2_EXPORT_URI "#"
+#define LV2_EXPORT__interface LV2_EXPORT_PREFIX "interface"
+
+/** Export interface */
+typedef struct {
+	/** ..  */
+	int (*setup)(LV2_Handle, const char*, LV2_Options_Option const*);
+	/** ..  */
+	int (*finalize)(LV2_Handle);
+} LV2_Export_Interface;
 
 /**
    @}

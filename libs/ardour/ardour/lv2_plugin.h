@@ -93,6 +93,12 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	const void* extension_data (const char* uri) const;
 
+#ifdef LV2_EXTENDED
+	int  setup_export (const char*);
+	int  finalize_export ();
+	bool can_export () const { return _export_interface; }
+#endif
+
 	const void* c_plugin();
 	const void* c_ui();
 	const void* c_ui_type();
@@ -312,9 +318,10 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	static void midnam_update (LV2_Midnam_Handle);
 	static void bankpatch_notify (LV2_BankPatch_Handle, uint8_t, uint32_t, uint8_t);
 
-	const LV2_Inline_Display_Interface* _display_interface;
 	bool _inline_display_in_gui;
-	const LV2_Midnam_Interface*    _midname_interface;
+	const LV2_Inline_Display_Interface* _display_interface;
+	const LV2_Midnam_Interface* _midname_interface;
+	const LV2_Export_Interface* _export_interface;
 
 	uint32_t _bankpatch[16];
 	bool seen_bankpatch;
