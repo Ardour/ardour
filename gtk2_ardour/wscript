@@ -286,6 +286,7 @@ gtk2_ardour_sources = [
         'strip_silence_dialog.cc',
         'stripable_colorpicker.cc',
         'stripable_time_axis.cc',
+        'surround_strip.cc',
         'sys_ex.cc',
         'template_dialog.cc',
         'tempo_curve.cc',
@@ -812,6 +813,9 @@ def build(bld):
     if bld.is_defined('PTFORMAT'):
         menus_argv += [ '-DPTFORMAT' ]
 
+    if bld.is_defined('MIXBUS') or Options.options.debug:
+        menus_argv += [ '-DVAPOR' ]
+
     # always build all versions of the menu definitions
     # so that we can try them out with different program builds.
     for program in [ 'ardour']:
@@ -820,7 +824,7 @@ def build(bld):
         obj.command_is_external = True
         obj.no_inputs = True
         obj.argv = menus_argv
-        obj.dep_vars = ['PTFORMAT', 'MIXBUS', 'MIXBUS32C', 'WINDOWS']
+        obj.dep_vars = ['PTFORMAT', 'MIXBUS', 'MIXBUS32C', 'WINDOWS', 'debug']
         obj.stdin = program + '.menus.in'
         obj.stdout = program + '.menus'
         bld.install_files (bld.env['CONFDIR'], program + '.menus')

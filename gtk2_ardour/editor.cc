@@ -5962,7 +5962,7 @@ Editor::add_stripables (StripableList& sl)
 
 		} else if ((r = std::dynamic_pointer_cast<Route> (*s)) != 0) {
 
-			if (r->is_auditioner() || r->is_monitor()) {
+			if (r->is_auditioner() || r->is_monitor() || r->is_surround_master ()) {
 				continue;
 			}
 

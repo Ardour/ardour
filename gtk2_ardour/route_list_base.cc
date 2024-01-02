@@ -579,6 +579,9 @@ RouteListBase::add_stripables (StripableList& slist)
 			if (route->is_monitor ()) {
 				continue;
 			}
+			if (route->is_surround_master ()) {
+				continue;
+			}
 
 			row = *(_model->insert (insert_iter));
 

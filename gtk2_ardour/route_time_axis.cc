@@ -57,6 +57,7 @@
 #include "ardour/profile.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
+#include "ardour/surround_send.h"
 #include "ardour/track.h"
 
 #include "canvas/debug.h"
@@ -1933,16 +1934,19 @@ RouteTimeAxisView::add_processor_to_subplugin_menu (std::weak_ptr<Processor> p)
 {
 	std::shared_ptr<Processor> processor (p.lock ());
 
-	if (!processor || !processor->display_to_user ()) {
+	if (!processor) {
 		return;
 	}
 
-	/* we use this override to veto the Amp processor from the plugin menu,
-	   as its automation lane can be accessed using the special "Fader" menu
-	   option
-	*/
-
-	if (std::dynamic_pointer_cast<Amp> (processor) != 0) {
+	if (std::dynamic_pointer_cast<SurroundSend> (processor) != 0) {
+		/* OK, show surround send controls */
+	} else if (std::dynamic_pointer_cast<Amp> (processor) != 0) {
+			/* we use this override to veto the Amp processor from the plugin menu,
+			 * as its automation lane can be accessed using the special "Fader" menu
+			 * option
+			 */
+		return;
+	} else if (!processor->display_to_user ()) {
 		return;
 	}
 

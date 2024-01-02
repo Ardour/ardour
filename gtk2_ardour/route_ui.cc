@@ -1476,6 +1476,12 @@ RouteUI::build_mute_menu(void)
 	items.push_back (CheckMenuElem(*main_mute_check));
 	main_mute_check->show_all();
 
+	surround_mute_check = manage (new Gtk::CheckMenuItem(_("Surround Send")));
+	init_mute_menu(MuteMaster::SurroundSend, surround_mute_check);
+	surround_mute_check->signal_toggled().connect(sigc::bind (sigc::mem_fun (*this, &RouteUI::toggle_mute_menu), MuteMaster::SurroundSend, surround_mute_check));
+	items.push_back (CheckMenuElem(*surround_mute_check));
+	surround_mute_check->show_all();
+
 	_route->mute_points_changed.connect (route_connections, invalidator (*this), boost::bind (&RouteUI::muting_change, this), gui_context());
 }
 

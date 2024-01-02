@@ -37,6 +37,9 @@
       </menu>
       <separator/>
       <menuitem action='toggle-session-options-editor'/>
+#ifdef VAPOR
+      <menuitem action='ToggleSurroundMaster'/>
+#endif
 
       <menu name='MonitorMenu' action='MonitorMenu'>
         <menuitem action='UseMonitorSection'/>

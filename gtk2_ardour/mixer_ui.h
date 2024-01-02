@@ -72,6 +72,7 @@ class MixerStrip;
 class PluginSelector;
 class MixerGroupTabs;
 class MonitorSection;
+class SurroundStrip;
 class VCAMasterStrip;
 
 class PluginTreeStore : public Gtk::TreeStore
@@ -147,6 +148,8 @@ public:
 
 	void toggle_mixer_list ();
 	void showhide_mixer_list (bool yn);
+
+	void toggle_surround_master ();
 
 	void toggle_monitor_section ();
 	void showhide_monitor_section (bool);
@@ -248,6 +251,7 @@ private:
 	void add_routes (ARDOUR::RouteList&);
 	void remove_strip (MixerStrip *);
 	void remove_foldback (FoldbackStrip *);
+	void remove_surround_master (SurroundStrip*);
 	void add_masters (ARDOUR::VCAList&);
 	void remove_master (VCAMasterStrip*);
 	void new_masters_created ();
@@ -332,8 +336,9 @@ private:
 	void build_track_menu ();
 
 	MonitorSection   _monitor_section;
-	PluginSelector *_plugin_selector;
-	FoldbackStrip * foldback_strip;
+	PluginSelector* _plugin_selector;
+	SurroundStrip*  _surround_strip;
+	FoldbackStrip*  foldback_strip;
 	bool _show_foldback_strip;
 
 	void stripable_property_changed (const PBD::PropertyChange& what_changed, std::weak_ptr<ARDOUR::Stripable> ws);

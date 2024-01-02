@@ -210,6 +210,7 @@ protected:
 	Gtk::CheckMenuItem* post_fader_mute_check;
 	Gtk::CheckMenuItem* listen_mute_check;
 	Gtk::CheckMenuItem* main_mute_check;
+	Gtk::CheckMenuItem* surround_mute_check;
 	Gtk::CheckMenuItem* solo_safe_check;
 	Gtk::CheckMenuItem* solo_isolated_check;
 	int                 set_color_from_route ();

@@ -584,6 +584,7 @@ private:
 	bool can_cut() const;
 	bool stub_processor_selected() const;
 	bool channelstrip_selected() const;
+	bool surrsend_selected() const;
 
 	static Glib::RefPtr<Gtk::Action> cut_action;
 	static Glib::RefPtr<Gtk::Action> copy_action;
