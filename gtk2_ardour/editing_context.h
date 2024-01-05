@@ -106,7 +106,8 @@ public:
 	virtual bool autoscroll_active() const = 0;
 
 	virtual void redisplay_grid (bool immediate_redraw) = 0;
-	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) = 0;
+	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) const = 0;
+
 	Temporal::timecnt_t relative_distance (Temporal::timepos_t const & origin, Temporal::timecnt_t const & duration, Temporal::TimeDomain domain);
 	Temporal::timecnt_t snap_relative_time_to_relative_time (Temporal::timepos_t const & origin, Temporal::timecnt_t const & x, bool ensure_snap) const;
 
@@ -194,11 +195,13 @@ public:
 	 */
 	samplepos_t canvas_event_sample (GdkEvent const * event, double* pcx = nullptr, double* pcy = nullptr) const;
 
-	virtual Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
-	virtual Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) = 0;
+	virtual bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 
-	virtual int32_t get_grid_beat_divisions (Editing::GridType gt) = 0;
-	virtual int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) = 0;
+	virtual Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) const = 0;
+	virtual Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const = 0;
+
+	virtual int32_t get_grid_beat_divisions (Editing::GridType gt) const = 0;
+	virtual int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const = 0;
 
 	Editing::GridType  grid_type () const;
 	bool  grid_type_is_musical (Editing::GridType) const;
@@ -223,17 +226,17 @@ public:
 	virtual void snap_to (Temporal::timepos_t & first,
 	                      Temporal::RoundMode   direction = Temporal::RoundNearest,
 	                      ARDOUR::SnapPref      pref = ARDOUR::SnapToAny_Visual,
-	                      bool                  ensure_snap = false);
+	                      bool                  ensure_snap = false) const;
 
 	virtual void snap_to_with_modifier (Temporal::timepos_t & first,
 	                                    GdkEvent const*       ev,
 	                                    Temporal::RoundMode   direction = Temporal::RoundNearest,
 	                                    ARDOUR::SnapPref      gpref = ARDOUR::SnapToAny_Visual,
-	                                    bool ensure_snap = false);
+	                                    bool ensure_snap = false) const;
 
 	virtual Temporal::timepos_t snap_to_bbt (Temporal::timepos_t const & start,
 	                                         Temporal::RoundMode   direction,
-	                                         ARDOUR::SnapPref    gpref);
+	                                         ARDOUR::SnapPref    gpref) const;
 
 	virtual double get_y_origin () const = 0;
 	virtual void reset_x_origin (samplepos_t) = 0;
@@ -383,18 +386,18 @@ public:
 	Temporal::timepos_t _snap_to_bbt (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
 	                                  ARDOUR::SnapPref    gpref,
-	                                  Editing::GridType   grid_type);
+	                                  Editing::GridType   grid_type) const;
 
 	virtual Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                          Temporal::RoundMode   direction,
-	                                          ARDOUR::SnapPref    gpref) = 0;
+	                                          ARDOUR::SnapPref    gpref) const = 0;
 
 	virtual void snap_to_internal (Temporal::timepos_t& first,
 	                               Temporal::RoundMode    direction = Temporal::RoundNearest,
 	                               ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
-	                               bool                 ensure_snap = false) = 0;
+	                               bool                 ensure_snap = false) const = 0;
 
-	void check_best_snap (Temporal::timepos_t const & presnap, Temporal::timepos_t &test, Temporal::timepos_t &dist, Temporal::timepos_t &best);
+	void check_best_snap (Temporal::timepos_t const & presnap, Temporal::timepos_t &test, Temporal::timepos_t &dist, Temporal::timepos_t &best) const;
 	virtual double visible_canvas_width() const = 0;
 
 	enum BBTRulerScale {

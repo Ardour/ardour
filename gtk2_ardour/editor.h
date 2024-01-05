@@ -315,14 +315,14 @@ public:
 
 	/* nudge is initiated by transport controls owned by ARDOUR_UI */
 
-	Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next);
+	Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) const;
 	Temporal::timecnt_t get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count, Temporal::timecnt_t const & duration);
 
-	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position);
-	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position);
+	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) const;
+	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const;
 
-	int32_t get_grid_beat_divisions (Editing::GridType gt);
-	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state);
+	int32_t get_grid_beat_divisions (Editing::GridType gt) const;
+	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const;
 
 	void nudge_forward (bool next, bool force_playhead);
 	void nudge_backward (bool next, bool force_playhead);
@@ -2227,27 +2227,27 @@ private:
 
 	Temporal::timepos_t snap_to_minsec (Temporal::timepos_t const & start,
 	                                    Temporal::RoundMode   direction,
-	                                    ARDOUR::SnapPref    gpref);
+	                                    ARDOUR::SnapPref    gpref) const;
 
 	Temporal::timepos_t snap_to_cd_frames (Temporal::timepos_t const & start,
 	                                       Temporal::RoundMode   direction,
-	                                       ARDOUR::SnapPref    gpref);
+	                                       ARDOUR::SnapPref    gpref) const;
 
 	Temporal::timepos_t snap_to_timecode (Temporal::timepos_t const & start,
 	                                      Temporal::RoundMode   direction,
-	                                      ARDOUR::SnapPref    gpref);
+	                                      ARDOUR::SnapPref    gpref) const;
 
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
-	                                  ARDOUR::SnapPref    gpref);
+	                                  ARDOUR::SnapPref    gpref) const;
 
 	void snap_to_internal (Temporal::timepos_t & first,
 	                       Temporal::RoundMode   direction = Temporal::RoundNearest,
 	                       ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
-	                       bool                for_mark  = false);
+	                       bool                for_mark  = false) const;
 
 	Temporal::timepos_t snap_to_marker (Temporal::timepos_t const & presnap,
-	                                    Temporal::RoundMode direction = Temporal::RoundNearest);
+	                                    Temporal::RoundMode direction = Temporal::RoundNearest) const;
 
 	double visible_canvas_width() const { return _visible_canvas_width; }
 

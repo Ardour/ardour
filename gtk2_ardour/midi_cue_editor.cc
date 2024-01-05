@@ -97,7 +97,7 @@ MidiCueEditor::build_canvas ()
 
 
 timepos_t
-MidiCueEditor::snap_to_grid (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref)
+MidiCueEditor::snap_to_grid (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref) const
 {
 	/* BBT time only */
 	return snap_to_bbt (presnap, direction, gpref);
@@ -105,7 +105,7 @@ MidiCueEditor::snap_to_grid (timepos_t const & presnap, Temporal::RoundMode dire
 
 
 void
-MidiCueEditor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap)
+MidiCueEditor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap) const
 {
 	UIConfiguration const& uic (UIConfiguration::instance ());
 	const timepos_t presnap = start;

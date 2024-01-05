@@ -46,7 +46,7 @@ class CueEditor : public EditingContext
 	bool autoscroll_active() const;
 
 	void redisplay_grid (bool immediate_redraw);
-	Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next);
+	Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) const;
 
 	void instant_save();
 
