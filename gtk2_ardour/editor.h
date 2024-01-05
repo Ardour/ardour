@@ -130,6 +130,7 @@ class EditorSummary;
 class GUIObjectState;
 class ArdourMarker;
 class MidiRegionView;
+class MidiView;
 class MidiExportDialog;
 class MixerStrip;
 class MouseCursors;
@@ -1726,7 +1727,7 @@ private:
 	void edit_meter_marker (MeterMarker&);
 	void edit_bbt_marker (BBTMarker&);
 	void edit_control_point (ArdourCanvas::Item*);
-	void edit_notes (MidiRegionView*);
+	void edit_notes (MidiView*);
 	void edit_region (RegionView*);
 
 	void edit_current_meter ();

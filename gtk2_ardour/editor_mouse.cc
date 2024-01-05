@@ -65,6 +65,7 @@
 #include "audio_time_axis.h"
 #include "audio_region_view.h"
 #include "midi_region_view.h"
+#include "midi_view.h"
 #include "marker.h"
 #include "streamview.h"
 #include "region_gain_line.h"
@@ -2323,9 +2324,9 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 }
 
 void
-Editor::edit_notes (MidiRegionView* mrv)
+Editor::edit_notes (MidiView* mrv)
 {
-	MidiRegionView::Selection const & s = mrv->selection();
+	MidiView::Selection const & s = mrv->selection();
 
 	if (s.empty ()) {
 		return;

@@ -25,7 +25,7 @@
 #include "gtkmm2ext/utils.h"
 
 #include "edit_note_dialog.h"
-#include "midi_region_view.h"
+#include "midi_view.h"
 #include "note_base.h"
 
 #include "pbd/i18n.h"
@@ -41,7 +41,7 @@ using namespace Gtkmm2ext;
  *    @param n Notes to edit.
  */
 
-EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
+EditNoteDialog::EditNoteDialog (MidiView* rv, set<NoteBase*> n)
 	: ArdourDialog (_("Note"))
 	, _region_view (rv)
 	, _events (n)
@@ -94,12 +94,11 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 	table->attach (_time_all, 2, 3, r, r + 1);
 	++r;
 
-	_time_clock.set_session (_region_view->get_time_axis_view().session ());
+	// XXXX _time_clock.set_session (_region_view->get_time_axis_view().session ());
 	_time_clock.set_mode (AudioClock::BBT);
 
 	/* Calculate absolute position of the event on time timeline */
-	std::shared_ptr<ARDOUR::Region> region (_region_view->region ());
-	timepos_t const pos = region->source_position() + timecnt_t ((*_events.begin())->note()->time ());
+	timepos_t const pos = _region_view->current_slice().source_position() + timecnt_t ((*_events.begin())->note()->time ());
 
 	_time_clock.set (pos, true);
 
@@ -109,7 +108,7 @@ EditNoteDialog::EditNoteDialog (MidiRegionView* rv, set<NoteBase*> n)
 	table->attach (_length_all, 2, 3, r, r + 1);
 	++r;
 
-	_length_clock.set_session (_region_view->get_time_axis_view().session ());
+	// XXXX _length_clock.set_session (_region_view->get_time_axis_view().session ());
 	_length_clock.set_mode (AudioClock::BBT);
 	_length_clock.set_duration (timecnt_t ((*_events.begin())->note()->length()), true);
 
@@ -201,10 +200,8 @@ EditNoteDialog::done (int r)
 		}
 	}
 
-	std::shared_ptr<ARDOUR::Region> region (_region_view->region ());
-
 	/* convert current clock time into an offset from the start of the source */
-	timecnt_t const time_clock_source_relative = region->source_position ().distance (_time_clock.last_when ());
+	timecnt_t const time_clock_source_relative = _region_view->current_slice().source_position ().distance (_time_clock.last_when ());
 
 	/* convert that into a position in Beats - this will be the new note time (as an offset inside the source) */
 	Beats const new_note_time_source_relative_beats = time_clock_source_relative.beats ();

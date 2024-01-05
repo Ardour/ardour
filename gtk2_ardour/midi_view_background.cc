@@ -40,6 +40,8 @@ MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent)
 	, _data_note_min (60)
 	, _data_note_max (71)
 	, _note_lines (new ArdourCanvas::LineSet (parent, ArdourCanvas::LineSet::Horizontal))
+	, _note_mode (ARDOUR::Sustained)
+	, _color_mode (ARDOUR::MeterColors)
 {
 	_note_lines->lower_to_bottom();
 

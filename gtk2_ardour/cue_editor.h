@@ -92,8 +92,6 @@ class CueEditor : public EditingContext
 	}
 	VerboseCursor* verbose_cursor () const;
 
-
-
 	void set_snapped_cursor_position (Temporal::timepos_t const & pos);
 
 	std::vector<MidiRegionView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const;

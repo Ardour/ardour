@@ -72,6 +72,7 @@
 #include "midi_region_view.h"
 #include "midi_selection.h"
 #include "midi_time_axis.h"
+#include "midi_view.h"
 #include "mouse_cursors.h"
 #include "note_base.h"
 #include "patch_change.h"
@@ -2384,12 +2385,14 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 
 	Drag::start_grab (event, cursor);
 
+#warning paul fix me MRV/MV
+#if 0
 	region = &cnote->region_view ();
 
 	double temp;
 	temp        = region->snap_to_pixel (cnote->x0 (), true);
 	_snap_delta = temp - cnote->x0 ();
-
+#endif
 	_item->grab ();
 
 	if (event->motion.state & ArdourKeyboard::note_size_relative_modifier ()) {
@@ -6157,13 +6160,13 @@ NoteDrag::NoteDrag (EditingContext& ec, ArdourCanvas::Item* i)
 	_primary = reinterpret_cast<NoteBase*> (_item->get_data ("notebase"));
 	assert (_primary);
 	_region      = &_primary->region_view ();
-	_note_height = _region->midi_stream_view ()->note_height ();
+	_note_height = _region->midi_context().note_height ();
 }
 
 void
 NoteDrag::setup_pointer_offset ()
 {
-	_pointer_offset = _region->region ()->source_beats_to_absolute_time (_primary->note ()->time ()).distance (raw_grab_time ());
+	_pointer_offset = _region->current_slice().source_beats_to_absolute_time (_primary->note ()->time ()).distance (raw_grab_time ());
 }
 
 void
@@ -6177,7 +6180,7 @@ NoteDrag::start_grab (GdkEvent* event, Gdk::Cursor*)
 		_copy = false;
 	}
 
-	setup_snap_delta (_region->region ()->source_beats_to_absolute_time (_primary->note ()->time ()));
+	setup_snap_delta (_region->current_slice().source_beats_to_absolute_time (_primary->note ()->time ()));
 
 	if (!(_was_selected = _primary->selected ())) {
 		/* tertiary-click means extend selection - we'll do that on button release,
@@ -6216,7 +6219,7 @@ NoteDrag::total_dx (GdkEvent* event) const
 	timecnt_t dx = t2.distance (t1);
 
 	/* primary note time in quarter notes */
-	timepos_t const n_qn = _region->region ()->source_beats_to_absolute_time (_primary->note ()->time ());
+	timepos_t const n_qn = _region->current_slice().source_beats_to_absolute_time (_primary->note ()->time ());
 
 	/* prevent (n_qn + dx) from becoming negative */
 	if (-dx.distance() > timecnt_t(n_qn).distance ()) {
@@ -6241,8 +6244,8 @@ NoteDrag::total_dx (GdkEvent* event) const
 	timecnt_t ret (snap.earlier (n_qn).earlier (snap_delta (event->button.state)), n_qn);
 
 	/* prevent the earliest note being dragged earlier than the region's start position */
-	if (_earliest + ret < _region->region ()->start ()) {
-		ret -= (ret + _earliest) - _region->region ()->start ();
+	if (_earliest + ret < _region->current_slice().start ()) {
+		ret -= (ret + _earliest) - _region->current_slice().start ();
 	}
 
 	return ret;
@@ -6256,13 +6259,13 @@ NoteDrag::total_dy () const
 		return 0;
 	}
 
-	double const y = _region->midi_view ()->y_position ();
+	double const y = _region->midi_context().y_position ();
 	/* new current note */
 	uint8_t n = _region->y_to_note (current_pointer_y () - y);
 	/* clamp */
-	MidiStreamView* msv = _region->midi_stream_view ();
-	n                   = max (msv->lowest_note (), n);
-	n                   = min (msv->highest_note (), n);
+	MidiViewBackground& mvb = _region->midi_context ();
+	n                   = max (mvb.lowest_note (), n);
+	n                   = min (mvb.highest_note (), n);
 	/* and work out delta */
 	return n - _region->y_to_note (grab_y () - y);
 }
@@ -6308,7 +6311,7 @@ NoteDrag::motion (GdkEvent* event, bool first_move)
 
 		_region->show_verbose_cursor_for_new_note_value (_primary->note (), new_note);
 
-		editing_context.set_snapped_cursor_position (_region->region ()->region_beats_to_absolute_time (_primary->note ()->time ()) + dx_qn);
+		editing_context.set_snapped_cursor_position (_region->current_slice().region_beats_to_absolute_time (_primary->note ()->time ()) + dx_qn);
 	}
 }
 
@@ -6675,21 +6678,21 @@ DraggingView::DraggingView (RegionView* v, RegionDrag* parent, TimeAxisView* ita
 	initial_end      = v->region ()->position () + v->region ()->length ();
 }
 
-PatchChangeDrag::PatchChangeDrag (EditingContext& ec, PatchChange* i, MidiRegionView* r)
+PatchChangeDrag::PatchChangeDrag (EditingContext& ec, PatchChange* i, MidiView* r)
 	: Drag (ec, i->canvas_item (), Temporal::BeatTime, true, false)
 	, _region_view (r)
 	, _patch_change (i)
 	, _cumulative_dx (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, string_compose ("New PatchChangeDrag, patch @ %1, grab @ %2\n",
-	                                           _region_view->region ()->source_beats_to_absolute_time (_patch_change->patch ()->time ()),
+	                                           _region_view->current_slice().source_beats_to_absolute_time (_patch_change->patch ()->time ()),
 	                                           grab_time ()));
 }
 
 void
 PatchChangeDrag::motion (GdkEvent* ev, bool)
 {
-	std::shared_ptr<Region> r = _region_view->region ();
+	std::shared_ptr<Region> r = _region_view->midi_region ();
 
 	timepos_t f = adjusted_current_time (ev);
 	f           = max (f, r->position ());
@@ -6713,13 +6716,13 @@ PatchChangeDrag::finished (GdkEvent* ev, bool movement_occurred)
 		return;
 	}
 
-	std::shared_ptr<Region> r (_region_view->region ());
+	std::shared_ptr<Region> r (_region_view->midi_region ());
 
 	timepos_t f = adjusted_current_time (ev);
 	f           = max (f, r->position ());
 	f           = min (f, r->nt_last ());
 
-	_region_view->move_patch_change (*_patch_change, _region_view->region ()->absolute_time_to_source_beats (f));
+	_region_view->move_patch_change (*_patch_change, r->absolute_time_to_source_beats (f));
 }
 
 void
@@ -6731,8 +6734,7 @@ PatchChangeDrag::aborted (bool)
 void
 PatchChangeDrag::setup_pointer_offset ()
 {
-	std::shared_ptr<Region> region = _region_view->region ();
-	_pointer_offset                = region->source_beats_to_absolute_time (_patch_change->patch ()->time ()).distance (raw_grab_time ());
+	_pointer_offset = _region_view->current_slice().source_beats_to_absolute_time (_patch_change->patch ()->time ()).distance (raw_grab_time ());
 }
 
 MidiRubberbandSelectDrag::MidiRubberbandSelectDrag (EditingContext& ec, MidiRegionView* rv)

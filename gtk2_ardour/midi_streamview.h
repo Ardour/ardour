@@ -85,6 +85,9 @@ public:
 	ArdourCanvas::Container* region_canvas () const { return _region_group; }
 
 	void parameter_changed (std::string const &);
+	uint8_t get_preferred_midi_channel () const;
+	void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t);
+	void set_note_highlight (bool);
 
 protected:
 	void setup_rec_box ();

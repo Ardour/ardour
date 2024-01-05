@@ -29,9 +29,14 @@
 #include <vector>
 #include <stdint.h>
 
+#include <boost/unordered_map.hpp>
+
+#include <sigc++/signal.h>
+
 #include "pbd/signals.h"
 
 #include "ardour/midi_model.h"
+#include "ardour/slice.h"
 #include "ardour/types.h"
 
 #include "editing.h"
@@ -44,6 +49,7 @@
 namespace ARDOUR {
 	class MidiRegion;
 	class MidiModel;
+	class MidiTrack;
 	class Filter;
 };
 
@@ -69,15 +75,16 @@ class ItemCounts;
 class CursorContext;
 class VelocityGhostRegion;
 class EditingContext;
+class PasteContext;
 
-class MidiView
+class MidiView : public virtual sigc::trackable
 {
   public:
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 	typedef Evoral::Sequence<Temporal::Beats>::Notes Notes;
 
 	MidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
-	          ArdourCanvas::Container* parent,
+	          ArdourCanvas::Container& parent,
 	          EditingContext&          ec,
 	          MidiViewBackground&      bg,
 	          uint32_t                 basic_color);
@@ -85,11 +92,12 @@ class MidiView
 	virtual ~MidiView ();
 
 	void init (bool wfd);
+	virtual bool display_enabled() const { return true; }
 
 	void step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 	                    Temporal::Beats pos, Temporal::Beats len);
 	void step_sustain (Temporal::Beats beats);
-	void set_height (double);
+	virtual void set_height (double);
 	void apply_note_range(uint8_t lowest, uint8_t highest, bool force=false);
 
 	// inline ARDOUR::ColorMode color_mode() const { return _background->color_mode(); }
@@ -102,8 +110,10 @@ class MidiView
 	void hide_step_edit_cursor ();
 	void set_step_edit_cursor_width (Temporal::Beats beats);
 
-	virtual GhostRegion* add_ghost (TimeAxisView&) {}
+	virtual GhostRegion* add_ghost (TimeAxisView&) { return nullptr; }
 	virtual std::string get_modifier_name() const;
+
+	void set_model (std::shared_ptr<ARDOUR::MidiModel>);
 
 	NoteBase* add_note(const std::shared_ptr<NoteType> note, bool visible);
 
@@ -310,22 +320,25 @@ class MidiView
 	 */
 	void clear_selection ();
 
-	ARDOUR::InstrumentInfo& instrument_info() const;
-
 	void note_deleted (NoteBase*);
 	void clear_note_selection ();
 
 	void show_verbose_cursor_for_new_note_value(std::shared_ptr<NoteType> current_note, uint8_t new_note) const;
 
+	std::shared_ptr<ARDOUR::MidiRegion> midi_region() const { return _region; }
+	EditingContext& editing_context() const { return _editing_context; }
+	MidiViewBackground& midi_context() const { return _midi_context; }
+	virtual ARDOUR::Slice const & current_slice() const { return _current_slice; }
+
   protected:
+	void init ();
 	void region_resized (const PBD::PropertyChange&);
 
 	void set_flags (XMLNode *);
 	void store_flags ();
 
-	void reset_width_dependent_items (double pixel_width);
+	virtual void reset_width_dependent_items (double pixel_width);
 
-	void parameter_changed (std::string const & p);
 	void _redisplay (bool view_only);
 
   protected:
@@ -406,6 +419,12 @@ class MidiView
 	void clear_selection_internal ();
 
 	void clear_events ();
+	virtual void clear_ghost_events() {}
+	virtual void ghosts_model_changed() {}
+	virtual void ghosts_view_changed() {}
+	virtual void ghost_remove_note (NoteBase*) {}
+	virtual void ghost_add_note (NoteBase*) {}
+	virtual void ghost_sync_selection (NoteBase*) {}
 
 	bool canvas_group_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
@@ -443,9 +462,11 @@ class MidiView
 	typedef std::vector<NoteBase*> CopyDragEvents;
 
 	std::shared_ptr<ARDOUR::MidiTrack>   _midi_track;
-	EditingContext&                       editing_context;
+	EditingContext&                      _editing_context;
+	MidiViewBackground&                  _midi_context;
 	std::shared_ptr<ARDOUR::MidiModel>   _model;
-	MidiViewBackground&                  _background;
+	std::shared_ptr<ARDOUR::MidiRegion>  _region;
+	ARDOUR::Slice                        _current_slice;
 	Events                               _events;
 	CopyDragEvents                       _copy_drag_events;
 	PatchChanges                         _patch_changes;
@@ -460,6 +481,9 @@ class MidiView
 	Temporal::Beats                      _step_edit_cursor_width;
 	Temporal::Beats                      _step_edit_cursor_position;
 	NoteBase*                            _channel_selection_scoped_note;
+
+	uint8_t  _current_range_min;
+	uint8_t  _current_range_max;
 
 	MouseState _mouse_state;
 	int _pressed_button;
@@ -508,14 +532,14 @@ class MidiView
 	void snap_changed ();
 	PBD::ScopedConnection snap_changed_connection;
 
-	bool motion (GdkEventMotion*);
-	bool scroll (GdkEventScroll*);
-	bool key_press (GdkEventKey*);
-	bool key_release (GdkEventKey*);
-	bool button_press (GdkEventButton*);
-	bool button_release (GdkEventButton*);
-	bool enter_notify (GdkEventCrossing*);
-	bool leave_notify (GdkEventCrossing*);
+	virtual bool motion (GdkEventMotion*);
+	virtual bool scroll (GdkEventScroll*);
+	virtual bool key_press (GdkEventKey*);
+	virtual bool key_release (GdkEventKey*);
+	virtual bool button_press (GdkEventButton*);
+	virtual bool button_release (GdkEventButton*);
+	virtual bool enter_notify (GdkEventCrossing*);
+	virtual bool leave_notify (GdkEventCrossing*);
 
 	void drop_down_keys ();
 	void maybe_select_by_position (GdkEventButton* ev, double x, double y);
@@ -533,8 +557,8 @@ class MidiView
 
 	void remove_ghost_note ();
 	void mouse_mode_changed ();
-	void enter_internal (uint32_t state);
-	void leave_internal ();
+	virtual void enter_internal (uint32_t state);
+	virtual void leave_internal ();
 	void hide_verbose_cursor ();
 
 	samplecnt_t _last_display_zoom;
@@ -557,7 +581,9 @@ class MidiView
 	ARDOUR::ChannelMode get_channel_mode() const;
 	uint16_t get_selected_channels () const;
 
-	inline double contents_height() const { return _height - 2; }
+	virtual double height() const = 0;
+
+	virtual double contents_height() const { return height() - 2; }
 	inline double contents_note_range () const { return (double)(_current_range_max - _current_range_min + 1); }
 	inline double note_height() const { return contents_height() / contents_note_range(); }
 

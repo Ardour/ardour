@@ -32,7 +32,7 @@ class Hit : public NoteBase
 public:
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 
-	Hit (MidiRegionView&                   region,
+	Hit (MidiView&                         region,
 	     ArdourCanvas::Item*               parent,
 	     double                            size,
 	     const std::shared_ptr<NoteType> note        = std::shared_ptr<NoteType>(),
