@@ -1555,3 +1555,34 @@ EditingContext::get_quantize_op ()
 	                     quantize_dialog->threshold());
 }
 
+timecnt_t
+EditingContext::relative_distance (timepos_t const & origin, timecnt_t const & duration, Temporal::TimeDomain domain)
+{
+	return Temporal::TempoMap::use()->convert_duration (duration, origin, domain);
+}
+
+/** Snap a time offset within our region using the current snap settings.
+ *  @param x Time offset from this region's position.
+ *  @param ensure_snap whether to ignore snap_mode (in the case of SnapOff) and magnetic snap.
+ *  Used when inverting snap mode logic with key modifiers, or snap distance calculation.
+ *  @return Snapped time offset from this region's position.
+ */
+timecnt_t
+EditingContext::snap_relative_time_to_relative_time (timepos_t const & origin, timecnt_t const & x, bool ensure_snap) const
+{
+	/* x is relative to origin, convert it to global absolute time */
+	timepos_t const session_pos = origin + x;
+
+	/* try a snap in either direction */
+	timepos_t snapped = session_pos;
+	snap_to (snapped, Temporal::RoundNearest, SnapToAny_Visual, ensure_snap);
+
+	/* if we went off the beginning of the region, snap forwards */
+	if (snapped < origin) {
+		snapped = session_pos;
+		snap_to (snapped, Temporal::RoundUpAlways, SnapToAny_Visual, ensure_snap);
+	}
+
+	/* back to relative */
+	return origin.distance (snapped);
+}

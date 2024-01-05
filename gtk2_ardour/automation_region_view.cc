@@ -184,7 +184,7 @@ AutomationRegionView::add_automation_event (timepos_t const & w, double y, bool 
 
 	/* snap time */
 
-	when = snap_region_time_to_region_time (_region->source_position().distance (when), false);
+	when = view->editor().snap_relative_time_to_relative_time (_region->position(), _region->source_position().distance (when), false);
 
 	/* map using line */
 

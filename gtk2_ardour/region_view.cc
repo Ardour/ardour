@@ -1148,40 +1148,6 @@ RegionView::move_contents (timecnt_t const & distance)
 	region_changed (PropertyChange (ARDOUR::Properties::start));
 }
 
-
-/** Snap a time offset within our region using the current snap settings.
- *  @param x Time offset from this region's position.
- *  @param ensure_snap whether to ignore snap_mode (in the case of SnapOff) and magnetic snap.
- *  Used when inverting snap mode logic with key modifiers, or snap distance calculation.
- *  @return Snapped time offset from this region's position.
- */
-timecnt_t
-RegionView::snap_region_time_to_region_time (timecnt_t const & x, bool ensure_snap) const
-{
-	PublicEditor& editor = trackview.editor();
-	/* x is region relative, convert it to global absolute time */
-	timepos_t const session_pos = _region->position() + x;
-
-	/* try a snap in either direction */
-	timepos_t snapped = session_pos;
-	editor.snap_to (snapped, Temporal::RoundNearest, SnapToAny_Visual, ensure_snap);
-
-	/* if we went off the beginning of the region, snap forwards */
-	if (snapped < _region->position ()) {
-		snapped = session_pos;
-		editor.snap_to (snapped, Temporal::RoundUpAlways, SnapToAny_Visual, ensure_snap);
-	}
-
-	/* back to region relative */
-	return _region->region_relative_position (snapped);
-}
-
-timecnt_t
-RegionView::region_relative_distance (timecnt_t const & duration, Temporal::TimeDomain domain)
-{
-	return Temporal::TempoMap::use()->convert_duration (duration, _region->position(), domain);
-}
-
 void
 RegionView::update_visibility ()
 {
