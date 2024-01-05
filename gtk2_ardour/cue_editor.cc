@@ -94,7 +94,7 @@ CueEditor::redisplay_grid (bool immediate_redraw)
 }
 
 Temporal::timecnt_t
-CueEditor::get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next)
+CueEditor::get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) const
 {
 	return Temporal::timecnt_t (Temporal::AudioTime);
 }

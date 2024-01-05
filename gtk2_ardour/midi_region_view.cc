@@ -1947,7 +1947,7 @@ MidiRegionView::add_note(const std::shared_ptr<NoteType> note, bool visible)
 
 	if (midi_view()->note_mode() == Sustained) {
 
-		Note* ev_rect = new Note (*this, _note_group, note); // XXX may leak
+		Note* ev_rect; // XXXX = new Note (*this, _note_group, note); // XXX may leak
 
 		update_sustained (ev_rect);
 
@@ -1957,7 +1957,7 @@ MidiRegionView::add_note(const std::shared_ptr<NoteType> note, bool visible)
 
 		const double diamond_size = std::max(1., floor(note_height()) - 2.);
 
-		Hit* ev_diamond = new Hit (*this, _note_group, diamond_size, note); // XXX may leak
+		Hit* ev_diamond; // XXXX = new Hit (*this, _note_group, diamond_size, note); // XXX may leak
 
 		update_hit (ev_diamond);
 
@@ -2059,6 +2059,8 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 	// so we need to do something more sophisticated to keep its color
 	// appearance (MidiPatchChangeFill/MidiPatchChangeInactiveChannelFill)
 	// up to date.
+#warning paul fix MRV/MV
+#if 0
 	std::shared_ptr<PatchChange> patch_change = std::shared_ptr<PatchChange>(
 		new PatchChange(*this, group,
 				height, x, 1.0,
@@ -2067,8 +2069,8 @@ MidiRegionView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 				_patch_change_outline,
 				_patch_change_fill)
 		);
-
 	_patch_changes.insert (make_pair (patch, patch_change));
+#endif
 }
 
 MIDI::Name::PatchPrimaryKey
@@ -2773,11 +2775,11 @@ MidiRegionView::copy_selection (NoteBase* primary)
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
 		std::shared_ptr<NoteType> g (new NoteType (*((*i)->note())));
 		if (midi_view()->note_mode() == Sustained) {
-			Note* n = new Note (*this, _note_group, g);
+			Note* n; // XXXX = new Note (*this, _note_group, g);
 			update_sustained (n, false);
 			note = n;
 		} else {
-			Hit* h = new Hit (*this, _note_group, 10, g);
+			Hit* h; // XXXX = new Hit (*this, _note_group, 10, g);
 			update_hit (h, false);
 			note = h;
 		}
@@ -4258,9 +4260,9 @@ MidiRegionView::create_ghost_note (double x, double y, uint32_t state)
 
 	std::shared_ptr<NoteType> g (new NoteType);
 	if (midi_view()->note_mode() == Sustained) {
-		_ghost_note = new Note (*this, _note_group, g);
+		// XXXX _ghost_note = new Note (*this, _note_group, g);
 	} else {
-		_ghost_note = new Hit (*this, _note_group, 10, g);
+		// XXXX _ghost_note = new Hit (*this, _note_group, 10, g);
 	}
 	_ghost_note->set_ignore_events (true);
 	_ghost_note->set_outline_color (0x000000aa);

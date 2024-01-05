@@ -1218,7 +1218,7 @@ EditingContext::duration_to_pixels_unrounded (timecnt_t const & dur) const
  *  @param event Event to get current key modifier information from, or 0.
  */
 void
-EditingContext::snap_to_with_modifier (timepos_t& start, GdkEvent const * event, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap)
+EditingContext::snap_to_with_modifier (timepos_t& start, GdkEvent const * event, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap) const
 {
 	if (!_session || !event) {
 		return;
@@ -1240,7 +1240,7 @@ EditingContext::snap_to_with_modifier (timepos_t& start, GdkEvent const * event,
 }
 
 void
-EditingContext::snap_to (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap)
+EditingContext::snap_to (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap) const
 {
 	if (!_session || (_snap_mode == SnapOff && !ensure_snap)) {
 		return;
@@ -1250,13 +1250,13 @@ EditingContext::snap_to (timepos_t& start, Temporal::RoundMode direction, SnapPr
 }
 
 timepos_t
-EditingContext::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref)
+EditingContext::snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref) const
 {
 	return _snap_to_bbt (presnap, direction, gpref, _grid_type);
 }
 
 timepos_t
-EditingContext::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref, GridType grid_type)
+EditingContext::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref, GridType grid_type) const
 {
 	timepos_t ret(presnap);
 	TempoMap::SharedPtr tmap (TempoMap::use());
@@ -1373,7 +1373,7 @@ EditingContext::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode dir
 }
 
 void
-EditingContext::check_best_snap (timepos_t const & presnap, timepos_t &test, timepos_t &dist, timepos_t &best)
+EditingContext::check_best_snap (timepos_t const & presnap, timepos_t &test, timepos_t &dist, timepos_t &best) const
 {
 	timepos_t diff = timepos_t (presnap.distance (test).abs ());
 	if (diff < dist) {

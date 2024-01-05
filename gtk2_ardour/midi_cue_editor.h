@@ -48,11 +48,13 @@ class MidiCueEditor : public CueEditor
 
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const {}
 
-	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) { return Temporal::Beats (1, 0); }
-	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) { return Temporal::Beats (1, 0); }
+	Temporal::Beats get_grid_type_as_beats (bool& success, Temporal::timepos_t const & position) const { return Temporal::Beats (1, 0); }
+	Temporal::Beats get_draw_length_as_beats (bool& success, Temporal::timepos_t const & position) const { return Temporal::Beats (1, 0); }
 
-	int32_t get_grid_beat_divisions (Editing::GridType gt) { return 1; }
-	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) { return 1; }
+	bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*);
+
+	int32_t get_grid_beat_divisions (Editing::GridType gt) const { return 1; }
+	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const { return 1; }
 
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
 	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
@@ -60,12 +62,12 @@ class MidiCueEditor : public CueEditor
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
-	                                  ARDOUR::SnapPref    gpref);
+	                                  ARDOUR::SnapPref    gpref) const;
 
 	void snap_to_internal (Temporal::timepos_t& first,
 	                       Temporal::RoundMode    direction = Temporal::RoundNearest,
 	                       ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
-	                       bool                 ensure_snap = false);
+	                       bool                 ensure_snap = false) const;
 
  private:
 	Gtk::Adjustment vertical_adjustment;
