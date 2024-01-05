@@ -200,6 +200,13 @@ Region::register_properties ()
 {
 	_xml_node_name = X_("Region");
 
+	/* anything derived from Slice must remember to add these properties to
+	 * Stateful's list, since Slice does not do this itself.
+	 */
+
+	add_property (_start);
+	add_property (_length);
+
 	add_property (_muted);
 	add_property (_opaque);
 	add_property (_locked);
