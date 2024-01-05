@@ -77,6 +77,7 @@ class TimeAxisView;
 class RouteTimeAxisView;
 class RegionSelection;
 class MidiRegionView;
+class MidiView;
 class MeterMarker;
 class ArdourMarker;
 class TempoMarker;
@@ -643,7 +644,7 @@ private:
 	Temporal::timecnt_t total_dx (GdkEvent * event) const; // total movement in quarter notes
 	int8_t total_dy () const;
 
-	MidiRegionView* _region;
+	MidiView* _region;
 	NoteBase* _primary;
 	Temporal::timecnt_t _cumulative_dx;
 	double _cumulative_dy;
@@ -727,7 +728,7 @@ private:
 class PatchChangeDrag : public Drag
 {
 public:
-	PatchChangeDrag (EditingContext&, PatchChange *, MidiRegionView *);
+	PatchChangeDrag (EditingContext&, PatchChange *, MidiView *);
 
 	void motion (GdkEvent *, bool);
 	void finished (GdkEvent *, bool);
@@ -744,7 +745,7 @@ public:
 	void setup_pointer_offset ();
 
 private:
-	MidiRegionView* _region_view;
+	MidiView* _region_view;
 	PatchChange* _patch_change;
 	double _cumulative_dx;
 };

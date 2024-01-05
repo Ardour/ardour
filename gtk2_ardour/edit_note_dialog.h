@@ -22,18 +22,18 @@
 #include "ardour_dialog.h"
 #include "audio_clock.h"
 
-class MidiRegionView;
+class MidiView;
 class NoteBase;
 
 class EditNoteDialog : public ArdourDialog
 {
 public:
-	EditNoteDialog (MidiRegionView* rv, std::set<NoteBase*> n);
+	EditNoteDialog (MidiView* rv, std::set<NoteBase*> n);
 
 	void done (int);
 
   private:
-	MidiRegionView* _region_view;
+	MidiView* _region_view;
 	std::set<NoteBase*> _events;
 	Gtk::SpinButton _channel;
 	Gtk::CheckButton _channel_all;

@@ -110,11 +110,11 @@ MidiStreamView::create_region_view (std::shared_ptr<Region> r, bool /*wfd*/, boo
 	if (recording) {
 		region_view = new MidiRegionView (
 			_region_group, _trackview.editor(), _trackview, region,
-			_samples_per_pixel, region_color, recording,
+			_samples_per_pixel, MidiViewBackground::region_color(), recording,
 			TimeAxisViewItem::Visibility(TimeAxisViewItem::ShowFrame));
 	} else {
 		region_view = new MidiRegionView (_region_group, _trackview.editor(), _trackview, region,
-		                                  _samples_per_pixel, region_color);
+		                                  _samples_per_pixel, MidiViewBackground::region_color());
 	}
 
 	region_view->init (false);
@@ -494,3 +494,20 @@ MidiStreamView::get_regions_with_selected_data (RegionSelection& rs)
 	}
 }
 
+void
+MidiStreamView::set_note_highlight (bool yn)
+{
+	dynamic_cast<MidiTimeAxisView*> (&_trackview)->set_note_highlight (yn);
+}
+
+uint8_t
+MidiStreamView::get_preferred_midi_channel () const
+{
+	return dynamic_cast<MidiTimeAxisView*> (&_trackview)->get_preferred_midi_channel();
+}
+
+void
+MidiStreamView::record_layer_check (std::shared_ptr<ARDOUR::Region> r, samplepos_t t)
+{
+	check_record_layers (r, t);
+}

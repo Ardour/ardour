@@ -168,3 +168,9 @@ MidiCueEditor::apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, Midi
 
 	return nullptr;
 }
+
+bool
+MidiCueEditor::canvas_note_event (GdkEvent* event, ArdourCanvas::Item*)
+{
+	return false;
+}

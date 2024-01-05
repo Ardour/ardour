@@ -27,12 +27,12 @@
 
 #include <gtkmm/adjustment.h>
 
+#include "ardour/types.h"
+
 namespace ArdourCanvas {
-class Item;
-class LineSet;
+	class Item;
+	class LineSet;
 }
-
-
 
 class MidiViewBackground
 {
@@ -46,6 +46,14 @@ class MidiViewBackground
 		FullRange,
 		ContentsRange
 	};
+
+	ARDOUR::NoteMode  note_mode() const { return _note_mode; }
+	void set_note_mode (ARDOUR::NoteMode nm);
+
+	ARDOUR::ColorMode color_mode() const { return _color_mode; }
+	void set_color_mode (ARDOUR::ColorMode);
+
+	Gtkmm2ext::Color region_color() const { return _region_color; }
 
 	void set_note_range (VisibleNoteRange r);
 
@@ -73,6 +81,13 @@ class MidiViewBackground
 	sigc::signal<void> NoteRangeChanged;
 	void apply_note_range (uint8_t lowest, uint8_t highest, bool to_children);
 
+	/** @return y position, or -1 if hidden */
+	virtual double y_position () const { return 0.; }
+
+	virtual uint8_t get_preferred_midi_channel () const = 0;
+	virtual void set_note_highlight (bool) = 0;
+	virtual void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t) = 0;
+
   protected:
 	bool                      _range_dirty;
 	double                    _range_sum_cache;
@@ -81,6 +96,9 @@ class MidiViewBackground
 	uint8_t                   _data_note_min; ///< in data
 	uint8_t                   _data_note_max; ///< in data
 	ArdourCanvas::LineSet*    _note_lines;
+	ARDOUR::NoteMode          _note_mode;
+	Gtkmm2ext::Color          _region_color;
+	ARDOUR::ColorMode         _color_mode;
 
 	void color_handler ();
 	void parameter_changed (std::string const &);

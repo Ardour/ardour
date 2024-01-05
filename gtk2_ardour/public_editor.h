@@ -96,6 +96,7 @@ class MeterMarker;
 class MixerStrip;
 class MouseCursors;
 class RegionView;
+class MidiView;
 class RouteTimeAxisView;
 class Selection;
 class SimpleExport;
@@ -329,7 +330,7 @@ public:
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
 	virtual Temporal::timecnt_t get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count, Temporal::timecnt_t const & duration) = 0;
 
-	virtual void edit_notes (MidiRegionView*) = 0;
+	virtual void edit_notes (MidiView*) = 0;
 
 	virtual void queue_visual_videotimeline_update () = 0;
 	virtual void set_close_video_sensitive (bool) = 0;
@@ -404,8 +405,6 @@ public:
 	virtual bool canvas_meter_marker_event (GdkEvent* event, ArdourCanvas::Item*, MeterMarker*) = 0;
 	virtual bool canvas_bbt_marker_event (GdkEvent* event, ArdourCanvas::Item*, BBTMarker*) = 0;
 	virtual bool canvas_automation_track_event(GdkEvent* event, ArdourCanvas::Item*, AutomationTimeAxisView*) = 0;
-
-	virtual bool canvas_note_event (GdkEvent* event, ArdourCanvas::Item*) = 0;
 
 	static const int window_border_width;
 	static const int container_border_width;

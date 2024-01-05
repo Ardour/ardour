@@ -34,7 +34,7 @@
 
 #include "editor.h"
 #include "editor_drag.h"
-#include "midi_region_view.h"
+#include "midi_view.h"
 #include "patch_change.h"
 #include "ui_config.h"
 
@@ -44,8 +44,8 @@ using Gtkmm2ext::Keyboard;
 
 /** @param x x position in pixels.
  */
-PatchChange::PatchChange (MidiRegionView&                   region,
-                          ArdourCanvas::Container*          parent,
+PatchChange::PatchChange (MidiView&                         region,
+                          ArdourCanvas::Item*               parent,
                           double                            height,
                           double                            x,
                           double                            y,
@@ -153,15 +153,15 @@ bool
 PatchChange::event_handler (GdkEvent* ev)
 {
 	/* XXX: icky dcast */
-	Editor* e = dynamic_cast<Editor*> (&_region.get_time_axis_view ().editor ());
+	EditingContext& e = _region.editing_context();
 
-	if (!e->internal_editing ()) {
+	if (!e.internal_editing ()) {
 		return false;
 	}
 
 	switch (ev->type) {
 		case GDK_BUTTON_PRESS:
-			if (e->current_mouse_mode () == Editing::MouseContent) {
+			if (e.current_mouse_mode () == Editing::MouseContent) {
 				if (Gtkmm2ext::Keyboard::is_delete_event (&ev->button)) {
 					_region.delete_patch_change (this);
 					return true;
@@ -171,7 +171,7 @@ PatchChange::event_handler (GdkEvent* ev)
 					return true;
 
 				} else if (ev->button.button == 1) {
-					e->drags ()->set (new PatchChangeDrag (*e, this, &_region), ev);
+					e.drags ()->set (new PatchChangeDrag (e, this, &_region), ev);
 					return true;
 				}
 			}

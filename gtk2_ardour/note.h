@@ -33,7 +33,7 @@ class Note : public NoteBase
 public:
 	typedef Evoral::Note<Temporal::Beats> NoteType;
 
-	Note (MidiRegionView&                   region,
+	Note (MidiView&                   region,
 	      ArdourCanvas::Item*               parent,
 	      const std::shared_ptr<NoteType> note = std::shared_ptr<NoteType>(),
 	      bool with_events = true);
