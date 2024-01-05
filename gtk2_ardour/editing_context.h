@@ -107,6 +107,8 @@ public:
 
 	virtual void redisplay_grid (bool immediate_redraw) = 0;
 	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) = 0;
+	Temporal::timecnt_t relative_distance (Temporal::timepos_t const & origin, Temporal::timecnt_t const & duration, Temporal::TimeDomain domain);
+	Temporal::timecnt_t snap_relative_time_to_relative_time (Temporal::timepos_t const & origin, Temporal::timecnt_t const & x, bool ensure_snap) const;
 
 	/** Set whether the editor should follow the playhead.
 	 * @param yn true to follow playhead, otherwise false.

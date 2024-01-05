@@ -2973,7 +2973,7 @@ MidiRegionView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, b
 timecnt_t
 MidiRegionView::snap_pixel_to_time (double x, bool ensure_snap)
 {
-	return snap_region_time_to_region_time (timecnt_t (editing_context.pixel_to_sample (x)), ensure_snap);
+	return trackview.editor().snap_relative_time_to_relative_time (_region->position(), timecnt_t (editing_context.pixel_to_sample (x)), ensure_snap);
 }
 
 /** @param x Pixel relative to the region position.
