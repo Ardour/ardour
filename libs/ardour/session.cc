@@ -252,6 +252,13 @@ Session::Session (AudioEngine &eng,
 	, pending_auto_loop (false)
 	, _mempool ("Session", 3145728)
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
+	, _lua_run (0)
+	, _lua_add (0)
+	, _lua_del (0)
+	, _lua_list (0)
+	, _lua_load (0)
+	, _lua_save (0)
+	, _lua_cleanup (0)
 	, _n_lua_scripts (0)
 	, _io_plugins (new IOPlugList)
 	, _butler (new Butler (*this))
@@ -679,7 +686,9 @@ Session::destroy ()
 	{
 		/* unregister all lua functions, drop held references (if any) */
 		Glib::Threads::Mutex::Lock tm (lua_lock, Glib::Threads::TRY_LOCK);
-		(*_lua_cleanup)();
+		if (_lua_cleanup) {
+			(*_lua_cleanup)();
+		}
 		lua.do_command ("Session = nil");
 		delete _lua_run;
 		delete _lua_add;
