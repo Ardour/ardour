@@ -3550,6 +3550,10 @@ Session::remove_routes (std::shared_ptr<RouteList> routes_to_remove)
 
 			/* speed up session deletion, don't do the solo dance */
 			if (!deletion_in_progress ()) {
+				/* Do not postpone set_value as rt-event via AC::check_rt,
+				 * The route will be deleted by then, and the Controllable gone.
+				 */
+				(*iter)->solo_control()->clear_flag (Controllable::RealTime);
 				(*iter)->solo_control()->set_value (0.0, Controllable::NoGroup);
 			}
 
