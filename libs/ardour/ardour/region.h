@@ -178,6 +178,7 @@ public:
 		{
 			Glib::Threads::Mutex::Lock lm (_operation_rgroup_mutex);
 			if (_retained_group_id == 0) {
+				_retained_take_cnt = 0;
 				++_next_group_id;
 				_operation_rgroup_map.clear ();              // this is used for split & paste operations that honor the region's prior grouping
 				_retained_group_id    = _next_group_id << 4; // this is used for newly created regions via recording or importing
@@ -191,6 +192,7 @@ public:
 			if (_clear_on_destruction) {
 				Glib::Threads::Mutex::Lock lm (_operation_rgroup_mutex);
 				_retained_group_id = 0;
+				_next_group_id += _retained_take_cnt;
 				_operation_rgroup_map.clear();
 			}
 		}
@@ -200,9 +202,14 @@ public:
 	static uint64_t next_group_id () { return _next_group_id; }
 	static void set_next_group_id (uint64_t ngid) { _next_group_id = ngid; }
 
-	/* access the retained group-id for actions like Recording, Import */
-	static uint64_t get_retained_group_id () {
-		return _retained_group_id;
+	/* access the retained group-id for actions like Recording, Import.
+	 *
+	 * Note When a single take creates multiple layered regions (e.g. loop recording)
+	 * then the group id need to be bumped for each take
+	 */
+	static uint64_t get_retained_group_id (uint64_t take = 0) {
+		_retained_take_cnt = std::max (_retained_take_cnt, take);
+		return _retained_group_id + (take << 4);
 	}
 
 	/* access the group-id for an operation on a region, honoring the existing region's group status */
@@ -617,6 +624,7 @@ private:
 		Explicit  = 0x1, // the user has explicitly grouped or ungrouped this region. explicitly grouped regions can cross track-group boundaries
 	};
 	static uint64_t _retained_group_id;
+	static uint64_t _retained_take_cnt;
 	static uint64_t _next_group_id;
 
 	static Glib::Threads::Mutex         _operation_rgroup_mutex;

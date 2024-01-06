@@ -1051,7 +1051,8 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 	const samplepos_t preroll_off = _session.preroll_record_trim_len ();
 	const timepos_t cstart (timepos_t (capture_info.front()->start).beats());
 
-	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+	int cnt = 0;
+	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci, ++cnt) {
 
 		string region_name;
 
@@ -1089,7 +1090,7 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 			plist.add (Properties::length, l);
 			plist.add (Properties::opaque, rmode != RecSoundOnSound);
 			plist.add (Properties::name, region_name);
-			plist.add (Properties::reg_group, Region::get_retained_group_id());
+			plist.add (Properties::reg_group, Region::get_retained_group_id (cnt));
 
 			std::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 			midi_region = std::dynamic_pointer_cast<MidiRegion> (rx);
@@ -1177,7 +1178,8 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 	samplecnt_t buffer_position = afs->last_capture_start_sample ();
 	CaptureInfos::const_iterator ci;
 
-	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci) {
+	int cnt = 0;
+	for (ci = capture_info.begin(); ci != capture_info.end(); ++ci, ++cnt) {
 
 		string region_name;
 
@@ -1194,7 +1196,7 @@ Track::use_captured_audio_sources (SourceList& srcs, CaptureInfos const & captur
 			plist.add (Properties::length, timecnt_t ((*ci)->samples, timepos_t::zero (false)));
 			plist.add (Properties::name, region_name);
 			plist.add (Properties::opaque, rmode != RecSoundOnSound);
-			plist.add (Properties::reg_group, Region::get_retained_group_id());
+			plist.add (Properties::reg_group, Region::get_retained_group_id (cnt));
 
 			std::shared_ptr<Region> rx (RegionFactory::create (srcs, plist));
 			region = std::dynamic_pointer_cast<AudioRegion> (rx);

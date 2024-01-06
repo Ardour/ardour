@@ -93,6 +93,7 @@ PBD::Signal2<void,std::shared_ptr<ARDOUR::RegionList>,const PropertyChange&> Reg
 
 /* these static values are used by Region Groups to assign a group-id across the scope of an operation that might span many function calls */
 uint64_t Region::_retained_group_id = 0;
+uint64_t Region::_retained_take_cnt = 0;
 uint64_t Region::_next_group_id     = 0;
 
 std::map<uint64_t, uint64_t> Region::_operation_rgroup_map;
