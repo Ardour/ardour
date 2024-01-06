@@ -298,21 +298,22 @@ top = '.'
 out = 'build'
 
 children = [
+        # patched 3rd party libs
         'libs/clearlooks-newer',
+        'libs/zita-resampler',
+        'libs/zita-convolver',
         # optionally external libraries
         'libs/fluidsynth',
         'libs/hidapi',
         'libs/libltc',
-        'libs/lua',
         'libs/ptformat',
         'libs/qm-dsp',
         'libs/vamp-plugins',
         'libs/vamp-pyin',
-        'libs/zita-resampler',
-        'libs/zita-convolver',
         'libs/aaf',
         # core ardour libraries
         'libs/pbd',
+        'libs/lua',
         'libs/midi++2',
         'libs/evoral',
         'libs/ctrl-interface',
@@ -326,6 +327,7 @@ children = [
         'libs/canvas',
         'libs/widgets',
         'libs/waveview',
+        # plugins
         'libs/plugins/reasonablesynth.lv2',
         'libs/plugins/a-comp.lv2',
         'libs/plugins/a-exp.lv2',
@@ -333,7 +335,7 @@ children = [
         'libs/plugins/a-eq.lv2',
         'libs/plugins/a-reverb.lv2',
         'libs/plugins/a-fluidsynth.lv2',
-        'gtk2_ardour',
+        # arch independent data
         'share/export',
         'share/media',
         'share/midi_maps',
@@ -343,6 +345,8 @@ children = [
         'share/plugin_metadata',
         'share/scripts',
         'share/web_surfaces',
+        # frontends
+        'gtk2_ardour',
         'headless',
         'luasession',
         'session_utils',
