@@ -911,8 +911,6 @@ Track::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 		return true;
 	}
 
-	cerr << name() << " looking for state for track procs, DR = " << _disk_reader << endl;
-
 	if (prop->value() == "diskreader") {
 		if (_disk_reader) {
 			_disk_reader->set_state (node, version);
