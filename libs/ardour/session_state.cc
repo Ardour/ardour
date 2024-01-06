@@ -2118,17 +2118,21 @@ Session::load_routes (const XMLNode& node, int version)
 
 		std::shared_ptr<Route> route;
 
-		if (version < 3000) {
-			route = XMLRouteFactory_2X (**niter, version);
-		} else if (version < 5000) {
-			route = XMLRouteFactory_3X (**niter, version);
-		} else {
-			route = XMLRouteFactory (**niter, version);
+		try {
+			if (version < 3000) {
+				route = XMLRouteFactory_2X (**niter, version);
+			} else if (version < 5000) {
+				route = XMLRouteFactory_3X (**niter, version);
+			} else {
+				route = XMLRouteFactory (**niter, version);
+			}
+		} catch (...) {
+			goto errout;
 		}
 
 		if (route == 0) {
 			error << _("Session: cannot create track/bus from XML description.") << endmsg;
-			return -1;
+			goto errout;
 		}
 
 		BootMessage (string_compose (_("Loaded track/bus %1"), route->name()));
@@ -2153,6 +2157,12 @@ Session::load_routes (const XMLNode& node, int version)
 	BootMessage (_("Finished adding tracks/busses"));
 
 	return 0;
+
+errout:
+	for (auto const& r : new_routes) {
+		r->drop_references ();
+	}
+	return -1;
 }
 
 std::shared_ptr<Route>
