@@ -1844,6 +1844,9 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 		}
 	}
 
+	/* retain playlist, since  clear_draggingview_list() deletes _primary RegionView* */
+	std::shared_ptr<ARDOUR::Playlist> primary_playlist = _primary->region ()->playlist ();
+
 	/* in the past this was done in the main iterator loop; no need */
 	clear_draggingview_list ();
 
@@ -1856,8 +1859,8 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 
 	/* Ripple marks & ranges if appropriate */
 
-	if (_editor->should_ripple_all () && _primary->region ()->playlist ()) {
-		_editor->ripple_marks (_primary->region ()->playlist (), extent_min, extent_min.distance (extent_max));
+	if (_editor->should_ripple_all ()) {
+		_editor->ripple_marks (primary_playlist, extent_min, extent_min.distance (extent_max));
 	}
 
 	/* If we've created new regions either by copying or moving
