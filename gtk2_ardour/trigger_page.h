@@ -34,7 +34,6 @@
 #include "audio_trigger_properties_box.h"
 #include "cuebox_ui.h"
 #include "fitted_canvas_widget.h"
-#include "midi_clip_editor.h"
 #include "midi_region_operations_box.h"
 #include "midi_region_properties_box.h"
 #include "midi_trigger_properties_box.h"
@@ -47,6 +46,7 @@
 #include "trigger_master.h"
 
 class TriggerStrip;
+class MidiCueEditor;
 
 class TriggerPage : public ArdourWidgets::Tabbable, public ARDOUR::SessionHandlePtr, public PBD::ScopedConnectionList, public AxisViewProvider
 {
@@ -135,8 +135,7 @@ private:
 	AudioClipEditorBox        _audio_trim_box;
 #endif
 
-	MidiRegionOperationsBox  _midi_ops_box;
-	MidiClipEditorBox        _midi_trim_box;
+	MidiCueEditor*           _midi_editor;
 
 	RouteProcessorSelection  _selection;
 	std::list<TriggerStrip*> _strips;

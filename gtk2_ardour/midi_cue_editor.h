@@ -109,6 +109,7 @@ class MidiCueEditor : public CueEditor
 	MidiView* view;
 
 	void build_canvas ();
+	void canvas_allocate (Gtk::Allocation);
 };
 
 

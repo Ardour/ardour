@@ -129,6 +129,8 @@ MidiViewBackground::update_note_range(uint8_t note_num)
 void
 MidiViewBackground::update_contents_height ()
 {
+	ViewBackground::update_contents_height ();
+
 	_note_lines->set_extent (ArdourCanvas::COORD_MAX);
 	apply_note_range (lowest_note(), highest_note(), true);
 }
