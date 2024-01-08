@@ -22,7 +22,9 @@
 #include "canvas/scroll_group.h"
 #include "canvas/rectangle.h"
 
+#include "midi_cue_background.h"
 #include "midi_cue_editor.h"
+#include "midi_view.h"
 #include "ui_config.h"
 #include "verbose_cursor.h"
 
@@ -93,6 +95,13 @@ MidiCueEditor::build_canvas ()
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
 	rubberband_rect->hide();
+
+	ArdourCanvas::Text* hw = new ArdourCanvas::Text (hv_scroll_group);
+	hw->set ("hello, world");
+	hw->set_fill_color (Gtkmm2ext::Color (0xff0000ff));
+
+	std::cerr << "New CMB\n";
+	bg = new CueMidiBackground (hv_scroll_group);
 }
 
 
@@ -173,4 +182,23 @@ bool
 MidiCueEditor::canvas_note_event (GdkEvent* event, ArdourCanvas::Item*)
 {
 	return false;
+}
+
+Gtk::Widget&
+MidiCueEditor::viewport()
+{
+	return *_canvas_viewport;
+}
+
+void
+MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr<ARDOUR::Region> r)
+{
+	// delete view;
+	// view = nullptr;
+
+	if (!t || !r) {
+		return;
+	}
+
+	// view = new MidiView (t, hv_scroll_group, *this, *bg, 0xff0000ff);
 }

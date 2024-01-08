@@ -45,7 +45,7 @@ MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent)
 {
 	_note_lines->lower_to_bottom();
 
-	color_handler ();
+	// color_handler ();
 
 	UIConfiguration::instance().ColorsChanged.connect(sigc::mem_fun(*this, &MidiViewBackground::color_handler));
 	UIConfiguration::instance().ParameterChanged.connect(sigc::mem_fun(*this, &MidiViewBackground::parameter_changed));

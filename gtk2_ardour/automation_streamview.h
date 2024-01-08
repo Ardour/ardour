@@ -52,7 +52,7 @@ public:
 
 	void redisplay_track ();
 
-	inline double contents_height() const {
+	double contents_height() const {
 		return (_trackview.current_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2);
 	}
 
