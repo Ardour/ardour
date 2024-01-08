@@ -617,7 +617,7 @@ Surface::handle_midi_controller_message (MIDI::Parser &, MIDI::EventTwoBytes* ev
 #endif
 	}
 
-#ifdef MIXBUS32C  //in 32C, we can use the joystick for the last 2 mixbus send level & pans
+#ifdef MIXBUS  //we can use the joystick for the last 2 mixbus send level & pans
 
 	if (_stype == st_joy && _joystick_active) {
 		if (ev->controller_number == 0x03) {

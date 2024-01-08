@@ -1335,14 +1335,11 @@ FaderPort8::build_well_known_processor_ctrls (std::shared_ptr<Stripable> s, int 
 			{ /* EQ */
 				int cnt = s->eq_band_cnt();
 
-#ifdef MIXBUS32C
+#ifdef MIXBUS
 				PUSH_BACK_NON_NULL ("Flt In", s->filter_enable_controllable (true)); // both HP/LP
 				PUSH_BACK_NON_NULL ("HP Freq", s->filter_freq_controllable (true));
 				PUSH_BACK_NON_NULL ("LP Freq", s->filter_freq_controllable (false));
 				PUSH_BACK_NON_NULL ("EQ In", s->eq_enable_controllable ());
-#elif defined (MIXBUS)
-				PUSH_BACK_NON_NULL ("EQ In", s->eq_enable_controllable ());
-				PUSH_BACK_NON_NULL ("HP Freq", s->filter_freq_controllable (true));
 #endif
 
 				for (int band = 0; band < cnt; ++band) {

@@ -2863,7 +2863,7 @@ RCOptionEditor::RCOptionEditor ()
 	add_option (_("Appearance/Mixer"), new OptionEditorHeading (_("Mixer Strip")));
 #endif
 
-#ifndef MIXBUS32C
+#ifndef MIXBUS
 	add_option (_("Appearance/Mixer"),
 	     new BoolOption (
 		     "default-narrow_ms",

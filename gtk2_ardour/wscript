@@ -820,9 +820,6 @@ def build(bld):
     if bld.is_defined('MIXBUS'):
         menus_argv += [ '-DMIXBUS' ]
 
-    if bld.is_defined('MIXBUS32C'):
-        menus_argv += [ '-DMIXBUS32C' ]
-
     if bld.is_defined('PTFORMAT'):
         menus_argv += [ '-DPTFORMAT' ]
 
@@ -837,7 +834,8 @@ def build(bld):
         obj.command_is_external = True
         obj.no_inputs = True
         obj.argv = menus_argv
-        obj.dep_vars = ['PTFORMAT', 'MIXBUS', 'MIXBUS32C', 'WINDOWS', 'debug']
+
+        obj.dep_vars = ['PTFORMAT', 'MIXBUS', 'WINDOWS', 'debug']
         obj.stdin = program + '.menus.in'
         obj.stdout = program + '.menus'
         bld.install_files (bld.env['CONFDIR'], program + '.menus')

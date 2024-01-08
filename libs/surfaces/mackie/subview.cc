@@ -323,7 +323,6 @@ void EQSubview::setup_vpot(
 	std::string band_name;
 	if (_subview_stripable->is_input_strip ()) {
 
-#ifdef MIXBUS32C
 		switch (global_strip_position) {
 			case 0:
 			case 2:
@@ -358,37 +357,6 @@ void EQSubview::setup_vpot(
 				pot_id = "EQ";
 				break;
 		}
-
-#else  //regular Mixbus channel EQ
-
-		switch (global_strip_position) {
-			case 0:
-			case 2:
-			case 4:
-				eq_band = global_strip_position / 2;
-				pc = _subview_stripable->eq_gain_controllable (eq_band);
-				band_name = _subview_stripable->eq_band_name (eq_band);
-				pot_id = band_name + "Gain";
-				break;
-			case 1:
-			case 3:
-			case 5:
-				eq_band = global_strip_position / 2;
-				pc = _subview_stripable->eq_freq_controllable (eq_band);
-				band_name = _subview_stripable->eq_band_name (eq_band);
-				pot_id = band_name + "Freq";
-				break;
-			case 6:
-				pc = _subview_stripable->eq_enable_controllable();
-				pot_id = "EQ";
-				break;
-			case 7:
-				pc = _subview_stripable->filter_freq_controllable(true);
-				pot_id = "HP Freq";
-				break;
-		}
-
-#endif
 
 	} else {  //mixbus or master bus ( these are currently the same for MB & 32C )
 		switch (global_strip_position) {
@@ -494,11 +462,9 @@ void DynamicsSubview::setup_vpot(
 	std::shared_ptr<AutomationControl> kc = _subview_stripable->comp_makeup_controllable ();
 	std::shared_ptr<AutomationControl> ec = _subview_stripable->comp_enable_controllable ();
 
-#ifdef MIXBUS32C	//Mixbus32C needs to spill the filter controls into the comp section
 	std::shared_ptr<AutomationControl> hpfc = _subview_stripable->filter_freq_controllable (true);
 	std::shared_ptr<AutomationControl> lpfc = _subview_stripable->filter_freq_controllable (false);
 	std::shared_ptr<AutomationControl> fec = _subview_stripable->filter_enable_controllable (true); // shared HP/LP
-#endif
 
 	/* we will control the global_strip_position-th available parameter, from the list in the
 	 * order shown above.
@@ -513,11 +479,9 @@ void DynamicsSubview::setup_vpot(
 	if (kc) { available.push_back (std::make_pair (kc, "Makeup")); }
 	if (ec) { available.push_back (std::make_pair (ec, "on/off")); }
 
-#ifdef MIXBUS32C	//Mixbus32C needs to spill the filter controls into the comp section
 	if (hpfc) { available.push_back (std::make_pair (hpfc, "HPF")); }
 	if (lpfc) { available.push_back (std::make_pair (lpfc, "LPF")); }
 	if (fec)  { available.push_back (std::make_pair (fec, "FiltIn")); }
-#endif
 
 	if (global_strip_position >= available.size()) {
 		/* this knob is not needed to control the available parameters */

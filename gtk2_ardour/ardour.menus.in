@@ -644,10 +644,8 @@
 #ifdef MIXBUS
       <separator/>
       <menuitem action='ToggleStripCtrls'/>
-#ifdef MIXBUS32C
       <menuitem action='ToggleStripEQ'/>
       <menuitem action='ToggleStripBus'/>
-#endif
 #endif
 
     </menu>

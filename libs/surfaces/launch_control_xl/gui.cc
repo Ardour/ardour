@@ -126,7 +126,7 @@ LCXLGUI::LCXLGUI (LaunchControlXL& p)
 	row++;
 
 	/* User Settings */
-#ifdef MIXBUS32C
+#ifdef MIXBUS
 	l = manage (new Gtk::Label (_("Control sends 7-12 in Mixer Mode")));
 	l->set_alignment (1.0, 0.5);
 	table.attach (*l, 0, 1, row, row+1, AttachOptions(FILL|EXPAND), AttachOptions (0));
@@ -303,7 +303,7 @@ LCXLGUI::toggle_fader8master ()
 	DEBUG_TRACE(DEBUG::LaunchControlXL, string_compose("use_fader8master IS: %1\n", lcxl.fader8master()));
 }
 
-#ifdef MIXBUS32C
+#ifdef MIXBUS
 void
 LCXLGUI::toggle_ctrllowersends ()
 {

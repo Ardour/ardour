@@ -109,8 +109,6 @@ LaunchControlXL::build_maps ()
 				boost::function<uint8_t ()> (boost::bind(&LaunchControlXL::dm_mb_check_send_knob, this, static_cast<KnobID>(i + 16))));
 		}
 
-#ifdef MIXBUS32C // from here 32C only
-
 		if (first_selected_stripable() && (first_selected_stripable()->is_master() || first_selected_stripable()->mixbus())) {
 			MAKE_DM_KNOB (SendA1, 13, 0, AmberFull, AmberLow, boost::function<void ()>
 					(boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA1, true, 0)),
@@ -163,38 +161,6 @@ LaunchControlXL::build_maps ()
 			              (boost::bind (&LaunchControlXL::dm_pan_azi, this, SendB4)),
 			              boost::bind(&LaunchControlXL::dm_check_pan_azi, this));
 
-#else	// from here Mixbus Standard only
-		MAKE_DM_KNOB (SendA1, 13, 0, AmberFull, AmberLow, boost::function<void ()>
-				(boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA1, true, 0)),
-				boost::function<uint8_t ()> (boost::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 0)));
-		MAKE_DM_KNOB (SendA2, 14, 1, AmberFull, AmberLow, boost::function<void ()>
-				(boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA2, true, 1)),
-				boost::function<uint8_t ()> (boost::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 1)));
-		MAKE_DM_KNOB (SendA3, 15, 2, AmberFull, AmberLow, boost::function<void ()>
-				(boost::bind (&LaunchControlXL::dm_mb_eq, this, SendA3, true, 2)),
-				boost::function<uint8_t ()> (boost::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 2)));
-		MAKE_DM_KNOB (SendA5, 17, 4, RedLow, AmberLow, boost::function<void ()>
-				(boost::bind (&LaunchControlXL::dm_pan_azi, this, SendA5)),
-				boost::bind(&LaunchControlXL::dm_check_pan_azi, this));
-		MAKE_DM_KNOB (SendA6, 18, 5, RedLow, RedLow, boost::function<void ()>
-				(boost::bind (&LaunchControlXL::dm_pan_width, this, SendA6)),
-				boost::bind(&LaunchControlXL::dm_check_pan_width, this));
-		MAKE_DM_KNOB (SendA7, 19, 6, AmberLow, AmberLow, boost::function<void ()>
-				(boost::bind (&LaunchControlXL::dm_mb_tapedrive, this, SendA7)),
-				boost::bind(&LaunchControlXL::dm_mb_has_tapedrive, this));
-		MAKE_DM_KNOB (SendB1, 29, 8, YellowFull, AmberLow, boost::function<void ()>
-				(boost::bind (&LaunchControlXL::dm_mb_eq, this, SendB1, false, 0)),
-				boost::bind(&LaunchControlXL::dm_mb_eq_freq_enabled, this));
-		MAKE_DM_KNOB (SendB2, 30, 9, YellowFull, AmberLow, boost::function<void ()>
-				(boost::bind (&LaunchControlXL::dm_mb_eq, this, SendB2, false, 1)),
-				boost::bind(&LaunchControlXL::dm_mb_eq_freq_enabled, this));
-		MAKE_DM_KNOB (SendB3, 31, 10, YellowFull, AmberLow, boost::function<void ()>
-				(boost::bind (&LaunchControlXL::dm_mb_eq, this, SendB3, false, 2)),
-				boost::bind(&LaunchControlXL::dm_mb_eq_freq_enabled, this));
-		MAKE_DM_KNOB (SendB4, 32, 11, YellowFull, AmberLow, boost::function<void ()>
-				(boost::bind (&LaunchControlXL::dm_mb_flt_frq, this, SendB4, true)),
-				boost::bind(&LaunchControlXL::dm_mb_eq_freq_enabled, this));
-#endif
 #else // from here Ardour
 #endif
 	}
@@ -306,9 +272,6 @@ LaunchControlXL::build_maps ()
 			boost::bind (&LaunchControlXL::dm_solo_enabled, this));
 		MAKE_CTRL_BUTTON_PRESS(Control3, 75, 34, AmberFull, AmberLow, (boost::bind (&LaunchControlXL::dm_mb_eq_switch, this)),
 			boost::function<uint8_t()> (boost::bind(&LaunchControlXL::dm_mb_eq_gain_enabled, this, 0)));
-
-
-#ifdef MIXBUS32C // from here 32C only
 		MAKE_CTRL_BUTTON_PRESS(Control4, 76, 35, AmberFull, AmberLow,
 			boost::function<void()> (boost::bind (&LaunchControlXL::dm_mb_eq_shape_switch, this, 0)),
 			boost::function<uint8_t()> (boost::bind(&LaunchControlXL::dm_mb_eq_shape_enabled, this, 0 )));
@@ -321,16 +284,6 @@ LaunchControlXL::build_maps ()
 			boost::bind(&LaunchControlXL::dm_mb_master_assign_enabled, this));
 		MAKE_CTRL_BUTTON_PRESS(Control8, 92, 39, GreenFull, GreenLow, (boost::bind (&LaunchControlXL::dm_mb_comp_switch, this)),
 			boost::bind(&LaunchControlXL::dm_mb_comp_enabled, this));
-
-#else // from here Mixbus Standard only
-		MAKE_CTRL_BUTTON_PRESS(Control5, 89, 36, GreenFull, GreenLow, (boost::bind (&LaunchControlXL::dm_mb_master_assign_switch, this)),
-			boost::bind(&LaunchControlXL::dm_mb_master_assign_enabled, this));
-		MAKE_CTRL_BUTTON_PRESS(Control7, 91, 38, GreenFull, GreenLow, (boost::bind (&LaunchControlXL::dm_mb_comp_switch, this)),
-			boost::bind(&LaunchControlXL::dm_mb_comp_enabled, this));
-		MAKE_CTRL_BUTTON_PRESS(Control8, 92, 39, RedFull, RedLow, (boost::bind (&LaunchControlXL::dm_recenable_switch, this)),
-			boost::bind(&LaunchControlXL::dm_recenable_enabled, this));
-
-#endif
 #else // Ardour
 #endif
 	}

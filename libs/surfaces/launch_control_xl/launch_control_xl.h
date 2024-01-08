@@ -391,7 +391,7 @@ public:
 	void set_device_mode (bool yn);
 	bool device_mode () const { return _device_mode; }
 
-#ifdef MIXBUS32C
+#ifdef MIXBUS
 	void set_ctrllowersends (bool yn);
 	bool ctrllowersends () const { return _ctrllowersends; }
 
@@ -416,7 +416,7 @@ private:
 
 	bool _fader8master;
 	bool _device_mode;
-#ifdef MIXBUS32C
+#ifdef MIXBUS
 	bool _ctrllowersends;
 	bool _fss_is_mixbus;
 #endif
