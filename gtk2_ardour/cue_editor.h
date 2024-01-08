@@ -83,7 +83,7 @@ class CueEditor : public EditingContext
 	 * (defined in editing_syms.h)
 	 */
 	Editing::MouseMode current_mouse_mode () const;
-	/** @return Whether the current mouse mode is an "internal" editing mode. */
+	/** cue editors are *always* used for internal editing */
 	bool internal_editing() const { return true; }
 
 	Gdk::Cursor* get_canvas_cursor () const;
