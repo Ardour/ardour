@@ -104,6 +104,7 @@ private:
 
 	void display_region(MidiRegionView* region_view, bool load_model);
 	void display_track (std::shared_ptr<ARDOUR::Track> tr);
+	void update_contents_height ();
 	void update_contents_metrics (std::shared_ptr<ARDOUR::Region> r);
 	void color_handler ();
 	void apply_note_range_to_children ();

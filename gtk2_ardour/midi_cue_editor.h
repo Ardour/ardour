@@ -34,6 +34,9 @@ namespace ArdourCanvas {
 	class ScrollGroup;
 }
 
+class MidiView;
+class CueMidiBackground;
+
 class MidiCueEditor : public CueEditor
 {
   public:
@@ -41,7 +44,7 @@ class MidiCueEditor : public CueEditor
 	~MidiCueEditor ();
 
 	ArdourCanvas::Container* get_noscroll_group() const { return no_scroll_group; }
-	Gtk::Widget& viewport() { return *_canvas_viewport; }
+	Gtk::Widget& viewport();
 
 	double visible_canvas_width() const { return _visible_canvas_width; }
 	samplecnt_t current_page_samples() const;
@@ -58,6 +61,8 @@ class MidiCueEditor : public CueEditor
 
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
 	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
+
+	void set_region (std::shared_ptr<ARDOUR::MidiTrack>, std::shared_ptr<ARDOUR::Region>);
 
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
@@ -99,6 +104,9 @@ class MidiCueEditor : public CueEditor
 	ArdourCanvas::Container* time_line_group;
 
 	ArdourCanvas::Rectangle* transport_loop_range_rect;
+
+	CueMidiBackground* bg;
+	MidiView* view;
 
 	void build_canvas ();
 };

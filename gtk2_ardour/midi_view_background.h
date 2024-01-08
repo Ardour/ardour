@@ -29,16 +29,26 @@
 
 #include "ardour/types.h"
 
+#include "gtkmm2ext/colors.h"
+
+#include "view_background.h"
+
 namespace ArdourCanvas {
 	class Item;
 	class LineSet;
 }
 
-class MidiViewBackground
+/** A class that provides various context for a MidiVieww:
+        = note ranges
+        * color information
+        * etc.
+ */
+
+class MidiViewBackground : public virtual ViewBackground
 {
   public:
 	MidiViewBackground (ArdourCanvas::Item* parent);
-	virtual ~MidiViewBackground ();
+	~MidiViewBackground ();
 
 	Gtk::Adjustment note_range_adjustment;
 
@@ -61,8 +71,6 @@ class MidiViewBackground
 	inline uint8_t highest_note() const { return _highest_note; }
 
 	void update_note_range(uint8_t note_num);
-
-	virtual double contents_height() const = 0;
 
 	double note_to_y (uint8_t note) const {
 		return contents_height() - (note + 1 - lowest_note()) * note_height() + 1;
@@ -103,9 +111,9 @@ class MidiViewBackground
 	void color_handler ();
 	void parameter_changed (std::string const &);
 	void note_range_adjustment_changed();
-	void update_contents_height ();
 	void draw_note_lines();
 	bool update_data_note_range(uint8_t min, uint8_t max);
+	void update_contents_height ();
 	virtual void apply_note_range_to_children () = 0;
 	virtual bool updates_suspended() const { return false; }
 };

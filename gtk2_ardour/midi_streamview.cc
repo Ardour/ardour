@@ -207,9 +207,17 @@ MidiStreamView::display_track (std::shared_ptr<Track> tr)
 {
 	StreamView::display_track (tr);
 
+	std::cerr << "MSV @ " << this << " dnl\n";
 	draw_note_lines();
 
 	NoteRangeChanged(); /* EMIT SIGNAL*/
+}
+
+void
+MidiStreamView::update_contents_height ()
+{
+	StreamView::update_contents_height();
+	MidiViewBackground::update_contents_height ();
 }
 
 void

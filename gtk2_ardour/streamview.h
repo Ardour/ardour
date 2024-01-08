@@ -31,7 +31,9 @@
 #include "pbd/signals.h"
 
 #include "ardour/location.h"
+
 #include "enums.h"
+#include "view_background.h"
 
 namespace Gdk {
 	class Color;
@@ -64,7 +66,7 @@ class RegionSelection;
 class CrossfadeView;
 class Selection;
 
-class StreamView : public sigc::trackable, public PBD::ScopedConnectionList
+class StreamView : public sigc::trackable, public PBD::ScopedConnectionList, public virtual ViewBackground
 {
 public:
 	virtual ~StreamView ();
