@@ -74,7 +74,7 @@ class CueEditor : public EditingContext
 	void reset_zoom (samplecnt_t);
 	void reposition_and_zoom (samplepos_t, double);
 
-		void set_mouse_mode (Editing::MouseMode, bool force = false);
+	void set_mouse_mode (Editing::MouseMode, bool force = false);
 	/** Step the mouse mode onto the next or previous one.
 	 * @param next true to move to the next, otherwise move to the previous
 	 */
