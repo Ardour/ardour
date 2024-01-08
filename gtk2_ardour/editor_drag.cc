@@ -1873,7 +1873,7 @@ RegionMoveDrag::finished_copy (bool const changed_position, bool const changed_t
 	/* Ripple marks & ranges if appropriate */
 
 	if (_editor.should_ripple_all () && _primary->region ()->playlist ()) {
-		_editor->ripple_marks (primary_playlist, extent_min, extent_min.distance (extent_max));
+		_editor.ripple_marks (primary_playlist, extent_min, extent_min.distance (extent_max));
 	}
 
 	/* If we've created new regions either by copying or moving
