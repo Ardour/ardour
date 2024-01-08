@@ -49,6 +49,7 @@
 #include "trigger_ui.h"
 #include "utils.h"
 
+#include "audio_clip_editor.h"
 #include "audio_region_properties_box.h"
 #include "audio_trigger_properties_box.h"
 #include "audio_region_operations_box.h"
@@ -56,7 +57,7 @@
 #include "midi_trigger_properties_box.h"
 #include "midi_region_properties_box.h"
 #include "midi_region_operations_box.h"
-#include "midi_clip_editor.h"
+#include "midi_cue_editor.h"
 
 #include "slot_properties_box.h"
 
@@ -743,20 +744,23 @@ SlotPropertyWindow::SlotPropertyWindow (TriggerReference tref)
 			_trim_box = manage(new AudioClipEditorBox ());
 
 			_trig_box->set_trigger (tref);
+			_trim_box->set_region(trigger->region(), tref);
+			_ops_box->set_session(&trigger->region()->session());
+
+			table->attach(*_trig_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+			table->attach(*_ops_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+			table->attach(*_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+
 		} else {
 			_trig_box = manage(new MidiTriggerPropertiesBox ());
-			_ops_box = manage(new MidiRegionOperationsBox ());
-			_trim_box = manage(new MidiClipEditorBox ());
-
 			_trig_box->set_trigger (tref);
+
+			_midi_editor = new MidiCueEditor;
+			_midi_editor->set_region (std::shared_ptr<MidiTrack>(), trigger->region());
+
+			table->attach(*_trig_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
+			table->attach(_midi_editor->viewport(),   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
 		}
-
-		_trim_box->set_region(trigger->region(), tref);
-		_ops_box->set_session(&trigger->region()->session());
-
-		table->attach(*_trig_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-		table->attach(*_trim_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
-		table->attach(*_ops_box,   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
 	}
 
 	add (*table);

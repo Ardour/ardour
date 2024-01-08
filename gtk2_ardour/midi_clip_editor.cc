@@ -81,19 +81,16 @@ MidiClipEditorBox::set_session (Session* s)
 void
 MidiClipEditorBox::set_region (std::shared_ptr<Region> r, TriggerReference /*notused*/)
 {
+	delete _midi_view;
+	_midi_view = nullptr;
+
+	if (!r) {
+		set_session (nullptr);
+		return;
+	}
+
 	set_session (&r->session ());
 
-	state_connection.disconnect ();
-
-	_region = r;
-
-	PBD::PropertyChange interesting_stuff;
-	region_changed (interesting_stuff);
-
-	_region->PropertyChanged.connect (state_connection, invalidator (*this), boost::bind (&MidiClipEditorBox::region_changed, this, _1), gui_context ());
+	editor->set_region (r);
 }
 
-void
-MidiClipEditorBox::region_changed (const PBD::PropertyChange& what_changed)
-{
-}

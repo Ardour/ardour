@@ -45,8 +45,8 @@
 #include "editor.h"
 #include "gui_thread.h"
 #include "public_editor.h"
+#include "midi_cue_editor.h"
 #include "timers.h"
-
 #include "trigger_page.h"
 #include "trigger_strip.h"
 #include "triggerbox_ui.h"
@@ -134,6 +134,8 @@ TriggerPage::TriggerPage ()
 	_pane_upper.add (_strip_group_box);
 	_pane_upper.add (_sidebar_vbox);
 
+	_midi_editor = new MidiCueEditor;
+
 	/* Bottom -- Properties of selected Slot/Region */
 	Gtk::Table* table = manage (new Gtk::Table);
 	table->set_homogeneous (false);
@@ -152,7 +154,7 @@ TriggerPage::TriggerPage ()
 	++col;
 
 	col = 3;
-	table->attach (_midi_trim_box, col, col + 1, 0, 1, Gtk::EXPAND, Gtk::SHRINK);
+	table->attach (_midi_editor->viewport(), col, col + 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL);
 	++col;
 
 	_parameter_box.pack_start (*table);
@@ -283,8 +285,7 @@ TriggerPage::set_session (Session* s)
 
 	_audio_trig_box.set_session (s);
 
-	_midi_trig_box.set_session (s);
-	_midi_trim_box.set_session (s);
+	_midi_editor->set_session (s);
 
 	update_title ();
 	start_updating ();
@@ -389,7 +390,7 @@ TriggerPage::selection_changed ()
 	_audio_trig_box.hide ();
 
 	_midi_trig_box.hide ();
-	_midi_trim_box.hide ();
+	_midi_editor->viewport().hide ();
 
 	_parameter_box.hide ();
 
@@ -410,7 +411,7 @@ TriggerPage::selection_changed ()
 				_midi_trig_box.show ();
 
 				// _midi_trim_box.set_trigger (ref);
-				_midi_trim_box.show ();
+				_midi_editor->viewport().show ();
 			}
 		}
 		_parameter_box.show ();

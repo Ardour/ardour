@@ -102,8 +102,15 @@ MidiCueEditor::build_canvas ()
 
 	std::cerr << "New CMB\n";
 	bg = new CueMidiBackground (hv_scroll_group);
+
+	_canvas_viewport->signal_size_allocate().connect (sigc::mem_fun(*this, &MidiCueEditor::canvas_allocate));
 }
 
+void
+MidiCueEditor::canvas_allocate (Gtk::Allocation alloc)
+{
+	bg->set_size (alloc.get_width(), alloc.get_height());
+}
 
 timepos_t
 MidiCueEditor::snap_to_grid (timepos_t const & presnap, Temporal::RoundMode direction, SnapPref gpref) const
