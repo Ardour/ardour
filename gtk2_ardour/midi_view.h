@@ -92,7 +92,7 @@ class MidiView : public virtual sigc::trackable
 	virtual ~MidiView ();
 
 	void init (bool wfd);
-	virtual bool display_enabled() const { return true; }
+	virtual bool display_is_enabled() const { return true; }
 
 	void step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 	                    Temporal::Beats pos, Temporal::Beats len);
@@ -102,7 +102,7 @@ class MidiView : public virtual sigc::trackable
 
 	// inline ARDOUR::ColorMode color_mode() const { return _background->color_mode(); }
 
-	uint32_t get_fill_color() const;
+	virtual uint32_t get_fill_color() const;
 	void color_handler ();
 
 	void show_step_edit_cursor (Temporal::Beats pos);
@@ -325,21 +325,21 @@ class MidiView : public virtual sigc::trackable
 
 	void show_verbose_cursor_for_new_note_value(std::shared_ptr<NoteType> current_note, uint8_t new_note) const;
 
-	std::shared_ptr<ARDOUR::MidiRegion> midi_region() const { return _region; }
+	std::shared_ptr<ARDOUR::MidiRegion> midi_region() const { return _midi_region; }
 	EditingContext& editing_context() const { return _editing_context; }
 	MidiViewBackground& midi_context() const { return _midi_context; }
 	virtual ARDOUR::Slice const & current_slice() const { return _current_slice; }
 
   protected:
 	void init ();
-	void region_resized (const PBD::PropertyChange&);
+	virtual void region_resized (const PBD::PropertyChange&);
 
 	void set_flags (XMLNode *);
 	void store_flags ();
 
 	virtual void reset_width_dependent_items (double pixel_width);
 
-	void _redisplay (bool view_only);
+	void redisplay (bool view_only);
 
   protected:
 	friend class EditingContext;
@@ -397,7 +397,7 @@ class MidiView : public virtual sigc::trackable
 
 	void quantize_selected_notes ();
 
-  private:
+  protected:
 	friend class MidiRubberbandSelectDrag;
 	friend class MidiVerticalSelectDrag;
 	friend class NoteDrag;
@@ -426,7 +426,7 @@ class MidiView : public virtual sigc::trackable
 	virtual void ghost_add_note (NoteBase*) {}
 	virtual void ghost_sync_selection (NoteBase*) {}
 
-	bool canvas_group_event(GdkEvent* ev);
+	virtual bool canvas_group_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
 
 	void midi_channel_mode_changed ();
@@ -465,7 +465,7 @@ class MidiView : public virtual sigc::trackable
 	EditingContext&                      _editing_context;
 	MidiViewBackground&                  _midi_context;
 	std::shared_ptr<ARDOUR::MidiModel>   _model;
-	std::shared_ptr<ARDOUR::MidiRegion>  _region;
+	std::shared_ptr<ARDOUR::MidiRegion>  _midi_region;
 	ARDOUR::Slice                        _current_slice;
 	Events                               _events;
 	CopyDragEvents                       _copy_drag_events;
@@ -547,7 +547,6 @@ class MidiView : public virtual sigc::trackable
 
 	void display_patch_changes_on_channel (uint8_t, bool);
 
-	void connect_to_diskstream ();
 	void data_recorded (std::weak_ptr<ARDOUR::MidiSource>);
 
 	/** Get grid type as beats, or default to 1 if not snapped to beats. */
@@ -556,7 +555,7 @@ class MidiView : public virtual sigc::trackable
 	Temporal::Beats get_draw_length_beats(Temporal::timepos_t const & pos) const;
 
 	void remove_ghost_note ();
-	void mouse_mode_changed ();
+	virtual void mouse_mode_changed ();
 	virtual void enter_internal (uint32_t state);
 	virtual void leave_internal ();
 	void hide_verbose_cursor ();
