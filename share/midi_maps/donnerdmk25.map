@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+
+Bindings file for the Donner DMK25 Spacline controller. 
+
+-----------------------------------------------------
+Setting transport buttons to mode 1:
+-----------------------------------------------------
+
+The transport buttons in the unit work in two modes (toggle or latch). For this
+file to work all buttons must be set to "mode 1" (latch, I think).
+
+- press transpose+ and octave+ at the same time to enter edit mode, the four
+	transpose and octave keys will light up.
+- press the key labelled "mode" (middle D)
+
+Now repeat for each transport control (loop, back, forward, stop, play, record):
+
+- Press the transport button you want to set up, it will light up.
+- Press the key labelled 1 (low C).
+
+Finally:
+
+- Press the key labelled "enter" to save (high C)
+
+-----------------------------------------------------
+Setting CC codes for transport buttons:
+-----------------------------------------------------
+
+CC messages in this file are the ones that come with the unit by default. 
+If these need changing you can either change the "ctl" values in this file to 
+the ones sent by your unit or change the values sent by your unit. If you
+wish to do the latter follow these instructions:
+
+- press transpose+ and octave+ at the same time to enter edit mode, all four
+	transpose and octave keys will light up.
+- press the key labelled "cc" (middle C)
+
+Now repeat for each transport control:
+
+- Press the transport button whose CC you want to change, it will light up.
+- Use the number keys (low C to low A) to enter the CC code using three digits.
+
+Finally:
+
+- Press the key labelled "enter" to save (high C)
+
+-->
+<ArdourMIDIBindings version="1.0.0" name="Donner DMK25 SpacLine">
+	<Binding channel="1" ctl="18" function="transport-stop"/>
+	<Binding channel="1" ctl="19" function="transport-roll"/>
+	<Binding channel="1" ctl="16" function="transport-start"/>
+	<Binding channel="1" ctl="17" function="transport-end"/>
+	<Binding channel="1" ctl="20" function="toggle-rec-enable"/>
+	<Binding channel="1" ctl="15" function="loop-toggle"/>
+</ArdourMIDIBindings>
