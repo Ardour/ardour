@@ -1,0 +1,520 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
+<MIDINameDocument>
+	<Author>Schmitty2005</Author>
+	<!-- The midnam is currently set to use channel 15
+     Customize accordingly in ChannelNameSetAssign and AvailableChannel below.
+
+     Manual for the Lexicon MPX100 is available here as of 12/26/2023: 
+     https://lexiconpro.com/en-US/product_documents/mpx100_user_guide_eng_rev0pdf
+
+-->
+	<MasterDeviceNames>
+		<Manufacturer>Lexicon</Manufacturer>
+		<Model>MPX100</Model>
+		<CustomDeviceMode Name="Lexicon MPX100">
+			<ChannelNameSetAssignments>
+				<ChannelNameSetAssign Channel="15" NameSet="Presets"/>
+			</ChannelNameSetAssignments>
+		</CustomDeviceMode>
+		<ChannelNameSet Name="Presets">
+			<AvailableForChannels>
+				<AvailableChannel Channel="1" Available="false"/>
+				<AvailableChannel Channel="2" Available="false"/>
+				<AvailableChannel Channel="3" Available="false"/>
+				<AvailableChannel Channel="4" Available="false"/>
+				<AvailableChannel Channel="5" Available="false"/>
+				<AvailableChannel Channel="6" Available="false"/>
+				<AvailableChannel Channel="7" Available="false"/>
+				<AvailableChannel Channel="8" Available="false"/>
+				<AvailableChannel Channel="9" Available="false"/>
+				<AvailableChannel Channel="10" Available="false"/>
+				<AvailableChannel Channel="11" Available="false"/>
+				<AvailableChannel Channel="12" Available="false"/>
+				<AvailableChannel Channel="13" Available="false"/>
+				<AvailableChannel Channel="14" Available="false"/>
+				<AvailableChannel Channel="15" Available="true"/>
+				<AvailableChannel Channel="16" Available="false"/>
+			</AvailableForChannels>
+			<!--
+        <UsesControlNameList Name="ControlsMX200"/> 
+      -->
+			<PatchBank Name="Plate , Gate">
+				<MIDICommands>
+					<ControlChange Control="32" Value="8"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="PlateGate"/>
+			</PatchBank>
+			<PatchBank Name="Hall , Chamber">
+				<MIDICommands>
+					<ControlChange Control="32" Value="9"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="HallChamber"/>
+			</PatchBank>
+			<PatchBank Name="Ambience , Room">
+				<MIDICommands>
+					<ControlChange Control="32" Value="10"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="AmbienceRoom"/>
+			</PatchBank>
+			<PatchBank Name="Tremolo , Rotary">
+				<MIDICommands>
+					<ControlChange Control="32" Value="11"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="TremoloRotary"/>
+			</PatchBank>
+			<PatchBank Name="Chorus , Flange">
+				<MIDICommands>
+					<ControlChange Control="32" Value="12"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="ChorusFlange"/>
+			</PatchBank>
+			<PatchBank Name="Pitch , Detune">
+				<MIDICommands>
+					<ControlChange Control="32" Value="13"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="PitchDetune"/>
+			</PatchBank>
+			<PatchBank Name="Delay , Echo">
+				<MIDICommands>
+					<ControlChange Control="32" Value="14"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="DelayEcho"/>
+			</PatchBank>
+			<PatchBank Name="Special FX">
+				<MIDICommands>
+					<ControlChange Control="32" Value="15"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="SpecialFX"/>
+			</PatchBank>
+			<PatchBank Name="USER">
+				<MIDICommands>
+					<ControlChange Control="32" Value="0"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="USER"/>
+			</PatchBank>
+			<PatchBank Name="Flange-Delay">
+				<MIDICommands>
+					<ControlChange Control="32" Value="1"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="Flange-Delay"/>
+			</PatchBank>
+			<PatchBank Name="Pitch-Delay">
+				<MIDICommands>
+					<ControlChange Control="32" Value="2"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="Pitch-Delay"/>
+			</PatchBank>
+			<PatchBank Name="Chorus-Delay">
+				<MIDICommands>
+					<ControlChange Control="32" Value="3"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="Chorus-Delay"/>
+			</PatchBank>
+			<PatchBank Name="Delay-Reverb">
+				<MIDICommands>
+					<ControlChange Control="32" Value="4"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="Delay-Reverb"/>
+			</PatchBank>
+			<PatchBank Name="Flange-Reverb">
+				<MIDICommands>
+					<ControlChange Control="32" Value="5"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="Flange-Reverb"/>
+			</PatchBank>
+			<PatchBank Name="Pitch-Reverb">
+				<MIDICommands>
+					<ControlChange Control="32" Value="6"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="Pitch-Reverb"/>
+			</PatchBank>
+			<PatchBank Name="Chorus-Reverb">
+				<MIDICommands>
+					<ControlChange Control="32" Value="7"/>
+				</MIDICommands>
+				<UsesPatchNameList Name="Chorus-Reverb"/>
+			</PatchBank>
+		</ChannelNameSet>
+		<!--Each Bank will have its own patchNameList of 16 Patches-->
+		<PatchNameList Name="PlateGate">
+			<Patch Number="001" Name="1 Small Plate " ProgramChange="0"/>
+			<Patch Number="002" Name="2 Medium Plate " ProgramChange="1"/>
+			<Patch Number="003" Name="3 Large Plate " ProgramChange="2"/>
+			<Patch Number="004" Name="4 Larger Plate " ProgramChange="3"/>
+			<Patch Number="005" Name="5 Tape Slap Plate " ProgramChange="4"/>
+			<Patch Number="006" Name="6 Rich Plate Decay " ProgramChange="5"/>
+			<Patch Number="007" Name="7 Large Bright Plate" ProgramChange="6"/>
+			<Patch Number="008" Name="8 Vocal Plate" ProgramChange="7"/>
+			<Patch Number="009" Name="9 Straight Gate " ProgramChange="8"/>
+			<Patch Number="010" Name="10 Drum Gate " ProgramChange="9"/>
+			<Patch Number="011" Name="11 Slope Down " ProgramChange="10"/>
+			<Patch Number="012" Name="12 140 ms Gate " ProgramChange="11"/>
+			<Patch Number="013" Name="13 240 ms Gate " ProgramChange="12"/>
+			<Patch Number="014" Name="14 340 ms Gate" ProgramChange="13"/>
+			<Patch Number="015" Name="15 440 ms Gate" ProgramChange="14"/>
+			<Patch Number="016" Name="16 540 ms Gate" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="HallChamber">
+			<Patch Number="001" Name="1 Recital Hall" ProgramChange="0"/>
+			<Patch Number="002" Name="2 Small Church" ProgramChange="1"/>
+			<Patch Number="003" Name="3 Jazz Hall" ProgramChange="2"/>
+			<Patch Number="004" Name="4 Dance Hall" ProgramChange="3"/>
+			<Patch Number="005" Name="5 Synth Hall" ProgramChange="4"/>
+			<Patch Number="006" Name="6 Medium Hall" ProgramChange="5"/>
+			<Patch Number="007" Name="7 Large Hall" ProgramChange="6"/>
+			<Patch Number="008" Name="8 Large Church" ProgramChange="7"/>
+			<Patch Number="009" Name="9 Brick Wall" ProgramChange="8"/>
+			<Patch Number="010" Name="10 Basement" ProgramChange="9"/>
+			<Patch Number="011" Name="11 Live Concert" ProgramChange="10"/>
+			<Patch Number="012" Name="12 Percussion 1" ProgramChange="11"/>
+			<Patch Number="013" Name="13 Percussion 2" ProgramChange="12"/>
+			<Patch Number="014" Name="14 Live Chamber" ProgramChange="13"/>
+			<Patch Number="015" Name="15 Vocal 1" ProgramChange="14"/>
+			<Patch Number="016" Name="16 Vocal 2" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="AmbienceRoom">
+			<Patch Number="001" Name="1 Voice Over" ProgramChange="0"/>
+			<Patch Number="002" Name="2 Very Small Ambience" ProgramChange="1"/>
+			<Patch Number="003" Name="3 Small Ambience" ProgramChange="2"/>
+			<Patch Number="004" Name="4 Medium Ambience" ProgramChange="3"/>
+			<Patch Number="005" Name="5 Studio D" ProgramChange="4"/>
+			<Patch Number="006" Name="6 Bright Ambience" ProgramChange="5"/>
+			<Patch Number="007" Name="7 Dark Ambience" ProgramChange="6"/>
+			<Patch Number="008" Name="8 Marble Foyer" ProgramChange="7"/>
+			<Patch Number="009" Name="9 Bedroom Wall" ProgramChange="8"/>
+			<Patch Number="010" Name="10 Tiled Room" ProgramChange="9"/>
+			<Patch Number="011" Name="11 Studio C" ProgramChange="10"/>
+			<Patch Number="012" Name="12 Small Room" ProgramChange="11"/>
+			<Patch Number="013" Name="13 Studio B" ProgramChange="12"/>
+			<Patch Number="014" Name="14 Rehearsal" ProgramChange="13"/>
+			<Patch Number="015" Name="15 Studio A" ProgramChange="14"/>
+			<Patch Number="016" Name="16 Large Room" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="TremoloRotary">
+			<Patch Number="001" Name="1 Rectified Sine Wave " ProgramChange="0"/>
+			<Patch Number="002" Name="2 Square Wave " ProgramChange="1"/>
+			<Patch Number="003" Name="3 Sawtooth Wave " ProgramChange="2"/>
+			<Patch Number="004" Name="4 Rectified Sine Wave" ProgramChange="3"/>
+			<Patch Number="005" Name="5 Square Wave" ProgramChange="4"/>
+			<Patch Number="006" Name="6 Sawtooth Wave" ProgramChange="5"/>
+			<Patch Number="007" Name="7 Triangle Wave" ProgramChange="6"/>
+			<Patch Number="008" Name="8 Sine Wave" ProgramChange="7"/>
+			<Patch Number="009" Name="9 Rotary Slow/Fast" ProgramChange="8"/>
+			<Patch Number="010" Name="10 Rotary Slow/Fast, Width" ProgramChange="9"/>
+			<Patch Number="011" Name="11 Rotary Slow/Fast, Balance" ProgramChange="10"/>
+			<Patch Number="012" Name="12 Slow Rotary" ProgramChange="11"/>
+			<Patch Number="013" Name="13 Varispeed Rotary" ProgramChange="12"/>
+			<Patch Number="014" Name="14 Tap Rotary Balance" ProgramChange="13"/>
+			<Patch Number="015" Name="15 Tap Rotary Width" ProgramChange="14"/>
+			<Patch Number="016" Name="16 Tap Rotary" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="ChorusFlange">
+			<Patch Number="001" Name="1 Rich Chorus Adj Reso" ProgramChange="0"/>
+			<Patch Number="002" Name="2 Rich Chorus Adj Depth" ProgramChange="1"/>
+			<Patch Number="003" Name="3 Rich Chorus Adj Rate" ProgramChange="2"/>
+			<Patch Number="004" Name="4 Rich Chorus Adj Hi-Cut" ProgramChange="3"/>
+			<Patch Number="005" Name="5 Diffuse Chorus" ProgramChange="4"/>
+			<Patch Number="006" Name="6 Slap Chorus" ProgramChange="5"/>
+			<Patch Number="007" Name="7 Slap Chorus" ProgramChange="6"/>
+			<Patch Number="008" Name="8 Slap Chorus" ProgramChange="7"/>
+			<Patch Number="009" Name="9 Light Flange: in phase sweep" ProgramChange="8"/>
+			<Patch Number="010" Name="10 Light Flange: out of phase sweep" ProgramChange="9"/>
+			<Patch Number="011" Name="11 Light Flange: in phase sweep Rate" ProgramChange="10"/>
+			<Patch Number="012" Name="12 Light Flange: out of phase sweep Rate" ProgramChange="11"/>
+			<Patch Number="013" Name="13 Deep Flange: in phase sweep" ProgramChange="12"/>
+			<Patch Number="014" Name="14 Deep Flange: out of phase sweep" ProgramChange="13"/>
+			<Patch Number="015" Name="15 Light Flange Sweep: 0, 90, 180, 270" ProgramChange="14"/>
+			<Patch Number="016" Name="16 Deep Flange" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="PitchDetune">
+			<Patch Number="001" Name="1 Semi-tone Shift -2" ProgramChange="0"/>
+			<Patch Number="002" Name="2 Glide Shifter" ProgramChange="1"/>
+			<Patch Number="003" Name="3 +/-100 cents" ProgramChange="2"/>
+			<Patch Number="004" Name="4 Minor 3rd to 4th Harmony" ProgramChange="3"/>
+			<Patch Number="005" Name="5 4th/5th Harmony" ProgramChange="4"/>
+			<Patch Number="006" Name="6 5th/6th Harmony" ProgramChange="5"/>
+			<Patch Number="007" Name="7 2nd Inversion Triad" ProgramChange="6"/>
+			<Patch Number="008" Name="8 Power Chords" ProgramChange="7"/>
+			<Patch Number="009" Name="9 Mild Detuning" ProgramChange="8"/>
+			<Patch Number="010" Name="10 Moderate Detuning" ProgramChange="9"/>
+			<Patch Number="011" Name="11 Heavy Detuning" ProgramChange="10"/>
+			<Patch Number="012" Name="12 FullRange Detuning" ProgramChange="11"/>
+			<Patch Number="013" Name="13 Warm and Mild Detuning" ProgramChange="12"/>
+			<Patch Number="014" Name="14 Warm and Moderate Detuning" ProgramChange="13"/>
+			<Patch Number="015" Name="15 Warm and Heavy Detuning" ProgramChange="14"/>
+			<Patch Number="016" Name="16 Slap Detuner" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="DelayEcho">
+			<Patch Number="001" Name="1 Mono Quarter-Note" ProgramChange="0"/>
+			<Patch Number="002" Name="2 Stereo Quarter-Note" ProgramChange="1"/>
+			<Patch Number="003" Name="3 Triplet Shuffle Delay/Echo" ProgramChange="2"/>
+			<Patch Number="004" Name="4 Dotted Eighth-Note" ProgramChange="3"/>
+			<Patch Number="005" Name="5 Eighth-Note and Triplet " ProgramChange="4"/>
+			<Patch Number="006" Name="6 Ping Pong Quarter-Note " ProgramChange="5"/>
+			<Patch Number="007" Name="7 Triplet Rhythm 1 Delay/Echo" ProgramChange="6"/>
+			<Patch Number="008" Name="8 Triplet Rhythm 2 Delay/Echo" ProgramChange="7"/>
+			<Patch Number="009" Name="9 Mono Delay/Echo " ProgramChange="8"/>
+			<Patch Number="010" Name="10 Stereo Delay/Echo" ProgramChange="9"/>
+			<Patch Number="011" Name="11 Tape Slap Delay/Echo" ProgramChange="10"/>
+			<Patch Number="012" Name="12 Multi Bounce Delay/Echo" ProgramChange="11"/>
+			<Patch Number="013" Name="13 Multi Linear Delay/Echo" ProgramChange="12"/>
+			<Patch Number="014" Name="14 Multi Inverse Delay/Echo" ProgramChange="13"/>
+			<Patch Number="015" Name="15 Multi Repeat Delay/Echo" ProgramChange="14"/>
+			<Patch Number="016" Name="16 Multi Pong" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="Chorus-Reverb">
+			<Patch Number="001" Name="1 Rich Chorus 1 - Small Space" ProgramChange="0"/>
+			<Patch Number="002" Name="2 Rich Chorus 1 - Medium Space" ProgramChange="1"/>
+			<Patch Number="003" Name="3 Rich Chorus 1 - Large Space" ProgramChange="2"/>
+			<Patch Number="004" Name="4 Rich Chorus 2 - Small Space" ProgramChange="3"/>
+			<Patch Number="005" Name="5 Rich Chorus 2 - Medium Space" ProgramChange="4"/>
+			<Patch Number="006" Name="6 Rich Chorus 2 - Large Space" ProgramChange="5"/>
+			<Patch Number="007" Name="7 Rich Chorus 1 > Room" ProgramChange="6"/>
+			<Patch Number="008" Name="8 Rich Chorus 2 > Room" ProgramChange="7"/>
+			<Patch Number="009" Name="9 Rich Chorus 3 > Room" ProgramChange="8"/>
+			<Patch Number="010" Name="10 Rich Chorus 1 > Small" ProgramChange="9"/>
+			<Patch Number="011" Name="11 Rich Chorus 1 + Small" ProgramChange="10"/>
+			<Patch Number="012" Name="12 Rich Chorus 2 + Medium" ProgramChange="11"/>
+			<Patch Number="013" Name="13 Rich Chorus 2 + Large" ProgramChange="12"/>
+			<Patch Number="014" Name="14 Rich Chorus 1 + Large" ProgramChange="13"/>
+			<Patch Number="015" Name="15 Rich Chorus 1 / Room" ProgramChange="14"/>
+			<Patch Number="016" Name="16 Rich Chorus 4 / Room" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="SpecialFX">
+			<Patch Number="001" Name="1 Infinite Reverb" ProgramChange="0"/>
+			<Patch Number="002" Name="2 The Abyss" ProgramChange="1"/>
+			<Patch Number="003" Name="3 Jet Flange" ProgramChange="2"/>
+			<Patch Number="004" Name="4 Chorus Verb" ProgramChange="3"/>
+			<Patch Number="005" Name="5 Rotary Delay" ProgramChange="4"/>
+			<Patch Number="006" Name="6 Fader Verb Input Volume Echo" ProgramChange="5"/>
+			<Patch Number="007" Name="7 PCM 60 - LgSize" ProgramChange="6"/>
+			<Patch Number="008" Name="8 LowRumble" ProgramChange="7"/>
+			<Patch Number="009" Name="9 Ducking Reverb Decay " ProgramChange="8"/>
+			<Patch Number="010" Name="10 Ducking Chorus>Delay " ProgramChange="9"/>
+			<Patch Number="011" Name="11 Ducking Triplets Delay" ProgramChange="10"/>
+			<Patch Number="012" Name="12 Subdividing Delay Beat" ProgramChange="11"/>
+			<Patch Number="013" Name="13 Panning Delays " ProgramChange="12"/>
+			<Patch Number="014" Name="14 Dream Sequence" ProgramChange="13"/>
+			<Patch Number="015" Name="15 Infinite Repeat" ProgramChange="14"/>
+			<Patch Number="016" Name="16 Diffusor" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="Chorus-Delay">
+			<Patch Number="001" Name="1 Rich Chorus 1 - Stereo 1/4 Note " ProgramChange="0"/>
+			<Patch Number="002" Name="2 Rich Chorus 1 - Dotted 1/8 Note " ProgramChange="1"/>
+			<Patch Number="003" Name="3 Rich Chorus 1 - 1/8 Note and Triplet " ProgramChange="2"/>
+			<Patch Number="004" Name="4 Rich Chorus 1 - Ping Pong 1/4 Note " ProgramChange="3"/>
+			<Patch Number="005" Name="5 Rich Chorus 1 - Multi Repeat Delay/Echo " ProgramChange="4"/>
+			<Patch Number="006" Name="6 Rich Chorus 1 - Multi Pong Delay/Echo " ProgramChange="5"/>
+			<Patch Number="007" Name="7 Rich Chorus 1 - Stereo 1/4 Note " ProgramChange="6"/>
+			<Patch Number="008" Name="8 Rich Chorus 2 - Multi Repeat Delay/Echo " ProgramChange="7"/>
+			<Patch Number="009" Name="9 Rich Chorus 2 - Ping Pong 1/4 Note " ProgramChange="8"/>
+			<Patch Number="010" Name="10 Rich Chorus 3 - Multi Pong Delay/Echo" ProgramChange="9"/>
+			<Patch Number="011" Name="11 Rich Chorus 1 - Stereo 1/4 Note " ProgramChange="10"/>
+			<Patch Number="012" Name="12 Rich Chorus 1 - Ping Pong 1/4 Note " ProgramChange="11"/>
+			<Patch Number="013" Name="13 Rich Chorus 1 - Crossfeed Delay/Echo " ProgramChange="12"/>
+			<Patch Number="014" Name="14 Rich Chorus 1 - Multi Pong Delay/Echo " ProgramChange="13"/>
+			<Patch Number="015" Name="15 Rich Chorus 4 - Mono 1/4 Note " ProgramChange="14"/>
+			<Patch Number="016" Name="16 Rich Chorus 4 - Dotted 1/8 Note" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="Pitch-Reverb">
+			<Patch Number="001" Name="1 Minor 3rd to 4th - Room " ProgramChange="0"/>
+			<Patch Number="002" Name="2 4th to 5th - Room " ProgramChange="1"/>
+			<Patch Number="003" Name="3 5th to 6th - Room " ProgramChange="2"/>
+			<Patch Number="004" Name="4 +/- 1 Octave - Medium Space" ProgramChange="3"/>
+			<Patch Number="005" Name="5 Power Chords - Medium Space " ProgramChange="4"/>
+			<Patch Number="006" Name="6 Manual Detune - Room" ProgramChange="5"/>
+			<Patch Number="007" Name="7 +/-100 > Small Space" ProgramChange="6"/>
+			<Patch Number="008" Name="8 Power Chords - Large Space " ProgramChange="7"/>
+			<Patch Number="009" Name="9 4ths > Medium Space " ProgramChange="8"/>
+			<Patch Number="010" Name="10 Octaves > Medium Space " ProgramChange="9"/>
+			<Patch Number="011" Name="11 4th to 5th + Room " ProgramChange="10"/>
+			<Patch Number="012" Name="12 5th to 6th + Room " ProgramChange="11"/>
+			<Patch Number="013" Name="13 4ths + Large Space " ProgramChange="12"/>
+			<Patch Number="014" Name="14 Octaves + Medium Space " ProgramChange="13"/>
+			<Patch Number="015" Name="15 Octaves / Medium Space " ProgramChange="14"/>
+			<Patch Number="016" Name="16 4ths / Large Space" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="USER">
+			<Patch Number="001" Name="User Preset 1" ProgramChange="0"/>
+			<Patch Number="002" Name="User Preset 2" ProgramChange="1"/>
+			<Patch Number="003" Name="User Preset 3" ProgramChange="2"/>
+			<Patch Number="004" Name="User Preset 4" ProgramChange="3"/>
+			<Patch Number="005" Name="User Preset 5" ProgramChange="4"/>
+			<Patch Number="006" Name="User Preset 6" ProgramChange="5"/>
+			<Patch Number="007" Name="User Preset 7" ProgramChange="6"/>
+			<Patch Number="008" Name="User Preset 8" ProgramChange="7"/>
+			<Patch Number="009" Name="User Preset 9" ProgramChange="8"/>
+			<Patch Number="010" Name="User Preset 10" ProgramChange="9"/>
+			<Patch Number="011" Name="User Preset 11" ProgramChange="10"/>
+			<Patch Number="012" Name="User Preset 12" ProgramChange="11"/>
+			<Patch Number="013" Name="User Preset 13" ProgramChange="12"/>
+			<Patch Number="014" Name="User Preset 14" ProgramChange="13"/>
+			<Patch Number="015" Name="User Preset 15" ProgramChange="14"/>
+			<Patch Number="016" Name="User Preset 16" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="Flange-Delay">
+			<Patch Number="001" Name="Flange-Delay 1 " ProgramChange="0"/>
+			<Patch Number="002" Name="Flange-Delay 2 als" ProgramChange="1"/>
+			<Patch Number="003" Name="Flange-Delay 3 rb" ProgramChange="2"/>
+			<Patch Number="004" Name="Flange-Delay 4 + Plate" ProgramChange="3"/>
+			<Patch Number="005" Name="Flange-Delay 5 all+Plate" ProgramChange="4"/>
+			<Patch Number="006" Name="Flange-Delay 6 oomy" ProgramChange="5"/>
+			<Patch Number="007" Name="Flange-Delay 7 oom" ProgramChange="6"/>
+			<Patch Number="008" Name="Flange-Delay 8 b" ProgramChange="7"/>
+			<Patch Number="009" Name="Flange-Delay 9" ProgramChange="8"/>
+			<Patch Number="010" Name="Flange-Delay 10" ProgramChange="9"/>
+			<Patch Number="011" Name="Flange-Delay 11t Chamber" ProgramChange="10"/>
+			<Patch Number="012" Name="Flange-Delay 12 Acoustic Bliss" ProgramChange="11"/>
+			<Patch Number="013" Name="Flange-Delay 13 Guitar World" ProgramChange="12"/>
+			<Patch Number="014" Name="Flange-Delay 14 Springtime" ProgramChange="13"/>
+			<Patch Number="015" Name="Flange-Delay 15 Giant Snare" ProgramChange="14"/>
+			<Patch Number="016" Name="Flange-Delay 16 SmoothDrmPlate" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="Flange-Reverb">
+			<Patch Number="001" Name="1 Light Flange - Small Space" ProgramChange="0"/>
+			<Patch Number="002" Name="2 Light Flange - Medium Space" ProgramChange="1"/>
+			<Patch Number="003" Name="3 Light Flange - Large Space" ProgramChange="2"/>
+			<Patch Number="004" Name="4 Deep Flange - Small Space " ProgramChange="3"/>
+			<Patch Number="005" Name="5 Deep Flange - Medium Space " ProgramChange="4"/>
+			<Patch Number="006" Name="6 Deep Flange - Large Space " ProgramChange="5"/>
+			<Patch Number="007" Name="7 Light Flange > Large Space" ProgramChange="6"/>
+			<Patch Number="008" Name="8 Deep Flange > Large Space " ProgramChange="7"/>
+			<Patch Number="009" Name="9 Light Flange > Room " ProgramChange="8"/>
+			<Patch Number="010" Name="10 Deep Flange > Room " ProgramChange="9"/>
+			<Patch Number="011" Name="11 Light Flange + Medium Space" ProgramChange="10"/>
+			<Patch Number="012" Name="12 Light Flange + Room " ProgramChange="11"/>
+			<Patch Number="013" Name="13 Deep Flange + Medium Space " ProgramChange="12"/>
+			<Patch Number="014" Name="14 Deep Flange + Room " ProgramChange="13"/>
+			<Patch Number="015" Name="15 Light Flange / Large Space" ProgramChange="14"/>
+			<Patch Number="016" Name="16 Light Flange / Large Space" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="Delay-Reverb">
+			<Patch Number="001" Name="1 Stereo 1/4 Note - Small Space " ProgramChange="0"/>
+			<Patch Number="002" Name="2 Triplet Shuffle - Medium Space " ProgramChange="1"/>
+			<Patch Number="003" Name="3 1/8 Note and Triplet - Large Space " ProgramChange="2"/>
+			<Patch Number="004" Name="4 Ping Pong 1/4 Note - Small Space " ProgramChange="3"/>
+			<Patch Number="005" Name="5 Triplet Rhythm 1 - Medium Space " ProgramChange="4"/>
+			<Patch Number="006" Name="6 Triplet Rhythm 2 - Large Space " ProgramChange="5"/>
+			<Patch Number="007" Name="7 Stereo 1/4 Note > Room " ProgramChange="6"/>
+			<Patch Number="008" Name="8 1/8 Note and Triplet > Large Space " ProgramChange="7"/>
+			<Patch Number="009" Name="9 Triplet Rhythm 1 > Room " ProgramChange="8"/>
+			<Patch Number="010" Name="10 Triplet Rhythm 2 > Large Space " ProgramChange="9"/>
+			<Patch Number="011" Name="11 Stereo 1/4 Note + Medium Space " ProgramChange="10"/>
+			<Patch Number="012" Name="12 Ping Pong 1/4 Note + Large Space " ProgramChange="11"/>
+			<Patch Number="013" Name="13 Triplet Rhythm 1 + Medium Space " ProgramChange="12"/>
+			<Patch Number="014" Name="14 Triplet Rhythm 2 + Small Space " ProgramChange="13"/>
+			<Patch Number="015" Name="15 Mono 1/4 Note / Room " ProgramChange="14"/>
+			<Patch Number="016" Name="16 Triplet Rhythm 2 / Large Space" ProgramChange="15"/>
+		</PatchNameList>
+		<PatchNameList Name="Pitch-Delay">
+			<Patch Number="001" Name="1 5th Up/Down - Stereo Quarter-Note  " ProgramChange="0"/>
+			<Patch Number="002" Name="2 Octave Up/Down - Triplet Shuffle" ProgramChange="1"/>
+			<Patch Number="003" Name="3 Octave Up/Down - Eighth and Triplet" ProgramChange="2"/>
+			<Patch Number="004" Name="4 3rd Up/4th Up - Ping Pong Quarter-Note  " ProgramChange="3"/>
+			<Patch Number="005" Name="5 4th Up/5th Up - Triplet Rhythm 1 " ProgramChange="4"/>
+			<Patch Number="006" Name="6 5th Up/6th Up - Triplet Rhythm 2 " ProgramChange="5"/>
+			<Patch Number="007" Name="7 Octave Up/Down > Triplet Rhythm 1" ProgramChange="6"/>
+			<Patch Number="008" Name="8 5th Up/Down > Triplet Rhythm 2  " ProgramChange="7"/>
+			<Patch Number="009" Name="9 Major/Minor Minor/Major 3rd w/Feedback " ProgramChange="8"/>
+			<Patch Number="010" Name="10 Intervals Up Ascending Intervals w/Feedback " ProgramChange="9"/>
+			<Patch Number="011" Name="11 5th Up/Down + Stereo Quarter-Note  " ProgramChange="10"/>
+			<Patch Number="012" Name="12 Octave Up/Down + Triplet Shuffle" ProgramChange="11"/>
+			<Patch Number="013" Name="13 4th Up/5th Up + Triplet Rhythm 1 " ProgramChange="12"/>
+			<Patch Number="014" Name="14 5th Up/6th Up + Triplet Rhythm 2 " ProgramChange="13"/>
+			<Patch Number="015" Name="15 Octave Up/Down / Mono Quarter-Note" ProgramChange="14"/>
+			<Patch Number="016" Name="16 Octave Up/Down / Triplet Shuffle" ProgramChange="15"/>
+		</PatchNameList>
+	</MasterDeviceNames>
+</MIDINameDocument>
+<!--
+
+*******************************************************************************
+Controls will need to be programmed into your unit to work.
+
+The MPX 100 recognizes Pitch Bend,
+AfterTouch and MIDI Continuous Controllers
+1-31 and 33-119. To Learn a Continuous
+Controller
+
+1. Simultaneously press Store and Tap to
+enter Learn Mode. (The Store LED flashes
+slowly and the Tap LED lights steadily to
+indicate Learn Mode is active.)
+
+
+2. Move one of the MPX 100 front panel
+controls (Mix, Effects Lvl/Bal, Adjust,
+Bypass or Tap) to assign it to the control-
+ler
+
+3. Move the MIDI controller through its full
+range. To use only a fraction of the
+controller's range, limit your movement to
+the desired range
+NOTE: The Edit LED will flash to indicate incom-
+ing MIDI activity.
+
+
+4. Press Store to commit to the assignment.
+The Store LED will flash rapidly.
+
+5. To assign another front panel control to a
+MIDI controller, repeat steps 2 - 5.
+
+6. Simultaneously press Store and Tap to
+exit. The Store LED will flash rapidly if
+you have created or changed any assign-
+ments.
+
+NOTE :  When a MIDI controller is assigned to
+Bypass or Tap, moving it through the mid-point
+of its Learned range will execute a "press" of
+the front panel button.
+
+*******************************************************************************
+-->
+<!--
+These are untested!
+Refer to Lexicon MPX 100 Manual and MIDI Spec for proper setup!
+
+    <ControlNameList Name="ControlsMPX100"><Control Type="7bit" Number="12" Name="Input"/><Control Type="7bit" Number="13" Name="Mix"/><Control Type="7bit" Number="14" Name="Output"/><Control Type="7bit" Number="15" Name="Effects Level / Balance"/><Control Type="7bit" Number="16" Name="Adjust"/></ControlNameList>
+-->
+<!--************************************************************************-->
+<!--
+          +++From Page 44 of the MPX-100 Manual:+++
+
+  ****Assigning a MIDI Channel for Program Load****
+
+     In order to use Program Change messages for Program loads as well as to control
+front panel buttons, the MPX 100 is designed to have one MIDI channel dedicated
+to loading programs. This is called the Program Load MIDI Channel.
+
+Although this channel can be used to receive other Program Change messages, 
+numbers 0-15 will always load the 16 variations of the currently loaded program. Program
+Change messages 0-15 will be ignored on all other MIDI Channels.
+
+When shipped from the factory, the MPX 100 has MIDI Channel 1 assigned as the
+default Program Load channel. To re-define the Program Load assignment:
+
+1. Simultaneously press Store and Tap to
+enter Learn Mode. (The Store LED
+flashes slowly and the Tap LED lights
+steadily to indicate Learn Mode is active.)
+
+2. Send a Program Change message to the
+MPX 100. (The Edit LED will flash to
+show incoming MIDI activity.)
+
+3. The MPX 100 learns the MIDI Channel of
+the transmitting device and re-assigns
+the Program Load function to that channel.
+
+4. Simultaneously press Store and Tap to
+exit.
+
+This Program Load channel assignment
+is remembered until it is deliberately re-set
+with the same procedure.
+  
+  -->
