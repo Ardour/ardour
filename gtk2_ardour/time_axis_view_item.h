@@ -85,7 +85,7 @@ public:
 	virtual uint32_t get_fill_color () const;
 
 	ArdourCanvas::Item* get_canvas_frame();
-	ArdourCanvas::Item* get_canvas_group();
+	ArdourCanvas::Item* get_canvas_group() const;
 	ArdourCanvas::Item* get_name_highlight();
 
 	virtual void set_samples_per_pixel (double);

@@ -106,7 +106,7 @@ using Gtkmm2ext::Keyboard;
 #define MIDI_BP_ZERO ((Config->get_first_midi_bank_is_zero())?0:1)
 
 MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
-                    ArdourCanvas::Container&   parent,
+                    ArdourCanvas::Item&        parent,
                     EditingContext&            ec,
                     MidiViewBackground&        bg,
                     uint32_t                   basic_color)
@@ -116,6 +116,39 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, _current_slice (timepos_t (Temporal::BeatTime), timecnt_t (Temporal::BeatTime))
 	, _active_notes(0)
 	, _note_group (new ArdourCanvas::Container (&parent))
+	, _note_diff_command (0)
+	, _ghost_note(0)
+	, _step_edit_cursor (0)
+	, _step_edit_cursor_width (1, 0)
+	, _channel_selection_scoped_note (0)
+	, _current_range_min(0)
+	, _current_range_max(0)
+	, _mouse_state(None)
+	, _pressed_button(0)
+	, _optimization_iterator (_events.end())
+	, _list_editor (0)
+	, _no_sound_notes (false)
+	, _last_display_zoom (0)
+	, _last_event_x (0)
+	, _last_event_y (0)
+	, _entered (false)
+	, _entered_note (0)
+	, _select_all_notes_after_add (false)
+	, _mouse_changed_selection (false)
+	, split_tuple (0)
+	, note_splitting (false)
+{
+	init ();
+}
+
+
+MidiView::MidiView (MidiView const & other)
+	: _midi_track (other._midi_track)
+	, _editing_context (other.editing_context())
+	, _midi_context (other.midi_context())
+	, _current_slice (other.current_slice())
+	, _active_notes(0)
+	, _note_group (new ArdourCanvas::Container (other._note_group->parent()))
 	, _note_diff_command (0)
 	, _ghost_note(0)
 	, _step_edit_cursor (0)
@@ -151,9 +184,18 @@ MidiView::init ()
 
 	_note_group->raise_to_top();
 	EditingContext::DropDownKeys.connect (sigc::mem_fun (*this, &MidiView::drop_down_keys));
+}
 
-	// XXXX Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiView::parameter_changed, this, _1), gui_context());
-	EditingContext::DropDownKeys.connect (sigc::mem_fun (*this, &MidiView::drop_down_keys));
+void
+MidiView::set_region (std::shared_ptr<MidiRegion> mr)
+{
+	_midi_region = mr;
+	if (!_midi_region) {
+		_model.reset ();
+		connections_requiring_model.drop_connections();
+		return;
+	}
+	set_model (_midi_region->midi_source (0)->model());
 }
 
 void
@@ -173,26 +215,29 @@ MidiView::set_model (std::shared_ptr<MidiModel> m)
 	set_colors ();
 	reset_width_dependent_items (_pixel_width);
 */
-	// XXX group->raise_to_top();
 
-	_midi_track->playback_filter().ChannelModeChanged.connect (_channel_mode_changed_connection, invalidator (*this),
+	connections_requiring_model.drop_connections ();
+
+	_model->ContentsChanged.connect (connections_requiring_model, invalidator (*this), boost::bind (&MidiView::model_changed, this), gui_context());
+
+	_midi_track->playback_filter().ChannelModeChanged.connect (connections_requiring_model, invalidator (*this),
 	                                                                         boost::bind (&MidiView::midi_channel_mode_changed, this),
 	                                                                         gui_context ());
 
-	_midi_track->instrument_info().Changed.connect (_instrument_changed_connection, invalidator (*this),
+	_midi_track->instrument_info().Changed.connect (connections_requiring_model, invalidator (*this),
 	                                   boost::bind (&MidiView::instrument_settings_changed, this), gui_context());
 
-	_editing_context.SnapChanged.connect(snap_changed_connection, invalidator(*this),
+	_editing_context.SnapChanged.connect (connections_requiring_model, invalidator(*this),
 	                                       boost::bind (&MidiView::snap_changed, this),
 	                                       gui_context());
 
-	_editing_context.MouseModeChanged.connect(_mouse_mode_connection, invalidator (*this),
+	_editing_context.MouseModeChanged.connect (connections_requiring_model, invalidator (*this),
 	                                            boost::bind (&MidiView::mouse_mode_changed, this),
 	                                            gui_context ());
 }
 
 bool
-MidiView::canvas_group_event(GdkEvent* ev)
+MidiView::canvas_group_event (GdkEvent* ev)
 {
 	//For now, move the snapped cursor aside so it doesn't bother you during internal editing
 	//_editing_context.set_snapped_cursor_position(_midi_region->position());
@@ -343,9 +388,9 @@ MidiView::button_press (GdkEventButton* ev)
 		if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
 
 			if (_midi_context.note_mode() == Percussive) {
-				// XXX _editing_context.drags()->set (new HitCreateDrag (_editing_context, _note_group->parent(), this), (GdkEvent *) ev);
+				_editing_context.drags()->set (new HitCreateDrag (_editing_context, _note_group->parent(), this), (GdkEvent *) ev);
 			} else {
-				// XXX _editing_context.drags()->set (new NoteCreateDrag (_editing_context, _note_group->parent(), this), (GdkEvent *) ev);
+				_editing_context.drags()->set (new NoteCreateDrag (_editing_context, _note_group->parent(), this), (GdkEvent *) ev);
 			}
 
 			_mouse_state = AddDragging;
@@ -477,7 +522,7 @@ MidiView::motion (GdkEventMotion* ev)
 			MouseMode m = _editing_context.current_mouse_mode();
 
 			if (m == MouseContent && !Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-				// XXX _editing_context.drags()->set (new MidiRubberbandSelectDrag (_editing_context, this), (GdkEvent *) ev);
+				_editing_context.drags()->set (new MidiRubberbandSelectDrag (_editing_context, this), (GdkEvent *) ev);
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 					clear_selection_internal ();
 					_mouse_changed_selection = true;
@@ -485,7 +530,7 @@ MidiView::motion (GdkEventMotion* ev)
 				_mouse_state = SelectRectDragging;
 				return true;
 			} else if (m == MouseRange) {
-				// XXX _editing_context.drags()->set (new MidiVerticalSelectDrag (_editing_context, this), (GdkEvent *) ev);
+				_editing_context.drags()->set (new MidiVerticalSelectDrag (_editing_context, this), (GdkEvent *) ev);
 				_mouse_state = SelectVerticalDragging;
 				return true;
 			}
@@ -759,10 +804,7 @@ MidiView::clear_events ()
 void
 MidiView::display_model (std::shared_ptr<MidiModel> model)
 {
-	_model = model;
-
-	content_connection.disconnect ();
-	_model->ContentsChanged.connect (content_connection, invalidator (*this), boost::bind (&MidiView::model_changed, this), gui_context());
+	set_model (_model);
 	/* Don't signal as nobody else needs to know until selection has been altered. */
 	clear_events();
 	model_changed ();
@@ -4628,4 +4670,10 @@ MidiView::add_split_notes ()
 			pos += b;
 		}
 	}
+}
+
+ArdourCanvas::Item*
+MidiView::drag_group () const
+{
+	return _note_group->parent();
 }

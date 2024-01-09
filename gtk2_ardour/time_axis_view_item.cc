@@ -618,7 +618,7 @@ TimeAxisViewItem::get_canvas_frame()
 }
 
 ArdourCanvas::Item*
-TimeAxisViewItem::get_canvas_group()
+TimeAxisViewItem::get_canvas_group() const
 {
 	return group;
 }

@@ -125,6 +125,8 @@ public:
 	double height() const;
 	void redisplay (bool);
 
+	ArdourCanvas::Item* drag_group() const;
+
   protected:
 	void reset_width_dependent_items (double pixel_width);
 	void parameter_changed (std::string const & p);
