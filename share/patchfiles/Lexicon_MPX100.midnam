@@ -14,7 +14,7 @@
 		<Model>MPX100</Model>
 		<CustomDeviceMode Name="Lexicon MPX100">
 			<ChannelNameSetAssignments>
-				<ChannelNameSetAssign Channel="1" NameSet="Presets"/>
+				<ChannelNameSetAssign Channel="15" NameSet="Presets"/>
 			</ChannelNameSetAssignments>
 		</CustomDeviceMode>
 		<ChannelNameSet Name="Presets">
