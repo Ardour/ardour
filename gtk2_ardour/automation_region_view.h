@@ -87,7 +87,7 @@ protected:
 	void mouse_mode_changed ();
 	void entered();
 	void exited();
-	void _redisplay (bool) {}
+	void redisplay (bool) {}
 
 private:
 	Evoral::Parameter                   _parameter;

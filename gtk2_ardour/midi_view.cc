@@ -195,7 +195,7 @@ bool
 MidiView::canvas_group_event(GdkEvent* ev)
 {
 	//For now, move the snapped cursor aside so it doesn't bother you during internal editing
-	//_editing_context.set_snapped_cursor_position(_region->position());
+	//_editing_context.set_snapped_cursor_position(_midi_region->position());
 
 	bool r;
 
@@ -939,7 +939,7 @@ MidiView::get_events (Events& e, Evoral::Sequence<Temporal::Beats>::NoteOperator
 }
 
 void
-MidiView::_redisplay (bool view_only)
+MidiView::redisplay (bool view_only)
 {
 	if (view_only) {
 		PropertyChange what_changed;
@@ -964,7 +964,7 @@ MidiView::_redisplay (bool view_only)
 void
 MidiView::model_changed()
 {
-	if (!display_enabled()) {
+	if (!display_is_enabled()) {
 		return;
 	}
 
@@ -1097,7 +1097,7 @@ MidiView::model_changed()
 void
 MidiView::view_changed()
 {
-	if (!display_enabled()) {
+	if (!display_is_enabled()) {
 		return;
 	}
 
@@ -3741,10 +3741,10 @@ MidiView::paste_internal (timepos_t const & pos, unsigned paste_count, float tim
 
 		DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste extended region from %1 to %2\n", region_end, end));
 
-		// XXXX _region->clear_changes ();
+		// XXXX _midi_region->clear_changes ();
 		/* we probably need to get the snap modifier somehow to make this correct for non-musical use */
 		_current_slice.set_length (_current_slice.position().distance (end));
-		_editing_context.session()->add_command (new StatefulDiffCommand (_region));
+		_editing_context.session()->add_command (new StatefulDiffCommand (_midi_region));
 	}
 
 	_marked_for_selection.clear ();
@@ -4166,7 +4166,7 @@ MidiView::data_recorded (std::weak_ptr<MidiSource> w)
 		back = ev.time ();
 	}
 
-	_midi_context.record_layer_check (_region, back);
+	_midi_context.record_layer_check (_midi_region, back);
 }
 
 void
@@ -4189,7 +4189,7 @@ MidiView::trim_front_ending ()
 void
 MidiView::edit_patch_change (PatchChange* pc)
 {
-	PatchChangeDialog d (_editing_context.session(), *pc->patch (), _midi_track->instrument_info(), Gtk::Stock::APPLY, true, true, _region);
+	PatchChangeDialog d (_editing_context.session(), *pc->patch (), _midi_track->instrument_info(), Gtk::Stock::APPLY, true, true, _midi_region);
 
 	int response = d.run();
 

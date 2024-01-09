@@ -222,7 +222,7 @@ protected:
 	void transients_changed();
 
 	AutomationLine::VisibleAspects automation_line_visibility () const;
-	void _redisplay (bool) {}
+	void redisplay (bool) {}
 
 private:
 	void setup_fade_handle_positions ();

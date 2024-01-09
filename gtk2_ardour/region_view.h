@@ -101,12 +101,13 @@ public:
 	virtual void exited () {}
 
 	bool display_enabled() const;
-	void redisplay (bool view_only = true) {
-		_redisplay (view_only);
+	virtual void redisplay (bool) = 0;
+	void redisplay () {
+		redisplay (true);
 	}
 
 	virtual void tempo_map_changed () {
-		_redisplay (true);
+		redisplay (true);
 	}
 
 	struct DisplaySuspender {
@@ -251,7 +252,6 @@ private:
 	typedef std::list<ViewCueMarker*> ViewCueMarkers;
 	ViewCueMarkers _cue_markers;
 	bool _cue_markers_visible;
-	virtual void _redisplay (bool) = 0;
 
   private:
 	friend struct DisplaySuspender;
