@@ -657,7 +657,7 @@ private:
 class NoteCreateDrag : public Drag
 {
 public:
-	NoteCreateDrag (EditingContext&, ArdourCanvas::Item *, MidiRegionView *);
+	NoteCreateDrag (EditingContext&, ArdourCanvas::Item *, MidiView *);
 	~NoteCreateDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -686,7 +686,7 @@ private:
 		return std::make_pair (Temporal::timecnt_t (0, Temporal::AudioTime), 0);
 	}
 
-	MidiRegionView* _region_view;
+	MidiView* _midi_view;
 	ArdourCanvas::Rectangle* _drag_rect;
 	Temporal::timepos_t _note[2];
 };
@@ -694,7 +694,7 @@ private:
 class HitCreateDrag : public Drag
 {
 public:
-	HitCreateDrag (EditingContext&, ArdourCanvas::Item *, MidiRegionView *);
+	HitCreateDrag (EditingContext&, ArdourCanvas::Item *, MidiView *);
 	~HitCreateDrag ();
 
 	void start_grab (GdkEvent *, Gdk::Cursor* c = 0);
@@ -718,7 +718,7 @@ private:
 		return std::make_pair (Temporal::timecnt_t::zero (Temporal::AudioTime), 0);
 	}
 
-	MidiRegionView* _region_view;
+	MidiView* _midi_view;
 	Temporal::timepos_t _last_pos;
 	double          _y;
 
@@ -1326,26 +1326,26 @@ public:
 class MidiRubberbandSelectDrag : public RubberbandSelectDrag
 {
 public:
-	MidiRubberbandSelectDrag (EditingContext&, MidiRegionView *);
+	MidiRubberbandSelectDrag (EditingContext&, MidiView *);
 
 	void select_things (int, Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, bool);
 	void deselect_things ();
 
 private:
-	MidiRegionView* _region_view;
+	MidiView* _midi_view;
 };
 
 /** A RubberbandSelectDrag for selecting MIDI notes but with no horizontal component */
 class MidiVerticalSelectDrag : public RubberbandSelectDrag
 {
 public:
-	MidiVerticalSelectDrag (EditingContext&, MidiRegionView *);
+	MidiVerticalSelectDrag (EditingContext&, MidiView *);
 
 	void select_things (int, Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, bool);
 	void deselect_things ();
 
 private:
-	MidiRegionView* _region_view;
+	MidiView* _midi_view;
 };
 
 /** Region drag in time-FX mode */

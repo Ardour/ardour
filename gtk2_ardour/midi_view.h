@@ -84,15 +84,18 @@ class MidiView : public virtual sigc::trackable
 	typedef Evoral::Sequence<Temporal::Beats>::Notes Notes;
 
 	MidiView (std::shared_ptr<ARDOUR::MidiTrack> mt,
-	          ArdourCanvas::Container& parent,
+	          ArdourCanvas::Item&      parent,
 	          EditingContext&          ec,
 	          MidiViewBackground&      bg,
 	          uint32_t                 basic_color);
+	MidiView (MidiView const & other);
 
 	virtual ~MidiView ();
 
 	void init (bool wfd);
 	virtual bool display_is_enabled() const { return true; }
+
+	virtual ArdourCanvas::Item* drag_group() const;
 
 	void step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 	                    Temporal::Beats pos, Temporal::Beats len);
@@ -113,6 +116,7 @@ class MidiView : public virtual sigc::trackable
 	virtual GhostRegion* add_ghost (TimeAxisView&) { return nullptr; }
 	virtual std::string get_modifier_name() const;
 
+	void set_region (std::shared_ptr<ARDOUR::MidiRegion>);
 	void set_model (std::shared_ptr<ARDOUR::MidiModel>);
 
 	NoteBase* add_note(const std::shared_ptr<NoteType> note, bool visible);
@@ -429,10 +433,10 @@ class MidiView : public virtual sigc::trackable
 	virtual bool canvas_group_event(GdkEvent* ev);
 	bool note_canvas_event(GdkEvent* ev);
 
+	PBD::ScopedConnectionList connections_requiring_model;
+
 	void midi_channel_mode_changed ();
-	PBD::ScopedConnection _channel_mode_changed_connection;
 	void instrument_settings_changed ();
-	PBD::ScopedConnection _instrument_changed_connection;
 
 	void change_note_channel (NoteBase *, int8_t, bool relative=false);
 	void change_note_velocity(NoteBase* ev, int8_t vel, bool relative=false);
@@ -507,7 +511,6 @@ class MidiView : public virtual sigc::trackable
 	std::vector<NoteResizeData *> _resize_data;
 
 	/** connection used to connect to model's ContentChanged signal */
-	PBD::ScopedConnection content_connection;
 
 	NoteBase* find_canvas_note (std::shared_ptr<NoteType>);
 	NoteBase* find_canvas_note (Evoral::event_id_t id);
@@ -530,7 +533,6 @@ class MidiView : public virtual sigc::trackable
 	bool _no_sound_notes;
 
 	void snap_changed ();
-	PBD::ScopedConnection snap_changed_connection;
 
 	virtual bool motion (GdkEventMotion*);
 	virtual bool scroll (GdkEventScroll*);
@@ -572,8 +574,6 @@ class MidiView : public virtual sigc::trackable
 
 	Gtkmm2ext::Color _patch_change_outline;
 	Gtkmm2ext::Color _patch_change_fill;
-
-	PBD::ScopedConnection _mouse_mode_connection;
 
 	std::shared_ptr<CursorContext> _press_cursor_ctx;
 

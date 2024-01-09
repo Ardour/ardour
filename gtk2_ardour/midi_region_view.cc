@@ -128,6 +128,46 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
 	connect_to_diskstream ();
 }
 
+MidiRegionView::MidiRegionView (const MidiRegionView& other)
+	: sigc::trackable(other)
+	, RegionView (other)
+	, MidiView (other)
+{
+	init (false);
+}
+
+MidiRegionView::MidiRegionView (const MidiRegionView& other, std::shared_ptr<MidiRegion> region)
+	: RegionView (other, std::shared_ptr<Region> (region))
+	, MidiView (other)
+{
+	init (true);
+}
+
+void
+MidiRegionView::init (bool /*wfd*/)
+{
+	DisplaySuspender ds (*this, true);
+
+	RegionView::init (false);
+
+	set_region (std::dynamic_pointer_cast<MidiRegion> (_region));
+
+	//set_height (trackview.current_height());
+
+	region_muted ();
+	region_sync_changed ();
+	region_resized (ARDOUR::bounds_change);
+	//region_locked ();
+
+	set_colors ();
+	reset_width_dependent_items (_pixel_width);
+
+	_note_group->parent()->raise_to_top();
+
+	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
+	connect_to_diskstream ();
+}
+
 bool
 MidiRegionView::display_is_enabled () const
 {
@@ -138,6 +178,7 @@ void
 MidiRegionView::parameter_changed (std::string const & p)
 {
 	RegionView::parameter_changed (p);
+
 	if (p == "display-first-midi-bank-as-zero") {
 		if (display_enabled()) {
 			view_changed ();
@@ -156,67 +197,11 @@ MidiRegionView::color_handler ()
 	MidiView::color_handler ();
 }
 
-MidiRegionView::MidiRegionView (const MidiRegionView& other)
-	: sigc::trackable(other)
-	, RegionView (other)
-	, MidiView (other)
-{
-	init (false);
-}
-
-MidiRegionView::MidiRegionView (const MidiRegionView& other, std::shared_ptr<MidiRegion> region)
-	: RegionView (other, std::shared_ptr<Region> (region))
-	, MidiView (other)
-{
-	init (true);
-}
-
 void
 MidiRegionView::region_resized (PBD::PropertyChange const & change)
 {
 	RegionView::region_resized (change);
 	MidiView::region_resized (change);
-}
-
-void
-MidiRegionView::init (bool /*wfd*/)
-{
-	DisplaySuspender ds (*this, true);
-
-	_model = midi_region()->midi_source(0)->model();
-	assert (_model);
-
-	RegionView::init (false);
-
-	//set_height (trackview.current_height());
-
-	region_muted ();
-	region_sync_changed ();
-	region_resized (ARDOUR::bounds_change);
-	//region_locked ();
-
-	set_colors ();
-	reset_width_dependent_items (_pixel_width);
-
-	group->raise_to_top();
-
-	midi_view()->midi_track()->playback_filter().ChannelModeChanged.connect (_channel_mode_changed_connection, invalidator (*this),
-	                                                                         boost::bind (&MidiRegionView::midi_channel_mode_changed, this),
-	                                                                         gui_context ());
-
-	instrument_info().Changed.connect (_instrument_changed_connection, invalidator (*this),
-	                                   boost::bind (&MidiRegionView::instrument_settings_changed, this), gui_context());
-
-	_editing_context.SnapChanged.connect(snap_changed_connection, invalidator(*this),
-	                                       boost::bind (&MidiRegionView::snap_changed, this),
-	                                       gui_context());
-
-	_editing_context.MouseModeChanged.connect(_mouse_mode_connection, invalidator (*this),
-	                                            boost::bind (&MidiRegionView::mouse_mode_changed, this),
-	                                            gui_context ());
-
-	Config->ParameterChanged.connect (*this, invalidator (*this), boost::bind (&MidiRegionView::parameter_changed, this, _1), gui_context());
-	connect_to_diskstream ();
 }
 
 InstrumentInfo&
@@ -306,13 +291,7 @@ MidiRegionView::canvas_group_event(GdkEvent* ev)
 		return RegionView::canvas_group_event (ev);
 	}
 
-	bool ret = MidiView::canvas_group_event (ev);
-
-	if (!ret) {
-		ret = RegionView::canvas_group_event (ev);
-	}
-
-	return ret;
+	return MidiView::canvas_group_event (ev);
 }
 
 bool
@@ -764,4 +743,10 @@ void
 MidiRegionView::redisplay (bool view_only)
 {
 	MidiView::redisplay (view_only);
+}
+
+ArdourCanvas::Item*
+MidiRegionView::drag_group () const
+{
+	return get_canvas_group ();
 }

@@ -297,6 +297,7 @@ Drag::Drag (EditingContext& ec, ArdourCanvas::Item* i, Temporal::TimeDomain td, 
 	, _constraint_pressed (false)
 	, _grab_button (-1)
 {
+	DEBUG_TRACE (DEBUG::Drags, "some kind of drag\n");
 }
 
 Drag::~Drag ()
@@ -6737,16 +6738,16 @@ PatchChangeDrag::setup_pointer_offset ()
 	_pointer_offset = _region_view->current_slice().source_beats_to_absolute_time (_patch_change->patch ()->time ()).distance (raw_grab_time ());
 }
 
-MidiRubberbandSelectDrag::MidiRubberbandSelectDrag (EditingContext& ec, MidiRegionView* rv)
-	: RubberbandSelectDrag (ec, rv->get_canvas_group ())
-	, _region_view (rv)
+MidiRubberbandSelectDrag::MidiRubberbandSelectDrag (EditingContext& ec, MidiView* mv)
+	: RubberbandSelectDrag (ec, mv->drag_group ())
+	, _midi_view (mv)
 {
 }
 
 void
 MidiRubberbandSelectDrag::select_things (int button_state, timepos_t const& x1, timepos_t const& x2, double y1, double y2, bool /*drag_in_progress*/)
 {
-	_region_view->update_drag_selection (
+	_midi_view->update_drag_selection (
 	    x1, x2, y1, y2,
 	    Keyboard::modifier_state_contains (button_state, Keyboard::TertiaryModifier));
 }
@@ -6757,9 +6758,9 @@ MidiRubberbandSelectDrag::deselect_things ()
 	/* XXX */
 }
 
-MidiVerticalSelectDrag::MidiVerticalSelectDrag (EditingContext& ec, MidiRegionView* rv)
-	: RubberbandSelectDrag (ec, rv->get_canvas_group ())
-	, _region_view (rv)
+MidiVerticalSelectDrag::MidiVerticalSelectDrag (EditingContext& ec, MidiView* mv)
+	: RubberbandSelectDrag (ec, mv->drag_group ())
+	, _midi_view (mv)
 {
 	_vertical_only = true;
 }
@@ -6767,12 +6768,12 @@ MidiVerticalSelectDrag::MidiVerticalSelectDrag (EditingContext& ec, MidiRegionVi
 void
 MidiVerticalSelectDrag::select_things (int button_state, timepos_t const& /*x1*/, timepos_t const& /*x2*/, double y1, double y2, bool /*drag_in_progress*/)
 {
-	double const y = _region_view->midi_view ()->y_position ();
+	double const y = _midi_view->midi_context().y_position ();
 
 	y1 = max (0.0, y1 - y);
 	y2 = max (0.0, y2 - y);
 
-	_region_view->update_vertical_drag_selection (
+	_midi_view->update_vertical_drag_selection (
 	    y1, y2,
 	    Keyboard::modifier_state_contains (button_state, Keyboard::TertiaryModifier));
 }
@@ -6818,9 +6819,9 @@ EditorRubberbandSelectDrag::deselect_things ()
 	editing_context.commit_reversible_selection_op ();
 }
 
-NoteCreateDrag::NoteCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiRegionView* rv)
+NoteCreateDrag::NoteCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv)
 	: Drag (ec, i, Temporal::BeatTime)
-	, _region_view (rv)
+	, _midi_view (mv)
 	, _drag_rect (0)
 {
 	_note[0] = _note[1] = timepos_t (Temporal::BeatTime);
@@ -6844,11 +6845,11 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	_drag_rect = new ArdourCanvas::Rectangle (_region_view->get_canvas_group ());
+	_drag_rect = new ArdourCanvas::Rectangle (_midi_view->drag_group ());
 
 	const timepos_t       pos = _drags->current_pointer_time ();
 	Temporal::Beats       aligned_beats (round_to_grid (pos, event));
-	const Temporal::Beats grid_beats (_region_view->get_draw_length_beats (pos));
+	const Temporal::Beats grid_beats (_midi_view->get_draw_length_beats (pos));
 
 	_note[0] = timepos_t (aligned_beats);
 	/* minimum initial length is grid beats */
@@ -6859,14 +6860,14 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	 * coordinates relative to the region in order to draw it correctly.
 	 */
 
-	const timecnt_t rrp1 (_region_view->region ()->region_relative_position (_note[0]));
-	const timecnt_t rrp2 (_region_view->region ()->region_relative_position (_note[1]));
+	const timecnt_t rrp1 (_midi_view->midi_region ()->region_relative_position (_note[0]));
+	const timecnt_t rrp2 (_midi_view->midi_region ()->region_relative_position (_note[1]));
 
 	double const x0 = editing_context.sample_to_pixel (rrp1.samples ());
 	double const x1 = editing_context.sample_to_pixel (rrp2.samples ());
-	double const y  = _region_view->note_to_y (_region_view->y_to_note (y_to_region (event->button.y)));
+	double const y  = _midi_view->note_to_y (_midi_view->y_to_note (y_to_region (event->button.y)));
 
-	_drag_rect->set (ArdourCanvas::Rect (x0, y, x1, y + floor (_region_view->midi_stream_view ()->note_height ())));
+	_drag_rect->set (ArdourCanvas::Rect (x0, y, x1, y + floor (_midi_view->midi_context ().note_height ())));
 	_drag_rect->set_outline_all ();
 	_drag_rect->set_outline_color (0xffffff99);
 	_drag_rect->set_fill_color (0xffffff66);
@@ -6878,13 +6879,13 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 	const timepos_t pos = _drags->current_pointer_time ();
 
 	/* when the user clicks and starts a drag to define the note's length, require notes to be at least |this| long */
-	const Temporal::Beats min_length (_region_view->get_draw_length_beats (pos));
+	const Temporal::Beats min_length (_midi_view->get_draw_length_beats (pos));
 	Temporal::Beats       aligned_beats = round_to_grid (pos, event);
 
 	_note[1] = std::max (aligned_beats, (_note[0].beats () + min_length));
 
-	const timecnt_t rrp1 (_region_view->region ()->region_relative_position (_note[0]));
-	const timecnt_t rrp2 (_region_view->region ()->region_relative_position (_note[1]));
+	const timecnt_t rrp1 (_midi_view->midi_region ()->region_relative_position (_note[0]));
+	const timecnt_t rrp2 (_midi_view->midi_region ()->region_relative_position (_note[1]));
 
 	double const x0 = editing_context.sample_to_pixel (rrp1.samples ());
 	double const x1 = editing_context.sample_to_pixel (rrp2.samples ());
@@ -6899,21 +6900,21 @@ NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 
 	/* Compute start within region, rather than absolute time start */
 
-	Beats const start  = _region_view->region ()->absolute_time_to_region_beats (min (_note[0], _note[1]));
+	Beats const start  = _midi_view->midi_region ()->absolute_time_to_region_beats (min (_note[0], _note[1]));
 	Beats       length = max (Beats (0, 1), (_note[0].distance (_note[1]).abs ().beats ()));
 
 	/* create_note_at() implements UNDO for us */
 	if (UIConfiguration::instance().get_select_last_drawn_note_only()) {
-		_region_view->clear_note_selection ();
+		_midi_view->clear_note_selection ();
 	}
-	_region_view->create_note_at (timepos_t (start), _drag_rect->y0 (), length, ev->button.state, false);
+	_midi_view->create_note_at (timepos_t (start), _drag_rect->y0 (), length, ev->button.state, false);
 }
 
 double
 NoteCreateDrag::y_to_region (double y) const
 {
 	double x = 0;
-	_region_view->get_canvas_group ()->canvas_to_item (x, y);
+	_midi_view->drag_group ()->canvas_to_item (x, y);
 	return y;
 }
 
@@ -6922,9 +6923,9 @@ NoteCreateDrag::aborted (bool)
 {
 }
 
-HitCreateDrag::HitCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiRegionView* rv)
+HitCreateDrag::HitCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv)
 	: Drag (ec, i, Temporal::BeatTime)
-	, _region_view (rv)
+	, _midi_view (mv)
 	, _last_pos (Temporal::Beats ())
 	, _y (0.0)
 {
@@ -6939,7 +6940,7 @@ HitCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 {
 	Drag::start_grab (event, cursor);
 
-	_y = _region_view->note_to_y (_region_view->y_to_note (y_to_region (event->button.y)));
+	_y = _midi_view->note_to_y (_midi_view->y_to_note (y_to_region (event->button.y)));
 }
 
 void
@@ -6949,26 +6950,26 @@ HitCreateDrag::finished (GdkEvent* event, bool had_movement)
 		return;
 	}
 
-	std::shared_ptr<MidiRegion> mr = _region_view->midi_region ();
+	std::shared_ptr<MidiRegion> mr = _midi_view->midi_region ();
 
 	timepos_t pos (_drags->current_pointer_time ());
 	editing_context.snap_to (pos, RoundNearest, SnapToGrid_Scaled);
 	Temporal::Beats aligned_beats (pos.beats ());
 
-	Beats const start = _region_view->region ()->absolute_time_to_region_beats (timepos_t (aligned_beats));
+	Beats const start = _midi_view->midi_region ()->absolute_time_to_region_beats (timepos_t (aligned_beats));
 
 	/* Percussive hits are as short as possible */
 	Beats length (0, 1);
 
 	/* create_note_at() implements UNDO for us */
-	_region_view->create_note_at (timepos_t (start), _y, length, event->button.state, false);
+	_midi_view->create_note_at (timepos_t (start), _y, length, event->button.state, false);
 }
 
 double
 HitCreateDrag::y_to_region (double y) const
 {
 	double x = 0;
-	_region_view->get_canvas_group ()->canvas_to_item (x, y);
+	_midi_view->drag_group ()->canvas_to_item (x, y);
 	return y;
 }
 
