@@ -297,7 +297,7 @@ Route::init ()
 
 	if (is_surround_master ()) {
 		_meter_point = _pending_meter_point = MeterPreFader;
-		_surround_return.reset (new SurroundReturn (_session));
+		_surround_return.reset (new SurroundReturn (_session, this));
 		_surround_return->activate ();
 		panner_shell()->set_bypassed (true);
 
@@ -3333,6 +3333,11 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 			_surround_send.reset (new SurroundSend (_session, _mute_master));
 			_surround_send->set_owner (this);
 			processor = _surround_send;
+		} else if (prop->value() == "surreturn") {
+			if (_surround_return) {
+				_surround_return->set_state (node, version);
+			}
+			return true;
 		} else {
 			warning << string_compose(_("unknown Processor type \"%1\"; ignored"), prop->value()) << endmsg;
 			return false;

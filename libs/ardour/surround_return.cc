@@ -17,19 +17,20 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include "ardour/surround_return.h"
+#include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/route.h"
 #include "ardour/session.h"
 #include "ardour/surround_pannable.h"
+#include "ardour/surround_return.h"
 #include "ardour/surround_send.h"
 #include "ardour/uri_map.h"
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
 
-SurroundReturn::SurroundReturn (Session& s)
+SurroundReturn::SurroundReturn (Session& s, Route* r)
 	: Processor (s, _("SurrReturn"), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _lufs_meter (s.nominal_sample_rate (), 5)
 	, _current_n_objects (max_object_id)
@@ -49,12 +50,18 @@ SurroundReturn::SurroundReturn (Session& s)
 		throw ProcessorException (_("Required Atmos/Vapor Processor not found."));
 	}
 
+	ChanCount cca128 (ChanCount (DataType::AUDIO, 128));
+
 	_flush.store (0);
 	_surround_processor->activate ();
 	_surround_bufs.ensure_buffers (DataType::AUDIO, 128, s.get_block_size ());
-	_surround_bufs.set_count (ChanCount (DataType::AUDIO, 128));
+	_surround_bufs.set_count (cca128);
 
 	lv2_atom_forge_init (&_forge, URIMap::instance ().urid_map ());
+
+	_trim.reset (new Amp (_session, X_("Trim"), r->trim_control(), false));
+	_trim->configure_io (cca128, cca128);
+	_trim->activate ();
 
 	for (size_t i = 0; i < max_object_id; ++i) {
 		_current_render_mode[i] = -1;
@@ -218,6 +225,10 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 #endif
 	}
 
+	_trim->set_gain_automation_buffer (_session.trim_automation_buffer ());
+	_trim->setup_gain_automation (start_sample, end_sample, nframes);
+	_trim->run (_surround_bufs, start_sample, end_sample, speed, nframes, true);
+
 	_surround_processor->connect_and_run (_surround_bufs, start_sample, end_sample, speed, _in_map, _out_map, nframes, 0);
 
 	BufferSet::iterator i = _surround_bufs.begin (DataType::AUDIO);
@@ -372,9 +383,17 @@ SurroundReturn::max_dbtp () const
 	return _lufs_meter.dbtp ();
 }
 
+int
+SurroundReturn::set_state (XMLNode const& node, int version)
+{
+	return _trim->set_state (node, version);
+}
+
 XMLNode&
 SurroundReturn::state () const
 {
-	XMLNode* node = new XMLNode (X_("SurroundReturn"));
-	return *node;
+	XMLNode& node (_trim->state ());
+	node.set_property ("name", "SurrReturn");
+	node.set_property ("type", "surreturn");
+	return node;
 }

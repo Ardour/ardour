@@ -34,6 +34,7 @@
 
 namespace ARDOUR
 {
+class Amp;
 class Session;
 class SurroundSend;
 class SurroundPannable;
@@ -42,7 +43,7 @@ class LV2Plugin;
 class LIBARDOUR_API SurroundReturn : public Processor
 {
 public:
-	SurroundReturn (Session&);
+	SurroundReturn (Session&, Route*);
 	virtual ~SurroundReturn ();
 
 	bool can_support_io_configuration (const ChanCount& in, ChanCount& out);
@@ -65,6 +66,8 @@ public:
 
 	samplecnt_t signal_latency () const;
 
+	int set_state (XMLNode const&, int version);
+
 protected:
 	XMLNode& state () const;
 
@@ -79,6 +82,8 @@ private:
 	std::shared_ptr<LV2Plugin> _surround_processor;
 
 	LUFSMeter _lufs_meter;
+
+	std::shared_ptr<Amp> _trim;
 
 	LV2_Atom_Forge   _forge;
 	uint8_t          _atom_buf[8192];
