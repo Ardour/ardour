@@ -685,9 +685,8 @@ MidiRegionView::reset_width_dependent_items (double pixel_width)
 void
 MidiRegionView::set_height (double height)
 {
-	double old_height = _height;
-	RegionView::set_height(height);
 	MidiView::set_height (height);
+	RegionView::set_height(height);
 }
 void
 MidiRegionView::set_selected (bool selected)
