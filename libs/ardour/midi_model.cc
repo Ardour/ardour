@@ -243,7 +243,6 @@ MidiModel::NoteDiffCommand::operator() ()
 		MidiModel::WriteLock lock(_model->edit_lock());
 
 		for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
-			std::cerr << "====== ADDDED a note " << *i << std::endl;
 			if (!_model->add_note_unlocked(*i)) {
 				/* failed to add it, so don't leave it in the removed list, to
 				   avoid apparent errors on undo.
