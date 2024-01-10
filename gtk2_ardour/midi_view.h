@@ -36,7 +36,6 @@
 #include "pbd/signals.h"
 
 #include "ardour/midi_model.h"
-#include "ardour/slice.h"
 #include "ardour/types.h"
 
 #include "editing.h"
