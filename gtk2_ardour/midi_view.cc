@@ -113,7 +113,6 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	: _midi_track (mt)
 	, _editing_context (ec)
 	, _midi_context (bg)
-	, _current_slice (timepos_t (Temporal::BeatTime), timecnt_t (Temporal::BeatTime))
 	, _active_notes(0)
 	, _note_group (new ArdourCanvas::Container (&parent))
 	, _note_diff_command (0)
@@ -146,7 +145,7 @@ MidiView::MidiView (MidiView const & other)
 	: _midi_track (other._midi_track)
 	, _editing_context (other.editing_context())
 	, _midi_context (other.midi_context())
-	, _current_slice (other.current_slice())
+	, _midi_region (other.midi_region())
 	, _active_notes(0)
 	, _note_group (new ArdourCanvas::Container (other._note_group->parent()))
 	, _note_diff_command (0)
@@ -1225,14 +1224,14 @@ MidiView::display_patch_changes_on_channel (uint8_t channel, bool active_channel
 
 		if ((p = find_canvas_patch_change (*i)) != 0) {
 
-			const timepos_t region_time = _current_slice.source_beats_to_region_time ((*i)->time());
-			if (region_time < timepos_t() || region_time >= _current_slice.length()) {
+			const timepos_t region_time = _midi_region->source_beats_to_region_time ((*i)->time());
+			if (region_time < timepos_t() || region_time >= _midi_region->length()) {
 				p->hide();
 			} else {
-				const timepos_t flag_time = _current_slice.source_beats_to_absolute_time ((*i)->time());
+				const timepos_t flag_time = _midi_region->source_beats_to_absolute_time ((*i)->time());
 				const double flag_x = _editing_context.time_to_pixel (flag_time);
 
-				const double region_x = _editing_context.time_to_pixel (_current_slice.position());
+				const double region_x = _editing_context.time_to_pixel (_midi_region->position());
 
 				p->canvas_item()->set_position (ArdourCanvas::Duple (flag_x-region_x, 1.0));
 				p->update_name ();
@@ -1253,15 +1252,15 @@ MidiView::update_patch_changes ()
 
 		std::shared_ptr<PatchChange> pc (p->second);
 
-		const timepos_t region_time (_current_slice.source_beats_to_region_time (p->first->time()));
+		const timepos_t region_time (_midi_region->source_beats_to_region_time (p->first->time()));
 
-		if (region_time < timepos_t() || region_time >= _current_slice.length()) {
+		if (region_time < timepos_t() || region_time >= _midi_region->length()) {
 			pc->hide();
 		} else {
-			const timepos_t flag_time = _current_slice.source_beats_to_absolute_time (p->first->time());
+			const timepos_t flag_time = _midi_region->source_beats_to_absolute_time (p->first->time());
 			const double flag_x = _editing_context.time_to_pixel (flag_time);
 
-			const double region_x = _editing_context.time_to_pixel (_current_slice.position());
+			const double region_x = _editing_context.time_to_pixel (_midi_region->position());
 
 			pc->canvas_item()->set_position (ArdourCanvas::Duple (flag_x-region_x, 1.0));
 			pc->update_name ();
@@ -1327,7 +1326,7 @@ MidiView::display_sysexes()
 		}
 		string text = str.str();
 
-		const double x = _editing_context.time_to_pixel (_current_slice.source_beats_to_region_time (time.beats()));
+		const double x = _editing_context.time_to_pixel (_midi_region->source_beats_to_region_time (time.beats()));
 
 		double height = _midi_context.contents_height();
 
@@ -1344,7 +1343,7 @@ MidiView::display_sysexes()
 		}
 
 		// Show unless message is beyond the region bounds
-		if (_current_slice.source_relative_position (time) >= _current_slice.length() || time < _current_slice.start()) {
+		if (_midi_region->source_relative_position (time) >= _midi_region->length() || time < _midi_region->start()) {
 			sysex->hide();
 		} else {
 			sysex->show();
@@ -1363,14 +1362,14 @@ MidiView::update_sysexes ()
 		std::shared_ptr<SysEx> sysex (s->second);
 
 		// Show unless message is beyond the region bounds
-		if (_current_slice.source_relative_position (time) >= _current_slice.length() || time < _current_slice.start()) {
+		if (_midi_region->source_relative_position (time) >= _midi_region->length() || time < _midi_region->start()) {
 			sysex->hide();
 			continue;
 		} else {
 			sysex->show();
 		}
 
-		const double x = _editing_context.time_to_pixel (_current_slice.source_beats_to_region_time (time.beats()));
+		const double x = _editing_context.time_to_pixel (_midi_region->source_beats_to_region_time (time.beats()));
 
 		sysex->set_height (height);
 		sysex->item().set_position (ArdourCanvas::Duple (x, 1.0));
@@ -1493,7 +1492,7 @@ MidiView::extend_active_notes()
 
 	for (unsigned i = 0; i < 128; ++i) {
 		if (_active_notes[i]) {
-			_active_notes[i]->set_x1 (_editing_context.duration_to_pixels (_current_slice.length()));
+			_active_notes[i]->set_x1 (_editing_context.duration_to_pixels (_midi_region->length()));
 		}
 	}
 }
@@ -1539,7 +1538,7 @@ bool
 MidiView::note_in_region_time_range (const std::shared_ptr<NoteType> note) const
 {
 	const std::shared_ptr<ARDOUR::MidiRegion> midi_reg = midi_region();
-	return  (timepos_t (note->time()) >= _current_slice.start()) && (timepos_t (note->time()) < _current_slice.start() + _current_slice.length());
+	return  (timepos_t (note->time()) >= _midi_region->start()) && (timepos_t (note->time()) < _midi_region->start() + _midi_region->length());
 }
 
 bool
@@ -1586,21 +1585,21 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 	/* compute absolute time where the start of the source is
 	 */
 
-	const timepos_t session_source_start = _current_slice.source_position();
+	const timepos_t session_source_start = _midi_region->source_position();
 
 	/* this computes the number of samples from the start of the region of the start of the
 	 * note. We add the source start to get to the absolute time of the
 	 * note, then subtract the start of the region
 	 */
 
-	const samplepos_t note_start_samples = _current_slice.position().distance ((note_start + session_source_start)).samples();
+	const samplepos_t note_start_samples = _midi_region->position().distance ((note_start + session_source_start)).samples();
 
 	const double x0 = _editing_context.sample_to_pixel (note_start_samples);
 	double x1;
 
 	const double y0 = 1 + floor(note_to_y(note->note()));
 	double y1;
-
+	samplepos_t note_end_samples;
 	if (note->length() == Temporal::Beats()) {
 
 		/* special case actual zero-length notes */
@@ -1611,13 +1610,13 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 
 		/* normal note */
 
-		const Temporal::Beats source_end ((_current_slice.start() + _current_slice.length()).beats());
+		const Temporal::Beats source_end ((_midi_region->start() + _midi_region->length()).beats());
 
 		if (note->end_time() > source_end) {
 			note_end = timepos_t (source_end);
 		}
 
-		const samplepos_t note_end_samples = _current_slice.position().distance ((note_end + session_source_start)).samples();
+		note_end_samples = _midi_region->position().distance ((session_source_start + note_end)).samples();
 
 		x1 = std::max(1., _editing_context.sample_to_pixel (note_end_samples));
 
@@ -1625,10 +1624,11 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 
 		/* nascent note currently being recorded, noteOff has not yet arrived */
 
-		x1 = std::max(1., _editing_context.duration_to_pixels (_current_slice.length()));
+		x1 = std::max(1., _editing_context.duration_to_pixels (_midi_region->length()));
 	}
 
 	y1 = y0 + std::max(1., floor(note_height()) - 1);
+
 
 	ev->set (ArdourCanvas::Rect (x0, y0, x1, y1));
 	ev->set_velocity (note->velocity()/127.0);
@@ -1664,9 +1664,9 @@ void
 MidiView::update_hit (Hit* ev, bool update_ghost_regions)
 {
 	std::shared_ptr<NoteType> note = ev->note();
-	const timepos_t note_time = _current_slice.source_beats_to_absolute_time (note->time());
+	const timepos_t note_time = _midi_region->source_beats_to_absolute_time (note->time());
 
-	const double x = _editing_context.time_to_pixel(note_time) - _editing_context.time_to_pixel (_current_slice.position());
+	const double x = _editing_context.time_to_pixel(note_time) - _editing_context.time_to_pixel (_midi_region->position());
 	const double diamond_size = std::max(1., floor(note_height()) - 2.);
 	const double y = 1.5 + floor(note_to_y(note->note())) + diamond_size * .5;
 
@@ -1756,11 +1756,11 @@ MidiView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 
 	/* potentially extend region to hold new note */
 
-	timepos_t note_end = _current_slice.source_beats_to_absolute_time (new_note->end_time());
-	timepos_t region_end = _current_slice.nt_last();
+	timepos_t note_end = _midi_region->source_beats_to_absolute_time (new_note->end_time());
+	timepos_t region_end = _midi_region->nt_last();
 
 	if (note_end > region_end) {
-		_current_slice.set_length (timecnt_t (note_end.earlier (_current_slice.position()), timepos_t()));
+		_midi_region->set_length (timecnt_t (note_end.earlier (_midi_region->position()), timepos_t()));
 	}
 
 	_midi_context.update_note_range(new_note->note());
@@ -1791,7 +1791,7 @@ MidiView::step_sustain (Temporal::Beats beats)
 void
 MidiView::add_canvas_patch_change (MidiModel::PatchChangePtr patch)
 {
-	timecnt_t off (_current_slice.source_beats_to_region_time (patch->time()), _current_slice.position());
+	timecnt_t off (_midi_region->source_beats_to_region_time (patch->time()), _midi_region->position());
 	const double x = _editing_context.duration_to_pixels (off);
 	double const height = _midi_context.contents_height();
 
@@ -1929,7 +1929,7 @@ MidiView::add_patch_change (timecnt_t const & t, Evoral::PatchChange<Temporal::B
 
 	c->add (MidiModel::PatchChangePtr (
 		        new Evoral::PatchChange<Temporal::Beats>
-		        (_current_slice.source_relative_position (_current_slice.position() + t).beats(),
+		        (_midi_region->source_relative_position (_midi_region->position() + t).beats(),
 		         patch.channel(), patch.program(), patch.bank())));
 
 	_model->apply_diff_command_as_commit (*_editing_context.session(), c);
@@ -2069,7 +2069,7 @@ MidiView::select_range (timepos_t const & start, timepos_t const & end)
 {
 	PBD::Unwinder<bool> uw (_no_sound_notes, true);
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		timepos_t t = _current_slice.source_beats_to_absolute_time (i->first->time());
+		timepos_t t = _midi_region->source_beats_to_absolute_time (i->first->time());
 		if (t >= start && t <= end) {
 			add_to_selection (i->second);
 		}
@@ -2090,14 +2090,14 @@ MidiView::extend_selection ()
 	timepos_t first_note_start = timepos_t::max (BeatTime);
 
 	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		timepos_t e (_current_slice.source_beats_to_absolute_beats ((*i)->note()->time()));
+		timepos_t e (_midi_region->source_beats_to_absolute_beats ((*i)->note()->time()));
 		if (e < first_note_start) {
 			first_note_start = e;
 		}
 	}
 
 	for (Events::iterator i = _events.begin(); i != _events.end(); ++i) {
-		timepos_t t (_current_slice.source_beats_to_absolute_beats(i->first->time()));
+		timepos_t t (_midi_region->source_beats_to_absolute_beats(i->first->time()));
 
 		if (i->second->selected()) {
 			continue;
@@ -2296,8 +2296,8 @@ MidiView::update_drag_selection(timepos_t const & start, timepos_t const & end, 
 {
 	// Convert to local coordinates
 	const double     y  = _midi_context.y_position();
-	const double     x0 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, _current_slice.region_relative_position (start).samples()));
-	const double     x1 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, _current_slice.region_relative_position (end).samples()));
+	const double     x0 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, _midi_region->region_relative_position (start).samples()));
+	const double     x1 = _editing_context.sample_to_pixel_unrounded (max<samplepos_t>(0, _midi_region->region_relative_position (end).samples()));
 	const double     y0 = max(0.0, gy0 - y);
 	const double     y1 = max(0.0, gy1 - y);
 
@@ -2443,7 +2443,7 @@ MidiView::move_selection(timecnt_t const & dx_qn, double dy, double cumulative_d
 		if (n->note()->time() == earliest) {
 			to_play.push_back (n->note());
 		}
-		Temporal::Beats const note_time_qn = _current_slice.source_beats_to_absolute_beats (n->note()->time());
+		Temporal::Beats const note_time_qn = _midi_region->source_beats_to_absolute_beats (n->note()->time());
 		double dx = 0.0;
 
 		if (_midi_context.note_mode() == Sustained) {
@@ -2539,7 +2539,7 @@ MidiView::move_copies (timecnt_t const & dx_qn, double dy, double cumulative_dy)
 			to_play.push_back (n->note());
 		}
 
-		timepos_t const note_time_qn = _current_slice.source_beats_to_absolute_time (n->note()->time());
+		timepos_t const note_time_qn = _midi_region->source_beats_to_absolute_time (n->note()->time());
 		double_t dx = 0;
 
 		if (_midi_context.note_mode() == Sustained) {
@@ -2707,7 +2707,7 @@ MidiView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool co
 timecnt_t
 MidiView::snap_pixel_to_time (double x, bool ensure_snap)
 {
-	return _editing_context.snap_relative_time_to_relative_time (_current_slice.position(), timecnt_t (_editing_context.pixel_to_sample (x)), ensure_snap);
+	return _editing_context.snap_relative_time_to_relative_time (_midi_region->position(), timecnt_t (_editing_context.pixel_to_sample (x)), ensure_snap);
 }
 
 /** @param x Pixel relative to the region position.
@@ -2723,13 +2723,13 @@ MidiView::snap_to_pixel(double x, bool ensure_snap)
 double
 MidiView::get_position_pixels()
 {
-	return _editing_context.time_to_pixel(_current_slice.position());
+	return _editing_context.time_to_pixel(_midi_region->position());
 }
 
 double
 MidiView::get_end_position_pixels()
 {
-	return _editing_context.time_to_pixel (_current_slice.end());
+	return _editing_context.time_to_pixel (_midi_region->end());
 }
 
 void
@@ -2812,8 +2812,8 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 			 */
 			current_x = 0;
 		}
-		if (current_x > _editing_context.duration_to_pixels (_current_slice.length())) {
-			current_x = _editing_context.duration_to_pixels (_current_slice.length());
+		if (current_x > _editing_context.duration_to_pixels (_midi_region->length())) {
+			current_x = _editing_context.duration_to_pixels (_midi_region->length());
 		}
 
 		if (at_front) {
@@ -2842,9 +2842,9 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 
 			/* negative beat offsets aren't allowed */
 			if (snap_delta_time > 0) {
-				snap_delta_beats = _current_slice.region_distance_to_region_beats (timecnt_t (snap_delta_time, _current_slice.position()));
+				snap_delta_beats = _midi_region->region_distance_to_region_beats (timecnt_t (snap_delta_time, _midi_region->position()));
 			} else if (snap_delta_time < 0) {
-				snap_delta_beats = _current_slice.region_distance_to_region_beats (timecnt_t (-snap_delta_time, _current_slice.position()));
+				snap_delta_beats = _midi_region->region_distance_to_region_beats (timecnt_t (-snap_delta_time, _midi_region->position()));
 				sign = -1;
 			}
 
@@ -2858,7 +2858,7 @@ MidiView::update_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 
 			Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 			const timepos_t abs_beats (tmap->quarters_at (snapped_x));
-			const Temporal::Beats src_beats = _current_slice.absolute_time_to_source_beats (abs_beats);
+			const Temporal::Beats src_beats = _midi_region->absolute_time_to_source_beats (abs_beats);
 			Temporal::Beats len         = Temporal::Beats();
 
 			if (at_front) {
@@ -2932,8 +2932,8 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 			current_x = 0;
 		}
 
-		if (current_x > _editing_context.duration_to_pixels (_current_slice.length())) {
-			current_x = _editing_context.duration_to_pixels (_current_slice.length());
+		if (current_x > _editing_context.duration_to_pixels (_midi_region->length())) {
+			current_x = _editing_context.duration_to_pixels (_midi_region->length());
 		}
 
 		/* Convert snap delta from pixels to beats with sign. */
@@ -2942,9 +2942,9 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 		int sign = 1;
 
 		if (snap_delta_time.is_positive()) {
-			snap_delta_beats = _current_slice.region_distance_to_region_beats (timecnt_t (snap_delta_time, _current_slice.position()));
+			snap_delta_beats = _midi_region->region_distance_to_region_beats (timecnt_t (snap_delta_time, _midi_region->position()));
 		} else if (snap_delta_time.is_negative()) {
-			snap_delta_beats = _current_slice.region_distance_to_region_beats (timecnt_t (-snap_delta_time, _current_slice.position()));
+			snap_delta_beats = _midi_region->region_distance_to_region_beats (timecnt_t (-snap_delta_time, _midi_region->position()));
 			sign = -1;
 		}
 
@@ -2957,7 +2957,7 @@ MidiView::finish_resizing (NoteBase* primary, bool at_front, double delta_x, boo
 		}
 
 		/* and then to beats */
-		const Temporal::Beats src_beats = _current_slice.absolute_time_to_source_beats (_current_slice.position() + current_time);
+		const Temporal::Beats src_beats = _midi_region->absolute_time_to_source_beats (_midi_region->position() + current_time);
 
 		if (at_front && src_beats < canvas_note->note()->end_time()) {
 			note_diff_add_change (canvas_note, MidiModel::NoteDiffCommand::StartTime, src_beats - (snap_delta_beats * sign));
@@ -3371,7 +3371,7 @@ MidiView::change_note_lengths (bool fine, bool shorter, Temporal::Beats delta, b
 			delta = Temporal::Beats::ticks (Temporal::ticks_per_beat / 128);
 		} else {
 			/* grab the current grid distance */
-			delta = get_draw_length_beats (_current_slice.position());
+			delta = get_draw_length_beats (_midi_region->position());
 		}
 	}
 
@@ -3409,7 +3409,7 @@ MidiView::nudge_notes (bool forward, bool fine)
 	   into a vector and sort before using the first one.
 	*/
 
-	const timepos_t ref_point = _current_slice.source_beats_to_absolute_time ((*(_selection.begin()))->note()->time());
+	const timepos_t ref_point = _midi_region->source_beats_to_absolute_time ((*(_selection.begin()))->note()->time());
 	Temporal::Beats  delta;
 
 	timecnt_t       unused;
@@ -3419,7 +3419,7 @@ MidiView::nudge_notes (bool forward, bool fine)
 
 		/* grid is off - use nudge distance */
 
-		delta = _current_slice.region_distance_to_region_beats (timecnt_t (distance.beats(), _current_slice.position()));
+		delta = _midi_region->region_distance_to_region_beats (timecnt_t (distance.beats(), _midi_region->position()));
 
 	} else {
 
@@ -3674,7 +3674,7 @@ MidiView::duplicate_selection ()
 	timepos_t dup_pos = timepos_t (Temporal::BeatTime);
 
 	for (Selection::const_iterator s = _selection.begin(); s != _selection.end(); ++s) {
-		dup_pos = std::max (dup_pos, _current_slice.source_beats_to_absolute_time ((*s)->note()->end_time()));
+		dup_pos = std::max (dup_pos, _midi_region->source_beats_to_absolute_time ((*s)->note()->end_time()));
 	}
 
 	/* Use a local Selection object that will not affect the global
@@ -3750,13 +3750,13 @@ MidiView::paste_internal (timepos_t const & pos, unsigned paste_count, float tim
 	const Temporal::Beats duration      = last_time - first_time;
 	const Temporal::Beats snap_duration = duration.round_to_multiple (snap_beats);
 	const Temporal::Beats paste_offset  = snap_duration * int32_t (paste_count);
-	const Temporal::Beats quarter_note  = _current_slice.absolute_time_to_source_beats (pos) + paste_offset;
+	const Temporal::Beats quarter_note  = _midi_region->absolute_time_to_source_beats (pos) + paste_offset;
 	Temporal::Beats       end_point;
 
 	DEBUG_TRACE (DEBUG::CutNPaste, string_compose ("Paste data spans from %1 to %2 (%3) ; paste pos beats = %4 (based on %5 - %6)\n",
 	                                               first_time,
 	                                               last_time,
-	                                               duration, pos, _current_slice.position(),
+	                                               duration, pos, _midi_region->position(),
 	                                               quarter_note));
 
 	for (int n = 0; n < (int) times; ++n) {
@@ -3776,8 +3776,8 @@ MidiView::paste_internal (timepos_t const & pos, unsigned paste_count, float tim
 
 	/* if we pasted past the current end of the region, extend the region */
 
-	timepos_t end = _current_slice.source_beats_to_absolute_time (end_point);
-	timepos_t region_end = _current_slice.nt_last();
+	timepos_t end = _midi_region->source_beats_to_absolute_time (end_point);
+	timepos_t region_end = _midi_region->nt_last();
 
 	if (end > region_end) {
 
@@ -3785,7 +3785,7 @@ MidiView::paste_internal (timepos_t const & pos, unsigned paste_count, float tim
 
 		// XXXX _midi_region->clear_changes ();
 		/* we probably need to get the snap modifier somehow to make this correct for non-musical use */
-		_current_slice.set_length (_current_slice.position().distance (end));
+		_midi_region->set_length (_midi_region->position().distance (end));
 		_editing_context.session()->add_command (new StatefulDiffCommand (_midi_region));
 	}
 
@@ -3945,10 +3945,10 @@ MidiView::update_ghost_note (double x, double y, uint32_t state)
 	Temporal::timepos_t snapped_pos = timepos_t (unsnapped_sample);
 	_editing_context.snap_to (snapped_pos, RoundNearest, SnapToGrid_Scaled);
 
-	const Temporal::Beats snapped_beats = _current_slice.absolute_time_to_region_beats(snapped_pos);
+	const Temporal::Beats snapped_beats = _midi_region->absolute_time_to_region_beats(snapped_pos);
 
 	/* prevent Percussive mode from displaying a ghost hit at region end */
-	if ((_midi_context.note_mode() == Percussive) && (snapped_beats >= _current_slice.length().beats())) {
+	if ((_midi_context.note_mode() == Percussive) && (snapped_beats >= _midi_region->length().beats())) {
 		_ghost_note->hide();
 		hide_verbose_cursor ();
 		return;
@@ -3964,7 +3964,7 @@ MidiView::update_ghost_note (double x, double y, uint32_t state)
 	_ghost_note->show();
 
 	/* calculate time in of a single grid units worth of beats, at the start of source */
-	const Temporal::Beats length = get_draw_length_beats (_current_slice.source_position() + timecnt_t (snapped_beats));
+	const Temporal::Beats length = get_draw_length_beats (_midi_region->source_position() + timecnt_t (snapped_beats));
 
 	_ghost_note->note()->set_time (snapped_beats);
 	_ghost_note->note()->set_length (length);
@@ -4097,7 +4097,7 @@ MidiView::move_step_edit_cursor (Temporal::Beats pos)
 	_step_edit_cursor_position = pos;
 
 	if (_step_edit_cursor) {
-		double pixel = _editing_context.time_to_pixel (_current_slice.region_beats_to_region_time (pos));
+		double pixel = _editing_context.time_to_pixel (_midi_region->region_beats_to_region_time (pos));
 		_step_edit_cursor->set_x0 (pixel);
 		set_step_edit_cursor_width (_step_edit_cursor_width);
 	}
@@ -4118,8 +4118,8 @@ MidiView::set_step_edit_cursor_width (Temporal::Beats beats)
 
 	if (_step_edit_cursor) {
 		_step_edit_cursor->set_x1 (_step_edit_cursor->x0() + _editing_context.duration_to_pixels (
-			                           _current_slice.region_beats_to_region_time (_step_edit_cursor_position).distance
-			                           (_current_slice.region_beats_to_region_time (_step_edit_cursor_position + beats))));
+			                           _midi_region->region_beats_to_region_time (_step_edit_cursor_position).distance
+			                           (_midi_region->region_beats_to_region_time (_step_edit_cursor_position + beats))));
 	}
 }
 
@@ -4222,7 +4222,7 @@ MidiView::trim_front_starting ()
 void
 MidiView::trim_front_ending ()
 {
-	if (_current_slice.start().is_negative()) {
+	if (_midi_region->start().is_negative()) {
 		/* Trim drag made start time -ve; fix this */
 		midi_region()->fix_negative_start ();
 	}
