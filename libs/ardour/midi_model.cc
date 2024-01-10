@@ -243,6 +243,7 @@ MidiModel::NoteDiffCommand::operator() ()
 		MidiModel::WriteLock lock(_model->edit_lock());
 
 		for (NoteList::iterator i = _added_notes.begin(); i != _added_notes.end(); ++i) {
+			std::cerr << "====== ADDDED a note " << *i << std::endl;
 			if (!_model->add_note_unlocked(*i)) {
 				/* failed to add it, so don't leave it in the removed list, to
 				   avoid apparent errors on undo.
@@ -1261,6 +1262,8 @@ bool
 MidiModel::sync_to_source (const Source::WriterLock& source_lock)
 {
 	ReadLock lock(read_lock());
+
+	std::cerr << "SYNC " << _midi_source.name() << " from model\n";
 
 	/* Invalidate and store active notes, which will be picked up by the iterator
 	   on the next roll if time progresses linearly. */
