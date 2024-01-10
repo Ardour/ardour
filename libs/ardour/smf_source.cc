@@ -475,9 +475,9 @@ SMFSource::append_event_beats (const WriterLock&   lock,
 	}
 
 #if 0
-	printf("SMFSource: %s - append_event_beats ID = %d time = %lf, size = %u, data = ",
-               name().c_str(), ev.id(), ev.time(), ev.size());
-	       for (size_t i = 0; i < ev.size(); ++i) printf("%X ", ev.buffer()[i]); printf("\n");
+	std::cerr << "SMFSource " << name() << " - append_event_beats ID = " << ev.id() << " time = " << ev.time() << " size " << ev.size() << " data: ";
+	for (size_t i = 0; i < ev.size(); ++i) std::cerr << "0x" << std::hex << (int) ev.buffer()[i];
+	std::cerr << std::dec << std::endl;
 #endif
 
 	Temporal::Beats time = ev.time();
