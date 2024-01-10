@@ -234,7 +234,6 @@ libardour_sources = [
         'simple_export.cc',
         'slavable.cc',
         'slavable_automation_control.cc',
-        'slice.cc',
         'smf_source.cc',
         'sndfile_helpers.cc',
         'sndfileimportable.cc',
