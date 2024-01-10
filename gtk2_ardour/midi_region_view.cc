@@ -109,7 +109,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
                                 double                        spu,
                                 uint32_t                      basic_color)
 	: RegionView (parent, tv, r, spu, basic_color)
-	, MidiView (std::dynamic_pointer_cast<MidiTrack> (tv.stripable()), *parent, ec, *dynamic_cast<MidiStreamView*>(tv.view()), basic_color)
+	, MidiView (std::dynamic_pointer_cast<MidiTrack> (tv.stripable()), *group, ec, *dynamic_cast<MidiStreamView*>(tv.view()), basic_color)
 {
 	connect_to_diskstream ();
 }
@@ -123,7 +123,7 @@ MidiRegionView::MidiRegionView (ArdourCanvas::Container*      parent,
                                 bool                          recording,
                                 TimeAxisViewItem::Visibility  visibility)
 	: RegionView (parent, tv, r, spu, basic_color, recording, visibility)
-	, MidiView (std::dynamic_pointer_cast<MidiTrack> (tv.stripable()), *parent, ec, *dynamic_cast<MidiStreamView*>(tv.view()), basic_color)
+	, MidiView (std::dynamic_pointer_cast<MidiTrack> (tv.stripable()), *group, ec, *dynamic_cast<MidiStreamView*>(tv.view()), basic_color)
 {
 	connect_to_diskstream ();
 }
