@@ -332,7 +332,6 @@ class MidiView : public virtual sigc::trackable
 	std::shared_ptr<ARDOUR::MidiRegion> midi_region() const { return _midi_region; }
 	EditingContext& editing_context() const { return _editing_context; }
 	MidiViewBackground& midi_context() const { return _midi_context; }
-	virtual ARDOUR::Slice const & current_slice() const { return _current_slice; }
 
   protected:
 	void init ();
@@ -470,7 +469,6 @@ class MidiView : public virtual sigc::trackable
 	MidiViewBackground&                  _midi_context;
 	std::shared_ptr<ARDOUR::MidiModel>   _model;
 	std::shared_ptr<ARDOUR::MidiRegion>  _midi_region;
-	ARDOUR::Slice                        _current_slice;
 	Events                               _events;
 	CopyDragEvents                       _copy_drag_events;
 	PatchChanges                         _patch_changes;

@@ -24,6 +24,8 @@
 
 #include "gtkmm2ext/utils.h"
 
+#include "ardour/midi_region.h"
+
 #include "edit_note_dialog.h"
 #include "midi_view.h"
 #include "note_base.h"
@@ -98,7 +100,7 @@ EditNoteDialog::EditNoteDialog (MidiView* rv, set<NoteBase*> n)
 	_time_clock.set_mode (AudioClock::BBT);
 
 	/* Calculate absolute position of the event on time timeline */
-	timepos_t const pos = _region_view->current_slice().source_position() + timecnt_t ((*_events.begin())->note()->time ());
+	timepos_t const pos = _region_view->midi_region()->source_position() + timecnt_t ((*_events.begin())->note()->time ());
 
 	_time_clock.set (pos, true);
 
@@ -201,7 +203,7 @@ EditNoteDialog::done (int r)
 	}
 
 	/* convert current clock time into an offset from the start of the source */
-	timecnt_t const time_clock_source_relative = _region_view->current_slice().source_position ().distance (_time_clock.last_when ());
+	timecnt_t const time_clock_source_relative = _region_view->midi_region()->source_position ().distance (_time_clock.last_when ());
 
 	/* convert that into a position in Beats - this will be the new note time (as an offset inside the source) */
 	Beats const new_note_time_source_relative_beats = time_clock_source_relative.beats ();
