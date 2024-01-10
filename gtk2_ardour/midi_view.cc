@@ -1599,7 +1599,7 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 
 	const double y0 = 1 + floor(note_to_y(note->note()));
 	double y1;
-	samplepos_t note_end_samples;
+
 	if (note->length() == Temporal::Beats()) {
 
 		/* special case actual zero-length notes */
@@ -1616,7 +1616,7 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 			note_end = timepos_t (source_end);
 		}
 
-		note_end_samples = _midi_region->position().distance ((session_source_start + note_end)).samples();
+		const samplepos_t note_end_samples = _midi_region->position().distance ((session_source_start + note_end)).samples();
 
 		x1 = std::max(1., _editing_context.sample_to_pixel (note_end_samples));
 
