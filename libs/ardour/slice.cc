@@ -8,6 +8,7 @@ Slice::Slice (timepos_t const & s, timecnt_t const & l)
 	, _length (Properties::length, l)
 	, _last_length (l)
 {
+	register_properties ();
 }
 
 Slice::Slice (Slice const & other)
@@ -18,17 +19,10 @@ Slice::Slice (Slice const & other)
 }
 
 void
-Slice::set_position (timepos_t const & pos)
+Slice::register_properties ()
 {
-	_length = timecnt_t (_length.val().distance(), pos);
-	_last_length = _length;
-}
-
-void
-Slice::set_length (timecnt_t const & len)
-{
-	_last_length = _length;
-	_length = timecnt_t (len.distance(), _length.val().position());
+	add_property (_start);
+	add_property (_length);
 }
 
 timepos_t

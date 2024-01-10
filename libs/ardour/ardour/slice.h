@@ -18,7 +18,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<timecnt_t>         length;
 }
 
-class LIBARDOUR_API Slice
+class LIBARDOUR_API Slice : virtual public PBD::Stateful
 {
   public:
   	Slice (Temporal::timepos_t const &, Temporal::timecnt_t const &);
@@ -32,10 +32,6 @@ class LIBARDOUR_API Slice
 	timecnt_t length ()    const { return _length.val(); }
 	timepos_t end()        const;
 	timepos_t nt_last()    const { return end().decrement(); }
-
-	virtual void set_start (timepos_t const & s) { _start = s; }
-	virtual void set_position (timepos_t const & p);
-	virtual void set_length (timecnt_t const &);
 
 	/* these two are valid ONLY during a StateChanged signal handler */
 
@@ -116,6 +112,9 @@ class LIBARDOUR_API Slice
 	virtual void set_length_internal (timecnt_t const &);
 	virtual void set_start_internal (timepos_t const &);
 	virtual void set_position_internal (timepos_t const &);
+
+  private:
+  	void register_properties ();
 };
 
 } /* namespace */
