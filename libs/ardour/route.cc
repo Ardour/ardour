@@ -303,6 +303,11 @@ Route::init ()
 
 		_monitor_control.reset (new MonitorProcessor (_session));
 		_monitor_control->activate ();
+		_output->set_audio_channel_names (std::vector<std::string> {
+				_("L"), _("R"), _("C"), _("LFE"), _("Ls"), _("Rs"),
+				_("Lrs"), _("Rrs"), _("Lfh"), _("Rfh"), _("Lrh"), _("Rrh"),
+				_("Lb"), _("Rb")
+				});
 	}
 
 	if (_presentation_info.flags() & PresentationInfo::FoldbackBus) {
