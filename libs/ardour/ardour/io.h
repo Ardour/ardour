@@ -95,6 +95,10 @@ public:
 	void set_pretty_name (const std::string& str);
 	std::string pretty_name () const { return _pretty_name_prefix; }
 
+	void set_audio_channel_names (std::vector<std::string> const& acn) {
+		_audio_channel_names = acn;
+	}
+
 	virtual void silence (samplecnt_t);
 
 	int ensure_io (ChanCount cnt, bool clear, void *src);
@@ -215,6 +219,8 @@ private:
 	PBD::ScopedConnectionList _port_connections;
 
 	std::shared_ptr<Bundle> _bundle; ///< a bundle representing our ports
+
+	std::vector<std::string> _audio_channel_names;
 
 	struct UserBundleInfo {
 		UserBundleInfo (IO*, std::shared_ptr<UserBundle> b);

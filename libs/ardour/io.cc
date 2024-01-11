@@ -1536,6 +1536,10 @@ IO::bundle_channel_name (uint32_t c, uint32_t n, DataType t) const
 
 	if (t == DataType::AUDIO) {
 
+		if (n == _audio_channel_names.size () && c < _audio_channel_names.size ()) {
+			return _audio_channel_names.at (c);
+		}
+
 		switch (n) {
 		case 1:
 			return _("mono");
