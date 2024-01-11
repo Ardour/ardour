@@ -60,6 +60,19 @@ public:
 		return _surround_processor;
 	}
 
+	enum MainOutputFormat {
+		OUTPUT_FORMAT_5_1 = 2,
+		OUTPUT_FORMAT_7_1_4 = 6
+	};
+
+	MainOutputFormat output_format () const {
+		return _current_output_format;
+	}
+
+	void set_output_format (MainOutputFormat mov) {
+		_target_output_format = mov;
+	}
+
 	/* a value <= -200 indicates that no data is available */
 	float integrated_loudness () const;
 	float max_dbtp () const;
@@ -90,6 +103,8 @@ private:
 	pan_t            _current_value[max_object_id][num_pan_parameters];
 	int              _current_render_mode[max_object_id];
 	size_t           _current_n_objects;
+	MainOutputFormat _target_output_format;
+	MainOutputFormat _current_output_format;
 	BufferSet        _surround_bufs;
 	ChanMapping      _in_map;
 	ChanMapping      _out_map;

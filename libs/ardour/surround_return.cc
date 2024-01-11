@@ -34,6 +34,8 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 	: Processor (s, _("SurrReturn"), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _lufs_meter (s.nominal_sample_rate (), 5)
 	, _current_n_objects (max_object_id)
+	, _target_output_format (OUTPUT_FORMAT_7_1_4)
+	, _current_output_format (OUTPUT_FORMAT_7_1_4)
 	, _in_map (ChanCount (DataType::AUDIO, 128))
 	, _out_map (ChanCount (DataType::AUDIO, 14 + 6 /* Loudness Meter */))
 	, _exporting (false)
@@ -199,6 +201,14 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 #if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
 		URIMap::URIDs const& urids = URIMap::instance ().urids;
 		forge_int_msg (urids.surr_Settings, urids.surr_ChannelCount, _current_n_objects);
+#endif
+	}
+
+	if (_current_output_format != _target_output_format) {
+		_current_output_format = _target_output_format;
+#if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
+		URIMap::URIDs const& urids = URIMap::instance ().urids;
+		forge_int_msg (urids.surr_Settings, urids.surr_OutputFormat, _target_output_format);
 #endif
 	}
 
@@ -386,6 +396,12 @@ SurroundReturn::max_dbtp () const
 int
 SurroundReturn::set_state (XMLNode const& node, int version)
 {
+	int target_output_format;
+	if (node.get_property (X_("output-format"), target_output_format)) {
+		if (target_output_format == OUTPUT_FORMAT_5_1 || target_output_format == OUTPUT_FORMAT_7_1_4) {
+			_target_output_format = (MainOutputFormat) target_output_format;
+		}
+	}
 	return _trim->set_state (node, version);
 }
 
@@ -395,5 +411,6 @@ SurroundReturn::state () const
 	XMLNode& node (_trim->state ());
 	node.set_property ("name", "SurrReturn");
 	node.set_property ("type", "surreturn");
+	node.set_property ("output-format", (int) _current_output_format);
 	return node;
 }

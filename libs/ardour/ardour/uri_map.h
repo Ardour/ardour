@@ -112,6 +112,7 @@ public:
 		uint32_t surr_BinauralRenderMode;
 		uint32_t surr_ChannelCount;
 		uint32_t surr_DownmixMode;
+		uint32_t surr_OutputFormat;
 		uint32_t surr_WarpMode;
 		uint32_t surr_ExportStart;
 		uint32_t surr_ExportStop;
