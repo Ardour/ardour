@@ -39,6 +39,7 @@
 #include "ardour/region_factory.h"
 #include "ardour/profile.h"
 #include "ardour/smf_source.h"
+#include "ardour/stripable.h"
 
 #include "actions.h"
 #include "ardour_ui.h"
@@ -410,8 +411,12 @@ TriggerPage::selection_changed ()
 				_midi_trig_box.set_trigger (ref);
 				_midi_trig_box.show ();
 
-				// _midi_trim_box.set_trigger (ref);
-				_midi_editor->viewport().show ();
+				std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (trigger->region());
+				if (mr) {
+					std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (entry->strip().stripable());
+					_midi_editor->set_region (mt, mr);
+					_midi_editor->viewport().show ();
+				}
 			}
 		}
 		_parameter_box.show ();

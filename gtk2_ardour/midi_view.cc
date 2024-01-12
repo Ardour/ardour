@@ -120,8 +120,6 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, _step_edit_cursor (0)
 	, _step_edit_cursor_width (1, 0)
 	, _channel_selection_scoped_note (0)
-	, _current_range_min(0)
-	, _current_range_max(0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _optimization_iterator (_events.end())
@@ -153,8 +151,6 @@ MidiView::MidiView (MidiView const & other)
 	, _step_edit_cursor (0)
 	, _step_edit_cursor_width (1, 0)
 	, _channel_selection_scoped_note (0)
-	, _current_range_min(0)
-	, _current_range_max(0)
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _optimization_iterator (_events.end())
@@ -233,6 +229,8 @@ MidiView::set_model (std::shared_ptr<MidiModel> m)
 	_editing_context.MouseModeChanged.connect (connections_requiring_model, invalidator (*this),
 	                                            boost::bind (&MidiView::mouse_mode_changed, this),
 	                                            gui_context ());
+
+	model_changed ();
 }
 
 bool
@@ -1005,6 +1003,8 @@ MidiView::redisplay (bool view_only)
 void
 MidiView::model_changed()
 {
+	std::cerr << "MC!\n";
+
 	if (!display_is_enabled()) {
 		return;
 	}
@@ -1044,6 +1044,22 @@ MidiView::model_changed()
 	MidiModel::Notes& notes (_model->notes());
 
 	NoteBase* cne;
+
+	std::cerr << "drawing " << notes.size() << " notes\n";
+
+	uint8_t low_note = std::numeric_limits<uint8_t>::max();
+	uint8_t hi_note = std::numeric_limits<uint8_t>::min();
+
+	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
+		if ((*n)->note() < low_note) {
+			low_note = (*n)->note();
+		}
+		if ((*n)->note() > hi_note)  {
+			hi_note = (*n)->note();
+		}
+	}
+
+	_midi_context.apply_note_range (low_note, hi_note, true);
 
 	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 
@@ -1445,12 +1461,9 @@ MidiView::set_height (double ht)
 void
 MidiView::apply_note_range (uint8_t min, uint8_t max, bool force)
 {
-	if (!force && _current_range_min == min && _current_range_max == max) {
+	if (!force && _midi_context.lowest_note() == min && _midi_context.highest_note() == max) {
 		return;
 	}
-
-	_current_range_min = min;
-	_current_range_max = max;
 
 	view_changed ();
 }
@@ -1548,7 +1561,7 @@ MidiView::note_in_region_range (const std::shared_ptr<NoteType> note, bool& visi
 
 	const bool outside = !note_in_region_time_range (note);
 
-	visible = (note->note() >= _current_range_min) && (note->note() <= _current_range_max);
+	visible = (note->note() >= _midi_context.lowest_note()) && (note->note() <= _midi_context.highest_note());
 
 	return !outside;
 }
@@ -1600,6 +1613,11 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 	const double y0 = 1 + floor(note_to_y(note->note()));
 	double y1;
 
+	std::cerr << "Note: " << *note << std::endl;
+	std::cerr << "SSS " << session_source_start << std::endl;
+	std::cerr << "nh " << note_height() << std::endl;
+	std::cerr << "vs. " << (int) _midi_context.lowest_note() << " .. " << (int) _midi_context.highest_note() << std::endl;
+
 	if (note->length() == Temporal::Beats()) {
 
 		/* special case actual zero-length notes */
@@ -1618,6 +1636,8 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 
 		const samplepos_t note_end_samples = _midi_region->position().distance ((session_source_start + note_end)).samples();
 
+		std::cerr << "nes: " << note_end_samples << " Z " << _editing_context.get_current_zoom() << std::endl;
+
 		x1 = std::max(1., _editing_context.sample_to_pixel (note_end_samples));
 
 	} else {
@@ -1629,6 +1649,7 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 
 	y1 = y0 + std::max(1., floor(note_height()) - 1);
 
+	std::cerr << "note rect " << ArdourCanvas::Rect (x0, y0, x1, y1) << std::endl;
 
 	ev->set (ArdourCanvas::Rect (x0, y0, x1, y1));
 	ev->set_velocity (note->velocity()/127.0);
@@ -4174,10 +4195,10 @@ MidiView::data_recorded (std::weak_ptr<MidiSource> w)
 			nb->item()->set_outline_color (UIConfiguration::instance().color ("recording note"));
 
 			/* fix up our note range */
-			if (ev.note() < _current_range_min) {
-				apply_note_range (ev.note(), _current_range_max, true);
-			} else if (ev.note() > _current_range_max) {
-				apply_note_range (_current_range_min, ev.note(), true);
+			if (ev.note() < _midi_context.lowest_note()) {
+				apply_note_range (ev.note(), _midi_context.highest_note(), true);
+			} else if (ev.note() > _midi_context.highest_note()) {
+				apply_note_range (_midi_context.lowest_note(), ev.note(), true);
 			}
 
 		} else if (ev.type() == MIDI_CMD_NOTE_OFF) {
@@ -4413,28 +4434,6 @@ MidiView::get_draw_length_beats (timepos_t const & pos) const
 	}
 
 	return beats;
-}
-
-uint8_t
-MidiView::y_to_note (double y) const
-{
-	int const n = ((contents_height() - y) / contents_height() * (double)(_current_range_max - _current_range_min + 1))
-		+ _current_range_min;
-
-	if (n < 0) {
-		return 0;
-	} else if (n > 127) {
-		return 127;
-	}
-
-	/* min due to rounding and/or off-by-one errors */
-	return min ((uint8_t) n, _current_range_max);
-}
-
-double
-MidiView::note_to_y(uint8_t note) const
-{
-	return contents_height() - (note + 1 - _current_range_min) * note_height() + 1;
 }
 
 void
@@ -4676,4 +4675,10 @@ ArdourCanvas::Item*
 MidiView::drag_group () const
 {
 	return _note_group->parent();
+}
+
+double
+MidiView::height() const
+{
+	return _midi_context.height();
 }

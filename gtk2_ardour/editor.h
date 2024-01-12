@@ -281,7 +281,6 @@ public:
 
 	void               set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const { return zoom_focus; }
-	samplecnt_t        get_current_zoom () const { return samples_per_pixel; }
 	void               cycle_zoom_focus ();
 	void temporal_zoom_step (bool zoom_out);
 	void temporal_zoom_step_scale (bool zoom_out, double scale);

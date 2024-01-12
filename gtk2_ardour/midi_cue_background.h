@@ -37,6 +37,7 @@ class CueMidiBackground : public MidiViewBackground
 	CueMidiBackground (ArdourCanvas::Item* parent);
 	~CueMidiBackground ();
 
+	double height() const;
 	double contents_height() const;
 
 	uint8_t get_preferred_midi_channel () const;

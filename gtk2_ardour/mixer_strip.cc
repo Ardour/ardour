@@ -115,7 +115,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, bool in_mixer)
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
-	, trigger_display (-1., TriggerBox::default_triggers_per_box*16.)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, rec_mon_table (2, 2)
 	, solo_iso_table (1, 2)
@@ -153,7 +152,6 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, std::shared_ptr<Route> rt, 
 	, processor_box (sess, boost::bind (&MixerStrip::plugin_selector, this), mx.selection(), this, in_mixer)
 	, gpm (sess, 250)
 	, panners (sess)
-	, trigger_display (-1., 8*16.)
 	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
 	, rec_mon_table (2, 2)
 	, solo_iso_table (1, 2)
@@ -335,7 +333,6 @@ MixerStrip::init ()
 	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (input_button_box, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (invert_button_box, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (trigger_display, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_tmaster_widget, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (processor_box, true, true);
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
@@ -425,7 +422,6 @@ MixerStrip::init ()
 	_visibility.add (&output_button, X_("Output"), _("Output"), false);
 	_visibility.add (&_comment_button, X_("Comments"), _("Comments"), false);
 	_visibility.add (&control_slave_ui, X_("VCA"), _("VCA Assigns"), false);
-	_visibility.add (&trigger_display, X_("TriggerGrid"), _("Trigger Grid"), false);
 	_visibility.add (&_tmaster_widget, X_("TriggerMaster"), _("Trigger Master"), false);
 
 	parameter_changed (X_("mixer-element-visibility"));
@@ -541,8 +537,6 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 	}
 
 	RouteUI::set_route (rt);
-
-	set_trigger_display (rt->triggerbox());
 
 	control_slave_ui.set_stripable (std::dynamic_pointer_cast<Stripable> (rt));
 
@@ -1683,8 +1677,6 @@ MixerStrip::revert_to_default_display ()
 	}
 
 	reset_strip_style ();
-
-	set_trigger_display (_route->triggerbox());
 }
 
 void
@@ -2140,9 +2132,3 @@ MixerStrip::hide_master_spacer (bool yn)
 	}
 }
 
-void
-MixerStrip::set_trigger_display (std::shared_ptr<TriggerBox> tb)
-{
-	_tmaster->set_triggerbox (tb);
-	trigger_display.set_triggerbox (tb.get());
-}

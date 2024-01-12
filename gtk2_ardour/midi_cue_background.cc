@@ -50,6 +50,12 @@ CueMidiBackground::contents_height() const
 	return _height;
 }
 
+double
+CueMidiBackground::height() const
+{
+	return _height;
+}
+
 uint8_t
 CueMidiBackground::get_preferred_midi_channel () const
 {

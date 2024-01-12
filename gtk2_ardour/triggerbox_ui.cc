@@ -65,8 +65,9 @@ using namespace ArdourCanvas;
 using namespace Gtkmm2ext;
 using namespace PBD;
 
-TriggerEntry::TriggerEntry (Item* item, TriggerReference tr)
+TriggerEntry::TriggerEntry (Item* item, TriggerStrip& s, TriggerReference tr)
 	: ArdourCanvas::Rectangle (item)
+	, _strip (s)
 	, _grabbed (false)
 	, _drag_active (false)
 {
@@ -826,9 +827,10 @@ TriggerEntry::drag_data_get (Glib::RefPtr<Gdk::DragContext> const&, Gtk::Selecti
 
 Glib::RefPtr<Gtk::TargetList> TriggerBoxUI::_dnd_src;
 
-TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerBox& tb)
+TriggerBoxUI::TriggerBoxUI (ArdourCanvas::Item* parent, TriggerStrip& s, TriggerBox& tb)
 	: Rectangle (parent)
 	, _triggerbox (tb)
+	, _strip (s)
 {
 	set_layout_sensitive (true); // why???
 
@@ -894,7 +896,7 @@ TriggerBoxUI::build ()
 		if (!t) {
 			break;
 		}
-		TriggerEntry* te = new TriggerEntry (this, TriggerReference (_triggerbox, n));
+		TriggerEntry* te = new TriggerEntry (this, _strip, TriggerReference (_triggerbox, n));
 
 		_slots.push_back (te);
 
@@ -1031,9 +1033,10 @@ TriggerBoxUI::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& context,
 
 /* ********************************************** */
 
-TriggerBoxWidget::TriggerBoxWidget (float w, float h)
+TriggerBoxWidget::TriggerBoxWidget (TriggerStrip& s, float w, float h)
 	: FittedCanvasWidget (w, h)
-	, ui (0)
+	, ui (nullptr)
+	, _strip (s)
 {
 	set_background_color (UIConfiguration::instance ().color (X_("theme:bg")));
 }
@@ -1044,13 +1047,13 @@ TriggerBoxWidget::set_triggerbox (TriggerBox* tb)
 	if (ui) {
 		root ()->remove (ui);
 		delete ui;
-		ui = 0;
+		ui = nullptr;
 	}
 
 	if (!tb) {
 		return;
 	}
 
-	ui = new TriggerBoxUI (root (), *tb);
+	ui = new TriggerBoxUI (root (), _strip, *tb);
 	repeat_size_allocation ();
 }

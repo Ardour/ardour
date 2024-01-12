@@ -96,13 +96,7 @@ MidiCueEditor::build_canvas ()
 	rubberband_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
 	rubberband_rect->hide();
 
-	ArdourCanvas::Text* hw = new ArdourCanvas::Text (hv_scroll_group);
-	hw->set ("hello, world");
-	hw->set_fill_color (Gtkmm2ext::Color (0xff0000ff));
-
-	std::cerr << "New CMB\n";
 	bg = new CueMidiBackground (hv_scroll_group);
-
 	_canvas_viewport->signal_size_allocate().connect (sigc::mem_fun(*this, &MidiCueEditor::canvas_allocate));
 }
 
@@ -118,7 +112,6 @@ MidiCueEditor::snap_to_grid (timepos_t const & presnap, Temporal::RoundMode dire
 	/* BBT time only */
 	return snap_to_bbt (presnap, direction, gpref);
 }
-
 
 void
 MidiCueEditor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapPref pref, bool ensure_snap) const
@@ -198,7 +191,7 @@ MidiCueEditor::viewport()
 }
 
 void
-MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr<ARDOUR::Region> r)
+MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr<ARDOUR::MidiRegion> r)
 {
 	// delete view;
 	// view = nullptr;
@@ -207,5 +200,6 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr
 		return;
 	}
 
-	// view = new MidiView (t, hv_scroll_group, *this, *bg, 0xff0000ff);
+	view = new MidiView (t, *hv_scroll_group, *this, *bg, 0xff0000ff);
+	view->set_region (r);
 }

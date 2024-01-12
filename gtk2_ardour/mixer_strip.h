@@ -192,7 +192,6 @@ private:
 	ProcessorBox processor_box;
 	GainMeter    gpm;
 	PannerUI     panners;
-	TriggerBoxWidget trigger_display;
 
 	Glib::RefPtr<Gtk::SizeGroup> button_size_group;
 

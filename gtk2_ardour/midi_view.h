@@ -483,9 +483,6 @@ class MidiView : public virtual sigc::trackable
 	Temporal::Beats                      _step_edit_cursor_position;
 	NoteBase*                            _channel_selection_scoped_note;
 
-	uint8_t  _current_range_min;
-	uint8_t  _current_range_max;
-
 	MouseState _mouse_state;
 	int _pressed_button;
 
@@ -577,14 +574,13 @@ class MidiView : public virtual sigc::trackable
 	ARDOUR::ChannelMode get_channel_mode() const;
 	uint16_t get_selected_channels () const;
 
-	virtual double height() const = 0;
+	virtual double height() const;
 
 	virtual double contents_height() const { return height() - 2; }
-	inline double contents_note_range () const { return (double)(_current_range_max - _current_range_min + 1); }
-	inline double note_height() const { return contents_height() / contents_note_range(); }
+	inline double note_height() const { return contents_height() / _midi_context.contents_note_range(); }
 
-	double note_to_y (uint8_t note) const;
-	uint8_t y_to_note (double y) const;
+	double note_to_y (uint8_t note) const { return _midi_context.note_to_y (note); }
+	uint8_t y_to_note (double y) const { return _midi_context.y_to_note (y); }
 
 	void update_patch_changes ();
 	void update_sysexes ();
