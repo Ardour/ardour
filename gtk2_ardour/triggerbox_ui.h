@@ -43,10 +43,12 @@ namespace ArdourCanvas
 	class Polygon;
 }
 
+class TriggerStrip;
+
 class TriggerEntry : public ArdourCanvas::Rectangle, public TriggerUI
 {
 public:
-	TriggerEntry (ArdourCanvas::Item* item, ARDOUR::TriggerReference rf);
+	TriggerEntry (ArdourCanvas::Item* item, TriggerStrip&, ARDOUR::TriggerReference rf);
 	~TriggerEntry ();
 
 	ArdourCanvas::Rectangle* play_button;
@@ -76,7 +78,10 @@ public:
 
 	bool name_button_event (GdkEvent*);
 
+	TriggerStrip& strip() const { return _strip; }
+
 private:
+	TriggerStrip& _strip;
 	bool   _grabbed;
 	double _poly_size;
 	double _poly_margin;
@@ -104,10 +109,12 @@ private:
 class TriggerBoxUI : public ArdourCanvas::Rectangle
 {
 public:
-	TriggerBoxUI (ArdourCanvas::Item* parent, ARDOUR::TriggerBox&);
+	TriggerBoxUI (ArdourCanvas::Item* parent, TriggerStrip&, ARDOUR::TriggerBox&);
 	~TriggerBoxUI ();
 
 	void _size_allocate (ArdourCanvas::Rect const&);
+
+	TriggerStrip& strip() const { return _strip; }
 
 	static Glib::RefPtr<Gtk::TargetList> dnd_src ()
 	{
@@ -119,6 +126,7 @@ private:
 
 	ARDOUR::TriggerBox& _triggerbox;
 	Slots               _slots;
+	TriggerStrip&       _strip;
 
 	static Glib::RefPtr<Gtk::TargetList> _dnd_src;
 
@@ -140,12 +148,14 @@ private:
 class TriggerBoxWidget : public FittedCanvasWidget
 {
 public:
-	TriggerBoxWidget (float w, float h);
+	TriggerBoxWidget (TriggerStrip&, float w, float h);
 
 	void set_triggerbox (ARDOUR::TriggerBox* tb);
+	TriggerStrip& strip() const { return _strip; }
 
 private:
 	TriggerBoxUI* ui;
+	TriggerStrip& _strip;
 };
 
 #endif

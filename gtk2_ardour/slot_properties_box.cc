@@ -756,7 +756,6 @@ SlotPropertyWindow::SlotPropertyWindow (TriggerReference tref)
 			_trig_box->set_trigger (tref);
 
 			_midi_editor = new MidiCueEditor;
-			_midi_editor->set_region (std::shared_ptr<MidiTrack>(), trigger->region());
 
 			table->attach(*_trig_box,  col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;
 			table->attach(_midi_editor->viewport(),   col, col+1, 0, 1, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND );  col++;

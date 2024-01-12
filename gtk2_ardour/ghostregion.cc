@@ -452,8 +452,8 @@ MidiGhostRegion::model_changed ()
 
 		std::shared_ptr<NoteType> note = i->first;
 		GhostEvent* cne = i->second;
-		const bool visible = (note->note() >= parent_mrv._current_range_min) &&
-			(note->note() <= parent_mrv._current_range_max);
+		const bool visible = (note->note() >= parent_mrv.midi_context().lowest_note()) &&
+			(note->note() <= parent_mrv.midi_context().highest_note());
 
 		if (visible) {
 			if (cne->is_hit) {

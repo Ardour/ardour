@@ -146,6 +146,8 @@ public:
 
 	virtual void set_selected_midi_region_view (MidiRegionView&);
 
+	samplecnt_t get_current_zoom () const { return samples_per_pixel; }
+
 	/* NOTE: these functions assume that the "pixel" coordinate is
 	   in canvas coordinates. These coordinates already take into
 	   account any scrolling offsets.
@@ -244,7 +246,6 @@ public:
 
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
 	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
-	virtual samplecnt_t get_current_zoom () const = 0;
 	virtual void reset_zoom (samplecnt_t) = 0;
 	virtual void reposition_and_zoom (samplepos_t, double) = 0;
 
