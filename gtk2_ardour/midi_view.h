@@ -173,7 +173,7 @@ class MidiView : public virtual sigc::trackable
 	void end_write();
 	void extend_active_notes();
 
-	void begin_drag_edit (std::string const & why);
+	virtual void begin_drag_edit (std::string const & why);
 	void end_drag_edit ();
 
 	void display_model(std::shared_ptr<ARDOUR::MidiModel> model);
@@ -331,6 +331,11 @@ class MidiView : public virtual sigc::trackable
 	std::shared_ptr<ARDOUR::MidiRegion> midi_region() const { return _midi_region; }
 	EditingContext& editing_context() const { return _editing_context; }
 	MidiViewBackground& midi_context() const { return _midi_context; }
+
+	virtual void select_self (bool add) {}
+	virtual void unselect_self () {}
+	void select_self () { select_self (false); }
+	virtual void select_self_uniquely () {}
 
   protected:
 	void init ();

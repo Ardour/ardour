@@ -1622,8 +1622,8 @@ Selection::midi_regions ()
 {
 	MidiRegionSelection ms;
 
-	for (RegionSelection::iterator i = regions.begin(); i != regions.end(); ++i) {
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(*i);
+	for (auto & r : regions) {
+		MidiRegionView* mrv = dynamic_cast<MidiRegionView*>(r);
 		if (mrv) {
 			ms.add (mrv);
 		}

@@ -113,9 +113,9 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	: _midi_track (mt)
 	, _editing_context (ec)
 	, _midi_context (bg)
-	, _active_notes(0)
+	, _active_notes (0)
 	, _note_group (new ArdourCanvas::Container (&parent))
-	, _note_diff_command (0)
+	, _note_diff_command (nullptr)
 	, _ghost_note(0)
 	, _step_edit_cursor (0)
 	, _step_edit_cursor_width (1, 0)
@@ -123,7 +123,7 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, _mouse_state(None)
 	, _pressed_button(0)
 	, _optimization_iterator (_events.end())
-	, _list_editor (0)
+	, _list_editor (nullptr)
 	, _no_sound_notes (false)
 	, _last_display_zoom (0)
 	, _last_event_x (0)
@@ -2066,7 +2066,7 @@ void
 MidiView::clear_note_selection ()
 {
 	clear_selection_internal ();
-	// XXXX _editing_context.get_selection().remove (this);
+	unselect_self ();
 }
 
 void
@@ -2403,7 +2403,7 @@ MidiView::remove_from_selection (NoteBase* ev)
 	ghost_sync_selection (ev);
 
 	if (_selection.empty()) {
-		// XXXX _editing_context.get_selection().remove (this);
+		unselect_self ();
 	}
 }
 
@@ -2428,7 +2428,7 @@ MidiView::add_to_selection (NoteBase* ev)
 		 * only apply to notes anyway, not regions.
 		 */
 
-		// XXX _editing_context.set_selected_midi_region_view (*this);
+		select_self_uniquely ();
 	}
 
 	if (_selection.insert (ev).second == true) {
@@ -3173,8 +3173,6 @@ MidiView::change_note_length (NoteBase* event, Temporal::Beats t)
 void
 MidiView::begin_drag_edit (std::string const & why)
 {
-	// XXXX _editing_context.get_selection().set (this, true);
-	start_note_diff_command (why);
 }
 
 void
@@ -4079,7 +4077,7 @@ MidiView::maybe_select_by_position (GdkEventButton* ev, double /*x*/, double y)
 	}
 
 	if (add_mrv_selection) {
-		// XXXXX _editing_context.get_selection().add (this);
+		select_self (true);
 	}
 }
 
