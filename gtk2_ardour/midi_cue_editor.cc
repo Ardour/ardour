@@ -202,4 +202,6 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr
 
 	view = new MidiView (t, *hv_scroll_group, *this, *bg, 0xff0000ff);
 	view->set_region (r);
+
+	bg->set_view (view);
 }

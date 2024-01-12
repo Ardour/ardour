@@ -21,9 +21,11 @@
  */
 
 #include "midi_cue_background.h"
+#include "midi_view.h"
 
 CueMidiBackground::CueMidiBackground (ArdourCanvas::Item* parent)
 	: MidiViewBackground (parent)
+	, view (nullptr)
 	, _width (0.)
 	, _height (0.)
 {
@@ -70,4 +72,18 @@ CueMidiBackground::set_note_highlight (bool yn)
 void
 CueMidiBackground::record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t)
 {
+}
+
+void
+CueMidiBackground::set_view (MidiView* mv)
+{
+	view = mv;
+}
+
+void
+CueMidiBackground::apply_note_range_to_children ()
+{
+	if (view) {
+		view->apply_note_range (lowest_note(), highest_note());
+	}
 }

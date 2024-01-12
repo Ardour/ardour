@@ -31,6 +31,8 @@
 
 #include "midi_view_background.h"
 
+class MidiView;
+
 class CueMidiBackground : public MidiViewBackground
 {
   public:
@@ -45,11 +47,14 @@ class CueMidiBackground : public MidiViewBackground
 	void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t);
 
 	void set_size (double w, double h);
+	void set_view (MidiView*);
 
   protected:
-	virtual void apply_note_range_to_children () {}
+	MidiView* view;
 	double _width;
 	double _height;
+
+	void apply_note_range_to_children();
 };
 
 

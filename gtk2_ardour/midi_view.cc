@@ -1003,8 +1003,6 @@ MidiView::redisplay (bool view_only)
 void
 MidiView::model_changed()
 {
-	std::cerr << "MC!\n";
-
 	if (!display_is_enabled()) {
 		return;
 	}
@@ -1461,10 +1459,6 @@ MidiView::set_height (double ht)
 void
 MidiView::apply_note_range (uint8_t min, uint8_t max, bool force)
 {
-	if (!force && _midi_context.lowest_note() == min && _midi_context.highest_note() == max) {
-		return;
-	}
-
 	view_changed ();
 }
 
@@ -1613,11 +1607,6 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 	const double y0 = 1 + floor(note_to_y(note->note()));
 	double y1;
 
-	std::cerr << "Note: " << *note << std::endl;
-	std::cerr << "SSS " << session_source_start << std::endl;
-	std::cerr << "nh " << note_height() << std::endl;
-	std::cerr << "vs. " << (int) _midi_context.lowest_note() << " .. " << (int) _midi_context.highest_note() << std::endl;
-
 	if (note->length() == Temporal::Beats()) {
 
 		/* special case actual zero-length notes */
@@ -1636,8 +1625,6 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 
 		const samplepos_t note_end_samples = _midi_region->position().distance ((session_source_start + note_end)).samples();
 
-		std::cerr << "nes: " << note_end_samples << " Z " << _editing_context.get_current_zoom() << std::endl;
-
 		x1 = std::max(1., _editing_context.sample_to_pixel (note_end_samples));
 
 	} else {
@@ -1648,8 +1635,6 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 	}
 
 	y1 = y0 + std::max(1., floor(note_height()) - 1);
-
-	std::cerr << "note rect " << ArdourCanvas::Rect (x0, y0, x1, y1) << std::endl;
 
 	ev->set (ArdourCanvas::Rect (x0, y0, x1, y1));
 	ev->set_velocity (note->velocity()/127.0);
