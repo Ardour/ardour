@@ -749,3 +749,37 @@ MidiRegionView::drag_group () const
 {
 	return get_canvas_group ();
 }
+
+void
+MidiRegionView::select_self (bool  add)
+{
+	if (add) {
+		_editing_context.get_selection().add (this);
+	} else {
+		_editing_context.get_selection().set (this);
+	}
+}
+
+void
+MidiRegionView::unselect_self ()
+{
+	_editing_context.get_selection().remove (this);
+}
+
+void
+MidiRegionView::begin_drag_edit (std::string const & why)
+{
+	if (!_selected) {
+		/* unclear why gcc can't understand which version of
+		   select_self() to use here, but so be it.
+		*/
+		MidiView::select_self ();
+	}
+	// start_note_diff_command (why);
+}
+
+void
+MidiRegionView::select_self_uniquely ()
+{
+	_editing_context.set_selected_midi_region_view (*this);
+}

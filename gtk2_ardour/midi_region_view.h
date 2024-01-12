@@ -126,6 +126,10 @@ public:
 	void redisplay (bool);
 
 	ArdourCanvas::Item* drag_group() const;
+	void select_self (bool add);
+	void unselect_self ();
+	void select_self_uniquely ();
+	void begin_drag_edit (std::string const & why);
 
   protected:
 	void reset_width_dependent_items (double pixel_width);
