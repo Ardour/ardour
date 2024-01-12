@@ -214,10 +214,23 @@ MidiViewBackground::set_note_range(VisibleNoteRange r)
 }
 
 void
-MidiViewBackground::apply_note_range(uint8_t lowest, uint8_t highest, bool to_children)
+MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_children)
 {
-	_highest_note = highest;
-	_lowest_note = lowest;
+	bool changed = false;
+
+	if (_highest_note != highest) {
+		_highest_note = highest;
+		changed = true;
+	}
+
+	if (_lowest_note != lowest) {
+		changed = true;
+		_lowest_note = lowest;
+	}
+
+	if (!changed) {
+		return;
+	}
 
 	float uiscale = UIConfiguration::instance().get_ui_scale();
 	uiscale = expf (uiscale) / expf (1.f);
