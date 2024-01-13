@@ -56,19 +56,19 @@ function factory() return function()
 
 		local disp = disp or PBD.GroupControlDisposition.NoGroup
 
-		reset(route:eq_enable_controllable(), disp, auto)
+		reset(route:mapped_control(ARDOUR.WellKnownCtrl.EQ_Enable), disp, auto)
 
 		local i = 0
 		repeat
 			for _,ctrl in pairs({
-				route:eq_freq_controllable(i),
-				route:eq_gain_controllable(i),
-				route:eq_q_controllable(i),
+				route:mapped_control (ARDOUR.WellKnownCtrl.EQ_Freq, i),
+				route:mapped_control (ARDOUR.WellKnownCtrl.EQ_Gain, i),
+				route:mapped_control (ARDOUR.WellKnownCtrl.EQ_Q, i),
 			}) do
 				reset(ctrl, disp, auto)
 			end
 			i = i + 1
-		until route:eq_freq_controllable(i):isnil()
+		until route:mapped_control (ARDOUR.WellKnownCtrl.EQ_Freq, i):isnil()
 	end
 
 	function reset_comp_controls(route, disp, auto)
@@ -79,11 +79,10 @@ function factory() return function()
 		local disp = disp or PBD.GroupControlDisposition.NoGroup
 
 		for _,ctrl in pairs({
-			route:comp_enable_controllable(),
-			route:comp_makeup_controllable(),
-			route:comp_mode_controllable(),
-			route:comp_speed_controllable(),
-			route:comp_threshold_controllable(),
+			route:mapped_control (ARDOUR.WellKnownCtrl.Comp_Enable),
+			route:mapped_control (ARDOUR.WellKnownCtrl.Comp_Makeup),
+			route:mapped_control (ARDOUR.WellKnownCtrl.Comp_Mode),
+			route:mapped_control (ARDOUR.WellKnownCtrl.Comp_Threshold),
 		}) do
 			reset(ctrl, disp, auto)
 		end
