@@ -1892,6 +1892,9 @@ RouteTimeAxisView::add_existing_processor_automation_curves (std::weak_ptr<Proce
 		/* The Amp processor is a special case and is dealt with separately */
 		return;
 	}
+	if (!processor->display_to_user()) {
+		return;
+	}
 
 	set<Evoral::Parameter> existing;
 	processor->what_has_data (existing);
