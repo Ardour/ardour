@@ -252,6 +252,9 @@ OSCSelectObserver::refresh_strip (std::shared_ptr<ARDOUR::Stripable> new_strip, 
 		_strip->mapped_control (Comp_Makeup)->Changed.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message, this, X_("/select/comp_makeup"), _strip->mapped_control (Comp_Makeup)), OSC::instance());
 		change_message (X_("/select/comp_makeup"), _strip->mapped_control (Comp_Makeup));
 	}
+
+	_strip->MappedControlsChanged.connect (strip_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::eq_restart, this, 0), OSC::instance ());
+
 	renew_sends ();
 	renew_plugin ();
 	eq_restart(0);

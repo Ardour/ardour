@@ -980,7 +980,7 @@ GenericMidiControlProtocol::reset_controllables ()
 }
 
 std::shared_ptr<Controllable>
-GenericMidiControlProtocol::lookup_controllable (const string & str) const
+GenericMidiControlProtocol::lookup_controllable (const string & str, MIDIControllable& mc) const
 {
 	std::shared_ptr<Controllable> c;
 
@@ -1394,6 +1394,7 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 
 	if (c) {
 		DEBUG_TRACE (DEBUG::GenericMidi, string_compose ("found controllable \"%1\"\n", c->name()));
+		mc.bind_remap (r);
 	} else {
 		DEBUG_TRACE (DEBUG::GenericMidi, "no controllable found\n");
 	}

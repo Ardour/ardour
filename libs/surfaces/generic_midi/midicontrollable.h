@@ -43,6 +43,7 @@ class GenericMidiControlProtocol;
 
 namespace ARDOUR {
 	class AsyncMIDIPort;
+	class Stripable;
 }
 
 class MIDIControllable : public PBD::Stateful
@@ -114,6 +115,8 @@ public:
 
 	int lookup_controllable();
 
+	void bind_remap (std::shared_ptr<ARDOUR::Stripable>);
+
 private:
 
 	int max_value_for_type () const;
@@ -135,6 +138,7 @@ private:
 	PBD::ScopedConnection midi_sense_connection[2];
 	PBD::ScopedConnection midi_learn_connection;
 	PBD::ScopedConnection controllable_death_connection;
+	PBD::ScopedConnection controllable_remapped_connection;
 	/** the type of MIDI message that is used for this control */
 	MIDI::eventType  control_type;
 	MIDI::byte       control_additional;

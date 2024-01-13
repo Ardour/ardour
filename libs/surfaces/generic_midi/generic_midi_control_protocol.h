@@ -82,7 +82,7 @@ public:
 	int set_feedback (bool yn);
 	bool get_feedback () const;
 
-	std::shared_ptr<PBD::Controllable> lookup_controllable (std::string const &) const;
+	std::shared_ptr<PBD::Controllable> lookup_controllable (std::string const &, MIDIControllable&) const;
 
 	void maybe_start_touch (std::shared_ptr<PBD::Controllable>);
 

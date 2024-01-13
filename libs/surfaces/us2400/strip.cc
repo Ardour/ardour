@@ -793,6 +793,7 @@ Strip::setup_trackview_vpot (std::shared_ptr<Stripable> r)
 		return;
 	}
 
+	r->MappedControlsChanged.connect (subview_connections, MISSING_INVALIDATOR, boost::bind (&Strip::subview_mode_changed, this), ui_context());
 
 	std::shared_ptr<AutomationControl> pc;
 	std::shared_ptr<Track> track = std::dynamic_pointer_cast<Track> (r);

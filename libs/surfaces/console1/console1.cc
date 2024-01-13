@@ -545,6 +545,8 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 	if (_current_stripable) {
 		DEBUG_TRACE (DEBUG::Console1, "current_stripable found:  \n");
 
+		r->MappedControlsChanged.connect (stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::set_current_stripable, this, r), this);
+
 		current_plugin_index = -1;
 
 		PresentationInfo pi = _current_stripable->presentation_info ();

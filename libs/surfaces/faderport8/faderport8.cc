@@ -1459,6 +1459,8 @@ FaderPort8::select_plugin (int num)
 		plugin->PresetLoaded.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
 		plugin->PresetDirty.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::preset_changed, this), this);
 
+		r->MappedControlsChanged.connect (processor_connections, MISSING_INVALIDATOR, boost::bind (&FaderPort8::stripable_selection_changed, this), this);
+
 		if (_auto_pluginui) {
 			pi->ShowUI (); /* EMIT SIGNAL */
 		}

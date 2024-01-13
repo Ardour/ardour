@@ -39,6 +39,7 @@
 #include "ardour/automation_control.h"
 #include "ardour/midi_ui.h"
 #include "ardour/debug.h"
+#include "ardour/stripable.h"
 
 #include "midicontrollable.h"
 #include "generic_midi_control_protocol.h"
@@ -143,6 +144,7 @@ MIDIControllable::set_controllable (std::shared_ptr<PBD::Controllable> c)
 	} else {
 		_controllable.reset();
 		last_controllable_value = 0.0f; // is there a better value?
+		controllable_remapped_connection.disconnect ();
 	}
 
 	last_incoming = 256;
@@ -150,6 +152,16 @@ MIDIControllable::set_controllable (std::shared_ptr<PBD::Controllable> c)
 	if (c) {
 		c->DropReferences.connect_same_thread (controllable_death_connection, boost::bind (&MIDIControllable::drop_controllable, this));
 	}
+}
+
+void
+MIDIControllable::bind_remap (std::shared_ptr<ARDOUR::Stripable> s)
+{
+	controllable_remapped_connection.disconnect ();
+	if (!s) {
+		return;
+	}
+	s->MappedControlsChanged.connect (controllable_remapped_connection, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::lookup_controllable, this), this);
 }
 
 void
@@ -264,7 +276,8 @@ MIDIControllable::lookup_controllable()
 		return -1;
 	}
 
-	std::shared_ptr<Controllable> c = _surface->lookup_controllable (_current_uri);
+	controllable_remapped_connection.disconnect ();
+	std::shared_ptr<Controllable> c = _surface->lookup_controllable (_current_uri, *this);
 
 	if (!c) {
 		set_controllable (std::shared_ptr<PBD::Controllable>());
