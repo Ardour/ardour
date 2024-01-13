@@ -1493,7 +1493,10 @@ Selection::remove (const TrackViewList& t)
 	PresentationInfo::ChangeSuspender cs;
 
 	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
-		std::shared_ptr<Stripable> s = (*i)->stripable ();
+		std::shared_ptr<Stripable> s;
+		if (!dynamic_cast<AutomationTimeAxisView*> (*i)) {
+			s = (*i)->stripable ();
+		}
 		std::shared_ptr<AutomationControl> c = (*i)->control ();
 		selection.remove (s, c);
 	}
