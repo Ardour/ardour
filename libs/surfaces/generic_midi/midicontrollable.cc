@@ -161,7 +161,7 @@ MIDIControllable::bind_remap (std::shared_ptr<ARDOUR::Stripable> s)
 	if (!s) {
 		return;
 	}
-	s->MappedControlsChanged.connect (controllable_remapped_connection, MISSING_INVALIDATOR, boost::bind (&GenericMidiControlProtocol::lookup_controllable, this), this);
+	s->MappedControlsChanged.connect (controllable_remapped_connection, MISSING_INVALIDATOR, boost::bind (&MIDIControllable::lookup_controllable, this), _surface);
 }
 
 void
