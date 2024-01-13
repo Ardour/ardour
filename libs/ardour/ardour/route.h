@@ -550,6 +550,9 @@ public:
 	uint32_t eq_band_cnt () const;
 	std::string eq_band_name (uint32_t) const;
 
+	std::shared_ptr<AutomationControl> mapped_control (enum WellKnownCtrl, uint32_t band = 0) const;
+	std::shared_ptr<ReadOnlyControl>   mapped_output (enum WellKnownData) const;
+
 	std::shared_ptr<AutomationControl> eq_enable_controllable () const;
 	std::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const;
 	std::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const;
@@ -839,6 +842,11 @@ private:
 	bool    _initial_io_setup;
 	bool    _in_sidechain_setup;
 	gain_t  _monitor_gain;
+
+	void add_well_known_ctrl (WellKnownCtrl, std::shared_ptr<PluginInsert>, int param);
+	void add_well_known_ctrl (WellKnownCtrl);
+
+	std::map<WellKnownCtrl, std::vector<std::weak_ptr<AutomationControl>>> _well_known_map;
 
 	/** true if we've made a note of a custom meter position in these variables */
 	bool _custom_meter_position_noted;

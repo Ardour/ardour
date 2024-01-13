@@ -53,6 +53,9 @@ class MonitorProcessor;
 class RecordEnableControl;
 class RecordSafeControl;
 
+enum WellKnownCtrl : int;
+enum WellKnownData : int;
+
 /* This is a virtual base class for any object that needs to be potentially
  * represented by a control-centric user interface using the general model of a
  * mixing console "strip" - a collection of controls that determine the state
@@ -138,13 +141,19 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual std::shared_ptr<AutomationControl> pan_frontback_control() const = 0;
 	virtual std::shared_ptr<AutomationControl> pan_lfe_control() const = 0;
 
-	/* "well-known" controls for an EQ in this route. Any or all may
-	 * be null. eq_band_cnt() must return 0 if there is no EQ present.
-	 * Passing an @p band value >= eq_band_cnt() will guarantee the
-	 * return of a null ptr (or an empty string for eq_band_name()).
-	 */
+	/* "well-known" controls. Any or all may NULL. */
 	virtual uint32_t eq_band_cnt () const = 0;
 	virtual std::string eq_band_name (uint32_t) const = 0;
+
+
+	virtual std::shared_ptr<AutomationControl> mapped_control (enum WellKnownCtrl, uint32_t band = 0) const = 0;
+	virtual std::shared_ptr<ReadOnlyControl>   mapped_output (enum WellKnownData) const = 0;
+
+	/* ACs mapped to any control have changed. API user is to drop references,
+	 * and query mapped ctrl again
+	 */
+	PBD::Signal0<void> MappedControlsChanged;
+
 	virtual std::shared_ptr<AutomationControl> eq_enable_controllable () const = 0;
 	virtual std::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const = 0;
 	virtual std::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const = 0;

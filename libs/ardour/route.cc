@@ -101,6 +101,7 @@
 #include "ardour/types_convert.h"
 #include "ardour/unknown_processor.h"
 #include "ardour/utils.h"
+#include "ardour/well_known_enum.h"
 #include "ardour/vca.h"
 
 #include "pbd/i18n.h"
@@ -5858,6 +5859,34 @@ Route::eq_band_cnt () const
 {
 	/* Ardour has no well-known EQ object */
 	return 0;
+}
+
+void
+Route::add_well_known_ctrl (WellKnownCtrl which)
+{
+	_well_known_map[which].push_back (std::weak_ptr<ARDOUR::AutomationControl> ());
+}
+
+void
+Route::add_well_known_ctrl (WellKnownCtrl which, std::shared_ptr<PluginInsert> pi, int param)
+{
+	_well_known_map[which].push_back (std::dynamic_pointer_cast<ARDOUR::AutomationControl> (pi->control (Evoral::Parameter (ARDOUR::PluginAutomation, 0, param))));
+}
+
+std::shared_ptr<AutomationControl>
+Route::mapped_control (enum WellKnownCtrl which, uint32_t band) const
+{
+	auto it = _well_known_map.find (which);
+	if (it == _well_known_map.end () || it->second.size () <= band) {
+		return std::shared_ptr<AutomationControl> ();
+	}
+	return it->second[band].lock();
+}
+
+std::shared_ptr<ReadOnlyControl>
+Route::mapped_output (enum WellKnownData which) const
+{
+	return std::shared_ptr<ReadOnlyControl>();
 }
 
 std::shared_ptr<AutomationControl>

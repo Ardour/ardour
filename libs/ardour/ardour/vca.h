@@ -110,6 +110,13 @@ class LIBARDOUR_API VCA : public Stripable,
 
 	/* null Stripable API, because VCAs don't have any of this */
 
+	std::shared_ptr<AutomationControl> mapped_control (enum WellKnownCtrl, uint32_t band = 0) const {
+		return std::shared_ptr<AutomationControl>();
+	}
+	std::shared_ptr<ReadOnlyControl>   mapped_output (enum WellKnownData) const {
+		return std::shared_ptr<ReadOnlyControl>();
+	}
+
 	std::shared_ptr<SoloIsolateControl> solo_isolate_control() const { return std::shared_ptr<SoloIsolateControl>(); }
 	std::shared_ptr<SoloSafeControl> solo_safe_control() const { return std::shared_ptr<SoloSafeControl>(); }
 	std::shared_ptr<PeakMeter>         peak_meter() { return std::shared_ptr<PeakMeter>(); }
