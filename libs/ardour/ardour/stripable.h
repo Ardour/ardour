@@ -145,7 +145,6 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	virtual uint32_t eq_band_cnt () const = 0;
 	virtual std::string eq_band_name (uint32_t) const = 0;
 
-
 	virtual std::shared_ptr<AutomationControl> mapped_control (enum WellKnownCtrl, uint32_t band = 0) const = 0;
 	virtual std::shared_ptr<ReadOnlyControl>   mapped_output (enum WellKnownData) const = 0;
 
@@ -153,54 +152,6 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	 * and query mapped ctrl again
 	 */
 	PBD::Signal0<void> MappedControlsChanged;
-
-	virtual std::shared_ptr<AutomationControl> eq_enable_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> eq_gain_controllable (uint32_t band) const = 0;
-	virtual std::shared_ptr<AutomationControl> eq_freq_controllable (uint32_t band) const = 0;
-	virtual std::shared_ptr<AutomationControl> eq_q_controllable (uint32_t band) const = 0;
-	virtual std::shared_ptr<AutomationControl> eq_shape_controllable (uint32_t band) const = 0;
-
-	virtual std::shared_ptr<AutomationControl> filter_freq_controllable (bool hp /* false for LPF*/) const = 0;
-	virtual std::shared_ptr<AutomationControl> filter_slope_controllable (bool hp) const = 0;
-	virtual std::shared_ptr<AutomationControl> filter_enable_controllable (bool hp) const = 0;
-
-	virtual std::shared_ptr<AutomationControl> tape_drive_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> tape_drive_mode_controllable () const = 0;
-	virtual std::shared_ptr<ReadOnlyControl> tape_drive_mtr_controllable () const = 0;
-
-	/* "well-known" controls for a compressor in this route. Any or all may
-	 * be null.
-	 */
-
-	virtual std::shared_ptr<AutomationControl> comp_enable_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> comp_threshold_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> comp_speed_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> comp_mode_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> comp_makeup_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> comp_ratio_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> comp_attack_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> comp_release_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> comp_key_filter_freq_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> comp_lookahead_controllable () const = 0;
-	virtual std::shared_ptr<ReadOnlyControl>   comp_meter_controllable () const = 0;
-	virtual std::shared_ptr<ReadOnlyControl>   comp_redux_controllable () const = 0;
-
-	virtual std::shared_ptr<AutomationControl> gate_enable_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> gate_mode_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> gate_ratio_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> gate_knee_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> gate_threshold_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> gate_depth_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> gate_hysteresis_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> gate_hold_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> gate_attack_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> gate_release_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> gate_key_listen_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> gate_key_filter_enable_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> gate_key_filter_freq_controllable () const = 0;
-	virtual std::shared_ptr<AutomationControl> gate_lookahead_controllable () const = 0;
-	virtual std::shared_ptr<ReadOnlyControl>   gate_meter_controllable () const = 0;
-	virtual std::shared_ptr<ReadOnlyControl>   gate_redux_controllable () const = 0;
 
 	/* "well-known" controls for sends to well-known busses in this route. Any or all may
 	 * be null.
@@ -226,31 +177,6 @@ class LIBARDOUR_API Stripable : public SessionObject,
 	 * the route.
 	 */
 	virtual std::shared_ptr<AutomationControl> master_send_enable_controllable () const = 0;
-
-	/* well known control for mixbus's correlation meter.
-	 *
-	 * In Ardour, this returns null.
-	 * In Mixbus, it will return a suitable control, or null depending on the route.
-	 * @param mm min/max of the correlation range, true for upper value
-	 */
-	virtual std::shared_ptr<ReadOnlyControl> master_correlation_mtr_controllable (bool mm) const { return std::shared_ptr<ReadOnlyControl>(); }
-
-	/* well known control for mixbus's limiter.
-	 *
-	 * In Ardour, this returns null.
-	 * In Mixbus, it will return a suitable control, or null depending on
-	 * the route.
-	 */
-	virtual std::shared_ptr<AutomationControl> master_limiter_enable_controllable () const { return std::shared_ptr<AutomationControl>(); }
-	virtual std::shared_ptr<ReadOnlyControl> master_limiter_mtr_controllable () const { return std::shared_ptr<ReadOnlyControl>(); }
-
-	/* well known control for mixbus's k-meter.
-	 *
-	 * In Ardour, this returns null.
-	 * In Mixbus, it will return a suitable control, or null depending on
-	 * the route.
-	 */
-	virtual std::shared_ptr<ReadOnlyControl> master_k_mtr_controllable () const { return std::shared_ptr<ReadOnlyControl>(); }
 
 	virtual bool muted_by_others_soloing () const = 0;
 
