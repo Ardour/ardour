@@ -1423,6 +1423,9 @@ FaderPort8::select_plugin (int num)
 		std::shared_ptr<Processor> proc;
 		std::shared_ptr<PluginInsert> pi;
 		for (uint32_t i = 0; 0 != (proc = r->nth_plugin (i)); ++i) {
+			if (!proc->display_to_user ()) {
+				continue;
+			}
 			switch (std::dynamic_pointer_cast<PluginInsert> (proc)->channelstrip ()) {
 				case Processor::MBComp:
 					if (num == -2) {
