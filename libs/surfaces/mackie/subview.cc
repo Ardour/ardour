@@ -35,6 +35,7 @@
 #include "ardour/solo_isolate_control.h"
 #include "ardour/stripable.h"
 #include "ardour/track.h"
+#include "ardour/well_known_enum.h"
 
 #include "mackie_control_protocol.h"
 #include "pot.h"
@@ -329,7 +330,7 @@ void EQSubview::setup_vpot(
 			case 4:
 			case 6:
 				eq_band = global_strip_position / 2;
-				pc = _subview_stripable->eq_freq_controllable (eq_band);
+				pc = _subview_stripable->mapped_control (EQ_Freq, eq_band);
 				band_name = _subview_stripable->eq_band_name (eq_band);
 				pot_id = band_name + "Freq";
 				break;
@@ -338,22 +339,22 @@ void EQSubview::setup_vpot(
 			case 5:
 			case 7:
 				eq_band = global_strip_position / 2;
-				pc = _subview_stripable->eq_gain_controllable (eq_band);
+				pc = _subview_stripable->mapped_control (EQ_Gain, eq_band);
 				band_name = _subview_stripable->eq_band_name (eq_band);
 				pot_id = band_name + "Gain";
 				break;
 			case 8:
-				pc = _subview_stripable->eq_shape_controllable(0);  //low band "bell" button
+				pc = _subview_stripable->mapped_control (EQ_Shape, 0);  //low band "bell" button
 				band_name = "lo";
 				pot_id = band_name + " Shp";
 				break;
 			case 9:
-				pc = _subview_stripable->eq_shape_controllable(3);  //high band "bell" button
+				pc = _subview_stripable->mapped_control (EQ_Shape, 3);  //high band "bell" button
 				band_name = "hi";
 				pot_id = band_name + " Shp";
 				break;
 			case 10:
-				pc = _subview_stripable->eq_enable_controllable();
+				pc = _subview_stripable->mapped_control(EQ_Enable);
 				pot_id = "EQ";
 				break;
 		}
@@ -364,7 +365,7 @@ void EQSubview::setup_vpot(
 			case 1:
 			case 2:
 				eq_band = global_strip_position;
-				pc = _subview_stripable->eq_gain_controllable (eq_band);
+				pc = _subview_stripable->mapped_control (EQ_Gain, eq_band);
 				band_name = _subview_stripable->eq_band_name (eq_band);
 				pot_id = band_name + "Gain";
 				break;
@@ -426,7 +427,7 @@ DynamicsSubview::~DynamicsSubview()
 
 bool DynamicsSubview::subview_mode_would_be_ok (std::shared_ptr<ARDOUR::Stripable> r, std::string& reason_why_not)
 {
-	if (r && r->comp_enable_controllable()) {
+	if (r && r->mapped_control (Comp_Enable)) {
 		return true;
 	}
 
@@ -456,15 +457,22 @@ void DynamicsSubview::setup_vpot(
 		return;
 	}
 
-	std::shared_ptr<AutomationControl> tc = _subview_stripable->comp_threshold_controllable ();
-	std::shared_ptr<AutomationControl> sc = _subview_stripable->comp_speed_controllable ();
-	std::shared_ptr<AutomationControl> mc = _subview_stripable->comp_mode_controllable ();
-	std::shared_ptr<AutomationControl> kc = _subview_stripable->comp_makeup_controllable ();
-	std::shared_ptr<AutomationControl> ec = _subview_stripable->comp_enable_controllable ();
+	std::shared_ptr<AutomationControl> hpfc = _subview_stripable->mapped_control (HPF_Freq);
+	std::shared_ptr<AutomationControl> lpfc = _subview_stripable->mapped_control (LPF_Freq);
+	std::shared_ptr<AutomationControl> fec = _subview_stripable->mapped_control (HPF_Enable); // shared HP/LP
 
-	std::shared_ptr<AutomationControl> hpfc = _subview_stripable->filter_freq_controllable (true);
-	std::shared_ptr<AutomationControl> lpfc = _subview_stripable->filter_freq_controllable (false);
-	std::shared_ptr<AutomationControl> fec = _subview_stripable->filter_enable_controllable (true); // shared HP/LP
+	std::shared_ptr<AutomationControl> ctc = _subview_stripable->mapped_control (Comp_Threshold);
+	std::shared_ptr<AutomationControl> crc = _subview_stripable->mapped_control (Comp_Ratio);
+	std::shared_ptr<AutomationControl> cac = _subview_stripable->mapped_control (Comp_Attack);
+	std::shared_ptr<AutomationControl> csc = _subview_stripable->mapped_control (Comp_Release);
+	std::shared_ptr<AutomationControl> ckc = _subview_stripable->mapped_control (Comp_Makeup);
+	std::shared_ptr<AutomationControl> cec = _subview_stripable->mapped_control (Comp_Enable);
+
+	std::shared_ptr<AutomationControl> gtc = _subview_stripable->mapped_control (Gate_Threshold);
+	std::shared_ptr<AutomationControl> gdc = _subview_stripable->mapped_control (Gate_Depth);
+	std::shared_ptr<AutomationControl> gac = _subview_stripable->mapped_control (Gate_Attack);
+	std::shared_ptr<AutomationControl> gsc = _subview_stripable->mapped_control (Gate_Release);
+	std::shared_ptr<AutomationControl> gec = _subview_stripable->mapped_control (Gate_Enable);
 
 	/* we will control the global_strip_position-th available parameter, from the list in the
 	 * order shown above.
@@ -473,15 +481,23 @@ void DynamicsSubview::setup_vpot(
 	std::vector<std::pair<std::shared_ptr<AutomationControl>, std::string > > available;
 	std::vector<AutomationType> params;
 
-	if (tc) { available.push_back (std::make_pair (tc, "Thresh")); }
-	if (sc) { available.push_back (std::make_pair (sc, mc ? mc->get_user_string () : "Speed")); }
-	if (mc) { available.push_back (std::make_pair (mc, "Mode")); }
-	if (kc) { available.push_back (std::make_pair (kc, "Makeup")); }
-	if (ec) { available.push_back (std::make_pair (ec, "on/off")); }
-
+	//Mixbus32C needs to spill the filter controls into the comp section
 	if (hpfc) { available.push_back (std::make_pair (hpfc, "HPF")); }
 	if (lpfc) { available.push_back (std::make_pair (lpfc, "LPF")); }
 	if (fec)  { available.push_back (std::make_pair (fec, "FiltIn")); }
+
+	if (ctc) { available.push_back (std::make_pair (ctc, "Thresh")); }
+	if (crc) { available.push_back (std::make_pair (crc, "Ratio")); }
+	if (cac) { available.push_back (std::make_pair (cac, "Attk")); }
+	if (csc) { available.push_back (std::make_pair (csc, "Rels")); }
+	if (ckc) { available.push_back (std::make_pair (ckc, "Makeup")); }
+	if (cec) { available.push_back (std::make_pair (cec, "on/off")); }
+
+	if (gtc) { available.push_back (std::make_pair (gtc, "Thresh")); }
+	if (gdc) { available.push_back (std::make_pair (gdc, "Depth")); }
+	if (gac) { available.push_back (std::make_pair (gac, "Attk")); }
+	if (gsc) { available.push_back (std::make_pair (gsc, "Rels")); }
+	if (gec) { available.push_back (std::make_pair (gec, "on/off")); }
 
 	if (global_strip_position >= available.size()) {
 		/* this knob is not needed to control the available parameters */
@@ -534,7 +550,7 @@ DynamicsSubview::notify_change (std::weak_ptr<ARDOUR::AutomationControl> pc, uin
 
 	if (control) {
 		float val = control->get_value();
-		if (control == _subview_stripable->comp_mode_controllable ()) {
+		if (control == _subview_stripable->mapped_control (Comp_Mode)) {
 			pending_display[1] = control->get_user_string ();
 		} else {
 			do_parameter_display(pending_display[1], control->desc(), val, strip, true);

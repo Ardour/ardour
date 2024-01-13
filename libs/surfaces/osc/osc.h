@@ -553,7 +553,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	PATH_CALLBACK1_MSG(sel_plugin_activate,f);
 	PATH_CALLBACK1_MSG(sel_comp_enable,f);
 	PATH_CALLBACK1_MSG(sel_comp_threshold,f);
-	PATH_CALLBACK1_MSG(sel_comp_speed,f);
 	PATH_CALLBACK1_MSG(sel_comp_mode,f);
 	PATH_CALLBACK1_MSG(sel_comp_makeup,f);
 	PATH_CALLBACK1_MSG(sel_eq_enable,f);
@@ -731,7 +730,6 @@ class OSC : public ARDOUR::ControlProtocol, public AbstractUI<OSCUIRequest>
 	int sel_pan_lfe (float val, lo_message msg);
 	int sel_comp_enable (float val, lo_message msg);
 	int sel_comp_threshold (float val, lo_message msg);
-	int sel_comp_speed (float val, lo_message msg);
 	int sel_comp_mode (float val, lo_message msg);
 	int sel_comp_makeup (float val, lo_message msg);
 	int sel_eq_enable (float val, lo_message msg);

@@ -24,6 +24,7 @@
 #include "ardour/stripable.h"
 #include "ardour/track.h"
 #include "ardour/value_as_string.h"
+#include "ardour/well_known_enum.h"
 
 #include "control_protocol/control_protocol.h"
 
@@ -324,7 +325,7 @@ FP8Strip::set_stripable (std::shared_ptr<Stripable> s, bool panmode)
 		recarm_button ().set_active (false);
 	}
 	_peak_meter = s->peak_meter ();
-	_redux_ctrl = s->comp_redux_controllable ();
+	_redux_ctrl = s->mapped_output (Comp_Redux);
 
 	set_select_controllable (std::shared_ptr<AutomationControl>());
 	select_button ().set_active (s->is_selected ());

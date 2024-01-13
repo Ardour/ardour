@@ -21,6 +21,7 @@
 #include "ardour/phase_control.h"
 #include "ardour/presentation_info.h"
 #include "ardour/session.h"
+#include "ardour/well_known_enum.h"
 
 #include "c1_control.h"
 #include "console1.h"
@@ -211,19 +212,19 @@ Console1::zoom (const uint32_t value)
 void
 Console1::filter (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->filter_enable_controllable (true))
+	if (!_current_stripable || !_current_stripable->mapped_control (HPF_Enable))
 		return;
 	session->set_control (
-	  _current_stripable->filter_enable_controllable (true), value > 0, PBD::Controllable::UseGroup);
+	  _current_stripable->mapped_control (HPF_Enable), value > 0, PBD::Controllable::UseGroup);
 }
 
 void
 Console1::low_cut (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->filter_freq_controllable (true)) {
+	if (!_current_stripable || !_current_stripable->mapped_control (HPF_Freq)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->filter_freq_controllable (true);
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (HPF_Freq);
 	double freq = midi_to_control (control, value);
 	session->set_control (control, freq, PBD::Controllable::UseGroup);
 }
@@ -231,10 +232,10 @@ Console1::low_cut (const uint32_t value)
 void
 Console1::high_cut (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->filter_freq_controllable (false)) {
+	if (!_current_stripable || !_current_stripable->mapped_control (LPF_Freq)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->filter_freq_controllable (false);
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (LPF_Freq);
 	double freq = midi_to_control (control, value);
 	session->set_control (control, freq, PBD::Controllable::UseGroup);
 }
@@ -243,35 +244,35 @@ Console1::high_cut (const uint32_t value)
 void
 Console1::gate (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->gate_enable_controllable ())
+	if (!_current_stripable || !_current_stripable->mapped_control (Gate_Enable))
 		return;
-	session->set_control (_current_stripable->gate_enable_controllable (), value > 0, PBD::Controllable::UseGroup);
+	session->set_control (_current_stripable->mapped_control (Gate_Enable), value > 0, PBD::Controllable::UseGroup);
 }
 
 void
 Console1::gate_scf (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->gate_key_filter_enable_controllable ())
+	if (!_current_stripable || !_current_stripable->mapped_control (Gate_KeyFilterEnable))
 		return;
 	session->set_control (
-	  _current_stripable->gate_key_filter_enable_controllable (), value > 0, PBD::Controllable::UseGroup);
+	  _current_stripable->mapped_control (Gate_KeyFilterEnable), value > 0, PBD::Controllable::UseGroup);
 }
 
 void
 Console1::gate_listen (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->gate_key_listen_controllable ())
+	if (!_current_stripable || !_current_stripable->mapped_control (Gate_KeyListen))
 		return;
-	session->set_control (_current_stripable->gate_key_listen_controllable (), value > 0, PBD::Controllable::UseGroup);
+	session->set_control (_current_stripable->mapped_control (Gate_KeyListen), value > 0, PBD::Controllable::UseGroup);
 }
 
 void
 Console1::gate_thresh (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->gate_threshold_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Gate_Threshold)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->gate_threshold_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Threshold);
 	double freq = midi_to_control (control, value);
 	session->set_control (control, freq, PBD::Controllable::UseGroup);
 }
@@ -279,10 +280,10 @@ Console1::gate_thresh (const uint32_t value)
 void
 Console1::gate_depth (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->gate_depth_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Gate_Depth)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->gate_depth_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Depth);
 	double freq = midi_to_control (control, value);
 	session->set_control (control, freq, PBD::Controllable::UseGroup);
 }
@@ -290,10 +291,10 @@ Console1::gate_depth (const uint32_t value)
 void
 Console1::gate_release (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->gate_release_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Gate_Release)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->gate_release_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Release);
 	double freq = midi_to_control (control, value);
 	session->set_control (control, freq, PBD::Controllable::UseGroup);
 }
@@ -301,10 +302,10 @@ Console1::gate_release (const uint32_t value)
 void
 Console1::gate_attack (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->gate_attack_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Gate_Attack)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->gate_attack_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Attack);
 	double freq = midi_to_control (control, value);
 	session->set_control (control, freq, PBD::Controllable::UseGroup);
 }
@@ -312,10 +313,10 @@ Console1::gate_attack (const uint32_t value)
 void
 Console1::gate_hyst (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->gate_hysteresis_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Gate_Hysteresis)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->gate_hysteresis_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Hysteresis);
 	double freq = midi_to_control (control, value);
 	session->set_control (control, freq, PBD::Controllable::UseGroup);
 }
@@ -323,10 +324,10 @@ Console1::gate_hyst (const uint32_t value)
 void
 Console1::gate_hold (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->gate_hold_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Gate_Hold)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->gate_hold_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Hold);
 	double freq = midi_to_control (control, value);
 	session->set_control (control, freq, PBD::Controllable::UseGroup);
 }
@@ -334,10 +335,10 @@ Console1::gate_hold (const uint32_t value)
 void
 Console1::gate_filter_freq (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->gate_key_filter_freq_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Gate_KeyFilterFreq)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->gate_key_filter_freq_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_KeyFilterFreq);
 	double freq = midi_to_control (control, value);
 	session->set_control (control, freq, PBD::Controllable::UseGroup);
 }
@@ -351,8 +352,8 @@ Console1::eq (const uint32_t value)
 	if (!_current_stripable) {
 		return;
 	}
-	if (_current_stripable->eq_enable_controllable ())
-		session->set_control (_current_stripable->eq_enable_controllable (), value > 0, PBD::Controllable::UseGroup);
+	if (_current_stripable->mapped_control (EQ_Enable))
+		session->set_control (_current_stripable->mapped_control (EQ_Enable), value > 0, PBD::Controllable::UseGroup);
 	else
 		map_eq ();
 }
@@ -364,8 +365,8 @@ Console1::eq_low_shape (const uint32_t value)
 	if (!_current_stripable) {
 		return;
 	}
-	if (_current_stripable->eq_shape_controllable (0))
-		session->set_control (_current_stripable->eq_shape_controllable (0), value > 0, PBD::Controllable::UseGroup);
+	if (_current_stripable->mapped_control (EQ_Shape, 0))
+		session->set_control (_current_stripable->mapped_control (EQ_Shape, 0), value > 0, PBD::Controllable::UseGroup);
 	else
 		map_eq_low_shape ();
 }
@@ -377,8 +378,8 @@ Console1::eq_high_shape (const uint32_t value)
 	if (!_current_stripable) {
 		return;
 	}
-	if (_current_stripable->eq_shape_controllable (3))
-		session->set_control (_current_stripable->eq_shape_controllable (3), value > 0, PBD::Controllable::UseGroup);
+	if (_current_stripable->mapped_control (EQ_Shape, 3))
+		session->set_control (_current_stripable->mapped_control (EQ_Shape, 3), value > 0, PBD::Controllable::UseGroup);
 	else
 		map_eq_high_shape ();
 }
@@ -386,10 +387,10 @@ Console1::eq_high_shape (const uint32_t value)
 void
 Console1::eq_freq (const uint32_t band, uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->eq_freq_controllable (band)) {
+	if (!_current_stripable || !_current_stripable->mapped_control (EQ_Freq, band)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->eq_freq_controllable (band);
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_Freq, band);
 	double freq = midi_to_control (control, value);
 	session->set_control (control, freq, PBD::Controllable::UseGroup);
 }
@@ -397,10 +398,10 @@ Console1::eq_freq (const uint32_t band, uint32_t value)
 void
 Console1::eq_gain (const uint32_t band, uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->eq_gain_controllable (band)) {
+	if (!_current_stripable || !_current_stripable->mapped_control (EQ_Gain, band)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->eq_gain_controllable (band);
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_Gain, band);
 	double gain = midi_to_control (control, value);
 	session->set_control (control, gain, PBD::Controllable::UseGroup);
 }
@@ -445,10 +446,10 @@ Console1::mb_send_level (const uint32_t n, const uint32_t value)
 void
 Console1::drive (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->tape_drive_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (TapeDrive_Drive)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->tape_drive_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (TapeDrive_Drive);
 	if (_current_stripable->presentation_info ().flags () & PresentationInfo::AudioTrack) {
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("drive audio track %1\n", value));
 		session->set_control (control, value > 62 ? 1 : 0, PBD::Controllable::UseGroup);
@@ -462,27 +463,27 @@ Console1::drive (const uint32_t value)
 void
 Console1::comp (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->comp_enable_controllable ())
+	if (!_current_stripable || !_current_stripable->mapped_control (Comp_Enable))
 		return;
-	session->set_control (_current_stripable->comp_enable_controllable (), value > 0, PBD::Controllable::UseGroup);
+	session->set_control (_current_stripable->mapped_control (Comp_Enable), value > 0, PBD::Controllable::UseGroup);
 }
 
 void
 Console1::comp_mode (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->comp_mode_controllable ())
+	if (!_current_stripable || !_current_stripable->mapped_control (Comp_Mode))
 		return;
 	int new_val = value == 63 ? 1 : value == 127 ? 2 : 0;
-	session->set_control (_current_stripable->comp_mode_controllable (), new_val, PBD::Controllable::UseGroup);
+	session->set_control (_current_stripable->mapped_control (Comp_Mode), new_val, PBD::Controllable::UseGroup);
 }
 
 void
 Console1::comp_thresh (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->comp_threshold_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Comp_Threshold)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->comp_threshold_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Threshold);
 	double gain = midi_to_control (control, value);
 	session->set_control (control, gain, PBD::Controllable::UseGroup);
 }
@@ -490,10 +491,10 @@ Console1::comp_thresh (const uint32_t value)
 void
 Console1::comp_attack (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->comp_attack_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Comp_Attack)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->comp_attack_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Attack);
 	double gain = midi_to_control (control, value);
 	session->set_control (control, gain, PBD::Controllable::UseGroup);
 }
@@ -501,10 +502,10 @@ Console1::comp_attack (const uint32_t value)
 void
 Console1::comp_release (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->comp_release_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Comp_Release)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->comp_release_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Release);
 	double gain = midi_to_control (control, value);
 	session->set_control (control, gain, PBD::Controllable::UseGroup);
 }
@@ -512,10 +513,10 @@ Console1::comp_release (const uint32_t value)
 void
 Console1::comp_ratio (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->comp_ratio_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Comp_Ratio)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->comp_ratio_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Ratio);
 	double gain = midi_to_control (control, value);
 	session->set_control (control, gain, PBD::Controllable::UseGroup);
 }
@@ -523,10 +524,10 @@ Console1::comp_ratio (const uint32_t value)
 void
 Console1::comp_makeup (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->comp_makeup_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Comp_Makeup)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->comp_makeup_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Makeup);
 	double gain = midi_to_control (control, value);
 	session->set_control (control, gain, PBD::Controllable::UseGroup);
 }
@@ -534,10 +535,10 @@ Console1::comp_makeup (const uint32_t value)
 void
 Console1::comp_emph (const uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->comp_key_filter_freq_controllable ()) {
+	if (!_current_stripable || !_current_stripable->mapped_control (Comp_KeyFilterFreq)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->comp_key_filter_freq_controllable ();
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_KeyFilterFreq);
 	double gain = midi_to_control (control, value);
 	session->set_control (control, gain, PBD::Controllable::UseGroup);
 }
@@ -729,8 +730,8 @@ Console1::map_filter ()
 	}
 	try {
 		get_button (ControllerID::FILTER_TO_COMPRESSORS)
-		  ->set_led_state (_current_stripable->filter_enable_controllable (true)
-		                     ? _current_stripable->filter_enable_controllable (true)->get_value ()
+		  ->set_led_state (_current_stripable->mapped_control (HPF_Enable)
+		                     ? _current_stripable->mapped_control (HPF_Enable)->get_value ()
 		                     : false);
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
@@ -742,7 +743,7 @@ Console1::map_low_cut ()
 {
 	ControllerID controllerID = ControllerID::LOW_CUT;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->filter_freq_controllable (true);
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (HPF_Freq);
 		map_encoder (controllerID, control);
 	}
 }
@@ -752,7 +753,7 @@ Console1::map_high_cut ()
 {
 	ControllerID controllerID = ControllerID::HIGH_CUT;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->filter_freq_controllable (false);
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (LPF_Freq);
 		map_encoder (controllerID, control);
 	}
 }
@@ -765,8 +766,8 @@ Console1::map_gate ()
 		return;
 	try {
 		get_button (ControllerID::SHAPE)
-		  ->set_led_state (_current_stripable->gate_enable_controllable ()
-		                     ? _current_stripable->gate_enable_controllable ()->get_value ()
+		  ->set_led_state (_current_stripable->mapped_control (Gate_Enable)
+		                     ? _current_stripable->mapped_control (Gate_Enable)->get_value ()
 		                     : false);
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
@@ -781,8 +782,8 @@ Console1::map_gate_scf ()
 	try {
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("map_gate_scf() - shift: %1\n", shift_state));
 		get_button (ControllerID::HARD_GATE)
-		  ->set_led_state (_current_stripable->gate_key_filter_enable_controllable ()
-		                     ? _current_stripable->gate_key_filter_enable_controllable ()->get_value ()
+		  ->set_led_state (_current_stripable->mapped_control (Gate_KeyFilterEnable)
+		                     ? _current_stripable->mapped_control (Gate_KeyFilterEnable)->get_value ()
 		                     : false);
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
@@ -797,8 +798,8 @@ Console1::map_gate_listen ()
 	try {
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("map_gate_listen() - shift: %1\n", shift_state));
 		get_button (ControllerID::HARD_GATE)
-		  ->set_led_state (_current_stripable->gate_key_listen_controllable ()
-		                     ? _current_stripable->gate_key_listen_controllable ()->get_value ()
+		  ->set_led_state (_current_stripable->mapped_control (Gate_KeyListen)
+		                     ? _current_stripable->mapped_control (Gate_KeyListen)->get_value ()
 		                     : false);
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
@@ -810,7 +811,7 @@ Console1::map_gate_thresh ()
 {
 	ControllerID controllerID = ControllerID::SHAPE_GATE;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->gate_threshold_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Threshold);
 		map_encoder (controllerID, control);
 	}
 }
@@ -823,7 +824,7 @@ Console1::map_gate_release ()
 	}
 	ControllerID controllerID = ControllerID::SHAPE_RELEASE;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->gate_release_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Release);
 		map_encoder (controllerID, control);
 	}
 }
@@ -836,7 +837,7 @@ Console1::map_gate_attack ()
 	}
 	ControllerID controllerID = ControllerID::SHAPE_SUSTAIN;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->gate_attack_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Attack);
 		map_encoder (controllerID, control);
 	}
 }
@@ -849,7 +850,7 @@ Console1::map_gate_depth ()
 	}
 	ControllerID controllerID = ControllerID::SHAPE_PUNCH;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->gate_depth_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Depth);
 		map_encoder (controllerID, control);
 	}
 }
@@ -862,7 +863,7 @@ Console1::map_gate_hyst ()
 	}
 	ControllerID controllerID = ControllerID::SHAPE_RELEASE;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->gate_hysteresis_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Hysteresis);
 		map_encoder (controllerID, control);
 	}
 }
@@ -875,7 +876,7 @@ Console1::map_gate_hold ()
 	}
 	ControllerID controllerID = ControllerID::SHAPE_SUSTAIN;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->gate_hold_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_Hold);
 		map_encoder (controllerID, control);
 	}
 }
@@ -888,7 +889,7 @@ Console1::map_gate_filter_freq ()
 	}
 	ControllerID controllerID = ControllerID::SHAPE_PUNCH;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->gate_key_filter_freq_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Gate_KeyFilterFreq);
 		map_encoder (controllerID, control);
 	}
 }
@@ -900,8 +901,8 @@ Console1::map_eq ()
 	if (!_current_stripable)
 		return;
 	try {
-		get_button (EQ)->set_led_state (_current_stripable->eq_enable_controllable ()
-		                                  ? _current_stripable->eq_enable_controllable ()->get_value ()
+		get_button (EQ)->set_led_state (_current_stripable->mapped_control (EQ_Enable)
+		                                  ? _current_stripable->mapped_control (EQ_Enable)->get_value ()
 		                                  : false);
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
@@ -916,7 +917,7 @@ Console1::map_eq_freq (const uint32_t band)
 	}
 	ControllerID controllerID = eq_freq_controller_for_band (band);
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->eq_freq_controllable (band);
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_Freq, band);
 		map_encoder (controllerID, control);
 	}
 }
@@ -929,7 +930,7 @@ Console1::map_eq_gain (const uint32_t band)
 	}
 	ControllerID controllerID = eq_gain_controller_for_band (band);
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->eq_gain_controllable (band);
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_Gain, band);
 		map_encoder (controllerID, control);
 	}
 }
@@ -940,8 +941,8 @@ Console1::map_eq_low_shape ()
 	if (!_current_stripable)
 		return;
 	try {
-		uint32_t led_value = _current_stripable->eq_shape_controllable (0)
-		                       ? _current_stripable->eq_shape_controllable (0)->get_value () == 0 ? 0 : 63
+		uint32_t led_value = _current_stripable->mapped_control (EQ_Shape, 0)
+		                       ? _current_stripable->mapped_control (EQ_Shape, 0)->get_value () == 0 ? 0 : 63
 		                       : 0;
 		get_button (ControllerID::LOW_SHAPE)->set_led_state (led_value);
 	} catch (ControlNotFoundException const&) {
@@ -955,8 +956,8 @@ Console1::map_eq_high_shape ()
 	if (!_current_stripable)
 		return;
 	try {
-		uint32_t led_value = _current_stripable->eq_shape_controllable (3)
-		                       ? _current_stripable->eq_shape_controllable (3)->get_value () == 0 ? 0 : 63
+		uint32_t led_value = _current_stripable->mapped_control (EQ_Shape, 3)
+		                       ? _current_stripable->mapped_control (EQ_Shape, 3)->get_value () == 0 ? 0 : 63
 		                       : 0;
 		get_button (ControllerID::HIGH_SHAPE)->set_led_state (led_value);
 	} catch (ControlNotFoundException const&) {
@@ -971,7 +972,7 @@ Console1::map_drive ()
 	ControllerID controllerID = ControllerID::CHARACTER;
 
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->tape_drive_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (TapeDrive_Drive);
 		if (control && _current_stripable->presentation_info ().flags () & PresentationInfo::AudioTrack) {
 			double val = control->get_value ();
 			DEBUG_TRACE (DEBUG::Console1, string_compose ("map_drive audio track %1\n", val));
@@ -1018,8 +1019,8 @@ Console1::map_comp ()
 		return;
 	try {
 		get_button (ControllerID::COMP)
-		  ->set_led_state (_current_stripable->comp_enable_controllable ()
-		                     ? _current_stripable->comp_enable_controllable ()->get_value ()
+		  ->set_led_state (_current_stripable->mapped_control (Comp_Enable)
+		                     ? _current_stripable->mapped_control (Comp_Enable)->get_value ()
 		                     : false);
 	} catch (ControlNotFoundException const&) {
 		DEBUG_TRACE (DEBUG::Console1, "Button not found\n");
@@ -1032,8 +1033,8 @@ Console1::map_comp_mode ()
 	if (!_current_stripable)
 		return;
 	try {
-		double value = _current_stripable->comp_mode_controllable ()
-		                 ? _current_stripable->comp_mode_controllable ()->get_value ()
+		double value = _current_stripable->mapped_control (Comp_Mode)
+		                 ? _current_stripable->mapped_control (Comp_Mode)->get_value ()
 		                 : false;
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("****value from comp-type %1\n", value));
 		get_mbutton (ControllerID::ORDER)->set_led_state (value);
@@ -1047,7 +1048,7 @@ Console1::map_comp_thresh ()
 {
 	ControllerID controllerID = ControllerID::COMP_THRESH;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->comp_threshold_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Threshold);
 		map_encoder (controllerID, control);
 	}
 }
@@ -1057,7 +1058,7 @@ Console1::map_comp_attack ()
 {
 	ControllerID controllerID = ControllerID::COMP_ATTACK;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->comp_attack_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Attack);
 		map_encoder (controllerID, control);
 	}
 }
@@ -1067,7 +1068,7 @@ Console1::map_comp_release ()
 {
 	ControllerID controllerID = ControllerID::COMP_RELEASE;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->comp_release_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Release);
 		map_encoder (controllerID, control);
 	}
 }
@@ -1077,7 +1078,7 @@ Console1::map_comp_ratio ()
 {
 	ControllerID controllerID = ControllerID::COMP_RATIO;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->comp_ratio_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Ratio);
 		map_encoder (controllerID, control);
 	}
 }
@@ -1087,7 +1088,7 @@ Console1::map_comp_makeup ()
 {
 	ControllerID controllerID = ControllerID::COMP_PAR;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->comp_makeup_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_Makeup);
 		map_encoder (controllerID, control);
 	}
 }
@@ -1097,7 +1098,7 @@ Console1::map_comp_emph ()
 {
 	ControllerID controllerID = ControllerID::DRIVE;
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->comp_key_filter_freq_controllable ();
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (Comp_KeyFilterFreq);
 		map_encoder (controllerID, control);
 	}
 }

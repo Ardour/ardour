@@ -55,6 +55,7 @@
 #include "ardour/user_bundle.h"
 #include "ardour/profile.h"
 #include "ardour/value_as_string.h"
+#include "ardour/well_known_enum.h"
 
 #include "us2400_control_protocol.h"
 #include "surface_port.h"
@@ -816,20 +817,20 @@ Strip::setup_trackview_vpot (std::shared_ptr<Stripable> r)
 		break;
 
 	case 2:
-		pc = r->comp_threshold_controllable();
+		pc = r->mapped_control (Comp_Threshold);
 		break;
 
 	case 3:
-		pc = r->comp_speed_controllable();
+		pc = r->mapped_control (Comp_Attack);
 		break;
 
 	case 4:
-		pc = r->comp_mode_controllable();
+		pc = r->mapped_control (Comp_Mode);
 		_vpot->set_mode(Pot::wrap);
 		break;
 
 	case 5:
-		pc = r->comp_makeup_controllable();
+		pc = r->mapped_control (Comp_Makeup);
 		break;
 
 
@@ -847,14 +848,14 @@ Strip::setup_trackview_vpot (std::shared_ptr<Stripable> r)
 				break;
 
 			case 7:
-				pc = r->tape_drive_controllable();
+				pc = r->mapped_control (TapeDrive_Drive);
 				break;
 
 			case 8:
 			case 9:
 			case 10:
 				eq_band = (global_pos-8);
-				pc = r->eq_gain_controllable (eq_band);
+				pc = r->mapped_control (EQ_Gain, eq_band);
 				_vpot->set_mode(Pot::boost_cut);
 				break;
 		}
@@ -863,24 +864,24 @@ Strip::setup_trackview_vpot (std::shared_ptr<Stripable> r)
 
 		switch (global_pos) {
 			case 6:
-				pc = r->filter_freq_controllable(true);
+				pc = r->mapped_control (HPF_Freq);
 				break;
 			case 7:
-				pc = r->filter_freq_controllable(false);
+				pc = r->mapped_control (LPF_Freq);
 				break;
 			case 8:
 			case 10:
 			case 12:
 			case 14: {
 				eq_band = (global_pos-8) / 2;
-				pc = r->eq_freq_controllable (eq_band);
+				pc = r->mapped_control (EQ_Freq, eq_band);
 				} break;
 			case 9:
 			case 11:
 			case 13:
 			case 15: {
 				eq_band = (global_pos-8) / 2;
-				pc = r->eq_gain_controllable (eq_band);
+				pc = r->mapped_control (EQ_Gain, eq_band);
 				_vpot->set_mode(Pot::boost_cut);
 				} break;
 		}

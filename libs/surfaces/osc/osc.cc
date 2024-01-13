@@ -68,6 +68,7 @@
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
 #include "ardour/vca_manager.h"
+#include "ardour/well_known_enum.h"
 #include "ardour/zeroconf.h"
 
 #include "osc_select_observer.h"
@@ -592,7 +593,6 @@ OSC::register_callbacks()
 		REGISTER_CALLBACK (serv, X_("/select/pan_lfe_control"), "f", sel_pan_lfe);
 		REGISTER_CALLBACK (serv, X_("/select/comp_enable"), "f", sel_comp_enable);
 		REGISTER_CALLBACK (serv, X_("/select/comp_threshold"), "f", sel_comp_threshold);
-		REGISTER_CALLBACK (serv, X_("/select/comp_speed"), "f", sel_comp_speed);
 		REGISTER_CALLBACK (serv, X_("/select/comp_mode"), "f", sel_comp_mode);
 		REGISTER_CALLBACK (serv, X_("/select/comp_makeup"), "f", sel_comp_makeup);
 		REGISTER_CALLBACK (serv, X_("/select/eq_enable"), "f", sel_eq_enable);
@@ -5752,8 +5752,8 @@ OSC::sel_comp_enable (float val, lo_message msg)
 	std::shared_ptr<Stripable> s;
 	s = sur->select;
 	if (s) {
-		if (s->comp_enable_controllable()) {
-			s->comp_enable_controllable()->set_value (s->comp_enable_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (Comp_Enable)) {
+			s->mapped_control (Comp_Enable)->set_value (s->mapped_control (Comp_Enable)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5767,27 +5767,12 @@ OSC::sel_comp_threshold (float val, lo_message msg)
 	std::shared_ptr<Stripable> s;
 	s = sur->select;
 	if (s) {
-		if (s->comp_threshold_controllable()) {
-			s->comp_threshold_controllable()->set_value (s->comp_threshold_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (Comp_Threshold)) {
+			s->mapped_control (Comp_Threshold)->set_value (s->mapped_control (Comp_Threshold)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
 	return float_message(X_("/select/comp_threshold"), 0, get_address (msg));
-}
-
-int
-OSC::sel_comp_speed (float val, lo_message msg)
-{
-	OSCSurface *sur = get_surface(get_address (msg));
-	std::shared_ptr<Stripable> s;
-	s = sur->select;
-	if (s) {
-		if (s->comp_speed_controllable()) {
-			s->comp_speed_controllable()->set_value (s->comp_speed_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
-			return 0;
-		}
-	}
-	return float_message(X_("/select/comp_speed"), 0, get_address (msg));
 }
 
 int
@@ -5797,8 +5782,8 @@ OSC::sel_comp_mode (float val, lo_message msg)
 	std::shared_ptr<Stripable> s;
 	s = sur->select;
 	if (s) {
-		if (s->comp_mode_controllable()) {
-			s->comp_mode_controllable()->set_value (s->comp_mode_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (Comp_Mode)) {
+			s->mapped_control (Comp_Mode)->set_value (s->mapped_control (Comp_Mode)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5812,8 +5797,8 @@ OSC::sel_comp_makeup (float val, lo_message msg)
 	std::shared_ptr<Stripable> s;
 	s = sur->select;
 	if (s) {
-		if (s->comp_makeup_controllable()) {
-			s->comp_makeup_controllable()->set_value (s->comp_makeup_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (Comp_Makeup)) {
+			s->mapped_control (Comp_Makeup)->set_value (s->mapped_control (Comp_Makeup)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5829,8 +5814,8 @@ OSC::sel_eq_enable (float val, lo_message msg)
 	std::shared_ptr<Stripable> s;
 	s = sur->select;
 	if (s) {
-		if (s->eq_enable_controllable()) {
-			s->eq_enable_controllable()->set_value (s->eq_enable_controllable()->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control(EQ_Enable)) {
+			s->mapped_control(EQ_Enable)->set_value (s->mapped_control(EQ_Enable)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5844,8 +5829,8 @@ OSC::sel_eq_hpf_freq (float val, lo_message msg)
 	std::shared_ptr<Stripable> s;
 	s = sur->select;
 	if (s) {
-		if (s->filter_freq_controllable(true)) {
-			s->filter_freq_controllable(true)->set_value (s->filter_freq_controllable(true)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (HPF_Freq)) {
+			s->mapped_control (HPF_Freq)->set_value (s->mapped_control (HPF_Freq)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5859,8 +5844,8 @@ OSC::sel_eq_lpf_freq (float val, lo_message msg)
 	std::shared_ptr<Stripable> s;
 	s = sur->select;
 	if (s) {
-		if (s->filter_freq_controllable(false)) {
-			s->filter_freq_controllable(false)->set_value (s->filter_freq_controllable(false)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (LPF_Freq)) {
+			s->mapped_control (LPF_Freq)->set_value (s->mapped_control (LPF_Freq)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5874,8 +5859,8 @@ OSC::sel_eq_hpf_enable (float val, lo_message msg)
 	std::shared_ptr<Stripable> s;
 	s = sur->select;
 	if (s) {
-		if (s->filter_enable_controllable(true)) {
-			s->filter_enable_controllable(true)->set_value (s->filter_enable_controllable(true)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (HPF_Enable)) {
+			s->mapped_control (HPF_Enable)->set_value (s->mapped_control (HPF_Enable)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5889,8 +5874,8 @@ OSC::sel_eq_lpf_enable (float val, lo_message msg)
 	std::shared_ptr<Stripable> s;
 	s = sur->select;
 	if (s) {
-		if (s->filter_enable_controllable(false)) {
-			s->filter_enable_controllable(false)->set_value (s->filter_enable_controllable(false)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (LPF_Enable)) {
+			s->mapped_control (LPF_Enable)->set_value (s->mapped_control (LPF_Enable)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5904,8 +5889,8 @@ OSC::sel_eq_hpf_slope (float val, lo_message msg)
 	std::shared_ptr<Stripable> s;
 	s = sur->select;
 	if (s) {
-		if (s->filter_slope_controllable(true)) {
-			s->filter_slope_controllable(true)->set_value (s->filter_slope_controllable(true)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (HPF_Slope)) {
+			s->mapped_control (HPF_Slope)->set_value (s->mapped_control (HPF_Slope)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5919,8 +5904,8 @@ OSC::sel_eq_lpf_slope (float val, lo_message msg)
 	std::shared_ptr<Stripable> s;
 	s = sur->select;
 	if (s) {
-		if (s->filter_slope_controllable(false)) {
-			s->filter_slope_controllable(false)->set_value (s->filter_slope_controllable(false)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (LPF_Slope)) {
+			s->mapped_control (LPF_Slope)->set_value (s->mapped_control (LPF_Slope)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5937,8 +5922,8 @@ OSC::sel_eq_gain (int id, float val, lo_message msg)
 		if (id > 0) {
 			--id;
 		}
-		if (s->eq_gain_controllable (id)) {
-			s->eq_gain_controllable (id)->set_value (s->eq_gain_controllable(id)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (EQ_Gain, id)) {
+			s->mapped_control (EQ_Gain, id)->set_value (s->mapped_control(EQ_Gain, id)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5955,8 +5940,8 @@ OSC::sel_eq_freq (int id, float val, lo_message msg)
 		if (id > 0) {
 			--id;
 		}
-		if (s->eq_freq_controllable (id)) {
-			s->eq_freq_controllable (id)->set_value (s->eq_freq_controllable(id)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (EQ_Freq, id)) {
+			s->mapped_control (EQ_Freq, id)->set_value (s->mapped_control (EQ_Freq, id)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5973,8 +5958,8 @@ OSC::sel_eq_q (int id, float val, lo_message msg)
 		if (id > 0) {
 			--id;
 		}
-		if (s->eq_q_controllable (id)) {
-			s->eq_q_controllable (id)->set_value (s->eq_q_controllable(id)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (EQ_Q, id)) {
+			s->mapped_control (EQ_Q, id)->set_value (s->mapped_control (EQ_Q, id)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5991,8 +5976,8 @@ OSC::sel_eq_shape (int id, float val, lo_message msg)
 		if (id > 0) {
 			--id;
 		}
-		if (s->eq_shape_controllable (id)) {
-			s->eq_shape_controllable (id)->set_value (s->eq_shape_controllable(id)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (EQ_Shape, id)) {
+			s->mapped_control (EQ_Shape, id)->set_value (s->mapped_control (EQ_Shape, id)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}

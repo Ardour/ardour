@@ -153,7 +153,6 @@ public:
 	enum CompParam {
 		CompMakeup,
 		CompMode,
-		CompSpeed
 	};
 #endif
 

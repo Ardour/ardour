@@ -47,8 +47,7 @@
 #include "ardour/types_convert.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
-
-
+#include "ardour/well_known_enum.h"
 
 #include "gtkmm2ext/gui_thread.h"
 
@@ -1177,25 +1176,25 @@ LaunchControlXL::init_dm_callbacks()
 		MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::init_buttons,this), lcxl);
 	}
 #ifdef MIXBUS
-	if (first_selected_stripable()->eq_enable_controllable()) {
-		first_selected_stripable()->eq_enable_controllable()->Changed.connect (stripable_connections,
+	if (first_selected_stripable()->mapped_control(EQ_Enable)) {
+		first_selected_stripable()->mapped_control(EQ_Enable)->Changed.connect (stripable_connections,
 		MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::init_knobs_and_buttons,this), lcxl);
 	}
-	if (first_selected_stripable()->eq_shape_controllable(0)) {
-		first_selected_stripable()->eq_shape_controllable(0)->Changed.connect (stripable_connections,
+	if (first_selected_stripable()->mapped_control (EQ_Shape, 0)) {
+		first_selected_stripable()->mapped_control (EQ_Shape, 0)->Changed.connect (stripable_connections,
 		MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::init_buttons,this), lcxl);
 	}
-	if (first_selected_stripable()->eq_shape_controllable(3)) {
-		first_selected_stripable()->eq_shape_controllable(3)->Changed.connect (stripable_connections,
+	if (first_selected_stripable()->mapped_control (EQ_Shape, 3)) {
+		first_selected_stripable()->mapped_control (EQ_Shape, 3)->Changed.connect (stripable_connections,
 		MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::init_buttons,this), lcxl);
 	}
 
-	if (first_selected_stripable()->comp_enable_controllable()) {
-		first_selected_stripable()->comp_enable_controllable()->Changed.connect (stripable_connections,
+	if (first_selected_stripable()->mapped_control (Comp_Enable)) {
+		first_selected_stripable()->mapped_control (Comp_Enable)->Changed.connect (stripable_connections,
 		MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::init_knobs_and_buttons,this), lcxl);
 	}
-	if (first_selected_stripable()->filter_enable_controllable(true)) { // only handle one case, as Mixbus only has one
-		first_selected_stripable()->filter_enable_controllable(true)->Changed.connect (stripable_connections,
+	if (first_selected_stripable()->mapped_control (HPF_Enable)) { // only handle one case, as Mixbus only has one
+		first_selected_stripable()->mapped_control (HPF_Enable)->Changed.connect (stripable_connections,
 		MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::init_knobs_and_buttons, this), lcxl);
 	}
 	if (first_selected_stripable()->master_send_enable_controllable()) {

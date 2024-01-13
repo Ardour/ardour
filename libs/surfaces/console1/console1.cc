@@ -35,6 +35,7 @@
 #include "ardour/stripable.h"
 #include "ardour/track.h"
 #include "ardour/vca_manager.h"
+#include "ardour/well_known_enum.h"
 
 #include "console1.h"
 #include "c1_control.h"
@@ -550,8 +551,8 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 
 		DEBUG_TRACE (DEBUG::Console1, string_compose ("current_stripable %1 - %2\n", pi.order (), pi.flags ()));
 
-		gate_redux_meter = _current_stripable->gate_redux_controllable ();
-		comp_redux_meter = _current_stripable->comp_redux_controllable ();
+		gate_redux_meter = _current_stripable->mapped_output (Gate_Redux);
+		comp_redux_meter = _current_stripable->mapped_output (Comp_Redux);
 
 		/*
 		Support all types of pan controls / find first available control
@@ -623,102 +624,102 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 		}
 
 		// Filter Section
-		if (_current_stripable->filter_enable_controllable (true)) {
-			_current_stripable->filter_enable_controllable (true)->Changed.connect (
+		if (_current_stripable->mapped_control (HPF_Enable)) {
+			_current_stripable->mapped_control (HPF_Enable)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_filter, this), this);
 		}
 
-		if (_current_stripable->filter_freq_controllable (true)) {
-			_current_stripable->filter_freq_controllable (true)->Changed.connect (
+		if (_current_stripable->mapped_control (HPF_Freq)) {
+			_current_stripable->mapped_control (HPF_Freq)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_low_cut, this), this);
 		}
 
-		if (_current_stripable->filter_freq_controllable (false)) {
-			_current_stripable->filter_freq_controllable (false)->Changed.connect (
+		if (_current_stripable->mapped_control (LPF_Freq)) {
+			_current_stripable->mapped_control (LPF_Freq)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_high_cut, this), this);
 		}
 
 		// Gate Section
-		if (_current_stripable->gate_enable_controllable ()) {
-			_current_stripable->gate_enable_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Gate_Enable)) {
+			_current_stripable->mapped_control (Gate_Enable)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate, this), this);
 		}
 
-		if (_current_stripable->gate_key_filter_enable_controllable ()) {
-			_current_stripable->gate_key_filter_enable_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Gate_KeyFilterEnable)) {
+			_current_stripable->mapped_control (Gate_KeyFilterEnable)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_scf, this), this);
 		}
 
-		if (_current_stripable->gate_key_listen_controllable ()) {
-			_current_stripable->gate_key_listen_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Gate_KeyListen)) {
+			_current_stripable->mapped_control (Gate_KeyListen)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_listen, this), this);
 		}
 
-		if (_current_stripable->gate_threshold_controllable ()) {
-			_current_stripable->gate_threshold_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Gate_Threshold)) {
+			_current_stripable->mapped_control (Gate_Threshold)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_thresh, this), this);
 		}
 
-		if (_current_stripable->gate_depth_controllable ()) {
-			_current_stripable->gate_depth_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Gate_Depth)) {
+			_current_stripable->mapped_control (Gate_Depth)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_depth, this), this);
 		}
 
-		if (_current_stripable->gate_release_controllable ()) {
-			_current_stripable->gate_release_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Gate_Release)) {
+			_current_stripable->mapped_control (Gate_Release)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_release, this), this);
 		}
 
-		if (_current_stripable->gate_attack_controllable ()) {
-			_current_stripable->gate_attack_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Gate_Attack)) {
+			_current_stripable->mapped_control (Gate_Attack)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_attack, this), this);
 		}
 
-		if (_current_stripable->gate_hysteresis_controllable ()) {
-			_current_stripable->gate_hysteresis_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Gate_Hysteresis)) {
+			_current_stripable->mapped_control (Gate_Hysteresis)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_hyst, this), this);
 		}
 
-		if (_current_stripable->gate_hold_controllable ()) {
-			_current_stripable->gate_hold_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Gate_Hold)) {
+			_current_stripable->mapped_control (Gate_Hold)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_hold, this), this);
 		}
 
-		if (_current_stripable->gate_key_filter_freq_controllable ()) {
-			_current_stripable->gate_key_filter_freq_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Gate_KeyFilterFreq)) {
+			_current_stripable->mapped_control (Gate_KeyFilterFreq)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_gate_filter_freq, this), this);
 		}
 
 		// EQ Section
-		if (_current_stripable->eq_enable_controllable ()) {
-			_current_stripable->eq_enable_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (EQ_Enable)) {
+			_current_stripable->mapped_control (EQ_Enable)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq, this), this);
 		}
 
 		for (uint32_t i = 0; i < _current_stripable->eq_band_cnt (); ++i) {
-			if (_current_stripable->eq_freq_controllable (i)) {
-				_current_stripable->eq_freq_controllable (i)->Changed.connect (
+			if (_current_stripable->mapped_control (EQ_Freq, i)) {
+				_current_stripable->mapped_control (EQ_Freq, i)->Changed.connect (
 				  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq_freq, this, i), this);
 			}
-			if (_current_stripable->eq_gain_controllable (i)) {
-				_current_stripable->eq_gain_controllable (i)->Changed.connect (
+			if (_current_stripable->mapped_control (EQ_Gain, i)) {
+				_current_stripable->mapped_control (EQ_Gain, i)->Changed.connect (
 				  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq_gain, this, i), this);
 			}
 		}
 
-		if (_current_stripable->eq_shape_controllable (0)) {
-			_current_stripable->eq_shape_controllable (0)->Changed.connect (
+		if (_current_stripable->mapped_control (EQ_Shape, 0)) {
+			_current_stripable->mapped_control (EQ_Shape, 0)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq_low_shape, this), this);
 		}
 
-		if (_current_stripable->eq_shape_controllable (3)) {
-			_current_stripable->eq_shape_controllable (3)->Changed.connect (
+		if (_current_stripable->mapped_control (EQ_Shape, 3)) {
+			_current_stripable->mapped_control (EQ_Shape, 3)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq_high_shape, this), this);
 		}
 
 		// Drive
-		if (_current_stripable->tape_drive_controllable ()) {
-			_current_stripable->tape_drive_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (TapeDrive_Drive)) {
+			_current_stripable->mapped_control (TapeDrive_Drive)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_drive, this), this);
 		}
 
@@ -734,43 +735,43 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 		}
 
 		// Comp Section
-		if (_current_stripable->comp_enable_controllable ()) {
-			_current_stripable->comp_enable_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Comp_Enable)) {
+			_current_stripable->mapped_control (Comp_Enable)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp, this), this);
 		}
 
-		if (_current_stripable->comp_mode_controllable ()) {
-			_current_stripable->comp_mode_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Comp_Mode)) {
+			_current_stripable->mapped_control (Comp_Mode)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_mode, this), this);
 		}
 
-		if (_current_stripable->comp_threshold_controllable ()) {
-			_current_stripable->comp_threshold_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Comp_Threshold)) {
+			_current_stripable->mapped_control (Comp_Threshold)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_thresh, this), this);
 		}
 
-		if (_current_stripable->comp_attack_controllable ()) {
-			_current_stripable->comp_attack_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Comp_Attack)) {
+			_current_stripable->mapped_control (Comp_Attack)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_attack, this), this);
 		}
 
-		if (_current_stripable->comp_release_controllable ()) {
-			_current_stripable->comp_release_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Comp_Release)) {
+			_current_stripable->mapped_control (Comp_Release)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_release, this), this);
 		}
 
-		if (_current_stripable->comp_ratio_controllable ()) {
-			_current_stripable->comp_ratio_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Comp_Ratio)) {
+			_current_stripable->mapped_control (Comp_Ratio)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_ratio, this), this);
 		}
 
-		if (_current_stripable->comp_makeup_controllable ()) {
-			_current_stripable->comp_makeup_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Comp_Makeup)) {
+			_current_stripable->mapped_control (Comp_Makeup)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_makeup, this), this);
 		}
 
-		if (_current_stripable->comp_key_filter_freq_controllable ()) {
-			_current_stripable->comp_key_filter_freq_controllable ()->Changed.connect (
+		if (_current_stripable->mapped_control (Comp_KeyFilterFreq)) {
+			_current_stripable->mapped_control (Comp_KeyFilterFreq)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_comp_emph, this), this);
 		}
 

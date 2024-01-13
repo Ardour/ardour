@@ -59,6 +59,7 @@
 #include "ardour/rc_configuration.h"
 #include "ardour/midiport_manager.h"
 #include "ardour/debug.h"
+#include "ardour/well_known_enum.h"
 
 #include "generic_midi_control_protocol.h"
 #include "midicontrollable.h"
@@ -1238,7 +1239,7 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 		if (path.size() == 3) {
 
 			if (path[2] == X_("enable")) {
-				c = s->eq_enable_controllable ();
+				c = s->mapped_control (EQ_Enable);
 			}
 
 		} else if (path.size() == 4) {
@@ -1246,13 +1247,13 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 			int band = atoi (path[3]); /* band number */
 
 			if (path[2] == X_("gain")) {
-				c = s->eq_gain_controllable (band);
+				c = s->mapped_control (EQ_Gain, band);
 			} else if (path[2] == X_("freq")) {
-				c = s->eq_freq_controllable (band);
+				c = s->mapped_control (EQ_Freq, band);
 			} else if (path[2] == X_("q")) {
-				c = s->eq_q_controllable (band);
+				c = s->mapped_control (EQ_Q, band);
 			} else if (path[2] == X_("shape")) {
-				c = s->eq_shape_controllable (band);
+				c = s->mapped_control (EQ_Shape, band);
 			}
 		}
 
@@ -1271,11 +1272,11 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 			}
 
 			if (path[3] == X_("enable")) {
-				c = s->filter_enable_controllable (filter);
+				c = s->mapped_control (filter ? HPF_Enable : LPF_Enable);
 			} else if (path[3] == X_("freq")) {
-				c = s->filter_freq_controllable (filter);
+				c = s->mapped_control (filter ? HPF_Freq : LPF_Freq);
 			} else if (path[3] == X_("slope")) {
-				c = s->filter_slope_controllable (filter);
+				c = s->mapped_control (filter ? HPF_Slope : LPF_Slope);
 			}
 
 		}
@@ -1286,39 +1287,35 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 		{
 			if (path[2] == X_("enable"))
 			{
-				c = s->comp_enable_controllable();
+				c = s->mapped_control (Comp_Enable);
 			}
 			else if (path[2] == X_("threshold"))
 			{
-				c = s->comp_threshold_controllable();
+				c = s->mapped_control (Comp_Threshold);
 			}
 			else if (path[2] == X_("mode"))
 			{
-				c = s->comp_mode_controllable();
-			}
-			else if (path[2] == X_("speed"))
-			{
-				c = s->comp_speed_controllable();
+				c = s->mapped_control (Comp_Mode);
 			}
 			else if (path[2] == X_("attack"))
 			{
-				c = s->comp_attack_controllable();
+				c = s->mapped_control (Comp_Attack);
 			}
 			else if (path[2] == X_("release"))
 			{
-				c = s->comp_release_controllable();
+				c = s->mapped_control (Comp_Release);
 			}
 			else if (path[2] == X_("makeup"))
 			{
-				c = s->comp_makeup_controllable();
+				c = s->mapped_control (Comp_Makeup);
 			}
 			else if (path[2] == X_("ratio"))
 			{
-				c = s->comp_ratio_controllable();
+				c = s->mapped_control (Comp_Ratio);
 			}
 			else if (path[2] == X_("key_filter_freq"))
 			{
-				c = s->comp_key_filter_freq_controllable();
+				c = s->mapped_control (Comp_KeyFilterFreq);
 			}
 		}
 	}
@@ -1328,55 +1325,55 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 		{
 			if (path[2] == X_("enable"))
 			{
-				c = s->gate_enable_controllable();
+				c = s->mapped_control (Gate_Enable);
 			}
 			else if (path[2] == X_("threshold"))
 			{
-				c = s->gate_threshold_controllable();
+				c = s->mapped_control (Gate_Threshold);
 			}
 			else if (path[2] == X_("mode"))
 			{
-				c = s->gate_mode_controllable();
+				c = s->mapped_control (Gate_Mode);
 			}
 			else if (path[2] == X_("ratio"))
 			{
-				c = s->gate_ratio_controllable();
+				c = s->mapped_control (Gate_Ratio);
 			}
 			else if (path[2] == X_("knee"))
 			{
-				c = s->gate_knee_controllable();
+				c = s->mapped_control (Gate_Knee);
 			}
 			else if (path[2] == X_("depth"))
 			{
-				c = s->gate_depth_controllable();
+				c = s->mapped_control (Gate_Depth);
 			}
 			else if (path[2] == X_("hysteresis"))
 			{
-				c = s->gate_hysteresis_controllable();
+				c = s->mapped_control (Gate_Hysteresis);
 			}
 			else if (path[2] == X_("hold"))
 			{
-				c = s->gate_hold_controllable();
+				c = s->mapped_control (Gate_Hold);
 			}
 			else if (path[2] == X_("attack"))
 			{
-				c = s->gate_attack_controllable();
+				c = s->mapped_control (Gate_Attack);
 			}
 			else if (path[2] == X_("release"))
 			{
-				c = s->gate_release_controllable();
+				c = s->mapped_control (Gate_Release);
 			}
 			else if (path[2] == X_("key_listen"))
 			{
-				c = s->gate_key_listen_controllable();
+				c = s->mapped_control (Gate_KeyListen);
 			}
 			else if (path[2] == X_("key_filter_enable"))
 			{
-				c = s->gate_key_filter_enable_controllable();
+				c = s->mapped_control (Gate_KeyFilterEnable);
 			}
 			else if (path[2] == X_("key_filter_freq"))
 			{
-				c = s->gate_key_filter_freq_controllable();
+				c = s->mapped_control (Gate_KeyFilterFreq);
 			}
 		}
 	}
@@ -1386,11 +1383,11 @@ GenericMidiControlProtocol::lookup_controllable (const string & str) const
 		{
 			if (path[2] == X_("drive"))
 			{
-				c = s->tape_drive_controllable();
+				c = s->mapped_control (TapeDrive_Drive);
 			}
 			else if (path[2] == X_("mode"))
 			{
-				c = s->tape_drive_mode_controllable();
+				c = s->mapped_control (TapeDrive_Mode);
 			}
 		}
 	}

@@ -49,6 +49,7 @@
 #include "ardour/session_configuration.h"
 #include "ardour/tempo.h"
 #include "ardour/vca.h"
+#include "ardour/well_known_enum.h"
 
 #include "faderport8.h"
 
@@ -1336,45 +1337,44 @@ FaderPort8::build_well_known_processor_ctrls (std::shared_ptr<Stripable> s, int 
 				int cnt = s->eq_band_cnt();
 
 #ifdef MIXBUS
-				PUSH_BACK_NON_NULL ("Flt In", s->filter_enable_controllable (true)); // both HP/LP
-				PUSH_BACK_NON_NULL ("HP Freq", s->filter_freq_controllable (true));
-				PUSH_BACK_NON_NULL ("LP Freq", s->filter_freq_controllable (false));
-				PUSH_BACK_NON_NULL ("EQ In", s->eq_enable_controllable ());
+				PUSH_BACK_NON_NULL ("Flt In", s->mapped_control (HPF_Enable)); // both HP/LP
+				PUSH_BACK_NON_NULL ("HP Freq", s->mapped_control (HPF_Freq));
+				PUSH_BACK_NON_NULL ("LP Freq", s->mapped_control (LPF_Freq));
+				PUSH_BACK_NON_NULL ("EQ In", s->mapped_control (EQ_Enable));
 #endif
 
 				for (int band = 0; band < cnt; ++band) {
 					std::string bn = s->eq_band_name (band);
-					PUSH_BACK_NON_NULL (string_compose ("Gain %1", bn), s->eq_gain_controllable (band));
-					PUSH_BACK_NON_NULL (string_compose ("Freq %1", bn), s->eq_freq_controllable (band));
-					PUSH_BACK_NON_NULL (string_compose ("Band %1", bn), s->eq_q_controllable (band));
-					PUSH_BACK_NON_NULL (string_compose ("Shape %1", bn), s->eq_shape_controllable (band));
+					PUSH_BACK_NON_NULL (string_compose ("Gain %1", bn), s->mapped_control (EQ_Gain, band));
+					PUSH_BACK_NON_NULL (string_compose ("Freq %1", bn), s->mapped_control (EQ_Freq, band));
+					PUSH_BACK_NON_NULL (string_compose ("Band %1", bn), s->mapped_control (EQ_Q, band));
+					PUSH_BACK_NON_NULL (string_compose ("Shape %1", bn), s->mapped_control (EQ_Shape, band));
 				}
 			}
 			break;
 		case 2:
-			PUSH_BACK_NON_NULL ("Comp In", s->comp_enable_controllable ());
-			PUSH_BACK_NON_NULL ("Threshold", s->comp_threshold_controllable ());
-			PUSH_BACK_NON_NULL ("Makeup", s->comp_makeup_controllable ());
-			PUSH_BACK_NON_NULL ("Mode", s->comp_mode_controllable ());
-			PUSH_BACK_NON_NULL ("Speed", s->comp_speed_controllable ());
-			PUSH_BACK_NON_NULL ("Ratio", s->comp_ratio_controllable ());
-			PUSH_BACK_NON_NULL ("Attack", s->comp_attack_controllable ());
-			PUSH_BACK_NON_NULL ("Release", s->comp_release_controllable ());
-			PUSH_BACK_NON_NULL ("Emphasis", s->comp_key_filter_freq_controllable ());
+			PUSH_BACK_NON_NULL ("Comp In", s->mapped_control (Comp_Enable));
+			PUSH_BACK_NON_NULL ("Threshold", s->mapped_control (Comp_Threshold));
+			PUSH_BACK_NON_NULL ("Makeup", s->mapped_control (Comp_Makeup));
+			PUSH_BACK_NON_NULL ("Mode", s->mapped_control (Comp_Mode));
+			PUSH_BACK_NON_NULL ("Ratio", s->mapped_control (Comp_Ratio));
+			PUSH_BACK_NON_NULL ("Attack", s->mapped_control (Comp_Attack));
+			PUSH_BACK_NON_NULL ("Release", s->mapped_control (Comp_Release));
+			PUSH_BACK_NON_NULL ("Emphasis", s->mapped_control (Comp_KeyFilterFreq));
 			break;
 		case 3:
-			PUSH_BACK_NON_NULL ("Gate In", s->gate_enable_controllable ());
-			PUSH_BACK_NON_NULL ("Exp", s->gate_mode_controllable ());
-			PUSH_BACK_NON_NULL ("Threshold", s->gate_threshold_controllable ());
-			PUSH_BACK_NON_NULL ("Depth", s->gate_depth_controllable ());
-			PUSH_BACK_NON_NULL ("Attack", s->gate_attack_controllable ());
-			PUSH_BACK_NON_NULL ("Release", s->gate_release_controllable ());
-			PUSH_BACK_NON_NULL ("Exp Ratio", s->gate_ratio_controllable ());
-			PUSH_BACK_NON_NULL ("Exp Knee", s->gate_knee_controllable ());
-			PUSH_BACK_NON_NULL ("Gate Hyst", s->gate_hysteresis_controllable ());
-			PUSH_BACK_NON_NULL ("Gate Hold", s->gate_hold_controllable ());
-			PUSH_BACK_NON_NULL ("SC Enable", s->gate_key_filter_enable_controllable ());
-			PUSH_BACK_NON_NULL ("SC Freq", s->gate_key_filter_freq_controllable ());
+			PUSH_BACK_NON_NULL ("Gate In", s->mapped_control (Gate_Enable));
+			PUSH_BACK_NON_NULL ("Exp", s->mapped_control (Gate_Mode));
+			PUSH_BACK_NON_NULL ("Threshold", s->mapped_control (Gate_Threshold));
+			PUSH_BACK_NON_NULL ("Depth", s->mapped_control (Gate_Depth));
+			PUSH_BACK_NON_NULL ("Attack", s->mapped_control (Gate_Attack));
+			PUSH_BACK_NON_NULL ("Release", s->mapped_control (Gate_Release));
+			PUSH_BACK_NON_NULL ("Exp Ratio", s->mapped_control (Gate_Ratio));
+			PUSH_BACK_NON_NULL ("Exp Knee", s->mapped_control (Gate_Knee));
+			PUSH_BACK_NON_NULL ("Gate Hyst", s->mapped_control (Gate_Hysteresis));
+			PUSH_BACK_NON_NULL ("Gate Hold", s->mapped_control (Gate_Hold));
+			PUSH_BACK_NON_NULL ("SC Enable", s->mapped_control (Gate_KeyFilterEnable));
+			PUSH_BACK_NON_NULL ("SC Freq", s->mapped_control (Gate_KeyFilterFreq));
 			break;
 		default:
 			assert (0);
@@ -1606,11 +1606,11 @@ FaderPort8::spill_plugins ()
 		--spillwidth;
 		have_well_known_eq = true;
 	}
-	if (r->comp_enable_controllable ()) {
+	if (r->mapped_control (Comp_Enable)) {
 		--spillwidth;
 		have_well_known_comp = true;
 	}
-	if (r->gate_enable_controllable ()) {
+	if (r->mapped_control (Gate_Enable)) {
 		--spillwidth;
 		have_well_known_gate = true;
 	}
