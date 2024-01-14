@@ -784,8 +784,6 @@ int main() { return 0; }''',
     compiler_flags.append ('-DPROGRAM_NAME="' + Options.options.program_name + '"')
     compiler_flags.append ('-DPROGRAM_VERSION="' + PROGRAM_VERSION + '"')
 
-    conf.env['PROGRAM_NAME'] = Options.options.program_name
-
     if opt.debug:
         conf.env.append_value('CFLAGS', debug_flags)
         conf.env.append_value('CXXFLAGS', debug_flags)
@@ -806,9 +804,9 @@ int main() { return 0; }''',
     conf.env.append_value('CXXFLAGS', cxx_flags)
     conf.env.append_value('LINKFLAGS', linker_flags)
 
-def create_resource_file(icon):
+def create_resource_file(name):
     try:
-        text = 'IDI_ICON1 ICON DISCARDABLE "icons/' + icon + '.ico"\n'
+        text = 'IDI_ICON1 ICON DISCARDABLE "icons/' + name + '.ico"\n'
         o = open('gtk2_ardour/windows_icon.rc', 'w')
         o.write(text)
         o.close()
@@ -982,6 +980,8 @@ def configure(conf):
         # lazy approach: just use major version 2.X.X
         if itstool != "itstool" or version[0] < "2":
             conf.fatal("--freedesktop requires itstool > 2.0.0 to translate files.")
+
+    conf.env['PROGRAM_NAME'] = Options.options.program_name or 'Ardour'
 
     conf.env['VERSION'] = VERSION
     conf.env['MAJOR'] = MAJOR
