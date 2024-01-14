@@ -121,7 +121,6 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	vertical_button.signal_button_press_event().connect (sigc::ptr_fun (&no_propagate), false);
 	vertical_button.signal_button_press_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vertical_button_press), false);
 	vertical_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vertical_button_release), false);
-
 	vertical_button.set_fallthrough_to_parent (true);
 	vertical_button.set_active_color (_vca->presentation_info().color ());
 	set_tooltip (vertical_button, _("Click to show assigned channels only")); /* tooltip updated dynamically */
@@ -393,11 +392,7 @@ VCAMasterStrip::solo_changed ()
 
 bool
 VCAMasterStrip::vertical_button_press (GdkEventButton* ev)
-{
-	// if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
-	// 	start_name_edit ();
-	// 	return false;
-	// }
+{	
 
 	if (Keyboard::is_context_menu_event (ev)) {
 		if (!context_menu) {
