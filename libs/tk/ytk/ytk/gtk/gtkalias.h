@@ -8078,24 +8078,11 @@ extern __typeof (gtk_rc_add_widget_name_style) IA__gtk_rc_add_widget_name_style 
 #define gtk_rc_add_widget_name_style IA__gtk_rc_add_widget_name_style
 
 #endif
-#ifndef _WIN64
-extern __typeof (gtk_rc_add_default_file) IA__gtk_rc_add_default_file __attribute((visibility("hidden")));
-#define gtk_rc_add_default_file IA__gtk_rc_add_default_file
-
-#endif
-#ifdef G_OS_WIN32
-extern __typeof (gtk_rc_add_default_file_utf8) IA__gtk_rc_add_default_file_utf8 __attribute((visibility("hidden")));
-#define gtk_rc_add_default_file_utf8 IA__gtk_rc_add_default_file_utf8
-
-#endif
 extern __typeof (gtk_rc_find_module_in_path) IA__gtk_rc_find_module_in_path __attribute((visibility("hidden")));
 #define gtk_rc_find_module_in_path IA__gtk_rc_find_module_in_path
 
 extern __typeof (gtk_rc_find_pixmap_in_path) IA__gtk_rc_find_pixmap_in_path __attribute((visibility("hidden")));
 #define gtk_rc_find_pixmap_in_path IA__gtk_rc_find_pixmap_in_path
-
-extern __typeof (gtk_rc_get_default_files) IA__gtk_rc_get_default_files __attribute((visibility("hidden")));
-#define gtk_rc_get_default_files IA__gtk_rc_get_default_files
 
 extern __typeof (gtk_rc_get_im_module_file) IA__gtk_rc_get_im_module_file __attribute((visibility("hidden")));
 #define gtk_rc_get_im_module_file IA__gtk_rc_get_im_module_file
@@ -8111,9 +8098,6 @@ extern __typeof (gtk_rc_get_style) IA__gtk_rc_get_style __attribute((visibility(
 
 extern __typeof (gtk_rc_get_style_by_paths) IA__gtk_rc_get_style_by_paths __attribute((visibility("hidden")));
 #define gtk_rc_get_style_by_paths IA__gtk_rc_get_style_by_paths
-
-extern __typeof (gtk_rc_get_theme_dir) IA__gtk_rc_get_theme_dir __attribute((visibility("hidden")));
-#define gtk_rc_get_theme_dir IA__gtk_rc_get_theme_dir
 
 #ifndef _WIN64
 extern __typeof (gtk_rc_parse) IA__gtk_rc_parse __attribute((visibility("hidden")));
@@ -8152,16 +8136,6 @@ extern __typeof (gtk_rc_reset_styles) IA__gtk_rc_reset_styles __attribute((visib
 extern __typeof (gtk_rc_scanner_new) IA__gtk_rc_scanner_new __attribute((visibility("hidden")));
 #define gtk_rc_scanner_new IA__gtk_rc_scanner_new
 
-#ifndef _WIN64
-extern __typeof (gtk_rc_set_default_files) IA__gtk_rc_set_default_files __attribute((visibility("hidden")));
-#define gtk_rc_set_default_files IA__gtk_rc_set_default_files
-
-#endif
-#ifdef G_OS_WIN32
-extern __typeof (gtk_rc_set_default_files_utf8) IA__gtk_rc_set_default_files_utf8 __attribute((visibility("hidden")));
-#define gtk_rc_set_default_files_utf8 IA__gtk_rc_set_default_files_utf8
-
-#endif
 extern __typeof (gtk_rc_style_copy) IA__gtk_rc_style_copy __attribute((visibility("hidden")));
 #define gtk_rc_style_copy IA__gtk_rc_style_copy
 

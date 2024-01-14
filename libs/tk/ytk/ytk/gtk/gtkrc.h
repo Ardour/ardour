@@ -125,8 +125,6 @@ struct _GtkRcStyleClass
 
 #ifdef G_OS_WIN32
 /* Reserve old names for DLL ABI backward compatibility */
-#define gtk_rc_add_default_file gtk_rc_add_default_file_utf8
-#define gtk_rc_set_default_files gtk_rc_set_default_files_utf8
 #define gtk_rc_parse gtk_rc_parse_utf8
 #endif
 
@@ -138,9 +136,6 @@ gboolean  _gtk_rc_match_widget_class     (GSList       *list,
                                           gchar        *path,
                                           gchar        *path_reversed);
 
-void      gtk_rc_add_default_file	(const gchar *filename);
-void      gtk_rc_set_default_files      (gchar **filenames);
-gchar**   gtk_rc_get_default_files      (void);
 GtkStyle* gtk_rc_get_style		(GtkWidget   *widget);
 GtkStyle* gtk_rc_get_style_by_paths     (GtkSettings *settings,
 					 const char  *widget_path,
@@ -179,7 +174,6 @@ void        gtk_rc_style_unref      (GtkRcStyle *rc_style);
 #endif
 
 gchar*		gtk_rc_find_module_in_path	(const gchar 	*module_file);
-gchar*		gtk_rc_get_theme_dir		(void);
 gchar*		gtk_rc_get_module_dir		(void);
 gchar*		gtk_rc_get_im_module_path	(void);
 gchar*		gtk_rc_get_im_module_file	(void);

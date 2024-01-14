@@ -8081,24 +8081,11 @@ extern __typeof (gtk_rc_add_widget_class_style) gtk_rc_add_widget_class_style __
 extern __typeof (gtk_rc_add_widget_name_style) gtk_rc_add_widget_name_style __attribute((alias("IA__gtk_rc_add_widget_name_style"), visibility("default")));
 
 #endif
-#ifndef _WIN64
-#undef gtk_rc_add_default_file 
-extern __typeof (gtk_rc_add_default_file) gtk_rc_add_default_file __attribute((alias("IA__gtk_rc_add_default_file"), visibility("default")));
-
-#endif
-#ifdef G_OS_WIN32
-#undef gtk_rc_add_default_file_utf8 
-extern __typeof (gtk_rc_add_default_file_utf8) gtk_rc_add_default_file_utf8 __attribute((alias("IA__gtk_rc_add_default_file_utf8"), visibility("default")));
-
-#endif
 #undef gtk_rc_find_module_in_path 
 extern __typeof (gtk_rc_find_module_in_path) gtk_rc_find_module_in_path __attribute((alias("IA__gtk_rc_find_module_in_path"), visibility("default")));
 
 #undef gtk_rc_find_pixmap_in_path 
 extern __typeof (gtk_rc_find_pixmap_in_path) gtk_rc_find_pixmap_in_path __attribute((alias("IA__gtk_rc_find_pixmap_in_path"), visibility("default")));
-
-#undef gtk_rc_get_default_files 
-extern __typeof (gtk_rc_get_default_files) gtk_rc_get_default_files __attribute((alias("IA__gtk_rc_get_default_files"), visibility("default")));
 
 #undef gtk_rc_get_im_module_file 
 extern __typeof (gtk_rc_get_im_module_file) gtk_rc_get_im_module_file __attribute((alias("IA__gtk_rc_get_im_module_file"), visibility("default")));
@@ -8114,9 +8101,6 @@ extern __typeof (gtk_rc_get_style) gtk_rc_get_style __attribute((alias("IA__gtk_
 
 #undef gtk_rc_get_style_by_paths 
 extern __typeof (gtk_rc_get_style_by_paths) gtk_rc_get_style_by_paths __attribute((alias("IA__gtk_rc_get_style_by_paths"), visibility("default")));
-
-#undef gtk_rc_get_theme_dir 
-extern __typeof (gtk_rc_get_theme_dir) gtk_rc_get_theme_dir __attribute((alias("IA__gtk_rc_get_theme_dir"), visibility("default")));
 
 #ifndef _WIN64
 #undef gtk_rc_parse 
@@ -8155,16 +8139,6 @@ extern __typeof (gtk_rc_reset_styles) gtk_rc_reset_styles __attribute((alias("IA
 #undef gtk_rc_scanner_new 
 extern __typeof (gtk_rc_scanner_new) gtk_rc_scanner_new __attribute((alias("IA__gtk_rc_scanner_new"), visibility("default")));
 
-#ifndef _WIN64
-#undef gtk_rc_set_default_files 
-extern __typeof (gtk_rc_set_default_files) gtk_rc_set_default_files __attribute((alias("IA__gtk_rc_set_default_files"), visibility("default")));
-
-#endif
-#ifdef G_OS_WIN32
-#undef gtk_rc_set_default_files_utf8 
-extern __typeof (gtk_rc_set_default_files_utf8) gtk_rc_set_default_files_utf8 __attribute((alias("IA__gtk_rc_set_default_files_utf8"), visibility("default")));
-
-#endif
 #undef gtk_rc_style_copy 
 extern __typeof (gtk_rc_style_copy) gtk_rc_style_copy __attribute((alias("IA__gtk_rc_style_copy"), visibility("default")));
 

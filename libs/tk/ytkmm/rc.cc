@@ -114,26 +114,6 @@ RC::parse_string(const Glib::ustring& rc_string)
   gtk_rc_parse_string(const_cast<char*>(rc_string.c_str()));
 }
 
-
-void
-RC::add_default_file(const Glib::ustring& filename)
-{
-  gtk_rc_add_default_file(const_cast<char*>(filename.c_str()));
-}
-
-void
-RC::set_default_files(const Glib::ArrayHandle<Glib::ustring>& filenames)
-{
-  gtk_rc_set_default_files(const_cast<char**>(filenames.data()));
-}
-
-Glib::ArrayHandle<Glib::ustring>
-RC::get_default_files()
-{
-  return Glib::ArrayHandle<Glib::ustring>(
-      const_cast<const char**>(gtk_rc_get_default_files()), Glib::OWNERSHIP_NONE);
-}
-
 bool RC::reparse_all()
 {
   return gtk_rc_reparse_all();
@@ -168,12 +148,6 @@ RC::find_module_in_path(const Glib::ustring& module_file)
 {
   return Glib::convert_return_gchar_ptr_to_ustring(
       gtk_rc_find_module_in_path(const_cast<char*>(module_file.c_str())));
-}
-
-Glib::ustring
-RC::get_theme_dir()
-{
-  return Glib::convert_return_gchar_ptr_to_ustring(gtk_rc_get_theme_dir());
 }
 
 Glib::ustring

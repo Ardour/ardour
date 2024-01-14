@@ -159,10 +159,6 @@ static GtkStyle *  gtk_rc_style_to_style             (GtkRcContext    *context,
 						      GtkRcStyle      *rc_style);
 static GtkStyle*   gtk_rc_init_style                 (GtkRcContext    *context,
 						      GSList          *rc_styles);
-static void        gtk_rc_parse_default_files        (GtkRcContext    *context);
-static void        gtk_rc_parse_named                (GtkRcContext    *context,
-						      const gchar     *name,
-						      const gchar     *type);
 static void        gtk_rc_context_parse_file         (GtkRcContext    *context,
 						      const gchar     *filename,
 						      gint             priority,
@@ -223,7 +219,6 @@ static void        gtk_rc_clear_hash_node            (gpointer         key,
                                                       gpointer         data,
                                                       gpointer         user_data);
 static void        gtk_rc_clear_styles               (GtkRcContext    *context);
-static void        gtk_rc_add_initial_default_files  (void);
 
 static void        gtk_rc_style_finalize             (GObject         *object);
 static void        gtk_rc_style_real_merge           (GtkRcStyle      *dest,
@@ -456,22 +451,6 @@ gtk_rc_get_im_module_file (void)
   return result;
 }
 
-gchar *
-gtk_rc_get_theme_dir (void)
-{
-  const gchar *var;
-  gchar *path;
-
-  var = g_getenv ("GTK_DATA_PREFIX");
-
-  if (var)
-    path = g_build_filename (var, "share", "themes", NULL);
-  else
-    path = g_build_filename (GTK_DATA_PREFIX, "share", "themes", NULL);
-
-  return path;
-}
-
 /**
  * gtk_rc_get_module_dir:
  * 
@@ -486,150 +465,6 @@ gchar *
 gtk_rc_get_module_dir (void)
 {
   return gtk_rc_make_default_dir ("engines");
-}
-
-static void
-gtk_rc_add_initial_default_files (void)
-{
-  static gint init = FALSE;
-  const gchar *var;
-  gchar *str;
-  gchar **files;
-  gint i;
-
-  if (init)
-    return;
- 
-  gtk_rc_default_files = g_new (gchar*, 10);
-  max_default_files = 10;
-
-  gtk_rc_default_files[0] = NULL;
-  init = TRUE;
-
-  var = g_getenv ("GTK2_RC_FILES");
-
-  if (var)
-    {
-      files = g_strsplit (var, G_SEARCHPATH_SEPARATOR_S, -1);
-      i=0;
-      while (files[i])
-	{
-	  gtk_rc_add_default_file (files[i]);
-	  i++;
-	}
-      g_strfreev (files);
-    }
-  else
-    {
-      const gchar *home;
-      const gchar * const *config_dirs;
-      const gchar *config_dir;
-
-      str = g_build_filename (GTK_DATA_PREFIX, "share", "gtk-2.0", "gtkrc", NULL);
-      gtk_rc_add_default_file (str);
-      g_free (str);
-
-      config_dirs = g_get_system_config_dirs ();
-      for (config_dir = *config_dirs; *config_dirs != NULL; config_dirs++)
-        {
-          str = g_build_filename (config_dir, "gtk-2.0", "gtkrc", NULL);
-          gtk_rc_add_default_file (str);
-          g_free (str);
-        }
-
-      str = g_build_filename (GTK_SYSCONFDIR, "gtk-2.0", "gtkrc", NULL);
-      gtk_rc_add_default_file (str);
-      g_free (str);
-
-      home = g_get_home_dir ();
-      if (home)
-	{
-	  str = g_build_filename (home, ".gtkrc-2.0", NULL);
-	  gtk_rc_add_default_file (str);
-	  g_free (str);
-	}
-    }
-}
-
-/**
- * gtk_rc_add_default_file:
- * @filename: the pathname to the file. If @filename is not absolute, it
- *    is searched in the current directory.
- * 
- * Adds a file to the list of files to be parsed at the
- * end of gtk_init().
- **/
-void
-gtk_rc_add_default_file (const gchar *filename)
-{
-  guint n;
-  
-  gtk_rc_add_initial_default_files ();
-
-  for (n = 0; n < max_default_files; n++) 
-    {
-      if (gtk_rc_default_files[n] == NULL)
-	break;
-    }
-
-  if (n == max_default_files)
-    {
-      max_default_files += 10;
-      gtk_rc_default_files = g_renew (gchar*, gtk_rc_default_files, max_default_files);
-    }
-  
-  gtk_rc_default_files[n++] = g_strdup (filename);
-  gtk_rc_default_files[n] = NULL;
-}
-
-/**
- * gtk_rc_set_default_files:
- * @filenames: A %NULL-terminated list of filenames.
- * 
- * Sets the list of files that GTK+ will read at the
- * end of gtk_init().
- **/
-void
-gtk_rc_set_default_files (gchar **filenames)
-{
-  gint i;
-
-  gtk_rc_add_initial_default_files ();
-
-  i = 0;
-  while (gtk_rc_default_files[i])
-    {
-      g_free (gtk_rc_default_files[i]);
-      i++;
-    }
-    
-  gtk_rc_default_files[0] = NULL;
-
-  i = 0;
-  while (filenames[i] != NULL)
-    {
-      gtk_rc_add_default_file (filenames[i]);
-      i++;
-    }
-}
-
-/**
- * gtk_rc_get_default_files:
- *
- * Retrieves the current list of RC files that will be parsed
- * at the end of gtk_init().
- *
- * Return value: (transfer none)  (array zero-terminated=1) (element-type filename):
- *     A %NULL-terminated array of filenames.
- *     This memory is owned by GTK+ and must not be freed by the application.
- *     If you want to store this information, you should make a copy.
- **/
-gchar **
-gtk_rc_get_default_files (void)
-{
-  gtk_rc_add_initial_default_files ();
-
-  return gtk_rc_default_files;
 }
 
 static void
@@ -800,68 +635,6 @@ _gtk_rc_context_destroy (GtkSettings *settings)
   settings->rc_context = NULL;
 }
 
-static void
-gtk_rc_parse_named (GtkRcContext *context,
-		    const gchar  *name,
-		    const gchar  *type)
-{
-  gchar *path = NULL;
-  const gchar *home_dir;
-  gchar *subpath;
-
-  if (type)
-    subpath = g_strconcat ("gtk-2.0-", type,
-			   G_DIR_SEPARATOR_S "gtkrc",
-			   NULL);
-  else
-    subpath = g_strdup ("gtk-2.0" G_DIR_SEPARATOR_S "gtkrc");
-  
-  /* First look in the users home directory
-   */
-  home_dir = g_get_home_dir ();
-  if (home_dir)
-    {
-      path = g_build_filename (home_dir, ".themes", name, subpath, NULL);
-      if (!g_file_test (path, G_FILE_TEST_EXISTS))
-	{
-	  g_free (path);
-	  path = NULL;
-	}
-    }
-
-  if (!path)
-    {
-      gchar *theme_dir = gtk_rc_get_theme_dir ();
-      path = g_build_filename (theme_dir, name, subpath, NULL);
-      g_free (theme_dir);
-      
-      if (!g_file_test (path, G_FILE_TEST_EXISTS))
-	{
-	  g_free (path);
-	  path = NULL;
-	}
-    }
-
-  if (path)
-    {
-      gtk_rc_context_parse_file (context, path, GTK_PATH_PRIO_THEME, FALSE);
-      g_free (path);
-    }
-
-  g_free (subpath);
-}
-
-static void
-gtk_rc_parse_default_files (GtkRcContext *context)
-{
-  gint i;
-
-  gtk_rc_add_initial_default_files ();
-
-  for (i = 0; gtk_rc_default_files[i] != NULL; i++)
-    gtk_rc_context_parse_file (context, gtk_rc_default_files[i], GTK_PATH_PRIO_RC, FALSE);
-}
-
 void
 _gtk_rc_init (void)
 {
@@ -870,8 +643,6 @@ _gtk_rc_init (void)
   if (!initialized)
     {
       initialized = TRUE;
-      
-      gtk_rc_add_initial_default_files ();
     }
   
   /* Default RC string */
@@ -1806,8 +1577,6 @@ gtk_rc_reparse_all_for_settings (GtkSettings *settings,
       _gtk_settings_reset_rc_values (context->settings);
       gtk_rc_clear_rc_files (context);
 
-      gtk_rc_parse_default_files (context);
-
       tmp_list = global_rc_files;
       while (tmp_list)
 	{
@@ -1828,11 +1597,6 @@ gtk_rc_reparse_all_for_settings (GtkSettings *settings,
 		    "gtk-theme-name", &context->theme_name,
 		    "gtk-key-theme-name", &context->key_theme_name,
 		    NULL);
-
-      if (context->theme_name && context->theme_name[0])
-	gtk_rc_parse_named (context, context->theme_name, NULL);
-      if (context->key_theme_name && context->key_theme_name[0])
-	gtk_rc_parse_named (context, context->key_theme_name, "key");
 
       context->reloading = FALSE;
 
@@ -4898,43 +4662,6 @@ _gtk_rc_match_widget_class (GSList  *list,
 }
 
 #if defined (G_OS_WIN32) && !defined (_WIN64)
-
-/* DLL ABI stability backward compatibility versions */
-
-#undef gtk_rc_add_default_file
-
-void
-gtk_rc_add_default_file (const gchar *filename)
-{
-  gchar *utf8_filename = g_locale_to_utf8 (filename, -1, NULL, NULL, NULL);
-
-  gtk_rc_add_default_file_utf8 (utf8_filename);
-
-  g_free (utf8_filename);
-}
-
-#undef gtk_rc_set_default_files
-
-void
-gtk_rc_set_default_files (gchar **filenames)
-{
-  gchar **utf8_filenames;
-  int n = 0, i;
-
-  while (filenames[n++] != NULL)
-    ;
-
-  utf8_filenames = g_new (gchar *, n + 1);
-
-  for (i = 0; i < n; i++)
-    utf8_filenames[i] = g_locale_to_utf8 (filenames[i], -1, NULL, NULL, NULL);
-
-  utf8_filenames[n] = NULL;
-
-  gtk_rc_set_default_files_utf8 (utf8_filenames);
-
-  g_strfreev (utf8_filenames);
-}
 
 #undef gtk_rc_parse
 

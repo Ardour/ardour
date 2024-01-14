@@ -251,25 +251,6 @@ public:
 
   static void parse_string(const Glib::ustring &rc_string);
 
-  /** Adds a file to the list of files to be parsed at the end of gtk_init().
-   *
-   * @param filename the pathname to the file. If @a filename is not absolute, it is searched in the current directory.
-   */
-  static void add_default_file(const Glib::ustring& filename);
-
-  /** Sets the list of files that GTK+ will read at the end of gtk_init().
-   *
-   * @param filenames A list of filenames.
-   */
-  static void set_default_files(const Glib::StringArrayHandle& filenames);
-
-  /** Retrieves the current list of RC files that will be parsed
-   * at the end of gtk_init().
-   *
-   * @result An array of filenames.
-   */
-  static Glib::StringArrayHandle get_default_files();
-
   /** If the modification time on any previously read file for the
    * default Gtk::Settings has changed, discard all style information
    * and then reread all previously read RC files.
