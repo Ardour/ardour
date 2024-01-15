@@ -672,6 +672,9 @@ ExportHandler::export_cd_marker_file (ExportTimespanPtr timespan, ExportFormatSp
 	} catch (std::exception& e) {
 		error << string_compose (_("an error occurred while writing a TOC/CUE file: %1"), e.what()) << endmsg;
 		::g_unlink (filepath.c_str());
+	} catch (Glib::ConvertError const& e) {
+		error << string_compose (_("an error occurred while writing a TOC/CUE file: %1"), e.what()) << endmsg;
+		::g_unlink (filepath.c_str());
 	} catch (Glib::Exception& e) {
 		error << string_compose (_("an error occurred while writing a TOC/CUE file: %1"), e.what()) << endmsg;
 		::g_unlink (filepath.c_str());
