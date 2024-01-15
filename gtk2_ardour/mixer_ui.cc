@@ -702,7 +702,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 				show_strip (strip);
 
 				if (route->is_master()) {
-					out_packer.pack_end (*strip, false, false);
+					out_packer.pack_start (*strip, false, false);
 					strip->set_packed (true);
 
 				} else {
@@ -1859,6 +1859,10 @@ Mixer_UI::redisplay_track_list ()
 	}
 	_spill_scroll_position = 0;
 
+	if (_surround_strip) {
+		out_packer.reorder_child (*_surround_strip, -1);
+	}
+	out_packer.reorder_child (_monitor_section.tearoff(), -1);
 }
 
 void
@@ -4343,11 +4347,11 @@ Mixer_UI::screenshot (std::string const& filename)
 	}
 	if (_surround_strip) {
 		_surround_strip->hide_spacer (false);
-		out_packer.pack_start (*_surround_strip, false, false);
+		out_packer.pack_end (*_surround_strip, false, false);
 	}
 	if (master) {
 		master->hide_master_spacer (false);
-		out_packer.pack_end (*master, false, false);
+		out_packer.pack_start (*master, false, false);
 	}
 	return true;
 }
