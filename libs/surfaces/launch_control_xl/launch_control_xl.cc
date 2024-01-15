@@ -1180,12 +1180,12 @@ LaunchControlXL::init_dm_callbacks()
 		first_selected_stripable()->mapped_control(EQ_Enable)->Changed.connect (stripable_connections,
 		MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::init_knobs_and_buttons,this), lcxl);
 	}
-	if (first_selected_stripable()->mapped_control (EQ_Shape, 0)) {
-		first_selected_stripable()->mapped_control (EQ_Shape, 0)->Changed.connect (stripable_connections,
+	if (first_selected_stripable()->mapped_control (EQ_BandShape, 0)) {
+		first_selected_stripable()->mapped_control (EQ_BandShape, 0)->Changed.connect (stripable_connections,
 		MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::init_buttons,this), lcxl);
 	}
-	if (first_selected_stripable()->mapped_control (EQ_Shape, 3)) {
-		first_selected_stripable()->mapped_control (EQ_Shape, 3)->Changed.connect (stripable_connections,
+	if (first_selected_stripable()->mapped_control (EQ_BandShape, 3)) {
+		first_selected_stripable()->mapped_control (EQ_BandShape, 3)->Changed.connect (stripable_connections,
 		MISSING_INVALIDATOR, boost::bind (&LaunchControlXL::init_buttons,this), lcxl);
 	}
 

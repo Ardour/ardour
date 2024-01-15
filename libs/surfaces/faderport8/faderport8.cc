@@ -1345,10 +1345,10 @@ FaderPort8::build_well_known_processor_ctrls (std::shared_ptr<Stripable> s, int 
 
 				for (int band = 0; band < cnt; ++band) {
 					std::string bn = s->eq_band_name (band);
-					PUSH_BACK_NON_NULL (string_compose ("Gain %1", bn), s->mapped_control (EQ_Gain, band));
-					PUSH_BACK_NON_NULL (string_compose ("Freq %1", bn), s->mapped_control (EQ_Freq, band));
-					PUSH_BACK_NON_NULL (string_compose ("Band %1", bn), s->mapped_control (EQ_Q, band));
-					PUSH_BACK_NON_NULL (string_compose ("Shape %1", bn), s->mapped_control (EQ_Shape, band));
+					PUSH_BACK_NON_NULL (string_compose ("Gain %1", bn), s->mapped_control (EQ_BandGain, band));
+					PUSH_BACK_NON_NULL (string_compose ("Freq %1", bn), s->mapped_control (EQ_BandFreq, band));
+					PUSH_BACK_NON_NULL (string_compose ("Band %1", bn), s->mapped_control (EQ_BandQ, band));
+					PUSH_BACK_NON_NULL (string_compose ("Shape %1", bn), s->mapped_control (EQ_BandShape, band));
 				}
 			}
 			break;

@@ -398,35 +398,35 @@ CC121::encoder_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	  break;
 	case 0x20:
 	  /* EQ 1 Q */
-	  if (r) { set_controllable (r->mapped_control (EQ_Q, 0), adj); }
+	  if (r) { set_controllable (r->mapped_control (EQ_BandQ, 0), adj); }
 	  break;
 	case 0x21:
 	  /* EQ 2 Q */
-	  if (r) { set_controllable (r->mapped_control (EQ_Q, 1), adj); }
+	  if (r) { set_controllable (r->mapped_control (EQ_BandQ, 1), adj); }
 	  break;
 	case 0x22:
 	  /* EQ 3 Q */
-	  if (r) { set_controllable (r->mapped_control (EQ_Q, 2), adj); }
+	  if (r) { set_controllable (r->mapped_control (EQ_BandQ, 2), adj); }
 	  break;
 	case 0x23:
 	  /* EQ 4 Q */
-	  if (r) { set_controllable (r->mapped_control (EQ_Q, 3), adj); }
+	  if (r) { set_controllable (r->mapped_control (EQ_BandQ, 3), adj); }
 	  break;
 	case 0x30:
 	  /* EQ 1 Frequency */
-	  if (r) { set_controllable (r->mapped_control (EQ_Freq, 0), adj); }
+	  if (r) { set_controllable (r->mapped_control (EQ_BandFreq, 0), adj); }
 	  break;
 	case 0x31:
 	  /* EQ 2 Frequency */
-	  if (r) { set_controllable (r->mapped_control (EQ_Freq, 1), adj); }
+	  if (r) { set_controllable (r->mapped_control (EQ_BandFreq, 1), adj); }
 	  break;
 	case 0x32:
 	  /* EQ 3 Frequency */
-	  if (r) { set_controllable (r->mapped_control (EQ_Freq, 2), adj); }
+	  if (r) { set_controllable (r->mapped_control (EQ_BandFreq, 2), adj); }
 	  break;
 	case 0x33:
 	  /* EQ 4 Frequency */
-	  if (r) { set_controllable (r->mapped_control (EQ_Freq, 3), adj); }
+	  if (r) { set_controllable (r->mapped_control (EQ_BandFreq, 3), adj); }
 	  break;
 	case 0x3C:
 	  /* AI */
@@ -449,19 +449,19 @@ CC121::encoder_handler (MIDI::Parser &, MIDI::EventTwoBytes* tb)
 	  break;
 	case 0x40:
 	  /* EQ 1 Gain */
-	  if (r) { set_controllable (r->mapped_control(EQ_Gain, 0), adj); }
+	  if (r) { set_controllable (r->mapped_control(EQ_BandGain, 0), adj); }
 	  break;
 	case 0x41:
 	  /* EQ 2 Gain */
-	  if (r) { set_controllable (r->mapped_control(EQ_Gain, 1), adj); }
+	  if (r) { set_controllable (r->mapped_control(EQ_BandGain, 1), adj); }
 	  break;
 	case 0x42:
 	  /* EQ 3 Gain */
-	  if (r) { set_controllable (r->mapped_control(EQ_Gain, 2), adj); }
+	  if (r) { set_controllable (r->mapped_control(EQ_BandGain, 2), adj); }
 	  break;
 	case 0x43:
 	  /* EQ 4 Gain */
-	  if (r) { set_controllable (r->mapped_control(EQ_Gain, 3), adj); }
+	  if (r) { set_controllable (r->mapped_control(EQ_BandGain, 3), adj); }
 	  break;
 	case 0x50:
 	  /* Value */

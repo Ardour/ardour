@@ -5922,8 +5922,8 @@ OSC::sel_eq_gain (int id, float val, lo_message msg)
 		if (id > 0) {
 			--id;
 		}
-		if (s->mapped_control (EQ_Gain, id)) {
-			s->mapped_control (EQ_Gain, id)->set_value (s->mapped_control(EQ_Gain, id)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (EQ_BandGain, id)) {
+			s->mapped_control (EQ_BandGain, id)->set_value (s->mapped_control(EQ_BandGain, id)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5940,8 +5940,8 @@ OSC::sel_eq_freq (int id, float val, lo_message msg)
 		if (id > 0) {
 			--id;
 		}
-		if (s->mapped_control (EQ_Freq, id)) {
-			s->mapped_control (EQ_Freq, id)->set_value (s->mapped_control (EQ_Freq, id)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (EQ_BandFreq, id)) {
+			s->mapped_control (EQ_BandFreq, id)->set_value (s->mapped_control (EQ_BandFreq, id)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5958,8 +5958,8 @@ OSC::sel_eq_q (int id, float val, lo_message msg)
 		if (id > 0) {
 			--id;
 		}
-		if (s->mapped_control (EQ_Q, id)) {
-			s->mapped_control (EQ_Q, id)->set_value (s->mapped_control (EQ_Q, id)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (EQ_BandQ, id)) {
+			s->mapped_control (EQ_BandQ, id)->set_value (s->mapped_control (EQ_BandQ, id)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}
@@ -5976,8 +5976,8 @@ OSC::sel_eq_shape (int id, float val, lo_message msg)
 		if (id > 0) {
 			--id;
 		}
-		if (s->mapped_control (EQ_Shape, id)) {
-			s->mapped_control (EQ_Shape, id)->set_value (s->mapped_control (EQ_Shape, id)->interface_to_internal (val), PBD::Controllable::NoGroup);
+		if (s->mapped_control (EQ_BandShape, id)) {
+			s->mapped_control (EQ_BandShape, id)->set_value (s->mapped_control (EQ_BandShape, id)->interface_to_internal (val), PBD::Controllable::NoGroup);
 			return 0;
 		}
 	}

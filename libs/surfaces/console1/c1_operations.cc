@@ -365,8 +365,8 @@ Console1::eq_low_shape (const uint32_t value)
 	if (!_current_stripable) {
 		return;
 	}
-	if (_current_stripable->mapped_control (EQ_Shape, 0))
-		session->set_control (_current_stripable->mapped_control (EQ_Shape, 0), value > 0, PBD::Controllable::UseGroup);
+	if (_current_stripable->mapped_control (EQ_BandShape, 0))
+		session->set_control (_current_stripable->mapped_control (EQ_BandShape, 0), value > 0, PBD::Controllable::UseGroup);
 	else
 		map_eq_low_shape ();
 }
@@ -378,8 +378,8 @@ Console1::eq_high_shape (const uint32_t value)
 	if (!_current_stripable) {
 		return;
 	}
-	if (_current_stripable->mapped_control (EQ_Shape, 3))
-		session->set_control (_current_stripable->mapped_control (EQ_Shape, 3), value > 0, PBD::Controllable::UseGroup);
+	if (_current_stripable->mapped_control (EQ_BandShape, 3))
+		session->set_control (_current_stripable->mapped_control (EQ_BandShape, 3), value > 0, PBD::Controllable::UseGroup);
 	else
 		map_eq_high_shape ();
 }
@@ -387,10 +387,10 @@ Console1::eq_high_shape (const uint32_t value)
 void
 Console1::eq_freq (const uint32_t band, uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->mapped_control (EQ_Freq, band)) {
+	if (!_current_stripable || !_current_stripable->mapped_control (EQ_BandFreq, band)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_Freq, band);
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_BandFreq, band);
 	double freq = midi_to_control (control, value);
 	session->set_control (control, freq, PBD::Controllable::UseGroup);
 }
@@ -398,10 +398,10 @@ Console1::eq_freq (const uint32_t band, uint32_t value)
 void
 Console1::eq_gain (const uint32_t band, uint32_t value)
 {
-	if (!_current_stripable || !_current_stripable->mapped_control (EQ_Gain, band)) {
+	if (!_current_stripable || !_current_stripable->mapped_control (EQ_BandGain, band)) {
 		return;
 	}
-	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_Gain, band);
+	std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_BandGain, band);
 	double gain = midi_to_control (control, value);
 	session->set_control (control, gain, PBD::Controllable::UseGroup);
 }
@@ -917,7 +917,7 @@ Console1::map_eq_freq (const uint32_t band)
 	}
 	ControllerID controllerID = eq_freq_controller_for_band (band);
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_Freq, band);
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_BandFreq, band);
 		map_encoder (controllerID, control);
 	}
 }
@@ -930,7 +930,7 @@ Console1::map_eq_gain (const uint32_t band)
 	}
 	ControllerID controllerID = eq_gain_controller_for_band (band);
 	if (map_encoder (controllerID)) {
-		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_Gain, band);
+		std::shared_ptr<AutomationControl> control = _current_stripable->mapped_control (EQ_BandGain, band);
 		map_encoder (controllerID, control);
 	}
 }
@@ -941,8 +941,8 @@ Console1::map_eq_low_shape ()
 	if (!_current_stripable)
 		return;
 	try {
-		uint32_t led_value = _current_stripable->mapped_control (EQ_Shape, 0)
-		                       ? _current_stripable->mapped_control (EQ_Shape, 0)->get_value () == 0 ? 0 : 63
+		uint32_t led_value = _current_stripable->mapped_control (EQ_BandShape, 0)
+		                       ? _current_stripable->mapped_control (EQ_BandShape, 0)->get_value () == 0 ? 0 : 63
 		                       : 0;
 		get_button (ControllerID::LOW_SHAPE)->set_led_state (led_value);
 	} catch (ControlNotFoundException const&) {
@@ -956,8 +956,8 @@ Console1::map_eq_high_shape ()
 	if (!_current_stripable)
 		return;
 	try {
-		uint32_t led_value = _current_stripable->mapped_control (EQ_Shape, 3)
-		                       ? _current_stripable->mapped_control (EQ_Shape, 3)->get_value () == 0 ? 0 : 63
+		uint32_t led_value = _current_stripable->mapped_control (EQ_BandShape, 3)
+		                       ? _current_stripable->mapped_control (EQ_BandShape, 3)->get_value () == 0 ? 0 : 63
 		                       : 0;
 		get_button (ControllerID::HIGH_SHAPE)->set_led_state (led_value);
 	} catch (ControlNotFoundException const&) {

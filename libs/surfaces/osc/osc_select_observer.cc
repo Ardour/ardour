@@ -1115,21 +1115,21 @@ OSCSelectObserver::eq_init()
 		if (_strip->eq_band_name(i).size()) {
 			_osc.text_message_with_id (X_("/select/eq_band_name"), i + 1, _strip->eq_band_name (i), in_line, addr);
 		}
-		if (_strip->mapped_control (EQ_Gain, i)) {
-			_strip->mapped_control(EQ_Gain, i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_gain"), i + 1, _strip->mapped_control(EQ_Gain, i)), OSC::instance());
-			change_message_with_id (X_("/select/eq_gain"), i + 1, _strip->mapped_control(EQ_Gain, i));
+		if (_strip->mapped_control (EQ_BandGain, i)) {
+			_strip->mapped_control(EQ_BandGain, i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_gain"), i + 1, _strip->mapped_control(EQ_BandGain, i)), OSC::instance());
+			change_message_with_id (X_("/select/eq_gain"), i + 1, _strip->mapped_control(EQ_BandGain, i));
 		}
-		if (_strip->mapped_control (EQ_Freq, i)) {
-			_strip->mapped_control (EQ_Freq, i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_freq"), i + 1, _strip->mapped_control (EQ_Freq, i)), OSC::instance());
-			change_message_with_id (X_("/select/eq_freq"), i + 1, _strip->mapped_control (EQ_Freq, i));
+		if (_strip->mapped_control (EQ_BandFreq, i)) {
+			_strip->mapped_control (EQ_BandFreq, i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_freq"), i + 1, _strip->mapped_control (EQ_BandFreq, i)), OSC::instance());
+			change_message_with_id (X_("/select/eq_freq"), i + 1, _strip->mapped_control (EQ_BandFreq, i));
 		}
-		if (_strip->mapped_control (EQ_Q, i)) {
-			_strip->mapped_control (EQ_Q, i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_q"), i + 1, _strip->mapped_control (EQ_Q, i)), OSC::instance());
-			change_message_with_id (X_("/select/eq_q"), i + 1, _strip->mapped_control (EQ_Q, i));
+		if (_strip->mapped_control (EQ_BandQ, i)) {
+			_strip->mapped_control (EQ_BandQ, i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_q"), i + 1, _strip->mapped_control (EQ_BandQ, i)), OSC::instance());
+			change_message_with_id (X_("/select/eq_q"), i + 1, _strip->mapped_control (EQ_BandQ, i));
 		}
-		if (_strip->mapped_control (EQ_Shape, i)) {
-			_strip->mapped_control (EQ_Shape, i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_shape"), i + 1, _strip->mapped_control (EQ_Shape, i)), OSC::instance());
-			change_message_with_id (X_("/select/eq_shape"), i + 1, _strip->mapped_control (EQ_Shape, i));
+		if (_strip->mapped_control (EQ_BandShape, i)) {
+			_strip->mapped_control (EQ_BandShape, i)->Changed.connect (eq_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::change_message_with_id, this, X_("/select/eq_shape"), i + 1, _strip->mapped_control (EQ_BandShape, i)), OSC::instance());
+			change_message_with_id (X_("/select/eq_shape"), i + 1, _strip->mapped_control (EQ_BandShape, i));
 		}
 	}
 }

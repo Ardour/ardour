@@ -1326,9 +1326,9 @@ LaunchControlXL::dm_mb_eq (KnobID k, bool gain, uint8_t band)
 	std::shared_ptr<AutomationControl> ac;
 	std::shared_ptr<Knob> knob = knob_by_id (k);
 	if (gain) {
-		ac = first_selected_stripable()->mapped_control(EQ_Gain, band);
+		ac = first_selected_stripable()->mapped_control(EQ_BandGain, band);
 	} else {
-		ac = first_selected_stripable()->mapped_control (EQ_Freq, band);
+		ac = first_selected_stripable()->mapped_control (EQ_BandFreq, band);
 	}
 
 	if (ac && check_pick_up(knob, ac)) {
@@ -1343,9 +1343,9 @@ LaunchControlXL::dm_mb_eq_shape_switch (uint8_t band)
 		return;
 	}
 
-	if (first_selected_stripable()->mapped_control (EQ_Shape, band)) {
-	first_selected_stripable()->mapped_control (EQ_Shape, band)->set_value
-			(!first_selected_stripable()->mapped_control (EQ_Shape, band)->get_value(), PBD::Controllable::NoGroup );
+	if (first_selected_stripable()->mapped_control (EQ_BandShape, band)) {
+	first_selected_stripable()->mapped_control (EQ_BandShape, band)->set_value
+			(!first_selected_stripable()->mapped_control (EQ_BandShape, band)->get_value(), PBD::Controllable::NoGroup );
 	}
 }
 
@@ -1359,8 +1359,8 @@ LaunchControlXL::dm_mb_eq_shape_enabled(uint8_t band)
 
 	uint8_t dev_status = dev_nonexistant;
 
-	if (first_selected_stripable()->mapped_control (EQ_Shape, band)) {
-		if (first_selected_stripable()->mapped_control (EQ_Shape, band)->get_value()) {
+	if (first_selected_stripable()->mapped_control (EQ_BandShape, band)) {
+		if (first_selected_stripable()->mapped_control (EQ_BandShape, band)->get_value()) {
 			dev_status = dev_active;
 		} else {
 			dev_status = dev_inactive;

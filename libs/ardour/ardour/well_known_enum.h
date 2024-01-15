@@ -24,10 +24,11 @@ namespace ARDOUR {
 enum WellKnownCtrl : int
 {
 	EQ_Enable,
-	EQ_Gain,
-	EQ_Freq,
-	EQ_Q,
-	EQ_Shape,
+	EQ_Mode,
+	EQ_BandGain,
+	EQ_BandFreq,
+	EQ_BandQ,
+	EQ_BandShape,
 
 	HPF_Enable,
 	HPF_Freq,

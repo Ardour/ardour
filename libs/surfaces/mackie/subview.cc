@@ -330,7 +330,7 @@ void EQSubview::setup_vpot(
 			case 4:
 			case 6:
 				eq_band = global_strip_position / 2;
-				pc = _subview_stripable->mapped_control (EQ_Freq, eq_band);
+				pc = _subview_stripable->mapped_control (EQ_BandFreq, eq_band);
 				band_name = _subview_stripable->eq_band_name (eq_band);
 				pot_id = band_name + "Freq";
 				break;
@@ -339,17 +339,17 @@ void EQSubview::setup_vpot(
 			case 5:
 			case 7:
 				eq_band = global_strip_position / 2;
-				pc = _subview_stripable->mapped_control (EQ_Gain, eq_band);
+				pc = _subview_stripable->mapped_control (EQ_BandGain, eq_band);
 				band_name = _subview_stripable->eq_band_name (eq_band);
 				pot_id = band_name + "Gain";
 				break;
 			case 8:
-				pc = _subview_stripable->mapped_control (EQ_Shape, 0);  //low band "bell" button
+				pc = _subview_stripable->mapped_control (EQ_BandShape, 0);  //low band "bell" button
 				band_name = "lo";
 				pot_id = band_name + " Shp";
 				break;
 			case 9:
-				pc = _subview_stripable->mapped_control (EQ_Shape, 3);  //high band "bell" button
+				pc = _subview_stripable->mapped_control (EQ_BandShape, 3);  //high band "bell" button
 				band_name = "hi";
 				pot_id = band_name + " Shp";
 				break;
@@ -365,7 +365,7 @@ void EQSubview::setup_vpot(
 			case 1:
 			case 2:
 				eq_band = global_strip_position;
-				pc = _subview_stripable->mapped_control (EQ_Gain, eq_band);
+				pc = _subview_stripable->mapped_control (EQ_BandGain, eq_band);
 				band_name = _subview_stripable->eq_band_name (eq_band);
 				pot_id = band_name + "Gain";
 				break;

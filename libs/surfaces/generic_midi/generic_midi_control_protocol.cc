@@ -1247,13 +1247,13 @@ GenericMidiControlProtocol::lookup_controllable (const string & str, MIDIControl
 			int band = atoi (path[3]); /* band number */
 
 			if (path[2] == X_("gain")) {
-				c = s->mapped_control (EQ_Gain, band);
+				c = s->mapped_control (EQ_BandGain, band);
 			} else if (path[2] == X_("freq")) {
-				c = s->mapped_control (EQ_Freq, band);
+				c = s->mapped_control (EQ_BandFreq, band);
 			} else if (path[2] == X_("q")) {
-				c = s->mapped_control (EQ_Q, band);
+				c = s->mapped_control (EQ_BandQ, band);
 			} else if (path[2] == X_("shape")) {
-				c = s->mapped_control (EQ_Shape, band);
+				c = s->mapped_control (EQ_BandShape, band);
 			}
 		}
 

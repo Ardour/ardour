@@ -856,7 +856,7 @@ Strip::setup_trackview_vpot (std::shared_ptr<Stripable> r)
 			case 9:
 			case 10:
 				eq_band = (global_pos-8);
-				pc = r->mapped_control (EQ_Gain, eq_band);
+				pc = r->mapped_control (EQ_BandGain, eq_band);
 				_vpot->set_mode(Pot::boost_cut);
 				break;
 		}
@@ -875,14 +875,14 @@ Strip::setup_trackview_vpot (std::shared_ptr<Stripable> r)
 			case 12:
 			case 14: {
 				eq_band = (global_pos-8) / 2;
-				pc = r->mapped_control (EQ_Freq, eq_band);
+				pc = r->mapped_control (EQ_BandFreq, eq_band);
 				} break;
 			case 9:
 			case 11:
 			case 13:
 			case 15: {
 				eq_band = (global_pos-8) / 2;
-				pc = r->mapped_control (EQ_Gain, eq_band);
+				pc = r->mapped_control (EQ_BandGain, eq_band);
 				_vpot->set_mode(Pot::boost_cut);
 				} break;
 		}

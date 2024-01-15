@@ -61,14 +61,14 @@ function factory() return function()
 		local i = 0
 		repeat
 			for _,ctrl in pairs({
-				route:mapped_control (ARDOUR.WellKnownCtrl.EQ_Freq, i),
-				route:mapped_control (ARDOUR.WellKnownCtrl.EQ_Gain, i),
-				route:mapped_control (ARDOUR.WellKnownCtrl.EQ_Q, i),
+				route:mapped_control (ARDOUR.WellKnownCtrl.EQ_BandFreq, i),
+				route:mapped_control (ARDOUR.WellKnownCtrl.EQ_BandGain, i),
+				route:mapped_control (ARDOUR.WellKnownCtrl.EQ_BandQ, i),
 			}) do
 				reset(ctrl, disp, auto)
 			end
 			i = i + 1
-		until route:mapped_control (ARDOUR.WellKnownCtrl.EQ_Freq, i):isnil()
+		until route:mapped_control (ARDOUR.WellKnownCtrl.EQ_BandFreq, i):isnil()
 	end
 
 	function reset_comp_controls(route, disp, auto)

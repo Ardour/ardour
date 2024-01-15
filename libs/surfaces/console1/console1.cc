@@ -699,23 +699,23 @@ Console1::set_current_stripable (std::shared_ptr<Stripable> r)
 		}
 
 		for (uint32_t i = 0; i < _current_stripable->eq_band_cnt (); ++i) {
-			if (_current_stripable->mapped_control (EQ_Freq, i)) {
-				_current_stripable->mapped_control (EQ_Freq, i)->Changed.connect (
+			if (_current_stripable->mapped_control (EQ_BandFreq, i)) {
+				_current_stripable->mapped_control (EQ_BandFreq, i)->Changed.connect (
 				  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq_freq, this, i), this);
 			}
-			if (_current_stripable->mapped_control (EQ_Gain, i)) {
-				_current_stripable->mapped_control (EQ_Gain, i)->Changed.connect (
+			if (_current_stripable->mapped_control (EQ_BandGain, i)) {
+				_current_stripable->mapped_control (EQ_BandGain, i)->Changed.connect (
 				  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq_gain, this, i), this);
 			}
 		}
 
-		if (_current_stripable->mapped_control (EQ_Shape, 0)) {
-			_current_stripable->mapped_control (EQ_Shape, 0)->Changed.connect (
+		if (_current_stripable->mapped_control (EQ_BandShape, 0)) {
+			_current_stripable->mapped_control (EQ_BandShape, 0)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq_low_shape, this), this);
 		}
 
-		if (_current_stripable->mapped_control (EQ_Shape, 3)) {
-			_current_stripable->mapped_control (EQ_Shape, 3)->Changed.connect (
+		if (_current_stripable->mapped_control (EQ_BandShape, 3)) {
+			_current_stripable->mapped_control (EQ_BandShape, 3)->Changed.connect (
 			  stripable_connections, MISSING_INVALIDATOR, boost::bind (&Console1::map_eq_high_shape, this), this);
 		}
 
