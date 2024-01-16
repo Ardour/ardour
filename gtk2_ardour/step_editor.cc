@@ -284,8 +284,8 @@ StepEditor::step_add_note (uint8_t channel, uint8_t pitch, uint8_t velocity, Tem
 	/* make sure its visible on the vertical axis */
 
 	if (pitch < msv->lowest_note() || pitch > msv->highest_note()) {
-		msv->update_note_range (pitch);
-		msv->set_note_range (MidiStreamView::ContentsRange);
+		msv->maybe_extend_note_range (pitch);
+		msv->set_note_visibility_range_style (MidiStreamView::ContentsRange);
 	}
 
 	/* make sure its visible on the horizontal axis */

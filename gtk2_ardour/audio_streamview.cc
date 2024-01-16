@@ -70,6 +70,11 @@ AudioStreamView::AudioStreamView (AudioTimeAxisView& tv)
 	color_handler ();
 }
 
+AudioStreamView::~AudioStreamView ()
+{
+	undisplay_track ();
+}
+
 int
 AudioStreamView::set_amplitude_above_axis (gdouble app)
 {

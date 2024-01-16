@@ -65,12 +65,13 @@ class MidiViewBackground : public virtual ViewBackground
 
 	Gtkmm2ext::Color region_color() const { return _region_color; }
 
-	void set_note_range (VisibleNoteRange r);
+	void set_note_visibility_range_style (VisibleNoteRange r);
+	VisibleNoteRange visibility_range_style() const { return _visibility_note_range; }
 
 	inline uint8_t lowest_note()  const { return _lowest_note; }
 	inline uint8_t highest_note() const { return _highest_note; }
 
-	void update_note_range(uint8_t note_num);
+	void maybe_extend_note_range (uint8_t note_num);
 
 	double note_to_y (uint8_t note) const {
 		return contents_height() - (note + 1 - lowest_note()) * note_height() + 1;
@@ -107,15 +108,18 @@ class MidiViewBackground : public virtual ViewBackground
 	ARDOUR::NoteMode          _note_mode;
 	Gtkmm2ext::Color          _region_color;
 	ARDOUR::ColorMode         _color_mode;
+	VisibleNoteRange          _visibility_note_range;
 
 	void color_handler ();
 	void parameter_changed (std::string const &);
 	void note_range_adjustment_changed();
 	void draw_note_lines();
-	bool update_data_note_range(uint8_t min, uint8_t max);
+	bool update_data_note_range (uint8_t min, uint8_t max);
 	void update_contents_height ();
 	virtual void apply_note_range_to_children () = 0;
 	virtual bool updates_suspended() const { return false; }
+
+	void sync_data_and_visual_range ();
 };
 
 

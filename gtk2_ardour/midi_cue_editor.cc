@@ -35,6 +35,7 @@ using namespace Temporal;
 MidiCueEditor::MidiCueEditor()
 	: vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, horizontal_adjustment (0.0, 0.0, 1e16)
+	, view (nullptr)
 {
 	build_canvas ();
 
@@ -193,8 +194,8 @@ MidiCueEditor::viewport()
 void
 MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr<ARDOUR::MidiRegion> r)
 {
-	// delete view;
-	// view = nullptr;
+	delete view;
+	view = nullptr;
 
 	if (!t || !r) {
 		return;

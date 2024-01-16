@@ -577,26 +577,26 @@ MidiView::scroll (GdkEventScroll* ev)
 		case GDK_SCROLL_UP:
 			if (just_one_edge) {
 				/* make higher notes visible aka expand higher pitch range */
-				apply_note_range (_midi_context.lowest_note(), min (127, _midi_context.highest_note() + step), true);
+				set_note_range (_midi_context.lowest_note(), min (127, _midi_context.highest_note() + step));
 			} else if (zoom) {
 				/* zoom out to show more higher and lower pitches */
-				apply_note_range (max (0, _midi_context.lowest_note() - step), min (127, _midi_context.highest_note() + step), true);
+				set_note_range (max (0, _midi_context.lowest_note() - step), min (127, _midi_context.highest_note() + step));
 			} else {
 				/* scroll towards higher pitches */
-				apply_note_range (max (0, _midi_context.lowest_note() + step), min (127, _midi_context.highest_note() + step), true);
+				set_note_range (max (0, _midi_context.lowest_note() + step), min (127, _midi_context.highest_note() + step));
 			}
 			return true;
 
 		case GDK_SCROLL_DOWN:
 			if (just_one_edge) {
 				/* make lower notes visible aka expand lower pitch range */
-				apply_note_range (max (0, _midi_context.lowest_note() - step), _midi_context.highest_note(), true);
+				set_note_range (max (0, _midi_context.lowest_note() - step), _midi_context.highest_note());
 			} else if (zoom) {
 				/* zoom in to show less higher and lower pitches */
-				apply_note_range (min (127, _midi_context.lowest_note() + step), max (0, _midi_context.highest_note() - step), true);
+				set_note_range (min (127, _midi_context.lowest_note() + step), max (0, _midi_context.highest_note() - step));
 			} else {
 				/* scroll towards lower pitches */
-				apply_note_range (min (127, _midi_context.lowest_note() - step), max (0, _midi_context.highest_note() - step), true);
+				set_note_range (min (127, _midi_context.lowest_note() - step), max (0, _midi_context.highest_note() - step));
 			}
 			return true;
 
@@ -768,7 +768,7 @@ MidiView::create_note_at (timepos_t const & t, double y, Temporal::Beats length,
 		return;
 	}
 
-	_midi_context.update_note_range(new_note->note());
+	_midi_context.maybe_extend_note_range (new_note->note());
 
 	start_note_diff_command(_("add note"));
 	note_diff_add_note (new_note, true, false);
@@ -789,7 +789,6 @@ MidiView::clear_events ()
 	_selection.clear ();
 
 	clear_ghost_events ();
-
 
 	_note_group->clear (true);
 	_events.clear();
@@ -1043,21 +1042,22 @@ MidiView::model_changed()
 
 	NoteBase* cne;
 
-	std::cerr << "drawing " << notes.size() << " notes\n";
+	if (_midi_context.visibility_range_style() == MidiViewBackground::ContentsRange) {
 
-	uint8_t low_note = std::numeric_limits<uint8_t>::max();
-	uint8_t hi_note = std::numeric_limits<uint8_t>::min();
+		uint8_t low_note = std::numeric_limits<uint8_t>::max();
+		uint8_t hi_note = std::numeric_limits<uint8_t>::min();
 
-	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
-		if ((*n)->note() < low_note) {
-			low_note = (*n)->note();
+		for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
+			if ((*n)->note() < low_note) {
+				low_note = (*n)->note();
+			}
+			if ((*n)->note() > hi_note)  {
+				hi_note = (*n)->note();
+			}
 		}
-		if ((*n)->note() > hi_note)  {
-			hi_note = (*n)->note();
-		}
+
+		set_note_range (low_note, hi_note);
 	}
-
-	_midi_context.apply_note_range (low_note, hi_note, true);
 
 	for (MidiModel::Notes::iterator n = notes.begin(); n != notes.end(); ++n) {
 
@@ -1437,11 +1437,9 @@ MidiView::reset_width_dependent_items (double pixel_width)
 void
 MidiView::set_height (double ht)
 {
-	double old_height = height();
-
-	apply_note_range (_midi_context.lowest_note(),
-			  _midi_context.highest_note(),
-			  ht != old_height);
+	if (ht != height()) {
+		view_changed ();
+	}
 
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
 		(*x).second->set_height (_midi_context.contents_height());
@@ -1676,7 +1674,6 @@ MidiView::update_hit (Hit* ev, bool update_ghost_regions)
 	const double diamond_size = std::max(1., floor(note_height()) - 2.);
 	const double y = 1.5 + floor(note_to_y(note->note())) + diamond_size * .5;
 
-	// see DnD note in MidiView::apply_note_range() above
 	if (y <= 0 || y >= height()) {
 		ev->hide();
 	} else {
@@ -1750,7 +1747,7 @@ MidiView::add_note(const std::shared_ptr<NoteType> note, bool visible)
 		}
 	}
 
-	_midi_context.update_note_range (note->note());
+	_midi_context.maybe_extend_note_range (note->note());
 	return event;
 }
 
@@ -1769,7 +1766,7 @@ MidiView::step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 		_midi_region->set_length (timecnt_t (note_end.earlier (_midi_region->position()), timepos_t()));
 	}
 
-	_midi_context.update_note_range(new_note->note());
+	_midi_context.maybe_extend_note_range (new_note->note());
 
 	_marked_for_selection.clear ();
 
@@ -2701,7 +2698,7 @@ MidiView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool co
 	// care about notes being moved beyond the upper/lower bounds on the canvas
 	if (lowest_note_in_selection  < _midi_context.lowest_note() ||
 	    highest_note_in_selection > _midi_context.highest_note()) {
-		_midi_context.set_note_range (MidiStreamView::ContentsRange);
+		_midi_context.set_note_visibility_range_style (MidiStreamView::ContentsRange);
 	}
 }
 
@@ -3361,9 +3358,8 @@ MidiView::transpose (bool up, bool fine, bool allow_smush)
 	apply_note_diff ();
 
 	if (lowest < _midi_context.lowest_note() || highest > _midi_context.highest_note()) {
-		_midi_context.update_note_range (lowest);
-		_midi_context.update_note_range (highest);
-		apply_note_range (lowest, highest, true);
+		_midi_context.maybe_extend_note_range (lowest);
+		_midi_context.maybe_extend_note_range (highest);
 	}
 }
 
@@ -4179,9 +4175,9 @@ MidiView::data_recorded (std::weak_ptr<MidiSource> w)
 
 			/* fix up our note range */
 			if (ev.note() < _midi_context.lowest_note()) {
-				apply_note_range (ev.note(), _midi_context.highest_note(), true);
+				set_note_range (ev.note(), _midi_context.highest_note());
 			} else if (ev.note() > _midi_context.highest_note()) {
-				apply_note_range (_midi_context.lowest_note(), ev.note(), true);
+				set_note_range (_midi_context.lowest_note(), ev.note());
 			}
 
 		} else if (ev.type() == MIDI_CMD_NOTE_OFF) {
@@ -4664,4 +4660,10 @@ double
 MidiView::height() const
 {
 	return _midi_context.height();
+}
+
+void
+MidiView::set_note_range (uint8_t low, uint8_t high)
+{
+	_midi_context.apply_note_range (low, high, true);
 }

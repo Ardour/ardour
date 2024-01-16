@@ -89,6 +89,7 @@ MidiStreamView::MidiStreamView (MidiTimeAxisView& tv)
 
 MidiStreamView::~MidiStreamView ()
 {
+	undisplay_track ();
 }
 
 void
@@ -159,7 +160,7 @@ MidiStreamView::add_region_view_internal (std::shared_ptr<Region> r, bool wait_f
 		/* fit note range if we are importing */
 		if (_trackview.session()->operation_in_progress (Operations::insert_file)) {
 			/* this will call display_region() */
-			set_note_range (ContentsRange);
+			set_note_visibility_range_style (ContentsRange);
 		}
 	}
 
@@ -517,4 +518,10 @@ void
 MidiStreamView::record_layer_check (std::shared_ptr<ARDOUR::Region> r, samplepos_t t)
 {
 	check_record_layers (r, t);
+}
+
+double
+MidiStreamView::y_position () const
+{
+	return _trackview.y_position();
 }

@@ -148,6 +148,8 @@ AudioTimeAxisView::set_route (std::shared_ptr<Route> rt)
 
 AudioTimeAxisView::~AudioTimeAxisView ()
 {
+	delete _view;
+	_view = nullptr;
 }
 
 void

@@ -75,6 +75,8 @@ public:
 		return (child_height() - TimeAxisViewItem::NAME_HIGHLIGHT_SIZE - 2);
 	}
 
+	double y_position () const;
+
 	RegionView* create_region_view (std::shared_ptr<ARDOUR::Region>, bool, bool);
 
 	bool paste (Temporal::timepos_t const & pos, const Selection& selection, PasteContext& ctx);
