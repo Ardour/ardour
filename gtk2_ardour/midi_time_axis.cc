@@ -122,18 +122,18 @@ MidiTimeAxisView::MidiTimeAxisView (PublicEditor& ed, Session* sess, ArdourCanva
 	, RouteTimeAxisView (ed, sess, canvas)
 	, _ignore_signals(false)
 	, _asked_all_automation(false)
-	, _piano_roll_header(0)
+	, _piano_roll_header(nullptr)
 	, _note_mode(Sustained)
 	, _note_mode_item(0)
-	, _percussion_mode_item(0)
+	, _percussion_mode_item(nullptr)
 	, _color_mode(MeterColors)
-	, _meter_color_mode_item(0)
-	, _channel_color_mode_item(0)
+	, _meter_color_mode_item(nullptr)
+	, _channel_color_mode_item(nullptr)
 	, _track_color_mode_item(0)
-	, _channel_selector (0)
-	, _step_edit_item (0)
-	, controller_menu (0)
-	, _step_editor (0)
+	, _channel_selector (nullptr)
+	, _step_edit_item (nullptr)
+	, controller_menu (nullptr)
+	, _step_editor (nullptr)
 	, velocity_menu_item (nullptr)
 {
 	_midnam_model_selector.disable_scrolling();
@@ -164,7 +164,9 @@ MidiTimeAxisView::parameter_changed (string const & param)
 void
 MidiTimeAxisView::set_note_highlight (uint8_t note)
 {
-	_piano_roll_header->set_note_highlight (note);
+	if (_piano_roll_header) {
+		_piano_roll_header->set_note_highlight (note);
+	}
 }
 
 void
@@ -358,13 +360,20 @@ MidiTimeAxisView::first_idle ()
 
 MidiTimeAxisView::~MidiTimeAxisView ()
 {
+	delete _view;
+	_view = nullptr;
+
 	delete _channel_selector;
+	_channel_selector = nullptr;
 
 	delete _piano_roll_header;
-	_piano_roll_header = 0;
+	_piano_roll_header = nullptr;
 
 	delete controller_menu;
+	controller_menu = nullptr;
+
 	delete _step_editor;
+	_step_editor = nullptr;
 }
 
 void
@@ -1324,7 +1333,7 @@ MidiTimeAxisView::set_note_range (MidiStreamView::VisibleNoteRange range, bool a
 			boost::bind (&MidiTimeAxisView::set_note_range, _1, range, false));
 	} else {
 		if (!_ignore_signals) {
-			midi_view()->set_note_range(range);
+			midi_view()->set_note_visibility_range_style (range);
 		}
 	}
 }

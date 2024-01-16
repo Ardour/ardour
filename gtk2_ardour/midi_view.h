@@ -625,6 +625,8 @@ class MidiView : public virtual sigc::trackable
 	void join_notes_on_channel (int channel);
 
 	void add_split_notes ();
+
+	void set_note_range (uint8_t low, uint8_t high);
 };
 
 

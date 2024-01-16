@@ -97,8 +97,6 @@ MidiViewBackground::note_range_adjustment_changed()
 	//cerr << "note range adjustment changed: " << lowest << " " << highest << endl;
 	//cerr << "  val=" << v_zoom_adjustment.get_value() << " page=" << v_zoom_adjustment.get_page_size() << " sum=" << v_zoom_adjustment.get_value() + v_zoom_adjustment.get_page_size() << endl;
 
-	_lowest_note = lowest;
-	_highest_note = highest;
 	apply_note_range (lowest, highest, true);
 }
 
@@ -119,19 +117,13 @@ MidiViewBackground::y_to_note (double y) const
 }
 
 
-void
-MidiViewBackground::update_note_range(uint8_t note_num)
-{
-	_data_note_min = min(_data_note_min, note_num);
-	_data_note_max = max(_data_note_max, note_num);
-}
 
 void
 MidiViewBackground::update_contents_height ()
 {
 	ViewBackground::update_contents_height ();
 
-	_note_lines->set_extent (ArdourCanvas::COORD_MAX);
+	draw_note_lines ();
 	apply_note_range (lowest_note(), highest_note(), true);
 }
 
@@ -197,22 +189,46 @@ MidiViewBackground::draw_note_lines()
 
 		prev_y = y;
 	}
+
+	_note_lines->set_extent (ArdourCanvas::COORD_MAX);
 }
 
 void
-MidiViewBackground::set_note_range(VisibleNoteRange r)
+MidiViewBackground::set_note_visibility_range_style (VisibleNoteRange r)
 {
-	if (r == FullRange) {
-		_lowest_note = 0;
-		_highest_note = 127;
-	} else {
-		_lowest_note = _data_note_min;
-		_highest_note = _data_note_max;
-	}
+	_visibility_note_range = r;
 
-	apply_note_range(_lowest_note, _highest_note, true);
+	if (_visibility_note_range == FullRange) {
+		apply_note_range (0, 127, true);
+	} else {
+		apply_note_range (_data_note_min, _data_note_max, true);
+	}
 }
 
+void
+MidiViewBackground::maybe_extend_note_range (uint8_t note_num)
+{
+	_data_note_min = min (_data_note_min, note_num);
+	_data_note_max = max (_data_note_max, note_num);
+
+	bool changed = false;
+
+	if (_visibility_note_range == FullRange) {
+		return;
+	}
+
+	if (_lowest_note > _data_note_min) {
+		changed = true;
+	}
+
+	if (_highest_note < _data_note_max) {
+		changed = true;
+	}
+
+	if (changed) {
+		apply_note_range (_data_note_min, _data_note_max, true);
+	}
+}
 void
 MidiViewBackground::apply_note_range (uint8_t lowest, uint8_t highest, bool to_children)
 {

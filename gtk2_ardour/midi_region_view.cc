@@ -641,22 +641,7 @@ MidiRegionView::ghosts_view_changed ()
 MidiRegionView::~MidiRegionView ()
 {
 	in_destructor = true;
-
-	hide_verbose_cursor ();
-
-	delete _list_editor;
-
 	RegionViewGoingAway (this); /* EMIT_SIGNAL */
-
-	if (_active_notes) {
-		end_write();
-	}
-	_entered_note = 0;
-	clear_events ();
-
-	delete _note_group;
-	delete _note_diff_command;
-	delete _step_edit_cursor;
 }
 
 void

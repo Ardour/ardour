@@ -55,6 +55,7 @@ class AudioStreamView : public StreamView
 {
 public:
 	AudioStreamView (AudioTimeAxisView&);
+	~AudioStreamView ();
 
 	int     set_amplitude_above_axis (gdouble app);
 	gdouble get_amplitude_above_axis () { return _amplitude_above_axis; }
