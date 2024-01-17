@@ -33,8 +33,8 @@ using namespace ARDOUR;
 SurroundReturn::SurroundReturn (Session& s, Route* r)
 	: Processor (s, _("SurrReturn"), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _lufs_meter (s.nominal_sample_rate (), 5)
+	, _output_format_control (new OutputFormatControl (false, _("Output Format"), PBD::Controllable::Toggle))
 	, _current_n_objects (max_object_id)
-	, _target_output_format (OUTPUT_FORMAT_7_1_4)
 	, _current_output_format (OUTPUT_FORMAT_7_1_4)
 	, _in_map (ChanCount (DataType::AUDIO, 128))
 	, _out_map (ChanCount (DataType::AUDIO, 14 + 6 /* Loudness Meter */))
@@ -204,11 +204,12 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 #endif
 	}
 
-	if (_current_output_format != _target_output_format) {
-		_current_output_format = _target_output_format;
+	MainOutputFormat target_output_format = _output_format_control->get_value () == 0 ? OUTPUT_FORMAT_7_1_4 : OUTPUT_FORMAT_5_1;
+	if (_current_output_format != target_output_format) {
+		_current_output_format = target_output_format;
 #if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
 		URIMap::URIDs const& urids = URIMap::instance ().urids;
-		forge_int_msg (urids.surr_Settings, urids.surr_OutputFormat, _target_output_format);
+		forge_int_msg (urids.surr_Settings, urids.surr_OutputFormat, target_output_format);
 #endif
 	}
 
@@ -399,7 +400,7 @@ SurroundReturn::set_state (XMLNode const& node, int version)
 	int target_output_format;
 	if (node.get_property (X_("output-format"), target_output_format)) {
 		if (target_output_format == OUTPUT_FORMAT_5_1 || target_output_format == OUTPUT_FORMAT_7_1_4) {
-			_target_output_format = (MainOutputFormat) target_output_format;
+			_output_format_control->set_value (target_output_format == OUTPUT_FORMAT_7_1_4 ? 0.0 : 1.0, PBD::Controllable::NoGroup);
 		}
 	}
 	return _trim->set_state (node, version);

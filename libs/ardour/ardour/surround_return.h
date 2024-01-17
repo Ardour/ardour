@@ -30,6 +30,7 @@
 
 #include "ardour/chan_mapping.h"
 #include "ardour/lufs_meter.h"
+#include "ardour/monitor_processor.h"
 #include "ardour/processor.h"
 
 namespace ARDOUR
@@ -69,8 +70,8 @@ public:
 		return _current_output_format;
 	}
 
-	void set_output_format (MainOutputFormat mov) {
-		_target_output_format = mov;
+	std::shared_ptr<PBD::Controllable> output_format_controllable () const {
+		return _output_format_control;
 	}
 
 	/* a value <= -200 indicates that no data is available */
@@ -98,12 +99,29 @@ private:
 
 	std::shared_ptr<Amp> _trim;
 
+	class OutputFormatControl : public MPControl<bool>
+	{
+	public:
+		OutputFormatControl (bool v, std::string const& n, PBD::Controllable::Flag f)
+			: MPControl<bool> (v, n, f)
+		{}
+
+		virtual std::string get_user_string () const {
+			if (get_value () == 0) {
+				return "7.1.4";
+			} else {
+				return "5.1";
+			}
+		}
+	};
+
+	std::shared_ptr<OutputFormatControl> _output_format_control;
+
 	LV2_Atom_Forge   _forge;
 	uint8_t          _atom_buf[8192];
 	pan_t            _current_value[max_object_id][num_pan_parameters];
 	int              _current_render_mode[max_object_id];
 	size_t           _current_n_objects;
-	MainOutputFormat _target_output_format;
 	MainOutputFormat _current_output_format;
 	BufferSet        _surround_bufs;
 	ChanMapping      _in_map;
