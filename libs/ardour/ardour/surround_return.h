@@ -102,17 +102,8 @@ private:
 	class OutputFormatControl : public MPControl<bool>
 	{
 	public:
-		OutputFormatControl (bool v, std::string const& n, PBD::Controllable::Flag f)
-			: MPControl<bool> (v, n, f)
-		{}
-
-		virtual std::string get_user_string () const {
-			if (get_value () == 0) {
-				return "7.1.4";
-			} else {
-				return "5.1";
-			}
-		}
+		OutputFormatControl (bool v, std::string const& n, PBD::Controllable::Flag f);
+		virtual std::string get_user_string () const;
 	};
 
 	std::shared_ptr<OutputFormatControl> _output_format_control;

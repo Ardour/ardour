@@ -119,6 +119,8 @@ protected:
 	T _normal;
 };
 
+template<> void MPControl<bool>::set_value (double v, PBD::Controllable::GroupControlDisposition gcd);
+
 class LIBARDOUR_API MonitorProcessor : public Processor
 {
 public:

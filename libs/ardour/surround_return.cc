@@ -30,6 +30,19 @@
 
 using namespace ARDOUR;
 
+SurroundReturn::OutputFormatControl::OutputFormatControl (bool v, std::string const& n, PBD::Controllable::Flag f)
+	: MPControl<bool> (v, n, f)
+{}
+
+std::string
+SurroundReturn::OutputFormatControl::get_user_string () const {
+	if (get_value () == 0) {
+		return "7.1.4";
+	} else {
+		return "5.1";
+	}
+}
+
 SurroundReturn::SurroundReturn (Session& s, Route* r)
 	: Processor (s, _("SurrReturn"), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _lufs_meter (s.nominal_sample_rate (), 5)
