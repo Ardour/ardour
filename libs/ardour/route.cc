@@ -5524,7 +5524,7 @@ Route::setup_invisible_processors ()
 	_processors = new_processors;
 
 	for (ProcessorList::iterator i = _processors.begin(); i != _processors.end(); ++i) {
-		if (!(*i)->display_to_user () && !(*i)->enabled () && (*i) != _monitor_send) {
+		if (!(*i)->display_to_user () && !(*i)->enabled () && (*i) != _monitor_send && (*i) != _surround_send) {
 			(*i)->enable (true);
 		}
 	}
