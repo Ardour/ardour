@@ -10,7 +10,7 @@
 # Raphaël Doursenaud <rdoursenaud@free.fr>, 2015.
 # Edouard <edwsaintesprit@hotmail.com>, 2016.
 # Rivaud Julien <frnchfrgg@free.fr>, 2016, 2019.
-# Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019, 2020, 2021, 2022.
+# Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019, 2020, 2021, 2022, 2023, 2024.
 # Julien Taverna <jujudusud@gmail.com>, 2022,2023.
 # Nicolas Faure <sub26nico@laposte.net>, 2022.
 msgid ""
@@ -901,7 +901,7 @@ msgstr "Ajouter la sélection (sans fermer la fenêtre)"
 
 #: add_route_dialog.cc:350
 msgid "Add and Close"
-msgstr "Ajouter et Fermer"
+msgstr "Ajouter et fermer"
 
 #: add_route_dialog.cc:447 add_route_dialog.cc:831 add_route_dialog.cc:844
 #: editor_actions.cc:539 editor_rulers.cc:286 time_axis_view.cc:1378
@@ -5916,19 +5916,19 @@ msgstr "Zoomer sur le prochain de cette liste"
 
 #: editor_actions.cc:563
 msgid "Marker Click Only Selects"
-msgstr ""
+msgstr "Le clic marqueur ne fait que sélectionner"
 
 #: editor_actions.cc:564
 msgid "Locate to Marker on Click"
-msgstr ""
+msgstr "Localise au marqueur sur le clic"
 
 #: editor_actions.cc:565
 msgid "Locate To Marker When Transport Is Not Rolling "
-msgstr ""
+msgstr "Localiser au marqueur lorsque le transport ne roule pas "
 
 #: editor_actions.cc:566
 msgid "Next Marker Click Mode"
-msgstr ""
+msgstr "Mode de clic du marqueur suivant"
 
 #: editor_actions.cc:581
 msgid "Smart Mode"
@@ -13094,6 +13094,9 @@ msgid ""
 "This starts a fresh scan, dropping all cached plugin data and ignorelist. "
 "Depending on the number of plugins installed this can take a long time."
 msgstr ""
+"Cela démarre une nouvelle analyse, en supprimant toutes les données de "
+"greffons mises en cache et la liste des ignorés. Selon le nombre de "
+"greffons installés, cela peut prendre beaucoup de temps."
 
 #: plugin_pin_dialog.cc:63
 msgid "Manual Config"
@@ -14291,8 +14294,9 @@ msgid "Emphasis audio file:"
 msgstr "Fichier audio accentué :"
 
 #: rc_option_editor.cc:140
+# Note trebmuh : l'espace supplémentaire est nécessaire pour obtenir un espacement avant les deux points qui suivent dans l'interface graphique (voir : Préférences -> Métronome)
 msgid "Gain level"
-msgstr "Niveau de gain"
+msgstr "Niveau de gain "
 
 #: rc_option_editor.cc:187
 msgid "Choose Click"
@@ -14470,8 +14474,9 @@ msgstr ""
 "La valeur 0 désactive le délai d'attente."
 
 #: rc_option_editor.cc:1174
+# Note trebmuh : l'espace supplémentaire est nécessaire pour obtenir un espacement avant les deux points qui suivent dans l'interface graphique (voir : Préférences -> Apparence -> Forme d'onde)
 msgid "Waveform Clip Level (dBFS)"
-msgstr "Niveau d'écrêtage de la forme d'onde (dBFS)"
+msgstr "Niveau d'écrêtage de la forme d'onde (dBFS) "
 
 #: rc_option_editor.cc:1206
 msgid "Playback (seconds of buffering)"
@@ -14727,8 +14732,9 @@ msgid "Default folder for new sessions:"
 msgstr "Répertoire par défaut des nouvelles sessions :"
 
 #: rc_option_editor.cc:2429
+# Note trebmuh : l'espace supplémentaire est nécessaire pour obtenir un espacement avant les deux points qui suivent dans l'interface graphique (voir : Préférences -> Général)
 msgid "Maximum number of recent sessions"
-msgstr "Nombre maximum de sessions récentes"
+msgstr "Nombre maximum de sessions récentes "
 
 #: rc_option_editor.cc:2440
 msgid "Drag and drop import always copies files to session"
@@ -14855,29 +14861,33 @@ msgstr "Indicateurs d'alerte clignotants"
 
 #: rc_option_editor.cc:2612
 msgid "Avoid strobing/blinking/flashing elements"
-msgstr ""
+msgstr "Éviter les éléments stroboscopiques/clignotants/flashants"
 
 #: rc_option_editor.cc:2617
 msgid ""
 "If enabled, disables meters in editor &amp; mixer, running clock updates and "
 "most blinking."
 msgstr ""
+"Si cette option est activée, elle désactive les indicateurs de l'éditeur "
+"&amp; le mixeur, les mises à jour de l'horloge en cours et la plupart des "
+"clignotements."
 
 #: rc_option_editor.cc:2620 rc_option_editor.cc:2633
 msgid "Appearance/Recorder"
-msgstr "Apparence/enregistreur"
+msgstr "Apparence/Enregistreur"
 
 #: rc_option_editor.cc:2620 rc_option_editor.cc:2624
+# Note trebmuh : l'espace supplémentaire est nécessaire pour obtenir un espacement avant les deux points qui suivent dans l'interface graphique (voir : Préférences -> Apparence -> Enregistreur)
 msgid "Input Meter Layout"
-msgstr "Disposition des compteurs d'entrée"
+msgstr "Disposition des compteurs d'entrée "
 
 #: rc_option_editor.cc:2630
 msgid "Horizontal"
-msgstr "Horizontal"
+msgstr "Horizontale"
 
 #: rc_option_editor.cc:2631
 msgid "Vertical"
-msgstr "Vertical"
+msgstr "Verticale"
 
 #: rc_option_editor.cc:2636 rc_option_editor.cc:2637 rc_option_editor.cc:2645
 #: rc_option_editor.cc:2653 rc_option_editor.cc:2661 rc_option_editor.cc:2681
@@ -15015,8 +15025,9 @@ msgid "Show waveform clipping"
 msgstr "Montrer l’écrêtage des formes d'onde"
 
 #: rc_option_editor.cc:2817
+# Note trebmuh : l'espace supplémentaire est nécessaire pour obtenir un espacement avant les deux points qui suivent dans l'interface graphique (voir : Préférences -> Apparence -> Forme d'onde)
 msgid "Waveform scale"
-msgstr "Échelle de l'enveloppe"
+msgstr "Échelle de l'enveloppe "
 
 #: rc_option_editor.cc:2822
 msgid "linear"
@@ -15027,8 +15038,9 @@ msgid "logarithmic"
 msgstr "logarithmique"
 
 #: rc_option_editor.cc:2829
+# Note trebmuh : l'espace supplémentaire est nécessaire pour obtenir un espacement avant les deux points qui suivent dans l'interface graphique (voir : Préférences -> Apparence -> Forme d'onde)
 msgid "Waveform shape"
-msgstr "Forme de l'enveloppe"
+msgstr "Forme de l'enveloppe "
 
 #: rc_option_editor.cc:2834
 msgid "traditional"
@@ -15647,23 +15659,23 @@ msgstr ""
 
 #: rc_option_editor.cc:3445
 msgid "Snap Target Mode:"
-msgstr ""
+msgstr "Mode de ciblage de l'accrochage :"
 
 #: rc_option_editor.cc:3449
 msgid "When the Grid is enabled, snap to"
-msgstr ""
+msgstr "Lorsque la grille est activée, accrocher à"
 
 #: rc_option_editor.cc:3454
 msgid "Snap Targets"
-msgstr ""
+msgstr "Cible d'accrochage"
 
 #: rc_option_editor.cc:3455
 msgid "Both the Grid and Snap Targets"
-msgstr ""
+msgstr "La grille et les cibles d'accrochage"
 
 #: rc_option_editor.cc:3458
 msgid "Snap Targets:"
-msgstr ""
+msgstr "Cibles d'accrochage"
 
 #: rc_option_editor.cc:3479
 msgid "Region Sync Points"
@@ -15711,6 +15723,8 @@ msgstr "Edition"
 #: rc_option_editor.cc:3535
 msgid "When drawing new notes, select only the last drawn note"
 msgstr ""
+"Lors du placement de nouvelles notes, seule la dernière note dessinée "
+"est sélectionnée"
 
 #: rc_option_editor.cc:3543
 msgid "Scroll wheel use when editing MIDI adjusts selected note velocity"
@@ -16039,7 +16053,7 @@ msgstr "Remise à zéro du compteur de décrochages au début de l'enregistremen
 #: rc_option_editor.cc:3806 rc_option_editor.cc:3808 rc_option_editor.cc:3825
 #: rc_option_editor.cc:3841 rc_option_editor.cc:3842
 msgid "Transport/Chase"
-msgstr ""
+msgstr "Transport/Poursuite"
 
 #: rc_option_editor.cc:3787 rc_option_editor.cc:3900
 msgid "MIDI Machine Control (MMC)"
@@ -16130,7 +16144,7 @@ msgstr "Horloge MIDI"
 #: rc_option_editor.cc:3902 rc_option_editor.cc:3910 rc_option_editor.cc:3919
 #: rc_option_editor.cc:3921
 msgid "Transport/Generate"
-msgstr "Transport/ Générer"
+msgstr "Transport/Générer"
 
 #: rc_option_editor.cc:3844
 msgid "Linear Timecode (LTC) Generator"
@@ -16485,11 +16499,11 @@ msgid ""
 "Technical+Documentation/Locations+Format/Plugin+Locations."
 "html\">specification</a> are always searched, and need not be explicitly set."
 msgstr ""
-"Personnaliser le chemin de recherche des VST3 est déconseillé. Notez que le "
-"chemin par défaut des VST3 conformément à la spécification <a href=\"https://"
-"steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/"
-"Locations+Format/Plugin+Locations.html\"></a> sont toujours recherchés et "
-"n'ont pas besoin d'être explicitement définis."
+"La personnalisation des chemins de recherche des VST3 est déconseillée. Notez "
+"que les chemins VST3 par défaut, conformément à la spécification "
+"<a href=\"https://steinbergmedia.github.io/vst3_dev_portal/pages/"
+"Technical+Documentation/Locations+Format/Plugin+Locations.html\"></a> sont "
+"toujours recherchés et n'ont pas besoin d'être explicitement définis."
 
 #: rc_option_editor.cc:4204
 msgid "Automatically show 'Micro Edit' tagged controls on the mixer-strip"
@@ -16503,7 +16517,7 @@ msgstr "VST2/VST3"
 
 #: rc_option_editor.cc:4214
 msgid "Conceal VST2 Plugin if matching VST3 exists"
-msgstr "Masquer le plugin VST2 s'il existe un plugin VST3 correspondant"
+msgstr "Masquer le greffon VST2 s'il existe un greffon VST3 correspondant"
 
 #: rc_option_editor.cc:4224 rc_option_editor.cc:4226 rc_option_editor.cc:4237
 #: rc_option_editor.cc:4239 rc_option_editor.cc:4244
@@ -21788,14 +21802,6 @@ msgstr "Fichier vidéo d'entrée"
 #~ msgid "import SMF tempo map"
 #~ msgstr "importer une cartographie de tempo SMF"
 
-#~ msgid ""
-#~ "This starts a fresh scan, dropping all cached plugin data and ignorelist. "
-#~ "Depending on the number if plugins installed this can take a long time."
-#~ msgstr ""
-#~ "Cela démarre une nouvelle analyse, en supprimant toutes les données de "
-#~ "greffons mises en cache et la liste des ignorés. Selon le nombre de "
-#~ "greffons installés, cela peut prendre beaucoup de temps."
-
 #~ msgid "In"
 #~ msgstr "Entrée"
 
@@ -21813,13 +21819,6 @@ msgstr "Fichier vidéo d'entrée"
 
 #~ msgid "Display Latency Compensation Info"
 #~ msgstr "Afficher les infos de compensation de latence"
-
-#~ msgid ""
-#~ "Czech:\n"
-#~ "\t Pavel Fric <pavelfric@seznam.cz>\n"
-#~ msgstr ""
-#~ "Tchèque :\n"
-#~ "\tPavel Fric <pavelfric@seznam.cz>\n"
 
 #~ msgid "Copyright (C) 1999-2022 Paul Davis\n"
 #~ msgstr "Copyright (C) 1999-2022 Paul Davis\n"
@@ -21955,17 +21954,6 @@ msgstr "Fichier vidéo d'entrée"
 #~ "<b>Si coché</b>, les greffons seront activés en les ajoutant aux pistes/"
 #~ "bus. Si décoché, les greffons seront laissés désactivés lors de leur "
 #~ "ajout aux pistes/bus"
-
-#~ msgid ""
-#~ "Customizing VST3 paths is discouraged. Note that default VST3 paths as "
-#~ "per <a href=\"https://developer.steinberg.help/display/VST/Plug-"
-#~ "in+Locations\">specification</a> are always searched, and need not be "
-#~ "explicitly set."
-#~ msgstr ""
-#~ "La personnalisation des chemins VST3 est déconseillée. Notez que les "
-#~ "chemins VST3 par défaut, conformément aux <a href=\"https://developer."
-#~ "steinberg.help/display/VST/Plug-in+Locations\">spécifications</a> sont "
-#~ "toujours recherchés et n'ont pas besoin d'être explicitement définis."
 
 #~ msgid "Underlays"
 #~ msgstr "Sous-couches"
@@ -22581,9 +22569,6 @@ msgstr "Fichier vidéo d'entrée"
 #~ "Spécifier le temps maximum d'initialisation des greffons. Ceux qui "
 #~ "dépasseront ce temps seront en liste noire. Une valeur de 0 désactive "
 #~ "cette fonction."
-
-#~ msgid "Waveform Clip Level (dBFS):"
-#~ msgstr "Niveau d'écrêtage des formes d'onde (dBFS) "
 
 #~ msgid "Show Video Export Info before export"
 #~ msgstr "Afficher les infos d'export vidéo avant l'export"
