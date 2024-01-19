@@ -94,6 +94,14 @@ SurroundPannable::SurroundPannable (Session& s, uint32_t chn, Temporal::TimeDoma
 	pan_pos_z->Changed.connect_same_thread (*this, boost::bind (&SurroundPannable::value_changed, this));
 	pan_size->Changed.connect_same_thread (*this, boost::bind (&SurroundPannable::value_changed, this));
 	pan_snap->Changed.connect_same_thread (*this, boost::bind (&SurroundPannable::value_changed, this));
+
+	/* all controls are visible together */
+	pan_pos_x->add_visually_linked_control (pan_pos_y);
+	pan_pos_x->add_visually_linked_control (pan_pos_z);
+	pan_pos_y->add_visually_linked_control (pan_pos_x);
+	pan_pos_y->add_visually_linked_control (pan_pos_z);
+	pan_pos_z->add_visually_linked_control (pan_pos_x);
+	pan_pos_z->add_visually_linked_control (pan_pos_y);
 }
 
 SurroundPannable::~SurroundPannable ()

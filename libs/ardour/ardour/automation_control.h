@@ -124,6 +124,14 @@ public:
 
 	AutomationControlList grouped_controls () const;
 
+	void add_visually_linked_control (std::shared_ptr<AutomationControl> ctrl) {
+		_visually_linked_ctrls.push_back (ctrl);
+	}
+
+	WeakAutomationControlList visually_linked_controls () const {
+		return _visually_linked_ctrls;
+	}
+
 protected:
 	std::shared_ptr<ControlGroup> _group;
 	std::shared_ptr<ControlGroup> _pushed_group;
@@ -149,6 +157,8 @@ protected:
 	virtual void do_pre_realtime_queue_stuff (double new_value) {}
 
 	void session_going_away ();
+
+	WeakAutomationControlList _visually_linked_ctrls;
 
 private:
 	/* I am unclear on why we have to make ControlGroup a friend in order

@@ -74,6 +74,13 @@ Pannable::Pannable (Session& s, Temporal::TimeDomainProvider const & tdp)
 	pan_width_control->Changed.connect_same_thread (*this, boost::bind (&Pannable::value_changed, this));
 	pan_frontback_control->Changed.connect_same_thread (*this, boost::bind (&Pannable::value_changed, this));
 	pan_lfe_control->Changed.connect_same_thread (*this, boost::bind (&Pannable::value_changed, this));
+
+	pan_azimuth_control->add_visually_linked_control (pan_width_control);
+	pan_azimuth_control->add_visually_linked_control (pan_elevation_control);
+	pan_width_control->add_visually_linked_control (pan_azimuth_control);
+	pan_width_control->add_visually_linked_control (pan_elevation_control);
+	pan_elevation_control->add_visually_linked_control (pan_azimuth_control);
+	pan_elevation_control->add_visually_linked_control (pan_width_control);
 }
 
 Pannable::~Pannable ()
