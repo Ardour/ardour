@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ArdourMIDIBindings version="1.0.0" name="Arturia MiniLab 3">
+<!-- 2024-01-19 Alexandre Prokoudine: Map file creation -->
+
+<!-- Transport controls. The rest is reserved for synths -->
+
+  <Binding channel="1" ctl="105" function="loop-toggle"/>
+  <Binding channel="1" ctl="106" function="transport-stop"/>
+  <Binding channel="1" ctl="107" function="transport-roll"/>
+  <Binding channel="1" ctl="108" function="toggle-rec-enable"/>
+
+</ArdourMIDIBindings>
