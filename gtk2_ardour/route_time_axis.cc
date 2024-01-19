@@ -50,6 +50,7 @@
 
 #include "ardour/amp.h"
 #include "ardour/meter.h"
+#include "ardour/pan_controllable.h"
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/plugin_insert.h"
@@ -1586,6 +1587,25 @@ RouteTimeAxisView::ensure_pan_views (bool show)
 			pan_tracks.push_back (automation_child (pan_control->parameter ()));
 		}
 	}
+
+	/* remove ATAV of no longer relevant pan ctrls (e.g. witdh, height); */
+	bool removed_one;
+	do {
+		removed_one = false;
+		for (auto const& j : children) {
+			std::shared_ptr<AutomationTimeAxisView> atv = std::dynamic_pointer_cast<AutomationTimeAxisView> (j);
+			if (!atv || !std::dynamic_pointer_cast<PanControllable> (atv->control ())) {
+				continue;
+			}
+			if (std::find (pan_tracks.begin (), pan_tracks.end(), atv) != pan_tracks.end ()) {
+				continue;
+			}
+			/* this invalidates the iterator */
+			remove_child (atv);
+			removed_one = true;
+			break;
+		}
+	} while (removed_one);
 }
 
 
@@ -1644,28 +1664,31 @@ RouteTimeAxisView::show_existing_automation (bool apply_to_selection)
 }
 
 void
-RouteTimeAxisView::maybe_hide_automation (bool hide, std::weak_ptr<PBD::Controllable> wctrl)
+RouteTimeAxisView::maybe_hide_automation (bool hide, WeakAutomationControlList wctrls)
 {
 	ctrl_autohide_connection.disconnect ();
 	if (!hide) {
 		/* disconnect only, leave lane visible */
 		return;
 	}
-	std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (wctrl.lock ());
-  if (!ac) {
-		return;
-	}
 
-	Gtk::CheckMenuItem* cmi = find_menu_item_by_ctrl (ac);
-	if (cmi) {
-		cmi->set_active (false);
-		return;
-	}
+	for (auto const& wctrl: wctrls) {
+		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (wctrl.lock ());
+		if (!ac) {
+			continue;
+		}
 
-	std::shared_ptr<AutomationTimeAxisView> atav = find_atav_by_ctrl (ac);
-	if (atav) {
-		atav->set_marked_for_display (false);
-		request_redraw ();
+		Gtk::CheckMenuItem* cmi = find_menu_item_by_ctrl (ac);
+		if (cmi) {
+			cmi->set_active (false);
+			continue;
+		}
+
+		std::shared_ptr<AutomationTimeAxisView> atav = find_atav_by_ctrl (ac);
+		if (atav) {
+			atav->set_marked_for_display (false);
+			request_redraw ();
+		}
 	}
 }
 
@@ -1679,7 +1702,7 @@ RouteTimeAxisView::show_touched_automation (std::weak_ptr<PBD::Controllable> wct
 
 	if (!_editor.show_touched_automation ()) {
 		if (ctrl_autohide_connection.connected ()) {
-			signal_ctrl_touched (true);
+			signal_ctrl_touched (true); /* EMIT SIGNAL */
 		}
 		return;
 	}
@@ -1694,22 +1717,46 @@ RouteTimeAxisView::show_touched_automation (std::weak_ptr<PBD::Controllable> wct
 	}
 
 	/* hide any lanes */
-	signal_ctrl_touched (true);
+	signal_ctrl_touched (true); /* EMIT SIGNAL */
+
+	WeakAutomationControlList wctrls;
 
 	if (cmi && !cmi->get_active ()) {
 		cmi->set_active (true);
-		ctrl_autohide_connection = signal_ctrl_touched.connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::maybe_hide_automation), wctrl));
+		wctrls.push_back (ac);
 		/* search ctrl to scroll to */
 		atav = find_atav_by_ctrl (ac, false);
 	} else if (atav && ! string_to<bool>(atav->gui_property ("visible"))) {
 		atav->set_marked_for_display (true);
-		ctrl_autohide_connection = signal_ctrl_touched.connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::maybe_hide_automation), wctrl));
+		wctrls.push_back (ac);
 		request_redraw ();
+	}
+
+	for (auto const& i: ac->visually_linked_controls ()) {
+		std::shared_ptr<AutomationControl> wac = i.lock ();
+		if (!wac) {
+			continue;
+		}
+		cmi = find_menu_item_by_ctrl (wac);
+		if (cmi && !cmi->get_active ()) {
+			cmi->set_active (true);
+			wctrls.push_back (wac);
+			continue;
+		}
+		std::shared_ptr<AutomationTimeAxisView> datav = find_atav_by_ctrl (wac, false);
+		if (datav && ! string_to<bool>(datav->gui_property ("visible"))) {
+			datav->set_marked_for_display (true);
+			wctrls.push_back (wac);
+			request_redraw ();
+		}
+	}
+
+	if (!wctrls.empty ()) {
+		ctrl_autohide_connection = signal_ctrl_touched.connect (sigc::bind (sigc::mem_fun (*this, &RouteTimeAxisView::maybe_hide_automation), wctrls));
 	}
 
 	if (atav) {
 		_editor.ensure_time_axis_view_is_visible (*atav, false);
-		return;
 	}
 }
 
@@ -1811,7 +1858,6 @@ RouteTimeAxisView::find_atav_by_ctrl (std::shared_ptr<ARDOUR::AutomationControl>
 	}
 
 	if (!pan_tracks.empty() && !ARDOUR::Profile->get_mixbus()) {
-		// XXX this can lead to inconsistent CheckMenuItem state (azimuth, width are treated separately)
 		for (list<std::shared_ptr<AutomationTimeAxisView> >::iterator i = pan_tracks.begin(); i != pan_tracks.end(); ++i) {
 			if ((*i)->control () == ac) {
 				return *i;

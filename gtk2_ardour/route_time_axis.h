@@ -301,7 +301,7 @@ private:
 	void parameter_changed (std::string const & p);
 	void update_track_number_visibility();
 	void show_touched_automation (std::weak_ptr<PBD::Controllable>);
-	void maybe_hide_automation (bool, std::weak_ptr<PBD::Controllable>);
+	void maybe_hide_automation (bool, ARDOUR::WeakAutomationControlList);
 
 	void drop_instrument_ref ();
 	void reread_midnam ();
