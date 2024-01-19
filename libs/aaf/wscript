@@ -38,7 +38,7 @@ def options(opt):
 
 def configure(conf):
     if conf.is_defined('USE_EXTERNAL_LIBS'):
-        autowaf.check_pkg(conf, 'aaf', uselib_store='LIBAAF', mandatory=True)
+        autowaf.check_pkg(conf, 'libaaf', uselib_store='LIBAAF', mandatory=True)
 
 def build(bld):
     if bld.is_defined('USE_EXTERNAL_LIBS'):
