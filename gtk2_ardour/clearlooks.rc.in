@@ -1058,6 +1058,8 @@ style "tooltip" = "medium_text"
 	fg[NORMAL] = @fg_tooltip
 	bg[NORMAL] = @bg_tooltip
 	bg[SELECTED] = @bg_tooltip
+	xthickness = 4
+	ythickness = 4
 }
 
 style "default_toggle_button"
