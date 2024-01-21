@@ -277,9 +277,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 		_surround_bufs.get_audio (19).data (meter_offset)
 	};
 
-	if (_rolling && (!_exporting || _export_end >= end_sample)) {
-		_lufs_meter.run (data, meter_nframes);
-	}
+	_lufs_meter.run (data, meter_nframes);
 }
 
 void
