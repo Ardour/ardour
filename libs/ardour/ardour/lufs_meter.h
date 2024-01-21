@@ -39,6 +39,7 @@ public:
 	void reset ();
 
 	float integrated_loudness () const;
+	float momentary () const;
 	float max_momentary () const;
 	float dbtp () const;
 
@@ -73,6 +74,8 @@ private:
 	float    _power[8];
 	uint32_t _pow_idx;
 	float    _thresh_rel;
+
+	float    _momentary_l;
 
 	float    _maxloudn_M;
 	float    _integrated;

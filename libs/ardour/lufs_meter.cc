@@ -173,6 +173,8 @@ LUFSMeter::run (float const** data, uint32_t n_samples)
 			const float sum_m      = sumfrag (4); // 400ms
 			const float loudness_m = -0.691f + 10.f * log10f (sum_m);
 
+			_momentary_l = loudness_m;
+
 			_maxloudn_M = std::max<float> (_maxloudn_M, loudness_m);
 
 			/* observe 400ms window every 100ms */
@@ -254,6 +256,12 @@ float
 LUFSMeter::integrated_loudness () const
 {
 	return _integrated;
+}
+
+float
+LUFSMeter::momentary () const
+{
+	return _momentary_l;
 }
 
 float

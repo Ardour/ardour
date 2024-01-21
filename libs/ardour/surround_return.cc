@@ -396,6 +396,18 @@ SurroundReturn::finalize_export ()
 }
 
 float
+SurroundReturn::momentary () const
+{
+	return _lufs_meter.momentary ();
+}
+
+float
+SurroundReturn::max_momentary () const
+{
+	return _lufs_meter.max_momentary ();
+}
+
+float
 SurroundReturn::integrated_loudness () const
 {
 	return _lufs_meter.integrated_loudness ();

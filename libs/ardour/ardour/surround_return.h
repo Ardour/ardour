@@ -76,6 +76,8 @@ public:
 
 	/* a value <= -200 indicates that no data is available */
 	float integrated_loudness () const;
+	float max_momentary () const;
+	float momentary () const;
 	float max_dbtp () const;
 
 	samplecnt_t signal_latency () const;
