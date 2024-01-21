@@ -398,22 +398,26 @@ SurroundStrip::fast_update ()
 	}
 
 	std::shared_ptr<SurroundReturn> sur = _route->surround_return ();
-	float loud = sur->integrated_loudness();
-	if (loud > -90) {
-		char buf[32];
-		sprintf(buf, "%3.1f", loud);
-		_lufs_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", buf));
-	} else {
-		_lufs_label.set_markup ("-");
-	}
 
-	float dbtp = sur->max_dbtp();
-	if (dbtp > -90) {
-		char buf[32];
-		sprintf(buf, "%3.1f", dbtp);
-		_dbtp_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", buf));
-	} else {
-		_dbtp_label.set_markup ("-");
+	//these 2 text meters should only be updated while rolling or exporting
+	if (_route->session().transport_rolling()) {
+		float loud = sur->integrated_loudness();
+		if (loud > -90) {
+			char buf[32];
+			sprintf(buf, "%3.1f", loud);
+			_lufs_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", buf));
+		} else {
+			_lufs_label.set_markup ("-");
+		}
+
+		float dbtp = sur->max_dbtp();
+		if (dbtp > -90) {
+			char buf[32];
+			sprintf(buf, "%3.1f", dbtp);
+			_dbtp_label.set_markup (string_compose ("<span size=\"large\" weight=\"bold\">%1</span>", buf));
+		} else {
+			_dbtp_label.set_markup ("-");
+		}
 	}
 }
 
