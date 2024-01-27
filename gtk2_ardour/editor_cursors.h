@@ -29,13 +29,13 @@
 #include "canvas/line.h"
 #include "canvas/types.h"
 
-class Editor;
+class EditingContext;
 
 class EditorCursor
 {
 public:
-	EditorCursor (Editor&, bool (Editor::*)(GdkEvent*,ArdourCanvas::Item*), std::string const &);
-	EditorCursor (Editor&, std::string const &);
+	EditorCursor (EditingContext&, bool (EditingContext::*)(GdkEvent*,ArdourCanvas::Item*), std::string const &);
+	EditorCursor (EditingContext&, std::string const &);
 	~EditorCursor ();
 
 	void set_position (samplepos_t);
@@ -57,7 +57,7 @@ public:
 	PBD::Signal1<void, samplepos_t> PositionChanged;
 
 private:
-	Editor&               _editor;
+	EditingContext&       _editor;
 	ArdourCanvas::Arrow*  _track_canvas_item;
 	samplepos_t           _current_sample;
 };

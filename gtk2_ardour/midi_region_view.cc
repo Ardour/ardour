@@ -150,6 +150,8 @@ MidiRegionView::init (bool /*wfd*/)
 
 	RegionView::init (false);
 
+	CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
+
 	set_region (std::dynamic_pointer_cast<MidiRegion> (_region));
 
 	//set_height (trackview.current_height());

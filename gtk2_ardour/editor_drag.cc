@@ -471,10 +471,7 @@ Drag::current_pointer_y () const
 		return _drags->current_pointer_y ();
 	}
 
-	Editor* editor = dynamic_cast<Editor*>(&editing_context);
-	assert (editor);
-
-	return _drags->current_pointer_y () - editor->get_trackview_group ()->canvas_origin ().y;
+	return _drags->current_pointer_y () - editing_context.upper_left ().y;
 }
 
 void

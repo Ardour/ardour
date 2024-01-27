@@ -353,7 +353,6 @@ public:
 	virtual RegionView* regionview_from_region (std::shared_ptr<ARDOUR::Region>) const = 0;
 	virtual RouteTimeAxisView* rtav_from_route (std::shared_ptr<ARDOUR::Route>) const = 0;
 
-	sigc::signal<void> ZoomChanged;
 	sigc::signal<void> Realized;
 	sigc::signal<void,samplepos_t> UpdateAllTransportClocks;
 

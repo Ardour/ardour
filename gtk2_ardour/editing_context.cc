@@ -1586,3 +1586,10 @@ EditingContext::snap_relative_time_to_relative_time (timepos_t const & origin, t
 	/* back to relative */
 	return origin.distance (snapped);
 }
+
+std::shared_ptr<Temporal::TempoMap const>
+EditingContext::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>)
+{
+	/* default is a no-op */
+	return Temporal::TempoMap::use ();
+}

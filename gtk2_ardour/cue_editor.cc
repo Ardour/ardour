@@ -7,12 +7,6 @@ CueEditor::~CueEditor ()
 {
 }
 
-VerboseCursor*
-CueEditor::verbose_cursor () const
-{
-	return nullptr;
-}
-
 void
 CueEditor::set_snapped_cursor_position (Temporal::timepos_t const & pos)
 {
@@ -167,15 +161,11 @@ CueEditor::get_zoom_focus () const
 	return Editing::ZoomFocusPlayhead;
 }
 
-samplecnt_t
-CueEditor::get_current_zoom () const
-{
-	return 2048;
-}
-
 void
-CueEditor::reset_zoom (samplecnt_t)
+CueEditor::reset_zoom (samplecnt_t n)
 {
+	samples_per_pixel = n;
+	ZoomChanged(); /* EMIT SIGNAL */
 }
 
 void
@@ -226,5 +216,20 @@ Editing::MouseMode
 CueEditor::current_mouse_mode () const
 {
 	return Editing::MouseContent;
+}
+
+
+std::shared_ptr<Temporal::TempoMap const>
+CueEditor::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap> map)
+{
+	std::shared_ptr<Temporal::TempoMap const> tmp = Temporal::TempoMap::use();
+	Temporal::TempoMap::set (map);
+	return tmp;
+}
+
+void
+CueEditor::end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const> map)
+{
+	Temporal::TempoMap::set (map);
 }
 

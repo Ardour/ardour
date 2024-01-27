@@ -29,13 +29,13 @@
 #include "canvas/scroll_group.h"
 
 #include "editor_cursors.h"
-#include "editor.h"
+#include "editing_context.h"
 
 using namespace ARDOUR;
 using namespace PBD;
 using namespace Gtk;
 
-EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callback)(GdkEvent*,ArdourCanvas::Item*), std::string const & name)
+EditorCursor::EditorCursor (EditingContext& ed, bool (EditingContext::*callback)(GdkEvent*,ArdourCanvas::Item*), std::string const & name)
 	: _editor (ed)
 	, _track_canvas_item (new ArdourCanvas::Arrow (_editor.get_cursor_scroll_group()))
 {
@@ -57,7 +57,7 @@ EditorCursor::EditorCursor (Editor& ed, bool (Editor::*callback)(GdkEvent*,Ardou
 	_current_sample = 1; /* force redraw at 0 */
 }
 
-EditorCursor::EditorCursor (Editor& ed, std::string const & name)
+EditorCursor::EditorCursor (EditingContext& ed, std::string const & name)
 	: _editor (ed)
 	, _track_canvas_item (new ArdourCanvas::Arrow (_editor.get_hscroll_group()))
 {

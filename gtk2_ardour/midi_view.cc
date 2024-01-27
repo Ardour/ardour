@@ -31,8 +31,6 @@
 
 #include <gtkmm.h>
 
-#include "gtkmm2ext/gtk_ui.h"
-
 #include <sigc++/signal.h>
 
 #include "midi++/midnam_patch.h"
@@ -56,6 +54,9 @@
 #include "evoral/midi_util.h"
 
 #include "canvas/debug.h"
+
+#include "gtkmm2ext/gtk_ui.h"
+#include "gtkmm2ext/utils.h"
 
 #include "automation_region_view.h"
 #include "automation_time_axis.h"
@@ -172,8 +173,6 @@ MidiView::MidiView (MidiView const & other)
 void
 MidiView::init ()
 {
-	// CANVAS_DEBUG_NAME (_note_group, string_compose ("note group for %1", get_item_name()));
-
 	_patch_change_outline = UIConfiguration::instance().color ("midi patch change outline");
 	_patch_change_fill = UIConfiguration::instance().color_mod ("midi patch change fill", "midi patch change fill");
 
@@ -238,6 +237,8 @@ MidiView::canvas_group_event (GdkEvent* ev)
 {
 	//For now, move the snapped cursor aside so it doesn't bother you during internal editing
 	//_editing_context.set_snapped_cursor_position(_midi_region->position());
+
+	std::cerr << "MV @ " << this << " CGE " << Gtkmm2ext::event_type_string (ev->type) << std::endl;
 
 	bool r;
 

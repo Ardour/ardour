@@ -654,6 +654,8 @@ private:
 
 	void reparent_location_markers (LocationMarkers*, ArdourCanvas::Item*);
 
+	ArdourCanvas::Duple upper_left() const;
+
 	LocationMarkers*  find_location_markers (ARDOUR::Location*) const;
 	ARDOUR::Location* find_location_from_marker (ArdourMarker*, bool& is_start) const;
 	ArdourMarker* find_marker_from_location_id (PBD::ID const&, bool) const;
@@ -1636,6 +1638,7 @@ private:
 	void mid_tempo_change (MidTempoChanges);
 
 	Editing::EditPoint edit_point() const { return _edit_point; }
+	bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
 
 	enum MarkerBarType {
 		CueMarks = 0x1,
@@ -1673,7 +1676,6 @@ private:
 	/* non-public event handlers */
 
 	bool canvas_section_box_event (GdkEvent* event);
-	bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*);
 	bool track_canvas_scroll (GdkEventScroll* event);
 
 	bool track_canvas_button_press_event (GdkEventButton* event);

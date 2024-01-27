@@ -90,11 +90,12 @@ class CueEditor : public EditingContext
 	MouseCursors const* cursors () const {
 		return _cursors;
 	}
-	VerboseCursor* verbose_cursor () const;
-
 	void set_snapped_cursor_position (Temporal::timepos_t const & pos);
 
 	std::vector<MidiRegionView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const;
+
+	std::shared_ptr<Temporal::TempoMap const> start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
+	void end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const>);
 
   protected:
 	void set_canvas_cursor (Gdk::Cursor*);

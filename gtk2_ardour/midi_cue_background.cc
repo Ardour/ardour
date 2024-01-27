@@ -41,8 +41,6 @@ CueMidiBackground::set_size (double w, double h)
 	_width = w;
 	_height = h;
 
-	std::cerr << "Size for cue midi: " << w << " x " << h << std::endl;
-
 	update_contents_height ();
 }
 
@@ -56,6 +54,12 @@ double
 CueMidiBackground::height() const
 {
 	return _height;
+}
+
+double
+CueMidiBackground::width() const
+{
+	return _width;
 }
 
 uint8_t
