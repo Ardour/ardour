@@ -6592,3 +6592,8 @@ Editor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapP
 	start = best;
 }
 
+ArdourCanvas::Duple
+Editor::upper_left() const
+{
+	get_trackview_group ()->canvas_origin ().y;
+}

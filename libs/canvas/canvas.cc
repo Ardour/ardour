@@ -673,7 +673,7 @@ GtkCanvas::pick_current_item (Duple const & point, int state)
 	}
 
 	if (_current_item) {
-		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CURRENT ITEM %1/%2\n", _new_current_item->whatami(), _current_item->name));
+		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, string_compose ("CURRENT ITEM %1/%2\n", _current_item->whatami(), _current_item->name));
 	} else {
 		DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, "--- no current item\n");
 	}

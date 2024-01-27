@@ -64,6 +64,11 @@ class MidiCueEditor : public CueEditor
 
 	void set_region (std::shared_ptr<ARDOUR::MidiTrack>, std::shared_ptr<ARDOUR::MidiRegion>);
 
+	ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
+	ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const { return cursor_scroll_group; }
+
+	void reset_zoom (samplecnt_t);
+
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
@@ -98,8 +103,6 @@ class MidiCueEditor : public CueEditor
 	/* The group containing all trackviews. */
 	ArdourCanvas::Container* no_scroll_group;
 
-	/* The group containing all trackviews. */
-	ArdourCanvas::Container* _trackview_group;
 	ArdourCanvas::Container* global_rect_group;
 	ArdourCanvas::Container* time_line_group;
 

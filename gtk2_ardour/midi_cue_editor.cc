@@ -16,17 +16,23 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ardour/midi_region.h"
+#include "ardour/midi_source.h"
+
 #include "canvas/canvas.h"
 #include "canvas/container.h"
 #include "canvas/debug.h"
 #include "canvas/scroll_group.h"
 #include "canvas/rectangle.h"
 
+#include "editor_cursors.h"
 #include "midi_cue_background.h"
 #include "midi_cue_editor.h"
-#include "midi_view.h"
+#include "midi_cue_view.h"
 #include "ui_config.h"
 #include "verbose_cursor.h"
+
+#include "pbd/i18n.h"
 
 using namespace ARDOUR;
 using namespace ArdourCanvas;
@@ -40,6 +46,12 @@ MidiCueEditor::MidiCueEditor()
 	build_canvas ();
 
 	_verbose_cursor = new VerboseCursor (*this);
+
+	// _playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event, X_("playhead"));
+	_playhead_cursor = new EditorCursor (*this, X_("playhead"));
+	_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());
+
+	_snapped_cursor = new EditorCursor (*this, X_("snapped"));
 }
 
 MidiCueEditor::~MidiCueEditor ()
@@ -89,9 +101,6 @@ MidiCueEditor::build_canvas ()
 	/*a group to hold time (measure) lines */
 	time_line_group = new ArdourCanvas::Container (h_scroll_group);
 	CANVAS_DEBUG_NAME (time_line_group, "time line group");
-
-	_trackview_group = new ArdourCanvas::Container (hv_scroll_group);
-	CANVAS_DEBUG_NAME (_trackview_group, "Canvas TrackViews");
 
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
@@ -144,6 +153,16 @@ MidiCueEditor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction
 	}
 
 	start = best;
+}
+
+void
+MidiCueEditor::reset_zoom (samplecnt_t spp)
+{
+	CueEditor::reset_zoom (spp);
+
+	if (view) {
+		view->set_samples_per_pixel (spp);
+	}
 }
 
 samplecnt_t
@@ -201,8 +220,26 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr
 		return;
 	}
 
-	view = new MidiView (t, *hv_scroll_group, *this, *bg, 0xff0000ff);
+	view = new MidiCueView (t, *hv_scroll_group, *this, *bg, 0xff0000ff);
 	view->set_region (r);
 
 	bg->set_view (view);
+
+	/* Compute zoom level to show entire source plus some margin if possible */
+
+	std::shared_ptr<Temporal::TempoMap> map;
+
+	Temporal::timecnt_t duration = Temporal::timecnt_t (r->midi_source()->length().beats());
+	/* XXX build tempo map from source */
+	map.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
+
+	{
+		EditingContext::TempoMapScope tms (*this, map);
+		double width = bg->width();
+		samplecnt_t samples = duration.samples();
+
+		samplecnt_t spp = floor (samples / width);
+		reset_zoom (spp);
+	}
 }
+

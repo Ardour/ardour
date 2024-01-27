@@ -51,6 +51,10 @@
 using ARDOUR::samplepos_t;
 using ARDOUR::samplecnt_t;
 
+namespace Temporal {
+	class TempoMap;
+}
+
 class XMLNode;
 
 class CursorContext;
@@ -79,12 +83,28 @@ public:
 
 	Temporal::TimeDomain time_domain () const;
 
+
+	struct TempoMapScope {
+		TempoMapScope (EditingContext& context, std::shared_ptr<Temporal::TempoMap> map) 
+			: ec (context)
+		{
+			old_map = ec.start_local_tempo_map (map);
+		}
+		~TempoMapScope () {
+			ec.end_local_tempo_map (old_map);
+		}
+		EditingContext& ec;
+		std::shared_ptr<Temporal::TempoMap const> old_map;
+	};
+
 	DragManager* drags () const {
 		return _drags;
 	}
 
 	bool drag_active () const;
 	bool preview_video_drag_active () const;
+
+	virtual ArdourCanvas::Duple upper_left() const { return ArdourCanvas::Duple (0, 0); }
 
 	virtual void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, TrackViewList const &, Selection::Operation, bool) = 0;
 	virtual void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&) const = 0;
@@ -249,6 +269,8 @@ public:
 	virtual void reset_zoom (samplecnt_t) = 0;
 	virtual void reposition_and_zoom (samplepos_t, double) = 0;
 
+	sigc::signal<void> ZoomChanged;
+
 	virtual Selection& get_selection() const { return *selection; }
 	virtual Selection& get_cut_buffer () const { return *cut_buffer; }
 
@@ -295,6 +317,9 @@ public:
 	ArdourCanvas::Rectangle* rubberband_rect;
 
 	virtual ArdourCanvas::Container* get_noscroll_group() const = 0;
+	virtual ArdourCanvas::ScrollGroup* get_hscroll_group () const = 0;
+	virtual ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const = 0;
+	virtual bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*) { return false; }
 
   protected:
 	Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
@@ -426,6 +451,10 @@ public:
 	double _visible_canvas_height; ///< height of the visible area of the track canvas
 
 	QuantizeDialog* quantize_dialog;
+
+	friend class TempoMapScope;
+	virtual std::shared_ptr<Temporal::TempoMap const> start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
+	virtual void end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const>) { /* no-op by default */ }
 };
 
 

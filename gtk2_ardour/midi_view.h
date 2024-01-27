@@ -92,6 +92,9 @@ class MidiView : public virtual sigc::trackable
 	virtual ~MidiView ();
 
 	void init (bool wfd);
+
+	virtual void set_samples_per_pixel (double) {};
+
 	virtual bool display_is_enabled() const { return true; }
 
 	virtual ArdourCanvas::Item* drag_group() const;
