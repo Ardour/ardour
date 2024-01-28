@@ -162,31 +162,7 @@ GenericPluginUI::GenericPluginUI (std::shared_ptr<PlugInsertBase> pib, bool scro
 	settings_box.set_border_width (0);
 	settings_box.pack_start (*smaller_hbox, false, false);
 
-	bool has_automatables = false;
-
-	for (size_t i = 0; i < plugin->parameter_count(); ++i) {
-		if (!plugin->parameter_is_control (i)) {
-			continue;
-		}
-		if (!plugin->parameter_is_input (i)) {
-			continue;
-		}
-		const Evoral::Parameter param(PluginAutomation, 0, i);
-		std::shared_ptr<ARDOUR::AutomationControl> c (std::dynamic_pointer_cast<ARDOUR::AutomationControl>(_pib->control (param)));
-		if (!c) {
-			continue;
-		}
-		if (c->flags () & Controllable::HiddenControl) {
-			continue;
-		}
-		if (c->flags () & Controllable::NotAutomatable) {
-			continue;
-		}
-		has_automatables = true;
-		break;
-	}
-
-	if (_pi && has_automatables) {
+	if (_pi && _pi->has_automatables ()) {
 		HBox* automation_hbox = manage (new HBox);
 		automation_hbox->set_spacing (6);
 		Label* l = manage (new Label (_("All Automation")));
