@@ -47,6 +47,7 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_mute;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_solo;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_recenable;
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_sursend_enable;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_select;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_route_active;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool> group_color;
@@ -84,6 +85,7 @@ public:
 	bool is_mute () const { return _mute.val(); }
 	bool is_solo () const { return _solo.val(); }
 	bool is_recenable () const { return _recenable.val(); }
+	bool is_sursend_enable () const { return _sursend_enable.val(); }
 	bool is_select () const { return _select.val(); }
 	bool is_route_active () const { return _route_active.val(); }
 	bool is_color () const { return _color.val(); }
@@ -105,6 +107,7 @@ public:
 	void set_mute (bool yn);
 	void set_solo (bool yn);
 	void set_recenable (bool yn);
+	void set_sursend_enable (bool yn);
 	void set_select (bool yn);
 	void set_route_active (bool yn);
 	void set_color (bool yn);
@@ -177,6 +180,7 @@ private:
 	PBD::Property<bool> _mute;
 	PBD::Property<bool> _solo;
 	PBD::Property<bool> _recenable;
+	PBD::Property<bool> _sursend_enable;
 	PBD::Property<bool> _select;
 	PBD::Property<bool> _route_active;
 	PBD::Property<bool> _color;
@@ -186,11 +190,13 @@ private:
 	std::shared_ptr<ControlGroup> _solo_group;
 	std::shared_ptr<ControlGroup> _mute_group;
 	std::shared_ptr<ControlGroup> _rec_enable_group;
+	std::shared_ptr<ControlGroup> _sursend_enable_group;
 	std::shared_ptr<ControlGroup> _gain_group;
 	std::shared_ptr<ControlGroup> _monitoring_group;
 
 	bool check_subgroup (bool, Placement, DataType&, uint32_t&) const;
 	void remove_when_going_away (std::weak_ptr<Route>);
+	void update_surround_sends ();
 	void unset_subgroup_bus ();
 	int set_state_2X (const XMLNode&, int);
 

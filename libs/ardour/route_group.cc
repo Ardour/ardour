@@ -37,6 +37,7 @@
 #include "ardour/route.h"
 #include "ardour/route_group.h"
 #include "ardour/session.h"
+#include "ardour/surround_send.h"
 #include "ardour/vca.h"
 #include "ardour/vca_manager.h"
 
@@ -54,6 +55,7 @@ namespace ARDOUR {
 		PropertyDescriptor<bool> group_mute;
 		PropertyDescriptor<bool> group_solo;
 		PropertyDescriptor<bool> group_recenable;
+		PropertyDescriptor<bool> group_sursend_enable;
 		PropertyDescriptor<bool> group_select;
 		PropertyDescriptor<bool> group_route_active;
 		PropertyDescriptor<bool> group_color;
@@ -78,6 +80,8 @@ RouteGroup::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for solo = %1\n", Properties::group_solo.property_id));
 	Properties::group_recenable.property_id = g_quark_from_static_string (X_("recenable"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for recenable = %1\n", Properties::group_recenable.property_id));
+	Properties::group_sursend_enable.property_id = g_quark_from_static_string (X_("sursend_enable"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for sursend_enable = %1\n", Properties::group_sursend_enable.property_id));
 	Properties::group_select.property_id = g_quark_from_static_string (X_("select"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for select = %1\n", Properties::group_select.property_id));
 	Properties::group_route_active.property_id = g_quark_from_static_string (X_("route-active"));
@@ -97,6 +101,7 @@ RouteGroup::make_property_quarks ()
 	, _mute (Properties::group_mute, true) \
 	, _solo (Properties::group_solo, true) \
 	, _recenable (Properties::group_recenable, true) \
+	, _sursend_enable (Properties::group_sursend_enable, true) \
 	, _select (Properties::group_select, true) \
 	, _route_active (Properties::group_route_active, true) \
 	, _color (Properties::group_color, true) \
@@ -110,6 +115,7 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	, _solo_group (new ControlGroup (SoloAutomation))
 	, _mute_group (new ControlGroup (MuteAutomation))
 	, _rec_enable_group (new ControlGroup (RecEnableAutomation))
+	, _sursend_enable_group (new ControlGroup (BusSendEnable))
 	, _gain_group (new GainControlGroup ())
 	, _monitoring_group (new ControlGroup (MonitoringAutomation))
 	, _rgba (0)
@@ -124,11 +130,14 @@ RouteGroup::RouteGroup (Session& s, const string &n)
 	add_property (_mute);
 	add_property (_solo);
 	add_property (_recenable);
+	add_property (_sursend_enable);
 	add_property (_select);
 	add_property (_route_active);
 	add_property (_color);
 	add_property (_monitoring);
 	add_property (_group_master_number);
+
+	s.SurroundMasterAddedOrRemoved.connect_same_thread (*this, boost::bind (&RouteGroup::update_surround_sends, this));
 }
 
 RouteGroup::~RouteGroup ()
@@ -137,6 +146,7 @@ RouteGroup::~RouteGroup ()
 	_mute_group->clear ();
 	_gain_group->clear ();
 	_rec_enable_group->clear ();
+	_sursend_enable_group->clear ();
 	_monitoring_group->clear ();
 
 	std::shared_ptr<VCA> vca (group_master.lock());
@@ -184,6 +194,10 @@ RouteGroup::add (std::shared_ptr<Route> r)
 		_monitoring_group->add_control (trk->monitoring_control());
 	}
 
+	if (r->surround_send ()) {
+		_sursend_enable_group->add_control (r->surround_send ()->send_enable_control ());
+	}
+
 	r->set_route_group (this);
 	r->DropReferences.connect_same_thread (*this, boost::bind (&RouteGroup::remove_when_going_away, this, std::weak_ptr<Route> (r)));
 
@@ -205,6 +219,17 @@ RouteGroup::remove_when_going_away (std::weak_ptr<Route> wr)
 
 	if (r) {
 		remove (r);
+	}
+}
+
+void
+RouteGroup::update_surround_sends ()
+{
+	for (auto const& r : *routes) {
+		if (r->surround_send ()) {
+			_sursend_enable_group->add_control (r->surround_send ()->send_enable_control ());
+		}
+		// Note: ctrl is removed via DropReferences
 	}
 }
 
@@ -238,6 +263,9 @@ RouteGroup::remove (std::shared_ptr<Route> r)
 		if (trk) {
 			_rec_enable_group->remove_control (trk->rec_enable_control());
 			_monitoring_group->remove_control (trk->monitoring_control());
+		}
+		if (r->surround_send ()) {
+			_sursend_enable_group->remove_control (r->surround_send ()->send_enable_control ());
 		}
 		routes->erase (i);
 		_session.set_dirty ();
@@ -417,6 +445,17 @@ RouteGroup::set_recenable (bool yn)
 	_recenable = yn;
 	_rec_enable_group->set_active (yn);
 	send_change (PropertyChange (Properties::group_recenable));
+}
+
+void
+RouteGroup::set_sursend_enable (bool yn)
+{
+	if (is_sursend_enable() == yn) {
+		return;
+	}
+	_sursend_enable = yn;
+	_sursend_enable_group->set_active (yn);
+	send_change (PropertyChange (Properties::group_sursend_enable));
 }
 
 void
@@ -722,13 +761,14 @@ RouteGroup::push_to_groups ()
 		_solo_group->set_active (is_solo());
 		_mute_group->set_active (is_mute());
 		_rec_enable_group->set_active (is_recenable());
+		_sursend_enable_group->set_active (is_sursend_enable());
 		_monitoring_group->set_active (is_monitoring());
 	} else {
 		_gain_group->set_active (false);
 		_solo_group->set_active (false);
 		_mute_group->set_active (false);
-
 		_rec_enable_group->set_active (false);
+		_sursend_enable_group->set_active (false);
 		_monitoring_group->set_active (false);
 	}
 }
