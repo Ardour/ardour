@@ -79,7 +79,7 @@ CueEditor::stop_canvas_autoscroll ()
 bool
 CueEditor::autoscroll_active() const
 {
-	return true;
+	return false;
 }
 
 void

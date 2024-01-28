@@ -238,8 +238,6 @@ MidiView::canvas_group_event (GdkEvent* ev)
 	//For now, move the snapped cursor aside so it doesn't bother you during internal editing
 	//_editing_context.set_snapped_cursor_position(_midi_region->position());
 
-	std::cerr << "MV @ " << this << " CGE " << Gtkmm2ext::event_type_string (ev->type) << std::endl;
-
 	bool r;
 
 	switch (ev->type) {
@@ -4649,12 +4647,6 @@ MidiView::add_split_notes ()
 			pos += b;
 		}
 	}
-}
-
-ArdourCanvas::Item*
-MidiView::drag_group () const
-{
-	return _note_group->parent();
 }
 
 double
