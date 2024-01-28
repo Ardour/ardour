@@ -34,7 +34,7 @@ namespace ArdourCanvas {
 	class ScrollGroup;
 }
 
-class MidiView;
+class MidiCueView;
 class CueMidiBackground;
 
 class MidiCueEditor : public CueEditor
@@ -109,7 +109,7 @@ class MidiCueEditor : public CueEditor
 	ArdourCanvas::Rectangle* transport_loop_range_rect;
 
 	CueMidiBackground* bg;
-	MidiView* view;
+	MidiCueView* view;
 
 	void build_canvas ();
 	void canvas_allocate (Gtk::Allocation);

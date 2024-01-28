@@ -97,7 +97,7 @@ class MidiView : public virtual sigc::trackable
 
 	virtual bool display_is_enabled() const { return true; }
 
-	virtual ArdourCanvas::Item* drag_group() const;
+	virtual ArdourCanvas::Item* drag_group() const = 0;
 
 	void step_add_note (uint8_t channel, uint8_t number, uint8_t velocity,
 	                    Temporal::Beats pos, Temporal::Beats len);
