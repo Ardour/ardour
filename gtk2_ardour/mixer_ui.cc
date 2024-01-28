@@ -1862,7 +1862,9 @@ Mixer_UI::redisplay_track_list ()
 	if (_surround_strip) {
 		out_packer.reorder_child (*_surround_strip, -1);
 	}
-	out_packer.reorder_child (_monitor_section.tearoff(), -1);
+	if (_monitor_section.tearoff ().get_parent ()) {
+		out_packer.reorder_child (_monitor_section.tearoff(), -1);
+	}
 }
 
 void
