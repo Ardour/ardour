@@ -86,6 +86,8 @@
 
 #define SYNAPSIS_ICON_WINDOW_CLASS "SynTrackCursorWindowClass"
 
+#define QS_YDK_RELEVANT_INPUT 0x4ff // = QS_KEY | QS_MOUSEMOVE | QS_MOUSEBUTTON | QS_POSTMESSAGE | QS_TIMER | QS_PAINT | QS_HOTKEY | QS_SENDMESSAGE | QS_RAWINPUT
+
 static gboolean gdk_event_translate (MSG        *msg,
 				     gint       *ret_valp);
 static void     handle_wm_paint     (MSG        *msg,
@@ -382,7 +384,7 @@ gdk_events_pending (void)
 {
   return (_gdk_event_queue_find_first (_gdk_display) ||
 	  (modal_win32_dialog == NULL &&
-	   GetQueueStatus (QS_ALLINPUT) != 0));
+	   GetQueueStatus (QS_YDK_RELEVANT_INPUT) != 0));
 }
 
 GdkEvent*
@@ -3653,7 +3655,7 @@ gdk_event_prepare (GSource *source,
 
   retval = (_gdk_event_queue_find_first (_gdk_display) != NULL ||
 	    (modal_win32_dialog == NULL &&
-	     GetQueueStatus (QS_ALLINPUT) != 0));
+	     GetQueueStatus (QS_YDK_RELEVANT_INPUT) != 0));
 
   GDK_THREADS_LEAVE ();
 
@@ -3671,7 +3673,7 @@ gdk_event_check (GSource *source)
     {
       retval = (_gdk_event_queue_find_first (_gdk_display) != NULL ||
 		(modal_win32_dialog == NULL &&
-		 GetQueueStatus (QS_ALLINPUT) != 0));
+		 GetQueueStatus (QS_YDK_RELEVANT_INPUT) != 0));
     }
   else
     {
