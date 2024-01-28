@@ -462,13 +462,43 @@ PluginInsert::is_instrument() const
 	return (pip->is_instrument ());
 }
 
+bool
+PluginInsert::has_automatables () const
+{
+	for (size_t i = 0; i < plugin(0)->parameter_count (); ++i) {
+		if (!plugin(0)->parameter_is_control (i)) {
+			continue;
+		}
+		if (!plugin(0)->parameter_is_input (i)) {
+			continue;
+		}
+		std::shared_ptr<AutomationControl const> ac = automation_control (Evoral::Parameter (PluginAutomation, 0, i));
+		if (!ac) {
+			continue;
+		}
+		if (ac->flags () & Controllable::HiddenControl) {
+			continue;
+		}
+		if (ac->flags () & Controllable::NotAutomatable) {
+			continue;
+		}
+		return true;
+		break;
+	}
+	return false;
+}
+
 PlugInsertBase::UIElements
 PluginInsert::ui_elements () const
 {
 	if (owner () == (ARDOUR::SessionObject*)(_session.the_auditioner().get())) {
 		return NoGUIToolbar;
 	}
+
 	UIElements rv = AllUIElements;
+	if (!has_automatables ()) {
+		rv = static_cast<PlugInsertBase::UIElements> (static_cast <std::uint8_t>(rv) & ~static_cast<std::uint8_t> (PlugInsertBase::PluginPreset));
+	}
 	if (!is_instrument()) {
 		rv = static_cast<PlugInsertBase::UIElements> (static_cast <std::uint8_t>(rv) & ~static_cast<std::uint8_t> (PlugInsertBase::MIDIKeyboard));
 	}

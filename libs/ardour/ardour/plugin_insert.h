@@ -192,6 +192,7 @@ public:
 	bool has_no_audio_inputs() const;
 
 	bool is_instrument () const;
+	bool has_automatables () const;
 
 	bool has_output_presets (
 			ChanCount in = ChanCount (DataType::MIDI, 1),
