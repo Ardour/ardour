@@ -463,88 +463,11 @@ MidiRegionView::button_release (GdkEventButton* ev)
 
 	return false;
 }
- 
+
 bool
 MidiRegionView::motion (GdkEventMotion* ev)
 {
-	if (!_entered_note) {
-
-		if (_mouse_state == AddDragging) {
-			if (_ghost_note) {
-				remove_ghost_note ();
-			}
-
-		} else if (!_ghost_note && _editing_context.current_mouse_mode() == MouseContent &&
-		    Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()) &&
-		    _mouse_state != AddDragging) {
-
-			create_ghost_note (ev->x, ev->y, ev->state);
-
-		} else if (_ghost_note && _editing_context.current_mouse_mode() == MouseContent &&
-			   Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-
-			update_ghost_note (ev->x, ev->y, ev->state);
-
-		} else if (_ghost_note && _editing_context.current_mouse_mode() == MouseContent) {
-
-			remove_ghost_note ();
-			hide_verbose_cursor ();
-
-		} else if (_editing_context.current_mouse_mode() == MouseDraw) {
-
-			if (_ghost_note) {
-				update_ghost_note (ev->x, ev->y, ev->state);
-			} else {
-				create_ghost_note (ev->x, ev->y, ev->state);
-			}
-		}
-	}
-
-	/* any motion immediately hides velocity text that may have been visible */
-
-	for (Selection::iterator i = _selection.begin(); i != _selection.end(); ++i) {
-		(*i)->hide_velocity ();
-	}
-
-	switch (_mouse_state) {
-	case Pressed:
-
-		if (_pressed_button == 1) {
-
-			MouseMode m = _editing_context.current_mouse_mode();
-
-			if (m == MouseContent && !Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-				_editing_context.drags()->set (new MidiRubberbandSelectDrag (_editing_context, this), (GdkEvent *) ev);
-				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
-					clear_selection_internal ();
-					_mouse_changed_selection = true;
-				}
-				_mouse_state = SelectRectDragging;
-				return true;
-			} else if (m == MouseRange) {
-				_editing_context.drags()->set (new MidiVerticalSelectDrag (_editing_context, this), (GdkEvent *) ev);
-				_mouse_state = SelectVerticalDragging;
-				return true;
-			}
-		}
-
-		return false;
-
-	case SelectRectDragging:
-	case SelectVerticalDragging:
-	case AddDragging:
-		_editing_context.drags()->motion_handler ((GdkEvent *) ev, false);
-		break;
-
-	case SelectTouchDragging:
-		return false;
-
-	default:
-		break;
-
-	}
-
-	//let RegionView do it's thing.  drags are handled in here
+	MidiView::motion (ev);
 	return RegionView::canvas_group_event ((GdkEvent *) ev);
 }
 
