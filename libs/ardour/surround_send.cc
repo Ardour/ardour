@@ -255,6 +255,15 @@ SurroundSend::configure_io (ChanCount in, ChanCount out)
 		add_pannable ();
 	}
 
+	if (changed) {
+		for (uint32_t i = 0; i < n_audio; ++i) {
+			_pannable[i]->foreach_pan_control ([](std::shared_ptr<AutomationControl> ac) { ac->clear_flag (PBD::Controllable::HiddenControl); });
+		}
+		for (uint32_t i = n_audio; i < _pannable.size (); ++i) {
+			_pannable[i]->foreach_pan_control ([](std::shared_ptr<AutomationControl> ac) { ac->set_flag (PBD::Controllable::HiddenControl); });
+		}
+	}
+
 #ifdef MIXBUS
 	/* Link visibility - currently only for Mixbus which has a custom UI, and at most stereo */
 	for (uint32_t i = 0; i < _pannable.size (); ++i) {
@@ -348,6 +357,10 @@ SurroundSend::cycle_start (pframes_t /*nframes*/)
 std::string
 SurroundSend::describe_parameter (Evoral::Parameter param)
 {
+	if (param.id() >=  n_pannables ()) {
+		return X_("hidden");
+	}
+
 	if (n_pannables () < 2) {
 		/* Use default names */
 		return Automatable::describe_parameter (param);
