@@ -228,6 +228,12 @@ SurroundSend::add_pannable ()
 	add_control (p->pan_size);
 	add_control (p->pan_snap);
 	add_control (p->binaural_render_mode);
+
+	for (uint32_t i = 0; i < _pannable.size (); ++i) {
+		_pannable[i]->sync_auto_state_with (p);
+		p->sync_auto_state_with (_pannable[i]);
+	}
+
 	_pannable.push_back (p);
 
 	_change_connections.drop_connections ();

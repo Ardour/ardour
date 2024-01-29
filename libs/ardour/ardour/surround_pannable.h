@@ -62,6 +62,7 @@ public:
 
 	void setup_visual_links ();
 	void sync_visual_link_to (std::shared_ptr<SurroundPannable>);
+	void sync_auto_state_with (std::shared_ptr<SurroundPannable>);
 
 	bool touching() const;
 

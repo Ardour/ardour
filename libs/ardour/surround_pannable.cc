@@ -131,6 +131,12 @@ SurroundPannable::sync_visual_link_to (std::shared_ptr<SurroundPannable> other)
 }
 
 void
+SurroundPannable::sync_auto_state_with (std::shared_ptr<SurroundPannable> other)
+{
+	other->pan_pos_x->alist()->automation_state_changed.connect_same_thread (*this, boost::bind (&SurroundPannable::control_auto_state_changed, this, _1));
+}
+
+void
 SurroundPannable::foreach_pan_control (boost::function<void(std::shared_ptr<AutomationControl>)> f) const
 {
 	f (pan_pos_x);
@@ -143,7 +149,7 @@ SurroundPannable::foreach_pan_control (boost::function<void(std::shared_ptr<Auto
 void
 SurroundPannable::control_auto_state_changed (AutoState new_state)
 {
-	if (_responding_to_control_auto_state_change) {
+	if (_responding_to_control_auto_state_change || _auto_state == new_state) {
 		return;
 	}
 
