@@ -321,6 +321,8 @@ public:
 	virtual ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const = 0;
 	virtual bool canvas_playhead_cursor_event (GdkEvent* event, ArdourCanvas::Item*) { return false; }
 
+	bool typed_event (ArdourCanvas::Item*, GdkEvent*, ItemType);
+
   protected:
 	Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 
@@ -455,6 +457,19 @@ public:
 	friend class TempoMapScope;
 	virtual std::shared_ptr<Temporal::TempoMap const> start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>);
 	virtual void end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const>) { /* no-op by default */ }
+
+	virtual bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
+	virtual bool button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
+	virtual bool button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
+	virtual bool button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
+	virtual bool button_press_dispatch (GdkEventButton*) = 0;
+	virtual bool button_release_dispatch (GdkEventButton*) = 0;
+	virtual bool motion_handler (ArdourCanvas::Item*, GdkEvent*, bool from_autoscroll = false) = 0;
+	virtual bool enter_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
+	virtual bool leave_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
+	virtual bool key_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
+	virtual bool key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
+
 };
 
 

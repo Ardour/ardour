@@ -102,7 +102,6 @@ class CueEditor : public EditingContext
 	size_t push_canvas_cursor (Gdk::Cursor*);
 	void pop_canvas_cursor ();
 	void reset_x_origin_to_follow_playhead ();
-
 };
 
 #endif /* __gtk_ardour_cue_editor_h__ */

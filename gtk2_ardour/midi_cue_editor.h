@@ -79,6 +79,18 @@ class MidiCueEditor : public CueEditor
 	                       ARDOUR::SnapPref     gpref = ARDOUR::SnapToAny_Visual,
 	                       bool                 ensure_snap = false) const;
 
+	bool button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool button_press_dispatch (GdkEventButton*);
+	bool button_release_dispatch (GdkEventButton*);
+	bool motion_handler (ArdourCanvas::Item*, GdkEvent*, bool from_autoscroll = false);
+	bool enter_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool leave_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool key_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
+	bool key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
+
  private:
 	Gtk::Adjustment vertical_adjustment;
 	Gtk::Adjustment horizontal_adjustment;
