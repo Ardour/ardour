@@ -388,7 +388,7 @@ if test -n "$MIXBUS"; then
 		unzip -q -o -d "$DESTDIR/share/${LOWERCASE_DIRNAME}/media/" "${SRCCACHE}/MixbusBundledMedia.zip"
 	fi
 else
-        echo "Fetching Ardour bundled media"
+	echo "Fetching Ardour bundled media"
 	curl -s -S --fail -#  \
 		-z "${SRCCACHE}/ArdourBundledMedia.zip" \
 		-o "${SRCCACHE}/ArdourBundledMedia.zip" \
@@ -431,6 +431,11 @@ fi
 if test -n "$QUICKZIP" ; then
 	cat > $NSISFILE << EOF
 SetCompressor zlib
+EOF
+elif test -n "$PACKAGE_GDB"; then
+	# debug version is > 2.2 GB and causes issues with SOLID lzma
+	cat > $NSISFILE << EOF
+SetCompressor lzma
 EOF
 else
 	cat > $NSISFILE << EOF
