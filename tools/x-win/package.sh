@@ -289,7 +289,7 @@ if test -n "$PACKAGE_GDB"; then
 	cd - > /dev/null
 
 	echo " === Creating debug.bat"
-	cp -r ${SRCCACHE}/gdb12_$WARCH $DESTDIR/gdb12
+	cp -r ${SRCCACHE}/gdb12 $DESTDIR/gdb12
 	cat > $DESTDIR/debug.bat << EOF
 set PYTHONPATH=%~dp0\gdb12\python3.10
 cd bin
