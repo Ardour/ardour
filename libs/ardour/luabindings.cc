@@ -97,6 +97,7 @@
 #include "ardour/solo_isolate_control.h"
 #include "ardour/solo_safe_control.h"
 #include "ardour/stripable.h"
+#include "ardour/surround_return.h"
 #include "ardour/surround_send.h"
 #include "ardour/surround_pannable.h"
 #include "ardour/track.h"
