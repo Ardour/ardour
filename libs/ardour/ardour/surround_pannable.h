@@ -58,6 +58,11 @@ public:
 		return (_auto_state & Play) || ((_auto_state & (Touch | Latch)) && !touching());
 	}
 
+	void foreach_pan_control (boost::function<void(std::shared_ptr<AutomationControl>)>) const;
+
+	void setup_visual_links ();
+	void sync_visual_link_to (std::shared_ptr<SurroundPannable>);
+
 	bool touching() const;
 
 	XMLNode& get_state () const;

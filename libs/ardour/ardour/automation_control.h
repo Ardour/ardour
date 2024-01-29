@@ -128,6 +128,10 @@ public:
 		_visually_linked_ctrls.push_back (ctrl);
 	}
 
+	void clear_visually_linked_control () {
+		_visually_linked_ctrls.clear ();
+	}
+
 	WeakAutomationControlList visually_linked_controls () const {
 		return _visually_linked_ctrls;
 	}

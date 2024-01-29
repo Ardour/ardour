@@ -95,6 +95,16 @@ SurroundPannable::SurroundPannable (Session& s, uint32_t chn, Temporal::TimeDoma
 	pan_size->Changed.connect_same_thread (*this, boost::bind (&SurroundPannable::value_changed, this));
 	pan_snap->Changed.connect_same_thread (*this, boost::bind (&SurroundPannable::value_changed, this));
 
+	setup_visual_links ();
+}
+
+SurroundPannable::~SurroundPannable ()
+{
+}
+
+void
+SurroundPannable::setup_visual_links ()
+{
 	/* all controls are visible together */
 	pan_pos_x->add_visually_linked_control (pan_pos_y);
 	pan_pos_x->add_visually_linked_control (pan_pos_z);
@@ -104,8 +114,30 @@ SurroundPannable::SurroundPannable (Session& s, uint32_t chn, Temporal::TimeDoma
 	pan_pos_z->add_visually_linked_control (pan_pos_y);
 }
 
-SurroundPannable::~SurroundPannable ()
+void
+SurroundPannable::sync_visual_link_to (std::shared_ptr<SurroundPannable> other)
 {
+	pan_pos_x->add_visually_linked_control (other->pan_pos_x);
+	pan_pos_x->add_visually_linked_control (other->pan_pos_y);
+	pan_pos_x->add_visually_linked_control (other->pan_pos_z);
+
+	pan_pos_y->add_visually_linked_control (other->pan_pos_x);
+	pan_pos_y->add_visually_linked_control (other->pan_pos_y);
+	pan_pos_y->add_visually_linked_control (other->pan_pos_z);
+
+	pan_pos_z->add_visually_linked_control (other->pan_pos_x);
+	pan_pos_z->add_visually_linked_control (other->pan_pos_y);
+	pan_pos_z->add_visually_linked_control (other->pan_pos_z);
+}
+
+void
+SurroundPannable::foreach_pan_control (boost::function<void(std::shared_ptr<AutomationControl>)> f) const
+{
+	f (pan_pos_x);
+	f (pan_pos_y);
+	f (pan_pos_z);
+	f (pan_size);
+	f (pan_snap);
 }
 
 void
@@ -117,11 +149,9 @@ SurroundPannable::control_auto_state_changed (AutoState new_state)
 
 	_responding_to_control_auto_state_change++;
 
-	pan_pos_x->set_automation_state (new_state);
-	pan_pos_y->set_automation_state (new_state);
-	pan_pos_z->set_automation_state (new_state);
-	pan_size->set_automation_state (new_state);
-	pan_snap->set_automation_state (new_state);
+	foreach_pan_control ([new_state](std::shared_ptr<AutomationControl> ac) {
+			ac->set_automation_state (new_state);
+			});
 
 	_responding_to_control_auto_state_change--;
 

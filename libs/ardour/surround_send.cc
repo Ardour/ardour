@@ -255,6 +255,25 @@ SurroundSend::configure_io (ChanCount in, ChanCount out)
 		add_pannable ();
 	}
 
+#ifdef MIXBUS
+	/* Link visibility - currently only for Mixbus which has a custom UI, and at most stereo */
+	for (uint32_t i = 0; i < _pannable.size (); ++i) {
+		_pannable[i]->foreach_pan_control ([](std::shared_ptr<AutomationControl> ac) { ac->clear_visually_linked_control (); });
+	}
+	/* first link local controls */
+	for (uint32_t i = 0; i < n_audio; ++i) {
+		_pannable[i]->setup_visual_links ();
+	}
+	for (uint32_t i = 0; i < n_audio; ++i) {
+		for (uint32_t j = 0; j < n_audio; ++j) {
+			if (i == j) {
+				continue;
+			}
+			_pannable[i]->sync_visual_link_to (_pannable[j]);
+		}
+	}
+#endif
+
 	if (!_configured && !_has_state) {
 		switch (n_audio) {
 			case 2:
