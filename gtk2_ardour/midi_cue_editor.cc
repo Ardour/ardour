@@ -249,3 +249,69 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr
 	}
 }
 
+bool
+MidiCueEditor::button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
+{
+	return true;
+}
+
+bool
+MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType)
+{
+	return true;
+}
+
+bool
+MidiCueEditor::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
+{
+	return true;
+}
+
+bool
+MidiCueEditor::button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
+{
+	return true;
+}
+
+bool
+MidiCueEditor::button_press_dispatch (GdkEventButton*)
+{
+	return true;
+}
+
+bool
+MidiCueEditor::button_release_dispatch (GdkEventButton*)
+{
+	return true;
+}
+
+bool
+MidiCueEditor::motion_handler (ArdourCanvas::Item*, GdkEvent*, bool from_autoscroll)
+{
+	return true;
+}
+
+bool
+MidiCueEditor::enter_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
+{
+	return true;
+}
+
+bool
+MidiCueEditor::leave_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
+{
+	return true;
+}
+
+bool
+MidiCueEditor::key_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
+{
+	return true;
+}
+
+bool
+MidiCueEditor::key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
+{
+	return true;
+}
+

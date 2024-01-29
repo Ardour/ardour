@@ -1593,3 +1593,48 @@ EditingContext::start_local_tempo_map (std::shared_ptr<Temporal::TempoMap>)
 	/* default is a no-op */
 	return Temporal::TempoMap::use ();
 }
+
+bool
+EditingContext::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType type)
+{
+	if (!session () || session()->loading () || session()->deletion_in_progress ()) {
+		return false;
+	}
+
+	gint ret = FALSE;
+
+	switch (event->type) {
+	case GDK_BUTTON_PRESS:
+	case GDK_2BUTTON_PRESS:
+	case GDK_3BUTTON_PRESS:
+		ret = button_press_handler (item, event, type);
+		break;
+	case GDK_BUTTON_RELEASE:
+		ret = button_release_handler (item, event, type);
+		break;
+	case GDK_MOTION_NOTIFY:
+		ret = motion_handler (item, event);
+		break;
+
+	case GDK_ENTER_NOTIFY:
+		ret = enter_handler (item, event, type);
+		break;
+
+	case GDK_LEAVE_NOTIFY:
+		ret = leave_handler (item, event, type);
+		break;
+
+	case GDK_KEY_PRESS:
+		ret = key_press_handler (item, event, type);
+		break;
+
+	case GDK_KEY_RELEASE:
+		ret = key_release_handler (item, event, type);
+		break;
+
+	default:
+		break;
+	}
+	return ret;
+}
+
