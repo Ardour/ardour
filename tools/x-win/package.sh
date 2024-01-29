@@ -261,10 +261,6 @@ if test -z "$NOVIDEOTOOLS"; then
 fi
 
 ################################################################################
-### include static gdb - re-zipped binaries from
-### http://sourceforge.net/projects/mingw/files/MinGW/Extension/gdb/gdb-7.6.1-1/gdb-7.6.1-1-mingw32-bin.tar.lzma
-### http://sourceforge.net/projects/mingw-w64/files/Toolchains%20targetting%20Win64/Personal%20Builds/mingw-builds/4.9.1/threads-win32/sjlj/x86_64-4.9.1-release-win32-sjlj-rt_v3-rev1.7z
-
 BUILDTYPE=""
 VERSIONINFO="Optimized Version."
 
@@ -286,16 +282,18 @@ fi
 OUTFILE="${TMPDIR}/${PRODUCT_NAME}-${ARDOURVERSION}${BUILDTYPE}-${WARCH}-Setup.exe"
 
 if test -n "$PACKAGE_GDB"; then
-	download gdb-static-win3264.tar.xz http://robin.linuxaudio.org/gdb-static-win3264.tar.xz
+	# re-packaged from https://packages.msys2.org/package/mingw-w64-x86_64-gdb
+	download gdb12-win64.tar.xz http://ardour.org/files/gdb/gdb12-win64.tar.xz
 	cd ${SRCCACHE}
-	tar xf gdb-static-win3264.tar.xz
+	tar xf gdb12-win64.tar.xz
 	cd - > /dev/null
 
 	echo " === Creating debug.bat"
-	cp -r ${SRCCACHE}/gdb_$WARCH $DESTDIR/gdb
+	cp -r ${SRCCACHE}/gdb12_$WARCH $DESTDIR/gdb12
 	cat > $DESTDIR/debug.bat << EOF
+set PYTHONPATH=%~dp0\gdb12\python3.10
 cd bin
-START ..\\gdb\\bin\\gdb.exe -iex "set logging overwrite on" -iex "set height 0" -iex "set logging on %UserProfile%\\${PRODUCT_NAME}-debug.log" -iex "target exec ${PRODUCT_EXE}" -iex "run"
+..\\gdb12\\gdb.exe -ex "set logging overwrite on" -ex "set height 0" -ex "set logging file %UserProfile%\\${PRODUCT_NAME}-debug.log" -ex "set logging enabled on" -ex "target exec ${PRODUCT_EXE}" -ex "run"
 EOF
 fi
 
@@ -500,7 +498,7 @@ Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
   File /r lib
   File /r share
   File /nonfatal debug.bat
-  File /nonfatal /r gdb
+  File /nonfatal /r gdb12
   WriteRegStr HKLM "Software\\${PROGRAM_KEY}\\v${major_version}\\$WARCH" "Install_Dir" "\$INSTDIR"
   WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" "DisplayName" "${PROGRAM_NAME}${PROGRAM_VERSION}"
   WriteRegStr HKLM "Software\\Microsoft\\Windows\\CurrentVersion\\Uninstall\\${PRODUCT_ID}-${WARCH}" "UninstallString" '"\$INSTDIR\\uninstall.exe"'
@@ -619,7 +617,7 @@ Section "Uninstall"
   RMDir /r "\$INSTDIR\\bin"
   RMDir /r "\$INSTDIR\\lib"
   RMDir /r "\$INSTDIR\\share"
-  RMDir /r "\$INSTDIR\\gdb"
+  RMDir /r "\$INSTDIR\\gdb12"
   RMDir /r "\$INSTDIR\\video"
   Delete "\$INSTDIR\\debug.bat"
   Delete "\$INSTDIR\\uninstall.exe"
