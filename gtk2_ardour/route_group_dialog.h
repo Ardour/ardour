@@ -48,6 +48,7 @@ private:
 	Gtk::CheckButton _mute;
 	Gtk::CheckButton _solo;
 	Gtk::CheckButton _rec_enable;
+	Gtk::CheckButton _sursend_enable;
 	Gtk::CheckButton _select;
 	Gtk::CheckButton _edit;
 	Gtk::CheckButton _route_active;
