@@ -69,6 +69,11 @@ class MidiCueEditor : public CueEditor
 
 	void reset_zoom (samplecnt_t);
 
+	void set_mouse_mode (Editing::MouseMode, bool force = false);
+	void step_mouse_mode (bool next);
+	Editing::MouseMode current_mouse_mode () const;
+	bool internal_editing() const;
+
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
@@ -125,6 +130,10 @@ class MidiCueEditor : public CueEditor
 
 	void build_canvas ();
 	void canvas_allocate (Gtk::Allocation);
+
+	Editing::MouseMode mouse_mode;
+
+	RegionSelection region_selection();
 };
 
 

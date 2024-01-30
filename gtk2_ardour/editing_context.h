@@ -60,7 +60,9 @@ class XMLNode;
 class CursorContext;
 class DragManager;
 class EditorCursor;
+class EditNoteDialog;
 class MidiRegionView;
+class MidiView;
 class MouseCursors;
 class VerboseCursor;
 class TrackViewList;
@@ -308,9 +310,14 @@ public:
 
 	/* MIDI actions, proxied to selected MidiRegionView(s) */
 	ARDOUR::Quantize* get_quantize_op ();
-	virtual void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs) = 0;
-	void midi_action (void (MidiRegionView::*method)());
-	virtual std::vector<MidiRegionView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const = 0;
+	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
+	void midi_action (void (MidiView::*method)());
+	std::vector<MidiView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const;
+
+	void quantize_region ();
+	void transform_region ();
+	void legatize_region (bool shrink_only);
+	void transpose_region ();
 
 	void register_midi_actions (Gtkmm2ext::Bindings*);
 
@@ -470,6 +477,23 @@ public:
 	virtual bool key_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
 	virtual bool key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType) = 0;
 
+	void popup_note_context_menu (ArdourCanvas::Item*, GdkEvent*);
+	Gtk::Menu _note_context_menu;
+
+	static Gtkmm2ext::Bindings* button_bindings;
+	XMLNode* button_settings () const;
+
+	virtual RegionSelection region_selection() = 0;
+
+	void edit_notes (MidiView*);
+	void note_edit_done (int, EditNoteDialog*);
+
+	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiView& mrv);
+
+	void quantize_regions (const RegionSelection& rs);
+	void legatize_regions (const RegionSelection& rs, bool shrink_only);
+	void transform_regions (const RegionSelection& rs);
+	void transpose_regions (const RegionSelection& rs);
 };
 
 
