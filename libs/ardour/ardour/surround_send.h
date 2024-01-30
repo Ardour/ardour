@@ -67,6 +67,7 @@ public:
 	BufferSet const& bufs () const { return _mixbufs; }
 
 	std::shared_ptr<SurroundPannable> const& pan_param (size_t chn, timepos_t& s, timepos_t& e) const;
+	std::shared_ptr<AutomationControl> send_enable_control () const { return _send_enable_control; }
 
 protected:
 	int set_state (const XMLNode&, int version);
@@ -78,20 +79,25 @@ private:
 	void   cycle_start (pframes_t);
 	void   add_pannable ();
 
+	void send_enable_changed ();
+	void proc_active_changed ();
+
 	BufferSet _mixbufs;
 	int32_t   _surround_id;
 	timepos_t _cycle_start;
 	timepos_t _cycle_end;
 	gain_t    _current_gain;
 	bool      _has_state;
+	bool      _ignore_enable_change;
 
 	std::vector<std::shared_ptr<SurroundPannable>> _pannable;
 
-	std::shared_ptr<GainControl>      _gain_control;
-	std::shared_ptr<Amp>              _amp;
-	std::shared_ptr<MuteMaster>       _mute_master;
-	std::shared_ptr<DelayLine>        _send_delay;
-	std::shared_ptr<DelayLine>        _thru_delay;
+	std::shared_ptr<AutomationControl> _send_enable_control;
+	std::shared_ptr<GainControl>       _gain_control;
+	std::shared_ptr<Amp>               _amp;
+	std::shared_ptr<MuteMaster>        _mute_master;
+	std::shared_ptr<DelayLine>         _send_delay;
+	std::shared_ptr<DelayLine>         _thru_delay;
 
 	PBD::ScopedConnectionList _change_connections;
 };

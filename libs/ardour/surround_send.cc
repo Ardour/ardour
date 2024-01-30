@@ -17,6 +17,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/unwind.h"
+
 #include "ardour/surround_send.h"
 #include "ardour/amp.h"
 #include "ardour/audioengine.h"
@@ -37,6 +39,7 @@ SurroundSend::SurroundSend (Session& s, std::shared_ptr<MuteMaster> mm)
 	, _surround_id (s.next_surround_send_id ())
 	, _current_gain (GAIN_COEFF_ZERO)
 	, _has_state (false)
+	, _ignore_enable_change (false)
 	, _mute_master (mm)
 
 {
@@ -53,11 +56,18 @@ SurroundSend::SurroundSend (Session& s, std::shared_ptr<MuteMaster> mm)
 
 	add_control (_gain_control);
 
+	_send_enable_control = std::shared_ptr<AutomationControl> (new AutomationControl (_session, BusSendEnable, ParameterDescriptor(BusSendEnable)));
+	_send_enable_control->Changed.connect_same_thread (*this, boost::bind (&SurroundSend::send_enable_changed, this));
+	_send_enable_control->clear_flag (PBD::Controllable::RealTime);
+
+	ActiveChanged.connect_same_thread (*this, boost::bind (&SurroundSend::proc_active_changed, this));
+
 	InternalSend::CycleStart.connect_same_thread (*this, boost::bind (&SurroundSend::cycle_start, this, _1));
 }
 
 SurroundSend::~SurroundSend ()
 {
+	_send_enable_control->drop_references ();
 }
 
 std::shared_ptr<SurroundPannable>
@@ -394,6 +404,30 @@ SurroundSend::describe_parameter (Evoral::Parameter param)
 	}
 
 	return Automatable::describe_parameter (param);
+}
+
+void
+SurroundSend::send_enable_changed ()
+{
+	if (_ignore_enable_change) {
+		return;
+	}
+	PBD::Unwinder<bool> uw (_ignore_enable_change, true);
+	if (_send_enable_control->get_value () > 0) {
+		activate ();
+	} else {
+		deactivate ();
+	}
+}
+
+void
+SurroundSend::proc_active_changed ()
+{
+	if (_ignore_enable_change) {
+		return;
+	}
+	PBD::Unwinder<bool> uw (_ignore_enable_change, true);
+	_send_enable_control->set_value (_pending_active ? 1 : 0, PBD::Controllable::UseGroup);
 }
 
 int
