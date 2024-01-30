@@ -26,9 +26,12 @@
 #include "canvas/rectangle.h"
 
 #include "editor_cursors.h"
+#include "editor_drag.h"
+#include "keyboard.h"
 #include "midi_cue_background.h"
 #include "midi_cue_editor.h"
 #include "midi_cue_view.h"
+#include "note_base.h"
 #include "ui_config.h"
 #include "verbose_cursor.h"
 
@@ -36,12 +39,14 @@
 
 using namespace ARDOUR;
 using namespace ArdourCanvas;
+using namespace Gtkmm2ext;
 using namespace Temporal;
 
 MidiCueEditor::MidiCueEditor()
 	: vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, horizontal_adjustment (0.0, 0.0, 1e16)
 	, view (nullptr)
+	, mouse_mode (Editing::MouseDraw)
 {
 	build_canvas ();
 
@@ -250,14 +255,51 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr
 }
 
 bool
-MidiCueEditor::button_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
+MidiCueEditor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	switch (event->button.button) {
+	case 1:
+		return button_press_handler_1 (item, event, item_type);
+		break;
+
+	case 2:
+		return button_press_handler_2 (item, event, item_type);
+		break;
+
+	case 3:
+		break;
+
+	default:
+		return button_press_dispatch (&event->button);
+		break;
+
+	}
+
 	return true;
 }
 
 bool
-MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item*, GdkEvent*, ItemType)
+MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	NoteBase* note = nullptr;
+
+	if (mouse_mode == Editing::MouseContent) {
+		switch (item_type) {
+		case NoteItem:
+			/* Existing note: allow trimming/motion */
+			if ((note = reinterpret_cast<NoteBase*> (item->get_data ("notebase")))) {
+				if (note->big_enough_to_trim() && note->mouse_near_ends()) {
+					_drags->set (new NoteResizeDrag (*this, item), event, get_canvas_cursor());
+				} else {
+					_drags->set (new NoteDrag (*this, item), event);
+				}
+			}
+			return true;
+		default:
+			break;
+		}
+	}
+
 	return true;
 }
 
@@ -268,21 +310,39 @@ MidiCueEditor::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
 }
 
 bool
-MidiCueEditor::button_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
+MidiCueEditor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	if (Keyboard::is_context_menu_event (&event->button)) {
+		switch (item_type) {
+		case NoteItem:
+			if (internal_editing()) {
+				popup_note_context_menu (item, event);
+			}
+			break;
+		default:
+			break;
+		}
+	}
+
 	return true;
 }
 
 bool
-MidiCueEditor::button_press_dispatch (GdkEventButton*)
+MidiCueEditor::button_press_dispatch (GdkEventButton* ev)
 {
-	return true;
+	/* this function is intended only for buttons 4 and above. */
+
+	Gtkmm2ext::MouseButton b (ev->state, ev->button);
+	return button_bindings->activate (b, Gtkmm2ext::Bindings::Press);
 }
 
 bool
-MidiCueEditor::button_release_dispatch (GdkEventButton*)
+MidiCueEditor::button_release_dispatch (GdkEventButton* ev)
 {
-	return true;
+	/* this function is intended only for buttons 4 and above. */
+
+	Gtkmm2ext::MouseButton b (ev->state, ev->button);
+	return button_bindings->activate (b, Gtkmm2ext::Bindings::Release);
 }
 
 bool
@@ -315,3 +375,36 @@ MidiCueEditor::key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
 	return true;
 }
 
+void
+MidiCueEditor::set_mouse_mode (Editing::MouseMode m, bool force)
+{
+	if (m != Editing::MouseDraw && m != Editing::MouseContent) {
+		return;
+	}
+
+	mouse_mode = m;
+}
+
+void
+MidiCueEditor::step_mouse_mode (bool next)
+{
+}
+
+Editing::MouseMode
+MidiCueEditor::current_mouse_mode () const
+{
+	return mouse_mode;
+}
+
+bool
+MidiCueEditor::internal_editing() const
+{
+	return true;
+}
+
+RegionSelection
+MidiCueEditor::region_selection()
+{
+	RegionSelection rs;
+	return rs;
+}

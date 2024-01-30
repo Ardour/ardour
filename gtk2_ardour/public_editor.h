@@ -175,10 +175,6 @@ public:
 
 	virtual void reverse_region () = 0;
 	virtual void normalize_region () = 0;
-	virtual void quantize_region () = 0;
-	virtual void legatize_region (bool shrink_only) = 0;
-	virtual void transform_region () = 0;
-	virtual void transpose_region () = 0;
 	virtual void pitch_shift_region () = 0;
 
 	virtual void transition_to_rolling (bool fwd) = 0;
@@ -329,8 +325,6 @@ public:
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
 	virtual Temporal::timecnt_t get_paste_offset (Temporal::timepos_t const & pos, unsigned paste_count, Temporal::timecnt_t const & duration) = 0;
-
-	virtual void edit_notes (MidiView*) = 0;
 
 	virtual void queue_visual_videotimeline_update () = 0;
 	virtual void set_close_video_sensitive (bool) = 0;

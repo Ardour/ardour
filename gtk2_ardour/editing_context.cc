@@ -21,19 +21,28 @@
 #include "pbd/error.h"
 #include "pbd/stacktrace.h"
 
+#include "ardour/legatize.h"
+#include "ardour/midi_region.h"
+#include "ardour/midi_source.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/transpose.h"
 #include "ardour/quantize.h"
 
 #include "gtkmm2ext/bindings.h"
 
 #include "actions.h"
+#include "ardour_ui.h"
+#include "edit_note_dialog.h"
 #include "editing_context.h"
 #include "editor_drag.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
+#include "note_base.h"
 #include "quantize_dialog.h"
 #include "selection.h"
 #include "selection_memento.h"
+#include "transform_dialog.h"
+#include "transpose_dialog.h"
 #include "verbose_cursor.h"
 
 #include "pbd/i18n.h"
@@ -48,6 +57,7 @@ using namespace Temporal;
 using std::string;
 
 sigc::signal<void> EditingContext::DropDownKeys;
+Gtkmm2ext::Bindings* EditingContext::button_bindings = nullptr;
 
 static const gchar *_grid_type_strings[] = {
 	N_("No Grid"),
@@ -104,6 +114,17 @@ EditingContext::EditingContext ()
 	, _visible_canvas_height (0)
 	, quantize_dialog (nullptr)
 {
+	if (!button_bindings) {
+		button_bindings = new Bindings ("editor-mouse");
+
+		XMLNode* node = button_settings();
+		if (node) {
+			for (XMLNodeList::const_iterator i = node->children().begin(); i != node->children().end(); ++i) {
+				button_bindings->load_operation (**i);
+			}
+		}
+	}
+
 	grid_type_strings =  I18N (_grid_type_strings);
 }
 
@@ -260,7 +281,7 @@ EditingContext::register_midi_actions (Bindings* midi_bindings)
 }
 
 void
-EditingContext::midi_action (void (MidiRegionView::*method)())
+EditingContext::midi_action (void (MidiView::*method)())
 {
 	MidiRegionSelection ms = get_selection().midi_regions();
 
@@ -1636,5 +1657,262 @@ EditingContext::typed_event (ArdourCanvas::Item* item, GdkEvent *event, ItemType
 		break;
 	}
 	return ret;
+}
+
+void
+EditingContext::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
+{
+	using namespace Menu_Helpers;
+
+	NoteBase* note = reinterpret_cast<NoteBase*>(item->get_data("notebase"));
+	if (!note) {
+		return;
+	}
+
+	/* We need to get the selection here and pass it to the operations, since
+	   popping up the menu will cause a region leave event which clears
+	   entered_regionview. */
+
+	MidiView&       mrv = note->region_view();
+	const RegionSelection rs  = region_selection ();
+	const uint32_t sel_size = mrv.selection_size ();
+
+	MenuList& items = _note_context_menu.items();
+	items.clear();
+
+	if (sel_size > 0) {
+		items.push_back (MenuElem(_("Delete"), sigc::mem_fun(mrv, &MidiView::delete_selection)));
+	}
+
+	items.push_back(MenuElem(_("Edit..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::edit_notes), &mrv)));
+	items.push_back(MenuElem(_("Transpose..."),  sigc::bind(sigc::mem_fun(*this, &EditingContext::transpose_regions), rs)));
+	items.push_back(MenuElem(_("Legatize"), sigc::bind(sigc::mem_fun(*this, &EditingContext::legatize_regions), rs, false)));
+	if (sel_size < 2) {
+		items.back().set_sensitive (false);
+	}
+	items.push_back(MenuElem(_("Quantize..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::quantize_regions), rs)));
+	items.push_back(MenuElem(_("Remove Overlap"), sigc::bind(sigc::mem_fun(*this, &EditingContext::legatize_regions), rs, true)));
+	if (sel_size < 2) {
+		items.back().set_sensitive (false);
+	}
+	items.push_back(MenuElem(_("Transform..."), sigc::bind(sigc::mem_fun(*this, &EditingContext::transform_regions), rs)));
+
+	_note_context_menu.popup (event->button.button, event->button.time);
+}
+
+XMLNode*
+EditingContext::button_settings () const
+{
+	XMLNode* settings = ARDOUR_UI::instance()->editor_settings();
+	XMLNode* node = find_named_node (*settings, X_("Buttons"));
+
+	if (!node) {
+		node = new XMLNode (X_("Buttons"));
+	}
+
+	return node;
+}
+
+std::vector<MidiView*>
+EditingContext::filter_to_unique_midi_region_views (RegionSelection const & rs) const
+{
+	typedef std::pair<std::shared_ptr<MidiSource>,timepos_t> MapEntry;
+	std::set<MapEntry> single_region_set;
+
+	std::vector<MidiView*> views;
+
+	/* build a list of regions that are unique with respect to their source
+	 * and start position. Note: this is non-exhaustive... if someone has a
+	 * non-forked copy of a MIDI region and then suitably modifies it, this
+	 * will still put both regions into the list of things to be acted
+	 * upon.
+	 *
+	 * Solution: user should not select both regions, or should fork one of them.
+	 */
+
+	for (auto const & rv : rs) {
+
+		MidiView* mrv = dynamic_cast<MidiView*> (rv);
+
+		if (!mrv) {
+			continue;
+		}
+
+		MapEntry entry = make_pair (mrv->midi_region()->midi_source(), mrv->midi_region()->start());
+
+		if (single_region_set.insert (entry).second) {
+			views.push_back (mrv);
+		}
+	}
+
+	return views;
+}
+
+void
+EditingContext::quantize_region ()
+{
+	if (_session) {
+		quantize_regions(region_selection ());
+	}
+}
+
+void
+EditingContext::quantize_regions (const RegionSelection& rs)
+{
+	if (rs.n_midi_regions() == 0) {
+		return;
+	}
+
+	Quantize* quant = get_quantize_op ();
+
+	if (!quant) {
+		return;
+	}
+
+	if (!quant->empty()) {
+		apply_midi_note_edit_op (*quant, rs);
+	}
+
+	delete quant;
+}
+
+void
+EditingContext::legatize_region (bool shrink_only)
+{
+	if (_session) {
+		legatize_regions(region_selection (), shrink_only);
+	}
+}
+
+void
+EditingContext::legatize_regions (const RegionSelection& rs, bool shrink_only)
+{
+	if (rs.n_midi_regions() == 0) {
+		return;
+	}
+
+	Legatize legatize(shrink_only);
+	apply_midi_note_edit_op (legatize, rs);
+}
+
+void
+EditingContext::transform_region ()
+{
+	if (_session) {
+		transform_regions(region_selection ());
+	}
+}
+
+void
+EditingContext::transform_regions (const RegionSelection& rs)
+{
+	if (rs.n_midi_regions() == 0) {
+		return;
+	}
+
+	TransformDialog td;
+
+	td.present();
+	const int r = td.run();
+	td.hide();
+
+	if (r == Gtk::RESPONSE_OK) {
+		Transform transform(td.get());
+		apply_midi_note_edit_op(transform, rs);
+	}
+}
+
+void
+EditingContext::transpose_region ()
+{
+	if (_session) {
+		transpose_regions(region_selection ());
+	}
+}
+
+void
+EditingContext::transpose_regions (const RegionSelection& rs)
+{
+	if (rs.n_midi_regions() == 0) {
+		return;
+	}
+
+	TransposeDialog d;
+	int const r = d.run ();
+
+	if (r == RESPONSE_ACCEPT) {
+		Transpose transpose(d.semitones ());
+		apply_midi_note_edit_op (transpose, rs);
+	}
+}
+
+void
+EditingContext::edit_notes (MidiView* mrv)
+{
+	MidiView::Selection const & s = mrv->selection();
+
+	if (s.empty ()) {
+		return;
+	}
+
+	EditNoteDialog* d = new EditNoteDialog (mrv, s);
+	d->show_all ();
+
+	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &EditingContext::note_edit_done), d));
+}
+
+void
+EditingContext::note_edit_done (int r, EditNoteDialog* d)
+{
+	d->done (r);
+	delete d;
+}
+
+PBD::Command*
+EditingContext::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiView& mrv)
+{
+	Evoral::Sequence<Temporal::Beats>::Notes selected;
+	mrv.selection_as_notelist (selected, true);
+
+	if (selected.empty()) {
+		return 0;
+	}
+
+	std::vector<Evoral::Sequence<Temporal::Beats>::Notes> v;
+	v.push_back (selected);
+
+	timepos_t pos = mrv.midi_region()->source_position();
+
+	return op (mrv.midi_region()->model(), pos.beats(), v);
+}
+
+void
+EditingContext::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection& rs)
+{
+	if (rs.empty()) {
+		return;
+	}
+
+	bool in_command = false;
+
+	std::vector<MidiView*> views = filter_to_unique_midi_region_views (rs);
+
+	for (auto & mv : views) {
+
+		Command* cmd = apply_midi_note_edit_op_to_region (op, *mv);
+		if (cmd) {
+			if (!in_command) {
+				begin_reversible_command (op.name ());
+				in_command = true;
+			}
+			(*cmd)();
+			_session->add_command (cmd);
+			}
+	}
+
+	if (in_command) {
+		commit_reversible_command ();
+		_session->set_dirty ();
+	}
 }
 

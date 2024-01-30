@@ -320,7 +320,6 @@ Editor::Editor ()
 	, _err_screen_engine (0)
 	, cut_buffer_start (0)
 	, cut_buffer_length (0)
-	, button_bindings (0)
 	, last_paste_pos (timepos_t::max (Temporal::AudioTime)) /* XXX NUTEMPO how to choose time domain */
 	, paste_count (0)
 	, sfbrowser (0)
@@ -794,17 +793,6 @@ Editor::Editor ()
 
 	_show_marker_lines = false;
 
-	/* Button bindings */
-
-	button_bindings = new Bindings ("editor-mouse");
-
-	XMLNode* node = button_settings();
-	if (node) {
-		for (XMLNodeList::const_iterator i = node->children().begin(); i != node->children().end(); ++i) {
-			button_bindings->load_operation (**i);
-		}
-	}
-
 	constructed = true;
 
 	/* grab current parameter state */
@@ -856,19 +844,6 @@ Editor::~Editor()
 	for (std::map<ARDOUR::FadeShape, Gtk::Image*>::const_iterator i = _xfade_out_images.begin(); i != _xfade_out_images.end (); ++i) {
 		delete i->second;
 	}
-}
-
-XMLNode*
-Editor::button_settings () const
-{
-	XMLNode* settings = ARDOUR_UI::instance()->editor_settings();
-	XMLNode* node = find_named_node (*settings, X_("Buttons"));
-
-	if (!node) {
-		node = new XMLNode (X_("Buttons"));
-	}
-
-	return node;
 }
 
 bool
@@ -6269,60 +6244,6 @@ Editor::popup_control_point_context_menu (ArdourCanvas::Item* item, GdkEvent* ev
 }
 
 void
-Editor::popup_note_context_menu (ArdourCanvas::Item* item, GdkEvent* event)
-{
-	using namespace Menu_Helpers;
-
-	NoteBase* note = reinterpret_cast<NoteBase*>(item->get_data("notebase"));
-	if (!note) {
-		return;
-	}
-
-	/* We need to get the selection here and pass it to the operations, since
-	   popping up the menu will cause a region leave event which clears
-	   entered_regionview. */
-
-	MidiView&       mrv = note->region_view();
-	const RegionSelection rs  = get_regions_from_selection_and_entered ();
-	const uint32_t sel_size = mrv.selection_size ();
-
-	MenuList& items = _note_context_menu.items();
-	items.clear();
-
-	if (sel_size > 0) {
-		items.push_back(MenuElem(_("Delete"),
-					 sigc::mem_fun(mrv, &MidiView::delete_selection)));
-	}
-
-	items.push_back(MenuElem(_("Edit..."),
-				 sigc::bind(sigc::mem_fun(*this, &Editor::edit_notes), &mrv)));
-
-	items.push_back(MenuElem(_("Transpose..."),
-	                         sigc::bind(sigc::mem_fun(*this, &Editor::transpose_regions), rs)));
-
-
-	items.push_back(MenuElem(_("Legatize"),
-				 sigc::bind(sigc::mem_fun(*this, &Editor::legatize_regions), rs, false)));
-	if (sel_size < 2) {
-		items.back().set_sensitive (false);
-	}
-
-	items.push_back(MenuElem(_("Quantize..."),
-	                         sigc::bind(sigc::mem_fun(*this, &Editor::quantize_regions), rs)));
-
-	items.push_back(MenuElem(_("Remove Overlap"),
-				 sigc::bind(sigc::mem_fun(*this, &Editor::legatize_regions), rs, true)));
-	if (sel_size < 2) {
-		items.back().set_sensitive (false);
-	}
-
-	items.push_back(MenuElem(_("Transform..."),
-	                         sigc::bind(sigc::mem_fun(*this, &Editor::transform_regions), rs)));
-
-	_note_context_menu.popup (event->button.button, event->button.time);
-}
-
-void
 Editor::zoom_vertical_modifier_released()
 {
 	_stepping_axis_view = 0;
@@ -6595,5 +6516,5 @@ Editor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapP
 ArdourCanvas::Duple
 Editor::upper_left() const
 {
-	get_trackview_group ()->canvas_origin ().y;
+	return get_trackview_group ()->canvas_origin ();
 }

@@ -2475,3 +2475,9 @@ Editor::move_selected_tracks (bool up)
 		ensure_time_axis_view_is_visible (*scroll_to, false);
 	}
 }
+
+RegionSelection
+Editor::region_selection()
+{
+	return get_regions_from_selection_and_entered ();
+}

@@ -6130,54 +6130,6 @@ Editor::strip_region_silence ()
 	}
 }
 
-PBD::Command*
-Editor::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiRegionView& mrv)
-{
-	Evoral::Sequence<Temporal::Beats>::Notes selected;
-	mrv.selection_as_notelist (selected, true);
-
-	if (selected.empty()) {
-		return 0;
-	}
-
-	vector<Evoral::Sequence<Temporal::Beats>::Notes> v;
-	v.push_back (selected);
-
-	timepos_t pos = mrv.midi_region()->source_position();
-
-	return op (mrv.midi_region()->model(), pos.beats(), v);
-}
-
-void
-Editor::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection& rs)
-{
-	if (rs.empty()) {
-		return;
-	}
-
-	bool in_command = false;
-
-	vector<MidiRegionView*> views = filter_to_unique_midi_region_views (rs);
-
-	for (vector<MidiRegionView*>::iterator mrv = views.begin(); mrv != views.end(); ++mrv) {
-
-		Command* cmd = apply_midi_note_edit_op_to_region (op, **mrv);
-		if (cmd) {
-			if (!in_command) {
-				begin_reversible_command (op.name ());
-				in_command = true;
-			}
-			(*cmd)();
-			_session->add_command (cmd);
-			}
-	}
-
-	if (in_command) {
-		commit_reversible_command ();
-		_session->set_dirty ();
-	}
-}
-
 #include "ardour/midi_source.h" // MidiSource::name()
 
 void
@@ -6307,140 +6259,6 @@ Editor::fork_selected_regions ()
 	}
 }
 
-void
-Editor::quantize_region ()
-{
-	if (_session) {
-		quantize_regions(get_regions_from_selection_and_entered ());
-	}
-}
-
-void
-Editor::quantize_regions (const RegionSelection& rs)
-{
-	if (rs.n_midi_regions() == 0) {
-		return;
-	}
-
-	Quantize* quant = get_quantize_op ();
-
-	if (!quant) {
-		return;
-	}
-
-	if (!quant->empty()) {
-		apply_midi_note_edit_op (*quant, rs);
-	}
-
-	delete quant;
-}
-
-void
-Editor::legatize_region (bool shrink_only)
-{
-	if (_session) {
-		legatize_regions(get_regions_from_selection_and_entered (), shrink_only);
-	}
-}
-
-void
-Editor::deinterlace_midi_regions (const RegionSelection& rs)
-{
-	begin_reversible_command (_("de-interlace midi"));
-
-	RegionSelection rcopy = rs;
-	if (_session) {
-
-		for (RegionSelection::iterator i = rcopy.begin (); i != rcopy.end(); i++) {
-			MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*i);
-			if (mrv) {
-				XMLNode& before (mrv->region()->playlist()->get_state());
-
-				/* pass the regions to deinterlace_midi_region*/
-				_session->deinterlace_midi_region(mrv->midi_region());
-
-				XMLNode& after (mrv->region()->playlist()->get_state());
-				_session->add_command (new MementoCommand<Playlist>(*(mrv->region()->playlist()), &before, &after));
-			}
-		}
-	}
-
-	/* Remove the original region(s) safely, without rippling, as part of this command */
-	remove_regions(rs, false /*can_ripple*/, true /*as_part_of_other_command*/);
-
-	commit_reversible_command ();
-}
-
-void
-Editor::deinterlace_selected_midi_regions ()
-{
-	if (_session) {
-		RegionSelection rs = get_regions_from_selection_and_entered ();
-		deinterlace_midi_regions(rs);
-	}
-}
-
-void
-Editor::legatize_regions (const RegionSelection& rs, bool shrink_only)
-{
-	if (rs.n_midi_regions() == 0) {
-		return;
-	}
-
-	Legatize legatize(shrink_only);
-	apply_midi_note_edit_op (legatize, rs);
-}
-
-void
-Editor::transform_region ()
-{
-	if (_session) {
-		transform_regions(get_regions_from_selection_and_entered ());
-	}
-}
-
-void
-Editor::transform_regions (const RegionSelection& rs)
-{
-	if (rs.n_midi_regions() == 0) {
-		return;
-	}
-
-	TransformDialog td;
-
-	td.present();
-	const int r = td.run();
-	td.hide();
-
-	if (r == Gtk::RESPONSE_OK) {
-		Transform transform(td.get());
-		apply_midi_note_edit_op(transform, rs);
-	}
-}
-
-void
-Editor::transpose_region ()
-{
-	if (_session) {
-		transpose_regions(get_regions_from_selection_and_entered ());
-	}
-}
-
-void
-Editor::transpose_regions (const RegionSelection& rs)
-{
-	if (rs.n_midi_regions() == 0) {
-		return;
-	}
-
-	TransposeDialog d;
-	int const r = d.run ();
-
-	if (r == RESPONSE_ACCEPT) {
-		Transpose transpose(d.semitones ());
-		apply_midi_note_edit_op (transpose, rs);
-	}
-}
 
 void
 Editor::insert_patch_change (bool from_context)
@@ -6560,6 +6378,43 @@ Editor::apply_filter (Filter& filter, string command, ProgressReporter* progress
 
 	if (in_command) {
 		commit_reversible_command ();
+	}
+}
+
+void
+Editor::deinterlace_midi_regions (const RegionSelection& rs)
+{
+	begin_reversible_command (_("de-interlace midi"));
+
+	RegionSelection rcopy = rs;
+	if (_session) {
+
+		for (RegionSelection::iterator i = rcopy.begin (); i != rcopy.end(); i++) {
+			MidiRegionView* const mrv = dynamic_cast<MidiRegionView*> (*i);
+			if (mrv) {
+				XMLNode& before (mrv->region()->playlist()->get_state());
+
+				/* pass the regions to deinterlace_midi_region*/
+				_session->deinterlace_midi_region(mrv->midi_region());
+
+				XMLNode& after (mrv->region()->playlist()->get_state());
+				_session->add_command (new MementoCommand<Playlist>(*(mrv->region()->playlist()), &before, &after));
+			}
+		}
+	}
+
+	/* Remove the original region(s) safely, without rippling, as part of this command */
+	remove_regions(rs, false /*can_ripple*/, true /*as_part_of_other_command*/);
+
+	commit_reversible_command ();
+}
+
+void
+Editor::deinterlace_selected_midi_regions ()
+{
+	if (_session) {
+		RegionSelection rs = region_selection ();
+		deinterlace_midi_regions(rs);
 	}
 }
 
@@ -9359,41 +9214,6 @@ Editor::launch_playlist_selector ()
 	if (rtav && rtav->is_track()) {
 		rtav->show_playlist_selector ();
 	}
-}
-
-vector<MidiRegionView*>
-Editor::filter_to_unique_midi_region_views (RegionSelection const & ms) const
-{
-	typedef std::pair<std::shared_ptr<MidiSource>,timepos_t> MapEntry;
-	std::set<MapEntry> single_region_set;
-
-	vector<MidiRegionView*> views;
-
-	/* build a list of regions that are unique with respect to their source
-	 * and start position. Note: this is non-exhaustive... if someone has a
-	 * non-forked copy of a MIDI region and then suitably modifies it, this
-	 * will still put both regions into the list of things to be acted
-	 * upon.
-	 *
-	 * Solution: user should not select both regions, or should fork one of them.
-	 */
-
-	for (MidiRegionSelection::const_iterator i = ms.begin(); i != ms.end(); ++i) {
-
-		MidiRegionView* mrv = dynamic_cast<MidiRegionView*> (*i);
-
-		if (!mrv) {
-			continue;
-		}
-
-		MapEntry entry = make_pair (mrv->midi_region()->midi_source(), mrv->region()->start());
-
-		if (single_region_set.insert (entry).second) {
-			views.push_back (mrv);
-		}
-	}
-
-	return views;
 }
 
 void

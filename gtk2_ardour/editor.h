@@ -533,6 +533,8 @@ protected:
 	void suspend_route_redisplay ();
 	void resume_route_redisplay ();
 
+	RegionSelection region_selection();
+
 private:
 
 	void color_handler ();
@@ -768,9 +770,6 @@ private:
 
 	void popup_control_point_context_menu (ArdourCanvas::Item*, GdkEvent*);
 	Gtk::Menu _control_point_context_menu;
-
-	void popup_note_context_menu (ArdourCanvas::Item*, GdkEvent*);
-	Gtk::Menu _note_context_menu;
 
 	void initial_display ();
 	void add_stripables (ARDOUR::StripableList&);
@@ -1162,9 +1161,6 @@ private:
 	bool key_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 
-	Gtkmm2ext::Bindings* button_bindings;
-	XMLNode* button_settings () const;
-
 	/* KEYMAP HANDLING */
 
 	void register_actions ();
@@ -1245,18 +1241,9 @@ private:
 	void normalize_region ();
 	void adjust_region_gain (bool up);
 	void reset_region_gain ();
-	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
-	void set_tempo_curve_range (double& max, double& min) const;
-	void quantize_region ();
-	void quantize_regions (const RegionSelection& rs);
-	void legatize_region (bool shrink_only);
-	void legatize_regions (const RegionSelection& rs, bool shrink_only);
 	void deinterlace_midi_regions (const RegionSelection& rs);
 	void deinterlace_selected_midi_regions ();
-	void transform_region ();
-	void transform_regions (const RegionSelection& rs);
-	void transpose_region ();
-	void transpose_regions (const RegionSelection& rs);
+	void set_tempo_curve_range (double& max, double& min) const;
 	void insert_patch_change (bool from_context);
 	void fork_selected_regions ();
 	void fork_regions_from_unselected ();
@@ -1726,7 +1713,6 @@ private:
 	void edit_meter_marker (MeterMarker&);
 	void edit_bbt_marker (BBTMarker&);
 	void edit_control_point (ArdourCanvas::Item*);
-	void edit_notes (MidiView*);
 	void edit_region (RegionView*);
 
 	void edit_current_meter ();
@@ -2139,8 +2125,6 @@ private:
 
 	void apply_filter (ARDOUR::Filter&, std::string cmd, ProgressReporter* progress = 0);
 
-	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
-
 	/* plugin setup */
 	int plugin_setup (std::shared_ptr<ARDOUR::Route>, std::shared_ptr<ARDOUR::PluginInsert>, ARDOUR::Route::PluginSetupOptions);
 
@@ -2327,7 +2311,6 @@ private:
 	bool _show_touched_automation;
 
 	int time_fx (ARDOUR::RegionList&, Temporal::ratio_t ratio, bool pitching, bool fixed_end);
-	void note_edit_done (int, EditNoteDialog*);
 	void toggle_sound_midi_notes ();
 
 	/** Flag for a bit of a hack wrt control point selection; see set_selected_control_point_from_click */
@@ -2350,8 +2333,6 @@ private:
 	void bring_all_sources_into_session ();
 
 	MainMenuDisabler* _main_menu_disabler;
-
-	std::vector<MidiRegionView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const;
 
 	/* private helper functions to help with registering region actions */
 

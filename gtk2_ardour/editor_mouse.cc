@@ -2324,28 +2324,6 @@ Editor::edit_control_point (ArdourCanvas::Item* item)
 }
 
 void
-Editor::edit_notes (MidiView* mrv)
-{
-	MidiView::Selection const & s = mrv->selection();
-
-	if (s.empty ()) {
-		return;
-	}
-
-	EditNoteDialog* d = new EditNoteDialog (mrv, s);
-	d->show_all ();
-
-	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &Editor::note_edit_done), d));
-}
-
-void
-Editor::note_edit_done (int r, EditNoteDialog* d)
-{
-	d->done (r);
-	delete d;
-}
-
-void
 Editor::edit_region (RegionView* rv)
 {
 	if (UIConfiguration::instance().get_use_double_click_to_zoom_to_selection()) {
