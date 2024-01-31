@@ -26,6 +26,7 @@
 #include "gtkmm2ext/colors.h"
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/rgb_macros.h"
+#include "gtkmm2ext/gtk_ui.h"
 
 #include "editing.h"
 #include "midi_streamview.h"
@@ -74,6 +75,10 @@ PianoRollHeader::PianoRollHeader(MidiStreamView& v)
 	//set_min_page_size(12);
 
 	//_adj = v->note_range_adjustment;
+
+	Gtkmm2ext::UI::instance()->set_tip (*this, string_compose (_("Left-button to play a note, left-button-drag to play a series of notes\n"
+	                                                             "%1-left-button to select or extend selection to all notes with this pitch\n"),
+	                                                           Keyboard::tertiary_modifier_name()));
 	add_events (Gdk::BUTTON_PRESS_MASK |
 	            Gdk::BUTTON_RELEASE_MASK |
 	            Gdk::POINTER_MOTION_MASK |
