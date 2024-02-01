@@ -121,9 +121,9 @@ LaunchPadX::probe (std::string& i, std::string& o)
 	}
 
 #ifdef LAUNCHPAD_MINI
-	std::regex rx (X_("Launchpad Mini.*MIDI"));
+	std::regex rx (X_("Launchpad Mini.*MI"));
 #else
-	std::regex rx (X_("Launchpad X.*MIDI"));
+	std::regex rx (X_("Launchpad X.*MI"));
 #endif
 
 	auto has_lppro = [&rx](string const &s) {
@@ -769,9 +769,9 @@ LaunchPadX::connect_daw_ports ()
          */
 
 #ifdef LAUNCHPAD_MINI
-        std::regex rx (X_("Launchpad Mini.*(DAW|MIDI 1)"), std::regex::extended);
+        std::regex rx (X_("Launchpad Mini.*(DAW|MIDI 1|DA$)"), std::regex::extended);
 #else
-        std::regex rx (X_("Launchpad X.*(DAW|MIDI 1)"), std::regex::extended);
+        std::regex rx (X_("Launchpad X.*(DAW|MIDI 1|DA$)"), std::regex::extended);
 #endif
 
         auto is_dawport = [&rx](string const &s) {
