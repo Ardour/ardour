@@ -533,6 +533,7 @@ GtkCanvas::re_enter ()
 	DEBUG_TRACE (PBD::DEBUG::CanvasEnterLeave, "re-enter canvas by request\n");
 	_current_item = 0;
 	pick_current_item (0);
+	PBD::stacktrace (std::cerr, 20);
 }
 
 /** Construct a GtkCanvas */
@@ -1426,7 +1427,7 @@ void
 GtkCanvas::ungrab ()
 {
 	/* XXX: should this be doing gdk_pointer_ungrab? */
-	_grabbed_item = 0;
+	_grabbed_item = nullptr;
 }
 
 /** Set keyboard focus on an item, so that all keyboard events are sent to that item until the focus

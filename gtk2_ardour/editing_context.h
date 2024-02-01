@@ -33,6 +33,8 @@
 #ifndef __ardour_midi_editing_context_h__
 #define __ardour_midi_editing_context_h__
 
+#include <queue>
+
 #include "pbd/signals.h"
 
 #include "temporal/timeline.h"
@@ -312,6 +314,7 @@ public:
 	ARDOUR::Quantize* get_quantize_op ();
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
 	void midi_action (void (MidiView::*method)());
+	static void _midi_action (void (MidiView::*method)());
 	std::vector<MidiView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const;
 
 	void quantize_region ();
@@ -319,7 +322,7 @@ public:
 	void legatize_region (bool shrink_only);
 	void transpose_region ();
 
-	void register_midi_actions (Gtkmm2ext::Bindings*);
+	static void register_midi_actions (Gtkmm2ext::Bindings*);
 
 	ArdourCanvas::Rectangle* rubberband_rect;
 
@@ -331,7 +334,7 @@ public:
 	bool typed_event (ArdourCanvas::Item*, GdkEvent*, ItemType);
 
   protected:
-	Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
+	static Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 
 	/* Cursor stuff.  Do not use directly, use via CursorContext. */
 	friend class CursorContext;
@@ -345,7 +348,7 @@ public:
 	Editing::GridType  internal_grid_type;
 	Editing::SnapMode  internal_snap_mode;
 
-	std::vector<std::string> grid_type_strings;
+	static std::vector<std::string> grid_type_strings;
 
 	Glib::RefPtr<Gtk::RadioAction> grid_type_action (Editing::GridType);
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
@@ -377,12 +380,15 @@ public:
 
 	void draw_length_selection_done (Editing::GridType);
 	void draw_length_chosen (Editing::GridType);
+	static void _draw_length_chosen (Editing::GridType);
 
 	void draw_velocity_selection_done (int);
 	void draw_velocity_chosen (int);
+	static void _draw_velocity_chosen (int);
 
 	void draw_channel_selection_done (int);
 	void draw_channel_chosen (int);
+	static void _draw_channel_chosen (int);
 
 	DragManager* _drags;
 
@@ -494,6 +500,13 @@ public:
 	void legatize_regions (const RegionSelection& rs, bool shrink_only);
 	void transform_regions (const RegionSelection& rs);
 	void transpose_regions (const RegionSelection& rs);
+
+	static EditingContext* current_editing_context();
+	static void push_editing_context (EditingContext*);
+	static void pop_editing_context ();
+
+  private:
+	static std::queue<EditingContext*> ec_stack;
 };
 
 

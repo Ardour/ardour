@@ -25,6 +25,9 @@
 #include "canvas/scroll_group.h"
 #include "canvas/rectangle.h"
 
+#include "gtkmm2ext/actions.h"
+
+#include "ardour_ui.h"
 #include "editor_cursors.h"
 #include "editor_drag.h"
 #include "keyboard.h"
@@ -69,7 +72,7 @@ MidiCueEditor::build_canvas ()
 	_canvas_viewport = new ArdourCanvas::GtkCanvasViewport (horizontal_adjustment, vertical_adjustment);
 
 	_canvas = _canvas_viewport->canvas ();
-	_canvas->set_background_color (0xff00000a); // UIConfiguration::instance().color ("arrange base"));
+	_canvas->set_background_color (UIConfiguration::instance().color ("arrange base"));
 	dynamic_cast<ArdourCanvas::GtkCanvas*>(_canvas)->use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
 
 	/* scroll group for items that should not automatically scroll
@@ -88,34 +91,68 @@ MidiCueEditor::build_canvas ()
 	hv_scroll_group = hsg = new ArdourCanvas::ScrollGroup (_canvas->root(),
 							       ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
 													     ArdourCanvas::ScrollGroup::ScrollsHorizontally));
-	CANVAS_DEBUG_NAME (hv_scroll_group, "canvas hv scroll");
+	CANVAS_DEBUG_NAME (hv_scroll_group, "cue canvas hv scroll");
 	_canvas->add_scroller (*hsg);
 
 	cursor_scroll_group = cg = new ArdourCanvas::ScrollGroup (_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
-	CANVAS_DEBUG_NAME (cursor_scroll_group, "canvas cursor scroll");
+	CANVAS_DEBUG_NAME (cursor_scroll_group, "cue canvas cursor scroll");
 	_canvas->add_scroller (*cg);
 
 	/*a group to hold global rects like punch/loop indicators */
 	global_rect_group = new ArdourCanvas::Container (hv_scroll_group);
-	CANVAS_DEBUG_NAME (global_rect_group, "global rect group");
+	CANVAS_DEBUG_NAME (global_rect_group, "cue global rect group");
 
         transport_loop_range_rect = new ArdourCanvas::Rectangle (global_rect_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, ArdourCanvas::COORD_MAX));
-	CANVAS_DEBUG_NAME (transport_loop_range_rect, "loop rect");
+	CANVAS_DEBUG_NAME (transport_loop_range_rect, "cue loop rect");
 	transport_loop_range_rect->hide();
 
 	/*a group to hold time (measure) lines */
 	time_line_group = new ArdourCanvas::Container (h_scroll_group);
-	CANVAS_DEBUG_NAME (time_line_group, "time line group");
+	CANVAS_DEBUG_NAME (time_line_group, "cue  time line group");
 
 	// used as rubberband rect
 	rubberband_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
 	rubberband_rect->hide();
 	rubberband_rect->set_outline_color (UIConfiguration::instance().color ("rubber band rect"));
 	rubberband_rect->set_fill_color (UIConfiguration::instance().color_mod ("rubber band rect", "selection rect"));
-	CANVAS_DEBUG_NAME (rubberband_rect, X_("midi cue rubberband rect"));
+	CANVAS_DEBUG_NAME (rubberband_rect, X_("cue rubberband rect"));
 
 	bg = new CueMidiBackground (hv_scroll_group);
 	_canvas_viewport->signal_size_allocate().connect (sigc::mem_fun(*this, &MidiCueEditor::canvas_allocate));
+
+	_canvas->set_name ("MidiCueCanvas");
+	_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
+	_canvas->signal_enter_notify_event().connect (sigc::mem_fun(*this, &MidiCueEditor::canvas_enter_leave), false);
+	_canvas->signal_leave_notify_event().connect (sigc::mem_fun(*this, &MidiCueEditor::canvas_enter_leave), false);
+	_canvas->set_can_focus ();
+
+	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
+	_canvas->set_data (X_("ardour-bindings"), midi_bindings);
+}
+
+bool
+MidiCueEditor::canvas_enter_leave (GdkEventCrossing* ev)
+{
+	switch (ev->type) {
+	case GDK_ENTER_NOTIFY:
+		if (ev->detail != GDK_NOTIFY_INFERIOR) {
+			_canvas_viewport->canvas()->grab_focus ();
+			ActionManager::set_sensitive (_midi_actions, true);
+			EditingContext::push_editing_context (this);
+			std::cerr << "GRAB FOCUS\n";
+		}
+		break;
+	case GDK_LEAVE_NOTIFY:
+		if (ev->detail != GDK_NOTIFY_INFERIOR) {
+			ActionManager::set_sensitive (_midi_actions, false);
+			ARDOUR_UI::instance()->reset_focus (_canvas_viewport);
+			EditingContext::pop_editing_context ();
+			std::cerr << "DROP FOCUS\n";
+		}
+	default:
+		break;
+	}
+	return false;
 }
 
 void
@@ -210,9 +247,9 @@ MidiCueEditor::apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, Midi
 }
 
 bool
-MidiCueEditor::canvas_note_event (GdkEvent* event, ArdourCanvas::Item*)
+MidiCueEditor::canvas_note_event (GdkEvent* event, ArdourCanvas::Item* item)
 {
-	return false;
+	return typed_event (item, event, NoteItem);
 }
 
 Gtk::Widget&
@@ -275,7 +312,7 @@ MidiCueEditor::button_press_handler (ArdourCanvas::Item* item, GdkEvent* event, 
 
 	}
 
-	return true;
+	return false;
 }
 
 bool
@@ -300,7 +337,7 @@ MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event
 		}
 	}
 
-	return true;
+	return false;
 }
 
 bool
@@ -312,11 +349,14 @@ MidiCueEditor::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
 bool
 MidiCueEditor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
+	std::cerr << "hey\n";
+
 	if (Keyboard::is_context_menu_event (&event->button)) {
 		switch (item_type) {
 		case NoteItem:
 			if (internal_editing()) {
 				popup_note_context_menu (item, event);
+				return true;
 			}
 			break;
 		default:
@@ -324,7 +364,7 @@ MidiCueEditor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event
 		}
 	}
 
-	return true;
+	return false;
 }
 
 bool
@@ -364,8 +404,20 @@ MidiCueEditor::leave_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
 }
 
 bool
-MidiCueEditor::key_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType)
+MidiCueEditor::key_press_handler (ArdourCanvas::Item*, GdkEvent* ev, ItemType)
 {
+
+	switch (ev->key.keyval) {
+	case GDK_d:
+		set_mouse_mode (Editing::MouseDraw);
+		std::cerr << "draw\n";
+		break;
+	case GDK_e:
+		set_mouse_mode (Editing::MouseContent);
+		std::cerr << "content/edit\n";
+		break;
+	}
+
 	return true;
 }
 

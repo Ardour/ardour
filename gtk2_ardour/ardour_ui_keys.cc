@@ -274,7 +274,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 			Gtkmm2ext::Bindings* focus_bindings = get_bindings_from_widget_hierarchy (&focus);
 
 			if (focus_bindings) {
-				DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing widget (%3) bindings %1 @ %2 for this event\n", focus_bindings->name(), focus_bindings, gtk_widget_get_name (focus)));
+				DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\t(nomod) using widget (%3) bindings %1 @ %2 for this event\n", focus_bindings->name(), focus_bindings, gtk_widget_get_name (focus)));
 				if (focus_bindings->activate (k, Bindings::Press)) {
 					return true;
 				}
@@ -290,7 +290,7 @@ ARDOUR_UI::key_press_focus_accelerator_handler (Gtk::Window& window, GdkEventKey
 		 */
 
 		if (top_level_bindings) {
-			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\tusing top level bindings %1 @ %2 for this event\n", top_level_bindings->name(), top_level_bindings));
+			DEBUG_TRACE (DEBUG::Accelerators, string_compose ("\t(nomod) using top level bindings %1 @ %2 for this event\n", top_level_bindings->name(), top_level_bindings));
 		}
 
 		if (top_level_bindings && top_level_bindings->activate (k, Bindings::Press)) {

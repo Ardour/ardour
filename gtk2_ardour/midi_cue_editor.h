@@ -100,7 +100,7 @@ class MidiCueEditor : public CueEditor
 	Gtk::Adjustment vertical_adjustment;
 	Gtk::Adjustment horizontal_adjustment;
 	ArdourCanvas::GtkCanvasViewport* _canvas_viewport;
-	ArdourCanvas::Canvas* _canvas;
+	ArdourCanvas::GtkCanvas* _canvas;
 
 	ArdourCanvas::Container* tempo_group;
 
@@ -134,6 +134,8 @@ class MidiCueEditor : public CueEditor
 	Editing::MouseMode mouse_mode;
 
 	RegionSelection region_selection();
+
+	bool canvas_enter_leave (GdkEventCrossing* ev);
 };
 
 
