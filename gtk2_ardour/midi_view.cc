@@ -244,14 +244,14 @@ MidiView::canvas_group_event (GdkEvent* ev)
 	case GDK_ENTER_NOTIFY:
 		_last_event_x = ev->crossing.x;
 		_last_event_y = ev->crossing.y;
-		enter_notify(&ev->crossing);
+		enter_notify (&ev->crossing);
 		// set entered_regionview (among other things)
 		return true;
 
 	case GDK_LEAVE_NOTIFY:
 		_last_event_x = ev->crossing.x;
 		_last_event_y = ev->crossing.y;
-		leave_notify(&ev->crossing);
+		leave_notify (&ev->crossing);
 		// reset entered_regionview (among other things)
 		return true;
 
@@ -384,9 +384,9 @@ MidiView::button_press (GdkEventButton* ev)
 		if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
 
 			if (_midi_context.note_mode() == Percussive) {
-				_editing_context.drags()->set (new HitCreateDrag (_editing_context, _note_group->parent(), this), (GdkEvent *) ev);
+				_editing_context.drags()->set (new HitCreateDrag (_editing_context, drag_group(), this), (GdkEvent *) ev);
 			} else {
-				_editing_context.drags()->set (new NoteCreateDrag (_editing_context, _note_group->parent(), this), (GdkEvent *) ev);
+				_editing_context.drags()->set (new NoteCreateDrag (_editing_context, drag_group(), this), (GdkEvent *) ev);
 			}
 
 			_mouse_state = AddDragging;
@@ -408,6 +408,8 @@ MidiView::button_press (GdkEventButton* ev)
 bool
 MidiView::button_release (GdkEventButton* ev)
 {
+	std::cerr << "ho1\n";
+
 	double event_x, event_y;
 
 	if (ev->button != 1) {
@@ -424,7 +426,7 @@ MidiView::button_release (GdkEventButton* ev)
 
 	switch (_mouse_state) {
 	case Pressed: // Clicked
-
+		std::cerr << "P\n";
 		switch (_editing_context.current_mouse_mode()) {
 		case MouseRange:
 			/* no motion occurred - simple click */
@@ -448,9 +450,11 @@ MidiView::button_release (GdkEventButton* ev)
 		break;
 
 	case AddDragging:
+		std::cerr << "AD\n";
 		/* Don't a ghost note when we added a note - wait until motion to avoid visual confusion.
 		   we don't want one when we were drag-selecting either. */
 	case SelectRectDragging:
+		std::cerr << "SRD\n";
 		_editing_context.drags()->end_grab ((GdkEvent *) ev);
 		_mouse_state = None;
 		break;

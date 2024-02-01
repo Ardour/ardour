@@ -118,9 +118,11 @@ ActionManager::set_sensitive (Glib::RefPtr<ActionGroup> group, bool yn)
 
 	GtkActionGroup* grp = group->gobj();
 
-	for (GList* acts = gtk_action_group_list_actions (grp); acts; acts = g_list_next (acts)) {
-		GtkAction* action = (GtkAction*) acts->data;
-		gtk_action_set_sensitive (action, yn);
+	if (grp) {
+		for (GList* acts = gtk_action_group_list_actions (grp); acts; acts = g_list_next (acts)) {
+			GtkAction* action = (GtkAction*) acts->data;
+			gtk_action_set_sensitive (action, yn);
+		}
 	}
 }
 

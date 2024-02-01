@@ -800,6 +800,8 @@ Editor::Editor ()
 	UIConfiguration::instance().map_parameters (pc);
 
 	setup_fade_images ();
+
+	push_editing_context (this);
 }
 
 Editor::~Editor()

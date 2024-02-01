@@ -154,6 +154,8 @@ TriggerPage::TriggerPage ()
 	table->attach (_midi_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
 	++col;
 
+	std::cerr << "there\n";
+
 	col = 3;
 	table->attach (_midi_editor->viewport(), col, col + 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL);
 	++col;
