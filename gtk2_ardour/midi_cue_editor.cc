@@ -17,7 +17,7 @@
  */
 
 #include "ardour/midi_region.h"
-#include "ardour/midi_source.h"
+#include "ardour/smf_source.h"
 
 #include "canvas/canvas.h"
 #include "canvas/container.h"
@@ -26,6 +26,7 @@
 #include "canvas/rectangle.h"
 
 #include "gtkmm2ext/actions.h"
+
 
 #include "ardour_ui.h"
 #include "editor_cursors.h"
@@ -295,11 +296,19 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr
 
 	/* Compute zoom level to show entire source plus some margin if possible */
 
-	std::shared_ptr<Temporal::TempoMap> map;
-
 	Temporal::timecnt_t duration = Temporal::timecnt_t (r->midi_source()->length().beats());
-	/* XXX build tempo map from source */
-	map.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
+
+	bool provided = false;
+	std::shared_ptr<Temporal::TempoMap> map;
+	std::shared_ptr<SMFSource> smf (std::dynamic_pointer_cast<SMFSource> (r->midi_source()));
+
+	if (smf) {
+		map = smf->tempo_map (provided);
+	}
+
+	if (!provided) {
+		map.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
+	}
 
 	{
 		EditingContext::TempoMapScope tms (*this, map);
@@ -497,12 +506,18 @@ MidiCueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sa
 		return;
 	}
 
+	bool provided = false;
 	std::shared_ptr<Temporal::TempoMap> tmap;
 
 	if (view) {
-		/* XXX MAKE MAP FROM REGION->SOURCE */
-		tmap.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
-	} else {
+		std::shared_ptr<SMFSource> smf (std::dynamic_pointer_cast<SMFSource> (view->midi_region()->midi_source()));
+
+		if (smf) {
+			tmap = smf->tempo_map (provided);
+		}
+	}
+
+	if (!provided) {
 		tmap.reset (new Temporal::TempoMap (Temporal::Tempo (120, 4), Temporal::Meter (4, 4)));
 	}
 
