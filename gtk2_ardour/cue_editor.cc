@@ -168,6 +168,12 @@ CueEditor::reset_zoom (samplecnt_t n)
 	ZoomChanged(); /* EMIT SIGNAL */
 }
 
+samplecnt_t
+CueEditor::get_current_zoom () const
+{
+	return samples_per_pixel;
+}
+
 void
 CueEditor::reposition_and_zoom (samplepos_t, double)
 {
