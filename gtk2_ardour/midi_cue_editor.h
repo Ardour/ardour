@@ -21,6 +21,8 @@
 
 #include <gtkmm/adjustment.h>
 
+#include "canvas/ruler.h"
+
 #include "cue_editor.h"
 
 namespace Gtk {
@@ -102,8 +104,6 @@ class MidiCueEditor : public CueEditor
 	ArdourCanvas::GtkCanvasViewport* _canvas_viewport;
 	ArdourCanvas::GtkCanvas* _canvas;
 
-	ArdourCanvas::Container* tempo_group;
-
 	/* The group containing all other groups that are scrolled vertically
 	   and horizontally.
 	*/
@@ -117,11 +117,11 @@ class MidiCueEditor : public CueEditor
 	*/
 	ArdourCanvas::ScrollGroup* cursor_scroll_group;
 
-	/* The group containing all trackviews. */
-	ArdourCanvas::Container* no_scroll_group;
-
 	ArdourCanvas::Container* global_rect_group;
+	ArdourCanvas::Container* no_scroll_group;
+	ArdourCanvas::Container* data_group;
 	ArdourCanvas::Container* time_line_group;
+	ArdourCanvas::Ruler*     bbt_ruler;
 
 	ArdourCanvas::Rectangle* transport_loop_range_rect;
 
@@ -136,6 +136,25 @@ class MidiCueEditor : public CueEditor
 	RegionSelection region_selection();
 
 	bool canvas_enter_leave (GdkEventCrossing* ev);
+
+	void metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>&, samplepos_t, samplepos_t, gint);
+
+	class BBTMetric : public ArdourCanvas::Ruler::Metric
+	{
+	  public:
+		BBTMetric (MidiCueEditor& ec) : context (&ec) {}
+
+		void get_marks (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t lower, int64_t upper, int maxchars) const {
+			context->metric_get_bbt (marks, lower, upper, maxchars);
+		}
+
+	  private:
+		MidiCueEditor* context;
+	};
+
+	BBTMetric bbt_metric;
+	double timebar_height;
+	size_t n_timebars;
 };
 
 
