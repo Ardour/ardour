@@ -408,8 +408,6 @@ MidiView::button_press (GdkEventButton* ev)
 bool
 MidiView::button_release (GdkEventButton* ev)
 {
-	std::cerr << "ho1\n";
-
 	double event_x, event_y;
 
 	if (ev->button != 1) {
@@ -450,11 +448,9 @@ MidiView::button_release (GdkEventButton* ev)
 		break;
 
 	case AddDragging:
-		std::cerr << "AD\n";
 		/* Don't a ghost note when we added a note - wait until motion to avoid visual confusion.
 		   we don't want one when we were drag-selecting either. */
 	case SelectRectDragging:
-		std::cerr << "SRD\n";
 		_editing_context.drags()->end_grab ((GdkEvent *) ev);
 		_mouse_state = None;
 		break;
@@ -602,7 +598,11 @@ MidiView::scroll (GdkEventScroll* ev)
 				set_note_range (min (127, _midi_context.lowest_note() - step), max (0, _midi_context.highest_note() - step));
 			}
 			return true;
+		case GDK_SCROLL_LEFT:
+			break;
+		case GDK_SCROLL_RIGHT:
 
+			
 		default:
 			break;
 		}
