@@ -76,6 +76,9 @@ class MidiCueEditor : public CueEditor
 	Editing::MouseMode current_mouse_mode () const;
 	bool internal_editing() const;
 
+	double timebar_height;
+	size_t n_timebars;
+
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
@@ -122,6 +125,7 @@ class MidiCueEditor : public CueEditor
 	ArdourCanvas::Container* data_group;
 	ArdourCanvas::Container* time_line_group;
 	ArdourCanvas::Ruler*     bbt_ruler;
+	ArdourCanvas::Rectangle* tempo_bar;
 
 	ArdourCanvas::Rectangle* transport_loop_range_rect;
 
@@ -153,8 +157,6 @@ class MidiCueEditor : public CueEditor
 	};
 
 	BBTMetric bbt_metric;
-	double timebar_height;
-	size_t n_timebars;
 };
 
 

@@ -47,13 +47,13 @@ using namespace Gtkmm2ext;
 using namespace Temporal;
 
 MidiCueEditor::MidiCueEditor()
-	: vertical_adjustment (0.0, 0.0, 10.0, 400.0)
+	: timebar_height (15.)
+	, n_timebars (2)
+	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, horizontal_adjustment (0.0, 0.0, 1e16)
 	, view (nullptr)
 	, mouse_mode (Editing::MouseDraw)
 	, bbt_metric (*this)
-	, timebar_height (15.)
-	, n_timebars (1)
 {
 	build_canvas ();
 
@@ -121,17 +121,24 @@ MidiCueEditor::build_canvas ()
 	rubberband_rect->set_fill_color (UIConfiguration::instance().color_mod ("rubber band rect", "selection rect"));
 	CANVAS_DEBUG_NAME (rubberband_rect, X_("cue rubberband rect"));
 
+	tempo_bar = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	CANVAS_DEBUG_NAME (tempo_bar, "Tempo Bar");
+	tempo_bar->set_fill(true);
+	tempo_bar->set_outline(false);
+	tempo_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
+	// tempo_bar->set_fill_color (UIConfiguration::instance().color_mod ("tempo bar", "marker bar"));
+	tempo_bar->set_fill_color (0xff0000ff);
 
 	Pango::FontDescription font (UIConfiguration::instance().get_SmallerFont());
 	Pango::FontDescription larger_font (UIConfiguration::instance().get_SmallBoldFont());
-	bbt_ruler = new ArdourCanvas::Ruler (time_line_group, &bbt_metric, ArdourCanvas::Rect (0, 0, ArdourCanvas::COORD_MAX, timebar_height));
+	bbt_ruler = new ArdourCanvas::Ruler (time_line_group, &bbt_metric, ArdourCanvas::Rect (0, timebar_height, ArdourCanvas::COORD_MAX, timebar_height * 2));
 	bbt_ruler->set_font_description (font);
 	bbt_ruler->set_second_font_description (larger_font);
 	Gtkmm2ext::Color base = UIConfiguration::instance().color ("ruler base");
 	Gtkmm2ext::Color text = UIConfiguration::instance().color ("ruler text");
 	bbt_ruler->set_fill_color (base);
 	bbt_ruler->set_outline_color (text);
-	CANVAS_DEBUG_NAME (bbt_ruler, "bbt ruler");
+	CANVAS_DEBUG_NAME (bbt_ruler, "cue bbt ruler");
 
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
 	data_group->move (ArdourCanvas::Duple (0., timebar_height * n_timebars));
@@ -176,10 +183,15 @@ MidiCueEditor::canvas_enter_leave (GdkEventCrossing* ev)
 void
 MidiCueEditor::canvas_allocate (Gtk::Allocation alloc)
 {
+	_visible_canvas_width = alloc.get_width();
+	_visible_canvas_height = alloc.get_height();
+
 	bg->set_size (alloc.get_width(), alloc.get_height());
+	std::cerr << "bg is " << bg->width() << std::endl;
 
 	if (view) {
-		view->set_size (alloc.get_width(), alloc.get_height() - (timebar_height * n_timebars));
+		ArdourCanvas::Rect r (0., timebar_height * n_timebars, ArdourCanvas::COORD_MAX, alloc.get_height() - (timebar_height * n_timebars));
+		view->set_size (r);
 	}
 }
 
@@ -231,7 +243,11 @@ MidiCueEditor::reset_zoom (samplecnt_t spp)
 		view->set_samples_per_pixel (spp);
 	}
 
+	std::cerr << "RZ @ " << spp << " cps " << current_page_samples() << " vcw " << _visible_canvas_width << std::endl;
+
 	bbt_ruler->set_range (0, current_page_samples());
+	compute_bbt_ruler_scale (0, current_page_samples());
+	bbt_metric.units_per_pixel = spp;
 }
 
 samplecnt_t
@@ -314,6 +330,8 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr
 		EditingContext::TempoMapScope tms (*this, map);
 		double width = bg->width();
 		samplecnt_t samples = duration.samples();
+
+		std::cerr << "region is " << samples << " long\n";
 
 		samplecnt_t spp = floor (samples / width);
 		reset_zoom (spp);
@@ -502,6 +520,8 @@ edit_last_mark_label (std::vector<ArdourCanvas::Ruler::Mark>& marks, const std::
 void
 MidiCueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, samplepos_t leftmost, samplepos_t rightmost, gint /*maxchars*/)
 {
+	std::cerr << "MCE:mgb s = " << _session << std::endl;
+
 	if (_session == 0) {
 		return;
 	}
