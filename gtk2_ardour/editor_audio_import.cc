@@ -279,47 +279,11 @@ Editor::import_smf_tempo_map (Evoral::SMF const & smf, timepos_t const & pos)
 		return;
 	}
 
-	const size_t num_tempos = smf.num_tempos ();
+	bool provided;
+	TempoMap::WritableSharedPtr new_map (smf.tempo_map (provided));
 
-	if (num_tempos == 0) {
+	if (!provided) {
 		return;
-	}
-
-	/* cannot create an empty TempoMap, so create one with "default" single
-	   values for tempo and meter, then overwrite them.
-	*/
-
-	TempoMap::WritableSharedPtr new_map (new TempoMap (Tempo (120, 4), Meter (4, 4)));
-
-	Meter last_meter (4, 4);
-	bool have_initial_meter = false;
-
-	for (size_t n = 0; n < num_tempos; ++n) {
-
-		Evoral::SMF::Tempo* t = smf.nth_tempo (n);
-		assert (t);
-
-		Tempo tempo (t->tempo(), 32.0 / (double) t->notes_per_note);
-		Meter meter (t->numerator, t->denominator);
-
-		Temporal::BBT_Argument bbt; /* 1|1|0 which is correct for the no-meter case */
-
-		if (have_initial_meter) {
-
-			bbt = new_map->bbt_at (timepos_t (Temporal::Beats (int_div_round (t->time_pulses, (size_t) smf.ppqn()), 0)));
-			new_map->set_tempo (tempo, bbt);
-
-			if (!(meter == last_meter)) {
-				new_map->set_meter (meter, bbt);
-			}
-
-		} else {
-			new_map->set_meter (meter, bbt);
-			new_map->set_tempo (tempo, bbt);
-			have_initial_meter = true;
-		}
-
-		last_meter = meter;
 	}
 
 	TempoMap::WritableSharedPtr wmap = TempoMap::write_copy ();
