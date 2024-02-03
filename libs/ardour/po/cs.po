@@ -5,13 +5,13 @@
 #
 # Pavel Fric <pavelfric@seznam.cz>, 2009, 2010, 2011.
 # Pavel Fric <pavelfric@seznam.cz>, 2010, 2012, 2013, 2015, 2016, 2020.
-# Martin Vlk <martin@vlkk.cz>, 2020, 2023.
+# Martin Vlk <martin@vlkk.cz>, 2020, 2023, 2024.
 msgid ""
 msgstr ""
 "Project-Id-Version: gtk-ardour 0.347.2\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-10-28 15:24+0200\n"
-"PO-Revision-Date: 2023-10-28 16:36+0200\n"
+"POT-Creation-Date: 2024-01-13 14:36+0100\n"
+"PO-Revision-Date: 2024-01-13 19:16+0100\n"
 "Last-Translator: Martin Vlk <martin@vlkk.cz>\n"
 "Language-Team: Czech <translation-team-cs@lists.sourceforge.net>\n"
 "Language: cs\n"
@@ -178,10 +178,10 @@ msgstr "Chyba: nedostatek paměti"
 
 #: audio_backend.cc:99
 msgid "Could not reconnect to Audio/MIDI engine"
-msgstr "Nepodařilo se znovu připojit ke stroji zvuku/MIDI"
+msgstr "Nepodařilo se znovu připojit k Audio/MIDI zařízení"
 
-#: audio_backend.cc:107 export_formats.cc:60 session.cc:7213
-#: transport_master.cc:481
+#: audio_backend.cc:107 export_formats.cc:60 session.cc:7488
+#: transport_master.cc:477
 msgid "None"
 msgstr "Žádný"
 
@@ -197,7 +197,7 @@ msgstr "Nemohu získat config složku: %1"
 msgid "Could not open %1.  Audio Library not saved"
 msgstr "Nepodařilo se %1. Zvuková knihovna neuložena"
 
-#: audio_playlist.cc:546
+#: audio_playlist.cc:554
 msgid ""
 "Legacy crossfade involved an incoming region not present in playlist \"%1\" "
 "- crossfade discarded"
@@ -205,7 +205,7 @@ msgstr ""
 "Zastaralé prolínání zahrnulo přicházející oblast, která ale není v seznamu "
 "skladeb \"%1\" - prolínání zahozeno"
 
-#: audio_playlist.cc:562
+#: audio_playlist.cc:570
 msgid ""
 "Legacy crossfade involved an outgoing region not present in playlist \"%1\" "
 "- crossfade discarded"
@@ -238,9 +238,9 @@ msgid "Audio Playlists (unused)"
 msgstr "Zvukové seznamy skladeb (nepoužívané)"
 
 #: audio_playlist_source.cc:156 audiosource.cc:1101 midi_source.cc:409
-#: midi_source.cc:436 plugin_insert.cc:1579 rb_effect.cc:334 session.cc:4639
-#: session.cc:5441 session.cc:5446 session.cc:5475 session.cc:5480
-#: session.cc:5579 session_handle.cc:87 sndfilesource.cc:179 triggerbox.cc:1143
+#: midi_source.cc:436 plugin_insert.cc:1580 rb_effect.cc:334 session.cc:4871
+#: session.cc:5673 session.cc:5678 session.cc:5707 session.cc:5712
+#: session.cc:5811 session_handle.cc:87 sndfilesource.cc:179 triggerbox.cc:1143
 msgid "programming error: %1"
 msgstr "Chyba v programování: %1"
 
@@ -316,23 +316,23 @@ msgid ""
 "transient data must be generated every time it is required.\n"
 "\n"
 "If you are doing work that will require transient data on a regular basis, "
-"you should probably enable \"auto-analyse-audio\" in Preferences > Audio > "
-"Regions, then quit %1 and restart.\n"
+"you should probably enable \"auto-analyse-audio\" in Preferences > Metering, "
+"then quit %1 and restart.\n"
 "\n"
 "This dialog will not display again.  But you may notice a slight delay in "
 "this and future transient-detection operations.\n"
 msgstr ""
-"Požádal jste o operaci, která vyžaduje rozbor zvuku.\n"
+"Požádali jste o operaci, která vyžaduje rozbor zvuku.\n"
 "\n"
-"V současnosti máte zakázáno \"auto-analyse-audio\", což znamená, že se "
-"přechodná data musí vytvářet pokaždé, když je to požadováno.\n"
+"V současnosti máte zakázáno \\"auto-analyse-audio\\", což znamená, že se "
+"data pro transients musí vytvářet pokaždé, když je to třeba.\n"
 "\n"
-"Pokud pravidelně děláte práci, která vyžaduje přechodná data, měl byste "
-"pravděpodobně v Nastavení -> Zvuk-> Oblasti povolit \"auto-analyse-audio\", "
-"potom %1 ukončit a znovu spustit.\n"
+"Pokud pravidelně děláte práci, která vyžaduje data o transients, měli byste "
+"pravděpodobně v Nastavení -> Měření povolit \\"auto-analyse-"
+"audio\\", potom ukončit %1 a znovu spustit.\n"
 "\n"
-"Tento dialog se znovu nezobrazí. Ale budete si moci všimnout lehkého "
-"zpoždění v této a budoucích operacích s přechodným zjišťováním.\n"
+"Tento dialog se znovu nezobrazí. Ale možná zaznamenáte malé \""
+"zpoždění v této a budoucích operacích pro zjištění transients.\n\""
 
 #: audioregion.cc:1846
 msgid "Audio Region"
@@ -449,59 +449,79 @@ msgstr "Zkušební poslech jiných oblastí než zvuk nebo MIDI není podporová
 msgid "Cannot audition empty file."
 msgstr "U prázdného souboru nelze provádět zkušební poslech."
 
-#: automatable.cc:109
+#: automatable.cc:110
 msgid "Automation node has no path property"
 msgstr "Uzel automatizace nemá žádnou vlastnost cesta"
 
-#: automatable.cc:130
+#: automatable.cc:131
 msgid "cannot open %2 to load automation data (%3)"
 msgstr "Nelze otevřít %2 pro nahrání dat automatizace (%3)"
 
-#: automatable.cc:158
+#: automatable.cc:159
 msgid "cannot load automation data from %2"
 msgstr "Nelze nahrát data automatizace z %2"
 
-#: automatable.cc:195 delivery.cc:194 session.cc:933
+#: automatable.cc:196 delivery.cc:194 session.cc:948
 msgid "Fader"
 msgstr "Prolínač"
 
-#: automatable.cc:197
+#: automatable.cc:198
 msgid "Send"
 msgstr "Poslat"
 
-#: automatable.cc:199 port_insert.cc:67
+#: automatable.cc:200 port_insert.cc:67
 msgid "Return"
 msgstr "Enter"
 
-#: automatable.cc:201
+#: automatable.cc:202
 msgid "Trim"
 msgstr "Zastřihnout"
 
-#: automatable.cc:203
+#: automatable.cc:204
 msgid "Master Volume"
 msgstr "Celková hlasitost"
 
-#: automatable.cc:205
+#: automatable.cc:206
 msgid "Mute"
 msgstr "Ztlumit"
 
-#: automatable.cc:207
+#: automatable.cc:208
 msgid "Azimuth"
 msgstr "Azimut"
 
-#: automatable.cc:209
+#: automatable.cc:210
 msgid "Width"
 msgstr "Šířka"
 
-#: automatable.cc:211
+#: automatable.cc:212 automatable.cc:218 surround_send.cc:349
 msgid "Elevation"
 msgstr "Zdvih"
 
-#: automatable.cc:213
+#: automatable.cc:214 surround_send.cc:345
+msgid "Left/Right"
+msgstr "Levý/Pravý"
+
+#: automatable.cc:216 surround_send.cc:347
+msgid "Front/Back"
+msgstr "Přední/Zadní"
+
+#: automatable.cc:220 surround_send.cc:351
+msgid "Object Size"
+msgstr "Velikost objektu"
+
+#: automatable.cc:222 surround_send.cc:353
+msgid "Snap to Speaker"
+msgstr "Přichytit k reproduktoru"
+
+#: automatable.cc:224 surround_send.cc:355
+msgid "Binaural Render mode"
+msgstr "Binaurální režim"
+
+#: automatable.cc:226
 msgid "Polarity Invert"
 msgstr "Převrácení polarity"
 
-#: automatable.cc:215 velocity_control.cc:36
+#: automatable.cc:228 velocity_control.cc:36
 msgid "Velocity"
 msgstr "Síla tónu"
 
@@ -624,7 +644,7 @@ msgstr "Nelze najít takt CPU MHz v /proc/cpuinfo"
 msgid "audio"
 msgstr "Zvuk"
 
-#: data_type.cc:28 session.cc:2496 session.cc:2524
+#: data_type.cc:28 session.cc:2704 session.cc:2732
 msgid "MIDI"
 msgstr "MIDI"
 
@@ -640,29 +660,29 @@ msgstr "Hlavní výstupy"
 msgid "listen"
 msgstr "Poslouchat"
 
-#: disk_reader.cc:82
+#: disk_reader.cc:84
 msgid "Player"
 msgstr "Přehrávač"
 
-#: disk_reader.cc:729
+#: disk_reader.cc:731
 msgid ""
 "DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"
 msgstr ""
 "DiskReader %1: při přepisování(1), nelze číst %2 ze seznamu oblastí na "
 "vzorku %3"
 
-#: disk_reader.cc:738
+#: disk_reader.cc:740
 msgid ""
 "DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"
 msgstr ""
 "DiskReader %1: při přepisování(2), nelze číst %2 ze seznamu oblastí na "
 "vzorku %3"
 
-#: disk_reader.cc:1045
+#: disk_reader.cc:1047
 msgid "DiskReader %1: cannot read %2 from playlist at sample %3"
 msgstr "DiskReader %1: nelze číst %2 ze seznamu oblastí na vzorku %3"
 
-#: disk_reader.cc:1303
+#: disk_reader.cc:1305
 msgid ""
 "DiskReader %1: when refilling, cannot read %2 from playlist at sample %3 "
 "(rv: %4)"
@@ -670,7 +690,7 @@ msgstr ""
 "DiskReader %1: při doplňování, nelze číst %2 ze seznamu oblastí na vzorku %3 "
 "(rv: %4)"
 
-#: disk_reader.cc:1309
+#: disk_reader.cc:1311
 msgid ""
 "DiskReader %1: when refilling, cannot write %2 into buffer (wrote %3, space "
 "%4)"
@@ -850,22 +870,22 @@ msgstr "MPEG-2 Audio Layer III"
 msgid "No sample format"
 msgstr "Žádný vzorkovací formát"
 
-#: export_handler.cc:511
+#: export_handler.cc:529
 msgid "File %1 uploaded to %2"
 msgstr "Soubor %1 nahrán do %2"
 
-#: export_handler.cc:517
+#: export_handler.cc:535
 msgid ""
 "upload to Soundcloud failed. Perhaps your email or password are incorrect?\n"
 msgstr ""
 "Nahrání Soundcloud selhalo. Možná je adresa elektronické pošty nebo heslo "
 "špatně?\n"
 
-#: export_handler.cc:655 export_handler.cc:658
+#: export_handler.cc:673 export_handler.cc:676
 msgid "an error occurred while writing a TOC/CUE file: %1"
 msgstr "Při zápisu souboru TOC/CUE se vyskytla chyba: %1"
 
-#: export_handler.cc:948 export_handler.cc:1006
+#: export_handler.cc:966 export_handler.cc:1024
 msgid "Cannot convert %1 to Latin-1 text"
 msgstr "%1 nelze převést na kódování textu Latin-1"
 
@@ -957,7 +977,7 @@ msgstr ""
 "%1 podporuje jen %2 kanály, ve vašem nastavení kanálů se však nachází %3 "
 "kanálů"
 
-#: file_source.cc:200 session_state.cc:3990
+#: file_source.cc:200 session_state.cc:4002
 msgid ""
 "there are already 1000 files with names like %1; versioning discontinued"
 msgstr "Již je 1000 souborů s názvem jako %1; verzování přerušeno"
@@ -1159,59 +1179,63 @@ msgstr ""
 msgid "Loading configuration"
 msgstr "Nahrává se nastavení"
 
-#: globals.cc:749 route.cc:221 session.cc:1109
+#: globals.cc:749 route.cc:228 session.cc:1124
 msgid "Monitor"
 msgstr "Sledování"
 
-#: globals.cc:750 session.cc:1375
+#: globals.cc:750 session.cc:1583
 msgid "Master"
 msgstr "Řízení"
 
-#: globals.cc:760
-msgid "Control"
-msgstr "Ctrl"
+#: globals.cc:751 session.cc:1485 surround_send.cc:36 surround_send.cc:48
+msgid "Surround"
+msgstr "Surround"
 
 #: globals.cc:761
+msgid "Control"
+msgstr "Control"
+
+#: globals.cc:762
 msgid "Mackie"
 msgstr "Mackie"
 
-#: globals.cc:762
+#: globals.cc:763
 msgid "FaderPort Recv"
 msgstr "FaderPort Recv"
 
-#: globals.cc:763
+#: globals.cc:764
 msgid "FaderPort Send"
 msgstr "FaderPort Send"
 
-#: globals.cc:764
+#: globals.cc:765
 msgid "FaderPort2 Recv"
 msgstr "FaderPort2 Recv"
 
-#: globals.cc:765
+#: globals.cc:766
 msgid "FaderPort2 Send"
 msgstr "FaderPort2 Send"
 
-#: globals.cc:766
+#: globals.cc:767
 msgid "FaderPort8 Recv"
 msgstr "FaderPort8 Recv"
 
-#: globals.cc:767
+#: globals.cc:768
 msgid "FaderPort8 Send"
 msgstr "FaderPort8 Send"
 
-#: globals.cc:768
+#: globals.cc:769
 msgid "FaderPort16 Recv"
 msgstr "FaderPort16 Recv"
 
-#: globals.cc:769
+#: globals.cc:770
 msgid "FaderPort16 Send"
 msgstr "FaderPort16 Send"
 
-#: globals.cc:770
+#: globals.cc:771
 msgid "Console1 Recv"
 msgstr "Console1 Recv"
 
-#: globals.cc:771
+#: globals.cc:772
 msgid "Console1 Send"
 msgstr "Console1 Send"
 
@@ -1307,7 +1331,7 @@ msgstr "Nalezeny všechny zvukové soubory pro zavedení PT!"
 msgid "Unknown"
 msgstr "Neznámý"
 
-#: internal_send.cc:454 internal_send.cc:455
+#: internal_send.cc:455 internal_send.cc:456
 msgid "%1 - cannot find any track/bus with the ID %2 to connect to"
 msgstr "%1 - nelze najít žádnou stopu/sběrnici s ID %2 ke spojení se s"
 
@@ -1388,15 +1412,17 @@ msgstr "Vst"
 msgid "%s %u"
 msgstr "%s %u"
 
-#: io.cc:1541 session_bundles.cc:159 session_bundles.cc:201
+#: io.cc:1545 session_bundles.cc:159 session_bundles.cc:201
 msgid "mono"
 msgstr "mono"
 
-#: io.cc:1543 session_bundles.cc:179 session_bundles.cc:222 triggerbox.cc:152
+#: io.cc:1547 route.cc:308 session_bundles.cc:179 session_bundles.cc:222
+#: triggerbox.cc:152
 msgid "L"
 msgstr "L"
 
-#: io.cc:1543 session_bundles.cc:181 session_bundles.cc:224 triggerbox.cc:158
+#: io.cc:1547 route.cc:308 session_bundles.cc:181 session_bundles.cc:224
+#: triggerbox.cc:158
 msgid "R"
 msgstr "P"
 
@@ -1473,55 +1499,55 @@ msgstr "Nepodařilo se vytvořit %1. Nastavení nebylo uloženo. (%2)"
 msgid "Error saving presets file %1."
 msgstr "Chyba při ukládání souboru s nastavením %1."
 
-#: location.cc:690
+#: location.cc:699
 msgid "incorrect XML node passed to Location::set_state"
 msgstr "nesprávný uzel XML předán do Location::set_state"
 
-#: location.cc:695
+#: location.cc:704
 msgid "XML node for Location has no ID information"
 msgstr "Uzel XML pro polohu nemá žádnou informaci o ID"
 
-#: location.cc:700
+#: location.cc:709
 msgid "XML node for Location has no name information"
 msgstr "Uzel XML pro polohu nemá žádnou informaci o názvu"
 
-#: location.cc:711
+#: location.cc:723
 msgid "XML node for Location has no start information"
 msgstr "Uzel XML pro polohu nemá žádnou informaci o začátku"
 
-#: location.cc:716
+#: location.cc:728
 msgid "XML node for Location has no end information"
 msgstr "Uzel XML pro polohu nemá žádnou informaci o konci"
 
-#: location.cc:726
+#: location.cc:738
 msgid "XML node for Location has no flags information"
 msgstr "Uzel XML pro polohu nemá žádnou informaci o příznaku"
 
-#: location.cc:964
+#: location.cc:978
 msgid "Locations: attempt to use unknown location as selected location"
 msgstr "Polohy: pokus o použití neznámé polohy jako vybrané polohy"
 
-#: location.cc:1141
+#: location.cc:1155
 msgid "cue"
 msgstr "cue"
 
-#: location.cc:1143
+#: location.cc:1157
 msgid "mark"
 msgstr "mark"
 
-#: location.cc:1145 location.cc:1169
+#: location.cc:1159 location.cc:1183
 msgid "range"
 msgstr "range"
 
-#: location.cc:1257
+#: location.cc:1271
 msgid "incorrect XML mode passed to Locations::set_state"
 msgstr "nesprávný režim XML předán do Locations::set_state"
 
-#: location.cc:1274 session.cc:1706 session_state.cc:1471
+#: location.cc:1290 session.cc:1914 session_state.cc:1475
 msgid "session"
 msgstr "session"
 
-#: location.cc:1339
+#: location.cc:1356
 msgid "could not load location from session file - ignored"
 msgstr "nepodařilo se nahrát polohu ze souboru se sezením - ignorováno"
 
@@ -1859,71 +1885,87 @@ msgstr ""
 msgid "panner plugin node has no type information!"
 msgstr "Uzel přídavného modulu vyvažovače nemá informaci o typu!"
 
-#: parameter_descriptor.cc:129
+#: parameter_descriptor.cc:124
+msgid "Mid"
+msgstr "Střed"
+
+#: parameter_descriptor.cc:125
+msgid "Off"
+msgstr "Vyp"
+
+#: parameter_descriptor.cc:126
+msgid "Near"
+msgstr "Blízko"
+
+#: parameter_descriptor.cc:127
+msgid "Far"
+msgstr "Daleko"
+
+#: parameter_descriptor.cc:154
 msgid "Normal"
 msgstr "Normální"
 
-#: parameter_descriptor.cc:130
+#: parameter_descriptor.cc:155
 msgid "Invert"
 msgstr "Obráceno"
 
-#: parameter_descriptor.cc:138
+#: parameter_descriptor.cc:163
 msgid "Auto"
 msgstr "Automaticky"
 
-#: parameter_descriptor.cc:139
+#: parameter_descriptor.cc:164
 msgid "Input"
 msgstr "Vstup"
 
-#: parameter_descriptor.cc:140
+#: parameter_descriptor.cc:165
 msgid "Disk"
 msgstr "Disk"
 
-#: parameter_descriptor.cc:270
+#: parameter_descriptor.cc:295
 msgid "Note|C"
 msgstr "C"
 
-#: parameter_descriptor.cc:271
+#: parameter_descriptor.cc:296
 msgid "Note|C#"
 msgstr "Cis"
 
-#: parameter_descriptor.cc:272
+#: parameter_descriptor.cc:297
 msgid "Note|D"
 msgstr "D"
 
-#: parameter_descriptor.cc:273
+#: parameter_descriptor.cc:298
 msgid "Note|D#"
 msgstr "Dis"
 
-#: parameter_descriptor.cc:274
+#: parameter_descriptor.cc:299
 msgid "Note|E"
 msgstr "E"
 
-#: parameter_descriptor.cc:275
+#: parameter_descriptor.cc:300
 msgid "Note|F"
 msgstr "F"
 
-#: parameter_descriptor.cc:276
+#: parameter_descriptor.cc:301
 msgid "Note|F#"
 msgstr "Fis"
 
-#: parameter_descriptor.cc:277
+#: parameter_descriptor.cc:302
 msgid "Note|G"
 msgstr "G"
 
-#: parameter_descriptor.cc:278
+#: parameter_descriptor.cc:303
 msgid "Note|G#"
 msgstr "Gis"
 
-#: parameter_descriptor.cc:279
+#: parameter_descriptor.cc:304
 msgid "Note|A"
 msgstr "A"
 
-#: parameter_descriptor.cc:280
+#: parameter_descriptor.cc:305
 msgid "Note|A#"
 msgstr "Ais"
 
-#: parameter_descriptor.cc:281
+#: parameter_descriptor.cc:306
 msgid "Note|B"
 msgstr "H"
 
@@ -1987,7 +2029,7 @@ msgstr "Nastavení s tímto názvem již existuje."
 msgid "Failed to save plugin preset."
 msgstr "Selhalo uložení nastavení přídavného modulu."
 
-#: plugin.cc:326 session.cc:2492
+#: plugin.cc:326 session.cc:2700
 msgid "Audio"
 msgstr "Zvuk"
 
@@ -1999,32 +2041,32 @@ msgstr "MIDI"
 msgid "?"
 msgstr "?"
 
-#: plugin_insert.cc:577
+#: plugin_insert.cc:578
 msgid "Plugin Enable"
 msgstr "Zapnout přídavný modul"
 
-#: plugin_insert.cc:776
+#: plugin_insert.cc:777
 msgid "PluginInsert: VST Bypass failed, falling back to host bypass."
 msgstr ""
 "PluginInsert: Přemostění VST selhalo, návrat zpět na přemostění serveru."
 
-#: plugin_insert.cc:1458
+#: plugin_insert.cc:1459
 msgid "programming error: "
 msgstr "Chyba v programování:"
 
-#: plugin_insert.cc:2072
+#: plugin_insert.cc:2073
 msgid "SC %1"
 msgstr "SC %1"
 
-#: plugin_insert.cc:2974
+#: plugin_insert.cc:2975
 msgid "PluginInsert: Auto: no ladspa port number"
 msgstr "PluginInsert: Auto: žádné číslo přípojky LADSPA"
 
-#: plugin_insert.cc:2979
+#: plugin_insert.cc:2980
 msgid "PluginInsert: Auto: port id out of range"
 msgstr "PluginInsert: Auto: překročení rozsahu ID přípojky"
 
-#: plugin_insert.cc:2991
+#: plugin_insert.cc:2992
 msgid "PluginInsert: automatable control %1 not found - ignored"
 msgstr ""
 "PluginInsert: automatizovatelný ovládací prvek %1 nenalezen - přehlíží se"
@@ -2093,7 +2135,7 @@ msgstr "Hledání přídavných modulů dokončeno..."
 msgid "Indexing Plugins..."
 msgstr "Indexuji přídavné moduly..."
 
-#: plugin_manager.cc:808 plugin_manager.cc:3260
+#: plugin_manager.cc:808 plugin_manager.cc:3268
 msgid "LADSPA (%1 / %2)"
 msgstr "LADSPA (%1 / %2)"
 
@@ -2129,51 +2171,51 @@ msgstr "LADSPA ignorován modul s duplicitním id %1."
 msgid "LADSPA no plugins found in module."
 msgstr "LADSPA v modulu nebyly nalezeny žádné pluginy."
 
-#: plugin_manager.cc:1196
+#: plugin_manager.cc:1204
 msgid "Cannot launch AU scanner app '%1': %2"
 msgstr "Nelze spustit aplikaci pro hledání AU '%1': %2"
 
-#: plugin_manager.cc:1291
+#: plugin_manager.cc:1299
 msgid "Saved AUV2 plugin cache to %1"
 msgstr "Uložena vyrovnávací paměť AUV2 modulů do %1"
 
-#: plugin_manager.cc:1322 plugin_manager.cc:1668 plugin_manager.cc:2176
+#: plugin_manager.cc:1330 plugin_manager.cc:1676 plugin_manager.cc:2184
 msgid "Scan Failed."
 msgstr "Hledání selhalo."
 
-#: plugin_manager.cc:1328
+#: plugin_manager.cc:1336
 msgid "Cannot parse AUv2 cache file '%1' for plugin '%2'"
 msgstr "Nelze načíst soubor vyrovnávací paměti AUv2 '%1' pro modul '%2'"
 
-#: plugin_manager.cc:1352
+#: plugin_manager.cc:1360
 msgid "Cache file %1 ID mismatch '%2' vs '%3'"
 msgstr "Nesoulad ID '%2' vs '%3' v souboru vyrovnávaí paměti %1"
 
-#: plugin_manager.cc:1359
+#: plugin_manager.cc:1367
 msgid "Corrupt AUv2 cache file '%1'"
 msgstr "Poškozený soubor vyrovnávací paměti AUv2 '%1'"
 
-#: plugin_manager.cc:1376 plugin_manager.cc:3230
+#: plugin_manager.cc:1384 plugin_manager.cc:3238
 msgid "AUv2"
 msgstr "AUv2"
 
-#: plugin_manager.cc:1376
+#: plugin_manager.cc:1384
 msgid "Indexing"
 msgstr "Indexuji"
 
-#: plugin_manager.cc:1397 plugin_manager.cc:3228
+#: plugin_manager.cc:1405 plugin_manager.cc:3236
 msgid "AUv2 (%1 / %2)"
 msgstr "AUv2 (%1 / %2)"
 
-#: plugin_manager.cc:1434
+#: plugin_manager.cc:1442
 msgid "Cannot write to VST2 blacklist file '%1'"
 msgstr "Nelze zapisovat do souboru černé listiny VST2 '%1'"
 
-#: plugin_manager.cc:1492 plugin_manager.cc:2247
+#: plugin_manager.cc:1500 plugin_manager.cc:2255
 msgid "Cannot launch VST scanner app '%1': %2"
 msgstr "Nelze spustit aplikaci pro hledání VST '%1': %2"
 
-#: plugin_manager.cc:1538
+#: plugin_manager.cc:1546
 msgid ""
 "plugin '%1' does not support processReplacing, and so cannot be used in %2 "
 "at this time"
@@ -2181,7 +2223,7 @@ msgstr ""
 "modul '%1' nepodporuje processReplacing, takže ho v tuto chvíli nelze použít "
 "v %2"
 
-#: plugin_manager.cc:1587
+#: plugin_manager.cc:1595
 msgid ""
 "Ignoring plugin '%1'. VST-ID conflicts with other plugin '%2' files: '%3' vs "
 "'%4'"
@@ -2189,145 +2231,145 @@ msgstr ""
 "Ignoruji modul '%1'. VST-ID koliduje se soubory jiného modulu '%2': '%3' vs "
 "'%4'"
 
-#: plugin_manager.cc:1636
+#: plugin_manager.cc:1644
 msgid "Saved VST2 plugin cache to '%1'"
 msgstr "Vyrovnávací paměť VST2 modulu uložena do '%1'"
 
-#: plugin_manager.cc:1674
+#: plugin_manager.cc:1682
 msgid "Cannot parse VST2 cache file '%1' for plugin '%2'"
 msgstr "Nemohu načíst soubor vyrovnávací paměti VST2 '%1' pro modul '%2'"
 
-#: plugin_manager.cc:1691
+#: plugin_manager.cc:1699
 msgid "Invalid VST2 cache file '%1'"
 msgstr "Neplatný soubor vyrovnávací paměti VST2 '%1'"
 
-#: plugin_manager.cc:1701
+#: plugin_manager.cc:1709
 msgid "VST2 architecture mismatches '%1'"
 msgstr "Architektura VST2 je v nesouladu s '%1'"
 
-#: plugin_manager.cc:1719
+#: plugin_manager.cc:1727
 msgid "Corrupt VST2 cache file '%1'"
 msgstr "Poškozený soubor vyrovnávací paměti VST2 '%1'"
 
-#: plugin_manager.cc:1765
+#: plugin_manager.cc:1773
 msgid "Disabled WindowsVST scan (safe mode)"
 msgstr "Zakázáno prohledání VST Windows (bezpečný režim)"
 
-#: plugin_manager.cc:1778 plugin_manager.cc:1861 plugin_manager.cc:1921
-#: plugin_manager.cc:3241
+#: plugin_manager.cc:1786 plugin_manager.cc:1869 plugin_manager.cc:1929
+#: plugin_manager.cc:3249
 msgid "VST2 (%1 / %2)"
 msgstr "VST2 (%1 / %2)"
 
-#: plugin_manager.cc:1819
+#: plugin_manager.cc:1827
 msgid "Disabled MacVST scan (safe mode)"
 msgstr "Zakázáno prohledání VST macOS (bezpečný režim)"
 
-#: plugin_manager.cc:1902
+#: plugin_manager.cc:1910
 msgid "Disabled LinuxVST scan (safe mode)"
 msgstr "Zakázáno prohledání VST Linux (bezpečný režim)"
 
-#: plugin_manager.cc:1986
+#: plugin_manager.cc:1994
 msgid "Cannot write to VST3 blacklist file '%1'"
 msgstr "Nelze zapisovat do souboru černé listiny VST3 '%1'"
 
-#: plugin_manager.cc:2051
+#: plugin_manager.cc:2059
 msgid "Disabled VST3 scan (safe mode)"
 msgstr "Hledání VST3 je vypnuté (bezpečný režim)"
 
-#: plugin_manager.cc:2072 plugin_manager.cc:3251
+#: plugin_manager.cc:2080 plugin_manager.cc:3259
 msgid "VST3 (%1 / %2)"
 msgstr "VST3 (%1 / %2)"
 
-#: plugin_manager.cc:2150
+#: plugin_manager.cc:2158
 msgid "Saved VST3 plugin cache to '%1'"
 msgstr "Vyrovnávací paměť VST3 modulu uložena do '%1'"
 
-#: plugin_manager.cc:2182
+#: plugin_manager.cc:2190
 msgid "Cannot parse VST3 cache file '%1' for plugin '%2'"
 msgstr "Nemohu načíst soubor vyrovnávací paměti VST3 '%1' pro modul '%2'"
 
-#: plugin_manager.cc:2198
+#: plugin_manager.cc:2206
 msgid "Invalid VST3 cache file '%1'"
 msgstr "Neplatný soubor vyrovnávací paměti VST3 '%1'"
 
-#: plugin_manager.cc:2214
+#: plugin_manager.cc:2222
 msgid "Corrupt VST3 cache file '%1'"
 msgstr "Poškozený soubor vyrovnávací paměti VST3 '%1'"
 
-#: plugin_manager.cc:2413
+#: plugin_manager.cc:2421
 msgid "unknown plugin status type \"%1\" - all entries ignored"
 msgstr ""
 "Neznámý typ stavu přídavného modulu \"%1\" - přehlíží se všechny záznamy"
 
-#: plugin_manager.cc:2435
+#: plugin_manager.cc:2443
 msgid "unknown plugin type \"%1\" - ignored"
 msgstr "Neznámý typ přídavného modulu \"%1\" - přehlíží se"
 
-#: plugin_manager.cc:2478
+#: plugin_manager.cc:2486
 msgid "Could not save Plugin Statistics to %1"
 msgstr "Nelze uložit statistiky modulu do %1"
 
-#: plugin_manager.cc:2489
+#: plugin_manager.cc:2497
 msgid "Loading plugin statistics file %1"
 msgstr "Načítám soubor statistik modulu %1"
 
-#: plugin_manager.cc:2493
+#: plugin_manager.cc:2501
 msgid "Cannot parse plugin statistics from %1"
 msgstr "Nelze zpracovat statistiky modulu z %1"
 
-#: plugin_manager.cc:2678
+#: plugin_manager.cc:2686
 msgid "Loading plugin order file %1"
 msgstr "Nahrává se soubor s pořadím přídavného modulu %1"
 
-#: plugin_manager.cc:2688
+#: plugin_manager.cc:2696
 msgid "Cannot parse Plugin Order info from %1"
 msgstr "Nelze nahrát pořadí přídavného modulu z %1"
 
-#: plugin_manager.cc:2702
+#: plugin_manager.cc:2710
 msgid "Could not save Plugin Order info to %1"
 msgstr "Nepodařilo se uložit pořadí přídavného modulu do %1"
 
-#: plugin_manager.cc:2773
+#: plugin_manager.cc:2781
 msgid "Could not save Plugin Tags info to %1"
 msgstr "Nepodařilo se uložit informace o značkách přídavného modulu do %1"
 
-#: plugin_manager.cc:2786
+#: plugin_manager.cc:2794
 msgid "Loading plugin meta data file %1"
 msgstr "Nahrává se soubor s popisem přídavného modulu %1"
 
-#: plugin_manager.cc:2793
+#: plugin_manager.cc:2801
 msgid "Cannot parse plugin tag info from %1"
 msgstr "Nelze zpracovat informace o značkách přídavného modulu z %1"
 
-#: plugin_manager.cc:2871
+#: plugin_manager.cc:2879
 msgid "PluginManager::sanitize_tag could not tokenize string: "
 msgstr "PluginManager::sanitize_tag nepodařilo se symbolizovat řetězec: "
 
-#: plugin_manager.cc:2921
+#: plugin_manager.cc:2929
 msgid "PluginManager: Could not tokenize string: "
 msgstr "Správce přídavných modulů: Nepodařilo se symbolizovat řetězec: "
 
-#: plugin_manager.cc:3243
+#: plugin_manager.cc:3251
 msgid "VST2"
 msgstr "VST2"
 
-#: plugin_manager.cc:3253
+#: plugin_manager.cc:3261
 msgid "VST3"
 msgstr "VST3"
 
-#: plugin_manager.cc:3262
+#: plugin_manager.cc:3270
 msgid "LADSPA"
 msgstr "LADSPA"
 
-#: plugin_manager.cc:3370
+#: plugin_manager.cc:3378
 msgid "Cannot load Plugin Scan Log from '%1'."
 msgstr "Nelze načíst vyhledané moduly z '%1'"
 
-#: plugin_manager.cc:3378
+#: plugin_manager.cc:3386
 msgid "Plugin Scan Log '%1' contains invalid information."
 msgstr "Záznam hledání modulů '%1' obsahuje neplatné informace."
 
-#: plugin_manager.cc:3398
+#: plugin_manager.cc:3406
 msgid "Could not save Plugin Scan Log to %1"
 msgstr "Nelze uložit záznam hledání modulů do %1"
 
@@ -2335,52 +2377,52 @@ msgstr "Nelze uložit záznam hledání modulů do %1"
 msgid "could not reregister %1"
 msgstr "nepodařilo se znovu zaregistrovat %1"
 
-#: port_engine_shared.cc:54
+#: port_engine_shared.cc:55
 msgid "BackendPort::connect (): invalid (null) port"
 msgstr "BackendPort::connect (): neplatná (null) přípojka"
 
-#: port_engine_shared.cc:59
+#: port_engine_shared.cc:60
 msgid "BackendPort::connect (): wrong port-type trying to connect %1 and %2"
 msgstr "BackendPort::connect (): chybný port-type se pokouší propojit %1 a %2"
 
-#: port_engine_shared.cc:64
+#: port_engine_shared.cc:65
 msgid "BackendPort::connect (): cannot inter-connect output ports %1 and %2."
 msgstr ""
 "BackendPort::connect (): nelze inter-connect výstupní přípojky %1 a %2."
 
-#: port_engine_shared.cc:69
+#: port_engine_shared.cc:70
 msgid "BackendPort::connect (): cannot inter-connect input ports."
 msgstr "BackendPort::connect (): nelze inter-connect vstupní přípojky."
 
-#: port_engine_shared.cc:74
+#: port_engine_shared.cc:75
 msgid "BackendPort::connect (): cannot self-connect ports."
 msgstr "BackendPort::connect (): nelze self-connect přípojky."
 
-#: port_engine_shared.cc:80
+#: port_engine_shared.cc:81
 msgid "BackendPort::connect (): ports are already connected:"
 msgstr "BackendPort::connect (): přípojky jsou již propojené:"
 
-#: port_engine_shared.cc:105
+#: port_engine_shared.cc:106
 msgid "BackendPort::disconnect (): invalid (null) port"
 msgstr "BackendPort::disconnect (): neplatná (null) přípojka"
 
-#: port_engine_shared.cc:110
+#: port_engine_shared.cc:111
 msgid "BackendPort::disconnect (): ports are not connected:"
 msgstr "BackendPort::disconnect (): přípojky nejsou propojené:"
 
-#: port_engine_shared.cc:321
+#: port_engine_shared.cc:322
 msgid "BackendPort::port_is_physical (): invalid port."
 msgstr "BackendPort::port_is_physical (): neplatná přípojka."
 
-#: port_engine_shared.cc:403
+#: port_engine_shared.cc:404
 msgid "%1::register_port: Port already exists: (%2)"
 msgstr "%1::register_port: Přípojka již existuje: (%2)"
 
-#: port_engine_shared.cc:447
+#: port_engine_shared.cc:448
 msgid "%1::unregister_port: Failed to find port: (%2)"
 msgstr "%1::unregister_port: Nepodařilo se najít přípojku: (%2)"
 
-#: port_engine_shared.cc:511
+#: port_engine_shared.cc:512
 msgid ""
 "PortEngineSharedImpl: recovering from unclean shutdown, port registry is not "
 "empty."
@@ -2388,67 +2430,67 @@ msgstr ""
 "PortEngineSharedImpl: zotavení z nekorektního ukončení, registr přípojek "
 "není prázdný."
 
-#: port_engine_shared.cc:545
+#: port_engine_shared.cc:546
 msgid "%1::set_port_name: Invalid port: (%2)"
 msgstr "%1::set_port_name: Neplatná přípojka: (%2)"
 
-#: port_engine_shared.cc:550
+#: port_engine_shared.cc:551
 msgid "%1::set_port_name: Port with given name ('%2') already exists"
 msgstr "%1::set_port_name: Přípojka s daným názvem ('%2') již existuje"
 
-#: port_engine_shared.cc:584
+#: port_engine_shared.cc:585
 msgid "%1::get_port_name: invalid port"
 msgstr "%1::get_port_name: neplatná přípojka"
 
-#: port_engine_shared.cc:595
+#: port_engine_shared.cc:596
 msgid "%1::get_port_flags: invalid port"
 msgstr "%1::get_port_flags: neplatná přípojka"
 
-#: port_engine_shared.cc:605
+#: port_engine_shared.cc:606
 msgid "%1::get_port_property: invalid port"
 msgstr "%1::get_port_property: neplatná přípojka"
 
-#: port_engine_shared.cc:632
+#: port_engine_shared.cc:633
 msgid "%1::set_port_property: invalid port"
 msgstr "%1::set_port_property: neplatná přípojka"
 
-#: port_engine_shared.cc:678
+#: port_engine_shared.cc:679
 msgid "%1::connect: Invalid Source port: (%2)"
 msgstr "%1::connect: Neplatná zdrojová přípojka: (%2)"
 
-#: port_engine_shared.cc:682
+#: port_engine_shared.cc:683
 msgid "%1::connect: Invalid Destination port: (%2)"
 msgstr "%1::connect: Neplatná cílová přípojka: (%2)"
 
-#: port_engine_shared.cc:698 port_engine_shared.cc:733
+#: port_engine_shared.cc:699 port_engine_shared.cc:734
 msgid "%1::disconnect: invalid port"
 msgstr "%1::disconnect: neplatná přípojka"
 
-#: port_engine_shared.cc:710
+#: port_engine_shared.cc:711
 msgid "%1::connect: Invalid Source Port Handle"
 msgstr "%1::connect: Neplatné ovládání zdrojové přípojky"
 
-#: port_engine_shared.cc:717
+#: port_engine_shared.cc:718
 msgid "%1::connect: Invalid Destination Port: (%2)"
 msgstr "%1::connect: Neplatná cílová přípojka: (%2)"
 
-#: port_engine_shared.cc:745
+#: port_engine_shared.cc:746
 msgid "%1::disconnect_all: Invalid Port"
 msgstr "%1::disconnect_all: Neplatná přípojka"
 
-#: port_engine_shared.cc:760
+#: port_engine_shared.cc:761
 msgid "%1::connected: Invalid Port"
 msgstr "%1::connected: Neplatná přípojka"
 
-#: port_engine_shared.cc:773
+#: port_engine_shared.cc:774
 msgid "%1::connected_to: Invalid Port"
 msgstr "%1::connected_to: Neplatná přípojka"
 
-#: port_engine_shared.cc:786
+#: port_engine_shared.cc:787
 msgid "%1::physically_connected: Invalid Port"
 msgstr "%1::physically_connected: Neplatná přípojka"
 
-#: port_engine_shared.cc:798
+#: port_engine_shared.cc:799
 msgid "%1::get_connections: Invalid Port"
 msgstr "%1::get_connections: Neplatná přípojka"
 
@@ -2464,7 +2506,7 @@ msgstr "Uzlu XML k popsání vložení přípojky chybí pole `type'"
 msgid "non-port insert XML used for port plugin insert"
 msgstr "XML vložení ne-přípojky použito k vložení přídavného modulu přípojky"
 
-#: port_manager.cc:603
+#: port_manager.cc:610
 msgid ""
 "a port with the name \"%1\" already exists: check for duplicated track/bus "
 "names"
@@ -2472,7 +2514,7 @@ msgstr ""
 "Přípojka s názvem \"%1\" již existuje: Prověřte na zdvojené názvy stop/"
 "sběrnic"
 
-#: port_manager.cc:605
+#: port_manager.cc:612
 msgid ""
 "No more ports are available. You will need to stop %1 and restart with more "
 "ports if you need this many tracks."
@@ -2480,35 +2522,35 @@ msgstr ""
 "Žádné další přípojky nejsou dostupné. Když potřebujete tolik stop, musíte %1 "
 "zastavit a spustit s více přípojkami."
 
-#: port_manager.cc:608
+#: port_manager.cc:615
 msgid "AudioEngine: cannot register port \"%1\": %2"
 msgstr "Zvukový stroj: nelze zaregistrovat přípojku \"%1\": %2"
 
-#: port_manager.cc:647
+#: port_manager.cc:654
 msgid "(unknown type)"
 msgstr "(neznámý typ)"
 
-#: port_manager.cc:664
+#: port_manager.cc:671
 msgid "(unknown error)"
 msgstr "(neznámá chyba)"
 
-#: port_manager.cc:790
+#: port_manager.cc:797
 msgid "AudioEngine: cannot connect %1 (%2) to %3 (%4)"
 msgstr "Zvukový stroj: nelze spojit %1 (%2) s %3 (%4)"
 
-#: port_manager.cc:852 port_manager.cc:853
+#: port_manager.cc:859 port_manager.cc:860
 msgid "Re-establising port %1 failed"
 msgstr "Obnovení přípojky %1 selhalo"
 
-#: port_manager.cc:1756
+#: port_manager.cc:1763
 msgid "Could not save port info to %1"
 msgstr "Nelze uložit info o přípojkách do %1"
 
-#: port_manager.cc:1772
+#: port_manager.cc:1779
 msgid "Cannot load/convert MIDI port info from '%1'."
 msgstr "Nelze načíst/převést info o MIDI přípojkách z '%1'"
 
-#: port_manager.cc:1781
+#: port_manager.cc:1788
 msgid ""
 "MIDI port info file '%1' contains invalid port description - please remove "
 "it."
@@ -2516,23 +2558,23 @@ msgstr ""
 "Soubor s informacemi o MIDI přípojkách '%1' obsahuje neplatný popis přípojky "
 "- prosím odstraňte ho."
 
-#: port_manager.cc:1789
+#: port_manager.cc:1796
 msgid "MIDI port info file '%1' contains invalid meta data - please remove it."
 msgstr ""
 "Soubor s informacemi o MIDI přípojkách '%1' obsahuje neplatná metadata - "
 "prosím odstraňte je."
 
-#: port_manager.cc:1802
+#: port_manager.cc:1809
 msgid "Cannot load port info from '%1'."
 msgstr "Nelze načíst info o přípojkách z '%1'."
 
-#: port_manager.cc:1812
+#: port_manager.cc:1819
 msgid "port info file '%1' contains invalid information - please remove it."
 msgstr ""
 "soubor s informacemi o přípojkách '%1' obsahuje neplatné informace - prosím "
 "odstraňte je."
 
-#: port_manager.cc:1932
+#: port_manager.cc:1939
 msgid "Ambiguous latency for port '%1' (%2, %3)"
 msgstr "Nejednoznačná latence pro přípojku '%1' (%2, %3)"
 
@@ -2600,23 +2642,23 @@ msgstr "Nelze otevřít soubor \"%1\": %2"
 msgid "Could not read file \"%1\"."
 msgstr "Nelze číst soubor \"%1\"."
 
-#: recent_sessions.cc:59
+#: recent_sessions.cc:60
 msgid "cannot open recent session file %1 (%2)"
 msgstr "Nelze otevřít nedávno otevřený soubor se sezením %1 (%2)"
 
-#: recent_sessions.cc:72 recent_sessions.cc:130
+#: recent_sessions.cc:73 recent_sessions.cc:131
 msgid "Error reading recent session file %1 (%2)"
 msgstr "Chyba při čtení nedávno otevřeného souboru se sezením %1 (%2)"
 
-#: recent_sessions.cc:117
+#: recent_sessions.cc:118
 msgid "Cannot open recent template file %1 (%2)"
 msgstr "Nelze otevřít nedávno otevřený soubor s předlohou %1 (%2)"
 
-#: recent_sessions.cc:180
+#: recent_sessions.cc:181
 msgid "Error writing recent sessions file %1 (%2)"
 msgstr "Chyba při zápisu nedávno otevřeného souboru se sezením %1 (%2)"
 
-#: recent_sessions.cc:215
+#: recent_sessions.cc:216
 msgid "Error writing saved template file %1 (%2)"
 msgstr "Chyba při zápisu nedávno uloženého souboru se sezením %1 (%2)"
 
@@ -2651,27 +2693,75 @@ msgstr "Zavedení: Chyba v src_new() : %1"
 msgid "return %1"
 msgstr "Vrácená hodnota %1"
 
-#: route.cc:976 route.cc:3314 track.cc:930
-msgid "unknown Processor type \"%1\"; ignored"
-msgstr "Neznámý typ procesoru \"%1\"; přehlíží se"
+#: route.cc:308 triggerbox.cc:143
+msgid "C"
+msgstr "C"
 
-#: route.cc:1000
+#: route.cc:308
+msgid "LFE"
+msgstr "LFE"
+
+#: route.cc:308
+msgid "Ls"
+msgstr "Ls"
+
+#: route.cc:308
+msgid "Rs"
+msgstr "Rs"
+
+#: route.cc:309
+msgid "Lrs"
+msgstr "Lrs"
+
+#: route.cc:309
+msgid "Rrs"
+msgstr "Rrs"
+
+#: route.cc:309
+msgid "Lfh"
+msgstr "Lfh"
+
+#: route.cc:309
+msgid "Rfh"
+msgstr "Rfh"
+
+#: route.cc:309
+msgid "Lrh"
+msgstr "Lrh"
+
+#: route.cc:309
+msgid "Rrh"
+msgstr "Rrh"
+
+#: route.cc:310
+msgid "Lb"
+msgstr "Lb"
+
+#: route.cc:310
+msgid "Rb"
+msgstr "Rb"
+
+#: route.cc:1001 route.cc:3348 track.cc:928
+msgid "unknown Processor type \"%1\"; ignored"
+msgstr "Neznámý typ procesoru \"%1\"; ignoruji"
+
+#: route.cc:1025
 msgid "processor could not be created. Ignored."
 msgstr "Procesor se Nepodařilo vytvořit. Přehlíží se"
 
-#: route.cc:2684 route.cc:2908
+#: route.cc:2709 route.cc:2933
 msgid "Bad node sent to Route::set_state() [%1]"
 msgstr "Špatný uzel odeslán do Route::set_state() [%1]"
 
-#: route.cc:2755
+#: route.cc:2780
 msgid "Panner state mismatches for track/bus (%1)."
 msgstr "Nesoulady stavu vyvažovače pro stopu/sběrnici (%1)."
 
-#: route.cc:3801
+#: route.cc:3844
 msgid "Invalid Solo-Isolate propagation: from:%1 new:%2 - old:%3 = delta:%4"
 msgstr "Neplatná propagace Solo-Isolate: z:%1 nový:%2 - starý:%3 = delta:%4"
 
-#: route.cc:5205
+#: route.cc:5267
 msgid "Amp/Fader on track/bus '%1' was missing."
 msgstr "Zesilovač/vyvažovač na stopě/sběrnici '%1' chyběl."
 
@@ -2708,53 +2798,57 @@ msgstr "foldback %1"
 msgid "programming error: send created using role %1"
 msgstr "Chyba programu: send vytvořen pomocí role %1"
 
-#: session.cc:374
+#: session.cc:383
 msgid "Session initialization failed because Audio/MIDI engine is not running."
 msgstr "Selhala inicializace sezení, protože zvukové/MIDI zařízení neběží."
 
-#: session.cc:388
+#: session.cc:397
 msgid "Session initialization failed"
 msgstr "Inicializace sezení selhala"
 
-#: session.cc:404
+#: session.cc:413
 msgid "Failed to load template/snapshot state"
 msgstr "Nepodařilo se nahrát předlohu/stav snímku"
 
-#: session.cc:408
+#: session.cc:417
 msgid "Failed to parse template/snapshot state"
 msgstr "Nepodařilo se zpracovat předlohu/stav snímku"
 
-#: session.cc:429
+#: session.cc:438
 msgid "Failed to load state"
 msgstr "Nepodařilo se nahrát stav"
 
-#: session.cc:442 session.cc:446 session.cc:449 session.cc:452 session.cc:455
-#: session.cc:458
+#: session.cc:451 session.cc:455 session.cc:458 session.cc:461 session.cc:464
+#: session.cc:467 session.cc:470
 msgid "Cannot initialize session/engine: %1"
 msgstr "Nelze inicializovat sezení/stroj: %1"
 
-#: session.cc:442
+#: session.cc:451
 msgid "Failed to create background threads."
 msgstr "Nepodařilo se vytvořit vlákna pozadí."
 
-#: session.cc:446
+#: session.cc:455
 msgid "Invalid TempoMap in session-file."
 msgstr "Neplatný TempoMap v souboru se sezením."
 
-#: session.cc:449
+#: session.cc:458
 msgid "Invalid or corrupt session state."
 msgstr "Neplatný nebo poškozený stav sezení."
 
-#: session.cc:452
+#: session.cc:461
 msgid "Port registration failed."
 msgstr "Registrace přípojky selhala."
 
-#: session.cc:455
+#: session.cc:464
 msgid "Audio/MIDI Engine is not running or sample-rate mismatches."
 msgstr ""
 "Zvukové/MIDI zařízení neběží, nebo je nesoulad ve vzorkovací frekvenci."
 
-#: session.cc:458
+#: session.cc:467
+msgid "Required Plugin/Processor is missing."
+msgstr "Požadovaný modul/procesor chybí."
+
+#: session.cc:470
 msgid ""
 "Unexpected exception during session setup, possibly invalid audio/midi "
 "engine parameters. Please see stdout/stderr for details"
@@ -2762,75 +2856,88 @@ msgstr ""
 " Neočekávaná výjimka během zřízení sezení, možná neplatné parametry stroje "
 "zvuku/MIDI. Podrobnosti naleznete v stdout/stderr"
 
-#: session.cc:515
+#: session.cc:527
 msgid "Connect to engine"
 msgstr "Připojit k zařízení"
 
-#: session.cc:535
+#: session.cc:547
 msgid "Session loading complete"
 msgstr "Nahrání sezení dokončeno"
 
-#: session.cc:589
+#: session.cc:601
 msgid "Set up LTC"
 msgstr "Zřídit LTC"
 
-#: session.cc:591
+#: session.cc:603
 msgid "Set up Click"
 msgstr "Zřídit metronom"
 
-#: session.cc:593
+#: session.cc:605
 msgid "Set up standard connections"
 msgstr "Zřídit standardní spojení"
 
-#: session.cc:972
+#: session.cc:987
 msgid "could not setup Click I/O"
 msgstr "nepodařilo se zřídit vstup/výstup metronomu"
 
-#: session.cc:1028
+#: session.cc:1043 session.cc:1534
 msgid "cannot connect %1 output %2 to %3"
 msgstr "nelze propojit %1 výstup %2 k %3"
 
-#: session.cc:1063
+#: session.cc:1078 session.cc:1390
 msgid "Cannot remove monitor section while the engine is offline."
 msgstr "Nelze odstranit sledovací úsek, zatímco je stroj nepřipojen."
 
-#: session.cc:1101
+#: session.cc:1116
 msgid "Cannot create monitor section while the engine is offline."
 msgstr "Nelze vytvořit sledovací úsek, zatímco je stroj nepřipojen."
 
-#: session.cc:1122
+#: session.cc:1137
 msgid "Cannot create monitor section. 'Monitor' Port name is not unique."
 msgstr ""
 "Nelze vytvořit sledovací úsek. Název přípojky 'Monitor' není jedinečný."
 
-#: session.cc:1156 session.cc:1303
+#: session.cc:1171 session.cc:1318
 msgid "cannot connect control input %1 to %2"
 msgstr "Nelze spojit kontrolní vstup %1 s %2"
 
-#: session.cc:1195 session.cc:1321
+#: session.cc:1210 session.cc:1336
 msgid "The preferred I/O for the monitor bus (%1) cannot be found"
 msgstr "Upřednostňovaný vstup/výstup pro sběrnici sledování (%1) nelze nalézt"
 
-#: session.cc:1226 session.cc:1352
+#: session.cc:1241 session.cc:1367
 msgid "cannot connect control output %1 to %2"
 msgstr "Nelze spojit kontrolní výstup  s %2"
 
-#: session.cc:1417
+#: session.cc:1476
+msgid "Cannot create surround master while the engine is offline."
+msgstr "Nemohu vytvořit surround master, když je zvukové zařízení offline."
+
+#: session.cc:1481
+msgid "Some surround sound systems require a sample-rate of 48kHz or 96kHz."
+msgstr ""
+"Některé surround systémy vyžadují vzorkovací frekvenci 48kHz nebo 96kHz."
+
+#: session.cc:1498
+msgid "Cannot create surround master. 'Surround' Port name is not unique."
+msgstr "Nemohu vytvořit surround master. Název portu 'Surround' není unikátní."
+
+#: session.cc:1625
 msgid "cannot create Auditioner: no auditioning of regions possible"
 msgstr ""
 "Nelze vytvořit poslechový systém: žádný zkušební poslech oblastí není možný"
 
-#: session.cc:1679
+#: session.cc:1887
 msgid "Session: you can't use that location for auto punch (start <= end)"
 msgstr ""
 "Sezení: Tuto polohu nemůžete použít pro automatické přepsání (začátek <= "
 "konec)"
 
-#: session.cc:1700
+#: session.cc:1908
 msgid "Session: you can't use that location for session start/end)"
 msgstr "Sezení: Tuto polohu nemůžete použít pro začátek/konec sezení"
 
-#: session.cc:1734
+#: session.cc:1942
 msgid ""
 "You cannot use this location for auto-loop because it has zero or negative "
 "length"
@@ -2838,15 +2945,15 @@ msgstr ""
 "Tuto polohu nemůžete použít pro automatickou smyčku, protože nemá žádnou "
 "nebo má zápornou délku"
 
-#: session.cc:1926
+#: session.cc:2134
 msgid "programming error: session range removed!"
 msgstr "Chyba programování: rozsah sezení odstraněn!"
 
-#: session.cc:2568
+#: session.cc:2776
 msgid "Session: could not create new midi track."
 msgstr "Sezení: Nepodařilo se vytvořit novou stopu MIDI."
 
-#: session.cc:2574
+#: session.cc:2782
 msgid ""
 "No more JACK ports are available. You will need to stop %1 and restart JACK "
 "with more ports if you need this many tracks."
@@ -2854,126 +2961,130 @@ msgstr ""
 "Žádné další přípojky JACK nejsou dostupné. Když potřebujete tolik stop, "
 "musíte %1 zastavit a spustit JACK s více přípojkami."
 
-#: session.cc:2604 session.cc:2607
+#: session.cc:2812 session.cc:2815
 msgid "Midi Bus"
 msgstr "Sběrnice MIDI"
 
-#: session.cc:2629
+#: session.cc:2837
 msgid "cannot configure new midi bus input"
 msgstr "Nelze nastavit nový vstup sběrnice MIDI"
 
-#: session.cc:2635
+#: session.cc:2843
 msgid "cannot configure new midi bus output"
 msgstr "Nelze nastavit nový výstup sběrnice MIDI"
 
-#: session.cc:2649
+#: session.cc:2857
 msgid "Session: could not create new MIDI bus."
 msgstr "Sezení: nelze vytvořit novou MIDI sběrnici."
 
-#: session.cc:2805 session.cc:2813 session.cc:2889 session.cc:2897
+#: session.cc:3013 session.cc:3021 session.cc:3097 session.cc:3105
 msgid "cannot configure %1 in/%2 out configuration for new audio track"
 msgstr "Nelze nastavit %1 vstup/%2 výstup pro novou zvukovou stopu"
 
-#: session.cc:2831
+#: session.cc:3039
 msgid "Session: could not create new audio track."
 msgstr "Sezení: nelze vytvořit novou zvukovou stopu."
 
-#: session.cc:2864 session.cc:2867
+#: session.cc:3072 session.cc:3075
 msgid "Bus"
 msgstr "Sběrnice"
 
-#: session.cc:2913
+#: session.cc:3121
 msgid "Session: could not create new audio bus."
 msgstr "Sezení: nelze vytvořit novou zvukovou sběrnici."
 
-#: session.cc:2991
+#: session.cc:3199
 msgid "Session: Failed to create unique ID for track from template."
 msgstr "Sezení: Selhalo vytvoření unikátního ID pro stopu z předlohy."
 
-#: session.cc:3001
+#: session.cc:3209
 msgid "Session: Failed to generate unique name and ID for track from template."
 msgstr "Sezení: Selhalo vytvoření unikátního názvu a ID pro stopu z předlohy."
 
-#: session.cc:3146
+#: session.cc:3354
 msgid "Session: cannot create track/bus from template description"
 msgstr "Sezení: nelze vytvořit stopu/sběrnici z popisu předlohy"
 
-#: session.cc:3180
+#: session.cc:3388
 msgid "Session: could not create new track/bus from template"
 msgstr "Sezení: nelze vytvořit novou stopu/sběrnici z předlohy"
 
-#: session.cc:3246
+#: session.cc:3459
 msgid "Adding new tracks/busses failed"
 msgstr "Chyba při přidávání nových stop/sběrnic"
 
-#: session.cc:4889
+#: session.cc:5121
 msgid "Merging embedded file %1: name collision AND md5 hash collision!"
 msgstr "Sloučení vloženého souboru %1: střet názvu AND md5 hash střet!"
 
-#: session.cc:5012
+#: session.cc:5244
 msgid "There are already %1 recordings for %2, which I consider too many."
 msgstr "Již je %1 nahrávek pro %2, což se považuje za příliš mnoho."
 
-#: session.cc:5073
+#: session.cc:5305
 msgid ""
 "There are already many recordings for %1, resulting in a too long file-path "
 "%2."
 msgstr ""
 "Již je mnoho nahrávek pro %1, což vede k příliš dlouhé souborové cestě %2."
 
-#: session.cc:5711
+#: session.cc:5963
 msgid "send ID %1 appears to be in use already"
 msgstr "Zdá se, že send ID %1 se již používá"
 
-#: session.cc:5723
+#: session.cc:5975
 msgid "aux send ID %1 appears to be in use already"
 msgstr "Zdá se, že aux send ID %1 se již používá"
 
-#: session.cc:5735
+#: session.cc:5987
+msgid "surround send ID %1 appears to be in use already"
+msgstr "surround výstup ID %1 vypadá že je již v použití"
+
+#: session.cc:5999
 msgid "return ID %1 appears to be in use already"
 msgstr "Zdá se, že return ID %1 se již používá"
 
-#: session.cc:5747
+#: session.cc:6011
 msgid "insert ID %1 appears to be in use already"
 msgstr "Zdá se, že insert ID %1 se již používá"
 
-#: session.cc:5897
+#: session.cc:6172
 msgid "Cannot write a range where end <= start (e.g. %1 <= %2)"
 msgstr "Nelze zapsat rozsah s koncem <= začátek (např. %1 <= %2)"
 
-#: session.cc:5910
+#: session.cc:6185
 msgid "Cannot write a range with no data."
 msgstr "Nelze zapsat rozsah bez dat."
 
-#: session.cc:5949
+#: session.cc:6224
 msgid "cannot create new file \"%1\" for %2"
 msgstr "nelze vytvořit nový soubor \"%1\" pro %2"
 
-#: session.cc:7166
+#: session.cc:7441
 msgid "Control Char"
 msgstr "Ovládací znak"
 
-#: session.cc:7260
+#: session.cc:7535
 msgid "Copy Section"
 msgstr "Kopírovat sekci"
 
-#: session.cc:7263
+#: session.cc:7538
 msgid "Move Section"
 msgstr "Přesunout sekci"
 
-#: session.cc:7266
+#: session.cc:7541
 msgid "Insert Section"
 msgstr "Vložit sekci"
 
-#: session.cc:7269
+#: session.cc:7544
 msgid "Delete Section"
 msgstr "Smazat sekci"
 
-#: session.cc:7364
+#: session.cc:7639
 msgid "cut tempo map"
 msgstr "oříznout mapu tempa"
 
-#: session.cc:7619 session.cc:7620
+#: session.cc:7894 session.cc:7895
 msgid "Virtual Keyboard"
 msgstr "Virtuální klaviatura"
 
@@ -3164,305 +3275,305 @@ msgstr "Nepodařilo se nastavit stav sezení z XML"
 msgid "Session state: "
 msgstr "Stav sezení: "
 
-#: session_state.cc:385
+#: session_state.cc:388
 msgid "Unexpected exception during session setup: "
 msgstr "Neočekávaná výjimka během zřízení sezení:"
 
-#: session_state.cc:388
+#: session_state.cc:391
 msgid "Unknown exception during session setup"
 msgstr "Neznámá výjimka během zřízení sezení"
 
-#: session_state.cc:392
+#: session_state.cc:395
 msgid "Reset Remote Controls"
 msgstr "Obnovit výchozí vzdálené ovládání"
 
-#: session_state.cc:408 session_state.cc:428
+#: session_state.cc:411 session_state.cc:431
 msgid "Filling playback buffers"
 msgstr "Vyplňuje se vyrovnávací paměť přehrávání"
 
-#: session_state.cc:495
+#: session_state.cc:498
 msgid "Session: cannot create session peakfile folder \"%1\" (%2)"
 msgstr ""
 "Sezení: Nelze vytvořit složku sezení se souborem s nejvyšší hodnotou "
 "\"%1\" (%2)"
 
-#: session_state.cc:502
+#: session_state.cc:505
 msgid "Session: cannot create session sounds dir \"%1\" (%2)"
 msgstr "Sezení: Nelze vytvořit adresář sezení pro zvuková data \"%1\" (%2)"
 
-#: session_state.cc:509
+#: session_state.cc:512
 msgid "Session: cannot create session midi dir \"%1\" (%2)"
 msgstr "Sezení: Nelze vytvořit adresář sezení pro MIDI \"%1\" (%2)"
 
-#: session_state.cc:516
+#: session_state.cc:519
 msgid "Session: cannot create session dead sounds folder \"%1\" (%2)"
 msgstr ""
 "Sezení: Nelze vytvořit složku (odpadkový koš) sezení pro opuštěné zvuky "
 "\"%1\" (%2)"
 
-#: session_state.cc:523
+#: session_state.cc:526
 msgid "Session: cannot create session export folder \"%1\" (%2)"
 msgstr "Sezení: Nelze vytvořit složku sezení pro data vyvedení \"%1\" (%2)"
 
-#: session_state.cc:531
+#: session_state.cc:534
 msgid "Session: cannot create session backup folder \"%1\" (%2)"
 msgstr "Sezení: Nelze vytvořit složku sezení pro záložní data \"%1\" (%2)"
 
-#: session_state.cc:539
+#: session_state.cc:542
 msgid "Session: cannot create session analysis folder \"%1\" (%2)"
 msgstr "Sezení: Nelze vytvořit složku sezení pro data s rozbory \"%1\" (%2)"
 
-#: session_state.cc:546
+#: session_state.cc:549
 msgid "Session: cannot create session plugins folder \"%1\" (%2)"
 msgstr "Sezení: Nelze vytvořit složku sezení pro přídavné moduly \"%1\" (%2)"
 
-#: session_state.cc:553
+#: session_state.cc:556
 msgid "Session: cannot create session externals folder \"%1\" (%2)"
 msgstr "Sezení: Nelze vytvořit složku sezení pro vnější znaky \"%1\" (%2)"
 
-#: session_state.cc:567
+#: session_state.cc:570
 msgid "Session: cannot create session folder \"%1\" (%2)"
 msgstr "Sezení: Nelze vytvořit složku sezení \"%1\" (%2)"
 
-#: session_state.cc:602
+#: session_state.cc:605
 msgid "Error reading session template file %1 (%2)"
 msgstr "Chyba při čtení souboru s předlohou sezení %1 (%2)"
 
-#: session_state.cc:617
+#: session_state.cc:620
 msgid "Error writing session template file %1 (%2)"
 msgstr "Chyba při zápisu souboru s předlohou sezení %1 (%2)"
 
-#: session_state.cc:632
+#: session_state.cc:635
 msgid "Could not open %1 for writing session template"
 msgstr "Nepodařilo se otevřít %1 pro zápis předlohy sezení"
 
-#: session_state.cc:639
+#: session_state.cc:642
 msgid "Could not open session template %1 for reading"
 msgstr "Nepodařilo se otevřít předlohu sezení %1 pro čtení"
 
-#: session_state.cc:688
+#: session_state.cc:692
 msgid "Could not remove pending capture state at path \"%1\" (%2)"
 msgstr "Nepodařilo se odstranit dočasný stav nahrávání v cestě \"%1\" (%2)"
 
-#: session_state.cc:717
+#: session_state.cc:721
 msgid "could not rename snapshot %1 to %2 (%3)"
 msgstr "Nepodařilo se přejmenovat snímek %1 na %2 (%3)"
 
-#: session_state.cc:745
+#: session_state.cc:749
 msgid "Could not remove session file at path \"%1\" (%2)"
 msgstr "Nepodařilo se odstranit soubor se sezením v cestě \"%1\" (%2)"
 
-#: session_state.cc:867
+#: session_state.cc:871
 msgid "state could not be saved to %1"
 msgstr "Stav se nepodařilo uložit do %1"
 
-#: session_state.cc:869 session_state.cc:882
+#: session_state.cc:873 session_state.cc:886
 msgid "Could not remove temporary session file at path \"%1\" (%2)"
 msgstr "Nepodařilo se odstranit dočasný soubor se sezením v cestě \"%1\" (%2)"
 
-#: session_state.cc:879
+#: session_state.cc:883
 msgid "could not rename temporary session file %1 to %2 (%3)"
 msgstr "Nepodařilo se přejmenovat dočasný soubor se sezením %1 na %2 (%3)"
 
-#: session_state.cc:908
+#: session_state.cc:912
 msgid "Could not save backup file at path \"%1\" (%2)"
 msgstr "Nepodařilo se uložit záložní soubor v cestě \"%1\" (%2)"
 
-#: session_state.cc:987
+#: session_state.cc:991
 msgid "%1: session file \"%2\" doesn't exist!"
 msgstr "%1: Soubor se sezením \"%2\" neexistuje!"
 
-#: session_state.cc:999
+#: session_state.cc:1003
 msgid "Could not understand session file %1"
 msgstr "Nepodařilo se porozumět souboru se sezením %1"
 
-#: session_state.cc:1008
+#: session_state.cc:1012
 msgid "Session file %1 is not a session"
 msgstr "Soubor se sezením %1 není sezení"
 
-#: session_state.cc:1020
+#: session_state.cc:1024
 msgid ""
 "Incompatible Session Version. That session was created with a newer version "
 "of %1"
 msgstr ""
 "Nekompatibilní verze sezení. Toto sezení bylo vytvořeno novější verzí %1"
 
-#: session_state.cc:1644
+#: session_state.cc:1648
 msgid "Session-Save: Failed to copy MIDI Source '%1' for snapshot"
 msgstr "Uložení sezení: Kopírování zdroje MIDI '%1' pro snímek selhalo"
 
-#: session_state.cc:1694
+#: session_state.cc:1698
 msgid "programming error: Session: incorrect XML node sent to set_state()"
 msgstr "Chyba programování: Sezení: nesprávný uzel XML poslán do set_state()"
 
-#: session_state.cc:1716
+#: session_state.cc:1720
 msgid "Session: Load aborted due to sample-rate mismatch"
 msgstr "Sezení: Načtení přerušeno kvůli nesouladu vzorkovací frekvence"
 
-#: session_state.cc:1718
+#: session_state.cc:1722
 msgid "Session: Load aborted since engine is offline"
-msgstr "Sezení: načtení přerušeno, protože zařízení je offline"
+msgstr "Sezení: načtení přerušeno, protože zvukové zařízení je offline"
 
-#: session_state.cc:1757
+#: session_state.cc:1761
 msgid "Session: XML state has no 'Tempo Map' section"
 msgstr "Sezení: XML nemá žádnou část 'Tempo Map'"
 
-#: session_state.cc:1765
+#: session_state.cc:1769
 msgid "Session: XML state has invalid Tempo Map section"
 msgstr "Sezení: XML stav má neplatnou sekci mapy tempa"
 
-#: session_state.cc:1827
+#: session_state.cc:1831
 msgid "Session: XML state has no 'Options' section"
 msgstr "Sezení: XML nemá žádnou část 'Options'"
 
-#: session_state.cc:1836
+#: session_state.cc:1840
 msgid "Session: XML state has no 'Metadata' section"
 msgstr "Sezení: XML nemá žádnou část 'Metadata'"
 
-#: session_state.cc:1838
+#: session_state.cc:1842
 msgid "Session: XML state contains invalid session metadata"
 msgstr "Sezení: XML stav obsahuje neplatná metadata sezení"
 
-#: session_state.cc:1848
+#: session_state.cc:1852
 msgid "Session: XML state has no 'Sources' section"
 msgstr "Sezení: XML nemá žádnou část 'Sources'"
 
-#: session_state.cc:1851
+#: session_state.cc:1855
 msgid "Session: failed to load audio/MIDI sources"
 msgstr "Sezení: selhalo načtení zvukových/MIDI zdrojů"
 
-#: session_state.cc:1856
+#: session_state.cc:1860
 msgid "Session: XML state has no 'Locations' section"
 msgstr "Sezení: XML nemá žádnou část 'Locations'"
 
-#: session_state.cc:1859
+#: session_state.cc:1863
 msgid "Session: failed to parse 'Locations' information"
 msgstr "Sezení: selhalo zpracování informací o 'Locations'"
 
-#: session_state.cc:1870
+#: session_state.cc:1874
 msgid "Session: XML state has no 'Regions' section"
 msgstr "Sezení: XML nemá žádnou část 'Regions'"
 
-#: session_state.cc:1873
+#: session_state.cc:1877
 msgid "Session: failed to load regions"
 msgstr "Sezení: selhalo načtení oblastí"
 
-#: session_state.cc:1878
+#: session_state.cc:1882
 msgid "Session: XML state has no 'Playlists' section"
 msgstr "Sezení: XML nemá žádnou část 'Playlists'"
 
-#: session_state.cc:1881
+#: session_state.cc:1885
 msgid "Session: failed to load active playlists"
 msgstr "Sezení: selhalo načtení aktivních playlistů"
 
-#: session_state.cc:1888
+#: session_state.cc:1892
 msgid "Session: failed to load playlists"
 msgstr "Sezení: selhalo načtení playlistů"
 
-#: session_state.cc:1894
+#: session_state.cc:1898
 msgid "Session: failed to load region compound information"
 msgstr "Sezení: selhalo načtení složené informace o oblastech"
 
-#: session_state.cc:1901
+#: session_state.cc:1905
 msgid "Session: XML state has no 'Bundles' section"
 msgstr "Sezení: XML nemá žádnou část 'Bundles'"
 
-#: session_state.cc:1971
+#: session_state.cc:1975
 msgid "Created region '%1' for source '%2'"
 msgstr "Vytvořena oblast '%1' pro zdroj '%2'"
 
-#: session_state.cc:1973
+#: session_state.cc:1977
 msgid "Failed to create region representation for source '%1'"
 msgstr "Selhalo vytvoření reprezentace oblasti pro zdroj '%1'"
 
-#: session_state.cc:1979
+#: session_state.cc:1983
 msgid "Session: XML state has no 'Routes' section"
 msgstr "Sezení: XML nemá žádnou část 'Routes'"
 
-#: session_state.cc:1982
+#: session_state.cc:1986
 msgid "Session: failed to load route state"
 msgstr "Sezení: selhalo načtení stavu cesty"
 
-#: session_state.cc:1998
+#: session_state.cc:2002
 msgid "Session: XML state has no 'Route Groups' section"
 msgstr "Sezení: XML nemá žádnou část 'Route Groups'"
 
-#: session_state.cc:2001
+#: session_state.cc:2005
 msgid "Session: failed to load route group information"
 msgstr "Sezení: selhalo načtení informací o skupině cest"
 
-#: session_state.cc:2008
+#: session_state.cc:2012
 msgid "Session: XML state has no 'Edit Groups' section"
 msgstr "Sezení: XML nemá žádnou část 'Edit Groups'"
 
-#: session_state.cc:2011
+#: session_state.cc:2015
 msgid "Session: failed to load edit group information"
 msgstr "Sezení: selhalo načtení informací o skupině pro úpravy"
 
-#: session_state.cc:2016
+#: session_state.cc:2020
 msgid "Session: XML state has no 'Mix Groups' section"
 msgstr "Sezení: XML nemá žádnou část 'Mix Groups'"
 
-#: session_state.cc:2019
+#: session_state.cc:2023
 msgid "Session: failed to load mix group information"
 msgstr "Sezení: selhalo načtení informací o skupině pro směšování"
 
-#: session_state.cc:2025
+#: session_state.cc:2029
 msgid "Session: XML state has no 'Click' section"
 msgstr "Sezení: XML nemá žádnou část 'Click'"
 
-#: session_state.cc:2130
+#: session_state.cc:2138
 msgid "Session: cannot create track/bus from XML description."
 msgstr "Sezení: nelze vytvořit stopu/sběrnici z XML popisu."
 
-#: session_state.cc:2134
+#: session_state.cc:2142
 msgid "Loaded track/bus %1"
 msgstr "Byla nahrána stopa/sběrnice %1"
 
-#: session_state.cc:2139
+#: session_state.cc:2147
 msgid "Tracks/busses loaded;  Adding to Session"
 msgstr "Byly nahrány stopy/sběrnice; Přidávají se do sezení"
 
-#: session_state.cc:2153
+#: session_state.cc:2161
 msgid "Finished adding tracks/busses"
 msgstr "Přidání stop/sběrnic dokončeno"
 
-#: session_state.cc:2291
+#: session_state.cc:2305
 msgid "Could not find diskstream for diskstream-id: '%1', playlist: '%2'"
 msgstr "Nelze najít diskstream pro diskstream-id: '%1', playlist: '%2'"
 
-#: session_state.cc:2350
+#: session_state.cc:2364
 msgid "Session: cannot create Region from XML description."
 msgstr "Sezení: Nelze vytvořit oblast z popisu XML."
 
-#: session_state.cc:2354
+#: session_state.cc:2368
 msgid "Can not load state for region '%1'"
 msgstr "Nelze nahrát stav pro oblast '%1'"
 
-#: session_state.cc:2390
+#: session_state.cc:2404
 msgid "Regions in compound description not found (ID's %1 and %2): ignored"
 msgstr "Oblasti v popisu spojení nenalezeny (ID %1 a %2): přehlíží se"
 
-#: session_state.cc:2418
+#: session_state.cc:2432
 msgid "Nested source has no ID info in session file! (ignored)"
 msgstr ""
 "Vnořený zdroj nemá v souboru se sezením žádné informace o ID! (přehlíží se)"
 
-#: session_state.cc:2430
+#: session_state.cc:2444
 msgid "Cannot reconstruct nested source for region %1"
 msgstr "Nelze znovu postavit vnořený zdroj pro oblast %1"
 
-#: session_state.cc:2490
+#: session_state.cc:2504
 msgid "Session: XMLNode describing a AudioRegion is incomplete (no source)"
 msgstr "Sezení: Uzel XML k popisu zvukové oblasti je neúplný (chybí zdroj)"
 
-#: session_state.cc:2498 session_state.cc:2519 session_state.cc:2539
+#: session_state.cc:2512 session_state.cc:2533 session_state.cc:2553
 msgid ""
 "Session: XMLNode describing a AudioRegion references an unknown source id =%1"
 msgstr ""
 "Sezení: Uzel XML k popisu zvukové oblasti odkazuje na ID neznámého zdroje =%1"
 
-#: session_state.cc:2504 session_state.cc:2525 session_state.cc:2545
+#: session_state.cc:2518 session_state.cc:2539 session_state.cc:2559
 msgid ""
 "Session: XMLNode describing a AudioRegion references a non-audio source id "
 "=%1"
@@ -3470,7 +3581,7 @@ msgstr ""
 "Sezení: Uzel XML k popisu zvukové oblasti odkazuje na ID ne-zvukového zdroje "
 "=%1"
 
-#: session_state.cc:2568
+#: session_state.cc:2582
 msgid ""
 "Session: XMLNode describing an AudioRegion is missing some master sources; "
 "ignored"
@@ -3478,27 +3589,27 @@ msgstr ""
 "Sezení: Uzlu XML k popisu zvukové oblasti chybí některé hlavní zdroje; "
 "přehlíží se"
 
-#: session_state.cc:2602
+#: session_state.cc:2616
 msgid "Session: XMLNode describing a MidiRegion is incomplete (no source)"
 msgstr "Sezení: Uzel XML k popisu oblasti MIDI je neúplný (chybí zdroj)"
 
-#: session_state.cc:2610
+#: session_state.cc:2624
 msgid ""
 "Session: XMLNode describing a MidiRegion references an unknown source id =%1"
 msgstr ""
 "Sezení: Uzel XML k popisu oblasti MIDI odkazuje na ID neznámého zdroje =%1"
 
-#: session_state.cc:2616
+#: session_state.cc:2630
 msgid ""
 "Session: XMLNode describing a MidiRegion references a non-midi source id =%1"
 msgstr ""
 "Sezení: Uzel XML k popisu oblasti MIDI odkazuje na ID ne-MIDI zdroje =%1"
 
-#: session_state.cc:2702
+#: session_state.cc:2716
 msgid "Session: cannot create Source from XML description."
 msgstr "Sezení: Nelze vytvořit zdroj z popisu XML."
 
-#: session_state.cc:2731
+#: session_state.cc:2745
 msgid ""
 "An external MIDI file is missing. %1 cannot currently recover from missing "
 "external MIDI files"
@@ -3506,39 +3617,39 @@ msgstr ""
 "Vnější soubor MIDI chybí. %1 se nyní nemůže bez chybějícího vnějšího souboru "
 "MIDI obejít"
 
-#: session_state.cc:2824
+#: session_state.cc:2838
 msgid "Found a sound file that cannot be used by %1. Talk to the programmers."
 msgstr "Byl nalezen zvukový soubor používaný %1. Promluvte si s programátory."
 
-#: session_state.cc:2846
+#: session_state.cc:2860
 msgid "Could not create templates directory \"%1\" (%2)"
 msgstr "Nepodařilo se vytvořit adresář s předlohami \"%1\" (%2)"
 
-#: session_state.cc:2857
+#: session_state.cc:2871
 msgid "Template \"%1\" already exists - new version not created"
 msgstr "Předloha \"%1\" už existuje - nová verze nebyla vytvořena"
 
-#: session_state.cc:2863
+#: session_state.cc:2877
 msgid "Could not create directory for Session template\"%1\" (%2)"
 msgstr "Nepodařilo se vytvořit adresář pro předlohu sezení \"%1\" (%2)"
 
-#: session_state.cc:2899
+#: session_state.cc:2913
 msgid "template not saved"
 msgstr "Předloha neuložena"
 
-#: session_state.cc:3146
+#: session_state.cc:3160
 msgid "Unknown node \"%1\" found in Bundles list from session file"
 msgstr "Neznámý uzel \"%1\" nalezen v seznamu balíků souboru se sezením"
 
-#: session_state.cc:3671
+#: session_state.cc:3685
 msgid "Cannot cleanup peak-files for read-only session."
 msgstr "Nelze uklidit soubory s nejvyššími hodnotami pro sezení jen pro čtení."
 
-#: session_state.cc:3675
+#: session_state.cc:3689
 msgid "Cannot cleanup peak-files while recording"
 msgstr "Nelze uklidit soubory s nejvyššími hodnotami během nahrávání"
 
-#: session_state.cc:3698
+#: session_state.cc:3712
 msgid ""
 "Timeout waiting for peak-file creation to terminate before cleanup, please "
 "try again later."
@@ -3546,86 +3657,86 @@ msgstr ""
 "Přestávka při čekání na to, až bude před úklidem dokončeno vytvoření souboru "
 "s nejvyššími hodnotami. Zkuste to, prosím, později znovu."
 
-#: session_state.cc:3967
+#: session_state.cc:3979
 msgid "Session: cannot create dead file folder \"%1\" (%2)"
 msgstr "Sezení: Nelze vytvořit složku (odpadkový koš) \"%1\" (%2)"
 
-#: session_state.cc:4000
+#: session_state.cc:4012
 msgid "cannot rename unused file source from %1 to %2 (%3)"
 msgstr "Nelze přejmenovat nepoužívaný zdrojový soubor z %1 na %2 (%3)"
 
-#: session_state.cc:4016
+#: session_state.cc:4028
 msgid "cannot remove peakfile %1 for %2 (%3)"
 msgstr "Nelze odstranit soubor s nejvyšší hodnotou %1 pro %2 (%3)"
 
-#: session_state.cc:4195
+#: session_state.cc:4207
 msgid "could not backup old history file, current history not saved"
 msgstr ""
 "Nepodařilo se zazálohovat starý soubor se seznamem činností, nynější seznam "
 "činností neuložen"
 
-#: session_state.cc:4209
+#: session_state.cc:4221
 msgid "history could not be saved to %1"
 msgstr "Sezname činností se nepodařilo uložit do %1"
 
-#: session_state.cc:4212
+#: session_state.cc:4224
 msgid "Could not remove history file at path \"%1\" (%2)"
 msgstr ""
 "Nepodařilo se odstranit soubor se seznamem činností v cestě \"%1\" (%2)"
 
-#: session_state.cc:4216
+#: session_state.cc:4228
 msgid "could not restore history file from backup %1 (%2)"
 msgstr "Nepodařilo se obnovit soubor se seznamem činností ze zálohy %1 (%2)"
 
-#: session_state.cc:4241
+#: session_state.cc:4253
 msgid "%1: no history file \"%2\" for this session."
 msgstr "%1: Žádný soubor se seznamem činností \"%2\" pro toto sezení."
 
-#: session_state.cc:4247
+#: session_state.cc:4259
 msgid "Could not understand session history file \"%1\""
 msgstr "Nepodařilo se porozumět souboru se seznamem činností \"%1\""
 
-#: session_state.cc:4302
+#: session_state.cc:4314
 msgid "Failed to downcast MidiSource for NoteDiffCommand"
 msgstr "MidiSource pro NoteDiffCommand není k nalezení"
 
-#: session_state.cc:4313
+#: session_state.cc:4325
 msgid "Failed to downcast MidiSource for SysExDiffCommand"
 msgstr "MidiSource pro SysExDiffCommand není k nalezení"
 
-#: session_state.cc:4324
+#: session_state.cc:4336
 msgid "Failed to downcast MidiSource for PatchChangeDiffCommand"
 msgstr "MidiSource pro PatchChangeDiffCommand není k nalezení"
 
-#: session_state.cc:4332
+#: session_state.cc:4344
 msgid "Couldn't figure out how to make a Command out of a %1 XMLNode."
 msgstr "V uzlu XML %1 se nepodařilo rozpoznat žádný příkaz."
 
-#: session_state.cc:4340
+#: session_state.cc:4352
 msgid "Error during loading undo history (%1). Undo history will be ignored"
 msgstr "Chyba při načítání historie úprav (%1). Historie úprav bude ignorována"
 
-#: session_state.cc:4691
+#: session_state.cc:4732
 msgid "Cannot rename read-only session."
 msgstr "Nelze přejmenovat sezení jen pro čtení."
 
-#: session_state.cc:4695
+#: session_state.cc:4736
 msgid "Cannot rename session while recording"
 msgstr "Nelze přejmenovat sezení během nahrávání"
 
-#: session_state.cc:4774 session_state.cc:4814
+#: session_state.cc:4815 session_state.cc:4855
 msgid "renaming %s as %2 failed (%3)"
 msgstr "Přejmenování %s jako %2 selhalo (%3)"
 
-#: session_state.cc:4828 session_state.cc:4840
+#: session_state.cc:4869 session_state.cc:4881
 msgid "renaming %1 as %2 failed (%3)"
 msgstr "Přejmenování %1 jako %2 selhalo (%3)"
 
-#: session_state.cc:5230
+#: session_state.cc:5271
 msgid "Cannot create new session folder %1"
 msgstr "Nelze vytvořit novou složku sezení %1"
 
-#: session_state.cc:5292 session_state.cc:5367
+#: session_state.cc:5333 session_state.cc:5408
 msgid ""
 "\n"
 "copying \"%1\" failed !"
@@ -3633,15 +3744,15 @@ msgstr ""
 "\n"
 "kopírování \"%1\" selhalo !"
 
-#: session_state.cc:5581
+#: session_state.cc:5622
 msgid "unknown reason"
 msgstr "neznámý důvod"
 
-#: session_state.cc:5604
+#: session_state.cc:5645
 msgid "Cannot archive session: invalid destination path/name"
 msgstr "Nelze archivovat sezení: neplatná cíloví cesta/název"
 
-#: session_state.cc:5631
+#: session_state.cc:5672
 msgid ""
 "Cannot archive: session media-search path does not include current session-"
 "path."
@@ -3649,19 +3760,19 @@ msgstr ""
 "Nelze archivovat: media-search cesta sezení neobsahuje současnou session-"
 "path."
 
-#: session_state.cc:5640
+#: session_state.cc:5681
 msgid "Could not make tmpdir: %1"
 msgstr "Nelze vytvořit tmpdir: %1"
 
-#: session_state.cc:5653
+#: session_state.cc:5694
 msgid "Session archive failed to create SessionDirectory `%1'"
 msgstr "Archivace sezení selhala při vytváření SessionDirectory '%1'"
 
-#: session_state.cc:5927
+#: session_state.cc:5968
 msgid "Session archive failed to save state `%1'"
 msgstr "Archivace sezení selhala při ukládání stavu '%1'"
 
-#: session_state.cc:5992
+#: session_state.cc:6033
 msgid "Session archive failed write output: `%1'"
 msgstr "Archivace sezení selhala při zapisování výstupu: '%1'"
 
@@ -3691,11 +3802,11 @@ msgstr ""
 "Looping nelze podporovat když %1 používá transport JACK.\n"
 "Doporučujeme změnu nastavení voleb"
 
-#: simple_export.cc:196
+#: simple_export.cc:198
 msgid "Exporting: '%1'"
 msgstr "Vyvádím: '%1'"
 
-#: simple_export.cc:208
+#: simple_export.cc:218
 msgid "Export initialization failed: %1"
 msgstr "Inicializace vyvedení se nezdařila: %1"
 
@@ -3859,6 +3970,26 @@ msgstr "Chybí informace o reproduktoru - reproduktor se přehlíží"
 msgid "SrcFileSource: %1"
 msgstr "SrcFileSource: %1"
 
+#: surround_pannable.cc:48
+msgid "Center"
+msgstr "Střed"
+
+#: surround_return.cc:34
+msgid "SurrReturn"
+msgstr "SurrReturn"
+
+#: surround_return.cc:52
+msgid "Required Atmos/Vapor Processor not found."
+msgstr "Požadovaný procesor Atmos/Vapor nebyl nalezen."
+
+#: surround_send.cc:339
+msgid "Panner|L"
+msgstr "L"
+
+#: surround_send.cc:339
+msgid "Panner|R"
+msgstr "P"
+
 #: template_utils.cc:117 template_utils.cc:172
 msgid "(unknown)"
 msgstr "(neznámý)"
@@ -3905,15 +4036,15 @@ msgstr ""
 "DiskIOProcessor %1:není žádný seznam skladeb, z něhož by se dala udělat "
 "kopie!"
 
-#: track.cc:1040
+#: track.cc:1038
 msgid "%1: could not create region for complete midi file"
 msgstr "%1: Nepodařilo se vytvořit oblast pro úplný soubor MIDI"
 
-#: track.cc:1104
+#: track.cc:1103
 msgid "%1: could not create region for captured data!"
 msgstr "%1: nelze vytvořit oblast pro nahraná data!"
 
-#: track.cc:1163
+#: track.cc:1162
 msgid "%1: could not create region for complete audio file"
 msgstr "%1: Nepodařilo se vytvořit oblast pro úplný zvukový soubor"
 
@@ -3922,43 +4053,43 @@ msgid "AudioDiskstream: could not create region for captured audio!"
 msgstr ""
 "AudioDiskstream: Nepodařilo se vytvořit oblast pro nahraný zvukový materiál!"
 
-#: transport_master.cc:398 transport_master.cc:399
+#: transport_master.cc:394 transport_master.cc:395
 msgid "Construction of transport master object of type %1 failed"
 msgstr "Konstrukce objektu řízení přehrávání typu %1 selhala"
 
-#: transport_master.cc:423 transport_master.cc:456
+#: transport_master.cc:419 transport_master.cc:452
 msgid "SyncSource|JACK"
 msgstr "JACK"
 
-#: transport_master.cc:430
+#: transport_master.cc:426
 msgid "SyncSource|MTC"
 msgstr "MTC"
 
-#: transport_master.cc:440
+#: transport_master.cc:436
 msgid "SyncSource|M-Clk"
 msgstr "M-Clk"
 
-#: transport_master.cc:450
+#: transport_master.cc:446
 msgid "SyncSource|LTC"
 msgstr "LTC"
 
-#: transport_master.cc:479
+#: transport_master.cc:475
 msgid "All"
 msgstr "Vše"
 
-#: transport_master.cc:483
+#: transport_master.cc:479
 msgid "Start/Stop"
 msgstr "Spustit/Zastavit"
 
-#: transport_master.cc:485
+#: transport_master.cc:481
 msgid "Speed"
 msgstr "Rychlost"
 
-#: transport_master.cc:487
+#: transport_master.cc:483
 msgid "Locate"
 msgstr "Najít"
 
-#: transport_master.cc:489
+#: transport_master.cc:485
 msgid "Complex"
 msgstr "Komplexní"
 
@@ -3985,10 +4116,6 @@ msgstr "A"
 #: triggerbox.cc:142
 msgid "B"
 msgstr "B"
-
-#: triggerbox.cc:143
-msgid "C"
-msgstr "C"
 
 #: triggerbox.cc:144
 msgid "D"
