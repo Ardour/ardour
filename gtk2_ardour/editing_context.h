@@ -295,8 +295,8 @@ public:
 	/** @return Whether the current mouse mode is an "internal" editing mode. */
 	virtual bool internal_editing() const = 0;
 
-	virtual Gdk::Cursor* get_canvas_cursor () const = 0;
-	virtual MouseCursors const* cursors () const {
+	virtual Gdk::Cursor* get_canvas_cursor () const;
+	static MouseCursors const* cursors () {
 		return _cursors;
 	}
 	virtual VerboseCursor* verbose_cursor () const {
@@ -333,15 +333,23 @@ public:
 
 	bool typed_event (ArdourCanvas::Item*, GdkEvent*, ItemType);
 
+	void set_horizontal_position (double);
+	double horizontal_position () const;
+
+	virtual samplecnt_t current_page_samples() const = 0;
+
+	virtual ArdourCanvas::GtkCanvasViewport* get_canvas_viewport() const = 0;
+	virtual ArdourCanvas::Canvas* get_canvas() const = 0;
+
   protected:
 	static Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 
 	/* Cursor stuff.  Do not use directly, use via CursorContext. */
 	friend class CursorContext;
 	std::vector<Gdk::Cursor*> _cursor_stack;
-	virtual void set_canvas_cursor (Gdk::Cursor*) = 0;
-	virtual size_t push_canvas_cursor (Gdk::Cursor*) = 0;
-	virtual void pop_canvas_cursor () = 0;
+	virtual void set_canvas_cursor (Gdk::Cursor*);
+	virtual size_t push_canvas_cursor (Gdk::Cursor*);
+	virtual void pop_canvas_cursor ();
 
 	Editing::GridType  pre_internal_grid_type;
 	Editing::SnapMode  pre_internal_snap_mode;
@@ -397,7 +405,6 @@ public:
 	virtual void mark_region_boundary_cache_dirty () {}
 	virtual void update_tempo_based_rulers () {};
 	virtual void show_rulers_for_grid () {};
-	virtual samplecnt_t current_page_samples() const = 0;
 
 	samplepos_t       _leftmost_sample;
 
@@ -417,7 +424,7 @@ public:
 
 	std::list<XMLNode*> before; /* used in *_reversible_command */
 
-	MouseCursors* _cursors;
+	static MouseCursors* _cursors;
 
 	VerboseCursor* _verbose_cursor;
 
@@ -505,8 +512,14 @@ public:
 	static void push_editing_context (EditingContext*);
 	static void pop_editing_context ();
 
+	/** the adjustment that controls the overall editing vertical scroll position */
+	friend class EditorSummary;
+	Gtk::Adjustment     vertical_adjustment;
+	Gtk::Adjustment     horizontal_adjustment;
+
   private:
 	static std::queue<EditingContext*> ec_stack;
+
 };
 
 

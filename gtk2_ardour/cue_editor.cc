@@ -191,22 +191,6 @@ CueEditor::step_mouse_mode (bool next)
 
 
 void
-CueEditor::set_canvas_cursor (Gdk::Cursor*)
-{
-}
-
-size_t
-CueEditor::push_canvas_cursor (Gdk::Cursor*)
-{
-	return 0;
-}
-
-void
-CueEditor::pop_canvas_cursor ()
-{
-}
-
-void
 CueEditor::reset_x_origin_to_follow_playhead ()
 {
 }

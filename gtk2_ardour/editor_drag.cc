@@ -7091,7 +7091,7 @@ RegionCutDrag::motion (GdkEvent* event, bool)
 void
 RegionCutDrag::finished (GdkEvent* event, bool)
 {
-	_editor.get_track_canvas ()->canvas ()->re_enter ();
+	_editor.get_canvas()->re_enter ();
 
 	timepos_t pos (_drags->current_pointer_time ());
 	editing_context.snap_to_with_modifier (pos, event);

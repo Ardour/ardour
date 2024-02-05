@@ -98,9 +98,6 @@ class CueEditor : public EditingContext
 	void end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const>);
 
   protected:
-	void set_canvas_cursor (Gdk::Cursor*);
-	size_t push_canvas_cursor (Gdk::Cursor*);
-	void pop_canvas_cursor ();
 	void reset_x_origin_to_follow_playhead ();
 };
 

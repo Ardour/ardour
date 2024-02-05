@@ -52,7 +52,7 @@ MidiCueEditor::MidiCueEditor()
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, horizontal_adjustment (0.0, 0.0, 1e16)
 	, view (nullptr)
-	, mouse_mode (Editing::MouseDraw)
+	, mouse_mode (Editing::MouseContent)
 	, bbt_metric (*this)
 {
 	build_canvas ();
@@ -70,6 +70,29 @@ MidiCueEditor::~MidiCueEditor ()
 {
 }
 
+ArdourCanvas::GtkCanvasViewport*
+MidiCueEditor::get_canvas_viewport() const
+{
+	return _canvas_viewport;
+}
+
+ArdourCanvas::Canvas*
+MidiCueEditor::get_canvas() const
+{
+	return _canvas;
+}
+
+bool
+MidiCueEditor::canvas_event (GdkEvent* ev)
+{
+	if (view) {
+		return view->canvas_event (ev);
+	}
+
+	return false;
+}
+
+
 void
 MidiCueEditor::build_canvas ()
 {
@@ -77,6 +100,7 @@ MidiCueEditor::build_canvas ()
 
 	_canvas = _canvas_viewport->canvas ();
 	_canvas->set_background_color (UIConfiguration::instance().color ("arrange base"));
+	_canvas->signal_event().connect (sigc::mem_fun (*this, &MidiCueEditor::canvas_event));
 	dynamic_cast<ArdourCanvas::GtkCanvas*>(_canvas)->use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
 
 	/* scroll group for items that should not automatically scroll
@@ -84,23 +108,19 @@ MidiCueEditor::build_canvas ()
 	*/
 	no_scroll_group = new ArdourCanvas::Container (_canvas->root());
 
-	ArdourCanvas::ScrollGroup* hsg;
-	ArdourCanvas::ScrollGroup* hg;
-	ArdourCanvas::ScrollGroup* cg;
-
-	h_scroll_group = hg = new ArdourCanvas::ScrollGroup (_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
+	h_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
 	CANVAS_DEBUG_NAME (h_scroll_group, "canvas h scroll");
-	_canvas->add_scroller (*hg);
+	_canvas->add_scroller (*h_scroll_group);
 
-	hv_scroll_group = hsg = new ArdourCanvas::ScrollGroup (_canvas->root(),
+	hv_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(),
 							       ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
 													     ArdourCanvas::ScrollGroup::ScrollsHorizontally));
 	CANVAS_DEBUG_NAME (hv_scroll_group, "cue canvas hv scroll");
-	_canvas->add_scroller (*hsg);
+	_canvas->add_scroller (*hv_scroll_group);
 
-	cursor_scroll_group = cg = new ArdourCanvas::ScrollGroup (_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
+	cursor_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsHorizontally);
 	CANVAS_DEBUG_NAME (cursor_scroll_group, "cue canvas cursor scroll");
-	_canvas->add_scroller (*cg);
+	_canvas->add_scroller (*cursor_scroll_group);
 
 	/*a group to hold global rects like punch/loop indicators */
 	global_rect_group = new ArdourCanvas::Container (hv_scroll_group);
@@ -187,12 +207,6 @@ MidiCueEditor::canvas_allocate (Gtk::Allocation alloc)
 	_visible_canvas_height = alloc.get_height();
 
 	bg->set_size (alloc.get_width(), alloc.get_height());
-	std::cerr << "bg is " << bg->width() << std::endl;
-
-	if (view) {
-		ArdourCanvas::Rect r (0., timebar_height * n_timebars, ArdourCanvas::COORD_MAX, alloc.get_height() - (timebar_height * n_timebars));
-		view->set_size (r);
-	}
 }
 
 timepos_t

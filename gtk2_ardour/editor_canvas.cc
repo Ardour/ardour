@@ -1005,14 +1005,6 @@ Editor::tie_vertical_scrolling ()
 }
 
 void
-Editor::set_horizontal_position (double p)
-{
-	horizontal_adjustment.set_value (p);
-
-	_leftmost_sample = (samplepos_t) floor (p * samples_per_pixel);
-}
-
-void
 Editor::color_handler()
 {
 	Gtkmm2ext::Color base = UIConfiguration::instance().color ("ruler base");
@@ -1077,10 +1069,16 @@ Editor::color_handler()
 */
 }
 
-double
-Editor::horizontal_position () const
+ArdourCanvas::GtkCanvasViewport*
+Editor::get_canvas_viewport() const
 {
-	return sample_to_pixel (_leftmost_sample);
+	return _track_canvas_viewport;
+}
+
+ArdourCanvas::Canvas*
+Editor::get_canvas() const
+{
+	return _track_canvas_viewport->canvas();
 }
 
 bool
@@ -1112,66 +1110,6 @@ Editor::clamp_verbose_cursor_y (double y)
 	y = max (0.0, y);
 	y = min (_visible_canvas_height - 50, y);
 	return y;
-}
-
-ArdourCanvas::GtkCanvasViewport*
-Editor::get_track_canvas() const
-{
-	return _track_canvas_viewport;
-}
-
-Gdk::Cursor*
-Editor::get_canvas_cursor () const
-{
-	/* The top of the cursor stack is always the currently visible cursor. */
-	return _cursor_stack.back();
-}
-
-void
-Editor::set_canvas_cursor (Gdk::Cursor* cursor)
-{
-	Glib::RefPtr<Gdk::Window> win = _track_canvas->get_window();
-
-	if (win && !_cursors->is_invalid (cursor)) {
-		/* glibmm 2.4 doesn't allow null cursor pointer because it uses
-		   a Gdk::Cursor& as the argument to Gdk::Window::set_cursor().
-		   But a null pointer just means "use parent window cursor",
-		   and so should be allowed. Gtkmm 3.x has fixed this API.
-
-		   For now, drop down and use C API
-		*/
-		gdk_window_set_cursor (win->gobj(), cursor ? cursor->gobj() : 0);
-	}
-}
-
-size_t
-Editor::push_canvas_cursor (Gdk::Cursor* cursor)
-{
-	if (!_cursors->is_invalid (cursor)) {
-		_cursor_stack.push_back (cursor);
-		set_canvas_cursor (cursor);
-	}
-	return _cursor_stack.size() - 1;
-}
-
-void
-Editor::pop_canvas_cursor ()
-{
-	while (true) {
-		if (_cursor_stack.size() <= 1) {
-			PBD::error << "attempt to pop default cursor" << endmsg;
-			return;
-		}
-
-		_cursor_stack.pop_back();
-		if (_cursor_stack.back()) {
-			/* Popped to an existing cursor, we're done.  Otherwise, the
-			   context that created this cursor has been destroyed, so we need
-			   to skip to the next down the stack. */
-			set_canvas_cursor (_cursor_stack.back());
-			return;
-		}
-	}
 }
 
 Gdk::Cursor*

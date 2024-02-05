@@ -79,6 +79,9 @@ class MidiCueEditor : public CueEditor
 	double timebar_height;
 	size_t n_timebars;
 
+	ArdourCanvas::GtkCanvasViewport* get_canvas_viewport() const;
+	ArdourCanvas::Canvas* get_canvas() const;
+
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
@@ -157,6 +160,8 @@ class MidiCueEditor : public CueEditor
 	};
 
 	BBTMetric bbt_metric;
+
+	bool canvas_event (GdkEvent*);
 };
 
 

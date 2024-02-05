@@ -452,8 +452,6 @@ public:
 	void set_current_trimmable (std::shared_ptr<ARDOUR::Trimmable>);
 	void set_current_movable (std::shared_ptr<ARDOUR::Movable>);
 
-	Gdk::Cursor* get_canvas_cursor () const;
-
 	double clamp_verbose_cursor_x (double);
 	double clamp_verbose_cursor_y (double);
 
@@ -481,7 +479,8 @@ public:
 	ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const { return cursor_scroll_group; }
 	ArdourCanvas::Container* get_drag_motion_group () const { return _drag_motion_group; }
 
-	ArdourCanvas::GtkCanvasViewport* get_track_canvas () const;
+	ArdourCanvas::GtkCanvasViewport* get_canvas_viewport () const;
+	ArdourCanvas::Canvas* get_canvas () const;
 
 	void override_visible_track_count ();
 
@@ -780,10 +779,6 @@ private:
 	Gtk::HBox global_hpacker;
 	Gtk::VBox global_vpacker;
 
-	void set_canvas_cursor (Gdk::Cursor* cursor);
-	size_t push_canvas_cursor (Gdk::Cursor*);
-	void pop_canvas_cursor ();
-
 	Gdk::Cursor* which_track_cursor () const;
 	Gdk::Cursor* which_mode_cursor () const;
 	Gdk::Cursor* which_trim_cursor (bool left_side) const;
@@ -1021,10 +1016,6 @@ private:
 
 	Gtk::Table          edit_packer;
 
-	/** the adjustment that controls the overall editor vertical scroll position */
-	Gtk::Adjustment     vertical_adjustment;
-	Gtk::Adjustment     horizontal_adjustment;
-
 	Gtk::Adjustment     unused_adjustment; // yes, really; Gtk::Layout constructor requires refs
 	Gtk::Layout         controls_layout;
 	bool control_layout_scroll (GdkEventScroll* ev);
@@ -1071,8 +1062,6 @@ private:
 	sigc::connection control_scroll_connection;
 
 	void tie_vertical_scrolling ();
-	void set_horizontal_position (double);
-	double horizontal_position () const;
 
 	struct VisualChange {
 		enum Type {
