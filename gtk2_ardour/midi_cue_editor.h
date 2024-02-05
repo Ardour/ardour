@@ -105,8 +105,6 @@ class MidiCueEditor : public CueEditor
 	bool key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 
  private:
-	Gtk::Adjustment vertical_adjustment;
-	Gtk::Adjustment horizontal_adjustment;
 	ArdourCanvas::GtkCanvasViewport* _canvas_viewport;
 	ArdourCanvas::GtkCanvas* _canvas;
 

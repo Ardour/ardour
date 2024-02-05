@@ -49,8 +49,6 @@ using namespace Temporal;
 MidiCueEditor::MidiCueEditor()
 	: timebar_height (15.)
 	, n_timebars (2)
-	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
-	, horizontal_adjustment (0.0, 0.0, 1e16)
 	, view (nullptr)
 	, mouse_mode (Editing::MouseContent)
 	, bbt_metric (*this)
@@ -85,6 +83,17 @@ MidiCueEditor::get_canvas() const
 bool
 MidiCueEditor::canvas_event (GdkEvent* ev)
 {
+	switch (ev->type) {
+	case GDK_ENTER_NOTIFY:
+	case GDK_LEAVE_NOTIFY:
+		if (canvas_enter_leave (&ev->crossing)) {
+			return true;
+		}
+		break;
+	default:
+		break;
+	}
+
 	if (view) {
 		return view->canvas_event (ev);
 	}
@@ -169,8 +178,6 @@ MidiCueEditor::build_canvas ()
 
 	_canvas->set_name ("MidiCueCanvas");
 	_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
-	_canvas->signal_enter_notify_event().connect (sigc::mem_fun(*this, &MidiCueEditor::canvas_enter_leave), false);
-	_canvas->signal_leave_notify_event().connect (sigc::mem_fun(*this, &MidiCueEditor::canvas_enter_leave), false);
 	_canvas->set_can_focus ();
 
 	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
@@ -186,6 +193,7 @@ MidiCueEditor::canvas_enter_leave (GdkEventCrossing* ev)
 			_canvas_viewport->canvas()->grab_focus ();
 			ActionManager::set_sensitive (_midi_actions, true);
 			EditingContext::push_editing_context (this);
+			std::cerr << "MIDI CUE EDITOR - IN!\n";
 		}
 		break;
 	case GDK_LEAVE_NOTIFY:
@@ -193,6 +201,7 @@ MidiCueEditor::canvas_enter_leave (GdkEventCrossing* ev)
 			ActionManager::set_sensitive (_midi_actions, false);
 			ARDOUR_UI::instance()->reset_focus (_canvas_viewport);
 			EditingContext::pop_editing_context ();
+			std::cerr << "MIDI CUE EDITOR - OUT!\n";
 		}
 	default:
 		break;
