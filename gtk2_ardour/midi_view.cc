@@ -555,6 +555,8 @@ MidiView::motion (GdkEventMotion* ev)
 bool
 MidiView::scroll (GdkEventScroll* ev)
 {
+	std::cerr << "scroll\n";
+
 	if (_editing_context.drags()->active()) {
 		return false;
 	}
@@ -598,11 +600,17 @@ MidiView::scroll (GdkEventScroll* ev)
 				set_note_range (min (127, _midi_context.lowest_note() - step), max (0, _midi_context.highest_note() - step));
 			}
 			return true;
-		case GDK_SCROLL_LEFT:
-			break;
-		case GDK_SCROLL_RIGHT:
 
-			
+		case GDK_SCROLL_LEFT:
+			std::cerr << "left minus\n";
+			_editing_context.set_horizontal_position (_editing_context.horizontal_position() - 20.0);
+			break;
+
+		case GDK_SCROLL_RIGHT:
+			std::cerr << "right plus\n";
+			_editing_context.set_horizontal_position (_editing_context.horizontal_position() + 20.0);
+			break;
+
 		default:
 			break;
 		}

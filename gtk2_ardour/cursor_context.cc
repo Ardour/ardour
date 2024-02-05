@@ -24,7 +24,8 @@
 CursorContext::CursorContext(EditingContext& ec, Gdk::Cursor* cursor)
 	: editing_context(ec)
 	, _index (editing_context.push_canvas_cursor(cursor))
-{}
+{
+}
 
 CursorContext::~CursorContext()
 {

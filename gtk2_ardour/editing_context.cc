@@ -61,6 +61,7 @@ Gtkmm2ext::Bindings* EditingContext::button_bindings = nullptr;
 Glib::RefPtr<Gtk::ActionGroup> EditingContext::_midi_actions;
 std::queue<EditingContext*> EditingContext::ec_stack;
 std::vector<std::string> EditingContext::grid_type_strings;
+MouseCursors* EditingContext::_cursors = nullptr;
 
 static const gchar *_grid_type_strings[] = {
 	N_("No Grid"),
@@ -106,7 +107,6 @@ EditingContext::EditingContext ()
 	, selection (new Selection (this, true))
 	, cut_buffer (new Selection (this, false))
 	, _selection_memento (new SelectionMemento())
-	, _cursors (nullptr)
 	, _verbose_cursor (nullptr)
 	, samples_per_pixel (2048)
 	, zoom_focus (ZoomFocusPlayhead)
@@ -116,6 +116,8 @@ EditingContext::EditingContext ()
 	, _visible_canvas_width (0)
 	, _visible_canvas_height (0)
 	, quantize_dialog (nullptr)
+	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
+	, horizontal_adjustment (0.0, 0.0, 1e16)
 {
 	if (!button_bindings) {
 		button_bindings = new Bindings ("editor-mouse");
@@ -130,6 +132,12 @@ EditingContext::EditingContext ()
 
 	if (grid_type_strings.empty()) {
 		grid_type_strings =  I18N (_grid_type_strings);
+	}
+
+	if (!_cursors) {
+		_cursors = new MouseCursors;
+		_cursors->set_cursor_set (UIConfiguration::instance().get_icon_set());
+		std::cerr << "Set cursor set to " << UIConfiguration::instance().get_icon_set() << std::endl;
 	}
 }
 
@@ -1977,4 +1985,75 @@ void
 EditingContext::pop_editing_context ()
 {
 	ec_stack.pop ();
+}
+
+double
+EditingContext::horizontal_position () const
+{
+	return sample_to_pixel (_leftmost_sample);
+}
+
+void
+EditingContext::set_horizontal_position (double p)
+{
+	p = std::max (0., p);
+
+	std::cerr << "new hp: " << p << std::endl;
+	horizontal_adjustment.set_value (p);
+
+	_leftmost_sample = (samplepos_t) floor (p * samples_per_pixel);
+}
+
+Gdk::Cursor*
+EditingContext::get_canvas_cursor () const
+{
+	/* The top of the cursor stack is always the currently visible cursor. */
+	return _cursor_stack.back();
+}
+
+void
+EditingContext::set_canvas_cursor (Gdk::Cursor* cursor)
+{
+	Glib::RefPtr<Gdk::Window> win = get_canvas_viewport()->get_window();
+
+	if (win && !_cursors->is_invalid (cursor)) {
+		/* glibmm 2.4 doesn't allow null cursor pointer because it uses
+		   a Gdk::Cursor& as the argument to Gdk::Window::set_cursor().
+		   But a null pointer just means "use parent window cursor",
+		   and so should be allowed. Gtkmm 3.x has fixed this API.
+
+		   For now, drop down and use C API
+		*/
+		gdk_window_set_cursor (win->gobj(), cursor ? cursor->gobj() : 0);
+	}
+}
+
+size_t
+EditingContext::push_canvas_cursor (Gdk::Cursor* cursor)
+{
+	if (!_cursors->is_invalid (cursor)) {
+		_cursor_stack.push_back (cursor);
+		set_canvas_cursor (cursor);
+	}
+	return _cursor_stack.size() - 1;
+}
+
+void
+EditingContext::pop_canvas_cursor ()
+{
+	while (true) {
+		if (_cursor_stack.size() <= 1) {
+			PBD::error << "attempt to pop default cursor" << endmsg;
+			return;
+		}
+
+		_cursor_stack.pop_back();
+		if (_cursor_stack.back()) {
+			/* Popped to an existing cursor, we're done.  Otherwise, the
+			   context that created this cursor has been destroyed, so we need
+			   to skip to the next down the stack. */
+			set_canvas_cursor (_cursor_stack.back());
+			return;
+		}
+	}
 }

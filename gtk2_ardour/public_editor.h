@@ -410,8 +410,6 @@ public:
 	virtual ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const = 0;
 	virtual ArdourCanvas::Container* get_drag_motion_group () const = 0;
 
-	virtual ArdourCanvas::GtkCanvasViewport* get_track_canvas() const = 0;
-
 	virtual void set_current_trimmable (std::shared_ptr<ARDOUR::Trimmable>) = 0;
 	virtual void set_current_movable (std::shared_ptr<ARDOUR::Movable>) = 0;
 
