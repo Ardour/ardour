@@ -36,6 +36,7 @@
 #include "midi_cue_editor.h"
 #include "midi_cue_view.h"
 #include "note_base.h"
+#include "prh.h"
 #include "ui_config.h"
 #include "verbose_cursor.h"
 
@@ -50,6 +51,7 @@ MidiCueEditor::MidiCueEditor()
 	: timebar_height (15.)
 	, n_timebars (3)
 	, view (nullptr)
+	, prh (nullptr)
 	, mouse_mode (Editing::MouseContent)
 	, bbt_metric (*this)
 {
@@ -175,7 +177,7 @@ MidiCueEditor::build_canvas ()
 	CANVAS_DEBUG_NAME (bbt_ruler, "cue bbt ruler");
 
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
-	data_group->move (ArdourCanvas::Duple (0., timebar_height * n_timebars));
+	data_group->move (ArdourCanvas::Duple (30, timebar_height * n_timebars));
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
 
 	bg = new CueMidiBackground (data_group);
@@ -310,6 +312,9 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr
 	view->set_region (r);
 
 	bg->set_view (view);
+
+	delete prh;
+	prh = new ArdourCanvas::PianoRollHeader (data_group, *view);
 
 	/* Compute zoom level to show entire source plus some margin if possible */
 

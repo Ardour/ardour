@@ -33,6 +33,7 @@ namespace ArdourCanvas {
 	class Canvas;
 	class Container;
 	class GtkCanvasViewport;
+	class PianoRollHeader;
 	class ScrollGroup;
 }
 
@@ -125,6 +126,7 @@ class MidiCueEditor : public CueEditor
 	ArdourCanvas::Ruler*     bbt_ruler;
 	ArdourCanvas::Rectangle* tempo_bar;
 	ArdourCanvas::Rectangle* meter_bar;
+	ArdourCanvas::PianoRollHeader* prh;
 
 	ArdourCanvas::Rectangle* transport_loop_range_rect;
 
