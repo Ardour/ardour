@@ -196,6 +196,8 @@ DragManager::start_grab (GdkEvent* e, Gdk::Cursor* c)
 bool
 DragManager::end_grab (GdkEvent* e)
 {
+	std::cerr << "DM end drag\n";
+
 	_ending = true;
 
 	bool r = false;
@@ -412,6 +414,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 bool
 Drag::end_grab (GdkEvent* event)
 {
+	std::cerr << "end drag\n";
 	editing_context.stop_canvas_autoscroll ();
 
 	_item->ungrab ();
@@ -6316,6 +6319,8 @@ NoteDrag::motion (GdkEvent* event, bool first_move)
 void
 NoteDrag::finished (GdkEvent* ev, bool moved)
 {
+	std::cerr << "ND::f (" << moved << ")\n";
+
 	if (!moved) {
 		/* no motion - select note */
 
@@ -6356,6 +6361,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			}
 		}
 	} else {
+		std::cerr << "drop it\n";
 		_region->note_dropped (_primary, total_dx (ev), total_dy (), _copy);
 	}
 }

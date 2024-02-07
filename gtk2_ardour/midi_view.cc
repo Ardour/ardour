@@ -381,6 +381,7 @@ MidiView::button_press (GdkEventButton* ev)
 
 		_pressed_button = ev->button;
 
+
 		if (m == MouseDraw || (m == MouseContent && Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier()))) {
 
 			if (_midi_context.note_mode() == Percussive) {
@@ -402,7 +403,7 @@ MidiView::button_press (GdkEventButton* ev)
 	_pressed_button = ev->button;
 	_mouse_changed_selection = false;
 
-	return true;
+	return false;
 }
 
 bool
@@ -424,7 +425,6 @@ MidiView::button_release (GdkEventButton* ev)
 
 	switch (_mouse_state) {
 	case Pressed: // Clicked
-		std::cerr << "P\n";
 		switch (_editing_context.current_mouse_mode()) {
 		case MouseRange:
 			/* no motion occurred - simple click */
@@ -555,8 +555,6 @@ MidiView::motion (GdkEventMotion* ev)
 bool
 MidiView::scroll (GdkEventScroll* ev)
 {
-	std::cerr << "scroll\n";
-
 	if (_editing_context.drags()->active()) {
 		return false;
 	}
@@ -602,12 +600,10 @@ MidiView::scroll (GdkEventScroll* ev)
 			return true;
 
 		case GDK_SCROLL_LEFT:
-			std::cerr << "left minus\n";
 			_editing_context.set_horizontal_position (_editing_context.horizontal_position() - 20.0);
 			break;
 
 		case GDK_SCROLL_RIGHT:
-			std::cerr << "right plus\n";
 			_editing_context.set_horizontal_position (_editing_context.horizontal_position() + 20.0);
 			break;
 
@@ -2702,6 +2698,8 @@ MidiView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool co
 
 		_copy_drag_events.clear ();
 	}
+
+	std::cerr << "DROP & EDIT\n";
 
 	apply_note_diff (true /*subcommand, we don't want this to start a new commit*/, copy);
 	_editing_context.commit_reversible_command ();

@@ -48,7 +48,7 @@ using namespace Temporal;
 
 MidiCueEditor::MidiCueEditor()
 	: timebar_height (15.)
-	, n_timebars (2)
+	, n_timebars (3)
 	, view (nullptr)
 	, mouse_mode (Editing::MouseContent)
 	, bbt_metric (*this)
@@ -81,7 +81,7 @@ MidiCueEditor::get_canvas() const
 }
 
 bool
-MidiCueEditor::canvas_event (GdkEvent* ev)
+MidiCueEditor::canvas_pre_event (GdkEvent* ev)
 {
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
@@ -94,13 +94,8 @@ MidiCueEditor::canvas_event (GdkEvent* ev)
 		break;
 	}
 
-	if (view) {
-		return view->canvas_event (ev);
-	}
-
 	return false;
 }
-
 
 void
 MidiCueEditor::build_canvas ()
@@ -109,7 +104,7 @@ MidiCueEditor::build_canvas ()
 
 	_canvas = _canvas_viewport->canvas ();
 	_canvas->set_background_color (UIConfiguration::instance().color ("arrange base"));
-	_canvas->signal_event().connect (sigc::mem_fun (*this, &MidiCueEditor::canvas_event));
+	_canvas->signal_event().connect (sigc::mem_fun (*this, &MidiCueEditor::canvas_pre_event), false);
 	dynamic_cast<ArdourCanvas::GtkCanvas*>(_canvas)->use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
 
 	/* scroll group for items that should not automatically scroll
@@ -122,8 +117,8 @@ MidiCueEditor::build_canvas ()
 	_canvas->add_scroller (*h_scroll_group);
 
 	hv_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(),
-							       ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
-													     ArdourCanvas::ScrollGroup::ScrollsHorizontally));
+	                                                 ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
+		                ArdourCanvas::ScrollGroup::ScrollsHorizontally));
 	CANVAS_DEBUG_NAME (hv_scroll_group, "cue canvas hv scroll");
 	_canvas->add_scroller (*hv_scroll_group);
 
@@ -150,17 +145,27 @@ MidiCueEditor::build_canvas ()
 	rubberband_rect->set_fill_color (UIConfiguration::instance().color_mod ("rubber band rect", "selection rect"));
 	CANVAS_DEBUG_NAME (rubberband_rect, X_("cue rubberband rect"));
 
-	tempo_bar = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, timebar_height));
+	meter_bar = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0., 0, ArdourCanvas::COORD_MAX, timebar_height));
+	CANVAS_DEBUG_NAME (meter_bar, "Meter Bar");
+	meter_bar->set_fill(true);
+	meter_bar->set_outline(true);
+	meter_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
+	meter_bar->set_fill_color (UIConfiguration::instance().color_mod ("meter bar", "marker bar"));
+	meter_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
+	meter_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
+
+	tempo_bar = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0.0, timebar_height, ArdourCanvas::COORD_MAX, timebar_height * 2));
 	CANVAS_DEBUG_NAME (tempo_bar, "Tempo Bar");
 	tempo_bar->set_fill(true);
-	tempo_bar->set_outline(false);
+	tempo_bar->set_outline(true);
 	tempo_bar->set_outline_what(ArdourCanvas::Rectangle::BOTTOM);
-	// tempo_bar->set_fill_color (UIConfiguration::instance().color_mod ("tempo bar", "marker bar"));
-	tempo_bar->set_fill_color (0xff0000ff);
+	tempo_bar->set_fill_color (UIConfiguration::instance().color_mod ("tempo bar", "marker bar"));
+	tempo_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
+	meter_bar->set_outline_what (ArdourCanvas::Rectangle::BOTTOM);
 
 	Pango::FontDescription font (UIConfiguration::instance().get_SmallerFont());
 	Pango::FontDescription larger_font (UIConfiguration::instance().get_SmallBoldFont());
-	bbt_ruler = new ArdourCanvas::Ruler (time_line_group, &bbt_metric, ArdourCanvas::Rect (0, timebar_height, ArdourCanvas::COORD_MAX, timebar_height * 2));
+	bbt_ruler = new ArdourCanvas::Ruler (time_line_group, &bbt_metric, ArdourCanvas::Rect (0, timebar_height * 2, ArdourCanvas::COORD_MAX, timebar_height * 3));
 	bbt_ruler->set_font_description (font);
 	bbt_ruler->set_second_font_description (larger_font);
 	Gtkmm2ext::Color base = UIConfiguration::instance().color ("ruler base");
@@ -193,7 +198,6 @@ MidiCueEditor::canvas_enter_leave (GdkEventCrossing* ev)
 			_canvas_viewport->canvas()->grab_focus ();
 			ActionManager::set_sensitive (_midi_actions, true);
 			EditingContext::push_editing_context (this);
-			std::cerr << "MIDI CUE EDITOR - IN!\n";
 		}
 		break;
 	case GDK_LEAVE_NOTIFY:
@@ -201,7 +205,6 @@ MidiCueEditor::canvas_enter_leave (GdkEventCrossing* ev)
 			ActionManager::set_sensitive (_midi_actions, false);
 			ARDOUR_UI::instance()->reset_focus (_canvas_viewport);
 			EditingContext::pop_editing_context ();
-			std::cerr << "MIDI CUE EDITOR - OUT!\n";
 		}
 	default:
 		break;
@@ -216,6 +219,10 @@ MidiCueEditor::canvas_allocate (Gtk::Allocation alloc)
 	_visible_canvas_height = alloc.get_height();
 
 	bg->set_size (alloc.get_width(), alloc.get_height());
+
+	if (view) {
+		view->set_height (alloc.get_height() - (n_timebars * timebar_height));
+	}
 }
 
 timepos_t
@@ -266,8 +273,6 @@ MidiCueEditor::reset_zoom (samplecnt_t spp)
 		view->set_samples_per_pixel (spp);
 	}
 
-	std::cerr << "RZ @ " << spp << " cps " << current_page_samples() << " vcw " << _visible_canvas_width << std::endl;
-
 	bbt_ruler->set_range (0, current_page_samples());
 	compute_bbt_ruler_scale (0, current_page_samples());
 	bbt_metric.units_per_pixel = spp;
@@ -277,33 +282,6 @@ samplecnt_t
 MidiCueEditor::current_page_samples() const
 {
 	return (samplecnt_t) _visible_canvas_width* samples_per_pixel;
-}
-
-void
-MidiCueEditor::apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs)
-{
-}
-
-PBD::Command*
-MidiCueEditor::apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv)
-{
-#if 0
-	Evoral::Sequence<Temporal::Beats>::Notes selected;
-	mrv.selection_as_notelist (selected, true);
-
-	if (selected.empty()) {
-		return 0;
-	}
-
-	vector<Evoral::Sequence<Temporal::Beats>::Notes> v;
-	v.push_back (selected);
-
-	timepos_t pos = mrv.midi_region()->source_position();
-
-	return op (mrv.midi_region()->model(), pos.beats(), v);
-#endif
-
-	return nullptr;
 }
 
 bool
@@ -419,7 +397,23 @@ MidiCueEditor::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
 bool
 MidiCueEditor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	std::cerr << "hey\n";
+	bool were_dragging = false;
+
+	if (!Keyboard::is_context_menu_event (&event->button)) {
+
+		/* see if we're finishing a drag */
+
+		if (_drags->active ()) {
+
+			bool const r = _drags->end_grab (event);
+			if (r) {
+				/* grab dragged, so do nothing else */
+				return true;
+			}
+
+			were_dragging = true;
+		}
+	}
 
 	if (Keyboard::is_context_menu_event (&event->button)) {
 		switch (item_type) {
@@ -456,8 +450,13 @@ MidiCueEditor::button_release_dispatch (GdkEventButton* ev)
 }
 
 bool
-MidiCueEditor::motion_handler (ArdourCanvas::Item*, GdkEvent*, bool from_autoscroll)
+MidiCueEditor::motion_handler (ArdourCanvas::Item*, GdkEvent* event, bool from_autoscroll)
 {
+	if (_drags->active ()) {
+		//drags change the snapped_cursor location, because we are snapping the thing being dragged, not the actual mouse cursor
+		return _drags->motion_handler (event, from_autoscroll);
+	}
+
 	return true;
 }
 

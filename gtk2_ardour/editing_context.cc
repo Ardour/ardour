@@ -1919,6 +1919,8 @@ EditingContext::apply_midi_note_edit_op_to_region (MidiOperator& op, MidiView& m
 		return 0;
 	}
 
+	std::cerr << "Apply op to " << selected.size() << std::endl;
+
 	std::vector<Evoral::Sequence<Temporal::Beats>::Notes> v;
 	v.push_back (selected);
 
