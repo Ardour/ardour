@@ -61,9 +61,6 @@ class MidiCueEditor : public CueEditor
 	int32_t get_grid_beat_divisions (Editing::GridType gt) const { return 1; }
 	int32_t get_grid_music_divisions (Editing::GridType gt, uint32_t event_state) const { return 1; }
 
-	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
-	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiRegionView& mrv);
-
 	void set_region (std::shared_ptr<ARDOUR::MidiTrack>, std::shared_ptr<ARDOUR::MidiRegion>);
 
 	ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
@@ -127,6 +124,7 @@ class MidiCueEditor : public CueEditor
 	ArdourCanvas::Container* time_line_group;
 	ArdourCanvas::Ruler*     bbt_ruler;
 	ArdourCanvas::Rectangle* tempo_bar;
+	ArdourCanvas::Rectangle* meter_bar;
 
 	ArdourCanvas::Rectangle* transport_loop_range_rect;
 
@@ -159,7 +157,7 @@ class MidiCueEditor : public CueEditor
 
 	BBTMetric bbt_metric;
 
-	bool canvas_event (GdkEvent*);
+	bool canvas_pre_event (GdkEvent*);
 };
 
 
