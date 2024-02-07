@@ -331,6 +331,7 @@ class MidiView : public virtual sigc::trackable
 
 	void show_verbose_cursor_for_new_note_value(std::shared_ptr<NoteType> current_note, uint8_t new_note) const;
 
+	std::shared_ptr<ARDOUR::MidiTrack>  midi_track() const { return _midi_track; }
 	std::shared_ptr<ARDOUR::MidiRegion> midi_region() const { return _midi_region; }
 	EditingContext& editing_context() const { return _editing_context; }
 	MidiViewBackground& midi_context() const { return _midi_context; }
