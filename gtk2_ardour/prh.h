@@ -41,6 +41,8 @@ class PianoRollHeader : public ArdourCanvas::Rectangle {
 public:
 	PianoRollHeader (ArdourCanvas::Item* parent, MidiView&);
 
+	void size_request (double& w, double& h) const;
+
 	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
 	void size_allocate (ArdourCanvas::Rect const &);
 
@@ -56,6 +58,7 @@ public:
 
 private:
 
+	bool event_handler (GdkEvent*);
 	bool motion_handler (GdkEventMotion*);
 	bool button_press_handler (GdkEventButton*);
 	bool button_release_handler (GdkEventButton*);

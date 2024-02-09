@@ -50,8 +50,9 @@ using namespace Temporal;
 MidiCueEditor::MidiCueEditor()
 	: timebar_height (15.)
 	, n_timebars (3)
-	, view (nullptr)
 	, prh (nullptr)
+	, bg (nullptr)
+	, view (nullptr)
 	, mouse_mode (Editing::MouseContent)
 	, bbt_metric (*this)
 {
@@ -118,6 +119,11 @@ MidiCueEditor::build_canvas ()
 	CANVAS_DEBUG_NAME (h_scroll_group, "canvas h scroll");
 	_canvas->add_scroller (*h_scroll_group);
 
+
+	v_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(), ArdourCanvas::ScrollGroup::ScrollsVertically);
+	CANVAS_DEBUG_NAME (v_scroll_group, "canvas v scroll");
+	_canvas->add_scroller (*v_scroll_group);
+
 	hv_scroll_group = new ArdourCanvas::ScrollGroup (_canvas->root(),
 	                                                 ArdourCanvas::ScrollGroup::ScrollSensitivity (ArdourCanvas::ScrollGroup::ScrollsVertically|
 		                ArdourCanvas::ScrollGroup::ScrollsHorizontally));
@@ -177,7 +183,6 @@ MidiCueEditor::build_canvas ()
 	CANVAS_DEBUG_NAME (bbt_ruler, "cue bbt ruler");
 
 	data_group = new ArdourCanvas::Container (hv_scroll_group);
-	data_group->move (ArdourCanvas::Duple (30, timebar_height * n_timebars));
 	CANVAS_DEBUG_NAME (data_group, "cue data group");
 
 	bg = new CueMidiBackground (data_group);
@@ -314,7 +319,16 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr
 	bg->set_view (view);
 
 	delete prh;
-	prh = new ArdourCanvas::PianoRollHeader (data_group, *view);
+	prh = new ArdourCanvas::PianoRollHeader (v_scroll_group, *view);
+
+	double w, h;
+	prh->size_request (w, h);
+
+	/* Move stuff around */
+
+	prh->move (Duple (0., n_timebars * timebar_height));
+	data_group->move (ArdourCanvas::Duple (w, timebar_height * n_timebars));
+	h_scroll_group->move (Duple (w, 0.));
 
 	/* Compute zoom level to show entire source plus some margin if possible */
 
@@ -336,8 +350,6 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr
 		EditingContext::TempoMapScope tms (*this, map);
 		double width = bg->width();
 		samplecnt_t samples = duration.samples();
-
-		std::cerr << "region is " << samples << " long\n";
 
 		samplecnt_t spp = floor (samples / width);
 		reset_zoom (spp);
