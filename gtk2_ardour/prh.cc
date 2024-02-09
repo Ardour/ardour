@@ -292,9 +292,9 @@ PianoRollHeader::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::C
 	Duple origin (item_to_window (Duple (0., 0.)));
 
 	cr->save ();
-	// cr->translate (origin.x, origin.y);
+	cr->translate (origin.x, origin.y);
 
-	Rect self (item_to_window (get()));
+	Rect self (get());
 
 	double y1 = max (self.y0, 0.);
 	double y2 = min (self.y1, (ArdourCanvas::Coord) floor(_view.midi_context().contents_height()));
@@ -711,6 +711,7 @@ PianoRollHeader::motion_handler (GdkEventMotion* ev)
 bool
 PianoRollHeader::button_press_handler (GdkEventButton* ev)
 {
+	/* Convert canvas-coordinates to item coordinates */
 	Duple evd (canvas_to_item (Duple (ev->x, ev->y)));
 
 	_scroomer_button_state = _scroomer_state;
