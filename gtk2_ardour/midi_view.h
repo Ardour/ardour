@@ -299,6 +299,8 @@ class MidiView : public virtual sigc::trackable
 
 	void show_list_editor ();
 
+	void set_note_range (uint8_t low, uint8_t high);
+
 	typedef std::set<NoteBase*> Selection;
 	Selection const & selection () const {
 		return _selection;
@@ -629,8 +631,6 @@ class MidiView : public virtual sigc::trackable
 	void join_notes_on_channel (int channel);
 
 	void add_split_notes ();
-
-	void set_note_range (uint8_t low, uint8_t high);
 };
 
 
