@@ -114,6 +114,7 @@ class MidiCueEditor : public CueEditor
 	/* The group containing all other groups that are scrolled horizontally ONLY
 	*/
 	ArdourCanvas::ScrollGroup* h_scroll_group;
+	ArdourCanvas::ScrollGroup* v_scroll_group;
 
 	/* Scroll group for cursors, scrolled horizontally, above everything else
 	*/
