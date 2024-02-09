@@ -253,13 +253,12 @@ PianoRollHeader::get_path (int note, double x[], double y[]) const
 {
 	double y_pos = floor(_view.midi_context().note_to_y(note));
 	double note_height;
-	_raw_note_height = floor(_view.midi_context().note_to_y(note - 1)) - y_pos;
 	double width = get().width() - 1.0f;
 
 	if (note == 0) {
 		note_height = floor(_view.midi_context().contents_height()) - y_pos;
 	} else {
-		note_height = _raw_note_height <= 3 ? _raw_note_height : _raw_note_height - 1.f;
+		note_height = _view.midi_context().note_height() <= 3 ? _view.midi_context().note_height() : _view.midi_context().note_height() - 1.f;
 	}
 
 	x[0] = _scroomer_size;
@@ -647,7 +646,7 @@ PianoRollHeader::motion_handler (GdkEventMotion* ev)
 			case TOP:
 				real_val_at_pointer = real_val_at_pointer <= _saved_top_val? _adj.get_value() + _adj.get_page_size() : real_val_at_pointer;
 				real_val_at_pointer = min(127.0, real_val_at_pointer);
-				if (_note_height >= UIConfiguration::instance().get_max_note_height()){
+				if (_view.midi_context().note_height() >= UIConfiguration::instance().get_max_note_height()){
 					_saved_top_val  = min(_adj.get_value() + _adj.get_page_size (), 127.0);
 				} else {
 					_saved_top_val = 0.0;
@@ -659,7 +658,7 @@ PianoRollHeader::motion_handler (GdkEventMotion* ev)
 			case BOTTOM:
 				real_val_at_pointer = max(0.0, real_val_at_pointer);
 				real_val_at_pointer = real_val_at_pointer >= _saved_bottom_val? _adj.get_value() : real_val_at_pointer;
-				if (_note_height >= UIConfiguration::instance().get_max_note_height()){
+				if (_view.midi_context().note_height() >= UIConfiguration::instance().get_max_note_height()){
 					_saved_bottom_val  = _adj.get_value();
 				} else {
 					_saved_bottom_val = 127.0;
@@ -719,7 +718,7 @@ PianoRollHeader::button_press_handler (GdkEventButton* ev)
 	if (ev->button == 1 && ev->x <= _scroomer_size){
 
 		if (ev->type == GDK_2BUTTON_PRESS) {
-			// _view.set_note_range (MidiStreamView::ContentsRange, false);
+			_view.set_note_range (MidiStreamView::ContentsRange, false);
 			return true;
 		}
 
@@ -858,7 +857,6 @@ PianoRollHeader::leave_handler (GdkEventCrossing*)
 void
 PianoRollHeader::note_range_changed ()
 {
-	_note_height = floor (_view.midi_context().note_height ()) + 0.5f;
 	redraw ();
 }
 

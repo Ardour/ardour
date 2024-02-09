@@ -652,7 +652,7 @@ PianoRollHeader::on_button_press_event (GdkEventButton* ev)
 		if (ev->type == GDK_2BUTTON_PRESS) {
 			MidiTimeAxisView* mtv = dynamic_cast<MidiTimeAxisView*>(&_view.trackview());
 			if (mtv) {
-				mtv->set_note_range (MidiStreamView::ContentsRange, false);
+				mtv->set_visibility_note_range (MidiStreamView::ContentsRange, false);
 			}
 			return true;
 		}
