@@ -4670,3 +4670,9 @@ MidiView::set_note_range (uint8_t low, uint8_t high)
 {
 	_midi_context.apply_note_range (low, high, true);
 }
+
+void
+MidiView::set_visibility_note_range (MidiViewBackground::VisibleNoteRange nvr, bool)
+{
+	_midi_context.set_note_visibility_range_style (nvr);
+}
