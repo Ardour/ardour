@@ -340,6 +340,9 @@ public:
 	virtual ArdourCanvas::GtkCanvasViewport* get_canvas_viewport() const = 0;
 	virtual ArdourCanvas::Canvas* get_canvas() const = 0;
 
+	virtual size_t push_canvas_cursor (Gdk::Cursor*);
+	virtual void pop_canvas_cursor ();
+
   protected:
 	static Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 
@@ -347,8 +350,6 @@ public:
 	friend class CursorContext;
 	std::vector<Gdk::Cursor*> _cursor_stack;
 	virtual void set_canvas_cursor (Gdk::Cursor*);
-	virtual size_t push_canvas_cursor (Gdk::Cursor*);
-	virtual void pop_canvas_cursor ();
 
 	Editing::GridType  pre_internal_grid_type;
 	Editing::SnapMode  pre_internal_snap_mode;

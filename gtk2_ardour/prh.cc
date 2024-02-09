@@ -615,17 +615,18 @@ PianoRollHeader::motion_handler (GdkEventMotion* ev)
 		Gdk::Cursor m_Cursor;
 		double scroomer_top = max(1.0, (1.0 - ((_adj.get_value()+_adj.get_page_size()) / 127.0)) * get().height());
 		double scroomer_bottom = (1.0 - (_adj.get_value () / 127.0)) * get().height();
+
 		if (evd.y > scroomer_top - 5 && evd.y < scroomer_top + 5){
 			m_Cursor = Gdk::Cursor (Gdk::TOP_SIDE);
-// XXX			_canvas->set_cursor(m_Cursor);
+			_view.editing_context().push_canvas_cursor (&m_Cursor);
 			_scroomer_state = TOP;
 		}else if (evd.y > scroomer_bottom - 5 && evd.y < scroomer_bottom + 5){
 			m_Cursor = Gdk::Cursor (Gdk::BOTTOM_SIDE);
-// XXXX			_canvas->set_cursor(m_Cursor);
+			_view.editing_context().push_canvas_cursor (&m_Cursor);
 			_scroomer_state = BOTTOM;
 		}else {
 			_scroomer_state = MOVE;
-// XXXX			_canvas->set_cursor();
+			_view.editing_context().pop_canvas_cursor ();
 		}
 	}
 
@@ -718,7 +719,7 @@ PianoRollHeader::button_press_handler (GdkEventButton* ev)
 	if (ev->button == 1 && ev->x <= _scroomer_size){
 
 		if (ev->type == GDK_2BUTTON_PRESS) {
-			_view.set_note_range (MidiStreamView::ContentsRange, false);
+			_view.set_visibility_note_range (MidiStreamView::ContentsRange, false);
 			return true;
 		}
 
@@ -774,9 +775,8 @@ PianoRollHeader::button_release_handler (GdkEventButton* ev)
 {
 	Duple evd (canvas_to_item (Duple (ev->x, ev->y)));
 
-	if (_scroomer_drag){
-		_scroomer_drag = false;
-	}
+	_scroomer_drag = false;
+
 	int note = _view.midi_context().y_to_note(evd.y);
 
 	if (false /*editor().current_mouse_mode() == Editing::MouseRange*/) { //Todo:  this mode is buggy, and of questionable utility anyway
@@ -839,7 +839,7 @@ bool
 PianoRollHeader::leave_handler (GdkEventCrossing*)
 {
 	if (!_scroomer_drag){
-// XXX		_canvas->set_cursor();
+		_view.editing_context().pop_canvas_cursor ();
 	}
 	invalidate_note_range(_highlighted_note, _highlighted_note);
 
