@@ -122,7 +122,6 @@ private:
 	double _old_y;
 	double _fract;
 	double _fract_top;
-	mutable double _raw_note_height;
 	double _min_page_size;
 	enum scr_pos {TOP, BOTTOM, MOVE, NONE};
 	scr_pos _scroomer_state;
@@ -131,9 +130,6 @@ private:
 	double _saved_bottom_val;
 	mutable bool _mini_map_display;
 	bool entered;
-
-	double _note_height;
-	double _old_av_note_height;
 
 	bool show_scroomer () const;
 

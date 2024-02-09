@@ -746,12 +746,12 @@ MidiTimeAxisView::append_extra_display_menu_items ()
 
 	range_items.push_back (
 		MenuElem (_("Show Full Range"),
-		          sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
+		          sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_visibility_note_range),
 		                      MidiStreamView::FullRange, true)));
 
 	range_items.push_back (
 		MenuElem (_("Fit Contents"),
-		          sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_note_range),
+		          sigc::bind (sigc::mem_fun(*this, &MidiTimeAxisView::set_visibility_note_range),
 		                      MidiStreamView::ContentsRange, true)));
 
 	items.push_back (MenuElem (_("Note Range"), *range_menu));
@@ -1326,11 +1326,11 @@ MidiTimeAxisView::set_color_mode (ColorMode mode, bool force, bool redisplay, bo
 }
 
 void
-MidiTimeAxisView::set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection)
+MidiTimeAxisView::set_visibility_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection)
 {
 	if (apply_to_selection) {
 		_editor.get_selection().tracks.foreach_midi_time_axis (
-			boost::bind (&MidiTimeAxisView::set_note_range, _1, range, false));
+			boost::bind (&MidiTimeAxisView::set_visibility_note_range, _1, range, false));
 	} else {
 		if (!_ignore_signals) {
 			midi_view()->set_note_visibility_range_style (range);

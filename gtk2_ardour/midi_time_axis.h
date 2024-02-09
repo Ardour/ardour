@@ -113,7 +113,7 @@ public:
 	void get_per_region_note_selection (std::list<std::pair<PBD::ID, std::set<std::shared_ptr<Evoral::Note<Temporal::Beats> > > > >&);
 	void use_midnam_info ();
 
-	void set_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
+	void set_visibility_note_range (MidiStreamView::VisibleNoteRange range, bool apply_to_selection = false);
 
 protected:
 	void start_step_editing ();

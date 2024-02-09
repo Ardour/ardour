@@ -693,3 +693,9 @@ MidiRegionView::select_self_uniquely ()
 {
 	_editing_context.set_selected_midi_region_view (*this);
 }
+
+void
+MidiRegionView::set_visibility_note_range (MidiViewBackground::VisibleNoteRange vnr, bool from_selection)
+{
+	dynamic_cast<MidiTimeAxisView*>(&trackview)->set_visibility_note_range (vnr, from_selection);
+}
