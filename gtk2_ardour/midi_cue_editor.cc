@@ -188,6 +188,15 @@ MidiCueEditor::build_canvas ()
 	bg = new CueMidiBackground (data_group);
 	_canvas_viewport->signal_size_allocate().connect (sigc::mem_fun(*this, &MidiCueEditor::canvas_allocate));
 
+	prh = new ArdourCanvas::PianoRollHeader (v_scroll_group, *bg);
+
+	double w, h;
+	prh->size_request (w, h);
+
+	prh->set_position (Duple (0., n_timebars * timebar_height));
+	data_group->set_position (ArdourCanvas::Duple (w, timebar_height * n_timebars));
+	h_scroll_group->set_position (Duple (w, 0.));
+
 	_canvas->set_name ("MidiCueCanvas");
 	_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 	_canvas->set_can_focus ();
@@ -317,18 +326,16 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr
 	view->set_region (r);
 
 	bg->set_view (view);
-
-	delete prh;
-	prh = new ArdourCanvas::PianoRollHeader (v_scroll_group, *view);
+	prh->set_view (*view);
 
 	double w, h;
 	prh->size_request (w, h);
 
 	/* Move stuff around */
 
-	prh->move (Duple (0., n_timebars * timebar_height));
-	data_group->move (ArdourCanvas::Duple (w, timebar_height * n_timebars));
-	h_scroll_group->move (Duple (w, 0.));
+	prh->set_position (Duple (0., n_timebars * timebar_height));
+	data_group->set_position (ArdourCanvas::Duple (w, timebar_height * n_timebars));
+	h_scroll_group->set_position (Duple (w, 0.));
 
 	/* Compute zoom level to show entire source plus some margin if possible */
 

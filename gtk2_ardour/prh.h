@@ -39,12 +39,10 @@ namespace ArdourCanvas {
 
 class PianoRollHeader : public ArdourCanvas::Rectangle {
 public:
-	PianoRollHeader (ArdourCanvas::Item* parent, MidiView&);
+	PianoRollHeader (ArdourCanvas::Item* parent, MidiViewBackground&);
 
 	void size_request (double& w, double& h) const;
-
 	void render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::Context>) const;
-	void size_allocate (ArdourCanvas::Rect const &);
 
 	void instrument_info_change ();
 
@@ -56,55 +54,14 @@ public:
 	sigc::signal<void,uint8_t> ToggleNoteSelection;
 	sigc::signal<void,uint8_t> ExtendNoteSelection;
 
+	void set_view (MidiView&);
+
 private:
+	MidiViewBackground& _midi_context;
+	Gtk::Adjustment&    _adj;
+	MidiView*           _view;
 
-	bool event_handler (GdkEvent*);
-	bool motion_handler (GdkEventMotion*);
-	bool button_press_handler (GdkEventButton*);
-	bool button_release_handler (GdkEventButton*);
-	bool scroll_handler (GdkEventScroll*);
-	bool enter_handler (GdkEventCrossing*);
-	bool leave_handler (GdkEventCrossing*);
-
-	// void on_size_request(Gtk::Requisition*);
-
-	struct NoteName {
-		std::string name;
-		bool from_midnam;
-	};
-	NoteName note_names[128];
-	bool have_note_names;
-	void set_min_page_size(double page_size);
-	void render_scroomer(Cairo::RefPtr<Cairo::Context>) const;
-	NoteName get_note_name (int note);
-
-	Gtk::Adjustment& _adj;
-
-	PianoRollHeader(const PianoRollHeader&);
-
-	enum ItemType {
-		BLACK_SEPARATOR,
-		BLACK_MIDDLE_SEPARATOR,
-		BLACK,
-		WHITE_SEPARATOR,
-		WHITE_RECT,
-		WHITE_CF,
-		WHITE_EB,
-		WHITE_DGA
-	};
-
-	void invalidate_note_range(int lowest, int highest);
-
-	void get_path(int note, double x[], double y[]) const;
-
-	void send_note_on(uint8_t note);
-	void send_note_off(uint8_t note);
-
-	void reset_clicked_note(uint8_t, bool invalidate = true);
-
-	MidiView& _view;
-
-	uint8_t _event[3];
+	uint8_t             _event[3];
 
 	mutable Glib::RefPtr<Pango::Layout> _layout;
 	mutable Glib::RefPtr<Pango::Layout> _big_c_layout;
@@ -117,7 +74,7 @@ private:
 	uint8_t _clicked_note;
 	double _grab_y;
 	bool _dragging;
-	double _scroomer_size;
+	mutable double _scroomer_size;
 	bool _scroomer_drag;
 	double _old_y;
 	double _fract;
@@ -131,9 +88,46 @@ private:
 	mutable bool _mini_map_display;
 	bool entered;
 
-	bool show_scroomer () const;
+	// void on_size_request(Gtk::Requisition*);
 
-	ArdourCanvas::Rect _alloc;
+	struct NoteName {
+		std::string name;
+		bool from_midnam;
+	};
+	NoteName note_names[128];
+	bool have_note_names;
+	PBD::ScopedConnection height_connection;
+
+	void set_min_page_size (double page_size);
+	void render_scroomer (Cairo::RefPtr<Cairo::Context>) const;
+	NoteName get_note_name (int note);
+
+	bool event_handler (GdkEvent*);
+	bool motion_handler (GdkEventMotion*);
+	bool button_press_handler (GdkEventButton*);
+	bool button_release_handler (GdkEventButton*);
+	bool scroll_handler (GdkEventScroll*);
+	bool enter_handler (GdkEventCrossing*);
+	bool leave_handler (GdkEventCrossing*);
+
+	enum ItemType {
+		BLACK_SEPARATOR,
+		BLACK_MIDDLE_SEPARATOR,
+		BLACK,
+		WHITE_SEPARATOR,
+		WHITE_RECT,
+		WHITE_CF,
+		WHITE_EB,
+		WHITE_DGA
+	};
+
+	void invalidate_note_range (int lowest, int highest);
+	void get_path (int note, double x[], double y[]) const;
+	void send_note_on (uint8_t note);
+	void send_note_off (uint8_t note);
+	void reset_clicked_note (uint8_t, bool invalidate = true);
+	bool show_scroomer () const;
+	void resize ();
 };
 
 }

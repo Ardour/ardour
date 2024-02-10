@@ -52,6 +52,8 @@ MidiViewBackground::MidiViewBackground (ArdourCanvas::Item* parent)
 
 	note_range_adjustment.set_page_size(_highest_note - _lowest_note);
 	note_range_adjustment.set_value(_lowest_note);
+	note_range_adjustment.set_lower(0);
+	note_range_adjustment.set_upper(127);
 
 	note_range_adjustment.signal_value_changed().connect(sigc::mem_fun(*this, &MidiViewBackground::note_range_adjustment_changed));
 }
