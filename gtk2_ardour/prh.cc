@@ -31,13 +31,15 @@
 #include "gtkmm2ext/keyboard.h"
 #include "gtkmm2ext/rgb_macros.h"
 
+#include "midi++/midnam_patch.h"
+
 #include "editing.h"
+#include "gui_thread.h"
 #include "midi_view.h"
 #include "midi_view_background.h"
 #include "prh.h"
 #include "editing_context.h"
 #include "ui_config.h"
-#include "midi++/midnam_patch.h"
 
 #include "pbd/i18n.h"
 
@@ -46,11 +48,11 @@ using namespace Gtkmm2ext;
 
 namespace ArdourCanvas {
 
-PianoRollHeader::PianoRollHeader (Item* parent, MidiView& v)
+PianoRollHeader::PianoRollHeader (Item* parent, MidiViewBackground& bg)
 	: Rectangle (parent)
-	, have_note_names (false)
-	, _adj (v.midi_context().note_range_adjustment)
-	, _view (v)
+	, _midi_context (bg)
+	, _adj (_midi_context.note_range_adjustment)
+	, _view (nullptr)
 	, _font_descript ("Sans Bold")
 	, _font_descript_big_c ("Sans")
 	, _font_descript_midnam ("Sans")
@@ -67,6 +69,7 @@ PianoRollHeader::PianoRollHeader (Item* parent, MidiView& v)
 	, _saved_bottom_val (127.0)
 	, _mini_map_display (false)
 	, entered (false)
+	, have_note_names (false)
 {
 	Glib::RefPtr<Pango::Context> context = _canvas->get_pango_context();
 
@@ -76,26 +79,16 @@ PianoRollHeader::PianoRollHeader (Item* parent, MidiView& v)
 	_big_c_layout->set_font_description(_font_descript_big_c);
 	_midnam_layout = Pango::Layout::create (context);
 
-	_adj.set_lower(0);
-	_adj.set_upper(127);
-
-	/* set minimum view range to one octave */
-	//set_min_page_size(12);
-
-	//_adj = v->note_range_adjustment;
-
 	for (int i = 0; i < 128; ++i) {
 		_active_notes[i] = false;
 	}
 
-	_view.midi_context().NoteRangeChanged.connect (sigc::mem_fun (*this, &PianoRollHeader::note_range_changed));
-
-	double w, h;
-	size_request (w, h);
-
-	set (Rect (0., 0., w, h));
+	resize ();
+	bg.HeightChanged.connect (height_connection, MISSING_INVALIDATOR, boost::bind (&PianoRollHeader::resize, this), gui_context());
 
 	/* draw vertical lines on both sides of the rectangle */
+	set_fill (false);
+	set_fill (true);
 	set_outline_color (0x000000ff); /* XXX theme me */
 	set_outline_what (Rectangle::What (Rectangle::LEFT|Rectangle::RIGHT));
 
@@ -103,23 +96,32 @@ PianoRollHeader::PianoRollHeader (Item* parent, MidiView& v)
 }
 
 void
-PianoRollHeader::size_request (double& w, double& h) const
+PianoRollHeader::resize ()
 {
-	h = _view.midi_context().contents_height();
-
-	if (show_scroomer()) {
-		w = 60.f * UIConfiguration::instance().get_ui_scale();
-	} else {
-		w = 20.f * UIConfiguration::instance().get_ui_scale();
-	}
-
-	w += 20.;
+	double w, h;
+	size_request (w, h);
+	set (Rect (0., 0., w, h));
 }
 
 void
-PianoRollHeader::size_allocate (ArdourCanvas::Rect const &r)
+PianoRollHeader::set_view (MidiView& v)
 {
-	_alloc = r;
+	_view = &v;
+	_view->midi_context().NoteRangeChanged.connect (sigc::mem_fun (*this, &PianoRollHeader::note_range_changed));
+}
+
+void
+PianoRollHeader::size_request (double& w, double& h) const
+{
+	h = _midi_context.contents_height();
+
+	if (show_scroomer()) {
+		_scroomer_size = 60.f * UIConfiguration::instance().get_ui_scale();
+	} else {
+		_scroomer_size = 20.f * UIConfiguration::instance().get_ui_scale();
+	}
+
+	w = _scroomer_size +  20.;
 }
 
 bool
@@ -174,7 +176,7 @@ render_rect(Cairo::RefPtr<Cairo::Context> cr, int note, double x[], double y[], 
 }
 
 void
-PianoRollHeader::render_scroomer(Cairo::RefPtr<Cairo::Context> cr) const
+PianoRollHeader::render_scroomer (Cairo::RefPtr<Cairo::Context> cr) const
 {
 	double scroomer_top = max (1.0, (1.0 - ((_adj.get_value()+_adj.get_page_size()) / 127.0)) * get().height () );
 	double scroomer_bottom = (1.0 - (_adj.get_value () / 127.0)) * get().height ();
@@ -212,16 +214,20 @@ PianoRollHeader::render_scroomer(Cairo::RefPtr<Cairo::Context> cr) const
 bool
 PianoRollHeader::scroll_handler (GdkEventScroll* ev)
 {
+	if (!_view) {
+		return false;
+	}
+
 	int note_range = _adj.get_page_size ();
 	int note_lower = _adj.get_value ();
 
 	if(ev->state == GDK_SHIFT_MASK){
 		switch (ev->direction) {
 		case GDK_SCROLL_UP: //ZOOM IN
-			_view.apply_note_range (min(note_lower + 1, 127), max(note_lower + note_range - 1,0), true);
+			_view->apply_note_range (min(note_lower + 1, 127), max(note_lower + note_range - 1,0), true);
 			break;
 		case GDK_SCROLL_DOWN: //ZOOM OUT
-			_view.apply_note_range (max(note_lower - 1,0), min(note_lower + note_range + 1, 127), true);
+			_view->apply_note_range (max(note_lower - 1,0), min(note_lower + note_range + 1, 127), true);
 			break;
 		default:
 			return false;
@@ -240,7 +246,7 @@ PianoRollHeader::scroll_handler (GdkEventScroll* ev)
 	}
 
 	Duple evd (canvas_to_item (Duple (ev->x, ev->y)));
-	set_note_highlight (_view.midi_context().y_to_note (evd.y));
+	set_note_highlight (_view->midi_context().y_to_note (evd.y));
 
 	_adj.value_changed ();
 	redraw ();
@@ -251,14 +257,14 @@ PianoRollHeader::scroll_handler (GdkEventScroll* ev)
 void
 PianoRollHeader::get_path (int note, double x[], double y[]) const
 {
-	double y_pos = floor(_view.midi_context().note_to_y(note));
+	double y_pos = floor(_midi_context.note_to_y(note));
 	double note_height;
 	double width = get().width() - 1.0f;
 
 	if (note == 0) {
-		note_height = floor(_view.midi_context().contents_height()) - y_pos;
+		note_height = floor(_midi_context.contents_height()) - y_pos;
 	} else {
-		note_height = _view.midi_context().note_height() <= 3 ? _view.midi_context().note_height() : _view.midi_context().note_height() - 1.f;
+		note_height = _midi_context.note_height() <= 3 ? _midi_context.note_height() : _midi_context.note_height() - 1.f;
 	}
 
 	x[0] = _scroomer_size;
@@ -288,6 +294,10 @@ PianoRollHeader::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::C
 
 	Rectangle::render (area, cr);
 
+	/* Setup a cairo translation so that all drawing can be done using item
+	 * coordinate
+	 */
+
 	Duple origin (item_to_window (Duple (0., 0.)));
 
 	cr->save ();
@@ -296,8 +306,8 @@ PianoRollHeader::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::C
 	Rect self (get());
 
 	double y1 = max (self.y0, 0.);
-	double y2 = min (self.y1, (ArdourCanvas::Coord) floor(_view.midi_context().contents_height()));
-	double av_note_height = _view.midi_context().note_height();
+	double y2 = min (self.y1, (ArdourCanvas::Coord) floor(_midi_context.contents_height()));
+	double av_note_height = _midi_context.note_height();
 	int bc_height, bc_width;
 
 	//Reduce the frequency of Pango layout resizing
@@ -318,8 +328,8 @@ PianoRollHeader::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::C
 
 	_midnam_layout->set_font_description(_font_descript_midnam);
 
-	lowest = max(_view.midi_context().lowest_note(), _view.midi_context().y_to_note(y2));
-	highest = min(_view.midi_context().highest_note(), _view.midi_context().y_to_note(y1));
+	lowest = max(_midi_context.lowest_note(), _midi_context.y_to_note(y2));
+	highest = min(_midi_context.highest_note(), _midi_context.y_to_note(y1));
 
 	if (lowest > 127) {
 		lowest = 0;
@@ -355,7 +365,7 @@ PianoRollHeader::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::C
 
 		for (int i = lowest; i <= highest; ++i) {
 			int size_x, size_y;
-			double y = floor(_view.midi_context().note_to_y(i)) - 0.5f;
+			double y = floor(_midi_context.note_to_y(i)) - 0.5f;
 			NoteName const & note (note_names[i]);
 
 			_midnam_layout->set_text (note.name);
@@ -466,19 +476,19 @@ PianoRollHeader::render (ArdourCanvas::Rect const & area, Cairo::RefPtr<Cairo::C
 	   so that the top of the C is shown to maintain visual context
 	 */
 	for (int i = lowest - 5; i <= highest; ++i) {
-		double y = floor(_view.midi_context().note_to_y(i)) - 0.5f;
-		double note_height = i == 0? av_note_height : floor(_view.midi_context().note_to_y(i - 1)) - y;
+		double y = floor(_midi_context.note_to_y(i)) - 0.5f;
+		double note_height = i == 0? av_note_height : floor(_midi_context.note_to_y(i - 1)) - y;
 		oct_rel = i % 12;
 
-		if (oct_rel == 0 || (oct_rel == 7 && _adj.get_page_size() <=10) ) {
+		if (oct_rel == 0 || (oct_rel == 7 && _adj.get_page_size() <=10)) {
 			std::stringstream s;
 
 			int cn = i / 12 - 1;
 
 			if (oct_rel == 0){
-				s << "C" << cn;
-			}else{
-				s << "G" << cn;
+				s << 'C' << cn;
+			} else {
+				s << 'G' << cn;
 			}
 
 			if (av_note_height > 12.0){
@@ -523,8 +533,9 @@ PianoRollHeader::instrument_info_change ()
 	   width.
 	*/
 
-
-	_view.midi_track()->gui_changed ("visible_tracks", (void *) 0); /* EMIT SIGNAL */
+	if (_view) {
+		_view->midi_track()->gui_changed ("visible_tracks", (void *) 0); /* EMIT SIGNAL */
+	}
 
 }
 
@@ -609,28 +620,34 @@ PianoRollHeader::get_note_name (int note)
 bool
 PianoRollHeader::motion_handler (GdkEventMotion* ev)
 {
+	if (!_view) {
+		return false;
+	}
+
 	Duple evd (canvas_to_item (Duple (ev->x, ev->y)));
 
 	if (!_scroomer_drag && ev->x < _scroomer_size){
+
 		Gdk::Cursor m_Cursor;
 		double scroomer_top = max(1.0, (1.0 - ((_adj.get_value()+_adj.get_page_size()) / 127.0)) * get().height());
 		double scroomer_bottom = (1.0 - (_adj.get_value () / 127.0)) * get().height();
 
 		if (evd.y > scroomer_top - 5 && evd.y < scroomer_top + 5){
 			m_Cursor = Gdk::Cursor (Gdk::TOP_SIDE);
-			_view.editing_context().push_canvas_cursor (&m_Cursor);
+			_view->editing_context().push_canvas_cursor (&m_Cursor);
 			_scroomer_state = TOP;
-		}else if (evd.y > scroomer_bottom - 5 && evd.y < scroomer_bottom + 5){
+		} else if (evd.y > scroomer_bottom - 5 && evd.y < scroomer_bottom + 5){
 			m_Cursor = Gdk::Cursor (Gdk::BOTTOM_SIDE);
-			_view.editing_context().push_canvas_cursor (&m_Cursor);
+			_view->editing_context().push_canvas_cursor (&m_Cursor);
 			_scroomer_state = BOTTOM;
-		}else {
+		} else {
 			_scroomer_state = MOVE;
-			_view.editing_context().pop_canvas_cursor ();
+			_view->editing_context().pop_canvas_cursor ();
 		}
 	}
 
 	if (_scroomer_drag){
+
 		double pixel2val = 127.0 / get().height();
 		double delta = _old_y - evd.y;
 		double val_at_pointer = (delta * pixel2val);
@@ -647,30 +664,32 @@ PianoRollHeader::motion_handler (GdkEventMotion* ev)
 			case TOP:
 				real_val_at_pointer = real_val_at_pointer <= _saved_top_val? _adj.get_value() + _adj.get_page_size() : real_val_at_pointer;
 				real_val_at_pointer = min(127.0, real_val_at_pointer);
-				if (_view.midi_context().note_height() >= UIConfiguration::instance().get_max_note_height()){
+				if (_midi_context.note_height() >= UIConfiguration::instance().get_max_note_height()){
 					_saved_top_val  = min(_adj.get_value() + _adj.get_page_size (), 127.0);
 				} else {
 					_saved_top_val = 0.0;
 				}
 				//if we are at largest note size & the user is moving down don't do anything
 				//FIXME we are using a heuristic of 18.5 for max note size, but this changes when track size is small to 19.5?
-				_view.midi_context().apply_note_range (_adj.get_value (), real_val_at_pointer, true);
+				_midi_context.apply_note_range (_adj.get_value (), real_val_at_pointer, true);
 				break;
 			case BOTTOM:
 				real_val_at_pointer = max(0.0, real_val_at_pointer);
 				real_val_at_pointer = real_val_at_pointer >= _saved_bottom_val? _adj.get_value() : real_val_at_pointer;
-				if (_view.midi_context().note_height() >= UIConfiguration::instance().get_max_note_height()){
+				if (_midi_context.note_height() >= UIConfiguration::instance().get_max_note_height()){
 					_saved_bottom_val  = _adj.get_value();
 				} else {
 					_saved_bottom_val = 127.0;
 				}
-				_view.midi_context().apply_note_range (real_val_at_pointer, _adj.get_value () + _adj.get_page_size (), true);
+				_midi_context.apply_note_range (real_val_at_pointer, _adj.get_value () + _adj.get_page_size (), true);
 				break;
 			default:
 				break;
 		}
-	}else{
-		int note = _view.midi_context().y_to_note(evd.y);
+
+	} else {
+
+		int note = _midi_context.y_to_note(evd.y);
 		set_note_highlight (note);
 
 		if (_dragging) {
@@ -700,7 +719,7 @@ PianoRollHeader::motion_handler (GdkEventMotion* ev)
 			}
 		}
 	}
-	_adj.value_changed ();
+
 	redraw ();
 	_old_y = evd.y;
 	//win->process_updates(false);
@@ -711,6 +730,10 @@ PianoRollHeader::motion_handler (GdkEventMotion* ev)
 bool
 PianoRollHeader::button_press_handler (GdkEventButton* ev)
 {
+	if (!_view) {
+		return false;
+	}
+
 	/* Convert canvas-coordinates to item coordinates */
 	Duple evd (canvas_to_item (Duple (ev->x, ev->y)));
 
@@ -719,7 +742,7 @@ PianoRollHeader::button_press_handler (GdkEventButton* ev)
 	if (ev->button == 1 && ev->x <= _scroomer_size){
 
 		if (ev->type == GDK_2BUTTON_PRESS) {
-			_view.set_visibility_note_range (MidiStreamView::ContentsRange, false);
+			_view->set_visibility_note_range (MidiStreamView::ContentsRange, false);
 			return true;
 		}
 
@@ -730,7 +753,7 @@ PianoRollHeader::button_press_handler (GdkEventButton* ev)
 		return true;
 
 	} else {
-		int note = _view.midi_context().y_to_note(evd.y);
+		int note = _midi_context.y_to_note(evd.y);
 		bool tertiary = Keyboard::modifier_state_contains (ev->state, Keyboard::TertiaryModifier);
 		bool primary = Keyboard::modifier_state_contains (ev->state, Keyboard::PrimaryModifier);
 
@@ -777,7 +800,7 @@ PianoRollHeader::button_release_handler (GdkEventButton* ev)
 
 	_scroomer_drag = false;
 
-	int note = _view.midi_context().y_to_note(evd.y);
+	int note = _midi_context.y_to_note(evd.y);
 
 	if (false /*editor().current_mouse_mode() == Editing::MouseRange*/) { //Todo:  this mode is buggy, and of questionable utility anyway
 
@@ -829,7 +852,7 @@ bool
 PianoRollHeader::enter_handler (GdkEventCrossing* ev)
 {
 	Duple evd (canvas_to_item (Duple (ev->x, ev->y)));
-	set_note_highlight (_view.midi_context().y_to_note (evd.y));
+	set_note_highlight (_midi_context.y_to_note (evd.y));
 	entered = true;
 	redraw ();
 	return true;
@@ -839,7 +862,9 @@ bool
 PianoRollHeader::leave_handler (GdkEventCrossing*)
 {
 	if (!_scroomer_drag){
-		_view.editing_context().pop_canvas_cursor ();
+		if (_view) {
+			_view->editing_context().pop_canvas_cursor ();
+		}
 	}
 	invalidate_note_range(_highlighted_note, _highlighted_note);
 
@@ -863,11 +888,11 @@ PianoRollHeader::note_range_changed ()
 void
 PianoRollHeader::invalidate_note_range (int lowest, int highest)
 {
-	lowest = max((int) _view.midi_context().lowest_note(), lowest - 1);
-	highest = min((int) _view.midi_context().highest_note(), highest + 2);
+	lowest = max((int) _midi_context.lowest_note(), lowest - 1);
+	highest = min((int) _midi_context.highest_note(), highest + 2);
 
-	double y      = _view.midi_context().note_to_y (highest);
-	double height = _view.midi_context().note_to_y (lowest - 1) - y;
+	double y      = _midi_context.note_to_y (highest);
+	double height = _midi_context.note_to_y (lowest - 1) - y;
 
 	dynamic_cast<ArdourCanvas::GtkCanvas*>(_canvas)->queue_draw_area (0., floor (y), get().width(), floor (height));
 }
@@ -875,13 +900,17 @@ PianoRollHeader::invalidate_note_range (int lowest, int highest)
 bool
 PianoRollHeader::show_scroomer () const
 {
+	if (!_view) {
+		return false;
+	}
+
 	Editing::NoteNameDisplay nnd = UIConfiguration::instance().get_note_name_display();
 
 	if (nnd == Editing::Never) {
 		return false;
 	}
 
-	switch (_view.editing_context().current_mouse_mode()) {
+	switch (_view->editing_context().current_mouse_mode()) {
 	case Editing::MouseDraw:
 	case Editing::MouseContent:
 		if (nnd == Editing::WithMIDNAM) {
@@ -898,12 +927,16 @@ PianoRollHeader::show_scroomer () const
 void
 PianoRollHeader::send_note_on (uint8_t note)
 {
-	std::shared_ptr<ARDOUR::MidiTrack> track = _view.midi_track ();
+	if (!_view) {
+		return;
+	}
+
+	std::shared_ptr<ARDOUR::MidiTrack> track = _view->midi_track ();
 
 	//cerr << "note on: " << (int) note << endl;
 
 	if (track) {
-		_event[0] = (MIDI_CMD_NOTE_ON | _view.midi_context().get_preferred_midi_channel ());
+		_event[0] = (MIDI_CMD_NOTE_ON | _midi_context.get_preferred_midi_channel ());
 		_event[1] = note;
 		_event[2] = 100;
 
@@ -914,10 +947,14 @@ PianoRollHeader::send_note_on (uint8_t note)
 void
 PianoRollHeader::send_note_off (uint8_t note)
 {
-	std::shared_ptr<ARDOUR::MidiTrack> track = _view.midi_track ();
+	if (!_view) {
+		return;
+	}
+
+	std::shared_ptr<ARDOUR::MidiTrack> track = _view->midi_track ();
 
 	if (track) {
-		_event[0] = (MIDI_CMD_NOTE_OFF | _view.midi_context().get_preferred_midi_channel ());
+		_event[0] = (MIDI_CMD_NOTE_OFF | _midi_context.get_preferred_midi_channel ());
 		_event[1] = note;
 		_event[2] = 100;
 

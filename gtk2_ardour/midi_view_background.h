@@ -27,6 +27,8 @@
 
 #include <gtkmm/adjustment.h>
 
+#include "pbd/signals.h"
+
 #include "ardour/types.h"
 
 #include "gtkmm2ext/colors.h"
@@ -96,6 +98,9 @@ class MidiViewBackground : public virtual ViewBackground
 	virtual uint8_t get_preferred_midi_channel () const = 0;
 	virtual void set_note_highlight (bool) = 0;
 	virtual void record_layer_check (std::shared_ptr<ARDOUR::Region>, samplepos_t) = 0;
+
+	virtual void set_size (double w, double h) {}
+	PBD::Signal0<void> HeightChanged;
 
   protected:
 	bool                      _range_dirty;

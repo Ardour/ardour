@@ -42,6 +42,8 @@ CueMidiBackground::set_size (double w, double h)
 	_height = h;
 
 	update_contents_height ();
+
+	HeightChanged (); /* EMIT SIGNAL */
 }
 
 double
