@@ -233,17 +233,55 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 		_lufs_meter.reset ();
 		meter_offset = _export_start - start_sample;
 		meter_nframes -= meter_offset;
+
 #if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
+		/* trigger export */
 		//std::cout << "SURR START EXPORT " << start_sample << " <= " << _export_start << " < " << end_sample << "\n";
 		URIMap::URIDs const& urids = URIMap::instance ().urids;
-		forge_int_msg (urids.surr_ExportStart, urids.time_frame, _export_start - start_sample);
+		forge_int_msg (urids.surr_ExportStart, urids.time_frame, meter_offset);
+
+		/* Re-transmit pan pos - using export-start */
+		size_t id = 10; // First 10 IDs are reseved for bed mixes
+		for (auto const& r : rl) {
+			std::shared_ptr<SurroundSend> ss;
+			if (!r->active ()) {
+				continue;
+			}
+			if (!(ss = r->surround_send ()) || !ss->active ()) {
+				continue;
+			}
+			timepos_t unused_start, unused_end;
+			for (uint32_t s = 0; s < ss->bufs ().count ().n_audio () && id < max_object_id; ++s, ++id) {
+				std::shared_ptr<SurroundPannable> const& p (ss->pan_param (s, unused_start, unused_end));
+				AutoState const as = p->automation_state ();
+				bool const automated = (as & Play) || ((as & (Touch | Latch)) && !p->touching ());
+				if (id > 9) {
+					if (!automated) {
+						pan_t const v[num_pan_parameters] =
+						{
+							(pan_t)p->pan_pos_x->get_value (),
+							(pan_t)p->pan_pos_y->get_value (),
+							(pan_t)p->pan_pos_z->get_value (),
+							(pan_t)p->pan_size->get_value (),
+							(pan_t)p->pan_snap->get_value ()
+						};
+						maybe_send_metadata (id, 0, v, true);
+					} else {
+						evaluate (id, p, timepos_t (_export_start), 0, true);
+					}
+				}
+			}
+			if (id >= max_object_id) {
+				break;
+			}
+		}
 #endif
 	}
 
 	if (_exporting && _export_end >= start_sample && _export_end < end_sample) {
 		meter_nframes = _export_end - start_sample;
 #if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
-		//std::cout << "SURR START EXPORT " << start_sample << " <= " << _export_end << " < " << end_sample << "\n";
+		//std::cout << "SURR STOP EXPORT " << start_sample << " <= " << _export_end << " < " << end_sample << "\n";
 		URIMap::URIDs const& urids = URIMap::instance ().urids;
 		forge_int_msg (urids.surr_ExportStop, urids.time_frame, _export_end - start_sample);
 #endif
@@ -299,7 +337,7 @@ SurroundReturn::forge_int_msg (uint32_t obj_id, uint32_t key, int val, uint32_t 
 }
 
 void
-SurroundReturn::maybe_send_metadata (size_t id, pframes_t sample, pan_t const v[num_pan_parameters])
+SurroundReturn::maybe_send_metadata (size_t id, pframes_t sample, pan_t const v[num_pan_parameters], bool force)
 {
 	bool changed = false;
 	for (size_t i = 0; i < num_pan_parameters; ++i) {
@@ -308,7 +346,7 @@ SurroundReturn::maybe_send_metadata (size_t id, pframes_t sample, pan_t const v[
 		}
 		_current_value[id][i] = v[i];
 	}
-	if (!changed) {
+	if (!changed && !force) {
 		return;
 	}
 	URIMap::URIDs const& urids = URIMap::instance ().urids;
@@ -339,7 +377,7 @@ SurroundReturn::maybe_send_metadata (size_t id, pframes_t sample, pan_t const v[
 }
 
 void
-SurroundReturn::evaluate (size_t id, std::shared_ptr<SurroundPannable> const& p, timepos_t const& when, pframes_t sample)
+SurroundReturn::evaluate (size_t id, std::shared_ptr<SurroundPannable> const& p, timepos_t const& when, pframes_t sample, bool force)
 {
 	bool ok[num_pan_parameters];
 	pan_t const v[num_pan_parameters] =
@@ -351,7 +389,7 @@ SurroundReturn::evaluate (size_t id, std::shared_ptr<SurroundPannable> const& p,
 		(pan_t)p->pan_snap->list()->rt_safe_eval (when, ok[4])
 	};
 	if (ok[0] && ok[1] && ok[2] && ok[3] && ok[4]) {
-		maybe_send_metadata (id, sample, v);
+		maybe_send_metadata (id, sample, v, force);
 	}
 }
 
@@ -379,6 +417,7 @@ void
 SurroundReturn::setup_export (std::string const& fn, samplepos_t ss, samplepos_t es)
 {
 	if (0 == _surround_processor->setup_export (fn.c_str())) {
+		//std::cout << "SurroundReturn::setup export "<< ss << " to " << es << "\n";
 		_exporting = true;
 		_export_start = ss - effective_latency ();
 		_export_end = es - effective_latency ();
@@ -388,6 +427,7 @@ SurroundReturn::setup_export (std::string const& fn, samplepos_t ss, samplepos_t
 void
 SurroundReturn::finalize_export ()
 {
+	//std::cout << "SurroundReturn::finalize_export\n";
 	_surround_processor->finalize_export ();
 	_exporting = false;
 	_export_start = _export_end = 0;

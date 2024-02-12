@@ -92,8 +92,8 @@ private:
 	static const size_t num_pan_parameters = 5; // X, Y, Z, Size, Snap
 
 	void forge_int_msg (uint32_t obj_id, uint32_t key, int val, uint32_t key2 = 0, int val2 = 0);
-	void maybe_send_metadata (size_t id, pframes_t frame, pan_t const v[num_pan_parameters]);
-	void evaluate (size_t id, std::shared_ptr<SurroundPannable> const&, timepos_t const& , pframes_t);
+	void maybe_send_metadata (size_t id, pframes_t frame, pan_t const v[num_pan_parameters], bool force = false);
+	void evaluate (size_t id, std::shared_ptr<SurroundPannable> const&, timepos_t const& , pframes_t, bool force = false);
 
 	std::shared_ptr<LV2Plugin> _surround_processor;
 
