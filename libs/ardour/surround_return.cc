@@ -175,7 +175,7 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 		UInt32 renderingAlgorithm = 7; // kSpatializationAlgorithm_UseOutputType;
 
 		err = AudioUnitSetProperty (_au,
-		                            19 /*kAudioUnitProperty_SpatializationAlgorithm*/,
+		                            3000 /*kAudioUnitProperty_SpatializationAlgorithm*/,
 		                            kAudioUnitScope_Input,
 		                            0,
 		                            &renderingAlgorithm,
