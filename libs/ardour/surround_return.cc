@@ -43,10 +43,30 @@ SurroundReturn::OutputFormatControl::get_user_string () const {
 	}
 }
 
+SurroundReturn::BinauralRenderControl::BinauralRenderControl (bool v, std::string const& n, PBD::Controllable::Flag f)
+	: MPControl<bool> (v, n, f)
+{}
+
+std::string
+SurroundReturn::BinauralRenderControl::get_user_string () const {
+	if (get_value () == 0) {
+		return "Dolby";
+	} else {
+		return "Apple";
+	}
+}
+
 SurroundReturn::SurroundReturn (Session& s, Route* r)
 	: Processor (s, _("SurrReturn"), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _lufs_meter (s.nominal_sample_rate (), 5)
 	, _output_format_control (new OutputFormatControl (false, _("Output Format"), PBD::Controllable::Toggle))
+	, _binaural_render_control (new BinauralRenderControl (false, _("Binaural Renderer"), PBD::Controllable::Toggle))
+#if defined __APPLE__ &&  MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+	, _au (0)
+	, _au_buffers (0)
+	, _au_samples_processed (0)
+#endif
+	, _have_au_renderer (false)
 	, _current_n_objects (max_object_id)
 	, _current_output_format (OUTPUT_FORMAT_7_1_4)
 	, _in_map (ChanCount (DataType::AUDIO, 128))
@@ -84,10 +104,115 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 			_current_value[i][p] = -1111; /* some invalid data that forces an update */
 		}
 	}
+
+#if defined __APPLE__ &&  MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+	AudioComponentDescription auDescription = {
+		kAudioUnitType_Mixer,
+		'3dem' /* kAudioUnitSubType_SpatialMixer */,
+		kAudioUnitManufacturer_Apple,
+		0,
+		0};
+
+	AudioComponent comp = AudioComponentFindNext (NULL, &auDescription);
+	if (comp && noErr == AudioComponentInstanceNew (comp, &_au)) {
+		ComponentResult err;
+
+		AudioStreamBasicDescription streamFormat;
+		streamFormat.mChannelsPerFrame = 12;
+		streamFormat.mSampleRate       = _session.sample_rate();
+		streamFormat.mFormatID         = kAudioFormatLinearPCM;
+		streamFormat.mFormatFlags      = kAudioFormatFlagIsFloat|kAudioFormatFlagIsPacked|kAudioFormatFlagIsNonInterleaved;
+		streamFormat.mBitsPerChannel   = 32;
+		streamFormat.mFramesPerPacket  = 1;
+		streamFormat.mBytesPerPacket   = 4;
+		streamFormat.mBytesPerFrame    = 4;
+
+		err = AudioUnitSetProperty (_au,
+				kAudioUnitProperty_StreamFormat,
+				kAudioUnitScope_Input,
+				0,
+				&streamFormat,
+				sizeof (AudioStreamBasicDescription));
+
+		if (err != noErr) { return; }
+
+		streamFormat.mChannelsPerFrame = 2;
+
+		err = AudioUnitSetProperty (_au,
+				kAudioUnitProperty_StreamFormat,
+				kAudioUnitScope_Output,
+				0,
+				&streamFormat,
+				sizeof (AudioStreamBasicDescription));
+
+		if (err != noErr) { return; }
+
+		AudioChannelLayout chanelLayout;
+		chanelLayout.mChannelLayoutTag = 0xc0000c; // kAudioChannelLayoutTag_Atmos_7_1_4;
+		chanelLayout.mChannelBitmap = 0;
+		chanelLayout.mNumberChannelDescriptions = 0;
+
+		err = AudioUnitSetProperty (_au,
+				kAudioUnitProperty_AudioChannelLayout,
+				kAudioUnitScope_Input,
+				0,
+				&chanelLayout,
+				sizeof (chanelLayout));
+
+		if (err != noErr) { return; }
+
+		UInt32 renderingAlgorithm = kSpatializationAlgorithm_UseOutputType;
+		err = AudioUnitSetProperty (_au,
+				kAudioUnitProperty_SpatializationAlgorithm,
+				kAudioUnitScope_Input,
+				0,
+				&renderingAlgorithm,
+				sizeof(renderingAlgorithm));
+
+		if (err != noErr) { return; }
+
+		UInt32 sourceMode = kSpatialMixerSourceMode_AmbienceBed;
+		err = AudioUnitSetProperty (_au,
+				kAudioUnitProperty_SpatialMixerSourceMode,
+				kAudioUnitScope_Input,
+				0,
+				&sourceMode,
+				sizeof(sourceMode));
+
+		if (err != noErr) { return; }
+
+		AURenderCallbackStruct renderCallbackInfo;
+		renderCallbackInfo.inputProc = _render_callback;
+		renderCallbackInfo.inputProcRefCon = this;
+		err = AudioUnitSetProperty (_au,
+				kAudioUnitProperty_SetRenderCallback,
+				kAudioUnitScope_Input,
+				0, (void*) &renderCallbackInfo,
+				sizeof(renderCallbackInfo));
+
+		if (err != noErr) { return; }
+
+		_au_buffers = (AudioBufferList *) malloc (offsetof(AudioBufferList, mBuffers) + 2 * sizeof(::AudioBuffer));
+		_au_buffers->mNumberBuffers = 2;
+
+		err = AudioUnitInitialize (_au);
+		if (err != noErr) { return; }
+
+		_have_au_renderer = true;
+	}
+#endif
 }
 
 SurroundReturn::~SurroundReturn ()
 {
+#if defined __APPLE__ &&  MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+	if (_au) {
+		AudioOutputUnitStop (_au);
+		AudioUnitUninitialize (_au);
+		CloseComponent (_au);
+	}
+	free (_au_buffers);
+#endif
 }
 
 int
@@ -217,7 +342,16 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 #endif
 	}
 
+	if (_have_au_renderer &&  _binaural_render_control->get_value () != 0 && _output_format_control->get_value () != 0) {
+		_output_format_control->set_value (0.0, PBD::Controllable::NoGroup);
+	}
+
 	MainOutputFormat target_output_format = _output_format_control->get_value () == 0 ? OUTPUT_FORMAT_7_1_4 : OUTPUT_FORMAT_5_1;
+
+	if (_have_au_renderer &&  _binaural_render_control->get_value () != 0) {
+		target_output_format = OUTPUT_FORMAT_7_1_4;
+	}
+
 	if (_current_output_format != target_output_format) {
 		_current_output_format = target_output_format;
 #if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
@@ -316,6 +450,40 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 	};
 
 	_lufs_meter.run (data, meter_nframes);
+
+#ifdef __APPLE__
+	if (_au && _have_au_renderer &&  _binaural_render_control->get_value () != 0) {
+		for (uint32_t i = 0; i < 12; ++i) {
+			_au_data[i] = _surround_bufs.get_audio (i).data (0);
+		}
+
+		_au_buffers->mNumberBuffers = 2;
+		for (uint32_t i = 0; i < 2; ++i) {
+			_au_buffers->mBuffers[i].mNumberChannels = 1;
+			_au_buffers->mBuffers[i].mDataByteSize = nframes * sizeof (Sample);
+			_au_buffers->mBuffers[i].mData = _surround_bufs.get_audio (12 + i).data (0);
+		}
+		AudioUnitRenderActionFlags flags = 0;
+		AudioTimeStamp ts;
+		ts.mSampleTime = _au_samples_processed;
+		ts.mFlags = kAudioTimeStampSampleTimeValid;
+
+		OSErr err = AudioUnitRender (_au, &flags, &ts, /*bus*/0, nframes, _au_buffers);
+		if (err == noErr) {
+			_au_samples_processed += nframes;
+			uint32_t limit = std::min<uint32_t> (_au_buffers->mNumberBuffers, 2);
+			for (uint32_t i = 0; i < limit; ++i) {
+				if (_au_buffers->mBuffers[i].mData == 0 || _au_buffers->mBuffers[i].mNumberChannels != 1) {
+					continue;
+				}
+				Sample* expected_buffer_address = bufs.get_audio (12 + i).data (0);
+				if (expected_buffer_address != _au_buffers->mBuffers[i].mData) {
+					memcpy (expected_buffer_address, _au_buffers->mBuffers[i].mData, nframes * sizeof (Sample));
+				}
+			}
+		}
+	}
+#endif
 }
 
 void
@@ -478,3 +646,37 @@ SurroundReturn::state () const
 	node.set_property ("output-format", (int) _current_output_format);
 	return node;
 }
+
+#if defined __APPLE__ &&  MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+OSStatus
+SurroundReturn::_render_callback(
+		void                        *userData,
+		 AudioUnitRenderActionFlags *ioActionFlags,
+		 const AudioTimeStamp       *inTimeStamp,
+		 UInt32                      inBusNumber,
+		 UInt32                      inNumberSamples,
+		 AudioBufferList*            ioData)
+{
+	if (userData) {
+		return ((SurroundReturn*)userData)->render_callback (ioActionFlags, inTimeStamp, inBusNumber, inNumberSamples, ioData);
+	}
+	return paramErr;
+}
+
+OSStatus
+SurroundReturn::render_callback(AudioUnitRenderActionFlags*,
+			  const AudioTimeStamp*,
+			  UInt32 bus,
+			  UInt32 inNumberSamples,
+			  AudioBufferList* ioData)
+{
+	uint32_t limit = std::min<uint32_t> (ioData->mNumberBuffers, 12);
+
+	for (uint32_t i = 0; i < limit; ++i) {
+		ioData->mBuffers[i].mNumberChannels = 1;
+		ioData->mBuffers[i].mDataByteSize = sizeof (Sample) * inNumberSamples;
+		ioData->mBuffers[i].mData = _au_data[i];
+	}
+	return noErr;
+}
+#endif
