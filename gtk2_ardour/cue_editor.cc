@@ -1,6 +1,7 @@
 #include "cue_editor.h"
 
-CueEditor::CueEditor ()
+CueEditor::CueEditor (std::string const & name)
+	: EditingContext (name)
 {
 }
 CueEditor::~CueEditor ()

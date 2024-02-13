@@ -25,7 +25,7 @@
 class CueEditor : public EditingContext
 {
   public:
-	CueEditor ();
+	CueEditor (std::string const & name);
 	~CueEditor ();
 
 	void select_all_within (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, TrackViewList const &, Selection::Operation, bool);

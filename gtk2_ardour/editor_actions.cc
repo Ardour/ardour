@@ -575,49 +575,8 @@ Editor::register_actions ()
 		act->set_sensitive (false);
 	}
 
-	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionManager::create_action_group (bindings, X_("MouseMode"));
-	RadioAction::Group mouse_mode_group;
-
-	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Smart Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
-	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
-	smart_mode_button.set_related_action (smart_mode_action);
-	smart_mode_button.set_text (_("Smart"));
-	smart_mode_button.set_name ("mouse mode button");
-
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseObject));
-	mouse_move_button.set_related_action (act);
-	mouse_move_button.set_icon (ArdourWidgets::ArdourIcon::ToolGrab);
-	mouse_move_button.set_name ("mouse mode button");
-
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseRange));
-	mouse_select_button.set_related_action (act);
-	mouse_select_button.set_icon (ArdourWidgets::ArdourIcon::ToolRange);
-	mouse_select_button.set_name ("mouse mode button");
-
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseDraw));
-	mouse_draw_button.set_related_action (act);
-	mouse_draw_button.set_icon (ArdourWidgets::ArdourIcon::ToolDraw);
-	mouse_draw_button.set_name ("mouse mode button");
-
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseTimeFX));
-	mouse_timefx_button.set_related_action (act);
-	mouse_timefx_button.set_icon (ArdourWidgets::ArdourIcon::ToolStretch);
-	mouse_timefx_button.set_name ("mouse mode button");
-
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseGrid));
-	mouse_grid_button.set_related_action (act);
-	mouse_grid_button.set_icon (ArdourWidgets::ArdourIcon::ToolGrid);
-	mouse_grid_button.set_name ("mouse mode button");
-
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseContent));
-	mouse_content_button.set_related_action (act);
-	mouse_content_button.set_icon (ArdourWidgets::ArdourIcon::ToolContent);
-	mouse_content_button.set_name ("mouse mode button");
-
-	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_mode_toggled), Editing::MouseCut));
-	mouse_cut_button.set_related_action (act);
-	mouse_cut_button.set_icon (ArdourWidgets::ArdourIcon::ToolCut);
-	mouse_cut_button.set_name ("mouse mode button");
+	register_mouse_mode_actions ();
+	bind_mouse_mode_buttons ();
 
 	ActionManager::register_action (editor_actions, "step-mouse-mode", _("Step Mouse Mode"), sigc::bind (sigc::mem_fun(*this, &Editor::step_mouse_mode), true));
 
@@ -645,8 +604,6 @@ Editor::register_actions ()
 	/* deprecated */  ActionManager::register_radio_action (editor_actions, snap_mode_group, X_("snap-normal"), _("Grid"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapNormal)));  //deprecated
 	/* deprecated */  ActionManager::register_radio_action (editor_actions, snap_mode_group, X_("snap-magnetic"), _("Magnetic"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapMagnetic)));
 
-	snap_mode_button.set_text (_("Snap"));
-	snap_mode_button.set_name ("mouse mode button");
 	snap_mode_button.signal_button_press_event().connect (sigc::mem_fun (*this, &Editor::snap_mode_button_clicked), false);
 
 	ActionManager::register_action (editor_actions, X_("cycle-snap-mode"), _("Toggle Snap"), sigc::mem_fun (*this, &Editor::cycle_snap_mode));
@@ -1486,4 +1443,16 @@ Editor::register_region_actions ()
 
 	/* desensitize them all by default. region selection will change this */
 	sensitize_all_region_actions (false);
+}
+
+void
+Editor::add_mouse_mode_actions (Glib::RefPtr<ActionGroup> mouse_mode_actions)
+{
+	RefPtr<Action> act;
+
+	act = ActionManager::register_toggle_action (mouse_mode_actions, "set-mouse-mode-object-range", _("Smart Mode"), sigc::mem_fun (*this, &Editor::mouse_mode_object_range_toggled));
+	smart_mode_action = Glib::RefPtr<ToggleAction>::cast_static (act);
+	smart_mode_button.set_related_action (smart_mode_action);
+	smart_mode_button.set_text (_("Smart"));
+	smart_mode_button.set_name ("mouse mode button");
 }

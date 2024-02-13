@@ -30,6 +30,8 @@
 
 #include "gtkmm2ext/bindings.h"
 
+#include "widgets/tooltips.h"
+
 #include "actions.h"
 #include "ardour_ui.h"
 #include "edit_note_dialog.h"
@@ -88,8 +90,9 @@ static const gchar *_grid_type_strings[] = {
 	0
 };
 
-EditingContext::EditingContext ()
-	: rubberband_rect (0)
+EditingContext::EditingContext (std::string const & name)
+	: _name (name)
+	, rubberband_rect (0)
 	, pre_internal_grid_type (GridTypeBeat)
 	, pre_internal_snap_mode (SnapOff)
 	, internal_grid_type (GridTypeBeat)
@@ -118,6 +121,7 @@ EditingContext::EditingContext ()
 	, quantize_dialog (nullptr)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, horizontal_adjustment (0.0, 0.0, 1e16)
+	, mouse_mode (MouseObject)
 {
 	if (!button_bindings) {
 		button_bindings = new Bindings ("editor-mouse");
@@ -133,6 +137,9 @@ EditingContext::EditingContext ()
 	if (grid_type_strings.empty()) {
 		grid_type_strings =  I18N (_grid_type_strings);
 	}
+
+	snap_mode_button.set_text (_("Snap"));
+	snap_mode_button.set_name ("mouse mode button");
 
 	if (!_cursors) {
 		_cursors = new MouseCursors;
@@ -877,11 +884,11 @@ EditingContext::set_grid_to (GridType gt)
 		compute_bbt_ruler_scale (_leftmost_sample, _leftmost_sample + current_page_samples());
 		update_tempo_based_rulers ();
 	} else if (current_mouse_mode () == Editing::MouseGrid) {
-		Glib::RefPtr<RadioAction> ract = ActionManager::get_radio_action (X_("MouseMode"), X_("set-mouse-mode-object"));
+		Glib::RefPtr<RadioAction> ract = Glib::RefPtr<RadioAction>::cast_dynamic (get_mouse_mode_action (Editing::MouseObject));
 		ract->set_active (true);
 	}
 
-	ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-grid"))->set_sensitive (grid_is_musical);
+	get_mouse_mode_action (Editing::MouseGrid)->set_sensitive (grid_is_musical);
 
 	mark_region_boundary_cache_dirty ();
 
@@ -1992,7 +1999,6 @@ EditingContext::set_horizontal_position (double p)
 {
 	p = std::max (0., p);
 
-	std::cerr << "new hp: " << p << std::endl;
 	horizontal_adjustment.set_value (p);
 
 	_leftmost_sample = (samplepos_t) floor (p * samples_per_pixel);
@@ -2050,4 +2056,158 @@ EditingContext::pop_canvas_cursor ()
 			return;
 		}
 	}
+}
+
+void
+EditingContext::pack_draw_box ()
+{
+	/* Draw  - these MIDI tools are only visible when in Draw mode */
+	draw_box.set_spacing (2);
+	draw_box.set_border_width (2);
+	draw_box.pack_start (*manage (new Label (_("Len:"))), false, false);
+	draw_box.pack_start (draw_length_selector, false, false, 4);
+	draw_box.pack_start (*manage (new Label (_("Ch:"))), false, false);
+	draw_box.pack_start (draw_channel_selector, false, false, 4);
+	draw_box.pack_start (*manage (new Label (_("Vel:"))), false, false);
+	draw_box.pack_start (draw_velocity_selector, false, false, 4);
+
+	draw_length_selector.set_name ("mouse mode button");
+	draw_velocity_selector.set_name ("mouse mode button");
+	draw_channel_selector.set_name ("mouse mode button");
+
+	draw_velocity_selector.set_sizing_text (_("Auto"));
+	draw_channel_selector.set_sizing_text (_("Auto"));
+
+	draw_velocity_selector.disable_scrolling ();
+	draw_velocity_selector.signal_scroll_event().connect (sigc::mem_fun(*this, &EditingContext::on_velocity_scroll_event), false);
+}
+
+void
+EditingContext::pack_snap_box ()
+{
+	snap_box.pack_start (snap_mode_button, false, false);
+	snap_box.pack_start (grid_type_selector, false, false);
+}
+
+Glib::RefPtr<Action>
+EditingContext::get_mouse_mode_action (MouseMode m) const
+{
+	char const * group_name = _name.c_str(); /* use char* to force correct ::get_action variant */
+
+	switch (m) {
+	case MouseRange:
+		return ActionManager::get_action (group_name, X_("set-mouse-mode-range"));
+	case MouseObject:
+		return ActionManager::get_action (group_name, X_("set-mouse-mode-object"));
+	case MouseCut:
+		return ActionManager::get_action (group_name, X_("set-mouse-mode-cut"));
+	case MouseDraw:
+		return ActionManager::get_action (group_name, X_("set-mouse-mode-draw"));
+	case MouseTimeFX:
+		return ActionManager::get_action (group_name, X_("set-mouse-mode-timefx"));
+	case MouseGrid:
+		return ActionManager::get_action (group_name, X_("set-mouse-mode-grid"));
+	case MouseContent:
+		return ActionManager::get_action (group_name, X_("set-mouse-mode-content"));
+	}
+	return Glib::RefPtr<Action>();
+}
+
+void
+EditingContext::register_mouse_mode_actions ()
+{
+	RefPtr<Action> act;
+	std::string group_name = _name;
+	Glib::RefPtr<ActionGroup> mouse_mode_actions = ActionManager::create_action_group (bindings, group_name);
+	RadioAction::Group mouse_mode_group;
+
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-object", _("Grab (Object Tool)"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseObject));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-range", _("Range Tool"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseRange));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-draw", _("Note Drawing Tool"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseDraw));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-timefx", _("Time FX Tool"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseTimeFX));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-grid", _("Grid Tool"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseGrid));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-content", _("Internal Edit (Content Tool)"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseContent));
+	act = ActionManager::register_radio_action (mouse_mode_actions, mouse_mode_group, "set-mouse-mode-cut", _("Cut Tool"), boost::bind (&EditingContext::mouse_mode_toggled, this, Editing::MouseCut));
+
+	add_mouse_mode_actions (mouse_mode_actions);
+}
+
+void
+EditingContext::bind_mouse_mode_buttons ()
+{
+	mouse_move_button.set_related_action (get_mouse_mode_action (Editing::MouseObject));
+	mouse_move_button.set_icon (ArdourWidgets::ArdourIcon::ToolGrab);
+	mouse_move_button.set_name ("mouse mode button");
+
+	mouse_select_button.set_related_action (get_mouse_mode_action (Editing::MouseRange));
+	mouse_select_button.set_icon (ArdourWidgets::ArdourIcon::ToolRange);
+	mouse_select_button.set_name ("mouse mode button");
+
+	mouse_draw_button.set_related_action (get_mouse_mode_action (Editing::MouseDraw));
+	mouse_draw_button.set_icon (ArdourWidgets::ArdourIcon::ToolDraw);
+	mouse_draw_button.set_name ("mouse mode button");
+
+	mouse_timefx_button.set_related_action (get_mouse_mode_action (Editing::MouseTimeFX));
+	mouse_timefx_button.set_icon (ArdourWidgets::ArdourIcon::ToolStretch);
+	mouse_timefx_button.set_name ("mouse mode button");
+
+	mouse_grid_button.set_related_action (get_mouse_mode_action (Editing::MouseGrid));
+	mouse_grid_button.set_icon (ArdourWidgets::ArdourIcon::ToolGrid);
+	mouse_grid_button.set_name ("mouse mode button");
+
+	mouse_content_button.set_related_action (get_mouse_mode_action (Editing::MouseContent));
+	mouse_content_button.set_icon (ArdourWidgets::ArdourIcon::ToolContent);
+	mouse_content_button.set_name ("mouse mode button");
+
+	mouse_cut_button.set_related_action (get_mouse_mode_action (Editing::MouseCut));
+	mouse_cut_button.set_icon (ArdourWidgets::ArdourIcon::ToolCut);
+	mouse_cut_button.set_name ("mouse mode button");
+
+	set_tooltip (mouse_move_button, _("Grab Mode (select/move objects)"));
+	set_tooltip (mouse_cut_button, _("Cut Mode (split regions)"));
+	set_tooltip (mouse_select_button, _("Range Mode (select time ranges)"));
+	set_tooltip (mouse_grid_button, _("Grid Mode (edit tempo-map, drag/drop music-time grid)"));
+	set_tooltip (mouse_draw_button, _("Draw Mode (draw and edit gain/notes/automation)"));
+	set_tooltip (mouse_timefx_button, _("Stretch Mode (time-stretch audio and midi regions, preserving pitch)"));
+	set_tooltip (mouse_content_button, _("Internal Edit Mode (edit notes and automation points)"));
+}
+
+void
+EditingContext::set_mouse_mode (MouseMode m, bool force)
+{
+	if (_drags->active ()) {
+		return;
+	}
+
+	if (!force && m == mouse_mode) {
+		return;
+	}
+
+	Glib::RefPtr<Action>       act  = get_mouse_mode_action(m);
+	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
+
+	/* go there and back to ensure that the toggled handler is called to set up mouse_mode */
+	tact->set_active (false);
+	tact->set_active (true);
+
+	/* NOTE: this will result in a call to mouse_mode_toggled which does the heavy lifting */
+}
+
+
+bool
+EditingContext::on_velocity_scroll_event (GdkEventScroll* ev)
+{
+	int v = PBD::atoi (draw_velocity_selector.get_text ());
+	switch (ev->direction) {
+		case GDK_SCROLL_DOWN:
+			v = std::min (127, v + 1);
+			break;
+		case GDK_SCROLL_UP:
+			v = std::max (1, v - 1);
+			break;
+		default:
+			return false;
+	}
+	set_draw_velocity_to(v);
+	return true;
 }

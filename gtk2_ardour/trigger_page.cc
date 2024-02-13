@@ -145,19 +145,10 @@ TriggerPage::TriggerPage ()
 
 	int col = 0;
 	table->attach (_slot_prop_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
-
-	col = 1;
+	++col;
 	table->attach (_audio_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK | Gtk::FILL);
 	++col;
-
-	col = 2;
-	table->attach (_midi_trig_box, col, col + 1, 0, 1, Gtk::FILL, Gtk::SHRINK);
-	++col;
-
-	std::cerr << "there\n";
-
-	col = 3;
-	table->attach (_midi_editor->viewport(), col, col + 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL);
+	table->attach (_midi_editor->toolbox(), col, col + 1, 0, 1, Gtk::EXPAND|Gtk::FILL, Gtk::EXPAND|Gtk::FILL);
 	++col;
 
 	_parameter_box.pack_start (*table);
