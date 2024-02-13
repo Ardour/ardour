@@ -61,7 +61,7 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 	, _lufs_meter (s.nominal_sample_rate (), 5)
 	, _output_format_control (new OutputFormatControl (false, _("Output Format"), PBD::Controllable::Toggle))
 	, _binaural_render_control (new BinauralRenderControl (false, _("Binaural Renderer"), PBD::Controllable::Toggle))
-#if defined __APPLE__ &&  MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+#ifdef __APPLE__
 	, _au (0)
 	, _au_buffers (0)
 	, _au_samples_processed (0)
@@ -105,7 +105,7 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 		}
 	}
 
-#if defined __APPLE__ &&  MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+#ifdef __APPLE__
 	AudioComponentDescription auDescription = {
 		kAudioUnitType_Mixer,
 		'3dem' /* kAudioUnitSubType_SpatialMixer */,
@@ -205,7 +205,7 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 
 SurroundReturn::~SurroundReturn ()
 {
-#if defined __APPLE__ &&  MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+#ifdef __APPLE__
 	if (_au) {
 		AudioOutputUnitStop (_au);
 		AudioUnitUninitialize (_au);
@@ -647,7 +647,7 @@ SurroundReturn::state () const
 	return node;
 }
 
-#if defined __APPLE__ &&  MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+#ifdef __APPLE__
 OSStatus
 SurroundReturn::_render_callback(
 		void                        *userData,

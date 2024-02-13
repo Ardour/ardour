@@ -28,7 +28,7 @@
 #include <lv2/lv2plug.in/ns/ext/atom/forge.h>
 #endif
 
-#if defined __APPLE__ && MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+#ifdef __APPLE__
 #include <CoreServices/CoreServices.h>
 #include <CoreAudio/CoreAudio.h>
 #include <AudioUnit/AudioUnit.h>
@@ -133,7 +133,7 @@ private:
 
 	std::shared_ptr<BinauralRenderControl> _binaural_render_control;
 
-#if defined __APPLE__ &&  MAC_OS_X_VERSION_MAX_ALLOWED >= 110000
+#ifdef __APPLE__
 	::AudioUnit      _au;
 	AudioBufferList* _au_buffers;
 	samplecnt_t      _au_samples_processed;
