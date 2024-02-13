@@ -157,22 +157,22 @@ This mode provides many different operations on both regions and control points,
 @gmark|Common/jump-backward-to-mark|                                   q|to previous mark
 @sess|Common/Quit|                                          <@PRIMARY@>q|quit
 @gmark|Common/jump-forward-to-mark|                                    w|to next mark
-@mmode|MouseMode/set-mouse-mode-content|                               e|content mode
+@mmode|Editor/set-mouse-mode-content|                               e|content mode
 @sess|Main/QuickExport|                                     <@PRIMARY@>e|quick export session
 @rop|Region/export-region|                     <@PRIMARY@><@SECONDARY@>e|export selected region(s)
 @sess|Main/ExportAudio|                                   <@SECONDARY@>e|export session
 @sess|Main/StemExport|                        <@SECONDARY@><@TERTIARY@>e|stem export selected tracks
 @select|Editor/select-all-after-edit-cursor|    <@PRIMARY@><@TERTIARY@>e|select all after EP
 @vis|Editor/show-editor-mixer|                             <@TERTIARY@>e|toggle editor window mixer
-@mmode|MouseMode/set-mouse-mode-range|                                 r|range mode
+@mmode|Editor/set-mouse-mode-range|                                 r|range mode
 @wvis|Common/show-recorder|                               <@SECONDARY@>r|show recorder page
 @edit|Editor/redo|                                          <@PRIMARY@>r|redo
 @edit|Editor/select-from-regions|               <@PRIMARY@><@TERTIARY@>r|set Range to selected regions
 @edit|Editor/add-range-marker-from-selection| <@SECONDARY@><@TERTIARY@>r|Add single Range marker from selection
 @trans|Transport/Record|                                   <@TERTIARY@>r|engage record
-@mmode|MouseMode/set-mouse-mode-timefx|                                t|timefx mode
+@mmode|Editor/set-mouse-mode-timefx|                                t|timefx mode
 @gselect|Common/select-all-visible-lanes|                   <@PRIMARY@>t|select all visible lanes
-@mmode|MouseMode/set-mouse-mode-grid|                                  y|grid mode
+@mmode|Editor/set-mouse-mode-grid|                                  y|grid mode
 @edit|Editor/alternate-redo|                                <@PRIMARY@>y|redo
 @select|Editor/select-all-between-cursors|                  <@PRIMARY@>u|select all regions enclosed by Range
 @select|Editor/select-all-within-cursors|                              u|select all regions touched by Range
@@ -200,7 +200,7 @@ This mode provides many different operations on both regions and control points,
 @sess|Main/SnapshotStay|                        <@PRIMARY@><@TERTIARY@>s|snapshot session
 @edtrk|Editor/track-solo-toggle|                          <@SECONDARY@>s|toggle track solo status
 @edit|Editor/ToggleSummary|                                <@TERTIARY@>s|toggle summary
-@mmode|MouseMode/set-mouse-mode-draw|                                  d|note-draw mode
+@mmode|Editor/set-mouse-mode-draw|                                  d|note-draw mode
 @edit|Editor/duplicate|                                     <@PRIMARY@>d|duplicate (once)
 @edit|Editor/multi-duplicate|                              <@SECONDARY@>d|duplicate (multi)
 @select|Editor/select-all-in-punch-range|                   <@TERTIARY@>d|select all in punch range
@@ -210,7 +210,7 @@ This mode provides many different operations on both regions and control points,
 @rop|Region/show-rhythm-ferret|                           <@SECONDARY@>f|show rhythm ferret window 
 @wvis|Common/ToggleMaximalEditor|              <@PRIMARY@><@SECONDARY@>f|maximise editor space
 @wvis|Common/ToggleMaximalMixer|                <@PRIMARY@><@TERTIARY@>f|maximise mixer space
-@mmode|MouseMode/set-mouse-mode-object|                                g|object mode
+@mmode|Editor/set-mouse-mode-object|                                g|object mode
 @edit|Editor/group-selected-regions|                        <@PRIMARY@>g|group selected regions
 @edit|Editor/ungroup-selected-regions|          <@PRIMARY@><@TERTIARY@>g|ungroup selected regions
 @edit|Region/play-selected-regions|                                    h|play selected region(s)
@@ -231,7 +231,7 @@ This mode provides many different operations on both regions and control points,
 @aep|Region/align-regions-sync-relative|                               x|align sync points (relative)
 @edit|Editor/editor-cut|                                    <@PRIMARY@>x|cut
 @edit|Editor/cut-paste-section|                 <@PRIMARY@><@TERTIARY@>x|cut \& paste section
-@mmode|MouseMode/set-mouse-mode-cut|                                   c|cut mode
+@mmode|Editor/set-mouse-mode-cut|                                   c|cut mode
 @edit|Editor/editor-copy|                                   <@PRIMARY@>c|copy
 @wvis|Common/show-trigger|                                <@SECONDARY@>c|show cues page
 @edit|Editor/editor-crop|                      <@PRIMARY@><@SECONDARY@>c|crop range
@@ -391,7 +391,7 @@ This mode provides many different operations on both regions and control points,
 @eep|Editor/cycle-edit-mode|                             1|cycle edit mode {slide, lock, ripple}
 @eep|Editor/cycle-edit-point|                            2|next EP w/o marker {playhead, mouse}
 @eep|Editor/cycle-edit-point-with-marker|     <@PRIMARY@>2|next EP w/marker {playhead, mouse, marker}
-@mmode|MouseMode/set-mouse-mode-object-range|            3|Smart Mode (provide some Range tools in Object mode)
+@mmode|Editor/set-mouse-mode-object-range|            3|Smart Mode (provide some Range tools in Object mode)
 @gmode|Transport/ToggleFollowEdits|           <@PRIMARY@>3|toggle playhead follows edits
 @grid|Editor/cycle-snap-mode|                            4|cycle to next snap mode {On/Off}
 @grid|Editor/prev-grid-choice|                           5|use prev grid unit

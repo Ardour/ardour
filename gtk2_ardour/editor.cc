@@ -235,7 +235,6 @@ Editor::Editor ()
 	, constructed (false)
 	, _properties_box (0)
 	, no_save_visual (false)
-	, mouse_mode (MouseObject)
 	, marker_click_behavior (MarkerClickSelectOnly)
 	, _join_object_range_state (JOIN_OBJECT_RANGE_NONE)
 	, _notebook_shrunk (false)
@@ -2876,23 +2875,11 @@ Editor::setup_toolbar ()
 
 	stretch_marker_cb.set_name ("mouse mode button");
 
-	grid_type_selector.set_name ("mouse mode button");
-	draw_length_selector.set_name ("mouse mode button");
-	draw_velocity_selector.set_name ("mouse mode button");
-	draw_channel_selector.set_name ("mouse mode button");
-
-	draw_velocity_selector.set_sizing_text (_("Auto"));
-	draw_channel_selector.set_sizing_text (_("Auto"));
-
-	draw_velocity_selector.disable_scrolling ();
-	draw_velocity_selector.signal_scroll_event().connect (sigc::mem_fun(*this, &Editor::on_velocity_scroll_event), false);
-
 	snap_mode_button.set_name ("mouse mode button");
 
 	edit_point_selector.set_name ("mouse mode button");
 
-	snap_box.pack_start (snap_mode_button, false, false);
-	snap_box.pack_start (grid_type_selector, false, false);
+	pack_snap_box ();
 
 	/* Nudge */
 
@@ -2910,20 +2897,13 @@ Editor::setup_toolbar ()
 	stretch_marker_cb.set_label (_("Adjust Markers"));
 	stretch_marker_cb.set_active (true);
 
-	/* Grid  - these tools are only visible when in Grid mode */
 	grid_box.set_spacing (2);
 	grid_box.set_border_width (2);
 	grid_box.pack_start (stretch_marker_cb, false, false, 4);
 
-	/* Draw  - these MIDI tools are only visible when in Draw mode */
-	draw_box.set_spacing (2);
-	draw_box.set_border_width (2);
-	draw_box.pack_start (*manage (new Label (_("Len:"))), false, false);
-	draw_box.pack_start (draw_length_selector, false, false, 4);
-	draw_box.pack_start (*manage (new Label (_("Ch:"))), false, false);
-	draw_box.pack_start (draw_channel_selector, false, false, 4);
-	draw_box.pack_start (*manage (new Label (_("Vel:"))), false, false);
-	draw_box.pack_start (draw_velocity_selector, false, false, 4);
+	grid_type_selector.set_name ("mouse mode button");
+
+	pack_draw_box ();
 
 	/* Pack everything in... */
 
@@ -2962,24 +2942,6 @@ Editor::setup_toolbar ()
 	toolbar_hbox.pack_end (_track_box, false, false);
 
 	toolbar_hbox.show_all ();
-}
-
-bool
-Editor::on_velocity_scroll_event (GdkEventScroll* ev)
-{
-	int v = PBD::atoi (draw_velocity_selector.get_text ());
-	switch (ev->direction) {
-		case GDK_SCROLL_DOWN:
-			v = std::min (127, v + 1);
-			break;
-		case GDK_SCROLL_UP:
-			v = std::max (1, v - 1);
-			break;
-		default:
-			return false;
-	}
-	set_draw_velocity_to(v);
-	return true;
 }
 
 
@@ -3119,13 +3081,6 @@ void
 Editor::setup_tooltips ()
 {
 	set_tooltip (smart_mode_button, _("Smart Mode (add range functions to Grab Mode)"));
-	set_tooltip (mouse_move_button, _("Grab Mode (select/move objects)"));
-	set_tooltip (mouse_cut_button, _("Cut Mode (split regions)"));
-	set_tooltip (mouse_select_button, _("Range Mode (select time ranges)"));
-	set_tooltip (mouse_grid_button, _("Grid Mode (edit tempo-map, drag/drop music-time grid)"));
-	set_tooltip (mouse_draw_button, _("Draw Mode (draw and edit gain/notes/automation)"));
-	set_tooltip (mouse_timefx_button, _("Stretch Mode (time-stretch audio and midi regions, preserving pitch)"));
-	set_tooltip (mouse_content_button, _("Internal Edit Mode (edit notes and automation points)"));
 	set_tooltip (*_group_tabs, _("Groups: click to (de)activate\nContext-click for other operations"));
 	set_tooltip (nudge_forward_button, _("Nudge Region/Selection Later"));
 	set_tooltip (nudge_backward_button, _("Nudge Region/Selection Earlier"));

@@ -19,14 +19,17 @@
 #include "ardour/midi_region.h"
 #include "ardour/smf_source.h"
 
+#include "canvas/box.h"
 #include "canvas/canvas.h"
 #include "canvas/container.h"
 #include "canvas/debug.h"
 #include "canvas/scroll_group.h"
 #include "canvas/rectangle.h"
+#include "canvas/widget.h"
 
 #include "gtkmm2ext/actions.h"
 
+#include "widgets/ardour_button.h"
 
 #include "ardour_ui.h"
 #include "editor_cursors.h"
@@ -44,19 +47,28 @@
 
 using namespace ARDOUR;
 using namespace ArdourCanvas;
+using namespace ArdourWidgets;
 using namespace Gtkmm2ext;
 using namespace Temporal;
 
 MidiCueEditor::MidiCueEditor()
-	: timebar_height (15.)
+	: CueEditor (X_("MIDICueEditor"))
+	, timebar_height (15.)
 	, n_timebars (3)
 	, prh (nullptr)
 	, bg (nullptr)
 	, view (nullptr)
-	, mouse_mode (Editing::MouseContent)
 	, bbt_metric (*this)
 {
+	mouse_mode = Editing::MouseContent;
+
+	register_mouse_mode_actions ();
+	bind_mouse_mode_buttons ();
+
 	build_canvas ();
+	setup_toolbar ();
+
+	_toolbox.pack_start (viewport(), true, true);
 
 	_verbose_cursor = new VerboseCursor (*this);
 
@@ -65,6 +77,7 @@ MidiCueEditor::MidiCueEditor()
 	_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());
 
 	_snapped_cursor = new EditorCursor (*this, X_("snapped"));
+
 }
 
 MidiCueEditor::~MidiCueEditor ()
@@ -98,6 +111,59 @@ MidiCueEditor::canvas_pre_event (GdkEvent* ev)
 	}
 
 	return false;
+}
+
+void
+MidiCueEditor::setup_toolbar ()
+{
+	Gtk::HBox* mode_box = manage(new Gtk::HBox);
+	mode_box->set_border_width (2);
+	mode_box->set_spacing(2);
+
+	Gtk::HBox* mouse_mode_box = manage (new Gtk::HBox);
+	Gtk::HBox* mouse_mode_hbox = manage (new Gtk::HBox);
+	Gtk::VBox* mouse_mode_vbox = manage (new Gtk::VBox);
+	Gtk::Alignment* mouse_mode_align = manage (new Gtk::Alignment);
+
+	Glib::RefPtr<Gtk::SizeGroup> mouse_mode_size_group = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL);
+	mouse_mode_size_group->add_widget (mouse_move_button);
+	mouse_mode_size_group->add_widget (mouse_draw_button);
+	mouse_mode_size_group->add_widget (mouse_content_button);
+
+	mouse_mode_size_group->add_widget (grid_type_selector);
+	mouse_mode_size_group->add_widget (draw_length_selector);
+	mouse_mode_size_group->add_widget (draw_velocity_selector);
+	mouse_mode_size_group->add_widget (draw_channel_selector);
+	mouse_mode_size_group->add_widget (snap_mode_button);
+
+	mouse_mode_hbox->set_spacing (2);
+	mouse_mode_hbox->pack_start (mouse_move_button, false, false);
+	mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
+	mouse_mode_hbox->pack_start (mouse_content_button, false, false);
+
+	mouse_mode_vbox->pack_start (*mouse_mode_hbox);
+
+	mouse_mode_align->add (*mouse_mode_vbox);
+	mouse_mode_align->set (0.5, 1.0, 0.0, 0.0);
+
+	mouse_mode_box->pack_start (*mouse_mode_align, false, false);
+
+	pack_snap_box ();
+	pack_draw_box ();
+
+	Gtk::HBox* _toolbar_inner = manage (new Gtk::HBox);
+	Gtk::HBox* _toolbar_outer = manage (new Gtk::HBox);
+
+	_toolbar_inner->pack_start (*mouse_mode_box, false, true);
+	_toolbar_inner->pack_start (snap_box, false, true);
+	_toolbar_inner->pack_start (grid_box, false, true);
+	_toolbar_inner->pack_start (draw_box, false, true);
+
+	_toolbar_outer->pack_start (*_toolbar_inner, true, true);
+	_toolbox.pack_start (*_toolbar_outer, false, false);
+
+	Bindings* pr_bindings = Bindings::get_bindings (X_("Pianoroll"));
+	_toolbox.set_data (X_("ardour-bindings"), pr_bindings);
 }
 
 void
@@ -310,6 +376,12 @@ Gtk::Widget&
 MidiCueEditor::viewport()
 {
 	return *_canvas_viewport;
+}
+
+Gtk::Widget&
+MidiCueEditor::toolbox ()
+{
+	return _toolbox;
 }
 
 void
@@ -907,3 +979,33 @@ MidiCueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sa
 	}
 }
 
+
+void
+MidiCueEditor::mouse_mode_toggled (Editing::MouseMode m)
+{
+
+	std::cerr << "MMT " << enum_2_string (m) << std::endl;
+
+	Glib::RefPtr<Gtk::Action>       act  = get_mouse_mode_action (m);
+	Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
+
+	std::cerr << "active ? " << tact->get_active() << std::endl;
+
+	if (!tact->get_active()) {
+		/* this was just the notification that the old mode has been
+		 * left. we'll get called again with the new mode active in a
+		 * jiffy.
+		 */
+		return;
+	}
+
+	mouse_mode = m;
+
+	/* this should generate a new enter event which will
+	   trigger the appropriate cursor.
+	*/
+
+	if (_canvas) {
+		_canvas->re_enter ();
+	}
+}

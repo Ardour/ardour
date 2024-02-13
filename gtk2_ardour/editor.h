@@ -180,17 +180,13 @@ public:
 	}
 	double trackviews_height () const;
 
-	bool on_velocity_scroll_event (GdkEventScroll*);
-
 	void undo (uint32_t n = 1);
 	void redo (uint32_t n = 1);
 
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
-	void set_mouse_mode (Editing::MouseMode, bool force = false);
 	void step_mouse_mode (bool next);
-	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
 	bool internal_editing() const;
 
 	void remove_midi_note (ArdourCanvas::Item*, GdkEvent*);
@@ -1810,24 +1806,16 @@ private:
 	Gtk::Table               toolbar_selection_clock_table;
 	Gtk::Label               toolbar_selection_cursor_label;
 
-	ArdourWidgets::ArdourButton mouse_select_button;
-	ArdourWidgets::ArdourButton mouse_draw_button;
-	ArdourWidgets::ArdourButton mouse_move_button;
-	ArdourWidgets::ArdourButton mouse_timefx_button;
-	ArdourWidgets::ArdourButton mouse_grid_button;
-	ArdourWidgets::ArdourButton mouse_content_button;
-	ArdourWidgets::ArdourButton mouse_cut_button;
-
 	ArdourWidgets::ArdourButton smart_mode_button;
 	Glib::RefPtr<Gtk::ToggleAction> smart_mode_action;
+
+	void add_mouse_mode_actions (Glib::RefPtr<Gtk::ActionGroup>);
 
 	void                     mouse_mode_toggled (Editing::MouseMode m);
 	void			 mouse_mode_object_range_toggled ();
 	bool                     ignore_mouse_mode_toggle;
 
 	bool                     mouse_select_button_release (GdkEventButton*);
-
-	Glib::RefPtr<Gtk::Action> get_mouse_mode_action (Editing::MouseMode m) const;
 
 	Gtk::VBox                automation_box;
 	Gtk::Button              automation_mode_button;
@@ -1853,13 +1841,6 @@ private:
 	}
 
 	bool snap_mode_button_clicked (GdkEventButton*);
-
-	Gtk::HBox snap_box;
-	Gtk::HBox grid_box;
-	Gtk::HBox draw_box;
-
-	ArdourWidgets::ArdourVSpacer _grid_box_spacer;
-	ArdourWidgets::ArdourVSpacer _draw_box_spacer;
 
 	Gtk::HBox ebox_hpacker;
 	Gtk::VBox ebox_vpacker;

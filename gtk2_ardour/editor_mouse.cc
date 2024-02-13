@@ -214,51 +214,6 @@ Editor::snap_mode_button_clicked (GdkEventButton* ev)
 	return true;
 }
 
-
-
-Glib::RefPtr<Action>
-Editor::get_mouse_mode_action(MouseMode m) const
-{
-	switch (m) {
-	case MouseRange:
-		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-range"));
-	case MouseObject:
-		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-object"));
-	case MouseCut:
-		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-cut"));
-	case MouseDraw:
-		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-draw"));
-	case MouseTimeFX:
-		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-timefx"));
-	case MouseGrid:
-		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-grid"));
-	case MouseContent:
-		return ActionManager::get_action (X_("MouseMode"), X_("set-mouse-mode-content"));
-	}
-	return Glib::RefPtr<Action>();
-}
-
-void
-Editor::set_mouse_mode (MouseMode m, bool force)
-{
-	if (_drags->active ()) {
-		return;
-	}
-
-	if (!force && m == mouse_mode) {
-		return;
-	}
-
-	Glib::RefPtr<Action>       act  = get_mouse_mode_action(m);
-	Glib::RefPtr<ToggleAction> tact = Glib::RefPtr<ToggleAction>::cast_dynamic(act);
-
-	/* go there and back to ensure that the toggled handler is called to set up mouse_mode */
-	tact->set_active (false);
-	tact->set_active (true);
-
-	/* NOTE: this will result in a call to mouse_mode_toggled which does the heavy lifting */
-}
-
 void
 Editor::mouse_mode_toggled (MouseMode m)
 {

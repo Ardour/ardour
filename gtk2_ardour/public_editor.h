@@ -469,8 +469,6 @@ public:
 	friend bool ARDOUR_UI_UTILS::relay_key_press (GdkEventKey*, Gtk::Window*);
 	friend bool ARDOUR_UI_UTILS::forward_key_press (GdkEventKey*);
 
-	Gtkmm2ext::Bindings* bindings;
-
 protected:
 	friend class DisplaySuspender;
 	virtual void suspend_route_redisplay () = 0;

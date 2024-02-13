@@ -30,11 +30,17 @@ namespace Gtk {
 }
 
 namespace ArdourCanvas {
+	class Box;
 	class Canvas;
 	class Container;
 	class GtkCanvasViewport;
 	class PianoRollHeader;
 	class ScrollGroup;
+	class Widget;
+}
+
+namespace ArdourWidgets {
+	class ArdourButton;
 }
 
 class MidiCueView;
@@ -48,6 +54,7 @@ class MidiCueEditor : public CueEditor
 
 	ArdourCanvas::Container* get_noscroll_group() const { return no_scroll_group; }
 	Gtk::Widget& viewport();
+	Gtk::Widget& toolbox ();
 
 	double visible_canvas_width() const { return _visible_canvas_width; }
 	samplecnt_t current_page_samples() const;
@@ -102,6 +109,8 @@ class MidiCueEditor : public CueEditor
 	bool key_press_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 	bool key_release_handler (ArdourCanvas::Item*, GdkEvent*, ItemType);
 
+	void mouse_mode_toggled (Editing::MouseMode);
+
  private:
 	ArdourCanvas::GtkCanvasViewport* _canvas_viewport;
 	ArdourCanvas::GtkCanvas* _canvas;
@@ -131,13 +140,13 @@ class MidiCueEditor : public CueEditor
 
 	ArdourCanvas::Rectangle* transport_loop_range_rect;
 
+	Gtk::VBox     _toolbox;
+
 	CueMidiBackground* bg;
 	MidiCueView* view;
 
 	void build_canvas ();
 	void canvas_allocate (Gtk::Allocation);
-
-	Editing::MouseMode mouse_mode;
 
 	RegionSelection region_selection();
 
@@ -161,6 +170,7 @@ class MidiCueEditor : public CueEditor
 	BBTMetric bbt_metric;
 
 	bool canvas_pre_event (GdkEvent*);
+	void setup_toolbar ();
 };
 
 

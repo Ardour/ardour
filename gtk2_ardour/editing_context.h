@@ -43,7 +43,9 @@
 #include "ardour/session_handle.h"
 #include "ardour/types.h"
 
+#include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
+#include "widgets/ardour_spacer.h"
 
 #include "axis_provider.h"
 #include "editing.h"
@@ -80,8 +82,10 @@ public:
 		std::shared_ptr<CursorContext> cursor_ctx;
 	};
 
-	EditingContext ();
+	EditingContext (std::string const &);
 	~EditingContext ();
+
+	std::string editor_name() const { return _name; }
 
 	void set_session (ARDOUR::Session*);
 
@@ -283,7 +287,7 @@ public:
 	 * @param force Perform the effects of the change even if no change is required
 	 * (ie even if the current mouse mode is equal to @p m)
 	 */
-	virtual void set_mouse_mode (Editing::MouseMode, bool force = false) = 0;
+	virtual void set_mouse_mode (Editing::MouseMode, bool force = false);
 	/** Step the mouse mode onto the next or previous one.
 	 * @param next true to move to the next, otherwise move to the previous
 	 */
@@ -291,7 +295,7 @@ public:
 	/** @return The current mouse mode (gain, object, range, timefx etc.)
 	 * (defined in editing_syms.h)
 	 */
-	virtual Editing::MouseMode current_mouse_mode () const = 0;
+	Editing::MouseMode current_mouse_mode () const { return mouse_mode; }
 	/** @return Whether the current mouse mode is an "internal" editing mode. */
 	virtual bool internal_editing() const = 0;
 
@@ -343,7 +347,13 @@ public:
 	virtual size_t push_canvas_cursor (Gdk::Cursor*);
 	virtual void pop_canvas_cursor ();
 
+	virtual void mouse_mode_toggled (Editing::MouseMode) = 0;
+
+	bool on_velocity_scroll_event (GdkEventScroll*);
+
   protected:
+	std::string _name;
+
 	static Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
 
 	/* Cursor stuff.  Do not use directly, use via CursorContext. */
@@ -516,6 +526,35 @@ public:
 	friend class EditorSummary;
 	Gtk::Adjustment     vertical_adjustment;
 	Gtk::Adjustment     horizontal_adjustment;
+
+	ArdourWidgets::ArdourButton mouse_select_button;
+	ArdourWidgets::ArdourButton mouse_timefx_button;
+	ArdourWidgets::ArdourButton mouse_grid_button;
+	ArdourWidgets::ArdourButton mouse_cut_button;
+	ArdourWidgets::ArdourButton mouse_move_button;
+	ArdourWidgets::ArdourButton mouse_draw_button;
+	ArdourWidgets::ArdourButton mouse_content_button;
+
+	Glib::RefPtr<Gtk::Action> get_mouse_mode_action (Editing::MouseMode m) const;
+	void register_mouse_mode_actions ();
+	void bind_mouse_mode_buttons ();
+	virtual void add_mouse_mode_actions (Glib::RefPtr<Gtk::ActionGroup>) {}
+
+	ArdourWidgets::ArdourButton* snap_button;
+
+	Gtk::HBox snap_box;
+	Gtk::HBox grid_box;
+	Gtk::HBox draw_box;
+
+	ArdourWidgets::ArdourVSpacer _grid_box_spacer;
+	ArdourWidgets::ArdourVSpacer _draw_box_spacer;
+
+	void pack_draw_box ();
+	void pack_snap_box ();
+
+	Gtkmm2ext::Bindings* bindings;
+
+	Editing::MouseMode mouse_mode;
 
   private:
 	static std::queue<EditingContext*> ec_stack;

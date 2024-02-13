@@ -145,7 +145,7 @@ MidiViewBackground::draw_note_lines()
 
 	ArdourCanvas::LineSet::ResetRAII lr (*_note_lines);
 
-	if (contents_height() < 140 || note_height() < 3) {
+	if (contents_height() < 10 || note_height() < 3) {
 		/* context is too small for note lines, or there are too many */
 		return;
 	}
