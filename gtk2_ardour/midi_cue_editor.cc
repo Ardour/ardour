@@ -154,12 +154,12 @@ MidiCueEditor::setup_toolbar ()
 	Gtk::HBox* _toolbar_inner = manage (new Gtk::HBox);
 	Gtk::HBox* _toolbar_outer = manage (new Gtk::HBox);
 
-	_toolbar_inner->pack_start (*mouse_mode_box, false, true);
-	_toolbar_inner->pack_start (snap_box, false, true);
-	_toolbar_inner->pack_start (grid_box, false, true);
-	_toolbar_inner->pack_start (draw_box, false, true);
+	_toolbar_inner->pack_start (*mouse_mode_box, false, false);
+	_toolbar_inner->pack_start (snap_box, false, false);
+	_toolbar_inner->pack_start (grid_box, false, false);
+	_toolbar_inner->pack_start (draw_box, false, false);
 
-	_toolbar_outer->pack_start (*_toolbar_inner, true, true);
+	_toolbar_outer->pack_start (*_toolbar_inner, true, false);
 	_toolbox.pack_start (*_toolbar_outer, false, false);
 
 	Bindings* pr_bindings = Bindings::get_bindings (X_("Pianoroll"));
@@ -1008,4 +1008,19 @@ MidiCueEditor::mouse_mode_toggled (Editing::MouseMode m)
 	if (_canvas) {
 		_canvas->re_enter ();
 	}
+}
+
+int
+MidiCueEditor::set_state (XMLNode const & node, int version)
+{
+	set_common_editing_state (node);
+	return 0;
+}
+
+XMLNode&
+MidiCueEditor::get_state () const
+{
+	XMLNode* node (new XMLNode (_("MIDICueEditor")));
+	get_common_editing_state (*node);
+	return *node;
 }

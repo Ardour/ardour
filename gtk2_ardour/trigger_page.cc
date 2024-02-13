@@ -224,6 +224,8 @@ TriggerPage::get_state () const
 	node->set_property (X_("triggerpage-hpane-pos"), _pane_upper.get_divider ());
 	node->set_property (X_("triggerpage-sidebar-page"), _sidebar_notebook.get_current_page ());
 
+	node->add_child_nocopy (_midi_editor->get_state());
+
 	return *node;
 }
 
@@ -234,6 +236,12 @@ TriggerPage::set_state (const XMLNode& node, int version)
 	if (node.get_property (X_("triggerpage-sidebar-page"), sidebar_page)) {
 		_sidebar_notebook.set_current_page (sidebar_page);
 	}
+
+	XMLNode* mn = node.child (X_("MIDICueEditor"));
+	if (mn) {
+		_midi_editor->set_state (*mn, version);
+	}
+
 	return Tabbable::set_state (node, version);
 }
 

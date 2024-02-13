@@ -87,6 +87,9 @@ class MidiCueEditor : public CueEditor
 	ArdourCanvas::GtkCanvasViewport* get_canvas_viewport() const;
 	ArdourCanvas::Canvas* get_canvas() const;
 
+	int set_state (const XMLNode&, int version);
+	XMLNode& get_state () const;
+
   protected:
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
