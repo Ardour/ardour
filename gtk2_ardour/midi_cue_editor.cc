@@ -65,6 +65,9 @@ MidiCueEditor::MidiCueEditor()
 	register_mouse_mode_actions ();
 	bind_mouse_mode_buttons ();
 
+	build_grid_type_menu ();
+	build_draw_midi_menus();
+
 	build_canvas ();
 	setup_toolbar ();
 
@@ -726,7 +729,7 @@ MidiCueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sa
 
 #if 0 // DEBUG GRID
 	for (auto const& g : grid) {
-		std::cout << "Grid " << g.time() <<  " Beats: " << g.beats() << " BBT: " << g.bbt() << " sample: " << g.sample(_session->nominal_sample_rate ()) << "\n"; 
+		std::cout << "Grid " << g.time() <<  " Beats: " << g.beats() << " BBT: " << g.bbt() << " sample: " << g.sample(_session->nominal_sample_rate ()) << "\n";
 	}
 #endif
 
