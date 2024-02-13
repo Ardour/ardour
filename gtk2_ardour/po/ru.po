@@ -11,8 +11,8 @@ msgid ""
 msgstr ""
 "Project-Id-Version: Ardour 8\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2024-01-15 00:12+0100\n"
-"PO-Revision-Date: 2024-01-15 00:27+0100\n"
+"POT-Creation-Date: 2024-02-13 12:30+0100\n"
+"PO-Revision-Date: 2024-02-13 12:36+0100\n"
 "Last-Translator: Alexandre Prokoudine <alexandre.prokoudine@gmail.com>\n"
 "Language-Team: Russian <gnome-cyr@lists.gnome.org>\n"
 "Language: ru\n"
@@ -678,7 +678,7 @@ msgid "Add:"
 msgstr "Добавить:"
 
 #: add_route_dialog.cc:75 bundle_manager.cc:205 loudness_dialog.cc:524
-#: region_editor.cc:57 route_group_dialog.cc:72
+#: region_editor.cc:57 route_group_dialog.cc:73
 msgid "Name:"
 msgstr "Имя:"
 
@@ -897,12 +897,12 @@ msgid "Add and Close"
 msgstr "Добавить и закрыть"
 
 #: add_route_dialog.cc:447 add_route_dialog.cc:831 add_route_dialog.cc:844
-#: editor_actions.cc:539 editor_rulers.cc:286 time_axis_view.cc:1378
+#: editor_actions.cc:539 editor_rulers.cc:286 time_axis_view.cc:1376
 msgid "Normal"
 msgstr "Обычный"
 
 #: add_route_dialog.cc:523 add_route_dialog.cc:810 editor_actions.cc:148
-#: engine_dialog.cc:272 missing_file_dialog.cc:65 mixer_ui.cc:2525
+#: engine_dialog.cc:272 missing_file_dialog.cc:65 mixer_ui.cc:2531
 #: plugin_pin_dialog.cc:76 rc_option_editor.cc:3507 rc_option_editor.cc:3519
 #: rc_option_editor.cc:3521 rc_option_editor.cc:3530 rc_option_editor.cc:3532
 #: rc_option_editor.cc:3540 rc_option_editor.cc:3548 rc_option_editor.cc:3550
@@ -970,7 +970,7 @@ msgstr "12 каналов"
 
 #: add_route_dialog.cc:957 gain_meter.cc:851 loudness_dialog.cc:337
 #: loudness_dialog.cc:527 loudness_dialog.cc:540 loudness_dialog.cc:585
-#: loudness_dialog.cc:640 mixer_strip.cc:2008 processor_box.cc:4221
+#: loudness_dialog.cc:640 mixer_strip.cc:2009 processor_box.cc:4223
 msgid "Custom"
 msgstr "На заказ"
 
@@ -982,7 +982,7 @@ msgstr "Готовый шаблон"
 msgid "New Group..."
 msgstr "Создать группу..."
 
-#: add_route_dialog.cc:1086 mixer_strip.cc:1037 route_group_menu.cc:93
+#: add_route_dialog.cc:1086 mixer_strip.cc:1038 route_group_menu.cc:93
 msgid "No Group"
 msgstr "Нет группы"
 
@@ -1048,8 +1048,8 @@ msgstr "Спектральный анализ"
 msgid "Track"
 msgstr "Дорожка"
 
-#: analysis_window.cc:65 ardour_ui_ed.cc:720 mixer_strip.cc:871 mixer_ui.cc:203
-#: mixer_ui.cc:2936
+#: analysis_window.cc:65 ardour_ui_ed.cc:720 mixer_strip.cc:872 mixer_ui.cc:203
+#: mixer_ui.cc:2942
 msgid "Show"
 msgstr "Показать"
 
@@ -1104,9 +1104,9 @@ msgstr "Воспр. очер."
 msgid "Audition"
 msgstr "Прослушивание"
 
-#: ardour_ui.cc:315 editor_actions.cc:178 mixer_strip.cc:1713
-#: monitor_section.cc:328 rc_option_editor.cc:4337 route_time_axis.cc:265
-#: route_time_axis.cc:2364 trigger_strip.cc:345 vca_master_strip.cc:237
+#: ardour_ui.cc:315 editor_actions.cc:178 mixer_strip.cc:1714
+#: monitor_section.cc:328 rc_option_editor.cc:4337 route_time_axis.cc:266
+#: route_time_axis.cc:2410 trigger_strip.cc:345 vca_master_strip.cc:237
 #: vca_time_axis.cc:283
 msgid "Solo"
 msgstr "Соло"
@@ -2281,7 +2281,7 @@ msgstr "Заархивировать..."
 
 #: ardour_ui_ed.cc:246 editor.cc:1612 editor_actions.cc:1848
 #: editor_markers.cc:1144 editor_snapshots.cc:152 foldback_strip.cc:802
-#: mixer_strip.cc:1117 route_ui.cc:2659 surround_strip.cc:367
+#: mixer_strip.cc:1118 route_ui.cc:2659 surround_strip.cc:367
 #: track_record_axis.cc:508 trigger_strip.cc:257
 msgid "Rename..."
 msgstr "Переименовать..."
@@ -2323,7 +2323,7 @@ msgstr "Выход"
 #: ardour_ui_ed.cc:277 ardour_ui_ed.cc:700 ardour_ui_ed.cc:701
 #: ardour_ui_ed.cc:702 ardour_ui_ed.cc:703 ardour_ui_ed.cc:704
 #: automation_time_axis.cc:675 location_ui.cc:69 plugin_manager_ui.cc:114
-#: route_time_axis.cc:888
+#: route_time_axis.cc:889
 msgid "Hide"
 msgstr "Скрыть"
 
@@ -2784,7 +2784,7 @@ msgstr "Выбрать все видимые полосы"
 msgid "Select All Tracks"
 msgstr "Выбрать все дорожки"
 
-#: ardour_ui_ed.cc:687 export_timespan_selector.cc:68 processor_box.cc:4201
+#: ardour_ui_ed.cc:687 export_timespan_selector.cc:68 processor_box.cc:4203
 msgid "Deselect All"
 msgstr "Снять все выделения"
 
@@ -3384,7 +3384,7 @@ msgstr ""
 "Вы можете узнать установленный предел при помощи команды 'ulimit -l'. Обычно "
 "это контролируется в %2."
 
-#: ardour_ui_startup.cc:802 mixer_ui.cc:4042 mixer_ui.cc:4087
+#: ardour_ui_startup.cc:802 mixer_ui.cc:4048 mixer_ui.cc:4093
 msgid "Do not show this window again"
 msgstr "Больше не показывать это окно"
 
@@ -3759,7 +3759,7 @@ msgstr "Касание"
 msgid "Latch"
 msgstr "Запирание"
 
-#: automation_time_axis.cc:193 generic_pluginui.cc:832
+#: automation_time_axis.cc:193 generic_pluginui.cc:808
 msgid "Mgnual"
 msgstr "Проба"
 
@@ -3795,7 +3795,7 @@ msgstr ""
 msgid "Line"
 msgstr "Линия"
 
-#: automation_time_axis.cc:680 mixer_ui.cc:4160 rc_option_editor.cc:4125
+#: automation_time_axis.cc:680 mixer_ui.cc:4166 rc_option_editor.cc:4125
 #: rc_option_editor.cc:4130 rc_option_editor.cc:4176 rc_option_editor.cc:4181
 #: rc_option_editor.cc:4240 rc_option_editor.cc:4245 trigger_ui.cc:408
 msgid "Clear"
@@ -3883,7 +3883,7 @@ msgstr "Правка"
 
 #: bundle_manager.cc:277 editor.cc:6799 editor.cc:6829 editor_actions.cc:440
 #: editor_actions.cc:441 io_plugin_window.cc:359 luawindow.cc:101
-#: plugin_ui.cc:533 processor_box.cc:4185 processor_box.cc:4187
+#: plugin_ui.cc:533 processor_box.cc:4187 processor_box.cc:4189
 msgid "Delete"
 msgstr "Удалить"
 
@@ -3916,7 +3916,7 @@ msgstr "Тема цветового оформления"
 msgid "Object"
 msgstr "Объект"
 
-#: color_theme_manager.cc:123 route_group_dialog.cc:55 route_group_dialog.cc:83
+#: color_theme_manager.cc:123 route_group_dialog.cc:56 route_group_dialog.cc:84
 msgid "Color"
 msgstr "Цвет"
 
@@ -4365,7 +4365,7 @@ msgstr "Видеолинейка"
 msgid "mode"
 msgstr "режим"
 
-#: editor.cc:700 editor.cc:4171 group_tabs.cc:600 route_group_dialog.cc:53
+#: editor.cc:700 editor.cc:4171 group_tabs.cc:600 route_group_dialog.cc:54
 #: time_info_box.cc:66
 msgid "Selection"
 msgstr "Выделение"
@@ -4657,15 +4657,15 @@ msgstr "Создать выделение между указателем и т�
 msgid "Select"
 msgstr "Выделить"
 
-#: editor.cc:2092 editor.cc:2166 editor_actions.cc:439 processor_box.cc:4181
+#: editor.cc:2092 editor.cc:2166 editor_actions.cc:439 processor_box.cc:4183
 msgid "Cut"
 msgstr "Вырезать"
 
-#: editor.cc:2093 editor.cc:2167 editor_actions.cc:445 processor_box.cc:4183
+#: editor.cc:2093 editor.cc:2167 editor_actions.cc:445 processor_box.cc:4185
 msgid "Copy"
 msgstr "Копировать"
 
-#: editor.cc:2094 editor.cc:2168 editor_actions.cc:446 processor_box.cc:4195
+#: editor.cc:2094 editor.cc:2168 editor_actions.cc:446 processor_box.cc:4197
 msgid "Paste"
 msgstr "Вставить"
 
@@ -5022,7 +5022,7 @@ msgstr "Сохранить оставшееся"
 
 #: editor.cc:4642 editor_audio_import.cc:729 editor_ops.cc:7607
 #: engine_dialog.cc:3125 sfdb_freesound_mootcher.cc:88 keyeditor.cc:81
-#: library_download_dialog.cc:311 processor_box.cc:3908 processor_box.cc:3933
+#: library_download_dialog.cc:311 processor_box.cc:3910 processor_box.cc:3935
 #: pt_import_selector.cc:45 template_dialog.cc:518
 #: transport_masters_dialog.cc:715 utils.cc:125
 msgid "Cancel"
@@ -5082,7 +5082,7 @@ msgstr "Дождитесь загрузки визуальных данных в
 
 #: editor.cc:6798 editor.cc:6833 editor_markers.cc:1246 editor_markers.cc:1262
 #: editor_markers.cc:1279 io_plugin_window.cc:355 panner_ui.cc:416
-#: processor_box.cc:4228 trigger_clip_picker.cc:332
+#: processor_box.cc:4230 trigger_clip_picker.cc:332
 msgid "Edit..."
 msgstr "Изменить"
 
@@ -5110,8 +5110,8 @@ msgstr "Преобразовать..."
 msgid "Autoconnect"
 msgstr "Автосоединение"
 
-#: editor_actions.cc:128 rc_option_editor.cc:4912 route_time_axis.cc:279
-#: route_time_axis.cc:817 vca_time_axis.cc:77 vca_time_axis.cc:461
+#: editor_actions.cc:128 rc_option_editor.cc:4912 route_time_axis.cc:280
+#: route_time_axis.cc:818 vca_time_axis.cc:77 vca_time_axis.cc:461
 msgid "Automation"
 msgstr "Автоматизация"
 
@@ -5155,7 +5155,7 @@ msgstr "Положение"
 msgid "Markers"
 msgstr "Маркеры"
 
-#: editor_actions.cc:144 panner_ui.cc:180 route_time_axis.cc:589
+#: editor_actions.cc:144 panner_ui.cc:180 route_time_axis.cc:590
 #: vca_time_axis.cc:500
 msgid "Trim"
 msgstr "Обрезать"
@@ -5206,7 +5206,7 @@ msgstr "Прочие параметры"
 #: rc_option_editor.cc:4332 rc_option_editor.cc:4337 rc_option_editor.cc:4346
 #: rc_option_editor.cc:4348 rc_option_editor.cc:4356 rc_option_editor.cc:4364
 #: rc_option_editor.cc:4372 rc_option_editor.cc:4390 rc_option_editor.cc:4402
-#: rc_option_editor.cc:4414 route_group_dialog.cc:56
+#: rc_option_editor.cc:4414 route_group_dialog.cc:57
 #: session_option_editor.cc:264 session_option_editor.cc:265
 #: session_option_editor.cc:272 session_option_editor.cc:279
 #: session_option_editor.cc:285
@@ -5265,7 +5265,7 @@ msgstr "Скорость (FPS) тайм-кода"
 msgid "Region Layers"
 msgstr "Слои областей"
 
-#: editor_actions.cc:190 route_time_axis.cc:647 vca_time_axis.cc:457
+#: editor_actions.cc:190 route_time_axis.cc:648 vca_time_axis.cc:457
 msgid "Height"
 msgstr "Высота"
 
@@ -5791,7 +5791,7 @@ msgstr "Переключить активность"
 #: editor_markers.cc:1247 editor_markers.cc:1263 editor_markers.cc:1280
 #: editor_snapshots.cc:151 foldback_strip.cc:829 loudness_dialog.cc:70
 #: lua_script_manager.cc:43 lua_script_manager.cc:47 lua_script_manager.cc:49
-#: mixer_strip.cc:1202 route_time_axis.cc:895 template_dialog.cc:225
+#: mixer_strip.cc:1203 route_time_axis.cc:896 template_dialog.cc:225
 #: transport_masters_dialog.cc:88 trigger_strip.cc:332 vca_master_strip.cc:481
 #: vca_time_axis.cc:466
 msgid "Remove"
@@ -5801,21 +5801,21 @@ msgstr "Удалить"
 msgid "Fit Selection (Vertical)"
 msgstr "Уместить выделение по вертикали"
 
-#: editor_actions.cc:530 time_axis_view.cc:1375
+#: editor_actions.cc:530 time_axis_view.cc:1373
 msgid "Largest"
 msgstr "Огромная"
 
-#: editor_actions.cc:533 time_axis_view.cc:1376
+#: editor_actions.cc:533 time_axis_view.cc:1374
 msgid "Larger"
 msgstr "Больше"
 
 #: editor_actions.cc:536 editor_rulers.cc:284 rc_option_editor.cc:2715
-#: time_axis_view.cc:1377
+#: time_axis_view.cc:1375
 msgid "Large"
 msgstr "Большая"
 
 #: editor_actions.cc:542 editor_rulers.cc:288 rc_option_editor.cc:2714
-#: time_axis_view.cc:1379
+#: time_axis_view.cc:1377
 msgid "Small"
 msgstr "Маленькая"
 
@@ -6243,7 +6243,7 @@ msgstr "Объединить выделенные ноты"
 
 #: editor_actions.cc:895 editor_actions.cc:1189
 msgid "Draw Velocity"
-msgstr ""
+msgstr "Рисовать силу нажатия"
 
 #: editor_actions.cc:902
 #, c-format
@@ -6252,7 +6252,7 @@ msgstr "Сила нажатия %d"
 
 #: editor_actions.cc:906 editor_actions.cc:1213
 msgid "Draw Channel"
-msgstr ""
+msgstr "Рисовать канал"
 
 #: editor_actions.cc:1288 editor_actions.cc:1375 editor_actions.cc:1558
 #: editor_actions.cc:1569 editor_actions.cc:1624 editor_actions.cc:1635
@@ -6288,9 +6288,9 @@ msgstr "Прикрепить к видео"
 msgid "Remove Sync"
 msgstr "Удалить синхронизатор"
 
-#: editor_actions.cc:1873 mixer_strip.cc:1700 mixer_strip.cc:1731
+#: editor_actions.cc:1873 mixer_strip.cc:1701 mixer_strip.cc:1732
 #: monitor_section.cc:260 monitor_section.cc:320 monitor_section.cc:938
-#: route_time_axis.cc:266 route_time_axis.cc:598 surround_strip.cc:438
+#: route_time_axis.cc:267 route_time_axis.cc:599 surround_strip.cc:442
 #: track_record_axis.cc:172 track_record_axis.cc:174 trigger_strip.cc:340
 #: vca_time_axis.cc:508
 msgid "Mute"
@@ -6763,7 +6763,7 @@ msgstr "CD"
 msgid "new CD marker"
 msgstr "Новый CD-маркер"
 
-#: editor_drag.cc:6048 editor_route_groups.cc:429 mixer_ui.cc:2474
+#: editor_drag.cc:6048 editor_route_groups.cc:429 mixer_ui.cc:2480
 msgid "unnamed"
 msgstr "Безымянный"
 
@@ -6822,9 +6822,9 @@ msgstr "Отн."
 msgid "Relative Gain Changes?"
 msgstr "Относительны ли изменения в усилении"
 
-#: editor_route_groups.cc:96 editor_regions.cc:87 mixer_strip.cc:1733
-#: meter_strip.cc:388 route_list_base.cc:197 route_time_axis.cc:2366
-#: time_axis_view.cc:1180 track_record_axis.cc:258 vca_time_axis.cc:64
+#: editor_route_groups.cc:96 editor_regions.cc:87 mixer_strip.cc:1734
+#: meter_strip.cc:388 route_list_base.cc:197 route_time_axis.cc:2412
+#: time_axis_view.cc:1178 track_record_axis.cc:258 vca_time_axis.cc:64
 msgid "Mute|M"
 msgstr "М"
 
@@ -6832,8 +6832,8 @@ msgstr "М"
 msgid "Sharing Mute?"
 msgstr "Разделяется ли приглушение"
 
-#: editor_route_groups.cc:97 mixer_strip.cc:1747 meter_strip.cc:396
-#: route_list_base.cc:207 route_time_axis.cc:2363 vca_master_strip.cc:236
+#: editor_route_groups.cc:97 mixer_strip.cc:1748 meter_strip.cc:396
+#: route_list_base.cc:207 route_time_axis.cc:2409 vca_master_strip.cc:236
 #: vca_time_axis.cc:282
 msgid "Solo|S"
 msgstr "С"
@@ -7105,8 +7105,8 @@ msgstr "Переименовать выделение"
 msgid "Rename Mark"
 msgstr "Переименовать пометку"
 
-#: editor_markers.cc:1861 editor_mouse.cc:2611 mixer_ui.cc:4126
-#: mixer_ui.cc:4161 processor_box.cc:3609 processor_box.cc:4197
+#: editor_markers.cc:1861 editor_mouse.cc:2611 mixer_ui.cc:4132
+#: mixer_ui.cc:4167 processor_box.cc:3611 processor_box.cc:4199
 #: route_ui.cc:1722 route_ui.cc:2834 template_dialog.cc:226
 #: vca_master_strip.cc:473
 msgid "Rename"
@@ -7287,7 +7287,7 @@ msgstr "Опускание областей вниз"
 msgid "Rename Region"
 msgstr "Переименовать область..."
 
-#: editor_ops.cc:3061 processor_box.cc:3607 route_ui.cc:1720
+#: editor_ops.cc:3061 processor_box.cc:3609 route_ui.cc:1720
 msgid "New name:"
 msgstr "Новое название:"
 
@@ -7444,7 +7444,7 @@ msgstr "сведение области"
 
 #: editor_ops.cc:4497
 msgid "delete control points"
-msgstr ""
+msgstr "удаление контрольной точки"
 
 #: editor_ops.cc:4559
 msgid "delete"
@@ -8508,14 +8508,14 @@ msgid "Systemic Latency [samples]"
 msgstr "Системная задержка в сэмплах"
 
 #: engine_dialog.cc:962 gain_meter.cc:843 io_button.cc:426 io_button.cc:711
-#: io_plugin_window.cc:488 mixer_strip.cc:404 mixer_strip.cc:2004
+#: io_plugin_window.cc:488 mixer_strip.cc:405 mixer_strip.cc:2005
 #: plugin_eq_gui.cc:133 rc_option_editor.cc:2843 export_video_dialog.cc:121
 msgid "Input"
 msgstr "Вход"
 
 #: engine_dialog.cc:966 foldback_strip.cc:475 gain_meter.cc:849
-#: io_button.cc:426 io_button.cc:711 io_plugin_window.cc:488 mixer_strip.cc:408
-#: mixer_strip.cc:2007 monitor_section.cc:304 plugin_eq_gui.cc:134
+#: io_button.cc:426 io_button.cc:711 io_plugin_window.cc:488 mixer_strip.cc:409
+#: mixer_strip.cc:2008 monitor_section.cc:304 plugin_eq_gui.cc:134
 #: rc_option_editor.cc:2847 surround_strip.cc:181 vca_master_strip.cc:246
 msgid "Output"
 msgstr "Выход"
@@ -9412,7 +9412,7 @@ msgstr "Показать время как:"
 msgid "Realtime Export"
 msgstr ""
 
-#: export_timespan_selector.cc:60 processor_box.cc:4199
+#: export_timespan_selector.cc:60 processor_box.cc:4201
 msgid "Select All"
 msgstr "Выделить всё"
 
@@ -9466,8 +9466,8 @@ msgid "Remove This Send"
 msgstr "Удалить этот посыл"
 
 #: foldback_strip.cc:383 foldback_strip.cc:764 foldback_strip.cc:775
-#: mixer_strip.cc:129 mixer_strip.cc:167 mixer_strip.cc:409 mixer_strip.cc:995
-#: mixer_strip.cc:1006 rc_option_editor.cc:2848 surround_strip.cc:61
+#: mixer_strip.cc:129 mixer_strip.cc:167 mixer_strip.cc:410 mixer_strip.cc:996
+#: mixer_strip.cc:1007 rc_option_editor.cc:2848 surround_strip.cc:61
 #: surround_strip.cc:332 surround_strip.cc:343 vca_master_strip.cc:247
 msgid "Comments"
 msgstr "Комментарии"
@@ -9488,36 +9488,36 @@ msgstr "Скрыть канал сценического монитора"
 msgid "Level: "
 msgstr "Уровень: "
 
-#: foldback_strip.cc:760 mixer_strip.cc:991 surround_strip.cc:328
+#: foldback_strip.cc:760 mixer_strip.cc:992 surround_strip.cc:328
 msgid "Click to add/edit comments"
 msgstr "Щёлкните, чтобы добавить или изменить комментарий"
 
-#: foldback_strip.cc:793 mixer_strip.cc:1093 route_time_axis.cc:636
+#: foldback_strip.cc:793 mixer_strip.cc:1094 route_time_axis.cc:637
 #: surround_strip.cc:360 track_record_axis.cc:501 trigger_strip.cc:247
 #: trigger_ui.cc:407 vca_master_strip.cc:474 vca_time_axis.cc:454
 msgid "Color..."
 msgstr "Цвет..."
 
-#: foldback_strip.cc:794 mixer_strip.cc:1095 route_time_axis.cc:638
+#: foldback_strip.cc:794 mixer_strip.cc:1096 route_time_axis.cc:639
 #: surround_strip.cc:361 track_record_axis.cc:502 trigger_strip.cc:249
 msgid "Comments..."
 msgstr "Комментарии..."
 
-#: foldback_strip.cc:796 mixer_strip.cc:1099 route_time_axis.cc:642
+#: foldback_strip.cc:796 mixer_strip.cc:1100 route_time_axis.cc:643
 #: surround_strip.cc:363 track_record_axis.cc:504 trigger_strip.cc:253
 msgid "Outputs..."
 msgstr "Выходы..."
 
-#: foldback_strip.cc:800 mixer_strip.cc:1113
+#: foldback_strip.cc:800 mixer_strip.cc:1114
 msgid "Save As Template..."
 msgstr "Сохранить как шаблон..."
 
-#: foldback_strip.cc:807 mixer_strip.cc:1131 route_group_dialog.cc:47
-#: route_time_axis.cc:875 trigger_strip.cc:271
+#: foldback_strip.cc:807 mixer_strip.cc:1132 route_group_dialog.cc:47
+#: route_time_axis.cc:876 trigger_strip.cc:271
 msgid "Active"
 msgstr "Активно"
 
-#: foldback_strip.cc:815 mixer_strip.cc:1176 surround_strip.cc:372
+#: foldback_strip.cc:815 mixer_strip.cc:1177 surround_strip.cc:372
 #: trigger_strip.cc:306
 msgid "Protect Against Denormals"
 msgstr "Защищать от отклонений"
@@ -9526,16 +9526,16 @@ msgstr "Защищать от отклонений"
 msgid "Duplicate Foldback Bus"
 msgstr "Продублировать шину сценического монитора"
 
-#: foldback_strip.cc:1023 mixer_strip.cc:857
+#: foldback_strip.cc:1023 mixer_strip.cc:858
 msgid "Show Sends"
 msgstr "Показывать посылы"
 
-#: foldback_strip.cc:1027 mixer_strip.cc:1717 monitor_section.cc:90
+#: foldback_strip.cc:1027 mixer_strip.cc:1718 monitor_section.cc:90
 #: trigger_strip.cc:349
 msgid "AFL"
 msgstr "AFL"
 
-#: foldback_strip.cc:1031 mixer_strip.cc:1720 monitor_section.cc:91
+#: foldback_strip.cc:1031 mixer_strip.cc:1721 monitor_section.cc:91
 #: recorder_ui.cc:1392 trigger_strip.cc:352
 msgid "PFL"
 msgstr "PFL"
@@ -9614,11 +9614,11 @@ msgstr "З"
 msgid "Write|W"
 msgstr "З"
 
-#: gain_meter.cc:845 mixer_strip.cc:2005
+#: gain_meter.cc:845 mixer_strip.cc:2006
 msgid "Pre Fader"
 msgstr "Предфейдер"
 
-#: gain_meter.cc:847 mixer_strip.cc:2006
+#: gain_meter.cc:847 mixer_strip.cc:2007
 msgid "Post Fader"
 msgstr "Послефейдер"
 
@@ -9634,52 +9634,52 @@ msgstr "Канал:"
 msgid "Velocity:"
 msgstr "Сила нажатия:"
 
-#: generic_pluginui.cc:192
+#: generic_pluginui.cc:168
 msgid "All Automation"
 msgstr "Вся автоматизация"
 
-#: generic_pluginui.cc:368
+#: generic_pluginui.cc:344
 msgid "Plugin Editor: could not build control element for port %1"
 msgstr "Редактор плагинов: невозможно создать управляющий элемент для порта %1"
 
-#: generic_pluginui.cc:394
+#: generic_pluginui.cc:370
 msgid "Plugin Editor: no control for property %1"
 msgstr "Редактор плагинов: нет регулятора для свойства %1"
 
-#: generic_pluginui.cc:400
+#: generic_pluginui.cc:376
 msgid "Plugin Editor: could not build control element for property %1"
 msgstr ""
 "Редактор плагина: не удалось создать контрольный элемент для свойства %1"
 
-#: generic_pluginui.cc:487
+#: generic_pluginui.cc:463
 msgid "Switches"
 msgstr "Переключатели"
 
-#: generic_pluginui.cc:497 generic_pluginui.cc:603
+#: generic_pluginui.cc:473 generic_pluginui.cc:579
 msgid "Controls"
 msgstr "Управление"
 
-#: generic_pluginui.cc:638
+#: generic_pluginui.cc:614
 msgid "Meters"
 msgstr "Индикаторы уровня"
 
-#: generic_pluginui.cc:668
+#: generic_pluginui.cc:644
 msgid "MIDI Programs (sent to track)"
 msgstr "MIDI-программы (посылается дорожке)"
 
-#: generic_pluginui.cc:670
+#: generic_pluginui.cc:646
 msgid "MIDI Programs (volatile)"
 msgstr "Программы MIDI"
 
-#: generic_pluginui.cc:747
+#: generic_pluginui.cc:723
 msgid "--Unset--"
 msgstr ""
 
-#: generic_pluginui.cc:805
+#: generic_pluginui.cc:781
 msgid "Automation control"
 msgstr "Контроль автоматизации"
 
-#: generic_pluginui.cc:1044
+#: generic_pluginui.cc:1020
 msgid "This control cannot be automated"
 msgstr "Этот параметр нельзя автоматизировать"
 
@@ -9962,7 +9962,7 @@ msgstr ""
 "<b>%1</b>\n"
 "Двойной щелчок, чтобы показать общий GUI.%2"
 
-#: io_plugin_window.cc:357 processor_box.cc:4232
+#: io_plugin_window.cc:357 processor_box.cc:4234
 msgid "Edit with generic controls..."
 msgstr "Изменить с интерфейсом хоста..."
 
@@ -11004,7 +11004,7 @@ msgstr "Режим представления нот"
 msgid "Channel Selector..."
 msgstr "Выбор каналов…"
 
-#: midi_time_axis.cc:753 mixer_strip.cc:1165 route_time_axis.cc:792
+#: midi_time_axis.cc:753 mixer_strip.cc:1166 route_time_axis.cc:793
 #: trigger_strip.cc:295
 msgid "Patch Selector..."
 msgstr "Выбор патчей…"
@@ -11085,7 +11085,7 @@ msgstr ""
 "Вы уверены., что хотите показать\n"
 "все полосы автоматизации MIDI?"
 
-#: midi_time_axis.cc:1340 route_time_axis.cc:556 vca_time_axis.cc:482
+#: midi_time_axis.cc:1340 route_time_axis.cc:557 vca_time_axis.cc:482
 msgid "Show All Automation"
 msgstr "Показать всю автоматизацию"
 
@@ -11326,11 +11326,11 @@ msgstr "Изолировать соло"
 msgid "Lock Solo Status"
 msgstr "Статус блокировки солирования"
 
-#: mixer_strip.cc:228 mixer_strip.cc:1725
+#: mixer_strip.cc:228 mixer_strip.cc:1726
 msgid "SoloLock|Lock"
 msgstr "Блок"
 
-#: mixer_strip.cc:229 mixer_strip.cc:1724
+#: mixer_strip.cc:229 mixer_strip.cc:1725
 msgid "Iso"
 msgstr "Изо."
 
@@ -11348,195 +11348,195 @@ msgid ""
 "Right-click to show the route operations context menu."
 msgstr ""
 
-#: mixer_strip.cc:405 rc_option_editor.cc:2844
+#: mixer_strip.cc:406 rc_option_editor.cc:2844
 msgid "Phase Invert"
 msgstr "Инверсия фазы"
 
-#: mixer_strip.cc:406 rc_option_editor.cc:2845
+#: mixer_strip.cc:407 rc_option_editor.cc:2845
 msgid "Record & Monitor"
 msgstr "Запись и монитор"
 
-#: mixer_strip.cc:407 rc_option_editor.cc:2846
+#: mixer_strip.cc:408 rc_option_editor.cc:2846
 msgid "Solo Iso / Lock"
 msgstr "Изоляция и блокировка солирования"
 
-#: mixer_strip.cc:410 rc_option_editor.cc:2849
+#: mixer_strip.cc:411 rc_option_editor.cc:2849
 msgid "VCA Assigns"
 msgstr "Привязка к VCA"
 
-#: mixer_strip.cc:411 rc_option_editor.cc:2850
+#: mixer_strip.cc:412 rc_option_editor.cc:2850
 msgid "Trigger Grid"
 msgstr "Сетка триггеров"
 
-#: mixer_strip.cc:412
+#: mixer_strip.cc:413
 msgid "Trigger Master"
 msgstr "Отсчёт триггеров"
 
-#: mixer_strip.cc:616
+#: mixer_strip.cc:617
 msgid "Show/Hide Monitoring Section"
 msgstr "Показать или скрыть панель мониторинга"
 
-#: mixer_strip.cc:643
+#: mixer_strip.cc:644
 msgid "Loudness|LAN"
 msgstr "LAN"
 
-#: mixer_strip.cc:647
+#: mixer_strip.cc:648
 msgid "Master output volume"
 msgstr "Громкость главного выхода"
 
-#: mixer_strip.cc:648
+#: mixer_strip.cc:649
 msgid "Measure loudness of the session, normalize master output volume"
 msgstr "Измерить громкость сессии и нормировать громкость главного выхода"
 
-#: mixer_strip.cc:683
+#: mixer_strip.cc:684
 msgid "Enable/Disable MIDI input"
 msgstr "Включить или выключить MIDI-вход"
 
-#: mixer_strip.cc:995 mixer_strip.cc:1006
+#: mixer_strip.cc:996 mixer_strip.cc:1007
 msgid "Cmt"
 msgstr "Кмт"
 
-#: mixer_strip.cc:1056
+#: mixer_strip.cc:1057
 msgid "Grp"
 msgstr "Грп"
 
-#: mixer_strip.cc:1059
+#: mixer_strip.cc:1060
 msgid "~G"
 msgstr "нГр"
 
-#: mixer_strip.cc:1097 route_time_axis.cc:640 track_record_axis.cc:503
+#: mixer_strip.cc:1098 route_time_axis.cc:641 track_record_axis.cc:503
 #: trigger_strip.cc:251
 msgid "Inputs..."
 msgstr "Входы..."
 
-#: mixer_strip.cc:1140 plugin_pin_dialog.cc:1077 trigger_strip.cc:280
+#: mixer_strip.cc:1141 plugin_pin_dialog.cc:1077 trigger_strip.cc:280
 msgid "Strict I/O"
 msgstr "Строгий I/O"
 
-#: mixer_strip.cc:1150
+#: mixer_strip.cc:1151
 msgid "Record Pre-Fader"
 msgstr "Записывать до фейдера"
 
-#: mixer_strip.cc:1151
+#: mixer_strip.cc:1152
 msgid "Record Post-Fader"
 msgstr "Записывать после фейдера"
 
-#: mixer_strip.cc:1152
+#: mixer_strip.cc:1153
 msgid "Custom Record+Playback Positions"
 msgstr "Другие положения для записи и воспроизведения"
 
-#: mixer_strip.cc:1154
+#: mixer_strip.cc:1155
 msgid "Disk I/O..."
 msgstr "I/O диска…"
 
-#: mixer_strip.cc:1161 processor_box.cc:4214 trigger_strip.cc:291
+#: mixer_strip.cc:1162 processor_box.cc:4216 trigger_strip.cc:291
 msgid "Pin Connections..."
 msgstr "Порты плагина..."
 
-#: mixer_strip.cc:1171 trigger_strip.cc:301
+#: mixer_strip.cc:1172 trigger_strip.cc:301
 msgid "Fan out to Busses"
 msgstr "Раскидать по шинам"
 
-#: mixer_strip.cc:1172 trigger_strip.cc:302
+#: mixer_strip.cc:1173 trigger_strip.cc:302
 msgid "Fan out to Tracks"
 msgstr "Раскидать по дорожкам"
 
-#: mixer_strip.cc:1200 route_time_axis.cc:892 trigger_strip.cc:330
+#: mixer_strip.cc:1201 route_time_axis.cc:893 trigger_strip.cc:330
 msgid "Duplicate..."
 msgstr "Продублировать..."
 
-#: mixer_strip.cc:1364 processor_box.cc:4224
+#: mixer_strip.cc:1365 processor_box.cc:4226
 msgid "Custom LAN Amp Position"
 msgstr "Другое положение усилителя LAN"
 
-#: mixer_strip.cc:1505
+#: mixer_strip.cc:1506
 msgid "MeterWide|In"
 msgstr ""
 
-#: mixer_strip.cc:1509
+#: mixer_strip.cc:1510
 msgid "MeterWide|Pre"
 msgstr ""
 
-#: mixer_strip.cc:1513
+#: mixer_strip.cc:1514
 msgid "MeterWide|Post"
 msgstr ""
 
-#: mixer_strip.cc:1517
+#: mixer_strip.cc:1518
 msgid "MeterWide|Out"
 msgstr ""
 
-#: mixer_strip.cc:1522
+#: mixer_strip.cc:1523
 msgid "MeterWide|Custom"
 msgstr ""
 
-#: mixer_strip.cc:1529
+#: mixer_strip.cc:1530
 msgid "Meter|In"
 msgstr "Вх"
 
-#: mixer_strip.cc:1533
+#: mixer_strip.cc:1534
 msgid "Meter|Pr"
 msgstr "Прд"
 
-#: mixer_strip.cc:1537
+#: mixer_strip.cc:1538
 msgid "Meter|Po"
 msgstr "Псл"
 
-#: mixer_strip.cc:1541
+#: mixer_strip.cc:1542
 msgid "Meter|O"
 msgstr "Вых"
 
-#: mixer_strip.cc:1546
+#: mixer_strip.cc:1547
 msgid "Meter|C"
 msgstr "З"
 
-#: mixer_strip.cc:1701 route_ui.cc:241 track_record_axis.cc:263
+#: mixer_strip.cc:1702 route_ui.cc:241 track_record_axis.cc:263
 #: trigger_strip.cc:341
 msgid "Monitor|In"
 msgstr ""
 
-#: mixer_strip.cc:1702 route_ui.cc:247 track_record_axis.cc:264
+#: mixer_strip.cc:1703 route_ui.cc:247 track_record_axis.cc:264
 #: trigger_strip.cc:342
 msgid "Monitor|Disk"
 msgstr ""
 
-#: mixer_strip.cc:1704 mixer_strip.cc:1738
+#: mixer_strip.cc:1705 mixer_strip.cc:1739
 msgid "Mon"
 msgstr "Мон"
 
-#: mixer_strip.cc:1735 meter_strip.cc:408 track_record_axis.cc:260
+#: mixer_strip.cc:1736 meter_strip.cc:408 track_record_axis.cc:260
 msgid "MonitorInput|I"
 msgstr "Вх"
 
-#: mixer_strip.cc:1736 meter_strip.cc:409 track_record_axis.cc:261
+#: mixer_strip.cc:1737 meter_strip.cc:409 track_record_axis.cc:261
 msgid "MonitorDisk|D"
 msgstr "Д"
 
-#: mixer_strip.cc:1751 meter_strip.cc:400 route_time_axis.cc:2354
+#: mixer_strip.cc:1752 meter_strip.cc:400 route_time_axis.cc:2400
 #: vca_master_strip.cc:227 vca_time_axis.cc:273
 msgid "AfterFader|A"
 msgstr "П"
 
-#: mixer_strip.cc:1754
+#: mixer_strip.cc:1755
 msgid "Prefader|P"
 msgstr "Д"
 
-#: mixer_strip.cc:1759
+#: mixer_strip.cc:1760
 msgid "SoloIso|I"
 msgstr "И"
 
-#: mixer_strip.cc:1760
+#: mixer_strip.cc:1761
 msgid "SoloLock|L"
 msgstr "Б"
 
-#: mixer_strip.cc:2050 meter_strip.cc:895
+#: mixer_strip.cc:2051 meter_strip.cc:895
 msgid "Change all in Group to %1"
 msgstr "Поменять все в группе на %1"
 
-#: mixer_strip.cc:2052 meter_strip.cc:897
+#: mixer_strip.cc:2053 meter_strip.cc:897
 msgid "Change all to %1"
 msgstr "Поменять все на %1"
 
-#: mixer_strip.cc:2054 meter_strip.cc:899
+#: mixer_strip.cc:2055 meter_strip.cc:899
 msgid "Change same track-type to %1"
 msgstr "Поменять дорожки одного типа на %1"
 
@@ -11548,7 +11548,7 @@ msgstr ""
 "Сделайте двойной щелчок или щелчок правой клавишей\n"
 "мыши, чтобы добавить дорожку, шину или VCA"
 
-#: mixer_ui.cc:204 route_time_axis.cc:267 route_time_axis.cc:813
+#: mixer_ui.cc:204 route_time_axis.cc:268 route_time_axis.cc:814
 msgid "Group"
 msgstr "Группа"
 
@@ -11556,11 +11556,11 @@ msgstr "Группа"
 msgid "Favorite Plugins"
 msgstr "Избранные плагины"
 
-#: mixer_ui.cc:272 mixer_ui.cc:3137
+#: mixer_ui.cc:272 mixer_ui.cc:3143
 msgid "Recent Plugins"
 msgstr "Недавние плагины"
 
-#: mixer_ui.cc:273 mixer_ui.cc:3135
+#: mixer_ui.cc:273 mixer_ui.cc:3141
 msgid "Top-10 Plugins"
 msgstr "ТОП10 плагинов"
 
@@ -11582,223 +11582,223 @@ msgstr ""
 msgid "Instrument has only 1 output bus. Nothing to fan out."
 msgstr "У инструмента только одна шина выхода. Нечего раскидывать."
 
-#: mixer_ui.cc:2051 plugin_selector.cc:208 route_list_base.cc:387
+#: mixer_ui.cc:2057 plugin_selector.cc:208 route_list_base.cc:387
 msgid "Show All"
 msgstr "Показать всё"
 
-#: mixer_ui.cc:2052 route_list_base.cc:388
+#: mixer_ui.cc:2058 route_list_base.cc:388
 msgid "Hide All"
 msgstr "Скрыть всё"
 
-#: mixer_ui.cc:2053 route_list_base.cc:389
+#: mixer_ui.cc:2059 route_list_base.cc:389
 msgid "Show All Audio Tracks"
 msgstr "Показать все звуковые дорожки"
 
-#: mixer_ui.cc:2054 route_list_base.cc:390
+#: mixer_ui.cc:2060 route_list_base.cc:390
 msgid "Hide All Audio Tracks"
 msgstr "Скрыть все звуковые дорожки"
 
-#: mixer_ui.cc:2055 route_list_base.cc:391
+#: mixer_ui.cc:2061 route_list_base.cc:391
 msgid "Show All Midi Tracks"
 msgstr "Показать все MIDI-дорожки"
 
-#: mixer_ui.cc:2056 route_list_base.cc:392
+#: mixer_ui.cc:2062 route_list_base.cc:392
 msgid "Hide All Midi Tracks"
 msgstr "Скрыть все MIDI-дорожки"
 
-#: mixer_ui.cc:2057 route_list_base.cc:393
+#: mixer_ui.cc:2063 route_list_base.cc:393
 msgid "Show All Busses"
 msgstr "Показать все шины"
 
-#: mixer_ui.cc:2058 route_list_base.cc:394
+#: mixer_ui.cc:2064 route_list_base.cc:394
 msgid "Hide All Busses"
 msgstr "Скрыть все шины"
 
-#: mixer_ui.cc:2103
+#: mixer_ui.cc:2109
 msgid "track display list item for renamed strip not found!"
 msgstr "Элемент списка для переименованного канала микшера не найден!"
 
-#: mixer_ui.cc:2201
+#: mixer_ui.cc:2207
 msgid "-all-"
 msgstr "-все-"
 
-#: mixer_ui.cc:2937
+#: mixer_ui.cc:2943
 msgid "Strips"
 msgstr "Каналы"
 
-#: mixer_ui.cc:2998 mixer_ui.cc:3004
+#: mixer_ui.cc:3004 mixer_ui.cc:3010
 msgid "Window|Mixer"
 msgstr "Микшер"
 
-#: mixer_ui.cc:3393
+#: mixer_ui.cc:3399
 msgid "No Track/Bus is selected."
 msgstr "Нет выбранных дорожек/шин"
 
-#: mixer_ui.cc:3395
+#: mixer_ui.cc:3401
 msgid "Add at the top"
 msgstr "Добавить в начало"
 
-#: mixer_ui.cc:3397
+#: mixer_ui.cc:3403
 msgid "Add Pre-Fader"
 msgstr "Добавить перед фейдером"
 
-#: mixer_ui.cc:3399
+#: mixer_ui.cc:3405
 msgid "Add Post-Fader"
 msgstr "Добавить после фейдера"
 
-#: mixer_ui.cc:3401
+#: mixer_ui.cc:3407
 msgid "Add at the end"
 msgstr "Добавить в конец"
 
-#: mixer_ui.cc:3407
+#: mixer_ui.cc:3413
 msgid "Remove from favorites"
 msgstr "Удалить из избранных"
 
-#: mixer_ui.cc:3413
+#: mixer_ui.cc:3419
 msgid "Delete Preset"
 msgstr "Удалить предустановку"
 
-#: mixer_ui.cc:3691
+#: mixer_ui.cc:3697
 msgid "Toggle Solo on Mixer-Selected Tracks/Busses"
 msgstr "Переключить соло в выбранных в микшере дорожках/шинах"
 
-#: mixer_ui.cc:3692
+#: mixer_ui.cc:3698
 msgid "Toggle Mute on Mixer-Selected Tracks/Busses"
 msgstr "Перекл. глушение в выбранных в микшере дорожках/шинах"
 
-#: mixer_ui.cc:3693
+#: mixer_ui.cc:3699
 msgid "Toggle Rec-enable on Mixer-Selected Tracks/Busses"
 msgstr "Перекл. использоание записи в выбранных в микшере дорожках/шинах"
 
-#: mixer_ui.cc:3694
+#: mixer_ui.cc:3700
 msgid "Decrease Gain on Mixer-Selected Tracks/Busses"
 msgstr "Уменьшить усиление в выбранных в микшере дорожках/шинах"
 
-#: mixer_ui.cc:3695
+#: mixer_ui.cc:3701
 msgid "Increase Gain on Mixer-Selected Tracks/Busses"
 msgstr "Увеличить усиление в выбранных в микшере дорожках/шинах"
 
-#: mixer_ui.cc:3696
+#: mixer_ui.cc:3702
 msgid "Set Gain to 0dB on Mixer-Selected Tracks/Busses"
 msgstr "Установить усиление на 0 усиление в выбранных в микшере дорожках/шинах"
 
-#: mixer_ui.cc:3699
+#: mixer_ui.cc:3705
 msgid "Copy Selected Processors"
 msgstr "Скопировать выбранные обработчики"
 
-#: mixer_ui.cc:3700
+#: mixer_ui.cc:3706
 msgid "Cut Selected Processors"
 msgstr "Вырезать выбранные обработчики"
 
-#: mixer_ui.cc:3701
+#: mixer_ui.cc:3707
 msgid "Paste Selected Processors"
 msgstr "Вставить выбранные обработчики"
 
-#: mixer_ui.cc:3702 mixer_ui.cc:3703
+#: mixer_ui.cc:3708 mixer_ui.cc:3709
 msgid "Delete Selected Processors"
 msgstr "Удалить выбранные обработчики"
 
-#: mixer_ui.cc:3704
+#: mixer_ui.cc:3710
 msgid "Select All (visible) Processors"
 msgstr "Выбрать все (видимые) обработчики"
 
-#: mixer_ui.cc:3705
+#: mixer_ui.cc:3711
 msgid "Toggle Selected Processors"
 msgstr "Переключить выбранные обработчики"
 
-#: mixer_ui.cc:3706
+#: mixer_ui.cc:3712
 msgid "Toggle Selected Plugins"
 msgstr "Переключить выбранные плагины"
 
-#: mixer_ui.cc:3707
+#: mixer_ui.cc:3713
 msgid "Deselect all strips and processors"
 msgstr "Снять выделение с полос и обработчиков"
 
-#: mixer_ui.cc:3709
+#: mixer_ui.cc:3715
 msgid "Select Next Mixer Strip"
 msgstr "Выбрать следующий канал микшера"
 
-#: mixer_ui.cc:3710
+#: mixer_ui.cc:3716
 msgid "Select Previous Mixer Strip"
 msgstr "Выбрать предыдущий канал микшера"
 
-#: mixer_ui.cc:3712
+#: mixer_ui.cc:3718
 msgid "Scroll Mixer Window to the left"
 msgstr "Прокрутить окно микшера влево"
 
-#: mixer_ui.cc:3713
+#: mixer_ui.cc:3719
 msgid "Scroll Mixer Window to the right"
 msgstr "Прокрутить окно микшера вправо"
 
-#: mixer_ui.cc:3715
+#: mixer_ui.cc:3721
 msgid "Toggle MIDI Input Active for Mixer-Selected Tracks/Busses"
 msgstr "Переключить активный MIDIвход  в выбранных в микшере дорожках/шинах"
 
-#: mixer_ui.cc:3718
+#: mixer_ui.cc:3724
 msgid "Mixer: Show Mixer List"
 msgstr "Микшер: показывать панель со списком"
 
-#: mixer_ui.cc:3720
+#: mixer_ui.cc:3726
 msgid "Mixer: Show VCAs"
 msgstr "Микшер: показывать VCA"
 
-#: mixer_ui.cc:3723
+#: mixer_ui.cc:3729
 msgid "Mixer: Show Mixbusses"
 msgstr "Микшер: показывать каналы Mixbus"
 
-#: mixer_ui.cc:3726
+#: mixer_ui.cc:3732
 msgid "Mixer: Show Monitor Section"
 msgstr "Микшер: показывать секцию мониторинга"
 
-#: mixer_ui.cc:3729
+#: mixer_ui.cc:3735
 msgid "Atmos Surround Master"
 msgstr ""
 
-#: mixer_ui.cc:3731
+#: mixer_ui.cc:3737
 msgid "Surround Master"
 msgstr ""
 
-#: mixer_ui.cc:3734
+#: mixer_ui.cc:3740
 msgid "Mixer: Show Foldback Strip"
 msgstr "Микшер: показывать канал сценического монитора"
 
-#: mixer_ui.cc:3736
+#: mixer_ui.cc:3742
 msgid "Toggle Disk Monitoring"
 msgstr "Переключить мониторинг диска"
 
-#: mixer_ui.cc:3737
+#: mixer_ui.cc:3743
 msgid "Toggle Input Monitoring"
 msgstr "Переключить мониторинг входа"
 
-#: mixer_ui.cc:3741
+#: mixer_ui.cc:3747
 msgid "Store Mixer Scene #%1"
 msgstr "Сохранить сцену микшера #%1"
 
-#: mixer_ui.cc:3746
+#: mixer_ui.cc:3752
 msgid "Recall Mixer Scene #%1"
 msgstr "Применить сцену микшера #%1"
 
-#: mixer_ui.cc:3751
+#: mixer_ui.cc:3757
 msgid "Clear Mixer Scene #%1"
 msgstr "Обнулить сцену микшера #%1"
 
-#: mixer_ui.cc:3975
+#: mixer_ui.cc:3981
 msgid "Scene is already set. Overwrite it?"
 msgstr "Сцена уже сохранена. Перезаписать?"
 
-#: mixer_ui.cc:3991
+#: mixer_ui.cc:3997
 msgid "Store Scene"
 msgstr "Сохранить сцену"
 
-#: mixer_ui.cc:3992 mixer_ui.cc:4124
+#: mixer_ui.cc:3998 mixer_ui.cc:4130
 msgid "Scene name:"
 msgstr "Название сцены:"
 
-#: mixer_ui.cc:3994 mixer_ui.cc:4156
+#: mixer_ui.cc:4000 mixer_ui.cc:4162
 msgid "Store"
 msgstr "Сохранить"
 
-#: mixer_ui.cc:4033
+#: mixer_ui.cc:4039
 msgid ""
 "Recall mixer scene \"%1\"?\n"
 "This will overwrite your mixer settings!\n"
@@ -11808,7 +11808,7 @@ msgstr ""
 "Текущие настройки микшера будут переписаны!\n"
 "Эта операция не может быть отменена."
 
-#: mixer_ui.cc:4079
+#: mixer_ui.cc:4085
 msgid ""
 "Clear mixer scene \"%1\"?\n"
 "This operation cannot be undone."
@@ -11816,15 +11816,15 @@ msgstr ""
 "Стереть микшерную сцену \"%1\"?\n"
 "Эта операция не может быть отменена."
 
-#: mixer_ui.cc:4123
+#: mixer_ui.cc:4129
 msgid "Rename Scene"
 msgstr "Переименовать сцену"
 
-#: mixer_ui.cc:4162
+#: mixer_ui.cc:4168
 msgid "Restore for selected tracks"
 msgstr "Восстановить в выбранных дорожках"
 
-#: mixer_ui.cc:4245
+#: mixer_ui.cc:4251
 msgid ""
 "Click to recall this mixer scene\n"
 "%1 for Momentary Restore\n"
@@ -11834,11 +11834,11 @@ msgstr ""
 "микшерную сцену %1.\n"
 "Щелкните ПКМ, чтобы открыть контекстное меню."
 
-#: mixer_ui.cc:4266
+#: mixer_ui.cc:4272
 msgid "(Right-Click to Store)"
 msgstr "(Щелкните ПКМ для сохранения)"
 
-#: mixer_ui.cc:4409
+#: mixer_ui.cc:4415
 msgid ""
 "Disabling surround master will delete all existing surround panner state.\n"
 "This cannot be undonoe. Proceed anyway?"
@@ -11848,7 +11848,7 @@ msgstr ""
 msgid "Reset Peak"
 msgstr "Сброс пик"
 
-#: meter_strip.cc:403 route_time_axis.cc:2358 vca_master_strip.cc:231
+#: meter_strip.cc:403 route_time_axis.cc:2404 vca_master_strip.cc:231
 #: vca_time_axis.cc:277
 msgid "PreFader|P"
 msgstr "Д"
@@ -12563,6 +12563,12 @@ msgstr ""
 msgid "Select Patch for \"%1\""
 msgstr "Выбрать патч для \"%1\""
 
+#: piano_roll_header.cc:79
+msgid ""
+"Left-button to play a note, left-button-drag to play a series of notes\n"
+"%1-left-button to select or extend selection to all notes with this pitch\n"
+msgstr ""
+
 #: playlist_selector.cc:65
 msgid "Group ID"
 msgstr "ID группы"
@@ -13003,7 +13009,7 @@ msgstr ""
 msgid "Failed to alter plugin input configuration."
 msgstr ""
 
-#: plugin_pin_dialog.cc:1833 processor_box.cc:2905
+#: plugin_pin_dialog.cc:1833 processor_box.cc:2907
 msgid "Cannot set up new send: %1"
 msgstr "Невозможно настроить новый посыл: %1"
 
@@ -13722,7 +13728,7 @@ msgstr "Связать регуляторы панорамирования"
 msgid "Allow Feedback Loop"
 msgstr "Разрешить цикл обратной связи"
 
-#: processor_box.cc:1992
+#: processor_box.cc:1994
 msgid ""
 "Right-click to add/remove/edit\n"
 "plugins,inserts,sends and more"
@@ -13730,22 +13736,22 @@ msgstr ""
 "Щелчком правой клавишей мыши можно добавлять, \n"
 "изменять и удалять плагины, посылы, возвраты и пр."
 
-#: processor_box.cc:2141
+#: processor_box.cc:2143
 msgid ""
 "Processor Drag/Drop failed. Probably because\n"
 "the I/O configuration of the plugins could\n"
 "not match the configuration of this track."
 msgstr ""
 
-#: processor_box.cc:2840 processor_box.cc:3380
+#: processor_box.cc:2842 processor_box.cc:3382
 msgid "Plugin Incompatibility"
 msgstr "Несовместимость плагинов"
 
-#: processor_box.cc:2843
+#: processor_box.cc:2845
 msgid "You attempted to add the plugin \"%1\" in slot %2.\n"
 msgstr "Вы пытались добавить плагин \"%1\" в слот %2.\n"
 
-#: processor_box.cc:2849
+#: processor_box.cc:2851
 msgid ""
 "\n"
 "This plugin has:\n"
@@ -13753,21 +13759,21 @@ msgstr ""
 "\n"
 "У этого плагина:\n"
 
-#: processor_box.cc:2852
+#: processor_box.cc:2854
 msgid "\t%1 MIDI input\n"
 msgid_plural "\t%1 MIDI inputs\n"
 msgstr[0] "\t%1 MIDI-вход\n"
 msgstr[1] "\t%1 MIDI-входа\n"
 msgstr[2] "\t%1 MIDI-входов\n"
 
-#: processor_box.cc:2856
+#: processor_box.cc:2858
 msgid "\t%1 audio input\n"
 msgid_plural "\t%1 audio inputs\n"
 msgstr[0] "\t%1 звуковой вход\n"
 msgstr[1] "\t%1 звуковых входа\n"
 msgstr[2] "\t%1 звуковых входов\n"
 
-#: processor_box.cc:2859
+#: processor_box.cc:2861
 msgid ""
 "\n"
 "but at the insertion point, there are:\n"
@@ -13775,21 +13781,21 @@ msgstr ""
 "\n"
 "но в точке вставки сейчас:\n"
 
-#: processor_box.cc:2862
+#: processor_box.cc:2864
 msgid "\t%1 MIDI channel\n"
 msgid_plural "\t%1 MIDI channels\n"
 msgstr[0] "\t%1 MIDI-канал\n"
 msgstr[1] "\t%1 MIDI-канала\n"
 msgstr[2] "\t%1 MIDI-каналов\n"
 
-#: processor_box.cc:2866
+#: processor_box.cc:2868
 msgid "\t%1 audio channel\n"
 msgid_plural "\t%1 audio channels\n"
 msgstr[0] "\t%1 звуковой канал\n"
 msgstr[1] "\t%1 звуковых канала\n"
 msgstr[2] "\t%1 звуковых каналов\n"
 
-#: processor_box.cc:2869
+#: processor_box.cc:2871
 msgid ""
 "\n"
 "%1 is unable to insert this plugin here.\n"
@@ -13797,7 +13803,7 @@ msgstr ""
 "\n"
 "%1 не может вставить сюда этот плагин.\n"
 
-#: processor_box.cc:3383
+#: processor_box.cc:3385
 msgid ""
 "You cannot reorder these plugins/sends/inserts\n"
 "in that way because the inputs and\n"
@@ -13807,24 +13813,24 @@ msgstr ""
 "посылы и возвраты подобным образом, поскольку \n"
 "входы и выходы перестанут корректно работать."
 
-#: processor_box.cc:3606
+#: processor_box.cc:3608
 msgid "Rename Processor"
 msgstr "Переименовать обработчик"
 
-#: processor_box.cc:3606
+#: processor_box.cc:3608
 msgid "Rename Plugin"
 msgstr "Переименовать плагин"
 
-#: processor_box.cc:3656
+#: processor_box.cc:3658
 msgid "At least 100 IO objects exist with a name like %1 - name not changed"
 msgstr ""
 "Существует по крайней мере 100 объектов IO с именем, как %1 - имя не изменено"
 
-#: processor_box.cc:3834
+#: processor_box.cc:3836
 msgid "plugin insert constructor failed"
 msgstr "Сбой конструктора вставки плагина"
 
-#: processor_box.cc:3845
+#: processor_box.cc:3847
 msgid ""
 "Copying the set of processors on the clipboard failed,\n"
 "probably because the I/O configuration of the plugins\n"
@@ -13834,7 +13840,7 @@ msgstr ""
 "буфер обмена. Вероятно, конфигурация входа и выхода\n"
 "плагинов не совпала с конфигурацией этой дорожки."
 
-#: processor_box.cc:3905
+#: processor_box.cc:3907
 msgid ""
 "Do you really want to remove all processors from %1?\n"
 "(this cannot be undone)"
@@ -13843,15 +13849,15 @@ msgstr ""
 "обработчики из \"%1\" ?\n"
 "(отмена невозможна)"
 
-#: processor_box.cc:3909 processor_box.cc:3934
+#: processor_box.cc:3911 processor_box.cc:3936
 msgid "Yes, remove them all"
 msgstr "Да, удалить их все"
 
-#: processor_box.cc:3911 processor_box.cc:3936
+#: processor_box.cc:3913 processor_box.cc:3938
 msgid "Remove processors"
 msgstr "Удалить обработчики"
 
-#: processor_box.cc:3926
+#: processor_box.cc:3928
 msgid ""
 "Do you really want to remove all pre-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -13860,7 +13866,7 @@ msgstr ""
 "предфейдерные обработчики из \"%1\" ?\n"
 "(отмена невозможна)"
 
-#: processor_box.cc:3929
+#: processor_box.cc:3931
 msgid ""
 "Do you really want to remove all post-fader processors from %1?\n"
 "(this cannot be undone)"
@@ -13869,83 +13875,83 @@ msgstr ""
 "послефейдерные обработчики из \"%1\" ?\n"
 "(отмена невозможна)"
 
-#: processor_box.cc:4154
+#: processor_box.cc:4156
 msgid "New Plugin"
 msgstr "Добавить плагин"
 
-#: processor_box.cc:4157
+#: processor_box.cc:4159
 msgid "New Insert"
 msgstr "Добавить возврат"
 
-#: processor_box.cc:4160
+#: processor_box.cc:4162
 msgid "New External Send ..."
 msgstr "Добавить внешний посыл с портом JACK..."
 
-#: processor_box.cc:4164
+#: processor_box.cc:4166
 msgid "New Aux Send ..."
 msgstr "Добавить внешний посыл без порта JACK..."
 
-#: processor_box.cc:4165
+#: processor_box.cc:4167
 msgid "New Foldback Send ..."
 msgstr "Добавить посыл сценического монитора…"
 
-#: processor_box.cc:4166
+#: processor_box.cc:4168
 msgid "Remove Foldback Send ..."
 msgstr "Удалить посыл сценического монитора…"
 
-#: processor_box.cc:4168
+#: processor_box.cc:4170
 msgid "Inline Controls"
 msgstr "Управление внутри канала"
 
-#: processor_box.cc:4169
+#: processor_box.cc:4171
 msgid "Send Options"
 msgstr "Параметры отправки"
 
-#: processor_box.cc:4170
+#: processor_box.cc:4172
 msgid "Presets"
 msgstr "Пресеты"
 
-#: processor_box.cc:4172
+#: processor_box.cc:4174
 msgid "Clear (all)"
 msgstr "Очистить (всё)"
 
-#: processor_box.cc:4174
+#: processor_box.cc:4176
 msgid "Clear (pre-fader)"
 msgstr "Очистить (до фейдера)"
 
-#: processor_box.cc:4176
+#: processor_box.cc:4178
 msgid "Clear (post-fader)"
 msgstr "Очистить (после фейдера)"
 
-#: processor_box.cc:4206
+#: processor_box.cc:4208
 msgid "Activate All"
 msgstr "Активировать все"
 
-#: processor_box.cc:4208
+#: processor_box.cc:4210
 msgid "Deactivate All"
 msgstr "Деактивировать все"
 
-#: processor_box.cc:4210
+#: processor_box.cc:4212
 msgid "A/B Plugins"
 msgstr "Отключить все"
 
-#: processor_box.cc:4218
+#: processor_box.cc:4220
 msgid "Disk I/O ..."
 msgstr "I/O диска…"
 
-#: processor_box.cc:4219
+#: processor_box.cc:4221
 msgid "Pre-Fader"
 msgstr "Предфейдер"
 
-#: processor_box.cc:4220
+#: processor_box.cc:4222
 msgid "Post-Fader"
 msgstr "Постфейдер"
 
-#: processor_box.cc:4625
+#: processor_box.cc:4627
 msgid "%1: %2 (by %3) [%4]"
 msgstr "%1: %2 (автор %3) [%4]"
 
-#: processor_box.cc:4627
+#: processor_box.cc:4629
 msgid "%1 (by %2) [%3]"
 msgstr "%1 (автор %2) [%3]"
 
@@ -14855,7 +14861,7 @@ msgstr "Показывать параметры записи и врезки"
 
 #: rc_option_editor.cc:2904
 msgid "Display Latency Compensation"
-msgstr ""
+msgstr "Показывать компенсацию задержки"
 
 #: rc_option_editor.cc:2913
 msgid "Display Secondary Clock"
@@ -15411,7 +15417,7 @@ msgstr "Исходная смена программы"
 
 #: rc_option_editor.cc:3530
 msgid "Editing"
-msgstr ""
+msgstr "Редактирование"
 
 #: rc_option_editor.cc:3535
 msgid "When drawing new notes, select only the last drawn note"
@@ -17153,19 +17159,23 @@ msgstr "Приглушение"
 msgid "Record enable"
 msgstr "Готовность к записи"
 
-#: route_group_dialog.cc:54
+#: route_group_dialog.cc:53
+msgid "Surround Send enable"
+msgstr ""
+
+#: route_group_dialog.cc:55
 msgid "Active state"
 msgstr "Активное состояние"
 
-#: route_group_dialog.cc:60
+#: route_group_dialog.cc:61
 msgid "RouteGroupDialog"
 msgstr "RouteGroupDialog"
 
-#: route_group_dialog.cc:101
+#: route_group_dialog.cc:102
 msgid "<b>Sharing</b>"
 msgstr "<b>Разделяются:</b>"
 
-#: route_group_dialog.cc:191
+#: route_group_dialog.cc:196
 msgid "The group name is not unique. Please use a different name."
 msgstr "Название группы не является уникальным. Используйте другое имя."
 
@@ -17253,128 +17263,128 @@ msgstr "Добавить дорожку или шину"
 msgid "No Track or Bus Selected"
 msgstr "Нет выбранных дорожек или шин"
 
-#: route_time_axis.cc:111
+#: route_time_axis.cc:112
 msgid "RTAV|G"
 msgstr "Г"
 
-#: route_time_axis.cc:112 track_record_axis.cc:89
+#: route_time_axis.cc:113 track_record_axis.cc:89
 msgid "RTAV|P"
 msgstr "П"
 
-#: route_time_axis.cc:113 vca_time_axis.cc:76
+#: route_time_axis.cc:114 vca_time_axis.cc:76
 msgid "RTAV|A"
 msgstr "А"
 
-#: route_time_axis.cc:193
+#: route_time_axis.cc:194
 msgid "Record (Right-click for Step Edit)"
 msgstr "Запись (правая клавиша мыши активирует пошаговый ввод)"
 
-#: route_time_axis.cc:196 track_record_axis.cc:173
+#: route_time_axis.cc:197 track_record_axis.cc:173
 msgid "Record"
 msgstr "Запись"
 
-#: route_time_axis.cc:277
+#: route_time_axis.cc:278
 msgid "MIDI Controllers and Automation"
 msgstr "MIDI-контроллеры и автоматизация"
 
-#: route_time_axis.cc:559 vca_time_axis.cc:485
+#: route_time_axis.cc:560 vca_time_axis.cc:485
 msgid "Show Existing Automation"
 msgstr "Показать существующую автоматизацию"
 
-#: route_time_axis.cc:562 vca_time_axis.cc:488
+#: route_time_axis.cc:563 vca_time_axis.cc:488
 msgid "Hide All Automation"
 msgstr "Скрыть всю автоматизацию"
 
-#: route_time_axis.cc:573
+#: route_time_axis.cc:574
 msgid "Processor automation"
 msgstr "Автоматизация обработчика"
 
-#: route_time_axis.cc:580 vca_time_axis.cc:492
+#: route_time_axis.cc:581 vca_time_axis.cc:492
 msgid "Fader"
 msgstr "Фейдер"
 
-#: route_time_axis.cc:607
+#: route_time_axis.cc:608
 msgid "Pan"
 msgstr "Панорама"
 
-#: route_time_axis.cc:669
+#: route_time_axis.cc:670
 msgid "Overlaid"
 msgstr "Перекрывают друг друга"
 
-#: route_time_axis.cc:675
+#: route_time_axis.cc:676
 msgid "Stacked"
 msgstr "В стопке"
 
-#: route_time_axis.cc:683
+#: route_time_axis.cc:684
 msgid "Layers"
 msgstr "Слои"
 
-#: route_time_axis.cc:746
+#: route_time_axis.cc:747
 msgid "Automatic (based on I/O connections)"
 msgstr "Автоматическое (по соединениям входа-выхода)"
 
-#: route_time_axis.cc:755
+#: route_time_axis.cc:756
 msgid "(Currently: Existing Material)"
 msgstr "(Сейчас: с записанным материалом)"
 
-#: route_time_axis.cc:758
+#: route_time_axis.cc:759
 msgid "(Currently: Capture Time)"
 msgstr "(Сейчас: по времени захвата)"
 
-#: route_time_axis.cc:766
+#: route_time_axis.cc:767
 msgid "Align With Existing Material"
 msgstr "С записанным материалом"
 
-#: route_time_axis.cc:771
+#: route_time_axis.cc:772
 msgid "Align With Capture Time"
 msgstr "По времени захвата"
 
-#: route_time_axis.cc:776
+#: route_time_axis.cc:777
 msgid "Alignment"
 msgstr "Выравнивание"
 
-#: route_time_axis.cc:786 route_time_axis.cc:1449 route_ui.cc:2525
+#: route_time_axis.cc:787 route_time_axis.cc:1450 route_ui.cc:2525
 #: track_record_axis.cc:175
 msgid "Playlist"
 msgstr "Плейлист"
 
-#: route_time_axis.cc:848 session_option_editor.cc:405
+#: route_time_axis.cc:849 session_option_editor.cc:405
 msgid "Audio (wallclock) time"
 msgstr "Реальное время (по часам)"
 
-#: route_time_axis.cc:856
+#: route_time_axis.cc:857
 msgid "Musical (beat) time"
 msgstr "Музыкальное время"
 
-#: route_time_axis.cc:864
+#: route_time_axis.cc:865
 msgid "Follow Session time domain"
 msgstr ""
 
-#: route_time_axis.cc:872
+#: route_time_axis.cc:873
 msgid "Time Domain"
 msgstr "Тип времени"
 
-#: route_time_axis.cc:1262
+#: route_time_axis.cc:1263
 msgid "The name \"%1\" is reserved for %2"
 msgstr "Название \"%1 зарезервировано для %2"
 
-#: route_time_axis.cc:1439 route_ui.cc:2518
+#: route_time_axis.cc:1440 route_ui.cc:2518
 msgid "Take: %1.%2"
 msgstr "Дубль: %1.%2"
 
-#: route_time_axis.cc:1845 selection.cc:904 selection.cc:960
+#: route_time_axis.cc:1891 selection.cc:904 selection.cc:960
 msgid "programming error: "
 msgstr "Ошибка в программе: "
 
-#: route_time_axis.cc:2007 route_time_axis.cc:2034
+#: route_time_axis.cc:2053 route_time_axis.cc:2080
 msgid "Parameters %1 - %2"
 msgstr "Параметры %1 - %2"
 
-#: route_time_axis.cc:2355 vca_master_strip.cc:228 vca_time_axis.cc:274
+#: route_time_axis.cc:2401 vca_master_strip.cc:228 vca_time_axis.cc:274
 msgid "After-fade listen (AFL)"
 msgstr "Прослушивание после фейдера (AFL)"
 
-#: route_time_axis.cc:2359 vca_master_strip.cc:232 vca_time_axis.cc:278
+#: route_time_axis.cc:2405 vca_master_strip.cc:232 vca_time_axis.cc:278
 msgid "Pre-fade listen (PFL)"
 msgstr "Прослушивание до фейдера (PFL)"
 
@@ -20895,7 +20905,7 @@ msgstr "Корневая папка документов сервера:"
 
 #: video_server_dialog.cc:70
 msgid "Do not show this dialog again (reset in Preferences > Video)."
-msgstr ""
+msgstr "Больше не показывать этот диалог (вернуть — в «Параметры > Видео»)."
 
 #: video_server_dialog.cc:111
 msgid ""
