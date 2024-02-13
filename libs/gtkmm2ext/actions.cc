@@ -76,6 +76,7 @@ ActionManager::MissingActionException::MissingActionException (std::string const
 	: missing_action_name (str)
 {
 	std::cerr << "MAE: " << str << std::endl;
+	PBD::stacktrace (std::cerr, 9);
 }
 
 const char *
@@ -262,6 +263,7 @@ ActionManager::get_action (const string& name, bool or_die)
 	}
 
 	cerr << "Failed to find action: [" << name << ']' << endl;
+	PBD::stacktrace (std::cerr, 8);
 	return RefPtr<Action>();
 }
 
