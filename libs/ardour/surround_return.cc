@@ -173,24 +173,26 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 		}
 
 		UInt32 renderingAlgorithm = 7; // kSpatializationAlgorithm_UseOutputType;
-		err                       = AudioUnitSetProperty (_au,
-                                            kAudioUnitProperty_SpatializationAlgorithm,
-                                            kAudioUnitScope_Input,
-                                            0,
-                                            &renderingAlgorithm,
-                                            sizeof (renderingAlgorithm));
+
+		err = AudioUnitSetProperty (_au,
+		                            19 /*kAudioUnitProperty_SpatializationAlgorithm*/,
+		                            kAudioUnitScope_Input,
+		                            0,
+		                            &renderingAlgorithm,
+		                            sizeof (renderingAlgorithm));
 
 		if (err != noErr) {
 			return;
 		}
 
-		UInt32 sourceMode = kSpatialMixerSourceMode_AmbienceBed;
-		err               = AudioUnitSetProperty (_au,
-                                            kAudioUnitProperty_SpatialMixerSourceMode,
-                                            kAudioUnitScope_Input,
-                                            0,
-                                            &sourceMode,
-                                            sizeof (sourceMode));
+		UInt32 sourceMode = 3; // kSpatialMixerSourceMode_AmbienceBed;
+
+		err = AudioUnitSetProperty (_au,
+		                            3005 /*kAudioUnitProperty_SpatialMixerSourceMode*/,
+		                            kAudioUnitScope_Input,
+		                            0,
+		                            &sourceMode,
+		                            sizeof (sourceMode));
 
 		if (err != noErr) {
 			return;
@@ -199,11 +201,12 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 		AURenderCallbackStruct renderCallbackInfo;
 		renderCallbackInfo.inputProc       = _render_callback;
 		renderCallbackInfo.inputProcRefCon = this;
-		err                                = AudioUnitSetProperty (_au,
-                                            kAudioUnitProperty_SetRenderCallback,
-                                            kAudioUnitScope_Input,
-                                            0, (void*)&renderCallbackInfo,
-                                            sizeof (renderCallbackInfo));
+
+		err  = AudioUnitSetProperty (_au,
+		                             kAudioUnitProperty_SetRenderCallback,
+		                             kAudioUnitScope_Input,
+		                             0, (void*)&renderCallbackInfo,
+		                             sizeof (renderCallbackInfo));
 
 		if (err != noErr) {
 			return;
