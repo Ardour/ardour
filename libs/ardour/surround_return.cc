@@ -32,10 +32,12 @@ using namespace ARDOUR;
 
 SurroundReturn::OutputFormatControl::OutputFormatControl (bool v, std::string const& n, PBD::Controllable::Flag f)
 	: MPControl<bool> (v, n, f)
-{}
+{
+}
 
 std::string
-SurroundReturn::OutputFormatControl::get_user_string () const {
+SurroundReturn::OutputFormatControl::get_user_string () const
+{
 	if (get_value () == 0) {
 		return "7.1.4";
 	} else {
@@ -45,10 +47,12 @@ SurroundReturn::OutputFormatControl::get_user_string () const {
 
 SurroundReturn::BinauralRenderControl::BinauralRenderControl (bool v, std::string const& n, PBD::Controllable::Flag f)
 	: MPControl<bool> (v, n, f)
-{}
+{
+}
 
 std::string
-SurroundReturn::BinauralRenderControl::get_user_string () const {
+SurroundReturn::BinauralRenderControl::get_user_string () const
+{
 	if (get_value () == 0) {
 		return "Dolby";
 	} else {
@@ -94,7 +98,7 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 
 	lv2_atom_forge_init (&_forge, URIMap::instance ().urid_map ());
 
-	_trim.reset (new Amp (_session, X_("Trim"), r->trim_control(), false));
+	_trim.reset (new Amp (_session, X_("Trim"), r->trim_control (), false));
 	_trim->configure_io (cca128, cca128);
 	_trim->activate ();
 
@@ -111,7 +115,8 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 		'3dem' /* kAudioUnitSubType_SpatialMixer */,
 		kAudioUnitManufacturer_Apple,
 		0,
-		0};
+		0
+	};
 
 	AudioComponent comp = AudioComponentFindNext (NULL, &auDescription);
 	if (comp && noErr == AudioComponentInstanceNew (comp, &_au)) {
@@ -119,84 +124,99 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 
 		AudioStreamBasicDescription streamFormat;
 		streamFormat.mChannelsPerFrame = 12;
-		streamFormat.mSampleRate       = _session.sample_rate();
+		streamFormat.mSampleRate       = _session.sample_rate ();
 		streamFormat.mFormatID         = kAudioFormatLinearPCM;
-		streamFormat.mFormatFlags      = kAudioFormatFlagIsFloat|kAudioFormatFlagIsPacked|kAudioFormatFlagIsNonInterleaved;
+		streamFormat.mFormatFlags      = kAudioFormatFlagIsFloat | kAudioFormatFlagIsPacked | kAudioFormatFlagIsNonInterleaved;
 		streamFormat.mBitsPerChannel   = 32;
 		streamFormat.mFramesPerPacket  = 1;
 		streamFormat.mBytesPerPacket   = 4;
 		streamFormat.mBytesPerFrame    = 4;
 
 		err = AudioUnitSetProperty (_au,
-				kAudioUnitProperty_StreamFormat,
-				kAudioUnitScope_Input,
-				0,
-				&streamFormat,
-				sizeof (AudioStreamBasicDescription));
+		                            kAudioUnitProperty_StreamFormat,
+		                            kAudioUnitScope_Input,
+		                            0,
+		                            &streamFormat,
+		                            sizeof (AudioStreamBasicDescription));
 
-		if (err != noErr) { return; }
+		if (err != noErr) {
+			return;
+		}
 
 		streamFormat.mChannelsPerFrame = 2;
 
 		err = AudioUnitSetProperty (_au,
-				kAudioUnitProperty_StreamFormat,
-				kAudioUnitScope_Output,
-				0,
-				&streamFormat,
-				sizeof (AudioStreamBasicDescription));
+		                            kAudioUnitProperty_StreamFormat,
+		                            kAudioUnitScope_Output,
+		                            0,
+		                            &streamFormat,
+		                            sizeof (AudioStreamBasicDescription));
 
-		if (err != noErr) { return; }
+		if (err != noErr) {
+			return;
+		}
 
 		AudioChannelLayout chanelLayout;
-		chanelLayout.mChannelLayoutTag = 0xc0000c; // kAudioChannelLayoutTag_Atmos_7_1_4;
-		chanelLayout.mChannelBitmap = 0;
+		chanelLayout.mChannelLayoutTag          = 0xc0000c; // kAudioChannelLayoutTag_Atmos_7_1_4;
+		chanelLayout.mChannelBitmap             = 0;
 		chanelLayout.mNumberChannelDescriptions = 0;
 
 		err = AudioUnitSetProperty (_au,
-				kAudioUnitProperty_AudioChannelLayout,
-				kAudioUnitScope_Input,
-				0,
-				&chanelLayout,
-				sizeof (chanelLayout));
+		                            kAudioUnitProperty_AudioChannelLayout,
+		                            kAudioUnitScope_Input,
+		                            0,
+		                            &chanelLayout,
+		                            sizeof (chanelLayout));
 
-		if (err != noErr) { return; }
+		if (err != noErr) {
+			return;
+		}
 
 		UInt32 renderingAlgorithm = 7; // kSpatializationAlgorithm_UseOutputType;
-		err = AudioUnitSetProperty (_au,
-				kAudioUnitProperty_SpatializationAlgorithm,
-				kAudioUnitScope_Input,
-				0,
-				&renderingAlgorithm,
-				sizeof(renderingAlgorithm));
+		err                       = AudioUnitSetProperty (_au,
+                                            kAudioUnitProperty_SpatializationAlgorithm,
+                                            kAudioUnitScope_Input,
+                                            0,
+                                            &renderingAlgorithm,
+                                            sizeof (renderingAlgorithm));
 
-		if (err != noErr) { return; }
+		if (err != noErr) {
+			return;
+		}
 
 		UInt32 sourceMode = kSpatialMixerSourceMode_AmbienceBed;
-		err = AudioUnitSetProperty (_au,
-				kAudioUnitProperty_SpatialMixerSourceMode,
-				kAudioUnitScope_Input,
-				0,
-				&sourceMode,
-				sizeof(sourceMode));
+		err               = AudioUnitSetProperty (_au,
+                                            kAudioUnitProperty_SpatialMixerSourceMode,
+                                            kAudioUnitScope_Input,
+                                            0,
+                                            &sourceMode,
+                                            sizeof (sourceMode));
 
-		if (err != noErr) { return; }
+		if (err != noErr) {
+			return;
+		}
 
 		AURenderCallbackStruct renderCallbackInfo;
-		renderCallbackInfo.inputProc = _render_callback;
+		renderCallbackInfo.inputProc       = _render_callback;
 		renderCallbackInfo.inputProcRefCon = this;
-		err = AudioUnitSetProperty (_au,
-				kAudioUnitProperty_SetRenderCallback,
-				kAudioUnitScope_Input,
-				0, (void*) &renderCallbackInfo,
-				sizeof(renderCallbackInfo));
+		err                                = AudioUnitSetProperty (_au,
+                                            kAudioUnitProperty_SetRenderCallback,
+                                            kAudioUnitScope_Input,
+                                            0, (void*)&renderCallbackInfo,
+                                            sizeof (renderCallbackInfo));
 
-		if (err != noErr) { return; }
+		if (err != noErr) {
+			return;
+		}
 
-		_au_buffers = (AudioBufferList *) malloc (offsetof(AudioBufferList, mBuffers) + 2 * sizeof(::AudioBuffer));
+		_au_buffers = (AudioBufferList*)malloc (offsetof (AudioBufferList, mBuffers) + 2 * sizeof (::AudioBuffer));
+
 		_au_buffers->mNumberBuffers = 2;
 
 		err = AudioUnitInitialize (_au);
-		if (err != noErr) { return; }
+		if (err != noErr) {
+			return;
+		}
 
 		_have_au_renderer = true;
 	}
@@ -267,10 +287,10 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 		timepos_t start, end;
 
 		for (uint32_t s = 0; s < ss->bufs ().count ().n_audio () && id < max_object_id; ++s, ++id) {
-
 			std::shared_ptr<SurroundPannable> const& p (ss->pan_param (s, start, end));
-			AutoState const as = p->automation_state ();
-			bool const automated = (as & Play) || ((as & (Touch | Latch)) && !p->touching ());
+
+			AutoState const as        = p->automation_state ();
+			bool const      automated = (as & Play) || ((as & (Touch | Latch)) && !p->touching ());
 
 			AudioBuffer&       dst_ab (_surround_bufs.get_audio (id));
 			AudioBuffer const& src_ab (ss->bufs ().get_audio (s));
@@ -278,8 +298,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 				/* object */
 				dst_ab.read_from (src_ab, nframes);
 				if (!automated || start_sample >= end_sample) {
-					pan_t const v[num_pan_parameters] =
-					{
+					pan_t const v[num_pan_parameters] = {
 						(pan_t)p->pan_pos_x->get_value (),
 						(pan_t)p->pan_pos_y->get_value (),
 						(pan_t)p->pan_pos_z->get_value (),
@@ -304,7 +323,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 							if (!p->find_next_event (start, end, next_event)) {
 								break;
 							}
-							samplecnt_t pos = std::min (timepos_t (start_sample).distance (next_event.when).samples(), (samplecnt_t) nframes - 1);
+							samplecnt_t pos = std::min (timepos_t (start_sample).distance (next_event.when).samples (), (samplecnt_t)nframes - 1);
 							evaluate (id, p, next_event.when, pos);
 							start = next_event.when;
 						}
@@ -314,7 +333,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 				}
 				/* configure near/mid/far - not sample-accurate */
 				int const brm = p->binaural_render_mode->get_value ();
-				if (brm!= _current_render_mode[id]) {
+				if (brm != _current_render_mode[id]) {
 					_current_render_mode[id] = brm;
 #if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
 					URIMap::URIDs const& urids = URIMap::instance ().urids;
@@ -326,7 +345,6 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 				/* bed mix */
 				dst_ab.merge_from (src_ab, nframes);
 			}
-
 		}
 
 		if (id >= max_object_id) {
@@ -342,13 +360,13 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 #endif
 	}
 
-	if (_have_au_renderer &&  _binaural_render_control->get_value () != 0 && _output_format_control->get_value () != 0) {
+	if (_have_au_renderer && _binaural_render_control->get_value () != 0 && _output_format_control->get_value () != 0) {
 		_output_format_control->set_value (0.0, PBD::Controllable::NoGroup);
 	}
 
 	MainOutputFormat target_output_format = _output_format_control->get_value () == 0 ? OUTPUT_FORMAT_7_1_4 : OUTPUT_FORMAT_5_1;
 
-	if (_have_au_renderer &&  _binaural_render_control->get_value () != 0) {
+	if (_have_au_renderer && _binaural_render_control->get_value () != 0) {
 		target_output_format = OUTPUT_FORMAT_7_1_4;
 	}
 
@@ -361,7 +379,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 	}
 
 	uint32_t meter_nframes = nframes;
-	uint32_t meter_offset = 0;
+	uint32_t meter_offset  = 0;
 
 	if (_exporting && _export_start >= start_sample && _export_start < end_sample && start_sample != end_sample) {
 		_lufs_meter.reset ();
@@ -387,12 +405,12 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 			timepos_t unused_start, unused_end;
 			for (uint32_t s = 0; s < ss->bufs ().count ().n_audio () && id < max_object_id; ++s, ++id) {
 				std::shared_ptr<SurroundPannable> const& p (ss->pan_param (s, unused_start, unused_end));
-				AutoState const as = p->automation_state ();
-				bool const automated = (as & Play) || ((as & (Touch | Latch)) && !p->touching ());
+
+				AutoState const as        = p->automation_state ();
+				bool const      automated = (as & Play) || ((as & (Touch | Latch)) && !p->touching ());
 				if (id > 9) {
 					if (!automated) {
-						pan_t const v[num_pan_parameters] =
-						{
+						pan_t const v[num_pan_parameters] = {
 							(pan_t)p->pan_pos_x->get_value (),
 							(pan_t)p->pan_pos_y->get_value (),
 							(pan_t)p->pan_pos_z->get_value (),
@@ -452,7 +470,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 	_lufs_meter.run (data, meter_nframes);
 
 #ifdef __APPLE__
-	if (_au && _have_au_renderer &&  _binaural_render_control->get_value () != 0) {
+	if (_au && _have_au_renderer && _binaural_render_control->get_value () != 0) {
 		for (uint32_t i = 0; i < 12; ++i) {
 			_au_data[i] = _surround_bufs.get_audio (i).data (0);
 		}
@@ -460,15 +478,15 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 		_au_buffers->mNumberBuffers = 2;
 		for (uint32_t i = 0; i < 2; ++i) {
 			_au_buffers->mBuffers[i].mNumberChannels = 1;
-			_au_buffers->mBuffers[i].mDataByteSize = nframes * sizeof (Sample);
-			_au_buffers->mBuffers[i].mData = _surround_bufs.get_audio (12 + i).data (0);
+			_au_buffers->mBuffers[i].mDataByteSize   = nframes * sizeof (Sample);
+			_au_buffers->mBuffers[i].mData           = _surround_bufs.get_audio (12 + i).data (0);
 		}
 		AudioUnitRenderActionFlags flags = 0;
-		AudioTimeStamp ts;
+		AudioTimeStamp             ts;
 		ts.mSampleTime = _au_samples_processed;
-		ts.mFlags = kAudioTimeStampSampleTimeValid;
+		ts.mFlags      = kAudioTimeStampSampleTimeValid;
 
-		OSErr err = AudioUnitRender (_au, &flags, &ts, /*bus*/0, nframes, _au_buffers);
+		OSErr err = AudioUnitRender (_au, &flags, &ts, /*bus*/ 0, nframes, _au_buffers);
 		if (err == noErr) {
 			_au_samples_processed += nframes;
 			uint32_t limit = std::min<uint32_t> (_au_buffers->mNumberBuffers, 2);
@@ -491,7 +509,7 @@ SurroundReturn::forge_int_msg (uint32_t obj_id, uint32_t key, int val, uint32_t 
 {
 	URIMap::URIDs const& urids = URIMap::instance ().urids;
 	LV2_Atom_Forge_Frame frame;
-	lv2_atom_forge_set_buffer (&_forge, _atom_buf, sizeof(_atom_buf));
+	lv2_atom_forge_set_buffer (&_forge, _atom_buf, sizeof (_atom_buf));
 	lv2_atom_forge_frame_time (&_forge, 0);
 	LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object (&_forge, &frame, 1, obj_id);
 	lv2_atom_forge_key (&_forge, key);
@@ -520,41 +538,40 @@ SurroundReturn::maybe_send_metadata (size_t id, pframes_t sample, pan_t const v[
 	URIMap::URIDs const& urids = URIMap::instance ().urids;
 
 #if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
-			LV2_Atom_Forge_Frame frame;
-			lv2_atom_forge_set_buffer (&_forge, _atom_buf, sizeof(_atom_buf));
-			lv2_atom_forge_frame_time (&_forge, 0);
-			LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object (&_forge, &frame, 1, urids.surr_MetaData);
-			lv2_atom_forge_key (&_forge, urids.time_frame);
-			lv2_atom_forge_int (&_forge, sample);
-			lv2_atom_forge_key (&_forge, urids.surr_Channel);
-			lv2_atom_forge_int (&_forge, id);
-			lv2_atom_forge_key (&_forge, urids.surr_PosX);
-			lv2_atom_forge_float (&_forge, v[0]);
-			lv2_atom_forge_key (&_forge, urids.surr_PosY);
-			lv2_atom_forge_float (&_forge, v[1]);
-			lv2_atom_forge_key (&_forge, urids.surr_PosZ);
-			lv2_atom_forge_float (&_forge, v[2]);
-			lv2_atom_forge_key (&_forge, urids.surr_Size);
-			lv2_atom_forge_float (&_forge, v[3]);
-			lv2_atom_forge_key (&_forge, urids.surr_Snap);
-			lv2_atom_forge_bool (&_forge, v[4]> 0 ? true : false);
-			lv2_atom_forge_pop (&_forge, &frame);
+	LV2_Atom_Forge_Frame frame;
+	lv2_atom_forge_set_buffer (&_forge, _atom_buf, sizeof (_atom_buf));
+	lv2_atom_forge_frame_time (&_forge, 0);
+	LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object (&_forge, &frame, 1, urids.surr_MetaData);
+	lv2_atom_forge_key (&_forge, urids.time_frame);
+	lv2_atom_forge_int (&_forge, sample);
+	lv2_atom_forge_key (&_forge, urids.surr_Channel);
+	lv2_atom_forge_int (&_forge, id);
+	lv2_atom_forge_key (&_forge, urids.surr_PosX);
+	lv2_atom_forge_float (&_forge, v[0]);
+	lv2_atom_forge_key (&_forge, urids.surr_PosY);
+	lv2_atom_forge_float (&_forge, v[1]);
+	lv2_atom_forge_key (&_forge, urids.surr_PosZ);
+	lv2_atom_forge_float (&_forge, v[2]);
+	lv2_atom_forge_key (&_forge, urids.surr_Size);
+	lv2_atom_forge_float (&_forge, v[3]);
+	lv2_atom_forge_key (&_forge, urids.surr_Snap);
+	lv2_atom_forge_bool (&_forge, v[4] > 0 ? true : false);
+	lv2_atom_forge_pop (&_forge, &frame);
 
-			_surround_processor->write_from_ui (0, urids.atom_eventTransfer, lv2_atom_total_size (msg), (const uint8_t*)msg);
+	_surround_processor->write_from_ui (0, urids.atom_eventTransfer, lv2_atom_total_size (msg), (const uint8_t*)msg);
 #endif
 }
 
 void
 SurroundReturn::evaluate (size_t id, std::shared_ptr<SurroundPannable> const& p, timepos_t const& when, pframes_t sample, bool force)
 {
-	bool ok[num_pan_parameters];
-	pan_t const v[num_pan_parameters] =
-	{
-		(pan_t)p->pan_pos_x->list()->rt_safe_eval (when, ok[0]),
-		(pan_t)p->pan_pos_y->list()->rt_safe_eval (when, ok[1]),
-		(pan_t)p->pan_pos_z->list()->rt_safe_eval (when, ok[2]),
-		(pan_t)p->pan_size->list()->rt_safe_eval (when, ok[3]),
-		(pan_t)p->pan_snap->list()->rt_safe_eval (when, ok[4])
+	bool        ok[num_pan_parameters];
+	pan_t const v[num_pan_parameters] = {
+		(pan_t)p->pan_pos_x->list ()->rt_safe_eval (when, ok[0]),
+		(pan_t)p->pan_pos_y->list ()->rt_safe_eval (when, ok[1]),
+		(pan_t)p->pan_pos_z->list ()->rt_safe_eval (when, ok[2]),
+		(pan_t)p->pan_size->list ()->rt_safe_eval (when, ok[3]),
+		(pan_t)p->pan_snap->list ()->rt_safe_eval (when, ok[4])
 	};
 	if (ok[0] && ok[1] && ok[2] && ok[3] && ok[4]) {
 		maybe_send_metadata (id, sample, v, force);
@@ -584,11 +601,11 @@ SurroundReturn::set_playback_offset (samplecnt_t cnt)
 void
 SurroundReturn::setup_export (std::string const& fn, samplepos_t ss, samplepos_t es)
 {
-	if (0 == _surround_processor->setup_export (fn.c_str())) {
+	if (0 == _surround_processor->setup_export (fn.c_str ())) {
 		//std::cout << "SurroundReturn::setup export "<< ss << " to " << es << "\n";
-		_exporting = true;
+		_exporting    = true;
 		_export_start = ss - effective_latency ();
-		_export_end = es - effective_latency ();
+		_export_end   = es - effective_latency ();
 	}
 }
 
@@ -597,7 +614,7 @@ SurroundReturn::finalize_export ()
 {
 	//std::cout << "SurroundReturn::finalize_export\n";
 	_surround_processor->finalize_export ();
-	_exporting = false;
+	_exporting    = false;
 	_export_start = _export_end = 0;
 }
 
@@ -643,19 +660,18 @@ SurroundReturn::state () const
 	XMLNode& node (_trim->state ());
 	node.set_property ("name", "SurrReturn");
 	node.set_property ("type", "surreturn");
-	node.set_property ("output-format", (int) _current_output_format);
+	node.set_property ("output-format", (int)_current_output_format);
 	return node;
 }
 
 #ifdef __APPLE__
 OSStatus
-SurroundReturn::_render_callback(
-		void                        *userData,
-		 AudioUnitRenderActionFlags *ioActionFlags,
-		 const AudioTimeStamp       *inTimeStamp,
-		 UInt32                      inBusNumber,
-		 UInt32                      inNumberSamples,
-		 AudioBufferList*            ioData)
+SurroundReturn::_render_callback (void*                       userData,
+                                  AudioUnitRenderActionFlags* ioActionFlags,
+                                  const AudioTimeStamp*       inTimeStamp,
+                                  UInt32                      inBusNumber,
+                                  UInt32                      inNumberSamples,
+                                  AudioBufferList*            ioData)
 {
 	if (userData) {
 		return ((SurroundReturn*)userData)->render_callback (ioActionFlags, inTimeStamp, inBusNumber, inNumberSamples, ioData);
@@ -664,18 +680,18 @@ SurroundReturn::_render_callback(
 }
 
 OSStatus
-SurroundReturn::render_callback(AudioUnitRenderActionFlags*,
-			  const AudioTimeStamp*,
-			  UInt32 bus,
-			  UInt32 inNumberSamples,
-			  AudioBufferList* ioData)
+SurroundReturn::render_callback (AudioUnitRenderActionFlags*,
+                                 const AudioTimeStamp*,
+                                 UInt32           bus,
+                                 UInt32           inNumberSamples,
+                                 AudioBufferList* ioData)
 {
 	uint32_t limit = std::min<uint32_t> (ioData->mNumberBuffers, 12);
 
 	for (uint32_t i = 0; i < limit; ++i) {
 		ioData->mBuffers[i].mNumberChannels = 1;
-		ioData->mBuffers[i].mDataByteSize = sizeof (Sample) * inNumberSamples;
-		ioData->mBuffers[i].mData = _au_data[i];
+		ioData->mBuffers[i].mDataByteSize   = sizeof (Sample) * inNumberSamples;
+		ioData->mBuffers[i].mData           = _au_data[i];
 	}
 	return noErr;
 }
