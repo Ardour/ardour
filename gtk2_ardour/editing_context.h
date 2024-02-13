@@ -556,6 +556,9 @@ public:
 
 	Editing::MouseMode mouse_mode;
 
+	void set_common_editing_state (XMLNode const & node);
+	void get_common_editing_state (XMLNode& node) const;
+
   private:
 	static std::queue<EditingContext*> ec_stack;
 

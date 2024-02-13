@@ -36,6 +36,7 @@
 #include "ardour_ui.h"
 #include "edit_note_dialog.h"
 #include "editing_context.h"
+#include "editing_convert.h"
 #include "editor_drag.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
@@ -2210,4 +2211,89 @@ EditingContext::on_velocity_scroll_event (GdkEventScroll* ev)
 	}
 	set_draw_velocity_to(v);
 	return true;
+}
+
+void
+EditingContext::set_common_editing_state (XMLNode const & node)
+{
+	double z;
+	if (node.get_property ("zoom", z)) {
+		/* older versions of ardour used floating point samples_per_pixel */
+		reset_zoom (llrintf (z));
+	} else {
+		reset_zoom (samples_per_pixel);
+	}
+
+	GridType grid_type;
+	if (!node.get_property ("grid-type", grid_type)) {
+		grid_type = _grid_type;
+	}
+	grid_type_selection_done (grid_type);
+
+	GridType draw_length;
+	if (!node.get_property ("draw-length", draw_length)) {
+		draw_length = _draw_length;
+	}
+	draw_length_selection_done (draw_length);
+
+	int draw_vel;
+	if (!node.get_property ("draw-velocity", draw_vel)) {
+		draw_vel = _draw_velocity;
+	}
+	draw_velocity_selection_done (draw_vel);
+
+	int draw_chan;
+	if (!node.get_property ("draw-channel", draw_chan)) {
+		draw_chan = DRAW_CHAN_AUTO;
+	}
+	draw_channel_selection_done (draw_chan);
+
+	SnapMode sm;
+	if (node.get_property ("snap-mode", sm)) {
+		snap_mode_selection_done(sm);
+		/* set text of Dropdown. in case _snap_mode == SnapOff (default)
+		 * snap_mode_selection_done() will only mark an already active item as active
+		 * which does not trigger set_text().
+		 */
+		set_snap_mode (sm);
+	} else {
+		set_snap_mode (_snap_mode);
+	}
+
+	node.get_property ("internal-grid-type", internal_grid_type);
+	node.get_property ("internal-snap-mode", internal_snap_mode);
+	node.get_property ("pre-internal-grid-type", pre_internal_grid_type);
+	node.get_property ("pre-internal-snap-mode", pre_internal_snap_mode);
+
+	std::string mm_str;
+	if (node.get_property ("mouse-mode", mm_str)) {
+		MouseMode m = str2mousemode(mm_str);
+		set_mouse_mode (m, true);
+	} else {
+		set_mouse_mode (MouseObject, true);
+	}
+
+	samplepos_t lf_pos;
+	if (node.get_property ("left-frame", lf_pos)) {
+		if (lf_pos < 0) {
+			lf_pos = 0;
+		}
+		reset_x_origin (lf_pos);
+	}
+}
+
+void
+EditingContext::get_common_editing_state (XMLNode& node) const
+{
+	node.set_property ("zoom", samples_per_pixel);
+	node.set_property ("grid-type", _grid_type);
+	node.set_property ("snap-mode", _snap_mode);
+	node.set_property ("internal-grid-type", internal_grid_type);
+	node.set_property ("internal-snap-mode", internal_snap_mode);
+	node.set_property ("pre-internal-grid-type", pre_internal_grid_type);
+	node.set_property ("pre-internal-snap-mode", pre_internal_snap_mode);
+	node.set_property ("draw-length", _draw_length);
+	node.set_property ("draw-velocity", _draw_velocity);
+	node.set_property ("draw-channel", _draw_channel);
+	node.set_property ("left-frame", _leftmost_sample);
 }
