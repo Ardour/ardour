@@ -45,6 +45,7 @@ class StartupFSM : public sigc::trackable
 
 	enum Result {
 		LoadSession,
+		LoadedSession,
 		ExitProgram,
 		QuitProgram,
 	};
@@ -72,6 +73,7 @@ class StartupFSM : public sigc::trackable
 	XMLNode              session_engine_hints;
 	bool                 session_is_new;
 	bool                 session_name_edited;
+	bool                 session_loaded;
 
 	ARDOUR::BusProfile bus_profile;
 

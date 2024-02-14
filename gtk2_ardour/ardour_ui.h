@@ -252,6 +252,8 @@ public:
 	int  save_state_canfail (std::string state_name = "", bool switch_to_it = false);
 	void save_state (const std::string & state_name = "", bool switch_to_it = false);
 
+	int new_session_from_aaf (std::string const&, std::string const&, std::string&, std::string&);
+
 	static ARDOUR_UI *instance () { return theArdourUI; }
 
 	/* signal emitted when escape key is pressed. All UI components that

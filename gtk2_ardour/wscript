@@ -25,6 +25,7 @@ gtk2_ardour_sources = [
         'ardour_ui.cc',
         'ardour_ui2.cc',
         'ardour_ui3.cc',
+        'ardour_ui_aaf.cc',
         'ardour_ui_access_web.cc',
         'ardour_ui_dependents.cc',
         'ardour_ui_dialogs.cc',
@@ -524,6 +525,12 @@ def build(bld):
             obj.uselib += ' GLIBMM GIOMM PANGOMM PANGOFT2 LIBPNG'
         else:
             obj.uselib += ' GTKMM'
+
+        if bld.is_defined('USE_EXTERNAL_LIBS'):
+            obj.uselib += ' LIBAAF'
+        else:
+            obj.use.extend (['libaaf'])
+
         if bld.is_defined('HAVE_USB'):
             obj.uselib += ' USB'
         if bld.is_defined('HAVE_SUIL'):
@@ -620,6 +627,12 @@ def build(bld):
         obj.uselib += ' GLIBMM GIOMM PANGOFT2 LIBPNG'
     else:
         obj.uselib += ' GTKMM GTK'
+
+    if bld.is_defined('USE_EXTERNAL_LIBS'):
+        obj.uselib += ' LIBAAF'
+    else:
+        obj.use.extend (['libaaf'])
+
     if bld.is_defined('HAVE_USB'):
         obj.uselib += ' USB'
     if sys.platform == 'darwin':

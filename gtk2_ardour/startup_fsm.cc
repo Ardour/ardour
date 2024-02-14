@@ -333,7 +333,7 @@ StartupFSM::dialog_response_handler (int response, StartupFSM::DialogID dialog_i
 			switch (response) {
 			case RESPONSE_OK:
 				if (AudioEngine::instance()->running()) {
-					_signal_response (LoadSession);
+					_signal_response (session_loaded ? LoadedSession : LoadSession);
 				} else {
 					/* Engine died unexpectedly (it was
 					 * running after
@@ -721,6 +721,7 @@ int
 StartupFSM::check_session_parameters (bool must_be_new)
 {
 	bool requested_new = false;
+	session_loaded     = false;
 
 	session_name        = session_dialog->session_name (requested_new);
 	session_path        = session_dialog->session_folder ();
@@ -764,6 +765,21 @@ StartupFSM::check_session_parameters (bool must_be_new)
 			}
 
 			session_existing_sample_rate = sr;
+			return 0;
+		}
+	}
+
+	if (!must_be_new) {
+		int rv = ARDOUR_UI::instance()->new_session_from_aaf (session_name, Config->get_default_session_parent_dir(), session_path, session_name);
+		if (rv < 0) {
+			ArdourMessageDialog msg (*session_dialog, _("Extracting aaf failed"));
+			msg.run ();
+			return 1;
+		} else if (rv == 0) {
+			if (ARDOUR_UI::instance()->session ()) {
+				session_existing_sample_rate = ARDOUR_UI::instance()->session ()->nominal_sample_rate ();
+			}
+			session_loaded = true;
 			return 0;
 		}
 	}

@@ -195,6 +195,20 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 			return; /* back to main event loop */
 		} else if (rv == 0) {
 			session_dialog->set_provided_session (session_name, session_path);
+		} else {
+
+			rv = new_session_from_aaf (session_name, Config->get_default_session_parent_dir(), session_path, session_name);
+			if (rv < 0) {
+				ArdourMessageDialog msg (*session_dialog, _("Extracting AAF failed"));
+				msg.run ();
+				return; /* back to main event loop */
+			} else if (rv == 0) {
+				session_dialog->set_provided_session (session_name, session_path);
+				/* we got a session now */
+				session_dialog->hide ();
+				delete_when_idle (session_dialog);
+				return;
+			}
 		}
 	}
 
@@ -1171,8 +1185,12 @@ ARDOUR_UI::open_session ()
 	FileFilter archive_filter;
 	archive_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::session_archive_suffix));
 	archive_filter.set_name (_("Session Archives"));
-
 	open_session_selector.add_filter (archive_filter);
+
+	FileFilter aaf_filter;
+	aaf_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::advanced_authoring_format_suffix));
+	aaf_filter.set_name (_("Advanced Authoring Format (AAF)"));
+	open_session_selector.add_filter (aaf_filter);
 
 	open_session_selector.set_filter (session_filter);
 
@@ -1190,22 +1208,34 @@ ARDOUR_UI::open_session ()
 	string path, name;
 	bool isnew;
 
-	if (session_path.length() > 0) {
-		int rv = ARDOUR::inflate_session (session_path,
-				Config->get_default_session_parent_dir(), path, name);
-		if (rv == 0) {
-			_session_is_new = false;
-			load_session (path, name);
-		}
-		else if (rv < 0) {
-			ArdourMessageDialog msg (_main_window,
-			                         string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
-			msg.run ();
-		}
-		else if (ARDOUR::find_session (session_path, path, name, isnew) == 0) {
-			_session_is_new = isnew;
-			load_session (path, name);
-		}
+	if (session_path.empty()) {
+		return;
+	}
+	int rv = ARDOUR::inflate_session (session_path, Config->get_default_session_parent_dir(), path, name);
+	if (rv == 0) {
+		_session_is_new = false;
+		load_session (path, name);
+		return;
+	}
+	else if (rv < 0) {
+		ArdourMessageDialog msg (_main_window, string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
+		msg.run ();
+		return;
+	}
+
+	rv = new_session_from_aaf (session_path, Config->get_default_session_parent_dir(), path, name);
+	if (rv == 0) {
+		_session_is_new = false;
+		return;
+	} else if (rv < 0) {
+		ArdourMessageDialog msg (_main_window, _("Extracting AAF failed"));
+		msg.run ();
+		return;
+	}
+
+	if (ARDOUR::find_session (session_path, path, name, isnew) == 0) {
+		_session_is_new = isnew;
+		load_session (path, name);
 	}
 }
 
