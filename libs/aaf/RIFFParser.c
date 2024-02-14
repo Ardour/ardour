@@ -124,7 +124,7 @@ riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS
 	size_t bytesRead = readerCallback ((unsigned char*)&riff, 0, sizeof (riff), user1, user2, user3);
 
 	if (bytesRead < sizeof (riff)) {
-		error ("Could not read file");
+		error ("Could not read file header");
 		return -1;
 	}
 
@@ -152,8 +152,6 @@ riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS
 		return -1;
 	}
 
-	// debug( "%.4s %.4s (%u bytes)", riff.ckid, riff.format, riff.cksz );
-
 	size_t filesize = riff.cksz + sizeof (chunk);
 	size_t pos      = sizeof (struct riffHeaderChunk);
 
@@ -161,7 +159,7 @@ riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS
 		bytesRead = readerCallback ((unsigned char*)&chunk, pos, sizeof (chunk), user1, user2, user3);
 
 		if (bytesRead < sizeof (chunk)) {
-			error ("Could not read chunk @ %" PRIu64 " (%" PRIu64 " bytes returned)", pos, bytesRead);
+			error ("Could not read chunk \"%.4s\" @ %" PRIu64 " (%" PRIu64 " bytes returned)", chunk.ckid, pos, bytesRead);
 			break;
 		}
 
@@ -169,7 +167,7 @@ riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS
 			chunk.cksz = BE2LE32 (chunk.cksz);
 		}
 
-		// debug( "Got chunk : %.4s (%u bytes)", chunk.ckid, chunk.cksz );
+		debug ("Got chunk \"%.4s\" (%u bytes) @ %" PRIu64 " (%" PRIu64 " bytes returned)", chunk.ckid, chunk.cksz, pos, bytesRead);
 
 		if (!be) { /* WAVE */
 
@@ -180,6 +178,11 @@ riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS
 				struct wavFmtChunk wavFmtChunk;
 
 				bytesRead = readerCallback ((unsigned char*)&wavFmtChunk, pos, sizeof (wavFmtChunk), user1, user2, user3);
+
+				if (bytesRead < sizeof (wavFmtChunk)) {
+					error ("Could not read chunk \"%.4s\" content @ %" PRIu64 " (%" PRIu64 " bytes returned)", chunk.ckid, pos, bytesRead);
+					break;
+				}
 
 				RIFFAudioFile->channels   = wavFmtChunk.channels;
 				RIFFAudioFile->sampleSize = wavFmtChunk.bits_per_sample;
@@ -193,7 +196,11 @@ riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS
 			           chunk.ckid[2] == 't' &&
 			           chunk.ckid[3] == 'a') {
 				if (RIFFAudioFile->channels > 0 && RIFFAudioFile->sampleSize > 0) {
-					RIFFAudioFile->duration = chunk.cksz / RIFFAudioFile->channels / (RIFFAudioFile->sampleSize / 8);
+					RIFFAudioFile->sampleCount = chunk.cksz / RIFFAudioFile->channels / (RIFFAudioFile->sampleSize / 8);
+				}
+
+				if (flags & RIFF_PARSE_AAF_SUMMARY) {
+					return 0;
 				}
 			}
 		} else { /* AIFF */
@@ -206,29 +213,40 @@ riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS
 
 				bytesRead = readerCallback ((unsigned char*)&aiffCOMMChunk, pos, sizeof (aiffCOMMChunk), user1, user2, user3);
 
-				RIFFAudioFile->channels   = BE2LE16 (aiffCOMMChunk.numChannels);
-				RIFFAudioFile->sampleSize = BE2LE16 (aiffCOMMChunk.sampleSize);
-				RIFFAudioFile->sampleRate = beExtended2leUint32 (aiffCOMMChunk.sampleRate);
-				RIFFAudioFile->duration   = BE2LE32 (aiffCOMMChunk.numSampleFrames);
+				if (bytesRead < sizeof (aiffCOMMChunk)) {
+					error ("Could not read chunk \"%.4s\" content @ %" PRIu64 " (%" PRIu64 " bytes returned)", chunk.ckid, pos, bytesRead);
+					break;
+				}
+
+				RIFFAudioFile->channels    = BE2LE16 (aiffCOMMChunk.numChannels);
+				RIFFAudioFile->sampleSize  = BE2LE16 (aiffCOMMChunk.sampleSize);
+				RIFFAudioFile->sampleRate  = beExtended2leUint32 (aiffCOMMChunk.sampleRate);
+				RIFFAudioFile->sampleCount = BE2LE32 (aiffCOMMChunk.numSampleFrames);
 
 				if (flags & RIFF_PARSE_ONLY_HEADER) {
 					return 0;
 				}
-			}
-			/*
-			 * We don't care about AIFF "SSND" chunk because we already know duration
-			 * from "COMM". Could we double check validity of duration by checking
-			 * "SSND" chunk size, like we do with WAV "DATA" chunk ? is it possible
-			 * with AAF audio file summary ?
-			 */
+			} else if (chunk.ckid[0] == 'S' &&
+			           chunk.ckid[1] == 'S' &&
+			           chunk.ckid[2] == 'N' &&
+			           chunk.ckid[3] == 'D') {
+				/*
+				 * Samplecount should be already set with numSampleFrames in COMM chunk.
+				 * However in AAF (AIFCDescriptor::Summary), numSampleFrames is often null,
+				 * so we must extract samplecount out of SSND chunk, like we do with wav DATA chunk.
+				 */
+				uint64_t sampleCount = chunk.cksz / RIFFAudioFile->channels / (RIFFAudioFile->sampleSize / 8);
 
-			// else
-			// if ( chunk.ckid[0] == 'S' &&
-			//      chunk.ckid[1] == 'S' &&
-			//      chunk.ckid[2] == 'N' &&
-			//      chunk.ckid[3] == 'D' )
-			// {
-			// }
+				if (RIFFAudioFile->sampleCount > 0 && RIFFAudioFile->sampleCount != sampleCount) {
+					debug ("Sample count retrieved from COMM chunk (%" PRIu64 ") does not match SSND chunk (%" PRIu64 ")", RIFFAudioFile->sampleCount, sampleCount);
+				}
+
+				RIFFAudioFile->sampleCount = sampleCount;
+
+				if (flags & RIFF_PARSE_AAF_SUMMARY) {
+					return 0;
+				}
+			}
 		}
 
 		pos += chunk.cksz + sizeof (chunk);

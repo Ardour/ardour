@@ -21,6 +21,7 @@
 #ifndef __utils_h__
 #define __utils_h__
 
+#include "aaf/AAFTypes.h"
 #include <stdarg.h>
 #include <stdint.h>
 
@@ -35,8 +36,12 @@ extern "C" {
 	 * swprintf() specific string format identifiers
 	 * https://learn.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions?view=msvc-170#type
 	 */
-#define WPRIs L"S"  // char*
+#define WPRIs L"S" // char*
+#ifdef XBUILD_WIN
 #define WPRIws L"s" // wchar_t*
+#else
+#define WPRIws L"ls" // wchar_t*
+#endif
 #else
 #define DIR_SEP '/'
 #define DIR_SEP_STR "/"
@@ -61,6 +66,15 @@ extern "C" {
 #define ANSI_COLOR_DARKGREY(dbg) (((dbg)->ansicolor) ? "\x1b[38;5;242m" : "")
 #define ANSI_COLOR_BOLD(dbg) (((dbg)->ansicolor) ? "\x1b[1m" : "")
 #define ANSI_COLOR_RESET(dbg) (((dbg)->ansicolor) ? "\x1b[0m" : "")
+
+aafPosition_t
+laaf_util_converUnit (aafPosition_t value, aafRational_t* valueEditRate, aafRational_t* destEditRate);
+
+char*
+laaf_util_wstr2str (const wchar_t* wstr);
+
+wchar_t*
+laaf_util_str2wstr (const char* str);
 
 int
 laaf_util_wstr_contains_nonlatin (const wchar_t* str);

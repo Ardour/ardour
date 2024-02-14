@@ -25,13 +25,13 @@
 
 #include "aaf/AAFIface.h"
 
-char*
+wchar_t*
 aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_file_path, const char* search_location);
 
 int
 aafi_extract_audio_essence (AAF_Iface* aafi, aafiAudioEssence* audioEssence, const char* outfilepath, const wchar_t* forcedFileName);
 
 int
-aafi_parse_audio_summary (AAF_Iface* aafi, aafiAudioEssence* audioEssence);
+aafi_parse_audio_essence (AAF_Iface* aafi, aafiAudioEssence* audioEssence);
 
 #endif // !__AAFIAudioFiles_h__

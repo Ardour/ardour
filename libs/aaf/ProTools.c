@@ -177,7 +177,7 @@ replace_clipfade_with_fade (AAF_Iface* aafi, aafiTimelineItem* Item)
 		if (Item->next->type == AAFI_AUDIO_CLIP) {
 			nextClip = (aafiAudioClip*)Item->next->data;
 
-			if (is_sample_accurate_edit (nextClip->Essence->file_name)) {
+			if (is_sample_accurate_edit (nextClip->essencePointerList->essence->file_name)) {
 				if (Item->next->next != NULL) {
 					nextClip = (aafiAudioClip*)Item->next->next->data;
 
@@ -281,7 +281,7 @@ protools_post_processing (AAF_Iface* aafi /*, enum protools_options flags*/)
 
 			aafiAudioClip* audioClip = (aafiAudioClip*)audioItem->data;
 
-			wchar_t* clipName = audioClip->Essence->file_name;
+			wchar_t* clipName = audioClip->essencePointerList->essence->file_name;
 
 			if ((aafi->ctx.options.protools & PROTOOLS_REPLACE_CLIP_FADES) && is_rendered_fade (clipName)) {
 				replace_clipfade_with_fade (aafi, audioItem);

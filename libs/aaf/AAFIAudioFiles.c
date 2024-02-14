@@ -69,7 +69,7 @@ embeddedAudioDataReaderCallback (unsigned char* buf, size_t offset, size_t reqLe
 static size_t
 externalAudioDataReaderCallback (unsigned char* buf, size_t offset, size_t reqLen, void* user1, void* user2, void* user3);
 
-char*
+wchar_t*
 aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_filepath, const char* search_location)
 {
 	/*
@@ -82,10 +82,11 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 	 * uses the / character as the path separator.
 	 */
 
-	char* uri_filepath   = NULL;
-	char* local_filepath = NULL;
-	char* aaf_path       = NULL;
-	char* retpath        = NULL;
+	char*    uri_filepath   = NULL;
+	char*    local_filepath = NULL;
+	char*    aaf_path       = NULL;
+	char*    foundpath      = NULL;
+	wchar_t* retpath        = NULL;
 
 	struct uri* uri = NULL;
 
@@ -94,23 +95,14 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 		goto err;
 	}
 
-	size_t uri_filepath_len = wcslen (original_uri_filepath) + 1;
-
-	uri_filepath = malloc (uri_filepath_len);
+	uri_filepath = laaf_util_wstr2str (original_uri_filepath);
 
 	if (uri_filepath == NULL) {
-		error ("Could not allocate memory : %s", strerror (errno));
+		error ("Could not convert original_uri_filepath from wstr to str : %ls", original_uri_filepath);
 		goto err;
 	}
 
-	int reqlen = snprintf (uri_filepath, uri_filepath_len, "%ls", original_uri_filepath);
-
-	if (reqlen < 0 || (unsigned)reqlen >= uri_filepath_len) {
-		error ("Failed converting wide char URI filepath to byte char%s", (reqlen < 0) ? " : encoding error" : "");
-		goto err;
-	}
-
-	// debug( "Original URI filepath : %s", uri_filepath );
+	// debug( "Original URI : %s", uri_filepath );
 
 	uri = uriParse (uri_filepath, URI_OPT_DECODE_ALL, aafi->dbg);
 
@@ -124,7 +116,7 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 		goto err;
 	}
 
-	// debug( "Decoded URI's filepath : %s", uri->path );
+	// debug( "Decoded URI's path : %s", uri->path );
 
 	/* extract relative path to essence file : "<firstparent>/<essence.file>" */
 
@@ -164,7 +156,7 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 
 		if (access (local_filepath, F_OK) != -1) {
 			// debug( "FOUND: %s", local_filepath );
-			retpath = local_filepath;
+			foundpath = local_filepath;
 			goto found;
 		}
 
@@ -186,7 +178,7 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 
 		if (access (local_filepath, F_OK) != -1) {
 			// debug( "FOUND: %s", local_filepath );
-			retpath = local_filepath;
+			foundpath = local_filepath;
 			goto found;
 		}
 
@@ -198,7 +190,7 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 
 	if (access (uri_filepath, F_OK) != -1) {
 		// debug( "FOUND: %s", uri_filepath );
-		retpath = uri_filepath;
+		foundpath = uri_filepath;
 		goto found;
 	}
 
@@ -206,7 +198,7 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 
 	if (access (uri->path, F_OK) != -1) {
 		// debug( "FOUND: %s", uri->path );
-		retpath = uri->path;
+		foundpath = uri->path;
 		goto found;
 	}
 
@@ -265,7 +257,7 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 
 	if (access (local_filepath, F_OK) != -1) {
 		// debug( "FOUND: %s", filepath );
-		retpath = local_filepath;
+		foundpath = local_filepath;
 		goto found;
 	}
 
@@ -287,7 +279,7 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 
 	if (access (local_filepath, F_OK) != -1) {
 		// debug( "FOUND: %s", filepath );
-		retpath = local_filepath;
+		foundpath = local_filepath;
 		goto found;
 	}
 
@@ -297,7 +289,15 @@ aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_uri_
 	// debug("File not found");
 
 found:
-	retpath = laaf_util_c99strdup (retpath);
+	if (foundpath) {
+		retpath = laaf_util_str2wstr (foundpath);
+
+		if (retpath == NULL) {
+			error ("Could not convert foundpath from str to wstr : %s", foundpath);
+			goto err;
+		}
+	}
+
 	goto end;
 
 err:
@@ -414,7 +414,7 @@ aafi_extract_audio_essence (AAF_Iface* aafi, aafiAudioEssence* audioEssence, con
 		memset (&wavBext, 0x00, sizeof (wavBext));
 		memcpy (wavBext.umid, audioEssence->sourceMobID, sizeof (aafMobID_t));
 		if (audioEssence->mobSlotEditRate) {
-			wavBext.time_reference = eu2sample (audioEssence->samplerate, audioEssence->mobSlotEditRate, audioEssence->timeReference);
+			wavBext.time_reference = laaf_util_converUnit (audioEssence->timeReference, audioEssence->mobSlotEditRate, audioEssence->samplerateRational);
 		}
 
 		if (datasz >= (uint32_t)-1) {
@@ -443,10 +443,10 @@ aafi_extract_audio_essence (AAF_Iface* aafi, aafiAudioEssence* audioEssence, con
 		goto err;
 	}
 
-	reqlen = swprintf (audioEssence->usable_file_path, strlen (filepath) + 1, L"%" WPRIs, filepath);
+	audioEssence->usable_file_path = laaf_util_str2wstr (filepath);
 
-	if (reqlen < 0) {
-		error ("Failed setting usable_file_path");
+	if (audioEssence->usable_file_path == NULL) {
+		error ("Could not convert usable_file_path from str to wstr : %s", filepath);
 		goto err;
 	}
 
@@ -473,94 +473,118 @@ end:
 }
 
 int
-aafi_parse_audio_summary (AAF_Iface* aafi, aafiAudioEssence* audioEssence)
+aafi_parse_audio_essence (AAF_Iface* aafi, aafiAudioEssence* audioEssence)
 {
-	// laaf_util_dump_hex( audioEssence->summary->val, audioEssence->summary->len );
+	// aafi->dbg->_dbg_msg_pos += laaf_util_dump_hex( audioEssence->summary->val, audioEssence->summary->len, &aafi->dbg->_dbg_msg, &aafi->dbg->_dbg_msg_size, aafi->dbg->_dbg_msg_pos );
 
-	int   rc               = 0;
-	char* externalFilePath = NULL;
-	FILE* fp               = NULL;
-
+	int                  rc               = 0;
+	char*                externalFilePath = NULL;
+	FILE*                fp               = NULL;
 	struct RIFFAudioFile RIFFAudioFile;
 
-	if (audioEssence->is_embedded) {
-		if (audioEssence->summary == NULL) {
-			warning ("TODO: Audio essence has no summary. TODO: Should try essence data stream ?");
+	/* try audioEssence->summary first, for both embedded and external */
+
+	if (audioEssence->summary) {
+		rc = riff_parseAudioFile (&RIFFAudioFile, RIFF_PARSE_AAF_SUMMARY, &embeddedAudioDataReaderCallback, audioEssence->summary->val, &audioEssence->summary->len, aafi, aafi->dbg);
+
+		if (rc < 0) {
+			warning ("Could not parse essence summary of %ls", audioEssence->file_name);
+
+			if (audioEssence->is_embedded) {
+				return -1;
+			}
+		} else {
+			audioEssence->channels   = RIFFAudioFile.channels;
+			audioEssence->samplerate = RIFFAudioFile.sampleRate;
+			audioEssence->samplesize = RIFFAudioFile.sampleSize;
+			audioEssence->length     = RIFFAudioFile.sampleCount;
+
+			audioEssence->samplerateRational->numerator   = audioEssence->samplerate;
+			audioEssence->samplerateRational->denominator = 1;
+
+			return 0;
+		}
+	} else if (audioEssence->is_embedded) {
+		if (audioEssence->type != AAFI_ESSENCE_TYPE_PCM) {
+			warning ("TODO: Embedded audio essence has no summary. Should we try essence data stream ?");
+		}
+
+		return -1;
+	} else if (!audioEssence->usable_file_path) {
+		// warning( "Can't parse a missing external essence file" );
+		return -1;
+	}
+
+	if (laaf_util_fop_is_wstr_fileext (audioEssence->usable_file_path, L"wav") ||
+	    laaf_util_fop_is_wstr_fileext (audioEssence->usable_file_path, L"wave") ||
+	    laaf_util_fop_is_wstr_fileext (audioEssence->usable_file_path, L"aif") ||
+	    laaf_util_fop_is_wstr_fileext (audioEssence->usable_file_path, L"aiff") ||
+	    laaf_util_fop_is_wstr_fileext (audioEssence->usable_file_path, L"aifc")) {
+		externalFilePath = laaf_util_wstr2str (audioEssence->usable_file_path);
+
+		if (externalFilePath == NULL) {
+			error ("Could not convert usable_file_path from wstr to str : %ls", audioEssence->usable_file_path);
 			goto err;
 		}
 
-		/*
-		 *	Adobe Premiere Pro, embedded mp3/mp4 files converted to PCM/AIFF on export, AAFClassID_AIFCDescriptor, 'COMM' is valid.
-		 *	______________________________ Hex Dump ______________________________
-		 *
-		 *	46 4f 52 4d 00 00 00 32  41 49 46 43 43 4f 4d 4d  |  FORM...2 AIFCCOMM
-		 *	00 00 00 26 00 01 00 00  00 00 00 10 40 0e bb 80  |  ........ ........
-		 *	00 00 00 00 00 00 4e 4f  4e 45 0e 4e 6f 74 20 43  |  ......NO NE.Not.C
-		 *	6f 6d 70 72 65 73 73 65  64 00                    |  ompresse d.
-		 *	______________________________________________________________________
-		 */
+		fp = fopen (externalFilePath, "rb");
 
-		// laaf_util_dump_hex( audioEssence->summary->val, audioEssence->summary->len );
+		if (fp == NULL) {
+			error ("Could not open external audio essence file for reading : %s", externalFilePath);
+			goto err;
+		}
 
-		rc = riff_parseAudioFile (&RIFFAudioFile, RIFF_PARSE_ONLY_HEADER, &embeddedAudioDataReaderCallback, audioEssence->summary->val, &audioEssence->summary->len, aafi, aafi->dbg);
+		rc = riff_parseAudioFile (&RIFFAudioFile, 0, &externalAudioDataReaderCallback, fp, externalFilePath, aafi, aafi->dbg);
 
 		if (rc < 0) {
-			warning ("TODO: Could not parse embedded essence summary. Should try essence data stream ?");
+			error ("Failed parsing external audio essence file : %s", externalFilePath);
 			goto err;
+		}
+
+		if (audioEssence->channels > 0 && audioEssence->channels != RIFFAudioFile.channels) {
+			warning ("%ls : summary channel count (%i) mismatch located file (%i)", audioEssence->usable_file_path, audioEssence->channels, RIFFAudioFile.channels);
+		}
+
+		if (audioEssence->samplerate > 0 && audioEssence->samplerate != RIFFAudioFile.sampleRate) {
+			warning ("%ls : summary samplerate (%i) mismatch located file (%i)", audioEssence->usable_file_path, audioEssence->samplerate, RIFFAudioFile.sampleRate);
+		}
+
+		if (audioEssence->samplesize > 0 && audioEssence->samplesize != RIFFAudioFile.sampleSize) {
+			warning ("%ls : summary samplesize (%i) mismatch located file (%i)", audioEssence->usable_file_path, audioEssence->samplesize, RIFFAudioFile.sampleSize);
+		}
+
+		if (audioEssence->length > 0 && audioEssence->length != RIFFAudioFile.sampleCount) {
+			warning ("%ls : summary samplecount (%" PRIi64 ") mismatch located file (%" PRIi64 ")", audioEssence->usable_file_path, audioEssence->length, RIFFAudioFile.sampleCount);
 		}
 
 		audioEssence->channels   = RIFFAudioFile.channels;
 		audioEssence->samplerate = RIFFAudioFile.sampleRate;
 		audioEssence->samplesize = RIFFAudioFile.sampleSize;
-		audioEssence->length     = RIFFAudioFile.duration;
+		audioEssence->length     = RIFFAudioFile.sampleCount;
+
+		audioEssence->samplerateRational->numerator   = audioEssence->samplerate;
+		audioEssence->samplerateRational->denominator = 1;
 	} else {
-		/* TODO: can external essence have audioEssence->summary too ? If mp3 (Resolve 18.5.aaf) ? */
+		/*
+		 * should be considered as a non-pcm audio format
+		 *
+│ 04317│├──◻ AAFClassID_TimelineMobSlot [slot:6 track:4] (DataDef : AAFDataDef_Sound) : Audio 4 - Layered Audio Editing
+│ 01943││    └──◻ AAFClassID_Sequence
+│ 02894││         └──◻ AAFClassID_SourceClip
+│ 02899││              └──◻ AAFClassID_MasterMob (UsageCode: n/a) : speech-sample
+│ 04405││                   └──◻ AAFClassID_TimelineMobSlot [slot:1 track:1] (DataDef : AAFDataDef_Sound)
+│ 03104││                        └──◻ AAFClassID_SourceClip
+│ 04140││                             └──◻ AAFClassID_SourceMob (UsageCode: n/a) : speech-sample
+│ 01287││                                  └──◻ AAFClassID_PCMDescriptor
+│ 01477││                                       └──◻ AAFClassID_NetworkLocator : file:///C:/Users/user/Desktop/libAAF/test/res/speech-sample.mp3
+		 *
+		 */
 
-		externalFilePath = aafi_locate_external_essence_file (aafi, audioEssence->original_file_path, aafi->ctx.options.media_location);
+		audioEssence->type = AAFI_ESSENCE_TYPE_UNK;
 
-		if (externalFilePath == NULL) {
-			error ("Could not locate external audio essence file '%ls'", audioEssence->original_file_path);
-			return -1;
-		}
-
-		audioEssence->usable_file_path = malloc ((strlen (externalFilePath) + 1) * sizeof (wchar_t));
-
-		if (audioEssence->usable_file_path == NULL) {
-			error ("Could not allocate memory : %s", strerror (errno));
-			goto err;
-		}
-
-		rc = swprintf (audioEssence->usable_file_path, strlen (externalFilePath) + 1, L"%" WPRIs, externalFilePath);
-
-		if (rc < 0) {
-			error ("Failed setting usable_file_path");
-			goto err;
-		}
-
-		if (laaf_util_fop_is_wstr_fileext (audioEssence->original_file_path, L"wav") ||
-		    laaf_util_fop_is_wstr_fileext (audioEssence->original_file_path, L"wave") ||
-		    laaf_util_fop_is_wstr_fileext (audioEssence->original_file_path, L"aif") ||
-		    laaf_util_fop_is_wstr_fileext (audioEssence->original_file_path, L"aiff") ||
-		    laaf_util_fop_is_wstr_fileext (audioEssence->original_file_path, L"aifc")) {
-			fp = fopen (externalFilePath, "rb");
-
-			if (fp == NULL) {
-				error ("Could not open external audio essence file for reading : %s", externalFilePath);
-				goto err;
-			}
-
-			rc = riff_parseAudioFile (&RIFFAudioFile, RIFF_PARSE_ONLY_HEADER, &externalAudioDataReaderCallback, fp, externalFilePath, aafi, aafi->dbg);
-
-			if (rc < 0) {
-				error ("Failed parsing external audio essence file : %s", externalFilePath);
-				goto err;
-			}
-
-			audioEssence->channels   = RIFFAudioFile.channels;
-			audioEssence->samplerate = RIFFAudioFile.sampleRate;
-			audioEssence->samplesize = RIFFAudioFile.sampleSize;
-			audioEssence->length     = RIFFAudioFile.duration;
-		}
+		// /* clears any wrong data previously retrieved out of AAFClassID_PCMDescriptor */
+		// audioEssence->samplerate = 0;
+		// audioEssence->samplesize = 0;
 	}
 
 	rc = 0;
@@ -586,12 +610,12 @@ embeddedAudioDataReaderCallback (unsigned char* buf, size_t offset, size_t reqLe
 	size_t         datasz = *(size_t*)user2;
 	AAF_Iface*     aafi   = (AAF_Iface*)user3;
 
-	if (offset >= datasz) {
+	if (offset > datasz) {
 		error ("Requested data starts beyond data length");
 		return -1;
 	}
 
-	if (offset + reqLen >= datasz) {
+	if (offset + reqLen > datasz) {
 		reqLen = datasz - (offset + reqLen);
 	}
 

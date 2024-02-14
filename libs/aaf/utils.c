@@ -29,6 +29,81 @@
 
 #define BUILD_PATH_DEFAULT_BUF_SIZE 1024
 
+aafPosition_t
+laaf_util_converUnit (aafPosition_t value, aafRational_t* valueEditRate, aafRational_t* destEditRate)
+{
+	if (!valueEditRate || !destEditRate) {
+		return value;
+	}
+
+	if (valueEditRate->numerator == destEditRate->numerator &&
+	    valueEditRate->denominator == destEditRate->denominator) {
+		/* same rate, no conversion */
+		return value;
+	}
+
+	double valueEditRateFloat = ((valueEditRate->denominator == 0) ? 0.0 : ((float)valueEditRate->numerator / valueEditRate->denominator));
+	double destEditRateFloat  = ((destEditRate->denominator == 0) ? 0.0 : ((float)destEditRate->numerator / destEditRate->denominator));
+
+	if (valueEditRateFloat == 0) {
+		return 0;
+	}
+
+	return value * (destEditRateFloat / valueEditRateFloat);
+}
+
+char*
+laaf_util_wstr2str (const wchar_t* wstr)
+{
+	if (wstr == NULL) {
+		return NULL;
+	}
+
+	size_t strsz = wcslen (wstr) + 1;
+	char*  str   = malloc (strsz);
+
+	if (str == NULL) {
+		// error( "Could not allocate memory : %s", strerror(errno) );
+		return NULL;
+	}
+
+	int rc = snprintf (str, strsz, "%ls", wstr);
+
+	if (rc < 0 || (unsigned)rc >= strsz) {
+		// error( "Failed converting wide char str to byte char str%s", (reqlen < 0) ? " : encoding error" : "" );
+		free (str);
+		return NULL;
+	}
+
+	return str;
+}
+
+wchar_t*
+laaf_util_str2wstr (const char* str)
+{
+	if (str == NULL) {
+		return NULL;
+	}
+
+	size_t   strsz = strlen (str) + 1;
+	wchar_t* wstr  = malloc (strsz * sizeof (wchar_t));
+
+	if (str == NULL) {
+		// error( "Could not allocate memory : %s", strerror(errno) );
+		return NULL;
+	}
+
+	int rc = swprintf (wstr, strsz, L"%" WPRIs, str);
+
+	if (rc < 0 || (unsigned)rc >= strsz) {
+		// error( "Failed converting byte char str to wide char str%s", (reqlen < 0) ? " : encoding error" : "" );
+		free (wstr);
+		return NULL;
+	}
+
+	return wstr;
+}
+
 int
 laaf_util_wstr_contains_nonlatin (const wchar_t* str)
 {

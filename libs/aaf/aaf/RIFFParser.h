@@ -33,6 +33,7 @@
 
 enum RIFF_PARSER_FLAGS {
 	RIFF_PARSE_ONLY_HEADER = (1 << 0),
+	RIFF_PARSE_AAF_SUMMARY = (1 << 1),
 };
 
 struct RIFFAudioFile {
@@ -40,7 +41,7 @@ struct RIFFAudioFile {
 	uint32_t sampleRate;
 	uint16_t sampleSize;
 	uint16_t channels;
-	uint64_t duration; /* total samples for 1 channel (no matter channel count). (duration / sampleRate) = duration in seconds */
+	uint64_t sampleCount; /* total samples for 1 channel (no matter channel count). (sampleCount / sampleRate) = duration in seconds */
 };
 
 PACK (struct riffHeaderChunk {

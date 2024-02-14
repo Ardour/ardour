@@ -880,42 +880,42 @@ parse_Header (AAF_Data* aafd)
 
 	if (ByteOrder == NULL) {
 		warning ("Missing Header::ByteOrder.");
+	} else {
+		aafd->Header.ByteOrder = *ByteOrder;
 	}
-
-	aafd->Header.ByteOrder = *ByteOrder;
 
 	aafTimeStamp_t* LastModified = aaf_get_propertyValue (Header, PID_Header_LastModified, &AAFTypeID_TimeStamp);
 
 	if (LastModified == NULL) {
 		warning ("Missing Header::LastModified.");
+	} else {
+		aafd->Header.LastModified = LastModified;
 	}
-
-	aafd->Header.LastModified = LastModified;
 
 	aafVersionType_t* Version = aaf_get_propertyValue (Header, PID_Header_Version, &AAFTypeID_VersionType);
 
 	if (Version == NULL) {
 		warning ("Missing Header::Version.");
+	} else {
+		aafd->Header.Version = Version;
 	}
-
-	aafd->Header.Version = Version;
 
 	uint32_t* ObjectModelVersion = aaf_get_propertyValue (Header, PID_Header_ObjectModelVersion, &AAFTypeID_UInt32);
 
 	if (ObjectModelVersion == NULL) {
 		warning ("Missing Header::ObjectModelVersion.");
+	} else {
+		aafd->Header.ObjectModelVersion = *ObjectModelVersion;
 	}
-
-	aafd->Header.ObjectModelVersion = *ObjectModelVersion;
 
 	const aafUID_t* OperationalPattern = aaf_get_propertyValue (Header, PID_Header_OperationalPattern, &AAFTypeID_AUID);
 
 	if (OperationalPattern == NULL) {
 		warning ("Missing Header::OperationalPattern.");
-		OperationalPattern = (const aafUID_t*)&AUID_NULL;
+		aafd->Header.OperationalPattern = (const aafUID_t*)&AUID_NULL;
+	} else {
+		aafd->Header.OperationalPattern = OperationalPattern;
 	}
-
-	aafd->Header.OperationalPattern = OperationalPattern;
 
 	return 0;
 }
@@ -934,73 +934,73 @@ parse_Identification (AAF_Data* aafd)
 
 	if (Company == NULL) {
 		warning ("Missing Identification::CompanyName.");
+	} else {
+		aafd->Identification.CompanyName = Company;
 	}
-
-	aafd->Identification.CompanyName = Company;
 
 	wchar_t* ProductName = aaf_get_propertyValue (Identif, PID_Identification_ProductName, &AAFTypeID_String);
 
 	if (ProductName == NULL) {
 		warning ("Missing Identification::ProductName.");
+	} else {
+		aafd->Identification.ProductName = ProductName;
 	}
-
-	aafd->Identification.ProductName = ProductName;
 
 	aafProductVersion_t* ProductVersion = aaf_get_propertyValue (Identif, PID_Identification_ProductVersion, &AAFTypeID_ProductVersion);
 
 	if (ProductVersion == NULL) {
 		warning ("Missing Identification::ProductVersion.");
+	} else {
+		aafd->Identification.ProductVersion = ProductVersion;
 	}
-
-	aafd->Identification.ProductVersion = ProductVersion;
 
 	wchar_t* ProductVersionString = aaf_get_propertyValue (Identif, PID_Identification_ProductVersionString, &AAFTypeID_String);
 
 	if (ProductVersionString == NULL) {
 		warning ("Missing Identification::ProductVersionString.");
+	} else {
+		aafd->Identification.ProductVersionString = ProductVersionString;
 	}
-
-	aafd->Identification.ProductVersionString = ProductVersionString;
 
 	aafUID_t* ProductID = aaf_get_propertyValue (Identif, PID_Identification_ProductID, &AAFTypeID_AUID);
 
 	if (ProductID == NULL) {
 		warning ("Missing Identification::ProductID.");
+	} else {
+		aafd->Identification.ProductID = ProductID;
 	}
-
-	aafd->Identification.ProductID = ProductID;
 
 	aafTimeStamp_t* Date = aaf_get_propertyValue (Identif, PID_Identification_Date, &AAFTypeID_TimeStamp);
 
 	if (Date == NULL) {
 		warning ("Missing Identification::Date.");
+	} else {
+		aafd->Identification.Date = Date;
 	}
-
-	aafd->Identification.Date = Date;
 
 	aafProductVersion_t* ToolkitVersion = aaf_get_propertyValue (Identif, PID_Identification_ToolkitVersion, &AAFTypeID_ProductVersion);
 
 	if (ToolkitVersion == NULL) {
 		warning ("Missing Identification::ToolkitVersion.");
+	} else {
+		aafd->Identification.ToolkitVersion = ToolkitVersion;
 	}
-
-	aafd->Identification.ToolkitVersion = ToolkitVersion;
 
 	wchar_t* Platform = aaf_get_propertyValue (Identif, PID_Identification_Platform, &AAFTypeID_String);
 
 	if (Platform == NULL) {
 		warning ("Missing Identification::Platform.");
+	} else {
+		aafd->Identification.Platform = Platform;
 	}
-
-	aafd->Identification.Platform = Platform;
 
 	aafUID_t* GenerationAUID = aaf_get_propertyValue (Identif, PID_Identification_GenerationAUID, &AAFTypeID_AUID);
 
 	if (GenerationAUID == NULL) {
 		warning ("Missing Identification::GenerationAUID.");
+	} else {
+		aafd->Identification.GenerationAUID = GenerationAUID;
 	}
-
-	aafd->Identification.GenerationAUID = GenerationAUID;
 
 	return 0;
 }

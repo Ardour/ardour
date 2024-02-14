@@ -75,47 +75,37 @@ aafi_alloc (AAF_Data* aafd)
 	aafi->dbg = laaf_new_debug ();
 
 	if (aafi->dbg == NULL) {
-		return NULL;
+		goto err;
 	}
 
 	aafi->Audio = calloc (sizeof (aafiAudio), sizeof (unsigned char));
 
 	if (aafi->Audio == NULL) {
-		return NULL;
+		goto err;
 	}
-
-	aafi->Audio->Essences    = NULL;
-	aafi->Audio->samplerate  = 0;
-	aafi->Audio->samplesize  = 0;
-	aafi->Audio->Tracks      = NULL;
-	aafi->Audio->track_count = 0;
-	aafi->Audio->length      = 0;
 
 	aafi->Video = calloc (sizeof (aafiVideo), sizeof (unsigned char));
 
 	if (aafi->Video == NULL) {
-		return NULL;
+		goto err;
 	}
-
-	aafi->Video->Essences = NULL;
-	aafi->Video->Tracks   = NULL;
-	aafi->Video->length   = 0;
 
 	if (aafd != NULL) {
 		aafi->aafd = aafd;
 	} else {
 		aafi->aafd = aaf_alloc (aafi->dbg);
+
+		if (aafi->aafd == NULL) {
+			goto err;
+		}
 	}
 
-	aafi->Markers = NULL;
-
-	aafi->compositionName = NULL;
-
-	aafi->ctx.is_inside_derivation_chain        = 0;
-	aafi->ctx.options.forbid_nonlatin_filenames = 0;
-	aafi->ctx.options.trace                     = 0;
-
 	return aafi;
+
+err:
+	aafi_release (&aafi);
+
+	return NULL;
 }
 
 void
@@ -174,16 +164,15 @@ aafi_set_option_str (AAF_Iface* aafi, const char* optname, const char* val)
 			aafi->ctx.options.dump_class_aaf_properties = NULL;
 		}
 
-		if (val == NULL)
+		if (val == NULL) {
 			return 0;
+		}
 
-		aafi->ctx.options.dump_class_aaf_properties = malloc ((strlen (val) + 1) * sizeof (wchar_t));
+		aafi->ctx.options.dump_class_aaf_properties = laaf_util_str2wstr (val);
 
 		if (aafi->ctx.options.dump_class_aaf_properties == NULL) {
 			return -1;
 		}
-
-		swprintf (aafi->ctx.options.dump_class_aaf_properties, strlen (val) + 1, L"%" WPRIs, val);
 
 		return 0;
 	} else if (strcmp (optname, "dump_class_raw_properties") == 0) {
@@ -192,16 +181,15 @@ aafi_set_option_str (AAF_Iface* aafi, const char* optname, const char* val)
 			aafi->ctx.options.dump_class_raw_properties = NULL;
 		}
 
-		if (val == NULL)
+		if (val == NULL) {
 			return 0;
+		}
 
-		aafi->ctx.options.dump_class_raw_properties = malloc ((strlen (val) + 1) * sizeof (wchar_t));
+		aafi->ctx.options.dump_class_raw_properties = laaf_util_str2wstr (val);
 
 		if (aafi->ctx.options.dump_class_raw_properties == NULL) {
 			return -1;
 		}
-
-		swprintf (aafi->ctx.options.dump_class_raw_properties, strlen (val) + 1, L"%" WPRIs, val);
 
 		return 0;
 	}
@@ -212,8 +200,9 @@ aafi_set_option_str (AAF_Iface* aafi, const char* optname, const char* val)
 void
 aafi_release (AAF_Iface** aafi)
 {
-	if (*aafi == NULL)
+	if (*aafi == NULL) {
 		return;
+	}
 
 	aaf_release (&(*aafi)->aafd);
 
@@ -541,6 +530,20 @@ aafi_freeAudioClip (aafiAudioClip* audioClip)
 	if (audioClip->automation != NULL) {
 		aafi_freeAudioGain (audioClip->automation);
 	}
+
+	aafi_freeAudioEssencePointer (audioClip->essencePointerList);
+}
+
+void
+aafi_freeAudioEssencePointer (aafiAudioEssencePointer* essencePointer)
+{
+	aafiAudioEssencePointer* next = NULL;
+
+	while (essencePointer) {
+		next = essencePointer->next;
+		free (essencePointer);
+		essencePointer = next;
+	}
 }
 
 void
@@ -649,12 +652,9 @@ aafi_newAudioTrack (AAF_Iface* aafi)
 		return NULL;
 	}
 
-	track->Audio       = aafi->Audio;
-	track->format      = AAFI_TRACK_FORMAT_NOT_SET;
-	track->pan         = NULL;
-	track->gain        = NULL;
-	track->current_pos = 0;
-	track->next        = NULL;
+	track->Audio  = aafi->Audio;
+	track->format = AAFI_TRACK_FORMAT_NOT_SET;
+	track->next   = NULL;
 
 	/* Add to track list */
 
@@ -718,9 +718,8 @@ aafi_newVideoTrack (AAF_Iface* aafi)
 		return NULL;
 	}
 
-	track->Video       = aafi->Video;
-	track->current_pos = 0;
-	track->next        = NULL;
+	track->Video = aafi->Video;
+	track->next  = NULL;
 
 	/* Add to track list */
 
@@ -776,18 +775,50 @@ aafi_newAudioEssence (AAF_Iface* aafi)
 		return NULL;
 	}
 
-	audioEssence->next = aafi->Audio->Essences;
+	audioEssence->samplerateRational = malloc (sizeof (aafRational_t));
 
-	audioEssence->original_file_path = NULL;
-	audioEssence->usable_file_path   = NULL;
-	audioEssence->file_name          = NULL;
-	audioEssence->unique_file_name   = NULL;
-	audioEssence->clip_count         = 0;
-	audioEssence->user               = NULL;
+	if (audioEssence->samplerateRational == NULL) {
+		return NULL;
+	}
+
+	audioEssence->samplerateRational->numerator   = 1;
+	audioEssence->samplerateRational->denominator = 1;
+
+	audioEssence->next = aafi->Audio->Essences;
 
 	aafi->Audio->Essences = audioEssence;
 
 	return audioEssence;
+}
+
+aafiAudioEssencePointer*
+aafi_newAudioEssencePointer (AAF_Iface* aafi, aafiAudioEssencePointer** list, aafiAudioEssence* audioEssence, uint32_t* essenceChannelNum)
+{
+	aafiAudioEssencePointer* essencePointer = calloc (sizeof (aafiAudioEssencePointer), sizeof (char));
+
+	if (essencePointer == NULL) {
+		error ("%s.", strerror (errno));
+		return NULL;
+	}
+
+	essencePointer->aafi           = aafi;
+	essencePointer->essence        = audioEssence;
+	essencePointer->essenceChannel = (essenceChannelNum) ? *essenceChannelNum : 0;
+
+	if (*list) {
+		aafiAudioEssencePointer* last = *list;
+		while (last->next != NULL) {
+			last = last->next;
+		}
+		last->next = essencePointer;
+	} else {
+		*list = essencePointer;
+
+		essencePointer->aafiNext        = aafi->Audio->essencePointerList;
+		aafi->Audio->essencePointerList = essencePointer;
+	}
+
+	return *list;
 }
 
 void
@@ -818,6 +849,10 @@ aafi_freeAudioEssences (aafiAudioEssence** audioEssence)
 			free ((*audioEssence)->unique_file_name);
 		}
 
+		if ((*audioEssence)->samplerateRational != NULL) {
+			free ((*audioEssence)->samplerateRational);
+		}
+
 		free (*audioEssence);
 	}
 
@@ -835,11 +870,6 @@ aafi_newVideoEssence (AAF_Iface* aafi)
 	}
 
 	videoEssence->next = aafi->Video->Essences;
-
-	videoEssence->original_file_path = NULL;
-	videoEssence->usable_file_path   = NULL;
-	videoEssence->file_name          = NULL;
-	videoEssence->unique_file_name   = NULL;
 
 	aafi->Video->Essences = videoEssence;
 
@@ -878,6 +908,35 @@ aafi_freeVideoEssences (aafiVideoEssence** videoEssence)
 	}
 
 	*videoEssence = NULL;
+}
+
+int
+aafi_getAudioEssencePointerChannelCount (aafiAudioEssencePointer* essencePointerList)
+{
+	/*
+	 * If essencePointerList holds a single multichannel essence file and if
+	 * essencePointer->essenceChannel is set, then clip is mono and audio comes
+	 * from essencePointer->essenceChannel of essencePointer->essence file.
+	 *
+	 * If essencePointerList holds a single multichannel essence file and if
+	 * essencePointer->essenceChannel is null, then clip is multichannel and
+	 * clip channel count equals essence->channels.
+	 *
+	 * If essencePointerList holds multiple pointers to multiple essence files,
+	 * then each file should be mono and describe a clip channel. Thus, clip
+	 * channel count equals pointers count.
+	 */
+
+	int                      essencePointerCount = 0;
+	aafiAudioEssencePointer* essencePointer      = NULL;
+
+	AAFI_foreachAudioEssencePointer (essencePointer, essencePointerList)
+	{
+		essencePointerCount++;
+	}
+
+	return (essencePointerCount > 1) ? essencePointerCount : (essencePointerList->essenceChannel) ? 1
+	                                                                                              : essencePointerList->essence->channels;
 }
 
 /**
