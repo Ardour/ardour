@@ -190,13 +190,14 @@ Session::Session (AudioEngine &eng,
                   const string& snapshot_name,
                   BusProfile const * bus_profile,
                   string mix_template,
-                  bool unnamed)
+                  bool unnamed,
+                  samplecnt_t sr)
 	: _playlists (new SessionPlaylists)
 	, _engine (eng)
 	, process_function (&Session::process_with_events)
 	, _bounce_processing_active (false)
 	, waiting_for_sync_offset (false)
-	, _base_sample_rate (0)
+	, _base_sample_rate (sr)
 	, _current_sample_rate (0)
 	, _transport_sample (0)
 	, _session_range_location (0)
