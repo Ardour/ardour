@@ -645,7 +645,7 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	audio_midi_setup->set_position (WIN_POS_CENTER);
 	audio_midi_setup->set_modal ();
 	audio_midi_setup->present ();
-	_engine_dialog_connection = audio_midi_setup->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::audio_midi_setup_for_new_session_done), path, snap_name, session_template, bus_profile, unnamed, domain));
+	_engine_dialog_connection = audio_midi_setup->signal_response().connect (boost::bind (&ARDOUR_UI::audio_midi_setup_for_new_session_done, this, _1, path, snap_name, session_template, bus_profile, unnamed, domain));
 
 	/* not done yet, but we're avoiding modal dialogs */
 	return 0;
@@ -675,14 +675,14 @@ ARDOUR_UI::audio_midi_setup_for_new_session_done (int response, std::string path
 }
 
 int
-ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& snap_name, std::string const& session_template, BusProfile const& bus_profile, bool unnamed, Temporal::TimeDomain domain)
+ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& snap_name, std::string const& session_template, BusProfile const& bus_profile, bool unnamed, Temporal::TimeDomain domain, samplecnt_t samplerate)
 {
 	Session* new_session;
 
 	bool meta_session = !session_template.empty() && session_template.substr (0, 11) == "urn:ardour:";
 
 	try {
-		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL, meta_session ? "" : session_template, unnamed);
+		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL, meta_session ? "" : session_template, unnamed, samplerate);
 	}
 	catch (SessionException const& e) {
 		gchar* escaped_error_txt = 0;
