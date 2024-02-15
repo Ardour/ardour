@@ -29,6 +29,7 @@ namespace PBD {
 	namespace DEBUG {
                 LIBGTKMM2EXT_API extern DebugBits Keyboard;
                 LIBGTKMM2EXT_API extern DebugBits Bindings;
+                LIBGTKMM2EXT_API extern DebugBits Actions;
 	}
 }
 
