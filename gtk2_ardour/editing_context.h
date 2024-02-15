@@ -411,6 +411,7 @@ public:
 	DragManager* _drags;
 
 	ArdourWidgets::ArdourButton snap_mode_button;
+	bool snap_mode_button_clicked (GdkEventButton*);
 
 	virtual void mark_region_boundary_cache_dirty () {}
 	virtual void update_tempo_based_rulers () {};
@@ -535,12 +536,14 @@ public:
 	ArdourWidgets::ArdourButton mouse_draw_button;
 	ArdourWidgets::ArdourButton mouse_content_button;
 
+	Glib::RefPtr<Gtk::ActionGroup> editor_actions;
+	virtual void register_actions() = 0;
+	void register_grid_actions ();
+
 	Glib::RefPtr<Gtk::Action> get_mouse_mode_action (Editing::MouseMode m) const;
 	void register_mouse_mode_actions ();
 	void bind_mouse_mode_buttons ();
 	virtual void add_mouse_mode_actions (Glib::RefPtr<Gtk::ActionGroup>) {}
-
-	ArdourWidgets::ArdourButton* snap_button;
 
 	Gtk::HBox snap_box;
 	Gtk::HBox grid_box;

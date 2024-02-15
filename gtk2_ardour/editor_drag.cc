@@ -2386,14 +2386,12 @@ NoteResizeDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*ignored*/)
 
 	Drag::start_grab (event, cursor);
 
-#warning paul fix me MRV/MV
-#if 0
 	region = &cnote->region_view ();
 
 	double temp;
 	temp        = region->snap_to_pixel (cnote->x0 (), true);
 	_snap_delta = temp - cnote->x0 ();
-#endif
+
 	_item->grab ();
 
 	if (event->motion.state & ArdourKeyboard::note_size_relative_modifier ()) {
@@ -5297,6 +5295,7 @@ RubberbandSelectDrag::do_select_things (GdkEvent* event, bool drag_in_progress)
 void
 RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 {
+	std::cerr << "RBSD::finished (moved ? " << movement_occurred << ")\n";
 	if (movement_occurred) {
 		motion (event, false);
 		do_select_things (event, false);

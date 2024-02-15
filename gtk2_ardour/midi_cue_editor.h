@@ -91,6 +91,8 @@ class MidiCueEditor : public CueEditor
 	XMLNode& get_state () const;
 
   protected:
+	void register_actions ();
+
 	Temporal::timepos_t snap_to_grid (Temporal::timepos_t const & start,
 	                                  Temporal::RoundMode   direction,
 	                                  ARDOUR::SnapPref    gpref) const;

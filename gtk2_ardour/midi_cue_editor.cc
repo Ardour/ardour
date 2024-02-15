@@ -62,8 +62,9 @@ MidiCueEditor::MidiCueEditor()
 {
 	mouse_mode = Editing::MouseContent;
 
-	register_mouse_mode_actions ();
-	bind_mouse_mode_buttons ();
+	bindings = Bindings::get_bindings (editor_name());
+
+	register_actions ();
 
 	build_grid_type_menu ();
 	build_draw_midi_menus();
@@ -85,6 +86,15 @@ MidiCueEditor::MidiCueEditor()
 
 MidiCueEditor::~MidiCueEditor ()
 {
+}
+
+void
+MidiCueEditor::register_actions ()
+{
+	editor_actions = ActionManager::create_action_group (bindings, editor_name());
+	register_mouse_mode_actions ();
+	bind_mouse_mode_buttons ();
+	register_grid_actions ();
 }
 
 ArdourCanvas::GtkCanvasViewport*
