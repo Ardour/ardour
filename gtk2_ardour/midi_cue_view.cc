@@ -59,7 +59,7 @@ MidiCueView::set_height (double h)
 ArdourCanvas::Item*
 MidiCueView::drag_group () const
 {
-	return _note_group->parent();
+	return event_rect;
 }
 
 bool
