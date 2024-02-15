@@ -41,6 +41,7 @@
 #include "pbd/stacktrace.h"
 
 #include "gtkmm2ext/actions.h"
+#include "gtkmm2ext/debug.h"
 #include "gtkmm2ext/utils.h"
 
 #include "pbd/i18n.h"
@@ -391,6 +392,7 @@ ActionManager::register_action (RefPtr<ActionGroup> group, const char* name, con
 	string fullpath;
 
 	RefPtr<Action> act = Action::create (name, label);
+	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
 
 	fullpath = group->get_name();
 	fullpath += '/';
@@ -413,6 +415,7 @@ ActionManager::register_action (RefPtr<ActionGroup> group,
 	string fullpath;
 
 	RefPtr<Action> act = Action::create (name, label);
+	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
 
 	fullpath = group->get_name();
 	fullpath += '/';
@@ -436,6 +439,7 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group,
 	string fullpath;
 
 	RefPtr<Action> act = RadioAction::create (rgroup, name, label);
+	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
 	RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 
 	fullpath = group->get_name();
@@ -461,6 +465,7 @@ ActionManager::register_radio_action (RefPtr<ActionGroup> group,
 	string fullpath;
 
 	RefPtr<Action> act = RadioAction::create (rgroup, name, label);
+	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created radio-action %1 in %2 success: %3\n", name, group->get_name(), (bool) act));
 	RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 	ract->property_value() = value;
 
@@ -489,6 +494,7 @@ ActionManager::register_toggle_action (RefPtr<ActionGroup> group,
 	fullpath += name;
 
 	RefPtr<Action> act = ToggleAction::create (name, label);
+	DEBUG_TRACE (PBD::DEBUG::Actions, string_compose ("created action %1 in %2 success: %2\n", name, group->get_name(), (bool) act));
 
 	if (actions.insert (ActionMap::value_type (fullpath, act)).second) {
 		group->add (act, sl);
