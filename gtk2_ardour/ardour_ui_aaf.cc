@@ -176,12 +176,12 @@ import_sndfile_as_region (Session* s, struct aafiAudioEssence* audioEssence, Src
 static std::shared_ptr<Region>
 create_region (vector<std::shared_ptr<Region>> source_regions, aafiAudioClip* aafAudioClip, SourceList& oneClipSources, aafPosition_t clipOffset, aafRational_t samplerate_r)
 {
-	wstring ws = aafAudioClip->Essence->unique_file_name;
+	wstring ws = aafAudioClip->essencePointerList->essence->unique_file_name; // XXX
 	string  unique_file_name (ws.begin (), ws.end ());
 
-	aafPosition_t clipPos       = convertEditUnit (aafAudioClip->pos, *aafAudioClip->track->edit_rate, samplerate_r);
-	aafPosition_t clipLen       = convertEditUnit (aafAudioClip->len, *aafAudioClip->track->edit_rate, samplerate_r);
-	aafPosition_t essenceOffset = convertEditUnit (aafAudioClip->essence_offset, *aafAudioClip->track->edit_rate, samplerate_r);
+	aafPosition_t clipPos       = laaf_util_converUnit (aafAudioClip->pos, aafAudioClip->track->edit_rate, &samplerate_r);
+	aafPosition_t clipLen       = laaf_util_converUnit (aafAudioClip->len, aafAudioClip->track->edit_rate, &samplerate_r);
+	aafPosition_t essenceOffset = laaf_util_converUnit (aafAudioClip->essence_offset, aafAudioClip->track->edit_rate, &samplerate_r);
 
 	PropertyList proplist;
 
@@ -251,7 +251,7 @@ aaf_fade_interpol_to_ardour_fade_shape (aafiInterpolation_e interpol)
 }
 
 static void
-set_region_fade (aafiAudioClip* aafAudioClip, std::shared_ptr<Region> region, aafRational_t const& samplerate)
+set_region_fade (aafiAudioClip* aafAudioClip, std::shared_ptr<Region> region, aafRational_t* samplerate)
 {
 	if (aafAudioClip == NULL) {
 		return;
@@ -274,14 +274,14 @@ set_region_fade (aafiAudioClip* aafAudioClip, std::shared_ptr<Region> region, aa
 
 	if (fadein != NULL) {
 		fade_shape = aaf_fade_interpol_to_ardour_fade_shape ((aafiInterpolation_e) (fadein->flags & AAFI_INTERPOL_MASK));
-		fade_len   = convertEditUnit (fadein->len, *aafAudioClip->track->edit_rate, samplerate);
+		fade_len   = laaf_util_converUnit (fadein->len, aafAudioClip->track->edit_rate, samplerate);
 
 		std::dynamic_pointer_cast<AudioRegion> (region)->set_fade_in (fade_shape, fade_len);
 	}
 
 	if (fadeout != NULL) {
 		fade_shape = aaf_fade_interpol_to_ardour_fade_shape ((aafiInterpolation_e) (fadeout->flags & AAFI_INTERPOL_MASK));
-		fade_len   = convertEditUnit (fadeout->len, *aafAudioClip->track->edit_rate, samplerate);
+		fade_len   = laaf_util_converUnit (fadeout->len, aafAudioClip->track->edit_rate, samplerate);
 
 		std::dynamic_pointer_cast<AudioRegion> (region)->set_fade_out (fade_shape, fade_len);
 	}
@@ -519,7 +519,7 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 
 	oneClipSources.clear ();
 
-	aafPosition_t sessionStart = convertEditUnit (aafi->compositionStart, aafi->compositionStart_editRate, samplerate_r);
+	aafPosition_t sessionStart = laaf_util_converUnit (aafi->compositionStart, aafi->compositionStart_editRate, &samplerate_r);
 
 	aafiAudioTrack*   aafAudioTrack = NULL;
 	aafiTimelineItem* aafAudioItem  = NULL;
@@ -537,47 +537,54 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 
 			aafAudioClip = (aafiAudioClip*)aafAudioItem->data;
 
-			if (aafAudioClip->Essence == NULL) {
+			if (aafAudioClip->essencePointerList == NULL) {
 				error << _("AAF: Clip has no essence.") << endmsg;
 				continue;
 			}
 
 			/* converts whatever edit_rate clip is in, to samples */
-			aafPosition_t clipPos = convertEditUnit (aafAudioClip->pos, *aafAudioClip->track->edit_rate, samplerate_r);
+			aafPosition_t clipPos = laaf_util_converUnit (aafAudioClip->pos, aafAudioClip->track->edit_rate, &samplerate_r);
 
-			aafiAudioEssence* audioEssence = aafAudioClip->Essence;
+			aafiAudioEssencePointer *audioEssencePtr = aafAudioClip->essencePointerList;
 
-			if (!audioEssence || !audioEssence->user) {
-				error << string_compose (_("AAF: Could not create new region for clip '%1': Missing audio essence"), aafAudioClip->Essence->unique_file_name) << endmsg;
-				continue;
+			while (audioEssencePtr) {
+				struct aafiAudioEssence* audioEssence = audioEssencePtr->essence;
+
+				if (!audioEssence || !audioEssence->user) {
+					error << string_compose (_("AAF: Could not create new region for clip '%1': Missing audio essence"), audioEssence->unique_file_name) << endmsg;
+					continue;
+				}
+
+				SourceList* oneClipSources = static_cast<SourceList*> (audioEssence->user);
+
+				if (oneClipSources->size () == 0) {
+					error << string_compose (_("AAF: Could not create new region for clip '%1': Region has no source"), audioEssence->unique_file_name) << endmsg;
+					continue;
+				}
+
+				std::shared_ptr<Region> region = create_region (source_regions, aafAudioClip, *oneClipSources, sessionStart, samplerate_r);
+
+				if (!region) {
+					error << string_compose (_("AAF: Could not create new region for clip '%2'"), audioEssence->unique_file_name) << endmsg;
+					continue;
+				}
+
+				track->playlist ()->add_region (region, timepos_t (clipPos + sessionStart));
+				set_region_gain (aafAudioClip, region, _session);
+				set_region_fade (aafAudioClip, region, &samplerate_r);
+				if (aafAudioClip->mute) {
+					region->set_muted (true);
+				}
+
+				audioEssencePtr = audioEssencePtr->next;
 			}
 
-			SourceList* oneClipSources = static_cast<SourceList*> (audioEssence->user);
-
-			if (oneClipSources->size () == 0) {
-				error << string_compose (_("AAF: Could not create new region for clip '%1': Region has no source"), aafAudioClip->Essence->unique_file_name) << endmsg;
-				continue;
-			}
-
-			std::shared_ptr<Region> region = create_region (source_regions, aafAudioClip, *oneClipSources, sessionStart, samplerate_r);
-
-			if (!region) {
-				error << string_compose (_("AAF: Could not create new region for clip '%2'"), aafAudioClip->Essence->unique_file_name) << endmsg;
-				continue;
-			}
-
-			track->playlist ()->add_region (region, timepos_t (clipPos + sessionStart));
-			set_region_gain (aafAudioClip, region, _session);
-			set_region_fade (aafAudioClip, region, samplerate_r);
-			if (aafAudioClip->mute) {
-				region->set_muted (true);
-			}
 		}
 	}
 
 	for (aafiMarker* marker = aafi->Markers; marker != NULL; marker = marker->next) {
-		aafPosition_t markerStart = sessionStart + convertEditUnit (marker->start, *marker->edit_rate, samplerate_r);
-		aafPosition_t markerEnd   = sessionStart + convertEditUnit ((marker->start + marker->length), *marker->edit_rate, samplerate_r);
+		aafPosition_t markerStart = sessionStart + laaf_util_converUnit (marker->start, marker->edit_rate, &samplerate_r);
+		aafPosition_t markerEnd   = sessionStart + laaf_util_converUnit ((marker->start + marker->length), marker->edit_rate, &samplerate_r);
 
 		wstring markerName (marker->name);
 
@@ -593,8 +600,12 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 	}
 
 	/* set session range */
-	samplepos_t start = samplepos_t (eu2sample (_session->nominal_sample_rate (), &aafi->compositionStart_editRate, aafi->compositionStart));
-	samplepos_t end   = samplepos_t (eu2sample (_session->nominal_sample_rate (), &aafi->compositionLength_editRate, aafi->compositionLength)) + start;
+	aafRational_t nominal_sample_rate;
+	nominal_sample_rate.numerator   = _session->nominal_sample_rate ();
+	nominal_sample_rate.denominator = 1;
+
+	samplepos_t start = samplepos_t (laaf_util_converUnit (aafi->compositionStart, aafi->compositionStart_editRate, &nominal_sample_rate));
+	samplepos_t end   = samplepos_t (laaf_util_converUnit (aafi->compositionLength, aafi->compositionLength_editRate, &nominal_sample_rate)) + start;
 	_session->maybe_update_session_range (timepos_t (start), timepos_t (end));
 
 	/* set timecode */
