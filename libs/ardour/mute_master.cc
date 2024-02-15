@@ -146,12 +146,15 @@ MuteMaster::set_mute_points (MutePoint mp)
 }
 
 int
-MuteMaster::set_state (const XMLNode& node, int /*version*/)
+MuteMaster::set_state (const XMLNode& node, int version)
 {
 	node.get_property ("mute-point", _mute_point);
 
 	if (!node.get_property ("muted", _muted_by_self)) {
 		_muted_by_self = (_mute_point != MutePoint (0));
+	}
+	if (version < 7003 && Config->get_mute_affects_surround_sends ()) {
+		_muted_by_self |= SurroundSend;
 	}
 
 	return 0;
