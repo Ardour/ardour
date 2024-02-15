@@ -3075,8 +3075,6 @@ ProcessorBox::maybe_add_processor_to_ui_list (std::weak_ptr<Processor> w)
 		if (!std::dynamic_pointer_cast<InternalReturn> (p)) {
 			have_ui = true;
 		}
-	} else if (std::dynamic_pointer_cast<TriggerBox> (p)) {
-		have_ui = true;
 	}
 #ifdef HAVE_BEATBOX
 	else if (std::dynamic_pointer_cast<BeatBox> (p)) {
@@ -3152,7 +3150,6 @@ ProcessorBox::add_processor_to_display (std::weak_ptr<Processor> p)
 
 	std::shared_ptr<Send> send = std::dynamic_pointer_cast<Send> (processor);
 	std::shared_ptr<PortInsert> ext = std::dynamic_pointer_cast<PortInsert> (processor);
-	std::shared_ptr<TriggerBox> tb = std::dynamic_pointer_cast<TriggerBox> (processor);
 #ifdef HAVE_BEATBOX
 	std::shared_ptr<BeatBox> bb = std::dynamic_pointer_cast<BeatBox> (processor);
 #endif
@@ -3162,9 +3159,9 @@ ProcessorBox::add_processor_to_display (std::weak_ptr<Processor> p)
 	//faders and meters are not deletable, copy/paste-able, so they shouldn't be selectable
 
 #ifdef HAVE_BEATBOX
-	if (!send && !plugin_insert && !ext && !stub && !bb && !tb && !sursend) {
+	if (!send && !plugin_insert && !ext && !stub && !bb && !sursend) {
 #else
-	if (!send && !plugin_insert && !ext && !stub && !tb && !sursend) {
+	if (!send && !plugin_insert && !ext && !stub && !sursend) {
 #endif
 		e->set_selectable(false);
 	}
@@ -3953,8 +3950,7 @@ ProcessorBox::processor_can_be_edited (std::shared_ptr<Processor> processor)
 	if (std::dynamic_pointer_cast<Send> (processor) ||
 	    std::dynamic_pointer_cast<Return> (processor) ||
 	    std::dynamic_pointer_cast<PluginInsert> (processor) ||
-	    std::dynamic_pointer_cast<PortInsert> (processor) ||
-	    std::dynamic_pointer_cast<TriggerBox> (processor)
+	    std::dynamic_pointer_cast<PortInsert> (processor)
 #ifdef HAVE_BEATBOX
 	    || std::dynamic_pointer_cast<BeatBox> (processor)
 #endif
@@ -4478,20 +4474,6 @@ ProcessorBox::edit_aux_send (std::shared_ptr<Processor> processor)
 	return true;
 }
 
-bool
-ProcessorBox::edit_triggerbox (std::shared_ptr<Processor> processor)
-{
-	std::shared_ptr<TriggerBox> tb;
-
-	if ((tb = std::dynamic_pointer_cast<TriggerBox> (processor)) == 0) {
-		return false;
-	}
-
-	UIConfiguration::instance().set_show_triggers_inline (!UIConfiguration::instance().get_show_triggers_inline());
-
-	return true;
-}
-
 void
 ProcessorBox::edit_processor (std::shared_ptr<Processor> processor)
 {
@@ -4499,9 +4481,6 @@ ProcessorBox::edit_processor (std::shared_ptr<Processor> processor)
 		return;
 	}
 	if (edit_aux_send (processor)) {
-		return;
-	}
-	if (edit_triggerbox (processor)) {
 		return;
 	}
 	if (!ARDOUR_UI_UTILS::engine_is_running ()) {

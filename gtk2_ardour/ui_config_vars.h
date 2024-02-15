@@ -147,7 +147,6 @@ UI_CONFIG_VARIABLE (bool, rulers_follow_grid, "rulers-follow-grid", false)
 UI_CONFIG_VARIABLE (bool, grid_follows_internal, "grid-follows-internal", false)  //this feature is deprecated, default it FALSE for now; remove it in v6
 UI_CONFIG_VARIABLE (bool, show_region_name, "show-region-name", true)
 UI_CONFIG_VARIABLE (int, time_axis_name_ellipsize_mode, "time-axis-name-ellipsize-mode", 0)
-UI_CONFIG_VARIABLE (bool, show_triggers_inline, "show-triggers-inline", false)
 UI_CONFIG_VARIABLE (bool, one_plugin_window_only, "one-plugin-window-only", false)
 UI_CONFIG_VARIABLE (int, default_lower_midi_note, "default-lower-midi-note", 60)
 UI_CONFIG_VARIABLE (int, default_upper_midi_note, "default-upper-midi-note", 71)
