@@ -197,23 +197,6 @@ Editor::mouse_mode_object_range_toggled()
 	set_mouse_mode (mouse_mode, true); /* updates set-mouse-mode-range */
 }
 
-bool
-Editor::snap_mode_button_clicked (GdkEventButton* ev)
-{
-	if (ev->button != 3) {
-		cycle_snap_mode();
-		return true;
-	}
-
-	RCOptionEditor* rc_option_editor = ARDOUR_UI::instance()->get_rc_option_editor();
-	if (rc_option_editor) {
-		ARDOUR_UI::instance()->show_tabbable (rc_option_editor);
-		rc_option_editor->set_current_page (_("Editor/Snap"));
-	}
-
-	return true;
-}
-
 void
 Editor::mouse_mode_toggled (MouseMode m)
 {

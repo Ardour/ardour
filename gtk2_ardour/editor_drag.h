@@ -615,11 +615,11 @@ public:
 	}
 
 private:
-	MidiRegionView*     region;
-	bool                relative;
-	bool                at_front;
-	bool                _was_selected;
-	double              _snap_delta;
+	MidiView*     region;
+	bool          relative;
+	bool          at_front;
+	bool         _was_selected;
+	double       _snap_delta;
 };
 
 /** Drags to move MIDI notes */

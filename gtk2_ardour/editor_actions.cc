@@ -118,7 +118,7 @@ Editor::register_actions ()
 {
 	RefPtr<Action> act;
 
-	editor_actions = ActionManager::create_action_group (bindings, X_("Editor"));
+	editor_actions = ActionManager::create_action_group (bindings, editor_name());
 	editor_menu_actions = ActionManager::create_action_group (bindings, X_("EditorMenu"));
 
 	/* non-operative menu items for menu bar */
@@ -597,46 +597,7 @@ Editor::register_actions ()
 	ActionManager::register_action (editor_actions, "set-ripple-all", _("All"), sigc::bind (sigc::mem_fun (*this, &Editor::set_ripple_mode), RippleAll));
 	ActionManager::register_action (editor_actions, "set-ripple-interview", S_("Interview"), sigc::bind (sigc::mem_fun (*this, &Editor::set_ripple_mode), RippleInterview));
 
-	ActionManager::register_action (editor_actions, X_("GridChoice"), _("Snap & Grid"));
-
-	RadioAction::Group snap_mode_group;
-	/* deprecated */  ActionManager::register_radio_action (editor_actions, snap_mode_group, X_("snap-off"), _("No Grid"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapOff)));
-	/* deprecated */  ActionManager::register_radio_action (editor_actions, snap_mode_group, X_("snap-normal"), _("Grid"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapNormal)));  //deprecated
-	/* deprecated */  ActionManager::register_radio_action (editor_actions, snap_mode_group, X_("snap-magnetic"), _("Magnetic"), (sigc::bind (sigc::mem_fun(*this, &Editor::snap_mode_chosen), Editing::SnapMagnetic)));
-
-	snap_mode_button.signal_button_press_event().connect (sigc::mem_fun (*this, &Editor::snap_mode_button_clicked), false);
-
-	ActionManager::register_action (editor_actions, X_("cycle-snap-mode"), _("Toggle Snap"), sigc::mem_fun (*this, &Editor::cycle_snap_mode));
-	ActionManager::register_action (editor_actions, X_("next-grid-choice"), _("Next Quantize Grid Choice"), sigc::mem_fun (*this, &Editor::next_grid_choice));
-	ActionManager::register_action (editor_actions, X_("prev-grid-choice"), _("Previous Quantize Grid Choice"), sigc::mem_fun (*this, &Editor::prev_grid_choice));
-
-	Glib::RefPtr<ActionGroup> snap_actions = ActionManager::create_action_group (bindings, X_("Snap"));
-	RadioAction::Group grid_choice_group;
-
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv32)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-twentyeighths"),  grid_type_strings[(int)GridTypeBeatDiv28].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv28)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-twentyfourths"),  grid_type_strings[(int)GridTypeBeatDiv24].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv24)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-twentieths"),     grid_type_strings[(int)GridTypeBeatDiv20].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv20)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-asixteenthbeat"), grid_type_strings[(int)GridTypeBeatDiv16].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv16)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-fourteenths"),    grid_type_strings[(int)GridTypeBeatDiv14].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv14)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-twelfths"),       grid_type_strings[(int)GridTypeBeatDiv12].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv12)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-tenths"),         grid_type_strings[(int)GridTypeBeatDiv10].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv10)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-eighths"),        grid_type_strings[(int)GridTypeBeatDiv8].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv8)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-sevenths"),       grid_type_strings[(int)GridTypeBeatDiv7].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv7)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-sixths"),         grid_type_strings[(int)GridTypeBeatDiv6].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv6)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-fifths"),         grid_type_strings[(int)GridTypeBeatDiv5].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv5)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-quarters"),       grid_type_strings[(int)GridTypeBeatDiv4].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv4)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv3)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeatDiv2)));
-
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-timecode"),       grid_type_strings[(int)GridTypeTimecode].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeTimecode)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-minsec"),         grid_type_strings[(int)GridTypeMinSec].c_str(),    (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeMinSec)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-cdframe"),        grid_type_strings[(int)GridTypeCDFrame].c_str(), (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeCDFrame)));
-
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBeat)));
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeBar)));
-
-	ActionManager::register_radio_action (snap_actions, grid_choice_group, X_("grid-type-none"),           grid_type_strings[(int)GridTypeNone].c_str(),      (sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_chosen), Editing::GridTypeNone)));
+	register_grid_actions ();
 
 	ActionManager::register_toggle_action (editor_actions, X_("show-marker-lines"), _("Show Marker Lines"), sigc::mem_fun (*this, &Editor::toggle_marker_lines));
 
@@ -822,7 +783,7 @@ Editor::trigger_script_by_name (const std::string script_name, const std::string
 void
 Editor::load_bindings ()
 {
-	bindings = Bindings::get_bindings (X_("Editor"));
+	bindings = Bindings::get_bindings (editor_name());
 	global_hpacker.set_data ("ardour-bindings", bindings);
 
 	/* This set of bindings may expand in the future to include things
