@@ -176,6 +176,15 @@ Editor::show_editor_mixer (bool yn)
 #endif
 }
 
+std::shared_ptr<ARDOUR::Route>
+Editor::current_mixer_stripable () const
+{
+	if (current_mixer_strip) {
+		return current_mixer_strip->route ();
+	}
+	return std::shared_ptr<ARDOUR::Route> ();
+}
+
 #ifdef __APPLE__
 void
 Editor::ensure_all_elements_drawn ()

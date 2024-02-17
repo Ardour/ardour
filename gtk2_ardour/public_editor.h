@@ -242,6 +242,8 @@ public:
 	virtual void set_selection (std::list<Selectable*>, Selection::Operation) = 0;
 	virtual void set_selected_midi_region_view (MidiRegionView&) = 0;
 
+	virtual std::shared_ptr<ARDOUR::Route> current_mixer_stripable () const = 0;
+
 	virtual bool extend_selection_to_track (TimeAxisView&) = 0;
 	virtual void play_solo_selection(bool restart) = 0;
 	virtual void play_selection () = 0;

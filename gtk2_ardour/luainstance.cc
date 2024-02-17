@@ -912,6 +912,8 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("get_cut_buffer", &PublicEditor::get_cut_buffer)
 		.addRefFunction ("get_selection_extents", &PublicEditor::get_selection_extents)
 
+		.addFunction ("current_mixer_stripable", &PublicEditor::current_mixer_stripable)
+
 		.addFunction ("set_selection", &PublicEditor::set_selection)
 
 		.addFunction ("play_selection", &PublicEditor::play_selection)
