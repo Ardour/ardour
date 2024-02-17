@@ -88,6 +88,7 @@
 #include "ardour/return.h"
 #include "ardour/revision.h"
 #include "ardour/route_group.h"
+#include "ardour/selection.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
 #include "ardour/session_object.h"
@@ -253,6 +254,7 @@ CLASSKEYS(ARDOUR::AudioEngine);
 CLASSKEYS(ARDOUR::BufferSet);
 CLASSKEYS(ARDOUR::ChanCount);
 CLASSKEYS(ARDOUR::ChanMapping);
+CLASSKEYS(ARDOUR::CoreSelection);
 CLASSKEYS(ARDOUR::DSP::DspShm);
 CLASSKEYS(ARDOUR::DataType);
 CLASSKEYS(ARDOUR::FluidSynth);
@@ -1735,6 +1737,13 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("user_latency", &Latent::user_latency)
 		.addFunction ("unset_user_latency", &Latent::unset_user_latency)
 		.addFunction ("set_user_latency", &Latent::set_user_latency)
+		.endClass ()
+
+		.deriveClass <CoreSelection, PBD::Stateful> ("Route")
+		.addFunction ("first_selected_stripable", &CoreSelection::first_selected_stripable)
+		.addFunction ("select_next_stripable", &CoreSelection::select_next_stripable)
+		.addFunction ("select_prev_stripable", &CoreSelection::select_prev_stripable)
+		.addFunction ("clear_stripables", &CoreSelection::clear_stripables)
 		.endClass ()
 
 		.beginClass <Latent> ("PDC")
@@ -3377,6 +3386,7 @@ LuaBindings::session (lua_State* L)
 		.addFunction ("set_dirty", &Session::set_dirty)
 		.addFunction ("unknown_processors", &Session::unknown_processors)
 		.addFunction ("export_track_state", &Session::export_track_state)
+		.addFunction ("selection", &Session::selection)
 
 		.addFunction<RouteList (Session::*)(uint32_t, PresentationInfo::order_t, const std::string&, const std::string&, PlaylistDisposition)> ("new_route_from_template", &Session::new_route_from_template)
 		// TODO  session_add_audio_track  session_add_midi_track  session_add_mixed_track
