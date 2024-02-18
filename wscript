@@ -859,7 +859,7 @@ def options(opt):
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler FLAGS')
     opt.add_option('--with-backends', type='string', action='store', default='', dest='with_backends',
-                    help='Specify which backend modules are to be included(jack,alsa,dummy,portaudio,coreaudio,pulseaudio)')
+                    help='Specify which backend modules are to be included(jack,alsa,portaudio,coreaudio,pulseaudio)')
     opt.add_option('--backtrace', action='store_true', default=False, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
@@ -1443,7 +1443,7 @@ int main () { __int128 x = 0; return 0; }
         if Options.options.dist_target == 'mingw':
             backends += ['portaudio']
 
-    if opts.build_tests and 'dummy' not in backends:
+    if 'dummy' not in backends:
         backends += ['dummy']
 
     conf.env['BACKENDS'] = backends
