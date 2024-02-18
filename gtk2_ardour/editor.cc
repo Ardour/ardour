@@ -2622,8 +2622,9 @@ Editor::set_state (const XMLNode& node, int version)
 		set_stationary_playhead (yn);
 	}
 
-	if (node.get_property ("show-editor-mixer", yn)) {
-
+	yn = true;
+	node.get_property ("show-editor-mixer", yn);
+	{
 		Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Editor"), X_("show-editor-mixer"));
 		/* do it twice to force the change */
 		tact->set_active (!yn);
