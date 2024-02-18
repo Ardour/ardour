@@ -138,9 +138,20 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 	case MidiChannelPressureAutomation:
 	case MidiNotePressureAutomation:
 		lower  = 0.0;
-		normal = 0.0;
 		upper  = 127.0;
 		print_fmt = "%.0f";
+		switch(parameter.id()) {
+			case 7: // Channel Volume (MSB)
+				normal = 127;
+				break;
+			case 8: // Balance (MSB)
+			case 10: // Pan (MSB)
+				normal = 64;
+				break;
+			default:
+				normal = 0.0;
+				break;
+		}
 		break;
 	case MidiPitchBenderAutomation:
 		lower  = 0.0;
