@@ -37,11 +37,11 @@ def options(opt):
     autowaf.set_options(opt)
 
 def configure(conf):
-    if conf.is_defined('USE_EXTERNAL_LIBS'):
+    if False and conf.is_defined('USE_EXTERNAL_LIBS'):
         autowaf.check_pkg(conf, 'libaaf', uselib_store='LIBAAF', mandatory=True, atleast_version='0.6.0')
 
 def build(bld):
-    if bld.is_defined('USE_EXTERNAL_LIBS'):
+    if False and bld.is_defined('USE_EXTERNAL_LIBS'):
         return
 
     if bld.is_defined ('INTERNAL_SHARED_LIBS'):

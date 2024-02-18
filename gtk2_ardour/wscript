@@ -542,7 +542,7 @@ def build(bld):
         else:
             obj.uselib += ' GTKMM'
 
-        if bld.is_defined('USE_EXTERNAL_LIBS'):
+        if False and bld.is_defined('USE_EXTERNAL_LIBS'):
             obj.uselib += ' LIBAAF'
         else:
             obj.use.extend (['libaaf'])
