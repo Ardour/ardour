@@ -430,6 +430,22 @@ def enoify (major, minor):
             return "\\n\\\"Tracks and Traces\\\"" # 1997
         if minor == 3:
             return "\\n\\\"Music for White Cube\\\"" # 1997
+        if minor == 4:
+            return "\\n\\\"Music for the Marble Palace\\\"" # 1998
+        if minor == 5:
+            return "\\n\\\"I Dormienti\\\"" # 1999
+        if minor == 6:
+            return "\\n\\\"Kite Stories\\\"" # 1999
+        if minor == 7:
+            return "\\n\\\"Sonora Portraits\\\"" # 1999 Compilation
+        if minor == 8:
+            return "\\n\\\"Music for Civic Recovery Centre\\\"" # 2000
+        if minor == 9:
+            return "\\n\\\"Music for Onmyo-Ji\\\"" # 2000 Collaborative
+        if minor == 10:
+            return "\\n\\\"Compact Forest Proposal\\\"" # 2001
+        if minor == 11:
+            return "\\n\\\"Drawn from Life\\\"" # 2001 Collaborative
     return "\\\"\\\""
 
 def options(opt):
