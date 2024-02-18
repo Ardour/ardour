@@ -141,12 +141,32 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		upper  = 127.0;
 		print_fmt = "%.0f";
 		switch(parameter.id()) {
-			case 7: // Channel Volume (MSB)
-				normal = 127;
+			case 0x07: // Channel Volume (MSB)
+				normal = 100.0;
 				break;
-			case 8: // Balance (MSB)
-			case 10: // Pan (MSB)
-				normal = 64;
+			case 0x0B: // expression (MSB)
+			case 0x2B: // expression (LSB)
+				normal = 127.0;
+				break;
+			case 0x08: // Balance (MSB)
+			case 0x0A: // Pan (MSB)
+			case 0x46: // Sound controls 1 ..
+			case 0x47:
+			case 0x48:
+			case 0x49:
+			case 0x4A:
+			case 0x4B:
+			case 0x4C:
+			case 0x4D:
+			case 0x4E:
+			case 0x4F: // .. to 10.
+				normal = 64.0;
+				break;
+			case 0x5B: // Reverb/FX1 depth
+				/* XG standard specifies the default to 40, but fluidsynth uses 0
+				 * https://lists.gnu.org/archive/html/fluid-dev/2009-07/msg00016.html
+				 */
+				normal = 0; // 40.0;
 				break;
 			default:
 				normal = 0.0;
