@@ -475,9 +475,9 @@ SessionDialog::setup_initial_choice_box ()
 
 	FileFilter all_filter;
 	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
-	aaf_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::session_archive_suffix));
-	aaf_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::advanced_authoring_format_suffix));
-	aaf_filter.set_name (_("All supported files"));
+	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::session_archive_suffix));
+	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::advanced_authoring_format_suffix));
+	all_filter.set_name (_("All supported files"));
 	existing_session_chooser.add_filter (all_filter);
 
 	existing_session_chooser.set_filter (session_filter);
