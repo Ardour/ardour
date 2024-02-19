@@ -1192,6 +1192,13 @@ ARDOUR_UI::open_session ()
 	aaf_filter.set_name (_("Advanced Authoring Format (AAF)"));
 	open_session_selector.add_filter (aaf_filter);
 
+	FileFilter all_filter;
+	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
+	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::session_archive_suffix));
+	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::advanced_authoring_format_suffix));
+	all_filter.set_name (_("All supported files"));
+	open_session_selector.add_filter (all_filter);
+
 	open_session_selector.set_filter (session_filter);
 
 	int response = open_session_selector.run();
