@@ -34,6 +34,8 @@
 #include <taglib/taglib.h>
 #include <taglib/xiphcomment.h>
 
+#include <iostream>
+
 /* Convert string to TagLib::String */
 #define TL_STR(string) TagLib::String ((string).c_str(), TagLib::String::UTF8)
 
