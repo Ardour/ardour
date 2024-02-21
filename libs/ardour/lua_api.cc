@@ -353,6 +353,36 @@ ARDOUR::LuaAPI::plugin_automation (lua_State *L)
 	return 3;
 }
 
+bool
+ARDOUR::LuaAPI::set_automation_data (std::shared_ptr<AutomationControl> ac, luabridge::LuaRef tbl, double thin)
+{
+	if (!tbl.isTable () || !ac) {
+		return false;
+	}
+
+	std::shared_ptr<ARDOUR::AutomationList> alist = ac->alist ();
+	ParameterDescriptor const& desc = ac->desc ();
+
+	alist->freeze ();
+	alist->clear ();
+	for (luabridge::Iterator i (tbl); !i.isNil (); ++i) {
+		if (!i.key ().isNumber () || !i.value ().isNumber ()) {
+			continue;
+		}
+		samplecnt_t tme = i.key ().cast<int> ();
+		double      val = i.value ().cast<double> ();
+		val = std::min<double> (desc.upper, std::max<double> (desc.lower, val));
+		alist->fast_simple_add (timepos_t (tme), val);
+	}
+	alist->thaw ();
+	if (thin < 0) {
+		alist->thin (Config->get_automation_thinning_factor ());
+	} else {
+		alist->thin (thin);
+	}
+	return true;
+}
+
 int
 ARDOUR::LuaAPI::desc_scale_points (lua_State *L)
 {
@@ -1085,7 +1115,7 @@ LuaAPI::Rubberband::set_mapping (luabridge::LuaRef tbl)
 		}
 		size_t ss = i.key ().cast<double> ();
 		size_t ds = i.value ().cast<double> ();
-		printf ("ADD %ld %ld\n", ss, ds);
+		//printf ("ADD %ld %ld\n", ss, ds);
 		_mapping[ss] = ds;
 	}
 	return !_mapping.empty ();

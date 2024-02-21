@@ -191,6 +191,14 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	int desc_scale_points (lua_State* p);
 
+	/* Replace all automation data for an AutomationContol from a Lua table
+	 * @param ac an AutomationControl
+	 * @param tbl Lua Table {[sample-time] = value}
+	 * @param thin thinning factor (-1; use default, 0: no thinning)
+	 * @returns true on success
+	 */
+	bool set_automation_data (std::shared_ptr<ARDOUR::AutomationControl> ac, luabridge::LuaRef tbl, double thin = -1);
+
 	/**
 	 * A convenience function for colorspace HSL to RGB conversion.
 	 * All ranges are 0..1
