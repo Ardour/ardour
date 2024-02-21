@@ -287,10 +287,11 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 			continue;
 		}
 
-		timepos_t start, end;
+		timepos_t unused_start, unused_end;
+		samplecnt_t latency = effective_latency ();
 
 		for (uint32_t s = 0; s < ss->bufs ().count ().n_audio () && id < max_object_id; ++s, ++id) {
-			std::shared_ptr<SurroundPannable> const& p (ss->pan_param (s, start, end));
+			std::shared_ptr<SurroundPannable> const& p (ss->pan_param (s, unused_start, unused_end));
 
 			AutoState const as        = p->automation_state ();
 			bool const      automated = (as & Play) || ((as & (Touch | Latch)) && !p->touching ());
@@ -319,19 +320,24 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 					if (nframes < 2) {
 						evaluate (id, p, timepos_t (start_sample), 0);
 					} else {
-						timepos_t start (start_sample);
-						timepos_t end (end_sample - 1);
+						bool found_event = false;
+						timepos_t start (start_sample + latency);
+						timepos_t end (end_sample + latency);
+						timepos_t next = start;
+
 						while (true) {
 							Evoral::ControlEvent next_event (timepos_t (Temporal::AudioTime), 0.0f);
-							if (!p->find_next_event (start, end, next_event)) {
+							if (!p->find_next_event (next, end, next_event)) {
 								break;
 							}
-							samplecnt_t pos = std::min (timepos_t (start_sample).distance (next_event.when).samples (), (samplecnt_t)nframes - 1);
+							samplecnt_t pos = std::min (timepos_t (start).distance (next_event.when).samples (), (samplecnt_t)nframes - 1);
 							evaluate (id, p, next_event.when, pos);
-							start = next_event.when;
+							next = next_event.when;
 						}
-						/* end */
-						evaluate (id, p, end, nframes - 1);
+						/* inform live renderer */
+						if (!found_event && !_exporting) {
+							evaluate (id, p, end, nframes - 1);
+						}
 					}
 				}
 				/* configure near/mid/far - not sample-accurate */
