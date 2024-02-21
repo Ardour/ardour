@@ -402,6 +402,7 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 		snapshot = basename_nosuffix (aaf);
 	}
 
+	snapshot = laaf_util_clean_filename((char *)snapshot.c_str());
 	snapshot = legalize_for_universal_path (snapshot);
 	path     = Glib::build_filename (target_dir, snapshot);
 
