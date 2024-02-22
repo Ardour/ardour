@@ -196,8 +196,6 @@ DragManager::start_grab (GdkEvent* e, Gdk::Cursor* c)
 bool
 DragManager::end_grab (GdkEvent* e)
 {
-	std::cerr << "DM end drag\n";
-
 	_ending = true;
 
 	bool r = false;
@@ -273,10 +271,11 @@ DragManager::have_item (ArdourCanvas::Item* i) const
 	return j != _drags.end ();
 }
 
-Drag::Drag (EditingContext& ec, ArdourCanvas::Item* i, Temporal::TimeDomain td, bool trackview_only, bool hide_snapped_cursor)
+Drag::Drag (EditingContext& ec, ArdourCanvas::Item* i, Temporal::TimeDomain td, ArdourCanvas::Item const * bi, bool hide_snapped_cursor)
 	: editing_context (ec)
 	, _drags (0)
 	, _item (i)
+	, _bounding_item (bi)
 	, _pointer_offset (0)
 	, _video_offset (0)
 	, _preview_video (false)
@@ -284,7 +283,6 @@ Drag::Drag (EditingContext& ec, ArdourCanvas::Item* i, Temporal::TimeDomain td, 
 	, _y_constrained (false)
 	, _was_rolling (false)
 	, _earliest_time_limit (0)
-	, _trackview_only (trackview_only)
 	, _hide_snapped_cursor (hide_snapped_cursor)
 	, _move_threshold_passed (false)
 	, _starting_point_passed (false)
@@ -376,11 +374,9 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_last_pointer_time = _grab_time;
 	_last_pointer_x    = _grab_x;
 
-	if (_trackview_only) {
-		Editor* editor = dynamic_cast<Editor*> (&editing_context);
-		if (editor) {
-			_grab_y = _grab_y - editor->get_trackview_group ()->canvas_origin ().y;
-		}
+
+	if (_bounding_item) {
+		_grab_y = _grab_y - _bounding_item->canvas_origin().y;
 	}
 
 	_last_pointer_y = _grab_y;
@@ -399,7 +395,8 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	}
 
 #if 0
-	if ( UIConfiguration::instance().get_snap_to_region_start() || UIConfiguration::instance().get_snap_to_region_end() || UIConfiguration::instance().get_snap_to_region_sync() ) {
+	Editor* editor = dynamic_cast<Editor*> (&editing_context);
+	if (editor && (UIConfiguration::instance().get_snap_to_region_start() || UIConfiguration::instance().get_snap_to_region_end() || UIConfiguration::instance().get_snap_to_region_sync())) {
 		_editor->build_region_boundary_cache ();
 	}
 #endif
@@ -414,7 +411,6 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 bool
 Drag::end_grab (GdkEvent* event)
 {
-	std::cerr << "end drag\n";
 	editing_context.stop_canvas_autoscroll ();
 
 	_item->ungrab ();
@@ -470,11 +466,11 @@ Drag::current_pointer_x () const
 double
 Drag::current_pointer_y () const
 {
-	if (!_trackview_only) {
+	if (!_bounding_item) {
 		return _drags->current_pointer_y ();
 	}
 
-	return _drags->current_pointer_y () - editing_context.upper_left ().y;
+	return _drags->current_pointer_y () - _bounding_item->canvas_origin().y;
 }
 
 void
@@ -631,8 +627,8 @@ Drag::add_midi_region (MidiTimeAxisView* view, bool commit)
 	return std::shared_ptr<Region> ();
 }
 
-EditorDrag::EditorDrag (Editor& e, ArdourCanvas::Item *i, Temporal::TimeDomain td, bool trackview_only, bool hide_snapped_cursor)
-	: Drag (e, i, td, trackview_only, hide_snapped_cursor)
+EditorDrag::EditorDrag (Editor& e, ArdourCanvas::Item *i, Temporal::TimeDomain td, ArdourCanvas::Item const * bi, bool hide_snapped_cursor)
+	: Drag (e, i, td, bi, hide_snapped_cursor)
 	, _editor (e)
 {
 }
@@ -647,7 +643,7 @@ struct TimeAxisViewStripableSorter {
 };
 
 RegionDrag::RegionDrag (Editor& e, ArdourCanvas::Item* i, RegionView* p, list<RegionView*> const& v, Temporal::TimeDomain td, bool hide_snapped_cursor)
-	: EditorDrag (e, i, td, true, hide_snapped_cursor)
+	: EditorDrag (e, i, td, e.get_trackview_group(), hide_snapped_cursor)
 	, _primary (p)
 	, _ntracks (0)
 {
@@ -2304,7 +2300,7 @@ RegionInsertDrag::aborted (bool)
 }
 
 RegionCreateDrag::RegionCreateDrag (Editor& e, ArdourCanvas::Item* i, TimeAxisView* v)
-	: EditorDrag (e, i, e.time_domain ())
+	: EditorDrag (e, i, e.time_domain (), e.get_trackview_group())
 	, _view (dynamic_cast<MidiTimeAxisView*> (v))
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RegionCreateDrag\n");
@@ -2358,7 +2354,7 @@ RegionCreateDrag::aborted (bool)
 }
 
 NoteResizeDrag::NoteResizeDrag (EditingContext& ec, ArdourCanvas::Item* i)
-	: Drag (ec, i, Temporal::BeatTime)
+	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
 	, region (0)
 	, relative (false)
 	, at_front (true)
@@ -2549,7 +2545,7 @@ AVDraggingView::AVDraggingView (RegionView* v)
 }
 
 VideoTimeLineDrag::VideoTimeLineDrag (Editor& e, ArdourCanvas::Item* i)
-	: EditorDrag (e, i, e.time_domain ())
+	: EditorDrag (e, i, e.time_domain (), e.get_trackview_group())
 {
 	DEBUG_TRACE (DEBUG::Drags, "New VideoTimeLineDrag\n");
 
@@ -3078,7 +3074,7 @@ TrimDrag::setup_pointer_offset ()
 }
 
 MeterMarkerDrag::MeterMarkerDrag (Editor& e, ArdourCanvas::Item* i, bool c)
-	: EditorDrag (e, i, Temporal::BeatTime, true, false)
+	: EditorDrag (e, i, Temporal::BeatTime, e.get_trackview_group(), false)
 	, _marker (reinterpret_cast<MeterMarker*> (_item->get_data ("marker")))
 	, _old_grid_type (e.grid_type ())
 	, _old_snap_mode (e.snap_mode ())
@@ -3201,7 +3197,7 @@ MeterMarkerDrag::aborted (bool moved)
 }
 
 TempoCurveDrag::TempoCurveDrag (Editor& e, ArdourCanvas::Item* i)
-	: EditorDrag (e, i, Temporal::BeatTime)
+	: EditorDrag (e, i, Temporal::BeatTime, e.get_trackview_group())
 {
 }
 
@@ -3279,7 +3275,7 @@ TempoCurveDrag::aborted (bool moved)
 }
 
 TempoMarkerDrag::TempoMarkerDrag (Editor& e, ArdourCanvas::Item* i)
-	: EditorDrag (e, i, Temporal::BeatTime)
+	: EditorDrag (e, i, Temporal::BeatTime, e.get_trackview_group())
 	, _before_state (nullptr)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New TempoMarkerDrag\n");
@@ -3380,7 +3376,7 @@ TempoMarkerDrag::aborted (bool moved)
 /********* */
 
 BBTMarkerDrag::BBTMarkerDrag (Editor& e, ArdourCanvas::Item* i)
-	: EditorDrag (e, i, Temporal::BeatTime)
+	: EditorDrag (e, i, Temporal::BeatTime,  e.get_trackview_group())
 	, _before_state (0)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New BBTMarkerDrag\n");
@@ -3471,7 +3467,7 @@ BBTMarkerDrag::aborted (bool moved)
 /******************************************************************************/
 
 MappingEndDrag::MappingEndDrag (Editor& e, ArdourCanvas::Item* i, Temporal::TempoMap::WritableSharedPtr& wmap, TempoPoint& tp, TempoPoint& ap, XMLNode& before)
-	: EditorDrag (e, i, Temporal::BeatTime)
+	: EditorDrag (e, i, Temporal::BeatTime, e.get_trackview_group())
 	, _tempo (tp)
 	, _after (ap)
 	, _grab_bpm (0)
@@ -3584,7 +3580,7 @@ MappingTwistDrag::MappingTwistDrag (Editor& e, ArdourCanvas::Item* i, Temporal::
                                     TempoPoint& nxt,
                                     XMLNode&    before,
                                     bool        ramped)
-	: EditorDrag (e, i, Temporal::BeatTime)
+	: EditorDrag (e, i, Temporal::BeatTime, e.get_trackview_group())
 	, prev (prv)
 	, focus (fcus)
 	, next (nxt)
@@ -3681,7 +3677,7 @@ MappingTwistDrag::aborted (bool moved)
 /*------------------------------------------------------------------*/
 
 TempoTwistDrag::TempoTwistDrag (Editor& e, ArdourCanvas::Item* i)
-	: EditorDrag (e, i, Temporal::BeatTime)
+	: EditorDrag (e, i, Temporal::BeatTime, e.get_trackview_group())
 	, _tempo (0)
 	, _drag_valid (true)
 	, _before_state (0)
@@ -3776,7 +3772,7 @@ TempoTwistDrag::aborted (bool moved)
 }
 
 TempoEndDrag::TempoEndDrag (Editor& e, ArdourCanvas::Item* i)
-	: EditorDrag (e, i, Temporal::BeatTime)
+	: EditorDrag (e, i, Temporal::BeatTime, e.get_trackview_group())
 	, _tempo (0)
 	, previous_tempo (0)
 	, _before_state (0)
@@ -3893,7 +3889,7 @@ TempoEndDrag::aborted (bool moved)
 }
 
 CursorDrag::CursorDrag (Editor& e, EditorCursor& c, bool s)
-	: EditorDrag (e, &c.track_canvas_item (), e.time_domain (), false)
+	: EditorDrag (e, &c.track_canvas_item (), e.time_domain (), nullptr)
 	, _cursor (c)
 	, _stop (s)
 	, _grab_zoom (0.0)
@@ -4346,7 +4342,7 @@ FadeOutDrag::aborted (bool)
 }
 
 MarkerDrag::MarkerDrag (Editor& e, ArdourCanvas::Item* i)
-	: EditorDrag (e, i, e.time_domain ())
+	: EditorDrag (e, i, e.time_domain (), e.get_trackview_group())
 	, _selection_changed (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New MarkerDrag\n");
@@ -4770,7 +4766,7 @@ MarkerDrag::update_item (Location*)
 }
 
 ControlPointDrag::ControlPointDrag (Editor& e, ArdourCanvas::Item* i)
-	: EditorDrag (e, i, e.time_domain (), true, false)
+	: EditorDrag (e, i, e.time_domain (), e.get_trackview_group(), false)
 	, _fixed_grab_x (0.0)
 	, _fixed_grab_y (0.0)
 	, _cumulative_y_drag (0.0)
@@ -4933,7 +4929,7 @@ ControlPointDrag::active (Editing::MouseMode m)
 }
 
 LineDrag::LineDrag (Editor& e, ArdourCanvas::Item* i)
-	: EditorDrag (e, i, e.time_domain ())
+	: EditorDrag (e, i, e.time_domain (), e.get_trackview_group())
 	, _line (0)
 	, _fixed_grab_x (0.0)
 	, _fixed_grab_y (0.0)
@@ -5079,7 +5075,7 @@ LineDrag::aborted (bool)
 }
 
 FeatureLineDrag::FeatureLineDrag (Editor& e, ArdourCanvas::Item* i)
-	: Drag (e, i, e.time_domain ())
+	: Drag (e, i, e.time_domain (), e.get_trackview_group())
 	, _line (0)
 	, _arv (0)
 	, _region_view_grab_x (0.0)
@@ -5158,7 +5154,7 @@ FeatureLineDrag::aborted (bool)
 }
 
 RubberbandSelectDrag::RubberbandSelectDrag (EditingContext& ec, ArdourCanvas::Item* i)
-	: Drag (ec, i, ec.time_domain ())
+	: Drag (ec, i, ec.time_domain (), ec.get_trackview_group())
 	, _vertical_only (false)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New RubberbandSelectDrag\n");
@@ -5295,7 +5291,6 @@ RubberbandSelectDrag::do_select_things (GdkEvent* event, bool drag_in_progress)
 void
 RubberbandSelectDrag::finished (GdkEvent* event, bool movement_occurred)
 {
-	std::cerr << "RBSD::finished (moved ? " << movement_occurred << ")\n";
 	if (movement_occurred) {
 		motion (event, false);
 		do_select_things (event, false);
@@ -5470,7 +5465,7 @@ TimeFXDrag::aborted (bool)
 }
 
 SelectionDrag::SelectionDrag (Editor& e, ArdourCanvas::Item* i, Operation o)
-	: EditorDrag (e, i, e.time_domain ())
+	: EditorDrag (e, i, e.time_domain (), e.get_trackview_group())
 	, _operation (o)
 	, _add (false)
 	, _time_selection_at_start (!editing_context.get_selection ().time.empty ())
@@ -5856,7 +5851,7 @@ SelectionDrag::aborted (bool)
 }
 
 SelectionMarkerDrag::SelectionMarkerDrag (Editor& e, ArdourCanvas::Item* i)
-	: EditorDrag (e, i, e.time_domain (), false, false)
+	: EditorDrag (e, i, e.time_domain (), nullptr, false)
 	, _edit_start (true)
 {
 	DEBUG_TRACE (DEBUG::Drags, "New SelectionMarkerDrag\n");
@@ -5918,7 +5913,7 @@ SelectionMarkerDrag::aborted (bool movement_occurred)
 }
 
 RangeMarkerBarDrag::RangeMarkerBarDrag (Editor& e, ArdourCanvas::Item* i, Operation o)
-	: EditorDrag (e, i, e.time_domain (), false)
+	: EditorDrag (e, i, e.time_domain (), nullptr)
 	, _operation (o)
 	, _copy (false)
 {
@@ -6150,7 +6145,7 @@ RangeMarkerBarDrag::update_item (Location* location)
 }
 
 NoteDrag::NoteDrag (EditingContext& ec, ArdourCanvas::Item* i)
-	: Drag (ec, i, Temporal::BeatTime, true, false)
+	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group(), false)
 	, _cumulative_dy (0)
 	, _was_selected (false)
 	, _copy (false)
@@ -6318,8 +6313,6 @@ NoteDrag::motion (GdkEvent* event, bool first_move)
 void
 NoteDrag::finished (GdkEvent* ev, bool moved)
 {
-	std::cerr << "ND::f (" << moved << ")\n";
-
 	if (!moved) {
 		/* no motion - select note */
 
@@ -6360,7 +6353,6 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			}
 		}
 	} else {
-		std::cerr << "drop it\n";
 		_region->note_dropped (_primary, total_dx (ev), total_dy (), _copy);
 	}
 }
@@ -6373,7 +6365,7 @@ NoteDrag::aborted (bool)
 
 /** Make an AutomationRangeDrag for lines in an AutomationTimeAxisView */
 AutomationRangeDrag::AutomationRangeDrag (EditingContext& ec, AutomationTimeAxisView* atv, float initial_value, list<TimelineRange> const& r)
-	: Drag (ec, &atv->base_item (), ec.time_domain ())
+	: Drag (ec, &atv->base_item (), ec.time_domain (), ec.get_trackview_group())
 	, _ranges (r)
 	, _y_origin (atv->y_position ())
 	, _y_height (atv->effective_height ()) // or atv->lines()->front()->height() ?!
@@ -6386,7 +6378,7 @@ AutomationRangeDrag::AutomationRangeDrag (EditingContext& ec, AutomationTimeAxis
 
 /** Make an AutomationRangeDrag for region gain lines or MIDI controller regions */
 AutomationRangeDrag::AutomationRangeDrag (EditingContext& ec, list<RegionView*> const& v, list<TimelineRange> const& r, double y_origin, double y_height)
-	: Drag (ec, v.front ()->get_canvas_group (), ec.time_domain ())
+	: Drag (ec, v.front ()->get_canvas_group (), ec.time_domain (), ec.get_trackview_group())
 	, _ranges (r)
 	, _y_origin (y_origin)
 	, _y_height (y_height)
@@ -6682,7 +6674,7 @@ DraggingView::DraggingView (RegionView* v, RegionDrag* parent, TimeAxisView* ita
 }
 
 PatchChangeDrag::PatchChangeDrag (EditingContext& ec, PatchChange* i, MidiView* r)
-	: Drag (ec, i->canvas_item (), Temporal::BeatTime, true, false)
+	: Drag (ec, i->canvas_item (), Temporal::BeatTime, ec.get_trackview_group(), false)
 	, _region_view (r)
 	, _patch_change (i)
 	, _cumulative_dx (0)
@@ -6822,7 +6814,7 @@ EditorRubberbandSelectDrag::deselect_things ()
 }
 
 NoteCreateDrag::NoteCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv)
-	: Drag (ec, i, Temporal::BeatTime)
+	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
 	, _midi_view (mv)
 	, _drag_rect (0)
 {
@@ -6926,7 +6918,7 @@ NoteCreateDrag::aborted (bool)
 }
 
 HitCreateDrag::HitCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv)
-	: Drag (ec, i, Temporal::BeatTime)
+	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
 	, _midi_view (mv)
 	, _last_pos (Temporal::Beats ())
 	, _y (0.0)
@@ -6976,7 +6968,7 @@ HitCreateDrag::y_to_region (double y) const
 }
 
 CrossfadeEdgeDrag::CrossfadeEdgeDrag (Editor& e, AudioRegionView* rv, ArdourCanvas::Item* i, bool start_yn)
-	: Drag (e, i, Temporal::AudioTime)
+	: Drag (e, i, Temporal::AudioTime, e.get_trackview_group())
 	, arv (rv)
 	, start (start_yn)
 {
@@ -7073,7 +7065,7 @@ CrossfadeEdgeDrag::aborted (bool)
 }
 
 RegionCutDrag::RegionCutDrag (Editor& e, ArdourCanvas::Item* item, samplepos_t pos)
-	: EditorDrag (e, item, e.time_domain (), true)
+	: EditorDrag (e, item, e.time_domain (), e.get_trackview_group())
 {
 }
 
@@ -7115,8 +7107,8 @@ RegionCutDrag::aborted (bool)
 {
 }
 
-RegionMarkerDrag::RegionMarkerDrag (Editor& ed, RegionView* r, ArdourCanvas::Item* i)
-	: Drag (ed, i, r->region ()->position ().time_domain ())
+RegionMarkerDrag::RegionMarkerDrag (Editor& e, RegionView* r, ArdourCanvas::Item* i)
+	: Drag (e, i, r->region ()->position ().time_domain (), e.get_trackview_group())
 	, rv (r)
 	, view (static_cast<ArdourMarker*> (i->get_data ("marker")))
 	, model (rv->find_model_cue_marker (view))
@@ -7203,7 +7195,7 @@ RegionMarkerDrag::setup_pointer_offset ()
 }
 
 LollipopDrag::LollipopDrag (EditingContext& ec, ArdourCanvas::Item* l)
-	: Drag (ec, l, Temporal::BeatTime)
+	: Drag (ec, l, Temporal::BeatTime, ec.get_trackview_group())
 	, _primary (dynamic_cast<ArdourCanvas::Lollipop*> (l))
 {
 	DEBUG_TRACE (DEBUG::Drags, "New LollipopDrag\n");
@@ -7269,7 +7261,7 @@ LollipopDrag::setup_pointer_offset ()
 
 template<typename OrderedPointList, typename OrderedPoint>
 FreehandLineDrag<OrderedPointList,OrderedPoint>::FreehandLineDrag (EditingContext& ec, ArdourCanvas::Item* p, ArdourCanvas::Rectangle& r, Temporal::TimeDomain time_domain)
-	: Drag (ec, &r, time_domain)
+	: Drag (ec, &r, time_domain, ec.get_trackview_group())
 	, parent (p)
 	, base_rect (r)
 	, dragging_line (nullptr)

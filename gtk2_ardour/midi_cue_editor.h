@@ -52,6 +52,7 @@ class MidiCueEditor : public CueEditor
 	MidiCueEditor ();
 	~MidiCueEditor ();
 
+	ArdourCanvas::Container* get_trackview_group () const { return no_scroll_group; }
 	ArdourCanvas::Container* get_noscroll_group() const { return no_scroll_group; }
 	Gtk::Widget& viewport();
 	Gtk::Widget& toolbox ();

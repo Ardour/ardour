@@ -329,6 +329,7 @@ public:
 
 	ArdourCanvas::Rectangle* rubberband_rect;
 
+	virtual ArdourCanvas::Container* get_trackview_group () const = 0;
 	virtual ArdourCanvas::Container* get_noscroll_group() const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_hscroll_group () const = 0;
 	virtual ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const = 0;
