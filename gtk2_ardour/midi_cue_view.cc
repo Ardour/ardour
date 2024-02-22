@@ -41,6 +41,11 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 {
 	CANVAS_DEBUG_NAME (_note_group, X_("note group for MIDI cue"));
 
+	/* Containers don't get canvas events, so we need an invisible rect
+	 * that will. It will be resized as needed sothat it always covers the
+	 * entire canvas/view.
+	 */
+
 	event_rect = new ArdourCanvas::Rectangle (&parent);
 	event_rect->set (ArdourCanvas::Rect (0.0, 0.0, ArdourCanvas::COORD_MAX, 10.));
 	event_rect->Event.connect (sigc::mem_fun (*this, &MidiCueView::canvas_event));
