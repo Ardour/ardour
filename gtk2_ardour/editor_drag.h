@@ -153,11 +153,15 @@ private:
 class Drag
 {
 public:
-	Drag (EditingContext&, ArdourCanvas::Item *, Temporal::TimeDomain td, bool trackview_only = true, bool hide_snapped_cursor = true);
+	Drag (EditingContext&, ArdourCanvas::Item *, Temporal::TimeDomain td, ArdourCanvas::Item const * bounding_item, bool hide_snapped_cursor = true);
 	virtual ~Drag ();
 
 	void set_manager (DragManager* m) {
 		_drags = m;
+	}
+
+	void set_bounding_item (ArdourCanvas::Item const * i) {
+		_bounding_item = i;
 	}
 
 	/** @return the canvas item being dragged */
@@ -318,6 +322,7 @@ protected:
 	EditingContext& editing_context;
 	DragManager* _drags;
 	ArdourCanvas::Item* _item; ///< our item
+	ArdourCanvas::Item const * _bounding_item; ///< our coordinate reference (normally null)
 	/** Offset from the mouse's position for the drag to the start of the thing that is being dragged */
 	Temporal::timecnt_t _pointer_offset;
 	Temporal::timecnt_t _video_offset;
@@ -335,7 +340,7 @@ private:
 	bool _initially_vertical; ///< true if after move threshold is passed we appear to be moving vertically; undefined before that
 	bool _was_double_click; ///< true if drag initiated by a double click event
 	double _grab_x; ///< trackview x of the grab start position
-	double _grab_y; ///< y of the grab start position, possibly adjusted if _trackview_only is true
+	double _grab_y; ///< y of the grab start position, possibly adjusted if _bounding_itme is non-null
 	double _last_pointer_x; ///< trackview x of the pointer last time a motion occurred
 	double _last_pointer_y; ///< trackview y of the pointer last time a motion occurred
 	Temporal::timepos_t _raw_grab_time; ///< unsnapped time that the mouse was at when start_grab was called, or 0
@@ -362,7 +367,7 @@ private:
 class EditorDrag : public Drag
 {
   public:
-	EditorDrag (Editor&, ArdourCanvas::Item *, Temporal::TimeDomain td, bool trackview_only = true, bool hide_snapped_cursor = true);
+	EditorDrag (Editor&, ArdourCanvas::Item *, Temporal::TimeDomain td, ArdourCanvas::Item const * bounding_item, bool hide_snapped_cursor = true);
   protected:
 	Editor& _editor;
 };

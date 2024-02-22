@@ -568,7 +568,6 @@ private:
 	void set_samples_per_pixel (samplecnt_t);
 	void on_samples_per_pixel_changed ();
 
-	Editing::MouseMode mouse_mode;
 	Editing::MouseMode effective_mouse_mode () const;
 
 	Editing::MarkerClickBehavior marker_click_behavior;

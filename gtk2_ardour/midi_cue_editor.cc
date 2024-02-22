@@ -226,7 +226,7 @@ MidiCueEditor::build_canvas ()
 	CANVAS_DEBUG_NAME (time_line_group, "cue  time line group");
 
 	// used as rubberband rect
-	rubberband_rect = new ArdourCanvas::Rectangle (hv_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
+	rubberband_rect = new ArdourCanvas::Rectangle (no_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
 	rubberband_rect->hide();
 	rubberband_rect->set_outline_color (UIConfiguration::instance().color ("rubber band rect"));
 	rubberband_rect->set_fill_color (UIConfiguration::instance().color_mod ("rubber band rect", "selection rect"));
