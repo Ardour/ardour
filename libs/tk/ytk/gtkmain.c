@@ -689,21 +689,6 @@ do_pre_parse_initialization (int    *argc,
       env_string = NULL;
     }
 #endif	/* G_ENABLE_DEBUG */
-
-  env_string = g_getenv ("GTK2_MODULES");
-  if (env_string)
-    gtk_modules_string = g_string_new (env_string);
-
-  env_string = g_getenv ("GTK_MODULES");
-  if (env_string)
-    {
-      if (gtk_modules_string)
-        g_string_append_c (gtk_modules_string, G_SEARCHPATH_SEPARATOR);
-      else
-        gtk_modules_string = g_string_new (NULL);
-
-      g_string_append (gtk_modules_string, env_string);
-    }
 }
 
 static void
