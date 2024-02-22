@@ -225,13 +225,6 @@ MidiCueEditor::build_canvas ()
 	time_line_group = new ArdourCanvas::Container (h_scroll_group);
 	CANVAS_DEBUG_NAME (time_line_group, "cue  time line group");
 
-	// used as rubberband rect
-	rubberband_rect = new ArdourCanvas::Rectangle (no_scroll_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
-	rubberband_rect->hide();
-	rubberband_rect->set_outline_color (UIConfiguration::instance().color ("rubber band rect"));
-	rubberband_rect->set_fill_color (UIConfiguration::instance().color_mod ("rubber band rect", "selection rect"));
-	CANVAS_DEBUG_NAME (rubberband_rect, X_("cue rubberband rect"));
-
 	meter_bar = new ArdourCanvas::Rectangle (time_line_group, ArdourCanvas::Rect (0., 0, ArdourCanvas::COORD_MAX, timebar_height));
 	CANVAS_DEBUG_NAME (meter_bar, "Meter Bar");
 	meter_bar->set_fill(true);
@@ -266,6 +259,13 @@ MidiCueEditor::build_canvas ()
 
 	bg = new CueMidiBackground (data_group);
 	_canvas_viewport->signal_size_allocate().connect (sigc::mem_fun(*this, &MidiCueEditor::canvas_allocate));
+
+	// used as rubberband rect
+	rubberband_rect = new ArdourCanvas::Rectangle (data_group, ArdourCanvas::Rect (0.0, 0.0, 0.0, 0.0));
+	rubberband_rect->hide();
+	rubberband_rect->set_outline_color (UIConfiguration::instance().color ("rubber band rect"));
+	rubberband_rect->set_fill_color (UIConfiguration::instance().color_mod ("rubber band rect", "selection rect"));
+	CANVAS_DEBUG_NAME (rubberband_rect, X_("cue rubberband rect"));
 
 	prh = new ArdourCanvas::PianoRollHeader (v_scroll_group, *bg);
 

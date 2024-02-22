@@ -518,16 +518,22 @@ MidiView::motion (GdkEventMotion* ev)
 			MouseMode m = _editing_context.current_mouse_mode();
 
 			if (m == MouseContent && !Keyboard::modifier_state_contains (ev->state, Keyboard::insert_note_modifier())) {
-				_editing_context.drags()->set (new MidiRubberbandSelectDrag (_editing_context, this), (GdkEvent *) ev);
+				MidiRubberbandSelectDrag* mrbsd = new MidiRubberbandSelectDrag (_editing_context, this);
+				mrbsd->set_bounding_item (_editing_context.get_trackview_group());
+				_editing_context.drags()->set (mrbsd, (GdkEvent *) ev);
+
 				if (!Keyboard::modifier_state_equals (ev->state, Keyboard::TertiaryModifier)) {
 					clear_selection_internal ();
 					_mouse_changed_selection = true;
 				}
 				_mouse_state = SelectRectDragging;
 				return true;
+
 			} else if (m == MouseRange) {
+
 				_editing_context.drags()->set (new MidiVerticalSelectDrag (_editing_context, this), (GdkEvent *) ev);
 				_mouse_state = SelectVerticalDragging;
+
 				return true;
 			}
 		}
