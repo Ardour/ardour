@@ -111,6 +111,13 @@ public:
 		uint32_t surr_Settings;
 		uint32_t surr_BinauralRenderMode;
 		uint32_t surr_ChannelCount;
+		uint32_t surr_ChannelDescription;
+		uint32_t surr_ChannelTypes;
+		uint32_t surr_ChannelBedIds;
+		uint32_t surr_ProgramData;
+		uint32_t surr_ContentFFOA;
+		uint32_t surr_ContentStart;
+		uint32_t surr_ContentFPS;
 		uint32_t surr_DownmixMode;
 		uint32_t surr_OutputFormat;
 		uint32_t surr_WarpMode;

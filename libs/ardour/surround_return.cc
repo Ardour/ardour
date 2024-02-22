@@ -78,6 +78,8 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 	, _exporting (false)
 	, _export_start (0)
 	, _export_end (0)
+	, _rolling (false)
+	, _with_bed (false)
 {
 #if !(defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0))
 	throw failed_constructor ();
@@ -259,6 +261,39 @@ SurroundReturn::flush ()
 }
 
 void
+SurroundReturn::set_bed_mix (bool on, int32_t chan_types[10], int32_t bed_ids[10], double ffoa) {
+	_with_bed = on;
+
+	if (!_with_bed) {
+		return;
+	}
+
+	URIMap::URIDs const& urids = URIMap::instance ().urids;
+	LV2_Atom_Forge_Frame frame;
+	lv2_atom_forge_set_buffer (&_forge, _atom_buf, sizeof (_atom_buf));
+	lv2_atom_forge_frame_time (&_forge, 0);
+	LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object (&_forge, &frame, 1, urids.surr_ChannelDescription);
+	lv2_atom_forge_key (&_forge, urids.surr_ChannelTypes);
+	lv2_atom_forge_vector(&_forge, sizeof(int32_t), urids.atom_Int, 10, chan_types);
+	lv2_atom_forge_key (&_forge, urids.surr_ChannelBedIds);
+	lv2_atom_forge_vector(&_forge, sizeof(int32_t), urids.atom_Int, 10, bed_ids);
+	lv2_atom_forge_pop (&_forge, &frame);
+	_surround_processor->write_from_ui (0, urids.atom_eventTransfer, lv2_atom_total_size (msg), (const uint8_t*)msg);
+
+	lv2_atom_forge_set_buffer (&_forge, _atom_buf, sizeof (_atom_buf));
+	lv2_atom_forge_frame_time (&_forge, 0);
+	msg = (LV2_Atom*)lv2_atom_forge_object (&_forge, &frame, 1, urids.surr_ProgramData);
+	lv2_atom_forge_key (&_forge, urids.surr_ContentFFOA);
+	lv2_atom_forge_float (&_forge, ffoa);
+	lv2_atom_forge_key (&_forge, urids.surr_ContentStart);
+	lv2_atom_forge_float (&_forge, 0); // TODO
+	lv2_atom_forge_key (&_forge, urids.surr_ContentFPS);
+	lv2_atom_forge_int (&_forge, 0); // TODO
+	lv2_atom_forge_pop (&_forge, &frame);
+	_surround_processor->write_from_ui (0, urids.atom_eventTransfer, lv2_atom_total_size (msg), (const uint8_t*)msg);
+}
+
+void
 SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes, bool)
 {
 	if (!check_active ()) {
@@ -270,13 +305,15 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 		_surround_processor->flush ();
 	}
 
+	bool with_bed = _with_bed;
+
 	bufs.set_count (_configured_output);
 	_surround_bufs.silence (nframes, 0);
 
 	RouteList rl = *_session.get_routes (); // XXX this allocates memory
 	rl.sort (Stripable::Sorter (true));
 
-	size_t id = 10; // First 10 IDs are reseved for bed mixes
+	size_t id = with_bed ? 0 : 10; // First 10 IDs are reseved for bed mixes
 
 	for (auto const& r : rl) {
 		std::shared_ptr<SurroundSend> ss;
@@ -340,6 +377,12 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 						}
 					}
 				}
+			} else {
+				/* bed mix */
+				dst_ab.merge_from (src_ab, nframes);
+			}
+
+			if (id > 9 || with_bed) {
 				/* configure near/mid/far - not sample-accurate */
 				int const brm = p->binaural_render_mode->get_value ();
 				if (brm != _current_render_mode[id]) {
@@ -349,11 +392,8 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 					forge_int_msg (urids.surr_Settings, urids.surr_Channel, id, urids.surr_BinauralRenderMode, brm);
 #endif
 				}
-
-			} else {
-				/* bed mix */
-				dst_ab.merge_from (src_ab, nframes);
 			}
+
 		}
 
 		if (id >= max_object_id) {
@@ -398,11 +438,12 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 #if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
 		/* trigger export */
 		//std::cout << "SURR START EXPORT " << start_sample << " <= " << _export_start << " < " << end_sample << "\n";
+
 		URIMap::URIDs const& urids = URIMap::instance ().urids;
 		forge_int_msg (urids.surr_ExportStart, urids.time_frame, meter_offset);
 
 		/* Re-transmit pan pos - using export-start */
-		size_t id = 10; // First 10 IDs are reseved for bed mixes
+		size_t id = with_bed ? 0 : 10; // First 10 IDs are reseved for bed mixes
 		for (auto const& r : rl) {
 			std::shared_ptr<SurroundSend> ss;
 			if (!r->active ()) {
