@@ -444,6 +444,9 @@ int main() { return 0; }''',
     if opt.gprofile:
         debug_flags = [ flags_dict['gprofile'] ]
 
+    if opt.gdebug:
+        debug_flags.append('-DG_ENABLE_DEBUG')
+
     # OSX
     if platform == 'darwin':
         if re.search ("^13[.]", version) is not None:
@@ -885,6 +888,8 @@ def options(opt):
                     help='Build a version suitable for distribution as a zero-cost binary')
     opt.add_option('--profile', action='store_true', default=False, dest='profile',
                     help='Compile for use with profiling tools requiring a frame pointer')
+    opt.add_option('--gtk-debug', action='store_true', default=False, dest='gdebug',
+                    help='Enable g/ytk debug mode (G_ENABLE_DEBUG)')
     opt.add_option('--gprofile', action='store_true', default=False, dest='gprofile',
                     help='Compile for use with gprofile')
     opt.add_option('--libjack', type='string', default="auto", dest='libjack_link',
