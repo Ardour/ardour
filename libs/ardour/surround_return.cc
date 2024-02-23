@@ -74,7 +74,7 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 	, _au_samples_processed (0)
 #endif
 	, _have_au_renderer (false)
-	, _current_n_objects (max_object_id)
+	, _current_n_channels (max_object_id)
 	, _current_output_format (OUTPUT_FORMAT_7_1_4)
 	, _in_map (ChanCount (DataType::AUDIO, 128))
 	, _out_map (ChanCount (DataType::AUDIO, 14 + 6 /* Loudness Meter */))
@@ -109,6 +109,7 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 
 	for (size_t i = 0; i < max_object_id; ++i) {
 		_current_render_mode[i] = -1;
+		_channel_id_map[i] = i;
 		for (size_t p = 0; p < num_pan_parameters; ++p) {
 			_current_value[i][p] = -1111; /* some invalid data that forces an update */
 		}
@@ -264,15 +265,34 @@ SurroundReturn::flush ()
 }
 
 void
-SurroundReturn::set_bed_mix (bool on, std::string const& ref)
+SurroundReturn::reset_object_map ()
+{
+	for (uint32_t i = 0; i < max_object_id; ++i) {
+		_channel_id_map[i] = i;
+	}
+}
+
+void
+SurroundReturn::set_bed_mix (bool on, std::string const& ref, int* cmap)
 {
 	_with_bed = on;
 
 	if (!_with_bed) {
 		_export_reference.clear ();
+		reset_object_map ();
 		return;
 	}
 	_export_reference = ref;
+
+	if (!cmap) {
+		reset_object_map ();
+	} else {
+		for (uint32_t i = 0; i < max_object_id; ++i) {
+			if (cmap[i] >= 0 && (size_t) cmap[i] <= max_object_id) {
+				_channel_id_map[i] = cmap[i];
+			}
+		}
+	}
 }
 
 void
@@ -295,7 +315,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 	RouteList rl = *_session.get_routes (); // XXX this allocates memory
 	rl.sort (Stripable::Sorter (true));
 
-	size_t id = with_bed ? 0 : 10; // First 10 IDs are reseved for bed mixes
+	size_t cid = with_bed ? 0 : 10; // First 10 IDs are reseved for bed mixes
 
 	for (auto const& r : rl) {
 		std::shared_ptr<SurroundSend> ss;
@@ -309,15 +329,19 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 		timepos_t unused_start, unused_end;
 		samplecnt_t latency = effective_latency ();
 
-		for (uint32_t s = 0; s < ss->bufs ().count ().n_audio () && id < max_object_id; ++s, ++id) {
+		for (uint32_t s = 0; s < ss->bufs ().count ().n_audio () && cid < max_object_id; ++s, ++cid) {
 			std::shared_ptr<SurroundPannable> const& p (ss->pan_param (s, unused_start, unused_end));
 
 			AutoState const as        = p->automation_state ();
 			bool const      automated = (as & Play) || ((as & (Touch | Latch)) && !p->touching ());
 
-			AudioBuffer&       dst_ab (_surround_bufs.get_audio (id));
+			AudioBuffer&       dst_ab (_surround_bufs.get_audio (cid));
 			AudioBuffer const& src_ab (ss->bufs ().get_audio (s));
-			if (id > 9) {
+
+			const uint32_t id  = cid;
+			const uint32_t oid = _channel_id_map[cid];
+
+			if (oid > 9) {
 				/* object */
 				dst_ab.read_from (src_ab, nframes);
 				if (!automated || start_sample >= end_sample) {
@@ -364,7 +388,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 				dst_ab.merge_from (src_ab, nframes);
 			}
 
-			if (id > 9 || with_bed) {
+			if (oid > 9 || with_bed) {
 				/* configure near/mid/far - not sample-accurate */
 				int const brm = p->binaural_render_mode->get_value ();
 				if (brm != _current_render_mode[id]) {
@@ -378,16 +402,16 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 
 		}
 
-		if (id >= max_object_id) {
+		if (cid >= max_object_id) {
 			break;
 		}
 	}
 
-	if (_current_n_objects != id) {
-		_current_n_objects = id;
+	if (_current_n_channels != cid) {
+		_current_n_channels = cid;
 #if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
 		URIMap::URIDs const& urids = URIMap::instance ().urids;
-		forge_int_msg (urids.surr_Settings, urids.surr_ChannelCount, _current_n_objects);
+		forge_int_msg (urids.surr_Settings, urids.surr_ChannelCount, _current_n_channels);
 #endif
 	}
 
@@ -425,7 +449,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 		forge_int_msg (urids.surr_ExportStart, urids.time_frame, meter_offset);
 
 		/* Re-transmit pan pos - using export-start */
-		size_t id = with_bed ? 0 : 10; // First 10 IDs are reseved for bed mixes
+		size_t cid = with_bed ? 0 : 10; // First 10 IDs are reseved for bed mixes
 		for (auto const& r : rl) {
 			std::shared_ptr<SurroundSend> ss;
 			if (!r->active ()) {
@@ -435,12 +459,15 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 				continue;
 			}
 			timepos_t unused_start, unused_end;
-			for (uint32_t s = 0; s < ss->bufs ().count ().n_audio () && id < max_object_id; ++s, ++id) {
+			for (uint32_t s = 0; s < ss->bufs ().count ().n_audio () && cid < max_object_id; ++s, ++cid) {
 				std::shared_ptr<SurroundPannable> const& p (ss->pan_param (s, unused_start, unused_end));
 
 				AutoState const as        = p->automation_state ();
 				bool const      automated = (as & Play) || ((as & (Touch | Latch)) && !p->touching ());
-				if (id > 9) {
+
+				const uint32_t id  = cid;
+				const uint32_t oid = _channel_id_map[cid];
+				if (oid > 9) {
 					if (!automated) {
 						pan_t const v[num_pan_parameters] = {
 							(pan_t)p->pan_pos_x->get_value (),
@@ -455,7 +482,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 					}
 				}
 			}
-			if (id >= max_object_id) {
+			if (cid >= max_object_id) {
 				break;
 			}
 		}

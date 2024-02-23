@@ -97,7 +97,7 @@ public:
 	samplecnt_t signal_latency () const;
 
 	/* XXX this is only for testing */
-	void set_bed_mix (bool on, std::string const& ref);
+	void set_bed_mix (bool on, std::string const& ref, int* cmap = NULL);
 
 	int set_state (XMLNode const&, int version);
 
@@ -111,6 +111,8 @@ private:
 	void forge_int_msg (uint32_t obj_id, uint32_t key, int val, uint32_t key2 = 0, int val2 = 0);
 	void maybe_send_metadata (size_t id, pframes_t frame, pan_t const v[num_pan_parameters], bool force = false);
 	void evaluate (size_t id, std::shared_ptr<SurroundPannable> const&, timepos_t const& , pframes_t, bool force = false);
+
+	void reset_object_map ();
 
 	std::shared_ptr<LV2Plugin> _surround_processor;
 
@@ -151,7 +153,8 @@ private:
 	uint8_t          _atom_buf[8192];
 	pan_t            _current_value[max_object_id][num_pan_parameters];
 	int              _current_render_mode[max_object_id];
-	size_t           _current_n_objects;
+	size_t           _channel_id_map[max_object_id];
+	size_t           _current_n_channels;
 	MainOutputFormat _current_output_format;
 	BufferSet        _surround_bufs;
 	ChanMapping      _in_map;

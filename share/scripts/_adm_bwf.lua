@@ -24,7 +24,7 @@ function factory () return function ()
 	end
 
 	-- place `Dolby_Atmos_Storage_SIDK_v2.3.2/Tools/linux/lin64_fpic/master_info` in $PATH
-	os.execute ("master_info -printProgramData -printMetadata \"" .. rv['file'] .. "\" > /tmp/adm.info")
+	os.execute ("master_info -printMetadata \"" .. rv['file'] .. "\" > /tmp/adm.info")
 
 	if Session:get_tracks():size() == 0 then
 		print ("Importing Files ...")
@@ -41,10 +41,8 @@ function factory () return function ()
 	end
 
 	local meta = {}
-	local chan_type = {[0] = 0, [1] = 1, [2] = 2, [3] = 3, [4] = 6, [5] = 7, [6] = 8, [7] = 9, [8] = 12, [9] = 13}
-	local chan_beds = {[0] = 0, [1] = 0, [2] = 0, [3] = 0, [4] = 0, [5] = 0, [6] = 0, [7] = 0, [8] = 0, [9] = 0}
+	local chan_map = {}
 	local last_chan = 0
-	local ffoa_sec  = 0
 
 	for line in io.lines('/tmp/adm.info') do
 
@@ -53,19 +51,9 @@ function factory () return function ()
 			last_chan = tonumber (chn)
 			goto next
 		end
-		local rv, _, chn = string.find (line, "channel type: (%a+)")
+		local rv, _, idx = string.find (line, "source channel index: (%d+)")
 		if rv then
-			chan_type[last_chan] = chn
-			goto next
-		end
-		local rv, _, bed = string.find (line, "object/bed ID: (%d+)")
-		if rv then
-			chan_beds[last_chan] = tonumber(bed)
-			goto next
-		end
-		local rv, _, ffoa = string.find (line, "FFOA: ([%d%.-]+) sec")
-		if rv then
-			ffoa_sec = tonumber (ffoa)
+			chan_map[last_chan] = tonumber(idx)
 			goto next
 		end
 
@@ -111,6 +99,12 @@ function factory () return function ()
 		::skip::
 	end
 
-	Session:surround_master():surround_return():set_bed_mix (true, rv['file'])
+	local imap = C.IntVector()
+	for k = 0, 127 do
+		v = chan_map[k] or k
+		imap:add ({v})
+	end
+
+	Session:surround_master():surround_return():set_bed_mix (true, rv['file'], imap:to_array ())
 	print ("OK")
 end end
