@@ -61,6 +61,7 @@ MidiCueEditor::MidiCueEditor()
 	, bbt_metric (*this)
 {
 	mouse_mode = Editing::MouseContent;
+	autoscroll_vertical_allowed = false;
 
 	bindings = Bindings::get_bindings (editor_name());
 
@@ -103,7 +104,7 @@ MidiCueEditor::get_canvas_viewport() const
 	return _canvas_viewport;
 }
 
-ArdourCanvas::Canvas*
+ArdourCanvas::GtkCanvas*
 MidiCueEditor::get_canvas() const
 {
 	return _canvas;
@@ -360,9 +361,9 @@ MidiCueEditor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction
 }
 
 void
-MidiCueEditor::reset_zoom (samplecnt_t spp)
+MidiCueEditor::set_samples_per_pixel (samplecnt_t spp)
 {
-	CueEditor::reset_zoom (spp);
+	CueEditor::set_samples_per_pixel (spp);
 
 	if (view) {
 		view->set_samples_per_pixel (spp);
@@ -1036,4 +1037,356 @@ MidiCueEditor::get_state () const
 	XMLNode* node (new XMLNode (_("MIDICueEditor")));
 	get_common_editing_state (*node);
 	return *node;
+}
+
+/** @param allow_horiz true to allow horizontal autoscroll, otherwise false.
+ *
+ *  @param allow_vert true to allow vertical autoscroll, otherwise false.
+ *
+ */
+void
+MidiCueEditor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_headers)
+{
+	if (!UIConfiguration::instance().get_autoscroll_editor () || autoscroll_active ()) {
+		return;
+	}
+
+	/* define a rectangular boundary for scrolling. If the mouse moves
+	 * outside of this area and/or continue to be outside of this area,
+	 * then we will continuously auto-scroll the canvas in the appropriate
+	 * direction(s)
+	 *
+	 * the boundary is defined in coordinates relative to canvas' own 
+	 * window since that is what we're going to call ::get_pointer() on
+	 * during autoscrolling to determine if we're still outside the
+	 * boundary or not.
+	 */
+
+	ArdourCanvas::Rect scrolling_boundary;
+	Gtk::Allocation alloc;
+
+	alloc = get_canvas()->get_allocation ();
+
+	if (allow_vert) {
+		/* reduce height by the height of the timebars, which happens
+		   to correspond to the position of the hv_scroll_group.
+		*/
+
+		alloc.set_height (alloc.get_height() - hv_scroll_group->position().y);
+		alloc.set_y (alloc.get_y() + hv_scroll_group->position().y);
+
+		/* now reduce it again so that we start autoscrolling before we
+		 * move off the top or bottom of the canvas
+		 */
+
+		alloc.set_height (alloc.get_height() - 20);
+		alloc.set_y (alloc.get_y() + 10);
+	}
+
+	/* the effective width of the autoscroll boundary so
+	   that we start scrolling before we hit the edge.
+
+	   this helps when the window is slammed up against the
+	   right edge of the screen, making it hard to scroll
+	   effectively.
+	*/
+
+	if (allow_horiz && (alloc.get_width() > 20)) {
+		alloc.set_width (alloc.get_width() - 20);
+		alloc.set_x (alloc.get_x() + 10);
+	}
+
+	scrolling_boundary = ArdourCanvas::Rect (0., 0., alloc.get_width(), alloc.get_height());
+
+	int x, y;
+	Gdk::ModifierType mask;
+
+	get_canvas()->get_window()->get_pointer (x, y, mask);
+
+	if ((allow_horiz && ((x < scrolling_boundary.x0 && _leftmost_sample > 0) || x >= scrolling_boundary.x1)) ||
+	    (allow_vert && ((y < scrolling_boundary.y0 && vertical_adjustment.get_value() > 0)|| y >= scrolling_boundary.y1))) {
+		start_canvas_autoscroll (allow_horiz, allow_vert, scrolling_boundary);
+	}
+}
+
+bool
+MidiCueEditor::autoscroll_active () const
+{
+	return autoscroll_connection.connected ();
+}
+
+bool
+MidiCueEditor::autoscroll_canvas ()
+{
+	using std::max;
+	using std::min;
+	int x, y;
+	Gdk::ModifierType mask;
+	sampleoffset_t dx = 0;
+	bool no_stop = false;
+	Gtk::Window* toplevel = dynamic_cast<Gtk::Window*>(_canvas_viewport->get_toplevel());
+
+	if (!toplevel) {
+		return false;
+	}
+
+	get_canvas()->get_window()->get_pointer (x, y, mask);
+
+	VisualChange vc;
+	bool vertical_motion = false;
+
+	if (autoscroll_horizontal_allowed) {
+
+		samplepos_t new_sample = _leftmost_sample;
+
+		/* horizontal */
+
+		if (x > autoscroll_boundary.x1) {
+
+			/* bring it back into view */
+			dx = x - autoscroll_boundary.x1;
+			dx += 10 + (2 * (autoscroll_cnt/2));
+
+			dx = pixel_to_sample (dx);
+
+			dx *= UIConfiguration::instance().get_draggable_playhead_speed();
+
+			if (_leftmost_sample < max_samplepos - dx) {
+				new_sample = _leftmost_sample + dx;
+			} else {
+				new_sample = max_samplepos;
+			}
+
+			no_stop = true;
+
+		} else if (x < autoscroll_boundary.x0) {
+
+			dx = autoscroll_boundary.x0 - x;
+			dx += 10 + (2 * (autoscroll_cnt/2));
+
+			dx = pixel_to_sample (dx);
+
+			dx *= UIConfiguration::instance().get_draggable_playhead_speed();
+
+			if (_leftmost_sample >= dx) {
+				new_sample = _leftmost_sample - dx;
+			} else {
+				new_sample = 0;
+			}
+
+			no_stop = true;
+		}
+
+		if (new_sample != _leftmost_sample) {
+			vc.time_origin = new_sample;
+			vc.add (VisualChange::TimeOrigin);
+		}
+	}
+
+	if (autoscroll_vertical_allowed) {
+
+		// const double vertical_pos = vertical_adjustment.get_value();
+		const int speed_factor = 10;
+
+		/* vertical */
+
+		if (y < autoscroll_boundary.y0) {
+
+			/* scroll to make higher tracks visible */
+
+			if (autoscroll_cnt && (autoscroll_cnt % speed_factor == 0)) {
+				// XXX SCROLL UP
+				vertical_motion = true;
+			}
+			no_stop = true;
+
+		} else if (y > autoscroll_boundary.y1) {
+
+			if (autoscroll_cnt && (autoscroll_cnt % speed_factor == 0)) {
+				// XXX SCROLL DOWN
+				vertical_motion = true;
+			}
+			no_stop = true;
+		}
+
+	}
+
+	if (vc.pending || vertical_motion) {
+
+		/* change horizontal first */
+
+		if (vc.pending) {
+			visual_changer (vc);
+		}
+
+		/* now send a motion event to notify anyone who cares
+		   that we have moved to a new location (because we scrolled)
+		*/
+
+		GdkEventMotion ev;
+
+		ev.type = GDK_MOTION_NOTIFY;
+		ev.state = Gdk::BUTTON1_MASK;
+
+		/* the motion handler expects events in canvas coordinate space */
+
+		/* we asked for the mouse position above (::get_pointer()) via
+		 * our own top level window (we being the Editor). Convert into
+		 * coordinates within the canvas window.
+		 */
+
+		int cx;
+		int cy;
+
+		//toplevel->translate_coordinates (*get_canvas(), x, y, cx,
+		//cy);
+		cx = x;
+		cy = y;
+
+		/* clamp x and y to remain within the autoscroll boundary,
+		 * which is defined in window coordinates
+		 */
+
+		x = min (max ((ArdourCanvas::Coord) cx, autoscroll_boundary.x0), autoscroll_boundary.x1);
+		y = min (max ((ArdourCanvas::Coord) cy, autoscroll_boundary.y0), autoscroll_boundary.y1);
+
+		/* now convert from Editor window coordinates to canvas
+		 * window coordinates
+		 */
+
+		ArdourCanvas::Duple d = get_canvas()->window_to_canvas (ArdourCanvas::Duple (cx, cy));
+		ev.x = d.x;
+		ev.y = d.y;
+		ev.state = mask;
+
+		motion_handler (0, (GdkEvent*) &ev, true);
+
+	} else if (no_stop) {
+
+		/* not changing visual state but pointer is outside the scrolling boundary
+		 * so we still need to deliver a fake motion event
+		 */
+
+		GdkEventMotion ev;
+
+		ev.type = GDK_MOTION_NOTIFY;
+		ev.state = Gdk::BUTTON1_MASK;
+
+		/* the motion handler expects events in canvas coordinate space */
+
+		/* first convert from Editor window coordinates to canvas
+		 * window coordinates
+		 */
+
+		int cx;
+		int cy;
+
+		/* clamp x and y to remain within the visible area. except
+		 * .. if horizontal scrolling is allowed, always allow us to
+		 * move back to zero
+		 */
+
+		if (autoscroll_horizontal_allowed) {
+			x = min (max ((ArdourCanvas::Coord) x, 0.0), autoscroll_boundary.x1);
+		} else {
+			x = min (max ((ArdourCanvas::Coord) x, autoscroll_boundary.x0), autoscroll_boundary.x1);
+		}
+		y = min (max ((ArdourCanvas::Coord) y, autoscroll_boundary.y0), autoscroll_boundary.y1);
+
+		// toplevel->translate_coordinates (*get_canvas_viewport(), x,
+		// y, cx, cy);
+		cx = x;
+		cy = y;
+
+		ArdourCanvas::Duple d = get_canvas()->window_to_canvas (ArdourCanvas::Duple (cx, cy));
+		ev.x = d.x;
+		ev.y = d.y;
+		ev.state = mask;
+
+		motion_handler (0, (GdkEvent*) &ev, true);
+
+	} else {
+		stop_canvas_autoscroll ();
+		return false;
+	}
+
+	autoscroll_cnt++;
+
+	return true; /* call me again */
+}
+
+void
+MidiCueEditor::start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary)
+{
+	if (!_session) {
+		return;
+	}
+
+	stop_canvas_autoscroll ();
+
+	autoscroll_horizontal_allowed = allow_horiz;
+	autoscroll_vertical_allowed = allow_vert;
+	autoscroll_boundary = boundary;
+
+	/* do the first scroll right now
+	*/
+
+	autoscroll_canvas ();
+
+	/* scroll again at very very roughly 30FPS */
+
+	autoscroll_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &MidiCueEditor::autoscroll_canvas), 30);
+}
+
+void
+MidiCueEditor::stop_canvas_autoscroll ()
+{
+	autoscroll_connection.disconnect ();
+	autoscroll_cnt = 0;
+}
+
+void
+MidiCueEditor::visual_changer (const VisualChange& vc)
+{
+	/**
+	 * Changed first so the correct horizontal canvas position is calculated in
+	 * EditingContext::set_horizontal_position
+	 */
+	if (vc.pending & VisualChange::ZoomLevel) {
+		set_samples_per_pixel (vc.samples_per_pixel);
+	}
+
+	if (vc.pending & VisualChange::TimeOrigin) {
+		double new_time_origin = sample_to_pixel_unrounded (vc.time_origin);
+		set_horizontal_position (new_time_origin);
+	}
+
+	if (vc.pending & VisualChange::YOrigin) {
+		vertical_adjustment.set_value (vc.y_origin);
+	}
+
+	/**
+	 * Now the canvas is in the final state before render the canvas items that
+	 * support the Item::prepare_for_render interface can calculate the correct
+	 * item to visible canvas intersection.
+	 */
+	if (vc.pending & VisualChange::ZoomLevel) {
+		on_samples_per_pixel_changed ();
+
+		// update_tempo_based_rulers ();
+	}
+
+	if (!(vc.pending & VisualChange::ZoomLevel)) {
+		/* If the canvas is not being zoomed then the canvas items will not change
+		 * and cause Item::prepare_for_render to be called so do it here manually.
+		 * Not ideal, but I can't think of a better solution atm.
+		 */
+		get_canvas()->prepare_for_render();
+	}
+
+	/* If we are only scrolling vertically there is no need to update these */
+	if (vc.pending != VisualChange::YOrigin) {
+		// XXX update_fixed_rulers ();
+		//  XXX redisplay_grid (true);
+	}
 }

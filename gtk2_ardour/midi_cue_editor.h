@@ -75,7 +75,7 @@ class MidiCueEditor : public CueEditor
 	ArdourCanvas::ScrollGroup* get_hscroll_group () const { return h_scroll_group; }
 	ArdourCanvas::ScrollGroup* get_cursor_scroll_group () const { return cursor_scroll_group; }
 
-	void reset_zoom (samplecnt_t);
+	void set_samples_per_pixel (samplecnt_t);
 
 	void set_mouse_mode (Editing::MouseMode, bool force = false);
 	void step_mouse_mode (bool next);
@@ -86,10 +86,13 @@ class MidiCueEditor : public CueEditor
 	size_t n_timebars;
 
 	ArdourCanvas::GtkCanvasViewport* get_canvas_viewport() const;
-	ArdourCanvas::Canvas* get_canvas() const;
+	ArdourCanvas::GtkCanvas* get_canvas() const;
 
 	int set_state (const XMLNode&, int version);
 	XMLNode& get_state () const;
+
+	void maybe_autoscroll (bool, bool, bool);
+	bool autoscroll_active() const;
 
   protected:
 	void register_actions ();
@@ -177,6 +180,14 @@ class MidiCueEditor : public CueEditor
 
 	bool canvas_pre_event (GdkEvent*);
 	void setup_toolbar ();
+
+	/* autoscrolling */
+
+	bool autoscroll_canvas ();
+	void start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary);
+	void stop_canvas_autoscroll ();
+
+	void visual_changer (const VisualChange&);
 };
 
 

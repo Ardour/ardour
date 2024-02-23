@@ -269,12 +269,15 @@ public:
 	                                         ARDOUR::SnapPref    gpref) const;
 
 	virtual double get_y_origin () const = 0;
-	virtual void reset_x_origin (samplepos_t) = 0;
-	virtual void reset_y_origin (double) = 0;
+
+	void reset_x_origin (samplepos_t);
+	void reset_y_origin (double);
+	void reset_zoom (samplecnt_t);
+	void set_samples_per_pixel (samplecnt_t);
+	virtual void on_samples_per_pixel_changed () {}
 
 	virtual void set_zoom_focus (Editing::ZoomFocus) = 0;
 	virtual Editing::ZoomFocus get_zoom_focus () const = 0;
-	virtual void reset_zoom (samplecnt_t) = 0;
 	virtual void reposition_and_zoom (samplepos_t, double) = 0;
 
 	sigc::signal<void> ZoomChanged;
@@ -343,7 +346,7 @@ public:
 	virtual samplecnt_t current_page_samples() const = 0;
 
 	virtual ArdourCanvas::GtkCanvasViewport* get_canvas_viewport() const = 0;
-	virtual ArdourCanvas::Canvas* get_canvas() const = 0;
+	virtual ArdourCanvas::GtkCanvas* get_canvas() const = 0;
 
 	virtual size_t push_canvas_cursor (Gdk::Cursor*);
 	virtual void pop_canvas_cursor ();
@@ -562,6 +565,43 @@ public:
 
 	void set_common_editing_state (XMLNode const & node);
 	void get_common_editing_state (XMLNode& node) const;
+
+	struct VisualChange {
+		enum Type {
+			TimeOrigin = 0x1,
+			ZoomLevel = 0x2,
+			YOrigin = 0x4,
+			VideoTimeline = 0x8
+		};
+
+		Type        pending;
+		samplepos_t time_origin;
+		samplecnt_t samples_per_pixel;
+		double      y_origin;
+
+		int idle_handler_id;
+		/** true if we are currently in the idle handler */
+		bool being_handled;
+
+		VisualChange() : pending ((VisualChange::Type) 0), time_origin (0), samples_per_pixel (0), idle_handler_id (-1), being_handled (false) {}
+		void add (Type t) {
+			pending = Type (pending | t);
+		}
+	};
+
+	VisualChange pending_visual_change;
+	bool visual_change_queued;
+
+	static int _idle_visual_changer (void* arg);
+	int idle_visual_changer ();
+	void ensure_visual_change_idle_handler ();
+	virtual void visual_changer (const VisualChange&) = 0;
+
+	sigc::connection autoscroll_connection;
+	bool autoscroll_horizontal_allowed;
+	bool autoscroll_vertical_allowed;
+	uint32_t autoscroll_cnt;
+	ArdourCanvas::Rect autoscroll_boundary;
 
   private:
 	static std::queue<EditingContext*> ec_stack;
