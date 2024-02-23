@@ -17,6 +17,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <glibmm/miscutils.h>
+#include <glibmm/fileutils.h>
+
 #include "ardour/amp.h"
 #include "ardour/audio_buffer.h"
 #include "ardour/lv2_plugin.h"
@@ -261,36 +264,15 @@ SurroundReturn::flush ()
 }
 
 void
-SurroundReturn::set_bed_mix (bool on, int32_t chan_types[10], int32_t bed_ids[10], double ffoa) {
+SurroundReturn::set_bed_mix (bool on, std::string const& ref)
+{
 	_with_bed = on;
 
 	if (!_with_bed) {
+		_export_reference.clear ();
 		return;
 	}
-
-	URIMap::URIDs const& urids = URIMap::instance ().urids;
-	LV2_Atom_Forge_Frame frame;
-	lv2_atom_forge_set_buffer (&_forge, _atom_buf, sizeof (_atom_buf));
-	lv2_atom_forge_frame_time (&_forge, 0);
-	LV2_Atom* msg = (LV2_Atom*)lv2_atom_forge_object (&_forge, &frame, 1, urids.surr_ChannelDescription);
-	lv2_atom_forge_key (&_forge, urids.surr_ChannelTypes);
-	lv2_atom_forge_vector(&_forge, sizeof(int32_t), urids.atom_Int, 10, chan_types);
-	lv2_atom_forge_key (&_forge, urids.surr_ChannelBedIds);
-	lv2_atom_forge_vector(&_forge, sizeof(int32_t), urids.atom_Int, 10, bed_ids);
-	lv2_atom_forge_pop (&_forge, &frame);
-	_surround_processor->write_from_ui (0, urids.atom_eventTransfer, lv2_atom_total_size (msg), (const uint8_t*)msg);
-
-	lv2_atom_forge_set_buffer (&_forge, _atom_buf, sizeof (_atom_buf));
-	lv2_atom_forge_frame_time (&_forge, 0);
-	msg = (LV2_Atom*)lv2_atom_forge_object (&_forge, &frame, 1, urids.surr_ProgramData);
-	lv2_atom_forge_key (&_forge, urids.surr_ContentFFOA);
-	lv2_atom_forge_float (&_forge, ffoa);
-	lv2_atom_forge_key (&_forge, urids.surr_ContentStart);
-	lv2_atom_forge_float (&_forge, 0); // TODO
-	lv2_atom_forge_key (&_forge, urids.surr_ContentFPS);
-	lv2_atom_forge_int (&_forge, 0); // TODO
-	lv2_atom_forge_pop (&_forge, &frame);
-	_surround_processor->write_from_ui (0, urids.atom_eventTransfer, lv2_atom_total_size (msg), (const uint8_t*)msg);
+	_export_reference = ref;
 }
 
 void
@@ -651,7 +633,18 @@ SurroundReturn::set_playback_offset (samplecnt_t cnt)
 void
 SurroundReturn::setup_export (std::string const& fn, samplepos_t ss, samplepos_t es)
 {
-	if (0 == _surround_processor->setup_export (fn.c_str ())) {
+	URIMap::URIDs const& urids = URIMap::instance ().urids;
+
+	bool have_ref = !_export_reference.empty () && Glib::file_test (_export_reference, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR));
+
+	uint32_t len = _export_reference.size () + 1;
+	LV2_Options_Option options[] = {
+		{ LV2_OPTIONS_INSTANCE, 0, urids.surr_ReferenceFile,
+			len, urids.atom_Path, _export_reference.c_str()},
+		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
+	};
+
+	if (0 == _surround_processor->setup_export (fn.c_str (), have_ref ? options : NULL)) {
 		//std::cout << "SurroundReturn::setup export "<< ss << " to " << es << "\n";
 		_exporting    = true;
 		_export_start = ss - effective_latency ();

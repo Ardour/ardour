@@ -14,40 +14,16 @@ function factory () return function ()
 		return 0 -- "Undefined" ie "Mid"
 	end
 
-	function parse_channel_type (t)
-		if tonumber (t) ~= nil then return t end
-		if t == "L" then return 0 end
-		if t == "R" then return 1 end
-		if t == "C" then return 2 end
-		if t == "LFE" then return 3 end
-		if t == "Ls" then return 4 end
-		if t == "Rs" then return 5 end
-		if t == "Lss" then return 6 end
-		if t == "Rss" then return 7 end
-		if t == "Lrs" or t == "Lb" then return 8 end
-		if t == "Rrs" or t == "Rb" then return 9 end
-		if t == "Lfh" or t == "Lvh" then return 10 end
-		if t == "Rfh" or t == "Rfh" then return 11 end
-		if t == "Ltm" or t == "Lts" then return 12 end
-		if t == "Rtm" or t == "Rts" then return 13 end
-		if t == "Lrh" then return 14 end
-		if t == "Rrh" then return 15 end
-		if t == "Lw" then return 16 end
-		if t == "Rw" then return 17 end
-		if t == "LFE2" then return 18 end
-		return -1 -- object
-	end
-
 	local rv = LuaDialog.Dialog ("Load ADM/BWF File",
 	{
-		{ type = "file", key = "file", title = "", path = ARDOUR.LuaAPI.build_filename("tmp", "input_D_Ren_24_48k_24.wav") },
+		{ type = "file", key = "file", title = "Choose ADM/BWF File", path = "" },
 	}):run()
 
 	if (not rv or not ARDOUR.LuaAPI.file_test (rv['file'], ARDOUR.LuaAPI.FileTest.Exists)) then
 		return
 	end
 
-	-- this is `Dolby_Atmos_Storage_SIDK_v2.3.2/Tools/linux/lin64_fpic/master_info`
+	-- place `Dolby_Atmos_Storage_SIDK_v2.3.2/Tools/linux/lin64_fpic/master_info` in $PATH
 	os.execute ("master_info -printProgramData -printMetadata \"" .. rv['file'] .. "\" > /tmp/adm.info")
 
 	if Session:get_tracks():size() == 0 then
@@ -135,16 +111,6 @@ function factory () return function ()
 		::skip::
 	end
 
-	local chan_types = C.IntVector()
-	local bed_ids = C.IntVector()
-	for k = 0, 9 do
-		v = chan_type[k] or k
-		chan_types:add ({parse_channel_type(v)})
-		v = chan_beds[k] or 0
-		bed_ids:add ({v})
-	end
-	assert (chan_types:size () > 9)
-	assert (bed_ids:size () > 9)
-	Session:surround_master():surround_return():set_bed_mix (true, chan_types:to_array(), bed_ids:to_array(), ffoa_sec)
+	Session:surround_master():surround_return():set_bed_mix (true, rv['file'])
 	print ("OK")
 end end

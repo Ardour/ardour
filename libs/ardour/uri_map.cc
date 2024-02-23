@@ -100,6 +100,7 @@ URIMap::URIDs::init(URIMap& uri_map)
 	surr_WarpMode           = uri_map.uri_to_id("urn:ardour:a-vapor#WarpMode");
 	surr_ExportStart        = uri_map.uri_to_id("urn:ardour:a-vapor#ExportStart");
 	surr_ExportStop         = uri_map.uri_to_id("urn:ardour:a-vapor#ExportStop");
+	surr_ReferenceFile      = uri_map.uri_to_id("urn:ardour:a-vapor#ReferenceFile");
 #endif
 }
 

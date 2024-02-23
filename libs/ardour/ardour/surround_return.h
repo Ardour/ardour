@@ -97,7 +97,7 @@ public:
 	samplecnt_t signal_latency () const;
 
 	/* XXX this is only for testing */
-	void set_bed_mix (bool on, int32_t types[10], int32_t ids[10], double);
+	void set_bed_mix (bool on, std::string const& ref);
 
 	int set_state (XMLNode const&, int version);
 
@@ -161,6 +161,7 @@ private:
 	samplepos_t      _export_end;
 	bool             _rolling;
 	bool             _with_bed;
+	std::string      _export_reference;
 	std::atomic<int> _flush;
 };
 

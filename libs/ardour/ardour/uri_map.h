@@ -123,6 +123,7 @@ public:
 		uint32_t surr_WarpMode;
 		uint32_t surr_ExportStart;
 		uint32_t surr_ExportStop;
+		uint32_t surr_ReferenceFile;
 #endif
 	};
 
