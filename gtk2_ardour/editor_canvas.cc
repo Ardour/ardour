@@ -1075,7 +1075,7 @@ Editor::get_canvas_viewport() const
 	return _track_canvas_viewport;
 }
 
-ArdourCanvas::Canvas*
+ArdourCanvas::GtkCanvas*
 Editor::get_canvas() const
 {
 	return _track_canvas_viewport->canvas();

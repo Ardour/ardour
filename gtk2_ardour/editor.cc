@@ -310,7 +310,6 @@ Editor::Editor ()
 	, _full_canvas_height (0)
 	, edit_controls_left_menu (0)
 	, edit_controls_right_menu (0)
-	, visual_change_queued(false)
 	, _tvl_no_redisplay(false)
 	, _tvl_redisplay_on_resume(false)
 	, _last_update_time (0)
@@ -369,10 +368,6 @@ Editor::Editor ()
 	, _sections (0)
 	, _snapshots (0)
 	, _locations (0)
-	, autoscroll_horizontal_allowed (false)
-	, autoscroll_vertical_allowed (false)
-	, autoscroll_cnt (0)
-	, autoscroll_widget (0)
 	, show_gain_after_trim (false)
 	, _no_not_select_reimported_tracks (false)
 	, selection_op_cmd_depth (0)
@@ -4169,36 +4164,6 @@ Editor::get_y_origin () const
 	return vertical_adjustment.get_value ();
 }
 
-/** Queue up a change to the viewport x origin.
- *  @param sample New x origin.
- */
-void
-Editor::reset_x_origin (samplepos_t sample)
-{
-	pending_visual_change.add (VisualChange::TimeOrigin);
-	pending_visual_change.time_origin = sample;
-	ensure_visual_change_idle_handler ();
-}
-
-void
-Editor::reset_y_origin (double y)
-{
-	pending_visual_change.add (VisualChange::YOrigin);
-	pending_visual_change.y_origin = y;
-	ensure_visual_change_idle_handler ();
-}
-
-void
-Editor::reset_zoom (samplecnt_t spp)
-{
-	if (spp == samples_per_pixel) {
-		return;
-	}
-
-	pending_visual_change.add (VisualChange::ZoomLevel);
-	pending_visual_change.samples_per_pixel = spp;
-	ensure_visual_change_idle_handler ();
-}
 
 void
 Editor::reposition_and_zoom (samplepos_t sample, double fpu)
@@ -4370,77 +4335,6 @@ Editor::playhead_cursor_sample () const
 }
 
 void
-Editor::queue_visual_videotimeline_update ()
-{
-	pending_visual_change.add (VisualChange::VideoTimeline);
-	ensure_visual_change_idle_handler ();
-}
-
-void
-Editor::ensure_visual_change_idle_handler ()
-{
-	if (pending_visual_change.idle_handler_id < 0) {
-		/* see comment in add_to_idle_resize above. */
-		pending_visual_change.idle_handler_id = g_idle_add_full (G_PRIORITY_HIGH_IDLE + 10, _idle_visual_changer, this, NULL);
-		pending_visual_change.being_handled = false;
-	}
-}
-
-int
-Editor::_idle_visual_changer (void* arg)
-{
-	return static_cast<Editor*>(arg)->idle_visual_changer ();
-}
-
-void
-Editor::pre_render ()
-{
-	visual_change_queued = false;
-
-	if (pending_visual_change.pending != 0) {
-		ensure_visual_change_idle_handler();
-	}
-}
-
-int
-Editor::idle_visual_changer ()
-{
-	pending_visual_change.idle_handler_id = -1;
-
-	if (pending_visual_change.pending == 0) {
-		return 0;
-	}
-
-	/* set_horizontal_position() below (and maybe other calls) call
-	   gtk_main_iteration(), so it's possible that a signal will be handled
-	   half-way through this method.  If this signal wants an
-	   idle_visual_changer we must schedule another one after this one, so
-	   mark the idle_handler_id as -1 here to allow that.  Also make a note
-	   that we are doing the visual change, so that changes in response to
-	   super-rapid-screen-update can be dropped if we are still processing
-	   the last one.
-	*/
-
-	if (visual_change_queued) {
-		return 0;
-	}
-
-	pending_visual_change.being_handled = true;
-
-	VisualChange vc = pending_visual_change;
-
-	pending_visual_change.pending = (VisualChange::Type) 0;
-
-	visual_changer (vc);
-
-	pending_visual_change.being_handled = false;
-
-	visual_change_queued = true;
-
-	return 0; /* this is always a one-shot call */
-}
-
-void
 Editor::visual_changer (const VisualChange& vc)
 {
 	/**
@@ -4495,6 +4389,23 @@ Editor::visual_changer (const VisualChange& vc)
 
 	_region_peak_cursor->hide ();
 	_summary->set_overlays_dirty ();
+}
+
+void
+Editor::queue_visual_videotimeline_update ()
+{
+	pending_visual_change.add (VisualChange::VideoTimeline);
+	ensure_visual_change_idle_handler ();
+}
+
+void
+Editor::pre_render ()
+{
+	visual_change_queued = false;
+
+	if (pending_visual_change.pending != 0) {
+		ensure_visual_change_idle_handler();
+	}
 }
 
 struct EditorOrderTimeAxisSorter {

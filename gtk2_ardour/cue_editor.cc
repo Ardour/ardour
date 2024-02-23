@@ -142,16 +142,6 @@ CueEditor::get_y_origin () const
 }
 
 void
-CueEditor::reset_x_origin (samplepos_t)
-{
-}
-
-void
-CueEditor::reset_y_origin (double)
-{
-}
-
-void
 CueEditor::set_zoom_focus (Editing::ZoomFocus)
 {
 }
@@ -163,7 +153,7 @@ CueEditor::get_zoom_focus () const
 }
 
 void
-CueEditor::reset_zoom (samplecnt_t n)
+CueEditor::set_samples_per_pixel (samplecnt_t n)
 {
 	samples_per_pixel = n;
 	ZoomChanged(); /* EMIT SIGNAL */

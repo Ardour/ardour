@@ -65,13 +65,11 @@ class CueEditor : public EditingContext
 	void redo_selection_op ();
 
 	double get_y_origin () const;
-	void reset_x_origin (samplepos_t);
-	void reset_y_origin (double);
 
 	void set_zoom_focus (Editing::ZoomFocus);
 	Editing::ZoomFocus get_zoom_focus () const;
 	samplecnt_t get_current_zoom () const;
-	void reset_zoom (samplecnt_t);
+	void set_samples_per_pixel (samplecnt_t);
 	void reposition_and_zoom (samplepos_t, double);
 
 	void set_mouse_mode (Editing::MouseMode, bool force = false);

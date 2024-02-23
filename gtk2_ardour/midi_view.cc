@@ -141,7 +141,8 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 
 
 MidiView::MidiView (MidiView const & other)
-	: _midi_track (other._midi_track)
+	: sigc::trackable ()
+	, _midi_track (other._midi_track)
 	, _editing_context (other.editing_context())
 	, _midi_context (other.midi_context())
 	, _midi_region (other.midi_region())

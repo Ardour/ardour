@@ -380,9 +380,6 @@ public:
 	void restore_editing_space();
 
 	double get_y_origin () const;
-	void reset_x_origin (samplepos_t);
-	void reset_y_origin (double);
-	void reset_zoom (samplecnt_t);
 	void reposition_and_zoom (samplepos_t, double);
 
 	void reset_x_origin_to_follow_playhead ();
@@ -476,7 +473,7 @@ public:
 	ArdourCanvas::Container* get_drag_motion_group () const { return _drag_motion_group; }
 
 	ArdourCanvas::GtkCanvasViewport* get_canvas_viewport () const;
-	ArdourCanvas::Canvas* get_canvas () const;
+	ArdourCanvas::GtkCanvas* get_canvas () const;
 
 	void override_visible_track_count ();
 
@@ -1058,38 +1055,9 @@ private:
 
 	void tie_vertical_scrolling ();
 
-	struct VisualChange {
-		enum Type {
-			TimeOrigin = 0x1,
-			ZoomLevel = 0x2,
-			YOrigin = 0x4,
-			VideoTimeline = 0x8
-		};
-
-		Type        pending;
-		samplepos_t time_origin;
-		samplecnt_t samples_per_pixel;
-		double      y_origin;
-
-		int idle_handler_id;
-		/** true if we are currently in the idle handler */
-		bool being_handled;
-
-		VisualChange() : pending ((VisualChange::Type) 0), time_origin (0), samples_per_pixel (0), idle_handler_id (-1), being_handled (false) {}
-		void add (Type t) {
-			pending = Type (pending | t);
-		}
-	};
-
-	VisualChange pending_visual_change;
-	bool visual_change_queued;
-
 	void pre_render ();
 
-	static int _idle_visual_changer (void* arg);
-	int idle_visual_changer ();
 	void visual_changer (const VisualChange&);
-	void ensure_visual_change_idle_handler ();
 
 	/* track views */
 	TrackViewList track_views;
@@ -1940,13 +1908,6 @@ private:
 	Glib::RefPtr<Gtk::TreeSelection> route_display_selection;
 
 	/* autoscrolling */
-
-	sigc::connection autoscroll_connection;
-	bool autoscroll_horizontal_allowed;
-	bool autoscroll_vertical_allowed;
-	uint32_t autoscroll_cnt;
-	Gtk::Widget* autoscroll_widget;
-	ArdourCanvas::Rect autoscroll_boundary;
 
 	bool autoscroll_canvas ();
 	void start_canvas_autoscroll (bool allow_horiz, bool allow_vert, const ArdourCanvas::Rect& boundary);
