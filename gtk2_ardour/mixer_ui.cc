@@ -1311,6 +1311,7 @@ Mixer_UI::set_session (Session* sess)
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::parameter_changed, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_title, this), gui_context());
 	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_title, this), gui_context());
+	_session->SurroundMasterAddedOrRemoved.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::sync_surround_action, this), gui_context());
 
 	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_masters, this, _1), gui_context());
 	_session->vca_manager().VCACreated.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::new_masters_created, this), gui_context());
@@ -4405,6 +4406,22 @@ Mixer_UI::toggle_surround_master ()
 	}
 
 	have_sm = _session->surround_master () != nullptr;
+
+	act->set_active (have_sm);
+
+	Glib::RefPtr<Action> surround_export = ActionManager::get_action (X_("Main"), X_("SurroundExport"));
+	surround_export->set_sensitive (have_sm && _session->vapor_export_barrier ());
+}
+
+void
+Mixer_UI::sync_surround_action ()
+{
+	RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Mixer"), "ToggleSurroundMaster");
+	if (_session->config.get_use_surround_master () == act->get_active ()) {
+		return;
+	}
+
+	bool have_sm = _session->surround_master () != nullptr;
 
 	act->set_active (have_sm);
 

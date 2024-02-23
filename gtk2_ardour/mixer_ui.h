@@ -436,6 +436,8 @@ private:
 	void monitor_section_attached ();
 	void monitor_section_detached ();
 
+	void sync_surround_action ();
+
 	enum PluginListMode {
 		PLM_Favorite,
 		PLM_Recent,
