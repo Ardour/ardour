@@ -444,7 +444,7 @@ int main() { return 0; }''',
     if opt.gprofile:
         debug_flags = [ flags_dict['gprofile'] ]
 
-    if opt.gdebug:
+    if opt.gdebug or conf.env['DEBUG']:
         debug_flags.append('-DG_ENABLE_DEBUG')
 
     # OSX
@@ -1570,6 +1570,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('FPU AVX/FMA support',   conf.is_defined('FPU_AVX_FMA_SUPPORT'))
     write_config_text('Futex Semaphore',       conf.is_defined('USE_FUTEX_SEMAPHORE'))
     write_config_text('Freedesktop files',     opts.freedesktop)
+    write_config_text('G_ENABLE_DEBUG',        opts.gdebug or conf.env['DEBUG'])
     write_config_text('Libjack linking',       conf.env['libjack_link'])
     write_config_text('Libjack metadata',      conf.is_defined ('HAVE_JACK_METADATA'))
     write_config_text('Lua Binding Doc',       conf.is_defined('LUABINDINGDOC'))
