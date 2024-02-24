@@ -29,6 +29,13 @@
 #include "ardour/surround_return.h"
 #include "ardour/surround_send.h"
 #include "ardour/uri_map.h"
+
+#ifdef __APPLE__
+#include <AudioUnit/AudioUnit.h>
+#include <AudioToolbox/AudioUnitUtilities.h>
+#include "AUParamInfo.h"
+#endif
+
 #include "pbd/i18n.h"
 
 using namespace ARDOUR;
@@ -226,6 +233,67 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 		if (err != noErr) {
 			return;
 		}
+
+		{
+			UInt32 dataSize;
+			Boolean isWritable;
+			if (noErr == AudioUnitGetPropertyInfo (_au, kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, &dataSize, &isWritable)) {
+				CFArrayRef presets;
+				assert (dataSize == sizeof (presets));
+
+				if (noErr == AudioUnitGetProperty (_au, kAudioUnitProperty_FactoryPresets, kAudioUnitScope_Global, 0, (void*) &presets, &dataSize) && presets) {
+
+					CFIndex cnt = CFArrayGetCount (presets);
+
+					for (CFIndex i = 0; i < cnt; ++i) {
+						AUPreset const* preset = (AUPreset const*) CFArrayGetValueAtIndex (presets, i);
+						_au_presets.push_back (*preset);
+
+						std::string name = CFStringRefToStdString (preset->presetName);
+						std::cout << "FOUND PRESET "<< preset->presetNumber << " - " <<  name << "\n";
+					}
+					CFRelease (presets);
+				}
+			}
+		}
+
+		AudioUnitScope scopes[] = {
+			kAudioUnitScope_Global,
+			kAudioUnitScope_Output,
+			kAudioUnitScope_Input
+		};
+		for (uint32_t i = 0; i < sizeof (scopes) / sizeof (scopes[0]); ++i) {
+			AUParamInfo param_info (_au, false, /* include read only */ false, scopes[i]);
+			for (uint32_t i = 0; i < param_info.NumParams(); ++i) {
+
+				const CAAUParameter* param = param_info.GetParamInfo ( param_info.ParamID (i));
+				const AudioUnitParameterInfo& info (param->ParamInfo());
+
+				if (!(info.flags & kAudioUnitParameterFlag_NonRealTime) && (info.flags & kAudioUnitParameterFlag_IsWritable)) {
+
+					AUParameter d;
+					d.id = param_info.ParamID (i);
+					d.scope = param_info.GetScope ();
+					d.element = param_info.GetElement ();
+
+					d.lower = info.minValue;
+					d.upper = info.maxValue;
+					d.normal = info.defaultValue;
+
+					const int len = CFStringGetLength (param->GetName());
+					char local_buffer[len * 2];
+					if (CFStringGetCString (param->GetName(), local_buffer,len * 2, kCFStringEncodingUTF8)) {
+						d.label = local_buffer;
+					}
+					_au_params.push_back(d);
+				}
+			}
+		}
+
+#if 1 // RAMP up reverb
+		load_au_preset (1);
+		set_au_param (0, 0.6); // +8dB global reverb
+#endif
 
 		_have_au_renderer = true;
 	}
@@ -732,6 +800,38 @@ SurroundReturn::state () const
 	node.set_property ("type", "surreturn");
 	node.set_property ("output-format", (int)_current_output_format);
 	return node;
+}
+
+bool
+SurroundReturn::load_au_preset (size_t id)
+{
+#ifdef __APPLE__
+	if (_au && _have_au_renderer && id < _au_presets.size ()) {
+		AUPreset* preset = &_au_presets[id];
+		if (noErr == AudioUnitSetProperty (_au, kAudioUnitProperty_PresentPreset, kAudioUnitScope_Global, 0, preset, sizeof (AUPreset))) {
+			AudioUnitParameter changedUnit;
+			changedUnit.mAudioUnit = _au;
+			changedUnit.mParameterID = kAUParameterListener_AnyParameter;
+			AUParameterListenerNotify (NULL, NULL, &changedUnit);
+			return true;
+		}
+	}
+#endif
+	return false;
+}
+
+bool
+SurroundReturn::set_au_param (size_t id, float val)
+{
+#ifdef __APPLE__
+	if (_au && _have_au_renderer && id < _au_params.size ()) {
+		const AUParameter& d (_au_params[id]);
+		val = std::max (0.f, std::min (1.f, val));
+		float v = d.lower + val * (d.upper - d.lower);
+		return noErr == AudioUnitSetParameter (_au, d.id, d.scope, d.element, v, 0);
+	}
+#endif
+	return false;
 }
 
 #ifdef __APPLE__

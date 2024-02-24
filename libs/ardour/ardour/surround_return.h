@@ -71,6 +71,9 @@ public:
 		return _have_au_renderer;
 	}
 
+	bool load_au_preset (size_t);
+	bool set_au_param (size_t, float);
+
 	std::shared_ptr<PBD::Controllable> binaural_render_controllable () const {
 		return _binaural_render_control;
 	}
@@ -143,6 +146,17 @@ private:
 	AudioBufferList* _au_buffers;
 	samplecnt_t      _au_samples_processed;
 	float*           _au_data[12];
+
+	struct LIBARDOUR_API AUParameter {
+		AudioUnitParameterID id;
+		AudioUnitScope scope;
+		AudioUnitElement element;
+		std::string label;
+		float lower, upper, normal;
+	};
+
+	std::vector<AUParameter> _au_params;
+	std::vector<AUPreset>    _au_presets;
 
 	static OSStatus _render_callback(void*, AudioUnitRenderActionFlags*, const AudioTimeStamp*, UInt32, UInt32, AudioBufferList*);
 	OSStatus render_callback(AudioUnitRenderActionFlags*, const AudioTimeStamp*, UInt32, UInt32, AudioBufferList*);
