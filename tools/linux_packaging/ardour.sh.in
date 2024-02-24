@@ -44,7 +44,7 @@ export GTK_MODULES=""
 
 if [ "T" = "$DEBUG" ]; then
 	export ARDOUR_INSIDE_GDB=1
-	exec gdb --args \
+	exec gdb -ex "handle SIG32 noprint nostop" -ex "set height 0" --args \
 		env LD_LIBRARY_PATH=$INSTALL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
 		$INSTALL_DIR/bin/%EXENAME%-%VER%
 else
