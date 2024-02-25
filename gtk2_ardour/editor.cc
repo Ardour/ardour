@@ -3063,7 +3063,7 @@ Editor::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, 
 		 * for the snap, based on the grid setting.
 		 */
 
-		int divisor;
+		float divisor;
 		switch (_grid_type) {
 			case GridTypeBeatDiv3:
 			case GridTypeBeatDiv6:
@@ -3074,12 +3074,12 @@ Editor::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, 
 			case GridTypeBeatDiv5:
 			case GridTypeBeatDiv10:
 			case GridTypeBeatDiv20:
-				divisor = 5;
+				divisor = 2.5;
 				break;
 			case GridTypeBeatDiv7:
 			case GridTypeBeatDiv14:
 			case GridTypeBeatDiv28:
-				divisor = 7;
+				divisor = 3.5;
 				break;
 			case GridTypeBeat:
 				divisor = 1;
