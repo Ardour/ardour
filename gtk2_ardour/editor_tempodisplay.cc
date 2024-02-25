@@ -358,7 +358,7 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 	const Beats lower_beat = (left < Beats() ? Beats() : left);
 	const samplecnt_t sr (_session->sample_rate());
 
-	int divisor;
+	float divisor;
 	switch (_grid_type) {
 		case GridTypeBeatDiv3:
 		case GridTypeBeatDiv6:
@@ -369,12 +369,12 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 		case GridTypeBeatDiv5:
 		case GridTypeBeatDiv10:
 		case GridTypeBeatDiv20:
-			divisor = 5;
+			divisor = 2.5;
 			break;
 		case GridTypeBeatDiv7:
 		case GridTypeBeatDiv14:
 		case GridTypeBeatDiv28:
-			divisor = 7;
+			divisor = 3.5;
 			break;
 		default:
 			divisor = 2;
