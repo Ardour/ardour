@@ -84,6 +84,9 @@ URIMap::URIDs::init(URIMap& uri_map)
 	surr_PosZ     = uri_map.uri_to_id("urn:ardour:a-vapor#PosZ");
 	surr_Size     = uri_map.uri_to_id("urn:ardour:a-vapor#Size");
 	surr_Snap     = uri_map.uri_to_id("urn:ardour:a-vapor#Snap");
+	surr_ElevEn   = uri_map.uri_to_id("urn:ardour:a-vapor#ElevationEnable");
+	surr_Zones    = uri_map.uri_to_id("urn:ardour:a-vapor#Zones");
+	surr_Ramp     = uri_map.uri_to_id("urn:ardour:a-vapor#Ramp");
 
 	surr_Settings           = uri_map.uri_to_id("urn:ardour:a-vapor#Settings");
 	surr_BinauralRenderMode = uri_map.uri_to_id("urn:ardour:a-vapor#BinauralRenderMode");

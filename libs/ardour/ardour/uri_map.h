@@ -108,6 +108,9 @@ public:
 		uint32_t surr_PosZ;
 		uint32_t surr_Size;
 		uint32_t surr_Snap;
+		uint32_t surr_ElevEn;
+		uint32_t surr_Zones;
+		uint32_t surr_Ramp;
 		uint32_t surr_Settings;
 		uint32_t surr_BinauralRenderMode;
 		uint32_t surr_ChannelCount;

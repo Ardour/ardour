@@ -222,6 +222,12 @@ Automatable::describe_parameter (Evoral::Parameter param)
 		return _("Snap to Speaker");
 	} else if (param.type() == BinauralRenderMode) {
 		return _("Binaural Render mode");
+	} else if (param.type() == PanSurroundElevationEnable) {
+		return X_("hidden");
+	} else if (param.type() == PanSurroundZones) {
+		return X_("hidden");
+	} else if (param.type() == PanSurroundRamp) {
+		return X_("hidden");
 	} else if (param.type() == PhaseAutomation) {
 		return _("Polarity Invert");
 	} else if (param.type() == MidiVelocityAutomation) {

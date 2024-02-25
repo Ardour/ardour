@@ -126,7 +126,26 @@ ParameterDescriptor::ParameterDescriptor(const Evoral::Parameter& parameter)
 		scale_points->insert (std::make_pair (_("Near"), 2));
 		scale_points->insert (std::make_pair (_("Far"), 3));
 		break;
+	case PanSurroundZones:
+		enumeration = true;
+		integer_step = true;
+		upper  = 5.0f;
+		normal = 0.0f;
+		scale_points = std::shared_ptr<ScalePoints>(new ScalePoints());
+		scale_points->insert (std::make_pair (_("All"), 0));
+		scale_points->insert (std::make_pair (_("No Back"), 1));
+		scale_points->insert (std::make_pair (_("No Sides"), 2));
+		scale_points->insert (std::make_pair (_("Center Back"), 3));
+		scale_points->insert (std::make_pair (_("Screen Only"), 4));
+		scale_points->insert (std::make_pair (_("Surround Only"), 5));
+		break;
+	case PanSurroundElevationEnable:
+		upper  = 1.0f;
+		normal = 1.0f;
+		toggled = true;
+		break;
 	case PanSurroundSnap:
+	case PanSurroundRamp:
 	case SoloAutomation:
 	case MuteAutomation:
 		upper  = 1.0f;

@@ -132,6 +132,8 @@ EventTypeMap::from_symbol(const string& str) const
 		p_type = GainAutomation;
 	} else if (str == "send") {
 		p_type = BusSendLevel;
+	} else if (str == "send-enable") {
+		p_type = BusSendEnable;
 	} else if (str == "return") {
 		p_type = InsertReturnLevel;
 	} else if (str == "trim") {
@@ -256,6 +258,8 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		return "gain";
 	} else if (t == BusSendLevel) {
 		return "send";
+	} else if (t == BusSendEnable) {
+		return "send-enable";
 	} else if (t == InsertReturnLevel) {
 		return "return";
 	} else if (t == TrimAutomation) {
@@ -284,6 +288,12 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		return std::string("pan-sur-snap-") + PBD::to_string(param.id());
 	} else if (t == BinauralRenderMode) {
 		return std::string("binaural-render-mode-") + PBD::to_string(param.id());
+	} else if (t == PanSurroundElevationEnable) {
+		return std::string("binaural-render-mode-") + PBD::to_string(param.id());
+	} else if (t == PanSurroundZones) {
+		return std::string("surround-zones-") + PBD::to_string(param.id());
+	} else if (t == PanSurroundRamp) {
+		return std::string("surround--ramp-") + PBD::to_string(param.id());
 	} else if (t == SoloAutomation) {
 		return "solo";
 	} else if (t == MuteAutomation) {
@@ -328,7 +338,7 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 	} else if (t == MidiVelocityAutomation) {
 		return "midi-velocity";
 	} else {
-		PBD::warning << "Uninitialized Parameter symbol() called." << endmsg;
+		PBD::warning << "Uninitialized Parameter symbol(" << t << ") called." << endmsg;
 		return "";
 	}
 }
