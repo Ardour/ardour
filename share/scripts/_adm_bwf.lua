@@ -14,6 +14,20 @@ function factory () return function ()
 		return 0 -- "Undefined" ie "Mid"
 	end
 
+	function parse_zone (zone)
+		if zone == "No Back" then return 1 end
+		if zone == "No Sides" then return 2 end
+		if zone == "Center Back" then return 3 end
+		if zone == "Screen Only" then return 4 end
+		if zone == "Surround Only" then return 5 end
+		return 0
+	end
+
+	function parse_ramp (ramp)
+		if tonumber(ramp) == 0 then return 0 end
+		return 1
+	end
+
 	local rv = LuaDialog.Dialog ("Load ADM/BWF File",
 	{
 		{ type = "file", key = "file", title = "Choose ADM/BWF File", path = "" },
@@ -57,13 +71,13 @@ function factory () return function ()
 			goto next
 		end
 
-		local rv, _, obj, tme, pan_x, pan_y, pan_z, pan_snap, pan_size, bin_mode = string.find (line,
-		"Metadata.* index: (%d+) offset: (%d+) .* pos: %(([%d%.]+),([%d%.]+),([%d%.]+)%) snap: (%d) .* size: %(([%d%.]+),.* binaural: '(%a+)'")
+		local rv, _, obj, tme, pan_ramp, pan_x, pan_y, pan_z, pan_snap, pan_eleven, pan_zone, pan_size, bin_mode = string.find (line,
+		"Metadata.* index: (%d+) offset: (%d+) .* ramp: (%d+) pos: %(([%d%.]+),([%d%.]+),([%d%.-]+)%) snap: (%d) elevation: (%d) zone: '([%a ]+)' size: %(([%d%.]+),.* binaural: '(%a+)'")
 
 		if not rv then goto next end
 
 		if not meta[obj] then
-			meta[obj] = {x = {}, y = {}, z = {}, sz = {}, sn = {}}
+			meta[obj] = {x = {}, y = {}, z = {}, sz = {}, sn = {}, el = {}, rp = {}, zn = {}}
 		end
 		tme = tonumber(tme)
 		meta[obj]['x'][tme] = tonumber(pan_x)
@@ -71,6 +85,9 @@ function factory () return function ()
 		meta[obj]['z'][tme] = tonumber(pan_z)
 		meta[obj]['sz'][tme] = tonumber(pan_size)
 		meta[obj]['sn'][tme] = tonumber(pan_snap)
+		meta[obj]['el'][tme] = tonumber(pan_eleven)
+		meta[obj]['rp'][tme] = parse_ramp(pan_ramp)
+		meta[obj]['zn'][tme] = parse_zone(pan_zone)
 		meta[obj]['bin'] = bin_mode
 
 		::next::
@@ -86,11 +103,18 @@ function factory () return function ()
 		assert(1 == s:n_pannables ())
 		local p = s:pannable (0)
 
-		ARDOUR.LuaAPI.set_automation_data (p.pan_pos_x, d['x'], 0.00001)
-		ARDOUR.LuaAPI.set_automation_data (p.pan_pos_y, d['y'], 0.00001)
-		ARDOUR.LuaAPI.set_automation_data (p.pan_pos_z, d['z'], 0.00001)
-		ARDOUR.LuaAPI.set_automation_data (p.pan_size, d['sz'], 0.00001)
-		ARDOUR.LuaAPI.set_automation_data (p.pan_snap, d['sn'], 0.00001)
+		local thin = 0.00001
+
+		ARDOUR.LuaAPI.set_automation_data (p.pan_pos_x, d['x'], thin)
+		ARDOUR.LuaAPI.set_automation_data (p.pan_pos_y, d['y'], thin)
+		ARDOUR.LuaAPI.set_automation_data (p.pan_pos_z, d['z'], thin)
+		ARDOUR.LuaAPI.set_automation_data (p.pan_size, d['sz'], thin)
+		ARDOUR.LuaAPI.set_automation_data (p.pan_snap, d['sn'], thin)
+
+		ARDOUR.LuaAPI.set_automation_data (p.sur_elevation_enable, d['el'], thin)
+		ARDOUR.LuaAPI.set_automation_data (p.sur_zones,            d['zn'], thin)
+		ARDOUR.LuaAPI.set_automation_data (p.sur_ramp,             d['rp'], thin)
+
 		p.binaural_render_mode:set_value (parse_bin_mode (d['bin']), PBD.GroupControlDisposition.NoGroup)
 
 		-- this changes all

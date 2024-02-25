@@ -418,7 +418,10 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 						(pan_t)p->pan_pos_y->get_value (),
 						(pan_t)p->pan_pos_z->get_value (),
 						(pan_t)p->pan_size->get_value (),
-						(pan_t)p->pan_snap->get_value ()
+						(pan_t)p->pan_snap->get_value (),
+						(pan_t)p->sur_elevation_enable->get_value (),
+						(pan_t)p->sur_ramp->get_value (),
+						(pan_t)p->sur_zones->get_value ()
 					};
 					maybe_send_metadata (id, 0, v);
 				} else {
@@ -434,7 +437,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 						bool found_event = false;
 						timepos_t start (start_sample + latency);
 						timepos_t end (end_sample + latency);
-						timepos_t next = start;
+						timepos_t next (start_sample + latency - 1);
 
 						while (true) {
 							Evoral::ControlEvent next_event (timepos_t (Temporal::AudioTime), 0.0f);
@@ -442,7 +445,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 								break;
 							}
 							samplecnt_t pos = std::min (timepos_t (start).distance (next_event.when).samples (), (samplecnt_t)nframes - 1);
-							evaluate (id, p, next_event.when, pos);
+							evaluate (id, p, next_event.when, pos, with_bed);
 							next = next_event.when;
 						}
 						/* inform live renderer */
@@ -542,7 +545,10 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 							(pan_t)p->pan_pos_y->get_value (),
 							(pan_t)p->pan_pos_z->get_value (),
 							(pan_t)p->pan_size->get_value (),
-							(pan_t)p->pan_snap->get_value ()
+							(pan_t)p->pan_snap->get_value (),
+							(pan_t)p->sur_elevation_enable->get_value (),
+							(pan_t)p->sur_ramp->get_value (),
+							(pan_t)p->sur_zones->get_value ()
 						};
 						maybe_send_metadata (id, 0, v, true);
 					} else {
@@ -653,7 +659,7 @@ void
 SurroundReturn::maybe_send_metadata (size_t id, pframes_t sample, pan_t const v[num_pan_parameters], bool force)
 {
 	bool changed = false;
-	for (size_t i = 0; i < num_pan_parameters; ++i) {
+	for (size_t i = 0; i < (_with_bed ? num_pan_parameters : 5); ++i) {
 		if (_current_value[id][i] != v[i]) {
 			changed = true;
 		}
@@ -683,6 +689,16 @@ SurroundReturn::maybe_send_metadata (size_t id, pframes_t sample, pan_t const v[
 	lv2_atom_forge_float (&_forge, v[3]);
 	lv2_atom_forge_key (&_forge, urids.surr_Snap);
 	lv2_atom_forge_bool (&_forge, v[4] > 0 ? true : false);
+
+	if (_with_bed) {
+		lv2_atom_forge_key (&_forge, urids.surr_ElevEn);
+		lv2_atom_forge_bool (&_forge, v[5] > 0 ? true : false);
+		lv2_atom_forge_key (&_forge, urids.surr_Ramp);
+		lv2_atom_forge_bool (&_forge, v[6] > 0 ? true : false);
+		lv2_atom_forge_key (&_forge, urids.surr_Zones);
+		lv2_atom_forge_int (&_forge, (int) v[7]);
+	}
+
 	lv2_atom_forge_pop (&_forge, &frame);
 
 	_surround_processor->write_from_ui (0, urids.atom_eventTransfer, lv2_atom_total_size (msg), (const uint8_t*)msg);
@@ -698,7 +714,10 @@ SurroundReturn::evaluate (size_t id, std::shared_ptr<SurroundPannable> const& p,
 		(pan_t)p->pan_pos_y->list ()->rt_safe_eval (when, ok[1]),
 		(pan_t)p->pan_pos_z->list ()->rt_safe_eval (when, ok[2]),
 		(pan_t)p->pan_size->list ()->rt_safe_eval (when, ok[3]),
-		(pan_t)p->pan_snap->list ()->rt_safe_eval (when, ok[4])
+		(pan_t)p->pan_snap->list ()->rt_safe_eval (when, ok[4]),
+		force ? (pan_t)p->sur_elevation_enable->list ()->rt_safe_eval (when, ok[5]) : 1,
+		force ? (pan_t)p->sur_ramp->list ()->rt_safe_eval (when, ok[6]) : 0,
+		force ? (pan_t)p->sur_zones->list ()->rt_safe_eval (when, ok[7]) : 0
 	};
 	if (ok[0] && ok[1] && ok[2] && ok[3] && ok[4]) {
 		maybe_send_metadata (id, sample, v, force);

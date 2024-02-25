@@ -109,7 +109,7 @@ protected:
 
 private:
 	static const size_t max_object_id = 128; // happens to be the same as a constant in a well known surround system
-	static const size_t num_pan_parameters = 5; // X, Y, Z, Size, Snap
+	static const size_t num_pan_parameters = 8; // X, Y, Z, Size, Snap [ElevEn, Ramp, Zones]
 
 	void forge_int_msg (uint32_t obj_id, uint32_t key, int val, uint32_t key2 = 0, int val2 = 0);
 	void maybe_send_metadata (size_t id, pframes_t frame, pan_t const v[num_pan_parameters], bool force = false);
