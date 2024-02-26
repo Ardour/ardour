@@ -28,6 +28,12 @@ function factory () return function ()
 		return 1
 	end
 
+	if 0 ~= os.execute ("master_info -h") then
+		local md = LuaDialog.Message ("Master Info Tool Missing", "The 'master_info' tool from Dolby_Atmos_Storage_SIDK_v2.3.2/Tools/ needs to be in $PATH for ADM/BWF meta-data import to work.", LuaDialog.MessageType.Error, LuaDialog.ButtonType.Close)
+		print (md:run())
+		return 1
+	end
+
 	local rv = LuaDialog.Dialog ("Load ADM/BWF File",
 	{
 		{ type = "file", key = "file", title = "Choose ADM/BWF File", path = "" },
@@ -38,7 +44,11 @@ function factory () return function ()
 	end
 
 	-- place `Dolby_Atmos_Storage_SIDK_v2.3.2/Tools/linux/lin64_fpic/master_info` in $PATH
-	os.execute ("master_info -printMetadata \"" .. rv['file'] .. "\" > /tmp/adm.info")
+	if 0 ~= os.execute ("master_info -printMetadata \"" .. rv['file'] .. "\" > /tmp/adm.info") then
+		local md = LuaDialog.Message ("Master Info Tool Error", "The 'master_info' tool failed to extract meta-data from\n'" .. rv['file'] .. "'.", LuaDialog.MessageType.Error, LuaDialog.ButtonType.Close)
+		print (md:run())
+		return 1
+	end
 
 	if Session:get_tracks():size() == 0 then
 		print ("Importing Files ...")
