@@ -3079,6 +3079,9 @@ Editor::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, 
 			case GridTypeBeatDiv7:
 			case GridTypeBeatDiv14:
 			case GridTypeBeatDiv28:
+				// Septuplets suffer from drifting until libtemporal handles fractional ticks
+				// or if ticks_per_beat (ppqn) is raised to a point where the result
+				// of Temporal::ticks_per_beat / beat_div is always an integer
 				divisor = 3.5;
 				break;
 			case GridTypeBeat:
@@ -3616,15 +3619,17 @@ Editor::build_grid_type_menu ()
 	}
 	grid_type_selector.AddMenuElem (Menu_Helpers::MenuElem (_("Quintuplets"), *_quintuplet_menu));
 
-	/* septuplet grid */
-	Gtk::Menu *_septuplet_menu = manage (new Menu);
-	MenuList& septuplet_items (_septuplet_menu->items());
-	{
-		septuplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv7],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv7)));
-		septuplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv14], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv14)));
-		septuplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv28], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv28)));
-	}
-	grid_type_selector.AddMenuElem (Menu_Helpers::MenuElem (_("Septuplets"), *_septuplet_menu));
+	/* septuplet grid */	
+	// Septuplets suffer from drifting and can't be draw properly until libtemporal handles fractional ticks
+	// or if ticks_per_beat (ppqn) is raised to a point where the result
+	// of Temporal::ticks_per_beat / beat_div is always an integer	// Gtk::Menu *_septuplet_menu = manage (new Menu);
+	// MenuList& septuplet_items (_septuplet_menu->items());
+	// {
+	// 	septuplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv7],  sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv7)));
+	// 	septuplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv14], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv14)));
+	// 	septuplet_items.push_back (MenuElem (grid_type_strings[(int)GridTypeBeatDiv28], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeBeatDiv28)));
+	// }
+	// grid_type_selector.AddMenuElem (Menu_Helpers::MenuElem (_("Septuplets"), *_septuplet_menu));
 
 	grid_type_selector.AddMenuElem(SeparatorElem());
 	grid_type_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeTimecode], sigc::bind (sigc::mem_fun(*this, &Editor::grid_type_selection_done), (GridType) GridTypeTimecode)));

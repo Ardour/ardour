@@ -374,6 +374,9 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 		case GridTypeBeatDiv7:
 		case GridTypeBeatDiv14:
 		case GridTypeBeatDiv28:
+			// Septuplets can't be drawn until libtemporal handles fractional ticks
+			// or if ticks_per_beat (ppqn) is raised to a point where the result
+			// of Temporal::ticks_per_beat / beat_div is always an integer
 			divisor = 3.5;
 			break;
 		default:
