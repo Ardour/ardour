@@ -63,6 +63,14 @@ public:
 	void setup_export (std::string const&, samplepos_t, samplepos_t);
 	void finalize_export ();
 
+	size_t n_channels () const {
+		return _current_n_channels;
+	}
+
+	size_t total_n_channels () const {
+		return _total_n_channels;
+	}
+
 	std::shared_ptr<LV2Plugin> surround_processor () const {
 		return _surround_processor;
 	}
@@ -169,6 +177,7 @@ private:
 	int              _current_render_mode[max_object_id];
 	size_t           _channel_id_map[max_object_id];
 	size_t           _current_n_channels;
+	size_t           _total_n_channels;
 	MainOutputFormat _current_output_format;
 	BufferSet        _surround_bufs;
 	ChanMapping      _in_map;

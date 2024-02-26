@@ -82,6 +82,7 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 #endif
 	, _have_au_renderer (false)
 	, _current_n_channels (max_object_id)
+	, _total_n_channels (max_object_id)
 	, _current_output_format (OUTPUT_FORMAT_7_1_4)
 	, _in_map (ChanCount (DataType::AUDIO, 128))
 	, _out_map (ChanCount (DataType::AUDIO, 14 + 6 /* Loudness Meter */))
@@ -397,7 +398,12 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 		timepos_t unused_start, unused_end;
 		samplecnt_t latency = effective_latency ();
 
-		for (uint32_t s = 0; s < ss->bufs ().count ().n_audio () && cid < max_object_id; ++s, ++cid) {
+		for (uint32_t s = 0; s < ss->bufs ().count ().n_audio (); ++s, ++cid) {
+
+			if (cid >= max_object_id) {
+				continue;
+			}
+
 			std::shared_ptr<SurroundPannable> const& p (ss->pan_param (s, unused_start, unused_end));
 
 			AutoState const as        = p->automation_state ();
@@ -470,13 +476,11 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 #endif
 				}
 			}
-
-		}
-
-		if (cid >= max_object_id) {
-			break;
 		}
 	}
+
+	_total_n_channels = cid;
+	cid = std::min<size_t> (128, cid);
 
 	if (_current_n_channels != cid) {
 		_current_n_channels = cid;

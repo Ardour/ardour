@@ -1927,6 +1927,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("max_momentary", &SurroundReturn::max_momentary)
 		.addFunction ("momentary", &SurroundReturn::momentary)
 		.addFunction ("max_dbtp", &SurroundReturn::max_dbtp)
+		.addFunction ("n_channels", &SurroundReturn::n_channels)
+		.addFunction ("total_n_channels", &SurroundReturn::total_n_channels)
 		.addFunction ("output_format_controllable", &SurroundReturn::output_format_controllable)
 		.endClass ()
 
