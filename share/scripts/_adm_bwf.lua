@@ -2,7 +2,7 @@ ardour {
 	["type"]    = "EditorAction",
 	name        = "Import ADM BWF File",
 	author      = "Ardour Team",
-	description = [[...]]
+	description = [[Load dynamic meta-data from an ADM file, import audio channels to the timeline and copy fixed settings for export.]]
 }
 
 function factory () return function ()
@@ -131,4 +131,15 @@ function factory () return function ()
 
 	Session:surround_master():surround_return():set_bed_mix (true, rv['file'], imap:to_array ())
 	print ("OK")
+end end
+
+function icon (params) return function (ctx, width, height, fg)
+	local wh = math.min (width, height)
+	ctx:set_source_rgba (ARDOUR.LuaAPI.color_to_rgba (fg))
+	ctx:arc (0.5 * width - wh * 0.3, 0.5 * height, wh * .275, -0.5 * math.pi , 0.5 * math.pi)
+	ctx:close_path ()
+	ctx:fill ()
+	ctx:arc (0.5 * width + wh * 0.3, 0.5 * height, wh * .275, 0.5 * math.pi , 1.5 * math.pi)
+	ctx:close_path ()
+	ctx:fill ()
 end end
