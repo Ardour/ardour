@@ -1546,7 +1546,7 @@ LuaInstance::pre_seed_scripts ()
 	int id = 0;
 	pre_seed_script ("Mixer Screenshot", id);
 	pre_seed_script ("List Plugins", id);
-#ifdef Mixbus
+#if defined MIXBUS && !defined PLATFORM_WINDOWS
 	pre_seed_script ("Import ADM BWF File", id);
 #endif
 }
