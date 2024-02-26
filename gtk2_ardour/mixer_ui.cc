@@ -112,12 +112,15 @@ using namespace std;
 using PBD::atoi;
 using PBD::Unwinder;
 
+
 static const gchar *_plugin_list_mode_strings[] = {
 	N_("Favorite Plugins"),
 	N_("Recent Plugins"),
 	N_("Top-10 Plugins"),
+	N_("All Plugins"),
 	0
 };
+
 
 Mixer_UI* Mixer_UI::_instance = 0;
 
@@ -281,6 +284,7 @@ Mixer_UI::Mixer_UI ()
 	favorite_plugins_mode_combo.AddMenuElem (Menu_Helpers::MenuElem (_("Favorite Plugins"), sigc::bind(sigc::mem_fun(*this, &Mixer_UI::set_plugin_list_mode), PLM_Favorite)));
 	favorite_plugins_mode_combo.AddMenuElem (Menu_Helpers::MenuElem (_("Recent Plugins"), sigc::bind(sigc::mem_fun(*this, &Mixer_UI::set_plugin_list_mode), PLM_Recent)));
 	favorite_plugins_mode_combo.AddMenuElem (Menu_Helpers::MenuElem (_("Top-10 Plugins"), sigc::bind(sigc::mem_fun(*this, &Mixer_UI::set_plugin_list_mode), PLM_TopHits)));
+	favorite_plugins_mode_combo.AddMenuElem (Menu_Helpers::MenuElem (_("All Plugins"), sigc::bind(sigc::mem_fun(*this, &Mixer_UI::set_plugin_list_mode), PLM_All)));
 	favorite_plugins_mode_combo.set_size_request(-1, 24);
 	set_plugin_list_mode(PLM_Favorite);
 
@@ -3170,7 +3174,7 @@ Mixer_UI::set_plugin_list_mode (PluginListMode plm)
 		favorite_plugins_mode_combo.set_text (str);
 	}
 
-	if (plugin_list_mode == PLM_Favorite) {
+	if (plugin_list_mode == PLM_Favorite || plugin_list_mode == PLM_All) {
 		PBD::Unwinder<bool> uw (ignore_plugin_refill, true);
 		favorite_plugins_search_hbox.show ();
 		plugin_search_entry.set_text ("");
@@ -3183,7 +3187,7 @@ Mixer_UI::set_plugin_list_mode (PluginListMode plm)
 void
 Mixer_UI::plugin_search_entry_changed ()
 {
-	if (plugin_list_mode == PLM_Favorite) {
+	if (plugin_list_mode == PLM_Favorite || plugin_list_mode == PLM_All) {
 		refill_favorite_plugins ();
 	}
 }
@@ -3206,8 +3210,8 @@ Mixer_UI::refiller (PluginInfoList& result, const PluginInfoList& plugs)
 	for (PluginInfoList::const_iterator i = plugs.begin(); i != plugs.end(); ++i) {
 		bool maybe_show = true;
 
-		if (plm == PLM_Favorite) {
-			if (manager.get_status (*i) != PluginManager::Favorite) {
+		if (plm == PLM_Favorite || plm == PLM_All) {
+			if (plm == PLM_Favorite && manager.get_status (*i) != PluginManager::Favorite) {
 				maybe_show = false;
 			}
 
@@ -3271,7 +3275,7 @@ Mixer_UI::refill_favorite_plugins ()
 
 	switch (plugin_list_mode) {
 		default:
-			/* use favorites as-is */
+			/* use favorites / all as-is */
 			break;
 		case PLM_TopHits:
 			{
@@ -3343,6 +3347,7 @@ Mixer_UI::sync_treeview_from_favorite_order ()
 			}
 			break;
 		case PLM_TopHits:
+		case PLM_All:
 			{
 				PluginABCSorter cmp;
 				plugin_list.sort (cmp);
