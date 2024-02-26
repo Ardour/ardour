@@ -755,15 +755,44 @@ SurroundReturn::setup_export (std::string const& fn, samplepos_t ss, samplepos_t
 
 	bool have_ref = !_export_reference.empty () && Glib::file_test (_export_reference, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR));
 
+	float content_start = ss / (float) _session.nominal_sample_rate ();
+	float content_ffoa = 0;
+	float content_fps = 30;
+
+	switch (_session.config.get_timecode_format()) {
+		case Timecode::timecode_23976:
+			content_fps = 23.976;
+			break;
+		case Timecode::timecode_24:
+			content_fps = 24.0;
+			break;
+		case Timecode::timecode_25:
+			content_fps = 25.0;
+			break;
+		case Timecode::timecode_2997drop:
+			content_fps = 29.97;
+			break;
+		case Timecode::timecode_30:
+			content_fps = 30;
+			break;
+		default:
+			break;
+	}
+
 	uint32_t len = _export_reference.size () + 1;
 	LV2_Options_Option options[] = {
 		{ LV2_OPTIONS_INSTANCE, 0, urids.surr_ReferenceFile,
-			len, urids.atom_Path, _export_reference.c_str()},
+			len, urids.atom_Path, have_ref ? _export_reference.c_str() : NULL},
+		{ LV2_OPTIONS_INSTANCE, 0, urids.surr_ContentStart,
+			len, urids.atom_Float, &content_start },
+		{ LV2_OPTIONS_INSTANCE, 0, urids.surr_ContentFFOA,
+			len, urids.atom_Float, &content_ffoa },
+		{ LV2_OPTIONS_INSTANCE, 0, urids.surr_ContentFPS,
+			len, urids.atom_Float, &content_fps },
 		{ LV2_OPTIONS_INSTANCE, 0, 0, 0, 0, NULL }
 	};
 
-	if (0 == _surround_processor->setup_export (fn.c_str (), have_ref ? options : NULL)) {
-		//std::cout << "SurroundReturn::setup export "<< ss << " to " << es << "\n";
+	if (0 == _surround_processor->setup_export (fn.c_str (), options)) {
 		_exporting    = true;
 		_export_start = ss - effective_latency ();
 		_export_end   = es - effective_latency ();
