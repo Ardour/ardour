@@ -459,8 +459,7 @@ lua_exec (std::string cmd)
 	if (x.start()) {
 		return -1;
 	}
-	x.wait ();
-	return 0;
+	return x.wait ();
 }
 #endif
 
