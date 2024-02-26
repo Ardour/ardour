@@ -1612,7 +1612,7 @@ LuaInstance::interactive_add (Gtk::Window& parent, LuaScriptInfo::ScriptType typ
 
 	ScriptParameterDialog spd (_("Set Script Parameters"), spi, reg, lsp);
 
-	if (spd.need_interation ()) {
+	if (spd.need_interaction ()) {
 		switch (spd.run ()) {
 			case Gtk::RESPONSE_ACCEPT:
 				break;
