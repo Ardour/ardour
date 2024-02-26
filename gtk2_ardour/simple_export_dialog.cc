@@ -31,6 +31,7 @@
 #include "ardour/export_timespan.h"
 #include "ardour/profile.h"
 #include "ardour/session_directory.h"
+#include "ardour/surround_return.h"
 
 #include "nag.h"
 #include "simple_export_dialog.h"
@@ -156,6 +157,11 @@ SimpleExportDialog::set_session (ARDOUR::Session* s)
 
 	if (_vapor_export && (!s->surround_master () || !s->vapor_export_barrier ())) {
 		set_error ("Error: Session has no exportable surround master.");
+		return;
+	}
+
+	if (_vapor_export && (s->surround_master ()->surround_return ()->total_n_channels () > 128)) {
+		set_error ("Error: ADM/BWN files cannot contain more than 128 channels.");
 		return;
 	}
 
