@@ -973,6 +973,8 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Discrete", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Discrete))
 		.addConst ("Linear", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Linear))
 		.addConst ("Curved", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Curved))
+		.addConst ("Logarithmic", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Logarithmic))
+		.addConst ("Exponential", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Exponential))
 		.endNamespace ()
 
 		.beginNamespace ("EventType")
