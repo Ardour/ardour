@@ -105,6 +105,7 @@ function factory () return function ()
 
 	print ("Setting Metadata")
 
+
 	for obj, d in pairs (meta) do
 		local r = Session:get_remote_nth_route (obj)
 		if r:isnil () then goto skip end
@@ -113,7 +114,12 @@ function factory () return function ()
 		assert(1 == s:n_pannables ())
 		local p = s:pannable (0)
 
-		local thin = 0.00001
+		p.pan_pos_x:to_ctrl():list():set_interpolation (Evoral.InterpolationStyle.Discrete)
+		p.pan_pos_y:to_ctrl():list():set_interpolation (Evoral.InterpolationStyle.Discrete)
+		p.pan_pos_z:to_ctrl():list():set_interpolation (Evoral.InterpolationStyle.Discrete)
+		p.pan_snap:to_ctrl():list():set_interpolation (Evoral.InterpolationStyle.Discrete)
+
+		local thin = 0 -- 0.00001
 
 		ARDOUR.LuaAPI.set_automation_data (p.pan_pos_x, d['x'], thin)
 		ARDOUR.LuaAPI.set_automation_data (p.pan_pos_y, d['y'], thin)
