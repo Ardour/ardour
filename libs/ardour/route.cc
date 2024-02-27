@@ -299,6 +299,7 @@ Route::init ()
 	if (is_surround_master ()) {
 		_meter_point = _pending_meter_point = MeterPreFader;
 		_surround_return.reset (new SurroundReturn (_session, this));
+		_surround_return->set_owner (this);
 		_surround_return->activate ();
 		panner_shell()->set_bypassed (true);
 

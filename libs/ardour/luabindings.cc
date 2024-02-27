@@ -1922,6 +1922,7 @@ LuaBindings::common (lua_State* L)
 
 		.deriveWSPtrClass <SurroundReturn, Processor> ("SurroundReturn")
 		.addFunction ("set_bed_mix", &SurroundReturn::set_bed_mix)
+		.addFunction ("set_sync_and_return", &SurroundReturn::set_sync_and_return)
 		.addFunction ("have_au_renderer", &SurroundReturn::have_au_renderer)
 		.addFunction ("load_au_preset", &SurroundReturn::load_au_preset)
 		.addFunction ("set_au_param", &SurroundReturn::set_au_param)
