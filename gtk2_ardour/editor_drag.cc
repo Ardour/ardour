@@ -353,6 +353,12 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	const samplepos_t pos = editing_context.canvas_event_sample (event, &_grab_x, &_grab_y);
 
+	if (_bounding_item) {
+		ArdourCanvas::Duple d (_bounding_item->canvas_origin());
+		_grab_x -= d.x;
+		_grab_y -= d.y;
+	}
+
 	if (_time_domain == Temporal::AudioTime) {
 		_raw_grab_time = timepos_t (pos);
 	} else {
@@ -460,7 +466,12 @@ Drag::snap_delta (guint state) const
 double
 Drag::current_pointer_x () const
 {
-	return _drags->current_pointer_x ();
+	if (!_bounding_item) {
+		return _drags->current_pointer_x ();
+	}
+
+	std::cerr << "mouse @ " <<  _drags->current_pointer_x () << " corrected by " << _bounding_item->canvas_origin().x << " to " << _drags->current_pointer_x () - _bounding_item->canvas_origin().x << std::endl;
+	return _drags->current_pointer_x () - _bounding_item->canvas_origin().x;
 }
 
 double
@@ -6213,6 +6224,8 @@ NoteDrag::total_dx (GdkEvent* event) const
 	/* now calculate proper `b@b` time */
 	timecnt_t dx = t2.distance (t1);
 
+	std::cerr << "apparent dx " << dx.beats().str() << " from " << _drags->current_pointer_x() << " - " << grab_x() << std::endl;
+
 	/* primary note time in quarter notes */
 	timepos_t const n_qn = _region->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ());
 
@@ -6288,12 +6301,12 @@ NoteDrag::motion (GdkEvent* event, bool first_move)
 		_cumulative_dx = dx_qn;
 		_cumulative_dy += tdy;
 
-		int8_t note_delta = total_dy ();
+		int8_t pitch_delta = total_dy ();
 
 		if (_copy) {
-			_region->move_copies (dx_qn, tdy, note_delta);
+			_region->move_copies (dx_qn, tdy, pitch_delta);
 		} else {
-			_region->move_selection (dx_qn, tdy, note_delta);
+			_region->move_selection (dx_qn, tdy, pitch_delta);
 		}
 
 		/* the new note value may be the same as the old one, but we
@@ -6302,7 +6315,7 @@ NoteDrag::motion (GdkEvent* event, bool first_move)
 		 * odd with them. so show the note value anyway, always.
 		 */
 
-		uint8_t new_note = min (max (_primary->note ()->note () + note_delta, 0), 127);
+		uint8_t new_note = min (max (_primary->note ()->note () + pitch_delta, 0), 127);
 
 		_region->show_verbose_cursor_for_new_note_value (_primary->note (), new_note);
 
@@ -6353,6 +6366,7 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			}
 		}
 	} else {
+		std::cerr << "ready to drop\n";
 		_region->note_dropped (_primary, total_dx (ev), total_dy (), _copy);
 	}
 }

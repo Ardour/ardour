@@ -183,10 +183,12 @@ public:
 
 	samplepos_t pixel_to_sample_from_event (double pixel) const {
 
-		/* pixel can be less than zero when motion events
-		   are processed. since we've already run the world->canvas
-		   affine, that means that the location *really* is "off
-		   to the right" and thus really is "before the start".
+		/* pixel can be less than zero when motion events are
+		   processed. Since the pixel value is in canvas units (since
+		   it comes from an event delivered to the canvas), we've
+		   already run the window->canvas transform, that means that
+		   the location *really* is "off to the right" and thus really
+		   is "before the start".
 		*/
 
 		if (pixel >= 0) {
@@ -320,6 +322,7 @@ public:
 	/* MIDI actions, proxied to selected MidiRegionView(s) */
 	ARDOUR::Quantize* get_quantize_op ();
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
+	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiView& mrv);
 	void midi_action (void (MidiView::*method)());
 	std::vector<MidiView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const;
 
@@ -515,8 +518,6 @@ public:
 
 	void edit_notes (MidiView*);
 	void note_edit_done (int, EditNoteDialog*);
-
-	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiView& mrv);
 
 	void quantize_regions (const RegionSelection& rs);
 	void legatize_regions (const RegionSelection& rs, bool shrink_only);

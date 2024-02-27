@@ -486,7 +486,9 @@ MidiCueEditor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event
 				if (note->big_enough_to_trim() && note->mouse_near_ends()) {
 					_drags->set (new NoteResizeDrag (*this, item), event, get_canvas_cursor());
 				} else {
-					_drags->set (new NoteDrag (*this, item), event);
+					NoteDrag* nd = new NoteDrag (*this, item);
+					nd->set_bounding_item (data_group);
+					_drags->set (nd, event);
 				}
 			}
 			return true;
@@ -1056,7 +1058,7 @@ MidiCueEditor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_he
 	 * then we will continuously auto-scroll the canvas in the appropriate
 	 * direction(s)
 	 *
-	 * the boundary is defined in coordinates relative to canvas' own 
+	 * the boundary is defined in coordinates relative to canvas' own
 	 * window since that is what we're going to call ::get_pointer() on
 	 * during autoscrolling to determine if we're still outside the
 	 * boundary or not.
@@ -1067,13 +1069,16 @@ MidiCueEditor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_he
 
 	alloc = get_canvas()->get_allocation ();
 
+	alloc.set_x (0);
+	alloc.set_y (0);
+
 	if (allow_vert) {
 		/* reduce height by the height of the timebars, which happens
-		   to correspond to the position of the hv_scroll_group.
+		   to correspond to the position of the data_group.
 		*/
 
-		alloc.set_height (alloc.get_height() - hv_scroll_group->position().y);
-		alloc.set_y (alloc.get_y() + hv_scroll_group->position().y);
+		alloc.set_height (alloc.get_height() - data_group->position().y);
+		alloc.set_y (alloc.get_y() + data_group->position().y);
 
 		/* now reduce it again so that we start autoscrolling before we
 		 * move off the top or bottom of the canvas
@@ -1083,20 +1088,29 @@ MidiCueEditor::maybe_autoscroll (bool allow_horiz, bool allow_vert, bool from_he
 		alloc.set_y (alloc.get_y() + 10);
 	}
 
-	/* the effective width of the autoscroll boundary so
-	   that we start scrolling before we hit the edge.
-
-	   this helps when the window is slammed up against the
-	   right edge of the screen, making it hard to scroll
-	   effectively.
-	*/
-
 	if (allow_horiz && (alloc.get_width() > 20)) {
+
+		if (prh) {
+			double w, h;
+			prh->size_request (w, h);
+
+			alloc.set_width (alloc.get_width() - w);
+			alloc.set_x (alloc.get_x() + w);
+		}
+
+		/* the effective width of the autoscroll boundary so
+		   that we start scrolling before we hit the edge.
+
+		   this helps when the window is slammed up against the
+		   right edge of the screen, making it hard to scroll
+		   effectively.
+		*/
+
 		alloc.set_width (alloc.get_width() - 20);
 		alloc.set_x (alloc.get_x() + 10);
 	}
 
-	scrolling_boundary = ArdourCanvas::Rect (0., 0., alloc.get_width(), alloc.get_height());
+	scrolling_boundary = ArdourCanvas::Rect (alloc.get_x(), alloc.get_y(), alloc.get_x() + alloc.get_width(), alloc.get_y() + alloc.get_height());
 
 	int x, y;
 	Gdk::ModifierType mask;

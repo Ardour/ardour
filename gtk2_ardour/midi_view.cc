@@ -2604,7 +2604,7 @@ MidiView::move_copies (timecnt_t const & dx_qn, double dy, double cumulative_dy)
 }
 
 void
-MidiView::note_dropped(NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool copy)
+MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool copy)
 {
 	uint8_t lowest_note_in_selection  = 127;
 	uint8_t highest_note_in_selection = 0;
@@ -4434,12 +4434,7 @@ MidiView::get_draw_length_beats (timepos_t const & pos) const
 void
 MidiView::quantize_selected_notes ()
 {
-#warning paul fix this MRV/MV
-#if 0
 	std::cerr << "QSN!\n";
-
-	RegionSelection rs;
-	rs.push_back (this);
 
 	Quantize* quant = _editing_context.get_quantize_op ();
 
@@ -4447,10 +4442,17 @@ MidiView::quantize_selected_notes ()
 		return;
 	}
 
-	_editing_context.apply_midi_note_edit_op (*quant, rs);
+	PBD::Command* cmd = _editing_context.apply_midi_note_edit_op_to_region (*quant, *this);
+
+	if (cmd) {
+	       _editing_context.begin_reversible_command (quant->name ());
+	       (*cmd)();
+	       _editing_context.session()->add_command (cmd);
+	       _editing_context.commit_reversible_command ();
+	       _editing_context.session()->set_dirty ();
+	}
 
 	delete quant;
-#endif
 }
 
 void
