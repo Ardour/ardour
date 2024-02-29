@@ -101,6 +101,7 @@
       <AvailableForChannels>
         <AvailableChannel Channel="10" Available="true"/>
       </AvailableForChannels>
+      <UsesControlNameList Name="Controls"/>
       <UsesNoteNameList Name="General MIDI Drums"/>
       <PatchBank Name="Patches" ROM="false">
         <MIDICommands>
