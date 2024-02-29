@@ -20,6 +20,8 @@
 
 #include <atomic>
 
+#include <archive.h>
+#include <archive_entry.h>
 #include <pthread.h>
 
 #include "pbd/signals.h"
