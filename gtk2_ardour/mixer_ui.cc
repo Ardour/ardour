@@ -588,6 +588,8 @@ Mixer_UI::add_stripables (StripableList& slist)
 		nroutes++;
 
 		// XXX what does this special case do?
+		// A: it inserts the new track at the correct point in the model
+		// uness it's the the first (after master-bus, which is not in Mixbus track-model)
 		if (s->presentation_info().order() == (slist.front()->presentation_info().order() + slist.size())) {
 			insert_iter = it;
 			break;
@@ -716,7 +718,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 	track_display.set_model (track_model);
 
 	if (!from_scratch) {
-		sync_presentation_info_from_treeview ();
+		sync_treeview_from_presentation_info (Properties::order);
 	}
 
 	redisplay_track_list ();
