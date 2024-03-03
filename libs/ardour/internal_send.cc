@@ -218,13 +218,15 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		return;
 	}
 
+	samplecnt_t latency = _thru_delay->delay ();
+
 	/* we have to copy the input, because we may alter the buffers with the amp
 	 * in-place, which a send must never do.
 	 */
 
 	if (_panshell && !_panshell->bypassed () && role () != Listen) {
 		if (mixbufs.count ().n_audio () > 0) {
-			_panshell->run (bufs, mixbufs, start_sample, end_sample, nframes);
+			_panshell->run (bufs, mixbufs, start_sample + latency, end_sample + latency, nframes);
 		}
 
 		/* non-audio data will not have been copied by the panner, do it now
@@ -325,8 +327,8 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 
 	/* apply fader gain automation */
 	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
-	_amp->setup_gain_automation (start_sample, end_sample, nframes);
-	_amp->run (mixbufs, start_sample, end_sample, speed, nframes, true);
+	_amp->setup_gain_automation (start_sample + latency, end_sample + latency, nframes);
+	_amp->run (mixbufs, start_sample + latency, end_sample + latency, speed, nframes, true);
 
 	_send_delay->run (mixbufs, start_sample, end_sample, speed, nframes, true);
 
