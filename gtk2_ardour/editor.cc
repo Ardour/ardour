@@ -3045,22 +3045,7 @@ Editor::_snap_to_bbt (timepos_t const & presnap, Temporal::RoundMode direction, 
 	 */
 
 	if (grid_type == GridTypeBar) {
-		TempoMetric m (tmap->metric_at (presnap));
-		BBT_Argument bbt (m.bbt_at (presnap));
-		switch (direction) {
-		case RoundDownAlways:
-			bbt = BBT_Argument (bbt.reference(), bbt.round_down_to_bar ());
-			break;
-		case RoundUpAlways:
-			bbt = BBT_Argument (bbt.reference(), bbt.round_up_to_bar ());
-			break;
-		case RoundNearest:
-			bbt = BBT_Argument (bbt.reference(), m.round_to_bar (bbt));
-			break;
-		default:
-			break;
-		}
-		return timepos_t (tmap->quarters_at (bbt));
+		return timepos_t (tmap->quarters_at (presnap).round_to_subdivision (get_grid_beat_divisions(_grid_type), direction));
 	}
 
 	if (gpref != SnapToGrid_Unscaled) { // use the visual grid lines which are limited by the zoom scale that the user selected
