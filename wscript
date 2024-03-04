@@ -1008,7 +1008,7 @@ def configure(conf):
 
     # freedesktop translations needs itstool > 1.0.3 (-j option)
     if Options.options.freedesktop:
-        output = subprocess.Popen("itstool --version", shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
+        output = subprocess.Popen("itstool --version", shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.PIPE).communicate()[0].splitlines()
         o = output[0].decode('utf-8')
         itstool = o.split(' ')[0]
         version = o.split(' ')[1].split('.')
