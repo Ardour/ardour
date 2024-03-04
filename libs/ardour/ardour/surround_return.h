@@ -110,7 +110,7 @@ public:
 
 	/* XXX this is only for testing */
 	void set_bed_mix (bool on, std::string const& ref, int* cmap = NULL);
-	void set_sync_and_return (bool on);
+	void set_sync_and_align (bool on);
 
 	int set_state (XMLNode const&, int version);
 

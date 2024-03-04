@@ -377,7 +377,7 @@ SurroundReturn::set_bed_mix (bool on, std::string const& ref, int* cmap)
 }
 
 void
-SurroundReturn::set_sync_and_return (bool on)
+SurroundReturn::set_sync_and_align (bool on)
 {
 	if (_sync_and_align == on) {
 		return;
