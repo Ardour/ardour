@@ -422,8 +422,11 @@ ParameterDescriptor::to_interface (float val, bool rotary) const
 				val = 1.0 - val;
 			}
 			break;
-		case PanElevationAutomation:
-			// val = val;
+		case PanSurroundX:
+		case PanSurroundY:
+			if (!rotary) {
+				val = 1.0 - val;
+			}
 			break;
 		case PanWidthAutomation:
 			val = .5f + val * .5f;
@@ -478,8 +481,11 @@ ParameterDescriptor::from_interface (float val, bool rotary) const
 				val = 1.0 - val;
 			}
 			break;
-		case PanElevationAutomation:
-			 // val = val;
+		case PanSurroundX:
+		case PanSurroundY:
+			if (!rotary) {
+				val = 1.0 - val;
+			}
 			break;
 		case PanWidthAutomation:
 			val = 2.f * val - 1.f;
