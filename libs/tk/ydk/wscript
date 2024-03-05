@@ -188,6 +188,7 @@ def build(bld):
         obj.cflags   += ['-xobjective-c']
         obj.uselib   += ' OSX' # -framework Cocoa -framework CoreFoundation -framework ApplicationServices
         obj.includes += ['ydk/quartz', 'ydk/quartz/gdk', 'ydk/gdk/quartz']
+        obj.defines += ['DISABLE_VISIBILITY']
         obj.export_includes += ['ydk/gdk']
         obj.export_includes += ['ydk/quartz']
     elif bld.env['build_target'] == 'mingw':
