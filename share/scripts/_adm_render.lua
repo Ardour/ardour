@@ -6,23 +6,9 @@ ardour {
 }
 
 function factory () return function ()
-	-- ignore input systemic latency, no additional pre-roll
-	-- to fill buffers with input.
-	for r in Session:get_tracks():iter() do
-		r:input():disconnect_all (nil)
-	end
-
 	-- make surround-return announce additional latency to the next 512
 	-- cycle boundary (and delay the output accordingly).
 	Session:surround_master():surround_return():set_sync_and_align (true)
-
-	-- Mixbus: enforce latency pre-roll to be >= 1505 (latency of Atmos renderer)
-	-- this allows the Stem Export the Surround Bus.
-	-- (Mixbus tracks are aligned to master-out, not surrround out)
-	if Session:master_out().ch_post then
-		Session:master_out():ch_post ():to_latent():set_user_latency (1505)
-	end
-
 end end
 
 function icon (params) return function (ctx, width, height, fg)

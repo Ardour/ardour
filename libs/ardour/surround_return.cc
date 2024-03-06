@@ -399,6 +399,13 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 
 	if (_sync_and_align) {
 		if (!_rolling && start_sample != end_sample) {
+			samplecnt_t latency_preroll = _session.remaining_latency_preroll ();
+			if (nframes + playback_offset () <= latency_preroll) {
+				end_sample = start_sample;
+				speed = 0;
+			}
+		}
+		if (!_rolling && start_sample != end_sample) {
 			_delaybuffers.flush ();
 			_surround_processor->deactivate();
 			_surround_processor->activate();
@@ -420,6 +427,8 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 
 	bool with_bed = _with_bed;
 
+	samplecnt_t latency = effective_latency ();
+
 	bufs.set_count (_configured_output);
 	_surround_bufs.silence (nframes, 0);
 
@@ -438,7 +447,6 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 		}
 
 		timepos_t unused_start, unused_end;
-		samplecnt_t latency = effective_latency ();
 
 		for (uint32_t s = 0; s < ss->bufs ().count ().n_audio (); ++s, ++cid) {
 
