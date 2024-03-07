@@ -464,6 +464,7 @@ Playlist::release_notifications (bool from_undo)
 void
 Playlist::notify_contents_changed ()
 {
+	printf ("Playlist::notify_contents_changed\n");
 	if (holding_state ()) {
 		pending_contents_change = true;
 	} else {

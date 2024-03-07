@@ -1690,6 +1690,7 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_fade_out_active", &AudioRegion::set_fade_out_active)
 		.addFunction ("set_fade_out_shape", &AudioRegion::set_fade_out_shape)
 		.addFunction ("set_fade_out_length", &AudioRegion::set_fade_out_length)
+		.addFunction ("add_plugin", &AudioRegion::add_plugin)
 		.addRefFunction ("separate_by_channel", &AudioRegion::separate_by_channel)
 		.endClass ()
 
