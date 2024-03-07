@@ -783,7 +783,7 @@ ARDOUR_UI::build_menu_bar ()
 
 	wall_clock_label.set_name ("WallClock");
 	wall_clock_label.set_use_markup ();
-	timecode_format_label.set_name ("WallClock");
+	timecode_format_label.set_name ("Timecode");
 	timecode_format_label.set_use_markup ();
 	peak_thread_work_label.set_name ("PeakThreadWork");
 	peak_thread_work_label.set_use_markup ();
