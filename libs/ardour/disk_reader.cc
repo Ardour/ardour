@@ -1056,6 +1056,7 @@ DiskReader::audio_read (Sample*            sum_buffer,
 		 * useful after the return from AudioPlayback::read()
 		 */
 
+		// XXX playlist read
 		if (audio_playlist ()->read (sum_buffer, mixdown_buffer, gain_buffer, timepos_t (start), timecnt_t::from_samples (this_read), channel) != this_read) {
 			error << string_compose (_("DiskReader %1: cannot read %2 from playlist at sample %3"), id (), this_read, start) << endmsg;
 			return 0;
@@ -1979,6 +1980,7 @@ DiskReader::setup_preloop_buffer ()
 		rci->resize_preloop (loop_fade_length);
 
 		if (loc->start () > loop_fade_length) {
+			// XXX playlist read
 			audio_playlist ()->read (rci->pre_loop_buffer, mix_buf.get (), gain_buf.get (), read_start, read_cnt, channel);
 		} else {
 			memset (rci->pre_loop_buffer, 0, sizeof (Sample) * loop_fade_length);

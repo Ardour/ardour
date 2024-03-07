@@ -1535,7 +1535,7 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <AudioPlaylist, Playlist> ("AudioPlaylist")
-		.addFunction ("read", &AudioPlaylist::read)
+		.addFunction ("read", &AudioPlaylist::read) // XXX playlist read
 		.endClass ()
 
 		.deriveWSPtrClass <MidiPlaylist, Playlist> ("MidiPlaylist")

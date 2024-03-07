@@ -689,6 +689,7 @@ Editor::write_audio_range (AudioPlaylist& playlist, const ChanCount& count, list
 
 				fs = sources[n];
 
+				// XXX playlist read
 				if (playlist.read (buf, buf, gain_buffer, timepos_t (pos), this_time, n) != this_time) {
 					break;
 				}

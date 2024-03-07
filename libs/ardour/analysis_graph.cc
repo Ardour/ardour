@@ -153,6 +153,7 @@ AnalysisGraph::analyze_range (std::shared_ptr<Route> route, std::shared_ptr<Audi
 			samplecnt_t n = 0;
 
 			for (uint32_t channel = 0; channel < n_audio; ++channel) {
+				// XXX playlist read
 				n = pl->read (_buf, _mixbuf, _gainbuf, timepos_t (rpos + x), timecnt_t (chunk), channel).samples();
 
 				ConstProcessContext<Sample> context (_buf, n, 1);

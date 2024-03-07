@@ -276,6 +276,7 @@ AnalysisWindow::analyze_data (Gtk::Button * /*button*/)
 								n = slen - x;
 							}
 
+							// XXX playlist read
 							n = pl->read(buf, mixbuf, gain, j->start() + timepos_t (x), timecnt_t (n), channel).samples();
 
 							if ( n < fft_graph.windowSize()) {

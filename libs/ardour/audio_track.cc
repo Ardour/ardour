@@ -220,6 +220,7 @@ AudioTrack::export_stuff (BufferSet& buffers, samplepos_t start, samplecnt_t nfr
 	assert(buffers.count().n_audio() >= 1);
 	assert ((samplecnt_t) buffers.get_audio(0).capacity() >= nframes);
 
+	// XXX playlist read -> OK
 	if (apl->read (buffers.get_audio(0).data(), mix_buffer.get(), gain_buffer.get(), timepos_t (start), timecnt_t (nframes)) != nframes) {
 		return -1;
 	}
@@ -230,6 +231,7 @@ AudioTrack::export_stuff (BufferSet& buffers, samplepos_t start, samplecnt_t nfr
 	++bi;
 	for ( ; bi != buffers.audio_end(); ++bi, ++n) {
 		if (n < _disk_reader->output_streams().n_audio()) {
+			// XXX playlist read -> OK
 			if (apl->read (bi->data(), mix_buffer.get(), gain_buffer.get(), timepos_t (start), timecnt_t (nframes), n) != nframes) {
 				return -1;
 			}
