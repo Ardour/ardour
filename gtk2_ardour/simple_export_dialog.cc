@@ -270,6 +270,21 @@ SimpleExportDialog::start_export ()
 			range_name = SimpleExport::_session->snap_name ();
 		}
 
+		samplepos_t rend = (*r)[_range_cols.end];
+		samplepos_t t24h;
+		Timecode::Time tc (SimpleExport::_session->timecode_frames_per_second ());
+		tc.hours = 24;
+
+		SimpleExport::_session->timecode_to_sample (tc, t24h, false /* use_offset */, false /* use_subframes */);
+
+		if (rend >= t24h) {
+			hide ();
+			std::string        txt = _("Error: ADM/BWN files timecode cannot be past 24h.");
+			Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+			msg.run ();
+			return;
+		}
+
 		/* Ensure timespan exists, see also SimpleExport::run_export */
 		auto ts = _manager->get_timespans ();
 		assert (ts.size () == 1);
