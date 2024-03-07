@@ -79,11 +79,14 @@ namespace Properties {
 	LIBARDOUR_API extern PBD::PropertyDescriptor<std::string>       tags;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<uint64_t>          reg_group;
 	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              contents; // type doesn't matter here, used for signal only
+	LIBARDOUR_API extern PBD::PropertyDescriptor<bool>              region_fx; // type doesn't matter here, used for signal only
 };
 
 class Playlist;
 class Filter;
 class ExportSpecification;
+class Plugin;
+class RegionFxPlugin;
 
 enum LIBARDOUR_API RegionEditState {
 	EditChangesNothing = 0,
@@ -107,10 +110,13 @@ class LIBARDOUR_API Region
 {
 public:
 	typedef std::vector<std::shared_ptr<Source> > SourceList;
+	typedef std::list<std::shared_ptr<RegionFxPlugin>> RegionFxList;
 
 	static void make_property_quarks ();
 
 	static PBD::Signal2<void,std::shared_ptr<RegionList>, const PBD::PropertyChange&> RegionsPropertyChanged;
+
+	PBD::Signal0<void> RegionFxChanged;
 
 	typedef std::map <PBD::PropertyChange, RegionList> ChangeMap;
 
@@ -503,6 +509,34 @@ public:
 	void move_cue_marker (CueMarker const &, timepos_t const & region_relative_position);
 	void rename_cue_marker (CueMarker&, std::string const &);
 
+	/* Region Fx */
+	bool load_plugin (ARDOUR::PluginType type, std::string const& name);
+	bool add_plugin (std::shared_ptr<RegionFxPlugin>, std::shared_ptr<RegionFxPlugin> pos = std::shared_ptr<RegionFxPlugin> ());
+	virtual bool remove_plugin (std::shared_ptr<RegionFxPlugin>) { return false; }
+	virtual void reorder_plugins (RegionFxList const&);
+
+	bool has_region_fx () const {
+		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		return !_plugins.empty ();
+	}
+
+	std::shared_ptr<RegionFxPlugin> nth_plugin (uint32_t n) const {
+		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		for (auto const& i : _plugins) {
+			if (0 == n--) {
+				return i;
+			}
+		}
+		return std::shared_ptr<RegionFxPlugin> ();
+	}
+
+	void foreach_plugin (boost::function<void(std::weak_ptr<RegionFxPlugin>)> method) const {
+		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		for (auto const& i : _plugins) {
+			method (std::weak_ptr<RegionFxPlugin> (i));
+		}
+	}
+
 protected:
 	virtual XMLNode& state () const;
 
@@ -528,6 +562,8 @@ protected:
 	}
 
 protected:
+	virtual bool _add_plugin (std::shared_ptr<RegionFxPlugin>, std::shared_ptr<RegionFxPlugin>, bool) { return false; }
+	virtual void fx_latency_changed (bool no_emit);
 
 	void send_change (const PBD::PropertyChange&);
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
@@ -545,6 +581,10 @@ protected:
 	timepos_t len_as_tpos () const { return timepos_t((samplepos_t)_length.val().samples()); }
 
 	DataType _type;
+
+	mutable Glib::Threads::RWLock _fx_lock;
+	uint32_t                      _fx_latency;
+	RegionFxList                  _plugins;
 
 	PBD::Property<bool>      _sync_marked;
 	PBD::Property<bool>      _left_of_split;

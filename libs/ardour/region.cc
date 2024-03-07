@@ -36,11 +36,13 @@
 #include "ardour/audioregion.h"
 #include "ardour/debug.h"
 #include "ardour/filter.h"
+#include "ardour/lua_api.h"
 #include "ardour/playlist.h"
 #include "ardour/playlist_source.h"
 #include "ardour/profile.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
+#include "ardour/region_fx_plugin.h"
 #include "ardour/session.h"
 #include "ardour/source.h"
 #include "ardour/tempo.h"
@@ -82,6 +84,7 @@ namespace ARDOUR {
 		PBD::PropertyDescriptor<std::string> tags;
 		PBD::PropertyDescriptor<uint64_t> reg_group;
 		PBD::PropertyDescriptor<bool> contents;
+		PBD::PropertyDescriptor<bool> region_fx;
 
 /* these properties are used as a convenience for announcing changes to state, but aren't stored as properties */
 		PBD::PropertyDescriptor<Temporal::TimeDomain> time_domain;
@@ -184,6 +187,8 @@ Region::make_property_quarks ()
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for tags = %1\n",	Properties::tags.property_id));
 	Properties::contents.property_id = g_quark_from_static_string (X_("contents"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for contents = %1\n",	Properties::contents.property_id));
+	Properties::region_fx.property_id = g_quark_from_static_string (X_("region-fx"));
+	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for region-fx = %1\n",	Properties::region_fx.property_id));
 	Properties::time_domain.property_id = g_quark_from_static_string (X_("time_domain"));
 	DEBUG_TRACE (DEBUG::Properties, string_compose ("quark for time_domain = %1\n",	Properties::time_domain.property_id));
 	Properties::reg_group.property_id = g_quark_from_static_string (X_("rgroup"));
@@ -290,6 +295,7 @@ Region::register_properties ()
 Region::Region (Session& s, timepos_t const & start, timecnt_t const & length, const string& name, DataType type)
 	: SessionObject(s, name)
 	, _type (type)
+	, _fx_latency (0)
 	, REGION_DEFAULT_STATE (start,length)
 	, _last_length (length)
 	, _first_edit (EditChangesNothing)
@@ -305,6 +311,7 @@ Region::Region (Session& s, timepos_t const & start, timecnt_t const & length, c
 Region::Region (const SourceList& srcs)
 	: SessionObject(srcs.front()->session(), "toBeRenamed")
 	, _type (srcs.front()->type())
+	, _fx_latency (0)
 	, REGION_DEFAULT_STATE(_type == DataType::MIDI ? timepos_t (Temporal::Beats()) : timepos_t::from_superclock (0),
 	                       _type == DataType::MIDI ? timecnt_t (Temporal::Beats()) : timecnt_t::from_superclock (0))
 	, _last_length (_type == DataType::MIDI ? timecnt_t (Temporal::Beats()) : timecnt_t::from_superclock (0))
@@ -326,6 +333,7 @@ Region::Region (const SourceList& srcs)
 Region::Region (std::shared_ptr<const Region> other)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
+	, _fx_latency (0)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _first_edit (EditChangesNothing)
@@ -384,6 +392,7 @@ Region::Region (std::shared_ptr<const Region> other)
 Region::Region (std::shared_ptr<const Region> other, timecnt_t const & offset)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
+	, _fx_latency (0)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _first_edit (EditChangesNothing)
@@ -429,6 +438,7 @@ Region::Region (std::shared_ptr<const Region> other, timecnt_t const & offset)
 Region::Region (std::shared_ptr<const Region> other, const SourceList& srcs)
 	: SessionObject (other->session(), other->name())
 	, _type (srcs.front()->type())
+	, _fx_latency (0)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _first_edit (EditChangesID)
@@ -1447,6 +1457,13 @@ Region::state () const
 		node->add_child_copy (*_extra_xml);
 	}
 
+	{
+		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
+		for (auto const & p : _plugins) {
+			node->add_child_nocopy (p->get_state ());
+		}
+	}
+
 	return *node;
 }
 
@@ -1550,6 +1567,30 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 	// saved property is invalid, region-transients are not saved
 	if (_user_transients.size() == 0){
 		_valid_transients = false;
+	}
+
+	{
+		Glib::Threads::RWLock::WriterLock lm (_fx_lock);
+		bool changed = !_plugins.empty ();
+
+		_plugins.clear ();
+
+		for (auto const& child : node.children ()) {
+			if (child->name() == X_("RegionFXPlugin")) {
+				std::shared_ptr<RegionFxPlugin> rfx (new RegionFxPlugin (_session, time_domain ()));
+				rfx->set_state (*child, version);
+				if (!_add_plugin (rfx, std::shared_ptr<RegionFxPlugin>(), true)) {
+					continue;
+				}
+				_plugins.push_back (rfx);
+				changed = true;
+			}
+		}
+		if (changed) {
+			fx_latency_changed (true);
+			send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
+			RegionFxChanged (); /* EMIT SIGNAL */
+		}
 	}
 
 	return 0;
@@ -2346,4 +2387,64 @@ Region::finish_domain_bounce (Temporal::DomainBounceInfo& cmd)
 	_length = tc->second;
 
 	send_change (Properties::length);
+}
+
+bool
+Region::load_plugin (ARDOUR::PluginType type, std::string const& name)
+{
+	PluginInfoPtr pip = LuaAPI::new_plugin_info (name, type);
+	if (!pip) {
+		return false;
+	}
+	PluginPtr p (pip->load (_session));
+	if (!p) {
+		return false;
+	}
+	std::shared_ptr<RegionFxPlugin> rfx (new RegionFxPlugin (_session, time_domain (), p));
+	return add_plugin (rfx);
+}
+
+bool
+Region::add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<RegionFxPlugin> pos)
+{
+	return _add_plugin (rfx, pos, false);
+}
+
+void
+Region::reorder_plugins (RegionFxList const& new_order)
+{
+	Glib::Threads::RWLock::WriterLock lm (_fx_lock);
+
+	RegionFxList                 as_it_will_be;
+	RegionFxList::iterator       oiter = _plugins.begin ();
+	RegionFxList::const_iterator niter = new_order.begin ();
+
+	while (niter != new_order.end ()) {
+		if (oiter == _plugins.end ()) {
+			as_it_will_be.insert (as_it_will_be.end (), niter, new_order.end ());
+			while (niter != new_order.end ()) {
+				++niter;
+			}
+			break;
+		}
+		if (find (new_order.begin (), new_order.end (), *oiter) != new_order.end ()) {
+			as_it_will_be.push_back (*niter);
+			++niter;
+		}
+		oiter = _plugins.erase (oiter);
+	}
+	_plugins.insert (oiter, as_it_will_be.begin (), as_it_will_be.end ());
+}
+
+void
+Region::fx_latency_changed (bool)
+{
+	uint32_t l = 0;
+	for (auto const& rfx : _plugins) {
+		l += rfx->effective_latency ();
+	}
+	if (l == _fx_latency) {
+		return;
+	}
+	_fx_latency = l;
 }

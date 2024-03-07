@@ -1700,6 +1700,7 @@ Playlist::region_changed (const PropertyChange& what_changed, std::shared_ptr<Re
 	our_interests.add (Properties::opaque);
 	our_interests.add (Properties::contents);
 	our_interests.add (Properties::time_domain);
+	our_interests.add (Properties::region_fx);
 
 	bounds.add (Properties::start);
 	bounds.add (Properties::length);

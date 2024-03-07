@@ -23,6 +23,7 @@
 #ifndef __ardour_audio_region_h__
 #define __ardour_audio_region_h__
 
+#include <atomic>
 #include <vector>
 #include <list>
 
@@ -32,6 +33,7 @@
 #include "ardour/ardour.h"
 #include "ardour/automatable.h"
 #include "ardour/automation_list.h"
+#include "ardour/buffer_set.h"
 #include "ardour/interthread_info.h"
 #include "ardour/logcurve.h"
 #include "ardour/region.h"
@@ -60,7 +62,8 @@ class Playlist;
 class Session;
 class Filter;
 class AudioSource;
-
+class RegionFxPlugin;
+class PlugInsertBase;
 
 class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 {
@@ -116,10 +119,12 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	samplecnt_t readable_length_samples() const { return length_samples(); }
 	uint32_t    n_channels() const { return _sources.size(); }
 
-	samplecnt_t read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
-	                             samplepos_t position,
-	                             samplecnt_t cnt,
-	                             uint32_t   chan_n = 0) const;
+	samplecnt_t read_at (Sample*     buf,
+	                     Sample*     mixdown_buf,
+	                     gain_t*     gain_buf,
+	                     samplepos_t position,
+	                     samplecnt_t cnt,
+	                     uint32_t    chan_n = 0) const;
 
 	samplecnt_t master_read_at (Sample*     buf,
 	                            samplepos_t position,
@@ -158,6 +163,9 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	void set_default_envelope ();
 
 	int separate_by_channel (std::vector<std::shared_ptr<Region> >&) const;
+
+	bool remove_plugin (std::shared_ptr<RegionFxPlugin>);
+	void reorder_plugins (RegionFxList const&);
 
 	/* automation */
 
@@ -249,10 +257,26 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 
 	std::shared_ptr<ARDOUR::Region> get_single_other_xfade_region (bool start) const;
 
+	void apply_region_fx (BufferSet&, samplepos_t, samplepos_t, samplecnt_t);
+	void fx_latency_changed (bool no_emit);
+	void copy_plugin_state (std::shared_ptr<const AudioRegion>);
+
+	mutable samplepos_t _fx_pos;
+	pframes_t           _fx_block_size;
+	mutable bool        _fx_latent_read;
+
+	mutable Glib::Threads::Mutex _cache_lock;
+	mutable BufferSet            _readcache;
+	mutable samplepos_t          _cache_start;
+	mutable samplepos_t          _cache_end;
+	mutable std::atomic<bool>    _invalidated;
+
   protected:
 	/* default constructor for derived (compound) types */
 
 	AudioRegion (Session& s, timepos_t const &, timecnt_t const &, std::string name);
+
+	bool _add_plugin (std::shared_ptr<RegionFxPlugin>, std::shared_ptr<RegionFxPlugin>, bool);
 
 	int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 };

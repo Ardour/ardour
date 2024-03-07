@@ -726,10 +726,11 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	 * each cycle). Session Export uses one, and the GUI requires
 	 * buffers (for plugin-analysis, auditioner updates) but not
 	 * concurrently.
+	 * Last but not least, the butler needs one for RegionFX.
 	 *
-	 * In theory (hw + 3) should be sufficient, let's add one for luck.
+	 * In theory (hw + 4) should be sufficient, let's add one for luck.
 	 */
-	BufferManager::init (hardware_concurrency () + 4);
+	BufferManager::init (hardware_concurrency () + 5);
 
 	PannerManager::instance ().discover_panners ();
 

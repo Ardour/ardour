@@ -715,19 +715,17 @@ DiskReader::overwrite_existing_audio ()
 	boost::scoped_array<float>  gain_buffer (new float[to_overwrite]);
 	uint32_t                    n   = 0;
 	bool                        ret = true;
-	samplepos_t                 start;
+	samplepos_t                 start = overwrite_sample;
 
-	for (auto const& chan : *c) {
-		Sample*            buf = chan->rbuf->buffer ();
-		ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (chan);
+	if (chunk1_cnt) {
+		for (auto const& chan : *c) {
+			Sample*            buf = chan->rbuf->buffer ();
+			ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (chan);
 
-		/* Note that @p start is passed by reference and will be
-		 * updated by the ::audio_read() call
-		 */
-
-		start = overwrite_sample;
-
-		if (chunk1_cnt) {
+			/* Note that @p start is passed by reference and will be
+			 * updated by the ::audio_read() call
+			 */
+			start = overwrite_sample;
 			if (audio_read (sum_buffer.get (), mixdown_buffer.get (), gain_buffer.get (), start, chunk1_cnt, rci, n, reversed) != (samplecnt_t)chunk1_cnt) {
 				error << string_compose (_("DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"), id (), chunk1_cnt, overwrite_sample) << endmsg;
 				ret = false;
@@ -735,9 +733,21 @@ DiskReader::overwrite_existing_audio ()
 				continue;
 			}
 			memcpy (buf + chunk1_offset, sum_buffer.get (), sizeof (float) * chunk1_cnt);
+		++n;
 		}
+	}
+
+	overwrite_sample = start;
+
+	/* sequence read chunks. first read data at same position for all channels */
+
+	n = 0;
+	for (auto const& chan : *c) {
+		Sample*            buf = chan->rbuf->buffer ();
+		ReaderChannelInfo* rci = dynamic_cast<ReaderChannelInfo*> (chan);
 
 		if (chunk2_cnt) {
+			start = overwrite_sample;
 			if (audio_read (sum_buffer.get (), mixdown_buffer.get (), gain_buffer.get (), start, chunk2_cnt, rci, n, reversed) != (samplecnt_t)chunk2_cnt) {
 				error << string_compose (_("DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"), id (), chunk2_cnt, overwrite_sample) << endmsg;
 				ret = false;
