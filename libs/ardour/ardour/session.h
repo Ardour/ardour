@@ -414,6 +414,8 @@ public:
 
 	void maybe_write_autosave ();
 
+	PBD::Signal0<void> SurroundObjectCountChanged;
+
 	/* Emitted when all i/o connections are complete */
 
 	PBD::Signal0<void> IOConnectionsComplete;
