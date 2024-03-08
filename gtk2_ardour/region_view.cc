@@ -237,6 +237,7 @@ RegionView::init (bool wfd)
 	//set_height (trackview.current_height());
 
 	_region->PropertyChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::region_changed, this, _1), gui_context());
+	_region->RegionFxChanged.connect (*this, invalidator (*this), boost::bind (&RegionView::region_renamed, this), gui_context());
 
 	/* derived class calls set_colors () including RegionView::set_colors() in ::init() */
 	//set_colors ();
@@ -790,6 +791,9 @@ RegionView::make_name () const
 
 	if (_region->muted()) {
 		str = std::string(u8"\U0001F507") + str; // SPEAKER WITH CANCELLATION STROKE
+	}
+	if (_region->has_region_fx()) {
+		str = str + " (Fx)";
 	}
 
 	return str;
