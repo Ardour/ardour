@@ -538,7 +538,6 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 		URIMap::URIDs const& urids = URIMap::instance ().urids;
 		forge_int_msg (urids.surr_Settings, urids.surr_ChannelCount, _current_n_channels);
 #endif
-		_session.SurroundObjectCountChanged();  //EMIT SIGNAL
 	}
 
 	if (_have_au_renderer && _binaural_render_control->get_value () != 0 && _output_format_control->get_value () != 0) {
