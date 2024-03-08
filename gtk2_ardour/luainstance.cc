@@ -826,6 +826,9 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.endClass ()
 
 		.deriveClass <RegionView, TimeAxisViewItem> ("RegionView")
+		.addFunction ("show_region_editor", &RegionView::show_region_editor)
+		.addFunction ("hide_region_editor", &RegionView::hide_region_editor)
+		.addFunction ("edit_region_fx", &RegionView::edit_region_fx)
 		.endClass ()
 
 		.deriveClass <RouteUI, Selectable> ("RouteUI")

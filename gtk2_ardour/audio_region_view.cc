@@ -36,6 +36,7 @@
 #include "ardour/audioregion.h"
 #include "ardour/audiosource.h"
 #include "ardour/profile.h"
+#include "ardour/region_fx_plugin.h"
 #include "ardour/session.h"
 
 #include "pbd/memento_command.h"
@@ -70,6 +71,7 @@
 #include "audio_time_axis.h"
 #include "rgb_macros.h"
 #include "gui_thread.h"
+#include "plugin_window_proxy.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -1701,6 +1703,38 @@ AudioRegionView::show_region_editor ()
 
 	editor->present ();
 	editor->show_all();
+}
+
+void
+AudioRegionView::edit_region_fx (uint32_t n)
+{
+	std::shared_ptr<RegionFxPlugin> rfx = std::dynamic_pointer_cast<RegionFxPlugin>(audio_region ()->nth_plugin (n));
+	if (!rfx) {
+		return;
+	}
+	PluginWindowProxy* pwp;
+
+	if (rfx->window_proxy ()) {
+		pwp = dynamic_cast<PluginWindowProxy*> (rfx->window_proxy ());
+	} else {
+		pwp = new PluginWindowProxy (string_compose ("RFX-%1", rfx->id ()), region()->name (), rfx);
+	}
+
+	const XMLNode* ui_xml = rfx->session ().extra_xml (X_("UI"));
+	if (ui_xml) {
+		pwp->set_state (*ui_xml, 0);
+	}
+
+	rfx->set_window_proxy (pwp);
+	WM::Manager::instance ().register_window (pwp);
+
+	pwp->set_custom_ui_mode (true);
+	pwp->show_the_right_window ();
+	Gtk::Window* tlw = trackview.editor().current_toplevel();
+	if (tlw) {
+		pwp->set_transient_for (*tlw);
+	}
+	RegionViewGoingAway.connect_same_thread (*this, [pwp] (RegionView*) { pwp->hide (); });
 }
 
 void

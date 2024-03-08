@@ -117,6 +117,8 @@ public:
 
 	void show_region_editor ();
 
+	void edit_region_fx (uint32_t);
+
 	void     set_frame_color ();
 	uint32_t get_fill_color () const;
 

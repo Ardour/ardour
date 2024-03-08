@@ -91,6 +91,8 @@ public:
 	virtual void show_region_editor ();
 	void hide_region_editor ();
 
+	virtual void edit_region_fx (uint32_t) {}
+
 	virtual void region_changed (const PBD::PropertyChange&);
 
 	virtual GhostRegion* add_ghost (TimeAxisView&) = 0;
