@@ -68,7 +68,7 @@ SimpleExportDialog::SimpleExportDialog (PublicEditor& editor, bool vapor_export)
 	/* clang-format off */
 	t->attach (LBL ("Format preset:"),  0, 1, r, r + 1, FILL,          SHRINK, 0, 0);
 	if (_vapor_export) {
-		t->attach (LBL ("ADM/BWF"),       1, 2, r, r + 1, EXPAND,        SHRINK, 0, 0);
+		t->attach (LBL ("ADM BWF"),       1, 2, r, r + 1, EXPAND,        SHRINK, 0, 0);
 	} else {
 		t->attach (_eps.the_combo (),     1, 2, r, r + 1, EXPAND | FILL, SHRINK, 0, 0);
 	}
@@ -161,7 +161,7 @@ SimpleExportDialog::set_session (ARDOUR::Session* s)
 	}
 
 	if (_vapor_export && (s->surround_master ()->surround_return ()->total_n_channels () > 128)) {
-		set_error ("Error: ADM/BWN files cannot contain more than 128 channels.");
+		set_error ("Error: ADM BWF files cannot contain more than 128 channels.");
 		return;
 	}
 
