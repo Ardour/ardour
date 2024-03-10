@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Adrien Gesta-Fline
+ * Copyright (C) 2017-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -22,18 +22,16 @@
 #define __LibCFB_h__
 
 #include <stdint.h>
-#include <wchar.h>
+#include <stdlib.h>
+#include <string.h>
 
-#include "aaf/debug.h"
+#include "aaf/log.h"
 
 #if defined(__linux__)
+#include <limits.h>
 #include <linux/limits.h>
 #elif defined(__APPLE__)
 #include <sys/syslimits.h>
-#elif defined(_MSC_VER) // MSVC
-#include <windows.h>    // MAX_PATH
-#include <limits.h>
-#define PATH_MAX MAX_PATH // TODO: can we get rid of it ?
 #elif defined(_WIN32)
 #include <windows.h> // MAX_PATH
 #include <limits.h>
@@ -50,8 +48,6 @@
  * @addtogroup LibCFB
  * @{
  */
-
-#define CFB_W16TOWCHAR_STRLEN SIZE_MAX
 
 /**
  * Class Identifier structure.
@@ -456,9 +452,6 @@ typedef struct StructuredStorageDirectoryEntry {
 	 *
 	 * A 64-byte array, for a maximum of 32 Unicode characters including a terminating
 	 * Unicode NULL character. The string shall be padded with zeros to fill the array.
-	 *
-	 *  Should be wchar_t, but on linux wchar_t is 32 bits wide as opposed to windows
-	 *  (and thus CFB) defining wchar_t to 16 bits. Conversion is done by cfb_w16towchar()
 	 */
 
 	uint16_t _ab[CFB_NODE_NAME_SZ];
@@ -571,7 +564,7 @@ typedef struct CFB_Data {
 	 * CFB file path.
 	 */
 
-	char file[PATH_MAX + 1];
+	char* file;
 
 	/**
 	 * CFB file size.
@@ -639,7 +632,7 @@ typedef struct CFB_Data {
 
 	cfbNode* nodes;
 
-	struct dbg* dbg;
+	struct aafLog* log;
 
 } CFB_Data;
 
@@ -657,7 +650,7 @@ typedef struct CFB_Data {
  * @param id   Index of the first sector in the Chain.
  */
 
-#define cfb_foreachSectorInChain(cfbd, buf, id) \
+#define CFB_foreachSectorInChain(cfbd, buf, id) \
 	for (buf = cfb_getSector (cfbd, id);    \
 	     id < CFB_MAX_REG_SECT &&           \
 	     buf != NULL;                       \
@@ -673,7 +666,7 @@ typedef struct CFB_Data {
  * @param id   Index of the first mini-sector in the Chain.
  */
 
-#define cfb_foreachMiniSectorInChain(cfbd, buf, id) \
+#define CFB_foreachMiniSectorInChain(cfbd, buf, id) \
 	for (buf = cfb_getMiniSector (cfbd, id);    \
 	     id < CFB_MAX_REG_SECT;                 \
 	     id = cfbd->miniFat[id],                \
@@ -690,7 +683,7 @@ typedef struct CFB_Data {
  *             sector data.
  */
 
-#define cfb_foreachSectorInDiFATChain(cfbd, buf, id)                                       \
+#define CFB_foreachSectorInDiFATChain(cfbd, buf, id)                                       \
 	for (id = cfbd->hdr->_sectDifStart,                                                \
 	    buf = cfb_getSector (cfbd, id);                                                \
 	     id < CFB_MAX_REG_SECT;                                                        \
@@ -705,7 +698,7 @@ typedef struct CFB_Data {
  * @param id   Index of each FAT sector.
  */
 
-#define cfb_foreachFATSectorIDInDiFAT(cfbd, id) \
+#define CFB_foreachFATSectorIDInDiFAT(cfbd, id) \
 	for (id = 0;                            \
 	     id < cfbd->DiFAT_sz &&             \
 	     id < cfbd->hdr->_csectFat;         \
@@ -716,21 +709,21 @@ typedef struct CFB_Data {
  * When 512 bytes sectors we don't care about _ulSizeHigh.
  */
 
-#define cfb_getNodeStreamLen(cfbd, node) \
+#define CFB_getNodeStreamLen(cfbd, node) \
 	((cfbd->hdr->_uSectorShift > 9) ? (uint64_t) (((uint64_t) (node->_ulSizeHigh) << 32) | (node->_ulSizeLow)) : node->_ulSizeLow)
 
-#define cfb_getStreamSectorShift(cfbd, node) \
-	((cfb_getNodeStreamLen (cfbd, node) < cfbd->hdr->_ulMiniSectorCutoff) ? cfbd->hdr->_uMiniSectorShift : cfbd->hdr->_uSectorShift)
+#define CFB_getStreamSectorShift(cfbd, node) \
+	((CFB_getNodeStreamLen (cfbd, node) < cfbd->hdr->_ulMiniSectorCutoff) ? cfbd->hdr->_uMiniSectorShift : cfbd->hdr->_uSectorShift)
 
 /*
  * @}
  */
 
-const wchar_t*
+const char*
 cfb_CLSIDToText (const cfbCLSID_t* clsid);
 
-wchar_t*
-cfb_w16towchar (wchar_t* buf, uint16_t* w16buf, size_t w16blen);
+char*
+cfb_w16toUTF8 (const uint16_t* w16buf, size_t w16blen);
 
 /**
  * @name Constructor function
@@ -739,7 +732,7 @@ cfb_w16towchar (wchar_t* buf, uint16_t* w16buf, size_t w16blen);
  */
 
 CFB_Data*
-cfb_alloc (struct dbg* dbg);
+cfb_alloc (struct aafLog* log);
 
 /**
  * @}
@@ -783,7 +776,7 @@ cfb_getStream (CFB_Data* cfbd, cfbNode* node, unsigned char** stream, uint64_t* 
 int
 cfb__foreachSectorInStream (CFB_Data* cfbd, cfbNode* node, unsigned char** buf, size_t* bytesRead, cfbSectorID_t* sectID);
 
-#define cfb_foreachSectorInStream(cfbd, node, buf, bytesRead, sectID) \
+#define CFB_foreachSectorInStream(cfbd, node, buf, bytesRead, sectID) \
 	while (cfb__foreachSectorInStream (cfbd, node, buf, bytesRead, sectID))
 
 /**
@@ -794,10 +787,10 @@ cfb__foreachSectorInStream (CFB_Data* cfbd, cfbNode* node, unsigned char** buf, 
  */
 
 cfbNode*
-cfb_getNodeByPath (CFB_Data* cfbd, const wchar_t* name, cfbSID_t id);
+cfb_getNodeByPath (CFB_Data* cfbd, const char* path, cfbSID_t id);
 
 cfbNode*
-cfb_getChildNode (CFB_Data* cfbd, const wchar_t* name, cfbNode* startNode);
+cfb_getChildNode (CFB_Data* cfbd, const char* name, cfbNode* startNode);
 
 /**
  * @}

@@ -19,18 +19,19 @@ libaaf_sources = [
 	'AAFClass.c',
 	'AAFCore.c',
 	'AAFDump.c',
-	'AAFIAudioFiles.c',
+	'AAFIEssenceFile.c',
 	'AAFIface.c',
 	'AAFIParser.c',
 	'AAFToText.c',
 	'CFBDump.c',
 	'LibCFB.c',
 	'ProTools.c',
+	'MediaComposer.c',
 	'Resolve.c',
 	'RIFFParser.c',
 	'URIParser.c',
 	'utils.c',
-	'debug.c',
+	'log.c',
 ]
 
 def options(opt):

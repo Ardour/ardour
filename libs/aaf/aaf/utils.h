@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Adrien Gesta-Fline
+ * Copyright (C) 2017-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -21,9 +21,10 @@
 #ifndef __utils_h__
 #define __utils_h__
 
-#include "aaf/AAFTypes.h"
 #include <stdarg.h>
 #include <stdint.h>
+
+#include "aaf/AAFTypes.h"
 
 #ifdef __cplusplus
 extern "C" {
@@ -32,76 +33,89 @@ extern "C" {
 #ifdef _WIN32
 #define DIR_SEP '\\'
 #define DIR_SEP_STR "\\"
-/*
-	 * swprintf() specific string format identifiers
-	 * https://learn.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions?view=msvc-170#type
-	 */
-#define WPRIs L"S" // char*
-#ifdef XBUILD_WIN
-#define WPRIws L"s" // wchar_t*
-#else
-#define WPRIws L"ls" // wchar_t*
-#endif
 #else
 #define DIR_SEP '/'
 #define DIR_SEP_STR "/"
-/*
-	 * swprintf() specific string format identifiers
-	 * https://learn.microsoft.com/en-us/cpp/c-runtime-library/format-specification-syntax-printf-and-wprintf-functions?view=msvc-170#type
-	 */
-#define WPRIs L"s"   // char*
-#define WPRIws L"ls" // wchar_t*
 #endif
+
+#if defined(__linux__)
+#include <limits.h>
+#include <linux/limits.h>
+#elif defined(__APPLE__)
+#include <sys/syslimits.h>
+#elif defined(_WIN32)
+#include <windows.h> // MAX_PATH
+#include <limits.h>
+#include <wchar.h>
+#endif
+
+#define AAF_DIR_SEP '/'
+#define AAF_DIR_SEP_STR "/"
 
 #define IS_DIR_SEP(c) \
 	((((c) == DIR_SEP) || ((c) == '/')))
 
-#define ANSI_COLOR_RED(dbg) (((dbg)->ansicolor) ? "\033[38;5;124m" : "") //"\x1b[31m"
-#define ANSI_COLOR_GREEN(dbg) (((dbg)->ansicolor) ? "\x1b[92m" : "")
-#define ANSI_COLOR_YELLOW(dbg) (((dbg)->ansicolor) ? "\x1b[33m" : "") //"\x1b[93m"
-#define ANSI_COLOR_ORANGE(dbg) (((dbg)->ansicolor) ? "\033[38;5;130m" : "")
-#define ANSI_COLOR_BLUE(dbg) (((dbg)->ansicolor) ? "\x1b[34m" : "")
-#define ANSI_COLOR_MAGENTA(dbg) (((dbg)->ansicolor) ? "\x1b[35m" : "")
-#define ANSI_COLOR_CYAN(dbg) (((dbg)->ansicolor) ? "\033[38;5;81m" : "") //"\x1b[36m"
-#define ANSI_COLOR_DARKGREY(dbg) (((dbg)->ansicolor) ? "\x1b[38;5;242m" : "")
-#define ANSI_COLOR_BOLD(dbg) (((dbg)->ansicolor) ? "\x1b[1m" : "")
-#define ANSI_COLOR_RESET(dbg) (((dbg)->ansicolor) ? "\x1b[0m" : "")
+#define IS_ANY_DIR_SEP(c) \
+	((((c) == '/') || ((c) == '\\')))
 
-aafPosition_t
-laaf_util_converUnit (aafPosition_t value, aafRational_t* valueEditRate, aafRational_t* destEditRate);
+#define ANSI_COLOR_RED(log) (((log)->ansicolor) ? "\x1b[38;5;124m" : "")
+#define ANSI_COLOR_GREEN(log) (((log)->ansicolor) ? "\x1b[92m" : "")
+#define ANSI_COLOR_YELLOW(log) (((log)->ansicolor) ? "\x1b[33m" : "")
+#define ANSI_COLOR_ORANGE(log) (((log)->ansicolor) ? "\x1b[38;5;130m" : "")
+#define ANSI_COLOR_BLUE(log) (((log)->ansicolor) ? "\x1b[34m" : "")
+#define ANSI_COLOR_MAGENTA(log) (((log)->ansicolor) ? "\x1b[35m" : "")
+#define ANSI_COLOR_CYAN(log) (((log)->ansicolor) ? "\x1b[38;5;81m" : "")
+#define ANSI_COLOR_DARKGREY(log) (((log)->ansicolor) ? "\x1b[38;5;242m" : "")
+#define ANSI_COLOR_BOLD(log) (((log)->ansicolor) ? "\x1b[1m" : "")
+#define ANSI_COLOR_RESET(log) (((log)->ansicolor) ? (log->color_reset) ? log->color_reset : "\x1b[0m" : "")
+
+#define TREE_LINE "\xe2\x94\x82"                               /* │ */
+#define TREE_PADDED_LINE "\xe2\x94\x82\x20\x20"                /* │   */
+#define TREE_ENTRY "\xe2\x94\x9c\xe2\x94\x80\xe2\x94\x80"      /* ├── */
+#define TREE_LAST_ENTRY "\xe2\x94\x94\xe2\x94\x80\xe2\x94\x80" /* └── */
+
+size_t
+laaf_util_utf8strCharLen (const char* u8str);
 
 char*
-laaf_util_wstr2str (const wchar_t* wstr);
+laaf_util_utf16Toutf8 (const uint16_t* u16str);
 
+#ifdef _WIN32
 wchar_t*
-laaf_util_str2wstr (const char* str);
+laaf_util_windows_utf8toutf16 (const char* str);
+char*
+laaf_util_windows_utf16toutf8 (const wchar_t* wstr);
+#endif
 
 int
-laaf_util_wstr_contains_nonlatin (const wchar_t* str);
+laaf_util_file_exists (const char* filepath);
 
 char*
 laaf_util_clean_filename (char* filename);
 
-const char*
-laaf_util_fop_get_file (const char* filepath);
-
 int
-laaf_util_fop_is_wstr_fileext (const wchar_t* filepath, const wchar_t* ext);
+laaf_util_is_fileext (const char* filepath, const char* ext);
 
 char*
 laaf_util_build_path (const char* sep, const char* first, ...);
 
-int
-laaf_util_snprintf_realloc (char** str, int* size, size_t offset, const char* format, ...);
+char*
+laaf_util_relative_path (const char* filepath, const char* refpath);
 
-int
-laaf_util_vsnprintf_realloc (char** str, int* size, int offset, const char* fmt, va_list* args);
+char*
+laaf_util_absolute_path (const char* relpath);
 
 char*
 laaf_util_c99strdup (const char* src);
 
 int
-laaf_util_dump_hex (const unsigned char* stream, size_t stream_sz, char** buf, int* bufsz, int offset);
+laaf_util_snprintf_realloc (char** str, size_t* size, size_t offset, const char* format, ...);
+
+int
+laaf_util_vsnprintf_realloc (char** str, size_t* size, size_t offset, const char* fmt, va_list args);
+
+int
+laaf_util_dump_hex (const unsigned char* stream, size_t stream_sz, char** buf, size_t* bufsz, size_t offset, const char* padding);
 
 #ifdef __cplusplus
 }

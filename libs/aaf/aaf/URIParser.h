@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Adrien Gesta-Fline
+ * Copyright (C) 2023-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -21,7 +21,17 @@
 #ifndef URI_PARSER_H
 #define URI_PARSER_H
 
-#include "aaf/debug.h"
+#include "aaf/log.h"
+
+#if defined(__linux__)
+#include <limits.h>
+#include <linux/limits.h>
+#elif defined(__APPLE__)
+#include <sys/syslimits.h>
+#elif defined(_WIN32)
+#include <windows.h> // MAX_PATH
+#include <limits.h>
+#endif
 
 #define MAX_URI_LENGTH 64000
 
@@ -118,25 +128,9 @@ struct uri {
 };
 
 struct uri*
-uriParse (const char*, enum uri_option, struct dbg* dbg);
+laaf_uri_parse (const char*, enum uri_option, struct aafLog* log);
 
 void
-uriFree (struct uri*);
-
-/*
- * if dst is NULL of equals src, then encoded source string will be overwritten
- * by decoded string.
- */
-char*
-uriDecodeString (char* src, char* dst);
-
-char*
-uriDecodeWString (wchar_t* src, wchar_t* dst);
-
-int
-uriIsIPv4 (const char* s, int size, char** err);
-
-int
-uriIsIPv6 (const char* s, int size, char** err);
+laaf_uri_free (struct uri*);
 
 #endif // ! URI_PARSER_H

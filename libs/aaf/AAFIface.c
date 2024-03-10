@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Adrien Gesta-Fline
+ * Copyright (C) 2017-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -39,13 +39,14 @@
  */
 
 #include <errno.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 #include "aaf/AAFIParser.h"
 #include "aaf/AAFIface.h"
-#include "aaf/debug.h"
+#include "aaf/log.h"
 #include "aaf/utils.h"
 
 #ifdef _WIN32
@@ -55,47 +56,47 @@
 #endif
 
 #define debug(...) \
-	_dbg (aafi->dbg, aafi, DEBUG_SRC_ID_AAF_IFACE, VERB_DEBUG, __VA_ARGS__)
+	AAF_LOG (aafi->log, aafi, DEBUG_SRC_ID_AAF_IFACE, VERB_DEBUG, __VA_ARGS__)
 
 #define warning(...) \
-	_dbg (aafi->dbg, aafi, DEBUG_SRC_ID_AAF_IFACE, VERB_WARNING, __VA_ARGS__)
+	AAF_LOG (aafi->log, aafi, DEBUG_SRC_ID_AAF_IFACE, VERB_WARNING, __VA_ARGS__)
 
 #define error(...) \
-	_dbg (aafi->dbg, aafi, DEBUG_SRC_ID_AAF_IFACE, VERB_ERROR, __VA_ARGS__)
+	AAF_LOG (aafi->log, aafi, DEBUG_SRC_ID_AAF_IFACE, VERB_ERROR, __VA_ARGS__)
 
 AAF_Iface*
 aafi_alloc (AAF_Data* aafd)
 {
-	AAF_Iface* aafi = calloc (sizeof (AAF_Iface), sizeof (unsigned char));
+	AAF_Iface* aafi = calloc (1, sizeof (AAF_Iface));
 
-	if (aafi == NULL) {
+	if (!aafi) {
 		return NULL;
 	}
 
-	aafi->dbg = laaf_new_debug ();
+	aafi->log = laaf_new_log ();
 
-	if (aafi->dbg == NULL) {
+	if (!aafi->log) {
 		goto err;
 	}
 
-	aafi->Audio = calloc (sizeof (aafiAudio), sizeof (unsigned char));
+	aafi->Audio = calloc (1, sizeof (aafiAudio));
 
-	if (aafi->Audio == NULL) {
+	if (!aafi->Audio) {
 		goto err;
 	}
 
-	aafi->Video = calloc (sizeof (aafiVideo), sizeof (unsigned char));
+	aafi->Video = calloc (1, sizeof (aafiVideo));
 
-	if (aafi->Video == NULL) {
+	if (!aafi->Video) {
 		goto err;
 	}
 
-	if (aafd != NULL) {
+	if (aafd) {
 		aafi->aafd = aafd;
 	} else {
-		aafi->aafd = aaf_alloc (aafi->dbg);
+		aafi->aafd = aaf_alloc (aafi->log);
 
-		if (aafi->aafd == NULL) {
+		if (!aafi->aafd) {
 			goto err;
 		}
 	}
@@ -109,19 +110,30 @@ err:
 }
 
 void
-aafi_set_debug (AAF_Iface* aafi, verbosityLevel_e v, int ansicolor, FILE* fp, void (*callback) (struct dbg* dbg, void* ctxdata, int lib, int type, const char* srcfile, const char* srcfunc, int lineno, const char* msg, void* user), void* user)
+aafi_set_debug (AAF_Iface* aafi, verbosityLevel_e v, int ansicolor, FILE* fp, void (*callback) (struct aafLog* log, void* ctxdata, int lib, int type, const char* srcfile, const char* srcfunc, int lineno, const char* msg, void* user), void* user)
 {
-	aafi->dbg->verb      = v;
-	aafi->dbg->ansicolor = ansicolor;
-	aafi->dbg->fp        = fp;
+	if (!aafi) {
+		return;
+	}
+
+	aafi->log->verb      = v;
+	aafi->log->ansicolor = ansicolor;
+	aafi->log->fp        = fp;
 
 	if (callback) {
-		aafi->dbg->debug_callback = callback;
+		aafi->log->debug_callback = callback;
 	}
 
 	if (user) {
-		aafi->dbg->user = user;
+		aafi->log->user = user;
 	}
+
+#ifdef _WIN32
+	/* we dont want junk bytes to be printed to a windows file */
+	if (fp != stdout && fp != stderr) {
+		aafi->log->ansicolor = 0;
+	}
+#endif
 }
 
 int
@@ -130,17 +142,17 @@ aafi_set_option_int (AAF_Iface* aafi, const char* optname, int val)
 	if (strcmp (optname, "trace") == 0) {
 		aafi->ctx.options.trace = val;
 		return 0;
-	} else if (strcmp (optname, "trace_meta") == 0) {
-		aafi->ctx.options.trace_meta = val;
+	} else if (strcmp (optname, "dump_meta") == 0) {
+		aafi->ctx.options.dump_meta = val;
 		return 0;
-	} else if (strcmp (optname, "forbid_nonlatin_filenames") == 0) {
-		aafi->ctx.options.forbid_nonlatin_filenames = val;
+	} else if (strcmp (optname, "dump_tagged_value") == 0) {
+		aafi->ctx.options.dump_tagged_value = val;
 		return 0;
 	} else if (strcmp (optname, "protools") == 0) {
 		aafi->ctx.options.protools = val;
 		return 0;
-	} else if (strcmp (optname, "resolve") == 0) {
-		aafi->ctx.options.resolve = val;
+	} else if (strcmp (optname, "mobid_essence_filename") == 0) {
+		aafi->ctx.options.mobid_essence_filename = val;
 		return 0;
 	}
 
@@ -151,43 +163,28 @@ int
 aafi_set_option_str (AAF_Iface* aafi, const char* optname, const char* val)
 {
 	if (strcmp (optname, "media_location") == 0) {
-		if (aafi->ctx.options.media_location) {
-			free (aafi->ctx.options.media_location);
-		}
+		free (aafi->ctx.options.media_location);
+		aafi->ctx.options.media_location = laaf_util_c99strdup (val);
 
-		aafi->ctx.options.media_location = (val) ? laaf_util_c99strdup (val) : NULL;
+		if (val && !aafi->ctx.options.media_location) {
+			return -1;
+		}
 
 		return 0;
 	} else if (strcmp (optname, "dump_class_aaf_properties") == 0) {
-		if (aafi->ctx.options.dump_class_aaf_properties) {
-			free (aafi->ctx.options.dump_class_aaf_properties);
-			aafi->ctx.options.dump_class_aaf_properties = NULL;
-		}
+		free (aafi->ctx.options.dump_class_aaf_properties);
+		aafi->ctx.options.dump_class_aaf_properties = laaf_util_c99strdup (val);
 
-		if (val == NULL) {
-			return 0;
-		}
-
-		aafi->ctx.options.dump_class_aaf_properties = laaf_util_str2wstr (val);
-
-		if (aafi->ctx.options.dump_class_aaf_properties == NULL) {
+		if (val && !aafi->ctx.options.dump_class_aaf_properties) {
 			return -1;
 		}
 
 		return 0;
 	} else if (strcmp (optname, "dump_class_raw_properties") == 0) {
-		if (aafi->ctx.options.dump_class_raw_properties) {
-			free (aafi->ctx.options.dump_class_raw_properties);
-			aafi->ctx.options.dump_class_raw_properties = NULL;
-		}
+		free (aafi->ctx.options.dump_class_raw_properties);
+		aafi->ctx.options.dump_class_raw_properties = laaf_util_c99strdup (val);
 
-		if (val == NULL) {
-			return 0;
-		}
-
-		aafi->ctx.options.dump_class_raw_properties = laaf_util_str2wstr (val);
-
-		if (aafi->ctx.options.dump_class_raw_properties == NULL) {
+		if (val && !aafi->ctx.options.dump_class_raw_properties) {
 			return -1;
 		}
 
@@ -197,81 +194,10 @@ aafi_set_option_str (AAF_Iface* aafi, const char* optname, const char* val)
 	return 1;
 }
 
-void
-aafi_release (AAF_Iface** aafi)
-{
-	if (*aafi == NULL) {
-		return;
-	}
-
-	aaf_release (&(*aafi)->aafd);
-
-	if ((*aafi)->compositionName != NULL) {
-		free ((*aafi)->compositionName);
-	}
-
-	if ((*aafi)->Comments) {
-		aafi_freeUserComments (&((*aafi)->Comments));
-	}
-
-	if ((*aafi)->Audio != NULL) {
-		if ((*aafi)->Audio->Tracks != NULL) {
-			aafi_freeAudioTracks (&(*aafi)->Audio->Tracks);
-		}
-
-		if ((*aafi)->Audio->Essences != NULL) {
-			aafi_freeAudioEssences (&(*aafi)->Audio->Essences);
-		}
-
-		free ((*aafi)->Audio);
-	}
-
-	if ((*aafi)->Video != NULL) {
-		if ((*aafi)->Video->Tracks != NULL) {
-			aafi_freeVideoTracks (&(*aafi)->Video->Tracks);
-		}
-
-		if ((*aafi)->Video->Essences != NULL) {
-			aafi_freeVideoEssences (&(*aafi)->Video->Essences);
-		}
-
-		free ((*aafi)->Video);
-	}
-
-	if ((*aafi)->Markers) {
-		aafi_freeMarkers (&(*aafi)->Markers);
-	}
-
-	if ((*aafi)->ctx.options.dump_class_aaf_properties) {
-		free ((*aafi)->ctx.options.dump_class_aaf_properties);
-	}
-
-	if ((*aafi)->ctx.options.dump_class_raw_properties) {
-		free ((*aafi)->ctx.options.dump_class_raw_properties);
-	}
-
-	if ((*aafi)->ctx.options.media_location) {
-		free ((*aafi)->ctx.options.media_location);
-	}
-
-	if ((*aafi)->Timecode != NULL) {
-		free ((*aafi)->Timecode);
-	}
-
-	if ((*aafi)->dbg) {
-		laaf_free_debug ((*aafi)->dbg);
-	}
-
-	free (*aafi);
-
-	*aafi = NULL;
-}
-
 int
 aafi_load_file (AAF_Iface* aafi, const char* file)
 {
-	if (aaf_load_file (aafi->aafd, file)) {
-		error ("Could not load file : %s\n", file);
+	if (!aafi || !file || aaf_load_file (aafi->aafd, file)) {
 		return 1;
 	}
 
@@ -280,9 +206,84 @@ aafi_load_file (AAF_Iface* aafi, const char* file)
 	return 0;
 }
 
-aafiTransition*
-aafi_get_fadein (aafiTimelineItem* audioItem)
+void
+aafi_release (AAF_Iface** aafi)
 {
+	if (!aafi || !(*aafi)) {
+		return;
+	}
+
+	aaf_release (&(*aafi)->aafd);
+
+	if ((*aafi)->Audio != NULL) {
+		aafi_freeAudioTracks (&(*aafi)->Audio->Tracks);
+		aafi_freeAudioEssences (&(*aafi)->Audio->essenceFiles);
+
+		free ((*aafi)->Audio);
+	}
+
+	if ((*aafi)->Video != NULL) {
+		aafi_freeVideoTracks (&(*aafi)->Video->Tracks);
+		aafi_freeVideoEssences (&(*aafi)->Video->essenceFiles);
+
+		free ((*aafi)->Video);
+	}
+
+	aafi_freeMarkers (&(*aafi)->Markers);
+	aafi_freeMetadata (&((*aafi)->metadata));
+
+	free ((*aafi)->compositionName);
+
+	free ((*aafi)->ctx.options.dump_class_aaf_properties);
+	free ((*aafi)->ctx.options.dump_class_raw_properties);
+	free ((*aafi)->ctx.options.media_location);
+	free ((*aafi)->Timecode);
+
+	laaf_free_log ((*aafi)->log);
+
+	free (*aafi);
+
+	*aafi = NULL;
+}
+
+aafiAudioClip*
+aafi_timelineItemToAudioClip (aafiTimelineItem* audioItem)
+{
+	if (!audioItem || audioItem->type != AAFI_AUDIO_CLIP) {
+		return NULL;
+	}
+
+	return audioItem->data;
+}
+
+aafiTransition*
+aafi_timelineItemToCrossFade (aafiTimelineItem* audioItem)
+{
+	if (!audioItem || audioItem->type != AAFI_TRANS) {
+		return NULL;
+	}
+
+	aafiTransition* Trans = audioItem->data;
+
+	if (!Trans || !(Trans->flags & AAFI_TRANS_XFADE))
+		return NULL;
+
+	return Trans;
+}
+
+aafiTransition*
+aafi_getFadeIn (aafiAudioClip* audioClip)
+{
+	if (!audioClip) {
+		return NULL;
+	}
+
+	aafiTimelineItem* audioItem = audioClip->timelineItem;
+
+	if (!audioItem) {
+		return NULL;
+	}
+
 	if (audioItem->prev != NULL &&
 	    audioItem->prev->type == AAFI_TRANS) {
 		aafiTransition* Trans = audioItem->prev->data;
@@ -295,8 +296,18 @@ aafi_get_fadein (aafiTimelineItem* audioItem)
 }
 
 aafiTransition*
-aafi_get_fadeout (aafiTimelineItem* audioItem)
+aafi_getFadeOut (aafiAudioClip* audioClip)
 {
+	if (!audioClip) {
+		return NULL;
+	}
+
+	aafiTimelineItem* audioItem = audioClip->timelineItem;
+
+	if (!audioItem) {
+		return NULL;
+	}
+
 	if (audioItem->next != NULL &&
 	    audioItem->next->type == AAFI_TRANS) {
 		aafiTransition* Trans = audioItem->next->data;
@@ -308,347 +319,219 @@ aafi_get_fadeout (aafiTimelineItem* audioItem)
 	return NULL;
 }
 
-aafiTransition*
-aafi_get_xfade (aafiTimelineItem* audioItem)
-{
-	if (audioItem->prev != NULL &&
-	    audioItem->prev->type == AAFI_TRANS) {
-		aafiTransition* Trans = audioItem->prev->data;
-
-		if (Trans->flags & AAFI_TRANS_XFADE)
-			return Trans;
-	}
-
-	return NULL;
-}
-
-aafiMarker*
-aafi_newMarker (AAF_Iface* aafi, aafRational_t* editRate, aafPosition_t start, aafPosition_t length, wchar_t* name, wchar_t* comment, uint16_t*(RGBColor[3]))
-{
-	aafiMarker* marker = malloc (sizeof (aafiMarker));
-
-	marker->edit_rate = editRate;
-	marker->start     = start;
-	marker->length    = length;
-
-	marker->name    = name;
-	marker->comment = comment;
-
-	marker->prev = NULL;
-	marker->next = NULL;
-
-	if (RGBColor) {
-		marker->RGBColor[0] = (*RGBColor)[0];
-		marker->RGBColor[1] = (*RGBColor)[1];
-		marker->RGBColor[2] = (*RGBColor)[2];
-	}
-
-	if (aafi->Markers != NULL) {
-		aafiMarker* tmp = aafi->Markers;
-
-		for (; tmp != NULL; tmp = tmp->next)
-			if (tmp->next == NULL)
-				break;
-
-		tmp->next    = marker;
-		marker->prev = marker;
-	} else {
-		aafi->Markers = marker;
-		marker->prev  = NULL;
-	}
-
-	return marker;
-}
-
-void
-aafi_freeMarkers (aafiMarker** Markers)
-{
-	aafiMarker* marker     = NULL;
-	aafiMarker* nextMarker = NULL;
-
-	for (marker = (*Markers); marker != NULL; marker = nextMarker) {
-		nextMarker = marker->next;
-
-		if (marker->name)
-			free (marker->name);
-
-		if (marker->comment)
-			free (marker->comment);
-
-		free (marker);
-	}
-
-	*Markers = NULL;
-}
-
-aafiTimelineItem*
-aafi_newTimelineItem (AAF_Iface* aafi, void* track, int itemType)
-{
-	aafiTimelineItem* item = NULL;
-
-	if (itemType == AAFI_AUDIO_CLIP) {
-		item = calloc (sizeof (aafiTimelineItem), sizeof (char));
-
-		if (item == NULL) {
-			error ("%s.", strerror (errno));
-			return NULL;
-		}
-
-		item->type = AAFI_AUDIO_CLIP;
-
-		item->data = calloc (sizeof (aafiAudioClip), sizeof (char));
-
-		aafiAudioClip* audioClip = item->data;
-
-		audioClip->track = (aafiAudioTrack*)track;
-		audioClip->Item  = item;
-	} else if (itemType == AAFI_VIDEO_CLIP) {
-		item = calloc (sizeof (aafiTimelineItem), sizeof (char));
-
-		if (item == NULL) {
-			error ("%s.", strerror (errno));
-			return NULL;
-		}
-
-		item->type = AAFI_VIDEO_CLIP;
-
-		item->data = calloc (sizeof (aafiVideoClip), sizeof (char));
-
-		aafiVideoClip* videoClip = item->data;
-
-		videoClip->track = (aafiVideoTrack*)track;
-	} else if (itemType == AAFI_TRANS) {
-		item = calloc (sizeof (aafiTimelineItem), sizeof (char));
-
-		if (item == NULL) {
-			error ("%s.", strerror (errno));
-			return NULL;
-		}
-
-		item->type = AAFI_TRANS;
-
-		item->data = calloc (sizeof (aafiTransition), sizeof (char));
-	}
-
-	if (itemType == AAFI_AUDIO_CLIP || itemType == AAFI_TRANS) {
-		if (track != NULL) {
-			/* Add to track's item list */
-
-			if (((aafiAudioTrack*)track)->Items != NULL) {
-				aafiTimelineItem* tmp = ((aafiAudioTrack*)track)->Items;
-
-				for (; tmp != NULL; tmp = tmp->next)
-					if (tmp->next == NULL)
-						break;
-
-				tmp->next  = item;
-				item->prev = tmp;
-			} else {
-				((aafiAudioTrack*)track)->Items = item;
-				item->prev                      = NULL;
-			}
-		}
-	} else if (itemType == AAFI_VIDEO_CLIP) {
-		if (track != NULL) {
-			/* Add to track's item list */
-
-			if (((aafiVideoTrack*)track)->Items != NULL) {
-				aafiTimelineItem* tmp = ((aafiVideoTrack*)track)->Items;
-
-				for (; tmp != NULL; tmp = tmp->next)
-					if (tmp->next == NULL)
-						break;
-
-				tmp->next  = item;
-				item->prev = tmp;
-			} else {
-				((aafiVideoTrack*)track)->Items = item;
-				item->prev                      = NULL;
-			}
-		}
-	}
-
-	return item;
-}
-
 int
-aafi_removeTimelineItem (AAF_Iface* aafi, aafiTimelineItem* item)
+aafi_get_clipIndex (aafiAudioClip* audioClip)
 {
-	if (item->prev != NULL) {
-		item->prev->next = item->next;
+	if (!audioClip) {
+		return 0;
 	}
 
-	if (item->next != NULL) {
-		item->next->prev = item->prev;
-	}
+	int                      index        = 0;
+	struct aafiTimelineItem* timelineItem = NULL;
+	struct aafiAudioTrack*   track        = audioClip->track;
 
-	aafiAudioTrack* audioTrack = NULL;
-
-	foreach_audioTrack (audioTrack, aafi)
+	AAFI_foreachTrackItem (track, timelineItem)
 	{
-		if (audioTrack->Items == item) {
-			audioTrack->Items = item->next;
+		if (timelineItem->type == AAFI_AUDIO_CLIP) {
+			index++;
+		}
+		if (timelineItem->data == audioClip) {
+			return index;
 		}
 	}
-
-	aafi_freeTimelineItem (&item);
 
 	return 0;
 }
 
-void
-aafi_freeAudioGain (aafiAudioGain* gain)
+aafPosition_t
+aafi_convertUnit (aafPosition_t value, aafRational_t* valueEditRate, aafRational_t* destEditRate)
 {
-	if (gain == NULL) {
-		return;
+	if (!valueEditRate || !destEditRate) {
+		return value;
 	}
 
-	if (gain->time != NULL) {
-		free (gain->time);
+	if (valueEditRate->numerator == destEditRate->numerator &&
+	    valueEditRate->denominator == destEditRate->denominator) {
+		/* same rate, no conversion */
+		return value;
 	}
 
-	if (gain->value != NULL) {
-		free (gain->value);
+	double valueEditRateFloat = ((valueEditRate->denominator == 0) ? 0.0 : ((float)valueEditRate->numerator / (float)valueEditRate->denominator));
+	double destEditRateFloat  = ((destEditRate->denominator == 0) ? 0.0 : ((float)destEditRate->numerator / (float)destEditRate->denominator));
+
+	if (valueEditRateFloat == 0) {
+		return 0;
 	}
 
-	free (gain);
+	return (aafPosition_t) ((double)value * (destEditRateFloat / valueEditRateFloat));
 }
 
-void
-aafi_freeAudioPan (aafiAudioPan* pan)
+uint64_t
+aafi_convertUnitUint64 (aafPosition_t value, aafRational_t* valueEditRate, aafRational_t* destEditRate)
 {
-	aafi_freeAudioGain ((aafiAudioGain*)pan);
+	if (!valueEditRate || !destEditRate) {
+		if (value < 0) {
+			/* TODO is ULONG_MAX ok for max uint64_t ? */
+			return ULONG_MAX;
+		}
+
+		return (uint64_t)value;
+	}
+
+	if (valueEditRate->numerator == destEditRate->numerator &&
+	    valueEditRate->denominator == destEditRate->denominator) {
+		/* same rate, no conversion */
+		if (value < 0) {
+			/* TODO is ULONG_MAX ok for max uint64_t ? */
+			return ULONG_MAX;
+		}
+
+		return (uint64_t)value;
+	}
+
+	double valueEditRateFloat = ((valueEditRate->denominator == 0) ? 0.0 : ((float)valueEditRate->numerator / (float)valueEditRate->denominator));
+	double destEditRateFloat  = ((destEditRate->denominator == 0) ? 0.0 : ((float)destEditRate->numerator / (float)destEditRate->denominator));
+
+	if (valueEditRateFloat == 0) {
+		return 0;
+	}
+
+	return (uint64_t) ((double)value * (destEditRateFloat / valueEditRateFloat));
 }
 
-void
-aafi_freeAudioClip (aafiAudioClip* audioClip)
+int
+aafi_removeTimelineItem (AAF_Iface* aafi, aafiTimelineItem* timelineItem)
 {
-	if (audioClip->gain != NULL) {
-		aafi_freeAudioGain (audioClip->gain);
+	if (!timelineItem) {
+		return 0;
 	}
 
-	if (audioClip->automation != NULL) {
-		aafi_freeAudioGain (audioClip->automation);
+	if (timelineItem->prev != NULL) {
+		timelineItem->prev->next = timelineItem->next;
 	}
 
-	aafi_freeAudioEssencePointer (audioClip->essencePointerList);
+	if (timelineItem->next != NULL) {
+		timelineItem->next->prev = timelineItem->prev;
+	}
+
+	aafiAudioTrack* audioTrack = NULL;
+
+	AAFI_foreachAudioTrack (aafi, audioTrack)
+	{
+		if (audioTrack->timelineItems == timelineItem) {
+			audioTrack->timelineItems = timelineItem->next;
+		}
+	}
+
+	aafi_freeTimelineItem (timelineItem);
+
+	return 0;
 }
 
-void
-aafi_freeAudioEssencePointer (aafiAudioEssencePointer* essencePointer)
+int
+aafi_getAudioEssencePointerChannelCount (aafiAudioEssencePointer* essencePointerList)
 {
-	aafiAudioEssencePointer* next = NULL;
+	/*
+	 * If essencePointerList holds a single multichannel essence file and if
+	 * essencePointer->essenceChannel is set, then clip is mono and audio comes
+	 * from essencePointer->essenceChannel of essencePointer.essenceFile.
+	 *
+	 * If essencePointerList holds a single multichannel essence file and if
+	 * essencePointer->essenceChannel is null, then clip is multichannel and
+	 * clip channel count equals essence->channels.
+	 *
+	 * If essencePointerList holds multiple pointers to multiple essence files,
+	 * then each file should be mono and describe a clip channel. Thus, clip
+	 * channel count equals pointers count.
+	 */
 
-	while (essencePointer) {
-		next = essencePointer->next;
-		free (essencePointer);
-		essencePointer = next;
+	// if ( !essencePointerList ) {
+	// 	return 0;
+	// }
+
+	int                      essencePointerCount = 0;
+	aafiAudioEssencePointer* essencePointer      = NULL;
+
+	AAFI_foreachEssencePointer (essencePointerList, essencePointer)
+	{
+		essencePointerCount++;
 	}
+
+	return (essencePointerCount > 1) ? essencePointerCount : (essencePointerList->essenceChannel) ? 1
+	                                                                                              : essencePointerList->essenceFile->channels;
 }
 
-void
-aafi_freeTimelineItem (aafiTimelineItem** item)
+int
+aafi_applyGainOffset (AAF_Iface* aafi, aafiAudioGain** gain, aafiAudioGain* offset)
 {
-	if ((*item)->type == AAFI_TRANS) {
-		aafi_freeTransition ((aafiTransition*)((*item)->data));
-		free ((*item)->data);
-	} else if ((*item)->type == AAFI_AUDIO_CLIP) {
-		aafi_freeAudioClip ((aafiAudioClip*)((*item)->data));
-		free ((*item)->data);
-	} else if ((*item)->type == AAFI_VIDEO_CLIP) {
-		free ((*item)->data);
+	if ((offset->flags & AAFI_AUDIO_GAIN_MASK) & AAFI_AUDIO_GAIN_VARIABLE) {
+		debug ("Variable gain offset is not supported");
+		return -1;
 	}
 
-	free (*item);
+	if (*gain == NULL) {
+		/*
+		 * apply offset as new gain
+		 */
 
-	*item = NULL;
-}
+		debug ("Applying gain to clip as a new gain");
 
-void
-aafi_freeTimelineItems (aafiTimelineItem** items)
-{
-	aafiTimelineItem* item     = NULL;
-	aafiTimelineItem* nextItem = NULL;
+		(*gain) = aafi_newAudioGain (aafi, offset->flags & AAFI_AUDIO_GAIN_MASK, offset->flags & AAFI_INTERPOL_MASK, NULL);
 
-	for (item = (*items); item != NULL; item = nextItem) {
-		nextItem = item->next;
-		aafi_freeTimelineItem (&item);
-	}
+		(*gain)->time  = calloc ((uint64_t)offset->pts_cnt, sizeof (aafRational_t));
+		(*gain)->value = calloc ((uint64_t)offset->pts_cnt, sizeof (aafRational_t));
 
-	*items = NULL;
-}
+		if (!(*gain)->time || !(*gain)->value) {
+			error ("Out of memory");
+			aafi_freeAudioGain (*gain);
+			return -1;
+		}
 
-aafiUserComment*
-aafi_newUserComment (AAF_Iface* aafi, aafiUserComment** CommentList)
-{
-	aafiUserComment* UserComment = calloc (sizeof (aafiUserComment), 1);
-
-	if (UserComment == NULL) {
-		error ("%s.", strerror (errno));
-		return NULL;
-	}
-
-	if (CommentList != NULL) {
-		UserComment->next = *CommentList;
-		*CommentList      = UserComment;
+		for (unsigned int i = 0; i < (*gain)->pts_cnt; i++) {
+			(*gain)->value[i].numerator   = offset->value[0].numerator;
+			(*gain)->value[i].denominator = offset->value[0].denominator;
+			// debug( "Setting (*gain)->value[%i] = %i/%i",
+			// 	i,
+			// 	(*gain)->value[i].numerator,
+			// 	(*gain)->value[i].denominator );
+		}
 	} else {
-		*CommentList = UserComment;
-	}
+		/*
+		 * update existing constant or variable gain
+		 */
 
-	return UserComment;
-}
+		debug ("Applying gain to clip: %i/%i (%+05.1lf dB) ",
+		       (*gain)->value[0].numerator,
+		       (*gain)->value[0].denominator,
+		       20 * log10 (aafRationalToDouble ((*gain)->value[0])));
 
-void
-aafi_freeUserComments (aafiUserComment** CommentList)
-{
-	aafiUserComment* UserComment = *CommentList;
-	aafiUserComment* tmp         = NULL;
-
-	while (UserComment != NULL) {
-		tmp         = UserComment;
-		UserComment = UserComment->next;
-
-		if (tmp->name != NULL) {
-			free (tmp->name);
+		for (unsigned int i = 0; i < (*gain)->pts_cnt; i++) {
+			/*
+			 * most of the time, gain values are made of very high numbers and denominator
+			 * is the same accross all gains in file. Thus, we devide both gain numbers
+			 * by offset denominator, so we fit inside uint32_t.
+			 */
+			(*gain)->value[i].numerator   = (int32_t) (((int64_t) (*gain)->value[i].numerator * (int64_t)offset->value[0].numerator) / (int64_t)offset->value[0].denominator);
+			(*gain)->value[i].denominator = (int32_t) (((int64_t) (*gain)->value[i].denominator * (int64_t)offset->value[0].denominator) / (int64_t)offset->value[0].denominator);
+			// debug( "Setting (*gain)->value[%i] = %i/%i * %i/%i",
+			// 	i,
+			// 	(*gain)->value[i].numerator,
+			// 	(*gain)->value[i].denominator,
+			// 	offset->value[0].numerator,
+			// 	offset->value[0].denominator );
 		}
-
-		if (tmp->text != NULL) {
-			free (tmp->text);
-		}
-
-		free (tmp);
 	}
 
-	*CommentList = NULL;
-}
-
-void
-aafi_freeTransition (aafiTransition* Transition)
-{
-	if (Transition->value_a != NULL) {
-		free (Transition->value_a);
-	}
-
-	if (Transition->value_b != NULL) {
-		free (Transition->value_b);
-	}
-
-	if (Transition->time_a != NULL) {
-		free (Transition->time_a);
-	}
-
-	if (Transition->time_b != NULL) {
-		free (Transition->time_b);
-	}
+	return 0;
 }
 
 aafiAudioTrack*
 aafi_newAudioTrack (AAF_Iface* aafi)
 {
-	aafiAudioTrack* track = calloc (sizeof (aafiAudioTrack), sizeof (unsigned char));
+	aafiAudioTrack* track = calloc (1, sizeof (aafiAudioTrack));
 
-	if (track == NULL) {
-		error ("%s.", strerror (errno));
+	if (!track) {
+		error ("Out of memory");
 		return NULL;
 	}
 
@@ -673,48 +556,13 @@ aafi_newAudioTrack (AAF_Iface* aafi)
 	return track;
 }
 
-void
-aafi_freeAudioTracks (aafiAudioTrack** tracks)
-{
-	if (*(tracks) == NULL) {
-		return;
-	}
-
-	aafiAudioTrack* track     = NULL;
-	aafiAudioTrack* nextTrack = NULL;
-
-	for (track = (*tracks); track != NULL; track = nextTrack) {
-		nextTrack = track->next;
-
-		if (track->name != NULL) {
-			free (track->name);
-		}
-
-		if (track->gain != NULL) {
-			aafi_freeAudioGain (track->gain);
-		}
-
-		if (track->pan != NULL) {
-			aafi_freeAudioPan (track->pan);
-		}
-
-		if (track->Items != NULL) {
-			aafi_freeTimelineItems (&(track->Items));
-		}
-
-		free (track);
-	}
-
-	*tracks = NULL;
-}
-
 aafiVideoTrack*
 aafi_newVideoTrack (AAF_Iface* aafi)
 {
-	aafiVideoTrack* track = calloc (sizeof (aafiVideoTrack), sizeof (unsigned char));
+	aafiVideoTrack* track = calloc (1, sizeof (aafiVideoTrack));
 
-	if (track == NULL) {
-		error ("%s.", strerror (errno));
+	if (!track) {
+		error ("Out of memory");
 		return NULL;
 	}
 
@@ -738,71 +586,213 @@ aafi_newVideoTrack (AAF_Iface* aafi)
 	return track;
 }
 
-void
-aafi_freeVideoTracks (aafiVideoTrack** tracks)
+aafiTimelineItem*
+aafi_newTimelineItem (AAF_Iface* aafi, void* track, int itemType, void* data)
 {
-	if (*(tracks) == NULL) {
-		return;
+	aafiTimelineItem* timelineItem = calloc (1, sizeof (aafiTimelineItem));
+
+	if (!timelineItem) {
+		error ("Out of memory");
+		return NULL;
 	}
 
-	aafiVideoTrack* track     = NULL;
-	aafiVideoTrack* nextTrack = NULL;
+	timelineItem->type = itemType;
+	timelineItem->data = data;
 
-	for (track = (*tracks); track != NULL; track = nextTrack) {
-		nextTrack = track->next;
+	if (itemType == AAFI_AUDIO_CLIP || itemType == AAFI_TRANS) {
+		if (track != NULL) {
+			/* Add to track's timelineItem list */
 
-		if (track->name != NULL) {
-			free (track->name);
+			if (((aafiAudioTrack*)track)->timelineItems != NULL) {
+				aafiTimelineItem* tmp = ((aafiAudioTrack*)track)->timelineItems;
+
+				for (; tmp != NULL; tmp = tmp->next)
+					if (tmp->next == NULL)
+						break;
+
+				tmp->next          = timelineItem;
+				timelineItem->prev = tmp;
+			} else {
+				((aafiAudioTrack*)track)->timelineItems = timelineItem;
+				timelineItem->prev                      = NULL;
+			}
 		}
+	} else if (itemType == AAFI_VIDEO_CLIP) {
+		if (track != NULL) {
+			/* Add to track's timelineItem list */
 
-		if (track->Items != NULL) {
-			aafi_freeTimelineItems (&(track->Items));
+			if (((aafiVideoTrack*)track)->timelineItems != NULL) {
+				aafiTimelineItem* tmp = ((aafiVideoTrack*)track)->timelineItems;
+
+				for (; tmp != NULL; tmp = tmp->next)
+					if (tmp->next == NULL)
+						break;
+
+				tmp->next          = timelineItem;
+				timelineItem->prev = tmp;
+			} else {
+				((aafiVideoTrack*)track)->timelineItems = timelineItem;
+				timelineItem->prev                      = NULL;
+			}
 		}
-
-		free (track);
 	}
 
-	*tracks = NULL;
+	return timelineItem;
 }
 
-aafiAudioEssence*
-aafi_newAudioEssence (AAF_Iface* aafi)
+aafiAudioClip*
+aafi_newAudioClip (AAF_Iface* aafi, aafiAudioTrack* track)
 {
-	aafiAudioEssence* audioEssence = calloc (sizeof (aafiAudioEssence), sizeof (char));
+	aafiAudioClip* audioClip = calloc (1, sizeof (aafiAudioClip));
 
-	if (audioEssence == NULL) {
-		error ("%s.", strerror (errno));
+	if (!audioClip) {
+		error ("Out of memory");
 		return NULL;
 	}
 
-	audioEssence->samplerateRational = malloc (sizeof (aafRational_t));
+	audioClip->track        = track;
+	audioClip->timelineItem = aafi_newTimelineItem (aafi, track, AAFI_AUDIO_CLIP, audioClip);
 
-	if (audioEssence->samplerateRational == NULL) {
+	if (!audioClip->timelineItem) {
+		error ("Could not create new timelineItem");
+		free (audioClip);
 		return NULL;
 	}
 
-	audioEssence->samplerateRational->numerator   = 1;
-	audioEssence->samplerateRational->denominator = 1;
+	return audioClip;
+}
 
-	audioEssence->next = aafi->Audio->Essences;
+aafiVideoClip*
+aafi_newVideoClip (AAF_Iface* aafi, aafiVideoTrack* track)
+{
+	aafiVideoClip* videoClip = calloc (1, sizeof (aafiVideoClip));
 
-	aafi->Audio->Essences = audioEssence;
+	if (!videoClip) {
+		error ("Out of memory");
+		return NULL;
+	}
 
-	return audioEssence;
+	videoClip->track        = track;
+	videoClip->timelineItem = aafi_newTimelineItem (aafi, track, AAFI_VIDEO_CLIP, videoClip);
+
+	if (!videoClip->timelineItem) {
+		error ("Could not create new timelineItem");
+		free (videoClip);
+		return NULL;
+	}
+
+	return videoClip;
+}
+
+aafiTransition*
+aafi_newTransition (AAF_Iface* aafi, aafiAudioTrack* track)
+{
+	aafiTransition* trans = calloc (1, sizeof (aafiTransition));
+
+	if (!trans) {
+		error ("Out of memory");
+		return NULL;
+	}
+
+	trans->timelineItem = aafi_newTimelineItem (aafi, track, AAFI_TRANS, trans);
+
+	if (!trans->timelineItem) {
+		error ("Could not create new timelineItem");
+		free (trans);
+		return NULL;
+	}
+
+	trans->time_a  = calloc (2, sizeof (aafRational_t));
+	trans->value_a = calloc (2, sizeof (aafRational_t));
+
+	if (!trans->time_a || !trans->value_a) {
+		error ("Out of memory");
+		aafi_freeTimelineItem (trans->timelineItem);
+		return NULL;
+	}
+
+	return trans;
+}
+
+aafiMarker*
+aafi_newMarker (AAF_Iface* aafi, aafRational_t* editRate, aafPosition_t start, aafPosition_t length, char* name, char* comment, uint16_t*(RGBColor[]))
+{
+	aafiMarker* marker = calloc (sizeof (aafiMarker), 1);
+
+	if (!marker) {
+		error ("Out of memory");
+		return NULL;
+	}
+
+	marker->edit_rate = editRate;
+	marker->start     = start;
+	marker->length    = length;
+
+	marker->name    = name;
+	marker->comment = comment;
+
+	marker->prev = NULL;
+	marker->next = NULL;
+
+	if (RGBColor && *RGBColor) {
+		marker->RGBColor[0] = (*RGBColor)[0];
+		marker->RGBColor[1] = (*RGBColor)[1];
+		marker->RGBColor[2] = (*RGBColor)[2];
+	}
+
+	if (aafi->Markers != NULL) {
+		aafiMarker* tmp = aafi->Markers;
+
+		for (; tmp != NULL; tmp = tmp->next)
+			if (tmp->next == NULL)
+				break;
+
+		tmp->next    = marker;
+		marker->prev = marker;
+	} else {
+		aafi->Markers = marker;
+		marker->prev  = NULL;
+	}
+
+	return marker;
+}
+
+aafiMetaData*
+aafi_newMetadata (AAF_Iface* aafi, aafiMetaData** CommentList)
+{
+	if (!CommentList) {
+		return NULL;
+	}
+
+	aafiMetaData* UserComment = calloc (1, sizeof (aafiMetaData));
+
+	if (!UserComment) {
+		error ("Out of memory");
+		return NULL;
+	}
+
+	if (*CommentList != NULL) {
+		UserComment->next = *CommentList;
+		*CommentList      = UserComment;
+	} else {
+		*CommentList = UserComment;
+	}
+
+	return UserComment;
 }
 
 aafiAudioEssencePointer*
-aafi_newAudioEssencePointer (AAF_Iface* aafi, aafiAudioEssencePointer** list, aafiAudioEssence* audioEssence, uint32_t* essenceChannelNum)
+aafi_newAudioEssencePointer (AAF_Iface* aafi, aafiAudioEssencePointer** list, aafiAudioEssenceFile* audioEssenceFile, uint32_t* essenceChannelNum)
 {
-	aafiAudioEssencePointer* essencePointer = calloc (sizeof (aafiAudioEssencePointer), sizeof (char));
+	aafiAudioEssencePointer* essencePointer = calloc (1, sizeof (aafiAudioEssencePointer));
 
-	if (essencePointer == NULL) {
-		error ("%s.", strerror (errno));
+	if (!essencePointer) {
+		error ("Out of memory");
 		return NULL;
 	}
 
 	essencePointer->aafi           = aafi;
-	essencePointer->essence        = audioEssence;
+	essencePointer->essenceFile    = audioEssenceFile;
 	essencePointer->essenceChannel = (essenceChannelNum) ? *essenceChannelNum : 0;
 
 	if (*list) {
@@ -821,122 +811,320 @@ aafi_newAudioEssencePointer (AAF_Iface* aafi, aafiAudioEssencePointer** list, aa
 	return *list;
 }
 
-void
-aafi_freeAudioEssences (aafiAudioEssence** audioEssence)
+aafiAudioEssenceFile*
+aafi_newAudioEssence (AAF_Iface* aafi)
 {
-	if (*(audioEssence) == NULL) {
-		return;
+	aafiAudioEssenceFile* audioEssenceFile = calloc (1, sizeof (aafiAudioEssenceFile));
+
+	if (!audioEssenceFile) {
+		error ("Out of memory");
+		goto err;
 	}
 
-	aafiAudioEssence* nextAudioEssence = NULL;
+	audioEssenceFile->samplerateRational = malloc (sizeof (aafRational_t));
 
-	for (; (*audioEssence) != NULL; *audioEssence = nextAudioEssence) {
-		nextAudioEssence = (*audioEssence)->next;
-
-		if ((*audioEssence)->original_file_path != NULL) {
-			free ((*audioEssence)->original_file_path);
-		}
-
-		if ((*audioEssence)->usable_file_path != NULL) {
-			free ((*audioEssence)->usable_file_path);
-		}
-
-		if ((*audioEssence)->file_name != NULL) {
-			free ((*audioEssence)->file_name);
-		}
-
-		if ((*audioEssence)->unique_file_name != NULL) {
-			free ((*audioEssence)->unique_file_name);
-		}
-
-		if ((*audioEssence)->samplerateRational != NULL) {
-			free ((*audioEssence)->samplerateRational);
-		}
-
-		free (*audioEssence);
+	if (!audioEssenceFile->samplerateRational) {
+		error ("Out of memory");
+		goto err;
 	}
 
-	*audioEssence = NULL;
+	audioEssenceFile->samplerateRational->numerator   = 1;
+	audioEssenceFile->samplerateRational->denominator = 1;
+
+	audioEssenceFile->next = aafi->Audio->essenceFiles;
+
+	aafi->Audio->essenceFiles = audioEssenceFile;
+	aafi->Audio->essenceCount++;
+
+	return audioEssenceFile;
+
+err:
+	if (audioEssenceFile) {
+		free (audioEssenceFile->samplerateRational);
+		free (audioEssenceFile);
+	}
+
+	return NULL;
 }
 
 aafiVideoEssence*
 aafi_newVideoEssence (AAF_Iface* aafi)
 {
-	aafiVideoEssence* videoEssence = calloc (sizeof (aafiVideoEssence), sizeof (char));
+	aafiVideoEssence* videoEssenceFile = calloc (1, sizeof (aafiVideoEssence));
 
-	if (videoEssence == NULL) {
-		error ("%s.", strerror (errno));
+	if (!videoEssenceFile) {
+		error ("Out of memory");
 		return NULL;
 	}
 
-	videoEssence->next = aafi->Video->Essences;
+	videoEssenceFile->next = aafi->Video->essenceFiles;
 
-	aafi->Video->Essences = videoEssence;
+	aafi->Video->essenceFiles = videoEssenceFile;
 
-	return videoEssence;
+	return videoEssenceFile;
+}
+
+aafiAudioGain*
+aafi_newAudioGain (AAF_Iface* aafi, enum aafiAudioGain_e type, enum aafiInterpolation_e interpol, aafRational_t* singleValue)
+{
+	aafiAudioGain* Gain = calloc (1, sizeof (aafiAudioGain));
+
+	if (!Gain) {
+		error ("Out of memory");
+		return NULL;
+	}
+
+	Gain->flags |= type;
+	Gain->flags |= interpol;
+
+	if (singleValue) {
+		Gain->pts_cnt = 1;
+		Gain->value   = calloc (1, sizeof (aafRational_t));
+
+		if (!Gain->value) {
+			error ("Out of memory");
+			free (Gain);
+			return NULL;
+		}
+
+		memcpy (&Gain->value[0], singleValue, sizeof (aafRational_t));
+	}
+
+	return Gain;
+}
+
+aafiAudioGain*
+aafi_newAudioPan (AAF_Iface* aafi, enum aafiAudioGain_e type, enum aafiInterpolation_e interpol, aafRational_t* singleValue)
+{
+	return aafi_newAudioGain (aafi, type, interpol, singleValue);
 }
 
 void
-aafi_freeVideoEssences (aafiVideoEssence** videoEssence)
+aafi_freeAudioTracks (aafiAudioTrack** tracks)
 {
-	if (*(videoEssence) == NULL) {
+	if (!tracks || !(*tracks)) {
+		return;
+	}
+
+	aafiAudioTrack* track     = NULL;
+	aafiAudioTrack* nextTrack = NULL;
+
+	for (track = (*tracks); track != NULL; track = nextTrack) {
+		nextTrack = track->next;
+
+		free (track->name);
+		aafi_freeAudioGain (track->gain);
+		aafi_freeAudioPan (track->pan);
+		aafi_freeTimelineItems (&track->timelineItems);
+
+		free (track);
+	}
+
+	*tracks = NULL;
+}
+
+void
+aafi_freeVideoTracks (aafiVideoTrack** tracks)
+{
+	if (*(tracks) == NULL) {
+		return;
+	}
+
+	aafiVideoTrack* track     = NULL;
+	aafiVideoTrack* nextTrack = NULL;
+
+	for (track = (*tracks); track != NULL; track = nextTrack) {
+		nextTrack = track->next;
+
+		free (track->name);
+		aafi_freeTimelineItems (&track->timelineItems);
+
+		free (track);
+	}
+
+	*tracks = NULL;
+}
+
+void
+aafi_freeTimelineItems (aafiTimelineItem** timelineItems)
+{
+	aafiTimelineItem* timelineItem = NULL;
+	aafiTimelineItem* nextItem     = NULL;
+
+	for (timelineItem = (*timelineItems); timelineItem != NULL; timelineItem = nextItem) {
+		nextItem = timelineItem->next;
+		aafi_freeTimelineItem (timelineItem);
+	}
+
+	*timelineItems = NULL;
+}
+
+void
+aafi_freeTimelineItem (aafiTimelineItem* timelineItem)
+{
+	if (!timelineItem) {
+		return;
+	}
+
+	if (timelineItem->type == AAFI_TRANS) {
+		aafi_freeTransition (timelineItem->data);
+	} else if (timelineItem->type == AAFI_AUDIO_CLIP) {
+		aafi_freeAudioClip (timelineItem->data);
+	} else if (timelineItem->type == AAFI_VIDEO_CLIP) {
+		free (timelineItem->data);
+	}
+
+	free (timelineItem);
+}
+
+void
+aafi_freeAudioClip (aafiAudioClip* audioClip)
+{
+	if (!audioClip) {
+		return;
+	}
+
+	free (audioClip->subClipName);
+
+	aafi_freeAudioGain (audioClip->gain);
+	aafi_freeAudioGain (audioClip->automation);
+	aafi_freeMetadata (&(audioClip->metadata));
+
+	aafi_freeAudioEssencePointer (audioClip->essencePointerList);
+
+	free (audioClip);
+}
+
+void
+aafi_freeTransition (aafiTransition* Transition)
+{
+	if (!Transition) {
+		return;
+	}
+
+	free (Transition->value_a);
+	free (Transition->value_b);
+	free (Transition->time_a);
+	free (Transition->time_b);
+
+	free (Transition);
+}
+
+void
+aafi_freeMarkers (aafiMarker** Markers)
+{
+	aafiMarker* marker     = NULL;
+	aafiMarker* nextMarker = NULL;
+
+	for (marker = (*Markers); marker != NULL; marker = nextMarker) {
+		nextMarker = marker->next;
+
+		free (marker->name);
+		free (marker->comment);
+
+		free (marker);
+	}
+
+	*Markers = NULL;
+}
+
+void
+aafi_freeMetadata (aafiMetaData** CommentList)
+{
+	aafiMetaData* UserComment = *CommentList;
+	aafiMetaData* tmp         = NULL;
+
+	while (UserComment != NULL) {
+		tmp         = UserComment;
+		UserComment = UserComment->next;
+
+		free (tmp->name);
+		free (tmp->text);
+
+		free (tmp);
+	}
+
+	*CommentList = NULL;
+}
+
+void
+aafi_freeAudioEssencePointer (aafiAudioEssencePointer* essencePointer)
+{
+	aafiAudioEssencePointer* next = NULL;
+
+	while (essencePointer) {
+		next = essencePointer->next;
+		free (essencePointer);
+		essencePointer = next;
+	}
+}
+
+void
+aafi_freeAudioEssences (aafiAudioEssenceFile** audioEssenceFile)
+{
+	if (*(audioEssenceFile) == NULL) {
+		return;
+	}
+
+	aafiAudioEssenceFile* nextAudioEssence = NULL;
+
+	for (; (*audioEssenceFile) != NULL; *audioEssenceFile = nextAudioEssence) {
+		nextAudioEssence = (*audioEssenceFile)->next;
+
+		free ((*audioEssenceFile)->original_file_path);
+		free ((*audioEssenceFile)->usable_file_path);
+		free ((*audioEssenceFile)->name);
+		free ((*audioEssenceFile)->unique_name);
+		free ((*audioEssenceFile)->samplerateRational);
+
+		aafi_freeMetadata (&((*audioEssenceFile)->metadata));
+
+		free (*audioEssenceFile);
+	}
+
+	*audioEssenceFile = NULL;
+}
+
+void
+aafi_freeVideoEssences (aafiVideoEssence** videoEssenceFile)
+{
+	if (*(videoEssenceFile) == NULL) {
 		return;
 	}
 
 	aafiVideoEssence* nextVideoEssence = NULL;
 
-	for (; (*videoEssence) != NULL; *videoEssence = nextVideoEssence) {
-		nextVideoEssence = (*videoEssence)->next;
+	for (; (*videoEssenceFile) != NULL; *videoEssenceFile = nextVideoEssence) {
+		nextVideoEssence = (*videoEssenceFile)->next;
 
-		if ((*videoEssence)->original_file_path != NULL) {
-			free ((*videoEssence)->original_file_path);
-		}
+		free ((*videoEssenceFile)->original_file_path);
+		free ((*videoEssenceFile)->usable_file_path);
+		free ((*videoEssenceFile)->name);
+		free ((*videoEssenceFile)->unique_name);
 
-		if ((*videoEssence)->usable_file_path != NULL) {
-			free ((*videoEssence)->usable_file_path);
-		}
-
-		if ((*videoEssence)->file_name != NULL) {
-			free ((*videoEssence)->file_name);
-		}
-
-		if ((*videoEssence)->unique_file_name != NULL) {
-			free ((*videoEssence)->unique_file_name);
-		}
-
-		free (*videoEssence);
+		free (*videoEssenceFile);
 	}
 
-	*videoEssence = NULL;
+	*videoEssenceFile = NULL;
 }
 
-int
-aafi_getAudioEssencePointerChannelCount (aafiAudioEssencePointer* essencePointerList)
+void
+aafi_freeAudioGain (aafiAudioGain* gain)
 {
-	/*
-	 * If essencePointerList holds a single multichannel essence file and if
-	 * essencePointer->essenceChannel is set, then clip is mono and audio comes
-	 * from essencePointer->essenceChannel of essencePointer->essence file.
-	 *
-	 * If essencePointerList holds a single multichannel essence file and if
-	 * essencePointer->essenceChannel is null, then clip is multichannel and
-	 * clip channel count equals essence->channels.
-	 *
-	 * If essencePointerList holds multiple pointers to multiple essence files,
-	 * then each file should be mono and describe a clip channel. Thus, clip
-	 * channel count equals pointers count.
-	 */
-
-	int                      essencePointerCount = 0;
-	aafiAudioEssencePointer* essencePointer      = NULL;
-
-	AAFI_foreachAudioEssencePointer (essencePointer, essencePointerList)
-	{
-		essencePointerCount++;
+	if (gain == NULL) {
+		return;
 	}
 
-	return (essencePointerCount > 1) ? essencePointerCount : (essencePointerList->essenceChannel) ? 1
-	                                                                                              : essencePointerList->essence->channels;
+	free (gain->time);
+	free (gain->value);
+
+	free (gain);
+}
+
+void
+aafi_freeAudioPan (aafiAudioPan* pan)
+{
+	aafi_freeAudioGain ((aafiAudioGain*)pan);
 }
 
 /**

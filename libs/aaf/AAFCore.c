@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Adrien Gesta-Fline
+ * Copyright (C) 2017-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -33,38 +33,19 @@
 #include "aaf/AAFDefs/AAFPropertyIDs.h"
 #include "aaf/AAFDefs/AAFTypeDefUIDs.h"
 
-#include "aaf/debug.h"
+#include "aaf/log.h"
 
 #include "aaf/AAFClass.h"
 #include "aaf/utils.h"
 
 #define debug(...) \
-	_dbg (aafd->dbg, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_DEBUG, __VA_ARGS__)
+	AAF_LOG (aafd->log, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_DEBUG, __VA_ARGS__)
 
 #define warning(...) \
-	_dbg (aafd->dbg, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_WARNING, __VA_ARGS__)
+	AAF_LOG (aafd->log, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_WARNING, __VA_ARGS__)
 
 #define error(...) \
-	_dbg (aafd->dbg, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_ERROR, __VA_ARGS__)
-
-/**
- * Loops through each aafPropertyIndexEntry_t of a "properties" node stream.
- *
- * @param Header Pointer to the stream's aafPropertyIndexHeader_t struct.
- * @param Entry  Pointer that will receive each aafPropertyIndexEntry_t struct.
- * @param Value  Pointer to each property's data value, of aafPropertyIndexEntry_t._length
- *               bytes length.
- * @param i      uint32_t iterator.
- */
-
-#define foreachPropertyEntry(propStream, Header, Entry, Value, valueOffset, i)                                                                                   \
-	for (valueOffset = sizeof (aafPropertyIndexHeader_t) + (Header._entryCount * sizeof (aafPropertyIndexEntry_t)),                                          \
-	    i            = 0;                                                                                                                                    \
-	     i < Header._entryCount &&                                                                                                                           \
-	     memcpy (&Entry, (propStream + ((sizeof (aafPropertyIndexHeader_t)) + (sizeof (aafPropertyIndexEntry_t) * i))), sizeof (aafPropertyIndexEntry_t)) && \
-	     (Value = propStream + valueOffset);                                                                                                                 \
-	     valueOffset += Entry._length,                                                                                                                       \
-	    i++)
+	AAF_LOG (aafd->log, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_ERROR, __VA_ARGS__)
 
 /**
  * Loops through each aafStrongRefSetEntry_t of a StrongRefSet Index node stream.
@@ -93,17 +74,17 @@
 	     memcpy (&Entry, (vectorStream + (sizeof (aafStrongRefVectorHeader_t) + (sizeof (aafStrongRefVectorEntry_t) * i))), sizeof (aafStrongRefVectorEntry_t)); \
 	     i++)
 
-#define attachNewProperty(Class, PDef, Pid, IsReq)                       \
-	PDef = calloc (sizeof (aafPropertyDef), sizeof (unsigned char)); \
-	if (PDef == NULL) {                                              \
-		error ("%s.", strerror (errno));                         \
-		return NULL;                                             \
-	}                                                                \
-	PDef->pid         = Pid;                                         \
-	PDef->isReq       = IsReq;                                       \
-	PDef->meta        = 0;                                           \
-	PDef->name        = NULL;                                        \
-	PDef->next        = Class->Properties;                           \
+#define attachNewProperty(Class, PDef, Pid, IsReq)  \
+	PDef = calloc (1, sizeof (aafPropertyDef)); \
+	if (!PDef) {                                \
+		error ("Out of memory");            \
+		return NULL;                        \
+	}                                           \
+	PDef->pid         = Pid;                    \
+	PDef->isReq       = IsReq;                  \
+	PDef->meta        = 0;                      \
+	PDef->name        = NULL;                   \
+	PDef->next        = Class->Properties;      \
 	Class->Properties = PDef;
 
 /*
@@ -267,7 +248,7 @@ setObjectStrongRefVector (aafObject* Obj, aafStrongRefVectorHeader_t* Header, aa
  */
 
 static int
-retrieveStrongReference (AAF_Data* aafd, aafProperty* Prop, aafObject* parent);
+retrieveStrongReference (AAF_Data* aafd, aafProperty* Prop, aafObject* Parent);
 
 /**
  * Retrieves and parses StrongReferenceSet Objects. This function is called by
@@ -291,7 +272,7 @@ retrieveStrongReferenceSet (AAF_Data* aafd, aafProperty* Prop, aafObject* parent
  */
 
 static int
-retrieveStrongReferenceVector (AAF_Data* aafd, aafProperty* Prop, aafObject* parent);
+retrieveStrongReferenceVector (AAF_Data* aafd, aafProperty* Prop, aafObject* Parent);
 
 /**
  * Adds a new aafProperty to an Object->properties list. If the property Stored Form is
@@ -337,7 +318,7 @@ retrieveObjectProperties (AAF_Data* aafd, aafObject* Obj);
  */
 
 static cfbNode*
-getStrongRefIndexNode (AAF_Data* aafd, aafObject* parent, const wchar_t* refName);
+getStrongRefIndexNode (AAF_Data* aafd, aafObject* Parent, const char* refName);
 
 /**
  * Retrieves a StrongRef Set or Vector Entry Node in the Compound File Tree. This
@@ -353,7 +334,7 @@ getStrongRefIndexNode (AAF_Data* aafd, aafObject* parent, const wchar_t* refName
  */
 
 static cfbNode*
-getStrongRefEntryNode (AAF_Data* aafd, aafObject* parent, const wchar_t* baseName, uint16_t index);
+getStrongRefEntryNode (AAF_Data* aafd, aafObject* Parent, const char* refName, uint32_t index);
 
 /**
  * Retrieves and returns a list of aafPropertyIndexHeader_t.
@@ -385,7 +366,7 @@ getNodeProperties (AAF_Data* aafd, cfbNode* node);
  */
 
 static aafStrongRefSetHeader_t*
-getStrongRefSetList (AAF_Data* aafd, cfbNode* node, aafObject* parent);
+getStrongRefSetList (AAF_Data* aafd, cfbNode* Node, aafObject* Parent);
 
 /**
  * Retrieves and returns a list of StrongReferenceVectors.
@@ -402,18 +383,18 @@ getStrongRefSetList (AAF_Data* aafd, cfbNode* node, aafObject* parent);
  */
 
 static aafByte_t*
-getStrongRefVectorList (AAF_Data* aafd, cfbNode* node, aafObject* parent);
+getStrongRefVectorList (AAF_Data* aafd, cfbNode* Node, aafObject* Parent);
 
 AAF_Data*
-aaf_alloc (struct dbg* dbg)
+aaf_alloc (struct aafLog* log)
 {
-	AAF_Data* aafd = calloc (sizeof (AAF_Data), sizeof (unsigned char));
+	AAF_Data* aafd = calloc (1, sizeof (AAF_Data));
 
-	if (aafd == NULL)
-		error ("%s.", strerror (errno));
+	if (!aafd) {
+		goto err;
+	}
 
 	aafd->cfbd = NULL;
-	// aafd->verb = VERB_QUIET;
 
 	aafd->Identification.CompanyName          = NULL;
 	aafd->Identification.ProductName          = NULL;
@@ -422,24 +403,32 @@ aaf_alloc (struct dbg* dbg)
 
 	aafd->Classes = NULL;
 	aafd->Objects = NULL;
-	// aafd->debug_callback = &laaf_debug_callback;
-	aafd->dbg = dbg;
+	aafd->log     = log;
 
-	aafd->cfbd = cfb_alloc (dbg);
+	aafd->cfbd = cfb_alloc (log);
 
-	if (aafd->cfbd == NULL) {
-		return NULL;
+	if (!aafd->cfbd) {
+		goto err;
 	}
 
-	// aafd->cfbd->verb = aafd->verb;
-
 	return aafd;
+
+err:
+
+	if (aafd) {
+		if (aafd->cfbd) {
+			cfb_release (&aafd->cfbd);
+		}
+		free (aafd);
+	}
+
+	return NULL;
 }
 
 int
 aaf_load_file (AAF_Data* aafd, const char* file)
 {
-	if (file == NULL)
+	if (!aafd || !file)
 		return 1;
 
 	aafd->Objects = NULL;
@@ -481,7 +470,7 @@ aaf_load_file (AAF_Data* aafd, const char* file)
 void
 aaf_release (AAF_Data** aafd)
 {
-	if (aafd == NULL || *aafd == NULL)
+	if (!aafd || !(*aafd))
 		return;
 
 	if ((*aafd)->cfbd != NULL)
@@ -496,18 +485,12 @@ aaf_release (AAF_Data** aafd)
 		aafPropertyDef* PDef    = NULL;
 		aafPropertyDef* tmpPDef = NULL;
 
-		if (Class->name != NULL) {
-			free (Class->name);
-		}
+		free (Class->name);
 
 		for (PDef = Class->Properties; PDef != NULL; PDef = tmpPDef) {
 			tmpPDef = PDef->next;
 
-			// if ( PDef->meta ) {
-			if (PDef->name != NULL)
-				free (PDef->name);
-			// }
-
+			free (PDef->name);
 			free (PDef);
 		}
 
@@ -520,11 +503,9 @@ aaf_release (AAF_Data** aafd)
 	for (Object = (*aafd)->Objects; Object != NULL; Object = tmpObject) {
 		tmpObject = Object->nextObj;
 
-		if (Object->Header != NULL)
-			free (Object->Header);
-
-		if (Object->Entry != NULL)
-			free (Object->Entry);
+		free (Object->Header);
+		free (Object->Entry);
+		free (Object->Name);
 
 		aafProperty* Prop    = NULL;
 		aafProperty* tmpProp = NULL;
@@ -548,42 +529,26 @@ aaf_release (AAF_Data** aafd)
 		free (Object);
 	}
 
-	if ((*aafd)->Identification.CompanyName != NULL) {
-		free ((*aafd)->Identification.CompanyName);
-	}
-
-	if ((*aafd)->Identification.ProductName != NULL) {
-		free ((*aafd)->Identification.ProductName);
-	}
-
-	if ((*aafd)->Identification.ProductVersionString != NULL) {
-		free ((*aafd)->Identification.ProductVersionString);
-	}
-
-	if ((*aafd)->Identification.Platform != NULL) {
-		free ((*aafd)->Identification.Platform);
-	}
-
-	/* free once in AAFIface */
-	// if ( (*aafd)->dbg ) {
-	// 	laaf_free_debug( (*aafd)->dbg );
-	// }
+	free ((*aafd)->Identification.CompanyName);
+	free ((*aafd)->Identification.ProductName);
+	free ((*aafd)->Identification.ProductVersionString);
+	free ((*aafd)->Identification.Platform);
 
 	free (*aafd);
 
 	*aafd = NULL;
 }
 
-wchar_t*
+char*
 aaf_get_ObjectPath (aafObject* Obj)
 {
-	static wchar_t path[CFB_PATH_NAME_SZ];
+	static char path[CFB_PATH_NAME_SZ];
 
 	uint32_t offset = CFB_PATH_NAME_SZ;
-	path[--offset]  = 0x0000; // NULL terminating byte
+	path[--offset]  = '\0';
 
 	while (Obj != NULL) {
-		for (int i = wcslen (Obj->Name) - 1; i >= 0 && offset > 0; i--) {
+		for (int i = (int)strlen (Obj->Name) - 1; i >= 0 && offset > 0; i--) {
 			path[--offset] = Obj->Name[i];
 		}
 
@@ -601,7 +566,7 @@ aaf_get_ObjectPath (aafObject* Obj)
 int
 _aaf_foreach_ObjectInSet (aafObject** Obj, aafObject* head, const aafUID_t* filter)
 {
-	if (*Obj == NULL)
+	if (!(*Obj))
 		*Obj = head;
 	else
 		*Obj = (*Obj)->next;
@@ -611,15 +576,13 @@ _aaf_foreach_ObjectInSet (aafObject** Obj, aafObject* head, const aafUID_t* filt
 			if (aafUIDCmp ((*Obj)->Class->ID, filter))
 				break;
 
-	return (*Obj == NULL) ? 0 : 1;
+	return (!(*Obj)) ? 0 : 1;
 }
 
 aafObject*
 aaf_get_ObjectByWeakRef (aafObject* list, aafWeakRef_t* ref)
 {
-	if (ref == NULL ||
-	    list == NULL ||
-	    list->Entry == NULL) {
+	if (!ref || !list || !list->Entry) {
 		return NULL;
 	}
 
@@ -655,19 +618,141 @@ aaf_get_ObjectByWeakRef (aafObject* list, aafWeakRef_t* ref)
 	return NULL;
 }
 
+aafUID_t*
+aaf_get_InterpolationIdentificationByWeakRef (AAF_Data* aafd, aafWeakRef_t* InterpolationDefWeakRef)
+{
+	aafObject* InterpolationDefinition = aaf_get_ObjectByWeakRef (aafd->InterpolationDefinition, InterpolationDefWeakRef);
+
+	if (!InterpolationDefinition) {
+		error ("Could not find InterpolationDefinition.");
+		return NULL;
+	}
+
+	aafUID_t* InterpolationIdentification = aaf_get_propertyValue (InterpolationDefinition, PID_DefinitionObject_Identification, &AAFTypeID_AUID);
+
+	if (!InterpolationIdentification) {
+		error ("Missing DefinitionObject::Identification.");
+		return NULL;
+	}
+
+	return InterpolationIdentification;
+}
+
+aafUID_t*
+aaf_get_OperationIdentificationByWeakRef (AAF_Data* aafd, aafWeakRef_t* OperationDefWeakRef)
+{
+	aafObject* OperationDefinition = aaf_get_ObjectByWeakRef (aafd->OperationDefinition, OperationDefWeakRef);
+
+	if (!OperationDefinition) {
+		error ("Could not retrieve OperationDefinition from dictionary.");
+		return NULL;
+	}
+
+	aafUID_t* OperationIdentification = aaf_get_propertyValue (OperationDefinition, PID_DefinitionObject_Identification, &AAFTypeID_AUID);
+
+	if (!OperationIdentification) {
+		error ("Missing DefinitionObject::Identification.");
+		return NULL;
+	}
+
+	return OperationIdentification;
+}
+
+aafUID_t*
+aaf_get_ContainerIdentificationByWeakRef (AAF_Data* aafd, aafWeakRef_t* ContainerDefWeakRef)
+{
+	aafObject* ContainerDefinition = aaf_get_ObjectByWeakRef (aafd->ContainerDefinition, ContainerDefWeakRef);
+
+	if (!ContainerDefinition) {
+		warning ("Could not retrieve WeakRef from Dictionary::ContainerDefinitions.");
+		return NULL;
+	}
+
+	aafUID_t* ContainerIdentification = aaf_get_propertyValue (ContainerDefinition, PID_DefinitionObject_Identification, &AAFTypeID_AUID);
+
+	if (!ContainerIdentification) {
+		warning ("Missing ContainerDefinition's DefinitionObject::Identification.");
+		return NULL;
+	}
+
+	return ContainerIdentification;
+}
+
+aafUID_t*
+aaf_get_DataIdentificationByWeakRef (AAF_Data* aafd, aafWeakRef_t* DataDefWeakRef)
+{
+	aafObject* DataDefinition = aaf_get_ObjectByWeakRef (aafd->DataDefinition, DataDefWeakRef);
+
+	if (!DataDefinition) {
+		warning ("Could not retrieve WeakRef from Dictionary::DataDefinition.");
+		return NULL;
+	}
+
+	aafUID_t* DataIdentification = aaf_get_propertyValue (DataDefinition, PID_DefinitionObject_Identification, &AAFTypeID_AUID);
+
+	if (!DataIdentification) {
+		warning ("Missing DataDefinition's DefinitionObject::Identification.");
+		return NULL;
+	}
+
+	return DataIdentification;
+}
+
+aafObject*
+aaf_get_ObjectAncestor (aafObject* Obj, const aafUID_t* ClassID)
+{
+	/*
+	 * NOTE : AAFClassID_ContentStorage is the container of Mob and EssenceData,
+	 * not of Identification, Dictionary and MetaDictionary. If needed, the func
+	 * should work for them too thanks to Obj != NULL.
+	 */
+
+	while (Obj != NULL && !aafUIDCmp (Obj->Class->ID, &AAFClassID_ContentStorage)) {
+		if (aafUIDCmp (ClassID, Obj->Class->ID)) {
+			return Obj;
+		}
+
+		if (aaf_ObjectInheritsClass (Obj, ClassID)) {
+			return Obj;
+		}
+
+		Obj = Obj->Parent;
+	}
+
+	return NULL;
+}
+
+int
+aaf_ObjectInheritsClass (aafObject* Obj, const aafUID_t* classID)
+{
+	// AAF_Data *aafd = Obj->aafd;
+
+	aafClass* classObj = NULL;
+	foreachClassInheritance (classObj, Obj->Class)
+	{
+		if (aafUIDCmp (classObj->ID, classID)) {
+			// debug( "%s is a parent of class %s",
+			// 	aaft_ClassIDToText( aafd, classObj->ID ),
+			// 	aaft_ClassIDToText( aafd, Obj->Class->ID ) );
+			return 1;
+		}
+	}
+	return 0;
+}
+
 aafObject*
 aaf_get_MobByID (aafObject* Mobs, aafMobID_t* MobID)
 {
 	aafObject* Mob = NULL;
 
-	if (MobID == NULL)
+	if (!MobID)
 		return NULL;
 
-	aaf_foreach_ObjectInSet (&Mob, Mobs, NULL)
+	AAF_foreach_ObjectInSet (&Mob, Mobs, NULL)
 	{
 		aafMobID_t* Current = aaf_get_propertyValue (Mob, PID_Mob_MobID, &AAFTypeID_MobIDType);
 
-		if (Current == NULL || aafMobIDCmp (Current, MobID))
+		if (!Current || aafMobIDCmp (Current, MobID))
 			break;
 	}
 
@@ -679,15 +764,116 @@ aaf_get_MobSlotBySlotID (aafObject* MobSlots, aafSlotID_t SlotID)
 {
 	aafObject* MobSlot = NULL;
 
-	aaf_foreach_ObjectInSet (&MobSlot, MobSlots, NULL)
+	AAF_foreach_ObjectInSet (&MobSlot, MobSlots, NULL)
 	{
 		aafSlotID_t* CurrentSlotID = aaf_get_propertyValue (MobSlot, PID_MobSlot_SlotID, &AAFTypeID_UInt32);
 
-		if (CurrentSlotID == NULL || *CurrentSlotID == SlotID)
+		if (!CurrentSlotID || *CurrentSlotID == SlotID)
 			break;
 	}
 
 	return MobSlot;
+}
+
+aafObject*
+aaf_get_EssenceDataByMobID (AAF_Data* aafd, aafMobID_t* MobID)
+{
+	aafMobID_t* DataMobID   = NULL;
+	aafObject*  EssenceData = NULL;
+
+	for (EssenceData = aafd->EssenceData; EssenceData != NULL; EssenceData = EssenceData->next) {
+		DataMobID = aaf_get_propertyValue (EssenceData, PID_EssenceData_MobID, &AAFTypeID_MobIDType);
+
+		if (aafMobIDCmp (DataMobID, MobID))
+			break;
+	}
+
+	return EssenceData;
+}
+
+aafUID_t*
+aaf_get_ParamDefIDByName (AAF_Data* aafd, const char* name)
+{
+	aafUID_t*  ParamDefIdent        = NULL;
+	aafObject* ParameterDefinitions = aaf_get_propertyValue (aafd->Dictionary, PID_Dictionary_ParameterDefinitions, &AAFTypeID_ParameterDefinitionStrongReferenceSet);
+	aafObject* ParameterDefinition  = NULL;
+
+	AAF_foreach_ObjectInSet (&ParameterDefinition, ParameterDefinitions, NULL)
+	{
+		char* paramName = aaf_get_propertyValue (ParameterDefinition, PID_DefinitionObject_Name, &AAFTypeID_String);
+
+		if (!paramName) {
+			continue;
+		}
+
+		if (strcmp (paramName, name) == 0) {
+			ParamDefIdent = aaf_get_propertyValue (ParameterDefinition, PID_DefinitionObject_Identification, &AAFTypeID_AUID);
+			free (paramName);
+			break;
+		}
+
+		free (paramName);
+	}
+
+	return ParamDefIdent;
+}
+
+void*
+aaf_get_TaggedValueByName (AAF_Data* aafd, aafObject* TaggedValueVector, const char* name, const aafUID_t* type)
+{
+	struct aafLog* log = aafd->log;
+
+	aafObject* TaggedValue = NULL;
+
+	AAF_foreach_ObjectInSet (&TaggedValue, TaggedValueVector, NULL)
+	{
+		if (!aafUIDCmp (TaggedValue->Class->ID, &AAFClassID_TaggedValue)) {
+			LOG_BUFFER_WRITE (log, "     %sObject > %s\n",
+			                  ANSI_COLOR_RESET (log),
+			                  aaft_ClassIDToText (aafd, TaggedValue->Class->ID));
+			continue;
+		}
+
+		char*          taggedName     = aaf_get_propertyValue (TaggedValue, PID_TaggedValue_Name, &AAFTypeID_String);
+		aafIndirect_t* taggedIndirect = aaf_get_propertyValue (TaggedValue, PID_TaggedValue_Value, &AAFTypeID_Indirect);
+
+		if (strcmp (taggedName, name) == 0) {
+			if (aafUIDCmp (&taggedIndirect->TypeDef, type)) {
+				debug ("Found TaggedValue \"%s\" of type %s",
+				       taggedName,
+				       aaft_TypeIDToText (&taggedIndirect->TypeDef));
+
+				free (taggedName);
+
+				void* value = aaf_get_indirectValue (aafd, taggedIndirect, type);
+
+				return value;
+			}
+
+			debug ("Got TaggedValue \"%s\" but of type %s instead of %s",
+			       taggedName,
+			       aaft_TypeIDToText (&taggedIndirect->TypeDef),
+			       aaft_TypeIDToText (type));
+		}
+		// LOG_BUFFER_WRITE( log, "     %sTagged > Name: %s%s%s%*s      Value: %s(%s)%s %s%s%s",
+		// 	ANSI_COLOR_RESET(log),
+		// 	ANSI_COLOR_DARKGREY(log),
+		// 	(name) ? name : "<unknown>",
+		// 	ANSI_COLOR_RESET(log),
+		// 	(name) ? (size_t)(24-(int)strlen(name)) : (size_t)(24-strlen("<unknown>")), " ",
+		// 	ANSI_COLOR_DARKGREY(log),
+		// 	aaft_TypeIDToText( &taggedIndirect->TypeDef ),
+		// 	ANSI_COLOR_RESET(log),
+		// 	ANSI_COLOR_DARKGREY(log),
+		// 	aaft_IndirectValueToText( aafd, taggedIndirect ),
+		// 	ANSI_COLOR_RESET(log) );
+
+		free (taggedName);
+	}
+
+	debug ("TaggedValue not found \"%s\"", name);
+
+	return NULL;
 }
 
 /*
@@ -695,7 +881,7 @@ aaf_get_MobSlotBySlotID (aafObject* MobSlots, aafSlotID_t SlotID)
  */
 
 aafPID_t
-aaf_get_PropertyIDByName (AAF_Data* aafd, const wchar_t* name)
+aaf_get_PropertyIDByName (AAF_Data* aafd, const char* name)
 {
 	aafClass* Class = NULL;
 
@@ -705,7 +891,7 @@ aaf_get_PropertyIDByName (AAF_Data* aafd, const wchar_t* name)
 
 		foreachPropertyDefinition (PDef, Class->Properties)
 		{
-			if (PDef->name != NULL && wcscmp (PDef->name, name) == 0) {
+			if (PDef->name != NULL && strcmp (PDef->name, name) == 0) {
 				return PDef->pid;
 			}
 		}
@@ -714,10 +900,32 @@ aaf_get_PropertyIDByName (AAF_Data* aafd, const wchar_t* name)
 	return 0;
 }
 
+aafUID_t*
+aaf_get_OperationDefIDByName (AAF_Data* aafd, const char* OpDefName)
+{
+	aafObject* OperationDefinitions = aaf_get_propertyValue (aafd->Dictionary, PID_Dictionary_OperationDefinitions, &AAFTypeID_OperationDefinitionStrongReferenceSet);
+	aafObject* OperationDefinition  = NULL;
+
+	while (_aaf_foreach_ObjectInSet (&OperationDefinition, OperationDefinitions, NULL)) {
+		aafUID_t* OpDefIdent = aaf_get_propertyValue (OperationDefinition, PID_DefinitionObject_Identification, &AAFTypeID_AUID);
+
+		char* name = aaf_get_propertyValue (OperationDefinition, PID_DefinitionObject_Name, &AAFTypeID_String);
+
+		if (strcmp (name, OpDefName) == 0) {
+			free (name);
+			return OpDefIdent;
+		}
+
+		free (name);
+	}
+
+	return NULL;
+}
+
 aafProperty*
 aaf_get_property (aafObject* Obj, aafPID_t pid)
 {
-	if (Obj == NULL)
+	if (!Obj)
 		return NULL;
 
 	AAF_Data* aafd = Obj->aafd;
@@ -728,18 +936,27 @@ aaf_get_property (aafObject* Obj, aafPID_t pid)
 		if (Prop->pid == pid)
 			break;
 
-	if (Prop == NULL) {
+	if (!Prop) {
 		aafPropertyDef* PDef = aafclass_getPropertyDefinitionByID (Obj->Class, pid);
 
-		if (PDef == NULL) {
-			warning ("Unknown property 0x%04x (%ls) of Class %ls", pid, aaft_PIDToText (aafd, pid), aaft_ClassIDToText (aafd, Obj->Class->ID));
+		if (!PDef) {
+			warning ("Could not retrieve 0x%04x (%s) of Class %s",
+			         pid,
+			         aaft_PIDToText (aafd, pid),
+			         aaft_ClassIDToText (aafd, Obj->Class->ID));
 			return NULL;
 		}
 
 		if (PDef->isReq) {
-			error ("Could not retrieve %ls required property 0x%04x (%ls)", aaft_ClassIDToText (aafd, Obj->Class->ID), pid, aaft_PIDToText (aafd, pid));
+			error ("Could not retrieve %s required property 0x%04x (%s)",
+			       aaft_ClassIDToText (aafd, Obj->Class->ID),
+			       pid,
+			       aaft_PIDToText (aafd, pid));
 		} else {
-			debug ("Could not retrieve %ls optional property 0x%04x (%ls)", aaft_ClassIDToText (aafd, Obj->Class->ID), pid, aaft_PIDToText (aafd, pid));
+			debug ("Could not retrieve %s optional property 0x%04x (%s)",
+			       aaft_ClassIDToText (aafd, Obj->Class->ID),
+			       pid,
+			       aaft_PIDToText (aafd, pid));
 		}
 	}
 
@@ -749,14 +966,14 @@ aaf_get_property (aafObject* Obj, aafPID_t pid)
 void*
 aaf_get_propertyValue (aafObject* Obj, aafPID_t pid, const aafUID_t* typeID)
 {
-	if (Obj == NULL) {
+	if (!Obj) {
 		return NULL;
 	}
 
 	AAF_Data*    aafd = Obj->aafd;
 	aafProperty* Prop = aaf_get_property (Obj, pid);
 
-	if (Prop == NULL) {
+	if (!Prop) {
 		return NULL;
 	}
 
@@ -774,11 +991,14 @@ aaf_get_propertyValue (aafObject* Obj, aafPID_t pid, const aafUID_t* typeID)
 
 	if (aafUIDCmp (typeID, &AAFTypeID_String)) {
 		if (((uint16_t*)value)[(len / 2) - 1] != 0x0000) {
-			error ("Object %ls string property 0x%04x (%ls) does not end with NULL", aaft_ClassIDToText (aafd, Obj->Class->ID), pid, aaft_PIDToText (aafd, pid));
+			error ("Object %s string property 0x%04x (%s) does not end with NULL",
+			       aaft_ClassIDToText (aafd, Obj->Class->ID),
+			       pid,
+			       aaft_PIDToText (aafd, pid));
 			return NULL;
 		}
 
-		return cfb_w16towchar (NULL, value, len);
+		return cfb_w16toUTF8 (value, len);
 	}
 
 	if (aafUIDCmp (typeID, &AAFTypeID_Indirect)) {
@@ -791,7 +1011,10 @@ aaf_get_propertyValue (aafObject* Obj, aafPID_t pid, const aafUID_t* typeID)
 		aafIndirect_t* Indirect = value;
 
 		if (aafUIDCmp (&Indirect->TypeDef, &AAFTypeID_String) && ((uint16_t*)value)[(len / 2) - 1] != 0x0000) {
-			error ("Object %ls Indirect::string property 0x%04x (%ls) does not end with NULL", aaft_ClassIDToText (aafd, Obj->Class->ID), pid, aaft_PIDToText (aafd, pid));
+			error ("Object %s Indirect::string property 0x%04x (%s) does not end with NULL",
+			       aaft_ClassIDToText (aafd, Obj->Class->ID),
+			       pid,
+			       aaft_PIDToText (aafd, pid));
 			return NULL;
 		}
 	}
@@ -814,7 +1037,12 @@ aaf_get_propertyValue (aafObject* Obj, aafPID_t pid, const aafUID_t* typeID)
 	    (aafUIDCmp (typeID, &AAFTypeID_UsageType) && len != sizeof (aafUID_t)) ||
 	    (aafUIDCmp (typeID, &AAFTypeID_AUID) && len != sizeof (aafUID_t)) ||
 	    (aafUIDCmp (typeID, &AAFTypeID_MobIDType) && len != sizeof (aafMobID_t))) {
-		error ("Object %ls property 0x%04x (%ls) size (%u) does not match type %ls", aaft_ClassIDToText (aafd, Obj->Class->ID), pid, aaft_PIDToText (aafd, pid), len, aaft_TypeIDToText (typeID));
+		error ("Object %s property 0x%04x (%s) size (%u) does not match type %s",
+		       aaft_ClassIDToText (aafd, Obj->Class->ID),
+		       pid,
+		       aaft_PIDToText (aafd, pid),
+		       len,
+		       aaft_TypeIDToText (typeID));
 		return NULL;
 	}
 
@@ -824,13 +1052,15 @@ aaf_get_propertyValue (aafObject* Obj, aafPID_t pid, const aafUID_t* typeID)
 void*
 aaf_get_indirectValue (AAF_Data* aafd, aafIndirect_t* Indirect, const aafUID_t* typeDef)
 {
-	if (Indirect == NULL) {
+	if (!Indirect) {
 		error ("Indirect is NULL");
 		return NULL;
 	}
 
 	if (typeDef && aafUIDCmp (&Indirect->TypeDef, typeDef) == 0) {
-		error ("Requested Indirect value of type %ls but has type %ls", aaft_TypeIDToText (typeDef), aaft_TypeIDToText (&Indirect->TypeDef));
+		error ("Requested Indirect value of type %s but has type %s",
+		       aaft_TypeIDToText (typeDef),
+		       aaft_TypeIDToText (&Indirect->TypeDef));
 		return NULL;
 	}
 
@@ -849,14 +1079,14 @@ aaf_get_indirectValue (AAF_Data* aafd, aafIndirect_t* Indirect, const aafUID_t* 
 
 		uint16_t* w16 = malloc (indirectValueSize);
 
-		if (w16 == NULL) {
-			error ("%s.", strerror (errno));
+		if (!w16) {
+			error ("Out of memory");
 			return NULL;
 		}
 
 		memcpy (w16, Indirect->Value, indirectValueSize);
 
-		wchar_t* str = cfb_w16towchar (NULL, w16, indirectValueSize);
+		char* str = cfb_w16toUTF8 (w16, indirectValueSize);
 
 		free (w16);
 
@@ -871,14 +1101,14 @@ parse_Header (AAF_Data* aafd)
 {
 	aafObject* Header = aafd->Header.obj;
 
-	if (Header == NULL) {
+	if (!Header) {
 		error ("Missing Header Object.");
 		return -1;
 	}
 
 	int16_t* ByteOrder = aaf_get_propertyValue (Header, PID_Header_ByteOrder, &AAFTypeID_Int16);
 
-	if (ByteOrder == NULL) {
+	if (!ByteOrder) {
 		warning ("Missing Header::ByteOrder.");
 	} else {
 		aafd->Header.ByteOrder = *ByteOrder;
@@ -886,7 +1116,7 @@ parse_Header (AAF_Data* aafd)
 
 	aafTimeStamp_t* LastModified = aaf_get_propertyValue (Header, PID_Header_LastModified, &AAFTypeID_TimeStamp);
 
-	if (LastModified == NULL) {
+	if (!LastModified) {
 		warning ("Missing Header::LastModified.");
 	} else {
 		aafd->Header.LastModified = LastModified;
@@ -894,7 +1124,7 @@ parse_Header (AAF_Data* aafd)
 
 	aafVersionType_t* Version = aaf_get_propertyValue (Header, PID_Header_Version, &AAFTypeID_VersionType);
 
-	if (Version == NULL) {
+	if (!Version) {
 		warning ("Missing Header::Version.");
 	} else {
 		aafd->Header.Version = Version;
@@ -902,7 +1132,7 @@ parse_Header (AAF_Data* aafd)
 
 	uint32_t* ObjectModelVersion = aaf_get_propertyValue (Header, PID_Header_ObjectModelVersion, &AAFTypeID_UInt32);
 
-	if (ObjectModelVersion == NULL) {
+	if (!ObjectModelVersion) {
 		warning ("Missing Header::ObjectModelVersion.");
 	} else {
 		aafd->Header.ObjectModelVersion = *ObjectModelVersion;
@@ -910,7 +1140,7 @@ parse_Header (AAF_Data* aafd)
 
 	const aafUID_t* OperationalPattern = aaf_get_propertyValue (Header, PID_Header_OperationalPattern, &AAFTypeID_AUID);
 
-	if (OperationalPattern == NULL) {
+	if (!OperationalPattern) {
 		warning ("Missing Header::OperationalPattern.");
 		aafd->Header.OperationalPattern = (const aafUID_t*)&AUID_NULL;
 	} else {
@@ -925,22 +1155,22 @@ parse_Identification (AAF_Data* aafd)
 {
 	aafObject* Identif = aafd->Identification.obj;
 
-	if (Identif == NULL) {
+	if (!Identif) {
 		error ("Missing Identification Object.");
 		return -1;
 	}
 
-	wchar_t* Company = aaf_get_propertyValue (Identif, PID_Identification_CompanyName, &AAFTypeID_String);
+	char* Company = aaf_get_propertyValue (Identif, PID_Identification_CompanyName, &AAFTypeID_String);
 
-	if (Company == NULL) {
+	if (!Company) {
 		warning ("Missing Identification::CompanyName.");
 	} else {
 		aafd->Identification.CompanyName = Company;
 	}
 
-	wchar_t* ProductName = aaf_get_propertyValue (Identif, PID_Identification_ProductName, &AAFTypeID_String);
+	char* ProductName = aaf_get_propertyValue (Identif, PID_Identification_ProductName, &AAFTypeID_String);
 
-	if (ProductName == NULL) {
+	if (!ProductName) {
 		warning ("Missing Identification::ProductName.");
 	} else {
 		aafd->Identification.ProductName = ProductName;
@@ -948,15 +1178,15 @@ parse_Identification (AAF_Data* aafd)
 
 	aafProductVersion_t* ProductVersion = aaf_get_propertyValue (Identif, PID_Identification_ProductVersion, &AAFTypeID_ProductVersion);
 
-	if (ProductVersion == NULL) {
+	if (!ProductVersion) {
 		warning ("Missing Identification::ProductVersion.");
 	} else {
 		aafd->Identification.ProductVersion = ProductVersion;
 	}
 
-	wchar_t* ProductVersionString = aaf_get_propertyValue (Identif, PID_Identification_ProductVersionString, &AAFTypeID_String);
+	char* ProductVersionString = aaf_get_propertyValue (Identif, PID_Identification_ProductVersionString, &AAFTypeID_String);
 
-	if (ProductVersionString == NULL) {
+	if (!ProductVersionString) {
 		warning ("Missing Identification::ProductVersionString.");
 	} else {
 		aafd->Identification.ProductVersionString = ProductVersionString;
@@ -964,7 +1194,7 @@ parse_Identification (AAF_Data* aafd)
 
 	aafUID_t* ProductID = aaf_get_propertyValue (Identif, PID_Identification_ProductID, &AAFTypeID_AUID);
 
-	if (ProductID == NULL) {
+	if (!ProductID) {
 		warning ("Missing Identification::ProductID.");
 	} else {
 		aafd->Identification.ProductID = ProductID;
@@ -972,7 +1202,7 @@ parse_Identification (AAF_Data* aafd)
 
 	aafTimeStamp_t* Date = aaf_get_propertyValue (Identif, PID_Identification_Date, &AAFTypeID_TimeStamp);
 
-	if (Date == NULL) {
+	if (!Date) {
 		warning ("Missing Identification::Date.");
 	} else {
 		aafd->Identification.Date = Date;
@@ -980,15 +1210,15 @@ parse_Identification (AAF_Data* aafd)
 
 	aafProductVersion_t* ToolkitVersion = aaf_get_propertyValue (Identif, PID_Identification_ToolkitVersion, &AAFTypeID_ProductVersion);
 
-	if (ToolkitVersion == NULL) {
+	if (!ToolkitVersion) {
 		warning ("Missing Identification::ToolkitVersion.");
 	} else {
 		aafd->Identification.ToolkitVersion = ToolkitVersion;
 	}
 
-	wchar_t* Platform = aaf_get_propertyValue (Identif, PID_Identification_Platform, &AAFTypeID_String);
+	char* Platform = aaf_get_propertyValue (Identif, PID_Identification_Platform, &AAFTypeID_String);
 
-	if (Platform == NULL) {
+	if (!Platform) {
 		warning ("Missing Identification::Platform.");
 	} else {
 		aafd->Identification.Platform = Platform;
@@ -996,7 +1226,7 @@ parse_Identification (AAF_Data* aafd)
 
 	aafUID_t* GenerationAUID = aaf_get_propertyValue (Identif, PID_Identification_GenerationAUID, &AAFTypeID_AUID);
 
-	if (GenerationAUID == NULL) {
+	if (!GenerationAUID) {
 		warning ("Missing Identification::GenerationAUID.");
 	} else {
 		aafd->Identification.GenerationAUID = GenerationAUID;
@@ -1013,7 +1243,7 @@ parse_Identification (AAF_Data* aafd)
 // 		 aafUIDCmp( hdrClsID, &AAFFileKind_Aaf4KBinary  ) )
 // 			return 1;
 //
-// //  warning( "Unsuported AAF encoding (%ls).", aaft_FileKindToText( hdrClsID ) );
+// //  warning( "Unsuported AAF encoding (%s).", aaft_FileKindToText( hdrClsID ) );
 //
 // 	return 0;
 // }
@@ -1057,23 +1287,21 @@ retrieveObjectTree (AAF_Data* aafd)
 
 	aafClass* Class = aafclass_getClassByID (aafd, (aafUID_t*)&Node->_clsId);
 
-	if (Class == NULL && aafUIDCmp (Class->ID, (aafUID_t*)&Node->_clsId) != 0) {
-		error ("Looks like the fist Object is not the Root Class : %ls.", aaft_ClassIDToText (aafd, Class->ID));
+	if (!Class) {
+		error ("Could not retrieve class by id");
 		goto err;
 	}
 
 	aafd->Root = newObject (aafd, Node, Class, NULL);
 
-	if (aafd->Root == NULL) {
+	if (!aafd->Root) {
 		goto err;
 	}
 
-	/* retrieveObjectProperties() */
-
 	propStream = getNodeProperties (aafd, aafd->Root->Node);
 
-	if (propStream == NULL) {
-		error ("Could not retrieve properties for %ls.", aaf_get_ObjectPath (aafd->Root));
+	if (!propStream) {
+		error ("Could not retrieve properties for %s.", aaf_get_ObjectPath (aafd->Root));
 		goto err;
 	}
 
@@ -1093,7 +1321,7 @@ retrieveObjectTree (AAF_Data* aafd)
 	aafPropertyDef* PDef = NULL;
 
 	uint32_t i           = 0;
-	int      valueOffset = 0;
+	size_t   valueOffset = 0;
 
 	foreachPropertyEntry (propStream, Header, Prop, value, valueOffset, i)
 	{
@@ -1115,7 +1343,7 @@ retrieveObjectTree (AAF_Data* aafd)
 	rc = retrieveProperty (aafd, aafd->Root, PDef, &AAFMetaDcProp, AAFMetaDcVal, Header._byteOrder);
 
 	if (rc < 0) {
-		error ("Could not retrieve property %ls.", aaft_PIDToText (aafd, PDef->pid));
+		error ("Could not retrieve property %s.", aaft_PIDToText (aafd, PDef->pid));
 		goto err;
 	}
 
@@ -1125,21 +1353,21 @@ retrieveObjectTree (AAF_Data* aafd)
 
 	aafObject* MetaDic = aaf_get_propertyValue (aafd->Root, PID_Root_MetaDictionary, &AAFUID_NULL);
 
-	if (MetaDic == NULL) {
+	if (!MetaDic) {
 		error ("Missing PID_Root_MetaDictionary.");
 		goto err;
 	}
 
 	aafObject* ClassDefs = aaf_get_propertyValue (MetaDic, PID_MetaDictionary_ClassDefinitions, &AAFTypeID_ClassDefinitionStrongReferenceSet);
 
-	if (ClassDefs == NULL) {
+	if (!ClassDefs) {
 		error ("Missing PID_MetaDictionary_ClassDefinitions.");
 		goto err;
 	}
 
 	aafObject* ClassDef = NULL;
 
-	aaf_foreach_ObjectInSet (&ClassDef, ClassDefs, NULL)
+	AAF_foreach_ObjectInSet (&ClassDef, ClassDefs, NULL)
 	{
 		retrieveMetaDictionaryClass (aafd, ClassDef);
 	}
@@ -1151,7 +1379,7 @@ retrieveObjectTree (AAF_Data* aafd)
 	rc = retrieveProperty (aafd, aafd->Root, PDef, &AAFHeaderProp, AAFHeaderVal, Header._byteOrder);
 
 	if (rc < 0) {
-		error ("Could not retrieve property %ls.", aaft_PIDToText (aafd, PDef->pid));
+		error ("Could not retrieve property %s.", aaft_PIDToText (aafd, PDef->pid));
 		goto err;
 	}
 
@@ -1165,8 +1393,7 @@ err:
 
 end:
 
-	if (propStream)
-		free (propStream);
+	free (propStream);
 
 	return rc;
 }
@@ -1176,29 +1403,50 @@ retrieveMetaDictionaryClass (AAF_Data* aafd, aafObject* TargetClassDef)
 {
 	aafObject* MetaDic = aaf_get_propertyValue (aafd->Root, PID_Root_MetaDictionary, &AAFUID_NULL);
 
-	aafObject* ClassDefs = aaf_get_propertyValue (MetaDic, PID_MetaDictionary_ClassDefinitions, &AAFTypeID_ClassDefinitionStrongReferenceSet);
-	aafObject* ClassDef  = NULL;
-
-	if (ClassDefs == NULL) {
-		error ("Could not retrieve PID_MetaDictionary_ClassDefinitions property from MetaDic.");
+	if (!MetaDic) { /* req */
+		debug ("Could not retrieve PID_Root_MetaDictionary property from Root.");
 		return NULL;
 	}
 
-	aaf_foreach_ObjectInSet (&ClassDef, ClassDefs, NULL)
+	aafObject* ClassDefs = aaf_get_propertyValue (MetaDic, PID_MetaDictionary_ClassDefinitions, &AAFTypeID_ClassDefinitionStrongReferenceSet);
+	aafObject* ClassDef  = NULL;
+
+	if (!ClassDefs) { /* opt */
+		debug ("Could not retrieve PID_MetaDictionary_ClassDefinitions property from MetaDic.");
+		return NULL;
+	}
+
+	AAF_foreach_ObjectInSet (&ClassDef, ClassDefs, NULL)
 	{
 		if (ClassDef == TargetClassDef)
 			break;
 	}
 
-	if (ClassDef == NULL) {
-		error ("Could not retrieve ClassDefinition %p.", (void*)TargetClassDef);
+	if (!ClassDef) {
+		error ("Could not retrieve ClassDefinition %p", (void*)TargetClassDef);
 		return NULL;
 	}
 
 	aafUID_t* ClassID = aaf_get_propertyValue (ClassDef, PID_MetaDefinition_Identification, &AAFTypeID_AUID);
 
+	if (!ClassID) { /* req */
+		error ("Could not retrieve PID_MetaDefinition_Identification property from ClassDef.");
+		return NULL;
+	}
+
 	aafWeakRef_t* parent = aaf_get_propertyValue (ClassDef, PID_ClassDefinition_ParentClass, &AAFTypeID_ClassDefinitionWeakReference);
-	aafObject*    Parent = aaf_get_ObjectByWeakRef (ClassDefs, parent);
+
+	if (!parent) {
+		error ("Could not retrieve PID_ClassDefinition_ParentClass property from ClassDef.");
+		return NULL;
+	}
+
+	aafObject* Parent = aaf_get_ObjectByWeakRef (ClassDefs, parent);
+
+	if (!Parent) {
+		error ("Could not retrieve object by weakRef (PID_ClassDefinition_ParentClass)");
+		return NULL;
+	}
 
 	aafClass* ParentClass = NULL;
 
@@ -1210,45 +1458,64 @@ retrieveMetaDictionaryClass (AAF_Data* aafd, aafObject* TargetClassDef)
 		/*
 		 * TODO: what is this ? when does it happen ?
 		 */
-		error ("Parent's Class equals Child's : %ls.", aaft_ClassIDToText (aafd, ClassID));
+		error ("Parent's Class equals Child's : %s.", aaft_ClassIDToText (aafd, ClassID));
 		return NULL;
 	}
 
 	aafClass* Class = aafclass_getClassByID (aafd, ClassID);
 
-	if (Class == NULL) {
+	if (!Class) {
 		aafBoolean_t* isCon = aaf_get_propertyValue (ClassDef, PID_ClassDefinition_IsConcrete, &AAFTypeID_Boolean);
 
-		if (isCon == NULL) {
+		if (!isCon) {
 			error ("Missing ClassDefinition::IsConcrete.");
 			return NULL;
 		}
 
 		Class = aafclass_defineNewClass (aafd, ClassID, *isCon, ParentClass);
 
-		Class->name = aaf_get_propertyValue (ClassDef, PID_MetaDefinition_Name, &AAFTypeID_String);
+		if (!Class) {
+			error ("Could set new class");
+			return NULL;
+		}
+
 		Class->meta = 1;
-	} else { // if class is standard, we only set its name
-		if (Class->name == NULL) {
+		Class->name = aaf_get_propertyValue (ClassDef, PID_MetaDefinition_Name, &AAFTypeID_String);
+
+		if (!Class->name) {
+			debug ("Could not retrieve PID_MetaDefinition_Name property from ClassDef (%s)", aaft_ClassIDToText (aafd, ClassID));
+		}
+	} else {
+		/* if class is standard, we only set its name */
+		if (!Class->name) {
 			Class->name = aaf_get_propertyValue (ClassDef, PID_MetaDefinition_Name, &AAFTypeID_String);
+
+			if (!Class->name) {
+				debug ("Could not retrieve PID_MetaDefinition_Name property from ClassDef (%s)", aaft_ClassIDToText (aafd, ClassID));
+			}
 		}
 	}
 
 	aafObject* Props = aaf_get_propertyValue (ClassDef, PID_ClassDefinition_Properties, &AAFTypeID_PropertyDefinitionStrongReferenceSet);
-	aafObject* Prop  = NULL;
 
-	aaf_foreach_ObjectInSet (&Prop, Props, NULL)
+	if (!Props) { /* opt */
+		debug ("Could not retrieve PID_ClassDefinition_Properties property from ClassDef (%s)", aaft_ClassIDToText (aafd, ClassID));
+	}
+
+	aafObject* Prop = NULL;
+
+	AAF_foreach_ObjectInSet (&Prop, Props, NULL)
 	{
 		aafPID_t* Pid = aaf_get_propertyValue (Prop, PID_PropertyDefinition_LocalIdentification, &AAFTypeID_UInt16);
 
-		if (Pid == NULL) {
+		if (!Pid) {
 			error ("Missing PropertyDefinition::LocalIdentification.");
 			return NULL;
 		}
 
 		aafBoolean_t* isOpt = aaf_get_propertyValue (Prop, PID_PropertyDefinition_IsOptional, &AAFTypeID_Boolean);
 
-		if (isOpt == NULL) {
+		if (!isOpt) {
 			error ("Missing PropertyDefinition::IsOptional.");
 			return NULL;
 		}
@@ -1257,9 +1524,9 @@ retrieveMetaDictionaryClass (AAF_Data* aafd, aafObject* TargetClassDef)
 		 * We skip all the properties that were already defined in aafclass_setDefaultClasses().
 		 */
 
-		aafPropertyDef* PDef = NULL;
+		aafPropertyDef* PDef = propertyIdExistsInClass (Class, *Pid);
 
-		if (!(PDef = propertyIdExistsInClass (Class, *Pid))) {
+		if (!PDef) {
 			attachNewProperty (Class, PDef, *Pid, (*isOpt) ? 0 : 1);
 			PDef->meta = 1;
 		} else {
@@ -1269,45 +1536,48 @@ retrieveMetaDictionaryClass (AAF_Data* aafd, aafObject* TargetClassDef)
 
 		PDef->name = aaf_get_propertyValue (Prop, PID_MetaDefinition_Name, &AAFTypeID_String);
 
+		if (!PDef->name) {
+			warning ("Could not retrieve PID_MetaDefinition_Name property from PropertyDefinition.");
+		}
+
 		aafObject* TypeDefs = aaf_get_propertyValue (MetaDic, PID_MetaDictionary_TypeDefinitions, &AAFTypeID_TypeDefinitionStrongReferenceSet);
 
-		if (TypeDefs == NULL) {
+		if (!TypeDefs) {
 			error ("Missing TypeDefinitions from MetaDictionary");
 			return NULL;
 		}
 
 		aafWeakRef_t* WeakRefToType = aaf_get_propertyValue (Prop, PID_PropertyDefinition_Type, &AAFTypeID_PropertyDefinitionWeakReference);
 
-		if (WeakRefToType == NULL) {
+		if (!WeakRefToType) {
 			error ("Missing PID_PropertyDefinition_Type");
 			return NULL;
 		}
 
 		aafObject* TypeDef = aaf_get_ObjectByWeakRef (TypeDefs, WeakRefToType);
 
-		if (TypeDef == NULL) {
+		if (!TypeDef) {
 			error ("Could not retrieve TypeDefinition from dictionary.");
 			return NULL;
 		}
 
 		aafUID_t* typeUID = aaf_get_propertyValue (TypeDef, PID_MetaDefinition_Identification, &AAFTypeID_AUID);
 
-		if (typeUID == NULL) {
+		if (!typeUID) { /* req */
 			error ("Missing PID_MetaDefinition_Identification");
 			return NULL;
 		}
 
 		/*
-		 *  Looks like nobody cares about AAF standard TypeDefinition. All observed files
+		 * Looks like nobody cares about AAF standard TypeDefinition. All observed files
 		 * had incorrect values for Type Name and Identification, even Avid's files. So...
 		 */
 
 		memcpy (&PDef->type, typeUID, sizeof (aafUID_t));
 
-		// wchar_t *typeName = aaf_get_propertyValue( TypeDef, PID_MetaDefinition_Name, &AAFTypeID_String );
+		// char *typeName = aaf_get_propertyValue( TypeDef, PID_MetaDefinition_Name, &AAFTypeID_String );
 		//
-		// debug( "TypeName :  %ls (%ls) |  name : %ls.",
-		// // AUIDToText(typeUID),
+		// debug( "TypeName :  %s (%s) |  name : %s.",
 		// 	typeName,
 		// 	aaft_TypeIDToText( typeUID ),
 		// 	PDef->name );
@@ -1321,15 +1591,14 @@ retrieveMetaDictionaryClass (AAF_Data* aafd, aafObject* TargetClassDef)
 static aafObject*
 newObject (AAF_Data* aafd, cfbNode* Node, aafClass* Class, aafObject* Parent)
 {
-	aafObject* Obj = calloc (sizeof (aafObject), sizeof (unsigned char));
+	aafObject* Obj = calloc (1, sizeof (aafObject));
 
-	if (Obj == NULL) {
-		error ("%s.", strerror (errno));
+	if (!Obj) {
+		error ("Out of memory");
 		return NULL;
 	}
 
-	cfb_w16towchar (Obj->Name, Node->_ab, Node->_cb);
-
+	Obj->Name       = cfb_w16toUTF8 (Node->_ab, Node->_cb);
 	Obj->aafd       = aafd;
 	Obj->Class      = Class;
 	Obj->Node       = Node;
@@ -1349,10 +1618,10 @@ newObject (AAF_Data* aafd, cfbNode* Node, aafClass* Class, aafObject* Parent)
 static aafProperty*
 newProperty (AAF_Data* aafd, aafPropertyDef* Def)
 {
-	aafProperty* Prop = calloc (sizeof (aafProperty), sizeof (unsigned char));
+	aafProperty* Prop = calloc (1, sizeof (aafProperty));
 
-	if (Prop == NULL) {
-		error ("%s.", strerror (errno));
+	if (!Prop) {
+		error ("Out of memory");
 		return NULL;
 	}
 
@@ -1379,8 +1648,8 @@ setObjectStrongRefSet (aafObject* Obj, aafStrongRefSetHeader_t* Header, aafStron
 
 	Obj->Header = malloc (sizeof (aafStrongRefSetHeader_t));
 
-	if (Obj->Header == NULL) {
-		error ("%s.", strerror (errno));
+	if (!Obj->Header) {
+		error ("Out of memory");
 		return -1;
 	}
 
@@ -1391,8 +1660,8 @@ setObjectStrongRefSet (aafObject* Obj, aafStrongRefSetHeader_t* Header, aafStron
 
 	Obj->Entry = malloc (entrySize);
 
-	if (Obj->Entry == NULL) {
-		error ("%s.", strerror (errno));
+	if (!Obj->Entry) {
+		error ("Out of memory");
 		return -1;
 	}
 
@@ -1413,19 +1682,19 @@ setObjectStrongRefVector (aafObject* Obj, aafStrongRefVectorHeader_t* Header, aa
 
 	AAF_Data* aafd = Obj->aafd;
 
-	Obj->Header = calloc (sizeof (aafStrongRefSetHeader_t), sizeof (unsigned char));
+	Obj->Header = calloc (1, sizeof (aafStrongRefSetHeader_t));
 
-	if (Obj->Header == NULL) {
-		error ("%s.", strerror (errno));
+	if (!Obj->Header) {
+		error ("Out of memory");
 		return -1;
 	}
 
 	memcpy (Obj->Header, Header, sizeof (aafStrongRefVectorHeader_t));
 
-	Obj->Entry = calloc (sizeof (aafStrongRefSetEntry_t), sizeof (unsigned char));
+	Obj->Entry = calloc (1, sizeof (aafStrongRefSetEntry_t));
 
-	if (Obj->Entry == NULL) {
-		error ("%s.", strerror (errno));
+	if (!Obj->Entry) {
+		error ("Out of memory");
 		return -1;
 	}
 
@@ -1438,35 +1707,37 @@ static int
 retrieveStrongReference (AAF_Data* aafd, aafProperty* Prop, aafObject* Parent)
 {
 	/*
-	 * Initial property value is a wchar string holding the name of a child node.
-	 * This child node being the object referenced, we store that object dirctly
+	 * Initial property value is a unicode string holding the name of a child node.
+	 * This child node being the object referenced, we store that object directly
 	 * as the property value, instead of the initial child node name.
 	 */
 
-	wchar_t name[CFB_NODE_NAME_SZ];
-
-	cfb_w16towchar (name, Prop->val, Prop->len);
+	char* name = cfb_w16toUTF8 (Prop->val, Prop->len);
 
 	free (Prop->val);
 	Prop->val = NULL;
 
 	cfbNode* Node = cfb_getChildNode (aafd->cfbd, name, Parent->Node);
 
-	if (Node == NULL) {
+	free (name);
+
+	if (!Node) {
 		error ("Could not find child node.");
 		return -1;
 	}
 
 	aafClass* Class = aafclass_getClassByID (aafd, (aafUID_t*)&Node->_clsId);
 
-	if (Class == NULL) {
-		error ("Could not retrieve Class %ls @ \"%ls\".", aaft_ClassIDToText (aafd, (aafUID_t*)&Node->_clsId), aaf_get_ObjectPath (Parent));
+	if (!Class) {
+		error ("Could not retrieve Class %s @ \"%s\".",
+		       aaft_ClassIDToText (aafd, (aafUID_t*)&Node->_clsId),
+		       aaf_get_ObjectPath (Parent));
 		return -1;
 	}
 
 	Prop->val = newObject (aafd, Node, Class, Parent);
 
-	if (Prop->val == NULL) {
+	if (!Prop->val) {
 		return -1;
 	}
 
@@ -1485,31 +1756,29 @@ retrieveStrongReferenceSet (AAF_Data* aafd, aafProperty* Prop, aafObject* Parent
 	aafStrongRefSetHeader_t* Header = NULL;
 	aafStrongRefSetEntry_t*  Entry  = NULL;
 
-	wchar_t refName[CFB_NODE_NAME_SZ];
-
-	cfb_w16towchar (refName, Prop->val, Prop->len);
+	char* refName = cfb_w16toUTF8 (Prop->val, Prop->len);
 
 	free (Prop->val);
 	Prop->val = NULL;
 
 	cfbNode* Node = getStrongRefIndexNode (aafd, Parent, refName);
 
-	if (Node == NULL) {
+	if (!Node) {
 		error ("Could not retrieve StrongReferenceSet's Index node.");
 		goto err;
 	}
 
 	Header = getStrongRefSetList (aafd, Node, Parent);
 
-	if (Header == NULL) {
+	if (!Header) {
 		error ("Could not retrieve StrongReferenceSet's CFB Stream.");
 		goto err;
 	}
 
 	Entry = malloc (sizeof (aafStrongRefSetEntry_t) + Header->_identificationSize);
 
-	if (Entry == NULL) {
-		error ("%s.", strerror (errno));
+	if (!Entry) {
+		error ("Out of memory");
 		goto err;
 	}
 
@@ -1522,20 +1791,21 @@ retrieveStrongReferenceSet (AAF_Data* aafd, aafProperty* Prop, aafObject* Parent
 	{
 		Node = getStrongRefEntryNode (aafd, Parent, refName, Entry->_localKey);
 
-		if (Node == NULL) {
+		if (!Node) {
 			continue;
 		}
 
 		aafClass* Class = aafclass_getClassByID (aafd, (aafUID_t*)&Node->_clsId);
 
-		if (Class == NULL) {
-			error ("Could not retrieve Class %ls.", aaft_ClassIDToText (aafd, (aafUID_t*)&Node->_clsId));
+		if (!Class) {
+			error ("Could not retrieve Class %s.",
+			       aaft_ClassIDToText (aafd, (aafUID_t*)&Node->_clsId));
 			continue;
 		}
 
 		aafObject* Obj = newObject (aafd, Node, Class, Parent);
 
-		if (Obj == NULL) {
+		if (!Obj) {
 			goto err;
 		}
 
@@ -1563,11 +1833,9 @@ err:
 
 end:
 
-	if (Header)
-		free (Header);
-
-	if (Entry)
-		free (Entry);
+	free (refName);
+	free (Header);
+	free (Entry);
 
 	return rc;
 }
@@ -1578,22 +1846,20 @@ retrieveStrongReferenceVector (AAF_Data* aafd, aafProperty* Prop, aafObject* Par
 	int        rc           = 0;
 	aafByte_t* vectorStream = NULL;
 
-	wchar_t refName[CFB_NODE_NAME_SZ];
-
-	cfb_w16towchar (refName, Prop->val, Prop->len);
+	char* refName = cfb_w16toUTF8 (Prop->val, Prop->len);
 
 	free (Prop->val);
 	Prop->val = NULL;
 
 	cfbNode* Node = getStrongRefIndexNode (aafd, Parent, refName);
 
-	if (Node == NULL) {
+	if (!Node) {
 		goto err;
 	}
 
 	vectorStream = getStrongRefVectorList (aafd, Node, Parent);
 
-	if (vectorStream == NULL) {
+	if (!vectorStream) {
 		error ("Could not retrieve StrongRefVectorList");
 		goto err;
 	}
@@ -1609,20 +1875,21 @@ retrieveStrongReferenceVector (AAF_Data* aafd, aafProperty* Prop, aafObject* Par
 	{
 		Node = getStrongRefEntryNode (aafd, Parent, refName, Entry._localKey);
 
-		if (Node == NULL) {
+		if (!Node) {
 			continue;
 		}
 
 		aafClass* Class = aafclass_getClassByID (aafd, (aafUID_t*)&Node->_clsId);
 
-		if (Class == NULL) {
-			warning ("Could not retrieve Class ID %ls.", aaft_ClassIDToText (aafd, (aafUID_t*)&Node->_clsId));
+		if (!Class) {
+			warning ("Could not retrieve Class ID %s.",
+			         aaft_ClassIDToText (aafd, (aafUID_t*)&Node->_clsId));
 			continue;
 		}
 
 		aafObject* Obj = newObject (aafd, Node, Class, Parent);
 
-		if (Obj == NULL) {
+		if (!Obj) {
 			goto err;
 		}
 
@@ -1646,7 +1913,7 @@ retrieveStrongReferenceVector (AAF_Data* aafd, aafProperty* Prop, aafObject* Par
 			aafObject* tmp = Prop->val;
 
 			for (; tmp != NULL; tmp = tmp->next)
-				if (tmp->next == NULL)
+				if (!tmp->next)
 					break;
 
 			Obj->prev = tmp;
@@ -1664,9 +1931,8 @@ err:
 	rc = -1;
 
 end:
-
-	if (vectorStream)
-		free (vectorStream);
+	free (refName);
+	free (vectorStream);
 
 	return rc;
 }
@@ -1678,7 +1944,7 @@ retrieveProperty (AAF_Data* aafd, aafObject* Obj, aafPropertyDef* Def, aafProper
 
 	aafProperty* Prop = newProperty (aafd, Def);
 
-	if (Prop == NULL) {
+	if (!Prop) {
 		return -1;
 	}
 
@@ -1693,8 +1959,9 @@ retrieveProperty (AAF_Data* aafd, aafObject* Obj, aafPropertyDef* Def, aafProper
 
 	Prop->val = malloc (p->_length);
 
-	if (Prop->val == NULL) {
-		error ("%s.", strerror (errno));
+	if (!Prop->val) {
+		error ("Out of memory");
+		free (Prop);
 		return -1;
 	}
 
@@ -1727,8 +1994,10 @@ retrieveObjectProperties (AAF_Data* aafd, aafObject* Obj)
 
 	aafByte_t* propStream = getNodeProperties (aafd, Obj->Node);
 
-	if (propStream == NULL) {
-		error ("Could not retrieve object %ls properties : %ls", aaft_ClassIDToText (aafd, Obj->Class->ID), aaf_get_ObjectPath (Obj));
+	if (!propStream) {
+		error ("Could not retrieve object %s properties : %s",
+		       aaft_ClassIDToText (aafd, Obj->Class->ID),
+		       aaf_get_ObjectPath (Obj));
 		goto err;
 	}
 
@@ -1740,7 +2009,7 @@ retrieveObjectProperties (AAF_Data* aafd, aafObject* Obj)
 	aafByte_t*      value = NULL;
 	aafPropertyDef* PDef  = NULL;
 
-	int valueOffset = 0;
+	size_t valueOffset = 0;
 
 	uint32_t i = 0;
 
@@ -1748,15 +2017,20 @@ retrieveObjectProperties (AAF_Data* aafd, aafObject* Obj)
 	{
 		PDef = aafclass_getPropertyDefinitionByID (Obj->Class, Prop._pid);
 
-		if (PDef == NULL) {
-			warning ("Unknown property 0x%04x (%ls) of object %ls", Prop._pid, aaft_PIDToText (aafd, Prop._pid), aaft_ClassIDToText (aafd, Obj->Class->ID));
+		if (!PDef) {
+			warning ("Unknown property 0x%04x (%s) of object %s",
+			         Prop._pid,
+			         aaft_PIDToText (aafd, Prop._pid),
+			         aaft_ClassIDToText (aafd, Obj->Class->ID));
 			continue;
 		}
 
 		rc = retrieveProperty (aafd, Obj, PDef, &Prop, value, Header._byteOrder);
 
 		if (rc < 0) {
-			error ("Could not retrieve property %ls of object %ls", aaft_PIDToText (aafd, PDef->pid), aaft_ClassIDToText (aafd, Obj->Class->ID));
+			error ("Could not retrieve property %s of object %s",
+			       aaft_PIDToText (aafd, PDef->pid),
+			       aaft_ClassIDToText (aafd, Obj->Class->ID));
 			goto err;
 		}
 	}
@@ -1769,23 +2043,29 @@ err:
 
 end:
 
-	if (propStream)
-		free (propStream);
+	free (propStream);
 
 	return rc;
 }
 
 static cfbNode*
-getStrongRefIndexNode (AAF_Data* aafd, aafObject* Parent, const wchar_t* refName)
+getStrongRefIndexNode (AAF_Data* aafd, aafObject* Parent, const char* refName)
 {
-	wchar_t name[CFB_NODE_NAME_SZ];
+	char name[CFB_NODE_NAME_SZ];
 
-	swprintf (name, CFB_NODE_NAME_SZ, L"%" WPRIws L" index", refName);
+	int rc = snprintf (name, CFB_NODE_NAME_SZ, "%s index", refName);
+
+	if (rc < 0 || (size_t)rc >= CFB_NODE_NAME_SZ) {
+		error ("snprintf() error");
+		return NULL;
+	}
 
 	cfbNode* Node = cfb_getChildNode (aafd->cfbd, name, Parent->Node);
 
-	if (Node == NULL) {
-		error ("Could not retrieve Reference Set/Vector Index Node @ \"%ls/%ls index\"", aaf_get_ObjectPath (Parent), refName);
+	if (!Node) {
+		error ("Could not retrieve Reference Set/Vector Index Node @ \"%s/%s index\"",
+		       aaf_get_ObjectPath (Parent),
+		       refName);
 		return NULL;
 	}
 
@@ -1793,16 +2073,23 @@ getStrongRefIndexNode (AAF_Data* aafd, aafObject* Parent, const wchar_t* refName
 }
 
 static cfbNode*
-getStrongRefEntryNode (AAF_Data* aafd, aafObject* Parent, const wchar_t* refName, uint16_t index)
+getStrongRefEntryNode (AAF_Data* aafd, aafObject* Parent, const char* refName, uint32_t index)
 {
-	wchar_t name[CFB_NODE_NAME_SZ];
+	char name[CFB_NODE_NAME_SZ];
 
-	swprintf (name, CFB_NODE_NAME_SZ, L"%" WPRIws L"{%x}", refName, index);
+	int rc = snprintf (name, CFB_NODE_NAME_SZ, "%s{%x}", refName, index);
+
+	if (rc < 0 || (size_t)rc >= CFB_NODE_NAME_SZ) {
+		error ("snprintf() error");
+		return NULL;
+	}
 
 	cfbNode* Node = cfb_getChildNode (aafd->cfbd, name, Parent->Node);
 
-	if (Node == NULL) {
-		error ("Could not retrieve Reference Set/vector Entry Node @ \"%ls/%ls index\"", aaf_get_ObjectPath (Parent), refName);
+	if (!Node) {
+		error ("Could not retrieve Reference Set/vector Entry Node @ \"%s/%s index\"",
+		       aaf_get_ObjectPath (Parent),
+		       refName);
 		return NULL;
 	}
 
@@ -1812,7 +2099,7 @@ getStrongRefEntryNode (AAF_Data* aafd, aafObject* Parent, const wchar_t* refName
 static aafByte_t*
 getNodeProperties (AAF_Data* aafd, cfbNode* Node)
 {
-	if (Node == NULL) {
+	if (!Node) {
 		error ("Node is NULL");
 		return NULL;
 	}
@@ -1820,16 +2107,16 @@ getNodeProperties (AAF_Data* aafd, cfbNode* Node)
 	uint64_t   stream_sz = 0;
 	aafByte_t* stream    = NULL;
 
-	cfbNode* propNode = cfb_getChildNode (aafd->cfbd, L"properties", Node);
+	cfbNode* propNode = cfb_getChildNode (aafd->cfbd, "properties", Node);
 
-	if (propNode == NULL) {
+	if (!propNode) {
 		error ("Could not retrieve Property Node");
 		return NULL;
 	}
 
 	cfb_getStream (aafd->cfbd, propNode, &stream, &stream_sz);
 
-	if (stream == NULL) {
+	if (!stream) {
 		error ("Could not retrieve Property Stream");
 		return NULL;
 	}
@@ -1848,7 +2135,7 @@ getNodeProperties (AAF_Data* aafd, cfbNode* Node)
 		prop_sz += (((aafPropertyIndexEntry_t*)(stream+((sizeof(aafPropertyIndexEntry_t)*i)+sizeof(aafPropertyIndexHeader_t))))->_length) + sizeof(aafPropertyIndexEntry_t);
 
 	if ( prop_sz != stream_sz )
-		warning( "Stream length (%lu Bytes) does not match property length (%u Bytes).",
+		warning( L"Stream length (%lu Bytes) does not match property length (%u Bytes).",
 			stream_sz,
 			prop_sz );
 */
@@ -1859,7 +2146,7 @@ getNodeProperties (AAF_Data* aafd, cfbNode* Node)
 static aafStrongRefSetHeader_t*
 getStrongRefSetList (AAF_Data* aafd, cfbNode* Node, aafObject* Parent)
 {
-	if (Node == NULL)
+	if (!Node)
 		return NULL;
 
 	aafByte_t* stream    = NULL;
@@ -1867,12 +2154,14 @@ getStrongRefSetList (AAF_Data* aafd, cfbNode* Node, aafObject* Parent)
 
 	cfb_getStream (aafd->cfbd, Node, &stream, &stream_sz);
 
-	if (stream == NULL) {
-		wchar_t refName[CFB_NODE_NAME_SZ];
+	if (!stream) {
+		char* refName = cfb_w16toUTF8 (Node->_ab, Node->_cb);
 
-		cfb_w16towchar (refName, Node->_ab, Node->_cb);
+		error ("Could not retrieve StrongReferenceSet Index Stream @ \"%s/%s index\"",
+		       aaf_get_ObjectPath (Parent),
+		       refName);
 
-		error ("Could not retrieve StrongReferenceSet Index Stream @ \"%ls/%ls index\"", aaf_get_ObjectPath (Parent), refName);
+		free (refName);
 
 		return NULL;
 	}
@@ -1883,7 +2172,7 @@ getStrongRefSetList (AAF_Data* aafd, cfbNode* Node, aafObject* Parent)
 static aafByte_t*
 getStrongRefVectorList (AAF_Data* aafd, cfbNode* Node, aafObject* Parent)
 {
-	if (Node == NULL)
+	if (!Node)
 		return NULL;
 
 	aafByte_t* stream    = NULL;
@@ -1891,12 +2180,13 @@ getStrongRefVectorList (AAF_Data* aafd, cfbNode* Node, aafObject* Parent)
 
 	cfb_getStream (aafd->cfbd, Node, &stream, &stream_sz);
 
-	if (stream == NULL) {
-		wchar_t refName[CFB_NODE_NAME_SZ];
+	if (!stream) {
+		char* refName = cfb_w16toUTF8 (Node->_ab, Node->_cb);
 
-		cfb_w16towchar (refName, Node->_ab, Node->_cb);
+		error ("Could not retrieve StrongReferenceVector Index Stream \"%s/%s index\"",
+		       aaf_get_ObjectPath (Parent),
+		       refName);
 
-		error ("Could not retrieve StrongReferenceVector Index Stream \"%ls/%ls index\"", aaf_get_ObjectPath (Parent), refName);
 		return NULL;
 	}
 
