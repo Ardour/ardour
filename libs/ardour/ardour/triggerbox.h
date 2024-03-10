@@ -315,6 +315,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	bool active() const { return _state >= Running; }
 	State state() const { return _state; }
 
+	virtual bool has_data() const = 0;
+
 	void set_region (std::shared_ptr<Region>, bool use_thread = true);
 	void clear_region ();
 	virtual int set_region_in_worker_thread (std::shared_ptr<Region>) = 0;
@@ -495,6 +497,9 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 		return audio_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm, quantize_offset);
 	}
 
+	bool has_data() const { return data.length > 0; }
+	uint32_t n_channels() const { return data.size(); }
+
 	StretchMode stretch_mode() const { return _stretch_mode; }
 	void set_stretch_mode (StretchMode);
 
@@ -559,6 +564,7 @@ class LIBARDOUR_API AudioTrigger : public Trigger {
 
 	void drop_data ();
 	int load_data (std::shared_ptr<AudioRegion>);
+	int load_data (BufferSet const &);
 	void estimate_tempo ();
 	void reset_stretcher ();
 	void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
@@ -576,6 +582,8 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	pframes_t run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, Temporal::Beats const & start, Temporal::Beats const & end, pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset) {
 		return midi_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm, quantize_offset);
 	}
+
+	bool has_data() const { return (bool) model; }
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
@@ -645,6 +653,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	bool                      map_change;
 
 	int load_data (std::shared_ptr<MidiRegion>);
+	int load_data (BufferSet const &);
 	void compute_and_set_length ();
 	void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
 };

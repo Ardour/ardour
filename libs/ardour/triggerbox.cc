@@ -562,7 +562,7 @@ Trigger::set_ui (void* p)
 void
 Trigger::bang (float velocity)
 {
-	if (!_region) {
+	if (!has_data()) {
 		return;
 	}
 	_pending_velocity_gain = velocity;
@@ -573,7 +573,7 @@ Trigger::bang (float velocity)
 void
 Trigger::unbang ()
 {
-	if (!_region) {
+	if (!has_data()) {
 		return;
 	}
 	_unbang.fetch_add (1);
@@ -1285,7 +1285,7 @@ AudioTrigger::set_stretch_mode (Trigger::StretchMode sm)
 void
 AudioTrigger::set_segment_tempo (double t)
 {
-	if (!_region) {
+	if (data.length <= 0) {
 		_segment_tempo = 0;
 		return;
 	}
@@ -1772,12 +1772,11 @@ AudioTrigger::setup_stretcher ()
 	using namespace RubberBand;
 	using namespace Temporal;
 
-	if (!_region) {
+	if (!has_data()) {
 		return;
 	}
 
-	std::shared_ptr<AudioRegion> ar (std::dynamic_pointer_cast<AudioRegion> (_region));
-	const uint32_t nchans = std::min (_box.input_streams().n_audio(), ar->n_channels());
+	const uint32_t nchans = std::min (_box.input_streams().n_audio(), n_channels());
 
 	//map our internal enum to a rubberband option
 	RubberBandStretcher::Option ro = RubberBandStretcher::Option (0);
@@ -1802,6 +1801,13 @@ AudioTrigger::drop_data ()
 		delete [] d;
 	}
 	data.clear ();
+	data.length = 0;
+}
+
+int
+AudioTrigger::load_data (BufferSet const & bufs)
+{
+	return 0;
 }
 
 int
@@ -1809,8 +1815,8 @@ AudioTrigger::load_data (std::shared_ptr<AudioRegion> ar)
 {
 	const uint32_t nchans = ar->n_channels();
 
-	data.length = ar->length_samples();
 	drop_data ();
+	data.length = ar->length_samples();
 
 	try {
 		for (uint32_t n = 0; n < nchans; ++n) {
@@ -1849,9 +1855,8 @@ AudioTrigger::audio_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t 
                          Temporal::Beats const & start, Temporal::Beats const & end,
                          pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset)
 {
-	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion>(_region);
 	/* We do not modify the I/O of our parent route, so we process only min (bufs.n_audio(),region.channels()) */
-	const uint32_t nchans = (in_process_context ? std::min (bufs.count().n_audio(), ar->n_channels()) : ar->n_channels());
+	const uint32_t nchans = (in_process_context ? std::min (bufs.count().n_audio(), n_channels()) : n_channels());
 	int avail = 0;
 	BufferSet* scratch;
 	std::unique_ptr<BufferSet> scratchp;
@@ -3262,7 +3267,7 @@ TriggerBox::fast_forward (CueEvents const & cues, samplepos_t transport_position
 	pos = c->time;
 	cnt = 0;
 
-	if (!trig->region()) {
+	if (!trig->has_data()) {
 		fast_forward_nothing_to_do ();
 		return;
 	}
@@ -3480,7 +3485,7 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 	if (p) {
 
 		if (p == Trigger::MagicClearPointerValue) {
-			if (all_triggers[slot]->region()) {
+			if (all_triggers[slot]->has_data()) {
 				if (_active_slots) {
 					_active_slots--;
 				}
@@ -3490,7 +3495,7 @@ TriggerBox::maybe_swap_pending (uint32_t slot)
 			}
 			all_triggers[slot]->clear_region ();
 		} else {
-			if (!all_triggers[slot]->region()) {
+			if (!all_triggers[slot]->has_data()) {
 				if (_active_slots == 0) {
 					empty_changed = true;
 				}
@@ -3772,7 +3777,7 @@ void
 TriggerBox::bang_trigger_at (Triggers::size_type row, float velocity)
 {
 	TriggerPtr t = trigger(row);
-	if (t && t->region()) {
+	if (t && t->has_data()) {
 		t->bang (velocity);
 	} else {
 		/* by convention, an empty slot is effectively a STOP button */
@@ -3784,7 +3789,7 @@ void
 TriggerBox::unbang_trigger_at (Triggers::size_type row)
 {
 	TriggerPtr t = trigger(row);
-	if (t && t->region()) {
+	if (t && t->has_data()) {
 		t->unbang();
 	} else {
 		/* you shouldn't be able to unbang an empty slot; but if this somehow happens we'll just treat it as a */
@@ -4174,7 +4179,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		DEBUG_TRACE (DEBUG::Triggers, string_compose ("tb noticed active scene %1\n", _active_scene));
 		if (_active_scene < (int32_t) all_triggers.size()) {
 			if (!all_triggers[_active_scene]->cue_isolated()) {
-				if (all_triggers[_active_scene]->region()) {
+				if (all_triggers[_active_scene]->has_data()) {
 					all_triggers[_active_scene]->bang ();
 				} else {
 					stop_all_quantized ();  //empty slot, this should work as a Stop for the running clips
@@ -4428,10 +4433,9 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 
 		pframes_t frames_covered;
 
-
-		std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (_currently_playing->region());
-		if (ar) {
-			max_chans = std::max (ar->n_channels(), max_chans);
+		std::shared_ptr<AudioTrigger> att = std::dynamic_pointer_cast<AudioTrigger> (_currently_playing);
+		if (att) {
+			max_chans = std::max (att->n_channels(), max_chans);
 		}
 
 		/* Quantize offset will generally be zero, but if non-zero, it
@@ -4506,12 +4510,12 @@ TriggerBox::determine_next_trigger (uint32_t current)
 	/* count number of triggers that can actually be run (i.e. they have a region) */
 
 	for (uint32_t n = 0; n < all_triggers.size(); ++n) {
-		if (all_triggers[n]->region()) {
+		if (all_triggers[n]->has_data()) {
 			runnable++;
 		}
 	}
 
-	if (runnable == 0 || !all_triggers[current]->region()) {
+	if (runnable == 0 || !all_triggers[current]->has_data()) {
 		return -1;
 	}
 
@@ -4572,7 +4576,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 				break;
 			}
 
-			if (all_triggers[n]->region() && !all_triggers[n]->active()) {
+			if (all_triggers[n]->has_data() && !all_triggers[n]->active()) {
 				return n;
 			}
 		}
@@ -4591,7 +4595,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 				break;
 			}
 
-			if (all_triggers[n]->region() && !all_triggers[n]->active ()) {
+			if (all_triggers[n]->has_data() && !all_triggers[n]->active ()) {
 				return n;
 			}
 		}
@@ -4599,14 +4603,14 @@ TriggerBox::determine_next_trigger (uint32_t current)
 
 	case FollowAction::FirstTrigger:
 		for (n = 0; n < all_triggers.size(); ++n) {
-			if (all_triggers[n]->region() && !all_triggers[n]->active ()) {
+			if (all_triggers[n]->has_data() && !all_triggers[n]->active ()) {
 				return n;
 			}
 		}
 		break;
 	case FollowAction::LastTrigger:
 		for (int i = all_triggers.size() - 1; i >= 0; --i) {
-			if (all_triggers[i]->region() && !all_triggers[i]->active ()) {
+			if (all_triggers[i]->has_data() && !all_triggers[i]->active ()) {
 				return i;
 			}
 		}
@@ -4614,7 +4618,7 @@ TriggerBox::determine_next_trigger (uint32_t current)
 
 	case FollowAction::JumpTrigger:
 		for (std::size_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
-			if (fa.targets.test (n) && all_triggers[n]->region()) {
+			if (fa.targets.test (n) && all_triggers[n]->has_data()) {
 				possible_targets.push_back (n);
 			}
 		}
