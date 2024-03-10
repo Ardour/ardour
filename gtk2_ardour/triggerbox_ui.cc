@@ -272,7 +272,7 @@ TriggerEntry::draw_launch_icon (Cairo::RefPtr<Cairo::Context> context, float sz,
 
 	bool active = trigger ()->active ();
 
-	if (!trigger ()->region ()) {
+	if (!trigger ()->has_data ()) {
 		/* no content in this slot, it is only a Stop button */
 		context->move_to (margin, margin);
 		context->rel_line_to (size, 0);
@@ -454,7 +454,7 @@ TriggerEntry::render (ArdourCanvas::Rect const& area, Cairo::RefPtr<Cairo::Conte
 	}
 
 	/* follow-action icon */
-	if (trigger ()->region () && trigger ()->will_follow ()) {
+	if (trigger ()->has_data () && trigger ()->will_follow ()) {
 		context->set_identity_matrix ();
 		context->translate (self.x0, self.y0 - 0.5);
 		context->translate (width - height, 0); // right side of the widget
@@ -467,7 +467,7 @@ void
 TriggerEntry::on_trigger_changed (PropertyChange const& change)
 {
 	if (change.contains (ARDOUR::Properties::name)) {
-		if (trigger ()->region ()) {
+		if (trigger ()->has_data ()) {
 			name_text->set (short_version (trigger ()->name (), 16));
 			play_button->set_tooltip (_("Launch this clip\nRight-click to select Launch Options for this clip"));
 		} else {
@@ -587,7 +587,7 @@ TriggerEntry::name_button_event (GdkEvent* ev)
 bool
 TriggerEntry::play_button_event (GdkEvent* ev)
 {
-	if (!trigger ()->region ()) {
+	if (!trigger ()->has_data ()) {
 		/* empty slot; this is just a stop button */
 		switch (ev->type) {
 			case GDK_BUTTON_PRESS:
@@ -688,7 +688,7 @@ TriggerEntry::follow_button_event (GdkEvent* ev)
 bool
 TriggerEntry::event (GdkEvent* ev)
 {
-	if (!trigger ()->region ()) {
+	if (!trigger ()->has_data ()) {
 		return false;
 	}
 
@@ -784,9 +784,13 @@ TriggerEntry::drag_begin (Glib::RefPtr<Gdk::DragContext> const& context)
 		/* ctx leaves scope, cr is destroyed, and pixmap surface is flush()ed */
 	}
 
-	std::shared_ptr<Region> region = trigger ()->region ();
-	if (region) {
-		PublicEditor::instance ().pbdid_dragged_dt = region->data_type ();
+	if (trigger()->has_data()) {
+		std::shared_ptr<AudioTrigger> att = std::dynamic_pointer_cast<AudioTrigger> (trigger());
+		if (att) {
+			PublicEditor::instance ().pbdid_dragged_dt = DataType::AUDIO;
+		} else {
+			PublicEditor::instance ().pbdid_dragged_dt = DataType::MIDI;
+		}
 	} else {
 		PublicEditor::instance ().pbdid_dragged_dt = DataType::NIL;
 	}
