@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023-2024 Adrien Gesta-Fline
+ * Copyright (C) 2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -38,18 +38,18 @@
 #define error(...)                                                             \
   AAF_LOG(aafi->log, aafi, DEBUG_SRC_ID_AAF_IFACE, VERB_ERROR, __VA_ARGS__)
 
-int resolve_AAF(struct AAF_Iface *aafi) {
+int mediaComposer_AAF(struct AAF_Iface *aafi) {
   int probe = 0;
 
   if (aafi->aafd->Identification.CompanyName &&
-      strncmp(aafi->aafd->Identification.CompanyName, "Blackmagic Design",
-              strlen("Blackmagic Design")) == 0) {
+      strncmp(aafi->aafd->Identification.CompanyName, "Avid Technology, Inc.",
+              strlen("Avid Technology, Inc.")) == 0) {
     probe++;
   }
 
   if (aafi->aafd->Identification.ProductName &&
-      strncmp(aafi->aafd->Identification.ProductName, "DaVinci Resolve",
-              strlen("DaVinci Resolve")) == 0) {
+      strncmp(aafi->aafd->Identification.ProductName, "Avid Media Composer",
+              strlen("Avid Media Composer")) == 0) {
     probe++;
   }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Adrien Gesta-Fline
+ * Copyright (C) 2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -18,20 +18,15 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#ifndef __AAFIAudioFiles_h__
-#define __AAFIAudioFiles_h__
+#ifndef __MediaComposer_h__
+#define __MediaComposer_h__
 
-#include <wchar.h>
-
+#include "aaf/AAFIParser.h"
 #include "aaf/AAFIface.h"
 
-wchar_t*
-aafi_locate_external_essence_file (AAF_Iface* aafi, const wchar_t* original_file_path, const char* search_location);
+#define AVID_MEDIA_COMPOSER_CURVE_TYPE_LINEAR 0
+#define AVID_MEDIA_COMPOSER_CURVE_TYPE_EQUAL_POWER 1
 
-int
-aafi_extract_audio_essence (AAF_Iface* aafi, aafiAudioEssence* audioEssence, const char* outfilepath, const wchar_t* forcedFileName);
+int mediaComposer_AAF(struct AAF_Iface *aafi);
 
-int
-aafi_parse_audio_essence (AAF_Iface* aafi, aafiAudioEssence* audioEssence);
-
-#endif // !__AAFIAudioFiles_h__
+#endif // !__MediaComposer_h__
