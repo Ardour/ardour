@@ -279,7 +279,7 @@ SimpleExportDialog::start_export ()
 
 		if (rend >= t24h) {
 			hide ();
-			std::string        txt = _("Error: ADM/BWN files timecode cannot be past 24h.");
+			std::string        txt = _("Error: ADM BWF files timecode cannot be past 24h.");
 			Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
 			msg.run ();
 			return;

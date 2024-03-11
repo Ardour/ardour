@@ -29,14 +29,14 @@ function factory () return function ()
 	end
 
 	if 0 ~= os.execute ("master_info -h") then
-		local md = LuaDialog.Message ("Master Info Tool Missing", "The 'master_info' tool from Dolby_Atmos_Storage_SIDK_v2.3.2/Tools/ needs to be in $PATH for ADM/BWF meta-data import to work.", LuaDialog.MessageType.Error, LuaDialog.ButtonType.Close)
+		local md = LuaDialog.Message ("Master Info Tool Missing", "The 'master_info' tool from Dolby_Atmos_Storage_SIDK_v2.3.2/Tools/ needs to be in $PATH for ADM BWF meta-data import to work.", LuaDialog.MessageType.Error, LuaDialog.ButtonType.Close)
 		print (md:run())
 		return 1
 	end
 
-	local rv = LuaDialog.Dialog ("Load ADM/BWF File",
+	local rv = LuaDialog.Dialog ("Load ADM BWF File",
 	{
-		{ type = "file", key = "file", title = "Choose ADM/BWF File", path = "" },
+		{ type = "file", key = "file", title = "Choose ADM BWF File", path = "" },
 	}):run()
 
 	if (not rv or not ARDOUR.LuaAPI.file_test (rv['file'], ARDOUR.LuaAPI.FileTest.Exists)) then
