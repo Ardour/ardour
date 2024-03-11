@@ -68,8 +68,8 @@ public:
 		return _current_n_channels;
 	}
 
-	size_t total_n_channels () const {
-		return _total_n_channels;
+	size_t total_n_channels (bool with_beds = true) const {
+		return _total_n_channels - (with_beds ? 0 : 10);
 	}
 
 	std::shared_ptr<LV2Plugin> surround_processor () const {
