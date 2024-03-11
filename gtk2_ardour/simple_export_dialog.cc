@@ -298,7 +298,7 @@ SimpleExportDialog::start_export ()
 				SimpleExport::_session->timecode_to_sample (tc, t24h, false /* use_offset */, false /* use_subframes */);
 				if (rend >= t24h) {
 					hide ();
-					std::string        txt = _("Error: The file to exported contains an illegal timecode value near the midnight boundary. Try moving the export-range earlier on the product timeline.");
+					std::string        txt = _("Error: The file to be exported contains an illegal timecode value near the midnight boundary. Try moving the export-range earlier on the product timeline.");
 					Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
 					msg.run ();
 					return;
