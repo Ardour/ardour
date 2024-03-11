@@ -507,6 +507,10 @@ Editor::nudge_forward (bool next, bool force_playhead)
 			alist->modify (m, p + distance, (*m)->value);
 			alist->thaw ();
 			_session->add_command (new MementoCommand<AutomationList> (new SimpleMementoCommandBinder<AutomationList> (*alist.get()), 0, &alist->get_state()));
+
+			if (selection->points.size()==1) {
+				_session->request_locate (timepos_t (p + distance).samples());
+			}
 		}
 		if (in_command) {
 			commit_reversible_command ();
@@ -633,6 +637,10 @@ Editor::nudge_backward (bool next, bool force_playhead)
 			alist->modify (m, max (timepos_t (p.time_domain()), p.earlier (distance)), (*m)->value);
 			alist->thaw ();
 			_session->add_command (new MementoCommand<AutomationList> (new SimpleMementoCommandBinder<AutomationList> (*alist.get()), 0, &alist->get_state()));
+
+			if (selection->points.size()==1) {
+				_session->request_locate (timepos_t (p.earlier (distance)).samples());
+			}
 		}
 		if (in_command) {
 			commit_reversible_command ();
