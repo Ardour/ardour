@@ -93,6 +93,7 @@
  */
 
 #include <errno.h>
+#include <limits.h>
 #include <math.h> // ceil()
 #include <stdio.h>
 #include <stdlib.h>
