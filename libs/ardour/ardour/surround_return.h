@@ -111,6 +111,8 @@ public:
 	/* XXX this is only for testing */
 	void set_bed_mix (bool on, std::string const& ref, int* cmap = NULL);
 	void set_sync_and_align (bool on);
+	void set_ffoa (float);
+	void set_with_all_metadata (bool);
 
 	int set_state (XMLNode const&, int version);
 
@@ -190,8 +192,10 @@ private:
 	samplepos_t      _export_end;
 	bool             _rolling;
 	bool             _with_bed;
-	std::string      _export_reference;
 	bool             _sync_and_align;
+	bool             _with_all_metadata;
+	float            _ffoa;
+	std::string      _export_reference;
 	FixedDelay       _delaybuffers;
 	std::atomic<int> _flush;
 };

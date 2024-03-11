@@ -92,6 +92,8 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 	, _rolling (false)
 	, _with_bed (false)
 	, _sync_and_align (false)
+	, _with_all_metadata (false)
+	, _ffoa (0)
 {
 #if !(defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0))
 	throw failed_constructor ();
@@ -357,6 +359,7 @@ void
 SurroundReturn::set_bed_mix (bool on, std::string const& ref, int* cmap)
 {
 	_with_bed = on;
+	_with_all_metadata = on;
 
 	if (!_with_bed) {
 		_export_reference.clear ();
@@ -383,6 +386,18 @@ SurroundReturn::set_sync_and_align (bool on)
 		return;
 	}
 	_sync_and_align = on;
+}
+
+void
+SurroundReturn::set_ffoa (float ffoa)
+{
+	_ffoa = ffoa;
+}
+
+void
+SurroundReturn::set_with_all_metadata (bool on)
+{
+	_with_all_metadata = on;
 }
 
 void
@@ -425,7 +440,8 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 		latency_changed ();
 	}
 
-	bool with_bed = _with_bed;
+	bool with_bed          = _with_bed;
+	bool with_all_metadata = _with_all_metadata;
 
 	samplecnt_t latency = effective_latency ();
 
@@ -501,12 +517,18 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 								break;
 							}
 							samplecnt_t pos = std::min (timepos_t (start).distance (next_event.when).samples (), (samplecnt_t)nframes - 1);
-							evaluate (id, p, next_event.when, pos, with_bed);
+							evaluate (id, p, next_event.when, pos, with_all_metadata);
 							next = next_event.when;
 						}
 						/* inform live renderer */
-						if (!found_event && !_exporting) {
-							evaluate (id, p, start, 0);
+						if (!found_event) {
+							if (p->pan_pos_x->list ()->interpolation () != Evoral::ControlList::Discrete || !_exporting) {
+								evaluate (id, p, start, 0, with_all_metadata);
+								/* send event at export end */
+								if (_exporting && _export_end - 1 >= start_sample && _export_end - 1 < end_sample) {
+									evaluate (id, p, timepos_t (_export_end + latency - 1), _export_end - start_sample - 1, with_all_metadata);
+								}
+							}
 						}
 					}
 				}
@@ -714,7 +736,7 @@ void
 SurroundReturn::maybe_send_metadata (size_t id, pframes_t sample, pan_t const v[num_pan_parameters], bool force)
 {
 	bool changed = false;
-	for (size_t i = 0; i < (_with_bed ? num_pan_parameters : 5); ++i) {
+	for (size_t i = 0; i < (_with_all_metadata ? num_pan_parameters : 5); ++i) {
 		if (_current_value[id][i] != v[i]) {
 			changed = true;
 		}
@@ -745,7 +767,7 @@ SurroundReturn::maybe_send_metadata (size_t id, pframes_t sample, pan_t const v[
 	lv2_atom_forge_key (&_forge, urids.surr_Snap);
 	lv2_atom_forge_bool (&_forge, v[4] > 0 ? true : false);
 
-	if (_with_bed) {
+	if (_with_all_metadata) {
 		lv2_atom_forge_key (&_forge, urids.surr_ElevEn);
 		lv2_atom_forge_bool (&_forge, v[5] > 0 ? true : false);
 		lv2_atom_forge_key (&_forge, urids.surr_Ramp);
@@ -807,7 +829,7 @@ SurroundReturn::setup_export (std::string const& fn, samplepos_t ss, samplepos_t
 	bool have_ref = !_export_reference.empty () && Glib::file_test (_export_reference, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR));
 
 	float content_start = ss / (float) _session.nominal_sample_rate ();
-	float content_ffoa = 0;
+	float content_ffoa = _ffoa;
 	float content_fps = 30;
 
 	switch (_session.config.get_timecode_format()) {
