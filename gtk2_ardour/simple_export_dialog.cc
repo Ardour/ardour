@@ -285,6 +285,29 @@ SimpleExportDialog::start_export ()
 			return;
 		}
 
+		/* C_Ex_08 - prevent export that might fail on some systems - 23.976 vs. 24/1001 */
+		switch (SimpleExport::_session->config.get_timecode_format ()) {
+			case Timecode::timecode_23976:
+			case Timecode::timecode_2997:
+			case Timecode::timecode_2997drop:
+			case Timecode::timecode_2997000drop:
+				tc.hours = 23;
+				tc.minutes = 58;
+				tc.seconds = 35;
+				tc.frames = 0;
+				SimpleExport::_session->timecode_to_sample (tc, t24h, false /* use_offset */, false /* use_subframes */);
+				if (rend >= t24h) {
+					hide ();
+					std::string        txt = _("Error: The file to exported contains an illegal timecode value near the midnight boundary. Try moving the export-range earlier on the product timeline.");
+					Gtk::MessageDialog msg (txt, false, Gtk::MESSAGE_ERROR, Gtk::BUTTONS_OK, true);
+					msg.run ();
+					return;
+				}
+				break;
+			default:
+				break;
+		}
+
 		/* Ensure timespan exists, see also SimpleExport::run_export */
 		auto ts = _manager->get_timespans ();
 		assert (ts.size () == 1);
