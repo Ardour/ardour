@@ -194,6 +194,7 @@ private:
 	bool             _with_bed;
 	bool             _sync_and_align;
 	bool             _with_all_metadata;
+	bool             _content_creation;
 	float            _ffoa;
 	std::string      _export_reference;
 	FixedDelay       _delaybuffers;

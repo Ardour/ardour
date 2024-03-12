@@ -93,6 +93,7 @@ SurroundReturn::SurroundReturn (Session& s, Route* r)
 	, _with_bed (false)
 	, _sync_and_align (false)
 	, _with_all_metadata (false)
+	, _content_creation (false)
 	, _ffoa (0)
 {
 #if !(defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0))
@@ -358,8 +359,9 @@ SurroundReturn::reset_object_map ()
 void
 SurroundReturn::set_bed_mix (bool on, std::string const& ref, int* cmap)
 {
-	_with_bed = on;
+	_with_bed          = on;
 	_with_all_metadata = on;
+	_content_creation  = on;
 
 	if (!_with_bed) {
 		_export_reference.clear ();
@@ -442,6 +444,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 
 	bool with_bed          = _with_bed;
 	bool with_all_metadata = _with_all_metadata;
+	bool content_creation  = _content_creation && _exporting;
 
 	samplecnt_t latency = effective_latency ();
 
@@ -511,7 +514,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 						timepos_t end (end_sample + latency);
 						timepos_t next (start_sample + latency - 1);
 
-						while (true) {
+						while (!content_creation) {
 							Evoral::ControlEvent next_event (timepos_t (Temporal::AudioTime), 0.0f);
 							if (!p->find_next_event (next, end, next_event)) {
 								break;
@@ -522,8 +525,10 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 						}
 						/* inform live renderer */
 						if (!found_event) {
-							if (p->pan_pos_x->list ()->interpolation () != Evoral::ControlList::Discrete || !_exporting) {
-								evaluate (id, p, start, 0, with_all_metadata);
+							if (p->pan_pos_x->list ()->interpolation () != Evoral::ControlList::Discrete || !_exporting || content_creation) {
+								if (!content_creation || 0 == ((start_sample + latency) & 0x1ff)) {
+									evaluate (id, p, start, 0, with_all_metadata);
+								}
 								/* send event at export end */
 								if (_exporting && _export_end - 1 >= start_sample && _export_end - 1 < end_sample) {
 									evaluate (id, p, timepos_t (_export_end + latency - 1), _export_end - start_sample - 1, with_all_metadata);
