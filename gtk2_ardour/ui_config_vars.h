@@ -156,6 +156,7 @@ UI_CONFIG_VARIABLE (std::string, freesound_dir, "freesound-dir", "")
 UI_CONFIG_VARIABLE (int, max_note_height, "max-note-height", 20)
 UI_CONFIG_VARIABLE (bool, prefer_tap_tempo, "prefer-tap-tempo", false)
 UI_CONFIG_VARIABLE (bool, sandbox_all_lua_scripts, "sandbox-all-lua-scripts", false)
+UI_CONFIG_VARIABLE (bool, update_action_scripts, "update-action-scripts", true)
 
 /* these are visibility-type selections in the New Track dialog that we should make persistent for the user's choices */
 UI_CONFIG_VARIABLE (bool, show_on_cue_page, "show-on-cue-page", true)
