@@ -1538,10 +1538,7 @@ Session::auto_connect_surround_master ()
 	}
 	lm.release ();
 
-	/* Mute non-surround path */
-	if (_monitor_out) {
-		_monitor_out->monitor_control ()->set_cut_all (true);
-	} else if (_master_out) {
+	if (_master_out) {
 		_master_out->mute_control ()->set_value (true, PBD::Controllable::NoGroup);
 	}
 
