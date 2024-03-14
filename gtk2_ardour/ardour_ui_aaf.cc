@@ -589,7 +589,7 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 					continue;
 				}
 
-				if (audioEssenceFile->is_embedded && !audioEssenceFile->usable_file_path) {
+				if (audioEssenceFile->is_embedded) {
 					if (aafi_extractAudioEssenceFile (aafi, audioEssenceFile, AAFI_EXTRACT_DEFAULT, media_cache_path.c_str (), 0, 0, NULL, NULL) < 0) {
 						PBD::error << string_compose ("AAF: Could not extract audio file '%1' from AAF.", audioEssenceFile->unique_name) << endmsg;
 						essenceError++;
