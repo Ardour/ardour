@@ -45,8 +45,7 @@ ControlPoint::ControlPoint (AutomationLine& al)
 	_size = 4.0;
 
 	_item = new ArdourCanvas::Rectangle (&_line.canvas_group());
-	_item->set_fill (true);
-	_item->set_fill_color (UIConfiguration::instance().color ("control point fill"));
+	_item->set_fill (false);
 	_item->set_outline_color (UIConfiguration::instance().color ("control point outline"));
 	_item->set_data ("control_point", this);
 	_item->Event.connect (sigc::mem_fun (this, &ControlPoint::event_handler));
@@ -122,10 +121,8 @@ ControlPoint::set_color ()
 {
 	if (_selected) {
 		_item->set_outline_color(UIConfiguration::instance().color ("control point selected outline"));;
-		_item->set_fill_color(UIConfiguration::instance().color ("control point selected fill"));
 	} else {
 		_item->set_outline_color(UIConfiguration::instance().color ("control point outline"));
-		_item->set_fill_color(UIConfiguration::instance().color ("control point fill"));
 	}
 }
 

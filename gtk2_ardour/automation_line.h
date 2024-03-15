@@ -85,7 +85,6 @@ public:
 	void get_selectables (Temporal::timepos_t const &, Temporal::timepos_t const &, double, double, std::list<Selectable*>&);
 	void get_inverted_selectables (Selection&, std::list<Selectable*>& results);
 
-	virtual void remove_point (ControlPoint&);
 	bool control_points_adjacent (double xval, uint32_t& before, uint32_t& after);
 
 	/* dragging API */
@@ -126,7 +125,7 @@ public:
 	std::string get_verbose_cursor_relative_string (double, double) const;
 	std::string fraction_to_string (double) const;
 	std::string delta_to_string (double) const;
-	double string_to_fraction (std::string const &) const;
+	double string_to_fraction (std::string const &, double old_fraction) const;
 
 	void   view_to_model_coord_y (double &) const;
 
@@ -150,6 +149,7 @@ public:
 	void set_colors();
 
 	void modify_points_y (std::vector<ControlPoint*> const&, double);
+	virtual void remove_points (std::vector<ControlPoint*> const& cps);
 
 	virtual MementoCommandBinder<ARDOUR::AutomationList>* memento_command_binder ();
 

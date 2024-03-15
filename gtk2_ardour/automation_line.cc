@@ -231,7 +231,7 @@ double
 AutomationLine::control_point_box_size ()
 {
 	float uiscale = UIConfiguration::instance().get_ui_scale();
-	uiscale = std::max<float> (1.f, powf (uiscale, 1.71));
+	uiscale = std::max<float> (1.f, powf (uiscale, 1.71)) * 2;
 
 	if (_height > TimeAxisView::preset_height (HeightLarger)) {
 		return rint (8.0 * uiscale);
@@ -394,25 +394,57 @@ AutomationLine::delta_to_string (double delta) const
  *  @return Corresponding y fraction.
  */
 double
-AutomationLine::string_to_fraction (string const & s) const
+AutomationLine::string_to_fraction (string const & s, double const old_fraction) const
 {
-	double v;
-	sscanf (s.c_str(), "%lf", &v);
-
+	bool is_db = false;
 	switch (_desc.type) {
 		case GainAutomation:
 		case BusSendLevel:
 		case EnvelopeAutomation:
 		case TrimAutomation:
 		case InsertReturnLevel:
-			if (s == "-inf") { /* translation */
-				v = 0;
-			} else {
-				v = dB_to_coefficient (v);
-			}
+			is_db = true;
 			break;
 		default:
 			break;
+	}
+	double v;
+	if ((s.length() > 2) && index("+-*/", s[0]) && (s[1] == '=')) {
+		v = old_fraction;
+		view_to_model_coord_y (v);
+		if (is_db) {
+			v = accurate_coefficient_to_dB(v);
+		}
+		double op_v;
+		sscanf (s.c_str() + 2, "%lf", &op_v);
+		if (op_v != 0.f) {
+			switch (s[0]) {
+				case '+':
+					v += op_v;
+					break;
+				case '-':
+					v -= op_v;
+					break;
+				case '*':
+					v *= op_v;
+					break;
+				case '/':
+					if (op_v > 1.0) {
+						v /= op_v;
+					}
+					break;
+			}
+		}
+	} else {
+		sscanf (s.c_str(), "%lf", &v);
+	}
+
+	if (is_db) {
+		if (s == "-inf") { /* translation */
+			v = 0;
+		} else {
+			v = dB_to_coefficient (v);
+		}
 	}
 	return model_to_view_coord_y (v);
 }
@@ -926,13 +958,21 @@ AutomationLine::is_first_point (ControlPoint& cp)
 
 // This is copied into AudioRegionGainLine
 void
-AutomationLine::remove_point (ControlPoint& cp)
+AutomationLine::remove_points (std::vector<ControlPoint*> const& cps)
 {
 	trackview.editor().begin_reversible_command (_("remove control point"));
 	XMLNode &before = alist->get_state();
 
 	trackview.editor ().get_selection ().clear_points ();
-	alist->erase (cp.model());
+
+	// Extract models before the ControlPoints iterator mutates on ControlPoint deletion
+	std::list<Evoral::ControlList::iterator> models;
+	for (auto const & cp : cps) {
+		models.push_back(cp->model());
+	}
+	for (auto const & model : models) {
+		alist->erase (model);
+	}
 
 	trackview.editor().session()->add_command(
 		new MementoCommand<AutomationList> (memento_command_binder (), &before, &alist->get_state()));
