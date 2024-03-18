@@ -555,6 +555,16 @@ GtkCanvas::GtkCanvas ()
 }
 
 void
+GtkCanvas::set_single_exposure (bool yn)
+{
+	if (g_getenv ("ARDOUR_CANVAS_SINGLE_EXPOSE_ALWAYS")) {
+		yn = true;
+	}
+
+	_single_exposure = yn;
+}
+
+void
 GtkCanvas::use_nsglview (bool retina)
 {
 	assert (!_nsglview);

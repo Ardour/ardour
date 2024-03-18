@@ -235,7 +235,7 @@ public:
 
 	bool get_mouse_position (Duple& winpos) const;
 
-	void set_single_exposure (bool s) { _single_exposure = s; }
+	void set_single_exposure (bool s);
 	bool single_exposure () { return _single_exposure; }
 
 	void re_enter ();
