@@ -85,6 +85,7 @@ PBD::DebugBits PBD::DEBUG::Ports = PBD::new_debug_bit ("Ports");
 PBD::DebugBits PBD::DEBUG::ProcessThreads = PBD::new_debug_bit ("processthreads");
 PBD::DebugBits PBD::DEBUG::Processors = PBD::new_debug_bit ("processors");
 PBD::DebugBits PBD::DEBUG::Push2 = PBD::new_debug_bit ("push2");
+PBD::DebugBits PBD::DEBUG::RegionFx = PBD::new_debug_bit ("regionfx");
 PBD::DebugBits PBD::DEBUG::Selection = PBD::new_debug_bit ("selection");
 PBD::DebugBits PBD::DEBUG::SessionEvents = PBD::new_debug_bit ("sessionevents");
 PBD::DebugBits PBD::DEBUG::Slave = PBD::new_debug_bit ("slave");

@@ -90,6 +90,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits ProcessThreads;
 		LIBARDOUR_API extern DebugBits Processors;
 		LIBARDOUR_API extern DebugBits Push2;
+		LIBARDOUR_API extern DebugBits RegionFx;
 		LIBARDOUR_API extern DebugBits Selection;
 		LIBARDOUR_API extern DebugBits SessionEvents;
 		LIBARDOUR_API extern DebugBits Slave;

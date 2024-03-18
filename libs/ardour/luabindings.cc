@@ -85,6 +85,7 @@
 #include "ardour/runtime_functions.h"
 #include "ardour/region.h"
 #include "ardour/region_factory.h"
+#include "ardour/region_fx_plugin.h"
 #include "ardour/return.h"
 #include "ardour/revision.h"
 #include "ardour/route_group.h"
@@ -340,6 +341,7 @@ CLASSKEYS(std::shared_ptr<ARDOUR::MidiRegion>);
 CLASSKEYS(std::shared_ptr<ARDOUR::MidiSource>);
 CLASSKEYS(std::shared_ptr<ARDOUR::PluginInfo>);
 CLASSKEYS(std::shared_ptr<ARDOUR::PluginInsert>);
+CLASSKEYS(std::shared_ptr<ARDOUR::RegionFxPlugin>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Processor>);
 CLASSKEYS(std::shared_ptr<ARDOUR::AudioReadable>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Region>);
@@ -2028,6 +2030,14 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("control_output", &PluginInsert::control_output)
 		.addFunction ("clear_stats", &PluginInsert::clear_stats)
 		.addRefFunction ("get_stats", &PluginInsert::get_stats)
+		.endClass ()
+
+		.deriveWSPtrClass <RegionFxPlugin, SessionObject> ("RegionFxPlugin")
+		.addFunction ("plugin", &RegionFxPlugin::plugin)
+		.addFunction ("signal_latency", &RegionFxPlugin::signal_latency)
+		.addFunction ("get_count", &RegionFxPlugin::get_count)
+		.addFunction ("type", &RegionFxPlugin::type)
+		.addFunction ("reset_parameters_to_default", &RegionFxPlugin::reset_parameters_to_default)
 		.endClass ()
 
 		.deriveWSPtrClass <MPControl<gain_t>, PBD::Controllable> ("MPGainControl")
