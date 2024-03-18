@@ -44,7 +44,6 @@
 #include "ardour/processor.h"
 #include "ardour/readonly_control.h"
 #include "ardour/sidechain.h"
-#include "ardour/automation_control.h"
 
 class XMLNode;
 
@@ -209,40 +208,16 @@ public:
 	bool get_stats (PBD::microseconds_t& min, PBD::microseconds_t& max, double& avg, double& dev) const;
 	void clear_stats ();
 
-	/** A control that manipulates a plugin parameter (control port). */
-	struct PluginControl : public AutomationControl
+	struct PIControl : public PluginControl
 	{
-		PluginControl (PluginInsert*                     p,
-		               const Evoral::Parameter&          param,
-		               const ParameterDescriptor&        desc,
-		               std::shared_ptr<AutomationList> list=std::shared_ptr<AutomationList>());
-
-		double get_value (void) const;
-		void catch_up_with_external_value (double val);
-		XMLNode& get_state() const;
-		std::string get_user_string() const;
-
+		PIControl (Session&                        s,
+		           PlugInsertBase*                 p,
+		           const Evoral::Parameter&        param,
+		           const ParameterDescriptor&      desc,
+		           std::shared_ptr<AutomationList> list = std::shared_ptr<AutomationList>())
+		: PluginControl (s, p, param, desc, list) {}
 	private:
-		PluginInsert* _plugin;
 		void actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
-	};
-
-	/** A control that manipulates a plugin property (message). */
-	struct PluginPropertyControl : public AutomationControl
-	{
-		PluginPropertyControl (PluginInsert*                     p,
-		                       const Evoral::Parameter&          param,
-		                       const ParameterDescriptor&        desc,
-		                       std::shared_ptr<AutomationList> list=std::shared_ptr<AutomationList>());
-
-		double get_value (void) const;
-		XMLNode& get_state() const;
-	protected:
-		void actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
-
-	private:
-		PluginInsert* _plugin;
-		Variant       _value;
 	};
 
 	std::shared_ptr<Plugin> plugin(uint32_t num=0) const {

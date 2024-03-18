@@ -2168,7 +2168,13 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("delay", &DelayLine::delay)
 		.endClass ()
 
-		.deriveWSPtrClass <PluginInsert::PluginControl, AutomationControl> ("PluginControl")
+		.deriveWSPtrClass <PlugInsertBase::PluginControl, AutomationControl> ("PluginControl")
+		.endClass ()
+
+		.deriveWSPtrClass <PlugInsertBase::PluginPropertyControl, AutomationControl> ("PluginPropertyControl")
+		.endClass ()
+
+		.deriveWSPtrClass <PluginInsert::PIControl, PlugInsertBase::PluginControl> ("PIControl")
 		.endClass ()
 
 		.beginClass <RawMidiParser> ("RawMidiParser")

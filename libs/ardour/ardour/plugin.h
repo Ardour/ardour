@@ -53,6 +53,7 @@ class AudioEngine;
 class Session;
 class BufferSet;
 class IOPlug;
+class PlugInsertBase;
 class PluginInsert;
 class Plugin;
 class PluginInfo;
@@ -373,8 +374,8 @@ public:
 	PBD::Signal1<void, uint32_t> EndTouch;
 
 protected:
-	friend class IOPlug;
 	friend class PluginInsert;
+	friend class PlugInsertBase;
 	friend class Session;
 
 	/* Called when a parameter of the plugin is changed outside of this
