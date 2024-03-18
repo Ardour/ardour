@@ -966,6 +966,9 @@ GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 	}
 #endif
 
+	/* call to ensure that entire canvas is marked in the invalidation region */
+	queue_draw ();
+
 	/* x, y in a are relative to the parent. When passing this down to the
 	   root group, this origin is effectively 0,0
 	*/
@@ -1111,6 +1114,23 @@ GtkCanvas::on_scroll_event (GdkEventScroll* ev)
 
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas scroll @ %1, %2 => %3\n", ev->x, ev->y, where));
 	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
+}
+
+void
+GtkCanvas::on_style_changed (const Glib::RefPtr<Gtk::Style>& style)
+{
+	EventBox::on_style_changed (style);
+	/* call to ensure that entire canvas is marked in the invalidation region */
+	queue_draw ();
+}
+
+bool
+GtkCanvas::on_visibility_notify_event (GdkEventVisibility* ev)
+{
+	bool ret = EventBox::on_visibility_notify_event (ev);
+	/* call to ensure that entire canvas is marked in the invalidation region */
+	queue_draw ();
+	return ret;
 }
 
 /** Handler for GDK key press events.

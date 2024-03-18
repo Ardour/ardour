@@ -270,6 +270,8 @@ protected:
 	bool on_motion_notify_event (GdkEventMotion *);
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
+	bool on_visibility_notify_event (GdkEventVisibility*);
 	void on_map();
 	void on_unmap();
 
