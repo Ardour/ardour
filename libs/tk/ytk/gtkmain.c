@@ -339,48 +339,6 @@ check_setugid (void)
   return TRUE;
 }
 
-#ifdef G_OS_WIN32
-
-const gchar *
-_gtk_get_datadir (void)
-{
-  static char *gtk_datadir = NULL;
-  if (gtk_datadir == NULL)
-    {
-      gchar *root = g_win32_get_package_installation_directory_of_module (gtk_dll);
-      gtk_datadir = g_build_filename (root, "share", NULL);
-      g_free (root);
-    }
-
-  return gtk_datadir;
-}
-
-const gchar *
-_gtk_get_sysconfdir (void)
-{
-  static char *gtk_sysconfdir = NULL;
-  if (gtk_sysconfdir == NULL)
-    {
-      gchar *root = g_win32_get_package_installation_directory_of_module (gtk_dll);
-      gtk_sysconfdir = g_build_filename (root, "etc", NULL);
-      g_free (root);
-    }
-
-  return gtk_sysconfdir;
-}
-
-const gchar *
-_gtk_get_data_prefix (void)
-{
-  static char *gtk_data_prefix = NULL;
-  if (gtk_data_prefix == NULL)
-    gtk_data_prefix = g_win32_get_package_installation_directory_of_module (gtk_dll);
-
-  return gtk_data_prefix;
-}
-
-#endif /* G_OS_WIN32 */
-
 static gboolean do_setlocale = TRUE;
 
 /**
