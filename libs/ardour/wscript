@@ -193,6 +193,7 @@ libardour_sources = [
         'record_enable_control.cc',
         'record_safe_control.cc',
         'region_factory.cc',
+        'region_fx_plugin.cc',
         'resampled_source.cc',
         'region.cc',
         'return.cc',

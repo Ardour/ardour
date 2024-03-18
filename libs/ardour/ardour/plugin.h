@@ -57,6 +57,7 @@ class PlugInsertBase;
 class PluginInsert;
 class Plugin;
 class PluginInfo;
+class RegionFxPlugin;
 class AutomationControl;
 class SessionObject;
 
@@ -376,6 +377,7 @@ public:
 protected:
 	friend class PluginInsert;
 	friend class PlugInsertBase;
+	friend class RegionFxPlugin;
 	friend class Session;
 
 	/* Called when a parameter of the plugin is changed outside of this
