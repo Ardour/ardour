@@ -108,37 +108,6 @@ public:
 protected:
 	std::string describe_parameter (Evoral::Parameter);
 
-	/** A control that manipulates a plugin parameter (control port). */
-	struct PluginControl : public AutomationControl
-	{
-		PluginControl (IOPlug*                    p,
-		               Evoral::Parameter const&   param,
-		               ParameterDescriptor const& desc);
-
-		double get_value () const;
-		void catch_up_with_external_value (double val);
-		XMLNode& get_state() const;
-		std::string get_user_string() const;
-	private:
-		void actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
-		IOPlug* _iop;
-	};
-
-	/** A control that manipulates a plugin property (message). */
-	struct PluginPropertyControl : public AutomationControl
-	{
-		PluginPropertyControl (IOPlug*                    p,
-		                       Evoral::Parameter const&   param,
-		                       ParameterDescriptor const& desc);
-
-		double get_value () const;
-		XMLNode& get_state() const;
-	private:
-		void actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
-		IOPlug* _iop;
-		Variant _value;
-	};
-
 private:
 	/* disallow copy construction */
 	IOPlug (IOPlug const&);

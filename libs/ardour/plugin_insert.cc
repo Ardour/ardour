@@ -569,7 +569,7 @@ PluginInsert::create_automatable_parameters ()
 		const bool automatable = a.find(param) != a.end();
 
 		std::shared_ptr<AutomationList> list(new AutomationList(param, desc, *this));
-		std::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
+		std::shared_ptr<AutomationControl> c (new PIControl(_session, this, param, desc, list));
 		if (!automatable || (limit_automatables > 0 && what_can_be_automated ().size() > limit_automatables)) {
 			c->set_flag (Controllable::NotAutomatable);
 		}
@@ -590,7 +590,7 @@ PluginInsert::create_automatable_parameters ()
 			if (Variant::type_is_numeric(desc.datatype)) {
 				list = std::shared_ptr<AutomationList>(new AutomationList(param, desc, *this));
 			}
-			std::shared_ptr<AutomationControl> c (new PluginPropertyControl(this, param, desc, list));
+			std::shared_ptr<AutomationControl> c (new PluginPropertyControl(_session, this, param, desc, list));
 			if (!Variant::type_is_numeric(desc.datatype)) {
 				c->set_flag (Controllable::NotAutomatable);
 			}
@@ -612,7 +612,7 @@ PluginInsert::create_automatable_parameters ()
 		desc.upper  = 1;
 
 		std::shared_ptr<AutomationList> list(new AutomationList(param, desc, *this));
-		std::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc, list));
+		std::shared_ptr<AutomationControl> c (new PluginControl(_session, this, param, desc, list));
 
 		add_control (c);
 	}
@@ -3069,129 +3069,15 @@ PluginInsert::type () const
 	return plugin()->get_info()->type;
 }
 
-PluginInsert::PluginControl::PluginControl (PluginInsert*                     p,
-                                            const Evoral::Parameter&          param,
-                                            const ParameterDescriptor&        desc,
-                                            std::shared_ptr<AutomationList> list)
-	: AutomationControl (p->session(), param, desc, list, p->describe_parameter(param))
-	, _plugin (p)
-{
-	if (alist()) {
-		if (desc.toggled) {
-			list->set_interpolation(Evoral::ControlList::Discrete);
-		}
-	}
-}
-
-/** @param val `user' value */
-
 void
-PluginInsert::PluginControl::actually_set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
+PluginInsert::PIControl::actually_set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
 {
-	/* FIXME: probably should be taking out some lock here.. */
-
-	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
-		(*i)->set_parameter (_list->parameter().id(), user_val, 0);
-	}
-
-	std::shared_ptr<Plugin> iasp = _plugin->_impulseAnalysisPlugin.lock();
+	std::shared_ptr<Plugin> iasp = dynamic_cast<PluginInsert*>(_pib)->_impulseAnalysisPlugin.lock();
 	if (iasp) {
 		iasp->set_parameter (_list->parameter().id(), user_val, 0);
 	}
 
-	AutomationControl::actually_set_value (user_val, group_override);
-}
-
-void
-PluginInsert::PluginControl::catch_up_with_external_value (double user_val)
-{
-	AutomationControl::actually_set_value (user_val, Controllable::NoGroup);
-}
-
-XMLNode&
-PluginInsert::PluginControl::get_state () const
-{
-	XMLNode& node (AutomationControl::get_state());
-	node.set_property (X_("parameter"), parameter().id());
-
-	std::shared_ptr<LV2Plugin> lv2plugin = std::dynamic_pointer_cast<LV2Plugin> (_plugin->_plugins[0]);
-	if (lv2plugin) {
-		node.set_property (X_("symbol"), lv2plugin->port_symbol (parameter().id()));
-	}
-
-	return node;
-}
-
-/** @return `user' val */
-double
-PluginInsert::PluginControl::get_value () const
-{
-	std::shared_ptr<Plugin> plugin = _plugin->plugin (0);
-
-	if (!plugin) {
-		return 0.0;
-	}
-
-	return plugin->get_parameter (_list->parameter().id());
-}
-
-std::string
-PluginInsert::PluginControl::get_user_string () const
-{
-	std::shared_ptr<Plugin> plugin = _plugin->plugin (0);
-	if (plugin) {
-		std::string pp;
-		if (plugin->print_parameter (parameter().id(), pp) && pp.size () > 0) {
-			return pp;
-		}
-	}
-	return AutomationControl::get_user_string ();
-}
-
-PluginInsert::PluginPropertyControl::PluginPropertyControl (PluginInsert*                     p,
-                                                            const Evoral::Parameter&          param,
-                                                            const ParameterDescriptor&        desc,
-                                                            std::shared_ptr<AutomationList> list)
-	: AutomationControl (p->session(), param, desc, list)
-	, _plugin (p)
-{
-}
-
-void
-PluginInsert::PluginPropertyControl::actually_set_value (double user_val, Controllable::GroupControlDisposition gcd)
-{
-	/* Old numeric set_value(), coerce to appropriate datatype if possible.
-	   This is lossy, but better than nothing until Ardour's automation system
-	   can handle various datatypes all the way down. */
-	const Variant value(_desc.datatype, user_val);
-	if (value.type() == Variant::NOTHING) {
-		error << "set_value(double) called for non-numeric property" << endmsg;
-		return;
-	}
-
-	for (Plugins::iterator i = _plugin->_plugins.begin(); i != _plugin->_plugins.end(); ++i) {
-		(*i)->set_property(_list->parameter().id(), value);
-	}
-
-	_value = value;
-
-	AutomationControl::actually_set_value (user_val, gcd);
-}
-
-XMLNode&
-PluginInsert::PluginPropertyControl::get_state () const
-{
-	XMLNode& node (AutomationControl::get_state());
-	node.set_property (X_("property"), parameter().id());
-	node.remove_property (X_("value"));
-
-	return node;
-}
-
-double
-PluginInsert::PluginPropertyControl::get_value () const
-{
-	return _value.to_double();
+	PluginControl::actually_set_value (user_val, group_override);
 }
 
 std::shared_ptr<Plugin>

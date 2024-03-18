@@ -16,11 +16,11 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "ardour/plug_insert_base.h"
 #include "ardour/ardour.h"
 #include "ardour/automation_control.h"
-#include "ardour/lv2_plugin.h"
 #include "ardour/luaproc.h"
-#include "ardour/plug_insert_base.h"
+#include "ardour/lv2_plugin.h"
 
 #include "pbd/i18n.h"
 
@@ -197,4 +197,126 @@ PlugInsertBase::preset_load_set_value (uint32_t p, float v)
 	ac->start_touch (timepos_t (ac->session ().audible_sample()));
 	ac->set_value (v, Controllable::NoGroup);
 	ac->stop_touch (timepos_t (ac->session ().audible_sample()));
+}
+
+/* ****************************************************************************/
+
+PlugInsertBase::PluginControl::PluginControl (Session&                        s,
+                                              PlugInsertBase*                 p,
+                                              const Evoral::Parameter&        param,
+                                              const ParameterDescriptor&      desc,
+                                              std::shared_ptr<AutomationList> list)
+	: AutomationControl (s, param, desc, list, p->describe_parameter (param))
+	, _pib (p)
+{
+	if (alist ()) {
+		if (desc.toggled) {
+			list->set_interpolation (Evoral::ControlList::Discrete);
+		}
+	}
+}
+
+/** @param val `user' value */
+
+void
+PlugInsertBase::PluginControl::actually_set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
+{
+	for (uint32_t i = 0; i < _pib->get_count (); ++i) {
+		_pib->plugin (i)->set_parameter (parameter ().id (), user_val, 0);
+	}
+
+	AutomationControl::actually_set_value (user_val, group_override);
+}
+
+void
+PlugInsertBase::PluginControl::catch_up_with_external_value (double user_val)
+{
+	AutomationControl::actually_set_value (user_val, Controllable::NoGroup);
+}
+
+XMLNode&
+PlugInsertBase::PluginControl::get_state () const
+{
+	XMLNode& node (AutomationControl::get_state ());
+	node.set_property (X_("parameter"), parameter ().id ());
+
+	std::shared_ptr<LV2Plugin> lv2plugin = std::dynamic_pointer_cast<LV2Plugin> (_pib->plugin (0));
+	if (lv2plugin) {
+		node.set_property (X_("symbol"), lv2plugin->port_symbol (parameter ().id ()));
+	}
+
+	return node;
+}
+
+/** @return `user' val */
+double
+PlugInsertBase::PluginControl::get_value () const
+{
+	std::shared_ptr<Plugin> plugin = _pib->plugin ();
+
+	if (!plugin) {
+		return 0.0;
+	}
+
+	return plugin->get_parameter (parameter ().id ());
+}
+
+std::string
+PlugInsertBase::PluginControl::get_user_string () const
+{
+	std::shared_ptr<Plugin> plugin = _pib->plugin ();
+	if (plugin) {
+		std::string pp;
+		if (plugin->print_parameter (parameter ().id (), pp) && pp.size () > 0) {
+			return pp;
+		}
+	}
+	return AutomationControl::get_user_string ();
+}
+
+PlugInsertBase::PluginPropertyControl::PluginPropertyControl (Session&                        s,
+                                                              PlugInsertBase*                 p,
+                                                              const Evoral::Parameter&        param,
+                                                              const ParameterDescriptor&      desc,
+                                                              std::shared_ptr<AutomationList> list)
+	: AutomationControl (s, param, desc, list)
+	, _pib (p)
+{
+}
+
+void
+PlugInsertBase::PluginPropertyControl::actually_set_value (double user_val, Controllable::GroupControlDisposition gcd)
+{
+	/* Old numeric set_value(), coerce to appropriate datatype if possible.
+	 * This is lossy, but better than nothing until Ardour's automation system
+	 * can handle various datatypes all the way down.
+	 */
+	const Variant value (_desc.datatype, user_val);
+	if (value.type () == Variant::NOTHING) {
+		error << "set_value(double) called for non-numeric property" << endmsg;
+		return;
+	}
+
+	for (uint32_t i = 0; i < _pib->get_count (); ++i) {
+		_pib->plugin (i)->set_property (parameter ().id (), value);
+	}
+
+	_value = value;
+
+	AutomationControl::actually_set_value (user_val, gcd);
+}
+
+XMLNode&
+PlugInsertBase::PluginPropertyControl::get_state () const
+{
+	XMLNode& node (AutomationControl::get_state ());
+	node.set_property (X_("property"), parameter ().id ());
+	node.remove_property (X_("value"));
+	return node;
+}
+
+double
+PlugInsertBase::PluginPropertyControl::get_value () const
+{
+	return _value.to_double ();
 }

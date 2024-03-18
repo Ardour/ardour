@@ -336,7 +336,7 @@ IOPlug::create_parameters ()
 
 		Evoral::Parameter param (PluginAutomation, 0, i);
 
-		std::shared_ptr<AutomationControl> c (new PluginControl(this, param, desc));
+		std::shared_ptr<AutomationControl> c (new PluginControl (_session, this, param, desc));
 		c->set_flag (Controllable::NotAutomatable);
 		add_control (c);
 
@@ -351,7 +351,7 @@ IOPlug::create_parameters ()
 		if (desc.datatype == Variant::NOTHING) {
 			continue;
 		}
-		std::shared_ptr<AutomationControl> c (new PluginPropertyControl (this, param, desc));
+		std::shared_ptr<AutomationControl> c (new PluginPropertyControl (_session, this, param, desc));
 		c->set_flag (Controllable::NotAutomatable);
 		add_control (c);
 	}
@@ -654,105 +654,4 @@ IOPlug::reset_parameters_to_default ()
 		ac->set_value (dflt, Controllable::NoGroup);
 	}
 	return all;
-}
-
-/* ****************************************************************************/
-
-IOPlug::PluginControl::PluginControl (IOPlug*                     p,
-                                      Evoral::Parameter const&    param,
-                                      ParameterDescriptor const&  desc)
-	: AutomationControl (p->session (), param, desc, std::shared_ptr<AutomationList> (), p->describe_parameter (param))
-	, _iop (p)
-{
-}
-
-void
-IOPlug::PluginControl::actually_set_value (double user_val, PBD::Controllable::GroupControlDisposition group_override)
-{
-	_iop->plugin ()->set_parameter (parameter().id(), user_val, 0);
-
-	AutomationControl::actually_set_value (user_val, group_override);
-}
-
-void
-IOPlug::PluginControl::catch_up_with_external_value (double user_val)
-{
-	AutomationControl::actually_set_value (user_val, Controllable::NoGroup);
-}
-
-XMLNode&
-IOPlug::PluginControl::get_state () const
-{
-	XMLNode& node (AutomationControl::get_state());
-	node.set_property ("parameter", parameter().id());
-
-	std::shared_ptr<LV2Plugin> lv2plugin = std::dynamic_pointer_cast<LV2Plugin> (_iop->plugin ());
-	if (lv2plugin) {
-		node.set_property ("symbol", lv2plugin->port_symbol (parameter().id()));
-	}
-
-	return node;
-}
-
-double
-IOPlug::PluginControl::get_value () const
-{
-	std::shared_ptr<Plugin> plugin = _iop->plugin ();
-
-	if (!plugin) {
-		return 0.0;
-	}
-
-	return plugin->get_parameter (parameter().id());
-}
-
-std::string
-IOPlug::PluginControl::get_user_string () const
-{
-	std::shared_ptr<Plugin> plugin = _iop->plugin (0);
-	if (plugin) {
-		std::string pp;
-		if (plugin->print_parameter (parameter().id(), pp) && pp.size () > 0) {
-			return pp;
-		}
-	}
-	return AutomationControl::get_user_string ();
-}
-
-IOPlug::PluginPropertyControl::PluginPropertyControl (IOPlug*                    p,
-                                                      Evoral::Parameter const&   param,
-                                                      ParameterDescriptor const& desc)
-	: AutomationControl (p->session(), param, desc )
-	, _iop (p)
-{
-}
-
-void
-IOPlug::PluginPropertyControl::actually_set_value (double user_val, Controllable::GroupControlDisposition gcd)
-{
-	const Variant value(_desc.datatype, user_val);
-	if (value.type() == Variant::NOTHING) {
-		return;
-	}
-
-	_iop->plugin ()->set_property (parameter().id(), value);
-
-	_value = value;
-
-	AutomationControl::actually_set_value (user_val, gcd);
-}
-
-XMLNode&
-IOPlug::PluginPropertyControl::get_state () const
-{
-	XMLNode& node (AutomationControl::get_state());
-	node.set_property ("property", parameter ().id ());
-	node.remove_property ("value");
-	return node;
-}
-
-double
-IOPlug::PluginPropertyControl::get_value () const
-{
-	return _value.to_double();
 }

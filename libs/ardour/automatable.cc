@@ -569,7 +569,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 		PluginInsert* pi = dynamic_cast<PluginInsert*>(this);
 		if (pi) {
 			pi->plugin(0)->get_parameter_descriptor(param.id(), desc);
-			control = new PluginInsert::PluginControl(pi, param, desc);
+			control = new PluginInsert::PIControl (_a_session, pi, param, desc);
 		} else {
 			warning << "PluginAutomation for non-Plugin" << endl;
 		}
@@ -583,7 +583,7 @@ Automatable::control_factory(const Evoral::Parameter& param)
 				} else {
 					list = std::shared_ptr<AutomationList>(new AutomationList(param, desc, Temporal::TimeDomainProvider (Temporal::AudioTime)));
 				}
-				control = new PluginInsert::PluginPropertyControl(pi, param, desc, list);
+				control = new PluginInsert::PluginPropertyControl (_a_session, pi, param, desc, list);
 			}
 		} else {
 			warning << "PluginPropertyAutomation for non-Plugin" << endl;
