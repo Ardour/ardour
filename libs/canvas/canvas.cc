@@ -1027,13 +1027,13 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 		draw_context->push_group ();
 	}
 
-	/* draw background color */
-	draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	Gtkmm2ext::set_source_rgba (draw_context, _bg_color);
-	draw_context->fill ();
-
 	/* render canvas */
 	if (_single_exposure) {
+
+		/* draw background color */
+		draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		Gtkmm2ext::set_source_rgba (draw_context, _bg_color);
+		draw_context->fill ();
 
 		Canvas::render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 
@@ -1042,10 +1042,18 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 		gint nrects;
 
 		gdk_region_get_rectangles (ev->region, &rects, &nrects);
+
 		for (gint n = 0; n < nrects; ++n) {
 			draw_context->set_identity_matrix();  //reset the cairo matrix, just in case someone left it transformed after drawing ( cough )
+
+			/* draw background color */
+			draw_context->rectangle (rects[n].x, rects[n].y, rects[n].x + rects[n].width, rects[n].y + rects[n].height);
+			Gtkmm2ext::set_source_rgba (draw_context, _bg_color);
+			draw_context->fill ();
+
 			Canvas::render (Rect (rects[n].x, rects[n].y, rects[n].x + rects[n].width, rects[n].y + rects[n].height), draw_context);
 		}
+
 		g_free (rects);
 	}
 
