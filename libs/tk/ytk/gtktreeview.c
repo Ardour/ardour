@@ -14157,7 +14157,7 @@ gtk_tree_view_set_search_entry (GtkTreeView *tree_view,
 
   if (entry)
     {
-      tree_view->priv->search_entry = g_object_ref (entry);
+      tree_view->priv->search_entry = GTK_ENTRY (g_object_ref (entry));
       tree_view->priv->search_custom_entry_set = TRUE;
 
       if (tree_view->priv->search_entry_changed_id == 0)
