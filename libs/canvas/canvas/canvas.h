@@ -249,12 +249,10 @@ public:
 
 	Glib::RefPtr<Pango::Context> get_pango_context();
 
-	void render (Cairo::RefPtr<Cairo::Context> const & ctx, cairo_rectangle_t* r)
-	{
-		ArdourCanvas::Rect rect (r->x, r->y, r->width + r->x, r->height + r->y);
-		Canvas::render (rect, ctx);
-	}
-
+	/* This is the render method called via the Gtkmm2ext::CairoCanvas API,
+	   which is distinct from ArdourCanvas.
+	*/
+	void render (Cairo::RefPtr<Cairo::Context> const & ctx, cairo_rectangle_t* r);
 	void prepare_for_render () const;
 
 	uint32_t background_color() { return Canvas::background_color (); }

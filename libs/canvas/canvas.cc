@@ -1600,6 +1600,13 @@ GtkCanvas::grab_can_translate () const
 	return _grabbed_item->scroll_translation ();
 }
 
+void
+GtkCanvas::render (Cairo::RefPtr<Cairo::Context> const & ctx, cairo_rectangle_t* r)
+{
+	ArdourCanvas::Rect rect (r->x, r->y, r->width + r->x, r->height + r->y);
+	Canvas::render (rect, ctx);
+}
+
 /** Create a GtkCanvaSViewport.
  *  @param hadj Adjustment to use for horizontal scrolling.
  *  @param vadj Adjustment to use for vertica scrolling.
