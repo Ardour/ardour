@@ -104,6 +104,8 @@ public:
 	};
 
 protected:
+	static std::shared_ptr<Plugin> plugin_factory (std::shared_ptr<Plugin>);
+
 	bool parse_plugin_type (XMLNode const&, PluginType&, std::string&) const;
 	std::shared_ptr<Plugin> find_and_load_plugin (Session&, XMLNode const&, PluginType&, std::string const&, bool& any_vst);
 
