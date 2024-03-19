@@ -19,8 +19,29 @@
 #include "ardour/plug_insert_base.h"
 #include "ardour/ardour.h"
 #include "ardour/automation_control.h"
+#include "ardour/ladspa_plugin.h"
 #include "ardour/luaproc.h"
 #include "ardour/lv2_plugin.h"
+
+#ifdef WINDOWS_VST_SUPPORT
+#include "ardour/windows_vst_plugin.h"
+#endif
+
+#ifdef LXVST_SUPPORT
+#include "ardour/lxvst_plugin.h"
+#endif
+
+#ifdef MACVST_SUPPORT
+#include "ardour/mac_vst_plugin.h"
+#endif
+
+#ifdef VST3_SUPPORT
+#include "ardour/vst3_plugin.h"
+#endif
+
+#ifdef AUDIOUNIT_SUPPORT
+#include "ardour/audio_unit.h"
+#endif
 
 #include "pbd/i18n.h"
 
@@ -197,6 +218,65 @@ PlugInsertBase::preset_load_set_value (uint32_t p, float v)
 	ac->start_touch (timepos_t (ac->session ().audible_sample()));
 	ac->set_value (v, Controllable::NoGroup);
 	ac->stop_touch (timepos_t (ac->session ().audible_sample()));
+}
+
+/* ****************************************************************************/
+
+std::shared_ptr<Plugin>
+PlugInsertBase::plugin_factory (std::shared_ptr<Plugin> other)
+{
+	std::shared_ptr<LadspaPlugin> lp;
+	std::shared_ptr<LuaProc> lua;
+	std::shared_ptr<LV2Plugin> lv2p;
+#ifdef WINDOWS_VST_SUPPORT
+	std::shared_ptr<WindowsVSTPlugin> vp;
+#endif
+#ifdef LXVST_SUPPORT
+	std::shared_ptr<LXVSTPlugin> lxvp;
+#endif
+#ifdef MACVST_SUPPORT
+	std::shared_ptr<MacVSTPlugin> mvp;
+#endif
+#ifdef VST3_SUPPORT
+	std::shared_ptr<VST3Plugin> vst3;
+#endif
+#ifdef AUDIOUNIT_SUPPORT
+	std::shared_ptr<AUPlugin> ap;
+#endif
+
+	if ((lp = std::dynamic_pointer_cast<LadspaPlugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new LadspaPlugin (*lp));
+	} else if ((lua = std::dynamic_pointer_cast<LuaProc> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new LuaProc (*lua));
+	} else if ((lv2p = std::dynamic_pointer_cast<LV2Plugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new LV2Plugin (*lv2p));
+#ifdef WINDOWS_VST_SUPPORT
+	} else if ((vp = std::dynamic_pointer_cast<WindowsVSTPlugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new WindowsVSTPlugin (*vp));
+#endif
+#ifdef LXVST_SUPPORT
+	} else if ((lxvp = std::dynamic_pointer_cast<LXVSTPlugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new LXVSTPlugin (*lxvp));
+#endif
+#ifdef MACVST_SUPPORT
+	} else if ((mvp = std::dynamic_pointer_cast<MacVSTPlugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new MacVSTPlugin (*mvp));
+#endif
+#ifdef VST3_SUPPORT
+	} else if ((vst3 = std::dynamic_pointer_cast<VST3Plugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new VST3Plugin (*vst3));
+#endif
+#ifdef AUDIOUNIT_SUPPORT
+	} else if ((ap = std::dynamic_pointer_cast<AUPlugin> (other)) != 0) {
+		return std::shared_ptr<Plugin> (new AUPlugin (*ap));
+#endif
+	}
+
+	fatal << string_compose (_("programming error: %1"),
+			  X_("unknown plugin type in PlugInsertBase::plugin_factory"))
+	      << endmsg;
+	abort(); /*NOTREACHED*/
+	return std::shared_ptr<Plugin> ((Plugin*) 0);
 }
 
 /* ****************************************************************************/

@@ -404,7 +404,6 @@ private:
 	bool check_inplace ();
 	void mapping_changed ();
 
-	std::shared_ptr<Plugin> plugin_factory (std::shared_ptr<Plugin>);
 	void add_plugin (std::shared_ptr<Plugin>);
 	void plugin_removed (std::weak_ptr<Plugin>);
 
