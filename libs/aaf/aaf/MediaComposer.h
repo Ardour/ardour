@@ -27,7 +27,6 @@
 #define AVID_MEDIA_COMPOSER_CURVE_TYPE_LINEAR 0
 #define AVID_MEDIA_COMPOSER_CURVE_TYPE_EQUAL_POWER 1
 
-int
-mediaComposer_AAF (struct AAF_Iface* aafi);
+int mediaComposer_AAF(struct AAF_Iface *aafi);
 
 #endif // !__MediaComposer_h__

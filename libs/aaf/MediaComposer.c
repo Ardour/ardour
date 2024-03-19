@@ -29,31 +29,33 @@
 #include "aaf/libaaf.h"
 #include "aaf/log.h"
 
-#define debug(...) \
-	AAF_LOG (aafi->log, aafi, DEBUG_SRC_ID_AAF_IFACE, VERB_DEBUG, __VA_ARGS__)
+#define debug(...)                                                             \
+  AAF_LOG(aafi->log, aafi, LOG_SRC_ID_AAF_IFACE, VERB_DEBUG, __VA_ARGS__)
 
-#define warning(...) \
-	AAF_LOG (aafi->log, aafi, DEBUG_SRC_ID_AAF_IFACE, VERB_WARNING, __VA_ARGS__)
+#define warning(...)                                                           \
+  AAF_LOG(aafi->log, aafi, LOG_SRC_ID_AAF_IFACE, VERB_WARNING, __VA_ARGS__)
 
-#define error(...) \
-	AAF_LOG (aafi->log, aafi, DEBUG_SRC_ID_AAF_IFACE, VERB_ERROR, __VA_ARGS__)
+#define error(...)                                                             \
+  AAF_LOG(aafi->log, aafi, LOG_SRC_ID_AAF_IFACE, VERB_ERROR, __VA_ARGS__)
 
-int
-mediaComposer_AAF (struct AAF_Iface* aafi)
-{
-	int probe = 0;
+int mediaComposer_AAF(struct AAF_Iface *aafi) {
+  int probe = 0;
 
-	if (aafi->aafd->Identification.CompanyName && strncmp (aafi->aafd->Identification.CompanyName, "Avid Technology, Inc.", strlen ("Avid Technology, Inc.")) == 0) {
-		probe++;
-	}
+  if (aafi->aafd->Identification.CompanyName &&
+      strncmp(aafi->aafd->Identification.CompanyName, "Avid Technology, Inc.",
+              strlen("Avid Technology, Inc.")) == 0) {
+    probe++;
+  }
 
-	if (aafi->aafd->Identification.ProductName && strncmp (aafi->aafd->Identification.ProductName, "Avid Media Composer", strlen ("Avid Media Composer")) == 0) {
-		probe++;
-	}
+  if (aafi->aafd->Identification.ProductName &&
+      strncmp(aafi->aafd->Identification.ProductName, "Avid Media Composer",
+              strlen("Avid Media Composer")) == 0) {
+    probe++;
+  }
 
-	if (probe == 2) {
-		return 1;
-	}
+  if (probe == 2) {
+    return 1;
+  }
 
-	return 0;
+  return 0;
 }

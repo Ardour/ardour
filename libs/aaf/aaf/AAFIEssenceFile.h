@@ -35,25 +35,32 @@
 
 #include "aaf/AAFIface.h"
 
-char*
-aafi_locate_external_essence_file (AAF_Iface* aafi, const char* original_uri_filepath, const char* search_location);
+char *aafi_locate_external_essence_file(AAF_Iface *aafi,
+                                        const char *original_uri_filepath,
+                                        const char *search_location);
 
 /**
  * Extract audio essence file.
  *
  * @param aafi XXXXXX
  */
-int
-aafi_extractAudioEssenceFile (AAF_Iface* aafi, aafiAudioEssenceFile* audioEssenceFile, enum aafiExtractFormat extractFormat, const char* outfilepath, uint64_t sampleOffset, uint64_t sampleLength, const char* forcedFileName, char** usable_file_path);
+int aafi_extractAudioEssenceFile(AAF_Iface *aafi,
+                                 aafiAudioEssenceFile *audioEssenceFile,
+                                 enum aafiExtractFormat extractFormat,
+                                 const char *outfilepath, uint64_t sampleOffset,
+                                 uint64_t sampleLength,
+                                 const char *forcedFileName,
+                                 char **usable_file_path);
 
-int
-aafi_extractAudioClip (AAF_Iface* aafi, aafiAudioClip* audioClip, enum aafiExtractFormat extractFormat, const char* outfilepath);
+int aafi_extractAudioClip(AAF_Iface *aafi, aafiAudioClip *audioClip,
+                          enum aafiExtractFormat extractFormat,
+                          const char *outfilepath);
 
-int
-aafi_parse_audio_essence (AAF_Iface* aafi, aafiAudioEssenceFile* audioEssenceFile);
+int aafi_parse_audio_essence(AAF_Iface *aafi,
+                             aafiAudioEssenceFile *audioEssenceFile);
 
-int
-aafi_build_unique_audio_essence_name (AAF_Iface* aafi, aafiAudioEssenceFile* audioEssenceFile);
+int aafi_build_unique_audio_essence_name(
+    AAF_Iface *aafi, aafiAudioEssenceFile *audioEssenceFile);
 
 /**
  * @}

@@ -23,31 +23,27 @@
 
 #include "aaf/LibCFB.h"
 
-void
-cfb_dump_node (CFB_Data* cfbd, cfbNode* node, int print_stream, const char* padding);
+void cfb_dump_node(CFB_Data *cfbd, cfbNode *node, int print_stream,
+                   const char *padding);
 
-void
-cfb_dump_nodePath (CFB_Data* cfbd, const char* path, int print_stream, const char* padding);
+void cfb_dump_nodePath(CFB_Data *cfbd, const char *path, int print_stream,
+                       const char *padding);
 
-void
-cfb_dump_nodeStream (CFB_Data* cfbd, cfbNode* node, const char* padding);
+void cfb_dump_nodeStream(CFB_Data *cfbd, cfbNode *node, const char *padding);
 
-void
-cfb_dump_nodePathStream (CFB_Data* cfbd, const char* path, const char* padding);
+void cfb_dump_nodePathStream(CFB_Data *cfbd, const char *path,
+                             const char *padding);
 
-void
-cfb_dump_nodePaths (CFB_Data* cfbd, uint32_t prevPath, char* strArray[], uint32_t* str_i, cfbNode* node, const char* padding, int firstIteration);
+void cfb_dump_nodePaths(CFB_Data *cfbd, uint32_t prevPath, char *strArray[],
+                        uint32_t *str_i, cfbNode *node, const char *padding,
+                        int firstIteration);
 
-void
-cfb_dump_header (CFB_Data* cfbd, const char* padding);
+void cfb_dump_header(CFB_Data *cfbd, const char *padding);
 
-void
-cfb_dump_FAT (CFB_Data* cfbd, const char* padding);
+void cfb_dump_FAT(CFB_Data *cfbd, const char *padding);
 
-void
-cfb_dump_MiniFAT (CFB_Data* cfbd, const char* padding);
+void cfb_dump_MiniFAT(CFB_Data *cfbd, const char *padding);
 
-void
-cfb_dump_DiFAT (CFB_Data* cfbd, const char* padding);
+void cfb_dump_DiFAT(CFB_Data *cfbd, const char *padding);
 
 #endif // !__CFBDump_h__

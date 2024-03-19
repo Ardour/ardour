@@ -24,7 +24,6 @@
 #include "aaf/AAFIParser.h"
 #include "aaf/AAFIface.h"
 
-int
-resolve_AAF (struct AAF_Iface* aafi);
+int resolve_AAF(struct AAF_Iface *aafi);
 
 #endif // !__Resolve_h__

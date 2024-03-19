@@ -25,16 +25,16 @@
 #include "aaf/AAFIface.h"
 
 enum protools_options {
-	AAFI_PROTOOLS_OPT_REMOVE_SAMPLE_ACCURATE_EDIT = 1 << 0,
-	AAFI_PROTOOLS_OPT_REPLACE_CLIP_FADES          = 1 << 1,
+  AAFI_PROTOOLS_OPT_REMOVE_SAMPLE_ACCURATE_EDIT = 1 << 0,
+  AAFI_PROTOOLS_OPT_REPLACE_CLIP_FADES = 1 << 1,
 };
 
-#define PROTOOLS_ALL_OPT (AAFI_PROTOOLS_OPT_REMOVE_SAMPLE_ACCURATE_EDIT | AAFI_PROTOOLS_OPT_REPLACE_CLIP_FADES)
+#define PROTOOLS_ALL_OPT                                                       \
+  (AAFI_PROTOOLS_OPT_REMOVE_SAMPLE_ACCURATE_EDIT |                             \
+   AAFI_PROTOOLS_OPT_REPLACE_CLIP_FADES)
 
-int
-protools_AAF (struct AAF_Iface* aafi);
+int protools_AAF(struct AAF_Iface *aafi);
 
-int
-protools_post_processing (AAF_Iface* aafi);
+int protools_post_processing(AAF_Iface *aafi);
 
 #endif // ! __ProTools_h__
