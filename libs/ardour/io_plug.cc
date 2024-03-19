@@ -170,7 +170,9 @@ IOPlug::set_state (const XMLNode& node, int version)
 	XMLNodeIterator niter;
 
 	for (niter = nlist.begin(); niter != nlist.end(); ++niter) {
-		if ((*niter)->name() == _plugin->state_node_name ()) {
+		if ((*niter)->name() == _plugin->state_node_name ()
+		   || (any_vst && ((*niter)->name() == "lxvst" || (*niter)->name() == "windows-vst" || (*niter)->name() == "mac-vst"))
+			 ) {
 			_plugin->set_state (**niter, version);
 			break;
 		}
@@ -481,7 +483,6 @@ IOPlug::connect_and_run (samplepos_t start, pframes_t n_samples)
 		}
 	}
 
-	PortSet& ports (_output->ports());
 	if (_pre) {
 		canderef = 1;
 		const bool reset       = _reset_meters.compare_exchange_strong (canderef, 0);
@@ -588,7 +589,7 @@ std::string
 IOPlug::describe_parameter (Evoral::Parameter param)
 {
 	if (param.type() == PluginAutomation) {
-		_plugin->describe_parameter (param);
+		return _plugin->describe_parameter (param);
 	} else if (param.type() == PluginPropertyAutomation) {
 		return string_compose ("Property %1", URIMap::instance ().id_to_uri (param.id()));
 	}
