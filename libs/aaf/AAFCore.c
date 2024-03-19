@@ -39,13 +39,13 @@
 #include "aaf/utils.h"
 
 #define debug(...) \
-	AAF_LOG (aafd->log, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_DEBUG, __VA_ARGS__)
+	AAF_LOG (aafd->log, aafd, LOG_SRC_ID_AAF_CORE, VERB_DEBUG, __VA_ARGS__)
 
 #define warning(...) \
-	AAF_LOG (aafd->log, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_WARNING, __VA_ARGS__)
+	AAF_LOG (aafd->log, aafd, LOG_SRC_ID_AAF_CORE, VERB_WARNING, __VA_ARGS__)
 
 #define error(...) \
-	AAF_LOG (aafd->log, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_ERROR, __VA_ARGS__)
+	AAF_LOG (aafd->log, aafd, LOG_SRC_ID_AAF_CORE, VERB_ERROR, __VA_ARGS__)
 
 /**
  * Loops through each aafStrongRefSetEntry_t of a StrongRefSet Index node stream.

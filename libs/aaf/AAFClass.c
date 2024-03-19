@@ -43,13 +43,13 @@
 #include "aaf/AAFClass.h"
 
 #define debug(...) \
-	AAF_LOG (aafd->log, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_DEBUG, __VA_ARGS__)
+	AAF_LOG (aafd->log, aafd, LOG_SRC_ID_AAF_CORE, VERB_DEBUG, __VA_ARGS__)
 
 #define warning(...) \
-	AAF_LOG (aafd->log, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_WARNING, __VA_ARGS__)
+	AAF_LOG (aafd->log, aafd, LOG_SRC_ID_AAF_CORE, VERB_WARNING, __VA_ARGS__)
 
 #define error(...) \
-	AAF_LOG (aafd->log, aafd, DEBUG_SRC_ID_AAF_CORE, VERB_ERROR, __VA_ARGS__)
+	AAF_LOG (aafd->log, aafd, LOG_SRC_ID_AAF_CORE, VERB_ERROR, __VA_ARGS__)
 
 #define attachNewProperty(aafd, Class, Prop, Pid, IsReq) \
 	Prop = calloc (1, sizeof (aafPropertyDef));      \
@@ -161,8 +161,6 @@ int
 aafclass_setDefaultClasses (AAF_Data* aafd)
 {
 	aafPropertyDef* prop = NULL;
-
-	/* TODO test ENOMEM after each class alloc */
 
 	aafClass* IOC = aafclass_defineNewClass (aafd, &AAFClassID_InterchangeObject, ABSTRACT, NULL);
 

@@ -28,13 +28,13 @@
 #include "aaf/utils.h"
 
 #define debug(...) \
-	AAF_LOG (cfbd->log, cfbd, DEBUG_SRC_ID_LIB_CFB, VERB_DEBUG, __VA_ARGS__)
+	AAF_LOG (cfbd->log, cfbd, LOG_SRC_ID_LIB_CFB, VERB_DEBUG, __VA_ARGS__)
 
 #define warning(...) \
-	AAF_LOG (cfbd->log, cfbd, DEBUG_SRC_ID_LIB_CFB, VERB_WARNING, __VA_ARGS__)
+	AAF_LOG (cfbd->log, cfbd, LOG_SRC_ID_LIB_CFB, VERB_WARNING, __VA_ARGS__)
 
 #define error(...) \
-	AAF_LOG (cfbd->log, cfbd, DEBUG_SRC_ID_LIB_CFB, VERB_ERROR, __VA_ARGS__)
+	AAF_LOG (cfbd->log, cfbd, LOG_SRC_ID_LIB_CFB, VERB_ERROR, __VA_ARGS__)
 
 void
 cfb_dump_node (CFB_Data* cfbd, cfbNode* node, int print_stream, const char* padding)
@@ -99,7 +99,7 @@ cfb_dump_node (CFB_Data* cfbd, cfbNode* node, int print_stream, const char* padd
 
 	LOG_BUFFER_WRITE (log, "\n\n");
 
-	log->debug_callback (log, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
+	log->log_callback (log, (void*)cfbd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 
 	if (print_stream == 1) {
 		cfb_dump_nodeStream (cfbd, node, "");
@@ -137,7 +137,7 @@ cfb_dump_nodeStream (CFB_Data* cfbd, cfbNode* node, const char* padding)
 
 	laaf_util_dump_hex (stream, stream_sz, &log->_msg, &log->_msg_size, log->_msg_pos, padding);
 
-	log->debug_callback (log, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
+	log->log_callback (log, (void*)cfbd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 
 	free (stream);
 }
@@ -161,7 +161,7 @@ cfb_dump_nodePathStream (CFB_Data* cfbd, const char* path, const char* padding)
 
 	laaf_util_dump_hex (stream, stream_sz, &log->_msg, &log->_msg_size, log->_msg_pos, padding);
 
-	log->debug_callback (log, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
+	log->log_callback (log, (void*)cfbd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 
 	free (stream);
 }
@@ -171,9 +171,8 @@ cfb_dump_nodePaths (CFB_Data* cfbd, uint32_t prevPath, char* strArray[], uint32_
 {
 	struct aafLog* log = cfbd->log;
 
-	// if ( !node ) {
+	/* initial function call */
 	if (firstIteration) {
-		/* initial function call */
 		node = &cfbd->nodes[0];
 
 		if (!node) {
@@ -190,7 +189,6 @@ cfb_dump_nodePaths (CFB_Data* cfbd, uint32_t prevPath, char* strArray[], uint32_
 
 	uint32_t thisPath = (*str_i);
 
-	/* TODO snprintf_realloc() ? */
 	char* nodeName = cfb_w16toUTF8 (node->_ab, node->_cb);
 
 	laaf_util_snprintf_realloc (&strArray[thisPath], 0, 0, "%s/%s", strArray[prevPath], nodeName);
@@ -209,7 +207,6 @@ cfb_dump_nodePaths (CFB_Data* cfbd, uint32_t prevPath, char* strArray[], uint32_
 		cfb_dump_nodePaths (cfbd, prevPath, strArray, str_i, &cfbd->nodes[node->_sidRightSib], padding, 0);
 
 	/* the end of the first function call, recursion is over. */
-	// if ( node == &cfbd->nodes[0] ) {
 	if (firstIteration) {
 		/* commented out because output seems proper this way... why did we call qsort() in the first place ?! */
 		// qsort( strArray, *str_i, sizeof(char*), compareStrings );
@@ -234,7 +231,7 @@ cfb_dump_nodePaths (CFB_Data* cfbd, uint32_t prevPath, char* strArray[], uint32_
 
 		LOG_BUFFER_WRITE (log, "\n\n");
 
-		log->debug_callback (log, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
+		log->log_callback (log, (void*)cfbd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 	}
 }
 
@@ -286,7 +283,7 @@ cfb_dump_header (CFB_Data* cfbd, const char* padding)
 
 	LOG_BUFFER_WRITE (log, "\n");
 
-	log->debug_callback (log, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
+	log->log_callback (log, (void*)cfbd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 }
 
 void
@@ -330,7 +327,7 @@ cfb_dump_FAT (CFB_Data* cfbd, const char* padding)
 
 	LOG_BUFFER_WRITE (log, "\n\n");
 
-	log->debug_callback (log, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
+	log->log_callback (log, (void*)cfbd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 }
 
 void
@@ -375,7 +372,7 @@ cfb_dump_MiniFAT (CFB_Data* cfbd, const char* padding)
 
 	LOG_BUFFER_WRITE (log, "\n\n");
 
-	log->debug_callback (log, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
+	log->log_callback (log, (void*)cfbd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 }
 
 void
@@ -420,5 +417,5 @@ cfb_dump_DiFAT (CFB_Data* cfbd, const char* padding)
 
 	LOG_BUFFER_WRITE (log, "\n\n");
 
-	log->debug_callback (log, (void*)cfbd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
+	log->log_callback (log, (void*)cfbd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 }

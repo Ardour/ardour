@@ -122,7 +122,7 @@ typedef struct aafPropertyDefinition {
 	char* name;
 
 	/*
-	 *  Looks like nobody cares about AAF standard TypeDefinition. All observed files
+	 * Looks like nobody cares about AAF standard TypeDefinition. All observed files
 	 * had incorrect values for Type's Name and Identification, even Avid's files.
 	 * Thus, PDef->type should NOT be trusted.
 	 *

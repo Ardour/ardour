@@ -107,13 +107,13 @@
 #include "aaf/utils.h"
 
 #define debug(...) \
-	AAF_LOG (cfbd->log, cfbd, DEBUG_SRC_ID_LIB_CFB, VERB_DEBUG, __VA_ARGS__)
+	AAF_LOG (cfbd->log, cfbd, LOG_SRC_ID_LIB_CFB, VERB_DEBUG, __VA_ARGS__)
 
 #define warning(...) \
-	AAF_LOG (cfbd->log, cfbd, DEBUG_SRC_ID_LIB_CFB, VERB_WARNING, __VA_ARGS__)
+	AAF_LOG (cfbd->log, cfbd, LOG_SRC_ID_LIB_CFB, VERB_WARNING, __VA_ARGS__)
 
 #define error(...) \
-	AAF_LOG (cfbd->log, cfbd, DEBUG_SRC_ID_LIB_CFB, VERB_ERROR, __VA_ARGS__)
+	AAF_LOG (cfbd->log, cfbd, LOG_SRC_ID_LIB_CFB, VERB_ERROR, __VA_ARGS__)
 
 static int
 cfb_getFileSize (CFB_Data* cfbd);

@@ -30,12 +30,12 @@
 
 #define __FILENAME__ (strrchr (__FILE__, '/') ? strrchr (__FILE__, '/') + 1 : __FILE__)
 
-enum debug_source_id {
-	DEBUG_SRC_ID_LIB_CFB,
-	DEBUG_SRC_ID_AAF_CORE,
-	DEBUG_SRC_ID_AAF_IFACE,
-	DEBUG_SRC_ID_TRACE,
-	DEBUG_SRC_ID_DUMP
+enum log_source_id {
+	LOG_SRC_ID_LIB_CFB,
+	LOG_SRC_ID_AAF_CORE,
+	LOG_SRC_ID_AAF_IFACE,
+	LOG_SRC_ID_TRACE,
+	LOG_SRC_ID_DUMP
 };
 
 typedef enum verbosityLevel_e {
@@ -49,7 +49,7 @@ typedef enum verbosityLevel_e {
 #define VERB_SUCCESS 99
 
 struct aafLog {
-	void (*debug_callback) (struct aafLog* log, void* ctxdata, int lib, int type, const char* srcfile, const char* srcfunc, int lineno, const char* msg, void* user);
+	void (*log_callback) (struct aafLog* log, void* ctxdata, int lib, int type, const char* srcfile, const char* srcfunc, int lineno, const char* msg, void* user);
 
 	FILE*            fp;
 	verbosityLevel_e verb;
@@ -64,7 +64,7 @@ struct aafLog {
 	char*  _previous_msg;
 	size_t _previous_pos;
 
-	int _tmp_dbg_msg_pos;
+	int _tmp_msg_pos;
 
 	void* user;
 };
@@ -72,11 +72,11 @@ struct aafLog {
 #define AAF_LOG(log, ctxdata, lib, type, ...) \
 	laaf_write_log (log, ctxdata, lib, type, __FILENAME__, __func__, __LINE__, __VA_ARGS__)
 
-#define LOG_BUFFER_WRITE(log, ...)                                                                                    \
-	log->_tmp_dbg_msg_pos = laaf_util_snprintf_realloc (&log->_msg, &log->_msg_size, log->_msg_pos, __VA_ARGS__); \
-	log->_msg_pos += (log->_tmp_dbg_msg_pos < 0) ? 0 : (size_t)log->_tmp_dbg_msg_pos;
+#define LOG_BUFFER_WRITE(log, ...)                                                                                \
+	log->_tmp_msg_pos = laaf_util_snprintf_realloc (&log->_msg, &log->_msg_size, log->_msg_pos, __VA_ARGS__); \
+	log->_msg_pos += (log->_tmp_msg_pos < 0) ? 0 : (size_t)log->_tmp_msg_pos;
 
-#define DBG_BUFFER_RESET(log) \
+#define LOG_BUFFER_RESET(log) \
 	log->_msg_pos = 0;
 
 struct aafLog*
@@ -89,6 +89,6 @@ void
 laaf_log_callback (struct aafLog* log, void* ctxdata, int lib, int type, const char* srcfile, const char* srcfunc, int lineno, const char* msg, void* user);
 
 void
-laaf_write_log (struct aafLog* log, void* ctxdata, enum debug_source_id lib, enum verbosityLevel_e type, const char* dbgfile, const char* dbgfunc, int dbgline, const char* format, ...);
+laaf_write_log (struct aafLog* log, void* ctxdata, enum log_source_id lib, enum verbosityLevel_e type, const char* srcfile, const char* srcfunc, int srcline, const char* format, ...);
 
 #endif // !laaf_log_h__

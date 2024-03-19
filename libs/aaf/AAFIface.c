@@ -50,20 +50,14 @@
 #include "aaf/log.h"
 #include "aaf/utils.h"
 
-#ifdef _WIN32
-#ifndef ENABLE_VIRTUAL_TERMINAL_PROCESSING
-#define ENABLE_VIRTUAL_TERMINAL_PROCESSING 0x0004
-#endif
-#endif
-
 #define debug(...) \
-	AAF_LOG (aafi->log, aafi, DEBUG_SRC_ID_AAF_IFACE, VERB_DEBUG, __VA_ARGS__)
+	AAF_LOG (aafi->log, aafi, LOG_SRC_ID_AAF_IFACE, VERB_DEBUG, __VA_ARGS__)
 
 #define warning(...) \
-	AAF_LOG (aafi->log, aafi, DEBUG_SRC_ID_AAF_IFACE, VERB_WARNING, __VA_ARGS__)
+	AAF_LOG (aafi->log, aafi, LOG_SRC_ID_AAF_IFACE, VERB_WARNING, __VA_ARGS__)
 
 #define error(...) \
-	AAF_LOG (aafi->log, aafi, DEBUG_SRC_ID_AAF_IFACE, VERB_ERROR, __VA_ARGS__)
+	AAF_LOG (aafi->log, aafi, LOG_SRC_ID_AAF_IFACE, VERB_ERROR, __VA_ARGS__)
 
 AAF_Iface*
 aafi_alloc (AAF_Data* aafd)
@@ -111,18 +105,18 @@ err:
 }
 
 void
-aafi_set_debug (AAF_Iface* aafi, verbosityLevel_e v, int ansicolor, FILE* fp, void (*callback) (struct aafLog* log, void* ctxdata, int lib, int type, const char* srcfile, const char* srcfunc, int lineno, const char* msg, void* user), void* user)
+aafi_set_debug (AAF_Iface* aafi, enum verbosityLevel_e verb, int ansicolor, FILE* fp, void (*callback) (struct aafLog* log, void* ctxdata, int lib, int type, const char* srcfile, const char* srcfunc, int lineno, const char* msg, void* user), void* user)
 {
 	if (!aafi) {
 		return;
 	}
 
-	aafi->log->verb      = v;
+	aafi->log->verb      = verb;
 	aafi->log->ansicolor = ansicolor;
 	aafi->log->fp        = fp;
 
 	if (callback) {
-		aafi->log->debug_callback = callback;
+		aafi->log->log_callback = callback;
 	}
 
 	if (user) {

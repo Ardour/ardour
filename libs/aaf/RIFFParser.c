@@ -26,13 +26,13 @@
 #include "aaf/RIFFParser.h"
 
 #define debug(...) \
-	AAF_LOG (log, NULL, DEBUG_SRC_ID_AAF_IFACE, VERB_DEBUG, __VA_ARGS__)
+	AAF_LOG (log, NULL, LOG_SRC_ID_AAF_IFACE, VERB_DEBUG, __VA_ARGS__)
 
 #define warning(...) \
-	AAF_LOG (log, NULL, DEBUG_SRC_ID_AAF_IFACE, VERB_WARNING, __VA_ARGS__)
+	AAF_LOG (log, NULL, LOG_SRC_ID_AAF_IFACE, VERB_WARNING, __VA_ARGS__)
 
 #define error(...) \
-	AAF_LOG (log, NULL, DEBUG_SRC_ID_AAF_IFACE, VERB_ERROR, __VA_ARGS__)
+	AAF_LOG (log, NULL, LOG_SRC_ID_AAF_IFACE, VERB_ERROR, __VA_ARGS__)
 
 #define BE2LE32(val) \
 	(((val >> 24) & 0xff) | ((val << 8) & 0xff0000) | ((val >> 8) & 0xff00) | ((val << 24) & 0xff000000))

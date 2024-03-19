@@ -307,9 +307,6 @@ laaf_util_relative_path (const char* filepath, const char* refpath)
 		return NULL;
 	}
 
-	// fprintf( stderr, "%s\n", filepath );
-	// fprintf( stderr, "%s\n", refpath );
-
 	int isWindowsPath = 0;
 	int aWindowsPath  = 0;
 	int bWindowsPath  = 0;

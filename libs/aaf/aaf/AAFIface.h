@@ -110,7 +110,6 @@ typedef enum aafiInterpolation_e {
  * Having two curves (AAFI_TRANS_TWO_CURVE) allows a cross fade to have one curve per fade.
  *
  * A transition should have at least two points, one at time zero and one at time 1.
- * TODO To finish
  */
 
 typedef struct aafiTransition {
@@ -270,7 +269,7 @@ typedef struct aafiAudioEssenceFile {
 	 * instead of name when exporting embedded essences.
 	 */
 
-	char* unique_name; // TODO: see creative_post.aaf
+	char* unique_name;
 
 	/**
 	 * Holds the URI path to the essence file, as specified in NetworkLocator::URLString.
@@ -377,7 +376,7 @@ typedef struct aafiAudioEssencePointer {
 
 typedef struct aafiVideoEssence {
 	char* original_file_path; // NetworkLocator::URLString should point to original essence file if external (and in some cases, points to the AAF itself if internal..)
-	char* usable_file_path;   // TODO, not that used.. to be tweaked.  ----  Holds the file path, once the essence has been exported, copied or linked.
+	char* usable_file_path;   // Holds the file path, once the essence has been exported, copied or linked.
 	char* name;               // MasterMob::Name -> file name
 	char* unique_name;        // unique name generated from aafiVideoEssence->name. Sometimes, multiple files share the same names so this unique name should be used on export.
 
@@ -755,21 +754,11 @@ typedef struct aafiMarker {
 } aafiMarker;
 
 typedef struct aafiContext {
-	/*
-	 * Current MobSlot Segment's DataDefinition
-	 * Mob::Slots > MobSlot::Segment > Component::DataDefinition
-	 */
-
-	// aafUID_t  *DataDef;
-
 	/* Clip */
 	aafObject* TopLevelCompositionMob;
 
 	aafiAudioTrack* current_track;
 
-	// int    current_track_number; // used only when missing MobSlot::PhysicalTrackNumber
-
-	// aafPosition_t     current_pos;
 	aafiAudioClip* current_clip;
 	aafiVideoClip* current_video_clip;
 	int            current_clip_is_muted;
@@ -810,8 +799,7 @@ typedef struct aafiContext {
 		char* dump_class_aaf_properties;
 		char* dump_class_raw_properties;
 		char* media_location;
-		// int              forbid_nonlatin_filenames;
-		int mobid_essence_filename;
+		int   mobid_essence_filename;
 
 		/* vendor specific */
 		int protools;
