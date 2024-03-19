@@ -52,7 +52,7 @@ aaf_debug_callback (struct aafLog* log, void* ctxdata, int libid, int type, cons
 {
 	const char *eol = "";
 
-	if ( libid != DEBUG_SRC_ID_TRACE && libid != DEBUG_SRC_ID_DUMP ) {
+	if ( libid != LOG_SRC_ID_TRACE && libid != LOG_SRC_ID_DUMP ) {
 		switch ( type ) {
 			case VERB_SUCCESS:  PBD::info    << string_compose ("[libaaf] %1:%2 in %3(): ", srcfile, lineno, srcfunc);  break;
 			case VERB_ERROR:    PBD::error   << string_compose ("[libaaf] %1:%2 in %3(): ", srcfile, lineno, srcfunc);  break;
@@ -61,7 +61,7 @@ aaf_debug_callback (struct aafLog* log, void* ctxdata, int libid, int type, cons
 		}
 	}
 
-	if ( libid != DEBUG_SRC_ID_DUMP ) {
+	if ( libid != LOG_SRC_ID_DUMP ) {
 		eol = "\n";
 	}
 
@@ -72,7 +72,7 @@ aaf_debug_callback (struct aafLog* log, void* ctxdata, int libid, int type, cons
 		// case VERB_DEBUG:    PBD::debug   << msg << eol;  break;
 	}
 
-	DBG_BUFFER_RESET (log);
+	LOG_BUFFER_RESET (log);
 }
 
 static std::shared_ptr<AudioTrack>
