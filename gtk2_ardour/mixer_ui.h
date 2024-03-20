@@ -54,6 +54,7 @@
 
 #include "widgets/pane.h"
 #include "widgets/tabbable.h"
+#include "widgets/ardour_dropdown.h"
 
 #include "axis_provider.h"
 #include "enums.h"
@@ -194,9 +195,9 @@ private:
 	Gtk::Frame            favorite_plugins_frame;
 	Gtk::VBox             favorite_plugins_vbox;
 	Gtk::HBox             favorite_plugins_search_hbox;
-	Gtk::ComboBoxText     favorite_plugins_mode_combo;
+	ArdourWidgets::ArdourDropdown favorite_plugins_mode_combo;
 	Gtk::Entry            plugin_search_entry;
-	Gtk::Button           plugin_search_clear_button;
+	ArdourWidgets::ArdourButton plugin_search_clear_button;
 	ArdourWidgets::VPane  rhs_pane1;
 	ArdourWidgets::VPane  rhs_pane2;
 	ArdourWidgets::HPane  inner_pane;
@@ -441,15 +442,18 @@ private:
 	enum PluginListMode {
 		PLM_Favorite,
 		PLM_Recent,
-		PLM_TopHits
+		PLM_TopHits,
+		PLM_All
 	};
+	enum PluginListMode plugin_list_mode;
+	void set_plugin_list_mode (PluginListMode plm);
+	std::vector<std::string> plugin_list_mode_strings;
 
 	void refiller (ARDOUR::PluginInfoList& result, const ARDOUR::PluginInfoList& plugs);
 	void refill_favorite_plugins ();
 	void maybe_refill_favorite_plugins (PluginListMode);
 	void store_current_favorite_order();
-	enum PluginListMode plugin_list_mode () const;
-	void plugin_list_mode_changed ();
+
 	void plugin_search_entry_changed ();
 	void plugin_search_clear_button_clicked ();
 	void favorite_plugins_deleted (const Gtk::TreeModel::Path&);
