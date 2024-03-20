@@ -117,6 +117,7 @@ namespace Gtkmm2ext {
 
 	/* C++ API for rounded rectangles */
 
+	LIBGTKMM2EXT_API void rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_left_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r=10);
@@ -128,6 +129,7 @@ namespace Gtkmm2ext {
 
 	/* C API for rounded rectangles */
 
+	LIBGTKMM2EXT_API void rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);
 	LIBGTKMM2EXT_API void rounded_top_left_rectangle (cairo_t*, double x, double y, double w, double h, double r=10);

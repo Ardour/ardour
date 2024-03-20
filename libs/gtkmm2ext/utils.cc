@@ -589,6 +589,12 @@ Gtkmm2ext::container_clear (Gtk::Container& c, bool and_delete)
 }
 
 void
+Gtkmm2ext::rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double /*r*/)
+{
+	cairo_rectangle (context->cobj(), x, y, w, h);
+}
+
+void
 Gtkmm2ext::rounded_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
 {
 	rounded_rectangle (context->cobj(), x, y, w, h, r);
@@ -629,6 +635,12 @@ void
 Gtkmm2ext::rounded_right_half_rectangle (Cairo::RefPtr<Cairo::Context> context, double x, double y, double w, double h, double r)
 {
 	rounded_right_half_rectangle (context->cobj(), x, y, w, h, r);
+}
+
+void
+Gtkmm2ext::rectangle (cairo_t* cr, double x, double y, double w, double h, double /*r*/)
+{
+	cairo_rectangle (cr, x, y, w, h);
 }
 
 void
