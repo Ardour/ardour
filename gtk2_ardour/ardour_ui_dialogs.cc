@@ -156,15 +156,18 @@ ARDOUR_UI::set_session (Session *s)
 
 	AutomationWatch::instance().set_session (s);
 
-	shuttle_box.set_session (s);
-	mini_timeline.set_session (s);
-	time_info_box->set_session (s);
-
 	primary_clock->set_session (s);
-	secondary_clock->set_session (s);
-	big_clock->set_session (s);
-	video_timeline->set_session (s);
-	rc_option_editor->set_session (s);
+
+	if (!Profile->get_livetrax()) {
+		shuttle_box.set_session (s);
+		mini_timeline.set_session (s);
+		time_info_box->set_session (s);
+
+		secondary_clock->set_session (s);
+		big_clock->set_session (s);
+		video_timeline->set_session (s);
+		rc_option_editor->set_session (s);
+	}
 
 	roll_controllable->set_session (s);
 	stop_controllable->set_session (s);

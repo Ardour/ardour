@@ -36,8 +36,11 @@
 
 #include "ardour/session.h"
 #include "ardour/lv2_plugin.h"
+#include "ardour/profile.h"
 
 #include "gtkmm2ext/bindings.h"
+
+#include "widgets/ardour_button.h"
 
 #include "actions.h"
 #include "ardour_message.h"
@@ -47,6 +50,7 @@
 #include "meterbridge.h"
 #include "luainstance.h"
 #include "luawindow.h"
+#include "main_clock.h"
 #include "mixer_ui.h"
 #include "recorder_ui.h"
 #include "trigger_page.h"
@@ -54,6 +58,7 @@
 #include "keyeditor.h"
 #include "rc_option_editor.h"
 #include "route_params_ui.h"
+#include "selection_properties_box.h"
 #include "time_info_box.h"
 #include "trigger_ui.h"
 #include "step_entry.h"
@@ -67,6 +72,7 @@
 
 using namespace Gtk;
 using namespace PBD;
+using namespace ArdourWidgets;
 
 namespace ARDOUR {
 	class Session;
@@ -130,9 +136,14 @@ ARDOUR_UI::connect_dependents_to_session (ARDOUR::Session *s)
 	editor->set_session (s);
 	BootMessage (_("Setup Mixer"));
 	mixer->set_session (s);
-	recorder->set_session (s);
-	trigger_page->set_session (s);
-	meterbridge->set_session (s);
+
+	if (!Profile->get_livetrax()) {
+		recorder->set_session (s);
+		trigger_page->set_session (s);
+		meterbridge->set_session (s);
+	} else {
+		livetrax_time_info_box->set_session (s);
+	}
 
 	/* its safe to do this now */
 
@@ -249,10 +260,15 @@ tab_window_root_drop (GtkNotebook* src,
 int
 ARDOUR_UI::setup_windows ()
 {
+	if (ARDOUR::Profile->get_livetrax()) {
+		return livetrax_setup_windows ();
+	}
+
 	_tabs.set_show_border(false);
 	_tabs.signal_switch_page().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_switch));
 	_tabs.signal_page_added().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_added));
 	_tabs.signal_page_removed().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_removed));
+
 
 	rc_option_editor = new RCOptionEditor;
 	rc_option_editor->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
@@ -351,6 +367,102 @@ ARDOUR_UI::setup_windows ()
 	 * deprecating the old set_window_creation_hook() method, but oh well...
 	 */
 	g_signal_connect (_tabs.gobj(), "create-window", (GCallback) ::tab_window_root_drop, this);
+
+#ifdef GDK_WINDOWING_X11
+	/* allow externalUIs to be transient, on top of the main window */
+	LV2Plugin::set_main_window_id (GDK_DRAWABLE_XID(_main_window.get_window()->gobj()));
+#endif
+
+	return 0;
+}
+
+int
+ARDOUR_UI::livetrax_setup_windows ()
+{
+	ArdourButton::set_default_tweaks (ArdourButton::Tweaks (ArdourButton::ForceBoxy|ArdourButton::ForceFlat));
+
+	if (create_editor()) {
+		error << _("UI: cannot setup editor") << endmsg;
+		return -1;
+	}
+
+	if (create_mixer()) {
+		error << _("UI: cannot setup mixer") << endmsg;
+		return -1;
+	}
+
+	livetrax_time_info_box = new TimeInfoBox ("LiveTraxTimeInfo", false);
+
+	Gtk::Label* l;
+	Gtk::VBox* vb;
+
+	livetrax_top_bar.set_spacing (12);
+	livetrax_top_bar.set_border_width (12);
+	livetrax_top_bar.pack_start (*livetrax_time_info_box, false, false);
+	livetrax_top_bar.pack_start (*primary_clock, false, false);
+
+	Gtk::EventBox* ev_dsp = manage (new EventBox);
+	Gtk::EventBox* ev_timecode = manage (new EventBox);
+	ev_dsp->set_name ("MainMenuBar");
+	ev_timecode->set_name ("MainMenuBar");
+	ev_dsp->add (dsp_load_label);
+	ev_timecode->add (timecode_format_label);
+
+	vb = manage (new Gtk::VBox);
+
+	vb->pack_start (*ev_dsp, true, true);
+	vb->pack_start (disk_space_label, true, true);
+	vb->show_all ();
+
+	livetrax_top_bar.pack_end (*vb, false, false);
+
+	livetrax_multi_out_button = manage (new ArdourWidgets::ArdourButton (_("Multi Out")));
+	livetrax_stereo_out_button = manage (new ArdourWidgets::ArdourButton (_("Stereo Out")));
+
+	vb = manage (new Gtk::VBox);
+	vb->pack_start (*livetrax_stereo_out_button, true, true);
+	vb->pack_start (*livetrax_multi_out_button, true, true);
+	vb->show_all ();
+
+	livetrax_top_bar.pack_end (*vb, false, false);
+
+	/* transport bar */
+
+	l = new Gtk::Label ("this is the transport bar with other controls too");
+	livetrax_transport_bar.pack_start (*l, true, true);
+
+	/* meter display */
+
+	l = new Gtk::Label ("this is the meter display");
+	livetrax_meter_bar.pack_start (*l, true, true);
+
+	livetrax_editor_bar.pack_start (editor->contents(), true, true);
+	livetrax_mixer_bar.pack_start (mixer->contents(), true, true);
+
+	we_have_dependents ();
+
+	/* order of addition affects order seen in initial window display */
+
+	main_vpacker.pack_start (menu_bar_base, false, false);
+	main_vpacker.pack_start (livetrax_top_bar, false, false);
+	main_vpacker.pack_start (livetrax_transport_bar, false, false);
+	main_vpacker.pack_start (livetrax_meter_bar, false, false);
+	main_vpacker.pack_start (livetrax_editor_bar, true, true);
+	main_vpacker.pack_start (livetrax_mixer_bar, true, true);
+
+	// setup_tooltips ();
+
+	_main_window.signal_delete_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::main_window_delete_event));
+
+	/* pack the main vpacker into the main window and show everything
+	 */
+
+	_main_window.add (main_vpacker);
+
+	apply_window_settings (true);
+
+	setup_toplevel_window (_main_window, "", this);
+	_main_window.show_all ();
 
 #ifdef GDK_WINDOWING_X11
 	/* allow externalUIs to be transient, on top of the main window */

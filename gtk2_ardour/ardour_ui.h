@@ -620,6 +620,18 @@ private:
 	void primary_clock_value_changed ();
 	void secondary_clock_value_changed ();
 
+	/* LiveTrax */
+
+	Gtk::HBox livetrax_top_bar;
+	Gtk::HBox livetrax_transport_bar;
+	Gtk::HBox livetrax_meter_bar;
+	Gtk::HBox livetrax_editor_bar;
+	Gtk::HBox livetrax_mixer_bar;
+	TimeInfoBox* livetrax_time_info_box;
+	ArdourWidgets::ArdourButton* livetrax_multi_out_button;
+	ArdourWidgets::ArdourButton* livetrax_stereo_out_button;
+	int livetrax_setup_windows ();
+
 	/* menu bar and associated stuff */
 
 	Gtk::MenuBar* menu_bar;

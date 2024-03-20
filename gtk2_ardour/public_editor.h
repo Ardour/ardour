@@ -105,6 +105,7 @@ class TempoMarker;
 class TimeAxisView;
 class VerboseCursor;
 struct SelectionRect;
+class SelectionPropertiesBox;
 
 class DisplaySuspender;
 
@@ -599,6 +600,8 @@ public:
 	PBD::Signal0<void> MouseModeChanged;
 
 	Gtkmm2ext::Bindings* bindings;
+
+	virtual SelectionPropertiesBox& properties_box() const = 0;
 
 protected:
 	friend class DisplaySuspender;

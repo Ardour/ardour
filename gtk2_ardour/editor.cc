@@ -602,7 +602,9 @@ Editor::Editor ()
 
 	CairoWidget::set_focus_handler (sigc::mem_fun (ARDOUR_UI::instance(), &ARDOUR_UI::reset_focus));
 
-	_summary = new EditorSummary (this);
+	if (!Profile->get_livetrax()) {
+		_summary = new EditorSummary (this);
+	}
 
 	TempoMap::MapChanged.connect (tempo_map_connection, invalidator (*this), boost::bind (&Editor::tempo_map_changed, this), gui_context());
 
@@ -732,93 +734,104 @@ Editor::Editor ()
 		settings->get_property ("notebook-shrunk", _notebook_shrunk);
 	}
 
-	editor_summary_pane.set_check_divider_position (true);
-	editor_summary_pane.add (edit_packer);
+	if (!Profile->get_livetrax()) {
+		editor_summary_pane.set_check_divider_position (true);
+		editor_summary_pane.add (edit_packer);
 
-	Button* summary_arrow_left = manage (new Button);
-	summary_arrow_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
-	summary_arrow_left->signal_pressed().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), LEFT)));
-	summary_arrow_left->signal_released().connect (sigc::mem_fun (*this, &Editor::scroll_release));
+		Button* summary_arrow_left = manage (new Button);
+		summary_arrow_left->add (*manage (new Arrow (ARROW_LEFT, SHADOW_NONE)));
+		summary_arrow_left->signal_pressed().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), LEFT)));
+		summary_arrow_left->signal_released().connect (sigc::mem_fun (*this, &Editor::scroll_release));
 
-	Button* summary_arrow_right = manage (new Button);
-	summary_arrow_right->add (*manage (new Arrow (ARROW_RIGHT, SHADOW_NONE)));
-	summary_arrow_right->signal_pressed().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), RIGHT)));
-	summary_arrow_right->signal_released().connect (sigc::mem_fun (*this, &Editor::scroll_release));
+		Button* summary_arrow_right = manage (new Button);
+		summary_arrow_right->add (*manage (new Arrow (ARROW_RIGHT, SHADOW_NONE)));
+		summary_arrow_right->signal_pressed().connect (sigc::hide_return (sigc::bind (sigc::mem_fun (*this, &Editor::scroll_press), RIGHT)));
+		summary_arrow_right->signal_released().connect (sigc::mem_fun (*this, &Editor::scroll_release));
 
-	VBox* summary_arrows_left = manage (new VBox);
-	summary_arrows_left->pack_start (*summary_arrow_left);
+		VBox* summary_arrows_left = manage (new VBox);
+		summary_arrows_left->pack_start (*summary_arrow_left);
 
-	VBox* summary_arrows_right = manage (new VBox);
-	summary_arrows_right->pack_start (*summary_arrow_right);
+		VBox* summary_arrows_right = manage (new VBox);
+		summary_arrows_right->pack_start (*summary_arrow_right);
 
-	Gtk::Frame* summary_frame = manage (new Gtk::Frame);
-	summary_frame->set_shadow_type (Gtk::SHADOW_ETCHED_IN);
+		Gtk::Frame* summary_frame = manage (new Gtk::Frame);
+		summary_frame->set_shadow_type (Gtk::SHADOW_ETCHED_IN);
 
-	summary_frame->add (*_summary);
-	summary_frame->show ();
+		summary_frame->add (*_summary);
+		summary_frame->show ();
 
-	_summary_hbox.pack_start (*summary_arrows_left, false, false);
-	_summary_hbox.pack_start (*summary_frame, true, true);
-	_summary_hbox.pack_start (*summary_arrows_right, false, false);
+		_summary_hbox.pack_start (*summary_arrows_left, false, false);
+		_summary_hbox.pack_start (*summary_frame, true, true);
+		_summary_hbox.pack_start (*summary_arrows_right, false, false);
 
-	editor_summary_pane.add (_summary_hbox);
-	edit_pane.set_check_divider_position (true);
-	edit_pane.add (editor_summary_pane);
-	_editor_list_vbox.pack_start (_the_notebook);
-	_editor_list_vbox.pack_start (*_properties_box, false, false, 0);
-	edit_pane.add (_editor_list_vbox);
-	edit_pane.set_child_minsize (_editor_list_vbox, 30); /* rough guess at width of notebook tabs */
+		editor_summary_pane.add (_summary_hbox);
+		edit_pane.set_check_divider_position (true);
+		edit_pane.add (editor_summary_pane);
+		_editor_list_vbox.pack_start (_the_notebook);
+		_editor_list_vbox.pack_start (*_properties_box, false, false, 0);
+		edit_pane.add (_editor_list_vbox);
+		edit_pane.set_child_minsize (_editor_list_vbox, 30); /* rough guess at width of notebook tabs */
 
-	edit_pane.set_drag_cursor (*_cursors->expand_left_right);
-	editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
+		edit_pane.set_drag_cursor (*_cursors->expand_left_right);
+		editor_summary_pane.set_drag_cursor (*_cursors->expand_up_down);
 
-	float fract;
-	if (!settings || !settings->get_property ("edit-horizontal-pane-pos", fract) || fract > 1.0) {
-		/* initial allocation is 90% to canvas, 10% to notebook */
-		fract = 0.90;
+		float fract;
+		if (!settings || !settings->get_property ("edit-horizontal-pane-pos", fract) || fract > 1.0) {
+			/* initial allocation is 90% to canvas, 10% to notebook */
+			fract = 0.90;
+		}
+		edit_pane.set_divider (0, fract);
+
+		if (!settings || !settings->get_property ("edit-vertical-pane-pos", fract) || fract > 1.0) {
+			/* initial allocation is 90% to canvas, 10% to summary */
+			fract = 0.90;
+		}
+		editor_summary_pane.set_divider (0, fract);
 	}
-	edit_pane.set_divider (0, fract);
-
-	if (!settings || !settings->get_property ("edit-vertical-pane-pos", fract) || fract > 1.0) {
-		/* initial allocation is 90% to canvas, 10% to summary */
-		fract = 0.90;
-	}
-	editor_summary_pane.set_divider (0, fract);
 
 	global_vpacker.set_spacing (0);
 	global_vpacker.set_border_width (0);
 
-	/* the next three EventBoxes provide the ability for their child widgets to have a background color.  That is all. */
+	if (!Profile->get_livetrax()) {
+		/* the next three EventBoxes provide the ability for their child widgets to have a background color.  That is all. */
 
-	Gtk::EventBox* ebox = manage (new Gtk::EventBox); // a themeable box
-	ebox->set_name("EditorWindow");
-	ebox->add (ebox_hpacker);
+		Gtk::EventBox* ebox = manage (new Gtk::EventBox); // a themeable box
+		ebox->set_name("EditorWindow");
+		ebox->add (ebox_hpacker);
 
-	Gtk::EventBox* epane_box = manage (new EventBoxExt); // a themeable box
-	epane_box->set_name("EditorWindow");
-	epane_box->add (edit_pane);
+		Gtk::EventBox* epane_box = manage (new EventBoxExt); // a themeable box
+		epane_box->set_name("EditorWindow");
+		epane_box->add (edit_pane);
 
-	Gtk::EventBox* epane_box2 = manage (new EventBoxExt); // a themeable box
-	epane_box2->set_name("EditorWindow");
-	epane_box2->add (global_vpacker);
+		Gtk::EventBox* epane_box2 = manage (new EventBoxExt); // a themeable box
+		epane_box2->set_name("EditorWindow");
+		epane_box2->add (global_vpacker);
 
-	ArdourWidgets::ArdourDropShadow *toolbar_shadow = manage (new (ArdourWidgets::ArdourDropShadow));
-	toolbar_shadow->set_size_request (-1, 4);
-	toolbar_shadow->set_mode(ArdourWidgets::ArdourDropShadow::DropShadowBoth);
-	toolbar_shadow->set_name("EditorWindow");
-	toolbar_shadow->show();
+		ArdourWidgets::ArdourDropShadow *toolbar_shadow = manage (new (ArdourWidgets::ArdourDropShadow));
+		toolbar_shadow->set_size_request (-1, 4);
+		toolbar_shadow->set_mode(ArdourWidgets::ArdourDropShadow::DropShadowBoth);
+		toolbar_shadow->set_name("EditorWindow");
+		toolbar_shadow->show();
+		global_vpacker.pack_start (*toolbar_shadow, false, false);
 
-	global_vpacker.pack_start (*toolbar_shadow, false, false);
-	global_vpacker.pack_start (*ebox, false, false);
-	global_vpacker.pack_start (*epane_box, true, true);
-	global_hpacker.pack_start (*epane_box2, true, true);
+		global_vpacker.pack_start (*ebox, false, false);
 
-	/* need to show the "contents" widget so that notebook will show if tab is switched to
-	 */
+		if (!Profile->get_livetrax()) {
+			global_vpacker.pack_start (*epane_box, true, true);
+			global_hpacker.pack_start (*epane_box2, true, true);
+		}
+		/* need to show the "contents" widget so that notebook will show if tab is switched to
+		 */
 
-	global_hpacker.show ();
-	ebox_hpacker.show();
-	ebox->show();
+		global_hpacker.show ();
+		ebox_hpacker.show();
+		ebox->show();
+
+	} else {
+		global_vpacker.pack_start (edit_packer, true, true);
+		global_hpacker.pack_start (global_vpacker, true, true);
+		global_hpacker.show ();
+	}
 
 	/* register actions now so that set_state() can find them and set toggles/checks etc */
 
@@ -1353,16 +1366,19 @@ Editor::set_session (Session *t)
 	 * before the visible state has been loaded from instant.xml */
 	_leftmost_sample = session_gui_extents().first.samples();
 
-	nudge_clock->set_session (_session);
-	_summary->set_session (_session);
+	if (!Profile->get_livetrax()) {
+		nudge_clock->set_session (_session);
+		_summary->set_session (_session);
+	}
+
 	_group_tabs->set_session (_session);
 	_route_groups->set_session (_session);
 	_regions->set_session (_session);
 	_sources->set_session (_session);
 	_snapshots->set_session (_session);
-	_sections->set_session (_session);
 	_routes->set_session (_session);
 	_locations->set_session (_session);
+	_sections->set_session (_session);
 	_properties_box->set_session (_session);
 
 	if (rhythm_ferret) {
@@ -5098,7 +5114,9 @@ Editor::on_samples_per_pixel_changed ()
 	}
 
 	refresh_location_display();
-	_summary->set_overlays_dirty ();
+	if (_summary) {
+		_summary->set_overlays_dirty ();
+	}
 
 	update_section_box ();
 	update_marker_labels ();
@@ -5237,7 +5255,9 @@ Editor::visual_changer (const VisualChange& vc)
 	}
 
 	_region_peak_cursor->hide ();
-	_summary->set_overlays_dirty ();
+	if (_summary) {
+		_summary->set_overlays_dirty ();
+	}
 }
 
 struct EditorOrderTimeAxisSorter {
@@ -5809,7 +5829,9 @@ Editor::region_view_added (RegionView * rv)
 		}
 	}
 
-	_summary->set_background_dirty ();
+	if (_summary) {
+		_summary->set_background_dirty ();
+	}
 
 	mark_region_boundary_cache_dirty ();
 }
@@ -5817,7 +5839,9 @@ Editor::region_view_added (RegionView * rv)
 void
 Editor::region_view_removed ()
 {
-	_summary->set_background_dirty ();
+	if (_summary) {
+		_summary->set_background_dirty ();
+	}
 
 	mark_region_boundary_cache_dirty ();
 }
@@ -6216,7 +6240,9 @@ Editor::redisplay_track_views ()
 		vertical_adjustment.set_value (_full_canvas_height - _visible_canvas_height);
 	}
 
-	_summary->set_background_dirty();
+	if (_summary) {
+		_summary->set_background_dirty();
+	}
 	_group_tabs->set_dirty ();
 
 	return false;

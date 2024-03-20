@@ -56,6 +56,7 @@
 #include "ardour/monitor_control.h"
 #include "ardour/panner_shell.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/profile.h"
 #include "ardour/route_group.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
@@ -330,57 +331,62 @@ Mixer_UI::Mixer_UI ()
 	}
 	_mixer_scene_vbox.pack_start(_mixer_scene_table, false, false);
 
-	rhs_pane1.add (favorite_plugins_frame);
-	rhs_pane1.add (track_display_frame);
+	if (!Profile->get_livetrax()) {
+		rhs_pane1.add (favorite_plugins_frame);
+		rhs_pane1.add (track_display_frame);
 
-	rhs_pane2.add (rhs_pane1);
-	rhs_pane2.add (group_display_frame);
+		rhs_pane2.add (rhs_pane1);
+		rhs_pane2.add (group_display_frame);
 
-	list_vpacker.pack_start (rhs_pane2, true, true);
+		list_vpacker.pack_start (rhs_pane2, true, true);
 
-	//add a spacer; this fills the area that is normally taken by the pane resizers
-	_mixer_scene_spacer.set_size_request (-1, 6);
-	list_vpacker.pack_start (_mixer_scene_spacer, false, false);
 
-	_mixer_scene_frame.add(_mixer_scene_vbox);
-	list_vpacker.pack_start (_mixer_scene_frame, false, false);
+		//add a spacer; this fills the area that is normally taken by the pane resizers
+		_mixer_scene_spacer.set_size_request (-1, 6);
+		list_vpacker.pack_start (_mixer_scene_spacer, false, false);
 
-	vca_label_bar.set_size_request (-1, 16 + 1); /* must match height in GroupTabs::set_size_request()  + 1 border px*/
-	vca_vpacker.pack_start (vca_label_bar, false, false);
+		_mixer_scene_frame.add(_mixer_scene_vbox);
+		list_vpacker.pack_start (_mixer_scene_frame, false, false);
 
-	vca_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
-	vca_scroller_base.set_name (X_("MixerWindow"));
-	vca_scroller_base.signal_button_press_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
-	vca_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
+		vca_label_bar.set_size_request (-1, 16 + 1); /* must match height in GroupTabs::set_size_request()  + 1 border px*/
+		vca_vpacker.pack_start (vca_label_bar, false, false);
 
-	vca_hpacker.signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_vca_scroll_event), false);
-	vca_scroller.add (vca_hpacker);
-	vca_scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
+		vca_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
+		vca_scroller_base.set_name (X_("MixerWindow"));
+		vca_scroller_base.signal_button_press_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
+		vca_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
 
-	vca_vpacker.pack_start (vca_scroller, true, true);
+		vca_hpacker.signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_vca_scroll_event), false);
+		vca_scroller.add (vca_hpacker);
+		vca_scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
 
-	inner_pane.add (scroller);
-	inner_pane.add (vca_vpacker);
+		vca_vpacker.pack_start (vca_scroller, true, true);
 
-	global_hpacker.pack_start (inner_pane, true, true);
-	global_hpacker.pack_start (out_packer, false, false);
+		inner_pane.add (scroller);
+		inner_pane.add (vca_vpacker);
 
-	list_hpane.set_check_divider_position (true);
-	list_hpane.add (list_vpacker);
-	list_hpane.add (global_hpacker);
-	list_hpane.set_child_minsize (list_vpacker, 30);
+		global_hpacker.pack_start (inner_pane, true, true);
+		global_hpacker.pack_start (out_packer, false, false);
 
-	rhs_pane1.set_divider (0, .6);
-	rhs_pane2.set_divider (0, .7);
-	list_hpane.set_divider (0, .2);
-	inner_pane.set_divider (0, .8);
+		list_hpane.set_check_divider_position (true);
+		list_hpane.add (list_vpacker);
+		list_hpane.add (global_hpacker);
+		list_hpane.set_child_minsize (list_vpacker, 30);
 
-	rhs_pane1.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
-	rhs_pane2.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
-	list_hpane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
-	inner_pane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
+		rhs_pane1.set_divider (0, .6);
+		rhs_pane2.set_divider (0, .7);
+		list_hpane.set_divider (0, .2);
+		inner_pane.set_divider (0, .8);
 
-	_content.pack_start (list_hpane, true, true);
+		rhs_pane1.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
+		rhs_pane2.set_drag_cursor (*PublicEditor::instance().cursors()->expand_up_down);
+		list_hpane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
+		inner_pane.set_drag_cursor (*PublicEditor::instance().cursors()->expand_left_right);
+
+		_content.pack_start (list_hpane, true, true);
+	} else {
+		_content.pack_start (scroller, true, true);
+	}
 
 	update_title ();
 
@@ -2293,7 +2299,7 @@ Mixer_UI::toggle_mixer_list ()
 void
 Mixer_UI::showhide_mixer_list (bool yn)
 {
-	if (yn) {
+	if (!Profile->get_livetrax() && yn) {
 		list_vpacker.show ();
 	} else {
 		list_vpacker.hide ();

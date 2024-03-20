@@ -485,7 +485,7 @@ Editor::update_ruler_visibility ()
 	videotl_label.hide();
 #endif
 
-	if (ruler_minsec_action->get_active()) {
+	if (!Profile->get_livetrax() && ruler_minsec_action->get_active()) {
 		old_unit_pos = minsec_ruler->position().y;
 		if (tbpos != old_unit_pos) {
 			minsec_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
@@ -501,7 +501,7 @@ Editor::update_ruler_visibility ()
 		minsec_label.hide();
 	}
 
-	if (ruler_timecode_action->get_active()) {
+	if (Profile->get_livetrax() || ruler_timecode_action->get_active()) {
 		old_unit_pos = timecode_ruler->position().y;
 		if (tbpos != old_unit_pos) {
 			timecode_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
@@ -517,7 +517,7 @@ Editor::update_ruler_visibility ()
 		timecode_label.hide();
 	}
 
-	if (ruler_samples_action->get_active()) {
+	if (!Profile->get_livetrax() && ruler_samples_action->get_active()) {
 		old_unit_pos = samples_ruler->position().y;
 		if (tbpos != old_unit_pos) {
 			samples_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
@@ -533,7 +533,7 @@ Editor::update_ruler_visibility ()
 		samples_label.hide();
 	}
 
-	if (ruler_bbt_action->get_active()) {
+	if (!Profile->get_livetrax() && ruler_bbt_action->get_active()) {
 		old_unit_pos = bbt_ruler->position().y;
 		if (tbpos != old_unit_pos) {
 			bbt_ruler->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
@@ -549,7 +549,7 @@ Editor::update_ruler_visibility ()
 		bbt_label.hide();
 	}
 
-	if (ruler_tempo_action->get_active()) {
+	if (!Profile->get_livetrax() && ruler_tempo_action->get_active()) {
 		old_unit_pos = tempo_group->position().y;
 		if (tbpos != old_unit_pos) {
 			tempo_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
@@ -564,7 +564,7 @@ Editor::update_ruler_visibility ()
 		tempo_label.hide();
 	}
 
-	if (ruler_meter_action->get_active()) {
+	if (!Profile->get_livetrax() && ruler_meter_action->get_active()) {
 		old_unit_pos = meter_group->position().y;
 		if (tbpos != old_unit_pos) {
 			meter_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
@@ -579,7 +579,7 @@ Editor::update_ruler_visibility ()
 		meter_label.hide();
 	}
 
-	if (ruler_range_action->get_active()) {
+	if (!Profile->get_livetrax() && ruler_range_action->get_active()) {
 		old_unit_pos = range_marker_group->position().y;
 		if (tbpos != old_unit_pos) {
 			range_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
@@ -597,7 +597,7 @@ Editor::update_ruler_visibility ()
 		range_mark_label.hide();
 	}
 
-	if (ruler_loop_punch_action->get_active()) {
+	if (!Profile->get_livetrax() && ruler_loop_punch_action->get_active()) {
 		old_unit_pos = transport_marker_group->position().y;
 		if (tbpos != old_unit_pos) {
 			transport_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
@@ -615,7 +615,7 @@ Editor::update_ruler_visibility ()
 		transport_mark_label.hide();
 	}
 
-	if (ruler_cd_marker_action->get_active()) {
+	if (!Profile->get_livetrax() && ruler_cd_marker_action->get_active()) {
 		old_unit_pos = cd_marker_group->position().y;
 		if (tbpos != old_unit_pos) {
 			cd_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
@@ -637,7 +637,7 @@ Editor::update_ruler_visibility ()
 		update_marker_display();
 	}
 
-	if (ruler_marker_action->get_active()) {
+	if (Profile->get_livetrax() || ruler_marker_action->get_active()) {
 		old_unit_pos = marker_group->position().y;
 		if (tbpos != old_unit_pos) {
 			marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
@@ -655,7 +655,7 @@ Editor::update_ruler_visibility ()
 		mark_label.hide();
 	}
 
-	if (ruler_cue_marker_action->get_active()) {
+	if (!Profile->get_livetrax() && ruler_cue_marker_action->get_active()) {
 		old_unit_pos = cue_marker_group->position().y;
 		if (tbpos != old_unit_pos) {
 			cue_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
@@ -673,7 +673,7 @@ Editor::update_ruler_visibility ()
 		cue_mark_label.hide();
 	}
 
-	if (ruler_section_action->get_active()) {
+	if (!Profile->get_livetrax() && ruler_section_action->get_active()) {
 		old_unit_pos = section_marker_group->position().y;
 		if (tbpos != old_unit_pos) {
 			section_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
@@ -693,7 +693,7 @@ Editor::update_ruler_visibility ()
 		update_marker_display();
 	}
 
-	if (ruler_video_action->get_active()) {
+	if (!Profile->get_livetrax() && ruler_video_action->get_active()) {
 		old_unit_pos = videotl_group->position().y;
 		if (tbpos != old_unit_pos) {
 			videotl_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));

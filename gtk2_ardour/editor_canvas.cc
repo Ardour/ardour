@@ -367,7 +367,10 @@ Editor::track_canvas_viewport_size_allocated ()
 	update_tempo_based_rulers ();
 	redisplay_grid (false);
 	redisplay_track_views ();
-	_summary->set_overlays_dirty ();
+
+	if (_summary) {
+		_summary->set_overlays_dirty ();
+	}
 }
 
 void

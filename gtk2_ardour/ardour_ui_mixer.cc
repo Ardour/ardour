@@ -26,6 +26,8 @@
    is to cut down on the nasty compile times for these classes.
 */
 
+#include "ardour/profile.h"
+
 #include "gtkmm2ext/keyboard.h"
 
 #include "actions.h"
@@ -44,7 +46,9 @@ ARDOUR_UI::create_mixer ()
 {
 	try {
 		mixer = Mixer_UI::instance ();
-		mixer->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
+		if (!ARDOUR::Profile->get_livetrax()) {
+			mixer->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
+		}
 	}
 
 	catch (failed_constructor& err) {

@@ -175,7 +175,7 @@ SelectionPropertiesBox::selection_changed ()
 
 	_header_label.hide();
 
-	if (!selection.time.empty()) {
+	if (Profile->get_livetrax() || !selection.time.empty()) {
 		_time_info_box->show();
 		_header_label.set_text(_("Range Properties (Press ESC to Deselect All)"));
 		_header_label.show();

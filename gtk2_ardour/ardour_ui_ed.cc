@@ -99,7 +99,9 @@ ARDOUR_UI::create_editor ()
 {
 	try {
 		editor = new Editor ();
-		editor->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
+		if (!ARDOUR::Profile->get_livetrax()) {
+			editor->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
+		}
 	}
 
 	catch (failed_constructor& err) {
@@ -116,7 +118,9 @@ ARDOUR_UI::create_recorder ()
 {
 	try {
 		recorder = new RecorderUI ();
-		recorder->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
+		if (!ARDOUR::Profile->get_livetrax()) {
+			recorder->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
+		}
 	} catch (failed_constructor& err) {
 		return -1;
 	}
@@ -128,7 +132,9 @@ ARDOUR_UI::create_trigger_page ()
 {
 	try {
 		trigger_page = new TriggerPage ();
-		trigger_page->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
+		if (!ARDOUR::Profile->get_livetrax()) {
+			trigger_page->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
+		}
 	} catch (failed_constructor& err) {
 		return -1;
 	}
@@ -762,19 +768,25 @@ ARDOUR_UI::build_menu_bar ()
 	ev->set_name ("MainMenuBar");
 	ev->show ();
 
-	EventBox* ev_dsp = manage (new EventBox);
+	EventBox* ev_dsp;
+	EventBox* ev_timecode;
 	EventBox* ev_path = manage (new EventBox);
 	EventBox* ev_name = manage (new EventBox);
 	EventBox* ev_audio = manage (new EventBox);
 	EventBox* ev_format = manage (new EventBox);
-	EventBox* ev_timecode = manage (new EventBox);
 
-	ev_dsp->set_name ("MainMenuBar");
+	if (!Profile->get_livetrax()) {
+		ev_dsp = manage (new EventBox);
+		ev_timecode = manage (new EventBox);
+
+		ev_dsp->set_name ("MainMenuBar");
+		ev_timecode->set_name ("MainMenuBar");
+	}
+
 	ev_path->set_name ("MainMenuBar");
 	ev_name->set_name ("MainMenuBar");
 	ev_audio->set_name ("MainMenuBar");
 	ev_format->set_name ("MainMenuBar");
-	ev_timecode->set_name ("MainMenuBar");
 
 	Gtk::HBox* hbox = manage (new Gtk::HBox);
 	hbox->show ();
@@ -794,18 +806,22 @@ ARDOUR_UI::build_menu_bar ()
 	snapshot_name_label.set_name ("Name");
 	format_label.set_use_markup ();
 
-	ev_dsp->add (dsp_load_label);
+	if (!Profile->get_livetrax()) {
+		ev_dsp->add (dsp_load_label);
+		ev_timecode->add (timecode_format_label);
+	}
 	ev_path->add (session_path_label);
 	ev_name->add (snapshot_name_label);
 	ev_audio->add (sample_rate_label);
 	ev_format->add (format_label);
-	ev_timecode->add (timecode_format_label);
 
-	ev_dsp->show ();
+	if (!Profile->get_livetrax()) {
+		ev_dsp->show ();
+		ev_timecode->show ();
+	}
 	ev_path->show ();
 	ev_audio->show ();
 	ev_format->show ();
-	ev_timecode->show ();
 
 #ifdef __APPLE__
 	use_menubar_as_top_menubar ();
@@ -817,7 +833,9 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (wall_clock_label, false, false, 10);
 
 	hbox->pack_end (*ev_dsp, false, false, 6);
-	hbox->pack_end (disk_space_label, false, false, 6);
+	if (!Profile->get_livetrax()) {
+		hbox->pack_end (disk_space_label, false, false, 6);
+	}
 	hbox->pack_end (*ev_audio, false, false, 6);
 	hbox->pack_end (*ev_timecode, false, false, 6);
 	hbox->pack_end (*ev_format, false, false, 6);
@@ -834,10 +852,13 @@ ARDOUR_UI::build_menu_bar ()
 	_status_bar_visibility.add (&snapshot_name_label   ,X_("Name"),      _("Snapshot Name and Modified Indicator"), false);
 	_status_bar_visibility.add (&peak_thread_work_label,X_("Peakfile"),  _("Active Peak-file Work"), false);
 	_status_bar_visibility.add (&format_label,          X_("Format"),    _("File Format"), false);
-	_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), false);
 	_status_bar_visibility.add (&sample_rate_label,     X_("Audio"),     _("Audio"), true);
-	_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
-	_status_bar_visibility.add (&dsp_load_label,        X_("DSP"),       _("DSP"), true);
+
+	if (!Profile->get_livetrax()) {
+		_status_bar_visibility.add (&timecode_format_label, X_("TCFormat"),  _("Timecode Format"), false);
+		_status_bar_visibility.add (&disk_space_label,      X_("Disk"),      _("Disk Space"), !Profile->get_small_screen());
+		_status_bar_visibility.add (&dsp_load_label,        X_("DSP"),       _("DSP"), true);
+	}
 #ifndef __APPLE__
 	// OSX provides its own wallclock, thank you very much
 	_status_bar_visibility.add (&wall_clock_label,      X_("WallClock"), _("Wall Clock"), false);
@@ -845,13 +866,16 @@ ARDOUR_UI::build_menu_bar ()
 
 	ev->signal_button_press_event().connect (sigc::mem_fun (_status_bar_visibility, &VisibilityGroup::button_press_event));
 
-	ev_dsp->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_press));
-	ev_dsp->signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_release));
+	if (!Profile->get_livetrax()) {
+		ev_dsp->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_press));
+		ev_dsp->signal_button_release_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::xrun_button_release));
+		ev_timecode->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::timecode_button_press));
+	}
+
 	ev_path->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::path_button_press));
 	ev_name->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::path_button_press));
 	ev_audio->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::audio_button_press));
 	ev_format->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::format_button_press));
-	ev_timecode->signal_button_press_event().connect (sigc::mem_fun (*this, &ARDOUR_UI::timecode_button_press));
 
 	ArdourWidgets::set_tooltip (session_path_label, _("Double click to open session folder."));
 	ArdourWidgets::set_tooltip (format_label, _("Double click to edit audio file format."));

@@ -121,6 +121,8 @@ ARDOUR_UI::setup_profile ()
 	if (g_getenv ("MIXBUS")) {
 		Profile->set_mixbus ();
 	}
+
+	Profile->set_livetrax ();
 }
 
 int
