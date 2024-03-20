@@ -11,7 +11,7 @@
 # Edouard <edwsaintesprit@hotmail.com>, 2016.
 # Rivaud Julien <frnchfrgg@free.fr>, 2016, 2019.
 # Olivier Humbert <trebmuh@tuxfamily.org>, 2016, 2018, 2019, 2020, 2021, 2022, 2023, 2024.
-# Julien Taverna <jujudusud@gmail.com>, 2022,2023.
+# Julien Taverna <jujudusud@gmail.com>, 2022, 2023, 2024.
 # Nicolas Faure <sub26nico@laposte.net>, 2022.
 msgid ""
 msgstr ""
@@ -26,7 +26,7 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=(n > 1);\n"
-"X-Generator: Poedit 3.4.1\n"
+"X-Generator: Poedit 3.4.2\n"
 
 #: about.cc:133
 msgid "Fons Adriaensen"
@@ -1148,7 +1148,7 @@ msgstr "Réglages audio/MIDI"
 
 #: ardour_ui.cc:334
 msgid "Video Export Dialog"
-msgstr "Fenêtre d'export vidéo"
+msgstr "Fenêtre d'exportation vidéo"
 
 #: ardour_ui.cc:335 lua_script_manager.cc:41
 msgid "Script Manager"
@@ -2677,11 +2677,11 @@ msgstr "Importer"
 
 #: ardour_ui_ed.cc:595
 msgid "Stem export..."
-msgstr "Export de fragments..."
+msgstr "Exportation de fragments..."
 
 #: ardour_ui_ed.cc:598
 msgid "Quick Audio Export..."
-msgstr "Export audio rapide..."
+msgstr "Exportation audio rapide..."
 
 #: ardour_ui_ed.cc:601
 msgid "Export Surround Master..."
@@ -2952,6 +2952,7 @@ msgstr ""
 "Vous ne pouvez pas ouvrir de sessions dans cet état"
 
 #: ardour_ui_options.cc:64
+#, fuzzy
 msgid ""
 "It is not possible to use JACK as the sync source\n"
 " when the pull up/down setting is non-zero."
@@ -2976,6 +2977,7 @@ msgid "Enable/Disable external positional sync"
 msgstr "(Dés)activer la synchro de position externe"
 
 #: ardour_ui_options.cc:578
+#, fuzzy
 msgid "Sync to JACK is not possible: video pull up/down is set"
 msgstr ""
 "Impossible de synchroniser avec JACK : le \"pullup/pulldown\" vidéo est "
@@ -3532,6 +3534,7 @@ msgid "%+.4f%%"
 msgstr "%+.4f%%"
 
 #: audio_clock.cc:1114
+#, fuzzy
 msgid "Pull"
 msgstr "\"Pull\""
 
@@ -5291,6 +5294,7 @@ msgid "Primary Clock"
 msgstr "Horloge principale"
 
 #: editor_actions.cc:164
+#, fuzzy
 msgid "Pullup / Pulldown"
 msgstr "Pullup / Pulldown"
 
@@ -8929,7 +8933,7 @@ msgid ""
 "Export has been aborted due to an error!\n"
 "See the Log for details."
 msgstr ""
-"L'export a échoué !\n"
+"L'exportation a échoué !\n"
 "Voir le journal pour les détails."
 
 #: export_dialog.cc:280
@@ -8962,16 +8966,16 @@ msgstr "Il y a eu %1 décrochages pendant l'exportation en temps réel."
 
 #: export_dialog.cc:470 export_report.cc:56
 msgid "Export Report/Analysis"
-msgstr "Analyse/Rapport d'export"
+msgstr "Analyse/Rapport d'exportation"
 
 # This one is currently unused (passed to the nag screen which drops it)
 #: export_dialog.cc:481
 msgid "export"
-msgstr "export"
+msgstr "exportation"
 
 #: export_dialog.cc:502
 msgid "Export for Analysis '%3' (timespan %1 of %2)"
-msgstr "Export pour analyse '%3' (période %1 sur %2)"
+msgstr "Exportation pour analyse '%3' (période %1 sur %2)"
 
 #: export_dialog.cc:507
 msgid "Analyzing '%3' (timespan %1 of %2)"
@@ -8999,7 +9003,7 @@ msgstr "Téléversement de \"%3\" (période %1 sur %2)"
 
 #: export_dialog.cc:539
 msgid "Running Post Export Command for '%1'"
-msgstr "Exécution de la commande de post-export pour \"%1\""
+msgstr "Exécution de la commande de post-exportation pour \"%1\""
 
 #: export_dialog.cc:569 export_dialog.cc:571
 msgid "<span color=\"#ffa755\">Error: "
@@ -9027,7 +9031,7 @@ msgstr "Exporter la région"
 
 #: export_dialog.cc:646
 msgid "Stem Export"
-msgstr "Export fragment"
+msgstr "Exportation fragment"
 
 #: export_file_notebook.cc:42
 msgid "Add another format"
@@ -9132,15 +9136,15 @@ msgstr "%1 : ce n'est pas un répertoire valide."
 
 #: export_filename_selector.cc:406
 msgid "Choose export folder"
-msgstr "Choisir le dossier d'export"
+msgstr "Choisir le dossier d'exportation"
 
 #: export_format_dialog.cc:42
 msgid "New Export Format Profile"
-msgstr "Nouveau profil de format d'export"
+msgstr "Nouveau profil de format d'exportation"
 
 #: export_format_dialog.cc:42
 msgid "Edit Export Format Profile"
-msgstr "Édition du profil de format d'export"
+msgstr "Édition du profil de format d'exportation"
 
 #: export_format_dialog.cc:50
 msgid "Label: "
@@ -9184,7 +9188,7 @@ msgid ""
 "Command to run post-export\n"
 "(%f=file path, %d=directory, %b=basename, see tooltip for more):"
 msgstr ""
-"Commande à exécuter après l'export\n"
+"Commande à exécuter après l'exportation\n"
 "(%f=chemin de fichier, %d=dossier, %b=nom de base, détails dans l'info-"
 "bulle) :"
 
@@ -9316,7 +9320,7 @@ msgstr "Encodage"
 
 #: export_format_dialog.cc:328
 msgid "Post Export"
-msgstr "Postexport"
+msgstr "Post exportation"
 
 #: export_format_dialog.cc:622
 msgid "Best (sinc)"
@@ -9530,7 +9534,7 @@ msgstr ""
 
 #: export_report.cc:821
 msgid "Writing Export Analysis Image: %1."
-msgstr "Enregistrement de l'image d'analyse de l'export: %1."
+msgstr "Enregistrement de l'image d'analyse de l'exportation : %1."
 
 #: export_report.cc:918 sfdb_ui.cc:522 trigger_clip_picker.cc:513
 #: trigger_clip_picker.cc:990
@@ -10418,9 +10422,9 @@ msgid ""
 "the session. If any outboard gear is used, a <i>realtime</i> export is "
 "available, to play at normal speed."
 msgstr ""
-"Par défaut, un export plus-rapide-que-le-temps-réel est utilisé pour évaluer "
-"la sonie de la session. Si un équipement externe est utilisé, un export "
-"<i>temps réel</i> est disponible, pour jouer à vitesse normale."
+"Par défaut, une exportation plus-rapide-que-le-temps-réel est utilisé pour "
+"évaluer la sonie de la session. Si un équipement externe est utilisé, un "
+"export <i>temps réel</i> est disponible, pour jouer à vitesse normale."
 
 #: loudness_dialog.cc:503
 msgid ""
@@ -10928,7 +10932,7 @@ msgstr "Rogneur de région MIDI :"
 
 #: midi_export_dialog.cc:37
 msgid "Export MIDI: %1"
-msgstr "Export MIDI : %1"
+msgstr "Exportation MIDI : %1"
 
 #: midi_list_editor.cc:57 trigger_ui.cc:720
 msgid "Whole"
@@ -12394,7 +12398,7 @@ msgstr "Je suis déjà abonné !"
 
 #: nag.cc:45
 msgid "Ask about this the next time I export"
-msgstr "Me demander lors du prochain export"
+msgstr "Me demander lors de la prochaine exportation"
 
 #: nag.cc:46
 msgid "Never ever ask me about this again"
@@ -12414,7 +12418,7 @@ msgid ""
 "happen if you choose not to do so. However Ardour's continuing development\n"
 "relies on a stable, sustainable income stream. Thanks for using Ardour!"
 msgstr ""
-"Félicitations pour votre export de session.\n"
+"Félicitations pour votre exportation de session.\n"
 "\n"
 "Il semblerait que vous soyez déjà abonné. Si c'est le cas,\n"
 "merci et désolé de vous avoir importuné avec ça.\n"
@@ -12439,7 +12443,7 @@ msgid ""
 "development\n"
 "relies on a stable, sustainable income stream. Thanks for using Ardour!"
 msgstr ""
-"Félicitations pour votre export de session.\n"
+"Félicitations pour votre exportation de session.\n"
 "\n"
 "J'espère qu'Ardour vous convient. Si c'est le cas,\n"
 "merci d'envisager un soutien à l'effort de développement\n"
@@ -14790,11 +14794,11 @@ msgstr "Dossier cache pour le clips Freesound téléchargés :"
 
 #: rc_option_editor.cc:2459
 msgid "Save loudness analysis as image file after export"
-msgstr "Enregistrer une image de l'analyse de la sonie après l'export"
+msgstr "Enregistrer une image de l'analyse de la sonie après l'exportation"
 
 #: rc_option_editor.cc:2467
 msgid "Save Mixer screenshot after export"
-msgstr "Enregistrer une image de la console après l'export"
+msgstr "Enregistrer une image de la console après l'exportation"
 
 #: rc_option_editor.cc:2473
 msgid "New Version Check"
@@ -18673,6 +18677,7 @@ msgid "60"
 msgstr "60"
 
 #: session_option_editor.cc:70
+#, fuzzy
 msgid "Pull-up / pull-down"
 msgstr "Pull-up / pull-down"
 
@@ -18757,6 +18762,7 @@ msgstr ""
 "temps et le contrôle vidéo."
 
 #: session_option_editor.cc:135
+#, fuzzy
 msgid ""
 "Apply Pull-Up/Down to Video Timeline and Video Monitor (Unless using JACK-"
 "sync)."
@@ -18856,9 +18862,10 @@ msgstr "Préfixer le nom de la prise"
 msgid "Adds the Take Name to the beginning of the recorded file name."
 msgstr "Ajoute le nom de la prise au début du nom de fichier enregistré."
 
+# Ajout d'un espace -> il y a un signe de ponctuation qui nécessite un espace.
 #: session_option_editor.cc:253
 msgid "Take Name"
-msgstr "Nom de prise"
+msgstr "Nom de prise "
 
 #: session_option_editor.cc:267
 msgid ""
@@ -19372,7 +19379,7 @@ msgstr "<b>Noms de pistes MIDI :</b>"
 
 #: sfdb_ui.cc:1961
 msgid "<b>Audio conversion quality:</b>"
-msgstr "<b>Qualité de conversion ausio :</b>"
+msgstr "<b>Qualité de conversion audio :</b>"
 
 #: sfdb_ui.cc:1982 sfdb_ui.cc:2101
 msgid "Best"
@@ -19452,7 +19459,7 @@ msgstr "Exportation Surround Master"
 
 #: simple_export_dialog.cc:47
 msgid "Quick Audio Export"
-msgstr "Export audio rapide"
+msgstr "Exportation audio rapide"
 
 #: simple_export_dialog.cc:88
 msgid "Open the folder where files are exported"
@@ -19491,12 +19498,12 @@ msgid ""
 "Export has been aborted due to an error!\n"
 "See the Log window for details."
 msgstr ""
-"L'export a échoué !\n"
+"L'exportation a échoué !\n"
 "Regardez les journaux pour plus d'informations."
 
 #: simple_export_dialog.cc:347
 msgid "Running Post-Export Command for '%1'"
-msgstr "Exécution de la commande de post-export pour '%1'"
+msgstr "Exécution de la commande de post-exportation pour '%1'"
 
 #: slot_properties_box.cc:76
 msgid "Slot Properties:"
@@ -21450,7 +21457,8 @@ msgid ""
 msgstr ""
 "Aucune installation de ffmpeg n'a été trouvée sur ce système.\n"
 "%1 requiert ffmpeg et ffprobe de ffmpeg.org - version 1.1 au minimum.\n"
-"L'import et export vidéo sont impossibles sans installer ces outils.\n"
+"L'importation et exportation vidéo sont impossibles sans installer ces "
+"outils.\n"
 "\n"
 "Les outils sont inclus dans les versions %1 d'ardour.org et sont aussi "
 "disponibles à http://x42.github.com/harvid/\n"
@@ -21681,7 +21689,7 @@ msgstr "Impossible de créer le dossier vidéo \"%1\" (%2)"
 
 #: export_video_dialog.cc:67
 msgid "Export Video File "
-msgstr "Export du fichier vidéo "
+msgstr "Exportation du fichier vidéo "
 
 #: export_video_dialog.cc:74
 msgid "Video:"
@@ -21704,8 +21712,8 @@ msgid ""
 "ffmpeg installation was not found. Video Export is not possible. See the Log "
 "window for more information."
 msgstr ""
-"ffmpeg n'a pas été trouvé. Export vidéo impossible. Voir la fenêtre Journal "
-"pour plus d'information."
+"ffmpeg n'a pas été trouvé. Exportation vidéo impossible. Voir la fenêtre "
+"Journal pour plus d'information."
 
 #: export_video_dialog.cc:112
 msgid "Output (file extension defines format)"
@@ -21816,12 +21824,12 @@ msgid ""
 "Export Video: Cannot query duration of video-file, using duration from "
 "timeline instead."
 msgstr ""
-"Export vidéo : impossible de récupérer la durée du fichier vidéo, "
+"Exportation vidéo : impossible de récupérer la durée du fichier vidéo, "
 "utilisation de la durée de la ligne de temps."
 
 #: export_video_dialog.cc:574
 msgid "Export Video: The export-range does not include video."
-msgstr "Export vidéo : la plage d'export ne comprend pas la vidéo."
+msgstr "Exportation vidéo : la plage d'exportation ne comprend pas la vidéo."
 
 #: export_video_dialog.cc:582
 msgid ""
@@ -21830,15 +21838,15 @@ msgid ""
 "intended result.\n"
 "Continue anyway?"
 msgstr ""
-"La plage d'export est plus longue que le fichier vidéo. Pour ajouter des "
-"images noires, la vidéo doit être encodée. Copier le codec peut échouer ou "
-"ne pas produire le résultat escompté.\n"
+"La plage d'exportation est plus longue que le fichier vidéo. Pour ajouter "
+"des images noires, la vidéo doit être encodée. Copier le codec peut échouer "
+"ou ne pas produire le résultat escompté.\n"
 "Continuer quand même ?"
 
 #: export_video_dialog.cc:608
 msgid "Export Video: No Master Out Ports to Connect for Audio Export"
 msgstr ""
-"Export vidéo : aucun port de sortie principal auquel se connecter pour "
+"Exportation vidéo : aucun port de sortie principal auquel se connecter pour "
 "l'export audio"
 
 #: export_video_dialog.cc:655
@@ -21847,7 +21855,7 @@ msgstr "Encodage vidéo..."
 
 #: export_video_dialog.cc:676
 msgid "Export Video: Video input file cannot be read."
-msgstr "Export vidéo : le fichier vidéo d'entrée ne peut être lu."
+msgstr "Exportation vidéo : le fichier vidéo d'entrée ne peut être lu."
 
 #: export_video_dialog.cc:777
 msgid "Transcoding failed."
