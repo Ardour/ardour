@@ -2334,7 +2334,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 					uint32_t f = 1; // at least one. e.g. control data filters, no in, no out.
 					for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 						uint32_t nout = outputs.get (*t);
-						if (nout == 0 || inx.get(*t) == 0) { continue; }
+						if (nout == 0 || inx.get(*t) == 0 || nout == 0) { continue; }
 						f = max (f, (uint32_t) ceil (inx.get(*t) / (float)nout));
 					}
 					out = inx;
@@ -2386,7 +2386,7 @@ PluginInsert::internal_can_support_io_configuration (ChanCount const & inx, Chan
 	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		uint32_t nin = ns_inputs.get (*t);
 		uint32_t nout = outputs.get (*t);
-		if (nin == 0 || inx.get(*t) == 0) { continue; }
+		if (nin == 0 || inx.get(*t) == 0 || nout == 0) { continue; }
 		// prefer floor() so the count won't overly increase IFF (nin < nout)
 		f = max (f, (uint32_t) floor (inx.get(*t) / (float)nout));
 	}
