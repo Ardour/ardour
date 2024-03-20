@@ -32,6 +32,7 @@ public:
 		SmallScreen,
 		SinglePackage,
 		Mixbus,
+		LiveTrax,
 		LastElement,
 	};
 
@@ -43,6 +44,9 @@ public:
 
     bool get_mixbus() const { return bits[Mixbus]; }
     void set_mixbus() { bits[Mixbus] = true; }
+
+    bool get_livetrax() const { return bits[LiveTrax]; }
+    void set_livetrax() { bits[LiveTrax] = true; }
 
     void set_single_package () { bits[SinglePackage] = true; }
     bool get_single_package () const { return bits[SinglePackage]; }
