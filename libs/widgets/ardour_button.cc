@@ -53,6 +53,7 @@ using namespace std;
 ArdourButton::Element ArdourButton::default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Text);
 ArdourButton::Element ArdourButton::led_default_elements = ArdourButton::Element (ArdourButton::default_elements|ArdourButton::Indicator);
 ArdourButton::Element ArdourButton::just_led_default_elements = ArdourButton::Element (ArdourButton::Edge|ArdourButton::Body|ArdourButton::Indicator);
+ArdourButton::Tweaks  ArdourButton::default_tweaks = ArdourButton::Tweaks (0);
 
 ArdourButton::ArdourButton (Element e, bool toggle)
 	: _markup (false)
@@ -60,7 +61,7 @@ ArdourButton::ArdourButton (Element e, bool toggle)
 	, _icon (ArdourIcon::NoIcon)
 	, _icon_render_cb (0)
 	, _icon_render_cb_data (0)
-	, _tweaks (Tweaks (0))
+	, _tweaks (default_tweaks)
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
 	, _char_avg_pixel_width (0)
@@ -108,7 +109,7 @@ ArdourButton::ArdourButton (const std::string& str, Element e, bool toggle)
 	: _markup (false)
 	, _elements (e)
 	, _icon (ArdourIcon::NoIcon)
-	, _tweaks (Tweaks (0))
+	, _tweaks (default_tweaks)
 	, _char_pixel_width (0)
 	, _char_pixel_height (0)
 	, _char_avg_pixel_width (0)
@@ -300,22 +301,25 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	}
 
 	void (*rounded_function)(cairo_t*, double, double, double, double, double);
-
-	switch (_corner_mask) {
-	case 0x1: /* upper left only */
-		rounded_function = Gtkmm2ext::rounded_top_left_rectangle;
-		break;
-	case 0x2: /* upper right only */
-		rounded_function = Gtkmm2ext::rounded_top_right_rectangle;
-		break;
-	case 0x3: /* upper only */
-		rounded_function = Gtkmm2ext::rounded_top_rectangle;
-		break;
-		/* should really have functions for lower right, lower left,
-		   lower only, but for now, we don't
-		*/
-	default:
-		rounded_function = Gtkmm2ext::rounded_rectangle;
+	if (corner_radius) {
+		switch (_corner_mask) {
+		case 0x1: /* upper left only */
+			rounded_function = Gtkmm2ext::rounded_top_left_rectangle;
+			break;
+		case 0x2: /* upper right only */
+			rounded_function = Gtkmm2ext::rounded_top_right_rectangle;
+			break;
+		case 0x3: /* upper only */
+			rounded_function = Gtkmm2ext::rounded_top_rectangle;
+			break;
+			/* should really have functions for lower right, lower left,
+			   lower only, but for now, we don't
+			*/
+		default:
+			rounded_function = Gtkmm2ext::rounded_rectangle;
+		}
+	} else {
+		rounded_function = Gtkmm2ext::rectangle;
 	}
 
 	// draw edge (filling a rect underneath, rather than stroking a border on top, allows the corners to be lighter-weight.
