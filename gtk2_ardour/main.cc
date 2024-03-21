@@ -51,6 +51,7 @@
 #include "ardour/revision.h"
 #include "ardour/ardour.h"
 #include "ardour/audioengine.h"
+#include "ardour/profile.h"
 #include "ardour/session_utils.h"
 #include "ardour/filesystem_paths.h"
 
@@ -455,6 +456,15 @@ int main (int argc, char *argv[])
 	if (UIConfiguration::instance().pre_gui_init ()) {
 		error << _("Could not complete pre-GUI initialization") << endmsg;
 		exit (EXIT_FAILURE);
+	}
+
+
+	if (g_getenv ("MIXBUS")) {
+		ARDOUR::Profile->set_mixbus ();
+	}
+
+	if (g_getenv ("LIVETRAX")) {
+		ARDOUR::Profile->set_livetrax ();
 	}
 
 	try {

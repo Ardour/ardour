@@ -1169,10 +1169,6 @@ private:
 
 	Gtk::Table          edit_packer;
 
-	/** the adjustment that controls the overall editor vertical scroll position */
-	Gtk::Adjustment     vertical_adjustment;
-	Gtk::Adjustment     horizontal_adjustment;
-
 	Gtk::Adjustment     unused_adjustment; // yes, really; Gtk::Layout constructor requires refs
 	Gtk::Layout         controls_layout;
 	bool control_layout_scroll (GdkEventScroll* ev);
@@ -1998,6 +1994,7 @@ private:
 	void build_edit_mode_menu ();
 	Gtk::VBox edit_mode_box;
 
+
 	void set_ripple_mode (ARDOUR::RippleMode);
 
 	void set_edit_mode (ARDOUR::EditMode);
@@ -2073,7 +2070,6 @@ private:
 
 	Gtk::HBox _track_box;
 
-	Gtk::HBox _zoom_box;
 	void zoom_adjustment_changed();
 
 	void setup_toolbar ();

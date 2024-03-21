@@ -125,21 +125,30 @@ TransportControlUI::setup (TransportControlProvider* ui)
 
 #undef PX_SCALE
 
-	if (!ARDOUR::Profile->get_mixbus()) {
-		pack_start (midi_panic_button, true, true, 0);
+	if (!ARDOUR::Profile->get_livetrax()) {
+		if (!ARDOUR::Profile->get_mixbus()) {
+			pack_start (midi_panic_button, true, true, 0);
+		} else {
+			pack_start (midi_panic_button, true, true, 3);
+		}
+		pack_start (click_button, true, true, 0);
+		pack_start (goto_start_button, true, true);
+		pack_start (goto_end_button, true, true);
+		pack_start (auto_loop_button, true, true);
+		if (!ARDOUR::Profile->get_mixbus()) {
+			pack_start (play_selection_button, true, true);
+		}
+		pack_start (roll_button, true, true);
+		pack_start (stop_button, true, true);
+		pack_start (rec_button, true, true, 3);
 	} else {
-		pack_start (midi_panic_button, true, true, 3);
+		pack_start (goto_start_button, true, true);
+		pack_start (goto_end_button, true, true);
+		pack_start (roll_button, true, true);
+		pack_start (stop_button, true, true);
+		pack_start (rec_button, true, true, 3);
+		pack_start (auto_loop_button, true, true);
 	}
-	pack_start (click_button, true, true, 0);
-	pack_start (goto_start_button, true, true);
-	pack_start (goto_end_button, true, true);
-	pack_start (auto_loop_button, true, true);
-	if (!ARDOUR::Profile->get_mixbus()) {
-		pack_start (play_selection_button, true, true);
-	}
-	pack_start (roll_button, true, true);
-	pack_start (stop_button, true, true);
-	pack_start (rec_button, true, true, 3);
 
 	roll_button.set_name ("transport button");
 	stop_button.set_name ("transport button");

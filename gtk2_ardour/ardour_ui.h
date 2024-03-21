@@ -176,6 +176,7 @@ class NSM_Client;
 class LevelMeterHBox;
 class GUIObjectState;
 class BasicUI;
+class MeterbridgeWidget;
 
 namespace ARDOUR {
 	class ControlProtocolInfo;
@@ -220,6 +221,7 @@ public:
 	void launch_howto_report ();
 	void show_about ();
 	void hide_about ();
+	void open_media_folder ();
 
 	void load_from_application_api (const std::string& path);
 	void finish();
@@ -460,6 +462,7 @@ private:
 
 	int  setup_windows ();
 	void apply_window_settings (bool);
+	void connect_transport_elements ();
 	void setup_transport ();
 	void setup_clock ();
 
@@ -630,6 +633,15 @@ private:
 	TimeInfoBox* livetrax_time_info_box;
 	ArdourWidgets::ArdourButton* livetrax_multi_out_button;
 	ArdourWidgets::ArdourButton* livetrax_stereo_out_button;
+	ArdourWidgets::ArdourButton* livetrax_meter_view_button;
+	ArdourWidgets::ArdourButton* livetrax_editor_view_button;
+	ArdourWidgets::ArdourButton* livetrax_mixer_view_button;
+	ArdourWidgets::ArdourButton* livetrax_lock_button;
+	ArdourWidgets::ArdourButton* livetrax_view_in_folder_button;
+	Gtk::HScrollbar* livetrax_edit_hscrollbar;
+	Gtk::VScrollbar* livetrax_edit_vscrollbar;
+	Gtk::HScrollbar* livetrax_mix_hscrollbar;
+	Gtk::HBox        livetrax_meter_box;
 	int livetrax_setup_windows ();
 
 	/* menu bar and associated stuff */

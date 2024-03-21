@@ -102,6 +102,7 @@
 #include "ardour/session_directory.h"
 #include "ardour/session_route.h"
 #include "ardour/source_factory.h"
+#include "ardour/system_exec.h"
 #include "ardour/transport_master.h"
 #include "ardour/transport_master_manager.h"
 #include "ardour/triggerbox.h"
@@ -3197,3 +3198,26 @@ ARDOUR_UI::stop_cues (int col, bool immediately)
 	_basic_ui->trigger_stop_col (col, immediately);
 }
 
+
+void
+ARDOUR_UI::open_media_folder ()
+{
+	if (!_session) {
+		return;
+	}
+
+	ARDOUR::SystemExec* cmd;
+
+#if defined (PLATFORM_WINDOWS)
+	cmd = new ARDOUR::SystemExec ("open", _session->session_directory().sound_path());
+#elif defined (__APPLE__)
+	cmd = new ARDOUR::SystemExec ("open", _session->session_directory().sound_path());
+#else
+	cmd = new ARDOUR::SystemExec ("xdg-open", _session->session_directory().sound_path());
+#endif
+
+	if (cmd->start ()) {
+		std::cerr << "Could not start file browser on " << _session->session_directory().sound_path() << std::endl;
+		error << "Could not start file browser on " << _session->session_directory().sound_path() << endmsg;
+	}
+}

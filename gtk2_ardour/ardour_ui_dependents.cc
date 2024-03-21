@@ -51,6 +51,7 @@
 #include "luainstance.h"
 #include "luawindow.h"
 #include "main_clock.h"
+#include "meterbridge.h"
 #include "mixer_ui.h"
 #include "recorder_ui.h"
 #include "trigger_page.h"
@@ -395,6 +396,7 @@ ARDOUR_UI::livetrax_setup_windows ()
 
 	Gtk::Label* l;
 	Gtk::VBox* vb;
+	Gtk::HBox* hb;
 
 	livetrax_top_bar.set_spacing (12);
 	livetrax_top_bar.set_border_width (12);
@@ -416,8 +418,8 @@ ARDOUR_UI::livetrax_setup_windows ()
 
 	livetrax_top_bar.pack_end (*vb, false, false);
 
-	livetrax_multi_out_button = manage (new ArdourWidgets::ArdourButton (_("Multi Out")));
-	livetrax_stereo_out_button = manage (new ArdourWidgets::ArdourButton (_("Stereo Out")));
+	livetrax_multi_out_button = manage (new ArdourButton (_("Multi Out")));
+	livetrax_stereo_out_button = manage (new ArdourButton (_("Stereo Out")));
 
 	vb = manage (new Gtk::VBox);
 	vb->pack_start (*livetrax_stereo_out_button, true, true);
@@ -428,15 +430,49 @@ ARDOUR_UI::livetrax_setup_windows ()
 
 	/* transport bar */
 
-	l = new Gtk::Label ("this is the transport bar with other controls too");
-	livetrax_transport_bar.pack_start (*l, true, true);
+	ArdourButton::Element elements (ArdourButton::Element (ArdourButton::Text|ArdourButton::VectorIcon));
+
+	livetrax_meter_view_button = manage (new ArdourButton (_("Meter Logo"), elements));
+	livetrax_mixer_view_button = manage (new ArdourButton (_("Meter Logo"), elements));
+	livetrax_editor_view_button = manage (new ArdourButton (_("Meter Logo"), elements));
+
+	livetrax_transport_bar.pack_start (*livetrax_editor_view_button, false, false);
+	livetrax_transport_bar.pack_start (*livetrax_mixer_view_button, false, false);
+	livetrax_transport_bar.pack_start (*livetrax_meter_view_button, false, false);
+
+	hb = manage (new Gtk::HBox);
+	hb->pack_start (transport_ctrl, false, false);
+
+	livetrax_lock_button = manage (new ArdourButton (_("Lock Icon"), elements));
+	editor->mouse_mode_hbox->pack_start (*livetrax_lock_button, false, false, 12);
+
+	livetrax_transport_bar.pack_start (*hb, true, false);
+	livetrax_transport_bar.pack_start (*editor->mouse_mode_hbox, true, false);
+
+	livetrax_view_in_folder_button = manage (new ArdourButton (_("Folder Icon"), elements));
+	editor->_zoom_box.pack_start (*livetrax_view_in_folder_button, false, false, 12);
+
+	livetrax_transport_bar.pack_start (editor->_zoom_box, true, false);
+	livetrax_transport_bar.show_all ();
 
 	/* meter display */
 
-	l = new Gtk::Label ("this is the meter display");
+	l = manage (new Gtk::Label ("meter area"));
 	livetrax_meter_bar.pack_start (*l, true, true);
 
-	livetrax_editor_bar.pack_start (editor->contents(), true, true);
+	hb = manage (new Gtk::HBox);
+	livetrax_edit_vscrollbar = manage (new Gtk::VScrollbar (editor->vertical_adjustment));
+	livetrax_edit_vscrollbar->show ();
+	hb->pack_start (editor->contents(), true, true);
+	hb->pack_start (*livetrax_edit_vscrollbar, false, false);
+
+	vb = manage (new Gtk::VBox);
+	livetrax_edit_hscrollbar = manage (new Gtk::HScrollbar (editor->horizontal_adjustment));
+	livetrax_edit_hscrollbar->show ();
+	vb->pack_start (*hb, true, true);
+	vb->pack_start (*livetrax_edit_hscrollbar, false, false);
+	livetrax_editor_bar.pack_start (*vb, true, true);
+
 	livetrax_mixer_bar.pack_start (mixer->contents(), true, true);
 
 	we_have_dependents ();
@@ -449,6 +485,9 @@ ARDOUR_UI::livetrax_setup_windows ()
 	main_vpacker.pack_start (livetrax_meter_bar, false, false);
 	main_vpacker.pack_start (livetrax_editor_bar, true, true);
 	main_vpacker.pack_start (livetrax_mixer_bar, true, true);
+
+	connect_transport_elements ();
+	setup_tooltips ();
 
 	// setup_tooltips ();
 

@@ -317,7 +317,7 @@ ARDOUR_UI::update_clock_visibility ()
 }
 
 void
-ARDOUR_UI::setup_transport ()
+ARDOUR_UI::connect_transport_elements ()
 {
 	RefPtr<Action> act;
 	/* setup actions */
@@ -360,6 +360,12 @@ ARDOUR_UI::setup_transport ()
 	act = ActionManager::get_action (X_("Monitor Section"), X_("monitor-cut-all"));
 	monitor_mute_button.set_related_action (act);
 
+	if (Profile->get_livetrax()) {
+		act = ActionManager::get_action (X_("Common"), X_("open-media-folder"));
+		std::cerr << "Connecting open media with " << act.get() << std::endl;
+		livetrax_view_in_folder_button->set_related_action (act);
+	}
+
 	act = ActionManager::get_action ("Main", "ToggleLatencyCompensation");
 	latency_disable_button.set_related_action (act);
 
@@ -375,6 +381,12 @@ ARDOUR_UI::setup_transport ()
 	secondary_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::secondary_clock_value_changed));
 	secondary_clock->change_display_delta_mode_signal.connect (sigc::mem_fun(UIConfiguration::instance(), &UIConfiguration::set_secondary_clock_delta_mode));
 	big_clock->ValueChanged.connect (sigc::mem_fun(*this, &ARDOUR_UI::big_clock_value_changed));
+}
+
+void
+ARDOUR_UI::setup_transport ()
+{
+	connect_transport_elements ();
 
 	editor_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), editor));
 	mixer_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), mixer));
@@ -1060,4 +1072,3 @@ ARDOUR_UI::update_title ()
 	}
 	snapshot_name_label.set_markup (snap_label.str());
 }
-

@@ -117,12 +117,6 @@ ARDOUR_UI::setup_profile ()
 	if (gdk_screen_width() < 1200 || getenv ("ARDOUR_NARROW_SCREEN")) {
 		Profile->set_small_screen ();
 	}
-
-	if (g_getenv ("MIXBUS")) {
-		Profile->set_mixbus ();
-	}
-
-	Profile->set_livetrax ();
 }
 
 int

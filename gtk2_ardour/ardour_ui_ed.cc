@@ -299,6 +299,7 @@ ARDOUR_UI::install_actions ()
 	ActionManager::register_action (common_actions, X_("website-dev"), _("Development"), mem_fun(*this, &ARDOUR_UI::launch_website_dev));
 	ActionManager::register_action (common_actions, X_("forums"), _("User Forums"), mem_fun(*this, &ARDOUR_UI::launch_forums));
 	ActionManager::register_action (common_actions, X_("howto-report"), _("How to Report a Bug"), mem_fun(*this, &ARDOUR_UI::launch_howto_report));
+	ActionManager::register_action (common_actions, X_("open-media-folder"), _("Open Media Folder"),  mem_fun(*this, &ARDOUR_UI::open_media_folder));
 
 	act = ActionManager::register_action (common_actions, X_("Save"), _("Save"),  sigc::hide_return (sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::save_state), string(""), false)));
 	ActionManager::session_sensitive_actions.push_back (act);

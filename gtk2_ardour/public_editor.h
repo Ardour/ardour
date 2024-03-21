@@ -602,6 +602,11 @@ public:
 	Gtkmm2ext::Bindings* bindings;
 
 	virtual SelectionPropertiesBox& properties_box() const = 0;
+	Gtk::HBox* mouse_mode_hbox;
+	Gtk::HBox _zoom_box;
+	/** the adjustment that controls the overall editor vertical scroll position */
+	Gtk::Adjustment  vertical_adjustment;
+	Gtk::Adjustment  horizontal_adjustment;
 
 protected:
 	friend class DisplaySuspender;

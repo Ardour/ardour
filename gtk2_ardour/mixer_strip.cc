@@ -154,7 +154,7 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, std::shared_ptr<Route> rt, 
 	, gpm (sess, 250)
 	, panners (sess)
 	, trigger_display (-1., 8*16.)
-	, button_size_group (Gtk::SizeGroup::create (Gtk::SIZE_GROUP_HORIZONTAL))
+	, button_size_group (Gtk::SizeGroup::create (ARDOUR::Profile->get_livetrax() ? Gtk::SIZE_GROUP_BOTH : Gtk::SIZE_GROUP_HORIZONTAL))
 	, rec_mon_table (2, 2)
 	, solo_iso_table (1, 2)
 	, mute_solo_table (1, 2)
@@ -237,10 +237,16 @@ MixerStrip::init ()
 	rec_mon_table.set_homogeneous (true);
 	rec_mon_table.set_row_spacings (2);
 	rec_mon_table.set_col_spacings (2);
-	if (ARDOUR::Profile->get_mixbus()) {
-		rec_mon_table.resize (1, 3);
+
+	if (ARDOUR::Profile->get_livetrax()) {
+		rec_mon_table.resize (1, 2);
 		rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
-		rec_mon_table.attach (*monitor_disk_button, 2, 3, 0, 1);
+	} else {
+		if (ARDOUR::Profile->get_mixbus()) {
+			rec_mon_table.resize (1, 3);
+			rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
+			rec_mon_table.attach (*monitor_disk_button, 2, 3, 0, 1);
+		}
 	}
 	rec_mon_table.show ();
 
@@ -324,23 +330,31 @@ MixerStrip::init ()
 	set_tooltip (&number_label, _("Double-click to edit the route color.\nRight-click to show the route operations context menu."));
 
 	global_vpacker.set_spacing (2);
-	global_vpacker.pack_start (width_hide_box, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (input_button_box, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (invert_button_box, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (trigger_display, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (_tmaster_widget, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (processor_box, true, true);
+	if (!Profile->get_livetrax()) {
+		global_vpacker.pack_start (width_hide_box, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (input_button_box, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (invert_button_box, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (trigger_display, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (_tmaster_widget, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (processor_box, true, true);
+	}
 	global_vpacker.pack_start (panners, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (rec_mon_table, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (master_volume_table, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (solo_iso_table, Gtk::PACK_SHRINK);
+	if (!Profile->get_livetrax()) {
+		global_vpacker.pack_start (master_volume_table, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (solo_iso_table, Gtk::PACK_SHRINK);
+	}
 	global_vpacker.pack_start (mute_solo_table, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (gpm, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (control_slave_ui, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (bottom_button_table, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
-	global_vpacker.pack_start (_comment_button, Gtk::PACK_SHRINK);
+	if (!Profile->get_livetrax()) {
+		global_vpacker.pack_start (control_slave_ui, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (bottom_button_table, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (_comment_button, Gtk::PACK_SHRINK);
+	} else {
+		global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
+	}
 
 #ifndef MIXBUS
 	//add a spacer underneath the master bus;
@@ -702,15 +716,19 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 
 	if (is_track ()) {
 
-		rec_mon_table.attach (*rec_enable_button, 0, 1, 0, ARDOUR::Profile->get_mixbus() ? 1 : 2);
+		rec_mon_table.attach (*rec_enable_button, 0, 1, 0, (ARDOUR::Profile->get_mixbus()|ARDOUR::Profile->get_livetrax()) ? 1 : 2);
 		rec_enable_button->show();
 
-		if (ARDOUR::Profile->get_mixbus()) {
+		if (ARDOUR::Profile->get_livetrax()) {
 			rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
-			rec_mon_table.attach (*monitor_disk_button, 2, 3, 0, 1);
 		} else {
-			rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
-			rec_mon_table.attach (*monitor_disk_button, 1, 2, 1, 2);
+			if (ARDOUR::Profile->get_mixbus()) {
+				rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
+				rec_mon_table.attach (*monitor_disk_button, 2, 3, 0, 1);
+			} else {
+				rec_mon_table.attach (*monitor_input_button, 1, 2, 0, 1);
+				rec_mon_table.attach (*monitor_disk_button, 1, 2, 1, 2);
+			}
 		}
 
 	} else {

@@ -347,8 +347,6 @@ Editor::Editor ()
 	, videotl_group (0)
 	, _region_boundary_cache_dirty (true)
 	, edit_packer (4, 4, true)
-	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
-	, horizontal_adjustment (0.0, 0.0, 1e16)
 	, unused_adjustment (0.0, 0.0, 10.0, 400.0)
 	, controls_layout (unused_adjustment, vertical_adjustment)
 	, _scroll_callbacks (0)
@@ -3308,7 +3306,7 @@ Editor::setup_toolbar ()
 	mode_box->set_spacing(2);
 
 	HBox* mouse_mode_box = manage (new HBox);
-	HBox* mouse_mode_hbox = manage (new HBox);
+	mouse_mode_hbox = manage (new HBox);
 	VBox* mouse_mode_vbox = manage (new VBox);
 	Alignment* mouse_mode_align = manage (new Alignment);
 
@@ -3351,7 +3349,9 @@ Editor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (nudge_backward_button);
 
 	mouse_mode_hbox->set_spacing (2);
-	mouse_mode_hbox->pack_start (smart_mode_button, false, false);
+	if (!Profile->get_livetrax()) {
+		mouse_mode_hbox->pack_start (smart_mode_button, false, false);
+	}
 
 	mouse_mode_hbox->pack_start (mouse_move_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_select_button, false, false);
@@ -3360,10 +3360,15 @@ Editor::setup_toolbar ()
 
 	mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_grid_button, false, false);
-	mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
-	mouse_mode_hbox->pack_start (mouse_content_button, false, false);
 
-	mouse_mode_vbox->pack_start (*mouse_mode_hbox);
+	if (!Profile->get_livetrax()) {
+		mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
+		mouse_mode_hbox->pack_start (mouse_content_button, false, false);
+	}
+
+	if (!Profile->get_livetrax()) {
+		mouse_mode_vbox->pack_start (*mouse_mode_hbox);
+	}
 
 	mouse_mode_align->add (*mouse_mode_vbox);
 	mouse_mode_align->set (0.5, 1.0, 0.0, 0.0);
@@ -3379,7 +3384,9 @@ Editor::setup_toolbar ()
 	mode_box->pack_start (edit_point_selector, false, false);
 	mode_box->pack_start (*(manage (new ArdourVSpacer ())), false, false, 3);
 
-	mode_box->pack_start (*mouse_mode_box, false, false);
+	if (!Profile->get_livetrax()) {
+		mode_box->pack_start (*mouse_mode_box, false, false);
+	}
 
 	/* Zoom */
 
@@ -3532,7 +3539,9 @@ Editor::setup_toolbar ()
 	toolbar_hbox.pack_start (grid_box, false, false);
 	toolbar_hbox.pack_start (_draw_box_spacer, false, false, 3);
 	toolbar_hbox.pack_start (draw_box, false, false);
-	toolbar_hbox.pack_end (_zoom_box, false, false, 2);
+	if (!Profile->get_livetrax()) {
+		toolbar_hbox.pack_end (_zoom_box, false, false, 2);
+	}
 	toolbar_hbox.pack_end (*(manage (new ArdourVSpacer ())), false, false, 3);
 	toolbar_hbox.pack_end (_track_box, false, false);
 

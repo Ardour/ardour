@@ -35,6 +35,8 @@ ARDOUR::DataType PublicEditor::pbdid_dragged_dt = ARDOUR::DataType::NIL;
 
 PublicEditor::PublicEditor (Gtk::Widget& content)
 	: Tabbable (content, _("Editor"), X_("editor"))
+	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
+	, horizontal_adjustment (0.0, 0.0, 1e16)
 {
 	_suspend_route_redisplay_counter.store (0);
 }

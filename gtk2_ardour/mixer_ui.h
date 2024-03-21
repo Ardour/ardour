@@ -169,6 +169,8 @@ public:
 
 	void toggle_monitor_action (ARDOUR::MonitorChoice monitor_choice, bool group_override = false, bool all = false);
 
+	Gtk::ScrolledWindow   scroller;
+
 protected:
 	void set_axis_targets_for_operation ();
 	PBD::ControllableSet selected_gaincontrols ();
@@ -179,7 +181,6 @@ private:
 	Gtk::VBox            _content;
 	Gtk::HBox             global_hpacker;
 	Gtk::VBox             global_vpacker;
-	Gtk::ScrolledWindow   scroller;
 	Gtk::EventBox         scroller_base;
 	Gtk::HBox             scroller_hpacker;
 	Gtk::VBox             mixer_scroller_vpacker;

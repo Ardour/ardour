@@ -150,6 +150,8 @@ MeterStrip::MeterStrip (Session* sess, std::shared_ptr<ARDOUR::Route> rt)
 		meter_width = 12;
 	}
 
+	meter_width = 30;
+
 	// level meter + ticks
 	level_meter = new LevelMeterHBox(sess);
 	level_meter->set_meter (_route->shared_peak_meter().get());
@@ -457,6 +459,7 @@ MeterStrip::on_theme_changed()
 		if (_route->shared_peak_meter()->input_streams().n_total() == 1) {
 			meter_width = 12;
 		}
+		meter_width = 30;
 		level_meter->setup_meters (220, meter_width, 6);
 	}
 }
