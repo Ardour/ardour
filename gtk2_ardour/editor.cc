@@ -3358,10 +3358,10 @@ Editor::setup_toolbar ()
 
 	mouse_mode_hbox->pack_start (mouse_cut_button, false, false);
 
-	mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
-	mouse_mode_hbox->pack_start (mouse_grid_button, false, false);
 
 	if (!Profile->get_livetrax()) {
+		mouse_mode_hbox->pack_start (mouse_timefx_button, false, false);
+		mouse_mode_hbox->pack_start (mouse_grid_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
 		mouse_mode_hbox->pack_start (mouse_content_button, false, false);
 	}

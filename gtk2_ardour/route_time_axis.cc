@@ -182,85 +182,121 @@ RouteTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	playlist_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::playlist_click), false);
 	automation_button.signal_button_press_event().connect (sigc::mem_fun(*this, &RouteTimeAxisView::automation_click), false);
 
-	if (is_track()) {
+	if (Profile->get_livetrax()) {
 
-		if (ARDOUR::Profile->get_mixbus()) {
-			controls_table.attach (*rec_enable_button, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		} else {
-			controls_table.attach (*rec_enable_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		}
+		monitor_input_button->show ();
 
-		if (is_midi_track()) {
-			set_tooltip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
-			gm.set_fader_name ("MidiTrackFader");
-		} else {
-			set_tooltip(*rec_enable_button, _("Record"));
-			gm.set_fader_name ("AudioTrackFader");
-		}
+		controls_table.attach (number_label, 0, 1, 0, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (*rec_enable_button, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (*monitor_input_button, 4, 5, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (*mute_button, 3, 4, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		controls_table.attach (*solo_button, 4, 5, 1, 2, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 
-		/* set playlist button tip to the current playlist, and make it update when it changes */
-		update_playlist_tip ();
-		track()->PlaylistChanged.connect (*this, invalidator (*this), ui_bind(&RouteTimeAxisView::update_playlist_tip, this), gui_context());
+		controls_button_size_group->add_widget(*mute_button);
+		controls_button_size_group->add_widget(*solo_button);
+		controls_button_size_group->add_widget(*monitor_input_button);
+		controls_button_size_group->add_widget(*rec_enable_button);
 
-	} else {
-		gm.set_fader_name ("AudioBusFader");
-		Gtk::Fixed *blank = manage(new Gtk::Fixed());
-		controls_button_size_group->add_widget(*blank);
-		if (ARDOUR::Profile->get_mixbus() ) {
-			controls_table.attach (*blank, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		} else {
-			controls_table.attach (*blank, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		}
-		blank->show();
-	}
-
-	top_hbox.pack_end(gm.get_level_meter(), false, false, 2);
-
-	if (!ARDOUR::Profile->get_mixbus()) {
 		controls_meters_size_group->add_widget (gm.get_level_meter());
-	}
 
-	if (_route->is_master()) {
-		route_group_button.set_sensitive(false);
-	}
+		top_hbox.pack_end(gm.get_level_meter(), false, false, 2);
 
-	_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
-	_route->input()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
-	_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
-	_route->track_number_changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::label_view, this), gui_context());
-
-	if (ARDOUR::Profile->get_mixbus()) {
-		controls_table.attach (*mute_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
 	} else {
-		controls_table.attach (*mute_button, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-	}
-	// mute button is always present, it is used to
-	// force the 'blank' placeholders to the proper size
-	controls_button_size_group->add_widget(*mute_button);
 
-	if (!_route->is_master()) {
-		if (ARDOUR::Profile->get_mixbus()) {
-			controls_table.attach (*solo_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		if (is_track()) {
+
+			if (ARDOUR::Profile->get_mixbus()) {
+				controls_table.attach (*rec_enable_button, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+			} else {
+				controls_table.attach (*rec_enable_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+			}
+
+			if (is_midi_track()) {
+				set_tooltip(*rec_enable_button, _("Record (Right-click for Step Edit)"));
+				gm.set_fader_name ("MidiTrackFader");
+			} else {
+				set_tooltip(*rec_enable_button, _("Record"));
+				gm.set_fader_name ("AudioTrackFader");
+			}
+
+			/* set playlist button tip to the current playlist, and make it update when it changes */
+			update_playlist_tip ();
+			track()->PlaylistChanged.connect (*this, invalidator (*this), ui_bind(&RouteTimeAxisView::update_playlist_tip, this), gui_context());
+
 		} else {
-			controls_table.attach (*solo_button, 4, 5, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+			gm.set_fader_name ("AudioBusFader");
+			Gtk::Fixed *blank = manage(new Gtk::Fixed());
+			controls_button_size_group->add_widget(*blank);
+			if (ARDOUR::Profile->get_mixbus() ) {
+				controls_table.attach (*blank, 0, 1, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+			} else {
+				controls_table.attach (*blank, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+			}
+			blank->show();
 		}
-	} else {
-		Gtk::Fixed *blank = manage(new Gtk::Fixed());
-		controls_button_size_group->add_widget(*blank);
-		if (ARDOUR::Profile->get_mixbus()) {
-			controls_table.attach (*blank, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		} else {
-			controls_table.attach (*blank, 4, 5, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		}
-		blank->show();
-	}
 
-	if (ARDOUR::Profile->get_mixbus()) {
-		controls_table.attach (route_group_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		controls_table.attach (gm.get_gain_slider(), 3, 5, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
-	} else {
-		controls_table.attach (route_group_button, 4, 5, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
-		controls_table.attach (gm.get_gain_slider(), 0, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
+		top_hbox.pack_end(gm.get_level_meter(), false, false, 2);
+
+		if (!ARDOUR::Profile->get_mixbus()) {
+			controls_meters_size_group->add_widget (gm.get_level_meter());
+		}
+
+		if (_route->is_master()) {
+			route_group_button.set_sensitive(false);
+		}
+
+		_route->meter_change.connect (*this, invalidator (*this), bind (&RouteTimeAxisView::meter_changed, this), gui_context());
+		_route->input()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
+		_route->output()->changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::io_changed, this, _1, _2), gui_context());
+		_route->track_number_changed.connect (*this, invalidator (*this), boost::bind (&RouteTimeAxisView::label_view, this), gui_context());
+
+		if (ARDOUR::Profile->get_mixbus()) {
+			controls_table.attach (*mute_button, 1, 2, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		} else {
+			controls_table.attach (*mute_button, 3, 4, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+		}
+		// mute button is always present, it is used to
+		// force the 'blank' placeholders to the proper size
+		controls_button_size_group->add_widget(*mute_button);
+
+		if (!_route->is_master()) {
+			if (ARDOUR::Profile->get_mixbus()) {
+				controls_table.attach (*solo_button, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+			} else {
+				controls_table.attach (*solo_button, 4, 5, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+			}
+		} else {
+			Gtk::Fixed *blank = manage(new Gtk::Fixed());
+			controls_button_size_group->add_widget(*blank);
+			if (ARDOUR::Profile->get_mixbus()) {
+				controls_table.attach (*blank, 2, 3, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+			} else {
+				controls_table.attach (*blank, 4, 5, 0, 1, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+			}
+			blank->show();
+		}
+
+		if (ARDOUR::Profile->get_mixbus()) {
+			controls_table.attach (route_group_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+			controls_table.attach (gm.get_gain_slider(), 3, 5, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
+		} else {
+			controls_table.attach (route_group_button, 4, 5, 2, 3, Gtk::SHRINK, Gtk::SHRINK, 0, 0);
+			controls_table.attach (gm.get_gain_slider(), 0, 2, 2, 3, Gtk::FILL|Gtk::EXPAND, Gtk::FILL|Gtk::EXPAND, 1, 0);
+		}
+
+		if (ARDOUR::Profile->get_mixbus()) {
+			controls_table.attach (automation_button, 1, 2, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
+		} else {
+			controls_table.attach (automation_button, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
+		}
+
+		if (is_track() && track()->mode() == ARDOUR::Normal) {
+			if (ARDOUR::Profile->get_mixbus()) {
+				controls_table.attach (playlist_button, 0, 1, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
+			} else {
+				controls_table.attach (playlist_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
+			}
+		}
 	}
 
 	set_tooltip(*solo_button,_("Solo"));
@@ -283,20 +319,6 @@ RouteTimeAxisView::set_route (std::shared_ptr<Route> rt)
 	update_track_number_visibility();
 	route_active_changed();
 	label_view ();
-
-	if (ARDOUR::Profile->get_mixbus()) {
-		controls_table.attach (automation_button, 1, 2, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-	} else {
-		controls_table.attach (automation_button, 3, 4, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-	}
-
-	if (is_track() && track()->mode() == ARDOUR::Normal) {
-		if (ARDOUR::Profile->get_mixbus()) {
-			controls_table.attach (playlist_button, 0, 1, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-		} else {
-			controls_table.attach (playlist_button, 2, 3, 2, 3, Gtk::SHRINK, Gtk::SHRINK);
-		}
-	}
 
 	_y_position = -1;
 
@@ -447,7 +469,7 @@ void
 RouteTimeAxisView::update_track_number_visibility ()
 {
 	DisplaySuspender ds;
-	bool show_label = _session->config.get_track_name_number();
+	bool show_label = (Profile->get_livetrax() || _session->config.get_track_name_number());
 
 	if (_route && _route->is_master()) {
 		show_label = false;

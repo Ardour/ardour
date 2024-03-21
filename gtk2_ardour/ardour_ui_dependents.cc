@@ -393,6 +393,7 @@ ARDOUR_UI::livetrax_setup_windows ()
 	}
 
 	livetrax_time_info_box = new TimeInfoBox ("LiveTraxTimeInfo", false);
+	Gtk::Image* icon = manage (new Gtk::Image (ARDOUR_UI_UTILS::get_icon ("allenheath")));
 
 	Gtk::Label* l;
 	Gtk::VBox* vb;
@@ -400,6 +401,7 @@ ARDOUR_UI::livetrax_setup_windows ()
 
 	livetrax_top_bar.set_spacing (12);
 	livetrax_top_bar.set_border_width (12);
+	livetrax_top_bar.pack_start (*icon, false, false);
 	livetrax_top_bar.pack_start (*livetrax_time_info_box, false, false);
 	livetrax_top_bar.pack_start (*primary_clock, false, false);
 
@@ -449,10 +451,10 @@ ARDOUR_UI::livetrax_setup_windows ()
 	livetrax_transport_bar.pack_start (*hb, true, false);
 	livetrax_transport_bar.pack_start (*editor->mouse_mode_hbox, true, false);
 
-	livetrax_view_in_folder_button = manage (new ArdourButton (_("Folder Icon"), elements));
+	livetrax_view_in_folder_button = manage (new ArdourButton (_("MEDIA"), elements));
 	editor->_zoom_box.pack_start (*livetrax_view_in_folder_button, false, false, 12);
 
-	livetrax_transport_bar.pack_start (editor->_zoom_box, true, false);
+	livetrax_transport_bar.pack_end (editor->_zoom_box, false, false);
 	livetrax_transport_bar.show_all ();
 
 	/* meter display */

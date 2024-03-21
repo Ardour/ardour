@@ -627,7 +627,11 @@ AddRouteDialog::maybe_update_name_template_entry ()
 
 	switch (type_wanted()) {
 	case AudioTrack:
-		name_template_entry.set_text (_("Audio"));
+		if (Profile->get_livetrax()) {
+			name_template_entry.set_text (_("Track"));
+		} else {
+			name_template_entry.set_text (_("Audio"));
+		}
 		break;
 	case MidiTrack:
 		/* set name of instrument or _("MIDI") */
