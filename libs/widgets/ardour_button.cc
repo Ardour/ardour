@@ -1215,10 +1215,9 @@ ArdourButton::on_focus_out_event (GdkEventFocus* ev)
 }
 
 bool
-ArdourButton::on_key_release_event (GdkEventKey *ev) {
-	if (_act_on_release && _focused &&
-			(ev->keyval == GDK_space || ev->keyval == GDK_Return))
-	{
+ArdourButton::on_key_release_event (GdkEventKey *ev)
+{
+	if (_act_on_release && _focused && (ev->keyval == GDK_space || ev->keyval == GDK_Return)) {
 		if (_auto_toggle && !_action) {
 				set_active (!get_active ());
 		}
@@ -1232,12 +1231,11 @@ ArdourButton::on_key_release_event (GdkEventKey *ev) {
 }
 
 bool
-ArdourButton::on_key_press_event (GdkEventKey *ev) {
-	if (!_act_on_release && _focused &&
-			(ev->keyval == GDK_space || ev->keyval == GDK_Return))
-	{
+ArdourButton::on_key_press_event (GdkEventKey *ev)
+{
+	if (!_act_on_release && _focused && (ev->keyval == GDK_space || ev->keyval == GDK_Return)) {
 		if (_auto_toggle && !_action) {
-				set_active (!get_active ());
+			set_active (!get_active ());
 		}
 		signal_clicked();
 		if (_action) {
