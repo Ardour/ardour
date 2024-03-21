@@ -160,6 +160,7 @@ TimeAxisView::TimeAxisView (ARDOUR::Session* sess, PublicEditor& ed, TimeAxisVie
 
 	inactive_label.set_name (X_("TrackNameEditor"));
 	inactive_label.set_alignment (0.0, 0.5);
+	inactive_label.set_width_chars (12);
 	set_tooltip (inactive_label, _("This track is inactive. (right-click to activate)"));
 
 	{
