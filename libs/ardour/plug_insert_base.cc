@@ -400,3 +400,24 @@ PlugInsertBase::PluginPropertyControl::get_value () const
 {
 	return _value.to_double ();
 }
+
+std::ostream& operator<<(std::ostream& o, const ARDOUR::PlugInsertBase::Match& m)
+{
+	switch (m.method) {
+		case PlugInsertBase::Impossible: o << "Impossible"; break;
+		case PlugInsertBase::Delegate:   o << "Delegate"; break;
+		case PlugInsertBase::NoInputs:   o << "NoInputs"; break;
+		case PlugInsertBase::ExactMatch: o << "ExactMatch"; break;
+		case PlugInsertBase::Replicate:  o << "Replicate"; break;
+		case PlugInsertBase::Split:      o << "Split"; break;
+		case PlugInsertBase::Hide:       o << "Hide"; break;
+	}
+	o << " cnt: " << m.plugins
+		<< (m.strict_io ? " strict-io" : "")
+		<< (m.custom_cfg ? " custom-cfg" : "");
+	if (m.method == PlugInsertBase::Hide) {
+		o << " hide: " << m.hide;
+	}
+	o << "\n";
+	return o;
+}

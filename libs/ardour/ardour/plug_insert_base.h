@@ -103,6 +103,33 @@ public:
 		Variant         _value;
 	};
 
+	/** Enumeration of the ways in which we can match our insert's
+	 *  IO to that of the plugin(s).
+	 */
+	enum MatchingMethod {
+		Impossible,  ///< we can't
+		Delegate,    ///< we are delegating to the plugin, and it can handle it
+		NoInputs,    ///< plugin has no inputs, so anything goes
+		ExactMatch,  ///< our insert's inputs are the same as the plugin's
+		Replicate,   ///< we have multiple instances of the plugin
+		Split,       ///< we copy one of our insert's inputs to multiple plugin inputs
+		Hide,        ///< we `hide' some of the plugin's inputs by feeding them silence
+	};
+
+	/** Description of how we can match our plugin's IO to our own insert IO */
+	struct Match {
+		Match () : method (Impossible), plugins (0), strict_io (false), custom_cfg (false) {}
+		Match (MatchingMethod m, int32_t p,
+				bool strict = false, bool custom = false, ChanCount h = ChanCount ())
+			: method (m), plugins (p), hide (h), strict_io (strict), custom_cfg (custom) {}
+
+		MatchingMethod method; ///< method to employ
+		int32_t plugins;       ///< number of copies of the plugin that we need
+		ChanCount hide;        ///< number of channels to hide
+		bool strict_io;        ///< force in == out
+		bool custom_cfg;       ///< custom config (if not strict)
+	};
+
 protected:
 	static std::shared_ptr<Plugin> plugin_factory (std::shared_ptr<Plugin>);
 
@@ -114,5 +141,7 @@ protected:
 };
 
 } // namespace ARDOUR
+
+std::ostream& operator<<(std::ostream& o, const ARDOUR::PlugInsertBase::Match& m);
 
 #endif
