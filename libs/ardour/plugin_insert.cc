@@ -2259,7 +2259,7 @@ PluginInsert::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 	return private_can_support_io_configuration (in, out).method != Impossible;
 }
 
-PluginInsert::Match
+PlugInsertBase::Match
 PluginInsert::private_can_support_io_configuration (ChanCount const& in, ChanCount& out) const
 {
 	if (!_custom_cfg && _preset_out.n_audio () > 0) {
@@ -3235,25 +3235,4 @@ void
 PluginInsert::clear_stats ()
 {
 	_stat_reset.store (1);
-}
-
-std::ostream& operator<<(std::ostream& o, const ARDOUR::PluginInsert::Match& m)
-{
-	switch (m.method) {
-		case PluginInsert::Impossible: o << "Impossible"; break;
-		case PluginInsert::Delegate:   o << "Delegate"; break;
-		case PluginInsert::NoInputs:   o << "NoInputs"; break;
-		case PluginInsert::ExactMatch: o << "ExactMatch"; break;
-		case PluginInsert::Replicate:  o << "Replicate"; break;
-		case PluginInsert::Split:      o << "Split"; break;
-		case PluginInsert::Hide:       o << "Hide"; break;
-	}
-	o << " cnt: " << m.plugins
-		<< (m.strict_io ? " strict-io" : "")
-		<< (m.custom_cfg ? " custom-cfg" : "");
-	if (m.method == PluginInsert::Hide) {
-		o << " hide: " << m.hide;
-	}
-	o << "\n";
-	return o;
 }
