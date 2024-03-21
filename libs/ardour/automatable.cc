@@ -722,7 +722,7 @@ Automatable::find_next_event (timepos_t const & start, timepos_t const & end, Ev
 }
 
 void
-Automatable::find_next_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event) const
+Automatable::find_next_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event)
 {
 	assert (start <= end);
 
@@ -749,7 +749,7 @@ Automatable::find_next_ac_event (std::shared_ptr<AutomationControl> c, timepos_t
 }
 
 void
-Automatable::find_prev_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event) const
+Automatable::find_prev_ac_event (std::shared_ptr<AutomationControl> c, timepos_t const & start, timepos_t const & end, Evoral::ControlEvent& next_event)
 {
 	assert (start > end);
 	std::shared_ptr<SlavableAutomationControl> sc

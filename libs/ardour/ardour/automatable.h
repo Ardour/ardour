@@ -122,6 +122,9 @@ public:
 	void start_domain_bounce (Temporal::DomainBounceInfo&);
 	void finish_domain_bounce (Temporal::DomainBounceInfo&);
 
+	static void find_next_ac_event (std::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev);
+	static void find_prev_ac_event (std::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev);
+
 protected:
 	Session& _a_session;
 
@@ -138,9 +141,6 @@ protected:
 	samplepos_t _last_automation_snapshot;
 
 	SlavableAutomationControlList slavables () const { return SlavableAutomationControlList(); }
-
-	void find_next_ac_event (std::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev) const;
-	void find_prev_ac_event (std::shared_ptr<AutomationControl>, Temporal::timepos_t const & start, Temporal::timepos_t const & end, Evoral::ControlEvent& ev) const;
 
 private:
 	PBD::ScopedConnectionList _control_connections; ///< connections to our controls' signals
