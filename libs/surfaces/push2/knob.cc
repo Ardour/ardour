@@ -326,6 +326,7 @@ Push2Knob::controllable_changed ()
 
 		case ARDOUR::GainAutomation:
 		case ARDOUR::BusSendLevel:
+		case ARDOUR::SurroundSendLevel:
 		case ARDOUR::InsertReturnLevel:
 		case ARDOUR::TrimAutomation:
 			set_gain_text (_val);

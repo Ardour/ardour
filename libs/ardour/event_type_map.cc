@@ -132,6 +132,8 @@ EventTypeMap::from_symbol(const string& str) const
 		p_type = GainAutomation;
 	} else if (str == "send") {
 		p_type = BusSendLevel;
+	} else if (str == "surround-send") {
+		p_type = SurroundSendLevel;
 	} else if (str == "send-enable") {
 		p_type = BusSendEnable;
 	} else if (str == "return") {
@@ -260,6 +262,8 @@ EventTypeMap::to_symbol(const Evoral::Parameter& param) const
 		return "send";
 	} else if (t == BusSendEnable) {
 		return "send-enable";
+	} else if (t == SurroundSendLevel) {
+		return "surround-send";
 	} else if (t == InsertReturnLevel) {
 		return "return";
 	} else if (t == TrimAutomation) {

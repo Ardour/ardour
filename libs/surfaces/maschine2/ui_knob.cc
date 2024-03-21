@@ -223,6 +223,7 @@ Maschine2Knob::controllable_changed ()
 
 			case ARDOUR::GainAutomation:
 			case ARDOUR::BusSendLevel:
+			case ARDOUR::SurroundSendLevel:
 			case ARDOUR::InsertReturnLevel:
 			case ARDOUR::TrimAutomation:
 				snprintf (buf, sizeof (buf), "%+4.1f dB", accurate_coefficient_to_dB (_controllable->get_value()));

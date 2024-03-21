@@ -173,6 +173,7 @@ enum AutomationType {
 	MonitoringAutomation,
 	BusSendLevel,
 	BusSendEnable,
+	SurroundSendLevel,
 	InsertReturnLevel,
 	MainOutVolume,
 	MidiVelocityAutomation,

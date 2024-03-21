@@ -42,6 +42,8 @@ static std::string gain_control_name (Evoral::Parameter const& param)
 			/* fallthrough */
 		case BusSendLevel:
 			/* fallthrough */
+		case SurroundSendLevel:
+			/* fallthrough */
 		case InsertReturnLevel:
 			return X_("gaincontrol");
 		case TrimAutomation:
@@ -63,6 +65,8 @@ static std::shared_ptr<AutomationList> automation_list_new (Evoral::Parameter co
 		case GainAutomation:
 			/* fallthrough */
 		case BusSendLevel:
+			/* fallthrough */
+		case SurroundSendLevel:
 			/* fallthrough */
 		case InsertReturnLevel:
 			/* fallthrough */

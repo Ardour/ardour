@@ -46,8 +46,8 @@ SurroundSend::SurroundSend (Session& s, std::shared_ptr<MuteMaster> mm)
 	_send_delay.reset (new DelayLine (_session, "Send-" + name ()));
 	_thru_delay.reset (new DelayLine (_session, "Thru-" + name ()));
 
-	std::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (BusSendLevel), *this));
-	_gain_control = std::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter (BusSendLevel), gl));
+	std::shared_ptr<AutomationList> gl (new AutomationList (Evoral::Parameter (SurroundSendLevel), *this));
+	_gain_control = std::shared_ptr<GainControl> (new GainControl (_session, Evoral::Parameter (SurroundSendLevel), gl));
 	_amp.reset (new Amp (_session, _("Surround"), _gain_control, false));
 	_amp->activate ();
 
