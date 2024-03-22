@@ -230,6 +230,7 @@ Session::Session (AudioEngine &eng,
 	, _writable (false)
 	, _under_nsm_control (false)
 	, _xrun_count (0)
+	, _required_thread_buffersize (0)
 	, master_wait_end (0)
 	, post_export_sync (false)
 	, post_export_position (0)
@@ -2407,6 +2408,7 @@ Session::set_block_size (pframes_t nframes)
 	 * here.
 	 */
 	current_block_size = nframes;
+	_required_thread_buffersize = -1;
 
 	ensure_buffers ();
 
@@ -5848,13 +5850,33 @@ Session::tempo_map_changed ()
 	set_dirty ();
 }
 
+void
+Session::ensure_buffers_unlocked (ChanCount howmany)
+{
+	if (_required_thread_buffers >= howmany) {
+		return;
+	}
+	Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock ());
+	ensure_buffers (howmany);
+}
+
 /** Ensures that all buffers (scratch, send, silent, etc) are allocated for
  * the given count with the current block size.
+ * Must be called with the process-lock held
  */
 void
 Session::ensure_buffers (ChanCount howmany)
 {
-	BufferManager::ensure_buffers (howmany, bounce_processing() ? bounce_chunk_size : 0);
+	size_t want_size = bounce_processing() ? bounce_chunk_size : 0;
+	if (howmany.n_total () == 0) {
+		howmany = _required_thread_buffers;
+	}
+	if (_required_thread_buffers >= howmany && _required_thread_buffersize == want_size) {
+		return;
+	}
+	_required_thread_buffers = ChanCount::max (_required_thread_buffers, howmany);
+	_required_thread_buffersize = want_size;
+	BufferManager::ensure_buffers (_required_thread_buffers, _required_thread_buffersize);
 }
 
 uint32_t
