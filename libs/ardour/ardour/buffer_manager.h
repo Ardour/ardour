@@ -42,7 +42,7 @@ public:
 	static void ensure_buffers (ChanCount howmany = ChanCount::ZERO, size_t custom = 0);
 
 private:
-        static Glib::Threads::Mutex rb_mutex;
+	static Glib::Threads::Mutex rb_mutex;
 
 	typedef PBD::RingBufferNPT<ThreadBuffers*> ThreadBufferFIFO;
 	typedef std::list<ThreadBuffers*> ThreadBufferList;
