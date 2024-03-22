@@ -1195,8 +1195,6 @@ public:
 	gain_t* scratch_automation_buffer () const;
 	pan_t** pan_automation_buffer () const;
 
-	void ensure_buffer_set (BufferSet& buffers, const ChanCount& howmany);
-
 	/* VST support */
 
 	static int  vst_current_loading_id;
