@@ -96,7 +96,7 @@ Session::overwrite_some_buffers (std::shared_ptr<Route> r, OverwriteReason why)
 	 */
 
 	if (actively_recording()) {
-		//return;
+		//return; // XXX revert -- used to test RegionFX bounce
 	}
 
 
