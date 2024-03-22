@@ -311,6 +311,8 @@ public:
 	BufferSet& get_route_buffers (ChanCount count = ChanCount::ZERO, bool silence = true);
 	BufferSet& get_mix_buffers (ChanCount count = ChanCount::ZERO);
 
+	void ensure_buffers_unlocked (ChanCount howmany);
+
 	bool have_rec_enabled_track () const;
 	bool have_rec_disabled_track () const;
 
@@ -1513,6 +1515,8 @@ private:
 	void setup_engine_resampling ();
 
 	void ensure_buffers (ChanCount howmany = ChanCount::ZERO);
+	ChanCount _required_thread_buffers;
+	size_t    _required_thread_buffersize;
 
 	void process_without_events (pframes_t);
 	void process_with_events    (pframes_t);
