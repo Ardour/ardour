@@ -777,6 +777,8 @@ _gdk_window_impl_new (GdkWindow     *window,
       g_object_ref (draw_impl->colormap);
     }
 
+  impl->needs_display_region = NULL;
+
   /* Maintain the z-ordered list of children. */
   if (private->parent != (GdkWindowObject *)_gdk_root)
     parent_impl->sorted_children = g_list_prepend (parent_impl->sorted_children, window);
