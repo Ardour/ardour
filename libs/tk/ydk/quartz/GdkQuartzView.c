@@ -717,17 +717,17 @@
       return;
     }
 
-  if (!impl->needs_display_region) {
+  if (!impl->needs_display_region || gdk_quartz_get_use_cocoa_invalidation()) {
     [self getRectsBeingDrawn: &drawn_rects count: &count];
     region = gdk_region_new ();
-    
+
     for (i = 0; i < count; i++)
       {
 	gdk_rect.x = drawn_rects[i].origin.x;
 	gdk_rect.y = drawn_rects[i].origin.y;
 	gdk_rect.width = drawn_rects[i].size.width;
 	gdk_rect.height = drawn_rects[i].size.height;
-	
+
 	gdk_region_union_with_rect (region, &gdk_rect);
     }
   } else {
