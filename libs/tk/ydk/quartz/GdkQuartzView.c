@@ -612,6 +612,8 @@
   private = GDK_WINDOW_OBJECT (gdk_window);
   impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
 
+  GDK_NOTE (EVENTS, g_print ("setNeedsDisplay, current NDR %p\n", impl->needs_display_region));
+
   if (!impl->needs_display_region)
     impl->needs_display_region = gdk_region_rectangle (&r);
   else 
@@ -647,6 +649,8 @@
   
   private = GDK_WINDOW_OBJECT (gdk_window);
   impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
+
+  GDK_NOTE (EVENTS, g_print ("setNeedsDisplayInRect, current NDR %p\n", impl->needs_display_region));
 
   if (!impl->needs_display_region)
     impl->needs_display_region = gdk_region_rectangle (&r);
@@ -765,6 +769,8 @@
   GdkWindowObject *private;
   GdkWindowImplQuartz *impl;
   GdkRectangle r;
+
+  GDK_NOTE (EVENTS, g_print ("reshape\n"));
 
   [super reshape];
 
