@@ -5857,14 +5857,6 @@ Session::ensure_buffers (ChanCount howmany)
 	BufferManager::ensure_buffers (howmany, bounce_processing() ? bounce_chunk_size : 0);
 }
 
-void
-Session::ensure_buffer_set(BufferSet& buffers, const ChanCount& count)
-{
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
-		buffers.ensure_buffers(*t, count.get(*t), _engine.raw_buffer_size(*t));
-	}
-}
-
 uint32_t
 Session::next_insert_id ()
 {

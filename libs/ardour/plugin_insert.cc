@@ -2230,10 +2230,10 @@ PluginInsert::configure_io (ChanCount in, ChanCount out)
 	ChanCount cc_analysis_in (DataType::AUDIO, in.n_audio());
 	ChanCount cc_analysis_out (DataType::AUDIO, out.n_audio());
 
-	session().ensure_buffer_set (_signal_analysis_inputs, cc_analysis_in);
+	_signal_analysis_inputs.ensure_buffers (cc_analysis_in, 8192);
 	_signal_analysis_inputs.set_count (cc_analysis_in);
 
-	session().ensure_buffer_set (_signal_analysis_outputs, cc_analysis_out);
+	_signal_analysis_outputs.ensure_buffers (cc_analysis_out, 8192);
 	_signal_analysis_outputs.set_count (cc_analysis_out);
 
 	// std::cerr << "set counts to i" << in.n_audio() << "/o" << out.n_audio() << std::endl;
