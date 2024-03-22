@@ -3096,6 +3096,18 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Appearance/Quirks"), bo);
 #endif
 
+#ifdef __APPLE__
+	BoolOption* bco = new BoolOption (
+		"use-cocoa-invalidation",
+		_("Use macOS to determine GUI redraw areas"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_cocoa_invalidation),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_cocoa_invalidation)
+		);
+
+	Gtkmm2ext::UI::instance()->set_tip (bco->tip_widget(), string_compose (_("When enabled, macOS is in charge of what areas of the GUI are redrawn.\nWhen disabled, %1 manages this by itself"), PROGRAM_NAME));
+	add_option (_("Appearance/Quirks"), bco);
+#endif
+
 	add_option (_("Appearance/Quirks"), new OptionEditorBlank ());
 #if (!defined USE_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE || defined __APPLE__)
 	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
