@@ -941,8 +941,13 @@ Item::render_children (Rect const & area, Cairo::RefPtr<Cairo::Context> context)
 					}
 				}
 #endif
-
+				if (_canvas->item_save_restore) {
+					context->save();
+				}
 				(*i)->render (area, context);
+				if (_canvas->item_save_restore) {
+					context->restore();
+				}
 				++render_count;
 			}
 

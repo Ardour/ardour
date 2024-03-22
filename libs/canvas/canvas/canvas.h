@@ -188,6 +188,9 @@ public:
 
 	void set_debug_render (bool yn) { _debug_render = yn; }
 	bool debug_render() const { return _debug_render; }
+
+	bool item_save_restore;
+
 protected:
 	Root             _root;
 	uint32_t         _queue_draw_frozen;

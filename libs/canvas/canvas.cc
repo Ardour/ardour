@@ -68,6 +68,13 @@ Canvas::Canvas ()
 #else
 	_use_intermediate_surface = NULL != g_getenv("ARDOUR_INTERMEDIATE_SURFACE");
 #endif
+
+	if (g_getenv ("ARDOUR_ITEM_CAIRO_SAVE_RESTORE")) {
+		item_save_restore = true;
+	} else {
+		item_save_restore = false;
+	}
+
 	set_epoch ();
 }
 
