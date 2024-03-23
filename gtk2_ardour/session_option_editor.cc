@@ -497,6 +497,7 @@ SessionOptionEditor::parameter_changed (std::string const & p)
 			_sf->add (FormatInt24, _("24-bit integer"));
 			_sf->add (FormatInt16, _("16-bit integer"));
 		}
+
 		if (need_refill) {
 			parameter_changed ("native-file-data-format");
 		}

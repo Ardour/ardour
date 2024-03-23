@@ -810,15 +810,16 @@ ARDOUR_UI::build_menu_bar ()
 	if (!Profile->get_livetrax()) {
 		ev_dsp->add (dsp_load_label);
 		ev_timecode->add (timecode_format_label);
+		ev_audio->add (sample_rate_label);
 	}
 	ev_path->add (session_path_label);
 	ev_name->add (snapshot_name_label);
-	ev_audio->add (sample_rate_label);
 	ev_format->add (format_label);
 
 	if (!Profile->get_livetrax()) {
 		ev_dsp->show ();
 		ev_timecode->show ();
+		ev_audio->show ();
 	}
 	ev_path->show ();
 	ev_audio->show ();
@@ -833,12 +834,14 @@ ARDOUR_UI::build_menu_bar ()
 	hbox->pack_end (error_alert_button, false, false, 2);
 	hbox->pack_end (wall_clock_label, false, false, 10);
 
-	hbox->pack_end (*ev_dsp, false, false, 6);
 	if (!Profile->get_livetrax()) {
+		hbox->pack_end (*ev_dsp, false, false, 6);
 		hbox->pack_end (disk_space_label, false, false, 6);
 	}
 	hbox->pack_end (*ev_audio, false, false, 6);
-	hbox->pack_end (*ev_timecode, false, false, 6);
+	if (!Profile->get_livetrax()) {
+		hbox->pack_end (*ev_timecode, false, false, 6);
+	}
 	hbox->pack_end (*ev_format, false, false, 6);
 	hbox->pack_end (peak_thread_work_label, false, false, 6);
 	hbox->pack_end (*ev_name, false, false, 6);

@@ -176,7 +176,7 @@ class NSM_Client;
 class LevelMeterHBox;
 class GUIObjectState;
 class BasicUI;
-class MeterbridgeWidget;
+class LiveTraxMeters;
 
 namespace ARDOUR {
 	class ControlProtocolInfo;
@@ -638,10 +638,12 @@ private:
 	ArdourWidgets::ArdourButton* livetrax_mixer_view_button;
 	ArdourWidgets::ArdourButton* livetrax_lock_button;
 	ArdourWidgets::ArdourButton* livetrax_view_in_folder_button;
+	ArdourWidgets::ArdourButton* livetrax_sf_button;
+	ArdourWidgets::ArdourButton* livetrax_sr_button;
 	Gtk::HScrollbar* livetrax_edit_hscrollbar;
 	Gtk::VScrollbar* livetrax_edit_vscrollbar;
 	Gtk::HScrollbar* livetrax_mix_hscrollbar;
-	Gtk::HBox        livetrax_meter_box;
+	LiveTraxMeters*  livetrax_meters;
 	int livetrax_setup_windows ();
 
 	/* menu bar and associated stuff */

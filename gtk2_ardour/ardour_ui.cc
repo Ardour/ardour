@@ -1254,13 +1254,22 @@ ARDOUR_UI::set_fps_timeout_connection ()
 void
 ARDOUR_UI::update_sample_rate ()
 {
-	std::string label = string_compose (X_("<span weight=\"ultralight\">%1</span>:"), _("Audio"));
+	std::string label;
+
+	if (!Profile->get_livetrax()) {
+		label = string_compose (X_("<span weight=\"ultralight\">%1</span>:"), _("Audio"));
+	}
 
 	ENSURE_GUI_THREAD (*this, &ARDOUR_UI::update_sample_rate, ignored)
 
 	if (!AudioEngine::instance()->running()) {
 
-		sample_rate_label.set_markup (label + _("none"));
+		if (Profile->get_livetrax()) {
+			livetrax_sr_button->set_text (_("Stopped"), true);
+		} else {
+			const std::string str (label + _("none"));
+			sample_rate_label.set_markup (str);
+		}
 
 	} else {
 
@@ -1269,14 +1278,23 @@ ARDOUR_UI::update_sample_rate ()
 		if (rate == 0) {
 
 			/* no sample rate available */
-			sample_rate_label.set_markup (label + _("none"));
+
+			if (Profile->get_livetrax()) {
+				livetrax_sr_button->set_text (_("Unknown"), true);
+			} else {
+				sample_rate_label.set_markup (label + _("none"));
+			}
 
 		} else {
 
 			char buf[64];
 			snprintf (buf, sizeof (buf), "%4.1f", (AudioEngine::instance()->usecs_per_cycle() / 1000.0f));
 			const char* const bg = (_session && _session->nominal_sample_rate () != rate) ? " background=\"red\" foreground=\"white\"" : "";
-			sample_rate_label.set_markup (string_compose ("%1 <span%2>%3</span> %4 %5", label, bg, ARDOUR_UI_UTILS::rate_as_string (rate), buf, _("ms")));
+			const std::string str (string_compose ("%1 <span%2>%3</span> %4 %5", label, bg, ARDOUR_UI_UTILS::rate_as_string (rate), buf, _("ms")));
+			sample_rate_label.set_markup (str);
+			if (Profile->get_livetrax()) {
+				livetrax_sr_button->set_text (str, true);
+			}
 
 		}
 	}
@@ -1341,6 +1359,42 @@ ARDOUR_UI::update_format ()
 	}
 
 	format_label.set_markup (s.str ());
+
+	if (Profile->get_livetrax()) {
+
+		s.str ("");
+		s.clear ();
+
+		/* LiveTrax only allows a very limited set of options */
+
+		/* This looks like we could just unconditionally add "24bit" to
+		 * the string, but this logic allows us to potentially detect
+		 * logic glitches where somehow we end up with a different
+		 * format.
+		 */
+
+		switch (_session->config.get_native_file_data_format ()) {
+		case FormatInt24:
+			s << _("24bit");
+			break;
+		default:
+			break;
+		}
+
+		s << ' ';
+
+		switch (_session->config.get_native_file_header_format ()) {
+		case RF64_WAV:
+			s << _("WAV/RF64");
+			break;
+		case FLAC:
+			s << _("FLAC");
+		default:
+			break;
+		}
+
+		livetrax_sf_button->set_text (s.str(), false);
+	}
 }
 
 void
