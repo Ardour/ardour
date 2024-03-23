@@ -135,7 +135,9 @@ PortManager::AudioInputPort::silence (pframes_t n_samples)
 void
 PortManager::AudioInputPort::process (Sample const* buf, pframes_t n_samples, bool reset)
 {
-	scope->write (buf, n_samples);
+	if (!Profile->get_livetrax()) {
+		scope->write (buf, n_samples);
+	}
 
 	float level  = reset ? 0 : meter->level;
 	level        = compute_peak (buf, n_samples, level);
