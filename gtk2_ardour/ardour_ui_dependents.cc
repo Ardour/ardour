@@ -396,7 +396,6 @@ ARDOUR_UI::livetrax_setup_windows ()
 	livetrax_time_info_box = new TimeInfoBox ("LiveTraxTimeInfo", false);
 	Gtk::Image* icon = manage (new Gtk::Image (ARDOUR_UI_UTILS::get_icon ("allenheath")));
 
-	Gtk::Label* l;
 	Gtk::VBox* vb;
 	Gtk::HBox* hb;
 	ArdourButton::Element elements (ArdourButton::Element (ArdourButton::Text|ArdourButton::VectorIcon));
@@ -440,9 +439,9 @@ ARDOUR_UI::livetrax_setup_windows ()
 
 	/* transport bar */
 
-	livetrax_meter_view_button = manage (new ArdourButton (_("Meter"), elements));
-	livetrax_mixer_view_button = manage (new ArdourButton (_("Mixer"), elements));
-	livetrax_editor_view_button = manage (new ArdourButton (_("Tracks"), elements));
+	livetrax_meter_view_button = manage (new ArdourButton (_("METER"), ArdourButton::Element (elements|ArdourButton::Edge|ArdourButton::Body), true));;
+	livetrax_mixer_view_button = manage (new ArdourButton (_("MIXER"), ArdourButton::Element (elements|ArdourButton::Edge|ArdourButton::Body), true));
+	livetrax_editor_view_button = manage (new ArdourButton (_("TRACKS"), ArdourButton::Element (elements|ArdourButton::Edge|ArdourButton::Body), true));
 
 	livetrax_transport_bar.pack_start (*livetrax_editor_view_button, false, false);
 	livetrax_transport_bar.pack_start (*livetrax_mixer_view_button, false, false);
@@ -465,7 +464,7 @@ ARDOUR_UI::livetrax_setup_windows ()
 
 	/* meter display */
 
-	livetrax_meters = manage (new LiveTraxMeters (16));
+	livetrax_meters = manage (new LiveTraxMeters (48));
 	livetrax_meters->show_all ();
 	livetrax_meter_bar.set_border_width (12);
 	livetrax_meter_bar.pack_start (*livetrax_meters, true, true, 12);

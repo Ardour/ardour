@@ -17,7 +17,7 @@ LiveTraxMeters::LiveTraxMeters (size_t initial_cnt)
 
 	resize (initial_cnt);
 
-	meter_box.set_spacing (PX_SCALE (6));
+	meter_box.set_spacing (PX_SCALE (10));
 	add (meter_box);
 
 	fast_screen_update_connection = Glib::signal_timeout().connect (sigc::mem_fun (*this, &LiveTraxMeters::update_meters), 40, GDK_PRIORITY_REDRAW + 10);
@@ -75,7 +75,7 @@ LiveTraxMeters::resize (size_t sz)
 
 	for (size_t i = old; i < sz; ++i) {
 
-		meters.push_back (manage (new FastMeter ((uint32_t)floor (UIConfiguration::instance ().get_meter_hold ()),
+		meters.push_back (manage (new FastMeter (10 /* (uint32_t)floor (UIConfiguration::instance ().get_meter_hold ()) */, 
 		                                          8, FastMeter::Vertical, PX_SCALE (64),
 		                                          c[0], c[1], c[2], c[3], c[4], c[5], c[6], c[7], c[8], c[9],
 		                                          b[0], b[1], b[2], b[3],

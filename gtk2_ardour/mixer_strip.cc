@@ -353,7 +353,7 @@ MixerStrip::init ()
 		global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
 		global_vpacker.pack_start (_comment_button, Gtk::PACK_SHRINK);
 	} else {
-		global_vpacker.pack_start (name_button, Gtk::PACK_SHRINK);
+		global_vpacker.pack_start (name_button, true, true);
 	}
 
 #ifndef MIXBUS
@@ -1086,7 +1086,13 @@ MixerStrip::route_color_changed ()
 {
 	using namespace ARDOUR_UI_UTILS;
 	name_button.modify_bg (STATE_NORMAL, color());
-	number_label.set_fixed_colors (gdk_color_to_rgba (color()), gdk_color_to_rgba (color()));
+	Gtkmm2ext::Color c (gdk_color_to_rgba (color()));
+
+	if (Profile->get_livetrax()) {
+		name_button.set_fixed_colors (c, c);
+	}
+
+	number_label.set_fixed_colors (c, c);
 	reset_strip_style ();
 }
 
