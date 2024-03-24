@@ -42,6 +42,7 @@
 #include "mixer_ui.h"
 #include "plugin_selector.h"
 #include "plugin_ui.h"
+#include "plugin_window_proxy.h"
 #include "ui_config.h"
 
 #include "pbd/i18n.h"
@@ -299,7 +300,7 @@ IOPluginWindow::IOPlugUI::IOPlugUI (std::shared_ptr<ARDOUR::IOPlug> iop)
 		_window_proxy = dynamic_cast<PluginWindowProxy*> (iop->window_proxy ());
 		assert (_window_proxy);
 	} else {
-		_window_proxy = new PluginWindowProxy (string_compose ("IOP-%1", _iop->id ()), _iop);
+		_window_proxy = new PluginWindowProxy (string_compose ("IOP-%1", _iop->id ()), "I/O", _iop);
 
 		const XMLNode* ui_xml = _iop->session ().extra_xml (X_("UI"));
 		if (ui_xml) {
@@ -372,113 +373,6 @@ IOPluginWindow::IOPlugUI::button_resized (Gtk::Allocation& alloc)
 {
 	_btn_ioplug.set_layout_ellipsize_width (alloc.get_width () * PANGO_SCALE);
 }
-
-/* ****************************************************************************/
-
-IOPluginWindow::PluginWindowProxy::PluginWindowProxy (std::string const& name, std::weak_ptr<PlugInsertBase> plugin)
-	: WM::ProxyBase (name, std::string ())
-	, _pib (plugin)
-	, _is_custom (true)
-	, _want_custom (true)
-{
-	std::shared_ptr<PlugInsertBase> p = _pib.lock ();
-	if (!p) {
-		return;
-	}
-	p->DropReferences.connect (_going_away_connection, MISSING_INVALIDATOR, boost::bind (&IOPluginWindow::PluginWindowProxy::plugin_going_away, this), gui_context ());
-}
-
-IOPluginWindow::PluginWindowProxy::~PluginWindowProxy ()
-{
-	_window = 0;
-}
-
-Gtk::Window*
-IOPluginWindow::PluginWindowProxy::get (bool create)
-{
-	std::shared_ptr<PlugInsertBase> p = _pib.lock ();
-	if (!p) {
-		return 0;
-	}
-
-	if (_window && (_is_custom != _want_custom)) {
-		set_state_mask (WindowProxy::StateMask (state_mask () & ~WindowProxy::Size));
-		drop_window ();
-	}
-
-	if (!_window) {
-		if (!create) {
-			return 0;
-		}
-
-		_is_custom = _want_custom;
-		_window    = new PluginUIWindow (p, false, _is_custom);
-
-		if (_window) {
-			std::shared_ptr<ARDOUR::IOPlug> iop = std::dynamic_pointer_cast<ARDOUR::IOPlug> (p);
-			assert (iop);
-			_window->set_title (iop->name ());
-			setup ();
-			_window->show_all ();
-		}
-	}
-	return _window;
-}
-
-void
-IOPluginWindow::PluginWindowProxy::show_the_right_window ()
-{
-	if (_window && (_is_custom != _want_custom)) {
-		set_state_mask (WindowProxy::StateMask (state_mask () & ~WindowProxy::Size));
-		drop_window ();
-	}
-
-	if (_window) {
-		_window->unset_transient_for ();
-	}
-	toggle ();
-}
-
-int
-IOPluginWindow::PluginWindowProxy::set_state (const XMLNode& node, int)
-{
-	XMLNodeList                 children = node.children ();
-	XMLNodeList::const_iterator i        = children.begin ();
-	while (i != children.end ()) {
-		std::string name;
-		if ((*i)->name () == X_("Window") && (*i)->get_property (X_("name"), name) && name == _name) {
-			break;
-		}
-		++i;
-	}
-
-	if (i != children.end ()) {
-		(*i)->get_property (X_("custom-ui"), _want_custom);
-	}
-
-	return ProxyBase::set_state (node, 0);
-}
-
-XMLNode&
-IOPluginWindow::PluginWindowProxy::get_state () const
-{
-	XMLNode* node;
-	node = &ProxyBase::get_state ();
-	node->set_property (X_("custom-ui"), _is_custom);
-	return *node;
-}
-
-void
-IOPluginWindow::PluginWindowProxy::plugin_going_away ()
-{
-	delete _window;
-	_window = 0;
-	WM::Manager::instance ().remove (this);
-	_going_away_connection.disconnect ();
-	delete this;
-}
-
-/* ****************************************************************************/
 
 IOPluginWindow::IOButton::IOButton (std::shared_ptr<ARDOUR::IO> io, bool pre)
 	: _io (io)

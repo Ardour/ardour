@@ -35,11 +35,11 @@ namespace ARDOUR
 {
 	class IO;
 	class IOPlug;
-	class PlugInsertBase;
 	class Port;
 }
 
 class IOSelectorWindow;
+class PluginWindowProxy;
 
 class IOPluginWindow : public ArdourWindow
 {
@@ -47,39 +47,6 @@ public:
 	IOPluginWindow ();
 
 	void set_session (ARDOUR::Session*);
-
-	class PluginWindowProxy : public WM::ProxyBase
-	{
-	public:
-		PluginWindowProxy (std::string const&, std::weak_ptr<ARDOUR::PlugInsertBase>);
-		~PluginWindowProxy ();
-		Gtk::Window* get (bool create = false);
-
-		void show_the_right_window ();
-
-		ARDOUR::SessionHandlePtr* session_handle ()
-		{
-			return 0;
-		}
-
-		void set_custom_ui_mode (bool use_custom)
-		{
-			_want_custom = use_custom;
-		}
-
-		int      set_state (const XMLNode&, int);
-		XMLNode& get_state () const;
-
-	private:
-		void plugin_going_away ();
-
-		std::weak_ptr<ARDOUR::PlugInsertBase> _pib;
-
-		bool _is_custom;
-		bool _want_custom;
-
-		PBD::ScopedConnection _going_away_connection;
-	};
 
 protected:
 	void on_show ();
@@ -147,7 +114,7 @@ private:
 		IOButton                          _btn_output;
 		ArdourWidgets::ArdourButton       _btn_ioplug;
 		PluginWindowProxy*                _window_proxy;
-		std::shared_ptr<ARDOUR::IOPlug> _iop;
+		std::shared_ptr<ARDOUR::IOPlug>   _iop;
 		PBD::ScopedConnection             _going_away_connection;
 	};
 
