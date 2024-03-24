@@ -219,6 +219,7 @@ gtk2_ardour_sources = [
         'plugin_ui.cc',
         'plugin_dspload_ui.cc',
         'plugin_dspload_window.cc',
+        'plugin_window_proxy.cc',
         'port_group.cc',
         'port_insert_ui.cc',
         'port_matrix.cc',
