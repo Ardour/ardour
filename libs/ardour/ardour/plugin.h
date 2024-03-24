@@ -358,6 +358,11 @@ public:
 	 */
 	virtual void set_property (uint32_t key, const Variant& value) {}
 
+	virtual Variant get_property_value (uint32_t) const
+	{
+		return Variant();
+	}
+
 	/** Emit PropertyChanged for all current property values. */
 	virtual void announce_property_values () {}
 

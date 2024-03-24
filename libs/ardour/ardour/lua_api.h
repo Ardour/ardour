@@ -167,6 +167,14 @@ namespace ARDOUR { namespace LuaAPI {
 	 */
 	bool set_plugin_insert_property (std::shared_ptr<ARDOUR::PluginInsert> pi, std::string const& uri, luabridge::LuaRef value);
 
+	/** get a plugin property (LV2 plugins only)
+	 *
+	 * @param p two arguments: Plugin-Inster, URI of the property
+	 * @param value the value to set (boolean, integer, float, string/path)
+	 * @returns value, depending on datatype or nil if property is not found
+	 */
+	int get_plugin_insert_property (lua_State *lua);
+
 	/**
 	 * A convenience function to get a Automation Lists and ParameterDescriptor
 	 * for a given plugin control.
