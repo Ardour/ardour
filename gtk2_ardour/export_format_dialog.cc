@@ -70,7 +70,7 @@ ExportFormatDialog::ExportFormatDialog (FormatPtr format, bool new_dialog)
 	, silence_end_checkbox (_("Add silence at end:"))
 	, silence_end_clock ("silence_end", true, "", true, false, true)
 
-	, command_label (_("Command to run post-export\n(%f=file path, %d=directory, %b=basename, see tooltip for more):"), Gtk::ALIGN_START)
+	, command_label (_("Command to run post-export\n(%f=file path, %d=directory, %b=basename; see tooltip for more,\ndon't add quotes around arguments):"), Gtk::ALIGN_START)
 
 	, format_table (3, 4)
 	, compatibility_label (_("Compatibility"), Gtk::ALIGN_START)
