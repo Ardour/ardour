@@ -3021,6 +3021,8 @@ Session::new_audio_track (int input_channels, int output_channels, RouteGroup* r
 					goto failed;
 				}
 
+				std::cerr << "new track with " << output_channels << " channels\n";
+
 				if (track->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
 					error << string_compose (
 						_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -3104,7 +3106,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 					      << endmsg;
 					goto failure;
 				}
-
+				
 
 				if (bus->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
 					error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -3524,6 +3526,8 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 	{
 		PresentationInfo::ChangeSuspender cs;
 		ensure_route_presentation_info_gap (order, new_routes.size());
+		ensure_stripable_sort_order ();
+		reassign_track_numbers ();
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x, ++added) {
 
@@ -3603,7 +3607,6 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 
 			ARDOUR::GUIIdle ();
 		}
-		ensure_stripable_sort_order ();
 	}
 
 	if (_monitor_out && !loading()) {
@@ -3622,8 +3625,6 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 			r->enable_surround_send ();
 		}
 	}
-
-	reassign_track_numbers ();
 }
 
 void
@@ -4580,15 +4581,19 @@ Session::reassign_track_numbers ()
 
 	StateProtector sp (this);
 
-	for (RouteList::iterator i = r.begin(); i != r.end(); ++i) {
-		assert (!(*i)->is_auditioner());
-		if (std::dynamic_pointer_cast<Track> (*i)) {
-			(*i)->set_track_number(++tn);
-		} else if (!(*i)->is_main_bus ()) {
-			(*i)->set_track_number(--bn);
+	for (auto & route : r) {
+		assert (!route->is_auditioner());
+		if (std::dynamic_pointer_cast<Track> (route)) {
+			route->set_track_number(++tn);
+		} else if (!route->is_main_bus ()) {
+			route->set_track_number(--bn);
 		}
 
-		std::shared_ptr<TriggerBox> tb = (*i)->triggerbox();
+		if (Profile->get_livetrax() && !route->is_auditioner() && route->is_track()) {
+			livetrax_auto_connect_route (route);
+		}
+
+		std::shared_ptr<TriggerBox> tb = (route)->triggerbox();
 		if (tb) {
 			tb->set_order (trigger_order);
 			trigger_order++;
@@ -4599,8 +4604,8 @@ Session::reassign_track_numbers ()
 	_track_number_decimals = decimals;
 
 	if (decimals_changed && config.get_track_name_number ()) {
-		for (RouteList::iterator i = r.begin(); i != r.end(); ++i) {
-			std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track> (*i);
+		for (auto & route : r) {
+			std::shared_ptr<Track> t = std::dynamic_pointer_cast<Track> (route);
 			if (t) {
 				t->resync_take_name ();
 			}
@@ -6462,7 +6467,7 @@ Session::write_one_track (Track& track, samplepos_t start, samplepos_t end,
 
 		plist.add (Properties::whole_file, true);
 		plist.add (Properties::length, len); //ToDo: in nutempo, if the Range is snapped to bbt, this should be in bbt (?)
-		plist.add (Properties::name, region_name_from_path (srcs.front()->name(), true)); // TODO: allow custom region-name when consolidating 
+		plist.add (Properties::name, region_name_from_path (srcs.front()->name(), true)); // TODO: allow custom region-name when consolidating
 		plist.add (Properties::tags, "(bounce)");
 
 		result = RegionFactory::create (srcs, plist, true);
@@ -7670,6 +7675,13 @@ Session::cut_copy_section (timepos_t const& start_, timepos_t const& end_, timep
 }
 
 void
+Session::livetrax_auto_connect_route (std::shared_ptr<Route> route)
+{
+	ChanCount ignored;
+	auto_connect_route (route, true, true, ignored, ignored, ignored, ignored);
+}
+
+void
 Session::auto_connect_route (std::shared_ptr<Route> route,
 		bool connect_inputs,
 		bool connect_outputs,
@@ -7711,6 +7723,27 @@ Session::queue_latency_recompute ()
 }
 
 void
+Session::livetrax_auto_connect (std::shared_ptr<Route> route)
+{
+	vector<string> physinputs;
+	vector<string> physoutputs;
+
+	get_physical_ports (physinputs, physoutputs, DataType::AUDIO);
+
+	const vector<string>::size_type n = route->track_number() - 1;
+
+	route->input()->disconnect (this);
+	route->output()->disconnect (this);
+
+	route->input()->connect (route->input()->ports().port (DataType::AUDIO, 0),  physinputs[n % physinputs.size()], this);
+	route->output()->connect (route->output()->ports().port (DataType::AUDIO, 0),  physoutputs[n % physoutputs.size()], this);
+
+	DEBUG_TRACE (DEBUG::PortConnectAuto, string_compose ("livetrax auto connect %1 [%2] to %3 and %4\n", route->name(), route->track_number(),
+	                                                     physinputs[n % physinputs.size()],
+	                                                     physoutputs[n % physoutputs.size()]));
+}
+
+void
 Session::auto_connect (const AutoConnectRequest& ar)
 {
 	std::shared_ptr<Route> route = ar.route.lock();
@@ -7718,6 +7751,11 @@ Session::auto_connect (const AutoConnectRequest& ar)
 	if (!route) { return; }
 
 	if (loading()) {
+		return;
+	}
+
+	if (Profile->get_livetrax() && !route->is_auditioner() && route->is_track()) {
+		livetrax_auto_connect (route);
 		return;
 	}
 
@@ -7750,7 +7788,6 @@ Session::auto_connect (const AutoConnectRequest& ar)
 		vector<string> physinputs;
 		vector<string> physoutputs;
 
-
 		/* for connecting track inputs we only want MIDI ports marked
 		 * for "music".
 		 */
@@ -7775,6 +7812,8 @@ Session::auto_connect (const AutoConnectRequest& ar)
 					DEBUG_TRACE (DEBUG::PortConnectAuto, "Failed to auto-connect input.");
 					break;
 				}
+
+				DEBUG_TRACE (DEBUG::PortConnectAuto, string_compose ("autoconnected input  %1/%2 [%4]to %3\n", route->name(), i, port, route->track_number()));
 			}
 		}
 
@@ -7801,6 +7840,8 @@ Session::auto_connect (const AutoConnectRequest& ar)
 					DEBUG_TRACE (DEBUG::PortConnectAuto, "Failed to auto-connect output.");
 					break;
 				}
+
+				DEBUG_TRACE (DEBUG::PortConnectAuto, string_compose ("autoconnected output %1/%2 [%4]to %3\n", route->name(), i, port, route->track_number()));
 			}
 		}
 	}
@@ -8132,4 +8173,3 @@ Session::foreach_route (void (Route::*method)())
 		((r.get())->*method) ();
 	}
 }
-

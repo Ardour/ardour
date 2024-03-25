@@ -316,6 +316,11 @@ Route::init ()
 		panner_shell()->select_panner_by_uri ("http://ardour.org/plugin/panner_balance");
 	}
 
+	if (Profile->get_livetrax() && is_track()) {
+		_master_send.reset (new InternalSend (_session, _pannable, _mute_master, std::dynamic_pointer_cast<Route> (shared_from_this()), std::shared_ptr<Route>(), Delivery::Aux, false));
+		_master_send->set_display_to_user (false);
+	}
+
 	/* now set up processor chain and invisible processors */
 	{
 		Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
@@ -1847,10 +1852,11 @@ Route::try_configure_processors_unlocked (ChanCount in, ProcessorStreams* err)
 
 		if ((*p)->can_support_io_configuration(in, out)) {
 
-			if (std::dynamic_pointer_cast<Delivery> (*p)
-					&& std::dynamic_pointer_cast<Delivery> (*p)->role() == Delivery::Main
-					&& !is_auditioner()
-					&& (is_monitor() || _strict_io || Profile->get_mixbus ())) {
+			if (!Profile->get_livetrax()
+			    && std::dynamic_pointer_cast<Delivery> (*p)
+			    && std::dynamic_pointer_cast<Delivery> (*p)->role() == Delivery::Main
+			    && !is_auditioner()
+			    && (is_monitor() || _strict_io || Profile->get_mixbus ())) {
 				/* with strict I/O the panner + output are forced to
 				 * follow the last processor's output.
 				 *
@@ -2522,41 +2528,49 @@ Route::customize_plugin_insert (std::shared_ptr<Processor> proc, uint32_t count,
 }
 
 bool
-Route::set_strict_io (const bool enable)
+Route::set_strict_io (bool enable)
 {
 	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock ());
 
-	if (_strict_io != enable) {
-		_strict_io = enable;
-		Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	if (Profile->get_livetrax()) {
+		/* cannot be disabled, and is set to true by default */
+		// enable = true;
+	}
+
+	if (_strict_io == enable) {
+		return true;
+	}
+
+	_strict_io = enable;
+	Glib::Threads::RWLock::ReaderLock lm (_processor_lock);
+	for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
+		std::shared_ptr<PluginInsert> pi;
+		if ((pi = std::dynamic_pointer_cast<PluginInsert>(*p)) != 0) {
+			pi->set_strict_io (_strict_io);
+		}
+	}
+
+	list<pair<ChanCount, ChanCount> > c = try_configure_processors_unlocked (n_inputs (), 0);
+
+	if (c.empty()) {
+		// not possible
+		_strict_io = !enable; // restore old value
 		for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
 			std::shared_ptr<PluginInsert> pi;
 			if ((pi = std::dynamic_pointer_cast<PluginInsert>(*p)) != 0) {
 				pi->set_strict_io (_strict_io);
 			}
 		}
-
-		list<pair<ChanCount, ChanCount> > c = try_configure_processors_unlocked (n_inputs (), 0);
-
-		if (c.empty()) {
-			// not possible
-			_strict_io = !enable; // restore old value
-			for (ProcessorList::iterator p = _processors.begin(); p != _processors.end(); ++p) {
-				std::shared_ptr<PluginInsert> pi;
-				if ((pi = std::dynamic_pointer_cast<PluginInsert>(*p)) != 0) {
-					pi->set_strict_io (_strict_io);
-				}
-			}
-			return false;
-		}
-		lm.release ();
-
-		configure_processors (0);
-		lx.release ();
-
-		processors_changed (RouteProcessorChange (RouteProcessorChange::CustomPinChange, false)); /* EMIT SIGNAL */
-		_session.set_dirty ();
+		return false;
 	}
+	lm.release ();
+
+	configure_processors (0);
+	lx.release ();
+
+	processors_changed (RouteProcessorChange (RouteProcessorChange::CustomPinChange, false)); /* EMIT SIGNAL */
+	_session.set_dirty ();
+
 	return true;
 }
 
@@ -5282,6 +5296,12 @@ Route::setup_invisible_processors ()
 	/* SURROUND SEND */
 	if (_surround_send) {
 		new_processors.push_back (_surround_send);
+	}
+
+	if (Profile->get_livetrax() && is_track()) {
+		assert (_master_send);
+		assert (!_master_send->display_to_user());
+		new_processors.push_back (_master_send);
 	}
 
 	/* MAIN OUTS */

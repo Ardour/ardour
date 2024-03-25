@@ -99,6 +99,7 @@ class MonitorControl;
 class TriggerBox;
 class SurroundReturn;
 class SurroundSend;
+class Send;
 
 class LIBARDOUR_API Route : public Stripable,
                             public GraphNode,
@@ -695,6 +696,7 @@ protected:
 	std::shared_ptr<PeakMeter>         _meter;
 	std::shared_ptr<PolarityProcessor> _polarity;
 	std::shared_ptr<TriggerBox>        _triggerbox;
+	std::shared_ptr<InternalSend>      _master_send;
 
 	bool _volume_applies_to_output;
 

@@ -36,6 +36,7 @@
 #include "ardour/io.h"
 #include "ardour/meter.h"
 #include "ardour/panner_shell.h"
+#include "ardour/profile.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
 
@@ -72,9 +73,17 @@ Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_b
 		return string ();
 	}
 
+
+
+
 	switch (r) {
 	case Delivery::Aux:
-		return string_compose (_("aux %1"), (bitslot = s.next_aux_send_id ()));
+		if (Profile->get_livetrax()) {
+			/* The only type of aux send possible with livetrax */
+			return _("master");
+		} else {
+			return string_compose (_("aux %1"), (bitslot = s.next_aux_send_id ()));
+		}
 	case Delivery::Listen:
 		bitslot = 0; /* unused */
 		return _("listen"); // no ports, no need for numbering
@@ -551,6 +560,10 @@ Send::set_name (const string& new_name)
 bool
 Send::display_to_user () const
 {
+	if (_role == Aux && Profile->get_livetrax()) {
+		return false;
+	}
+
 	/* we ignore Deliver::_display_to_user */
 
 	if (_role == Listen || _role == Foldback) {
