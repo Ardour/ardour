@@ -2970,7 +2970,7 @@ ARDOUR_UI::add_route_dialog_response (int r)
 		}
 	}
 
-	if (oac & AutoConnectMaster) {
+	if (!Profile->get_livetrax() && (oac & AutoConnectMaster)) {
 		output_chan.set (DataType::AUDIO, (_session->master_out() ? _session->master_out()->n_inputs().n_audio() : input_chan.n_audio()));
 		output_chan.set (DataType::MIDI, 0);
 	} else {
