@@ -23,6 +23,11 @@
 #include <map>
 #include <set>
 
+#include <gtkmm/treemodel.h>
+#include <gtkmm/liststore.h>
+
+#include <glibmm/threads.h>
+
 #define ABSTRACT_UI_EXPORTS
 #include "pbd/abstract_ui.h"
 
@@ -109,6 +114,7 @@ public:
 
 	std::string input_port_name () const override;
 	std::string output_port_name () const override;
+	uint32_t load_mappings ();
 
 	XMLNode& get_state () const override;
 	int set_state (const XMLNode&, int version) override;
@@ -279,11 +285,26 @@ public:
 		                         { "TRACK_COPY", ControllerID::TRACK_COPY },
 		                         { "TRACK_GROUP", ControllerID::TRACK_GROUP } };
 
-private:
+    struct PluginControllerColumns : public Gtk::TreeModel::ColumnRecord {
+		PluginControllerColumns () { 
+			add (controllerName);
+            add (controllerId);
+		}
+		Gtk::TreeModelColumn<std::string> controllerName;
+		Gtk::TreeModelColumn<int>         controllerId; 
+	};
+	PluginControllerColumns plugin_controller_columns;
+	Glib::RefPtr<Gtk::ListStore> plugin_controller_model;
+	const std::string findControllerNameById (const ControllerID id);
+
+  private:
 	std::string config_dir_name = "c1mappings";
 	/* GUI */
 	mutable C1GUI* gui;
 	void build_gui ();
+
+	bool mappings_loaded = false;
+	bool controls_model_loaded = false;
 
 	/* Configuration */
 	const uint32_t bank_size = 20;
@@ -586,16 +607,8 @@ private:
 
 	using ParameterMap = std::map<uint32_t, PluginParameterMapping>;
 
-	struct PluginMapping
-	{
-		std::string id;
-		std::string name;
-		ParameterMap parameters;
-	};
-
 	/* plugin handling */
 	bool ensure_config_dir ();
-	uint32_t load_mappings ();
 	bool load_mapping (XMLNode* fin);
 	void create_mapping (const std::shared_ptr<ARDOUR::Processor> proc, const std::shared_ptr<ARDOUR::Plugin> plugin);
 
@@ -608,8 +621,21 @@ private:
 
 	bool map_select_plugin (const int32_t plugin_index);
 
+
+  public:
+	struct PluginMapping
+	{
+		std::string id;
+		std::string name;
+		bool configured;
+		ParameterMap parameters;
+	};
 	using PluginMappingMap = std::map<std::string, PluginMapping>;
 	PluginMappingMap pluginMappingMap;
+
+	PluginMappingMap getPluginMappingMap () { return pluginMappingMap; }
+    Glib::RefPtr<Gtk::ListStore> getPluginControllerModel();
+	void write_plugin_mapping (PluginMapping &mapping);
 };
 }
 #endif /* ardour_surface_console1_h */
