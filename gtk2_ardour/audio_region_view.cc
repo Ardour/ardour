@@ -205,7 +205,7 @@ AudioRegionView::init (bool wfd)
 
 	create_waves ();
 
-	if (!_recregion) {
+	if (!_recregion && !Profile->get_livetrax()) {
 		fade_in_handle = new ArdourCanvas::Rectangle (group);
 		CANVAS_DEBUG_NAME (fade_in_handle, string_compose ("fade in handle for %1", region()->name()));
 		fade_in_handle->set_outline_color (Gtkmm2ext::rgba_to_color (0, 0, 0, 1.0));
