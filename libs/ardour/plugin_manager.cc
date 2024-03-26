@@ -83,6 +83,7 @@
 #include "ardour/lv2_plugin.h"
 #include "ardour/plugin.h"
 #include "ardour/plugin_manager.h"
+#include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/search_paths.h"
 
@@ -194,6 +195,10 @@ PluginManager::PluginManager ()
 	, _cancel_scan_timeout_all (false)
 	, _enable_scan_timeout (false)
 {
+	if (Profile->get_livetrax()) {
+		return;
+	}
+
 	char* s;
 
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined VST3_SUPPORT
@@ -458,6 +463,10 @@ PluginManager::conceal_duplicates (ARDOUR::PluginInfoList* old, ARDOUR::PluginIn
 void
 PluginManager::refresh (bool cache_only)
 {
+	if (Profile->get_livetrax()) {
+		return;
+	}
+
 	Glib::Threads::Mutex::Lock lm (_lock, Glib::Threads::TRY_LOCK);
 
 	if (!lm.locked()) {
