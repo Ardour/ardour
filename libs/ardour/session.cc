@@ -346,6 +346,7 @@ Session::Session (AudioEngine &eng,
 	, _pending_cue (-1)
 	, _active_cue (-1)
 	, tb_with_filled_slots (0)
+	, _no_file_format_reset (0)
 {
 	_suspend_save.store (0);
 	_playback_load.store (0);
@@ -6093,8 +6094,26 @@ Session::unmark_insert_id (uint32_t id)
 }
 
 void
+Session::enable_file_format_reset ()
+{
+	if (_no_file_format_reset) {
+		_no_file_format_reset--;
+	}
+}
+
+void
+Session::disable_file_format_reset ()
+{
+	_no_file_format_reset++;
+}
+
+void
 Session::reset_native_file_format ()
 {
+	if (_no_file_format_reset) {
+		return;
+	}
+
 	std::shared_ptr<RouteList const> rl = routes.reader ();
 
 	for (auto const& i : *rl) {

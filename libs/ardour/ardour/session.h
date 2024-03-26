@@ -1405,6 +1405,9 @@ public:
 	void start_domain_bounce (Temporal::DomainBounceInfo&);
 	void finish_domain_bounce (Temporal::DomainBounceInfo&);
 
+	void enable_file_format_reset ();
+	void disable_file_format_reset ();
+
 protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
@@ -2415,6 +2418,7 @@ private:
 	void handle_slots_empty_status (std::weak_ptr<Route> const &);
 
 	void time_domain_changed ();
+	uint32_t _no_file_format_reset;
 };
 
 

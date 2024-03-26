@@ -608,6 +608,13 @@ enum HeaderFormat {
 	FLAC,
 };
 
+struct LiveTraxFileFormat {
+	LiveTraxFileFormat (SampleFormat sff, HeaderFormat hff) : sf (sff), hf (hff) {}
+
+	SampleFormat sf;
+	HeaderFormat hf;
+};
+
 struct PeakData {
 	typedef Sample PeakDatum;
 
