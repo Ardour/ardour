@@ -600,6 +600,7 @@ public:
 	PBD::Signal0<void> MouseModeChanged;
 
 	Gtkmm2ext::Bindings* bindings;
+	Gtkmm2ext::Bindings* midi_bindings;
 
 	virtual SelectionPropertiesBox& properties_box() const = 0;
 	Gtk::HBox* mouse_mode_hbox;

@@ -399,6 +399,7 @@ ARDOUR_UI::livetrax_setup_windows ()
 	Gtk::VBox* vb;
 	Gtk::HBox* hb;
 	ArdourButton::Element elements (ArdourButton::Element (ArdourButton::Text|ArdourButton::VectorIcon));
+	Gtkmm2ext::Bindings* bindings;
 
 	livetrax_top_bar.set_spacing (12);
 	livetrax_top_bar.set_border_width (12);
@@ -474,7 +475,7 @@ ARDOUR_UI::livetrax_setup_windows ()
 	livetrax_edit_vscrollbar->show ();
 	hb->pack_start (editor->contents(), true, true);
 	hb->pack_start (*livetrax_edit_vscrollbar, false, false);
-
+	
 	vb = manage (new Gtk::VBox);
 	livetrax_edit_hscrollbar = manage (new Gtk::HScrollbar (editor->horizontal_adjustment));
 	livetrax_edit_hscrollbar->show ();
@@ -498,6 +499,11 @@ ARDOUR_UI::livetrax_setup_windows ()
 	connect_transport_elements ();
 	setup_tooltips ();
 	build_menu_bar ();
+
+	bindings = Bindings::get_bindings (X_("Editor"));
+	livetrax_editor_bar.set_data ("ardour-bindings", bindings);
+	bindings = Bindings::get_bindings (X_("Mixer"));
+	livetrax_mixer_bar.set_data ("ardour-bindings", bindings);
 
 	// setup_tooltips ();
 

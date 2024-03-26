@@ -453,7 +453,7 @@ MixerStrip::~MixerStrip ()
 void
 MixerStrip::vca_assign (std::shared_ptr<ARDOUR::VCA> vca)
 {
-	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> ( route() );
+	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> (route());
 	if (sl)
 		sl->assign(vca);
 }
@@ -461,14 +461,19 @@ MixerStrip::vca_assign (std::shared_ptr<ARDOUR::VCA> vca)
 void
 MixerStrip::vca_unassign (std::shared_ptr<ARDOUR::VCA> vca)
 {
-	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> ( route() );
-	if (sl)
+	std::shared_ptr<Slavable> sl = std::dynamic_pointer_cast<Slavable> (route());
+	if (sl) {
 		sl->unassign(vca);
+	}
 }
 
 bool
-MixerStrip::mixer_strip_enter_event (GdkEventCrossing* /*ev*/)
+MixerStrip::mixer_strip_enter_event (GdkEventCrossing* ev)
 {
+	if (ev->detail != GDK_NOTIFY_INFERIOR) {
+		_mixer.steal_focus ();
+	}
+
 	_entered_mixer_strip = this;
 
 	return false;
@@ -478,7 +483,7 @@ bool
 MixerStrip::mixer_strip_leave_event (GdkEventCrossing *ev)
 {
 	//if we have moved outside our strip, but not into a child view, then deselect ourselves
-	if ( !(ev->detail == GDK_NOTIFY_INFERIOR) ) {
+	if (ev->detail != GDK_NOTIFY_INFERIOR) {
 		_entered_mixer_strip= 0;
 
 		//clear keyboard focus in the gain display.  this is cheesy but fixes a longstanding "bug" where the user starts typing in the gain entry, and leaves it active, thereby prohibiting other keybindings from working

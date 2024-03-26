@@ -1316,7 +1316,7 @@ private:
 
 	void register_actions ();
 	void register_region_actions ();
-	void register_midi_actions (Gtkmm2ext::Bindings*);
+	void register_midi_actions ();
 
 	void load_bindings ();
 

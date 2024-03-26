@@ -165,6 +165,8 @@ Mixer_UI::Mixer_UI ()
 	scroller_base.set_name ("MixerWindow");
 	scroller_base.signal_button_press_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
 	scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
+	scroller_base.signal_enter_notify_event ().connect (sigc::mem_fun (*this, &Mixer_UI::scroller_enter), false);
+
 
 	/* set up drag-n-drop */
 	vector<TargetEntry> target_table;
@@ -521,8 +523,17 @@ Mixer_UI::show_window ()
 		ms->parameter_changed (X_("mixer-element-visibility"));
 	}
 
-	/* force focus into main area */
-	scroller_base.grab_focus ();
+	if (!Profile->get_livetrax()) {
+		/* force focus into main area */
+		scroller_base.grab_focus ();
+	}
+}
+
+bool
+Mixer_UI::scroller_enter (GdkEventCrossing* ev)
+{
+	steal_focus ();
+	return false;
 }
 
 void
@@ -4435,4 +4446,12 @@ Mixer_UI::sync_surround_action ()
 
 	Glib::RefPtr<Action> surround_export = ActionManager::get_action (X_("Main"), X_("SurroundExport"));
 	surround_export->set_sensitive (have_sm && _session->vapor_export_barrier ());
+}
+
+void
+Mixer_UI::steal_focus ()
+{
+	if (Profile->get_livetrax()) {
+		scroller_base.grab_focus ();
+	}
 }

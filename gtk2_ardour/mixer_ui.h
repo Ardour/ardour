@@ -169,7 +169,7 @@ public:
 
 	void toggle_monitor_action (ARDOUR::MonitorChoice monitor_choice, bool group_override = false, bool all = false);
 
-	Gtk::ScrolledWindow   scroller;
+	void steal_focus ();
 
 protected:
 	void set_axis_targets_for_operation ();
@@ -181,6 +181,7 @@ private:
 	Gtk::VBox            _content;
 	Gtk::HBox             global_hpacker;
 	Gtk::VBox             global_vpacker;
+	Gtk::ScrolledWindow   scroller;
 	Gtk::EventBox         scroller_base;
 	Gtk::HBox             scroller_hpacker;
 	Gtk::VBox             mixer_scroller_vpacker;
@@ -235,6 +236,7 @@ private:
 
 	void scroller_drag_data_received (const Glib::RefPtr<Gdk::DragContext>&, int, int, const Gtk::SelectionData&, guint, guint);
 	bool strip_scroller_button_event (GdkEventButton*);
+	bool scroller_enter (GdkEventCrossing*);
 	void scroll_left ();
 	void scroll_right ();
 	void vca_scroll_left ();

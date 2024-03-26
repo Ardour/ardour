@@ -790,7 +790,7 @@ Editor::register_actions ()
 }
 
 void
-Editor::register_midi_actions (Bindings* midi_bindings)
+Editor::register_midi_actions ()
 {
 	_midi_actions = ActionManager::create_action_group (midi_bindings, X_("Notes"));
 
@@ -985,7 +985,9 @@ void
 Editor::load_bindings ()
 {
 	bindings = Bindings::get_bindings (X_("Editor"));
-	global_hpacker.set_data ("ardour-bindings", bindings);
+	midi_bindings = Bindings::get_bindings (X_("MIDI"));
+
+	register_midi_actions ();
 
 	/* This set of bindings may expand in the future to include things
 	 * other than MIDI editing, but for now this is all we've got as far as
@@ -993,11 +995,11 @@ Editor::load_bindings ()
 	 * the keys may overlap.
 	 */
 
-	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
 
-	register_midi_actions (midi_bindings);
-
-	_track_canvas_viewport->canvas()->set_data ("ardour-bindings", midi_bindings);
+	if (!Profile->get_livetrax()) {
+		global_hpacker.set_data ("ardour-bindings", bindings);
+		_track_canvas_viewport->canvas()->set_data ("ardour-bindings", midi_bindings);
+	}
 }
 
 void

@@ -975,7 +975,7 @@ Editor::entered_track_canvas (GdkEventCrossing* ev)
 
 	if (!was_within) {
 
-		if (internal_editing()) {
+		if (internal_editing() || Profile->get_livetrax()) {
 			/* ensure that key events go here because there are
 			   internal editing bindings associated only with the
 			   canvas. if the focus is elsewhere, we cannot find them.
