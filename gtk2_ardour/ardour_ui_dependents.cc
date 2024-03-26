@@ -718,8 +718,6 @@ ARDOUR_UI::livetrax_set_file_format (LiveTraxFileFormat const & ff)
 
 	/* Don't reset write sources on header format change */
 
-	std::cerr << "Set FF to " << ff.hf << " holding " << ff.sf << std::endl;
-
 	_session->disable_file_format_reset ();
 
 	_session->config.set_native_file_header_format (ff.hf);
