@@ -1751,7 +1751,7 @@ AudioRegionView::set_fade_visibility (bool yn)
 		if (end_xfade_curve)      { end_xfade_curve->show (); }
 		if (start_xfade_rect)     { start_xfade_rect->show (); }
 		if (end_xfade_rect)       { end_xfade_rect->show (); }
-		} else {
+	} else {
 		if (start_xfade_curve)    { start_xfade_curve->hide(); }
 		if (end_xfade_curve)      { end_xfade_curve->hide(); }
 		if (fade_in_handle)       { fade_in_handle->hide(); }
