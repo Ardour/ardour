@@ -1407,6 +1407,7 @@ public:
 
 	void enable_file_format_reset ();
 	void disable_file_format_reset ();
+	void reset_native_file_format();
 
 protected:
 	friend class AudioEngine;
@@ -2247,7 +2248,6 @@ private:
 	void controllable_touched (std::weak_ptr<PBD::Controllable>);
 	std::weak_ptr<PBD::Controllable> _recently_touched_controllable;
 
-	void reset_native_file_format();
 	bool first_file_data_format_reset;
 	bool first_file_header_format_reset;
 
