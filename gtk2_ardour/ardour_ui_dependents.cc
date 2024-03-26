@@ -381,6 +381,9 @@ ARDOUR_UI::setup_windows ()
 int
 ARDOUR_UI::livetrax_setup_windows ()
 {
+	using namespace Menu_Helpers;
+	using namespace Gtk;
+
 	ArdourButton::set_default_tweaks (ArdourButton::Tweaks (ArdourButton::ForceBoxy|ArdourButton::ForceFlat));
 
 	if (create_editor()) {
@@ -394,10 +397,10 @@ ARDOUR_UI::livetrax_setup_windows ()
 	}
 
 	livetrax_time_info_box = new TimeInfoBox ("LiveTraxTimeInfo", false);
-	Gtk::Image* icon = manage (new Gtk::Image (ARDOUR_UI_UTILS::get_icon ("allenheath")));
+	Image* icon = manage (new Image (ARDOUR_UI_UTILS::get_icon ("allenheath")));
 
-	Gtk::VBox* vb;
-	Gtk::HBox* hb;
+	VBox* vb;
+	HBox* hb;
 	ArdourButton::Element elements (ArdourButton::Element (ArdourButton::Text|ArdourButton::VectorIcon));
 	Gtkmm2ext::Bindings* bindings;
 	Glib::RefPtr<Action> act;
@@ -408,21 +411,25 @@ ARDOUR_UI::livetrax_setup_windows ()
 	livetrax_top_bar.pack_start (*livetrax_time_info_box, false, false);
 	livetrax_top_bar.pack_start (*primary_clock, false, false);
 
-	Gtk::EventBox* ev_dsp = manage (new EventBox);
-	Gtk::EventBox* ev_timecode = manage (new EventBox);
+	EventBox* ev_dsp = manage (new EventBox);
+	EventBox* ev_timecode = manage (new EventBox);
 	ev_dsp->set_name ("MainMenuBar");
 	ev_timecode->set_name ("MainMenuBar");
 	ev_dsp->add (dsp_load_label);
 	ev_timecode->add (timecode_format_label);
 
+	livetrax_ff_dropdown = manage (new ArdourDropdown ());
+	Menu_Helpers::MenuList& items (livetrax_ff_dropdown->items());
+	items.push_back (MenuElem (_("24 bit WAV/RF64"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::livetrax_set_file_format), LiveTraxFileFormat (ARDOUR::FormatInt24, ARDOUR::RF64_WAV))));
+	items.push_back (MenuElem (_("24 bit FLAC"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::livetrax_set_file_format), LiveTraxFileFormat (ARDOUR::FormatInt24, ARDOUR::FLAC))));
+
 	livetrax_sr_button = manage (new ArdourButton (""));
-	livetrax_sf_button = manage (new ArdourButton (""));
-	vb = manage (new Gtk::VBox);
-	vb->pack_start (*livetrax_sf_button, false, false);
+	vb = manage (new VBox);
+	vb->pack_start (*livetrax_ff_dropdown, false, false);
 	vb->pack_start (*livetrax_sr_button, false, false);
 	livetrax_top_bar.pack_start (*vb, false, false);
 
-	vb = manage (new Gtk::VBox);
+	vb = manage (new VBox);
 	vb->pack_start (*ev_dsp, true, true);
 	vb->pack_start (disk_space_label, true, true);
 	vb->show_all ();
@@ -432,7 +439,7 @@ ARDOUR_UI::livetrax_setup_windows ()
 	livetrax_multi_out_button = manage (new ArdourButton (_("Multi Out")));
 	livetrax_stereo_out_button = manage (new ArdourButton (_("Stereo Out")));
 
-	vb = manage (new Gtk::VBox);
+	vb = manage (new VBox);
 	vb->pack_start (*livetrax_stereo_out_button, true, true);
 	vb->pack_start (*livetrax_multi_out_button, true, true);
 	vb->show_all ();
@@ -457,7 +464,7 @@ ARDOUR_UI::livetrax_setup_windows ()
 	livetrax_transport_bar.pack_start (*livetrax_mixer_view_button, false, false);
 	livetrax_transport_bar.pack_start (*livetrax_meter_view_button, false, false);
 
-	hb = manage (new Gtk::HBox);
+	hb = manage (new HBox);
 	hb->pack_start (transport_ctrl, false, false);
 
 	livetrax_lock_button = manage (new ArdourButton (_("Lock Icon"), elements));
@@ -479,14 +486,14 @@ ARDOUR_UI::livetrax_setup_windows ()
 	livetrax_meter_bar.set_border_width (12);
 	livetrax_meter_bar.pack_start (*livetrax_meters, true, true, 12);
 
-	hb = manage (new Gtk::HBox);
-	livetrax_edit_vscrollbar = manage (new Gtk::VScrollbar (editor->vertical_adjustment));
+	hb = manage (new HBox);
+	livetrax_edit_vscrollbar = manage (new VScrollbar (editor->vertical_adjustment));
 	livetrax_edit_vscrollbar->show ();
 	hb->pack_start (editor->contents(), true, true);
 	hb->pack_start (*livetrax_edit_vscrollbar, false, false);
 
-	vb = manage (new Gtk::VBox);
-	livetrax_edit_hscrollbar = manage (new Gtk::HScrollbar (editor->horizontal_adjustment));
+	vb = manage (new VBox);
+	livetrax_edit_hscrollbar = manage (new HScrollbar (editor->horizontal_adjustment));
 	livetrax_edit_hscrollbar->show ();
 	vb->pack_start (*hb, true, true);
 	vb->pack_start (*livetrax_edit_hscrollbar, false, false);
@@ -700,4 +707,25 @@ ARDOUR_UI::livetrax_toggle_visibility (LiveTraxVisibility v)
 	}
 
 	livetrax_visibility_change ();
+}
+
+void
+ARDOUR_UI::livetrax_set_file_format (LiveTraxFileFormat const & ff)
+{
+	if (!_session) {
+		return;
+	}
+
+	/* Don't reset write sources on header format change */
+
+	std::cerr << "Set FF to " << ff.hf << " holding " << ff.sf << std::endl;
+
+	_session->disable_file_format_reset ();
+
+	_session->config.set_native_file_header_format (ff.hf);
+	_session->config.set_native_file_data_format (ff.sf);
+
+	_session->enable_file_format_reset ();
+
+	_session->reset_native_file_format ();
 }

@@ -1375,7 +1375,7 @@ ARDOUR_UI::update_format ()
 
 		switch (_session->config.get_native_file_data_format ()) {
 		case FormatInt24:
-			s << _("24bit");
+			s << _("24 bit");
 			break;
 		default:
 			break;
@@ -1393,7 +1393,7 @@ ARDOUR_UI::update_format ()
 			break;
 		}
 
-		livetrax_sf_button->set_text (s.str(), false);
+		livetrax_ff_dropdown->set_active (s.str());
 	}
 }
 

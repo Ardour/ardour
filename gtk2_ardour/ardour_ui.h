@@ -646,7 +646,7 @@ private:
 	ArdourWidgets::ArdourButton* livetrax_mixer_view_button;
 	ArdourWidgets::ArdourButton* livetrax_lock_button;
 	ArdourWidgets::ArdourButton* livetrax_view_in_folder_button;
-	ArdourWidgets::ArdourButton* livetrax_sf_button;
+	ArdourWidgets::ArdourDropdown* livetrax_ff_dropdown;
 	ArdourWidgets::ArdourButton* livetrax_sr_button;
 	Gtk::HScrollbar* livetrax_edit_hscrollbar;
 	Gtk::VScrollbar* livetrax_edit_vscrollbar;
@@ -991,6 +991,8 @@ private:
 
 	LiveTraxVisibility _livetrax_visibility;
 	void livetrax_visibility_change ();
+
+	void livetrax_set_file_format (ARDOUR::LiveTraxFileFormat const &);
 };
 
 #endif /* __ardour_gui_h__ */
