@@ -132,7 +132,7 @@ Mixer_UI::Mixer_UI ()
 	, no_track_list_redisplay (false)
 	, in_group_row_change (false)
 	, track_menu (0)
-	, _plugin_selector (0)
+	, _plugin_selector (nullptr)
 	, _surround_strip (0)
 	, foldback_strip (0)
 	, _show_foldback_strip (true)
@@ -437,7 +437,9 @@ Mixer_UI::Mixer_UI ()
 	ARDOUR_UI::instance()->Escape.connect (*this, invalidator (*this), boost::bind (&Mixer_UI::escape, this), gui_context());
 
 #ifndef DEFER_PLUGIN_SELECTOR_LOAD
-	_plugin_selector = new PluginSelector (PluginManager::instance ());
+	if (!Profile->get_livetrax()) {
+		_plugin_selector = new PluginSelector (PluginManager::instance ());
+	}
 #else
 #error implement deferred Plugin-Favorite list
 #endif
@@ -1302,7 +1304,9 @@ Mixer_UI::set_session (Session* sess)
 		return;
 	}
 
-	refill_favorite_plugins();
+	if (!Profile->get_livetrax()) {
+		refill_favorite_plugins();
+	}
 
 	XMLNode* node = ARDOUR_UI::instance()->mixer_settings();
 	set_state (*node, 0);
@@ -2932,6 +2936,11 @@ Mixer_UI::set_route_group_activation (RouteGroup* g, bool a)
 PluginSelector*
 Mixer_UI::plugin_selector()
 {
+	if (Profile->get_livetrax()) {
+		/* no plugins, no plugin selector */
+		return nullptr;
+	}
+
 #ifdef DEFER_PLUGIN_SELECTOR_LOAD
 	if (!_plugin_selector)
 		_plugin_selector = new PluginSelector (PluginManager::instance());
@@ -3184,6 +3193,10 @@ Mixer_UI::save_favorite_ui_state (const TreeModel::iterator& iter, const TreeMod
 void
 Mixer_UI::plugin_list_mode_changed ()
 {
+	if (Profile->get_livetrax()) {
+		return;
+	}
+
 	if (plugin_list_mode () == PLM_Favorite) {
 		PBD::Unwinder<bool> uw (ignore_plugin_refill, true);
 		favorite_plugins_search_hbox.show ();
@@ -3197,6 +3210,10 @@ Mixer_UI::plugin_list_mode_changed ()
 void
 Mixer_UI::plugin_search_entry_changed ()
 {
+	if (Profile->get_livetrax()) {
+		return;
+	}
+
 	if (plugin_list_mode () == PLM_Favorite) {
 		refill_favorite_plugins ();
 	}

@@ -353,8 +353,9 @@ Editor::Editor ()
 	, _visible_canvas_width (0)
 	, _visible_canvas_height (0)
 	, _full_canvas_height (0)
-	, edit_controls_left_menu (0)
-	, edit_controls_right_menu (0)
+	, edit_controls_left_menu (nullptr)
+	, edit_controls_right_menu (nullptr)
+	, _trigger_clip_picker (nullptr)
 	, visual_change_queued(false)
 	, _tvl_no_redisplay(false)
 	, _tvl_redisplay_on_resume(false)
@@ -706,20 +707,27 @@ Editor::Editor ()
 	add_notebook_page (_("Selection"), *_properties_box);
 #warning Fix Properties Sidebar Layout to fit < 720px height
 #endif
-	add_notebook_page (_("Tracks & Busses"), _routes->widget ());
-	add_notebook_page (_("Sources"), _sources->widget ());
-	add_notebook_page (_("Regions"), _regions->widget ());
-	add_notebook_page (_("Clips"), _trigger_clip_picker);
-	add_notebook_page (_("Arrangement"), _sections->widget ());
-	add_notebook_page (_("Snapshots"), _snapshots->widget ());
-	add_notebook_page (_("Track & Bus Groups"), _route_groups->widget ());
-	add_notebook_page (_("Ranges & Marks"), _locations->widget ());
+	if (!Profile->get_livetrax()) {
 
-	_the_notebook.set_show_tabs (true);
-	_the_notebook.set_scrollable (true);
-	_the_notebook.popup_disable ();
-	_the_notebook.set_tab_pos (Gtk::POS_RIGHT);
-	_the_notebook.show_all ();
+		if (!Profile->get_livetrax()) {
+			_trigger_clip_picker = manage (new TriggerClipPicker ());
+		}
+
+		add_notebook_page (_("Tracks & Busses"), _routes->widget ());
+		add_notebook_page (_("Sources"), _sources->widget ());
+		add_notebook_page (_("Regions"), _regions->widget ());
+		add_notebook_page (_("Clips"), *_trigger_clip_picker);
+		add_notebook_page (_("Arrangement"), _sections->widget ());
+		add_notebook_page (_("Snapshots"), _snapshots->widget ());
+		add_notebook_page (_("Track & Bus Groups"), _route_groups->widget ());
+		add_notebook_page (_("Ranges & Marks"), _locations->widget ());
+
+		_the_notebook.set_show_tabs (true);
+		_the_notebook.set_scrollable (true);
+		_the_notebook.popup_disable ();
+		_the_notebook.set_tab_pos (Gtk::POS_RIGHT);
+		_the_notebook.show_all ();
+	}
 
 	_notebook_shrunk = false;
 
@@ -1351,7 +1359,10 @@ void
 Editor::set_session (Session *t)
 {
 	SessionHandlePtr::set_session (t);
-	_trigger_clip_picker.set_session (_session);
+
+	if (_trigger_clip_picker) {
+		_trigger_clip_picker->set_session (_session);
+	}
 
 	section_marker_bar->clear (true);
 

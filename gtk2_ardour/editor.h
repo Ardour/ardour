@@ -1201,7 +1201,7 @@ private:
 	Gtk::VBox           edit_controls_vbox;
 	Gtk::HBox           edit_controls_hbox;
 
-	TriggerClipPicker    _trigger_clip_picker;
+	TriggerClipPicker*    _trigger_clip_picker;
 
 	void control_vertical_zoom_in_all ();
 	void control_vertical_zoom_out_all ();
