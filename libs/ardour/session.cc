@@ -1611,7 +1611,7 @@ Session::hookup_io ()
 
 	_state_of_the_state = StateOfTheState (_state_of_the_state | InitialConnecting);
 
-	if (!auditioner) {
+	if (!Profile->get_livetrax() && !auditioner) {
 
 		/* we delay creating the auditioner till now because
 		   it makes its own connections to ports.
