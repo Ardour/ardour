@@ -271,6 +271,7 @@ CLASSKEYS(ARDOUR::RouteGroup);
 CLASSKEYS(ARDOUR::ParameterDescriptor);
 CLASSKEYS(ARDOUR::PeakMeter);
 CLASSKEYS(ARDOUR::PluginInfo);
+CLASSKEYS(ARDOUR::PluginInsert);
 CLASSKEYS(ARDOUR::Plugin::PresetRecord);
 CLASSKEYS(ARDOUR::PortEngine);
 CLASSKEYS(ARDOUR::PortManager);
