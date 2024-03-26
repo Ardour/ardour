@@ -281,8 +281,10 @@ AudioRegionView::init (bool wfd)
 
 	setup_waveform_visibility ();
 
-	get_canvas_frame()->set_data ("linemerger", (LineMerger*) this);
-	_fx_line->canvas_group().raise_to_top ();
+	if (gain_line) {
+		get_canvas_frame()->set_data ("linemerger", (LineMerger*) this);
+		_fx_line->canvas_group().raise_to_top ();
+	}
 
 	/* XXX sync mark drag? */
 }
@@ -1163,6 +1165,10 @@ AudioRegionView::unhide_envelope ()
 void
 AudioRegionView::set_region_gain_line ()
 {
+	if (Profile->get_livetrax()) {
+		return;
+	}
+	
 	if (_ignore_line_change) {
 		return;
 	}
