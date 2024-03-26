@@ -405,6 +405,14 @@ public:
 
 	void gui_idle_handler ();
 
+	enum LiveTraxVisibility {
+		LiveTraxEditorVisible = 0x1,
+		LiveTraxMixerVisible = 0x2,
+		LiveTraxMeterVisible = 0x4,
+	};
+
+	void livetrax_toggle_visibility (LiveTraxVisibility);
+
 protected:
 	friend class PublicEditor;
 
@@ -980,6 +988,9 @@ private:
 	bool nsm_first_session_opened;
 
 	PBD::ScopedConnectionList clock_state_connection;
+
+	LiveTraxVisibility _livetrax_visibility;
+	void livetrax_visibility_change ();
 };
 
 #endif /* __ardour_gui_h__ */

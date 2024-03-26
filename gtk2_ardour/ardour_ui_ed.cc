@@ -286,6 +286,13 @@ ARDOUR_UI::install_actions ()
 		ActionManager::register_action (common_actions, X_("show-ui-prefs"), _("Show more UI preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_ui_prefs));
 	}
 
+	if (Profile->get_livetrax()) {
+		/* XXX should these be toggles? */
+		ActionManager::register_action (common_actions, X_("livetrax-toggle-meter"), _("Hide/Show Meters"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::livetrax_toggle_visibility), LiveTraxMeterVisible));
+		ActionManager::register_action (common_actions, X_("livetrax-toggle-mixer"), _("Hide/Show Mixer"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::livetrax_toggle_visibility), LiveTraxMixerVisible));
+		ActionManager::register_action (common_actions, X_("livetrax-toggle-editor"), _("Hide/Show Editor"), sigc::bind (sigc::mem_fun(*this, &ARDOUR_UI::livetrax_toggle_visibility), LiveTraxEditorVisible));
+	}
+
 	ActionManager::register_action (common_actions, X_("toggle-meterbridge"), S_("Window|Meterbridge"),  sigc::mem_fun(*this, &ARDOUR_UI::toggle_meterbridge));
 
 	act = ActionManager::register_action (common_actions, X_("NewMIDITracer"), _("MIDI Tracer"), sigc::mem_fun(*this, &ARDOUR_UI::new_midi_tracer_window));

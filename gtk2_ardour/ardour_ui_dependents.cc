@@ -400,6 +400,7 @@ ARDOUR_UI::livetrax_setup_windows ()
 	Gtk::HBox* hb;
 	ArdourButton::Element elements (ArdourButton::Element (ArdourButton::Text|ArdourButton::VectorIcon));
 	Gtkmm2ext::Bindings* bindings;
+	Glib::RefPtr<Action> act;
 
 	livetrax_top_bar.set_spacing (12);
 	livetrax_top_bar.set_border_width (12);
@@ -440,9 +441,17 @@ ARDOUR_UI::livetrax_setup_windows ()
 
 	/* transport bar */
 
-	livetrax_meter_view_button = manage (new ArdourButton (_("METER"), ArdourButton::Element (elements|ArdourButton::Edge|ArdourButton::Body), true));;
-	livetrax_mixer_view_button = manage (new ArdourButton (_("MIXER"), ArdourButton::Element (elements|ArdourButton::Edge|ArdourButton::Body), true));
-	livetrax_editor_view_button = manage (new ArdourButton (_("TRACKS"), ArdourButton::Element (elements|ArdourButton::Edge|ArdourButton::Body), true));
+	livetrax_meter_view_button = manage (new ArdourButton (_("METERS"), ArdourButton::Element (ArdourButton::Text|ArdourButton::Edge|ArdourButton::Body), true));;
+	act = ActionManager::get_action (X_("Common"), X_("livetrax-toggle-meter"));
+	livetrax_meter_view_button->set_related_action (act);
+
+	livetrax_mixer_view_button = manage (new ArdourButton (_("MIXER"), ArdourButton::Element (ArdourButton::Text|ArdourButton::Edge|ArdourButton::Body), true));
+	act = ActionManager::get_action (X_("Common"), X_("livetrax-toggle-mixer"));
+	livetrax_mixer_view_button->set_related_action (act);
+
+	livetrax_editor_view_button = manage (new ArdourButton (_("TRACKS"), ArdourButton::Element (ArdourButton::Text|ArdourButton::Edge|ArdourButton::Body), true));
+	act = ActionManager::get_action (X_("Common"), X_("livetrax-toggle-editor"));
+	livetrax_editor_view_button->set_related_action (act);
 
 	livetrax_transport_bar.pack_start (*livetrax_editor_view_button, false, false);
 	livetrax_transport_bar.pack_start (*livetrax_mixer_view_button, false, false);
@@ -475,7 +484,7 @@ ARDOUR_UI::livetrax_setup_windows ()
 	livetrax_edit_vscrollbar->show ();
 	hb->pack_start (editor->contents(), true, true);
 	hb->pack_start (*livetrax_edit_vscrollbar, false, false);
-	
+
 	vb = manage (new Gtk::VBox);
 	livetrax_edit_hscrollbar = manage (new Gtk::HScrollbar (editor->horizontal_adjustment));
 	livetrax_edit_hscrollbar->show ();
@@ -504,6 +513,9 @@ ARDOUR_UI::livetrax_setup_windows ()
 	livetrax_editor_bar.set_data ("ardour-bindings", bindings);
 	bindings = Bindings::get_bindings (X_("Mixer"));
 	livetrax_mixer_bar.set_data ("ardour-bindings", bindings);
+
+	_livetrax_visibility = LiveTraxVisibility (LiveTraxMeterVisible|LiveTraxMixerVisible|LiveTraxEditorVisible);
+	livetrax_visibility_change ();
 
 	// setup_tooltips ();
 
@@ -648,4 +660,44 @@ ARDOUR_UI::action_script_changed (int i, const std::string& n)
 		act->set_sensitive (true);
 	}
 	KeyEditor::UpdateBindings ();
+}
+
+void
+ARDOUR_UI::livetrax_visibility_change ()
+{
+	if (_livetrax_visibility & LiveTraxMeterVisible) {
+		livetrax_meter_bar.show ();
+		livetrax_meter_view_button->set_active_state (Gtkmm2ext::ExplicitActive);
+	} else {
+		livetrax_meter_bar.hide ();
+		livetrax_meter_view_button->set_active_state (Gtkmm2ext::Off);
+	}
+
+	if (_livetrax_visibility & LiveTraxEditorVisible) {
+		livetrax_editor_bar.show ();
+		livetrax_editor_view_button->set_active_state (Gtkmm2ext::ExplicitActive);
+	} else {
+		livetrax_editor_bar.hide ();
+		livetrax_editor_view_button->set_active_state (Gtkmm2ext::Off);
+	}
+
+	if (_livetrax_visibility & LiveTraxMixerVisible) {
+		livetrax_mixer_bar.show ();
+		livetrax_mixer_view_button->set_active_state (Gtkmm2ext::ExplicitActive);
+	} else {
+		livetrax_mixer_bar.hide ();
+		livetrax_mixer_view_button->set_active_state (Gtkmm2ext::Off);
+	}
+}
+
+void
+ARDOUR_UI::livetrax_toggle_visibility (LiveTraxVisibility v)
+{
+	if (_livetrax_visibility & v) {
+		_livetrax_visibility = LiveTraxVisibility (_livetrax_visibility & ~v);
+	} else {
+	_livetrax_visibility = LiveTraxVisibility (_livetrax_visibility | v);
+	}
+
+	livetrax_visibility_change ();
 }
