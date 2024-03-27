@@ -1026,7 +1026,13 @@ Session::load_state (string snapshot_name, bool from_template)
 
 	if (Stateful::loading_state_version < CURRENT_SESSION_FILE_VERSION && _writable && !from_template) {
 
-		std::string backup_path(_session_dir->root_path());
+		std::string backup_path (_session_dir->backup_path());
+		if (!Glib::file_test (backup_path, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_DIR)) {
+			if (g_mkdir_with_parents (backup_path.c_str(), 0755) < 0) {
+				backup_path = _session_dir->root_path ();
+			}
+		}
+
 		std::string backup_filename = string_compose ("%1-%2%3", legalize_for_path (snapshot_name), Stateful::loading_state_version, statefile_suffix);
 		backup_path = Glib::build_filename (backup_path, backup_filename);
 
