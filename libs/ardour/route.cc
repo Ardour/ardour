@@ -317,7 +317,7 @@ Route::init ()
 	}
 
 	if (Profile->get_livetrax() && is_track()) {
-		_master_send.reset (new InternalSend (_session, _pannable, _mute_master, std::dynamic_pointer_cast<Route> (shared_from_this()), std::shared_ptr<Route>(), Delivery::Aux, false));
+		_master_send.reset (new InternalSend (_session, _pannable, _mute_master, std::dynamic_pointer_cast<Route> (shared_from_this()), std::shared_ptr<Route>(), Delivery::MasterSend, false));
 		_master_send->set_display_to_user (false);
 	}
 

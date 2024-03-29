@@ -39,7 +39,7 @@ using namespace std;
 const string MuteMaster::xml_node_name (X_("MuteMaster"));
 
 const MuteMaster::MutePoint MuteMaster::AllPoints = MuteMaster::MutePoint(
-	PreFader|PostFader|Listen|Main|SurroundSend);
+	PreFader|PostFader|Listen|Main|SurroundSend|MasterSend);
 
 MuteMaster::MuteMaster (Session& s, Muteable& m, const std::string&)
 	: SessionHandleRef (s)
@@ -69,6 +69,10 @@ MuteMaster::MuteMaster (Session& s, Muteable& m, const std::string&)
 
 	if (Config->get_mute_affects_surround_sends ()) {
 		_mute_point = MutePoint (_mute_point | SurroundSend);
+	}
+
+	if (Config->get_mute_affects_master_sends ()) {
+		_mute_point = MutePoint (_mute_point | MasterSend);
 	}
 }
 

@@ -731,6 +731,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Delivery, Main);
 	REGISTER_CLASS_ENUM (Delivery, Aux);
 	REGISTER_CLASS_ENUM (Delivery, Foldback);
+	REGISTER_CLASS_ENUM (Delivery, MasterSend);
 	REGISTER_BITS (_Delivery_Role);
 
 	REGISTER_CLASS_ENUM (MuteMaster, PreFader);
@@ -738,6 +739,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (MuteMaster, Listen);
 	REGISTER_CLASS_ENUM (MuteMaster, Main);
 	REGISTER_CLASS_ENUM (MuteMaster, SurroundSend);
+	REGISTER_CLASS_ENUM (MuteMaster, MasterSend);
 	REGISTER_BITS (_MuteMaster_MutePoint);
 
 	REGISTER_CLASS_ENUM (IO, Input);

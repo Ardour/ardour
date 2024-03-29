@@ -589,22 +589,25 @@ Delivery::target_gain ()
 	MuteMaster::MutePoint mp = MuteMaster::Main; // stupid gcc uninit warning
 
 	switch (_role) {
-		case Main:
-			mp = MuteMaster::Main;
-			break;
-		case Listen:
-			mp = MuteMaster::Listen;
-			break;
-		case Send:
-		case Insert:
-		case Aux:
-		case Foldback:
-			if (_pre_fader) {
-				mp = MuteMaster::PreFader;
-			} else {
-				mp = MuteMaster::PostFader;
-			}
-			break;
+	case Main:
+		mp = MuteMaster::Main;
+		break;
+	case Listen:
+		mp = MuteMaster::Listen;
+		break;
+	case MasterSend:
+		mp = MuteMaster::MasterSend;
+		break;
+	case Send:
+	case Insert:
+	case Aux:
+	case Foldback:
+		if (_pre_fader) {
+			mp = MuteMaster::PreFader;
+		} else {
+			mp = MuteMaster::PostFader;
+		}
+		break;
 	}
 
 	gain_t desired_gain = _mute_master->mute_gain_at (mp);
