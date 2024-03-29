@@ -484,11 +484,13 @@ RouteUI::mute_press (GdkEventButton* ev)
 
 	if (Keyboard::is_context_menu_event (ev)) {
 
-		if (mute_menu == 0){
-			build_mute_menu();
-		}
+		if (!Profile->get_livetrax()) {
+			if (mute_menu == 0){
+				build_mute_menu();
+			}
 
-		mute_menu->popup (ev->button, ev->time);
+			mute_menu->popup (ev->button, ev->time);
+		}
 
 		return true;
 
@@ -650,11 +652,13 @@ RouteUI::solo_press(GdkEventButton* ev)
 
 	if (Keyboard::is_context_menu_event (ev)) {
 
-		if (solo_menu == 0) {
-			build_solo_menu ();
-		}
+		if (!Profile->get_livetrax()) {
+			if (solo_menu == 0) {
+				build_solo_menu ();
+			}
 
-		solo_menu->popup (ev->button, ev->time);
+			solo_menu->popup (ev->button, ev->time);
+		}
 
 	} else {
 
@@ -1025,7 +1029,7 @@ RouteUI::step_edit_changed (bool yn)
 bool
 RouteUI::rec_enable_release (GdkEventButton* ev)
 {
-	if (Keyboard::is_context_menu_event (ev)) {
+	if (!Profile->get_livetrax() && Keyboard::is_context_menu_event (ev)) {
 		build_record_menu ();
 		if (_record_menu) {
 			_record_menu->popup (ev->button, ev->time);
@@ -2880,4 +2884,3 @@ RouteUI::clear_time_domain (bool apply_to_selection)
 	}
 
 }
-
