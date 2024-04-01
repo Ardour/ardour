@@ -1856,7 +1856,7 @@ LV2Plugin::write_to(RingBuffer<uint8_t>* dest,
 		return false;
 	}
 
-	vector<uint8_t> buf(buf_size);
+	uint8_t buf[buf_size];
 	UIMessage* msg = (UIMessage*)&buf[0];
 	msg->index    = index;
 	msg->protocol = protocol;
