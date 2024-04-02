@@ -19,7 +19,9 @@
 #include "pbd/convert.h"
 #include "pbd/enumwriter.h"
 
+#include "ardour/profile.h"
 #include "ardour/plugin_manager.h"
+
 #include "gtkmm2ext/gui_thread.h"
 
 #include "instrument_selector.h"
@@ -47,12 +49,20 @@ InstrumentSelector::drop_plugin_ptr()
 {
 	unset_model ();
 	clear ();
-	_instrument_list->clear ();
+	if (_instrument_list) {
+		_instrument_list->clear ();
+	}
 }
 
 void
 InstrumentSelector::refill()
 {
+	/* XXX conditional can be removed once livetrax has its own simple add
+	   tracks dialog.
+	*/
+	if (Profile->get_livetrax()) {
+		return;
+	}
 	TreeModel::iterator iter = get_active();
 	std::string selected;
 	if (iter) {
