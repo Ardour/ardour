@@ -2528,7 +2528,9 @@ Editor::set_state (const XMLNode& node, int version)
 	PBD::Unwinder<bool> nsi (no_save_instant, true);
 	bool yn;
 
-	Tabbable::set_state (node, version);
+	if (!Profile->get_livetrax()) {
+		Tabbable::set_state (node, version);
+	}
 
 	samplepos_t ph_pos;
 	if (_session && node.get_property ("playhead", ph_pos)) {
@@ -2746,7 +2748,9 @@ Editor::get_state () const
 
 	node->set_property ("id", id().to_s ());
 
-	node->add_child_nocopy (Tabbable::get_state());
+	if (!Profile->get_livetrax()) {
+		node->add_child_nocopy (Tabbable::get_state());
+	}
 
 	node->set_property("edit-horizontal-pane-pos", edit_pane.get_divider ());
 	node->set_property("notebook-shrunk", _notebook_shrunk);

@@ -2560,7 +2560,9 @@ Mixer_UI::set_state (const XMLNode& node, int version)
 {
 	bool yn;
 
-	Tabbable::set_state (node, version);
+	if (!Profile->get_livetrax()) {
+		Tabbable::set_state (node, version);
+	}
 
 	if (node.get_property ("narrow-strips", yn)) {
 		if (yn) {
@@ -2704,7 +2706,9 @@ Mixer_UI::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Mixer"));
 
-	node->add_child_nocopy (Tabbable::get_state());
+	if (!Profile->get_livetrax()) {
+		node->add_child_nocopy (Tabbable::get_state());
+	}
 
 	node->set_property (X_("mixer-rhs-pane1-pos"), rhs_pane1.get_divider());
 	node->set_property (X_("mixer-rhs_pane2-pos"), rhs_pane2.get_divider());
