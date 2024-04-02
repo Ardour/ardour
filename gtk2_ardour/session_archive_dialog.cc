@@ -34,14 +34,12 @@ using namespace ARDOUR;
 SessionArchiveDialog::SessionArchiveDialog ()
 	: ArdourDialog (_("Zip/Archive Current Session"))
 	, ProgressReporter ()
+	, format_Label (ARDOUR::session_archive_suffix)
 	, only_used_checkbox (_("Exclude unused audio sources"))
 {
 	VBox* vbox = get_vbox();
 
 	vbox->set_spacing (6);
-
-	format_selector.append (ARDOUR::session_archive_suffix);
-	format_selector.set_active_text (ARDOUR::session_archive_suffix);
 
 	encode_selector.append (_("None"));
 	encode_selector.append (_("FLAC 16bit"));
@@ -66,7 +64,7 @@ SessionArchiveDialog::SessionArchiveDialog ()
 	HBox* hbox = manage (new HBox);
 	hbox->set_spacing (6);
 	hbox->pack_start (name_entry, true, true);
-	hbox->pack_start (format_selector, false, false);
+	hbox->pack_start (format_Label, false, false);
 	table->attach (*hbox, 1, 2, row, row + 1, Gtk::FILL | Gtk::EXPAND, Gtk::SHRINK);
 
 	++row;
@@ -124,7 +122,7 @@ SessionArchiveDialog::name_entry_changed ()
 		return;
 	}
 
-	std::string dir = Glib::build_filename (target_folder(), name_entry.get_text() + format_selector.get_active_text ());
+	std::string dir = Glib::build_filename (target_folder(), name_entry.get_text() + ARDOUR::session_archive_suffix);
 
 	if (Glib::file_test (dir, Glib::FILE_TEST_EXISTS)) {
 		set_response_sensitive (RESPONSE_OK, false);
