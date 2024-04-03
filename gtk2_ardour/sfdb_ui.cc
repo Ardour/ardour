@@ -312,13 +312,15 @@ SoundFileBox::audition_progress(ARDOUR::samplecnt_t pos, ARDOUR::samplecnt_t len
 }
 
 bool
-SoundFileBox::seek_button_press(GdkEventButton*) {
+SoundFileBox::seek_button_press (GdkEventButton*)
+{
 	_seeking = true;
 	return false; // pass on to slider
 }
 
 bool
-SoundFileBox::seek_button_release(GdkEventButton*) {
+SoundFileBox::seek_button_release (GdkEventButton*)
+{
 	_seeking = false;
 	_session->the_auditioner()->seek_to_percent(seek_slider.get_value() / 10.0);
 	seek_slider.set_sensitive (false);
