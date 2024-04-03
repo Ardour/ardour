@@ -3232,6 +3232,10 @@ Mixer_UI::plugin_search_clear_button_clicked ()
 void
 Mixer_UI::refiller (PluginInfoList& result, const PluginInfoList& plugs)
 {
+	if (Profile->get_livetrax()) {
+		return;
+	}
+
 	PluginManager& manager (PluginManager::instance());
 	PluginListMode plm = plugin_list_mode ();
 
@@ -3278,6 +3282,10 @@ Mixer_UI::refiller (PluginInfoList& result, const PluginInfoList& plugs)
 void
 Mixer_UI::refill_favorite_plugins ()
 {
+	if (Profile->get_livetrax()) {
+		return;
+	}
+
 	if (ignore_plugin_refill) {
 		return;
 	}
