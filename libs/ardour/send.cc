@@ -91,6 +91,8 @@ Send::name_and_id_new_send (Session& s, Role r, uint32_t& bitslot, bool ignore_b
 		return string_compose (_("send %1"), (bitslot = s.next_send_id ()));
 	case Delivery::Foldback:
 		return string_compose (_("foldback %1"), (bitslot = s.next_aux_send_id ()));
+	case Delivery::MasterSend:
+		return string_compose (_("master %1"), (bitslot = s.next_aux_send_id ()));
 	default:
 		fatal << string_compose (_("programming error: send created using role %1"), enum_2_string (r)) << endmsg;
 		abort(); /*NOTREACHED*/
