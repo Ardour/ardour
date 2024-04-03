@@ -703,6 +703,8 @@ protected:
 	std::shared_ptr<TriggerBox>        _triggerbox;
 	std::shared_ptr<InternalSend>      _master_send;
 
+	void create_master_send ();
+
 	bool _volume_applies_to_output;
 
 	std::shared_ptr<DelayLine> _delayline;

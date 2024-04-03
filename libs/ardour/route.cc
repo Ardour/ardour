@@ -3325,7 +3325,16 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 
 		if (prop->value() == "intsend") {
 
-			processor.reset (new InternalSend (_session, _pannable, _mute_master, std::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), std::shared_ptr<Route>(), Delivery::Aux, true));
+			XMLProperty const * role_prop = node.property (X_("role"));
+			if (role_prop && role_prop->value() == "MasterSend") {
+				if (Profile->get_livetrax()) {
+					create_master_send ();
+					assert (_master_send);
+					processor = _master_send;
+				}
+			} else {
+				processor.reset (new InternalSend (_session, _pannable, _mute_master, std::dynamic_pointer_cast<ARDOUR::Route>(shared_from_this()), std::shared_ptr<Route>(), Delivery::Aux, true));
+			}
 
 		} else if (prop->value() == "ladspa" || prop->value() == "Ladspa" ||
 		           prop->value() == "lv2" ||
@@ -3518,6 +3527,14 @@ Route::remove_monitor_send ()
 }
 
 void
+Route::create_master_send ()
+{
+	_master_send.reset (new InternalSend (_session, pannable(), _mute_master, std::dynamic_pointer_cast<Route> (shared_from_this()), _session.master_out(), Delivery::MasterSend, false));
+	_master_send->set_display_to_user (false);
+	_master_send->gain_control()->set_value (dB_to_coefficient (0.0), Controllable::NoGroup);
+}
+
+void
 Route::enable_master_send()
 {
 	if (!Profile->get_livetrax()) {
@@ -3533,9 +3550,7 @@ Route::enable_master_send()
 	/* make sure we have one */
 	if (!_master_send) {
 		/* An internal send with its own panner to deliver to the master bus */
-		_master_send.reset (new InternalSend (_session, pannable(), _mute_master, std::dynamic_pointer_cast<Route> (shared_from_this()), _session.master_out(), Delivery::MasterSend, false));
-		_master_send->set_display_to_user (false);
-		_master_send->gain_control()->set_value (dB_to_coefficient (0.0), Controllable::NoGroup);
+		create_master_send ();
 	}
 
 	/* set it up */
