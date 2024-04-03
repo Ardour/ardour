@@ -322,7 +322,9 @@ bool
 SoundFileBox::seek_button_release (GdkEventButton*)
 {
 	_seeking = false;
-	_session->the_auditioner()->seek_to_percent(seek_slider.get_value() / 10.0);
+	if (_session->the_auditioner()) {
+		_session->the_auditioner()->seek_to_percent(seek_slider.get_value() / 10.0);
+	}
 	seek_slider.set_sensitive (false);
 	return false; // pass on to slider
 }
