@@ -462,7 +462,9 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	if (type == DataType::AUDIO || type == DataType::NIL) {
 		if (!inputs) {
 
-			program->add_bundle (session->the_auditioner()->output()->bundle());
+			if (session->the_auditioner()) {
+				program->add_bundle (session->the_auditioner()->output()->bundle());
+			}
 			if (session->click_io()) {
 				program->add_bundle (session->click_io()->bundle());
 			}
