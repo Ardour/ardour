@@ -1462,7 +1462,13 @@ Route::clear_processors (Placement p)
 bool
 Route::is_internal_processor (std::shared_ptr<Processor> p) const
 {
-	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim || p == _polarity || (_volume && p == _volume) || (_triggerbox && p == _triggerbox) || (_surround_return && p == _surround_return) || (_surround_send && p == _surround_send)) {
+	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim ||
+	    p == _polarity || (_volume && p == _volume) || 
+	    (_triggerbox && p == _triggerbox) ||
+	    (_surround_return && p == _surround_return) ||
+	    (_surround_send && p == _surround_send) ||
+	    (_master_send && p == _master_send) ||
+	    (is_master() && p == _intreturn))  {
 		return true;
 	}
 	return false;
