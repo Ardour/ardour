@@ -1706,7 +1706,7 @@ MixerStrip::revert_to_default_display ()
 	gain_meter().set_controls (_route, _route->shared_peak_meter(), _route->amp(), _route->gain_control());
 	gain_meter().setup_meters ();
 
-	panner_ui().set_panner (_route->main_outs()->panner_shell(), _route->main_outs()->panner());
+	panner_ui().set_panner (_route->panner_shell(), _route->panner());
 	update_panner_choices();
 	panner_ui().setup_pan ();
 	panner_ui().set_send_drawing_mode (false);
