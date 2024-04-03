@@ -84,6 +84,8 @@
 #include "ardour/filename_extensions.h"
 #include "ardour/gain_control.h"
 #include "ardour/graph.h"
+#include "ardour/internal_return.h"
+#include "ardour/internal_send.h"
 #include "ardour/io_plug.h"
 #include "ardour/luabindings.h"
 #include "ardour/lv2_plugin.h"
@@ -1290,6 +1292,34 @@ Session::setup_route_monitor_sends (bool enable, bool need_process_lock)
 	}
 }
 
+void
+Session::setup_route_master_sends (bool enable, bool need_process_lock)
+{
+	Glib::Threads::Mutex::Lock lx (AudioEngine::instance()->process_lock (), Glib::Threads::NOT_LOCK);
+	if (need_process_lock) {
+		/* Hold process lock while doing this so that we don't hear bits and
+		 * pieces of audio as we work on each route.
+		 */
+		lx.acquire();
+	}
+
+	std::shared_ptr<RouteList const> rl = routes.reader ();
+	ProcessorChangeBlocker  pcb (this, false /* XXX */);
+
+	for (auto const& x : *rl) {
+		if (x->is_track()) {
+			if (enable) {
+				x->enable_master_send ();
+			} else {
+				x->remove_master_send ();
+			}
+		}
+	}
+
+	if (auditioner) {
+		auditioner->connect ();
+	}
+}
 
 void
 Session::reset_monitor_section ()
@@ -3111,7 +3141,7 @@ Session::new_audio_route (int input_channels, int output_channels, RouteGroup* r
 					      << endmsg;
 					goto failure;
 				}
-				
+
 
 				if (bus->output()->ensure_io (ChanCount(DataType::AUDIO, output_channels), false, this)) {
 					error << string_compose (_("cannot configure %1 in/%2 out configuration for new audio track"),
@@ -3617,20 +3647,29 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		}
 	}
 
-	if (_monitor_out && !loading()) {
+	if (!loading()) {
 		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
 
-		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x) {
-			if ((*x)->can_monitor ()) {
-				(*x)->enable_monitor_send ();
+		if (_monitor_out) {
+			for (auto & r : new_routes) {
+				if (r->can_monitor ()) {
+					r->enable_monitor_send ();
+				}
 			}
 		}
-	}
 
-	if (_surround_master && !loading()) {
-		Glib::Threads::Mutex::Lock lm (_engine.process_lock());
-		for (auto & r : new_routes) {
-			r->enable_surround_send ();
+		if (_surround_master) {
+			for (auto & r : new_routes) {
+				r->enable_surround_send ();
+			}
+		}
+
+		if (Profile->get_livetrax ()) {
+			for (auto & r : new_routes) {
+				if (r->is_track()) {
+					r->enable_master_send ();
+				}
+			}
 		}
 	}
 }

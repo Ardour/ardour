@@ -281,6 +281,11 @@ Route::init ()
 		_volume.reset (new Amp (_session, X_("LAN Amp"), _volume_control, false));
 		_volume->set_display_to_user (false);
 		_volume->deactivate ();
+
+		if (Profile->get_livetrax()) {
+			_intreturn.reset (new InternalReturn (_session, tdp));
+			_intreturn->activate ();
+		}
 	}
 	_main_outs->activate ();
 
@@ -314,11 +319,6 @@ Route::init ()
 
 	if (_presentation_info.flags() & PresentationInfo::FoldbackBus) {
 		panner_shell()->select_panner_by_uri ("http://ardour.org/plugin/panner_balance");
-	}
-
-	if (Profile->get_livetrax() && is_track()) {
-		_master_send.reset (new InternalSend (_session, _pannable, _mute_master, std::dynamic_pointer_cast<Route> (shared_from_this()), std::shared_ptr<Route>(), Delivery::MasterSend, false));
-		_master_send->set_display_to_user (false);
 	}
 
 	/* now set up processor chain and invisible processors */
@@ -3511,6 +3511,43 @@ Route::remove_monitor_send ()
 	_monitor_send.reset ();
 }
 
+void
+Route::enable_master_send()
+{
+	if (!Profile->get_livetrax()) {
+		return;
+	}
+
+	/* Caller must hold process lock */
+	assert (!AudioEngine::instance()->process_lock().trylock());
+
+	/* master sends are for tracks only */
+	assert (is_track());
+
+	/* make sure we have one */
+	if (!_master_send) {
+		/* An internal send with its own panner to deliver to the master bus */
+		_master_send.reset (new InternalSend (_session, pannable(), _mute_master, std::dynamic_pointer_cast<Route> (shared_from_this()), _session.master_out(), Delivery::MasterSend, false));
+		_master_send->set_display_to_user (false);
+		_master_send->gain_control()->set_value (dB_to_coefficient (0.0), Controllable::NoGroup);
+	}
+
+	/* set it up */
+	configure_processors (0);
+}
+
+void
+Route::remove_master_send ()
+{
+	/* caller needs to hold process lock */
+	if (!_master_send) {
+		return;
+	}
+	ProcessorStreams err;
+	remove_processor (_master_send, &err, false);
+	_master_send.reset ();
+}
+
 /** Add an aux send to a route.
  *  @param route route to send to.
  *  @param before Processor to insert before, or 0 to insert at the end.
@@ -6305,3 +6342,4 @@ Route::remove_surround_send ()
 	 */
 	_pending_surround_send.store (1);
 }
+

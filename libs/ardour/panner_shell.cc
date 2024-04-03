@@ -488,5 +488,6 @@ PannerShell::set_linked_to_route (bool onoff)
 			}
 			_session.set_dirty ();
 	}
+
 	PannableChanged();
 }

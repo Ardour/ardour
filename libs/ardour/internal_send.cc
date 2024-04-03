@@ -150,6 +150,8 @@ InternalSend::init_gain ()
 int
 InternalSend::use_target (std::shared_ptr<Route> sendto, bool update_name)
 {
+	assert (sendto);
+
 	if (_send_to) {
 		propagate_solo ();
 		_send_to->remove_send_from_internal_return (this);
@@ -165,8 +167,11 @@ InternalSend::use_target (std::shared_ptr<Route> sendto, bool update_name)
 	_meter->configure_io (_send_to->internal_return ()->input_streams (), _send_to->internal_return ()->input_streams ());
 
 	_send_delay->configure_io (_send_to->internal_return ()->input_streams (), _send_to->internal_return ()->input_streams ());
-
 	reset_panner ();
+
+	if (_role == MasterSend) {
+		_panshell->set_linked_to_route (false);
+	}
 
 	if (update_name) {
 		set_name (sendto->name ());
@@ -455,7 +460,6 @@ InternalSend::after_connect ()
 
 	if ((sendto = _session.route_by_id (_send_to_id)) == 0) {
 		error << string_compose (_("%1 - cannot find any track/bus with the ID %2 to connect to"), display_name (), _send_to_id) << endmsg;
-		cerr << string_compose (_("%1 - cannot find any track/bus with the ID %2 to connect to"), display_name (), _send_to_id) << endl;
 		return -1;
 	}
 

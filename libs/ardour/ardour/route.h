@@ -196,8 +196,16 @@ public:
 	bool can_monitor () const {
 		return can_solo() || is_foldbackbus ();
 	}
+
 	void enable_monitor_send ();
 	void enable_surround_send ();
+	void enable_master_send ();
+	void remove_monitor_send ();
+	void remove_surround_send ();
+	void remove_master_send ();
+
+	int add_aux_send (std::shared_ptr<Route>, std::shared_ptr<Processor>);
+	int add_foldback_send (std::shared_ptr<Route>, bool post_fader);
 
 	void set_denormal_protection (bool yn);
 	bool denormal_protection() const;
@@ -279,12 +287,14 @@ public:
 	std::shared_ptr<Delivery>         main_outs() const { return _main_outs; }
 	std::shared_ptr<InternalReturn>   internal_return() const { return _intreturn; }
 	std::shared_ptr<MonitorProcessor> monitor_control() const { return _monitor_control; }
+	std::shared_ptr<InternalSend>     master_send() const { return _master_send; }
 	std::shared_ptr<Send>             internal_send_for (std::shared_ptr<const Route> target) const;
 	void add_internal_return ();
 	void add_send_to_internal_return (InternalSend *);
 	void remove_send_from_internal_return (InternalSend *);
 	void listen_position_changed ();
 	std::shared_ptr<CapturingProcessor> add_export_point(/* Add some argument for placement later */);
+	void add_master_send (std::shared_ptr<Route>);
 
 	/** A record of the stream configuration at some point in the processor list.
 	 * Used to return where and why an processor list configuration request failed.
@@ -439,11 +449,6 @@ public:
 	int save_as_template (const std::string& path, const std::string& name, const std::string& description );
 
 	PBD::Signal1<void,void*> SelectedChanged;
-
-	int add_aux_send (std::shared_ptr<Route>, std::shared_ptr<Processor>);
-	int add_foldback_send (std::shared_ptr<Route>, bool post_fader);
-	void remove_monitor_send ();
-	void remove_surround_send ();
 
 	/**
 	 * return true if this route feeds the first argument directly, via
