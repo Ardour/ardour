@@ -562,7 +562,7 @@ Send::set_name (const string& new_name)
 bool
 Send::display_to_user () const
 {
-	if (_role == Aux && Profile->get_livetrax()) {
+	if (_role == MasterSend && Profile->get_livetrax()) {
 		return false;
 	}
 
