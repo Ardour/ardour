@@ -1118,7 +1118,9 @@ Session::remove_monitor_section ()
 void
 Session::add_monitor_section ()
 {
-	RouteList rl;
+	if (Profile->get_livetrax()) {
+		return;
+	}
 
 	if (!_engine.running()) {
 		error << _("Cannot create monitor section while the engine is offline.") << endmsg;
@@ -1128,6 +1130,7 @@ Session::add_monitor_section ()
 	if (_monitor_out || !_master_out) {
 		return;
 	}
+
 
 	std::shared_ptr<Route> r (new Route (*this, _("Monitor"), PresentationInfo::MonitorOut, DataType::AUDIO));
 
@@ -1146,6 +1149,7 @@ Session::add_monitor_section ()
 		return;
 	}
 
+	RouteList rl;
 	rl.push_back (r);
 	add_routes (rl, false, false, 0);
 
