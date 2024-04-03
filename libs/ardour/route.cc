@@ -4863,13 +4863,24 @@ Route::pannable() const
 std::shared_ptr<Panner>
 Route::panner() const
 {
-	/* may be null ! */
+	/* may return  null ! */
+
+	if (Profile->get_livetrax() && _master_send) {
+		return _master_send->panner_shell()->panner();
+	}
+
 	return _main_outs->panner_shell()->panner();
 }
 
 std::shared_ptr<PannerShell>
 Route::panner_shell() const
 {
+	/* may return  null ! */
+
+	if (Profile->get_livetrax() && _master_send) {
+		return _master_send->panner_shell();
+	}
+
 	return _main_outs->panner_shell();
 }
 
