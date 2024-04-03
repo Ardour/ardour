@@ -47,9 +47,9 @@ InternalReturn::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t 
 		return;
 	}
 
-	for (list<InternalSend*>::iterator i = _sends.begin(); i != _sends.end(); ++i) {
-		if ((*i)->active () && (!(*i)->source_route() || (*i)->source_route()->active())) {
-			bufs.merge_from ((*i)->get_buffers(), nframes);
+	for (auto & send : _sends) {
+		if (send->active () && (!send->source_route() || send->source_route()->active())) {
+			bufs.merge_from (send->get_buffers(), nframes);
 		}
 	}
 }
