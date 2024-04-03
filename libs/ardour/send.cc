@@ -400,7 +400,7 @@ Send::set_state (const XMLNode& node, int version)
 		*/
 
 		if ((prop = node.property ("bitslot")) == 0) {
-			if (_role == Delivery::Aux || _role == Delivery::Foldback) {
+			if (_role == Delivery::Aux || _role == Delivery::Foldback || _role == Delivery::MasterSend) {
 				_bitslot = _session.next_aux_send_id ();
 			} else if (_role == Delivery::Send) {
 				_bitslot = _session.next_send_id ();
@@ -409,7 +409,7 @@ Send::set_state (const XMLNode& node, int version)
 				_bitslot = 0;
 			}
 		} else {
-			if (_role == Delivery::Aux || _role == Delivery::Foldback) {
+			if (_role == Delivery::Aux || _role == Delivery::Foldback || _role == Delivery::MasterSend) {
 				_session.unmark_aux_send_id (_bitslot);
 				_bitslot = string_to<uint32_t>(prop->value());
 				_session.mark_aux_send_id (_bitslot);
