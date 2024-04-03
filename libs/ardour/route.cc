@@ -5298,8 +5298,7 @@ Route::setup_invisible_processors ()
 		new_processors.push_back (_surround_send);
 	}
 
-	if (Profile->get_livetrax() && is_track()) {
-		assert (_master_send);
+	if (Profile->get_livetrax() && _master_send) {
 		assert (!_master_send->display_to_user());
 		new_processors.push_back (_master_send);
 	}
