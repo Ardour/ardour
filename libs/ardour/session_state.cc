@@ -657,7 +657,7 @@ Session::create (const string& session_template, BusProfile const * bus_profile,
 				return rv;
 			}
 
-			if (Config->get_use_monitor_bus()) {
+			if (Config->get_use_monitor_bus() && !Profile->get_livetrax()) {
 				add_monitor_section ();
 			}
 		}
