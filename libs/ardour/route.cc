@@ -3498,6 +3498,19 @@ Route::enable_monitor_send ()
 	configure_processors (0);
 }
 
+
+void
+Route::remove_monitor_send ()
+{
+	/* caller needs to hold process lock */
+	if (!_monitor_send) {
+		return;
+	}
+	ProcessorStreams err;
+	remove_processor (_monitor_send, &err, false);
+	_monitor_send.reset ();
+}
+
 /** Add an aux send to a route.
  *  @param route route to send to.
  *  @param before Processor to insert before, or 0 to insert at the end.
@@ -3583,18 +3596,6 @@ Route::add_foldback_send (std::shared_ptr<Route> route, bool post_fader)
 	_session.FBSendsChanged ();
 
 	return 0;
-}
-
-void
-Route::remove_monitor_send ()
-{
-	/* caller needs to hold process lock */
-	if (!_monitor_send) {
-		return;
-	}
-	ProcessorStreams err;
-	remove_processor (_monitor_send, &err, false);
-	_monitor_send.reset ();
 }
 
 void
