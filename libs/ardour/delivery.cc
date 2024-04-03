@@ -67,7 +67,9 @@ Delivery::Delivery (Session& s, std::shared_ptr<IO> io, std::shared_ptr<Pannable
 {
 	if (pannable) {
 		bool is_send = false;
-		if (r & (Delivery::Send|Delivery::Aux|Delivery::Foldback)) is_send = true;
+		if (r & (Delivery::Send|Delivery::Aux|Delivery::Foldback|Delivery::MasterSend)) {
+			is_send = true;
+		}
 		_panshell = std::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, *this, is_send));
 	}
 
@@ -91,7 +93,9 @@ Delivery::Delivery (Session& s, std::shared_ptr<Pannable> pannable, std::shared_
 {
 	if (pannable) {
 		bool is_send = false;
-		if (r & (Delivery::Send|Delivery::Aux|Delivery::Foldback)) is_send = true;
+		if (r & (Delivery::Send|Delivery::Aux|Delivery::Foldback|Delivery::MasterSend)) {
+			is_send = true;
+		}
 		_panshell = std::shared_ptr<PannerShell>(new PannerShell (_name, _session, pannable, *this, is_send));
 	}
 
