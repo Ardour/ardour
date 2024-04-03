@@ -79,7 +79,7 @@ PannerShell::PannerShell (string name, Session& s, std::shared_ptr<Pannable> p, 
 {
 	if (is_send) {
 		_pannable_internal.reset(new Pannable (s, tdp));
-		if (Config->get_link_send_and_route_panner()) {
+		if (!Profile->get_livetrax() && Config->get_link_send_and_route_panner()) {
 			_panlinked = true;
 		} else {
 			_panlinked = false;
