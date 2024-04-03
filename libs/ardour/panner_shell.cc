@@ -200,8 +200,7 @@ PannerShell::set_state (const XMLNode& node, int version)
 			if ((*niter)->get_property (X_("uri"), str)) {
 				PannerInfo* p = PannerManager::instance().get_by_uri(str);
 				if (p) {
-					_panner.reset (p->descriptor.factory (
-								_is_send ? _pannable_internal : _pannable_route, _session.get_speakers ()));
+					_panner.reset (p->descriptor.factory (_is_send ? _pannable_internal : _pannable_route, _session.get_speakers ()));
 					_current_panner_uri = p->descriptor.panner_uri;
 					_panner_gui_uri = p->descriptor.gui_uri;
 					if (_is_send) {
