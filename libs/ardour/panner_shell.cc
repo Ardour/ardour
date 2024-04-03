@@ -472,7 +472,7 @@ PannerShell::set_linked_to_route (bool onoff)
 	 */
 	if (pannable()) {
 		XMLNode state = pannable()->get_state();
-		pannable()->set_state(state, Stateful::loading_state_version);
+		pannable()->set_state (state, Stateful::loading_state_version);
 	}
 
 	_panlinked = onoff;
