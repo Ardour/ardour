@@ -997,18 +997,20 @@ SoundFileBrowser::add_gain_meter ()
 {
 	delete gm;
 
-	gm = new GainMeter (_session, 250);
-
 	std::shared_ptr<Route> r = _session->the_auditioner ();
 
-	gm->set_controls (r, r->shared_peak_meter(), r->amp(), r->gain_control());
-	gm->set_fader_name (X_("GainFader"));
+	if (r) {
+		gm = new GainMeter (_session, 250);
 
-	meter_packer.set_border_width (12);
-	meter_packer.pack_start (*gm, false, true);
-	hpacker.pack_end (meter_packer, false, false);
-	meter_packer.show_all ();
-	start_metering ();
+		gm->set_controls (r, r->shared_peak_meter(), r->amp(), r->gain_control());
+		gm->set_fader_name (X_("GainFader"));
+
+		meter_packer.set_border_width (12);
+		meter_packer.pack_start (*gm, false, true);
+		hpacker.pack_end (meter_packer, false, false);
+		meter_packer.show_all ();
+		start_metering ();
+	}
 }
 
 void
@@ -2132,7 +2134,9 @@ SoundFileOmega::where_combo_changed()
 void
 SoundFileOmega::instrument_combo_changed()
 {
-	_session->the_auditioner()->set_audition_synth_info( instrument_combo.selected_instrument() );
+	if (_session->the_auditioner()) {
+		_session->the_auditioner()->set_audition_synth_info( instrument_combo.selected_instrument() );
+	}
 }
 
 MidiTrackNameSource
