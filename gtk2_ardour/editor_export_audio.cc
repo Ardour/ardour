@@ -184,10 +184,11 @@ Editor::measure_master_loudness (samplepos_t start, samplepos_t end, bool is_ran
 	ARDOUR::TimelineRange ar (timepos_t (start), timepos_t (end), 0);
 
 	LoudnessDialog ld (_session, ar, is_range_selection);
-
+#ifndef __APPLE__
 	if (own_window ()) {
 		ld.set_transient_for (*own_window ());
 	}
+#endif
 
 	ld.run ();
 }
