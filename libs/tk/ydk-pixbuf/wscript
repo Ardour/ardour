@@ -66,4 +66,4 @@ def build(bld):
         obj.ldflags     = ' -lintl'
 
     if re.search ("bsd", sys.platform) != None:
-        obj.defines.append('_POSIX_C_SOURCE=200809')
+        obj.defines.append('_POSIX_C_SOURCE=200809L')
