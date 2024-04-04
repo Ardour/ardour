@@ -555,8 +555,8 @@ ARDOUR_UI::install_actions ()
 	ActionManager::transport_sensitive_actions.push_back (act);
 
 	if (Profile->get_livetrax()) {
-		act = ActionManager::register_toggle_action (common_actions, X_("disable-virtual-soundcheck"), _("Disable Virtual Soundcheck"), sigc::mem_fun (*this, &ARDOUR_UI::disable_virtual_soundcheck));
-		act = ActionManager::register_toggle_action (common_actions, X_("enable-virtual-soundcheck"), _("Enable Virtual Soundcheck"), sigc::mem_fun (*this, &ARDOUR_UI::enable_virtual_soundcheck));
+		act = ActionManager::register_action (common_actions, X_("disable-virtual-soundcheck"), _("Disable Virtual Soundcheck"), sigc::mem_fun (*this, &ARDOUR_UI::disable_virtual_soundcheck));
+		act = ActionManager::register_action (common_actions, X_("enable-virtual-soundcheck"), _("Enable Virtual Soundcheck"), sigc::mem_fun (*this, &ARDOUR_UI::enable_virtual_soundcheck));
 	}
 }
 

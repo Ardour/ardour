@@ -731,3 +731,19 @@ ARDOUR_UI::livetrax_set_file_format (LiveTraxFileFormat const & ff)
 
 	_session->reset_native_file_format ();
 }
+
+void
+ARDOUR_UI::virtual_soundcheck_changed (bool onoff)
+{
+	if (!Profile->get_livetrax()) {
+		return;
+	}
+
+	if (onoff) {
+		livetrax_stereo_out_button->set_active_state (Gtkmm2ext::Off);
+		livetrax_multi_out_button->set_active_state (Gtkmm2ext::ExplicitActive);
+	} else {
+		livetrax_stereo_out_button->set_active_state (Gtkmm2ext::ExplicitActive);
+		livetrax_multi_out_button->set_active_state (Gtkmm2ext::Off);
+	}
+}

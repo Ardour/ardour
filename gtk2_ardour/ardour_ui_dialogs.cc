@@ -209,6 +209,11 @@ ARDOUR_UI::set_session (Session *s)
 	_session->TransportStateChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::map_transport_state, this), gui_context());
 	_session->DirtyChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::session_dirty_changed, this), gui_context());
 
+	if (Profile->get_livetrax()) {
+		_session->VirtualSoundCheckChanged.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::virtual_soundcheck_changed, this, _1), gui_context());
+		virtual_soundcheck_changed (_session->virtual_soundcheck());
+	}
+
 	_session->PunchLoopConstraintChange.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context());
 	_session->auto_punch_location_changed.connect (_session_connections, MISSING_INVALIDATOR, boost::bind (&ARDOUR_UI::set_punch_sensitivity, this), gui_context ());
 

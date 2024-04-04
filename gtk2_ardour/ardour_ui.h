@@ -497,6 +497,7 @@ private:
 	void update_autosave();
 	sigc::connection _autosave_connection;
 
+	void virtual_soundcheck_changed (bool);
 	void session_dirty_changed ();
 	void update_title ();
 
