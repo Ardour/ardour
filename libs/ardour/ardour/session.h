@@ -1409,6 +1409,10 @@ public:
 	void disable_file_format_reset ();
 	void reset_native_file_format();
 
+	void enable_virtual_soundcheck ();
+	void disable_virtual_soundcheck ();
+	PBD::Signal1<void,bool> VirtualSoundCheckChanged;
+
 protected:
 	friend class AudioEngine;
 	void set_block_size (pframes_t nframes);
@@ -2420,6 +2424,8 @@ private:
 
 	void time_domain_changed ();
 	uint32_t _no_file_format_reset;
+
+	void set_virtual_soundcheck (bool);
 };
 
 

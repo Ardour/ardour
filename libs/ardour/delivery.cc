@@ -192,7 +192,8 @@ Delivery::can_support_io_configuration (const ChanCount& in, ChanCount& out)
 }
 
 void
-Delivery::set_gain_control (std::shared_ptr<GainControl> gc) {
+Delivery::set_gain_control (std::shared_ptr<GainControl> gc)
+{
 	if (gc) {
 		_gain_control = gc;
 		_amp.reset (new Amp (_session, _("Fader"), _gain_control, true));

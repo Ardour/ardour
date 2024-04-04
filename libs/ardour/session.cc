@@ -8238,3 +8238,44 @@ Session::foreach_route (void (Route::*method)())
 		((r.get())->*method) ();
 	}
 }
+
+void
+Session::enable_virtual_soundcheck ()
+{
+	set_virtual_soundcheck (true);
+}
+
+void
+Session::disable_virtual_soundcheck ()
+{
+	set_virtual_soundcheck (false);
+}
+
+void
+Session::set_virtual_soundcheck (bool yn)
+{
+	std::shared_ptr<RouteList const> rl = routes.reader ();
+	std::shared_ptr<AutomationControlList> master_sends (new AutomationControlList);
+	std::shared_ptr<AutomationControlList> main_outs (new AutomationControlList);
+
+	gain_t main_val = (yn ? 1. : 0.);
+	gain_t send_val = (yn ? 0. : 1.);
+
+	for (auto & route : *rl) {
+
+		if (!route->is_track()) {
+			continue;
+		}
+
+		master_sends->push_back (route->master_send()->gain_control());
+		main_outs->push_back (route->main_outs()->gain_control());
+
+	}
+
+	if (!master_sends->empty()) {
+		set_controls (master_sends, send_val, PBD::Controllable::NoGroup);
+		set_controls (main_outs, main_val, PBD::Controllable::NoGroup);
+	}
+
+	VirtualSoundCheckChanged (yn); /* EMIT SIGNAL */
+}

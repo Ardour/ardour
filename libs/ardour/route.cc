@@ -2839,6 +2839,12 @@ Route::set_state (const XMLNode& node, int version)
 		}
 	}
 
+	if (Profile->get_livetrax() && is_track()) {
+		_volume_control.reset (new GainControl (_session, MainOutVolume));
+		_volume_control->set_flag (Controllable::NotAutomatable);
+		_main_outs->set_gain_control (_volume_control);
+	}
+
 	set_processor_state (processor_state, version);
 
 	// this looks up the internal instrument in processors
