@@ -61,6 +61,26 @@ using namespace PBD;
 using namespace ArdourWidgets;
 
 void
+ARDOUR_UI::enable_virtual_soundcheck ()
+{
+	if (!_session) {
+		return;
+	}
+
+	_session->enable_virtual_soundcheck ();
+}
+
+void
+ARDOUR_UI::disable_virtual_soundcheck ()
+{
+	if (!_session) {
+		return;
+	}
+
+	_session->disable_virtual_soundcheck ();
+}
+
+void
 ARDOUR_UI::toggle_external_sync()
 {
 	if (_session) {

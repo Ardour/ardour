@@ -880,6 +880,8 @@ private:
 	void toggle_send_mmc ();
 	void toggle_send_mtc ();
 	void toggle_send_midi_clock ();
+	void disable_virtual_soundcheck ();
+	void enable_virtual_soundcheck ();
 
 	void toggle_use_osc ();
 

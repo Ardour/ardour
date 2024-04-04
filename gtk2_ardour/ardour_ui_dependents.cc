@@ -438,6 +438,10 @@ ARDOUR_UI::livetrax_setup_windows ()
 
 	livetrax_multi_out_button = manage (new ArdourButton (_("Multi Out")));
 	livetrax_stereo_out_button = manage (new ArdourButton (_("Stereo Out")));
+	act = ActionManager::get_action (X_("Common"), X_("disable-virtual-soundcheck"));
+	livetrax_stereo_out_button->set_related_action (act);
+	act = ActionManager::get_action (X_("Common"), X_("enable-virtual-soundcheck"));
+	livetrax_multi_out_button->set_related_action (act);
 
 	vb = manage (new VBox);
 	vb->pack_start (*livetrax_stereo_out_button, true, true);
