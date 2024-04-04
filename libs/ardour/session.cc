@@ -349,6 +349,7 @@ Session::Session (AudioEngine &eng,
 	, _active_cue (-1)
 	, tb_with_filled_slots (0)
 	, _no_file_format_reset (0)
+	, _virtual_soundcheck (false)
 {
 	_suspend_save.store (0);
 	_playback_load.store (0);
@@ -8254,6 +8255,10 @@ Session::disable_virtual_soundcheck ()
 void
 Session::set_virtual_soundcheck (bool yn)
 {
+	if (!Profile->get_livetrax()) {
+		return;
+	}
+
 	std::shared_ptr<RouteList const> rl = routes.reader ();
 	std::shared_ptr<AutomationControlList> master_sends (new AutomationControlList);
 	std::shared_ptr<AutomationControlList> main_outs (new AutomationControlList);
@@ -8277,5 +8282,17 @@ Session::set_virtual_soundcheck (bool yn)
 		set_controls (main_outs, main_val, PBD::Controllable::NoGroup);
 	}
 
+	_virtual_soundcheck = yn;
+
 	VirtualSoundCheckChanged (yn); /* EMIT SIGNAL */
+}
+
+bool
+Session::virtual_soundcheck () const
+{
+	if (!Profile->get_livetrax()) {
+		return false;
+	}
+
+	return _virtual_soundcheck;
 }

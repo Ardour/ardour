@@ -2843,6 +2843,7 @@ Route::set_state (const XMLNode& node, int version)
 		_volume_control.reset (new GainControl (_session, MainOutVolume));
 		_volume_control->set_flag (Controllable::NotAutomatable);
 		_main_outs->set_gain_control (_volume_control);
+		_volume_control->set_value (_session.virtual_soundcheck() ? 1. : 0., PBD::Controllable::NoGroup);
 	}
 
 	set_processor_state (processor_state, version);
@@ -3537,7 +3538,7 @@ Route::create_master_send ()
 {
 	_master_send.reset (new InternalSend (_session, pannable(), _mute_master, std::dynamic_pointer_cast<Route> (shared_from_this()), _session.master_out(), Delivery::MasterSend, false));
 	_master_send->set_display_to_user (false);
-	_master_send->gain_control()->set_value (dB_to_coefficient (0.0), Controllable::NoGroup);
+	_master_send->gain_control()->set_value (_session.virtual_soundcheck() ? 0. : 1., Controllable::NoGroup);
 }
 
 void

@@ -1411,6 +1411,7 @@ public:
 
 	void enable_virtual_soundcheck ();
 	void disable_virtual_soundcheck ();
+	bool virtual_soundcheck() const;
 	PBD::Signal1<void,bool> VirtualSoundCheckChanged;
 
 protected:
@@ -2426,6 +2427,7 @@ private:
 	uint32_t _no_file_format_reset;
 
 	void set_virtual_soundcheck (bool);
+	bool _virtual_soundcheck;
 };
 
 
