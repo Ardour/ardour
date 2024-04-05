@@ -54,6 +54,10 @@ namespace Gtk {
 	class Menuitem;
 }
 
+namespace ArdourWidgets {
+	class ArdourKnob;
+}
+
 class PannerUI : public Gtk::HBox, public ARDOUR::SessionHandlePtr
 {
 public:
@@ -106,6 +110,7 @@ private:
 
 	StereoPanner*  _stereo_panner;
 	MonoPanner*    _mono_panner;
+	ArdourWidgets::ArdourKnob*    _knob_panner;
 
 	bool _ignore_width_change;
 	bool _ignore_position_change;

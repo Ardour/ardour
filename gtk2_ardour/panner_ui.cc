@@ -33,8 +33,10 @@
 #include "ardour/pannable.h"
 #include "ardour/panner.h"
 #include "ardour/panner_shell.h"
+#include "ardour/profile.h"
 #include "ardour/session.h"
 
+#include "widgets/ardour_knob.h"
 #include "widgets/tooltips.h"
 
 #include "gain_meter.h"
@@ -55,23 +57,26 @@ using namespace Gtkmm2ext;
 using namespace Gtk;
 
 PannerUI::PannerUI (Session* s)
-	: _current_nouts (-1)
+	: in_pan_update (false)
+	, _current_nouts (-1)
 	, _current_nins (-1)
 	, _current_uri ("")
 	, _send_mode (false)
+	, twod_panner (nullptr)
+	, big_window (nullptr)
+	, _stereo_panner (nullptr)
+	, _mono_panner (nullptr)
+	, _knob_panner (nullptr)
+	, _ignore_width_change (false)
+	, _ignore_position_change (false)
+	, pan_astate_menu (nullptr)
+	, pan_astyle_menu (nullptr)
 	, pan_automation_state_button ("")
-	, _panner_list()
+	, pan_menu (nullptr)
+	, bypass_menu_item (nullptr)
+	, send_link_menu_item (nullptr)
 {
 	set_session (s);
-
-	pan_menu = 0;
-	pan_astate_menu = 0;
-	pan_astyle_menu = 0;
-	in_pan_update = false;
-	_stereo_panner = 0;
-	_mono_panner = 0;
-	_ignore_width_change = false;
-	_ignore_position_change = false;
 
 	pan_automation_state_button.set_name ("MixerAutomationPlaybackButton");
 
@@ -86,10 +91,7 @@ PannerUI::PannerUI (Session* s)
 	pan_vbox.set_spacing (2);
 	pack_start (pan_vbox, true, true);
 
-	twod_panner = 0;
-	big_window = 0;
-
-	set_width(Narrow);
+	set_width (Narrow);
 }
 
 void
@@ -120,6 +122,9 @@ PannerUI::set_panner (std::shared_ptr<PannerShell> ps, std::shared_ptr<Panner> p
 
 	delete _mono_panner;
 	_mono_panner = 0;
+
+	delete _knob_panner;
+	_knob_panner = 0;
 
 	if (!_panner) {
 		return;
@@ -202,6 +207,7 @@ PannerUI::~PannerUI ()
 	delete pan_astate_menu;
 	delete _stereo_panner;
 	delete _mono_panner;
+	delete _knob_panner;
 }
 
 void
@@ -219,11 +225,9 @@ PannerUI::setup_pan ()
 
 	assert (_panshell);
 
-	if (nouts == _current_nouts
-			&& nins == _current_nins
-			&& _current_uri == _panshell->panner_gui_uri()
-			)
-	{
+	if (nouts == _current_nouts &&
+	    nins == _current_nins &&
+	    _current_uri == _panshell->panner_gui_uri()) {
 		return;
 	}
 
@@ -239,6 +243,8 @@ PannerUI::setup_pan ()
 	_stereo_panner = 0;
 	delete _mono_panner;
 	_mono_panner = 0;
+	delete _knob_panner;
+	_knob_panner = 0;
 
 	if (!_panner) {
 		delete big_window;
@@ -283,20 +289,35 @@ PannerUI::setup_pan ()
 		std::shared_ptr<Pannable> pannable = _panner->pannable();
 		std::shared_ptr<AutomationControl> ac = pannable->pan_azimuth_control;
 
-		_mono_panner = new MonoPanner (_panshell);
+		if (ARDOUR::Profile->get_livetrax()) {
 
-		_mono_panner->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
-					std::weak_ptr<AutomationControl> (ac)));
-		_mono_panner->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
-					std::weak_ptr<AutomationControl>(ac)));
+			_knob_panner = new ArdourWidgets::ArdourKnob (ArdourWidgets::ArdourKnob::default_elements,
+			                                              ArdourWidgets::ArdourCtrlBase::Flags (ArdourWidgets::ArdourCtrlBase::Detent|ArdourWidgets::ArdourCtrlBase::ArcToZero));
 
-		_mono_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
+			_knob_panner->set_controllable (ac);
+			update_pan_sensitive ();
+			_knob_panner->show ();
+			_knob_panner->set_size_request (-1, 5 * ceilf(7.f * scale));
+			_knob_panner->set_name ("monitor section knob");
+			pan_vbox.pack_start (*_knob_panner, false, false);
 
-		_mono_panner->set_size_request (-1, 5 * ceilf(7.f * scale));
-		_mono_panner->set_send_drawing_mode (_send_mode);
+		} else {
 
-		update_pan_sensitive ();
-		pan_vbox.pack_start (*_mono_panner, false, false);
+			_mono_panner = new MonoPanner (_panshell);
+
+			_mono_panner->StartGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::start_touch),
+			                                                std::weak_ptr<AutomationControl> (ac)));
+			_mono_panner->StopGesture.connect (sigc::bind (sigc::mem_fun (*this, &PannerUI::stop_touch),
+			                                               std::weak_ptr<AutomationControl>(ac)));
+
+			_mono_panner->signal_button_release_event().connect (sigc::mem_fun(*this, &PannerUI::pan_button_event));
+
+			_mono_panner->set_size_request (-1, 5 * ceilf(7.f * scale));
+			_mono_panner->set_send_drawing_mode (_send_mode);
+
+			update_pan_sensitive ();
+			pan_vbox.pack_start (*_mono_panner, false, false);
+		}
 	}
 	else if (_current_uri == "http://ardour.org/plugin/panner_vbap#ui")
 	{
