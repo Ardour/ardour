@@ -111,4 +111,11 @@ AudioBackend::get_standard_device_name (StandardDeviceName device_name)
 	return std::string();
 }
 
+void
+AudioBackend::setup_channel_masks (size_t in, size_t out)
+{
+	_input_channel_mask.assign (in, true);
+	_output_channel_mask.assign (out, true);
+}
+
 } // namespace ARDOUR

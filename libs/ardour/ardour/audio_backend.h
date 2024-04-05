@@ -338,6 +338,10 @@ public:
 		return false;
 	}
 
+	typedef std::vector<bool> ChannelMask;
+	ChannelMask const & input_channel_mask() const  { return _input_channel_mask; }
+	ChannelMask const & output_channel_mask() const { return _output_channel_mask; }
+
 	/** Returns a collection of float identifying sample rates that are
 	 * potentially usable with the hardware identified by \p device .
 	 * Any of these values may be supplied in other calls to this backend
@@ -859,6 +863,11 @@ protected:
 	AudioEngine&      engine;
 
 	virtual int _start (bool for_latency_measurement) = 0;
+
+	void setup_channel_masks (size_t in, size_t out);
+
+	ChannelMask _input_channel_mask;
+	ChannelMask _output_channel_mask;
 };
 
 } // namespace ARDOUR
