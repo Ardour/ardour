@@ -790,7 +790,7 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 		index          = in_map.get (DataType::AUDIO, in_index++, &valid);
 		ins[i]         = (valid)
 		               ? bufs.get_audio (index).data (offset)
-		               : silent_bufs.get_audio (0).data (offset);
+		               : silent_bufs.get_audio (0).data (0);
 		_connected_inputs[i] = valid;
 	}
 
@@ -801,7 +801,7 @@ VST3Plugin::connect_and_run (BufferSet&  bufs,
 		index          = out_map.get (DataType::AUDIO, out_index++, &valid);
 		outs[i]        = (valid)
 		               ? bufs.get_audio (index).data (offset)
-		               : scratch_bufs.get_audio (0).data (offset);
+		               : scratch_bufs.get_audio (0).data (0);
 		_connected_outputs[i] = valid;
 	}
 

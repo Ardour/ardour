@@ -1417,7 +1417,7 @@ AUPlugin::render_callback(AudioUnitRenderActionFlags*,
 		if (valid) {
 			ioData->mBuffers[i].mData = input_buffers->get_audio (idx).data (cb_offsets[bus] + input_offset);
 		} else {
-			ioData->mBuffers[i].mData = silent_bufs.get_audio(0).data (cb_offsets[bus] + input_offset);
+			ioData->mBuffers[i].mData = silent_bufs.get_audio(0).data (0);
 		}
 	}
 	cb_offsets[bus] += inNumberSamples;
@@ -1536,7 +1536,7 @@ AUPlugin::connect_and_run (BufferSet& bufs,
 				if (valid) {
 					buffers->mBuffers[i].mData = bufs.get_audio (idx).data (offset);
 				} else {
-					buffers->mBuffers[i].mData = scratch_bufs.get_audio(0).data(offset);
+					buffers->mBuffers[i].mData = scratch_bufs.get_audio(0).data(0);
 				}
 			}
 		}

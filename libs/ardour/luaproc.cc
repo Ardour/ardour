@@ -813,7 +813,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 				if (valid) {
 					in_map[ap + 1] = bufs.get_audio (buf_index).data (offset);
 				} else {
-					in_map[ap + 1] = silent_bufs.get_audio (0).data (offset);
+					in_map[ap + 1] = silent_bufs.get_audio (0).data (0);
 				}
 			}
 			for (uint32_t ap = 0; ap < audio_out; ++ap) {
@@ -822,7 +822,7 @@ LuaProc::connect_and_run (BufferSet& bufs,
 				if (valid) {
 					out_map[ap + 1] = bufs.get_audio (buf_index).data (offset);
 				} else {
-					out_map[ap + 1] = scratch_bufs.get_audio (0).data (offset);
+					out_map[ap + 1] = scratch_bufs.get_audio (0).data (0);
 				}
 			}
 

@@ -2845,12 +2845,12 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 				index = in_map.get(DataType::AUDIO, audio_in_index++, &valid);
 				buf = (valid)
 					? bufs.get_audio(index).data(offset)
-					: silent_bufs.get_audio(0).data(offset);
+					: silent_bufs.get_audio(0).data(0);
 			} else {
 				index = out_map.get(DataType::AUDIO, audio_out_index++, &valid);
 				buf = (valid)
 					? bufs.get_audio(index).data(offset)
-					: scratch_bufs.get_audio(0).data(offset);
+					: scratch_bufs.get_audio(0).data(0);
 			}
 		} else if (flags & PORT_SEQUENCE) {
 			/* FIXME: The checks here for bufs.count().n_midi() > index shouldn't
