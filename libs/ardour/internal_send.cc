@@ -141,6 +141,12 @@ InternalSend::init_gain ()
 	if (_role == Listen) {
 		/* send to monitor bus is always at unity */
 		gain_control ()->set_value (GAIN_COEFF_UNITY, PBD::Controllable::NoGroup);
+	} else if (_role == MasterSend) {
+		if (_session.virtual_soundcheck()) {
+			gain_control ()->set_value (GAIN_COEFF_ZERO, PBD::Controllable::NoGroup);
+		} else {
+			gain_control ()->set_value (GAIN_COEFF_UNITY, PBD::Controllable::NoGroup);
+		}
 	} else {
 		/* aux sends start at -inf dB */
 		gain_control ()->set_value (GAIN_COEFF_ZERO, PBD::Controllable::NoGroup);

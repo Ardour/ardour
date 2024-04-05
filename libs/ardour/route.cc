@@ -289,6 +289,19 @@ Route::init ()
 	}
 	_main_outs->activate ();
 
+	if (Profile->get_livetrax() && is_track()) {
+
+		/* We need a separate gain control the main outs, because we
+		 * will use that when switching between stereo outs and direct
+		 * outs for virtual soundcheck
+		 */
+
+		_volume_control.reset (new GainControl (_session, MainOutVolume));
+		_volume_control->set_flag (Controllable::NotAutomatable);
+		_main_outs->set_gain_control (_volume_control);
+		_volume_control->set_value (_session.virtual_soundcheck() ? GAIN_COEFF_UNITY : GAIN_COEFF_ZERO, PBD::Controllable::NoGroup);
+	}
+
 	if (is_monitor()) {
 		/* where we listen to tracks */
 		_intreturn.reset (new MonitorReturn (_session, tdp));
@@ -1463,7 +1476,7 @@ bool
 Route::is_internal_processor (std::shared_ptr<Processor> p) const
 {
 	if (p == _amp || p == _meter || p == _main_outs || p == _delayline || p == _trim ||
-	    p == _polarity || (_volume && p == _volume) || 
+	    p == _polarity || (_volume && p == _volume) ||
 	    (_triggerbox && p == _triggerbox) ||
 	    (_surround_return && p == _surround_return) ||
 	    (_surround_send && p == _surround_send) ||
@@ -2839,13 +2852,6 @@ Route::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if (Profile->get_livetrax() && is_track()) {
-		_volume_control.reset (new GainControl (_session, MainOutVolume));
-		_volume_control->set_flag (Controllable::NotAutomatable);
-		_main_outs->set_gain_control (_volume_control);
-		_volume_control->set_value (_session.virtual_soundcheck() ? 1. : 0., PBD::Controllable::NoGroup);
-	}
-
 	set_processor_state (processor_state, version);
 
 	// this looks up the internal instrument in processors
@@ -3538,7 +3544,6 @@ Route::create_master_send ()
 {
 	_master_send.reset (new InternalSend (_session, pannable(), _mute_master, std::dynamic_pointer_cast<Route> (shared_from_this()), _session.master_out(), Delivery::MasterSend, false));
 	_master_send->set_display_to_user (false);
-	_master_send->gain_control()->set_value (_session.virtual_soundcheck() ? 0. : 1., Controllable::NoGroup);
 }
 
 void
@@ -6370,4 +6375,3 @@ Route::remove_surround_send ()
 	 */
 	_pending_surround_send.store (1);
 }
-
