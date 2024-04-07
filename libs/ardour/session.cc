@@ -3562,8 +3562,6 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 	{
 		PresentationInfo::ChangeSuspender cs;
 		ensure_route_presentation_info_gap (order, new_routes.size());
-		ensure_stripable_sort_order ();
-		reassign_track_numbers ();
 
 		for (RouteList::iterator x = new_routes.begin(); x != new_routes.end(); ++x, ++added) {
 
@@ -3645,6 +3643,11 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 			}
 
 			ARDOUR::GUIIdle ();
+		}
+
+		ensure_stripable_sort_order ();
+		if (Profile->get_livetrax()) {
+			reassign_track_numbers ();
 		}
 	}
 
