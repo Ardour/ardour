@@ -166,7 +166,7 @@ PlugInsertBase::find_and_load_plugin (Session& s, XMLNode const& node, PluginTyp
 }
 
 void
-PlugInsertBase::set_control_ids (const XMLNode& node, int version)
+PlugInsertBase::set_control_ids (const XMLNode& node, int version, bool by_value)
 {
 	const XMLNodeList& nlist = node.children();
 	for (XMLNodeConstIterator iter = nlist.begin(); iter != nlist.end(); ++iter) {
@@ -190,14 +190,21 @@ PlugInsertBase::set_control_ids (const XMLNode& node, int version)
 			continue;
 		}
 
-		/* this may create the new controllable */
 		std::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, p));
-
 		if (!c) {
 			continue;
 		}
 		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (c);
-		if (ac) {
+		if (!ac) {
+			continue;
+		}
+
+		if (by_value) {
+			float val;
+			if ((*iter)->get_property (X_("value"), val)) {
+				ac->set_value (val, Controllable::NoGroup);
+			}
+		} else {
 			ac->set_state (**iter, version);
 		}
 	}

@@ -2631,50 +2631,6 @@ PluginInsert::state () const
 	return node;
 }
 
-void
-PluginInsert::update_control_values (const XMLNode& node, int version)
-{
-	const XMLNodeList& nlist = node.children();
-	for (XMLNodeConstIterator iter = nlist.begin(); iter != nlist.end(); ++iter) {
-		if ((*iter)->name() != Controllable::xml_node_name) {
-			continue;
-		}
-
-		float val;
-		if (!(*iter)->get_property (X_("value"), val)) {
-			continue;
-		}
-
-		uint32_t p = (uint32_t)-1;
-
-		std::string str;
-		if ((*iter)->get_property (X_("symbol"), str)) {
-			std::shared_ptr<LV2Plugin> lv2plugin = std::dynamic_pointer_cast<LV2Plugin> (_plugins[0]);
-			if (lv2plugin) {
-				p = lv2plugin->port_index(str.c_str());
-			}
-		}
-
-		if (p == (uint32_t)-1) {
-			(*iter)->get_property (X_("parameter"), p);
-		}
-
-		if (p == (uint32_t)-1) {
-			continue;
-		}
-
-		/* lookup controllable */
-		std::shared_ptr<Evoral::Control> c = control (Evoral::Parameter (PluginAutomation, 0, p), false);
-		if (!c) {
-			continue;
-		}
-		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (c);
-		if (ac) {
-			ac->set_value (val, Controllable::NoGroup);
-		}
-	}
-}
-
 int
 PluginInsert::set_state(const XMLNode& node, int version)
 {
@@ -2725,7 +2681,7 @@ PluginInsert::set_state(const XMLNode& node, int version)
 		assert (_plugins[0]->unique_id() == unique_id);
 		/* update controllable value only (copy plugin state) */
 		set_id (node);
-		update_control_values (node, version);
+		set_control_ids (node, version, true);
 	}
 
 	Processor::set_state (node, version);

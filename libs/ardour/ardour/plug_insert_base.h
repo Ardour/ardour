@@ -136,7 +136,7 @@ protected:
 	bool parse_plugin_type (XMLNode const&, PluginType&, std::string&) const;
 	std::shared_ptr<Plugin> find_and_load_plugin (Session&, XMLNode const&, PluginType&, std::string const&, bool& any_vst);
 
-	void set_control_ids (const XMLNode&, int version);
+	void set_control_ids (const XMLNode&, int version, bool by_value = false);
 	void preset_load_set_value (uint32_t, float);
 };
 
