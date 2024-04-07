@@ -177,6 +177,7 @@ class LevelMeterHBox;
 class GUIObjectState;
 class BasicUI;
 class LiveTraxMeters;
+class LiveTraxAddTrackDialog;
 
 namespace ARDOUR {
 	class ControlProtocolInfo;
@@ -793,6 +794,8 @@ private:
 	WM::Proxy<PluginDSPLoadWindow> plugin_dsp_load_window;
 	WM::Proxy<DspStatisticsWindow> dsp_statistics_window;
 	WM::Proxy<TransportMastersWindow> transport_masters_window;
+
+	LiveTraxAddTrackDialog* livetrax_track_dialog;
 
 	/* Windows/Dialogs that require a creator method */
 

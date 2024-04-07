@@ -151,6 +151,7 @@
 #include "keyboard.h"
 #include "keyeditor.h"
 #include "library_download_dialog.h"
+#include "livetrax_add_track_dialog.h"
 #include "location_ui.h"
 #include "lua_script_manager.h"
 #include "luawindow.h"
@@ -339,6 +340,7 @@ ARDOUR_UI::ARDOUR_UI (int *argcp, char **argvp[], const char* localedir)
 	, plugin_dsp_load_window (X_("plugin-dsp-load"), _("Plugin DSP Load"))
 	, dsp_statistics_window (X_("dsp-statistics"), _("Performance Meters"))
 	, transport_masters_window (X_("transport-masters"), _("Transport Masters"))
+	, livetrax_track_dialog (nullptr)
 	, session_option_editor (X_("session-options-editor"), _("Properties"), boost::bind (&ARDOUR_UI::create_session_option_editor, this))
 	, add_video_dialog (X_("add-video"), _("Add Video"), boost::bind (&ARDOUR_UI::create_add_video_dialog, this))
 	, bundle_manager (X_("bundle-manager"), _("Bundle Manager"), boost::bind (&ARDOUR_UI::create_bundle_manager, this))
@@ -2863,6 +2865,16 @@ ARDOUR_UI::add_route ()
 		return;
 	}
 
+	if (Profile->get_livetrax()) {
+		if (!livetrax_track_dialog) {
+			livetrax_track_dialog = new LiveTraxAddTrackDialog;
+			livetrax_track_dialog->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::add_route_dialog_response));
+		}
+		livetrax_track_dialog->set_position (WIN_POS_MOUSE);
+		livetrax_track_dialog->present ();
+		return;
+	}
+
 	if (!add_route_dialog.get (false)) {
 		add_route_dialog->signal_response().connect (sigc::mem_fun (*this, &ARDOUR_UI::add_route_dialog_response));
 	}
@@ -2881,6 +2893,15 @@ ARDOUR_UI::add_route_dialog_response (int r)
 {
 	if (!_session) {
 		warning << _("You cannot add tracks or busses without a session already loaded.") << endmsg;
+		return;
+	}
+
+	if (Profile->get_livetrax()) {
+		if (r == RESPONSE_OK) {
+			int nchan = livetrax_track_dialog->stereo() ? 2 : 1;
+			session_add_audio_route (true, nchan, nchan, ARDOUR::Normal, nullptr, livetrax_track_dialog->num_tracks(), string(), false, PresentationInfo::max_order, false);
+		}
+		livetrax_track_dialog->hide ();
 		return;
 	}
 

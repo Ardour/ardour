@@ -143,6 +143,7 @@ gtk2_ardour_sources = [
         'led.cc',
         'level_meter.cc',
         'library_download_dialog.cc',
+	'livetrax_add_track_dialog.cc',
 	'livetrax_meters.cc',
         'location_ui.cc',
         'loudness_dialog.cc',
