@@ -1075,13 +1075,15 @@ AudioEngine::start (bool for_latency)
 	}
 
 	if (!for_latency) {
+		/* Do this here so we do not have to add it to every backend */
+		_backend->setup_channel_masks (_backend->input_channels(), _backend->output_channels());
+
 		/* Call the library-wide ::init_post_engine() before emitting
 		 * running to ensure that its tasks are complete before any
 		 * signal handlers execute. PBD::Signal does not ensure
 		 * ordering of signal handlers so even if ::init_post_engine()
 		 * is connected first, it may not run first.
 		 */
-
 		ARDOUR::init_post_engine (_start_cnt);
 
 		Running (_start_cnt); /* EMIT SIGNAL */

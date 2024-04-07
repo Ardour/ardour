@@ -3548,7 +3548,7 @@ Session::add_routes_inner (RouteList& new_routes, bool input_auto_connect, bool 
 		 * we will resort when done.
 		 */
 
-		if (!_monitor_out && !loading() && !input_auto_connect && !output_auto_connect) {
+		if (!_monitor_out && !loading() && !input_auto_connect && !output_auto_connect && !Profile->get_livetrax()) {
 			resort_routes_using (r);
 		}
 	}
@@ -7799,17 +7799,99 @@ Session::livetrax_auto_connect (std::shared_ptr<Route> route)
 
 	get_physical_ports (physinputs, physoutputs, DataType::AUDIO);
 
-	const vector<string>::size_type n = route->track_number() - 1;
+	AudioBackend::ChannelMask const & input_channel_mask ( _engine.current_backend()->input_channel_mask());
+	AudioBackend::ChannelMask const & output_channel_mask ( _engine.current_backend()->output_channel_mask());
 
 	route->input()->disconnect (this);
 	route->output()->disconnect (this);
 
-	route->input()->connect (route->input()->ports().port (DataType::AUDIO, 0),  physinputs[n % physinputs.size()], this);
-	route->output()->connect (route->output()->ports().port (DataType::AUDIO, 0),  physoutputs[n % physoutputs.size()], this);
+	vector<string>::size_type n;
+	vector<string>::size_type ichn;
+	vector<string>::size_type ochn;
+	vector<string>::size_type i;
+	vector<string>::size_type start_from;
+	vector<string>::size_type enabled;
+
+	n = route->track_number() - 1;
+
+	/* move to the nth enabled input channel */
+
+	i = 0;
+	start_from = 0;
+	enabled = 0;
+	while (enabled <= n && i < input_channel_mask.size()) {
+		if (input_channel_mask[i]) {
+			start_from = i;
+			enabled++;
+		}
+		++i;
+	}
+
+	n = start_from;
+	size_t attempts = 0;
+	size_t limit = physinputs.size();
+
+	while (attempts < limit) {
+
+		ichn = n % physinputs.size();
+
+		if (input_channel_mask[ichn]) {
+			route->input()->connect (route->input()->ports().port (DataType::AUDIO, 0),  physinputs[ichn], this);
+			break;
+		} else {
+			/* reduce limit because we found a channel that can't be used */
+			--limit;
+		}
+
+		++attempts;
+		++n;
+
+		if (n >= physinputs.size()) {
+			n = 0;
+		}
+	}
+
+
+	n = route->track_number() - 1;
+
+	i = 0;
+	start_from = 0;
+	enabled = 0;
+	while (enabled <= n && i < output_channel_mask.size()) {
+		if (output_channel_mask[i]) {
+			start_from = i;
+			enabled++;
+		}
+		++i;
+	}
+
+	n = start_from;
+	attempts = 0;
+	limit = physoutputs.size();
+
+	while (attempts < limit) {
+
+		ochn = n % physoutputs.size();
+
+		if (output_channel_mask[ochn]) {
+			route->output()->connect (route->output()->ports().port (DataType::AUDIO, 0),  physoutputs[ochn], this);
+			break;
+		} else {
+			/* reduce limit because we found a channel that can't be used */
+			--limit;
+		}
+
+		++attempts;
+		++n;
+
+		if (n >= physinputs.size()) {
+			n = 0;
+		}
+	}
 
 	DEBUG_TRACE (DEBUG::PortConnectAuto, string_compose ("livetrax auto connect %1 [%2] to %3 and %4\n", route->name(), route->track_number(),
-	                                                     physinputs[n % physinputs.size()],
-	                                                     physoutputs[n % physoutputs.size()]));
+	                                                     physinputs[ichn],
+	                                                     physoutputs[ochn]));
 }
 
 void

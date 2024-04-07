@@ -858,13 +858,13 @@ public:
 
 	PBD::TimingStats dsp_stats[NTT];
 
+	void setup_channel_masks (size_t in, size_t out);
+
 protected:
 	AudioBackendInfo& _info;
 	AudioEngine&      engine;
 
 	virtual int _start (bool for_latency_measurement) = 0;
-
-	void setup_channel_masks (size_t in, size_t out);
 
 	ChannelMask _input_channel_mask;
 	ChannelMask _output_channel_mask;

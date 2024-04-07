@@ -116,6 +116,9 @@ AudioBackend::setup_channel_masks (size_t in, size_t out)
 {
 	_input_channel_mask.assign (in, true);
 	_output_channel_mask.assign (out, true);
+
+	_input_channel_mask[2] = false;
+	_output_channel_mask[3] = false;
 }
 
 } // namespace ARDOUR
