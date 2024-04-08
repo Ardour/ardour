@@ -475,8 +475,7 @@ AudioRegion::read (Sample* buf, samplepos_t pos, samplecnt_t cnt, int channel) c
 }
 
 samplecnt_t
-AudioRegion::master_read_at (Sample* buf, Sample* /*mixdown_buffer*/, float* /*gain_buffer*/,
-                             samplepos_t position, samplecnt_t cnt, uint32_t chan_n) const
+AudioRegion::master_read_at (Sample* buf, samplepos_t position, samplecnt_t cnt, uint32_t chan_n) const
 {
 	/* do not read gain/scaling/fades and do not count this disk i/o in statistics */
 

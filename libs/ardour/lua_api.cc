@@ -1216,7 +1216,7 @@ LuaAPI::Rubberband::set_mapping (luabridge::LuaRef tbl)
 samplecnt_t
 LuaAPI::Rubberband::read (Sample* buf, samplepos_t pos, samplecnt_t cnt, int channel) const
 {
-	return _region->master_read_at (buf, NULL, NULL, _read_offset + pos, cnt, channel);
+	return _region->master_read_at (buf, _read_offset + pos, cnt, channel);
 }
 
 static void null_deleter (LuaAPI::Rubberband*) {}

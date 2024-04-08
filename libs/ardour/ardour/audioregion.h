@@ -121,9 +121,10 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	                             samplecnt_t cnt,
 	                             uint32_t   chan_n = 0) const;
 
-	samplecnt_t master_read_at (Sample *buf, Sample *mixdown_buf, float *gain_buf,
-	                                    samplepos_t position, samplecnt_t cnt,
-	                                    uint32_t chan_n=0) const;
+	samplecnt_t master_read_at (Sample*     buf,
+	                            samplepos_t position,
+	                            samplecnt_t cnt,
+	                            uint32_t    chan_n=0) const;
 
 	samplecnt_t read_raw_internal (Sample*, samplepos_t, samplecnt_t, int channel) const;
 
