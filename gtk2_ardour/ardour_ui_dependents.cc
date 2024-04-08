@@ -51,6 +51,7 @@
 #include "luainstance.h"
 #include "luawindow.h"
 #include "livetrax_meters.h"
+#include "livetrax_tc_widget.h"
 #include "main_clock.h"
 #include "meterbridge.h"
 #include "mixer_ui.h"
@@ -428,6 +429,10 @@ ARDOUR_UI::livetrax_setup_windows ()
 	vb->pack_start (*livetrax_ff_dropdown, false, false);
 	vb->pack_start (*livetrax_sr_button, false, false);
 	livetrax_top_bar.pack_start (*vb, false, false);
+
+	CairoWidget* cw = new LiveTraxTCWidget;
+	cw->show ();
+	livetrax_top_bar.pack_start (*cw, false, false);
 
 	vb = manage (new VBox);
 	vb->pack_start (*ev_dsp, true, true);
