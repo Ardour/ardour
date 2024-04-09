@@ -46,6 +46,7 @@ enum RMIDI_EV_TYPE {
 	NOTE_OFF,
 	PROGRAM_CHANGE,
 	CONTROL_CHANGE,
+	PITCH_BEND,
 };
 
 struct rmidi_event_t {
@@ -60,6 +61,10 @@ struct rmidi_event_t {
 			uint8_t param;
 			uint8_t value;
 		} control;
+		struct {
+			uint8_t lo;
+			uint8_t hi;
+		} bend;
 	} d;
 };
 
@@ -78,8 +83,9 @@ typedef struct _RSSynthChannel {
 	int8_t   midimsgs[128];  // internal, note-off + on in same cycle, sustained-off
 	int8_t   sustain;        // sustain pedal pressed
 	ADSRcfg  adsr;
+	float    pitch_bend;
 	void (*synthesize) (struct _RSSynthChannel* sc,
-	                    const uint8_t note, const float vol, const float pc,
+	                    const uint8_t note, const float vol, float pc,
 	                    const size_t n_samples, float* left, float* right);
 } RSSynthChannel;
 
@@ -180,11 +186,15 @@ adsr_env (RSSynthChannel* sc, const uint8_t note)
 /* piano like sound w/slight stereo phase */
 static void
 synthesize_sineP (RSSynthChannel* sc,
-                  const uint8_t note, const float vol, const float fq,
+                  const uint8_t note, const float vol, float fq,
                   const size_t n_samples, float* left, float* right)
 {
 	size_t i;
 	float  phase = sc->phase[note];
+
+	if (sc->pitch_bend != 1) {
+		fq *= sc->pitch_bend;
+	}
 
 	for (i = 0; i < n_samples; ++i) {
 		float env = adsr_env (sc, note);
@@ -337,7 +347,8 @@ synth_reset_channel (RSSynthChannel* sc)
 		sc->miditable[k] = 0;
 		sc->midimsgs[k]  = 0;
 	}
-	sc->keycomp = 0;
+	sc->keycomp    = 0;
+	sc->pitch_bend = 1.0;
 }
 
 static void
@@ -396,6 +407,12 @@ synth_process_midi_event (void* synth, struct rmidi_event_t* ev)
 				synth_reset_channel (&(rs->sc[ev->channel]));
 			} else if (ev->d.control.param >= 120) {
 				/* params 122-127 are reserved - skip them. */
+			}
+			break;
+		case PITCH_BEND:
+			{
+				float st = ((((int)ev->d.bend.hi << 7) | ev->d.bend.lo) - 8192) / 4096.0; // +/- 2 semitones
+				rs->sc[ev->channel].pitch_bend = powf (2, st / 12.0);
 			}
 			break;
 		default:
@@ -483,6 +500,11 @@ synth_parse_midi (void* synth, const uint8_t* data, const size_t size)
 		case 0xC0:
 			ev.type            = PROGRAM_CHANGE;
 			ev.d.control.value = data[1] & 0x7f;
+			break;
+		case 0xE0:
+			ev.type            = PITCH_BEND;
+			ev.d.bend.lo = data[1] & 0x7f;
+			ev.d.bend.hi = data[2] & 0x7f;
 			break;
 		default:
 			return;
