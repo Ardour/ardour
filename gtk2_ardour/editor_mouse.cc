@@ -775,6 +775,9 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 		}
 		return true;
+	case SceneMarkerItem:
+		_drags->set (new MarkerDrag (this, item), event);
+		return true;
 
 	case TempoMarkerItem:
 		if (ArdourKeyboard::indicates_constraint (event->button.state)) {
@@ -1728,6 +1731,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 				break;
 
 			case MarkerItem:
+				marker_context_menu (&event->button, item);
+				break;
+
+			case SceneMarkerItem:
 				marker_context_menu (&event->button, item);
 				break;
 

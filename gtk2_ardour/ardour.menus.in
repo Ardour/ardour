@@ -553,6 +553,7 @@
         <menuitem action="toggle-arrangement-ruler"/>
         <menuitem action="toggle-marker-ruler"/>
         <menuitem action="toggle-cue-marker-ruler"/>
+        <menuitem action="toggle-scene-marker-ruler"/>
         <separator/>
         <menuitem action="toggle-video-ruler"/>
       </menu>
@@ -805,6 +806,7 @@
     <menuitem action="toggle-cd-marker-ruler"/>
     <menuitem action="toggle-marker-ruler"/>
     <menuitem action="toggle-cue-marker-ruler"/>
+    <menuitem action="toggle-scene-marker-ruler"/>
     <separator/>
     <menuitem action="toggle-video-ruler"/>
   </popup>

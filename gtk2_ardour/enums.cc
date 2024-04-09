@@ -152,11 +152,13 @@ setup_gtk_ardour_enums ()
 	REGISTER_ENUM (StreamItem);
 	REGISTER_ENUM (PlayheadCursorItem);
 	REGISTER_ENUM (MarkerItem);
+	REGISTER_ENUM (SceneMarkerItem);
 	REGISTER_ENUM (MarkerBarItem);
 	REGISTER_ENUM (RangeMarkerBarItem);
 	REGISTER_ENUM (CdMarkerBarItem);
 	REGISTER_ENUM (SectionMarkerBarItem);
 	REGISTER_ENUM (CueMarkerBarItem);
+	REGISTER_ENUM (SceneMarkerBarItem);
 	REGISTER_ENUM (VideoBarItem);
 	REGISTER_ENUM (TransportMarkerBarItem);
 	REGISTER_ENUM (SelectionItem);

@@ -343,6 +343,7 @@ Editor::Editor ()
 	, cd_mark_label (_("CD Markers"))
 	, section_mark_label (_("Arrangement"))
 	, cue_mark_label (_("Cue Markers"))
+	, scene_mark_label (_("Scenes"))
 	, videotl_label (_("Video Timeline"))
 	, videotl_group (0)
 	, _region_boundary_cache_dirty (true)
@@ -575,6 +576,13 @@ Editor::Editor ()
 	cue_mark_label.set_padding (5,0);
 	cue_mark_label.hide();
 	cue_mark_label.set_no_show_all();
+
+	scene_mark_label.set_name ("EditorRulerLabel");
+	scene_mark_label.set_size_request (-1, (int)timebar_height);
+	scene_mark_label.set_alignment (1.0, 0.5);
+	scene_mark_label.set_padding (5,0);
+	scene_mark_label.hide();
+	scene_mark_label.set_no_show_all();
 
 	videotl_bar_height = 4;
 	videotl_label.set_name ("EditorRulerLabel");

@@ -939,6 +939,7 @@ private:
 	ArdourCanvas::Container* cd_marker_group;
 	ArdourCanvas::Container* section_marker_group;
 	ArdourCanvas::Container* cue_marker_group;
+	ArdourCanvas::Container* scene_marker_group;
 
 	/* parent for groups which themselves contain time markers */
 	ArdourCanvas::Container* _time_markers_group;
@@ -992,6 +993,7 @@ private:
 	Glib::RefPtr<Gtk::ToggleAction> ruler_section_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_marker_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_cue_marker_action;
+	Glib::RefPtr<Gtk::ToggleAction> ruler_scene_marker_action;
 	bool                            no_ruler_shown_update;
 
 	Gtk::Widget* ruler_grabbed_widget;
@@ -1083,6 +1085,7 @@ private:
 	ArdourCanvas::Rectangle* cd_marker_bar;
 	ArdourCanvas::Rectangle* section_marker_bar;
 	ArdourCanvas::Rectangle* cue_marker_bar;
+	ArdourCanvas::Rectangle* scene_marker_bar;
 	ArdourCanvas::Line*      ruler_separator;
 
 	void toggle_cue_behavior ();
@@ -1099,6 +1102,7 @@ private:
 	Gtk::Label  cd_mark_label;
 	Gtk::Label  section_mark_label;
 	Gtk::Label  cue_mark_label;
+	Gtk::Label  scene_mark_label;
 
 	/* videtimline related actions */
 	Gtk::Label                      videotl_label;
@@ -1593,6 +1597,7 @@ private:
 	void clear_xrun_markers ();
 	void clear_ranges ();
 	void clear_cues ();
+	void clear_scenes ();
 	void clear_locations ();
 	void unhide_markers ();
 	void unhide_ranges ();
