@@ -145,6 +145,8 @@ Editor::add_new_location_internal (Location* location)
 		color = X_("location loop");
 	} else if (location->is_auto_punch()) {
 		color = X_("location punch");
+	} else if (location->is_scene()) {
+		color = X_("location scene");
 	} else {
 		color = X_("location range");
 	}
@@ -161,6 +163,9 @@ Editor::add_new_location_internal (Location* location)
 		} else if (location->is_section()) {
 			lam->start = new ArdourMarker (*this, *section_marker_group, color, location->name(), marker_type (location), location->start());
 			group = section_marker_group;
+		} else if (location->is_scene()) {
+			lam->start = new ArdourMarker (*this, *scene_marker_group, color, location->name(), marker_type (location), location->start());
+			group = scene_marker_group;
 		} else {
 			lam->start = new ArdourMarker (*this, *marker_group, color, location->name(), marker_type (location), location->start());
 			group = marker_group;
@@ -514,6 +519,8 @@ void Editor::ensure_marker_updated (LocationMarkers* lam, Location* location)
 {
 	if (location->is_cd_marker()) {
 		reparent_location_markers (lam, cd_marker_group);
+	} else if (location->is_scene()) {
+		reparent_location_markers (lam, scene_marker_group);
 	} else if (location->is_section()) {
 		reparent_location_markers (lam, section_marker_group);
 	} else if (location->is_cue_marker()) {

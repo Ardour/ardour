@@ -180,6 +180,7 @@ Editor::initialize_rulers ()
 	lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(cue_mark_label, PACK_SHRINK, PACK_START));
+	lab_children.push_back (Element(scene_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(section_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(videotl_label, PACK_SHRINK, PACK_START));
 
@@ -255,6 +256,10 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
 			ruler_items.push_back (MenuElem (string_compose (_("Cue %1"), cue_marker_name (n)), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, n)));
 		}
+		break;
+
+	case SceneMarkerBarItem:
+		ruler_items.push_back (MenuElem (_("Delete all Scenes"), sigc::mem_fun (*this, &Editor::clear_scenes)));
 		break;
 
 	case TempoBarItem:
@@ -671,6 +676,25 @@ Editor::update_ruler_visibility ()
 	} else {
 		cue_marker_group->hide();
 		cue_mark_label.hide();
+	}
+
+	if (Profile->get_livetrax() || ruler_scene_marker_action->get_active()) {
+		old_unit_pos = scene_marker_group->position().y;
+		if (tbpos != old_unit_pos) {
+			scene_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
+		}
+		scene_marker_group->show();
+		scene_mark_label.show();
+
+		scene_marker_bar->set_outline(false);
+
+		tbpos += timebar_height;
+		tbgpos += timebar_height;
+		visible_timebars++;
+		update_marker_display();
+	} else {
+		scene_marker_group->hide ();
+		scene_mark_label.hide ();
 	}
 
 	if (!Profile->get_livetrax() && ruler_section_action->get_active()) {

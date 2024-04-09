@@ -362,7 +362,6 @@ ARDOUR_UI::connect_transport_elements ()
 
 	if (Profile->get_livetrax()) {
 		act = ActionManager::get_action (X_("Common"), X_("open-media-folder"));
-		std::cerr << "Connecting open media with " << act.get() << std::endl;
 		livetrax_view_in_folder_button->set_related_action (act);
 	}
 
