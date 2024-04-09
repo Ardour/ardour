@@ -81,8 +81,6 @@ ActionManager::load_menus (const string& menus_file)
 
 	bool loaded = false;
 
-	std::cerr << "Load menus from " << ui_file << std::endl;
-
 	try {
 		ui_manager->add_ui_from_file (ui_file);
 		info << string_compose (_("Loading menus from %1"), ui_file) << endmsg;
