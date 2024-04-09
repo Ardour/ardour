@@ -384,31 +384,34 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 	assert (!AudioEngine::instance()->process_lock().trylock());
 #endif
 
-	std::shared_ptr<Port> port;
-	vector<std::shared_ptr<Port> > deleted_ports;
-
 	changed    = false;
 
-	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+	{
+		Glib::Threads::RWLock::WriterLock wl (_io_lock);
+		vector<std::shared_ptr<Port> > deleted_ports;
 
-		const size_t n = count.get(*t);
+		for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+			const size_t n = count.get(*t);
 
-		/* remove unused ports */
-		for (size_t i = n_ports().get(*t); i > n; --i) {
-			port = _ports.port(*t, i-1);
+			/* remove unused ports */
+			{
+				for (size_t i = n_ports().get(*t); i > n; --i) {
+					auto port = _ports.port(*t, i-1);
 
-			assert(port);
-			_ports.remove(port);
+					assert(port);
+					_ports.remove(port);
 
-			/* hold a reference to the port so that we can ensure
-			 * that this thread, and not a JACK notification thread,
-			 * holds the final reference.
-			 */
+					/* hold a reference to the port so that we can ensure
+					 * that this thread, and not a JACK notification thread,
+					 * holds the final reference.
+					 */
 
-			deleted_ports.push_back (port);
-			_session.engine().unregister_port (port);
+					deleted_ports.push_back (port);
+					_session.engine().unregister_port (port);
 
-			changed = true;
+					changed = true;
+				}
+			}
 		}
 
 		/* this will drop the final reference to the deleted ports,
@@ -422,12 +425,21 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 		 * which all happens right .... here.
 		 */
 		deleted_ports.clear ();
+	}
 
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
 		/* create any necessary new ports */
-		while (n_ports().get(*t) < n) {
+		while (true) {
 
-			string portname = build_legal_port_name (*t);
+			{
+				Glib::Threads::RWLock::ReaderLock rl (_io_lock);
+				if (n_ports().get(*t) >= count.get(*t))
+					break;
+			}
 
+			const string portname = build_legal_port_name (*t);
+
+			std::shared_ptr<Port> port;
 			try {
 
 				if (_direction == Input) {
@@ -448,8 +460,14 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 				throw;
 			}
 
-			_ports.add (port);
-			changed = true;
+			{
+				Glib::Threads::RWLock::WriterLock wl (_io_lock);
+				if (n_ports().get(*t) < count.get(*t))
+				{
+					_ports.add (port);
+					changed = true;
+				}
+			}
 		}
 	}
 
@@ -487,7 +505,6 @@ IO::ensure_ports (ChanCount count, bool clear, void* src)
 	change.before = _ports.count ();
 
 	{
-		Glib::Threads::RWLock::WriterLock wl (_io_lock);
 		if (ensure_ports_locked (count, clear, changed)) {
 			return -1;
 		}
