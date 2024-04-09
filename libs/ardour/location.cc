@@ -801,6 +801,11 @@ Location::set_scene_change (std::shared_ptr<SceneChange>  sc)
 {
 	if (_scene_change != sc) {
 		_scene_change = sc;
+		if (_scene_change) {
+			_flags = Flags (_flags | IsScene);
+		} else {
+			_flags = Flags (_flags & ~IsScene);
+		}
 		_session.set_dirty ();
 		emit_signal (Scene); /* EMIT SIGNAL */
 	}
@@ -2008,6 +2013,60 @@ Locations::clear_cue_markers (samplepos_t start, samplepos_t end)
 		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
 
 			if ((*i)->is_cue_marker()) {
+				Location* l (*i);
+
+				if (l->start().time_domain() == AudioTime) {
+					samplepos_t when = l->start().samples();
+					if (when >= start && when < end) {
+						i = locations.erase (i);
+						r.push_back (l);
+						continue;
+					}
+				} else {
+					if (!have_beats) {
+						sb = tmap->quarters_at (timepos_t (start));
+						eb = tmap->quarters_at (timepos_t (end));
+						have_beats = true;
+					}
+
+					Temporal::Beats when = l->start().beats();
+					if (when >= sb && when < eb) {
+						r.push_back (l);
+						i = locations.erase (i);
+						continue;
+					}
+				}
+				removed_at_least_one = true;
+			}
+
+			++i;
+		}
+	} /* end lock scope */
+
+	for (auto & l : r) {
+		removed (l); /* EMIT SIGNAL */
+		delete l;
+	}
+
+	return removed_at_least_one;
+}
+
+bool
+Locations::clear_scene_markers (samplepos_t start, samplepos_t end)
+{
+	TempoMap::SharedPtr tmap (TempoMap::use());
+	Temporal::Beats sb;
+	Temporal::Beats eb;
+	bool have_beats = false;
+	vector<Location*> r;
+	bool removed_at_least_one = false;
+
+	{
+		Glib::Threads::RWLock::WriterLock lm (_lock);
+
+		for (LocationList::iterator i = locations.begin(); i != locations.end(); ) {
+
+			if ((*i)->is_scene()) {
 				Location* l (*i);
 
 				if (l->start().time_domain() == AudioTime) {
