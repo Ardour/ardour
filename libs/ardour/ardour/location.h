@@ -69,6 +69,7 @@ public:
 		IsXrun = 0x400,
 		IsCueMarker = 0x800,
 		IsSection = 0x1000,
+		IsScene = 0x2000
 	};
 
 	Location (Session &);
@@ -125,6 +126,7 @@ public:
 	bool is_skipping() const { return (_flags & IsSkip) && (_flags & IsSkipping); }
 	bool is_xrun() const { return _flags & IsXrun; }
 	bool is_section() const { return _flags & IsSection; }
+	bool is_scene() const { return (bool) _scene_change && _flags & IsScene; }
 	bool matches (Flags f) const { return _flags & f; }
 
 	/* any range with start < end  -- not a marker */
@@ -274,6 +276,7 @@ public:
 	bool clear_ranges ();
 
 	bool clear_cue_markers (samplepos_t start, samplepos_t end);
+	bool clear_scene_markers (samplepos_t start, samplepos_t end);
 
 	void cut_copy_section (timepos_t const& start, timepos_t const& end, timepos_t const& to, SectionOperation const op);
 
