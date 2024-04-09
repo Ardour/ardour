@@ -30,7 +30,7 @@
     the value of the variable.
 *****************************************************/
 
-CONFIG_VARIABLE (Temporal::TimeDomain, preferred_time_domain, "preferred_time_domain", Temporal::BeatTime)
+CONFIG_VARIABLE (Temporal::TimeDomain, preferred_time_domain, "preferred_time_domain", Temporal::AudioTime)
 
 /* IO connection */
 
