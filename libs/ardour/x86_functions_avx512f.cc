@@ -995,7 +995,7 @@ x86_avx512f_copy_vector(float *dst, const float *src, uint32_t nframes)
 		}
 
 		if (frames >= 8                        &&
-				IS_ALIGNED_TO(src, sizeof(__m256)) &&
+		    IS_ALIGNED_TO(src, sizeof(__m256)) &&
 		    IS_ALIGNED_TO(dst, sizeof(__m256))) {
 			__m256 x = _mm256_load_ps(src);
 			_mm256_store_ps(dst, x);
