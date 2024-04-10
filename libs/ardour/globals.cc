@@ -207,16 +207,6 @@ setup_hardware_optimization (bool try_optimization)
 			mix_buffers_no_gain   = x86_avx512f_mix_buffers_no_gain;
 			copy_vector           = x86_avx512f_copy_vector;
 
-			if (g_getenv("ARDOUR_AVX_DEBUG")) {
-				int a = atoi (g_getenv("ARDOUR_AVX_DEBUG"));
-				if (a & 0x01) compute_peak          = default_compute_peak;
-				if (a & 0x02) find_peaks            = default_find_peaks;
-				if (a & 0x04) apply_gain_to_buffer  = default_apply_gain_to_buffer;
-				if (a & 0x08) mix_buffers_with_gain = default_mix_buffers_with_gain;
-				if (a & 0x10) mix_buffers_no_gain   = default_mix_buffers_no_gain;
-				if (a & 0x20) copy_vector           = default_copy_vector;
-			}
-
 			generic_mix_functions = false;
 
 		} else
