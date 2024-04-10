@@ -2826,6 +2826,13 @@ gdk_window_fullscreen (GdkWindow *window)
       !WINDOW_IS_TOPLEVEL (window))
     return;
 
+	if ([impl->toplevel styleMask] & NSWindowStyleMaskFullScreen) {
+		/* already in full screen, this can happen when a user
+		 * uses the "green button" to maximize the window.
+		 */
+		return;
+	}
+
   geometry = get_fullscreen_geometry (window);
   if (!geometry)
     {
