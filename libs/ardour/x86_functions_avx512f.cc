@@ -1,5 +1,6 @@
 /*
  * Copyright (C) 2023 Ayan Shafqat <ayan.x.shafqat@gmail.com>
+ * Copyright (C) 2024 Robin Gareus <robin@gareus.org>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -50,7 +51,7 @@ x86_avx512f_compute_peak(const float *src, uint32_t nframes, float current)
 			break;
 		}
 
-		if (IS_ALIGNED_TO(src, sizeof(__m256))) {
+		if (frames >=8 && IS_ALIGNED_TO(src, sizeof(__m256))) {
 			__m512 x = _mm512_castps256_ps512(_mm256_load_ps(src));
 
 			x = _mm512_abs_ps(x);
@@ -61,7 +62,7 @@ x86_avx512f_compute_peak(const float *src, uint32_t nframes, float current)
 			continue;
 		}
 
-		if (IS_ALIGNED_TO(src, sizeof(__m128))) {
+		if (frames >= 4 && IS_ALIGNED_TO(src, sizeof(__m128))) {
 			__m512 x = _mm512_castps128_ps512(_mm_load_ps(src));
 
 			x = _mm512_abs_ps(x);
@@ -286,7 +287,7 @@ x86_avx512f_find_peaks(const float *src, uint32_t nframes, float *minf, float *m
 			break;
 		}
 
-		if (IS_ALIGNED_TO(src, sizeof(__m256))) {
+		if (frames >= 8 && IS_ALIGNED_TO(src, sizeof(__m256))) {
 			__m512 x = _mm512_castps256_ps512(_mm256_load_ps(src));
 
 			zmin = _mm512_min_ps(zmin, x);
@@ -297,7 +298,7 @@ x86_avx512f_find_peaks(const float *src, uint32_t nframes, float *minf, float *m
 			continue;
 		}
 
-		if (IS_ALIGNED_TO(src, sizeof(__m128))) {
+		if (frames >= 4 && IS_ALIGNED_TO(src, sizeof(__m128))) {
 			__m512 x = _mm512_castps128_ps512(_mm_load_ps(src));
 
 			zmin = _mm512_min_ps(zmin, x);
@@ -522,7 +523,7 @@ x86_avx512f_apply_gain_to_buffer(float *dst, uint32_t nframes, float gain)
 			break;
 		}
 
-		if (IS_ALIGNED_TO(dst, sizeof(__m256))) {
+		if (frames >= 8 && IS_ALIGNED_TO(dst, sizeof(__m256))) {
 			__m256 x = _mm256_load_ps(dst);
 			__m256 y = _mm256_mul_ps(ygain, x);
 			_mm256_store_ps(dst, y);
@@ -531,7 +532,7 @@ x86_avx512f_apply_gain_to_buffer(float *dst, uint32_t nframes, float gain)
 			continue;
 		}
 
-		if (IS_ALIGNED_TO(dst, sizeof(__m128))) {
+		if (frames >= 4 && IS_ALIGNED_TO(dst, sizeof(__m128))) {
 			__m128 x = _mm_load_ps(dst);
 			__m128 y = _mm_mul_ps(xgain, x);
 			_mm_store_ps(dst, y);
@@ -658,7 +659,8 @@ x86_avx512f_mix_buffers_with_gain(float *dst, const float *src, uint32_t nframes
 			break;
 		}
 
-		if (IS_ALIGNED_TO(src, sizeof(__m256)) &&
+		if (frames >= 8                        &&
+		    IS_ALIGNED_TO(src, sizeof(__m256)) &&
 		    IS_ALIGNED_TO(dst, sizeof(__m256))) {
 			__m256 x = _mm256_load_ps(src);
 			__m256 y = _mm256_load_ps(dst);
@@ -672,7 +674,8 @@ x86_avx512f_mix_buffers_with_gain(float *dst, const float *src, uint32_t nframes
 			continue;
 		}
 
-		if (IS_ALIGNED_TO(src, sizeof(__m128)) &&
+		if (frames >= 4                        &&
+		    IS_ALIGNED_TO(src, sizeof(__m128)) &&
 		    IS_ALIGNED_TO(dst, sizeof(__m128))) {
 			__m128 x = _mm_load_ps(src);
 			__m128 y = _mm_load_ps(dst);
@@ -826,7 +829,8 @@ x86_avx512f_mix_buffers_no_gain(float *dst, const float *src, uint32_t nframes)
 			break;
 		}
 
-		if (IS_ALIGNED_TO(src, sizeof(__m256)) &&
+		if (frames >= 8                        &&
+		    IS_ALIGNED_TO(src, sizeof(__m256)) &&
 		    IS_ALIGNED_TO(dst, sizeof(__m256))) {
 			__m256 x = _mm256_load_ps(src);
 			__m256 y = _mm256_load_ps(dst);
@@ -838,7 +842,8 @@ x86_avx512f_mix_buffers_no_gain(float *dst, const float *src, uint32_t nframes)
 			continue;
 		}
 
-		if (IS_ALIGNED_TO(src, sizeof(__m128)) &&
+		if (frames >= 4                        &&
+		    IS_ALIGNED_TO(src, sizeof(__m128)) &&
 		    IS_ALIGNED_TO(dst, sizeof(__m128))) {
 			__m128 x = _mm_load_ps(src);
 			__m128 y = _mm_load_ps(dst);
@@ -989,7 +994,8 @@ x86_avx512f_copy_vector(float *dst, const float *src, uint32_t nframes)
 			break;
 		}
 
-		if (IS_ALIGNED_TO(src, sizeof(__m256)) &&
+		if (frames >= 8                        &&
+				IS_ALIGNED_TO(src, sizeof(__m256)) &&
 		    IS_ALIGNED_TO(dst, sizeof(__m256))) {
 			__m256 x = _mm256_load_ps(src);
 			_mm256_store_ps(dst, x);
@@ -999,7 +1005,8 @@ x86_avx512f_copy_vector(float *dst, const float *src, uint32_t nframes)
 			continue;
 		}
 
-		if (IS_ALIGNED_TO(src, sizeof(__m128)) &&
+		if (frames >= 4                        &&
+		    IS_ALIGNED_TO(src, sizeof(__m128)) &&
 		    IS_ALIGNED_TO(dst, sizeof(__m128))) {
 			__m128 x = _mm_load_ps(src);
 			_mm_store_ps(dst, x);
