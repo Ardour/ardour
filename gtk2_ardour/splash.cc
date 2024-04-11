@@ -238,6 +238,10 @@ Splash::expose (GdkEventExpose* ev)
 {
 	RefPtr<Gdk::Window> window = darea.get_window();
 
+	/* clear background (for transparent splash images */
+	Glib::RefPtr<Gdk::GC> bg = get_style()->get_bg_gc (STATE_NORMAL);
+	window->draw_rectangle(bg, true, ev->area.x, ev->area.y, ev->area.width, ev->area.height)
+
 	/* note: height & width need to be constrained to the pixbuf size
 	   in case a WM provides us with a screwy allocation
 	*/
