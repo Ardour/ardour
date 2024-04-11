@@ -266,6 +266,7 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 
 	static AudioEngine*       _instance;
 
+	Glib::Threads::Mutex       _buffer_lock;
 	Glib::Threads::Mutex       _process_lock;
 	Glib::Threads::Mutex       _latency_lock;
 	Glib::Threads::RecMutex    _state_lock;

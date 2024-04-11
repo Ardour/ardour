@@ -212,7 +212,7 @@ AudioEngine::sample_rate_change (pframes_t nframes)
 int
 AudioEngine::buffer_size_change (pframes_t bufsiz)
 {
-	Glib::Threads::Mutex::Lock pl (_process_lock);
+	Glib::Threads::Mutex::Lock pl (_buffer_lock);
 	set_port_buffer_sizes (bufsiz);
 
 	if (_session) {
@@ -235,6 +235,7 @@ int
 AudioEngine::process_callback (pframes_t nframes)
 {
 	TimerRAII tr (dsp_stats[ProcessCallback]);
+	Glib::Threads::Mutex::Lock bm (_buffer_lock);
 	Glib::Threads::Mutex::Lock tm (_process_lock, Glib::Threads::TRY_LOCK);
 	Port::set_varispeed_ratio (1.0);
 
