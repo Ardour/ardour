@@ -1036,11 +1036,11 @@ ProcessorEntry::Control::Control (ProcessorEntry& e,std::shared_ptr<AutomationCo
 		_slider.show ();
 
 		const ARDOUR::ParameterDescriptor& desc = c->desc();
-		double const lo        = c->internal_to_interface (desc.lower);
-		double const up        = c->internal_to_interface (desc.upper);
-		double const normal    = c->internal_to_interface (desc.normal);
-		double const smallstep = c->internal_to_interface (desc.lower + desc.smallstep);
-		double const largestep = c->internal_to_interface (desc.lower + desc.largestep);
+		double const lo        = c->internal_to_interface (desc.lower, true);
+		double const up        = c->internal_to_interface (desc.upper, true);
+		double const normal    = c->internal_to_interface (desc.normal, true);
+		double const smallstep = fabs (c->internal_to_interface (desc.lower + desc.smallstep, true) - lo);
+		double const largestep = fabs (c->internal_to_interface (desc.lower + desc.largestep, true) - lo);
 
 		_adjustment.set_lower (lo);
 		_adjustment.set_upper (up);
@@ -1099,7 +1099,7 @@ ProcessorEntry::Control::slider_adjusted ()
 		return;
 	}
 
-	c->set_value ( c->interface_to_internal(_adjustment.get_value ()) , Controllable::NoGroup);
+	c->set_value ( c->interface_to_internal(_adjustment.get_value (), true) , Controllable::NoGroup);
 	set_tooltip ();
 }
 
@@ -1186,7 +1186,7 @@ ProcessorEntry::Control::control_changed ()
 		_button.set_active (c->get_value() > 0.5);
 	} else {
 		// Note: the _slider watches the controllable by itself
-		const double nval = c->internal_to_interface (c->get_value ());
+		const double nval = c->internal_to_interface (c->get_value (), true);
 		if (_adjustment.get_value() != nval) {
 			_adjustment.set_value (nval);
 			set_tooltip ();
