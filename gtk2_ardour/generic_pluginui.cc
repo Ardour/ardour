@@ -1015,7 +1015,10 @@ GenericPluginUI::build_control_ui (const Evoral::Parameter&             param,
 		}
 
 
-		if (!_pi || mcontrol->flags () & Controllable::NotAutomatable) {
+		if (!_pi) {
+			control_ui->automate_button.set_no_show_all ();
+			control_ui->automate_button.hide ();
+		} else if (mcontrol->flags () & Controllable::NotAutomatable) {
 			control_ui->automate_button.set_sensitive (false);
 			set_tooltip(control_ui->automate_button, _("This control cannot be automated"));
 		} else {
