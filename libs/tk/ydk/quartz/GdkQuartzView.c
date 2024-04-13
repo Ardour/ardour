@@ -602,6 +602,76 @@
     gdk_screen_get_rgba_colormap (_gdk_screen);
 }
 
+- (void) setNeedsDisplay:(BOOL)yn
+{
+  GdkWindowObject *private;
+  GdkWindowImplQuartz *impl;
+  NSRect nsrect = [self bounds];
+  GdkRectangle r = { nsrect.origin.x, nsrect.origin.y, nsrect.size.width, nsrect.size.height };
+  
+  private = GDK_WINDOW_OBJECT (gdk_window);
+  impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
+
+  GDK_NOTE (EVENTS, g_print ("setNeedsDisplay, current NDR %p\n", impl->needs_display_region));
+
+  if (!impl->needs_display_region)
+    impl->needs_display_region = gdk_region_rectangle (&r);
+  else 
+    gdk_region_union_with_rect (impl->needs_display_region, &r);
+
+#if 0
+  gint nrects;
+  GdkRectangle* rects;
+
+  gdk_region_get_rectangles (impl->needs_display_region, &rects, &nrects);
+  printf ("SND %p INVALID with %d rects\n", impl, nrects);
+  for (gint n = 0; n < nrects; ++n) {
+    printf ("\t%d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
+  }
+#endif
+
+  [super setNeedsDisplay:yn];
+}
+
+- (void) setNeedsDisplayInRect:(NSRect)rect
+{
+  GdkWindowObject *private;
+  GdkWindowImplQuartz *impl;
+  GdkRectangle r = { rect.origin.x, rect.origin.y, rect.size.width, rect.size.height };
+
+  if (r.width >= 2147483647 || r.height >= 2147483647) {
+    NSRect bounds = [self bounds];
+    r.x = 0;
+    r.y = 0;
+    r.width = bounds.size.width;
+    r.height = bounds.size.height;
+  }
+  
+  private = GDK_WINDOW_OBJECT (gdk_window);
+  impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
+
+  GDK_NOTE (EVENTS, g_print ("setNeedsDisplayInRect, current NDR %p\n", impl->needs_display_region));
+
+  if (!impl->needs_display_region)
+    impl->needs_display_region = gdk_region_rectangle (&r);
+  else 
+    gdk_region_union_with_rect (impl->needs_display_region, &r);
+
+#if 0
+  gint nrects;
+  GdkRectangle* rects;
+
+  gdk_region_get_rectangles (impl->needs_display_region, &rects, &nrects);
+  printf ("SNDiR %p INVALID with %d rects\n", impl, nrects);
+  for (gint n = 0; n < nrects; ++n) {
+    printf ("\t%d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
+  }
+#endif
+
+  
+  [super setNeedsDisplayInRect:rect];
+}
+
 -(void)drawRect: (NSRect)rect
 {
   GdkRectangle gdk_rect;
@@ -647,31 +717,44 @@
       return;
     }
 
-  /* Clear our own bookkeeping of regions that need display */
-  if (impl->needs_display_region)
-    {
-      gdk_region_destroy (impl->needs_display_region);
-      impl->needs_display_region = NULL;
+  if (!impl->needs_display_region || gdk_quartz_get_use_cocoa_invalidation()) {
+    [self getRectsBeingDrawn: &drawn_rects count: &count];
+    region = gdk_region_new ();
+
+    for (i = 0; i < count; i++)
+      {
+	gdk_rect.x = drawn_rects[i].origin.x;
+	gdk_rect.y = drawn_rects[i].origin.y;
+	gdk_rect.width = drawn_rects[i].size.width;
+	gdk_rect.height = drawn_rects[i].size.height;
+
+	gdk_region_union_with_rect (region, &gdk_rect);
     }
+  } else {
+    region = impl->needs_display_region;
+  }
 
-  [self getRectsBeingDrawn: &drawn_rects count: &count];
-  region = gdk_region_new ();
+#if 0
+  gint nrects;
+  GdkRectangle* rects;
 
-  for (i = 0; i < count; i++)
-    {
-      gdk_rect.x = drawn_rects[i].origin.x;
-      gdk_rect.y = drawn_rects[i].origin.y;
-      gdk_rect.width = drawn_rects[i].size.width;
-      gdk_rect.height = drawn_rects[i].size.height;
-
-      gdk_region_union_with_rect (region, &gdk_rect);
-    }
-
+  gdk_region_get_rectangles (region, &rects, &nrects);
+  printf ("%p drawRect with %d rects\n", impl, nrects);
+  for (gint n = 0; n < nrects; ++n) {
+    printf ("\t%d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
+  }
+#endif
+  
   impl->in_paint_rect_count++;
   /* this essentially generates an expose event */
   _gdk_window_process_updates_recurse (gdk_window, region);
   impl->in_paint_rect_count--;
 
+  if (impl->needs_display_region)
+    {
+      impl->needs_display_region = NULL;
+    }
+  
   gdk_region_destroy (region);
 
   if (needsInvalidateShadow)
@@ -679,6 +762,48 @@
       [[self window] invalidateShadow];
       needsInvalidateShadow = NO;
     }
+}
+
+- (void) reshape
+{
+  GdkWindowObject *private;
+  GdkWindowImplQuartz *impl;
+  GdkRectangle r;
+
+  GDK_NOTE (EVENTS, g_print ("reshape\n"));
+
+  [super reshape];
+
+  NSRect bounds = [self bounds];
+
+  private = GDK_WINDOW_OBJECT (gdk_window);
+  impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
+
+  if (impl->needs_display_region) {
+    gdk_region_destroy (impl->needs_display_region);
+  }
+
+  r.x = 0;
+  r.y = 0;
+  r.width = bounds.size.width;
+  r.height = bounds.size.height;
+
+  if (impl->needs_display_region)
+    gdk_region_destroy (impl->needs_display_region);
+  
+  impl->needs_display_region = gdk_region_rectangle (&r);
+
+#if 0
+  gint nrects;
+  GdkRectangle* rects;
+
+  gdk_region_get_rectangles (impl->needs_display_region, &rects, &nrects);
+  printf ("RS %p INVALID with %d rects\n", impl, nrects);
+  for (gint n = 0; n < nrects; ++n) {
+    printf ("\t%d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
+  }
+#endif
+
 }
 
 -(void)setNeedsInvalidateShadow: (BOOL)invalidate

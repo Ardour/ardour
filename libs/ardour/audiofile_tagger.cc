@@ -34,6 +34,8 @@
 #include <taglib/taglib.h>
 #include <taglib/xiphcomment.h>
 
+#include <iostream>
+
 /* Convert string to TagLib::String */
 #define TL_STR(string) TagLib::String ((string).c_str(), TagLib::String::UTF8)
 
@@ -88,11 +90,9 @@ AudiofileTagger::tag_file (std::string const& filename, SessionMetadata const& m
 		TagLib::RIFF::Info::Tag* info_tag = dynamic_cast<TagLib::RIFF::Info::Tag*> (wav_file->InfoTag ());
 		assert (info_tag);
 		tag_riff_info (*info_tag, metadata);
-#if 1 // Also add id3v2 header to .wav
-		TagLib::ID3v2::Tag* id3v2_tag = dynamic_cast<TagLib::ID3v2::Tag*> (wav_file->tag ());
+		TagLib::ID3v2::Tag* id3v2_tag = wav_file->ID3v2Tag ();
 		assert (id3v2_tag);
 		tag_id3v2 (*id3v2_tag, metadata);
-#endif
 	}
 
 	TagLib::RIFF::AIFF::File* aiff_file;

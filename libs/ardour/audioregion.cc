@@ -262,8 +262,8 @@ AudioRegion::AudioRegion (Session& s, timepos_t const &  start, timecnt_t const 
 AudioRegion::AudioRegion (const SourceList& srcs)
 	: Region (srcs)
 	, AUDIOREGION_STATE_DEFAULT(Temporal::TimeDomainProvider (Temporal::AudioTime))
-        , _envelope (Properties::envelope, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter(EnvelopeAutomation), Temporal::TimeDomainProvider (Temporal::AudioTime))))
-        , _automatable(srcs[0]->session(), Temporal::TimeDomainProvider (Temporal::AudioTime))
+	, _envelope (Properties::envelope, std::shared_ptr<AutomationList> (new AutomationList (Evoral::Parameter(EnvelopeAutomation), Temporal::TimeDomainProvider (Temporal::AudioTime))))
+	, _automatable(srcs[0]->session(), Temporal::TimeDomainProvider (Temporal::AudioTime))
 	, _fade_in_suspended (0)
 	, _fade_out_suspended (0)
 {
@@ -475,8 +475,8 @@ AudioRegion::read (Sample* buf, samplepos_t pos, samplecnt_t cnt, int channel) c
 }
 
 samplecnt_t
-AudioRegion::master_read_at (Sample *buf, Sample* /*mixdown_buffer*/, float* /*gain_buffer*/,
-			     samplepos_t position, samplecnt_t cnt, uint32_t chan_n) const
+AudioRegion::master_read_at (Sample* buf, Sample* /*mixdown_buffer*/, float* /*gain_buffer*/,
+                             samplepos_t position, samplecnt_t cnt, uint32_t chan_n) const
 {
 	/* do not read gain/scaling/fades and do not count this disk i/o in statistics */
 
@@ -492,10 +492,10 @@ AudioRegion::master_read_at (Sample *buf, Sample* /*mixdown_buffer*/, float* /*g
  *  @param chan_n Channel number to read.
  */
 samplecnt_t
-AudioRegion::read_at (Sample *buf, Sample *mixdown_buffer, float *gain_buffer,
-		      samplepos_t pos,
-		      samplecnt_t cnt,
-		      uint32_t chan_n) const
+AudioRegion::read_at (Sample* buf, Sample* mixdown_buffer, float* gain_buffer,
+                      samplepos_t pos,
+                      samplecnt_t cnt,
+                      uint32_t    chan_n) const
 {
 	/* We are reading data from this region into buf (possibly via mixdown_buffer).
 	   The caller has verified that we cover the desired section.
@@ -1300,7 +1300,7 @@ AudioRegion::set_default_envelope ()
 	 * we call its fast_simple_add() mechanism and it discovers that the
 	 * time is not AudioTime.
 	 *
-	 * XXX this needs some thought 
+	 * XXX this needs some thought
 	 */
 
 	_envelope->fast_simple_add (len_as_tpos (), GAIN_COEFF_UNITY);

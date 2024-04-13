@@ -50,6 +50,10 @@
 
 #include "pbd/i18n.h"
 
+#ifdef __APPLE__
+extern void use_cocoa_invalidation (int); // cocoacarbon.mm
+#endif
+
 using namespace Gtk;
 using namespace Gtkmm2ext;
 using namespace ARDOUR;
@@ -501,6 +505,10 @@ ARDOUR_UI::parameter_changed (std::string p)
 	} else if (p == "no-strobe") {
 		stop_clocking ();
 		start_clocking ();
+	} else if (p == "use-cocoa-invalidation") {
+#ifdef __APPLE__
+		use_cocoa_invalidation (UIConfiguration::instance().get_use_cocoa_invalidation());
+#endif
 	}
 }
 

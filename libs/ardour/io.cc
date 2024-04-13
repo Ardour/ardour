@@ -306,8 +306,8 @@ IO::add_port (string destination, void* src, DataType type)
 	ChanCount after = before;
 	after.set (type, after.get (type) + 1);
 
-	bool const r = PortCountChanging (after); /* EMIT SIGNAL */
-	if (r) {
+	boost::optional<bool> const r = PortCountChanging (after); /* EMIT SIGNAL */
+	if (r.value_or (false)) {
 		return -1;
 	}
 

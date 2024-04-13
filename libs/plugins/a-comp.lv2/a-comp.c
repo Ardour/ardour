@@ -338,6 +338,12 @@ run(LV2_Handle instance, uint32_t n_samples)
 		makeup_target = 1.f;
 	}
 
+	for (uint32_t c=0; c<n_channels; ++c) {
+		if (ins[c] != outs[c]) {
+			memcpy (outs[c], ins[c], sizeof (float) * n_samples);
+		}
+	}
+
 #ifdef LV2_EXTENDED
 	if (acomp->v_knee != *acomp->knee) {
 		acomp->v_knee = *acomp->knee;
@@ -366,7 +372,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 	for (i = 0; i < n_samples; i++) {
 		maxabs = 0.f;
 		for (uint32_t c=0; c<n_channels; ++c) {
-			maxabs = fmaxf(fabsf(ins[c][i]), maxabs);
+			maxabs = fmaxf(fabsf(outs[c][i]), maxabs);
 		}
 		sc0 = sc[i];
 		ingain = usesidechain ? fabs(sc0) : maxabs;
@@ -409,7 +415,7 @@ run(LV2_Handle instance, uint32_t n_samples)
 		makeup_gain += tau * (makeup_target - makeup_gain);
 
 		for (uint32_t c=0; c<n_channels; ++c) {
-			float out = ins[c][i] * Lgain * makeup_gain;
+			float out = outs[c][i] * Lgain * makeup_gain;
 			outs[c][i] = out;
 			out = fabsf (out);
 			if (out > max_out) {

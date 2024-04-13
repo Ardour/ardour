@@ -49,6 +49,9 @@ public:
 	std::shared_ptr<AutomationControl> pan_size;
 	std::shared_ptr<AutomationControl> pan_snap;
 	std::shared_ptr<AutomationControl> binaural_render_mode;
+	std::shared_ptr<AutomationControl> sur_elevation_enable;
+	std::shared_ptr<AutomationControl> sur_zones;
+	std::shared_ptr<AutomationControl> sur_ramp;
 
 	void set_automation_state (AutoState);
 	AutoState automation_state() const { return _auto_state; }

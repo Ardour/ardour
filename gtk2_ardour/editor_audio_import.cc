@@ -1005,6 +1005,13 @@ Editor::add_sources (vector<string>            paths,
 			}
 		}
 
+		if (track_names.size() > 2 && current_interthread_info) {
+			import_status.current = n;
+			import_status.total = track_names.size ();
+			import_status.progress = 0.5;
+			import_status.doing_what = "Creating Tracks";
+			ARDOUR::GUIIdle ();
+		}
 		finish_bringing_in_material (*r, input_chan, output_chan, pos, mode, track, track_names[n], pgroup_id, instrument);
 
 		rlen = (*r)->length();

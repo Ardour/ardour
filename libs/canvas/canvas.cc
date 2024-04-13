@@ -68,6 +68,13 @@ Canvas::Canvas ()
 #else
 	_use_intermediate_surface = NULL != g_getenv("ARDOUR_INTERMEDIATE_SURFACE");
 #endif
+
+	if (g_getenv ("ARDOUR_ITEM_CAIRO_SAVE_RESTORE")) {
+		item_save_restore = true;
+	} else {
+		item_save_restore = false;
+	}
+
 	set_epoch ();
 }
 
@@ -555,6 +562,16 @@ GtkCanvas::GtkCanvas ()
 }
 
 void
+GtkCanvas::set_single_exposure (bool yn)
+{
+	if (g_getenv ("ARDOUR_CANVAS_SINGLE_EXPOSE_ALWAYS")) {
+		yn = true;
+	}
+
+	_single_exposure = yn;
+}
+
+void
 GtkCanvas::use_nsglview (bool retina)
 {
 	assert (!_nsglview);
@@ -966,6 +983,9 @@ GtkCanvas::on_size_allocate (Gtk::Allocation& a)
 	}
 #endif
 
+	/* call to ensure that entire canvas is marked in the invalidation region */
+	queue_draw ();
+
 	/* x, y in a are relative to the parent. When passing this down to the
 	   root group, this origin is effectively 0,0
 	*/
@@ -1027,13 +1047,13 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 		draw_context->push_group ();
 	}
 
-	/* draw background color */
-	draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
-	Gtkmm2ext::set_source_rgba (draw_context, _bg_color);
-	draw_context->fill ();
-
 	/* render canvas */
 	if (_single_exposure) {
+
+		/* draw background color */
+		draw_context->rectangle (ev->area.x, ev->area.y, ev->area.width, ev->area.height);
+		Gtkmm2ext::set_source_rgba (draw_context, _bg_color);
+		draw_context->fill ();
 
 		Canvas::render (Rect (ev->area.x, ev->area.y, ev->area.x + ev->area.width, ev->area.y + ev->area.height), draw_context);
 
@@ -1042,10 +1062,18 @@ GtkCanvas::on_expose_event (GdkEventExpose* ev)
 		gint nrects;
 
 		gdk_region_get_rectangles (ev->region, &rects, &nrects);
+
 		for (gint n = 0; n < nrects; ++n) {
 			draw_context->set_identity_matrix();  //reset the cairo matrix, just in case someone left it transformed after drawing ( cough )
+
+			/* draw background color */
+			draw_context->rectangle (rects[n].x, rects[n].y, rects[n].x + rects[n].width, rects[n].y + rects[n].height);
+			Gtkmm2ext::set_source_rgba (draw_context, _bg_color);
+			draw_context->fill ();
+
 			Canvas::render (Rect (rects[n].x, rects[n].y, rects[n].x + rects[n].width, rects[n].y + rects[n].height), draw_context);
 		}
+
 		g_free (rects);
 	}
 
@@ -1103,6 +1131,23 @@ GtkCanvas::on_scroll_event (GdkEventScroll* ev)
 
 	DEBUG_TRACE (PBD::DEBUG::CanvasEvents, string_compose ("canvas scroll @ %1, %2 => %3\n", ev->x, ev->y, where));
 	return deliver_event (reinterpret_cast<GdkEvent*>(&copy));
+}
+
+void
+GtkCanvas::on_style_changed (const Glib::RefPtr<Gtk::Style>& style)
+{
+	EventBox::on_style_changed (style);
+	/* call to ensure that entire canvas is marked in the invalidation region */
+	queue_draw ();
+}
+
+bool
+GtkCanvas::on_visibility_notify_event (GdkEventVisibility* ev)
+{
+	bool ret = EventBox::on_visibility_notify_event (ev);
+	/* call to ensure that entire canvas is marked in the invalidation region */
+	queue_draw ();
+	return ret;
 }
 
 /** Handler for GDK key press events.
@@ -1570,6 +1615,13 @@ GtkCanvas::grab_can_translate () const
 	}
 
 	return _grabbed_item->scroll_translation ();
+}
+
+void
+GtkCanvas::render (Cairo::RefPtr<Cairo::Context> const & ctx, cairo_rectangle_t* r)
+{
+	ArdourCanvas::Rect rect (r->x, r->y, r->width + r->x, r->height + r->y);
+	Canvas::render (rect, ctx);
 }
 
 /** Create a GtkCanvaSViewport.

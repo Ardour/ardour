@@ -31,8 +31,6 @@
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 
-#include <archive.h>
-#include <archive_entry.h>
 #include <curl/curl.h>
 
 #include "pbd/failed_constructor.h"

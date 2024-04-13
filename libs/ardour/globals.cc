@@ -167,8 +167,10 @@ float ARDOUR::ui_scale_factor = 1.0;
 
 static bool have_old_configuration_files = false;
 static bool running_from_gui             = false;
-static int  cpu_dma_latency_fd           = -1;
 
+#if !(defined PLATFORM_WINDOWS || defined __APPLE__)
+static int  cpu_dma_latency_fd           = -1;
+#endif
 
 namespace ARDOUR {
 extern void setup_enum_writer ();
@@ -926,6 +928,9 @@ ARDOUR::setup_fpu ()
 		    : "=r"(cw)::"memory");
 	}
 
+#elif defined(__ARMEL__)
+	/* no FTZ instructions on that platform */
+#warning you do not want to compile Arodur on armel.
 #elif defined(__arm__)
 	/* http://infocenter.arm.com/help/topic/com.arm.doc.dui0068b/BCFHFBGA.html
 	 * bit 24: flush-to-zero */

@@ -358,25 +358,52 @@ Editor::compute_current_bbt_points (Temporal::TempoMapPoints& grid, samplepos_t 
 	const Beats lower_beat = (left < Beats() ? Beats() : left);
 	const samplecnt_t sr (_session->sample_rate());
 
+	float divisor;
+	switch (_grid_type) {
+		case GridTypeBeatDiv3:
+		case GridTypeBeatDiv6:
+		case GridTypeBeatDiv12:
+		case GridTypeBeatDiv24:
+			divisor = 3;
+			break;
+		case GridTypeBeatDiv5:
+		case GridTypeBeatDiv10:
+		case GridTypeBeatDiv20:
+			divisor = 2.5;
+			break;
+		case GridTypeBeatDiv7:
+		case GridTypeBeatDiv14:
+		case GridTypeBeatDiv28:
+			/* Septuplets can't be drawn until libtemporal handles fractional ticks
+			 * or if ticks_per_beat (ppqn) is raised to a point where the result
+			 * of Temporal::ticks_per_beat / beat_div is always an integer
+			 */
+			divisor = 3.5;
+			break;
+		default:
+			divisor = 2;
+			break;
+	};
+
 	switch (bbt_ruler_scale) {
 
 	case bbt_show_quarters:
 		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 1);
 		break;
 	case bbt_show_eighths:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 2);
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 1 * divisor);
 		break;
 	case bbt_show_sixteenths:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 4);
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 2 * divisor);
 		break;
 	case bbt_show_thirtyseconds:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 8);
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 4 * divisor);
 		break;
 	case bbt_show_sixtyfourths:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 16);
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 8 * divisor);
 		break;
 	case bbt_show_onetwentyeighths:
-		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 32);
+		tmap->get_grid (grid, max (tmap->superclock_at (lower_beat), (superclock_t) 0), samples_to_superclock (rightmost, sr), 0, 16 * divisor);
 		break;
 
 	case bbt_show_1:

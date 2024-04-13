@@ -124,6 +124,9 @@ ExportHandler::ExportHandler (Session & session)
 
 ExportHandler::~ExportHandler ()
 {
+	if (export_status->aborted () && !current_timespan->vapor ().empty () && session.surround_master ()) {
+		session.surround_master ()->surround_return ()->finalize_export ();
+	}
 	graph_builder->cleanup (export_status->aborted () );
 }
 

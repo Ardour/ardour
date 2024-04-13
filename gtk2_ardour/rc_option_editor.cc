@@ -3096,6 +3096,18 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Appearance/Quirks"), bo);
 #endif
 
+#ifdef __APPLE__
+	BoolOption* bco = new BoolOption (
+		"use-cocoa-invalidation",
+		_("Use macOS to determine GUI redraw areas"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_use_cocoa_invalidation),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_use_cocoa_invalidation)
+		);
+
+	Gtkmm2ext::UI::instance()->set_tip (bco->tip_widget(), string_compose (_("When enabled, macOS is in charge of what areas of the GUI are redrawn.\nWhen disabled, %1 manages this by itself"), PROGRAM_NAME));
+	add_option (_("Appearance/Quirks"), bco);
+#endif
+
 	add_option (_("Appearance/Quirks"), new OptionEditorBlank ());
 #if (!defined USE_CAIRO_IMAGE_SURFACE || defined CAIRO_SUPPORTS_FORCE_BUGGY_GRADIENTS_ENVIRONMENT_VARIABLE || defined __APPLE__)
 	add_option (_("Appearance"), new OptionEditorHeading (_("Graphics Acceleration")));
@@ -4044,7 +4056,7 @@ These settings will only take effect after %1 is restarted.\n\
 		puimode->add (PluginGUIDestroyVST, _("only destroys VST2/3 UIs, hides others"));
 
 		add_option (_("Plugins/GUI"), puimode);
-	Gtkmm2ext::UI::instance()->set_tip (puimode->tip_widget(), _("Closing a plugin window, usually only hides it. This makes is fast to open the same plugin UI again at a later time.\n\nMost plugin UIs are inactive and do not consume any CPU resources while they are not mapped on the screen.\n\nHowever some plugins do consume significant CPU and GPU resources even when they are not currently displayed. This option allows to work around the issue."));
+	Gtkmm2ext::UI::instance()->set_tip (puimode->tip_widget(), _("Closing a plugin window, usually only hides it. This makes is fast to open the same plugin UI again at a later time.\n\nMost plugin UIs are inactive and do not consume any CPU resources while they are not mapped on the screen.\n\nHowever some plugins do consume significant CPU and GPU resources even when they are not currently displayed. This option allows one to work around the issue."));
 
 #ifdef LV2_EXTENDED
 	add_option (_("Plugins/GUI"), new OptionEditorHeading (_("Mixer Strip Inline Display")));

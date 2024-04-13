@@ -710,6 +710,7 @@ DiskReader::overwrite_existing_audio ()
 		chunk2_cnt = to_overwrite - chunk1_cnt;
 	}
 
+	boost::scoped_array<Sample> sum_buffer (new Sample[to_overwrite]);
 	boost::scoped_array<Sample> mixdown_buffer (new Sample[to_overwrite]);
 	boost::scoped_array<float>  gain_buffer (new float[to_overwrite]);
 	uint32_t                    n   = 0;
@@ -727,19 +728,21 @@ DiskReader::overwrite_existing_audio ()
 		start = overwrite_sample;
 
 		if (chunk1_cnt) {
-			if (audio_read (buf + chunk1_offset, mixdown_buffer.get (), gain_buffer.get (), start, chunk1_cnt, rci, n, reversed) != (samplecnt_t)chunk1_cnt) {
+			if (audio_read (sum_buffer.get (), mixdown_buffer.get (), gain_buffer.get (), start, chunk1_cnt, rci, n, reversed) != (samplecnt_t)chunk1_cnt) {
 				error << string_compose (_("DiskReader %1: when overwriting(1), cannot read %2 from playlist at sample %3"), id (), chunk1_cnt, overwrite_sample) << endmsg;
 				ret = false;
 				++n;
 				continue;
 			}
+			memcpy (buf + chunk1_offset, sum_buffer.get (), sizeof (float) * chunk1_cnt);
 		}
 
 		if (chunk2_cnt) {
-			if (audio_read (buf, mixdown_buffer.get (), gain_buffer.get (), start, chunk2_cnt, rci, n, reversed) != (samplecnt_t)chunk2_cnt) {
+			if (audio_read (sum_buffer.get (), mixdown_buffer.get (), gain_buffer.get (), start, chunk2_cnt, rci, n, reversed) != (samplecnt_t)chunk2_cnt) {
 				error << string_compose (_("DiskReader %1: when overwriting(2), cannot read %2 from playlist at sample %3"), id (), chunk2_cnt, overwrite_sample) << endmsg;
 				ret = false;
 			}
+			memcpy (buf, sum_buffer.get (), sizeof (float) * chunk2_cnt);
 		}
 
 		if (!rci->initialized) {

@@ -195,6 +195,20 @@ ARDOUR_UI::session_dialog_response_handler (int response, SessionDialog* session
 			return; /* back to main event loop */
 		} else if (rv == 0) {
 			session_dialog->set_provided_session (session_name, session_path);
+		} else {
+
+			rv = new_session_from_aaf (session_name, Config->get_default_session_parent_dir(), session_path, session_name);
+			if (rv < 0) {
+				ArdourMessageDialog msg (*session_dialog, _("Extracting AAF failed"));
+				msg.run ();
+				return; /* back to main event loop */
+			} else if (rv == 0) {
+				session_dialog->set_provided_session (session_name, session_path);
+				/* we got a session now */
+				session_dialog->hide ();
+				delete_when_idle (session_dialog);
+				return;
+			}
 		}
 	}
 
@@ -645,7 +659,7 @@ ARDOUR_UI::build_session (const std::string& path, const std::string& snap_name,
 	audio_midi_setup->set_position (WIN_POS_CENTER);
 	audio_midi_setup->set_modal ();
 	audio_midi_setup->present ();
-	_engine_dialog_connection = audio_midi_setup->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::audio_midi_setup_for_new_session_done), path, snap_name, session_template, bus_profile, unnamed, domain));
+	_engine_dialog_connection = audio_midi_setup->signal_response().connect (boost::bind (&ARDOUR_UI::audio_midi_setup_for_new_session_done, this, _1, path, snap_name, session_template, bus_profile, unnamed, domain));
 
 	/* not done yet, but we're avoiding modal dialogs */
 	return 0;
@@ -675,14 +689,14 @@ ARDOUR_UI::audio_midi_setup_for_new_session_done (int response, std::string path
 }
 
 int
-ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& snap_name, std::string const& session_template, BusProfile const& bus_profile, bool unnamed, Temporal::TimeDomain domain)
+ARDOUR_UI::build_session_stage_two (std::string const& path, std::string const& snap_name, std::string const& session_template, BusProfile const& bus_profile, bool unnamed, Temporal::TimeDomain domain, samplecnt_t samplerate)
 {
 	Session* new_session;
 
 	bool meta_session = !session_template.empty() && session_template.substr (0, 11) == "urn:ardour:";
 
 	try {
-		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL, meta_session ? "" : session_template, unnamed);
+		new_session = new Session (*AudioEngine::instance(), path, snap_name, bus_profile.master_out_channels > 0 ? &bus_profile : NULL, meta_session ? "" : session_template, unnamed, samplerate);
 	}
 	catch (SessionException const& e) {
 		gchar* escaped_error_txt = 0;
@@ -1171,8 +1185,19 @@ ARDOUR_UI::open_session ()
 	FileFilter archive_filter;
 	archive_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::session_archive_suffix));
 	archive_filter.set_name (_("Session Archives"));
-
 	open_session_selector.add_filter (archive_filter);
+
+	FileFilter aaf_filter;
+	aaf_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::advanced_authoring_format_suffix));
+	aaf_filter.set_name (_("Advanced Authoring Format (AAF)"));
+	open_session_selector.add_filter (aaf_filter);
+
+	FileFilter all_filter;
+	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
+	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::session_archive_suffix));
+	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::advanced_authoring_format_suffix));
+	all_filter.set_name (_("All supported files"));
+	open_session_selector.add_filter (all_filter);
 
 	open_session_selector.set_filter (session_filter);
 
@@ -1190,22 +1215,34 @@ ARDOUR_UI::open_session ()
 	string path, name;
 	bool isnew;
 
-	if (session_path.length() > 0) {
-		int rv = ARDOUR::inflate_session (session_path,
-				Config->get_default_session_parent_dir(), path, name);
-		if (rv == 0) {
-			_session_is_new = false;
-			load_session (path, name);
-		}
-		else if (rv < 0) {
-			ArdourMessageDialog msg (_main_window,
-			                         string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
-			msg.run ();
-		}
-		else if (ARDOUR::find_session (session_path, path, name, isnew) == 0) {
-			_session_is_new = isnew;
-			load_session (path, name);
-		}
+	if (session_path.empty()) {
+		return;
+	}
+	int rv = ARDOUR::inflate_session (session_path, Config->get_default_session_parent_dir(), path, name);
+	if (rv == 0) {
+		_session_is_new = false;
+		load_session (path, name);
+		return;
+	}
+	else if (rv < 0) {
+		ArdourMessageDialog msg (_main_window, string_compose (_("Extracting session-archive failed: %1"), inflate_error (rv)));
+		msg.run ();
+		return;
+	}
+
+	rv = new_session_from_aaf (session_path, Config->get_default_session_parent_dir(), path, name);
+	if (rv == 0) {
+		_session_is_new = false;
+		return;
+	} else if (rv < 0) {
+		ArdourMessageDialog msg (_main_window, _("Extracting AAF failed"));
+		msg.run ();
+		return;
+	}
+
+	if (ARDOUR::find_session (session_path, path, name, isnew) == 0) {
+		_session_is_new = isnew;
+		load_session (path, name);
 	}
 }
 

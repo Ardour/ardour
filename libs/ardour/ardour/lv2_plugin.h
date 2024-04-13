@@ -94,7 +94,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	const void* extension_data (const char* uri) const;
 
 #ifdef LV2_EXTENDED
-	int  setup_export (const char*);
+	int  setup_export (const char*, LV2_Options_Option const* options = NULL);
 	int  finalize_export ();
 	bool can_export () const { return _export_interface; }
 #endif

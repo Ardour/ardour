@@ -147,7 +147,6 @@ UI_CONFIG_VARIABLE (bool, rulers_follow_grid, "rulers-follow-grid", false)
 UI_CONFIG_VARIABLE (bool, grid_follows_internal, "grid-follows-internal", false)  //this feature is deprecated, default it FALSE for now; remove it in v6
 UI_CONFIG_VARIABLE (bool, show_region_name, "show-region-name", true)
 UI_CONFIG_VARIABLE (int, time_axis_name_ellipsize_mode, "time-axis-name-ellipsize-mode", 0)
-UI_CONFIG_VARIABLE (bool, show_triggers_inline, "show-triggers-inline", false)
 UI_CONFIG_VARIABLE (bool, one_plugin_window_only, "one-plugin-window-only", false)
 UI_CONFIG_VARIABLE (int, default_lower_midi_note, "default-lower-midi-note", 60)
 UI_CONFIG_VARIABLE (int, default_upper_midi_note, "default-upper-midi-note", 71)
@@ -157,6 +156,8 @@ UI_CONFIG_VARIABLE (std::string, freesound_dir, "freesound-dir", "")
 UI_CONFIG_VARIABLE (int, max_note_height, "max-note-height", 20)
 UI_CONFIG_VARIABLE (bool, prefer_tap_tempo, "prefer-tap-tempo", false)
 UI_CONFIG_VARIABLE (bool, sandbox_all_lua_scripts, "sandbox-all-lua-scripts", false)
+UI_CONFIG_VARIABLE (bool, update_action_scripts, "update-action-scripts", true)
+UI_CONFIG_VARIABLE (bool, use_cocoa_invalidation, "use-cocoa-invalidation", true)
 
 /* these are visibility-type selections in the New Track dialog that we should make persistent for the user's choices */
 UI_CONFIG_VARIABLE (bool, show_on_cue_page, "show-on-cue-page", true)

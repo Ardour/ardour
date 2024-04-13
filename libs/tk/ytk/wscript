@@ -230,7 +230,6 @@ libytk_x11_sources = [
     'gtkdnd.c',
     'gtkmountoperation-x11.c',
     'gtkplug-x11.c',
-    'gtkrelocation.c',
     'gtksocket-x11.c',
     'gtkxembed.c',
 ]
@@ -241,7 +240,6 @@ libytk_quartz_sources = [
     'gtkmountoperation-stub.c',
     'gtkplug-stub.c',
     'gtkquartz.c',
-    'gtkrelocation.c',
     'gtksearchenginequartz.c',
     'gtksocket-stub.c',
 ]

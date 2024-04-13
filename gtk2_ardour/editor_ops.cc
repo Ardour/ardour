@@ -480,6 +480,41 @@ Editor::nudge_forward (bool next, bool force_playhead)
 		if (in_command) {
 			commit_reversible_command ();
 		}
+	} else if (!force_playhead && !selection->points.empty()) {
+		bool in_command = false;
+		for (auto const& pt : selection->points) {
+			std::shared_ptr<ARDOUR::AutomationList> alist = pt->line ().the_list ();
+			AutomationList::iterator m = pt->model ();
+			AutomationList::iterator n = m;
+
+			const timepos_t p = (*m)->when;
+			distance = get_nudge_distance (p, next_distance);
+			if (next) {
+				distance = next_distance;
+			}
+
+			if (++n != alist->end ()) {
+				if ((*n)->when <= p + distance) {
+					continue;
+				}
+			}
+			if (!in_command) {
+				begin_reversible_command (_("nudge automation forward"));
+				in_command = true;
+			}
+			_session->add_command (new MementoCommand<AutomationList> (new SimpleMementoCommandBinder<AutomationList> (*alist.get()), &alist->get_state(), 0));
+			alist->freeze ();
+			alist->modify (m, p + distance, (*m)->value);
+			alist->thaw ();
+			_session->add_command (new MementoCommand<AutomationList> (new SimpleMementoCommandBinder<AutomationList> (*alist.get()), 0, &alist->get_state()));
+
+			if (selection->points.size()==1) {
+				_session->request_locate (timepos_t (p + distance).samples());
+			}
+		}
+		if (in_command) {
+			commit_reversible_command ();
+		}
 	} else {
 		distance = get_nudge_distance (timepos_t (playhead_cursor()->current_sample ()), next_distance);
 		_session->request_locate ((timepos_t (playhead_cursor()->current_sample ()) + distance).samples());
@@ -574,6 +609,42 @@ Editor::nudge_backward (bool next, bool force_playhead)
 			commit_reversible_command ();
 		}
 
+	} else if (!force_playhead && !selection->points.empty()) {
+		bool in_command = false;
+		for (auto const& pt : selection->points) {
+			std::shared_ptr<ARDOUR::AutomationList> alist = pt->line ().the_list ();
+			AutomationList::iterator m = pt->model ();
+			AutomationList::iterator n = m;
+
+			const timepos_t p = (*m)->when;
+			distance = get_nudge_distance (p, next_distance);
+			if (next) {
+				distance = next_distance;
+			}
+
+			if (n != alist->begin ()) {
+				--n;
+				if ((*n)->when >= p.earlier (distance)) {
+					continue;
+				}
+			}
+			if (!in_command) {
+				begin_reversible_command (_("nudge automation backward"));
+				in_command = true;
+			}
+			_session->add_command (new MementoCommand<AutomationList> (new SimpleMementoCommandBinder<AutomationList> (*alist.get()), &alist->get_state(), 0));
+			alist->freeze ();
+			alist->modify (m, max (timepos_t (p.time_domain()), p.earlier (distance)), (*m)->value);
+			alist->thaw ();
+			_session->add_command (new MementoCommand<AutomationList> (new SimpleMementoCommandBinder<AutomationList> (*alist.get()), 0, &alist->get_state()));
+
+			if (selection->points.size()==1) {
+				_session->request_locate (timepos_t (p.earlier (distance)).samples());
+			}
+		}
+		if (in_command) {
+			commit_reversible_command ();
+		}
 	} else {
 		distance = get_nudge_distance (timepos_t (playhead_cursor()->current_sample ()), next_distance);
 		if (_playhead_cursor->current_sample () > distance.samples()) {

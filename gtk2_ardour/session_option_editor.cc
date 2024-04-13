@@ -20,6 +20,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include "pbd/configuration.h"
+
 #include "ardour/session.h"
 #include "ardour/transport_master_manager.h"
 
@@ -445,6 +447,20 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 	/* Place the search entry */
 
 	vpacker.pack_end (search_packer, false, false);
+
+	/* Connect metadata */
+
+	for (auto p : pages()) {
+		for (auto oc : p.second->components) {
+			Option* o = dynamic_cast<Option*> (oc);
+			if (o) {
+				PBD::Configuration::Metadata const * m = PBD::Configuration::get_metadata (o->id());
+				if (m) {
+					oc->set_metadata (*m);
+				}
+			}
+		}
+	}
 }
 
 void

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Adrien Gesta-Fline
+ * Copyright (C) 2017-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -119,15 +119,17 @@ typedef struct aafPropertyDefinition {
 
 	aafBoolean_t meta;
 
-	wchar_t* name;
+	char* name;
 
 	/*
-	 *  Looks like nobody cares about AAF standard TypeDefinition. All observed files
+	 * Looks like nobody cares about AAF standard TypeDefinition. All observed files
 	 * had incorrect values for Type's Name and Identification, even Avid's files.
-	 * Thus, PDef->type should NOT be trusted
+	 * Thus, PDef->type should NOT be trusted.
+	 *
+	 * TODO: Should be set by attachNewProperty() in AAFClass.c
 	 */
 
-	aafUID_t type; // TODO: Should be set by attachNewProperty() in AAFClass.c
+	aafUID_t type;
 
 	/**
 	 * Pointer to the next aafPropertyDef in the list.
@@ -183,7 +185,7 @@ typedef struct aafclass {
 	 * A Class is #CONCRETE if it can be retrieved as an
 	 * object. Else, a Class is #ABSTRACT if it can't be
 	 * directly retrieved and can only be inherited by
-	 * another Class, so only its memebers can be retrieved.
+	 * another Class, so only its members can be retrieved.
 	 */
 
 	aafBoolean_t isConcrete;
@@ -206,7 +208,8 @@ typedef struct aafclass {
 
 	aafBoolean_t meta;
 
-	wchar_t* name; // this is set at runtime
+	/* name is set at runtime */
+	char* name;
 
 	/**
 	 * Pointer to the next Class in the AAF_Data.Class list.
@@ -297,10 +300,10 @@ typedef struct aafObject {
 	cfbNode* Node;
 
 	/**
-	 * The name of the Node in the Compound File Tree : cfbNode._ab.
+	 * UTF-8 name of the Node in the Compound File Tree, set from cfbNode._ab.
 	 */
 
-	wchar_t Name[CFB_NODE_NAME_SZ];
+	char* Name;
 
 	/**
 	 * Pointer to an aafProperty list. This list holds the retrieved
@@ -362,7 +365,8 @@ typedef struct aafObject {
 
 	struct aafObject* nextObj;
 
-	struct _aafData* aafd; // only to access aafd->verb
+	/* keeps track of aafd, mostly to access aafd->verb without having to pass aafd to some functions */
+	struct _aafData* aafd;
 
 } aafObject;
 
@@ -416,14 +420,14 @@ typedef struct _aafData {
 	struct Identification {
 		aafObject* obj;
 
-		wchar_t*             CompanyName;
-		wchar_t*             ProductName;
+		char*                CompanyName;
+		char*                ProductName;
 		aafProductVersion_t* ProductVersion;
-		wchar_t*             ProductVersionString;
+		char*                ProductVersionString;
 		aafUID_t*            ProductID;
 		aafTimeStamp_t*      Date;
 		aafProductVersion_t* ToolkitVersion;
-		wchar_t*             Platform;
+		char*                Platform;
 		aafUID_t*            GenerationAUID;
 
 	} Identification;
@@ -542,7 +546,7 @@ typedef struct _aafData {
 
 	aafObject* TaggedValueDefinition;
 
-	struct dbg* dbg;
+	struct aafLog* log;
 
 } AAF_Data;
 
@@ -586,7 +590,10 @@ typedef struct _aafData {
  */
 
 #define aafRationalToFloat(r) \
-	(((r).denominator == 0) ? 0 : ((float)(r).numerator / (r).denominator))
+	(((r).denominator == 0) ? 0 : ((float)(r).numerator / (float)(r).denominator))
+
+#define aafRationalToDouble(r) \
+	(((r).denominator == 0) ? 0 : ((double)(r).numerator / (r).denominator))
 
 /**
  * Converts an aafRational_t to a int64 number.
@@ -595,6 +602,25 @@ typedef struct _aafData {
 
 #define aafRationalToint64(r) \
 	(((r).denominator == 0) ? 0 : (int64_t) ((r).numerator / (r).denominator))
+
+/**
+ * Loops through each aafPropertyIndexEntry_t of a "properties" node stream.
+ *
+ * @param Header Pointer to the stream's aafPropertyIndexHeader_t struct.
+ * @param Entry  Pointer that will receive each aafPropertyIndexEntry_t struct.
+ * @param Value  Pointer to each property's data value, of aafPropertyIndexEntry_t._length
+ *               bytes length.
+ * @param i      uint32_t iterator.
+ */
+
+#define foreachPropertyEntry(propStream, Header, Entry, Value, valueOffset, i)                                                                                   \
+	for (valueOffset = sizeof (aafPropertyIndexHeader_t) + (Header._entryCount * sizeof (aafPropertyIndexEntry_t)),                                          \
+	    i            = 0;                                                                                                                                    \
+	     i < Header._entryCount &&                                                                                                                           \
+	     memcpy (&Entry, (propStream + ((sizeof (aafPropertyIndexHeader_t)) + (sizeof (aafPropertyIndexEntry_t) * i))), sizeof (aafPropertyIndexEntry_t)) && \
+	     (Value = propStream + valueOffset);                                                                                                                 \
+	     valueOffset += Entry._length,                                                                                                                       \
+	    i++)
 
 /**
  * @name Initialisation functions
@@ -608,7 +634,7 @@ typedef struct _aafData {
  */
 
 AAF_Data*
-aaf_alloc (struct dbg* dbg);
+aaf_alloc (struct aafLog* log);
 
 /**
  * Loads an AAF file and sets the AAF_Data sructure accordingly.
@@ -661,7 +687,7 @@ aaf_release (AAF_Data** aafd);
  * @return      Pointer to a null-terminated string holding the Object's path.
  */
 
-wchar_t*
+char*
 aaf_get_ObjectPath (aafObject* Obj);
 
 /**
@@ -680,6 +706,21 @@ aafObject*
 aaf_get_ObjectByWeakRef (aafObject*    list,
                          aafWeakRef_t* ref);
 
+aafUID_t*
+aaf_get_InterpolationIdentificationByWeakRef (AAF_Data* aafd, aafWeakRef_t* InterpolationDefWeakRef);
+aafUID_t*
+aaf_get_OperationIdentificationByWeakRef (AAF_Data* aafd, aafWeakRef_t* OperationDefWeakRef);
+aafUID_t*
+aaf_get_ContainerIdentificationByWeakRef (AAF_Data* aafd, aafWeakRef_t* ContainerDefWeakRef);
+aafUID_t*
+aaf_get_DataIdentificationByWeakRef (AAF_Data* aafd, aafWeakRef_t* DataDefWeakRef);
+
+aafObject*
+aaf_get_ObjectAncestor (aafObject* Obj, const aafUID_t* ClassID);
+
+int
+aaf_ObjectInheritsClass (aafObject* Obj, const aafUID_t* classID);
+
 /**
  * Retrieves a Mob Object by its given MobID.
  *
@@ -697,6 +738,9 @@ aaf_get_MobByID (aafObject*  Mobs,
 aafObject*
 aaf_get_MobSlotBySlotID (aafObject*  MobSlots,
                          aafSlotID_t SlotID);
+
+aafObject*
+aaf_get_EssenceDataByMobID (AAF_Data* aafd, aafMobID_t* MobID);
 
 /**
  * Loops through each aafObject of a list, that is of a Set or Vector. It is also
@@ -724,8 +768,11 @@ _aaf_foreach_ObjectInSet (aafObject**     Obj,
  * be used istead of directly calling _aaf_foreach_ObjectInSet().
  */
 
-#define aaf_foreach_ObjectInSet(Obj, head, filter) \
+#define AAF_foreach_ObjectInSet(Obj, head, filter) \
 	while (_aaf_foreach_ObjectInSet (Obj, head, filter))
+
+void*
+aaf_get_TaggedValueByName (AAF_Data* aafd, aafObject* TaggedValueVector, const char* name, const aafUID_t* type);
 
 /**
  * Retrieves an Object property by ID.
@@ -741,6 +788,9 @@ aafProperty*
 aaf_get_property (aafObject* Obj,
                   aafPID_t   pid);
 
+aafUID_t*
+aaf_get_ParamDefIDByName (AAF_Data* aafd, const char* name);
+
 /**
  * Retrieves a Property ID by its name.
  *
@@ -752,8 +802,11 @@ aaf_get_property (aafObject* Obj,
  */
 
 aafPID_t
-aaf_get_PropertyIDByName (AAF_Data*      aafd,
-                          const wchar_t* name);
+aaf_get_PropertyIDByName (AAF_Data*   aafd,
+                          const char* name);
+
+aafUID_t*
+aaf_get_OperationDefIDByName (AAF_Data* aafd, const char* OpDefName);
 
 /**
  * Retrieves an Object property by ID, and returns its value.
@@ -781,7 +834,7 @@ aaf_get_propertyValue (aafObject*      Obj,
 /**
  * Safely get an Indirect value, after it was retrieved using aaf_get_propertyValue().
  * Function checks value type and in case of AAFTypeID_String, performs allocation
- * and conversion to system wchar_t*.
+ * and UTF8 conversion.
  *
  * Caller must free the returned value, only if Indirect is of type
  * AAFTypeID_String.
@@ -790,7 +843,7 @@ aaf_get_propertyValue (aafObject*      Obj,
  * @param  Indirect   Pointer to the Indirect structure.
  * @param  typeDef    Type definition expected from the Indirect.
  *
- * @return            A pointer to the Indirect value, or a pointer to an allocated wchar_t if Indirect is AAFTypeID_String\n
+ * @return            A pointer to the Indirect value, or a pointer to an allocated char if Indirect is AAFTypeID_String\n
  *                    NULL in case of error.
  */
 

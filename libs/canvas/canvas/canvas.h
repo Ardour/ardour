@@ -188,6 +188,9 @@ public:
 
 	void set_debug_render (bool yn) { _debug_render = yn; }
 	bool debug_render() const { return _debug_render; }
+
+	bool item_save_restore;
+
 protected:
 	Root             _root;
 	uint32_t         _queue_draw_frozen;
@@ -235,7 +238,7 @@ public:
 
 	bool get_mouse_position (Duple& winpos) const;
 
-	void set_single_exposure (bool s) { _single_exposure = s; }
+	void set_single_exposure (bool s);
 	bool single_exposure () { return _single_exposure; }
 
 	void re_enter ();
@@ -249,12 +252,10 @@ public:
 
 	Glib::RefPtr<Pango::Context> get_pango_context();
 
-	void render (Cairo::RefPtr<Cairo::Context> const & ctx, cairo_rectangle_t* r)
-	{
-		ArdourCanvas::Rect rect (r->x, r->y, r->width + r->x, r->height + r->y);
-		Canvas::render (rect, ctx);
-	}
-
+	/* This is the render method called via the Gtkmm2ext::CairoCanvas API,
+	   which is distinct from ArdourCanvas.
+	*/
+	void render (Cairo::RefPtr<Cairo::Context> const & ctx, cairo_rectangle_t* r);
 	void prepare_for_render () const;
 
 	uint32_t background_color() { return Canvas::background_color (); }
@@ -270,6 +271,8 @@ protected:
 	bool on_motion_notify_event (GdkEventMotion *);
 	bool on_enter_notify_event (GdkEventCrossing*);
 	bool on_leave_notify_event (GdkEventCrossing*);
+	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
+	bool on_visibility_notify_event (GdkEventVisibility*);
 	void on_map();
 	void on_unmap();
 

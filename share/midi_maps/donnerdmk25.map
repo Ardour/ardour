@@ -3,9 +3,9 @@
 
 Bindings file for the Donner DMK25 Spacline controller. 
 
------------------------------------------------------
+=====================================================
 Setting transport buttons to mode 1:
------------------------------------------------------
+=====================================================
 
 The transport buttons in the unit work in two modes (toggle or latch). For this
 file to work all buttons must be set to "mode 1" (latch, I think).
@@ -23,9 +23,9 @@ Finally:
 
 - Press the key labelled "enter" to save (high C)
 
------------------------------------------------------
+==================================================
 Setting CC codes for transport buttons:
------------------------------------------------------
+=================================================
 
 CC messages in this file are the ones that come with the unit by default. 
 If these need changing you can either change the "ctl" values in this file to 

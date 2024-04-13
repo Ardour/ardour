@@ -468,6 +468,18 @@ SessionDialog::setup_initial_choice_box ()
 	archive_filter.set_name (_("Session Archives"));
 	existing_session_chooser.add_filter (archive_filter);
 
+	FileFilter aaf_filter;
+	aaf_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::advanced_authoring_format_suffix));
+	aaf_filter.set_name (_("Advanced Authoring Format (AAF)"));
+	existing_session_chooser.add_filter (aaf_filter);
+
+	FileFilter all_filter;
+	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::statefile_suffix));
+	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::session_archive_suffix));
+	all_filter.add_pattern (string_compose(X_("*%1"), ARDOUR::advanced_authoring_format_suffix));
+	all_filter.set_name (_("All supported files"));
+	existing_session_chooser.add_filter (all_filter);
+
 	existing_session_chooser.set_filter (session_filter);
 
 	Gtkmm2ext::add_volume_shortcuts (existing_session_chooser);

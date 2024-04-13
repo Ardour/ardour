@@ -546,6 +546,10 @@ ARDOUR_UI::sfsm_response (StartupFSM::Result r)
 		queue_finish ();
 		break;
 
+	case StartupFSM::LoadedSession:
+		startup_done ();
+		break;
+
 	case StartupFSM::LoadSession:
 
 		if (load_session_from_startup_fsm () == 0) {

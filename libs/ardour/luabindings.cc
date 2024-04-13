@@ -88,6 +88,7 @@
 #include "ardour/return.h"
 #include "ardour/revision.h"
 #include "ardour/route_group.h"
+#include "ardour/selection.h"
 #include "ardour/send.h"
 #include "ardour/session.h"
 #include "ardour/session_object.h"
@@ -253,6 +254,7 @@ CLASSKEYS(ARDOUR::AudioEngine);
 CLASSKEYS(ARDOUR::BufferSet);
 CLASSKEYS(ARDOUR::ChanCount);
 CLASSKEYS(ARDOUR::ChanMapping);
+CLASSKEYS(ARDOUR::CoreSelection);
 CLASSKEYS(ARDOUR::DSP::DspShm);
 CLASSKEYS(ARDOUR::DataType);
 CLASSKEYS(ARDOUR::FluidSynth);
@@ -337,6 +339,7 @@ CLASSKEYS(std::shared_ptr<ARDOUR::MidiPlaylist>);
 CLASSKEYS(std::shared_ptr<ARDOUR::MidiRegion>);
 CLASSKEYS(std::shared_ptr<ARDOUR::MidiSource>);
 CLASSKEYS(std::shared_ptr<ARDOUR::PluginInfo>);
+CLASSKEYS(std::shared_ptr<ARDOUR::PluginInsert>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Processor>);
 CLASSKEYS(std::shared_ptr<ARDOUR::AudioReadable>);
 CLASSKEYS(std::shared_ptr<ARDOUR::Region>);
@@ -450,6 +453,9 @@ LuaBindings::stddef (lua_State* L)
 		.endClass ()
 
 		.beginStdVector <uint8_t> ("ByteVector")
+		.endClass ()
+
+		.beginStdVector <int32_t> ("IntVector")
 		.endClass ()
 
 		.beginStdVector <float*> ("FloatArrayVector")
@@ -968,6 +974,8 @@ LuaBindings::common (lua_State* L)
 		.addConst ("Discrete", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Discrete))
 		.addConst ("Linear", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Linear))
 		.addConst ("Curved", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Curved))
+		.addConst ("Logarithmic", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Logarithmic))
+		.addConst ("Exponential", Evoral::ControlList::InterpolationStyle(Evoral::ControlList::Exponential))
 		.endNamespace ()
 
 		.beginNamespace ("EventType")
@@ -1737,6 +1745,13 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("set_user_latency", &Latent::set_user_latency)
 		.endClass ()
 
+		.deriveClass <CoreSelection, PBD::Stateful> ("Route")
+		.addFunction ("first_selected_stripable", &CoreSelection::first_selected_stripable)
+		.addFunction ("select_next_stripable", &CoreSelection::select_next_stripable)
+		.addFunction ("select_prev_stripable", &CoreSelection::select_prev_stripable)
+		.addFunction ("clear_stripables", &CoreSelection::clear_stripables)
+		.endClass ()
+
 		.beginClass <Latent> ("PDC")
 		/* cannot reuse "Latent"; weak/shared-ptr refs cannot have static member functions */
 		.addStaticFunction ("zero_latency", &Latent::zero_latency)
@@ -1887,22 +1902,40 @@ LuaBindings::common (lua_State* L)
 		.endClass ()
 
 		.deriveWSPtrClass <SurroundPannable, Automatable> ("SurroundPannable")
-		.addData ("name", &SurroundPannable::pan_pos_x)
-		.addData ("name", &SurroundPannable::pan_pos_y)
-		.addData ("name", &SurroundPannable::pan_pos_z)
-		.addData ("name", &SurroundPannable::pan_size)
-		.addData ("name", &SurroundPannable::pan_snap)
+		.addData ("pan_pos_x", &SurroundPannable::pan_pos_x)
+		.addData ("pan_pos_y", &SurroundPannable::pan_pos_y)
+		.addData ("pan_pos_z", &SurroundPannable::pan_pos_z)
+		.addData ("pan_size", &SurroundPannable::pan_size)
+		.addData ("pan_snap", &SurroundPannable::pan_snap)
+		.addData ("binaural_render_mode", &SurroundPannable::binaural_render_mode)
+		.addData ("sur_elevation_enable", &SurroundPannable::sur_elevation_enable)
+		.addData ("sur_zones", &SurroundPannable::sur_zones)
+		.addData ("sur_ramp", &SurroundPannable::sur_ramp)
 		.endClass ()
 
 		.deriveWSPtrClass <SurroundSend, Processor> ("SurroundSend")
 		.addFunction ("get_delay_in", &SurroundSend::get_delay_in)
 		.addFunction ("get_delay_out", &SurroundSend::get_delay_out)
 		.addFunction ("gain_control", &SurroundSend::gain_control)
-		.addFunction ("n_pannables", &SurroundSend::gain_control)
+		.addFunction ("n_pannables", &SurroundSend::n_pannables)
 		.addFunction ("pannable", &SurroundSend::pannable)
 		.endClass ()
 
 		.deriveWSPtrClass <SurroundReturn, Processor> ("SurroundReturn")
+		.addFunction ("set_bed_mix", &SurroundReturn::set_bed_mix)
+		.addFunction ("set_sync_and_align", &SurroundReturn::set_sync_and_align)
+		.addFunction ("set_ffoa", &SurroundReturn::set_ffoa)
+		.addFunction ("set_with_all_metadata", &SurroundReturn::set_with_all_metadata)
+		.addFunction ("have_au_renderer", &SurroundReturn::have_au_renderer)
+		.addFunction ("load_au_preset", &SurroundReturn::load_au_preset)
+		.addFunction ("set_au_param", &SurroundReturn::set_au_param)
+		.addFunction ("integrated_loudness", &SurroundReturn::integrated_loudness)
+		.addFunction ("max_momentary", &SurroundReturn::max_momentary)
+		.addFunction ("momentary", &SurroundReturn::momentary)
+		.addFunction ("max_dbtp", &SurroundReturn::max_dbtp)
+		.addFunction ("n_channels", &SurroundReturn::n_channels)
+		.addFunction ("total_n_channels", &SurroundReturn::total_n_channels)
+		.addFunction ("output_format_controllable", &SurroundReturn::output_format_controllable)
 		.endClass ()
 
 		.deriveWSPtrClass <Return, IOProcessor> ("Return")
@@ -2362,6 +2395,7 @@ LuaBindings::common (lua_State* L)
 		.beginNamespace ("AutomationType")
 		.addConst ("GainAutomation", ARDOUR::AutomationType(GainAutomation))
 		.addConst ("BusSendLevel", ARDOUR::AutomationType(BusSendLevel))
+		.addConst ("SurroundSendLevel", ARDOUR::AutomationType(SurroundSendLevel))
 		.addConst ("InsertReturnLevel", ARDOUR::AutomationType(InsertReturnLevel))
 		.addConst ("PluginAutomation", ARDOUR::AutomationType(PluginAutomation))
 		.addConst ("SoloAutomation", ARDOUR::AutomationType(SoloAutomation))
@@ -3009,6 +3043,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("snap_name", &Session::snap_name)
 		.addFunction ("monitor_out", &Session::monitor_out)
 		.addFunction ("master_out", &Session::master_out)
+		.addFunction ("master_volume", &Session::master_volume)
+		.addFunction ("surround_master", &Session::surround_master)
 		.addFunction ("add_internal_send", (void (Session::*)(std::shared_ptr<Route>, std::shared_ptr<Processor>, std::shared_ptr<Route>))&Session::add_internal_send)
 		.addFunction ("add_internal_sends", &Session::add_internal_sends)
 		.addFunction ("locations", &Session::locations)
@@ -3041,6 +3077,8 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("new_route_group", &Session::new_route_group)
 		.addFunction ("session_range_is_free", &Session::session_range_is_free)
 		.addFunction ("set_session_range_is_free", &Session::set_session_range_is_free)
+		.addFunction ("set_session_extents", &Session::set_session_extents)
+		.addFunction ("maybe_update_session_range", &Session::maybe_update_session_range)
 		.addFunction ("remove_route", &Session::remove_route)
 		.addFunction ("remove_routes", &Session::remove_routes)
 		.addFunction ("remove_route_group", (void (Session::*)(RouteGroup*))&Session::remove_route_group)
@@ -3095,7 +3133,10 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("new_plugin_with_time_domain", ARDOUR::LuaAPI::new_plugin_with_time_domain)
 		.addFunction ("set_processor_param", ARDOUR::LuaAPI::set_processor_param)
 		.addFunction ("set_plugin_insert_param", ARDOUR::LuaAPI::set_plugin_insert_param)
+		.addFunction ("set_plugin_insert_property", ARDOUR::LuaAPI::set_plugin_insert_property)
+		.addCFunction ("get_plugin_insert_property", ARDOUR::LuaAPI::get_plugin_insert_property)
 		.addFunction ("reset_processor_to_default", ARDOUR::LuaAPI::reset_processor_to_default)
+		.addFunction ("set_automation_data", ARDOUR::LuaAPI::set_automation_data)
 		.addRefFunction ("get_processor_param", ARDOUR::LuaAPI::get_processor_param)
 		.addRefFunction ("get_plugin_insert_param", ARDOUR::LuaAPI::get_plugin_insert_param)
 		.addCFunction ("desc_scale_points", ARDOUR::LuaAPI::desc_scale_points)
@@ -3377,6 +3418,7 @@ LuaBindings::session (lua_State* L)
 		.addFunction ("set_dirty", &Session::set_dirty)
 		.addFunction ("unknown_processors", &Session::unknown_processors)
 		.addFunction ("export_track_state", &Session::export_track_state)
+		.addFunction ("selection", &Session::selection)
 
 		.addFunction<RouteList (Session::*)(uint32_t, PresentationInfo::order_t, const std::string&, const std::string&, PlaylistDisposition)> ("new_route_from_template", &Session::new_route_from_template)
 		// TODO  session_add_audio_track  session_add_midi_track  session_add_mixed_track

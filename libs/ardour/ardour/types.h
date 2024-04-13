@@ -173,6 +173,7 @@ enum AutomationType {
 	MonitoringAutomation,
 	BusSendLevel,
 	BusSendEnable,
+	SurroundSendLevel,
 	InsertReturnLevel,
 	MainOutVolume,
 	MidiVelocityAutomation,
@@ -182,6 +183,9 @@ enum AutomationType {
 	PanSurroundSize,
 	PanSurroundSnap,
 	BinauralRenderMode,
+	PanSurroundElevationEnable,
+	PanSurroundZones,
+	PanSurroundRamp,
 
 	/* used only by Controllable Descriptor to access send parameters */
 

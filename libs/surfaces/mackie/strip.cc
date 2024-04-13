@@ -715,6 +715,7 @@ Strip::format_parameter_for_display(
 	case GainAutomation:
 	case BusSendLevel:
 	case TrimAutomation:
+	case SurroundSendLevel:
 	case InsertReturnLevel:
 		// we can't use value_as_string() that'll suffix "dB" and also use "-inf" w/o space :(
 		if (val == 0.0) {

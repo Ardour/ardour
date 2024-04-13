@@ -168,9 +168,11 @@ DummyAudioBackend::available_buffer_sizes (const std::string&) const
 	bs.push_back (32);
 	bs.push_back (64);
 	bs.push_back (128);
+	bs.push_back (131);
 	bs.push_back (256);
 	bs.push_back (512);
 	bs.push_back (1024);
+	bs.push_back (1031);
 	bs.push_back (2048);
 	bs.push_back (4096);
 	bs.push_back (8192);

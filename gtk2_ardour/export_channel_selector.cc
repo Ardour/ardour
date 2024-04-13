@@ -838,7 +838,7 @@ TrackExportChannelSelector::fill_list()
 	for (RouteList::iterator it = routes.begin(); it != routes.end(); ++it) {
 		if (!std::dynamic_pointer_cast<Track>(*it)) {
 			// not a track, must be a bus
-			if ((*it)->is_main_bus ()) {
+			if ((*it)->is_main_bus () && !(*it)->is_surround_master ()) {
 				continue;
 			}
 			if (!(*it)->active ()) {

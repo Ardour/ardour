@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Adrien Gesta-Fline
+ * Copyright (C) 2023-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -18,7 +18,6 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
-#include <inttypes.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -27,13 +26,13 @@
 #include "aaf/RIFFParser.h"
 
 #define debug(...) \
-	_dbg (dbg, NULL, DEBUG_SRC_ID_AAF_IFACE, VERB_DEBUG, __VA_ARGS__)
+	AAF_LOG (log, NULL, LOG_SRC_ID_AAF_IFACE, VERB_DEBUG, __VA_ARGS__)
 
 #define warning(...) \
-	_dbg (dbg, NULL, DEBUG_SRC_ID_AAF_IFACE, VERB_WARNING, __VA_ARGS__)
+	AAF_LOG (log, NULL, LOG_SRC_ID_AAF_IFACE, VERB_WARNING, __VA_ARGS__)
 
 #define error(...) \
-	_dbg (dbg, NULL, DEBUG_SRC_ID_AAF_IFACE, VERB_ERROR, __VA_ARGS__)
+	AAF_LOG (log, NULL, LOG_SRC_ID_AAF_IFACE, VERB_ERROR, __VA_ARGS__)
 
 #define BE2LE32(val) \
 	(((val >> 24) & 0xff) | ((val << 8) & 0xff0000) | ((val >> 8) & 0xff00) | ((val << 24) & 0xff000000))
@@ -45,10 +44,10 @@ static uint32_t
 beExtended2leUint32 (const unsigned char numx[10]);
 
 int
-riff_writeWavFileHeader (FILE* fp, struct wavFmtChunk* wavFmt, struct wavBextChunk* wavBext, uint32_t audioDataSize, struct dbg* dbg)
+laaf_riff_writeWavFileHeader (FILE* fp, struct wavFmtChunk* wavFmt, struct wavBextChunk* wavBext, uint32_t audioDataSize, struct aafLog* log)
 {
-	(void)dbg;
-	uint32_t filesize = (4 /* WAVE */) + sizeof (struct wavFmtChunk) + ((wavBext) ? sizeof (struct wavBextChunk) : 0) + (8 /*data chunk header*/) + audioDataSize;
+	(void)log;
+	size_t filesize = (4 /* WAVE */) + sizeof (struct wavFmtChunk) + ((wavBext) ? sizeof (struct wavBextChunk) : 0) + (8 /*data chunk header*/) + audioDataSize;
 
 	size_t writtenBytes = fwrite ("RIFF", sizeof (unsigned char), 4, fp);
 
@@ -75,7 +74,7 @@ riff_writeWavFileHeader (FILE* fp, struct wavFmtChunk* wavFmt, struct wavBextChu
 	wavFmt->cksz              = sizeof (struct wavFmtChunk) - sizeof (struct riffChunk);
 	wavFmt->format_tag        = 1; /* PCM */
 	wavFmt->avg_bytes_per_sec = wavFmt->samples_per_sec * wavFmt->channels * wavFmt->bits_per_sample / 8;
-	wavFmt->block_align       = wavFmt->channels * wavFmt->bits_per_sample / 8;
+	wavFmt->block_align       = wavFmt->channels * (wavFmt->bits_per_sample >> 3);
 
 	writtenBytes = fwrite ((unsigned char*)wavFmt, sizeof (unsigned char), sizeof (struct wavFmtChunk), fp);
 
@@ -114,7 +113,7 @@ riff_writeWavFileHeader (FILE* fp, struct wavFmtChunk* wavFmt, struct wavBextChu
 }
 
 int
-riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS flags, size_t (*readerCallback) (unsigned char*, size_t, size_t, void*, void*, void*), void* user1, void* user2, void* user3, struct dbg* dbg)
+laaf_riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS flags, size_t (*readerCallback) (unsigned char*, size_t, size_t, void*, void*, void*), void* user1, void* user2, void* user3, struct aafLog* log)
 {
 	struct riffChunk       chunk;
 	struct riffHeaderChunk riff;
@@ -123,8 +122,9 @@ riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS
 
 	size_t bytesRead = readerCallback ((unsigned char*)&riff, 0, sizeof (riff), user1, user2, user3);
 
-	if (bytesRead < sizeof (riff)) {
-		error ("Could not read file");
+	if (bytesRead == RIFF_READER_ERROR ||
+	    bytesRead < sizeof (riff)) {
+		error ("Could not read file header");
 		return -1;
 	}
 
@@ -152,16 +152,16 @@ riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS
 		return -1;
 	}
 
-	// debug( "%.4s %.4s (%u bytes)", riff.ckid, riff.format, riff.cksz );
-
 	size_t filesize = riff.cksz + sizeof (chunk);
+	size_t pos_sz   = 0;
 	size_t pos      = sizeof (struct riffHeaderChunk);
 
 	while (pos < filesize) {
 		bytesRead = readerCallback ((unsigned char*)&chunk, pos, sizeof (chunk), user1, user2, user3);
 
-		if (bytesRead < sizeof (chunk)) {
-			error ("Could not read chunk @ %" PRIu64 " (%" PRIu64 " bytes returned)", pos, bytesRead);
+		if (bytesRead == RIFF_READER_ERROR ||
+		    bytesRead < sizeof (chunk)) {
+			error ("Could not read chunk \"%.4s\" @ %" PRIu64 " (%" PRIu64 " bytes returned)", chunk.ckid, pos, bytesRead);
 			break;
 		}
 
@@ -169,7 +169,7 @@ riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS
 			chunk.cksz = BE2LE32 (chunk.cksz);
 		}
 
-		// debug( "Got chunk : %.4s (%u bytes)", chunk.ckid, chunk.cksz );
+		debug ("Got chunk \"%.4s\" (%u bytes) @ %" PRIu64 " (%" PRIu64 " bytes returned)", chunk.ckid, chunk.cksz, pos, bytesRead);
 
 		if (!be) { /* WAVE */
 
@@ -180,6 +180,12 @@ riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS
 				struct wavFmtChunk wavFmtChunk;
 
 				bytesRead = readerCallback ((unsigned char*)&wavFmtChunk, pos, sizeof (wavFmtChunk), user1, user2, user3);
+
+				if (bytesRead == RIFF_READER_ERROR ||
+				    bytesRead < sizeof (riff)) {
+					error ("Could not read chunk \"%.4s\" content @ %" PRIu64 " (%" PRIu64 " bytes returned)", chunk.ckid, pos, bytesRead);
+					break;
+				}
 
 				RIFFAudioFile->channels   = wavFmtChunk.channels;
 				RIFFAudioFile->sampleSize = wavFmtChunk.bits_per_sample;
@@ -193,7 +199,13 @@ riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS
 			           chunk.ckid[2] == 't' &&
 			           chunk.ckid[3] == 'a') {
 				if (RIFFAudioFile->channels > 0 && RIFFAudioFile->sampleSize > 0) {
-					RIFFAudioFile->duration = chunk.cksz / RIFFAudioFile->channels / (RIFFAudioFile->sampleSize / 8);
+					RIFFAudioFile->sampleCount = chunk.cksz / RIFFAudioFile->channels / (RIFFAudioFile->sampleSize / 8);
+				}
+
+				RIFFAudioFile->pcm_audio_start_offset = (pos + sizeof (struct riffChunk));
+
+				if (flags & RIFF_PARSE_AAF_SUMMARY) {
+					return 0;
 				}
 			}
 		} else { /* AIFF */
@@ -206,32 +218,52 @@ riff_parseAudioFile (struct RIFFAudioFile* RIFFAudioFile, enum RIFF_PARSER_FLAGS
 
 				bytesRead = readerCallback ((unsigned char*)&aiffCOMMChunk, pos, sizeof (aiffCOMMChunk), user1, user2, user3);
 
-				RIFFAudioFile->channels   = BE2LE16 (aiffCOMMChunk.numChannels);
-				RIFFAudioFile->sampleSize = BE2LE16 (aiffCOMMChunk.sampleSize);
-				RIFFAudioFile->sampleRate = beExtended2leUint32 (aiffCOMMChunk.sampleRate);
-				RIFFAudioFile->duration   = BE2LE32 (aiffCOMMChunk.numSampleFrames);
+				if (bytesRead == RIFF_READER_ERROR ||
+				    bytesRead < sizeof (riff)) {
+					error ("Could not read chunk \"%.4s\" content @ %" PRIu64 " (%" PRIu64 " bytes returned)", chunk.ckid, pos, bytesRead);
+					break;
+				}
+
+				RIFFAudioFile->channels    = BE2LE16 (aiffCOMMChunk.numChannels);
+				RIFFAudioFile->sampleSize  = BE2LE16 (aiffCOMMChunk.sampleSize);
+				RIFFAudioFile->sampleRate  = beExtended2leUint32 (aiffCOMMChunk.sampleRate);
+				RIFFAudioFile->sampleCount = BE2LE32 (aiffCOMMChunk.numSampleFrames);
 
 				if (flags & RIFF_PARSE_ONLY_HEADER) {
 					return 0;
 				}
-			}
-			/*
-			 * We don't care about AIFF "SSND" chunk because we already know duration
-			 * from "COMM". Could we double check validity of duration by checking
-			 * "SSND" chunk size, like we do with WAV "DATA" chunk ? is it possible
-			 * with AAF audio file summary ?
-			 */
+			} else if (chunk.ckid[0] == 'S' &&
+			           chunk.ckid[1] == 'S' &&
+			           chunk.ckid[2] == 'N' &&
+			           chunk.ckid[3] == 'D') {
+				/*
+				 * Samplecount should be already set with numSampleFrames in COMM chunk.
+				 * However in AAF (AIFCDescriptor::Summary), numSampleFrames is often null,
+				 * so we must extract samplecount out of SSND chunk, like we do with wav DATA chunk.
+				 */
+				uint64_t sampleCount = chunk.cksz / RIFFAudioFile->channels / (RIFFAudioFile->sampleSize / 8);
 
-			// else
-			// if ( chunk.ckid[0] == 'S' &&
-			//      chunk.ckid[1] == 'S' &&
-			//      chunk.ckid[2] == 'N' &&
-			//      chunk.ckid[3] == 'D' )
-			// {
-			// }
+				if (RIFFAudioFile->sampleCount > 0 && RIFFAudioFile->sampleCount != sampleCount) {
+					debug ("Sample count retrieved from COMM chunk (%" PRIu64 ") does not match SSND chunk (%" PRIu64 ")", RIFFAudioFile->sampleCount, sampleCount);
+				}
+
+				RIFFAudioFile->sampleCount            = sampleCount;
+				RIFFAudioFile->pcm_audio_start_offset = pos + sizeof (struct aiffSSNDChunk);
+
+				if (flags & RIFF_PARSE_AAF_SUMMARY) {
+					return 0;
+				}
+			}
 		}
 
-		pos += chunk.cksz + sizeof (chunk);
+		pos_sz = chunk.cksz + sizeof (chunk);
+
+		if (pos_sz >= SIZE_MAX) {
+			error ("Parser position is bigger than RIFF_SIZE limits");
+			break;
+		}
+
+		pos += pos_sz;
 	}
 
 	return 0;
@@ -275,7 +307,7 @@ beExtended2leUint32 (const unsigned char numx[10])
 		} else {
 			/* Otherwise it's denormal. It cannot be represented as double. Translate as singed zero. */
 			memcpy (&result, d, 8);
-			return result;
+			return (uint32_t)result;
 		}
 	} else {
 		/* Normal number. */
@@ -283,7 +315,7 @@ beExtended2leUint32 (const unsigned char numx[10])
 
 		if (exponent <= -52) { /*< Too small to represent. Translate as (signed) zero. */
 			memcpy (&result, d, 8);
-			return result;
+			return (uint32_t)result;
 		} else if (exponent < 0) {
 			/* Denormal, exponent bits are already zero here. */
 		} else if (exponent >= 0x7FF) { /*< Too large to represent. Translate as infinite. */
@@ -291,11 +323,11 @@ beExtended2leUint32 (const unsigned char numx[10])
 			d[6] = 0xF0;
 			memset (d, 0x00, 6);
 			memcpy (&result, d, 8);
-			return result;
+			return (uint32_t)result;
 		} else {
 			/* Representable number */
 			d[7] |= (exponent & 0x7F0) >> 4;
-			d[6] |= (exponent & 0xF) << 4;
+			d[6] |= (unsigned char)((exponent & 0xF) << 4);
 		}
 	}
 

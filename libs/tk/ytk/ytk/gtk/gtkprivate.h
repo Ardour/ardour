@@ -74,8 +74,7 @@ typedef enum
 #define GTK_PRIVATE_SET_FLAG(wid,flag)    G_STMT_START{ (GTK_PRIVATE_FLAGS (wid) |= (PRIVATE_ ## flag)); }G_STMT_END
 #define GTK_PRIVATE_UNSET_FLAG(wid,flag)  G_STMT_START{ (GTK_PRIVATE_FLAGS (wid) &= ~(PRIVATE_ ## flag)); }G_STMT_END
 
-#if defined G_OS_WIN32 \
-  || (defined GDK_WINDOWING_QUARTZ && defined QUARTZ_RELOCATION)
+#if defined G_OS_WIN32
 
 const gchar *_gtk_get_datadir ();
 const gchar *_gtk_get_libdir ();
@@ -83,16 +82,10 @@ const gchar *_gtk_get_sysconfdir ();
 const gchar *_gtk_get_localedir ();
 const gchar *_gtk_get_data_prefix ();
 
-#undef GTK_DATADIR
-#define GTK_DATADIR _gtk_get_datadir ()
 #undef GTK_LIBDIR
 #define GTK_LIBDIR _gtk_get_libdir ()
 #undef GTK_LOCALEDIR
 #define GTK_LOCALEDIR _gtk_get_localedir ()
-#undef GTK_SYSCONFDIR
-#define GTK_SYSCONFDIR _gtk_get_sysconfdir ()
-#undef GTK_DATA_PREFIX
-#define GTK_DATA_PREFIX _gtk_get_data_prefix ()
 
 #endif /* G_OS_WIN32 */
 

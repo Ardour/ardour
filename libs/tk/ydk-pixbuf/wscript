@@ -52,7 +52,7 @@ def build(bld):
     obj.use             = ''
     obj.uselib          = 'GLIB GIO GOBJECT LIBPNG'
     obj.defines         = [ 'HAVE_CONFIG_H', '_LARGEFILE64_SOURCE', '_REENTRANT', 'G_LOG_DOMAIN="GdkPixbuf"', 'DGDK_PIXBUF_COMPILATION', '_FILE_OFFSET_BITS=64',
-                            'GDK_PIXBUF_ENABLE_BACKEND', 'G_DISABLE_SINGLE_INCLUDES',
+                            'GDK_PIXBUF_ENABLE_BACKEND', 'G_DISABLE_SINGLE_INCLUDES', '_POSIX_C_SOURCE=200809L',
                             'INCLUDE_png', 'INCLUDE_xbm', 'INCLUDE_xpm',
                             'PACKAGE="' + I18N_PACKAGE + '"', 'GDK_PIXBUF_LOCALEDIR=""'
 

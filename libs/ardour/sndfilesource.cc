@@ -404,7 +404,7 @@ SndFileSource::open ()
 #ifdef HAVE_RF64_RIFF
 	if (_file_is_new && _length == 0 && writable()) {
 		if (_flags & RF64_RIFF) {
-			if (sf_command (_sndfile, SFC_RF64_AUTO_DOWNGRADE, 0, 0) != SF_TRUE) {
+			if (sf_command (_sndfile, SFC_RF64_AUTO_DOWNGRADE, 0, 1) != SF_TRUE) {
 				char errbuf[256];
 				sf_error_str (_sndfile, errbuf, sizeof (errbuf) - 1);
 				error << string_compose (_("Cannot mark RF64 audio file for automatic downgrade to WAV: %1"), errbuf)

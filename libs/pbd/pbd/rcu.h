@@ -220,13 +220,27 @@ public:
 				boost::detail::yield (i);
 			}
 
+#if 0 // TODO find a good solition here...
 			/* if we are not the only user, put the old value into dead_wood.
 			 * if we are the only user, then it is safe to drop it here.
 			 */
 
 			if (!_current_write_old->unique ()) {
-				_dead_wood.push_back (*_current_write_old); 
+				_dead_wood.push_back (*_current_write_old);
 			}
+#else
+			/* above ->unique() condition is subject to a race condition.
+			 *
+			 * Particulalry with JACK2 graph-order callbacks arriving
+			 * concurrently to processing, which can lead to heap-use-after-free
+			 * of the RouteList.
+			 *
+			 * std::shared_ptr<T>::use_count documetation reads:
+			 * > In multithreaded environment, the value returned by use_count is approximate
+			 * > (typical implementations use a memory_order_relaxed load).
+			 */
+			_dead_wood.push_back (*_current_write_old);
+#endif
 
 			/* now delete it - if we are the only user, this deletes the
 			 * underlying object. If other users existed, then there will

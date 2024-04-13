@@ -196,6 +196,8 @@ Automatable::describe_parameter (Evoral::Parameter param)
 		return _("Fader");
 	} else if (param.type() == BusSendLevel) {
 		return _("Send");
+	} else if (param.type() == SurroundSendLevel) {
+		return _("Send");
 	} else if (param.type() == InsertReturnLevel) {
 		return _("Return");
 	} else if (param.type() == TrimAutomation) {
@@ -222,6 +224,12 @@ Automatable::describe_parameter (Evoral::Parameter param)
 		return _("Snap to Speaker");
 	} else if (param.type() == BinauralRenderMode) {
 		return _("Binaural Render mode");
+	} else if (param.type() == PanSurroundElevationEnable) {
+		return X_("hidden");
+	} else if (param.type() == PanSurroundZones) {
+		return X_("hidden");
+	} else if (param.type() == PanSurroundRamp) {
+		return X_("hidden");
 	} else if (param.type() == PhaseAutomation) {
 		return _("Polarity Invert");
 	} else if (param.type() == MidiVelocityAutomation) {
@@ -589,6 +597,8 @@ Automatable::control_factory(const Evoral::Parameter& param)
 	} else if (param.type() == MainOutVolume) {
 		control = new GainControl(_a_session, param);
 	} else if (param.type() == BusSendLevel) {
+		control = new GainControl(_a_session, param);
+	} else if (param.type() == SurroundSendLevel) {
 		control = new GainControl(_a_session, param);
 	} else if (param.type() == PanSurroundX || param.type() == PanSurroundY || param.type() == PanSurroundZ || param.type() == PanSurroundSize || param.type() == PanSurroundSnap || param.type() == BinauralRenderMode) {
 		assert (0);

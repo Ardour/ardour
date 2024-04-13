@@ -207,6 +207,7 @@ setup_enum_writer ()
 	REGISTER_ENUM (MonitoringAutomation);
 	REGISTER_ENUM (BusSendLevel);
 	REGISTER_ENUM (BusSendEnable);
+	REGISTER_ENUM (SurroundSendLevel);
 	REGISTER_ENUM (InsertReturnLevel);
 	REGISTER_ENUM (MainOutVolume);
 	REGISTER_ENUM (MidiVelocityAutomation);
@@ -216,6 +217,9 @@ setup_enum_writer ()
 	REGISTER_ENUM (PanSurroundSize);
 	REGISTER_ENUM (PanSurroundSnap);
 	REGISTER_ENUM (BinauralRenderMode);
+	REGISTER_ENUM (PanSurroundElevationEnable);
+	REGISTER_ENUM (PanSurroundZones);
+	REGISTER_ENUM (PanSurroundRamp);
 	REGISTER (_AutomationType);
 
 	REGISTER_ENUM (Off);

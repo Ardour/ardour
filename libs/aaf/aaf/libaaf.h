@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Adrien Gesta-Fline
+ * Copyright (C) 2017-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -28,13 +28,14 @@ extern "C" {
 #include "aaf/version.h"
 
 #include "aaf/AAFCore.h"
-#include "aaf/AAFIAudioFiles.h"
+#include "aaf/AAFIEssenceFile.h"
 #include "aaf/AAFIface.h"
 #include "aaf/LibCFB.h"
 
 #include "aaf/AAFDump.h"
 #include "aaf/CFBDump.h"
 
+#include "aaf/MediaComposer.h"
 #include "aaf/ProTools.h"
 #include "aaf/Resolve.h"
 

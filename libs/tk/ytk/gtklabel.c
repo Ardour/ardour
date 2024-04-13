@@ -1336,7 +1336,7 @@ gtk_label_buildable_custom_tag_start (GtkBuildable     *buildable,
 
       parser_data = g_slice_new0 (PangoParserData);
       parser_data->builder = g_object_ref (builder);
-      parser_data->object = g_object_ref (buildable);
+      parser_data->object = G_OBJECT (g_object_ref (buildable));
       *parser = pango_parser;
       *data = parser_data;
       return TRUE;

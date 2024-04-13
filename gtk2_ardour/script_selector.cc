@@ -258,7 +258,7 @@ ScriptParameterDialog::ScriptParameterDialog (std::string title,
 }
 
 bool
-ScriptParameterDialog::need_interation () const
+ScriptParameterDialog::need_interaction () const
 {
 	if (!parameters_ok ()) {
 		return true;

@@ -450,7 +450,6 @@ public:
 	void hide_things ();
 
 	bool edit_aux_send (std::shared_ptr<ARDOUR::Processor>);
-	bool edit_triggerbox (std::shared_ptr<ARDOUR::Processor>);
 
 	/* Everything except a WindowProxy object should use this to get the window */
 	Gtk::Window* get_processor_ui (std::shared_ptr<ARDOUR::Processor>) const;

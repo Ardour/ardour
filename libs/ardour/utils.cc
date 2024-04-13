@@ -117,7 +117,10 @@ ARDOUR::legalize_for_path (const string& str)
 string
 ARDOUR::legalize_for_universal_path (const string& str)
 {
-	return replace_chars (str, "<>:\"/\\|?*");
+	string rv = replace_chars (str, "<>:\"/\\|?*");
+	/* windows filenames can't end with ' ' or '.' */
+	rv.erase (rv.find_last_not_of(" .") + 1);
+	return rv;
 }
 
 /** Legalize for a URI path component.  This is like

@@ -529,7 +529,7 @@ FoldbackStrip::init ()
 	_global_frame.set_name ("MixerStripFrame");
 	add (_global_frame);
 
-	_number_label.signal_button_release_event().connect (sigc::mem_fun (*this, &FoldbackStrip::number_button_press), false);
+	_number_label.signal_button_press_event().connect (sigc::mem_fun (*this, &FoldbackStrip::number_button_press), false);
 	_name_button.signal_button_press_event ().connect (sigc::mem_fun (*this, &FoldbackStrip::name_button_button_press), false);
 	_previous_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), false));
 	_next_button.signal_clicked.connect (sigc::bind (sigc::mem_fun (*this, &FoldbackStrip::cycle_foldbacks), true));
@@ -855,6 +855,8 @@ FoldbackStrip::build_route_select_menu ()
 bool
 FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 {
+	_mixer.select_none();
+
 	if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS) {
 		StripableList            slist;
 		std::shared_ptr<Route> previous = std::shared_ptr<Route> ();
@@ -875,6 +877,13 @@ FoldbackStrip::name_button_button_press (GdkEventButton* ev)
 bool
 FoldbackStrip::number_button_press (GdkEventButton* ev)
 {
+	_mixer.select_none();
+	
+	if (ev->type == GDK_2BUTTON_PRESS) {
+		choose_color ();
+		return true;
+	}
+	
 	if (Keyboard::is_context_menu_event (ev)) {
 		return name_button_button_press (ev);
 	}

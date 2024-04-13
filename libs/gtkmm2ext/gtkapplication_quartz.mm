@@ -1067,8 +1067,8 @@ add_menu_item (NSMenu* cocoa_menu, GtkWidget* menu_item, int index)
 	
 	/* connect GtkMenuItem and NSMenuItem so that we can notice changes to accel/label/submenu etc. */
 	cocoa_menu_item_connect (menu_item, (GNSMenuItem*) cocoa_item, label);
-	
-	[ cocoa_item setEnabled:YES];
+	cocoa_menu_item_update_state (cocoa_item, menu_item);
+
 	if (index >= 0) 
 		[ cocoa_menu insertItem:cocoa_item atIndex:index];
 	else 

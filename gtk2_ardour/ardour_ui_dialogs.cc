@@ -334,8 +334,13 @@ ARDOUR_UI::unload_session (bool hide_stuff, bool force_unload)
 			break;
 		case 0:
 			// discard/don't save
+			if (_session->unnamed()) {
+				ask_about_scratch_deletion ();
+			}
 			break;
 		}
+	} else if (!force_unload && _session && _session->unnamed()) {
+		ask_about_scratch_deletion ();
 	}
 
 

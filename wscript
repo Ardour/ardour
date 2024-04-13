@@ -444,6 +444,9 @@ int main() { return 0; }''',
     if opt.gprofile:
         debug_flags = [ flags_dict['gprofile'] ]
 
+    if opt.gdebug or conf.env['DEBUG']:
+        debug_flags.append('-DG_ENABLE_DEBUG')
+
     # OSX
     if platform == 'darwin':
         if re.search ("^13[.]", version) is not None:
@@ -859,7 +862,7 @@ def options(opt):
     opt.add_option('--arch', type='string', action='store', dest='arch',
                     help='Architecture-specific compiler FLAGS')
     opt.add_option('--with-backends', type='string', action='store', default='', dest='with_backends',
-                    help='Specify which backend modules are to be included(jack,alsa,dummy,portaudio,coreaudio,pulseaudio)')
+                    help='Specify which backend modules are to be included(jack,alsa,portaudio,coreaudio,pulseaudio)')
     opt.add_option('--backtrace', action='store_true', default=False, dest='backtrace',
                     help='Compile with -rdynamic -- allow obtaining backtraces from within Ardour')
     opt.add_option('--no-carbon', action='store_true', default=False, dest='nocarbon',
@@ -885,6 +888,8 @@ def options(opt):
                     help='Build a version suitable for distribution as a zero-cost binary')
     opt.add_option('--profile', action='store_true', default=False, dest='profile',
                     help='Compile for use with profiling tools requiring a frame pointer')
+    opt.add_option('--gtk-debug', action='store_true', default=False, dest='gdebug',
+                    help='Enable g/ytk debug mode (G_ENABLE_DEBUG)')
     opt.add_option('--gprofile', action='store_true', default=False, dest='gprofile',
                     help='Compile for use with gprofile')
     opt.add_option('--libjack', type='string', default="auto", dest='libjack_link',
@@ -1003,7 +1008,7 @@ def configure(conf):
 
     # freedesktop translations needs itstool > 1.0.3 (-j option)
     if Options.options.freedesktop:
-        output = subprocess.Popen("itstool --version", shell=True, stderr=subprocess.STDOUT, stdout=subprocess.PIPE).communicate()[0].splitlines()
+        output = subprocess.Popen("itstool --version", shell=True, stderr=subprocess.DEVNULL, stdout=subprocess.PIPE).communicate()[0].splitlines()
         o = output[0].decode('utf-8')
         itstool = o.split(' ')[0]
         version = o.split(' ')[1].split('.')
@@ -1443,7 +1448,7 @@ int main () { __int128 x = 0; return 0; }
         if Options.options.dist_target == 'mingw':
             backends += ['portaudio']
 
-    if opts.build_tests and 'dummy' not in backends:
+    if 'dummy' not in backends:
         backends += ['dummy']
 
     conf.env['BACKENDS'] = backends
@@ -1565,6 +1570,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('FPU AVX/FMA support',   conf.is_defined('FPU_AVX_FMA_SUPPORT'))
     write_config_text('Futex Semaphore',       conf.is_defined('USE_FUTEX_SEMAPHORE'))
     write_config_text('Freedesktop files',     opts.freedesktop)
+    write_config_text('G_ENABLE_DEBUG',        opts.gdebug or conf.env['DEBUG'])
     write_config_text('Libjack linking',       conf.env['libjack_link'])
     write_config_text('Libjack metadata',      conf.is_defined ('HAVE_JACK_METADATA'))
     write_config_text('Lua Binding Doc',       conf.is_defined('LUABINDINGDOC'))

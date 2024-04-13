@@ -459,8 +459,7 @@ lua_exec (std::string cmd)
 	if (x.start()) {
 		return -1;
 	}
-	x.wait ();
-	return 0;
+	return x.wait ();
 }
 #endif
 
@@ -912,6 +911,8 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.addFunction ("get_cut_buffer", &PublicEditor::get_cut_buffer)
 		.addRefFunction ("get_selection_extents", &PublicEditor::get_selection_extents)
 
+		.addFunction ("current_mixer_stripable", &PublicEditor::current_mixer_stripable)
+
 		.addFunction ("set_selection", &PublicEditor::set_selection)
 
 		.addFunction ("play_selection", &PublicEditor::play_selection)
@@ -1196,9 +1197,27 @@ LuaInstance::~LuaInstance ()
 	_callbacks.clear();
 }
 
+static std::string
+lua_read_script (std::string const& fn)
+{
+	if (!UIConfiguration::instance().get_update_action_scripts ()) {
+		return "";
+	}
+	try {
+		return Glib::file_get_contents (fn);
+	} catch (...) { }
+	return "";
+}
+
 void
 LuaInstance::init ()
 {
+	luabridge::getGlobalNamespace (lua.getState())
+		.beginNamespace ("Internal")
+		.addFunction ("get_factory_bytecode", &LuaScripting::get_factory_bytecode)
+		.addFunction ("read_script", &lua_read_script)
+		.endNamespace ();
+
 	lua.do_command (
 			"function ScriptManager ()"
 			"  local self = { scripts = {}, instances = {}, icons = {} }"
@@ -1301,10 +1320,20 @@ LuaInstance::init ()
 			"   collectgarbage()"
 			"  end"
 			""
+			"  local get_factory_bytecode = Internal.get_factory_bytecode"
+			"  local read_script = Internal.read_script"
 			"  local restore = function (state)"
 			"   clear()"
 			"   load (state)()"
 			"   for i, s in pairs (scripts) do"
+			"    if s['a']['x-script-origin'] then"
+			"       local sc = read_script (s['a']['x-script-origin'])"
+			"       if sc ~= '' then"
+			"         fnc = nil load (get_factory_bytecode (sc, 'factory', 'fnc'))()"
+			"         icn = nil load (get_factory_bytecode (sc, 'icon', 'icn'))()"
+			"         if fnc ~= '' and type(fnc) == 'string' then s['f'] = fnc s['c'] = icn s['s'] = sc end "
+			"       end"
+			"    end"
 			"    addinternal (i, s['n'], s['s'], load(s['f']), type (s['c']) ~= \"string\" or s['c'] == '' or load (s['c']), s['a'])"
 			"   end"
 			"   collectgarbage()"
@@ -1322,6 +1351,7 @@ LuaInstance::init ()
 	try {
 		luabridge::LuaRef lua_mgr = luabridge::getGlobal (L, "manager");
 		lua.do_command ("manager = nil"); // hide it.
+		lua.do_command ("Internal = nil");
 		lua.do_command ("collectgarbage()");
 
 		_lua_add_action = new luabridge::LuaRef(lua_mgr["add"]);
@@ -1610,7 +1640,7 @@ LuaInstance::interactive_add (Gtk::Window& parent, LuaScriptInfo::ScriptType typ
 
 	ScriptParameterDialog spd (_("Set Script Parameters"), spi, reg, lsp);
 
-	if (spd.need_interation ()) {
+	if (spd.need_interaction ()) {
 		switch (spd.run ()) {
 			case Gtk::RESPONSE_ACCEPT:
 				break;

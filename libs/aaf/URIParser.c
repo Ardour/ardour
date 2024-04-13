@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2023 Adrien Gesta-Fline
+ * Copyright (C) 2023-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -18,7 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <assert.h>
 #include <ctype.h>
+#include <limits.h>
 #include <stdarg.h>
 #include <stdint.h>
 #include <stdio.h>
@@ -31,15 +33,16 @@ typedef SSIZE_T ssize_t;
 #endif
 
 #include "aaf/URIParser.h"
+#include "aaf/utils.h"
 
 #define debug(...) \
-	_dbg (dbg, NULL, DEBUG_SRC_ID_AAF_IFACE, VERB_DEBUG, __VA_ARGS__)
+	AAF_LOG (log, NULL, LOG_SRC_ID_AAF_IFACE, VERB_DEBUG, __VA_ARGS__)
 
 #define warning(...) \
-	_dbg (dbg, NULL, DEBUG_SRC_ID_AAF_IFACE, VERB_WARNING, __VA_ARGS__)
+	AAF_LOG (log, NULL, LOG_SRC_ID_AAF_IFACE, VERB_WARNING, __VA_ARGS__)
 
 #define error(...) \
-	_dbg (dbg, NULL, DEBUG_SRC_ID_AAF_IFACE, VERB_ERROR, __VA_ARGS__)
+	AAF_LOG (log, NULL, LOG_SRC_ID_AAF_IFACE, VERB_ERROR, __VA_ARGS__)
 
 #define IS_LOWALPHA(c) \
 	((c >= 'a') && (c <= 'z'))
@@ -89,52 +92,45 @@ typedef SSIZE_T ssize_t;
 	(uri->scheme_t != URI_SCHEME_T_FILE && \
 	 !(uri->opts & URI_OPT_IGNORE_FRAGMENT))
 
-#define URI_SET_STR(str, start, end)                        \
-                                                            \
-	str = malloc (sizeof (char) * ((end - start) + 1)); \
-                                                            \
-	if (NULL == str) {                                  \
-		error ("URI allocation failed");            \
-		goto err;                                   \
-	}                                                   \
-                                                            \
-	snprintf (str, (end - start) + 1, "%s", start);
+#define URI_SET_STR(str, start, end)                                   \
+                                                                       \
+	str = malloc (sizeof (char) * (uint32_t) ((end - start) + 1)); \
+                                                                       \
+	if (!str) {                                                    \
+		error ("Out of memory");                               \
+		goto err;                                              \
+	}                                                              \
+                                                                       \
+	snprintf (str, (uint32_t) (end - start) + 1, "%s", start);
+
+static char*
+uriDecodeString (char* src, char* dst);
+static int
+uriIsIPv4 (const char* s, size_t size, char** err);
+static int
+uriIsIPv6 (const char* s, size_t size, char** err);
 
 static int
-_uri_parse_scheme (struct uri* uri, const char** pos, const char* end, struct dbg* dbg);
+_uri_parse_scheme (struct uri* uri, const char** pos, const char* end, struct aafLog* log);
 static int
-_uri_parse_authority (struct uri* uri, const char** pos, const char* end, struct dbg* dbg);
+_uri_parse_authority (struct uri* uri, const char** pos, const char* end, struct aafLog* log);
 static int
-_uri_parse_userinfo (struct uri* uri, const char** pos, const char* end, struct dbg* dbg);
+_uri_parse_userinfo (struct uri* uri, const char** pos, const char* end, struct aafLog* log);
 static int
-_uri_parse_hostname (struct uri* uri, const char** pos, const char* end, struct dbg* dbg);
+_uri_parse_hostname (struct uri* uri, const char** pos, const char* end, struct aafLog* log);
 static int
-_uri_parse_path (struct uri* uri, const char** pos, const char* end, struct dbg* dbg);
+_uri_parse_path (struct uri* uri, const char** pos, const char* end, struct aafLog* log);
 static int
-_uri_parse_query (struct uri* uri, const char** pos, const char* end, struct dbg* dbg);
+_uri_parse_query (struct uri* uri, const char** pos, const char* end, struct aafLog* log);
 static int
-_uri_parse_fragment (struct uri* uri, const char** pos, const char* end, struct dbg* dbg);
+_uri_parse_fragment (struct uri* uri, const char** pos, const char* end, struct aafLog* log);
 
 static void
 _uri_scheme2schemeType (struct uri* uri);
-static int
-_laaf_util_snprintf_realloc (char** str, size_t* size, size_t offset, const char* format, ...);
 
-#ifdef BUILD_URI_TEST //  gcc -g -W -Wall ./URIParser.c -D BUILD_URI_TEST
-static int
-_uri_cmp (const struct uri* a, const struct uri* b);
-static void
-_uri_dump_diff (struct uri* a, struct uri* b, int totalDifferencies);
-static int
-_uri_test (const char* uristr, enum uri_option optflags, struct uri expectedRes, int line);
-#endif // BUILD_URI_TEST
-
-char*
+static char*
 uriDecodeString (char* src, char* dst)
 {
-	int inpos  = 0;
-	int outpos = 0;
-
 	if (src == NULL) {
 		return NULL;
 	}
@@ -143,47 +139,39 @@ uriDecodeString (char* src, char* dst)
 		dst = src;
 	}
 
-	while (src[inpos]) {
-		if (src[inpos] == '%' && IS_HEX (src[inpos + 1]) && IS_HEX (src[inpos + 2])) {
-			int c = 0;
+	char* end = src + strlen (src);
 
-			char hex1 = src[inpos + 1];
+	while (*src) {
+		if (*src == '%' && src + 2 < end && IS_HEX (*(src + 1)) && IS_HEX (*(src + 2))) {
+			char d1 = *(src + 1);
+			char d2 = *(src + 2);
 
-			if ((hex1 >= '0') && (hex1 <= '9'))
-				c = (hex1 - '0');
-			else if ((hex1 >= 'a') && (hex1 <= 'f'))
-				c = (hex1 - 'a') + 10;
-			else if ((hex1 >= 'A') && (hex1 <= 'F'))
-				c = (hex1 - 'A') + 10;
+			int digit = 0;
 
-			char hex2 = src[inpos + 2];
+			digit = (d1 >= 'A' ? ((d1 & 0xdf) - 'A') + 10 : (d1 - '0'));
+			digit <<= 4;
+			digit += (d2 >= 'A' ? ((d2 & 0xdf) - 'A') + 10 : (d2 - '0'));
 
-			if ((hex2 >= '0') && (hex2 <= '9'))
-				c = c * 16 + (hex2 - '0');
-			else if ((hex2 >= 'a') && (hex2 <= 'f'))
-				c = c * 16 + (hex2 - 'a') + 10;
-			else if ((hex2 >= 'A') && (hex2 <= 'F'))
-				c = c * 16 + (hex2 - 'A') + 10;
+			assert (digit > CHAR_MIN && digit < UCHAR_MAX);
 
-			dst[outpos] = (char)c;
-			inpos += 3;
+			*dst = (char)digit;
+
+			src += 3;
+			dst++;
 		} else {
-			dst[outpos] = src[inpos];
-			inpos++;
+			*dst = *src;
+			src++;
+			dst++;
 		}
-
-		outpos++;
 	}
 
-	if (inpos > outpos) {
-		dst[outpos] = 0x00;
-	}
+	*dst = 0x00;
 
 	return dst;
 }
 
 static int
-_uri_parse_scheme (struct uri* uri, const char** pos, const char* end, struct dbg* dbg)
+_uri_parse_scheme (struct uri* uri, const char** pos, const char* end, struct aafLog* log)
 {
 	const char* p = *pos;
 
@@ -216,7 +204,12 @@ _uri_parse_scheme (struct uri* uri, const char** pos, const char* end, struct db
 	char* pp = uri->scheme;
 
 	while (*pp) {
-		*pp = tolower (*pp);
+		int charint = tolower (*pp);
+
+		assert (charint > CHAR_MIN && charint < CHAR_MAX);
+
+		*pp = (char)charint;
+
 		pp++;
 	}
 
@@ -231,7 +224,7 @@ err:
 }
 
 static int
-_uri_parse_authority (struct uri* uri, const char** pos, const char* end, struct dbg* dbg)
+_uri_parse_authority (struct uri* uri, const char** pos, const char* end, struct aafLog* log)
 {
 	/*
 	 * RFC 3986 - Uniform Resource Identifier (URI): Generic Syntax
@@ -298,7 +291,7 @@ err:
 }
 
 static int
-_uri_parse_userinfo (struct uri* uri, const char** pos, const char* end, struct dbg* dbg)
+_uri_parse_userinfo (struct uri* uri, const char** pos, const char* end, struct aafLog* log)
 {
 	int hasUserinfo               = 0;
 	int userinfoIllegalCharacters = 0;
@@ -373,7 +366,7 @@ err:
 }
 
 static int
-_uri_parse_hostname (struct uri* uri, const char** pos, const char* end, struct dbg* dbg)
+_uri_parse_hostname (struct uri* uri, const char** pos, const char* end, struct aafLog* log)
 {
 	const char* p = *pos;
 
@@ -422,7 +415,7 @@ _uri_parse_hostname (struct uri* uri, const char** pos, const char* end, struct 
 			p++;
 		}
 
-		// debug( " >>> %.*s", (int)(p-*pos), p );
+		// debug( L" >>> %.*s", (int)(p-*pos), p );
 
 		URI_SET_STR (uri->host, *pos, p);
 	}
@@ -430,7 +423,7 @@ _uri_parse_hostname (struct uri* uri, const char** pos, const char* end, struct 
 	// if ( !(uri->flags & URI_T_HOST_IPV6 || uri->flags & URI_T_HOST_EMPTY) ) {
 	if (!(uri->flags & URI_T_HOST_IPV6) && uri->host != NULL && *uri->host != 0x00) {
 		if (uriIsIPv4 (uri->host, strlen (uri->host), NULL)) {
-			uri->flags &= ~URI_T_HOST_MASK;
+			uri->flags &= ~(unsigned)URI_T_HOST_MASK;
 			uri->flags |= URI_T_HOST_IPV4;
 			if (strcmp (uri->host, "127.0.0.1") == 0) {
 				uri->flags |= URI_T_LOCALHOST;
@@ -479,7 +472,7 @@ err:
 }
 
 static int
-_uri_parse_path (struct uri* uri, const char** pos, const char* end, struct dbg* dbg)
+_uri_parse_path (struct uri* uri, const char** pos, const char* end, struct aafLog* log)
 {
 	int winDrive = 0;
 
@@ -507,7 +500,7 @@ _uri_parse_path (struct uri* uri, const char** pos, const char* end, struct dbg*
 		p++;
 	}
 
-	// debug( " >>> (%i) %.*s", (int)(p-*pos), (int)(p-*pos), p );
+	// debug( L" >>> (%i) %.*s", (int)(p-*pos), (int)(p-*pos), p );
 
 	URI_SET_STR (uri->path, *pos, p);
 
@@ -534,7 +527,7 @@ err:
 }
 
 static int
-_uri_parse_query (struct uri* uri, const char** pos, const char* end, struct dbg* dbg)
+_uri_parse_query (struct uri* uri, const char** pos, const char* end, struct aafLog* log)
 {
 	const char* p = *pos;
 
@@ -561,7 +554,7 @@ err:
 }
 
 static int
-_uri_parse_fragment (struct uri* uri, const char** pos, const char* end, struct dbg* dbg)
+_uri_parse_fragment (struct uri* uri, const char** pos, const char* end, struct aafLog* log)
 {
 	/*
 	 * https://datatracker.ietf.org/doc/html/draft-yevstifeyev-ftp-uri-scheme#section-3.2.4.2
@@ -602,7 +595,7 @@ err:
 }
 
 struct uri*
-uriParse (const char* uristr, enum uri_option optflags, struct dbg* dbg)
+laaf_uri_parse (const char* uristr, enum uri_option optflags, struct aafLog* log)
 {
 	if (uristr == NULL) {
 		return NULL;
@@ -610,7 +603,8 @@ uriParse (const char* uristr, enum uri_option optflags, struct dbg* dbg)
 
 	struct uri* uri = calloc (1, sizeof (struct uri));
 
-	if (uri == NULL) {
+	if (!uri) {
+		error ("Out of memory");
 		return NULL;
 	}
 
@@ -626,27 +620,27 @@ uriParse (const char* uristr, enum uri_option optflags, struct dbg* dbg)
 	const char* pos = uristr;
 	const char* end = pos + urilen;
 
-	_uri_parse_scheme (uri, &pos, end, dbg);
+	_uri_parse_scheme (uri, &pos, end, log);
 
-	if (_uri_parse_authority (uri, &pos, end, dbg)) {
-		_uri_parse_userinfo (uri, &pos, end, dbg);
-		_uri_parse_hostname (uri, &pos, end, dbg);
+	if (_uri_parse_authority (uri, &pos, end, log)) {
+		_uri_parse_userinfo (uri, &pos, end, log);
+		_uri_parse_hostname (uri, &pos, end, log);
 	}
 
-	_uri_parse_path (uri, &pos, end, dbg);
+	_uri_parse_path (uri, &pos, end, log);
 
 	if (SCHEME_ALLOW_QUERY (uri)) {
-		_uri_parse_query (uri, &pos, end, dbg);
+		_uri_parse_query (uri, &pos, end, log);
 	}
 
 	if (SCHEME_ALLOW_FRAGMENT (uri)) {
-		_uri_parse_fragment (uri, &pos, end, dbg);
+		_uri_parse_fragment (uri, &pos, end, log);
 	}
 
 	goto end;
 
 err:
-	uriFree (uri);
+	laaf_uri_free (uri);
 	uri = NULL;
 
 end:
@@ -655,51 +649,34 @@ end:
 }
 
 void
-uriFree (struct uri* uri)
+laaf_uri_free (struct uri* uri)
 {
-	if (uri == NULL) {
+	if (!uri) {
 		return;
 	}
-	if (NULL != uri->scheme) {
-		free (uri->scheme);
-	}
-	if (NULL != uri->userinfo) {
-		free (uri->userinfo);
-	}
-	if (NULL != uri->authority) {
-		free (uri->authority);
-	}
-	if (NULL != uri->user) {
-		free (uri->user);
-	}
-	if (NULL != uri->pass) {
-		free (uri->pass);
-	}
-	if (NULL != uri->host) {
-		free (uri->host);
-	}
-	if (NULL != uri->path) {
-		free (uri->path);
-	}
-	if (NULL != uri->query) {
-		free (uri->query);
-	}
-	if (NULL != uri->fragment) {
-		free (uri->fragment);
-	}
+
+	free (uri->scheme);
+	free (uri->userinfo);
+	free (uri->authority);
+	free (uri->user);
+	free (uri->pass);
+	free (uri->host);
+	free (uri->path);
+	free (uri->query);
+	free (uri->fragment);
 
 	free (uri);
 }
 
-int
-uriIsIPv4 (const char* s, int size, char** err)
+static int
+uriIsIPv4 (const char* s, size_t size, char** err)
 {
 	int         octets            = 0;
 	const char* currentOctetStart = s;
 
 	char prev = 0;
 
-	for (int i = 0; i <= size; i++) {
+	for (size_t i = 0; i <= size; i++) {
 		if (prev == 0) {
 			if (IS_DIGIT (*(s + i))) {
 				currentOctetStart = (s + i);
@@ -709,7 +686,7 @@ uriIsIPv4 (const char* s, int size, char** err)
 
 			if (*(s + i) == '.') {
 				if (err) {
-					_laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : can't start with a single '.'");
+					laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : can't start with a single '.'");
 				}
 				return 0;
 			}
@@ -724,7 +701,7 @@ uriIsIPv4 (const char* s, int size, char** err)
 
 			if (*(s + i) == '.') {
 				if (err) {
-					_laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : can't have successive '.'");
+					laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : can't have successive '.'");
 				}
 				return 0;
 			}
@@ -740,14 +717,14 @@ uriIsIPv4 (const char* s, int size, char** err)
 				int octet = atoi (currentOctetStart);
 				if (octet > 255) {
 					if (err) {
-						_laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : octet %i is too high : %.*s", (octets), (int)((s + i) - currentOctetStart), currentOctetStart);
+						laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : octet %i is too high : %.*s", (octets), (int)((s + i) - currentOctetStart), currentOctetStart);
 					}
 					return 0;
 				}
 
 				if (i + 1 == size) {
 					if (err) {
-						_laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : can't end with a single '.'");
+						laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : can't end with a single '.'");
 					}
 					return 0;
 				}
@@ -763,20 +740,20 @@ uriIsIPv4 (const char* s, int size, char** err)
 		}
 
 		if (err) {
-			_laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : illegal char '%c' (0x%02x)", *(s + i), *(s + i));
+			laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : illegal char '%c' (0x%02x)", *(s + i), *(s + i));
 		}
 		return 0;
 	}
 
 	if (octets > 4) {
 		if (err) {
-			_laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : too many octets");
+			laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : too many octets");
 		}
 		return 0;
 	}
 	if (octets < 4) {
 		if (err) {
-			_laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : not enough octets");
+			laaf_util_snprintf_realloc (err, NULL, 0, "IPV4 parser error : not enough octets");
 		}
 		return 0;
 	}
@@ -784,8 +761,8 @@ uriIsIPv4 (const char* s, int size, char** err)
 	return 1;
 }
 
-int
-uriIsIPv6 (const char* s, int size, char** err)
+static int
+uriIsIPv6 (const char* s, size_t size, char** err)
 {
 	int segmentCount      = 0;
 	int emptySegmentCount = 0;
@@ -798,7 +775,7 @@ uriIsIPv6 (const char* s, int size, char** err)
 
 	char prev = 0;
 
-	for (int i = 0; i <= size; i++) {
+	for (size_t i = 0; i <= size; i++) {
 		if (prev == 0) {
 			if (IS_HEX (*(s + i))) {
 				segmentCount++;
@@ -826,7 +803,7 @@ uriIsIPv6 (const char* s, int size, char** err)
 
 			if (*(s + i) == ':') {
 				if (err) {
-					_laaf_util_snprintf_realloc (err, NULL, 0, "can't start with a single ':'");
+					laaf_util_snprintf_realloc (err, NULL, 0, "can't start with a single ':'");
 				}
 				return 0;
 			}
@@ -852,11 +829,11 @@ uriIsIPv6 (const char* s, int size, char** err)
 				int octet = atoi (curSegmentStart);
 				if (octet > 255) {
 					if (err) {
-						_laaf_util_snprintf_realloc (err, NULL, 0, "ipv4 portion octet %i is too high : %.*s", (ipv4portion), curSegmentLength, curSegmentStart);
+						laaf_util_snprintf_realloc (err, NULL, 0, "ipv4 portion octet %i is too high : %.*s", (ipv4portion), curSegmentLength, curSegmentStart);
 					}
 					return 0;
 				}
-				// debug( "%i", octet );
+				// debug( L"%i", octet );
 				prev = 'p';
 				ipv4portion++;
 				continue;
@@ -865,7 +842,7 @@ uriIsIPv6 (const char* s, int size, char** err)
 			if (i == size || *(s + i) == ':') {
 				if (curSegmentLength > 4) {
 					if (err) {
-						_laaf_util_snprintf_realloc (err, NULL, 0, "segment %i is too long : %.*s", (segmentCount - 1), curSegmentLength, curSegmentStart);
+						laaf_util_snprintf_realloc (err, NULL, 0, "segment %i is too long : %.*s", (segmentCount - 1), curSegmentLength, curSegmentStart);
 					}
 					return 0;
 				}
@@ -879,7 +856,7 @@ uriIsIPv6 (const char* s, int size, char** err)
 					    i++;
 				} else if (i + 1 == size) {
 					if (err) {
-						_laaf_util_snprintf_realloc (err, NULL, 0, "can't end with a single ':'");
+						laaf_util_snprintf_realloc (err, NULL, 0, "can't end with a single ':'");
 					}
 					return 0;
 				} else {
@@ -910,7 +887,7 @@ uriIsIPv6 (const char* s, int size, char** err)
 
 			if (*(s + i) == ':') {
 				if (err) {
-					_laaf_util_snprintf_realloc (err, NULL, 0, "can't have more than two successive ':'");
+					laaf_util_snprintf_realloc (err, NULL, 0, "can't have more than two successive ':'");
 				}
 				return 0;
 			}
@@ -925,14 +902,14 @@ uriIsIPv6 (const char* s, int size, char** err)
 
 			if (*(s + i) == '.') {
 				if (err) {
-					_laaf_util_snprintf_realloc (err, NULL, 0, "can't have successive '.'");
+					laaf_util_snprintf_realloc (err, NULL, 0, "can't have successive '.'");
 				}
 				return 0;
 			}
 		}
 
 		if (prev == 'd') {
-			if (IS_DIGIT (*(s + i))) {
+			if (IS_DIGIT (*(s + i)) && *(s + i + 1) != '\0' && i + 1 != size) {
 				prev = 'd';
 				continue;
 			}
@@ -941,16 +918,16 @@ uriIsIPv6 (const char* s, int size, char** err)
 				int octet = atoi (curSegmentStart);
 				if (octet > 255) {
 					if (err) {
-						_laaf_util_snprintf_realloc (err, NULL, 0, "ipv4 portion octet %i is too high : %.*s", (ipv4portion), curSegmentLength, curSegmentStart);
+						laaf_util_snprintf_realloc (err, NULL, 0, "ipv4 portion octet %i is too high : %.*s", (ipv4portion), curSegmentLength, curSegmentStart);
 					}
 					return 0;
 				}
 
-				// debug( "%i", octet );
+				// debug( L"%i", octet );
 
 				if (i + 1 == size) {
 					if (err) {
-						_laaf_util_snprintf_realloc (err, NULL, 0, "can't end with a single '.'");
+						laaf_util_snprintf_realloc (err, NULL, 0, "can't end with a single '.'");
 					}
 					return 0;
 				}
@@ -966,43 +943,43 @@ uriIsIPv6 (const char* s, int size, char** err)
 		}
 
 		if (err) {
-			_laaf_util_snprintf_realloc (err, NULL, 0, "illegal char '%c' (0x%02x)", *(s + i), *(s + i));
+			laaf_util_snprintf_realloc (err, NULL, 0, "illegal char '%c' (0x%02x)", *(s + i), *(s + i));
 		}
 
 		return 0;
 	}
 
-	// debug( "segments : %i", segmentCount );
-	// debug( "empty segments : %i", emptySegmentCount );
-	// debug( "ipv4portion : %i", ipv4portion );
+	// debug( L"segments : %i", segmentCount );
+	// debug( L"empty segments : %i", emptySegmentCount );
+	// debug( L"ipv4portion : %i", ipv4portion );
 
 	if (ipv4portion > 4) {
 		if (err) {
-			_laaf_util_snprintf_realloc (err, NULL, 0, "too many octets in ipv4 portion");
+			laaf_util_snprintf_realloc (err, NULL, 0, "too many octets in ipv4 portion : %i", ipv4portion);
 		}
 		return 0;
 	}
 	if (ipv4portion > 0 && ipv4portion < 4) {
 		if (err) {
-			_laaf_util_snprintf_realloc (err, NULL, 0, "not enough octets in ipv4 portion");
+			laaf_util_snprintf_realloc (err, NULL, 0, "not enough octets in ipv4 portion : %i", ipv4portion);
 		}
 		return 0;
 	}
 	if (emptySegmentCount + (segmentCount / 2) + ipv4portion > 8) {
 		if (err) {
-			_laaf_util_snprintf_realloc (err, NULL, 0, "too many segments");
+			laaf_util_snprintf_realloc (err, NULL, 0, "too many segments");
 		}
 		return 0;
 	}
 
 	if (emptySegmentCount == 0 && (((ipv4portion / 2) + segmentCount) < 8)) {
 		if (err) {
-			_laaf_util_snprintf_realloc (err, NULL, 0, "not enough segments");
+			laaf_util_snprintf_realloc (err, NULL, 0, "not enough segments");
 		}
 		return 0;
 	}
 
-	// debug( "LOCALHOST >>>>>>> %i", loopback );
+	// debug( L"LOCALHOST >>>>>>> %i", loopback );
 
 	/*
 	 * 1: valid ipv6 address
@@ -1059,261 +1036,3 @@ _uri_scheme2schemeType (struct uri* uri)
 		uri->scheme_t = URI_SCHEME_T_UNKNOWN;
 	}
 }
-
-static int
-_laaf_util_snprintf_realloc (char** str, size_t* size, size_t offset, const char* format, ...)
-{
-	size_t tmpsize = 0;
-
-	if (!size) {
-		size = &tmpsize;
-	}
-
-	int     retval, needed;
-	va_list ap;
-
-	va_start (ap, format);
-
-	while (0 <= (retval = vsnprintf ((*str) + offset, (*size) - offset, format, ap)) && (int64_t) ((*size) - offset) < (needed = retval + 1)) {
-		va_end (ap);
-
-		*size *= 2;
-
-		if ((int64_t) ((*size) - offset) < needed)
-			*size = needed;
-
-		char* p = realloc (*str, *size);
-
-		if (p) {
-			*str = p;
-		} else {
-			free (*str);
-			*str  = NULL;
-			*size = 0;
-			return -1;
-		}
-
-		va_start (ap, format);
-	}
-
-	va_end (ap);
-
-	return retval;
-}
-
-#ifdef BUILD_URI_TEST
-
-static int
-_uri_cmp (const struct uri* a, const struct uri* b)
-{
-	int differenciesCount = 0;
-
-	if (a == NULL || b == NULL) {
-		return -1;
-	}
-
-	// if ( (strcmp((a->scheme) ? a->scheme : "", (b->scheme) ? b->scheme : "") != 0 ) ) {
-	//   differenciesCount++;
-	// }
-	if ((strcmp ((a->userinfo) ? a->userinfo : "", (b->userinfo) ? b->userinfo : "") != 0)) {
-		differenciesCount++;
-	}
-	if ((strcmp ((a->user) ? a->user : "", (b->user) ? b->user : "") != 0)) {
-		differenciesCount++;
-	}
-	if ((strcmp ((a->pass) ? a->pass : "", (b->pass) ? b->pass : "") != 0)) {
-		differenciesCount++;
-	}
-	if ((strcmp ((a->host) ? a->host : "", (b->host) ? b->host : "") != 0)) {
-		differenciesCount++;
-	}
-	if ((strcmp ((a->path) ? a->path : "", (b->path) ? b->path : "") != 0)) {
-		differenciesCount++;
-	}
-	if ((strcmp ((a->query) ? a->query : "", (b->query) ? b->query : "") != 0)) {
-		differenciesCount++;
-	}
-	if ((strcmp ((a->fragment) ? a->fragment : "", (b->fragment) ? b->fragment : "") != 0)) {
-		differenciesCount++;
-	}
-	if (a->port != b->port) {
-		differenciesCount++;
-	}
-	if (a->scheme_t != b->scheme_t) {
-		differenciesCount++;
-	}
-	if (a->flags != b->flags) {
-		differenciesCount++;
-	}
-
-	return differenciesCount;
-}
-
-static void
-_uri_dump_diff (struct uri* a, struct uri* b, int totalDifferencies)
-{
-	int differenciesCount = 0;
-
-	if (a == NULL || b == NULL) {
-		return;
-	}
-
-	// if ( (strcmp((a->scheme) ? a->scheme : "", (b->scheme) ? b->scheme : "") != 0 ) ) {
-	//   printf("      \x1b[38;5;242m\u2502\x1b[0m   \x1b[38;5;124m%s .scheme : \"%s\" (expected: \"%s\")\n", (++differenciesCount < totalDifferencies) ? "\u251c\u2500\u2500\u25fb" : "\u2514\u2500\u2500\u25fb", a->scheme, b->scheme );
-	// }
-	if ((strcmp ((a->userinfo) ? a->userinfo : "", (b->userinfo) ? b->userinfo : "") != 0)) {
-		printf ("      \x1b[38;5;242m\u2502\x1b[0m   \x1b[38;5;124m%s .userinfo : \"%s\" (expected: \"%s\")\n", (++differenciesCount < totalDifferencies) ? "\u251c\u2500\u2500\u25fb" : "\u2514\u2500\u2500\u25fb", a->userinfo, b->userinfo);
-	}
-	if ((strcmp ((a->user) ? a->user : "", (b->user) ? b->user : "") != 0)) {
-		printf ("      \x1b[38;5;242m\u2502\x1b[0m   \x1b[38;5;124m%s .user : \"%s\" (expected: \"%s\")\n", (++differenciesCount < totalDifferencies) ? "\u251c\u2500\u2500\u25fb" : "\u2514\u2500\u2500\u25fb", a->user, b->user);
-	}
-	if ((strcmp ((a->pass) ? a->pass : "", (b->pass) ? b->pass : "") != 0)) {
-		printf ("      \x1b[38;5;242m\u2502\x1b[0m   \x1b[38;5;124m%s .pass : \"%s\" (expected: \"%s\")\n", (++differenciesCount < totalDifferencies) ? "\u251c\u2500\u2500\u25fb" : "\u2514\u2500\u2500\u25fb", a->pass, b->pass);
-	}
-	if ((strcmp ((a->host) ? a->host : "", (b->host) ? b->host : "") != 0)) {
-		printf ("      \x1b[38;5;242m\u2502\x1b[0m   \x1b[38;5;124m%s .host : \"%s\" (expected: \"%s\")\n", (++differenciesCount < totalDifferencies) ? "\u251c\u2500\u2500\u25fb" : "\u2514\u2500\u2500\u25fb", a->host, b->host);
-	}
-	if ((strcmp ((a->path) ? a->path : "", (b->path) ? b->path : "") != 0)) {
-		printf ("      \x1b[38;5;242m\u2502\x1b[0m   \x1b[38;5;124m%s .path : \"%s\" (expected: \"%s\")\n", (++differenciesCount < totalDifferencies) ? "\u251c\u2500\u2500\u25fb" : "\u2514\u2500\u2500\u25fb", a->path, b->path);
-	}
-	if ((strcmp ((a->query) ? a->query : "", (b->query) ? b->query : "") != 0)) {
-		printf ("      \x1b[38;5;242m\u2502\x1b[0m   \x1b[38;5;124m%s .query : \"%s\" (expected: \"%s\")\n", (++differenciesCount < totalDifferencies) ? "\u251c\u2500\u2500\u25fb" : "\u2514\u2500\u2500\u25fb", a->query, b->query);
-	}
-	if ((strcmp ((a->fragment) ? a->fragment : "", (b->fragment) ? b->fragment : "") != 0)) {
-		printf ("      \x1b[38;5;242m\u2502\x1b[0m   \x1b[38;5;124m%s .fragment : \"%s\" (expected: \"%s\")\n", (++differenciesCount < totalDifferencies) ? "\u251c\u2500\u2500\u25fb" : "\u2514\u2500\u2500\u25fb", a->fragment, b->fragment);
-	}
-
-	if (a->port != b->port) {
-		printf ("      \x1b[38;5;242m\u2502\x1b[0m   \x1b[38;5;124m%s .port : %i (expected: %i)\n", (++differenciesCount < totalDifferencies) ? "\u251c\u2500\u2500\u25fb" : "\u2514\u2500\u2500\u25fb", a->port, b->port);
-	}
-	if (a->scheme_t != b->scheme_t) {
-		printf ("      \x1b[38;5;242m\u2502\x1b[0m   \x1b[38;5;124m%s .scheme_t : %i (expected: %i)\n", (++differenciesCount < totalDifferencies) ? "\u251c\u2500\u2500\u25fb" : "\u2514\u2500\u2500\u25fb", a->scheme_t, b->scheme_t);
-	}
-	if (a->flags != b->flags) {
-		printf ("      \x1b[38;5;242m\u2502\x1b[0m   \x1b[38;5;124m%s .flags : %i (expected: %i)\n", (++differenciesCount < totalDifferencies) ? "\u251c\u2500\u2500\u25fb" : "\u2514\u2500\u2500\u25fb", a->flags, b->flags);
-	}
-}
-
-static int
-_uri_test (const char* uristr, enum uri_option optflags, struct uri expectedRes, int line)
-{
-	struct uri* uri = uriParse (uristr, optflags);
-
-	int differenciesCount = 0;
-
-	if ((differenciesCount = _uri_cmp (uri, &expectedRes)) == 0) {
-		printf ("\x1b[38;5;242m"); // dark gray
-		printf ("%05i", line);
-		printf ("\x1b[0m");
-
-		printf ("\x1b[38;5;242m %s \x1b[0m", "\u2502");
-
-		printf ("\x1b[38;5;120m"); // green
-		printf ("[ok] ");
-		printf ("\x1b[0m");
-
-		printf ("\x1b[38;5;242m"); // dark gray
-		printf ("%s", uristr);
-		printf ("\x1b[0m");
-
-		printf ("\n");
-	} else {
-		printf ("\x1b[38;5;124m"); // red
-		printf ("%05i", line);
-		printf ("\x1b[0m");
-
-		printf ("\x1b[38;5;242m %s \x1b[0m", "\u2502");
-
-		printf ("\x1b[38;5;124m"); // red
-		printf ("[er] ");
-		printf ("\x1b[0m");
-
-		printf ("\x1b[38;5;242m"); // dark gray
-		printf ("%s", uristr);
-		printf ("\x1b[0m");
-
-		printf ("\n");
-
-		printf ("\x1b[38;5;124m"); // red
-		_uri_dump_diff (uri, &expectedRes, differenciesCount);
-		printf ("\x1b[0m");
-
-		printf ("      \x1b[38;5;242m\u2502\x1b[0m\n");
-	}
-
-	uriFree (uri);
-
-	return differenciesCount;
-}
-
-int
-main (void)
-{
-	int rc = 0;
-
-	// rc += _uri_test( "", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_UNKNOWN, .host = NULL, .port = 0, .path = NULL, .query = NULL, .fragment = NULL }, __LINE__ );
-	rc += _uri_test ("https://www.server.com", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = NULL, .query = NULL, .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://user:pass@www.server.com", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .userinfo = "user:pass", .user = "user", .pass = "pass", .host = "www.server.com", .port = 0, .path = NULL, .query = NULL, .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("HTTPS://www.server.com", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = NULL, .query = NULL, .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("hTtPs://www.server.com", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = NULL, .query = NULL, .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com:8080", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 8080, .path = NULL, .query = NULL, .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com:8080?foo=bar", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 8080, .path = NULL, .query = "foo=bar", .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com:8080#anchor", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 8080, .path = NULL, .query = NULL, .fragment = "anchor", .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com/", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = "/", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com/?foo=bar", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = "/", .query = "foo=bar", .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com/////?foo=bar", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = "/", .query = "foo=bar", .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com///////", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = "/", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com?foo=bar", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = NULL, .query = "foo=bar", .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com#anchor", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = NULL, .query = NULL, .fragment = "anchor", .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com/path/to/file.html?foo=bar&foo2=bar2#anchor", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = "/path/to/file.html", .query = "foo=bar&foo2=bar2", .fragment = "anchor", .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com:80/", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 80, .path = "/", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com:/", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = "/", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com:", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = "", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-
-	rc += _uri_test ("https://[8:3:1:2:1234:5678::]:8080/ipv6", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "8:3:1:2:1234:5678::", .port = 8080, .path = "/ipv6", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_IPV6 }, __LINE__);
-	rc += _uri_test ("https://[2001:db8:0:85a3::ac1f:8001]:8080/ipv6", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "2001:db8:0:85a3::ac1f:8001", .port = 8080, .path = "/ipv6", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_IPV6 }, __LINE__);
-	rc += _uri_test ("https://user:pass@[2001:db8:3333:4444:5555:6666:1.2.3.4]:8080/ipv6", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .userinfo = "user:pass", .user = "user", .pass = "pass", .host = "2001:db8:3333:4444:5555:6666:1.2.3.4", .port = 8080, .path = "/ipv6", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_IPV6 }, __LINE__);
-	rc += _uri_test ("https://192.168.0.1:8080/ipv4", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "192.168.0.1", .port = 8080, .path = "/ipv4", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_IPV4 }, __LINE__);
-	rc += _uri_test ("https://127.0.0.1:8080/ipv4loopback", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "127.0.0.1", .port = 8080, .path = "/ipv4loopback", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_IPV4 | URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("https://localhost:8080/loopback", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "localhost", .port = 8080, .path = "/loopback", .query = NULL, .fragment = NULL, .flags = URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("https://[0:0:0:0:0:0:0:1]:8080/ipv6loopback", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "0:0:0:0:0:0:0:1", .port = 8080, .path = "/ipv6loopback", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_IPV6 | URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("https://[::0:0:0:1]:8080/ipv6loopback", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "::0:0:0:1", .port = 8080, .path = "/ipv6loopback", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_IPV6 | URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("https://[::0:0000:0:001]:8080/ipv6loopback", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "::0:0000:0:001", .port = 8080, .path = "/ipv6loopback", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_IPV6 | URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("https://[::1]:8080/ipv6loopback", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "::1", .port = 8080, .path = "/ipv6loopback", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_IPV6 | URI_T_LOCALHOST }, __LINE__);
-
-	rc += _uri_test ("https://user:pass@192.168.0.1:8080/ipv4", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .userinfo = "user:pass", .user = "user", .pass = "pass", .host = "192.168.0.1", .port = 8080, .path = "/ipv4", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_IPV4 }, __LINE__);
-
-	rc += _uri_test ("file://///C:/windows/path", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_FILE, .host = NULL, .port = 0, .path = "C:/windows/path", .query = NULL, .fragment = NULL, .flags = URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("file:C:/windows/path", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_FILE, .host = NULL, .port = 0, .path = "C:/windows/path", .query = NULL, .fragment = NULL, .flags = URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("file:/C:/windows/path", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_FILE, .host = NULL, .port = 0, .path = "C:/windows/path", .query = NULL, .fragment = NULL, .flags = URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("file:///C:/windows/path", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_FILE, .host = NULL, .port = 0, .path = "C:/windows/path", .query = NULL, .fragment = NULL, .flags = URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("file://?/C:/windows/path", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_FILE, .host = NULL, .port = 0, .path = "C:/windows/path", .query = NULL, .fragment = NULL, .flags = URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("file://./C:/windows/path", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_FILE, .host = NULL, .port = 0, .path = "C:/windows/path", .query = NULL, .fragment = NULL, .flags = URI_T_LOCALHOST }, __LINE__);
-
-	// Examples from AAF files external essences
-	rc += _uri_test ("file:///C:/Users/username/Downloads/441-16b.wav", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_FILE, .host = NULL, .port = 0, .path = "C:/Users/username/Downloads/441-16b.wav", .query = NULL, .fragment = NULL, .flags = URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("file://?/E:/ADPAAF/Sequence A Rendu.mxf", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_FILE, .host = NULL, .port = 0, .path = "E:/ADPAAF/Sequence A Rendu.mxf", .query = NULL, .fragment = NULL, .flags = URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("file:////C:/Users/username/Desktop/TEST2977052.aaf", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_FILE, .host = NULL, .port = 0, .path = "C:/Users/username/Desktop/TEST2977052.aaf", .query = NULL, .fragment = NULL, .flags = URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("file://localhost/Users/username/Music/fonk_2_3#04.wav", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_FILE, .host = "localhost", .port = 0, .path = "/Users/username/Music/fonk_2_3#04.wav", .query = NULL, .fragment = NULL, .flags = URI_T_LOCALHOST }, __LINE__);
-	rc += _uri_test ("file://10.87.230.71/mixage/DR2/Avid MediaFiles/MXF/1/3572607.mxf", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_FILE, .host = "10.87.230.71", .port = 0, .path = "/mixage/DR2/Avid MediaFiles/MXF/1/3572607.mxf", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_IPV4 }, __LINE__);
-	rc += _uri_test ("file:///_system/Users/username/pt2MCCzmhsFRHQgdgsTMQX.mxf", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_FILE, .host = NULL, .port = 0, .path = "/_system/Users/username/pt2MCCzmhsFRHQgdgsTMQX.mxf", .query = NULL, .fragment = NULL, .flags = URI_T_LOCALHOST }, __LINE__);
-
-	// URL Percent Decoding
-	rc += _uri_test ("https://www.server.com/NON_DECODING/%C2%B0%2B%29%3D%C5%93%21%3A%3B%2C%3F.%2F%C2%A7%C3%B9%2A%24%C2%B5%C2%A3%7D%5D%E2%80%9C%23%7B%5B%7C%5E%40%5D%3C%3E", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = "/NON_DECODING/%C2%B0%2B%29%3D%C5%93%21%3A%3B%2C%3F.%2F%C2%A7%C3%B9%2A%24%C2%B5%C2%A3%7D%5D%E2%80%9C%23%7B%5B%7C%5E%40%5D%3C%3E", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com/DECODING/%C2%B0%2B%29%3D%C5%93%21%3A%3B%2C%3F.%2F%C2%A7%C3%B9%2A%24%C2%B5%C2%A3%7D%5D%E2%80%9C%23%7B%5B%7C%5E%40%5D%3C%3E", URI_OPT_DECODE_ALL, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .host = "www.server.com", .port = 0, .path = "/DECODING/°+)=œ!:;,?./§ù*$µ£}]“#{[|^@]<>", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-	rc += _uri_test ("https://www.server.com/DECODING_UTF8/%E3%82%B5%E3%83%B3%E3%83%97%E3%83%AB%E7%B2%BE%E5%BA%A6%E7%B7%A8%E9%9B%86", URI_OPT_DECODE_ALL, (struct uri){ .scheme_t = URI_SCHEME_T_HTTPS, .userinfo = NULL, .user = NULL, .pass = NULL, .host = "www.server.com", .port = 0, .path = "/DECODING_UTF8/サンプル精度編集", .query = NULL, .fragment = NULL, .flags = URI_T_HOST_REGNAME }, __LINE__);
-
-	// Examples from https://en.wikipedia.org/wiki/Uniform_Resource_Identifier
-	rc += _uri_test ("tel:+1-816-555-1212", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_TEL, .userinfo = NULL, .user = NULL, .pass = NULL, .host = NULL, .port = 0, .path = "+1-816-555-1212", .query = NULL, .fragment = NULL, .flags = 0 }, __LINE__);
-	rc += _uri_test ("mailto:John.Doe@example.com", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_MAILTO, .userinfo = NULL, .user = NULL, .pass = NULL, .host = NULL, .port = 0, .path = "John.Doe@example.com", .query = NULL, .fragment = NULL, .flags = 0 }, __LINE__);
-	rc += _uri_test ("urn:oasis:names:specification:docbook:dtd:xml:4.1.2", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_UNKNOWN, .userinfo = NULL, .user = NULL, .pass = NULL, .host = NULL, .port = 0, .path = "oasis:names:specification:docbook:dtd:xml:4.1.2", .query = NULL, .fragment = NULL, .flags = 0 }, __LINE__);
-	rc += _uri_test ("ldap://[2001:db8::7]/c=GB?objectClass?one", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_UNKNOWN, .userinfo = NULL, .user = NULL, .pass = NULL, .host = "2001:db8::7", .port = 0, .path = "/c=GB", .query = "objectClass?one", .fragment = NULL, .flags = URI_T_HOST_IPV6 }, __LINE__);
-	rc += _uri_test ("news:comp.infosystems.www.servers.unix", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_UNKNOWN, .userinfo = NULL, .user = NULL, .pass = NULL, .host = NULL, .port = 0, .path = "comp.infosystems.www.servers.unix", .query = NULL, .fragment = NULL, .flags = 0 }, __LINE__);
-
-	// rc += _uri_test( "xxxxxxxx", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_UNKNOWN, .userinfo = NULL, .user = NULL, .pass = NULL, .host = NULL, .port = 0, .path = NULL, .query = NULL, .fragment = NULL, .flags = 0 }, __LINE__ );
-	// rc += _uri_test( "xxxxxxxx", URI_OPT_NONE, (struct uri){ .scheme_t = URI_SCHEME_T_UNKNOWN, .userinfo = NULL, .user = NULL, .pass = NULL, .host = NULL, .port = 0, .path = NULL, .query = NULL, .fragment = NULL, .flags = 0 }, __LINE__ );
-
-	return rc;
-}
-
-#endif // BUILD_URI_TEST

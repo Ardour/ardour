@@ -234,7 +234,6 @@ private:
 
 	void scroller_drag_data_received (const Glib::RefPtr<Gdk::DragContext>&, int, int, const Gtk::SelectionData&, guint, guint);
 	bool strip_scroller_button_event (GdkEventButton*);
-	bool masters_scroller_button_release (GdkEventButton*);
 	void scroll_left ();
 	void scroll_right ();
 	void vca_scroll_left ();
@@ -436,6 +435,8 @@ private:
 	void monitor_section_going_away ();
 	void monitor_section_attached ();
 	void monitor_section_detached ();
+
+	void sync_surround_action ();
 
 	enum PluginListMode {
 		PLM_Favorite,

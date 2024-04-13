@@ -109,7 +109,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	number_label.set_alignment (.5, .5);
 	number_label.set_fallthrough_to_parent (true);
 	number_label.set_inactive_color (_vca->presentation_info().color ());
-	number_label.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::number_button_press), false);
+	number_label.signal_button_press_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::number_button_press), false);
 
 	update_bottom_padding ();
 
@@ -119,6 +119,7 @@ VCAMasterStrip::VCAMasterStrip (Session* s, std::shared_ptr<VCA> v)
 	vertical_button.set_angle (90);
 	vertical_button.set_layout_font (UIConfiguration::instance().get_NormalBoldFont());
 	vertical_button.signal_button_press_event().connect (sigc::ptr_fun (&no_propagate), false);
+	vertical_button.signal_button_press_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vertical_button_press), false);
 	vertical_button.signal_button_release_event().connect (sigc::mem_fun (*this, &VCAMasterStrip::vertical_button_release), false);
 	vertical_button.set_fallthrough_to_parent (true);
 	vertical_button.set_active_color (_vca->presentation_info().color ());
@@ -335,7 +336,7 @@ VCAMasterStrip::solo_release (GdkEventButton*)
 	   is redundant, but clear.
 	*/
 	_vca->solo_control()->set_value (_vca->solo_control()->self_soloed() ? 0.0 : 1.0, Controllable::NoGroup);
-	return true;
+	return false;
 }
 
 bool
@@ -345,7 +346,7 @@ VCAMasterStrip::mute_release (GdkEventButton*)
 	   is redundant, but clear.
 	*/
 	_vca->mute_control()->set_value (_vca->mute_control()->muted_by_self() ? 0.0 : 1.0, Controllable::NoGroup);
-	return true;
+	return false;
 }
 
 void
@@ -390,12 +391,8 @@ VCAMasterStrip::solo_changed ()
 }
 
 bool
-VCAMasterStrip::vertical_button_release (GdkEventButton* ev)
-{
-	if (ev->button == 1 && ev->type == GDK_2BUTTON_PRESS) {
-		start_name_edit ();
-		return true;
-	}
+VCAMasterStrip::vertical_button_press (GdkEventButton* ev)
+{	
 
 	if (Keyboard::is_context_menu_event (ev)) {
 		if (!context_menu) {
@@ -405,16 +402,28 @@ VCAMasterStrip::vertical_button_release (GdkEventButton* ev)
 		return true;
 	}
 
+	return false;
+}
+
+bool
+VCAMasterStrip::vertical_button_release (GdkEventButton* ev)
+{
+
 	if (ev->button == 1) {
 		spill ();
 	}
 
-	return true;
+	return false;
 }
 
 bool
 VCAMasterStrip::number_button_press (GdkEventButton* ev)
 {
+	if (ev->type == GDK_2BUTTON_PRESS) {
+		start_color_edit ();
+		return true;
+	}
+
 	if (Keyboard::is_context_menu_event (ev)) {
 		if (!context_menu) {
 			build_context_menu ();

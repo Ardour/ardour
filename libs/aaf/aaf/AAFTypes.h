@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Adrien Gesta-Fline
+ * Copyright (C) 2017-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -184,6 +184,8 @@ typedef struct _aafUID_t {
 
 static const aafUID_t AUID_NULL = { 0x00000000, 0x0000, 0x0000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
 
+static const aafUID_t AAFUID_NULL = { 0x00000000, 0x0000, 0x0000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
+
 typedef struct _aafMobID_t {
 	uint8_t  SMPTELabel[12]; // 12-bytes of label prefix
 	uint8_t  length;
@@ -193,6 +195,8 @@ typedef struct _aafMobID_t {
 	aafUID_t material; // 16 bytes
 
 } aafMobID_t; // 32 bytes total
+
+static const aafMobID_t AAFMOBID_NULL = { { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 }, 0x00, 0x00, 0x00, 0x00, { 0x00000000, 0x0000, 0x0000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } } };
 
 typedef struct _aafIndirect_t {
 	/*
@@ -366,8 +370,6 @@ typedef struct _aafRGBAComponent_t {
 } aafRGBAComponent_t;
 
 //typedef aafRGBAComponent_t aafRGBALayout[8];
-
-static const aafUID_t AAFUID_NULL = { 0x00000000, 0x0000, 0x0000, { 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00 } };
 
 /**
  * This structure map the first bytes in a **properties** stream

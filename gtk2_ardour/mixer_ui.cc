@@ -350,13 +350,12 @@ Mixer_UI::Mixer_UI ()
 
 	vca_scroller_base.add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK);
 	vca_scroller_base.set_name (X_("MixerWindow"));
-	vca_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::masters_scroller_button_release), false);
+	vca_scroller_base.signal_button_press_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
+	vca_scroller_base.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
 
 	vca_hpacker.signal_scroll_event().connect (sigc::mem_fun (*this, &Mixer_UI::on_vca_scroll_event), false);
 	vca_scroller.add (vca_hpacker);
 	vca_scroller.set_policy (Gtk::POLICY_ALWAYS, Gtk::POLICY_AUTOMATIC);
-	vca_scroller.signal_button_press_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
-	vca_scroller.signal_button_release_event().connect (sigc::mem_fun(*this, &Mixer_UI::strip_scroller_button_event));
 
 	vca_vpacker.pack_start (vca_scroller, true, true);
 
@@ -540,19 +539,6 @@ Mixer_UI::remove_master (VCAMasterStrip* vms)
 	}
 }
 
-bool
-Mixer_UI::masters_scroller_button_release (GdkEventButton* ev)
-{
-	using namespace Menu_Helpers;
-
-	if (Keyboard::is_context_menu_event (ev)) {
-		ARDOUR_UI::instance()->add_route ();
-		return true;
-	}
-
-	return false;
-}
-
 void
 Mixer_UI::new_masters_created ()
 {
@@ -602,6 +588,8 @@ Mixer_UI::add_stripables (StripableList& slist)
 		nroutes++;
 
 		// XXX what does this special case do?
+		// A: it inserts the new track at the correct point in the model
+		// uness it's the the first (after master-bus, which is not in Mixbus track-model)
 		if (s->presentation_info().order() == (slist.front()->presentation_info().order() + slist.size())) {
 			insert_iter = it;
 			break;
@@ -730,7 +718,7 @@ Mixer_UI::add_stripables (StripableList& slist)
 	track_display.set_model (track_model);
 
 	if (!from_scratch) {
-		sync_presentation_info_from_treeview ();
+		sync_treeview_from_presentation_info (Properties::order);
 	}
 
 	redisplay_track_list ();
@@ -1325,6 +1313,7 @@ Mixer_UI::set_session (Session* sess)
 	_session->config.ParameterChanged.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::parameter_changed, this, _1), gui_context());
 	_session->DirtyChanged.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_title, this), gui_context());
 	_session->StateSaved.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::update_title, this), gui_context());
+	_session->SurroundMasterAddedOrRemoved.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::sync_surround_action, this), gui_context());
 
 	_session->vca_manager().VCAAdded.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::add_masters, this, _1), gui_context());
 	_session->vca_manager().VCACreated.connect (_session_connections, invalidator (*this), boost::bind (&Mixer_UI::new_masters_created, this), gui_context());
@@ -4419,6 +4408,22 @@ Mixer_UI::toggle_surround_master ()
 	}
 
 	have_sm = _session->surround_master () != nullptr;
+
+	act->set_active (have_sm);
+
+	Glib::RefPtr<Action> surround_export = ActionManager::get_action (X_("Main"), X_("SurroundExport"));
+	surround_export->set_sensitive (have_sm && _session->vapor_export_barrier ());
+}
+
+void
+Mixer_UI::sync_surround_action ()
+{
+	RefPtr<ToggleAction> act = ActionManager::get_toggle_action (X_("Mixer"), "ToggleSurroundMaster");
+	if (_session->config.get_use_surround_master () == act->get_active ()) {
+		return;
+	}
+
+	bool have_sm = _session->surround_master () != nullptr;
 
 	act->set_active (have_sm);
 

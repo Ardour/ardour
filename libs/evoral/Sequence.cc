@@ -1069,8 +1069,17 @@ Sequence<Time>::append_note_off_unlocked (const Event<Time>& ev)
 	}
 
 	if (!resolved) {
-		cerr << this << " spurious note off chan " << (int)ev.channel()
-		     << ", note " << (int)ev.note() << " @ " << ev.time() << endl;
+		/* No corresponding note-on for this note-off. Instead of
+		   assuming that it is a spurious note off, assume that the
+		   note-on occured before capture began.
+
+		   Insert a new note-on event that starts at zero and ends when
+		   this note-off was received.
+		*/
+		/* Can there any better guess at the velocity value ? */
+		NotePtr note (new Note<Time> (ev.channel(), Time(), ev.time(), ev.note(), 64));
+		note->set_off_velocity (ev.velocity());
+		add_note_unlocked (note);
 	}
 }
 

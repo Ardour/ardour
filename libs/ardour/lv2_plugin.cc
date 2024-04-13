@@ -1216,12 +1216,13 @@ LV2Plugin::midnam_model () {
 }
 
 int
-LV2Plugin::setup_export (const char* fn)
+LV2Plugin::setup_export (const char* fn, LV2_Options_Option const* options)
 {
 	if (!_export_interface) {
 		return -1;
 	}
-	return _export_interface->setup ((void*)_impl->instance->lv2_handle, fn, NULL);
+
+	return _export_interface->setup ((void*)_impl->instance->lv2_handle, fn, options);
 }
 
 int
@@ -1855,7 +1856,7 @@ LV2Plugin::write_to(RingBuffer<uint8_t>* dest,
 		return false;
 	}
 
-	vector<uint8_t> buf(buf_size);
+	uint8_t* buf = (uint8_t*) g_alloca (sizeof (uint8_t) * buf_size);
 	UIMessage* msg = (UIMessage*)&buf[0];
 	msg->index    = index;
 	msg->protocol = protocol;

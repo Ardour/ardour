@@ -44,12 +44,6 @@ def build_ardour_util(bld, util):
     obj.uselib       += ' AUDIOUNITS OSX LO '
     obj.uselib       += ' FFTW3F LO TAGLIB LILV RUBBERBAND AUBIO LRDF ARCHIVE VAMPSDK VAMPHOSTSDK'
 
-    if util == "new_aaf_session":
-        if bld.is_defined('USE_EXTERNAL_LIBS'):
-            obj.uselib += ' LIBAAF'
-        else:
-            obj.use.extend (['libaaf'])
-
     if bld.is_defined('HAVE_SUIL'):
         if bld.is_defined('YTK'):
             obj.use += [ 'libsuil' ]

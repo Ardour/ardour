@@ -1,2 +1,2 @@
 #pragma once
-#define LIBAAF_VERSION "v0.5-2-g4dfb754"
+#define LIBAAF_VERSION "v1.0-10-g13f0b0a"

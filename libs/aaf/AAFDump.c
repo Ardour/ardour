@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Adrien Gesta-Fline
+ * Copyright (C) 2017-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -21,68 +21,134 @@
 #include <stdio.h>
 #include <string.h>
 
+#include "aaf/AAFDefs/AAFClassDefUIDs.h"
+#include "aaf/AAFDefs/AAFPropertyIDs.h"
+#include "aaf/AAFDefs/AAFTypeDefUIDs.h"
 #include "aaf/AAFDump.h"
 #include "aaf/AAFToText.h"
 #include "aaf/AAFTypes.h"
 
-#include "aaf/AAFClass.h"
 #include "aaf/utils.h"
 
+#include "aaf/AAFClass.h"
+
 void
-aaf_dump_Header (AAF_Data* aafd)
+aaf_dump_Header (AAF_Data* aafd, const char* padding)
 {
-	struct dbg* dbg = aafd->dbg;
+	struct aafLog* log = aafd->log;
 
-	DBG_BUFFER_WRITE (dbg, " ByteOrder            : %ls (0x%04x)\n", aaft_ByteOrderToText (aafd->Header.ByteOrder), aafd->Header.ByteOrder);
-	DBG_BUFFER_WRITE (dbg, " LastModified         : %ls\n", aaft_TimestampToText (aafd->Header.LastModified));
-	DBG_BUFFER_WRITE (dbg, " AAF ObjSpec Version  : %ls\n", aaft_VersionToText (aafd->Header.Version));
-	DBG_BUFFER_WRITE (dbg, " ObjectModel Version  : %u\n", aafd->Header.ObjectModelVersion);
-	DBG_BUFFER_WRITE (dbg, " Operational Pattern  : %ls\n", aaft_OPDefToText (aafd->Header.OperationalPattern));
+	LOG_BUFFER_WRITE (log, "%sByteOrder            : %s%s (0x%04x)%s\n", padding, ANSI_COLOR_DARKGREY (log), aaft_ByteOrderToText (aafd->Header.ByteOrder), aafd->Header.ByteOrder, ANSI_COLOR_RESET (log));
+	LOG_BUFFER_WRITE (log, "%sLastModified         : %s%s%s\n", padding, ANSI_COLOR_DARKGREY (log), aaft_TimestampToText (aafd->Header.LastModified), ANSI_COLOR_RESET (log));
+	LOG_BUFFER_WRITE (log, "%sAAF ObjSpec Version  : %s%s%s\n", padding, ANSI_COLOR_DARKGREY (log), aaft_VersionToText (aafd->Header.Version), ANSI_COLOR_RESET (log));
+	LOG_BUFFER_WRITE (log, "%sObjectModel Version  : %s%u%s\n", padding, ANSI_COLOR_DARKGREY (log), aafd->Header.ObjectModelVersion, ANSI_COLOR_RESET (log));
+	LOG_BUFFER_WRITE (log, "%sOperational Pattern  : %s%s%s\n", padding, ANSI_COLOR_DARKGREY (log), aaft_OPDefToText (aafd->Header.OperationalPattern), ANSI_COLOR_RESET (log));
 
-	DBG_BUFFER_WRITE (dbg, "\n\n");
+	LOG_BUFFER_WRITE (log, "\n\n");
 
-	dbg->debug_callback (dbg, (void*)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
+	log->log_callback (log, (void*)aafd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 }
 
 void
-aaf_dump_Identification (AAF_Data* aafd)
+aaf_dump_Identification (AAF_Data* aafd, const char* padding)
 {
-	struct dbg* dbg = aafd->dbg;
+	struct aafLog* log = aafd->log;
 
-	DBG_BUFFER_WRITE (dbg, " CompanyName          : %ls\n", (aafd->Identification.CompanyName) ? aafd->Identification.CompanyName : L"n/a");
-	DBG_BUFFER_WRITE (dbg, " ProductName          : %ls\n", (aafd->Identification.ProductName) ? aafd->Identification.ProductName : L"n/a");
-	DBG_BUFFER_WRITE (dbg, " ProductVersion       : %ls\n", aaft_ProductVersionToText (aafd->Identification.ProductVersion));
-	DBG_BUFFER_WRITE (dbg, " ProductVersionString : %ls\n", (aafd->Identification.ProductVersionString) ? aafd->Identification.ProductVersionString : L"n/a");
-	DBG_BUFFER_WRITE (dbg, " ProductID            : %ls\n", AUIDToText (aafd->Identification.ProductID));
-	DBG_BUFFER_WRITE (dbg, " Date                 : %ls\n", aaft_TimestampToText (aafd->Identification.Date));
-	DBG_BUFFER_WRITE (dbg, " ToolkitVersion       : %ls\n", aaft_ProductVersionToText (aafd->Identification.ToolkitVersion));
-	DBG_BUFFER_WRITE (dbg, " Platform             : %ls\n", (aafd->Identification.Platform) ? aafd->Identification.Platform : L"n/a");
-	DBG_BUFFER_WRITE (dbg, " GenerationAUID       : %ls\n", AUIDToText (aafd->Identification.GenerationAUID));
+	LOG_BUFFER_WRITE (log, "%sCompanyName          : %s%s%s\n", padding, ANSI_COLOR_DARKGREY (log), (aafd->Identification.CompanyName) ? aafd->Identification.CompanyName : "n/a", ANSI_COLOR_RESET (log));
+	LOG_BUFFER_WRITE (log, "%sProductName          : %s%s%s\n", padding, ANSI_COLOR_DARKGREY (log), (aafd->Identification.ProductName) ? aafd->Identification.ProductName : "n/a", ANSI_COLOR_RESET (log));
+	LOG_BUFFER_WRITE (log, "%sProductVersion       : %s%s%s\n", padding, ANSI_COLOR_DARKGREY (log), aaft_ProductVersionToText (aafd->Identification.ProductVersion), ANSI_COLOR_RESET (log));
+	LOG_BUFFER_WRITE (log, "%sProductVersionString : %s%s%s\n", padding, ANSI_COLOR_DARKGREY (log), (aafd->Identification.ProductVersionString) ? aafd->Identification.ProductVersionString : "n/a", ANSI_COLOR_RESET (log));
+	LOG_BUFFER_WRITE (log, "%sProductID            : %s%s%s\n", padding, ANSI_COLOR_DARKGREY (log), AUIDToText (aafd->Identification.ProductID), ANSI_COLOR_RESET (log));
+	LOG_BUFFER_WRITE (log, "%sDate                 : %s%s%s\n", padding, ANSI_COLOR_DARKGREY (log), aaft_TimestampToText (aafd->Identification.Date), ANSI_COLOR_RESET (log));
+	LOG_BUFFER_WRITE (log, "%sToolkitVersion       : %s%s%s\n", padding, ANSI_COLOR_DARKGREY (log), aaft_ProductVersionToText (aafd->Identification.ToolkitVersion), ANSI_COLOR_RESET (log));
+	LOG_BUFFER_WRITE (log, "%sPlatform             : %s%s%s\n", padding, ANSI_COLOR_DARKGREY (log), (aafd->Identification.Platform) ? aafd->Identification.Platform : "n/a", ANSI_COLOR_RESET (log));
+	LOG_BUFFER_WRITE (log, "%sGenerationAUID       : %s%s%s\n", padding, ANSI_COLOR_DARKGREY (log), AUIDToText (aafd->Identification.GenerationAUID), ANSI_COLOR_RESET (log));
 
-	DBG_BUFFER_WRITE (dbg, "\n\n");
+	LOG_BUFFER_WRITE (log, "\n\n");
 
-	dbg->debug_callback (dbg, (void*)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
+	log->log_callback (log, (void*)aafd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 }
 
 void
-aaf_dump_ObjectProperty (AAF_Data* aafd, aafProperty* Prop)
+aaf_dump_ObjectProperty (AAF_Data* aafd, aafProperty* Prop, const char* padding)
 {
-	struct dbg* dbg = aafd->dbg;
+	struct aafLog* log = aafd->log;
 
 	if (Prop->def->meta) {
-		DBG_BUFFER_WRITE (dbg, " :.: %s(0x%04x) %ls%s (%ls)\n", ANSI_COLOR_YELLOW (dbg), Prop->pid, aaft_PIDToText (aafd, Prop->pid), ANSI_COLOR_RESET (dbg), aaft_StoredFormToText (Prop->sf) /*AUIDToText( &Prop->def->type ),*/ /*aaft_TypeIDToText( &(Prop->def->type) )*/);
+		LOG_BUFFER_WRITE (log, "%s%s[%s0x%04x%s] %s (%s)\n",
+		                  padding,
+		                  ANSI_COLOR_RESET (log),
+		                  ANSI_COLOR_MAGENTA (log),
+		                  Prop->pid,
+		                  ANSI_COLOR_RESET (log),
+		                  aaft_PIDToText (aafd, Prop->pid),
+		                  aaft_StoredFormToText (Prop->sf));
 	} else {
-		DBG_BUFFER_WRITE (dbg, " :.: (0x%04x) %ls (%ls)\n", Prop->pid, aaft_PIDToText (aafd, Prop->pid), aaft_StoredFormToText (Prop->sf) /*AUIDToText( &Prop->def->type ),*/ /*aaft_TypeIDToText( &(Prop->def->type) )*/);
+		LOG_BUFFER_WRITE (log, "%s%s[%s0x%04x%s] %s (%s)\n",
+		                  padding,
+		                  ANSI_COLOR_RESET (log),
+		                  ANSI_COLOR_DARKGREY (log),
+		                  Prop->pid,
+		                  ANSI_COLOR_RESET (log),
+		                  aaft_PIDToText (aafd, Prop->pid),
+		                  aaft_StoredFormToText (Prop->sf));
 	}
 
-	// WARNING : Wont print strong references (set/vector) corectly.
-	aafd->dbg->_dbg_msg_pos += laaf_util_dump_hex (Prop->val, Prop->len, &aafd->dbg->_dbg_msg, &aafd->dbg->_dbg_msg_size, aafd->dbg->_dbg_msg_pos);
+	int rc = laaf_util_dump_hex (Prop->val, Prop->len, &aafd->log->_msg, &aafd->log->_msg_size, aafd->log->_msg_pos, padding);
 
-	dbg->debug_callback (dbg, (void*)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
+	if (rc > 0) {
+		aafd->log->_msg_pos += (size_t)rc;
+	}
+
+	log->log_callback (log, (void*)aafd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 }
 
 void
-aaf_dump_ObjectProperties (AAF_Data* aafd, aafObject* Obj)
+aaf_dump_TaggedValueSet (AAF_Data* aafd, aafObject* ObjCollection, const char* padding)
+{
+	struct aafLog* log = aafd->log;
+
+	aafObject* Obj = NULL;
+
+	int i = 0;
+	AAF_foreach_ObjectInSet (&Obj, ObjCollection, NULL)
+	{
+		i++;
+
+		if (!aafUIDCmp (Obj->Class->ID, &AAFClassID_TaggedValue)) {
+			LOG_BUFFER_WRITE (log, "%s%sObject > %s\n",
+			                  padding,
+			                  ANSI_COLOR_RESET (log),
+			                  aaft_ClassIDToText (aafd, Obj->Class->ID));
+			continue;
+		}
+
+		char*          name     = aaf_get_propertyValue (Obj, PID_TaggedValue_Name, &AAFTypeID_String);
+		aafIndirect_t* indirect = aaf_get_propertyValue (Obj, PID_TaggedValue_Value, &AAFTypeID_Indirect);
+
+		LOG_BUFFER_WRITE (log, "%s%sTagged > Name: %s%s%s%*s      Value: %s(%s)%s %s%s%s%s%s\n",
+		                  padding,
+		                  ANSI_COLOR_RESET (log),
+		                  ANSI_COLOR_DARKGREY (log),
+		                  (name) ? name : "<unknown>",
+		                  ANSI_COLOR_RESET (log),
+		                  (name) ? (size_t) (34 - (int)strlen (name)) : (size_t) (34 - strlen ("<unknown>")), " ",
+		                  ANSI_COLOR_DARKGREY (log),
+		                  aaft_TypeIDToText (&indirect->TypeDef),
+		                  ANSI_COLOR_RESET (log),
+		                  ANSI_COLOR_DARKGREY (log),
+		                  (aafUIDCmp (&indirect->TypeDef, &AAFTypeID_String)) ? "\"" : "",
+		                  aaft_IndirectValueToText (aafd, indirect),
+		                  (aafUIDCmp (&indirect->TypeDef, &AAFTypeID_String)) ? "\"" : "",
+		                  ANSI_COLOR_RESET (log));
+
+		log->log_callback (log, (void*)aafd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
+
+		free (name);
+	}
+}
+
+void
+aaf_dump_ObjectProperties (AAF_Data* aafd, aafObject* Obj, const char* padding)
 {
 	/*
 	 *  List the properties once they have been parsed and interpreted by AAFCore.
@@ -91,20 +157,23 @@ aaf_dump_ObjectProperties (AAF_Data* aafd, aafObject* Obj)
 	aafProperty* Prop = NULL;
 
 	for (Prop = Obj->Properties; Prop != NULL; Prop = Prop->next) {
-		aaf_dump_ObjectProperty (aafd, Prop);
+		aaf_dump_ObjectProperty (aafd, Prop, padding);
 	}
 }
 
 void
-aaf_dump_rawProperties (AAF_Data* aafd, aafByte_t* propStream)
+aaf_dump_rawProperties (AAF_Data* aafd, aafByte_t* propStream, const char* padding)
 {
-	struct dbg* dbg = aafd->dbg;
+	struct aafLog* log = aafd->log;
 
 	if (propStream == NULL) {
-		DBG_BUFFER_WRITE (dbg,
-		                  " ## Property_Header____________________________________________________\n\n"
-		                  " aafPropertyIndexHeader_t is NULL\n"
-		                  " ======================================================================\n\n");
+		LOG_BUFFER_WRITE (log,
+		                  "%s## Property_Header____________________________________________________\n\n"
+		                  "%saafPropertyIndexHeader_t is NULL\n"
+		                  "%s======================================================================\n\n",
+		                  padding,
+		                  padding,
+		                  padding);
 		return;
 	}
 
@@ -115,53 +184,52 @@ aaf_dump_rawProperties (AAF_Data* aafd, aafByte_t* propStream)
 	memcpy (&Header, propStream, sizeof (aafPropertyIndexHeader_t));
 
 	uint32_t i           = 0;
-	uint32_t valueOffset = 0;
+	size_t   valueOffset = 0;
 
-	DBG_BUFFER_WRITE (dbg,
-	                  " ## Property_Header____________________________________________________\n\n"
-	                  " _byteOrder     : 0x%02x\n"
-	                  " _formatVersion : 0x%02x\n"
-	                  " _entryCount    : %u\n\n"
-	                  " ======================================================================\n\n",
-	                  Header._byteOrder,
-	                  Header._formatVersion,
-	                  Header._entryCount);
+	LOG_BUFFER_WRITE (log,
+	                  "%s## Property_Header____________________________________________________\n\n"
+	                  "%s_byteOrder     : %s0x%02x%s\n"
+	                  "%s_formatVersion : %s0x%02x%s\n"
+	                  "%s_entryCount    : %s%u%s\n\n"
+	                  "%s======================================================================\n\n",
+	                  padding,
+	                  padding, ANSI_COLOR_DARKGREY (log), Header._byteOrder, ANSI_COLOR_RESET (log),
+	                  padding, ANSI_COLOR_DARKGREY (log), Header._formatVersion, ANSI_COLOR_RESET (log),
+	                  padding, ANSI_COLOR_DARKGREY (log), Header._entryCount, ANSI_COLOR_RESET (log),
+	                  padding);
 
-	DBG_BUFFER_WRITE (dbg, "\n\n");
+	LOG_BUFFER_WRITE (log, "\n\n");
 
 	/*
 	 * Since the following for-loop macro is not intended to be user
 	 * accessible, it has been defined as a local macro in AAFCore.c.
 	 */
+	foreachPropertyEntry (propStream, Header, Prop, value, valueOffset, i)
+	{
+		LOG_BUFFER_WRITE (log,
+		                  "%s#%u Property_Entry_____________________________________________________\n"
+		                  "%s_pid        : %s0x%04x (%s)%s\n"
+		                  "%s_storedForm : %s%s%s\n"
+		                  "%s_length     : %s%u bytes%s\n",
+		                  padding, i,
+		                  padding, ANSI_COLOR_DARKGREY (log), Prop._pid, aaft_PIDToText (aafd, Prop._pid), ANSI_COLOR_RESET (log),
+		                  padding, ANSI_COLOR_DARKGREY (log), aaft_StoredFormToText (Prop._storedForm), ANSI_COLOR_RESET (log),
+		                  padding, ANSI_COLOR_DARKGREY (log), Prop._length, ANSI_COLOR_RESET (log));
 
-	// foreachPropertyEntry( Header, Prop, value, i )
-	for (valueOffset = sizeof (aafPropertyIndexHeader_t) + (Header._entryCount * sizeof (aafPropertyIndexEntry_t)),
-	    i            = 0;
-	     i < Header._entryCount &&
-	     memcpy (&Prop, (propStream + ((sizeof (aafPropertyIndexHeader_t)) + (sizeof (aafPropertyIndexEntry_t) * i))), sizeof (aafPropertyIndexEntry_t)) &&
-	     (value = propStream + valueOffset);
-	     valueOffset += Prop._length,
-	    i++) {
-		DBG_BUFFER_WRITE (dbg,
-		                  " #%u Property_Entry_____________________________________________________\n"
-		                  " _pid        : 0x%04x (%ls)\n"
-		                  " _storedForm : %ls\n"
-		                  " _length     : %u bytes\n",
-		                  i,
-		                  Prop._pid, aaft_PIDToText (aafd, Prop._pid),
-		                  aaft_StoredFormToText (Prop._storedForm),
-		                  Prop._length);
+		int rc = laaf_util_dump_hex (value, Prop._length, &aafd->log->_msg, &aafd->log->_msg_size, aafd->log->_msg_pos, padding);
 
-		aafd->dbg->_dbg_msg_pos += laaf_util_dump_hex (value, Prop._length, &aafd->dbg->_dbg_msg, &aafd->dbg->_dbg_msg_size, aafd->dbg->_dbg_msg_pos);
+		if (rc > 0) {
+			aafd->log->_msg_pos += (size_t)rc;
+		}
 
-		DBG_BUFFER_WRITE (dbg, "\n");
+		LOG_BUFFER_WRITE (log, "\n");
 	}
 
-	dbg->debug_callback (dbg, (void*)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
+	log->log_callback (log, (void*)aafd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 }
 
 void
-aaf_dump_nodeStreamProperties (AAF_Data* aafd, cfbNode* node)
+aaf_dump_nodeStreamProperties (AAF_Data* aafd, cfbNode* node, const char* padding)
 {
 	/*
 	 *  List the raw properties directly from a CFB Node's stream.
@@ -171,13 +239,13 @@ aaf_dump_nodeStreamProperties (AAF_Data* aafd, cfbNode* node)
 
 	cfb_getStream (aafd->cfbd, node, &propStream, NULL);
 
-	aaf_dump_rawProperties (aafd, propStream);
+	aaf_dump_rawProperties (aafd, propStream, padding);
 
 	free (propStream);
 }
 
 void
-aaf_dump_MetaDictionary (AAF_Data* aafd)
+aaf_dump_MetaDictionary (AAF_Data* aafd, const char* padding)
 {
 	/*
 	 *  NOTE Only dumps the "custom" classes/properties, since those are the only
@@ -185,7 +253,7 @@ aaf_dump_MetaDictionary (AAF_Data* aafd)
 	 *  wont be printed out.
 	 */
 
-	struct dbg* dbg = aafd->dbg;
+	struct aafLog* log = aafd->log;
 
 	aafClass* Class = NULL;
 
@@ -198,42 +266,42 @@ aaf_dump_MetaDictionary (AAF_Data* aafd)
 		foreachPropertyDefinition (PDef, Class->Properties)
 		{
 			if (Class->meta) {
-				DBG_BUFFER_WRITE (dbg, "%s%ls::%ls (0x%04x)%s\n",
-				                  ANSI_COLOR_YELLOW (dbg),
+				LOG_BUFFER_WRITE (log, "%s%s%s::%s (0x%04x)%s\n",
+				                  padding,
+				                  ANSI_COLOR_MAGENTA (log),
 				                  Class->name,
 				                  PDef->name,
 				                  PDef->pid,
-				                  ANSI_COLOR_RESET (dbg));
+				                  ANSI_COLOR_RESET (log));
 
 				print++;
 			} else if (PDef->meta) {
-				DBG_BUFFER_WRITE (dbg, "%ls::%s%ls (0x%04x)%s\n",
+				LOG_BUFFER_WRITE (log, "%s%s::%s%s (0x%04x)%s\n",
+				                  padding,
 				                  aaft_ClassIDToText (aafd, Class->ID),
-				                  ANSI_COLOR_YELLOW (dbg),
+				                  ANSI_COLOR_MAGENTA (log),
 				                  PDef->name,
 				                  PDef->pid,
-				                  ANSI_COLOR_RESET (dbg));
+				                  ANSI_COLOR_RESET (log));
 
 				print++;
 			}
 		}
 
 		if (print) {
-			DBG_BUFFER_WRITE (dbg, "\n");
+			LOG_BUFFER_WRITE (log, "\n");
 		}
-
-		print = 1;
 	}
 
-	DBG_BUFFER_WRITE (dbg, "\n\n");
+	LOG_BUFFER_WRITE (log, "\n\n");
 
-	dbg->debug_callback (dbg, (void*)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
+	log->log_callback (log, (void*)aafd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 }
 
 void
-aaf_dump_Classes (AAF_Data* aafd)
+aaf_dump_Classes (AAF_Data* aafd, const char* padding)
 {
-	struct dbg* dbg = aafd->dbg;
+	struct aafLog* log = aafd->log;
 
 	aafClass* ConcreteClass = NULL;
 	aafClass* Class         = NULL;
@@ -242,19 +310,21 @@ aaf_dump_Classes (AAF_Data* aafd)
 	{
 		foreachClassInheritance (Class, ConcreteClass)
 		{
-			DBG_BUFFER_WRITE (dbg, "%s%ls%s",
-			                  (Class->meta) ? ANSI_COLOR_YELLOW (dbg) : "",
+			LOG_BUFFER_WRITE (log, "%s%s%s%s",
+			                  padding,
+			                  (Class->meta) ? ANSI_COLOR_MAGENTA (log) : "",
 			                  aaft_ClassIDToText (aafd, Class->ID),
-			                  (Class->meta) ? ANSI_COLOR_RESET (dbg) : "");
+			                  (Class->meta) ? ANSI_COLOR_RESET (log) : "");
 
-			if (Class->Parent != NULL)
-				DBG_BUFFER_WRITE (dbg, " > ");
+			if (Class->Parent != NULL) {
+				LOG_BUFFER_WRITE (log, " > ");
+			}
 		}
 
-		DBG_BUFFER_WRITE (dbg, "\n");
+		LOG_BUFFER_WRITE (log, "\n");
 	}
 
-	DBG_BUFFER_WRITE (dbg, "\n\n");
+	LOG_BUFFER_WRITE (log, "\n\n");
 
-	dbg->debug_callback (dbg, (void*)aafd, DEBUG_SRC_ID_DUMP, 0, "", "", 0, dbg->_dbg_msg, dbg->user);
+	log->log_callback (log, (void*)aafd, LOG_SRC_ID_DUMP, 0, "", "", 0, log->_msg, log->user);
 }

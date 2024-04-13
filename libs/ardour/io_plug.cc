@@ -18,6 +18,7 @@
 #include <cassert>
 
 #include "pbd/types_convert.h"
+#include "pbd/unwind.h"
 #include "pbd/xml++.h"
 
 #include "temporal/tempo.h"
@@ -46,6 +47,7 @@ IOPlug::IOPlug (Session& s, std::shared_ptr<Plugin> p, bool pre)
 	, _plugin (p)
 	, _pre (pre)
 	, _plugin_signal_latency (0)
+	, _configuring_io (false)
 	, _window_proxy (0)
 {
 	_stat_reset.store (0);
@@ -57,6 +59,12 @@ IOPlug::IOPlug (Session& s, std::shared_ptr<Plugin> p, bool pre)
 	}
 	_input.reset (new IO (_session, io_name (), IO::Input));
 	_output.reset (new IO (_session, io_name (), IO::Output));
+
+	/* do not allow to add/remove ports (for now).
+	 * when adding ports _buf will needs to be resized.
+	 */
+	_input->PortCountChanging.connect_same_thread (*this, [this](ChanCount) { return !_configuring_io; });
+	_output->PortCountChanging.connect_same_thread (*this, [this](ChanCount) { return !_configuring_io; });
 }
 
 IOPlug::~IOPlug ()
@@ -380,6 +388,8 @@ IOPlug::ui_elements () const
 bool
 IOPlug::ensure_io ()
 {
+	PBD::Unwinder<bool> uw (_configuring_io, true);
+
 	/* must be called with process-lock held */
 	if (_input->ensure_io (_n_in, false, this) != 0) {
 		return false;

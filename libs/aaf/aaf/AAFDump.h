@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017-2023 Adrien Gesta-Fline
+ * Copyright (C) 2017-2024 Adrien Gesta-Fline
  *
  * This file is part of libAAF.
  *
@@ -26,27 +26,30 @@
 #include "aaf/LibCFB.h"
 
 void
-aaf_dump_Header (AAF_Data* aafd);
+aaf_dump_Header (AAF_Data* aafd, const char* padding);
 
 void
-aaf_dump_Identification (AAF_Data* aafd);
+aaf_dump_Identification (AAF_Data* aafd, const char* padding);
 
 void
-aaf_dump_rawProperties (AAF_Data* aafd, aafByte_t* propStream);
+aaf_dump_rawProperties (AAF_Data* aafd, aafByte_t* propStream, const char* padding);
 
 void
-aaf_dump_ObjectProperty (AAF_Data* aafd, aafProperty* Prop);
+aaf_dump_ObjectProperty (AAF_Data* aafd, aafProperty* Prop, const char* padding);
 
 void
-aaf_dump_ObjectProperties (AAF_Data* aafd, aafObject* Obj);
+aaf_dump_ObjectProperties (AAF_Data* aafd, aafObject* Obj, const char* padding);
 
 void
-aaf_dump_nodeStreamProperties (AAF_Data* aafd, cfbNode* node);
+aaf_dump_TaggedValueSet (AAF_Data* aafd, aafObject* ObjCollection, const char* padding);
 
 void
-aaf_dump_MetaDictionary (AAF_Data* aafd);
+aaf_dump_nodeStreamProperties (AAF_Data* aafd, cfbNode* node, const char* padding);
 
 void
-aaf_dump_Classes (AAF_Data* aafd);
+aaf_dump_MetaDictionary (AAF_Data* aafd, const char* padding);
+
+void
+aaf_dump_Classes (AAF_Data* aafd, const char* padding);
 
 #endif // ! __AAFDump_h__

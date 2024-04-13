@@ -54,7 +54,7 @@ protected:
 private:
 	Gtk::FileChooserButton target_folder_selector;
 	Gtk::Entry             name_entry;
-	Gtk::ComboBoxText      format_selector;
+	Gtk::Label             format_Label;
 	Gtk::ComboBoxText      encode_selector;
 	Gtk::ComboBoxText      compression_selector;
 	Gtk::CheckButton       only_used_checkbox;

@@ -108,14 +108,25 @@ public:
 		uint32_t surr_PosZ;
 		uint32_t surr_Size;
 		uint32_t surr_Snap;
+		uint32_t surr_ElevEn;
+		uint32_t surr_Zones;
+		uint32_t surr_Ramp;
 		uint32_t surr_Settings;
 		uint32_t surr_BinauralRenderMode;
 		uint32_t surr_ChannelCount;
+		uint32_t surr_ChannelDescription;
+		uint32_t surr_ChannelTypes;
+		uint32_t surr_ChannelBedIds;
+		uint32_t surr_ProgramData;
+		uint32_t surr_ContentFFOA;
+		uint32_t surr_ContentStart;
+		uint32_t surr_ContentFPS;
 		uint32_t surr_DownmixMode;
 		uint32_t surr_OutputFormat;
 		uint32_t surr_WarpMode;
 		uint32_t surr_ExportStart;
 		uint32_t surr_ExportStop;
+		uint32_t surr_ReferenceFile;
 #endif
 	};
 

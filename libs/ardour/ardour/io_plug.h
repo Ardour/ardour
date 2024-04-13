@@ -161,6 +161,7 @@ private:
 	BufferSet             _bufs;
 	std::shared_ptr<IO> _input;
 	std::shared_ptr<IO> _output;
+	bool                _configuring_io;
 
 	PortManager::AudioInputPorts _audio_input_ports;
 	PortManager::MIDIInputPorts  _midi_input_ports;

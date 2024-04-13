@@ -41,12 +41,14 @@ export ARDOUR_SELF=`basename "$0"`
 
 # Disable extra modules from being loaded by gtk (example, libcanberra-gtk-module.so)
 export GTK_MODULES=""
-# Set this so that the executable will find all the right libraries inside the bundle
-export LD_LIBRARY_PATH=$INSTALL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 
 if [ "T" = "$DEBUG" ]; then
 	export ARDOUR_INSIDE_GDB=1
-	exec gdb $INSTALL_DIR/bin/%EXENAME%-%VER%
+	exec gdb -ex "handle SIG32 noprint nostop" -ex "set height 0" --args \
+		env LD_LIBRARY_PATH=$INSTALL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH} \
+		$INSTALL_DIR/bin/%EXENAME%-%VER%
 else
+# Set this so that the executable will find all the right libraries inside the bundle
+	export LD_LIBRARY_PATH=$INSTALL_DIR/lib${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
 	exec $INSTALL_DIR/bin/%EXENAME%-%VER% "$@"
 fi

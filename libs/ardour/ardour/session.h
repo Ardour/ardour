@@ -221,7 +221,8 @@ public:
 	         const std::string& snapshot_name,
 	         BusProfile const * bus_profile = 0,
 	         std::string mix_template = "",
-	         bool unnamed = false);
+	         bool unnamed = false,
+	         samplecnt_t samplerate = 0);
 
 	virtual ~Session ();
 
@@ -412,6 +413,8 @@ public:
 	void set_all_tracks_record_enabled(bool);
 
 	void maybe_write_autosave ();
+
+	PBD::Signal1<void, int> SurroundObjectCountChanged;
 
 	/* Emitted when all i/o connections are complete */
 

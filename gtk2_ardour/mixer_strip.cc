@@ -195,7 +195,7 @@ MixerStrip::init ()
 	}
 
 	width_button.set_icon (ArdourIcon::StripWidth);
-	hide_button.set_tweaks (ArdourButton::Square);
+	width_button.set_tweaks (ArdourButton::Square);
 	set_tooltip (width_button, t);
 
 	hide_button.set_icon (ArdourIcon::HideEye);

@@ -201,3 +201,10 @@ query_darwin_version ()
 	}
 	return -1;
 }
+
+void
+use_cocoa_invalidation (int yn)
+{
+	gdk_quartz_set_use_cocoa_invalidation (yn);
+	std::cerr << "cocoa invalidation: " << yn << std::endl;
+}

@@ -295,6 +295,8 @@ public:
 	void set_selection (std::list<Selectable*>, Selection::Operation);
 	void set_selected_midi_region_view (MidiRegionView&);
 
+	std::shared_ptr<ARDOUR::Route> current_mixer_stripable () const;
+
 	bool extend_selection_to_track (TimeAxisView&);
 
 	void play_selection ();
