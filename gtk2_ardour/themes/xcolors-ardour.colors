@@ -357,6 +357,7 @@
     <ColorAlias name="recording note" alias="neutral:foregroundest"/>
     <ColorAlias name="recording waveform fill" alias="neutral:foregroundest"/>
     <ColorAlias name="recording waveform outline" alias="neutral:foregroundest"/>
+    <ColorAlias name="region automation line" alias="alert:blue"/>
     <ColorAlias name="region list automatic" alias="theme:contrasting less"/>
     <ColorAlias name="region list missing source" alias="alert:red"/>
     <ColorAlias name="region list whole file" alias="neutral:foreground"/>

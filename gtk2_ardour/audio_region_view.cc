@@ -1673,11 +1673,11 @@ AudioRegionView::set_fx_line_colors ()
 	assert (_fx_line);
 
 	if (_rdx_param != UINT32_MAX && _rfx_id != 0) {
-		_fx_line->set_line_color (UIConfiguration::instance().color ("processor automation line"));
+		_fx_line->set_line_color ("region automation line");
+	} else if (audio_region()->envelope_active()) {
+		_fx_line->set_line_color ("gain line");
 	} else {
-		_fx_line->set_line_color (audio_region()->envelope_active()
-				? UIConfiguration::instance().color ("gain line")
-				: UIConfiguration::instance().color_mod ("gain line inactive", "gain line inactive"));
+		_fx_line->set_line_color ("gain line inactive", "gain line inactive");
 	}
 }
 

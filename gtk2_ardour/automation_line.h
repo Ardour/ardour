@@ -104,8 +104,8 @@ public:
 	bool    visible() const { return _visible != VisibleAspects(0); }
 	guint32 height()  const { return _height; }
 
-	void     set_line_color (uint32_t);
-	uint32_t get_line_color() const { return _line_color; }
+	void set_line_color (std::string color, std::string mod = "");
+	uint32_t get_line_color() const;
 
 	void set_visibility (VisibleAspects);
 	void add_visibility (VisibleAspects);
@@ -174,7 +174,8 @@ protected:
 
 	std::string    _name;
 	guint32        _height;
-	uint32_t       _line_color;
+	std::string    _line_color;
+	std::string    _line_color_mod;
 	uint32_t       _view_index_offset;
 	std::shared_ptr<ARDOUR::AutomationList> alist;
 

@@ -7267,7 +7267,7 @@ FreehandLineDrag<OrderedPointList,OrderedPoint>::motion (GdkEvent* ev, bool firs
 		dragging_line = new ArdourCanvas::PolyLine (parent ? parent : item());
 		dragging_line->set_ignore_events (true);
 		dragging_line->set_outline_width (2.0);
-		dragging_line->set_outline_color (UIConfiguration::instance().color ("automation line"));
+		dragging_line->set_outline_color (UIConfiguration::instance().color ("automation line")); // XXX -> get color from AutomationLine
 		dragging_line->raise_to_top ();
 
 		/* for freehand drawing, we only support left->right direction, for now. */

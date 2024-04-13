@@ -92,6 +92,7 @@ AutomationLine::AutomationLine (const string&                              name,
 	: trackview (tv)
 	, _name (name)
 	, _height (0)
+	, _line_color ("automation line")
 	, _view_index_offset (0)
 	, alist (al)
 	, _visible (Line)
@@ -264,14 +265,23 @@ AutomationLine::set_height (guint32 h)
 }
 
 void
-AutomationLine::set_line_color (uint32_t color)
+AutomationLine::set_line_color (string color_name, std::string color_mod)
 {
-	_line_color = color;
+	_line_color     = color_name;
+	_line_color_mod = color_mod;
+
+	uint32_t color = UIConfiguration::instance().color (color_name);
 	line->set_outline_color (color);
 
-	Gtkmm2ext::SVAModifier mod = UIConfiguration::instance().modifier ("automation line fill");
+	Gtkmm2ext::SVAModifier mod = UIConfiguration::instance().modifier (color_mod.empty () ? "automation line fill" : color_mod);
 
-	line->set_fill_color ((color & 0xffffff00) + mod.a()*255);
+	line->set_fill_color ((color & 0xffffff00) + mod.a() * 255);
+}
+
+uint32_t
+AutomationLine::get_line_color() const
+{
+	return UIConfiguration::instance().color (_line_color);
 }
 
 ControlPoint*
@@ -996,7 +1006,7 @@ AutomationLine::set_selected_points (PointSelection const & points)
 void
 AutomationLine::set_colors ()
 {
-	set_line_color (UIConfiguration::instance().color ("automation line"));
+	set_line_color (_line_color, _line_color_mod);
 	for (vector<ControlPoint*>::iterator i = control_points.begin(); i != control_points.end(); ++i) {
 		(*i)->set_color ();
 	}
