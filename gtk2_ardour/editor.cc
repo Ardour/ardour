@@ -2821,7 +2821,9 @@ Editor::set_snapped_cursor_position (timepos_t const & pos)
 {
 	if (_edit_point == EditAtMouse) {
 		_snapped_cursor->set_position (pos.samples());
-		_snapped_cursor->show ();
+		if (UIConfiguration::instance().get_show_snapped_cursor()) {
+			_snapped_cursor->show ();
+		}
 	}
 }
 
@@ -6514,12 +6516,16 @@ Editor::super_rapid_screen_update ()
 			timepos_t ms (selection->markers.front()->position());
 			snap_to (ms); // should use snap_to_with_modifier?
 			_snapped_cursor->set_position (ms.samples());
-			_snapped_cursor->show ();
+			if (UIConfiguration::instance().get_show_snapped_cursor()) {
+				_snapped_cursor->show ();
+			}
 		}
 	} else if (_edit_point == EditAtMouse && mouse_sample (where.sample, ignored)) {
 		/* cursor is in the editing canvas. show it. */
 		if (!_drags->active()) {
-			_snapped_cursor->show ();
+			if (UIConfiguration::instance().get_show_snapped_cursor()) {
+				_snapped_cursor->show ();
+			}
 		}
 	} else {
 		/* mouse is out of the editing canvas, or edit-point isn't mouse. Hide the snapped_cursor */
