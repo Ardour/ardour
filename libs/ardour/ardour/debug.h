@@ -66,7 +66,9 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits LatencyIO;
 		LIBARDOUR_API extern DebugBits LatencyRoute;
 		LIBARDOUR_API extern DebugBits LaunchControlXL;
+		LIBARDOUR_API extern DebugBits Launchpad;
 		LIBARDOUR_API extern DebugBits Layering;
+		LIBARDOUR_API extern DebugBits MIDISurface;
 		LIBARDOUR_API extern DebugBits MTC;
 		LIBARDOUR_API extern DebugBits MackieControl;
 		LIBARDOUR_API extern DebugBits MidiClock;
@@ -88,8 +90,6 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits ProcessThreads;
 		LIBARDOUR_API extern DebugBits Processors;
 		LIBARDOUR_API extern DebugBits Push2;
-		LIBARDOUR_API extern DebugBits Launchpad;
-		LIBARDOUR_API extern DebugBits MIDISurface;
 		LIBARDOUR_API extern DebugBits Selection;
 		LIBARDOUR_API extern DebugBits SessionEvents;
 		LIBARDOUR_API extern DebugBits Slave;
