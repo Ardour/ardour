@@ -35,6 +35,7 @@
 #include "gtkmm2ext/colors.h"
 
 #include "ardour/dB.h"
+#include "ardour/profile.h"
 #include "ardour/rc_configuration.h"
 #include "ardour/session.h"
 #include "ardour/types.h"
@@ -1216,7 +1217,12 @@ OptionEditorWindow::OptionEditorWindow (PBD::Configuration* c, string const& str
 	hpacker.set_border_width (4);
 	Frame* f = manage (new Frame ());
 
-	f->add (treeview());
+	if (Profile->get_livetrax()) {
+		f->add (button_box());
+	} else {
+		f->add (treeview());
+	}
+
 	f->set_shadow_type (Gtk::SHADOW_OUT);
 	f->set_border_width (0);
 	vpacker.pack_start (*f, true, true);

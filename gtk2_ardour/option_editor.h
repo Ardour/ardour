@@ -726,6 +726,7 @@ protected:
 	PBD::Configuration* _config;
 	Gtk::Notebook& notebook() { return _notebook; }
 	Gtk::TreeView& treeview() { return option_treeview; }
+	Gtk::VBox& button_box() { return _button_box; }
 
 	class OptionColumns : public Gtk::TreeModel::ColumnRecord
 	{
@@ -775,6 +776,7 @@ private:
 	PBD::ScopedConnection config_connection;
 	Gtk::Notebook _notebook;
 	Gtk::TreeView option_treeview;
+	Gtk::VBox _button_box;
 	std::map<std::string, OptionEditorPage*> _pages;
 
 	void add_path_to_treeview (std::string const &, Gtk::Widget&);
