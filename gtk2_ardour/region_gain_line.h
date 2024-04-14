@@ -45,7 +45,10 @@ public:
 	Temporal::timepos_t get_origin() const;
 
 	void start_drag_single (ControlPoint*, double, float);
+	void start_drag_line (uint32_t, uint32_t, float);
+	void start_drag_multiple (std::list<ControlPoint*>, float, XMLNode*);
 	void end_drag (bool with_push, uint32_t final_index);
+	void end_draw_merge ();
 
 	void remove_point (ControlPoint&);
 	AudioRegionView& region_view () { return rv; }

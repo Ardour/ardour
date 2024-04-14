@@ -77,6 +77,28 @@ AudioRegionGainLine::start_drag_single (ControlPoint* cp, double x, float fracti
 	}
 }
 
+void
+AudioRegionGainLine::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
+{
+	AutomationLine::start_drag_line (i1, i2, fraction);
+
+	if (!rv.audio_region()->envelope_active()) {
+		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
+		rv.audio_region()->set_envelope_active(false);
+	}
+}
+
+void
+AudioRegionGainLine::start_drag_multiple (list<ControlPoint*> cp, float fraction, XMLNode* state)
+{
+	AutomationLine::start_drag_multiple (cp, fraction, state);
+
+	if (!rv.audio_region()->envelope_active()) {
+		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
+		rv.audio_region()->set_envelope_active(false);
+	}
+}
+
 // This is an extended copy from AutomationList
 void
 AudioRegionGainLine::remove_point (ControlPoint& cp)
@@ -107,6 +129,18 @@ AudioRegionGainLine::end_drag (bool with_push, uint32_t final_index)
 	}
 
 	AutomationLine::end_drag (with_push, final_index);
+}
+
+void
+AudioRegionGainLine::end_draw_merge ()
+{
+	if (!rv.audio_region()->envelope_active()) {
+		XMLNode& before = rv.audio_region()->get_state();
+		rv.audio_region()->set_envelope_active(true);
+		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &before, &rv.audio_region()->get_state()));
+	}
+
+	AutomationLine::end_draw_merge ();
 }
 
 void

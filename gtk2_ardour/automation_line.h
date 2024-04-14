@@ -94,6 +94,7 @@ public:
 	virtual void start_drag_multiple (std::list<ControlPoint*>, float, XMLNode *);
 	virtual std::pair<float, float> drag_motion (Temporal::timecnt_t const &, float, bool, bool with_push, uint32_t& final_index);
 	virtual void end_drag (bool with_push, uint32_t final_index);
+	virtual void end_draw_merge () {}
 
 	ControlPoint* nth (uint32_t);
 	ControlPoint const * nth (uint32_t) const;

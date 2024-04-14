@@ -103,6 +103,8 @@ MergeableLine::merge_drawn_line (Editor& e, Session& s, Evoral::ControlList::Ord
 	e.begin_reversible_command (_("draw automation"));
 	s.add_command (new MementoCommand<ARDOUR::AutomationList> (*list.get (), &before, &after));
 
+	_line->end_draw_merge ();
+
 	_line->get_selectables (earliest, latest, 0.0, 1.0, results);
 	e.get_selection ().set (results);
 
