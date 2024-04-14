@@ -239,7 +239,6 @@ gtk2_ardour_sources = [
         'pt_import_selector.cc',
         'public_editor.cc',
         'quantize_dialog.cc',
-        'rc_option_editor.cc',
         'rec_info_box.cc',
         'recorder_group_tabs.cc',
         'recorder_ui.cc',
@@ -615,6 +614,11 @@ def build(bld):
     obj.target    = 'ardour-' + bld.env['VERSION']
     obj.includes  = ['.']
 
+    if Options.options.program_name == "Livetrax":
+        obj.source += [ 'livetrax_rc_option_editor.cc' ]
+    else:
+        obj.source  += [ 'rc_option_editor.cc' ]
+        
     if bld.is_defined('WINDOWS_VST_SUPPORT'):
         obj.includes += [ '../libs/fst' ]
 
