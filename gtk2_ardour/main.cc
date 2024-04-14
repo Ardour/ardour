@@ -463,7 +463,7 @@ int main (int argc, char *argv[])
 		ARDOUR::Profile->set_mixbus ();
 	}
 
-	if (g_getenv ("LIVETRAX")) {
+	if (!strcmp (PROGRAM_NAME, X_("Livetrax")))  {
 		ARDOUR::Profile->set_livetrax ();
 	}
 
