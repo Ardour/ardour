@@ -710,7 +710,7 @@ typedef struct CFB_Data {
  */
 
 #define CFB_getNodeStreamLen(cfbd, node) \
-	((cfbd->hdr->_uSectorShift > 9) ? (uint64_t) (((uint64_t) (node->_ulSizeHigh) << 32) | (node->_ulSizeLow)) : node->_ulSizeLow)
+	((cfbd->hdr->_uSectorShift > 9) ? (uint64_t)(((uint64_t)(node->_ulSizeHigh) << 32) | (node->_ulSizeLow)) : node->_ulSizeLow)
 
 #define CFB_getStreamSectorShift(cfbd, node) \
 	((CFB_getNodeStreamLen (cfbd, node) < cfbd->hdr->_ulMiniSectorCutoff) ? cfbd->hdr->_uMiniSectorShift : cfbd->hdr->_uSectorShift)

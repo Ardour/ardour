@@ -3166,12 +3166,23 @@ aafi_retrieveData (AAF_Iface* aafi)
 
 		AAFI_foreachTrackItem (audioTrack, audioItem)
 		{
-			if (audioItem->type == AAFI_TRANS) {
+			if (audioItem->type != AAFI_AUDIO_CLIP) {
 				continue;
 			}
 
 			audioClip           = (aafiAudioClip*)audioItem->data;
 			audioClip->channels = aafi_getAudioEssencePointerChannelCount (audioClip->essencePointerList);
+
+			/*
+			 * we check if any previous clip is using the exact same essence pointer,
+			 * to avoid duplication and allow to detect when multiple clips are using
+			 * the same essence.
+			 */
+			aafiAudioEssencePointer* prev = aafi_audioEssencePointer_exists_before (aafi, audioClip->essencePointerList);
+
+			if (prev) {
+				audioClip->essencePointerList = prev;
+			}
 		}
 	}
 
