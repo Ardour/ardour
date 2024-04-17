@@ -729,7 +729,7 @@ cfb_getStream (CFB_Data* cfbd, cfbNode* node, unsigned char** stream, uint64_t* 
 				return 0;
 			}
 
-			cpy_sz = ((stream_len - offset) < (uint64_t) (1 << cfbd->hdr->_uMiniSectorShift)) ? (stream_len - offset) : (uint64_t) (1 << cfbd->hdr->_uMiniSectorShift);
+			cpy_sz = ((stream_len - offset) < (uint64_t)(1 << cfbd->hdr->_uMiniSectorShift)) ? (stream_len - offset) : (uint64_t)(1 << cfbd->hdr->_uMiniSectorShift);
 
 			memcpy (*stream + offset, buf, cpy_sz);
 
@@ -740,7 +740,7 @@ cfb_getStream (CFB_Data* cfbd, cfbNode* node, unsigned char** stream, uint64_t* 
 	} else {
 		CFB_foreachSectorInChain (cfbd, buf, id)
 		{
-			cpy_sz = ((stream_len - offset) < (uint64_t) (1 << cfbd->hdr->_uSectorShift)) ? (stream_len - offset) : (uint64_t) (1 << cfbd->hdr->_uSectorShift);
+			cpy_sz = ((stream_len - offset) < (uint64_t)(1 << cfbd->hdr->_uSectorShift)) ? (stream_len - offset) : (uint64_t)(1 << cfbd->hdr->_uSectorShift);
 
 			memcpy (*stream + offset, buf, cpy_sz);
 
@@ -1073,7 +1073,7 @@ cfb_retrieveMiniFAT (CFB_Data* cfbd)
  * its ID (a.k.a SID) :
  *
  * ```
-	cfbNode *node = CFB_Data.nodes[ID];
+        cfbNode *node = CFB_Data.nodes[ID];
  * ```
  *
  * @param cfbd Pointer to the CFB_Data structure.
