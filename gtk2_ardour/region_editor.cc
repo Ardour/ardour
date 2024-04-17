@@ -62,11 +62,11 @@ using namespace PBD;
 using namespace std;
 using namespace Gtkmm2ext;
 
-RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
+RegionEditor::RegionEditor (Session* s, RegionView* rv)
 	: ArdourDialog (_("Region"))
 	, _table (9, 3)
 	, _table_row (0)
-	, _region (r)
+	, _region (rv->region ())
 	, name_label (_("Name:"))
 	, audition_button (_("Audition"))
 	, _clock_group (new ClockGroup)
@@ -77,12 +77,12 @@ RegionEditor::RegionEditor (Session* s, std::shared_ptr<Region> r)
 	, sync_offset_absolute_clock (X_("regionsyncoffsetabsolute"), true, "", true, false)
 	  /* XXX cannot file start yet */
 	, start_clock (X_("regionstart"), true, "", false, false)
-	, _region_fx_box (r)
+	, _region_fx_box (_region)
 	, _sources (1)
 {
 	set_session (s);
 
-	switch (r->time_domain()) {
+	switch (_region->time_domain()) {
 	case Temporal::AudioTime:
 		/* XXX check length of region and choose samples or minsec */
 		_clock_group->set_clock_mode (AudioClock::MinSec);

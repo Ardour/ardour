@@ -4833,7 +4833,7 @@ Editor::cut_copy_points (Editing::CutCopyOp op, timepos_t const & earliest_time)
 
 			bool erase = true;
 
-			if (dynamic_cast<AudioRegionGainLine*> (&line)) {
+			if (dynamic_cast<RegionFxLine*> (&line)) {
 				/* removing of first and last gain point in region gain lines is prohibited*/
 				if (line.is_last_point (*(*sel_point)) || line.is_first_point (*(*sel_point))) {
 					erase = false;

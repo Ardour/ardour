@@ -33,10 +33,12 @@
 #include "ardour/audioregion.h"
 #include "ardour/session_event.h"
 #include "ardour/dB.h"
+#include "ardour/region_fx_plugin.h"
 
 #include "audio_region_editor.h"
 #include "audio_region_view.h"
 #include "gui_thread.h"
+#include "public_editor.h"
 
 #include "pbd/i18n.h"
 
@@ -52,11 +54,13 @@ _peak_amplitude_thread (void* arg)
 	return 0;
 }
 
-AudioRegionEditor::AudioRegionEditor (Session* s, std::shared_ptr<AudioRegion> r)
-	: RegionEditor (s, r)
-	, _audio_region (r)
+AudioRegionEditor::AudioRegionEditor (Session* s, AudioRegionView* arv)
+	: RegionEditor (s, arv)
+	, _arv (arv)
+	, _audio_region (arv->audio_region ())
 	, gain_adjustment(accurate_coefficient_to_dB(fabsf (_audio_region->scale_amplitude())), -40.0, +40.0, 0.1, 1.0, 0)
 	, _polarity_toggle (_("Invert"))
+	, _show_on_touch (_("Show on Touch"))
 	, _peak_channel (false)
 {
 
@@ -87,14 +91,27 @@ AudioRegionEditor::AudioRegionEditor (Session* s, std::shared_ptr<AudioRegion> r
 
 	_polarity_label.set_name ("AudioRegionEditorLabel");
 	_polarity_label.set_text (_("Polarity:"));
+	_polarity_label.set_alignment (1, 0.5);
 	_table.attach (_polarity_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	_table.attach (_polarity_toggle, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
 	++_table_row;
 
+	_region_line_label.set_name ("AudioRegionEditorLabel");
+	_region_line_label.set_text (_("Region Line:"));
+	_region_line_label.set_alignment (1, 0.5);
+	_table.attach (_region_line_label, 0, 1, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (_region_line, 1, 2, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	_table.attach (_show_on_touch, 2, 3, _table_row, _table_row + 1, Gtk::FILL, Gtk::FILL);
+	++_table_row;
+
 	gain_changed ();
+	refill_region_line ();
 
 	gain_adjustment.signal_value_changed().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
 	_polarity_toggle.signal_toggled().connect (sigc::mem_fun (*this, &AudioRegionEditor::gain_adjustment_changed));
+	_show_on_touch.signal_toggled().connect (sigc::mem_fun (*this, &AudioRegionEditor::show_on_touch_changed));
+
+	arv->region_line_changed.connect ((sigc::mem_fun (*this, &AudioRegionEditor::refill_region_line)));
 
 	_peak_amplitude.property_editable() = false;
 	_peak_amplitude.set_text (_("Calculating..."));
@@ -105,6 +122,7 @@ AudioRegionEditor::AudioRegionEditor (Session* s, std::shared_ptr<AudioRegion> r
 	snprintf (name, 64, "peak amplitude-%p", this);
 	pthread_create_and_store (name, &_peak_amplitude_thread_handle, _peak_amplitude_thread, this);
 	signal_peak_thread ();
+
 }
 
 AudioRegionEditor::~AudioRegionEditor ()
@@ -128,6 +146,14 @@ AudioRegionEditor::region_changed (const PBD::PropertyChange& what_changed)
 		signal_peak_thread ();
 	}
 }
+
+void
+AudioRegionEditor::region_fx_changed ()
+{
+	RegionEditor::region_fx_changed ();
+	refill_region_line ();
+}
+
 void
 AudioRegionEditor::gain_changed ()
 {
@@ -189,3 +215,118 @@ AudioRegionEditor::peak_amplitude_found (double p)
 	_peak_amplitude.set_text (s.str ());
 }
 
+void
+AudioRegionEditor::show_touched_automation (std::weak_ptr<PBD::Controllable> wac)
+{
+	if (!_arv->set_region_fx_line (wac)) {
+		return;
+	}
+
+	switch (PublicEditor::instance ().current_mouse_mode ()) {
+		case Editing::MouseObject:
+		case Editing::MouseTimeFX:
+		case Editing::MouseGrid:
+		case Editing::MouseCut:
+			PublicEditor::instance ().set_mouse_mode (Editing::MouseDraw, false);
+			break;
+		default:
+			break;
+	}
+}
+
+void
+AudioRegionEditor::show_on_touch_changed ()
+{
+	if (!_show_on_touch.get_active ()) {
+		_ctrl_touched_connection.disconnect ();
+		return;
+	}
+	Controllable::ControlTouched.connect (_ctrl_touched_connection, invalidator (*this), boost::bind (&AudioRegionEditor::show_touched_automation, this, _1), gui_context ());
+}
+
+void
+AudioRegionEditor::refill_region_line ()
+{
+	using namespace Gtk::Menu_Helpers;
+
+	_region_line.clear_items ();
+
+	MenuList& rm_items (_region_line.items ());
+
+	int      nth = 0;
+	PBD::ID  rfx_id (0);
+	uint32_t param_id = 0;
+	string   active_text = _("Gain Envelope");
+
+	_arv->get_region_fx_line (rfx_id, param_id);
+	_arv->set_ignore_line_change (true);
+
+	Gtk::RadioMenuItem::Group grp;
+	AudioRegionView*          arv = _arv;
+
+	rm_items.push_back (RadioMenuElem (grp, _("Gain Envelope")));
+	Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&rm_items.back ());
+	cmi->set_active (rfx_id == 0 || param_id == UINT32_MAX);
+	cmi->signal_activate ().connect ([cmi, arv] () { if (cmi->get_active ()) {arv->set_region_gain_line (); }});
+
+	_audio_region->foreach_plugin ([&rm_items, arv, &nth, &grp, &active_text, rfx_id, param_id](std::weak_ptr<RegionFxPlugin> wfx)
+	{
+		std::shared_ptr<RegionFxPlugin> fx (wfx.lock ());
+		if (!fx) {
+			return;
+		}
+		std::shared_ptr<Plugin> plugin = fx->plugin ();
+
+		Gtk::Menu* acm = manage (new Gtk::Menu);
+		MenuList&  acm_items (acm->items ());
+
+		for (size_t i = 0; i < plugin->parameter_count (); ++i) {
+			if (!plugin->parameter_is_control (i) || !plugin->parameter_is_input (i)) {
+				continue;
+			}
+			const Evoral::Parameter param (PluginAutomation, 0, i);
+			std::string             label = plugin->describe_parameter (param);
+			if (label == X_("latency") || label == X_("hidden")) {
+				continue;
+			}
+			std::shared_ptr<ARDOUR::AutomationControl> c (std::dynamic_pointer_cast<ARDOUR::AutomationControl> (fx->control (param)));
+			if (c && c->flags () & (Controllable::HiddenControl | Controllable::NotAutomatable)) {
+				continue;
+			}
+			bool active = fx->id () == rfx_id && param_id == i;
+
+			acm_items.push_back (RadioMenuElem (grp, label));
+			Gtk::CheckMenuItem* cmi = static_cast<Gtk::CheckMenuItem*> (&acm_items.back ());
+			cmi->set_active (active);
+			cmi->signal_activate ().connect ([cmi, arv, nth, i] () { if (cmi->get_active ()) {arv->set_region_fx_line (nth, i); }});
+			if (active) {
+				active_text = fx->name () + ": " + label;
+			}
+		}
+
+		if (!acm_items.empty ()) {
+			rm_items.push_back (MenuElem (fx->name (), *acm));
+		} else {
+			delete acm;
+		}
+		++nth;
+	});
+
+
+	if (rm_items.size () > 1) {
+		_show_on_touch.set_sensitive (true);
+	} else {
+		_show_on_touch.set_active (false);
+		_show_on_touch.set_sensitive (false);
+	}
+
+	_region_line.set_text (active_text);
+	_arv->set_ignore_line_change (false);
+}
+
+void
+AudioRegionEditor::on_unmap ()
+{
+	_show_on_touch.set_active (false);
+	ArdourDialog::on_unmap ();
+}

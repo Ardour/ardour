@@ -35,67 +35,52 @@
 
 #include "time_axis_view.h"
 #include "editor.h"
-#include "gui_thread.h"
 
 #include "pbd/i18n.h"
 
 using namespace std;
 using namespace ARDOUR;
-using namespace PBD;
 
 AudioRegionGainLine::AudioRegionGainLine (const string & name, AudioRegionView& r, ArdourCanvas::Container& parent, std::shared_ptr<AutomationList> l)
-	: AutomationLine (name, r.get_time_axis_view(), parent, l, l->parameter())
-	, rv (r)
+	: RegionFxLine (name, r, parent, l, l->parameter ())
+	, arv (r)
 {
-	// If this isn't true something is horribly wrong, and we'll get catastrophic gain values
-	assert(l->parameter().type() == EnvelopeAutomation);
 
-	r.region()->PropertyChanged.connect (_region_changed_connection, invalidator (*this), boost::bind (&AudioRegionGainLine::region_changed, this, _1), gui_context());
-
-	group->raise_to_top ();
-	group->set_y_position (2);
 	terminal_points_can_slide = false;
 }
-
-timepos_t
-AudioRegionGainLine::get_origin() const
-{
-	return rv.region()->position();
-}
-
 
 void
 AudioRegionGainLine::start_drag_single (ControlPoint* cp, double x, float fraction)
 {
-	AutomationLine::start_drag_single (cp, x, fraction);
+	RegionFxLine::start_drag_single (cp, x, fraction);
 
 	// XXX Stateful need to capture automation curve data
 
-	if (!rv.audio_region()->envelope_active()) {
-		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
-		rv.audio_region()->set_envelope_active(false);
+	if (!arv.audio_region()->envelope_active()) {
+		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(arv.audio_region().get()), &arv.audio_region()->get_state(), 0));
+		arv.audio_region()->set_envelope_active(false);
 	}
 }
 
 void
 AudioRegionGainLine::start_drag_line (uint32_t i1, uint32_t i2, float fraction)
 {
-	AutomationLine::start_drag_line (i1, i2, fraction);
+	RegionFxLine::start_drag_line (i1, i2, fraction);
 
-	if (!rv.audio_region()->envelope_active()) {
-		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
-		rv.audio_region()->set_envelope_active(false);
+	if (!arv.audio_region()->envelope_active()) {
+		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(arv.audio_region().get()), &arv.audio_region()->get_state(), 0));
+		arv.audio_region()->set_envelope_active(false);
 	}
 }
 
 void
 AudioRegionGainLine::start_drag_multiple (list<ControlPoint*> cp, float fraction, XMLNode* state)
 {
-	AutomationLine::start_drag_multiple (cp, fraction, state);
+	RegionFxLine::start_drag_multiple (cp, fraction, state);
 
-	if (!rv.audio_region()->envelope_active()) {
-		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &rv.audio_region()->get_state(), 0));
-		rv.audio_region()->set_envelope_active(false);
+	if (!arv.audio_region()->envelope_active()) {
+		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(arv.audio_region().get()), &arv.audio_region()->get_state(), 0));
+		arv.audio_region()->set_envelope_active(false);
 	}
 }
 
@@ -106,10 +91,10 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 	trackview.editor().begin_reversible_command (_("remove control point"));
 	XMLNode &before = alist->get_state();
 
-	if (!rv.audio_region()->envelope_active()) {
-		rv.audio_region()->clear_changes ();
-		rv.audio_region()->set_envelope_active(true);
-		trackview.session()->add_command(new StatefulDiffCommand (rv.audio_region()));
+	if (!arv.audio_region()->envelope_active()) {
+		arv.audio_region()->clear_changes ();
+		arv.audio_region()->set_envelope_active(true);
+		trackview.session()->add_command(new PBD::StatefulDiffCommand (arv.audio_region()));
 	}
 
 	trackview.editor ().get_selection ().clear_points ();
@@ -123,35 +108,27 @@ AudioRegionGainLine::remove_point (ControlPoint& cp)
 void
 AudioRegionGainLine::end_drag (bool with_push, uint32_t final_index)
 {
-	if (!rv.audio_region()->envelope_active()) {
-		rv.audio_region()->set_envelope_active(true);
-		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), 0, &rv.audio_region()->get_state()));
+	if (!arv.audio_region()->envelope_active()) {
+		arv.audio_region()->set_envelope_active(true);
+		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(arv.audio_region().get()), 0, &arv.audio_region()->get_state()));
 	}
 
-	AutomationLine::end_drag (with_push, final_index);
+	RegionFxLine::end_drag (with_push, final_index);
 }
 
 void
 AudioRegionGainLine::end_draw_merge ()
 {
-	if (!rv.audio_region()->envelope_active()) {
-		XMLNode& before = rv.audio_region()->get_state();
-		rv.audio_region()->set_envelope_active(true);
-		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(rv.audio_region().get()), &before, &rv.audio_region()->get_state()));
-	}
-
-	AutomationLine::end_draw_merge ();
+	enable_autoation ();
+	RegionFxLine::end_draw_merge ();
 }
 
 void
-AudioRegionGainLine::region_changed (const PropertyChange& what_changed)
+AudioRegionGainLine::enable_autoation ()
 {
-	PropertyChange interesting_stuff;
-
-	interesting_stuff.add (ARDOUR::Properties::start);
-	interesting_stuff.add (ARDOUR::Properties::length);
-
-	if (what_changed.contains (interesting_stuff)) {
-		reset ();
+	if (!arv.audio_region()->envelope_active()) {
+		XMLNode& before = arv.audio_region()->get_state();
+		arv.audio_region()->set_envelope_active(true);
+		trackview.session()->add_command(new MementoCommand<AudioRegion>(*(arv.audio_region().get()), &before, &arv.audio_region()->get_state()));
 	}
 }

@@ -622,7 +622,7 @@ StreamView::get_selectables (timepos_t const & start, timepos_t const & end, dou
 		    || (!within && (*i)->region()->coverage (start, end) != Temporal::OverlapNone)) {
 			if (_trackview.editor().internal_editing()) {
 				AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*i);
-				if (arv && arv->get_gain_line ()) {
+				if (arv && arv->fx_line ()) {
 					/* Note: AutomationLine::get_selectables() uses trackview.current_height (),
 					 * disregarding Stacked layer display height
 					 */
@@ -630,7 +630,7 @@ StreamView::get_selectables (timepos_t const & start, timepos_t const & end, dou
 					double const y = (*i)->get_canvas_group ()->position().y;
 					double t = 1.0 - std::min (1.0, std::max (0., (top - _trackview.y_position () - y) / c));
 					double b = 1.0 - std::min (1.0, std::max (0., (bottom - _trackview.y_position () - y) / c));
-					arv->get_gain_line()->get_selectables (start, end, b, t, results);
+					arv->fx_line()->get_selectables (start, end, b, t, results);
 				}
 			} else {
 				results.push_back (*i);

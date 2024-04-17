@@ -1176,11 +1176,11 @@ Selection::get_state () const
 			continue;
 		}
 
-		AudioRegionGainLine* argl = dynamic_cast<AudioRegionGainLine*> (&(*i)->line());
-		if (argl) {
+		RegionFxLine* fxl = dynamic_cast<RegionFxLine*> (&(*i)->line());
+		if (fxl) {
 			XMLNode* r = node->add_child (X_("ControlPoint"));
 			r->set_property (X_("type"), "region");
-			r->set_property (X_("region-id"), argl->region_view ().region ()->id ());
+			r->set_property (X_("region-id"), fxl->region_view ().region ()->id ());
 			r->set_property (X_("view-index"), (*i)->view_index());
 		}
 
@@ -1323,35 +1323,6 @@ Selection::set_state (XMLNode const & node, int)
 				}
 				if (!cps.empty()) {
 					add (cps);
-				}
-			} else if (prop_type->value () == "region") {
-
-				PBD::ID region_id;
-				uint32_t view_index;
-				if (!(*i)->get_property (X_("region-id"), region_id) ||
-				    !(*i)->get_property (X_("view-index"), view_index)) {
-					continue;
-				}
-
-				RegionSelection rs;
-				editor->get_regionviews_by_id (region_id, rs);
-
-				if (!rs.empty ()) {
-					vector <ControlPoint *> cps;
-					for (RegionSelection::iterator rsi = rs.begin(); rsi != rs.end(); ++rsi) {
-						AudioRegionView* arv = dynamic_cast<AudioRegionView*> (*rsi);
-						if (arv) {
-							std::shared_ptr<AudioRegionGainLine> gl = arv->get_gain_line ();
-							ControlPoint* cp = gl->nth(view_index);
-							if (cp) {
-								cps.push_back (cp);
-								cp->show();
-							}
-						}
-					}
-					if (!cps.empty()) {
-						add (cps);
-					}
 				}
 			}
 

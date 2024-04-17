@@ -2340,7 +2340,7 @@ Editor::can_remove_control_point (ArdourCanvas::Item* item)
 	}
 
 	AutomationLine& line = control_point->line ();
-	if (dynamic_cast<AudioRegionGainLine*> (&line)) {
+	if (dynamic_cast<RegionFxLine*> (&line)) {
 		/* we shouldn't remove the first or last gain point in region gain lines */
 		if (line.is_last_point(*control_point) || line.is_first_point(*control_point)) {
 			return false;

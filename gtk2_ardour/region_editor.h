@@ -55,12 +55,13 @@ namespace ARDOUR {
 	class RegionFxPlugin;
 }
 
+class RegionView;
 class ClockGroup;
 
 class RegionEditor : public ArdourDialog
 {
 public:
-	RegionEditor (ARDOUR::Session*, std::shared_ptr<ARDOUR::Region>);
+	RegionEditor (ARDOUR::Session*, RegionView*);
 	virtual ~RegionEditor ();
 
 protected:

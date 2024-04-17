@@ -87,7 +87,7 @@ using namespace Temporal;
 AutomationLine::AutomationLine (const string&                              name,
                                 TimeAxisView&                              tv,
                                 ArdourCanvas::Item&                        parent,
-                                std::shared_ptr<AutomationList>          al,
+                                std::shared_ptr<AutomationList>            al,
                                 const ParameterDescriptor&                 desc)
 	: trackview (tv)
 	, _name (name)

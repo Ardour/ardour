@@ -42,6 +42,7 @@
 
 #include "ardour_http.h"
 #include "ardour_ui.h"
+#include "audio_region_view.h"
 #include "public_editor.h"
 #include "region_selection.h"
 #include "luadialog.h"
@@ -826,8 +827,14 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 		.endClass ()
 
 		.deriveClass <RegionView, TimeAxisViewItem> ("RegionView")
+		.addCast<AudioRegionView> ("to_audioregionview")
 		.addFunction ("show_region_editor", &RegionView::show_region_editor)
 		.addFunction ("hide_region_editor", &RegionView::hide_region_editor)
+		.endClass ()
+
+		.deriveClass <AudioRegionView, RegionView> ("RegionView")
+		.addFunction ("set_region_gain_line", &AudioRegionView::set_region_gain_line)
+		.addFunction ("set_region_fx_line", (bool (AudioRegionView::*)(uint32_t, uint32_t))&AudioRegionView::set_region_fx_line)
 		.endClass ()
 
 		.deriveClass <RouteUI, Selectable> ("RouteUI")

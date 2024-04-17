@@ -470,8 +470,8 @@ AudioStreamView::set_selected_points (PointSelection& points)
 {
 	for (list<RegionView *>::iterator i = region_views.begin(); i != region_views.end(); ++i) {
 		AudioRegionView* const arv = dynamic_cast<AudioRegionView*>(*i);
-		if (arv && arv->get_gain_line ()) {
-			arv->get_gain_line ()->set_selected_points (points);
+		if (arv && arv->fx_line ()) {
+			arv->fx_line ()->set_selected_points (points);
 		}
 	}
 }

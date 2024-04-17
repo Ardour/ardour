@@ -68,7 +68,7 @@ public:
 	AutomationLine (const std::string&                                 name,
 	                TimeAxisView&                                      tv,
 	                ArdourCanvas::Item&                                parent,
-	                std::shared_ptr<ARDOUR::AutomationList>          al,
+	                std::shared_ptr<ARDOUR::AutomationList>            al,
 	                const ARDOUR::ParameterDescriptor&                 desc);
 
 
@@ -248,6 +248,7 @@ private:
 	const ARDOUR::ParameterDescriptor _desc;
 
 	friend class AudioRegionGainLine;
+	friend class RegionFxLine;
 };
 
 #endif /* __ardour_automation_line_h__ */

@@ -37,6 +37,7 @@
 #include <gtkmm/separator.h>
 #include <gtkmm/spinbutton.h>
 
+#include "widgets/ardour_dropdown.h"
 
 #include "pbd/signals.h"
 #include "pbd/crossthread.h"
@@ -55,18 +56,25 @@ class AudioRegionView;
 class AudioRegionEditor : public RegionEditor
 {
 public:
-	AudioRegionEditor (ARDOUR::Session*, std::shared_ptr<ARDOUR::AudioRegion>);
+	AudioRegionEditor (ARDOUR::Session*, AudioRegionView*);
 	~AudioRegionEditor ();
 
 	void peak_amplitude_thread ();
+	void on_unmap ();
 
 private:
 
 	void region_changed (PBD::PropertyChange const &);
+	void region_fx_changed ();
 
 	void gain_changed ();
 	void gain_adjustment_changed ();
 
+	void refill_region_line ();
+	void show_on_touch_changed ();
+	void show_touched_automation (std::weak_ptr<PBD::Controllable>);
+
+	AudioRegionView*                     _arv;
 	std::shared_ptr<ARDOUR::AudioRegion> _audio_region;
 
 	Gtk::Label      gain_label;
@@ -78,6 +86,12 @@ private:
 
 	Gtk::Label _peak_amplitude_label;
 	Gtk::Entry _peak_amplitude;
+
+	Gtk::Label                    _region_line_label;
+	ArdourWidgets::ArdourDropdown _region_line;
+
+	Gtk::CheckButton      _show_on_touch;
+	PBD::ScopedConnection _ctrl_touched_connection;
 
 	void signal_peak_thread ();
 	pthread_t _peak_amplitude_thread_handle;

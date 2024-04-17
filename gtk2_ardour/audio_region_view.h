@@ -50,9 +50,9 @@ namespace ARDOUR {
 };
 
 class AudioTimeAxisView;
-class AudioRegionGainLine;
 class GhostRegion;
 class AutomationTimeAxisView;
+class RegionFxLine;
 class RouteTimeAxisView;
 
 class AudioRegionView : public RegionView, public LineMerger
@@ -91,12 +91,18 @@ public:
 	void temporarily_hide_envelope (); ///< Dangerous!
 	void unhide_envelope ();           ///< Dangerous!
 
+	void set_region_gain_line ();
+	void set_ignore_line_change (bool v) { _ignore_line_change = v; };
+	bool set_region_fx_line (uint32_t, uint32_t);
+	bool set_region_fx_line (std::weak_ptr<PBD::Controllable>);
+	bool get_region_fx_line (PBD::ID&, uint32_t&);
 	void update_envelope_visibility ();
 
-	void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event, bool with_guard_points);
-	void remove_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event);
+	sigc::signal<void> region_line_changed;
 
-	std::shared_ptr<AudioRegionGainLine> get_gain_line() const { return gain_line; }
+	void add_gain_point_event (ArdourCanvas::Item *item, GdkEvent *event, bool with_guard_points);
+
+	std::shared_ptr<RegionFxLine> fx_line() const { return _fx_line; }
 
 	void region_changed (const PBD::PropertyChange&);
 	void envelope_active_changed ();
@@ -184,7 +190,7 @@ protected:
 	ArdourCanvas::Rectangle*  end_xfade_rect;
 	bool _end_xfade_visible;
 
-	std::shared_ptr<AudioRegionGainLine> gain_line;
+	std::shared_ptr<RegionFxLine> _fx_line;
 
 	double _amplitude_above_axis;
 
@@ -206,6 +212,7 @@ protected:
 
 	void set_colors ();
 	void set_waveform_colors ();
+	void set_fx_line_colors ();
 	void reset_width_dependent_items (double pixel_width);
 
 	void color_handler ();
@@ -234,6 +241,14 @@ private:
 
 	bool trim_fade_in_drag_active;
 	bool trim_fade_out_drag_active;
+
+	void set_region_fx_line (std::shared_ptr<ARDOUR::AutomationControl>, std::shared_ptr<ARDOUR::RegionFxPlugin>, uint32_t);
+
+	PBD::ID  _rfx_id;
+	uint32_t _rdx_param;
+	bool     _ignore_line_change;
+
+	PBD::ScopedConnection _region_fx_connection;
 };
 
 #endif /* __gtk_ardour_audio_region_view_h__ */

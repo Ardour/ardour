@@ -5039,7 +5039,7 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 			AudioRegionView* arv;
 
 			if ((arv = dynamic_cast<AudioRegionView*> (_editor->clicked_regionview)) != 0) {
-				arv->add_gain_point_event (&arv->get_gain_line ()->grab_item (), event, false);
+				arv->add_gain_point_event (&arv->fx_line ()->grab_item (), event, false);
 			}
 		}
 	}
@@ -6367,7 +6367,7 @@ AutomationRangeDrag::AutomationRangeDrag (Editor* editor, list<RegionView*> cons
 
 	for (list<RegionView*>::const_iterator i = v.begin (); i != v.end (); ++i) {
 		if (AudioRegionView* audio_view = dynamic_cast<AudioRegionView*> (*i)) {
-			lines.push_back (audio_view->get_gain_line ());
+			lines.push_back (audio_view->fx_line ());
 		} else if (AutomationRegionView* automation_view = dynamic_cast<AutomationRegionView*> (*i)) {
 			lines.push_back (automation_view->line ());
 			_integral = true;
@@ -6394,8 +6394,8 @@ AutomationRangeDrag::setup (list<std::shared_ptr<AutomationLine>> const& lines)
 
 		/* need a special detection for automation lanes (not region gain line) */
 		// TODO: if we implement automation regions, this check can probably be removed
-		AudioRegionGainLine* argl = dynamic_cast<AudioRegionGainLine*> ((*i).get ());
-		if (!argl) {
+		RegionFxLine* fxl = dynamic_cast<RegionFxLine*> ((*i).get ());
+		if (!fxl) {
 			/* in automation lanes, the EFFECTIVE range should be considered 0->max_position (even if there is no line) */
 			r.first  = Temporal::timepos_t ((*i)->the_list ()->time_domain ());
 			r.second = Temporal::timepos_t::max ((*i)->the_list ()->time_domain ());
