@@ -302,6 +302,8 @@ private:
 
 	void reset_scan_cancel_state (bool single = false);
 
+	void get_all_plugins (PluginInfoList&) const;
+
 	bool no_timeout () const { return _cancel_scan_timeout_one || _cancel_scan_timeout_all; }
 
 	void detect_name_ambiguities (ARDOUR::PluginInfoList*);

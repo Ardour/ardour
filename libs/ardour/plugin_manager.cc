@@ -610,18 +610,8 @@ PluginManager::refresh (bool cache_only)
 }
 
 void
-PluginManager::detect_ambiguities ()
+PluginManager::get_all_plugins (PluginInfoList& all_plugs) const
 {
-	detect_name_ambiguities (_windows_vst_plugin_info);
-	detect_name_ambiguities (_lxvst_plugin_info);
-	detect_name_ambiguities (_mac_vst_plugin_info);
-	detect_name_ambiguities (_au_plugin_info);
-	detect_name_ambiguities (_ladspa_plugin_info);
-	detect_name_ambiguities (_lv2_plugin_info);
-	detect_name_ambiguities (_lua_plugin_info);
-	detect_name_ambiguities (_vst3_plugin_info);
-
-	PluginInfoList all_plugs;
 	if (_windows_vst_plugin_info) {
 		all_plugs.insert(all_plugs.end(), _windows_vst_plugin_info->begin(), _windows_vst_plugin_info->end());
 	}
@@ -646,6 +636,22 @@ PluginManager::detect_ambiguities ()
 	if (_lua_plugin_info) {
 		all_plugs.insert(all_plugs.end(), _lua_plugin_info->begin(), _lua_plugin_info->end());
 	}
+}
+
+void
+PluginManager::detect_ambiguities ()
+{
+	detect_name_ambiguities (_windows_vst_plugin_info);
+	detect_name_ambiguities (_lxvst_plugin_info);
+	detect_name_ambiguities (_mac_vst_plugin_info);
+	detect_name_ambiguities (_au_plugin_info);
+	detect_name_ambiguities (_ladspa_plugin_info);
+	detect_name_ambiguities (_lv2_plugin_info);
+	detect_name_ambiguities (_lua_plugin_info);
+	detect_name_ambiguities (_vst3_plugin_info);
+
+	PluginInfoList all_plugs;
+	get_all_plugins (all_plugs);
 	detect_type_ambiguities (all_plugs);
 
 	save_scanlog ();
@@ -2898,9 +2904,22 @@ PluginManager::get_all_tags (TagFilter tag_filter) const
 {
 	std::vector<std::string> ret;
 
+	PluginInfoList all_plugs;
+	get_all_plugins (all_plugs);
+
+	std::map<PluginType, std::set<std::string>> nfos;
+	for (auto const& nfo : all_plugs) {
+		nfos[to_generic_vst (nfo->type)].insert (nfo->unique_id);
+	}
+
 	PluginTagList::const_iterator pt;
 	for (pt = ptags.begin(); pt != ptags.end(); ++pt) {
 		if ((*pt).tags.empty ()) {
+			continue;
+		}
+
+		if (nfos[(*pt).type].find ((*pt).unique_id) == nfos[(*pt).type].end ()) {
+			/* Plugin is not installed */
 			continue;
 		}
 
