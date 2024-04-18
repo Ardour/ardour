@@ -458,15 +458,6 @@ int main (int argc, char *argv[])
 		exit (EXIT_FAILURE);
 	}
 
-
-	if (g_getenv ("MIXBUS")) {
-		ARDOUR::Profile->set_mixbus ();
-	}
-
-	if (!strcmp (PROGRAM_NAME, X_("Livetrax")))  {
-		ARDOUR::Profile->set_livetrax ();
-	}
-
 	try {
 		ui = new ARDOUR_UI (&argc, &argv, localedir.c_str());
 	} catch (failed_constructor& err) {
