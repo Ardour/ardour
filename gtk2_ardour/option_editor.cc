@@ -1107,20 +1107,20 @@ OptionEditor::add_path_to_treeview (std::string const & pn, Gtk::Widget& widget)
 }
 
 /** Add a component to a given page.
- *  @param pn Page name (will be created if it doesn't already exist)
+ *  @param page_name Page name (will be created if it doesn't already exist)
  *  @param o Component.
  */
 void
-OptionEditor::add_option (std::string const & pn, OptionEditorComponent* o)
+OptionEditor::add_option (std::string const & page_name, OptionEditorComponent* o)
 {
-	if (_pages.find (pn) == _pages.end()) {
-		OptionEditorPage* oep = new OptionEditorPage (_notebook, pn);
-		_pages[pn] = oep;
+	if (_pages.find (page_name) == _pages.end()) {
+		OptionEditorPage* oep = new OptionEditorPage (_notebook, page_name);
+		_pages[page_name] = oep;
 
-		add_path_to_treeview (pn, oep->box);
+		add_path_to_treeview (page_name, oep->box);
 	}
 
-	OptionEditorPage* p = _pages[pn];
+	OptionEditorPage* p = _pages[page_name];
 	p->components.push_back (o);
 
 	o->add_to_page (p);
