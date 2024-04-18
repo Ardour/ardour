@@ -689,11 +689,11 @@ ARDOUR::init (bool try_optimization, const char* localedir, bool with_gui)
 	Profile = new RuntimeProfile;
 
 	if (g_getenv ("MIXBUS")) {
-		ARDOUR::Profile->set_mixbus ();
+		Profile->set_mixbus ();
 	}
 
 #ifdef LIVETRAX
-	ARDOUR::Profile->set_livetrax ();
+	Profile->set_livetrax ();
 #endif
 
 #ifdef WINDOWS_VST_SUPPORT
