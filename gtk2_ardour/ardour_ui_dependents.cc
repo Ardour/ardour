@@ -186,8 +186,10 @@ ARDOUR_UI::tab_window_root_drop (GtkNotebook* src,
 		tabbable = editor;
 	} else if (w == GTK_WIDGET(mixer->contents().gobj())) {
 		tabbable = mixer;
+#ifndef LIVETRAX
 	} else if (w == GTK_WIDGET(rc_option_editor->contents().gobj())) {
 		tabbable = rc_option_editor;
+#endif
 	} else if (w == GTK_WIDGET(recorder->contents().gobj())) {
 		tabbable = recorder;
 	} else if (w == GTK_WIDGET(trigger_page->contents().gobj())) {
@@ -272,9 +274,10 @@ ARDOUR_UI::setup_windows ()
 	_tabs.signal_page_added().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_added));
 	_tabs.signal_page_removed().connect (sigc::mem_fun (*this, &ARDOUR_UI::tabs_page_removed));
 
-
 	rc_option_editor = new RCOptionEditor;
+#ifndef LIVETRAX
 	rc_option_editor->StateChange.connect (sigc::mem_fun (*this, &ARDOUR_UI::tabbable_state_change));
+#endif
 
 	if (create_editor ()) {
 		error << _("UI: cannot setup editor") << endmsg;
@@ -308,7 +311,9 @@ ARDOUR_UI::setup_windows ()
 
 	/* order of addition affects order seen in initial window display */
 
+#ifndef LIVETRAX
 	rc_option_editor->add_to_notebook (_tabs);
+#endif
 	mixer->add_to_notebook (_tabs);
 	editor->add_to_notebook (_tabs);
 	recorder->add_to_notebook (_tabs);
@@ -384,6 +389,8 @@ ARDOUR_UI::livetrax_setup_windows ()
 {
 	using namespace Menu_Helpers;
 	using namespace Gtk;
+
+	rc_option_editor = new RCOptionEditor;
 
 	ArdourButton::set_default_tweaks (ArdourButton::Tweaks (ArdourButton::ForceBoxy|ArdourButton::ForceFlat));
 
@@ -611,8 +618,10 @@ ARDOUR_UI::apply_window_settings (bool with_size)
 
 	if (mixer && current_tab == "mixer") {
 		_tabs.set_current_page (_tabs.page_num (mixer->contents()));
+#ifndef LIVETRAX
 	} else if (rc_option_editor && current_tab == "preferences") {
 		_tabs.set_current_page (_tabs.page_num (rc_option_editor->contents()));
+#endif
 	} else if (recorder && current_tab == "recorder") {
 		_tabs.set_current_page (_tabs.page_num (recorder->contents()));
 	} else if (trigger_page && current_tab == "trigger") {

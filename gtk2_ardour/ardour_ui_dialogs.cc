@@ -496,10 +496,11 @@ ARDOUR_UI::step_up_through_tabs ()
 		candidates.push_back (trigger_page);
 	}
 
+#ifndef LIVETRAX
 	if (rc_option_editor->tabbed()) {
 		candidates.push_back (rc_option_editor);
 	}
-
+#endif
 	if (candidates.size() < 2) {
 		/* nothing to be done with zero or one visible in tabs */
 		return;
@@ -545,10 +546,11 @@ ARDOUR_UI::step_down_through_tabs ()
 		candidates.push_back (trigger_page);
 	}
 
+#ifndef LIVETRAX
 	if (rc_option_editor->tabbed()) {
 		candidates.push_back (rc_option_editor);
 	}
-
+#endif
 	if (candidates.size() < 2) {
 		/* nothing to be done with zero or one visible in tabs */
 		return;
@@ -675,10 +677,12 @@ ARDOUR_UI::tabs_page_added (Widget*,guint)
 		                                                                             Pango::FontDescription ("Sans 24"),
 		                                                                             0, 0,
 		                                                                             Gdk::Color ("red")));
+#ifndef LIVETRAX
 		prefs_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (rc_option_editor->name(),
 		                                                                             Pango::FontDescription ("Sans 24"),
 		                                                                             0, 0,
 		                                                                             Gdk::Color ("red")));
+#endif
 		recorder_visibility_button.drag_source_set_icon (Gtkmm2ext::pixbuf_from_string (recorder->name(),
 		                                                                                Pango::FontDescription ("Sans 24"),
 		                                                                                0, 0,
@@ -713,9 +717,11 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 			mixer_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
 
+#ifndef LIVETRAX
 		if (rc_option_editor && (rc_option_editor->tabbed() || rc_option_editor->tabbed_by_default())) {
 			prefs_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
+#endif
 
 		if (recorder && (recorder->tabbed() || recorder->tabbed_by_default())) {
 			recorder_visibility_button.set_active_state (Gtkmm2ext::Off);
@@ -733,9 +739,11 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 
 		mixer_visibility_button.set_active_state (Gtkmm2ext::ImplicitActive);
 
+#ifndef LIVETRAX
 		if (rc_option_editor && (rc_option_editor->tabbed() || rc_option_editor->tabbed_by_default())) {
 			prefs_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
+#endif
 
 		if (recorder && (recorder->tabbed() || recorder->tabbed_by_default())) {
 			recorder_visibility_button.set_active_state (Gtkmm2ext::Off);
@@ -745,6 +753,7 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 			trigger_page_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
 
+#ifndef LIVETRAX
 	} else if (page == (guint) _tabs.page_num (rc_option_editor->contents())) {
 
 		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
@@ -764,7 +773,7 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 		if (trigger_page && (trigger_page->tabbed() || trigger_page->tabbed_by_default())) {
 			trigger_page_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
-
+#endif
 	} else if (page == (guint) _tabs.page_num (recorder->contents())) {
 
 		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {
@@ -775,9 +784,11 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 			mixer_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
 
+#ifndef LIVETRAX
 		if (rc_option_editor && (rc_option_editor->tabbed() || rc_option_editor->tabbed_by_default())) {
 			prefs_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
+#endif
 
 		recorder_visibility_button.set_active_state (Gtkmm2ext::ImplicitActive);
 
@@ -795,9 +806,11 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 			mixer_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
 
+#ifndef LIVETRAX
 		if (rc_option_editor && (rc_option_editor->tabbed() || rc_option_editor->tabbed_by_default())) {
 			prefs_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
+#endif
 
 		if (recorder && (recorder->tabbed() || recorder->tabbed_by_default())) {
 			recorder_visibility_button.set_active_state (Gtkmm2ext::Off);
@@ -891,8 +904,10 @@ ARDOUR_UI::tabbable_state_change (Tabbable& t)
 		vis_button = &editor_visibility_button;
 	} else if (&t == mixer) {
 		vis_button = &mixer_visibility_button;
+#ifndef LIVETRAX
 	} else if (&t == rc_option_editor) {
 		vis_button = &prefs_visibility_button;
+#endif
 	} else if (&t == recorder) {
 		vis_button = &recorder_visibility_button;
 	} else if (&t == trigger_page) {

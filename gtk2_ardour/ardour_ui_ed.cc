@@ -714,29 +714,37 @@ ARDOUR_UI::install_dependent_actions ()
 
 	/* XXX */
 
+#ifdef LIVETRAX
+	ActionManager::register_action (common_actions, X_("menu-show-preferences"), _("Preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_mixer_prefs));
+	ActionManager::register_action (common_actions, X_("show-preferences"), _("Preferences"), sigc::mem_fun (*this, &ARDOUR_UI::show_mixer_prefs));
+	ActionManager::register_action (common_actions, X_("hide-preferences"), _("Hide"), sigc::mem_fun (*rc_option_editor, &Gtk::Widget::hide));
+#else
 	ActionManager::register_action (common_actions, X_("menu-show-preferences"), _("Preferences"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
+	ActionManager::register_action (common_actions, X_("show-preferences"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
+	ActionManager::register_action (common_actions, X_("hide-preferences"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), rc_option_editor));
+	ActionManager::register_action (common_actions, X_("attach-preferences"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), rc_option_editor));
+	ActionManager::register_action (common_actions, X_("detach-preferences"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), rc_option_editor));
+	ActionManager::register_action (common_actions, X_("change-preferences-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::button_change_tabbable_visibility), rc_option_editor));
+	ActionManager::register_action (common_actions, X_("key-change-preferences-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_change_tabbable_visibility), rc_option_editor));
+#endif
 
 	ActionManager::register_action (common_actions, X_("hide-editor"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), editor));
 	ActionManager::register_action (common_actions, X_("hide-mixer"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), mixer));
-	ActionManager::register_action (common_actions, X_("hide-preferences"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), rc_option_editor));
 	ActionManager::register_action (common_actions, X_("hide-recorder"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), recorder));
 	ActionManager::register_action (common_actions, X_("hide-trigger"), _("Hide"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::hide_tabbable), trigger_page));
 
 	ActionManager::register_action (common_actions, X_("attach-editor"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), editor));
 	ActionManager::register_action (common_actions, X_("attach-mixer"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), mixer));
-	ActionManager::register_action (common_actions, X_("attach-preferences"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), rc_option_editor));
 	ActionManager::register_action (common_actions, X_("attach-recorder"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), recorder));
 	ActionManager::register_action (common_actions, X_("attach-trigger"), _("Attach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::attach_tabbable), trigger_page));
 
 	ActionManager::register_action (common_actions, X_("detach-editor"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), editor));
 	ActionManager::register_action (common_actions, X_("detach-mixer"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), mixer));
-	ActionManager::register_action (common_actions, X_("detach-preferences"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), rc_option_editor));
 	ActionManager::register_action (common_actions, X_("detach-recorder"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), recorder));
 	ActionManager::register_action (common_actions, X_("detach-trigger"), _("Detach"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::detach_tabbable), trigger_page));
 
 	ActionManager::register_action (common_actions, X_("show-editor"), _("Show Editor"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), editor));
 	ActionManager::register_action (common_actions, X_("show-mixer"), _("Show Mixer"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), mixer));
-	ActionManager::register_action (common_actions, X_("show-preferences"), _("Show"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), rc_option_editor));
 	ActionManager::register_action (common_actions, X_("show-recorder"), _("Show Recorder"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), recorder));
 	ActionManager::register_action (common_actions, X_("show-trigger"), _("Show Cues"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::show_tabbable), trigger_page));
 
@@ -746,7 +754,6 @@ ARDOUR_UI::install_dependent_actions ()
 	*/
 	ActionManager::register_action (common_actions, X_("change-editor-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::button_change_tabbable_visibility), editor));
 	ActionManager::register_action (common_actions, X_("change-mixer-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::button_change_tabbable_visibility), mixer));
-	ActionManager::register_action (common_actions, X_("change-preferences-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::button_change_tabbable_visibility), rc_option_editor));
 	ActionManager::register_action (common_actions, X_("change-recorder-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::button_change_tabbable_visibility), recorder));
 	ActionManager::register_action (common_actions, X_("change-trigger-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::button_change_tabbable_visibility), trigger_page));
 
@@ -756,7 +763,6 @@ ARDOUR_UI::install_dependent_actions ()
 	*/
 	ActionManager::register_action (common_actions, X_("key-change-editor-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_change_tabbable_visibility), editor));
 	ActionManager::register_action (common_actions, X_("key-change-mixer-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_change_tabbable_visibility), mixer));
-	ActionManager::register_action (common_actions, X_("key-change-preferences-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_change_tabbable_visibility), rc_option_editor));
 	ActionManager::register_action (common_actions, X_("key-change-recorder-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_change_tabbable_visibility), recorder));
 	ActionManager::register_action (common_actions, X_("key-change-trigger-visibility"), _("Change"), sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::key_change_tabbable_visibility), trigger_page));
 
@@ -970,8 +976,10 @@ ARDOUR_UI::save_ardour_state ()
 		current_tab = "recorder";
 	} else if (current_page_number == _tabs.page_num (trigger_page->contents())) {
 		current_tab = "trigger";
+#ifndef LIVETRAX
 	} else if (current_page_number == _tabs.page_num (rc_option_editor->contents())) {
 		current_tab = "preferences";
+#endif
 	}
 
 	main_window_node.set_property (X_("current-tab"), current_tab);

@@ -247,7 +247,11 @@ Editor::snap_mode_button_clicked (GdkEventButton* ev)
 
 	RCOptionEditor* rc_option_editor = ARDOUR_UI::instance()->get_rc_option_editor();
 	if (rc_option_editor) {
+#ifdef LIVETRAX
+		rc_option_editor->present ();
+#else
 		ARDOUR_UI::instance()->show_tabbable (rc_option_editor);
+#endif
 		rc_option_editor->set_current_page (_("Editor/Snap"));
 	}
 

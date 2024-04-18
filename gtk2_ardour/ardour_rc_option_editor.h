@@ -36,13 +36,14 @@
  */
 
 /** Editor for options which are obtained from and written back to one of the .rc files. */
-class RCOptionEditor : public OptionEditorWindow
+class RCOptionEditor : public OptionEditorContainer, public ARDOUR::SessionHandlePtr, public ArdourWidgets::Tabbable
 {
 public:
 	RCOptionEditor ();
 
 	void set_session (ARDOUR::Session*);
 
+	Gtk::Window* use_own_window (bool and_fill_it);
 	XMLNode& get_state () const;
 
 	bool on_key_release_event (GdkEventKey*);
@@ -62,12 +63,6 @@ private:
 	BoolOption* _cairo_image_surface;
 	TransportMastersWidget _transport_masters_widget;
 
-	Gtk::Button audiomidi_tab_button;
-	Gtk::Button midi_tab_button;
-	Gtk::Button session_tab_button;
-	Gtk::Button preferences_tab_button;
-	Gtk::Button sync_tab_button;
-
 	PBD::ScopedConnection parameter_change_connection;
 	PBD::ScopedConnection engine_started_connection;
 
@@ -82,6 +77,17 @@ private:
 	bool set_default_lower_midi_note (std::string);
 	std::string get_default_upper_midi_note ();
 	bool set_default_upper_midi_note (std::string);
+
+	/* plugin actions */
+	void plugin_scan_refresh ();
+	void plugin_reset_stats ();
+	void clear_vst2_cache ();
+	void clear_vst2_blacklist ();
+	void clear_vst3_cache ();
+	void clear_vst3_blacklist ();
+	void clear_au_cache ();
+	void clear_au_blacklist ();
+	void edit_vst_path (std::string const&, std::string const&, sigc::slot<std::string>, sigc::slot<bool, std::string>);
 };
 
 #endif /* __gtk_ardour_rc_option_editor_h__ */

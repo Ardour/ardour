@@ -337,11 +337,13 @@ ARDOUR_UI::connect_transport_elements ()
 	error_alert_button.set_related_action(act);
 	error_alert_button.set_fallthrough_to_parent(true);
 
+#ifndef LIVETRAX
 	editor_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-editor-visibility")));
 	mixer_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-mixer-visibility")));
 	prefs_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-preferences-visibility")));
 	recorder_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-recorder-visibility")));
 	trigger_page_visibility_button.set_related_action (ActionManager::get_action (X_("Common"), X_("change-trigger-visibility")));
+#endif
 
 	act = ActionManager::get_action ("Transport", "ToggleAutoReturn");
 	auto_return_button.set_related_action (act);
@@ -389,7 +391,9 @@ ARDOUR_UI::setup_transport ()
 
 	editor_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), editor));
 	mixer_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), mixer));
+#ifndef LIVETRAX
 	prefs_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), rc_option_editor));
+#endif
 	recorder_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), recorder));
 	trigger_page_visibility_button.signal_drag_failed().connect (sigc::bind (sigc::ptr_fun (drag_failed), trigger_page));
 
@@ -484,9 +488,11 @@ ARDOUR_UI::setup_transport ()
 	                                    string_compose (_("Left-Click to show the %1 window\n"
 	                                                      "Right-click to show more options"), mixer->name()));
 
+#ifndef LIVETRAX
 	Gtkmm2ext::UI::instance()->set_tip (prefs_visibility_button,
 	                                    string_compose (_("Left-Click to show the %1 window\n"
 	                                                      "Right-click to show more options"), rc_option_editor->name()));
+#endif
 
 	Gtkmm2ext::UI::instance()->set_tip (recorder_visibility_button,
 	                                    string_compose (_("Left-Click to show the %1 window\n"
@@ -980,7 +986,11 @@ void
 ARDOUR_UI::show_ui_prefs ()
 {
 	if (rc_option_editor) {
+#ifdef LIVETRAX
+		rc_option_editor->present();
+#else
 		show_tabbable (rc_option_editor);
+#endif
 		rc_option_editor->set_current_page (_("Appearance"));
 	}
 }
@@ -989,7 +999,11 @@ void
 ARDOUR_UI::show_mixer_prefs ()
 {
 	if (rc_option_editor) {
+#ifdef LIVETRAX
+		rc_option_editor->present();
+#else
 		show_tabbable (rc_option_editor);
+#endif
 		rc_option_editor->set_current_page (_("Signal Flow"));
 	}
 }
@@ -998,7 +1012,11 @@ void
 ARDOUR_UI::show_plugin_prefs ()
 {
 	if (rc_option_editor) {
+#ifdef LIVETRAX
+		rc_option_editor->present ();
+#else
 		show_tabbable (rc_option_editor);
+#endif
 		rc_option_editor->set_current_page (_("Plugins"));
 	}
 }
@@ -1011,7 +1029,11 @@ ARDOUR_UI::click_button_clicked (GdkEventButton* ev)
 		return false;
 	}
 
+#ifdef LIVETRAX
+	rc_option_editor->present();
+#else
 	show_tabbable (rc_option_editor);
+#endif
 	rc_option_editor->set_current_page (_("Metronome"));
 	return true;
 }

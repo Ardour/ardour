@@ -78,7 +78,7 @@
 #include "meter_patterns.h"
 #include "midi_tracer.h"
 #include "plugin_scan_dialog.h"
-#include "livetrax_rc_option_editor.h"
+#include "rc_option_editor.h"
 #include "sfdb_ui.h"
 #include "transport_masters_dialog.h"
 #include "ui_config.h"
@@ -2357,27 +2357,18 @@ MidiPortOptions::pretty_name_edit (std::string const & path, string const & new_
 	AudioEngine::instance()->set_port_pretty_name ((*iter)[midi_port_columns.fullname], new_text);
 }
 
+
+
 RCOptionEditor::RCOptionEditor ()
-	: OptionEditorWindow (Config, _("Preferences"))
+	: OptionEditorContainer (Config)
+	  /* pack self-as-vbox into tabbable */
+	, Tabbable (*this, _("Preferences"), X_("preferences"), /* detached by default */ false)
 	, _rc_config (Config)
 	, _mixer_strip_visibility ("mixer-element-visibility")
 	, _cairo_image_surface (0)
-	, audiomidi_tab_button (_("Audio\nSystem\nSettings"))
-	, midi_tab_button (_("MIDI\nSystem\nSettings"))
-	, session_tab_button (_("Session\nSettings"))
-	, preferences_tab_button (_("Preferences"))
-	, sync_tab_button (_("Sync"))
 {
 	UIConfiguration::instance().ParameterChanged.connect (sigc::mem_fun (*this, &RCOptionEditor::parameter_changed));
 	BoolOption* bo;
-
-	button_box().pack_start (audiomidi_tab_button, true, true);
-	button_box().pack_start (midi_tab_button, true, true);
-	button_box().pack_start (session_tab_button, true, true);
-	button_box().pack_start (preferences_tab_button, true, true);
-	button_box().pack_start (sync_tab_button, true, true);
-	button_box().set_homogeneous (true);
-	button_box().show_all ();
 
 	/* GENERAL *****************************************************************/
 
@@ -3959,6 +3950,369 @@ These settings will only take effect after %1 is restarted.\n\
 	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
 					    _("<b>When enabled</b> plugins will be reset at transport stop. When disabled plugins will be left unchanged at transport stop.\n\nThis mostly affects plugins with a \"tail\" like Reverbs."));
 
+	/* PLUGINS ******************************************************************/
+
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined VST3_SUPPORT)
+	add_option (_("Plugins"), new OptionEditorHeading (_("Scan/Discover")));
+	add_option (_("Plugins"),
+			new RcActionButton (_("Scan for Plugins"),
+				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
+
+	add_option (_("Plugins"), new PluginScanTimeOutSliderOption (_rc_config));
+#endif
+
+	add_option (_("Plugins"), new OptionEditorHeading (_("General")));
+
+#if (defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT || defined AUDIOUNIT_SUPPORT || defined VST3_SUPPORT)
+
+	bo = new BoolOption (
+			"discover-plugins-on-start",
+			_("Scan for [new] Plugins on Application Start"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_discover_plugins_on_start),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_discover_plugins_on_start)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> new plugins are searched, tested and added to the cache index on application start. When disabled new plugins will only be available after triggering a 'Scan' manually"));
+
+	bo = new BoolOption (
+			"show-plugin-scan-window",
+			_("Always Display Plugin Scan Progress"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_plugin_scan_window),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_plugin_scan_window)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> a popup window showing plugin scan progress is displayed for indexing (cache load) and discovery (detect new plugins)"));
+
+	bo = new BoolOption (
+			"verbose-plugin-scan",
+			_("Verbose Plugin Scan"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_verbose_plugin_scan),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_verbose_plugin_scan)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> additional information for every plugin is shown to the Plugin Manager Log."));
+#endif
+
+	bo = new BoolOption (
+			"show-manager-if-plugins-are-missing",
+			_("Open Plugin Manager window when missing plugins are found"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_manager_if_plugins_are_missing),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_manager_if_plugins_are_missing)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> the Plugin Manager is display at session load if the session contains any plugins that are missing, or plugins have been updated and require a rescan."));
+
+	bo = new BoolOption (
+		"new-plugins-active",
+			_("Make new plugins active"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_new_plugins_active),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_new_plugins_active)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> plugins will be activated when they are added to tracks/busses.\n<b>When disabled</b> plugins will be left inactive when they are added to tracks/busses"));
+
+	bo = new BoolOption (
+		"setup-sidechain",
+			_("Setup Sidechain ports when loading plugin with aux inputs"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_setup_sidechain),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_setup_sidechain)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> sidechain ports are created for plugins at instantiation time if a plugin has sidechain inputs. Note that the ports themselves will have to be manually connected, so while the plugin pins are connected they are initially fed with silence.\n<b>When disabled</b> sidechain input pins will remain unconnected."));
+
+	add_option (_("Plugins/GUI"), new OptionEditorHeading (_("Plugin GUI")));
+	add_option (_("Plugins/GUI"),
+	     new BoolOption (
+		     "open-gui-after-adding-plugin",
+		     _("Automatically open the plugin GUI when adding a new plugin"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_open_gui_after_adding_plugin),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_open_gui_after_adding_plugin)
+		     ));
+
+	bo = new BoolOption (
+		"one-plugin-window-only",
+		_("Show only one plugin window at a time"),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_one_plugin_window_only),
+		sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_one_plugin_window_only)
+		);
+	add_option (_("Plugins/GUI"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+					    _("<b>When enabled</b> at most one plugin GUI window can be on-screen at a time. <b>When disabled</b>, the number of visible plugin GUI windows is unlimited"));
+
+	ComboOption<PluginGUIBehavior>* puimode = new ComboOption<PluginGUIBehavior> (
+			"plugin-gui-behavior",
+			_("Closing a Plugin GUI Window"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_plugin_gui_behavior),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_plugin_gui_behavior)
+			);
+		puimode->add (PluginGUIHide, _("only hides the window"));
+		puimode->add (PluginGUIDestroyAny, _("destroys the GUI instance, releasing resources"));
+		puimode->add (PluginGUIDestroyVST, _("only destroys VST2/3 UIs, hides others"));
+
+		add_option (_("Plugins/GUI"), puimode);
+	Gtkmm2ext::UI::instance()->set_tip (puimode->tip_widget(), _("Closing a plugin window, usually only hides it. This makes is fast to open the same plugin UI again at a later time.\n\nMost plugin UIs are inactive and do not consume any CPU resources while they are not mapped on the screen.\n\nHowever some plugins do consume significant CPU and GPU resources even when they are not currently displayed. This option allows one to work around the issue."));
+
+#ifdef LV2_EXTENDED
+	add_option (_("Plugins/GUI"), new OptionEditorHeading (_("Mixer Strip Inline Display")));
+	add_option (_("Plugins/GUI"),
+	     new BoolOption (
+		     "show-inline-display-by-default",
+		     _("Show Plugin Inline Display on Mixer Strip by default"),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_show_inline_display_by_default),
+		     sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_show_inline_display_by_default)
+		     ));
+
+	_plugin_prefer_inline = new BoolOption (
+			"prefer-inline-over-gui",
+			_("Don't automatically open the plugin GUI when the plugin has an inline display mode"),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_prefer_inline_over_gui),
+			sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_prefer_inline_over_gui)
+			);
+	add_option (_("Plugins/GUI"), _plugin_prefer_inline);
+#endif
+
+
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT || defined VST3_SUPPORT)
+	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST")));
+#if 0
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Scan for Plugins"),
+				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
+#endif
+
+#if (defined AUDIOUNIT_SUPPORT && defined MACVST_SUPPORT)
+	bo = new BoolOption (
+			"use-macvst",
+			_("Enable Mac VST2 support (requires restart or re-scan)"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_macvst),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_macvst)
+			);
+	add_option (_("Plugins/VST"), bo);
+#endif
+
+#ifndef MIXBUS
+
+#ifdef WINDOWS_VST_SUPPORT
+	bo = new BoolOption (
+			"use-windows-vst",
+			_("Enable Windows VST2 support (requires restart or re-scan)"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_windows_vst),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_windows_vst)
+			);
+	add_option (_("Plugins/VST"), bo);
+#endif
+
+#ifdef LXVST_SUPPORT
+	bo = new BoolOption (
+			"use-lxvst",
+			_("Enable Linux VST2 support (requires restart or re-scan)"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_lxvst),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_lxvst)
+			);
+	add_option (_("Plugins/VST"), bo);
+#endif
+
+#ifdef VST3_SUPPORT
+	bo = new BoolOption (
+			"use-vst3",
+			_("Enable VST3 support (requires restart or re-scan)"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_vst3),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_vst3)
+			);
+	add_option (_("Plugins/VST"), bo);
+#endif
+
+#endif // !Mixbus
+
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
+	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST 2.x")));
+
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_vst2_cache),
+				_("VST 2 Cache:")));
+
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_vst2_blacklist),
+				_("VST 2 Ignorelist:")));
+#endif
+
+#ifdef LXVST_SUPPORT
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Edit"),
+				sigc::bind (sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
+					_("Set Linux VST2 Search Path"),
+					PluginManager::instance().get_default_lxvst_path (),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_lxvst),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugin_path_lxvst)
+					),
+				_("Linux VST2 Path:")));
+
+	add_option (_("Plugins/VST"),
+			new RcConfigDisplay (
+				"plugin-path-lxvst",
+				_("Path:"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_lxvst),
+				0));
+#endif
+
+#ifdef WINDOWS_VST_SUPPORT
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Edit"),
+				sigc::bind (sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
+					_("Set Windows VST2 Search Path"),
+					PluginManager::instance().get_default_windows_vst_path (),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_vst),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugin_path_vst)
+					),
+				_("Windows VST2 Path:")));
+
+	add_option (_("Plugins/VST"),
+			new RcConfigDisplay (
+				"plugin-path-vst",
+				_("Path:"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_vst),
+				';'));
+#endif
+
+#ifdef VST3_SUPPORT
+	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST 3")));
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_vst3_cache),
+				_("VST 3 Cache:")));
+
+	add_option (_("Plugins/VST"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_vst3_blacklist),
+				_("VST 3 Ignorelist:")));
+
+	RcActionButton* vst3_path =
+			new RcActionButton (_("Edit"),
+				sigc::bind (sigc::mem_fun (*this, &RCOptionEditor::edit_vst_path),
+					_("Set Additional VST3 Search Path"),
+					"", /* default is blank */
+					sigc::mem_fun (*_rc_config, &RCConfiguration::get_plugin_path_vst3),
+					sigc::mem_fun (*_rc_config, &RCConfiguration::set_plugin_path_vst3)
+					),
+				_("Additional VST3 Path:"));
+
+	vst3_path->set_note (_("Customizing VST3 paths is discouraged. Note that default VST3 paths as per "
+	                       "<a href=\"https://steinbergmedia.github.io/vst3_dev_portal/pages/Technical+Documentation/Locations+Format/Plugin+Locations.html\">specification</a> "
+	                       "are always searched, and need not be explicitly set."));
+	add_option (_("Plugins/VST"), vst3_path);
+
+	// -> Appearance/Mixer ?
+	add_option (_("Plugins/VST"),
+	     new BoolOption (
+		     "show-vst3-micro-edit-inline",
+		     _("Automatically show 'Micro Edit' tagged controls on the mixer-strip"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_show_vst3_micro_edit_inline),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_show_vst3_micro_edit_inline)
+		     ));
+
+#if (defined WINDOWS_VST_SUPPORT || defined MACVST_SUPPORT || defined LXVST_SUPPORT)
+	add_option (_("Plugins/VST"), new OptionEditorHeading (_("VST2/VST3")));
+	add_option (_("Plugins/VST"),
+	     new BoolOption (
+		     "conceal-vst2-if-vst3-exists",
+		     _("Conceal VST2 Plugin if matching VST3 exists"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_conceal_vst2_if_vst3_exists),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_conceal_vst2_if_vst3_exists)
+		     ));
+#endif
+#endif // VST3
+#endif // Any VST (2 or 3)
+
+#ifdef AUDIOUNIT_SUPPORT
+
+	add_option (_("Plugins/Audio Unit"), new OptionEditorHeading (_("Audio Unit")));
+#if 0
+	add_option (_("Plugins/Audio Unit"),
+			new RcActionButton (_("Scan for Plugins"),
+				sigc::mem_fun (*this, &RCOptionEditor::plugin_scan_refresh)));
+#endif
+
+	bo = new BoolOption (
+			"use-audio-units",
+			_("Enable Audio Unit support (requires restart or re-scan)"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_use_audio_units),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_use_audio_units)
+			);
+	add_option (_("Plugins/Audio Unit"), bo);
+
+	add_option (_("Plugins/Audio Unit"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_au_cache),
+				_("AU Cache:")));
+
+	add_option (_("Plugins/Audio Unit"),
+			new RcActionButton (_("Clear"),
+				sigc::mem_fun (*this, &RCOptionEditor::clear_au_blacklist),
+				_("AU Ignorelist:")));
+#endif
+
+	add_option (_("Plugins"), new OptionEditorHeading (_("LV1/LV2")));
+	add_option (_("Plugins"),
+	     new BoolOption (
+		     "conceal-lv1-if-lv2-exists",
+		     _("Conceal LADSPA (LV1) Plugins if matching LV2 exists"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_conceal_lv1_if_lv2_exists),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_conceal_lv1_if_lv2_exists)
+		     ));
+	add_option (_("Plugins"), new OptionEditorHeading (_("Instrument")));
+
+	bo = new BoolOption (
+			"ask-replace-instrument",
+			_("Ask to replace existing instrument plugin"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_ask_replace_instrument),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_ask_replace_instrument)
+			);
+	add_option (_("Plugins"), bo);
+
+	bo = new BoolOption (
+			"ask-setup_instrument",
+			_("Interactively configure instrument plugins on insert"),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::get_ask_setup_instrument),
+			sigc::mem_fun (*_rc_config, &RCConfiguration::set_ask_setup_instrument)
+			);
+	add_option (_("Plugins"), bo);
+	Gtkmm2ext::UI::instance()->set_tip (bo->tip_widget(),
+			_("<b>When enabled</b> show a dialog to select instrument channel configuration before adding a multichannel plugin."));
+
+	add_option (_("Plugins"), new OptionEditorHeading (_("Statistics")));
+
+	add_option (_("Plugins"),
+			new RcActionButton (_("Reset Statistics"),
+				sigc::mem_fun (*this, &RCOptionEditor::plugin_reset_stats)));
+
+	add_option (_("Plugins"),
+	     new SpinOption<int32_t> (
+		     "max-plugin-chart",
+		     _("Plugin chart (use-count) length"),
+				 sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_max_plugin_chart),
+				 sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_max_plugin_chart),
+		     10, 25, 1, 5
+		     ));
+
+	add_option (_("Plugins"),
+	     new SpinOption<int32_t> (
+		     "max-plugin-recent",
+		     _("Plugin recent list length"),
+				 sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::get_max_plugin_recent),
+				 sigc::mem_fun (UIConfiguration::instance(), &UIConfiguration::set_max_plugin_recent),
+		     10, 50, 1, 5
+		     ));
+
+	add_option (_("Plugins"), new OptionEditorBlank ());
+
 	/* MONITORING, SOLO) ********************************************************/
 
 	add_option (_("Monitoring"), new OptionEditorHeading (_("Monitoring")));
@@ -4646,9 +5000,19 @@ These settings will only take effect after %1 is restarted.\n\
 	parameter_changed ("use-opengl-view");
 #endif
 
-	// XMLNode* node = ARDOUR_UI::instance()->preferences_settings();
+	XMLNode* node = ARDOUR_UI::instance()->preferences_settings();
+	if (node) {
+		/* gcc4 complains about ambiguity with Gtk::Widget::set_state
+		   (Gtk::StateType) here !!!
+		*/
+		Tabbable::set_state (*node, Stateful::loading_state_version);
+	}
 
 	set_current_page (_("General"));
+
+	/* Place the search entry */
+
+	treeview_packer.pack_end (search_packer, false, false);
 
 	/* Connect metadata */
 
@@ -4670,7 +5034,7 @@ RCOptionEditor::on_key_release_event (GdkEventKey* event)
 {
 	if (Keyboard::modifier_state_equals (event->state, Keyboard::close_window_modifier)) {
 		if (event->keyval == (guint) Keyboard::close_window_key) {
-			hide ();
+			WindowProxy::hide ();
 			return true;
 		}
 	}
@@ -4681,7 +5045,7 @@ RCOptionEditor::on_key_release_event (GdkEventKey* event)
 void
 RCOptionEditor::set_session (Session *s)
 {
-	ArdourWindow::set_session (s);
+	SessionHandlePtr::set_session (s);
 	_transport_masters_widget.set_session (s);
 }
 
@@ -4709,6 +5073,14 @@ RCOptionEditor::parameter_changed (string const & p)
 		bool const s = Config->get_send_ltc ();
 		_ltc_send_continuously->set_sensitive (s);
 		_ltc_volume_slider->set_sensitive (s);
+	} else if (p == "open-gui-after-adding-plugin" || p == "show-inline-display-by-default") {
+#ifdef LV2_EXTENDED
+		_plugin_prefer_inline->set_sensitive (UIConfiguration::instance().get_open_gui_after_adding_plugin() && UIConfiguration::instance().get_show_inline_display_by_default());
+#endif
+	} else if (p == "conceal-lv1-if-lv2-exists") {
+		plugin_scan_refresh ();
+	} else if (p == "conceal-vst2-if-vst3-exists") {
+		plugin_scan_refresh ();
 	}
 }
 
@@ -4727,10 +5099,83 @@ void RCOptionEditor::show_transport_masters () {
 	tact->set_active();
 }
 
+void RCOptionEditor::plugin_scan_refresh () {
+	/* first argument says discover new plugins, second means be verbose */
+	PluginScanDialog psd (false, true, current_toplevel ());
+	psd.start ();
+	ARDOUR_UI::instance()->show_plugin_manager ();
+}
+
+void RCOptionEditor::plugin_reset_stats () {
+	PluginManager::instance().reset_stats();
+}
+
+void RCOptionEditor::clear_vst2_cache () {
+	PluginManager::instance().clear_vst_cache();
+}
+
+void RCOptionEditor::clear_vst2_blacklist () {
+	PluginManager::instance().clear_vst_blacklist();
+}
+
+void RCOptionEditor::clear_vst3_cache () {
+	PluginManager::instance().clear_vst3_cache();
+}
+
+void RCOptionEditor::clear_vst3_blacklist () {
+	PluginManager::instance().clear_vst3_blacklist();
+}
+
+void RCOptionEditor::clear_au_cache () {
+	PluginManager::instance().clear_au_cache();
+}
+
+void RCOptionEditor::clear_au_blacklist () {
+	PluginManager::instance().clear_au_blacklist();
+}
+
+void
+RCOptionEditor::edit_vst_path (std::string const& title, std::string const& dflt, sigc::slot<string> get, sigc::slot<bool, string> set)
+{
+	/* see also PluginManagerUI::edit_vst_path */
+	PathsDialog pd (*current_toplevel(), title, get (), dflt);
+	if (pd.run () != Gtk::RESPONSE_ACCEPT) {
+		return;
+	}
+	pd.hide();
+	set (pd.get_serialized_paths());
+	MessageDialog msg (_("Re-scan Plugins now?"), false, Gtk::MESSAGE_QUESTION, Gtk::BUTTONS_YES_NO, true);
+	msg.set_default_response (Gtk::RESPONSE_YES);
+	if (msg.run() != Gtk::RESPONSE_YES) {
+		return;
+	}
+	msg.hide ();
+	plugin_scan_refresh ();
+}
+
+
+Gtk::Window*
+RCOptionEditor::use_own_window (bool and_fill_it)
+{
+	bool new_window = !own_window ();
+
+	Gtk::Window* win = Tabbable::use_own_window (and_fill_it);
+
+	if (win && new_window) {
+		win->set_name ("PreferencesWindow");
+		ARDOUR_UI::instance()->setup_toplevel_window (*win, _("Preferences"), this);
+		win->resize (1, 1);
+		win->set_resizable (false);
+	}
+
+	return win;
+}
+
 XMLNode&
 RCOptionEditor::get_state () const
 {
 	XMLNode* node = new XMLNode (X_("Preferences"));
+	node->add_child_nocopy (Tabbable::get_state());
 	return *node;
 }
 
