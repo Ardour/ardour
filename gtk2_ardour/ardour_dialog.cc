@@ -191,3 +191,9 @@ ArdourDialog::set_ui_sensitive (bool yn)
 {
 	_sensitive = yn;
 }
+
+void
+ArdourDialog::add_widget_action (Gtk::Widget& w)
+{
+	get_action_area()->add (w);
+}

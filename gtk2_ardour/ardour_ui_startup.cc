@@ -205,8 +205,8 @@ audio will be resampled, which reduces quality.\n"), desired, PROGRAM_NAME, actu
 	switch (dialog.run()) {
 	case RESPONSE_YES:
 		ARDOUR::AudioEngine::instance ()->stop ();
-		(dynamic_cast<EngineControl*> (audio_midi_setup.get (true)))->run ();
-		(dynamic_cast<EngineControl*> (audio_midi_setup.get (true)))->hide ();
+		(dynamic_cast<EngineControlDialog*> (audio_midi_setup.get (true)))->run ();
+		(dynamic_cast<EngineControlDialog*> (audio_midi_setup.get (true)))->hide ();
 		return AudioEngine::instance()->running () ? -1 : 1;
 	case RESPONSE_ACCEPT:
 		return 0;
@@ -580,10 +580,10 @@ ARDOUR_UI::starting ()
 	 *  audio backend end up.
 	 */
 
-	EngineControl* amd;
+	EngineControlDialog* amd;
 
 	try {
-		amd = dynamic_cast<EngineControl*> (audio_midi_setup.get (true));
+		amd = dynamic_cast<EngineControlDialog*> (audio_midi_setup.get (true));
 	} catch (...) {
 		std::cerr << "audio-midi engine setup failed."<< std::endl;
 		return -1;
@@ -922,10 +922,10 @@ ARDOUR_UI::load_from_application_api (const std::string& path)
 
 		/* do this again */
 
-		EngineControl* amd;
+		EngineControlDialog* amd;
 
 		try {
-			amd = dynamic_cast<EngineControl*> (audio_midi_setup.get (true));
+			amd = dynamic_cast<EngineControlDialog*> (audio_midi_setup.get (true));
 		} catch (...) {
 			std::cerr << "audio-midi engine setup failed."<< std::endl;
 			return;

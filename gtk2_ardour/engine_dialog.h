@@ -45,7 +45,7 @@
 
 #include "ardour_dialog.h"
 
-class EngineControl : public ArdourDialog, public PBD::ScopedConnectionList
+class EngineControl : public PBD::ScopedConnectionList, virtual public sigc::trackable
 {
 public:
 	EngineControl ();
@@ -57,6 +57,12 @@ public:
 	bool     set_state (const XMLNode&);
 
 	void set_desired_sample_rate (uint32_t);
+
+	Gtk::Widget& contents() { return notebook; }
+	void on_show ();
+	bool on_delete_event (GdkEventAny*);
+
+	void set_parent (ArdourDialog&);
 
 private:
 	Gtk::Notebook notebook;
@@ -347,8 +353,6 @@ private:
 	sigc::connection latency_timeout;
 	sigc::connection lm_back_button_signal;
 
-	void on_show ();
-	void on_map ();
 	void on_monitor_expand ();
 	void on_latency_expand ();
 	void config_parameter_changed (std::string const&);
@@ -382,8 +386,6 @@ private:
 
 	/* main dialog events */
 	void on_switch_page (GtkNotebookPage*, guint page_num);
-	bool on_delete_event (GdkEventAny*);
-	void on_response (int);
 
 	void connect_disconnect_click ();
 	void calibrate_audio_latency ();
@@ -396,6 +398,27 @@ private:
 	PBD::ScopedConnection     running_connection;
 	PBD::ScopedConnectionList stopped_connection;
 	PBD::ScopedConnection     devicelist_connection;
+
+	ArdourDialog* parent;
+};
+
+class EngineControlDialog : public ArdourDialog
+{
+  public:
+	EngineControlDialog ();
+
+	XMLNode& get_state () const { return engine_control.get_state (); }
+	bool     set_state (XMLNode const & node) { return engine_control.set_state (node); }
+
+	void set_desired_sample_rate (uint32_t hz) { engine_control.set_desired_sample_rate (hz); }
+
+  private:
+	EngineControl engine_control;
+
+	void on_show ();
+	void on_map ();
+	void on_response (int);
+	bool on_delete_event (GdkEventAny*);
 };
 
 #endif /* __gtk2_ardour_engine_dialog_h__ */

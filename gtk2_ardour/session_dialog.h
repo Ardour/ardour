@@ -47,7 +47,7 @@
 
 #include "ardour_dialog.h"
 
-class EngineControl;
+class EngineControlDialog;
 
 class SessionDialog : public ArdourDialog
 {

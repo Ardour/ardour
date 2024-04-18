@@ -27,7 +27,7 @@
 
 class ArdourDialog;
 class NewUserWizard;
-class EngineControl;
+class EngineControlDialog;
 class SessionDialog;
 class PluginScanDialog;
 
@@ -59,7 +59,7 @@ class StartupFSM : public sigc::trackable
 		WaitingForPlugins
 	};
 
-	StartupFSM (EngineControl&);
+	StartupFSM (EngineControlDialog&);
 	~StartupFSM ();
 
 	void start ();
@@ -121,7 +121,7 @@ class StartupFSM : public sigc::trackable
 	 * created and destroyed within the scope of startup.
 	 */
 
-	EngineControl& audiomidi_dialog;
+	EngineControlDialog& audiomidi_dialog;
 	NewUserWizard* new_user_dialog;
 	SessionDialog* session_dialog;
 	ArdourDialog* pre_release_dialog;
