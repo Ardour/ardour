@@ -619,12 +619,12 @@
 
   NSRect nsrect = [self bounds];
   GdkRectangle r = { nsrect.origin.x, nsrect.origin.y, nsrect.size.width, nsrect.size.height };
-  
+
   GDK_NOTE (EVENTS, g_print ("setNeedsDisplay, current NDR %p\n", impl->needs_display_region));
 
   if (!impl->needs_display_region)
     impl->needs_display_region = gdk_region_rectangle (&r);
-  else 
+  else
     gdk_region_union_with_rect (impl->needs_display_region, &r);
 
 #if 0
@@ -670,7 +670,7 @@
 
   if (!impl->needs_display_region)
     impl->needs_display_region = gdk_region_rectangle (&r);
-  else 
+  else
     gdk_region_union_with_rect (impl->needs_display_region, &r);
 
 #if 0
@@ -683,7 +683,7 @@
     printf ("\t%d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
   }
 #endif
-  
+
   [super setNeedsDisplayInRect:rect];
 }
 
@@ -759,7 +759,7 @@
     printf ("\t%d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
   }
 #endif
-  
+
   impl->in_paint_rect_count++;
   /* this essentially generates an expose event */
   _gdk_window_process_updates_recurse (gdk_window, region);
@@ -769,7 +769,7 @@
     {
       impl->needs_display_region = NULL;
     }
-  
+
   gdk_region_destroy (region);
 
   if (needsInvalidateShadow)
@@ -805,7 +805,7 @@
 
   if (impl->needs_display_region)
     gdk_region_destroy (impl->needs_display_region);
-  
+
   impl->needs_display_region = gdk_region_rectangle (&r);
 
 #if 0
