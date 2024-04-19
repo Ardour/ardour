@@ -604,7 +604,7 @@
 
 - (void) setNeedsDisplay:(BOOL)yn
 {
-  if (GDK_WINDOW_DESTROYED (gdk_window)) {
+  if (!gdk_window || GDK_WINDOW_DESTROYED (gdk_window)) {
     [super setNeedsDisplay:yn];
     return;
   }
@@ -643,12 +643,17 @@
 
 - (void) setNeedsDisplayInRect:(NSRect)rect
 {
+  if (!gdk_window || GDK_WINDOW_DESTROYED (gdk_window)) {
+	  [super setNeedsDisplayInRect:rect];
+	  return;
+  }
+
   GdkWindowObject* private = GDK_WINDOW_OBJECT (gdk_window);
   GdkWindowImplQuartz* impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
 
   if (!impl) {
-		[super setNeedsDisplayInRect:rect];
-		return;
+	  [super setNeedsDisplayInRect:rect];
+	  return;
   }
 
   GdkRectangle r = { rect.origin.x, rect.origin.y, rect.size.width, rect.size.height };
