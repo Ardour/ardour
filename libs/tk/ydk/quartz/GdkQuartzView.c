@@ -605,6 +605,7 @@
 - (void) setNeedsDisplay:(BOOL)yn
 {
   if (GDK_WINDOW_DESTROYED (gdk_window)) {
+    [super setNeedsDisplay:yn];
     return;
   }
 
@@ -642,8 +643,14 @@
 
 - (void) setNeedsDisplayInRect:(NSRect)rect
 {
-  GdkWindowObject *private;
-  GdkWindowImplQuartz *impl;
+  GdkWindowObject* private = GDK_WINDOW_OBJECT (gdk_window);
+  GdkWindowImplQuartz* impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
+
+  if (!impl) {
+		[super setNeedsDisplayInRect:rect];
+		return;
+  }
+
   GdkRectangle r = { rect.origin.x, rect.origin.y, rect.size.width, rect.size.height };
 
   if (r.width >= 2147483647 || r.height >= 2147483647) {
@@ -652,13 +659,6 @@
     r.y = 0;
     r.width = bounds.size.width;
     r.height = bounds.size.height;
-  }
-  
-  private = GDK_WINDOW_OBJECT (gdk_window);
-  impl = GDK_WINDOW_IMPL_QUARTZ (private->impl);
-
-  if (!impl) {
-    return;
   }
 
   GDK_NOTE (EVENTS, g_print ("setNeedsDisplayInRect, current NDR %p\n", impl->needs_display_region));
@@ -678,7 +678,6 @@
     printf ("\t%d,%d %d x %d\n", rects[n].x, rects[n].y, rects[n].width, rects[n].height);
   }
 #endif
-
   
   [super setNeedsDisplayInRect:rect];
 }
