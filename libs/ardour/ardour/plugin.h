@@ -191,6 +191,9 @@ public:
 	void realtime_locate (bool);
 	void monitoring_changed ();
 
+	/* use plugin for offline processing */
+	virtual void set_non_realtime (bool) {}
+
 	virtual void add_slave (std::shared_ptr<Plugin>, bool realtime) {}
 	virtual void remove_slave (std::shared_ptr<Plugin>) {}
 

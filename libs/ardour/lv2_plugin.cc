@@ -453,6 +453,7 @@ LV2Plugin::LV2Plugin (AudioEngine& engine,
 	, _worker(NULL)
 	, _state_worker(NULL)
 	, _insert_id("0")
+	, _non_realtime (false)
 	, _bpm_control_port_index((uint32_t)-1)
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
@@ -472,6 +473,7 @@ LV2Plugin::LV2Plugin (const LV2Plugin& other)
 	, _worker(NULL)
 	, _state_worker(NULL)
 	, _insert_id(other._insert_id)
+	, _non_realtime (other._non_realtime)
 	, _bpm_control_port_index((uint32_t)-1)
 	, _patch_port_in_index((uint32_t)-1)
 	, _patch_port_out_index((uint32_t)-1)
@@ -1830,6 +1832,12 @@ LV2Plugin::remove_slave (std::shared_ptr<Plugin> p)
 	}
 }
 
+void
+LV2Plugin::set_non_realtime (bool yn)
+{
+	_non_realtime = yn;
+}
+
 bool
 LV2Plugin::has_message_output() const
 {
@@ -2790,7 +2798,7 @@ LV2Plugin::connect_and_run(BufferSet& bufs,
 	TempoMetric metric (tmap->metric_at (timepos_t (start0)));
 
 	if (_freewheel_control_port) {
-		*_freewheel_control_port = _session.engine().freewheeling() ? 1.f : 0.f;
+		*_freewheel_control_port = _non_realtime || _session.engine().freewheeling() ? 1.f : 0.f;
 	}
 
 	if (_bpm_control_port) {
@@ -3379,7 +3387,7 @@ LV2Plugin::run(pframes_t nframes, bool sync_work)
 
 	if (_worker) {
 		// Execute work synchronously if we're freewheeling (export)
-		_worker->set_synchronous(sync_work || session().engine().freewheeling());
+		_worker->set_synchronous(sync_work || _non_realtime || session().engine().freewheeling());
 	}
 
 	// Run the plugin for this cycle

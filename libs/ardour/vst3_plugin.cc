@@ -699,6 +699,12 @@ VST3Plugin::remove_slave (std::shared_ptr<Plugin> p)
 	}
 }
 
+void
+VST3Plugin::set_non_realtime (bool yn)
+{
+	_plug->set_non_realtime (yn);
+}
+
 int
 VST3Plugin::connect_and_run (BufferSet&  bufs,
                              samplepos_t start, samplepos_t end, double speed,
@@ -1166,6 +1172,7 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 	, _is_loading_state (false)
 	, _is_processing (false)
 	, _block_size (0)
+	, _process_offline (false)
 	, _port_id_bypass (UINT32_MAX)
 	, _owner (0)
 	, _add_to_selection (false)
@@ -1764,7 +1771,7 @@ VST3PI::update_processor ()
 	}
 
 	Vst::ProcessSetup setup;
-	setup.processMode        = AudioEngine::instance ()->freewheeling () ? Vst::kOffline : Vst::kRealtime;
+	setup.processMode        = _process_offline || AudioEngine::instance ()->freewheeling () ? Vst::kOffline : Vst::kRealtime;
 	setup.symbolicSampleSize = Vst::kSample32;
 	setup.maxSamplesPerBlock = _block_size;
 	setup.sampleRate         = _context.sampleRate;
@@ -1802,6 +1809,12 @@ VST3PI::set_owner (SessionObject* o)
 	if (!setup_psl_info_handler ()) {
 		setup_info_listener ();
 	}
+}
+
+void
+VST3PI::set_non_realtime (bool yn)
+{
+	_process_offline = yn;
 }
 
 int32
@@ -2315,7 +2328,7 @@ VST3PI::process (float** ins, float** outs, uint32_t n_samples)
 
 	Vst::ProcessData data;
 	data.numSamples         = n_samples;
-	data.processMode        = AudioEngine::instance ()->freewheeling () ? Vst::kOffline : Vst::kRealtime;
+	data.processMode        = _process_offline || AudioEngine::instance ()->freewheeling () ? Vst::kOffline : Vst::kRealtime;
 	data.symbolicSampleSize = Vst::kSample32;
 	data.numInputs          = _n_bus_in;
 	data.numOutputs         = _n_bus_out;

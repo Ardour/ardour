@@ -199,6 +199,7 @@ public:
 	}
 
 	void set_owner (ARDOUR::SessionObject* o);
+	void set_non_realtime (bool);
 
 	void enable_io (std::vector<bool> const&, std::vector<bool> const&);
 
@@ -297,6 +298,7 @@ private:
 	bool    _is_loading_state;
 	bool    _is_processing;
 	int32_t _block_size;
+	bool    _process_offline;
 
 	/* ports */
 	struct Param {
@@ -426,6 +428,7 @@ public:
 	int set_block_size (pframes_t);
 
 	void set_owner (ARDOUR::SessionObject* o);
+	void set_non_realtime (bool);
 
 	void add_slave (std::shared_ptr<Plugin>, bool);
 	void remove_slave (std::shared_ptr<Plugin>);

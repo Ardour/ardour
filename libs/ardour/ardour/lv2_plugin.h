@@ -154,6 +154,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 
 	void add_slave (std::shared_ptr<Plugin>, bool);
 	void remove_slave (std::shared_ptr<Plugin>);
+	void set_non_realtime (bool);
 
 	bool write_from_ui(uint32_t       index,
 	                   uint32_t       protocol,
@@ -226,6 +227,7 @@ class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 	double        _current_bpm;
 	double        _prev_time_scale;  ///< previous Port::speed_ratio
 	PBD::ID       _insert_id;
+	bool          _non_realtime;
 	std::string   _plugin_state_dir;
 	uint32_t      _bpm_control_port_index;
 	uint32_t      _patch_port_in_index;
