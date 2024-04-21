@@ -104,13 +104,13 @@ Session::rt_set_controls (std::shared_ptr<WeakAutomationControlList> cl, double 
 		return;
 	}
 
-	AutomationType type = NullAutomation;
+	bool update_solo_state = false;
 
 	for (auto const& c : *cl) {
 		std::shared_ptr<AutomationControl> ac = c.lock ();
 		if (ac) {
 			ac->set_value (val, gcd);
-			type = ac->desc().type;
+			update_solo_state |= SoloAutomation == ac->desc().type;
 		}
 	}
 
@@ -118,12 +118,8 @@ Session::rt_set_controls (std::shared_ptr<WeakAutomationControlList> cl, double 
 	 * that here.
 	 */
 
-	switch (type) {
-	case SoloAutomation:
+	if (update_solo_state) {
 		update_route_solo_state ();
-		break;
-	default:
-		break;
 	}
 }
 
