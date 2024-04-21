@@ -483,7 +483,8 @@ ARDOUR_UI::livetrax_setup_windows ()
 	hb = manage (new HBox);
 	hb->pack_start (transport_ctrl, false, false);
 
-	livetrax_lock_button = manage (new ArdourButton (_("Lock Icon"), elements));
+	livetrax_lock_button = manage (new ArdourButton (_("🔒"), elements));
+	livetrax_lock_button->set_layout_font (UIConfiguration::instance().get_LargerBoldMonospaceFont());
 	editor->mouse_mode_hbox->pack_start (*livetrax_lock_button, false, false, 12);
 
 	livetrax_transport_bar.pack_start (*hb, true, false);
