@@ -556,19 +556,19 @@ typedef struct _aafData {
  */
 
 #define aafUIDCmp(auid1, auid2)                    \
-	((auid1) != NULL &&                        \
-	 ((auid2)) != NULL &&                      \
-	 (auid1)->Data1 == (auid2)->Data1 &&       \
-	 (auid1)->Data2 == (auid2)->Data2 &&       \
-	 (auid1)->Data3 == (auid2)->Data3 &&       \
-	 (auid1)->Data4[0] == (auid2)->Data4[0] && \
-	 (auid1)->Data4[1] == (auid2)->Data4[1] && \
-	 (auid1)->Data4[2] == (auid2)->Data4[2] && \
-	 (auid1)->Data4[3] == (auid2)->Data4[3] && \
-	 (auid1)->Data4[4] == (auid2)->Data4[4] && \
-	 (auid1)->Data4[5] == (auid2)->Data4[5] && \
-	 (auid1)->Data4[6] == (auid2)->Data4[6] && \
-	 (auid1)->Data4[7] == (auid2)->Data4[7])
+        ((auid1) != NULL &&                        \
+         (auid2) != NULL &&                        \
+         (auid1)->Data1 == (auid2)->Data1 &&       \
+         (auid1)->Data2 == (auid2)->Data2 &&       \
+         (auid1)->Data3 == (auid2)->Data3 &&       \
+         (auid1)->Data4[0] == (auid2)->Data4[0] && \
+         (auid1)->Data4[1] == (auid2)->Data4[1] && \
+         (auid1)->Data4[2] == (auid2)->Data4[2] && \
+         (auid1)->Data4[3] == (auid2)->Data4[3] && \
+         (auid1)->Data4[4] == (auid2)->Data4[4] && \
+         (auid1)->Data4[5] == (auid2)->Data4[5] && \
+         (auid1)->Data4[6] == (auid2)->Data4[6] && \
+         (auid1)->Data4[7] == (auid2)->Data4[7])
 
 /**
  * Compares two aafMobID_t, returns 1 if equal or 0 otherwise.
