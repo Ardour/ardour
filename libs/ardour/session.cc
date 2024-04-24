@@ -5690,14 +5690,7 @@ Session::setup_lua ()
 	LuaBindings::stddef (L);
 	LuaBindings::common (L);
 	LuaBindings::dsp (L);
-	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("Ardour")
-		.beginClass <Session> ("Session")
-		/* thse are private to Session */
-		.addFunction ("rt_set_controls", &Session::rt_set_controls)
-		.addFunction ("rt_clear_all_solo_state", &Session::rt_clear_all_solo_state)
-		.endClass ()
-		.endNamespace ();
+	luabindings_session_rt (L);
 
 	lua_mlock (L, 0);
 	luabridge::push <Session *> (L, this);

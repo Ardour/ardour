@@ -1663,6 +1663,7 @@ private:
 	uint32_t            _n_lua_scripts;
 
 	void setup_lua ();
+	void luabindings_session_rt (lua_State*);
 	void try_run_lua (pframes_t);
 
 	SerializedRCUManager<IOPlugList> _io_plugins;
