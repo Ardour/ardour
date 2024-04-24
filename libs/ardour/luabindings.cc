@@ -221,6 +221,7 @@ luabridge::getIdentityKey ()
 	template void const* luabridge::ClassInfo< CLS >::getConstKey();
 
 CLASSINFO(ArdourMarker);
+CLASSINFO(AudioRegionView);
 CLASSINFO(AxisView);
 CLASSINFO(MarkerSelection);
 CLASSINFO(PublicEditor);
