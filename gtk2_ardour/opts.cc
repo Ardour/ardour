@@ -50,7 +50,7 @@ bool ARDOUR_COMMAND_LINE::new_session = false;
 bool ARDOUR_COMMAND_LINE::try_hw_optimization = true;
 bool ARDOUR_COMMAND_LINE::no_connect_ports = false;
 string ARDOUR_COMMAND_LINE::keybindings_path = ""; /* empty means use builtin default */
-std::string ARDOUR_COMMAND_LINE::menus_file = std::string (PBD::downcase(PROGRAM_NAME)) + ".menus";
+std::string ARDOUR_COMMAND_LINE::menus_file = "ardour.menus";
 bool ARDOUR_COMMAND_LINE::finder_invoked_ardour = false;
 string ARDOUR_COMMAND_LINE::load_template;
 bool ARDOUR_COMMAND_LINE::check_announcements = true;
