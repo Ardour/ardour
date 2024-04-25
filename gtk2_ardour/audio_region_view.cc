@@ -1107,8 +1107,6 @@ AudioRegionView::set_colors ()
 {
 	RegionView::set_colors();
 
-	assert (_fx_line);
-
 	set_fx_line_colors ();
 	set_waveform_colors ();
 
@@ -1269,7 +1267,9 @@ AudioRegionView::get_region_fx_line (PBD::ID& id, uint32_t& param_id)
 void
 AudioRegionView::update_envelope_visibility ()
 {
-	assert (_fx_line);
+	if (!_fx_line) {
+		return;
+	}
 
 	if (trackview.editor().current_mouse_mode() == Editing::MouseDraw || trackview.editor().current_mouse_mode() == Editing::MouseContent ) {
 		_fx_line->set_visibility (AutomationLine::VisibleAspects(AutomationLine::ControlPoints|AutomationLine::Line));
@@ -1676,7 +1676,9 @@ AudioRegionView::color_handler ()
 void
 AudioRegionView::set_fx_line_colors ()
 {
-	assert (_fx_line);
+	if (!_fx_line) {
+		return;
+	}
 
 	if (_rdx_param != UINT32_MAX && _rfx_id != 0) {
 		_fx_line->set_line_color ("region automation line");
