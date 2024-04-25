@@ -464,11 +464,13 @@ ARDOUR_UI::livetrax_setup_windows ()
 
 	/* transport bar */
 
-	livetrax_meter_view_button = manage (new ArdourButton (_("METERS"), ArdourButton::Element (ArdourButton::Text|ArdourButton::Edge|ArdourButton::Body), true));;
+	livetrax_meter_view_button = manage (new ArdourButton (ArdourButton::Element (ArdourButton::Text|ArdourButton::Edge|ArdourButton::Body), true));;
+	livetrax_meter_view_button->set_icon (ArdourWidgets::ArdourIcon::Meters);
 	act = ActionManager::get_action (X_("Common"), X_("livetrax-toggle-meter"));
 	livetrax_meter_view_button->set_related_action (act);
 
-	livetrax_mixer_view_button = manage (new ArdourButton (_("MIXER"), ArdourButton::Element (ArdourButton::Text|ArdourButton::Edge|ArdourButton::Body), true));
+	livetrax_mixer_view_button = manage (new ArdourButton (ArdourButton::Element (ArdourButton::Text|ArdourButton::Edge|ArdourButton::Body), true));
+	livetrax_mixer_view_button->set_icon (ArdourWidgets::ArdourIcon::Mixer);
 	act = ActionManager::get_action (X_("Common"), X_("livetrax-toggle-mixer"));
 	livetrax_mixer_view_button->set_related_action (act);
 
@@ -483,8 +485,10 @@ ARDOUR_UI::livetrax_setup_windows ()
 	hb = manage (new HBox);
 	hb->pack_start (transport_ctrl, false, false);
 
-	livetrax_lock_button = manage (new ArdourButton (_("🔒"), elements));
-	livetrax_lock_button->set_layout_font (UIConfiguration::instance().get_LargerBoldMonospaceFont());
+	livetrax_lock_button = manage (new ArdourButton (ArdourButton::default_elements, true));
+	livetrax_lock_button->set_icon (ArdourWidgets::ArdourIcon::Lock);
+	act = ActionManager::get_action (X_("Editor"), X_("lock"));
+	livetrax_lock_button->set_related_action (act);
 	editor->mouse_mode_hbox->pack_start (*livetrax_lock_button, false, false, 12);
 
 	livetrax_transport_bar.pack_start (*hb, true, false);
