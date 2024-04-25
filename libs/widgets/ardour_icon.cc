@@ -1388,6 +1388,126 @@ icon_file_folder (cairo_t* cr, const int width, const int height, const uint32_t
 #endif
 }
 
+static void
+icon_lock (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+
+	const double x0 = rint (x) - lc;
+	const double y0 = rint (y + std::min (x, y) * .15) - lc;
+
+	const double r = std::min (x, y) * .4;
+
+	const double ww = rint (std::min (x, y) * .55);
+	const double hh = rint (std::min (x, y) * .40);
+
+	cairo_rectangle (cr, x0 - ww, y0 - hh, 2 * ww, 2 * hh);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_arc (cr, x0 + lc, y0 - hh + lc, r, 1.0 * M_PI, 2.0 * M_PI);
+	VECTORICONSTROKE (lw, fg_color);
+
+	cairo_move_to (cr, x, y0);
+	cairo_close_path (cr);
+  cairo_set_line_width (cr, 2 * lw);
+	cairo_stroke (cr);
+}
+
+static void
+icon_mixer (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double wh = .75 * std::min (x, y);
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+
+	const double x0 = rint (x - wh * .45) - lc;
+	const double x1 = rint (x + wh * .45) - lc;
+
+	const double h  = wh * .80 - lw;
+	const double y0 = rint (y - h * .5) - lc;
+	const double y1 = rint (y + h * .5) - lc;
+
+	const double ww  = 1.5 * lw;
+
+	cairo_move_to (cr, x0, y - h);
+	cairo_line_to (cr, x0, y + h);
+
+	cairo_move_to (cr, x1, y - h);
+	cairo_line_to (cr, x1, y + h);
+
+	cairo_move_to (cr, x0 - ww, y0);
+	cairo_line_to (cr, x0 + ww, y0);
+
+	cairo_move_to (cr, x1 - ww, y1);
+	cairo_line_to (cr, x1 + ww, y1);
+
+	VECTORICONSTROKE (lw, fg_color);
+
+	/* outer box */
+	const double wb  = 2 * lw;
+	const double r = rint (y + wh) - rint (y - wh);
+
+	cairo_move_to (cr, x0 - wb, rint (y - wh) - lc);
+	cairo_line_to (cr, x1 + wb, rint (y - wh) - lc);
+
+	cairo_save (cr);
+	cairo_translate (cr, x1 + wb, y);
+	cairo_scale (cr, 0.25, 1.0);
+	cairo_arc (cr, 0, 0, 0.5 * r, 1.5 * M_PI, 2.5 * M_PI);
+	cairo_restore (cr);
+
+	cairo_move_to (cr, x1 + wb, rint (y + wh) - lc);
+	cairo_line_to (cr, x0 - wb, rint (y + wh) - lc);
+
+	cairo_save (cr);
+	cairo_translate (cr, x0 - wb, y);
+	cairo_scale (cr, 0.25, 1.0);
+	cairo_arc (cr, 0, 0, 0.5 * r, 0.5 * M_PI, 1.5 * M_PI);
+	cairo_restore (cr);
+
+	VECTORICONSTROKE (lw, fg_color);
+}
+
+static void
+icon_meters (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double wh = std::min (x, y);
+	const double dx = .25 * wh;
+
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+
+	const double h = wh * .8;
+	const int m = floor (h / lw);
+	const double dy = rint (2 * h / m);
+	const double y0 = rint (y + lw - 0.5 * m * dy);
+
+	for (int i = 0; i < m ; ++i) {
+
+		cairo_move_to (cr, x - 3 * dx + lw, y0 + i * dy - lc);
+		cairo_line_to (cr, x - 1 * dx - lw, y0 + i * dy - lc);
+
+		if (i > m - 4) {
+		cairo_move_to (cr, x - 1 * dx + lw, y0 + i * dy - lc);
+		cairo_line_to (cr, x + 1 * dx - lw, y0 + i * dy - lc);
+		}
+
+		if (i > m - 6) {
+		cairo_move_to (cr, x + 1 * dx + lw, y0 + i * dy - lc);
+		cairo_line_to (cr, x + 3 * dx - lw, y0 + i * dy - lc);
+		}
+	}
+
+	VECTORICONSTROKE (lw, fg_color);
+}
 
 /*****************************************************************************/
 
@@ -1537,6 +1657,15 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 			break;
 		case Folder:
 			icon_file_folder (cr, width, height, fg_color);
+			break;
+		case Lock:
+			icon_lock (cr, width, height, fg_color);
+			break;
+		case Mixer:
+			icon_mixer (cr, width, height, fg_color);
+			break;
+		case Meters:
+			icon_meters (cr, width, height, fg_color);
 			break;
 		case NoIcon:
 			rv = false;

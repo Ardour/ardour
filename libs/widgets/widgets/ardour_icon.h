@@ -73,6 +73,9 @@ namespace ArdourWidgets { namespace ArdourIcon {
 		PowerOnOff,
 		ShadedPlusSign,
 		Folder,
+		Lock,
+		Mixer,
+		Meters,
 		NoIcon //< Last
 	};
 
