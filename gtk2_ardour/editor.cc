@@ -3566,7 +3566,9 @@ Editor::setup_toolbar ()
 		toolbar_hbox.pack_end (_zoom_box, false, false, 2);
 	}
 	toolbar_hbox.pack_end (*(manage (new ArdourVSpacer ())), false, false, 3);
-	toolbar_hbox.pack_end (_track_box, false, false);
+	if (!Profile->get_livetrax()) {
+		toolbar_hbox.pack_end (_track_box, false, false);
+	}
 
 	toolbar_hbox.show_all ();
 }

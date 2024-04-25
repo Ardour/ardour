@@ -494,6 +494,7 @@ ARDOUR_UI::livetrax_setup_windows ()
 	editor->_zoom_box.pack_start (*livetrax_view_in_folder_button, false, false, 12);
 
 	livetrax_transport_bar.pack_end (editor->_zoom_box, false, false);
+	livetrax_transport_bar.pack_end (editor->_track_box, false, false);
 	livetrax_transport_bar.show_all ();
 
 	/* meter display */

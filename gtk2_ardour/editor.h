@@ -2073,8 +2073,6 @@ private:
 	void marker_click_behavior_chosen (Editing::MarkerClickBehavior);
 	void marker_click_behavior_selection_done (Editing::MarkerClickBehavior);
 
-	Gtk::HBox _track_box;
-
 	void zoom_adjustment_changed();
 
 	void setup_toolbar ();
