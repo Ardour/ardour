@@ -679,11 +679,6 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 						/* we own this port (named after the program) */
 
-						/* Hide scene ports for now */
-						if (p.find (_("Scene ")) != string::npos) {
-							continue;
-						}
-
 						extra_program[t].push_back (p);
 
 					} else if (flags & IsPhysical) {
