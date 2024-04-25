@@ -281,7 +281,7 @@ AudioRegionView::init (bool wfd)
 
 	setup_waveform_visibility ();
 
-	if (gain_line) {
+	if (_fx_line) {
 		get_canvas_frame()->set_data ("linemerger", (LineMerger*) this);
 		_fx_line->canvas_group().raise_to_top ();
 	}
