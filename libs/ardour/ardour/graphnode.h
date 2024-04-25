@@ -60,6 +60,7 @@ public:
 
 	node_set_t const& activation_set (GraphChain const* const g) const;
 	int               init_refcount (GraphChain const* const g) const;
+	void              flush_graph_activision_rcu ();
 
 protected:
 	friend struct GraphChain;

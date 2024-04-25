@@ -3849,12 +3849,10 @@ Session::remove_routes (std::shared_ptr<RouteList> routes_to_remove)
 	 * going away, then flush old references out of the graph.
 	 */
 
-	routes.flush (); // maybe unsafe, see below.
 	resort_routes ();
 
 	/* get rid of it from the dead wood collection in the route list manager */
 	/* XXX i think this is unsafe as it currently stands, but i am not sure. (pd, october 2nd, 2006) */
-
 	routes.flush ();
 
 	/* remove these routes from the selection if appropriate, and signal
@@ -3880,6 +3878,15 @@ Session::remove_routes (std::shared_ptr<RouteList> routes_to_remove)
 
 	if (deletion_in_progress()) {
 		return;
+	}
+
+	/* really drop reference to the Surround Master to
+	 * unload the vapor plugin. While the RCU keeps a refecent the
+	 * SurroundMaster, a new SurroundMaster cannot be added.
+	 */
+	std::shared_ptr<RouteList const> r = routes.reader ();
+	for (auto const& rt : *r) {
+		rt->flush_graph_activision_rcu ();
 	}
 
 	PropertyChange pc;
