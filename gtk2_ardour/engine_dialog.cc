@@ -80,68 +80,9 @@ static const unsigned int latency_tab = 1; /* zero-based, page zero is the main 
 
 static const char* results_markup = X_("<span weight=\"bold\" size=\"larger\">%1</span>");
 
-EngineControlDialog::EngineControlDialog ()
-	: ArdourDialog (_("Audio/MIDI Setup"))
-{
-	engine_control.set_parent (*this);
-
-	if (UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
-		set_resizable (false);
-	}
-	set_name (X_("AudioMIDISetup"));
-
-	/* packup the notebook */
-
-	get_vbox ()->set_border_width (12);
-	get_vbox ()->pack_start (engine_control.contents());
-}
-
-void
-EngineControlDialog::on_response (int r)
-{
-	/* Do not run ArdourDialog::on_response() which will hide us. Leave
-	 * that to whoever invoked us, if they wish to hide us after "start".
-	 *
-	 * StartupFSM does hide us after response(); Window > Audio/MIDI Setup
-	 * does not.
-	 */
-	if (r == RESPONSE_OK) {
-		pop_splash ();
-	}
-	Gtk::Dialog::on_response (r);
-}
-
-
-
-void
-EngineControlDialog::on_show ()
-{
-	ArdourDialog::on_show ();
-	engine_control.on_show ();
-}
-
-void
-EngineControlDialog::on_map ()
-{
-	if (!ARDOUR_UI::instance ()->the_session () && !PublicEditor::_instance) {
-		set_type_hint (Gdk::WINDOW_TYPE_HINT_NORMAL);
-	} else if (UIConfiguration::instance ().get_all_floating_windows_are_dialogs ()) {
-		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
-	} else {
-		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
-	}
-	ArdourDialog::on_map ();
-}
-
-bool
-EngineControlDialog::on_delete_event (GdkEventAny* ev)
-{
-	engine_control.on_delete_event (ev);
-	return ArdourDialog::on_delete_event (ev);
-}
-
 EngineControl::EngineControl ()
-	: engine_status ("")
+	: ArdourDialog (_("Audio/MIDI Setup"))
+	, engine_status ("")
 	, settings_table (4, 4)
 	, latency_expander (_("Advanced Settings"))
 	, monitor_expander (_("Hardware Monitoring"))
@@ -185,13 +126,17 @@ EngineControl::EngineControl ()
 	, queue_device_changed (false)
 	, _have_control (true)
 	, block_signals (0)
-	, parent (nullptr)
 {
 	using namespace Notebook_Helpers;
 	vector<string> backend_names;
 	Label*         label;
 	AttachOptions  xopt = AttachOptions (FILL | EXPAND);
 	int            row;
+
+	if (UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
+		set_resizable (false);
+	}
+	set_name (X_("AudioMIDISetup"));
 
 	/* the backend combo is the one thing that is ALWAYS visible */
 
@@ -331,6 +276,11 @@ EngineControl::EngineControl ()
 	notebook.show_all ();
 
 	notebook.set_name ("SettingsNotebook");
+
+	/* packup the notebook */
+
+	get_vbox ()->set_border_width (12);
+	get_vbox ()->pack_start (notebook);
 
 	/* Setup buttons and signals */
 
@@ -504,12 +454,26 @@ EngineControl::SignalBlocker::~SignalBlocker ()
 void
 EngineControl::on_show ()
 {
+	ArdourDialog::on_show ();
 	if (!ARDOUR::AudioEngine::instance ()->current_backend () || !ARDOUR::AudioEngine::instance ()->running ()) {
 		// re-check _have_control (jackd running) see #6041
 		backend_changed ();
 	}
 	device_changed ();
 	start_stop_button.grab_focus ();
+}
+
+void
+EngineControl::on_map ()
+{
+	if (!ARDOUR_UI::instance ()->the_session () && !PublicEditor::_instance) {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_NORMAL);
+	} else if (UIConfiguration::instance ().get_all_floating_windows_are_dialogs ()) {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_DIALOG);
+	} else {
+		set_type_hint (Gdk::WINDOW_TYPE_HINT_UTILITY);
+	}
+	ArdourDialog::on_map ();
 }
 
 void
@@ -536,17 +500,15 @@ EngineControl::config_parameter_changed (std::string const& p)
 bool
 EngineControl::start_engine ()
 {
-	assert (parent);
-
 	int rv = push_state_to_backend (true);
 	if (rv < 0) {
 		/* error message from backend */
-		ArdourMessageDialog msg (*parent, ARDOUR::AudioEngine::instance ()->get_last_backend_error ());
+		ArdourMessageDialog msg (*this, ARDOUR::AudioEngine::instance ()->get_last_backend_error ());
 		msg.run ();
 	} else if (rv > 0) {
 		/* error from push_state_to_backend() */
 		// TODO: get error message from push_state_to_backend
-		ArdourMessageDialog msg (*parent, _("Could not configure Audio/MIDI engine with given settings."));
+		ArdourMessageDialog msg (*this, _("Could not configure Audio/MIDI engine with given settings."));
 		msg.run ();
 	}
 	return rv == 0;
@@ -1121,8 +1083,8 @@ EngineControl::backend_changed ()
 		maybe_display_saved_state ();
 	}
 
-	if (parent && !UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
-		parent->resize (1, 1); // shrink window
+	if (!UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
+		resize (1, 1); // shrink window
 	}
 }
 
@@ -2718,7 +2680,7 @@ EngineControl::get_output_device_name () const
 void
 EngineControl::control_app_button_clicked ()
 {
-	if (!parent || parent->ui_sensitive()) {
+	if (!_sensitive) {
 		return;
 	}
 
@@ -2732,9 +2694,24 @@ EngineControl::control_app_button_clicked ()
 }
 
 void
+EngineControl::on_response (int r)
+{
+	/* Do not run ArdourDialog::on_response() which will hide us. Leave
+	 * that to whoever invoked us, if they wish to hide us after "start".
+	 *
+	 * StartupFSM does hide us after response(); Window > Audio/MIDI Setup
+	 * does not.
+	 */
+	if (r == RESPONSE_OK) {
+		pop_splash ();
+	}
+	Gtk::Dialog::on_response (r);
+}
+
+void
 EngineControl::start_stop_button_clicked ()
 {
-	if (!parent || parent->ui_sensitive()) {
+	if (!_sensitive) {
 		return;
 	}
 
@@ -2755,15 +2732,13 @@ EngineControl::start_stop_button_clicked ()
 		rv = start_engine () ? RESPONSE_OK : RESPONSE_ACCEPT;
 	}
 
-	if (parent) {
-		parent->response (rv);
-	}
+	response (rv);
 }
 
 void
 EngineControl::update_devices_button_clicked ()
 {
-	if (!parent || parent->ui_sensitive()) {
+	if (!_sensitive) {
 		return;
 	}
 
@@ -2785,7 +2760,7 @@ EngineControl::update_devices_button_clicked ()
 void
 EngineControl::try_autostart_button_clicked ()
 {
-	if (!parent || parent->ui_sensitive()) {
+	if (!_sensitive) {
 		return;
 	}
 
@@ -2796,7 +2771,7 @@ EngineControl::try_autostart_button_clicked ()
 void
 EngineControl::use_buffered_io_button_clicked ()
 {
-	if (!parent || parent->ui_sensitive()) {
+	if (!_sensitive) {
 		return;
 	}
 
@@ -2977,10 +2952,6 @@ unparent_widget (Gtk::Widget& w)
 void
 EngineControl::populate_action_area (int page_num)
 {
-	if (!parent) {
-		return;
-	}
-
 	/* re-populate action area */
 	unparent_widget (start_stop_button);
 	unparent_widget (connect_disconnect_button);
@@ -2991,19 +2962,17 @@ EngineControl::populate_action_area (int page_num)
 
 	if (page_num == 0) {
 		if (_have_control) {
-			parent->add_widget_action (start_stop_button);
+			get_action_area ()->add (start_stop_button);
 		} else {
-			parent->add_widget_action (connect_disconnect_button);
+			get_action_area ()->add (connect_disconnect_button);
 		}
 	} else if (page_num == latency_tab) {
-		parent->add_widget_action (lm_measure_button);
-		parent->add_widget_action (lm_use_button);
-		parent->add_widget_action (lm_back_button);
-		lm_measure_button.show();
-		lm_use_button.show ();
-		lm_back_button.show ();
+		get_action_area ()->add (lm_measure_button);
+		get_action_area ()->add (lm_use_button);
+		get_action_area ()->add (lm_back_button);
+		get_action_area ()->show_all ();
 	} else if (page_num == midi_tab) {
-		parent->add_widget_action (midi_back_button);
+		get_action_area ()->add (midi_back_button);
 		midi_back_button.show ();
 	}
 }
@@ -3179,7 +3148,7 @@ EngineControl::end_latency_detection ()
 void
 EngineControl::latency_button_clicked ()
 {
-	if (!parent || parent->ui_sensitive()) {
+	if (!_sensitive) {
 		return;
 	}
 
@@ -3193,7 +3162,7 @@ EngineControl::latency_button_clicked ()
 void
 EngineControl::latency_back_button_clicked ()
 {
-	if (!parent || parent->ui_sensitive()) {
+	if (!_sensitive) {
 		return;
 	}
 
@@ -3212,7 +3181,7 @@ EngineControl::latency_back_button_clicked ()
 void
 EngineControl::use_latency_button_clicked ()
 {
-	if (!parent || parent->ui_sensitive()) {
+	if (!_sensitive) {
 		return;
 	}
 
@@ -3258,15 +3227,24 @@ EngineControl::use_latency_button_clicked ()
 			 * from a running instance.
 			 */
 			notebook.set_current_page (0);
-			if (parent) {
-				parent->response (RESPONSE_OK);
-			}
+			response (RESPONSE_OK);
 			return;
 		}
 
 		/* back to settings page */
 		notebook.set_current_page (0);
 	}
+}
+
+bool
+EngineControl::on_delete_event (GdkEventAny* ev)
+{
+	if (lm_running || notebook.get_current_page () == 2) {
+		/* currently measuring latency - be sure to clean up */
+		end_latency_detection ();
+	}
+
+	return ArdourDialog::on_delete_event (ev);
 }
 
 void
@@ -3341,13 +3319,13 @@ EngineControl::connect_disconnect_click ()
 		stop_engine ();
 	} else {
 		if (!ARDOUR_UI::instance ()->the_session ()) {
-			parent->pop_splash ();
-			parent->hide ();
+			pop_splash ();
+			hide ();
 			ARDOUR::GUIIdle ();
 		}
 		start_engine ();
 		if (!ARDOUR_UI::instance ()->the_session ()) {
-			parent->response (RESPONSE_OK);
+			ArdourDialog::response (RESPONSE_OK);
 		}
 	}
 }
@@ -3376,20 +3354,4 @@ void
 EngineControl::configure_midi_devices ()
 {
 	notebook.set_current_page (midi_tab);
-}
-
-void
-EngineControl::set_parent (ArdourDialog& d)
-{
-	parent = &d;
-}
-
-bool
-EngineControl::on_delete_event (GdkEventAny*)
-{
-	if (lm_running || notebook.get_current_page () == 2) {
-		/* currently measuring latency - be sure to clean up */
-		end_latency_detection ();
-	}
-	return false;
 }

@@ -68,7 +68,7 @@ using namespace PBD;
 using std::string;
 using std::vector;
 
-StartupFSM::StartupFSM (EngineControlDialog& amd)
+StartupFSM::StartupFSM (EngineControl& amd)
 	: session_domain (Config->get_preferred_time_domain())
 	, session_existing_sample_rate (0)
 	, session_engine_hints ("EngineHints")

@@ -51,13 +51,10 @@ public:
 	void on_show ();
 	virtual void on_response (int);
 	void set_ui_sensitive (bool);
-	bool ui_sensitive () const { return _sensitive; }
 	void disallow_idle ();
 
-	void pop_splash ();
-	void add_widget_action (Gtk::Widget&);
-
 protected:
+	void pop_splash ();
 	void close_self ();
 
 	bool _sensitive;

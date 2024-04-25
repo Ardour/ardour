@@ -132,7 +132,7 @@ class AddVideoDialog;
 class BigClockWindow;
 class BigTransportWindow;
 class BundleManager;
-class EngineControlDialog;
+class EngineControl;
 class ExportVideoDialog;
 class KeyEditor;
 class LocationUIWindow;
@@ -785,7 +785,7 @@ private:
 	WM::Proxy<About> about;
 	WM::Proxy<LocationUIWindow> location_ui;
 	WM::Proxy<RouteParams_UI> route_params;
-	WM::Proxy<EngineControlDialog> audio_midi_setup;
+	WM::Proxy<EngineControl> audio_midi_setup;
 	WM::Proxy<ExportVideoDialog> export_video_dialog;
 	WM::Proxy<LuaScriptManager> lua_script_window;
 	WM::Proxy<IdleOMeter> idleometer;
