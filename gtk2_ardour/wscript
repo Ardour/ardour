@@ -859,17 +859,19 @@ def build(bld):
 
     # always build all versions of the menu definitions
     # so that we can try them out with different program builds.
-    for program in [ 'ardour']:
-        obj = bld(features = 'command-output')
-        obj.command = 'cpp'
-        obj.command_is_external = True
-        obj.no_inputs = True
-        obj.argv = menus_argv
 
-        obj.dep_vars = ['PTFORMAT', 'MIXBUS', 'WINDOWS', 'debug']
-        obj.stdin = program + '.menus.in'
-        obj.stdout = program + '.menus'
-        bld.install_files (bld.env['CONFDIR'], program + '.menus')
+    obj = bld(features = 'command-output')
+    obj.command = 'cpp'
+    obj.command_is_external = True
+    obj.no_inputs = True
+    obj.argv = menus_argv
+    obj.dep_vars = ['PTFORMAT', 'MIXBUS', 'WINDOWS', 'debug']
+    if bld.is_defined('LIVETRAX'):
+        obj.stdin = 'livetrax.menus.in'
+    else:
+        obj.stdin = 'ardour.menus.in'
+    obj.stdout = 'ardour.menus'        
+    bld.install_files (bld.env['CONFDIR'], 'ardour.menus')
 
     # Freedesktop
     freedesktop_subst_dict = {
