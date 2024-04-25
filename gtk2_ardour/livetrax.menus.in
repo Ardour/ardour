@@ -1,0 +1,304 @@
+<ui>
+  <menubar name='Main' action='MainMenu'>
+    <menu name='Session' action='Session'>
+      <menuitem action='New'/>
+      <menuitem action='Open'/>
+      <menuitem action='Recent'/>
+      <menuitem action='Close'/>
+      <separator/>
+      <menuitem action='Save'/>
+      <menuitem action='SaveAs'/>
+#ifndef WINDOWS /* can't move open files. */
+      <menuitem action='Rename'/>
+      <menuitem action='SnapshotStay'/>
+      <menuitem action='SnapshotSwitch'/>
+#endif
+      <menuitem action='SaveTemplate'/>
+      <menuitem action='Archive'/>
+      <separator/>
+      <menuitem action='addExistingAudioFiles'/>
+      <menu name='Export' action='Export'>
+        <menuitem action='QuickExport'/>
+        <menuitem action='ExportAudio'/>
+        <menuitem action='StemExport'/>
+      </menu>
+      <separator/>
+
+      <menu name='Cleanup' action='Cleanup'>
+        <menuitem action='CleanupPeakFiles'/>
+        <menuitem action='CleanupUnusedSources'/>
+        <menuitem action='CleanupUnusedRegions'/>
+        <menuitem action='FlushWastebasket'/>
+      </menu>
+#ifdef __APPLE__
+      <menuitem action='toggle-about'/>
+#endif
+#ifndef MIXBUS
+      <separator/>
+      <menuitem action='lock'/>
+#endif
+#ifndef __APPLE__
+      <separator/>
+      <menuitem action='Quit'/>
+#endif
+    </menu>
+
+    <menu name='Transport' action='Transport'>
+      <menuitem action='ToggleRoll'/>
+      <menuitem action='Record'/>
+      <separator/>
+      <menu action="MovePlayHeadMenu">
+        <menuitem action='jump-forward-to-mark'/>
+        <menuitem action='jump-backward-to-mark'/>
+        <menuitem action='GotoStart'/>
+        <menuitem action='GotoEnd'/>
+      </menu>
+      <separator/>
+      <menuitem action='ToggleFollowEdits'/>
+      <menuitem action='ToggleAutoPlay'/>
+      <menuitem action='ToggleAutoReturn'/>
+      <separator/>
+    </menu>
+
+    <menu name='Edit' action='Edit'>
+      <menuitem action='undo'/>
+      <menuitem action='redo'/>
+      <menuitem action='editor-copy'/>
+      <menuitem action='editor-paste'/>
+      <menuitem action='editor-cut'/>
+      <menuitem action='editor-delete'/>
+      <separator/>
+      <menuitem action='split-region'/>
+      <menu action="SelectMenu">
+        <menuitem action='select-all-objects'/>
+        <menuitem action='invert-selection'/>
+      </menu>
+      <separator/>
+      <menuitem action='lock'/>
+    </menu>
+
+
+    <menu action='TrackMenu'>
+      <menuitem action='AddTrackBus'/>
+      <menuitem action='remove-track'/>
+      <menuitem action="move-selected-tracks-up"/>
+      <menuitem action="move-selected-tracks-down"/>
+    </menu>
+
+    <menu name='View' action = 'View'>
+      <menuitem action='toggle-big-clock'/>
+      <menu action="PrimaryClockMenu">
+        <menuitem action="primary-clock-timecode"/>
+        <menuitem action="primary-clock-minsec"/>
+        <menuitem action="primary-clock-samples"/>
+     </menu>
+        <menuitem action="toggle-marker-ruler"/>
+        <menuitem action="toggle-scene-marker-ruler"/>
+      <menu action="ZoomMenu">
+        <menuitem action='temporal-zoom-in'/>
+        <menuitem action='temporal-zoom-out'/>
+        <menuitem action='zoom-to-session'/>
+      </menu>
+      <menu name='ZoomFocus' action='ZoomFocus'>
+        <menuitem action='zoom-focus-left'/>
+        <menuitem action='zoom-focus-right'/>
+        <menuitem action='zoom-focus-center'/>
+        <menuitem action='zoom-focus-playhead'/>
+        <menuitem action='zoom-focus-mouse'/>
+        <menuitem action='zoom-focus-edit'/>
+        <menuitem action='cycle-zoom-focus'/>
+      </menu>
+      <menuitem action='ToggleGroupTabs'/>
+    </menu>
+
+    <menu action = 'WindowMenu'>
+    </menu>
+</menubar>
+
+  <popup action="RulerMenuPopup" accelerators='true'>
+    <menuitem action="toggle-minsec-ruler"/>
+    <menuitem action="toggle-timecode-ruler"/>
+    <menuitem action="toggle-samples-ruler"/>
+    <menuitem action="toggle-bbt-ruler"/>
+    <separator/>
+    <menuitem action="toggle-meter-ruler"/>
+    <menuitem action="toggle-tempo-ruler"/>
+    <menuitem action="toggle-range-ruler"/>
+    <menuitem action="toggle-loop-punch-ruler"/>
+    <menuitem action="toggle-cd-marker-ruler"/>
+    <menuitem action="toggle-marker-ruler"/>
+    <menuitem action="toggle-cue-marker-ruler"/>
+    <menuitem action="toggle-scene-marker-ruler"/>
+    <separator/>
+    <menuitem action="toggle-video-ruler"/>
+  </popup>
+
+  <popup name='ProcessorMenu' accelerators='true'>
+    <menuitem action='presets'/>
+    <menuitem action='edit'/>
+    <menuitem action='edit-generic'/>
+    <menuitem action='controls'/>
+    <menuitem action='rename'/>
+    <separator/>
+    <menuitem action='manage-pins'/>
+    <separator/>
+    <menuitem action='send_options'/>
+    <separator/>
+    <menuitem action='newplugin'/>
+    <menuitem action='newinsert'/>
+    <menuitem action='newsend'/>
+    <menuitem action='newaux'/>
+    <menuitem action='newlisten'/>
+    <menuitem action='removelisten'/>
+    <separator/>
+    <menuitem action='clear'/>
+    <menuitem action='clear_pre'/>
+    <menuitem action='clear_post'/>
+    <separator/>
+    <menuitem action='cut'/>
+    <menuitem action='copy'/>
+    <menuitem action='paste'/>
+    <menuitem action='delete'/>
+    <separator/>
+    <menuitem action='selectall'/>
+    <menuitem action='deselectall'/>
+    <separator/>
+    <menuitem action='activate_all'/>
+    <menuitem action='deactivate_all'/>
+#ifndef MIXBUS
+    <menuitem action='ab_plugins'/>
+#endif
+    <separator/>
+#ifndef MIXBUS
+    <menu action="disk-io-menu">
+      <menuitem action='disk-io-prefader'/>
+      <menuitem action='disk-io-postfader'/>
+      <menuitem action='disk-io-custom'/>
+    </menu>
+#endif
+    <menuitem action='custom-volume-pos'/>
+    <separator/>
+  </popup>
+
+  <popup name='ShuttleUnitPopup' accelerators='true'>
+    <menuitem action='SetShuttleUnitsPercentage'/>
+    <menuitem action='SetShuttleUnitsSemitones'/>
+  </popup>
+
+  <popup name='RegionListMenu' accelerators='true'>
+    <menuitem action='rlAudition'/>
+    <separator/>
+    <menuitem action='addExternalAudioToRegionList'/>
+    <separator/>
+    <menuitem action='removeUnusedRegions'/>
+  </popup>
+
+  <popup name='PopupRegionMenu' action='PopupRegionMenu' accelerators='true'>
+    <menuitem action='play-selected-regions'/>
+    <menuitem action='tag-selected-regions'/>
+    <separator/>
+    <menuitem action='group-selected-regions'/>
+    <menuitem action='ungroup-selected-regions'/>
+    <separator/>
+    <menuitem action='loop-region'/>
+    <menuitem action='rename-region'/>
+    <menuitem action='show-region-properties'/>
+    <menu action='RegionMenuEdit'>
+      <menuitem action='combine-regions'/>
+      <menuitem action='uncombine-regions'/>
+      <menuitem action='pitch-shift-region'/>
+      <menuitem action='split-region'/>
+      <menuitem action='split-region-at-transients'/>
+      <menuitem action='split-multichannel-region'/>
+      <menuitem action='close-region-gaps'/>
+      <menuitem action='place-transient' />
+      <menuitem action='show-rhythm-ferret'/>
+      <menuitem action='strip-region-silence'/>
+      <menuitem action='reverse-region'/>
+    </menu>
+    <menu action='RegionMenuMIDI'>
+      <menuitem action='transpose-region'/>
+      <menuitem action='insert-patch-change-context'/>
+      <menuitem action='quantize-region'/>
+      <menuitem action='legatize-region'/>
+      <menuitem action='remove-overlap'/>
+      <menuitem action='transform-region'/>
+      <menuitem action='fork-region'/>
+      <menuitem action='fork-regions-from-unselected'/>
+      <menuitem action='deinterlace-midi'/>
+      <menuitem action='show-region-list-editor'/>
+    </menu>
+    <menu action='RegionMenuPosition'>
+      <menuitem action='naturalize-region'/>
+      <menuitem action='toggle-region-lock'/>
+      <menuitem action='toggle-region-video-lock'/>
+      <menuitem action='snap-regions-to-grid'/>
+      <menuitem action='set-region-sync-position'/>
+      <menuitem action='remove-region-sync'/>
+      <menuitem action='nudge-forward'/>
+      <menuitem action='nudge-backward'/>
+      <menuitem action='nudge-forward-by-capture-offset'/>
+      <menuitem action='nudge-backward-by-capture-offset'/>
+      <menuitem action='sequence-regions'/>
+    </menu>
+    <menu action='RegionMenuMarkers'>
+      <menuitem action='add-region-cue-marker'/>
+      <menuitem action='clear-region-cue-markers'/>
+      <separator/>
+      <menuitem action='make-region-markers-cd'/>
+      <menuitem action='make-region-markers-global'/>
+    </menu>
+    <menu action='RegionMenuTrim'>
+      <menuitem action='trim-front'/>
+      <menuitem action='trim-back'/>
+      <menuitem action='trim-region-to-loop'/>
+      <menuitem action='trim-region-to-punch'/>
+      <menuitem action='trim-to-previous-region'/>
+      <menuitem action='trim-to-next-region'/>
+    </menu>
+    <menu action='RegionMenuLayering'>
+      <menuitem action='raise-region-to-top'/>
+      <menuitem action='raise-region'/>
+      <menuitem action='lower-region'/>
+      <menuitem action='lower-region-to-bottom'/>
+    </menu>
+    <menu action='RegionMenuRanges'>
+      <menuitem action='set-loop-from-region'/>
+      <menuitem action='set-punch-from-region'/>
+      <menuitem action='add-range-marker-from-region'/>
+      <menuitem action='add-range-markers-from-region'/>
+      <menuitem action='set-selection-from-region'/>
+    </menu>
+    <menu action='RegionMenuGain'>
+      <menuitem action='toggle-opaque-region'/>
+      <menuitem action='toggle-region-mute'/>
+      <menuitem action='normalize-region'/>
+      <menuitem action='boost-region-gain'/>
+      <menuitem action='cut-region-gain'/>
+      <menuitem action='reset-region-gain'/>
+      <menuitem action='reset-region-gain-envelopes'/>
+      <menuitem action='toggle-region-polarity'/>
+      <menuitem action='toggle-region-gain-envelope-active'/>
+    </menu>
+    <menu action='RegionMenuFades'>
+      <menuitem action='toggle-region-fade-in'/>
+      <menuitem action='toggle-region-fade-out'/>
+      <menuitem action='toggle-region-fades'/>
+    </menu>
+    <menu action='RegionMenuDuplicate'>
+      <menuitem action='duplicate-region'/>
+      <menuitem action='multi-duplicate-region'/>
+      <menuitem action='region-fill-track'/>
+    </menu>
+    <menuitem action='export-region'/>
+    <menuitem action='bounce-regions-unprocessed'/>
+#ifndef MIXBUS
+    <menuitem action='bounce-regions-processed'/>
+#endif
+    <menuitem action='loudness-analyze-region'/>
+    <menuitem action='spectral-analyze-region'/>
+    <separator/>
+    <menuitem action='remove-region'/>
+  </popup>
+
+</ui>
