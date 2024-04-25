@@ -1101,6 +1101,7 @@ Session::remove_monitor_section ()
 	}
 
 	remove_route (_monitor_out);
+	_monitor_out.reset ();
 	if (deletion_in_progress ()) {
 		return;
 	}
@@ -1410,6 +1411,8 @@ Session::remove_surround_master ()
 	}
 
 	remove_route (_surround_master);
+	_surround_master.reset ();
+
 	if (deletion_in_progress ()) {
 		return;
 	}
