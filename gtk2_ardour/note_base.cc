@@ -293,6 +293,14 @@ NoteBase::event_handler (GdkEvent* ev)
 		return false;
 	}
 
+	if (_region.get_time_axis_view ().layer_display () == Stacked) {
+		/* only allow edting notes in the topmost layer */
+		if (_region.region()->layer() != _region.region()->playlist()->top_layer ()) {
+			/* this stll allows the draw tool to work, and edit cursor is updated */
+			return false;
+		}
+	}
+
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 		_region.note_entered (this);
