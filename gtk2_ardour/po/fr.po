@@ -19426,7 +19426,7 @@ msgstr "<b>Noms de pistes MIDI :</b>"
 
 #: sfdb_ui.cc:1961
 msgid "<b>Audio conversion quality:</b>"
-msgstr "<b>Qualité de conversion ausio :</b>"
+msgstr "<b>Qualité de conversion audio :</b>"
 
 #: sfdb_ui.cc:1982 sfdb_ui.cc:2101
 msgid "Best"
