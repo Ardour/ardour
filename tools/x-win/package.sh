@@ -33,6 +33,7 @@ PRODUCT_VERSION=${major_version}
 WITH_HARRISON_LV2=1 ;
 WITH_COMMERCIAL_X42_LV2=
 WITH_GRATIS_X42_LV2=
+WITH_GMSYNTH=1
 
 # TODO: grep from build/config.log instead
 while [ $# -gt 0 ] ; do
@@ -58,6 +59,15 @@ while [ $# -gt 0 ] ; do
 			PROGRAM_NAME=Mixbus32C-${PROGRAM_VERSION}
 			PROGRAM_VERSION=""
 			MANUAL_NAME="mixbus32c-live-manual"
+			shift ;;
+		--livetrax)
+			LIVETRAX=1 ;
+			NOVIDEOTOOLS=1 ;
+			WITH_HARRISON_LV2="" ;
+			WITH_GMSYNTH="" ;
+			PROGRAM_NAME=LiveTrax
+			PROGRAM_KEY=LiveTrax
+			PRODUCT_NAME=LiveTrax
 			shift ;;
 		--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
 	esac
@@ -185,7 +195,7 @@ cp `find build/libs/surfaces/ -iname "*.dll"` $ALIBDIR/surfaces/
 cp `find build/libs/backends/ -iname "*.dll"` $ALIBDIR/backends/
 cp `find build/libs/panners/ -iname "*.dll"` $ALIBDIR/panners/
 
-cp -r build/libs/LV2 $ALIBDIR/
+cp -r build/libs/LV2 $ALIBDIR/ || true
 cp -r build/libs/vamp-plugins/*ardourvampplugins*.dll $ALIBDIR/vamp/libardourvampplugins.dll
 cp -r build/libs/vamp-pyin/*ardourvamppyin*.dll $ALIBDIR/vamp/libardourvamppyin.dll
 
@@ -232,7 +242,7 @@ cp gtk2_ardour/icons/cursor_square/* $DESTDIR/share/${LOWERCASE_DIRNAME}/icons/
 # clean build-dir after depoyment
 echo " === bundle completed, cleaning up"
 ./waf uninstall
-find $DESTDIR -name "*.dll.a" | xargs rm
+find $DESTDIR -name "*.dll.a" -print0 | xargs -0 -r rm
 echo " === complete"
 du -sh $DESTDIR
 
@@ -299,7 +309,7 @@ fi
 
 ################################################################################
 ### Mixbus plugins, etc
-if true ; then
+if test x$WITH_GMSYNYTH != x ; then
 	mkdir -p $ALIBDIR/LV2
 
 	echo "Adding General MIDI Synth LV2"
@@ -387,7 +397,7 @@ if test -n "$MIXBUS"; then
 		rm -f $DESTDIR/share/${LOWERCASE_DIRNAME}/media/*.*
 		unzip -q -o -d "$DESTDIR/share/${LOWERCASE_DIRNAME}/media/" "${SRCCACHE}/MixbusBundledMedia.zip"
 	fi
-else
+elif test -z "$LIVETRAX"; then
 	echo "Fetching Ardour bundled media"
 	curl -s -S --fail -#  \
 		-z "${SRCCACHE}/ArdourBundledMedia.zip" \

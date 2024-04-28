@@ -22,6 +22,7 @@ MIXBUS=
 WITH_HARRISON_LV2=
 WITH_COMMERCIAL_X42_LV2=
 WITH_GRATIS_X42_LV2=
+WITH_GMSYNYTH=
 WITH_HARVID=
 STRIP=all
 PRINT_SYSDEPS=
@@ -58,6 +59,7 @@ while [ $# -gt 0 ] ; do
 		WITH_HARRISON_LV2=1 ;
 		WITH_COMMERCIAL_X42_LV2=1
 		WITH_GRATIS_X42_LV2=1
+		WITH_GMSYNYTH=1
 		WITH_NLS=1 ;
 		STRIP=all
 		APPNAME=Mixbus ;
@@ -69,6 +71,7 @@ while [ $# -gt 0 ] ; do
 		WITH_HARRISON_LV2=1 ;
 		WITH_COMMERCIAL_X42_LV2=1
 		WITH_GRATIS_X42_LV2=1
+		WITH_GMSYNYTH=1
 		WITH_NLS=1 ;
 		STRIP=all
 		APPNAME=Mixbus32C ;
@@ -76,8 +79,16 @@ while [ $# -gt 0 ] ; do
 		EXENAME=mixbus32c ;
 		major_version=""
 		shift ;;
+	--livetrax)
+		LIVETRAX=1 ;
+		STRIP=all ;
+		WITH_NLS=1 ;
+		APPNAME=LiveTrax ;
+		WITHOUT_GMSYNYTH=1 ;
+		shift ;;
 	--public)
 		WITH_HARRISON_LV2=1 ;
+		WITH_GMSYNYTH=1
 		WITH_NLS=1 ;
 		STRIP=all ;
 		APPNAME=Ardour ;
@@ -676,7 +687,7 @@ if [ -d specialSauce ] ; then
 fi
 
 # install bundled LV2s to <app>/lib/LV2/
-cp -R $BUILD_ROOT/libs/LV2 $APPLIB/
+cp -R $BUILD_ROOT/libs/LV2 $APPLIB/ || true
 
 # lv2 core, classifications
 for file in $GTKSTACK_ROOT/lib/lv2/*.lv2; do
@@ -740,7 +751,7 @@ if test -n "$MIXBUS"; then
 		rm -f "${MediaClips}/"*.*
 		unzip -q -o -d "${MediaClips}" "${CACHEDIR}/MixbusBundledMedia.zip"
 	fi
-else
+elif test -z "$LIVETRAX"; then
     echo "Fetching Ardour bundled content"
 
     curl -s -S --fail -#  \
@@ -758,7 +769,7 @@ echo "Setting Bundled Media dir/file permissions"
 find "${MediaClips}" -type d -exec chmod 755 "{}" \;
 find "${MediaClips}" -type f -exec chmod 644 "{}" \;
 
-if true ; then
+if test x$WITH_GMSYNYTH != x ; then
 	mkdir -p $APPLIB/LV2
 
 	echo "Adding General MIDI Synth LV2"

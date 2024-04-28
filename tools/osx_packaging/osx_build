@@ -19,6 +19,7 @@ WITH_HARVID=1
 WITH_HARRISON_LV2=
 WITH_COMMERCIAL_X42_LV2=
 WITH_GRATIS_X42_LV2=
+WITH_GMSYNTH=
 STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=1
@@ -41,6 +42,7 @@ while [ $# -gt 0 ] ; do
 		WITH_HARRISON_LV2=1 ;
 		WITH_COMMERCIAL_X42_LV2=1
 		WITH_GRATIS_X42_LV2=1
+		WITH_GMSYNTH=1
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus;
 		APPNAME=Mixbus ;
@@ -53,6 +55,7 @@ while [ $# -gt 0 ] ; do
 		WITH_HARRISON_LV2=1 ;
 		WITH_COMMERCIAL_X42_LV2=1
 		WITH_GRATIS_X42_LV2=1
+		WITH_GMSYNTH=1
 		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus32C;
 		lower_case_appname=mixbus32c;
@@ -60,8 +63,18 @@ while [ $# -gt 0 ] ; do
 		APPNAME=Mixbus32C ;
 		BUNDLENAME=Mixbus32C-${major_version} ;
 		shift ;;
+	--livetrax)
+		LIVETRAX=1 ;
+		WITH_HARVID= ;
+		APPNAME=LiveTrax ;
+		PRODUCT_PKG_DIR=LiveTrax;
+		BUNDLENAME=LiveTrax${major_version} ;
+		lower_case_appname=livetrax;
+		BUNDLE_ID_BASE=com.harrisonconsoles
+		shift ;;
 	--public)
 		WITH_HARRISON_LV2=1 ;
+		WITH_GMSYNTH=1
 		PRODUCT_PKG_DIR=Ardour;
 		APPNAME=Ardour ;
 		BUNDLENAME=Ardour${major_version} ;
@@ -537,7 +550,7 @@ done
 rm $Frameworks/ardour-util.sh
 
 # install bundled LV2s to <app>/Contents/lib/LV2/
-cp -R $BUILD_ROOT/libs/LV2 $Frameworks/
+cp -R $BUILD_ROOT/libs/LV2 $Frameworks/ || true
 
 # lv2 core, classifications
 for file in $GTKSTACK_ROOT/lib/lv2/*.lv2; do
@@ -743,7 +756,7 @@ fi
 
 ################################################################################
 ### Mixbus plugins, etc
-if true; then
+if test x$WITH_GMSYNYTH != x ; then
 	echo "Bundling General MIDI Synth LV2"
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
@@ -828,7 +841,7 @@ if test -n "$MIXBUS"; then
 		bsdtar -C "${PRODUCT_PKG_DIR}/${MediaClips}" -xf \
 			"${CACHEDIR}/MixbusBundledMedia.zip"
 	fi
-else
+elif test -z "$LIVETRAX"; then
 	echo "Fetching Ardour bundled content"
 	curl -s -S --fail -#  \
 		-z "${CACHEDIR}/ArdourBundledMedia.zip" \
@@ -949,7 +962,9 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 
 		rm $ZIP_PATH
 	fi
+fi
 
+if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" -a -n "$WITH_HARVID"; then
 	#############
 	## Sign Jadeo
 
