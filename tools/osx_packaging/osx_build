@@ -247,6 +247,8 @@ if test x$MIXBUS32C != x ; then
 	cp  Mixbus32C.icns $Resources/appIcon.icns
 elif test x$MIXBUS != x ; then
 	cp  Mixbus.icns $Resources/appIcon.icns
+elif test x$LIVETRAX != x ; then
+	cp  LiveTrax.icns $Resources/appIcon.icns
 else
 	cp  Ardour.icns $Resources/appIcon.icns
 fi
@@ -443,15 +445,17 @@ chmod +x $Frameworks/ardour-util.sh
 
 # session-utils
 HAVE_SESSION_UTILS=false
-for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; do
-	BN=$(basename $file)
-	cp $file $Frameworks/
-	if test x$STRIP = xall ; then
-		strip -s $Frameworks/${BN}
-	fi
-	cp -R $Frameworks/ardour-util.sh ${APPROOT}/MacOS/${BN}
-	HAVE_SESSION_UTILS=true
-done
+if test -d $BUILD_ROOT/session_utils/; then
+	for file in $BUILD_ROOT/session_utils/${lower_case_appname}${major_version}-*; do
+		BN=$(basename $file)
+		cp $file $Frameworks/
+		if test x$STRIP = xall ; then
+			strip -s $Frameworks/${BN}
+		fi
+		cp -R $Frameworks/ardour-util.sh ${APPROOT}/MacOS/${BN}
+		HAVE_SESSION_UTILS=true
+	done
+fi
 
 if test -x $BUILD_ROOT/luasession/luasession; then
 	BN=${lower_case_appname}${major_version}-lua
@@ -930,9 +934,12 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 	find ${PRODUCT_PKG_DIR}/${APPROOT}/lib -type f -print0 | xargs -0 -I {} -P 7 codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}"
 
 	find ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS -name "${lower_case_appname}${major_version}-*" -print0 | xargs -0 -I {} -P 7 codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" "{}"
-	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/ffmpeg_harvid
-	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/ffprobe_harvid
-	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/harvid
+
+	if test x$WITH_HARVID != x ; then
+		codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/ffmpeg_harvid
+		codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/ffprobe_harvid
+		codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/harvid
+	fi
 
 	codesign --verbose --timestamp ${HARDENED_OPTIONS} --force --sign "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" ${PRODUCT_PKG_DIR}/${APPROOT}/MacOS/${MAIN_EXECUTABLE}
 
