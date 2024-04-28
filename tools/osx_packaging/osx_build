@@ -541,11 +541,6 @@ cp ../../gtk2_ardour/resources/${PRODUCT_PKG_DIR}-* ${Resources}/resources/
 # Themes: only install those named for this app
 cp ../../gtk2_ardour/themes/*-${lower_case_appname}.colors $Themes
 
-# go through and recursively remove any .svn dirs in the bundle
-for svndir in `find $APPDIR -name .svn -type dir`; do
-	rm -rf $svndir
-done
-
 # remove temp session utils start script
 rm $Frameworks/ardour-util.sh
 
