@@ -750,9 +750,9 @@ SurroundReturn::maybe_send_metadata (size_t id, pframes_t sample, pan_t const v[
 	if (!changed && !force) {
 		return;
 	}
+#if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
 	URIMap::URIDs const& urids = URIMap::instance ().urids;
 
-#if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
 	LV2_Atom_Forge_Frame frame;
 	lv2_atom_forge_set_buffer (&_forge, _atom_buf, sizeof (_atom_buf));
 	lv2_atom_forge_frame_time (&_forge, 0);
@@ -829,6 +829,7 @@ SurroundReturn::set_playback_offset (samplecnt_t cnt)
 void
 SurroundReturn::setup_export (std::string const& fn, samplepos_t ss, samplepos_t es)
 {
+#if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
 	URIMap::URIDs const& urids = URIMap::instance ().urids;
 
 	bool have_ref = !_export_reference.empty () && Glib::file_test (_export_reference, Glib::FileTest (Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR));
@@ -875,13 +876,16 @@ SurroundReturn::setup_export (std::string const& fn, samplepos_t ss, samplepos_t
 		_export_start = ss - effective_latency ();
 		_export_end   = es - effective_latency ();
 	}
+#endif
 }
 
 void
 SurroundReturn::finalize_export ()
 {
+#if defined(LV2_EXTENDED) && defined(HAVE_LV2_1_10_0)
 	//std::cout << "SurroundReturn::finalize_export\n";
 	_surround_processor->finalize_export ();
+#endif
 	_exporting    = false;
 	_export_start = _export_end = 0;
 }

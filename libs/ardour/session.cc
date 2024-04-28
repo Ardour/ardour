@@ -1425,7 +1425,7 @@ Session::vapor_barrier ()
 {
 #if !(defined (LV2_EXTENDED) && defined (HAVE_LV2_1_10_0))
 	return false;
-#endif
+#else
 	if (_vapor_available.has_value ()) {
 		return _vapor_available.value ();
 	}
@@ -1458,6 +1458,7 @@ Session::vapor_barrier ()
 	_vapor_available = ok;
 
 	return ok;
+#endif
 }
 
 bool

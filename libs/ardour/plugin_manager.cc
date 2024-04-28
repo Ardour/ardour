@@ -3010,8 +3010,11 @@ PluginManager::ladspa_plugin_info ()
 const ARDOUR::PluginInfoList&
 PluginManager::lv2_plugin_info ()
 {
+#ifdef LV2_SUPPORT
 	assert(_lv2_plugin_info);
 	return *_lv2_plugin_info;
+#endif
+	return _empty_plugin_info;
 }
 
 const ARDOUR::PluginInfoList&
