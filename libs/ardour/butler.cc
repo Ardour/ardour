@@ -44,6 +44,7 @@
 #include "ardour/disk_io.h"
 #include "ardour/disk_reader.h"
 #include "ardour/io.h"
+#include "ardour/io_tasklist.h"
 #include "ardour/session.h"
 #include "ardour/track.h"
 
@@ -264,6 +265,8 @@ Butler::thread_work ()
 
 		DEBUG_TRACE (DEBUG::Butler, string_compose ("butler starts refill loop, twr = %1\n", transport_work_requested ()));
 
+		std::shared_ptr<IOTaskList> tl = _session.io_tasklist ();
+
 		for (i = rl_with_auditioner.begin (); !transport_work_requested () && should_run && i != rl_with_auditioner.end (); ++i) {
 			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (*i);
 
@@ -278,23 +281,26 @@ Butler::thread_work ()
 				// DEBUG_TRACE (DEBUG::Butler, string_compose ("butler skips inactive track %1\n", tr->name()));
 				continue;
 			}
-			// DEBUG_TRACE (DEBUG::Butler, string_compose ("butler refills %1, playback load = %2\n", tr->name(), tr->playback_buffer_load()));
-			switch (tr->do_refill ()) {
-				case 0:
-					//DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill done %1\n", tr->name()));
-					break;
 
-				case 1:
-					DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill unfinished %1\n", tr->name ()));
-					disk_work_outstanding = true;
-					break;
-
-				default:
-					error << string_compose (_("Butler read ahead failure on dstream %1"), (*i)->name ()) << endmsg;
-					std::cerr << string_compose (_("Butler read ahead failure on dstream %1"), (*i)->name ()) << std::endl;
-					break;
-			}
+			tl->push_back ([tr, &disk_work_outstanding]() {
+				switch (tr->do_refill ()) {
+					case 0:
+						//DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill done %1\n", tr->name()));
+						break;
+					case 1:
+						DEBUG_TRACE (DEBUG::Butler, string_compose ("\ttrack refill unfinished %1\n", tr->name ()));
+						disk_work_outstanding = true;
+						break;
+					default:
+						error << string_compose (_("Butler read ahead failure on dstream %1"), tr->name ()) << endmsg;
+						std::cerr << string_compose (_("Butler read ahead failure on dstream %1"), tr->name ()) << std::endl;
+						break;
+				}
+			});
 		}
+
+		tl->process ();
+		tl.reset ();
 
 		if (i != rl_with_auditioner.begin () && i != rl_with_auditioner.end ()) {
 			/* we didn't get to all the streams */

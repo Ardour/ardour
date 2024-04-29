@@ -85,6 +85,7 @@
 #include "ardour/gain_control.h"
 #include "ardour/graph.h"
 #include "ardour/io_plug.h"
+#include "ardour/io_tasklist.h"
 #include "ardour/luabindings.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/midiport_manager.h"
@@ -589,6 +590,7 @@ Session::immediately_post_engine ()
 
 	_process_graph.reset (new Graph (*this));
 	_rt_tasklist.reset (new RTTaskList (_process_graph));
+	_io_tasklist.reset (new IOTaskList ());
 
 	/* every time we reconnect, recompute worst case output latencies */
 
@@ -719,6 +721,8 @@ Session::destroy ()
 
 	_io_graph_chain[0].reset ();
 	_io_graph_chain[1].reset ();
+
+	_io_tasklist.reset ();
 
 	_butler->drop_references ();
 	delete _butler;

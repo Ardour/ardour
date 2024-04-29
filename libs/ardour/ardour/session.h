@@ -149,6 +149,7 @@ struct GraphChain;
 class IO;
 class IOPlug;
 class IOProcessor;
+class IOTaskList;
 class ImportStatus;
 class MidiClockTicker;
 class MidiControlUI;
@@ -334,6 +335,7 @@ public:
 	}
 
 	std::shared_ptr<RTTaskList> rt_tasklist () { return _rt_tasklist; }
+	std::shared_ptr<IOTaskList> io_tasklist () { return _io_tasklist; }
 
 	RouteList get_routelist (bool mixer_order = false, PresentationInfo::Flag fl = PresentationInfo::MixerRoutes) const;
 
@@ -2344,6 +2346,7 @@ private:
 	std::shared_ptr<Port>  _ltc_output_port;
 
 	std::shared_ptr<RTTaskList> _rt_tasklist;
+	std::shared_ptr<IOTaskList> _io_tasklist;
 
 	/* Scene Changing */
 	SceneChanger* _scene_changer;

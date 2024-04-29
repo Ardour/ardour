@@ -110,6 +110,7 @@ libardour_sources = [
         'io.cc',
         'io_plug.cc',
         'io_processor.cc',
+        'io_tasklist.cc',
         'kmeterdsp.cc',
         'ladspa_plugin.cc',
         'latent.cc',

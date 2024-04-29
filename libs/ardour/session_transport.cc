@@ -54,6 +54,7 @@
 #include "ardour/click.h"
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
+#include "ardour/io_tasklist.h"
 #include "ardour/location.h"
 #include "ardour/playlist.h"
 #include "ardour/profile.h"
@@ -1283,12 +1284,14 @@ Session::non_realtime_locate ()
 		tf = _transport_sample;
 		start = get_microseconds ();
 
+		std::shared_ptr<IOTaskList> tl = io_tasklist ();
 		for (auto const& i : *rl) {
 			++nt;
-			i->non_realtime_locate (tf);
-			if (sc != _seek_counter.load ()) {
-				goto restart;
-			}
+			tl->push_back ([this, i, tf, sc]() { if (sc == _seek_counter.load ()) { i->non_realtime_locate (tf); }});
+		}
+		tl->process ();
+		if (sc != _seek_counter.load ()) {
+			goto restart;
 		}
 
 		microseconds_t end = get_microseconds ();
@@ -1528,15 +1531,26 @@ Session::non_realtime_stop (bool abort, int on_entry, bool& finished, bool will_
 
 		DEBUG_TRACE (DEBUG::Transport, X_("Butler PTW: locate\n"));
 
-		for (auto const& i : *r) {
-			DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler PTW: locate on %1\n", i->name()));
-			i->non_realtime_locate (_transport_sample);
+		std::shared_ptr<IOTaskList> tl = io_tasklist ();
 
-			if (on_entry != _butler->should_do_transport_work.load()) {
-				finished = false;
-				/* we will be back */
-				return;
-			}
+		std::atomic<bool> fini (finished);
+		for (auto const& i : *r) {
+			tl->push_back ([this, i, on_entry, &fini]() {
+				if (!fini.load ()) {
+					return;
+				}
+				DEBUG_TRACE (DEBUG::Transport, string_compose ("Butler PTW: locate on %1\n", i->name()));
+				i->non_realtime_locate (_transport_sample);
+				if (on_entry != _butler->should_do_transport_work.load()) {
+					fini = false;
+				}
+			});
+		}
+		tl->process ();
+		if (!fini.load ()) {
+			finished = false;
+			/* we will be back */
+			return;
 		}
 
 		VCAList v = _vca_manager->vcas ();
