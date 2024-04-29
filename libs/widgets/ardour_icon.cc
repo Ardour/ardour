@@ -1509,6 +1509,39 @@ icon_meters (cairo_t* cr, const int width, const int height, const uint32_t fg_c
 	VECTORICONSTROKE (lw, fg_color);
 }
 
+static void
+icon_waveform (cairo_t* cr, const int width, const int height, const uint32_t fg_color)
+{
+	const double x  = width * .5;
+	const double y  = height * .5;
+	const double wh = std::min (x, y);
+
+	const double lw = DEFAULT_LINE_WIDTH;
+	const double lc = fmod (lw * .5, 1.0);
+
+	const int m = floor (1.6 * wh - lw);
+	const double x0 = rint (x + 1 - 0.5 * m);
+
+	// for i=0,60 do print (string.format ("%.2f, ", (math.random(1,100)/100) * (math.random(1,100)/100))) end
+	static const float wave[] = {
+		0.12, 0.40, 0.28, 0.21, 0.25, 0.57, 0.57, 0.41, 0.33, 0.63,
+		0.11, 0.89, 0.13, 0.29, 0.18, 0.24, 0.10, 0.05, 0.24, 0.15,
+		0.01, 0.39, 0.93, 0.27, 0.28, 0.07, 0.15, 0.12, 0.10, 0.13,
+		0.08, 0.03, 0.04, 0.59, 0.64, 0.49, 0.01, 0.04, 0.01, 0.39,
+		0.44, 0.01, 0.21, 0.12, 0.06, 0.07, 0.01, 0.11, 0.07, 0.33,
+		0.38, 0.24, 0.16, 0.64, 0.17, 0.05, 0.24, 0.07, 0.04, 0.35,
+	};
+
+	static const int p = sizeof(wave)/sizeof (float);
+
+	for (int i = 0; i < m; ++i) {
+		double dy = (wh * .8) * wave[i % p] * sqrt(sin (M_PI * i / m));
+		cairo_move_to (cr, x0 + i - lc, y - dy);
+		cairo_line_to (cr, x0 + i - lc, y + dy);
+	}
+	VECTORICONSTROKE (lw, fg_color);
+}
+
 /*****************************************************************************/
 
 bool
@@ -1666,6 +1699,9 @@ ArdourWidgets::ArdourIcon::render (cairo_t*                                   cr
 			break;
 		case Meters:
 			icon_meters (cr, width, height, fg_color);
+			break;
+		case TrackWaveform:
+			icon_waveform (cr, width, height, fg_color);
 			break;
 		case NoIcon:
 			rv = false;
