@@ -1152,14 +1152,17 @@ Session::butler_transport_work (bool have_process_lock)
 		if (!have_process_lock) {
 			lx.acquire ();
 		}
+		std::shared_ptr<IOTaskList> tl = io_tasklist ();
 		for (auto const& i : *r) {
 			std::shared_ptr<Track> tr = std::dynamic_pointer_cast<Track> (i);
 			if (tr) {
 				tr->adjust_playback_buffering ();
 				/* and refill those buffers ... */
 			}
-			i->non_realtime_locate (_transport_sample);
+			tl->push_back ([this, i]() { i->non_realtime_locate (_transport_sample); });
 		}
+		tl->process ();
+
 		VCAList v = _vca_manager->vcas ();
 		for (VCAList::const_iterator i = v.begin(); i != v.end(); ++i) {
 			(*i)->non_realtime_locate (_transport_sample);
