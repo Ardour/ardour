@@ -172,7 +172,12 @@ Butler::_thread_work (void* arg)
 {
 	SessionEvent::create_per_thread_pool ("butler events", 4096);
 	pthread_set_name (X_("butler"));
-	return ((Butler*)arg)->thread_work ();
+	ARDOUR::ProcessThread* pt = new ProcessThread ();
+	pt->get_buffers ();
+	void* rv = ((Butler*)arg)->thread_work ();
+	pt->drop_buffers ();
+	delete pt;
+	return rv;
 }
 
 void*

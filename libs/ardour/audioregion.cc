@@ -2430,9 +2430,6 @@ AudioRegion::apply_region_fx (BufferSet& bufs, samplepos_t start_sample, samplep
 		}
 	}
 
-	ARDOUR::ProcessThread* pt = new ProcessThread (); // TODO -> move to butler ?
-	pt->get_buffers ();
-
 	samplecnt_t latency_offset = 0;
 
 	for (auto const& rfx : _plugins) {
@@ -2470,6 +2467,4 @@ AudioRegion::apply_region_fx (BufferSet& bufs, samplepos_t start_sample, samplep
 	}
 	_fx_pos = end_sample;
 	_fx_latent_read = false;
-	pt->drop_buffers ();
-	delete pt;
 }
