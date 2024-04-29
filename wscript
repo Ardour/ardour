@@ -1571,6 +1571,7 @@ const char* const ardour_config_info = "\\n\\
     write_config_text('Futex Semaphore',       conf.is_defined('USE_FUTEX_SEMAPHORE'))
     write_config_text('Freedesktop files',     opts.freedesktop)
     write_config_text('G_ENABLE_DEBUG',        opts.gdebug or conf.env['DEBUG'])
+    write_config_text('I/O Priorty Set',       conf.is_defined('HAVE_IOPRIO'))
     write_config_text('Libjack linking',       conf.env['libjack_link'])
     write_config_text('Libjack metadata',      conf.is_defined ('HAVE_JACK_METADATA'))
     write_config_text('Lua Binding Doc',       conf.is_defined('LUABINDINGDOC'))

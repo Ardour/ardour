@@ -345,8 +345,18 @@ def configure(conf):
 
     conf.check(header_name='sys/vfs.h', define_name='HAVE_SYS_VFS_H',mandatory=False)
     conf.check(header_name='sys/statvfs.h', define_name='HAVE_SYS_STATVFS_H',mandatory=False)
-
     conf.check(header_name='unistd.h', define_name='HAVE_UNISTD',mandatory=False)
+
+    have_sys_ioprio = conf.check_cc(
+            msg="Checking for 'ioprio_set' syscall support",
+            features  = 'c',
+            mandatory = False,
+            execute   = False,
+            fragment = "#include <sys/syscall.h>\nint main () { syscall(SYS_ioprio_set, 1, 0, 8192); return 0; }")
+
+    if have_sys_ioprio:
+            conf.define('HAVE_IOPRIO', 1)
+            conf.env['HAVE_IOPRIO'] = True
 
     conf.write_config_header('libardour-config.h', remove=False)
 
