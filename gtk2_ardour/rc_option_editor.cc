@@ -4906,6 +4906,27 @@ These settings will only take effect after %1 is restarted.\n\
 
 	add_option (_("Performance"), new BufferingOptions (_rc_config));
 
+	if (hwcpus > 1) {
+		ComboOption<int32_t>* procs = new ComboOption<int32_t> (
+				"io-thread-count",
+				_("Disk I/O threads"),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::get_io_thread_count),
+				sigc::mem_fun (*_rc_config, &RCConfiguration::set_io_thread_count)
+				);
+
+		procs->add (-2, _("all but two processor"));
+		procs->add (-1, _("all but one processor"));
+		procs->add (0, _("all available processors"));
+
+		for (uint32_t i = 1; i <= hwcpus; ++i) {
+			procs->add (i, string_compose (P_("%1 processor", "%1 processors", i), i));
+		}
+
+		procs->set_note (string_compose (_("This setting will only take effect when %1 is restarted."), PROGRAM_NAME));
+
+		add_option (_("Performance"), procs);
+	}
+
 	/* Image cache size */
 	add_option (_("Performance"), new OptionEditorHeading (_("Memory Usage")));
 
