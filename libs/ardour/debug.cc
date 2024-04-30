@@ -53,6 +53,7 @@ PBD::DebugBits PBD::DEBUG::FaderPort = PBD::new_debug_bit ("faderport");
 PBD::DebugBits PBD::DEBUG::FaderPort8 = PBD::new_debug_bit ("faderport8");
 PBD::DebugBits PBD::DEBUG::GenericMidi = PBD::new_debug_bit ("genericmidi");
 PBD::DebugBits PBD::DEBUG::Graph = PBD::new_debug_bit ("graph");
+PBD::DebugBits PBD::DEBUG::IOTaskList = PBD::new_debug_bit ("iotasklist");
 PBD::DebugBits PBD::DEBUG::LTC = PBD::new_debug_bit ("ltc");
 PBD::DebugBits PBD::DEBUG::LV2 = PBD::new_debug_bit ("lv2");
 PBD::DebugBits PBD::DEBUG::LV2Automate = PBD::new_debug_bit ("lv2automate");

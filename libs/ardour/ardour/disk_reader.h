@@ -229,9 +229,9 @@ private:
 	                        int                channel,
 	                        bool               reversed);
 
-	static Sample* _sum_buffer;
-	static Sample* _mixdown_buffer;
-	static gain_t* _gain_buffer;
+	static thread_local Sample* _sum_buffer;
+	static thread_local Sample* _mixdown_buffer;
+	static thread_local gain_t* _gain_buffer;
 
 	int refill (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level, bool reversed);
 	int refill_audio (Sample* sum_buffer, Sample* mixdown_buffer, float* gain_buffer, samplecnt_t fill_level, bool reversed);

@@ -590,7 +590,8 @@ Session::immediately_post_engine ()
 
 	_process_graph.reset (new Graph (*this));
 	_rt_tasklist.reset (new RTTaskList (_process_graph));
-	_io_tasklist.reset (new IOTaskList ());
+
+	_io_tasklist.reset (new IOTaskList (how_many_io_threads ()));
 
 	/* every time we reconnect, recompute worst case output latencies */
 
@@ -774,8 +775,6 @@ Session::destroy ()
 	routes.flush ();
 	_bundles.flush ();
 	_io_plugins.flush ();
-
-	DiskReader::free_working_buffers();
 
 	/* tell everyone who is still standing that we're about to die */
 	drop_references ();

@@ -172,9 +172,14 @@ Butler::_thread_work (void* arg)
 {
 	SessionEvent::create_per_thread_pool ("butler events", 4096);
 	pthread_set_name (X_("butler"));
+	/* get thread buffers for RegionFx */
 	ARDOUR::ProcessThread* pt = new ProcessThread ();
 	pt->get_buffers ();
+	DiskReader::allocate_working_buffers ();
+
 	void* rv = ((Butler*)arg)->thread_work ();
+
+	DiskReader::free_working_buffers ();
 	pt->drop_buffers ();
 	delete pt;
 	return rv;

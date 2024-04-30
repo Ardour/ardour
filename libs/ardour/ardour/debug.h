@@ -58,6 +58,7 @@ namespace PBD {
 		LIBARDOUR_API extern DebugBits FaderPort;
 		LIBARDOUR_API extern DebugBits GenericMidi;
 		LIBARDOUR_API extern DebugBits Graph;
+		LIBARDOUR_API extern DebugBits IOTaskList;
 		LIBARDOUR_API extern DebugBits LTC;
 		LIBARDOUR_API extern DebugBits LV2;
 		LIBARDOUR_API extern DebugBits LV2Automate;

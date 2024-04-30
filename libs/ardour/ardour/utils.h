@@ -109,6 +109,7 @@ LIBARDOUR_API const char* native_header_format_extension (ARDOUR::HeaderFormat, 
 LIBARDOUR_API bool matching_unsuffixed_filename_exists_in (const std::string& dir, const std::string& name);
 
 LIBARDOUR_API uint32_t how_many_dsp_threads ();
+LIBARDOUR_API uint32_t how_many_io_threads ();
 
 LIBARDOUR_API std::string compute_sha1_of_file (std::string path);
 

@@ -696,6 +696,25 @@ ARDOUR::how_many_dsp_threads ()
         return num_threads;
 }
 
+uint32_t
+ARDOUR::how_many_io_threads ()
+{
+	int num_cpu = hardware_concurrency();
+	int pu = Config->get_io_thread_count ();
+	uint32_t num_threads = max (num_cpu - 2, 2);
+	if (pu < 0) {
+		if (-pu < num_cpu) {
+			num_threads = num_cpu + pu;
+		}
+	} else if (pu == 0) {
+		num_threads = num_cpu;
+
+	} else {
+		num_threads = min (num_cpu, pu);
+	}
+	return num_threads;
+}
+
 double
 ARDOUR::gain_to_slider_position_with_max (double g, double max_gain)
 {

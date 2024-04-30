@@ -221,6 +221,7 @@ CONFIG_VARIABLE (std::string, sample_lib_path, "sample-lib-path", "") /* custom 
 CONFIG_VARIABLE (bool, allow_special_bus_removal, "allow-special-bus-removal", false)
 CONFIG_VARIABLE (int32_t, processor_usage, "processor-usage", -1)
 CONFIG_VARIABLE (int32_t, cpu_dma_latency, "cpu-dma-latency", -1) /* >=0 to enable */
+CONFIG_VARIABLE (int32_t, io_thread_count, "io-thread-count", -2)
 CONFIG_VARIABLE (gain_t, max_gain, "max-gain", 2.0) /* +6.0dB */
 CONFIG_VARIABLE (uint32_t, max_recent_sessions, "max-recent-sessions", 10)
 CONFIG_VARIABLE (uint32_t, max_recent_templates, "max-recent-templates", 10)

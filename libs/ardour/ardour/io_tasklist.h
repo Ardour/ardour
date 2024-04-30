@@ -19,8 +19,12 @@
 #ifndef _ardour_io_tasklist_h_
 #define _ardour_io_tasklist_h_
 
+#include <atomic>
 #include <boost/function.hpp>
 #include <vector>
+#include <glibmm/threads.h>
+
+#include "pbd/semutils.h"
 
 #include "ardour/libardour_visibility.h"
 
@@ -30,7 +34,7 @@ namespace ARDOUR
 class LIBARDOUR_API IOTaskList
 {
 public:
-	IOTaskList ();
+	IOTaskList (uint32_t);
 	~IOTaskList ();
 
 	/** process tasks in list in parallel, wait for them to complete */
@@ -38,9 +42,19 @@ public:
 	void push_back (boost::function<void ()> fn);
 
 private:
+	static void* _worker_thread (void*);
+
+	void io_thread ();
+
 	std::vector<boost::function<void ()>> _tasks;
 
-	size_t _n_threads;
+	uint32_t               _n_threads;
+	std::atomic<uint32_t>  _n_workers;
+	std::vector<pthread_t> _workers;
+	std::atomic <bool>     _terminate;
+	PBD::Semaphore         _exec_sem;
+	PBD::Semaphore         _idle_sem;
+	Glib::Threads::Mutex   _tasks_mutex;
 };
 
 } // namespace ARDOUR

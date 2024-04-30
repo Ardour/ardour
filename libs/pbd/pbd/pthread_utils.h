@@ -68,7 +68,8 @@ LIBPBD_API void pthread_set_name (const char* name);
 enum PBDThreadClass {
 	THREAD_MAIN, // main audio I/O thread
 	THREAD_MIDI, // MIDI I/O threads
-	THREAD_PROC // realtime worker
+	THREAD_PROC, // realtime worker
+	THREAD_IO    // non-realtime I/O
 };
 
 LIBPBD_API int pbd_pthread_priority (PBDThreadClass);

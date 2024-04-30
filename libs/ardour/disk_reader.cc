@@ -49,9 +49,9 @@ using namespace std;
 
 ARDOUR::samplecnt_t   DiskReader::_chunk_samples = default_chunk_samples ();
 PBD::Signal0<void>    DiskReader::Underrun;
-Sample*               DiskReader::_sum_buffer     = 0;
-Sample*               DiskReader::_mixdown_buffer = 0;
-gain_t*               DiskReader::_gain_buffer    = 0;
+thread_local Sample*  DiskReader::_sum_buffer     = 0;
+thread_local Sample*  DiskReader::_mixdown_buffer = 0;
+thread_local gain_t*  DiskReader::_gain_buffer    = 0;
 std::atomic<int>      DiskReader::_no_disk_output (0);
 DiskReader::Declicker DiskReader::loop_declick_in;
 DiskReader::Declicker DiskReader::loop_declick_out;

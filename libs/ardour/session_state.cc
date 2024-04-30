@@ -272,7 +272,6 @@ Session::post_engine_init ()
 		_engine.GraphReordered.connect_same_thread (*this, boost::bind (&Session::graph_reordered, this, true));
 		_engine.MidiSelectionPortsChanged.connect_same_thread (*this, boost::bind (&Session::rewire_midi_selection_ports, this));
 
-		DiskReader::allocate_working_buffers();
 		refresh_disk_space ();
 
 		/* we're finally ready to call set_state() ... all objects have

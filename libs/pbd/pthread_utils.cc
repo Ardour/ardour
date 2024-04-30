@@ -280,6 +280,11 @@ pbd_pthread_priority (PBDThreadClass which)
 		default:
 		case THREAD_PROC:
 			return -2;
+		case THREAD_IO:
+			/* https://github.com/mingw-w64/mingw-w64/blob/master/mingw-w64-libraries/winpthreads/src/sched.c
+			 * -> THREAD_PRIORITY_HIGHEST
+			 */
+			return -13;
 	}
 #else
 	int base = -20;
@@ -299,6 +304,8 @@ pbd_pthread_priority (PBDThreadClass which)
 		default:
 		case THREAD_PROC:
 			return base - 2;
+		case THREAD_IO:
+			return base - 10;
 	}
 #endif
 }
