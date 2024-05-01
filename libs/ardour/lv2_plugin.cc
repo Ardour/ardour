@@ -610,6 +610,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 	static const int32_t _max_block_length = 8192; // max possible (with all engines and during export)
 	static const int32_t rt_policy = PBD_SCHED_FIFO;
 	static const int32_t rt_priority = pbd_absolute_rt_priority (PBD_SCHED_FIFO, AudioEngine::instance()->client_real_time_priority () - 1);
+	static const int32_t hw_concurrency = how_many_dsp_threads ();
 	/* Consider updating max-block-size whenever the buffersize changes.
 	 * It requires re-instantiating the plugin (which is a non-realtime operation),
 	 * so it should be done lightly and only for plugins that require it.
@@ -632,6 +633,8 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 		  sizeof(int32_t), atom_Int, &rt_policy },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/threads/#schedPriority"),
 		  sizeof(int32_t), atom_Int, &rt_priority },
+		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://ardour.org/lv2/threads/#concurrency"),
+		  sizeof(int32_t), atom_Int, &hw_concurrency },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#backgroundColor"),
 		  sizeof(int32_t), atom_Int, &_ui_background_color },
 		{ LV2_OPTIONS_INSTANCE, 0, _uri_map.uri_to_id("http://lv2plug.in/ns/extensions/ui#foregroundColor"),
