@@ -669,9 +669,6 @@ AudioRegion::read_at (Sample*     buf,
 		uint32_t fx_latency = _fx_latency;
 		lm.release ();
 
-		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Region '%1' channel: %2 read at %3 - %4 to_read: %5 with fx: %6\n",
-		             name(), chan_n, internal_offset, internal_offset + to_read, to_read, have_fx));
-
 		ChanCount cc (DataType::AUDIO, n_channels ());
 		_readcache.ensure_buffers (cc, to_read + _fx_latency);
 
@@ -697,6 +694,9 @@ AudioRegion::read_at (Sample*     buf,
 			readat += fx_latency;
 			n_read = max<samplecnt_t> (0, min (to_read, lsamples - offset));
 		}
+
+		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Region '%1' channel: %2 read: %3 - %4 (%5) to_read: %6 offset: %7 with fx: %8 fx_latency: %9\n",
+		             name(), chan_n, readat, readat + n_read, n_read, to_read, internal_offset, have_fx, fx_latency));
 
 		_readcache.ensure_buffers (cc, n_proc);
 
