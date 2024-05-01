@@ -477,7 +477,7 @@ ExportDialog::show_progress ()
 
 	if (!status->aborted()) {
 		hide();
-		if (!ARDOUR::Profile->get_mixbus()) {
+		if (!ARDOUR::Profile->get_mixbus () && !ARDOUR::Profile->get_livetrax ()) {
 			NagScreen* ns = NagScreen::maybe_nag (_("export"));
 			if (ns) {
 				ns->nag ();

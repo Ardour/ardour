@@ -345,7 +345,7 @@ SimpleExportDialog::start_export ()
 		if (_post_export_combo.get_active_row_number () == 0) {
 			PBD::open_folder (folder ());
 		}
-		if (!ARDOUR::Profile->get_mixbus ()) {
+		if (!ARDOUR::Profile->get_mixbus () && !ARDOUR::Profile->get_livetrax ()) {
 			NagScreen* ns = NagScreen::maybe_nag (_("Export"));
 			if (ns) {
 				ns->nag ();
