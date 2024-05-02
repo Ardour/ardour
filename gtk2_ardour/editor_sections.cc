@@ -228,6 +228,10 @@ EditorSections::scroll_row_timeout ()
 void
 EditorSections::update_time_selection ()
 {
+	if (!_session) {
+		return;
+	}
+
 	_view.get_selection ()->unselect_all ();
 
 	Selection& selection (PublicEditor::instance ().get_selection ());
@@ -256,6 +260,10 @@ EditorSections::update_time_selection ()
 void
 EditorSections::selection_changed ()
 {
+	if (!_session) {
+		return;
+	}
+
 	TreeView::Selection::ListHandle_Path rows = _view.get_selection ()->get_selected_rows ();
 	if (rows.empty ()) {
 		return;
