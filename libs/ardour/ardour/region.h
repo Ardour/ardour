@@ -565,7 +565,7 @@ protected:
 	virtual bool _add_plugin (std::shared_ptr<RegionFxPlugin>, std::shared_ptr<RegionFxPlugin>, bool) { return false; }
 	virtual void fx_latency_changed (bool no_emit);
 
-	void send_change (const PBD::PropertyChange&);
+	virtual void send_change (const PBD::PropertyChange&);
 	virtual int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
 	virtual void set_position_internal (timepos_t const & pos);
 	virtual void set_length_internal (timecnt_t const &);

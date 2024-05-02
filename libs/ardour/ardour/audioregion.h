@@ -279,6 +279,7 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	bool _add_plugin (std::shared_ptr<RegionFxPlugin>, std::shared_ptr<RegionFxPlugin>, bool);
 
 	int _set_state (const XMLNode&, int version, PBD::PropertyChange& what_changed, bool send_signal);
+	void send_change (const PBD::PropertyChange&);
 };
 
 } /* namespace ARDOUR */

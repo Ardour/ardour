@@ -252,6 +252,27 @@ AudioRegion::init ()
 }
 
 void
+AudioRegion::send_change (const PropertyChange& what_changed)
+{
+
+	PropertyChange our_interests;
+
+	our_interests.add (Properties::fade_in_active);
+	our_interests.add (Properties::fade_out_active);
+	our_interests.add (Properties::scale_amplitude);
+	our_interests.add (Properties::envelope_active);
+	our_interests.add (Properties::envelope);
+	our_interests.add (Properties::fade_in);
+	our_interests.add (Properties::fade_out);
+
+	if (what_changed.contains (our_interests)) {
+		_invalidated.exchange (true);
+	}
+
+	Region::send_change (what_changed);
+}
+
+void
 AudioRegion::copy_plugin_state (std::shared_ptr<const AudioRegion> other)
 {
 	/* state cannot copied in Region, because when running Region's c'tor
