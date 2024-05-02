@@ -194,10 +194,10 @@ Gtkmm2ext::pixbuf_from_string(const string& name, const Pango::FontDescription& 
 		int width, height;
 		pixel_size (name, font, width, height);
 		if (clip_width <= 0) {
-			clip_width = width - clip_width;
+			clip_width = width - clip_width;    /* this is an addition because clip_width is negative */
 		}
 		if (clip_height <= 0) {
-			clip_height = height - clip_height;
+			clip_height = height - clip_height; /* this is an addition because clip_height is negative */
 		}
 	}
 
