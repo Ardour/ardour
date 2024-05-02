@@ -38,72 +38,72 @@ class MidiPlaylist;
 
 template <typename T> class MidiRingBuffer;
 
-class LIBARDOUR_API DiskReader : public DiskIOProcessor
+class /*LIBARDOUR_API*/ DiskReader : public DiskIOProcessor
 {
 public:
-	DiskReader (Session&, Track&, std::string const& name, Temporal::TimeDomainProvider const &, DiskIOProcessor::Flag f = DiskIOProcessor::Flag (0));
-	~DiskReader ();
+	LIBARDOUR_API DiskReader (Session&, Track&, std::string const& name, Temporal::TimeDomainProvider const &, DiskIOProcessor::Flag f = DiskIOProcessor::Flag (0));
+	LIBARDOUR_API ~DiskReader ();
 
-	bool set_name (std::string const& str);
+	LIBARDOUR_API bool set_name (std::string const& str);
 
-	std::string display_name () const;
+	LIBARDOUR_API std::string display_name () const;
 
-	static samplecnt_t chunk_samples ()
+	LIBARDOUR_API static samplecnt_t chunk_samples ()
 	{
 		return _chunk_samples;
 	}
 
-	static void set_chunk_samples (samplecnt_t n)
+	LIBARDOUR_API static void set_chunk_samples (samplecnt_t n)
 	{
 		_chunk_samples = n;
 	}
 
-	static samplecnt_t default_chunk_samples ();
+	LIBARDOUR_API static samplecnt_t default_chunk_samples ();
 
-	void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
-	void realtime_handle_transport_stopped ();
-	void realtime_locate (bool);
-	bool overwrite_existing_buffers ();
-	void set_pending_overwrite (OverwriteReason);
-	void set_loop (Location*);
+	LIBARDOUR_API void run (BufferSet& /*bufs*/, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double speed, pframes_t /*nframes*/, bool /*result_required*/);
+	LIBARDOUR_API void realtime_handle_transport_stopped ();
+	LIBARDOUR_API void realtime_locate (bool);
+	LIBARDOUR_API bool overwrite_existing_buffers ();
+	LIBARDOUR_API void set_pending_overwrite (OverwriteReason);
+	LIBARDOUR_API void set_loop (Location*);
 
-	int set_state (const XMLNode&, int version);
+	LIBARDOUR_API int set_state (const XMLNode&, int version);
 
 	PBD::Signal0<void> AlignmentStyleChanged;
 
-	float buffer_load () const;
+	LIBARDOUR_API float buffer_load () const;
 
-	void move_processor_automation (std::weak_ptr<Processor>, std::list<Temporal::RangeMove> const&);
+	LIBARDOUR_API void move_processor_automation (std::weak_ptr<Processor>, std::list<Temporal::RangeMove> const&);
 
 	/* called by the Butler in a non-realtime context as part of its normal
 	 * buffer refill loop (not due to transport-mechanism requests like
 	 * locate)
 	 */
-	int do_refill ();
+	LIBARDOUR_API int do_refill ();
 
 	/** For contexts outside the normal butler refill loop (allocates temporary working buffers) */
 	int do_refill_with_alloc (bool partial_fill, bool reverse);
 
-	bool pending_overwrite () const;
+	LIBARDOUR_API bool pending_overwrite () const;
 
 	/* Working buffers for do_refill (butler thread) */
-	static void allocate_working_buffers ();
-	static void free_working_buffers ();
+	LIBARDOUR_API static void allocate_working_buffers ();
+	LIBARDOUR_API static void free_working_buffers ();
 
-	void adjust_buffering ();
+	LIBARDOUR_API void adjust_buffering ();
 
-	bool can_internal_playback_seek (sampleoffset_t distance);
-	void internal_playback_seek (sampleoffset_t distance);
-	int  seek (samplepos_t sample, bool complete_refill = false);
+	LIBARDOUR_API bool can_internal_playback_seek (sampleoffset_t distance);
+	LIBARDOUR_API void internal_playback_seek (sampleoffset_t distance);
+	LIBARDOUR_API int  seek (samplepos_t sample, bool complete_refill = false);
 
-	static PBD::Signal0<void> Underrun;
+	LIBARDOUR_API static PBD::Signal0<void> Underrun;
 
-	void playlist_modified ();
-	void reset_tracker ();
+	LIBARDOUR_API void playlist_modified ();
+	LIBARDOUR_API void reset_tracker ();
 
-	bool declick_in_progress () const;
+	LIBARDOUR_API bool declick_in_progress () const;
 
-	void set_need_midi_catchup (bool);
+	LIBARDOUR_API void set_need_midi_catchup (bool);
 
 	/* inc/dec variants MUST be called as part of the process call tree, before any
 	 * disk readers are invoked. We use it when the session needs the
@@ -112,21 +112,21 @@ public:
 	 * don't want any actual disk output yet because we are still not
 	 * synced.
 	 */
-	static void inc_no_disk_output ();
-	static void dec_no_disk_output ();
-	static bool no_disk_output ()
+	LIBARDOUR_API static void inc_no_disk_output ();
+	LIBARDOUR_API static void dec_no_disk_output ();
+	LIBARDOUR_API static bool no_disk_output ()
 	{
 		return _no_disk_output.load ();
 	}
-	static void reset_loop_declick (Location*, samplecnt_t sample_rate);
-	static void alloc_loop_declick (samplecnt_t sample_rate);
+	LIBARDOUR_API static void reset_loop_declick (Location*, samplecnt_t sample_rate);
+	LIBARDOUR_API static void alloc_loop_declick (samplecnt_t sample_rate);
 
 protected:
 	friend class Track;
 	friend class MidiTrack;
 
 	struct ReaderChannelInfo : public DiskIOProcessor::ChannelInfo {
-		ReaderChannelInfo (samplecnt_t buffer_size, samplecnt_t preloop_size)
+		LIBARDOUR_API ReaderChannelInfo (samplecnt_t buffer_size, samplecnt_t preloop_size)
 			: DiskIOProcessor::ChannelInfo (buffer_size)
 			, pre_loop_buffer (0)
 			, pre_loop_buffer_size (0)
@@ -135,27 +135,27 @@ protected:
 			resize (buffer_size);
 		}
 
-		~ReaderChannelInfo ()
+		LIBARDOUR_API ~ReaderChannelInfo ()
 		{
 			delete[] pre_loop_buffer;
 		}
 
-		void resize (samplecnt_t);
-		void resize_preloop (samplecnt_t);
+		LIBARDOUR_API void resize (samplecnt_t);
+		LIBARDOUR_API void resize_preloop (samplecnt_t);
 
 		Sample*     pre_loop_buffer;
 		samplecnt_t pre_loop_buffer_size;
 		bool        initialized;
 	};
 
-	XMLNode& state () const;
+	LIBARDOUR_API XMLNode& state () const;
 
-	void resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
+	LIBARDOUR_API void resolve_tracker (Evoral::EventSink<samplepos_t>& buffer, samplepos_t time);
 
-	int  use_playlist (DataType, std::shared_ptr<Playlist>);
-	void playlist_ranges_moved (std::list<Temporal::RangeMove> const&, bool);
+	LIBARDOUR_API int  use_playlist (DataType, std::shared_ptr<Playlist>);
+	LIBARDOUR_API void playlist_ranges_moved (std::list<Temporal::RangeMove> const&, bool);
 
-	int add_channel_to (std::shared_ptr<ChannelList>, uint32_t how_many);
+	LIBARDOUR_API int add_channel_to (std::shared_ptr<ChannelList>, uint32_t how_many);
 
 	class DeclickAmp
 	{
