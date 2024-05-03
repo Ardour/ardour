@@ -355,9 +355,12 @@ RegionFxPlugin::set_default_automation (timepos_t end)
 {
 	for (auto const& i : _controls) {
 		std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (i.second);
-		assert (ac->alist ()->empty ());
-		ac->alist ()->fast_simple_add (timepos_t (time_domain ()), ac->normal ());
-		ac->alist ()->fast_simple_add (end, ac->normal ());
+		if (ac->alist ()->empty ()) {
+			ac->alist ()->fast_simple_add (timepos_t (time_domain ()), ac->normal ());
+			ac->alist ()->fast_simple_add (end, ac->normal ());
+		} else {
+			ac->alist ()->truncate_end (end);
+		}
 	}
 }
 
