@@ -588,6 +588,12 @@ public:
 
 	virtual void set_tempo_curve_range (double& max, double& min) const = 0;
 
+	virtual void start_track_drag (TimeAxisView&, int y, Gtk::Widget&) = 0;
+	virtual void mid_track_drag (GdkEventMotion*, Gtk::Widget&) = 0;
+	virtual void end_track_drag () = 0;
+	virtual void get_layout_relative_coordinates (Gtk::Widget&, int x, int y, int &xo, int &yo) = 0;
+	virtual bool track_dragging() const = 0;
+
 	/// Singleton instance, set up by Editor::Editor()
 
 	static PublicEditor* _instance;
