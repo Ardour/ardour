@@ -4291,6 +4291,11 @@ Editor::override_visible_track_count ()
 bool
 Editor::edit_controls_button_event (GdkEventButton* ev)
 {
+	if (ev->type == GDK_BUTTON_RELEASE && track_dragging()) {
+		end_track_drag ();
+		return true;
+	}
+
 	if ((ev->type == GDK_2BUTTON_PRESS && ev->button == 1) || (ev->type == GDK_BUTTON_RELEASE && Keyboard::is_context_menu_event (ev))) {
 		ARDOUR_UI::instance()->add_route ();
 	} else if (ev->button == 1 && ev->type == GDK_BUTTON_PRESS) {
