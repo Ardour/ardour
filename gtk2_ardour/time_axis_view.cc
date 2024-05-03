@@ -518,6 +518,10 @@ TimeAxisView::maybe_set_cursor (int y)
 bool
 TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 {
+	if (_editor.track_dragging()) {
+		return false;
+	}
+
 	if (_resize_drag_start >= 0) {
 		if (_have_preresize_cursor) {
 			gdk_window_set_cursor (controls_ebox.get_window()->gobj(), _preresize_cursor);
