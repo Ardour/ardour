@@ -1413,6 +1413,12 @@ private:
 	void insert_patch_change (bool from_context);
 	void fork_selected_regions ();
 	void fork_regions_from_unselected ();
+	void start_track_drag (TimeAxisView&, int y, Gtk::Widget& w);
+	void mid_track_drag (GdkEventMotion*, Gtk::Widget& e);
+	void end_track_drag ();
+	void maybe_place_drag_spacer ();
+	void get_layout_relative_coordinates (Gtk::Widget&, int x, int y, int &xo, int &yo);
+	bool track_dragging() const;
 
 	void do_insert_time ();
 	void insert_time (Temporal::timepos_t const &, Temporal::timecnt_t const &, Editing::InsertTimeOption, bool, bool, bool, bool);

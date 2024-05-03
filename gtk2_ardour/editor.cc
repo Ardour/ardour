@@ -474,6 +474,7 @@ Editor::Editor ()
 	, quantize_dialog (0)
 	, _main_menu_disabler (0)
 	, domain_bounce_info (nullptr)
+	, track_drag (nullptr)
 {
 	/* we are a singleton */
 
