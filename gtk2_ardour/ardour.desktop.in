@@ -7,3 +7,4 @@ Terminal=false
 MimeType=application/x-ardour;
 Type=Application
 Categories=AudioVideo;Audio;AudioEditing;X-Recorders;X-Multitrack;X-Jack;
+StartupWMClass=Ardour
