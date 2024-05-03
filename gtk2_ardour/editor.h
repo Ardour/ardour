@@ -2593,6 +2593,37 @@ private:
 	friend class Drag;
 	friend class RegionCutDrag;
 	friend class RegionDrag;
+
+	struct TrackDrag {
+		RouteTimeAxisView* track;
+		Gtk::EventBox*     spacer;
+		GdkCursor*         drag_cursor;
+		GdkCursor*         predrag_cursor;
+		TimeAxisView*      bump_track;
+		int                spacer_order;
+		double             start;
+		double             current;
+		double             previous;
+		bool               have_predrag_cursor;
+		int                direction;
+
+		TrackDrag (RouteTimeAxisView* rtav)
+			: track (rtav)
+			, spacer (nullptr)
+			, drag_cursor (nullptr)
+			, predrag_cursor (nullptr)
+			, bump_track (nullptr)
+			, spacer_order (-1)
+			, start (-1.)
+			, current (0.)
+			, previous (0.)
+			, have_predrag_cursor (false)
+			, direction (0)
+		{}
+
+	};
+	TrackDrag* track_drag;
+
 	friend class RegionMoveDrag;
 	friend class TrimDrag;
 	friend class MappingTwistDrag;
