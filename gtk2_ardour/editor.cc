@@ -6176,6 +6176,67 @@ struct TrackViewStripableSorter
   }
 };
 
+static const int track_drag_spacer_height = 25;
+
+void
+Editor::maybe_place_drag_spacer ()
+{
+	/* Build a map of track<->visual order */
+
+	std::map<TimeAxisView*,int> visual_order;
+	int n = 0;
+
+	for (auto & tv : track_views) {
+		if (!tv->marked_for_display () || (tv == track_drag->track)) {
+			continue;
+		}
+		visual_order[tv] = n;
+		++n;
+	}
+
+	for (auto & tv : track_views) {
+
+		if (!tv->marked_for_display () || (tv == track_drag->track)) {
+			continue;
+		}
+
+		/* find the track the mouse pointer is within, and if
+		 * we're in the upper or lower half of it (depending on
+		 * drag direction, move the spacer.
+		 */
+
+		if (track_drag->current >= tv->y_position() && track_drag->current < (tv->y_position() + tv->effective_height())) {
+
+			if (track_drag->bump_track == tv) {
+				/* already bumped for this track */
+				break;
+			}
+
+			if (track_drag->direction < 0) {
+
+				/* dragging up */
+
+				if (track_drag->current < (tv->y_position() + (tv->effective_height() / 2))) {
+					/* in top half of this track, move spacer */
+					track_drag->spacer_order = visual_order[tv];
+					track_drag->bump_track = tv;
+				}
+
+			} else if (track_drag->direction > 0) {
+
+				/* dragging down */
+
+				if (track_drag->current > (tv->y_position() + (tv->effective_height() / 2))) {
+					track_drag->spacer_order = visual_order[tv] + 1;
+					track_drag->bump_track = tv;
+				}
+			}
+
+			break;
+		}
+	}
+}
+
 bool
 Editor::redisplay_track_views ()
 {
@@ -6192,22 +6253,54 @@ Editor::redisplay_track_views ()
 
 	track_views.sort (TrackViewStripableSorter ());
 
-	uint32_t position;
-	TrackViewList::const_iterator i;
+	if (track_drag && track_drag->spacer) {
+		maybe_place_drag_spacer ();
+	}
 
 	/* n will be the count of tracks plus children (updated by TimeAxisView::show_at),
 	 * so we will use that to know where to put things.
 	 */
-	int n;
-	for (n = 0, position = 0, i = track_views.begin(); i != track_views.end(); ++i) {
-		TimeAxisView *tv = (*i);
+	int n = 0;
+	uint32_t position = 0;
+
+	for (auto & tv : track_views) {
+
+		int xtra = 0;
 
 		if (tv->marked_for_display ()) {
-			position += tv->show_at (position, n, &edit_controls_vbox);
+
+			if (track_drag) {
+
+				if (tv == track_drag->track) {
+					tv->hide ();
+					continue;
+				}
+
+				if (tv->stripable()->presentation_info().order() > track_drag->spacer_order) {
+					xtra = track_drag_spacer_height;
+					++n;
+				}
+			}
+
+			position += tv->show_at (position + xtra, n, &edit_controls_vbox);
+
 		} else {
 			tv->hide ();
 		}
+
 		n++;
+	}
+
+	if (track_drag) {
+
+		if (!track_drag->spacer) {
+			track_drag->spacer = manage (new Gtk::EventBox);
+			track_drag->spacer->set_size_request (-1, track_drag_spacer_height);
+			track_drag->spacer->show ();
+			edit_controls_vbox.pack_start (*track_drag->spacer, false, false);
+		}
+
+		edit_controls_vbox.reorder_child (*track_drag->spacer, track_drag->spacer_order);
 	}
 
 	reset_controls_layout_height (position);
@@ -7007,4 +7100,106 @@ Editor::default_time_domain () const
 			break;
 	}
 	return BeatTime;
+}
+
+void
+Editor::start_track_drag (TimeAxisView& tav, int y, Gtk::Widget& w)
+{
+	/* Find the visual order of this track */
+	int nth = 0;
+
+	for (auto const & tv : track_views) {
+		if (!tv->marked_for_display()) {
+			continue;
+		}
+
+		if (tv == &tav) {
+			break;
+		}
+
+		++nth;
+	}
+
+	track_drag = new TrackDrag (dynamic_cast<RouteTimeAxisView*> (&tav));
+
+	/* Create a useful dragging cursor from the first track's name */
+
+	Pango::FontDescription fd (UIConfiguration::instance().get_LargerBoldFont());
+	Gtkmm2ext::Color c (UIConfiguration::instance().color ("midi meter color0"));
+	Gdk::Color color (Gtkmm2ext::gdk_color_from_rgb (c));
+	Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gtkmm2ext::pixbuf_from_string (track_drag->track->route()->name(), fd, 0, 0, color);
+
+	track_drag->drag_cursor = gdk_cursor_new_from_pixbuf (gdk_display_get_default(), pixbuf->gobj(), 0, 0);
+	track_drag->predrag_cursor = gdk_window_get_cursor (edit_controls_vbox.get_window()->gobj());
+
+	gdk_window_set_cursor (edit_controls_vbox.get_toplevel()->get_window()->gobj(), track_drag->drag_cursor);
+
+
+	int xo, yo;
+	w.translate_coordinates (edit_controls_vbox, 0, y, xo, yo);
+
+	track_drag->have_predrag_cursor = true;
+	track_drag->bump_track = nullptr;
+	track_drag->spacer_order = nth;
+	track_drag->previous = yo;
+	track_drag->start = yo;
+}
+
+void
+Editor::mid_track_drag (GdkEventMotion* ev, Gtk::Widget& w)
+{
+	int xo, yo;
+	w.translate_coordinates (edit_controls_vbox, ev->x, ev->y, xo, yo);
+
+	track_drag->current = yo;
+
+	if (track_drag->current > track_drag->previous) {
+		if (track_drag->direction != 1) {
+			track_drag->bump_track = nullptr;
+			track_drag->direction = 1;
+		}
+	} else if (track_drag->current < track_drag->previous) {
+		if (track_drag->direction != -1) {
+			track_drag->bump_track = nullptr;
+			track_drag->direction = -1;
+		}
+	}
+
+	if (track_drag->current == track_drag->previous) {
+		return;
+	}
+
+	redisplay_track_views ();
+	track_drag->previous = yo;
+}
+
+void
+Editor::end_track_drag ()
+{
+	if (track_drag->have_predrag_cursor) {
+		gdk_window_set_cursor (edit_controls_vbox.get_window()->gobj(), track_drag->predrag_cursor);
+	}
+
+
+	if (track_drag->spacer) {
+		edit_controls_vbox.remove (*track_drag->spacer);
+	}
+
+	delete track_drag;
+	track_drag = nullptr;
+
+	redisplay_track_views ();
+}
+
+void
+Editor::get_layout_relative_coordinates (Gtk::Widget& src, int x, int y, int &xo, int &yo)
+{
+	gtk_widget_translate_coordinates (src.gobj(), GTK_WIDGET (controls_layout.gobj()),
+	                                  x, y, &xo, &yo);
+}
+
+bool
+Editor::track_dragging() const
+{
+	return (bool) track_drag;
 }
