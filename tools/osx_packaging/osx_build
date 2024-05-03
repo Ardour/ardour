@@ -16,6 +16,7 @@ mkdir -p "$CACHEDIR"
 MIXBUS=
 MIXBUS32C=
 WITH_HARVID=1
+WITH_XJADEO=1
 WITH_HARRISON_LV2=
 WITH_COMMERCIAL_X42_LV2=
 WITH_GRATIS_X42_LV2=
@@ -50,22 +51,9 @@ while [ $# -gt 0 ] ; do
 		lower_case_appname=mixbus;
 		BUNDLE_ID_BASE=com.harrisonconsoles
 		shift ;;
-	--mixbus32c) MIXBUS=1;
-		MIXBUS32C=1;
-		WITH_HARRISON_LV2=1 ;
-		WITH_COMMERCIAL_X42_LV2=1
-		WITH_GRATIS_X42_LV2=1
-		WITH_GMSYNTH=1
-		STRIP= ;
-		PRODUCT_PKG_DIR=Mixbus32C;
-		lower_case_appname=mixbus32c;
-		BUNDLE_ID_BASE=com.harrisonconsoles
-		APPNAME=Mixbus32C ;
-		BUNDLENAME=Mixbus32C-${major_version} ;
-		shift ;;
 	--livetrax)
 		LIVETRAX=1 ;
-		WITH_HARVID= ;
+		WITH_XJADEO= ;
 		APPNAME=LiveTrax ;
 		PRODUCT_PKG_DIR=LiveTrax;
 		BUNDLENAME=LiveTrax${major_version} ;
@@ -86,7 +74,7 @@ while [ $# -gt 0 ] ; do
 	# specific build flags
 	#
 
-	--noharvid) WITH_HARVID= ; shift ;;
+	--noharvid) shift ;;
 	--nostrip) STRIP= ; shift ;;
 	--sysdeps) PRINT_SYSDEPS=1; shift ;;
 	--no-nls) WITH_NLS= ; shift ;;
@@ -711,28 +699,25 @@ if test x$WITH_HARRISON_LV2 != x ; then
 fi
 
 if test x$WITH_HARVID != x ; then
-	echo "installing video tools.."
-	if test $OSX_ARCH = ppc; then
-		# EOL
-		HARVID_VERSION=v0.8.2
-		XJADEO_VERSION=v0.8.8
-	else
-		HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
-		XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
-	fi
-	echo "copying harvid and xjadeo ..."
+	echo "installing harvid..."
+	HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
 
 	rsync -Pa \
 		rsync://ardour.org/video-tools/harvid-${HARVID_ARCH}-${HARVID_VERSION}.tgz \
 		"$CACHEDIR/harvid-${HARVID_ARCH}-${HARVID_VERSION}.tgz"
 
-	rsync -Pa \
-		rsync://ardour.org/video-tools/jadeo${XJADEO_ARCH}-${XJADEO_VERSION:1}.dmg \
-		"$CACHEDIR/jadeo${XJADEO_ARCH}-${XJADEO_VERSION:1}.dmg"
-
 	tar -x -z \
 		-C $PRODUCT_PKG_DIR/$APPROOT \
 		-f "$CACHEDIR/harvid-${HARVID_ARCH}-${HARVID_VERSION}.tgz" || exit 1
+fi
+
+if test x$WITH_XJADEO != x ; then
+	echo "installing video monitor.."
+	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
+
+	rsync -Pa \
+		rsync://ardour.org/video-tools/jadeo${XJADEO_ARCH}-${XJADEO_VERSION:1}.dmg \
+		"$CACHEDIR/jadeo${XJADEO_ARCH}-${XJADEO_VERSION:1}.dmg"
 
 	JADEO=$(hdiutil attach "$CACHEDIR/jadeo${XJADEO_ARCH}-${XJADEO_VERSION:1}.dmg" | grep Apple_HFS | grep dev/ | cut -f 3)
 	cp -r "${JADEO}/Jadeo.app" "$PRODUCT_PKG_DIR/"

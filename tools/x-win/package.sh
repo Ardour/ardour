@@ -34,6 +34,8 @@ WITH_HARRISON_LV2=1 ;
 WITH_COMMERCIAL_X42_LV2=
 WITH_GRATIS_X42_LV2=
 WITH_GMSYNTH=1
+WITH_HARVID=1
+WITH_XJADEO=1
 
 # TODO: grep from build/config.log instead
 while [ $# -gt 0 ] ; do
@@ -49,20 +51,9 @@ while [ $# -gt 0 ] ; do
 			PRODUCT_NAME=Mixbus
 			MANUAL_NAME="mixbus-live-manual"
 			shift ;;
-		--mixbus32c)
-			MIXBUS=1
-			WITH_HARRISON_LV2=1 ;
-			WITH_COMMERCIAL_X42_LV2=1
-			WITH_GRATIS_X42_LV2=1
-			PRODUCT_NAME=Mixbus32C
-			PROGRAM_KEY=Mixbus32C
-			PROGRAM_NAME=Mixbus32C-${PROGRAM_VERSION}
-			PROGRAM_VERSION=""
-			MANUAL_NAME="mixbus32c-live-manual"
-			shift ;;
 		--livetrax)
 			LIVETRAX=1 ;
-			NOVIDEOTOOLS=1 ;
+			WITH_XJADEO=
 			WITH_HARRISON_LV2="" ;
 			WITH_GMSYNTH="" ;
 			PROGRAM_NAME=LiveTrax
@@ -248,26 +239,29 @@ du -sh $DESTDIR
 
 ################################################################################
 ### get video tools
-if test -z "$NOVIDEOTOOLS"; then
-	echo " === Including video-tools"
+
+if test -n "$WITH_HARVID"; then
+	echo " === Including harvid"
 	HARVID_VERSION=$(curl -s -S http://ardour.org/files/video-tools/harvid_version.txt)
-	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
 
 	rsync -a -q --partial \
 		rsync://ardour.org/video-tools/harvid_${WARCH}-${HARVID_VERSION}.tar.xz \
 		"${SRCCACHE}/harvid_${WARCH}-${HARVID_VERSION}.tar.xz"
 
+	mkdir -p $DESTDIR/video
+	tar -xf "${SRCCACHE}/harvid_${WARCH}-${HARVID_VERSION}.tar.xz" -C "$DESTDIR/video/"
+fi
+
+if test -n "$WITH_XJADEO"; then
+	echo " === Including video-monitor"
+	XJADEO_VERSION=$(curl -s -S http://ardour.org/files/video-tools/xjadeo_version.txt)
+
 	rsync -a -q --partial \
 		rsync://ardour.org/video-tools/xjadeo_${WARCH}-${XJADEO_VERSION}.tar.xz \
 		"${SRCCACHE}/xjadeo_${WARCH}-${XJADEO_VERSION}.tar.xz"
 
-	mkdir $DESTDIR/video
-	tar -xf "${SRCCACHE}/harvid_${WARCH}-${HARVID_VERSION}.tar.xz" -C "$DESTDIR/video/"
+	mkdir -p $DESTDIR/video
 	tar -xf "${SRCCACHE}/xjadeo_${WARCH}-${XJADEO_VERSION}.tar.xz" -C "$DESTDIR/video/"
-
-	echo " === unzipped"
-	du -sh $DESTDIR/video
-	du -sh $DESTDIR
 fi
 
 ################################################################################
@@ -525,10 +519,10 @@ Section "${PROGRAM_NAME}${PROGRAM_VERSION} (required)" SecMainProg
 SectionEnd
 EOF
 
-if test -z "$NOVIDEOTOOLS"; then
+if test -n "$WITH_HARVID$WITH_XJADEO"; then
 
 	cat >> $NSISFILE << EOF
-Section "Videotimeline Tools (required)" SecVideo
+Section "A/V Tools (required)" SecVideo
   WriteRegStr HKLM "Software\\${PROGRAM_KEY}\\v${major_version}\\video" "Install_Dir" "\$INSTDIR\\video"
   SectionIn RO
   SetOutPath \$INSTDIR
@@ -577,7 +571,7 @@ if test -f "$DESTDIR/debug.bat"; then
 EOF
 fi
 
-if test -z "$NOVIDEOTOOLS"; then
+if test -n "$WITH_XJADEO"; then
 	cat >> $NSISFILE << EOF
   IfFileExists "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" 0 +2
   CreateShortCut "\$SMPROGRAMS\\${PRODUCT_ID}${SFX}\\Video Monitor.lnk" "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" "" "\$INSTDIR\\video\\xjadeo\\xjadeo.exe" 0
@@ -591,11 +585,20 @@ LangString DESC_SecMainProg \${LANG_ENGLISH} "${PROGRAM_NAME} ${ARDOURVERSION}\$
 LangString DESC_SecWASAPI \${LANG_ENGLISH} "WASAPI Audio Driver\$\\r\$\\nOnly works on Vista or later. Windows 10 Users may currently also experience issues if this is installed."
 EOF
 
-if test -z "$NOVIDEOTOOLS"; then
+if test -n "$WITH_XJADEO" -a -n "$WITH_HARVID"; then
 	cat >> $NSISFILE << EOF
 LangString DESC_SecVideo \${LANG_ENGLISH} "Video Tools\$\\r\$\\nxjadeo-${XJADEO_VERSION}\$\\r\$\\nharvid-${HARVID_VERSION}"
 EOF
+elif test -n "$WITH_HAVID"; then
+	cat >> $NSISFILE << EOF
+LangString DESC_SecVideo \${LANG_ENGLISH} "Video Tools\$\\r\$\\nharvid-${HARVID_VERSION}"
+EOF
+elif test -n "$WITH_XJADEO"; then
+	cat >> $NSISFILE << EOF
+LangString DESC_SecVideo \${LANG_ENGLISH} "Video Tools\$\\r\$\\nxjadeo-${XJADEO_VERSION}"
+EOF
 fi
+
 if test x$WITH_HARRISON_LV2 != x ; then
 	cat >> $NSISFILE << EOF
 LangString DESC_SecXT \${LANG_ENGLISH} "These are proprietary additions, but the DSP is not license encumbered. XT-plugin GUIs are commercial, the additional a-*/ACE plugin GUIs are free."
@@ -609,7 +612,7 @@ LangString DESC_SecMenu \${LANG_ENGLISH} "Create Start-Menu Shortcuts (recommend
 !insertmacro MUI_DESCRIPTION_TEXT \${SecWASAPI} \$(DESC_SecWASAPI)
 EOF
 
-if test -z "$NOVIDEOTOOLS"; then
+if test -n "$WITH_XJADEO$WITH_HARVID"; then
 	cat >> $NSISFILE << EOF
 !insertmacro MUI_DESCRIPTION_TEXT \${SecVideo} \$(DESC_SecVideo)
 EOF
