@@ -362,7 +362,14 @@ EditorSections::drag_motion (Glib::RefPtr<Gdk::DragContext> const& context, int 
 		path.push_back (_model->children ().size () - 1);
 	}
 
-	context->drag_status (context->get_suggested_action (), time);
+	Gdk::DragAction suggested_action = context->get_suggested_action ();
+
+	/* default to move, unless the user hold ctrl */
+	if (context->get_actions () & Gdk::ACTION_MOVE) {
+		suggested_action = Gdk::ACTION_MOVE;
+	}
+
+	context->drag_status (suggested_action, time);
 
 	_view.set_drag_dest_row (path, pos);
 	_view.drag_highlight ();
@@ -394,7 +401,7 @@ EditorSections::drag_data_received (Glib::RefPtr<Gdk::DragContext> const& contex
 	SectionOperation op = CopyPasteSection;
 	timepos_t        to (0);
 
-	if ((context->get_suggested_action () == Gdk::ACTION_MOVE)) {
+	if ((context->get_selected_action () == Gdk::ACTION_MOVE)) {
 		op = CutPasteSection;
 	}
 
