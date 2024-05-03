@@ -275,8 +275,6 @@ public:
 
 	void reset_focus (Gtk::Widget*);
 
-	static PublicEditor* _instance;
-
 	/** Emitted frequently with the audible sample, false, and the edit point as
 	 *  parameters respectively.
 	 *
