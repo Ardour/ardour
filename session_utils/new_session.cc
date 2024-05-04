@@ -50,7 +50,7 @@ static void usage ()
 This tool creates a new Ardour session, optionally based on a\n\
 session-template.\n\
 \n\
-If the session-name is unspecified, the sesion-dir-name is used.\n\
+If the session-name is unspecified, the session-dir-name is used.\n\
 If specified, the tool expects a session-name without .ardour\n\
 file-name extension.\n\
 \n\
