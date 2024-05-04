@@ -629,7 +629,7 @@ ArdourButton::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_
 	//
 	//A: yes, it's keyboard focus and it does work when there's no editor window
 	//   (the editor is always the first receiver for KeyDown).
-	//   It's needed for eg. the engine-dialog at startup or after closing a sesion.
+	//   It's needed for eg. the engine-dialog at startup or after closing a session.
 	if (_focused) {
 		rounded_function (cr, 1.5, 1.5, get_width() - 3, get_height() - 3, corner_radius);
 		cairo_set_source_rgba (cr, 0.905, 0.917, 0.925, 0.8);

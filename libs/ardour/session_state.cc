@@ -4566,7 +4566,7 @@ Session::config_changed (std::string p, bool ours)
 		bool have_ms = _monitor_out ? true : false;
 		if (loading ()) {
 			/* When loading an existing session, the config "use-monitor-bus"
-			 * is ignored. Instead the sesion-state (xml) will have added the
+			 * is ignored. Instead the session-state (xml) will have added the
 			 * "monitor-route" and restored its state (and connections)
 			 * if the session has a monitor-section.
 			 * Update the config to reflect this.
@@ -4595,7 +4595,7 @@ Session::config_changed (std::string p, bool ours)
 		bool have_sm = _surround_master ? true : false;
 		if (loading ()) {
 			/* When loading an existing session, the config "use-surround-master"
-			 * is ignored. Instead the sesion-state (xml) will have added the
+			 * is ignored. Instead the session-state (xml) will have added the
 			 * "surround-master" and restored its state (and connections)
 			 * if the session has a surround master..
 			 * Update the config to reflect this.
