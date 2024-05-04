@@ -1710,6 +1710,17 @@ PluginPinWidget::add_remove_port_clicked (bool add, ARDOUR::DataType dt)
 		ChanCount ins, outs, src;
 		_pi->configured_io (ins, outs);
 		src = _pi->natural_output_streams ();
+		if (src.get (dt) == 0) {
+			if (!add || ins.get (dt) < out.get (dt)) {
+				return;
+			}
+			int pn = out.get (dt);
+			assert (pn > 0);
+			ChanMapping map (_pi->thru_map ());
+			map.set (dt, pn - 1, pn - 1);
+			_pi->set_thru_map (map);
+			return;
+		}
 		for (uint32_t i = n_before; i < outs.get (dt); ++i) {
 			uint32_t pc = i / src.get (dt);
 			uint32_t pn = i % src.get (dt);
