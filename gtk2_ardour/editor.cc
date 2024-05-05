@@ -6184,6 +6184,54 @@ struct TrackViewStripableSorter
   }
 };
 
+static const int track_drag_spacer_height = 25;
+
+void
+Editor::maybe_move_tracks ()
+{
+	for (auto & tv : track_views) {
+
+		if (!tv->marked_for_display () || (tv == track_drag->track)) {
+			continue;
+		}
+
+		/* find the track the mouse pointer is within, and if
+		 * we're in the upper or lower half of it (depending on
+		 * drag direction, move the spacer.
+		 */
+
+		if (track_drag->current >= tv->y_position() && track_drag->current < (tv->y_position() + tv->effective_height())) {
+
+			if (track_drag->bump_track == tv) {
+				/* already bumped for this track */
+				break;
+			}
+
+			if (track_drag->direction < 0) {
+
+				/* dragging up */
+
+				if (track_drag->current < (tv->y_position() + (tv->effective_height() / 2))) {
+					/* in top half of this track, move spacer */
+					track_drag->bump_track = tv;
+					move_selected_tracks (true);
+				}
+
+			} else if (track_drag->direction > 0) {
+
+				/* dragging down */
+
+				if (track_drag->current > (tv->y_position() + (tv->effective_height() / 2))) {
+					track_drag->bump_track = tv;
+					move_selected_tracks (false);
+				}
+			}
+
+			break;
+		}
+	}
+}
+
 bool
 Editor::redisplay_track_views ()
 {
@@ -6200,21 +6248,24 @@ Editor::redisplay_track_views ()
 
 	track_views.sort (TrackViewStripableSorter ());
 
-	uint32_t position;
-	TrackViewList::const_iterator i;
+	if (track_drag) { //  && track_drag->spacer) {
+		maybe_move_tracks ();
+	}
 
 	/* n will be the count of tracks plus children (updated by TimeAxisView::show_at),
 	 * so we will use that to know where to put things.
 	 */
-	int n;
-	for (n = 0, position = 0, i = track_views.begin(); i != track_views.end(); ++i) {
-		TimeAxisView *tv = (*i);
+	int n = 0;
+	uint32_t position = 0;
+
+	for (auto & tv : track_views) {
 
 		if (tv->marked_for_display ()) {
 			position += tv->show_at (position, n, &edit_controls_vbox);
 		} else {
 			tv->hide ();
 		}
+
 		n++;
 	}
 
@@ -7015,4 +7066,75 @@ Editor::default_time_domain () const
 			break;
 	}
 	return BeatTime;
+}
+
+void
+Editor::start_track_drag (TimeAxisView& tav, int y, Gtk::Widget& w)
+{
+	track_drag = new TrackDrag (dynamic_cast<RouteTimeAxisView*> (&tav));
+
+	track_drag->drag_cursor = _cursors->move->gobj();
+	track_drag->predrag_cursor = gdk_window_get_cursor (edit_controls_vbox.get_window()->gobj());
+
+	gdk_window_set_cursor (edit_controls_vbox.get_toplevel()->get_window()->gobj(), track_drag->drag_cursor);
+
+	int xo, yo;
+	w.translate_coordinates (edit_controls_vbox, 0, y, xo, yo);
+
+	track_drag->have_predrag_cursor = true;
+	track_drag->bump_track = nullptr;
+	track_drag->previous = yo;
+	track_drag->start = yo;
+}
+
+void
+Editor::mid_track_drag (GdkEventMotion* ev, Gtk::Widget& w)
+{
+	int xo, yo;
+	w.translate_coordinates (edit_controls_vbox, ev->x, ev->y, xo, yo);
+
+	if (track_drag->first_move) {
+		if (!track_drag->track->selected()) {
+			set_selected_track (*track_drag->track, Selection::Set, false);
+		}
+		track_drag->first_move = false;
+	}
+
+	track_drag->current = yo;
+
+	if (track_drag->current > track_drag->previous) {
+		if (track_drag->direction != 1) {
+			track_drag->bump_track = nullptr;
+			track_drag->direction = 1;
+		}
+	} else if (track_drag->current < track_drag->previous) {
+		if (track_drag->direction != -1) {
+			track_drag->bump_track = nullptr;
+			track_drag->direction = -1;
+		}
+	}
+
+	if (track_drag->current == track_drag->previous) {
+		return;
+	}
+
+	redisplay_track_views ();
+	track_drag->previous = yo;
+}
+
+void
+Editor::end_track_drag ()
+{
+	if (track_drag->have_predrag_cursor) {
+		gdk_window_set_cursor (edit_controls_vbox.get_toplevel()->get_window()->gobj(), track_drag->predrag_cursor);
+	}
+
+	delete track_drag;
+	track_drag = nullptr;
+}
+
+bool
+Editor::track_dragging() const
+{
+	return (bool) track_drag;
 }

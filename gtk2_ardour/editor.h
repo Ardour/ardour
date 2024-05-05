@@ -1416,8 +1416,7 @@ private:
 	void start_track_drag (TimeAxisView&, int y, Gtk::Widget& w);
 	void mid_track_drag (GdkEventMotion*, Gtk::Widget& e);
 	void end_track_drag ();
-	void maybe_place_drag_spacer ();
-	void get_layout_relative_coordinates (Gtk::Widget&, int x, int y, int &xo, int &yo);
+	void maybe_move_tracks ();
 	bool track_dragging() const;
 
 	void do_insert_time ();
@@ -2607,29 +2606,27 @@ private:
 
 	struct TrackDrag {
 		RouteTimeAxisView* track;
-		Gtk::EventBox*     spacer;
 		GdkCursor*         drag_cursor;
 		GdkCursor*         predrag_cursor;
 		TimeAxisView*      bump_track;
-		int                spacer_order;
 		double             start;
 		double             current;
 		double             previous;
 		bool               have_predrag_cursor;
 		int                direction;
+		bool               first_move;
 
 		TrackDrag (RouteTimeAxisView* rtav)
 			: track (rtav)
-			, spacer (nullptr)
 			, drag_cursor (nullptr)
 			, predrag_cursor (nullptr)
 			, bump_track (nullptr)
-			, spacer_order (-1)
 			, start (-1.)
 			, current (0.)
 			, previous (0.)
 			, have_predrag_cursor (false)
 			, direction (0)
+			, first_move (true)
 		{}
 
 	};

@@ -438,7 +438,13 @@ TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 	_ebox_release_can_act = true;
 
 	if (maybe_set_cursor (event->y) > 0) {
+
 		_resize_drag_start = event->y_root;
+
+	} else {
+		if (event->button == 1) {
+			_editor.start_track_drag (*this, event->y, controls_ebox);
+		}
 	}
 
 	return true;
@@ -453,6 +459,12 @@ TimeAxisView::idle_resize (int32_t h)
 bool
 TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 {
+	if (_editor.track_dragging()) {
+		_editor.mid_track_drag (ev, controls_ebox);
+		gdk_event_request_motions (ev);
+		return true;
+	}
+
 	if (_resize_drag_start >= 0) {
 
 		/* (ab)use the DragManager to do autoscrolling - basically we
@@ -468,13 +480,15 @@ TimeAxisView::controls_ebox_motion (GdkEventMotion* ev)
 		_editor.add_to_idle_resize (this, delta);
 		_resize_drag_start = ev->y_root;
 		_did_resize = true;
+		gdk_event_request_motions (ev);
+		return true;
 	} else {
 		/* not dragging but ... */
 		maybe_set_cursor (ev->y);
 	}
 
-	gdk_event_request_motions(ev);
-	return true;
+	gdk_event_request_motions (ev);
+	return false;
 }
 
 bool
@@ -519,26 +533,26 @@ bool
 TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 {
 	if (_editor.track_dragging()) {
-		return false;
+		_editor.end_track_drag ();
+	} else {
+		if (_resize_drag_start >= 0) {
+			if (_have_preresize_cursor) {
+				gdk_window_set_cursor (controls_ebox.get_window()->gobj(), _preresize_cursor);
+				_preresize_cursor = 0;
+				_have_preresize_cursor = false;
+			}
+			_editor.stop_canvas_autoscroll ();
+			_resize_drag_start = -1;
+			if (_did_resize) {
+				_did_resize = false;
+				// don't change selection
+				return true;
+			}
 	}
 
-	if (_resize_drag_start >= 0) {
-		if (_have_preresize_cursor) {
-			gdk_window_set_cursor (controls_ebox.get_window()->gobj(), _preresize_cursor);
-			_preresize_cursor = 0;
-			_have_preresize_cursor = false;
-		}
-		_editor.stop_canvas_autoscroll ();
-		_resize_drag_start = -1;
-		if (_did_resize) {
-			_did_resize = false;
-			// don't change selection
+		if (!_ebox_release_can_act) {
 			return true;
 		}
-	}
-
-	if (!_ebox_release_can_act) {
-		return true;
 	}
 
 	switch (ev->button) {
