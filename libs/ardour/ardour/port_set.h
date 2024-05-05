@@ -89,8 +89,12 @@ public:
 	private:
 		friend class PortSet;
 
-		iterator_base<PS,P>(PS& list, DataType type, size_t index)
-			: _set(list), _type(type), _index(index) {}
+		iterator_base (PS& list, DataType type, size_t index)
+		        : _set (list)
+		        , _type (type)
+		        , _index (index)
+		{
+		}
 
 		PS&      _set;
 		DataType _type; ///< Ignored if NIL (to iterator over entire set)
