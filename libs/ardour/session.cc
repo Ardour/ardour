@@ -6971,7 +6971,7 @@ Session::source_search_path (DataType type) const
 		break;
 	}
 
-	return std::move(sp);
+	return sp;
 }
 
 void
