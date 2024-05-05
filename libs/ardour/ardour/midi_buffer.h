@@ -71,11 +71,17 @@ public:
 		class iterator_base
 	{
 	public:
-		iterator_base<BufferType, EventType>(BufferType& b, samplecnt_t o)
-			: buffer(&b), offset(o) {}
+		iterator_base (BufferType& b, samplecnt_t o)
+		        : buffer (&b)
+		        , offset (o)
+		{
+		}
 
-		iterator_base<BufferType, EventType>(const iterator_base<BufferType,EventType>& o)
-			: buffer (o.buffer), offset(o.offset) {}
+		iterator_base (const iterator_base<BufferType, EventType>& o)
+		        : buffer (o.buffer)
+		        , offset (o.offset)
+		{
+		}
 
 		inline iterator_base<BufferType,EventType> operator= (const iterator_base<BufferType,EventType>& o) {
 			if (&o != this) {
