@@ -468,6 +468,7 @@ else
 STDCPP=
 fi
 
+echo "Stripping symbols and architectures."
 while [ true ] ; do
 	missing=false
 	for file in $APPROOT/MacOS/* $Frameworks/* $Panners/*.dylib $Backends/*.dylib $Surfaces/*.dylib $GTK_ENGINE_DIR/*.dylib ; do
@@ -951,7 +952,7 @@ if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}"; then
 	fi
 fi
 
-if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" -a -n "$WITH_HARVID"; then
+if test -n "${APPLE_DEVELOPER_ID_FOR_APPLICATION}" -a -n "$WITH_XJADEO"; then
 	#############
 	## Sign Jadeo
 
