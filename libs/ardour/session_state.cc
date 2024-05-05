@@ -3941,8 +3941,6 @@ Session::cleanup_sources (CleanupReport& rep)
 		}
 	}
 
-	cerr << "Actually unused: " << unused.size() << endl;
-
 	if (unused.empty()) {
 		/* Nothing to do */
 		ret = 0;
