@@ -2398,6 +2398,20 @@ Editor::move_selected_tracks (bool up)
 
 	sl.sort (Stripable::Sorter());
 
+	/* Check if the selected tracks are already at the beginning or end of
+	 * the ordering, depending on direction.
+	 */
+
+	for (auto & s : sl) {
+		if (s->is_selected()) {
+			if (up && (s->presentation_info().order() <= 1)) {
+				return;
+			} else if (!up && (s->presentation_info().order() >= sl.size() - 1)) {
+				return;
+			}
+		}
+	}
+
 	std::list<ViewStripable> view_stripables;
 
 	/* build a list that includes time axis view information */
