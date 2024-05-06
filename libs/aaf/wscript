@@ -60,7 +60,7 @@ def build(bld):
     #obj.uselib          = 'GLIB'
     obj.vnum             = LIBAAF_LIB_VERSION
     obj.install_path     = bld.env['LIBDIR']
-    obj.defines         += [ 'PACKAGE="' + I18N_PACKAGE + '"' ]
+    obj.defines         += [ 'PACKAGE="' + I18N_PACKAGE + '"', '_POSIX_C_SOURCE=200809L' ]
 
 def shutdown():
     autowaf.shutdown()
