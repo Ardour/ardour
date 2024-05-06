@@ -2905,8 +2905,12 @@ Mixer_UI::parameter_changed (string const & p)
 		bool const s = _session ? _session->config.get_show_group_tabs () : true;
 		if (s) {
 			_group_tabs->show ();
+			vca_label_bar.show ();
+			Gtk::Requisition group_size = _group_tabs->size_request();
+			vca_label_bar.set_size_request (-1, group_size.height + 1);
 		} else {
 			_group_tabs->hide ();
+			vca_label_bar.hide ();
 		}
 	} else if (p == "default-narrow_ms") {
 		bool const s = UIConfiguration::instance().get_default_narrow_ms ();
