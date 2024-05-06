@@ -34,6 +34,8 @@
 #include "ardour/process_thread.h"
 #include "ardour/session_event.h"
 
+#include "pbd/i18n.h"
+
 using namespace ARDOUR;
 
 IOTaskList::IOTaskList (uint32_t n_threads)
@@ -67,7 +69,13 @@ IOTaskList::IOTaskList (uint32_t n_threads)
 	_workers.resize (_n_threads);
 	for (uint32_t i = 0; i < _n_threads; ++i) {
 		if (pthread_create (&_workers[i], &attr, &_worker_thread, this)) {
-			throw failed_constructor ();
+			if (pthread_create (&_workers[i], NULL, &_worker_thread, this)) {
+				std::cerr << "Failed to start IOTaskList thread\n";
+				throw failed_constructor ();
+			}
+			if (i == 0) {
+				PBD::warning << _("IOTaskList: cannot acquire realtime permissions.") << endmsg;
+			}
 		}
 	}
 	pthread_attr_destroy (&attr);
