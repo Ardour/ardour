@@ -1218,7 +1218,7 @@ MixerStrip::name_button_button_press (GdkEventButton* ev)
 		return true;
 	}
 
-	if (ev->button == 1 || ev->button == 3) {
+	if (ev->button == 3) {
 		list_route_operations ();
 
 		if (ev->button == 1) {
