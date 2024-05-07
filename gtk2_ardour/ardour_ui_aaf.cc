@@ -212,8 +212,7 @@ import_sndfile_as_region (Session* s, struct aafiAudioEssencePointer* aafAudioEs
 	*oneClipSources = sources;
 
 	/* Put the source on a region */
-	std::shared_ptr<Region> region;
-	string                  region_name;
+	string region_name;
 
 	/* take all the sources we have and package them up as a region */
 	region_name = region_name_from_path (status.paths.front (), (sources->size () > 1), false);
