@@ -419,7 +419,9 @@ DiskReader::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 				if (available == 0 && !chaninfo->initialized) {
 					disk_buf.silence (disk_samples_to_consume);
 				} else if (disk_samples_to_consume > available) {
+#ifndef NDEBUG // not rt-safe to print here
 					cerr << "underrun for " << _name << " Available samples: " << available << " required: " << disk_samples_to_consume << endl;
+#endif
 					DEBUG_TRACE (DEBUG::Butler, string_compose ("%1 underrun in %2, total space = %3 vs %4\n", DEBUG_THREAD_SELF, name (), available, disk_samples_to_consume));
 					Underrun ();
 					return;

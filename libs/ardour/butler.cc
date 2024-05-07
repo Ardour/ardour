@@ -303,7 +303,9 @@ Butler::thread_work ()
 						break;
 					default:
 						error << string_compose (_("Butler read ahead failure on dstream %1"), tr->name ()) << endmsg;
+#ifndef NDEBUG
 						std::cerr << string_compose (_("Butler read ahead failure on dstream %1"), tr->name ()) << std::endl;
+#endif
 						break;
 				}
 			});
@@ -396,7 +398,9 @@ Butler::flush_tracks_to_disk_normal (std::shared_ptr<RouteList const> rl, uint32
 			default:
 				errors++;
 				error << string_compose (_("Butler write-behind failure on dstream %1"), (*i)->name ()) << endmsg;
+#ifndef NDEBUG
 				std::cerr << string_compose (_("Butler write-behind failure on dstream %1"), (*i)->name ()) << std::endl;
+#endif
 				/* don't break - try to flush all streams in case they
 			   are split across disks.
 			*/
