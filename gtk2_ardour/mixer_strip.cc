@@ -1209,6 +1209,15 @@ MixerStrip::build_route_ops_menu ()
 gboolean
 MixerStrip::name_button_button_press (GdkEventButton* ev)
 {
+	if (ev->button == 1) {
+		/* fall thru to mixer */
+		return false;
+	}
+
+	if (ev->button == 3 && ARDOUR::Profile->get_livetrax() && _route && _route->is_singleton ()) {
+		return true;
+	}
+
 	if (ev->button == 1 || ev->button == 3) {
 		list_route_operations ();
 
