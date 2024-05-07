@@ -188,7 +188,17 @@ import_sndfile_as_region (Session* s, struct aafiAudioEssencePointer* aafAudioEs
 		}
 
 		for (int i = 0; i < channelCount; i++) {
+			PropertyList proplist;
 			sources->push_back (status.sources.at (i));
+
+			proplist.add (ARDOUR::Properties::start, 0);
+			proplist.add (ARDOUR::Properties::length, timecnt_t ((*sources)[0]->length (), pos));
+			proplist.add (ARDOUR::Properties::name, aafAudioEssencePtrList->essenceFile->unique_name);
+			proplist.add (ARDOUR::Properties::layer, 0);
+			proplist.add (ARDOUR::Properties::whole_file, true);
+			proplist.add (ARDOUR::Properties::external, true);
+
+			RegionFactory::create (*sources, proplist);
 		}
 
 		/* build peakfiles */
@@ -213,17 +223,6 @@ import_sndfile_as_region (Session* s, struct aafiAudioEssencePointer* aafAudioEs
 		region_name = bump_name_once (region_name, '.');
 	}
 
-	PropertyList proplist;
-
-	proplist.add (ARDOUR::Properties::start, 0);
-	proplist.add (ARDOUR::Properties::length, timecnt_t ((*sources)[0]->length (), pos));
-	proplist.add (ARDOUR::Properties::name, aafAudioEssencePtrList->essenceFile->unique_name);
-	proplist.add (ARDOUR::Properties::layer, 0);
-	proplist.add (ARDOUR::Properties::whole_file, true);
-	proplist.add (ARDOUR::Properties::external, true);
-
-	region = RegionFactory::create (*sources, proplist);
-	regions.push_back (region);
 	return true;
 }
 
