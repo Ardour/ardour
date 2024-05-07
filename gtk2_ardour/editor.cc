@@ -649,7 +649,6 @@ Editor::Editor ()
 
 	_cursors = new MouseCursors;
 	_cursors->set_cursor_set (UIConfiguration::instance().get_icon_set());
-	cerr << "Set cursor set to " << UIConfiguration::instance().get_icon_set() << endl;
 
 	/* Push default cursor to ever-present bottom of cursor stack. */
 	push_canvas_cursor(_cursors->grabber);

@@ -4751,8 +4751,6 @@ MidiRegionView::note_to_y(uint8_t note) const
 void
 MidiRegionView::quantize_selected_notes ()
 {
-	std::cerr << "QSN!\n";
-
 	RegionSelection rs;
 	rs.push_back (this);
 

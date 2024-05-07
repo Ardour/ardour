@@ -2210,8 +2210,6 @@ ARDOUR_UI::update_clocks ()
 void
 ARDOUR_UI::start_clocking ()
 {
-	std::cerr << "start clocking\n";
-
 	if (UIConfiguration::instance().get_no_strobe()) {
 		if (!_session) {
 			return;

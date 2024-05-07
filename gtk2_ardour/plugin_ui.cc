@@ -200,9 +200,6 @@ PluginUIWindow::PluginUIWindow (std::shared_ptr<PlugInsertBase> pib,
 
 PluginUIWindow::~PluginUIWindow ()
 {
-#ifndef NDEBUG
-	cerr << "PluginWindow deleted for " << this << endl;
-#endif
 	delete _pluginui;
 
 	if (the_plugin_window == this) {
