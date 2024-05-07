@@ -172,9 +172,10 @@ RouteProcessorSelection::set (AxisView* r)
 	if (!shp.session()) {
 		return;
 	}
-	PresentationInfo::ChangeSuspender cs;
-	shp.session()->selection().clear_stripables ();
-	add (r, true);
+
+	StripableList sl;
+	sl.push_back (r->stripable());
+	shp.session()->selection().set (sl);
 }
 
 bool
