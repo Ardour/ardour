@@ -64,6 +64,7 @@
 #include "editing.h"
 #include "enums_convert.h"
 #include "actions.h"
+#include "meter_patterns.h"
 #include "meterbridge.h"
 #include "luawindow.h"
 #include "mixer_ui.h"
@@ -498,6 +499,9 @@ ARDOUR_UI::install_actions ()
 	ActionManager::transport_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_toggle_action (main_actions, X_("ToggleLatencyCompensation"), _("Disable Latency Compensation"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_latency_switch));
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (main_actions, X_("ResetAllPeakDisplays"), _("Reset All Meter Peaks"), []() { ArdourMeter::ResetAllPeakDisplays (); });
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("MonitorMenu"), _("Monitor Section")); /* just the submenu item */
