@@ -501,7 +501,10 @@ ARDOUR_UI::install_actions ()
 	act = ActionManager::register_toggle_action (main_actions, X_("ToggleLatencyCompensation"), _("Disable Latency Compensation"), sigc::mem_fun(*this, &ARDOUR_UI::toggle_latency_switch));
 	ActionManager::session_sensitive_actions.push_back (act);
 
-	act = ActionManager::register_toggle_action (main_actions, X_("ResetAllPeakDisplays"), _("Reset All Meter Peaks"), []() { ArdourMeter::ResetAllPeakDisplays (); });
+	act = ActionManager::register_toggle_action (main_actions, X_("ResetAllPeakDisplays"), _("Reset Mixer Meter Peaks"), []() { ArdourMeter::ResetAllPeakDisplays (); });
+	ActionManager::session_sensitive_actions.push_back (act);
+
+	act = ActionManager::register_toggle_action (main_actions, X_("ResetMeterPeakHold"), _("Reset All Meter Peak Hold"), []() { ArdourMeter::ResetAllPeakDisplays (); ActionManager::get_action ("Recorder", "reset-input-peak-hold")->activate (); });
 	ActionManager::session_sensitive_actions.push_back (act);
 
 	act = ActionManager::register_action (main_actions, X_("MonitorMenu"), _("Monitor Section")); /* just the submenu item */
