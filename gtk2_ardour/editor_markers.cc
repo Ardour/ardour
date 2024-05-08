@@ -435,14 +435,19 @@ Editor::update_marker_labels (ArdourCanvas::Item* group)
 				--pi;
 			}
 
-			double const p = sample_to_pixel ((*pi)->position().distance ((*i)->position()).samples());
+			double p = sample_to_pixel ((*pi)->position().distance ((*i)->position()).samples());
+
+			if (p == 0) {
+				p = DBL_MAX;
+			}
 
 			if ((*prev)->label_on_left()) {
 				(*i)->set_left_label_limit (p);
 			} else {
 				(*i)->set_left_label_limit (p / 2);
 			}
-
+		} else {
+			(*i)->set_left_label_limit (DBL_MAX);
 		}
 
 		while (next != sorted.end() && (*next)->position () == (*i)->position ()) {
@@ -459,6 +464,8 @@ Editor::update_marker_labels (ArdourCanvas::Item* group)
 			}
 
 			++next;
+		} else {
+			(*i)->set_right_label_limit (DBL_MAX);
 		}
 
 		prev = i;
