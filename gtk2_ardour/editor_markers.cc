@@ -306,7 +306,10 @@ Editor::check_marker_label (ArdourMarker* m)
 
 	list<ArdourMarker*>::iterator prev = sorted.end ();
 	list<ArdourMarker*>::iterator next = i;
-	++next;
+
+	if (next != sorted.end()) {
+		++next;
+	}
 
 	/* Look to see if the previous marker is still behind `m' in time */
 	if (i != sorted.begin()) {
@@ -314,7 +317,7 @@ Editor::check_marker_label (ArdourMarker* m)
 		prev = i;
 		--prev;
 
-		if ((*prev)->position() > m->position()) {
+		if ((*prev)->position() >= m->position()) {
 			/* This marker is no longer in the correct order with the previous one, so
 			 * update all the markers in this group.
 			 */
@@ -351,8 +354,11 @@ Editor::check_marker_label (ArdourMarker* m)
 		}
 	}
 
-	if (next != sorted.end()) {
+	while (next != sorted.end() && (*next)->position () == m->position ()) {
+		++next;
+	}
 
+	if (next != sorted.end()) {
 		/* Update just the available space between this marker and the next */
 
 		double const p = sample_to_pixel (m->position().distance ((*next)->position()).samples());
@@ -373,6 +379,9 @@ Editor::check_marker_label (ArdourMarker* m)
 
 struct MarkerComparator {
 	bool operator() (ArdourMarker const * a, ArdourMarker const * b) {
+		if (a->position() == b->position()) {
+			return a->label_on_left ();
+		}
 		return a->position() < b->position();
 	}
 };
@@ -420,7 +429,13 @@ Editor::update_marker_labels (ArdourCanvas::Item* group)
 	while (i != sorted.end()) {
 
 		if (prev != sorted.end()) {
-			double const p = sample_to_pixel ((*prev)->position().distance ((*i)->position()).samples());
+
+			list<ArdourMarker*>::iterator pi = prev;
+			while (pi != sorted.begin () && (*pi)->position () == (*i)->position()) {
+				--pi;
+			}
+
+			double const p = sample_to_pixel ((*pi)->position().distance ((*i)->position()).samples());
 
 			if ((*prev)->label_on_left()) {
 				(*i)->set_left_label_limit (p);
@@ -428,6 +443,10 @@ Editor::update_marker_labels (ArdourCanvas::Item* group)
 				(*i)->set_left_label_limit (p / 2);
 			}
 
+		}
+
+		while (next != sorted.end() && (*next)->position () == (*i)->position ()) {
+			++next;
 		}
 
 		if (next != sorted.end()) {
