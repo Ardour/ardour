@@ -1535,7 +1535,9 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		   match.
 		*/
 		if ((length().time_domain() == Temporal::AudioTime) && (_sources.front()->length().time_domain() == Temporal::AudioTime) && (length().distance() > _sources.front()->length())) {
-			_length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
+			std::cerr << "Region " << _name << " has length " << _length.val().str() << " which is longer than its (first?) source's length of " << _sources.front()->length().str() << std::endl;
+			throw failed_constructor();
+			// _length = timecnt_t (start().distance (_sources.front()->length()), _length.val().position());
 		}
 	}
 
