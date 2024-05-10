@@ -465,15 +465,7 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 		return -1;
 	}
 
-	/* extract or set session name */
-	if (aafi->compositionName && aafi->compositionName[0] != 0x00) {
-		string compositionName = string (aafi->compositionName);
-		snapshot               = laaf_util_clean_filename (&compositionName[0]);
-	} else {
-		snapshot = basename_nosuffix (aaf);
-	}
-
-	snapshot = legalize_for_universal_path (snapshot);
+	snapshot = legalize_for_universal_path (basename_nosuffix (aaf));
 	path     = Glib::build_filename (target_dir, snapshot);
 
 	if (Glib::file_test (path, Glib::FILE_TEST_EXISTS)) {
