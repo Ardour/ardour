@@ -229,29 +229,34 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 			_panshell->run (bufs, mixbufs, start_sample + latency, end_sample + latency, nframes);
 		}
 
-		/* non-audio data will not have been copied by the panner, do it now
-		 * if there are more buffers available than send buffers, ignore them,
-		 * if there are less, copy the last as IO::copy_to_output does. */
+		/* No need to handle non-audio if this is the MasterSend */
 
-		for (DataType::iterator t = DataType::begin (); t != DataType::end (); ++t) {
-			if (*t != DataType::AUDIO) {
-				BufferSet::iterator o = mixbufs.begin (*t);
-				BufferSet::iterator i = bufs.begin (*t);
+		if (role() != MasterSend) {
 
-				while (i != bufs.end (*t) && o != mixbufs.end (*t)) {
-					o->read_from (*i, nframes);
-					++i;
-					++o;
-				}
-				while (o != mixbufs.end (*t)) {
-					o->silence (nframes, 0);
-					++o;
+			/* non-audio data will not have been copied by the panner, do it now
+			 * if there are more buffers available than send buffers, ignore them,
+			 * if there are less, copy the last as IO::copy_to_output does. */
+
+			for (DataType::iterator t = DataType::begin (); t != DataType::end (); ++t) {
+				if (*t != DataType::AUDIO) {
+					BufferSet::iterator o = mixbufs.begin (*t);
+					BufferSet::iterator i = bufs.begin (*t);
+
+					while (i != bufs.end (*t) && o != mixbufs.end (*t)) {
+						o->read_from (*i, nframes);
+						++i;
+						++o;
+					}
+					while (o != mixbufs.end (*t)) {
+						o->silence (nframes, 0);
+						++o;
+					}
 				}
 			}
 		}
 
-	} else if (role () == Listen) {
-		/* We're going to the monitor bus, so discard MIDI data */
+	} else if (role () == Listen || role() == MasterSend) {
+		/* We're going to the monitor or master bus, so discard MIDI data */
 
 		uint32_t const bufs_audio    = bufs.count ().get (DataType::AUDIO);
 		uint32_t const mixbufs_audio = mixbufs.count ().get (DataType::AUDIO);
@@ -309,15 +314,51 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		}
 	}
 
-	/* main gain control: * mute & bypass/enable */
+	/* For a master send, we want the meter to be effectively MeterPostFader
+	 * rather than MeterOutput. But below, we compute a target gain that
+	 * will take mute and solo into account, and apply to mixbufs *before*
+	 * metering, which would make metering equivalent to MeterOutput. 
+	 *
+	 * So, for a master send, run our own gain control first (so we see the
+	 * effect in the meters), then meter, then apply any mute/solo-driven gain.
+	 *
+	 * For other internal sends, apply mute/solo-controlled gain, then our
+	 * own gain control, then meter.
+	 */
+
+	if (role() == MasterSend) {
+
+		/* apply fader gain automation before running meter */
+
+		_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
+		_amp->setup_gain_automation (start_sample + latency, end_sample + latency, nframes);
+		_amp->run (mixbufs, start_sample + latency, end_sample + latency, speed, nframes, true);
+
+		if (_metering) {
+			if (gain_control ()->get_value () == GAIN_COEFF_ZERO) {
+				_meter->reset ();
+			} else {
+				_meter->run (mixbufs, start_sample, end_sample, speed, nframes, true);
+			}
+		}
+	}
+
+	/* tgain reflects muting and soling */
+
 	gain_t tgain = target_gain ();
 
 	if (tgain != _current_gain) {
 		/* target gain has changed, fade in/out */
 		_current_gain = Amp::apply_gain (mixbufs, _session.nominal_sample_rate (), nframes, _current_gain, tgain);
 	} else if (tgain == GAIN_COEFF_ZERO) {
-		/* we were quiet last time, and we're still supposed to be quiet. */
-		_meter->reset ();
+		/* we were quiet last time, and we're still supposed to be
+		 * quiet. Don't do this for a MasterSend, because its meter is
+		 * effectively MeterPostFader, not MeterOutput, so we don't
+		 * want it to reflect mute/solo-controlled levels.
+		 */
+		if (role() != MasterSend || (gain_control()->get_value() == GAIN_COEFF_ZERO)) {
+			_meter->reset ();
+		}
 		Amp::apply_simple_gain (mixbufs, nframes, GAIN_COEFF_ZERO);
 		return;
 	} else if (tgain != GAIN_COEFF_UNITY) {
@@ -325,15 +366,17 @@ InternalSend::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sa
 		Amp::apply_simple_gain (mixbufs, nframes, tgain);
 	}
 
-	/* apply fader gain automation */
-	_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
-	_amp->setup_gain_automation (start_sample + latency, end_sample + latency, nframes);
-	_amp->run (mixbufs, start_sample + latency, end_sample + latency, speed, nframes, true);
+	if (role() != MasterSend) {
+		/* apply fader gain automation */
+		_amp->set_gain_automation_buffer (_session.send_gain_automation_buffer ());
+		_amp->setup_gain_automation (start_sample + latency, end_sample + latency, nframes);
+		_amp->run (mixbufs, start_sample + latency, end_sample + latency, speed, nframes, true);
+	}
 
 	_send_delay->run (mixbufs, start_sample, end_sample, speed, nframes, true);
 
 	/* consider metering */
-	if (_metering) {
+	if (_metering && role() != MasterSend) {
 		if (gain_control ()->get_value () == GAIN_COEFF_ZERO) {
 			_meter->reset ();
 		} else {
