@@ -466,7 +466,7 @@ ARDOUR_UI::new_session_from_aaf (string const& aaf, string const& target_dir, st
 	}
 
 	/* extract or set session name */
-	if (aafi->compositionName && aafi->compositionName[0] != 0x00) {
+	if (/* Temporary - in the absence of user-options, don't rely on extracted session names which can be meaningless...  aafi->compositionName && aafi->compositionName[0] != */ 0x00) {
 		string compositionName = string (aafi->compositionName);
 		snapshot               = laaf_util_clean_filename (&compositionName[0]);
 	} else {
