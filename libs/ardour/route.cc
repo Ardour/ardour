@@ -5306,12 +5306,6 @@ Route::setup_invisible_processors ()
 		new_processors.insert (meter_point, _meter);
 	}
 
-
-	if (Profile->get_livetrax() && _master_send) {
-		assert (!_master_send->display_to_user());
-		new_processors.insert (main, _master_send);
-	}
-
 	/* Foldback Sends */
 
 	for (ProcessorList::iterator i = foldback_sends.begin(); i != foldback_sends.end(); ++i) {
