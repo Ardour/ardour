@@ -894,7 +894,7 @@ Editor::register_midi_actions (Bindings* midi_bindings)
 	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), Editing::GridTypeBar)));
 	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-auto"),           _("Auto"),                                         (sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_chosen), DRAW_LEN_AUTO)));
 
-	Glib::RefPtr<ActionGroup> velocity_actions = ActionManager::create_action_group (midi_bindings, _("Draw Velocity"));
+	Glib::RefPtr<ActionGroup> velocity_actions = ActionManager::create_action_group (midi_bindings, X_("DrawVelocity"));
 	RadioAction::Group draw_velocity_group;
 	ActionManager::register_radio_action (velocity_actions, draw_velocity_group, X_("draw-velocity-auto"),  _("Auto"), (sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_chosen), DRAW_VEL_AUTO)));
 	for (int i = 1; i <= 127; i++) {
@@ -905,7 +905,7 @@ Editor::register_midi_actions (Bindings* midi_bindings)
 		ActionManager::register_radio_action (velocity_actions, draw_velocity_group, buf, vel, (sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_chosen), i)));
 	}
 
-	Glib::RefPtr<ActionGroup> channel_actions = ActionManager::create_action_group (midi_bindings, _("Draw Channel"));
+	Glib::RefPtr<ActionGroup> channel_actions = ActionManager::create_action_group (midi_bindings, X_("DrawChannel"));
 	RadioAction::Group draw_channel_group;
 	ActionManager::register_radio_action (channel_actions, draw_channel_group, X_("draw-channel-auto"),  _("Auto"), (sigc::bind (sigc::mem_fun(*this, &Editor::draw_channel_chosen), DRAW_CHAN_AUTO)));
 	for (int i = 0; i <= 15; i++) {
@@ -1188,7 +1188,7 @@ Editor::draw_velocity_action (int v)
 		action = buf;
 	}
 
-	act = ActionManager::get_action (_("Draw Velocity"), action);
+	act = ActionManager::get_action (X_("DrawVelocity"), action);
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 		return ract;
@@ -1212,7 +1212,7 @@ Editor::draw_channel_action (int c)
 		action = buf;
 	}
 
-	act = ActionManager::get_action (_("Draw Channel"), action);
+	act = ActionManager::get_action (X_("DrawChannel"), action);
 	if (act) {
 		RefPtr<RadioAction> ract = RefPtr<RadioAction>::cast_dynamic(act);
 		return ract;
