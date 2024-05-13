@@ -124,7 +124,9 @@ TransportMastersWidget::~TransportMastersWidget ()
 void
 TransportMastersWidget::set_transport_master (std::shared_ptr<TransportMaster> tm)
 {
-	_session->request_sync_source (tm);
+	if (_session) {
+		_session->request_sync_source (tm);
+	}
 }
 
 void
