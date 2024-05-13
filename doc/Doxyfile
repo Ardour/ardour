@@ -778,7 +778,11 @@ INPUT                  = ../libs/ardour \
                          ../libs/widgets \
                          ../libs/zita-convolver \
                          ../libs/zita-resampler \
+                         ../libs/zita-resampler \
                          ../gtk2_ardour \
+                         ../libs/tk/ytkmm/ytkmm/gtkmm \
+                         ../libs/tk/ydkmm/ydkmm/gdkmm \
+                         ../libs/tk/ydk/ydk/gdk \
                          mainpage.txt
 
 ## audiographer assumes it's documented separately (has it's own @mainpage)
