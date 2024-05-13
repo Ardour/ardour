@@ -2113,7 +2113,7 @@ private:
 
 	std::vector<space_and_path> session_dirs;
 	std::vector<space_and_path>::iterator last_rr_session_dir;
-	uint32_t _total_free_4k_blocks;
+	uint64_t _total_free_4k_blocks;
 	/** If this is true, _total_free_4k_blocks is not definite,
 	    as one or more of the session directories' filesystems
 	    could not report free space.
