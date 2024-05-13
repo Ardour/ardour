@@ -340,20 +340,23 @@ RemainInfoBox::render (Cairo::RefPtr<Cairo::Context> const& cr, cairo_rectangle_
 		float remain_sec = samples / (float)sample_rate;
 		char buf[32];
 
+		bool  at_least     = FLAC == _session->config.get_native_file_header_format ();
+		const char* prefix = at_least ? u8"\u2265" : ""; // Greater-Than or Equal To
+
 		if (remain_sec > 86400) {
 			_layout_value->set_text (_(">24h"));
 		} else if (remain_sec > 32400 /* 9 hours */) {
-			snprintf (buf, sizeof (buf), "%.0f", remain_sec / 3600.f);
+			snprintf (buf, sizeof (buf), "%s%.0f", prefix, remain_sec / 3600.f);
 			_layout_value->set_text (std::string (buf) + S_("hours|h"));
 		} else if (remain_sec > 5940 /* 99 mins */) {
-			snprintf (buf, sizeof (buf), "%.1f", remain_sec / 3600.f);
+			snprintf (buf, sizeof (buf), "%s%.1f", prefix, remain_sec / 3600.f);
 			_layout_value->set_text (std::string (buf) + S_("hours|h"));
 		} else if (remain_sec > 60*3 /* 3 mins */) {
-			snprintf (buf, sizeof (buf), "%.0f", remain_sec / 60.f);
+			snprintf (buf, sizeof (buf), "%s%.0f", prefix, remain_sec / 60.f);
 			_layout_value->set_text (std::string (buf) + S_("minutes|m"));
 		} else {
 			Gtkmm2ext::set_source_rgb_a (cr, UIConfiguration::instance ().color ("alert:red"), .7);
-			snprintf (buf, sizeof (buf), "%.0f", remain_sec / 60.f);
+			snprintf (buf, sizeof (buf), "%s%.0f", prefix, remain_sec / 60.f);
 			_layout_value->set_text (std::string (buf) + S_("minutes|m"));
 		}
 	}
