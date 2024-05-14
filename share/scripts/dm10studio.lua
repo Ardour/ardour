@@ -34,7 +34,7 @@ function dsp_run (_, _, n_samples)
 		if #d == 0 then event_type = -1 else event_type = d[1] >> 4 end
 
 		-- intercept CC message
-		if #d == 3 and event_type == 11 and d[2] == 8 then
+		if #d == 3 and event_type == 11 and d[2] == 4 then
 			hihat_state = d[3]
 		end
 
