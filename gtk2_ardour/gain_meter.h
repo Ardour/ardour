@@ -48,7 +48,6 @@
 
 #include "widgets/ardour_button.h"
 #include "widgets/focus_entry.h"
-#include "widgets/slider_controller.h"
 
 #include "enums.h"
 #include "level_meter.h"
@@ -68,6 +67,10 @@ namespace ARDOUR {
 
 namespace Gtk {
 	class Menu;
+}
+
+namespace ArdourWidgets {
+	class SliderController;
 }
 
 enum MeterPointChangeTarget {
@@ -106,7 +109,7 @@ public:
 	std::shared_ptr<PBD::Controllable> get_controllable();
 
 	LevelMeterHBox& get_level_meter() const { return *level_meter; }
-	ArdourWidgets::SliderController& get_gain_slider() const { return *gain_slider; }
+	CairoWidget& get_gain_slider() const;
 
 	/** Emitted in the GUI thread when a button is pressed over the level meter;
 	 *  return true if the event is handled.

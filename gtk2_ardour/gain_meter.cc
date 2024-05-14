@@ -45,6 +45,7 @@
 #include "gtkmm2ext/utils.h"
 #include "gtkmm2ext/gtk_ui.h"
 
+#include "widgets/slider_controller.h"
 #include "widgets/tooltips.h"
 
 #include "pbd/fastlog.h"
@@ -313,6 +314,11 @@ GainMeterBase::set_gain_astate (AutoState as)
 		_control->set_automation_state (as);
 		_session->set_dirty ();
 	}
+}
+
+CairoWidget&
+GainMeterBase::get_gain_slider() const {
+	return *gain_slider;
 }
 
 void
@@ -676,7 +682,7 @@ void
 GainMeterBase::update_gain_sensitive ()
 {
 	bool x = !(_control->alist()->automation_state() & Play);
-	static_cast<ArdourWidgets::SliderController*>(gain_slider)->set_sensitive (x);
+	gain_slider->set_sensitive (x);
 }
 
 gint

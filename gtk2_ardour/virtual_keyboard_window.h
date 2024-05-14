@@ -30,13 +30,16 @@
 #include "widgets/ardour_button.h"
 #include "widgets/ardour_dropdown.h"
 #include "widgets/ardour_knob.h"
-#include "widgets/slider_controller.h"
 
 #include "ardour_window.h"
 #include "pianokeyboard.h"
 
 namespace ARDOUR {
 	class Session;
+}
+
+namespace ArdourWidgets {
+	class VSliderController;
 }
 
 class VKBDControl : public PBD::Controllable

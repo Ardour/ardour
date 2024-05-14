@@ -37,8 +37,6 @@
 #include "ardour/session_handle.h"
 
 #include "widgets/fastmeter.h"
-#include "widgets/focus_entry.h"
-#include "widgets/slider_controller.h"
 
 #include "enums.h"
 

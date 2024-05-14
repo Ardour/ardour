@@ -26,6 +26,8 @@
 #include "ardour/session.h"
 
 #include "gtkmm2ext/utils.h"
+
+#include "widgets/slider_controller.h"
 #include "widgets/tooltips.h"
 
 #include "ardour_ui.h"

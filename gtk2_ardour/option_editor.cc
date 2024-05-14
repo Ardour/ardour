@@ -45,6 +45,7 @@
 #include "pbd/strsplit.h"
 
 #include "widgets/frame.h"
+#include "widgets/slider_controller.h"
 
 #include "gui_thread.h"
 #include "option_editor.h"
@@ -676,6 +677,11 @@ void
 FaderOption::add_to_page (OptionEditorPage* p)
 {
 	add_widgets_to_page (p, _label, &_box);
+}
+
+Gtk::Widget&
+FaderOption::tip_widget() {
+	return *_db_slider;
 }
 
 /*--------------------------*/

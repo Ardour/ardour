@@ -20,13 +20,13 @@
 #define __ardour_gtk_trigger_ui_h__
 
 #include "gtkmm/colorselection.h"
+#include "gtkmm/entry.h"
 
 #include "gtkmm2ext/actions.h"
 #include "gtkmm2ext/bindings.h"
 
 #include "ardour/triggerbox.h"
 #include "widgets/ardour_button.h"
-#include "widgets/slider_controller.h"
 #include "widgets/frame.h"
 
 namespace Gtk

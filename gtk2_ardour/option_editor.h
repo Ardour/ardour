@@ -39,8 +39,6 @@
 
 #include "pbd/configuration.h"
 
-#include "widgets/slider_controller.h"
-
 #include "actions.h"
 #include "ardour_window.h"
 #include "audio_clock.h"
@@ -64,6 +62,7 @@
 
 namespace ArdourWidgets {
 	class Frame;
+	class HSliderController;
 }
 
 class OptionEditorPage;
@@ -601,7 +600,7 @@ public:
 	void set_state_from_config ();
 	void add_to_page (OptionEditorPage *);
 
-	Gtk::Widget& tip_widget() { return *_db_slider; }
+	Gtk::Widget& tip_widget();
 
 private:
 	void db_changed ();

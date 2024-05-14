@@ -44,11 +44,6 @@ namespace ARDOUR {
 	class Location;
 }
 
-namespace ArdourWidgets {
-	class ArdourButton;
-	class HSliderController;
-}
-
 class TriggerPropertiesBox;
 class RegionPropertiesBox;
 class RegionOperationsBox;
