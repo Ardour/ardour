@@ -28,32 +28,21 @@
 
 #include "gtkmm2ext/cairo_widget.h"
 #include "gtkmm2ext/colors.h"
+
+#include "widgets/fader_widget.h"
 #include "widgets/visibility.h"
 
 namespace ArdourWidgets {
 
-class LIBWIDGETS_API ArdourFader : public CairoWidget
+class LIBWIDGETS_API ArdourFader : virtual public FaderWidget
 {
 public:
 	ArdourFader (Gtk::Adjustment& adjustment, int orientation, int span, int girth);
 	virtual ~ArdourFader ();
 	static void flush_pattern_cache();
 
-	sigc::signal<void,int> StartGesture;
-	sigc::signal<void,int> StopGesture;
-	sigc::signal<void> OnExpose;
-
 	void set_default_value (float);
 	void set_text (const std::string&, bool centered = true, bool expose = true);
-
-	enum Tweaks {
-		NoShowUnityLine = 0x1,
-		NoButtonForward = 0x2,
-		NoVerticalScroll = 0x4,
-	};
-
-	Tweaks tweaks() const { return _tweaks; }
-	void set_tweaks (Tweaks);
 
 	void set_bg (Gtkmm2ext::Color);
 	void set_fg (Gtkmm2ext::Color);
@@ -65,40 +54,21 @@ protected:
 	void on_size_allocate (Gtk::Allocation& alloc);
 
 	void render (Cairo::RefPtr<Cairo::Context> const&, cairo_rectangle_t*);
-	bool on_grab_broken_event (GdkEventGrabBroken*);
-	bool on_button_press_event (GdkEventButton*);
-	bool on_button_release_event (GdkEventButton*);
 	bool on_motion_notify_event (GdkEventMotion*);
-	bool on_scroll_event (GdkEventScroll* ev);
-	bool on_enter_notify_event (GdkEventCrossing* ev);
-	bool on_leave_notify_event (GdkEventCrossing* ev);
 
 	void on_state_changed (Gtk::StateType);
 	void on_style_changed (const Glib::RefPtr<Gtk::Style>&);
 
-	enum Orientation {
-		VERT,
-		HORIZ,
-	};
-
 private:
 	Glib::RefPtr<Pango::Layout> _layout;
 	std::string                 _text;
-	Tweaks                      _tweaks;
-	Gtk::Adjustment&            _adjustment;
 	int _text_width;
 	int _text_height;
 
 	int _span, _girth;
 	int _min_span, _min_girth;
-	int _orien;
 	cairo_pattern_t* _pattern;
-	bool _hovering;
-	GdkWindow* _grab_window;
-	double _grab_loc;
-	double _grab_start;
-	bool _dragging;
-	float _default_value;
+
 	int _unity_loc;
 	bool _centered_text;
 
@@ -113,7 +83,6 @@ private:
 	uint32_t outline_color;
 
 	void create_patterns();
-	void adjustment_changed ();
 	void set_adjustment_from_event (GdkEventButton *);
 	void update_unity_position ();
 	int  display_span ();

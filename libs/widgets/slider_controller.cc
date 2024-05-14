@@ -30,8 +30,8 @@
 using namespace PBD;
 using namespace ArdourWidgets;
 
-SliderController::SliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::Controllable> mc, int orientation, int fader_length, int fader_girth)
-	: ArdourFader (*adj, orientation, fader_length, fader_girth)
+SliderController::SliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::Controllable> mc, int orien)
+	: FaderWidget (*adj, orien)
 	, _ctrl (mc)
 	, _ctrl_adj (adj)
 	, _spin_adj (0, 0, 1.0, .1, .01)
@@ -75,7 +75,7 @@ SliderController::on_button_press_event (GdkEventButton *ev)
 		return true;
 	}
 
-	return ArdourFader::on_button_press_event (ev);
+	return FaderWidget::on_button_press_event (ev);
 }
 
 bool
@@ -85,7 +85,7 @@ SliderController::on_enter_notify_event (GdkEventCrossing* ev)
 	if (c) {
 		PBD::Controllable::GUIFocusChanged (std::weak_ptr<PBD::Controllable> (c));
 	}
-	return ArdourFader::on_enter_notify_event (ev);
+	return FaderWidget::on_enter_notify_event (ev);
 }
 
 bool
@@ -94,7 +94,7 @@ SliderController::on_leave_notify_event (GdkEventCrossing* ev)
 	if (_binding_proxy.get_controllable()) {
 		PBD::Controllable::GUIFocusChanged (std::weak_ptr<PBD::Controllable> ());
 	}
-	return ArdourFader::on_leave_notify_event (ev);
+	return FaderWidget::on_leave_notify_event (ev);
 }
 
 void
@@ -133,11 +133,24 @@ SliderController::spin_adjusted ()
 
 
 VSliderController::VSliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::Controllable> mc, int fader_length, int fader_girth)
-	: SliderController (adj, mc, VERT, fader_length, fader_girth)
+	: FaderWidget (*adj, VERT)
+	, SliderController (adj, mc, VERT)
+	, ArdourFader (*adj, VERT, fader_length, fader_girth)
 {
 }
 
 HSliderController::HSliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::Controllable> mc, int fader_length, int fader_girth)
-	: SliderController (adj, mc, HORIZ, fader_length, fader_girth)
+	: FaderWidget (*adj, HORIZ)
+	, SliderController (adj, mc, HORIZ)
+	, ArdourFader (*adj, HORIZ, fader_length, fader_girth)
 {
 }
+
+#ifdef LIVETRAX
+TraxSliderController::TraxSliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::Controllable> mc, int fader_length, int fader_girth)
+	: FaderWidget (*adj, VERT)
+	, SliderController (adj, mc, VERT)
+	, TraxFader (*adj, fader_length, fader_girth)
+{
+}
+#endif
