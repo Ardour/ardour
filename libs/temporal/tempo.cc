@@ -3619,7 +3619,7 @@ TempoMap::remove_time (timepos_t const & pos, timecnt_t const & duration)
 	}
 
 	if (last_meter && !meter_after) {
-		last_tempo->set (start, last_meter->beats(), last_meter->bbt());
+		last_meter->set (start, last_meter->beats(), last_meter->bbt());
 		moved = true;
 	}
 
