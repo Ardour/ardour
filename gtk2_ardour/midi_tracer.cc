@@ -338,9 +338,9 @@ MidiTracer::tracer (Parser&, MIDI::byte* msg, size_t len, samplecnt_t now)
 
 	case polypress:
 		if (show_hex) {
-			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x\n", "PolyPressure", (msg[0]&0xf)+1, (int) msg[1]);
+			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x %02x\n", "PolyPressure", (msg[0]&0xf)+1, (int) msg[1], msg[2]);
 		} else {
-			s += snprintf (&buf[s], bufsize, "%16s chn %2d %-3d\n", "PolyPressure", (msg[0]&0xf)+1, (int) msg[1]);
+			s += snprintf (&buf[s], bufsize, "%16s chn %2d %-3d %-3d\n", "PolyPressure", (msg[0]&0xf)+1, (int) msg[1], msg[2]);
 		}
 		break;
 
@@ -362,9 +362,9 @@ MidiTracer::tracer (Parser&, MIDI::byte* msg, size_t len, samplecnt_t now)
 
 	case chanpress:
 		if (show_hex) {
-			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x/%-3d\n", "Channel Pressure", (msg[0]&0xf)+1, (int) msg[1], (int) msg[1]);
+			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x\n", "Channel Pressure", (msg[0]&0xf)+1, (int) msg[1]);
 		} else {
-			s += snprintf (&buf[s], bufsize, "%16s chn %2d %02x/%-3d\n", "Channel Pressure", (msg[0]&0xf)+1, (int) msg[1], (int) msg[1]);
+			s += snprintf (&buf[s], bufsize, "%16s chn %2d %-3d\n", "Channel Pressure", (msg[0]&0xf)+1, (int) msg[1]);
 		}
 		break;
 
