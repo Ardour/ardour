@@ -59,6 +59,7 @@ public:
 	void resize(size_t);
 	size_t size() const { return _size; }
 	bool empty() const { return _size == 0; }
+	bool silent_data () const { return _size == 0; }
 
 	bool insert_event(const Evoral::Event<TimeType>& event);
 	bool merge_in_place(const MidiBuffer &other);

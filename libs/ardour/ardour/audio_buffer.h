@@ -42,6 +42,8 @@ public:
 	 */
 	void silence (samplecnt_t len, samplecnt_t offset = 0);
 
+	bool silent_data() const;
+
 	/** Copy samples from src array starting at src_offset into self starting at dst_offset
 	 * @param src array to read from
 	 * @param len number of samples to copy

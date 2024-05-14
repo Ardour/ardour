@@ -69,6 +69,9 @@ public:
 	/** Clear (eg zero, or empty) buffer */
 	virtual void silence (samplecnt_t len, samplecnt_t offset = 0) = 0;
 
+	/* return true if all data is silent (or for MIDI-like, non-existent */
+	virtual bool silent_data () const = 0;
+
 	/** Clear the entire buffer */
 	virtual void clear() { silence(_capacity, 0); }
 

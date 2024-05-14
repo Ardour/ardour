@@ -229,6 +229,19 @@ BufferSet::ensure_buffers(const ChanCount& chns, size_t buffer_capacity)
 	}
 }
 
+bool
+BufferSet::silent_data () const
+{
+	for (DataType::iterator t = DataType::begin(); t != DataType::end(); ++t) {
+		for (BufferSet::const_iterator i = begin (*t); i != end (*t); ++i) {
+			if (!i->silent_data ()) {
+				return false;
+			}
+		}
+	}
+	return true;
+}
+
 /** Get the capacity (size) of the available buffers of the given type.
  *
  * All buffers of a certain type always have the same capacity.

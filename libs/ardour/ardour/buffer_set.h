@@ -82,6 +82,9 @@ public:
 	void ensure_buffers(DataType type, size_t num_buffers, size_t buffer_capacity);
 	void ensure_buffers(const ChanCount& chns, size_t buffer_capacity);
 
+	/* Returns true if Buffer::silent_data() is true for all buffers */
+	bool silent_data() const;
+
 	const ChanCount& available() const { return _available; }
 	ChanCount&       available()       { return _available; }
 

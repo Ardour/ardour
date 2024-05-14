@@ -81,6 +81,17 @@ AudioBuffer::check_silence (pframes_t nframes, pframes_t& n) const
 	return true;
 }
 
+bool
+AudioBuffer::silent_data () const
+{
+	for (pframes_t n = 0; n < _capacity; ++n) {
+		if (_data[n]) {
+			return false;
+		}
+	}
+	return true;
+}
+
 void
 AudioBuffer::silence (samplecnt_t len, samplecnt_t offset) {
 
