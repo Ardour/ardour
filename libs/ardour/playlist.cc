@@ -2668,6 +2668,7 @@ Playlist::relayer ()
 		}
 
 		assert (divisions == 0 || end_division < divisions);
+		assert (start_division >= 0 && end_division >= start_division);
 
 		/* find the lowest layer that this region can go on */
 		size_t j = layers.size ();
