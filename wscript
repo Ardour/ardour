@@ -1199,10 +1199,10 @@ def configure(conf):
                         fragment = "#include <dlfcn.h>\n int main(void) { dlopen (\"\", 0); return 0;}\n",
                         lib='dl', uselib_store='DL', execute = False)
 
-    conf.check_cxx(fragment = "#include <boost/version.hpp>\n#if !defined (BOOST_VERSION) || BOOST_VERSION < 105600\n#error boost >= 1.56 is not available\n#endif\nint main(void) { return 0; }\n",
+    conf.check_cxx(fragment = "#include <boost/version.hpp>\n#if !defined (BOOST_VERSION) || BOOST_VERSION < 106800\n#error boost >= 1.68 is not available\n#endif\nint main(void) { return 0; }\n",
               execute = False,
               mandatory = True,
-              msg = 'Checking for boost library >= 1.56')
+              msg = 'Checking for boost library >= 1.68')
 
     if re.search ("linux", sys.platform) is not None and Options.options.dist_target != 'mingw':
         autowaf.check_pkg(conf, 'alsa', uselib_store='ALSA')
