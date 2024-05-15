@@ -3455,7 +3455,7 @@ ARDOUR::Session::luabindings_session_rt (lua_State* L)
 {
 	/* declaration need to be in this file due to Windows CLASSKEYS */
 	luabridge::getGlobalNamespace (L)
-		.beginNamespace ("Ardour")
+		.beginNamespace ("ARDOUR")
 		.beginClass <Session> ("Session")
 		/* thse are private to Session */
 		.addFunction ("rt_set_controls", &Session::rt_set_controls)
