@@ -145,12 +145,3 @@ HSliderController::HSliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD:
 	, ArdourFader (*adj, HORIZ, fader_length, fader_girth)
 {
 }
-
-#ifdef LIVETRAX
-TraxSliderController::TraxSliderController (Gtk::Adjustment *adj, std::shared_ptr<PBD::Controllable> mc, int fader_length, int fader_girth)
-	: FaderWidget (*adj, VERT)
-	, SliderController (adj, mc, VERT)
-	, TraxFader (*adj, fader_length, fader_girth)
-{
-}
-#endif
