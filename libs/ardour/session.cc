@@ -258,8 +258,14 @@ Session::Session (AudioEngine &eng,
 	, _last_roll_or_reversal_location (0)
 	, _last_record_location (0)
 	, pending_auto_loop (false)
-	, _mempool ("Session", 3145728)
+	, _mempool ("Session", 4194304)
+#ifdef USE_TLSF
+	, lua (lua_newstate (&PBD::TLSF::lalloc, &_mempool))
+#elif defined USE_MALLOC
+	, lua (lua_newstate (true, true))
+#else
 	, lua (lua_newstate (&PBD::ReallocPool::lalloc, &_mempool))
+#endif
 	, _lua_run (0)
 	, _lua_add (0)
 	, _lua_del (0)

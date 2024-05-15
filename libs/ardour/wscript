@@ -321,6 +321,8 @@ def configure(conf):
                       atleast_version='0.24.2', mandatory=True)
     conf.define ('LV2_SUPPORT', 1)
 
+    conf.define ('USE_TLSF', 1)
+
     # non-standard LV2 extention -- TODO: add option to disable??
     if conf.is_defined ('HAVE_LV2_1_10_0'):
         conf.define ('LV2_EXTENDED', 1)

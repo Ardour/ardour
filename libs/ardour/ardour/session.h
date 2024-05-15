@@ -60,11 +60,15 @@
 #include "pbd/event_loop.h"
 #include "pbd/file_archive.h"
 #include "pbd/rcu.h"
-#include "pbd/reallocpool.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/signals.h"
 #include "pbd/undo.h"
 
+#ifdef USE_TLSF
+#  include "pbd/tlsf.h"
+#else
+#  include "pbd/reallocpool.h"
+#endif
 #include "lua/luastate.h"
 
 #include "temporal/range.h"
@@ -1652,7 +1656,11 @@ private:
 	bool              pending_abort;
 	bool              pending_auto_loop;
 
+#ifdef USE_TLSF
+	PBD::TLSF _mempool;
+#else
 	PBD::ReallocPool _mempool;
+#endif
 	LuaState lua;
 	mutable Glib::Threads::Mutex lua_lock;
 	luabridge::LuaRef * _lua_run;

@@ -30,7 +30,6 @@
 #include <vector>
 #include <string>
 
-#define USE_TLSF
 #ifdef USE_TLSF
 #  include "pbd/tlsf.h"
 #else
