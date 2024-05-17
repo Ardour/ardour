@@ -52,6 +52,8 @@ public:
 	void set_tweaks (Tweaks);
 	Tweaks tweaks() const { return _tweaks; }
 
+	int orientation () const { return _orien; }
+
 	virtual void set_bg (Gtkmm2ext::Color) = 0;
 	virtual void set_fg (Gtkmm2ext::Color) = 0;
 	virtual void unset_bg () = 0;
