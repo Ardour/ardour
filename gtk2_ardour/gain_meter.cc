@@ -380,6 +380,13 @@ GainMeterBase::setup_meters (int len)
 		meter_channels = route()->shared_peak_meter()->input_streams().n_total();
 	}
 
+	if (len == 0) {
+		assert (gain_slider);
+		Gtk::Requisition sz;
+		sz = gain_slider->size_request ();
+		len = gain_slider->orientation () == FaderWidget::VERT ? sz.height : sz.width;
+	}
+
 	switch (_width) {
 		case Wide:
 			//meter_ticks1_area.show();
