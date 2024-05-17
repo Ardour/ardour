@@ -859,33 +859,6 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		return true;
 		break;
 
-	case CdMarkerBarItem:
-		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
-		} else {
-			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateCDMarker), event);
-		}
-		return true;
-		break;
-
-	case CueMarkerBarItem:
-		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
-		} else {
-			/* no range dragging on this ruler/bar */
-		}
-		return true;
-		break;
-
-	case TransportMarkerBarItem:
-		if (!Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
-			_drags->set (new CursorDrag (this, *_playhead_cursor, false), event);
-		} else {
-			_drags->set (new RangeMarkerBarDrag (this, item, RangeMarkerBarDrag::CreateTransportMarker), event);
-		}
-		return true;
-		break;
-
 	case VelocityItem:
 		_drags->set (new LollipopDrag (this, item), event);
 		return true;
@@ -1709,8 +1682,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 
 			case MarkerBarItem:
 			case RangeMarkerBarItem:
-			case TransportMarkerBarItem:
-			case CdMarkerBarItem:
 			case SectionMarkerBarItem:
 			case TempoBarItem:
 			case TempoCurveItem:
@@ -1722,11 +1693,6 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			case BBTRulerItem:
 			case SelectionMarkerItem:
 				snap_to (where, Temporal::RoundNearest, SnapToGrid_Scaled, false);
-				popup_ruler_menu (where, item_type);
-				break;
-
-			case CueMarkerBarItem:
-				snap_to (where, Temporal::RoundNearest, SnapToGrid_Scaled, true);
 				popup_ruler_menu (where, item_type);
 				break;
 
@@ -1831,26 +1797,10 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 			}
 			return true;
 
-		case CdMarkerBarItem:
-			if (!_dragging_playhead) {
-				/* if we get here then a dragged range wasn't done */
-				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);
-				mouse_add_new_marker (where, Location::IsCDMarker);
-			}
-			return true;
-
 		case SectionMarkerBarItem:
 			if (!_dragging_playhead && Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);
 				mouse_add_new_marker (where, Location::IsSection);
-			}
-			return true;
-
-		case CueMarkerBarItem:
-			if (!_dragging_playhead) {
-				/* if we get here then a dragged range wasn't done */
-				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);  //TODO: force to-measure?
-				mouse_add_new_marker (where, Location::IsCueMarker);
 			}
 			return true;
 

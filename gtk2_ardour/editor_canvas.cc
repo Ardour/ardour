@@ -1448,12 +1448,8 @@ Editor::which_canvas_cursor(ItemType type) const
 	case MarkerItem:
 	case MarkerBarItem:
 	case RangeMarkerBarItem:
-	case CdMarkerBarItem:
 	case SectionMarkerBarItem:
-	case CueMarkerBarItem:
-	case SceneMarkerBarItem:
 	case VideoBarItem:
-	case TransportMarkerBarItem:
 	case DropZoneItem:
 	case GridZoneItem:
 	case SelectionMarkerItem:
