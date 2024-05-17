@@ -5957,16 +5957,10 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 
 	switch (_operation) {
 		case CreateSkipMarker:
-			crect = _editor->range_bar_drag_rect;
-			break;
 		case CreateRangeMarker:
-			crect = _editor->range_bar_drag_rect;
-			break;
 		case CreateTransportMarker:
-			crect = _editor->transport_bar_drag_rect;
-			break;
 		case CreateCDMarker:
-			crect = _editor->cd_marker_bar_drag_rect;
+			crect = _editor->range_bar_drag_rect;
 			break;
 		default:
 			error << string_compose (_("programming_error: %1"), "Error: unknown range marker op passed to Editor::drag_range_markerbar_op ()") << endmsg;
@@ -6042,9 +6036,9 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 					_editor->session ()->locations ()->next_available_name (rangename, _("CD"));
 					_editor->begin_reversible_command (_("new CD marker"));
 					flags = Location::Flags (Location::IsRangeMarker | Location::IsCDMarker);
-					_editor->cd_marker_bar_drag_rect->hide ();
+					_editor->range_bar_drag_rect->hide ();
 				} else {
-					_editor->begin_reversible_command (_("new skip marker"));
+					_editor->begin_reversible_command (_("new range marker"));
 					_editor->session ()->locations ()->next_available_name (rangename, _("unnamed"));
 					flags = Location::IsRangeMarker;
 					_editor->range_bar_drag_rect->hide ();

@@ -154,17 +154,13 @@ Editor::initialize_canvas ()
 	 * ::update_ruler_visibility()
 	 */
 
-	cd_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
-	CANVAS_DEBUG_NAME (cd_marker_group, "cd marker group");
 	/* the video ruler is temporarily placed a the same location as the
-	   cd_marker_group, but is moved later.
+	   previous marker group, but is moved later.
 	*/
 	videotl_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple(0.0, 0.0));
 	CANVAS_DEBUG_NAME (videotl_group, "videotl group");
 	marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, timebar_height + 1.0));
 	CANVAS_DEBUG_NAME (marker_group, "marker group");
-	transport_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 2.0) + 1.0));
-	CANVAS_DEBUG_NAME (transport_marker_group, "transport marker group");
 	range_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 3.0) + 1.0));
 	CANVAS_DEBUG_NAME (range_marker_group, "range marker group");
 	tempo_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 4.0) + 1.0));
@@ -173,8 +169,6 @@ Editor::initialize_canvas ()
 	CANVAS_DEBUG_NAME (section_marker_group, "Arranger marker group");
 	meter_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
 	CANVAS_DEBUG_NAME (meter_group, "meter group");
-	scene_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, (timebar_height * 5.0) + 1.0));
-	CANVAS_DEBUG_NAME (scene_marker_group, "scene marker_group");
 
 	float timebar_thickness = timebar_height; //was 4
 	float timebar_top = (timebar_height - timebar_thickness)/2;
@@ -193,24 +187,11 @@ Editor::initialize_canvas ()
 	range_marker_bar = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
 	CANVAS_DEBUG_NAME (range_marker_bar, "Range Marker Bar");
 
-	transport_marker_bar = new ArdourCanvas::Rectangle (transport_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
-	CANVAS_DEBUG_NAME (transport_marker_bar, "transport Marker Bar");
-
 	marker_bar = new ArdourCanvas::Rectangle (marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
 	CANVAS_DEBUG_NAME (marker_bar, "Marker Bar");
 
-	cd_marker_bar = new ArdourCanvas::Rectangle (cd_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
-	CANVAS_DEBUG_NAME (cd_marker_bar, "CD Marker Bar");
-
 	section_marker_bar = new ArdourCanvas::Rectangle (section_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
 	CANVAS_DEBUG_NAME (section_marker_bar, "Arranger Marker Bar");
-
-	cue_marker_group = new ArdourCanvas::Container (_time_markers_group, ArdourCanvas::Duple (0.0, 0.0));
-	cue_marker_bar = new ArdourCanvas::Rectangle (cue_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
-	CANVAS_DEBUG_NAME (cue_marker_bar, "Cue Marker Bar");
-
-	scene_marker_bar = new ArdourCanvas::Rectangle (scene_marker_group, ArdourCanvas::Rect (0.0, timebar_top, ArdourCanvas::COORD_MAX, timebar_btm));
-	CANVAS_DEBUG_NAME (cue_marker_bar, "Scene Marker Bar");
 
 	ruler_separator = new ArdourCanvas::Line(_time_markers_group);
 	CANVAS_DEBUG_NAME (ruler_separator, "separator between ruler and main canvas");
@@ -221,25 +202,10 @@ Editor::initialize_canvas ()
 
 	ARDOUR_UI::instance()->video_timeline = new VideoTimeLine(this, videotl_group, (timebar_height * videotl_bar_height));
 
-	cd_marker_bar_drag_rect = new ArdourCanvas::Rectangle (cd_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
-	CANVAS_DEBUG_NAME (cd_marker_bar_drag_rect, "cd marker drag");
-	cd_marker_bar_drag_rect->set_outline (false);
-	cd_marker_bar_drag_rect->hide ();
-
-	cue_marker_bar_drag_rect = new ArdourCanvas::Rectangle (cue_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
-	CANVAS_DEBUG_NAME (cd_marker_bar_drag_rect, "cd marker drag");
-	cue_marker_bar_drag_rect->set_outline (false);
-	cue_marker_bar_drag_rect->hide ();
-
 	range_bar_drag_rect = new ArdourCanvas::Rectangle (range_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
 	CANVAS_DEBUG_NAME (range_bar_drag_rect, "range drag");
 	range_bar_drag_rect->set_outline (false);
 	range_bar_drag_rect->hide ();
-
-	transport_bar_drag_rect = new ArdourCanvas::Rectangle (transport_marker_group, ArdourCanvas::Rect (0.0, 0.0, 100, timebar_height));
-	CANVAS_DEBUG_NAME (transport_bar_drag_rect, "transport drag");
-	transport_bar_drag_rect->set_outline (false);
-	transport_bar_drag_rect->hide ();
 
 	transport_punchin_line = new ArdourCanvas::Line (hv_scroll_group);
 	transport_punchin_line->set_x0 (0);
@@ -258,13 +224,9 @@ Editor::initialize_canvas ()
 	tempo_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), tempo_bar, TempoBarItem, "tempo bar"));
 	meter_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), meter_bar, MeterBarItem, "meter bar"));
 	marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), marker_bar, MarkerBarItem, "marker bar"));
-	cd_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), cd_marker_bar, CdMarkerBarItem, "cd marker bar"));
 	section_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), section_marker_bar, SectionMarkerBarItem, "arrangement marker bar"));
-	cue_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), cue_marker_bar, CueMarkerBarItem, "cd marker bar"));
-	scene_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), scene_marker_bar, SceneMarkerBarItem, "scene marker bar"));
 	videotl_group->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_videotl_bar_event), videotl_group));
 	range_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), range_marker_bar, RangeMarkerBarItem, "range marker bar"));
-	transport_marker_bar->Event.connect (sigc::bind (sigc::mem_fun (*this, &Editor::canvas_ruler_bar_event), transport_marker_bar, TransportMarkerBarItem, "transport marker bar"));
 
 	_playhead_cursor = new EditorCursor (*this, &Editor::canvas_playhead_cursor_event, X_("playhead"));
 	_playhead_cursor->set_sensitive (UIConfiguration::instance().get_sensitize_playhead());
@@ -1091,32 +1053,14 @@ Editor::color_handler()
 	marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("marker bar", "marker bar"));
 	marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
-	cd_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("cd marker bar", "marker bar"));
-	cd_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
-
 	section_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("arrangement marker bar", "marker bar"));
 	section_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
-
-	scene_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("arrangement marker bar", "marker bar"));
-	scene_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
-
-	cue_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("cd marker bar", "marker bar"));
-	cue_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
 	range_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("range marker bar", "marker bar"));
 	range_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
 
-	transport_marker_bar->set_fill_color (UIConfiguration::instance().color_mod ("transport marker bar", "marker bar"));
-	transport_marker_bar->set_outline_color (UIConfiguration::instance().color ("marker bar separator"));
-
-	cd_marker_bar_drag_rect->set_fill_color (UIConfiguration::instance().color ("range drag bar rect"));
-	cd_marker_bar_drag_rect->set_outline_color (UIConfiguration::instance().color ("range drag bar rect"));
-
 	range_bar_drag_rect->set_fill_color (UIConfiguration::instance().color ("range drag bar rect"));
 	range_bar_drag_rect->set_outline_color (UIConfiguration::instance().color ("range drag bar rect"));
-
-	transport_bar_drag_rect->set_fill_color (UIConfiguration::instance().color ("transport drag rect"));
-	transport_bar_drag_rect->set_outline_color (UIConfiguration::instance().color ("transport drag rect"));
 
 	transport_loop_range_rect->set_fill_color (UIConfiguration::instance().color_mod ("transport loop rect", "loop rectangle"));
 	transport_loop_range_rect->set_outline_color (UIConfiguration::instance().color ("transport loop rect"));

@@ -548,12 +548,8 @@
         <menuitem action="toggle-meter-ruler"/>
         <menuitem action="toggle-tempo-ruler"/>
         <menuitem action="toggle-range-ruler"/>
-        <menuitem action="toggle-loop-punch-ruler"/>
-        <menuitem action="toggle-cd-marker-ruler"/>
         <menuitem action="toggle-arrangement-ruler"/>
         <menuitem action="toggle-marker-ruler"/>
-        <menuitem action="toggle-cue-marker-ruler"/>
-        <menuitem action="toggle-scene-marker-ruler"/>
         <separator/>
         <menuitem action="toggle-video-ruler"/>
       </menu>
@@ -802,11 +798,7 @@
     <menuitem action="toggle-meter-ruler"/>
     <menuitem action="toggle-tempo-ruler"/>
     <menuitem action="toggle-range-ruler"/>
-    <menuitem action="toggle-loop-punch-ruler"/>
-    <menuitem action="toggle-cd-marker-ruler"/>
     <menuitem action="toggle-marker-ruler"/>
-    <menuitem action="toggle-cue-marker-ruler"/>
-    <menuitem action="toggle-scene-marker-ruler"/>
     <separator/>
     <menuitem action="toggle-video-ruler"/>
   </popup>
@@ -870,6 +862,22 @@
     <separator/>
     <menuitem action='removeUnusedRegions'/>
   </popup>
+
+<popup name='MarkerShowMenu' accelerators='true'>
+   <menuitem action='show-all-markers'/>
+   <menuitem action='show-cd-markers'/>
+   <menuitem action='show-cue-markers'/>
+   <menuitem action='show-scene-markers'/>
+   <menuitem action='show-location-markers'/>
+</popup>
+
+<popup name='RangeShowMenu' accelerators='true'>
+   <menuitem action='show-all-ranges'/>
+   <menuitem action='show-session-range'/>
+   <menuitem action='show-punch-range'/>
+   <menuitem action='show-loop-range'/>
+   <menuitem action='show-other-ranges'/>
+</popup>
 
   <popup name='PopupRegionMenu' action='PopupRegionMenu' accelerators='true'>
     <menuitem action='play-selected-regions'/>

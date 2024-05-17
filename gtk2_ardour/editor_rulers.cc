@@ -176,11 +176,7 @@ Editor::initialize_rulers ()
 	lab_children.push_back (Element(tempo_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(meter_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(range_mark_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(transport_mark_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(cd_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(mark_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(cue_mark_label, PACK_SHRINK, PACK_START));
-	lab_children.push_back (Element(scene_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(section_mark_label, PACK_SHRINK, PACK_START));
 	lab_children.push_back (Element(videotl_label, PACK_SHRINK, PACK_START));
 
@@ -222,6 +218,39 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 
 	editor_ruler_menu->set_name ("ArdourContextMenu");
 	ruler_items.clear();
+
+#define MAKE_ACTION_ITEM(menu,item,action_group,action_name) \
+	(item) = new (Gtk::CheckMenuItem); \
+	gtk_activatable_set_related_action (GTK_ACTIVATABLE((item)->gobj()), ActionManager::get_action (action_group, action_name)->gobj()); \
+	(item)->set_draw_as_radio (); \
+	(menu)->append (*(item));
+
+	Gtk::Menu* ms_menu = new (Gtk::Menu);
+	Gtk::CheckMenuItem* ms_item;
+
+	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-all-markers"));
+	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-cue-markers"));
+	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-cd-markers"));
+	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-scene-markers"));
+	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-location-markers"));
+
+	ruler_items.push_back (MenuElem (_("Locations")));
+	Gtk::MenuItem& marker_show_menu = ruler_items.back();
+	marker_show_menu.set_submenu (*ms_menu);
+
+	Gtk::Menu* rs_menu = new (Gtk::Menu);
+	Gtk::CheckMenuItem* rs_item;
+	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-all-ranges"));
+	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-punch-range"));
+	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-loop-range"));
+	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-session-range"));
+	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-location-markers"));
+
+	ruler_items.push_back (MenuElem (_("Ranges")));
+	Gtk::MenuItem& range_show_menu = ruler_items.back();
+	range_show_menu.set_submenu (*rs_menu);
+
+#undef MAKE_ACTION_ITEM
 
 	switch (t) {
 	case MarkerBarItem:
@@ -346,11 +375,8 @@ Editor::store_ruler_visibility ()
 	node->set_property (X_("meter"), ruler_meter_action->get_active());
 	node->set_property (X_("tempo"), ruler_tempo_action->get_active());
 	node->set_property (X_("rangemarker"), ruler_range_action->get_active());
-	node->set_property (X_("transportmarker"), ruler_loop_punch_action->get_active());
-	node->set_property (X_("cdmarker"), ruler_cd_marker_action->get_active());
-	node->set_property (X_("arrangement"), ruler_section_action->get_active());
 	node->set_property (X_("marker"), ruler_marker_action->get_active());
-	node->set_property (X_("cuemarker"), ruler_cue_marker_action->get_active());
+	node->set_property (X_("arrangement"), ruler_section_action->get_active());
 	node->set_property (X_("videotl"), ruler_video_action->get_active());
 
 	_session->add_extra_xml (*node);
@@ -389,46 +415,10 @@ Editor::restore_ruler_visibility ()
 		if (node->get_property ("rangemarker", yn)) {
 			ruler_range_action->set_active (yn);
 		}
-		if (node->get_property ("transportmarker", yn)) {
-			ruler_loop_punch_action->set_active (yn);
-		}
-
-		if (node->get_property ("cdmarker", yn)) {
-			ruler_cd_marker_action->set_active (yn);
-		} else {
-			// this _session doesn't yet know about the cdmarker ruler
-			// as a benefit to the user who doesn't know the feature exists, show the ruler if
-			// any cd marks exist
-			ruler_cd_marker_action->set_active (false);
-			const Locations::LocationList & locs = _session->locations()->list();
-			for (Locations::LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
-				if ((*i)->is_cd_marker()) {
-					ruler_cd_marker_action->set_active (true);
-					break;
-				}
-			}
-		}
-
 		if (node->get_property ("arrangement", yn)) {
 			ruler_section_action->set_active (yn);
 		} else {
 			ruler_section_action->set_active (true);
-		}
-
-		if (node->get_property ("cuemarker", yn)) {
-			ruler_cue_marker_action->set_active (yn);
-		} else {
-			// this _session doesn't yet know about the cue marker ruler
-			// as a benefit to the user who doesn't know the feature exists, show the ruler if
-			// any cue marks exist
-			ruler_cue_marker_action->set_active (false);
-			const Locations::LocationList & locs = _session->locations()->list();
-			for (Locations::LocationList::const_iterator i = locs.begin(); i != locs.end(); ++i) {
-				if ((*i)->is_cue_marker()) {
-					ruler_cue_marker_action->set_active (true);
-					break;
-				}
-			}
 		}
 
 		if (node->get_property ("videotl", yn)) {
@@ -445,10 +435,7 @@ Editor::restore_ruler_visibility ()
 		ruler_meter_action->set_active (td == Temporal::BeatTime);
 		ruler_tempo_action->set_active (td == Temporal::BeatTime);
 		ruler_range_action->set_active (true);
-		ruler_loop_punch_action->set_active (td == Temporal::BeatTime);
-		ruler_cd_marker_action->set_active (td == Temporal::AudioTime);
 		ruler_marker_action->set_active (true);
-		ruler_cue_marker_action->set_active (td == Temporal::BeatTime);
 		ruler_section_action->set_active (td == Temporal::BeatTime);
 	}
 
@@ -602,46 +589,6 @@ Editor::update_ruler_visibility ()
 		range_mark_label.hide();
 	}
 
-	if (ruler_loop_punch_action->get_active()) {
-		old_unit_pos = transport_marker_group->position().y;
-		if (tbpos != old_unit_pos) {
-			transport_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		transport_marker_group->show();
-		transport_mark_label.show();
-
-		transport_marker_bar->set_outline(false);
-
-		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
-	} else {
-		transport_marker_group->hide();
-		transport_mark_label.hide();
-	}
-
-	if (ruler_cd_marker_action->get_active()) {
-		old_unit_pos = cd_marker_group->position().y;
-		if (tbpos != old_unit_pos) {
-			cd_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		cd_marker_group->show();
-		cd_mark_label.show();
-
-		cd_marker_bar->set_outline(false);
-
-		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
-		// make sure all cd markers show up in their respective places
-		update_marker_display();
-	} else {
-		cd_marker_group->hide();
-		cd_mark_label.hide();
-		// make sure all cd markers show up in their respective places
-		update_marker_display();
-	}
-
 	if (ruler_marker_action->get_active()) {
 		old_unit_pos = marker_group->position().y;
 		if (tbpos != old_unit_pos) {
@@ -658,43 +605,6 @@ Editor::update_ruler_visibility ()
 	} else {
 		marker_group->hide();
 		mark_label.hide();
-	}
-
-	if (ruler_cue_marker_action->get_active()) {
-		old_unit_pos = cue_marker_group->position().y;
-		if (tbpos != old_unit_pos) {
-			cue_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		cue_marker_group->show();
-		cue_mark_label.show();
-
-		cue_marker_bar->set_outline(false);
-
-		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
-	} else {
-		cue_marker_group->hide();
-		cue_mark_label.hide();
-	}
-
-	if (ruler_scene_marker_action->get_active()) {
-		old_unit_pos = scene_marker_group->position().y;
-		if (tbpos != old_unit_pos) {
-			scene_marker_group->move (ArdourCanvas::Duple (0.0, tbpos - old_unit_pos));
-		}
-		scene_marker_group->show();
-		scene_mark_label.show();
-
-		scene_marker_bar->set_outline(false);
-
-		tbpos += timebar_height;
-		tbgpos += timebar_height;
-		visible_timebars++;
-		update_marker_display();
-	} else {
-		scene_marker_group->hide ();
-		scene_mark_label.hide ();
 	}
 
 	if (!Profile->get_livetrax() && ruler_section_action->get_active()) {
@@ -1264,7 +1174,7 @@ Editor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, int64_t l
 
 #if 0 // DEBUG GRID
 	for (auto const& g : grid) {
-		std::cout << "Grid " << g.time() <<  " Beats: " << g.beats() << " BBT: " << g.bbt() << " sample: " << g.sample(_session->nominal_sample_rate ()) << "\n"; 
+		std::cout << "Grid " << g.time() <<  " Beats: " << g.beats() << " BBT: " << g.bbt() << " sample: " << g.sample(_session->nominal_sample_rate ()) << "\n";
 	}
 #endif
 

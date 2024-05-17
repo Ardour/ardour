@@ -246,7 +246,8 @@ ARDOUR_UI::toggle_punch_out ()
 void
 ARDOUR_UI::show_loop_punch_ruler_and_disallow_hide ()
 {
-	Glib::RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("Rulers"), "toggle-loop-punch-ruler");
+/* XXX FIX ME */
+	Glib::RefPtr<ToggleAction> tact; //  = ActionManager::get_toggle_action (X_("Rulers"), "toggle-loop-punch-ruler");
 
 	tact->set_sensitive (false);
 
@@ -259,9 +260,10 @@ ARDOUR_UI::show_loop_punch_ruler_and_disallow_hide ()
 void
 ARDOUR_UI::reenable_hide_loop_punch_ruler_if_appropriate ()
 {
+/* XXX FIX ME */
 	if (!_session->config.get_punch_in() && !_session->config.get_punch_out()) {
 		/* if punch in/out are now both off, reallow hiding of the loop/punch ruler */
-		Glib::RefPtr<Action> act = ActionManager::get_action (X_("Rulers"), "toggle-loop-punch-ruler");
+		Glib::RefPtr<Action> act; // = ActionManager::get_action (X_("Rulers"), "toggle-loop-punch-ruler");
 		if (act) {
 			act->set_sensitive (true);
 		}

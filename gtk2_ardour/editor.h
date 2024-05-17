@@ -935,11 +935,7 @@ private:
 	ArdourCanvas::Container* meter_group;
 	ArdourCanvas::Container* marker_group;
 	ArdourCanvas::Container* range_marker_group;
-	ArdourCanvas::Container* transport_marker_group;
-	ArdourCanvas::Container* cd_marker_group;
 	ArdourCanvas::Container* section_marker_group;
-	ArdourCanvas::Container* cue_marker_group;
-	ArdourCanvas::Container* scene_marker_group;
 
 	/* parent for groups which themselves contain time markers */
 	ArdourCanvas::Container* _time_markers_group;
@@ -988,13 +984,21 @@ private:
 	Glib::RefPtr<Gtk::ToggleAction> ruler_meter_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_tempo_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_range_action;
-	Glib::RefPtr<Gtk::ToggleAction> ruler_loop_punch_action;
-	Glib::RefPtr<Gtk::ToggleAction> ruler_cd_marker_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_section_action;
 	Glib::RefPtr<Gtk::ToggleAction> ruler_marker_action;
-	Glib::RefPtr<Gtk::ToggleAction> ruler_cue_marker_action;
-	Glib::RefPtr<Gtk::ToggleAction> ruler_scene_marker_action;
 	bool                            no_ruler_shown_update;
+
+	Glib::RefPtr<Gtk::RadioAction> all_marker_action;
+	Glib::RefPtr<Gtk::RadioAction> cd_marker_action;
+	Glib::RefPtr<Gtk::RadioAction> scene_marker_action;
+	Glib::RefPtr<Gtk::RadioAction> cue_marker_action;
+	Glib::RefPtr<Gtk::RadioAction> location_marker_action;
+
+	Glib::RefPtr<Gtk::RadioAction> all_range_action;
+	Glib::RefPtr<Gtk::RadioAction> punch_range_action;
+	Glib::RefPtr<Gtk::RadioAction> loop_range_action;
+	Glib::RefPtr<Gtk::RadioAction> session_range_action;
+	Glib::RefPtr<Gtk::RadioAction> other_range_action;
 
 	Gtk::Widget* ruler_grabbed_widget;
 
@@ -1081,11 +1085,7 @@ private:
 	ArdourCanvas::Rectangle* meter_bar;
 	ArdourCanvas::Rectangle* marker_bar;
 	ArdourCanvas::Rectangle* range_marker_bar;
-	ArdourCanvas::Rectangle* transport_marker_bar;
-	ArdourCanvas::Rectangle* cd_marker_bar;
 	ArdourCanvas::Rectangle* section_marker_bar;
-	ArdourCanvas::Rectangle* cue_marker_bar;
-	ArdourCanvas::Rectangle* scene_marker_bar;
 	ArdourCanvas::Line*      ruler_separator;
 
 	void toggle_cue_behavior ();
@@ -1098,11 +1098,8 @@ private:
 	Gtk::Label  meter_label;
 	Gtk::Label  mark_label;
 	Gtk::Label  range_mark_label;
-	Gtk::Label  transport_mark_label;
-	Gtk::Label  cd_mark_label;
 	Gtk::Label  section_mark_label;
 	Gtk::Label  cue_mark_label;
-	Gtk::Label  scene_mark_label;
 
 	/* videtimline related actions */
 	Gtk::Label                      videotl_label;
@@ -1799,6 +1796,29 @@ private:
 
 	Editing::EditPoint edit_point() const { return _edit_point; }
 
+	enum MarkerBarType {
+		CueMarks = 0x1,
+		SceneMarks = 0x2,
+		CDMarks = 0x4,
+		LocationMarks = 0x8
+	};
+
+	enum RangeBarType {
+		PunchRange = 0x1,
+		LoopRange = 0x2,
+		SessionRange = 0x4,
+		OtherRange = 0x8
+	};
+
+	static const MarkerBarType all_marker_types = MarkerBarType (CueMarks|SceneMarks|CDMarks|LocationMarks);
+	static const RangeBarType all_range_types = RangeBarType (PunchRange|LoopRange|SessionRange|OtherRange);
+
+	MarkerBarType visible_marker_types () const;
+	RangeBarType visible_range_types () const;
+
+	void set_visible_marker_types (MarkerBarType);
+	void set_visible_range_types (RangeBarType);
+
 protected:
 	void _commit_tempo_map_edit (Temporal::TempoMap::WritableSharedPtr&, bool with_update = false);
 
@@ -2137,11 +2157,7 @@ private:
 
 	/* transport range select process */
 
-	ArdourCanvas::Rectangle* cd_marker_bar_drag_rect;
-	ArdourCanvas::Rectangle* cue_marker_bar_drag_rect;
 	ArdourCanvas::Rectangle* range_bar_drag_rect;
-	ArdourCanvas::Rectangle* transport_bar_drag_rect;
-	ArdourCanvas::Rectangle* transport_bar_range_rect;
 	ArdourCanvas::Rectangle* transport_bar_preroll_rect;
 	ArdourCanvas::Rectangle* transport_bar_postroll_rect;
 	ArdourCanvas::Rectangle* transport_loop_range_rect;
@@ -2631,6 +2647,14 @@ private:
 
 	};
 	TrackDrag* track_drag;
+
+	MarkerBarType _visible_marker_types;
+	RangeBarType _visible_range_types;
+	void update_mark_and_range_visibility ();
+	void show_marker_type (MarkerBarType);
+	void show_range_type (RangeBarType);
+	PBD::Signal0<void> VisibleMarkersChanged;
+	PBD::Signal0<void> VisibleRangesChanged;
 
 	friend class RegionMoveDrag;
 	friend class TrimDrag;

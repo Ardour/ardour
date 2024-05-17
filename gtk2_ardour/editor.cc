@@ -289,8 +289,6 @@ Editor::Editor ()
 	, meter_group (0)
 	, marker_group (0)
 	, range_marker_group (0)
-	, transport_marker_group (0)
-	, cd_marker_group (0)
 	, section_marker_group (0)
 	, _time_markers_group (0)
 	, _selection_marker_group (0)
@@ -326,10 +324,7 @@ Editor::Editor ()
 	, meter_bar (0)
 	, marker_bar (0)
 	, range_marker_bar (0)
-	, transport_marker_bar (0)
-	, cd_marker_bar (0)
 	, section_marker_bar (0)
-	, cue_marker_bar (0)
 	, ruler_separator (0)
 	, minsec_label (_("Mins:Secs"))
 	, bbt_label (_("Bars:Beats"))
@@ -339,11 +334,8 @@ Editor::Editor ()
 	, meter_label (_("Time Signature"))
 	, mark_label (_("Location Markers"))
 	, range_mark_label (_("Range Markers"))
-	, transport_mark_label (_("Loop/Punch Ranges"))
-	, cd_mark_label (_("CD Markers"))
 	, section_mark_label (_("Arrangement"))
 	, cue_mark_label (_("Cue Markers"))
-	, scene_mark_label (_("Scenes"))
 	, videotl_label (_("Video Timeline"))
 	, videotl_group (0)
 	, _region_boundary_cache_dirty (true)
@@ -412,11 +404,7 @@ Editor::Editor ()
 	, _section_box (0)
 	, _playhead_cursor (0)
 	, _snapped_cursor (0)
-	, cd_marker_bar_drag_rect (0)
-	, cue_marker_bar_drag_rect (0)
 	, range_bar_drag_rect (0)
-	, transport_bar_drag_rect (0)
-	, transport_bar_range_rect (0)
 	, transport_bar_preroll_rect (0)
 	, transport_bar_postroll_rect (0)
 	, transport_loop_range_rect (0)
@@ -475,6 +463,8 @@ Editor::Editor ()
 	, _main_menu_disabler (0)
 	, domain_bounce_info (nullptr)
 	, track_drag (nullptr)
+	, _visible_marker_types (all_marker_types)
+	, _visible_range_types (all_range_types)
 {
 	/* we are a singleton */
 
@@ -557,33 +547,12 @@ Editor::Editor ()
 	mark_label.hide();
 	mark_label.set_no_show_all();
 
-	cd_mark_label.set_name ("EditorRulerLabel");
-	cd_mark_label.set_size_request (-1, (int)timebar_height);
-	cd_mark_label.set_alignment (1.0, 0.5);
-	cd_mark_label.set_padding (5,0);
-	cd_mark_label.hide();
-	cd_mark_label.set_no_show_all();
-
 	section_mark_label.set_name ("EditorRulerLabel");
 	section_mark_label.set_size_request (-1, (int)timebar_height);
 	section_mark_label.set_alignment (1.0, 0.5);
 	section_mark_label.set_padding (5,0);
 	section_mark_label.hide();
 	section_mark_label.set_no_show_all();
-
-	cue_mark_label.set_name ("EditorRulerLabel");
-	cue_mark_label.set_size_request (-1, (int)timebar_height);
-	cue_mark_label.set_alignment (1.0, 0.5);
-	cue_mark_label.set_padding (5,0);
-	cue_mark_label.hide();
-	cue_mark_label.set_no_show_all();
-
-	scene_mark_label.set_name ("EditorRulerLabel");
-	scene_mark_label.set_size_request (-1, (int)timebar_height);
-	scene_mark_label.set_alignment (1.0, 0.5);
-	scene_mark_label.set_padding (5,0);
-	scene_mark_label.hide();
-	scene_mark_label.set_no_show_all();
 
 	videotl_bar_height = 4;
 	videotl_label.set_name ("EditorRulerLabel");
@@ -599,13 +568,6 @@ Editor::Editor ()
 	range_mark_label.set_padding (5,0);
 	range_mark_label.hide();
 	range_mark_label.set_no_show_all();
-
-	transport_mark_label.set_name ("EditorRulerLabel");
-	transport_mark_label.set_size_request (-1, (int)timebar_height);
-	transport_mark_label.set_alignment (1.0, 0.5);
-	transport_mark_label.set_padding (5,0);
-	transport_mark_label.hide();
-	transport_mark_label.set_no_show_all();
 
 	initialize_canvas ();
 
@@ -2297,7 +2259,6 @@ Editor::show_rulers_for_grid ()
 			ruler_samples_action->set_active(false);
 		}
 	} else if (_grid_type == GridTypeCDFrame) {
-		ruler_cd_marker_action->set_active(true);
 		ruler_minsec_action->set_active(true);
 
 		if (UIConfiguration::instance().get_rulers_follow_grid()) {
@@ -4051,6 +4012,7 @@ void
 Editor::grid_type_selection_done (GridType gridtype)
 {
 	RefPtr<RadioAction> ract = grid_type_action (gridtype);
+
 	if (ract && ract->get_active()) {  /*radio-action is already set*/
 		set_grid_to(gridtype);         /*so we must set internal state here*/
 	} else {

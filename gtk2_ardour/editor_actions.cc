@@ -693,12 +693,23 @@ Editor::register_actions ()
 	ruler_meter_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-meter-ruler"), _("Time Signature"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_tempo_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-tempo-ruler"), _("Tempo"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_range_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-range-ruler"), _("Range Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
-	ruler_loop_punch_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-loop-punch-ruler"), _("Loop/Punch Ranges"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
-	ruler_cd_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-cd-marker-ruler"), _("CD Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_section_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-arrangement-ruler"), _("Arrangement"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
 	ruler_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-marker-ruler"), _("Location Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
-	ruler_scene_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-scene-marker-ruler"), _("Scene Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
-	ruler_cue_marker_action = Glib::RefPtr<ToggleAction>::cast_static (ActionManager::register_toggle_action (ruler_actions, X_("toggle-cue-marker-ruler"), _("Cue Markers"), sigc::mem_fun(*this, &Editor::toggle_ruler_visibility)));
+
+	RadioAction::Group marker_choice_group;
+	RadioAction::Group range_choice_group;
+
+	all_marker_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, marker_choice_group, X_("show-all-markers"), _("All Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::show_marker_type), all_marker_types)));
+	cd_marker_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, marker_choice_group, X_("show-cd-markers"), _("CD Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::show_marker_type), CDMarks)));
+	scene_marker_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, marker_choice_group, X_("show-cue-markers"), _("Cue Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::show_marker_type), SceneMarks)));
+	cue_marker_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, marker_choice_group, X_("show-scene-markers"), _("Scene Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::show_marker_type), CueMarks)));
+	location_marker_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, marker_choice_group, X_("show-location-markers"), _("Location Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::show_marker_type), LocationMarks)));
+
+	all_range_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, range_choice_group, X_("show-all-ranges"), _("All Ranges"), sigc::bind (sigc::mem_fun(*this, &Editor::show_range_type), all_range_types)));
+	session_range_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, range_choice_group, X_("show-session-range"), _("Session Range"), sigc::bind (sigc::mem_fun(*this, &Editor::show_range_type), SessionRange)));
+	punch_range_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, range_choice_group, X_("show-punch-range"), _("Punch Range"), sigc::bind (sigc::mem_fun(*this, &Editor::show_range_type), PunchRange)));
+	loop_range_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, range_choice_group, X_("show-loop-range"), _("Loop Range"), sigc::bind (sigc::mem_fun(*this, &Editor::show_range_type), LoopRange)));
+	other_range_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, range_choice_group, X_("show-other-ranges"), _("Other Ranges"), sigc::bind (sigc::mem_fun(*this, &Editor::show_range_type), OtherRange)));
 
 	ActionManager::register_action (editor_menu_actions, X_("VideoMonitorMenu"), _("Video Monitor"));
 
@@ -724,11 +735,7 @@ Editor::register_actions ()
 	ruler_meter_action->set_active (true);
 	ruler_tempo_action->set_active (true);
 	ruler_range_action->set_active (true);
-	ruler_loop_punch_action->set_active (true);
-	ruler_cd_marker_action->set_active (true);
 	ruler_marker_action->set_active (true);
-	ruler_cue_marker_action->set_active (true);
-	ruler_scene_marker_action->set_active (false);
 
 	ruler_video_action->set_active (false);
 	xjadeo_proc_action->set_active (false);
