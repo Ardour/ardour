@@ -1411,9 +1411,9 @@ icon_lock (cairo_t* cr, const int width, const int height, const uint32_t fg_col
 	cairo_arc (cr, x0 + lc, y0 - hh + lc, r, 1.0 * M_PI, 2.0 * M_PI);
 	VECTORICONSTROKE (lw, fg_color);
 
-	cairo_move_to (cr, x, y0);
+	cairo_move_to (cr, x0, y0);
 	cairo_close_path (cr);
-  cairo_set_line_width (cr, 2 * lw);
+	cairo_set_line_width (cr, 1.75 * lw);
 	cairo_stroke (cr);
 }
 
@@ -1426,12 +1426,14 @@ icon_mixer (cairo_t* cr, const int width, const int height, const uint32_t fg_co
 	const double lw = DEFAULT_LINE_WIDTH;
 	const double lc = fmod (lw * .5, 1.0);
 
-	const double x0 = rint (x - wh * .45) - lc;
-	const double x1 = rint (x + wh * .45) - lc;
+	const double x0 = rint (x - wh * .6) - lc;
+	const double x1 = rint (x) - lc;
+	const double x2 = rint (x + wh * .6) - lc;
 
 	const double h  = wh * .80 - lw;
 	const double y0 = rint (y - h * .5) - lc;
 	const double y1 = rint (y + h * .5) - lc;
+	const double y2 = rint (y + h * .0) - lc;
 
 	const double ww  = 1.5 * lw;
 
@@ -1441,37 +1443,21 @@ icon_mixer (cairo_t* cr, const int width, const int height, const uint32_t fg_co
 	cairo_move_to (cr, x1, y - h);
 	cairo_line_to (cr, x1, y + h);
 
+	cairo_move_to (cr, x2, y - h);
+	cairo_line_to (cr, x2, y + h);
+
+	VECTORICONSTROKE (lw, (fg_color & 0xffffff00) + 0xaa);
+
 	cairo_move_to (cr, x0 - ww, y0);
 	cairo_line_to (cr, x0 + ww, y0);
 
 	cairo_move_to (cr, x1 - ww, y1);
 	cairo_line_to (cr, x1 + ww, y1);
 
-	VECTORICONSTROKE (lw, fg_color);
+	cairo_move_to (cr, x2 - ww, y2);
+	cairo_line_to (cr, x2 + ww, y2);
 
-	/* outer box */
-	const double wb  = 2 * lw;
-	const double r = rint (y + wh) - rint (y - wh);
-
-	cairo_move_to (cr, x0 - wb, rint (y - wh) - lc);
-	cairo_line_to (cr, x1 + wb, rint (y - wh) - lc);
-
-	cairo_save (cr);
-	cairo_translate (cr, x1 + wb, y);
-	cairo_scale (cr, 0.25, 1.0);
-	cairo_arc (cr, 0, 0, 0.5 * r, 1.5 * M_PI, 2.5 * M_PI);
-	cairo_restore (cr);
-
-	cairo_move_to (cr, x1 + wb, rint (y + wh) - lc);
-	cairo_line_to (cr, x0 - wb, rint (y + wh) - lc);
-
-	cairo_save (cr);
-	cairo_translate (cr, x0 - wb, y);
-	cairo_scale (cr, 0.25, 1.0);
-	cairo_arc (cr, 0, 0, 0.5 * r, 0.5 * M_PI, 1.5 * M_PI);
-	cairo_restore (cr);
-
-	VECTORICONSTROKE (lw, fg_color);
+	VECTORICONSTROKE (lw * 2.2, fg_color);
 }
 
 static void
