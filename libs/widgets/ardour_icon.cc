@@ -1380,8 +1380,8 @@ icon_file_folder (cairo_t* cr, const int width, const int height, const uint32_t
 #if 1
 	cairo_set_line_cap (cr, CAIRO_LINE_CAP_BUTT);
 	cairo_set_line_join (cr, CAIRO_LINE_JOIN_BEVEL);
-  Gtkmm2ext::set_source_rgba (cr, fg_color);
-  cairo_set_line_width (cr, lw);
+	Gtkmm2ext::set_source_rgba (cr, fg_color);
+	cairo_set_line_width (cr, lw);
 	cairo_stroke (cr);
 #else
 	VECTORICONSTROKE (lw, fg_color);
