@@ -219,78 +219,7 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 	editor_ruler_menu->set_name ("ArdourContextMenu");
 	ruler_items.clear();
 
-#define MAKE_ACTION_ITEM(menu,item,action_group,action_name) \
-	(item) = new (Gtk::CheckMenuItem); \
-	gtk_activatable_set_related_action (GTK_ACTIVATABLE((item)->gobj()), ActionManager::get_action (action_group, action_name)->gobj()); \
-	(item)->set_draw_as_radio (); \
-	(menu)->append (*(item));
-
-	Gtk::Menu* ms_menu = new (Gtk::Menu);
-	Gtk::CheckMenuItem* ms_item;
-
-	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-all-markers"));
-	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-cue-markers"));
-	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-cd-markers"));
-	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-scene-markers"));
-	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-location-markers"));
-
-	ruler_items.push_back (MenuElem (_("Locations")));
-	Gtk::MenuItem& marker_show_menu = ruler_items.back();
-	marker_show_menu.set_submenu (*ms_menu);
-
-	Gtk::Menu* rs_menu = new (Gtk::Menu);
-	Gtk::CheckMenuItem* rs_item;
-	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-all-ranges"));
-	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-punch-range"));
-	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-loop-range"));
-	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-session-range"));
-	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-location-markers"));
-
-	ruler_items.push_back (MenuElem (_("Ranges")));
-	Gtk::MenuItem& range_show_menu = ruler_items.back();
-	range_show_menu.set_submenu (*rs_menu);
-
-#undef MAKE_ACTION_ITEM
-
 	switch (t) {
-	case MarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New Location Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags (0), 0)));
-		ruler_items.push_back (MenuElem (_("Clear All Locations"), sigc::mem_fun(*this, &Editor::clear_markers)));
-		ruler_items.push_back (MenuElem (_("Clear All Xruns"), sigc::mem_fun(*this, &Editor::clear_xrun_markers)));
-		ruler_items.push_back (MenuElem (_("Unhide Locations"), sigc::mem_fun(*this, &Editor::unhide_markers)));
-		break;
-
-	case RangeMarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New Range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_range), where)));
-		ruler_items.push_back (MenuElem (_("Clear All Ranges"), sigc::mem_fun(*this, &Editor::clear_ranges)));
-		ruler_items.push_back (MenuElem (_("Unhide Ranges"), sigc::mem_fun(*this, &Editor::unhide_ranges)));
-		break;
-
-	case TransportMarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New Loop Range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_loop), where)));
-		ruler_items.push_back (MenuElem (_("New Punch Range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_punch), where)));
-		break;
-
-	case CdMarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New CD Track Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark |Location::IsCDMarker), 0)));
-		break;
-
-	case SectionMarkerBarItem:
-		ruler_items.push_back (MenuElem (_("New Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
-		break;
-
-	case CueMarkerBarItem:
-		ruler_items.push_back (MenuElem (_("Stop All Cues"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, CueRecord::stop_all)));
-		ruler_items.push_back (MenuElem (_("Clear All Cues"), sigc::mem_fun (*this, &Editor::clear_cues)));
-		for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
-			ruler_items.push_back (MenuElem (string_compose (_("Cue %1"), cue_marker_name (n)), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, n)));
-		}
-		break;
-
-	case SceneMarkerBarItem:
-		ruler_items.push_back (MenuElem (_("Delete all Scenes"), sigc::mem_fun (*this, &Editor::clear_scenes)));
-		break;
-
 	case TempoBarItem:
 	case TempoCurveItem:
 		ruler_items.push_back (MenuElem (_("Add New Tempo"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_tempo_event), where)));
@@ -352,9 +281,75 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		ruler_items.push_back (MenuElem (_("Add BBT Marker"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_bbt_marker_event), where)));
 		break;
 
-	default:
+	default: {
+		ruler_items.push_back (MenuElem ("Add..."));
+		Gtk::MenuItem& add_menu = ruler_items.back();
+		Gtk::Menu* a_menu = new Gtk::Menu;
+		MenuList& add_items = a_menu->items();
+		add_items.push_back (MenuElem (_("Location Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags (0), 0)));
+		add_items.push_back (MenuElem (_("Range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_range), where)));
+		add_items.push_back (MenuElem (_("Loop Range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_loop), where)));
+		add_items.push_back (MenuElem (_("Punch Range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_punch), where)));
+		add_items.push_back (MenuElem (_("CD Track Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark |Location::IsCDMarker), 0)));
+		add_items.push_back (MenuElem (_("Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
+		for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
+			add_items.push_back (MenuElem (string_compose (_("Cue %1"), cue_marker_name (n)), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, n)));
+		}
+		add_menu.set_submenu (*a_menu);
+
+		ruler_items.push_back (MenuElem ("Remove..."));
+		Gtk::MenuItem& clear_menu = ruler_items.back();
+		Gtk::Menu* c_menu = new Gtk::Menu;
+		MenuList& clear_items = c_menu->items();
+		clear_items.push_back (MenuElem (_("All Locations"), sigc::mem_fun(*this, &Editor::clear_markers)));
+		clear_items.push_back (MenuElem (_("All Ranges"), sigc::mem_fun(*this, &Editor::clear_ranges)));
+		clear_items.push_back (MenuElem (_("All Cues"), sigc::mem_fun (*this, &Editor::clear_cues)));
+		clear_items.push_back (MenuElem (_("All Xruns"), sigc::mem_fun(*this, &Editor::clear_xrun_markers)));
+		clear_items.push_back (MenuElem (_("All (MIDI) Scenes"), sigc::mem_fun (*this, &Editor::clear_scenes)));
+		clear_menu.set_submenu (*c_menu);
+
+		ruler_items.push_back (MenuElem (_("Stop All Cues"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, CueRecord::stop_all)));
+		}
 		break;
 	}
+
+	/* Gtkmm does not expose the ::set_related_action() API for
+	 * Gtk::Activatable, so we have to drop to C to create menu items
+	 * directly from actions.
+	 */
+
+#define MAKE_ACTION_ITEM(menu,item,action_group,action_name) \
+	(item) = new (Gtk::CheckMenuItem); \
+	gtk_activatable_set_related_action (GTK_ACTIVATABLE((item)->gobj()), ActionManager::get_action (action_group, action_name)->gobj()); \
+	(item)->set_draw_as_radio (); \
+	(menu)->append (*(item));
+
+	Gtk::Menu* ms_menu = new (Gtk::Menu);
+	Gtk::CheckMenuItem* ms_item;
+
+	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-all-markers"));
+	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-cue-markers"));
+	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-cd-markers"));
+	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-scene-markers"));
+	MAKE_ACTION_ITEM (ms_menu, ms_item, X_("Rulers"), X_("show-location-markers"));
+
+	ruler_items.push_back (MenuElem (_("Show Locations...")));
+	Gtk::MenuItem& marker_show_menu = ruler_items.back();
+	marker_show_menu.set_submenu (*ms_menu);
+
+	Gtk::Menu* rs_menu = new (Gtk::Menu);
+	Gtk::CheckMenuItem* rs_item;
+	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-all-ranges"));
+	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-punch-range"));
+	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-loop-range"));
+	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-session-range"));
+	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-location-markers"));
+
+	ruler_items.push_back (MenuElem (_("Show Ranges...")));
+	Gtk::MenuItem& range_show_menu = ruler_items.back();
+	range_show_menu.set_submenu (*rs_menu);
+
+#undef MAKE_ACTION_ITEM
 
 	if (!ruler_items.empty()) {
 		editor_ruler_menu->popup (1, gtk_get_current_event_time());
