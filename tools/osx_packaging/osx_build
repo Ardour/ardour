@@ -14,7 +14,6 @@ fi
 mkdir -p "$CACHEDIR"
 
 MIXBUS=
-MIXBUS32C=
 WITH_HARVID=1
 WITH_XJADEO=1
 WITH_HARRISON_LV2=
@@ -44,7 +43,6 @@ while [ $# -gt 0 ] ; do
 		WITH_COMMERCIAL_X42_LV2=1
 		WITH_GRATIS_X42_LV2=1
 		WITH_GMSYNTH=1
-		STRIP= ;
 		PRODUCT_PKG_DIR=Mixbus;
 		APPNAME=Mixbus ;
 		BUNDLENAME=Mixbus${major_version} ;
@@ -231,9 +229,7 @@ MAIN_EXECUTABLE=$EXECUTABLE
 
 echo "Copying ardour executable ...."
 cp $BUILD_ROOT/gtk2_ardour/ardour-$release_version $APPROOT/MacOS/$MAIN_EXECUTABLE
-if test x$MIXBUS32C != x ; then
-	cp  Mixbus32C.icns $Resources/appIcon.icns
-elif test x$MIXBUS != x ; then
+if test x$MIXBUS != x ; then
 	cp  Mixbus.icns $Resources/appIcon.icns
 elif test x$LIVETRAX != x ; then
 	cp  LiveTrax.icns $Resources/appIcon.icns
