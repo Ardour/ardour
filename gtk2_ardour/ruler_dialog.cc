@@ -51,11 +51,8 @@ RulerDialog::RulerDialog ()
 	connect_action (bbt_button, "bbt-ruler");
 	connect_action (tempo_button, "tempo-ruler");
 	connect_action (meter_button, "meter-ruler");
-	connect_action (loop_punch_button, "loop-punch-ruler");
 	connect_action (range_button, "range-ruler");
 	connect_action (mark_button, "marker-ruler");
-	connect_action (cdmark_button, "cd-marker-ruler");
-	connect_action (cuemark_button, "cue-marker-ruler");
 	connect_action (section_button, "arrangement-ruler");
 	connect_action (video_button, "video-ruler");
 }
