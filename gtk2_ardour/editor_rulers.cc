@@ -464,8 +464,6 @@ Editor::update_ruler_visibility ()
 	meter_label.hide();
 	tempo_label.hide();
 	range_mark_label.hide();
-	transport_mark_label.hide();
-	cd_mark_label.hide();
 	section_mark_label.hide();
 	cue_mark_label.hide();
 	mark_label.hide();
