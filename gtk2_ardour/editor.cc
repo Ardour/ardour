@@ -2575,11 +2575,10 @@ Editor::set_state (const XMLNode& node, int version)
 	yn = false;
 	node.get_property ("join-object-range", yn);
 	{
-		RefPtr<ToggleAction> tact = ActionManager::get_toggle_action (X_("MouseMode"), X_("set-mouse-mode-object-range"));
 		/* do it twice to force the change */
-		tact->set_active (!yn);
-		tact->set_active (yn);
-		set_mouse_mode(mouse_mode, true);
+		smart_mode_action->set_active (!yn);
+		smart_mode_action->set_active (yn);
+		set_mouse_mode (mouse_mode, true);
 	}
 
 	EditPoint ep;
