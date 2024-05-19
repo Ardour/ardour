@@ -41,12 +41,9 @@ private:
 	Gtk::CheckButton bbt_button;
 	Gtk::CheckButton tempo_button;
 	Gtk::CheckButton meter_button;
-	Gtk::CheckButton loop_punch_button;
 	Gtk::CheckButton range_button;
 	Gtk::CheckButton mark_button;
-	Gtk::CheckButton cdmark_button;
 	Gtk::CheckButton section_button;
-	Gtk::CheckButton cuemark_button;
 	Gtk::CheckButton video_button;
 
 	void connect_action (Gtk::CheckButton& button, std::string const &action_name_part);
