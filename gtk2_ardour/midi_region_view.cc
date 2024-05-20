@@ -910,11 +910,8 @@ MidiRegionView::create_note_at (timepos_t const & t, double y, Temporal::Beats l
 	apply_note_diff();
 
 	trackview.editor().set_selected_midi_region_view (*this);
-	list<Evoral::event_id_t> to_be_selected;
-	to_be_selected.push_back (new_note->id());
-	select_notes (to_be_selected, true);
 
-	play_midi_note (new_note);
+	/* apply_note_diff above selects and plays the newly created note */
 }
 
 void
