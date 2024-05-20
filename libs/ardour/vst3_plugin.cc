@@ -2969,14 +2969,21 @@ VST3PI::getContextInfoValue (double& value, FIDString id)
 tresult
 VST3PI::setContextInfoValue (FIDString id, double value)
 {
-	if (!_owner) {
+	Stripable* s = dynamic_cast<Stripable*> (_owner);
+	if (!s) {
 		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::setContextInfoValue<double>: not initialized");
 		return kNotInitialized;
 	}
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::setContextInfoValue<double> %1 to %2\n", id, value));
+	if (s->session ().loading () || s->session ().deletion_in_progress ()) {
+		return kResultOk;
+	}
 	if (0 == strcmp (id, ContextInfo::kVolume)) {
 		std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
-		ac->set_value (value, Controllable::NoGroup);
+		assert (ac);
+		if (ac) {
+			ac->set_value (value, Controllable::NoGroup);
+		}
 	} else if (0 == strcmp (id, ContextInfo::kPan)) {
 		std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
 		if (ac) {
@@ -3005,6 +3012,9 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 		return kNotInitialized;
 	}
 	DEBUG_TRACE (DEBUG::VST3Callbacks, string_compose ("VST3PI::setContextInfoValue<int> %1 to %2\n", id, value));
+	if (s->session ().loading () || s->session ().deletion_in_progress ()) {
+		return kResultOk;
+	}
 	if (0 == strcmp (id, ContextInfo::kColor)) {
 #if BYTEORDER == kBigEndian
 		SWAP_32 (value) // ABGR32 -> RGBA32
@@ -3022,10 +3032,11 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 		}
 	} else if (0 == strcmp (id, ContextInfo::kMultiSelect)) {
 		_add_to_selection = value != 0;
-	} else if (0 == strcmp (id, ContextInfo::kMute)) {
-		s->session ().set_control (lookup_ac (_owner, id), value != 0 ? 1 : 0, Controllable::NoGroup);
-	} else if (0 == strcmp (id, ContextInfo::kSolo)) {
-		s->session ().set_control (lookup_ac (_owner, id), value != 0 ? 1 : 0, Controllable::NoGroup);
+	} else if (0 == strcmp (id, ContextInfo::kMute) || 0 == strcmp (id, ContextInfo::kSolo)) {
+		std::shared_ptr<AutomationControl> ac = lookup_ac (_owner, id);
+		if (ac) {
+			s->session ().set_control (ac, value != 0 ? 1 : 0, Controllable::NoGroup);
+		}
 	} else {
 		DEBUG_TRACE (DEBUG::VST3Callbacks, "VST3PI::setContextInfoValue<int>: unsupported ID\n");
 		return kNotImplemented;
