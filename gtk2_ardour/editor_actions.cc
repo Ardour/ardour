@@ -701,8 +701,8 @@ Editor::register_actions ()
 
 	all_marker_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, marker_choice_group, X_("show-all-markers"), _("All Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::show_marker_type), all_marker_types)));
 	cd_marker_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, marker_choice_group, X_("show-cd-markers"), _("CD Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::show_marker_type), CDMarks)));
-	scene_marker_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, marker_choice_group, X_("show-cue-markers"), _("Cue Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::show_marker_type), SceneMarks)));
-	cue_marker_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, marker_choice_group, X_("show-scene-markers"), _("Scene Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::show_marker_type), CueMarks)));
+	scene_marker_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, marker_choice_group, X_("show-cue-markers"), _("Cue Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::show_marker_type), CueMarks)));
+	cue_marker_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, marker_choice_group, X_("show-scene-markers"), _("Scene Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::show_marker_type), SceneMarks)));
 	location_marker_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, marker_choice_group, X_("show-location-markers"), _("Location Markers"), sigc::bind (sigc::mem_fun(*this, &Editor::show_marker_type), LocationMarks)));
 
 	all_range_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, range_choice_group, X_("show-all-ranges"), _("All Ranges"), sigc::bind (sigc::mem_fun(*this, &Editor::show_range_type), all_range_types)));
