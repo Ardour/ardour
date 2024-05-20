@@ -287,14 +287,23 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		Gtk::Menu* a_menu = new Gtk::Menu;
 		MenuList& add_items = a_menu->items();
 		add_items.push_back (MenuElem (_("Location Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags (0), 0)));
+		add_items.push_back (MenuElem (_("Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
+		add_items.push_back (MenuElem (_("CD Track Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark |Location::IsCDMarker), 0)));
+		add_items.push_back (MenuElem ("Cue Marker..."));
+		Gtk::MenuItem& cue_submenu = add_items.back();
+		Gtk::Menu* cue_menu = new Gtk::Menu;
+		MenuList& cue_items = cue_menu->items();
+		cue_items.push_back (MenuElem (_("Stop All Cues"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, CueRecord::stop_all)));
+		for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
+			cue_items.push_back (MenuElem (string_compose (_("Cue %1"), cue_marker_name (n)), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, n)));
+		}
+		cue_submenu.set_submenu (*cue_menu);
+
+		add_items.push_back (SeparatorElem());
+
 		add_items.push_back (MenuElem (_("Range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_range), where)));
 		add_items.push_back (MenuElem (_("Loop Range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_loop), where)));
 		add_items.push_back (MenuElem (_("Punch Range"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_punch), where)));
-		add_items.push_back (MenuElem (_("CD Track Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark |Location::IsCDMarker), 0)));
-		add_items.push_back (MenuElem (_("Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
-		for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
-			add_items.push_back (MenuElem (string_compose (_("Cue %1"), cue_marker_name (n)), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, n)));
-		}
 		add_menu.set_submenu (*a_menu);
 
 		ruler_items.push_back (MenuElem ("Remove..."));
@@ -308,10 +317,11 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		clear_items.push_back (MenuElem (_("All (MIDI) Scenes"), sigc::mem_fun (*this, &Editor::clear_scenes)));
 		clear_menu.set_submenu (*c_menu);
 
-		ruler_items.push_back (MenuElem (_("Stop All Cues"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, CueRecord::stop_all)));
 		}
 		break;
 	}
+
+	ruler_items.push_back (SeparatorElem());
 
 	/* Gtkmm does not expose the ::set_related_action() API for
 	 * Gtk::Activatable, so we have to drop to C to create menu items
