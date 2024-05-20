@@ -195,7 +195,7 @@ Butler::thread_work ()
 #ifdef HAVE_IOPRIO
 	// ioprio_set (IOPRIO_WHO_PROCESS, 0 /*calling thread*/, IOPRIO_PRIO_VALUE (IOPRIO_CLASS_RT, 4))
 	if (0 != syscall (SYS_ioprio_set, 1, 0, (1 << 13) | 4)) {
-		warning << _("Cannot set I/O Priority for disk read/write thread") << endmsg;
+		info << _("Cannot set I/O Priority for disk read/write thread") << endmsg;
 	}
 #endif
 
