@@ -732,6 +732,7 @@ setup_enum_writer ()
 	REGISTER_CLASS_ENUM (Delivery, Main);
 	REGISTER_CLASS_ENUM (Delivery, Aux);
 	REGISTER_CLASS_ENUM (Delivery, Foldback);
+	REGISTER_CLASS_ENUM (Delivery, DirectOuts);
 	REGISTER_BITS (_Delivery_Role);
 
 	REGISTER_CLASS_ENUM (MuteMaster, PreFader);

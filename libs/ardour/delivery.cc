@@ -411,6 +411,12 @@ Delivery::state () const
 	return node;
 }
 
+bool
+Delivery::role_from_xml (const XMLNode& node, Role& role)
+{
+	return node.get_property ("role", role);
+}
+
 int
 Delivery::set_state (const XMLNode& node, int version)
 {

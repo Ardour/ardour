@@ -3328,6 +3328,12 @@ Route::set_processor_state (XMLNode const& node, int version, XMLProperty const*
 			processor->set_owner (this);
 
 		} else if (prop->value() == "send") {
+#ifndef LIVETRAX
+			Delivery::Role role;
+			if (Delivery::role_from_xml (node, role) && role == Delivery::DirectOuts) {
+				return true;
+			}
+#endif
 
 			processor.reset (new Send (_session, _pannable, _mute_master, Delivery::Send, true));
 			std::shared_ptr<Send> send = std::dynamic_pointer_cast<Send> (processor);
