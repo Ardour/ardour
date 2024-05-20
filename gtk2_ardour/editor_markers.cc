@@ -844,7 +844,7 @@ Editor::mouse_add_new_marker (timepos_t where, Location::Flags extra_flags, int3
 		markername = string_compose (_("cue %1"), cue_marker_name (cue_id));
 	} else {
 		if (flags & Location::IsSection) {
-			namebase = _("verse");
+			namebase = _("section");
 		} else {
 			namebase = _("mark");
 		}
