@@ -829,52 +829,6 @@ Editor::LocationMarkers::setup_lines ()
 }
 
 void
-Editor::mouse_add_new_marker (timepos_t where, Location::Flags extra_flags, int32_t cue_id)
-{
-	if (!_session) {
-		return;
-	}
-
-	string markername;
-	string namebase;
-	Location::Flags flags = Location::Flags (extra_flags|Location::IsMark);
-
-	if (flags & Location::IsCueMarker) {
-		/* XXX i18n needed for cue letter names */
-		markername = string_compose (_("cue %1"), cue_marker_name (cue_id));
-	} else {
-		if (flags & Location::IsSection) {
-			namebase = _("section");
-		} else {
-			namebase = _("mark");
-		}
-		_session->locations()->next_available_name (markername, namebase);
-
-		if (!choose_new_marker_name (markername)) {
-			return;
-		}
-	}
-
-	Location *location = new Location (*_session, where, where, markername, flags, cue_id);
-	begin_reversible_command (_("add marker"));
-
-	XMLNode &before = _session->locations()->get_state();
-	_session->locations()->add (location, true);
-	XMLNode &after = _session->locations()->get_state();
-	_session->add_command (new MementoCommand<Locations>(*(_session->locations()), &before, &after));
-
-	/* find the marker we just added */
-
-	LocationMarkers *lam = find_location_markers (location);
-	if (lam) {
-		/* make it the selected marker */
-		selection->set (lam->start);
-	}
-
-	commit_reversible_command ();
-}
-
-void
 Editor::mouse_add_new_loop (timepos_t where)
 {
 	if (!_session) {

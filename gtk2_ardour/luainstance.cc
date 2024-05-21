@@ -1036,7 +1036,7 @@ LuaInstance::register_classes (lua_State* L, bool sandbox)
 
 		.addRefFunction ("find_location_from_marker", &PublicEditor::find_location_from_marker)
 		.addFunction ("find_marker_from_location_id", &PublicEditor::find_marker_from_location_id)
-		.addFunction ("mouse_add_new_marker", &PublicEditor::mouse_add_new_marker)
+		.addFunction ("mouse_add_new_marker", &PublicEditor::add_location_mark)
 #if 0
 		.addFunction ("get_regions_at", &PublicEditor::get_regions_at)
 		.addFunction ("get_regions_after", &PublicEditor::get_regions_after)

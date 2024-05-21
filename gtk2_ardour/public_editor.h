@@ -257,7 +257,10 @@ public:
 	virtual void add_bbt_marker_at_playhead_cursor () = 0;
 	virtual void add_location_from_playhead_cursor () = 0;
 	virtual void remove_location_at_playhead_cursor () = 0;
-	virtual void add_location_mark (Temporal::timepos_t const & where) = 0;
+	void add_location_mark (Temporal::timepos_t const & where, ARDOUR::Location::Flags flags = ARDOUR::Location::IsMark, int32_t cue_id = 0) {
+		add_location_mark_with_flag (where, flags, cue_id);
+	}
+	virtual void add_location_mark_with_flag (Temporal::timepos_t const & where, ARDOUR::Location::Flags, int32_t cue_id) = 0;
 	virtual void update_grid () = 0;
 	virtual void remove_tracks () = 0;
 	virtual void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd) = 0;
@@ -391,7 +394,6 @@ public:
 	virtual void toggle_meter_updating() = 0;
 	virtual void split_regions_at (Temporal::timepos_t const &, RegionSelection&) = 0;
 	virtual void split_region_at_points (std::shared_ptr<ARDOUR::Region>, ARDOUR::AnalysisFeatureList&, bool can_ferret, bool select_new = false) = 0;
-	virtual void mouse_add_new_marker (Temporal::timepos_t where, ARDOUR::Location::Flags extra_flags = ARDOUR::Location::Flags (0), int32_t cue_id = 0) = 0;
 	virtual void foreach_time_axis_view (sigc::slot<void,TimeAxisView&>) = 0;
 	virtual void add_to_idle_resize (TimeAxisView*, int32_t) = 0;
 	virtual Temporal::timecnt_t get_nudge_distance (Temporal::timepos_t const & pos, Temporal::timecnt_t& next) = 0;

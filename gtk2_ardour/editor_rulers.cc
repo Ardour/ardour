@@ -286,16 +286,16 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		Gtk::MenuItem& add_menu = ruler_items.back();
 		Gtk::Menu* a_menu = new Gtk::Menu;
 		MenuList& add_items = a_menu->items();
-		add_items.push_back (MenuElem (_("Location Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags (0), 0)));
-		add_items.push_back (MenuElem (_("Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
-		add_items.push_back (MenuElem (_("CD Track Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::Flags(Location::IsMark |Location::IsCDMarker), 0)));
+		add_items.push_back (MenuElem (_("Location Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::Flags (0), 0)));
+		add_items.push_back (MenuElem (_("Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
+		add_items.push_back (MenuElem (_("CD Track Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::Flags(Location::IsMark |Location::IsCDMarker), 0)));
 		add_items.push_back (MenuElem ("Cue Marker..."));
 		Gtk::MenuItem& cue_submenu = add_items.back();
 		Gtk::Menu* cue_menu = new Gtk::Menu;
 		MenuList& cue_items = cue_menu->items();
-		cue_items.push_back (MenuElem (_("Stop All Cues"), sigc::bind (sigc::mem_fun (*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, CueRecord::stop_all)));
+		cue_items.push_back (MenuElem (_("Stop All Cues"), sigc::bind (sigc::mem_fun (*this, &Editor::add_location_mark_with_flag), where, Location::IsCueMarker, CueRecord::stop_all)));
 		for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
-			cue_items.push_back (MenuElem (string_compose (_("Cue %1"), cue_marker_name (n)), sigc::bind (sigc::mem_fun(*this, &Editor::mouse_add_new_marker), where, Location::IsCueMarker, n)));
+			cue_items.push_back (MenuElem (string_compose (_("Cue %1"), cue_marker_name (n)), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::IsCueMarker, n)));
 		}
 		cue_submenu.set_submenu (*cue_menu);
 

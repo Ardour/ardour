@@ -1793,14 +1793,14 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case MarkerBarItem:
 			if (!_dragging_playhead) {
 				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);
-				mouse_add_new_marker (where);
+				add_location_mark (where);
 			}
 			return true;
 
 		case SectionMarkerBarItem:
 			if (!_dragging_playhead && Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);
-				mouse_add_new_marker (where, Location::IsSection);
+				add_location_mark (where, Location::IsSection);
 			}
 			return true;
 

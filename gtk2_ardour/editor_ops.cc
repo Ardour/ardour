@@ -2348,21 +2348,36 @@ Editor::add_location_from_selection ()
 }
 
 void
-Editor::add_location_mark (timepos_t const & where)
+Editor::add_location_mark_with_flag (timepos_t const & where, Location::Flags flags, int32_t cue_id)
 {
+	if (!_session) {
+		return;
+	}
+
 	if (_session->locations()->mark_at (where, timecnt_t (1))) {
 		return;
 	}
 
 	string markername;
+	string namebase;
 
 	select_new_marker = true;
 
-	_session->locations()->next_available_name(markername,"mark");
-	if (!choose_new_marker_name(markername)) {
+	if (flags & Location::IsCueMarker) {
+		/* XXX i18n needed for cue letter names */
+		markername = string_compose (_("cue %1"), cue_marker_name (cue_id));
+	} else if (flags & Location::IsSection) {
+		namebase = _("section");
+	} else {
+		namebase = _("mark");
+	}
+
+	_session->locations()->next_available_name(markername, namebase);
+
+	if (!choose_new_marker_name (markername)) {
 		return;
 	}
-	Location *location = new Location (*_session, where, where, markername, Location::IsMark);
+	Location *location = new Location (*_session, where, where, markername, flags);
 	begin_reversible_command (_("add marker"));
 
 	XMLNode &before = _session->locations()->get_state();
@@ -7249,7 +7264,7 @@ Editor::set_edit_point ()
 
 	if (selection->markers.empty()) {
 
-		mouse_add_new_marker (where);
+		add_location_mark (where);
 
 	} else {
 		bool ignored;
