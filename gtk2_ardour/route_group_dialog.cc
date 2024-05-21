@@ -115,9 +115,9 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 	_share_monitoring.set_active (_group->is_monitoring());
 
 	if (_group->name ().empty()) {
-		_initial_name = "1";
+		_initial_name = bump_name_abc ("");
 		while (!unique_name (_initial_name)) {
-			_initial_name = bump_name_number (_initial_name);
+			_initial_name = bump_name_abc (_initial_name);
 		}
 		_name.set_text (_initial_name);
 		update();
