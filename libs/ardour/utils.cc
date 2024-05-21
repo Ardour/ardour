@@ -232,6 +232,44 @@ ARDOUR::bump_name_number (const std::string& name)
 	return newname;
 }
 
+string
+ARDOUR::bump_name_abc (const std::string& name)
+{
+	/* A, B, C, .. Z,  A1, B1, .. Z1, A2 .. Z2, A3 .. */
+	static char const* abc = _("ABCDEFGHIJKLMNOPQRSTUVWXYZ");
+	if (name.empty ()) {
+		return {abc[0]};
+	}
+
+	/* check first char */
+	char first = toupper (name[0]);
+
+	char const* end = abc + strlen (abc);
+	char const* pos = std::find (abc, end, first);
+
+	/* first char is not in the given set. Start over */
+	if (pos == end) {
+		return {abc[0]};
+	}
+
+	++pos;
+	if (pos != end) {
+		string rv = name;
+		rv[0] = *pos;
+		return rv;
+	}
+
+	/* find number */
+	size_t num = 0;
+	if (name.length () > 1) {
+		num = strtol (name.c_str() + 1, (char **)NULL, 10);
+	}
+	++num;
+
+	return string_compose ("%1%2", abc[0], num);
+}
+
+
 XMLNode *
 ARDOUR::find_named_node (const XMLNode& node, string name)
 {
