@@ -7055,6 +7055,13 @@ Editor::mid_track_drag (GdkEventMotion* ev, Gtk::Widget& w)
 	w.translate_coordinates (edit_controls_vbox, ev->x, ev->y, xo, yo);
 
 	if (track_drag->first_move) {
+
+		/* move threshold */
+
+		if (abs (yo - track_drag->previous) < (int) (4 * UIConfiguration::instance().get_ui_scale())) {
+			return;
+		}
+
 		if (!track_drag->track->selected()) {
 			set_selected_track (*track_drag->track, Selection::Set, false);
 		}
