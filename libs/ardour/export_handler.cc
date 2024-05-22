@@ -125,6 +125,7 @@ ExportHandler::ExportHandler (Session & session)
 ExportHandler::~ExportHandler ()
 {
 	if (export_status->aborted () && !current_timespan->vapor ().empty () && session.surround_master ()) {
+		Glib::Threads::Mutex::Lock l (export_status->lock());
 		session.surround_master ()->surround_return ()->finalize_export ();
 	}
 	graph_builder->cleanup (export_status->aborted () );
