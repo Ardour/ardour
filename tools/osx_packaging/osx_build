@@ -515,6 +515,10 @@ cp $BUILD_ROOT/gtk2_ardour/ardour.menus $Resources
 cp $BUILD_ROOT/gtk2_ardour/default_ui_config $Resources
 cp $BUILD_ROOT/gtk2_ardour/clearlooks.rc $Resources
 
+if test -n "$LIVETRAX"; then
+	cp $BUILD_ROOT/gtk2_ardour/livetrax.keys $Resources
+fi
+
 # Copied directly from source tree
 
 mkdir ${Resources}/icons
