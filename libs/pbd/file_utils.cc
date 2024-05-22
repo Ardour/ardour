@@ -21,6 +21,7 @@
  */
 
 #include <algorithm>
+#include <climits>
 #include <vector>
 
 #include <glib.h>
@@ -138,18 +139,14 @@ run_functor_for_paths (vector<string>& result,
 			}
 		}
 		catch (Glib::FileError const& err) {
-#ifndef NDEBUG
-			warning << string_compose (_("Cannot access file: %1"), err.what()) << endmsg;
-#endif
+			char errstr[PATH_MAX*2];
+			snprintf (errstr, sizeof (errstr), "Cannot access file: %s", err.what().c_str());
+			warning << errstr << endmsg;
 		}
 		catch (Glib::ConvertError const& err) {
-#ifndef NDEBUG
-			warning << string_compose (_("Could not convert filename: %1"), err.what()) << endmsg;
-#endif
-		} catch (...) {
-#ifndef NDEBUG
-			warning << string_compose (_("Could not convert filename: '%1'"), *i) << endmsg;
-#endif
+			char errstr[PATH_MAX*2];
+			snprintf (errstr, sizeof (errstr), "Cannot convert filename: %s", err.what().c_str());
+			warning << errstr << endmsg;
 		}
 	}
 }
