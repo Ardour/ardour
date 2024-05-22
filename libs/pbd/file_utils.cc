@@ -82,14 +82,15 @@ run_functor_for_paths (vector<string>& result,
                        bool recurse)
 {
 	for (vector<string>::const_iterator i = paths.begin(); i != paths.end(); ++i) {
-		string expanded_path = path_expand (*i);
-		DEBUG_TRACE (DEBUG::FileUtils,
-				string_compose("Find files in expanded path: %1\n", expanded_path));
-
-		if (!Glib::file_test (expanded_path, Glib::FILE_TEST_IS_DIR)) continue;
-
 		try
 		{
+			string expanded_path = path_expand (*i);
+
+			DEBUG_TRACE (DEBUG::FileUtils,
+					string_compose("Find files in expanded path: %1\n", expanded_path));
+
+			if (!Glib::file_test (expanded_path, Glib::FILE_TEST_IS_DIR)) continue;
+
 			Glib::Dir dir(expanded_path);
 
 			for (Glib::DirIterator di = dir.begin(); di != dir.end(); di++) {
@@ -137,10 +138,18 @@ run_functor_for_paths (vector<string>& result,
 			}
 		}
 		catch (Glib::FileError const& err) {
+#ifndef NDEBUG
 			warning << string_compose (_("Cannot access file: %1"), err.what()) << endmsg;
+#endif
 		}
 		catch (Glib::ConvertError const& err) {
+#ifndef NDEBUG
 			warning << string_compose (_("Could not convert filename: %1"), err.what()) << endmsg;
+#endif
+		} catch (...) {
+#ifndef NDEBUG
+			warning << string_compose (_("Could not convert filename: '%1'"), *i) << endmsg;
+#endif
 		}
 	}
 }
