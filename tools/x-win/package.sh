@@ -303,7 +303,7 @@ fi
 
 ################################################################################
 ### Mixbus plugins, etc
-if test x$WITH_GMSYNYTH != x ; then
+if test x$WITH_GMSYNTH != x ; then
 	mkdir -p $ALIBDIR/LV2
 
 	echo "Adding General MIDI Synth LV2"

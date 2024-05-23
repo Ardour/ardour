@@ -74,7 +74,6 @@ while [ $# -gt 0 ] ; do
 		STRIP=all ;
 		WITH_NLS=1 ;
 		APPNAME=LiveTrax ;
-		WITHOUT_GMSYNYTH=1 ;
 		shift ;;
 	--public)
 		WITH_HARRISON_LV2=1 ;

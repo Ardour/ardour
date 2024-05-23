@@ -741,7 +741,7 @@ fi
 
 ################################################################################
 ### Mixbus plugins, etc
-if test x$WITH_GMSYNYTH != x ; then
+if test x$WITH_GMSYNTH != x ; then
 	echo "Bundling General MIDI Synth LV2"
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
