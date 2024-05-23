@@ -2863,6 +2863,9 @@ EngineControl::on_latency_expand ()
 		lbl_midi_system.hide ();
 		midi_option_combo.hide ();
 		midi_devices_button.hide ();
+		if (!UIConfiguration::instance().get_allow_to_resize_engine_dialog ()) {
+			resize (1, 1); // shrink window
+		}
 	}
 }
 
