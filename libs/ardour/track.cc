@@ -435,6 +435,11 @@ Track::resync_take_name (std::string n)
 bool
 Track::set_name (const string& str)
 {
+	if (_record_enable_control->get_value()) {
+		/* cannot rename rec-armed track - see also Track::resync_take_name */
+		return false;
+	}
+
 	if (str.empty ()) {
 		return false;
 	}
