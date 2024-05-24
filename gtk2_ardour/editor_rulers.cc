@@ -868,6 +868,8 @@ Editor::set_timecode_ruler_scale (samplepos_t lower, samplepos_t upper)
 		timecode_ruler_scale = timecode_show_many_hours;
 		timecode_mark_modulo = std::max ((samplecnt_t) 1, 1 + (hours_in_range / timecode_nmarks));
 	}
+
+	timecode_mark_modulo = 1;
 }
 
 void
