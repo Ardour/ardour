@@ -444,7 +444,13 @@ Track::set_name (const string& str)
 		return false;
 	}
 
-	switch (resync_take_name (str)) {
+	string newname = Route::ensure_track_or_route_name (str);
+
+	if (newname == name()) {
+		return true;
+	}
+
+	switch (resync_take_name (newname)) {
 		case -1:
 			return false;
 		case 1:
@@ -455,8 +461,8 @@ Track::set_name (const string& str)
 
 	std::shared_ptr<Track> me = std::dynamic_pointer_cast<Track> (shared_from_this ());
 
-	_disk_reader->set_name (str);
-	_disk_writer->set_name (str);
+	_disk_reader->set_name (newname);
+	_disk_writer->set_name (newname);
 
 
 	/* When creating a track during session-load, do not change playlist's name.
@@ -467,7 +473,7 @@ Track::set_name (const string& str)
 	 * (new track name -> new playlist name  != old playlist)
 	 */
 	if (_session.loading ()) {
-		return Route::set_name (str);
+		return Route::set_name (newname);
 	}
 
 	for (uint32_t n = 0; n < DataType::num_types; ++n) {
@@ -486,11 +492,11 @@ Track::set_name (const string& str)
 			 * If (b) is not followed, we rename the current playlist and not
 			 * the other ones, which is a bit confusing (see mantis #4977).
 			 */
-			_playlists[n]->set_name (str);
+			_playlists[n]->set_name (newname);
 		}
 	}
 
-	return Route::set_name (str);
+	return Route::set_name (newname);
 }
 
 std::shared_ptr<Playlist>
