@@ -355,6 +355,13 @@ Route::~Route ()
 string
 Route::ensure_track_or_route_name (string newname) const
 {
+	/* remove any colons (and other nasty chars) */
+	newname = legalize_for_universal_path (newname);
+
+	/* Some ctrl surfaces may put NULL in the middle of a string.
+	 * Ben found out just how much havoc this can wreak. SysEx 1s 4 b1tch. */
+	newname.erase (std::remove (newname.begin(), newname.end(), '\0'), newname.end());
+
 	while (!_session.io_name_is_legal (newname)) {
 		newname = bump_name_once (newname, ' ');
 		if (newname == name()) {
