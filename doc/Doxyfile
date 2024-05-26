@@ -148,7 +148,7 @@ INLINE_INHERITED_MEMB  = NO
 # shortest path that makes the file name unique will be used
 # The default value is: YES.
 
-FULL_PATH_NAMES        = YES
+FULL_PATH_NAMES        = NO
 
 # The STRIP_FROM_PATH tag can be used to strip a user-defined part of the path.
 # Stripping is only done if one of the specified strings matches the left-hand
@@ -355,7 +355,7 @@ AUTOLINK_SUPPORT       = YES
 # diagrams that involve STL classes more complete and accurate.
 # The default value is: NO.
 
-BUILTIN_STL_SUPPORT    = NO
+BUILTIN_STL_SUPPORT    = YES
 
 # If you use Microsoft's C++/CLI language, you should set this option to YES to
 # enable parsing support.
@@ -487,7 +487,7 @@ EXTRACT_PRIVATE        = YES
 # methods of a class will be included in the documentation.
 # The default value is: NO.
 
-EXTRACT_PRIV_VIRTUAL   = NO
+EXTRACT_PRIV_VIRTUAL   = YES
 
 # If the EXTRACT_PACKAGE tag is set to YES, all members with package or internal
 # scope will be included in the documentation.
@@ -874,7 +874,6 @@ INPUT                  = ../gtk2_ardour \
                          ../libs/surfaces \
                          ../libs/temporal \
                          ../libs/tk/suil/suil \
-                         ../libs/tk/ydk-pixbuf/ydk-pixbuf/gdk-pixbuf \
                          ../libs/tk/ydk/ydk/gdk \
                          ../libs/tk/ytk/ytk/gtk \
                          ../libs/tk/ydkmm/ydkmm/gdkmm \
@@ -884,6 +883,8 @@ INPUT                  = ../gtk2_ardour \
                          ../libs/zita-convolver \
                          ../libs/zita-resampler \
                          mainpage.txt
+## ytk internal use only
+#                        ../libs/tk/ydk-pixbuf/ydk-pixbuf/gdk-pixbuf \
 ## tools w/binaries (maybe add those)
 #                       ../headless \
 #                       ../libs/fst \
@@ -973,7 +974,8 @@ EXCLUDE_PATTERNS       =
 # Note that the wildcards are matched against the file with absolute path, so to
 # exclude all test directories use the pattern */test/*
 
-EXCLUDE_SYMBOLS        =
+EXCLUDE_SYMBOLS        = Cairo \
+                         Pango
 
 # The EXAMPLE_PATH tag can be used to specify one or more files or directories
 # that contain example code fragments that are included (see the \include
