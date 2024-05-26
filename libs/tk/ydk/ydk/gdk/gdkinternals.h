@@ -547,9 +547,9 @@ GType _gdk_pixmap_impl_get_type (void) G_GNUC_CONST;
 
 /**
  * _gdk_windowing_gc_set_clip_region:
- * @gc: a #GdkGC
- * @region: the new clip region
- * @reset_origin: if TRUE, reset the clip_x/y_origin values to 0
+ * @param gc: a #GdkGC
+ * @param region: the new clip region
+ * @param reset_origin: if TRUE, reset the clip_x/y_origin values to 0
  * 
  * Do any window-system specific processing necessary
  * for a change in clip region. Since the clip origin
@@ -566,12 +566,12 @@ void _gdk_windowing_gc_set_clip_region (GdkGC           *gc,
 
 /**
  * _gdk_windowing_gc_copy:
- * @dst_gc: a #GdkGC from the GDK backend
- * @src_gc: a #GdkGC from the GDK backend
+ * @param dst_gc: a #GdkGC from the GDK backend
+ * @param src_gc: a #GdkGC from the GDK backend
  * 
- * Copies backend specific state from @src_gc to @dst_gc.
+ * Copies backend specific state from \p src_gc to \p dst_gc.
  * This is called before the generic state is copied, so
- * the old generic state is still available from @dst_gc
+ * the old generic state is still available from \p dst_gc
  **/
 void _gdk_windowing_gc_copy (GdkGC *dst_gc,
 			     GdkGC *src_gc);

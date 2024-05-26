@@ -240,7 +240,7 @@ public:
    * @param action the action
    * @param proxy the proxy
    *
-   * @par Slot Prototype:
+   * @paragraph Slot Prototype:
    * <tt>void on_my_%disconnect_proxy(const Glib::RefPtr<Action>& action, Widget* proxy)</tt>
    *
    */
@@ -248,15 +248,15 @@ public:
   Glib::SignalProxy2< void,const Glib::RefPtr<Action>&,Widget* > signal_disconnect_proxy();
 
   
-  /** The pre_activate signal is emitted just before the @action in the
+  /** The pre_activate signal is emitted just before the \p action in the
    * action_group is activated
    *
    * This is intended for UIManager to proxy the signal and provide global
    * notification just before any action is activated.
    *
-   * @action the action
+   * @param action the action
    *
-   * @par Slot Prototype:
+   * @paragraph Slot Prototype:
    * <tt>void on_my_%pre_activate(const Glib::RefPtr<Action>& action)</tt>
    *
    */
@@ -264,15 +264,15 @@ public:
   Glib::SignalProxy1< void,const Glib::RefPtr<Action>& > signal_pre_activate();
 
   
-  /** The post_activate signal is emitted just after the @action in the
-   * @action_group is activated
+  /** The post_activate signal is emitted just after the \p action in the
+   * \p action_group is activated
    *
    * This is intended for UIManager to proxy the signal and provide global
    * notification just after any action is activated.
    *
    * @param action the action
    *
-   * @par Slot Prototype:
+   * @paragraph Slot Prototype:
    * <tt>void on_my_%post_activate(const Glib::RefPtr<Action>& action)</tt>
    *
    */

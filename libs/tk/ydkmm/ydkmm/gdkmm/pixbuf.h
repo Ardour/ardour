@@ -311,7 +311,7 @@ protected:
    * image data from a server-side drawable to a client-side RGB(A) buffer.
    * This allows you to efficiently read individual pixels on the client side.
    *
-   * If the drawable @src has no colormap (See Gdk::Drawable::get_colormap()),
+   * If the drawable \p src has no colormap (See Gdk::Drawable::get_colormap()),
    * then a suitable colormap must be specified. Otherwise, you may use the
    * constructor that takes no colormap argument.
    * Typically a Gdk::Window or a pixmap created by passing a Gdk:Window
@@ -433,7 +433,7 @@ public:
    * image data from a server-side drawable to a client-side RGB(A) buffer.
    * This allows you to efficiently read individual pixels on the client side.
    *
-   * If the drawable @src has no colormap (See Gdk::Drawable::get_colormap()),
+   * If the drawable \p src has no colormap (See Gdk::Drawable::get_colormap()),
    * then a suitable colormap must be specified. Otherwise, you may use the
    * constructor that takes no colormap argument.
    * Typically a Gdk::Window or a pixmap created by passing a Gdk:Window
@@ -667,7 +667,7 @@ public:
    * TThe list of all writable formats can be determined by using get_formats() with
    * Gdk::PixbufFormat::is_writable().
    *
-   * The @a option_keys and @option_values, if not empty, should contain pairs of strings that modify the save parameters.
+   * The @a option_keys and \p option_values, if not empty, should contain pairs of strings that modify the save parameters.
    * For example,  "quality", "100".
    *
    * Currently only a few parameters exist. JPEG images can be saved with a "quality" parameter;

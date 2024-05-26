@@ -39,13 +39,13 @@ G_BEGIN_DECLS
 
 /**
  * GtkRecentSortType:
- * @GTK_RECENT_SORT_NONE: Do not sort the returned list of recently used
+ * @param GTK_RECENT_SORT_NONE: Do not sort the returned list of recently used
  *   resources.
- * @GTK_RECENT_SORT_MRU: Sort the returned list with the most recently used
+ * @param GTK_RECENT_SORT_MRU: Sort the returned list with the most recently used
  *   items first.
- * @GTK_RECENT_SORT_LRU: Sort the returned list with the least recently used
+ * @param GTK_RECENT_SORT_LRU: Sort the returned list with the least recently used
  *   items first.
- * @GTK_RECENT_SORT_CUSTOM: Sort the returned list using a custom sorting
+ * @param GTK_RECENT_SORT_CUSTOM: Sort the returned list using a custom sorting
  *   function passed using gtk_recent_manager_set_sort_func().
  *
  * Used to specify the sorting method to be applyed to the recently

@@ -527,7 +527,7 @@ public:
   /** Looks up the Gdk::Pixmap that wraps the given native pixmap handle.
    * 
    * For example in the X backend, a native pixmap handle is an Xlib
-   * <type>XID</type>.
+   * <tt>XID</tt>.
    * 
    * @param anid A native pixmap handle.
    * @return The Gdk::Pixmap wrapper for the native pixmap,
@@ -538,7 +538,7 @@ public:
   /** Looks up the Gdk::Pixmap that wraps the given native pixmap handle.
    * 
    * For example in the X backend, a native pixmap handle is an Xlib
-   * <type>XID</type>.
+   * <tt>XID</tt>.
    * 
    * @param anid A native pixmap handle.
    * @return The Gdk::Pixmap wrapper for the native pixmap,

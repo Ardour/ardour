@@ -423,20 +423,20 @@ public:
   /** This signal is emitted when the toolbar needs information from @tool_item
    * about whether the item should appear in the toolbar overflow menu. In
    * response the tool item should either
-   * <itemizedlist>
-   * <listitem> call set_proxy_menu_item() with a NULL
+   * <ul>
+   * <li> call set_proxy_menu_item() with a NULL
    * pointer and return true to indicate that the item should not appear
    * in the overflow menu
-   * </listitem>
-   * <listitem> call set_proxy_menu_item() with a new menu
+   * </li>
+   * <li> call set_proxy_menu_item() with a new menu
    * item and return true, or
-   * </listitem>
-   * <listitem> return false to indicate that the signal was not
+   * </li>
+   * <li> return false to indicate that the signal was not
    * handled by the item. This means that
    * the item will not appear in the overflow menu unless a later handler
    * installs a menu item.
-   * </listitem>
-   * </itemizedlist>
+   * </li>
+   * </ul>
    *
    * The toolbar may cache the result of this signal. When the tool item changes
    * how it will respond to this signal it must call rebuild_menu()
@@ -456,12 +456,12 @@ public:
   /** This signal is emitted when some property of the toolbar that the
    * item is a child of changes. For custom subclasses of ToolItem,
    * the default handler of this signal use the functions
-   * <itemizedlist>
-   * <listitem>Toolbar::get_orientation()</listitem>
-   * <listitem>Toolbar::get_style()</listitem>
-   * <listitem>Toolbar::get_icon_size()</listitem>
-   * <listitem>Toolbar::get_relief_style()</listitem>
-   * </itemizedlist>
+   * <ul>
+   * <li>Toolbar::get_orientation()</li>
+   * <li>Toolbar::get_style()</li>
+   * <li>Toolbar::get_icon_size()</li>
+   * <li>Toolbar::get_relief_style()</li>
+   * </ul>
    * to find out what the toolbar should look like and change
    * themselves accordingly.
    *

@@ -60,19 +60,19 @@ struct _GtkIconThemeClass
 
 /**
  * GtkIconLookupFlags:
- * @GTK_ICON_LOOKUP_NO_SVG: Never return SVG icons, even if gdk-pixbuf
+ * @param GTK_ICON_LOOKUP_NO_SVG: Never return SVG icons, even if gdk-pixbuf
  *   supports them. Cannot be used together with %GTK_ICON_LOOKUP_FORCE_SVG.
- * @GTK_ICON_LOOKUP_FORCE_SVG: Return SVG icons, even if gdk-pixbuf
+ * @param GTK_ICON_LOOKUP_FORCE_SVG: Return SVG icons, even if gdk-pixbuf
  *   doesn't support them.
  *   Cannot be used together with %GTK_ICON_LOOKUP_NO_SVG.
- * @GTK_ICON_LOOKUP_USE_BUILTIN: When passed to
+ * @param GTK_ICON_LOOKUP_USE_BUILTIN: When passed to
  *   gtk_icon_theme_lookup_icon() includes builtin icons
  *   as well as files. For a builtin icon, gtk_icon_info_get_filename()
  *   returns %NULL and you need to call gtk_icon_info_get_builtin_pixbuf().
- * @GTK_ICON_LOOKUP_GENERIC_FALLBACK: Try to shorten icon name at '-'
+ * @param GTK_ICON_LOOKUP_GENERIC_FALLBACK: Try to shorten icon name at '-'
  *   characters before looking at inherited themes. For more general
  *   fallback, see gtk_icon_theme_choose_icon(). Since 2.12.
- * @GTK_ICON_LOOKUP_FORCE_SIZE: Always return the icon scaled to the
+ * @param GTK_ICON_LOOKUP_FORCE_SIZE: Always return the icon scaled to the
  *   requested size. Since 2.14.
  * 
  * Used to specify options for gtk_icon_theme_lookup_icon()
@@ -90,8 +90,8 @@ typedef enum
 
 /**
  * GtkIconThemeError:
- * @GTK_ICON_THEME_NOT_FOUND: The icon specified does not exist in the theme
- * @GTK_ICON_THEME_FAILED: An unspecified error occurred.
+ * @param GTK_ICON_THEME_NOT_FOUND: The icon specified does not exist in the theme
+ * @param GTK_ICON_THEME_FAILED: An unspecified error occurred.
  * 
  * Error codes for GtkIconTheme operations.
  **/

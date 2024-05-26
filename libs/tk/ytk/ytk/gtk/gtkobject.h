@@ -56,7 +56,7 @@ G_BEGIN_DECLS
 #ifndef GTK_DISABLE_DEPRECATED
 /**
  * GTK_OBJECT_TYPE:
- * @object: a #GtkObject.
+ * @param object: a #GtkObject.
  *
  * Gets the type of an object.
  *
@@ -65,7 +65,7 @@ G_BEGIN_DECLS
 #define GTK_OBJECT_TYPE                   G_OBJECT_TYPE
 /**
  * GTK_OBJECT_TYPE_NAME:
- * @object: a #GtkObject.
+ * @param object: a #GtkObject.
  *
  * Gets the name of an object's type.
  *

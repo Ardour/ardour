@@ -46,7 +46,7 @@ typedef struct _GtkAboutDialogClass   GtkAboutDialogClass;
 /**
  * GtkAboutDialog:
  *
- * The <structname>GtkAboutDialog</structname> struct contains
+ * The \struct GtkAboutDialog struct contains
  * only private fields and should not be directly accessed.
  */
 struct _GtkAboutDialog 
@@ -128,9 +128,9 @@ void                   gtk_about_dialog_set_logo_icon_name     (GtkAboutDialog  
 
 /**
  * GtkAboutDialogActivateLinkFunc:
- * @about: the #GtkAboutDialog in which the link was activated
- * @link_: the URL or email address to which the activated link points
- * @data: user data that was passed when the function was registered
+ * @param about: the #GtkAboutDialog in which the link was activated
+ * @param link_: the URL or email address to which the activated link points
+ * @param data: user data that was passed when the function was registered
  *  with gtk_about_dialog_set_email_hook() or
  *  gtk_about_dialog_set_url_hook()
  *

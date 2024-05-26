@@ -66,18 +66,18 @@ struct _GtkBoxClass
 
 /**
  * GtkBoxChild:
- * @widget: the child widget, packed into the GtkBox.
- * @padding: the number of extra pixels to put between this child and its
+ * @param widget: the child widget, packed into the GtkBox.
+ * @param padding: the number of extra pixels to put between this child and its
  *  neighbors, set when packed, zero by default.
- * @expand: flag indicates whether extra space should be given to this child.
+ * @param expand: flag indicates whether extra space should be given to this child.
  *  Any extra space given to the parent GtkBox is divided up among all children
  *  with this attribute set to %TRUE; set when packed, %TRUE by default.
- * @fill: flag indicates whether any extra space given to this child due to its
- *  @expand attribute being set is actually allocated to the child, rather than
+ * @param fill: flag indicates whether any extra space given to this child due to its
+ *  \p expand attribute being set is actually allocated to the child, rather than
  *  being used as padding around the widget; set when packed, %TRUE by default.
- * @pack: one of #GtkPackType indicating whether the child is packed with
+ * @param pack: one of #GtkPackType indicating whether the child is packed with
  *  reference to the start (top/left) or end (bottom/right) of the GtkBox.
- * @is_secondary: %TRUE if the child is secondary
+ * @param is_secondary: %TRUE if the child is secondary
  *
  * The #GtkBoxChild holds a child widget of #GtkBox and describes how the child
  * is to be packed into the #GtkBox. All fields of this #GtkBoxChild should be

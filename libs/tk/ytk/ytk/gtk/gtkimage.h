@@ -106,16 +106,16 @@ struct _GtkImageGIconData
 
 /**
  * GtkImageType:
- * @GTK_IMAGE_EMPTY: there is no image displayed by the widget
- * @GTK_IMAGE_PIXMAP: the widget contains a #GdkPixmap
- * @GTK_IMAGE_IMAGE: the widget contains a #GdkImage
- * @GTK_IMAGE_PIXBUF: the widget contains a #GdkPixbuf
- * @GTK_IMAGE_STOCK: the widget contains a stock icon name (see <xref linkend="gtk-Stock-Items"/>)
- * @GTK_IMAGE_ICON_SET: the widget contains a #GtkIconSet
- * @GTK_IMAGE_ANIMATION: the widget contains a #GdkPixbufAnimation
- * @GTK_IMAGE_ICON_NAME: the widget contains a named icon.
+ * @param GTK_IMAGE_EMPTY: there is no image displayed by the widget
+ * @param GTK_IMAGE_PIXMAP: the widget contains a #GdkPixmap
+ * @param GTK_IMAGE_IMAGE: the widget contains a #GdkImage
+ * @param GTK_IMAGE_PIXBUF: the widget contains a #GdkPixbuf
+ * @param GTK_IMAGE_STOCK: the widget contains a stock icon name
+ * @param GTK_IMAGE_ICON_SET: the widget contains a #GtkIconSet
+ * @param GTK_IMAGE_ANIMATION: the widget contains a #GdkPixbufAnimation
+ * @param GTK_IMAGE_ICON_NAME: the widget contains a named icon.
  *  This image type was added in GTK+ 2.6
- * @GTK_IMAGE_GICON: the widget contains a #GIcon.
+ * @param GTK_IMAGE_GICON: the widget contains a GIcon.
  *  This image type was added in GTK+ 2.14
  *
  * Describes the image data representation used by a #GtkImage. If you

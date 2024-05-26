@@ -51,7 +51,7 @@ namespace Gtk
  * About dialogs often contain links and email addresses. Gtk::AboutDialog supports this by offering global
  * hooks, which are called when the user clicks on a link or email address, see set_email_hook() and
  * set_url_hook(). Email addresses in the authors, documenters and artists properties are recognized by looking
- * for <user@host>, URLs are recognized by looking for http://url, with the URL extending to the next space,
+ * for <user\@host>, URLs are recognized by looking for http://url, with the URL extending to the next space,
  * tab or line break.
  *
  * An AboutDialog looks like this:

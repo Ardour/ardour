@@ -137,9 +137,10 @@ public:
    * method is called when the related Gtk::Action properties change
    * and registers to the action's proxy list.
    * 
-   * <note>Be careful to call this before setting the local
+   * \note
+	 * Be careful to call this before setting the local
    * copy of the Gtk::Action property, since this function uses 
-   * gtk_activatable_get_action() to retrieve the previous action</note>
+   * gtk_activatable_get_action() to retrieve the previous action
    * 
    * @param action The Gtk::Action to set.
    */
@@ -176,8 +177,9 @@ public:
   
   /** Sets the related action on the @a activatable object.
    * 
-   * <note>Gtk::Activatable implementors need to handle the Gtk::Activatable::property_related_action()
-   * property and call do_set_related_action() when it changes.</note>
+   * \note
+	 * Gtk::Activatable implementors need to handle the Gtk::Activatable::property_related_action()
+   * property and call do_set_related_action() when it changes.
    * 
    * @param action The Gtk::Action to set.
    */
@@ -186,10 +188,11 @@ public:
   /** Sets whether this activatable should reset its layout and appearance
    * when setting the related action or when the action changes appearance
    * 
-   * <note>Gtk::Activatable implementors need to handle the
+   * \note
+	 * Gtk::Activatable implementors need to handle the
    * Gtk::Activatable::property_use_action_appearance() property and call
    * sync_action_properties() to update @a activatable
-   * if needed.</note>
+   * if needed.
    * 
    * @param use_appearance Whether to use the actions appearance.
    */

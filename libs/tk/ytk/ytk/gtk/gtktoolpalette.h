@@ -45,8 +45,8 @@ typedef struct _GtkToolPalettePrivate    GtkToolPalettePrivate;
 
 /**
  * GtkToolPaletteDragTargets:
- * @GTK_TOOL_PALETTE_DRAG_ITEMS: Support drag of items.
- * @GTK_TOOL_PALETTE_DRAG_GROUPS: Support drag of groups.
+ * @param GTK_TOOL_PALETTE_DRAG_ITEMS: Support drag of items.
+ * @param GTK_TOOL_PALETTE_DRAG_GROUPS: Support drag of groups.
  *
  * Flags used to specify the supported drag targets.
  */

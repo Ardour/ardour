@@ -275,7 +275,7 @@ public:
    * GtkTreeModel), you have to explicitely list all of them.
    *
    * @param buffer The file to parse.
-   * @param The object to build.
+   * @param object_id The object to build.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError, Glib::MarkupError
    */
@@ -290,7 +290,7 @@ public:
    * GtkTreeModel), you have to explicitely list all of them.
    *
    * @param buffer The file to parse.
-   * @param The object to build.
+   * @param object_id The object to build.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError, Glib::MarkupError
    */
@@ -305,11 +305,10 @@ public:
    * Error from the Gtk::BUILDER_ERROR, MARKUP_ERROR or FILE_ERROR 
    * domain.
    * 
-   * <note>
+   * \note
    * If you are adding an object that depends on an object that is not 
    * its child (for instance a Gtk::TreeView that depends on its
    * Gtk::TreeModel), you have to explicitely list all of them in @a object_ids. 
-   * </note>
    * 
    * @param filename The name of the file to parse.
    * @param object_ids Nul-terminated array of objects to build.
@@ -333,7 +332,7 @@ public:
    * and merges it with the current contents of the builder.
    *
    * @param buffer The string to parse.
-   * @param The object to build.
+   * @param object_id The object to build.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError
    */
@@ -344,7 +343,7 @@ public:
    * and merges it with the current contents of the builder.
    *
    * @param buffer The string to parse.
-   * @param The object to build.
+   * @param object_id The object to build.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError
    */
@@ -355,7 +354,7 @@ public:
    * and merges it with the current contents of the builder.
    *
    * @param buffer The string to parse.
-   * @param The objects to build.
+   * @param object_id The objects to build.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError
    */
@@ -366,7 +365,7 @@ public:
    * and merges it with the current contents of the builder.
    *
    * @param buffer The string to parse.
-   * @param length The length of @a buffer (may be -1 if @buffer is nul-terminated).
+   * @param length The length of @a buffer (may be -1 if \p buffer is nul-terminated).
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError
    */
