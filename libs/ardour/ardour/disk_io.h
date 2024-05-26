@@ -27,7 +27,6 @@
 #include "pbd/ringbufferNPT.h"
 #include "pbd/rcu.h"
 
-#include "ardour/interpolation.h"
 #include "ardour/midi_buffer.h"
 #include "ardour/processor.h"
 #include "ardour/rt_midibuffer.h"
