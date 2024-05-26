@@ -26,10 +26,6 @@
 
 #include "gtkmm2ext/visibility.h"
 
-namespace sigc {
-	struct trackable;
-}
-
 #define ENSURE_GUI_THREAD(obj,method, ...) if (!Gtkmm2ext::UI::instance()->caller_is_self()) { abort (); }
 
 #define gui_context() Gtkmm2ext::UI::instance() /* a UICallback-derived object that specifies the event loop for GUI signal handling */
