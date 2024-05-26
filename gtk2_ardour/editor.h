@@ -105,10 +105,6 @@ namespace ARDOUR {
 	class Track;
 }
 
-namespace LADSPA {
-	class Plugin;
-}
-
 class AnalysisWindow;
 class AudioClock;
 class AudioRegionView;
