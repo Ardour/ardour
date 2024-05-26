@@ -884,8 +884,6 @@ INPUT                  = ../gtk2_ardour \
                          ../libs/zita-convolver \
                          ../libs/zita-resampler \
                          mainpage.txt
-## audiographer assumes it's documented separately (has it's own @mainpage)
-#                       ../libs/audiographer \
 ## tools w/binaries (maybe add those)
 #                       ../headless \
 #                       ../libs/fst \
