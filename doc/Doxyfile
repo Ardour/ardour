@@ -38,7 +38,7 @@ PROJECT_NAME           = Ardour
 # could be handy for archiving the generated documentation or if some version
 # control system is used.
 
-PROJECT_NUMBER         =
+PROJECT_NUMBER         = $(ARDOUR_VERSION)
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer a
@@ -51,7 +51,7 @@ PROJECT_BRIEF          =
 # pixels and the maximum width should not exceed 200 pixels. Doxygen will copy
 # the logo to the output directory.
 
-PROJECT_LOGO           =
+PROJECT_LOGO           = ../gtk2_ardour/resources/Ardour-icon_48px.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute) path
 # into which the generated documentation will be written. If a relative path is
@@ -854,32 +854,56 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../libs/ardour \
+INPUT                  = ../gtk2_ardour \
+                         ../libs/ardour \
                          ../libs/ardouralsautil \
                          ../libs/audiographer \
                          ../libs/backends \
                          ../libs/canvas \
+                         ../libs/ctrl-interface \
                          ../libs/evoral \
                          ../libs/gtkmm2ext \
                          ../libs/libltc \
                          ../libs/lua \
                          ../libs/midi++2 \
+                         ../libs/panners \
                          ../libs/pbd \
                          ../libs/plugins \
                          ../libs/ptformat \
                          ../libs/qm-dsp \
                          ../libs/surfaces \
                          ../libs/temporal \
+                         ../libs/tk/suil/suil \
+                         ../libs/tk/ydk-pixbuf/ydk-pixbuf/gdk-pixbuf \
+                         ../libs/tk/ydk/ydk/gdk \
+                         ../libs/tk/ytk/ytk/gtk \
+                         ../libs/tk/ydkmm/ydkmm/gdkmm \
+                         ../libs/tk/ytkmm/ytkmm/gtkmm \
                          ../libs/waveview \
                          ../libs/widgets \
                          ../libs/zita-convolver \
                          ../libs/zita-resampler \
-                         ../libs/zita-resampler \
-                         ../gtk2_ardour \
-                         ../libs/tk/ytkmm/ytkmm/gtkmm \
-                         ../libs/tk/ydkmm/ydkmm/gdkmm \
-                         ../libs/tk/ydk/ydk/gdk \
                          mainpage.txt
+## audiographer assumes it's documented separately (has it's own @mainpage)
+#                       ../libs/audiographer \
+## tools w/binaries (maybe add those)
+#                       ../headless \
+#                       ../libs/fst \
+#                       ../libs/auscan \
+#                       ../libs/vfork \
+#                       ../session_utils \
+#                       ../tools/luadevel \
+## 3rd party libs
+#                       ../libs/aaf \
+#                       ../libs/appleutility \
+#                       ../libs/clearlooks-newer \
+#                       ../libs/fluidsynth \
+#                       ../libs/hidapi \
+#                       ../libs/lua \
+#                       ../libs/vamp-plugins \
+#                       ../libs/vamp-pyin \
+#                       ../libs/vst3 \
+
 
 # This tag can be used to specify the character encoding of the source files
 # that doxygen parses. Internally doxygen uses the UTF-8 encoding. Doxygen uses
@@ -887,30 +911,6 @@ INPUT                  = ../libs/ardour \
 # documentation (see:
 # https://www.gnu.org/software/libiconv/) for the list of possible encodings.
 # The default value is: UTF-8.
-
-## audiographer assumes it's documented separately (has it's own @mainpage)
-#                       ../libs/audiographer \
-## tools w/binaries (maybe add those)
-#                       ../headless \
-#                       ../libs/fst \
-#                       ../libs/vfork \
-#                       ../session_utils \
-#                       ../tools/luadevel \
-## backends includes a lot of irrelevant doc from waves, portaudio
-#                       ../libs/backends \
-## plugins
-#                       ../libs/panners \
-#                       ../libs/plugins \
-## 3rd party libs
-#                       ../libs/appleutility \
-#                       ../libs/clearlooks-newer \
-#                       ../libs/fluidsynth \
-#                       ../libs/hidapi \
-#                       ../libs/lua \
-#                       ../libs/qm-dsp \
-#                       ../libs/vamp-plugins \
-#                       ../libs/vamp-pyin \
-
 INPUT_ENCODING         = UTF-8
 
 # If the value of the INPUT tag contains directories, you can use the
@@ -2261,7 +2261,7 @@ INCLUDE_FILE_PATTERNS  =
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
 PREDEFINED             = PROGRAM_NAME=Ardour \
-                         PROGRAM_VERSION=6 \
+                         PROGRAM_VERSION=8 \
                          LOCALEDIR=/ \
                          ARCH_X86 \
                          CONFIG_ARCH=x86_64 \
