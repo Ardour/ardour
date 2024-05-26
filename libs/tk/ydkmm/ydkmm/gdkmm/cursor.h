@@ -205,15 +205,11 @@ public:
   
   /** Returns the display on which the Gdk::Cursor is defined.
    * 
-   * @newin{2,2}
-   * 
    * @return The Gdk::Display associated to @a cursor.
    */
   Glib::RefPtr<Display> get_display();
   
   /** Returns the display on which the Gdk::Cursor is defined.
-   * 
-   * @newin{2,2}
    * 
    * @return The Gdk::Display associated to @a cursor.
    */
@@ -226,8 +222,6 @@ public:
    * on the cursor, GDK may not be able to obtain the image data. In this 
    * case, <tt>0</tt> is returned.
    * 
-   * @newin{2,8}
-   * 
    * @return A Gdk::Pixbuf representing @a cursor, or <tt>0</tt>.
    */
   Glib::RefPtr<Gdk::Pixbuf> get_image();
@@ -238,16 +232,12 @@ public:
    * on the cursor, GDK may not be able to obtain the image data. In this 
    * case, <tt>0</tt> is returned.
    * 
-   * @newin{2,8}
-   * 
    * @return A Gdk::Pixbuf representing @a cursor, or <tt>0</tt>.
    */
   Glib::RefPtr<const Gdk::Pixbuf> get_image() const;
   
   
   /** Returns the cursor type for this cursor.
-   * 
-   * @newin{2,22}
    * 
    * @return A Gdk::CursorType.
    */

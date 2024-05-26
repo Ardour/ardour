@@ -191,15 +191,11 @@ public:
   
   /** Gets the screen for which this colormap was created.
    * 
-   * @newin{2,2}
-   * 
    * @return The screen for which this colormap was created.
    */
   Glib::RefPtr<Screen> get_screen();
   
   /** Gets the screen for which this colormap was created.
-   * 
-   * @newin{2,2}
    * 
    * @return The screen for which this colormap was created.
    */

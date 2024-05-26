@@ -535,8 +535,6 @@ public:
    * the same group identificator will be able to exchange tabs
    * via drag and drop. A notebook with group identificator -1 will
    * not be able to exchange tabs with any other notebook.
-   * 
-   * @newin{2,10}
    * Deprecated: 2.12: use set_group_name() instead.
    * 
    * @param group_id A group identificator, or -1 to unset it.
@@ -548,8 +546,6 @@ public:
 #ifndef GTKMM_DISABLE_DEPRECATED
 
   /** Gets the current group identificator for @a notebook.
-   * 
-   * @newin{2,10}
    * Deprecated: 2.12: use get_group_name() instead.
    * 
    * @return The group identificator, or -1 if none is set.
@@ -567,8 +563,6 @@ public:
    * via drag and drop. A notebook with a <tt>0</tt> group identificator will
    * not be able to exchange tabs with any other notebook.
    * 
-   * @newin{2,12}
-   * 
    * Deprecated: 2.24: Use set_group_name() instead
    * 
    * @param group A pointer to identify the notebook group, or <tt>0</tt> to unset it.
@@ -580,8 +574,6 @@ public:
 #ifndef GTKMM_DISABLE_DEPRECATED
 
   /** Gets the current group identificator pointer for @a notebook.
-   * 
-   * @newin{2,12}
    * 
    * Deprecated: 2.24: Use get_group_name() instead
    * 
@@ -595,8 +587,6 @@ public:
 #ifndef GTKMM_DISABLE_DEPRECATED
 
   /** Gets the current group identificator pointer for @a notebook.
-   * 
-   * @newin{2,12}
    * 
    * Deprecated: 2.24: Use get_group_name() instead
    * 
@@ -613,8 +603,6 @@ public:
    * via drag and drop. A notebook with a <tt>0</tt> group name will
    * not be able to exchange tabs with any other notebook.
    * 
-   * @newin{2,24}
-   * 
    * @param name The name of the notebook group, or <tt>0</tt> to unset it.
    */
   void set_group_name(const Glib::ustring& group_name);
@@ -627,8 +615,6 @@ public:
    * 
    *  Return Value: (transfer none): the group name,
    * or <tt>0</tt> if none is set.
-   * 
-   * @newin{2,24}
    */
   Glib::ustring get_group_name() const;
   
@@ -663,8 +649,6 @@ public:
 
   /** Gets the number of pages in a notebook.
    * 
-   * @newin{2,2}
-   * 
    * @deprecated Use the const method.
    * 
    * @return The number of pages in the notebook.
@@ -674,8 +658,6 @@ public:
 
 
   /** Gets the number of pages in a notebook.
-   * 
-   * @newin{2,2}
    * 
    * @return The number of pages in the notebook.
    */
@@ -794,15 +776,11 @@ public:
   
   /** Returns the horizontal width of a tab border.
    * 
-   * @newin{2,22}
-   * 
    * @return Horizontal width of a tab border.
    */
   guint16 get_tab_hborder() const;
   
   /** Returns the vertical width of a tab border.
-   * 
-   * @newin{2,22}
    * 
    * @return Vertical width of a tab border.
    */
@@ -945,8 +923,6 @@ public:
   
   /** Gets whether the tab can be reordered via drag and drop or not.
    * 
-   * @newin{2,10}
-   * 
    * @param child A child Gtk::Widget.
    * @return <tt>true</tt> if the tab is reorderable.
    */
@@ -955,16 +931,12 @@ public:
   /** Sets whether the notebook tab can be reordered
    * via drag and drop or not.
    * 
-   * @newin{2,10}
-   * 
    * @param child A child Gtk::Widget.
    * @param reorderable Whether the tab is reorderable or not.
    */
   void set_tab_reorderable(Widget& child, bool reorderable =  true);
   
   /** Returns whether the tab contents can be detached from @a notebook.
-   * 
-   * @newin{2,10}
    * 
    * @param child A child Gtk::Widget.
    * @return <tt>true</tt> if the tab is detachable.
@@ -989,8 +961,6 @@ public:
    * If you want a notebook to accept drags from other widgets,
    * you will have to set your own DnD code to do it.
    * 
-   * @newin{2,10}
-   * 
    * @param child A child Gtk::Widget.
    * @param detachable Whether the tab is detachable or not.
    */
@@ -998,8 +968,6 @@ public:
 
   
   /** Gets one of the action widgets. See set_action_widget().
-   * 
-   * @newin{2,20}
    * 
    * @param pack_type Pack type of the action widget to receive.
    * @return The action widget with the given @a pack_type
@@ -1013,8 +981,6 @@ public:
    * 
    * Note that action widgets are "internal" children of the notebook and thus
    * not included in the list returned from Gtk::Container::foreach().
-   * 
-   * @newin{2,20}
    * 
    * @param widget A Gtk::Widget.
    * @param pack_type Pack type of the action widget.

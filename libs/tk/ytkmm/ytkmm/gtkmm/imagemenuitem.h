@@ -122,16 +122,12 @@ public:
    * Use this property if the menuitem would be useless or hard to use
    * without the image. 
    * 
-   * @newin{2,16}
-   * 
    * @param always_show <tt>true</tt> if the menuitem should always show the image.
    */
   void set_always_show_image(bool always_show =  true);
   
   /** Returns whether the menu item will ignore the Gtk::Settings::property_gtk_menu_images()
    * setting and always show the image, if available.
-   * 
-   * @newin{2,16}
    * 
    * @return <tt>true</tt> if the menu item will always show the image.
    */
@@ -164,16 +160,12 @@ public:
   /** If <tt>true</tt>, the label set in the menuitem is used as a
    * stock id to select the stock item for the item.
    * 
-   * @newin{2,16}
-   * 
    * @param use_stock <tt>true</tt> if the menuitem should use a stock item.
    */
   void set_use_stock(bool use_stock =  true);
   
   /** Checks whether the label set in the menuitem is used as a
    * stock id to select the stock item for the item.
-   * 
-   * @newin{2,16}
    * 
    * @return <tt>true</tt> if the label set in the menuitem is used as a
    * stock id to select the stock item for the item.
@@ -187,8 +179,6 @@ public:
    * 
    * If you want this menu item to have changeable accelerators then
    * you shouldnt need this (see new_from_stock()).
-   * 
-   * @newin{2,16}
    * 
    * @param accel_group The Gtk::AccelGroup.
    */

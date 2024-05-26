@@ -130,7 +130,6 @@ public:
   TreePath& operator=(const TreeModel::iterator& iter);
 
   /** Checks that the path is not empty, by calling empty().
-   * @newin{2,16}
    */
   operator bool() const;
 

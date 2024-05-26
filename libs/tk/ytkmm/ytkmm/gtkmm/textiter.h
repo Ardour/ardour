@@ -755,8 +755,6 @@ public:
    * the end of the buffer and is now not dereferenceable, or if @a iter was
    * already at the end of the buffer.
    * 
-   * @newin{2,8}
-   * 
    * @return Whether @a iter can be dereferenced.
    */
   bool forward_visible_line();
@@ -768,8 +766,6 @@ public:
    * the line and the function returns <tt>true</tt>. (Note that this implies that
    * in a loop calling this function, the line number may not change on
    * every iteration, if your first iteration is on line 0.)
-   * 
-   * @newin{2,8}
    * 
    * @return Whether @a iter moved.
    */
@@ -783,8 +779,6 @@ public:
    * the function does nothing and returns <tt>false</tt>. If @a count is negative,
    * moves backward by 0 - @a count lines.
    * 
-   * @newin{2,8}
-   * 
    * @param count Number of lines to move forward.
    * @return Whether @a iter moved and is dereferenceable.
    */
@@ -797,8 +791,6 @@ public:
    * moved onto the end iterator, then <tt>false</tt> is returned. If @a count is 0,
    * the function does nothing and returns <tt>false</tt>. If @a count is negative,
    * moves forward by 0 - @a count lines.
-   * 
-   * @newin{2,8}
    * 
    * @param count Number of lines to move backward.
    * @return Whether @a iter moved and is dereferenceable.
@@ -815,8 +807,6 @@ public:
    * language (if not, the correct fix would be to the Pango word break
    * algorithms).
    * 
-   * @newin{2,4}
-   * 
    * @return <tt>true</tt> if @a iter moved and is not the end iterator.
    */
   bool forward_visible_word_end();
@@ -827,15 +817,11 @@ public:
    * language (if not, the correct fix would be to the Pango word break
    * algorithms).
    * 
-   * @newin{2,4}
-   * 
    * @return <tt>true</tt> if @a iter moved and is not the end iterator.
    */
   bool backward_visible_word_start();
   
   /** Calls forward_visible_word_end() up to @a count times.
-   * 
-   * @newin{2,4}
    * 
    * @param count Number of times to move.
    * @return <tt>true</tt> if @a iter moved and is not the end iterator.
@@ -843,8 +829,6 @@ public:
   bool forward_visible_word_ends(int count);
   
   /** Calls backward_visible_word_start() up to @a count times.
-   * 
-   * @newin{2,4}
    * 
    * @param count Number of times to move.
    * @return <tt>true</tt> if @a iter moved and is not the end iterator.
@@ -932,16 +916,12 @@ public:
   /** Moves @a iter forward to the next visible cursor position. See 
    * forward_cursor_position() for details.
    * 
-   * @newin{2,4}
-   * 
    * @return <tt>true</tt> if we moved and the new position is dereferenceable.
    */
   bool forward_visible_cursor_position();
   
   /** Moves @a iter forward to the previous visible cursor position. See 
    * backward_cursor_position() for details.
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt> if we moved and the new position is dereferenceable.
    */
@@ -950,8 +930,6 @@ public:
   /** Moves up to @a count visible cursor positions. See
    * forward_cursor_position() for details.
    * 
-   * @newin{2,4}
-   * 
    * @param count Number of positions to move.
    * @return <tt>true</tt> if we moved and the new position is dereferenceable.
    */
@@ -959,8 +937,6 @@ public:
   
   /** Moves up to @a count visible cursor positions. See
    * backward_cursor_position() for details.
-   * 
-   * @newin{2,4}
    * 
    * @param count Number of positions to move.
    * @return <tt>true</tt> if we moved and the new position is dereferenceable.

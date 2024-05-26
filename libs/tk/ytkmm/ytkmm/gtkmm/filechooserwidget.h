@@ -119,8 +119,6 @@ public:
    * custom windows, and it is the same widget that is used by Gtk::FileChooserDialog.
    *
    * @param action Open or save mode for the widget
-   * 
-   * @newin{2,4}
    */
     explicit FileChooserWidget(FileChooserAction action);
 

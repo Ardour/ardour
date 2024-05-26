@@ -124,8 +124,6 @@ public:
    * 0 the item is prepended to the start of the toolbar. If @a pos is
    * negative, the item is appended to the end of the toolbar.
    * 
-   * @newin{2,4}
-   * 
    * @param item A Gtk::ToolItem.
    * @param pos The position of the new item.
    */
@@ -145,8 +143,6 @@ public:
   /** Returns the position of @a item on the toolbar, starting from 0.
    * It is an error if @a item is not a child of the toolbar.
    * 
-   * @newin{2,4}
-   * 
    * @param item A Gtk::ToolItem that is a child of @a toolbar.
    * @return The position of item on the toolbar.
    */
@@ -154,16 +150,12 @@ public:
   
   /** Returns the number of items on the toolbar.
    * 
-   * @newin{2,4}
-   * 
    * @return The number of items on the toolbar.
    */
   int get_n_items() const;
   
   /** Returns the @a n<!-- -->'th item on @a toolbar, or <tt>0</tt> if the
    * toolbar does not contain an @a n<!-- -->'th item.
-   * 
-   * @newin{2,4}
    * 
    * @param n A position on the toolbar.
    * @return The @a n<!-- -->'th Gtk::ToolItem on @a toolbar,
@@ -174,8 +166,6 @@ public:
   /** Returns the @a n<!-- -->'th item on @a toolbar, or <tt>0</tt> if the
    * toolbar does not contain an @a n<!-- -->'th item.
    * 
-   * @newin{2,4}
-   * 
    * @param n A position on the toolbar.
    * @return The @a n<!-- -->'th Gtk::ToolItem on @a toolbar,
    * or <tt>0</tt> if there isn't an @a n<!-- -->'th item.
@@ -185,8 +175,6 @@ public:
   /** Returns whether the toolbar has an overflow menu.
    * See set_show_arrow().
    * 
-   * @newin{2,4}
-   * 
    * @return <tt>true</tt> if the toolbar has an overflow menu.
    */
   bool get_show_arrow() const;
@@ -195,8 +183,6 @@ public:
    *  @a toolbar doesn't have room for all items on it. If <tt>true</tt>,
    * items that there are not room are available through an
    * overflow menu.
-   * 
-   * @newin{2,4}
    * 
    * @param show_arrow Whether to show an overflow menu.
    */
@@ -286,16 +272,12 @@ public:
    * application toolbars should respect the user preferences for the
    * size of icons.
    * 
-   * @newin{2,12}
-   * 
    * @param icon_size The Gtk::IconSize that stock icons in the toolbar shall have.
    */
   void set_icon_size(IconSize icon_size);
   
   /** Unsets toolbar icon size set with set_icon_size(), so that
    * user preferences will be used to determine the icon size.
-   * 
-   * @newin{2,12}
    */
   void unset_icon_size();
 
@@ -311,8 +293,6 @@ public:
   /** Returns the relief style of buttons on @a toolbar. See
    * Gtk::Button::set_relief().
    * 
-   * @newin{2,4}
-   * 
    * @return The relief style of buttons on @a toolbar.
    */
   ReliefStyle get_relief_style() const;
@@ -323,8 +303,6 @@ public:
    * inserted.
    * 
    *  @a x and @a y are in @a toolbar coordinates.
-   * 
-   * @newin{2,4}
    * 
    * @param x X coordinate of a point on the toolbar.
    * @param y Y coordinate of a point on the toolbar.
@@ -341,8 +319,6 @@ public:
    * hierarchy. When an item is set as drop highlight item it can not
    * added to any widget hierarchy or used as highlight item for another
    * toolbar.
-   * 
-   * @newin{2,4}
    * 
    * @param tool_item A Gtk::ToolItem, or <tt>0</tt> to turn of highlighting.
    * @param index A position on @a toolbar.

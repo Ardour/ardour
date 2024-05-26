@@ -117,8 +117,6 @@ public:
   
   /** Gets the Gtk::Settings object for @a screen, creating it if necessary.
    * 
-   * @newin{2,2}
-   * 
    * @param screen A Gdk::Screen.
    * @return A Gtk::Settings object.
    */

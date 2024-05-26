@@ -35,8 +35,6 @@ namespace Gtk
  * @ingroup Widgets
  * @ingroup Containers
  * @ingroup TreeView
- *
- * @newin{2,10}
  */
 class ListViewText : public Gtk::TreeView
 {

@@ -170,16 +170,12 @@ public:
   /** Get the Gtk::EntryBuffer object which holds the text for
    * this widget.
    * 
-   * @newin{2,18}
-   * 
    * @return A Gtk::EntryBuffer object.
    */
   Glib::RefPtr<EntryBuffer> get_buffer();
   
   /** Get the Gtk::EntryBuffer object which holds the text for
    * this widget.
-   * 
-   * @newin{2,18}
    * 
    * @return A Gtk::EntryBuffer object.
    */
@@ -188,8 +184,6 @@ public:
   
   /** Set the Gtk::EntryBuffer object which holds the text for
    * this widget.
-   * 
-   * @newin{2,18}
    * 
    * @param buffer A Gtk::EntryBuffer.
    */
@@ -203,8 +197,6 @@ public:
    * 
    * See also get_icon_window().
    * 
-   * @newin{2,20}
-   * 
    * @return The entry's text window.
    */
   Glib::RefPtr<Gdk::Window> get_text_window();
@@ -215,8 +207,6 @@ public:
    * the text window and entry's icon windows.
    * 
    * See also get_icon_window().
-   * 
-   * @newin{2,20}
    * 
    * @return The entry's text window.
    */
@@ -258,8 +248,6 @@ public:
   /** Unsets the invisible char previously set with
    * set_invisible_char(). So that the
    * default invisible char is used again.
-   * 
-   * @newin{2,16}
    */
   void unset_invisible_char();
   
@@ -293,16 +281,12 @@ public:
    * in-place editing of some text in a canvas or list widget, where
    * pixel-exact positioning of the entry is important.
    * 
-   * @newin{2,10}
-   * 
    * @param border A Gtk::Border, or <tt>0</tt>.
    */
   void set_inner_border(const Border& border);
   
   /** This function returns the entry's Gtk::Entry::property_inner_border() property. See
    * set_inner_border() for more information.
-   * 
-   * @newin{2,10}
    * 
    * @return The entry's Gtk::Border, or <tt>0</tt> if none was set.
    */
@@ -311,15 +295,11 @@ public:
   
   /** Sets whether the text is overwritten when typing in the Gtk::Entry.
    * 
-   * @newin{2,14}
-   * 
    * @param overwrite New value.
    */
   void set_overwrite_mode(bool overwrite =  true);
   
   /** Gets the value set by set_overwrite_mode().
-   * 
-   * @newin{2,14}
    * 
    * @return Whether the text is overwritten when typing.
    */
@@ -357,8 +337,6 @@ public:
    * This is equivalent to:
    * 
    * [C example ellipted]
-   * 
-   * @newin{2,14}
    * 
    * @return The current number of characters
    * in Gtk::Entry, or 0 if there are none.
@@ -500,8 +478,6 @@ public:
    * The adjustment has to be in pixel units and in the same coordinate system 
    * as the entry. 
    * 
-   * @newin{2,12}
-   * 
    * @param adjustment An adjustment which should be adjusted when the cursor 
    * is moved, or <tt>0</tt>.
    */
@@ -510,8 +486,6 @@ public:
   /** Retrieves the horizontal cursor adjustment for the entry. 
    * See set_cursor_hadjustment().
    * 
-   * @newin{2,12}
-   * 
    * @return The horizontal cursor adjustment, or <tt>0</tt>
    * if none has been set.
    */
@@ -519,8 +493,6 @@ public:
   
   /** Retrieves the horizontal cursor adjustment for the entry. 
    * See set_cursor_hadjustment().
-   * 
-   * @newin{2,12}
    * 
    * @return The horizontal cursor adjustment, or <tt>0</tt>
    * if none has been set.
@@ -532,8 +504,6 @@ public:
    * the horizontal positioning of the contents when the displayed
    * text is shorter than the width of the entry.
    * 
-   * @newin{2,4}
-   * 
    * @param xalign The horizontal alignment, from 0 (left) to 1 (right).
    * Reversed for RTL layouts.
    */
@@ -543,16 +513,12 @@ public:
    * the horizontal positioning of the contents when the displayed
    * text is shorter than the width of the entry.
    * 
-   * @newin{2,4}
-   * 
    * @param xalign The horizontal alignment, from 0 (left) to 1 (right).
    * Reversed for RTL layouts.
    */
   void set_alignment(AlignmentEnum xalign);
   
   /** Gets the value set by set_alignment().
-   * 
-   * @newin{2,4}
    * 
    * @return The alignment.
    */
@@ -564,15 +530,11 @@ public:
    *  @a completion using the Gtk::EntryCompletion API. Completion is disabled if
    *  @a completion is set to <tt>0</tt>.
    * 
-   * @newin{2,4}
-   * 
    * @param completion The Gtk::EntryCompletion or <tt>0</tt>.
    */
   void set_completion(const Glib::RefPtr<EntryCompletion>& completion);
   
   /** Returns the auxiliary completion object currently in use by @a entry.
-   * 
-   * @newin{2,4}
    * 
    * @return The auxiliary completion object currently
    * in use by @a entry.
@@ -580,8 +542,6 @@ public:
   Glib::RefPtr<EntryCompletion> get_completion();
   
   /** Returns the auxiliary completion object currently in use by @a entry.
-   * 
-   * @newin{2,4}
    * 
    * @return The auxiliary completion object currently
    * in use by @a entry.
@@ -593,16 +553,12 @@ public:
    * fraction of the bar. The fraction should be between 0.0 and 1.0,
    * inclusive.
    * 
-   * @newin{2,16}
-   * 
    * @param fraction Fraction of the task that's been completed.
    */
   void set_progress_fraction(double fraction);
   
   /** Returns the current fraction of the task that's been completed.
    * See set_progress_fraction().
-   * 
-   * @newin{2,16}
    * 
    * @return A fraction from 0.0 to 1.0.
    */
@@ -611,15 +567,11 @@ public:
   /** Sets the fraction of total entry width to move the progress
    * bouncing block for each call to progress_pulse().
    * 
-   * @newin{2,16}
-   * 
    * @param fraction Fraction between 0.0 and 1.0.
    */
   void set_progress_pulse_step(double fraction);
   
   /** Retrieves the pulse step set with set_progress_pulse_step().
-   * 
-   * @newin{2,16}
    * 
    * @return A fraction from 0.0 to 1.0.
    */
@@ -631,8 +583,6 @@ public:
    * progress_pulse() causes the block to move by a little bit
    * (the amount of movement per pulse is determined by
    * set_progress_pulse_step()).
-   * 
-   * @newin{2,16}
    */
   void progress_pulse();
 
@@ -640,8 +590,6 @@ public:
   /** Sets the icon shown in the specified position using a pixbuf.
    * 
    * If @a pixbuf is <tt>0</tt>, no icon will be shown in the specified position.
-   * 
-   * @newin{2,16}
    * 
    * @param icon_pos Icon position.
    * @param pixbuf A Gdk::Pixbuf, or <tt>0</tt>.
@@ -654,8 +602,6 @@ public:
    * a stock image.
    * 
    * If @a stock_id is <tt>0</tt>, no icon will be shown in the specified position.
-   * 
-   * @newin{2,16}
    * 
    * @param icon_pos Icon position.
    * @param stock_id The name of the stock item, or <tt>0</tt>.
@@ -672,8 +618,6 @@ public:
    * 
    * If @a icon_name is <tt>0</tt>, no icon will be shown in the specified position.
    * 
-   * @newin{2,16}
-   * 
    * @param icon_pos The position at which to set the icon.
    * @param icon_name An icon name, or <tt>0</tt>.
    */
@@ -688,8 +632,6 @@ public:
    * 
    * If @a icon is <tt>0</tt>, no icon will be shown in the specified position.
    * 
-   * @newin{2,16}
-   * 
    * @param icon_pos The position at which to set the icon.
    * @param icon The icon to set, or <tt>0</tt>.
    */
@@ -701,8 +643,6 @@ public:
    * to store image data. If the icon has no image data,
    * the return value will be Gtk::IMAGE_EMPTY.
    * 
-   * @newin{2,16}
-   * 
    * @param icon_pos Icon position.
    * @return Image representation being used.
    */
@@ -713,8 +653,6 @@ public:
    * Unlike the other methods of setting and getting icon data, this
    * method will work regardless of whether the icon was set using a
    * Gdk::Pixbuf, a Icon, a stock item, or an icon name.
-   * 
-   * @newin{2,16}
    * 
    * @param icon_pos Icon position.
    * @return A Gdk::Pixbuf, or <tt>0</tt> if no icon is
@@ -728,8 +666,6 @@ public:
    * method will work regardless of whether the icon was set using a
    * Gdk::Pixbuf, a Icon, a stock item, or an icon name.
    * 
-   * @newin{2,16}
-   * 
    * @param icon_pos Icon position.
    * @return A Gdk::Pixbuf, or <tt>0</tt> if no icon is
    * set for this position.
@@ -739,8 +675,6 @@ public:
   /** Retrieves the stock id used for the icon, or <tt>0</tt> if there is
    * no icon or if the icon was set by some other method (e.g., by
    * pixbuf, icon name or gicon).
-   * 
-   * @newin{2,16}
    * 
    * @param icon_pos Icon position.
    * @return A stock id, or <tt>0</tt> if no icon is set or if the icon
@@ -752,8 +686,6 @@ public:
    * no icon or if the icon was set by some other method (e.g., by
    * pixbuf, stock or gicon).
    * 
-   * @newin{2,16}
-   * 
    * @param icon_pos Icon position.
    * @return An icon name, or <tt>0</tt> if no icon is set or if the icon
    * wasn't set from an icon name.
@@ -763,8 +695,6 @@ public:
   /** Retrieves the Icon used for the icon, or <tt>0</tt> if there is
    * no icon or if the icon was set by some other method (e.g., by
    * stock, pixbuf, or icon name).
-   * 
-   * @newin{2,16}
    * 
    * @param icon_pos Icon position.
    * @return A Icon, or <tt>0</tt> if no icon is set
@@ -776,8 +706,6 @@ public:
    * no icon or if the icon was set by some other method (e.g., by
    * stock, pixbuf, or icon name).
    * 
-   * @newin{2,16}
-   * 
    * @param icon_pos Icon position.
    * @return A Icon, or <tt>0</tt> if no icon is set
    * or if the icon is not a Icon.
@@ -786,8 +714,6 @@ public:
 
   
   /** Sets whether the icon is activatable.
-   * 
-   * @newin{2,16}
    * 
    * @param icon_pos Icon position.
    * @param activatable <tt>true</tt> if the icon should be activatable.
@@ -798,16 +724,12 @@ public:
 
   /** Returns whether the icon is activatable.
    * 
-   * @newin{2,16}
-   * 
    * @param icon_pos Icon position.
    * @return <tt>true</tt> if the icon is activatable.
    */
   bool get_icon_activatable(EntryIconPosition icon_pos =  ENTRY_ICON_PRIMARY) const;
   
   /** Sets the sensitivity for the specified icon.
-   * 
-   * @newin{2,16}
    * 
    * @param icon_pos Icon position.
    * @param sensitive Specifies whether the icon should appear
@@ -816,8 +738,6 @@ public:
   void set_icon_sensitive(EntryIconPosition icon_pos =  ENTRY_ICON_PRIMARY, bool sensitive =  true);
   
   /** Returns whether the icon appears sensitive or insensitive.
-   * 
-   * @newin{2,16}
    * 
    * @param icon_pos Icon position.
    * @return <tt>true</tt> if the icon is sensitive.
@@ -828,8 +748,6 @@ public:
    * If @a x, @a y doesn't lie inside an icon, -1 is returned.
    * This function is intended for use in a Gtk::Widget::signal_query_tooltip()
    * signal handler.
-   * 
-   * @newin{2,16}
    * 
    * @param x The x coordinate of the position to find.
    * @param y The y coordinate of the position to find.
@@ -846,8 +764,6 @@ public:
    * See also Gtk::Widget::set_tooltip_text() and 
    * set_icon_tooltip_markup().
    * 
-   * @newin{2,16}
-   * 
    * @param icon_pos The icon position.
    * @param tooltip The contents of the tooltip for the icon, or <tt>0</tt>.
    */
@@ -857,8 +773,6 @@ public:
 
   /** Gets the contents of the tooltip on the icon at the specified 
    * position in @a entry.
-   * 
-   * @newin{2,16}
    * 
    * @param icon_pos The icon position.
    * @return The tooltip text, or <tt>0</tt>. Free the returned string
@@ -876,8 +790,6 @@ public:
    * See also Gtk::Widget::set_tooltip_markup() and 
    * gtk_enty_set_icon_tooltip_text().
    * 
-   * @newin{2,16}
-   * 
    * @param icon_pos The icon position.
    * @param tooltip The contents of the tooltip for the icon, or <tt>0</tt>.
    */
@@ -887,8 +799,6 @@ public:
 
   /** Gets the contents of the tooltip on the icon at the specified 
    * position in @a entry.
-   * 
-   * @newin{2,16}
    * 
    * @param icon_pos The icon position.
    * @return The tooltip text, or <tt>0</tt>. Free the returned string
@@ -911,8 +821,6 @@ public:
    * have to use Glib::signal_connect_after() to ensure that your signal handler
    * gets executed after the default handler.
    * 
-   * @newin{2,16}
-   * 
    * @param icon_pos Icon position.
    * @param target_list The targets (data formats) in which the data can be provided.
    * @param actions A bitmask of the allowed drag actions.
@@ -927,8 +835,6 @@ public:
    * This function is meant to be used in a Gtk::Widget::signal_drag_data_get()
    * callback.
    * 
-   * @newin{2,16}
-   * 
    * @return Index of the icon which is the source of the current
    * DND operation, or -1.
    */
@@ -942,8 +848,6 @@ public:
    * 
    * See also get_text_window().
    * 
-   * @newin{2,20}
-   * 
    * @param icon_pos Icon position.
    * @return The entry's icon window at @a icon_pos.
    */
@@ -955,8 +859,6 @@ public:
    * to distinguish between the text window and entry's icon windows.
    * 
    * See also get_text_window().
-   * 
-   * @newin{2,20}
    * 
    * @param icon_pos Icon position.
    * @return The entry's icon window at @a icon_pos.
@@ -975,8 +877,6 @@ public:
    * and the default key event handling of the Gtk::Entry.
    * See Gtk::TextView::reset_im_context() for an example of use.
    * 
-   * @newin{2,22}
-   * 
    * @param event The key event.
    * @return <tt>true</tt> if the input method handled the key event.
    */
@@ -986,8 +886,6 @@ public:
    * 
    * This can be necessary in the case where modifying the buffer
    * would confuse on-going input method behavior.
-   * 
-   * @newin{2,22}
    */
   void reset_im_context();
 

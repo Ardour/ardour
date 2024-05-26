@@ -199,15 +199,11 @@ public:
    * 
    * See Gtk::Widget::get_direction().
    * 
-   * @newin{2,18}
-   * 
    * @param flippable <tt>true</tt> to make the range flippable.
    */
   void set_flippable(bool flippable =  true);
   
   /** Gets the value set by set_flippable().
-   * 
-   * @newin{2,18}
    * 
    * @return <tt>true</tt> if the range is flippable.
    */
@@ -219,8 +215,6 @@ public:
    * 
    * This function is useful mainly for Gtk::Range subclasses.
    * 
-   * @newin{2,20}
-   * 
    * @param size_fixed <tt>true</tt> to make the slider size constant.
    */
   void set_slider_size_fixed(bool size_fixed =  true);
@@ -228,8 +222,6 @@ public:
   /** This function is useful mainly for Gtk::Range subclasses.
    * 
    * See set_slider_size_fixed().
-   * 
-   * @newin{2,20}
    * 
    * @return Whether the range's slider has a fixed size.
    */
@@ -240,8 +232,6 @@ public:
    * 
    * This function is useful mainly for Gtk::Range subclasses.
    * 
-   * @newin{2,20}
-   * 
    * @param min_size The slider's minimum size.
    */
   void set_min_slider_size(bool min_size =  true);
@@ -249,8 +239,6 @@ public:
   /** This function is useful mainly for Gtk::Range subclasses.
    * 
    * See set_min_slider_size().
-   * 
-   * @newin{2,20}
    * 
    * @return The minimum size of the range's slider.
    */
@@ -262,8 +250,6 @@ public:
    * This method is useful mainly for Range subclasses.
    *
    * @result The range rectangle.
-   *
-   * @@newin{2,20}
    */
   Gdk::Rectangle get_range_rect() const;
   
@@ -272,8 +258,6 @@ public:
    * in widget->window coordinates.
    * 
    * This function is useful mainly for Gtk::Range subclasses.
-   * 
-   * @newin{2,20}
    * 
    * @param slider_start Return location for the slider's start, or <tt>0</tt>.
    * @param slider_end Return location for the slider's end, or <tt>0</tt>.
@@ -284,16 +268,12 @@ public:
   /** Sets the sensitivity policy for the stepper that points to the
    * 'lower' end of the GtkRange's adjustment.
    * 
-   * @newin{2,10}
-   * 
    * @param sensitivity The lower stepper's sensitivity policy.
    */
   void set_lower_stepper_sensitivity(SensitivityType sensitivity);
   
   /** Gets the sensitivity policy for the stepper that points to the
    * 'lower' end of the GtkRange's adjustment.
-   * 
-   * @newin{2,10}
    * 
    * @return The lower stepper's sensitivity policy.
    */
@@ -302,16 +282,12 @@ public:
   /** Sets the sensitivity policy for the stepper that points to the
    * 'upper' end of the GtkRange's adjustment.
    * 
-   * @newin{2,10}
-   * 
    * @param sensitivity The upper stepper's sensitivity policy.
    */
   void set_upper_stepper_sensitivity(SensitivityType sensitivity);
   
   /** Gets the sensitivity policy for the stepper that points to the
    * 'upper' end of the GtkRange's adjustment.
-   * 
-   * @newin{2,10}
    * 
    * @return The upper stepper's sensitivity policy.
    */
@@ -357,15 +333,11 @@ public:
    * set_fill_level() for a general description of the fill
    * level concept.
    * 
-   * @newin{2,12}
-   * 
    * @param show_fill_level Whether a fill level indicator graphics is shown.
    */
   void set_show_fill_level(bool show_fill_level =  true);
   
   /** Gets whether the range displays the fill level graphically.
-   * 
-   * @newin{2,12}
    * 
    * @return <tt>true</tt> if @a range shows the fill level.
    */
@@ -375,15 +347,11 @@ public:
    * set_fill_level() for a general description of the fill
    * level concept.
    * 
-   * @newin{2,12}
-   * 
    * @param restrict_to_fill_level Whether the fill level restricts slider movement.
    */
   void set_restrict_to_fill_level(bool restrict_to_fill_level =  true);
   
   /** Gets whether the range is restricted to the fill level.
-   * 
-   * @newin{2,12}
    * 
    * @return <tt>true</tt> if @a range is restricted to the fill level.
    */
@@ -407,15 +375,11 @@ public:
    * by set_restrict_to_fill_level() and is by default
    * enabled.
    * 
-   * @newin{2,12}
-   * 
    * @param fill_level The new position of the fill level indicator.
    */
   void set_fill_level(double fill_level);
   
   /** Gets the current position of the fill level indicator.
-   * 
-   * @newin{2,12}
    * 
    * @return The current fill level.
    */

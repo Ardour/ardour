@@ -155,8 +155,6 @@ public:
   /** Sets the model column which @a entry_box should use to get strings from
    * to be @a text_column.
    * 
-   * @newin{2,4}
-   * 
    * Deprecated: 2.24: Use set_entry_text_column() instead
    * 
    * @param text_column A column in @a model to get the strings from.
@@ -166,8 +164,6 @@ public:
   /** Sets the model column which @a entry_box should use to get strings from
    * to be @a text_column.
    * 
-   * @newin{2,4}
-   * 
    * Deprecated: 2.24: Use set_entry_text_column() instead
    * 
    * @param text_column A column in @a model to get the strings from.
@@ -175,8 +171,6 @@ public:
   void set_text_column(int text_column) const; 
   
   /** Returns the column which @a entry_box is using to get the strings from.
-   * 
-   * @newin{2,4}
    * 
    * Deprecated: 2.24: Use get_entry_text_column() instead
    * 
@@ -186,8 +180,6 @@ public:
 
   /** Returns the currently active string.
    * @result The currently active text.
-   *
-   * @newin{2,14}
    */
   Glib::ustring get_active_text() const;
 

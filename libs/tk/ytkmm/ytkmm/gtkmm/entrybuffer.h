@@ -63,8 +63,6 @@ namespace Gtk
  * text to be stored in an alternate location, such as non-pageable memory,
  * useful in the case of important passwords. Or a derived class could 
  * integrate with an application's concept of undo/redo.
- *
- * @@newin{2,20}
  */
 
 class EntryBuffer : public Glib::Object
@@ -146,15 +144,11 @@ public:
   /** Retrieves the length in bytes of the buffer.
    * See get_length().
    * 
-   * @newin{2,18}
-   * 
    * @return The byte length of the buffer.
    */
   gsize get_bytes() const;
   
   /** Retrieves the length in characters of the buffer.
-   * 
-   * @newin{2,18}
    * 
    * @return The number of characters in the buffer.
    */
@@ -164,8 +158,6 @@ public:
    * 
    * The memory pointer returned by this call will not change
    * unless this object emits a signal, or is finalized.
-   * 
-   * @newin{2,18}
    * 
    * @return A pointer to the contents of the widget as a
    * string. This string points to internally allocated
@@ -186,8 +178,6 @@ public:
    * the current contents are longer than the given length, then they
    * will be truncated to fit.
    * 
-   * @newin{2,18}
-   * 
    * @param max_length The maximum length of the entry buffer, or 0 for no maximum.
    * (other than the maximum length of entries.) The value passed in will
    * be clamped to the range 0-65536.
@@ -196,8 +186,6 @@ public:
   
   /** Retrieves the maximum allowed length of the text in
    *  @a buffer. See set_max_length().
-   * 
-   * @newin{2,18}
    * 
    * @return The maximum allowed number of characters
    * in Gtk::EntryBuffer, or 0 if there is no maximum.
@@ -222,8 +210,6 @@ public:
    * 
    * Note that the positions are specified in characters, not bytes.
    * 
-   * @newin{2,18}
-   * 
    * @param position Position at which to delete text.
    * @param n_chars Number of characters to delete.
    * @return The number of characters deleted.
@@ -238,8 +224,6 @@ public:
   
 
   /** Used when subclassing Gtk::EntryBuffer
-   * 
-   * @newin{2,18}
    * 
    * @param position Position at which text was deleted.
    * @param n_chars Number of characters deleted.

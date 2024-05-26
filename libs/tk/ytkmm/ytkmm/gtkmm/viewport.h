@@ -178,15 +178,11 @@ public:
   
   /** Gets the bin window of the Gtk::Viewport.
    * 
-   * @newin{2,20}
-   * 
    * @return A Gdk::Window.
    */
   Glib::RefPtr<Gdk::Window> get_bin_window();
   
   /** Gets the bin window of the Gtk::Viewport.
-   * 
-   * @newin{2,20}
    * 
    * @return A Gdk::Window.
    */
@@ -195,15 +191,11 @@ public:
   
   /** Gets the view window of the Gtk::Viewport.
    * 
-   * @newin{2,22}
-   * 
    * @return A Gdk::Window.
    */
   Glib::RefPtr<Gdk::Window> get_view_window();
   
   /** Gets the view window of the Gtk::Viewport.
-   * 
-   * @newin{2,22}
    * 
    * @return A Gdk::Window.
    */

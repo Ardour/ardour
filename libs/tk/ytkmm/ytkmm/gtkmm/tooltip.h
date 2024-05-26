@@ -87,8 +87,6 @@ namespace Gtk
  * using Gtk::Widget::get_tooltip_window() and manipulate it as you
  * wish. The semantics of the return value are exactly as before,
  * return true to show the window, false to not show it.
- *
- * @newin{2,12}
  */
 
 class Tooltip : public Glib::Object
@@ -148,16 +146,12 @@ public:
    * with the Pango text markup language.
    * If @a markup is <tt>0</tt>, the label will be hidden.
    * 
-   * @newin{2,12}
-   * 
    * @param markup A markup string (see Pango markup format) or <tt>0</tt>.
    */
   void set_markup(const Glib::ustring& markup);
   
   /** Sets the text of the tooltip to be @a text. If @a text is <tt>0</tt>, the label
    * will be hidden. See also set_markup().
-   * 
-   * @newin{2,12}
    * 
    * @param text A text string or <tt>0</tt>.
    */
@@ -166,8 +160,6 @@ public:
   /** Sets the icon of the tooltip (which is in front of the text) to be
    *  @a pixbuf.  If @a pixbuf is <tt>0</tt>, the image will be hidden.
    * 
-   * @newin{2,12}
-   * 
    * @param pixbuf A Gdk::Pixbuf, or <tt>0</tt>.
    */
   void set_icon(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
@@ -175,8 +167,6 @@ public:
   /** Sets the icon of the tooltip (which is in front of the text)
    * to be the icon indicated by @a gicon with the size indicated
    * by @a size. If @a gicon is <tt>0</tt>, the image will be hidden.
-   * 
-   * @newin{2,20}
    * 
    * @param gicon A Icon representing the icon, or <tt>0</tt>.
    * @param size A stock icon size.
@@ -189,8 +179,6 @@ public:
    * the stock item indicated by @a stock_id with the size indicated
    * by @a size.  If @a stock_id is <tt>0</tt>, the image will be hidden.
    * 
-   * @newin{2,12}
-   * 
    * @param stock_id A stock id, or <tt>0</tt>.
    * @param size A stock icon size.
    */
@@ -199,8 +187,6 @@ public:
   /** Sets the icon of the tooltip (which is in front of the text) to be
    * the icon indicated by @a icon_name with the size indicated
    * by @a size.  If @a icon_name is <tt>0</tt>, the image will be hidden.
-   * 
-   * @newin{2,14}
    * 
    * @param icon_name An icon name, or <tt>0</tt>.
    * @param size A stock icon size.
@@ -216,8 +202,6 @@ public:
    * and set_icon().
    * 
    * 
-   * @newin{2,12}
-   * 
    * @param custom_widget A Gtk::Widget, or <tt>0</tt> to unset the old custom widget.
    */
   void set_custom(Widget& custom_widget);
@@ -230,8 +214,6 @@ public:
    * For setting tooltips on Gtk::TreeView, please refer to the convenience
    * functions for this: Gtk::TreeView::set_tooltip_row() and
    * Gtk::TreeView::set_tooltip_cell().
-   * 
-   * @newin{2,12}
    * 
    * @param rect A Gdk::Rectangle.
    */

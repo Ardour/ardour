@@ -179,15 +179,11 @@ public:
    * to change, or using configure() has the same effect
    * of compressing "changed" emissions.
    * 
-   * @newin{2,14}
-   * 
    * @param lower The new minimum value.
    */
   void set_lower(double lower);
   
   /** Retrieves the minimum value of the adjustment.
-   * 
-   * @newin{2,14}
    * 
    * @return The current minimum value of the adjustment.
    */
@@ -204,15 +200,11 @@ public:
    * emissions of the "changed" signal when setting multiple adjustment
    * properties.
    * 
-   * @newin{2,14}
-   * 
    * @param upper The new maximum value.
    */
   void set_upper(double upper);
   
   /** Retrieves the maximum value of the adjustment.
-   * 
-   * @newin{2,14}
    * 
    * @return The current maximum value of the adjustment.
    */
@@ -225,15 +217,11 @@ public:
    * emissions of the "changed" signal when setting multiple adjustment
    * properties.
    * 
-   * @newin{2,14}
-   * 
    * @param step_increment The new step increment.
    */
   void set_step_increment(double step_increment);
   
   /** Retrieves the step increment of the adjustment.
-   * 
-   * @newin{2,14}
    * 
    * @return The current step increment of the adjustment.
    */
@@ -246,15 +234,11 @@ public:
    * emissions of the "changed" signal when setting multiple adjustment
    * properties.
    * 
-   * @newin{2,14}
-   * 
    * @param page_increment The new page increment.
    */
   void set_page_increment(double page_increment);
   
   /** Retrieves the page increment of the adjustment.
-   * 
-   * @newin{2,14}
    * 
    * @return The current page increment of the adjustment.
    */
@@ -267,15 +251,11 @@ public:
    * emissions of the "changed" signal when setting multiple adjustment
    * properties.
    * 
-   * @newin{2,14}
-   * 
    * @param page_size The new page size.
    */
   void set_page_size(double page_size);
   
   /** Retrieves the page size of the adjustment.
-   * 
-   * @newin{2,14}
    * 
    * @return The current page size of the adjustment.
    */
@@ -287,8 +267,6 @@ public:
    * Use this function to avoid multiple emissions of the "changed"
    * signal. See set_lower() for an alternative way
    * of compressing multiple emissions of "changed" into one.
-   * 
-   * @newin{2,14}
    * 
    * @param value The new value.
    * @param lower The new minimum value.

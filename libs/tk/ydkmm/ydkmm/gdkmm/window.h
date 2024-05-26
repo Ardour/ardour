@@ -772,15 +772,11 @@ public:
   
   /** Gets the Gdk::Visual describing the pixel format of @a window.
    * 
-   * @newin{2,24}
-   * 
    * @return A Gdk::Visual.
    */
   Glib::RefPtr<Visual> get_visual();
   
   /** Gets the Gdk::Visual describing the pixel format of @a window.
-   * 
-   * @newin{2,24}
    * 
    * @return A Gdk::Visual.
    */
@@ -802,15 +798,11 @@ public:
   
   /** Gets the Gdk::Display associated with a Gdk::Window.
    * 
-   * @newin{2,24}
-   * 
    * @return The Gdk::Display associated with @a window.
    */
   Glib::RefPtr<Display> get_display();
   
   /** Gets the Gdk::Display associated with a Gdk::Window.
-   * 
-   * @newin{2,24}
    * 
    * @return The Gdk::Display associated with @a window.
    */
@@ -962,8 +954,6 @@ public:
    * request to move the window in the Z-order, restack() only
    * requests the restack, does not guarantee it.
    * 
-   * @newin{2,18}
-   * 
    * @param sibling A Gdk::Window that is a sibling of @a window, or <tt>0</tt>.
    * @param above A boolean.
    */
@@ -977,8 +967,6 @@ public:
    * requests the restack but does not guarantee it.
    *
    * @param above Whether to raise or lower the window.
-   *
-   * @newin{2,18}
    */
   void restack(bool above);
 
@@ -1054,8 +1042,6 @@ public:
    * 
    * Child windows are not moved.
    * 
-   * @newin{2,8}
-   * 
    * @param region The Gdk::Region to move.
    * @param dx Amount to move in the X direction.
    * @param dy Amount to move in the Y direction.
@@ -1068,8 +1054,6 @@ public:
    * Offscreen window and children of them can never have native windows.
    * 
    * Some backends may not support native child windows.
-   * 
-   * @newin{2,18}
    * 
    * @return <tt>true</tt> if the window has a native window, <tt>false</tt> otherwise.
    */
@@ -1133,8 +1117,6 @@ public:
    * 
    * See set_composited().
    * 
-   * @newin{2,22}
-   * 
    * @return <tt>true</tt> if the window is composited.
    */
   bool get_composited() const;
@@ -1162,8 +1144,6 @@ public:
    * You must call Gdk::Display::supports_composite() to check if
    * setting a window as composited is supported before
    * attempting to do so.
-   * 
-   * @newin{2,12}
    * 
    * @param composited <tt>true</tt> to set the window as composited.
    */
@@ -1198,8 +1178,6 @@ public:
    * On the Win32 platform, this functionality is not present and the
    * function does nothing.
    * 
-   * @newin{2,10}
-   * 
    * @param mask Shape mask, or <tt>0</tt>.
    * @param x X position of shape mask with respect to @a window.
    * @param y Y position of shape mask with respect to @a window.
@@ -1223,8 +1201,6 @@ public:
    * On the Win32 platform, this functionality is not present and the
    * function does nothing.
    * 
-   * @newin{2,10}
-   * 
    * @param shape_region Region of window to be non-transparent.
    * @param offset_x X position of @a shape_region in @a window coordinates.
    * @param offset_y Y position of @a shape_region in @a window coordinates.
@@ -1235,8 +1211,6 @@ public:
    * for all children of @a window, ignoring the input shape mask of @a window
    * itself. Contrast with merge_child_input_shapes() which includes
    * the input shape mask of @a window in the masks to be merged.
-   * 
-   * @newin{2,10}
    */
   void set_child_input_shapes();
   
@@ -1248,8 +1222,6 @@ public:
    * This function is distinct from set_child_input_shapes()
    * because it includes @a window's input shape mask in the set of
    * shapes to be merged.
-   * 
-   * @newin{2,10}
    */
   void merge_child_input_shapes();
 
@@ -1272,15 +1244,11 @@ public:
   
   /** Determines whether or not the window is an input only window.
    * 
-   * @newin{2,22}
-   * 
    * @return <tt>true</tt> if @a window is input only.
    */
   bool is_input_only() const;
   
   /** Determines whether or not the window is shaped.
-   * 
-   * @newin{2,22}
    * 
    * @return <tt>true</tt> if @a window is shaped.
    */
@@ -1306,8 +1274,6 @@ public:
   /** Checks whether the window has a native window or not. Note that
    * you can use ensure_native() if a native window is needed.
    * 
-   * @newin{2,22}
-   * 
    * @return <tt>true</tt> if the %window has a native window, <tt>false</tt> otherwise.
    */
   bool has_native() const;
@@ -1325,16 +1291,12 @@ public:
   
   /** This function returns the type hint set for a window.
    * 
-   * @newin{2,10}
-   * 
    * @return The type hint set for @a window.
    */
   WindowTypeHint get_type_hint();
   
   /** Determines whether or not the window manager is hinted that @a window
    * has modal behaviour.
-   * 
-   * @newin{2,22}
    * 
    * @return Whether or not the window has the modal hint set.
    */
@@ -1473,8 +1435,6 @@ public:
    * be needed if you for instance mix direct native drawing with
    * gdk drawing. For Gtk widgets that don't use double buffering this
    * will be called automatically before sending the expose event.
-   * 
-   * @newin{2,18}
    */
   void flush();
   
@@ -1507,8 +1467,6 @@ public:
   
   /** When using GTK+, typically you should use gtk_window_set_startup_id()
    * instead of this low-level function.
-   * 
-   * @newin{2,12}
    * 
    * @param startup_id A string with startup-notification identifier.
    */
@@ -1564,7 +1522,6 @@ public:
    * the display.
    *
    * @see set_back_pixmap().
-   * @newin{2,14}
    */
   void unset_back_pixmap();
 
@@ -1572,8 +1529,6 @@ public:
   /** Gets the pattern used to clear the background on @a window. If @a window
    * does not have its own background and reuses the parent's, <tt>0</tt> is
    * returned and you'll have to query it yourself.
-   * 
-   * @newin{2,22}
    * 
    * @return The pattern to use for the background or
    * <tt>0</tt> to use the parent's background.
@@ -1584,8 +1539,6 @@ public:
   /** Gets the pattern used to clear the background on @a window. If @a window
    * does not have its own background and reuses the parent's, <tt>0</tt> is
    * returned and you'll have to query it yourself.
-   * 
-   * @newin{2,22}
    * 
    * @return The pattern to use for the background or
    * <tt>0</tt> to use the parent's background.
@@ -1656,8 +1609,6 @@ public:
    * most-recently-processed configure event, rather than the current
    * size on the X server.
    * 
-   * @newin{2,24}
-   * 
    * @return The width of @a window.
    */
   int get_width() const;
@@ -1667,8 +1618,6 @@ public:
    * On the X11 platform the returned size is the size reported in the
    * most-recently-processed configure event, rather than the current
    * size on the X server.
-   * 
-   * @newin{2,24}
    * 
    * @return The height of @a window.
    */
@@ -1703,8 +1652,6 @@ public:
    * get_origin() but allows you go pass
    * in any position in the window, not just the origin.
    * 
-   * @newin{2,18}
-   * 
    * @param x X coordinate in window.
    * @param y Y coordinate in window.
    * @param root_x Return location for X coordinate.
@@ -1728,8 +1675,6 @@ public:
    * walks up a window hierarchy.
    * 
    * See also: coords_from_parent()
-   * 
-   * @newin{2,22}
    * 
    * @param x X coordinate in child's coordinate system.
    * @param y Y coordinate in child's coordinate system.
@@ -1756,8 +1701,6 @@ public:
    * walks down a window hierarchy.
    * 
    * See also: coords_to_parent()
-   * 
-   * @newin{2,22}
    * 
    * @param parent_x X coordinate in parent's coordinate system.
    * @param parent_y Y coordinate in parent's coordinate system.
@@ -1869,8 +1812,6 @@ public:
    * 
    * See also: gdk_offscreen_window_get_embedder()
    * 
-   * @newin{2,22}
-   * 
    * @return Effective parent of @a window.
    */
   Glib::RefPtr<Window> get_effective_parent();
@@ -1880,8 +1821,6 @@ public:
    * window's embedder for offscreen windows.
    * 
    * See also: gdk_offscreen_window_get_embedder()
-   * 
-   * @newin{2,22}
    * 
    * @return Effective parent of @a window.
    */
@@ -1893,8 +1832,6 @@ public:
    * embedder as its parent, using get_effective_parent().
    * 
    * See also: gdk_offscreen_window_get_embedder()
-   * 
-   * @newin{2,22}
    * 
    * @return The effective toplevel window containing @a window.
    */
@@ -2003,15 +1940,11 @@ public:
   
   /** Returns the group leader window for @a window. See set_group().
    * 
-   * @newin{2,4}
-   * 
    * @return The group leader window for @a window.
    */
   Glib::RefPtr<Window> get_group();
   
   /** Returns the group leader window for @a window. See set_group().
-   * 
-   * @newin{2,4}
    * 
    * @return The group leader window for @a window.
    */
@@ -2086,8 +2019,6 @@ public:
    * Initially the surface contents are all 0 (transparent if contents
    * have transparency, black otherwise.)
    * 
-   * @newin{2,22}
-   * 
    * @param content The content for the new surface.
    * @param width Width of the new surface.
    * @param height Height of the new surface.
@@ -2105,8 +2036,6 @@ public:
   /** Emits a short beep associated to @a window in the appropriate
    * display, if supported. Otherwise, emits a short beep on
    * the display just as Gdk::Display::beep().
-   * 
-   * @newin{2,12}
    */
   void beep();
 
@@ -2208,8 +2137,6 @@ public:
    * @param window The source window for this drag.
    * @param targets A list of the offered targets names.
    * @return A newly created Gdk::DragContext.
-   *
-   * @newin{2,24}
    */
   Glib::RefPtr<DragContext> drag_begin(const Glib::StringArrayHandle& targets);
   
@@ -2345,8 +2272,6 @@ public:
    * 
    * On X, calling this function makes @a window participate in the
    * _NET_WM_SYNC_REQUEST window manager protocol.
-   * 
-   * @newin{2,6}
    */
   void enable_synchronized_configure();
   
@@ -2358,8 +2283,6 @@ public:
    * 
    * This function can only be called if enable_synchronized_configure()
    * was called previously.
-   * 
-   * @newin{2,6}
    */
   void configure_finished();
 
@@ -2370,8 +2293,6 @@ public:
    * function should <em>not</em> be called in addition, 
    * instead you should allow the window to be treated according to 
    * standard policy for its semantic type.
-   * 
-   * @newin{2,2}
    * 
    * @param skips_taskbar <tt>true</tt> to skip the taskbar.
    */
@@ -2386,8 +2307,6 @@ public:
    * allow the window to be treated according to standard policy for 
    * its semantic type.
    * 
-   * @newin{2,2}
-   * 
    * @param skips_pager <tt>true</tt> to skip the pager.
    */
   void set_skip_pager_hint(bool skips_pager =  true);
@@ -2395,8 +2314,6 @@ public:
   
   /** Toggles whether a window needs the user's
    * urgent attention.
-   * 
-   * @newin{2,8}
    * 
    * @param urgent <tt>true</tt> if the window is urgent.
    */
@@ -2416,8 +2333,6 @@ public:
    * fullscreenification actually happening. But it will happen with
    * most standard window managers, and GDK makes a best effort to get
    * it to happen.
-   * 
-   * @newin{2,2}
    */
   void fullscreen();
   
@@ -2431,8 +2346,6 @@ public:
    * unfullscreenification actually happening. But it will happen with
    * most standard window managers, and GDK makes a best effort to get
    * it to happen. 
-   * 
-   * @newin{2,2}
    */
   void unfullscreen();
 
@@ -2490,8 +2403,6 @@ public:
    * But it will happen with most standard window managers,
    * and GDK makes a best effort to get it to happen.
    * 
-   * @newin{2,4}
-   * 
    * @param setting Whether to keep @a window above other windows.
    */
   void set_keep_above(bool setting =  true);
@@ -2505,8 +2416,6 @@ public:
    * "keep below"; so you can't rely on the window being kept below.
    * But it will happen with most standard window managers,
    * and GDK makes a best effort to get it to happen.
-   * 
-   * @newin{2,4}
    * 
    * @param setting Whether to keep @a window below other windows.
    */
@@ -2524,8 +2433,6 @@ public:
    * For making non-toplevel windows translucent, see 
    * set_composited().
    * 
-   * @newin{2,12}
-   * 
    * @param opacity Opacity.
    */
   void set_opacity(double opacity);
@@ -2533,8 +2440,6 @@ public:
   
   /** Determines whether or not the desktop environment shuld be hinted that
    * the window does not want to receive input focus.
-   * 
-   * @newin{2,22}
    * 
    * @return Whether or not the window should receive input focus.
    */
@@ -2546,8 +2451,6 @@ public:
    * On X, it is the responsibility of the window manager to interpret this 
    * hint. ICCCM-compliant window manager usually respect it.
    * 
-   * @newin{2,4}
-   * 
    * @param accept_focus <tt>true</tt> if the window should receive input focus.
    */
   void set_accept_focus(bool accept_focus =  true);
@@ -2555,8 +2458,6 @@ public:
   
   /** Determines whether or not the desktop environment should be hinted that the
    * window does not want to receive input focus when it is mapped.
-   * 
-   * @newin{2,22}
    * 
    * @return Whether or not the window wants to receive input focus when
    * it is mapped.
@@ -2571,8 +2472,6 @@ public:
    * On X, it is the responsibility of the window manager to interpret
    * this hint. %Window managers following the freedesktop.org window
    * manager extension specification should respect it.
-   * 
-   * @newin{2,6}
    * 
    * @param focus_on_map <tt>true</tt> if the window should receive input focus when mapped.
    */
@@ -2591,8 +2490,6 @@ public:
    * If you need to keep this around over window resizes, you need to
    * add a reference to it.
    * 
-   * @newin{2,18}
-   * 
    * @param window A Gdk::Window.
    * @return The offscreen pixmap, or <tt>0</tt> if not offscreen.
    */
@@ -2602,8 +2499,6 @@ public:
    * If you need to keep this around over window resizes, you need to
    * add a reference to it.
    * 
-   * @newin{2,18}
-   * 
    * @param window A Gdk::Window.
    * @return The offscreen pixmap, or <tt>0</tt> if not offscreen.
    */
@@ -2612,8 +2507,6 @@ public:
   
   /** Gets the window that @a window is embedded in.
    * 
-   * @newin{2,18}
-   * 
    * @param window A Gdk::Window.
    * @return The embedding Gdk::Window, or <tt>0</tt> if @a window is not an
    * embedded offscreen window.
@@ -2621,8 +2514,6 @@ public:
   Glib::RefPtr<Window> get_offscreen_embedder();
   
   /** Gets the window that @a window is embedded in.
-   * 
-   * @newin{2,18}
    * 
    * @param window A Gdk::Window.
    * @return The embedding Gdk::Window, or <tt>0</tt> if @a window is not an
@@ -2637,8 +2528,6 @@ public:
    * function, it is also necessary to handle the Gdk::Window::signal_pick_embedded_child()
    * signal on the @a embedder and the Gdk::Window::signal_to_embedder() and
    * Gdk::Window::signal_from_embedder() signals on @a window.
-   * 
-   * @newin{2,18}
    * 
    * @param window A Gdk::Window.
    * @param embedder The Gdk::Window that @a window gets embedded in.
@@ -2658,8 +2547,6 @@ public:
    * Redirection is active until remove_redirection()
    * is called.
    * 
-   * @newin{2,14}
-   * 
    * @param drawable A Gdk::Drawable.
    * @param src_x X position in @a window.
    * @param src_y Y position in @a window.
@@ -2672,8 +2559,6 @@ public:
   
   /** Removes any active redirection started by
    * redirect_to_drawable().
-   * 
-   * @newin{2,14}
    */
   void remove_redirection();
 
@@ -2681,8 +2566,6 @@ public:
   /** This function informs GDK that the geometry of an embedded
    * offscreen window has changed. This is necessary for GDK to keep
    * track of which offscreen window the pointer is in.
-   * 
-   * @newin{2,18}
    */
   void geometry_changed();
   

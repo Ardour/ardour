@@ -241,8 +241,6 @@ public:
   /** Gets the widget button that uses the given response ID in the action area
    * of a dialog.
    * 
-   * @newin{2,20}
-   * 
    * @param response_id The response ID used by the @a dialog widget.
    * @return The @a widget button that uses the given @a response_id, or <tt>0</tt>.
    */
@@ -251,8 +249,6 @@ public:
   /** Gets the widget button that uses the given response ID in the action area
    * of a dialog.
    * 
-   * @newin{2,20}
-   * 
    * @param response_id The response ID used by the @a dialog widget.
    * @return The @a widget button that uses the given @a response_id, or <tt>0</tt>.
    */
@@ -260,8 +256,6 @@ public:
   
   /** Gets the response id of a widget in the action area
    * of a dialog.
-   * 
-   * @newin{2,8}
    * 
    * @param widget A widget in the action area of @a dialog.
    * @return The response id of @a widget, or Gtk::RESPONSE_NONE
@@ -296,8 +290,6 @@ public:
    * Gtk::Settings object associated to @a screen, in order to be 
    * notified if the button order setting changes.
    * 
-   * @newin{2,6}
-   * 
    * @param screen A Gdk::Screen, or <tt>0</tt> to use the default screen.
    * @return Whether the alternative button order should be used.
    */
@@ -317,8 +309,6 @@ public:
    * Use this function after adding all the buttons to your dialog
    *
    * @param new_order an array of response ids of the dialog's buttons.
-   *
-   * @newinp26
    */
   void set_alternative_button_order_from_array(const Glib::ArrayHandle<int>& new_order);
   
@@ -370,15 +360,11 @@ public:
   
   /** Returns the action area of @a dialog.
    * 
-   * @newin{2,14}
-   * 
    * @return The action area.
    */
   ButtonBox* get_action_area();
   
   /** Returns the action area of @a dialog.
-   * 
-   * @newin{2,14}
    * 
    * @return The action area.
    */
@@ -389,15 +375,11 @@ public:
   
   /** Returns the content area of @a dialog.
    * 
-   * @newin{2,14}
-   * 
    * @return The content area Gtk::VBox.
    */
   VBox* get_vbox();
   
   /** Returns the content area of @a dialog.
-   * 
-   * @newin{2,14}
    * 
    * @return The content area Gtk::VBox.
    */

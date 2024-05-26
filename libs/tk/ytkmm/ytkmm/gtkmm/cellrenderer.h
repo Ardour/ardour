@@ -312,16 +312,12 @@ public:
   
   /** Sets the renderer's alignment within its available space.
    * 
-   * @newin{2,18}
-   * 
    * @param xalign The x alignment of the cell renderer.
    * @param yalign The y alignment of the cell renderer.
    */
   void set_alignment(float align, float yalign);
   
   /** Fills in @a xalign and @a yalign with the appropriate values of @a cell.
-   * 
-   * @newin{2,18}
    * 
    * @param xalign Location to fill in with the x alignment of the cell, or <tt>0</tt>.
    * @param yalign Location to fill in with the y alignment of the cell, or <tt>0</tt>.
@@ -331,16 +327,12 @@ public:
   
   /** Sets the renderer's padding.
    * 
-   * @newin{2,18}
-   * 
    * @param xpad The x padding of the cell renderer.
    * @param ypad The y padding of the cell renderer.
    */
   void set_padding(int xpad, int ypad);
   
   /** Fills in @a xpad and @a ypad with the appropriate values of @a cell.
-   * 
-   * @newin{2,18}
    * 
    * @param xpad Location to fill in with the x padding of the cell, or <tt>0</tt>.
    * @param ypad Location to fill in with the y padding of the cell, or <tt>0</tt>.
@@ -350,15 +342,11 @@ public:
   
   /** Sets the cell renderer's visibility.
    * 
-   * @newin{2,18}
-   * 
    * @param visible The visibility of the cell.
    */
   void set_visible(bool visible =  true);
   
   /** Returns the cell renderer's visibility.
-   * 
-   * @newin{2,18}
    * 
    * @return <tt>true</tt> if the cell renderer is visible.
    */
@@ -366,15 +354,11 @@ public:
   
   /** Sets the cell renderer's sensitivity.
    * 
-   * @newin{2,18}
-   * 
    * @param sensitive The sensitivity of the cell.
    */
   void set_sensitive(bool sensitive =  true);
   
   /** Returns the cell renderer's sensitivity.
-   * 
-   * @newin{2,18}
    * 
    * @return <tt>true</tt> if the cell renderer is sensitive.
    */
@@ -389,8 +373,6 @@ public:
    * This function is for use only by implementations of cell renderers that 
    * need to notify the client program that an editing process was canceled 
    * and the changes were not committed.
-   * 
-   * @newin{2,4}
    * Deprecated: 2.6: Use stop_editing() instead
    * 
    * @deprecated Use stop_editing().
@@ -406,8 +388,6 @@ public:
    * This function should be called by cell renderer implementations 
    * in response to the Gtk::CellEditable::signal_editing_done() signal of 
    * Gtk::CellEditable.
-   * 
-   * @newin{2,6}
    * 
    * @param canceled <tt>true</tt> if the editing has been canceled.
    */
@@ -450,8 +430,6 @@ public:
    *
    * Note that this signal does not work yet in gtkmm.
    * See http://bugzilla.gnome.org/show_bug.cgi?id=301597
-   *
-   * @newin{2,6}
    *
    * @param editable the CellEditable.
    * @param path the path identifying the edited cell.

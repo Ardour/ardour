@@ -203,8 +203,6 @@ public:
   
   /** Determines the type of a given image.
    * 
-   * @newin{2,22}
-   * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 
    * @return The Gdk::ImageType of the image.
@@ -212,8 +210,6 @@ public:
   ImageType get_image_type() const;
   
   /** Determines the visual that was used to create the image.
-   * 
-   * @newin{2,22}
    * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 
@@ -223,8 +219,6 @@ public:
   
   /** Determines the visual that was used to create the image.
    * 
-   * @newin{2,22}
-   * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 
    * @return A Gdk::Visual.
@@ -232,8 +226,6 @@ public:
   Glib::RefPtr<const Visual> get_visual() const;
   
   /** Determines the byte order of the image.
-   * 
-   * @newin{2,22}
    * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 
@@ -243,8 +235,6 @@ public:
   
   /** Determines the width of the image.
    * 
-   * @newin{2,22}
-   * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 
    * @return The width.
@@ -253,8 +243,6 @@ public:
   
   /** Determines the height of the image.
    * 
-   * @newin{2,22}
-   * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 
    * @return The height.
@@ -262,8 +250,6 @@ public:
   int get_height() const;
   
   /** Determines the depth of the image.
-   * 
-   * @newin{2,22}
    * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 
@@ -275,8 +261,6 @@ public:
 #ifndef GDKMM_DISABLE_DEPRECATED
 
   /** Determines the number of bytes per pixel of the image.
-   * 
-   * @newin{2,22}
    * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 
@@ -290,8 +274,6 @@ public:
 
   /** Determines the number of bytes per pixel of the image.
    * 
-   * @newin{2,22}
-   * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 
    * @return The bytes per pixel.
@@ -302,8 +284,6 @@ public:
 #ifndef GDKMM_DISABLE_DEPRECATED
 
   /** Determines the number of bytes per line of the image.
-   * 
-   * @newin{2,22}
    * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 
@@ -317,8 +297,6 @@ public:
 
   /** Determines the number of bytes per line of the image.
    * 
-   * @newin{2,22}
-   * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 
    * @return The bytes per line.
@@ -327,8 +305,6 @@ public:
 
   
   /** Determines the number of bits per pixel of the image.
-   * 
-   * @newin{2,22}
    * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 
@@ -339,8 +315,6 @@ public:
   
   /** Returns a pointer to the pixel data of the image.
    * 
-   * @newin{2,22}
-   * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 
    * @return The pixel data of the image.
@@ -348,8 +322,6 @@ public:
   void* get_pixels();
   
   /** Returns a pointer to the pixel data of the image.
-   * 
-   * @newin{2,22}
    * 
    * Deprecated: 2.22: Gdk::Image should not be used anymore.
    * 

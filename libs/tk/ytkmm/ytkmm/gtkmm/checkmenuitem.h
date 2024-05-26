@@ -147,15 +147,11 @@ public:
   
   /** Sets whether @a check_menu_item is drawn like a Gtk::RadioMenuItem
    * 
-   * @newin{2,4}
-   * 
    * @param draw_as_radio Whether @a check_menu_item is drawn like a Gtk::RadioMenuItem.
    */
   void set_draw_as_radio(bool draw_as_radio =  true);
   
   /** Returns whether @a check_menu_item looks like a Gtk::RadioMenuItem
-   * 
-   * @newin{2,4}
    * 
    * @return Whether @a check_menu_item looks like a Gtk::RadioMenuItem.
    */

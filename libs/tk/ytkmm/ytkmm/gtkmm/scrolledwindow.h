@@ -226,8 +226,6 @@ public:
    * 
    * See also set_placement() and
    * get_placement().
-   * 
-   * @newin{2,10}
    */
   void unset_placement();
   
@@ -262,16 +260,12 @@ public:
 
   /** Returns the vertical scrollbar of @a scrolled_window.
    * 
-   * @newin{2,8}
-   * 
    * @return The vertical scrollbar of the scrolled window,
    * or <tt>0</tt> if it does not have one.
    */
   VScrollbar* get_vscrollbar();
   
   /** Returns the vertical scrollbar of @a scrolled_window.
-   * 
-   * @newin{2,8}
    * 
    * @return The vertical scrollbar of the scrolled window,
    * or <tt>0</tt> if it does not have one.
@@ -281,16 +275,12 @@ public:
   
   /** Returns the horizontal scrollbar of @a scrolled_window.
    * 
-   * @newin{2,8}
-   * 
    * @return The horizontal scrollbar of the scrolled window,
    * or <tt>0</tt> if it does not have one.
    */
   HScrollbar* get_hscrollbar();
   
   /** Returns the horizontal scrollbar of @a scrolled_window.
-   * 
-   * @newin{2,8}
    * 
    * @return The horizontal scrollbar of the scrolled window,
    * or <tt>0</tt> if it does not have one.

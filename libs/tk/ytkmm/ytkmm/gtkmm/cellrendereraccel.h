@@ -86,7 +86,6 @@ namespace Gtk
  * simply typing the new combination.
  *
  * @ingroup TreeView
- * @newin{2,10}
  */
 
 class CellRendererAccel : public CellRendererText

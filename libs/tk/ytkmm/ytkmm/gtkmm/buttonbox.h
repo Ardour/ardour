@@ -155,8 +155,6 @@ public:
   
   /** Returns whether @a child should appear in a secondary group of children.
    * 
-   * @newin{2,4}
-   * 
    * @param child A child of @a widget.
    * @return Whether @a child should appear in a secondary group of children.
    */

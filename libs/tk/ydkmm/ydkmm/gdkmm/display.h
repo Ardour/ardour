@@ -116,8 +116,6 @@ public:
   
   /** Opens a display.
    * 
-   * @newin{2,2}
-   * 
    * @param display_name The name of the display to open.
    * @return A Gdk::Display, or <tt>0</tt> if the display
    * could not be opened.
@@ -127,8 +125,6 @@ public:
   
   /** Gets the name of the display.
    * 
-   * @newin{2,2}
-   * 
    * @return A string representing the display name. This string is owned
    * by GDK and should not be modified or freed.
    */
@@ -137,15 +133,11 @@ public:
   
   /** Gets the number of screen managed by the @a display.
    * 
-   * @newin{2,2}
-   * 
    * @return Number of screens.
    */
   int get_n_screens() const;
   
   /** Returns a screen object for one of the screens of the display.
-   * 
-   * @newin{2,2}
    * 
    * @param screen_num The screen number.
    * @return The Gdk::Screen object.
@@ -153,8 +145,6 @@ public:
   Glib::RefPtr<Screen> get_screen(int screen_num);
   
   /** Returns a screen object for one of the screens of the display.
-   * 
-   * @newin{2,2}
    * 
    * @param screen_num The screen number.
    * @return The Gdk::Screen object.
@@ -164,15 +154,11 @@ public:
   
   /** Get the default Gdk::Screen for @a display.
    * 
-   * @newin{2,2}
-   * 
    * @return The default Gdk::Screen object for @a display.
    */
   Glib::RefPtr<Screen> get_default_screen();
   
   /** Get the default Gdk::Screen for @a display.
-   * 
-   * @newin{2,2}
    * 
    * @return The default Gdk::Screen object for @a display.
    */
@@ -181,15 +167,11 @@ public:
   
   /** Release any pointer grab.
    * 
-   * @newin{2,2}
-   * 
    * @param timestamp A timestap (e.g. GDK_CURRENT_TIME).
    */
   void pointer_ungrab(guint32 timestamp);
   
   /** Release any keyboard grab
-   * 
-   * @newin{2,2}
    * 
    * @param timestamp A timestap (e.g Gdk::CURRENT_TIME).
    */
@@ -197,15 +179,11 @@ public:
   
   /** Test if the pointer is grabbed.
    * 
-   * @newin{2,2}
-   * 
    * @return <tt>true</tt> if an active X pointer grab is in effect.
    */
   bool pointer_is_grabbed() const;
   
   /** Emits a short beep on @a display
-   * 
-   * @newin{2,2}
    */
   void beep();
   
@@ -218,15 +196,11 @@ public:
    * 
    * This is most useful for X11. On windowing systems where requests are
    * handled synchronously, this function will do nothing.
-   * 
-   * @newin{2,2}
    */
   void sync();
   
   /** Closes the connection to the windowing system for the given display,
    * and cleans up associated resources.
-   * 
-   * @newin{2,2}
    */
   void close();
 
@@ -234,16 +208,12 @@ public:
   /** Returns the list of available input devices attached to @a display.
    * The list is statically allocated and should not be freed.
    * 
-   * @newin{2,2}
-   * 
    * @return A list of Gdk::Device.
    */
   Glib::ListHandle< Glib::RefPtr<Device> > list_devices();
   
   /** Returns the list of available input devices attached to @a display.
    * The list is statically allocated and should not be freed.
-   * 
-   * @newin{2,2}
    * 
    * @return A list of Gdk::Device.
    */
@@ -255,8 +225,6 @@ public:
   /** Gets the next Gdk::Event to be processed for @a display, fetching events from the
    * windowing system if necessary.
    * 
-   * @newin{2,2}
-   * 
    * @return The next Gdk::Event to be processed, or <tt>0</tt> if no events
    * are pending. The returned Gdk::Event should be freed with Gdk::Event::free().
    */
@@ -264,8 +232,6 @@ public:
   
   /** Gets the next Gdk::Event to be processed for @a display, fetching events from the
    * windowing system if necessary.
-   * 
-   * @newin{2,2}
    * 
    * @return The next Gdk::Event to be processed, or <tt>0</tt> if no events
    * are pending. The returned Gdk::Event should be freed with Gdk::Event::free().
@@ -278,8 +244,6 @@ public:
    * not get more events from the windowing system.  It only checks the events
    * that have already been moved to the GDK event queue.)
    * 
-   * @newin{2,2}
-   * 
    * @return A copy of the first Gdk::Event on the event queue, or <tt>0</tt> 
    * if no events are in the queue. The returned Gdk::Event should be freed with
    * Gdk::Event::free().
@@ -291,8 +255,6 @@ public:
    * not get more events from the windowing system.  It only checks the events
    * that have already been moved to the GDK event queue.)
    * 
-   * @newin{2,2}
-   * 
    * @return A copy of the first Gdk::Event on the event queue, or <tt>0</tt> 
    * if no events are in the queue. The returned Gdk::Event should be freed with
    * Gdk::Event::free().
@@ -301,8 +263,6 @@ public:
   
   /** Appends a copy of the given event onto the front of the event
    * queue for @a display.
-   * 
-   * @newin{2,2}
    * 
    * @param event A Gdk::Event.
    */
@@ -314,8 +274,6 @@ public:
   /** Adds a filter to be called when X ClientMessage events are received.
    * See Gdk::Window::add_filter() if you are interested in filtering other
    * types of events.
-   * 
-   * @newin{2,2}
    * 
    * @param message_type The type of ClientMessage events to receive.
    * This will be checked against the @a message_type field 
@@ -331,8 +289,6 @@ public:
    * Applications should <em>not</em> set this, it is a global 
    * user-configured setting.
    * 
-   * @newin{2,2}
-   * 
    * @param msec Double click time in milliseconds (thousandths of a second).
    */
   void set_double_click_time(guint msec);
@@ -343,8 +299,6 @@ public:
    * Applications should <em>not</em> set this, it is a global 
    * user-configured setting.
    * 
-   * @newin{2,4}
-   * 
    * @param distance Distance in pixels.
    */
   void set_double_click_distance(guint distance);
@@ -354,8 +308,6 @@ public:
    * function for
    * <tt>gdk_display_manager_get_default_display (manager_get())</tt>.
    * 
-   * @newin{2,2}
-   * 
    * @return A Gdk::Display, or <tt>0</tt> if there is no default
    * display.
    */
@@ -364,16 +316,12 @@ public:
   
   /** Returns the core pointer device for the given display
    * 
-   * @newin{2,2}
-   * 
    * @return The core pointer device; this is owned by the
    * display and should not be freed.
    */
   Glib::RefPtr<Device> get_core_pointer();
   
   /** Returns the core pointer device for the given display
-   * 
-   * @newin{2,2}
    * 
    * @return The core pointer device; this is owned by the
    * display and should not be freed.
@@ -409,8 +357,6 @@ public:
    * if the window under the mouse pointer is not known to GDK (for example, 
    * belongs to another application).
    * 
-   * @newin{2,2}
-   * 
    * @param win_x Return location for x coordinate of the pointer location relative
    * to the window origin, or <tt>0</tt>.
    * @param win_y Return location for y coordinate of the pointer location relative
@@ -423,8 +369,6 @@ public:
    * of the pointer in that window in @a win_x, @a win_y for @a screen. Returns <tt>0</tt>
    * if the window under the mouse pointer is not known to GDK (for example, 
    * belongs to another application).
-   * 
-   * @newin{2,2}
    * 
    * @param win_x Return location for x coordinate of the pointer location relative
    * to the window origin, or <tt>0</tt>.
@@ -461,8 +405,6 @@ public:
    * some rare use cases like keyboard navigation support
    * for the color picker in the Gtk::ColorSelectionDialog.
    * 
-   * @newin{2,8}
-   * 
    * @param screen The screen of @a display to warp the pointer to.
    * @param x The x coordinate of the destination.
    * @param y The y coordinate of the destination.
@@ -477,8 +419,6 @@ public:
    * display. This is only useful for such low-level tools as an
    * event recorder. Applications should never have any
    * reason to use this facility.
-   * 
-   * @newin{2,2}
    * 
    * @param new_hooks A table of pointers to functions for getting
    * quantities related to the current pointer position.
@@ -512,7 +452,6 @@ public:
 
   /** Finds out the DND protocol supported by a window.
    *
-   * @newin{2,2}
    * @deprecated Use the version that takes a GdkNativeWindow.
    * @param xid The X id of the destination window.
    * @param protocol Location where the supported DND protocol is returned.
@@ -532,8 +471,6 @@ public:
   
   /** Finds out the DND protocol supported by a window.
    * 
-   * @newin{2,2}
-   * 
    * @param xid The windowing system id of the destination window.
    * @param protocol Location where the supported DND protocol is returned.
    * @return The windowing system id of the window where the drop should happen. This 
@@ -545,15 +482,11 @@ public:
   
   /** Returns the Gdk::Keymap attached to @a display.
    * 
-   * @newin{2,2}
-   * 
    * @return The Gdk::Keymap attached to @a display.
    */
   GdkKeymap* get_keymap();
   
   /** Returns the Gdk::Keymap attached to @a display.
-   * 
-   * @newin{2,2}
    * 
    * @return The Gdk::Keymap attached to @a display.
    */
@@ -565,7 +498,6 @@ public:
 #ifdef G_OS_WIN32
   /** Send a response to SelectionRequest event.
    *
-   * @newin{2,2}
    * @param requestor Window to which to deliver response.
    * @param selection Selection that was requested.
    * @param target Target that was selected.
@@ -582,7 +514,6 @@ public:
 
   /** Send a response to SelectionRequest event.
    *
-   * @newin{2,2}
    * @param requestor Window to which to deliver response.
    * @param selection Selection that was requested.
    * @param target Target that was selected.
@@ -598,8 +529,6 @@ public:
    * For example in the X backend, a native pixmap handle is an Xlib
    * <type>XID</type>.
    * 
-   * @newin{2,2}
-   * 
    * @param anid A native pixmap handle.
    * @return The Gdk::Pixmap wrapper for the native pixmap,
    * or <tt>0</tt> if there is none.
@@ -610,8 +539,6 @@ public:
    * 
    * For example in the X backend, a native pixmap handle is an Xlib
    * <type>XID</type>.
-   * 
-   * @newin{2,2}
    * 
    * @param anid A native pixmap handle.
    * @return The Gdk::Pixmap wrapper for the native pixmap,
@@ -629,16 +556,12 @@ public:
    * 
    * This is most useful for X11. On windowing systems where requests are
    * handled synchronously, this function will do nothing.
-   * 
-   * @newin{2,4}
    */
   void flush();
   
   /** Returns <tt>true</tt> if cursors can use an 8bit alpha channel 
    * on @a display. Otherwise, cursors are restricted to bilevel 
    * alpha (i.e. a mask).
-   * 
-   * @newin{2,4}
    * 
    * @return Whether cursors can have alpha channels.
    */
@@ -648,23 +571,17 @@ public:
    * on @a display. Otherwise, cursors have only a forground
    * and a background color.
    * 
-   * @newin{2,4}
-   * 
    * @return Whether cursors can have multiple colors.
    */
   bool supports_cursor_color() const;
   
   /** Returns the default size to use for cursors on @a display.
    * 
-   * @newin{2,4}
-   * 
    * @return The default cursor size.
    */
   guint get_default_cursor_size() const;
   
   /** Gets the maximal size to use for cursors on @a display.
-   * 
-   * @newin{2,4}
    * 
    * @param width The return location for the maximal cursor width.
    * @param height The return location for the maximal cursor height.
@@ -676,8 +593,6 @@ public:
    * on @a display. This window is implicitly created by GDK. 
    * See Gdk::Window::set_group().
    * 
-   * @newin{2,4}
-   * 
    * @return The default group leader window for @a display.
    */
   Glib::RefPtr<Window> get_default_group();
@@ -685,8 +600,6 @@ public:
   /** Returns the default group leader window for all toplevel windows
    * on @a display. This window is implicitly created by GDK. 
    * See Gdk::Window::set_group().
-   * 
-   * @newin{2,4}
    * 
    * @return The default group leader window for @a display.
    */
@@ -698,8 +611,6 @@ public:
   /** Returns whether Gdk::EventOwnerChange events will be 
    * sent when the owner of a selection changes.
    * 
-   * @newin{2,6}
-   * 
    * @return Whether Gdk::EventOwnerChange events will 
    * be sent.
    */
@@ -707,8 +618,6 @@ public:
   
   /** Request Gdk::EventOwnerChange events for ownership changes
    * of the selection named by the given atom.
-   * 
-   * @newin{2,6}
    * 
    * @param selection The Gdk::Atom naming the selection for which
    * ownership change notification is requested.
@@ -723,8 +632,6 @@ public:
    * application has quit. On X11 this checks if a clipboard daemon is
    * running.
    * 
-   * @newin{2,6}
-   * 
    * @return <tt>true</tt> if the display supports clipboard persistance.
    */
   bool supports_clipboard_persistence() const;
@@ -733,8 +640,6 @@ public:
    * saving all available targets.
    * On X11, this is a special program that works according to the freedesktop clipboard specification,
    * available at http://www.freedesktop.org/Standards/clipboard-manager-spec.
-   * @newin{2,6}
-   *
    * @param clipboard_window A Gdk::Window belonging to the clipboard owner.
    * @param time_ A timestamp.
    */
@@ -746,16 +651,12 @@ public:
   /** Returns <tt>true</tt> if Gdk::Window::shape_combine_mask() can
    * be used to create shaped windows on @a display.
    * 
-   * @newin{2,10}
-   * 
    * @return <tt>true</tt> if shaped windows are supported.
    */
   bool supports_shapes() const;
   
   /** Returns <tt>true</tt> if Gdk::Window::input_shape_combine_mask() can
    * be used to modify the input shape of windows on @a display.
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if windows with modified input shape are supported.
    */
@@ -766,8 +667,6 @@ public:
    * 
    * Currently this only works on X11 with XComposite and
    * XDamage extensions available.
-   * 
-   * @newin{2,12}
    * 
    * @return <tt>true</tt> if windows may be composited.
    */

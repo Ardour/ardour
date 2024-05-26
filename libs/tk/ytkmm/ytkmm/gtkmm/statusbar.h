@@ -161,8 +161,6 @@ public:
   /** Forces the removal of all messages from a statusbar's
    * stack with the exact @a context_id.
    * 
-   * @newin{2,22}
-   * 
    * @param context_id A context identifier.
    */
   void remove_all_messages(guint context_id =  0);
@@ -186,15 +184,11 @@ public:
   
   /** Retrieves the box containing the label widget.
    * 
-   * @newin{2,20}
-   * 
    * @return A Gtk::Box.
    */
   Gtk::Widget* get_message_area();
   
   /** Retrieves the box containing the label widget.
-   * 
-   * @newin{2,20}
    * 
    * @return A Gtk::Box.
    */

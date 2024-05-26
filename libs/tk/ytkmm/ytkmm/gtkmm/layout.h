@@ -125,15 +125,11 @@ public:
   
   /** Retrieve the bin window of the layout used for drawing operations.
    * 
-   * @newin{2,14}
-   * 
    * @return A Gdk::Window.
    */
   Glib::RefPtr<Gdk::Window> get_bin_window();
   
   /** Retrieve the bin window of the layout used for drawing operations.
-   * 
-   * @newin{2,14}
    * 
    * @return A Gdk::Window.
    */

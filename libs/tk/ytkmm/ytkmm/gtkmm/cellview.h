@@ -139,8 +139,6 @@ public:
    * set, it will remove it before setting the new model. Use unset_model() to
    * unset the old model.
    * 
-   * @newin{2,6}
-   * 
    * @param model A Gtk::TreeModel.
    */
   void set_model(const Glib::RefPtr<TreeModel>& model);
@@ -148,8 +146,6 @@ public:
   /** Remove the model from the CellView.
    *
    * @see set_model().
-   *
-   * @newin{2,16}
    */
   void unset_model();
 
@@ -157,16 +153,12 @@ public:
   /** Returns the model for @a cell_view. If no model is used <tt>0</tt> is
    * returned.
    * 
-   * @newin{2,16}
-   * 
    * @return A Gtk::TreeModel used or <tt>0</tt>.
    */
   Glib::RefPtr<TreeModel> get_model();
   
   /** Returns the model for @a cell_view. If no model is used <tt>0</tt> is
    * returned.
-   * 
-   * @newin{2,16}
    * 
    * @return A Gtk::TreeModel used or <tt>0</tt>.
    */
@@ -180,8 +172,6 @@ public:
    * a needed intermediate state if say, the model for
    * the Gtk::CellView becomes temporarily empty.
    * 
-   * @newin{2,6}
-   * 
    * @param path A Gtk::TreePath or <tt>0</tt> to unset.
    */
   void set_displayed_row(const TreeModel::Path& path);
@@ -190,16 +180,12 @@ public:
    * displayed row. If no row is currently displayed, 
    * <tt>0</tt> is returned.
    * 
-   * @newin{2,6}
-   * 
    * @return The currently displayed row or <tt>0</tt>.
    */
   TreeModel::Path get_displayed_row() const;
   
   /** Sets @a requisition to the size needed by @a cell_view to display 
    * the model row pointed to by @a path.
-   * 
-   * @newin{2,6}
    * 
    * @param path A Gtk::TreePath.
    * @param requisition Return location for the size.
@@ -210,8 +196,6 @@ public:
   
   /** Sets the background color of @a view.
    * 
-   * @newin{2,6}
-   * 
    * @param color The new background color.
    */
   void set_background_color(const Gdk::Color& color);
@@ -220,8 +204,6 @@ public:
 #ifndef GTKMM_DISABLE_DEPRECATED
 
   /** Returns the cell renderers which have been added to @a cell_view.
-   * 
-   * @newin{2,6}
    * 
    * Deprecated: 2.18: use Gtk::CellLayout::get_cells() instead.
    * 
@@ -236,8 +218,6 @@ public:
 #ifndef GTKMM_DISABLE_DEPRECATED
 
   /** Returns the cell renderers which have been added to @a cell_view.
-   * 
-   * @newin{2,6}
    * 
    * Deprecated: 2.18: use Gtk::CellLayout::get_cells() instead.
    * 

@@ -201,8 +201,6 @@ public:
    * 
    * Checks if the given iter is a valid iter for this Gtk::TreeModelSort.
    * 
-   * @newin{2,2}
-   * 
    * @param iter A Gtk::TreeIter.
    * @return <tt>true</tt> if the iter is valid, <tt>false</tt> if the iter is invalid.
    */

@@ -53,8 +53,6 @@ namespace Gtk
  * A RecentChooserDialog looks like this:
  * @image html recentchooserdialog1.png
  *
- * @newin{2,10}
- *
  * @ingroup RecentFiles
  */
 

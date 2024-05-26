@@ -145,16 +145,12 @@ public:
    * want the GtkToggleButton to be 'pressed in', and <tt>false</tt> to raise it.
    * This action causes the toggled signal to be emitted.
    * 
-   * @newin{2,4}
-   * 
    * @param is_active Whether @a button should be active.
    */
   void set_active(bool is_active =  true);
   
   /** Queries a Gtk::ToggleToolButton and returns its current state.
    * Returns <tt>true</tt> if the toggle button is pressed in and <tt>false</tt> if it is raised.
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt> if the toggle tool button is pressed in, <tt>false</tt> if not.
    */

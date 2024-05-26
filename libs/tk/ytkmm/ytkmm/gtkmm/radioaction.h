@@ -189,8 +189,6 @@ public:
    * 
    * [C example ellipted]
    * 
-   * @newin{2,4}
-   * 
    * @return The list representing the radio group for this object.
    */
   Group get_group();
@@ -200,16 +198,12 @@ public:
   /** Obtains the value property of the currently active member of 
    * the group to which @a action belongs.
    * 
-   * @newin{2,4}
-   * 
    * @return The value of the currently active group member.
    */
   int get_current_value() const;
   
   /** Sets the currently active group member to the member with value
    * property @a current_value.
-   * 
-   * @newin{2,10}
    * 
    * @param current_value The new value.
    */

@@ -152,15 +152,11 @@ public:
   /** Retrieves the current pack direction of the menubar. 
    * See set_pack_direction().
    * 
-   * @newin{2,8}
-   * 
    * @return The pack direction.
    */
   PackDirection get_pack_direction() const;
   
   /** Sets how items should be packed inside a menubar.
-   * 
-   * @newin{2,8}
    * 
    * @param pack_dir A new Gtk::PackDirection.
    */
@@ -169,15 +165,11 @@ public:
   /** Retrieves the current child pack direction of the menubar.
    * See set_child_pack_direction().
    * 
-   * @newin{2,8}
-   * 
    * @return The child pack direction.
    */
   PackDirection get_child_pack_direction() const;
   
   /** Sets how widgets should be packed inside the children of a menubar.
-   * 
-   * @newin{2,8}
    * 
    * @param child_pack_dir A new Gtk::PackDirection.
    */

@@ -117,15 +117,11 @@ public:
   
   /** Gets the default colormap for @a screen.
    * 
-   * @newin{2,2}
-   * 
    * @return The default Gdk::Colormap.
    */
   Glib::RefPtr<Colormap> get_default_colormap();
   
   /** Gets the default colormap for @a screen.
-   * 
-   * @newin{2,2}
    * 
    * @return The default Gdk::Colormap.
    */
@@ -134,23 +130,17 @@ public:
   
   /** Sets the default @a colormap for @a screen.
    * 
-   * @newin{2,2}
-   * 
    * @param colormap A Gdk::Colormap.
    */
   void set_default_colormap(const Glib::RefPtr<const Colormap>& colormap);
   
   /** Gets the system's default colormap for @a screen
    * 
-   * @newin{2,2}
-   * 
    * @return The default colormap for @a screen.
    */
   Glib::RefPtr<Colormap> get_system_colormap();
   
   /** Gets the system's default colormap for @a screen
-   * 
-   * @newin{2,2}
    * 
    * @return The default colormap for @a screen.
    */
@@ -161,8 +151,6 @@ public:
    * This is the visual for the root window of the display.
    * The return value should not be freed.
    * 
-   * @newin{2,2}
-   * 
    * @return The system visual.
    */
   Glib::RefPtr<Visual> get_system_visual();
@@ -170,8 +158,6 @@ public:
   /** Get the system's default visual for @a screen.
    * This is the visual for the root window of the display.
    * The return value should not be freed.
-   * 
-   * @newin{2,2}
    * 
    * @return The system visual.
    */
@@ -184,8 +170,6 @@ public:
    * it can render to any colormap and visual. So there's no need to
    * call this function.
    * 
-   * @newin{2,2}
-   * 
    * Deprecated: 2.22: Use get_system_colormap()
    * 
    * @return The preferred colormap.
@@ -197,8 +181,6 @@ public:
    * image data to one colormap and visual, but in the current version
    * it can render to any colormap and visual. So there's no need to
    * call this function.
-   * 
-   * @newin{2,2}
    * 
    * Deprecated: 2.22: Use get_system_colormap()
    * 
@@ -214,8 +196,6 @@ public:
    * the optimal one in those previous versions. GdkRGB can now render to 
    * drawables with any visual.
    * 
-   * @newin{2,2}
-   * 
    * Deprecated: 2.22: Use get_system_visual()
    * 
    * @return The Gdk::Visual chosen by GdkRGB.
@@ -228,8 +208,6 @@ public:
    * current versions, it's simply the visual GdkRGB would have chosen as 
    * the optimal one in those previous versions. GdkRGB can now render to 
    * drawables with any visual.
-   * 
-   * @newin{2,2}
    * 
    * Deprecated: 2.22: Use get_system_visual()
    * 
@@ -252,8 +230,6 @@ public:
    * For setting an overall opacity for a top-level window, see
    * Gdk::Window::set_opacity().
    * 
-   * @newin{2,8}
-   * 
    * @return A colormap to use for windows with
    * an alpha channel or <tt>0</tt> if the capability is not available.
    */
@@ -273,8 +249,6 @@ public:
    * For setting an overall opacity for a top-level window, see
    * Gdk::Window::set_opacity().
    * 
-   * @newin{2,8}
-   * 
    * @return A colormap to use for windows with
    * an alpha channel or <tt>0</tt> if the capability is not available.
    */
@@ -285,8 +259,6 @@ public:
    * alpha channel. See the docs for get_rgba_colormap()
    * for caveats.
    * 
-   * @newin{2,8}
-   * 
    * @return A visual to use for windows with an
    * alpha channel or <tt>0</tt> if the capability is not available.
    */
@@ -295,8 +267,6 @@ public:
   /** Gets a visual to use for creating windows or pixmaps with an
    * alpha channel. See the docs for get_rgba_colormap()
    * for caveats.
-   * 
-   * @newin{2,8}
    * 
    * @return A visual to use for windows with an
    * alpha channel or <tt>0</tt> if the capability is not available.
@@ -311,8 +281,6 @@ public:
    * On X11 this function returns whether a compositing manager is
    * compositing @a screen.
    * 
-   * @newin{2,10}
-   * 
    * @return Whether windows with RGBA visuals can reasonably be
    * expected to have their alpha channels drawn correctly on the screen.
    */
@@ -321,15 +289,11 @@ public:
   
   /** Gets the root window of @a screen.
    * 
-   * @newin{2,2}
-   * 
    * @return The root window.
    */
   Glib::RefPtr<Window> get_root_window();
   
   /** Gets the root window of @a screen.
-   * 
-   * @newin{2,2}
    * 
    * @return The root window.
    */
@@ -338,15 +302,11 @@ public:
   
   /** Gets the display to which the @a screen belongs.
    * 
-   * @newin{2,2}
-   * 
    * @return The display to which @a screen belongs.
    */
   Glib::RefPtr<Display> get_display();
   
   /** Gets the display to which the @a screen belongs.
-   * 
-   * @newin{2,2}
    * 
    * @return The display to which @a screen belongs.
    */
@@ -356,23 +316,17 @@ public:
   /** Gets the index of @a screen among the screens in the display
    * to which it belongs. (See get_display())
    * 
-   * @newin{2,2}
-   * 
    * @return The index.
    */
   int get_number() const;
   
   /** Gets the width of @a screen in pixels
    * 
-   * @newin{2,2}
-   * 
    * @return The width of @a screen in pixels.
    */
   int get_width() const;
   
   /** Gets the height of @a screen in pixels
-   * 
-   * @newin{2,2}
    * 
    * @return The height of @a screen in pixels.
    */
@@ -381,16 +335,12 @@ public:
   /** Gets the width of @a screen in millimeters. 
    * Note that on some X servers this value will not be correct.
    * 
-   * @newin{2,2}
-   * 
    * @return The width of @a screen in millimeters.
    */
   int get_width_mm() const;
   
   /** Returns the height of @a screen in millimeters. 
    * Note that on some X servers this value will not be correct.
-   * 
-   * @newin{2,2}
    * 
    * @return The heigth of @a screen in millimeters.
    */
@@ -401,8 +351,6 @@ public:
    * A visual describes a hardware image data format.
    * For example, a visual might support 24-bit color, or 8-bit color,
    * and might expect pixels to be in a certain format.
-   * @newin{2,2}
-   * 
    * @return A list of visuals.
    */
   Glib::ListHandle< Glib::RefPtr<Visual> > list_visuals();
@@ -411,8 +359,6 @@ public:
   /** Obtains a list of all toplevel windows known to GDK on the screen @a screen.
    * A toplevel window is a child of the root window (see
    * gdk_get_default_root_window()).
-   * @newin{2,2}
-   * 
    * @return List of toplevel windows.
    */
   Glib::ListHandle< Glib::RefPtr<Window> > get_toplevel_windows();
@@ -421,16 +367,12 @@ public:
   /** Determines the name to pass to Gdk::Display::open() to get
    * a Gdk::Display with this screen as the default screen.
    * 
-   * @newin{2,2}
-   * 
    * @return The name.
    */
   Glib::ustring make_display_name();
 
   
   /** Returns the number of monitors which @a screen consists of.
-   * 
-   * @newin{2,2}
    * 
    * @return Number of monitors which @a screen consists of.
    */
@@ -445,8 +387,6 @@ public:
    * If no primary monitor is configured by the user, the return value
    * will be 0, defaulting to the first monitor.
    * 
-   * @newin{2,20}
-   * 
    * @return An integer index for the primary monitor, or 0 if none is configured.
    */
   int get_primary_monitor() const;
@@ -457,16 +397,12 @@ public:
    * Note that the size of the entire screen area can be retrieved via
    * get_width() and get_height().
    * 
-   * @newin{2,2}
-   * 
    * @param monitor_num The monitor number, between 0 and gdk_screen_get_n_monitors (screen).
    * @param dest A Gdk::Rectangle to be filled with the monitor geometry.
    */
   void get_monitor_geometry(int monitor_num, Rectangle& dest) const;
   
   /** Returns the monitor number in which the point ( @a x, @a y) is located.
-   * 
-   * @newin{2,2}
    * 
    * @param x The x coordinate in the virtual screen.
    * @param y The y coordinate in the virtual screen.
@@ -478,8 +414,6 @@ public:
   /** Returns the number of the monitor in which the largest area of the 
    * bounding rectangle of @a window resides.
    * 
-   * @newin{2,2}
-   * 
    * @param window A Gdk::Window.
    * @return The monitor number in which most of @a window is located,
    * or if @a window does not intersect any monitors, a monitor,
@@ -490,16 +424,12 @@ public:
   
   /** Gets the width in millimeters of the specified monitor, if available.
    * 
-   * @newin{2,14}
-   * 
    * @param monitor_num Number of the monitor, between 0 and gdk_screen_get_n_monitors (screen).
    * @return The width of the monitor, or -1 if not available.
    */
   int get_monitor_width_mm(int monitor_num) const;
   
   /** Gets the height in millimeters of the specified monitor.
-   * 
-   * @newin{2,14}
    * 
    * @param monitor_num Number of the monitor, between 0 and gdk_screen_get_n_monitors (screen).
    * @return The height of the monitor, or -1 if not available.
@@ -509,8 +439,6 @@ public:
   /** Returns the output name of the specified monitor.
    * Usually something like VGA, DVI, or TV, not the actual
    * product name of the display device.
-   * 
-   * @newin{2,14}
    * 
    * @param monitor_num Number of the monitor, between 0 and gdk_screen_get_n_monitors (screen).
    * @return A newly-allocated string containing the name of the monitor,
@@ -531,8 +459,6 @@ public:
    * GDK_WIN32_CLIENT_MESSAGE to all top-level windows. The amount of
    * data is limited to one long, i.e. four bytes.
    * 
-   * @newin{2,2}
-   * 
    * @param event The Gdk::Event.
    */
   void broadcast_client_message(GdkEvent* event);
@@ -540,8 +466,6 @@ public:
   
   /** Gets the default screen for the default display. (See
    * Gdk::Display::get_default()).
-   * 
-   * @newin{2,2}
    * 
    * @return A Gdk::Screen, or <tt>0</tt> if there is no default display.
    */
@@ -557,8 +481,6 @@ public:
    * default set of font options does not affect contexts that
    * have already been created.
    * 
-   * @newin{2,10}
-   * 
    * @param options A #cairo_font_options_t, or <tt>0</tt> to unset any
    * previously set default font options.
    */
@@ -568,8 +490,6 @@ public:
    
 
   /** Gets any options previously set with set_font_options().
-   * 
-   * @newin{2,10}
    * 
    * @return The current font options, or <tt>0</tt> if no default
    * font options have been set.
@@ -582,8 +502,6 @@ public:
    * and cairo units. The default value is 96, meaning that a 10 point
    * font will be 13 units high. (10 * 96. / 72. = 13.3).
    * 
-   * @newin{2,10}
-   * 
    * @param dpi The resolution in "dots per inch". (Physical inches aren't actually
    * involved; the terminology is conventional.).
    */
@@ -591,8 +509,6 @@ public:
   
   /** Gets the resolution for font handling on the screen; see
    * set_resolution() for full details.
-   * 
-   * @newin{2,10}
    * 
    * @return The current resolution, or -1 if no resolution
    * has been set.
@@ -614,8 +530,6 @@ public:
    * The returned window should be unrefed using Glib::object_unref() when
    * no longer needed.
    * 
-   * @newin{2,10}
-   * 
    * @return The currently active window, or <tt>0</tt>.
    */
   Glib::RefPtr<Gdk::Window> get_active_window();
@@ -633,8 +547,6 @@ public:
    * 
    * The returned window should be unrefed using Glib::object_unref() when
    * no longer needed.
-   * 
-   * @newin{2,10}
    * 
    * @return The currently active window, or <tt>0</tt>.
    */
@@ -655,8 +567,6 @@ public:
    * The returned list is newly allocated and owns references to the
    * windows it contains, so it should be freed using Glib::list_free() and
    * its windows unrefed using Glib::object_unref() when no longer needed.
-   * 
-   * @newin{2,10}
    * 
    * @return A list of Gdk::Window<!-- -->s for the current window stack,
    * or <tt>0</tt>.

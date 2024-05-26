@@ -293,8 +293,6 @@ public:
   /** Remove the model from the TreeView.
    *
    * @see set_model().
-   *
-   * @newin{2,8}
    */
   void unset_model();
 
@@ -381,8 +379,6 @@ public:
   void columns_autosize();
   
   /** Returns whether all header columns are clickable.
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if all header columns are clickable, otherwise <tt>false</tt>.
    */
@@ -804,8 +800,6 @@ public:
   /** Expands the row at @a path. This will also expand all parent rows of
    *  @a path as necessary.
    * 
-   * @newin{2,2}
-   * 
    * @param path Path to a row.
    */
   void expand_to_path(const TreeModel::Path& path);
@@ -900,8 +894,6 @@ public:
    * If @a path is invalid for @a model, the current cursor (if any) will be unset
    * and the function will return without failing.
    * 
-   * @newin{2,2}
-   * 
    * @param path A Gtk::TreePath.
    * @param focus_column A Gtk::TreeViewColumn, or <tt>0</tt>.
    * @param focus_cell A Gtk::CellRenderer, or <tt>0</tt>.
@@ -979,8 +971,6 @@ public:
    * @param cell_y A reference where the Y coordinate relative to the cell
    *   can be placed
    * @return true if a row exists at that coordinate.
-   *
-   * @newin{2,8}
    */
   bool get_path_at_pos(int x, int y, TreeModel::Path& path, TreeViewColumn*& column, int& cell_x, int& cell_y) const;
 
@@ -1001,8 +991,6 @@ public:
    * @param y The y position to be identified (relative to bin_window).
    * @param path A reference to a TreeModel::Path to be filled in
    * @return true if a row exists at that coordinate.
-   *
-   * newin{2,16}
    */
   bool get_path_at_pos(int x, int y, TreeModel::Path& path) const;
 
@@ -1345,8 +1333,6 @@ public:
    * entry for @a tree_view.  In case the built-in entry is being used, <tt>0</tt>
    * will be returned.
    * 
-   * @newin{2,10}
-   * 
    * @return The entry currently in use as search entry.
    */
   Entry* get_search_entry();
@@ -1354,8 +1340,6 @@ public:
   /** Returns the Gtk::Entry which is currently in use as interactive search
    * entry for @a tree_view.  In case the built-in entry is being used, <tt>0</tt>
    * will be returned.
-   * 
-   * @newin{2,10}
    * 
    * @return The entry currently in use as search entry.
    */
@@ -1366,8 +1350,6 @@ public:
    * in our interface at all time at a fixed position.  Passing <tt>0</tt> for
    *  @a entry will make the interactive search code use the built-in popup
    * entry again.
-   * 
-   * @newin{2,10}
    * 
    * @param entry The entry the interactive search code of @a tree_view should use or <tt>0</tt>.
    */
@@ -1381,8 +1363,6 @@ public:
   /** Converts widget coordinates to coordinates for the
    * tree (the full scrollable area of the tree).
    * 
-   * @newin{2,12}
-   * 
    * @param wx X coordinate relative to the widget.
    * @param wy Y coordinate relative to the widget.
    * @param tx Return location for tree X coordinate.
@@ -1392,8 +1372,6 @@ public:
   
   /** Converts tree coordinates (coordinates in full scrollable area of the tree)
    * to widget coordinates.
-   * 
-   * @newin{2,12}
    * 
    * @param tx X coordinate relative to the tree.
    * @param ty Y coordinate relative to the tree.
@@ -1405,8 +1383,6 @@ public:
   /** Converts widget coordinates to coordinates for the bin_window
    * (see get_bin_window()).
    * 
-   * @newin{2,12}
-   * 
    * @param wx X coordinate relative to the widget.
    * @param wy Y coordinate relative to the widget.
    * @param bx Return location for bin_window X coordinate.
@@ -1416,8 +1392,6 @@ public:
   
   /** Converts bin_window coordinates (see get_bin_window())
    * to widget relative coordinates.
-   * 
-   * @newin{2,12}
    * 
    * @param bx Bin_window X coordinate.
    * @param by Bin_window Y coordinate.
@@ -1429,8 +1403,6 @@ public:
   /** Converts tree coordinates (coordinates in full scrollable area of the tree)
    * to bin_window coordinates.
    * 
-   * @newin{2,12}
-   * 
    * @param tx Tree X coordinate.
    * @param ty Tree Y coordinate.
    * @param bx Return location for X coordinate relative to bin_window.
@@ -1440,8 +1412,6 @@ public:
   
   /** Converts bin_window coordinates to coordinates for the
    * tree (the full scrollable area of the tree).
-   * 
-   * @newin{2,12}
    * 
    * @param bx X coordinate relative to bin_window.
    * @param by Y coordinate relative to bin_window.
@@ -1457,15 +1427,11 @@ public:
    * Only enable this option if all rows are the same height and all
    * columns are of type Gtk::TREE_VIEW_COLUMN_FIXED.
    * 
-   * @newin{2,6}
-   * 
    * @param enable <tt>true</tt> to enable fixed height mode.
    */
   void set_fixed_height_mode(bool enable =  true);
   
   /** Returns whether fixed height mode is turned on for @a tree_view.
-   * 
-   * @newin{2,6}
    * 
    * @return <tt>true</tt> if @a tree_view is in fixed height mode.
    */
@@ -1476,15 +1442,11 @@ public:
    * Currently, this works only for the selection modes 
    * Gtk::SELECTION_SINGLE and Gtk::SELECTION_BROWSE.
    * 
-   * @newin{2,6}
-   * 
    * @param hover <tt>true</tt> to enable hover selection mode.
    */
   void set_hover_selection(bool hover =  true);
   
   /** Returns whether hover selection mode is turned on for @a tree_view.
-   * 
-   * @newin{2,6}
    * 
    * @return <tt>true</tt> if @a tree_view is in hover selection mode.
    */
@@ -1494,15 +1456,11 @@ public:
    * Hover expansion makes rows expand or collapse if the pointer 
    * moves over them.
    * 
-   * @newin{2,6}
-   * 
    * @param expand <tt>true</tt> to enable hover selection mode.
    */
   void set_hover_expand(bool expand =  true);
   
   /** Returns whether hover expansion mode is turned on for @a tree_view.
-   * 
-   * @newin{2,6}
    * 
    * @return <tt>true</tt> if @a tree_view is in hover expansion mode.
    */
@@ -1512,8 +1470,6 @@ public:
    * is Gtk::SELECTION_MULTIPLE, rubber banding will allow the user to select
    * multiple rows by dragging the mouse.
    * 
-   * @newin{2,10}
-   * 
    * @param enable <tt>true</tt> to enable rubber banding.
    */
   void set_rubber_banding(bool enable =  true);
@@ -1521,8 +1477,6 @@ public:
   /** Returns whether rubber banding is turned on for @a tree_view.  If the
    * selection mode is Gtk::SELECTION_MULTIPLE, rubber banding will allow the
    * user to select multiple rows by dragging the mouse.
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if rubber banding in @a tree_view is enabled.
    */
@@ -1532,8 +1486,6 @@ public:
   
   /** Returns whether a rubber banding operation is currently being done
    * in @a tree_view.
-   * 
-   * @newin{2,12}
    * 
    * @return <tt>true</tt> if a rubber banding operation is currently being
    * done in @a tree_view.
@@ -1550,16 +1502,12 @@ public:
 
   /** Sets which grid lines to draw in @a tree_view.
    * 
-   * @newin{2,10}
-   * 
    * @param grid_lines A Gtk::TreeViewGridLines value indicating which grid lines to
    * enable.
    */
   void set_grid_lines(TreeViewGridLines grid_lines);
   
   /** Returns which grid lines are enabled in @a tree_view.
-   * 
-   * @newin{2,10}
    * 
    * @return A Gtk::TreeViewGridLines value indicating which grid lines
    * are enabled.
@@ -1570,15 +1518,11 @@ public:
   /** Sets whether to draw lines interconnecting the expanders in @a tree_view.
    * This does not have any visible effects for lists.
    * 
-   * @newin{2,10}
-   * 
    * @param enabled <tt>true</tt> to enable tree line drawing, <tt>false</tt> otherwise.
    */
   void set_enable_tree_lines(bool enable =  true);
   
   /** Returns whether or not tree lines are drawn in @a tree_view.
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if tree lines are drawn in @a tree_view, <tt>false</tt>
    * otherwise.
@@ -1594,15 +1538,11 @@ public:
    * set_level_indentation().
    * This does not have any visible effects for lists.
    * 
-   * @newin{2,12}
-   * 
    * @param enabled <tt>true</tt> to enable expander drawing, <tt>false</tt> otherwise.
    */
   void set_show_expanders(bool enabled =  true);
   
   /** Returns whether or not expanders are drawn in @a tree_view.
-   * 
-   * @newin{2,12}
    * 
    * @return <tt>true</tt> if expanders are drawn in @a tree_view, <tt>false</tt>
    * otherwise.
@@ -1615,16 +1555,12 @@ public:
    * indentation will be used.
    * This does not have any visible effects for lists.
    * 
-   * @newin{2,12}
-   * 
    * @param indentation The amount, in pixels, of extra indentation in @a tree_view.
    */
   void set_level_indentation(int indentation);
   
   /** Returns the amount, in pixels, of extra indentation for child levels
    * in @a tree_view.
-   * 
-   * @newin{2,12}
    * 
    * @return The amount of extra indentation for child levels in
    *  @a tree_view.  A return value of 0 means that this feature is disabled.
@@ -1656,8 +1592,6 @@ public:
    * 
    * See also set_tooltip_column() for a simpler alternative.
    * 
-   * @newin{2,12}
-   * 
    * @param tooltip A Gtk::Tooltip.
    * @param path A Gtk::TreePath or <tt>0</tt>.
    * @param column A Gtk::TreeViewColumn or <tt>0</tt>.
@@ -1685,8 +1619,6 @@ public:
    * to be relative to Gtk::TreeView's bin_window if keyboard_tooltip is false.
    *
    * Return value: whether or not the given tooltip context points to a row.
-   *
-   * @newin{2,12}
    */
   bool get_tooltip_context_path(int& x, int& y,
                                 bool keyboard_tip,
@@ -1711,8 +1643,6 @@ public:
    * to be relative to Gtk::TreeView's bin_window if keyboard_tooltip is false.
    *
    * Return value: whether or not the given tooltip context points to a row.
-   *
-   * @newin{2,12}
    */
   bool get_tooltip_context_iter(int& x, int& y,
                                 bool keyboard_tip,
@@ -1730,16 +1660,12 @@ public:
    * Note that the signal handler sets the text with Gtk::Tooltip::set_markup(),
    * so &, <, etc have to be escaped in the text.
    * 
-   * @newin{2,12}
-   * 
    * @param column An integer, which is a valid column number for @a tree_view's model.
    */
   void set_tooltip_column(int column);
   
   /** Returns the column of @a tree_view's model which is being used for
    * displaying tooltips on @a tree_view's rows.
-   * 
-   * @newin{2,12}
    * 
    * @return The index of the tooltip column that is currently being
    * used, or -1 if this is disabled.

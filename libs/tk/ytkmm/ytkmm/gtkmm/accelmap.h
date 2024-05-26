@@ -107,8 +107,6 @@ void save(const std::string& filename);
  * have to be unlocked.
  *
  * @param accel_path a valid accelerator path
- *
- * @newin{2,4}
  */
 void lock_path(const std::string& accel_path);
 
@@ -116,16 +114,12 @@ void lock_path(const std::string& accel_path);
  * about accelerator path locking.
  *
  * @param accel_path a valid accelerator path
- *
- * @newin{2,4}
  */
 void unlock_path(const std::string& accel_path);
 
 /** Looks up the accelerator entry for accel_path.
  * @param accel_path A valid accelerator path.
  * @result true if accel_path is known, false otherwise
- *
- * @newin{2,10}
  */
 bool lookup_entry (const Glib::ustring& accel_path);
 
@@ -133,8 +127,6 @@ bool lookup_entry (const Glib::ustring& accel_path);
  * @param accel_path A valid accelerator path.
  * @param key The accelerator key to be filled in.
  * @result true if accel_path is known, false otherwise
- *
- * @newin{2,10}
  */
 bool lookup_entry (const Glib::ustring& accel_path, Gtk::AccelKey& key);
 

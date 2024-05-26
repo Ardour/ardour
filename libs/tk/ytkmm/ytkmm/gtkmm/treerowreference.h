@@ -98,15 +98,11 @@ public:
   
   /** Returns the model that the row reference is monitoring.
    * 
-   * @newin{2,8}
-   * 
    * @return The model.
    */
   Glib::RefPtr<TreeModel> get_model();
   
   /** Returns the model that the row reference is monitoring.
-   * 
-   * @newin{2,8}
    * 
    * @return The model.
    */

@@ -573,8 +573,6 @@ public:
    * support can be turned off by setting the GDK_DISABLE_MEDIALIB environment
    * variable.
    * 
-   * @newin{2,2}
-   * 
    * @param gc A Gdk::GC, used for clipping.
    * @param pixbuf A Gdk::Pixbuf.
    * @param src_x Source X coordinate within pixbuf.
@@ -609,7 +607,6 @@ public:
    * support can be turned off by setting the GDK_DISABLE_MEDIALIB environment
    * variable.
    *
-   * @newin{2,16}
    * @param pixbuf A Gdk::Pixbuf.
    * @param src_x Source X coordinate within pixbuf.
    * @param src_y Source Y coordinates within pixbuf.
@@ -758,8 +755,6 @@ public:
 
   /** Gets the Gdk::Screen associated with a Gdk::Drawable.
    * 
-   * @newin{2,2}
-   * 
    * Deprecated: 2.24: Use Gdk::Window::get_screen() instead
    * 
    * @return The Gdk::Screen associated with @a drawable.
@@ -771,8 +766,6 @@ public:
 #ifndef GDKMM_DISABLE_DEPRECATED
 
   /** Gets the Gdk::Screen associated with a Gdk::Drawable.
-   * 
-   * @newin{2,2}
    * 
    * Deprecated: 2.24: Use Gdk::Window::get_screen() instead
    * 
@@ -786,8 +779,6 @@ public:
 
   /** Gets the Gdk::Display associated with a Gdk::Drawable.
    * 
-   * @newin{2,2}
-   * 
    * Deprecated: 2.24: Use Gdk::Window::get_display() instead
    * 
    * @return The Gdk::Display associated with @a drawable.
@@ -800,8 +791,6 @@ public:
 
   /** Gets the Gdk::Display associated with a Gdk::Drawable.
    * 
-   * @newin{2,2}
-   * 
    * Deprecated: 2.24: Use Gdk::Window::get_display() instead
    * 
    * @return The Gdk::Display associated with @a drawable.
@@ -813,8 +802,6 @@ public:
   /** Creates a Cairo context for drawing to @a drawable.
    * 
    * @return A newly created Cairo context.
-   * 
-   * @newin{2,10}.
    */
   Cairo::RefPtr<Cairo::Context> create_cairo_context();
 

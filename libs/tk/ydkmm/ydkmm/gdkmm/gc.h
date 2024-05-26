@@ -698,15 +698,11 @@ public:
   
   /** Gets the Gdk::Screen for which @a gc was created
    * 
-   * @newin{2,2}
-   * 
    * @return The Gdk::Screen for @a gc.
    */
   Glib::RefPtr<Screen> get_screen();
   
   /** Gets the Gdk::Screen for which @a gc was created
-   * 
-   * @newin{2,2}
    * 
    * @return The Gdk::Screen for @a gc.
    */

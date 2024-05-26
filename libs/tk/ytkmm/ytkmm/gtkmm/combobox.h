@@ -142,16 +142,12 @@ public:
 
   /** Creates a new empty #GtkComboBox, optionally with an entry.
    * @param has_entry If this is true then this will have an Entry widget.
-   *
-   * newin{2,24}
    */
   explicit ComboBox(bool has_entry); //has_entry has a default value in gtkmm-3.0 but can't here because we already have a default constructor.
   
   /** Creates a new ComboBox with the model initialized to @a model.
    * @param model The model containing data to display in the ComboBox.
    * @param has_entry If this is true then this will have an Entry widget.
-   *
-   * newin{2,24}
    */
   explicit ComboBox(const Glib::RefPtr<TreeModel>& model, bool has_entry); //has_entry has a default value in gtkmm-3.0 but can't here because we already have a default constructor.
   
@@ -160,8 +156,6 @@ public:
    * the preferred number of columns when you want the popup to be layed out
    * in a table.
    * 
-   * @newin{2,4}
-   * 
    * @param width Preferred number of columns.
    */
   void set_wrap_width(int width);
@@ -169,8 +163,6 @@ public:
   /** Returns the wrap width which is used to determine the number of columns 
    * for the popup menu. If the wrap width is larger than 1, the combo box 
    * is in table mode.
-   * 
-   * @newin{2,6}
    * 
    * @return The wrap width.
    */
@@ -181,15 +173,11 @@ public:
    * The row span column contains integers which indicate how many rows
    * an item should span.
    * 
-   * @newin{2,4}
-   * 
    * @param row_span A column in the model passed during construction.
    */
   void set_row_span_column(int row_span);
   
   /** Returns the column with row span information for @a combo_box.
-   * 
-   * @newin{2,6}
    * 
    * @return The row span column.
    */
@@ -200,15 +188,11 @@ public:
    *  @a column_span. The column span column contains integers which indicate
    * how many columns an item should span.
    * 
-   * @newin{2,4}
-   * 
    * @param column_span A column in the model passed during construction.
    */
   void set_column_span_column(int column_span);
   
   /** Returns the column with column span information for @a combo_box.
-   * 
-   * @newin{2,6}
    * 
    * @return The column span column.
    */
@@ -224,8 +208,6 @@ public:
   /** Sets whether the popup menu should have a tearoff 
    * menu item.
    * 
-   * @newin{2,6}
-   * 
    * @param add_tearoffs <tt>true</tt> to add tearoff menu items.
    */
   void set_add_tearoffs(bool add_tearoffs =  true);
@@ -234,16 +216,12 @@ public:
   /** Gets the current title of the menu in tearoff mode. See
    * set_add_tearoffs().
    * 
-   * @newin{2,10}
-   * 
    * @return The menu's title in tearoff mode. This is an internal copy of the
    * string which must not be freed.
    */
   Glib::ustring get_title() const;
   
   /** Sets the menu's title in tearoff mode.
-   * 
-   * @newin{2,10}
    * 
    * @param title A title for the menu in tearoff mode.
    */
@@ -252,8 +230,6 @@ public:
   
   /** Returns whether the combo box grabs focus when it is clicked 
    * with the mouse. See set_focus_on_click().
-   * 
-   * @newin{2,6}
    * 
    * @return <tt>true</tt> if the combo box grabs focus when it is 
    * clicked with the mouse.
@@ -264,8 +240,6 @@ public:
    * the mouse. Making mouse clicks not grab focus is useful in places 
    * like toolbars where you don't want the keyboard focus removed from 
    * the main area of the application.
-   * 
-   * @newin{2,6}
    * 
    * @param focus_on_click Whether the combo box grabs focus when clicked 
    * with the mouse.
@@ -279,8 +253,6 @@ public:
    * is not an immediate child of the root of the tree, this function returns 
    * <tt>gtk_tree_path_get_indices (path)[0]</tt>, where 
    * <tt>path</tt> is the Gtk::TreePath of the active item.
-   * 
-   * @newin{2,4}
    * 
    * @return An integer which is the index of the currently active item, 
    * or -1 if there's no active item.
@@ -300,8 +272,6 @@ public:
     
   /** Sets the active item of @a combo_box to be the item at @a index.
    * 
-   * @newin{2,4}
-   * 
    * @param index An index in the model passed during construction, or -1 to have
    * no active item.
    */
@@ -310,16 +280,12 @@ public:
   /** Sets the current active item to be the one referenced by @a iter, or
    * unsets the active item if @a iter is <tt>0</tt>.
    * 
-   * @newin{2,4}
-   * 
    * @param iter The Gtk::TreeIter, or <tt>0</tt>.
    */
   void set_active(const TreeModel::iterator& iter);
   
   //TODO: See https://bugzilla.gnome.org/show_bug.cgi?id=612396#c30
   /** Get the text in the entry, if there is an entry.
-   *
-   * @newin{2,24}
    */
   Glib::ustring get_entry_text() const;
 
@@ -330,16 +296,12 @@ public:
   
   /** Returns the Gtk::TreeModel which is acting as data source for @a combo_box.
    * 
-   * @newin{2,4}
-   * 
    * @return A Gtk::TreeModel which was passed
    * during construction.
    */
   Glib::RefPtr<TreeModel> get_model();
   
   /** Returns the Gtk::TreeModel which is acting as data source for @a combo_box.
-   * 
-   * @newin{2,4}
    * 
    * @return A Gtk::TreeModel which was passed
    * during construction.
@@ -353,8 +315,6 @@ public:
    * call Gtk::CellLayout::clear() yourself if you need to set up different
    * cell renderers for the new model.
    * 
-   * @newin{2,4}
-   * 
    * @param model A Gtk::TreeModel.
    */
   void set_model(const Glib::RefPtr<TreeModel>& model);
@@ -362,8 +322,6 @@ public:
   /** Remove the model from the ComboBox.
    *
    * @see set_model().
-   *
-   * @newin{2,16}
    */
   void unset_model();
 
@@ -385,16 +343,12 @@ public:
    * always sensitive (Gtk::SENSITIVITY_ON), never sensitive (Gtk::SENSITIVITY_OFF)
    * or only if there is at least one item to display (Gtk::SENSITIVITY_AUTO).
    * 
-   * @newin{2,14}
-   * 
    * @param sensitivity Specify the sensitivity of the dropdown button.
    */
   void set_button_sensitivity(SensitivityType sensitivity);
   
   /** Returns whether the combo box sets the dropdown button
    * sensitive or not when there are no items in the model.
-   * 
-   * @newin{2,14}
    * 
    * @return Gtk::SENSITIVITY_ON if the dropdown button
    * is sensitive when the model is empty, Gtk::SENSITIVITY_OFF
@@ -406,8 +360,6 @@ public:
 
   
   /** Returns whether the combo box has an entry.
-   * 
-   * @newin{2,24}
    * 
    * @return Whether there is an entry in @a combo_box.
    */
@@ -421,8 +373,6 @@ public:
    * This is only relevant if @a combo_box has been created with
    * Gtk::ComboBox::property_has_entry() as <tt>true</tt>.
    * 
-   * @newin{2,24}
-   * 
    * @param text_column A column in @a model to get the strings from for
    * the internal entry.
    */
@@ -435,8 +385,6 @@ public:
    * This is only relevant if @a combo_box has been created with
    * Gtk::ComboBox::property_has_entry() as <tt>true</tt>.
    * 
-   * @newin{2,24}
-   * 
    * @param text_column A column in @a model to get the strings from for
    * the internal entry.
    */
@@ -445,8 +393,6 @@ public:
   
   /** Returns the column which @a combo_box is using to get the strings
    * from to display in the internal entry.
-   * 
-   * @newin{2,24}
    * 
    * @return A column in the data source model of @a combo_box.
    */
@@ -457,8 +403,6 @@ public:
    * 
    * This function is mostly intended for use by accessibility technologies;
    * applications should have little use for it.
-   * 
-   * @newin{2,4}
    */
   void popup();
   
@@ -466,8 +410,6 @@ public:
    * 
    * This function is mostly intended for use by accessibility technologies;
    * applications should have little use for it.
-   * 
-   * @newin{2,4}
    */
   void popdown();
 
@@ -478,8 +420,6 @@ public:
    * 
    * This function is mostly intended for use by accessibility technologies;
    * applications should have little use for it.
-   * 
-   * @newin{2,6}
    * 
    * @return The accessible object corresponding
    * to the combo box's popup.
@@ -495,8 +435,6 @@ public:
    * This function is mostly intended for use by accessibility technologies;
    * applications should have little use for it.
    * 
-   * @newin{2,6}
-   * 
    * @return The accessible object corresponding
    * to the combo box's popup.
    */
@@ -507,12 +445,10 @@ public:
    //These are in ComboBoxText.
 
   /** @see Bin::get_child().
-   * @newin{2,24}
    */
   Entry* get_entry();
 
   /** @see Bin::get_child().
-   * @newin{2,24}
    */
   const Entry* get_entry() const;
   

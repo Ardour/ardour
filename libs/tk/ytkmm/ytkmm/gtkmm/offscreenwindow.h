@@ -62,8 +62,6 @@ namespace Gtk
  *
  * When contained offscreen widgets are redrawn, OffscreenWindow
  * will emit a "damage-event" signal.
- *
- * @newin{2,20}
  * @ingroup Containers
  * @ingroup Widgets
  */
@@ -131,8 +129,6 @@ public:
    * a Gdk::Pixmap.  If you need to keep this around over window
    * resizes then you should add a reference to it.
    * 
-   * @newin{2,20}
-   * 
    * @return A Gdk::Pixmap pointer to the offscreen pixmap,
    * or <tt>0</tt>.
    */
@@ -141,8 +137,6 @@ public:
   /** Retrieves a snapshot of the contained widget in the form of
    * a Gdk::Pixmap.  If you need to keep this around over window
    * resizes then you should add a reference to it.
-   * 
-   * @newin{2,20}
    * 
    * @return A Gdk::Pixmap pointer to the offscreen pixmap,
    * or <tt>0</tt>.
@@ -155,8 +149,6 @@ public:
    * and the application should unreference it once it is no longer
    * needed.
    * 
-   * @newin{2,20}
-   * 
    * @return A Gdk::Pixbuf pointer, or <tt>0</tt>.
    */
   Glib::RefPtr<Gdk::Pixbuf> get_pixbuf();
@@ -165,8 +157,6 @@ public:
    * a Gdk::Pixbuf.  This is a new pixbuf with a reference count of 1,
    * and the application should unreference it once it is no longer
    * needed.
-   * 
-   * @newin{2,20}
    * 
    * @return A Gdk::Pixbuf pointer, or <tt>0</tt>.
    */

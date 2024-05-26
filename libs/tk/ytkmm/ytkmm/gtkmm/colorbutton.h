@@ -119,8 +119,6 @@ public:
    * the current selected color. When the button is clicked, a color-selection dialog will
    * open, allowing the user to select a color. The swatch will be updated to reflect the
    * new color when the user finishes.
-   *
-   * @newin{2,4}
    */
   ColorButton();
   
@@ -132,23 +130,17 @@ public:
    * after the default constructor.
    *
    * @param color A Gdk::Color to set the current color with.
-   *
-   * @newin{2,4}
    */
     explicit ColorButton(const Gdk::Color& color);
 
 
   /** Sets the current color to be @a color.
    * 
-   * @newin{2,4}
-   * 
    * @param color A Gdk::Color to set the current color with.
    */
   void set_color(const Gdk::Color& color);
   
   /** Sets the current opacity to be @a alpha. 
-   * 
-   * @newin{2,4}
    * 
    * @param alpha An integer between 0 and 65535.
    */
@@ -159,15 +151,11 @@ public:
    * Changes to the return value will have no effect on the Gtk::ColorButton.
    *
    * @return A Gdk::Color representing the current internal color of the Gtk::ColorButton.
-   *
-   * @newin{2,4}
    */
   Gdk::Color get_color() const;
   
   
   /** Returns the current alpha value. 
-   * 
-   * @newin{2,4}
    * 
    * @return An integer between 0 and 65535.
    */
@@ -175,15 +163,11 @@ public:
   
   /** Sets whether or not the color button should use the alpha channel.
    * 
-   * @newin{2,4}
-   * 
    * @param use_alpha <tt>true</tt> if color button should use alpha channel, <tt>false</tt> if not.
    */
   void set_use_alpha(bool use_alpha =  true);
   
   /** Does the color selection dialog use the alpha channel?
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt> if the color sample uses alpha channel, <tt>false</tt> if not.
    */
@@ -191,15 +175,11 @@ public:
   
   /** Sets the title for the color selection dialog.
    * 
-   * @newin{2,4}
-   * 
    * @param title String containing new window title.
    */
   void set_title(const Glib::ustring& title);
   
   /** Gets the title of the color selection dialog.
-   * 
-   * @newin{2,4}
    * 
    * @return The title.
    */

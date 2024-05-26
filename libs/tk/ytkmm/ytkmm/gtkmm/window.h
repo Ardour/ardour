@@ -816,7 +816,6 @@ public:
 
   /** Unsets the current transient window.
    * @see set_transient_for().
-   * @newin{2,20}
    */
   void unset_transient_for();
 
@@ -848,16 +847,12 @@ public:
    * Note that setting a window's opacity after the window has been
    * shown causes it to flicker once on Windows.
    * 
-   * @newin{2,12}
-   * 
    * @param opacity Desired opacity, between 0 and 1.
    */
   void set_opacity(double opacity);
   
   /** Fetches the requested opacity for this window. See
    * set_opacity().
-   * 
-   * @newin{2,12}
    * 
    * @return The requested opacity for this window.
    */
@@ -887,15 +882,11 @@ public:
   /** Windows may set a hint asking the desktop environment not to display
    * the window in the task bar. This function sets this hint.
    * 
-   * @newin{2,2}
-   * 
    * @param setting <tt>true</tt> to keep this window from appearing in the task bar.
    */
   void set_skip_taskbar_hint(bool setting =  true);
   
   /** Gets the value set by set_skip_taskbar_hint()
-   * 
-   * @newin{2,2}
    * 
    * @return <tt>true</tt> if window shouldn't be in taskbar.
    */
@@ -908,15 +899,11 @@ public:
    * switcher that displays a thumbnail representation of the windows
    * on the screen.)
    * 
-   * @newin{2,2}
-   * 
    * @param setting <tt>true</tt> to keep this window from appearing in the pager.
    */
   void set_skip_pager_hint(bool setting =  true);
   
   /** Gets the value set by set_skip_pager_hint().
-   * 
-   * @newin{2,2}
    * 
    * @return <tt>true</tt> if window shouldn't be in pager.
    */
@@ -926,15 +913,11 @@ public:
   /** Windows may set a hint asking the desktop environment to draw
    * the users attention to the window. This function sets this hint.
    * 
-   * @newin{2,8}
-   * 
    * @param setting <tt>true</tt> to mark this window as urgent.
    */
   void set_urgency_hint(bool setting =  true);
   
   /** Gets the value set by set_urgency_hint()
-   * 
-   * @newin{2,8}
    * 
    * @return <tt>true</tt> if window is urgent.
    */
@@ -944,15 +927,11 @@ public:
   /** Windows may set a hint asking the desktop environment not to receive
    * the input focus. This function sets this hint.
    * 
-   * @newin{2,4}
-   * 
    * @param setting <tt>true</tt> to let this window receive input focus.
    */
   void set_accept_focus(bool setting =  true);
   
   /** Gets the value set by set_accept_focus().
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt> if window should receive the input focus.
    */
@@ -962,15 +941,11 @@ public:
    * the input focus when the window is mapped.  This function sets this
    * hint.
    * 
-   * @newin{2,6}
-   * 
    * @param setting <tt>true</tt> to let this window receive input focus on map.
    */
   void set_focus_on_map(bool setting =  true);
   
   /** Gets the value set by set_focus_on_map().
-   * 
-   * @newin{2,6}
    * 
    * @return <tt>true</tt> if window should receive the input focus when
    * mapped.
@@ -992,8 +967,6 @@ public:
 
   
   /** Sets the Gtk::Window::property_mnemonics_visible() property.
-   * 
-   * @newin{2,20}
    * 
    * @param setting The new value.
    */
@@ -1052,8 +1025,6 @@ public:
    * the window is already mapped, it will be unmapped, and
    * then remapped on the new screen.
    * 
-   * @newin{2,2}
-   * 
    * @param screen A Gdk::Screen.
    */
   void set_screen(const Glib::RefPtr<Gdk::Screen>& screen);
@@ -1061,15 +1032,11 @@ public:
   
   /** Returns the Gdk::Screen associated with @a window.
    * 
-   * @newin{2,2}
-   * 
    * @return A Gdk::Screen.
    */
   Glib::RefPtr<Gdk::Screen> get_screen();
   
   /** Returns the Gdk::Screen associated with @a window.
-   * 
-   * @newin{2,2}
    * 
    * @return A Gdk::Screen.
    */
@@ -1193,16 +1160,12 @@ public:
    * On Windows, this function always works, since there's no window manager
    * policy involved.
    * 
-   * @newin{2,10}
-   * 
    * @param setting <tt>true</tt> to decorate the window as deletable.
    */
   void set_deletable(bool setting =  true);
   
   /** Returns whether the window has been set to have a close button
    * via set_deletable().
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if the window has been set to have a close button.
    */
@@ -1287,8 +1250,6 @@ public:
    * Note that this has nothing to do with the WM_ICON_NAME 
    * property which is mentioned in the ICCCM.
    * 
-   * @newin{2,6}
-   * 
    * @param name The name of the themed icon.
    */
   void set_icon_name(const Glib::ustring& name);
@@ -1324,8 +1285,6 @@ public:
   /** Returns the name of the themed icon for the window,
    * see set_icon_name().
    * 
-   * @newin{2,6}
-   * 
    * @return The icon name or <tt>0</tt> if the window has 
    * no themed icon.
    */
@@ -1354,8 +1313,6 @@ public:
   /** Sets an icon to be used as fallback for windows that haven't
    * had set_icon() called on them from a pixbuf.
    * 
-   * @newin{2,4}
-   * 
    * @param icon The icon.
    */
   static void set_default_icon(const Glib::RefPtr<Gdk::Pixbuf>& icon);
@@ -1364,8 +1321,6 @@ public:
    * had set_icon_list() called on them from a named
    * themed icon, see set_icon_name().
    * 
-   * @newin{2,6}
-   * 
    * @param name The name of the themed icon.
    */
   static void set_default_icon_name(const Glib::ustring& name);
@@ -1373,8 +1328,6 @@ public:
   /** Sets an icon to be used as fallback for windows that haven't
    * had set_icon_list() called on them from a file
    * on disk. Warns on failure if @a err is <tt>0</tt>.
-   * 
-   * @newin{2,2}
    * 
    * @param filename Location of icon file.
    * @return <tt>true</tt> if setting the icon succeeded.
@@ -1390,8 +1343,6 @@ public:
    * In that example, you would disable startup notification
    * temporarily, show your splash screen, then re-enable it so that
    * showing the main window would automatically result in notification.
-   * 
-   * @newin{2,2}
    * 
    * @param setting <tt>true</tt> to automatically do startup notification.
    */
@@ -1495,8 +1446,6 @@ public:
    * If you need to present a window without a timestamp, use 
    * present(). See present() for details. 
    * 
-   * @newin{2,8}
-   * 
    * @param timestamp The timestamp of the user interaction (typically a 
    * button or key press event) which triggered this call.
    */
@@ -1595,8 +1544,6 @@ public:
    * 
    * You can track the fullscreen state via the "window-state-event" signal
    * on Gtk::Widget.
-   * 
-   * @newin{2,2}
    */
   void fullscreen();
   
@@ -1609,8 +1556,6 @@ public:
    * 
    * You can track the fullscreen state via the "window-state-event" signal
    * on Gtk::Widget.
-   * 
-   * @newin{2,2}
    */
   void unfullscreen();
 
@@ -1875,8 +1820,6 @@ public:
    *  @a window is <tt>0</tt> or if @a window does not have an explicit
    * window group.
    * 
-   * @newin{2,10}
-   * 
    * @return The Gtk::WindowGroup for a window or the default group.
    */
   Glib::RefPtr<WindowGroup> get_group();
@@ -1885,16 +1828,12 @@ public:
    *  @a window is <tt>0</tt> or if @a window does not have an explicit
    * window group.
    * 
-   * @newin{2,10}
-   * 
    * @return The Gtk::WindowGroup for a window or the default group.
    */
   Glib::RefPtr<const WindowGroup> get_group() const;
 
   
   /** Gets the type of the window. See Gtk::WindowType.
-   * 
-   * @newin{2,20}
    * 
    * @return The type of the window.
    */
@@ -1927,8 +1866,6 @@ public:
    * for user preferences and should not be used by applications e.g. for 
    * drawing attention to their dialogs.
    * 
-   * @newin{2,4}
-   * 
    * @param setting Whether to keep @a window above other windows.
    */
   void set_keep_above(bool setting =  true);
@@ -1951,8 +1888,6 @@ public:
    * Manager Hints specification, the above state is mainly meant 
    * for user preferences and should not be used by applications e.g. for 
    * drawing attention to their dialogs.
-   * 
-   * @newin{2,4}
    * 
    * @param setting Whether to keep @a window below other windows.
    */

@@ -236,16 +236,12 @@ public:
   /** Sets the mode used to ellipsize (add an ellipsis: "...") the text 
    * if there is not enough space to render the entire string.
    * 
-   * @newin{2,6}
-   * 
    * @param mode A Pango::EllipsizeMode.
    */
   void set_ellipsize(Pango::EllipsizeMode mode);
   
   /** Returns the ellipsizing position of the progressbar. 
    * See set_ellipsize().
-   * 
-   * @newin{2,6}
    * 
    * @return Pango::EllipsizeMode.
    */

@@ -107,8 +107,6 @@ public:
   
   /** Gets the name of the action group.
    * 
-   * @newin{2,4}
-   * 
    * @return The name of the action group.
    */
   Glib::ustring get_name() const;
@@ -119,15 +117,11 @@ public:
    * they are sensitive (see get_sensitive()) and their group
    * is sensitive.
    * 
-   * @newin{2,4}
-   * 
    * @return <tt>true</tt> if the group is sensitive.
    */
   bool get_sensitive() const;
   
   /** Changes the sensitivity of @a action_group
-   * 
-   * @newin{2,4}
    * 
    * @param sensitive New sensitivity.
    */
@@ -138,15 +132,11 @@ public:
    * they are visible (see get_visible()) and their group
    * is visible.
    * 
-   * @newin{2,4}
-   * 
    * @return <tt>true</tt> if the group is visible.
    */
   bool get_visible() const;
   
   /** Changes the visible of @a action_group.
-   * 
-   * @newin{2,4}
    * 
    * @param visible New visiblity.
    */
@@ -155,16 +145,12 @@ public:
   
   /** Looks up an action in the action group by name.
    * 
-   * @newin{2,4}
-   * 
    * @param action_name The name of the action.
    * @return The action, or <tt>0</tt> if no action by that name exists.
    */
   Glib::RefPtr<Action> get_action(const Glib::ustring& action_name);
   
   /** Looks up an action in the action group by name.
-   * 
-   * @newin{2,4}
    * 
    * @param action_name The name of the action.
    * @return The action, or <tt>0</tt> if no action by that name exists.
@@ -174,15 +160,11 @@ public:
   
   /** Lists the actions in the action group.
    * 
-   * @newin{2,4}
-   * 
    * @return An allocated list of the action objects in the action group.
    */
   Glib::ListHandle< Glib::RefPtr<Action> > get_actions();
   
   /** Lists the actions in the action group.
-   * 
-   * @newin{2,4}
    * 
    * @return An allocated list of the action objects in the action group.
    */
@@ -205,8 +187,6 @@ public:
   
   /** Removes an action object from the action group.
    * 
-   * @newin{2,4}
-   * 
    * @param action An action.
    */
   void remove(const Glib::RefPtr<Action>& action);
@@ -215,8 +195,6 @@ public:
   
   /** Translates a string using the specified translate_func(). This
    * is mainly intended for language bindings.
-   * 
-   * @newin{2,6}
    * 
    * @param string A string.
    * @return The translation of @a string.

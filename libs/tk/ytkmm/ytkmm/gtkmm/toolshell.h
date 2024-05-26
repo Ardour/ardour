@@ -55,8 +55,6 @@ namespace Gtk
 
 /** A base class for containers containing ToolItem widgets.
  * This interface allows container widgets to provide additional information when embedding ToolItem widgets. 
- *
- * @newin{2,14}
  */
 
 class ToolShell : public Glib::Interface
@@ -130,8 +128,6 @@ public:
   /** Retrieves the icon size for the tool shell. Tool items must not call this
    * function directly, but rely on Gtk::ToolItem::get_icon_size() instead.
    * 
-   * @newin{2,14}
-   * 
    * @return The current size for icons of @a shell.
    */
   IconSize get_icon_size() const;
@@ -139,8 +135,6 @@ public:
   /** Retrieves the current orientation for the tool shell. Tool items must not
    * call this function directly, but rely on Gtk::ToolItem::get_orientation()
    * instead.
-   * 
-   * @newin{2,14}
    * 
    * @return The current orientation of @a shell.
    */
@@ -150,16 +144,12 @@ public:
    * not call this function directly, but rely on gtk_tool_item_get_style()
    * instead.
    * 
-   * @newin{2,14}
-   * 
    * @return The current style of @a shell.
    */
   ToolbarStyle get_style() const;
   
   /** Returns the relief style of buttons on @a shell. Tool items must not call this
    * function directly, but rely on Gtk::ToolItem::get_relief_style() instead.
-   * 
-   * @newin{2,14}
    * 
    * @return The relief style of buttons on @a shell.
    */
@@ -171,16 +161,12 @@ public:
    * 
    * Tool items must not call this function directly, but rely on
    * Gtk::ToolItem::rebuild_menu() instead.
-   * 
-   * @newin{2,14}
    */
   void rebuild_menu();
   
   /** Retrieves the current text orientation for the tool shell. Tool items must not
    * call this function directly, but rely on Gtk::ToolItem::get_text_orientation()
    * instead.
-   * 
-   * @newin{2,20}
    * 
    * @return The current text orientation of @a shell.
    */
@@ -190,8 +176,6 @@ public:
    * call this function directly, but rely on Gtk::ToolItem::get_text_alignment()
    * instead.
    * 
-   * @newin{2,20}
-   * 
    * @return The current text alignment of @a shell.
    */
   float get_text_alignment() const;
@@ -199,8 +183,6 @@ public:
   /** Retrieves the current ellipsize mode for the tool shell. Tool items must not
    * call this function directly, but rely on Gtk::ToolItem::get_ellipsize_mode()
    * instead.
-   * 
-   * @newin{2,20}
    * 
    * @return The current ellipsize mode of @a shell.
    */
@@ -211,8 +193,6 @@ public:
    * call this function directly, but rely on Gtk::ToolItem::get_text_size_group()
    * instead.
    * 
-   * @newin{2,20}
-   * 
    * @return The current text size group of @a shell.
    */
   Glib::RefPtr<SizeGroup> get_text_size_group();
@@ -220,8 +200,6 @@ public:
   /** Retrieves the current text size group for the tool shell. Tool items must not
    * call this function directly, but rely on Gtk::ToolItem::get_text_size_group()
    * instead.
-   * 
-   * @newin{2,20}
    * 
    * @return The current text size group of @a shell.
    */

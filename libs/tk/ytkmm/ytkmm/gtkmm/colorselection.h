@@ -348,15 +348,11 @@ public:
 
   /** Retrieves the Gtk::ColorSelection widget embedded in the dialog.
    * 
-   * @newin{2,14}
-   * 
    * @return The embedded Gtk::ColorSelection.
    */
   ColorSelection* get_color_selection();
   
   /** Retrieves the Gtk::ColorSelection widget embedded in the dialog.
-   * 
-   * @newin{2,14}
    * 
    * @return The embedded Gtk::ColorSelection.
    */

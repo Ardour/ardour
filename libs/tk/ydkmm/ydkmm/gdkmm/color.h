@@ -216,8 +216,6 @@ public:
    * where r, g and b are hex digits representing the red, green and blue components respectively.
    *
    * @result The string representation.
-   *
-   * @newin{2,14}
    */
   Glib::ustring to_string() const;
 

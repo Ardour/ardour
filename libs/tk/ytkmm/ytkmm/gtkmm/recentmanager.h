@@ -124,8 +124,6 @@ namespace Gtk
  * get_for_screen() and it will contain information about current
  * recent manager for that screen.
  *
- * @newin{2,10}
- *
  * @ingroup RecentFiles
  */
 
@@ -191,8 +189,6 @@ public:
    * in your application without caring about memory management. The
    * returned instance will be freed when you application terminates.
    * 
-   * @newin{2,10}
-   * 
    * @return A unique Gtk::RecentManager. Do not ref or unref it.
    */
   static Glib::RefPtr<RecentManager> get_default();
@@ -211,8 +207,6 @@ public:
    * Deprecated: 2.12: This function has been deprecated and should
    * not be used in newly written code. Calling this function is
    * equivalent to calling get_default().
-   * 
-   * @newin{2,10}
    * 
    * @param screen A Gdk::Screen.
    * @return A unique Gtk::RecentManager associated with the given
@@ -260,8 +254,6 @@ public:
    * track the user's currently configured recently used documents
    * storage.
    * 
-   * @newin{2,10}
-   * 
    * Deprecated: 2.12: This function has been deprecated and should
    * not be used in newly written code. Calling this function has
    * no effect.
@@ -288,8 +280,6 @@ public:
   /** Removes a resource pointed by @a uri from the recently used resources
    * list handled by a recent manager.
    * 
-   * @newin{2,10}
-   * 
    * @param uri The URI of the item you wish to remove.
    * @return <tt>true</tt> if the item pointed by @a uri has been successfully
    * removed by the recently used resources list, and <tt>false</tt> otherwise.
@@ -299,8 +289,6 @@ public:
   /** Searches for a URI inside the recently used resources list, and
    * returns a structure containing informations about the resource
    * like its MIME type, or its display name.
-   * 
-   * @newin{2,10}
    * 
    * @param uri A URI.
    * @return A Gtk::RecentInfo structure containing information
@@ -314,8 +302,6 @@ public:
    * returns a structure containing informations about the resource
    * like its MIME type, or its display name.
    * 
-   * @newin{2,10}
-   * 
    * @param uri A URI.
    * @return A Gtk::RecentInfo structure containing information
    * about the resource pointed by @a uri, or <tt>0</tt> if the URI was
@@ -327,8 +313,6 @@ public:
   /** Checks whether there is a recently used resource registered
    * with @a uri inside the recent manager.
    * 
-   * @newin{2,10}
-   * 
    * @param uri A URI.
    * @return <tt>true</tt> if the resource was found, <tt>false</tt> otherwise.
    */
@@ -338,8 +322,6 @@ public:
    * 
    * Please note that this function will not affect the resource pointed
    * by the URIs, but only the URI used in the recently used resources list.
-   * 
-   * @newin{2,10}
    * 
    * @param uri The URI of a recently used resource.
    * @param new_uri The new URI of the recently used resource, or <tt>0</tt> to
@@ -352,8 +334,6 @@ public:
    * function should return.  If @a limit is set to -1, then return all the
    * items.
    * 
-   * @newin{2,10}
-   * 
    * Deprecated: 2.22: The length of the list should be managed by the
    * view (implementing Gtk::RecentChooser), and not by the model (the
    * Gtk::RecentManager). See Gtk::RecentChooser::property_limit().
@@ -364,8 +344,6 @@ public:
   
   /** Gets the maximum number of items that the get_items()
    * function should return.
-   * 
-   * @newin{2,10}
    * 
    * Deprecated: 2.22: The length of the list should be managed by the
    * view (implementing Gtk::RecentChooser), and not by the model (the
@@ -380,8 +358,6 @@ public:
 
   /** Gets the list of recently used resources.
    * 
-   * @newin{2,10}
-   * 
    * @return A list of
    * newly allocated Gtk::RecentInfo objects. Use
    * Gtk::RecentInfo::unref() on each item inside the list, and then
@@ -391,8 +367,6 @@ public:
 
   
   /** Purges every item from the recently used resources list.
-   * 
-   * @newin{2,10}
    * 
    * @return The number of items that have been removed from the
    * recently used resources list.

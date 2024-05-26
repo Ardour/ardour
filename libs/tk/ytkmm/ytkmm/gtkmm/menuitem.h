@@ -137,7 +137,6 @@ public:
   void set_submenu(Menu& submenu);
 
   /** Remove the menu item's sub-menu.
-   * @newin{2,22}
    */
   void unset_submenu();
 
@@ -224,8 +223,6 @@ public:
    * 
    * See set_accel_path() for details.
    * 
-   * @newin{2,14}
-   * 
    * @return The accelerator path corresponding to this menu item's
    * functionality, or <tt>0</tt> if not set.
    */
@@ -233,15 +230,11 @@ public:
   
   /** Sets @a text on the @a menu_item label
    * 
-   * @newin{2,16}
-   * 
    * @param label The text you want to set.
    */
   void set_label(const Glib::ustring& label);
   
   /** Sets @a text on the @a menu_item label
-   * 
-   * @newin{2,16}
    * 
    * @return The text in the @a menu_item label. This is the internal
    * string used by the label, and must not be modified.
@@ -251,16 +244,12 @@ public:
   /** If true, an underline in the text indicates the next character should be
    * used for the mnemonic accelerator key.
    * 
-   * @newin{2,16}
-   * 
    * @param setting <tt>true</tt> if underlines in the text indicate mnemonics.
    */
   void set_use_underline(bool setting =  true);
   
   /** Checks if an underline in the text indicates the next character should be
    * used for the mnemonic accelerator key.
-   * 
-   * @newin{2,16}
    * 
    * @return <tt>true</tt> if an embedded underline in the label indicates
    * the mnemonic accelerator key.

@@ -338,8 +338,6 @@ public:
    * which returns cursor locations, i.e. positions <em>between</em>
    * characters.
    * 
-   * @newin{2,6}
-   * 
    * @param iter A Gtk::TextIter.
    * @param trailing If non-<tt>0</tt>, location to store an integer indicating where
    * in the grapheme the user clicked. It will either be
@@ -405,15 +403,11 @@ public:
   
   /** Gets the horizontal-scrolling Gtk::Adjustment.
    * 
-   * @newin{2,22}
-   * 
    * @return Pointer to the horizontal Gtk::Adjustment.
    */
   Gtk::Adjustment* get_hadjustment();
   
   /** Gets the horizontal-scrolling Gtk::Adjustment.
-   * 
-   * @newin{2,22}
    * 
    * @return Pointer to the horizontal Gtk::Adjustment.
    */
@@ -421,15 +415,11 @@ public:
   
   /** Gets the vertical-scrolling Gtk::Adjustment.
    * 
-   * @newin{2,22}
-   * 
    * @return Pointer to the vertical Gtk::Adjustment.
    */
   Gtk::Adjustment* get_vadjustment();
   
   /** Gets the vertical-scrolling Gtk::Adjustment.
-   * 
-   * @newin{2,22}
    * 
    * @return Pointer to the vertical Gtk::Adjustment.
    */
@@ -591,8 +581,6 @@ public:
    * 
    * [C example ellipted]
    * 
-   * @newin{2,22}
-   * 
    * @param event The key event.
    * @return <tt>true</tt> if the input method handled the key event.
    */
@@ -602,8 +590,6 @@ public:
    * 
    * This can be necessary in the case where modifying the buffer
    * would confuse on-going input method behavior.
-   * 
-   * @newin{2,22}
    */
   void reset_im_context();
 
@@ -803,15 +789,11 @@ public:
   
   /** Changes the Gtk::TextView overwrite mode.
    * 
-   * @newin{2,4}
-   * 
    * @param overwrite <tt>true</tt> to turn on overwrite mode, <tt>false</tt> to turn it off.
    */
   void set_overwrite(bool overwrite =  true);
   
   /** Returns whether the Gtk::TextView is in overwrite mode or not.
-   * 
-   * @newin{2,4}
    * 
    * @return Whether @a text_view is in overwrite mode or not.
    */
@@ -823,8 +805,6 @@ public:
    * is <tt>false</tt> the keyboard focus is moved to the next widget in the focus 
    * chain.
    * 
-   * @newin{2,4}
-   * 
    * @param accepts_tab <tt>true</tt> if pressing the Tab key should insert a tab 
    * character, <tt>false</tt>, if pressing the Tab key should move the 
    * keyboard focus.
@@ -833,8 +813,6 @@ public:
   
   /** Returns whether pressing the Tab key inserts a tab characters.
    * set_accepts_tab().
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt> if pressing the Tab key inserts a tab character, 
    * <tt>false</tt> if pressing the Tab key moves the keyboard focus.

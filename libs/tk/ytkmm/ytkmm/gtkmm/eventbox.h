@@ -116,8 +116,6 @@ public:
   /** Returns whether the event box has a visible window.
    * See set_visible_window() for details.
    * 
-   * @newin{2,4}
-   * 
    * @return <tt>true</tt> if the event box window is visible.
    */
   bool get_visible_window() const;
@@ -158,8 +156,6 @@ public:
    * descendant windows, not just at the same place on the screen.
    * </note>
    * 
-   * @newin{2,4}
-   * 
    * @param visible_window Boolean value.
    */
   void set_visible_window(bool visible_window =  true);
@@ -167,8 +163,6 @@ public:
   /** Returns whether the event box window is above or below the
    * windows of its child. See set_above_child() for
    * details.
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt> if the event box window is above the window
    * of its child.
@@ -182,8 +176,6 @@ public:
    * to its parents.
    * 
    * The default is to keep the window below the child.
-   * 
-   * @newin{2,4}
    * 
    * @param above_child <tt>true</tt> if the event box window is above the windows of its child.
    */

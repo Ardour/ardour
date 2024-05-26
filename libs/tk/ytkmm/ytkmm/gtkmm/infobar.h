@@ -61,8 +61,6 @@ namespace Gtk
  * The InfoBar widget looks like
  * @image html infobar1.png
  *
- * @newin{2,18}
- *
  * @ingroup Widgets
  */
 
@@ -131,15 +129,11 @@ public:
   
   /** Returns the action area of @a info_bar.
    * 
-   * @newin{2,18}
-   * 
    * @return The action area.
    */
   Widget* get_action_area();
   
   /** Returns the action area of @a info_bar.
-   * 
-   * @newin{2,18}
    * 
    * @return The action area.
    */
@@ -148,15 +142,11 @@ public:
   
   /** Returns the content area of @a info_bar.
    * 
-   * @newin{2,18}
-   * 
    * @return The content area.
    */
   Widget* get_content_area();
   
   /** Returns the content area of @a info_bar.
-   * 
-   * @newin{2,18}
    * 
    * @return The content area.
    */
@@ -167,8 +157,6 @@ public:
    * connecting a signal handler that will emit the Gtk::InfoBar::signal_response()
    * signal on the message area when the widget is activated. The widget
    * is appended to the end of the message areas action area.
-   * 
-   * @newin{2,18}
    * 
    * @param child An activatable widget.
    * @param response_id Response ID for @a child.
@@ -182,8 +170,6 @@ public:
    * to the end of the info bars's action area. The button widget is
    * returned, but usually you don't need it.
    * 
-   * @newin{2,18}
-   * 
    * @param button_text Text of button, or stock ID.
    * @param response_id Response ID for the button.
    * @return The button widget that was added.
@@ -196,8 +182,6 @@ public:
    * to the end of the info bars's action area. The button widget is
    * returned, but usually you don't need it.
    * 
-   * @newin{2,18}
-   * 
    * @param button_text Text of button, or stock ID.
    * @param response_id Response ID for the button.
    * @return The button widget that was added.
@@ -208,8 +192,6 @@ public:
   /** Calls gtk_widget_set_sensitive (widget, setting) for each
    * widget in the info bars's action area with the given response_id.
    * A convenient way to sensitize/desensitize dialog buttons.
-   * 
-   * @newin{2,18}
    * 
    * @param response_id A response ID.
    * @param setting <tt>true</tt> for sensitive.
@@ -223,16 +205,12 @@ public:
    * Note that this function currently requires @a info_bar to
    * be added to a widget hierarchy. 
    * 
-   * @newin{2,18}
-   * 
    * @param response_id A response ID.
    */
   void set_default_response(int response_id);
 
   
   /** Emits the 'response' signal with the given @a response_id.
-   * 
-   * @newin{2,18}
    * 
    * @param response_id A response ID.
    */
@@ -243,15 +221,11 @@ public:
    * GTK+ uses this type to determine what color to use
    * when drawing the message area.
    * 
-   * @newin{2,18}
-   * 
    * @param message_type A Gtk::MessageType.
    */
   void set_message_type(MessageType message_type);
   
   /** Returns the message type of the message area.
-   * 
-   * @newin{2,18}
    * 
    * @return The message type of the message area.
    */

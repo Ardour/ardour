@@ -54,8 +54,6 @@ namespace Gtk
  *
  * The LinkButton widget looks like this:
  * @image html linkbutton1.png
- *
- * @newin{2,10}
  * @ingroup Widgets
  */
 
@@ -122,8 +120,6 @@ public:
 
   /** Retrieves the URI set using set_uri().
    * 
-   * @newin{2,10}
-   * 
    * @return A valid URI.  The returned string is owned by the link button
    * and should not be modified or freed.
    */
@@ -131,8 +127,6 @@ public:
   
   /** Sets @a uri as the URI where the Gtk::LinkButton points. As a side-effect
    * this unsets the 'visited' state of the button.
-   * 
-   * @newin{2,10}
    * 
    * @param uri A valid URI.
    */
@@ -145,16 +139,12 @@ public:
    * 
    * The state may also be changed using set_visited().
    * 
-   * @newin{2,14}
-   * 
    * @return <tt>true</tt> if the link has been visited, <tt>false</tt> otherwise.
    */
   bool get_visited() const;
   
   /** Sets the 'visited' state of the URI where the Gtk::LinkButton
    * points.  See get_visited() for more details.
-   * 
-   * @newin{2,14}
    * 
    * @param visited The new 'visited' state.
    */
@@ -175,8 +165,6 @@ public:
    * This function is called before every signal handler registered for the "clicked" signal.
    *
    * @param slot A function called each time a LinkButton is clicked.
-   * @newin{2,12}
-   *
    * @deprecated Use Button::signal_clicked()  instead.
    */
   static void set_uri_hook(const SlotUri& slot);
@@ -184,8 +172,6 @@ public:
 
   /** Unsets any previously set slot as the function that should be invoked every time a user clicks a LinkButton. 
    * @see set_uri_hook().
-   * @newin{2,
-   *
    * @deprecated Use  Button::signal_clicked() instead.
    */
   static void unset_uri_hook();

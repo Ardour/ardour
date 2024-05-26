@@ -154,15 +154,11 @@ public:
   /** Retrieves the title of the browse dialog used by @a button. The returned value
    * should not be modified or freed.
    * 
-   * @newin{2,6}
-   * 
    * @return A pointer to the browse dialog's title.
    */
   Glib::ustring get_title() const;
   
   /** Modifies the @a title of the browse dialog used by @a button.
-   * 
-   * @newin{2,6}
    * 
    * @param title The new browse dialog title.
    */
@@ -171,15 +167,11 @@ public:
   
   /** Retrieves the width in characters of the @a button widget's entry and/or label.
    * 
-   * @newin{2,6}
-   * 
    * @return An integer width (in characters) that the button will use to size itself.
    */
   int get_width_chars() const;
   
   /** Sets the width (in characters) that @a button will use to @a n_chars.
-   * 
-   * @newin{2,6}
    * 
    * @param n_chars The new width, in characters.
    */
@@ -188,8 +180,6 @@ public:
   
   /** Returns whether the button grabs focus when it is clicked with the mouse.
    * See set_focus_on_click().
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if the button grabs focus when it is clicked with
    * the mouse.
@@ -200,8 +190,6 @@ public:
    * Making mouse clicks not grab focus is useful in places like toolbars where
    * you don't want the keyboard focus removed from the main area of the
    * application.
-   * 
-   * @newin{2,10}
    * 
    * @param focus_on_click Whether the button grabs focus when clicked with the mouse.
    */

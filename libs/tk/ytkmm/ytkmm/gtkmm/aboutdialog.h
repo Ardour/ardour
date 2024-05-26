@@ -123,8 +123,6 @@ public:
 
   /** Returns the program name displayed in the about dialog.
    * 
-   * @newin{2,6}
-   * 
    * Deprecated: 2.12: Use get_program_name() instead.
    * 
    * @return The program name. The string is owned by the about
@@ -139,8 +137,6 @@ public:
   /** Sets the name to display in the about dialog.
    * If this is not set, it defaults to Glib::get_application_name().
    * 
-   * @newin{2,6}
-   * 
    * Deprecated: 2.12: Use set_program_name() instead.
    * 
    * @param name The program name.
@@ -152,15 +148,11 @@ public:
   /** Return value: The program name.
    * 
    * @return The program name.
-   * 
-   * @newin{2,12}.
    */
   Glib::ustring get_program_name() const;
   
   /** Sets the name to display in the about dialog.
    * If this is not set, it defaults to Glib::get_application_name().
-   * 
-   * @newin{2,12}
    * 
    * @param name The program name.
    */
@@ -169,8 +161,6 @@ public:
   
   /** Returns the version string.
    * 
-   * @newin{2,6}
-   * 
    * @return The version string. The string is owned by the about
    * dialog and must not be modified.
    */
@@ -178,15 +168,11 @@ public:
   
   /** Sets the version string to display in the about dialog.
    * 
-   * @newin{2,6}
-   * 
    * @param version The version string.
    */
   void set_version(const Glib::ustring& version);
   
   /** Returns the copyright string.
-   * 
-   * @newin{2,6}
    * 
    * @return The copyright string. The string is owned by the about
    * dialog and must not be modified.
@@ -196,15 +182,11 @@ public:
   /** Sets the copyright string to display in the about dialog.
    * This should be a short string of one or two lines.
    * 
-   * @newin{2,6}
-   * 
    * @param copyright (allow-none) the copyright string.
    */
   void set_copyright(const Glib::ustring& copyright);
   
   /** Returns the comments string.
-   * 
-   * @newin{2,6}
    * 
    * @return The comments. The string is owned by the about
    * dialog and must not be modified.
@@ -214,15 +196,11 @@ public:
   /** Sets the comments string to display in the about dialog.
    * This should be a short string of one or two lines.
    * 
-   * @newin{2,6}
-   * 
    * @param comments A comments string.
    */
   void set_comments(const Glib::ustring& comments);
   
   /** Returns the license information.
-   * 
-   * @newin{2,6}
    * 
    * @return The license information. The string is owned by the about
    * dialog and must not be modified.
@@ -233,15 +211,11 @@ public:
    * license dialog. If @a license is <tt>0</tt>, the license button is
    * hidden.
    * 
-   * @newin{2,6}
-   * 
    * @param license The license information or <tt>0</tt>.
    */
   void set_license(const Glib::ustring& license);
   
   /** Returns the website URL.
-   * 
-   * @newin{2,6}
    * 
    * @return The website URL. The string is owned by the about
    * dialog and must not be modified.
@@ -253,8 +227,6 @@ public:
    * Note that that the hook functions need to be set up
    * before calling this function.
    * 
-   * @newin{2,6}
-   * 
    * @param website A URL string starting with "http://".
    */
   void set_website(const Glib::ustring& website);
@@ -262,15 +234,11 @@ public:
   /** Return value: The label used for the website link.
    * 
    * @return The label used for the website link. 
-   * 
-   * @newin{2,6}.
    */
   Glib::ustring get_website_label() const;
   
   /** Sets the label to be used for the website link.
    * It defaults to the website URL.
-   * 
-   * @newin{2,6}
    * 
    * @param website_label The label used for the website link.
    */
@@ -279,8 +247,6 @@ public:
    
   /** Returns the string which are displayed in the authors tab
    * of the secondary credits dialog.
-   * 
-   * @newin{2,6}
    * 
    * @return A <tt>0</tt>-terminated string array containing
    * the authors. The array is owned by the about dialog
@@ -292,8 +258,6 @@ public:
   /** Sets the strings which are displayed in the authors tab
    * of the secondary credits dialog.
    * 
-   * @newin{2,6}
-   * 
    * @param authors A <tt>0</tt>-terminated array of strings.
    */
   void set_authors(const Glib::StringArrayHandle& authors) const;
@@ -301,8 +265,6 @@ public:
   
   /** Returns the string which are displayed in the documenters
    * tab of the secondary credits dialog.
-   * 
-   * @newin{2,6}
    * 
    * @return A <tt>0</tt>-terminated string array containing
    * the documenters. The array is owned by the about dialog
@@ -314,16 +276,12 @@ public:
   /** Sets the strings which are displayed in the documenters tab
    * of the secondary credits dialog.
    * 
-   * @newin{2,6}
-   * 
    * @param documenters A <tt>0</tt>-terminated array of strings.
    */
   void set_documenters(const Glib::StringArrayHandle& documenters);
   
   /** Returns the string which are displayed in the artists tab
    * of the secondary credits dialog.
-   * 
-   * @newin{2,6}
    * 
    * @return A <tt>0</tt>-terminated string array containing
    * the artists. The array is owned by the about dialog
@@ -334,16 +292,12 @@ public:
   /** Sets the strings which are displayed in the artists tab
    * of the secondary credits dialog.
    * 
-   * @newin{2,6}
-   * 
    * @param artists A <tt>0</tt>-terminated array of strings.
    */
   void set_artists(const Glib::StringArrayHandle& artists);
   
   /** Returns the translator credits string which is displayed
    * in the translators tab of the secondary credits dialog.
-   * 
-   * @newin{2,6}
    * 
    * @return The translator credits string. The string is
    * owned by the about dialog and must not be modified.
@@ -364,16 +318,12 @@ public:
    * since Gtk::AboutDialog will detect if "translator-credits" is untranslated
    * and hide the tab.
    * 
-   * @newin{2,6}
-   * 
    * @param translator_credits The translator credits.
    */
   void set_translator_credits(const Glib::ustring& translator_credits);
 
   
   /** Returns the pixbuf displayed as logo in the about dialog.
-   * 
-   * @newin{2,6}
    * 
    * @return The pixbuf displayed as logo. The
    * pixbuf is owned by the about dialog. If you want to keep a
@@ -382,8 +332,6 @@ public:
   Glib::RefPtr<Gdk::Pixbuf> get_logo();
   
   /** Returns the pixbuf displayed as logo in the about dialog.
-   * 
-   * @newin{2,6}
    * 
    * @return The pixbuf displayed as logo. The
    * pixbuf is owned by the about dialog. If you want to keep a
@@ -396,16 +344,12 @@ public:
    * If it is <tt>0</tt>, the default window icon set with
    * Gtk::Window::set_default_icon() will be used.
    * 
-   * @newin{2,6}
-   * 
    * @param logo A Gdk::Pixbuf, or <tt>0</tt>.
    */
   void set_logo(const Glib::RefPtr<Gdk::Pixbuf>& logo);
 
   
   /** Returns the icon name displayed as logo in the about dialog.
-   * 
-   * @newin{2,6}
    * 
    * @return The icon name displayed as logo. The string is
    * owned by the dialog. If you want to keep a reference
@@ -417,8 +361,6 @@ public:
    * If it is <tt>0</tt>, the default window icon set with
    * Gtk::Window::set_default_icon() will be used.
    * 
-   * @newin{2,6}
-   * 
    * @param icon_name An icon name, or <tt>0</tt>.
    */
   void set_logo_icon_name(const Glib::ustring& icon_name);
@@ -427,16 +369,12 @@ public:
   /** Returns whether the license text in @a about is
    * automatically wrapped.
    * 
-   * @newin{2,8}
-   * 
    * @return <tt>true</tt> if the license text is wrapped.
    */
   bool get_wrap_license() const;
   
   /** Sets whether the license text in @a about is
    * automatically wrapped.
-   * 
-   * @newin{2,8}
    * 
    * @param wrap_license Whether to wrap the license.
    */

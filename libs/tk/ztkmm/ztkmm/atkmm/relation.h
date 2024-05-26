@@ -167,8 +167,6 @@ public:
   /** Adds the specified AtkObject to the target for the relation, if it is
    * not already present.  See also Atk::Object::add_relationship().
    * 
-   * 
-   * @newin{1,9}
    * @param target An Atk::Object.
    */
   void add_target(const Glib::RefPtr<Atk::Object>& target);

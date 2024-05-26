@@ -186,8 +186,6 @@ public:
   /** Swaps @a a and @a b in @a store. Note that this function only works with
    * unsorted stores.
    * 
-   * @newin{2,2}
-   * 
    * @param a A Gtk::TreeIter.
    * @param b Another Gtk::TreeIter.
    */
@@ -215,8 +213,6 @@ public:
    * purposes.</warning>
    * 
    * Checks if the given iter is a valid iter for this Gtk::ListStore.
-   * 
-   * @newin{2,2}
    * 
    * @param iter A Gtk::TreeIter.
    * @return <tt>true</tt> if the iter is valid, <tt>false</tt> if the iter is invalid.

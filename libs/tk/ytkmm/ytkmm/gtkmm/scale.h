@@ -172,8 +172,6 @@ public:
    * object is owned by the scale so does not need to be freed by
    * the caller.
    * 
-   * @newin{2,4}
-   * 
    * @return The Pango::Layout for this scale,
    * or <tt>0</tt> if the Gtk::Scale::property_draw_value() property is <tt>false</tt>.
    */
@@ -182,8 +180,6 @@ public:
   /** Gets the Pango::Layout used to display the scale. The returned
    * object is owned by the scale so does not need to be freed by
    * the caller.
-   * 
-   * @newin{2,4}
    * 
    * @return The Pango::Layout for this scale,
    * or <tt>0</tt> if the Gtk::Scale::property_draw_value() property is <tt>false</tt>.
@@ -197,8 +193,6 @@ public:
    * 
    * If the Gtk::Scale::property_draw_value() property is <tt>false</tt>, the return 
    * values are undefined.
-   * 
-   * @newin{2,4}
    * 
    * @param x Location to store X offset of layout, or <tt>0</tt>.
    * @param y Location to store Y offset of layout, or <tt>0</tt>.
@@ -216,8 +210,6 @@ public:
    * 
    * To remove marks from a scale, use clear_marks().
    * 
-   * @newin{2,16}
-   * 
    * @param value The value at which the mark is placed, must be between 
    * the lower and upper limits of the scales' adjustment.
    * @param position Where to draw the mark. For a horizontal scale, Gtk::POS_TOP
@@ -229,8 +221,6 @@ public:
   void add_mark(double value, PositionType position, const Glib::ustring& markup);
   
   /** Removes any marks that have been added with add_mark().
-   * 
-   * @newin{2,16}
    */
   void clear_marks();
   

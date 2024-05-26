@@ -307,8 +307,6 @@ public:
   
   /** Returns the number of rows and columns in the table.
    * 
-   * @newin{2,22}
-   * 
    * @param rows Return location for the number of
    * rows, or <tt>0</tt>.
    * @param columns Return location for the number

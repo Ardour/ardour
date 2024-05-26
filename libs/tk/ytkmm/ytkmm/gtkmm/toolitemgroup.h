@@ -44,8 +44,6 @@ namespace Gtk
 
 /** A ToolItemGroup is used together with ToolPalette to add ToolItems to a 
  * palette-like container with different categories and drag and drop support.
- *
- * @newin{2,20}
  * @ingroup Widgets
  * @ingroup Containers
  */
@@ -114,8 +112,6 @@ public:
   /** Sets the label of the tool item group. The label is displayed in the header
    * of the group.
    * 
-   * @newin{2,20}
-   * 
    * @param label The new human-readable label of of the group.
    */
   void set_label(const Glib::ustring& label);
@@ -124,23 +120,17 @@ public:
    * The label widget is displayed in the header of the group, in place
    * of the usual label.
    * 
-   * @newin{2,20}
-   * 
    * @param label_widget The widget to be displayed in place of the usual label.
    */
   void set_label_widget(Widget& label_widget);
   
   /** Sets whether the @a group should be collapsed or expanded.
    * 
-   * @newin{2,20}
-   * 
    * @param collapsed Whether the @a group should be collapsed or expanded.
    */
   void set_collapsed(bool collapsed =  true);
   
   /** Sets the ellipsization mode which should be used by labels in @a group.
-   * 
-   * @newin{2,20}
    * 
    * @param ellipsize The Pango::EllipsizeMode labels in @a group should use.
    */
@@ -149,16 +139,12 @@ public:
   /** Set the button relief of the group header.
    * See Gtk::Button::set_relief() for details.
    * 
-   * @newin{2,20}
-   * 
    * @param style The Gtk::ReliefStyle.
    */
   void set_header_relief(ReliefStyle style);
 
   
   /** Gets the label of @a group.
-   * 
-   * @newin{2,20}
    * 
    * @return The label of @a group. The label is an internal string of @a group
    * and must not be modified. Note that <tt>0</tt> is returned if a custom
@@ -170,16 +156,12 @@ public:
   /** Gets the label widget of @a group.
    * See set_label_widget().
    * 
-   * @newin{2,20}
-   * 
    * @return The label widget of @a group.
    */
   Widget* get_label_widget();
   
   /** Gets the label widget of @a group.
    * See set_label_widget().
-   * 
-   * @newin{2,20}
    * 
    * @return The label widget of @a group.
    */
@@ -188,15 +170,11 @@ public:
   
   /** Gets whether @a group is collapsed or expanded.
    * 
-   * @newin{2,20}
-   * 
    * @return <tt>true</tt> if @a group is collapsed, <tt>false</tt> if it is expanded.
    */
   bool get_collapsed() const;
   
   /** Gets the ellipsization mode of @a group.
-   * 
-   * @newin{2,20}
    * 
    * @return The Pango::EllipsizeMode of @a group.
    */
@@ -204,16 +182,12 @@ public:
   
   /** Gets the relief mode of the header button of @a group.
    * 
-   * @newin{2,20}
-   * 
    * @return The Gtk::ReliefStyle.
    */
   ReliefStyle get_header_relief() const;
 
   
   /** Inserts @a item at @a position in the list of children of @a group.
-   * 
-   * @newin{2,20}
    * 
    * @param item The Gtk::ToolItem to insert into @a group.
    * @param position The position of @a item in @a group, starting with 0.
@@ -230,8 +204,6 @@ public:
   
   /** Sets the position of @a item in the list of children of @a group.
    * 
-   * @newin{2,20}
-   * 
    * @param item The Gtk::ToolItem to move to a new position, should
    * be a child of @a group.
    * @param position The new position of @a item in @a group, starting with 0.
@@ -241,8 +213,6 @@ public:
   
   /** Gets the position of @a item in @a group as index.
    * 
-   * @newin{2,20}
-   * 
    * @param item A Gtk::ToolItem.
    * @return The index of @a item in @a group or -1 if @a item is no child of @a group.
    */
@@ -251,8 +221,6 @@ public:
   
   /** Gets the number of tool items in @a group.
    * 
-   * @newin{2,20}
-   * 
    * @return The number of tool items in @a group.
    */
   guint get_n_items() const;
@@ -260,16 +228,12 @@ public:
   
   /** Gets the tool item at @a index in group.
    * 
-   * @newin{2,20}
-   * 
    * @param index The index.
    * @return The Gtk::ToolItem at index.
    */
   ToolItem* get_nth_item(guint index);
   
   /** Gets the tool item at @a index in group.
-   * 
-   * @newin{2,20}
    * 
    * @param index The index.
    * @return The Gtk::ToolItem at index.
@@ -279,8 +243,6 @@ public:
   
   /** Gets the tool item at position (x, y).
    * 
-   * @newin{2,20}
-   * 
    * @param x The x position.
    * @param y The y position.
    * @return The Gtk::ToolItem at position (x, y).
@@ -288,8 +250,6 @@ public:
   ToolItem* get_drop_item(int x, int y);
   
   /** Gets the tool item at position (x, y).
-   * 
-   * @newin{2,20}
    * 
    * @param x The x position.
    * @param y The y position.

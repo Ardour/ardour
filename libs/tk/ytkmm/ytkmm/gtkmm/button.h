@@ -241,16 +241,12 @@ public:
    * you don't want the keyboard focus removed from the main area of the
    * application.
    * 
-   * @newin{2,4}
-   * 
    * @param focus_on_click Whether the button grabs focus when clicked with the mouse.
    */
   void set_focus_on_click(bool focus_on_click =  true);
   
   /** Returns whether the button grabs focus when it is clicked with the mouse.
    * See set_focus_on_click().
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt> if the button grabs focus when it is clicked with
    * the mouse.
@@ -261,8 +257,6 @@ public:
   /** Sets the alignment of the child. This property has no effect unless 
    * the child is a Gtk::Misc or a Gtk::Aligment.
    * 
-   * @newin{2,4}
-   * 
    * @param xalign The horizontal position of the child, 0.0 is left aligned, 
    * 1.0 is right aligned.
    * @param yalign The vertical position of the child, 0.0 is top aligned, 
@@ -271,8 +265,6 @@ public:
   void set_alignment(float xalign, float yalign);
   
   /** Gets the alignment of the child in the button.
-   * 
-   * @newin{2,4}
    * 
    * @param xalign Return location for horizontal alignment.
    * @param yalign Return location for vertical alignment.
@@ -285,8 +277,6 @@ public:
    * image will be displayed or not, you don't have to call
    * Gtk::Widget::show() on @a image yourself.
    * 
-   * @newin{2,6}
-   * 
    * @param image A widget to set as the image for the button.
    */
   void set_image(Widget& image);
@@ -294,16 +284,12 @@ public:
   /** Gets the widget that is currenty set as the image of @a button.
    *     This may have been explicitly set by set_image()
    *     or specified as a stock item to the constructor.
-   * 
-   *     @newin{2,6}
    */
   Widget* get_image();
   
   /** Gets the widget that is currenty set as the image of @a button.
    *     This may have been explicitly set by set_image()
    *     or specified as a stock item to the constructor.
-   * 
-   *     @newin{2,6}
    */
   const Widget* get_image() const;
 
@@ -311,16 +297,12 @@ public:
   /** Sets the position of the image relative to the text 
    * inside the button.
    * 
-   * @newin{2,10}
-   * 
    * @param position The position.
    */
   void set_image_position(PositionType position);
   
   /** Gets the position of the image relative to the text 
    * inside the button.
-   * 
-   * @newin{2,10}
    * 
    * @return The position.
    */
@@ -330,16 +312,12 @@ public:
   /** Returns the button's event window if it is realized, <tt>0</tt> otherwise.
    * This function should be rarely needed.
    * 
-   * @newin{2,22}
-   * 
    * @return  @a button's event window.
    */
   Glib::RefPtr<Gdk::Window> get_event_window();
   
   /** Returns the button's event window if it is realized, <tt>0</tt> otherwise.
    * This function should be rarely needed.
-   * 
-   * @newin{2,22}
    * 
    * @return  @a button's event window.
    */

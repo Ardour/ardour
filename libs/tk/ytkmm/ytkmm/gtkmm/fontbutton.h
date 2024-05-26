@@ -117,15 +117,11 @@ public:
   
   /** Retrieves the title of the font selection dialog.
    * 
-   * @newin{2,4}
-   * 
    * @return An internal copy of the title string which must not be freed.
    */
   Glib::ustring get_title() const;
   
   /** Sets the title for the font selection dialog.  
-   * 
-   * @newin{2,4}
    * 
    * @param title A string containing the font selection dialog title.
    */
@@ -133,15 +129,11 @@ public:
   
   /** Returns whether the selected font is used in the label.
    * 
-   * @newin{2,4}
-   * 
    * @return Whether the selected font is used in the label.
    */
   bool get_use_font() const;
   
   /** If @a use_font is <tt>true</tt>, the font name will be written using the selected font.  
-   * 
-   * @newin{2,4}
    * 
    * @param use_font If <tt>true</tt>, font name will be written using font chosen.
    */
@@ -149,15 +141,11 @@ public:
   
   /** Returns whether the selected size is used in the label.
    * 
-   * @newin{2,4}
-   * 
    * @return Whether the selected size is used in the label.
    */
   bool get_use_size() const;
   
   /** If @a use_size is <tt>true</tt>, the font name will be written using the selected size.
-   * 
-   * @newin{2,4}
    * 
    * @param use_size If <tt>true</tt>, font name will be written using the selected size.
    */
@@ -170,15 +158,11 @@ public:
    * style, size, weight) just query these properties from the
    * Pango::FontDescription object.
    * 
-   * @newin{2,4}
-   * 
    * @return An internal copy of the font name which must not be freed.
    */
   Glib::ustring get_font_name() const;
   
   /** Sets or updates the currently-displayed font in font picker dialog.
-   * 
-   * @newin{2,4}
    * 
    * @param fontname Name of font to display in font selection dialog.
    * @return Return value of Gtk::FontSelectionDialog::set_font_name() if the
@@ -188,15 +172,11 @@ public:
   
   /** Returns whether the name of the font style will be shown in the label.
    * 
-   * @newin{2,4}
-   * 
    * @return Whether the font style will be shown in the label.
    */
   bool get_show_style() const;
   
   /** If @a show_style is <tt>true</tt>, the font style will be displayed along with name of the selected font.
-   * 
-   * @newin{2,4}
    * 
    * @param show_style <tt>true</tt> if font style should be displayed in label.
    */
@@ -204,15 +184,11 @@ public:
   
   /** Returns whether the font size will be shown in the label.
    * 
-   * @newin{2,4}
-   * 
    * @return Whether the font size will be shown in the label.
    */
   bool get_show_size() const;
   
   /** If @a show_size is <tt>true</tt>, the font size will be displayed along with the name of the selected font.
-   * 
-   * @newin{2,4}
    * 
    * @param show_size <tt>true</tt> if font size should be displayed in dialog.
    */

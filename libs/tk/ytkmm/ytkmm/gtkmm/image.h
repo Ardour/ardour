@@ -210,8 +210,6 @@ public:
    *
    * @param icon_set An IconSet
    * @param size A stock icon size.
-   *
-   * @newin{2,24}
    */
     explicit Image(const IconSet& icon_set, IconSize icon_size);
 
@@ -305,8 +303,6 @@ public:
   
   /** See new_from_gicon() for details.
    * 
-   * @newin{2,14}
-   * 
    * @param icon An icon.
    * @param size An icon size.
    */
@@ -318,8 +314,6 @@ public:
    * displayed instead.  If the current icon theme is changed, the icon
    * will be updated appropriately.
    * 
-   * @newin{2,6}
-   * 
    * @param icon_name An icon name.
    * @param size A stock icon size.
    */
@@ -327,8 +321,6 @@ public:
 
 
   /** Resets the image to be empty.
-   * 
-   * @newin{2,8}
    */
   void clear();
 
@@ -395,8 +387,6 @@ public:
   * IMAGE_GICON (see get_storage_type()).
   *
   * @param icon_size A place to store an icon size.
-  * 
-  * @newin{2,14}
   */
   Glib::RefPtr<Gio::Icon> get_gicon(Gtk::IconSize& icon_size);
 
@@ -405,8 +395,6 @@ public:
   * IMAGE_GICON (see get_storage_type()).
   *
   * @param icon_size A place to store an icon size.
-  * 
-  * @newin{2,14}
   */
   Glib::RefPtr<const Gio::Icon> get_gicon(Gtk::IconSize& icon_size) const;
   
@@ -417,8 +405,6 @@ public:
 
   /** Gets the pixel size used for named icons.
    * 
-   * @newin{2,6}
-   * 
    * @return The pixel size used for named icons.
    */
   int get_pixel_size() const;
@@ -426,8 +412,6 @@ public:
   /** Sets the pixel size to use for named icons. If the pixel size is set
    * to a value != -1, it is used instead of the icon size set by
    * set_from_icon_name().
-   * 
-   * @newin{2,6}
    * 
    * @param pixel_size The new pixel size.
    */

@@ -141,8 +141,6 @@ namespace Gtk
  * that implement this interface are RecentChooserWidget, RecentChooserDialog
  * and RecentChooserMenu.
  *
- * @newin{2,10}
- *
  * @ingroup RecentFiles
  */
 
@@ -216,16 +214,12 @@ public:
   
   /** Whether to show recently used resources marked registered as private.
    * 
-   * @newin{2,10}
-   * 
    * @param show_private <tt>true</tt> to show private items, <tt>false</tt> otherwise.
    */
   void set_show_private(bool show_private =  true);
   
   /** Returns whether @a chooser should display recently used resources
    * registered as private.
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if the recent chooser should show private items,
    * <tt>false</tt> otherwise.
@@ -235,16 +229,12 @@ public:
   /** Sets whether @a chooser should display the recently used resources that
    * it didn't find.  This only applies to local resources.
    * 
-   * @newin{2,10}
-   * 
    * @param show_not_found Whether to show the local items we didn't find.
    */
   void set_show_not_found(bool show_not_found =  true);
   
   /** Retrieves whether @a chooser should show the recently used resources that
    * were not found.
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if the resources not found should be displayed, and
    * <tt>false</tt> otheriwse.
@@ -253,15 +243,11 @@ public:
   
   /** Sets whether @a chooser can select multiple items.
    * 
-   * @newin{2,10}
-   * 
    * @param select_multiple <tt>true</tt> if @a chooser can select more than one item.
    */
   void set_select_multiple(bool select_multiple =  true);
   
   /** Gets whether @a chooser can select multiple items.
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if @a chooser can select more than one item.
    */
@@ -270,8 +256,6 @@ public:
   /** Sets the number of items that should be returned by
    * get_items() and get_uris().
    * 
-   * @newin{2,10}
-   * 
    * @param limit A positive integer, or -1 for all items.
    */
   void set_limit(int limit);
@@ -279,8 +263,6 @@ public:
   
   /** Gets the number of items returned by get_items()
    * and get_uris().
-   * 
-   * @newin{2,10}
    * 
    * @return A positive integer, or -1 meaning that all items are
    * returned.
@@ -292,16 +274,12 @@ public:
    *  @a local_only is <tt>true</tt> (the default) then the shown resources are guaranteed
    * to be accessible through the operating system native file system.
    * 
-   * @newin{2,10}
-   * 
    * @param local_only <tt>true</tt> if only local files can be shown.
    */
   void set_local_only(bool local_only =  true);
   
   /** Gets whether only local resources should be shown in the recently used
    * resources selector.  See set_local_only()
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if only local resources should be shown.
    */
@@ -310,16 +288,12 @@ public:
   /** Sets whether to show a tooltips containing the full path of each
    * recently used resource in a Gtk::RecentChooser widget.
    * 
-   * @newin{2,10}
-   * 
    * @param show_tips <tt>true</tt> if tooltips should be shown.
    */
   void set_show_tips(bool show_tips =  true);
   
   /** Gets whether @a chooser should display tooltips containing the full path
    * of a recently user resource.
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if the recent chooser should show tooltips,
    * <tt>false</tt> otherwise.
@@ -332,15 +306,11 @@ public:
   /** Sets whether @a chooser should show an icon near the resource when
    * displaying it.
    * 
-   * @newin{2,10}
-   * 
    * @param show_icons Whether to show an icon near the resource.
    */
   void set_show_icons(bool show_icons =  true);
   
   /** Retrieves whether @a chooser should show an icon near the resource.
-   * 
-   * @newin{2,10}
    * 
    * @return <tt>true</tt> if the icons should be displayed, <tt>false</tt> otherwise.
    */
@@ -349,15 +319,11 @@ public:
   /** Changes the sorting order of the recently used resources list displayed by
    *  @a chooser.
    * 
-   * @newin{2,10}
-   * 
    * @param sort_type Sort order that the chooser should use.
    */
   void set_sort_type(RecentSortType sort_type);
   
   /** Gets the value set by set_sort_type().
-   * 
-   * @newin{2,10}
    * 
    * @return The sorting order of the @a chooser.
    */
@@ -381,8 +347,6 @@ public:
   
   /** Sets @a uri as the current URI for @a chooser.
    * 
-   * @newin{2,10}
-   * 
    * @param uri A URI.
    * @return <tt>true</tt> if the URI was found.
    */
@@ -390,15 +354,11 @@ public:
   
   /** Gets the URI currently selected by @a chooser.
    * 
-   * @newin{2,10}
-   * 
    * @return A newly allocated string holding a URI.
    */
   Glib::ustring get_current_uri() const;
   
   /** Gets the Gtk::RecentInfo currently selected by @a chooser.
-   * 
-   * @newin{2,10}
    * 
    * @return A Gtk::RecentInfo.  Use Gtk::RecentInfo::unref() when
    * when you have finished using it.
@@ -406,8 +366,6 @@ public:
   Glib::RefPtr<RecentInfo> get_current_item();
   
   /** Gets the Gtk::RecentInfo currently selected by @a chooser.
-   * 
-   * @newin{2,10}
    * 
    * @return A Gtk::RecentInfo.  Use Gtk::RecentInfo::unref() when
    * when you have finished using it.
@@ -417,8 +375,6 @@ public:
   
   /** Selects @a uri inside @a chooser.
    * 
-   * @newin{2,10}
-   * 
    * @param uri A URI.
    * @return <tt>true</tt> if @a uri was found.
    */
@@ -426,22 +382,16 @@ public:
   
   /** Unselects @a uri inside @a chooser.
    * 
-   * @newin{2,10}
-   * 
    * @param uri A URI.
    */
   void unselect_uri(const Glib::ustring& uri);
   
   /** Selects all the items inside @a chooser, if the @a chooser supports
    * multiple selection.
-   * 
-   * @newin{2,10}
    */
   void select_all();
   
   /** Unselects all the items inside @a chooser.
-   * 
-   * @newin{2,10}
    */
   void unselect_all();
 
@@ -452,8 +402,6 @@ public:
    * 
    * The return value of this function is affected by the "sort-type" and
    * "limit" properties of @a chooser.
-   * 
-   * @newin{2,10}
    * 
    * @return A newly allocated
    * list of Gtk::RecentInfo objects.  You should
@@ -475,23 +423,17 @@ public:
    * If no previous filter objects were defined, this function will call
    * set_filter().
    * 
-   * @newin{2,10}
-   * 
    * @param filter A Gtk::RecentFilter.
    */
   void add_filter(const RecentFilter& filter);
   
   /** Removes @a filter from the list of Gtk::RecentFilter objects held by @a chooser.
    * 
-   * @newin{2,10}
-   * 
    * @param filter A Gtk::RecentFilter.
    */
   void remove_filter(const RecentFilter& filter);
   
   /** Gets the Gtk::RecentFilter objects held by @a chooser.
-   * 
-   * @newin{2,10}
    * 
    * @return A singly linked list
    * of Gtk::RecentFilter objects.  You
@@ -500,8 +442,6 @@ public:
   Glib::SListHandle<RecentFilter*> list_filters();
   
   /** Gets the Gtk::RecentFilter objects held by @a chooser.
-   * 
-   * @newin{2,10}
    * 
    * @return A singly linked list
    * of Gtk::RecentFilter objects.  You
@@ -512,8 +452,6 @@ public:
   /** Sets @a filter as the current Gtk::RecentFilter object used by @a chooser
    * to affect the displayed recently used resources.
    * 
-   * @newin{2,10}
-   * 
    * @param filter A Gtk::RecentFilter.
    */
   void set_filter(const RecentFilter& filter);
@@ -521,16 +459,12 @@ public:
   /** Gets the Gtk::RecentFilter object currently used by @a chooser to affect
    * the display of the recently used resources.
    * 
-   * @newin{2,10}
-   * 
    * @return A Gtk::RecentFilter object.
    */
   RecentFilter* get_filter();
   
   /** Gets the Gtk::RecentFilter object currently used by @a chooser to affect
    * the display of the recently used resources.
-   * 
-   * @newin{2,10}
    * 
    * @return A Gtk::RecentFilter object.
    */

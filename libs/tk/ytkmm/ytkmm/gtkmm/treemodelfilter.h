@@ -169,8 +169,6 @@ public:
    * TYPE_BOOLEAN, where <tt>true</tt> means that a row is visible, and <tt>false</tt>
    * if not.
    * 
-   * @newin{2,4}
-   * 
    * @param column A <tt>int</tt> which is the column containing the visible information.
    */
   void set_visible_column(const TreeModelColumnBase& column);
@@ -180,8 +178,6 @@ public:
    * TYPE_BOOLEAN, where <tt>true</tt> means that a row is visible, and <tt>false</tt>
    * if not.
    * 
-   * @newin{2,4}
-   * 
    * @param column A <tt>int</tt> which is the column containing the visible information.
    */
   void set_visible_column(int column);
@@ -189,15 +185,11 @@ public:
   
   /** Returns a pointer to the child model of @a filter.
    * 
-   * @newin{2,4}
-   * 
    * @return A pointer to a Gtk::TreeModel.
    */
   Glib::RefPtr<TreeModel> get_model();
   
   /** Returns a pointer to the child model of @a filter.
-   * 
-   * @newin{2,4}
    * 
    * @return A pointer to a Gtk::TreeModel.
    */
@@ -227,8 +219,6 @@ public:
    * child model or points to a row which is not visible in @a filter, then <tt>0</tt>
    * is returned.
    * 
-   * @newin{2,4}
-   * 
    * @deprecated Use convert_child_path_to_path(const Path& child_path) const
    * 
    * @param child_path A Gtk::TreePath to convert.
@@ -245,8 +235,6 @@ public:
    * point to the same location in the model not being filtered. If @a filter_path
    * does not point to a location in the child model, <tt>0</tt> is returned.
    * 
-   * @newin{2,4}
-   * 
    * @deprecated convert_path_to_child_path(const Path& filter_path) const
    * 
    * @param filter_path A Gtk::TreePath to convert.
@@ -262,8 +250,6 @@ public:
    * child model or points to a row which is not visible in @a filter, then <tt>0</tt>
    * is returned.
    * 
-   * @newin{2,4}
-   * 
    * @param child_path A Gtk::TreePath to convert.
    * @return A newly allocated Gtk::TreePath, or <tt>0</tt>.
    */
@@ -274,8 +260,6 @@ public:
    * point to the same location in the model not being filtered. If @a filter_path
    * does not point to a location in the child model, <tt>0</tt> is returned.
    * 
-   * @newin{2,4}
-   * 
    * @param filter_path A Gtk::TreePath to convert.
    * @return A newly allocated Gtk::TreePath, or <tt>0</tt>.
    */
@@ -284,8 +268,6 @@ public:
   
   /** Emits ::row_changed for each row in the child model, which causes
    * the filter to re-evaluate whether a row is visible or not.
-   * 
-   * @newin{2,4}
    */
   void refilter();
   
@@ -295,8 +277,6 @@ public:
    * being filtered is static (and doesn't change often) and there has been
    * a lot of unreffed access to nodes. As a side effect of this function,
    * all unreffed iters will be invalid.
-   * 
-   * @newin{2,4}
    */
   void clear_cache();
   

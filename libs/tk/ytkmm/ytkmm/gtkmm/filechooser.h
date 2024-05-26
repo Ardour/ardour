@@ -276,16 +276,12 @@ public:
    * Gtk::FILE_CHOOSER_ACTION_SAVE but not if the action is
    * Gtk::FILE_CHOOSER_ACTION_OPEN.
    * 
-   * @newin{2,4}
-   * 
    * @param action The action that the file selector is performing.
    */
   void set_action(FileChooserAction action);
   
   /** Gets the type of operation that the file chooser is performing; see
    * set_action().
-   * 
-   * @newin{2,4}
    * 
    * @return The action that the file selector is performing.
    */
@@ -301,16 +297,12 @@ public:
    * rather than the URI functions like
    * get_uri(),
    * 
-   * @newin{2,4}
-   * 
    * @param local_only <tt>true</tt> if only local files can be selected.
    */
   void set_local_only(bool local_only =  true);
   
   /** Gets whether only local files can be selected in the
    * file selector. See set_local_only()
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt> if only local files can be selected.
    */
@@ -320,16 +312,12 @@ public:
    * only relevant if the action is set to be Gtk::FILE_CHOOSER_ACTION_OPEN or
    * Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER.
    * 
-   * @newin{2,4}
-   * 
    * @param select_multiple <tt>true</tt> if multiple files can be selected.
    */
   void set_select_multiple(bool select_multiple =  true);
   
   /** Gets whether multiple files can be selected in the file
    * selector. See set_select_multiple().
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt> if multiple files can be selected.
    */
@@ -338,16 +326,12 @@ public:
   
   /** Sets whether hidden files and folders are displayed in the file selector.  
    * 
-   * @newin{2,6}
-   * 
    * @param show_hidden <tt>true</tt> if hidden files and folders should be displayed.
    */
   void set_show_hidden(bool show_hidden =  true);
   
   /** Gets whether hidden files and folders are displayed in the file selector.   
    * See set_show_hidden().
-   * 
-   * @newin{2,6}
    * 
    * @return <tt>true</tt> if hidden files and folders are displayed.
    */
@@ -366,16 +350,12 @@ public:
    * Gtk::FileChooser::signal_confirm_overwrite() signal; please refer to its documentation
    * for the details.
    * 
-   * @newin{2,8}
-   * 
    * @param do_overwrite_confirmation Whether to confirm overwriting in save mode.
    */
   void set_do_overwrite_confirmation(bool do_overwrite_confirmation =  true);
   
   /** Queries whether a file chooser is set to confirm for overwriting when the user
    * types a file name that already exists.
-   * 
-   * @newin{2,8}
    * 
    * @return <tt>true</tt> if the file chooser will present a confirmation dialog;
    * <tt>false</tt> otherwise.
@@ -387,16 +367,12 @@ public:
    * This is only relevant if the action is not set to be 
    * Gtk::FILE_CHOOSER_ACTION_OPEN.
    * 
-   * @newin{2,18}
-   * 
    * @param create_folders <tt>true</tt> if the New Folder button should be displayed.
    */
   void set_create_folders(bool create_folders =  true);
   
   /** Gets whether file choser will offer to create new folders.
    * See set_create_folders().
-   * 
-   * @newin{2,18}
    * 
    * @return <tt>true</tt> if the New Folder button should be displayed.
    */
@@ -413,8 +389,6 @@ public:
    * Please see the documentation for those functions for an example of using
    * set_current_name() as well.
    * 
-   * @newin{2,4}
-   * 
    * @param name The filename to use, as a UTF-8 string.
    */
   void set_current_name(const Glib::ustring& name);
@@ -425,8 +399,6 @@ public:
    * 
    * If the file chooser is in folder mode, this function returns the selected
    * folder.
-   * 
-   * @newin{2,4}
    * 
    * @return The currently selected filename, or an empty string
    * if no file is selected, or the selected file can't
@@ -457,8 +429,6 @@ public:
    * 
    * [C example ellipted]
    * 
-   * @newin{2,4}
-   * 
    * @param filename The filename to set as current.
    * @return <tt>true</tt> if both the folder could be changed and the file was
    * selected successfully, <tt>false</tt> otherwise.
@@ -468,8 +438,6 @@ public:
   /** Selects a filename. If the file name isn't in the current
    * folder of @a chooser, then the current folder of @a chooser will
    * be changed to the folder containing @a filename.
-   * 
-   * @newin{2,4}
    * 
    * @param filename The filename to select.
    * @return <tt>true</tt> if both the folder could be changed and the file was
@@ -481,21 +449,15 @@ public:
    * is not in the current directory, does not exist, or
    * is otherwise not currently selected, does nothing.
    * 
-   * @newin{2,4}
-   * 
    * @param filename The filename to unselect.
    */
   void unselect_filename(const Glib::ustring& filename);
   
   /** Selects all the files in the current folder of a file chooser.
-   * 
-   * @newin{2,4}
    */
   void select_all();
   
   /** Unselects all the files in the current folder of a file chooser.
-   * 
-   * @newin{2,4}
    */
   void unselect_all();
   
@@ -506,16 +468,12 @@ public:
    * 
    * @return A list containing the filenames of all selected
    * files and subfolders in the current folder.
-   * 
-   * @newin{2,4}.
    */
   Glib::SListHandle<Glib::ustring> get_filenames() const;
   
   /** Sets the current folder for @a chooser from a local filename.
    * The user will be shown the full contents of the current folder,
    * plus user interface elements for navigating to other folders.
-   * 
-   * @newin{2,4}
    * 
    * @param filename The full path of the new current folder.
    * @return <tt>true</tt> if the folder could be changed successfully, <tt>false</tt>
@@ -531,8 +489,6 @@ public:
    * and empty string if the file chooser was unable to load the last folder that was
    * requested from it; for example, as would be for calling
    * set_current_folder() on a nonexistent folder.
-   * 
-   * @newin{2,4}.
    */
   Glib::ustring get_current_folder() const;
 
@@ -546,8 +502,6 @@ public:
    * 
    * If the file chooser is in folder mode, this function returns the selected
    * folder.
-   * 
-   * @newin{2,4}
    * 
    * @return The currently selected URI, or an empty string
    * if no file is selected.
@@ -576,8 +530,6 @@ public:
    * 
    * [C example ellipted]
    * 
-   * @newin{2,4}
-   * 
    * @param uri The URI to set as current.
    * @return <tt>true</tt> if both the folder could be changed and the URI was
    * selected successfully, <tt>false</tt> otherwise.
@@ -587,8 +539,6 @@ public:
   /** Selects the file to by @a uri. If the URI doesn't refer to a
    * file in the current folder of @a chooser, then the current folder of
    *  @a chooser will be changed to the folder containing @a filename.
-   * 
-   * @newin{2,4}
    * 
    * @param uri The URI to select.
    * @return <tt>true</tt> if both the folder could be changed and the URI was
@@ -600,8 +550,6 @@ public:
    * is not in the current directory, does not exist, or
    * is otherwise not currently selected, does nothing.
    * 
-   * @newin{2,4}
-   * 
    * @param uri The URI to unselect.
    */
   void unselect_uri(const Glib::ustring& uri);
@@ -611,8 +559,6 @@ public:
    * 
    * @return A list containing the URIs of all selected
    * files and subfolders in the current folder.
-   * 
-   * @newin{2,4}.
    */
   Glib::SListHandle<Glib::ustring> get_uris() const;
 
@@ -620,8 +566,6 @@ public:
   /** Sets the current folder for @a chooser from an URI.
    * The user will be shown the full contents of the current folder,
    * plus user interface elements for navigating to other folders.
-   * 
-   * @newin{2,4}
    * 
    * @param uri The URI for the new current folder.
    * @return <tt>true</tt> if the folder could be changed successfully, <tt>false</tt>
@@ -639,8 +583,6 @@ public:
    * (e.g. "file:///home/username/Documents/selected-folder/".  To get the
    * currently-selected folder in that mode, use get_uri() as the
    * usual way to get the selection.
-   * 
-   * @newin{2,4}
    * 
    * @return The URI for the current folder.
    */
@@ -670,8 +612,6 @@ public:
    * 
    * [C example ellipted]
    * 
-   * @newin{2,14}
-   * 
    * @param file The File to set as current.
    * @return <tt>true</tt> if both the folder could be changed and the file was
    * selected successfully, <tt>false</tt> otherwise.
@@ -682,8 +622,6 @@ public:
   /** Selects the file referred to by @a file. An internal function. See
    * _gtk_file_chooser_select_uri().
    * 
-   * @newin{2,14}
-   * 
    * @param file The file to select.
    * @return <tt>true</tt> if both the folder could be changed and the path was
    * selected successfully, <tt>false</tt> otherwise.
@@ -693,8 +631,6 @@ public:
   /** Unselects the file referred to by @a file. If the file is not in the current
    * directory, does not exist, or is otherwise not currently selected, does nothing.
    * 
-   * @newin{2,14}
-   * 
    * @param file A File.
    */
   void unselect_file(const Glib::RefPtr<const Gio::File>& file);
@@ -702,8 +638,6 @@ public:
  
   /** Lists all the selected files and subfolders in the current folder of @a chooser
    * as File. An internal function, see get_uris().
-   * 
-   * @newin{2,14}
    * 
    * @return A SList
    * containing a File for each selected file and subfolder in the
@@ -716,8 +650,6 @@ public:
   /** Sets the current folder for @a chooser from a File.
    * Internal function, see set_current_folder_uri().
    * 
-   * @newin{2,14}
-   * 
    * @param file The File for the new folder.
    * @return <tt>true</tt> if the folder could be changed successfully, <tt>false</tt>
    * otherwise.
@@ -728,8 +660,6 @@ public:
   
   /** Gets the current folder of @a chooser as File.
    * See get_current_folder_uri().
-   * 
-   * @newin{2,14}
    * 
    * @return The File for the current folder.
    */
@@ -744,8 +674,6 @@ public:
    * If the file chooser is in folder mode, this function returns the selected
    * folder.
    * 
-   * @newin{2,14}
-   * 
    * @return A selected File. You own the returned file;
    * use Glib::object_unref() to release it.
    */
@@ -757,8 +685,6 @@ public:
    * 
    * If the file chooser is in folder mode, this function returns the selected
    * folder.
-   * 
-   * @newin{2,14}
    * 
    * @return A selected File. You own the returned file;
    * use Glib::object_unref() to release it.
@@ -782,8 +708,6 @@ public:
    * may display an internally generated preview of the current file or
    * it may display no preview at all.
    * 
-   * @newin{2,4}
-   * 
    * @param preview_widget Widget for displaying preview.
    */
   void set_preview_widget(Gtk::Widget& preview_widget);
@@ -792,16 +716,12 @@ public:
   /** Gets the current preview widget; see
    * set_preview_widget().
    * 
-   * @newin{2,4}
-   * 
    * @return The current preview widget, or <tt>0</tt>.
    */
   Gtk::Widget* get_preview_widget();
   
   /** Gets the current preview widget; see
    * set_preview_widget().
-   * 
-   * @newin{2,4}
    * 
    * @return The current preview widget, or <tt>0</tt>.
    */
@@ -815,8 +735,6 @@ public:
    * or it may display no preview at all. See
    * set_preview_widget() for more details.
    * 
-   * @newin{2,4}
-   * 
    * @param active Whether to display the user-specified preview widget.
    */
   void set_preview_widget_active(bool active =  true);
@@ -824,8 +742,6 @@ public:
   /** Gets whether the preview widget set by set_preview_widget()
    * should be shown for the current filename. See
    * set_preview_widget_active().
-   * 
-   * @newin{2,4}
    * 
    * @return <tt>true</tt> if the preview widget is active for the current filename.
    */
@@ -838,8 +754,6 @@ public:
    * display the name themselves in their preview widget.
    * 
    * See also: set_preview_widget()
-   * 
-   * @newin{2,4}
    * 
    * @param use_label Whether to display a stock label with the name of the previewed file.
    */
@@ -857,8 +771,6 @@ public:
   /** Gets the filename that should be previewed in a custom preview
    * widget. See set_preview_widget().
    * 
-   * @newin{2,4}
-   * 
    * @return The filename to preview, or an empty string if no file
    * is selected, or if the selected file cannot be represented
    * as a local filename.
@@ -867,8 +779,6 @@ public:
   
   /** Gets the URI that should be previewed in a custom preview
    * widget. See set_preview_widget().
-   * 
-   * @newin{2,4}
    * 
    * @return The URI for the file to preview, or an empty string if no file is
    * selected.
@@ -880,8 +790,6 @@ public:
   /** Gets the File that should be previewed in a custom preview
    * Internal function, see get_preview_uri().
    * 
-   * @newin{2,14}
-   * 
    * @return The File for the file to preview,
    * or <tt>0</tt> if no file is selected. Free with Glib::object_unref().
    */
@@ -889,8 +797,6 @@ public:
   
   /** Gets the File that should be previewed in a custom preview
    * Internal function, see get_preview_uri().
-   * 
-   * @newin{2,14}
    * 
    * @return The File for the file to preview,
    * or <tt>0</tt> if no file is selected. Free with Glib::object_unref().
@@ -902,8 +808,6 @@ public:
   
   /** Sets an application-supplied widget to provide extra options to the user.
    * 
-   * @newin{2,4}
-   * 
    * @param extra_widget Widget for extra options.
    */
   void set_extra_widget(Gtk::Widget& extra_widget);
@@ -911,16 +815,12 @@ public:
   /** Gets the current preview widget; see
    * set_extra_widget().
    * 
-   * @newin{2,4}
-   * 
    * @return The current extra widget, or <tt>0</tt>.
    */
   Gtk::Widget* get_extra_widget();
   
   /** Gets the current preview widget; see
    * set_extra_widget().
-   * 
-   * @newin{2,4}
    * 
    * @return The current extra widget, or <tt>0</tt>.
    */
@@ -936,15 +836,11 @@ public:
    * Note that the @a chooser takes ownership of the filter, so you have to 
    * ref and sink it if you want to keep a reference.
    * 
-   * @newin{2,4}
-   * 
    * @param filter A Gtk::FileFilter.
    */
   void add_filter(const FileFilter& filter);
   
   /** Removes @a filter from the list of filters that the user can select between.
-   * 
-   * @newin{2,4}
    * 
    * @param filter A Gtk::FileFilter.
    */
@@ -956,8 +852,6 @@ public:
    * 
    * @return A list containing the current set of
    * user selectable filters.
-   * 
-   * @newin{2,4}.
    */
   Glib::SListHandle< FileFilter* > list_filters();
   
@@ -966,8 +860,6 @@ public:
    * 
    * @return A list containing the current set of
    * user selectable filters.
-   * 
-   * @newin{2,4}.
    */
   Glib::SListHandle< const FileFilter* > list_filters() const;
 
@@ -981,23 +873,17 @@ public:
    * filters is empty is useful if you want to restrict the displayed
    * set of files without letting the user change it.
    * 
-   * @newin{2,4}
-   * 
    * @param filter A Gtk::FileFilter.
    */
   void set_filter(const FileFilter& filter);
   
   /** Gets the current filter; see set_filter().
    * 
-   * @newin{2,4}
-   * 
    * @return The current filter, or <tt>0</tt>.
    */
   FileFilter* get_filter();
   
   /** Gets the current filter; see set_filter().
-   * 
-   * @newin{2,4}
    * 
    * @return The current filter, or <tt>0</tt>.
    */
@@ -1011,8 +897,6 @@ public:
    * application.  For example, you can use this to add a
    * "/usr/share/mydrawprogram/Clipart" folder to the volume list.
    * 
-   * @newin{2,4}
-   * 
    * @param folder Filename of the folder to add.
    * @return <tt>true</tt> if the folder could be added successfully, <tt>false</tt>
    * otherwise.  In the latter case, the @a error will be set as appropriate.
@@ -1020,8 +904,6 @@ public:
   bool add_shortcut_folder(const Glib::ustring& folder);
   
   /** Removes a folder from a file chooser's list of shortcut folders.
-   * 
-   * @newin{2,4}
    * 
    * @param folder Filename of the folder to remove.
    * @return <tt>true</tt> if the operation succeeds, <tt>false</tt> otherwise.  
@@ -1034,8 +916,6 @@ public:
   /** Queries the list of shortcut folders in the file chooser, as set by
    * add_shortcut_folder().
    * 
-   * @newin{2,4}
-   * 
    * @return A list of folder filenames, if there are any shortcut
    * folders..
    */
@@ -1047,8 +927,6 @@ public:
    * by the application.  For example, you can use this to add a
    * "file:///usr/share/mydrawprogram/Clipart" folder to the volume list.
    * 
-   * @newin{2,4}
-   * 
    * @param uri URI of the folder to add.
    * @return <tt>true</tt> if the folder could be added successfully, <tt>false</tt>
    * otherwise.  In the latter case, the @a error will be set as appropriate.
@@ -1056,8 +934,6 @@ public:
   bool add_shortcut_folder_uri(const Glib::ustring& uri);
   
   /** Removes a folder URI from a file chooser's list of shortcut folders.
-   * 
-   * @newin{2,4}
    * 
    * @param uri URI of the folder to remove.
    * @return <tt>true</tt> if the operation succeeds, <tt>false</tt> otherwise.  
@@ -1071,8 +947,6 @@ public:
    * add_shortcut_folder_uri().
    * 
    * @return A list of folder URIs
-   * 
-   * @newin{2,4}.
    */
   Glib::SListHandle<Glib::ustring> list_shortcut_folder_uris() const;
 

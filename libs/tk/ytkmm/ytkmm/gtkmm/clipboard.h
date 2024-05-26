@@ -169,8 +169,6 @@ public:
    * if your application called "Foo" has a special-purpose
    * clipboard, you might call it "_FOO_SPECIAL_CLIPBOARD".
    * 
-   * @newin{2,2}
-   * 
    * @param display The display for which the clipboard is to be retrieved or created.
    * @param selection A Gdk::Atom which identifies the clipboard
    * to use.
@@ -186,15 +184,11 @@ public:
   
   /** Gets the Gdk::Display associated with @a clipboard
    * 
-   * @newin{2,2}
-   * 
    * @return The Gdk::Display associated with @a clipboard.
    */
   Glib::RefPtr<Gdk::Display> get_display();
   
   /** Gets the Gdk::Display associated with @a clipboard
-   * 
-   * @newin{2,2}
    * 
    * @return The Gdk::Display associated with @a clipboard.
    */
@@ -266,8 +260,6 @@ public:
    * for the image, and for converting the image into the 
    * requested format.
    * 
-   * @newin{2,6}
-   * 
    * @param pixbuf A Gdk::Pixbuf.
    */
   void set_image(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
@@ -338,8 +330,6 @@ public:
   * contents of the clipboard could not be converted into URI form.
   *
   * @param slot A slot to call when the URIs are received, or the retrieval fails. (It will always be called one way or the other.)
-  *
-  * @newin{2,14}
   */
   void request_uris(const SlotUrisReceived& slot);
   
@@ -379,8 +369,6 @@ public:
    *             one way or the other.) Remember that Glib::StringArrayHandle
    *             is an intermediate type, so you should convert it to a
    *             standard C++ container.
-   *
-   * @newin{2,4}
    */
   void request_targets(const SlotTargetsReceived& slot);
   
@@ -420,8 +408,6 @@ public:
    * the data to be received using the main loop, so events,
    * timeouts, etc, may be dispatched during the wait.
    * 
-   * @newin{2,6}
-   * 
    * @return A newly-allocated Gdk::Pixbuf object which must
    * be disposed with Glib::object_unref(), or <tt>0</tt> if 
    * retrieving the selection data failed. (This 
@@ -456,8 +442,6 @@ public:
    * wait_for_rich_text() since it doesn't need to retrieve
    * the actual text.
    * 
-   * @newin{2,10}
-   * 
    * @param buffer A Gtk::TextBuffer.
    * @return <tt>true</tt> is there is rich text available, <tt>false</tt> otherwise.
    */
@@ -473,8 +457,6 @@ public:
    * wait_for_image() since it doesn't need to retrieve
    * the actual image data.
    * 
-   * @newin{2,6}
-   * 
    * @return <tt>true</tt> is there is an image available, <tt>false</tt> otherwise.
    */
   bool wait_is_image_available() const;
@@ -489,8 +471,6 @@ public:
    * wait_for_uris() since it doesn't need to retrieve
    * the actual URI data.
    * 
-   * @newin{2,14}
-   * 
    * @return <tt>true</tt> is there is an URI list available, <tt>false</tt> otherwise.
    */
   bool wait_is_uris_available() const;
@@ -502,8 +482,6 @@ public:
    * If you want to see if there's text available on the clipboard, use
    * wait_is_text_available() instead.
    * 
-   * @newin{2,6}
-   * 
    * @param target A Gdk::Atom indicating which target to look for.
    * @return <tt>true</tt> if the target is available, <tt>false</tt> otherwise.
    */
@@ -514,8 +492,6 @@ public:
    * loop, so events, timeouts, etc, may be dispatched during the wait.
    *
    * @result targets: The targets.
-   *
-   * @newin{2,4}
    */
   Glib::StringArrayHandle wait_for_targets() const;
   
@@ -523,8 +499,6 @@ public:
   /** Requests the contents of the clipboard as URIs. This function waits
    * for the data to be received using the main loop, so events,
    * timeouts, etc, may be dispatched during the wait.
-   * 
-   * @newin{2,14}
    * 
    * @return A newly-allocated
    * <tt>0</tt>-terminated array of strings which must
@@ -558,8 +532,6 @@ public:
   
   /** Stores the current clipboard data somewhere so that it will stay
    * around after the application has quit.
-   * 
-   * @newin{2,6}
    */
   void store();
 

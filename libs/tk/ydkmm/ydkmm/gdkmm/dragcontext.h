@@ -309,15 +309,11 @@ public:
   
   /** Returns the Gdk::Window where the DND operation started.
    * 
-   * @newin{2,22}
-   * 
    * @return A Gdk::Window.
    */
   Glib::RefPtr<Window> get_source_window();
   
   /** Returns the Gdk::Window where the DND operation started.
-   * 
-   * @newin{2,22}
    * 
    * @return A Gdk::Window.
    */
@@ -345,15 +341,11 @@ public:
   /** Determines the bitmask of actions proposed by the source if
    * gdk_drag_context_suggested_action() returns GDK_ACTION_ASK.
    * 
-   * @newin{2,22}
-   * 
    * @return The Gdk::DragAction flags.
    */
   DragAction get_actions() const;
   
   /** Determines the suggested drag action of the context.
-   * 
-   * @newin{2,22}
    * 
    * @return A Gdk::DragAction value.
    */
@@ -364,8 +356,6 @@ public:
 
   /** Determines the action chosen by the drag destination.
    * 
-   * @newin{2,22}
-   * 
    * @deprecated Use get_selected_action()
    * 
    * @return A Gdk::DragAction value.
@@ -375,8 +365,6 @@ public:
 
 
   /** Determines the action chosen by the drag destination.
-   * 
-   * @newin{2,22}
    * 
    * @return A Gdk::DragAction value.
    */
@@ -393,8 +381,6 @@ public:
    * 
    * This function is called by the drag source to obtain the 
    *  @a dest_window and @a protocol parameters for gdk_drag_motion().
-   * 
-   * @newin{2,2}
    * 
    * @param drag_window A window which may be at the pointer position, but
    * should be ignored, since it is put up by the drag source as an icon.

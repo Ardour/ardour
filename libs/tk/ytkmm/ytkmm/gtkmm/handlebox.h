@@ -147,8 +147,6 @@ public:
   
   /** Whether the handlebox's child is currently detached.
    * 
-   * @newin{2,14}
-   * 
    * @return <tt>true</tt> if the child is currently detached, otherwise <tt>false</tt>.
    */
   bool is_child_detached() const;

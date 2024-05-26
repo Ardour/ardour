@@ -138,15 +138,11 @@ public:
   
   /** Gets the entry @a completion has been attached to.
    * 
-   * @newin{2,4}
-   * 
    * @return The entry @a completion has been attached to.
    */
   Entry* get_entry();
   
   /** Gets the entry @a completion has been attached to.
-   * 
-   * @newin{2,4}
    * 
    * @return The entry @a completion has been attached to.
    */
@@ -157,16 +153,12 @@ public:
    * a model set, it will remove it before setting the new model.
    * Use unset_model() to unset the old model.
    * 
-   * @newin{2,4}
-   * 
    * @param model The Gtk::TreeModel.
    */
   void set_model(const Glib::RefPtr<TreeModel>& model);
   
   /** Returns the model the Gtk::EntryCompletion is using as data source.
    * Returns <tt>0</tt> if the model is unset.
-   * 
-   * @newin{2,4}
    * 
    * @return A Gtk::TreeModel, or <tt>0</tt> if none
    * is currently being used.
@@ -176,8 +168,6 @@ public:
   /** Returns the model the Gtk::EntryCompletion is using as data source.
    * Returns <tt>0</tt> if the model is unset.
    * 
-   * @newin{2,4}
-   * 
    * @return A Gtk::TreeModel, or <tt>0</tt> if none
    * is currently being used.
    */
@@ -186,8 +176,6 @@ public:
   /** Remove the model from the EntryCompletion.
    *
    * @see set_model().
-   *
-   * @newin{2,16}
    */
   void unset_model();
 
@@ -202,15 +190,11 @@ public:
    * key takes a lot of time and will come up with meaningless results anyway
    * (ie, a too large dataset).
    * 
-   * @newin{2,4}
-   * 
    * @param length The minimum length of the key in order to start completing.
    */
   void set_minimum_key_length(int length);
   
   /** Returns the minimum key length as set for @a completion.
-   * 
-   * @newin{2,4}
    * 
    * @return The currently used minimum key length.
    */
@@ -219,15 +203,11 @@ public:
   /** Requests a completion operation, or in other words a refiltering of the
    * current list with completions, using the current key. The completion list
    * view will be updated accordingly.
-   * 
-   * @newin{2,4}
    */
   void complete();
 
   
   /** Requests a prefix insertion. 
-   * 
-   * @newin{2,6}
    */
   void insert_prefix();
 
@@ -247,8 +227,6 @@ public:
   
   /** Deletes the action at @a index from @a completion's action list.
    * 
-   * @newin{2,4}
-   * 
    * @param index The index of the item to Delete.
    */
   void delete_action(int index =  0);
@@ -257,16 +235,12 @@ public:
   /** Sets whether the common prefix of the possible completions should
    * be automatically inserted in the entry.
    * 
-   * @newin{2,6}
-   * 
    * @param inline_completion <tt>true</tt> to do inline completion.
    */
   void set_inline_completion(bool inline_completion =  true);
   
   /** Returns whether the common prefix of the possible completions should
    * be automatically inserted in the entry.
-   * 
-   * @newin{2,6}
    * 
    * @return <tt>true</tt> if inline completion is turned on.
    */
@@ -275,15 +249,11 @@ public:
   /** Sets whether it is possible to cycle through the possible completions
    * inside the entry.
    * 
-   * @newin{2,12}
-   * 
    * @param inline_selection <tt>true</tt> to do inline selection.
    */
   void set_inline_selection(bool inline_selection =  true);
   
   /** Returns <tt>true</tt> if inline-selection mode is turned on.
-   * 
-   * @newin{2,12}
    * 
    * @return <tt>true</tt> if inline-selection mode is on.
    */
@@ -291,15 +261,11 @@ public:
   
   /** Sets whether the completions should be presented in a popup window.
    * 
-   * @newin{2,6}
-   * 
    * @param popup_completion <tt>true</tt> to do popup completion.
    */
   void set_popup_completion(bool popup_completion =  true);
   
   /** Returns whether the completions should be presented in a popup window.
-   * 
-   * @newin{2,6}
    * 
    * @return <tt>true</tt> if popup completion is turned on.
    */
@@ -309,16 +275,12 @@ public:
   /** Sets whether the completion popup window will be resized to be the same
    * width as the entry.
    * 
-   * @newin{2,8}
-   * 
    * @param popup_set_width <tt>true</tt> to make the width of the popup the same as the entry.
    */
   void set_popup_set_width(bool popup_set_width =  true);
   
   /** Returns whether the  completion popup window will be resized to the 
    * width of the entry.
-   * 
-   * @newin{2,8}
    * 
    * @return <tt>true</tt> if the popup window will be resized to the width of 
    * the entry.
@@ -332,8 +294,6 @@ public:
    * only a single match. You may want to set this to <tt>false</tt> if you
    * are using inline
    * completion.
-   * 
-   * @newin{2,8}
    * 
    * @deprecated Use set_popup_single_match() instead. This function was wrongly named.
    * 
@@ -349,8 +309,6 @@ public:
    * are using inline
    * completion.
    * 
-   * @newin{2,8}
-   * 
    * @param popup_single_match <tt>true</tt> if the popup should appear even for a single
    * match.
    */
@@ -359,8 +317,6 @@ public:
   
   /** Returns whether the completion popup window will appear even if there is
    * only a single match. 
-   * 
-   * @newin{2,8}
    * 
    * @return <tt>true</tt> if the popup window will appear regardless of the
    * number of matches.
@@ -371,8 +327,6 @@ public:
    * the completion or an empty string if there's no completion ongoing.
    * 
    * @return The prefix for the current completion
-   * 
-   * @newin{2,12}.
    */
   Glib::ustring get_completion_prefix() const;
 
@@ -385,8 +339,6 @@ public:
    * This functions creates and adds a Gtk::CellRendererText for the selected 
    * column. If you need to set the text column, but don't want the cell 
    * renderer, use Glib::object_set() to set the ::text_column property directly.
-   * 
-   * @newin{2,4}
    * 
    * @param column The column in the model of @a completion to get strings from.
    */
@@ -401,8 +353,6 @@ public:
    * column. If you need to set the text column, but don't want the cell 
    * renderer, use Glib::object_set() to set the ::text_column property directly.
    * 
-   * @newin{2,4}
-   * 
    * @param column The column in the model of @a completion to get strings from.
    */
   void set_text_column(int column);
@@ -410,8 +360,6 @@ public:
 #ifndef GTKMM_DISABLE_DEPRECATED
 
   /** Returns the column in the model of @a completion to get strings from.
-   * 
-   * @newin{2,6}
    * 
    * @deprecated Use the const version of this method.
    * 
@@ -422,8 +370,6 @@ public:
 
 
   /** Returns the column in the model of @a completion to get strings from.
-   * 
-   * @newin{2,6}
    * 
    * @return The column containing the strings.
    */
@@ -480,8 +426,6 @@ public:
    * 
    * @par Prototype:
    * <tt>bool %on_cursor_on_match(const TreeModel::iterator& iter)</tt>
-   *
-   * @newin{2,12}
    */
   Glib::SignalProxy1< bool, const TreeModel::iterator& > signal_cursor_on_match();
 
@@ -499,8 +443,6 @@ public:
    * the FileChooser inserts only the part of the prefix up to the 
    * next '/'.
    * 
-   * @newin{2,6}
-   *
    * @param prefix The common prefix of all possible completions.
    * @result true if the signal has been handled
    *

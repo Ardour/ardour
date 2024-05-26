@@ -349,8 +349,6 @@ protected:
    * @param src_y Source Y coordinate within drawable.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newin{2,12}
    */
    Pixbuf(const Glib::RefPtr<Drawable>& src, const Glib::RefPtr<Colormap>& cmap,
          int src_x, int src_y, int width, int height);
@@ -362,8 +360,6 @@ protected:
    * @param src_y Source Y coordinate within drawable.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newin{2,12}
    */
    Pixbuf(const Glib::RefPtr<Drawable>& src,
          int src_x, int src_y, int width, int height);
@@ -384,8 +380,6 @@ protected:
    * @param src_y Source Y coordinate within the image.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newin{2,12}
    */
   Pixbuf(const Glib::RefPtr<Image>& src, const Glib::RefPtr<Colormap>& cmap,
          int src_x, int src_y, int width, int height);
@@ -397,8 +391,6 @@ protected:
    * @param src_y Source Y coordinate within the image.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newinp212
    */
   Pixbuf(const Glib::RefPtr<Image>& src,
          int src_x, int src_y, int width, int height);
@@ -479,8 +471,6 @@ public:
    * @param src_y Source Y coordinate within drawable.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newin{2,12}
    */
   
   static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Drawable>& src, const Glib::RefPtr<Colormap>& cmap, int src_x, int src_y, int width, int height);
@@ -493,8 +483,6 @@ public:
    * @param src_y Source Y coordinate within drawable.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newin{2,12}
    */
   
   static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Drawable>& src, int src_x, int src_y, int width, int height);
@@ -508,8 +496,6 @@ public:
    * @param src_y Source Y coordinate within the image.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newin{2,12}
    */
   
   static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Image>& src, const Glib::RefPtr<Colormap>& cmap, int src_x, int src_y, int width, int height);
@@ -522,8 +508,6 @@ public:
    * @param src_y Source Y coordinate within the image.
    * @param width Width in pixels of region to get.
    * @param height Height in pixels of region to get.
-   *
-   * @newinp212
    */
   
   static Glib::RefPtr<Pixbuf> create(const Glib::RefPtr<Image>& src, int src_x, int src_y, int width, int height);

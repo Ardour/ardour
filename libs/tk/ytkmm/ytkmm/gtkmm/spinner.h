@@ -43,7 +43,6 @@ namespace Gtk
 
 /** A widget that displays a spinner animation.
  *
- * @newin{2,20}
  * @ingroup Widgets
  */
 
@@ -107,14 +106,10 @@ public:
 
   
   /** Starts the animation of the spinner.
-   * 
-   * @newin{2,20}
    */
   void start();
   
   /** Stops the animation of the spinner.
-   * 
-   * @newin{2,20}
    */
   void stop();
 

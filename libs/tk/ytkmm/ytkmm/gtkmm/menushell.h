@@ -198,8 +198,6 @@ public:
    * don't select tearoff items unless the only item is a tearoff
    * item.
    * 
-   * @newin{2,2}
-   * 
    * @param search_sensitive If <tt>true</tt>, search for the first selectable
    * menu item, otherwise select nothing if
    * the first item isn't sensitive. This
@@ -211,8 +209,6 @@ public:
   void deactivate();
   
   /** Cancels the selection within the menu shell.  
-   * 
-   * @newin{2,4}
    */
   void cancel();
 
@@ -290,8 +286,6 @@ public:
   
   /** Returns <tt>true</tt> if the menu shell will take the keyboard focus on popup.
    * 
-   * @newin{2,8}
-   * 
    * @return <tt>true</tt> if the menu shell will take the keyboard focus on popup.
    */
   bool get_take_focus() const;
@@ -321,8 +315,6 @@ public:
    * guaranteed that they will work.
    * 
    * See also gdk_keyboard_grab()
-   * 
-   * @newin{2,8}
    * 
    * @param take_focus <tt>true</tt> if the menu shell should take the keyboard focus on popup.
    */
