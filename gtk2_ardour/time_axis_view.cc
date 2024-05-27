@@ -411,20 +411,26 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 bool
 TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 {
-	if ((event->button == 1 && event->type == GDK_2BUTTON_PRESS) || Keyboard::is_edit_event (event)) {
+	if (event->button == 1) {
 		/* see if it is inside the name label */
 		if (name_label.is_ancestor (controls_ebox)) {
+
 			int nlx;
 			int nly;
 			controls_ebox.translate_coordinates (name_label, event->x, event->y, nlx, nly);
 			Gtk::Allocation a = name_label.get_allocation ();
+
 			if (nlx > 0 && nlx < a.get_width() && nly > 0 && nly < a.get_height()) {
-				begin_name_edit ();
-				_ebox_release_can_act = false;
-				return true;
+
+				if ((event->type == GDK_2BUTTON_PRESS) || Keyboard::is_edit_event (event)) {
+					begin_name_edit ();
+					_ebox_release_can_act = false;
+					return true;
+				} else {
+					return true;
+				}
 			}
 		}
-
 	}
 
 	if (event->button == 1 && event->type == GDK_2BUTTON_PRESS) {
