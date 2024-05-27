@@ -2298,7 +2298,7 @@ private:
 
 	/** computes the timeline position for an event whose coordinates
 	 * are in canvas units (pixels, scroll offset included). The time
-	 * domain used by the return value will match ::default_time_domain()
+	 * domain used by the return value will match Editor::default_time_domain()
 	 * at the time of calling.
 	 */
 	Temporal::timepos_t canvas_event_time (GdkEvent const*, double* px = 0, double* py = 0) const;
