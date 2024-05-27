@@ -327,7 +327,7 @@ protected:
 
 private:
 	bool _trackview_only; ///< true if pointer y value should always be relative to the top of the trackview group
-	bool _hide_snapped_cursor; ///< set true of ::motion does not call `set_snapped_cursor_position`
+	bool _hide_snapped_cursor; ///< set true of Drag::motion does not call `set_snapped_cursor_position`
 	bool _move_threshold_passed; ///< true if the move threshold has been passed, otherwise false
 	bool _starting_point_passed; ///< true if we called move () with first_move flag, otherwise false
 	bool _initially_vertical; ///< true if after move threshold is passed we appear to be moving vertically; undefined before that
