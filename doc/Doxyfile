@@ -854,7 +854,8 @@ WARN_LOGFILE           =
 # spaces. See also FILE_PATTERNS and EXTENSION_MAPPING
 # Note: If this tag is empty the current directory is searched.
 
-INPUT                  = ../gtk2_ardour \
+INPUT                  = mainpage.md \
+                         ../gtk2_ardour \
                          ../libs/ardour \
                          ../libs/ardouralsautil \
                          ../libs/audiographer \
@@ -882,7 +883,6 @@ INPUT                  = ../gtk2_ardour \
                          ../libs/widgets \
                          ../libs/zita-convolver \
                          ../libs/zita-resampler \
-                         mainpage.txt
 ## ytk internal use only
 #                        ../libs/tk/ydk-pixbuf/ydk-pixbuf/gdk-pixbuf \
 ## tools w/binaries (maybe add those)
@@ -1057,7 +1057,7 @@ FILTER_SOURCE_PATTERNS =
 # (index.html). This can be useful if you have a project on for instance GitHub
 # and want to reuse the introduction page also for the doxygen output.
 
-USE_MDFILE_AS_MAINPAGE =
+USE_MDFILE_AS_MAINPAGE = mainpage.md
 
 #---------------------------------------------------------------------------
 # Configuration options related to source browsing
