@@ -1,4 +1,4 @@
-# Ardour - the open source Digital Audio Workstation
+# Overview and Source Tree Layout
 
 Welcome to the in-code documentation for Ardour.
 
@@ -28,13 +28,12 @@ The source tree is laid out as follows:
 
 * `luasession/`
 
-  arlua -- commandline interface to libardour
+  arlua -- fully fledged commandline interface to libardour
 
 ## Libraries
 
 A collection of libraries and utility functions. Most are shared
 libraries, and almost all are exclusive to Ardour.
-
 A few specific libraries are compiled statically (e.g. fluidsynth for use in plugins).
 
 ### Ardour specific libs
@@ -48,32 +47,35 @@ A few specific libraries are compiled statically (e.g. fluidsynth for use in plu
 
 * `libs/evoral/`
 
-   Control events, control lists, automation evaluation,
-   parameter descriptions, incl. MIDI event abstraction
+   Evoral is Ardour's event Library, used for control events, control lists, automation evaluation,
+   parameter interpolation, parameter descriptions, incl. MIDI event abstraction.
 
    - `libs/evoral/libsmf/` (contains several non-upstreamed fixes)
 
-     Handling Standard MIDI File format. Abstracted to C++ in SMF.{cc,h}
-     (used inside evoral)
+     Handling Standard %MIDI File (Evoral::SMF) format. Abstracted to C++ in SMF.{cc,h}
 
 * libs/backends/
 
    Interaction with Operating System's Audio/MIDI API:
    ALSA, CoreAudio, JACK, PortAudio/ASIO, PulseAudio
 
+   see ARDOUR::AudioBackend
+
 * `libs/surfaces/`
 
    Control Surfaces, dynamically loaded by libardour on runtime,
    to remote-control ardour (midi bindings, network etc).
 
+   see ARDOUR::ControlProtocol
+
 * `libs/midi++2/`
 
-   MIDI parsing, MIDNAM handling, Port abstraction for I/O
+   %MIDI parsing, MIDNAM handling, Port abstraction for I/O
 
 * `libs/temporal`
 
    Various utility code for dealing with different kinds of time,
-   including Timecode (FPS) and musical time conversions.
+   including Timecode, and musical time conversions (Temporal::Beats, Temporal::BBT_Time).
 
    This library also provides the fundamental time types, and the *TempoMap*.
    See <https://ardour.org/representing-time.html> for more information.
@@ -82,15 +84,22 @@ A few specific libraries are compiled statically (e.g. fluidsynth for use in plu
 
    Pan plugins (stereo-balance, VBAP, etc) are dynamically loaded at runtime.
 
+   see ARDOUR::Panner
+
 * `libs/audiographer/`
 
    Mini Ardour inside Ardour to export audio-files from sessions.
+
+   It is a combination of AudioGrapher::Source and AudioGrapher::Sink classes that are chained together by ARDOUR::ExportGraphBuilder as shown in the ASCII art
+   [Export Graph](https://git.ardour.org/ardour/ardour/src/commit/0df0e14e2309a00d433827fa34b87638b87f4fff/libs/ardour/export_graph_builder.cc#L73-L154).
 
 * `libs/ardour/`
 
    This is it. libardour runs Ardour sessions.
 
    All realtime processing happens here, plugins are managed etc.
+
+   Some starting points are ARDOUR::Route ARDOUR::Session ARDOUR::Processor
 
 ### UI related libs
 
@@ -104,11 +113,13 @@ A few specific libraries are compiled statically (e.g. fluidsynth for use in plu
 * `libs/canvas/`
 
   Cairo Canvas, provides a slate for scalable drawing and basic layout/packing
-  This is used by `gtk2ardour`'s main editor.
+  This is used by Ardour's main editor.
+
+  See ArdourCanvas::GtkCanvas and ArdourCanvas::Item
 
 * `libs/widgets/`
 
-   Ardour GUI widgets (buttons, fader, knobs, etc)
+   Ardour GUI widgets (buttons, fader, knobs, etc). They are basically all CairoWidget%s
 
 * `libs/waveview/`
 
@@ -116,7 +127,7 @@ A few specific libraries are compiled statically (e.g. fluidsynth for use in plu
 
 * libs/tk/
 
-  A localized version of GTK+2, renamed as YTK:
+  A localized version of GTK+2, renamed as YTK. See Gtk namespace for relevant documentation.
 
   - `libs/tk/ydk` `libs/tk/ytk`
 
@@ -146,7 +157,7 @@ A few specific libraries are compiled statically (e.g. fluidsynth for use in plu
 
 ### Plugin Scan Tools
 
-By default plugins are scanned by a dedictaed external process. If that crashes the
+By default plugins are scanned by a dedicated external process. If that crashes the
 main application is not affected, and the plugin that causes the scanner to crash can be
 blacklisted.
 
@@ -158,11 +169,13 @@ For practical and historical reasons the actual scanner code lives inside libard
 
 * `libs/fst/`
 
-   VST2/3 plugin scan commandline tools
+   VST2/3 plugin scan commandline tools.
 
 * `libs/vfork/`
 
-   A exec-wrapper which redirects file-descriptors to be used with vfork(2)
+   A exec-wrapper which redirects file-descriptors to be used with vfork(2).
+   It is used to launch external applications, without impacting real-time
+   constraints of the calling process.
 
 
 ### Ardour Community Effect (ACE) Plugins
@@ -178,18 +191,21 @@ For practical and historical reasons the actual scanner code lives inside libard
 
 ### Independent, standalone libs
 
+These are 3rd party libs that have been copied into Ardour's source-tree.
+
 * `libs/aaf/`
 
    Unmodified <https://github.com/agfline/LibAAF> for importing AAF sessions.
-   use `tools/update_libaaf.sh` to update from upstream.
+
+   Use `tools/update_libaaf.sh` to update from upstream.
 
 * `libs/appleutility/`
 
-   Utility Classes, abstraction for CoreAudio and AudioUnits (OSX, macOS)
+   Utility classes, abstraction for CoreAudio and AudioUnits (OSX, macOS)
 
 * `libs/ardouralsautil/`
 
-   Utility Class for device-listing (used by the jack and  ALSA backends).
+   Utility class for device-listing (used by the JACK and ALSA backends).
    Device-reservation commandline tool (linked against libdbus), which is
    also available from <https://github.com/x42/alsa_request_device>
 
@@ -200,6 +216,7 @@ For practical and historical reasons the actual scanner code lives inside libard
 * `libs/fluidsynth/`
 
    Stripped down (library only) and slightly customized version of fluidsynth.
+
    Use `tools/update_fluidsynth.sh` to update from upstream.
 
 * `libs/hidapi/`
@@ -209,7 +226,7 @@ For practical and historical reasons the actual scanner code lives inside libard
 
 * `libs/libltc/`
 
-   Unmodified <https://github.com/x42/libltc/> for Linear Timecode en/decoding
+   Unmodified <https://github.com/x42/libltc/> for Linear Timecode en/decoding. see LTCFrame.
 
 * `libs/lua/`
 
@@ -220,7 +237,7 @@ For practical and historical reasons the actual scanner code lives inside libard
 
 * `libs/ptformat/`
 
-   Unmodified <https://github.com/zamaudio/ptformat> for loading ProTools sessions
+   Unmodified <https://github.com/zamaudio/ptformat> for loading ProTools sessions.
 
 * `libs/qm-dsp/`
 
@@ -243,58 +260,58 @@ For practical and historical reasons the actual scanner code lives inside libard
 
 * `libs/zita-convolver/`
 
-   convolution kernel, so far only available to Lua scripts.
+   A convolution kernel, so far only available to Lua scripts.
 
 * `libs/zita-resampler/`
 
    Efficient resampler with variable rate, useful for adaptive resampling.
    Mainly used for vari-speed playback. This has been customized for multiple mono
-   channel processing, and optimized to skip processing for a ratio of 1:1.
+   channel processing (ArdourZita::VMResampler), and optimized to skip processing for a ratio of 1:1.
 
 
-## RESOURCE FILES
+## Resource Files
 
-These are bundled as-is.
+These are platform independent files, and bundled as-is.
 
 * `share/export/`
 
- Export Presets
+  Export Format and Presets (see <https://manual.ardour.org/exporting/edit-export-format-profile/>)
 
 * `share/mcp/`
 
- Mackie control surface device files
+  Mackie control surface device files (see <https://manual.ardour.org/using-control-surfaces/devices-using-mackielogic-control-protocol/>)
 
 * `share/midi_maps/`
 
- Generic MIDI control surface presets
+  Generic %MIDI control surface presets
 
 * `share/osc/`
 
- Configuration presets for the OSC control surface
+  [TouchOSC](https://hexler.net/touchosc) layouts for use with Ardour's OSC control surface.
 
 * `share/patchfiles/`
 
- MIDNAM files, MIDI synth descriptions (note-names, CC, PGM names)
+  MIDNAM files, %MIDI synth descriptions (note-names, CC, PGM names)
 
 * `share/scripts/`
 
- Lua scripts (files with a leading underscore are not bundled).
- see `share/scripts/README` for file name convention.
+  Lua scripts (files with a leading underscore are not bundled).
+  see `share/scripts/README` for file name convention.
 
 * `share/templates/`
 
- Session templates (currently none)
+  Session templates (currently none)
 
-## MISC
+## Miscellaneous
 
 * `doc/`
 
- Misc developer oriented documentation files and Doxygen
+  Misc developer oriented documentation files and Doxygen
 
 * `patches/`
 
- Some .diff files for the build-stack.
+  Some .diff files for the build-stack.
 
 * `tools/`
 
- Various developer tools, most notably packaging scripts
+  Various developer tools, most notably packaging scripts
