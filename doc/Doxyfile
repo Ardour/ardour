@@ -2318,6 +2318,8 @@ PREDEFINED             = PROGRAM_NAME=Ardour \
                          LIBPTFORMAT_API= \
                          LIBEVORAL_API= \
                          LIBMIDIPP_API= \
+                         \
+                         DOXYGEN_SHOULD_SKIP_THIS=1
 
 
 # If the MACRO_EXPANSION and EXPAND_ONLY_PREDEF tags are set to YES then this
