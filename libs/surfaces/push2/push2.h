@@ -360,6 +360,8 @@ class Push2 : public MIDISurface
 	 *
 	 * @param mode The active musical mode (scale).
 	 *
+	 * @param origin The note assigned to the bottom left pad
+	 *
 	 * @param ideal_vertical_semitones The ideal interval between rows in
 	 * semitones.  This is an "ideal" because it may not be possible to use
 	 * exactly this interval for every row depending on the scale.  It may be
@@ -384,6 +386,8 @@ class Push2 : public MIDISurface
 	 * @param octave The octave number of the "actual" root (at most 10).
 	 *
 	 * @param mode The active musical mode (scale).
+	 *
+	 * @param origin The note assigned to the bottom left pad
 	 *
 	 * @param vertical_semitones The interval between rows in semitones.  This
 	 * mode guarantees that the vertical interval for all rows is always

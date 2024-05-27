@@ -169,11 +169,10 @@ namespace ARDOUR { namespace LuaAPI {
 
 	/** get a plugin property (LV2 plugins only)
 	 *
-	 * @param p two arguments: Plugin-Inster, URI of the property
-	 * @param value the value to set (boolean, integer, float, string/path)
+	 * @param p two arguments: Plugin-Insert, URI of the property
 	 * @returns value, depending on datatype or nil if property is not found
 	 */
-	int get_plugin_insert_property (lua_State *lua);
+	int get_plugin_insert_property (lua_State *p);
 
 	/**
 	 * A convenience function to get a Automation Lists and ParameterDescriptor
