@@ -155,7 +155,7 @@ public:
    * 
    * @param text A text string or <tt>0</tt>.
    */
-  void set_text(const Glib::ustring& markup);
+  void set_text(const Glib::ustring& text);
   
   /** Sets the icon of the tooltip (which is in front of the text) to be
    *  @a pixbuf.  If @a pixbuf is <tt>0</tt>, the image will be hidden.
@@ -168,7 +168,7 @@ public:
    * to be the icon indicated by @a gicon with the size indicated
    * by @a size. If @a gicon is <tt>0</tt>, the image will be hidden.
    * 
-   * @param gicon A Icon representing the icon, or <tt>0</tt>.
+   * @param icon A Icon representing the icon, or <tt>0</tt>.
    * @param size A stock icon size.
    */
   void set_icon(const Glib::RefPtr<Gio::Icon>& icon, IconSize size);

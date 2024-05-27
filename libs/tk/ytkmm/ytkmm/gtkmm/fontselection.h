@@ -281,7 +281,7 @@ public:
    * 
    * @param text The text to display in the preview area.
    */
-  void set_preview_text(const Glib::ustring& fontname);
+  void set_preview_text(const Glib::ustring& text);
 
   //TODO: Remove these accessors when we can break ABI.
   //They probably all return null now anyway.
@@ -351,9 +351,6 @@ public:
 /** A dialog box for selecting fonts.
  *
  * The Gtk::FontSelectionDialog widget is a dialog box for selecting a font.
- *
- * A FontSelectionDialog looks like this:
- * @image html fontselectiondialog1.png
  *
  * @ingroup Dialogs
  */
@@ -453,7 +450,7 @@ public:
    * 
    * @param text The text to display in the preview area.
    */
-  void set_preview_text(const Glib::ustring& fontname);
+  void set_preview_text(const Glib::ustring& text);
 
   
   /** Gets the 'OK' button.

@@ -58,9 +58,6 @@ namespace Gtk
  * warning, informational message, etc, by using set_message_type(). This
  * determines the background color of the message area.
  *
- * The InfoBar widget looks like
- * @image html infobar1.png
- *
  * @ingroup Widgets
  */
 
@@ -182,7 +179,7 @@ public:
    * to the end of the info bars's action area. The button widget is
    * returned, but usually you don't need it.
    * 
-   * @param button_text Text of button, or stock ID.
+   * @param stock_id A stock ID.
    * @param response_id Response ID for the button.
    * @return The button widget that was added.
    */

@@ -41,8 +41,8 @@ namespace AccelMap
  * with the canonical accel_key and accel_mods for this path.
  * To change the accelerator during runtime programatically, use
  * change_entry().
- * The accelerator path must consist of "<WINDOWTYPE>/Category1/Category2/.../Action",
- * where <WINDOWTYPE> should be a unique application-specific identifier, that
+ * The accelerator path must consist of "&lt;WINDOWTYPE&gt;/Category1/Category2/.../Action",
+ * where &lt;<WINDOWTYPE&gt; should be a unique application-specific identifier, that
  * corresponds to the kind of window the accelerator is being used in, e.g. "Gimp-Image",
  * "Abiword-Document" or "Gnumeric-Settings".
  * The Category1/.../Action portion is most appropriately chosen by the action the

@@ -187,16 +187,16 @@ public:
    * @param keyval Return value for the keyval.
    * @param modifiers Return value for modifiers.
    */
-  void get_key(guint index_, guint& keyval, ModifierType& modifiers) const;
+  void get_key(guint index, guint& keyval, ModifierType& modifiers) const;
   
-  void set_key(guint index_, guint keyval, ModifierType modifiers);
+  void set_key(guint index, guint keyval, ModifierType modifiers);
   
   /** Returns the axis use for @a index.
    * 
    * @param index The index of the axis.
    * @return A Gdk::AxisUse specifying how the axis is used.
    */
-  AxisUse get_axis_use(guint index_) const;
+  AxisUse get_axis_use(guint index) const;
   
   void set_axis_use(guint index_, AxisUse use);
   

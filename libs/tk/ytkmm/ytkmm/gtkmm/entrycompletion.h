@@ -338,7 +338,7 @@ public:
    * 
    * This functions creates and adds a Gtk::CellRendererText for the selected 
    * column. If you need to set the text column, but don't want the cell 
-   * renderer, use Glib::object_set() to set the ::text_column property directly.
+   * renderer, use Glib::object_set() to set the text_column property directly.
    * 
    * @param column The column in the model of @a completion to get strings from.
    */
@@ -351,7 +351,7 @@ public:
    * 
    * This functions creates and adds a Gtk::CellRendererText for the selected 
    * column. If you need to set the text column, but don't want the cell 
-   * renderer, use Glib::object_set() to set the ::text_column property directly.
+   * renderer, use Glib::object_set() to set the text_column property directly.
    * 
    * @param column The column in the model of @a completion to get strings from.
    */

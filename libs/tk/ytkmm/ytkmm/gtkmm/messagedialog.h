@@ -90,9 +90,6 @@ namespace Gtk
  * Gtk::MessageDialog from Gtk::Dialog without too much effort, but
  * Gtk::MessageDialog saves typing.
  *
- * A MessageDialog looks like this:
- * @image html messagedialog1.png
- *
  * @ingroup Dialogs
  */
 
@@ -191,7 +188,7 @@ public:
 
   /** Sets the primary text of the message dialog.
    *
-   * @param text The message.
+   * @param message The message.
    * @param use_markup Whether @a message contains pango markup.
    */
   void set_message(const Glib::ustring& message, bool use_markup = false);

@@ -196,7 +196,7 @@ public:
   /** Translates a string using the specified translate_func(). This
    * is mainly intended for language bindings.
    * 
-   * @param string A string.
+   * @param str A string.
    * @return The translation of @a string.
    */
   Glib::ustring translate_string(const Glib::ustring& str) const;
@@ -240,7 +240,7 @@ public:
    * @param action the action
    * @param proxy the proxy
    *
-   * @paragraph Slot Prototype:
+   * \par Slot Prototype:
    * <tt>void on_my_%disconnect_proxy(const Glib::RefPtr<Action>& action, Widget* proxy)</tt>
    *
    */
@@ -256,7 +256,7 @@ public:
    *
    * @param action the action
    *
-   * @paragraph Slot Prototype:
+   * \par Slot Prototype:
    * <tt>void on_my_%pre_activate(const Glib::RefPtr<Action>& action)</tt>
    *
    */
@@ -272,7 +272,7 @@ public:
    *
    * @param action the action
    *
-   * @paragraph Slot Prototype:
+   * \par Slot Prototype:
    * <tt>void on_my_%post_activate(const Glib::RefPtr<Action>& action)</tt>
    *
    */

@@ -2516,7 +2516,6 @@ public:
   /** Sets the icon that will be used for drags from a particular source
    * to a themed icon. See the docs for Gtk::IconTheme for more details.
    * 
-   * @param widget A Gtk::Widget.
    * @param icon_name Name of icon to use.
    */
   void drag_source_set_icon(const Glib::ustring& icon_name);
@@ -2679,9 +2678,9 @@ public:
    * If the custom window should have the default theming it needs to
    * have the name "gtk-tooltip", see set_name().
    * 
-   * @param custom_window A Gtk::Window, or <tt>0</tt>.
+   * @param window A Gtk::Window, or <tt>0</tt>.
    */
-  void set_tooltip_window(Window& widget);
+  void set_tooltip_window(Window& window);
   
   /** Returns the Gtk::Window of the current tooltip. This can be the
    * GtkWindow created by default, or the custom tooltip window set
@@ -3051,7 +3050,7 @@ public:
   Glib::SignalProxy1< void,bool > signal_grab_notify();
 
 
-  /** The ::child-notify signal is emitted for each child property that has
+  /** The <tt>child-notify</tt> signal is emitted for each child property that has
   * changed on an object. The signal's detail holds the property name.
   *
   * @param pspec The GParamSpec of the changed child property.
@@ -3522,13 +3521,13 @@ public:
 
   /** The drag_data_received signal is emitted on the drop site when the dragged data has been
    * received. If the data was received in order to determine whether the drop will be accepted,
-   * the handler is expected to call drag_status() and <emphasis>not</emphasis> finish the drag.
+   * the handler is expected to call drag_status() and <em>not</em> finish the drag.
    * If the data was received in response to a drag_drop signal (and this is the last target to be
    * received), the handler for this signal is expected to process the received data and then call
    * drag_finish(), setting the @a success parameter depending on whether the data was processed
    * successfully.
    *
-   * The handler may inspect and modify @drag_context->action before calling gtk_drag_finish(),
+   * The handler may inspect and modify @p drag_context->action before calling gtk_drag_finish(),
    * e.g. to implement %Gdk::ACTION_ASK.
    *
    * @param drag_context the drag context

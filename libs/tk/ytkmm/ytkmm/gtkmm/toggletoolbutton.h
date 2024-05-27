@@ -46,9 +46,6 @@ namespace Gtk
  *
  * A ToggleToolButton is a Gtk::ToolItem that contains a toggle button.
  *
- * A ToggleToolButton widget looks like this:
- * @image html toggletoolbutton1.png
- *
  * @ingroup Widgets
  */
 

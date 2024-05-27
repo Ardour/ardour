@@ -96,9 +96,6 @@ namespace Gtk
 
 /** Multi-line text editing widget. It displays a Gtk::TextBuffer.
  *
- * The TextView widget looks like this:
- * @image html textview1.png
- *
  * @ingroup Widgets
  * @ingroup Containers
  * @ingroup TextView

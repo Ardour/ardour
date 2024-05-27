@@ -612,7 +612,7 @@ public:
    * 
    * [C example ellipted]
    * 
-   * @param file The File to set as current.
+   * @param uri The File/URI to set as current.
    * @return <tt>true</tt> if both the folder could be changed and the file was
    * selected successfully, <tt>false</tt> otherwise.
    */
@@ -1019,7 +1019,7 @@ public:
 
   /** This signal is emitted when the user "activates" a file in the file
    * chooser.  This can happen by double-clicking on a file in the file list, or
-   * by pressing <keycap>Enter</keycap>.
+   * by pressing <em>Enter</em>.
    *
    * Normally you do not need to connect to this signal.  It is used internally
    * by FileChooserDialog to know when to activate the default button in the

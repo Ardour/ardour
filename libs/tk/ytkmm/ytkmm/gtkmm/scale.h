@@ -309,9 +309,6 @@ protected:
  * vertical slider. See the Gtk::Scale documentation for more information
  * on how to use a Gtk::VScale.
  *
- * A VScale widget looks like this:
- * @image html vscale1.png
- *
  * @ingroup Widgets
  */
 
@@ -389,9 +386,6 @@ public:
  * horizontal slider. See the Gtk::Scale documentation for more information
  * on how to use a Gtk::HScale.
  *
- * The HScale widget looks like this:
- * @image html hscale1.png
- * 
  * @ingroup Widgets
  */
 

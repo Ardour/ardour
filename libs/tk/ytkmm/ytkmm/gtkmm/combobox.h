@@ -60,12 +60,6 @@ namespace Gtk
  * valid choices is not restricted to a flat list, it can be a real tree, and the popup will reflect the tree 
  * structure.
  *
- * The ComboBox widget looks like this with has_entry = false:
- * @image html combobox1.png
- *
- * The ComboBox widget looks like this with has_entry = true:
- * @image html comboboxentry1.png
- *
  * See also ComboBoxText, which is specialised for a single text column.
  *
  * @ingroup Widgets

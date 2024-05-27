@@ -118,7 +118,7 @@ public:
    * Optionally, the text can be marked up with the Pango text markup language.
    *
    * @param text The text to display in the cell view
-   * @param markup Whether the @a text uses Pango text markup language.
+   * @param use_markup Whether the @a text uses Pango text markup language.
    */
   explicit CellView(const Glib::ustring& text, bool use_markup = false);
   
@@ -126,7 +126,6 @@ public:
   /** Creates a new CellView widget, adds a CellRendererPixbuf to it, and makes it show the pixbuf.
    *
    * @param pixbuf The image to display in the cell view
-   * @param markup Whether the @a text uses Pango text markup language.
    */
   explicit CellView(const Glib::RefPtr<Gdk::Pixbuf>& pixbuf);
   

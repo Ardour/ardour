@@ -48,9 +48,6 @@ namespace Gtk
  * allows to open a font selection dialog to change the font. It is suitable widget
  * for selecting a font in a preference dialog.
  *
- * The FontButton widget looks like this:
- * @image html fontbutton1.png
- *
  * @ingroup Widgets
  */
 

@@ -83,9 +83,6 @@ namespace Gtk
 /** A standard menu bar which usually holds Gtk::Menu submenu items.
  * The useful methods are in the base class - Gtk::MenuShell.
  *
- * The MenuBar widget looks like this:
- * @image html menubar1.png
- *
  * @ingroup Widgets
  * @ingroup Menus
  */

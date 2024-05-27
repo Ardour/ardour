@@ -91,9 +91,6 @@ namespace Gtk
  * longer than the allocation of the widget, the widget will scroll so that
  * the cursor position is visible.
  *
- * The Entry widget looks like this:
- * @image html entry1.png
- *
  * @ingroup Widgets
  */
 

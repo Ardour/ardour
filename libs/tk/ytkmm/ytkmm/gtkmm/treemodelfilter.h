@@ -266,7 +266,7 @@ public:
   Path convert_path_to_child_path(const Path& filter_path) const;
 
   
-  /** Emits ::row_changed for each row in the child model, which causes
+  /** Emits <tt>row_changed</tt> for each row in the child model, which causes
    * the filter to re-evaluate whether a row is visible or not.
    */
   void refilter();

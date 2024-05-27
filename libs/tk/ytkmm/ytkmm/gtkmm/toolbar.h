@@ -341,9 +341,9 @@ public:
 
   /** Emitted when the style of the toolbar changes.
    *
-   * @param @style The new ToolbarStyle of the toolbar.
+   * @param style The new ToolbarStyle of the toolbar.
    *
-   * @par Slot Prototype:
+   * \par Slot Prototype:
    * <tt>void on_my_%toolbar_style_changed(ToolbarStyle style)</tt>
    *
    */
@@ -363,7 +363,7 @@ public:
    * @param x The x coordinate of the point where the menu should appear.
    * @param y The y coordinate of the point where the menu should appear.
    * @param button The mouse button the user pressed, or -1
-   * @resultt true if the signal was handled, false if not.
+   * @result true if the signal was handled, false if not.
    *
    * @par Slot Prototype:
    * <tt>bool on_my_%popup_context_menu(int x, int y, int button_number)</tt>

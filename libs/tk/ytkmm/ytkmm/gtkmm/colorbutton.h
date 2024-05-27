@@ -49,9 +49,6 @@ namespace Gtk
  * open a color selection dialog to change the color. It is suitable widget for selecting a
  * color in a preference dialog.
  *
- * The ColorButton widget looks like this:
- * @image html colorbutton1.png
- *
  * @ingroup Widgets
  */
 

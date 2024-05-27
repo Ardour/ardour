@@ -192,7 +192,7 @@ protected:
    * If @a pred never returns <tt>true</tt>, @a iter is set to @a limit if
    *  @a limit is non-<tt>0</tt>, otherwise to the end iterator.
    * 
-   * @param pred A function to be called on each character.
+   * @param predicate A function to be called on each character.
    * @param user_data User data for @a pred.
    * @param limit Search limit, or <tt>0</tt> for none.
    * @return Whether a match was found.
@@ -202,7 +202,7 @@ protected:
   
   /** Same as forward_find_char(), but goes backward from @a iter.
    * 
-   * @param pred Function to be called on each character.
+   * @param predicate Function to be called on each character.
    * @param user_data User data for @a pred.
    * @param limit Search limit, or <tt>0</tt> for none.
    * @return Whether a match was found.

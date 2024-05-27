@@ -602,7 +602,7 @@ public:
    * Deprecated: 2.22: Use the Cairo functions cairo_set_line_width(),
    * cairo_set_line_join(), cairo_set_line_cap() and cairo_set_dash()
    * to affect the stroking behavior in Cairo. Keep in mind that the default
-   * attributes of a #cairo_t are different from the default attributes of
+   * attributes of a <tt>cairo_t</tt> are different from the default attributes of
    * a Gdk::GC.
    * 
    * @param line_width The width of lines.

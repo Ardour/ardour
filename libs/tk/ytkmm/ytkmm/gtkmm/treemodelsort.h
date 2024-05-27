@@ -195,9 +195,7 @@ public:
   void clear_cache();
 
   
-  /** <warning>
-   * This function is slow. Only use it for debugging and/or testing purposes.
-   * </warning>
+  /** \warning This function is slow. Only use it for debugging and/or testing purposes.
    * 
    * Checks if the given iter is a valid iter for this Gtk::TreeModelSort.
    * 

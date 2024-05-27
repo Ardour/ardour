@@ -215,7 +215,7 @@ public:
    * appended to the end of the dialog's action area. The button widget is 
    * returned, but usually you don't need it.
    * 
-   * @param button_text Text of button, or stock ID.
+   * @param stock_id Text of button, or stock ID.
    * @param response_id Response ID for the button.
    * @return The button widget that was added.
    */
@@ -286,7 +286,7 @@ public:
    * about alternative button order. 
    * 
    * If you need to use this function, you should probably connect
-   * to the ::notify:gtk-alternative-button-order signal on the
+   * to the notify:gtk-alternative-button-order signal on the
    * Gtk::Settings object associated to @a screen, in order to be 
    * notified if the button order setting changes.
    * 
@@ -300,10 +300,9 @@ public:
    * the order of the response ids in @a new_order.
    *
    * By default, GTK+ dialogs use the button order advocated by the Gnome
-   * <ulink url="http://developer.gnome.org/projects/gup/hig/2.0/">Human
-   * Interface Guidelines</ulink> with the affirmative button at the far
+   * Human Interface Guidelines with the affirmative button at the far
    * right, and the cancel button left of it. But the builtin GTK+ dialogs
-   * and #GtkMessageDialog<!-- -->s do provide an alternative button order,
+   * and #GtkMessageDialog do provide an alternative button order,
    * which is more suitable on some platforms, e.g. Windows.
    *
    * Use this function after adding all the buttons to your dialog

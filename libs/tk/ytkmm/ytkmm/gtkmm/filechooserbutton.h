@@ -55,9 +55,6 @@ namespace Gtk
  * space, you should call size_request(), set_width_chars(), or pack the button in such a way that other interface 
  * elements give space to the widget.
  *
- * The FileChooserButton widget looks like this:
- * @image html filechooserbutton1.png
- *
  * @ingroup Widgets
  */
 
@@ -121,9 +118,7 @@ private:
 public:
 
   /** Creates a new file-selecting button widget with the default title.
-   * @param title The title of the browse dialog.
    * @param action The open mode for the widget.
-   * @param backend The name of the Gtk::FileSystem backend to use.
    */
   explicit FileChooserButton(FileChooserAction action = FILE_CHOOSER_ACTION_OPEN);
   

@@ -205,7 +205,7 @@ public:
   
   /** Tests whether a rectangle is within a region.
    * 
-   * @param rectangle A Gdk::Rectangle.
+   * @param rect A Gdk::Rectangle.
    * @return Gdk::OVERLAP_RECTANGLE_IN, Gdk::OVERLAP_RECTANGLE_OUT, or
    * Gdk::OVERLAP_RECTANGLE_PART, depending on whether the rectangle is inside,
    * outside, or partly inside the Gdk::Region, respectively.

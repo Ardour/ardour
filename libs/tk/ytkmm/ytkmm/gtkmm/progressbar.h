@@ -102,9 +102,6 @@ namespace Gtk
  * the bar, optional text can be displayed along with the bar, and the step
  * size used in activity mode can be set. 
  *
- * The ProgressBar widget looks like this:
- * @image html progressbar1.png
- *
  * @ingroup Widgets
  */
 

@@ -354,9 +354,6 @@ protected:
  * The Gtk::Notebook widget is a Gtk::Container whose children are pages that
  * can be switched between using tab labels along one edge.
  *
- * A Notebook widget looks like this:
- * @image html notebook1.png
- *
  * @ingroup Widgets
  * @ingroup Containers
  */
@@ -603,7 +600,7 @@ public:
    * via drag and drop. A notebook with a <tt>0</tt> group name will
    * not be able to exchange tabs with any other notebook.
    * 
-   * @param name The name of the notebook group, or <tt>0</tt> to unset it.
+   * @param group_name The name of the notebook group, or <tt>0</tt> to unset it.
    */
   void set_group_name(const Glib::ustring& group_name);
   

@@ -273,7 +273,7 @@ public:
    * to be in position (according to the "mask").  Finally, "precision" refers
    * to how much precision the pixel value contains for a particular primary.
    * 
-   * @param mask A pointer to a #guint32 to be filled in, or <tt>0</tt>.
+   * @param mask A pointer to a <tt>guint32</tt> to be filled in, or <tt>0</tt>.
    * @param shift A pointer to a <tt>int</tt> to be filled in, or <tt>0</tt>.
    * @param precision A pointer to a <tt>int</tt> to be filled in, or <tt>0</tt>.
    */
@@ -285,7 +285,7 @@ public:
    * to be in position (according to the "mask").  Finally, "precision" refers
    * to how much precision the pixel value contains for a particular primary.
    * 
-   * @param mask A pointer to a #guint32 to be filled in, or <tt>0</tt>.
+   * @param mask A pointer to a <tt>guint32</tt> to be filled in, or <tt>0</tt>.
    * @param shift A pointer to a <tt>int</tt> to be filled in, or <tt>0</tt>.
    * @param precision A pointer to a <tt>int</tt> to be filled in, or <tt>0</tt>.
    */
@@ -297,7 +297,7 @@ public:
    * to be in position (according to the "mask").  Finally, "precision" refers
    * to how much precision the pixel value contains for a particular primary.
    * 
-   * @param mask A pointer to a #guint32 to be filled in, or <tt>0</tt>.
+   * @param mask A pointer to a <tt>guint32</tt> to be filled in, or <tt>0</tt>.
    * @param shift A pointer to a <tt>int</tt> to be filled in, or <tt>0</tt>.
    * @param precision A pointer to a <tt>int</tt> to be filled in, or <tt>0</tt>.
    */

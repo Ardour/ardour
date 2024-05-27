@@ -54,9 +54,6 @@ namespace Gtk
  * for <user\@host>, URLs are recognized by looking for http://url, with the URL extending to the next space,
  * tab or line break.
  *
- * An AboutDialog looks like this:
- * @image html aboutdialog1.png
- *
  * @ingroup Dialogs
  */
 

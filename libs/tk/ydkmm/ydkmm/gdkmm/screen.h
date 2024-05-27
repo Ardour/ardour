@@ -481,7 +481,7 @@ public:
    * default set of font options does not affect contexts that
    * have already been created.
    * 
-   * @param options A #cairo_font_options_t, or <tt>0</tt> to unset any
+   * @param options A <tt>cairo_font_options_t</tt>, or <tt>0</tt> to unset any
    * previously set default font options.
    */
   void set_font_options(const Cairo::FontOptions& options);

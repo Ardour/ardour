@@ -141,7 +141,7 @@ public:
    * you want to set the background to a different color or
    * draw on it.
    * 
-   * <note>
+   * \note
    * There is one unexpected issue for an invisible event box that has its
    * window below the child. (See set_above_child().)
    * Since the input-only window is not an ancestor window of any windows
@@ -151,10 +151,10 @@ public:
    * mask for the descendant window (see Gtk::Widget::add_events()),  
    * it won't be received by the event box. 
    * 
+	 * \note
    * This problem doesn't occur for visible event boxes, because in
    * that case, the event box window is actually the ancestor of the
    * descendant windows, not just at the same place on the screen.
-   * </note>
    * 
    * @param visible_window Boolean value.
    */

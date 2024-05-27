@@ -279,9 +279,6 @@ public:
 
 /** This dialog allows the user to select a color.
  *
- * A ColorSelectionDialog looks like this:
- * @image html colorselectiondialog1.png
- *
  * @ingroup Dialogs
  */
 

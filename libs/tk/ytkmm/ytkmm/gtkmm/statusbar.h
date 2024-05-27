@@ -51,9 +51,6 @@ namespace Gtk
  * It derives from Gtk::HBox so that additional information can be added
  * easily.
  *
- * The Statusbar widget looks like this:
- * @image html statusbar1.png
- *
  * @ingroup Widgets
  */
 

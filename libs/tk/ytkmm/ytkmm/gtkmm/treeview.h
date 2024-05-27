@@ -565,7 +565,7 @@ public:
   int insert_column_with_data_func(int position, const Glib::ustring& title, CellRenderer& cell, const SlotCellData& slot);
 
   
-  /** Gets the Gtk::TreeViewColumn at the given position in the #tree_view.
+  /** Gets the Gtk::TreeViewColumn at the given position in the Gtk::TreeView
    * 
    * @param n The position of the column, counting from 0.
    * @return The Gtk::TreeViewColumn, or <tt>0</tt> if the
@@ -573,7 +573,7 @@ public:
    */
   TreeViewColumn* get_column(int n);
   
-  /** Gets the Gtk::TreeViewColumn at the given position in the #tree_view.
+  /** Gets the Gtk::TreeViewColumn at the given position in the Gtk::TreeView
    * 
    * @param n The position of the column, counting from 0.
    * @return The Gtk::TreeViewColumn, or <tt>0</tt> if the
@@ -949,8 +949,8 @@ public:
   /** Finds the path at the point (@a x, @a y), relative to bin_window coordinates
    * (please get_bin_window()).
    * That is, @a x and @a y are relative to an events coordinates. @a x and @a y must
-   * come from an event on the TreeView only where <literal>event->window ==
-   * gtk_tree_view_get_bin_window (<!-- -->)</literal>. It is primarily for
+   * come from an event on the TreeView only where <tt>event->window ==
+   * gtk_tree_view_get_bin_window ()</tt>. It is primarily for
    * things like popup menus. @a path will be filled
    * with the TreeModel::Path at that point. @a column will be filled
    * with the column at that point.  @a cell_x and @a cell_y return the coordinates
@@ -1002,7 +1002,7 @@ public:
    * of the rectangle will be filled with 0.  The sum of all cell rects does not cover the
    * entire tree; there are extra pixels in between rows, for example. The
    * returned rectangle is equivalent to the @a cell_area passed to
-   * Gtk::CellRenderer::render().  This function is only valid if #tree_view is
+   * Gtk::CellRenderer::render().  This function is only valid if @a Gtk::TreeView is
    * realized.
    * 
    * @deprecated Use the const version
@@ -1023,7 +1023,7 @@ public:
    * of the rectangle will be filled with 0.  The sum of all cell rects does not cover the
    * entire tree; there are extra pixels in between rows, for example. The
    * returned rectangle is equivalent to the @a cell_area passed to
-   * Gtk::CellRenderer::render().  This function is only valid if #tree_view is
+   * Gtk::CellRenderer::render().  This function is only valid if @a Gtk::TreeView is
    * realized.
    * 
    * @param path A Gtk::TreePath for the row.
@@ -1518,7 +1518,7 @@ public:
   /** Sets whether to draw lines interconnecting the expanders in @a tree_view.
    * This does not have any visible effects for lists.
    * 
-   * @param enabled <tt>true</tt> to enable tree line drawing, <tt>false</tt> otherwise.
+   * @param enable <tt>true</tt> to enable tree line drawing, <tt>false</tt> otherwise.
    */
   void set_enable_tree_lines(bool enable =  true);
   
@@ -1573,6 +1573,7 @@ public:
    * 
    * See also Tooltip::set_tip_area().
    * 
+   * @param tooltip A Gtk::Tooltip.
    * @param path A Gtk::TreePath.
    */
   void set_tooltip_row(const Glib::RefPtr<Tooltip>& tooltip, const TreePath& path);

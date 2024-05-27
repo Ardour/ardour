@@ -44,7 +44,7 @@ G_BEGIN_DECLS
 /**
  * GtkWidgetFlags:
  * @param GTK_TOPLEVEL: widgets without a real parent, as there are #GtkWindow and
- *  #GtkMenu<!-- -->s have this flag set throughout their lifetime.
+ *  #GtkMenu have this flag set throughout their lifetime.
  *  Toplevel widgets always contain their own #GdkWindow.
  * @param GTK_NO_WINDOW: Indicative for a widget that does not provide its own #GdkWindow.
  *  Visible action (e.g. drawing) is performed on the parent's #GdkWindow.
@@ -85,13 +85,13 @@ G_BEGIN_DECLS
  * @param GTK_APP_PAINTABLE: Set and unset by gtk_widget_set_app_paintable().
  *  Must be set on widgets whose window the application directly draws on,
  *  in order to keep GTK+ from overwriting the drawn stuff.  See
- *  #app-paintable-widgets for a detailed
+ *  app-paintable-widgets for a detailed
  *  description of this flag.
  * @param GTK_RECEIVES_DEFAULT: The widget when focused will receive the default action and have
  *  %GTK_HAS_DEFAULT set even if there is a different widget set as default.
  * @param GTK_DOUBLE_BUFFERED: Set and unset by gtk_widget_set_double_buffered().
  *  Indicates that exposes done on the widget should be
- *  double-buffered.  #double-buffering" for a
+ *  double-buffered. See "double-buffering" for a
  *  detailed discussion of how double-buffering works in GTK+ and
  *  why you may want to disable it for special cases.
  * @param GTK_NO_SHOW_ALL:
@@ -493,7 +493,7 @@ typedef struct _GtkWindow          GtkWindow;
  *
  * A GtkAllocation of a widget represents region which has been allocated to the
  * widget by its parent. It is a subregion of its parents allocation. See
- * #size-allocation for more information.
+ * size-allocation for more information.
  */
 typedef 	GdkRectangle	   GtkAllocation;
 
@@ -514,7 +514,7 @@ typedef void    (*GtkCallback)     (GtkWidget        *widget,
  * @param height: the widget's desired height
  *
  * A GtkRequisition represents the desired size of a widget. See
- * #size-requisition for more information.
+ * size-requisition for more information.
  */
 struct _GtkRequisition
 {

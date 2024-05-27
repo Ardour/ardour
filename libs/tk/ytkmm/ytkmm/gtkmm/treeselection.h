@@ -296,7 +296,7 @@ public:
   
   /** Selects the specified iterator.
    * 
-   * @param iter The Gtk::TreeIter to be selected.
+   * @param row The Gtk::TreeModel::Row to be selected.
    */
   void select(const TreeModel::Row& row);
   

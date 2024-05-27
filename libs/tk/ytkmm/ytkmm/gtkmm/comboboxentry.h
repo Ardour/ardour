@@ -65,9 +65,6 @@ namespace Gtk
  * If you have special needs that go beyond a simple entry (e.g. input validation), it is possible to replace the 
  * child entry by a different widget using Gtk::Container::remove() and Gtk::Container::add(). 
  *
- * The ComboBoxEntry widget looks like this:
- * @image html comboboxentry1.png
- *
  * @ingroup Widgets
  *
  * @deprecated Instead use ComboBox with has_entry = true.

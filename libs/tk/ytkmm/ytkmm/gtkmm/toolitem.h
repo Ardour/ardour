@@ -312,7 +312,7 @@ public:
    * Gtk::ToolItem should call this function to find out how text should
    * be aligned.
    * 
-   * @return A #gfloat indicating the horizontal text alignment
+   * @return A float indicating the horizontal text alignment
    * used for @a tool_item.
    */
   float get_text_alignment() const;
@@ -420,7 +420,7 @@ public:
 
   //TODO: This suggests calling set_proxy_menu_item() with NULL. but the function asserts against that.
   
-  /** This signal is emitted when the toolbar needs information from @tool_item
+  /** This signal is emitted when the toolbar needs information from @a tool_item
    * about whether the item should appear in the toolbar overflow menu. In
    * response the tool item should either
    * <ul>

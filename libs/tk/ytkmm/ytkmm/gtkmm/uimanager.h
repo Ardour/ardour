@@ -237,7 +237,7 @@ namespace Gtk
  * \par Accelerators
  *
  * Every action has an accelerator path. Accelerators are installed together with menuitem 
- * proxies, but they can also be explicitly added with <accelerator> elements in the 
+ * proxies, but they can also be explicitly added with 'accelerator' elements in the 
  * UI definition. This makes it possible to have accelerators for actions even 
  * if they have no visible proxies.
  * 
@@ -389,10 +389,10 @@ public:
   /** Looks up a widget by following a path. 
    * The path consists of the names specified in the XML description of the UI. 
    * separated by '/'. Elements which don't have a name or action attribute in 
-   * the XML (e.g. <popup>) can be addressed by their XML element name 
+   * the XML (e.g. &lt;popup&gt; can be addressed by their XML element name 
    * (e.g. "popup"). The root element ("/ui") can be omitted in the path.
    * 
-   * Note that the widget found by following a path that ends in a <menu>
+   * Note that the widget found by following a path that ends in a &lt;menu&gt;
    * element is the menuitem to which the menu is attached, not the menu itself.
    * 
    * Also note that the widgets constructed by a ui manager are not tied to 
@@ -409,10 +409,10 @@ public:
   /** Looks up a widget by following a path. 
    * The path consists of the names specified in the XML description of the UI. 
    * separated by '/'. Elements which don't have a name or action attribute in 
-   * the XML (e.g. <popup>) can be addressed by their XML element name 
+   * the XML (e.g. &lt;popup&gt;) can be addressed by their XML element name 
    * (e.g. "popup"). The root element ("/ui") can be omitted in the path.
    * 
-   * Note that the widget found by following a path that ends in a <menu>
+   * Note that the widget found by following a path that ends in a &lt;menu&gt;
    * element is the menuitem to which the menu is attached, not the menu itself.
    * 
    * Also note that the widgets constructed by a ui manager are not tied to 

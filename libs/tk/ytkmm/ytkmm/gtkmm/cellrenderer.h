@@ -315,7 +315,7 @@ public:
    * @param xalign The x alignment of the cell renderer.
    * @param yalign The y alignment of the cell renderer.
    */
-  void set_alignment(float align, float yalign);
+  void set_alignment(float xalign, float yalign);
   
   /** Fills in @a xalign and @a yalign with the appropriate values of @a cell.
    * 

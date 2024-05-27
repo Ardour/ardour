@@ -487,7 +487,7 @@ public:
   /** This signal is emitted when the user "activates" a recent item
    * in the recent chooser.  This can happen by double-clicking on an item
    * in the recently used resources list, or by pressing
-   * <keycap>Enter</keycap>.
+   * <em>Enter</em>.
    *
    * @par Slot Prototype:
    * <tt>void on_my_%item_activated()</tt>

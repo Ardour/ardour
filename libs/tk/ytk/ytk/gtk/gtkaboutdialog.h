@@ -46,7 +46,7 @@ typedef struct _GtkAboutDialogClass   GtkAboutDialogClass;
 /**
  * GtkAboutDialog:
  *
- * The \struct GtkAboutDialog struct contains
+ * The struct GtkAboutDialog struct contains
  * only private fields and should not be directly accessed.
  */
 struct _GtkAboutDialog 

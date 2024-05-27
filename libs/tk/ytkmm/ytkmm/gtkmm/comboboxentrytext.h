@@ -110,7 +110,7 @@ public:
   void clear_items();
 
   /** Remove the specified item if it is in the drop-down menu.
-   * @text The text of the item that should be removed.
+   * @param text The text of the item that should be removed.
    */
   void remove_text(const Glib::ustring& text);
 

@@ -53,9 +53,6 @@ namespace Stock { struct BuiltinStockID; }
  * This widget is generally used with a signal handler that is called when the button is pressed.
  * It can hold any valid child widget.  The most commonly used child is the Gtk::Label.
  *
- * The Button widget looks like this:
- * @image html button2.png
- *
  * @ingroup Widgets
  */
 

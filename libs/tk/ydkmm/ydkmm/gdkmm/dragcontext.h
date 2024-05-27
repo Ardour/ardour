@@ -285,7 +285,7 @@ public:
   /** Informs the drag source that the drop is finished, and that the data of the drag will no longer be required.
    * @param success A flag indicating whether the drop was successful.
    * @param del Aa flag indicating whether the source should delete the original data. (This should be true for a move.)
-   * time The timestamp from the "drag_data_drop" signal.
+   * @param time The timestamp from the "drag_data_drop" signal.
    */
   void drag_finish(bool success, bool del, guint32 time);
   //Gtk::Widget* get_source_widget() - see Gtk::Widget::drag_get_source_widget()

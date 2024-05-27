@@ -172,8 +172,8 @@ public:
    * Note that the position is in characters, not in bytes. 
    * The function updates @a position to point after the newly inserted text.
    * 
-   * @param new_text The text to append.
-   * @param new_text_length The length of the text in bytes, or -1.
+   * @param text The text to append.
+   * @param length The length of the text in bytes, or -1.
    * @param position Location of the position text will be inserted at.
    */
   void insert_text(const Glib::ustring& text, int length, int& position);

@@ -424,7 +424,7 @@ public:
   int get_spacing() const;
 
   
-  /** Moves @a child to a new @a position in the list of @a box children.  
+  /** Moves @a child to a new @a pos in the list of @a box children.  
    * The list is the <tt>children</tt> field of
    * Gtk::Box-struct, and contains both widgets packed Gtk::PACK_START 
    * as well as widgets packed Gtk::PACK_END, in the order that these 
@@ -436,7 +436,7 @@ public:
    * same packing type that appear earlier in the list.
    * 
    * @param child The Gtk::Widget to move.
-   * @param position The new position for @a child in the list of children 
+   * @param pos The new position for @a child in the list of children 
    * of @a box, starting from 0. If negative, indicates the end of 
    * the list.
    */

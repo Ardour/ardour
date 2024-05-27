@@ -52,8 +52,6 @@ namespace Gtk
  * and retrieved using get_uri().
  * Gtk::LinkButton offers a global hook, which is called when the used clicks on it: see set_uri_hook(). 
  *
- * The LinkButton widget looks like this:
- * @image html linkbutton1.png
  * @ingroup Widgets
  */
 

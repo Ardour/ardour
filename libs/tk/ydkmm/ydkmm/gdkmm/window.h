@@ -1127,8 +1127,7 @@ public:
    * and an expose event is emitted on the parent of the composited
    * window. It is the responsibility of the parent's expose handler
    * to manually merge the off-screen content onto the screen in
-   * whatever way it sees fit. See <xref linkend="composited-window-example"/>
-   * for an example.
+   * whatever way it sees fit.
    * 
    * It only makes sense for child windows to be composited; see
    * set_opacity() if you need translucent toplevel
@@ -1586,14 +1585,13 @@ public:
    * Gdk::EventConfigure. get_position() in contrast gets the
    * position from the most recent configure event.
    * 
-   * <note>
+   * \note
    * If @a window is not a toplevel, it is <em>much</em> better
    * to call get_position() and Gdk::Drawable::get_size() instead,
    * because it avoids the roundtrip to the X server and because
    * Gdk::Drawable::get_size() supports the full 32-bit coordinate space,
    * whereas get_geometry() is restricted to the 16-bit
    * coordinates of X11.
-   * </note>
    * 
    * @param x Return location for X coordinate of window (relative to its parent).
    * @param y Return location for Y coordinate of window (relative to its parent).
@@ -2134,7 +2132,6 @@ public:
   /** Starts a drag and creates a new drag context for it.
    * 
    * This method is called by the drag source.
-   * @param window The source window for this drag.
    * @param targets A list of the offered targets names.
    * @return A newly created Gdk::DragContext.
    */
@@ -2529,7 +2526,6 @@ public:
    * signal on the @a embedder and the Gdk::Window::signal_to_embedder() and
    * Gdk::Window::signal_from_embedder() signals on @a window.
    * 
-   * @param window A Gdk::Window.
    * @param embedder The Gdk::Window that @a window gets embedded in.
    */
   void set_offscreen_embedder(const Glib::RefPtr<Window>& embedder);

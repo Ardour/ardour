@@ -206,7 +206,7 @@ public:
   /** Sets the column with text for @a icon_view to be @a column. The text
    * column must be of type TYPE_STRING.
    * 
-   * @param column A column in the currently used model, or -1 to display no text.
+   * @param model_column A column in the currently used model, or -1 to display no text.
    */
   void set_text_column(const TreeModelColumnBase& model_column);
   
@@ -415,11 +415,11 @@ public:
    */
   bool get_item_at_pos(int x, int y, TreeModel::Path& path) const;
 
-  /** Finds the path at the point (@a x, @a y), relative to widget coordinates.
+  /** Finds the cell renderer at the point (@a x, @a y).
    *
    * @param x The x position to be identified.
    * @param y The y position to be identified.
-   * @param path The path.
+   * @param cell The cellrender or <tt>0</tt> if none is found.
    *
    * @result true if an item exists at the specified position.
    */
@@ -663,7 +663,7 @@ public:
   /** Gets information about the item that is highlighted for feedback.
    *
    * @param path The highlighted item.
-   * @pos The drop position.
+   * @param pos The drop position.
    */
   void get_drag_dest_item(TreeModel::Path& path, IconViewDropPosition& pos) const;
 
@@ -675,7 +675,7 @@ public:
 
   /** Gets information about the item that is highlighted for feedback.
    *
-   * @pos The drop position.
+   * @param pos The drop position.
    */
   void get_drag_dest_item(IconViewDropPosition& pos) const;
   

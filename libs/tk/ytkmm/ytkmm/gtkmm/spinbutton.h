@@ -120,9 +120,6 @@ class Adjustment;
 /** numeric Entry with up/down buttons
  * Slightly misnamed, this should be called a SpinEntry.
  *
- * The SpinButton widget looks like this:
- * @image html spinbutton1.png
- *
  * @ingroup Widgets
  */
 

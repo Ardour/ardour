@@ -101,9 +101,6 @@ namespace Gtk
  * image, such as button clicks, place the image inside a Gtk::EventBox, then
  * connect to the event signals on the event box. 
  *
- * The Image widget looks like this:
- * @image html image1.png
- *
  * @ingroup Widgets
  */
 
@@ -209,7 +206,7 @@ public:
    * constructor that takes a StockID. This will allow themes to override the icon you ship with your application.
    *
    * @param icon_set An IconSet
-   * @param size A stock icon size.
+   * @param icon_size A stock icon size.
    */
     explicit Image(const IconSet& icon_set, IconSize icon_size);
 

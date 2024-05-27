@@ -50,9 +50,6 @@ namespace Gtk
  * side of the frame. The position of the label can be controlled with
  * set_label_align().
  *
- * A Frame widget looks like this:
- * @image html frame1.png
- *
  * @ingroup Widgets
  * @ingroup Containers
  */

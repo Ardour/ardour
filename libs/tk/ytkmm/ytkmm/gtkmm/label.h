@@ -48,9 +48,6 @@ class Menu;
  *
  * A simple setable widget for holding a Glib::ustring.
  *
- * The Label widget looks like this:
- * @image html label1.png
- *
  * @ingroup Widgets
  */
 
@@ -160,12 +157,13 @@ public:
   /** Sets a Pango::AttrList; the attributes in the list are applied to the
    * label text. 
    * 
-   * <note>The attributes set with this function will be applied
+   * \note
+	 * The attributes set with this function will be applied
    * and merged with any other attributes previously effected by way
    * of the Gtk::Label::property_use_underline() or Gtk::Label::property_use_markup() properties.
    * While it is not recommended to mix markup strings with manually set
    * attributes, if you must; know that the attributes will be applied
-   * to the label after the markup string is parsed.</note>
+   * to the label after the markup string is parsed.
    * 
    * @param attrs A Pango::AttrList.
    */

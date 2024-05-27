@@ -275,7 +275,7 @@ public:
    * you can assume that selection data of type "GTK_TREE_MODEL_ROW" is
    * from the current process.
    *
-   * @param selection_data a #SelectionData
+   * @param selection_data a @a SelectionData
    * @param model a Gtk::TreeModel
    * @param path a row in model
    *
@@ -292,7 +292,7 @@ public:
    * Sets selection data of target type "GTK_TREE_MODEL_ROW". Normally used
    * in a drag_data_get signal handler.
    *
-   * @param selection_data some #SelectionData
+   * @param selection_data some @a SelectionData
    * @param model: a Gtk::TreeModel
    *
    * @return true if the selection_data had the proper target type to allow us to set a tree row

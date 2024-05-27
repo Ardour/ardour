@@ -258,7 +258,7 @@ public:
   /** Parses a file containing a GtkBuilder UI definition, 
    * and merges it with the current contents of the builder.
    *
-   * @param buffer The file to parse.
+   * @param filename The file to parse.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError, Glib::MarkupError
    */
@@ -274,7 +274,7 @@ public:
    * its child (for instance a GtkTreeView that depends on its
    * GtkTreeModel), you have to explicitely list all of them.
    *
-   * @param buffer The file to parse.
+   * @param filename The file to parse.
    * @param object_id The object to build.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError, Glib::MarkupError
@@ -289,7 +289,7 @@ public:
    * its child (for instance a GtkTreeView that depends on its
    * GtkTreeModel), you have to explicitely list all of them.
    *
-   * @param buffer The file to parse.
+   * @param filename The file to parse.
    * @param object_id The object to build.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError, Glib::MarkupError
@@ -354,7 +354,7 @@ public:
    * and merges it with the current contents of the builder.
    *
    * @param buffer The string to parse.
-   * @param object_id The objects to build.
+   * @param object_ids The objects to build.
    * @result true on success or false if an error occurred.
    * @throws BuilderError, Glib::MarkupError
    */
@@ -398,7 +398,7 @@ public:
    * container widget.
    *
    * @param name The name of the widget.
-   * @retval widget A pointer to the widget, or <tt>0</tt> on failure.
+   * @param widget A pointer to the widget, or <tt>0</tt> on failure.
    */
   template <class T_Widget> inline
   void get_widget(const Glib::ustring& name, T_Widget*& widget)
@@ -427,7 +427,7 @@ public:
    * @endcode
    *
    * @param name The name of the widget.
-   * @retval widget A pointer to the widget, or <tt>0</tt> on failure.
+   * @param widget A pointer to the widget, or <tt>0</tt> on failure.
    */
   template <class T_Widget> inline
   void get_widget_derived(const Glib::ustring& name, T_Widget*& widget)

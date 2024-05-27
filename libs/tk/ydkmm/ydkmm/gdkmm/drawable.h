@@ -436,7 +436,7 @@ public:
    * @param n_segs The number of line segments to draw, i.e. the size of the 
    *  @a segs array.
    */
-  void draw_segments(const Glib::RefPtr<const GC>& gc, GdkSegment* segs, int nsegs);
+  void draw_segments(const Glib::RefPtr<const GC>& gc, GdkSegment* segs, int n_segs);
 #endif // GDKMM_DISABLE_DEPRECATED
 
  // TODO

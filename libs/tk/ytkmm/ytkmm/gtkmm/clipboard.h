@@ -310,8 +310,8 @@ public:
    * an empty string if it failed. This function can fail for various reasons, in particular if the 
    * clipboard was empty or if the contents of the clipboard could not be converted into rich text form.
    *
-   *
-   * @param slot:  a function to call when the text is received,
+   * @param buffer A Gtk::TextBuffer.
+   * @param slot  A function to call when the text is received,
    *             or the retrieval fails. (It will always be called
    *             one way or the other.)
    */

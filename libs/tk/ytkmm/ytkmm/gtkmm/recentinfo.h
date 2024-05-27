@@ -177,7 +177,7 @@ public:
    */
 
   bool get_application_info(const Glib::ustring& app_name, std::string& app_exec,
-                            guint& count, time_t& time_) const;
+                            guint& count, time_t& time) const;
 
   
   /** Retrieves the list of applications that have registered this resource.
@@ -221,7 +221,7 @@ public:
   /** Checks whether @a group_name appears inside the groups registered for the
    * recently used item @a info.
    * 
-   * @param group_name Name of a group.
+   * @param group Name of a group.
    * @return <tt>true</tt> if the group was found.
    */
   bool has_group(const Glib::ustring& group) const;
@@ -289,7 +289,7 @@ public:
   /** Checks whether two Gtk::RecentInfo structures point to the same
    * resource.
    * 
-   * @param info_b A Gtk::RecentInfo.
+   * @param b A Gtk::RecentInfo.
    * @return <tt>true</tt> if both Gtk::RecentInfo structures point to se same
    * resource, <tt>false</tt> otherwise.
    */

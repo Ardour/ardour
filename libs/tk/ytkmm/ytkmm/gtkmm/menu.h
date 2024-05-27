@@ -50,7 +50,7 @@ class AccelGroup;
 /** A drop-down menu consisting of Gtk::MenuItem objects which can be navigated and activated by the user to perform application functions.
  * Menus are normally placed inside a Gtk::MenuBar or another MenuItem as a sub menu.
  * A Menu can also be popped up, for instance as a right-click context menu, by calling the popup() method.
- * .
+ *
  * @ingroup Widgets
  * @ingroup Menus
  */
@@ -135,7 +135,7 @@ public:
    * The @a activate_time  parameter should be the time stamp of the event that
    * initiated the popup. If such an event is not available, use
    * gtk_get_current_event_time() instead.
-   * @param func A position_calc_slot supplied function used to position the menu, or <tt>0</tt>.
+   * @param position_calc_slot A function used to position the menu, or <tt>0</tt>.
    * @param button The mouse button which was pressed to initiate the event.
    * @param activate_time The time at which the activation event occurred.
    */
@@ -461,7 +461,7 @@ protected:
   //TODO: What does "attach" actually mean here? murrayc
   /** Attaches the menu to the widget.
    * 
-   * param @attach_widget: the Widget that the menu will be attached to.
+   * @param attach_widget: the Widget that the menu will be attached to.
    */
   void attach_to_widget(Widget& attach_widget);
 

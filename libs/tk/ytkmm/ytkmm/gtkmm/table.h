@@ -177,9 +177,6 @@ virtual void remove(Widget& w); //Implented as custom or by LIST_CONTAINER_REMOV
  * spacing can be used in the table.  Padding is added on either side of a
  * widget, while spacing is placed between widgets.
  *
- * A Table widget looks like this:
- * @image html table1.png
- *
  * @see Gtk::HBox, Gtk::VBox
  */
 

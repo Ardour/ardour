@@ -52,9 +52,9 @@ namespace Gtk
  * which can be shown by widgets such as Gtk::RecentChooserDialog or 
  * Gtk::RecentChooserMenu.
  * To construct a submenu showing recently used files, use a 
- * Gtk::RecentAction as the action for a <menuitem>. To construct a menu 
+ * Gtk::RecentAction as the action for a menuitem. To construct a menu 
  * toolbutton showing the recently used files in the popup menu, use a 
- * Gtk::RecentAction as the action for a <toolitem> element.
+ * Gtk::RecentAction as the action for a toolitem element.
  *
  * See also the methods in the RecentChooser base class.
  *
