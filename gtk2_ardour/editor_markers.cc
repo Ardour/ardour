@@ -2135,7 +2135,7 @@ Editor::update_mark_and_range_visibility ()
 			} else if (location->is_section()) {
 
 			} else if (location->is_scene()) {
-				mark_type = CueMarks;
+				mark_type = SceneMarks;
 			} else {
 				mark_type = LocationMarks;
 			}
