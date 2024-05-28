@@ -286,7 +286,7 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		Gtk::MenuItem& add_menu = ruler_items.back();
 		Gtk::Menu* a_menu = new Gtk::Menu;
 		MenuList& add_items = a_menu->items();
-		add_items.push_back (MenuElem (_("Location Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::Flags (0), 0)));
+		add_items.push_back (MenuElem (_("Location Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::Flags (Location::IsMark), 0)));
 		add_items.push_back (MenuElem (_("Arrangement Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::Flags(Location::IsMark | Location::IsSection), 0)));
 		add_items.push_back (MenuElem (_("CD Track Marker"), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::Flags(Location::IsMark |Location::IsCDMarker), 0)));
 		add_items.push_back (MenuElem ("Cue Marker..."));
