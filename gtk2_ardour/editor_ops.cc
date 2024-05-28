@@ -2368,6 +2368,8 @@ Editor::add_location_mark_with_flag (timepos_t const & where, Location::Flags fl
 		markername = string_compose (_("cue %1"), cue_marker_name (cue_id));
 	} else if (flags & Location::IsSection) {
 		namebase = _("section");
+	} else if (flags & Location::IsCDMarker) {
+		namebase = _("cd trk");
 	} else {
 		namebase = _("mark");
 	}
