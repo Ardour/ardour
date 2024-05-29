@@ -301,8 +301,15 @@ public:
 
 	void set_clock_origin (Location*, void *src);
 
-	timepos_t first_mark_before (timepos_t const &, bool include_special_ranges = false);
-	timepos_t first_mark_after (timepos_t const &, bool include_special_ranges = false);
+	timepos_t first_mark_before_flagged (timepos_t const &, bool include_special_ranges = false, Location::Flags whitelist = Location::Flags (0), Location::Flags blacklist = Location::Flags (0), Location::Flags equalist = Location::Flags (0));
+	timepos_t first_mark_after_flagged (timepos_t const &, bool include_special_ranges = false, Location::Flags whitelist = Location::Flags (0), Location::Flags blacklist = Location::Flags (0), Location::Flags equalist = Location::Flags (0));
+
+	timepos_t first_mark_after (timepos_t const & t, bool include_special_ranges = false) {
+		return first_mark_after_flagged (t, include_special_ranges);
+	}
+	timepos_t first_mark_before (timepos_t const & t, bool include_special_ranges = false) {
+		return first_mark_before_flagged (t, include_special_ranges);
+	}
 
 	Location* next_section (Location*, timepos_t&, timepos_t&) const;
 	Location* next_section_iter (Location*, timepos_t&, timepos_t&, std::vector<LocationPair>& cache) const;

@@ -1417,7 +1417,7 @@ struct LocationStartLaterComparison
 };
 
 timepos_t
-Locations::first_mark_before (timepos_t const & pos, bool include_special_ranges)
+Locations::first_mark_before_flagged (timepos_t const & pos, bool include_special_ranges, Location::Flags whitelist, Location::Flags blacklist, Location::Flags equalist)
 {
 	vector<LocationPair> locs;
 	{
@@ -1442,6 +1442,21 @@ Locations::first_mark_before (timepos_t const & pos, bool include_special_ranges
 		}
 		if (!include_special_ranges && ((*i).second->is_auto_loop() || (*i).second->is_auto_punch())) {
 			continue;
+		}
+		if (whitelist != Location::Flags (0)) {
+			if (!((*i).second->flags() & whitelist)) {
+				continue;
+			}
+		}
+		if (blacklist != Location::Flags (0)) {
+			if ((*i).second->flags() & blacklist) {
+				continue;
+			}
+		}
+		if (equalist != Location::Flags (0)) {
+			if (!((*i).second->flags() == equalist)) {
+				continue;
+			}
 		}
 		if ((*i).first < pos) {
 			return (*i).first;
@@ -1490,7 +1505,7 @@ Locations::mark_at (timepos_t const & pos, timecnt_t const & slop) const
 }
 
 timepos_t
-Locations::first_mark_after (timepos_t const & pos, bool include_special_ranges)
+Locations::first_mark_after_flagged (timepos_t const & pos, bool include_special_ranges, Location::Flags whitelist, Location::Flags blacklist, Location::Flags equalist)
 {
 	vector<LocationPair> locs;
 
@@ -1516,6 +1531,21 @@ Locations::first_mark_after (timepos_t const & pos, bool include_special_ranges)
 		}
 		if (!include_special_ranges && ((*i).second->is_auto_loop() || (*i).second->is_auto_punch())) {
 			continue;
+		}
+		if (whitelist != Location::Flags (0)) {
+			if (!((*i).second->flags() & whitelist)) {
+				continue;
+			}
+		}
+		if (blacklist != Location::Flags (0)) {
+			if ((*i).second->flags() & blacklist) {
+				continue;
+			}
+		}
+		if (equalist != Location::Flags (0)) {
+			if (!((*i).second->flags() == equalist)) {
+				continue;
+			}
 		}
 		if ((*i).first > pos) {
 			return (*i).first;
