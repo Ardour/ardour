@@ -740,8 +740,8 @@ private:
 	void update_selection_markers ();
 	void update_section_box ();
 
-	void jump_forward_to_mark ();
-	void jump_backward_to_mark ();
+	void jump_forward_to_mark_flagged (ARDOUR::Location::Flags, ARDOUR::Location::Flags, ARDOUR::Location::Flags);
+	void jump_backward_to_mark_flagged (ARDOUR::Location::Flags, ARDOUR::Location::Flags, ARDOUR::Location::Flags);
 
 	struct LocationMarkers {
 		ArdourMarker* start;

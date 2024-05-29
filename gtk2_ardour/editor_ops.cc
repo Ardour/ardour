@@ -2563,13 +2563,13 @@ Editor::add_location_from_region ()
 /* MARKS */
 
 void
-Editor::jump_forward_to_mark ()
+Editor::jump_forward_to_mark_flagged (Location::Flags whitelist, Location::Flags blacklist, Location::Flags equalist)
 {
 	if (!_session) {
 		return;
 	}
 
-	timepos_t pos = _session->locations()->first_mark_after (timepos_t (_session->transport_sample()+1));
+	timepos_t pos = _session->locations()->first_mark_after_flagged (timepos_t (_session->transport_sample()+1), true, whitelist, blacklist, equalist);
 
 	if (pos == timepos_t::max (Temporal::AudioTime)) {
 		return;
@@ -2579,13 +2579,13 @@ Editor::jump_forward_to_mark ()
 }
 
 void
-Editor::jump_backward_to_mark ()
+Editor::jump_backward_to_mark_flagged (Location::Flags whitelist, Location::Flags blacklist, Location::Flags equalist)
 {
 	if (!_session) {
 		return;
 	}
 
-	timepos_t pos = _session->locations()->first_mark_before (timepos_t (_playhead_cursor->current_sample()));
+	timepos_t pos = _session->locations()->first_mark_before_flagged (timepos_t (_playhead_cursor->current_sample()), true, whitelist, blacklist, equalist);
 
 	//handle the case where we are rolling, and we're less than one-half second past the mark, we want to go to the prior mark...
 	if (_session->transport_rolling()) {

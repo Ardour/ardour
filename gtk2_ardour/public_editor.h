@@ -266,8 +266,14 @@ public:
 	virtual void set_loop_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd) = 0;
 	virtual void set_punch_range (Temporal::timepos_t const & start, Temporal::timepos_t const & end, std::string cmd) = 0;
 
-	virtual void jump_forward_to_mark () = 0;
-	virtual void jump_backward_to_mark () = 0;
+	void jump_forward_to_mark () {
+		jump_forward_to_mark_flagged (ARDOUR::Location::Flags (0), ARDOUR::Location::Flags (0), ARDOUR::Location::Flags (0));
+	}
+	void jump_backward_to_mark () {
+		jump_backward_to_mark_flagged (ARDOUR::Location::Flags (0), ARDOUR::Location::Flags (0), ARDOUR::Location::Flags (0));
+	}
+	virtual void jump_forward_to_mark_flagged (ARDOUR::Location::Flags whitelist, ARDOUR::Location::Flags blacklist, ARDOUR::Location::Flags equalist) = 0;
+	virtual void jump_backward_to_mark_flagged (ARDOUR::Location::Flags whitelist, ARDOUR::Location::Flags blacklist, ARDOUR::Location::Flags equalist) = 0;
 
 	virtual void set_session_start_from_playhead () = 0;
 	virtual void set_session_end_from_playhead () = 0;
