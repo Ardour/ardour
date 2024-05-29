@@ -7032,7 +7032,7 @@ Editor::default_time_domain () const
 void
 Editor::start_track_drag (TimeAxisView& tav, int y, Gtk::Widget& w)
 {
-	track_drag = new TrackDrag (dynamic_cast<RouteTimeAxisView*> (&tav));
+	track_drag = new TrackDrag (dynamic_cast<RouteTimeAxisView*> (&tav), *_session);
 	DEBUG_TRACE (DEBUG::TrackDrag, string_compose ("start track drag with %1\n", track_drag));
 
 	track_drag->drag_cursor = _cursors->move->gobj();

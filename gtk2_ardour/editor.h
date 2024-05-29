@@ -2627,7 +2627,7 @@ private:
 		int                direction;
 		bool               first_move;
 
-		TrackDrag (RouteTimeAxisView* rtav)
+		TrackDrag (RouteTimeAxisView* rtav, ARDOUR::Session& s)
 			: track (rtav)
 			, drag_cursor (nullptr)
 			, predrag_cursor (nullptr)
