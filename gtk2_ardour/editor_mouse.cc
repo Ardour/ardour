@@ -1800,7 +1800,7 @@ Editor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		case SectionMarkerBarItem:
 			if (!_dragging_playhead && Keyboard::modifier_state_equals (event->button.state, Keyboard::PrimaryModifier)) {
 				snap_to_with_modifier (where, event, Temporal::RoundNearest, SnapToGrid_Scaled);
-				add_location_mark (where, Location::IsSection);
+				add_location_mark (where, Location::Flags (Location::IsMark | Location::IsSection));
 			}
 			return true;
 
