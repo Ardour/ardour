@@ -170,6 +170,10 @@ Ruler::render (Rect const & area, Cairo::RefPtr<Cairo::Context> cr) const
 			pos.x = round (m->position/_metric->units_per_pixel) + self.x0;
 			pos.y = self.y1; /* bottom edge */
 
+			if (pos.x < 0) {
+				continue;
+			}
+
 			if (fd != last_font_description) {
 				layout->set_font_description (*fd);
 				last_font_description = fd;
