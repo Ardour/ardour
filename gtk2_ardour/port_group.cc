@@ -292,9 +292,7 @@ PortGroupList::~PortGroupList()
 }
 
 void
-PortGroupList::maybe_add_processor_to_list (
-	std::weak_ptr<Processor> wp, list<std::shared_ptr<IO> >* route_ios, bool inputs, set<std::shared_ptr<IO> >& used_io
-	)
+PortGroupList::maybe_add_processor_to_list (std::weak_ptr<Processor> wp, list<std::shared_ptr<IO> >* route_ios, bool inputs, set<std::shared_ptr<IO> >& used_io)
 {
 	std::shared_ptr<Processor> p (wp.lock());
 
