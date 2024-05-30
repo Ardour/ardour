@@ -391,25 +391,25 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 	/* Now put the bundles that belong to these sorted RouteIOs into the PortGroup. */
 
-	for (list<RouteIOs>::iterator i = route_ios.begin(); i != route_ios.end(); ++i) {
-		TimeAxisView* tv = PublicEditor::instance().time_axis_view_from_stripable (i->route);
+	for (auto & rio : route_ios) {
+		TimeAxisView* tv = PublicEditor::instance().time_axis_view_from_stripable (rio.route);
 
 		/* Work out which group to put these IOs' bundles in */
 		std::shared_ptr<PortGroup> g;
-		if (std::dynamic_pointer_cast<Track> (i->route)) {
+		if (std::dynamic_pointer_cast<Track> (rio.route)) {
 			g = track;
 		} else {
 			g = bus;
 		}
 
-		for (list<std::shared_ptr<IO> >::iterator j = i->ios.begin(); j != i->ios.end(); ++j) {
+		for (auto & io : rio.ios) {
 			/* Only add the bundle if there is at least one port
 			 * with a type that's been asked for */
-			if (type == DataType::NIL || (*j)->bundle()->nchannels().n(type) > 0) {
+			if (type == DataType::NIL || io->bundle()->nchannels().n(type) > 0) {
 				if (tv) {
-					g->add_bundle ((*j)->bundle(), *j, tv->color ());
+					g->add_bundle (io->bundle(), io, tv->color ());
 				} else {
-					g->add_bundle ((*j)->bundle(), *j);
+					g->add_bundle (io->bundle(), io);
 				}
 			}
 		}
@@ -417,7 +417,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 		/* When on input side, let's look for sidechains in the route's plugins
 		   to display them right next to their route */
 		for (uint32_t n = 0; inputs; ++n) {
-			std::shared_ptr<Processor> p = (i->route)->nth_plugin (n);
+			std::shared_ptr<Processor> p = (rio.route)->nth_plugin (n);
 			if (!p) {
 				break;
 			}
