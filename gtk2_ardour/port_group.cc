@@ -300,6 +300,14 @@ PortGroupList::maybe_add_processor_to_list (std::weak_ptr<Processor> wp, list<st
 		return;
 	}
 
+#ifdef LIVETRAX
+	std::shared_ptr<Delivery> d = std::dynamic_pointer_cast<Delivery> (p);
+
+	if (d && d->role() == Delivery::Main) {
+		return;
+	}
+#endif
+
 	std::shared_ptr<IOProcessor> iop = std::dynamic_pointer_cast<IOProcessor> (p);
 
 	if (iop) {
