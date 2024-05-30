@@ -771,7 +771,7 @@ PortGroupList::add_bundles_for_ports (std::vector<std::string> const & p, ARDOUR
 		if (pf != cp && !nb.empty()) {
 				std::shared_ptr<Bundle> b = make_bundle_from_ports (nb, type, inputs);
 				group->add_bundle (b, allow_dups);
-				nb.clear();			
+				nb.clear();
 		}
 		cp = pf;
 		nb.push_back(s);
