@@ -475,11 +475,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 
 			std::shared_ptr<Bundle> sync (new Bundle (_("Sync"), inputs));
 			AudioEngine* ae = AudioEngine::instance();
-			TransportMasterManager::TransportMasters const & tm (TransportMasterManager::instance().transport_masters());
+			TransportMasterManager::TransportMasters const & tms (TransportMasterManager::instance().transport_masters());
 
-			for (TransportMasterManager::TransportMasters::const_iterator i = tm.begin(); i != tm.end(); ++i) {
+			for (auto const & tm : tms) {
 
-				std::shared_ptr<Port> port = (*i)->port ();
+				std::shared_ptr<Port> port = tm->port ();
 
 				if (!port) {
 					continue;
@@ -489,7 +489,7 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 					continue;
 				}
 
-				sync->add_channel ((*i)->name(), DataType::AUDIO, ae->make_port_name_non_relative (port->name()));
+				sync->add_channel (tm->name(), DataType::AUDIO, ae->make_port_name_non_relative (port->name()));
 			}
 
 			program->add_bundle (sync);
