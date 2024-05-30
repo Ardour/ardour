@@ -324,7 +324,9 @@ PortGroupList::maybe_add_processor_to_list (std::weak_ptr<Processor> wp, list<st
 struct RouteIOs {
 	RouteIOs (std::shared_ptr<Route> r, std::shared_ptr<IO> i) {
 		route = r;
-		ios.push_back (i);
+		if (i) {
+			ios.push_back (i);
+		}
 	}
 
 	std::shared_ptr<Route> route;
@@ -371,11 +373,11 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	std::shared_ptr<RouteList const> routes = session->get_routes ();
 	list<RouteIOs> route_ios;
 
-	for (RouteList::const_iterator i = routes->begin(); i != routes->end(); ++i) {
+	for (auto const & r : *routes) {
 
 		/* we never show the monitor bus inputs */
 
-		if (inputs && (*i)->is_monitor()) {
+		if (inputs && r->is_monitor()) {
 			continue;
 		}
 
@@ -385,12 +387,20 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
                 */
 
 		set<std::shared_ptr<IO> > used_io;
-		std::shared_ptr<IO> io = inputs ? (*i)->input() : (*i)->output();
+		std::shared_ptr<IO> io;
+
+#ifdef LIVETRAX
+		if (inputs) {
+			io = r->input();
+			used_io.insert (io);
+		}
+#else
+		io = inputs ? r->input() : r->output();
 		used_io.insert (io);
+#endif
 
-		RouteIOs rb (*i, io);
-		(*i)->foreach_processor (boost::bind (&PortGroupList::maybe_add_processor_to_list, this, _1, &rb.ios, inputs, used_io));
-
+		RouteIOs rb (r, io);
+		r->foreach_processor (boost::bind (&PortGroupList::maybe_add_processor_to_list, this, _1, &rb.ios, inputs, used_io));
 		route_ios.push_back (rb);
 	}
 
