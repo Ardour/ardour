@@ -363,14 +363,17 @@ GroupTabs::get_menu (RouteGroup* g, bool in_tab_area)
 	const VCAList vcas = _session->vca_manager().vcas ();
 
 	if (!in_tab_area) {
-		/* context menu is not for a group tab, show the "create new
-		   from" items here
+		/* context menu is not for a group tab (e.g. mixer sidebar).
+		 * Show the "create new from" items here.
 		*/
 		add_new_from_items (items);
 	}
 
-	if (g) {
+	if (!in_tab_area && g) {
 		items.push_back (SeparatorElem());
+	}
+
+	if (g) {
 		items.push_back (MenuElem (_("Edit Group..."), sigc::bind (sigc::mem_fun (*this, &GroupTabs::edit_group), g)));
 		items.push_back (MenuElem (_("Collect Group"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::collect), g)));
 		items.push_back (MenuElem (_("Remove Group"), sigc::bind (sigc::mem_fun (*this, &GroupTabs::remove_group), g)));
