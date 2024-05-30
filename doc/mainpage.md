@@ -54,7 +54,7 @@ A few specific libraries are compiled statically (e.g. fluidsynth for use in plu
 
      Handling Standard %MIDI File (Evoral::SMF) format. Abstracted to C++ in SMF.{cc,h}
 
-* libs/backends/
+* `libs/backends/`
 
    Interaction with Operating System's Audio/MIDI API:
    ALSA, CoreAudio, JACK, PortAudio/ASIO, PulseAudio
@@ -72,7 +72,7 @@ A few specific libraries are compiled statically (e.g. fluidsynth for use in plu
 
    %MIDI parsing, MIDNAM handling, Port abstraction for I/O
 
-* `libs/temporal`
+* `libs/temporal/`
 
    Various utility code for dealing with different kinds of time,
    including Timecode, and musical time conversions (Temporal::Beats, Temporal::BBT_Time).
@@ -103,7 +103,7 @@ A few specific libraries are compiled statically (e.g. fluidsynth for use in plu
 
 ### UI related libs
 
-* libs/gtkmm2ext/
+* `libs/gtkmm2ext/`
 
    Utility Library to extend GDK, GTK, and basic abstraction for UIs
    and event-loops. This library is not limited to the GUI, but also
@@ -125,7 +125,7 @@ A few specific libraries are compiled statically (e.g. fluidsynth for use in plu
 
    Threaded waveform rendering and waveform image cache.
 
-* libs/tk/
+* `libs/tk/`
 
   A localized version of GTK+2, renamed as YTK. See Gtk namespace for relevant documentation.
 
