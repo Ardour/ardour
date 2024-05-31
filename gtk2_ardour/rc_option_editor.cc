@@ -3739,6 +3739,20 @@ These settings will only take effect after %1 is restarted.\n\
 	add_option (_("Transport"), psc);
 
 
+	bo = new BoolOption ("mark-at-pgm-change",
+	                     _("Create a marker when a MIDI program change is received (and RECORDING)"),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mark_at_pgm_change),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mark_at_pgm_change)
+	                     );
+	add_option (_("Transport"), bo);
+
+	bo = new BoolOption ("locate-to-pgm-change",
+	                     _("Locate to the next matching scene marker when a MIDI program change is received (and NOT recording)"),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::get_locate_to_pgm_change),
+	                     sigc::mem_fun (*_rc_config, &RCConfiguration::set_locate_to_pgm_change)
+	                     );
+	add_option (_("Transport"), bo);
+
 	add_option (_("Transport"), new OptionEditorHeading (_("Looping")));
 
 	bo = new BoolOption (
