@@ -353,7 +353,7 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-punch-range"));
 	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-loop-range"));
 	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-session-range"));
-	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-location-markers"));
+	MAKE_ACTION_ITEM (rs_menu, rs_item, X_("Rulers"), X_("show-other-ranges"));
 
 	ruler_items.push_back (MenuElem (_("Show Ranges...")));
 	Gtk::MenuItem& range_show_menu = ruler_items.back();

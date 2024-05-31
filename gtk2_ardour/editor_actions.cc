@@ -709,7 +709,7 @@ Editor::register_actions ()
 	session_range_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, range_choice_group, X_("show-session-range"), _("Only Session Range"), sigc::bind (sigc::mem_fun(*this, &Editor::show_range_type), SessionRange)));
 	punch_range_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, range_choice_group, X_("show-punch-range"), _("Only Punch Range"), sigc::bind (sigc::mem_fun(*this, &Editor::show_range_type), PunchRange)));
 	loop_range_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, range_choice_group, X_("show-loop-range"), _("Only Loop Range"), sigc::bind (sigc::mem_fun(*this, &Editor::show_range_type), LoopRange)));
-	other_range_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, range_choice_group, X_("show-other-ranges"), _("Only Other Ranges"), sigc::bind (sigc::mem_fun(*this, &Editor::show_range_type), OtherRange)));
+	other_range_action = Glib::RefPtr<RadioAction>::cast_static (ActionManager::register_radio_action (ruler_actions, range_choice_group, X_("show-other-ranges"), _("Only Named Ranges"), sigc::bind (sigc::mem_fun(*this, &Editor::show_range_type), OtherRange)));
 
 	ActionManager::register_action (editor_menu_actions, X_("VideoMonitorMenu"), _("Video Monitor"));
 
