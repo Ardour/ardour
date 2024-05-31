@@ -635,7 +635,7 @@ mkdir $PRODUCT_PKG_DIR
 DMGWINBOTTOM=440
 DMGBACKGROUND=dmgbg
 
-if [ x$MIXBUS != x ] ; then
+if [ x$MIXBUS != x -o x$LIVETRAX != x] ; then
 
 	# Mixbus packaging
 
