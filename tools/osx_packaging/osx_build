@@ -635,19 +635,12 @@ mkdir $PRODUCT_PKG_DIR
 DMGWINBOTTOM=440
 DMGBACKGROUND=dmgbg
 
-if [ x$MIXBUS != x -o x$LIVETRAX != x] ; then
-
-	# Mixbus packaging
-
-	echo "Creating Mixbus packaging directory"
-	mv $APPDIR $PRODUCT_PKG_DIR/
+if test -n "$MIXBUS" -o -n "$LIVETRAX"; then
 	DMGBACKGROUND=dmgbgMB
-else
-
-	echo "Creating $APPNAME packaging directory"
-	mv $APPDIR $PRODUCT_PKG_DIR/
-
 fi
+
+echo "Creating Mixbus packaging directory"
+mv $APPDIR $PRODUCT_PKG_DIR/
 
 ################################################################################
 # from here on $PRODUCT_PKG_DIR/ prefix is needed
@@ -738,6 +731,8 @@ if test x$WITH_XJADEO != x ; then
 
 	DMGBACKGROUND=${DMGBACKGROUND}xj
 fi
+
+echo "Using image '$DMGBACKGROUND' for the DMG.\n"
 
 ################################################################################
 ### Mixbus plugins, etc
