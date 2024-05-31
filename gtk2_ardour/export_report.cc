@@ -831,19 +831,19 @@ ExportReport::init (const AnalysisResults & ar, bool with_file)
 	get_vbox ()->set_spacing (4);
 	get_vbox ()->pack_start (pages, false, false);
 
-	if (_session) {
+	if (_session && _session->the_auditioner()) {
 		_session->AuditionActive.connect(auditioner_connections, invalidator (*this), boost::bind (&ExportReport::audition_active, this, _1), gui_context());
 		_session->the_auditioner()->AuditionProgress.connect(auditioner_connections, invalidator (*this), boost::bind (&ExportReport::audition_progress, this, _1, _2), gui_context());
 	}
 
-	if (_session && with_file) {
+	if (_session && with_file && _session->the_auditioner()) {
 		play_btn = add_button (Stock::MEDIA_PLAY, RESPONSE_ACCEPT);
 		stop_btn = add_button (Stock::MEDIA_STOP, RESPONSE_ACCEPT);
 	}
 	add_button (Stock::CLOSE, RESPONSE_CLOSE);
 
 	set_default_response (RESPONSE_CLOSE);
-	if (_session && with_file) {
+	if (_session && with_file && _session->the_auditioner()) {
 		stop_btn->signal_clicked().connect (sigc::mem_fun (*this, &ExportReport::stop_audition));
 		play_btn->signal_clicked().connect (sigc::mem_fun (*this, &ExportReport::play_audition));
 		stop_btn->set_sensitive (false);
@@ -908,7 +908,7 @@ ExportReport::audition_active (bool active)
 void
 ExportReport::audition (std::string path, unsigned n_chn, int page)
 {
-	assert (_session);
+	assert (_session && _session->the_auditioner());
 	_session->cancel_audition();
 
 	if (n_chn ==0) { return; }
