@@ -283,16 +283,22 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 
 	last_program_message_time = time;
 
-	if (!recording()) {
+	if (!recording ()) {
+		if (Config->get_locate_to_pgm_change ()) {
+			MIDIInputActivity (); /* EMIT SIGNAL */
 
-		MIDIInputActivity (); /* EMIT SIGNAL */
+			int bank = -1;
+			if (have_seen_bank_changes) {
+				bank = std::dynamic_pointer_cast<AsyncMIDIPort>(input_port)->channel (channel)->bank();
+			}
 
-		int bank = -1;
-		if (have_seen_bank_changes) {
-			bank = std::dynamic_pointer_cast<AsyncMIDIPort>(input_port)->channel (channel)->bank();
+			jump_to (bank, program);
+			return;
 		}
+	}
 
-		jump_to (bank, program);
+	/* we are recording,  do we need to create a marker */
+	if (!Config->get_mark_at_pgm_change ()) {
 		return;
 	}
 

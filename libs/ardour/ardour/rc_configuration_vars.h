@@ -231,6 +231,9 @@ CONFIG_VARIABLE (EditMode, edit_mode, "edit-mode", Slide)
 CONFIG_VARIABLE (RippleMode, ripple_mode, "ripple-mode", RippleSelected)
 CONFIG_VARIABLE (Temporal::TimeDomain, default_automation_time_domain, "default-automation-time-domain", Temporal::BeatTime)
 
+CONFIG_VARIABLE (bool, mark_at_pgm_change, "mark-at-pgm-change", true)
+CONFIG_VARIABLE (bool, locate_to_pgm_change, "locate-to-pgm-change", true)
+
 /* plugin related */
 
 CONFIG_VARIABLE (bool, new_plugins_active, "new-plugins-active", true)
