@@ -293,9 +293,9 @@ Editor::popup_ruler_menu (timepos_t const & where, ItemType t)
 		Gtk::MenuItem& cue_submenu = add_items.back();
 		Gtk::Menu* cue_menu = new Gtk::Menu;
 		MenuList& cue_items = cue_menu->items();
-		cue_items.push_back (MenuElem (_("Stop All Cues"), sigc::bind (sigc::mem_fun (*this, &Editor::add_location_mark_with_flag), where, Location::IsCueMarker, CueRecord::stop_all)));
+		cue_items.push_back (MenuElem (_("Stop All Cues"), sigc::bind (sigc::mem_fun (*this, &Editor::add_location_mark_with_flag), where, Location::Flags(Location::IsMark |Location::IsCueMarker), CueRecord::stop_all)));
 		for (int32_t n = 0; n < TriggerBox::default_triggers_per_box; ++n) {
-			cue_items.push_back (MenuElem (string_compose (_("Cue %1"), cue_marker_name (n)), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::IsCueMarker, n)));
+			cue_items.push_back (MenuElem (string_compose (_("Cue %1"), cue_marker_name (n)), sigc::bind (sigc::mem_fun(*this, &Editor::add_location_mark_with_flag), where, Location::Flags(Location::IsMark |Location::IsCueMarker), n)));
 		}
 		cue_submenu.set_submenu (*cue_menu);
 
