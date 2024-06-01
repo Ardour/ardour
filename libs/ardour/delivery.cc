@@ -668,8 +668,6 @@ Delivery::set_name (const std::string& name)
 	return ret;
 }
 
-bool ignore_output_change = false;
-
 void
 Delivery::output_changed (IOChange change, void* /*src*/)
 {
