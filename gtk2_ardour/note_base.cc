@@ -298,6 +298,11 @@ NoteBase::event_handler (GdkEvent* ev)
 		return false;
 	}
 
+#warning paul fix this pianorule issue
+#if 0
+	/* notebase has a MidiView not a RegionView so get_time_axis_view() Is
+	missing etc.
+	*/
 	if (_region.get_time_axis_view ().layer_display () == Stacked) {
 		/* only allow edting notes in the topmost layer */
 		if (_region.region()->layer() != _region.region()->playlist()->top_layer ()) {
@@ -305,7 +310,7 @@ NoteBase::event_handler (GdkEvent* ev)
 			return false;
 		}
 	}
-
+#endif
 	switch (ev->type) {
 	case GDK_ENTER_NOTIFY:
 		_region.note_entered (this);

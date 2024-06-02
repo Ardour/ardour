@@ -2896,44 +2896,6 @@ Editor::build_edit_mode_menu ()
 }
 
 void
-Editor::build_draw_midi_menus ()
-{
-	using namespace Menu_Helpers;
-
-	/* Note-Length when drawing */
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeat],      sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeat)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv2],  sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv2)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv4],  sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv4)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv8],  sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv8)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv16], sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv16)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv32], sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) GridTypeBeatDiv32)));
-	draw_length_selector.AddMenuElem (MenuElem (_("Auto"), sigc::bind (sigc::mem_fun(*this, &Editor::draw_length_selection_done), (GridType) DRAW_LEN_AUTO)));
-
-	{
-		std::vector<std::string> draw_grid_type_strings = {grid_type_strings.begin() + GridTypeBeat, grid_type_strings.begin() + GridTypeBeatDiv32 + 1};
-		draw_grid_type_strings.push_back (_("Auto"));
-		grid_type_selector.set_sizing_texts (draw_grid_type_strings);
-	}
-
-	/* Note-Velocity when drawing */
-	draw_velocity_selector.AddMenuElem (MenuElem ("8",    sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 8)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("32",   sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 32)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("64",   sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 64)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("82",   sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 82)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("100",  sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 100)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("127",  sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), 127)));
-	draw_velocity_selector.AddMenuElem (MenuElem (_("Auto"), sigc::bind (sigc::mem_fun(*this, &Editor::draw_velocity_selection_done), DRAW_VEL_AUTO)));
-
-	/* Note-Channel when drawing */
-	for (int i = 0; i<= 15; i++) {
-		char buf[64];
-		sprintf(buf, "%d", i+1);
-		draw_channel_selector.AddMenuElem (MenuElem (buf, sigc::bind (sigc::mem_fun(*this, &Editor::draw_channel_selection_done), i)));
-	}
-	draw_channel_selector.AddMenuElem (MenuElem (_("Auto"), sigc::bind (sigc::mem_fun(*this, &Editor::draw_channel_selection_done), DRAW_CHAN_AUTO)));
-}
-
-void
 Editor::setup_tooltips ()
 {
 	set_tooltip (smart_mode_button, _("Smart Mode (add range functions to Grab Mode)"));
@@ -3239,61 +3201,6 @@ void
 Editor::ripple_mode_selection_done (RippleMode m)
 {
 	Config->set_ripple_mode (m);
-}
-
-void
-Editor::grid_type_selection_done (GridType gridtype)
-{
-	RefPtr<RadioAction> ract = grid_type_action (gridtype);
-
-	if (ract && ract->get_active()) {  /*radio-action is already set*/
-		set_grid_to(gridtype);         /*so we must set internal state here*/
-	} else {
-		ract->set_active ();
-	}
-}
-
-void
-Editor::draw_length_selection_done (GridType gridtype)
-{
-	RefPtr<RadioAction> ract = draw_length_action (gridtype);
-	if (ract && ract->get_active()) {  /*radio-action is already set*/
-		set_draw_length_to(gridtype);  /*so we must set internal state here*/
-	} else {
-		ract->set_active ();
-	}
-}
-
-void
-Editor::draw_velocity_selection_done (int v)
-{
-	RefPtr<RadioAction> ract = draw_velocity_action (v);
-	if (ract && ract->get_active()) {  /*radio-action is already set*/
-		set_draw_velocity_to(v);       /*so we must set internal state here*/
-	} else {
-		ract->set_active ();
-	}
-}
-
-void
-Editor::draw_channel_selection_done (int c)
-{
-	RefPtr<RadioAction> ract = draw_channel_action (c);
-	if (ract && ract->get_active()) {  /*radio-action is already set*/
-		set_draw_channel_to(c);        /*so we must set internal state here*/
-	} else {
-		ract->set_active ();
-	}
-}
-
-void
-Editor::snap_mode_selection_done (SnapMode mode)
-{
-	RefPtr<RadioAction> ract = snap_mode_action (mode);
-
-	if (ract) {
-		ract->set_active (true);
-	}
 }
 
 void
@@ -6243,4 +6150,85 @@ ArdourCanvas::Duple
 Editor::upper_left() const
 {
 	return get_trackview_group ()->canvas_origin ();
+}
+
+void
+Editor::start_track_drag (TimeAxisView& tav, int y, Gtk::Widget& w)
+{
+	track_drag = new TrackDrag (dynamic_cast<RouteTimeAxisView*> (&tav), *_session);
+	DEBUG_TRACE (DEBUG::TrackDrag, string_compose ("start track drag with %1\n", track_drag));
+	PBD::stacktrace (std::cerr, 20);
+
+	track_drag->drag_cursor = _cursors->move->gobj();
+	track_drag->predrag_cursor = gdk_window_get_cursor (edit_controls_vbox.get_window()->gobj());
+
+	gdk_window_set_cursor (edit_controls_vbox.get_toplevel()->get_window()->gobj(), track_drag->drag_cursor);
+
+	int xo, yo;
+	w.translate_coordinates (edit_controls_vbox, 0, y, xo, yo);
+
+	track_drag->have_predrag_cursor = true;
+	track_drag->bump_track = nullptr;
+	track_drag->previous = yo;
+	track_drag->start = yo;
+}
+
+void
+Editor::mid_track_drag (GdkEventMotion* ev, Gtk::Widget& w)
+{
+	int xo, yo;
+	w.translate_coordinates (edit_controls_vbox, ev->x, ev->y, xo, yo);
+
+	if (track_drag->first_move) {
+
+		/* move threshold */
+
+		if (abs (yo - track_drag->previous) < (int) (4 * UIConfiguration::instance().get_ui_scale())) {
+			return;
+		}
+
+		if (!track_drag->track->selected()) {
+			set_selected_track (*track_drag->track, Selection::Set, false);
+		}
+		track_drag->first_move = false;
+	}
+
+	track_drag->current = yo;
+
+	if (track_drag->current > track_drag->previous) {
+		if (track_drag->direction != 1) {
+			track_drag->bump_track = nullptr;
+			track_drag->direction = 1;
+		}
+	} else if (track_drag->current < track_drag->previous) {
+		if (track_drag->direction != -1) {
+			track_drag->bump_track = nullptr;
+			track_drag->direction = -1;
+		}
+	}
+
+	if (track_drag->current == track_drag->previous) {
+		return;
+	}
+
+	redisplay_track_views ();
+	track_drag->previous = yo;
+}
+
+void
+Editor::end_track_drag ()
+{
+	if (track_drag->have_predrag_cursor) {
+		gdk_window_set_cursor (edit_controls_vbox.get_toplevel()->get_window()->gobj(), track_drag->predrag_cursor);
+	}
+
+	DEBUG_TRACE (DEBUG::TrackDrag, string_compose ("ending track drag with %1\n", track_drag));
+	delete track_drag;
+	track_drag = nullptr;
+}
+
+bool
+Editor::track_dragging() const
+{
+	return (bool) track_drag;
 }
