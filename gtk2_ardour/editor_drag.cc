@@ -5068,7 +5068,7 @@ LineDrag::finished (GdkEvent* event, bool movement_occurred)
 			AudioRegionView* arv;
 
 			if ((arv = dynamic_cast<AudioRegionView*> (_editor.clicked_regionview)) != 0) {
-				arv->add_gain_point_event (&arv->get_gain_line ()->grab_item (), event, false);
+				arv->add_gain_point_event (&arv->fx_line ()->grab_item (), event, false);
 			}
 		}
 	}
@@ -5992,7 +5992,7 @@ RangeMarkerBarDrag::motion (GdkEvent* event, bool first_move)
 		case CreateRangeMarker:
 		case CreateTransportMarker:
 		case CreateCDMarker:
-			crect = _editor->range_bar_drag_rect;
+			crect = _editor.range_bar_drag_rect;
 			break;
 		default:
 			error << string_compose (_("programming_error: %1"), "Error: unknown range marker op passed to Editor::drag_range_markerbar_op ()") << endmsg;
