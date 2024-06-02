@@ -679,7 +679,7 @@ Editor::button_press_handler_1 (ArdourCanvas::Item* item, GdkEvent* event, ItemT
 		}
 		return true;
 	case SceneMarkerItem:
-		_drags->set (new MarkerDrag (this, item), event);
+		_drags->set (new MarkerDrag (*this, item), event);
 		return true;
 
 	case TempoMarkerItem:
