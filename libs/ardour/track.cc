@@ -1086,7 +1086,6 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 			if (time_domain() == Temporal::BeatTime) {
 
 				const timepos_t ss (start_off);
-				const timepos_t ss (start_off);
 				/* 2nd argument is the timeline position of the
 				 * start of the region in samples. We have to
 				 * get this right so that the conversion of
