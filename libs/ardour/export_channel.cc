@@ -385,6 +385,11 @@ RouteExportChannel::create_from_route (std::list<ExportChannelPtr>& result, std:
 void
 RouteExportChannel::create_from_state (std::list<ExportChannelPtr>& result, Session& s, XMLNode* node)
 {
+	uint32_t chn;
+	if (node->get_property ("number", chn) && chn > 1) {
+		/* create_from_route adds ExportChannel for all channels of a given Route */
+		return;
+	}
 	XMLNode* xml_route = node->child ("Route");
 	if (!xml_route) {
 		return;
