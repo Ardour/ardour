@@ -1086,7 +1086,21 @@ Track::use_captured_midi_sources (SourceList& srcs, CaptureInfos const & capture
 			if (time_domain() == Temporal::BeatTime) {
 
 				const timepos_t ss (start_off);
-				const timecnt_t ll ((*ci)->samples, ss);
+				const timepos_t ss (start_off);
+				/* 2nd argument is the timeline position of the
+				 * start of the region in samples. We have to
+				 * get this right so that the conversion of
+				 * the capture duration (samples) to beats is
+				 * using the actual position where the region
+				 * will end up, rather than using its
+				 * source-relative start offset as a timeline position.
+				 *
+				 * This matters if the region ought to cover
+				 * part of the timeline where the tempo is
+				 * different from the value at the natural
+				 * position of the source.
+				 */
+				const timecnt_t ll ((*ci)->samples, timepos_t (initial_capture + start_off));
 
 				s = timepos_t (ss.beats());
 				l = timecnt_t (ll.beats(), s);
