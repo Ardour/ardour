@@ -2404,7 +2404,7 @@ Editor::move_selected_tracks (bool up)
 
 	for (auto & s : sl) {
 		if (s->is_selected()) {
-			if (up && (s->presentation_info().order() <= 1)) {
+			if (up && (s->presentation_info().order() <= 0)) {
 				return;
 			} else if (!up && (s->presentation_info().order() >= sl.size() - 1)) {
 				return;
