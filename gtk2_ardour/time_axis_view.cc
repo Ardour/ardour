@@ -411,8 +411,28 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 bool
 TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 {
-	if (event->button == 1) {
+	/* double-click inside the name area */
+
+	if ((event->button == 1 && event->type == GDK_2BUTTON_PRESS) || Keyboard::is_edit_event (event)) {
+
+		/* Remember, for a dbl-click, X Window/GDK sends:
+
+		   button press
+		   button release
+		   button press
+		   2button press
+		   (and later, button release)
+
+		   since we would have "started" a track drag
+		   on the button press that precded the 2button press,
+		   we need to cancel it here.
+		*/
+
+		_editor.end_track_drag ();
+
 		/* see if it is inside the name label */
+
+
 		if (name_label.is_ancestor (controls_ebox)) {
 
 			int nlx;
@@ -426,12 +446,12 @@ TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 					begin_name_edit ();
 					_ebox_release_can_act = false;
 					return true;
-				} else {
-					return true;
 				}
 			}
 		}
 	}
+
+	/* double-click outside the name area */
 
 	if (event->button == 1 && event->type == GDK_2BUTTON_PRESS) {
 		if (_effective_height < preset_height (HeightLargest)) {
@@ -447,10 +467,8 @@ TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 
 		_resize_drag_start = event->y_root;
 
-	} else {
-		if (event->button == 1) {
-			_editor.start_track_drag (*this, event->y, controls_ebox);
-		}
+	} else if (event->button == 1 && event->type == GDK_BUTTON_PRESS) {
+		_editor.start_track_drag (*this, event->y, controls_ebox);
 	}
 
 	return true;

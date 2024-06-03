@@ -7034,17 +7034,10 @@ Editor::start_track_drag (TimeAxisView& tav, int y, Gtk::Widget& w)
 {
 	track_drag = new TrackDrag (dynamic_cast<RouteTimeAxisView*> (&tav), *_session);
 	DEBUG_TRACE (DEBUG::TrackDrag, string_compose ("start track drag with %1\n", track_drag));
-	PBD::stacktrace (std::cerr, 20);
-
-	track_drag->drag_cursor = _cursors->move->gobj();
-	track_drag->predrag_cursor = gdk_window_get_cursor (edit_controls_vbox.get_window()->gobj());
-
-	gdk_window_set_cursor (edit_controls_vbox.get_toplevel()->get_window()->gobj(), track_drag->drag_cursor);
 
 	int xo, yo;
 	w.translate_coordinates (edit_controls_vbox, 0, y, xo, yo);
 
-	track_drag->have_predrag_cursor = true;
 	track_drag->bump_track = nullptr;
 	track_drag->previous = yo;
 	track_drag->start = yo;
@@ -7067,6 +7060,12 @@ Editor::mid_track_drag (GdkEventMotion* ev, Gtk::Widget& w)
 		if (!track_drag->track->selected()) {
 			set_selected_track (*track_drag->track, Selection::Set, false);
 		}
+
+		track_drag->drag_cursor = _cursors->move->gobj();
+		track_drag->predrag_cursor = gdk_window_get_cursor (edit_controls_vbox.get_window()->gobj());
+		gdk_window_set_cursor (edit_controls_vbox.get_toplevel()->get_window()->gobj(), track_drag->drag_cursor);
+		track_drag->have_predrag_cursor = true;
+
 		track_drag->first_move = false;
 	}
 
