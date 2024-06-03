@@ -1405,7 +1405,7 @@ private:
 	void insert_patch_change (bool from_context);
 	void fork_selected_regions ();
 	void fork_regions_from_unselected ();
-	void start_track_drag (TimeAxisView&, int y, Gtk::Widget& w);
+	void start_track_drag (TimeAxisView&, int y, Gtk::Widget& w, bool can_change_cursor);
 	void mid_track_drag (GdkEventMotion*, Gtk::Widget& e);
 	void end_track_drag ();
 	void maybe_move_tracks ();

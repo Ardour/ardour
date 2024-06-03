@@ -411,6 +411,19 @@ TimeAxisView::controls_ebox_scroll (GdkEventScroll* ev)
 bool
 TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 {
+	bool inside_name_label = false;
+
+	if (name_label.is_ancestor (controls_ebox)) {
+		int nlx;
+		int nly;
+		controls_ebox.translate_coordinates (name_label, event->x, event->y, nlx, nly);
+		Gtk::Allocation a = name_label.get_allocation ();
+
+		if (nlx > 0 && nlx < a.get_width() && nly > 0 && nly < a.get_height()) {
+			inside_name_label = true;
+		}
+	}
+
 	/* double-click inside the name area */
 
 	if ((event->button == 1 && event->type == GDK_2BUTTON_PRESS) || Keyboard::is_edit_event (event)) {
@@ -430,23 +443,12 @@ TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 
 		_editor.end_track_drag ();
 
-		/* see if it is inside the name label */
+		if (inside_name_label) {
 
-
-		if (name_label.is_ancestor (controls_ebox)) {
-
-			int nlx;
-			int nly;
-			controls_ebox.translate_coordinates (name_label, event->x, event->y, nlx, nly);
-			Gtk::Allocation a = name_label.get_allocation ();
-
-			if (nlx > 0 && nlx < a.get_width() && nly > 0 && nly < a.get_height()) {
-
-				if ((event->type == GDK_2BUTTON_PRESS) || Keyboard::is_edit_event (event)) {
-					begin_name_edit ();
-					_ebox_release_can_act = false;
-					return true;
-				}
+			if ((event->type == GDK_2BUTTON_PRESS) || Keyboard::is_edit_event (event)) {
+				begin_name_edit ();
+				_ebox_release_can_act = false;
+				return true;
 			}
 		}
 	}
@@ -464,11 +466,9 @@ TimeAxisView::controls_ebox_button_press (GdkEventButton* event)
 	_ebox_release_can_act = true;
 
 	if (maybe_set_cursor (event->y) > 0) {
-
 		_resize_drag_start = event->y_root;
-
 	} else if (event->button == 1 && event->type == GDK_BUTTON_PRESS) {
-		_editor.start_track_drag (*this, event->y, controls_ebox);
+		_editor.start_track_drag (*this, event->y, controls_ebox, !inside_name_label);
 	}
 
 	return true;
