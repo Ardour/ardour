@@ -56,7 +56,7 @@ typedef struct _CoreMIDIPacket {
 		: timeStamp(other->timeStamp)
 		, length (other->length)
 	{
-		assert (l <= 1024);
+		assert (length <= 1024);
 		if (length > 0) {
 			memcpy(data, other->data, length);
 		}
