@@ -174,6 +174,7 @@ MidiView::MidiView (MidiView const & other)
 void
 MidiView::init ()
 {
+	_midi_track->DropReferences.connect (track_going_away_connection, invalidator (*this), boost::bind (&MidiView::track_going_away, this), gui_context());
 	_patch_change_outline = UIConfiguration::instance().color ("midi patch change outline");
 	_patch_change_fill = UIConfiguration::instance().color_mod ("midi patch change fill", "midi patch change fill");
 
@@ -182,14 +183,30 @@ MidiView::init ()
 }
 
 void
+MidiView::track_going_away ()
+{
+	_midi_track.reset ();
+}
+
+void
+MidiView::region_going_away ()
+{
+	_midi_region.reset ();
+	_model.reset ();
+	connections_requiring_model.drop_connections();
+}
+
+void
 MidiView::set_region (std::shared_ptr<MidiRegion> mr)
 {
 	_midi_region = mr;
 	if (!_midi_region) {
-		_model.reset ();
-		connections_requiring_model.drop_connections();
+		region_going_away ();
 		return;
 	}
+
+	_midi_region->DropReferences.connect (region_going_away_connection, invalidator (*this), boost::bind (&MidiView::region_going_away, this), gui_context());
+
 	set_model (_midi_region->midi_source (0)->model());
 }
 
