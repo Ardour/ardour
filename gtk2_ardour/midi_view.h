@@ -444,6 +444,10 @@ class MidiView : public virtual sigc::trackable
 	bool note_canvas_event(GdkEvent* ev);
 
 	PBD::ScopedConnectionList connections_requiring_model;
+	PBD::ScopedConnection track_going_away_connection;
+	PBD::ScopedConnection region_going_away_connection;
+	void track_going_away ();
+	void region_going_away ();
 
 	void midi_channel_mode_changed ();
 	void instrument_settings_changed ();
