@@ -38,7 +38,7 @@ namespace ARDOUR {
 typedef struct _CoreMIDIPacket {
 	MIDITimeStamp timeStamp;
 	UInt16 length;
-	Byte data[256];
+	Byte data[1024];
 #if 0 // unused
 	_CoreMIDIPacket (MIDITimeStamp t, Byte *d, UInt16 l)
 		: timeStamp(t)
@@ -56,6 +56,7 @@ typedef struct _CoreMIDIPacket {
 		: timeStamp(other->timeStamp)
 		, length (other->length)
 	{
+		assert (l <= 1024);
 		if (length > 0) {
 			memcpy(data, other->data, length);
 		}
