@@ -579,7 +579,7 @@ ArdourMarker::setup_name_display ()
 			_name_item->set_x_position (-name_width);
 		}
 
-		_name_item->clamp_width (name_width);
+		_name_item->clamp_width (_type==Cue ? name_width*2 : name_width);
 
 		if (_type == Cue) {
 			if (_cue_index != CueRecord::stop_all) {
