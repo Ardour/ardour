@@ -7103,6 +7103,10 @@ Editor::mid_track_drag (GdkEventMotion* ev, Gtk::Widget& w)
 void
 Editor::end_track_drag ()
 {
+	if (!track_drag) {
+		return;
+	}
+
 	if (track_drag->have_predrag_cursor) {
 		gdk_window_set_cursor (edit_controls_vbox.get_toplevel()->get_window()->gobj(), track_drag->predrag_cursor);
 	}
