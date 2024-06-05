@@ -3695,8 +3695,8 @@ Mixer_UI::register_actions ()
 	ActionManager::register_action (group, "solo", _("Toggle Solo on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::solo_action));
 	ActionManager::register_action (group, "mute", _("Toggle Mute on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::mute_action));
 	ActionManager::register_action (group, "recenable", _("Toggle Rec-enable on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::rec_enable_action));
-	ActionManager::register_action (group, "increment-gain", _("Decrease Gain on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::step_gain_up_action));
-	ActionManager::register_action (group, "decrement-gain", _("Increase Gain on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::step_gain_down_action));
+	ActionManager::register_action (group, "increment-gain", _("Increase Gain on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::step_gain_up_action));
+	ActionManager::register_action (group, "decrement-gain", _("Decrease Gain on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::step_gain_down_action));
 	ActionManager::register_action (group, "unity-gain", _("Set Gain to 0dB on Mixer-Selected Tracks/Busses"), sigc::mem_fun (*this, &Mixer_UI::unity_gain_action));
 
 
