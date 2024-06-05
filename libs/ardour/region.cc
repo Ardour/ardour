@@ -1024,34 +1024,35 @@ Region::modify_front_unchecked (timepos_t const & npos, bool reset_fade)
 		source_zero = timepos_t (source_position().time_domain()); // its actually negative, but this will work for us
 	}
 
-	if (new_position < last) { /* can't trim it zero or negative length */
-
-		timecnt_t newlen (_length);
-		timepos_t np = new_position;
-
-		if (!can_trim_start_before_source_start ()) {
-			/* can't trim it back past where source position zero is located */
-			np = max (np, source_zero);
-		}
-
-		if (np > position()) {
-			newlen = length() - (position().distance (np));
-		} else {
-			newlen = length() + (np.distance (position()));
-		}
-
-		trim_to_internal (np, newlen);
-
-		if (reset_fade) {
-			_right_of_split = true;
-		}
-
-		if (!property_changes_suspended()) {
-			recompute_at_start ();
-		}
-
-		maybe_invalidate_transients ();
+	if (new_position >= last) { /* can't trim it zero or negative length */
+		return;
 	}
+
+	timecnt_t newlen (_length);
+	timepos_t np = new_position;
+
+	if (!can_trim_start_before_source_start ()) {
+		/* can't trim it back past where source position zero is located */
+		np = max (np, source_zero);
+	}
+
+	if (np > position()) {
+		newlen = length() - (position().distance (np));
+	} else {
+		newlen = length() + (np.distance (position()));
+	}
+
+	trim_to_internal (np, newlen);
+
+	if (reset_fade) {
+		_right_of_split = true;
+	}
+
+	if (!property_changes_suspended()) {
+		recompute_at_start ();
+	}
+
+	maybe_invalidate_transients ();
 }
 
 void
