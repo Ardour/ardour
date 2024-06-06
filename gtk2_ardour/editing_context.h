@@ -176,6 +176,8 @@ public:
 
 	samplecnt_t get_current_zoom () const { return samples_per_pixel; }
 
+	double timeline_origin() const { return _timeline_origin; }
+
 	/* NOTE: these functions assume that the "pixel" coordinate is
 	   in canvas coordinates. These coordinates already take into
 	   account any scrolling offsets.
@@ -191,12 +193,17 @@ public:
 		   is "before the start".
 		*/
 
-		if (pixel >= 0) {
-			return pixel * samples_per_pixel;
+		if (pixel >= _timeline_origin) {
+			return (pixel - _timeline_origin) * samples_per_pixel;
 		} else {
 			return 0;
 		}
 	}
+
+	/* It makes no sense to ever call these functions to convert to or from a
+	 * non-timeline relative pixel position, so they all assume that is
+	 * what they are being asked to do.
+	 */
 
 	samplepos_t pixel_to_sample (double pixel) const {
 		return pixel * samples_per_pixel;
@@ -207,13 +214,24 @@ public:
 	}
 
 	double sample_to_pixel_unrounded (samplepos_t sample) const {
-		return sample / (double) samples_per_pixel;
+		return (sample / (double) samples_per_pixel);
 	}
 
 	double time_to_pixel (Temporal::timepos_t const & pos) const;
 	double time_to_pixel_unrounded (Temporal::timepos_t const & pos) const;
+
 	double duration_to_pixels (Temporal::timecnt_t const & pos) const;
 	double duration_to_pixels_unrounded (Temporal::timecnt_t const & pos) const;
+	samplecnt_t pixel_duration_to_samples (double pixels) const {
+		return pixels * samples_per_pixel;
+	}
+
+	/* These two convert between timeline-relative x-axis pixel positions and
+	 * global canvas ones.
+	 */
+
+	double timeline_to_canvas (double p) const { return p + _timeline_origin; }
+	double canvas_to_timeline (double p) const { return p - _timeline_origin; }
 
 	/** computes the timeline position for an event whose coordinates
 	 * are in canvas units (pixels, scroll offset included). The time
@@ -389,6 +407,8 @@ public:
 
 	int _draw_velocity;
 	int _draw_channel;
+
+	double _timeline_origin;
 
 	ArdourWidgets::ArdourDropdown grid_type_selector;
 	void build_grid_type_menu ();
