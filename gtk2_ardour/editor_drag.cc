@@ -379,13 +379,7 @@ Drag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	_grab_time         = adjusted_time (_raw_grab_time, event);
 	_last_pointer_time = _grab_time;
 	_last_pointer_x    = _grab_x;
-
-
-	if (_bounding_item) {
-		_grab_y = _grab_y - _bounding_item->canvas_origin().y;
-	}
-
-	_last_pointer_y = _grab_y;
+	_last_pointer_y    = _grab_y;
 
 	_item->grab ();
 
