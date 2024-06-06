@@ -275,6 +275,8 @@ MidiCueEditor::build_canvas ()
 
 	prh->set_position (Duple (0., n_timebars * timebar_height));
 	data_group->set_position (ArdourCanvas::Duple (w, timebar_height * n_timebars));
+
+	_timeline_origin = w;
 	h_scroll_group->set_position (Duple (w, 0.));
 
 	_canvas->set_name ("MidiCueCanvas");
@@ -418,6 +420,8 @@ MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr
 	prh->size_request (w, h);
 
 	/* Move stuff around */
+
+	_timeline_origin = w;
 
 	prh->set_position (Duple (0., n_timebars * timebar_height));
 	data_group->set_position (ArdourCanvas::Duple (w, timebar_height * n_timebars));
