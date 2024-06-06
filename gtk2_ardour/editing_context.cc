@@ -2000,7 +2000,7 @@ EditingContext::pop_editing_context ()
 double
 EditingContext::horizontal_position () const
 {
-	return sample_to_pixel (_leftmost_sample);
+	return horizontal_adjustment.get_value();
 }
 
 void
