@@ -313,9 +313,9 @@ Drag::set_time_domain (Temporal::TimeDomain td)
 }
 
 timepos_t
-Drag::pixel_to_time (double x) const
+Drag::pixel_duration_to_time (double x) const
 {
-	samplepos_t p = editing_context.pixel_to_sample (x);
+	samplepos_t p = editing_context.pixel_duration_to_samples (x);
 
 	if (_time_domain == Temporal::AudioTime) {
 		return timepos_t (p);
@@ -464,7 +464,6 @@ Drag::current_pointer_x () const
 		return _drags->current_pointer_x ();
 	}
 
-	std::cerr << "mouse @ " <<  _drags->current_pointer_x () << " corrected by " << _bounding_item->canvas_origin().x << " to " << _drags->current_pointer_x () - _bounding_item->canvas_origin().x << std::endl;
 	return _drags->current_pointer_x () - _bounding_item->canvas_origin().x;
 }
 
@@ -512,7 +511,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 			if (old_move_threshold_passed != _move_threshold_passed) {
 				/* just changed */
 
-				if (fabs (current_pointer_y () - _grab_y) > fabs (current_pointer_x () - _grab_x)) {
+				if (fabs (_drags->current_pointer_y () - _grab_y) > fabs (_drags->current_pointer_x () - _grab_x)) {
 					_initially_vertical = true;
 				} else {
 					_initially_vertical = false;
@@ -565,7 +564,7 @@ Drag::motion_handler (GdkEvent* event, bool from_autoscroll)
 					_starting_point_passed = true;
 				}
 
-				_last_pointer_x    = _drags->current_pointer_x ();
+				_last_pointer_x    = current_pointer_x ();
 				_last_pointer_y    = current_pointer_y ();
 				_last_pointer_time = adjusted_current_time (event, false);
 			}
@@ -953,7 +952,7 @@ RegionMotionDrag::compute_x_delta (GdkEvent const* event, Temporal::timepos_t& p
 		dx = editing_context.duration_to_pixels_unrounded (_last_position.distance (pending_region_position));
 
 		/* total x movement */
-		timecnt_t total_dx = timecnt_t (pixel_to_time (_total_x_delta + dx), grab_time ());
+		timecnt_t total_dx = timecnt_t (pixel_duration_to_time (_total_x_delta + dx), grab_time ());
 
 		for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
 			const timepos_t off = i->view->region ()->position () + total_dx;
@@ -2461,7 +2460,7 @@ NoteResizeDrag::motion (GdkEvent* event, bool first_move)
 				sd = _snap_delta;
 			}
 
-			mrv->update_resizing (nb, at_front, _drags->current_pointer_x () - grab_x (), relative, sd, snap);
+			mrv->update_resizing (nb, at_front, current_pointer_x () - grab_x (), relative, sd, snap);
 		}
 	}
 }
@@ -2524,7 +2523,7 @@ NoteResizeDrag::finished (GdkEvent* event, bool movement_occurred)
 				sd = _snap_delta;
 			}
 
-			mrv->finish_resizing (nb, at_front, _drags->current_pointer_x () - grab_x (), relative, sd, snap);
+			mrv->finish_resizing (nb, at_front, current_pointer_x () - grab_x (), relative, sd, snap);
 		}
 	}
 
@@ -3625,7 +3624,7 @@ MappingTwistDrag::setup_pointer_offset ()
 void
 MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 {
-	if (_drags->current_pointer_x () < last_pointer_x ()) {
+	if (current_pointer_x () < last_pointer_x ()) {
 		if (direction < 0.) {
 			direction = 1.;
 			initial_focus_npm += delta;
@@ -3643,7 +3642,7 @@ MappingTwistDrag::motion (GdkEvent* event, bool first_move)
 
 	/* XXX needs to scale somehow with zoom level */
 
-	const double pixel_distance = last_pointer_x () - _drags->current_pointer_x ();
+	const double pixel_distance = last_pointer_x () - current_pointer_x ();
 	const double spp            = editing_context.get_current_zoom ();
 	const double scaling_factor = 0.4 * (spp / 1500.);
 
@@ -4798,7 +4797,7 @@ ControlPointDrag::total_dt (GdkEvent* event) const
 	}
 
 	/* x-axis delta in absolute samples, because we can't do any better */
-	timecnt_t const dx = timecnt_t (pixel_to_time (_drags->current_pointer_x () - grab_x ()), _point->line ().get_origin ());
+	timecnt_t const dx = timecnt_t (pixel_duration_to_time (current_pointer_x () - grab_x ()), _point->line ().get_origin ());
 
 	/* control point time in absolute time, using natural time domain */
 	timepos_t const point_absolute = (*_point->model ())->when + _point->line ().get_origin ().shift_earlier (_point->line ().offset ());
@@ -5119,7 +5118,7 @@ FeatureLineDrag::start_grab (GdkEvent* event, Gdk::Cursor* /*cursor*/)
 void
 FeatureLineDrag::motion (GdkEvent*, bool)
 {
-	double dx = _drags->current_pointer_x () - last_pointer_x ();
+	double dx = current_pointer_x () - last_pointer_x ();
 
 	double cx = _region_view_grab_x + _cumulative_x_drag + dx;
 
@@ -5262,7 +5261,7 @@ RubberbandSelectDrag::do_select_things (GdkEvent* event, bool drag_in_progress)
 	if (!UIConfiguration::instance ().get_rubberbanding_snaps_to_grid ()) {
 		grab = raw_grab_time ();
 
-		timepos_t pos (pixel_to_time (last_pointer_x ()));
+		timepos_t pos (pixel_duration_to_time (last_pointer_x ()));
 
 		if (editing_context.time_domain () == Temporal::AudioTime) {
 			lpf = pos;
@@ -6218,7 +6217,7 @@ NoteDrag::total_dx (GdkEvent* event) const
 	/* now calculate proper `b@b` time */
 	timecnt_t dx = t2.distance (t1);
 
-	std::cerr << "apparent dx " << dx.beats().str() << " from " << _drags->current_pointer_x() << " - " << grab_x() << std::endl;
+	// std::cerr << "apparent dx " << dx << " beats " << dx.beats().str() << " from " << current_pointer_x() << " - " << grab_x() << " = " << current_pointer_x() - grab_x() << std::endl;
 
 	/* primary note time in quarter notes */
 	timepos_t const n_qn = _region->midi_region()->source_beats_to_absolute_time (_primary->note ()->time ());
@@ -6261,7 +6260,10 @@ NoteDrag::total_dy () const
 		return 0;
 	}
 
+
 	double const y = _region->midi_context().y_position ();
+	double const p = current_pointer_y();
+
 	/* new current note */
 	uint8_t n = _region->y_to_note (current_pointer_y () - y);
 	/* clamp */
@@ -6292,7 +6294,7 @@ NoteDrag::motion (GdkEvent* event, bool first_move)
 	double const    tdy = _y_constrained ? 0 : -dy * _note_height - _cumulative_dy;
 
 	if (!tdx.is_zero () || tdy) {
-		_cumulative_dx = dx_qn;
+		_cumulative_dx += dx_qn;
 		_cumulative_dy += tdy;
 
 		int8_t pitch_delta = total_dy ();
@@ -6360,7 +6362,6 @@ NoteDrag::finished (GdkEvent* ev, bool moved)
 			}
 		}
 	} else {
-		std::cerr << "ready to drop\n";
 		_region->note_dropped (_primary, total_dx (ev), total_dy (), _copy);
 	}
 }
@@ -6999,16 +7000,16 @@ CrossfadeEdgeDrag::motion (GdkEvent*, bool)
 	std::shared_ptr<AudioRegion> ar (arv->audio_region ());
 
 	if (start) {
-		distance = _drags->current_pointer_x () - grab_x ();
+		distance = current_pointer_x () - grab_x ();
 		len      = timecnt_t (ar->fade_in ()->back ()->when);
 	} else {
-		distance = grab_x () - _drags->current_pointer_x ();
+		distance = grab_x () - current_pointer_x ();
 		len      = timecnt_t (ar->fade_out ()->back ()->when);
 	}
 
 	/* how long should it be ? */
 
-	new_length = len + timecnt_t (pixel_to_time (distance));
+	new_length = len + timecnt_t (pixel_duration_to_time (distance));
 
 	/* now check with the region that this is legal */
 
@@ -7031,14 +7032,14 @@ CrossfadeEdgeDrag::finished (GdkEvent*, bool)
 	std::shared_ptr<AudioRegion> ar (arv->audio_region ());
 
 	if (start) {
-		distance = _drags->current_pointer_x () - grab_x ();
+		distance = current_pointer_x () - grab_x ();
 		len      = timecnt_t (ar->fade_in ()->back ()->when);
 	} else {
-		distance = grab_x () - _drags->current_pointer_x ();
+		distance = grab_x () - current_pointer_x ();
 		len      = timecnt_t (ar->fade_out ()->back ()->when);
 	}
 
-	timecnt_t tdist  = timecnt_t (pixel_to_time (distance));
+	timecnt_t tdist  = timecnt_t (pixel_duration_to_time (distance));
 	timecnt_t newlen = len + tdist;
 	new_length       = timecnt_t (ar->verify_xfade_bounds (newlen.samples (), start));
 
