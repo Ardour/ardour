@@ -2466,7 +2466,7 @@ MidiView::earliest_in_selection ()
 }
 
 void
-MidiView::move_selection(timecnt_t const & dx_qn, double dy, double cumulative_dy)
+MidiView::move_selection (timecnt_t const & dx_qn, double dy, double cumulative_dy)
 {
 	typedef vector<std::shared_ptr<NoteType> > PossibleChord;
 	PossibleChord to_play;
@@ -2481,24 +2481,39 @@ MidiView::move_selection(timecnt_t const & dx_qn, double dy, double cumulative_d
 		double dx = 0.0;
 
 		if (_midi_context.note_mode() == Sustained) {
-			dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn + dx_qn.beats()))
-				- n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x;
+			dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn + dx_qn.beats()));
+
+			/*: ::item_to_canvas() converts to a global canvas
+			 *  coordinate, but ::time_to_pixel() gives us a
+			 *  timeline-relative coordinate.
+			 *
+			 * So we need to adjust ...
+			 */
+
+			dx -= _editing_context.canvas_to_timeline (n->item()->item_to_canvas (ArdourCanvas::Duple (n->x0(), 0)).x);
 		} else {
 			/* Hit::x0() is offset by _position.x, unlike Note::x0() */
 			Hit* hit = dynamic_cast<Hit*>(n);
 			if (hit) {
-				dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn + dx_qn.beats()))
-					- n->item()->item_to_canvas (ArdourCanvas::Duple (((hit->x0() + hit->x1()) / 2.0) - hit->position().x, 0)).x;
+				dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn + dx_qn.beats()));
+				dx -= _editing_context.canvas_to_timeline ( n->item()->item_to_canvas (ArdourCanvas::Duple (((hit->x0() + hit->x1()) / 2.0) - hit->position().x, 0)).x);
 			}
 		}
 
-		(*i)->move_event(dx, dy);
+		(*i)->move_event (dx, dy);
 
-		/* update length */
+		/* update length, which may have changed in pixels at the new location */
 		if (_midi_context.note_mode() == Sustained) {
 			Note* sus = dynamic_cast<Note*> (*i);
-			double const len_dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + timecnt_t (n->note()->length()));
+			double len_dx = _editing_context.time_to_pixel_unrounded (timepos_t (note_time_qn) + dx_qn + timecnt_t (n->note()->length()));
 
+			/* at this point, len_dx is a timeline-relative pixel
+			 * duration. To convert it back to an item-centric
+			 * coordinate, we need to first convert it to a global
+			 * canvas position.
+			 */
+
+			len_dx = _editing_context.timeline_to_canvas (len_dx);
 			sus->set_x1 (n->item()->canvas_to_item (ArdourCanvas::Duple (len_dx, 0)).x);
 		}
 	}
@@ -2661,7 +2676,9 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 				continue;
 			}
 
-			note_diff_add_change (sel, MidiModel::NoteDiffCommand::StartTime, new_time);
+			if (new_time != sel->note()->time()) {
+				note_diff_add_change (sel, MidiModel::NoteDiffCommand::StartTime, new_time);
+			}
 
 			uint8_t original_pitch = sel->note()->note();
 			uint8_t new_pitch      = original_pitch + dnote - highest_note_difference;
@@ -2672,10 +2689,12 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 			lowest_note_in_selection  = std::min(lowest_note_in_selection,  new_pitch);
 			highest_note_in_selection = std::max(highest_note_in_selection, new_pitch);
 
-			note_diff_add_change (sel, MidiModel::NoteDiffCommand::NoteNumber, new_pitch);
+			if (new_pitch != original_pitch) {
+				note_diff_add_change (sel, MidiModel::NoteDiffCommand::NoteNumber, new_pitch);
+			}
 		}
-	} else {
 
+	} else {
 		clear_selection_internal ();
 
 		for (CopyDragEvents::iterator i = _copy_drag_events.begin(); i != _copy_drag_events.end(); ++i) {
@@ -2722,8 +2741,6 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 
 		_copy_drag_events.clear ();
 	}
-
-	std::cerr << "DROP & EDIT\n";
 
 	apply_note_diff (true /*subcommand, we don't want this to start a new commit*/, copy);
 	_editing_context.commit_reversible_command ();
