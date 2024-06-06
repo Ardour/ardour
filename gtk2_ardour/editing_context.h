@@ -93,7 +93,7 @@ public:
 
 
 	struct TempoMapScope {
-		TempoMapScope (EditingContext& context, std::shared_ptr<Temporal::TempoMap> map) 
+		TempoMapScope (EditingContext& context, std::shared_ptr<Temporal::TempoMap> map)
 			: ec (context)
 		{
 			old_map = ec.start_local_tempo_map (map);
