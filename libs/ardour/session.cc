@@ -817,6 +817,7 @@ Session::destroy ()
 		for (RouteList::iterator i = r->begin(); i != r->end(); ++i) {
 			DEBUG_TRACE(DEBUG::Destruction, string_compose ("Dropping for route %1 ; pre-ref = %2\n", (*i)->name(), (*i).use_count()));
 			(*i)->drop_references ();
+			DEBUG_TRACE(DEBUG::Destruction, string_compose ("post pre-ref = %2\n", (*i)->name(), (*i).use_count()));
 		}
 
 		r->clear ();
