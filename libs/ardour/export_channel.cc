@@ -112,7 +112,7 @@ PortExportChannel::read (Buffer const*& buf, samplecnt_t samples) const
 	assert (_buffer);
 	assert (samples <= _buffer_size);
 
-	if (ports.size () == 1 && _delaylines.size () == 1 && !ports.begin ()->expired () && _delaylines.front ()->bufsize () == _buffer_size + 1) {
+	if (ports.size () == 1 && _delaylines.size () == 1 && !ports.begin ()->expired () && (samplecnt_t) _delaylines.front ()->bufsize () == _buffer_size + 1) {
 		std::shared_ptr<AudioPort> p = ports.begin ()->lock ();
 		AudioBuffer&               ab (p->get_audio_buffer (samples)); // unsets AudioBuffer::_written
 		ab.set_written (true);
