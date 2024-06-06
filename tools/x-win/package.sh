@@ -49,7 +49,7 @@ while [ $# -gt 0 ] ; do
 			PROGRAM_NAME=Mixbus
 			PROGRAM_KEY=Mixbus
 			PRODUCT_NAME=Mixbus
-			MANUAL_NAME="mixbus-live-manual"
+			MANUAL_URL="https://rsrc.harrisonconsoles.com/mixbus/mixbus-live-manual/"
 			shift ;;
 		--livetrax)
 			LIVETRAX=1 ;
@@ -59,7 +59,7 @@ while [ $# -gt 0 ] ; do
 			PROGRAM_NAME=LiveTrax
 			PROGRAM_KEY=LiveTrax
 			PRODUCT_NAME=LiveTrax
-			MANUAL_NAME="livetrax-live-manual"
+			MANUAL_URL="https://rsrc.harrisonconsoles.com/livetrax/livetrax-live-manual/"
 			shift ;;
 		--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
 	esac
@@ -472,7 +472,7 @@ if test -n "$MIXBUS" -o -n "$LIVETRAX" ; then
 !define MUI_FINISHPAGE_TITLE "Welcome to Harrison ${PROGRAM_NAME}"
 !define MUI_FINISHPAGE_TEXT "Thanks for your purchase of ${PROGRAM_NAME}!\$\\r\$\\nYou will find the ${PROGRAM_NAME} application in the Start Menu (or the All Apps panel for Windows 8) \$\\r\$\\nClick the link below to view the ${PROGRAM_NAME} manual, and learn ways to get involved with the Mixbus community."
 !define MUI_FINISHPAGE_LINK "${PROGRAM_NAME} Manual"
-!define MUI_FINISHPAGE_LINK_LOCATION "https://rsrc.harrisonconsoles.com/mixbus/${MANUAL_NAME}/"
+!define MUI_FINISHPAGE_LINK_LOCATION "${MANUAL_URL}"
 !define MUI_FINISHPAGE_NOREBOOTSUPPORT
 EOF
 
