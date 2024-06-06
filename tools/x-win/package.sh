@@ -59,6 +59,7 @@ while [ $# -gt 0 ] ; do
 			PROGRAM_NAME=LiveTrax
 			PROGRAM_KEY=LiveTrax
 			PRODUCT_NAME=LiveTrax
+			MANUAL_NAME="livetrax-live-manual"
 			shift ;;
 		--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
 	esac
@@ -464,7 +465,7 @@ InstallDirRegKey HKLM "Software\\${PRODUCT_NAME}\\${PRODUCT_ID}\\$WARCH" "Instal
 
 EOF
 
-if test -n "$MIXBUS"; then
+if test -n "$MIXBUS" -o -n "$LIVETRAX" ; then
 
 # TODO: proper welcome/finish text.
 	cat >> $NSISFILE << EOF
