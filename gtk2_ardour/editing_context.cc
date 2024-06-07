@@ -213,57 +213,57 @@ EditingContext::register_midi_actions (Bindings* midi_bindings)
 
 	/* Alt versions allow bindings for both Tab and ISO_Left_Tab, if desired */
 
-	ActionManager::register_action (_midi_actions, X_("select-next"), _("Select Next"), []() { current_editing_context()->midi_action (&MidiRegionView::select_next_note); });
-	ActionManager::register_action (_midi_actions, X_("alt-select-next"), _("Select Next (alternate)"), []() { current_editing_context()->midi_action (&MidiRegionView::select_next_note); });
-	ActionManager::register_action (_midi_actions, X_("select-previous"), _("Select Previous"), []() { current_editing_context()->midi_action (&MidiRegionView::select_previous_note); });
-	ActionManager::register_action (_midi_actions, X_("alt-select-previous"), _("Select Previous (alternate)"), []() { current_editing_context()->midi_action (&MidiRegionView::select_previous_note); });
-	ActionManager::register_action (_midi_actions, X_("add-select-next"), _("Add Next to Selection"), []() { current_editing_context()->midi_action (&MidiRegionView::add_select_next_note); });
-	ActionManager::register_action (_midi_actions, X_("alt-add-select-next"), _("Add Next to Selection (alternate)"), []() { current_editing_context()->midi_action (&MidiRegionView::add_select_next_note); });
-	ActionManager::register_action (_midi_actions, X_("add-select-previous"), _("Add Previous to Selection"), []() { current_editing_context()->midi_action (&MidiRegionView::add_select_previous_note); });
-	ActionManager::register_action (_midi_actions, X_("alt-add-select-previous"), _("Add Previous to Selection (alternate)"), []() { current_editing_context()->midi_action (&MidiRegionView::add_select_previous_note); });
+	ActionManager::register_action (_midi_actions, X_("select-next"), _("Select Next"), []() { current_editing_context()->midi_action (&MidiView::select_next_note); });
+	ActionManager::register_action (_midi_actions, X_("alt-select-next"), _("Select Next (alternate)"), []() { current_editing_context()->midi_action (&MidiView::select_next_note); });
+	ActionManager::register_action (_midi_actions, X_("select-previous"), _("Select Previous"), []() { current_editing_context()->midi_action (&MidiView::select_previous_note); });
+	ActionManager::register_action (_midi_actions, X_("alt-select-previous"), _("Select Previous (alternate)"), []() { current_editing_context()->midi_action (&MidiView::select_previous_note); });
+	ActionManager::register_action (_midi_actions, X_("add-select-next"), _("Add Next to Selection"), []() { current_editing_context()->midi_action (&MidiView::add_select_next_note); });
+	ActionManager::register_action (_midi_actions, X_("alt-add-select-next"), _("Add Next to Selection (alternate)"), []() { current_editing_context()->midi_action (&MidiView::add_select_next_note); });
+	ActionManager::register_action (_midi_actions, X_("add-select-previous"), _("Add Previous to Selection"), []() { current_editing_context()->midi_action (&MidiView::add_select_previous_note); });
+	ActionManager::register_action (_midi_actions, X_("alt-add-select-previous"), _("Add Previous to Selection (alternate)"), []() { current_editing_context()->midi_action (&MidiView::add_select_previous_note); });
 
-	ActionManager::register_action (_midi_actions, X_("increase-velocity"), _("Increase Velocity"), []() { current_editing_context()->midi_action (&MidiRegionView::increase_note_velocity); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine"), _("Increase Velocity (fine)"), []() { current_editing_context()->midi_action (&MidiRegionView::increase_note_velocity_fine); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-smush"), _("Increase Velocity (allow mush)"), []() { current_editing_context()->midi_action (&MidiRegionView::increase_note_velocity_smush); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-together"), _("Increase Velocity (non-relative)"), []() { current_editing_context()->midi_action (&MidiRegionView::increase_note_velocity_together); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-smush"), _("Increase Velocity (fine, allow mush)"), []() { current_editing_context()->midi_action (&MidiRegionView::increase_note_velocity_fine_smush); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-together"), _("Increase Velocity (fine, non-relative)"), []() { current_editing_context()->midi_action (&MidiRegionView::increase_note_velocity_fine_together); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-smush-together"), _("Increase Velocity (maintain ratios, allow mush)"), []() { current_editing_context()->midi_action (&MidiRegionView::increase_note_velocity_smush_together); });
-	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-smush-together"), _("Increase Velocity (fine, allow mush, non-relative)"), []() { current_editing_context()->midi_action (&MidiRegionView::increase_note_velocity_fine_smush_together); });
+	ActionManager::register_action (_midi_actions, X_("increase-velocity"), _("Increase Velocity"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity); });
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine"), _("Increase Velocity (fine)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_fine); });
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-smush"), _("Increase Velocity (allow mush)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_smush); });
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-together"), _("Increase Velocity (non-relative)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_together); });
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-smush"), _("Increase Velocity (fine, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_fine_smush); });
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-together"), _("Increase Velocity (fine, non-relative)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_fine_together); });
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-smush-together"), _("Increase Velocity (maintain ratios, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_smush_together); });
+	ActionManager::register_action (_midi_actions, X_("increase-velocity-fine-smush-together"), _("Increase Velocity (fine, allow mush, non-relative)"), []() { current_editing_context()->midi_action (&MidiView::increase_note_velocity_fine_smush_together); });
 
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity"), _("Decrease Velocity"), []() { current_editing_context()->midi_action (&MidiRegionView::decrease_note_velocity); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine"), _("Decrease Velocity (fine)"), []() { current_editing_context()->midi_action (&MidiRegionView::decrease_note_velocity_fine); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush"), _("Decrease Velocity (allow mush)"), []() { current_editing_context()->midi_action (&MidiRegionView::decrease_note_velocity_smush); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-together"), _("Decrease Velocity (non-relative)"), []() { current_editing_context()->midi_action (&MidiRegionView::decrease_note_velocity_together); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush"), _("Decrease Velocity (fine, allow mush)"), []() { current_editing_context()->midi_action (&MidiRegionView::decrease_note_velocity_fine_smush); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-together"), _("Decrease Velocity (fine, non-relative)"), []() { current_editing_context()->midi_action (&MidiRegionView::decrease_note_velocity_fine_together); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush-together"), _("Decrease Velocity (maintain ratios, allow mush)"), []() { current_editing_context()->midi_action (&MidiRegionView::decrease_note_velocity_smush_together); });
-	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush-together"), _("Decrease Velocity (fine, allow mush, non-relative)"), []() { current_editing_context()->midi_action (&MidiRegionView::decrease_note_velocity_fine_smush_together); });
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity"), _("Decrease Velocity"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity); });
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine"), _("Decrease Velocity (fine)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_fine); });
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush"), _("Decrease Velocity (allow mush)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_smush); });
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-together"), _("Decrease Velocity (non-relative)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_together); });
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush"), _("Decrease Velocity (fine, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_fine_smush); });
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-together"), _("Decrease Velocity (fine, non-relative)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_fine_together); });
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-smush-together"), _("Decrease Velocity (maintain ratios, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_smush_together); });
+	ActionManager::register_action (_midi_actions, X_("decrease-velocity-fine-smush-together"), _("Decrease Velocity (fine, allow mush, non-relative)"), []() { current_editing_context()->midi_action (&MidiView::decrease_note_velocity_fine_smush_together); });
 
-	ActionManager::register_action (_midi_actions, X_("transpose-up-octave"), _("Transpose Up (octave)"), []() { current_editing_context()->midi_action (&MidiRegionView::transpose_up_octave); });
-	ActionManager::register_action (_midi_actions, X_("transpose-up-octave-smush"), _("Transpose Up (octave, allow mush)"), []() { current_editing_context()->midi_action (&MidiRegionView::transpose_up_octave_smush); });
-	ActionManager::register_action (_midi_actions, X_("transpose-up-semitone"), _("Transpose Up (semitone)"), []() { current_editing_context()->midi_action (&MidiRegionView::transpose_up_tone); });
-	ActionManager::register_action (_midi_actions, X_("transpose-up-semitone-smush"), _("Transpose Up (semitone, allow mush)"), []() { current_editing_context()->midi_action (&MidiRegionView::transpose_up_octave_smush); });
+	ActionManager::register_action (_midi_actions, X_("transpose-up-octave"), _("Transpose Up (octave)"), []() { current_editing_context()->midi_action (&MidiView::transpose_up_octave); });
+	ActionManager::register_action (_midi_actions, X_("transpose-up-octave-smush"), _("Transpose Up (octave, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::transpose_up_octave_smush); });
+	ActionManager::register_action (_midi_actions, X_("transpose-up-semitone"), _("Transpose Up (semitone)"), []() { current_editing_context()->midi_action (&MidiView::transpose_up_tone); });
+	ActionManager::register_action (_midi_actions, X_("transpose-up-semitone-smush"), _("Transpose Up (semitone, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::transpose_up_octave_smush); });
 
-	ActionManager::register_action (_midi_actions, X_("transpose-down-octave"), _("Transpose Down (octave)"), []() { current_editing_context()->midi_action (&MidiRegionView::transpose_down_octave); });
-	ActionManager::register_action (_midi_actions, X_("transpose-down-octave-smush"), _("Transpose Down (octave, allow mush)"), []() { current_editing_context()->midi_action (&MidiRegionView::transpose_down_octave_smush); });
-	ActionManager::register_action (_midi_actions, X_("transpose-down-semitone"), _("Transpose Down (semitone)"), []() { current_editing_context()->midi_action (&MidiRegionView::transpose_down_tone); });
-	ActionManager::register_action (_midi_actions, X_("transpose-down-semitone-smush"), _("Transpose Down (semitone, allow mush)"), []() { current_editing_context()->midi_action (&MidiRegionView::transpose_down_octave_smush); });
+	ActionManager::register_action (_midi_actions, X_("transpose-down-octave"), _("Transpose Down (octave)"), []() { current_editing_context()->midi_action (&MidiView::transpose_down_octave); });
+	ActionManager::register_action (_midi_actions, X_("transpose-down-octave-smush"), _("Transpose Down (octave, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::transpose_down_octave_smush); });
+	ActionManager::register_action (_midi_actions, X_("transpose-down-semitone"), _("Transpose Down (semitone)"), []() { current_editing_context()->midi_action (&MidiView::transpose_down_tone); });
+	ActionManager::register_action (_midi_actions, X_("transpose-down-semitone-smush"), _("Transpose Down (semitone, allow mush)"), []() { current_editing_context()->midi_action (&MidiView::transpose_down_octave_smush); });
 
-	ActionManager::register_action (_midi_actions, X_("nudge-later"), _("Nudge Notes Later (grid)"), []() { current_editing_context()->midi_action (&MidiRegionView::nudge_notes_later); });
-	ActionManager::register_action (_midi_actions, X_("nudge-later-fine"), _("Nudge Notes Later (1/4 grid)"), []() { current_editing_context()->midi_action (&MidiRegionView::nudge_notes_later_fine); });
-	ActionManager::register_action (_midi_actions, X_("nudge-earlier"), _("Nudge Notes Earlier (grid)"), []() { current_editing_context()->midi_action (&MidiRegionView::nudge_notes_earlier); });
-	ActionManager::register_action (_midi_actions, X_("nudge-earlier-fine"), _("Nudge Notes Earlier (1/4 grid)"), []() { current_editing_context()->midi_action (&MidiRegionView::nudge_notes_earlier_fine); });
+	ActionManager::register_action (_midi_actions, X_("nudge-later"), _("Nudge Notes Later (grid)"), []() { current_editing_context()->midi_action (&MidiView::nudge_notes_later); });
+	ActionManager::register_action (_midi_actions, X_("nudge-later-fine"), _("Nudge Notes Later (1/4 grid)"), []() { current_editing_context()->midi_action (&MidiView::nudge_notes_later_fine); });
+	ActionManager::register_action (_midi_actions, X_("nudge-earlier"), _("Nudge Notes Earlier (grid)"), []() { current_editing_context()->midi_action (&MidiView::nudge_notes_earlier); });
+	ActionManager::register_action (_midi_actions, X_("nudge-earlier-fine"), _("Nudge Notes Earlier (1/4 grid)"), []() { current_editing_context()->midi_action (&MidiView::nudge_notes_earlier_fine); });
 
-	ActionManager::register_action (_midi_actions, X_("split-notes-grid"), _("Split Selected Notes on grid boundaries"), []() { current_editing_context()->midi_action (&MidiRegionView::split_notes_grid); });
-	ActionManager::register_action (_midi_actions, X_("split-notes-more"), _("Split Selected Notes into more pieces"), []() { current_editing_context()->midi_action (&MidiRegionView::split_notes_more); });
-	ActionManager::register_action (_midi_actions, X_("split-notes-less"), _("Split Selected Notes into less pieces"), []() { current_editing_context()->midi_action (&MidiRegionView::split_notes_less); });
-	ActionManager::register_action (_midi_actions, X_("join-notes"), _("Join Selected Notes"), []() { current_editing_context()->midi_action (&MidiRegionView::join_notes); });
+	ActionManager::register_action (_midi_actions, X_("split-notes-grid"), _("Split Selected Notes on grid boundaries"), []() { current_editing_context()->midi_action (&MidiView::split_notes_grid); });
+	ActionManager::register_action (_midi_actions, X_("split-notes-more"), _("Split Selected Notes into more pieces"), []() { current_editing_context()->midi_action (&MidiView::split_notes_more); });
+	ActionManager::register_action (_midi_actions, X_("split-notes-less"), _("Split Selected Notes into less pieces"), []() { current_editing_context()->midi_action (&MidiView::split_notes_less); });
+	ActionManager::register_action (_midi_actions, X_("join-notes"), _("Join Selected Notes"), []() { current_editing_context()->midi_action (&MidiView::join_notes); });
 
-	ActionManager::register_action (_midi_actions, X_("edit-channels"), _("Edit Note Channels"), []() { current_editing_context()->midi_action (&MidiRegionView::channel_edit); });
-	ActionManager::register_action (_midi_actions, X_("edit-velocities"), _("Edit Note Velocities"), []() { current_editing_context()->midi_action (&MidiRegionView::velocity_edit); });
+	ActionManager::register_action (_midi_actions, X_("edit-channels"), _("Edit Note Channels"), []() { current_editing_context()->midi_action (&MidiView::channel_edit); });
+	ActionManager::register_action (_midi_actions, X_("edit-velocities"), _("Edit Note Velocities"), []() { current_editing_context()->midi_action (&MidiView::velocity_edit); });
 
-	ActionManager::register_action (_midi_actions, X_("quantize-selected-notes"), _("Quantize Selected Notes"), []() { current_editing_context()->midi_action ( &MidiRegionView::quantize_selected_notes); });
+	ActionManager::register_action (_midi_actions, X_("quantize-selected-notes"), _("Quantize Selected Notes"), []() { current_editing_context()->midi_action ( &MidiView::quantize_selected_notes); });
 
 	Glib::RefPtr<ActionGroup> length_actions = ActionManager::create_action_group (midi_bindings, X_("DrawLength"));
 	RadioAction::Group draw_length_group;
