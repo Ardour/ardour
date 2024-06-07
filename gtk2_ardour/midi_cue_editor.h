@@ -94,6 +94,8 @@ class MidiCueEditor : public CueEditor
 	void maybe_autoscroll (bool, bool, bool);
 	bool autoscroll_active() const;
 
+	void midi_action (void (MidiView::*method)());
+
   protected:
 	void register_actions ();
 

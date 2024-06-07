@@ -1408,3 +1408,13 @@ MidiCueEditor::visual_changer (const VisualChange& vc)
 		//  XXX redisplay_grid (true);
 	}
 }
+
+void
+MidiCueEditor::midi_action (void (MidiView::*method)())
+{
+	if (!view) {
+		return;
+	}
+
+	(view->*method) ();
+}

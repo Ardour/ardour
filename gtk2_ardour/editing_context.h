@@ -341,7 +341,7 @@ public:
 	ARDOUR::Quantize* get_quantize_op ();
 	void apply_midi_note_edit_op (ARDOUR::MidiOperator& op, const RegionSelection& rs);
 	PBD::Command* apply_midi_note_edit_op_to_region (ARDOUR::MidiOperator& op, MidiView& mrv);
-	void midi_action (void (MidiView::*method)());
+	virtual void midi_action (void (MidiView::*method)());
 	std::vector<MidiView*> filter_to_unique_midi_region_views (RegionSelection const & ms) const;
 
 	void quantize_region ();
