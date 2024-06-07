@@ -63,7 +63,7 @@ using std::string;
 sigc::signal<void> EditingContext::DropDownKeys;
 Gtkmm2ext::Bindings* EditingContext::button_bindings = nullptr;
 Glib::RefPtr<Gtk::ActionGroup> EditingContext::_midi_actions;
-std::queue<EditingContext*> EditingContext::ec_stack;
+std::stack<EditingContext*> EditingContext::ec_stack;
 std::vector<std::string> EditingContext::grid_type_strings;
 MouseCursors* EditingContext::_cursors = nullptr;
 
@@ -1979,7 +1979,7 @@ EditingContext*
 EditingContext::current_editing_context()
 {
 	if (!ec_stack.empty()) {
-		return ec_stack.front ();
+		return ec_stack.top ();
 	}
 
 	return nullptr;

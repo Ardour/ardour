@@ -33,7 +33,7 @@
 #ifndef __ardour_midi_editing_context_h__
 #define __ardour_midi_editing_context_h__
 
-#include <queue>
+#include <stack>
 
 #include "pbd/signals.h"
 
@@ -625,7 +625,7 @@ public:
 	ArdourCanvas::Rect autoscroll_boundary;
 
   private:
-	static std::queue<EditingContext*> ec_stack;
+	static std::stack<EditingContext*> ec_stack;
 
 };
 
