@@ -94,8 +94,8 @@ static const gchar *_grid_type_strings[] = {
 };
 
 EditingContext::EditingContext (std::string const & name)
-	: _name (name)
-	, rubberband_rect (0)
+	: rubberband_rect (0)
+	, _name (name)
 	, pre_internal_grid_type (GridTypeBeat)
 	, pre_internal_snap_mode (SnapOff)
 	, internal_grid_type (GridTypeBeat)
