@@ -38,6 +38,7 @@
 #include "editing_context.h"
 #include "editing_convert.h"
 #include "editor_drag.h"
+#include "gui_thread.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
 #include "note_base.h"
@@ -154,6 +155,10 @@ EditingContext::EditingContext (std::string const & name)
 		_cursors->set_cursor_set (UIConfiguration::instance().get_icon_set());
 		std::cerr << "Set cursor set to " << UIConfiguration::instance().get_icon_set() << std::endl;
 	}
+
+	/* handle escape */
+
+	ARDOUR_UI::instance()->Escape.connect (escape_connection, MISSING_INVALIDATOR, boost::bind (&EditingContext::escape, this), gui_context());
 }
 
 EditingContext::~EditingContext()

@@ -1418,3 +1418,13 @@ MidiCueEditor::midi_action (void (MidiView::*method)())
 
 	(view->*method) ();
 }
+
+void
+MidiCueEditor::escape ()
+{
+	if (!view) {
+		return;
+	}
+
+	view->clear_note_selection ();
+}

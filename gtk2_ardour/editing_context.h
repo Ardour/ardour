@@ -624,6 +624,9 @@ public:
 	uint32_t autoscroll_cnt;
 	ArdourCanvas::Rect autoscroll_boundary;
 
+	PBD::ScopedConnection escape_connection;
+	virtual void escape () {}
+
   private:
 	static std::stack<EditingContext*> ec_stack;
 
