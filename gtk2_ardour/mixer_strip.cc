@@ -174,6 +174,15 @@ MixerStrip::MixerStrip (Mixer_UI& mx, Session* sess, std::shared_ptr<Route> rt, 
 {
 	init ();
 	set_route (rt);
+
+	if (is_master () && !_route->comment().empty () && _session->config.get_show_master_bus_comment_on_load () && self_destruct) {
+		open_comment_editor ();
+		_comment_window->hide ();
+		_comment_window->set_position (Gtk::WIN_POS_CENTER_ON_PARENT);
+		_comment_window->present ();
+		/* show only once */
+		_session->config.set_show_master_bus_comment_on_load (false);
+	}
 }
 
 void

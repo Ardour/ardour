@@ -268,6 +268,8 @@ protected:
 	ARDOUR::SoloMuteRelease* _solo_release;
 	ARDOUR::SoloMuteRelease* _mute_release;
 
+	ArdourWindow* _comment_window;
+
 private:
 	void invert_menu_toggled (uint32_t);
 	bool invert_press (GdkEventButton*);
@@ -322,7 +324,6 @@ private:
 	PlaylistSelector*  _playlist_selector;
 
 	Gtk::Menu*     _record_menu;
-	ArdourWindow*  _comment_window;
 	Gtk::TextView* _comment_area;
 
 	Gtk::CheckMenuItem* _step_edit_item;

@@ -436,6 +436,15 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 				sigc::mem_fun (*_session_config, &SessionConfiguration::set_count_in)
 				));
 
+	add_option (_("Misc"), new OptionEditorHeading (_("Project Banner")));
+
+	add_option (_("Misc"), new BoolOption (
+				"show-master-bus-comment-on-load",
+				_("Show master bus comment window on session load (once)"),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_master_bus_comment_on_load),
+				sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_master_bus_comment_on_load)
+				));
+
 	add_option (_("Misc"), new OptionEditorHeading (_("Defaults")));
 
 	Gtk::Button* btn = Gtk::manage (new Gtk::Button (_("Use these settings as defaults")));
