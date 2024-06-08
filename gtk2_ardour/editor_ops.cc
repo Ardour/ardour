@@ -2354,7 +2354,7 @@ Editor::add_location_mark_with_flag (timepos_t const & where, Location::Flags fl
 		return;
 	}
 
-	if (_session->locations()->mark_at (where, timecnt_t (1))) {
+	if (_session->locations()->mark_at (where, timecnt_t (1), flags)) {
 		return;
 	}
 
