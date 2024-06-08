@@ -276,7 +276,7 @@ Editor::initialize_canvas ()
 	_track_canvas->signal_enter_notify_event().connect (sigc::mem_fun(*this, &Editor::entered_track_canvas), false);
 	_track_canvas->set_can_focus ();
 
-	_track_canvas->PreRender.connect (sigc::mem_fun(*this, &Editor::pre_render));
+	_track_canvas->PreRender.connect (sigc::mem_fun(*this, &EditingContext::pre_render));
 
 	/* set up drag-n-drop */
 

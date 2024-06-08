@@ -375,6 +375,7 @@ public:
 	virtual void mouse_mode_toggled (Editing::MouseMode) = 0;
 
 	bool on_velocity_scroll_event (GdkEventScroll*);
+	void pre_render ();
 
   protected:
 	std::string _name;
