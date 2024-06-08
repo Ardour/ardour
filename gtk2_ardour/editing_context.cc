@@ -2401,7 +2401,7 @@ EditingContext::idle_visual_changer ()
 	/* set_horizontal_position() below (and maybe other calls) call
 	   gtk_main_iteration(), so it's possible that a signal will be handled
 	   half-way through this method.  If this signal wants an
-	   idle_visual_changer we must schedule another one after this one, so
+	   idle_visual_changer we must schedule another one after this one, soa
 	   mark the idle_handler_id as -1 here to allow that.  Also make a note
 	   that we are doing the visual change, so that changes in response to
 	   super-rapid-screen-update can be dropped if we are still processing
@@ -2458,3 +2458,14 @@ EditingContext::reset_zoom (samplecnt_t spp)
 	pending_visual_change.samples_per_pixel = spp;
 	ensure_visual_change_idle_handler ();
 }
+
+void
+EditingContext::pre_render ()
+{
+	visual_change_queued = false;
+
+	if (pending_visual_change.pending != 0) {
+		ensure_visual_change_idle_handler();
+	}
+}
+

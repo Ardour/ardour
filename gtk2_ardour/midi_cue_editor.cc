@@ -190,6 +190,8 @@ MidiCueEditor::build_canvas ()
 	_canvas->signal_event().connect (sigc::mem_fun (*this, &MidiCueEditor::canvas_pre_event), false);
 	dynamic_cast<ArdourCanvas::GtkCanvas*>(_canvas)->use_nsglview (UIConfiguration::instance().get_nsgl_view_mode () == NSGLHiRes);
 
+	_canvas->PreRender.connect (sigc::mem_fun(*this, &EditingContext::pre_render));
+
 	/* scroll group for items that should not automatically scroll
 	 *  (e.g verbose cursor). It shares the canvas coordinate space.
 	*/
@@ -513,8 +515,6 @@ MidiCueEditor::button_press_handler_2 (ArdourCanvas::Item*, GdkEvent*, ItemType)
 bool
 MidiCueEditor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event, ItemType item_type)
 {
-	bool were_dragging = false;
-
 	if (!Keyboard::is_context_menu_event (&event->button)) {
 
 		/* see if we're finishing a drag */
@@ -526,8 +526,6 @@ MidiCueEditor::button_release_handler (ArdourCanvas::Item* item, GdkEvent* event
 				/* grab dragged, so do nothing else */
 				return true;
 			}
-
-			were_dragging = true;
 		}
 	}
 
@@ -595,11 +593,9 @@ MidiCueEditor::key_press_handler (ArdourCanvas::Item*, GdkEvent* ev, ItemType)
 	switch (ev->key.keyval) {
 	case GDK_d:
 		set_mouse_mode (Editing::MouseDraw);
-		std::cerr << "draw\n";
 		break;
 	case GDK_e:
 		set_mouse_mode (Editing::MouseContent);
-		std::cerr << "content/edit\n";
 		break;
 	}
 
@@ -658,8 +654,6 @@ edit_last_mark_label (std::vector<ArdourCanvas::Ruler::Mark>& marks, const std::
 void
 MidiCueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, samplepos_t leftmost, samplepos_t rightmost, gint /*maxchars*/)
 {
-	std::cerr << "MCE:mgb s = " << _session << std::endl;
-
 	if (_session == 0) {
 		return;
 	}
@@ -1003,13 +997,8 @@ MidiCueEditor::metric_get_bbt (std::vector<ArdourCanvas::Ruler::Mark>& marks, sa
 void
 MidiCueEditor::mouse_mode_toggled (Editing::MouseMode m)
 {
-
-	std::cerr << "MMT " << enum_2_string (m) << std::endl;
-
 	Glib::RefPtr<Gtk::Action>       act  = get_mouse_mode_action (m);
 	Glib::RefPtr<Gtk::ToggleAction> tact = Glib::RefPtr<Gtk::ToggleAction>::cast_dynamic (act);
-
-	std::cerr << "active ? " << tact->get_active() << std::endl;
 
 	if (!tact->get_active()) {
 		/* this was just the notification that the old mode has been
@@ -1406,6 +1395,14 @@ MidiCueEditor::visual_changer (const VisualChange& vc)
 	if (vc.pending != VisualChange::YOrigin) {
 		// XXX update_fixed_rulers ();
 		//  XXX redisplay_grid (true);
+	}
+}
+
+void
+MidiCueEditor::on_samples_per_pixel_changed ()
+{
+	if (view) {
+		view->set_samples_per_pixel (samples_per_pixel);
 	}
 }
 

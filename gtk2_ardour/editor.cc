@@ -4235,16 +4235,6 @@ Editor::queue_visual_videotimeline_update ()
 	ensure_visual_change_idle_handler ();
 }
 
-void
-Editor::pre_render ()
-{
-	visual_change_queued = false;
-
-	if (pending_visual_change.pending != 0) {
-		ensure_visual_change_idle_handler();
-	}
-}
-
 struct EditorOrderTimeAxisSorter {
     bool operator() (const TimeAxisView* a, const TimeAxisView* b) const {
 	    return a->order () < b->order ();

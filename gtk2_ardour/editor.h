@@ -1055,8 +1055,6 @@ private:
 
 	void tie_vertical_scrolling ();
 
-	void pre_render ();
-
 	void visual_changer (const VisualChange&);
 
 	/* track views */

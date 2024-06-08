@@ -123,6 +123,7 @@ class MidiCueEditor : public CueEditor
 	void mouse_mode_toggled (Editing::MouseMode);
 
 	void escape ();
+	void on_samples_per_pixel_changed ();
 
  private:
 	ArdourCanvas::GtkCanvasViewport* _canvas_viewport;

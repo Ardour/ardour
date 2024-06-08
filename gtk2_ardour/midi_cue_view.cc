@@ -114,7 +114,5 @@ MidiCueView::set_samples_per_pixel (double spp)
 
 	EditingContext::TempoMapScope tms (_editing_context, map);
 
-	std::cerr << "for duration of " << duration << " pixels " << _editing_context.duration_to_pixels (duration) << std::endl;
-
 	reset_width_dependent_items (_editing_context.duration_to_pixels (duration));
 }
