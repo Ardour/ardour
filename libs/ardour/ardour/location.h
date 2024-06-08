@@ -297,7 +297,7 @@ public:
 	int set_current (Location *, bool want_lock = true);
 	Location *current () const { return current_location; }
 
-	Location* mark_at (timepos_t const &, timecnt_t const & slop = timecnt_t::zero (Temporal::AudioTime)) const;
+	Location* mark_at (timepos_t const &, timecnt_t const & slop = timecnt_t::zero (Temporal::AudioTime), Location::Flags flags = Location::Flags (0)) const;
 
 	void set_clock_origin (Location*, void *src);
 

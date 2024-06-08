@@ -1467,7 +1467,7 @@ Locations::first_mark_before_flagged (timepos_t const & pos, bool include_specia
 }
 
 Location*
-Locations::mark_at (timepos_t const & pos, timecnt_t const & slop) const
+Locations::mark_at (timepos_t const & pos, timecnt_t const & slop, Location::Flags flags) const
 {
 	Location* closest = 0;
 	timecnt_t mindelta = timecnt_t::max (pos.time_domain());
@@ -1480,7 +1480,7 @@ Locations::mark_at (timepos_t const & pos, timecnt_t const & slop) const
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 
-		if ((*i)->is_mark()) {
+		if ((*i)->is_mark() && (flags && ((*i)->flags() == flags))) {
 			if (pos > (*i)->start()) {
 				delta = (*i)->start().distance (pos);
 			} else {
