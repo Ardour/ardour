@@ -152,6 +152,7 @@ ARDOUR_UI::start_session_load (bool create_new)
 
 	SessionDialog* session_dialog = new SessionDialog (create_new, string(), Config->get_default_session_parent_dir(), string(), true);
 	session_dialog->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &ARDOUR_UI::session_dialog_response_handler), session_dialog));
+	session_dialog->set_position (WIN_POS_CENTER);
 	session_dialog->present ();
 }
 
