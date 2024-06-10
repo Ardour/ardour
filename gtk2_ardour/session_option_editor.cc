@@ -440,7 +440,7 @@ SessionOptionEditor::SessionOptionEditor (Session* s)
 
 	add_option (_("Misc"), new BoolOption (
 				"show-master-bus-comment-on-load",
-				_("Show master bus comment window on session load (once)"),
+				_("Show master bus comment window on session load"),
 				sigc::mem_fun (*_session_config, &SessionConfiguration::get_show_master_bus_comment_on_load),
 				sigc::mem_fun (*_session_config, &SessionConfiguration::set_show_master_bus_comment_on_load)
 				));

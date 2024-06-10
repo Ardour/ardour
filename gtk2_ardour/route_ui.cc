@@ -76,6 +76,7 @@
 #include "keyboard.h"
 #include "mixer_strip.h"
 #include "mixer_ui.h"
+#include "option_editor.h"
 #include "opts.h"
 #include "patch_change_widget.h"
 #include "playlist_selector.h"
@@ -1780,10 +1781,15 @@ RouteUI::open_comment_editor ()
 void
 RouteUI::setup_comment_editor ()
 {
+	const float scale = std::max(1.f, UIConfiguration::instance().get_ui_scale());
+
 	_comment_window = new ArdourWindow (""); // title will be reset to show route
 	_comment_window->set_skip_taskbar_hint (true);
 	_comment_window->signal_hide().connect (sigc::mem_fun(*this, &MixerStrip::comment_editor_done_editing));
-	_comment_window->set_default_size (400, 200);
+	_comment_window->set_default_size (400 * scale, 200 * scale);
+
+	VBox* vbox = manage (new VBox ());
+	vbox->show ();
 
 	_comment_area = manage (new TextView());
 	_comment_area->set_name ("MixerTrackCommentArea");
@@ -1792,7 +1798,23 @@ RouteUI::setup_comment_editor ()
 	_comment_area->get_buffer()->set_text (_route->comment());
 	_comment_area->show ();
 
-	_comment_window->add (*_comment_area);
+	vbox->pack_start (*_comment_area);
+
+	if (is_master ()) {
+		BoolOption* bo = new BoolOption (
+				"show-master-bus-comment-on-load",
+				_("Show this comment on next session load"),
+				sigc::mem_fun (_session->config, &SessionConfiguration::get_show_master_bus_comment_on_load),
+				sigc::mem_fun (_session->config, &SessionConfiguration::set_show_master_bus_comment_on_load)
+				);
+
+		vbox->pack_start (bo->tip_widget (), false, false, 4);
+		bo->tip_widget ().show_all ();
+		bo->parameter_changed ("show-master-bus-comment-on-load");
+		vbox->signal_unrealize().connect ([bo]() { delete bo; });
+		_session->config.ParameterChanged.connect (*this, invalidator (*this), boost::bind (&BoolOption::parameter_changed, bo, _1), gui_context());
+	}
+	_comment_window->add (*vbox);
 }
 
 void
