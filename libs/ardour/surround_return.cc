@@ -514,7 +514,7 @@ SurroundReturn::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_
 						timepos_t end (end_sample + latency);
 						timepos_t next (start_sample + latency - 1);
 
-						while (!content_creation) {
+						while (true) {
 							Evoral::ControlEvent next_event (timepos_t (Temporal::AudioTime), 0.0f);
 							if (!p->find_next_event (next, end, next_event)) {
 								break;
