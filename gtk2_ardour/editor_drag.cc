@@ -6825,7 +6825,7 @@ EditorRubberbandSelectDrag::deselect_things ()
 NoteCreateDrag::NoteCreateDrag (EditingContext& ec, ArdourCanvas::Item* i, MidiView* mv)
 	: Drag (ec, i, Temporal::BeatTime, ec.get_trackview_group())
 	, _midi_view (mv)
-	, _drag_rect (0)
+	, _drag_rect (nullptr)
 {
 	_note[0] = _note[1] = timepos_t (Temporal::BeatTime);
 }
