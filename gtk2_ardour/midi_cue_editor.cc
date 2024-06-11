@@ -140,7 +140,6 @@ MidiCueEditor::setup_toolbar ()
 	Gtk::Alignment* mouse_mode_align = manage (new Gtk::Alignment);
 
 	Glib::RefPtr<Gtk::SizeGroup> mouse_mode_size_group = Gtk::SizeGroup::create (Gtk::SIZE_GROUP_VERTICAL);
-	mouse_mode_size_group->add_widget (mouse_move_button);
 	mouse_mode_size_group->add_widget (mouse_draw_button);
 	mouse_mode_size_group->add_widget (mouse_content_button);
 
@@ -151,7 +150,6 @@ MidiCueEditor::setup_toolbar ()
 	mouse_mode_size_group->add_widget (snap_mode_button);
 
 	mouse_mode_hbox->set_spacing (2);
-	mouse_mode_hbox->pack_start (mouse_move_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_draw_button, false, false);
 	mouse_mode_hbox->pack_start (mouse_content_button, false, false);
 
