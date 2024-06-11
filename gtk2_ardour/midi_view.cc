@@ -3982,7 +3982,8 @@ void
 MidiView::update_ghost_note (double x, double y, uint32_t state)
 {
 	assert (_ghost_note);
-	x = std::max(0.0, x);
+	x = _editing_context.canvas_to_timeline (x);
+	x = std::max (0.0, x);
 
 	const double global_x (x);
 
