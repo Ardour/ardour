@@ -229,7 +229,7 @@ class MidiView : public virtual sigc::trackable
 	 * @param visible will be set to true if the note is within the visible note range, false otherwise.
 	 * @return true iff the note is within the (time) extent of the region.
 	 */
-	bool note_in_region_range(const std::shared_ptr<NoteType> note, bool& visible) const;
+	virtual bool note_in_region_range(const std::shared_ptr<NoteType> note, bool& visible) const;
 	/* Test if a note is withing this region's time range. Return true if so */
 	bool note_in_region_time_range(const std::shared_ptr<NoteType> note) const;
 
@@ -625,6 +625,10 @@ class MidiView : public virtual sigc::trackable
 
 	uint32_t split_tuple;
 	bool     note_splitting;
+	bool    _extensible; /* if true, we can add data beyond the current region/source end */
+
+	bool extensible() const { return _extensible; }
+	void set_extensible (bool yn) { _extensible = yn; }
 
 	void start_note_splitting ();
 	void end_note_splitting ();
