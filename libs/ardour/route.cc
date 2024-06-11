@@ -2898,6 +2898,8 @@ Route::set_state (const XMLNode& node, int version)
 				_volume_control->set_state (*child, version);
 			} else if (control_name == _phase_control->name()) {
 				_phase_control->set_state (*child, version);
+			} else if (control_name == "recenable" && version <= 3002) {
+				/* ignore (now "rec-enable"), handled by Track */
 			} else {
 				Evoral::Parameter p = EventTypeMap::instance().from_symbol (control_name);
 				if (p.type () >= MidiCCAutomation && p.type () < MidiSystemExclusiveAutomation) {

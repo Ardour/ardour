@@ -268,6 +268,11 @@ Track::set_state (const XMLNode& node, int version)
 				_record_safe_control->set_state (*child, version);
 			} else if (name == _monitoring_control->name()) {
 				_monitoring_control->set_state (*child, version);
+			} else if (name == "recenable" && version <= 3002) {
+				float value;
+				if (child->get_property ("value", value)) {
+					_record_enable_control->set_value (value, Controllable::NoGroup);
+				}
 			}
 		}
 	}
