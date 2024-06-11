@@ -156,6 +156,12 @@ EditingContext::EditingContext (std::string const & name)
 		std::cerr << "Set cursor set to " << UIConfiguration::instance().get_icon_set() << std::endl;
 	}
 
+	set_tooltip (draw_length_selector, _("Note Length to Draw (AUTO uses the current Grid setting)"));
+	set_tooltip (draw_velocity_selector, _("Note Velocity to Draw (AUTO uses the nearest note's velocity)"));
+	set_tooltip (draw_channel_selector, _("Note Channel to Draw (AUTO uses the nearest note's channel)"));
+	set_tooltip (grid_type_selector, _("Grid Mode"));
+	set_tooltip (snap_mode_button, _("Snap Mode\n\nRight-click to visit Snap preferences."));
+
 	/* handle escape */
 
 	ARDOUR_UI::instance()->Escape.connect (escape_connection, MISSING_INVALIDATOR, boost::bind (&EditingContext::escape, this), gui_context());
