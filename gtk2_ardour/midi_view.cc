@@ -938,7 +938,6 @@ MidiView::abort_note_diff()
 NoteBase*
 MidiView::find_canvas_note (std::shared_ptr<NoteType> note)
 {
-
 	if (_optimization_iterator != _events.end()) {
 		++_optimization_iterator;
 	}

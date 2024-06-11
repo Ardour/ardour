@@ -93,6 +93,13 @@ static const gchar *_grid_type_strings[] = {
 	0
 };
 
+Editing::GridType EditingContext::_draw_length (GridTypeNone);
+int EditingContext::_draw_velocity (DRAW_VEL_AUTO);
+int EditingContext::_draw_channel (DRAW_CHAN_AUTO);
+sigc::signal<void> EditingContext::DrawLengthChanged;
+sigc::signal<void> EditingContext::DrawVelocityChanged;
+sigc::signal<void> EditingContext::DrawChannelChanged;
+
 EditingContext::EditingContext (std::string const & name)
 	: rubberband_rect (0)
 	, _name (name)
@@ -102,9 +109,6 @@ EditingContext::EditingContext (std::string const & name)
 	, internal_snap_mode (SnapOff)
 	, _grid_type (GridTypeBeat)
 	, _snap_mode (SnapOff)
-	, _draw_length (GridTypeNone)
-	, _draw_velocity (DRAW_VEL_AUTO)
-	, _draw_channel (DRAW_CHAN_AUTO)
 	, _timeline_origin (0.)
 	, _drags (new DragManager (this))
 	, _leftmost_sample (0)
@@ -156,6 +160,10 @@ EditingContext::EditingContext (std::string const & name)
 		std::cerr << "Set cursor set to " << UIConfiguration::instance().get_icon_set() << std::endl;
 	}
 
+	DrawLengthChanged.connect (sigc::mem_fun (*this, &EditingContext::draw_length_changed));
+	DrawVelocityChanged.connect (sigc::mem_fun (*this, &EditingContext::draw_velocity_changed));
+	DrawChannelChanged.connect (sigc::mem_fun (*this, &EditingContext::draw_channel_changed));
+
 	set_tooltip (draw_length_selector, _("Note Length to Draw (AUTO uses the current Grid setting)"));
 	set_tooltip (draw_velocity_selector, _("Note Velocity to Draw (AUTO uses the nearest note's velocity)"));
 	set_tooltip (draw_channel_selector, _("Note Channel to Draw (AUTO uses the nearest note's channel)"));
@@ -194,6 +202,8 @@ EditingContext::set_selected_midi_region_view (MidiRegionView& mrv)
 void
 EditingContext::register_midi_actions (Bindings* midi_bindings)
 {
+	/* These actions are all singletons, defined globally for all EditingContexts */
+
 	if (_midi_actions) {
 		return;
 	}
@@ -279,45 +289,45 @@ EditingContext::register_midi_actions (Bindings* midi_bindings)
 	Glib::RefPtr<ActionGroup> length_actions = ActionManager::create_action_group (midi_bindings, X_("DrawLength"));
 	RadioAction::Group draw_length_group;
 
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv32)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyeighths"),  grid_type_strings[(int)GridTypeBeatDiv28].c_str(), (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv28)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyfourths"),  grid_type_strings[(int)GridTypeBeatDiv24].c_str(), (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv24)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentieths"),     grid_type_strings[(int)GridTypeBeatDiv20].c_str(), (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv20)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-asixteenthbeat"), grid_type_strings[(int)GridTypeBeatDiv16].c_str(), (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv16)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fourteenths"),    grid_type_strings[(int)GridTypeBeatDiv14].c_str(), (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv14)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twelfths"),       grid_type_strings[(int)GridTypeBeatDiv12].c_str(), (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv12)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-tenths"),         grid_type_strings[(int)GridTypeBeatDiv10].c_str(), (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv10)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-eighths"),        grid_type_strings[(int)GridTypeBeatDiv8].c_str(),  (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv8)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sevenths"),       grid_type_strings[(int)GridTypeBeatDiv7].c_str(),  (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv7)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sixths"),         grid_type_strings[(int)GridTypeBeatDiv6].c_str(),  (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv6)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fifths"),         grid_type_strings[(int)GridTypeBeatDiv5].c_str(),  (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv5)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-quarters"),       grid_type_strings[(int)GridTypeBeatDiv4].c_str(),  (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv4)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv3)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeatDiv2)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBeat)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), Editing::GridTypeBar)));
-	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-auto"),           _("Auto"),                                         (sigc::bind (sigc::ptr_fun (&EditingContext::_draw_length_chosen), DRAW_LEN_AUTO)));
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirtyseconds"),  grid_type_strings[(int)GridTypeBeatDiv32].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv32); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyeighths"),  grid_type_strings[(int)GridTypeBeatDiv28].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv28); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentyfourths"),  grid_type_strings[(int)GridTypeBeatDiv24].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv24); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twentieths"),     grid_type_strings[(int)GridTypeBeatDiv20].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv20); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-asixteenthbeat"), grid_type_strings[(int)GridTypeBeatDiv16].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv16); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fourteenths"),    grid_type_strings[(int)GridTypeBeatDiv14].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv14); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-twelfths"),       grid_type_strings[(int)GridTypeBeatDiv12].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv12); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-tenths"),         grid_type_strings[(int)GridTypeBeatDiv10].c_str(), []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv10); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-eighths"),        grid_type_strings[(int)GridTypeBeatDiv8].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv8); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sevenths"),       grid_type_strings[(int)GridTypeBeatDiv7].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv7); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-sixths"),         grid_type_strings[(int)GridTypeBeatDiv6].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv6); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-fifths"),         grid_type_strings[(int)GridTypeBeatDiv5].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv5); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-quarters"),       grid_type_strings[(int)GridTypeBeatDiv4].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv4); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-thirds"),         grid_type_strings[(int)GridTypeBeatDiv3].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv3); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-halves"),         grid_type_strings[(int)GridTypeBeatDiv2].c_str(),  []() { EditingContext::draw_length_action_method (Editing::GridTypeBeatDiv2); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-beat"),           grid_type_strings[(int)GridTypeBeat].c_str(),      []() { EditingContext::draw_length_action_method (Editing::GridTypeBeat); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-bar"),            grid_type_strings[(int)GridTypeBar].c_str(),       []() { EditingContext::draw_length_action_method (Editing::GridTypeBar); });
+	ActionManager::register_radio_action (length_actions, draw_length_group, X_("draw-length-auto"),           _("Auto"),                                         []() { EditingContext::draw_length_action_method (DRAW_LEN_AUTO); });
 
 	Glib::RefPtr<ActionGroup> velocity_actions = ActionManager::create_action_group (midi_bindings, _("Draw Velocity"));
 	RadioAction::Group draw_velocity_group;
-	ActionManager::register_radio_action (velocity_actions, draw_velocity_group, X_("draw-velocity-auto"),  _("Auto"), (sigc::bind (sigc::ptr_fun(&EditingContext::_draw_velocity_chosen), DRAW_VEL_AUTO)));
+	ActionManager::register_radio_action (velocity_actions, draw_velocity_group, X_("draw-velocity-auto"),  _("Auto"), []() { EditingContext::draw_velocity_action_method (DRAW_VEL_AUTO); });
 	for (int i = 1; i <= 127; i++) {
 		char buf[64];
-		sprintf(buf, X_("draw-velocity-%d"), i);
+		snprintf(buf, sizeof (buf), X_("draw-velocity-%d"), i);
 		char vel[64];
 		sprintf(vel, _("Velocity %d"), i);
-		ActionManager::register_radio_action (velocity_actions, draw_velocity_group, buf, vel, (sigc::bind (sigc::ptr_fun(&EditingContext::_draw_velocity_chosen), i)));
+		ActionManager::register_radio_action (velocity_actions, draw_velocity_group, buf, vel, [i]() { EditingContext::draw_velocity_action_method (i); });
 	}
 
 	Glib::RefPtr<ActionGroup> channel_actions = ActionManager::create_action_group (midi_bindings, _("Draw Channel"));
 	RadioAction::Group draw_channel_group;
-	ActionManager::register_radio_action (channel_actions, draw_channel_group, X_("draw-channel-auto"),  _("Auto"), (sigc::bind (sigc::ptr_fun(&EditingContext::_draw_channel_chosen), DRAW_CHAN_AUTO)));
+	ActionManager::register_radio_action (channel_actions, draw_channel_group, X_("draw-channel-auto"),  _("Auto"), []() { EditingContext::draw_channel_action_method (DRAW_CHAN_AUTO); });
 	for (int i = 0; i <= 15; i++) {
 		char buf[64];
-		sprintf(buf, X_("draw-channel-%d"), i+1);
+		snprintf(buf, sizeof (buf), X_("draw-channel-%d"), i+1);
 		char ch[64];
 		sprintf(ch, X_("Channel %d"), i+1);
-		ActionManager::register_radio_action (channel_actions, draw_channel_group, buf, ch, (sigc::bind (sigc::ptr_fun(&EditingContext::_draw_channel_chosen), i)));
+		ActionManager::register_radio_action (channel_actions, draw_channel_group, buf, ch, [i]() { EditingContext::draw_channel_action_method (i); });
 	}
 
 	ActionManager::set_sensitive (_midi_actions, false);
@@ -356,39 +366,6 @@ EditingContext::grid_type_selection_done (GridType gridtype)
 	RefPtr<RadioAction> ract = grid_type_action (gridtype);
 	if (ract && ract->get_active()) {  /*radio-action is already set*/
 		set_grid_to(gridtype);         /*so we must set internal state here*/
-	} else {
-		ract->set_active ();
-	}
-}
-
-void
-EditingContext::draw_length_selection_done (GridType gridtype)
-{
-	RefPtr<RadioAction> ract = draw_length_action (gridtype);
-	if (ract && ract->get_active()) {  /*radio-action is already set*/
-		set_draw_length_to(gridtype);  /*so we must set internal state here*/
-	} else {
-		ract->set_active ();
-	}
-}
-
-void
-EditingContext::draw_velocity_selection_done (int v)
-{
-	RefPtr<RadioAction> ract = draw_velocity_action (v);
-	if (ract && ract->get_active()) {  /*radio-action is already set*/
-		set_draw_velocity_to(v);       /*so we must set internal state here*/
-	} else {
-		ract->set_active ();
-	}
-}
-
-void
-EditingContext::draw_channel_selection_done (int c)
-{
-	RefPtr<RadioAction> ract = draw_channel_action (c);
-	if (ract && ract->get_active()) {  /*radio-action is already set*/
-		set_draw_channel_to(c);        /*so we must set internal state here*/
 	} else {
 		ract->set_active ();
 	}
@@ -598,10 +575,18 @@ EditingContext::grid_type_chosen (GridType type)
 }
 
 void
-EditingContext::_draw_length_chosen (GridType type)
+EditingContext::draw_length_action_method (GridType type)
 {
-	if (current_editing_context()) {
-		current_editing_context()->draw_length_chosen (type);
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<RadioAction> ract = draw_length_action (type);
+
+	if (ract && ract->get_active()) {
+		/* It doesn't really matter which EditingContext executes this */
+		current_editing_context()->set_draw_length_to (type);
 	}
 }
 
@@ -616,15 +601,26 @@ EditingContext::draw_length_chosen (GridType type)
 	RefPtr<RadioAction> ract = draw_length_action (type);
 
 	if (ract && ract->get_active()) {
-		set_draw_length_to (type);
+		/* It doesn't really matter which EditingContext executes this */
+		current_editing_context()->set_draw_length_to (type);
+	} else {
+		ract->set_active();
 	}
 }
 
 void
-EditingContext::_draw_velocity_chosen (int v)
+EditingContext::draw_velocity_action_method (int v)
 {
-	if (current_editing_context()) {
-		current_editing_context()->draw_velocity_action (v);
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<RadioAction> ract = draw_velocity_action (v);
+
+	if (ract && ract->get_active()) {
+		/* It doesn't really matter which EditingContext executes this */
+		current_editing_context()->set_draw_velocity_to (v);
 	}
 }
 
@@ -639,15 +635,26 @@ EditingContext::draw_velocity_chosen (int v)
 	RefPtr<RadioAction> ract = draw_velocity_action (v);
 
 	if (ract && ract->get_active()) {
-		set_draw_velocity_to (v);
+		/* It doesn't really matter which EditingContext executes this */
+		current_editing_context()->set_draw_velocity_to (v);
+	} else {
+		ract->set_active();
 	}
 }
 
 void
-EditingContext::_draw_channel_chosen (int c)
+EditingContext::draw_channel_action_method (int c)
 {
-	if (current_editing_context()) {
-		current_editing_context()->draw_channel_chosen (c);
+	/* this is driven by a toggle on a radio group, and so is invoked twice,
+	   once for the item that became inactive and once for the one that became
+	   active.
+	*/
+
+	RefPtr<RadioAction> ract = draw_channel_action (c);
+
+	if (ract && ract->get_active()) {
+		/* It doesn't really matter which EditingContext executes this */
+		current_editing_context()->set_draw_channel_to (c);
 	}
 }
 
@@ -662,7 +669,10 @@ EditingContext::draw_channel_chosen (int c)
 	RefPtr<RadioAction> ract = draw_channel_action (c);
 
 	if (ract && ract->get_active()) {
-		set_draw_channel_to (c);
+		/* It doesn't really matter which EditingContext executes this */
+		current_editing_context()->set_draw_channel_to (c);
+	} else {
+		ract->set_active();
 	}
 }
 
@@ -807,18 +817,20 @@ EditingContext::set_draw_length_to (GridType gt)
 	}
 
 	_draw_length = gt;
+	DrawLengthChanged (); /* EMIT SIGNAL */
+}
 
-	if (DRAW_LEN_AUTO==gt) {
+void
+EditingContext::draw_length_changed ()
+{
+	if (DRAW_LEN_AUTO == _draw_length) {
 		draw_length_selector.set_text (_("Auto"));
 		return;
 	}
 
-	unsigned int grid_index = (unsigned int)gt;
+	unsigned int grid_index = (unsigned int) _draw_length;
 	std::string str = grid_type_strings[grid_index];
-	if (str != draw_length_selector.get_text()) {
-		draw_length_selector.set_text (str);
-	}
-
+	draw_length_selector.set_text (str);
 	instant_save ();
 }
 
@@ -830,37 +842,45 @@ EditingContext::set_draw_velocity_to (int v)
 	}
 
 	_draw_velocity = v;
+	DrawVelocityChanged (); /* EMIT SIGNAL */
+}
 
-	if (DRAW_VEL_AUTO==v) {
+void
+EditingContext::draw_velocity_changed ()
+{
+	if (DRAW_VEL_AUTO == _draw_velocity) {
 		draw_velocity_selector.set_text (_("Auto"));
 		return;
 	}
 
 	char buf[64];
-	sprintf(buf, "%d", v );
+	snprintf (buf, sizeof (buf), "%d", _draw_velocity);
 	draw_velocity_selector.set_text (buf);
-
 	instant_save ();
 }
 
 void
 EditingContext::set_draw_channel_to (int c)
 {
-	if ( c<0 || c>15 ) {  //range-check midi channel
+	if (c < 0 || c > 15)  {  //range-check midi channel
 		c = DRAW_CHAN_AUTO;
 	}
 
 	_draw_channel = c;
+	DrawChannelChanged (); /* EMIT SIGNAL */
+}
 
-	if (DRAW_CHAN_AUTO==c) {
+void
+EditingContext::draw_channel_changed ()
+{
+	if (DRAW_CHAN_AUTO == _draw_channel) {
 		draw_channel_selector.set_text (_("Auto"));
 		return;
 	}
 
 	char buf[64];
-	sprintf(buf, "%d", c+1 );
+	snprintf (buf, sizeof (buf), "%d", _draw_channel+1 );
 	draw_channel_selector.set_text (buf);
-
 	instant_save ();
 }
 
@@ -948,7 +968,7 @@ EditingContext::draw_velocity_action (int v)
 	if (v==DRAW_VEL_AUTO) {
 		action = "draw-velocity-auto";
 	} else if (v>=1 && v<=127) {
-		sprintf(buf, X_("draw-velocity-%d"), v);  //we don't allow drawing a velocity 0;  some synths use that as note-off
+		snprintf (buf, sizeof (buf), X_("draw-velocity-%d"), v);  //we don't allow drawing a velocity 0;  some synths use that as note-off
 		action = buf;
 	}
 
@@ -972,7 +992,7 @@ EditingContext::draw_channel_action (int c)
 	if (c==DRAW_CHAN_AUTO) {
 		action = "draw-channel-auto";
 	} else if (c>=0 && c<=15) {
-		sprintf(buf, X_("draw-channel-%d"), c+1);
+		snprintf (buf, sizeof (buf), X_("draw-channel-%d"), c+1);
 		action = buf;
 	}
 
@@ -1131,13 +1151,13 @@ EditingContext::build_draw_midi_menus ()
 	using namespace Menu_Helpers;
 
 	/* Note-Length when drawing */
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeat],      sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_length_selection_done), (GridType) GridTypeBeat)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv2],  sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_length_selection_done), (GridType) GridTypeBeatDiv2)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv4],  sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_length_selection_done), (GridType) GridTypeBeatDiv4)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv8],  sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_length_selection_done), (GridType) GridTypeBeatDiv8)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv16], sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_length_selection_done), (GridType) GridTypeBeatDiv16)));
-	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv32], sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_length_selection_done), (GridType) GridTypeBeatDiv32)));
-	draw_length_selector.AddMenuElem (MenuElem (_("Auto"), sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_length_selection_done), (GridType) DRAW_LEN_AUTO)));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeat],     []() { EditingContext::draw_length_chosen ((GridType) GridTypeBeat); }));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv2], []() { EditingContext::draw_length_chosen ((GridType) GridTypeBeatDiv2); }));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv4], []() { EditingContext::draw_length_chosen ((GridType) GridTypeBeatDiv4); }));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv8], []() { EditingContext::draw_length_chosen ((GridType) GridTypeBeatDiv8); }));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv16],[]() { EditingContext::draw_length_chosen ((GridType) GridTypeBeatDiv16); }));
+	draw_length_selector.AddMenuElem (MenuElem (grid_type_strings[(int)GridTypeBeatDiv32],[]() { EditingContext::draw_length_chosen ((GridType) GridTypeBeatDiv32); }));
+	draw_length_selector.AddMenuElem (MenuElem (_("Auto"),[]() { EditingContext::draw_length_chosen ((GridType) DRAW_LEN_AUTO); }));
 
 	{
 		std::vector<std::string> draw_grid_type_strings = {grid_type_strings.begin() + GridTypeBeat, grid_type_strings.begin() + GridTypeBeatDiv32 + 1};
@@ -1146,21 +1166,22 @@ EditingContext::build_draw_midi_menus ()
 	}
 
 	/* Note-Velocity when drawing */
-	draw_velocity_selector.AddMenuElem (MenuElem ("8",    sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_velocity_selection_done), 8)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("32",   sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_velocity_selection_done), 32)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("64",   sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_velocity_selection_done), 64)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("82",   sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_velocity_selection_done), 82)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("100",  sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_velocity_selection_done), 100)));
-	draw_velocity_selector.AddMenuElem (MenuElem ("127",  sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_velocity_selection_done), 127)));
-	draw_velocity_selector.AddMenuElem (MenuElem (_("Auto"), sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_velocity_selection_done), DRAW_VEL_AUTO)));
+
+	draw_velocity_selector.AddMenuElem (MenuElem ("8",   []() { EditingContext::draw_velocity_chosen (8); }));
+	draw_velocity_selector.AddMenuElem (MenuElem ("32",  []() { EditingContext::draw_velocity_chosen (32); }));
+	draw_velocity_selector.AddMenuElem (MenuElem ("64",  []() { EditingContext::draw_velocity_chosen (64); }));
+	draw_velocity_selector.AddMenuElem (MenuElem ("82",  []() { EditingContext::draw_velocity_chosen (82); }));
+	draw_velocity_selector.AddMenuElem (MenuElem ("100", []() { EditingContext::draw_velocity_chosen (100); }));
+	draw_velocity_selector.AddMenuElem (MenuElem ("127", []() { EditingContext::draw_velocity_chosen (127); }));
+	draw_velocity_selector.AddMenuElem (MenuElem (_("Auto"),[]() { EditingContext::draw_velocity_chosen (DRAW_VEL_AUTO); }));
 
 	/* Note-Channel when drawing */
 	for (int i = 0; i<= 15; i++) {
 		char buf[64];
 		sprintf(buf, "%d", i+1);
-		draw_channel_selector.AddMenuElem (MenuElem (buf, sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_channel_selection_done), i)));
+		draw_channel_selector.AddMenuElem (MenuElem (buf, [i]() { EditingContext::draw_channel_chosen (i); }));
 	}
-	draw_channel_selector.AddMenuElem (MenuElem (_("Auto"), sigc::bind (sigc::mem_fun(*this, &EditingContext::draw_channel_selection_done), DRAW_CHAN_AUTO)));
+	draw_channel_selector.AddMenuElem (MenuElem (_("Auto"),[]() { EditingContext::draw_channel_chosen (DRAW_CHAN_AUTO); }));
 }
 
 bool
@@ -2253,19 +2274,19 @@ EditingContext::set_common_editing_state (XMLNode const & node)
 	if (!node.get_property ("draw-length", draw_length)) {
 		draw_length = _draw_length;
 	}
-	draw_length_selection_done (draw_length);
+	draw_length_chosen (draw_length);
 
 	int draw_vel;
 	if (!node.get_property ("draw-velocity", draw_vel)) {
 		draw_vel = _draw_velocity;
 	}
-	draw_velocity_selection_done (draw_vel);
+	draw_velocity_chosen (draw_vel);
 
 	int draw_chan;
 	if (!node.get_property ("draw-channel", draw_chan)) {
 		draw_chan = DRAW_CHAN_AUTO;
 	}
-	draw_channel_selection_done (draw_chan);
+	draw_channel_chosen (draw_chan);
 
 	SnapMode sm;
 	if (node.get_property ("snap-mode", sm)) {
@@ -2337,8 +2358,6 @@ EditingContext::snap_mode_button_clicked (GdkEventButton* ev)
 void
 EditingContext::register_grid_actions ()
 {
-	std::cerr << "REGISTER GRID ACTIONS for " << editor_name() << std::endl;
-
 	ActionManager::register_action (editor_actions, X_("GridChoice"), _("Snap & Grid"));
 
 	RadioAction::Group snap_mode_group;

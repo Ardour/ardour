@@ -397,17 +397,32 @@ public:
 	Glib::RefPtr<Gtk::RadioAction> grid_type_action (Editing::GridType);
 	Glib::RefPtr<Gtk::RadioAction> snap_mode_action (Editing::SnapMode);
 
-	Glib::RefPtr<Gtk::RadioAction> draw_length_action (Editing::GridType);
-	Glib::RefPtr<Gtk::RadioAction> draw_velocity_action (int);
-	Glib::RefPtr<Gtk::RadioAction> draw_channel_action (int);
+	static Glib::RefPtr<Gtk::RadioAction> draw_length_action (Editing::GridType);
+	static Glib::RefPtr<Gtk::RadioAction> draw_velocity_action (int);
+	static Glib::RefPtr<Gtk::RadioAction> draw_channel_action (int);
 
 	Editing::GridType _grid_type;
 	Editing::SnapMode _snap_mode;
 
-	Editing::GridType _draw_length;
+	static Editing::GridType _draw_length;
+	static int _draw_velocity;
+	static int _draw_channel;
 
-	int _draw_velocity;
-	int _draw_channel;
+	static void draw_channel_chosen (int);
+	static void draw_velocity_chosen (int);
+	static void draw_length_chosen (Editing::GridType);
+
+	static void draw_channel_action_method (int);
+	static void draw_velocity_action_method (int);
+	static void draw_length_action_method (Editing::GridType);
+
+	static sigc::signal<void> DrawLengthChanged;
+	static sigc::signal<void> DrawVelocityChanged;
+	static sigc::signal<void> DrawChannelChanged;
+
+	void draw_length_changed ();
+	void draw_velocity_changed ();
+	void draw_channel_changed ();
 
 	double _timeline_origin;
 
@@ -423,18 +438,6 @@ public:
 	void snap_mode_selection_done (Editing::SnapMode);
 	void snap_mode_chosen (Editing::SnapMode);
 	void grid_type_chosen (Editing::GridType);
-
-	void draw_length_selection_done (Editing::GridType);
-	void draw_length_chosen (Editing::GridType);
-	static void _draw_length_chosen (Editing::GridType);
-
-	void draw_velocity_selection_done (int);
-	void draw_velocity_chosen (int);
-	static void _draw_velocity_chosen (int);
-
-	void draw_channel_selection_done (int);
-	void draw_channel_chosen (int);
-	static void _draw_channel_chosen (int);
 
 	DragManager* _drags;
 
