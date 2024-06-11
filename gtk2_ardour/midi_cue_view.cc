@@ -53,6 +53,8 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	event_rect->set_outline (false);
 
 	_note_group->raise_to_top ();
+
+	set_extensible (true);
 }
 
 void

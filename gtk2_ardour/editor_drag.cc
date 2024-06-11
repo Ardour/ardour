@@ -6852,11 +6852,11 @@ NoteCreateDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 
 	const timepos_t       pos = _drags->current_pointer_time ();
 	Temporal::Beats       aligned_beats (round_to_grid (pos, event));
-	const Temporal::Beats grid_beats (_midi_view->get_draw_length_beats (pos));
+	const Temporal::Beats min_length (0, Temporal::Beats::PPQN/ 128);
 
 	_note[0] = timepos_t (aligned_beats);
 	/* minimum initial length is grid beats */
-	_note[1] = _note[0] + timepos_t (grid_beats);
+	_note[1] = _note[0] + timepos_t (min_length);
 
 	/* the note positions we've just computed are in absolute beats, but
 	 * the drag rect is a member of the region view group, so we need
@@ -6882,7 +6882,7 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 	const timepos_t pos = _drags->current_pointer_time ();
 
 	/* when the user clicks and starts a drag to define the note's length, require notes to be at least |this| long */
-	const Temporal::Beats min_length (_midi_view->get_draw_length_beats (pos));
+	const Temporal::Beats min_length (0, Temporal::Beats::PPQN / 128);
 	Temporal::Beats       aligned_beats = round_to_grid (pos, event);
 
 	_note[1] = std::max (aligned_beats, (_note[0].beats () + min_length));
@@ -6899,12 +6899,18 @@ NoteCreateDrag::motion (GdkEvent* event, bool)
 void
 NoteCreateDrag::finished (GdkEvent* ev, bool had_movement)
 {
-	/* we create a note even if there was no movement */
+	Beats length;
 
 	/* Compute start within region, rather than absolute time start */
 
 	Beats const start  = _midi_view->midi_region ()->absolute_time_to_region_beats (min (_note[0], _note[1]));
-	Beats       length = max (Beats (0, 1), (_note[0].distance (_note[1]).abs ().beats ()));
+
+	if (!had_movement) {
+		/* we create a note even if there was no movement */
+		length = _midi_view->get_draw_length_beats (_note[0]);
+	} else {
+		length = _note[0].distance (_note[1]).abs ().beats ();
+	}
 
 	/* create_note_at() implements UNDO for us */
 	if (UIConfiguration::instance().get_select_last_drawn_note_only()) {

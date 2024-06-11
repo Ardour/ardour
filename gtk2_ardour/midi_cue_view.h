@@ -41,6 +41,10 @@ class MidiCueView : public MidiView
 	void set_height (double);
 
 	ArdourCanvas::Item* drag_group() const;
+	bool note_in_region_range (const std::shared_ptr<NoteType> note, bool& visible) const {
+		visible = true;
+		return true;
+	}
 
   protected:
 	bool scroll (GdkEventScroll* ev);

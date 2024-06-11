@@ -135,6 +135,7 @@ MidiView::MidiView (std::shared_ptr<MidiTrack> mt,
 	, _mouse_changed_selection (false)
 	, split_tuple (0)
 	, note_splitting (false)
+	, _extensible (false)
 {
 	init ();
 }
@@ -1095,7 +1096,7 @@ MidiView::model_changed()
 		std::shared_ptr<NoteType> note (*n);
 		bool visible;
 
-		if (note_in_region_range (note, visible)) {
+		if (_extensible || note_in_region_range (note, visible)) {
 			if (!empty_when_starting && (cne = find_canvas_note (note)) != 0) {
 				cne->validate ();
 				if (visible) {
@@ -1648,7 +1649,7 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 
 		const Temporal::Beats source_end ((_midi_region->start() + _midi_region->length()).beats());
 
-		if (note->end_time() > source_end) {
+		if (!_extensible && note->end_time() > source_end) {
 			note_end = timepos_t (source_end);
 		}
 
