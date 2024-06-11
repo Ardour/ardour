@@ -1692,8 +1692,8 @@ MidiView::update_sustained (Note* ev, bool update_ghost_regions)
 
 	// Update color in case velocity has changed
 	const uint32_t base_col = ev->base_color();
-	ev->set_fill_color(base_col);
-	ev->set_outline_color(ev->calculate_outline(base_col, ev->selected()));
+	ev->set_fill_color (base_col);
+	ev->set_outline_color (ev->calculate_outline(base_col, ev->selected()));
 }
 
 void
