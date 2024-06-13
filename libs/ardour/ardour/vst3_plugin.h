@@ -100,9 +100,6 @@ public:
 	IPlugView* view ();
 	void       close_view ();
 	void       update_contoller_param ();
-#if SMTG_OS_LINUX
-	void set_runloop (Linux::IRunLoop*);
-#endif
 	PBD::Signal2<void, int, int> OnResizeView;
 
 	tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE;
@@ -279,10 +276,6 @@ private:
 	Vst::IEditController* _controller;
 	IPlugView*            _view;
 
-#if SMTG_OS_LINUX
-	Linux::IRunLoop* _run_loop;
-#endif
-
 	IPtr<Vst::IAudioProcessor> _processor;
 	Vst::ProcessContext        _context;
 	Glib::Threads::Mutex       _process_lock;
@@ -442,9 +435,6 @@ public:
 	Steinberg::IPlugView* view ();
 	void                  close_view ();
 	void                  update_contoller_param ();
-#if SMTG_OS_LINUX
-	void set_runloop (Steinberg::Linux::IRunLoop*);
-#endif
 
 	PBD::Signal2<void, int, int> OnResizeView;
 

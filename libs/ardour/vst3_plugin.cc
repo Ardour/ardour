@@ -507,14 +507,6 @@ VST3Plugin::close_view ()
 	_plug->close_view ();
 }
 
-#if SMTG_OS_LINUX
-void
-VST3Plugin::set_runloop (Steinberg::Linux::IRunLoop* run_loop)
-{
-	return _plug->set_runloop (run_loop);
-}
-#endif
-
 void
 VST3Plugin::update_contoller_param ()
 {
@@ -1308,9 +1300,6 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 	, _component (0)
 	, _controller (0)
 	, _view (0)
-#if SMTG_OS_LINUX
-	, _run_loop (0)
-#endif
 	, _is_loading_state (false)
 	, _is_processing (false)
 	, _block_size (0)
@@ -3389,14 +3378,6 @@ VST3PI::has_editor () const
 	}
 	return rv;
 }
-
-#if SMTG_OS_LINUX
-void
-VST3PI::set_runloop (Linux::IRunLoop* run_loop)
-{
-	_run_loop = run_loop;
-}
-#endif
 
 tresult
 VST3PI::resizeView (IPlugView* view, ViewRect* new_size)
