@@ -1277,6 +1277,14 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 		throw failed_constructor ();
 	}
 
+#if SMTG_OS_LINUX
+	IPtr<IPluginFactory3> factory3 = FUnknownPtr<IPluginFactory3> (factory);
+	if (factory3) {
+		Vst::IComponentHandler* ctx = this;
+		factory3->setHostContext ((FUnknown*) ctx);
+	}
+#endif
+
 	/* prepare process context */
 	memset (&_context, 0, sizeof (Vst::ProcessContext));
 
