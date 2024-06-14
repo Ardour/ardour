@@ -916,6 +916,10 @@ Session::request_stop (bool abort, bool clear_state, TransportRequestSource orig
 void
 Session::request_locate (samplepos_t target_sample, bool force, LocateTransportDisposition ltd, TransportRequestSource origin)
 {
+	if (actively_recording ()) {
+		return;
+	}
+
 	if (synced_to_engine()) {
 		_engine.transport_locate (target_sample);
 		return;
