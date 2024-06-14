@@ -189,6 +189,7 @@ public:
 	LilvNode* lv2_ControlPort;
 	LilvNode* lv2_InputPort;
 	LilvNode* lv2_OutputPort;
+	LilvNode* lv2_CvPort;
 	LilvNode* lv2_designation;
 	LilvNode* lv2_enumeration;
 	LilvNode* lv2_freewheeling;
@@ -840,7 +841,7 @@ LV2Plugin::init(const void* c_plugin, samplecnt_t rate)
 			lilv_nodes_free(min_size_v);
 			lilv_nodes_free(buffer_types);
 			lilv_nodes_free(atom_supports);
-		} else {
+		} else if (!lilv_port_is_a(_impl->plugin, port, _world.lv2_CvPort)) {
 			error << string_compose(
 				"LV2: \"%1\" port %2 has no known data type",
 				lilv_node_as_string(_impl->name), i) << endmsg;
@@ -3517,6 +3518,7 @@ LV2World::LV2World()
 	lv2_ControlPort    = lilv_new_uri(world, LILV_URI_CONTROL_PORT);
 	lv2_InputPort      = lilv_new_uri(world, LILV_URI_INPUT_PORT);
 	lv2_OutputPort     = lilv_new_uri(world, LILV_URI_OUTPUT_PORT);
+	lv2_CvPort         = lilv_new_uri(world, LILV_URI_CV_PORT);
 	lv2_inPlaceBroken  = lilv_new_uri(world, LV2_CORE__inPlaceBroken);
 	lv2_isSideChain    = lilv_new_uri(world, LV2_CORE_PREFIX "isSideChain");
 	lv2_index          = lilv_new_uri(world, LV2_CORE__index);
@@ -3619,6 +3621,7 @@ LV2World::~LV2World()
 	lilv_node_free(lv2_integer);
 	lilv_node_free(lv2_isSideChain);
 	lilv_node_free(lv2_inPlaceBroken);
+	lilv_node_free(lv2_CvPort);
 	lilv_node_free(lv2_OutputPort);
 	lilv_node_free(lv2_InputPort);
 	lilv_node_free(lv2_ControlPort);
@@ -3974,7 +3977,12 @@ LV2PluginInfo::discover (boost::function <void (std::string const&, PluginScanLo
 					count_ctrl_out++;
 				}
 			}
-			else if (!lilv_port_is_a (p, port, world.lv2_AudioPort)) {
+			else if (lilv_port_is_a(p, port, world.lv2_CvPort)) {
+				LilvNode* name = lilv_port_get_name(p, port);
+				cb (uri, PluginScanLogEntry::OK, string_compose (_("Port %1 ('%2') has CV data type. It is not usable in Ardour."), i, lilv_node_as_string (name)), false);
+				lilv_node_free(name);
+			}
+			else if (!lilv_port_is_a(p, port, world.lv2_AudioPort)) {
 				err = 1;
 				LilvNode* name = lilv_port_get_name(p, port);
 				cb (uri, PluginScanLogEntry::Error, string_compose (_("Port %1 ('%2') has no known data type"), i, lilv_node_as_string (name)), false);
