@@ -744,7 +744,8 @@ Session::disconnect_port_for_rewire (std::string const& port) const
 	bool keep_ctrl = mpf & MidiPortControl;
 
 	vector<string> port_connections;
-	AudioEngine::instance()->get_connections (port, port_connections);
+	AudioEngine::instance()->get_connections (port, port_connections, false);
+
 	for (vector<string>::iterator i = port_connections.begin(); i != port_connections.end(); ++i) {
 
 		/* test if (*i) is a control-surface input port */
