@@ -351,6 +351,14 @@ MixerStrip::init ()
 	global_vpacker.pack_start (output_button, Gtk::PACK_SHRINK);
 	global_vpacker.pack_start (_comment_button, Gtk::PACK_SHRINK);
 
+	midi_input_enable_button.set_size_request (PX_SCALE(19), PX_SCALE(19));
+	midi_input_enable_button.set_name ("midi input button");
+	midi_input_enable_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
+	midi_input_enable_button.set_icon (ArdourIcon::DinMidi);
+	midi_input_enable_button.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_press), false);
+	midi_input_enable_button.signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_release), false);
+	set_tooltip (midi_input_enable_button, _("Enable/Disable MIDI input"));
+
 #ifndef MIXBUS
 	//add a spacer underneath the master bus;
 	//this fills the area that is taken up by the scrollbar on the tracks;
@@ -684,15 +692,9 @@ MixerStrip::set_route (std::shared_ptr<Route> rt)
 	update_trim_control();
 
 	if (is_midi_track()) {
-
-		midi_input_enable_button.set_size_request (PX_SCALE(19), PX_SCALE(19));
-		midi_input_enable_button.set_name ("midi input button");
-		midi_input_enable_button.set_elements ((ArdourButton::Element)(ArdourButton::Edge|ArdourButton::Body|ArdourButton::VectorIcon));
-		midi_input_enable_button.set_icon (ArdourIcon::DinMidi);
-		midi_input_enable_button.signal_button_press_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_press), false);
-		midi_input_enable_button.signal_button_release_event().connect (sigc::mem_fun (*this, &MixerStrip::input_active_button_release), false);
-		set_tooltip (midi_input_enable_button, _("Enable/Disable MIDI input"));
-		input_button_box.pack_start (midi_input_enable_button, false, false);
+		if (!midi_input_enable_button.get_parent()) {
+			input_button_box.pack_start (midi_input_enable_button, false, false);
+		}
 
 		/* get current state */
 		midi_input_status_changed ();
