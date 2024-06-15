@@ -749,7 +749,7 @@ PortManager::physically_connected (const string& port_name)
 }
 
 int
-PortManager::get_connections (const string& port_name, std::vector<std::string>& s)
+PortManager::get_connections (const string& port_name, std::vector<std::string>& s, bool process_context_safe)
 {
 	if (!_backend) {
 		s.clear ();
@@ -763,7 +763,7 @@ PortManager::get_connections (const string& port_name, std::vector<std::string>&
 		return 0;
 	}
 
-	return _backend->get_connections (handle, s);
+	return _backend->get_connections (handle, s, process_context_safe);
 }
 
 int

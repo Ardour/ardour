@@ -151,7 +151,7 @@ public:
 
 	bool connected (const std::string&);
 	bool physically_connected (const std::string&);
-	int  get_connections (const std::string&, std::vector<std::string>&);
+	int  get_connections (const std::string&, std::vector<std::string>&, bool process_context_safe = true);
 
 	/* Naming */
 
