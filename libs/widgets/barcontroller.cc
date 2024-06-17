@@ -87,7 +87,7 @@ BarController::on_button_press_event (GdkEventButton* ev)
 	} else {
 		_switch_on_release = false;
 	}
-	return false;
+	return 1 == ev->button;
 }
 
 bool
