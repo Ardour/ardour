@@ -35,6 +35,7 @@
 #include "ardour/filesystem_paths.h"
 #include "ardour/plugin_manager.h"
 #include "ardour/route.h"
+#include "ardour/search_paths.h"
 #include "ardour/session.h"
 #include "ardour/system_exec.h"
 
@@ -1207,11 +1208,16 @@ LuaInstance::~LuaInstance ()
 }
 
 static std::string
-lua_read_script (std::string const& fn)
+lua_read_script (std::string fn)
 {
 	if (!UIConfiguration::instance().get_update_action_scripts ()) {
 		return "";
 	}
+
+	if (Glib::path_is_absolute (fn) && !Glib::file_test (fn, Glib::FILE_TEST_EXISTS | Glib::FILE_TEST_IS_REGULAR)) {
+		PBD::find_file (lua_search_path (), Glib::path_get_basename (fn), fn);
+	}
+
 	try {
 		return Glib::file_get_contents (fn);
 	} catch (...) { }
