@@ -264,6 +264,10 @@ EditorSections::selection_changed ()
 		return;
 	}
 
+	if (PublicEditor::instance ().drag_active ()) {
+		return;
+	}
+
 	TreeView::Selection::ListHandle_Path rows = _view.get_selection ()->get_selected_rows ();
 	if (rows.empty ()) {
 		return;
