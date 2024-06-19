@@ -303,8 +303,6 @@ MixerStrip::init ()
 	trim_control.set_tooltip_prefix (_("Trim: "));
 	trim_control.set_name ("trim knob");
 	trim_control.set_no_show_all (true);
-	trim_control.StartGesture.connect(sigc::mem_fun(*this, &MixerStrip::trim_start_touch));
-	trim_control.StopGesture.connect(sigc::mem_fun(*this, &MixerStrip::trim_end_touch));
 	input_button_box.pack_start (trim_control, false, false);
 
 	global_vpacker.set_no_show_all ();
@@ -517,45 +515,6 @@ MixerStrip::update_trim_control ()
 		trim_control.hide ();
 		std::shared_ptr<Controllable> none;
 		trim_control.set_controllable (none);
-	}
-}
-
-void
-MixerStrip::trim_start_touch (int)
-{
-	assert (_route && _session);
-
-	if (!route()->trim() || !route()->trim()->active() || route()->n_inputs().n_audio() <= 0) {
-		return;
-	}
-
-	std::shared_ptr<AutomationControl> control (route()->trim()->gain_control());
-
-	StripableList sl;
-	_session->selection ().get_stripables_for_op (sl, _route, &RouteGroup::is_gain);
-
-	_touch_control_group.reset (new GainControlGroup (TrimAutomation));
-	_touch_control_group->set_mode (ControlGroup::Relative);
-	_touch_control_group->fill_from_stripable_list (sl, control->parameter());
-
-	control->start_touch (timepos_t (_session->transport_sample()));
-}
-
-void
-MixerStrip::trim_end_touch (int)
-{
-	assert (_route && _session);
-
-	if (route()->trim() && route()->trim()->active() && route()->n_inputs().n_audio() > 0) {
-
-		std::shared_ptr<AutomationControl> control (route()->trim()->gain_control());
-
-		control->stop_touch (timepos_t (_session->transport_sample()));
-
-		if (_touch_control_group) {
-			_touch_control_group->pop_all ();
-			_touch_control_group.reset ();
-		}
 	}
 }
 
