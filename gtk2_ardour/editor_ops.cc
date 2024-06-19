@@ -9205,6 +9205,7 @@ Editor::lock ()
 	delete _main_menu_disabler;
 	_main_menu_disabler = new MainMenuDisabler;
 
+	lock_dialog->set_position (Gtk::WIN_POS_CENTER);
 	lock_dialog->present ();
 
 	lock_dialog->get_window()->set_decorations (Gdk::WMDecoration (0));
