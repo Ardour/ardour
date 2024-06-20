@@ -16,6 +16,8 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+#include <regex>
+
 #include "pbd/gstdio_compat.h"
 #include <glibmm.h>
 
@@ -1452,6 +1454,8 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 	int32 n_params = _controller->getParameterCount ();
 	DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3 parameter count: %1\n", n_params));
 
+	std::regex dpf_midi_CC ("MIDI Ch. [0-9]+ CC [0-9]+");
+
 	for (int32 i = 0; i < n_params; ++i) {
 		Vst::ParameterInfo pi;
 		if (_controller->getParameterInfo (i, pi) != kResultTrue) {
@@ -1463,6 +1467,10 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 		}
 		if (tchar_to_utf8 (pi.title).find ("MIDI CC ") != std::string::npos) {
 			/* Some JUCE plugins add 16 * 128 automatable MIDI CC parameters */
+			continue;
+		}
+		if (std::regex_search (tchar_to_utf8 (pi.title), dpf_midi_CC)) {
+			/* DPF plugins also adds automatable MIDI CC parameters "MIDI Ch. %d CC %d" */
 			continue;
 		}
 
