@@ -86,6 +86,8 @@ public:
 	void raise_to_top ();
 	void lower_to_bottom ();
 
+	void drag_start ();
+
 	bool set_position(Temporal::timepos_t const & pos, void* src, double* delta = 0);
 
 	virtual void show_region_editor ();
@@ -237,6 +239,8 @@ private:
 	bool _xrun_markers_visible;
 
 	void update_cue_markers ();
+
+	void clear_coverage_frame ();
 
 	struct ViewCueMarker {
 		ArdourMarker* view_marker;

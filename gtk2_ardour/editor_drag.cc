@@ -2795,11 +2795,12 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 				rv->trim_front_starting ();
 			}
 
+			rv->drag_start ();
+
 			AudioRegionView* const arv = dynamic_cast<AudioRegionView*> (rv);
 
 			if (arv) {
 				arv->temporarily_hide_envelope ();
-				arv->drag_start ();
 			}
 
 			std::shared_ptr<Playlist> pl = rv->region ()->playlist ();

@@ -963,17 +963,28 @@ RegionView::set_height (double h)
 	}
 }
 
+void
+RegionView::drag_start ()
+{
+	clear_coverage_frame ();
+}
+
+void
+RegionView::clear_coverage_frame ()
+{
+	for (auto& i : _coverage_frame) {
+		delete i;
+	}
+	_coverage_frame.clear ();
+}
+
 /** Remove old coverage frame and make new ones, if we're in a LayerDisplay mode
  *  which uses them. */
 void
 RegionView::update_coverage_frame (LayerDisplay d)
 {
 	/* remove old coverage frame */
-	for (auto& i : _coverage_frame) {
-		delete i;
-	}
-
-	_coverage_frame.clear ();
+	clear_coverage_frame ();
 
 	if (d != Stacked) {
 		/* don't do coverage frame unless we're in stacked mode */
