@@ -1486,6 +1486,7 @@ VST3PI::VST3PI (std::shared_ptr<ARDOUR::VST3PluginModule> m, std::string unique_
 
 		if (pi.flags & /*Vst::ParameterInfo::kIsHidden*/ (1 << 4)) {
 			p.label = X_("hidden");
+			p.automatable = 0;
 		}
 
 #if 1 // if (host_editing == 0) // FUnknownPtr<Vst::IEditControllerHostEditing> host_editing (_controller);
