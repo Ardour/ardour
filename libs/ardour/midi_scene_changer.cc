@@ -355,8 +355,8 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 		}
 	}
 
-	loc->set_scene_change (std::shared_ptr<MIDISceneChange> (msc));
-	loc->set_name( string_compose(_("scene [%1]"), 1+bank*128+(program & 0x7f)));
+	loc->set_scene_change (msc);
+	loc->set_name (string_compose(_("scene [%1]"), 1 + ((bank*128)+(program & 0x7f))));
 
 	/* this will generate a "changed" signal to be emitted by locations,
 	   and we will call ::gather() to update our list of MIDI events.
