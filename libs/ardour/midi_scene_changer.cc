@@ -340,7 +340,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 		bank = std::dynamic_pointer_cast<AsyncMIDIPort>(input_port)->channel (channel)->bank();
 	}
 
-	MIDISceneChange* msc =new MIDISceneChange (channel, bank, program & 0x7f);
+	std::shared_ptr<MIDISceneChange> msc (new MIDISceneChange (channel, bank, program & 0x7f));
 
 	/* check for identical scene change so we can re-use color, if any */
 
