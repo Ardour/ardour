@@ -335,7 +335,7 @@ MIDISceneChanger::program_change_input (MIDI::Parser& parser, MIDI::byte program
 		new_mark = true;
 	}
 
-	int bank = -1;
+	int bank = 0;
 	if (have_seen_bank_changes) {
 		bank = std::dynamic_pointer_cast<AsyncMIDIPort>(input_port)->channel (channel)->bank();
 	}
