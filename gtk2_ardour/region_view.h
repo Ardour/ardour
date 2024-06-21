@@ -86,8 +86,6 @@ public:
 	void raise_to_top ();
 	void lower_to_bottom ();
 
-	void drag_start ();
-
 	bool set_position(Temporal::timepos_t const & pos, void* src, double* delta = 0);
 
 	virtual void show_region_editor ();

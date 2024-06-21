@@ -2876,10 +2876,13 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 		}
 	}
 
+	bool changed = false;
+
 	switch (_operation) {
 		case StartTrim:
 			for (list<DraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {
-				bool changed = i->view->trim_front (timepos_t (i->initial_position) + dt, non_overlap_trim);
+				changed = i->view->trim_front (timepos_t (i->initial_position) + dt, non_overlap_trim);
+
 
 				if (changed && _preserve_fade_anchor) {
 					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
@@ -2900,7 +2903,7 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 
 		case EndTrim:
 			for (list<DraggingView>::iterator i = _views.begin (); i != _views.end (); ++i) {
-				bool changed = i->view->trim_end (timepos_t (i->initial_end) + dt, non_overlap_trim);
+				changed = i->view->trim_end (timepos_t (i->initial_end) + dt, non_overlap_trim);
 
 				if (changed && _preserve_fade_anchor) {
 					AudioRegionView* arv = dynamic_cast<AudioRegionView*> (i->view);
@@ -2916,6 +2919,13 @@ TrimDrag::motion (GdkEvent* event, bool first_move)
 				}
 			}
 			break;
+	}
+
+	if (changed) {
+		for (list<DraggingView>::const_iterator i = _views.begin (); i != _views.end (); ++i) {
+			StreamView* sv = i->view->get_time_axis_view ().view ();
+			sv->update_coverage_frame ();
+		}
 	}
 
 	switch (_operation) {

@@ -964,12 +964,6 @@ RegionView::set_height (double h)
 }
 
 void
-RegionView::drag_start ()
-{
-	clear_coverage_frame ();
-}
-
-void
 RegionView::clear_coverage_frame ()
 {
 	for (auto& i : _coverage_frame) {

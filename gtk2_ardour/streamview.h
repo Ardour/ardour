@@ -126,6 +126,7 @@ public:
 	void check_record_layers (std::shared_ptr<ARDOUR::Region>, ARDOUR::samplepos_t);
 
 	virtual void playlist_layered (std::weak_ptr<ARDOUR::Track>);
+	void update_coverage_frame ();
 
 	sigc::signal<void, RegionView*> RegionViewAdded;
 	sigc::signal<void> RegionViewRemoved;
@@ -193,9 +194,6 @@ protected:
 	*/
 	samplepos_t _new_rec_layer_time;
 	void setup_new_rec_layer_time (std::shared_ptr<ARDOUR::Region>);
-
-private:
-	void update_coverage_frame ();
 };
 
 #endif /* __ardour_streamview_h__ */
