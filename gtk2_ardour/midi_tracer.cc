@@ -166,6 +166,10 @@ MidiTracer::ports_changed ()
 
 	_midi_port_list->clear ();
 
+	if (!AudioEngine::instance()->running()) {
+		return;
+	}
+
 	PortManager::PortList pl;
 	AudioEngine::instance()->get_ports (DataType::MIDI, pl);
 
