@@ -102,14 +102,23 @@ MIDISceneChanger::rt_deliver (MidiBuffer& mbuf, samplepos_t when, std::shared_pt
 
 	uint8_t buf[4];
 	size_t cnt;
+	std::shared_ptr<AsyncMIDIPort> aport = std::dynamic_pointer_cast<AsyncMIDIPort>(output_port);
+	MIDI::Parser* parser (aport ? aport->parser() : output_port->trace_parser().get());
 
 	MIDIOutputActivity (); /* EMIT SIGNAL */
 
 	if ((cnt = msc->get_bank_msb_message (buf, sizeof (buf))) > 0) {
 		mbuf.push_back (when, Evoral::MIDI_EVENT, cnt, buf);
 
+		for (size_t n = 0; parser && n < cnt; ++n) {
+			parser->scanner (buf[n]);
+		}
+
 		if ((cnt = msc->get_bank_lsb_message (buf, sizeof (buf))) > 0) {
 			mbuf.push_back (when, Evoral::MIDI_EVENT, cnt, buf);
+			for (size_t n = 0; parser && n < cnt; ++n) {
+				parser->scanner (buf[n]);
+			}
 		}
 
 		last_delivered_bank = msc->bank();
@@ -117,7 +126,9 @@ MIDISceneChanger::rt_deliver (MidiBuffer& mbuf, samplepos_t when, std::shared_pt
 
 	if ((cnt = msc->get_program_message (buf, sizeof (buf))) > 0) {
 		mbuf.push_back (when, Evoral::MIDI_EVENT, cnt, buf);
-
+		for (size_t n = 0; parser && n < cnt; ++n) {
+			parser->scanner (buf[n]);
+		}
 		last_delivered_program = msc->program();
 	}
 }
