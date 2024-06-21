@@ -231,9 +231,14 @@ AsyncMIDIPort::write (const MIDI::byte * msg, size_t msglen, MIDI::timestamp_t t
 		 * delivered
 		 */
 
+		std::shared_ptr<MIDI::Parser> tp (trace_parser());
+
 		_parser->set_timestamp (AudioEngine::instance()->sample_time() + timestamp);
 		for (size_t n = 0; n < msglen; ++n) {
 			_parser->scanner (msg[n]);
+			if (tp) {
+				tp->scanner (msg[n]);
+			}
 		}
 
 		Glib::Threads::Mutex::Lock lm (output_fifo_lock);
