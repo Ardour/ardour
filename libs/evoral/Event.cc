@@ -94,34 +94,35 @@ Event<Timestamp>::Event(EventType      type,
 }
 
 template<typename Timestamp>
-Event<Timestamp>::Event(const Event& copy, bool owns_buf)
-	: _type(copy._type)
-	, _time(copy._time)
-	, _size(copy._size)
-	, _buf(copy._buf)
+Event<Timestamp>::Event (const Event& copy, bool owns_buf)
+	: _type (copy._type)
+	, _time (copy._time)
+	, _size (copy._size)
+	, _buf (copy._buf)
 	, _id (next_event_id ())
-	, _owns_buf(owns_buf)
+	, _owns_buf (owns_buf)
 {
 	if (owns_buf) {
-		_buf = (uint8_t*)malloc(_size);
+		_buf = (uint8_t*) malloc (_size);
 		if (copy._buf) {
-			memcpy(_buf, copy._buf, _size);
+			memcpy (_buf, copy._buf, _size);
 		} else {
-			memset(_buf, 0, _size);
+			memset (_buf, 0, _size);
 		}
 	}
 }
 
 template<typename Timestamp>
-Event<Timestamp>::~Event() {
+Event<Timestamp>::~Event()
+{
 	if (_owns_buf) {
-		free(_buf);
+		free (_buf);
 	}
 }
 
 template<typename Timestamp>
 void
-Event<Timestamp>::assign(const Event& other)
+Event<Timestamp>::assign (const Event& other)
 {
 	_id = other._id;
 	_type = other._type;
