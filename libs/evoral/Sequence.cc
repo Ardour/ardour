@@ -534,9 +534,7 @@ Sequence<Time>::Sequence(const Sequence<Time>& other)
  */
 template<typename Time>
 bool
-Sequence<Time>::control_to_midi_event(
-	std::shared_ptr< Event<Time> >& ev,
-	const ControlIterator&            iter) const
+Sequence<Time>::control_to_midi_event(std::shared_ptr< Event<Time> >& ev, const ControlIterator& iter) const
 {
 	assert(iter.list.get());
 

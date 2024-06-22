@@ -1431,7 +1431,7 @@ MidiModel::edit_lock()
 	 * if playback resumes at the same point after the edit.
 	 */
 	source_lock = new Source::WriterLock (_midi_source.mutex());
-	_midi_source.invalidate(*source_lock);
+	_midi_source.invalidate (*source_lock);
 	return WriteLock (new WriteLockImpl (source_lock, _lock, _control_lock));
 }
 
