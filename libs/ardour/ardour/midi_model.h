@@ -48,6 +48,7 @@ namespace ARDOUR {
 
 class Session;
 class MidiSource;
+class MidiStateTracker;
 
 /** This is a higher level (than MidiBuffer) model of MIDI data, with separate
  * representations for notes (instead of just unassociated note on/off events)
@@ -61,6 +62,7 @@ public:
 	typedef Temporal::Beats TimeType;
 
 	MidiModel (MidiSource&);
+	MidiModel (MidiModel const & other, MidiSource&);
 
 	class LIBARDOUR_API DiffCommand : public PBD::Command {
 	public:
@@ -323,6 +325,8 @@ public:
 
 	void insert_silence_at_start (TimeType);
 	void transpose (NoteDiffCommand *, const NotePtr, int);
+
+	void track_state (timepos_t const & when, MidiStateTracker&) const;
 
   protected:
 	int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);

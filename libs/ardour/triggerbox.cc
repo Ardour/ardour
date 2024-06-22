@@ -2205,12 +2205,21 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	, pending_rt_midibuffer (nullptr)
 	, old_rt_midibuffer (nullptr)
 	, map_change (false)
+	, model_swap (nullptr)
 {
 	_channel_map.assign (16, -1);
 }
 
 MIDITrigger::~MIDITrigger ()
 {
+}
+
+void
+MIDITrigger::check_edit_swap (bool playing)
+{
+	if (model_swap != nullptr) {
+		std::cerr << "EDIT!\n";
+	}
 }
 
 void
@@ -2779,6 +2788,13 @@ MIDITrigger::tempo_map_changed ()
 	map_change = true;
 }
 
+void
+MIDITrigger::swap_model (std::shared_ptr<ARDOUR::MidiModel> model, ARDOUR::MidiModel::DiffCommand* cmd)
+{
+	ModelSwap* ms = new ModelSwap (model, cmd);
+	model_swap = ms;
+}
+
 template<bool in_process_context>
 pframes_t
 MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample,
@@ -2787,11 +2803,14 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 {
 	assert (rt_midibuffer);
 
-	MidiBuffer* mb (in_process_context? &bufs.get_midi (0) : 0);
+	MidiBuffer* mb (in_process_context? &bufs.get_midi (0) : nullptr);
 	typedef Evoral::Event<MidiModel::TimeType> MidiEvent;
 	const timepos_t region_start_time = _region->start();
 	const Temporal::Beats region_start = region_start_time.beats();
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
+
+	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (_region);
+	assert (mr);
 
 	last_event_samples = end_sample;
 
@@ -3145,7 +3164,7 @@ TriggerBox::send_property_change (PBD::PropertyChange pc)
 
 TriggerBox::TriggerBox (Session& s, DataType dt)
 	: Processor (s, _("TriggerBox"), Temporal::TimeDomainProvider (Temporal::BeatTime))
-	, tracker (dt == DataType::MIDI ? new MidiStateTracker : 0)
+	, tracker (dt == DataType::MIDI ? new MidiStateTracker : nullptr)
 	, _data_type (dt)
 	, _order (-1)
 	, explicit_queue (64)
@@ -4829,6 +4848,10 @@ void
 TriggerBox::process_requests (BufferSet& bufs)
 {
 	Request* r;
+
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+		all_triggers[n]->check_edit_swap (_currently_playing == all_triggers[n]);
+	}
 
 	while (requests.read (&r, 1) == 1) {
 		process_request (bufs, r);
