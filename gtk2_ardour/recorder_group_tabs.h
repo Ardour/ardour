@@ -34,7 +34,7 @@ private:
 	ARDOUR::RouteList routes_for_tab (Tab const*) const;
 	ARDOUR::RouteList selected_routes () const;
 	double            primary_coordinate (double, double) const;
-	double            extent () const;
+	double            visible_extent () const;
 
 	RecorderUI* _recorder;
 };

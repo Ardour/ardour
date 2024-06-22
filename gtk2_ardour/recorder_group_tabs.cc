@@ -39,7 +39,7 @@ RecorderGroupTabs::primary_coordinate (double, double y) const
 }
 
 double
-RecorderGroupTabs::extent () const
+RecorderGroupTabs::visible_extent () const
 {
 	return get_height ();
 }

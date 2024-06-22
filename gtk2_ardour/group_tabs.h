@@ -65,6 +65,9 @@ public:
 
 	void run_new_group_dialog (ARDOUR::RouteList const *, bool with_master);
 
+	void set_extent (double);
+	void set_offset (double);
+
 	static void set_group_color (ARDOUR::RouteGroup *, uint32_t);
 	static std::string group_gui_id (ARDOUR::RouteGroup *);
 	static uint32_t group_color (ARDOUR::RouteGroup *);
@@ -79,6 +82,15 @@ protected:
 		uint32_t color; ///< color
 		ARDOUR::RouteGroup* group; ///< route group
 	};
+
+	/** @return Size of the widget along the primary axis */
+	virtual double visible_extent () const = 0;
+
+	/** @return Size of all contained strips along the primary axis */
+	double extent () const { return _extent < 0 ? visible_extent () : _extent; }
+
+	/** @return Scroll offset of \ref visible_extent along the primary axis */
+	double offset () const { return _offset; }
 
 private:
 	static void emit_gui_changed_for_members (std::shared_ptr<ARDOUR::RouteList>);
@@ -102,10 +114,6 @@ private:
 	virtual double primary_coordinate (double x, double y) const = 0;
 
 	virtual ARDOUR::RouteList routes_for_tab (Tab const * t) const = 0;
-
-	/** @return Size of the widget along the primary axis */
-	virtual double extent () const = 0;
-
 	virtual void add_menu_items (Gtk::Menu *, ARDOUR::RouteGroup *) {}
 	virtual ARDOUR::RouteList selected_routes () const = 0;
 
@@ -162,6 +170,8 @@ private:
 	double _drag_min; ///< minimum position for drag
 	double _drag_max; ///< maximum position for drag
 	double _drag_first; ///< first mouse pointer position during drag
+	double _extent;
+	double _offset;
 
 	/** colors that have been used for new route group tabs */
 	static std::list<Gdk::Color> _used_colors;

@@ -347,11 +347,6 @@ Editor::reset_controls_layout_width ()
 	req = edit_controls_vbox.size_request ();
 	w = req.width;
 
-	if (_group_tabs->get_visible()) {
-		req = _group_tabs->size_request ();
-		w += req.width;
-	}
-
 	/* the controls layout has no horizontal scrolling, its visible
 	   width is always equal to the total width of its contents.
 	*/
@@ -381,6 +376,7 @@ Editor::reset_controls_layout_height (int32_t h)
 
 	controls_layout.property_height() = h;
 
+	_group_tabs->set_extent (h);
 }
 
 bool
@@ -1016,6 +1012,7 @@ Editor::tie_vertical_scrolling ()
 		_region_peak_cursor->hide ();
 		_summary->set_overlays_dirty ();
 	}
+	_group_tabs->set_offset (vertical_adjustment.get_value ());
 }
 
 void

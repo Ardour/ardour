@@ -52,6 +52,8 @@ GroupTabs::GroupTabs ()
 	: _menu (0)
 	, _dragging (0)
 	, _dragging_new_tab (0)
+	, _extent (-1)
+	, _offset (0)
 {
 	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &GroupTabs::queue_draw));
@@ -82,6 +84,27 @@ GroupTabs::set_session (Session* s)
 	}
 }
 
+void
+GroupTabs::set_extent (double extent)
+{
+	if (_extent == extent) {
+		return;
+	}
+	_extent = extent;
+	set_dirty ();
+	queue_draw ();
+}
+
+void
+GroupTabs::set_offset (double offset)
+{
+	if (_offset == offset) {
+		return;
+	}
+	_offset = offset;
+	set_dirty ();
+	queue_draw ();
+}
 
 /** Handle a size request.
  *  @param req GTK requisition

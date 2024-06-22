@@ -87,6 +87,13 @@ EditorGroupTabs::compute_tabs () const
 void
 EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab)
 {
+	const double from = tab.from - offset ();
+	const double to   = tab.to   - offset ();
+
+	if (from > visible_extent () || to < 0) {
+		return;
+	}
+
 	double const arc_radius = get_width();
 	double r, g, b, a;
 
@@ -99,14 +106,14 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab)
 	a = 1.0;
 
 	cairo_set_source_rgba (cr, r, g, b, a);
-	cairo_move_to (cr, 0, tab.from + arc_radius);
-	cairo_arc (cr, get_width(), tab.from + arc_radius, arc_radius, M_PI, 3 * M_PI / 2);
-	cairo_line_to (cr, get_width(), tab.to);
-	cairo_arc (cr, get_width(), tab.to - arc_radius, arc_radius, M_PI / 2, M_PI);
-	cairo_line_to (cr, 0, tab.from + arc_radius);
+	cairo_move_to (cr, 0, from + arc_radius);
+	cairo_arc (cr, get_width(), from + arc_radius, arc_radius, M_PI, 3 * M_PI / 2);
+	cairo_line_to (cr, get_width(), to);
+	cairo_arc (cr, get_width(), to - arc_radius, arc_radius, M_PI / 2, M_PI);
+	cairo_line_to (cr, 0, from + arc_radius);
 	cairo_fill (cr);
 
-	if (tab.group && (tab.to - tab.from) > arc_radius) {
+	if (tab.group && (to - from) > arc_radius) {
 		int text_width, text_height;
 
 		Glib::RefPtr<Pango::Layout> layout;
@@ -114,10 +121,10 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab)
 		layout->set_ellipsize (Pango::ELLIPSIZE_MIDDLE);
 
 		layout->set_text (tab.group->name ());
-		layout->set_width ((tab.to - tab.from - arc_radius) * PANGO_SCALE);
+		layout->set_width ((to - from - arc_radius) * PANGO_SCALE);
 		layout->get_pixel_size (text_width, text_height);
 
-		cairo_move_to (cr, (get_width() - text_height) * .5, (text_width + tab.to + tab.from) * .5);
+		cairo_move_to (cr, (get_width() - text_height) * .5, (text_width + to + from) * .5);
 
 		Gtkmm2ext::Color c = Gtkmm2ext::contrasting_text_color (Gtkmm2ext::rgba_to_color (r, g, b, a));
 		Gtkmm2ext::color_to_rgba (c, r, g, b, a);
@@ -133,7 +140,7 @@ EditorGroupTabs::draw_tab (cairo_t* cr, Tab const & tab)
 double
 EditorGroupTabs::primary_coordinate (double, double y) const
 {
-	return y;
+	return y + offset ();
 }
 
 RouteList
