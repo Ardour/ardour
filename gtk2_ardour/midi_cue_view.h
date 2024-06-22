@@ -51,6 +51,9 @@ class MidiCueView : public MidiView
 
 	std::shared_ptr<Temporal::TempoMap const> tempo_map;
 	ArdourCanvas::Rectangle* event_rect;
+
+	std::shared_ptr<ARDOUR::MidiModel> model_to_edit() const;
+	void post_edit (std::shared_ptr<ARDOUR::MidiModel>, ARDOUR::MidiModel::NoteDiffCommand const &);
 };
 
 
