@@ -907,10 +907,13 @@ MidiView::apply_note_diff (bool as_subcommand, bool was_copy)
 		}
 	}
 
+	std::shared_ptr<MidiModel> op_model = model_to_edit ();
+
 	{
 		PBD::Unwinder<bool> puw (_select_all_notes_after_add, true);
 		/*note that we don't use as_commit here, because that would BEGIN a new undo record; we already have one underway*/
-		_model->apply_diff_command_as_subcommand (*_editing_context.session(), _note_diff_command);
+		op_model->apply_diff_command_as_subcommand (*_editing_context.session(), _note_diff_command);
+		post_edit (op_model, *_note_diff_command);
 	}
 
 	if (!as_subcommand) {
@@ -924,6 +927,7 @@ MidiView::apply_note_diff (bool as_subcommand, bool was_copy)
 	}
 
 	_marked_for_velocity.clear();
+
 }
 
 void

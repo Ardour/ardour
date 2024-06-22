@@ -118,3 +118,16 @@ MidiCueView::set_samples_per_pixel (double spp)
 
 	reset_width_dependent_items (_editing_context.duration_to_pixels (duration));
 }
+
+
+std::shared_ptr<ARDOUR::MidiModel>
+MidiCueView::model_to_edit() const
+{
+	return std::shared_ptr<ARDOUR::MidiModel> (new ARDOUR::MidiModel (*_model, *(midi_region()->midi_source())));
+}
+
+void
+MidiCueView::post_edit (std::shared_ptr<ARDOUR::MidiModel> edited_model, ARDOUR::MidiModel::NoteDiffCommand const & diff_command)
+{
+	_model = edited_model;
+}
