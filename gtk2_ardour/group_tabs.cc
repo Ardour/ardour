@@ -121,7 +121,6 @@ GroupTabs::set_extent (double extent)
 	}
 	_extent = extent;
 	set_dirty ();
-	queue_draw ();
 }
 
 void
@@ -132,7 +131,6 @@ GroupTabs::set_offset (double offset)
 	}
 	_offset = offset;
 	set_dirty ();
-	queue_draw ();
 }
 
 /** Handle a size request.
@@ -240,7 +238,6 @@ GroupTabs::on_motion_notify_event (GdkEventMotion* ev)
 	_dragging->to = min (_dragging->to, _drag_max);
 
 	set_dirty ();
-	queue_draw ();
 
 	gdk_event_request_motions(ev);
 
@@ -295,7 +292,6 @@ GroupTabs::on_button_release_event (GdkEventButton*)
 		}
 
 		set_dirty ();
-		queue_draw ();
 	}
 
 	_dragging = 0;
