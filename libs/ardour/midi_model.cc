@@ -66,6 +66,14 @@ MidiModel::MidiModel (MidiSource& s)
 	_midi_source.AutomationStateChanged.connect_same_thread (_midi_source_connections, boost::bind (&MidiModel::source_automation_state_changed, this, _1, _2));
 }
 
+MidiModel::MidiModel (MidiModel const & other, MidiSource & s)
+	: AutomatableSequence<TimeType> (other)
+	, _midi_source (s)
+{
+	_midi_source.InterpolationChanged.connect_same_thread (_midi_source_connections, boost::bind (&MidiModel::source_interpolation_changed, this, _1, _2));
+	_midi_source.AutomationStateChanged.connect_same_thread (_midi_source_connections, boost::bind (&MidiModel::source_automation_state_changed, this, _1, _2));
+}
+
 MidiModel::NoteDiffCommand*
 MidiModel::new_note_diff_command (const string& name)
 {
@@ -1424,7 +1432,7 @@ MidiModel::find_sysex (Evoral::event_id_t sysex_id)
 MidiModel::WriteLock
 MidiModel::edit_lock()
 {
-	Source::WriterLock*   source_lock = 0;
+	Source::WriterLock*   source_lock = nullptr;
 
 	/* Take source lock and invalidate iterator to release its lock on model.
 	 * Add currently active notes to _active_notes so we can restore them
@@ -1865,4 +1873,12 @@ MidiModel::rebuild_from_mapping_stash (Temporal::Beats const & src_pos_offset)
 	apply_diff_command_as_subcommand (_midi_source.session(), pc_cmd);
 
 	tempo_mapping_stash.clear ();
+}
+
+void
+MidiModel::track_state (timepos_t const & when, MidiStateTracker& mst) const
+{
+	for (auto const & ev : *this) {
+		mst.track (ev.buffer());
+	}
 }

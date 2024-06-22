@@ -497,6 +497,7 @@ void
 MidiSource::set_model (const WriterLock& lock, std::shared_ptr<MidiModel> m)
 {
 	_model = m;
+	std::cerr << "Source " << name() << " switched to model " << _model << std::endl;
 	invalidate(lock);
 	ModelChanged (); /* EMIT SIGNAL */
 }
