@@ -141,6 +141,9 @@ private:
 	bool on_motion_notify_event (GdkEventMotion *);
 	bool on_button_release_event (GdkEventButton *);
 
+	bool on_enter_notify_event (GdkEventCrossing*);
+	bool on_leave_notify_event (GdkEventCrossing*);
+
 	Tab * click_to_tab (double, std::list<Tab>::iterator *, std::list<Tab>::iterator *);
 
 	void route_group_property_changed (ARDOUR::RouteGroup *);
@@ -172,6 +175,8 @@ private:
 	double _drag_first; ///< first mouse pointer position during drag
 	double _extent;
 	double _offset;
+
+	bool  _hovering;
 
 	/** colors that have been used for new route group tabs */
 	static std::list<Gdk::Color> _used_colors;

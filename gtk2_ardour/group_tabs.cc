@@ -54,8 +54,9 @@ GroupTabs::GroupTabs ()
 	, _dragging_new_tab (0)
 	, _extent (-1)
 	, _offset (0)
+	, _hovering (false)
 {
-	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK);
+	add_events (Gdk::BUTTON_PRESS_MASK|Gdk::BUTTON_RELEASE_MASK|Gdk::POINTER_MOTION_MASK|Gdk::ENTER_NOTIFY_MASK|Gdk::LEAVE_NOTIFY_MASK);
 	UIConfiguration::instance().ColorsChanged.connect (sigc::mem_fun (*this, &GroupTabs::queue_draw));
 }
 
@@ -82,6 +83,34 @@ GroupTabs::set_session (Session* s)
 
 		_session->route_group_removed.connect (_session_connections, invalidator (*this), boost::bind (&GroupTabs::set_dirty, this, (cairo_rectangle_t*)0), gui_context());
 	}
+}
+
+bool
+GroupTabs::on_enter_notify_event (GdkEventCrossing* ev)
+{
+	_hovering = true;
+
+	if (UIConfiguration::instance ().get_widget_prelight ()) {
+		queue_draw ();
+	}
+
+	get_window()->set_cursor (Gdk::Cursor (offset () != primary_coordinate (1, 0) ? Gdk::SB_H_DOUBLE_ARROW : Gdk::SB_V_DOUBLE_ARROW));
+
+	return CairoWidget::on_enter_notify_event (ev);
+}
+
+bool
+GroupTabs::on_leave_notify_event (GdkEventCrossing* ev)
+{
+	_hovering = false;
+
+	if (UIConfiguration::instance ().get_widget_prelight ()) {
+		queue_draw ();
+	}
+
+	get_window()->set_cursor ();
+
+	return CairoWidget::on_leave_notify_event (ev);
 }
 
 void
@@ -305,6 +334,12 @@ GroupTabs::render (Cairo::RefPtr<Cairo::Context> const& ctx, cairo_rectangle_t*)
 
 	for (list<Tab>::const_iterator i = _tabs.begin(); i != _tabs.end(); ++i) {
 		draw_tab (cr, *i);
+	}
+
+	if (_hovering && UIConfiguration::instance ().get_widget_prelight ()) {
+		cairo_set_source_rgba (cr, 1, 1, 1, 0.12);
+		cairo_rectangle (cr, 0, 0, get_width(), get_height());
+		cairo_fill (cr);
 	}
 }
 
