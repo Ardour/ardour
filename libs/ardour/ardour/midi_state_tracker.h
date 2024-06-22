@@ -60,7 +60,7 @@ public:
 
 	bool empty() const { return _on == 0; }
 	uint16_t on() const { return _on; }
-	bool active (uint8_t note, uint8_t channel) {
+	bool active (uint8_t note, uint8_t channel) const {
 		return _active_notes[(channel*128)+note] > 0;
 	}
 
@@ -89,6 +89,7 @@ class LIBARDOUR_API MidiStateTracker : public MidiNoteTracker
 
 	void flush (MidiBuffer&, samplepos_t, bool reset);
 	void resolve_state (Evoral::EventSink<samplepos_t>&, Evoral::EventList<samplepos_t> const&, samplepos_t time, bool reset = true);
+	void resolve_diff (MidiStateTracker const& other, Evoral::EventSink<samplepos_t>&, samplepos_t time, bool reset = true);
 
   private:
 	uint8_t  program[16];
