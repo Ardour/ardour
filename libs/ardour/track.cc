@@ -314,11 +314,12 @@ bool
 Track::can_record()
 {
 	bool will_record = true;
-	for (PortSet::iterator i = _input->ports().begin(); i != _input->ports().end() && will_record; ++i) {
-		if (!i->connected())
+	for (auto const& p : *_input->ports()) {
+		if (!p->connected()) {
 			will_record = false;
+			break;
+		}
 	}
-
 	return will_record;
 }
 
@@ -513,16 +514,16 @@ Track::playlist ()
 void
 Track::request_input_monitoring (bool m)
 {
-	for (PortSet::iterator i = _input->ports().begin(); i != _input->ports().end(); ++i) {
-		AudioEngine::instance()->request_input_monitoring ((*i)->name(), m);
+	for (auto const& p : *_input->ports()) {
+		AudioEngine::instance()->request_input_monitoring (p->name(), m);
 	}
 }
 
 void
 Track::ensure_input_monitoring (bool m)
 {
-	for (PortSet::iterator i = _input->ports().begin(); i != _input->ports().end(); ++i) {
-		AudioEngine::instance()->ensure_input_monitoring ((*i)->name(), m);
+	for (auto const& p : *_input->ports()) {
+		AudioEngine::instance()->ensure_input_monitoring (p->name(), m);
 	}
 }
 

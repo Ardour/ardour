@@ -271,14 +271,14 @@ IOPlug::set_public_latency (bool playback)
 	/* Step1: set private port latency
 	 * compare to Route::set_private_port_latencies, Route::update_port_latencies
 	 */
-	PortSet& from = playback ? _output->ports () : _input->ports ();
-	PortSet& to   = playback ? _input->ports () : _output->ports ();
+	std::shared_ptr<PortSet> from = playback ? _output->ports () : _input->ports ();
+	std::shared_ptr<PortSet> to   = playback ? _input->ports () : _output->ports ();
 
 	LatencyRange all_connections;
 	all_connections.min = ~((pframes_t) 0);
 	all_connections.max = 0;
 
-	for (auto const& p : from) {
+	for (auto const& p : *from) {
 		if (!p->connected ()) {
 			continue;
 		}
@@ -294,14 +294,14 @@ IOPlug::set_public_latency (bool playback)
 	}
 
 	/* set the "from" port latencies to the max/min range of all their connections */
-	for (auto const& p : from) {
+	for (auto const& p : *from) {
 		p->set_private_latency_range (all_connections, playback);
 	}
 
 	all_connections.min += _plugin_signal_latency;
 	all_connections.max += _plugin_signal_latency;
 
-	for (auto const& p : to) {
+	for (auto const& p : *to) {
 		p->set_private_latency_range (all_connections, playback);
 	}
 

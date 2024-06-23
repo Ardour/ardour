@@ -102,7 +102,7 @@ BufferSet::clear()
  *  XXX: this *is* called in a process context; I'm not sure quite what `should not' means above.
  */
 void
-BufferSet::attach_buffers (PortSet& ports)
+BufferSet::attach_buffers (PortSet const& ports)
 {
 	const ChanCount& count (ports.count());
 
