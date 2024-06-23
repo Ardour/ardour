@@ -31,6 +31,7 @@
 
 #include "pbd/fastlog.h"
 #include "pbd/undo.h"
+#include "pbd/rcu.h"
 #include "pbd/statefuldestructible.h"
 #include "pbd/controllable.h"
 #include "pbd/enum_convert.h"
@@ -131,8 +132,8 @@ public:
 	void set_public_port_latencies (samplecnt_t value, bool playback) const;
 	void set_public_port_latency_from_connections () const;
 
-	PortSet& ports() { return _ports; }
-	const PortSet& ports() const { return _ports; }
+	std::shared_ptr<PortSet> ports ();
+	std::shared_ptr<PortSet const> ports () const;
 
 	bool has_port (std::shared_ptr<Port>) const;
 
@@ -205,8 +206,7 @@ protected:
 	bool     _sendish;
 
 private:
-	mutable Glib::Threads::RWLock _io_lock;
-	PortSet   _ports;
+	SerializedRCUManager<PortSet> _ports;
 
 	void reestablish_port_subscriptions ();
 	PBD::ScopedConnectionList _port_connections;

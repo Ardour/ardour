@@ -5180,10 +5180,10 @@ Route::set_private_port_latencies (bool playback) const
 
 	if (playback) {
 		/* playback: propagate latency from "outside the route" to outputs to inputs */
-		return update_port_latencies (_output->ports (), _input->ports (), true, own_latency);
+		return update_port_latencies (*_output->ports (), *_input->ports (), true, own_latency);
 	} else {
 		/* capture: propagate latency from "outside the route" to inputs to outputs */
-		return update_port_latencies (_input->ports (), _output->ports (), false, own_latency);
+		return update_port_latencies (*_input->ports (), *_output->ports (), false, own_latency);
 	}
 }
 

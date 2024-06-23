@@ -71,8 +71,8 @@ public:
 
 	void clear();
 
-	void attach_buffers (PortSet& ports);
-	void get_backend_port_addresses (PortSet &, samplecnt_t);
+	void attach_buffers (PortSet const& ports);
+	void get_backend_port_addresses (PortSet&, samplecnt_t);
 
 	/* the capacity here is a size_t and has a different interpretation depending
 	   on the DataType of the buffers. for audio, its a sample count. for MIDI

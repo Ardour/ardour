@@ -1179,8 +1179,8 @@ Session::add_monitor_section ()
 		_master_out->output()->disconnect (this);
 
 		for (uint32_t n = 0; n < limit; ++n) {
-			std::shared_ptr<AudioPort> p = _monitor_out->input()->ports().nth_audio_port (n);
-			std::shared_ptr<AudioPort> o = _master_out->output()->ports().nth_audio_port (n);
+			std::shared_ptr<AudioPort> p = _monitor_out->input()->ports()->nth_audio_port (n);
+			std::shared_ptr<AudioPort> o = _master_out->output()->ports()->nth_audio_port (n);
 
 			if (o) {
 				string connect_to = o->name();
@@ -1246,7 +1246,7 @@ Session::auto_connect_monitor_bus ()
 
 			for (uint32_t n = 0; n < limit; ++n) {
 
-				std::shared_ptr<Port> p = _monitor_out->output()->ports().port(DataType::AUDIO, n);
+				std::shared_ptr<Port> p = _monitor_out->output()->ports()->port(DataType::AUDIO, n);
 				string connect_to;
 				if (outputs[DataType::AUDIO].size() > (n % mod)) {
 					connect_to = outputs[DataType::AUDIO][n % mod];
@@ -1326,8 +1326,8 @@ Session::reset_monitor_section ()
 	_monitor_out->output()->ensure_io (mon_chn, false, this);
 
 	for (uint32_t n = 0; n < limit; ++n) {
-		std::shared_ptr<AudioPort> p = _monitor_out->input()->ports().nth_audio_port (n);
-		std::shared_ptr<AudioPort> o = _master_out->output()->ports().nth_audio_port (n);
+		std::shared_ptr<AudioPort> p = _monitor_out->input()->ports()->nth_audio_port (n);
+		std::shared_ptr<AudioPort> o = _master_out->output()->ports()->nth_audio_port (n);
 
 		if (o) {
 			string connect_to = o->name();
@@ -1372,7 +1372,7 @@ Session::reset_monitor_section ()
 
 				for (uint32_t n = 0; n < limit; ++n) {
 
-					std::shared_ptr<Port> p = _monitor_out->output()->ports().port(DataType::AUDIO, n);
+					std::shared_ptr<Port> p = _monitor_out->output()->ports()->port(DataType::AUDIO, n);
 					string connect_to;
 					if (outputs[DataType::AUDIO].size() > (n % mod)) {
 						connect_to = outputs[DataType::AUDIO][n % mod];
@@ -3447,7 +3447,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 				if (!io) {
 					continue;
 				}
-				for (auto const& p : io->ports()) {
+				for (auto const& p : *io->ports()) {
 					p->reconnect ();
 				}
 			}
@@ -3456,7 +3456,7 @@ Session::new_route_from_template (uint32_t how_many, PresentationInfo::order_t i
 				if (!io) {
 					continue;
 				}
-				for (auto const& p : io->ports()) {
+				for (auto const& p : *io->ports()) {
 					p->reconnect ();
 				}
 			}
@@ -4388,9 +4388,7 @@ Session::set_exclusive_input_active (std::shared_ptr<RouteList> rl, bool onoff, 
 
 	for (RouteList::iterator rt = rl->begin(); rt != rl->end(); ++rt) {
 
-		PortSet& ps ((*rt)->input()->ports());
-
-		for (PortSet::iterator p = ps.begin(); p != ps.end(); ++p) {
+		for (auto const& p : *(*rt)->input()->ports()) {
 			p->get_connections (connections);
 		}
 
@@ -7791,7 +7789,7 @@ Session::auto_connect (const AutoConnectRequest& ar)
 					port = physinputs[(in_offset.get(*t) + i) % nphysical_in];
 				}
 
-				if (!port.empty() && route->input()->connect (route->input()->ports().port(*t, i), port, this)) {
+				if (!port.empty() && route->input()->connect (route->input()->ports()->port(*t, i), port, this)) {
 					DEBUG_TRACE (DEBUG::PortConnectAuto, "Failed to auto-connect input.");
 					break;
 				}
@@ -7812,12 +7810,12 @@ Session::auto_connect (const AutoConnectRequest& ar)
 				} else if ((*t) == DataType::AUDIO && (Config->get_output_auto_connect() & AutoConnectMaster)) {
 					/* master bus is audio only */
 					if (_master_out && _master_out->n_inputs().get(*t) > 0) {
-						port = _master_out->input()->ports().port(*t,
+						port = _master_out->input()->ports()->port(*t,
 								i % _master_out->input()->n_ports().get(*t))->name();
 					}
 				}
 
-				if (!port.empty() && route->output()->connect (route->output()->ports().port(*t, i), port, this)) {
+				if (!port.empty() && route->output()->connect (route->output()->ports()->port(*t, i), port, this)) {
 					DEBUG_TRACE (DEBUG::PortConnectAuto, "Failed to auto-connect output.");
 					break;
 				}

@@ -475,9 +475,8 @@ MidiTrack::non_realtime_locate (samplepos_t spos)
 void
 MidiTrack::push_midi_input_to_step_edit_ringbuffer (samplecnt_t nframes)
 {
-	PortSet& ports (_input->ports());
-
-	for (PortSet::iterator p = ports.begin(DataType::MIDI); p != ports.end(DataType::MIDI); ++p) {
+	std::shared_ptr<PortSet> ports (_input->ports());
+	for (PortSet::iterator p = ports->begin (DataType::MIDI); p != ports->end (DataType::MIDI); ++p) {
 
 		Buffer& b (p->get_buffer (nframes));
 		const MidiBuffer* const mb = dynamic_cast<MidiBuffer*>(&b);
@@ -874,9 +873,8 @@ MidiTrack::map_input_active (bool yn)
 		return;
 	}
 
-	PortSet& ports (_input->ports());
-
-	for (PortSet::iterator p = ports.begin(DataType::MIDI); p != ports.end(DataType::MIDI); ++p) {
+	std::shared_ptr<PortSet> ports (_input->ports());
+	for (PortSet::iterator p = ports->begin (DataType::MIDI); p != ports->end (DataType::MIDI); ++p) {
 		std::shared_ptr<MidiPort> mp = std::dynamic_pointer_cast<MidiPort> (*p);
 		if (yn != mp->input_active()) {
 			mp->set_input_active (yn);
@@ -947,10 +945,8 @@ MidiTrack::monitoring_changed (bool self, Controllable::GroupControlDisposition 
 	 * port level.
 	 */
 
-	PortSet& ports (_output->ports());
-
-	for (PortSet::iterator p = ports.begin(); p != ports.end(); ++p) {
-		std::shared_ptr<MidiPort> mp = std::dynamic_pointer_cast<MidiPort> (*p);
+	for (auto const& p : *_output->ports()) {
+		std::shared_ptr<MidiPort> mp = std::dynamic_pointer_cast<MidiPort> (p);
 		if (mp) {
 			mp->require_resolve ();
 		}

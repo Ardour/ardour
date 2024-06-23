@@ -262,10 +262,10 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 		return;
 	}
 
-	PortSet& ports (_output->ports());
+	std::shared_ptr<PortSet> ports (_output->ports());
 	gain_t tgain;
 
-	if (ports.num_ports () == 0) {
+	if (ports->num_ports () == 0) {
 		return;
 	}
 
@@ -274,7 +274,7 @@ Delivery::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample
 	 */
 
 	// TODO delayline -- latency-compensation
-	output_buffers().get_backend_port_addresses (ports, nframes);
+	output_buffers().get_backend_port_addresses (*ports, nframes);
 
 	// this Delivery processor is not a derived type, and thus we assume
 	// we really can modify the buffers passed in (it is almost certainly
@@ -555,10 +555,8 @@ Delivery::non_realtime_transport_stop (samplepos_t now, bool flush)
 	}
 
 	if (_output) {
-		PortSet& ports (_output->ports());
-
-		for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-			i->transport_stopped ();
+		for (auto const& p : *_output->ports()) {
+			p->transport_stopped ();
 		}
 	}
 }
@@ -567,10 +565,8 @@ void
 Delivery::realtime_locate (bool for_loop_end)
 {
 	if (_output) {
-		PortSet& ports (_output->ports());
-
-		for (PortSet::iterator i = ports.begin(); i != ports.end(); ++i) {
-			i->realtime_locate (for_loop_end);
+		for (auto const& p : *_output->ports()) {
+			p->realtime_locate (for_loop_end);
 		}
 	}
 }
@@ -601,6 +597,7 @@ Delivery::target_gain ()
 		case Listen:
 			mp = MuteMaster::Listen;
 			break;
+		case DirectOuts:
 		case Send:
 		case Insert:
 		case Aux:
@@ -673,7 +670,7 @@ Delivery::output_changed (IOChange change, void* /*src*/)
 {
 	if (change.type & IOChange::ConfigurationChanged) {
 		reset_panner ();
-		_output_buffers->attach_buffers (_output->ports ());
+		_output_buffers->attach_buffers (*_output->ports ());
 	}
 }
 
