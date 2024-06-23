@@ -136,20 +136,13 @@ public:
 
 	bool has_port (std::shared_ptr<Port>) const;
 
-	std::shared_ptr<Port> nth (uint32_t n) const {
-		if (n < _ports.num_ports()) {
-			return _ports.port(n);
-		} else {
-			return std::shared_ptr<Port> ();
-		}
-	}
-
+	std::shared_ptr<Port> nth (uint32_t n) const;
 	std::shared_ptr<Port> port_by_name (const std::string& str) const;
 
 	std::shared_ptr<AudioPort> audio(uint32_t n) const;
 	std::shared_ptr<MidiPort>  midi(uint32_t n) const;
 
-	const ChanCount& n_ports ()  const { return _ports.count(); }
+	const ChanCount& n_ports () const;
 
 	/* The process lock will be held on emission of this signal if
 	 * IOChange contains ConfigurationChanged.  In other cases,

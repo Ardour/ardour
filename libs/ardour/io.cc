@@ -393,8 +393,9 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 
 		const size_t n = count.get(*t);
 
+		const ChanCount n_ports = _ports.count ();
 		/* remove unused ports */
-		for (size_t i = n_ports().get(*t); i > n; --i) {
+		for (size_t i = n_ports.get(*t); i > n; --i) {
 			port = _ports.port(*t, i-1);
 
 			assert(port);
@@ -424,7 +425,7 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 		deleted_ports.clear ();
 
 		/* create any necessary new ports */
-		while (n_ports().get(*t) < n) {
+		while (_ports.count ().get(*t) < n) {
 
 			string portname = build_legal_port_name (*t);
 
@@ -454,7 +455,8 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 	}
 
 	if (changed) {
-		PortCountChanged (n_ports()); /* EMIT SIGNAL */
+		const ChanCount n_ports = _ports.count ();
+		PortCountChanged (n_ports); /* EMIT SIGNAL */
 		_session.set_dirty ();
 	}
 
@@ -1590,6 +1592,7 @@ bool
 IO::connected () const
 {
 	/* do we have any connections at all? */
+	Glib::Threads::RWLock::ReaderLock rl (_io_lock);
 
 	for (PortSet::const_iterator p = _ports.begin(); p != _ports.end(); ++p) {
 		if (p->connected()) {
@@ -1629,6 +1632,7 @@ IO::connected_to (std::shared_ptr<const IO> other) const
 bool
 IO::connected_to (const string& str) const
 {
+	Glib::Threads::RWLock::ReaderLock rl (_io_lock);
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		if (i->connected_to (str)) {
 			return true;
@@ -1722,6 +1726,7 @@ IO::port_by_name (const std::string& str) const
 bool
 IO::physically_connected () const
 {
+	Glib::Threads::RWLock::ReaderLock rl (_io_lock);
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		if (i->physically_connected()) {
 			return true;
@@ -1734,6 +1739,7 @@ IO::physically_connected () const
 bool
 IO::has_ext_connection () const
 {
+	Glib::Threads::RWLock::ReaderLock rl (_io_lock);
 	for (PortSet::const_iterator i = _ports.begin(); i != _ports.end(); ++i) {
 		if (i->has_ext_connection()) {
 			return true;
@@ -1748,4 +1754,20 @@ IO::has_port (std::shared_ptr<Port> p) const
 {
 	Glib::Threads::RWLock::ReaderLock rl (_io_lock);
 	return _ports.contains (p);
+}
+
+std::shared_ptr<Port>
+IO::nth (uint32_t n) const {
+	Glib::Threads::RWLock::ReaderLock rl (_io_lock);
+	if (n < _ports.num_ports()) {
+		return _ports.port(n);
+	} else {
+		return std::shared_ptr<Port> ();
+	}
+}
+
+const ChanCount&
+IO::n_ports () const {
+	Glib::Threads::RWLock::ReaderLock rl (_io_lock);
+	return _ports.count();
 }
