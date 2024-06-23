@@ -307,25 +307,25 @@ IO::add_port (string destination, void* src, DataType type)
 		BLOCK_PROCESS_CALLBACK ();
 
 		/* Create a new port */
-
-		string portname = build_legal_port_name (type);
-
-		if (_direction == Input) {
-			if ((our_port = _session.engine().register_input_port (type, portname)) == 0) {
-				error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
-				return -1;
-			}
-		} else {
-			if ((our_port = _session.engine().register_output_port (type, portname)) == 0) {
-				error << string_compose(_("IO: cannot register output port %1"), portname) << endmsg;
-				return -1;
-			}
-		}
-
 		{
 			RCUWriter<PortSet> writer (_ports);
 			std::shared_ptr<PortSet> p = writer.get_copy ();
 			change.before = p->count ();
+
+			string portname = build_legal_port_name (p, type);
+
+			if (_direction == Input) {
+				if ((our_port = _session.engine().register_input_port (type, portname)) == 0) {
+					error << string_compose(_("IO: cannot register input port %1"), portname) << endmsg;
+					return -1;
+				}
+			} else {
+				if ((our_port = _session.engine().register_output_port (type, portname)) == 0) {
+					error << string_compose(_("IO: cannot register output port %1"), portname) << endmsg;
+					return -1;
+				}
+			}
+
 			p->add (our_port);
 			change.after = p->count ();
 		}
@@ -418,7 +418,7 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 			/* create any necessary new ports */
 			while (p->count ().get(*t) < n) {
 
-				string portname = build_legal_port_name (*t);
+				string portname = build_legal_port_name (p, *t);
 
 				try {
 
@@ -1334,7 +1334,7 @@ IO::bundle_changed (Bundle::Change /*c*/)
 
 
 string
-IO::build_legal_port_name (DataType type)
+IO::build_legal_port_name (std::shared_ptr<PortSet const> ports, DataType type)
 {
 	const int name_size = AudioEngine::instance()->port_name_size();
 	int limit;
@@ -1381,20 +1381,18 @@ IO::build_legal_port_name (DataType type)
 
 	snprintf (&buf1[0], name_size+1, ("%.*s/%s"), limit, nom.c_str(), suffix.c_str());
 
-	int port_number = find_port_hole (&buf1[0]);
+	int port_number = find_port_hole (ports, &buf1[0]);
 	snprintf (&buf2[0], name_size+1, "%s %d", &buf1[0], port_number);
 
 	return string (&buf2[0]);
 }
 
 int32_t
-IO::find_port_hole (const char* base)
+IO::find_port_hole (std::shared_ptr<PortSet const> ports, const char* base)
 {
 	/* CALLER MUST HOLD IO LOCK */
 
 	uint32_t n;
-
-	std::shared_ptr<PortSet const> ports = _ports.reader();
 
 	if (ports->empty()) {
 		return 1;

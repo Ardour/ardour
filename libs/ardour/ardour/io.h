@@ -237,8 +237,8 @@ private:
 
 	int ensure_ports_locked (ChanCount, bool clear, bool& changed);
 
-	std::string build_legal_port_name (DataType type);
-	int32_t find_port_hole (const char* base);
+	std::string build_legal_port_name (std::shared_ptr<PortSet const>, DataType type);
+	int32_t find_port_hole (std::shared_ptr<PortSet const>, const char* base);
 
 	void setup_bundle ();
 	std::string bundle_channel_name (uint32_t, uint32_t, DataType) const;
