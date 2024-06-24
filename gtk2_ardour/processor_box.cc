@@ -636,8 +636,8 @@ ProcessorEntry::name (Width w) const
 
 		if (send->remove_on_disconnect ()) {
 			// assume it's a sidechain, find pretty name of connected port(s)
-			PortSet& ps (send->output ()->ports ());
-			for (PortSet::iterator i = ps.begin (); i != ps.end () && pretty_ok; ++i) {
+			shared_ptr<PortSet const> ps (send->output ()->ports ());
+			for (auto i = ps->begin (); i != ps->end () && pretty_ok; ++i) {
 				vector<string> connections;
 				if (i->get_connections (connections)) {
 					vector<string>::const_iterator ci;

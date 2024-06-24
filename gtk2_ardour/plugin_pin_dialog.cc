@@ -482,12 +482,12 @@ PluginPinWidget::refill_sidechain_table ()
 	}
 
 	uint32_t r = 0;
-	PortSet& p (io->ports ());
-	bool can_remove = p.num_ports () > 1;
-	for (PortSet::iterator i = p.begin (DataType::MIDI); i != p.end (DataType::MIDI); ++i) {
+	std::shared_ptr<PortSet> p (io->ports ());
+	bool can_remove = p->num_ports () > 1;
+	for (PortSet::iterator i = p->begin (DataType::MIDI); i != p->end (DataType::MIDI); ++i) {
 		r += add_port_to_table (*i, r, can_remove);
 	}
-	for (PortSet::iterator i = p.begin (DataType::AUDIO); i != p.end (DataType::AUDIO); ++i) {
+	for (PortSet::iterator i = p->begin (DataType::AUDIO); i != p->end (DataType::AUDIO); ++i) {
 		r += add_port_to_table (*i, r, can_remove);
 	}
 	_sidechain_tbl->show_all ();
@@ -1857,8 +1857,8 @@ PluginPinWidget::add_send_from (std::weak_ptr<ARDOUR::Port> wp, std::weak_ptr<AR
 	p->disconnect_all ();
 
 	DataType dt = p->type ();
-	PortSet& ps (send->output ()->ports ());
-	for (PortSet::iterator i = ps.begin (dt); i != ps.end (dt); ++i) {
+	std::shared_ptr<PortSet> ps (send->output ()->ports ());
+	for (PortSet::iterator i = ps->begin (dt); i != ps->end (dt); ++i) {
 		p->connect (&(**i));
 	}
 

@@ -60,11 +60,12 @@ exclusively_connected (std::shared_ptr<IO> dest_io, std::shared_ptr<IO> io, Data
 	uint32_t           n   = 0;
 	uint32_t           cnt = 0;
 	std::set<uint32_t> pn;
-	PortSet const&     psa (dest_io->ports ());
-	PortSet const&     psb (io->ports ());
 
-	for (auto a = psa.begin (dt); a != psa.end (dt); ++a, ++n) {
-		for (auto b = psb.begin (dt); b != psb.end (dt); ++b) {
+	std::shared_ptr<PortSet const> psa (dest_io->ports ());
+	std::shared_ptr<PortSet const> psb (io->ports ());
+
+	for (auto a = psa->begin (dt); a != psa->end (dt); ++a, ++n) {
+		for (auto b = psb->begin (dt); b != psb->end (dt); ++b) {
 			if (a->connected_to (b->name ())) {
 				++cnt;
 				pn.insert (n);
@@ -117,7 +118,7 @@ IOButtonBase::guess_main_type (std::shared_ptr<IO> io)
 
 	/* Find most likely type among connected ports */
 	DataType type = DataType::NIL; /* NIL is always last so least likely */
-	for (PortSet::iterator p = io->ports ().begin (); p != io->ports ().end (); ++p) {
+	for (auto const& p : *io->ports ()) {
 		if (p->connected () && p->type () < type)
 			type = p->type ();
 	}
@@ -213,7 +214,7 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, std::shar
 
 	vector<string> port_connections;
 
-	for (auto const& port : io->ports ()) {
+	for (auto const& port : *io->ports ()) {
 		port_connections.clear ();
 		port->get_connections (port_connections);
 
@@ -306,8 +307,9 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, std::shar
 			session.engine ().get_physical_outputs (dt, phys);
 			playorcapture = "playback_";
 		}
-		for (PortSet::iterator port = io->ports ().begin (dt);
-		     port != io->ports ().end (dt);
+		std::shared_ptr<PortSet> ps (io->ports ());
+		for (PortSet::iterator port = ps->begin (dt);
+		     port != ps->end (dt);
 		     ++port) {
 			string pn = "";
 			for (auto const& s : phys) {
@@ -328,7 +330,7 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, std::shar
 				temp_label.str (""); /* erase the failed attempt */
 				break;
 			}
-			if (port != io->ports ().begin (dt)) {
+			if (port != ps->begin (dt)) {
 				temp_label << "/";
 			}
 			temp_label << pn;
@@ -368,10 +370,11 @@ IOButtonBase::set_label (IOButtonBase& self, ARDOUR::Session& session, std::shar
 	/* Is each main-typed channel connected to a single and different port with
 	 * the same client name (e.g. another JACK client) ? */
 	if (!have_label && each_typed_port_has_one_connection) {
-		string         maybe_client = "";
-		vector<string> connections;
-		for (PortSet::iterator port = io->ports ().begin (dt);
-		     port != io->ports ().end (dt);
+		string                   maybe_client = "";
+		vector<string>           connections;
+		std::shared_ptr<PortSet> ps (io->ports ());
+		for (PortSet::iterator port = ps->begin (dt);
+		     port != ps->end (dt);
 		     ++port) {
 			port_connections.clear ();
 			port->get_connections (port_connections);

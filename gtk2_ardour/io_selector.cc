@@ -79,7 +79,7 @@ IOSelector::setup_type ()
 	int N = 0;
 	DataType type_with_ports = DataType::NIL;
 	for (DataType::iterator i = DataType::begin(); i != DataType::end(); ++i) {
-		if (_io->ports().num_ports (*i)) {
+		if (_io->ports()->num_ports (*i)) {
 			type_with_ports = *i;
 			++N;
 		}
