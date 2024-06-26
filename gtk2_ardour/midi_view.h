@@ -641,8 +641,7 @@ class MidiView : public virtual sigc::trackable
 
 	void add_split_notes ();
 
-	virtual std::shared_ptr<ARDOUR::MidiModel> model_to_edit() const { return _model; }
-	virtual void post_edit (std::shared_ptr<ARDOUR::MidiModel>, ARDOUR::MidiModel::NoteDiffCommand const &) {}
+	virtual void post_edit () {}
 };
 
 

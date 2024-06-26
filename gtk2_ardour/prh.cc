@@ -104,10 +104,12 @@ PianoRollHeader::resize ()
 }
 
 void
-PianoRollHeader::set_view (MidiView& v)
+PianoRollHeader::set_view (MidiView* v)
 {
-	_view = &v;
-	_view->midi_context().NoteRangeChanged.connect (sigc::mem_fun (*this, &PianoRollHeader::note_range_changed));
+	_view = v;
+	if (_view) {
+		_view->midi_context().NoteRangeChanged.connect (sigc::mem_fun (*this, &PianoRollHeader::note_range_changed));
+	}
 }
 
 void

@@ -401,28 +401,25 @@ MidiCueEditor::toolbox ()
 }
 
 void
-MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, std::shared_ptr<ARDOUR::MidiRegion> r)
+MidiCueEditor::set_region (std::shared_ptr<ARDOUR::MidiTrack> t, uint32_t slot_index, std::shared_ptr<ARDOUR::MidiRegion> r)
 {
 	delete view;
 	view = nullptr;
 
 	if (!t || !r) {
+		bg->set_view (nullptr);
+		prh->set_view (nullptr);
 		return;
 	}
 
-	view = new MidiCueView (t, *data_group, *this, *bg, 0xff0000ff);
-	view->set_region (r);
+	view = new MidiCueView (t, r, slot_index, *data_group, *this, *bg, 0xff0000ff);
 
 	bg->set_view (view);
-	prh->set_view (*view);
+	prh->set_view (view);
 
 	double w, h;
 	prh->size_request (w, h);
-
-	/* Move stuff around */
-
 	_timeline_origin = w;
-
 	prh->set_position (Duple (0., n_timebars * timebar_height));
 	data_group->set_position (ArdourCanvas::Duple (w, timebar_height * n_timebars));
 	h_scroll_group->set_position (Duple (w, 0.));

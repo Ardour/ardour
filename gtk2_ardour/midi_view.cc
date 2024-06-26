@@ -215,10 +215,12 @@ void
 MidiView::set_model (std::shared_ptr<MidiModel> m)
 {
 	_model = m;
+	std::cerr << this << " now has sp<MM> " << _model << " with ref " << _model.use_count() << std::endl;
 	assert (_model);
 
 	//set_height (trackview.current_height());
 
+#warning paul pianorule needs these fixed
 /* XXXX
 	region_muted ();
 	region_sync_changed ();
@@ -843,6 +845,7 @@ MidiView::start_note_diff_command (string name)
 {
 	if (!_note_diff_command) {
 		_editing_context.begin_reversible_command (name);
+		std::cerr << "start note diff on " << _model << " uc " << _model.use_count() << std::endl;
 		_note_diff_command = _model->new_note_diff_command (name);
 	} else {
 		std::cerr << "ERROR: start_note_diff_command command called, but a note_diff_command was already underway" << std::endl;
@@ -907,17 +910,15 @@ MidiView::apply_note_diff (bool as_subcommand, bool was_copy)
 		}
 	}
 
-	std::shared_ptr<MidiModel> op_model = model_to_edit ();
-
 	{
 		PBD::Unwinder<bool> puw (_select_all_notes_after_add, true);
 		/*note that we don't use as_commit here, because that would BEGIN a new undo record; we already have one underway*/
-		op_model->apply_diff_command_as_subcommand (*_editing_context.session(), _note_diff_command);
-		post_edit (op_model, *_note_diff_command);
+		_model->apply_diff_command_as_subcommand (*_editing_context.session(), _note_diff_command);
 	}
 
 	if (!as_subcommand) {
 		_editing_context.commit_reversible_command ();  /*instead, we can explicitly commit the command in progress */
+		post_edit ();
 	}
 
 	_note_diff_command = nullptr;
@@ -2748,6 +2749,7 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 
 	apply_note_diff (true /*subcommand, we don't want this to start a new commit*/, copy);
 	_editing_context.commit_reversible_command ();
+	post_edit ();
 
 	// care about notes being moved beyond the upper/lower bounds on the canvas
 	if (lowest_note_in_selection  < _midi_context.lowest_note() ||
@@ -3245,6 +3247,7 @@ MidiView::set_velocities_for_notes (std::vector<NoteBase*>& notes, std::vector<i
 
 	apply_note_diff (true /*subcommand, we don't want this to start a new commit*/, false);
 	_editing_context.commit_reversible_command ();
+	post_edit ();
 	delete _note_diff_command;
 	_note_diff_command = nullptr;
 
@@ -3747,6 +3750,7 @@ MidiView::duplicate_selection ()
 	bool commit = paste (dup_pos, local_selection, ctxt);
 	if (commit) {
 		_editing_context.commit_reversible_command ();
+		post_edit ();
 	} else {
 		_editing_context.abort_reversible_command ();
 	}
@@ -3906,6 +3910,7 @@ MidiView::goto_next_note (bool add_to_selection)
 
 
 	_editing_context.commit_reversible_selection_op();
+	post_edit ();
 }
 
 void
@@ -3958,6 +3963,7 @@ MidiView::goto_previous_note (bool add_to_selection)
 	}
 
 	_editing_context.commit_reversible_selection_op();
+	post_edit ();
 }
 
 void
@@ -4488,6 +4494,7 @@ MidiView::quantize_selected_notes ()
 	       (*cmd)();
 	       _editing_context.session()->add_command (cmd);
 	       _editing_context.commit_reversible_command ();
+		post_edit ();
 	       _editing_context.session()->set_dirty ();
 	}
 

@@ -415,7 +415,7 @@ TriggerPage::selection_changed ()
 				std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (trigger->region());
 				if (mr) {
 					std::shared_ptr<MidiTrack> mt = std::dynamic_pointer_cast<MidiTrack> (entry->strip().stripable());
-					_midi_editor->set_region (mt, mr);
+					_midi_editor->set_region (mt, ref.slot, mr);
 					_midi_editor->viewport().show ();
 				}
 			}

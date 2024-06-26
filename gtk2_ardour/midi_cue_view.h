@@ -31,10 +31,13 @@ class MidiCueView : public MidiView
 {
   public:
 	MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
-	          ArdourCanvas::Item&      parent,
-	          EditingContext&          ec,
-	          MidiViewBackground&      bg,
-	          uint32_t                 basic_color);
+	             std::shared_ptr<ARDOUR::MidiRegion> region,
+	             uint32_t                    slot_index,
+	             ArdourCanvas::Item&         parent,
+	             EditingContext&             ec,
+	             MidiViewBackground&         bg,
+	             uint32_t                    basic_color
+		);
 
 	bool canvas_event (GdkEvent*);
 	void set_samples_per_pixel (double);
@@ -51,9 +54,9 @@ class MidiCueView : public MidiView
 
 	std::shared_ptr<Temporal::TempoMap const> tempo_map;
 	ArdourCanvas::Rectangle* event_rect;
+	uint32_t _slot_index;
 
-	std::shared_ptr<ARDOUR::MidiModel> model_to_edit() const;
-	void post_edit (std::shared_ptr<ARDOUR::MidiModel>, ARDOUR::MidiModel::NoteDiffCommand const &);
+	void post_edit ();
 };
 
 

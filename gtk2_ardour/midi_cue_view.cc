@@ -18,6 +18,8 @@
 
 #include "ardour/midi_region.h"
 #include "ardour/midi_source.h"
+#include "ardour/midi_track.h"
+#include "ardour/triggerbox.h"
 
 #include "gtkmm2ext/utils.h"
 
@@ -33,11 +35,14 @@
 using namespace Gtkmm2ext;
 
 MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
+                          std::shared_ptr<ARDOUR::MidiRegion> region,
+                          uint32_t                 slot_index,
                           ArdourCanvas::Item&      parent,
                           EditingContext&          ec,
                           MidiViewBackground&      bg,
                           uint32_t                 basic_color)
 	: MidiView (mt, parent, ec, bg, basic_color)
+	, _slot_index (slot_index)
 {
 	CANVAS_DEBUG_NAME (_note_group, X_("note group for MIDI cue"));
 
@@ -55,6 +60,7 @@ MidiCueView::MidiCueView (std::shared_ptr<ARDOUR::MidiTrack> mt,
 	_note_group->raise_to_top ();
 
 	set_extensible (true);
+	set_region (region);
 }
 
 void
@@ -119,15 +125,11 @@ MidiCueView::set_samples_per_pixel (double spp)
 	reset_width_dependent_items (_editing_context.duration_to_pixels (duration));
 }
 
-
-std::shared_ptr<ARDOUR::MidiModel>
-MidiCueView::model_to_edit() const
-{
-	return std::shared_ptr<ARDOUR::MidiModel> (new ARDOUR::MidiModel (*_model, *(midi_region()->midi_source())));
-}
-
 void
-MidiCueView::post_edit (std::shared_ptr<ARDOUR::MidiModel> edited_model, ARDOUR::MidiModel::NoteDiffCommand const & diff_command)
+MidiCueView::post_edit ()
 {
-	_model = edited_model;
+	std::cerr << "Post-edit\n";
+	std::shared_ptr<ARDOUR::TriggerBox> tb = _midi_track->triggerbox ();
+	assert (tb);
+	std::dynamic_pointer_cast<ARDOUR::MIDITrigger>(tb->trigger (_slot_index))->edited ();
 }
