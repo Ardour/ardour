@@ -1882,3 +1882,11 @@ MidiModel::track_state (timepos_t const & when, MidiStateTracker& mst) const
 		mst.track (ev.buffer());
 	}
 }
+
+void
+MidiModel::render (const ReadLock& lock, Evoral::EventSink<Temporal::Beats>& dst)
+{
+	for (auto const & ev : *this) {
+		dst.write (ev.time(), Evoral::MIDI_EVENT, ev.size(), ev.buffer());
+	}
+}
