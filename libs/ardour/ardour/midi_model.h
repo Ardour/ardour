@@ -327,6 +327,7 @@ public:
 	void transpose (NoteDiffCommand *, const NotePtr, int);
 
 	void track_state (timepos_t const & when, MidiStateTracker&) const;
+	void render (const ReadLock& lock, Evoral::EventSink<Temporal::Beats>& dst);
 
   protected:
 	int resolve_overlaps_unlocked (const NotePtr, void* arg = 0);
