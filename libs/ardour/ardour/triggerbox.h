@@ -48,6 +48,7 @@
 #include "ardour/midi_model.h"
 #include "ardour/midi_state_tracker.h"
 #include "ardour/processor.h"
+#include "ardour/rt_midibuffer.h"
 #include "ardour/segment_descriptor.h"
 #include "ardour/types.h"
 #include "ardour/types_convert.h"
@@ -415,6 +416,8 @@ class LIBARDOUR_API Trigger : public PBD::Stateful {
 	void get_ui_state (UIState &state) const;
 	void set_ui_state (UIState &state);
 
+	virtual void check_edit_swap (timepos_t const & time, bool playing, BufferSet& bufs) {}
+
 	static PBD::Signal2<void,PBD::PropertyChange,Trigger*> TriggerPropertyChange;
 
   protected:
@@ -624,6 +627,8 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	int channel_map (int channel);
 	std::vector<int> const & channel_map() const { return _channel_map; }
 
+	void check_edit_swap (timepos_t const &, bool playing, BufferSet&);
+
   protected:
 	void retrigger ();
 
@@ -640,9 +645,14 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	Temporal::BBT_Offset _start_offset;
 	Temporal::BBT_Offset _legato_offset;
 
-	std::shared_ptr<MidiModel> model;
-	MidiModel::const_iterator iter;
-	bool                      map_change;
+	typedef RTMidiBufferBase<Temporal::Beats,Temporal::Beats> RTMidiBufferBeats;
+
+	std::atomic<RTMidiBufferBeats*> rt_midibuffer;
+	std::atomic<RTMidiBufferBeats*> pending_rt_midibuffer;
+	std::atomic<RTMidiBufferBeats*> old_rt_midibuffer;
+	uint32_t       iter;
+
+	bool         map_change;
 
 	int load_data (std::shared_ptr<MidiRegion>);
 	void compute_and_set_length ();

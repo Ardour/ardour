@@ -44,7 +44,9 @@
 #include "ardour/debug.h"
 #include "ardour/import_status.h"
 #include "ardour/midi_buffer.h"
+#include "ardour/midi_cursor.h"
 #include "ardour/midi_model.h"
+#include "ardour/midi_state_tracker.h"
 #include "ardour/midi_region.h"
 #include "ardour/minibpm.h"
 #include "ardour/port.h"
@@ -1271,6 +1273,31 @@ AudioTrigger::~AudioTrigger ()
 }
 
 void
+MIDITrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& bufs)
+{
+	RTMidiBufferBeats* pending = pending_rt_midibuffer.load();
+
+	if (!pending) {
+		return;
+	}
+
+//	if (playing) {
+	MidiBuffer& mbuf (bufs.get_midi (0));
+	MidiStateTracker post_edit_state;
+
+	const timepos_t region_start_time = _region->start();
+	const Temporal::Beats region_start = region_start_time.beats();
+	pending->track_state (transition_beats + (time.beats() - region_start), post_edit_state);
+	// _box.tracker->resolve_diff (post_edit_state, mbuf, time.samples());
+//	}
+
+	old_rt_midibuffer = rt_midibuffer.exchange (pending);
+	std::cerr << "Swapped in new pending RT MB\n";
+	pending_rt_midibuffer = nullptr;
+}
+
+
+void
 AudioTrigger::set_stretch_mode (Trigger::StretchMode sm)
 {
 	if (_stretch_mode == sm) {
@@ -2174,6 +2201,9 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	, last_event_samples (0)
 	, _start_offset (0, 0, 0)
 	, _legato_offset (0, 0, 0)
+	, rt_midibuffer (nullptr)
+	, pending_rt_midibuffer (nullptr)
+	, old_rt_midibuffer (nullptr)
 	, map_change (false)
 {
 	_channel_map.assign (16, -1);
@@ -2664,7 +2694,13 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 	data_length = mr->length().beats();
 	_follow_length = Temporal::BBT_Offset (0, data_length.get_beats(), 0);
 	set_length (mr->length());
-	model = mr->model ();
+
+	pending_rt_midibuffer = new RTMidiBufferBeats;
+
+	{
+		Source::ReaderLock lm (mr->midi_source()->mutex());
+		mr->midi_source()->render (lm, *pending_rt_midibuffer);
+	}
 
 	estimate_midi_patches ();
 
@@ -2687,11 +2723,11 @@ MIDITrigger::retrigger ()
 
 	/* XXX need to deal with bar offsets */
 	// const Temporal::BBT_Offset o = _start_offset + _legato_offset;
-	iter = model->begin();
+	iter = 0;
 	_legato_offset = Temporal::BBT_Offset ();
 	last_event_beats = Temporal::Beats();
 	last_event_samples = 0;
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to %2, ts = %3\n", _index, iter->time(), transition_beats));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 retriggered to start, ts = %2\n", _index, transition_beats));
 }
 
 void
@@ -2706,12 +2742,13 @@ MIDITrigger::tempo_map_changed ()
 	 * on an active trigger.
 	 */
 
-	iter = model->begin();
+	iter = 0;
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	const timepos_t region_start_time = _region->start();
 	const Temporal::Beats region_start = region_start_time.beats();
+	RTMidiBufferBeats* rtmb (rt_midibuffer.load());
 
-	while (iter != model->end()) {
+	while (iter < rtmb->size()) {
 
 		/* Find the first event whose sample time is equal-to or
 		 * greater than the last played event sample. That is the
@@ -2722,7 +2759,9 @@ MIDITrigger::tempo_map_changed ()
 		 * one.
 		 */
 
-		const Temporal::Beats iter_timeline_beats = transition_beats + ((*iter).time() - region_start);
+		RTMidiBufferBeats::Item const & item ((*rtmb)[iter]);
+		// const Temporal::Beats iter_timeline_beats =
+		Temporal::Beats iter_timeline_beats = transition_beats + (item.timestamp - region_start);
 		samplepos_t iter_timeline_samples = tmap->sample_at (iter_timeline_beats);
 
 		if (iter_timeline_samples >= last_event_samples) {
@@ -2732,7 +2771,7 @@ MIDITrigger::tempo_map_changed ()
 		++iter;
 	}
 
-	if (iter != model->end()) {
+	if (iter < rtmb->size()) {
 		Temporal::Beats elen_ignored;
 		(void) compute_end (tmap, _transition_bbt, transition_samples, elen_ignored);
 	}
@@ -2746,6 +2785,8 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
                        Temporal::Beats const & start_beats, Temporal::Beats const & end_beats,
                        pframes_t nframes, pframes_t dest_offset, double bpm, pframes_t& quantize_offset)
 {
+	assert (rt_midibuffer);
+
 	MidiBuffer* mb (in_process_context? &bufs.get_midi (0) : 0);
 	typedef Evoral::Event<MidiModel::TimeType> MidiEvent;
 	const timepos_t region_start_time = _region->start();
@@ -2758,8 +2799,9 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 	quantize_offset = 0;
 	maybe_compute_next_transition (start_sample, start_beats, end_beats, nframes, quantize_offset);
 	const pframes_t orig_nframes = nframes;
+	RTMidiBufferBeats* rtmb (rt_midibuffer.load());
 
-	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2\n", name(), enum_2_string (_state)));
+	DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 after checking for transition, state = %2 iter @ %3 total %4\n", name(), enum_2_string (_state), iter, rtmb->size()));
 
 	switch (_state) {
 	case Stopped:
@@ -2775,18 +2817,17 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 	Temporal::Beats last_event_timeline_beats = final_beat; /* will indicate "done" if there is nothing to do */
 
-	while (iter != model->end() && !_playout) {
+	while (iter < rtmb->size() && !_playout) {
 
-		MidiEvent const & event (*iter);
+		RTMidiBufferBeats::Item const & item ((*rtmb)[iter]);
 
 		/* Event times are in beats, relative to start of source
-		 * file. We need to convert to region-relative time, and then
+		 * file. We need to conv+ert to region-relative time, and then
 		 * a session timeline time, which is defined by the time at
 		 * which we last transitioned (in this case, to being active)
 		 */
 
-		Temporal::Beats maybe_last_event_timeline_beats = transition_beats + (event.time() - region_start);
-
+		Temporal::Beats maybe_last_event_timeline_beats = transition_beats + (item.timestamp - region_start);
 
 		/* check that the event is within the bounds for this run() call */
 
@@ -2795,7 +2836,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		}
 
 		if (maybe_last_event_timeline_beats > final_beat) {
-			iter = model->end();
+			iter = rtmb->size();
 			break;
 		}
 
@@ -2806,6 +2847,9 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		/* Now get the sample position of the event, on the timeline */
 
 		const samplepos_t timeline_samples = tmap->sample_at (maybe_last_event_timeline_beats);
+
+		uint32_t evsize;
+		uint8_t const * buf = rtmb->bytes (item, evsize);
 
 		if (in_process_context) { /* compile-time const expr */
 
@@ -2864,7 +2908,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 			assert (buffer_samples >= 0);
 
-			Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, event.size(), const_cast<uint8_t*>(event.buffer()), false);
+			Evoral::Event<MidiBuffer::TimeType> ev (Evoral::MIDI_EVENT, buffer_samples, evsize, const_cast<uint8_t*>(buf), false);
 
 			if (_gain != 1.0f && ev.is_note()) {
 				ev.scale_velocity (_gain);
@@ -2900,9 +2944,9 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 			mb->insert_event (ev);
 		}
 
-		_box.tracker->track (event.buffer());
+		_box.tracker->track (buf);
 
-		last_event_beats = event.time();
+		last_event_beats = item.timestamp;
 		last_event_timeline_beats = maybe_last_event_timeline_beats;
 
 		++iter;
@@ -2914,7 +2958,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		_box.tracker->resolve_notes (*mb, nframes-1);
 	}
 
-	if (iter == model->end()) {
+	if (iter >= rtmb->size()) {
 
 		/* We reached the end */
 
@@ -2922,8 +2966,8 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 
 		/* "final_beat" is an inclusive end of the trigger, not
 		 * exclusive, so we must use <= here. That is, any last event
-		 * (remember, iter == model->end() here, so we have already read
-		 * through the entire MIDI model) that is up to AND INCLUDING
+		 * (remember, iter == rt_midibuffer->size() here, so we have already read
+		 * through the entire RTMidiBuffer) that is up to AND INCLUDING
 		 * final_beat counts as "haven't reached the end".
 		 */
 
@@ -2981,7 +3025,7 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		/* we didn't reach the end of the MIDI data, ergo we covered
 		   the entire timespan passed into us.
 		*/
-		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 did not reach end, nframes left at %2, next event is %3\n", index(), nframes, *iter));
+		DEBUG_TRACE (DEBUG::Triggers, string_compose ("%1 did not reach end, nframes left at %2, next event is %3\n", index(), nframes, iter));
 		nframes = 0;
 	}
 
@@ -4215,6 +4259,10 @@ TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 				}
 			}
 		}
+	}
+
+	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
+		all_triggers[n]->check_edit_swap (timepos_t (start_sample), _currently_playing == all_triggers[n], bufs);
 	}
 
 	/* STEP FOUR: handle any incoming requests from the GUI or other
