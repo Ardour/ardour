@@ -2205,21 +2205,12 @@ MIDITrigger::MIDITrigger (uint32_t n, TriggerBox& b)
 	, pending_rt_midibuffer (nullptr)
 	, old_rt_midibuffer (nullptr)
 	, map_change (false)
-	, model_swap (nullptr)
 {
 	_channel_map.assign (16, -1);
 }
 
 MIDITrigger::~MIDITrigger ()
 {
-}
-
-void
-MIDITrigger::check_edit_swap (bool playing)
-{
-	if (model_swap != nullptr) {
-		std::cerr << "EDIT!\n";
-	}
 }
 
 void
@@ -2789,10 +2780,11 @@ MIDITrigger::tempo_map_changed ()
 }
 
 void
-MIDITrigger::swap_model (std::shared_ptr<ARDOUR::MidiModel> model, ARDOUR::MidiModel::DiffCommand* cmd)
+MIDITrigger::edited ()
 {
-	ModelSwap* ms = new ModelSwap (model, cmd);
-	model_swap = ms;
+	// RTMidiBufferBase<Beats,Beats>* rtmb (new RTMidiBufferBase<Beats,Beats>);
+	MidiModel::ReadLock rl (model->read_lock());
+	/* render, then set pending rt */
 }
 
 template<bool in_process_context>
@@ -4848,10 +4840,6 @@ void
 TriggerBox::process_requests (BufferSet& bufs)
 {
 	Request* r;
-
-	for (uint64_t n = 0; n < all_triggers.size(); ++n) {
-		all_triggers[n]->check_edit_swap (_currently_playing == all_triggers[n]);
-	}
 
 	while (requests.read (&r, 1) == 1) {
 		process_request (bufs, r);
