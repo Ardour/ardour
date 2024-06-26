@@ -109,6 +109,7 @@ class LIBARDOUR_API MidiSource : virtual public Source
 	                             MidiNoteTracker*                   tracker,
 	                             MidiChannelFilter*                 filter,
 	                             const std::set<Evoral::Parameter>& filtered);
+	virtual void render (const ReaderLock& lock, Evoral::EventSink<Temporal::Beats>& dst) = 0;
 
 	/** Write data from a MidiRingBuffer to this source.
 	 * @param lock Reference to the Mutex to lock before modification

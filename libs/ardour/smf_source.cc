@@ -217,6 +217,62 @@ SMFSource::close ()
 
 extern PBD::Timing minsert;
 
+void
+SMFSource::render (const ReaderLock& lock, Evoral::EventSink<Temporal::Beats>& destination)
+{
+	int      ret  = 0;
+	Temporal::Beats time; // in SMF ticks, 1 tick per _ppqn
+
+	if (writable() && !_open) {
+		/* nothing to read since nothing has ben written */
+		return;
+	}
+
+	// Output parameters for read_event (which will allocate scratch in buffer as needed)
+	uint32_t ev_delta_t = 0;
+	uint32_t ev_size    = 0;
+	uint8_t* ev_buffer  = 0;
+	size_t   scratch_size = 0; // keep track of scratch to minimize reallocs
+
+	/* start of read in SMF ticks (which may differ from our own musical ticks */
+
+	Evoral::SMF::seek_to_start();
+
+	while (true) {
+
+		Evoral::event_id_t ignored; /* XXX don't ignore note id's ??*/
+
+		ret = read_event (&ev_delta_t, &ev_size, &ev_buffer, &ignored);
+
+		if (ret == -1) { // EOF
+			break;
+		}
+
+		if (ret == 0) { // meta-event (skipped, just accumulate time)
+			continue;
+		}
+
+		time += Temporal::Beats::ticks_at_rate (ev_delta_t, ppqn()); // accumulate delta time
+
+		DEBUG_TRACE (DEBUG::MidiSourceIO, string_compose ("SMF render delta %1, time %2, buf[0] %3\n",
+								  ev_delta_t, time, ev_buffer[0]));
+
+		/* Note that we add on the source start time (in session samples) here so that ev_sample_time
+		   is in session samples.
+		*/
+		destination.write (time, Evoral::MIDI_EVENT, ev_size, ev_buffer);
+
+		if (ev_size > scratch_size) {
+			scratch_size = ev_size;
+		}
+
+		ev_size = scratch_size; // ensure read_event only allocates if necessary
+	}
+
+	_smf_last_read_end = time;
+	_smf_last_read_time = time;
+}
+
 timecnt_t
 SMFSource::read_unlocked (const ReaderLock&               lock,
                           Evoral::EventSink<samplepos_t>& destination,
