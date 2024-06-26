@@ -220,7 +220,7 @@ MidiNoteTracker::resolve_notes (MidiSource& src, const MidiSource::WriterLock& l
 }
 
 void
-MidiNoteTracker::dump (ostream& o)
+MidiNoteTracker::dump (ostream& o) const
 {
 	o << "****** NOTES\n";
 	for (int c = 0; c < 16; ++c) {
@@ -263,7 +263,7 @@ MidiStateTracker::reset ()
 }
 
 void
-MidiStateTracker::dump (ostream& o)
+MidiStateTracker::dump (ostream& o) const
 {
 	const size_t n_channels = 16;
 	const size_t n_controls = 127;
@@ -523,8 +523,12 @@ MidiStateTracker::resolve_diff (MidiStateTracker const & other, Evoral::EventSin
 	 * indicated by @param other
 	 */
 
-	uint8_t      buf[3];
+	uint8_t buf[3];
 
+	std::cerr << "MST::rd\n";
+	dump (std::cerr);
+	std::cerr << "MST::rd other\n";
+	other.dump (std::cerr);
 
 	for (int channel = 0; channel < 16; ++channel) {
 
@@ -537,13 +541,15 @@ MidiStateTracker::resolve_diff (MidiStateTracker const & other, Evoral::EventSin
 				buf[1] = n;
 				buf[2] = 64; /* not good, needs nuance */
 				dst.write (time, Evoral::MIDI_EVENT, 3, buf);
+				std::cerr << "MST:rd note " << n << " turned " << (on ? "off" : "on") << std::endl;
 			}
 
 			if (control[channel][n] != other.control[channel][n]) {
 				buf[0] = MIDI_CMD_CONTROL | channel;
 				buf[1] = n;
-				buf[2] = control[channel][n];
+				buf[2] = other.control[channel][n];
 				dst.write (time, Evoral::MIDI_EVENT, 3, buf);
+				std::cerr << "MST:rd control" << n << " set to " << (int) other.control[channel][n] << std::endl;
 			}
 		}
 

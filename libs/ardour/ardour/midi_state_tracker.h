@@ -46,7 +46,7 @@ public:
 	virtual ~MidiNoteTracker() {}
 
 	virtual void track (const uint8_t* evbuf);
-	virtual void dump (std::ostream&);
+	virtual void dump (std::ostream&) const;
 	virtual void reset ();
 
 	void track (const MidiBuffer::const_iterator& from, const MidiBuffer::const_iterator& to);
@@ -84,7 +84,7 @@ class LIBARDOUR_API MidiStateTracker : public MidiNoteTracker
 	~MidiStateTracker() {}
 
 	void track (const uint8_t* evbuf);
-	void dump (std::ostream&);
+	void dump (std::ostream&) const;
 	void reset ();
 
 	void flush (MidiBuffer&, samplepos_t, bool reset);
