@@ -580,7 +580,7 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 		return midi_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm, quantize_offset);
 	}
 
-	void swap_model (std::shared_ptr<ARDOUR::MidiModel>, ARDOUR::MidiModel::DiffCommand*);
+	void edited ();
 
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
@@ -659,16 +659,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	int load_data (std::shared_ptr<MidiRegion>);
 	void compute_and_set_length ();
 	void _startup (BufferSet&, pframes_t dest_offset, Temporal::BBT_Offset const &);
-
-	struct ModelSwap {
-		std::shared_ptr<ARDOUR::MidiModel> model;
-		ARDOUR::MidiModel::DiffCommand* cmd;
-
-		ModelSwap (std::shared_ptr<ARDOUR::MidiModel> m, ARDOUR::MidiModel::DiffCommand* c)
-			: model (m), cmd (c) {}
-	};
-
-	std::atomic<ModelSwap*> model_swap;
 };
 
 class LIBARDOUR_API TriggerBoxThread
