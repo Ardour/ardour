@@ -54,7 +54,7 @@ public:
 	sigc::signal<void,uint8_t> ToggleNoteSelection;
 	sigc::signal<void,uint8_t> ExtendNoteSelection;
 
-	void set_view (MidiView&);
+	void set_view (MidiView*);
 
 private:
 	MidiViewBackground& _midi_context;
