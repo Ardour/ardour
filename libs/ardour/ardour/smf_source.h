@@ -79,6 +79,8 @@ public:
 	/** Query the smf file for its channel info */
 	SMF::UsedChannels used_midi_channels();
 
+	void render (const ReaderLock& lock, Evoral::EventSink<Temporal::Beats>& dst);
+
   protected:
 	void close ();
 	void flush_midi (const WriterLock& lock);
