@@ -282,7 +282,7 @@ Channel::process_controller (Parser & parser, EventTwoBytes *tb)
 		cv = (unsigned short) _controller_val[tb->controller_number];
 
 		if (_controller_14bit[tb->controller_number]) {
-			cv = (tb->value & 0x7f) << 7);
+			cv = (tb->value & 0x7f) << 7;
 		} else {
 			cv = tb->value;
 		}
