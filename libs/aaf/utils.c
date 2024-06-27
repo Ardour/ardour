@@ -18,6 +18,9 @@
  * 51 Franklin Street, Fifth Floor, Boston, MA 02110-1301 USA.
  */
 
+/* stdlib.h should define realpath */
+#define _GNU_SOURCE
+
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>

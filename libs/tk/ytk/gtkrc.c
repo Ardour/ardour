@@ -24,6 +24,9 @@
  * GTK+ at ftp://ftp.gtk.org/pub/gtk/. 
  */
 
+/* sys/stat.h should define lstat */
+#define _GNU_SOURCE
+
 #include "config.h"
 
 #include <locale.h>
