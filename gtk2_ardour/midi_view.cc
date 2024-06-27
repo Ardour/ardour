@@ -215,7 +215,6 @@ void
 MidiView::set_model (std::shared_ptr<MidiModel> m)
 {
 	_model = m;
-	std::cerr << this << " now has sp<MM> " << _model << " with ref " << _model.use_count() << std::endl;
 	assert (_model);
 
 	//set_height (trackview.current_height());
