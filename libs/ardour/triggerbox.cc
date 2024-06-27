@@ -1288,11 +1288,47 @@ MIDITrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& b
 	const timepos_t region_start_time = _region->start();
 	const Temporal::Beats region_start = region_start_time.beats();
 	pending->track_state (transition_beats + (time.beats() - region_start), post_edit_state);
-	// _box.tracker->resolve_diff (post_edit_state, mbuf, time.samples());
+	_box.tracker->resolve_diff (post_edit_state, mbuf, time.samples());
 //	}
 
+	std::cerr << "OLD\n";
+	RTMidiBufferBeats* ort = rt_midibuffer.load();
+	if (ort) {
+		ort->dump (99);
+	}
+
 	old_rt_midibuffer = rt_midibuffer.exchange (pending);
-	std::cerr << "Swapped in new pending RT MB\n";
+	std::cerr << "old after exch " << old_rt_midibuffer << std::endl;
+	if (iter < rt_midibuffer.load()->size()) {
+		/* shutdown */
+	}
+
+	ort = rt_midibuffer.load ();
+
+	first_event_index = std::numeric_limits<uint32_t>::min();
+	last_event_index = std::numeric_limits<uint32_t>::max();
+
+	for (uint32_t n = 0; n < ort->size(); ++n) {
+		if (first_event_index == std::numeric_limits<uint32_t>::min()) {
+			if ((*ort)[n].timestamp <= loop_start) {
+				first_event_index = n;
+			} else {
+				break;
+			}
+		}
+	}
+
+	for (uint32_t n = 0; n < ort->size(); ++n) {
+		if (last_event_index == std::numeric_limits<uint32_t>::max()) {
+			if ((*ort)[n].timestamp >= loop_end) {
+				last_event_index = n; /* exclusive end */
+				break;
+			}
+		}
+	}
+
+	std::cerr << "Swapped in new pending RT MB, events " << first_event_index << " .. " << last_event_index << "\n";
+	rt_midibuffer.load()->dump (99);
 	pending_rt_midibuffer = nullptr;
 }
 
@@ -2695,12 +2731,18 @@ MIDITrigger::set_region_in_worker_thread (std::shared_ptr<Region> r)
 	_follow_length = Temporal::BBT_Offset (0, data_length.get_beats(), 0);
 	set_length (mr->length());
 
-	pending_rt_midibuffer = new RTMidiBufferBeats;
+	_model = mr->model();
+	loop_start = r->start ().beats();
+	loop_end = r->end ().beats();
+
+	RTMidiBufferBeats* rtmb = new RTMidiBufferBeats;
 
 	{
 		Source::ReaderLock lm (mr->midi_source()->mutex());
-		mr->midi_source()->render (lm, *pending_rt_midibuffer);
+		mr->midi_source()->render (lm, *rtmb);
 	}
+
+	pending_rt_midibuffer = rtmb;
 
 	estimate_midi_patches ();
 
@@ -2723,7 +2765,7 @@ MIDITrigger::retrigger ()
 
 	/* XXX need to deal with bar offsets */
 	// const Temporal::BBT_Offset o = _start_offset + _legato_offset;
-	iter = 0;
+	iter = first_event_index;
 	_legato_offset = Temporal::BBT_Offset ();
 	last_event_beats = Temporal::Beats();
 	last_event_samples = 0;
@@ -2742,7 +2784,7 @@ MIDITrigger::tempo_map_changed ()
 	 * on an active trigger.
 	 */
 
-	iter = 0;
+	iter = first_event_index;
 	Temporal::TempoMap::SharedPtr tmap (Temporal::TempoMap::use());
 	const timepos_t region_start_time = _region->start();
 	const Temporal::Beats region_start = region_start_time.beats();
@@ -2782,9 +2824,22 @@ MIDITrigger::tempo_map_changed ()
 void
 MIDITrigger::edited ()
 {
-	// RTMidiBufferBase<Beats,Beats>* rtmb (new RTMidiBufferBase<Beats,Beats>);
-	MidiModel::ReadLock rl (model->read_lock());
-	/* render, then set pending rt */
+	RTMidiBufferBeats * rtmb (new RTMidiBufferBeats);
+	std::shared_ptr<MidiRegion> mr = std::dynamic_pointer_cast<MidiRegion> (_region);
+
+	_model->render (_model->read_lock(), *rtmb);
+
+	/* Clean up a previous RT midi buffer swap */
+
+	RTMidiBufferBeats* old = old_rt_midibuffer.load();
+	if (old) {
+		delete old;
+		old_rt_midibuffer = nullptr;
+	}
+
+	/* And set it. RT thread will find this and do what needs to be done */
+
+	pending_rt_midibuffer = rtmb;
 }
 
 template<bool in_process_context>
@@ -2843,6 +2898,11 @@ MIDITrigger::midi_run (BufferSet& bufs, samplepos_t start_sample, samplepos_t en
 		/* check that the event is within the bounds for this run() call */
 
 		if (maybe_last_event_timeline_beats < start_beats) {
+			break;
+		}
+
+		if (iter >= last_event_index) {
+			iter = rtmb->size();
 			break;
 		}
 

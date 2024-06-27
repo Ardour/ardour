@@ -647,6 +647,12 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	Temporal::BBT_Offset _start_offset;
 	Temporal::BBT_Offset _legato_offset;
 
+	std::shared_ptr<MidiModel> _model;
+	Temporal::Beats loop_start;
+	Temporal::Beats loop_end;
+	uint32_t first_event_index;
+	uint32_t last_event_index;
+
 	typedef RTMidiBufferBase<Temporal::Beats,Temporal::Beats> RTMidiBufferBeats;
 
 	std::atomic<RTMidiBufferBeats*> rt_midibuffer;
