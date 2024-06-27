@@ -272,8 +272,8 @@ Channel::process_controller (Parser & parser, EventTwoBytes *tb)
 	if (tb->controller_number < 32) { /* unsigned: no test for >= 0 */
 
 		/* if this controller is already known to use 14 bits,
-		   then treat this value as the MSB, and combine it
-		   with the existing LSB.
+		   then treat this value as the MSB, and as per MIDI spec, set
+		   LSB to zero.
 
 		   otherwise, just treat it as a 7 bit value, and set
 		   it directly.
@@ -282,7 +282,7 @@ Channel::process_controller (Parser & parser, EventTwoBytes *tb)
 		cv = (unsigned short) _controller_val[tb->controller_number];
 
 		if (_controller_14bit[tb->controller_number]) {
-			cv = ((tb->value & 0x7f) << 7) | (cv & 0x7f);
+			cv = (tb->value & 0x7f) << 7);
 		} else {
 			cv = tb->value;
 		}
