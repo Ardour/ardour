@@ -917,7 +917,6 @@ MidiView::apply_note_diff (bool as_subcommand, bool was_copy)
 
 	if (!as_subcommand) {
 		_editing_context.commit_reversible_command ();  /*instead, we can explicitly commit the command in progress */
-		post_edit ();
 	}
 
 	_note_diff_command = nullptr;
@@ -2748,7 +2747,6 @@ MidiView::note_dropped (NoteBase *, timecnt_t const & d_qn, int8_t dnote, bool c
 
 	apply_note_diff (true /*subcommand, we don't want this to start a new commit*/, copy);
 	_editing_context.commit_reversible_command ();
-	post_edit ();
 
 	// care about notes being moved beyond the upper/lower bounds on the canvas
 	if (lowest_note_in_selection  < _midi_context.lowest_note() ||
@@ -3246,7 +3244,6 @@ MidiView::set_velocities_for_notes (std::vector<NoteBase*>& notes, std::vector<i
 
 	apply_note_diff (true /*subcommand, we don't want this to start a new commit*/, false);
 	_editing_context.commit_reversible_command ();
-	post_edit ();
 	delete _note_diff_command;
 	_note_diff_command = nullptr;
 
@@ -3749,7 +3746,6 @@ MidiView::duplicate_selection ()
 	bool commit = paste (dup_pos, local_selection, ctxt);
 	if (commit) {
 		_editing_context.commit_reversible_command ();
-		post_edit ();
 	} else {
 		_editing_context.abort_reversible_command ();
 	}
@@ -3909,7 +3905,6 @@ MidiView::goto_next_note (bool add_to_selection)
 
 
 	_editing_context.commit_reversible_selection_op();
-	post_edit ();
 }
 
 void
@@ -3962,7 +3957,6 @@ MidiView::goto_previous_note (bool add_to_selection)
 	}
 
 	_editing_context.commit_reversible_selection_op();
-	post_edit ();
 }
 
 void
@@ -4493,7 +4487,6 @@ MidiView::quantize_selected_notes ()
 	       (*cmd)();
 	       _editing_context.session()->add_command (cmd);
 	       _editing_context.commit_reversible_command ();
-		post_edit ();
 	       _editing_context.session()->set_dirty ();
 	}
 
