@@ -125,11 +125,3 @@ MidiCueView::set_samples_per_pixel (double spp)
 	reset_width_dependent_items (_editing_context.duration_to_pixels (duration));
 }
 
-void
-MidiCueView::post_edit ()
-{
-	std::cerr << "Post-edit\n";
-	std::shared_ptr<ARDOUR::TriggerBox> tb = _midi_track->triggerbox ();
-	assert (tb);
-	std::dynamic_pointer_cast<ARDOUR::MIDITrigger>(tb->trigger (_slot_index))->edited ();
-}
