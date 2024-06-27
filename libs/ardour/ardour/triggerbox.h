@@ -580,8 +580,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 		return midi_run<true> (bufs, start_sample, end_sample, start, end, nframes, dest_offset, bpm, quantize_offset);
 	}
 
-	void edited ();
-
 	void set_start (timepos_t const &);
 	void set_end (timepos_t const &);
 	void set_legato_offset (timepos_t const &);
@@ -636,7 +634,6 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 
   private:
 	PBD::ID data_source;
-	PBD::ScopedConnection content_connection;
 
 	Temporal::Beats final_beat;
 
@@ -648,6 +645,9 @@ class LIBARDOUR_API MIDITrigger : public Trigger {
 	Temporal::BBT_Offset _legato_offset;
 
 	std::shared_ptr<MidiModel> _model;
+	PBD::ScopedConnection content_connection;
+	void model_contents_changed();
+
 	Temporal::Beats loop_start;
 	Temporal::Beats loop_end;
 	uint32_t first_event_index;
