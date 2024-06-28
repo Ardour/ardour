@@ -180,9 +180,6 @@ public:
 	}
 	double trackviews_height () const;
 
-	void undo (uint32_t n = 1);
-	void redo (uint32_t n = 1);
-
 	XMLNode& get_state () const;
 	int set_state (const XMLNode&, int version);
 
@@ -526,6 +523,9 @@ protected:
 	void resume_route_redisplay ();
 
 	RegionSelection region_selection();
+
+	void do_undo (uint32_t n);
+	void do_redo (uint32_t n);
 
 private:
 

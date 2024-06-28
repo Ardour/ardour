@@ -145,7 +145,7 @@ using Gtkmm2ext::Keyboard;
  ***********************************************************************/
 
 void
-Editor::undo (uint32_t n)
+Editor::do_undo (uint32_t n)
 {
 	if (_session && _session->actively_recording()) {
 		/* no undo allowed while recording. Session will check also,
@@ -166,7 +166,7 @@ Editor::undo (uint32_t n)
 }
 
 void
-Editor::redo (uint32_t n)
+Editor::do_redo (uint32_t n)
 {
 	if (_session && _session->actively_recording()) {
 		/* no redo allowed while recording. Session will check also,

@@ -377,6 +377,16 @@ public:
 	bool on_velocity_scroll_event (GdkEventScroll*);
 	void pre_render ();
 
+	/** Undo some transactions.
+	 * @param n Number of transactions to undo.
+	 */
+	void undo (uint32_t n = 1) { do_undo (n); }
+
+	/** Redo some transactions.
+	 * @param n Number of transaction to redo.
+	 */
+	void redo (uint32_t n = 1) { do_redo (n); }
+
   protected:
 	std::string _name;
 
@@ -630,6 +640,9 @@ public:
 
 	PBD::ScopedConnection escape_connection;
 	virtual void escape () {}
+
+	virtual void do_undo (uint32_t n) = 0;
+	virtual void do_redo (uint32_t n) = 0;
 
   private:
 	static std::stack<EditingContext*> ec_stack;
