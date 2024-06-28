@@ -486,6 +486,8 @@ OSCSelectObserver::plugin_init()
 		plugin_end ();
 		return;
 	}
+	_osc.float_message (X_("/select/plugin"), selected_piid, addr);
+
 	std::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
 	// we have a plugin we can ask if it is activated
 	proc->ActiveChanged.connect (plugin_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::plug_enable, this, X_("/select/plugin/activate"), proc), OSC::instance());
@@ -558,6 +560,7 @@ void
 OSCSelectObserver::plugin_end ()
 {
 	plugin_connections.drop_connections ();
+	_osc.float_message (X_("/select/plugin"), 0, addr);
 	_osc.float_message (X_("/select/plugin/activate"), 0, addr);
 	_osc.text_message (X_("/select/plugin/name"), " ", addr);
 	for (uint32_t i = 1; i <= plug_size; i++) {
