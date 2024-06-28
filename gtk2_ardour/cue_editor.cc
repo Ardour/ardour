@@ -1,7 +1,11 @@
 #include "cue_editor.h"
+#include "editor_drag.h"
+
+#include "pbd/i18n.h"
 
 CueEditor::CueEditor (std::string const & name)
 	: EditingContext (name)
+	, HistoryOwner (X_("cue-editor"))
 {
 }
 CueEditor::~CueEditor ()
@@ -212,5 +216,25 @@ void
 CueEditor::end_local_tempo_map (std::shared_ptr<Temporal::TempoMap const> map)
 {
 	Temporal::TempoMap::set (map);
+}
+
+void
+CueEditor::do_undo (uint32_t n)
+{
+	if (_drags->active ()) {
+		_drags->abort ();
+	}
+
+	_history.undo (n);
+}
+
+void
+CueEditor::do_redo (uint32_t n)
+{
+	if (_drags->active ()) {
+		_drags->abort ();
+	}
+
+	_history.redo (n);
 }
 

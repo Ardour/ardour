@@ -19,10 +19,12 @@
 #ifndef __gtk_ardour_cue_editor_h__
 #define __gtk_ardour_cue_editor_h__
 
+#include "pbd/history_owner.h"
+
 #include "editing.h"
 #include "editing_context.h"
 
-class CueEditor : public EditingContext
+class CueEditor : public EditingContext, public PBD::HistoryOwner
 {
   public:
 	CueEditor (std::string const & name);
@@ -97,6 +99,9 @@ class CueEditor : public EditingContext
 
   protected:
 	void reset_x_origin_to_follow_playhead ();
+
+	void do_undo (uint32_t n);
+	void do_redo (uint32_t n);
 };
 
 #endif /* __gtk_ardour_cue_editor_h__ */

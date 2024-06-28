@@ -400,11 +400,11 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "multi-duplicate", _("Multi-Duplicate..."),
 	          sigc::bind (sigc::mem_fun (*this, &Editor::duplicate_range), true));
 
-	undo_action = reg_sens (editor_actions, "undo", S_("Command|Undo"), sigc::bind (sigc::mem_fun(*this, &Editor::undo), 1U));
 
-	redo_action = reg_sens (editor_actions, "redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
-	alternate_redo_action = reg_sens (editor_actions, "alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
-	alternate_alternate_redo_action = reg_sens (editor_actions, "alternate-alternate-redo", _("Redo"), sigc::bind (sigc::mem_fun(*this, &Editor::redo), 1U));
+	undo_action = reg_sens (editor_actions, "undo", S_("Command|Undo"), []() { current_editing_context()->undo(1U) ; });
+	redo_action = reg_sens (editor_actions, "redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
+	alternate_redo_action = reg_sens (editor_actions, "alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
+	alternate_alternate_redo_action = reg_sens (editor_actions, "alternate-alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
 
 	selection_undo_action = reg_sens (editor_actions, "undo-last-selection-op", _("Undo Selection Change"), sigc::mem_fun(*this, &Editor::undo_selection_op));
 	selection_redo_action = reg_sens (editor_actions, "redo-last-selection-op", _("Redo Selection Change"), sigc::mem_fun(*this, &Editor::redo_selection_op));

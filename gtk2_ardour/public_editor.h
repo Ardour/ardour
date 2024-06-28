@@ -145,17 +145,6 @@ public:
 
 	virtual samplepos_t playhead_cursor_sample () const = 0;
 
-	/** Undo some transactions.
-	 * @param n Number of transactions to undo.
-	 */
-
-	virtual void undo (uint32_t n = 1) = 0;
-
-	/** Redo some transactions.
-	 * @param n Number of transaction to redo.
-	 */
-	virtual void redo (uint32_t n = 1) = 0;
-
 	/** Possibly start the audition of a region.
 	 *
 	 * If \p r is 0, or not an AudioRegion any current audition is cancelled.
