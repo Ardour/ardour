@@ -43,6 +43,7 @@ libpbd_sources = [
     'file_utils.cc',
     'fpu.cc',
     'glib_event_source.cc',
+    'history_owner.cc',
     'id.cc',
     'inflater.cc',
     'locale_guard.cc',
