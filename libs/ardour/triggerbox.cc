@@ -1296,6 +1296,10 @@ MIDITrigger::check_edit_swap (timepos_t const & time, bool playing, BufferSet& b
 
 		Temporal::Beats p = time.beats() - transition_beats;
 
+		/* now determine the state at this time, which we need relative
+		 * to the start of the loop within the data.
+		 */
+
 		pending->track_state (p - loop_start, post_edit_state);
 		_box.tracker->resolve_diff (post_edit_state, mbuf, time.samples());
 	}
