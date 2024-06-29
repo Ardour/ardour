@@ -32,6 +32,7 @@
 #include "pbd/compose.h"
 #include "pbd/enumwriter.h"
 #include "pbd/error.h"
+#include "pbd/history_owner.h"
 
 #include "evoral/Control.h"
 
@@ -100,24 +101,24 @@ MidiModel::new_patch_change_diff_command (const string& name)
 
 
 void
-MidiModel::apply_diff_command_as_commit(Session& session, Command* cmd)
+MidiModel::apply_diff_command_as_commit(HistoryOwner& history, Command* cmd)
 {
-	session.begin_reversible_command (cmd->name());
+	history.begin_reversible_command (cmd->name());
 	(*cmd)();
-	session.commit_reversible_command (cmd);
+	history.commit_reversible_command (cmd);
 	set_edited (true);
 }
 
 void
-MidiModel::apply_diff_command_as_subcommand(Session& session, Command* cmd)
+MidiModel::apply_diff_command_as_subcommand (HistoryOwner& history, Command* cmd)
 {
 	(*cmd)();
-	session.add_command (cmd);
+	history.add_command (cmd);
 	set_edited (true);
 }
 
 void
-MidiModel::apply_diff_command_only(Session& session, Command* cmd)
+MidiModel::apply_diff_command_only (Command* cmd)
 {
 	(*cmd)();
 	set_edited (true);
