@@ -117,6 +117,7 @@ class OSCSelectObserver
 	void send_init (void);
 	void send_end (void);
 	void plugin_init (void);
+	void plugin_feedback (std::shared_ptr<ARDOUR::Route> r, int piid );
 	void plugin_end (void);
 	void plugin_parameter_changed (int pid, bool swtch, std::shared_ptr<PBD::Controllable> controllable);
 	void send_gain (uint32_t id, std::shared_ptr<PBD::Controllable> controllable);

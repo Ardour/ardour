@@ -487,8 +487,13 @@ OSCSelectObserver::plugin_init()
 		return;
 	}
 
+	plugin_feedback(r, selected_piid);
+}
+
+void
+OSCSelectObserver::plugin_feedback(std::shared_ptr<Route> r, int piid) {
 	// we have a plugin number now get the processor
-	std::shared_ptr<Processor> proc = r->nth_plugin (sur->plugins[selected_piid - 1]);
+	std::shared_ptr<Processor> proc = r->nth_plugin (sur->plugins[piid - 1]);
 	std::shared_ptr<PluginInsert> pi;
 	if (!(pi = std::dynamic_pointer_cast<PluginInsert>(proc))) {
 		plugin_end ();
