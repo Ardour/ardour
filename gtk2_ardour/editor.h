@@ -431,6 +431,14 @@ public:
 	void abort_reversible_selection_op ();
 	void undo_selection_op ();
 	void redo_selection_op ();
+	void add_command (PBD::Command * cmd);
+
+	PBD::HistoryOwner& history();
+
+	void begin_reversible_command (std::string cmd_name);
+	void begin_reversible_command (GQuark);
+	void abort_reversible_command ();
+	void commit_reversible_command ();
 
 	MixerStrip* get_current_mixer_strip () const {
 		return current_mixer_strip;
@@ -2092,10 +2100,6 @@ private:
 
 	void session_state_saved (std::string);
 
-	Glib::RefPtr<Gtk::Action>              undo_action;
-	Glib::RefPtr<Gtk::Action>              redo_action;
-	Glib::RefPtr<Gtk::Action>              alternate_redo_action;
-	Glib::RefPtr<Gtk::Action>              alternate_alternate_redo_action;
 	Glib::RefPtr<Gtk::Action>              selection_undo_action;
 	Glib::RefPtr<Gtk::Action>              selection_redo_action;
 
@@ -2264,10 +2268,6 @@ private:
 
 	Glib::RefPtr<Gtk::Action> register_region_action (Glib::RefPtr<Gtk::ActionGroup> group, Editing::RegionActionTarget, char const* name, char const* label, sigc::slot<void> slot);
 	void register_toggle_region_action (Glib::RefPtr<Gtk::ActionGroup> group, Editing::RegionActionTarget, char const* name, char const* label, sigc::slot<void> slot);
-
-	Glib::RefPtr<Gtk::Action> reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
-	void toggle_reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
-	void radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const* name, char const* label, sigc::slot<void> slot);
 
 	void remove_gap_marker_callback (Temporal::timepos_t at, Temporal::timecnt_t distance);
 

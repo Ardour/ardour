@@ -8,6 +8,7 @@ CueEditor::CueEditor (std::string const & name)
 	, HistoryOwner (X_("cue-editor"))
 {
 }
+
 CueEditor::~CueEditor ()
 {
 }

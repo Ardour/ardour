@@ -66,6 +66,14 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	void undo_selection_op ();
 	void redo_selection_op ();
 
+	PBD::HistoryOwner& history() { return *this; }
+
+	void add_command (PBD::Command * cmd) { HistoryOwner::add_command (cmd); }
+	void begin_reversible_command (std::string cmd_name) { HistoryOwner::begin_reversible_command (cmd_name); }
+	void begin_reversible_command (GQuark gq) { HistoryOwner::begin_reversible_command (gq); }
+	void abort_reversible_command () { HistoryOwner::abort_reversible_command (); }
+	void commit_reversible_command () { HistoryOwner::commit_reversible_command (); }
+
 	double get_y_origin () const;
 
 	void set_zoom_focus (Editing::ZoomFocus);

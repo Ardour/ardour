@@ -844,7 +844,6 @@ MidiView::start_note_diff_command (string name)
 {
 	if (!_note_diff_command) {
 		_editing_context.begin_reversible_command (name);
-		std::cerr << "start note diff on " << _model << " uc " << _model.use_count() << std::endl;
 		_note_diff_command = _model->new_note_diff_command (name);
 	} else {
 		std::cerr << "ERROR: start_note_diff_command command called, but a note_diff_command was already underway" << std::endl;
@@ -912,7 +911,7 @@ MidiView::apply_note_diff (bool as_subcommand, bool was_copy)
 	{
 		PBD::Unwinder<bool> puw (_select_all_notes_after_add, true);
 		/*note that we don't use as_commit here, because that would BEGIN a new undo record; we already have one underway*/
-		_model->apply_diff_command_as_subcommand (*_editing_context.session(), _note_diff_command);
+		_model->apply_diff_command_as_subcommand (_editing_context.history(), _note_diff_command);
 	}
 
 	if (!as_subcommand) {
@@ -1911,7 +1910,7 @@ MidiView::change_patch_change (PatchChange& pc, const MIDI::Name::PatchPrimaryKe
 		c->change_bank (pc.patch (), new_bank);
 	}
 
-	_model->apply_diff_command_as_commit (*_editing_context.session(), c);
+	_model->apply_diff_command_as_commit (_editing_context.history(), c);
 
 	remove_canvas_patch_change (&pc);
 	display_patch_changes ();
@@ -1940,7 +1939,7 @@ MidiView::change_patch_change (MidiModel::PatchChangePtr old_change, const Evora
 		c->change_bank (old_change, new_change.bank());
 	}
 
-	_model->apply_diff_command_as_commit (*_editing_context.session(), c);
+	_model->apply_diff_command_as_commit (_editing_context.history(), c);
 
 	for (PatchChanges::iterator x = _patch_changes.begin(); x != _patch_changes.end(); ++x) {
 		if (x->second->patch() == old_change) {
@@ -1969,7 +1968,7 @@ MidiView::add_patch_change (timecnt_t const & t, Evoral::PatchChange<Temporal::B
 		        (_midi_region->source_relative_position (_midi_region->position() + t).beats(),
 		         patch.channel(), patch.program(), patch.bank())));
 
-	_model->apply_diff_command_as_commit (*_editing_context.session(), c);
+	_model->apply_diff_command_as_commit (_editing_context.history(), c);
 
 	display_patch_changes ();
 }
@@ -1979,7 +1978,7 @@ MidiView::move_patch_change (PatchChange& pc, Temporal::Beats t)
 {
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("move patch change"));
 	c->change_time (pc.patch (), t);
-	_model->apply_diff_command_as_commit (*_editing_context.session(), c);
+	_model->apply_diff_command_as_commit (_editing_context.history(), c);
 
 	display_patch_changes ();
 }
@@ -1989,7 +1988,7 @@ MidiView::delete_patch_change (PatchChange* pc)
 {
 	MidiModel::PatchChangeDiffCommand* c = _model->new_patch_change_diff_command (_("delete patch change"));
 	c->remove (pc->patch ());
-	_model->apply_diff_command_as_commit (*_editing_context.session(), c);
+	_model->apply_diff_command_as_commit (_editing_context.history(), c);
 
 	remove_canvas_patch_change (pc);
 	display_patch_changes ();
@@ -3839,13 +3838,13 @@ MidiView::paste_internal (timepos_t const & pos, unsigned paste_count, float tim
 		// XXXX _midi_region->clear_changes ();
 		/* we probably need to get the snap modifier somehow to make this correct for non-musical use */
 		_midi_region->set_length (_midi_region->position().distance (end));
-		_editing_context.session()->add_command (new StatefulDiffCommand (_midi_region));
+		_editing_context.add_command (new StatefulDiffCommand (_midi_region));
 	}
 
 	_marked_for_selection.clear ();
 	_pending_note_selection.clear ();
 
-	_model->apply_diff_command_as_subcommand (*_editing_context.session(), _note_diff_command);
+	_model->apply_diff_command_as_subcommand (_editing_context.history(), _note_diff_command);
 	_note_diff_command = nullptr;
 }
 
@@ -4485,7 +4484,7 @@ MidiView::quantize_selected_notes ()
 	if (cmd) {
 	       _editing_context.begin_reversible_command (quant->name ());
 	       (*cmd)();
-	       _editing_context.session()->add_command (cmd);
+	       _editing_context.add_command (cmd);
 	       _editing_context.commit_reversible_command ();
 	       _editing_context.session()->set_dirty ();
 	}

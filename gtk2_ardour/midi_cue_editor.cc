@@ -87,6 +87,7 @@ MidiCueEditor::MidiCueEditor()
 
 MidiCueEditor::~MidiCueEditor ()
 {
+	delete bindings;
 }
 
 void
@@ -283,7 +284,16 @@ MidiCueEditor::build_canvas ()
 	_canvas->add_events (Gdk::POINTER_MOTION_HINT_MASK | Gdk::SCROLL_MASK | Gdk::KEY_PRESS_MASK | Gdk::KEY_RELEASE_MASK);
 	_canvas->set_can_focus ();
 
+	bindings_changed ();
+}
+
+void
+MidiCueEditor::bindings_changed ()
+{
 	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
+	Bindings* shared_bindings = Bindings::get_bindings (X_("Editing"));
+
+	_canvas_viewport->set_data (X_("ardour-bindings"), shared_bindings);
 	_canvas->set_data (X_("ardour-bindings"), midi_bindings);
 }
 
