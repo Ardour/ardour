@@ -44,9 +44,12 @@
 #include "evoral/Note.h"
 #include "evoral/Sequence.h"
 
+namespace PBD {
+	class HistoryOwner;
+}
+
 namespace ARDOUR {
 
-class Session;
 class MidiSource;
 class MidiStateTracker;
 
@@ -277,22 +280,22 @@ public:
 	 * This STARTS and COMMITS an undo command.
 	 * The command will constitute one item on the undo stack.
 	 */
-	void apply_diff_command_as_commit (Session& session, PBD::Command* cmd);
+	void apply_diff_command_as_commit (PBD::HistoryOwner&, PBD::Command* cmd);
 
-	void apply_diff_command_as_commit (Session* session, PBD::Command* cmd) { if (session) { apply_diff_command_as_commit (*session, cmd); } }
+	void apply_diff_command_as_commit (PBD::HistoryOwner* history, PBD::Command* cmd) { if (history) { apply_diff_command_as_commit (*history, cmd); } }
 
 	/** Add a command as part of a larger reversible transaction
 	 *
 	 * Ownership of cmd is taken, it must not be deleted by the caller.
 	 * The command will be incorporated into the current command.
 	 */
-	void apply_diff_command_as_subcommand (Session& session, PBD::Command* cmd);
+	void apply_diff_command_as_subcommand (PBD::HistoryOwner&, PBD::Command* cmd);
 
 	/** Apply the midi diff, but without any effect on undo
 	 *
 	 * Ownership of cmd is not changed.
 	 */
-	void apply_diff_command_only (Session& session, PBD::Command* cmd);
+	void apply_diff_command_only (PBD::Command* cmd);
 
 	bool sync_to_source (const Source::WriterLock& source_lock);
 

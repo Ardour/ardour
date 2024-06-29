@@ -466,7 +466,7 @@ no_audio_tracks:
 			/* PT C-2 = 0, Ardour C-1 = 0, subtract twelve to convert ? */
 			midicmd->add (std::shared_ptr<Evoral::Note<Temporal::Beats> > (new Evoral::Note<Temporal::Beats> ((uint8_t)1, start, len, j->note, j->velocity)));
 		}
-		mm->apply_diff_command_only (*this, midicmd);
+		mm->apply_diff_command_only (midicmd);
 		delete midicmd;
 		std::shared_ptr<Region> copy (RegionFactory::create (mr, true));
 		playlist->clear_changes ();
