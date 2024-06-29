@@ -84,14 +84,14 @@ HistoryOwner::begin_reversible_command (GQuark q)
 	*/
 
 	if (_current_trans == 0) {
-		DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("Begin Reversible Command, new transaction: %1\n", g_quark_to_string (q)));
+		DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("%2 Begin Reversible Command, new transaction: %1\n", g_quark_to_string (q), _name));
 
 		/* start a new transaction */
 		assert (_current_trans_quarks.empty ());
 		_current_trans = new UndoTransaction();
 		_current_trans->set_name (g_quark_to_string (q));
 	} else {
-		DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("Begin Reversible Command, current transaction: %1\n", _current_trans->name ()));
+		DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("%2 Begin Reversible Command, current transaction: %1\n", _current_trans->name (), _name));
 	}
 
 	_current_trans_quarks.push_front (q);
@@ -103,7 +103,7 @@ HistoryOwner::abort_reversible_command ()
 	if (!_current_trans) {
 		return;
 	}
-	DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("Abort Reversible Command: %1\n", _current_trans->name ()));
+	DEBUG_TRACE (DEBUG::UndoHistory, string_compose ("%2 Abort Reversible Command: %1\n", _current_trans->name (), _name));
 	_current_trans->clear();
 	delete _current_trans;
 	_current_trans = nullptr;
@@ -133,23 +133,23 @@ HistoryOwner::commit_reversible_command (Command *cmd)
 
 	if (cmd) {
 		DEBUG_TRACE (DEBUG::UndoHistory,
-		    string_compose ("Current Undo Transaction %1, adding command: %2\n",
+		    string_compose ("%3 Current Undo Transaction %1, adding command: %2\n",
 		                    _current_trans->name (),
-		                    cmd->name ()));
+		                    cmd->name (), _name));
 		_current_trans->add_command (cmd);
 	}
 
 	DEBUG_TRACE (DEBUG::UndoHistory,
-	    string_compose ("Commit Reversible Command, current transaction: %1\n",
-	                    _current_trans->name ()));
+	    string_compose ("%2 Commit Reversible Command, current transaction: %1\n",
+	                    _current_trans->name (), _name));
 
 	_current_trans_quarks.pop_front ();
 
 	if (!_current_trans_quarks.empty ()) {
 		DEBUG_TRACE (DEBUG::UndoHistory,
-		    string_compose ("Commit Reversible Command, transaction is not "
+		    string_compose ("%2 Commit Reversible Command, transaction is not "
 		                    "top-level, current transaction: %1\n",
-		                    _current_trans->name ()));
+		                    _current_trans->name (), _name));
 		/* the transaction we're committing is not the top-level one */
 		return;
 	}
@@ -157,9 +157,9 @@ HistoryOwner::commit_reversible_command (Command *cmd)
 	if (_current_trans->empty()) {
 		/* no commands were added to the transaction, so just get rid of it */
 		DEBUG_TRACE (DEBUG::UndoHistory,
-		    string_compose ("Commit Reversible Command, No commands were "
+		    string_compose ("%2 Commit Reversible Command, No commands were "
 		                    "added to current transaction: %1\n",
-		                    _current_trans->name ()));
+		                    _current_trans->name (), _name));
 		delete _current_trans;
 		_current_trans = nullptr;
 		return;
@@ -169,8 +169,8 @@ HistoryOwner::commit_reversible_command (Command *cmd)
 	_current_trans->set_timestamp (now);
 
 	DEBUG_TRACE (DEBUG::UndoHistory,
-	             string_compose ("Commit Reversible Command, add to history %1\n",
-	                             _current_trans->name ()));
+	             string_compose ("%2 Commit Reversible Command, add to history %1\n",
+	                             _current_trans->name (), _name));
 	_history.add (_current_trans);
 	_current_trans = nullptr;
 }
