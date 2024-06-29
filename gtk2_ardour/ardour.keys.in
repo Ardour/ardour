@@ -98,6 +98,7 @@ This mode provides many different operations on both regions and control points,
 %midi Global Global MIDI commands
 
 %notes MIDI Note Editing
+%editing Editing Shared Editing
 
 %rec Recorder Recorder Page
 
@@ -166,14 +167,14 @@ This mode provides many different operations on both regions and control points,
 @vis|Editor/show-editor-mixer|                             <@TERTIARY@>e|toggle editor window mixer
 @mmode|Editor/set-mouse-mode-range|                                 r|range mode
 @wvis|Common/show-recorder|                               <@SECONDARY@>r|show recorder page
-@edit|Editor/redo|                                          <@PRIMARY@>r|redo
+@editing|Editing/redo|                                          <@PRIMARY@>r|redo
 @edit|Editor/select-from-regions|               <@PRIMARY@><@TERTIARY@>r|set Range to selected regions
 @edit|Editor/add-range-marker-from-selection| <@SECONDARY@><@TERTIARY@>r|Add single Range marker from selection
 @trans|Transport/Record|                                   <@TERTIARY@>r|engage record
 @mmode|Editor/set-mouse-mode-timefx|                                t|timefx mode
 @gselect|Common/select-all-visible-lanes|                   <@PRIMARY@>t|select all visible lanes
 @mmode|Editor/set-mouse-mode-grid|                                  y|grid mode
-@edit|Editor/alternate-redo|                                <@PRIMARY@>y|redo
+@editing|Editing/alternate-redo|                                <@PRIMARY@>y|redo
 @select|Editor/select-all-between-cursors|                  <@PRIMARY@>u|select all regions enclosed by Range
 @select|Editor/select-all-within-cursors|                              u|select all regions touched by Range
 @rop|Region/fork-regions-from-unselected|                  <@TERTIARY@>u|unlink midi from unselected regions
@@ -225,8 +226,8 @@ This mode provides many different operations on both regions and control points,
 ;; BOTTOM ROW
 
 @mmode|Editor/zoom-to-selection|                                       z|zoom to selection
-@edit|Editor/undo|                                          <@PRIMARY@>z|undo
-@edit|Editor/alternate-alternate-redo|          <@PRIMARY@><@TERTIARY@>z|redo
+@editing|Editing/undo|                                          <@PRIMARY@>z|undo
+@editing|Editing/alternate-alternate-redo|          <@PRIMARY@><@TERTIARY@>z|redo
 @vis|Editor/toggle-zoom|                                   <@TERTIARY@>z|toggle last 2 zoom states
 @aep|Region/align-regions-sync-relative|                               x|align sync points (relative)
 @edit|Editor/editor-cut|                                    <@PRIMARY@>x|cut
