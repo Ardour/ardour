@@ -481,7 +481,7 @@ Bindings::activate (KeyboardKey kb, Operation op)
 
 	if (k == kbm.end()) {
 		/* no entry for this key in the state map */
-		DEBUG_TRACE (DEBUG::Bindings, string_compose ("no binding for %1 (of %2)\n", unshifted, kbm.size()));
+		DEBUG_TRACE (DEBUG::Bindings, string_compose ("no binding for %1 (of %2) within %3\n", unshifted, kbm.size(), _name));
 		return false;
 	}
 
@@ -507,14 +507,14 @@ Bindings::activate (KeyboardKey kb, Operation op)
 	if (action) {
 		/* lets do it ... */
 		if (action->get_sensitive()) {
-			DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2\n", unshifted, k->second.action_name));
+			DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2 within %3\n", unshifted, k->second.action_name, _name));
 			action->activate ();
 		} else {
-			DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2 - insensitive, skipped\n", unshifted, k->second.action_name));
+			DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1: %2 - insensitive, skipped within %3\n", unshifted, k->second.action_name, _name));
 			return false;
 		}
 	} else {
-		DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1 is known but has no action\n", unshifted));
+		DEBUG_TRACE (DEBUG::Bindings, string_compose ("binding for %1 is known but has no action within %2\n", unshifted, _name));
 	}
 	/* return true even if the action could not be found */
 
