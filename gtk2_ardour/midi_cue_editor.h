@@ -193,6 +193,7 @@ class MidiCueEditor : public CueEditor
 	void stop_canvas_autoscroll ();
 
 	void visual_changer (const VisualChange&);
+	void bindings_changed ();
 };
 
 

@@ -64,6 +64,7 @@ using std::string;
 sigc::signal<void> EditingContext::DropDownKeys;
 Gtkmm2ext::Bindings* EditingContext::button_bindings = nullptr;
 Glib::RefPtr<Gtk::ActionGroup> EditingContext::_midi_actions;
+Glib::RefPtr<Gtk::ActionGroup> EditingContext::_common_actions;
 std::stack<EditingContext*> EditingContext::ec_stack;
 std::vector<std::string> EditingContext::grid_type_strings;
 MouseCursors* EditingContext::_cursors = nullptr;
@@ -100,6 +101,11 @@ sigc::signal<void> EditingContext::DrawLengthChanged;
 sigc::signal<void> EditingContext::DrawVelocityChanged;
 sigc::signal<void> EditingContext::DrawChannelChanged;
 
+Glib::RefPtr<Gtk::Action> EditingContext::undo_action;
+Glib::RefPtr<Gtk::Action> EditingContext::redo_action;
+Glib::RefPtr<Gtk::Action> EditingContext::alternate_redo_action;
+Glib::RefPtr<Gtk::Action> EditingContext::alternate_alternate_redo_action;
+
 EditingContext::EditingContext (std::string const & name)
 	: rubberband_rect (0)
 	, _name (name)
@@ -129,6 +135,7 @@ EditingContext::EditingContext (std::string const & name)
 	, quantize_dialog (nullptr)
 	, vertical_adjustment (0.0, 0.0, 10.0, 400.0)
 	, horizontal_adjustment (0.0, 0.0, 1e16)
+	, bindings (nullptr)
 	, mouse_mode (MouseObject)
 	, visual_change_queued (false)
 	, autoscroll_horizontal_allowed (false)
@@ -197,6 +204,21 @@ EditingContext::set_selected_midi_region_view (MidiRegionView& mrv)
 
 	midi_action (&MidiRegionView::clear_note_selection);
 	get_selection().set (&mrv);
+}
+
+void
+EditingContext::register_common_actions (Bindings* common_bindings)
+{
+	if (_common_actions) {
+		return;
+	}
+
+	_common_actions = ActionManager::create_action_group (common_bindings, X_("Editing"));
+
+	undo_action = reg_sens (_common_actions, "undo", S_("Command|Undo"), []() { current_editing_context()->undo(1U) ; });
+	redo_action = reg_sens (_common_actions, "redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
+	alternate_redo_action = reg_sens (_common_actions, "alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
+	alternate_alternate_redo_action = reg_sens (_common_actions, "alternate-alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
 }
 
 void
@@ -1245,56 +1267,6 @@ EditingContext::set_follow_playhead (bool yn, bool catch_up)
 			reset_x_origin_to_follow_playhead ();
 		}
 		instant_save ();
-	}
-}
-
-void
-EditingContext::begin_reversible_command (string name)
-{
-	if (_session) {
-		before.push_back (&_selection_memento->get_state ());
-		_session->begin_reversible_command (name);
-	}
-}
-
-void
-EditingContext::begin_reversible_command (GQuark q)
-{
-	if (_session) {
-		before.push_back (&_selection_memento->get_state ());
-		_session->begin_reversible_command (q);
-	}
-}
-
-void
-EditingContext::abort_reversible_command ()
-{
-	if (_session) {
-		while(!before.empty()) {
-			delete before.front();
-			before.pop_front();
-		}
-		_session->abort_reversible_command ();
-	}
-}
-
-void
-EditingContext::commit_reversible_command ()
-{
-	if (_session) {
-		if (before.size() == 1) {
-			_session->add_command (new MementoCommand<SelectionMemento>(*(_selection_memento), before.front(), &_selection_memento->get_state ()));
-			begin_selection_op_history ();
-		}
-
-		if (before.empty()) {
-			PBD::stacktrace (std::cerr, 30);
-			std::cerr << "Please call begin_reversible_command() before commit_reversible_command()." << std::endl;
-		} else {
-			before.pop_back();
-		}
-
-		_session->commit_reversible_command ();
 	}
 }
 
@@ -2492,5 +2464,29 @@ EditingContext::pre_render ()
 	if (pending_visual_change.pending != 0) {
 		ensure_visual_change_idle_handler();
 	}
+}
+
+/* Convenience functions to slightly reduce verbosity when registering actions */
+
+RefPtr<Action>
+EditingContext::reg_sens (RefPtr<ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot)
+{
+	RefPtr<Action> act = ActionManager::register_action (group, name, label, slot);
+	ActionManager::session_sensitive_actions.push_back (act);
+	return act;
+}
+
+void
+EditingContext::toggle_reg_sens (RefPtr<ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot)
+{
+	RefPtr<Action> act = ActionManager::register_toggle_action (group, name, label, slot);
+	ActionManager::session_sensitive_actions.push_back (act);
+}
+
+void
+EditingContext::radio_reg_sens (RefPtr<ActionGroup> action_group, RadioAction::Group& radio_group, char const * name, char const * label, sigc::slot<void> slot)
+{
+	RefPtr<Action> act = ActionManager::register_radio_action (action_group, radio_group, name, label, slot);
+	ActionManager::session_sensitive_actions.push_back (act);
 }
 

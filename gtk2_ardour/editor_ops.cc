@@ -144,6 +144,71 @@ using Gtkmm2ext::Keyboard;
   Editor operations
  ***********************************************************************/
 
+HistoryOwner&
+Editor::history()
+{
+	assert (_session);
+	return *_session;
+}
+
+void
+Editor::add_command (PBD::Command * cmd)
+{
+	if (_session) {
+		_session->add_command (cmd);
+	}
+}
+
+void
+Editor::begin_reversible_command (string name)
+{
+	if (_session) {
+		before.push_back (&_selection_memento->get_state ());
+		_session->begin_reversible_command (name);
+	}
+}
+
+void
+Editor::begin_reversible_command (GQuark q)
+{
+	if (_session) {
+		before.push_back (&_selection_memento->get_state ());
+		_session->begin_reversible_command (q);
+	}
+}
+
+void
+Editor::abort_reversible_command ()
+{
+	if (_session) {
+		while(!before.empty()) {
+			delete before.front();
+			before.pop_front();
+		}
+		_session->abort_reversible_command ();
+	}
+}
+
+void
+Editor::commit_reversible_command ()
+{
+	if (_session) {
+		if (before.size() == 1) {
+			_session->add_command (new MementoCommand<SelectionMemento>(*(_selection_memento), before.front(), &_selection_memento->get_state ()));
+			begin_selection_op_history ();
+		}
+
+		if (before.empty()) {
+			PBD::stacktrace (std::cerr, 30);
+			std::cerr << "Please call begin_reversible_command() before commit_reversible_command()." << std::endl;
+		} else {
+			before.pop_back();
+		}
+
+		_session->commit_reversible_command ();
+	}
+}
+
 void
 Editor::do_undo (uint32_t n)
 {

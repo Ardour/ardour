@@ -71,9 +71,6 @@ using namespace Editing;
 
 using Gtkmm2ext::Bindings;
 
-/* Convenience functions to slightly reduce verbosity below */
-
-
 RefPtr<Action>
 Editor::register_region_action (RefPtr<ActionGroup> group, RegionActionTarget tgt, char const * name, char const * label, sigc::slot<void> slot)
 {
@@ -89,28 +86,6 @@ Editor::register_toggle_region_action (RefPtr<ActionGroup> group, RegionActionTa
 	RefPtr<Action> act = ActionManager::register_toggle_action (group, name, label, slot);
 	ActionManager::session_sensitive_actions.push_back (act);
 	region_action_map.insert (make_pair<string,RegionAction> (name, RegionAction (act,tgt)));
-}
-
-RefPtr<Action>
-Editor::reg_sens (RefPtr<ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot)
-{
-	RefPtr<Action> act = ActionManager::register_action (group, name, label, slot);
-	ActionManager::session_sensitive_actions.push_back (act);
-	return act;
-}
-
-void
-Editor::toggle_reg_sens (RefPtr<ActionGroup> group, char const * name, char const * label, sigc::slot<void> slot)
-{
-	RefPtr<Action> act = ActionManager::register_toggle_action (group, name, label, slot);
-	ActionManager::session_sensitive_actions.push_back (act);
-}
-
-void
-Editor::radio_reg_sens (RefPtr<ActionGroup> action_group, RadioAction::Group& radio_group, char const * name, char const * label, sigc::slot<void> slot)
-{
-	RefPtr<Action> act = ActionManager::register_radio_action (action_group, radio_group, name, label, slot);
-	ActionManager::session_sensitive_actions.push_back (act);
 }
 
 void
@@ -400,11 +375,6 @@ Editor::register_actions ()
 	reg_sens (editor_actions, "multi-duplicate", _("Multi-Duplicate..."),
 	          sigc::bind (sigc::mem_fun (*this, &Editor::duplicate_range), true));
 
-
-	undo_action = reg_sens (editor_actions, "undo", S_("Command|Undo"), []() { current_editing_context()->undo(1U) ; });
-	redo_action = reg_sens (editor_actions, "redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
-	alternate_redo_action = reg_sens (editor_actions, "alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
-	alternate_alternate_redo_action = reg_sens (editor_actions, "alternate-alternate-redo", _("Redo"), []() { current_editing_context()->redo(1U) ; });
 
 	selection_undo_action = reg_sens (editor_actions, "undo-last-selection-op", _("Undo Selection Change"), sigc::mem_fun(*this, &Editor::undo_selection_op));
 	selection_redo_action = reg_sens (editor_actions, "redo-last-selection-op", _("Redo Selection Change"), sigc::mem_fun(*this, &Editor::redo_selection_op));
@@ -793,10 +763,13 @@ Editor::load_bindings ()
 	 */
 
 	Bindings* midi_bindings = Bindings::get_bindings (X_("MIDI"));
-
 	register_midi_actions (midi_bindings);
 
+	Bindings* shared_bindings = Bindings::get_bindings (X_("Editing"));
+	register_common_actions (shared_bindings);
+
 	_track_canvas_viewport->canvas()->set_data ("ardour-bindings", midi_bindings);
+	global_hpacker.set_data ("ardour-bindings-shared", shared_bindings);
 }
 
 void

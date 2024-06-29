@@ -167,10 +167,20 @@ public:
 	virtual void undo_selection_op () = 0;
 	virtual void redo_selection_op () = 0;
 
-	virtual void begin_reversible_command (std::string cmd_name);
-	virtual void begin_reversible_command (GQuark);
-	virtual void abort_reversible_command ();
-	virtual void commit_reversible_command ();
+	/* Some EditingContexts may defer to the Session, which IS-A
+	 * HistoryOwner (Editor does this).
+	 *
+	 * Others may themselves have the IS-A HistoryOwner inheritance, and so
+	 * they just proxy back to their base class (CueEditor does this).
+	 */
+
+	virtual PBD::HistoryOwner& history() = 0;
+
+	virtual void add_command (PBD::Command *) = 0;
+	virtual void begin_reversible_command (std::string cmd_name) = 0;
+	virtual void begin_reversible_command (GQuark) = 0;
+	virtual void abort_reversible_command () = 0;
+	virtual void commit_reversible_command () = 0;
 
 	virtual void set_selected_midi_region_view (MidiRegionView&);
 
@@ -350,6 +360,7 @@ public:
 	void transpose_region ();
 
 	static void register_midi_actions (Gtkmm2ext::Bindings*);
+	static void register_common_actions (Gtkmm2ext::Bindings*);
 
 	ArdourCanvas::Rectangle* rubberband_rect;
 
@@ -391,6 +402,7 @@ public:
 	std::string _name;
 
 	static Glib::RefPtr<Gtk::ActionGroup> _midi_actions;
+	static Glib::RefPtr<Gtk::ActionGroup> _common_actions;
 
 	/* Cursor stuff.  Do not use directly, use via CursorContext. */
 	friend class CursorContext;
@@ -643,6 +655,17 @@ public:
 
 	virtual void do_undo (uint32_t n) = 0;
 	virtual void do_redo (uint32_t n) = 0;
+
+	static Glib::RefPtr<Gtk::Action> undo_action;
+	static Glib::RefPtr<Gtk::Action> redo_action;
+	static Glib::RefPtr<Gtk::Action> alternate_redo_action;
+	static Glib::RefPtr<Gtk::Action> alternate_alternate_redo_action;
+
+	/* protected helper functions to help with registering actions */
+
+	static Glib::RefPtr<Gtk::Action> reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
+	static void toggle_reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
+	static void radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const* name, char const* label, sigc::slot<void> slot);
 
   private:
 	static std::stack<EditingContext*> ec_stack;
