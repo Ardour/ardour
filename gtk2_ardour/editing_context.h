@@ -33,8 +33,6 @@
 #ifndef __ardour_midi_editing_context_h__
 #define __ardour_midi_editing_context_h__
 
-#include <stack>
-
 #include "pbd/signals.h"
 
 #include "temporal/timeline.h"
@@ -401,6 +399,9 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	virtual void history_changed() = 0;
 	static void update_undo_redo_actions (PBD::UndoHistory const &);
 
+	static EditingContext* current_editing_context();
+	static void switch_editing_context(EditingContext*);
+
   protected:
 	std::string _name;
 
@@ -573,10 +574,6 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	void transform_regions (const RegionSelection& rs);
 	void transpose_regions (const RegionSelection& rs);
 
-	static EditingContext* current_editing_context();
-	static void push_editing_context (EditingContext*);
-	static void pop_editing_context ();
-
 	/** the adjustment that controls the overall editing vertical scroll position */
 	friend class EditorSummary;
 	Gtk::Adjustment     vertical_adjustment;
@@ -670,8 +667,7 @@ class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 	static void toggle_reg_sens (Glib::RefPtr<Gtk::ActionGroup> group, char const* name, char const* label, sigc::slot<void> slot);
 	static void radio_reg_sens (Glib::RefPtr<Gtk::ActionGroup> action_group, Gtk::RadioAction::Group& radio_group, char const* name, char const* label, sigc::slot<void> slot);
 
-  private:
-	static std::stack<EditingContext*> ec_stack;
+	static EditingContext* _current_editing_context;
 
 };
 

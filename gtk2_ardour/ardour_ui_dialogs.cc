@@ -718,6 +718,8 @@ ARDOUR_UI::tabs_switch (GtkNotebookPage*, guint page)
 			trigger_page_visibility_button.set_active_state (Gtkmm2ext::Off);
 		}
 
+		EditingContext::switch_editing_context (editor);
+
 	} else if (mixer && (page == (guint) _tabs.page_num (mixer->contents()))) {
 
 		if (editor && (editor->tabbed() || editor->tabbed_by_default())) {

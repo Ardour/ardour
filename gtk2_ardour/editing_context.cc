@@ -65,9 +65,9 @@ sigc::signal<void> EditingContext::DropDownKeys;
 Gtkmm2ext::Bindings* EditingContext::button_bindings = nullptr;
 Glib::RefPtr<Gtk::ActionGroup> EditingContext::_midi_actions;
 Glib::RefPtr<Gtk::ActionGroup> EditingContext::_common_actions;
-std::stack<EditingContext*> EditingContext::ec_stack;
 std::vector<std::string> EditingContext::grid_type_strings;
 MouseCursors* EditingContext::_cursors = nullptr;
+EditingContext* EditingContext::_current_editing_context = nullptr;
 
 static const gchar *_grid_type_strings[] = {
 	N_("No Grid"),
@@ -1982,28 +1982,14 @@ EditingContext::apply_midi_note_edit_op (MidiOperator& op, const RegionSelection
 EditingContext*
 EditingContext::current_editing_context()
 {
-	if (!ec_stack.empty()) {
-		return ec_stack.top ();
-	}
-
-	return nullptr;
+	return _current_editing_context;
 }
 
 void
-EditingContext::push_editing_context (EditingContext* ec)
+EditingContext::switch_editing_context (EditingContext* ec)
 {
 	assert (ec);
-	ec_stack.push (ec);
-	ec->history_changed ();
-}
-
-void
-EditingContext::pop_editing_context ()
-{
-	ec_stack.pop ();
-	if (!ec_stack.empty()) {
-		ec_stack.top()->history_changed ();
-	}
+	_current_editing_context = ec;
 }
 
 double
