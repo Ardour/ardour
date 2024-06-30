@@ -1322,8 +1322,9 @@ Editor::set_session (Session *t)
 	_session->locations()->removed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::location_gone, this, _1), gui_context());
 	_session->locations()->changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::refresh_location_display, this), gui_context());
 	_session->auto_loop_location_changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::loop_location_changed, this, _1), gui_context ());
-	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
 	Location::flags_changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::update_section_rects, this), gui_context ());
+
+	_session->history().Changed.connect (_session_connections, invalidator (*this), boost::bind (&Editor::history_changed, this), gui_context());
 
 	_playhead_cursor->track_canvas_item().reparent ((ArdourCanvas::Item*) get_cursor_scroll_group());
 	_playhead_cursor->show ();
@@ -3066,29 +3067,7 @@ Editor::history_changed ()
 		return;
 	}
 
-	string label;
-
-	if (undo_action) {
-		if (_session->undo_depth() == 0) {
-			label = S_("Command|Undo");
-			undo_action->set_sensitive(false);
-		} else {
-			label = string_compose(S_("Command|Undo (%1)"), _session->next_undo());
-			undo_action->set_sensitive(true);
-		}
-		undo_action->property_label() = label;
-	}
-
-	if (redo_action) {
-		if (_session->redo_depth() == 0) {
-			label = _("Redo");
-			redo_action->set_sensitive (false);
-		} else {
-			label = string_compose(_("Redo (%1)"), _session->next_redo());
-			redo_action->set_sensitive (true);
-		}
-		redo_action->property_label() = label;
-	}
+	update_undo_redo_actions (_session->undo_redo());
 }
 
 void

@@ -1,5 +1,6 @@
 #include "cue_editor.h"
 #include "editor_drag.h"
+#include "gui_thread.h"
 
 #include "pbd/i18n.h"
 
@@ -7,6 +8,7 @@ CueEditor::CueEditor (std::string const & name)
 	: EditingContext (name)
 	, HistoryOwner (X_("cue-editor"))
 {
+	_history.Changed.connect (history_connection, invalidator (*this), boost::bind (&CueEditor::history_changed, this), gui_context());
 }
 
 CueEditor::~CueEditor ()
@@ -237,5 +239,11 @@ CueEditor::do_redo (uint32_t n)
 	}
 
 	_history.redo (n);
+}
+
+void
+CueEditor::history_changed ()
+{
+	update_undo_redo_actions (_history);
 }
 

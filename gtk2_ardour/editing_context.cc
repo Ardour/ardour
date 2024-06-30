@@ -1992,13 +1992,18 @@ EditingContext::current_editing_context()
 void
 EditingContext::push_editing_context (EditingContext* ec)
 {
+	assert (ec);
 	ec_stack.push (ec);
+	ec->history_changed ();
 }
 
 void
 EditingContext::pop_editing_context ()
 {
 	ec_stack.pop ();
+	if (!ec_stack.empty()) {
+		ec_stack.top()->history_changed ();
+	}
 }
 
 double
@@ -2490,3 +2495,30 @@ EditingContext::radio_reg_sens (RefPtr<ActionGroup> action_group, RadioAction::G
 	ActionManager::session_sensitive_actions.push_back (act);
 }
 
+void
+EditingContext::update_undo_redo_actions (PBD::UndoHistory const & history)
+{
+	string label;
+
+	if (undo_action) {
+		if (history.undo_depth() == 0) {
+			label = S_("Command|Undo");
+			undo_action->set_sensitive(false);
+		} else {
+			label = string_compose(S_("Command|Undo (%1)"), history.next_undo());
+			undo_action->set_sensitive(true);
+		}
+		undo_action->property_label() = label;
+	}
+
+	if (redo_action) {
+		if (history.redo_depth() == 0) {
+			label = _("Redo");
+			redo_action->set_sensitive (false);
+		} else {
+			label = string_compose(_("Redo (%1)"), history.next_redo());
+			redo_action->set_sensitive (true);
+		}
+		redo_action->property_label() = label;
+	}
+}

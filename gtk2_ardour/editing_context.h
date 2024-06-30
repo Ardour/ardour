@@ -75,7 +75,7 @@ class SelectionMemento;
 
 class EditingContext : public ARDOUR::SessionHandlePtr, public AxisViewProvider
 {
-public:
+ public:
 	/** Context for mouse entry (stored in a stack). */
 	struct EnterContext {
 		ItemType                       item_type;
@@ -397,6 +397,9 @@ public:
 	 * @param n Number of transaction to redo.
 	 */
 	void redo (uint32_t n = 1) { do_redo (n); }
+
+	virtual void history_changed() = 0;
+	static void update_undo_redo_actions (PBD::UndoHistory const &);
 
   protected:
 	std::string _name;
