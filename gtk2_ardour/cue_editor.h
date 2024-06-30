@@ -24,7 +24,7 @@
 #include "editing.h"
 #include "editing_context.h"
 
-class CueEditor : public EditingContext, public PBD::HistoryOwner
+class CueEditor : public EditingContext, public PBD::HistoryOwner, public sigc::trackable
 {
   public:
 	CueEditor (std::string const & name);
@@ -67,6 +67,8 @@ class CueEditor : public EditingContext, public PBD::HistoryOwner
 	void redo_selection_op ();
 
 	PBD::HistoryOwner& history() { return *this; }
+	void history_changed ();
+	PBD::ScopedConnection history_connection;
 
 	void add_command (PBD::Command * cmd) { HistoryOwner::add_command (cmd); }
 	void begin_reversible_command (std::string cmd_name) { HistoryOwner::begin_reversible_command (cmd_name); }
