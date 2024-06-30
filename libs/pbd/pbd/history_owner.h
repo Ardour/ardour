@@ -85,6 +85,8 @@ class LIBPBD_API HistoryOwner
 
 	void add_commands (std::vector<PBD::Command*> const & cmds);
 
+	PBD::UndoHistory& undo_redo() { return _history; }
+
   protected:
 	std::string           _name;
 	PBD::UndoHistory      _history;
