@@ -533,11 +533,11 @@ OSCSelectObserver::plugin_init()
 		plug_size = nplug_params;
 	}
 
-	int pid = 1;
-	for ( uint32_t ppi = page_start;  ppi < page_end; ++ppi, ++pid) {
+	int paid = 1;
+	for ( uint32_t ppi = page_start;  ppi < page_end; ++ppi, ++paid) {
 		if (ppi >= nplug_params) {
-			_osc.text_message_with_id (X_("/select/plugin/parameter/name"), pid, " ", in_line, addr);
-			_osc.float_message_with_id (X_("/select/plugin/parameter"), pid, 0, in_line, addr);
+			_osc.text_message_with_id (X_("/select/plugin/parameter/name"), paid, " ", in_line, addr);
+			_osc.float_message_with_id (X_("/select/plugin/parameter"), paid, 0, in_line, addr);
 			continue;
 		}
 
@@ -547,7 +547,7 @@ OSCSelectObserver::plugin_init()
 		}
 		ParameterDescriptor pd;
 		pip->get_parameter_descriptor(controlid, pd);
-		_osc.text_message_with_id (X_("/select/plugin/parameter/name"), pid, pd.label, in_line, addr);
+		_osc.text_message_with_id (X_("/select/plugin/parameter/name"), paid, pd.label, in_line, addr);
 		if ( pip->parameter_is_input(controlid)) {
 			std::shared_ptr<AutomationControl> c = pi->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
 			if (c) {
@@ -555,8 +555,8 @@ OSCSelectObserver::plugin_init()
 				if (pd.integer_step && pd.upper == 1) {
 					swtch = true;
 				}
-				c->Changed.connect (plugin_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::plugin_parameter_changed, this, pid, swtch, c), OSC::instance());
-				plugin_parameter_changed (pid, swtch, c);
+				c->Changed.connect (plugin_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::plugin_parameter_changed, this, paid, swtch, c), OSC::instance());
+				plugin_parameter_changed (paid, swtch, c);
 			}
 		}
 	}
