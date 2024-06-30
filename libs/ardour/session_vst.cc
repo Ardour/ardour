@@ -302,11 +302,12 @@ intptr_t Session::vst_callback (
 			VstEvents* v = (VstEvents*)ptr;
 			for (int n = 0 ; n < v->numEvents; ++n) {
 				VstMidiEvent *vme = (VstMidiEvent*) (v->events[n]->dump);
-				if (vme->type == kVstMidiType) {
+				int size = Evoral::midi_event_size((uint8_t)vme->midiData[0]);
+				if (vme->type == kVstMidiType && size > 0) {
 					plug->midi_buffer()->push_back(
 						vme->deltaSamples,
 						Evoral::MIDI_EVENT,
-						Evoral::midi_event_size((uint8_t)vme->midiData[0]),
+						size,
 						(uint8_t*)vme->midiData
 					);
 				}
