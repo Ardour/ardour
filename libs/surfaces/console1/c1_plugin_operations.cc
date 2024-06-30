@@ -22,6 +22,9 @@
 
 #include <boost/algorithm/string/trim.hpp>
 
+#include <gtkmm/liststore.h>
+#include <gtkmm/treemodel.h>
+
 #include "glib-2.0/gio/gio.h"
 #include "glib-2.0/glib/gstdio.h"
 #include "glibmm-2.4/glibmm/main.h"
@@ -59,6 +62,9 @@ Console1::ensure_config_dir ()
 uint32_t
 Console1::load_mappings ()
 {
+    if( mappings_loaded )
+		return pluginMappingMap.size ();
+        
 	uint32_t i = 0;
 	if (!ensure_config_dir ())
 		return 1;
@@ -91,7 +97,9 @@ Console1::load_mappings ()
 		++i;
 	}
 	DEBUG_TRACE (DEBUG::Console1, string_compose ("Console1::load_mappings - found %1 mapping files\n", i));
+	DEBUG_TRACE (DEBUG::Console1, string_compose ("Console1::load_mappings - loaded %1 mapping files\n", pluginMappingMap.size()));
 	g_dir_close (gdir);
+	mappings_loaded = true;
 	return i;
 }
 
@@ -120,26 +128,32 @@ Console1::load_mapping (XMLNode* mapping_xml)
 		const XMLNodeList& plist = (*i)->children ();
 
 		XMLNodeConstIterator j;
+		PluginParameterMapping parmap;
 		for (j = plist.begin (); j != plist.end (); ++j) {
 			if ((*j)->name () == "name") {
 				param_name = (*j)->child_content ();
 			} else if ((*j)->name () == "mapping") {
 				param_mapping = (*j)->child_content ();
+				(*j)->get_property ("shift", parmap.shift);
 			}
 		}
+		parmap.paramIndex = index;
+		parmap.name = param_name;
+   		parmap.is_switch = (param_type == "switch");
 		if (!param_mapping.empty ()) {
-			PluginParameterMapping parmap;
-			parmap.paramIndex = index;
-			parmap.name = param_name;
 			ControllerMap::const_iterator m = controllerMap.find (param_mapping);
-			if (m == controllerMap.end ())
-				continue;
-			parmap.controllerId = m->second;
-			parmap.is_switch = (param_type == "switch");
-			pm.parameters[index] = std::move (parmap);
-			pluginMappingMap[pm.id] = pm;
+			if (m != controllerMap.end ())
+            {
+    			parmap.controllerId = m->second;
+            }
 		}
+        else{
+			pm.configured = false;
+   			parmap.controllerId = CONTROLLER_NONE;
+		}
+		pm.parameters[index] = std::move (parmap);
 	}
+	pluginMappingMap[pm.id] = pm;
 	return true;
 }
 
@@ -182,6 +196,44 @@ Console1::create_mapping (const std::shared_ptr<Processor> proc, const std::shar
 
 	tree->set_filename (filename);
 	tree->write ();
+}
+
+void
+Console1::write_plugin_mapping (PluginMapping &mapping)
+{
+    DEBUG_TRACE (DEBUG::Console1, "write_plugin_mapping \n");
+	XMLTree* tree = new XMLTree ();
+	XMLNode node = XMLNode ("c1plugin-mapping");
+	node.set_property ("ID", mapping.id);
+	node.set_property ("NAME", mapping.name);
+
+	for (const auto& plugin_param : mapping.parameters ) {
+		DEBUG_TRACE (DEBUG::Console1, string_compose ("Plugin parameter %1: %2\n",plugin_param.first ,plugin_param.second.name));
+		XMLNode param = XMLNode ("param-mapping");
+		param.set_property ("id", plugin_param.second.paramIndex);
+		XMLNode name = XMLNode ("name");
+		XMLNode c = XMLNode ("c", plugin_param.second.name );
+		name.add_child_copy (c);
+		XMLNode mapping = XMLNode ("mapping");
+		mapping.set_property ("shift", plugin_param.second.shift);
+        XMLNode controller = XMLNode ("c", findControllerNameById(plugin_param.second.controllerId) );
+		mapping.add_child_copy (controller);
+		param.add_child_copy (name);
+		param.add_child_copy (mapping);
+		node.add_child_copy (param);
+	}
+
+	tree->set_root (&node);
+
+	if (!ensure_config_dir ())
+		return;
+
+	std::string filename = Glib::build_filename (
+	  user_config_directory (), config_dir_name, string_compose ("%1.%2", mapping.id, "xml"));
+
+	tree->set_filename (filename);
+	tree->write ();
+	load_mapping (&node);
 }
 
 bool
@@ -444,6 +496,18 @@ Console1::spill_plugins (const int32_t plugin_index)
 		}
 	}
 	return true;
+}
+
+Glib::RefPtr<Gtk::ListStore> Console1::getPluginControllerModel()
+{
+    plugin_controller_model = Gtk::ListStore::create (plugin_controller_columns);
+	Gtk::TreeModel::Row plugin_controller_combo_row;
+    for( const auto &controller : controllerMap ){
+        plugin_controller_combo_row = *(plugin_controller_model->append ());
+		plugin_controller_combo_row[plugin_controller_columns.controllerId] = controller.second;
+		plugin_controller_combo_row[plugin_controller_columns.controllerName] = X_(controller.first);
+	}
+	return plugin_controller_model;
 }
 
 }
