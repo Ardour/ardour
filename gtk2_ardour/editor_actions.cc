@@ -769,7 +769,7 @@ Editor::load_bindings ()
 	register_common_actions (shared_bindings);
 
 	_track_canvas_viewport->canvas()->set_data ("ardour-bindings", midi_bindings);
-	global_hpacker.set_data ("ardour-bindings-shared", shared_bindings);
+	_track_canvas_viewport->set_data ("ardour-bindings", shared_bindings);
 }
 
 void
