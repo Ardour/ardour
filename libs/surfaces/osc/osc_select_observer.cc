@@ -68,8 +68,7 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ARDOUR::Session& s, ArdourSurface:
 	session = &s;
 	addr = lo_address_new_from_url 	(sur->remote_url.c_str());
 	gainmode = sur->gainmode;
-	feedback = sur->feedback;
-	in_line = feedback[2];
+	set_feedback(sur->feedback);
 	send_page_size = sur->send_page_size;
 	send_size = send_page_size;
 	send_page = sur->send_page;
@@ -91,6 +90,15 @@ OSCSelectObserver::~OSCSelectObserver ()
 	_init = true;
 	no_strip ();
 	lo_address_free (addr);
+}
+
+void
+OSCSelectObserver::set_feedback (std::bitset<32> fb)
+{
+	feedback = fb;
+	in_line = fb[2];
+	// No explicit refresh, callers should take care of that to
+	// prevent duplicate refreshing
 }
 
 void
