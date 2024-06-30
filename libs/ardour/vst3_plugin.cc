@@ -647,36 +647,44 @@ VST3PI::vst3_to_midi_buffers (BufferSet& bufs, ChanMapping const& out_map)
 				data[2] = vst_to_midi (e.polyPressure.pressure);
 				mb.push_back (e.sampleOffset, Evoral::MIDI_EVENT, 3, data);
 				break;
-			case Vst::Event::kLegacyMIDICCOutEvent:
+			case Vst::Event::kLegacyMIDICCOutEvent: {
+				size_t size = 0;
+
 				switch (e.midiCCOut.controlNumber) {
 					case Vst::kCtrlPolyPressure:
+						size = 3;
 						data[0] = MIDI_CMD_NOTE_PRESSURE | e.midiCCOut.channel;
 						data[1] = e.midiCCOut.value;
 						data[2] = e.midiCCOut.value2;
 						break;
 					default: /* Control Change */
+						size = 3;
 						data[0] = MIDI_CMD_CONTROL | e.midiCCOut.channel;
 						data[1] = e.midiCCOut.controlNumber;
 						data[2] = e.midiCCOut.value;
 						break;
 					case Vst::kCtrlProgramChange:
+						size = 2;
 						data[0] = MIDI_CMD_PGM_CHANGE | e.midiCCOut.channel;
 						data[1] = e.midiCCOut.value;
 						data[2] = e.midiCCOut.value2;
 						break;
 					case Vst::kAfterTouch:
+						size = 2;
 						data[0] = MIDI_CMD_CHANNEL_PRESSURE | e.midiCCOut.channel;
 						data[1] = e.midiCCOut.value;
 						data[2] = e.midiCCOut.value2;
 						break;
 					case Vst::kPitchBend:
+						size = 3;
 						data[0] = MIDI_CMD_BENDER | e.midiCCOut.channel;
 						data[1] = e.midiCCOut.value;
 						data[2] = e.midiCCOut.value2;
 						break;
 				}
-				mb.push_back (e.sampleOffset, Evoral::MIDI_EVENT, e.midiCCOut.controlNumber == Vst::kCtrlProgramChange ? 2 : 3, data);
+				mb.push_back (e.sampleOffset, Evoral::MIDI_EVENT, size, data);
 				break;
+			}
 
 			case Vst::Event::kNoteExpressionValueEvent:
 			case Vst::Event::kNoteExpressionTextEvent:
