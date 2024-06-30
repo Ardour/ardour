@@ -27,6 +27,8 @@
 #endif
 #include <cstdio>
 
+#include "evoral/midi_util.h"
+
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
 #include "ardour/session.h"
@@ -301,7 +303,12 @@ intptr_t Session::vst_callback (
 			for (int n = 0 ; n < v->numEvents; ++n) {
 				VstMidiEvent *vme = (VstMidiEvent*) (v->events[n]->dump);
 				if (vme->type == kVstMidiType) {
-					plug->midi_buffer()->push_back(vme->deltaSamples, Evoral::MIDI_EVENT, 3, (uint8_t*)vme->midiData);
+					plug->midi_buffer()->push_back(
+						vme->deltaSamples,
+						Evoral::MIDI_EVENT,
+						Evoral::midi_event_size((uint8_t)vme->midiData[0]),
+						(uint8_t*)vme->midiData
+					);
 				}
 			}
 		}
