@@ -2883,26 +2883,6 @@ OSC::_sel_plugin (int id, lo_address addr)
 			return 1;
 		}
 
-		/* find out how many plugins we have */
-		sur->plugins.clear();
-		for (int nplugs = 0; true; ++nplugs) {
-			std::shared_ptr<Processor> proc = r->nth_plugin (nplugs);
-			if (!proc) {
-				break;
-			}
-			if (!r->nth_plugin(nplugs)->display_to_user()) {
-				continue;
-			}
-#ifdef MIXBUS
-			/* need to check for mixbus channel strips (and exclude them) */
-			std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert>(proc);
-			if (pi && pi->is_channelstrip()) {
-				continue;
-			}
-#endif
-			sur->plugins.push_back (nplugs);
-		}
-
 		// limit plugin_id to actual plugins
 		if (sur->plugins.size() < 1) {
 			sur->plugin_id = 0;
@@ -4760,11 +4740,36 @@ OSC::_strip_select2 (std::shared_ptr<Stripable> s, OSCSurface *sur, lo_address a
 		_select = s;
 	}
 	if (!s) {
+		sur->plugins.clear();
 		return 0;
 	}
 	if (s != old_sel) {
 		sur->select = s;
 	}
+
+	/* Create list of user-visible plugins (into which piid indexes) */
+	sur->plugins.clear();
+	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route>(s);
+	if (r) {
+		for (int nplugs = 0; true; ++nplugs) {
+			std::shared_ptr<Processor> proc = r->nth_plugin (nplugs);
+			if (!proc) {
+				break;
+			}
+			if (!r->nth_plugin(nplugs)->display_to_user()) {
+				continue;
+			}
+#ifdef MIXBUS
+			/* need to check for mixbus channel strips (and exclude them) */
+			std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert>(proc);
+			if (pi && pi->is_channelstrip()) {
+				continue;
+			}
+#endif
+			sur->plugins.push_back (nplugs);
+		}
+	}
+
 	bool sends;
 	uint32_t nsends  = 0;
 	do {
@@ -4807,7 +4812,6 @@ OSC::_strip_select2 (std::shared_ptr<Stripable> s, OSCSurface *sur, lo_address a
 	}
 	// need to set monitor for processor changed signal (for paging)
 	string address = lo_address_get_url (addr);
-	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route>(s);
 	if (r) {
 		r->processors_changed.connect  (sur->proc_connection, MISSING_INVALIDATOR, boost::bind (&OSC::processor_changed, this, address), this);
 		_sel_plugin (sur->plugin_id, addr);
