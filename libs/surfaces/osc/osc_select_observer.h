@@ -87,7 +87,6 @@ class OSCSelectObserver
 	uint32_t send_size;
 	uint32_t send_page;
 
-	uint32_t nplug_params;
 	uint32_t plug_page_size;
 	uint32_t plug_page;
 	uint32_t selected_piid;

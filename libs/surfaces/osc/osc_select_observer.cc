@@ -577,7 +577,6 @@ OSCSelectObserver::plugin_end ()
 		_osc.text_message_with_id (X_("/select/plugin/parameter/name"), i, " ", in_line, addr);
 	}
 	plug_size = 0;
-	nplug_params = 0;
 }
 
 void
