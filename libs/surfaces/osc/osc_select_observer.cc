@@ -503,7 +503,7 @@ OSCSelectObserver::plugin_init()
 
 	bool ok = false;
 	// put only input controls into a vector
-	plug_params.clear ();
+	std::vector<int> plug_params;
 	uint32_t nplug_params  = pip->parameter_count();
 	for ( uint32_t ppi = 0;  ppi < nplug_params; ++ppi) {
 		uint32_t controlid = pip->nth_parameter(ppi, ok);

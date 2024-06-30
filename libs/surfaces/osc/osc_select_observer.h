@@ -91,7 +91,6 @@ class OSCSelectObserver
 	uint32_t plug_page;
 	uint32_t selected_piid;
 	uint32_t plug_size;
-	std::vector<int> plug_params;
 	int eq_bands;
 	uint32_t _expand;
 	std::bitset<16> _group_sharing;
