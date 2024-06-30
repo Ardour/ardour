@@ -4337,11 +4337,15 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 			uint32_t n = *(rwv.buf[0]);
 			nxt = trigger (n);
 
-			/* if user triggered same clip, that will have been handled as
-			 * it processed bang requests. Nothing to do here otherwise.
+			/* Repeated triggers of the same clip can stack up, and cause unintended retriggers.
+			 * This was especially problematic on the Novation Mini, which had a tendency to
+			 * send multiple button press events for a single physical press. This achieves a
+    			 * simple "debouncing" by dequeuing events for the same trigger.
 			 */
 
-			if (nxt != _currently_playing) {
+			if (nxt == _currently_playing) {
+				explicit_queue.increment_read_idx (1); /* consume the entry we peeked at */
+			} else {
 
 				/* user has triggered a different slot than the currently waiting-to-play or playing slot */
 
