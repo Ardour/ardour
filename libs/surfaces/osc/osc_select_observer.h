@@ -72,6 +72,7 @@ class OSCSelectObserver
 	uint32_t gainmode;
 	std::bitset<32> feedback;
 	bool in_line;
+	bool all_plugins;
 	ArdourSurface::OSC::OSCSurface* sur;
 	std::vector<int> send_timeout;
 	uint32_t gain_timeout;
@@ -90,7 +91,7 @@ class OSCSelectObserver
 	uint32_t plug_page_size;
 	uint32_t plug_page;
 	uint32_t selected_piid;
-	uint32_t plug_size;
+	std::vector<uint32_t> params_sent;
 	int eq_bands;
 	uint32_t _expand;
 	std::bitset<16> _group_sharing;
@@ -117,9 +118,11 @@ class OSCSelectObserver
 	void send_init (void);
 	void send_end (void);
 	void plugin_init (void);
-	void plugin_feedback (std::shared_ptr<ARDOUR::Route> r, int piid );
+	void plugin_feedback(std::shared_ptr<ARDOUR::Route> r, uint32_t piid, uint32_t msg_pid);
+	void plugin_feedback_clear (uint32_t piid);
+	void plugin_parameter_message (std::string path, uint32_t piid, uint32_t paid, std::string value_str, float value_float, int value_int);
 	void plugin_end (void);
-	void plugin_parameter_changed (int pid, bool swtch, std::shared_ptr<PBD::Controllable> controllable);
+	void plugin_parameter_changed (uint32_t piid, uint32_t paid, bool swtch, std::shared_ptr<PBD::Controllable> controllable);
 	void send_gain (uint32_t id, std::shared_ptr<PBD::Controllable> controllable);
 	void send_enable (std::string path, uint32_t id, std::shared_ptr<ARDOUR::Processor> proc);
 	void plug_enable (std::string path, std::shared_ptr<ARDOUR::Processor> proc);

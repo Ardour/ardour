@@ -2849,9 +2849,20 @@ OSC::sel_plug_page (int page, lo_message msg)
 	int new_page = 0;
 	OSCSurface *s = get_surface(get_address (msg));
 	if (page > 0) {
-		new_page = s->plug_page + s->plug_page_size;
-		if ((uint32_t) new_page > s->plugin_input_params[s->plugin_id].size ()) {
-			new_page = s->plug_page;
+		// Do not change page when there are no more parameters
+		// in the next page
+		new_page = s->plug_page;
+		if (s->feedback[17]) {
+			for (auto const& params: s->plugin_input_params) {
+				if ((uint32_t) new_page <= params.size ()) {
+					new_page = s->plug_page + s->plug_page_size;
+					break;
+				}
+			}
+		} else {
+			if ((uint32_t) new_page <= s->plugin_input_params[s->plugin_id].size ()) {
+				new_page = s->plug_page + s->plug_page_size;
+			}
 		}
 	} else {
 		new_page = s->plug_page - s->plug_page_size;

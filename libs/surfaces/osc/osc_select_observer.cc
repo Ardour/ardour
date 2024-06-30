@@ -73,7 +73,6 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ARDOUR::Session& s, ArdourSurface:
 	send_size = send_page_size;
 	send_page = sur->send_page;
 	plug_page_size = sur->plug_page_size;
-	plug_size = plug_page_size;
 	plug_page = sur->plug_page;
 	if (sur->plugins.size () > 0) {
 		selected_piid = sur->plugin_id;
@@ -97,6 +96,7 @@ OSCSelectObserver::set_feedback (std::bitset<32> fb)
 {
 	feedback = fb;
 	in_line = fb[2];
+	all_plugins = fb[17];
 	// No explicit refresh, callers should take care of that to
 	// prevent duplicate refreshing
 }
@@ -449,9 +449,11 @@ OSCSelectObserver::send_end ()
 void
 OSCSelectObserver::set_plugin_id (int id, uint32_t page)
 {
+	bool page_changed = (page != plug_page);
 	selected_piid = id;
 	plug_page = page;
-	renew_plugin ();
+	if (page_changed || !all_plugins)
+		renew_plugin ();
 }
 
 void
@@ -477,34 +479,57 @@ OSCSelectObserver::renew_plugin () {
 void
 OSCSelectObserver::plugin_init()
 {
-	if (!selected_piid) {
-		plugin_end ();
-		return;
-	}
 	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route>(_strip);
 	if (!r) {
 		plugin_end ();
 		return;
 	}
 
-	plugin_feedback(r, selected_piid);
+	if (all_plugins) {
+		uint32_t piid;
+		for (piid = 1; piid <= sur->plugins.size(); ++piid) {
+			plugin_feedback(r, piid, piid);
+		}
+		// Clear previously sent values for plugins that are not
+		// in the current strip
+		for (; piid < params_sent.size(); ++piid) {
+			if (params_sent[piid]) {
+				plugin_feedback_clear(piid);
+			}
+
+		}
+	} else {
+		if (!selected_piid) {
+			plugin_feedback_clear(0);
+			return;
+		}
+
+		// Passing msg_piid = 0 signals to omit the piid from messages
+		plugin_feedback(r, selected_piid, 0);
+	}
 }
 
 void
-OSCSelectObserver::plugin_feedback(std::shared_ptr<Route> r, int piid) {
+OSCSelectObserver::plugin_feedback(std::shared_ptr<Route> r, uint32_t piid, uint32_t msg_piid) {
 	// we have a plugin number now get the processor
 	std::shared_ptr<Processor> proc = r->nth_plugin (sur->plugins[piid - 1]);
 	std::shared_ptr<PluginInsert> pi;
 	if (!(pi = std::dynamic_pointer_cast<PluginInsert>(proc))) {
-		plugin_end ();
+		plugin_feedback_clear(msg_piid);
 		return;
 	}
-	_osc.float_message (X_("/select/plugin"), selected_piid, addr);
+	if (!all_plugins) {
+		// When sending feedback about all plugins, there is no
+		// concept of selected plugin
+		_osc.float_message (X_("/select/plugin"), selected_piid, addr);
+	}
 
 	std::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
 	// we have a plugin we can ask if it is activated
 	proc->ActiveChanged.connect (plugin_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::plug_enable, this, X_("/select/plugin/activate"), proc), OSC::instance());
-	_osc.float_message (X_("/select/plugin/activate"), proc->enabled(), addr);
+
+	plugin_parameter_message(X_("/select/plugin/activate"), msg_piid, 0, {}, proc->enabled(), 0);
+	plugin_parameter_message(X_("/select/plugin/name"), msg_piid, 0, pip->name(), 0, 0);
 
 	bool ok = false;
 	// put only input controls into a vector
@@ -521,28 +546,30 @@ OSCSelectObserver::plugin_feedback(std::shared_ptr<Route> r, int piid) {
 	}
 	nplug_params = plug_params.size ();
 
-	_osc.text_message (X_("/select/plugin/name"), pip->name(), addr);
+	while (msg_piid >= params_sent.size()) {
+		params_sent.push_back(0);
+	}
 	uint32_t page_start, page_end;
 	if (plug_page_size) {
 		page_start = plug_page - 1;
 		page_end = page_start + plug_page_size;
-		plug_size = plug_page_size;
+		params_sent[msg_piid] = plug_page_size;
 	} else {
 		// plug_page_size=0 means to disable paging
 		page_start = 0;
 		// If we have fewer params than the last time, increase
 		// page_end to clear the values of the extra parameters
-		page_end = std::max(nplug_params, plug_size);
+		page_end = std::max(nplug_params, params_sent[msg_piid]);
 		// But remember only the actual parameters, no need to
 		// keep clearing the same parameters over and over again.
-		plug_size = nplug_params;
+		params_sent[msg_piid] = nplug_params;
 	}
 
 	int paid = 1;
 	for ( uint32_t ppi = page_start;  ppi < page_end; ++ppi, ++paid) {
 		if (ppi >= nplug_params) {
-			_osc.text_message_with_id (X_("/select/plugin/parameter/name"), paid, " ", in_line, addr);
-			_osc.float_message_with_id (X_("/select/plugin/parameter"), paid, 0, in_line, addr);
+			plugin_parameter_message(X_("/select/plugin/parameter/name"), msg_piid, paid, " ", 0, 0);
+			plugin_parameter_message(X_("/select/plugin/parameter"), msg_piid, paid, {}, 0.0, 0);
 			continue;
 		}
 
@@ -552,7 +579,7 @@ OSCSelectObserver::plugin_feedback(std::shared_ptr<Route> r, int piid) {
 		}
 		ParameterDescriptor pd;
 		pip->get_parameter_descriptor(controlid, pd);
-		_osc.text_message_with_id (X_("/select/plugin/parameter/name"), paid, pd.label, in_line, addr);
+		plugin_parameter_message(X_("/select/plugin/parameter/name"), msg_piid, paid, pd.label, 0, 0);
 		if ( pip->parameter_is_input(controlid)) {
 			std::shared_ptr<AutomationControl> c = pi->automation_control(Evoral::Parameter(PluginAutomation, 0, controlid));
 			if (c) {
@@ -560,20 +587,61 @@ OSCSelectObserver::plugin_feedback(std::shared_ptr<Route> r, int piid) {
 				if (pd.integer_step && pd.upper == 1) {
 					swtch = true;
 				}
-				c->Changed.connect (plugin_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::plugin_parameter_changed, this, paid, swtch, c), OSC::instance());
-				plugin_parameter_changed (paid, swtch, c);
+				c->Changed.connect (plugin_connections, MISSING_INVALIDATOR, boost::bind (&OSCSelectObserver::plugin_parameter_changed, this, msg_piid, paid, swtch, c), OSC::instance());
+				plugin_parameter_changed (msg_piid, paid, swtch, c);
 			}
 		}
 	}
 }
 
 void
-OSCSelectObserver::plugin_parameter_changed (int pid, bool swtch, std::shared_ptr<PBD::Controllable> controllable)
+OSCSelectObserver::plugin_parameter_message (std::string path, uint32_t msg_piid, uint32_t paid, std::string value_str, float value_float, int value_int)
+{
+	lo_message msg = lo_message_new ();
+	if (in_line) {
+		if (paid) {
+			if (msg_piid) {
+				path = string_compose ("%1/%2/%3", path, msg_piid, paid);
+			} else if (in_line) {
+				path = string_compose ("%1/%2", path, paid);
+			}
+		} else {
+			if (msg_piid) {
+				path = string_compose ("%1/%2", path, msg_piid);
+			}
+		}
+	} else {
+		if (msg_piid)
+			lo_message_add_int32 (msg, msg_piid);
+		if (paid)
+			lo_message_add_int32 (msg, paid);
+	}
+
+	if (value_str.length())
+		lo_message_add_string (msg, value_str.c_str());
+	else if (!isnan(value_float))
+		lo_message_add_float (msg, value_float);
+	else
+		lo_message_add_int32 (msg, value_int);
+
+	lo_send_message (addr, path.c_str(), msg);
+	Glib::usleep(1);
+	lo_message_free (msg);
+}
+
+void
+OSCSelectObserver::plugin_parameter_changed (uint32_t msg_piid, uint32_t paid, bool swtch, std::shared_ptr<PBD::Controllable> controllable)
 {
 	if (swtch) {
-		enable_message_with_id (X_("/select/plugin/parameter"), pid, controllable);
+		float val = controllable->get_value();
+		if (val) {
+			plugin_parameter_message ("/select/plugin/parameter", msg_piid, paid, {}, NAN, 1);
+		} else {
+			plugin_parameter_message ("/select/plugin/parameter", msg_piid, paid, {}, NAN, 0);
+		}
 	} else {
-		change_message_with_id (X_("/select/plugin/parameter"), pid, controllable);
+		float val = controllable->internal_to_interface(controllable->get_value());
+		plugin_parameter_message ("/select/plugin/parameter", msg_piid, paid, {}, val, 0);
 	}
 }
 
@@ -581,15 +649,31 @@ void
 OSCSelectObserver::plugin_end ()
 {
 	plugin_connections.drop_connections ();
-	_osc.float_message (X_("/select/plugin"), 0, addr);
-	_osc.float_message (X_("/select/plugin/activate"), 0, addr);
-	_osc.text_message (X_("/select/plugin/name"), " ", addr);
-	for (uint32_t i = 1; i <= plug_size; i++) {
-		_osc.float_message_with_id (X_("/select/plugin/parameter"), i, 0, in_line, addr);
-		// next name
-		_osc.text_message_with_id (X_("/select/plugin/parameter/name"), i, " ", in_line, addr);
+	for (unsigned msg_piid = 0; msg_piid < params_sent.size(); ++msg_piid) {
+		if (params_sent[msg_piid]) {
+			plugin_feedback_clear(msg_piid);
+		}
 	}
-	plug_size = 0;
+}
+
+void
+OSCSelectObserver::plugin_feedback_clear (uint32_t msg_piid)
+{
+	if (!all_plugins) {
+		_osc.float_message (X_("/select/plugin"), 0, addr);
+	}
+	plugin_parameter_message(X_("/select/plugin/activate"), msg_piid, 0, {}, 0, 0);
+	plugin_parameter_message(X_("/select/plugin/name"), msg_piid, 0, " ", 0, 0);
+
+	while (msg_piid >= params_sent.size()) {
+		params_sent.push_back(0);
+	}
+	for (uint32_t i = 1; i <= params_sent[msg_piid]; i++) {
+		plugin_parameter_message(X_("/select/plugin/parameter"), msg_piid, i, {}, 0, 0);
+		// next name
+		plugin_parameter_message(X_("/select/plugin/parameter/name"), msg_piid, i, " ", 0, 0);
+	}
+	params_sent[msg_piid] = 0;
 }
 
 void
