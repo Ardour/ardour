@@ -89,7 +89,7 @@ class OSCSelectObserver
 	uint32_t nplug_params;
 	uint32_t plug_page_size;
 	uint32_t plug_page;
-	int plug_id;
+	uint32_t selected_piid;
 	uint32_t plug_size;
 	std::vector<int> plug_params;
 	int eq_bands;
