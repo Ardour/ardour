@@ -2888,7 +2888,7 @@ OSC::_sel_plugin (int id, lo_address addr)
 			sur->plugin_id = 0;
 			sur->plug_page = 1;
 			if (sur->sel_obs) {
-				sur->sel_obs->set_plugin_id(-1, 1);
+				sur->sel_obs->set_plugin_id(0, 1);
 			}
 			return 0;
 		} else if (id < 1) {
@@ -2924,7 +2924,7 @@ OSC::_sel_plugin (int id, lo_address addr)
 		sur->plug_page = 1;
 
 		if (sur->sel_obs) {
-			sur->sel_obs->set_plugin_id(sur->plugins[sur->plugin_id - 1], sur->plug_page);
+			sur->sel_obs->set_plugin_id(sur->plugin_id, sur->plug_page);
 		}
 		return 0;
 	}

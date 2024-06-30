@@ -77,9 +77,9 @@ OSCSelectObserver::OSCSelectObserver (OSC& o, ARDOUR::Session& s, ArdourSurface:
 	plug_size = plug_page_size;
 	plug_page = sur->plug_page;
 	if (sur->plugins.size () > 0) {
-		plug_id = sur->plugins[sur->plugin_id - 1];
+		selected_piid = sur->plugin_id;
 	} else {
-		plug_id = -1;
+		selected_piid = 0;
 	}
 	_group_sharing[15] = 1;
 	refresh_strip (sur->select, sur->nsends, gainmode, true);
@@ -441,7 +441,7 @@ OSCSelectObserver::send_end ()
 void
 OSCSelectObserver::set_plugin_id (int id, uint32_t page)
 {
-	plug_id = id;
+	selected_piid = id;
 	plug_page = page;
 	renew_plugin ();
 }
@@ -469,7 +469,7 @@ OSCSelectObserver::renew_plugin () {
 void
 OSCSelectObserver::plugin_init()
 {
-	if (plug_id < 0) {
+	if (!selected_piid) {
 		plugin_end ();
 		return;
 	}
@@ -480,7 +480,7 @@ OSCSelectObserver::plugin_init()
 	}
 
 	// we have a plugin number now get the processor
-	std::shared_ptr<Processor> proc = r->nth_plugin (plug_id);
+	std::shared_ptr<Processor> proc = r->nth_plugin (sur->plugins[selected_piid - 1]);
 	std::shared_ptr<PluginInsert> pi;
 	if (!(pi = std::dynamic_pointer_cast<PluginInsert>(proc))) {
 		plugin_end ();
