@@ -305,14 +305,13 @@ MidiCueEditor::canvas_enter_leave (GdkEventCrossing* ev)
 		if (ev->detail != GDK_NOTIFY_INFERIOR) {
 			_canvas_viewport->canvas()->grab_focus ();
 			ActionManager::set_sensitive (_midi_actions, true);
-			EditingContext::push_editing_context (this);
+			EditingContext::switch_editing_context (this);
 		}
 		break;
 	case GDK_LEAVE_NOTIFY:
 		if (ev->detail != GDK_NOTIFY_INFERIOR) {
 			ActionManager::set_sensitive (_midi_actions, false);
 			ARDOUR_UI::instance()->reset_focus (_canvas_viewport);
-			EditingContext::pop_editing_context ();
 		}
 	default:
 		break;
