@@ -516,14 +516,22 @@ OSCSelectObserver::plugin_init()
 	}
 	nplug_params = plug_params.size ();
 
-	// default of 0 page size means show all
-	plug_size = nplug_params;
-	if (plug_page_size) {
-		plug_size = plug_page_size;
-	}
 	_osc.text_message (X_("/select/plugin/name"), pip->name(), addr);
-	uint32_t page_start = plug_page - 1;
-	uint32_t page_end = page_start + plug_size;
+	uint32_t page_start, page_end;
+	if (plug_page_size) {
+		page_start = plug_page - 1;
+		page_end = page_start + plug_page_size;
+		plug_size = plug_page_size;
+	} else {
+		// plug_page_size=0 means to disable paging
+		page_start = 0;
+		// If we have fewer params than the last time, increase
+		// page_end to clear the values of the extra parameters
+		page_end = std::max(nplug_params, plug_size);
+		// But remember only the actual parameters, no need to
+		// keep clearing the same parameters over and over again.
+		plug_size = nplug_params;
+	}
 
 	int pid = 1;
 	for ( uint32_t ppi = page_start;  ppi < page_end; ++ppi, ++pid) {
