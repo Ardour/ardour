@@ -790,7 +790,7 @@ Editor::Editor ()
 
 	setup_fade_images ();
 
-	push_editing_context (this);
+	switch_editing_context (this);
 }
 
 Editor::~Editor()
