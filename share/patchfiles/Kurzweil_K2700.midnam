@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE MIDINameDocument PUBLIC "-//MIDI Manufacturers Association//DTD MIDINameDocument 1.0//EN" "http://www.midi.org/dtds/MIDINameDocument10.dtd">
 <MIDINameDocument>
-    <Author>Nikolaos Strikos strikosn@gmail.com</Author>
+  <Author>Nikolaos Strikos strikosn@gmail.com</Author>
+  <MasterDeviceNames>
     <Manufacturer>Kurzweil</Manufacturer>
     <Model>K2700</Model>
     <CustomDeviceMode Name="Mode 1">
