@@ -7032,7 +7032,15 @@ Editor::default_time_domain () const
 void
 Editor::start_track_drag (TimeAxisView& tav, int y, Gtk::Widget& w, bool can_change_cursor)
 {
-	track_drag = new TrackDrag (dynamic_cast<RouteTimeAxisView*> (&tav), *_session);
+	RouteTimeAxisView* rtav = dynamic_cast<RouteTimeAxisView*> (&tav);
+
+	/* We do not allow dragging VCA Masters */
+
+	if (!rtav) {
+		return;
+	}
+
+	track_drag = new TrackDrag (rtav, *_session);
 	DEBUG_TRACE (DEBUG::TrackDrag, string_compose ("start track drag with %1\n", track_drag));
 
 	int xo, yo;
