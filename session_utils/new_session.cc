@@ -109,9 +109,6 @@ create_new_session (string const& dir, string const& state, float sample_rate, i
 		::exit (EXIT_FAILURE);
 	}
 
-	engine->set_input_channels (256);
-	engine->set_output_channels (256);
-
 	if (engine->set_sample_rate (sample_rate)) {
 		cerr << "Cannot set session's samplerate.\n";
 		return 0;

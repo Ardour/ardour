@@ -141,9 +141,6 @@ static Session * _load_session (string dir, string state)
 		::exit (EXIT_FAILURE);
 	}
 
-	engine->set_input_channels (256);
-	engine->set_output_channels (256);
-
 	float sr;
 	SampleFormat sf;
 	std::string v;
@@ -209,9 +206,6 @@ SessionUtils::create_session (string dir, string state, float sample_rate)
 		std::cerr << "Cannot create Audio/MIDI engine\n";
 		::exit (EXIT_FAILURE);
 	}
-
-	engine->set_input_channels (256);
-	engine->set_output_channels (256);
 
 	if (engine->set_sample_rate (sample_rate)) {
 		std::cerr << "Cannot set session's samplerate.\n";
