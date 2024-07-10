@@ -71,8 +71,6 @@ AlsaAudioBackend::AlsaAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _samplerate (48000)
 	, _samples_per_period (1024)
 	, _periods_per_cycle (2)
-	, _n_inputs (0)
-	, _n_outputs (0)
 	, _systemic_audio_input_latency (0)
 	, _systemic_audio_output_latency (0)
 	, _midi_device_thread_active (false)
@@ -919,24 +917,6 @@ AlsaAudioBackend::_start (bool for_latency_measurement)
 	}
 #endif
 
-	if (_n_outputs != _pcmi->nplay ()) {
-		if (_n_outputs == 0) {
-			_n_outputs = _pcmi->nplay ();
-		} else {
-			_n_outputs = std::min (_n_outputs, _pcmi->nplay ());
-		}
-		PBD::info << _("AlsaAudioBackend: adjusted output channel count to match device.") << endmsg;
-	}
-
-	if (_n_inputs != _pcmi->ncapt ()) {
-		if (_n_inputs == 0) {
-			_n_inputs = _pcmi->ncapt ();
-		} else {
-			_n_inputs = std::min (_n_inputs, _pcmi->ncapt ());
-		}
-		PBD::info << _("AlsaAudioBackend: adjusted input channel count to match device.") << endmsg;
-	}
-
 	if (_pcmi->fsize () != _samples_per_period) {
 		_samples_per_period = _pcmi->fsize ();
 		PBD::warning << string_compose (_("AlsaAudioBackend: samples per period does not match, using %1."), _samples_per_period) << endmsg;
@@ -1246,8 +1226,8 @@ AlsaAudioBackend::register_system_audio_ports ()
 {
 	LatencyRange lr;
 
-	const int a_ins = _n_inputs;
-	const int a_out = _n_outputs;
+	const int a_ins = _pcmi->ncapt ();
+	const int a_out = _pcmi->nplay ();
 
 	const uint32_t lcpp = (_periods_per_cycle - 2) * _samples_per_period;
 

@@ -84,8 +84,6 @@ PortAudioBackend::PortAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _midi_driver_option(winmme_driver_name)
 	, _samplerate (48000)
 	, _samples_per_period (1024)
-	, _n_inputs (0)
-	, _n_outputs (0)
 	, _systemic_audio_input_latency (0)
 	, _systemic_audio_output_latency (0)
 	, _dsp_load (0)
@@ -612,15 +610,6 @@ PortAudioBackend::_start (bool for_latency_measurement)
 		return AudioDeviceOpenError;
 	}
 
-	if (_n_outputs != _pcmio->n_playback_channels ()) {
-		_n_outputs = _pcmio->n_playback_channels ();
-		PBD::info << get_error_string(OutputChannelCountNotSupportedError) << endmsg;
-	}
-
-	if (_n_inputs != _pcmio->n_capture_channels ()) {
-		_n_inputs = _pcmio->n_capture_channels ();
-		PBD::info << get_error_string(InputChannelCountNotSupportedError) << endmsg;
-	}
 #if 0
 	if (_pcmio->samples_per_period() != _samples_per_period) {
 		_samples_per_period = _pcmio->samples_per_period();
@@ -1196,8 +1185,8 @@ PortAudioBackend::register_system_audio_ports()
 {
 	LatencyRange lr;
 
-	const uint32_t a_ins = _n_inputs;
-	const uint32_t a_out = _n_outputs;
+	const uint32_t a_ins = _pcmio->n_capture_channels ();
+	const uint32_t a_out = _pcmio->n_playback_channels ();
 
 	/* audio ports */
 	lr.min = lr.max = (_measure_latency ? 0 : _systemic_audio_input_latency);

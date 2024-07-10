@@ -322,9 +322,6 @@ class PortAudioBackend : public AudioBackend, public PortEngineSharedImpl {
 		size_t _samples_per_period;
 		static size_t _max_buffer_size;
 
-		uint32_t _n_inputs;
-		uint32_t _n_outputs;
-
 		uint32_t _systemic_audio_input_latency;
 		uint32_t _systemic_audio_output_latency;
 

@@ -108,8 +108,6 @@ CoreAudioBackend::CoreAudioBackend (AudioEngine& e, AudioBackendInfo& info)
 	, _midi_driver_option(_("CoreMidi"))
 	, _samplerate (48000)
 	, _samples_per_period (1024)
-	, _n_inputs (0)
-	, _n_outputs (0)
 	, _systemic_audio_input_latency (0)
 	, _systemic_audio_output_latency (0)
 	, _hw_audio_input_latency (0)
@@ -564,24 +562,6 @@ CoreAudioBackend::_start (bool for_latency_measurement)
 		return error_code;
 	}
 
-	if (_n_outputs != _pcmio->n_playback_channels ()) {
-		if (_n_outputs == 0) {
-			_n_outputs = _pcmio->n_playback_channels ();
-		} else {
-			_n_outputs = std::min (_n_outputs, _pcmio->n_playback_channels ());
-		}
-		PBD::info << _("CoreAudioBackend: adjusted output channel count to match device.") << endmsg;
-	}
-
-	if (_n_inputs != _pcmio->n_capture_channels ()) {
-		if (_n_inputs == 0) {
-			_n_inputs = _pcmio->n_capture_channels ();
-		} else {
-			_n_inputs = std::min (_n_inputs, _pcmio->n_capture_channels ());
-		}
-		PBD::info << _("CoreAudioBackend: adjusted input channel count to match device.") << endmsg;
-	}
-
 	if (_pcmio->sample_rate() != _samplerate) {
 		_samplerate = _pcmio->sample_rate();
 		engine.sample_rate_change (_samplerate);
@@ -927,8 +907,8 @@ CoreAudioBackend::register_system_audio_ports()
 {
 	LatencyRange lr;
 
-	const uint32_t a_ins = _n_inputs;
-	const uint32_t a_out = _n_outputs;
+	const uint32_t a_ins = _pcmio->n_capture_channels ();
+	const uint32_t a_out = _pcmio->n_playback_channels ();
 
 	const uint32_t coreaudio_reported_input_latency = _pcmio->get_latency(name_to_id(_input_audio_device, Input), true);
 	const uint32_t coreaudio_reported_output_latency = _pcmio->get_latency(name_to_id(_output_audio_device, Output), false);
