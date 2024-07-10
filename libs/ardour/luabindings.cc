@@ -2866,8 +2866,6 @@ LuaBindings::common (lua_State* L)
 		.addFunction ("sample_rate", &AudioBackend::sample_rate)
 		.addFunction ("buffer_size", &AudioBackend::buffer_size)
 		.addFunction ("period_size", &AudioBackend::period_size)
-		.addFunction ("input_channels", &AudioBackend::input_channels)
-		.addFunction ("output_channels", &AudioBackend::output_channels)
 		.addFunction ("dsp_load", &AudioBackend::dsp_load)
 
 		.addFunction ("set_sample_rate", &AudioBackend::set_sample_rate)

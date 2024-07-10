@@ -377,18 +377,6 @@ PulseAudioBackend::available_buffer_sizes (const std::string&) const
 	return bs;
 }
 
-uint32_t
-PulseAudioBackend::available_input_channel_count (const std::string&) const
-{
-	return 0;
-}
-
-uint32_t
-PulseAudioBackend::available_output_channel_count (const std::string&) const
-{
-	return N_CHANNELS;
-}
-
 bool
 PulseAudioBackend::can_change_sample_rate_when_running () const
 {
@@ -441,18 +429,6 @@ PulseAudioBackend::set_interleaved (bool yn)
 }
 
 int
-PulseAudioBackend::set_input_channels (uint32_t cc)
-{
-	return 0;
-}
-
-int
-PulseAudioBackend::set_output_channels (uint32_t cc)
-{
-	return 0;
-}
-
-int
 PulseAudioBackend::set_systemic_input_latency (uint32_t sl)
 {
 	return 0;
@@ -487,18 +463,6 @@ bool
 PulseAudioBackend::interleaved () const
 {
 	return false;
-}
-
-uint32_t
-PulseAudioBackend::input_channels () const
-{
-	return 0;
-}
-
-uint32_t
-PulseAudioBackend::output_channels () const
-{
-	return N_CHANNELS;
 }
 
 uint32_t

@@ -245,18 +245,6 @@ PortAudioBackend::available_buffer_sizes (const std::string&) const
 	return bs;
 }
 
-uint32_t
-PortAudioBackend::available_input_channel_count (const std::string&) const
-{
-	return 128; // TODO query current device
-}
-
-uint32_t
-PortAudioBackend::available_output_channel_count (const std::string&) const
-{
-	return 128; // TODO query current device
-}
-
 bool
 PortAudioBackend::can_change_sample_rate_when_running () const
 {
@@ -318,20 +306,6 @@ PortAudioBackend::set_interleaved (bool yn)
 {
 	if (!yn) { return 0; }
 	return -1;
-}
-
-int
-PortAudioBackend::set_input_channels (uint32_t cc)
-{
-	_n_inputs = cc;
-	return 0;
-}
-
-int
-PortAudioBackend::set_output_channels (uint32_t cc)
-{
-	_n_outputs = cc;
-	return 0;
 }
 
 int
@@ -407,18 +381,6 @@ bool
 PortAudioBackend::interleaved () const
 {
 	return false;
-}
-
-uint32_t
-PortAudioBackend::input_channels () const
-{
-	return _n_inputs;
-}
-
-uint32_t
-PortAudioBackend::output_channels () const
-{
-	return _n_outputs;
 }
 
 uint32_t

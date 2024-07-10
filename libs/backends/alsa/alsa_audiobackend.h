@@ -139,8 +139,6 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 		std::vector<uint32_t> available_buffer_sizes (const std::string& device) const;
 		std::vector<uint32_t> available_buffer_sizes2 (const std::string&, const std::string&) const;
 		std::vector<uint32_t> available_period_sizes (const std::string& driver, const std::string& device) const;
-		uint32_t available_input_channel_count (const std::string& device) const;
-		uint32_t available_output_channel_count (const std::string& device) const;
 
 		bool can_change_sample_rate_when_running () const;
 		bool can_change_buffer_size_when_running () const;
@@ -158,8 +156,6 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 		int set_buffer_size (uint32_t);
 		int set_peridod_size (uint32_t);
 		int set_interleaved (bool yn);
-		int set_input_channels (uint32_t);
-		int set_output_channels (uint32_t);
 		int set_systemic_input_latency (uint32_t);
 		int set_systemic_output_latency (uint32_t);
 		int set_systemic_midi_input_latency (std::string const, uint32_t);
@@ -175,8 +171,6 @@ class AlsaAudioBackend : public AudioBackend, public PortEngineSharedImpl
 		uint32_t     buffer_size () const;
 		uint32_t     period_size () const;
 		bool         interleaved () const;
-		uint32_t     input_channels () const;
-		uint32_t     output_channels () const;
 		uint32_t     systemic_input_latency () const;
 		uint32_t     systemic_output_latency () const;
 		uint32_t     systemic_midi_input_latency (std::string const) const;

@@ -124,8 +124,6 @@ class LIBARDOUR_API AudioEngine : public PortManager, public SessionHandlePtr
 	int set_sample_rate (float);
 	int set_buffer_size (uint32_t);
 	int set_interleaved (bool yn);
-	int set_input_channels (uint32_t);
-	int set_output_channels (uint32_t);
 	int set_systemic_input_latency (uint32_t);
 	int set_systemic_output_latency (uint32_t);
 

@@ -227,18 +227,6 @@ JACKAudioBackend::available_period_sizes (const std::string& driver, const std::
 	return s;
 }
 
-uint32_t
-JACKAudioBackend::available_input_channel_count (const string& /*device*/) const
-{
-	return 128;
-}
-
-uint32_t
-JACKAudioBackend::available_output_channel_count (const string& /*device*/) const
-{
-	return 128;
-}
-
 /* -- parameter setting -- */
 
 int
@@ -307,36 +295,6 @@ JACKAudioBackend::set_interleaved (bool yn)
 		return 0;
 	}
 	return -1;
-}
-
-int
-JACKAudioBackend::set_input_channels (uint32_t cnt)
-{
-	if (available()) {
-		if (cnt != 0) {
-			/* can't set a real value for this while JACK runs */
-			return -1;
-		}
-	}
-
-	_target_input_channels = cnt;
-
-	return 0;
-}
-
-int
-JACKAudioBackend::set_output_channels (uint32_t cnt)
-{
-	if (available()) {
-		if (cnt != 0) {
-			/* can't set a real value for this while JACK runs */
-			return -1;
-		}
-	}
-
-	_target_output_channels = cnt;
-
-	return 0;
 }
 
 int
@@ -431,42 +389,6 @@ string
 JACKAudioBackend::midi_option () const
 {
 	return _target_midi_option;
-}
-
-uint32_t
-JACKAudioBackend::input_channels () const
-{
-	if (!_jack_connection->in_control()) {
-		if (available()) {
-			return n_physical (JackPortIsInput).n_audio();
-		} else {
-			return 0;
-		}
-	} else {
-		if (available()) {
-			return n_physical (JackPortIsInput).n_audio();
-		} else {
-			return _target_input_channels;
-		}
-	}
-}
-
-uint32_t
-JACKAudioBackend::output_channels () const
-{
-	if (!_jack_connection->in_control()) {
-		if (available()) {
-			return n_physical (JackPortIsOutput).n_audio();
-		} else {
-			return 0;
-		}
-	} else {
-		if (available()) {
-			return n_physical (JackPortIsOutput).n_audio();
-		} else {
-			return _target_output_channels;
-		}
-	}
 }
 
 uint32_t

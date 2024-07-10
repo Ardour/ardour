@@ -270,18 +270,6 @@ CoreAudioBackend::available_buffer_sizes2 (const std::string& input_device, cons
 	}
 }
 
-uint32_t
-CoreAudioBackend::available_input_channel_count (const std::string&) const
-{
-	return 128; // TODO query current device
-}
-
-uint32_t
-CoreAudioBackend::available_output_channel_count (const std::string&) const
-{
-	return 128; // TODO query current device
-}
-
 bool
 CoreAudioBackend::can_change_sample_rate_when_running () const
 {
@@ -362,20 +350,6 @@ CoreAudioBackend::set_interleaved (bool yn)
 }
 
 int
-CoreAudioBackend::set_input_channels (uint32_t cc)
-{
-	_n_inputs = cc;
-	return 0;
-}
-
-int
-CoreAudioBackend::set_output_channels (uint32_t cc)
-{
-	_n_outputs = cc;
-	return 0;
-}
-
-int
 CoreAudioBackend::set_systemic_input_latency (uint32_t sl)
 {
 	_systemic_audio_input_latency = sl;
@@ -424,18 +398,6 @@ bool
 CoreAudioBackend::interleaved () const
 {
 	return false;
-}
-
-uint32_t
-CoreAudioBackend::input_channels () const
-{
-	return _n_inputs;
-}
-
-uint32_t
-CoreAudioBackend::output_channels () const
-{
-	return _n_outputs;
 }
 
 uint32_t

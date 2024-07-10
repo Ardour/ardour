@@ -258,30 +258,6 @@ AlsaAudioBackend::available_buffer_sizes (const std::string& device) const
 	return bs;
 }
 
-uint32_t
-AlsaAudioBackend::available_input_channel_count (const std::string& device) const
-{
-	if (device == get_standard_device_name (DeviceNone)) {
-		return 0;
-	}
-	if (device == _input_audio_device && _input_audio_device_info.valid) {
-		return _input_audio_device_info.max_channels;
-	}
-	return 128;
-}
-
-uint32_t
-AlsaAudioBackend::available_output_channel_count (const std::string& device) const
-{
-	if (device == get_standard_device_name (DeviceNone)) {
-		return 0;
-	}
-	if (device == _output_audio_device && _output_audio_device_info.valid) {
-		return _output_audio_device_info.max_channels;
-	}
-	return 128;
-}
-
 std::vector<uint32_t>
 AlsaAudioBackend::available_period_sizes (const std::string& driver, const std::string& device) const
 {
@@ -447,20 +423,6 @@ AlsaAudioBackend::set_interleaved (bool yn)
 }
 
 int
-AlsaAudioBackend::set_input_channels (uint32_t cc)
-{
-	_n_inputs = cc;
-	return 0;
-}
-
-int
-AlsaAudioBackend::set_output_channels (uint32_t cc)
-{
-	_n_outputs = cc;
-	return 0;
-}
-
-int
 AlsaAudioBackend::set_systemic_input_latency (uint32_t sl)
 {
 	if (_systemic_audio_input_latency == sl) {
@@ -608,18 +570,6 @@ bool
 AlsaAudioBackend::interleaved () const
 {
 	return false;
-}
-
-uint32_t
-AlsaAudioBackend::input_channels () const
-{
-	return _n_inputs;
-}
-
-uint32_t
-AlsaAudioBackend::output_channels () const
-{
-	return _n_outputs;
 }
 
 uint32_t

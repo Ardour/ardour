@@ -179,18 +179,6 @@ DummyAudioBackend::available_buffer_sizes (const std::string&) const
 	return bs;
 }
 
-uint32_t
-DummyAudioBackend::available_input_channel_count (const std::string&) const
-{
-	return 128;
-}
-
-uint32_t
-DummyAudioBackend::available_output_channel_count (const std::string&) const
-{
-	return 128;
-}
-
 bool
 DummyAudioBackend::can_change_sample_rate_when_running () const
 {
@@ -296,20 +284,6 @@ DummyAudioBackend::set_interleaved (bool yn)
 }
 
 int
-DummyAudioBackend::set_input_channels (uint32_t cc)
-{
-	_n_inputs = cc;
-	return 0;
-}
-
-int
-DummyAudioBackend::set_output_channels (uint32_t cc)
-{
-	_n_outputs = cc;
-	return 0;
-}
-
-int
 DummyAudioBackend::set_systemic_input_latency (uint32_t sl)
 {
 	_systemic_input_latency = sl;
@@ -346,18 +320,6 @@ bool
 DummyAudioBackend::interleaved () const
 {
 	return false;
-}
-
-uint32_t
-DummyAudioBackend::input_channels () const
-{
-	return _n_inputs;
-}
-
-uint32_t
-DummyAudioBackend::output_channels () const
-{
-	return _n_outputs;
 }
 
 uint32_t

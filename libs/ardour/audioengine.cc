@@ -1412,24 +1412,6 @@ AudioEngine::set_interleaved (bool yn)
 }
 
 int
-AudioEngine::set_input_channels (uint32_t ic)
-{
-	if (!_backend) {
-		return -1;
-	}
-	return _backend->set_input_channels  (ic);
-}
-
-int
-AudioEngine::set_output_channels (uint32_t oc)
-{
-	if (!_backend) {
-		return -1;
-	}
-	return _backend->set_output_channels (oc);
-}
-
-int
 AudioEngine::set_systemic_input_latency (uint32_t il)
 {
 	if (!_backend) {
