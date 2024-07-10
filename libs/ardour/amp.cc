@@ -73,7 +73,7 @@ Amp::configure_io (ChanCount in, ChanCount out)
 }
 
 void
-Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
+Amp::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t /*end_sample*/, double /*speed*/, pframes_t nframes, bool)
 {
 	if (!check_active()) {
 		/* disregard potentially prepared gain-automation. */
@@ -128,6 +128,8 @@ Amp::run (BufferSet& bufs, samplepos_t /*start_sample*/, samplepos_t /*end_sampl
 		_apply_gain_automation = false;
 
 	} else { /* manual (scalar) gain */
+
+		_gain_control->automation_run (start_sample, nframes);
 
 		gain_t const target_gain = _gain_control->get_value();
 
@@ -384,7 +386,7 @@ Amp::setup_gain_automation (samplepos_t start_sample, samplepos_t end_sample, sa
 
 		_apply_gain_automation = _gain_control->get_masters_curve ( start_sample, end_sample, _gain_automation_buffer, nframes);
 
-		if (start_sample != _current_automation_sample && _session.bounce_processing ()) {
+		if (start_sample != _current_automation_sample) {
 			_current_gain = _gain_automation_buffer[0];
 		}
 		_current_automation_sample = end_sample;
