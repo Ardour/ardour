@@ -244,8 +244,6 @@ FaderPort8::~FaderPort8 ()
 		AudioEngine::instance()->unregister_port (_output_port);
 		_output_port.reset ();
 	}
-
-	tear_down_gui ();
 }
 
 /* ****************************************************************************
@@ -266,6 +264,7 @@ FaderPort8::do_request (FaderPort8Request* req)
 void
 FaderPort8::stop ()
 {
+	tear_down_gui ();
 	DEBUG_TRACE (DEBUG::FaderPort8, "BaseUI::quit ()\n");
 	BaseUI::quit ();
 	close (); // drop references, disconnect from session signals
