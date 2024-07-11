@@ -61,10 +61,10 @@ Console1::~Console1 ()
 {
 	all_lights_out ();
 
+	tear_down_gui ();
+
 	stop_event_loop ();
 	MIDISurface::drop ();
-
-	tear_down_gui ();
 
 	for (const auto& b : buttons) {
 		delete b.second;

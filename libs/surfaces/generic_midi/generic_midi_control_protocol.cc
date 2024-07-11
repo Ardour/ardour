@@ -167,7 +167,6 @@ GenericMidiControlProtocol::~GenericMidiControlProtocol ()
 	}
 
 	drop_all ();
-	tear_down_gui ();
 }
 
 list<std::shared_ptr<ARDOUR::Bundle> >
@@ -300,6 +299,7 @@ GenericMidiControlProtocol::do_request (GenericMIDIRequest* req)
 int
 GenericMidiControlProtocol::stop ()
 {
+	tear_down_gui ();
 	BaseUI::quit ();
 
 	return 0;
@@ -328,6 +328,7 @@ GenericMidiControlProtocol::set_active (bool yn)
 	if (yn) {
 		BaseUI::run ();
 	} else {
+		tear_down_gui ();
 		BaseUI::quit ();
 	}
 

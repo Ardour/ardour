@@ -138,7 +138,6 @@ OSC::~OSC()
 {
 	tick = false;
 	stop ();
-	tear_down_gui ();
 	_instance = 0;
 }
 
@@ -315,6 +314,8 @@ OSC::thread_init ()
 int
 OSC::stop ()
 {
+	tear_down_gui ();
+
 	periodic_connection.disconnect ();
 	session_connections.drop_connections ();
 

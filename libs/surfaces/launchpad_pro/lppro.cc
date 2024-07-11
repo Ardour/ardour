@@ -189,8 +189,8 @@ LaunchPadPro::~LaunchPadPro ()
 		p.second.timeout_connection.disconnect ();
 	}
 
-	stop_event_loop ();
 	tear_down_gui ();
+	stop_event_loop ();
 
 	MIDISurface::drop ();
 
