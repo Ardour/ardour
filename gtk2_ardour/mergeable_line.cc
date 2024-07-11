@@ -85,7 +85,7 @@ MergeableLine::merge_drawn_line (Editor& e, Session& s, Evoral::ControlList::Ord
 	}
 
 	list->freeze ();
-	list->editor_add_ordered (points, false);
+	list->editor_add_ordered (points, true);
 	if (thin) {
 		list->thin (Config->get_automation_thinning_factor());
 	}
