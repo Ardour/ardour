@@ -5405,7 +5405,7 @@ Editor::paste_internal (timepos_t const & pos, float times)
 		 * the below "do the reasonable thing" logic. */
 		ts = selection->tracks.filter_to_unique_playlists ();
 		sort_track_selection (ts);
-	} else {
+	} else if (cut_buffer->lines.empty ()) {
 		/* Figure out which track to base the paste at. */
 		TimeAxisView* base_track = NULL;
 		if (_edit_point == Editing::EditAtMouse && entered_track) {
@@ -5459,10 +5459,17 @@ Editor::paste_internal (timepos_t const & pos, float times)
 		   R1.A1, R1.A2, R2, R2.A1, ... */
 	}
 
+
 	bool commit = false;
 	begin_reversible_command (Operations::paste);
 
-	if (ts.size() == 1 && cut_buffer->lines.size() == 1 &&
+	if (ts.size() == 0 && cut_buffer->lines.size() == 1 && entered_regionview) {
+		AudioRegionView* arv = dynamic_cast<AudioRegionView*>(entered_regionview);
+		if (arv) {
+			PasteContext ctx(paste_count, times, ItemCounts(), true);
+			commit |= arv->paste (position, *cut_buffer, ctx);
+		}
+	} else if (ts.size() == 1 && cut_buffer->lines.size() == 1 &&
 	    dynamic_cast<AutomationTimeAxisView*>(ts.front())) {
 	    /* Only one line copied, and one automation track selected.  Do a
 	       "greedy" paste from one automation type to another. */

@@ -54,6 +54,7 @@ class GhostRegion;
 class AutomationTimeAxisView;
 class RegionFxLine;
 class RouteTimeAxisView;
+class PasteContext;
 
 class AudioRegionView : public RegionView, public LineMerger
 {
@@ -97,6 +98,7 @@ public:
 	bool set_region_fx_line (std::weak_ptr<PBD::Controllable>);
 	bool get_region_fx_line (PBD::ID&, uint32_t&);
 	void update_envelope_visibility ();
+	bool paste (Temporal::timepos_t const&, const Selection&, PasteContext&);
 
 	sigc::signal<void> region_line_changed;
 

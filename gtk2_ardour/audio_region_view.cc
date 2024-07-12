@@ -67,6 +67,7 @@
 #include "mergeable_line.h"
 #include "region_gain_line.h"
 #include "control_point.h"
+#include "paste_context.h"
 #include "ghostregion.h"
 #include "audio_time_axis.h"
 #include "rgb_macros.h"
@@ -1256,6 +1257,40 @@ AudioRegionView::get_region_fx_line (PBD::ID& id, uint32_t& param_id)
 	id       = _rfx_id;
 	param_id = _rdx_param;
 	return _rdx_param != UINT32_MAX && _rfx_id != 0;
+}
+
+bool
+AudioRegionView::paste (Temporal::timepos_t const& pos, const Selection& selection, PasteContext& ctx)
+{
+	if (!_fx_line || selection.lines.size() != 1) {
+		return false;
+	}
+	std::shared_ptr<AutomationList> alist (_fx_line->the_list());
+
+	AutomationSelection::const_iterator p = selection.lines.begin ();
+
+	Temporal::timecnt_t len = (*p)->length();
+	Temporal::timepos_t tpos (pos);
+
+	unsigned paste_count = ctx.count;
+
+	switch (alist->time_domain()) {
+		case Temporal::BeatTime:
+			tpos += trackview.editor().get_paste_offset (pos, paste_count > 0 ? 1 : 0, len);
+			break;
+		case Temporal::AudioTime:
+			tpos += trackview.editor().get_paste_offset (pos, paste_count, len);
+			break;
+	}
+
+	XMLNode &before = alist->get_state();
+	Temporal::timepos_t model_pos (_region->position().distance (tpos));
+	alist->paste (**p, model_pos);
+	timepos_t rlen ((samplepos_t)_region->length().samples());
+	alist->truncate_end (rlen);
+	trackview.session()->add_command (new MementoCommand<AutomationList>(*alist.get(), &before, &alist->get_state()));
+
+	return true;
 }
 
 void
