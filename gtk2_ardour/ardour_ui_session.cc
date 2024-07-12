@@ -58,6 +58,7 @@
 #include "ardour/session_utils.h"
 #include "ardour/session_state_utils.h"
 #include "ardour/session_directory.h"
+#include "ardour/wrong_program.h"
 
 #include "ardour_message.h"
 #include "ardour_ui.h"
@@ -461,6 +462,21 @@ ARDOUR_UI::load_session_stage_two (const std::string& path, const std::string& s
 		msg.hide ();
 		g_free (escaped_error_txt);
 
+		goto out;
+	}
+	catch (ARDOUR::WrongProgram const & wp) {
+
+		std::string first_word = wp.creator.substr (0, wp.creator.find (' '));
+
+		ArdourMessageDialog msg (string_compose ("<span size=\"large\">%1\ncannot load sessions\nlast modified by\n%2</span>", PROGRAM_NAME, first_word),
+		                         true,
+		                         Gtk::MESSAGE_ERROR,
+		                         BUTTONS_OK);
+		msg.set_title (_("Session not loaded"));
+		msg.set_position (Gtk::WIN_POS_CENTER);
+
+		(void) msg.run ();
+		msg.hide ();
 		goto out;
 	}
 	catch (Glib::Error const& e) {
