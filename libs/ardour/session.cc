@@ -644,8 +644,6 @@ Session::immediately_post_engine ()
 void
 Session::destroy ()
 {
-	vector<void*> debug_pointers;
-
 	/* if we got to here, leaving pending state around
 	 * is a mistake.
 	 */
