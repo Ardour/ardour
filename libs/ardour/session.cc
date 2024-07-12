@@ -111,6 +111,7 @@
 #include "ardour/revision.h"
 #include "ardour/route_group.h"
 #include "ardour/rt_tasklist.h"
+#include "ardour/wrong_program.h"
 
 #include "ardour/rt_safe_delete.h"
 #include "ardour/silentfilesource.h"
@@ -459,28 +460,31 @@ Session::Session (AudioEngine &eng,
 	if (err) {
 		destroy ();
 		switch (err) {
-			case -1:
-				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Failed to create background threads.")));
-				break;
-			case -2:
-			case -3:
-				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Invalid TempoMap in session-file.")));
-				break;
-			case -4:
-				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Invalid or corrupt session state.")));
-				break;
-			case -5:
-				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Port registration failed.")));
-				break;
-			case -6:
-				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Audio/MIDI Engine is not running or sample-rate mismatches.")));
-				break;
-			case -8:
-				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Required Plugin/Processor is missing.")));
-				break;
-			default:
-				throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Unexpected exception during session setup, possibly invalid audio/midi engine parameters. Please see stdout/stderr for details")));
-				break;
+		case -1:
+			throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Failed to create background threads.")));
+			break;
+		case -2:
+		case -3:
+			throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Invalid TempoMap in session-file.")));
+			break;
+		case -4:
+			throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Invalid or corrupt session state.")));
+			break;
+		case -5:
+			throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Port registration failed.")));
+			break;
+		case -6:
+			throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Audio/MIDI Engine is not running or sample-rate mismatches.")));
+			break;
+		case -8:
+			throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Required Plugin/Processor is missing.")));
+			break;
+		case -9:
+			throw WrongProgram (modified_with);
+			break;
+		default:
+			throw SessionException (string_compose (_("Cannot initialize session/engine: %1"), _("Unexpected exception during session setup, possibly invalid audio/midi engine parameters. Please see stdout/stderr for details")));
+			break;
 		}
 	}
 
