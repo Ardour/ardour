@@ -1786,9 +1786,11 @@ Session::set_state (const XMLNode& node, int version)
 		child->get_property (X_("created-with"), created_with);
 
  		child->get_property (X_("modified-with"), modified_with);
- 		if (modified_with.rfind (PROGRAM_NAME, 0) != 0) {
+#if 0
+		if (modified_with.rfind (PROGRAM_NAME, 0) != 0) {
 			throw WrongProgram (modified_with);
 		}
+#endif
 	}
 
 	setup_raid_path(_session_dir->root_path());
