@@ -1215,7 +1215,7 @@ Session::state (bool save_template, snapshot_t snapshot_type, bool for_archive, 
 	child = node->add_child ("ProgramVersion");
 	child->set_property("created-with", created_with);
 
-	std::string modified_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
+	modified_with = string_compose ("%1 %2", PROGRAM_NAME, revision);
 	child->set_property("modified-with", modified_with);
 
 	/* store configuration settings */
@@ -1780,6 +1780,8 @@ Session::set_state (const XMLNode& node, int version)
 	created_with = "unknown";
 	if ((child = find_named_node (node, "ProgramVersion")) != 0) {
 		child->get_property (X_("created-with"), created_with);
+
+ 		child->get_property (X_("modified-with"), modified_with);
 	}
 
 	setup_raid_path(_session_dir->root_path());

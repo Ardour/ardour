@@ -2381,6 +2381,7 @@ private:
 	std::shared_ptr<Route> get_midi_nth_route_by_id (PresentationInfo::order_t n) const;
 
 	std::string created_with;
+	mutable std::string modified_with;
 
 	void midi_track_presentation_info_changed (PBD::PropertyChange const &, std::weak_ptr<MidiTrack>);
 	void rewire_selected_midi (std::shared_ptr<MidiTrack>);
