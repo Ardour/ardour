@@ -286,7 +286,7 @@ FP8Strip::set_strip_name ()
 }
 
 void
-FP8Strip::set_stripable (std::shared_ptr<Stripable> s, bool panmode)
+FP8Strip::set_stripable (std::shared_ptr<Stripable> s, FaderMode fadermode)
 {
 	assert (s);
 
@@ -301,11 +301,18 @@ FP8Strip::set_stripable (std::shared_ptr<Stripable> s, bool panmode)
 		set_bar_mode (4, true); // Off
 	}
 
-	if (panmode) {
-		set_fader_controllable (s->pan_azimuth_control ());
-	} else {
-		set_fader_controllable (s->gain_control ());
+	switch (fadermode) {
+		case ModePan:
+			set_fader_controllable (s->pan_azimuth_control ());
+			break;
+		case ModeTrim:
+			set_fader_controllable (s->trim_control ());
+			break;
+		default:
+			set_fader_controllable (s->gain_control ());
+			break;
 	}
+
 	set_pan_controllable (s->pan_azimuth_control ());
 
 	if (s->is_monitor ()) {

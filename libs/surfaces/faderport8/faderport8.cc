@@ -1045,7 +1045,7 @@ FaderPort8::assign_stripables (bool select_only)
 #ifdef FADERPORT2
 	std::shared_ptr<Stripable> s = first_selected_stripable();
 	if (s) {
-		_ctrls.strip(0).set_stripable (s, _ctrls.fader_mode() == ModePan);
+		_ctrls.strip(0).set_stripable (s, _ctrls.fader_mode());
 	} else {
 		_ctrls.strip(0).unset_controllables ( FP8Strip::CTRL_ALL );
 	}
@@ -1090,7 +1090,7 @@ FaderPort8::assign_stripables (bool select_only)
 			_ctrls.strip(id).select_button ().set_active ((*s)->is_selected ());
 			_ctrls.strip(id).select_button ().set_blinking (*s == first_selected_stripable ());
 		} else {
-			_ctrls.strip(id).set_stripable (*s, _ctrls.fader_mode() == ModePan);
+			_ctrls.strip(id).set_stripable (*s, _ctrls.fader_mode());
 		}
 
 		 boost::function<void ()> cb (boost::bind (&FaderPort8::select_strip, this, std::weak_ptr<Stripable> (*s)));
@@ -1782,6 +1782,7 @@ FaderPort8::assign_strips ()
 	FaderMode fadermode = _ctrls.fader_mode ();
 	switch (fadermode) {
 		case ModeTrack:
+		case ModeTrim:
 		case ModePan:
 			assign_stripables ();
 			stripable_selection_changed (); // update selection, automation-state
@@ -1895,6 +1896,7 @@ FaderPort8::notify_fader_mode_changed ()
 
 	switch (fadermode) {
 		case ModeTrack:
+		case ModeTrim:
 		case ModePan:
 			break;
 		case ModePlugins:
@@ -1965,7 +1967,7 @@ FaderPort8::notify_stripable_property_changed (std::weak_ptr<Stripable> ws, cons
 	}
 
 	if (what_changed.empty ()) {
-		_ctrls.strip(id).set_stripable (s, _ctrls.fader_mode() == ModePan);
+		_ctrls.strip(id).set_stripable (s, _ctrls.fader_mode());
 	}
 
 	if (what_changed.contains (Properties::name)) {
@@ -1974,6 +1976,7 @@ FaderPort8::notify_stripable_property_changed (std::weak_ptr<Stripable> ws, cons
 				_ctrls.strip(id).set_text_line (3, s->name(), true);
 				break;
 			case ModeTrack:
+			case ModeTrim:
 			case ModePan:
 				_ctrls.strip(id).set_text_line (0, s->name());
 				break;
@@ -2026,6 +2029,7 @@ FaderPort8::stripable_selection_changed ()
 			assign_sends ();
 			return;
 		case ModeTrack:
+		case ModeTrim:
 		case ModePan:
 			break;
 	}

@@ -80,6 +80,9 @@ FaderPort8::notify_route_state_changed ()
 			case ModeTrack:
 				ac = s->gain_control();
 				break;
+			case ModeTrim:
+				ac = s->trim_control();
+				break;
 			case ModePan:
 				ac = s->pan_azimuth_control();
 				break;

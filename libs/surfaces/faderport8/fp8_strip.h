@@ -95,7 +95,7 @@ public:
 	void set_periodic_display_mode (DisplayMode m);
 
 	// convenience function to call all set_XXX_controllable
-	void set_stripable (std::shared_ptr<ARDOUR::Stripable>, bool panmode);
+	void set_stripable (std::shared_ptr<ARDOUR::Stripable>, FP8Types::FaderMode);
 	void set_text_line (uint8_t, std::string const&, bool inv = false);
 
 	enum CtrlMask {

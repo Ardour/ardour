@@ -228,6 +228,7 @@ FaderPort8::button_link ()
 {
 	switch (_ctrls.fader_mode()) {
 		case ModeTrack:
+		case ModeTrim:
 		case ModePan:
 			if (_link_enabled) {
 				stop_link ();
@@ -286,6 +287,9 @@ FaderPort8::button_automation (ARDOUR::AutoState as)
 		switch (fadermode) {
 			case ModeTrack:
 				ac = (*i)->gain_control ();
+				break;
+			case ModeTrim:
+				ac = (*i)->trim_control ();
 				break;
 			case ModePan:
 				ac = (*i)->pan_azimuth_control ();
@@ -473,7 +477,7 @@ FaderPort8::button_arm (bool press)
 	}
 #else
 	FaderMode fadermode = _ctrls.fader_mode ();
-	if (fadermode == ModeTrack || fadermode == ModePan) {
+	if (fadermode == ModeTrack || fadermode == ModePan || fadermode == ModeTrim) {
 		_ctrls.button (FP8Controls::BtnArm).set_active (press);
 		ARMButtonChange (press); /* EMIT SIGNAL */
 	}
@@ -660,6 +664,7 @@ FaderPort8::button_parameter ()
 {
 	switch (_ctrls.fader_mode()) {
 		case ModeTrack:
+		case ModeTrim:
 		case ModePan:
 			if (_link_enabled || _link_locked) {
 				handle_encoder_link (0);
@@ -681,6 +686,7 @@ FaderPort8::encoder_parameter (bool neg, int steps)
 {
 	switch (_ctrls.fader_mode()) {
 		case ModeTrack:
+		case ModeTrim:
 		case ModePan:
 			if (steps != 0) {
 				if (_link_enabled || _link_locked) {

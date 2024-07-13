@@ -428,6 +428,11 @@ FP8Controls::set_nav_mode (NavigationMode m)
 void
 FP8Controls::set_fader_mode (FaderMode m)
 {
+#if 0
+	if (m == ModeSend /*&& shift_mod ()*/) {
+		m = ModeTrim;
+	}
+#endif
 	if (_fadermode == m) {
 		if (m == ModePlugins || m == ModeSend) {
 			/* "Edit Plugins" while editing Plugin-params, returns back

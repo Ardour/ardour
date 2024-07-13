@@ -152,7 +152,8 @@ namespace FP8Types {
 		ModeTrack,
 		ModePlugins,
 		ModeSend,
-		ModePan
+		ModePan,
+		ModeTrim
 	};
 
 	enum NavigationMode {
