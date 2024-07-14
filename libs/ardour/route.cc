@@ -226,6 +226,8 @@ Route::init ()
 
 	if (is_monitor ()) {
 		_amp->set_display_name (_("Monitor"));
+		_gain_control->set_flag (Controllable::MonitorControl);
+		_trim_control->set_flag (Controllable::MonitorControl);
 	}
 
 	if (!is_singleton () && !is_auditioner ()) {

@@ -79,6 +79,7 @@ public:
 		NotAutomatable = 0x08,
 		InlineControl  = 0x10,
 		HiddenControl  = 0x20,
+		MonitorControl = 0x40,
 	};
 
 	Controllable (const std::string& name, Flag f = Flag (0));

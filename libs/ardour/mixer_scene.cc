@@ -67,7 +67,9 @@ MixerScene::snapshot ()
 		if (!std::dynamic_pointer_cast<AutomationControl> (c)) {
 			continue;
 		}
-		if (c->flags () & Controllable::HiddenControl) {
+		if (std::dynamic_pointer_cast<GainControl> (c)) {
+		}
+		if (c->flags () & Controllable::Flag (Controllable::HiddenControl | Controllable::MonitorControl)) {
 			continue;
 		}
 		_ctrl_map[c->id ()] = c->get_save_value ();
