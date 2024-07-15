@@ -2176,6 +2176,7 @@ Editor::leave_handler (ArdourCanvas::Item* item, GdkEvent*, ItemType item_type)
 	break;
 
 	default:
+		_region_peak_cursor->hide ();
 		break;
 	}
 
