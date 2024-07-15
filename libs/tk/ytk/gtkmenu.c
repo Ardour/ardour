@@ -3906,9 +3906,8 @@ gtk_menu_enter_notify (GtkWidget        *widget,
 		   */
 		  menu_shell->activate_time = 0;
 		}
+	      priv->seen_item_enter = TRUE;
 	    }
-	    
-	  priv->seen_item_enter = TRUE;
 	}
     }
   
