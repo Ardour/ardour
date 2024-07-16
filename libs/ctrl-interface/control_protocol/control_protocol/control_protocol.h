@@ -57,7 +57,7 @@ public:
 	virtual int set_feedback (bool /*yn*/) { return 0; }
 	virtual bool get_feedback () const { return false; }
 
-	virtual void midi_connectivity_established () {}
+	virtual void midi_connectivity_established (bool) {}
 
 	virtual void stripable_selection_changed () = 0;
 

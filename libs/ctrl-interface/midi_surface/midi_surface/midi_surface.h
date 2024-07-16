@@ -85,6 +85,7 @@ class MIDISurface : public ARDOUR::ControlProtocol
 	CONTROL_PROTOCOL_THREADS_NEED_TEMPO_MAP_DECL();
 
 	virtual bool midi_input_handler (Glib::IOCondition ioc, MIDI::Port* port);
+	void midi_connectivity_established (bool);
 
   protected:
 	bool with_pad_filter;

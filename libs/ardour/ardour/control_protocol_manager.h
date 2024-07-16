@@ -72,7 +72,7 @@ class LIBARDOUR_API ControlProtocolManager : public PBD::Stateful, public ARDOUR
 	void set_session (Session*);
 	void discover_control_protocols ();
 	void foreach_known_protocol (boost::function<void(const ControlProtocolInfo*)>);
-	void midi_connectivity_established ();
+	void midi_connectivity_established (bool);
 	void drop_protocols ();
 	void probe_midi_control_protocols ();
 	void probe_usb_control_protocols (bool, uint16_t, uint16_t);

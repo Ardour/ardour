@@ -52,6 +52,7 @@
 #include "ardour/automation_watch.h"
 #include "ardour/butler.h"
 #include "ardour/click.h"
+#include "ardour/control_protocol_manager.h"
 #include "ardour/debug.h"
 #include "ardour/disk_reader.h"
 #include "ardour/io_tasklist.h"
@@ -1868,6 +1869,8 @@ Session::engine_halted ()
 	 */
 
 	realtime_stop (false, true);
+
+	ControlProtocolManager::instance().midi_connectivity_established (false);
 }
 
 void

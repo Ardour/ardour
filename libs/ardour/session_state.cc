@@ -355,7 +355,7 @@ Session::post_engine_init ()
 		 * could start talking to surfaces if they want to.
 		 */
 
-		ControlProtocolManager::instance().midi_connectivity_established ();
+		ControlProtocolManager::instance().midi_connectivity_established (true);
 
 		if (_is_new && !no_auto_connect()) {
 			Glib::Threads::Mutex::Lock lm (AudioEngine::instance()->process_lock());

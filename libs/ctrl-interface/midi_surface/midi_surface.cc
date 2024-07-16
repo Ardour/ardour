@@ -256,6 +256,8 @@ MIDISurface::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1,
 	std::string ni = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (std::shared_ptr<ARDOUR::Port>(_async_in)->name());
 	std::string no = ARDOUR::AudioEngine::instance()->make_port_name_non_relative (std::shared_ptr<ARDOUR::Port>(_async_out)->name());
 
+	int old_connection_state = _connection_state;
+
 	if (ni == name1 || ni == name2) {
 		if (yn) {
 			_connection_state |= InputConnected;
@@ -277,23 +279,34 @@ MIDISurface::connection_handler (std::weak_ptr<ARDOUR::Port>, std::string name1,
 	DEBUG_TRACE (DEBUG::MIDISurface, string_compose ("our ports changed connection state: %1 -> %2 connected ? %3, connection state now %4\n",
 	                                                 name1, name2, yn, _connection_state));
 
-	if ((_connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
+	/* it ought o be impossible for the connection state of our ports to
+	 * change without a corresponding change in _connection_state. But
+	 * since the consequences of calling device_acquire() and
+	 * begin_using_device() are substantial, include it as a test to catch
+	 * any weird corner cases.
+	 */
 
-		/* XXX this is a horrible hack. Without a short sleep here,
-		   something prevents the device wakeup messages from being
-		   sent and/or the responses from being received.
-		*/
+	if ((_connection_state != old_connection_state) && (_connection_state & (InputConnected|OutputConnected)) == (InputConnected|OutputConnected)) {
 
                 DEBUG_TRACE (DEBUG::MIDISurface, "device now connected for both input and output\n");
-		g_usleep (100000);
 
-                /* may not have the device open if it was just plugged
-                   in. Really need USB device detection rather than MIDI port
-                   detection for this to work well.
-                */
+		if (!_in_use) {
 
-                device_acquire ();
-                begin_using_device ();
+			/* XXX this is a horrible hack. Without a short sleep here,
+			   something prevents the device wakeup messages from being
+			   sent and/or the responses from being received.
+			*/
+
+			g_usleep (100000);
+
+			/* may not have the device open if it was just plugged
+			   in. Really need USB device detection rather than MIDI port
+			   detection for this to work well.
+			*/
+
+			device_acquire ();
+			begin_using_device ();
+		}
 
 	} else {
 		DEBUG_TRACE (DEBUG::MIDISurface, "Device disconnected (input or output or both) or not yet fully connected\n");
@@ -330,6 +343,15 @@ void
 MIDISurface::write (MIDI::byte const * data, size_t size)
 {
 	_output_port->write (data, size, 0);
+}
+
+void
+MIDISurface::midi_connectivity_established (bool yn)
+{
+	if (!yn) {
+		_connection_state = ConnectionState (0);
+		stop_using_device ();
+	}
 }
 
 bool
