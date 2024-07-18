@@ -2365,6 +2365,10 @@ gdk_window_set_type_hint (GdkWindow        *window,
   [impl->toplevel setHasShadow: window_type_hint_to_shadow (hint)];
   [impl->toplevel setLevel: window_type_hint_to_level (hint)];
   [impl->toplevel setHidesOnDeactivate: window_type_hint_to_hides_on_deactivate (hint)];
+
+	bool allow_minimize_and_maximize = window_type_hint_to_level (hint) != NSFloatingWindowLevel;
+	[[impl->toplevel standardWindowButton:NSWindowMiniaturizeButton] setEnabled:allow_minimize_and_maximize];
+	[[impl->toplevel standardWindowButton:NSWindowZoomButton] setEnabled:allow_minimize_and_maximize];
 }
 
 GdkWindowTypeHint
