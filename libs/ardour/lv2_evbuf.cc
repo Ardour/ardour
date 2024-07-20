@@ -26,6 +26,7 @@
 #include <lv2/lv2plug.in/ns/ext/event/event.h>
 #endif
 
+#include "pbd/malign.h"
 #include "ardour/lv2_evbuf.h"
 
 using namespace ARDOUR;
@@ -48,9 +49,16 @@ ARDOUR::lv2_evbuf_new (uint32_t       capacity,
                        uint32_t       atom_Chunk,
                        uint32_t       atom_Sequence)
 {
-	// FIXME: memory must be 64-bit aligned
-	LV2_Evbuf* evbuf = (LV2_Evbuf*)malloc(
-		sizeof(LV2_Evbuf) + sizeof(LV2_Atom_Sequence) + capacity);
+	LV2_Evbuf* evbuf;
+
+	int err = cache_aligned_malloc ((void**) &evbuf, sizeof(LV2_Evbuf) + sizeof(LV2_Atom_Sequence) + capacity);
+
+	if (err) {
+		//fatal << string_compose (_("Memory allocation error:  (%1)"), strerror (err)) << endmsg;
+		abort ();
+		return 0;
+	}
+
 	evbuf->capacity      = capacity;
 	evbuf->atom_Chunk    = atom_Chunk;
 	evbuf->atom_Sequence = atom_Sequence;
@@ -61,7 +69,7 @@ ARDOUR::lv2_evbuf_new (uint32_t       capacity,
 void
 ARDOUR::lv2_evbuf_free (LV2_Evbuf* evbuf)
 {
-	free(evbuf);
+	cache_aligned_free (evbuf);
 }
 
 void
