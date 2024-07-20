@@ -35,6 +35,7 @@ struct ARDOUR::LV2_Evbuf {
 	uint32_t          capacity;
 	uint32_t          atom_Chunk;
 	uint32_t          atom_Sequence;
+	uint32_t          pad; // for 8byte alignment
 	LV2_Atom_Sequence atom;
 };
 
