@@ -38,7 +38,7 @@
 #include "ardour/port.h"
 #include "ardour/port_set.h"
 #include "ardour/lv2_plugin.h"
-#include "lv2_evbuf.h"
+#include "ardour/lv2_evbuf.h"
 #include "ardour/uri_map.h"
 #if defined WINDOWS_VST_SUPPORT || defined LXVST_SUPPORT || defined MACVST_SUPPORT
 #include "ardour/vestige/vestige.h"

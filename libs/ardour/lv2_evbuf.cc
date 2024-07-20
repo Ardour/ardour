@@ -26,9 +26,11 @@
 #include <lv2/lv2plug.in/ns/ext/event/event.h>
 #endif
 
-#include "lv2_evbuf.h"
+#include "ardour/lv2_evbuf.h"
 
-struct LV2_Evbuf_Impl {
+using namespace ARDOUR;
+
+struct ARDOUR::LV2_Evbuf {
 	uint32_t          capacity;
 	uint32_t          atom_Chunk;
 	uint32_t          atom_Sequence;
@@ -42,9 +44,9 @@ lv2_evbuf_pad_size(uint32_t size)
 }
 
 LV2_Evbuf*
-lv2_evbuf_new(uint32_t       capacity,
-              uint32_t       atom_Chunk,
-              uint32_t       atom_Sequence)
+ARDOUR::lv2_evbuf_new (uint32_t       capacity,
+                       uint32_t       atom_Chunk,
+                       uint32_t       atom_Sequence)
 {
 	// FIXME: memory must be 64-bit aligned
 	LV2_Evbuf* evbuf = (LV2_Evbuf*)malloc(
@@ -57,13 +59,13 @@ lv2_evbuf_new(uint32_t       capacity,
 }
 
 void
-lv2_evbuf_free(LV2_Evbuf* evbuf)
+ARDOUR::lv2_evbuf_free (LV2_Evbuf* evbuf)
 {
 	free(evbuf);
 }
 
 void
-lv2_evbuf_reset(LV2_Evbuf* evbuf, bool input)
+ARDOUR::lv2_evbuf_reset (LV2_Evbuf* evbuf, bool input)
 {
 	if (input) {
 		evbuf->atom.atom.size = sizeof(LV2_Atom_Sequence_Body);
@@ -75,7 +77,7 @@ lv2_evbuf_reset(LV2_Evbuf* evbuf, bool input)
 }
 
 uint32_t
-lv2_evbuf_get_size(LV2_Evbuf* evbuf)
+ARDOUR::lv2_evbuf_get_size (LV2_Evbuf* evbuf)
 {
 	assert(evbuf->atom.atom.type != evbuf->atom_Sequence
 	       || evbuf->atom.atom.size >= sizeof(LV2_Atom_Sequence_Body));
@@ -86,26 +88,26 @@ lv2_evbuf_get_size(LV2_Evbuf* evbuf)
 }
 
 uint32_t
-lv2_evbuf_get_capacity(LV2_Evbuf* evbuf)
+ARDOUR::lv2_evbuf_get_capacity (LV2_Evbuf* evbuf)
 {
 	return evbuf->capacity;
 }
 
 void*
-lv2_evbuf_get_buffer(LV2_Evbuf* evbuf)
+ARDOUR::lv2_evbuf_get_buffer (LV2_Evbuf* evbuf)
 {
 	return &evbuf->atom;
 }
 
 LV2_Evbuf_Iterator
-lv2_evbuf_begin(LV2_Evbuf* evbuf)
+ARDOUR::lv2_evbuf_begin (LV2_Evbuf* evbuf)
 {
 	LV2_Evbuf_Iterator iter = { evbuf, 0 };
 	return iter;
 }
 
 LV2_Evbuf_Iterator
-lv2_evbuf_end(LV2_Evbuf* evbuf)
+ARDOUR::lv2_evbuf_end (LV2_Evbuf* evbuf)
 {
 	const uint32_t           size = lv2_evbuf_get_size(evbuf);
 	const LV2_Evbuf_Iterator iter = { evbuf, lv2_evbuf_pad_size(size) };
@@ -113,13 +115,13 @@ lv2_evbuf_end(LV2_Evbuf* evbuf)
 }
 
 bool
-lv2_evbuf_is_valid(LV2_Evbuf_Iterator iter)
+ARDOUR::lv2_evbuf_is_valid(LV2_Evbuf_Iterator iter)
 {
 	return iter.offset < lv2_evbuf_get_size(iter.evbuf);
 }
 
 LV2_Evbuf_Iterator
-lv2_evbuf_next(LV2_Evbuf_Iterator iter)
+ARDOUR::lv2_evbuf_next (LV2_Evbuf_Iterator iter)
 {
 	if (!lv2_evbuf_is_valid(iter)) {
 		return iter;
@@ -140,12 +142,12 @@ lv2_evbuf_next(LV2_Evbuf_Iterator iter)
 }
 
 bool
-lv2_evbuf_get(LV2_Evbuf_Iterator iter,
-              uint32_t*          samples,
-              uint32_t*          subframes,
-              uint32_t*          type,
-              uint32_t*          size,
-              uint8_t**          data)
+ARDOUR::lv2_evbuf_get (LV2_Evbuf_Iterator iter,
+                       uint32_t*          samples,
+                       uint32_t*          subframes,
+                       uint32_t*          type,
+                       uint32_t*          size,
+                       uint8_t**          data)
 {
 	*samples = *subframes = *type = *size = 0;
 	*data = NULL;
@@ -168,12 +170,12 @@ lv2_evbuf_get(LV2_Evbuf_Iterator iter,
 }
 
 bool
-lv2_evbuf_write(LV2_Evbuf_Iterator* iter,
-                uint32_t            samples,
-                uint32_t            subframes,
-                uint32_t            type,
-                uint32_t            size,
-                const uint8_t*      data)
+ARDOUR::lv2_evbuf_write (LV2_Evbuf_Iterator* iter,
+                         uint32_t            samples,
+                         uint32_t            subframes,
+                         uint32_t            type,
+                         uint32_t            size,
+                         const uint8_t*      data)
 {
 	LV2_Atom_Sequence* aseq = (LV2_Atom_Sequence*)&iter->evbuf->atom;
 

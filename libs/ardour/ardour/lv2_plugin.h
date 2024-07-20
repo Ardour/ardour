@@ -46,7 +46,6 @@
 #define PATH_MAX 1024
 #endif
 
-typedef struct LV2_Evbuf_Impl LV2_Evbuf;
 
 namespace ARDOUR {
 
@@ -59,6 +58,7 @@ const void* lv2plugin_get_port_value(const char* port_symbol,
 
 class AudioEngine;
 class Session;
+struct LV2_Evbuf;
 
 class LIBARDOUR_API LV2Plugin : public ARDOUR::Plugin, public ARDOUR::Workee
 {

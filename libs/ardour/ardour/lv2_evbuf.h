@@ -14,21 +14,16 @@
   OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS SOFTWARE.
 */
 
-#ifndef LV2_EVBUF_H
-#define LV2_EVBUF_H
+#pragma once
 
 #include <stdint.h>
 
-#ifdef __cplusplus
-extern "C" {
-#else
-#include <stdbool.h>
-#endif
+namespace ARDOUR {
 
 /**
    An abstract/opaque LV2 event buffer.
 */
-typedef struct LV2_Evbuf_Impl LV2_Evbuf;
+struct LV2_Evbuf;
 
 /**
    An iterator over an LV2_Evbuf.
@@ -140,8 +135,4 @@ lv2_evbuf_write(LV2_Evbuf_Iterator* iter,
                 uint32_t            size,
                 const uint8_t*      data);
 
-#ifdef __cplusplus
 }
-#endif
-
-#endif /* LV2_EVBUF_H */

@@ -64,6 +64,7 @@
 #include "ardour/audioengine.h"
 #include "ardour/directory_names.h"
 #include "ardour/debug.h"
+#include "ardour/lv2_evbuf.h"
 #include "ardour/lv2_plugin.h"
 #include "ardour/midi_patch_manager.h"
 #include "ardour/session.h"
@@ -115,8 +116,6 @@
 #include <lv2/lv2plug.in/ns/ext/buf-size/buf-size.h>
 #include <lv2/lv2plug.in/ns/ext/options/options.h>
 #endif
-
-#include "lv2_evbuf.h"
 
 #ifdef HAVE_SUIL
 #include <suil/suil.h>

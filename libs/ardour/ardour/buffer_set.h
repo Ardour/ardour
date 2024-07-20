@@ -41,7 +41,6 @@ struct _VstMidiEvent;
 typedef struct _VstMidiEvent VstMidiEvent;
 #endif
 
-typedef struct LV2_Evbuf_Impl LV2_Evbuf;
 
 namespace ARDOUR {
 
@@ -49,6 +48,8 @@ class Buffer;
 class AudioBuffer;
 class MidiBuffer;
 class PortSet;
+
+struct LV2_Evbuf;
 
 /** A set of buffers of various types.
  *
