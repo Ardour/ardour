@@ -321,8 +321,6 @@ Region::Region (const SourceList& srcs)
 {
 	register_properties ();
 
-	_type = srcs.front()->type();
-
 	use_sources (srcs);
 
 	assert(_sources.size() > 0);
