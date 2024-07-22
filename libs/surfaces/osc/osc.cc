@@ -1873,14 +1873,15 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	s->bank_size = b_size;
 	s->strip_types = strips;
 	s->feedback = fb;
+	if (s->sel_obs) {
+		s->sel_obs->set_feedback(fb);
+	}
 	s->gainmode = gm;
 	if (s->strip_types[10]) {
 		s->usegroup = PBD::Controllable::UseGroup;
 	} else {
 		s->usegroup = PBD::Controllable::NoGroup;
 	}
-	s->send_page_size = se_size;
-	s->plug_page_size = pi_size;
 	if (s->temp_mode) {
 		s->temp_mode = TempOff;
 	}
@@ -1953,6 +1954,9 @@ OSC::set_surface_feedback (uint32_t fb, lo_message msg)
 	}
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->feedback = fb;
+	if (s->sel_obs) {
+		s->sel_obs->set_feedback(fb);
+	}
 
 	strip_feedback (s, true);
 	global_feedback (s);
