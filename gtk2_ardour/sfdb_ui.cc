@@ -696,11 +696,13 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 
 	chooser.set_border_width (12);
 
-	audio_and_midi_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun (*this, &SoundFileBrowser::on_audio_and_midi_filter));
-	audio_and_midi_filter.set_name (_("Audio and MIDI files"));
-
 	audio_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun(*this, &SoundFileBrowser::on_audio_filter));
 	audio_filter.set_name (_("Audio files"));
+	chooser.add_filter (audio_filter);
+
+#ifndef LIVETRAX
+	audio_and_midi_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun (*this, &SoundFileBrowser::on_audio_and_midi_filter));
+	audio_and_midi_filter.set_name (_("Audio and MIDI files"));
 
 	midi_filter.add_custom (FILE_FILTER_FILENAME, sigc::mem_fun(*this, &SoundFileBrowser::on_midi_filter));
 	midi_filter.set_name (_("MIDI files"));
@@ -709,9 +711,9 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	matchall_filter.set_name (_("All files"));
 
 	chooser.add_filter (audio_and_midi_filter);
-	chooser.add_filter (audio_filter);
 	chooser.add_filter (midi_filter);
 	chooser.add_filter (matchall_filter);
+#endif
 	chooser.set_select_multiple (true);
 	chooser.signal_update_preview().connect(sigc::mem_fun(*this, &SoundFileBrowser::update_preview));
 	chooser.signal_file_activated().connect (sigc::mem_fun (*this, &SoundFileBrowser::chooser_file_activated));
@@ -736,6 +738,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 
 	add (vpacker);
 
+#ifndef LIVETRAX
 	//add tag search
 
 	VBox* vbox;
@@ -870,6 +873,7 @@ SoundFileBrowser::SoundFileBrowser (string title, ARDOUR::Session* s, bool persi
 	freesound_more_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_more_clicked));
 	freesound_similar_btn.signal_clicked().connect(sigc::mem_fun(*this, &SoundFileBrowser::freesound_similar_clicked));
 	notebook.append_page (*vbox, _("Search Freesound"));
+#endif
 
 	notebook.set_size_request (500, -1);
 	notebook.signal_switch_page().connect (sigc::hide_return (sigc::hide (sigc::hide (sigc::mem_fun (*this, &SoundFileBrowser::reset_options)))));
@@ -1945,6 +1949,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	vspace->set_size_request (16, 2);
 	options.attach (*vspace, 2, 3, 6, 7, SHRINK, SHRINK, 0, 0);
 
+#ifndef LIVETRAX
 	l = manage (new Label);
 	l->set_markup (_("<b>MIDI Instrument:</b>"));
 	l->set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
@@ -1956,7 +1961,7 @@ SoundFileOmega::SoundFileOmega (string title, ARDOUR::Session* s,
 	l->set_alignment(Gtk::ALIGN_END, Gtk::ALIGN_CENTER);
 	options.attach (*l, 3, 4, 1, 2, FILL, SHRINK, 4, 0);
 	options.attach (midi_track_name_combo, 4, 5, 1, 2, FILL, SHRINK, 2, 0);
-
+#endif
 	options.attach (smf_tempo_btn, 4, 5, 2, 3, FILL, SHRINK, 2, 0);
 	options.attach (smf_marker_btn, 4, 5, 3, 4, FILL, SHRINK, 2, 0);
 
