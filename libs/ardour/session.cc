@@ -4923,7 +4923,6 @@ Session::remove_source (std::weak_ptr<Source> src, bool drop_references)
 
 	SourceRemoved (src); /* EMIT SIGNAL */
 	if (drop_references) {
-		printf ("Source->drop_references!\n");
 		source->drop_references ();
 		/* Removing a Source cannot be undone.
 		 * We need to clear all undo commands that reference the
