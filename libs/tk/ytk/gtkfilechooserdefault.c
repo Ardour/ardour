@@ -7744,7 +7744,7 @@ static void
 show_filters (GtkFileChooserDefault *impl,
 	      gboolean               show)
 {
-  if (show)
+  if (show && impl->filters && g_slist_length (impl->filters) > 1)
     gtk_widget_show (impl->filter_combo_hbox);
   else
     gtk_widget_hide (impl->filter_combo_hbox);
