@@ -44,6 +44,7 @@ public:
 
 	/* define accessor methods */
 
+	/* clang-format off */
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) \
@@ -55,11 +56,13 @@ public:
 #include "ardour/session_configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
+	/* clang-format on */
 
   private:
 
 	/* declare variables */
 
+	/* clang-format off */
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
 #define CONFIG_VARIABLE(Type,var,name,value) PBD::ConfigVariable<Type> var;
@@ -67,6 +70,7 @@ public:
 #include "ardour/session_configuration_vars.h"
 #undef  CONFIG_VARIABLE
 #undef  CONFIG_VARIABLE_SPECIAL
+	/* clang-format on */
 
 	int foo;
 
