@@ -16,22 +16,22 @@ top = '.'
 out = 'build'
 
 libaaf_sources = [
-	'AAFClass.c',
-	'AAFCore.c',
-	'AAFDump.c',
-	'AAFIEssenceFile.c',
-	'AAFIface.c',
-	'AAFIParser.c',
-	'AAFToText.c',
-	'CFBDump.c',
-	'LibCFB.c',
-	'ProTools.c',
-	'MediaComposer.c',
-	'Resolve.c',
-	'RIFFParser.c',
-	'URIParser.c',
-	'utils.c',
-	'log.c',
+    'AAFClass.c',
+    'AAFCore.c',
+    'AAFDump.c',
+    'AAFIEssenceFile.c',
+    'AAFIface.c',
+    'AAFIParser.c',
+    'AAFToText.c',
+    'CFBDump.c',
+    'LibCFB.c',
+    'ProTools.c',
+    'MediaComposer.c',
+    'Resolve.c',
+    'RIFFParser.c',
+    'URIParser.c',
+    'utils.c',
+    'log.c',
 ]
 
 def options(opt):

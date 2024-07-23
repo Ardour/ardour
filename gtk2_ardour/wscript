@@ -156,7 +156,7 @@ gtk2_ardour_sources = [
         'main.cc',
         'main_clock.cc',
         'marker.cc',
-    	'mergeable_line.cc',
+        'mergeable_line.cc',
         'midi_automation_line.cc',
         'midi_channel_dialog.cc',
         'midi_channel_selector.cc',
@@ -876,7 +876,7 @@ def build(bld):
         obj.stdin = 'livetrax.menus.in'
     else:
         obj.stdin = 'ardour.menus.in'
-    obj.stdout = 'ardour.menus'        
+    obj.stdout = 'ardour.menus'
     bld.install_files (bld.env['CONFDIR'], 'ardour.menus')
 
     # Freedesktop
