@@ -1182,7 +1182,7 @@ OSC::get_surfaces ()
 		PBD::info << string_compose ("	Strip Types: %1   Feedback: %2   No_clear flag: %3   Gain mode: %4   Use groups flag %5\n", \
 			sur->strip_types.to_ulong(), sur->feedback.to_ulong(), sur->no_clear, sur->gainmode, ug);
 		PBD::info << string_compose ("	Using plugin: %1  of  %2 plugins, with %3 params.  Page size: %4  Page: %5\n", \
-			sur->plugin_id, sur->plugins.size(), sur->plug_params.size(), sur->plug_page_size, sur->plug_page);
+			sur->plugin_id, sur->plugins.size(), sur->plugin_input_params[sur->plugin_id - 1].size(), sur->plug_page_size, sur->plug_page);
 		PBD::info << string_compose ("	Send page size: %1  Page: %2\n", sur->send_page_size, sur->send_page);
 		PBD::info << string_compose ("	Expanded flag %1   Track: %2   Jogmode: %3\n", sur->expand_enable, sur->expand, sur->jogmode);
 		PBD::info << string_compose ("	Personal monitor flag %1,   Aux master: %2,   Number of sends: %3\n", sur->cue, sur->aux, sur->sends.size());
@@ -1873,14 +1873,15 @@ OSC::set_surface (uint32_t b_size, uint32_t strips, uint32_t fb, uint32_t gm, ui
 	s->bank_size = b_size;
 	s->strip_types = strips;
 	s->feedback = fb;
+	if (s->sel_obs) {
+		s->sel_obs->set_feedback(fb);
+	}
 	s->gainmode = gm;
 	if (s->strip_types[10]) {
 		s->usegroup = PBD::Controllable::UseGroup;
 	} else {
 		s->usegroup = PBD::Controllable::NoGroup;
 	}
-	s->send_page_size = se_size;
-	s->plug_page_size = pi_size;
 	if (s->temp_mode) {
 		s->temp_mode = TempOff;
 	}
@@ -1953,6 +1954,9 @@ OSC::set_surface_feedback (uint32_t fb, lo_message msg)
 	}
 	OSCSurface *s = get_surface(get_address (msg), true);
 	s->feedback = fb;
+	if (s->sel_obs) {
+		s->sel_obs->set_feedback(fb);
+	}
 
 	strip_feedback (s, true);
 	global_feedback (s);
@@ -2846,9 +2850,20 @@ OSC::sel_plug_page (int page, lo_message msg)
 	int new_page = 0;
 	OSCSurface *s = get_surface(get_address (msg));
 	if (page > 0) {
-		new_page = s->plug_page + s->plug_page_size;
-		if ((uint32_t) new_page > s->plug_params.size ()) {
-			new_page = s->plug_page;
+		// Do not change page when there are no more parameters
+		// in the next page
+		new_page = s->plug_page;
+		if (s->feedback[17]) {
+			for (auto const& params: s->plugin_input_params) {
+				if ((uint32_t) new_page <= params.size ()) {
+					new_page = s->plug_page + s->plug_page_size;
+					break;
+				}
+			}
+		} else {
+			if ((uint32_t) new_page <= s->plugin_input_params[s->plugin_id].size ()) {
+				new_page = s->plug_page + s->plug_page_size;
+			}
 		}
 	} else {
 		new_page = s->plug_page - s->plug_page_size;
@@ -2884,32 +2899,12 @@ OSC::_sel_plugin (int id, lo_address addr)
 			return 1;
 		}
 
-		/* find out how many plugins we have */
-		sur->plugins.clear();
-		for (int nplugs = 0; true; ++nplugs) {
-			std::shared_ptr<Processor> proc = r->nth_plugin (nplugs);
-			if (!proc) {
-				break;
-			}
-			if (!r->nth_plugin(nplugs)->display_to_user()) {
-				continue;
-			}
-#ifdef MIXBUS
-			/* need to check for mixbus channel strips (and exclude them) */
-			std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert>(proc);
-			if (pi && pi->is_channelstrip()) {
-				continue;
-			}
-#endif
-			sur->plugins.push_back (nplugs);
-		}
-
 		// limit plugin_id to actual plugins
 		if (sur->plugins.size() < 1) {
 			sur->plugin_id = 0;
 			sur->plug_page = 1;
 			if (sur->sel_obs) {
-				sur->sel_obs->set_plugin_id(-1, 1);
+				sur->sel_obs->set_plugin_id(0, 1);
 			}
 			return 0;
 		} else if (id < 1) {
@@ -2920,32 +2915,10 @@ OSC::_sel_plugin (int id, lo_address addr)
 			sur->plugin_id = id;
 		}
 
-		// we have a plugin number now get the processor
-		std::shared_ptr<Processor> proc = r->nth_plugin (sur->plugins[sur->plugin_id - 1]);
-		std::shared_ptr<PluginInsert> pi;
-		if (!(pi = std::dynamic_pointer_cast<PluginInsert>(proc))) {
-			PBD::warning << "OSC: Plugin: " << sur->plugin_id << " does not seem to be a plugin" << endmsg;
-			return 1;
-		}
-		std::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
-		bool ok = false;
-		// put only input controls into a vector
-		sur->plug_params.clear ();
-		uint32_t nplug_params  = pip->parameter_count();
-		for ( uint32_t ppi = 0;  ppi < nplug_params; ++ppi) {
-			uint32_t controlid = pip->nth_parameter(ppi, ok);
-			if (!ok) {
-				continue;
-			}
-			if (pip->parameter_is_input(controlid)) {
-				sur->plug_params.push_back (ppi);
-			}
-		}
-
 		sur->plug_page = 1;
 
 		if (sur->sel_obs) {
-			sur->sel_obs->set_plugin_id(sur->plugins[sur->plugin_id - 1], sur->plug_page);
+			sur->sel_obs->set_plugin_id(sur->plugin_id, sur->plug_page);
 		}
 		return 0;
 	}
@@ -4761,11 +4734,55 @@ OSC::_strip_select2 (std::shared_ptr<Stripable> s, OSCSurface *sur, lo_address a
 		_select = s;
 	}
 	if (!s) {
+		sur->plugins.clear();
+		sur->plugin_input_params.clear();
 		return 0;
 	}
 	if (s != old_sel) {
 		sur->select = s;
 	}
+
+	/* Create list of user-visible plugins (into which piid indexes) */
+	sur->plugins.clear();
+	sur->plugin_input_params.clear();
+	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route>(s);
+	if (r) {
+		for (int nplugs = 0; true; ++nplugs) {
+			std::shared_ptr<Processor> proc = r->nth_plugin (nplugs);
+			if (!proc) {
+				break;
+			}
+			if (!r->nth_plugin(nplugs)->display_to_user()) {
+				continue;
+			}
+			std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert>(proc);
+			std::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
+#ifdef MIXBUS
+			/* need to check for mixbus channel strips (and exclude them) */
+			if (pi && pi->is_channelstrip()) {
+				continue;
+			}
+#endif
+			sur->plugins.push_back (nplugs);
+			sur->plugin_input_params.emplace_back();
+
+
+			// put only input controls into a vector
+			std::vector<int>& plug_params = sur->plugin_input_params.back();
+			bool ok = false;
+			uint32_t nplug_params  = pip->parameter_count();
+			for ( uint32_t ppi = 0;  ppi < nplug_params; ++ppi) {
+				uint32_t controlid = pip->nth_parameter(ppi, ok);
+				if (!ok) {
+					continue;
+				}
+				if (pip->parameter_is_input(controlid)) {
+					plug_params.push_back (ppi);
+				}
+			}
+		}
+	}
+
 	bool sends;
 	uint32_t nsends  = 0;
 	do {
@@ -4808,7 +4825,6 @@ OSC::_strip_select2 (std::shared_ptr<Stripable> s, OSCSurface *sur, lo_address a
 	}
 	// need to set monitor for processor changed signal (for paging)
 	string address = lo_address_get_url (addr);
-	std::shared_ptr<Route> r = std::dynamic_pointer_cast<Route>(s);
 	if (r) {
 		r->processors_changed.connect  (sur->proc_connection, MISSING_INVALIDATOR, boost::bind (&OSC::processor_changed, this, address), this);
 		_sel_plugin (sur->plugin_id, addr);
@@ -5193,7 +5209,7 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 	std::shared_ptr<ARDOUR::Plugin> pip = pi->plugin();
 	// paid is paged parameter convert to absolute
 	int parid = paid + (int)sur->plug_page - 1;
-	if (parid > (int) sur->plug_params.size ()) {
+	if (parid > (int) sur->plugin_input_params[piid - 1].size ()) {
 		if (sur->feedback[13]) {
 			float_message_with_id (X_("/select/plugin/parameter"), paid, 0, sur->feedback[2], get_address (msg));
 		}
@@ -5201,7 +5217,7 @@ OSC::select_plugin_parameter (const char *path, const char* types, lo_arg **argv
 	}
 
 	bool ok = false;
-	uint32_t controlid = pip->nth_parameter(sur->plug_params[parid - 1], ok);
+	uint32_t controlid = pip->nth_parameter(sur->plugin_input_params[piid - 1][parid - 1], ok);
 	if (!ok) {
 		return 1;
 	}
