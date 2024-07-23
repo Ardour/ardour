@@ -29,9 +29,13 @@
 
 #include "note_base.h"
 #include "public_editor.h"
-#include "editing_syms.h"
 #include "keyboard.h"
 #include "midi_region_view.h"
+
+/* clang-format off */
+// Include last, when GRIDTYPE has been defined by editing.h via midi_region_view.h
+#include "editing_syms.h"
+/* clang-format on */
 
 using namespace std;
 using namespace Gtkmm2ext;

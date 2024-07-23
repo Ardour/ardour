@@ -31,10 +31,6 @@
 class PortMatrix;
 class PortMatrixBody;
 
-namespace ARDOUR {
-	class Bundle;
-}
-
 /**  The grid part of the port matrix */
 class PortMatrixGrid : public PortMatrixComponent
 {

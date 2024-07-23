@@ -19,6 +19,7 @@
 #ifndef __ardour_us2400_control_protocol_control_group_h__
 #define __ardour_us2400_control_protocol_control_group_h__
 
+#include <string>
 #include <vector>
 
 namespace ArdourSurface {

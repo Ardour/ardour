@@ -20,12 +20,10 @@
 #ifndef __ardour_gtk_playlist_selection_h__
 #define __ardour_gtk_playlist_selection_h__
 
+#include "ardour/playlist.h"
+
 #include <list>
 #include <memory>
-
-namespace ARDOUR {
-	class Playlist;
-}
 
 struct PlaylistSelection : std::list<std::shared_ptr<ARDOUR::Playlist> > {
 public:

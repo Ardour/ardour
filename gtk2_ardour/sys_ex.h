@@ -20,11 +20,8 @@
 #ifndef __SYSEX_H__
 #define __SYSEX_H__
 
+#include "canvas/flag.h"
 #include "midi_region_view.h"
-
-namespace ArdourCanvas {
-	class Flag;
-}
 
 class SysEx
 {
