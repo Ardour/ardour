@@ -4178,6 +4178,7 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 					all_triggers[_active_scene]->bang ();
 				} else {
 					stop_all_quantized ();  //empty slot, this should work as a Stop for the running clips
+
 					//TODO:  can we set a flag so the UI reports that we are stopping?
 				}
 			}

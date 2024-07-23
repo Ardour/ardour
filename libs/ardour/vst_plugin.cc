@@ -193,6 +193,7 @@ VSTPlugin::set_parameter (uint32_t which, float newval, sampleoffset_t when)
 		} else {
 			cerr << "effSetBypass failed rv=" << rv << endl; // XXX DEBUG
 #ifdef ALLOW_VST_BYPASS_TO_FAIL // yet unused, see also vst_plugin.cc
+
 			// emit signal.. hard un/bypass from here?!
 #endif
 		}
