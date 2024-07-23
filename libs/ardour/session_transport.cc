@@ -521,7 +521,7 @@ Session::start_transport (bool after_loop)
 
 	switch (record_status()) {
 	case Enabled:
-		if (!config.get_punch_in()) {
+		if (!config.get_punch_in() || 0 == locations()->auto_punch_location ()) {
 			/* This is only for UIs (keep blinking rec-en before
 			 * punch-in, don't show rec-region etc). The UI still
 			 * depends on SessionEvent::PunchIn and ensuing signals.

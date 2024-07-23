@@ -2288,7 +2288,7 @@ Session::maybe_enable_record (bool rt_context)
 
 	if (_transport_fsm->transport_speed() != 0) {
 		maybe_allow_only_punch ();
-		if (!config.get_punch_in()) {
+		if (!config.get_punch_in() || 0 == locations()->auto_punch_location ()) {
 			enable_record ();
 		}
 		/* When rolling, start recording immediately.

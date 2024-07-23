@@ -6198,7 +6198,7 @@ Route::monitoring_state () const
 	 * TODO: FIXME
 	 */
 
-	if (_session.config.get_punch_in() || _session.config.get_punch_out()) {
+	if ((_session.config.get_punch_in() || _session.config.get_punch_out()) && 0 != _session.locations()->auto_punch_location ()) {
 		session_rec = _session.actively_recording ();
 	} else {
 		session_rec = _session.get_record_enabled();
