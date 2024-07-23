@@ -719,7 +719,7 @@ int main() { return 0; }''',
                  "-mmacosx-version-min=11.0"))
         linker_flags.append("-mmacosx-version-min=11.0")
         # Xcode 15 does not like our boost version, producing warnings from almost every file
-        # boost/type_traits/has_trivial_destructor.hpp:30:86: warning: builtin __has_trivial_destructor is deprecated; use __is_trivially_destructible instead 
+        # boost/type_traits/has_trivial_destructor.hpp:30:86: warning: builtin __has_trivial_destructor is deprecated; use __is_trivially_destructible instead
         flags_dict['basic-warnings'].append ("-Wno-deprecated-builtins")
 
     #
