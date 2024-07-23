@@ -234,6 +234,7 @@ ARDOUR_UI::set_session (Session *s)
 	start_clocking ();
 
 	map_transport_state ();
+	set_punch_sensitivity ();
 
 	second_connection = Timers::second_connect (sigc::mem_fun(*this, &ARDOUR_UI::every_second));
 	point_one_second_connection = Timers::rapid_connect (sigc::mem_fun(*this, &ARDOUR_UI::every_point_one_seconds));
