@@ -21,6 +21,7 @@
 #ifndef __libardour_route_group_member_h__
 #define __libardour_route_group_member_h__
 
+#include "ardour/libardour_visibility.h"
 #include "pbd/controllable.h"
 #include "pbd/signals.h"
 

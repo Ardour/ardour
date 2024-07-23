@@ -31,12 +31,12 @@
 #include <gtkmm/widget.h>
 #include <gtkmm/checkbutton.h>
 
+#include "ardour/bundle.h"
 #include "ardour/data_type.h"
 #include "ardour/types.h"
 
 namespace ARDOUR {
 	class Session;
-	class Bundle;
 	class Processor;
 	class IO;
 }

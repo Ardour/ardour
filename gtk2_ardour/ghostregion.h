@@ -28,6 +28,7 @@
 #include <vector>
 #include <boost/unordered_map.hpp>
 
+#include "evoral/Note.h"
 #include "pbd/signals.h"
 
 #include "gtkmm2ext/colors.h"

@@ -24,6 +24,7 @@
 #include <map>
 #include <string>
 
+#include "ardour/types.h"
 #include "pbd/configuration.h"
 
 namespace ARDOUR {
