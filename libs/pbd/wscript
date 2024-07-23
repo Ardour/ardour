@@ -111,7 +111,7 @@ def configure(conf):
                 define_name='HAVE_POSIX_MEMALIGN', execute = False, mandatory=False)
     conf.check_cc(
             msg="Checking for function 'getmntent' in mntent.h",
-            fragment = "#include <mntent.h>\n int main(void) { return (int)getmntent(0); }\n",
+            fragment = "#include <mntent.h>\n int main(void) { getmntent(0); }\n",
             define_name='HAVE_GETMNTENT', execute = False, mandatory=False)
     conf.check_cc(
             msg="Checking for function 'localtime_r' in time.h",
