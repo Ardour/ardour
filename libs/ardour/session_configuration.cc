@@ -41,6 +41,8 @@
 using namespace ARDOUR;
 using namespace PBD;
 
+/* clang-format off */
+
 SessionConfiguration::SessionConfiguration ()
 	:
 /* construct variables */
@@ -151,6 +153,7 @@ SessionConfiguration::map_parameters (boost::function<void (std::string)>& funct
 #undef  CONFIG_VARIABLE_SPECIAL
 }
 
+/* clang-format on */
 
 bool
 SessionConfiguration::load_state ()
