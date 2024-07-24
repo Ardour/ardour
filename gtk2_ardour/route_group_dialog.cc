@@ -30,6 +30,7 @@
 
 #include "gtkmm2ext/colors.h"
 
+#include "gui_thread.h"
 #include "route_group_dialog.h"
 #include "group_tabs.h"
 
@@ -177,6 +178,8 @@ RouteGroupDialog::RouteGroupDialog (RouteGroup* g, bool creating_new)
 		add_button (Stock::CANCEL, RESPONSE_CANCEL);
 		add_button (Stock::NEW, RESPONSE_OK);
 		set_default_response (RESPONSE_OK);
+	} else {
+		_group->Destroyed.connect (_group_connection, invalidator (*this), boost::bind (&Dialog::response, this, RESPONSE_CANCEL), gui_context());
 	}
 
 	show_all_children ();

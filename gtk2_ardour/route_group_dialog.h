@@ -29,6 +29,10 @@
 #include "ardour_dialog.h"
 #include "stripable_colorpicker.h"
 
+namespace ARDOUR {
+	class RouteGroup;
+}
+
 class RouteGroupDialog : public ArdourDialog
 {
 public:
@@ -59,7 +63,8 @@ private:
 	void gain_toggled ();
 	void update ();
 	bool unique_name (std::string const name) const;
-};
 
+	PBD::ScopedConnection _group_connection;
+};
 
 #endif
