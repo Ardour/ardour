@@ -1108,7 +1108,7 @@ LV2Plugin::~LV2Plugin ()
 	if (_atom_ev_buffers) {
 		LV2_Evbuf**  b = _atom_ev_buffers;
 		while (*b) {
-			free(*b);
+			lv2_evbuf_free (*b);
 			b++;
 		}
 		free(_atom_ev_buffers);
