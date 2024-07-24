@@ -20,6 +20,7 @@ fi
 
 MIXBUS=
 WITH_HARRISON_LV2=
+WITH_HARRISON_VBM=
 WITH_COMMERCIAL_X42_LV2=
 WITH_GRATIS_X42_LV2=
 WITH_GMSYNYTH=
@@ -33,6 +34,7 @@ VENDOR=Ardour ;
 EXENAME=ardour
 BUILDTYPE=""
 NOSTRIP="libsuil|libserd|libsord|liblilv|libsratom|liblrdf|libardour|libpbd|libevoral"
+X42PLUGINS="x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner"
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
@@ -74,6 +76,20 @@ while [ $# -gt 0 ] ; do
 		STRIP=all ;
 		WITH_NLS=1 ;
 		APPNAME=LiveTrax ;
+		shift ;;
+	--vbm)
+		VBM=1
+		WITH_HARRISON_LV2=1 ;
+		WITH_HARRISON_VBM=1 ;
+		WITH_COMMERCIAL_X42_LV2=1
+		WITH_GRATIS_X42_LV2=1
+		WITH_NLS=1 ;
+		STRIP=all
+		APPNAME=MixbusVBM ;
+		VENDOR=Harrison ;
+		EXENAME=mixbusvbm ;
+		major_version=""
+		X42PLUGINS="$X42PLUGINS x42-testsignal x42-nodelay"
 		shift ;;
 	--public)
 		WITH_HARRISON_LV2=1 ;
@@ -710,6 +726,17 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/${HARRISONLV2}.${HARCH}.zip"
 fi
 
+if test x$WITH_HARRISON_VBM != x ; then
+	echo "Including Harrison VBM Channelstrip LV2"
+	mkdir -p $APPLIB/LV2
+
+	curl -s -S --fail -# \
+		-z "${CACHEDIR}/harrison_vbm.${HARCH}.zip" \
+		-o "${CACHEDIR}/harrison_vbm.${HARCH}.zip" \
+		"${HARRISONDSPURL}/harrison_vbm.${HARCH}.zip"
+	unzip -q -d "$APPLIB/LV2/" "${CACHEDIR}/harrison_vbm.${HARCH}.zip"
+fi
+
 if test -n "$MIXBUS"; then
 	echo "Adding Mixbus Channelstrip"
 
@@ -746,7 +773,7 @@ if test -n "$MIXBUS"; then
 		rm -f "${MediaClips}/"*.*
 		unzip -q -o -d "${MediaClips}" "${CACHEDIR}/MixbusBundledMedia.zip"
 	fi
-elif test -z "$LIVETRAX"; then
+elif test -z "$LIVETRAX" -a -z "$VBM"; then
     echo "Fetching Ardour bundled content"
 
     curl -s -S --fail -#  \
@@ -798,7 +825,17 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 
 	echo "Adding gratis x42 Plugins"
 
-	for proj in x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner; do
+	for proj in $X42PLUGINS; do
+
+		if test -n "$VBM"; then
+			if test "$proj" = "setBfree"; then
+				continue
+			fi
+			if test "$proj" = "x42-avldrums"; then
+				continue
+			fi
+		fi
+
 		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/linux/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/linux/${proj}-lv2-linux-${WARCH}-${X42_VERSION}.zip \

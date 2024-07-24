@@ -14,15 +14,18 @@ fi
 mkdir -p "$CACHEDIR"
 
 MIXBUS=
+VBM=
 WITH_HARVID=1
 WITH_XJADEO=1
 WITH_HARRISON_LV2=
+WITH_HARRISON_VBM=
 WITH_COMMERCIAL_X42_LV2=
 WITH_GRATIS_X42_LV2=
 WITH_GMSYNTH=
 STRIP=1
 PRINT_SYSDEPS=
 WITH_NLS=1
+X42PLUGINS="x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner"
 
 : ${HARRISONCHANNELSTRIP=harrison_channelstrip}
 : ${HARRISONLV2=harrison_lv2s-n}
@@ -57,6 +60,19 @@ while [ $# -gt 0 ] ; do
 		BUNDLENAME=LiveTrax${major_version} ;
 		lower_case_appname=livetrax;
 		BUNDLE_ID_BASE=com.harrisonconsoles
+		shift ;;
+	--vbm)
+		VBM=1
+		WITH_HARRISON_LV2=1 ;
+		WITH_HARRISON_VBM=1 ;
+		WITH_COMMERCIAL_X42_LV2=1
+		WITH_GRATIS_X42_LV2=1
+		STRIP= ;
+		PRODUCT_PKG_DIR=MixbusVBM;
+		lower_case_appname=mixbusvbm;
+		APPNAME=MixbusVBM ;
+		BUNDLENAME=MixbusVBM${major_version} ;
+		X42PLUGINS="$X42PLUGINS x42-testsignal x42-nodelay"
 		shift ;;
 	--public)
 		WITH_HARRISON_LV2=1 ;
@@ -170,9 +186,12 @@ mkdir -p $ExportFormats
 mkdir -p $Etc
 mkdir -p $MackieControl
 mkdir -p $OSC
-mkdir -p $PatchFiles
 mkdir -p $LuaScripts
 mkdir -p $Themes
+
+if test -z "$VBM"; then
+mkdir -p $PatchFiles
+fi
 
 EXECUTABLE=${BUNDLENAME}
 
@@ -233,6 +252,8 @@ if test x$MIXBUS != x ; then
 	cp  Mixbus.icns $Resources/appIcon.icns
 elif test x$LIVETRAX != x ; then
 	cp  LiveTrax.icns $Resources/appIcon.icns
+elif test x$VBM != x ; then
+	cp  MixbusVBM.icns $Resources/appIcon.icns
 else
 	cp  Ardour.icns $Resources/appIcon.icns
 fi
@@ -345,9 +366,11 @@ done
 
 # MIDNAM Patch Files
 # got to be careful with names here
-for x in $BUILD_ROOT/../share/patchfiles/*.midnam ; do
-	cp "$x" $PatchFiles
-done
+if test -z "$VBM"; then
+	for x in $BUILD_ROOT/../share/patchfiles/*.midnam ; do
+		cp "$x" $PatchFiles
+	done
+fi
 
 # Lua Script Files
 # got to be careful with names here
@@ -635,11 +658,11 @@ mkdir $PRODUCT_PKG_DIR
 DMGWINBOTTOM=440
 DMGBACKGROUND=dmgbg
 
-if test -n "$MIXBUS" -o -n "$LIVETRAX"; then
+if test -n "$MIXBUS" -o -n "$LIVETRAX" -o -n "$VBM" ; then
 	DMGBACKGROUND=dmgbgMB
 fi
 
-echo "Creating Mixbus packaging directory"
+echo "Creating $APPNAME packaging directory"
 mv $APPDIR $PRODUCT_PKG_DIR/
 
 ################################################################################
@@ -690,6 +713,17 @@ if test x$WITH_HARRISON_LV2 != x ; then
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
 		"${CACHEDIR}/${HARRISONLV2}.${OSX_BENSID}.zip"
+fi
+
+if test x$WITH_HARRISON_VBM != x ; then
+	curl -s -S --fail -#  \
+		-z "${CACHEDIR}/harrison_vbm.${OSX_BENSID}.zip" \
+		-o "${CACHEDIR}/harrison_vbm.${OSX_BENSID}.zip" \
+		"${HARRISONDSPURL}/harrison_vbm.${OSX_BENSID}.zip"
+
+	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
+	bsdtar -C "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2/" -xf \
+		"${CACHEDIR}/harrison_vbm.${OSX_BENSID}.zip"
 fi
 
 if test x$WITH_HARVID != x ; then
@@ -768,7 +802,17 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 	echo "Adding gratis x42 plugins"
 	mkdir -p "${PRODUCT_PKG_DIR}/${APPROOT}/lib/LV2"
 
-	for proj in x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner; do
+	for proj in $X42PLUGINS; do
+
+		if test -n "$VBM"; then
+			if test "$proj" = "setBfree"; then
+				continue
+			fi
+			if test "$proj" = "x42-avldrums"; then
+				continue
+			fi
+		fi
+
 		X42_VERSION=$(curl -s -S http://${OSX_X42URI}/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://${OSX_X42URI}/${proj}-lv2-${OSX_X42ID}-${X42_VERSION}.zip \
@@ -821,7 +865,7 @@ if test -n "$MIXBUS"; then
 		bsdtar -C "${PRODUCT_PKG_DIR}/${MediaClips}" -xf \
 			"${CACHEDIR}/MixbusBundledMedia.zip"
 	fi
-elif test -z "$LIVETRAX"; then
+elif test -z "$LIVETRAX" -a -z "$VBM" ; then
 	echo "Fetching Ardour bundled content"
 	curl -s -S --fail -#  \
 		-z "${CACHEDIR}/ArdourBundledMedia.zip" \

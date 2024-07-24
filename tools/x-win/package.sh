@@ -30,12 +30,14 @@ PROGRAM_VERSION=${major_version}
 PRODUCT_NAME=Ardour
 PRODUCT_VERSION=${major_version}
 
-WITH_HARRISON_LV2=1 ;
+WITH_HARRISON_LV2=1
+WITH_HARRISON_VBM=
 WITH_COMMERCIAL_X42_LV2=
 WITH_GRATIS_X42_LV2=
 WITH_GMSYNTH=1
 WITH_HARVID=1
 WITH_XJADEO=1
+X42PLUGINS="x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner"
 
 # TODO: grep from build/config.log instead
 while [ $# -gt 0 ] ; do
@@ -60,6 +62,20 @@ while [ $# -gt 0 ] ; do
 			PROGRAM_KEY=LiveTrax
 			PRODUCT_NAME=LiveTrax
 			MANUAL_URL="https://rsrc.harrisonconsoles.com/livetrax/livetrax-live-manual/"
+			shift ;;
+		--vbm)
+			VBM=1
+			WITH_HARRISON_LV2=1 ;
+			WITH_HARRISON_VBM=1 ;
+			WITH_COMMERCIAL_X42_LV2=1
+			WITH_GRATIS_X42_LV2=1
+			WITH_GMSYNTH="" ;
+			PRODUCT_NAME=MixbusVBM
+			PROGRAM_KEY=MixbusVBM
+			PROGRAM_NAME=MixbusVBM-${PROGRAM_VERSION}
+			PROGRAM_VERSION=""
+			MANUAL_NAME="mixbusvbm-${major_version}-live-manual"
+			X42PLUGINS="$X42PLUGINS x42-testsignal x42-nodelay"
 			shift ;;
 		--chanstrip) HARRISONCHANNELSTRIP=$2 ; shift; shift ;;
 	esac
@@ -338,7 +354,17 @@ if test x$WITH_GRATIS_X42_LV2 != x ; then
 
 	echo "Adding gratis x42 Plugins"
 
-	for proj in x42-autotune x42-midifilter x42-stereoroute setBfree x42-avldrums x42-limiter x42-tuner; do
+	for proj in $X42PLUGINS; do
+
+		if test -n "$VBM"; then
+			if test "$proj" = "setBfree"; then
+				continue
+			fi
+			if test "$proj" = "x42-avldrums"; then
+				continue
+			fi
+		fi
+
 		X42_VERSION=$(curl -s -S http://x42-plugins.com/x42/win/${proj}.latest.txt)
 		rsync -a -q --partial \
 			rsync://x42-plugins.com/x42/win/${proj}-lv2-${WARCH}-${X42_VERSION}.zip \
@@ -357,6 +383,21 @@ if test x$WITH_HARRISON_LV2 != x ; then
 		-o "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip" \
 		"${HARRISONDSPURL}/${HARRISONLV2}.${WARCH}.zip"
 	unzip -q -d "$DESTDIR/LV2/" "${SRCCACHE}/${HARRISONLV2}.${WARCH}.zip"
+fi
+
+if test x$WITH_HARRISON_VBM != x ; then
+	mkdir -p $DESTDIR/LV2
+
+	echo "Including Harrison VBM Channelstrip LV2"
+
+	curl -s -S --fail -# \
+		-z "${SRCCACHE}/harrison_vbm.${WARCH}.zip" \
+		-o "${SRCCACHE}/harrison_vbm.${WARCH}.zip" \
+		"${HARRISONDSPURL}/harrison_vbm.${WARCH}.zip"
+	unzip -q -d "$DESTDIR/LV2/" "${SRCCACHE}/harrison_vbm.${WARCH}.zip"
+
+	# use mingw-11 gcc-12's libstdc++-6.dll (channelstrip compat)
+	cp -v "${SRCCACHE}/libstdc++-6.dll" $DESTDIR/bin/
 fi
 
 if test -n "$MIXBUS"; then
@@ -392,7 +433,7 @@ if test -n "$MIXBUS"; then
 		rm -f $DESTDIR/share/${LOWERCASE_DIRNAME}/media/*.*
 		unzip -q -o -d "$DESTDIR/share/${LOWERCASE_DIRNAME}/media/" "${SRCCACHE}/MixbusBundledMedia.zip"
 	fi
-elif test -z "$LIVETRAX"; then
+elif test -z "$LIVETRAX" -a -z "$VBM"; then
 	echo "Fetching Ardour bundled media"
 	curl -s -S --fail -#  \
 		-z "${SRCCACHE}/ArdourBundledMedia.zip" \
@@ -465,7 +506,7 @@ InstallDirRegKey HKLM "Software\\${PRODUCT_NAME}\\${PRODUCT_ID}\\$WARCH" "Instal
 
 EOF
 
-if test -n "$MIXBUS" -o -n "$LIVETRAX" ; then
+if test -n "$MIXBUS" -o -n "$LIVETRAX" -o -n "$VBM"; then
 
 # TODO: proper welcome/finish text.
 	cat >> $NSISFILE << EOF
@@ -534,7 +575,7 @@ EOF
 fi
 
 if test x$WITH_HARRISON_LV2 != x ; then
-if test -n "$MIXBUS"; then
+if [ -n "$MIXBUS" ] || [ -n "$VBM" ]; then
 	cat >> $NSISFILE << EOF
 Section "Harrison XT plugins (required)" SecXT
   SectionIn RO
