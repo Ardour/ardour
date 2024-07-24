@@ -436,10 +436,6 @@ FPGUI::build_foot_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 void
 FPGUI::build_user_action_combo (Gtk::ComboBox& cb, FaderPort::ButtonState bs)
 {
-#ifndef MIXBUS
-	bs = FaderPort::ButtonState (bs|FaderPort::UserDown);
-#endif
-
 	/* set the active "row" to the right value for the current button binding */
 
 	string current_action = fp.get_action (FaderPort::User, false, bs); /* lookup release action */

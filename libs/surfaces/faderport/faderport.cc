@@ -321,13 +321,8 @@ FaderPort::handle_midi_pitchbend_message (MIDI::Parser &, MIDI::pitchbend_t pb)
 		ButtonState trim_modifier;
 		ButtonState width_modifier;
 
-		if (Profile->get_mixbus()) {
-			trim_modifier = ShiftDown;
-			width_modifier = ButtonState (0);
-		} else {
-			trim_modifier = UserDown;
-			width_modifier = ShiftDown;
-		}
+		trim_modifier = ShiftDown;
+		width_modifier = ButtonState (0);
 
 		if ((button_state & trim_modifier) == trim_modifier ) {    // mod+encoder = input trim
 			std::shared_ptr<AutomationControl> trim = _current_stripable->trim_control ();

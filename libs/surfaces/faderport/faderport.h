@@ -131,7 +131,7 @@ class FaderPort : public MIDISurface {
 		ShiftDown = 0x1,
 		RewindDown = 0x2,
 		StopDown = 0x4,
-		UserDown = 0x8,
+		/* gap when we removed UserMode as a modifier */
 		LongPress = 0x10
 	};
 
