@@ -89,7 +89,7 @@ BufferSet::clear()
 #endif
 
 	for (LV2Buffers::iterator i = _lv2_buffers.begin(); i != _lv2_buffers.end(); ++i) {
-		free ((*i).second);
+		lv2_evbuf_free ((*i).second);
 	}
 	_lv2_buffers.clear ();
 
