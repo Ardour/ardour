@@ -179,6 +179,8 @@ ARDOUR_COMMAND_LINE::parse_opts (int argc, char *argv[])
 			if (PBD::parse_debug_options (optarg)) {
 				exit (EXIT_SUCCESS);
 			}
+#else
+			cerr << "This is not a debug build - igoring '-D " << optarg << "'" << endl;
 #endif /* NDEBUG */
 			break;
 
