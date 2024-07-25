@@ -107,26 +107,36 @@ FaderPort8::probe (std::string& i, std::string& o)
 	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsOutput|IsTerminal), midi_inputs);
 	AudioEngine::instance()->get_ports ("", DataType::MIDI, PortFlags (IsInput|IsTerminal), midi_outputs);
 
-	auto has_fp8 = [](string const& s) {
-		std::string pn = AudioEngine::instance()->get_hardware_port_name_by_name (s);
+	if (midi_outputs.size () == 0)
+		DEBUG_TRACE (DEBUG::FaderPort8, "prope got no output midi ports at all - perhaps an audio backend problem?\n");
+	// midi_inputs will never be empty - there is always at least x-virtual-keyboard
+
+	const string needle =
 #ifdef FADERPORT16
-		return pn.find ("PreSonus FP16 Port 1") != string::npos;
+	    "PreSonus FP16 Port 1"
 #elif defined FADERPORT2
-		return pn.find ("PreSonus FP2") != string::npos;
+	    "PreSonus FP2"
 #else
-		return pn.find ("PreSonus FP8") != string::npos;
+	    "PreSonus FP8"
 #endif
+	    ;
+
+	auto has_fp8 = [&needle] (string const& s) {
+		std::string pn = AudioEngine::instance ()->get_hardware_port_name_by_name (s);
+		return pn.find (needle) != string::npos;
 	};
 
 	auto pi = std::find_if (midi_inputs.begin (), midi_inputs.end (), has_fp8);
 	auto po = std::find_if (midi_outputs.begin (), midi_outputs.end (), has_fp8);
 
 	if (pi == midi_inputs.end () || po == midi_outputs.end ()) {
+		DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("prope did not find the '%1' midi ports\n", needle));
 		return false;
 	}
 
 	i = *pi;
 	o = *po;
+	DEBUG_TRACE (DEBUG::FaderPort8, string_compose ("prope found midi ports '%1' and '%2'\n", i, o));
 	return true;
 }
 
