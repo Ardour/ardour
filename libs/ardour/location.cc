@@ -1417,7 +1417,7 @@ struct LocationStartLaterComparison
 };
 
 timepos_t
-Locations::first_mark_before_flagged (timepos_t const & pos, bool include_special_ranges, Location::Flags whitelist, Location::Flags blacklist, Location::Flags equalist)
+Locations::first_mark_before_flagged (timepos_t const & pos, bool include_special_ranges, Location::Flags whitelist, Location::Flags blacklist, Location::Flags equalist, Location** retval)
 {
 	vector<LocationPair> locs;
 	{
@@ -1436,30 +1436,33 @@ Locations::first_mark_before_flagged (timepos_t const & pos, bool include_specia
 
 	/* locs is sorted in ascending order */
 
-	for (vector<LocationPair>::iterator i = locs.begin(); i != locs.end(); ++i) {
-		if ((*i).second->is_hidden()) {
+	for (auto & loc : locs) {
+		if (loc.second->is_hidden()) {
 			continue;
 		}
-		if (!include_special_ranges && ((*i).second->is_auto_loop() || (*i).second->is_auto_punch())) {
+		if (!include_special_ranges && (loc.second->is_auto_loop() || loc.second->is_auto_punch())) {
 			continue;
 		}
 		if (whitelist != Location::Flags (0)) {
-			if (!((*i).second->flags() & whitelist)) {
+			if (!(loc.second->flags() & whitelist)) {
 				continue;
 			}
 		}
 		if (blacklist != Location::Flags (0)) {
-			if ((*i).second->flags() & blacklist) {
+			if (loc.second->flags() & blacklist) {
 				continue;
 			}
 		}
 		if (equalist != Location::Flags (0)) {
-			if (!((*i).second->flags() == equalist)) {
+			if (!(loc.second->flags() == equalist)) {
 				continue;
 			}
 		}
-		if ((*i).first < pos) {
-			return (*i).first;
+		if (loc.first < pos) {
+			if (retval) {
+				*retval = loc.second;
+			}
+			return loc.first;
 		}
 	}
 
@@ -1480,7 +1483,7 @@ Locations::mark_at (timepos_t const & pos, timecnt_t const & slop, Location::Fla
 	Glib::Threads::RWLock::ReaderLock lm (_lock);
 	for (LocationList::const_iterator i = locations.begin(); i != locations.end(); ++i) {
 
-		if ((*i)->is_mark() && (flags && ((*i)->flags() == flags))) {
+		if ((*i)->is_mark() && (!flags || ((*i)->flags() == flags))) {
 			if (pos > (*i)->start()) {
 				delta = (*i)->start().distance (pos);
 			} else {
@@ -1505,7 +1508,7 @@ Locations::mark_at (timepos_t const & pos, timecnt_t const & slop, Location::Fla
 }
 
 timepos_t
-Locations::first_mark_after_flagged (timepos_t const & pos, bool include_special_ranges, Location::Flags whitelist, Location::Flags blacklist, Location::Flags equalist)
+Locations::first_mark_after_flagged (timepos_t const & pos, bool include_special_ranges, Location::Flags whitelist, Location::Flags blacklist, Location::Flags equalist, Location** retval)
 {
 	vector<LocationPair> locs;
 
@@ -1525,30 +1528,33 @@ Locations::first_mark_after_flagged (timepos_t const & pos, bool include_special
 
 	/* locs is sorted in reverse order */
 
-	for (vector<LocationPair>::iterator i = locs.begin(); i != locs.end(); ++i) {
-		if ((*i).second->is_hidden()) {
+	for (auto & loc : locs) {
+		if (loc.second->is_hidden()) {
 			continue;
 		}
-		if (!include_special_ranges && ((*i).second->is_auto_loop() || (*i).second->is_auto_punch())) {
+		if (!include_special_ranges && (loc.second->is_auto_loop() || loc.second->is_auto_punch())) {
 			continue;
 		}
 		if (whitelist != Location::Flags (0)) {
-			if (!((*i).second->flags() & whitelist)) {
+			if (!(loc.second->flags() & whitelist)) {
 				continue;
 			}
 		}
 		if (blacklist != Location::Flags (0)) {
-			if ((*i).second->flags() & blacklist) {
+			if (loc.second->flags() & blacklist) {
 				continue;
 			}
 		}
 		if (equalist != Location::Flags (0)) {
-			if (!((*i).second->flags() == equalist)) {
+			if (!(loc.second->flags() == equalist)) {
 				continue;
 			}
 		}
-		if ((*i).first > pos) {
-			return (*i).first;
+		if (loc.first > pos) {
+			if (retval) {
+				*retval = loc.second;
+			}
+			return loc.first;
 		}
 	}
 
