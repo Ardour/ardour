@@ -132,7 +132,6 @@ PBD::parse_debug_options (const char* str)
 	typedef boost::tokenizer<boost::char_separator<char> > tokenizer;
 	boost::char_separator<char> sep (",");
 	tokenizer tokens (in_str, sep);
-	DebugBits bits;
 
 	for (tokenizer::iterator tok_iter = tokens.begin(); tok_iter != tokens.end(); ++tok_iter) {
 		if (*tok_iter == "list") {
@@ -148,14 +147,12 @@ PBD::parse_debug_options (const char* str)
 		for (map<const char*,DebugBits>::iterator i = _debug_bit_map().begin(); i != _debug_bit_map().end(); ++i) {
 			const char* cstr = (*tok_iter).c_str();
 
-                        if (strncasecmp (cstr, i->first, strlen (cstr)) == 0) {
-	                        bits |= i->second;
-	                        cout << string_compose (X_("Debug flag '%1' set\n"), i->first);
-                        }
-                }
+			if (strncasecmp (cstr, i->first, strlen (cstr)) == 0) {
+				debug_bits |= i->second;
+				cout << string_compose (X_("Debug flag '%1' set\n"), i->first);
+			}
+		}
 	}
-
-	debug_bits = bits;
 
 	return 0;
 }
