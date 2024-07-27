@@ -895,7 +895,7 @@ PulseAudioBackend::set_latency_range (PortEngine::PortHandle port_handle, bool f
 {
 	BackendPortPtr port = std::dynamic_pointer_cast<BackendPort> (port_handle);
 	if (!valid_port (port)) {
-		PBD::error << _("PulsePort::set_latency_range (): invalid port.") << endmsg;
+		PBD::error << _("PulseAudioBackend::set_latency_range (): invalid port.") << endmsg;
 	}
 	port->set_latency_range (latency_range, for_playback);
 }
@@ -907,7 +907,7 @@ PulseAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool f
 	LatencyRange r;
 
 	if (!valid_port (port)) {
-		PBD::error << _("PulsePort::get_latency_range (): invalid port.") << endmsg;
+		PBD::error << _("PulseAudioBackend::get_latency_range (): invalid port.") << endmsg;
 		r.min = 0;
 		r.max = 0;
 		return r;

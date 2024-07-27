@@ -1428,7 +1428,7 @@ PortAudioBackend::set_latency_range (PortEngine::PortHandle port_handle, bool fo
 {
 	std::shared_ptr<BackendPort> port = std::dynamic_pointer_cast<BackendPort>(port_handle);
 	if (!valid_port (port)) {
-		DEBUG_PORTS("BackendPort::set_latency_range (): invalid port.\n");
+		DEBUG_PORTS ("PortAudioBackend::set_latency_range (): invalid port.\n");
 		return;
 	}
 	port->set_latency_range (latency_range, for_playback);
@@ -1440,7 +1440,7 @@ PortAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool fo
 	std::shared_ptr<BackendPort> port = std::dynamic_pointer_cast<BackendPort>(port_handle);
 	LatencyRange r;
 	if (!valid_port (port)) {
-		DEBUG_PORTS("BackendPort::get_latency_range (): invalid port.\n");
+		DEBUG_PORTS ("PortAudioBackend::get_latency_range (): invalid port.\n");
 		r.min = 0;
 		r.max = 0;
 		return r;
