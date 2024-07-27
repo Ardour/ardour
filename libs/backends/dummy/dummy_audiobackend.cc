@@ -846,7 +846,7 @@ DummyAudioBackend::set_latency_range (PortEngine::PortHandle port_handle, bool f
 {
 	BackendPortPtr port = std::dynamic_pointer_cast<BackendPort> (port_handle);
 	if (!valid_port (port)) {
-		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "DummyPort::set_latency_range (): invalid port.");
+		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "DummyAudioBackend::set_latency_range (): invalid port.");
 		return;
 	}
 	port->set_latency_range (latency_range, for_playback);
@@ -858,7 +858,7 @@ DummyAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool f
 	LatencyRange r;
 	BackendPortPtr port = std::dynamic_pointer_cast<BackendPort> (port_handle);
 	if (!valid_port (port)) {
-		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "DummyPort::get_latency_range (): invalid port.");
+		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "DummyAudioBackend::get_latency_range (): invalid port.");
 		r.min = 0;
 		r.max = 0;
 		return r;

@@ -1666,7 +1666,7 @@ AlsaAudioBackend::set_latency_range (PortEngine::PortHandle port_handle, bool fo
 {
 	BackendPortPtr port = std::dynamic_pointer_cast<BackendPort> (port_handle);
 	if (!valid_port (port)) {
-		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "AlsaPort::set_latency_range (): invalid port.");
+		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "AlsaAudioBackend::set_latency_range (): invalid port.");
 		return;
 	}
 	port->set_latency_range (latency_range, for_playback);
@@ -1679,7 +1679,7 @@ AlsaAudioBackend::get_latency_range (PortEngine::PortHandle port_handle, bool fo
 	LatencyRange   r;
 
 	if (!valid_port (port)) {
-		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "AlsaPort::get_latency_range (): invalid port.");
+		DEBUG_TRACE (PBD::DEBUG::BackendPorts, "AlsaAudioBackend::get_latency_range (): invalid port.");
 		r.min = 0;
 		r.max = 0;
 		return r;
