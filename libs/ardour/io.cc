@@ -445,10 +445,12 @@ IO::ensure_ports_locked (ChanCount count, bool clear, bool& changed)
 		/* end of RCUWriter scope */
 	}
 
+
 	if (changed) {
 		const ChanCount n_ports = ports ()->count ();
 		PortCountChanged (n_ports); /* EMIT SIGNAL */
 		_session.set_dirty ();
+		_ports.flush ();
 	}
 
 	if (clear) {
