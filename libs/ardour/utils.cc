@@ -647,7 +647,13 @@ ARDOUR::native_header_format_extension (HeaderFormat hf, const DataType& type)
         case RF64:
         case RF64_WAV:
         case MBWF:
-                return ".rf64";
+	        /* our goal when using RF64 is to be able to fall back to a
+	           regular RIFF/WAV if the data size is small enough. Rather than
+	           confuse people in the common case where this happens by having
+	           files named "foo.rf64", deal with the common case as ".wav" and
+	           leave potential confusion for the actual RF64 files.
+	        */
+	        return ".wav";
         }
 
         fatal << string_compose (_("programming error: unknown native header format: %1"), hf);
