@@ -77,6 +77,8 @@
 #include "ardour/types.h"
 #include "ardour/value_as_string.h"
 
+#include "control_protocol/control_protocol.h"
+
 #include "LuaBridge/LuaBridge.h"
 
 #include "actions.h"
@@ -1956,6 +1958,7 @@ ProcessorBox::ProcessorBox (ARDOUR::Session* sess, boost::function<PluginSelecto
 	 */
 
 	processor_display.set_data ("ardour-bindings", bindings);
+	processor_display.SelectionAdded.connect (sigc::mem_fun (*this, &ProcessorBox::selection_added));
 
 	_width = Wide;
 	processor_menu = 0;
@@ -2714,7 +2717,6 @@ ProcessorBox::processor_button_press_event (GdkEventButton *ev, ProcessorEntry* 
 		ret = true;
 
 	} else if (processor && ev->button == 1 && selected) {
-
 		// this is purely informational but necessary for route params UI
 		ProcessorSelected (processor); // emit
 
@@ -4956,4 +4958,18 @@ void
 ProcessorBox::load_bindings ()
 {
 	bindings = Bindings::get_bindings (X_("Processor Box"));
+}
+
+void
+ProcessorBox::selection_added (ProcessorEntry& pe)
+{
+	std::shared_ptr<Processor> proc = pe.processor ();
+	std::shared_ptr<PluginInsert> pi = std::dynamic_pointer_cast<PluginInsert> (proc);
+	if (pi) {
+		/* be explicit here about the fact that we're using a weak
+		   pointer, even though we probably don't need to be.
+		*/
+		std::weak_ptr<PluginInsert> wpi;
+		ControlProtocol::PluginSelected (wpi);
+	}
 }

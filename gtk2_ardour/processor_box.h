@@ -653,6 +653,8 @@ private:
 	PBD::ScopedConnection amp_config_connection;
 
 	static bool _ignore_rb_change;
+
+	void selection_added (ProcessorEntry&);
 };
 
 #endif /* __ardour_gtk_processor_box__ */
