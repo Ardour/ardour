@@ -627,8 +627,9 @@ private:
 
 	void add_to_selection (T* child)
 	{
-		if ( !child->is_selectable() )
+		if (!child->is_selectable()) {
 			return;
+		}
 		_selection.push_back (child);
 		setup_child_state (child);
 	}
