@@ -251,6 +251,7 @@ public:
 	sigc::signal<void, DnDVBox*, T*, Glib::RefPtr<Gdk::DragContext> const & > DropFromAnotherBox;
 	sigc::signal<void, Gtk::SelectionData const &, T*, Glib::RefPtr<Gdk::DragContext> const & > DropFromExternal;
 	sigc::signal<void> SelectionChanged;
+	sigc::signal<void,T&> SelectionAdded;
 
 private:
 
@@ -632,6 +633,7 @@ private:
 		}
 		_selection.push_back (child);
 		setup_child_state (child);
+		SelectionAdded (*child); /* EMIT SIGNAL */
 	}
 
 	void remove_from_selection (T* child)
