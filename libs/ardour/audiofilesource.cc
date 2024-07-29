@@ -340,6 +340,7 @@ AudioFileSource::safe_audio_file_extension(const string& file)
 		".vwe", ".VWE",
 		".w64", ".W64",
 		".wav", ".WAV",
+		".rf64", ".RF64",
 		/* minimp3 can read mp2, mp3 */
 		".mp2", ".MP2",
 		".mp3", ".MP3",
