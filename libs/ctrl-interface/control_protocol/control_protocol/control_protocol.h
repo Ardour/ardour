@@ -27,7 +27,6 @@
 #include <string>
 #include <vector>
 
-
 #include "pbd/signals.h"
 #include "pbd/stateful.h"
 #include "pbd/glib_event_source.h"
@@ -42,6 +41,7 @@ class Route;
 class Session;
 class Bundle;
 class Stripable;
+class PluginInsert;
 
 class LIBCONTROLCP_API ControlProtocol : public PBD::Stateful, public PBD::ScopedConnectionList, public BasicUI
 {
@@ -82,6 +82,7 @@ public:
 	static PBD::Signal0<void> VerticalZoomOutSelected;
 	static PBD::Signal0<void> StepTracksDown;
 	static PBD::Signal0<void> StepTracksUp;
+	static PBD::Signal1<void, std::weak_ptr<ARDOUR::PluginInsert> > PluginSelected;
 
 	void add_stripable_to_selection (std::shared_ptr<ARDOUR::Stripable>);
 	void set_stripable_selection (std::shared_ptr<ARDOUR::Stripable>);
