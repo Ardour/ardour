@@ -4969,7 +4969,7 @@ ProcessorBox::selection_added (ProcessorEntry& pe)
 		/* be explicit here about the fact that we're using a weak
 		   pointer, even though we probably don't need to be.
 		*/
-		std::weak_ptr<PluginInsert> wpi;
+		std::weak_ptr<PluginInsert> wpi = pi;
 		ControlProtocol::PluginSelected (wpi);
 	}
 }
