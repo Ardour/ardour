@@ -49,9 +49,14 @@ using namespace PBD;
 static const char* localedir = LOCALEDIR;
 
 static string             backend_client_name;
-static string             backend_name = "JACK";
 static CrossThreadChannel xthread (true);
 static TestReceiver       test_receiver;
+
+#if ! (defined(__APPLE__) || defined(PLATFORM_WINDOWS))
+static string backend_name = "JACK/Pipewire";
+#else
+static string backend_name = "JACK";
+#endif
 
 /** @param dir Session directory.
  *  @param state Session state file, without .ardour suffix.
