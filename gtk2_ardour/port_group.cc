@@ -628,10 +628,19 @@ PortGroupList::gather (ARDOUR::Session* session, ARDOUR::DataType type, bool inp
 	if (ports.size () > 0) {
 
 		struct SortByPortName {
+			bool _use_pretty_name;
+			SortByPortName (bool use_pretty_name) : _use_pretty_name (use_pretty_name) {}
 			bool operator() (std::string const& lhs, std::string const& rhs) const {
-				return PBD::naturally_less (lhs.c_str (), rhs.c_str ());
+				if (_use_pretty_name) {
+					/* add port-name as suffix (in case pretty-name is unset) */
+					std::string l = AudioEngine::instance()->get_hardware_port_name_by_name (lhs) + lhs;
+					std::string r = AudioEngine::instance()->get_hardware_port_name_by_name (rhs) + rhs;
+					return PBD::naturally_less (l.c_str (), r.c_str ());
+				} else {
+					return PBD::naturally_less (lhs.c_str (), rhs.c_str ());
+				}
 			}
-		} port_sorter;
+		} port_sorter (type == DataType::MIDI);
 
 		std::sort (ports.begin (), ports.end (), port_sorter);
 
