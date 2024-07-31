@@ -986,6 +986,12 @@ AudioEngine::current_backend_name() const
 	return string();
 }
 
+bool
+AudioEngine::is_jack() const
+{
+	return _backend && _backend->is_jack();
+}
+
 void
 AudioEngine::drop_backend ()
 {

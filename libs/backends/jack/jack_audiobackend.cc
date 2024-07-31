@@ -87,7 +87,11 @@ JACKAudioBackend::~JACKAudioBackend()
 string
 JACKAudioBackend::name() const
 {
+#if ! (defined(__APPLE__) || defined(PLATFORM_WINDOWS))
+	return X_("JACK/Pipewire");
+#else
 	return X_("JACK");
+#endif
 }
 
 void*

@@ -50,13 +50,13 @@ Engine_TransportMaster::init ()
 bool
 Engine_TransportMaster::usable () const
 {
-	return AudioEngine::instance()->current_backend_name() == X_("JACK");
+	return AudioEngine::instance()->is_jack();
 }
 
 void
 Engine_TransportMaster::check_backend()
 {
-	if (AudioEngine::instance()->current_backend_name() == X_("JACK")) {
+	if (AudioEngine::instance()->is_jack ()) {
 		_connected = true;
 	} else {
 		_connected = false;

@@ -1027,7 +1027,7 @@ ARDOUR::get_available_sync_options ()
 	vector<SyncSource> ret;
 
 	std::shared_ptr<AudioBackend> backend = AudioEngine::instance ()->current_backend ();
-	if (backend && backend->name () == "JACK") {
+	if (backend && backend->is_jack ()) {
 		ret.push_back (Engine);
 	}
 

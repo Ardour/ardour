@@ -60,6 +60,8 @@ class JACKAudioBackend : public AudioBackend {
 	void* private_handle() const;
 	bool is_realtime () const;
 
+	bool is_jack () const { return true; }
+
 	bool requires_driver_selection() const;
 	std::vector<std::string> enumerate_drivers () const;
 	int set_driver (const std::string&);

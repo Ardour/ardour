@@ -886,7 +886,7 @@ PortManager::reestablish_ports ()
 		set_pretty_names (port_names, DataType::MIDI, false);
 	}
 
-	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->current_backend_name () == X_("JACK")) {
+	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->is_jack ()) {
 		port_engine ().register_port (X_("physical_audio_input_monitor_enable"), DataType::AUDIO, ARDOUR::PortFlags (IsInput | IsTerminal | Hidden));
 		port_engine ().register_port (X_("physical_midi_input_monitor_enable"), DataType::MIDI, ARDOUR::PortFlags (IsInput | IsTerminal | Hidden));
 	}
@@ -943,7 +943,7 @@ PortManager::reconnect_ports ()
 		}
 	}
 
-	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->current_backend_name () == X_("JACK")) {
+	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->is_jack ()) {
 		std::string const        audio_port = AudioEngine::instance ()->make_port_name_non_relative (X_("physical_audio_input_monitor_enable"));
 		std::string const        midi_port  = AudioEngine::instance ()->make_port_name_non_relative (X_("physical_midi_input_monitor_enable"));
 		std::vector<std::string> audio_ports;
@@ -1145,7 +1145,7 @@ PortManager::update_input_ports (bool clear)
 #endif
 			mpw->insert (make_pair (*p, MIDIInputPort (32)));
 
-			if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->current_backend_name () == X_("JACK")) {
+			if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->is_jack ()) {
 				physical_midi_connection_list.push_back (*p);
 			}
 		}
@@ -1534,7 +1534,7 @@ PortManager::port_is_virtual_piano (std::string const& name)
 bool
 PortManager::port_is_physical_input_monitor_enable (std::string const& name)
 {
-	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->current_backend_name () == X_("JACK")) {
+	if (Config->get_work_around_jack_no_copy_optimization () && AudioEngine::instance ()->is_jack ()) {
 		if (ends_with (name, X_(":physical_midi_input_monitor_enable"))) {
 			return true;
 		}
