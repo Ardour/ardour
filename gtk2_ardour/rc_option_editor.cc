@@ -3829,6 +3829,17 @@ These settings will only take effect after %1 is restarted.\n\
 		     0, 127, 1, 10
 		     ));
 
+	ComboOption<FastWindOp> *mtc_op = new ComboOption<FastWindOp> (
+		     "mmc-fast-wind-op",
+		     _("MMC Fast-wind behavior"),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::get_mmc_fast_wind_op),
+		     sigc::mem_fun (*_rc_config, &RCConfiguration::set_mmc_fast_wind_op)
+		     );
+	mtc_op->add (FastWindOff, _("Off (MMC fast-forward+rewind are ignored)"));
+	mtc_op->add (FastWindVarispeed, _("Varispeed"));
+	mtc_op->add (FastWindLocate, _("Marker Locate (MMC ffwd/rewd jumps to next/prior marker)"));
+	add_option (_("Transport/Chase"), mtc_op);
+
 	add_option (_("Transport/Chase"), new OptionEditorHeading (_("Transport Masters")));
 
 	add_option (_("Transport/Chase"),

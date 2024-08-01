@@ -86,6 +86,7 @@ setup_enum_writer ()
 	Placement _Placement;
 	MonitorModel _MonitorModel;
 	MonitorChoice _MonitorChoice;
+	FastWindOp _FastWindOp;
 	MonitorState _MonitorState;
 	PFLPosition _PFLPosition;
 	AFLPosition _AFLPosition;
@@ -379,6 +380,11 @@ setup_enum_writer ()
 	REGISTER_ENUM (DeltaEditPoint);
 	REGISTER_ENUM (DeltaOriginMarker);
 	REGISTER (_ClockDeltaMode);
+
+	REGISTER_ENUM (FastWindOff);
+	REGISTER_ENUM (FastWindVarispeed);
+	REGISTER_ENUM (FastWindLocate);
+	REGISTER (_FastWindOp);
 
 	REGISTER_ENUM (DenormalNone);
 	REGISTER_ENUM (DenormalFTZ);
