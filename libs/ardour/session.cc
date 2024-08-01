@@ -509,16 +509,11 @@ Session::Session (AudioEngine &eng,
 	}
 
 	bool was_dirty = dirty();
-	unset_dirty ();
 
 	PresentationInfo::Change.connect_same_thread (*this, boost::bind (&Session::notify_presentation_info_change, this, _1));
 
 	Config->ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, false));
 	config.ParameterChanged.connect_same_thread (*this, boost::bind (&Session::config_changed, this, _1, true));
-
-	if (was_dirty) {
-		DirtyChanged (); /* EMIT SIGNAL */
-	}
 
 	StartTimeChanged.connect_same_thread (*this, boost::bind (&Session::start_time_changed, this, _1));
 	EndTimeChanged.connect_same_thread (*this, boost::bind (&Session::end_time_changed, this, _1));
@@ -553,7 +548,18 @@ Session::Session (AudioEngine &eng,
 		_is_new = true;
 	}
 
+	/* unsets dirty flag */
 	session_loaded ();
+
+	if (_is_new && unnamed) {
+		set_dirty ();
+		was_dirty = false;
+	}
+
+	if (was_dirty) {
+		DirtyChanged (); /* EMIT SIGNAL */
+	}
+
 	_is_new = false;
 
 	if (need_template_resave) {

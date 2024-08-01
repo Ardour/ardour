@@ -407,8 +407,6 @@ Session::post_engine_init ()
 	/* Can't do this until the trigger input MIDI port is set up */
 	TriggerBox::static_init (*this);
 
-	set_clean ();
-
 	/* Now, finally, we can [ask the butler to] fill the playback buffers */
 
 	BootMessage (_("Filling playback buffers"));
