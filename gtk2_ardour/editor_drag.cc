@@ -6196,13 +6196,9 @@ NoteDrag::total_dx (GdkEvent* event) const
 		return timecnt_t::zero (Temporal::BeatTime);
 	}
 
-	/* dx in as samples, because we can't do any better */
-	samplepos_t const p1 = _editor->pixel_to_sample (_drags->current_pointer_x ());
-	samplepos_t const p2 = _editor->pixel_to_sample (grab_x ());
-
 	/* we need to use absolute positions here to honor the tempo-map */
-	timepos_t const t1 = timepos_t (timepos_t (p1).beats ());
-	timepos_t const t2 = timepos_t (timepos_t (p2).beats ());
+	timepos_t const t1 = pixel_to_time (_drags->current_pointer_x ());
+	timepos_t const t2 = pixel_to_time (grab_x ());
 
 	/* now calculate proper `b@b` time */
 	timecnt_t const dx = t2.distance (t1);
