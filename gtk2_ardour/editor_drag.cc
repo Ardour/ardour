@@ -6197,7 +6197,15 @@ NoteDrag::total_dx (GdkEvent* event) const
 	}
 
 	/* dx in as samples, because we can't do any better */
-	timecnt_t const dx = timecnt_t (pixel_to_time (_drags->current_pointer_x () - grab_x ()), timepos_t ());
+	samplepos_t const p1 = _editor->pixel_to_sample (_drags->current_pointer_x ());
+	samplepos_t const p2 = _editor->pixel_to_sample (grab_x ());
+
+	/* we need to use absolute positions here to honor the tempo-map */
+	timepos_t const t1 = timepos_t (timepos_t (p1).beats ());
+	timepos_t const t2 = timepos_t (timepos_t (p2).beats ());
+
+	/* now calculate proper `b@b` time */
+	timecnt_t const dx = t2.distance (t1);
 
 	/* primary note time in quarter notes */
 	timepos_t const n_qn = _region->region ()->source_beats_to_absolute_time (_primary->note ()->time ());
