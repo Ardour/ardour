@@ -1871,8 +1871,12 @@ Editor::register_region_actions ()
 	/* Move selected regions to their original (`natural') position */
 	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "naturalize-region", _("Move to Original Position"), sigc::mem_fun (*this, &Editor::naturalize_region));
 
+	/* Change `locked' status of selected regions */
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "region-lock", _("Lock"), sigc::mem_fun(*this, &Editor::region_lock));
+	register_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "region-unlock", _("Unlock"), sigc::mem_fun(*this, &Editor::region_unlock));
+
 	/* Toggle `locked' status of selected regions */
-	register_toggle_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "toggle-region-lock", _("Lock"), sigc::mem_fun(*this, &Editor::toggle_region_lock));
+	register_toggle_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "toggle-region-lock", _("Lock (toggle)"), sigc::mem_fun(*this, &Editor::toggle_region_lock));
 	register_toggle_region_action (_region_actions, RegionActionTarget (SelectedRegions|EnteredRegions), "toggle-region-video-lock", _("Lock to Video"), sigc::mem_fun(*this, &Editor::toggle_region_video_lock));
 
 	/* Remove sync points from selected regions */

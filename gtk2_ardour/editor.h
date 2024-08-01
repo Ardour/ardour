@@ -1336,6 +1336,8 @@ private:
 	/* EDITING OPERATIONS */
 
 	void reset_point_selection ();
+	void region_lock ();
+	void region_unlock ();
 	void toggle_region_lock ();
 	void toggle_opaque_region ();
 	void toggle_record_enable ();

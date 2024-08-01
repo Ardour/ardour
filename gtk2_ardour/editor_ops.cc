@@ -6754,6 +6754,54 @@ Editor::toggle_gain_envelope_active ()
 }
 
 void
+Editor::region_lock ()
+{
+	if (_ignore_region_action) {
+		return;
+	}
+
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+
+	if (!_session || rs.empty()) {
+		return;
+	}
+
+	begin_reversible_command (_("region lock"));
+
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		(*i)->region()->clear_changes ();
+		(*i)->region()->set_locked (true);
+		_session->add_command (new StatefulDiffCommand ((*i)->region()));
+	}
+
+	commit_reversible_command ();
+}
+
+void
+Editor::region_unlock ()
+{
+	if (_ignore_region_action) {
+		return;
+	}
+
+	RegionSelection rs = get_regions_from_selection_and_entered ();
+
+	if (!_session || rs.empty()) {
+		return;
+	}
+
+	begin_reversible_command (_("region unlock"));
+
+	for (RegionSelection::iterator i = rs.begin(); i != rs.end(); ++i) {
+		(*i)->region()->clear_changes ();
+		(*i)->region()->set_locked (false);
+		_session->add_command (new StatefulDiffCommand ((*i)->region()));
+	}
+
+	commit_reversible_command ();
+}
+
+void
 Editor::toggle_region_lock ()
 {
 	if (_ignore_region_action) {
