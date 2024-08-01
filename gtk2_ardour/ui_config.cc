@@ -289,7 +289,7 @@ UIConfiguration::load_defaults ()
 }
 
 std::string
-UIConfiguration::color_file_name (bool use_my, bool with_version) const
+UIConfiguration::color_file_name (bool use_my, bool with_version, bool fallback) const
 {
 	string basename;
 
@@ -298,6 +298,11 @@ UIConfiguration::color_file_name (bool use_my, bool with_version) const
 	}
 
 	std::string color_name = color_file.get();
+
+	if (fallback) {
+		color_name = "dark";
+	}
+
 	size_t sep = color_name.find_first_of("-");
 	if (sep != string::npos) {
 		color_name = color_name.substr (0, sep);
@@ -349,26 +354,8 @@ UIConfiguration::load_color_theme (bool allow_own)
 	 */
 	PBD::Unwinder<uint32_t> uw (block_save, block_save + 1);
 
-	if (find_file (theme_search_path(), color_file_name (false, true), cfile)) {
-		found = true;
-	}
-
-	if (!found) {
-		if (find_file (theme_search_path(), color_file_name (false, false), cfile)) {
-			found = true;
-		}
-	}
-
-	if (!found) {
-		warning << string_compose (_("Color file for %1 not found along %2"), color_file.get(), theme_search_path().to_string()) << endmsg;
-		return -1;
-	}
-
-	(void) load_color_file (cfile);
-
+	/* first search for the user's customized settings (for this major.minor version)*/
 	if (allow_own) {
-
-		found = false;
 
 		PBD::Searchpath sp (user_config_directory());
 
@@ -383,11 +370,33 @@ UIConfiguration::load_color_theme (bool allow_own)
 				found = true;
 			}
 		}
+	}
 
-		if (found) {
-			(void) load_color_file (cfile);
+	/* now search for a versioned color file (for this major.minor version) CURRENTLY UNUSED */
+	if (!found) {
+		if (find_file (theme_search_path(), color_file_name (false, true), cfile)) {
+			found = true;
 		}
+	}
 
+	/* now search for the theme file that the user last selected */
+	if (!found) {
+		if (find_file (theme_search_path(), color_file_name (false, false), cfile)) {
+			found = true;
+		}
+	}
+
+	/* still not found? use the 'dark' theme */
+	if (!found) {
+		if (find_file (theme_search_path(), color_file_name (false, false, true), cfile)) {
+			found = true;
+		}
+	}
+
+	if (found) {
+		(void) load_color_file (cfile);
+	} else {
+		error << _("no theme file was found; colors will be odd") << endmsg;
 	}
 
 	ColorsChanged ();

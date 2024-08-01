@@ -71,7 +71,7 @@ public:
 	XMLNode& get_variables (std::string const &) const;
 	void     set_variables (const XMLNode&);
 
-	std::string color_file_name (bool use_my, bool with_version) const;
+	std::string color_file_name (bool use_my, bool with_version, bool fallback = false) const;
 
 	typedef std::map<std::string, Gtkmm2ext::Color>       Colors;
 	typedef std::map<std::string, std::string>            ColorAliases;
