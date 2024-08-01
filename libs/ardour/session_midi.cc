@@ -258,6 +258,10 @@ Session::mmc_step (MIDI::MachineControl &/*mmc*/, int steps)
 void
 Session::mmc_rewind (MIDI::MachineControl &/*mmc*/)
 {
+	if (actively_recording()) {
+		return;
+	}
+
 	if (Config->get_mmc_control ()) {
 		switch (Config->get_mmc_fast_wind_op ()) {
 			case (FastWindOff):
@@ -265,6 +269,7 @@ Session::mmc_rewind (MIDI::MachineControl &/*mmc*/)
 			break;
 			case (FastWindVarispeed):
 				request_transport_speed (-Config->get_max_transport_speed());
+				request_roll (TRS_MMC);
 			break;
 			case (FastWindLocate):
 				timepos_t pos = locations()->first_mark_before (timepos_t (transport_sample()-1), false);
@@ -279,6 +284,10 @@ Session::mmc_rewind (MIDI::MachineControl &/*mmc*/)
 void
 Session::mmc_fast_forward (MIDI::MachineControl &/*mmc*/)
 {
+	if (actively_recording()) {
+		return;
+	}
+
 	if (Config->get_mmc_control ()) {
 		switch (Config->get_mmc_fast_wind_op ()) {
 			case (FastWindOff):
@@ -286,6 +295,7 @@ Session::mmc_fast_forward (MIDI::MachineControl &/*mmc*/)
 			break;
 			case (FastWindVarispeed):
 				request_transport_speed (Config->get_max_transport_speed());
+				request_roll (TRS_MMC);
 			break;
 			case (FastWindLocate):
 				timepos_t pos = locations()->first_mark_after (timepos_t (transport_sample()+1), false);
