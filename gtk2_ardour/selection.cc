@@ -1406,15 +1406,13 @@ Selection::remove_regions (TimeAxisView* t)
 void
 Selection::toggle (const TrackViewList& track_list)
 {
-	TrackViewList t = add_grouped_tracks (track_list);
-
 	CoreSelection& selection (editor->session()->selection());
 	PresentationInfo::ChangeSuspender cs;
 
-	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
-		std::shared_ptr<Stripable> s = (*i)->stripable ();
-		std::shared_ptr<AutomationControl> c = (*i)->control ();
-		selection.toggle (s, c);
+	for (auto const t : track_list) {
+		std::shared_ptr<Stripable> s = t->stripable ();
+		std::shared_ptr<AutomationControl> c = t->control ();
+		selection.select_stripable_with_control (s, c, SelectionToggle);
 	}
 }
 
@@ -1429,15 +1427,13 @@ Selection::toggle (TimeAxisView* track)
 void
 Selection::add (TrackViewList const & track_list)
 {
-	TrackViewList t = add_grouped_tracks (track_list);
-
 	CoreSelection& selection (editor->session()->selection());
 	PresentationInfo::ChangeSuspender cs;
 
-	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
-		std::shared_ptr<Stripable> s = (*i)->stripable ();
-		std::shared_ptr<AutomationControl> c = (*i)->control ();
-		selection.add (s, c);
+	for (auto const & t : track_list) {
+		std::shared_ptr<Stripable> s = t->stripable ();
+		std::shared_ptr<AutomationControl> c = t->control ();
+		selection.select_stripable_with_control (s, c, SelectionAdd);
 	}
 }
 
@@ -1469,7 +1465,7 @@ Selection::remove (const TrackViewList& t)
 			s = (*i)->stripable ();
 		}
 		std::shared_ptr<AutomationControl> c = (*i)->control ();
-		selection.remove (s, c);
+		selection.select_stripable_with_control (s, c, SelectionRemove);
 	}
 }
 
@@ -1484,8 +1480,6 @@ Selection::set (TimeAxisView* track)
 void
 Selection::set (const TrackViewList& track_list)
 {
-	TrackViewList t = add_grouped_tracks (track_list);
-
 	CoreSelection& selection (editor->session()->selection());
 
 #if 1 // crazy optimization hack
@@ -1503,9 +1497,9 @@ Selection::set (const TrackViewList& track_list)
 	bool changed = false;
 	CoreSelection::StripableAutomationControls sac;
 	selection.get_stripables (sac);
-	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
-		std::shared_ptr<Stripable> s = (*i)->stripable ();
-		std::shared_ptr<AutomationControl> c = (*i)->control ();
+	for (auto const & t : track_list) {
+		std::shared_ptr<Stripable> s = t->stripable ();
+		std::shared_ptr<AutomationControl> c = t->control ();
 		bool found = false;
 		for (CoreSelection::StripableAutomationControls::iterator j = sac.begin (); j != sac.end (); ++j) {
 			if (j->stripable == s && j->controllable == c) {
@@ -1528,10 +1522,13 @@ Selection::set (const TrackViewList& track_list)
 
 	selection.clear_stripables ();
 
-	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
-		std::shared_ptr<Stripable> s = (*i)->stripable ();
-		std::shared_ptr<AutomationControl> c = (*i)->control ();
-		selection.add (s, c);
+	bool first = true;
+
+	for (auto const & t : track_list) {
+		std::shared_ptr<Stripable> s = t->stripable ();
+		std::shared_ptr<AutomationControl> c = t->control ();
+		selection.select_stripable_with_control (s, c, first ? SelectionSet : SelectionAdd);
+		first = false;
 	}
 }
 
@@ -1567,45 +1564,6 @@ Selection::selected (TimeAxisView* tv) const
 	}
 
 	return selection.selected (s);
-}
-
-TrackViewList
-Selection::add_grouped_tracks (TrackViewList const & t)
-{
-	TrackViewList added;
-
-	for (TrackSelection::const_iterator i = t.begin(); i != t.end(); ++i) {
-		if (dynamic_cast<VCATimeAxisView*> (*i)) {
-			continue;
-		}
-
-		/* select anything in the same select-enabled route group */
-		ARDOUR::RouteGroup* rg = (*i)->route_group ();
-
-		if (rg && rg->is_active() && rg->is_select ()) {
-
-			TrackViewList tr = editor->axis_views_from_routes (rg->route_list ());
-
-			for (TrackViewList::iterator j = tr.begin(); j != tr.end(); ++j) {
-
-				/* Do not add the trackview passed in as an
-				 * argument, because we want that to be on the
-				 * end of the list.
-				 */
-
-				if (*j != *i) {
-					if (!added.contains (*j)) {
-						added.push_back (*j);
-					}
-				}
-			}
-		}
-	}
-
-	/* now add the the trackview's passed in as actual arguments */
-	added.insert (added.end(), t.begin(), t.end());
-
-	return added;
 }
 
 #if 0

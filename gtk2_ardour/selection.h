@@ -248,8 +248,6 @@ private:
 	PublicEditor const * editor;
 	uint32_t next_time_id;
 	bool     manage_libardour_selection;
-
-	TrackViewList add_grouped_tracks (TrackViewList const & t);
 };
 
 bool operator==(const Selection& a, const Selection& b);

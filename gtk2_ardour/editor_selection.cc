@@ -214,63 +214,29 @@ Editor::set_selected_track_as_side_effect (SelectionOperation op, Controllable::
 
 	PBD::Unwinder<bool> uw (_editor_track_selection_change_without_scroll, true);
 
-	RouteGroup* group = NULL;
-	if (clicked_routeview) {
-		group = clicked_routeview->route()->route_group();
-	}
-
 	switch (op) {
 	case SelectionToggle:
 		if (selection->selected (clicked_axisview)) {
-			if (group && group->is_active() && group->enabled_property(ARDOUR::Properties::group_select.property_id)) {
-				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-					if ((*i)->route_group() == group && gcd != Controllable::NoGroup) {
-						selection->remove(*i);
-					}
-				}
-			} else {
-				selection->remove (clicked_axisview);
-			}
-		} else {
-			if (group && group->is_active() && group->enabled_property(ARDOUR::Properties::group_select.property_id)) {
-				for (TrackViewList::iterator i = track_views.begin(); i != track_views.end (); ++i) {
-					if ((*i)->route_group() == group && gcd != Controllable::NoGroup) {
-						selection->add(*i);
-					}
-				}
-			} else {
-				selection->add (clicked_axisview);
-			}
-		}
-		break;
-
-	case SelectionAdd:
-		if (group && group->is_active() && group->enabled_property(ARDOUR::Properties::group_select.property_id)) {
-			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
-				if ((*i)->route_group() == group && gcd != Controllable::NoGroup) {
-					selection->add(*i);
-				}
-			}
+			selection->remove (clicked_axisview);
 		} else {
 			selection->add (clicked_axisview);
 		}
 		break;
 
+	case SelectionAdd:
+		selection->add (clicked_axisview);
+		break;
+
 	case SelectionSet:
 		selection->clear();
-		if (group && group->is_active() && group->enabled_property(ARDOUR::Properties::group_select.property_id)) {
-			for (TrackViewList::iterator i  = track_views.begin(); i != track_views.end (); ++i) {
-				if ((*i)->route_group() == group && gcd != Controllable::NoGroup) {
-					selection->add(*i);
-				}
-			}
-		} else {
-			selection->set (clicked_axisview);
-		}
+		selection->set (clicked_axisview);
 		break;
 
 	case SelectionExtend:
 		selection->clear();
+		break;
+
+	default:
 		break;
 	}
 }
@@ -278,10 +244,10 @@ Editor::set_selected_track_as_side_effect (SelectionOperation op, Controllable::
 void
 Editor::set_selected_track (TimeAxisView& view, SelectionOperation op, bool no_remove)
 {
-	begin_reversible_selection_op (X_("Set Selected Track"));
 
 	switch (op) {
 	case SelectionToggle:
+		begin_reversible_selection_op (X_("Toggle track selection"));
 		if (selection->selected (&view)) {
 			if (!no_remove) {
 				selection->remove (&view);
@@ -292,16 +258,21 @@ Editor::set_selected_track (TimeAxisView& view, SelectionOperation op, bool no_r
 		break;
 
 	case SelectionAdd:
+		begin_reversible_selection_op (X_("Add track selection"));
 		selection->add (&view);
 		break;
 
 	case SelectionSet:
+		begin_reversible_selection_op (X_("Set track selection"));
 		selection->set (&view);
 		break;
 
 	case SelectionExtend:
+		begin_reversible_selection_op (X_("Extend track selection"));
 		extend_selection_to_track (view);
 		break;
+	default:
+		return;
 	}
 
 	commit_reversible_selection_op ();
@@ -382,6 +353,8 @@ Editor::set_selected_control_point_from_click (bool press, SelectionOperation op
 		break;
 	case SelectionExtend:
 		/* XXX */
+		break;
+	default:
 		break;
 	}
 
@@ -1025,20 +998,25 @@ Editor::set_selection (std::list<Selectable*> s, SelectionOperation op)
 	if (s.empty()) {
 		return;
 	}
-	begin_reversible_selection_op (X_("set selection"));
 	switch (op) {
-		case SelectionToggle:
-			selection->toggle (s);
-			break;
-		case SelectionSet:
-			selection->set (s);
-			break;
-		case SelectionExtend:
-			selection->add (s);
-			break;
-		case SelectionAdd:
-			selection->add (s);
-			break;
+	case SelectionToggle:
+		begin_reversible_selection_op (X_("toggle selection"));
+		selection->toggle (s);
+		break;
+	case SelectionSet:
+		begin_reversible_selection_op (X_("set selection"));
+		selection->set (s);
+		break;
+	case SelectionExtend:
+		begin_reversible_selection_op (X_("extend selection"));
+		selection->add (s);
+		break;
+	case SelectionAdd:
+		begin_reversible_selection_op (X_("add to selection"));
+		selection->add (s);
+		break;
+	default:
+		return;
 	}
 
 	commit_reversible_selection_op () ;
@@ -1055,22 +1033,27 @@ Editor::set_selected_regionview_from_region_list (std::shared_ptr<Region> region
 		return;
 	}
 
-	begin_reversible_selection_op (X_("set selected regions"));
 
 	switch (op) {
 	case SelectionToggle:
 		/* XXX this is not correct */
+		begin_reversible_selection_op (X_("toggle selected regions"));
 		selection->toggle (regionviews);
 		break;
 	case SelectionSet:
+		begin_reversible_selection_op (X_("toggle selected regions"));
 		selection->set (regionviews);
 		break;
 	case SelectionExtend:
+		begin_reversible_selection_op (X_("extend selected regions"));
 		selection->add (regionviews);
 		break;
 	case SelectionAdd:
+		begin_reversible_selection_op (X_("add selected regions"));
 		selection->add (regionviews);
 		break;
+	default:
+		return;
 	}
 
 	commit_reversible_selection_op () ;
@@ -1762,23 +1745,23 @@ Editor::select_all_in_track (SelectionOperation op)
 		return;
 	}
 
-	begin_reversible_selection_op (X_("Select All in Track"));
-
 	clicked_routeview->get_selectables (timepos_t(), timepos_t::max (Temporal::AudioTime), 0, DBL_MAX, touched);
 
 	switch (op) {
 	case SelectionToggle:
+		begin_reversible_selection_op (X_("Toggle Select All in Track"));
 		selection->add (touched);
 		break;
 	case SelectionSet:
+		begin_reversible_selection_op (X_("Select All in Track"));
 		selection->set (touched);
 		break;
-	case SelectionExtend:
-		/* meaningless, because we're selecting everything */
-		break;
 	case SelectionAdd:
+		begin_reversible_selection_op (X_("Add Select All in Track"));
 		selection->add (touched);
 		break;
+	default:
+		return;
 	}
 
 	commit_reversible_selection_op ();
@@ -1832,20 +1815,21 @@ Editor::select_all_objects (SelectionOperation op)
 		(*iter)->get_selectables (timepos_t(), timepos_t::max (Temporal::AudioTime), 0, DBL_MAX, touched);
 	}
 
-	begin_reversible_selection_op (X_("select all"));
 	switch (op) {
 	case SelectionAdd:
+		begin_reversible_selection_op (X_("add select all"));
 		selection->add (touched);
 		break;
 	case SelectionToggle:
+		begin_reversible_selection_op (X_("toggle select all"));
 		selection->toggle (touched);
 		break;
 	case SelectionSet:
+		begin_reversible_selection_op (X_("select all"));
 		selection->set (touched);
 		break;
-	case SelectionExtend:
-		/* meaningless, because we're selecting everything */
-		break;
+	default:
+		return;
 	}
 	commit_reversible_selection_op ();
 }
@@ -1949,20 +1933,21 @@ Editor::select_all_within (timepos_t const & start, timepos_t const & end, doubl
 		}
 	}
 
-	begin_reversible_selection_op (X_("select all within"));
 	switch (op) {
 	case SelectionAdd:
+		begin_reversible_selection_op (X_("add select all within"));
 		selection->add (found);
 		break;
 	case SelectionToggle:
+		begin_reversible_selection_op (X_("toggle select all within"));
 		selection->toggle (found);
 		break;
 	case SelectionSet:
+		begin_reversible_selection_op (X_("select all within"));
 		selection->set (found);
 		break;
-	case SelectionExtend:
-		/* not defined yet */
-		break;
+	default:
+		return;
 	}
 
 	commit_reversible_selection_op ();

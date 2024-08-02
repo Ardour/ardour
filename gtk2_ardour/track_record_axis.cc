@@ -466,7 +466,7 @@ TrackRecordAxis::playlist_click (GdkEventButton* ev)
 	}
 
 	build_playlist_menu ();
-	_route->session ().selection().select_stripable_and_maybe_group (_route, false, true, 0);
+	_route->session ().selection().select_stripable_and_maybe_group (_route, SelectionSet, false, true, nullptr);
 	Gtkmm2ext::anchored_menu_popup (playlist_action_menu, &_playlist_button, "", 1, ev->time);
 
 	return true;
@@ -481,7 +481,7 @@ TrackRecordAxis::route_ops_click (GdkEventButton* ev)
 
 	build_route_ops_menu ();
 
-	_route->session ().selection().select_stripable_and_maybe_group (_route, false, true, 0);
+	_route->session ().selection().select_stripable_and_maybe_group (_route, SelectionSet, false, true, nullptr);
 
 	Gtkmm2ext::anchored_menu_popup (_route_ops_menu, &_number_label, "", 1, ev->time);
 	return true;

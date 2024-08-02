@@ -56,7 +56,6 @@ private:
 	ARDOUR::SessionHandlePtr& shp;
 	AxisViewProvider& avp;
 	void removed (AxisView*);
-	std::list<AxisView*> add_grouped_tracks (AxisView*) const;
 
 	RouteProcessorSelection& operator= (const RouteProcessorSelection& other);
 	RouteProcessorSelection (RouteProcessorSelection const&);
