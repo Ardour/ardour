@@ -363,25 +363,25 @@ ControlProtocol::first_selected_stripable () const
 void
 ControlProtocol::add_stripable_to_selection (std::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().add (s, std::shared_ptr<AutomationControl>());
+	session->selection().select_stripable_and_maybe_group (s, SelectionAdd);
 }
 
 void
 ControlProtocol::set_stripable_selection (std::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().select_stripable_and_maybe_group (s, true, true, 0);
+	session->selection().select_stripable_and_maybe_group (s, SelectionSet);
 }
 
 void
 ControlProtocol::toggle_stripable_selection (std::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().toggle (s, std::shared_ptr<AutomationControl>());
+	session->selection().select_stripable_and_maybe_group (s, SelectionToggle);
 }
 
 void
 ControlProtocol::remove_stripable_from_selection (std::shared_ptr<ARDOUR::Stripable> s)
 {
-	session->selection().remove (s, std::shared_ptr<AutomationControl>());
+	session->selection().select_stripable_and_maybe_group (s, SelectionRemove);
 }
 
 void
@@ -389,7 +389,7 @@ ControlProtocol::add_rid_to_selection (int rid)
 {
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
-		session->selection().add (s, std::shared_ptr<AutomationControl>());
+		session->selection().select_stripable_and_maybe_group (s, SelectionAdd);
 	}
 }
 
@@ -398,7 +398,7 @@ ControlProtocol::set_rid_selection (int rid)
 {
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
-		session->selection().select_stripable_and_maybe_group (s, true, true, 0);
+		session->selection().select_stripable_and_maybe_group (s, SelectionSet, true, true, 0);
 	}
 }
 
@@ -407,7 +407,7 @@ ControlProtocol::toggle_rid_selection (int rid)
 {
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
-		session->selection().toggle (s, std::shared_ptr<AutomationControl>());
+		session->selection().select_stripable_and_maybe_group (s, SelectionToggle);
 	}
 }
 
@@ -416,7 +416,7 @@ ControlProtocol::remove_rid_from_selection (int rid)
 {
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
-		session->selection().remove (s, std::shared_ptr<AutomationControl>());
+		session->selection().select_stripable_and_maybe_group (s, SelectionRemove);
 	}
 }
 

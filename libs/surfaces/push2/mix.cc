@@ -414,7 +414,7 @@ MixLayout::button_lower (uint32_t n)
 		return;
 	}
 
-	_session.selection().set (_stripable[n], std::shared_ptr<AutomationControl>());
+	_session.selection().select_stripable_and_maybe_group (_stripable[n], SelectionSet);
 }
 
 void
@@ -690,7 +690,7 @@ MixLayout::button_select_release ()
 		/* no visible track selected, select first (if any) */
 
 		if (_stripable[0]) {
-			_session.selection().set (_stripable[0], std::shared_ptr<AutomationControl>());
+			_session.selection().select_stripable_and_maybe_group (_stripable[0], SelectionSet);
 		}
 
 	} else {
@@ -706,7 +706,7 @@ MixLayout::button_select_release ()
 					_session.selection().clear_stripables ();
 					switch_bank (_bank_start - 1);
 					if (_stripable[0]) {
-						_session.selection().set (_stripable[0], std::shared_ptr<AutomationControl>());
+						_session.selection().select_stripable_and_maybe_group (_stripable[0], SelectionSet);
 					}
 				}
 			} else {
@@ -716,7 +716,7 @@ MixLayout::button_select_release ()
 					--n;
 				}
 				if (n >= 0) {
-					_session.selection().set (_stripable[n], std::shared_ptr<AutomationControl>());
+					_session.selection().select_stripable_and_maybe_group (_stripable[n], SelectionSet);
 				}
 			}
 
@@ -728,10 +728,10 @@ MixLayout::button_select_release ()
 				/* current selected is rightmost ... cancel selection,
 				   switch banks by one, and select righmost
 				*/
-				_session.selection().toggle (_stripable[selected], std::shared_ptr<AutomationControl>());
+				_session.selection().select_stripable_and_maybe_group (_stripable[selected], SelectionToggle);
 				switch_bank (_bank_start + 1);
 				if (_stripable[7]) {
-					_session.selection().set (_stripable[7], std::shared_ptr<AutomationControl>());
+					_session.selection().select_stripable_and_maybe_group (_stripable[7], SelectionSet);
 				}
 			} else {
 				/* select next, if any */
@@ -741,7 +741,7 @@ MixLayout::button_select_release ()
 				}
 
 				if (n != 8) {
-					_session.selection().set (_stripable[n], std::shared_ptr<AutomationControl>());
+					_session.selection().select_stripable_and_maybe_group (_stripable[n], SelectionSet);
 				}
 			}
 		}

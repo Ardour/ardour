@@ -979,7 +979,8 @@ enum SelectionOperation {
 	SelectionSet,
 	SelectionAdd,
 	SelectionToggle,
-	SelectionExtend
+	SelectionRemove,
+	SelectionExtend /* UI only operation, not core */
 };
 
 

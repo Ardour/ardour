@@ -289,7 +289,7 @@ CueLayout::button_lower (uint32_t n)
 		tb->stop_all_quantized ();
 	} else {
 		/* select track */
-		_session.selection().set (_route[n], std::shared_ptr<AutomationControl>());
+		_session.selection().select_stripable_and_maybe_group (_route[n], SelectionSet);
 	}
 }
 

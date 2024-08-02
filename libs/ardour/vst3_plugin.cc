@@ -3180,11 +3180,11 @@ VST3PI::setContextInfoValue (FIDString id, int32 value)
 		std::shared_ptr<Stripable> stripable = s->session ().stripable_by_id (s->id ());
 		assert (stripable);
 		if (value == 0) {
-			s->session ().selection ().remove (stripable, std::shared_ptr<AutomationControl> ());
+			s->session ().selection ().select_stripable_and_maybe_group (stripable, SelectionRemove);
 		} else if (_add_to_selection) {
-			s->session ().selection ().add (stripable, std::shared_ptr<AutomationControl> ());
+			s->session ().selection ().select_stripable_and_maybe_group (stripable, SelectionAdd);
 		} else {
-			s->session ().selection ().set (stripable, std::shared_ptr<AutomationControl> ());
+			s->session ().selection ().select_stripable_and_maybe_group (stripable, SelectionSet);
 		}
 	} else if (0 == strcmp (id, ContextInfo::kMultiSelect)) {
 		_add_to_selection = value != 0;

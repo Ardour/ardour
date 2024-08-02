@@ -35,6 +35,116 @@
 using namespace ARDOUR;
 using namespace PBD;
 
+bool
+CoreSelection::do_select (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c, SelectionOperation op, bool with_group, bool routes_only, RouteGroup* not_allowed_in_group)
+{
+	std::shared_ptr<Route> r;
+	StripableList sl;
+	bool changed = false;
+	std::vector<std::shared_ptr<Stripable> > removed;
+
+	/* no selection of hidden stripables (though they can be selected and
+	 * then hidden
+	 */
+
+	if (s->is_hidden()) {
+		return false;
+	}
+
+	/* monitor is never selectable */
+
+	if (s->is_monitor() || s->is_surround_master ()) {
+		return false;
+	}
+
+	if (!(r = std::dynamic_pointer_cast<Route> (s)) && routes_only) {
+		return false;
+	}
+
+	if (r) {
+
+		/* no selection of inactive routes, though they can be selected
+		 * and made inactive.
+		 */
+
+		if (!r->active()) {
+			return false;
+		}
+
+		if (!c && with_group) {
+
+
+			if (!not_allowed_in_group || !r->route_group() || r->route_group() != not_allowed_in_group) {
+
+				if (r->route_group() && r->route_group()->is_select() && r->route_group()->is_active()) {
+					for (auto & ri : *(r->route_group()->route_list())) {
+						if (ri != r) {
+							sl.push_back (ri);
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/* it is important to make the "primary" stripable being selected the last in this
+	 * list
+	 */
+
+	sl.push_back (s);
+
+	switch (op) {
+	case SelectionAdd:
+		changed = add (sl, c);
+		break;
+	case SelectionToggle:
+		changed = toggle (sl, c);
+		break;
+	case SelectionSet:
+		changed = set (sl, c, removed);
+		break;
+	case SelectionRemove:
+		changed = remove (sl, c);
+		break;
+	default:
+		return false;
+	}
+
+	if (changed || !removed.empty()) {
+
+		send_selection_change ();
+
+		/* send per-object signal to notify interested parties
+		   the selection status has changed
+		*/
+
+		PropertyChange pc (Properties::selected);
+
+		for (auto & s : removed) {
+			s->presentation_info().PropertyChanged (pc);
+		}
+
+		for (auto & s: sl) {
+			s->presentation_info().PropertyChanged (pc);
+		}
+
+	}
+
+	return changed;
+}
+
+bool
+CoreSelection::select_stripable_and_maybe_group (std::shared_ptr<Stripable> s, SelectionOperation op, bool with_group, bool routes_only, RouteGroup* not_allowed_in_group)
+{
+	return do_select (s, nullptr, op, with_group, routes_only, not_allowed_in_group);
+}
+
+void
+CoreSelection::select_stripable_with_control (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c, SelectionOperation op)
+{
+	do_select (s, c, op, c ? false : true, false, nullptr);
+}
+
 void
 CoreSelection::send_selection_change ()
 {
@@ -68,7 +178,7 @@ CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
 		stripables.sort (ARDOUR::Stripable::Sorter (mixer_order));
 
 		for (StripableList::iterator s = stripables.begin(); s != stripables.end(); ++s) {
-			if (select_stripable_and_maybe_group (*s, true, routes_only, 0)) {
+			if (select_stripable_and_maybe_group (*s, SelectionSet, true, routes_only, nullptr)) {
 				break;
 			}
 		}
@@ -105,7 +215,7 @@ CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
 		if (select_me) {
 
 			if (!this->selected (*i)) { /* not currently selected */
-				if (select_stripable_and_maybe_group (*i, true, routes_only, group)) {
+				if (select_stripable_and_maybe_group (*i, SelectionSet, true, routes_only, group)) {
 					return;
 				}
 			}
@@ -127,7 +237,7 @@ CoreSelection::select_adjacent_stripable (bool mixer_order, bool routes_only,
 		/* monitor is never selectable anywhere. for now, anyway */
 
 		if (!routes_only || r) {
-			if (select_stripable_and_maybe_group (*s, true, routes_only, 0)) {
+			if (select_stripable_and_maybe_group (*s, SelectionSet, true, routes_only, 0)) {
 				return;
 			}
 		}
@@ -148,89 +258,39 @@ CoreSelection::select_prev_stripable (bool mixer_order, bool routes_only)
 
 
 bool
-CoreSelection::select_stripable_and_maybe_group (std::shared_ptr<Stripable> s, bool with_group, bool routes_only, RouteGroup* not_allowed_in_group)
+CoreSelection::toggle (StripableList& sl, std::shared_ptr<AutomationControl> c)
 {
-	std::shared_ptr<Route> r;
-	StripableList sl;
+	assert (sl.size() == 1 || !c);
+	bool changed = false;
+	StripableList sl2;
 
-	/* no selection of hidden stripables (though they can be selected and
-	 * then hidden
-	 */
+	for (auto & s : sl) {
+		DEBUG_TRACE (DEBUG::Selection, string_compose ("toggle: s %1 selected %2 c %3 selected %4\n",
+		                                               s, selected (s), c, selected (c)));
 
-	if (s->is_hidden()) {
-		return false;
-	}
+		sl2.clear ();
+		sl2.push_back (s);
 
-	/* monitor is never selectable */
-
-	if (s->is_monitor() || s->is_surround_master ()) {
-		return false;
-	}
-
-	if ((r = std::dynamic_pointer_cast<Route> (s))) {
-
-		/* no selection of inactive routes, though they can be selected
-		 * and made inactive.
-		 */
-
-		if (!r->active()) {
-			return false;
-		}
-
-		if (with_group) {
-
-			if (!not_allowed_in_group || !r->route_group() || r->route_group() != not_allowed_in_group) {
-
-				if (r->route_group() && r->route_group()->is_select() && r->route_group()->is_active()) {
-					std::shared_ptr<RouteList> rl = r->route_group()->route_list ();
-					for (RouteList::iterator ri = rl->begin(); ri != rl->end(); ++ri) {
-						if (*ri != r) {
-							sl.push_back (*ri);
-						}
-					}
-				}
-
-				/* it is important to make the "primary" stripable being selected the last in this
-				 * list
-				 */
-
-				sl.push_back (s);
-				set (sl);
-				return true;
+		if ((c && selected (c)) || selected (s)) {
+			if (remove (sl2, c)) {
+				changed = true;
 			}
-
 		} else {
-			set (s, std::shared_ptr<AutomationControl>());
-			return true;
+			if (add (sl2, c)) {
+				changed = true;
+			}
 		}
-
-	} else if (!routes_only) {
-		set (s, std::shared_ptr<AutomationControl>());
-		return true;
 	}
 
-	return false;
+	return changed;
 }
 
-void
-CoreSelection::toggle (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c)
+bool
+CoreSelection::set (StripableList& sl, std::shared_ptr<AutomationControl> c, std::vector<std::shared_ptr<Stripable> > & removed)
 {
-	DEBUG_TRACE (DEBUG::Selection, string_compose ("toggle: s %1 selected %2 c %3 selected %4\n",
-	                                               s, selected (s), c, selected (c)));
-	if ((c && selected (c)) || selected (s)) {
-		remove (s, c);
-	} else {
-		add (s, c);
-	}
-}
+	assert (sl.size() == 1 || !c);
 
-void
-CoreSelection::set (StripableList& sl)
-{
-	bool send = false;
-	std::shared_ptr<AutomationControl> no_control;
-
-	std::vector<std::shared_ptr<Stripable> > removed;
+	bool changed = false;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
@@ -248,136 +308,84 @@ CoreSelection::set (StripableList& sl)
 
 		for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
 
-			SelectedStripable ss (*s, no_control, _selection_order.fetch_add (1));
+			SelectedStripable ss (*s, c, _selection_order.fetch_add (1));
 
 			if (_stripables.insert (ss).second) {
 				DEBUG_TRACE (DEBUG::Selection, string_compose ("set:added %1 to s/c selection\n", (*s)->name()));
-				send = true;
+				changed = true;
 			} else {
 				DEBUG_TRACE (DEBUG::Selection, string_compose ("%1 already in s/c selection\n", (*s)->name()));
 			}
 		}
 
-		if (sl.size () > 0) {
+		if (!sl.empty()) {
 			_first_selected_stripable = sl.back ();
 		} else {
 			_first_selected_stripable.reset ();
 		}
 	}
 
-	if (send || !removed.empty()) {
-
-		send_selection_change ();
-
-		/* send per-object signal to notify interested parties
-		   the selection status has changed
-		*/
-
-		PropertyChange pc (Properties::selected);
-
-		for (std::vector<std::shared_ptr<Stripable> >::iterator s = removed.begin(); s != removed.end(); ++s) {
-			(*s)->presentation_info().PropertyChanged (pc);
-		}
-
-		for (StripableList::iterator s = sl.begin(); s != sl.end(); ++s) {
-			(*s)->presentation_info().PropertyChanged (pc);
-		}
-
-	}
-
+	return changed;
 }
 
-void
-CoreSelection::add (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c)
+bool
+CoreSelection::add (StripableList& sl, std::shared_ptr<AutomationControl> c)
 {
-	bool send = false;
+	assert (sl.size() == 1 || !c);
+
+	bool changed = false;
 
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
 
-		SelectedStripable ss (s, c, _selection_order.fetch_add (1));
+		for (auto & s : sl) {
+			SelectedStripable ss (s, c, _selection_order.fetch_add (1));
 
-		if (_stripables.insert (ss).second) {
-			DEBUG_TRACE (DEBUG::Selection, string_compose ("added %1/%2 to s/c selection\n", s->name(), c));
-			send = true;
+			if (_stripables.insert (ss).second) {
+				DEBUG_TRACE (DEBUG::Selection, string_compose ("added %1/%2 to s/c selection\n", s->name(), c));
+				changed  = true;
+			} else {
+				DEBUG_TRACE (DEBUG::Selection, string_compose ("%1/%2 already in s/c selection\n", s->name(), c));
+			}
+		}
+
+		if (!sl.empty()) {
+			_first_selected_stripable = sl.back();
 		} else {
-			DEBUG_TRACE (DEBUG::Selection, string_compose ("%1/%2 already in s/c selection\n", s->name(), c));
-		}
-		_first_selected_stripable = s;
-	}
-
-	if (send) {
-		send_selection_change ();
-		/* send per-object signal to notify interested parties
-		   the selection status has changed
-		*/
-		if (s) {
-			PropertyChange pc (Properties::selected);
-			s->presentation_info().PropertyChanged (pc);
-		}
-	}
-}
-
-void
-CoreSelection::remove (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c)
-{
-	bool send = false;
-	{
-		Glib::Threads::RWLock::WriterLock lm (_lock);
-
-		SelectedStripable ss (s, c, 0);
-
-		SelectedStripables::iterator i = _stripables.find (ss);
-
-		if (i != _stripables.end()) {
-			_stripables.erase (i);
-			DEBUG_TRACE (DEBUG::Selection, string_compose ("removed %1/%2 from s/c selection\n", s, c));
-			send = true;
-		}
-		if (s == _first_selected_stripable.lock ()) {
 			_first_selected_stripable.reset ();
 		}
 	}
 
-	if (send) {
-		send_selection_change ();
-		/* send per-object signal to notify interested parties
-		   the selection status has changed
-		*/
-		if (s) {
-			PropertyChange pc (Properties::selected);
-			s->presentation_info().PropertyChanged (pc);
-		}
-	}
+	return changed;
 }
 
-void
-CoreSelection::set (std::shared_ptr<Stripable> s, std::shared_ptr<AutomationControl> c)
+bool
+CoreSelection::remove (StripableList & sl, std::shared_ptr<AutomationControl> c)
 {
+	assert (sl.size() == 1 || !c);
+	bool changed = false;
+
 	{
 		Glib::Threads::RWLock::WriterLock lm (_lock);
 
-		SelectedStripable ss (s, c, _selection_order.fetch_add (1));
+		for (auto & s : sl) {
+			SelectedStripable ss (s, c, 0);
 
-		if (_stripables.size() == 1 && _stripables.find (ss) != _stripables.end()) {
-			return;
+			SelectedStripables::iterator i = _stripables.find (ss);
+
+			if (i != _stripables.end()) {
+				_stripables.erase (i);
+				DEBUG_TRACE (DEBUG::Selection, string_compose ("removed %1/%2 from s/c selection\n", s, c));
+				changed = true;
+			}
+
+			if (s == _first_selected_stripable.lock ()) {
+				_first_selected_stripable.reset ();
+			}
 		}
-
-		_stripables.clear ();
-		_stripables.insert (ss);
-		_first_selected_stripable = s;
-		DEBUG_TRACE (DEBUG::Selection, string_compose ("set s/c selection to %1/%2\n", s->name(), c));
 	}
 
-	send_selection_change ();
-
-	/* send per-object signal to notify interested parties
-	   the selection status has changed
-	*/
-	if (s) {
-		PropertyChange pc (Properties::selected);
-		s->presentation_info().PropertyChanged (pc);
-	}
+	return changed;
 }
 
 void

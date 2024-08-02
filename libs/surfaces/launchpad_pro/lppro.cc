@@ -1473,7 +1473,7 @@ LaunchPadPro::select_stripable (int n)
 
 	std::shared_ptr<Route> r = session->get_remote_nth_route (scroll_x_offset + n);
 	if (r) {
-		session->selection().set (r, std::shared_ptr<AutomationControl>());
+		session->selection().select_stripable_and_maybe_group (r, SelectionSet);
 	}
 }
 

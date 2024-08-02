@@ -1195,7 +1195,7 @@ Console1::select_rid_by_index (uint32_t index)
 	}
 	std::shared_ptr<Stripable> s = session->get_remote_nth_stripable (rid, PresentationInfo::MixerStripables);
 	if (s) {
-		session->selection ().select_stripable_and_maybe_group (s, true, false, 0);
+		session->selection ().select_stripable_and_maybe_group (s, SelectionSet, true, false, 0);
 	} else {
 		success = false;
 	}
