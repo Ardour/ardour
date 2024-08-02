@@ -6201,10 +6201,15 @@ NoteDrag::total_dx (GdkEvent* event) const
 	timepos_t const t2 = pixel_to_time (grab_x ());
 
 	/* now calculate proper `b@b` time */
-	timecnt_t const dx = t2.distance (t1);
+	timecnt_t dx = t2.distance (t1);
 
 	/* primary note time in quarter notes */
 	timepos_t const n_qn = _region->region ()->source_beats_to_absolute_time (_primary->note ()->time ());
+
+	/* prevent (n_qn + dx) from becoming negative */
+	if (-dx.distance() > timecnt_t(n_qn).distance ()) {
+		dx = n_qn.distance (timepos_t (0));
+	}
 
 	/* new session relative time of the primary note (will be in beats)
 
