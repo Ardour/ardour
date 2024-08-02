@@ -43,7 +43,7 @@ public:
 
 	void setup_keybindings ();
 
-	static Selection::Operation selection_type (guint state);
+	static ARDOUR::SelectionOperation selection_type (guint state);
 
 	ARDOUR_UI& ui;
 

@@ -975,6 +975,14 @@ struct ProcessedRanges {
 	ProcessedRanges() : start { 0, 0 }, end { 0, 0 }, cnt (0) {}
 };
 
+enum SelectionOperation {
+	SelectionSet,
+	SelectionAdd,
+	SelectionToggle,
+	SelectionExtend
+};
+
+
 } // namespace ARDOUR
 
 /* for now, break the rules and use "using" to make this "global" */

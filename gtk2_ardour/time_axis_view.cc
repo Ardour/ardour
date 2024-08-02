@@ -597,7 +597,7 @@ TimeAxisView::controls_ebox_button_release (GdkEventButton* ev)
 void
 TimeAxisView::selection_click (GdkEventButton* ev)
 {
-	Selection::Operation op = ArdourKeyboard::selection_type (ev->state);
+	SelectionOperation op = ArdourKeyboard::selection_type (ev->state);
 	_editor.set_selected_track (*this, op, false);
 }
 
@@ -805,7 +805,7 @@ TimeAxisView::conditionally_add_to_selection ()
 	Selection& s (_editor.get_selection ());
 
 	if (!s.selected (this)) {
-		_editor.set_selected_track (*this, Selection::Set);
+		_editor.set_selected_track (*this, SelectionSet);
 	}
 }
 

@@ -239,7 +239,7 @@ public:
 	virtual bool get_selection_extents (Temporal::timepos_t &start, Temporal::timepos_t &end) const = 0;
 	virtual Selection& get_cut_buffer () const = 0;
 
-	virtual void set_selection (std::list<Selectable*>, Selection::Operation) = 0;
+	virtual void set_selection (std::list<Selectable*>, ARDOUR::SelectionOperation) = 0;
 	virtual void set_selected_midi_region_view (MidiRegionView&) = 0;
 
 	virtual std::shared_ptr<ARDOUR::Route> current_mixer_stripable () const = 0;
@@ -349,7 +349,7 @@ public:
 	virtual void select_all_tracks () = 0;
 	virtual void deselect_all () = 0;
 	virtual void invert_selection () = 0;
-	virtual void set_selected_track (TimeAxisView&, Selection::Operation op = Selection::Set, bool no_remove = false) = 0;
+	virtual void set_selected_track (TimeAxisView&, ARDOUR::SelectionOperation op = ARDOUR::SelectionSet, bool no_remove = false) = 0;
 	virtual void set_selected_mixer_strip (TimeAxisView&) = 0;
 	virtual void hide_track_in_display (TimeAxisView* tv, bool apply_to_selection = false) = 0;
 	virtual void show_track_in_display (TimeAxisView* tv, bool move_into_view = false) = 0;

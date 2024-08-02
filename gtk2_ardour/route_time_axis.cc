@@ -1145,19 +1145,19 @@ RouteTimeAxisView::selection_click (GdkEventButton* ev)
 	_editor.begin_reversible_selection_op (X_("Selection Click"));
 
 	switch (ArdourKeyboard::selection_type (ev->state)) {
-	case Selection::Toggle:
+	case SelectionToggle:
 		_editor.get_selection().toggle (this);
 		break;
 
-	case Selection::Set:
+	case SelectionSet:
 		_editor.get_selection().set (this);
 		break;
 
-	case Selection::Extend:
+	case SelectionExtend:
 		_editor.extend_selection_to_track (*this);
 		break;
 
-	case Selection::Add:
+	case SelectionAdd:
 		_editor.get_selection().add (this);
 		break;
 	}

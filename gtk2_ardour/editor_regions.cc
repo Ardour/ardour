@@ -124,7 +124,7 @@ EditorRegions::selection_changed ()
 
 				if (region) {
 					_change_connection.block (true);
-					_editor->set_selected_regionview_from_region_list (region, Selection::Add);
+					_editor->set_selected_regionview_from_region_list (region, SelectionAdd);
 					_change_connection.block (false);
 				}
 			}

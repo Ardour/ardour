@@ -361,16 +361,16 @@ ArdourKeyboard::set_note_size_relative_modifier (guint mod)
 	the_keyboard().reset_relevant_modifier_key_mask();
 }
 
-Selection::Operation
+SelectionOperation
 ArdourKeyboard::selection_type (guint state)
 {
 	/* note that there is no modifier for "Add" */
 
 	if (modifier_state_equals (state, RangeSelectModifier)) {
-		return Selection::Extend;
+		return SelectionExtend;
 	} else if (modifier_state_equals (state, PrimaryModifier)) {
-		return Selection::Toggle;
+		return SelectionToggle;
 	} else {
-		return Selection::Set;
+		return SelectionSet;
 	}
 }

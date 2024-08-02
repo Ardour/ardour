@@ -8028,7 +8028,7 @@ Editor::split_region_at_points (std::shared_ptr<Region> r, AnalysisFeatureList& 
 	if (select_new) {
 
 		for (list<std::shared_ptr<Region> >::iterator i = new_regions.begin(); i != new_regions.end(); ++i){
-			set_selected_regionview_from_region_list ((*i), Selection::Add);
+			set_selected_regionview_from_region_list ((*i), SelectionAdd);
 		}
 	}
 }

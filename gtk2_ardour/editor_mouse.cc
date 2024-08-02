@@ -554,7 +554,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 		}
 	}
 
-	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
+	SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
 	bool press = (event->type == GDK_BUTTON_PRESS);
 
 	if (press) {
@@ -575,7 +575,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 					 * so, "collapse" the selection to just this track
 					 */
 					if (!selection->selected (clicked_axisview)) {
-						set_selected_track_as_side_effect (Selection::Set);
+						set_selected_track_as_side_effect (SelectionSet);
 					}
 				}
 			} else {
@@ -611,7 +611,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 				if (event->button.button != 3) {
 					_mouse_changed_selection |= set_selected_control_point_from_click (press, op);
 				} else {
-					_mouse_changed_selection |= set_selected_control_point_from_click (press, Selection::Set);
+					_mouse_changed_selection |= set_selected_control_point_from_click (press, SelectionSet);
 				}
 			}
 			break;
@@ -632,26 +632,26 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 				selectables.push_back (argl->nth (after));
 
 				switch (op) {
-					case Selection::Set:
+					case SelectionSet:
 						if (press) {
 							selection->set (selectables);
 							_mouse_changed_selection = true;
 						}
 						break;
-					case Selection::Add:
+					case SelectionAdd:
 						if (press) {
 							selection->add (selectables);
 							_mouse_changed_selection = true;
 						}
 						break;
-					case Selection::Toggle:
+					case SelectionToggle:
 						if (press) {
 							selection->toggle (selectables);
 							_mouse_changed_selection = true;
 						}
 						break;
 
-					case Selection::Extend:
+					case SelectionExtend:
 						/* XXX */
 						break;
 				}
@@ -678,26 +678,26 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 				selectables.push_back (al->nth (after));
 
 				switch (op) {
-					case Selection::Set:
+					case SelectionSet:
 						if (press) {
 							selection->set (selectables);
 							_mouse_changed_selection = true;
 						}
 						break;
-					case Selection::Add:
+					case SelectionAdd:
 						if (press) {
 							selection->add (selectables);
 							_mouse_changed_selection = true;
 						}
 						break;
-					case Selection::Toggle:
+					case SelectionToggle:
 						if (press) {
 							selection->toggle (selectables);
 							_mouse_changed_selection = true;
 						}
 						break;
 
-					case Selection::Extend:
+					case SelectionExtend:
 						/* XXX */
 						break;
 				}
@@ -717,7 +717,7 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 			break;
 
 		case AutomationTrackItem:
-			if (eff_mouse_mode != MouseDraw && op == Selection::Set) {
+			if (eff_mouse_mode != MouseDraw && op == SelectionSet) {
 				set_selected_track_as_side_effect (op);
 			}
 			break;

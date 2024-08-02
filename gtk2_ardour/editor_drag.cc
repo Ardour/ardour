@@ -4387,19 +4387,19 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	show_view_preview ((is_start ? location->start () : location->end ()) + _video_offset);
 	setup_snap_delta (timepos_t (is_start ? location->start () : location->end ()));
 
-	Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
+	SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
 
 	switch (op) {
-		case Selection::Toggle:
+		case SelectionToggle:
 			/* we toggle on the button release */
 			break;
-		case Selection::Set:
+		case SelectionSet:
 			if (!_editor->selection->selected (_marker)) {
 				_editor->selection->set (_marker);
 				_selection_changed = true;
 			}
 			break;
-		case Selection::Extend: {
+		case SelectionExtend: {
 			Locations::LocationList ll;
 			list<ArdourMarker*>     to_add;
 			timepos_t               s, e;
@@ -4429,7 +4429,7 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 			}
 			break;
 		}
-		case Selection::Add:
+		case SelectionAdd:
 			_editor->selection->add (_marker);
 			_selection_changed = true;
 
@@ -4643,24 +4643,24 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 		   off the selection process (and locate if appropriate)
 		*/
 
-		Selection::Operation op = ArdourKeyboard::selection_type (event->button.state);
+		SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
 		switch (op) {
-			case Selection::Set:
+			case SelectionSet:
 				if (_editor->selection->selected (_marker) && _editor->selection->markers.size () > 1) {
 					_editor->selection->set (_marker);
 					_selection_changed = true;
 				}
 				break;
 
-			case Selection::Toggle:
+			case SelectionToggle:
 				/* we toggle on the button release, click only */
 				_editor->selection->toggle (_marker);
 				_selection_changed = true;
 
 				break;
 
-			case Selection::Extend:
-			case Selection::Add:
+			case SelectionExtend:
+			case SelectionAdd:
 				break;
 		}
 
@@ -5595,14 +5595,14 @@ SelectionDrag::motion (GdkEvent* event, bool first_move)
 			if (first_move) {
 				if (_add) {
 					/* adding to the selection */
-					_editor->set_selected_track_as_side_effect (Selection::Add, gcd);
+					_editor->set_selected_track_as_side_effect (SelectionAdd, gcd);
 					_editor->clicked_selection = _editor->selection->add (start, end);
 					_add                       = false;
 
 				} else {
 					/* new selection */
 					if (_editor->clicked_axisview && !_editor->selection->selected (_editor->clicked_axisview)) {
-						_editor->set_selected_track_as_side_effect (Selection::Set, gcd);
+						_editor->set_selected_track_as_side_effect (SelectionSet, gcd);
 					}
 
 					_editor->clicked_selection = _editor->selection->set (start, end);
@@ -6099,7 +6099,7 @@ RangeMarkerBarDrag::finished (GdkEvent* event, bool movement_occurred)
 			switch (_editor->mouse_mode) {
 				case MouseObject:
 					/* find the two markers on either side and then make the selection from it */
-					_editor->select_all_within (start, end, 0.0f, FLT_MAX, _editor->track_views, Selection::Set, false);
+					_editor->select_all_within (start, end, 0.0f, FLT_MAX, _editor->track_views, SelectionSet, false);
 					break;
 
 				case MouseRange:
@@ -6782,7 +6782,7 @@ EditorRubberbandSelectDrag::select_things (int button_state, timepos_t const& x1
 		return;
 	}
 
-	Selection::Operation op = ArdourKeyboard::selection_type (button_state);
+	SelectionOperation op = ArdourKeyboard::selection_type (button_state);
 
 	_editor->begin_reversible_selection_op (X_("rubberband selection"));
 

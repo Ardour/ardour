@@ -125,7 +125,7 @@ EditorSources::selection_changed ()
 
 					for (set<std::shared_ptr<Region>>::iterator region = regions.begin (); region != regions.end (); region++) {
 						_change_connection.block (true);
-						_editor->set_selected_regionview_from_region_list (*region, Selection::Add);
+						_editor->set_selected_regionview_from_region_list (*region, SelectionAdd);
 						_change_connection.block (false);
 					}
 				}
@@ -228,7 +228,7 @@ EditorSources::remove_selected_sources ()
 							 * (Source::drop_references -> Region::source_deleted,
 							 *  -> Region::drop_references). see f58f5bef55a5aa1
 							 */
-							_editor->set_selected_regionview_from_region_list (region, Selection::Add);
+							_editor->set_selected_regionview_from_region_list (region, SelectionAdd);
 							_change_connection.block (false);
 						}
 
