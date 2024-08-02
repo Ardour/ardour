@@ -100,6 +100,8 @@ LTC_TransportMaster::set_session (Session *s)
 		parse_timecode_offset();
 		reset (true);
 
+		fps_detected = false;
+
 		_session->config.ParameterChanged.connect_same_thread (session_connections, boost::bind (&LTC_TransportMaster::parameter_changed, this, _1));
 		_session->LatencyUpdated.connect_same_thread (session_connections, boost::bind (&LTC_TransportMaster::resync_latency, this, _1));
 	}
@@ -121,6 +123,7 @@ LTC_TransportMaster::connection_handler (std::weak_ptr<ARDOUR::Port> w0, std::st
 	std::shared_ptr<Port> p = w1.lock ();
 	if (p == _port) {
 		resync_latency (false);
+		fps_detected = false;
 	}
 }
 
@@ -354,12 +357,12 @@ LTC_TransportMaster::detect_ltc_fps(int frameno, bool df)
 				}
 			}
 
-			timecode_format_valid = true; /* SET FLAG */
+			if (!timecode_format_valid) {
+				fps_changed = true;
+			}
 
 			if (timecode.rate != detected_fps || timecode.drop != df) {
 				DEBUG_TRACE (DEBUG::LTC, string_compose ("detected FPS: %1%2\n", detected_fps, df?"df":"ndf"));
-			} else {
-				detected_fps = 0; /* no change */
 			}
 		}
 		ltc_detect_fps_cnt = ltc_detect_fps_max = 0;
@@ -413,6 +416,7 @@ LTC_TransportMaster::process_ltc(samplepos_t const now)
 		if (!ltc_is_stationary && detect_ltc_fps (stime.frame, (ltc_frame.ltc.dfbit) ? true : false)) {
 			reset (true);
 			fps_detected = true;
+			timecode_format_valid = true; /* SET FLAG */
 		}
 
 #ifndef NDEBUG
