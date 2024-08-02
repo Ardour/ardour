@@ -1152,7 +1152,7 @@ private:
 	std::shared_ptr<ARDOUR::Region> find_next_region (Temporal::timepos_t const &, ARDOUR::RegionPoint, int32_t dir, TrackViewList&, TimeAxisView** = 0);
 	Temporal::timepos_t find_next_region_boundary (Temporal::timepos_t const &, int32_t dir, const TrackViewList&);
 
-	std::vector<Temporal::timepos_t> region_boundary_cache;
+	std::set<Temporal::timepos_t> region_boundary_cache;
 	void mark_region_boundary_cache_dirty () { _region_boundary_cache_dirty = true; }
 	void build_region_boundary_cache ();
 	bool	_region_boundary_cache_dirty;

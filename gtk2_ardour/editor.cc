@@ -3206,8 +3206,8 @@ Editor::snap_to_internal (timepos_t& start, Temporal::RoundMode direction, SnapP
 
 		if (!region_boundary_cache.empty ()) {
 
-			vector<timepos_t>::iterator prev = region_boundary_cache.begin ();
-			vector<timepos_t>::iterator next = std::upper_bound (region_boundary_cache.begin (), region_boundary_cache.end (), presnap);
+			set<timepos_t>::iterator prev = region_boundary_cache.begin ();
+			set<timepos_t>::iterator next = std::upper_bound (region_boundary_cache.begin (), region_boundary_cache.end (), presnap);
 			if (next != region_boundary_cache.begin ()) {
 				prev = next;
 				prev--;

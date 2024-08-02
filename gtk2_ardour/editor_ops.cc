@@ -795,11 +795,7 @@ Editor::build_region_boundary_cache ()
 	if (!_region_boundary_cache_dirty)
 		return;
 
-	timepos_t pos;
 	vector<RegionPoint> interesting_points;
-	std::shared_ptr<Region> r;
-	TrackViewList tracks;
-	bool at_end = false;
 
 	region_boundary_cache.clear ();
 
@@ -823,22 +819,19 @@ Editor::build_region_boundary_cache ()
 	}
 
 	/* if no snap selections are set, boundary cache should be left empty */
-	if ( interesting_points.empty() ) {
+	if (interesting_points.empty ()) {
 		_region_boundary_cache_dirty = false;
 		return;
 	}
 
-	TimeAxisView *ontrack = 0;
-	TrackViewList tlist;
-
-	tlist = track_views.filter_to_unique_playlists ();
+	TrackViewList tlist = track_views.filter_to_unique_playlists ();
 
 	if (maybe_first_sample) {
 		TrackViewList::const_iterator i;
 		for (i = tlist.begin(); i != tlist.end(); ++i) {
 			std::shared_ptr<Playlist> pl = (*i)->playlist();
 			if (pl && pl->count_regions_at (timepos_t())) {
-				region_boundary_cache.push_back (timepos_t());
+				region_boundary_cache.insert (timepos_t());
 				break;
 			}
 		}
@@ -846,75 +839,48 @@ Editor::build_region_boundary_cache ()
 
 	/* allow regions to snap to the video start (if any) as if it were a "region" */
 	if (ARDOUR_UI::instance()->video_timeline) {
-		ARDOUR::samplepos_t vo = ARDOUR_UI::instance()->video_timeline->get_video_start_offset();
-		if (std::find (region_boundary_cache.begin(), region_boundary_cache.end(), vo) == region_boundary_cache.end()) {
-			region_boundary_cache.push_back (timepos_t (ARDOUR_UI::instance()->video_timeline->get_video_start_offset()));
-		}
+		timepos_t vo = timepos_t (ARDOUR_UI::instance()->video_timeline->get_video_start_offset ());
+		region_boundary_cache.insert (vo);
 	}
 
 	std::pair<timepos_t, timepos_t> ext = session_gui_extents (false);
 	timepos_t session_end = ext.second;
 
-	while (pos < session_end && !at_end) {
+	for (auto const& tav : tlist) {
+		std::shared_ptr<Playlist> pl = tav->playlist ();
+		if (!pl) {
+			continue;
+		}
+		std::shared_ptr<RegionList> rl = pl->region_list ();
+		for (auto const& r : *rl) {
+			timepos_t lpos = session_end;
 
-		timepos_t rpos;
-		timepos_t lpos = session_end;
-
-		for (vector<RegionPoint>::iterator p = interesting_points.begin(); p != interesting_points.end(); ++p) {
-
-			if ((r = find_next_region (pos, *p, 1, tlist, &ontrack)) == 0) {
-				if (*p == interesting_points.back()) {
-					at_end = true;
+			for (auto const& p : interesting_points) {
+				timepos_t rpos;
+				switch (p) {
+					case Start:
+						rpos = r->position();
+						break;
+					case End:
+						rpos = r->end();
+						break;
+					case SyncPoint:
+						rpos = r->sync_position ();
+						break;
+					default:
+						break;
 				}
-				/* move to next point type */
-				continue;
-			}
+				region_boundary_cache.insert (rpos);
 
-			switch (*p) {
-			case Start:
-				rpos = r->position();
-				break;
-
-			case End:
-				rpos = r->end();
-				break;
-
-			case SyncPoint:
-				rpos = r->sync_position ();
-				break;
-
-			default:
-				break;
-			}
-
-			if (rpos < lpos) {
-				lpos = rpos;
-			}
-
-			/* prevent duplicates, but we don't use set<> because we want to be able
-			   to sort later.
-			*/
-
-			vector<timepos_t>::iterator ri;
-
-			for (ri = region_boundary_cache.begin(); ri != region_boundary_cache.end(); ++ri) {
-				if (*ri == rpos) {
-					break;
+				if (rpos < lpos) {
+					lpos = rpos;
 				}
 			}
-
-			if (ri == region_boundary_cache.end()) {
-				region_boundary_cache.push_back (rpos);
+			if (lpos >= session_end) {
+				break;
 			}
 		}
-
-		pos = lpos.increment();
 	}
-
-	/* finally sort to be sure that the order is correct */
-
-	sort (region_boundary_cache.begin(), region_boundary_cache.end());
-
 	_region_boundary_cache_dirty = false;
 }
 
