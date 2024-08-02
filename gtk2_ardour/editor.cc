@@ -6145,8 +6145,6 @@ struct TrackViewStripableSorter
   }
 };
 
-static const int track_drag_spacer_height = 25;
-
 void
 Editor::maybe_move_tracks ()
 {
