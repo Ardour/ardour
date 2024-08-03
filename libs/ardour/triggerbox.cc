@@ -4129,6 +4129,38 @@ TriggerBox::run (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_samp
 		return;
 	}
 
+	const Location* const loop_loc = _loop_location;
+
+	if (!loop_loc) {
+		run_cycle (bufs, start_sample, end_sample, speed, nframes);
+	} else {
+		const samplepos_t loop_start = loop_loc->start_sample ();
+		const samplepos_t loop_end   = loop_loc->end_sample ();
+		const samplecnt_t looplen    = loop_end - loop_start;
+
+		samplecnt_t remain    = nframes;
+		samplepos_t start_pos = start_sample;
+
+		while (remain > 0) {
+			if (start_pos >= loop_end) {
+				sampleoffset_t start_off = (start_pos - loop_start) % looplen;
+				start_pos = loop_start + start_off;
+			}
+
+			samplecnt_t move = std::min ((samplecnt_t)nframes, loop_end - start_pos);
+
+			run_cycle (bufs, start_pos, start_pos + move, speed, move);
+
+			remain -= move;
+			start_pos += move;
+		}
+	}
+}
+
+void
+TriggerBox::run_cycle (BufferSet& bufs, samplepos_t start_sample, samplepos_t end_sample, double speed, pframes_t nframes)
+{
+
 #ifndef NDEBUG
 	{
 		Temporal::TempoMap::SharedPtr __tmap (Temporal::TempoMap::use());
