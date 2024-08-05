@@ -91,6 +91,8 @@ public:
 	bool reset_parameters_to_default ();
 	bool can_reset_all_parameters ();
 
+	void maybe_emit_changed_signals () const;
+
 	std::string describe_parameter (Evoral::Parameter param);
 
 	bool provides_stats () const
@@ -189,11 +191,15 @@ private:
 	bool _configured;
 	bool _no_inplace;
 
+	mutable samplepos_t _last_emit;
+
 	typedef std::map<uint32_t, std::shared_ptr<ReadOnlyControl>> CtrlOutMap;
 	CtrlOutMap                                                   _control_outputs;
 
 	Gtkmm2ext::WindowProxy* _window_proxy;
 	std::atomic<int>        _flush;
+
+	mutable Glib::Threads::Mutex _process_lock;
 };
 
 } // namespace ARDOUR
