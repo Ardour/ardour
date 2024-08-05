@@ -37,6 +37,50 @@ using namespace std;
 using namespace ARDOUR;
 using namespace PBD;
 
+class TimedReadOnlyControl : public ReadOnlyControl {
+public:
+	TimedReadOnlyControl (std::shared_ptr<Plugin> p, const ParameterDescriptor& desc, uint32_t pnum)
+		: ReadOnlyControl (p, desc, pnum)
+	{}
+
+	double get_parameter () const {
+		std::shared_ptr<Plugin> p = _plugin.lock();
+
+		if (!p) {
+			return 0;
+		}
+		samplepos_t when = p->session().audible_sample ();
+
+		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		auto it = _history.lower_bound (when);
+		if (it == _history.end ()) {
+			return p->get_parameter (_parameter_num);
+		} else {
+			return it->second;
+		}
+	}
+
+	void flush () {
+		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		_history.clear ();
+	}
+
+	void store_value (samplepos_t start, samplepos_t end) {
+		std::shared_ptr<Plugin> p = _plugin.lock();
+		if (!p) {
+			return;
+		}
+		double value = p->get_parameter (_parameter_num);
+		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		_history[start] = value;
+		_history[end] = value;
+	}
+
+private:
+	std::map<samplepos_t, double> _history;
+	mutable Glib::Threads::Mutex  _history_mutex;
+};
+
 RegionFxPlugin::RegionFxPlugin (Session& s, Temporal::TimeDomain const td, std::shared_ptr<Plugin> plug)
 	: SessionObject (s, (plug ? plug->name () : string ("toBeRenamed")))
 	, TimeDomainProvider (td)
@@ -317,7 +361,7 @@ RegionFxPlugin::create_parameters ()
 		plugin->get_parameter_descriptor (i, desc);
 
 		if (!plugin->parameter_is_input (i)) {
-			_control_outputs[i] = std::shared_ptr<ReadOnlyControl> (new ReadOnlyControl (plugin, desc, i));
+			_control_outputs[i] = std::shared_ptr<TimedReadOnlyControl> (new TimedReadOnlyControl (plugin, desc, i));
 			continue;
 		}
 
@@ -548,6 +592,11 @@ void
 RegionFxPlugin::flush ()
 {
 	_flush.store (1);
+
+	for (auto const& i : _control_outputs) {
+		shared_ptr<TimedReadOnlyControl> toc = std::dynamic_pointer_cast<TimedReadOnlyControl>(i.second);
+		toc->flush ();
+	}
 }
 
 bool
@@ -1160,6 +1209,11 @@ RegionFxPlugin::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t
 				return false;
 			}
 		}
+	}
+
+	for (auto const& i : _control_outputs) {
+		shared_ptr<TimedReadOnlyControl> toc = std::dynamic_pointer_cast<TimedReadOnlyControl>(i.second);
+		toc->store_value (start + pos, end + pos);
 	}
 
 	const samplecnt_t l = effective_latency ();
