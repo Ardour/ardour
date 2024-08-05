@@ -129,7 +129,7 @@ void
 VST3PluginUI::parameter_update ()
 {
 	// XXX replicated plugins, too ?!
-	_vst3->update_contoller_param ();
+	_vst3->update_contoller_param (); // XXX
 }
 
 void
