@@ -70,9 +70,9 @@ LV2PluginUI::write_from_ui(void*       controller,
 
 		std::shared_ptr<AutomationControl> ac = me->_controllables[port_index];
 
-		me->_updates.insert (port_index);
 
 		if (ac) {
+			me->_updates.insert (port_index);
 			ac->set_value(*(const float*)buffer, Controllable::NoGroup);
 		}
 	} else if (format == URIMap::instance().urids.atom_eventTransfer) {
@@ -208,7 +208,7 @@ void
 LV2PluginUI::control_changed (uint32_t port_index)
 {
 	/* Must run in GUI thread because we modify _updates with no lock */
-	if (_lv2->get_parameter (port_index) != _values_last_sent_to_ui[port_index]) {
+	if (_controllables[port_index]->get_value () != _values_last_sent_to_ui[port_index]) {
 		/* current plugin parameter does not match last value received
 		   from GUI, so queue an update to push it to the GUI during
 		   our regular timeout.
@@ -241,7 +241,7 @@ LV2PluginUI::queue_port_update()
 	for (uint32_t i = 0; i < num_ports; ++i) {
 		bool     ok;
 		uint32_t port = _lv2->nth_parameter(i, ok);
-		if (ok) {
+		if (ok && _lv2->parameter_is_input (i)) {
 			_updates.insert (port);
 		}
 	}
@@ -277,7 +277,7 @@ LV2PluginUI::output_update()
 	uint32_t nports = _output_ports.size();
 	for (uint32_t i = 0; i < nports; ++i) {
 		uint32_t index = _output_ports[i];
-		float val = _lv2->get_parameter (index);
+		float val = _pib->control_output (index)->get_parameter ();
 
 		if (val != _values_last_sent_to_ui[index]) {
 			/* Send to GUI */
@@ -292,7 +292,7 @@ LV2PluginUI::output_update()
 	*/
 
 	for (Updates::iterator i = _updates.begin(); i != _updates.end(); ++i) {
-		float val = _lv2->get_parameter (*i);
+		float val = _controllables[*i]->get_value ();
 		/* push current value to the GUI */
 		suil_instance_port_event ((SuilInstance*)_inst, (*i), 4, 0, &val);
 		_values_last_sent_to_ui[(*i)] = val;
@@ -483,11 +483,10 @@ LV2PluginUI::lv2ui_instantiate(const std::string& title)
 			if (_lv2->parameter_is_control(port) && _lv2->parameter_is_input(port)) {
 				if (_controllables[port]) {
 					_controllables[port]->Changed.connect (control_connections, invalidator (*this), boost::bind (&LV2PluginUI::control_changed, this, port), gui_context());
+					/* queue for first update ("push") to GUI */
+					_updates.insert (port);
 				}
 			}
-
-			/* queue for first update ("push") to GUI */
-			_updates.insert (port);
 		}
 	}
 
