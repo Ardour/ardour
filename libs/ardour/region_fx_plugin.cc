@@ -81,12 +81,67 @@ private:
 	mutable Glib::Threads::Mutex  _history_mutex;
 };
 
+class TimedPluginControl : public PlugInsertBase::PluginControl
+{
+public:
+	TimedPluginControl (Session&                       s,
+			               PlugInsertBase*                 p,
+			               const Evoral::Parameter&        param,
+			               const ParameterDescriptor&      desc,
+			               std::shared_ptr<AutomationList> list)
+		: PlugInsertBase::PluginControl (s, p, param, desc, list)
+		, _last_value (desc.lower - 1)
+	{
+	}
+
+	double get_value (void) const
+	{
+		samplepos_t when = _session.audible_sample ();
+		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		auto it = _history.lower_bound (when);
+		if (it == _history.end ()) {
+			return PlugInsertBase::PluginControl::get_value ();
+		} else {
+			return it->second;
+		}
+	}
+
+	void maybe_emit_changed ()
+	{
+		double current = get_value ();
+		if (current == _last_value) {
+			return;
+		}
+		_last_value = current;
+		Changed (true, Controllable::NoGroup);
+	}
+
+	void flush () {
+		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		_history.clear ();
+	}
+
+	void store_value (samplepos_t start, samplepos_t end)
+	{
+		double value = PlugInsertBase::PluginControl::get_value ();
+		Glib::Threads::Mutex::Lock lm (_history_mutex);
+		_history[start] = value;
+		_history[end] = value;
+	}
+
+private:
+	std::map<samplepos_t, double> _history;
+	mutable Glib::Threads::Mutex  _history_mutex;
+	double                        _last_value;
+};
+
 RegionFxPlugin::RegionFxPlugin (Session& s, Temporal::TimeDomain const td, std::shared_ptr<Plugin> plug)
 	: SessionObject (s, (plug ? plug->name () : string ("toBeRenamed")))
 	, TimeDomainProvider (td)
 	, _plugin_signal_latency (0)
 	, _configured (false)
 	, _no_inplace (false)
+	, _last_emit (0)
 	, _window_proxy (0)
 {
 	_flush.store (0);
@@ -369,7 +424,7 @@ RegionFxPlugin::create_parameters ()
 		const bool automatable = a.find(param) != a.end();
 
 		std::shared_ptr<AutomationList> list (new AutomationList (param, desc, *this));
-		std::shared_ptr<AutomationControl> c (new PluginControl (_session, this, param, desc, list));
+		std::shared_ptr<AutomationControl> c (new TimedPluginControl (_session, this, param, desc, list));
 		if (!automatable) {
 			c->set_flag (Controllable::NotAutomatable);
 		}
@@ -596,6 +651,10 @@ RegionFxPlugin::flush ()
 	for (auto const& i : _control_outputs) {
 		shared_ptr<TimedReadOnlyControl> toc = std::dynamic_pointer_cast<TimedReadOnlyControl>(i.second);
 		toc->flush ();
+	}
+	for (auto const& i : _controls) {
+		shared_ptr<TimedPluginControl> tpc = std::dynamic_pointer_cast<TimedPluginControl>(i.second);
+		tpc->flush ();
 	}
 }
 
@@ -1216,10 +1275,36 @@ RegionFxPlugin::connect_and_run (BufferSet& bufs, samplepos_t start, samplepos_t
 		toc->store_value (start + pos, end + pos);
 	}
 
+	for (auto const& i : _controls) {
+		shared_ptr<TimedPluginControl> tpc = std::dynamic_pointer_cast<TimedPluginControl>(i.second);
+		if (tpc->automation_playback ()) {
+			tpc->store_value (start + pos, end + pos);
+		}
+	}
+
 	const samplecnt_t l = effective_latency ();
 	if (_plugin_signal_latency != l) {
 		_plugin_signal_latency= l;
 		LatencyChanged (); /* EMIT SIGNAL */
 	}
 	return true;
+}
+
+void
+RegionFxPlugin::maybe_emit_changed_signals () const
+{
+	if (!_session.transport_rolling ()) {
+		samplepos_t when = _session.audible_sample ();
+		if (_last_emit == when) {
+			return;
+		}
+		_last_emit = when;
+	}
+
+	for (auto const& i : _controls) {
+		shared_ptr<TimedPluginControl> tpc = std::dynamic_pointer_cast<TimedPluginControl>(i.second);
+		if (tpc->automation_playback ()) {
+			tpc->maybe_emit_changed ();
+		}
+	}
 }

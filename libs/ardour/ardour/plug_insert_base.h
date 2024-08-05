@@ -69,17 +69,18 @@ public:
 	virtual void clear_stats () = 0;
 
 	/** A control that manipulates a plugin parameter (control port). */
-	struct PluginControl : public AutomationControl {
+	class PluginControl : public AutomationControl {
+	public:
 		PluginControl (Session&                        s,
 		               PlugInsertBase*                 p,
 		               const Evoral::Parameter&        param,
 		               const ParameterDescriptor&      desc,
 		               std::shared_ptr<AutomationList> list = std::shared_ptr<AutomationList> ());
 
-		double      get_value (void) const;
-		void        catch_up_with_external_value (double val);
-		XMLNode&    get_state () const;
-		std::string get_user_string () const;
+		virtual double get_value (void) const;
+		void           catch_up_with_external_value (double val);
+		XMLNode&       get_state () const;
+		std::string    get_user_string () const;
 
 	protected:
 		virtual void    actually_set_value (double val, PBD::Controllable::GroupControlDisposition group_override);
@@ -94,8 +95,8 @@ public:
 		                       const ParameterDescriptor&      desc,
 		                       std::shared_ptr<AutomationList> list = std::shared_ptr<AutomationList> ());
 
-		double   get_value (void) const;
-		XMLNode& get_state () const;
+		virtual double get_value (void) const;
+		XMLNode&       get_state () const;
 
 	protected:
 		virtual void    actually_set_value (double value, PBD::Controllable::GroupControlDisposition);
