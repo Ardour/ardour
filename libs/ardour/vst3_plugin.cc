@@ -751,6 +751,10 @@ VST3Plugin::set_state (const XMLNode& node, int version)
 				value /= (n_presets - 1.f);
 			}
 			DEBUG_TRACE (DEBUG::VST3Config, string_compose ("VST3Plugin::set_state: set_program (pgm: %1 plug: %2)\n", value, name ()));
+#if 0 /// XXX
+			int32 index;
+			_input_param_changes.addParameterData (id, index)->addPoint (0, value, index);
+#endif
 			_plug->controller ()->setParamNormalized (_plug->program_change_port ().id, value);
 		}
 	}
