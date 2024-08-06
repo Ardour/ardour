@@ -22,6 +22,7 @@
 #ifndef __ardour_track_h__
 #define __ardour_track_h__
 
+#include <boost/optional.hpp>
 #include <memory>
 
 #include "pbd/enum_convert.h"
@@ -193,10 +194,12 @@ public:
 protected:
 	XMLNode& state (bool save_template) const;
 
-	std::shared_ptr<Playlist>   _playlists[DataType::num_types];
+	void update_input_meter ();
 
-	MeterPoint    _saved_meter_point;
-	TrackMode     _mode;
+	std::shared_ptr<Playlist>   _playlists[DataType::num_types];
+	boost::optional<MeterPoint> _saved_meter_point;
+	bool                        _record_prepared;
+	TrackMode                   _mode;
 
 	//private: (FIXME)
 	struct FreezeRecordProcessorInfo {

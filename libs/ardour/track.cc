@@ -64,7 +64,7 @@ using namespace PBD;
 
 Track::Track (Session& sess, string name, PresentationInfo::Flag flag, TrackMode mode, DataType default_type)
 	: Route (sess, name, flag, default_type)
-	, _saved_meter_point (_meter_point)
+	, _record_prepared (false)
 	, _mode (mode)
 	, _alignment_choice (Automatic)
 	, _pending_name_change (false)
@@ -142,6 +142,8 @@ Track::init ()
 	}
 
 	_session.config.ParameterChanged.connect_same_thread (*this, boost::bind (&Track::parameter_changed, this, _1));
+	_session.RecordStateChanged.connect_same_thread (*this, boost::bind (&Track::update_input_meter, this));
+	_session.TransportStateChange.connect_same_thread (*this, boost::bind (&Track::update_input_meter, this));
 
 	_monitoring_control->Changed.connect_same_thread (*this, boost::bind (&Track::monitoring_changed, this, _1, _2));
 	_record_safe_control->Changed.connect_same_thread (*this, boost::bind (&Track::record_safe_changed, this, _1, _2));
@@ -202,7 +204,9 @@ Track::state (bool save_template) const
 	root.add_child_nocopy (_record_safe_control->get_state ());
 	root.add_child_nocopy (_record_enable_control->get_state ());
 
-	root.set_property (X_("saved-meter-point"), _saved_meter_point);
+	if (_saved_meter_point) {
+		root.set_property (X_("saved-meter-point"), _saved_meter_point.value ());
+	}
 	root.set_property (X_("alignment-choice"), _alignment_choice);
 
 	return root;
@@ -277,10 +281,10 @@ Track::set_state (const XMLNode& node, int version)
 		}
 	}
 
-	if (!node.get_property (X_("saved-meter-point"), _saved_meter_point)) {
-		_saved_meter_point = _meter_point;
+	MeterPoint mp;
+	if (node.get_property (X_("saved-meter-point"), mp)) {
+		_saved_meter_point = mp;
 	}
-
 
 	AlignChoice ac;
 
@@ -334,11 +338,6 @@ Track::prep_record_enabled (bool yn)
 		return -1;
 	}
 
-	/* keep track of the meter point as it was before we rec-enabled */
-	if (!_disk_writer->record_enabled()) {
-		_saved_meter_point = _meter_point;
-	}
-
 	bool will_follow;
 
 	if (yn) {
@@ -347,17 +346,65 @@ Track::prep_record_enabled (bool yn)
 		will_follow = _disk_writer->prep_record_disable ();
 	}
 
-	if (will_follow) {
-		if (yn) {
-			if (_meter_point != MeterCustom) {
-				set_meter_point (MeterInput);
-			}
-		} else {
-			set_meter_point (_saved_meter_point);
+	if (!will_follow) {
+		return -1;
+	}
+
+	_record_prepared = yn;
+	update_input_meter ();
+
+	return 0;
+}
+
+void
+Track::update_input_meter ()
+{
+	if (_session.loading ()) {
+		return;
+	}
+	/* meter input if _record_prepared,
+	 * except if Rolling, but not recording (master-rec-enable is off) and auto-input is enabled
+	 */
+	bool monitor_input = false;
+
+	if (_record_prepared) {
+		/* actually rolling (no count-in, pre-roll) */
+		bool const rolling     = 0 != _session.transport_speed();
+		bool const recording   = _session.actively_recording ();
+		bool const auto_input  = _session.config.get_auto_input ();
+
+		if (!(rolling && !recording && auto_input)) {
+			monitor_input = true;
 		}
 	}
 
-	return 0;
+	if (monitor_input) {
+		if (_saved_meter_point) {
+			/* already monitoring input */
+			return;
+		}
+		MeterPoint mp = meter_point ();
+		if (mp == MeterInput) {
+			/* user explicitly monitors input, do nothing */
+			return;
+		}
+
+		/* keep track of the meter point as it was before we rec-enabled */
+		_saved_meter_point = mp;
+
+		if (mp != MeterCustom) {
+			set_meter_point (MeterInput);
+		}
+
+	} else {
+		if (!_saved_meter_point) {
+			return;
+		}
+		if (_saved_meter_point != MeterCustom) {
+			set_meter_point (_saved_meter_point.value ());
+		}
+		_saved_meter_point.reset ();
+	}
 }
 
 void
@@ -397,6 +444,8 @@ Track::parameter_changed (string const & p)
 		if (_session.config.get_track_name_take()) {
 			resync_take_name ();
 		}
+	} else if (p == "auto-input") {
+		update_input_meter ();
 	}
 }
 
