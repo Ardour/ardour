@@ -4390,50 +4390,51 @@ MarkerDrag::start_grab (GdkEvent* event, Gdk::Cursor* cursor)
 	SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
 
 	switch (op) {
-		case SelectionToggle:
-			/* we toggle on the button release */
-			break;
-		case SelectionSet:
-			if (!_editor->selection->selected (_marker)) {
-				_editor->selection->set (_marker);
-				_selection_changed = true;
-			}
-			break;
-		case SelectionExtend: {
-			Locations::LocationList ll;
-			list<ArdourMarker*>     to_add;
-			timepos_t               s, e;
-			_editor->selection->markers.range (s, e);
-			s = min (_marker->position (), s);
-			e = max (_marker->position (), e);
-			s = min (s, e);
-			e = max (s, e);
-			if (e < timepos_t::max (e.time_domain ())) {
-				e = e.increment ();
-			}
-			_editor->session ()->locations ()->find_all_between (s, e, ll, Location::Flags (0));
-			for (Locations::LocationList::iterator i = ll.begin (); i != ll.end (); ++i) {
-				Editor::LocationMarkers* lm = _editor->find_location_markers (*i);
-				if (lm) {
-					if (lm->start) {
-						to_add.push_back (lm->start);
-					}
-					if (lm->end) {
-						to_add.push_back (lm->end);
-					}
+	case SelectionToggle:
+		/* we toggle on the button release */
+		break;
+	case SelectionSet:
+		if (!_editor->selection->selected (_marker)) {
+			_editor->selection->set (_marker);
+			_selection_changed = true;
+		}
+		break;
+	case SelectionExtend: {
+		Locations::LocationList ll;
+		list<ArdourMarker*>     to_add;
+		timepos_t               s, e;
+		_editor->selection->markers.range (s, e);
+		s = min (_marker->position (), s);
+		e = max (_marker->position (), e);
+		s = min (s, e);
+		e = max (s, e);
+		if (e < timepos_t::max (e.time_domain ())) {
+			e = e.increment ();
+		}
+		_editor->session ()->locations ()->find_all_between (s, e, ll, Location::Flags (0));
+		for (Locations::LocationList::iterator i = ll.begin (); i != ll.end (); ++i) {
+			Editor::LocationMarkers* lm = _editor->find_location_markers (*i);
+			if (lm) {
+				if (lm->start) {
+					to_add.push_back (lm->start);
+				}
+				if (lm->end) {
+					to_add.push_back (lm->end);
 				}
 			}
-			if (!to_add.empty ()) {
-				_editor->selection->add (to_add);
-				_selection_changed = true;
-			}
-			break;
 		}
-		case SelectionAdd:
-			_editor->selection->add (_marker);
+		if (!to_add.empty ()) {
+			_editor->selection->add (to_add);
 			_selection_changed = true;
-
-			break;
+		}
+		break;
+	}
+	case SelectionAdd:
+		_editor->selection->add (_marker);
+		_selection_changed = true;
+		break;
+	default:
+		break;
 	}
 
 	/* Set up copies for us to manipulate during the drag
@@ -4645,23 +4646,24 @@ MarkerDrag::finished (GdkEvent* event, bool movement_occurred)
 
 		SelectionOperation op = ArdourKeyboard::selection_type (event->button.state);
 		switch (op) {
-			case SelectionSet:
-				if (_editor->selection->selected (_marker) && _editor->selection->markers.size () > 1) {
-					_editor->selection->set (_marker);
-					_selection_changed = true;
-				}
-				break;
-
-			case SelectionToggle:
-				/* we toggle on the button release, click only */
-				_editor->selection->toggle (_marker);
+		case SelectionSet:
+			if (_editor->selection->selected (_marker) && _editor->selection->markers.size () > 1) {
+				_editor->selection->set (_marker);
 				_selection_changed = true;
+			}
+			break;
 
-				break;
+		case SelectionToggle:
+			/* we toggle on the button release, click only */
+			_editor->selection->toggle (_marker);
+			_selection_changed = true;
 
-			case SelectionExtend:
-			case SelectionAdd:
-				break;
+			break;
+
+		case SelectionExtend:
+		case SelectionAdd:
+		case SelectionRemove:
+			break;
 		}
 
 		if (_selection_changed) {

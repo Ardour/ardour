@@ -632,28 +632,31 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 				selectables.push_back (argl->nth (after));
 
 				switch (op) {
-					case SelectionSet:
-						if (press) {
-							selection->set (selectables);
-							_mouse_changed_selection = true;
-						}
-						break;
-					case SelectionAdd:
-						if (press) {
-							selection->add (selectables);
-							_mouse_changed_selection = true;
-						}
-						break;
-					case SelectionToggle:
-						if (press) {
-							selection->toggle (selectables);
-							_mouse_changed_selection = true;
-						}
-						break;
+				case SelectionSet:
+					if (press) {
+						selection->set (selectables);
+						_mouse_changed_selection = true;
+					}
+					break;
+				case SelectionAdd:
+					if (press) {
+						selection->add (selectables);
+						_mouse_changed_selection = true;
+					}
+					break;
+				case SelectionToggle:
+					if (press) {
+						selection->toggle (selectables);
+						_mouse_changed_selection = true;
+					}
+					break;
 
-					case SelectionExtend:
-						/* XXX */
-						break;
+				case SelectionExtend:
+					/* XXX */
+					break;
+				case SelectionRemove:
+					/* XXX */
+					break;
 				}
 			}
 			break;
@@ -678,28 +681,30 @@ Editor::button_selection (ArdourCanvas::Item* item, GdkEvent* event, ItemType it
 				selectables.push_back (al->nth (after));
 
 				switch (op) {
-					case SelectionSet:
-						if (press) {
-							selection->set (selectables);
-							_mouse_changed_selection = true;
-						}
-						break;
-					case SelectionAdd:
-						if (press) {
-							selection->add (selectables);
-							_mouse_changed_selection = true;
-						}
-						break;
-					case SelectionToggle:
-						if (press) {
-							selection->toggle (selectables);
-							_mouse_changed_selection = true;
-						}
-						break;
-
-					case SelectionExtend:
-						/* XXX */
-						break;
+				case SelectionSet:
+					if (press) {
+						selection->set (selectables);
+						_mouse_changed_selection = true;
+					}
+					break;
+				case SelectionAdd:
+					if (press) {
+						selection->add (selectables);
+						_mouse_changed_selection = true;
+					}
+					break;
+				case SelectionToggle:
+					if (press) {
+						selection->toggle (selectables);
+						_mouse_changed_selection = true;
+					}
+					break;
+				case SelectionExtend:
+					/* XXX */
+					break;
+				case SelectionRemove:
+					/* not relevant */
+					break;
 				}
 			}
 			break;
