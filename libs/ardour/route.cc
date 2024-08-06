@@ -6169,7 +6169,7 @@ Route::monitoring_state () const
 			break;
 	}
 
-	/* This is an implementation of the truth table in doc/monitor_modes.pdf;
+	/* This is an implementation of the truth table at https://manual.ardour.org/appendix/monitor-modes/
 	 * I don't think it's ever going to be too pretty too look at.
 	 */
 
