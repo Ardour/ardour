@@ -19,6 +19,7 @@
 #include <glibmm/main.h>
 
 #include "ardour/plug_insert_base.h"
+#include "ardour/region_fx_plugin.h"
 #include "ardour/session.h"
 #include "ardour/vst3_plugin.h"
 
@@ -129,7 +130,11 @@ void
 VST3PluginUI::parameter_update ()
 {
 	// XXX replicated plugins, too ?!
-	_vst3->update_contoller_param (); // XXX
+	if (std::dynamic_pointer_cast<RegionFxPlugin> (_pib) != NULL) {
+		_vst3->update_contoller_param (_pib);
+	} else {
+		_vst3->update_contoller_param (std::shared_ptr<ARDOUR::PlugInsertBase> ());
+	}
 }
 
 void

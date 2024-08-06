@@ -41,7 +41,9 @@
 #include "ardour/audio_buffer.h"
 #include "ardour/audioengine.h"
 #include "ardour/debug.h"
+#include "ardour/ardour/plug_insert_base.h"
 #include "ardour/rc_configuration.h"
+#include "ardour/readonly_control.h"
 #include "ardour/selection.h"
 #include "ardour/session.h"
 #include "ardour/stripable.h"
@@ -510,10 +512,10 @@ VST3Plugin::close_view ()
 }
 
 void
-VST3Plugin::update_contoller_param ()
+VST3Plugin::update_contoller_param (std::shared_ptr<ARDOUR::PlugInsertBase> pib)
 {
 	/* GUI Thread */
-	_plug->update_contoller_param ();
+	_plug->update_contoller_param (pib);
 }
 
 /* ****************************************************************************
@@ -2245,12 +2247,61 @@ VST3PI::update_shadow_data ()
 }
 
 void
-VST3PI::update_contoller_param ()
+VST3PI::update_contoller_param (std::shared_ptr<ARDOUR::PlugInsertBase> pib)
 {
 	/* GUI thread */
 	FUnknownPtr<Vst::IEditControllerHostEditing> host_editing (_controller);
 
 	std::map<uint32_t, Vst::ParamID>::const_iterator i;
+
+	if (pib) {
+		Glib::Threads::Mutex::Lock pl (_process_lock);
+		for (i = _ctrl_index_id.begin (); i != _ctrl_index_id.end (); ++i) {
+			_update_ctrl[i->first] = false;
+			float val;
+			if (parameter_is_readonly (i->first)) {
+				val = pib->control_output (i->first)->get_parameter ();
+			} else {
+				val = std::dynamic_pointer_cast<ARDOUR::AutomationControl> (pib->control(Evoral::Parameter(PluginAutomation, 0, i->first)))->get_value ();
+			}
+			if (host_editing && !parameter_is_automatable (i->first) && !parameter_is_readonly (i->first)) {
+				host_editing->beginEditFromHost (i->second);
+			}
+			int32 index;
+			_input_param_changes.addParameterData (i->second, index)->addPoint (0, val, index);
+			_controller->setParamNormalized (i->second, val);
+			if (host_editing && !parameter_is_automatable (i->first) && !parameter_is_readonly (i->first)) {
+				host_editing->endEditFromHost (i->second);
+			}
+		}
+
+		// process 0 samples
+		Vst::ProcessData data;
+		data.numSamples = 0;
+		data.processMode  = Vst::kOffline;
+		data.symbolicSampleSize = Vst::kSample32;
+		data.numInputs          = 0;
+		data.numOutputs         = 0;
+		data.inputs             = NULL;
+		data.outputs            = NULL;
+
+		data.processContext = &_context;
+		data.inputEvents    = &_input_events;
+		data.outputEvents   = &_output_events;
+
+		data.inputParameterChanges  = &_input_param_changes;
+		data.outputParameterChanges = &_output_param_changes;
+
+		if (_processor->process (data) != kResultOk) {
+			printf ("FAIL\n");
+		}
+
+		_input_param_changes.clear ();
+		_output_param_changes.clear ();
+
+		return;
+	}
+
 	for (i = _ctrl_index_id.begin (); i != _ctrl_index_id.end (); ++i) {
 		if (!_update_ctrl[i->first]) {
 			continue;

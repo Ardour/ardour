@@ -36,6 +36,7 @@ namespace ARDOUR
 {
 class VST3PluginModule;
 class AutomationList;
+class PlugInsertBase;
 }
 
 #if defined(__clang__)
@@ -99,7 +100,7 @@ public:
 	bool       has_editor () const;
 	IPlugView* view ();
 	void       close_view ();
-	void       update_contoller_param ();
+	void       update_contoller_param (std::shared_ptr<ARDOUR::PlugInsertBase>);
 	PBD::Signal2<void, int, int> OnResizeView;
 
 	tresult PLUGIN_API queryInterface (const TUID _iid, void** obj) SMTG_OVERRIDE;
@@ -434,7 +435,7 @@ public:
 	bool                  has_editor () const;
 	Steinberg::IPlugView* view ();
 	void                  close_view ();
-	void                  update_contoller_param ();
+	void                  update_contoller_param (std::shared_ptr<ARDOUR::PlugInsertBase>);
 
 	PBD::Signal2<void, int, int> OnResizeView;
 
