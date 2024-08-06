@@ -47,51 +47,54 @@ CoreSelection::do_select (std::shared_ptr<Stripable> s, std::shared_ptr<Automati
 	 * then hidden
 	 */
 
-	if (s->is_hidden()) {
-		return false;
-	}
-
-	/* monitor is never selectable */
-
-	if (s->is_monitor() || s->is_surround_master ()) {
-		return false;
-	}
-
-	if (!(r = std::dynamic_pointer_cast<Route> (s)) && routes_only) {
-		return false;
-	}
-
-	if (r) {
-
-		/* no selection of inactive routes, though they can be selected
-		 * and made inactive.
-		 */
-
-		if (!r->active()) {
+	if (s)  {
+		if (s->is_hidden()) {
 			return false;
 		}
 
-		if (!c && with_group) {
+		/* monitor is never selectable */
 
+		if (s->is_monitor() || s->is_surround_master ()) {
+			return false;
+		}
 
-			if (!not_allowed_in_group || !r->route_group() || r->route_group() != not_allowed_in_group) {
+		if (!(r = std::dynamic_pointer_cast<Route> (s)) && routes_only) {
+			return false;
+		}
 
-				if (r->route_group() && r->route_group()->is_select() && r->route_group()->is_active()) {
-					for (auto & ri : *(r->route_group()->route_list())) {
-						if (ri != r) {
-							sl.push_back (ri);
+		if (r) {
+
+			/* no selection of inactive routes, though they can be selected
+			 * and made inactive.
+			 */
+
+			if (!r->active()) {
+				return false;
+			}
+
+			if (!c && with_group) {
+
+				if (!not_allowed_in_group || !r->route_group() || r->route_group() != not_allowed_in_group) {
+
+					RouteGroup* group = r->route_group();
+
+					if (group && group->is_select() && group->is_active()) {
+						for (auto & ri : *(group->route_list())) {
+							if (ri != r) {
+								sl.push_back (ri);
+							}
 						}
 					}
 				}
 			}
 		}
+
+		/* it is important to make the "primary" stripable being selected the last in this
+		 * list
+		 */
+
+		sl.push_back (s);
 	}
-
-	/* it is important to make the "primary" stripable being selected the last in this
-	 * list
-	 */
-
-	sl.push_back (s);
 
 	switch (op) {
 	case SelectionAdd:
@@ -260,7 +263,7 @@ CoreSelection::select_prev_stripable (bool mixer_order, bool routes_only)
 bool
 CoreSelection::toggle (StripableList& sl, std::shared_ptr<AutomationControl> c)
 {
-	assert (sl.size() == 1 || !c);
+	assert (sl.size() <= 1 || !c);
 	bool changed = false;
 	StripableList sl2;
 
@@ -288,7 +291,7 @@ CoreSelection::toggle (StripableList& sl, std::shared_ptr<AutomationControl> c)
 bool
 CoreSelection::set (StripableList& sl, std::shared_ptr<AutomationControl> c, std::vector<std::shared_ptr<Stripable> > & removed)
 {
-	assert (sl.size() == 1 || !c);
+	assert (sl.size() <= 1 || !c);
 
 	bool changed = false;
 
@@ -331,7 +334,7 @@ CoreSelection::set (StripableList& sl, std::shared_ptr<AutomationControl> c, std
 bool
 CoreSelection::add (StripableList& sl, std::shared_ptr<AutomationControl> c)
 {
-	assert (sl.size() == 1 || !c);
+	assert (sl.size() <= 1 || !c);
 
 	bool changed = false;
 
@@ -362,7 +365,7 @@ CoreSelection::add (StripableList& sl, std::shared_ptr<AutomationControl> c)
 bool
 CoreSelection::remove (StripableList & sl, std::shared_ptr<AutomationControl> c)
 {
-	assert (sl.size() == 1 || !c);
+	assert (sl.size() <= 1 || !c);
 	bool changed = false;
 
 	{
