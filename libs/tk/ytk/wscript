@@ -286,9 +286,9 @@ def build(bld):
                             'GTK_VERSION="2.24.23"', 'GTK_BINARY_VERSION="2.10.0"', 'GTK_HOST="ardour"',
                             'PACKAGE="' + I18N_PACKAGE + '"',
                             'GETTEXT_PACKAGE="' + I18N_PACKAGE + '"',
-                            'GTK_DATA_PREFIX="' + bld.env['PREFIX'] + '"', 
-                            'GTK_SYSCONFDIR="' + bld.env['SYSCONFDIR'] + '"', 
-                            'GTK_DATA_DIR="' + bld.env['DATADIR'] + '"', 
+                            'GTK_DATA_PREFIX="' + bld.env['PREFIX'] + '"',
+                            'GTK_SYSCONFDIR="' + bld.env['SYSCONFDIR'] + '"',
+                            'GTK_DATA_DIR="' + bld.env['DATADIR'] + '"',
                             'GTK_LIBDIR="' + bld.env['LIBDIR'] + '"',
                           ]
     obj.vnum            = LIBYDK_VERSION
