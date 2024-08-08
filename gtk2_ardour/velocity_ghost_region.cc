@@ -185,7 +185,13 @@ VelocityGhostRegion::set_size_and_position (GhostEvent& gev)
 	const double available_height = base_rect->y1();
 	const double actual_height = ((dragging ? gev.velocity_while_editing : gev.event->note()->velocity()) / 127.0) * available_height;
 	const double scale  = UIConfiguration::instance ().get_ui_scale ();
-	l->set (ArdourCanvas::Duple (gev.event->x0(), base_rect->y1() - actual_height), actual_height, lollipop_radius * scale);
+
+	if (gev.is_hit) {
+		/* compare to Hit::points , offset by w/2 */
+		l->set (ArdourCanvas::Duple (gev.event->x0() + (gev.event->x1() - gev.event->x0()) / 2, base_rect->y1() - actual_height), actual_height, lollipop_radius * scale);
+	} else {
+		l->set (ArdourCanvas::Duple (gev.event->x0(), base_rect->y1() - actual_height), actual_height, lollipop_radius * scale);
+	}
 }
 
 void
