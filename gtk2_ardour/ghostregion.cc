@@ -216,6 +216,9 @@ MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g
 	, is_hit (false)
 {
 	velocity_while_editing = event->note()->velocity();
+	if (dynamic_cast<Hit*>(e)) {
+		is_hit = true;
+	}
 }
 
 MidiGhostRegion::GhostEvent::GhostEvent (NoteBase* e, ArdourCanvas::Container* g)
