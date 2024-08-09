@@ -6174,6 +6174,7 @@ Editor::maybe_move_tracks ()
 					/* in top half of this track, move spacer */
 					track_drag->bump_track = tv;
 					move_selected_tracks (true);
+					track_drag->did_reorder = true;
 				}
 
 			} else if (track_drag->direction > 0) {
@@ -6183,6 +6184,7 @@ Editor::maybe_move_tracks ()
 				if (track_drag->current > (tv->y_position() + (tv->effective_height() / 2))) {
 					track_drag->bump_track = tv;
 					move_selected_tracks (false);
+					track_drag->did_reorder = true;
 				}
 			}
 

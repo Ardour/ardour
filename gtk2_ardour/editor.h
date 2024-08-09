@@ -2628,6 +2628,7 @@ private:
 		bool               have_predrag_cursor;
 		int                direction;
 		bool               first_move;
+		bool               did_reorder;
 
 		TrackDrag (RouteTimeAxisView* rtav, ARDOUR::Session& s)
 			: track (rtav)
@@ -2640,6 +2641,7 @@ private:
 			, have_predrag_cursor (false)
 			, direction (0)
 			, first_move (true)
+			, did_reorder (false)
 		{}
 
 	};
