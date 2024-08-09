@@ -1375,7 +1375,7 @@ DiskReader::playlist_ranges_moved (list<Temporal::RangeMove> const& movements, b
 		return;
 	}
 
-	/* move panner automation */
+	/* move panner automation (route owned control) */
 	std::shared_ptr<Pannable>     pannable = _track.pannable ();
 	Evoral::ControlSet::Controls& c (pannable->controls ());
 
@@ -1395,6 +1395,18 @@ DiskReader::playlist_ranges_moved (list<Temporal::RangeMove> const& movements, b
 			    *alist.get (), &before, &alist->get_state ()));
 		}
 	}
+
+	/* move mute automation (route owned control) */
+	std::shared_ptr<AutomationList> alist = _track.mute_control ()->alist ();
+	if (alist->size ()) {
+		XMLNode&   before       = alist->get_state ();
+		bool const things_moved = alist->move_ranges (movements);
+		if (things_moved) {
+			_session.add_command (new MementoCommand<AutomationList> (
+						*alist.get (), &before, &alist->get_state ()));
+		}
+	}
+
 	/* move processor automation */
 	_track.foreach_processor (boost::bind (&DiskReader::move_processor_automation, this, _1, movements));
 }
