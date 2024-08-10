@@ -115,6 +115,7 @@ private:
 	Gtk::CheckButton use_osc10;
 	Gtk::CheckButton trigger_status;
 	Gtk::CheckButton scene_status;
+	Gtk::CheckButton all_plugins;
 	int fbvalue;
 	void set_bitsets ();
 

@@ -407,6 +407,12 @@ OSC_GUI::OSC_GUI (OSC& p)
 	fbtable->attach (scene_status, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
 	++fn;
 
+	label = manage (new Gtk::Label(_("Report values for all plugins:")));
+	label->set_alignment(1, .5);
+	fbtable->attach (*label, 0, 1, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0));
+	fbtable->attach (all_plugins, 1, 2, fn, fn+1, AttachOptions(FILL|EXPAND), AttachOptions(0), 0, 0);
+	++fn;
+
 	fbtable->show_all ();
 	append_page (*fbtable, _("Default Feedback"));
 	// set strips and feedback from loaded default values
@@ -440,6 +446,7 @@ OSC_GUI::OSC_GUI (OSC& p)
 	use_osc10.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	trigger_status.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	scene_status.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
+	all_plugins.signal_clicked().connect (sigc::mem_fun (*this, &OSC_GUI::set_bitsets));
 	preset_busy = false;
 
 }
@@ -696,6 +703,7 @@ OSC_GUI::reshow_values ()
 	use_osc10.set_active(def_feedback & 16384);
 	trigger_status.set_active(def_feedback & 32768);
 	scene_status.set_active(def_feedback & 65536);
+	all_plugins.set_active(def_feedback & 131072);
 
 	calculate_strip_types ();
 	calculate_feedback ();
@@ -755,6 +763,9 @@ OSC_GUI::calculate_feedback ()
 	}
 	if (scene_status.get_active()) {
 		fbvalue += 65536;
+	}
+	if (all_plugins.get_active()) {
+		fbvalue += 131072;
 	}
 
 	current_feedback.set_text(string_compose("%1", fbvalue));
