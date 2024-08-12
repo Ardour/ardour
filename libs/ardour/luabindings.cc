@@ -3439,6 +3439,9 @@ LuaBindings::session (lua_State* L)
 		.addFunction ("unknown_processors", &Session::unknown_processors)
 		.addFunction ("export_track_state", &Session::export_track_state)
 		.addFunction ("selection", &Session::selection)
+		.addFunction ("have_external_connections_for_current_backend", &Session::have_external_connections_for_current_backend)
+		.addFunction ("unnamed", &Session::unnamed)
+		.addFunction ("writable", &Session::writable)
 
 		.addFunction<RouteList (Session::*)(uint32_t, PresentationInfo::order_t, const std::string&, const std::string&, PlaylistDisposition)> ("new_route_from_template", &Session::new_route_from_template)
 		// TODO  session_add_audio_track  session_add_midi_track  session_add_mixed_track
