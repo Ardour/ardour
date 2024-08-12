@@ -261,6 +261,7 @@ public:
 	bool cannot_save () const                      { return _state_of_the_state & CannotSave; }
 	bool in_cleanup () const                       { return _state_of_the_state & InCleanup; }
 	bool inital_connect_or_deletion_in_progress () const { return _state_of_the_state & (InitialConnecting | Deletion); }
+	bool have_external_connections_for_current_backend (bool tracks_only = true) const;
 	bool unnamed() const;
 
 	void end_unnamed_status () const;

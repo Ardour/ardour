@@ -8158,3 +8158,27 @@ Session::foreach_route (void (Route::*method)())
 	}
 }
 
+bool
+Session::have_external_connections_for_current_backend (bool tracks_only) const
+{
+	std::shared_ptr<RouteList const> rl = routes.reader();
+	for (auto const& r : *rl) {
+		if (tracks_only && !std::dynamic_pointer_cast<Track> (r)) {
+			continue;
+		}
+		if (r->is_singleton ()) {
+			continue;
+		}
+		for (auto const& p : *r->input()->ports()) {
+			if (p->has_ext_connection ()) {
+				return true;
+			}
+		}
+		for (auto const& p : *r->output()->ports()) {
+			if (p->has_ext_connection ()) {
+				return true;
+			}
+		}
+	}
+	return false;
+}
