@@ -5002,6 +5002,13 @@ Editor::remove_regions (const RegionSelection& sel, bool can_ripple, bool as_par
 
 	vector<std::shared_ptr<Playlist> > playlists;
 
+	if (!as_part_of_other_command) {
+		/* we need to start the undo coammd here, since
+		 * other playlists maybe modified as result of a ripple
+		 */
+		begin_reversible_command (_("remove regions"));
+	}
+
 	for (list<std::shared_ptr<Region> >::iterator rl = regions_to_remove.begin(); rl != regions_to_remove.end(); ++rl) {
 
 		std::shared_ptr<Playlist> playlist = (*rl)->playlist();
@@ -5011,16 +5018,14 @@ Editor::remove_regions (const RegionSelection& sel, bool can_ripple, bool as_par
 			continue;
 		}
 
-		/* get_regions_from_selection_and_entered() guarantees that
-		   the playlists involved are unique, so there is no need
-		   to check here.
-		*/
+		if (std::find (playlists.begin(), playlists.end(), playlist) == playlists.end()) {
+			playlists.push_back (playlist);
 
-		playlists.push_back (playlist);
+			playlist->clear_changes ();
+			playlist->clear_owned_changes ();
+			playlist->freeze ();
+		}
 
-		playlist->clear_changes ();
-		playlist->clear_owned_changes ();
-		playlist->freeze ();
 		playlist->remove_region (*rl);
 
 		if (can_ripple && should_ripple()) {
@@ -5029,27 +5034,24 @@ Editor::remove_regions (const RegionSelection& sel, bool can_ripple, bool as_par
 	}
 
 	vector<std::shared_ptr<Playlist> >::iterator pl;
-	bool in_command = false;
+
+	bool commit_result = false;
 
 	for (pl = playlists.begin(); pl != playlists.end(); ++pl) {
+		commit_result = true;
 		(*pl)->thaw ();
 
 		/* We might have removed regions, which alters other regions' layering_index,
 		   so we need to do a recursive diff here.
 		*/
 
-		if (!in_command && !as_part_of_other_command) {
-			begin_reversible_command (_("remove region"));
-			in_command = true;
-		}
 		vector<Command*> cmds;
 		(*pl)->rdiff (cmds);
 		_session->add_commands (cmds);
-
 		_session->add_command(new StatefulDiffCommand (*pl));
 	}
 
-	if (in_command && !as_part_of_other_command) {
+	if (commit_result && !as_part_of_other_command) {
 		commit_reversible_command ();
 	}
 }
