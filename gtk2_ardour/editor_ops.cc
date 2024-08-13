@@ -4931,11 +4931,10 @@ Editor::remove_clicked_region ()
 	playlist->remove_region (region);
 
 	if (should_ripple()) {
-		do_ripple (playlist, region->position(), - region->length(), std::shared_ptr<Region>(), true);
-	} else {
-		playlist->rdiff_and_add_command (_session);
+		do_ripple (playlist, region->position(), - region->length(), std::shared_ptr<Region>(), false);
 	}
 
+	playlist->rdiff_and_add_command (_session);
 	commit_reversible_command ();
 }
 
