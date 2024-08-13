@@ -598,7 +598,8 @@ RegionEditor::RegionFxBox::add_fx_to_display (std::weak_ptr<RegionFxPlugin> wfx)
 	if (!fx) {
 		return;
 	}
-	RegionFxEntry* e = new RegionFxEntry (fx);
+	std::shared_ptr<AudioRegion> ar = std::dynamic_pointer_cast<AudioRegion> (_region);
+	RegionFxEntry* e = new RegionFxEntry (fx, ar && ar->fade_before_fx ());
 	_display.add_child (e, drag_targets ());
 }
 
@@ -936,7 +937,7 @@ RegionEditor::RegionFxBox::show_plugin_gui (std::weak_ptr<RegionFxPlugin> wfx, b
 
 /* ****************************************************************************/
 
-RegionEditor::RegionFxEntry::RegionFxEntry (std::shared_ptr<RegionFxPlugin> rfx)
+RegionEditor::RegionFxEntry::RegionFxEntry (std::shared_ptr<RegionFxPlugin> rfx, bool pre)
 	: _fx_btn (ArdourWidgets::ArdourButton::default_elements)
 	, _rfx (rfx)
 {
@@ -947,7 +948,11 @@ RegionEditor::RegionFxEntry::RegionFxEntry (std::shared_ptr<RegionFxPlugin> rfx)
 	_fx_btn.set_fallthrough_to_parent (true);
 	_fx_btn.set_text (name ());
 	_fx_btn.set_active (true);
-	_fx_btn.set_name ("processor postfader");
+	if (pre) {
+		_fx_btn.set_name ("processor prefader");
+	} else {
+		_fx_btn.set_name ("processor postfader");
+	}
 
 	if (rfx->plugin ()->has_editor ()) {
 		set_tooltip (_fx_btn, string_compose (_("<b>%1</b>\nDouble-click to show GUI.\n%2+double-click to show generic GUI."), name (), Keyboard::secondary_modifier_name ()));

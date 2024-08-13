@@ -75,7 +75,7 @@ private:
 	class RegionFxEntry : public Gtkmm2ext::DnDVBoxChild, public sigc::trackable
 	{
 	public:
-		RegionFxEntry (std::shared_ptr<ARDOUR::RegionFxPlugin>);
+		RegionFxEntry (std::shared_ptr<ARDOUR::RegionFxPlugin>, bool pre);
 
 		Gtk::EventBox& action_widget () { return _fx_btn; }
 		Gtk::Widget& widget () { return _box; }
