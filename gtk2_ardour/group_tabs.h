@@ -178,6 +178,8 @@ private:
 
 	bool  _hovering;
 
+	mutable PBD::ScopedConnection _new_route_group_connection;
+
 	/** colors that have been used for new route group tabs */
 	static std::list<Gdk::Color> _used_colors;
 };

@@ -698,7 +698,13 @@ GroupTabs::run_new_group_dialog (RouteList const * rl, bool with_master)
 	}
 
 	RouteGroup* g = new RouteGroup (*_session, "");
-	RouteGroupDialog* d = new RouteGroupDialog (g, true);
+	RouteGroupDialog* d = new RouteGroupDialog (g, true); // XXX
+
+	if (rl) {
+		for (auto const& r : *rl) {
+			r->DropReferences.connect (_new_route_group_connection, invalidator (*d), boost::bind (&Dialog::response, d, RESPONSE_CANCEL), gui_context());
+		}
+	}
 
 	d->signal_response().connect (sigc::bind (sigc::mem_fun (*this, &GroupTabs::new_group_dialog_finished), d, rl ? new RouteList (*rl): 0, with_master));
 	d->present ();
@@ -707,6 +713,7 @@ GroupTabs::run_new_group_dialog (RouteList const * rl, bool with_master)
 void
 GroupTabs::new_group_dialog_finished (int r, RouteGroupDialog* d, RouteList const * rl, bool with_master) const
 {
+	_new_route_group_connection.disconnect ();
 	if (r == RESPONSE_OK) {
 
 		if (!d->name_check()) {
