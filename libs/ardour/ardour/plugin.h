@@ -175,6 +175,9 @@ public:
 	/** the max possible latency a plugin will have */
 	virtual samplecnt_t max_latency () const { return 0; }
 
+	samplecnt_t effective_tail() const;
+	PBD::Signal0<void> TailChanged;
+
 	virtual int  set_block_size (pframes_t nframes) = 0;
 	virtual bool requires_fixed_sized_buffers () const { return false; }
 	virtual bool inplace_broken () const { return false; }
@@ -423,6 +426,11 @@ protected:
 
 private:
 	virtual samplecnt_t plugin_latency () const = 0;
+	/** tail duration in samples. e.g. for reverb or delay plugins.
+	 *
+	 * The default when unknown is 2 sec */
+	virtual samplecnt_t plugin_tail () const;
+
 
 	/** Fill _presets with our presets */
 	virtual void find_presets () = 0;

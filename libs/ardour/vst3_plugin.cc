@@ -820,6 +820,12 @@ VST3Plugin::set_block_size (pframes_t n_samples)
 }
 
 samplecnt_t
+VST3Plugin::plugin_tail () const
+{
+	return _plug->plugin_tail ();
+}
+
+samplecnt_t
 VST3Plugin::plugin_latency () const
 {
 	return _plug->plugin_latency ();
@@ -1949,6 +1955,15 @@ VST3PI::plugin_latency ()
 		_plugin_latency = _processor->getLatencySamples ();
 	}
 	return _plugin_latency.value ();
+}
+
+uint32_t
+VST3PI::plugin_tail ()
+{
+	if (!_plugin_tail) { // XXX this is currently never reset
+		_plugin_tail = _processor->getTailSamples ();
+	}
+	return _plugin_tail.value ();
 }
 
 void

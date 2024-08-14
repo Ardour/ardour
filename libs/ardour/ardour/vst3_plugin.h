@@ -180,6 +180,7 @@ public:
 
 	/* API for Ardour -- Setup/Processing */
 	uint32_t plugin_latency ();
+	uint32_t plugin_tail ();
 	bool     set_block_size (int32_t);
 	bool     activate ();
 	bool     deactivate ();
@@ -326,6 +327,7 @@ private:
 	bool                        _add_to_selection;
 
 	boost::optional<uint32_t> _plugin_latency;
+	boost::optional<uint32_t> _plugin_tail;
 
 	int _n_bus_in;
 	int _n_bus_out;
@@ -440,6 +442,7 @@ public:
 
 private:
 	samplecnt_t plugin_latency () const;
+	samplecnt_t plugin_tail () const;
 	void        init ();
 	void        find_presets ();
 	void        forward_resize_view (int w, int h);
