@@ -171,6 +171,8 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	bool remove_plugin (std::shared_ptr<RegionFxPlugin>);
 	void reorder_plugins (RegionFxList const&);
 
+	timecnt_t tail () const;
+
 	/* automation */
 
 	std::shared_ptr<Evoral::Control>
@@ -264,6 +266,7 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 
 	void apply_region_fx (BufferSet&, samplepos_t, samplepos_t, samplecnt_t);
 	void fx_latency_changed (bool no_emit);
+	void fx_tail_changed (bool no_emit);
 	void copy_plugin_state (std::shared_ptr<const AudioRegion>);
 
 	mutable samplepos_t _fx_pos;
@@ -274,6 +277,7 @@ class LIBARDOUR_API AudioRegion : public Region, public AudioReadable
 	mutable BufferSet            _readcache;
 	mutable samplepos_t          _cache_start;
 	mutable samplepos_t          _cache_end;
+	mutable samplecnt_t          _cache_tail;
 	mutable std::atomic<bool>    _invalidated;
 
   protected:

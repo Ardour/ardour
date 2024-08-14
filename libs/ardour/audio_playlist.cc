@@ -176,7 +176,7 @@ ARDOUR::timecnt_t
 AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, timepos_t const & start, timecnt_t const & cnt, uint32_t chan_n)
 {
 	DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Playlist %1 read @ %2 for %3, channel %4, regions %5 mixdown @ %6 gain @ %7\n",
-							   name(), start, cnt, chan_n, regions.size(), mixdown_buffer, gain_buffer));
+							   name(), start.samples(), cnt.samples(), chan_n, regions.size(), mixdown_buffer, gain_buffer));
 
 	samplecnt_t const scnt (cnt.samples ());
 
@@ -204,7 +204,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ti
 	/* Find all the regions that are involved in the bit we are reading,
 	   and sort them by descending layer and ascending position.
 	*/
-	std::shared_ptr<RegionList> all = regions_touched_locked (start, start + cnt);
+	std::shared_ptr<RegionList> all = regions_touched_locked (start, start + cnt, true);
 	all->sort (ReadSorter ());
 
 	/* This will be a list of the bits of our read range that we have
@@ -236,7 +236,7 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ti
 		*/
 		Temporal::Range rrange = ar->range_samples ();
 		Temporal::Range region_range (max (rrange.start(), start),
-		                              min (rrange.end(), start + cnt));
+		                              min (rrange.end() + ar->tail (), start + cnt));
 
 		/* ... and then remove the bits that are already done */
 
@@ -256,9 +256,9 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ti
 				/* Cut this range down to just the body and mark it done */
 				Temporal::Range body = ar->body_range ();
 
-				if (body.start() < d.end() && body.end() > d.start()) {
+				if (body.start() < d.end().earlier (ar->tail ()) && body.end() > d.start()) {
 					d.set_start (max (d.start(), body.start()));
-					d.set_end (min (d.end(), body.end()));
+					d.set_end (min (d.end().earlier (ar->tail ()), body.end()));
 					done.add (d);
 				}
 			}
@@ -285,8 +285,13 @@ AudioPlaylist::read (Sample *buf, Sample *mixdown_buffer, float *gain_buffer, ti
 		assert (soffset + read_cnt <= scnt);
 		samplecnt_t nread = i->region->read_at (buf + soffset, mixdown_buffer, gain_buffer, read_pos, read_cnt, chan_n);
 		if (nread != read_cnt) {
-			std::cerr << name() << " tried to read " << read_cnt << " from " << nread << " in " << i->region->name() << " using range "
-			          << i->range.start() << " .. " << i->range.end() << " len " << i->range.length() << std::endl;
+			std::cerr << name() << " tried to read " << read_cnt
+				<< " got " << nread
+				<< " in " << i->region->name()
+				<< " for chn " << chan_n
+				<< " to offset " << soffset
+				<< " using range " << i->range.start().samples() << " .. " << i->range.end().samples()
+				<< " len " << i->range.length().samples() << std::endl;
 #ifndef NDEBUG
 			/* forward error to DiskReader::audio_read. This does 2 things:
 			 *  - error "DiskReader %1: when refilling, cannot read ..."

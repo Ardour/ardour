@@ -402,7 +402,7 @@ protected:
 
 	void _set_sort_id ();
 
-	std::shared_ptr<RegionList> regions_touched_locked (timepos_t const & start, timepos_t const & end);
+	std::shared_ptr<RegionList> regions_touched_locked (timepos_t const & start, timepos_t const & end, bool with_tail);
 
 	void notify_region_removed (std::shared_ptr<Region>);
 	void notify_region_added (std::shared_ptr<Region>);

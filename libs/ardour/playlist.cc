@@ -1989,16 +1989,16 @@ std::shared_ptr<RegionList>
 Playlist::regions_touched (timepos_t const & start, timepos_t const & end)
 {
 	RegionReadLock rlock (this);
-	return regions_touched_locked (start, end);
+	return regions_touched_locked (start, end, false);
 }
 
 std::shared_ptr<RegionList>
-Playlist::regions_touched_locked (timepos_t const & start, timepos_t const & end)
+Playlist::regions_touched_locked (timepos_t const & start, timepos_t const & end, bool with_tail)
 {
 	std::shared_ptr<RegionList> rlist (new RegionList);
 
 	for (auto & r : regions) {
-		if (r->coverage (start, end) != Temporal::OverlapNone) {
+		if (r->coverage (start, end, with_tail) != Temporal::OverlapNone) {
 			rlist->push_back (r);
 		}
 	}

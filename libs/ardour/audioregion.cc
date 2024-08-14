@@ -254,6 +254,7 @@ AudioRegion::init ()
 	connect_to_header_position_offset_changed ();
 
 	_fx_pos = _cache_start = _cache_end = -1;
+	_cache_tail = 0;
 	_fx_block_size = 0;
 	_fx_latent_read = false;
 }
@@ -347,6 +348,7 @@ AudioRegion::AudioRegion (std::shared_ptr<const AudioRegion> other)
 	connect_to_header_position_offset_changed ();
 
 	_fx_pos = _cache_start = _cache_end = -1;
+	_cache_tail = 0;
 	_fx_block_size = 0;
 	_fx_latent_read = false;
 
@@ -375,6 +377,7 @@ AudioRegion::AudioRegion (std::shared_ptr<const AudioRegion> other, timecnt_t co
 	connect_to_header_position_offset_changed ();
 
 	_fx_pos = _cache_start = _cache_end = -1;
+	_cache_tail = 0;
 	_fx_block_size = 0;
 	_fx_latent_read = false;
 
@@ -401,6 +404,7 @@ AudioRegion::AudioRegion (std::shared_ptr<const AudioRegion> other, const Source
 	connect_to_header_position_offset_changed ();
 
 	_fx_pos = _cache_start = _cache_end = -1;
+	_cache_tail = 0;
 	_fx_block_size = 0;
 	_fx_latent_read = false;
 
@@ -521,6 +525,16 @@ AudioRegion::set_fade_before_fx (bool yn)
 	}
 }
 
+timecnt_t
+AudioRegion::tail () const
+{
+	if (_fade_before_fx && has_region_fx ()) {
+		return timecnt_t (_session.sample_rate ()); // TODO use plugin API
+	} else {
+		return timecnt_t (0);
+	}
+}
+
 /** @param buf Buffer to put peak data in.
  *  @param npeaks Number of peaks to read (ie the number of PeakDatas in buf)
  *  @param offset Start position, as an offset from the start of this region's source.
@@ -614,24 +628,33 @@ AudioRegion::read_at (Sample*     buf,
 
 	/* WORK OUT WHERE TO GET DATA FROM */
 
-	samplecnt_t to_read;
 	const samplepos_t psamples = position().samples();
 	const samplecnt_t lsamples = _length.val().samples();
+	const samplecnt_t tsamples = tail ().samples ();
 
 	assert (pos >= psamples);
-	sampleoffset_t const internal_offset = pos - psamples;
+	sampleoffset_t internal_offset = pos - psamples;
+	sampleoffset_t suffix = 0;
 
-	if (internal_offset >= lsamples) {
+	if (internal_offset >= lsamples + tsamples) {
 		return 0; /* read nothing */
+	}
+
+	if (internal_offset > lsamples) {
+		suffix          = internal_offset - lsamples;
+		internal_offset = lsamples;
 	}
 
 	const samplecnt_t esamples = lsamples - internal_offset;
 	assert (esamples >= 0);
 
-	if ((to_read = min (cnt, esamples)) == 0) {
+	if (min (cnt, esamples + tsamples) <= 0) {
 		return 0; /* read nothing */
 	}
 
+	/* does not include tail */
+	samplecnt_t const to_read = max<samplecnt_t> (0, min (cnt, esamples));
+	samplecnt_t const can_read = max<samplecnt_t> (0, min (cnt, esamples + tsamples));
 
 	/* COMPUTE DETAILS OF ANY FADES INVOLVED IN THIS READ
 	 *
@@ -699,16 +722,17 @@ AudioRegion::read_at (Sample*     buf,
 	Glib::Threads::Mutex::Lock cl (_cache_lock);
 	if (chan_n == 0 && _invalidated.exchange (false)) {
 		_cache_start = _cache_end = -1;
+		_cache_tail  = 0;
 	}
 
 	boost::scoped_array<gain_t> gain_array;
 	boost::scoped_array<Sample> mixdown_array;
 
 	// TODO optimize mono reader, w/o plugins -> old code
-	if (n_chn > 1 && _cache_start < _cache_end && internal_offset >= _cache_start && internal_offset + to_read <= _cache_end) {
-		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Region '%1' channel: %2 copy from cache %3 - %4 to_read: %5\n",
-		             name(), chan_n, internal_offset, internal_offset + to_read, to_read));
-		copy_vector (mixdown_buffer, _readcache.get_audio (chan_n).data (internal_offset - _cache_start), to_read);
+	if (n_chn > 1 && _cache_start < _cache_end && internal_offset + suffix >= _cache_start && internal_offset + suffix + can_read <= _cache_end) {
+		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Region '%1' channel: %2 copy from cache %3 - %4 to_read: %5 can_read: %6\n",
+		             name(), chan_n, internal_offset + suffix, internal_offset + suffix + can_read, to_read, can_read));
+		copy_vector (mixdown_buffer, _readcache.get_audio (chan_n).data (internal_offset + suffix - _cache_start), can_read);
 		cl.release ();
 	} else {
 		Glib::Threads::RWLock::ReaderLock lm (_fx_lock);
@@ -716,24 +740,21 @@ AudioRegion::read_at (Sample*     buf,
 		uint32_t fx_latency = _fx_latency;
 		lm.release ();
 
-		ChanCount cc (DataType::AUDIO, n_channels ());
-		_readcache.ensure_buffers (cc, to_read + _fx_latency);
-
 		samplecnt_t    n_read = to_read; //< data to read from disk
 		samplecnt_t    n_proc = to_read; //< silence pad data to process
+		samplepos_t    n_tail = 0; // further silence pad, read tail from FX
 		samplepos_t    readat = pos;
 		sampleoffset_t offset = internal_offset;
 
-		//printf ("READ Cache end %ld pos %ld\n", _cache_end, readat);
-		if (_cache_end != readat && fx_latency > 0) {
+		if (tsamples > 0 && cnt >= esamples) {
+			n_tail = can_read - n_read;
+			n_proc += n_tail;
+		}
+
+		if (_cache_end != internal_offset + suffix && fx_latency > 0) {
 			_fx_latent_read = true;
 			n_proc += fx_latency;
 			n_read = min (to_read + fx_latency, esamples);
-
-			mixdown_array.reset (new Sample[n_proc]);
-			mixdown_buffer = mixdown_array.get ();
-			gain_array.reset (new gain_t[n_proc]);
-			gain_buffer = gain_array.get ();
 		}
 
 		if (!_fx_latent_read && fx_latency > 0) {
@@ -742,13 +763,20 @@ AudioRegion::read_at (Sample*     buf,
 			n_read = max<samplecnt_t> (0, min (to_read, lsamples - offset));
 		}
 
-		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Region '%1' channel: %2 read: %3 - %4 (%5) to_read: %6 offset: %7 with fx: %8 fx_latency: %9\n",
-		             name(), chan_n, readat, readat + n_read, n_read, to_read, internal_offset, have_fx, fx_latency));
+		if (n_proc > to_read) {
+			mixdown_array.reset (new Sample[n_proc]);
+			mixdown_buffer = mixdown_array.get ();
+			gain_array.reset (new gain_t[n_proc]);
+			gain_buffer = gain_array.get ();
+		}
 
+		DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Region '%1' channel: %2 read: %3 - %4 (%5) to_read: %6 offset: %7 with fx: %8 fx_latency: %9 fx_tail %10\n",
+		             name(), chan_n, readat, readat + n_read, n_read, to_read, internal_offset, have_fx, fx_latency, n_tail));
+
+		ChanCount cc (DataType::AUDIO, n_channels ());
 		_readcache.ensure_buffers (cc, n_proc);
 
 		if (n_read < n_proc) {
-			//printf ("SILENCE PAD rd: %ld proc: %ld\n", n_read, n_proc);
 			/* silence pad, process tail of latent effects */
 			memset (&mixdown_buffer[n_read], 0, sizeof (Sample)* (n_proc - n_read));
 			_readcache.silence (n_proc - n_read, n_read);
@@ -756,6 +784,7 @@ AudioRegion::read_at (Sample*     buf,
 
 		/* reset in case read fails we return early */
 		_cache_start = _cache_end = -1;
+		_cache_tail  = 0;
 
 		for (uint32_t chn = 0; chn < n_chn; ++chn) {
 			/* READ DATA FROM THE SOURCE INTO mixdown_buffer.
@@ -838,26 +867,27 @@ AudioRegion::read_at (Sample*     buf,
 
 		/* apply region FX to all channels */
 		if (have_fx) {
-			const_cast<AudioRegion*>(this)->apply_region_fx (_readcache, offset, offset + n_proc, n_proc);
+			const_cast<AudioRegion*>(this)->apply_region_fx (_readcache, offset + suffix, offset + suffix + n_proc, n_proc);
 		}
 
 		/* for mono regions without plugins, mixdown_buffer is valid as-is */
 		if (n_chn > 1 || have_fx) {
 			/* copy data for current channel */
 			if (chan_n < n_channels()) {
-				copy_vector (mixdown_buffer, _readcache.get_audio (chan_n).data (), to_read);
+				copy_vector (mixdown_buffer, _readcache.get_audio (chan_n).data (), to_read + n_tail);
 			} else {
 				if (Config->get_replicate_missing_region_channels()) {
 					chan_n = chan_n % n_channels ();
-					copy_vector (mixdown_buffer, _readcache.get_audio (chan_n).data (), to_read);
+					copy_vector (mixdown_buffer, _readcache.get_audio (chan_n).data (), to_read + n_tail);
 				} else {
-					memset (mixdown_buffer, 0, sizeof (Sample) * to_read);
+					memset (mixdown_buffer, 0, sizeof (Sample) * (to_read + n_tail));
 				}
 			}
 		}
 
-		_cache_start = internal_offset;
-		_cache_end = internal_offset + to_read;
+		_cache_start = internal_offset + suffix;
+		_cache_end   = internal_offset + suffix + to_read + n_tail;
+		_cache_tail  = n_tail;
 		cl.release ();
 	}
 
@@ -974,8 +1004,16 @@ AudioRegion::read_at (Sample*     buf,
 			mix_buffers_no_gain (buf + fade_in_limit, mixdown_buffer + fade_in_limit, N);
 		}
 	}
+	samplecnt_t T = _cache_tail;
+	if (T > 0) {
+		T = min (T, can_read);
+			DEBUG_TRACE (DEBUG::AudioPlayback, string_compose ("Region %1 adding FX tail of %2 cut to_read %3 at %4 total len = %5 cnt was %6\n",
+			             name (), _cache_tail, T, to_read, to_read + T, cnt));
+		/* AudioPlaylist::read reads regions in reverse order, so we can add the tail here */
+		mix_buffers_no_gain (buf + to_read, mixdown_buffer + to_read, T);
+	}
 
-	return to_read;
+	return to_read + T;
 }
 
 /** Read data directly from one of our sources, accounting for the situation when the track has a different channel
@@ -2445,6 +2483,7 @@ AudioRegion::_add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<R
 	}
 
 	rfx->LatencyChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fx_latency_changed, this, false));
+	rfx->plugin()->TailChanged.connect_same_thread (*this, boost::bind (&AudioRegion::fx_tail_changed, this, false));
 	rfx->set_block_size (_session.get_block_size ());
 
 	if (from_set_state) {
@@ -2463,6 +2502,8 @@ AudioRegion::_add_plugin (std::shared_ptr<RegionFxPlugin> rfx, std::shared_ptr<R
 	rfx->set_default_automation (len_as_tpos ());
 
 	fx_latency_changed (true);
+	fx_tail_changed (true);
+
 	if (!_invalidated.exchange (true)) {
 		send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
 	}
@@ -2484,6 +2525,7 @@ AudioRegion::remove_plugin (std::shared_ptr<RegionFxPlugin> fx)
 
 	fx->drop_references ();
 	fx_latency_changed (true);
+	fx_tail_changed (true);
 
 	if (!_invalidated.exchange (true)) {
 		send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
@@ -2513,6 +2555,27 @@ AudioRegion::fx_latency_changed (bool no_emit)
 		return;
 	}
 	_fx_latency = l;
+
+	if (no_emit) {
+		return;
+	}
+
+	if (!_invalidated.exchange (true)) {
+		send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
+	}
+}
+
+void
+AudioRegion::fx_tail_changed (bool no_emit)
+{
+	uint32_t t = 0;
+	for (auto const& rfx : _plugins) {
+		t = max<uint32_t> (t, rfx->plugin()->effective_tail ());
+	}
+	if (t == _fx_tail) {
+		return;
+	}
+	_fx_tail = t;
 
 	if (no_emit) {
 		return;

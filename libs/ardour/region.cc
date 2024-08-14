@@ -296,6 +296,7 @@ Region::Region (Session& s, timepos_t const & start, timecnt_t const & length, c
 	: SessionObject(s, name)
 	, _type (type)
 	, _fx_latency (0)
+	, _fx_tail (0)
 	, REGION_DEFAULT_STATE (start,length)
 	, _last_length (length)
 	, _first_edit (EditChangesNothing)
@@ -312,6 +313,7 @@ Region::Region (const SourceList& srcs)
 	: SessionObject(srcs.front()->session(), "toBeRenamed")
 	, _type (srcs.front()->type())
 	, _fx_latency (0)
+	, _fx_tail (0)
 	, REGION_DEFAULT_STATE(_type == DataType::MIDI ? timepos_t (Temporal::Beats()) : timepos_t::from_superclock (0),
 	                       _type == DataType::MIDI ? timecnt_t (Temporal::Beats()) : timecnt_t::from_superclock (0))
 	, _last_length (_type == DataType::MIDI ? timecnt_t (Temporal::Beats()) : timecnt_t::from_superclock (0))
@@ -332,6 +334,7 @@ Region::Region (std::shared_ptr<const Region> other)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
 	, _fx_latency (0)
+	, _fx_tail (0)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _first_edit (EditChangesNothing)
@@ -391,6 +394,7 @@ Region::Region (std::shared_ptr<const Region> other, timecnt_t const & offset)
 	: SessionObject(other->session(), other->name())
 	, _type (other->data_type())
 	, _fx_latency (0)
+	, _fx_tail (0)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _first_edit (EditChangesNothing)
@@ -437,6 +441,7 @@ Region::Region (std::shared_ptr<const Region> other, const SourceList& srcs)
 	: SessionObject (other->session(), other->name())
 	, _type (srcs.front()->type())
 	, _fx_latency (0)
+	, _fx_tail (0)
 	, REGION_COPY_STATE (other)
 	, _last_length (other->_last_length)
 	, _first_edit (EditChangesID)
@@ -1589,6 +1594,7 @@ Region::_set_state (const XMLNode& node, int version, PropertyChange& what_chang
 		}
 		if (changed) {
 			fx_latency_changed (true);
+			fx_tail_changed (true);
 			send_change (PropertyChange (Properties::region_fx)); // trigger DiskReader overwrite
 			RegionFxChanged (); /* EMIT SIGNAL */
 		}
@@ -2448,4 +2454,17 @@ Region::fx_latency_changed (bool)
 		return;
 	}
 	_fx_latency = l;
+}
+
+void
+Region::fx_tail_changed (bool)
+{
+	uint32_t t = 0;
+	for (auto const& rfx : _plugins) {
+		t = max<uint32_t> (t, rfx->plugin()->effective_tail ());
+	}
+	if (t == _fx_tail) {
+		return;
+	}
+	_fx_tail = t;
 }
