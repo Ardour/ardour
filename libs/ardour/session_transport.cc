@@ -1728,7 +1728,7 @@ Session::worst_latency_preroll () const
 samplecnt_t
 Session::worst_latency_preroll_buffer_size_ceil () const
 {
-	return lrintf (ceil ((_worst_output_latency + _worst_input_latency) / (float) current_block_size) * current_block_size);
+	return lrintf (ceil ((_worst_output_latency + max (_worst_route_latency, _worst_input_latency)) / (float) current_block_size) * current_block_size);
 }
 
 void
