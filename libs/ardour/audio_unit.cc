@@ -360,6 +360,7 @@ AUPlugin::AUPlugin (AudioEngine& engine, Session& session, std::shared_ptr<CACom
 	, comp (_comp)
 	, unit (new CAAudioUnit)
 	, initialized (false)
+	, process_offline (false)
 	, _last_nframes (0)
 	, _requires_fixed_size_buffers (false)
 	, buffers (0)
@@ -401,6 +402,7 @@ AUPlugin::AUPlugin (const AUPlugin& other)
 	, comp (other.get_comp())
 	, unit (new CAAudioUnit)
 	, initialized (false)
+	, process_offline (false)
 	, _last_nframes (0)
 	, _requires_fixed_size_buffers (false)
 	, buffers (0)
@@ -869,6 +871,33 @@ AUPlugin::requires_fixed_size_buffers() const
 	return _requires_fixed_size_buffers;
 }
 
+void
+AUPlugin::set_non_realtime (bool yn)
+{
+	if (process_offline == yn) {
+		return;
+	}
+	process_offline = yn;
+
+	bool was_initialized = initialized;
+	if (initialized) {
+		deactivate ();
+	}
+
+	OSErr err;
+	UInt32 isOffline = yn ? 1 : 0;
+	if ((err = unit->SetProperty (/*kAudioUnitProperty_OfflineRender*/ 37, kAudioUnitScope_Global, 0, &isOffline, sizeof (isOffline))) != noErr) {
+		info << string_compose (_("AU: cannot set offline rendering(err = %1)"), err) << endmsg;
+	}
+	if (yn) {
+		UInt32 numSamples = _session.get_block_size();
+		unit->SetProperty (/*kAudioUnitOfflineProperty_InputSize*/ 3020, kAudioUnitScope_Global, 0, &numSamples, sizeof(numSamples));
+	}
+
+	if (was_initialized) {
+		activate ();
+	}
+}
 
 int
 AUPlugin::set_block_size (pframes_t nframes)
@@ -886,6 +915,10 @@ AUPlugin::set_block_size (pframes_t nframes)
 				      0, &numSamples, sizeof (numSamples))) != noErr) {
 		error << string_compose (_("AU: cannot set max samples (err = %1)"), err) << endmsg;
 		return -1;
+	}
+
+	if (process_offline) {
+		unit->SetProperty (/*kAudioUnitOfflineProperty_InputSize*/ 3020, kAudioUnitScope_Global, 0, &numSamples, sizeof(numSamples));
 	}
 
 	if (was_initialized) {
