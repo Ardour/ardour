@@ -465,7 +465,6 @@ RegionFxPlugin::describe_parameter (Evoral::Parameter param)
 void
 RegionFxPlugin::start_touch (uint32_t param_id)
 {
-	assert (0); // touch is N/A
 	std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (control (Evoral::Parameter (PluginAutomation, 0, param_id)));
 	if (ac) {
 		ac->start_touch (timepos_t (_session.audible_sample ())); // XXX subtract region position
@@ -475,7 +474,6 @@ RegionFxPlugin::start_touch (uint32_t param_id)
 void
 RegionFxPlugin::end_touch (uint32_t param_id)
 {
-	assert (0); // touch is N/A
 	std::shared_ptr<AutomationControl> ac = std::dynamic_pointer_cast<AutomationControl> (control (Evoral::Parameter (PluginAutomation, 0, param_id)));
 	if (ac) {
 		ac->stop_touch (timepos_t (_session.audible_sample ())); // XXX subtract region position
