@@ -775,7 +775,16 @@ AudioRegion::read_at (Sample*     buf,
 		/* for mono regions without plugins, mixdown_buffer is valid as-is */
 		if (n_chn > 1 || have_fx) {
 			/* copy data for current channel */
-			copy_vector (mixdown_buffer, _readcache.get_audio (chan_n).data (), to_read);
+			if (chan_n < n_channels()) {
+				copy_vector (mixdown_buffer, _readcache.get_audio (chan_n).data (), to_read);
+			} else {
+				if (Config->get_replicate_missing_region_channels()) {
+					chan_n = chan_n % n_channels ();
+					copy_vector (mixdown_buffer, _readcache.get_audio (chan_n).data (), to_read);
+				} else {
+					memset (mixdown_buffer, 0, sizeof (Sample) * to_read);
+				}
+			}
 		}
 
 		_cache_start = internal_offset;
