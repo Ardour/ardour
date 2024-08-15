@@ -1970,7 +1970,11 @@ VST3PI::set_owner (SessionObject* o)
 void
 VST3PI::set_non_realtime (bool yn)
 {
+	if (_process_offline == yn) {
+		return;
+	}
 	_process_offline = yn;
+	update_processor ();
 }
 
 int32
